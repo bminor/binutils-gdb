@@ -1,3 +1,21 @@
+2011-01-19  Tom Tromey  <tromey@redhat.com>
+
+	PR mi/8618:
+	* thread.c (free_thread): Free 'name'.
+	(print_thread_info): Emit thread name.  Change CLI output.
+	(thread_name_command): New function.
+	(do_captured_thread_select): Emit newline.
+	(_initialize_thread): Register 'thread name' command.
+	* target.h (struct target_ops) <to_thread_name>: New field.
+	(target_thread_name): New macro.
+	* target.c (update_current_target): Handle to_thread_name.
+	* python/py-infthread.c (thpy_get_name): New function.
+	(thpy_set_name): Likewise.
+	(thread_object_getset): Add "name".
+	* linux-nat.c (linux_nat_thread_name): New function.
+	(linux_nat_add_target): Set to_thread_name.
+	* gdbthread.h (struct thread_info) <name>: New field.
+
 2011-01-18  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-valprint.c (ada_print_scalar): Remove unsigned char downcast.

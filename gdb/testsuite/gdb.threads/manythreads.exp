@@ -99,6 +99,9 @@ gdb_test_multiple $cmd $cmd {
     }
 }
 
+gdb_test_no_output "thread name zardoz" "give a name to the thread"
+gdb_test "info threads" ".*zardoz.*" "check thread name"
+
 set message "second continue"
 gdb_test_multiple "continue" "second continue" {
   -re "error:.*$gdb_prompt $" {

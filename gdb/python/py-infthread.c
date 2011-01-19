@@ -64,6 +64,63 @@ thpy_dealloc (PyObject *self)
 }
 
 static PyObject *
+thpy_get_name (PyObject *self, void *ignore)
+{
+  thread_object *thread_obj = (thread_object *) self;
+  char *name;
+
+  THPY_REQUIRE_VALID (thread_obj);
+
+  name = thread_obj->thread->name;
+  if (name == NULL)
+    name = target_thread_name (thread_obj->thread);
+
+  if (name == NULL)
+    Py_RETURN_NONE;
+
+  return PyString_FromString (name);
+}
+
+static int
+thpy_set_name (PyObject *self, PyObject *newvalue, void *ignore)
+{
+  thread_object *thread_obj = (thread_object *) self;
+  char *name;
+
+  if (! thread_obj->thread)
+    {
+      PyErr_SetString (PyExc_RuntimeError, _("Thread no longer exists."));
+      return -1;
+    }
+
+  if (newvalue == NULL)
+    {
+      PyErr_SetString (PyExc_TypeError, 
+		       _("Cannot delete `name' attribute."));
+      return -1;
+    }
+  else if (newvalue == Py_None)
+    name = NULL;
+  else if (! gdbpy_is_string (newvalue))
+    {
+      PyErr_SetString (PyExc_TypeError,
+		       _("The value of `name' must be a string."));
+      return -1;
+    }
+  else
+    {
+      name = python_string_to_host_string (newvalue);
+      if (! name)
+	return -1;
+    }
+
+  xfree (thread_obj->thread->name);
+  thread_obj->thread->name = name;
+
+  return 0;
+}
+
+static PyObject *
 thpy_get_num (PyObject *self, void *closure)
 {
   thread_object *thread_obj = (thread_object *) self;
@@ -201,6 +258,8 @@ gdbpy_initialize_thread (void)
 
 static PyGetSetDef thread_object_getset[] =
 {
+  { "name", thpy_get_name, thpy_set_name,
+    "The name of the thread, as set by the user or the OS.", NULL },
   { "num", thpy_get_num, NULL, "ID of the thread, as assigned by GDB.", NULL },
   { "ptid", thpy_get_ptid, NULL, "ID of the thread, as assigned by the OS.",
     NULL },

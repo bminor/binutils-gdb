@@ -634,6 +634,7 @@ update_current_target (void)
       /* Do not inherit to_find_new_threads.  */
       /* Do not inherit to_pid_to_str.  */
       INHERIT (to_extra_thread_info, t);
+      INHERIT (to_thread_name, t);
       INHERIT (to_stop, t);
       /* Do not inherit to_xfer_partial.  */
       INHERIT (to_rcmd, t);
@@ -802,6 +803,9 @@ update_current_target (void)
 	    (void (*) (ptid_t))
 	    target_ignore);
   de_fault (to_extra_thread_info,
+	    (char *(*) (struct thread_info *))
+	    return_zero);
+  de_fault (to_thread_name,
 	    (char *(*) (struct thread_info *))
 	    return_zero);
   de_fault (to_stop,
@@ -2405,6 +2409,20 @@ target_pid_to_str (ptid_t ptid)
     }
 
   return normal_pid_to_str (ptid);
+}
+
+char *
+target_thread_name (struct thread_info *info)
+{
+  struct target_ops *t;
+
+  for (t = current_target.beneath; t != NULL; t = t->beneath)
+    {
+      if (t->to_thread_name != NULL)
+	return (*t->to_thread_name) (info);
+    }
+
+  return NULL;
 }
 
 void

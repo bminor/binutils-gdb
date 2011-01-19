@@ -1,3 +1,10 @@
+2011-01-19  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.texinfo (Threads): Document thread name output and `thread
+	name' command.
+	(Threads In Python): Document Thread.name attribute.
+	(GDB/MI Thread Commands): Document thread attributes.
+
 2011-01-12  Andrew Burgess  <aburgess@broadcom.com>
 
 	* gdb.texinfo (GDB/MI Data Manipulation): Update to reflect

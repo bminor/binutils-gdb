@@ -141,6 +141,7 @@ free_thread (struct thread_info *tp)
 	xfree (tp->private);
     }
 
+  xfree (tp->name);
   xfree (tp);
 }
 
@@ -769,7 +770,7 @@ print_thread_info (struct ui_out *uiout, int requested_thread, int pid)
   struct thread_info *tp;
   ptid_t current_ptid;
   struct cleanup *old_chain;
-  char *extra_info;
+  char *extra_info, *name, *target_id;
   int current_thread = -1;
 
   update_thread_list ();
@@ -811,12 +812,11 @@ print_thread_info (struct ui_out *uiout, int requested_thread, int pid)
 	  return;
 	}
 
-      make_cleanup_ui_out_table_begin_end (uiout, 5, n_threads, "threads");
+      make_cleanup_ui_out_table_begin_end (uiout, 4, n_threads, "threads");
 
       ui_out_table_header (uiout, 1, ui_left, "current", "");
       ui_out_table_header (uiout, 4, ui_left, "id", "Id");
       ui_out_table_header (uiout, 17, ui_left, "target-id", "Target Id");
-      ui_out_table_header (uiout, 1, ui_noalign, "details", "");
       ui_out_table_header (uiout, 1, ui_left, "frame", "Frame");
       ui_out_table_body (uiout);
     }
@@ -861,17 +861,45 @@ print_thread_info (struct ui_out *uiout, int requested_thread, int pid)
 	}
 
       ui_out_field_int (uiout, "id", tp->num);
-      ui_out_field_string (uiout, "target-id", target_pid_to_str (tp->ptid));
 
+      /* For the CLI, we stuff everything into the target-id field.
+	 This is a gross hack to make the output come out looking
+	 correct.  The underlying problem here is that ui-out has no
+	 way to specify that a field's space allocation should be
+	 shared by several fields.  For MI, we do the right thing
+	 instead.  */
+
+      target_id = target_pid_to_str (tp->ptid);
       extra_info = target_extra_thread_info (tp);
-      if (extra_info)
+      name = tp->name ? tp->name : target_thread_name (tp);
+
+      if (ui_out_is_mi_like_p (uiout))
 	{
-	  ui_out_text (uiout, " (");
-	  ui_out_field_string (uiout, "details", extra_info);
-	  ui_out_text (uiout, ")");
+	  ui_out_field_string (uiout, "target-id", target_id);
+	  if (extra_info)
+	    ui_out_field_string (uiout, "details", extra_info);
+	  if (name)
+	    ui_out_field_string (uiout, "name", name);
 	}
-      else if (! ui_out_is_mi_like_p (uiout))
-	ui_out_field_skip (uiout, "details");
+      else
+	{
+	  struct cleanup *str_cleanup;
+	  char *contents;
+
+	  if (extra_info && name)
+	    contents = xstrprintf ("%s \"%s\" (%s)", target_id,
+				   name, extra_info);
+	  else if (extra_info)
+	    contents = xstrprintf ("%s (%s)", target_id, extra_info);
+	  else if (name)
+	    contents = xstrprintf ("%s \"%s\"", target_id, name);
+	  else
+	    contents = xstrdup (target_id);
+	  str_cleanup = make_cleanup (xfree, contents);
+
+	  ui_out_field_string (uiout, "target-id", contents);
+	  do_cleanups (str_cleanup);
+	}
 
       if (tp->state_ == THREAD_RUNNING)
 	ui_out_text (uiout, "(running)\n");
@@ -1267,6 +1295,24 @@ thread_command (char *tidstr, int from_tty)
   gdb_thread_select (uiout, tidstr, NULL);
 }
 
+/* Implementation of `thread name'.  */
+
+static void
+thread_name_command (char *arg, int from_tty)
+{
+  struct thread_info *info;
+
+  if (ptid_equal (inferior_ptid, null_ptid))
+    error (_("No thread selected"));
+
+  while (arg && isspace (*arg))
+    ++arg;
+
+  info = inferior_thread ();
+  xfree (info->name);
+  info->name = arg ? xstrdup (arg) : NULL;
+}
+
 /* Print notices when new threads are attached and detached.  */
 int print_thread_events = 1;
 static void
@@ -1371,6 +1417,11 @@ The new thread ID must be currently known."),
 
   add_cmd ("all", class_run, thread_apply_all_command,
 	   _("Apply a command to all threads."), &thread_apply_list);
+
+  add_cmd ("name", class_run, thread_name_command,
+	   _("Set the current thread's name.\n\
+Usage: thread name [NAME]\n\
+If NAME is not given, then any existing name is removed."), &thread_cmd_list);
 
   if (!xdb_commands)
     add_com_alias ("t", "thread", class_run, 1);

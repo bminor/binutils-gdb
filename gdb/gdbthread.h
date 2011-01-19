@@ -125,6 +125,10 @@ struct thread_info
 				    kernel thread id, etc.  */
   int num;			/* Convenient handle (GDB thread id) */
 
+  /* The name of the thread, as specified by the user.  This is NULL
+     if the thread does not have a user-given name.  */
+  char *name;
+
   /* Non-zero means the thread is executing.  Note: this is different
      from saying that there is an active target and we are stopped at
      a breakpoint, for instance.  This is a real indicator whether the

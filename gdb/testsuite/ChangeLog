@@ -1,3 +1,7 @@
+2011-01-19  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.python/py-infthread.exp: Add thread tests.
+
 2011-01-14  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.base/wchar.c, gdb.base/wchar.exp: New testcases.

@@ -2718,6 +2718,11 @@ the thread number assigned by @value{GDBN}
 the target system's thread identifier (@var{systag})
 
 @item
+the thread's name, if one is known.  A thread can either be named by
+the user (see @code{thread name}, below), or, in some cases, by the
+program itself.
+
+@item
 the current stack frame summary for that thread
 @end enumerate
 
@@ -2786,6 +2791,19 @@ threads that you want affected with the command argument
 shown in the first field of the @samp{info threads} display; or it
 could be a range of thread numbers, as in @code{2-4}.  To apply a
 command to all threads, type @kbd{thread apply all @var{command}}.
+
+@kindex thread name
+@cindex name a thread
+@item thread name [@var{name}]
+This command assigns a name to the current thread.  If no argument is
+given, any existing user-specified name is removed.  The thread name
+appears in the @samp{info threads} display.
+
+On some systems, such as @sc{gnu}/Linux, @value{GDBN} is able to
+determine the name of the thread as given by the OS.  On these
+systems, a name specified with @samp{thread name} will override the
+system-give name, and removing the user-specified name will cause
+@value{GDBN} to once again display the system-specified name.
 
 @kindex set print thread-events
 @cindex print messages on thread start and exit
@@ -21865,6 +21883,17 @@ is no selected thread, this will return @code{None}.
 A @code{gdb.InferiorThread} object has the following attributes:
 
 @table @code
+@defivar InferiorThread name
+The name of the thread.  If the user specified a name using
+@code{thread name}, then this returns that name.  Otherwise, if an
+OS-supplied name is available, then it is returned.  Otherwise, this
+returns @code{None}.
+
+This attribute can be assigned to.  The new value must be a string
+object, which sets the new name, or @code{None}, which removes any
+user-specified thread name.
+@end defivar
+
 @defivar InferiorThread num
 ID of the thread, as assigned by GDB.
 @end defivar
@@ -25753,21 +25782,38 @@ also reports the current thread.
 The @samp{info thread} command prints the same information
 about all threads.
 
-@subsubheading Example
+@subsubheading Result
 
-@smallexample
--thread-info
-^done,threads=[
-@{id="2",target-id="Thread 0xb7e14b90 (LWP 21257)",
-   frame=@{level="0",addr="0xffffe410",func="__kernel_vsyscall",args=[]@},state="running"@},
-@{id="1",target-id="Thread 0xb7e156b0 (LWP 21254)",
-   frame=@{level="0",addr="0x0804891f",func="foo",args=[@{name="i",value="10"@}],
-           file="/tmp/a.c",fullname="/tmp/a.c",line="158"@},state="running"@}],
-current-thread-id="1"
-(gdb)
-@end smallexample
+The result is a list of threads.  The following attributes are
+defined for a given thread:
 
-The @samp{state} field may have the following values:
+@table @samp
+@item current
+This field exists only for the current thread.  It has the value @samp{*}.
+
+@item id
+The identifier that @value{GDBN} uses to refer to the thread.
+
+@item target-id
+The identifier that the target uses to refer to the thread.
+
+@item details
+Extra information about the thread, in a target-specific format.  This
+field is optional.
+
+@item name
+The name of the thread.  If the user specified a name using the
+@code{thread name} command, then this name is given.  Otherwise, if
+@value{GDBN} can extract the thread name from the target, then that
+name is given.  If @value{GDBN} cannot find the thread name, then this
+field is omitted.
+
+@item frame
+The stack frame currently executing in the thread.
+
+@item state
+The thread's state.  The @samp{state} field may have the following
+values:
 
 @table @code
 @item stopped
@@ -25779,6 +25825,29 @@ The thread is running.  There's no frame information for running
 threads.
 
 @end table
+
+@item core
+If @value{GDBN} can find the CPU core on which this thread is running,
+then this field is the core identifier.  This field is optional.
+
+@end table
+
+@subsubheading Example
+
+@smallexample
+-thread-info
+^done,threads=[
+@{id="2",target-id="Thread 0xb7e14b90 (LWP 21257)",
+   frame=@{level="0",addr="0xffffe410",func="__kernel_vsyscall",
+           args=[]@},state="running"@},
+@{id="1",target-id="Thread 0xb7e156b0 (LWP 21254)",
+   frame=@{level="0",addr="0x0804891f",func="foo",
+           args=[@{name="i",value="10"@}],
+           file="/tmp/a.c",fullname="/tmp/a.c",line="158"@},
+           state="running"@}],
+current-thread-id="1"
+(gdb)
+@end smallexample
 
 @subheading The @code{-thread-list-ids} Command
 @findex -thread-list-ids

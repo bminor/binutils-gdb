@@ -18,6 +18,14 @@
   It is like the "dir" command except that it replaces the
   source path list instead of augmenting it.
 
+* GDB now understands thread names.
+
+  On GNU/Linux, "info threads" will display the thread name as set by
+  prctl or pthread_setname_np.
+
+  There is also a new command, "thread name", which can be used to
+  assign a name internally for GDB to display.
+
 * OpenCL C
   Initial support for the OpenCL C language (http://www.khronos.org/opencl)
   has been integrated into GDB.
@@ -48,6 +56,9 @@
 
   ** New function gdb.newest_frame returns the newest frame in the
      selected thread.
+
+  ** The gdb.InferiorThread class has a new "name" attribute.  This
+     holds the thread's name.
 
 * C++ Improvements:
 
