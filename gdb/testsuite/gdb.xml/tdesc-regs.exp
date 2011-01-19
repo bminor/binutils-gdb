@@ -27,10 +27,7 @@ set core-regs ""
 set regdir ""
 set architecture ""
 switch -glob -- [istarget] {
-    "*arm-*-*" {
-        set core-regs {arm-core.xml}
-    }
-    "xscale-*-*" {
+    "arm*-*-*" {
         set core-regs {arm-core.xml}
     }
     "*m68k-*-*" {

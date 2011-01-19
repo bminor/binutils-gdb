@@ -12,18 +12,13 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+load_lib dwarf.exp
 
 # Test DW_TAG_compile_unit with no children and with neither DW_AT_low_pc nor
 # DW_AT_high_pc but with DW_AT_ranges instead.
 
 # This test can only be run on targets which support DWARF-2 and use gas.
-# For now pick a sampling of likely targets.
-if {![istarget *-*-linux*]
-    && ![istarget *-*-gnu*]
-    && ![istarget *-*-elf*]
-    && ![istarget *-*-openbsd*]
-    && ![istarget arm-*-eabi*]
-    && ![istarget powerpc-*-eabi*]} {
+if {![dwarf2_support]} {
     verbose "Skipping DW_AT_ranges test."
     return 0  
 }

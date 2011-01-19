@@ -22,7 +22,8 @@ if {![istarget *-*-linux*]
     && ![istarget *-*-gnu*]
     && ![istarget *-*-elf*]
     && ![istarget *-*-openbsd*]
-    && ![istarget arm-*-eabi*]
+    && ![istarget arm*-*-eabi*]
+    && ![istarget arm*-*-symbianelf*]
     && ![istarget powerpc-*-eabi*]} {
     verbose "Skipping py-section-script.exp because of lack of support."
     return

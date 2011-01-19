@@ -1,3 +1,50 @@
+2011-01-19  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.asm/asm-source.exp: Replace ARM target triplet with a
+	canonical form.
+	Remove "xscale-*-*"
+	* gdb.xml/tdesc-regs.exp: Likewise.
+	* gdb.python/py-section-script.exp: Replace ARM target triplet
+	with canonical form.
+	Match arm*-*-symbianelf*.
+	* gdb.base/dup-sect.exp: Likewise.
+	* lib/dwarf.exp: New.
+	* gdb.dwarf2/callframecfa.exp: Check dwarf2 support by routine
+	dwarf2_support.
+	* gdb.dwarf2/dup-psym.exp: Likewise.
+	* gdb.dwarf2/dw2-ada-ffffffff.exp: Likewise.
+	* gdb.dwarf2/dw2-anonymous-func.exp: Likewise.
+	* gdb.dwarf2/dw2-bad-parameter-type.exp: Likewise.
+	* gdb.dwarf2/dw2-basic.exp: Likewise.
+	* gdb.dwarf2/dw2-compressed.exp: Likewise.
+	* gdb.dwarf2/dw2-const.exp: Likewise.
+	* gdb.dwarf2/dw2-cp-infcall-ref-static.exp: Likewise.
+	* gdb.dwarf2/dw2-cu-size.exp: Likewise.
+	* gdb.dwarf2/dw2-double-set-die-type.exp: Likewise.
+	* gdb.dwarf2/dw2-empty-namespace.exp: Likewise.
+	* gdb.dwarf2/dw2-filename.exp: Likewise.
+	* gdb.dwarf2/dw2-inheritance.exp: Likewise.
+	* gdb.dwarf2/dw2-inline-param.exp: Likewise.
+	* gdb.dwarf2/dw2-intercu.exp: Likewise.
+	* gdb.dwarf2/dw2-intermix.exp: Likewise.
+	* gdb.dwarf2/dw2-modula2-self-type.exp: Likewise.
+	* gdb.dwarf2/dw2-noloc.exp: Likewise.
+	* gdb.dwarf2/dw2-op-call.exp: Likewise.
+	* gdb.dwarf2/dw2-producer.exp: Likewise.
+	* gdb.dwarf2/dw2-ranges.exp: Likewise.
+	* gdb.dwarf2/dw2-ref-missing-frame.exp: Likewise.
+	* gdb.dwarf2/dw2-stack-boundary.exp: Likewise.
+	* gdb.dwarf2/dw2-strp.exp: Likewise.
+	* gdb.dwarf2/dw2-unresolved.exp: Likewise.
+	* gdb.dwarf2/implptr.exp: Likewise.
+	* gdb.dwarf2/mac-fileno.exp: Likewise.
+	* gdb.dwarf2/member-ptr-forwardref.exp: Likewise.
+	* gdb.dwarf2/pieces.exp: Likewise.
+	* gdb.dwarf2/pr11465.exp: Likewise.
+	* gdb.dwarf2/valop.exp: Likewise.
+	* gdb.dwarf2/watch-notconst.exp: Likewise.
+	* gdb.mi/dw2-ref-missing-frame.exp: Likewise.
+
 2011-01-19  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.python/py-infthread.exp: Add thread tests.

@@ -40,10 +40,7 @@ switch -glob -- [istarget] {
         set asm-flags "-no-mdebug -I${srcdir}/${subdir} -I${objdir}/${subdir}"
 	set debug-flags "-gdwarf-2"
     }
-    "*arm-*-*" {
-        set asm-arch arm
-    }
-    "xscale-*-*" {
+    "arm*-*-*" {
         set asm-arch arm
     }
     "frv-*-*" {

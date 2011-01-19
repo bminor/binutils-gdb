@@ -13,17 +13,12 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+load_lib dwarf.exp
 
 # Note: Inspired from dw2-basic.exp.
 
 # This test can only be run on targets which support DWARF-2 and use gas.
-# For now pick a sampling of likely targets.
-if {![istarget *-*-linux*]
-    && ![istarget *-*-gnu*]
-    && ![istarget *-*-elf*]
-    && ![istarget *-*-openbsd*]
-    && ![istarget arm-*-eabi*]
-    && ![istarget powerpc-*-eabi*]} {
+if {![dwarf2_support]} {
     return 0
 }
 
