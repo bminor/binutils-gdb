@@ -559,7 +559,7 @@ static int
 constant_fits_width_p (struct h8_op *operand, unsigned int width)
 {
   return ((operand->exp.X_add_number & ~width) == 0
-	  || (operand->exp.X_add_number | width) == (unsigned)(~0));
+	  || (operand->exp.X_add_number | (offsetT) width) == (offsetT)(~0));
 }
 
 static int

@@ -1,3 +1,9 @@
+2011-01-20  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/12384
+	* config/tc-h8300.c (constant_fits_width_p): Use correct type for
+	comparison.
+
 2011-01-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* write.c (compress_debug): Return if section size is smaller
