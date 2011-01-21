@@ -1,3 +1,7 @@
+2011-01-21  Dave Murphy  <davem@devkitpro.org>
+
+	* ppc-opc.c (NON32, NO371): Remove PPC_OPCODE_PPCPS.
+
 2011-01-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (sIbT): New.
