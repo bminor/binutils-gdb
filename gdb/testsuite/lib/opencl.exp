@@ -50,7 +50,7 @@ proc skip_opencl_tests {} {
     verbose "$me:  compiling OpenCL test app" 2
     set compile_flags {debug nowarnings quiet}
 
-    if { [gdb_compile_opencl_hostapp "${clprogram}" "${executable}" "" ] != "" } {
+    if { [gdb_compile_opencl_hostapp "${clprogram}" "${executable}" "${compile_flags}" ] != "" } {
         verbose "$me:  compiling OpenCL binary failed, returning 1" 2
 	return [set skip_opencl_tests_saved($board) 1]
     }

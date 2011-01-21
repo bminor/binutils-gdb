@@ -1,3 +1,8 @@
+2011-01-21  Ken Werner  <ken.werner@de.ibm.com>
+
+	* lib/opencl.exp (skip_opencl_tests): Add missing compile_flags
+	argument to the gdb_compile_opencl_hostapp call.
+
 2011-01-19  Yao Qi  <yao@codesourcery.com>
 
 	* lib/dwarf.exp (dwarf2_support): Change supported targets to a
