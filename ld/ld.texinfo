@@ -5567,8 +5567,13 @@ An operation involving only numbers results in a number.
 @item
 The result of comparisons, @samp{&&} and @samp{||} is also a number.
 @item
-The result of other operations on relative addresses (after above
-conversions) is a relative address in the same section as the operand(s).
+The result of other binary arithmetic and logical operations on two
+relative addresses in the same section or two absolute addresess
+(after above conversions) is also a number.
+@item
+The result of other operations on relative addresses or one
+relative address and a number, is a relative address in the same
+section as the relative operand(s).
 @item
 The result of other operations on absolute addresses (after above
 conversions) is an absolute address.

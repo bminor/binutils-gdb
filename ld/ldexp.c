@@ -335,36 +335,47 @@ fold_binary (etree_type *tree)
 	    {
 	      make_abs ();
 	      lhs.value += lhs.section->vma;
+	      lhs.section = bfd_abs_section_ptr;
 	    }
 
 	  /* If the rhs is just a number, keep the lhs section.  */
 	  else if (expld.result.section == NULL)
-	    expld.result.section = lhs.section;
+	    {
+	      expld.result.section = lhs.section;
+	      /* Make this NULL so that we know one of the operands
+		 was just a number, for later tests.  */
+	      lhs.section = NULL;
+	    }
 	}
+      /* At this point we know that both operands have the same
+	 section, or at least one of them is a plain number.  */
 
       switch (tree->type.node_code)
 	{
-	case '%':
-	  if (expld.result.value != 0)
-	    expld.result.value = ((bfd_signed_vma) lhs.value
-				  % (bfd_signed_vma) expld.result.value);
-	  else if (expld.phase != lang_mark_phase_enum)
-	    einfo (_("%F%S %% by zero\n"));
-	  break;
-
-	case '/':
-	  if (expld.result.value != 0)
-	    expld.result.value = ((bfd_signed_vma) lhs.value
-				  / (bfd_signed_vma) expld.result.value);
-	  else if (expld.phase != lang_mark_phase_enum)
-	    einfo (_("%F%S / by zero\n"));
-	  break;
-
+	  /* Arithmetic operators, bitwise AND, bitwise OR and XOR
+	     keep the section of one of their operands only when the
+	     other operand is a plain number.  Losing the section when
+	     operating on two symbols, ie. a result of a plain number,
+	     is required for subtraction and XOR.  It's justifiable
+	     for the other operations on the grounds that adding,
+	     multiplying etc. two section relative values does not
+	     really make sense unless they are just treated as
+	     numbers.
+	     The same argument could be made for many expressions
+	     involving one symbol and a number.  For example,
+	     "1 << x" and "100 / x" probably should not be given the
+	     section of x.  The trouble is that if we fuss about such
+	     things the rules become complex and it is onerous to
+	     document ld expression evaluation.  */
 #define BOP(x, y) \
 	case x:							\
 	  expld.result.value = lhs.value y expld.result.value;	\
+	  if (expld.result.section == lhs.section)		\
+	    expld.result.section = NULL;			\
 	  break;
 
+	  /* Comparison operators, logical AND, and logical OR always
+	     return a plain number.  */
 #define BOPN(x, y) \
 	case x:							\
 	  expld.result.value = lhs.value y expld.result.value;	\
@@ -387,6 +398,26 @@ fold_binary (etree_type *tree)
 	  BOPN (GE, >=);
 	  BOPN (ANDAND, &&);
 	  BOPN (OROR, ||);
+
+	case '%':
+	  if (expld.result.value != 0)
+	    expld.result.value = ((bfd_signed_vma) lhs.value
+				  % (bfd_signed_vma) expld.result.value);
+	  else if (expld.phase != lang_mark_phase_enum)
+	    einfo (_("%F%S %% by zero\n"));
+	  if (expld.result.section == lhs.section)
+	    expld.result.section = NULL;
+	  break;
+
+	case '/':
+	  if (expld.result.value != 0)
+	    expld.result.value = ((bfd_signed_vma) lhs.value
+				  / (bfd_signed_vma) expld.result.value);
+	  else if (expld.phase != lang_mark_phase_enum)
+	    einfo (_("%F%S / by zero\n"));
+	  if (expld.result.section == lhs.section)
+	    expld.result.section = NULL;
+	  break;
 
 	case MAX_K:
 	  if (lhs.value > expld.result.value)
