@@ -1,3 +1,22 @@
+2011-01-21  Joel Brobecker  <brobecker@adacore.com>
+
+	* inflow.c: Include "gdbcmd.h".
+	(interactive_mode): New static global, moved here from top.c.
+	(show_interactive_mode): New function, moved here from top.c.
+	use gdb_has_a_terminal instead of input_from_terminal_p to
+	determine the current mode.
+	(gdb_has_a_terminal): Add handling of the "iteractive-mode"
+	setting.
+	(_initialize_inflow): Add the "set/show interactive-mode"
+	commands.  Moved here from top.c, after having adjusted slightly
+	the help text.
+	* top.c (interactive_mode, show_interactive_mode): Delete, moved
+	to inflow.c.
+	(input_from_terminal_p): Remove handling of "interactive-mode"
+	setting, moved to infow.c.
+	(init_main): Remove creation of the "set/show interactive-mode"
+	commands, moved to inflow.c.
+
 2011-01-19  Joel Brobecker  <brobecker@adacore.com>
 
 	* NEWS: Add entry for native ia64-hpux support.

@@ -1,3 +1,8 @@
+2011-01-21  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (Other Misc Settings): Rework part of the
+	documentation of the "set interactive mode" command.
+
 2011-01-19  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (Threads): Document thread name output and `thread

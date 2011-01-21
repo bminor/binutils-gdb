@@ -34,6 +34,7 @@
 #include "gdb_select.h"
 
 #include "inflow.h"
+#include "gdbcmd.h"
 
 #ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
@@ -141,10 +142,31 @@ enum
   }
 gdb_has_a_terminal_flag = have_not_checked;
 
+/* The value of the "interactive-mode" setting.  */
+static enum auto_boolean interactive_mode = AUTO_BOOLEAN_AUTO;
+
+/* Implement the "show interactive-mode" option.  */
+
+static void
+show_interactive_mode (struct ui_file *file, int from_tty,
+                       struct cmd_list_element *c,
+                       const char *value)
+{
+  if (interactive_mode == AUTO_BOOLEAN_AUTO)
+    fprintf_filtered (file, "Debugger's interactive mode "
+		            "is %s (currently %s).\n",
+                      value, gdb_has_a_terminal () ? "on" : "off");
+  else
+    fprintf_filtered (file, "Debugger's interactive mode is %s.\n", value);
+}
+
 /* Does GDB have a terminal (on stdin)?  */
 int
 gdb_has_a_terminal (void)
 {
+  if (interactive_mode != AUTO_BOOLEAN_AUTO)
+    return interactive_mode = AUTO_BOOLEAN_TRUE;
+
   switch (gdb_has_a_terminal_flag)
     {
     case yes:
@@ -852,6 +874,20 @@ _initialize_inflow (void)
 {
   add_info ("terminal", term_info,
 	    _("Print inferior's saved terminal status."));
+
+  add_setshow_auto_boolean_cmd ("interactive-mode", class_support,
+                                &interactive_mode, _("\
+Set whether GDB's standard input is a terminal."), _("\
+Show whether GDB's standard input is a terminal."), _("\
+If on, GDB assumes that standard input is a terminal.  In practice, it\n\
+means that GDB should wait for the user to answer queries associated to\n\
+commands entered at the command prompt.  If off, GDB assumes that standard\n\
+input is not a terminal, and uses the default answer to all queries.\n\
+If auto (the default), determine which mode to use based on the standard\n\
+input settings."),
+                        NULL,
+                        show_interactive_mode,
+                        &setlist, &showlist);
 
   terminal_is_ours = 1;
 
