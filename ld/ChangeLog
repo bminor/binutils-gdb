@@ -1,3 +1,8 @@
+2011-01-22  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* plugin.c (plugin_get_ir_dummy_bfd): Copy across the bfd's
+	private data and GP size.
+
 2011-01-21  Alan Modra  <amodra@gmail.com>
 
 	* ldexp.c (fold_binary): Set result section for arithmetic and

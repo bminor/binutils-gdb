@@ -1,3 +1,8 @@
+2011-01-22  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* elfxx-mips.c (_bfd_mips_elf_merge_private_bfd_data): Ignore
+	common sections too.
+
 2011-01-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf64-x86-64.c (elf_backend_want_plt_sym): Redefine to 0 after

@@ -237,6 +237,8 @@ plugin_get_ir_dummy_bfd (const char *name, bfd *srctemplate)
 		     srctemplate);
   bfd_set_arch_info (abfd, bfd_get_arch_info (srctemplate));
   bfd_make_writable (abfd);
+  bfd_copy_private_bfd_data (srctemplate, abfd);
+  bfd_set_gp_size (abfd, bfd_get_gp_size (abfd));
   /* Create a minimal set of sections to own the symbols.  */
   sec = bfd_make_section_old_way (abfd, ".text");
   bfd_set_section_flags (abfd, sec,
