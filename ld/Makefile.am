@@ -92,7 +92,6 @@ CC_FOR_TARGET = ` \
     fi; \
   fi`
 
-CXX = g++
 CXX_FOR_TARGET = ` \
   if [ -f $$r/../gcc/g++ ] ; then \
     if [ -f $$r/../newlib/Makefile ] ; then \

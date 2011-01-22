@@ -1,3 +1,12 @@
+2011-01-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.am (CXX): Removed.
+
+	* configure.in: Add AC_PROG_CXX.
+
+	* Makefile.in: Regenerated.
+	* configure: Likewise.
+
 2011-01-22  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* plugin.c (plugin_get_ir_dummy_bfd): Copy across the bfd's
