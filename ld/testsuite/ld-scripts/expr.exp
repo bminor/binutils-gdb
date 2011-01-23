@@ -22,3 +22,4 @@
 
 run_dump_test expr1
 run_dump_test expr2
+run_dump_test sane1
