@@ -211,7 +211,7 @@ val_print_packed_array_elements (struct type *type, const gdb_byte *valaddr,
 	  opts.deref_ref = 0;
 	  val_print (elttype, value_contents_for_printing (v0),
 		     value_embedded_offset (v0), 0, stream,
-		     recurse + 1, val, &opts, current_language);
+		     recurse + 1, v0, &opts, current_language);
 	  annotate_elt_rep (i - i0);
 	  fprintf_filtered (stream, _(" <repeats %u times>"), i - i0);
 	  annotate_elt_rep_end ();
@@ -242,7 +242,7 @@ val_print_packed_array_elements (struct type *type, const gdb_byte *valaddr,
 		}
 	      val_print (elttype, value_contents_for_printing (v0),
 			 value_embedded_offset (v0), 0, stream,
-			 recurse + 1, val, &opts, current_language);
+			 recurse + 1, v0, &opts, current_language);
 	      annotate_elt ();
 	    }
 	}
@@ -708,7 +708,7 @@ ada_val_print_1 (struct type *type, const gdb_byte *valaddr,
 				value_contents_for_printing (val),
 				value_embedded_offset (val),
 				value_address (val), stream, recurse,
-				NULL, options);
+				val, options);
       value_free_to_mark (mark);
       return retn;
     }
@@ -770,7 +770,7 @@ ada_val_print_1 (struct type *type, const gdb_byte *valaddr,
 	      return ada_val_print_1 (target_type,
 				      value_contents_for_printing (v),
 				      value_embedded_offset (v), 0,
- 				      stream, recurse + 1, NULL, options);
+ 				      stream, recurse + 1, v, options);
 	    }
 	  else
 	    return ada_val_print_1 (TYPE_TARGET_TYPE (type),
@@ -915,7 +915,7 @@ ada_val_print_1 (struct type *type, const gdb_byte *valaddr,
                          value_contents_for_printing (deref_val),
                          value_embedded_offset (deref_val),
                          value_address (deref_val), stream, recurse + 1,
-			 original_value, options, current_language);
+			 deref_val, options, current_language);
             }
           else
             fputs_filtered ("(null)", stream);
