@@ -1,6 +1,6 @@
 // readsyms.h -- read input file symbols for gold   -*- C++ -*-
 
-// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -190,6 +190,8 @@ class Input_group
   Input_group()
     : archives_()
   { }
+
+  ~Input_group();
 
   // Add an archive to the group.
   void

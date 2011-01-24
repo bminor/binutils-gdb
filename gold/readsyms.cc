@@ -1,6 +1,6 @@
 // readsyms.cc -- read input file symbols for gold
 
-// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -599,6 +599,19 @@ Add_symbols::run(Workqueue*)
     }
 }
 
+// Class Input_group.
+
+// When we delete an Input_group we can delete the archive
+// information.
+
+Input_group::~Input_group()
+{
+  for (Input_group::const_iterator p = this->begin();
+       p != this->end();
+       ++p)
+    delete *p;
+}
+
 // Class Start_group.
 
 Start_group::~Start_group()
@@ -680,8 +693,8 @@ Finish_group::run(Workqueue*)
 	}
     }
 
-  // Now that we're done with the archives, record the incremental layout
-  // information, then delete them.
+  // Now that we're done with the archives, record the incremental
+  // layout information.
   for (Input_group::const_iterator p = this->input_group_->begin();
        p != this->input_group_->end();
        ++p)
@@ -691,10 +704,12 @@ Finish_group::run(Workqueue*)
           this->layout_->incremental_inputs();
       if (incremental_inputs != NULL)
 	incremental_inputs->report_archive_end(*p);
-
-      delete *p;
     }
-  delete this->input_group_;
+
+  if (parameters->options().has_plugins())
+    parameters->options().plugins()->save_input_group(this->input_group_);
+  else
+    delete this->input_group_;
 }
 
 // Class Read_script

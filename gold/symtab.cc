@@ -1,6 +1,6 @@
 // symtab.cc -- the gold symbol table
 
-// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -1002,7 +1002,11 @@ Symbol_table::add_from_object(Object* object,
   // Record every time we see a new undefined symbol, to speed up
   // archive groups.
   if (!was_undefined && ret->is_undefined())
-    ++this->saw_undefined_;
+    {
+      ++this->saw_undefined_;
+      if (parameters->options().has_plugins())
+	parameters->options().plugins()->new_undefined_symbol(ret);
+    }
 
   // Keep track of common symbols, to speed up common symbol
   // allocation.
