@@ -1,6 +1,6 @@
 // archive.cc -- archive support for gold
 
-// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -779,6 +779,42 @@ Archive::add_symbols(Symbol_table* symtab, Layout* layout,
   return true;
 }
 
+// Return whether the archive includes a member which defines the
+// symbol SYM.
+
+bool
+Archive::defines_symbol(Symbol* sym) const
+{
+  const char* symname = sym->name();
+  size_t symname_len = strlen(symname);
+  size_t armap_size = this->armap_.size();
+  for (size_t i = 0; i < armap_size; ++i)
+    {
+      if (this->armap_checked_[i])
+	continue;
+      const char* archive_symname = (this->armap_names_.data()
+				     + this->armap_[i].name_offset);
+      if (strncmp(archive_symname, symname, symname_len) != 0)
+	continue;
+      char c = archive_symname[symname_len];
+      if (c == '\0' && sym->version() == NULL)
+	return true;
+      if (c == '@')
+	{
+	  const char* ver = archive_symname + symname_len + 1;
+	  if (*ver == '@')
+	    {
+	      if (sym->version() == NULL)
+		return true;
+	      ++ver;
+	    }
+	  if (sym->version() != NULL && strcmp(sym->version(), ver) == 0)
+	    return true;
+	}
+    }
+  return false;
+}
+
 // Include all the archive members in the link.  This is for --whole-archive.
 
 bool
@@ -1001,8 +1037,18 @@ Add_archive_symbols::run(Workqueue* workqueue)
       if (incremental_inputs != NULL)
 	incremental_inputs->report_archive_end(this->archive_);
 
-      // We no longer need to know about this archive.
-      delete this->archive_;
+      if (!parameters->options().has_plugins()
+	  || this->archive_->input_file()->options().whole_archive())
+	{
+	  // We no longer need to know about this archive.
+	  delete this->archive_;
+	}
+      else
+	{
+	  // The plugin interface may want to rescan this archive.
+	  parameters->options().plugins()->save_archive(this->archive_);
+	}
+
       this->archive_ = NULL;
     }
 }

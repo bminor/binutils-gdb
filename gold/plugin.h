@@ -1,6 +1,6 @@
 // plugin.h -- plugin manager for gold      -*- C++ -*-
 
-// Copyright 2008, 2009, 2010 Free Software Foundation, Inc.
+// Copyright 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
 // Written by Cary Coutant <ccoutant@google.com>.
 
 // This file is part of gold.
@@ -36,12 +36,17 @@ namespace gold
 class General_options;
 class Input_file;
 class Input_objects;
+class Archive;
+class Input_group;
+class Symbol;
 class Symbol_table;
 class Layout;
 class Dirsearch;
 class Mapfile;
+class Task;
 class Task_token;
 class Pluginobj;
+class Plugin_rescan;
 
 // This class represents a single plugin library.
 
@@ -124,7 +129,8 @@ class Plugin_manager
  public:
   Plugin_manager(const General_options& options)
     : plugins_(), objects_(), deferred_layout_objects_(), input_file_(NULL),
-      plugin_input_file_(), in_replacement_phase_(false),
+      plugin_input_file_(), rescannable_(), undefined_symbols_(),
+      any_claimed_(false), in_replacement_phase_(false), any_added_(false),
       options_(options), workqueue_(NULL), task_(NULL), input_objects_(NULL),
       symtab_(NULL), layout_(NULL), dirpath_(NULL), mapfile_(NULL),
       this_blocker_(NULL), extra_search_path_()
@@ -153,12 +159,27 @@ class Plugin_manager
   Pluginobj*
   claim_file(Input_file* input_file, off_t offset, off_t filesize);
 
+  // Let the plugin manager save an archive for later rescanning.
+  // This takes ownership of the Archive pointer.
+  void
+  save_archive(Archive*);
+
+  // Let the plugin manager save an input group for later rescanning.
+  // This takes ownership of the Input_group pointer.
+  void
+  save_input_group(Input_group*);
+
   // Call the all-symbols-read handlers.
   void
   all_symbols_read(Workqueue* workqueue, Task* task,
                    Input_objects* input_objects, Symbol_table* symtab,
                    Layout* layout, Dirsearch* dirpath, Mapfile* mapfile,
                    Task_token** last_blocker);
+
+  // Tell the plugin manager that we've a new undefined symbol which
+  // may require rescanning.
+  void
+  new_undefined_symbol(Symbol*);
 
   // Run deferred layout.
   void
@@ -245,9 +266,42 @@ class Plugin_manager
   Plugin_manager(const Plugin_manager&);
   Plugin_manager& operator=(const Plugin_manager&);
 
+  // Plugin_rescan is a Task which calls the private rescan method.
+  friend class Plugin_rescan;
+
+  // An archive or input group which may have to be rescanned if a
+  // plugin adds a new file.
+  struct Rescannable
+  {
+    bool is_archive;
+    union
+    {
+      Archive* archive;
+      Input_group* input_group;
+    } u;
+
+    Rescannable(Archive* archive)
+      : is_archive(true)
+    { this->u.archive = archive; }
+
+    Rescannable(Input_group* input_group)
+      : is_archive(false)
+    { this->u.input_group = input_group; }
+  };
+
   typedef std::list<Plugin*> Plugin_list;
   typedef std::vector<Pluginobj*> Object_list;
   typedef std::vector<Relobj*> Deferred_layout_list;
+  typedef std::vector<Rescannable> Rescannable_list;
+  typedef std::vector<Symbol*> Undefined_symbol_list;
+
+  // Rescan archives for undefined symbols.
+  void
+  rescan(Task*);
+
+  // See whether the rescannable at index I defines SYM.
+  bool
+  rescannable_defines(size_t i, Symbol* sym);
 
   // The list of plugin libraries.
   Plugin_list plugins_;
@@ -265,10 +319,23 @@ class Plugin_manager
   Input_file* input_file_;
   struct ld_plugin_input_file plugin_input_file_;
 
-  // TRUE after the all symbols read event; indicates that we are
-  // processing replacement files whose symbols should replace the
+  // A list of archives and input groups being saved for possible
+  // later rescanning.
+  Rescannable_list rescannable_;
+
+  // A list of undefined symbols found in added files.
+  Undefined_symbol_list undefined_symbols_;
+
+  // Whether any input files have been claimed by a plugin.
+  bool any_claimed_;
+
+  // Set to true after the all symbols read event; indicates that we
+  // are processing replacement files whose symbols should replace the
   // placeholder symbols from the Pluginobj objects.
   bool in_replacement_phase_;
+
+  // Whether any input files or libraries were added by a plugin.
+  bool any_added_;
 
   const General_options& options_;
   Workqueue* workqueue_;

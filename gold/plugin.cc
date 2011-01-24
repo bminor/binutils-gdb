@@ -1,6 +1,6 @@
 // plugin.cc -- plugin manager for gold      -*- C++ -*-
 
-// Copyright 2008, 2009, 2010 Free Software Foundation, Inc.
+// Copyright 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
 // Written by Cary Coutant <ccoutant@google.com>.
 
 // This file is part of gold.
@@ -261,6 +261,45 @@ Plugin::cleanup()
     }
 }
 
+// This task is used to rescan archives as needed.
+
+class Plugin_rescan : public Task
+{
+ public:
+  Plugin_rescan(Task_token* this_blocker, Task_token* next_blocker)
+    : this_blocker_(this_blocker), next_blocker_(next_blocker)
+  { }
+
+  ~Plugin_rescan()
+  {
+    delete this->this_blocker_;
+  }
+
+  Task_token*
+  is_runnable()
+  {
+    if (this->this_blocker_->is_blocked())
+      return this->this_blocker_;
+    return NULL;
+  }
+
+  void
+  locks(Task_locker* tl)
+  { tl->add(this, this->next_blocker_); }
+
+  void
+  run(Workqueue*)
+  { parameters->options().plugins()->rescan(this); }
+
+  std::string
+  get_name() const
+  { return "Plugin_rescan"; }
+
+ private:
+  Task_token* this_blocker_;
+  Task_token* next_blocker_;
+};
+
 // Plugin_manager methods.
 
 Plugin_manager::~Plugin_manager()
@@ -311,6 +350,8 @@ Plugin_manager::claim_file(Input_file* input_file, off_t offset,
     {
       if ((*this->current_)->claim_file(&this->plugin_input_file_))
         {
+	  this->any_claimed_ = true;
+
           if (this->objects_.size() > handle)
             return this->objects_[handle];
 
@@ -322,6 +363,31 @@ Plugin_manager::claim_file(Input_file* input_file, off_t offset,
     }
 
   return NULL;
+}
+
+// Save an archive.  This is used so that a plugin can add a file
+// which refers to a symbol which was not previously referenced.  In
+// that case we want to pretend that the symbol was referenced before,
+// and pull in the archive object.
+
+void
+Plugin_manager::save_archive(Archive* archive)
+{
+  if (this->in_replacement_phase_ || !this->any_claimed_)
+    delete archive;
+  else
+    this->rescannable_.push_back(Rescannable(archive));
+}
+
+// Save an Input_group.  This is like save_archive.
+
+void
+Plugin_manager::save_input_group(Input_group* input_group)
+{
+  if (this->in_replacement_phase_ || !this->any_claimed_)
+    delete input_group;
+  else
+    this->rescannable_.push_back(Rescannable(input_group));
 }
 
 // Call the all-symbols-read handlers.
@@ -348,7 +414,144 @@ Plugin_manager::all_symbols_read(Workqueue* workqueue, Task* task,
        ++this->current_)
     (*this->current_)->all_symbols_read();
 
+  if (this->any_added_)
+    {
+      Task_token* next_blocker = new Task_token(true);
+      next_blocker->add_blocker();
+      workqueue->queue(new Plugin_rescan(this->this_blocker_, next_blocker));
+      this->this_blocker_ = next_blocker;
+    }
+
   *last_blocker = this->this_blocker_;
+}
+
+// This is called when we see a new undefined symbol.  If we are in
+// the replacement phase, this means that we may need to rescan some
+// archives we have previously seen.
+
+void
+Plugin_manager::new_undefined_symbol(Symbol* sym)
+{
+  if (this->in_replacement_phase_)
+    this->undefined_symbols_.push_back(sym);
+}
+
+// Rescan archives as needed.  This handles the case where a new
+// object file added by a plugin has an undefined reference to some
+// symbol defined in an archive.
+
+void
+Plugin_manager::rescan(Task* task)
+{
+  size_t rescan_pos = 0;
+  size_t rescan_size = this->rescannable_.size();
+  while (!this->undefined_symbols_.empty())
+    {
+      if (rescan_pos >= rescan_size)
+	{
+	  this->undefined_symbols_.clear();
+	  return;
+	}
+
+      Undefined_symbol_list undefs;
+      undefs.reserve(this->undefined_symbols_.size());
+      this->undefined_symbols_.swap(undefs);
+
+      size_t min_rescan_pos = rescan_size;
+
+      for (Undefined_symbol_list::const_iterator p = undefs.begin();
+	   p != undefs.end();
+	   ++p)
+	{
+	  if (!(*p)->is_undefined())
+	    continue;
+
+	  this->undefined_symbols_.push_back(*p);
+
+	  // Find the first rescan archive which defines this symbol,
+	  // starting at the current rescan position.  The rescan position
+	  // exists so that given -la -lb -lc we don't look for undefined
+	  // symbols in -lb back in -la, but instead get the definition
+	  // from -lc.  Don't bother to look past the current minimum
+	  // rescan position.
+	  for (size_t i = rescan_pos; i < min_rescan_pos; ++i)
+	    {
+	      if (this->rescannable_defines(i, *p))
+		{
+		  min_rescan_pos = i;
+		  break;
+		}
+	    }
+	}
+
+      if (min_rescan_pos >= rescan_size)
+	{
+	  // We didn't find any rescannable archives which define any
+	  // undefined symbols.
+	  return;
+	}
+
+      const Rescannable& r(this->rescannable_[min_rescan_pos]);
+      if (r.is_archive)
+	{
+	  Task_lock_obj<Archive> tl(task, r.u.archive);
+	  r.u.archive->add_symbols(this->symtab_, this->layout_,
+				   this->input_objects_, this->mapfile_);
+	}
+      else
+	{
+	  size_t next_saw_undefined = this->symtab_->saw_undefined();
+	  size_t saw_undefined;
+	  do
+	    {
+	      saw_undefined = next_saw_undefined;
+
+	      for (Input_group::const_iterator p = r.u.input_group->begin();
+		   p != r.u.input_group->end();
+		   ++p)
+		{
+		  Task_lock_obj<Archive> tl(task, *p);
+
+		  (*p)->add_symbols(this->symtab_, this->layout_,
+				    this->input_objects_, this->mapfile_);
+		}
+
+	      next_saw_undefined = this->symtab_->saw_undefined();
+	    }
+	  while (saw_undefined != next_saw_undefined);
+	}
+
+      for (size_t i = rescan_pos; i < min_rescan_pos + 1; ++i)
+	{
+	  if (this->rescannable_[i].is_archive)
+	    delete this->rescannable_[i].u.archive;
+	  else
+	    delete this->rescannable_[i].u.input_group;
+	}
+
+      rescan_pos = min_rescan_pos + 1;
+    }
+}
+
+// Return whether the rescannable at index I defines SYM.
+
+bool
+Plugin_manager::rescannable_defines(size_t i, Symbol* sym)
+{
+  const Rescannable& r(this->rescannable_[i]);
+  if (r.is_archive)
+    return r.u.archive->defines_symbol(sym);
+  else
+    {
+      for (Input_group::const_iterator p = r.u.input_group->begin();
+	   p != r.u.input_group->end();
+	   ++p)
+	{
+	  if ((*p)->defines_symbol(sym))
+	    return true;
+	}
+      return false;
+    }
 }
 
 // Layout deferred objects.
@@ -473,6 +676,7 @@ Plugin_manager::add_input_file(const char* pathname, bool is_lib)
                                                 this->this_blocker_,
                                                 next_blocker));
   this->this_blocker_ = next_blocker;
+  this->any_added_ = true;
   return LDPS_OK;
 }
 

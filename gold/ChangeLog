@@ -1,3 +1,31 @@
+2011-01-24  Ian Lance Taylor  <iant@google.com>
+
+	* plugin.cc (class Plugin_rescan): Define new class.
+	(Plugin_manager::claim_file): Set any_claimed_.
+	(Plugin_manager::save_archive): New function.
+	(Plugin_manager::save_input_group): New function.
+	(Plugin_manager::all_symbols_read): Create Plugin_rescan task if
+	necessary.
+	(Plugin_manager::new_undefined_symbol): New function.
+	(Plugin_manager::rescan): New function.
+	(Plugin_manager::rescannable_defines): New function.
+	(Plugin_manager::add_input_file): Set any_added_.
+	* plugin.h (class Plugin_manager): define new fields rescannable_,
+	undefined_symbols_, any_claimed_, and any_added_.  Declare
+	Plugin_rescan as friend.  Declare new functions.
+	(Plugin_manager::Rescannable): Define type.
+	(Plugin_manager::Rescannable_list): Define type.
+	(Plugin_manager::Undefined_symbol_list): Define type.
+	(Plugin_manager::Plugin_manager): Initialize new fields.
+	* archive.cc (Archive::defines_symbol): New function.
+	(Add_archive_symbols::run): Pass archive to plugins if any.
+	* archive.h (class Archive): Declare defines_symbol.
+	* readsyms.cc (Input_group::~Input_group): New function.
+	(Finish_group::run): Pass input_group to plugins if any.
+	* readsyms.h (class Input_group): Declare destructor.
+	* symtab.cc (add_from_object): Pass undefined symbol to plugins if
+	any.
+
 2011-01-10  Ian Lance Taylor  <iant@google.com>
 
 	* layout.cc (Layout::layout_eh_frame): Mark a writable .eh_frame
