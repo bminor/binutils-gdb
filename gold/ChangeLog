@@ -1,5 +1,9 @@
 2011-01-24  Ian Lance Taylor  <iant@google.com>
 
+	* version.cc (version_string): Bump to 1.11.
+
+2011-01-24  Ian Lance Taylor  <iant@google.com>
+
 	* plugin.cc (class Plugin_rescan): Define new class.
 	(Plugin_manager::claim_file): Set any_claimed_.
 	(Plugin_manager::save_archive): New function.
