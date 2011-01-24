@@ -259,6 +259,7 @@ java_value_print (struct value *val, struct ui_file *stream,
 
 static void
 java_print_value_fields (struct type *type, const gdb_byte *valaddr,
+			 int offset,
 			 CORE_ADDR address, struct ui_file *stream,
 			 int recurse,
 			 const struct value *val,
@@ -304,11 +305,11 @@ java_print_value_fields (struct type *type, const gdb_byte *valaddr,
 
 	  base_valaddr = valaddr;
 
-	  java_print_value_fields (baseclass, base_valaddr, address + boffset,
+	  java_print_value_fields (baseclass, base_valaddr,
+				   offset + boffset, address,
 				   stream, recurse + 1, val, options);
 	  fputs_filtered (", ", stream);
 	}
-
     }
 
   if (!len && n_baseclasses == 1)
@@ -412,8 +413,9 @@ java_print_value_fields (struct type *type, const gdb_byte *valaddr,
 		{
 		  struct value_print_options opts;
 
-		  v = value_from_longest (TYPE_FIELD_TYPE (type, i),
-				   unpack_field_as_long (type, valaddr, i));
+		  v = value_from_longest
+		    (TYPE_FIELD_TYPE (type, i),
+		     unpack_field_as_long (type, valaddr + offset, i));
 
 		  opts = *options;
 		  opts.deref_ref = 0;
@@ -454,9 +456,9 @@ java_print_value_fields (struct type *type, const gdb_byte *valaddr,
 
 		  opts.deref_ref = 0;
 		  val_print (TYPE_FIELD_TYPE (type, i),
-			     valaddr + TYPE_FIELD_BITPOS (type, i) / 8, 0,
-			     address + TYPE_FIELD_BITPOS (type, i) / 8,
-			     stream, recurse + 1, val, &opts,
+			     valaddr,
+			     offset + TYPE_FIELD_BITPOS (type, i) / 8,
+			     address, stream, recurse + 1, val, &opts,
 			     current_language);
 		}
 	    }
@@ -497,7 +499,8 @@ java_val_print (struct type *type, const gdb_byte *valaddr,
     case TYPE_CODE_PTR:
       if (options->format && options->format != 's')
 	{
-	  print_scalar_formatted (valaddr, type, options, 0, stream);
+	  print_scalar_formatted (valaddr + embedded_offset,
+				  type, options, 0, stream);
 	  break;
 	}
 #if 0
@@ -507,14 +510,15 @@ java_val_print (struct type *type, const gdb_byte *valaddr,
 	  /* Print vtable entry - we only get here if we ARE using
 	     -fvtable_thunks.  (Otherwise, look under TYPE_CODE_STRUCT.)  */
 	  /* Extract an address, assume that it is unsigned.  */
-	  print_address_demangle (gdbarch,
-				  extract_unsigned_integer (valaddr,
-							    TYPE_LENGTH (type)),
-				  stream, demangle);
+	  print_address_demangle
+	    (gdbarch,
+	     extract_unsigned_integer (valaddr + embedded_offset,
+				       TYPE_LENGTH (type)),
+	     stream, demangle);
 	  break;
 	}
 #endif
-      addr = unpack_pointer (type, valaddr);
+      addr = unpack_pointer (type, valaddr + embedded_offset);
       if (addr == 0)
 	{
 	  fputs_filtered ("null", stream);
@@ -548,20 +552,22 @@ java_val_print (struct type *type, const gdb_byte *valaddr,
 
 	  opts.format = (options->format ? options->format
 			 : options->output_format);
-	  print_scalar_formatted (valaddr, type, &opts, 0, stream);
+	  print_scalar_formatted (valaddr + embedded_offset,
+				  type, &opts, 0, stream);
 	}
       else if (TYPE_CODE (type) == TYPE_CODE_CHAR
 	       || (TYPE_CODE (type) == TYPE_CODE_INT
 		   && TYPE_LENGTH (type) == 2
 		   && strcmp (TYPE_NAME (type), "char") == 0))
-	LA_PRINT_CHAR ((int) unpack_long (type, valaddr), type, stream);
+	LA_PRINT_CHAR ((int) unpack_long (type, valaddr + embedded_offset),
+		       type, stream);
       else
-	val_print_type_code_int (type, valaddr, stream);
+	val_print_type_code_int (type, valaddr + embedded_offset, stream);
       break;
 
     case TYPE_CODE_STRUCT:
-      java_print_value_fields (type, valaddr, address, stream, recurse,
-			       val, options);
+      java_print_value_fields (type, valaddr, embedded_offset,
+			       address, stream, recurse, val, options);
       break;
 
     default:

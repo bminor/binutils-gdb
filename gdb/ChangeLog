@@ -1,3 +1,71 @@
+2011-01-24  Pedro Alves  <pedro@codesourcery.com>
+
+	Don't lose embedded_offset in printing routines throughout.
+
+	* valprint.h (val_print_array_elements): Change prototype.
+	* valprint.c (val_print_array_elements): Add `embedded_offset'
+	parameter, and adjust to pass it down to val_print, while passing
+	`valaddr' or `address' unmodified.  Take embedded_offset into
+	account when checking repetitions.
+	* c-valprint.c (c_val_print): Pass embedded_offset to
+	val_print_array_elements instead of adjusting `valaddr' and
+	`address'.
+	* m2-valprint.c (m2_print_array_contents, m2_val_print): Pass
+	embedded_offset to val_print_array_elements instead of adjusting
+	`valaddr'.
+	* p-lang.h (pascal_object_print_value_fields): Adjust prototype.
+	* p-valprint.c (pascal_val_print): Pass embedded_offset to
+	val_print_array_elements and pascal_object_print_value_fields
+	instead of adjusting `valaddr'.
+	(pascal_object_print_value_fields): Add `offset' parameter, and
+	adjust to use it.
+	(pascal_object_print_value): Add `offset' parameter, and adjust to
+	use it.
+	(pascal_object_print_static_field): Use
+	value_contents_for_printing/value_embedded_offset, rather than
+	value_contents.
+	* ada-valprint.c (val_print_packed_array_elements): Add `offset'
+	parameter, and adjust to use it.  Use
+	value_contents_for_printing/value_embedded_offset, rather than
+	value_contents.
+	(ada_val_print): Rename `valaddr0' parameter to `valaddr'.
+	(ada_val_print_array): Add `offset' parameter, and adjust to use
+	it.
+	(ada_val_print_1): Rename `valaddr0' parameter to `valaddr', and
+	`embedded_offset' to `offset'.  Don't re-adjust `valaddr'.
+	Instead work with offsets.  Use
+	value_contents_for_printing/value_embedded_offset, rather than
+	value_contents.  Change `defer_val_int' local type to CORE_ADDR,
+	and use value_from_pointer to extract a target pointer, rather
+	than value_from_longest.
+	(print_variant_part): Add `offset' parameter.  Replace
+	`outer_valaddr' parameter by a new `outer_offset' parameter.
+	Don't re-adjust `valaddr'.  Instead pass down adjusted offsets.
+	(ada_value_print): Use
+	value_contents_for_printing/value_embedded_offset, rather than
+	value_contents.
+	(print_record): Add `offset' parameter, and adjust to pass it
+	down.
+	(print_field_values): Add `offset' parameter.  Replace
+	`outer_valaddr' parameter by a new `outer_offset' parameter.
+	Don't re-adjust `valaddr'.  Instead pass down adjusted offsets.
+	Use value_contents_for_printing/value_embedded_offset, rather than
+	value_contents.
+	* d-valprint.c (dynamic_array_type): Use
+	value_contents_for_printing/value_embedded_offset, rather than
+	value_contents.
+	* jv-valprint.c (java_print_value_fields): Add `offset' parameter.
+	Don't re-adjust `valaddr'.  Instead pass down adjusted offsets.
+	(java_print_value_fields): Take `offset' into account.  Don't
+	re-adjust `valaddr'.  Instead pass down adjusted offsets.
+	(java_val_print): Take `embedded_offset' into account.  Pass it to
+	java_print_value_fields.
+	* f-valprint.c (f77_print_array_1): Add `embedded_offset'
+	parameter.  Don't re-adjust `valaddr' or `address'.  Instead pass
+	down adjusted offsets.
+	(f77_print_array): Add `embedded_offset' parameter.  Pass it down.
+	(f_val_print): Take `embedded_offset' into account.
+
 2011-01-21  Joel Brobecker  <brobecker@adacore.com>
 
 	* inflow.c: Include "gdbcmd.h".

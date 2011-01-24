@@ -70,6 +70,7 @@ extern void
   pascal_type_print_varspec_prefix (struct type *, struct ui_file *, int, int);
 
 extern void pascal_object_print_value_fields (struct type *, const gdb_byte *,
+					      int,
 					      CORE_ADDR, struct ui_file *,
 					      int,
 					      const struct value *,

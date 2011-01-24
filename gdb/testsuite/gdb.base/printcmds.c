@@ -96,6 +96,28 @@ enum some_volatile_enum { enumvolval1, enumvolval2 };
    name.  See PR11827.  */
 volatile enum some_volatile_enum some_volatile_enum = enumvolval1;
 
+/* A structure with an embedded array at an offset > 0.  The array has
+   all elements with the same repeating value, which must not be the
+   same as the value of the preceding fields in the structure for the
+   test to be effective.  This tests whether GDB uses the correct
+   element content offsets (relative to the complete `some_struct'
+   value) when counting value repetitions.  */
+struct some_struct
+{
+  int a;
+  int b;
+  unsigned char array[20];
+} some_struct = {
+  0x12345678,
+  0x87654321,
+  {
+    0xaa, 0xaa, 0xaa, 0xaa, 0xaa,
+    0xaa, 0xaa, 0xaa, 0xaa, 0xaa,
+    0xaa, 0xaa, 0xaa, 0xaa, 0xaa,
+    0xaa, 0xaa, 0xaa, 0xaa, 0xaa
+  }
+};
+
 /* -- */
 
 int main ()

@@ -474,6 +474,18 @@ proc test_print_repeats_10 {} {
     }
 }
 
+# This tests whether GDB uses the correct element content offsets
+# (relative to the complete `some_struct' value) when counting value
+# repetitions.
+
+proc test_print_repeats_embedded_array {} {
+    global gdb_prompt
+
+    gdb_test_escape_braces "p/x some_struct" \
+	"= {a = 0x12345678, b = 0x87654321, array = {0xaa <repeats 20 times>}}" \
+	"correct element repeats in array embedded at offset > 0"
+}
+
 proc test_print_strings {} {
     global gdb_prompt
 
@@ -818,6 +830,7 @@ test_float_rejected
 test_character_literals_accepted
 test_print_all_chars
 test_print_repeats_10
+test_print_repeats_embedded_array
 test_print_strings
 test_print_int_arrays
 test_print_typedef_arrays

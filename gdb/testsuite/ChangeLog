@@ -1,3 +1,10 @@
+2011-01-24  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.base/printcmds.c (some_struct): New struct and instance.
+	* gdb.base/printcmds.exp (test_print_repeats_embedded_array): New
+	procedure.
+	<global scope>: Call it.
+
 2011-01-21  Ken Werner  <ken.werner@de.ibm.com>
 
 	* lib/opencl.exp (skip_opencl_tests): Add missing compile_flags
