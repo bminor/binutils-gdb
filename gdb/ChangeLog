@@ -1,3 +1,9 @@
+2011-01-24  Kevin Buettner  <kevinb@redhat.com>
+
+	* configure.tgt (mips*-*-elf): New; just like mips*-*-*, but
+	with remote-mips.o added to gdb_target_obs.
+	* Makefile.in (ALL_TARGET_OBS): Add remote-mips.o.
+
 2011-01-24  Pedro Alves  <pedro@codesourcery.com>
 
 	* ada-valprint.c (val_print_packed_array_elements): Pass the

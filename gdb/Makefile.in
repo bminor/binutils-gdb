@@ -554,7 +554,7 @@ ALL_TARGET_OBS = \
 	solib-frv.o solib-irix.o solib-svr4.o solib-target.o \
 	solib-som.o solib-pa64.o solib-darwin.o \
 	dbug-rom.o dink32-rom.o ppcbug-rom.o m32r-rom.o dsrec.o monitor.o \
-	remote-m32r-sdi.o \
+	remote-m32r-sdi.o remote-mips.o \
 	xcoffread.o \
 	symfile-mem.o \
 	corelow.o \

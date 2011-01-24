@@ -371,6 +371,11 @@ mips64*-*-openbsd*)
 	gdb_target_obs="mips-tdep.o mips64obsd-tdep.o \
 			corelow.o solib.o solib-svr4.o"
 	;;
+mips*-*-elf)
+	# Target: MIPS ELF
+	gdb_target_obs="mips-tdep.o remote-mips.o"
+	gdb_sim=../sim/mips/libsim.a
+	;;
 mips*-*-*)
 	# Target: MIPS
 	gdb_target_obs="mips-tdep.o"
