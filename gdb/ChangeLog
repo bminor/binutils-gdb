@@ -1,5 +1,22 @@
 2011-01-25  Pedro Alves  <pedro@codesourcery.com>
 
+	Stop remote_read_bytes from handling partial reads itself.
+
+	* remote-fileio.c: Include target.h.
+	(remote_fileio_write_bytes): Delete.
+	(remote_fileio_func_open, remote_fileio_func_write)
+	(remote_fileio_func_rename, remote_fileio_func_unlink): Use
+	target_read_memory.
+	(remote_fileio_func_stat): Use target_read_memory and
+	target_write_memory.
+	(remote_fileio_func_gettimeofday): Use target_write_memory.
+	(remote_fileio_func_system): Use target_read_memory.
+	* remote.c (remote_write_bytes): Make it static.
+	(remote_read_bytes): Don't handle partial reads here.
+	* remote.h (remote_read_bytes): Delete declaration.
+
+2011-01-25  Pedro Alves  <pedro@codesourcery.com>
+
 	Simplify XML parsing a bit.
 
 	* xml-support.h (gdb_xml_parse_quick): Declare.

@@ -42,11 +42,6 @@ extern char *unpack_varlen_hex (char *buff, ULONGEST *result);
 
 extern void async_remote_interrupt_twice (void *arg);
 
-extern int remote_write_bytes (CORE_ADDR memaddr, const gdb_byte *myaddr,
-			       int len);
-
-extern int remote_read_bytes (CORE_ADDR memaddr, gdb_byte *myaddr, int len);
-
 void register_remote_g_packet_guess (struct gdbarch *gdbarch, int bytes,
 				     const struct target_desc *tdesc);
 void register_remote_support_xml (const char *);

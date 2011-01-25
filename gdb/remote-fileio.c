@@ -30,6 +30,7 @@
 #include "exceptions.h"
 #include "remote-fileio.h"
 #include "event-loop.h"
+#include "target.h"
 
 #include <fcntl.h>
 #include <sys/time.h>
@@ -588,29 +589,11 @@ remote_fileio_return_success (int retcode)
   remote_fileio_reply (retcode, 0);
 }
 
-/* Wrapper function for remote_write_bytes() which has the disadvantage to
-   write only one packet, regardless of the requested number of bytes to
-   transfer.  This wrapper calls remote_write_bytes() as often as needed.  */
-static int
-remote_fileio_write_bytes (CORE_ADDR memaddr, gdb_byte *myaddr, int len)
-{
-  int ret = 0, written;
-
-  while (len > 0 && (written = remote_write_bytes (memaddr, myaddr, len)) > 0)
-    {
-      len -= written;
-      memaddr += written;
-      myaddr += written;
-      ret += written;
-    }
-  return ret;
-}
-
 static void
 remote_fileio_func_open (char *buf)
 {
   CORE_ADDR ptrval;
-  int length, retlength;
+  int length;
   long num;
   int flags, fd;
   mode_t mode;
@@ -638,10 +621,9 @@ remote_fileio_func_open (char *buf)
     }
   mode = remote_fileio_mode_to_host (num, 1);
 
-  /* Request pathname using 'm' packet.  */
+  /* Request pathname.  */
   pathname = alloca (length);
-  retlength = remote_read_bytes (ptrval, (gdb_byte *) pathname, length);
-  if (retlength != length)
+  if (target_read_memory (ptrval, (gdb_byte *) pathname, length) != 0)
     {
       remote_fileio_ioerror ();
       return;
@@ -819,10 +801,9 @@ remote_fileio_func_read (char *buf)
 
   if (ret > 0)
     {
-      retlength = remote_fileio_write_bytes (ptrval, buffer, ret);
-      if (retlength != ret)
-	ret = -1; /* errno has been set to EIO in
-		     remote_fileio_write_bytes().  */
+      errno = target_write_memory (ptrval, buffer, ret);
+      if (errno != 0)
+	ret = -1;
     }
 
   if (ret < 0)
@@ -839,7 +820,7 @@ remote_fileio_func_write (char *buf)
   long target_fd, num;
   LONGEST lnum;
   CORE_ADDR ptrval;
-  int fd, ret, retlength;
+  int fd, ret;
   gdb_byte *buffer;
   size_t length;
 
@@ -871,8 +852,7 @@ remote_fileio_func_write (char *buf)
   length = (size_t) num;
     
   buffer = (gdb_byte *) xmalloc (length);
-  retlength = remote_read_bytes (ptrval, buffer, length);
-  if (retlength != length)
+  if (target_read_memory (ptrval, buffer, length) != 0)
     {
       xfree (buffer);
       remote_fileio_ioerror ();
@@ -966,7 +946,7 @@ static void
 remote_fileio_func_rename (char *buf)
 {
   CORE_ADDR old_ptr, new_ptr;
-  int old_len, new_len, retlength;
+  int old_len, new_len;
   char *oldpath, *newpath;
   int ret, of, nf;
   struct stat ost, nst;
@@ -987,8 +967,7 @@ remote_fileio_func_rename (char *buf)
   
   /* Request oldpath using 'm' packet */
   oldpath = alloca (old_len);
-  retlength = remote_read_bytes (old_ptr, (gdb_byte *) oldpath, old_len);
-  if (retlength != old_len)
+  if (target_read_memory (old_ptr, (gdb_byte *) oldpath, old_len) != 0)
     {
       remote_fileio_ioerror ();
       return;
@@ -996,8 +975,7 @@ remote_fileio_func_rename (char *buf)
   
   /* Request newpath using 'm' packet */
   newpath = alloca (new_len);
-  retlength = remote_read_bytes (new_ptr, (gdb_byte *) newpath, new_len);
-  if (retlength != new_len)
+  if (target_read_memory (new_ptr, (gdb_byte *) newpath, new_len) != 0)
     {
       remote_fileio_ioerror ();
       return;
@@ -1062,7 +1040,7 @@ static void
 remote_fileio_func_unlink (char *buf)
 {
   CORE_ADDR ptrval;
-  int length, retlength;
+  int length;
   char *pathname;
   int ret;
   struct stat st;
@@ -1075,8 +1053,7 @@ remote_fileio_func_unlink (char *buf)
     }
   /* Request pathname using 'm' packet */
   pathname = alloca (length);
-  retlength = remote_read_bytes (ptrval, (gdb_byte *) pathname, length);
-  if (retlength != length)
+  if (target_read_memory (ptrval, (gdb_byte *) pathname, length) != 0)
     {
       remote_fileio_ioerror ();
       return;
@@ -1103,7 +1080,7 @@ static void
 remote_fileio_func_stat (char *buf)
 {
   CORE_ADDR statptr, nameptr;
-  int ret, namelength, retlength;
+  int ret, namelength;
   char *pathname;
   LONGEST lnum;
   struct stat st;
@@ -1126,8 +1103,7 @@ remote_fileio_func_stat (char *buf)
   
   /* Request pathname using 'm' packet */
   pathname = alloca (namelength);
-  retlength = remote_read_bytes (nameptr, (gdb_byte *) pathname, namelength);
-  if (retlength != namelength)
+  if (target_read_memory (nameptr, (gdb_byte *) pathname, namelength) != 0)
     {
       remote_fileio_ioerror ();
       return;
@@ -1151,10 +1127,9 @@ remote_fileio_func_stat (char *buf)
     {
       remote_fileio_to_fio_stat (&st, &fst);
       remote_fileio_to_fio_uint (0, fst.fst_dev);
-      
-      retlength = remote_fileio_write_bytes (statptr,
-					     (gdb_byte *) &fst, sizeof fst);
-      if (retlength != sizeof fst)
+
+      errno = target_write_memory (statptr, (gdb_byte *) &fst, sizeof fst);
+      if (errno != 0)
 	{
 	  remote_fileio_return_errno (-1);
 	  return;
@@ -1236,9 +1211,8 @@ remote_fileio_func_fstat (char *buf)
     {
       remote_fileio_to_fio_stat (&st, &fst);
 
-      retlength = remote_fileio_write_bytes (ptrval, (gdb_byte *) &fst,
-					     sizeof fst);
-      if (retlength != sizeof fst)
+      errno = target_write_memory (ptrval, (gdb_byte *) &fst, sizeof fst);
+      if (errno != 0)
 	{
 	  remote_fileio_return_errno (-1);
 	  return;
@@ -1289,9 +1263,8 @@ remote_fileio_func_gettimeofday (char *buf)
     {
       remote_fileio_to_fio_timeval (&tv, &ftv);
 
-      retlength = remote_fileio_write_bytes (ptrval, (gdb_byte *) &ftv,
-					     sizeof ftv);
-      if (retlength != sizeof ftv)
+      errno = target_write_memory (ptrval, (gdb_byte *) &ftv, sizeof ftv);
+      if (errno != 0)
 	{
 	  remote_fileio_return_errno (-1);
 	  return;
@@ -1336,8 +1309,7 @@ remote_fileio_func_system (char *buf)
     {
       /* Request commandline using 'm' packet */
       cmdline = alloca (length);
-      retlength = remote_read_bytes (ptrval, (gdb_byte *) cmdline, length);
-      if (retlength != length)
+      if (target_read_memory (ptrval, (gdb_byte *) cmdline, length) != 0)
 	{
 	  remote_fileio_ioerror ();
 	  return;
