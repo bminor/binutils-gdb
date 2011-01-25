@@ -1,3 +1,9 @@
+2011-01-25  Pedro Alves  <pedro@codesourcery.com>
+
+	* m2-valprint.c (print_unbounded_array): Pass
+	value_contents_for_printing rather than value_contents, to
+	m2_print_array_contents.  Also pass in the value.
+
 2011-01-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* dwarf2read.c (dwarf2_read_index, write_psymtabs_to_index)
