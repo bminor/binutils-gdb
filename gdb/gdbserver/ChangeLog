@@ -1,3 +1,24 @@
+2011-01-25  Pedro Alves  <pedro@codesourcery.com>
+
+	* server.h (decode_xfer_write): Change prototype.
+	* remote-utils.c (decode_xfer_write): Remove `annex' parameter,
+	and don't extract the annex here.
+	* server.c (decode_xfer_read): Remove `annex' parameter,
+	and don't extract the annex here.
+	(decode_xfer): New.
+	(struct qxfer): New.
+	(handle_qxfer_auxv, handle_qxfer_features, handle_qxfer_libraries)
+	(handle_qxfer_osdata, handle_qxfer_siginfo, handle_qxfer_spu)
+	(handle_qxfer_statictrace): New functions, abstracted out from
+	handle_query, and made to use the struct qxfer interface.
+	(handle_threads_qxfer_proper): Rename to ...
+	(handle_qxfer_threads_proper): ... this.
+	(handle_threads_qxfer): Rename to ...
+	(handle_qxfer_threads): ... this.  Adjust.
+	(qxfer_packets): New array.
+	(handle_qxfer): New function.
+	(handle_query): Use handle_qxfer.
+
 2011-01-05  Michael Snyder  <msnyder@msnyder-server.eng.vmware.com>
 
 	* gdbreplay.c: Shorten lines of >= 80 columns.

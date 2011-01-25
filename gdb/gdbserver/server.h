@@ -423,7 +423,7 @@ void decode_M_packet (char *from, CORE_ADDR * mem_addr_ptr,
 		      unsigned int *len_ptr, unsigned char **to_p);
 int decode_X_packet (char *from, int packet_len, CORE_ADDR * mem_addr_ptr,
 		     unsigned int *len_ptr, unsigned char **to_p);
-int decode_xfer_write (char *buf, int packet_len, char **annex,
+int decode_xfer_write (char *buf, int packet_len,
 		       CORE_ADDR *offset, unsigned int *len,
 		       unsigned char *data);
 int decode_search_memory_packet (const char *buf, int packet_len,

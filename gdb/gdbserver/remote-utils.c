@@ -1432,19 +1432,13 @@ decode_X_packet (char *from, int packet_len, CORE_ADDR *mem_addr_ptr,
 }
 
 /* Decode a qXfer write request.  */
+
 int
-decode_xfer_write (char *buf, int packet_len, char **annex, CORE_ADDR *offset,
+decode_xfer_write (char *buf, int packet_len, CORE_ADDR *offset,
 		   unsigned int *len, unsigned char *data)
 {
   char ch;
-
-  /* Extract and NUL-terminate the annex.  */
-  *annex = buf;
-  while (*buf && *buf != ':')
-    buf++;
-  if (*buf == '\0')
-    return -1;
-  *buf++ = 0;
+  char *b = buf;
 
   /* Extract the offset.  */
   *offset = 0;
@@ -1455,7 +1449,7 @@ decode_xfer_write (char *buf, int packet_len, char **annex, CORE_ADDR *offset,
     }
 
   /* Get encoded data.  */
-  packet_len -= buf - *annex;
+  packet_len -= buf - b;
   *len = remote_unescape_input ((const gdb_byte *) buf, packet_len,
 				data, packet_len);
   return 0;
