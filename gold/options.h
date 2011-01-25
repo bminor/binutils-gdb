@@ -682,8 +682,8 @@ class General_options
 	      NULL);
 
   DEFINE_bool(detect_odr_violations, options::TWO_DASHES, '\0', false,
-              N_("Try to detect violations of the One Definition Rule"),
-              NULL);
+              N_("Look for violations of the C++ One Definition Rule"),
+	      N_("Do not look for violations of the C++ One Definition Rule"));
 
   DEFINE_bool(discard_all, options::TWO_DASHES, 'x', false,
 	      N_("Delete all local symbols"), NULL);

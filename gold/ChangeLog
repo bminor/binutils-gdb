@@ -1,5 +1,10 @@
 2011-01-24  Ian Lance Taylor  <iant@google.com>
 
+	* options.h (class General_options): Accept
+	--no-detect-odr-violations.
+
+2011-01-24  Ian Lance Taylor  <iant@google.com>
+
 	* version.cc (version_string): Bump to 1.11.
 
 2011-01-24  Ian Lance Taylor  <iant@google.com>
