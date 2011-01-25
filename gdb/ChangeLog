@@ -1,5 +1,22 @@
 2011-01-25  Pedro Alves  <pedro@codesourcery.com>
 
+	* regcache.c (struct regcache_descr): Remove outdated comment.
+	(init_regcache_descr): Remove sizeof_raw_register_valid_p
+	overallocate hack.
+	(regcache_xmalloc): Rename to ...
+	(regcache_xmalloc_1): ... this.  Add `readonly_p' parameter.
+	Allocate the regcache type accordingly.
+	(regcache_xmalloc): New as wrapper around regcache_xmalloc_1.
+	(regcache_xfree): Asser the source is also readonly.  Copy sizeof
+	cooked registers, not raw.
+	(regcache_dup_no_passthrough): Delete.
+	(get_thread_arch_regcache): Use regcache_xmalloc_1.
+	* h8300-tdep.c (h8300_push_dummy_call): Tweak comment to not
+	mention obsolete write_register_bytes.
+	* regcache.h (regcache_dup_no_passthrough): Delete declaration.
+
+2011-01-25  Pedro Alves  <pedro@codesourcery.com>
+
 	Stop remote_read_bytes from handling partial reads itself.
 
 	* remote-fileio.c: Include target.h.

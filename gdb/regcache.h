@@ -154,7 +154,6 @@ extern void regcache_restore (struct regcache *dst,
    only transfer values already in the cache.  */
 
 extern struct regcache *regcache_dup (struct regcache *regcache);
-extern struct regcache *regcache_dup_no_passthrough (struct regcache *);
 extern void regcache_cpy (struct regcache *dest, struct regcache *src);
 extern void regcache_cpy_no_passthrough (struct regcache *dest,
 					 struct regcache *src);

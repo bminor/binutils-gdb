@@ -67,10 +67,8 @@ struct regcache_descr
 
   /* Offset and size (in 8 bit bytes), of reach register in the
      register cache.  All registers (including those in the range
-     [NR_RAW_REGISTERS .. NR_COOKED_REGISTERS) are given an offset.
-     Assigning all registers an offset makes it possible to keep
-     legacy code, such as that found in read_register_bytes() and
-     write_register_bytes() working.  */
+     [NR_RAW_REGISTERS .. NR_COOKED_REGISTERS) are given an
+     offset.  */
   long *register_offset;
   long *sizeof_register;
 
@@ -108,12 +106,7 @@ init_regcache_descr (struct gdbarch *gdbarch)
   /* Construct a strictly RAW register cache.  Don't allow pseudo's
      into the register cache.  */
   descr->nr_raw_registers = gdbarch_num_regs (gdbarch);
-
-  /* FIXME: cagney/2002-08-13: Overallocate the register_valid_p
-     array.  This pretects GDB from erant code that accesses elements
-     of the global register_valid_p[] array in the range 
-     [gdbarch_num_regs .. gdbarch_num_regs + gdbarch_num_pseudo_regs).  */
-  descr->sizeof_raw_register_valid_p = descr->sizeof_cooked_register_valid_p;
+  descr->sizeof_raw_register_valid_p = gdbarch_num_regs (gdbarch);
 
   /* Lay out the register cache.
 
@@ -129,23 +122,26 @@ init_regcache_descr (struct gdbarch *gdbarch)
       = GDBARCH_OBSTACK_CALLOC (gdbarch, descr->nr_cooked_registers, long);
     descr->register_offset
       = GDBARCH_OBSTACK_CALLOC (gdbarch, descr->nr_cooked_registers, long);
-    for (i = 0; i < descr->nr_cooked_registers; i++)
+    for (i = 0; i < descr->nr_raw_registers; i++)
       {
 	descr->sizeof_register[i] = TYPE_LENGTH (descr->register_type[i]);
 	descr->register_offset[i] = offset;
 	offset += descr->sizeof_register[i];
 	gdb_assert (MAX_REGISTER_SIZE >= descr->sizeof_register[i]);
       }
-    /* Set the real size of the register cache buffer.  */
+    /* Set the real size of the raw register cache buffer.  */
+    descr->sizeof_raw_registers = offset;
+
+    for (; i < descr->nr_cooked_registers; i++)
+      {
+	descr->sizeof_register[i] = TYPE_LENGTH (descr->register_type[i]);
+	descr->register_offset[i] = offset;
+	offset += descr->sizeof_register[i];
+	gdb_assert (MAX_REGISTER_SIZE >= descr->sizeof_register[i]);
+      }
+    /* Set the real size of the readonly register cache buffer.  */
     descr->sizeof_cooked_registers = offset;
   }
-
-  /* FIXME: cagney/2002-05-22: Should only need to allocate space for
-     the raw registers.  Unfortunately some code still accesses the
-     register array directly using the global registers[].  Until that
-     code has been purged, play safe and over allocating the register
-     buffer.  Ulgh!  */
-  descr->sizeof_raw_registers = descr->sizeof_cooked_registers;
 
   return descr;
 }
@@ -215,8 +211,9 @@ struct regcache
   ptid_t ptid;
 };
 
-struct regcache *
-regcache_xmalloc (struct gdbarch *gdbarch, struct address_space *aspace)
+static struct regcache *
+regcache_xmalloc_1 (struct gdbarch *gdbarch, struct address_space *aspace,
+		    int readonly_p)
 {
   struct regcache_descr *descr;
   struct regcache *regcache;
@@ -225,14 +222,30 @@ regcache_xmalloc (struct gdbarch *gdbarch, struct address_space *aspace)
   descr = regcache_descr (gdbarch);
   regcache = XMALLOC (struct regcache);
   regcache->descr = descr;
-  regcache->registers
-    = XCALLOC (descr->sizeof_raw_registers, gdb_byte);
-  regcache->register_valid_p
-    = XCALLOC (descr->sizeof_raw_register_valid_p, gdb_byte);
+  regcache->readonly_p = readonly_p;
+  if (readonly_p)
+    {
+      regcache->registers
+	= XCALLOC (descr->sizeof_cooked_registers, gdb_byte);
+      regcache->register_valid_p
+	= XCALLOC (descr->sizeof_cooked_register_valid_p, gdb_byte);
+    }
+  else
+    {
+      regcache->registers
+	= XCALLOC (descr->sizeof_raw_registers, gdb_byte);
+      regcache->register_valid_p
+	= XCALLOC (descr->sizeof_raw_register_valid_p, gdb_byte);
+    }
   regcache->aspace = aspace;
-  regcache->readonly_p = 1;
   regcache->ptid = minus_one_ptid;
   return regcache;
+}
+
+struct regcache *
+regcache_xmalloc (struct gdbarch *gdbarch, struct address_space *aspace)
+{
+  return regcache_xmalloc_1 (gdbarch, aspace, 1);
 }
 
 void
@@ -382,11 +395,12 @@ regcache_cpy_no_passthrough (struct regcache *dst, struct regcache *src)
   /* NOTE: cagney/2002-05-17: Don't let the caller do a no-passthrough
      move of data into the current regcache.  Doing this would be
      silly - it would mean that valid_p would be completely invalid.  */
-  gdb_assert (dst->readonly_p);
+  gdb_assert (dst->readonly_p && src->readonly_p);
 
-  memcpy (dst->registers, src->registers, dst->descr->sizeof_raw_registers);
+  memcpy (dst->registers, src->registers,
+	  dst->descr->sizeof_cooked_registers);
   memcpy (dst->register_valid_p, src->register_valid_p,
-	  dst->descr->sizeof_raw_register_valid_p);
+	  dst->descr->sizeof_cooked_register_valid_p);
 }
 
 struct regcache *
@@ -396,16 +410,6 @@ regcache_dup (struct regcache *src)
 
   newbuf = regcache_xmalloc (src->descr->gdbarch, get_regcache_aspace (src));
   regcache_cpy (newbuf, src);
-  return newbuf;
-}
-
-struct regcache *
-regcache_dup_no_passthrough (struct regcache *src)
-{
-  struct regcache *newbuf;
-
-  newbuf = regcache_xmalloc (src->descr->gdbarch, get_regcache_aspace (src));
-  regcache_cpy_no_passthrough (newbuf, src);
   return newbuf;
 }
 
@@ -459,9 +463,8 @@ get_thread_arch_regcache (ptid_t ptid, struct gdbarch *gdbarch)
 	&& get_regcache_arch (list->regcache) == gdbarch)
       return list->regcache;
 
-  new_regcache = regcache_xmalloc (gdbarch,
-				   target_thread_address_space (ptid));
-  new_regcache->readonly_p = 0;
+  new_regcache = regcache_xmalloc_1 (gdbarch,
+				     target_thread_address_space (ptid), 0);
   new_regcache->ptid = ptid;
   gdb_assert (new_regcache->aspace != NULL);
 

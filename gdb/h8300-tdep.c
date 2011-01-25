@@ -698,9 +698,8 @@ h8300_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	  else
 	    {
 	      /* Heavens to Betsy --- it's really going in registers!
-	         It would be nice if we could use write_register_bytes
-	         here, but on the h8/300s, there are gaps between
-	         the registers in the register file.  */
+	         Note that on the h8/300s, there are gaps between the
+	         registers in the register file.  */
 	      int offset;
 
 	      for (offset = 0; offset < padded_len; offset += wordsize)
