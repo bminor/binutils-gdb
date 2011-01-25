@@ -283,8 +283,8 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
     case TYPE_CODE_PTR:
       if (options->format && options->format != 's')
 	{
-	  print_scalar_formatted (valaddr + embedded_offset,
-				  type, options, 0, stream);
+	  val_print_scalar_formatted (type, valaddr, embedded_offset,
+				      original_value, options, 0, stream);
 	  break;
 	}
       else
@@ -352,8 +352,8 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
     case TYPE_CODE_FUNC:
       if (options->format)
 	{
-	  print_scalar_formatted (valaddr + embedded_offset,
-				  type, options, 0, stream);
+	  val_print_scalar_formatted (type, valaddr, embedded_offset,
+				      original_value, options, 0, stream);
 	  break;
 	}
       /* FIXME, we should consider, at least for ANSI C language, eliminating
@@ -372,8 +372,8 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 
 	  opts.format = (options->format ? options->format
 			 : options->output_format);
-	  print_scalar_formatted (valaddr + embedded_offset,
-				  type, &opts, 0, stream);
+	  val_print_scalar_formatted (type, valaddr, embedded_offset,
+				      original_value, options, 0, stream);
 	}
       else
 	{
@@ -395,16 +395,16 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 
     case TYPE_CODE_FLAGS:
       if (options->format)
-	print_scalar_formatted (valaddr + embedded_offset,
-				type, options, 0, stream);
+	val_print_scalar_formatted (type, valaddr, embedded_offset,
+				    original_value, options, 0, stream);
       else
 	val_print_type_code_flags (type, valaddr + embedded_offset, stream);
       break;
 
     case TYPE_CODE_FLT:
       if (options->format)
-	print_scalar_formatted (valaddr + embedded_offset,
-				type, options, 0, stream);
+	val_print_scalar_formatted (type, valaddr, embedded_offset,
+				    original_value, options, 0, stream);
       else
 	print_floating (valaddr + embedded_offset, type, stream);
       break;
@@ -429,8 +429,8 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 
 	  opts.format = (options->format ? options->format
 			 : options->output_format);
-	  print_scalar_formatted (valaddr + embedded_offset,
-				  type, &opts, 0, stream);
+	  val_print_scalar_formatted (type, valaddr, embedded_offset,
+				      original_value, &opts, 0, stream);
 	}
       else
 	{

@@ -329,8 +329,11 @@ print_formatted (struct value *val, int size,
   else
     /* User specified format, so don't look to the the type to
        tell us what to do.  */
-    print_scalar_formatted (value_contents (val), type,
-			    options, size, stream);
+    val_print_scalar_formatted (type,
+				value_contents_for_printing (val),
+				value_embedded_offset (val),
+				val,
+				options, size, stream);
 }
 
 /* Return builtin floating point type of same length as TYPE.
@@ -353,11 +356,8 @@ float_type_from_length (struct type *type)
 }
 
 /* Print a scalar of data of type TYPE, pointed to in GDB by VALADDR,
-   according to OPTIONS and SIZE on STREAM.
-   Formats s and i are not supported at this level.
-
-   This is how the elements of an array or structure are printed
-   with a format.  */
+   according to OPTIONS and SIZE on STREAM.  Formats s and i are not
+   supported at this level.  */
 
 void
 print_scalar_formatted (const void *valaddr, struct type *type,
@@ -369,18 +369,8 @@ print_scalar_formatted (const void *valaddr, struct type *type,
   unsigned int len = TYPE_LENGTH (type);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
-  /* If we get here with a string format, try again without it.  Go
-     all the way back to the language printers, which may call us
-     again.  */
-  if (options->format == 's')
-    {
-      struct value_print_options opts = *options;
-      opts.format = 0;
-      opts.deref_ref = 0;
-      val_print (type, valaddr, 0, 0, stream, 0, NULL, &opts,
-		 current_language);
-      return;
-    }
+  /* String printing should go through val_print_scalar_formatted.  */
+  gdb_assert (options->format != 's');
 
   if (len > sizeof(LONGEST) &&
       (TYPE_CODE (type) == TYPE_CODE_INT

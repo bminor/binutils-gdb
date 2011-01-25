@@ -388,8 +388,8 @@ m2_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	print_variable_at_address (type, valaddr + embedded_offset,
 				   stream, recurse, options);
       else if (options->format && options->format != 's')
-	print_scalar_formatted (valaddr + embedded_offset, type,
-				options, 0, stream);
+	val_print_scalar_formatted (type, valaddr, embedded_offset,
+				    original_value, options, 0, stream);
       else
 	{
 	  addr = unpack_pointer (type, valaddr + embedded_offset);
@@ -450,8 +450,8 @@ m2_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
     case TYPE_CODE_ENUM:
       if (options->format)
 	{
-	  print_scalar_formatted (valaddr + embedded_offset, type,
-				  options, 0, stream);
+	  val_print_scalar_formatted (type, valaddr, embedded_offset,
+				      original_value, options, 0, stream);
 	  break;
 	}
       len = TYPE_NFIELDS (type);
@@ -477,8 +477,8 @@ m2_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
     case TYPE_CODE_FUNC:
       if (options->format)
 	{
-	  print_scalar_formatted (valaddr + embedded_offset, type,
-				  options, 0, stream);
+	  val_print_scalar_formatted (type, valaddr, embedded_offset,
+				      original_value, options, 0, stream);
 	  break;
 	}
       /* FIXME, we should consider, at least for ANSI C language, eliminating
@@ -497,8 +497,8 @@ m2_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 
 	  opts.format = (options->format ? options->format
 			 : options->output_format);
-	  print_scalar_formatted (valaddr + embedded_offset, type,
-				  &opts, 0, stream);
+	  val_print_scalar_formatted (type, valaddr, embedded_offset,
+				      original_value, &opts, 0, stream);
 	}
       else
 	{
@@ -535,8 +535,8 @@ m2_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 
 	  opts.format = (options->format ? options->format
 			 : options->output_format);
-	  print_scalar_formatted (valaddr + embedded_offset, type,
-				  &opts, 0, stream);
+	  val_print_scalar_formatted (type, valaddr, embedded_offset,
+				      original_value, &opts, 0, stream);
 	}
       else
 	val_print_type_code_int (type, valaddr + embedded_offset, stream);
@@ -549,8 +549,8 @@ m2_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 
 	  opts.format = (options->format ? options->format
 			 : options->output_format);
-	  print_scalar_formatted (valaddr + embedded_offset, type,
-				  &opts, 0, stream);
+	  val_print_scalar_formatted (type, valaddr, embedded_offset,
+				      original_value, &opts, 0, stream);
 	}
       else
 	{
@@ -566,8 +566,8 @@ m2_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 
     case TYPE_CODE_FLT:
       if (options->format)
-	print_scalar_formatted (valaddr + embedded_offset, type,
-				options, 0, stream);
+	val_print_scalar_formatted (type, valaddr, embedded_offset,
+				    original_value, options, 0, stream);
       else
 	print_floating (valaddr + embedded_offset, type, stream);
       break;

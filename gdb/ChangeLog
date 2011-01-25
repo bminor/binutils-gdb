@@ -1,5 +1,22 @@
 2011-01-25  Pedro Alves  <pedro@codesourcery.com>
 
+	* printcmd.c (print_formatted): Use val_print_scalar_formatted
+	instead of print_scalar_formatted.
+	(print_scalar_formatted): Don't handle 's' format strings here,
+	and add an assertion that we never see such format here.
+	* valprint.h (val_print_scalar_formatted): Declare.
+	* valprint.c (val_print_scalar_formatted): New.
+	* c-valprint.c (c_val_print): Use val_print_scalar_formatted
+	instead of print_scalar_formatted.
+	* jv-valprint.c (java_val_print): Ditto.
+	* p-valprint.c (pascal_val_print): Ditto.
+	* ada-valprint.c (ada_val_print_1): Ditto.
+	* f-valprint.c (f_val_print): Ditto.
+	* infcmd.c (registers_info): Ditto.
+	* m2-valprint.c (m2_val_print): Ditto.
+
+2011-01-25  Pedro Alves  <pedro@codesourcery.com>
+
 	* m2-valprint.c (print_unbounded_array): Pass
 	value_contents_for_printing rather than value_contents, to
 	m2_print_array_contents.  Also pass in the value.

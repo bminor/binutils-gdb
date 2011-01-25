@@ -2110,9 +2110,11 @@ registers_info (char *addr_exp, int fpregs)
 
 		printf_filtered ("%s: ", start);
 		get_formatted_print_options (&opts, 'x');
-		print_scalar_formatted (value_contents (val),
-					check_typedef (value_type (val)),
-					&opts, 0, gdb_stdout);
+		val_print_scalar_formatted (check_typedef (value_type (val)),
+					    value_contents_for_printing (val),
+					    value_embedded_offset (val),
+					    val,
+					    &opts, 0, gdb_stdout);
 		printf_filtered ("\n");
 	      }
 	    else

@@ -788,8 +788,8 @@ ada_val_print_1 (struct type *type, const gdb_byte *valaddr,
 	      struct value_print_options opts = *options;
 
 	      opts.format = format;
-	      print_scalar_formatted (valaddr + offset_aligned,
-				      type, &opts, 0, stream);
+	      val_print_scalar_formatted (type, valaddr, offset_aligned,
+					  original_value, &opts, 0, stream);
 	    }
           else if (ada_is_system_address_type (type))
             {
@@ -827,8 +827,8 @@ ada_val_print_1 (struct type *type, const gdb_byte *valaddr,
     case TYPE_CODE_ENUM:
       if (options->format)
 	{
-	  print_scalar_formatted (valaddr + offset_aligned,
-				  type, options, 0, stream);
+	  val_print_scalar_formatted (type, valaddr, offset_aligned,
+				      original_value, options, 0, stream);
 	  break;
 	}
       len = TYPE_NFIELDS (type);
@@ -858,8 +858,8 @@ ada_val_print_1 (struct type *type, const gdb_byte *valaddr,
 
     case TYPE_CODE_FLAGS:
       if (options->format)
-	print_scalar_formatted (valaddr + offset_aligned,
-				type, options, 0, stream);
+	val_print_scalar_formatted (type, valaddr, offset_aligned,
+				    original_value, options, 0, stream);
       else
 	val_print_type_code_flags (type, valaddr + offset_aligned, stream);
       break;
