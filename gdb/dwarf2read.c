@@ -2024,13 +2024,14 @@ dwarf2_read_index (struct objfile *objfile)
   /* Version check.  */
   version = MAYBE_SWAP (*(offset_type *) addr);
   /* Versions earlier than 3 emitted every copy of a psymbol.  This
-     causes the index to behave very poorly for certain requests.  So,
-     it seems better to just ignore such indices.  */
-  if (version < 3)
+     causes the index to behave very poorly for certain requests.  Version 4
+     contained incomplete addrmap.  So, it seems better to just ignore such
+     indices.  */
+  if (version < 4)
     return 0;
   /* Indexes with higher version than the one supported by GDB may be no
      longer backward compatible.  */
-  if (version > 3)
+  if (version > 4)
     return 0;
 
   map = OBSTACK_ZALLOC (&objfile->objfile_obstack, struct mapped_index);
@@ -15688,7 +15689,7 @@ write_psymtabs_to_index (struct objfile *objfile, const char *dir)
   total_len = size_of_contents;
 
   /* The version number.  */
-  val = MAYBE_SWAP (3);
+  val = MAYBE_SWAP (4);
   obstack_grow (&contents, &val, sizeof (val));
 
   /* The offset of the CU list from the start of the file.  */
@@ -15746,7 +15747,7 @@ write_psymtabs_to_index (struct objfile *objfile, const char *dir)
    1. The file header.  This is a sequence of values, of offset_type
    unless otherwise noted:
 
-   [0] The version number, currently 3.  Versions 1 and 2 are
+   [0] The version number, currently 4.  Versions 1, 2 and 3 are
    obsolete.
    [1] The offset, from the start of the file, of the CU list.
    [2] The offset, from the start of the file, of the types CU list.

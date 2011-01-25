@@ -1,3 +1,8 @@
+2011-01-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf2read.c (dwarf2_read_index, write_psymtabs_to_index)
+	(save_gdb_index_command): Switch to .gdb_index version 4.
+
 2011-01-25  Pedro Alves  <pedro@codesourcery.com>
 
 	* mi/mi-main.c (get_register): Use get_frame_register_value rather
