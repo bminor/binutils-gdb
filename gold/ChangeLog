@@ -1,3 +1,7 @@
+2011-01-25  Doug Kwan  <dougkwan@google.com>
+
+	* gold/icf.cc (get_section_contents): Always lock section's object.
+
 2011-01-24  Ian Lance Taylor  <iant@google.com>
 
 	* options.h (class General_options): Accept

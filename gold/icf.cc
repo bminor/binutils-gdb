@@ -237,20 +237,16 @@ get_section_contents(bool first_iteration,
                      const std::vector<unsigned int>& kept_section_id,
                      std::vector<std::string>* section_contents)
 {
+  // Lock the object so we can read from it.  This is only called
+  // single-threaded from queue_middle_tasks, so it is OK to lock.
+  // Unfortunately we have no way to pass in a Task token.
+  const Task* dummy_task = reinterpret_cast<const Task*>(-1);
+  Task_lock_obj<Object> tl(dummy_task, secn.first);
+
   section_size_type plen;
   const unsigned char* contents = NULL;
-
   if (first_iteration)
-    {
-      // Lock the object so we can read from it.  This is only called
-      // single-threaded from queue_middle_tasks, so it is OK to lock.
-      // Unfortunately we have no way to pass in a Task token.
-      const Task* dummy_task = reinterpret_cast<const Task*>(-1);
-      Task_lock_obj<Object> tl(dummy_task, secn.first);
-      contents = secn.first->section_contents(secn.second,
-                                              &plen,
-                                              false);
-    }
+    contents = secn.first->section_contents(secn.second, &plen, false);
 
   // The buffer to hold all the contents including relocs.  A checksum
   // is then computed on this buffer.
@@ -372,12 +368,6 @@ get_section_contents(bool first_iteration,
               // Process it only in the first iteration.
               if (!first_iteration)
                 continue;
-
-              // Lock the object so we can read from it.  This is only called
-              // single-threaded from queue_middle_tasks, so it is OK to lock.
-              // Unfortunately we have no way to pass in a Task token.
-              const Task* dummy_task = reinterpret_cast<const Task*>(-1);
-              Task_lock_obj<Object> tl(dummy_task, it_v->first);
 
               uint64_t secn_flags = (it_v->first)->section_flags(it_v->second);
               // This reloc points to a merge section.  Hash the
