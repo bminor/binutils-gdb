@@ -7124,10 +7124,43 @@ is_resolvable_asm_expansion (bfd *abfd,
 	  || is_reloc_sym_weak (abfd, irel)))
     return FALSE;
 
-  self_address = (sec->output_section->vma
-		  + sec->output_offset + irel->r_offset + 3);
-  dest_address = (target_sec->output_section->vma
-		  + target_sec->output_offset + target_offset);
+  if (target_sec->output_section != sec->output_section)
+    {
+      /* If the two sections are sufficiently far away that relaxation
+	 might take the call out of range, we can't simplify.  For
+	 example, a positive displacement call into another memory
+	 could get moved to a lower address due to literal removal,
+	 but the destination won't move, and so the displacment might
+	 get larger.
+
+	 If the displacement is negative, assume the destination could
+	 move as far back as the start of the output section.  The
+	 self_address will be at least as far into the output section
+	 as it is prior to relaxation.
+
+	 If the displacement is postive, assume the destination will be in
+	 it's pre-relaxed location (because relaxation only makes sections
+	 smaller).  The self_address could go all the way to the beginning
+	 of the output section.  */
+
+      dest_address = target_sec->output_section->vma;
+      self_address = sec->output_section->vma;
+
+      if (sec->output_section->vma > target_sec->output_section->vma)
+	self_address += sec->output_offset + irel->r_offset + 3;
+      else
+	dest_address += bfd_get_section_limit (abfd, target_sec->output_section);
+      /* Call targets should be four-byte aligned.  */
+      dest_address = (dest_address + 3) & ~3;
+    }
+  else
+    {
+
+      self_address = (sec->output_section->vma
+		      + sec->output_offset + irel->r_offset + 3);
+      dest_address = (target_sec->output_section->vma
+		      + target_sec->output_offset + target_offset);
+    }
 
   *is_reachable_p = pcrel_reloc_fits (direct_call_opcode, 0,
 				      self_address, dest_address);

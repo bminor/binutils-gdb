@@ -1,3 +1,10 @@
+2014-09-23  Sterling Augustine  <augustine.sterling@gmail.com>
+
+	* elf32-xtensa.c (is_resolvable_asm_expansion): for cross-section
+	call relaxation use furthermost addresses where call source and
+	destination can be to check whether it's in the range of a direct
+	call.
+
 2014-09-22  Alan Modra  <amodra@gmail.com>
 
 	* elf-eh-frame.c (_bfd_elf_write_section_eh_frame_hdr): Don't return
