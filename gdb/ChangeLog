@@ -1,5 +1,9 @@
 2011-01-25  Pedro Alves  <pedro@codesourcery.com>
 
+	* tui/tui-regs.c (tui_register_format): Remove dead code.
+
+2011-01-25  Pedro Alves  <pedro@codesourcery.com>
+
 	* printcmd.c (print_formatted): Use val_print_scalar_formatted
 	instead of print_scalar_formatted.
 	(print_scalar_formatted): Don't handle 's' format strings here,

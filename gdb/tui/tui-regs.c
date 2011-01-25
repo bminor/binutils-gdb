@@ -702,23 +702,7 @@ tui_register_format (struct frame_info *frame,
   stream = tui_sfileopen (256);
   gdb_stdout = stream;
   cleanups = make_cleanup (tui_restore_gdbout, (void*) old_stdout);
-  if (TYPE_VECTOR (type) != 0 && 0)
-    {
-      gdb_byte buf[MAX_REGISTER_SIZE];
-      int len;
-      struct value_print_options opts;
-
-      len = register_size (gdbarch, regnum);
-      fprintf_filtered (stream, "%-14s ", name);
-      get_frame_register (frame, regnum, buf);
-      get_formatted_print_options (&opts, 'f');
-      print_scalar_formatted (buf, type, &opts, len, stream);
-    }
-  else
-    {
-      gdbarch_print_registers_info (gdbarch, stream,
-                                    frame, regnum, 1);
-    }
+  gdbarch_print_registers_info (gdbarch, stream, frame, regnum, 1);
 
   /* Save formatted output in the buffer.  */
   p = tui_file_get_strbuf (stream);
