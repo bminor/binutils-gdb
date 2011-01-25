@@ -145,4 +145,6 @@ int read_string (CORE_ADDR addr, int len, int width, unsigned int fetchlimit,
 		 enum bfd_endian byte_order, gdb_byte **buffer,
 		 int *bytes_read);
 
+extern void val_print_optimized_out (struct ui_file *stream);
+
 #endif

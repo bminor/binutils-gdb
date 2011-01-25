@@ -46,16 +46,16 @@ proc file_symbols {type} {
     gdb_test "print file_locaddr_unresolvable" "= 1234567890"
     gdb_test "ptype file_locaddr_unresolvable" "type = int"
 
-    gdb_test "print file_locempty_resolvable" "= <value optimized out>"
+    gdb_test "print file_locempty_resolvable" "= <optimized out>"
     gdb_test "ptype file_locempty_resolvable" "type = int"
 
-    gdb_test "print file_locempty_unresolvable" "= <value optimized out>"
+    gdb_test "print file_locempty_unresolvable" "= <optimized out>"
     gdb_test "ptype file_locempty_unresolvable" "type = int"
 
-    gdb_test "print file_locno_resolvable" "= <value optimized out>"
+    gdb_test "print file_locno_resolvable" "= <optimized out>"
     gdb_test "ptype file_locno_resolvable" "type = int"
 
-    gdb_test "print file_locno_unresolvable" "= <value optimized out>"
+    gdb_test "print file_locno_unresolvable" "= <optimized out>"
     gdb_test "ptype file_locno_unresolvable" "type = int"
 
     gdb_test "print file_extern_locaddr_resolvable" "= 1234567890"
@@ -64,10 +64,10 @@ proc file_symbols {type} {
     gdb_test "print file_extern_locaddr_unresolvable" "= 1234567890"
     gdb_test "ptype file_extern_locaddr_unresolvable" "type = int"
 
-    gdb_test "print file_extern_locempty_resolvable" "= <value optimized out>"
+    gdb_test "print file_extern_locempty_resolvable" "= <optimized out>"
     gdb_test "ptype file_extern_locempty_resolvable" "type = int"
 
-    gdb_test "print file_extern_locempty_unresolvable" "= <value optimized out>"
+    gdb_test "print file_extern_locempty_unresolvable" "= <optimized out>"
     gdb_test "ptype file_extern_locempty_unresolvable" "type = int"
 
     gdb_test "print file_extern_locno_resolvable" "= 1234567890"
@@ -76,7 +76,7 @@ proc file_symbols {type} {
     # `print file_extern_locno_unresolvable' currently prints
     # Address of symbol "file_extern_locno_unresolvable" is unknown.
     # As DW_AT_declaration is not present in this DIE
-    # it should print <value optimized out>.  As usefulness of such DIE is not
+    # it should print <optimized out>.  As usefulness of such DIE is not
     # clear its resolution is not being tested.
 
     set pf_prefix $old_prefix
@@ -97,16 +97,16 @@ gdb_test "ptype main_local_locaddr_resolvable" "type = int"
 gdb_test "print main_local_locaddr_unresolvable" "= 1234567890"
 gdb_test "ptype main_local_locaddr_unresolvable" "type = int"
 
-gdb_test "print main_local_locempty_resolvable" "= <value optimized out>"
+gdb_test "print main_local_locempty_resolvable" "= <optimized out>"
 gdb_test "ptype main_local_locempty_resolvable" "type = int"
 
-gdb_test "print main_local_locempty_unresolvable" "= <value optimized out>"
+gdb_test "print main_local_locempty_unresolvable" "= <optimized out>"
 gdb_test "ptype main_local_locempty_unresolvable" "type = int"
 
-gdb_test "print main_local_locno_resolvable" "= <value optimized out>"
+gdb_test "print main_local_locno_resolvable" "= <optimized out>"
 gdb_test "ptype main_local_locno_resolvable" "type = int"
 
-gdb_test "print main_local_locno_unresolvable" "= <value optimized out>"
+gdb_test "print main_local_locno_unresolvable" "= <optimized out>"
 gdb_test "ptype main_local_locno_unresolvable" "type = int"
 
 gdb_test "print main_extern_locaddr_resolvable" "= 1234567890"
@@ -115,10 +115,10 @@ gdb_test "ptype main_extern_locaddr_resolvable" "type = int"
 gdb_test "print main_extern_locaddr_unresolvable" "= 1234567890"
 gdb_test "ptype main_extern_locaddr_unresolvable" "type = int"
 
-gdb_test "print main_extern_locempty_resolvable" "= <value optimized out>"
+gdb_test "print main_extern_locempty_resolvable" "= <optimized out>"
 gdb_test "ptype main_extern_locempty_resolvable" "type = int"
 
-gdb_test "print main_extern_locempty_unresolvable" "= <value optimized out>"
+gdb_test "print main_extern_locempty_unresolvable" "= <optimized out>"
 gdb_test "ptype main_extern_locempty_unresolvable" "type = int"
 
 gdb_test "print main_extern_locno_resolvable" "= 1234567890"

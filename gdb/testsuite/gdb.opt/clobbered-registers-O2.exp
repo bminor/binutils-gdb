@@ -53,12 +53,12 @@ if { ![runto start_sequence] } then {
 gdb_test "frame 1" "#1.*in gen_movsd.*" "Backtracing"
 
 gdb_test_multiple "print operand0" "print operand0" {
-    -re "\\\$$decimal = <value optimized out>\r\n$gdb_prompt $" { pass "print operand0"}
+    -re "\\\$$decimal = <optimized out>\r\n$gdb_prompt $" { pass "print operand0"}
     -re "$hex\r\n$gdb_prompt $" { gdb_test "print *operand0" "13" "print operand0" }
 }
 
 gdb_test_multiple "print operand1" "print operand1" {
-    -re "\\\$$decimal = <value optimized out>\r\n$gdb_prompt $" { pass "print operand1"}
+    -re "\\\$$decimal = <optimized out>\r\n$gdb_prompt $" { pass "print operand1"}
     -re "$hex\r\n$gdb_prompt $" { gdb_test "print *operand1" "14" "print operand1" }
 }
 

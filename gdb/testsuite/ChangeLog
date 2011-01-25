@@ -1,3 +1,13 @@
+2011-01-25  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.base/frame-args.exp: Adjust.
+	* gdb.dwarf2/dw2-noloc.exp: Adjust.
+	* gdb.dwarf2/dw2-inline-param.exp: Adjust.
+	* gdb.dwarf2/pieces.exp: Adjust.
+	* gdb.opt/clobbered-registers-O2.exp: Adjust.
+	* gdb.opt/inline-locals.exp: Adjust.
+	* gdb.threads/fork-child-threads.exp: Adjust.
+
 2011-01-25  Ken Werner  <ken.werner@de.ibm.com>
 
 	* gdb.opencl/convs_casts.cl: Move program scope variables into the

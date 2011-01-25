@@ -272,7 +272,7 @@ valprint_check_validity (struct ui_file *stream,
       if (! value_bits_valid (val, TARGET_CHAR_BIT * offset,
 			      TARGET_CHAR_BIT * TYPE_LENGTH (type)))
 	{
-	  fprintf_filtered (stream, _("<value optimized out>"));
+	  val_print_optimized_out (stream);
 	  return 0;
 	}
 
@@ -285,6 +285,12 @@ valprint_check_validity (struct ui_file *stream,
     }
 
   return 1;
+}
+
+void
+val_print_optimized_out (struct ui_file *stream)
+{
+  fprintf_filtered (stream, _("<optimized out>"));
 }
 
 /* Print using the given LANGUAGE the data of type TYPE located at VALADDR
@@ -378,7 +384,7 @@ value_check_printable (struct value *val, struct ui_file *stream)
 
   if (value_entirely_optimized_out (val))
     {
-      fprintf_filtered (stream, _("<value optimized out>"));
+      val_print_optimized_out (stream);
       return 0;
     }
 

@@ -62,7 +62,7 @@ if { ! $no_frames } {
 	-re "arg1 = $decimal\r\n$gdb_prompt $" {
 	    pass $msg
 	}
-	-re "arg1 = <value optimized out>\r\n$gdb_prompt $" {
+	-re "arg1 = <optimized out>\r\n$gdb_prompt $" {
 	    # GCC 4.3 and later lose location information for arg1.  GCC 4.2 is OK.
 	    if { [test_compiler_info "gcc-4-3-*"]  || [test_compiler_info "gcc-4-4-*"]} {
 		setup_xfail *-*-*
@@ -101,7 +101,7 @@ if { ! $no_frames } {
 	-re "arg1 = $decimal\r\n$gdb_prompt $" {
 	    pass $msg
 	}
-	-re "arg1 = <value optimized out>\r\n$gdb_prompt $" {
+	-re "arg1 = <optimized out>\r\n$gdb_prompt $" {
 	    # GCC 4.3 and later lose location information for arg1.  GCC 4.2 is OK.
 	    if { [test_compiler_info "gcc-4-3-*"]  || [test_compiler_info "gcc-4-4-*"]} {
 		setup_xfail *-*-*

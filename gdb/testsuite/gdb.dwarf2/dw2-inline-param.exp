@@ -57,4 +57,4 @@ if ![runto "*${break_at}"] {
     return -1
 }
 
-gdb_test "bt" "#0  (0x\[0-9a-f\]+ in )?func \\(funcparam=<value optimized out>\\)\r\n#1  main \\(mainparam=<value optimized out>\\)\[^\r\n\]*"
+gdb_test "bt" "#0  (0x\[0-9a-f\]+ in )?func \\(funcparam=<optimized out>\\)\r\n#1  main \\(mainparam=<optimized out>\\)\[^\r\n\]*"

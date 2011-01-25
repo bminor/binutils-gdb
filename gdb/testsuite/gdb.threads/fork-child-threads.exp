@@ -52,6 +52,6 @@ gdb_test "continue" "Breakpoint 2, start.*" "get to the spawned thread"
 # * 2 LWP 4466  start (arg=0x0) at fork-child-threads.c:28
 # Correct:
 # * 3 Thread 0x40a00950 (LWP 5553)  start (arg=0x0) at ../.././gdb/testsuite/gdb.threads/fork-child-threads.c:28
-#   2 Thread 0x2aaaaaac3000 (LWP 5552)  0x00000031674076dd in pthread_join (threadid=<value optimized out>, thread_return=<value optimized out>) at pthread_join.c:89
+#   2 Thread 0x2aaaaaac3000 (LWP 5552)  0x00000031674076dd in pthread_join (threadid=<optimized out>, thread_return=<optimized out>) at pthread_join.c:89
 
 gdb_test "info threads" " Thread .* Thread .*" "two threads found"

@@ -82,7 +82,7 @@ proc pieces_test_f6 {} {
        "set f6 breakpoint for pieces"
     gdb_continue_to_breakpoint "continue to f6 breakpoint for pieces"
     gdb_test "print a" \
-	" = {i = 7, j = 8, q = .value optimized out.}" \
+	" = {i = 7, j = 8, q = .optimized out.}" \
 	"print a with optimized out piece"
     # Note: no warning for this case.
     gdb_test_multiple "print a.i" \

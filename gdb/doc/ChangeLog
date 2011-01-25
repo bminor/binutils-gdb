@@ -1,3 +1,7 @@
+2011-01-25  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.texinfo: s/value optimized out/optimized out/g
+
 2011-01-21  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.texinfo (Other Misc Settings): Rework part of the

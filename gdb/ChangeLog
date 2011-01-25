@@ -1,5 +1,19 @@
 2011-01-25  Pedro Alves  <pedro@codesourcery.com>
 
+	Centralize printing "<optimized out>".
+
+	* valprint.h (val_print_optimized_out): Declare.
+	* cp-valprint.c (cp_print_value_fields): Use
+	val_print_optimized_out.
+	* jv-valprint.c (java_print_value_fields): Ditto.
+	* p-valprint.c (pascal_object_print_value_fields): Ditto.
+	* printcmd.c (print_formatted): Ditto.
+	* valprint.c (valprint_check_validity): Ditto.
+	(value_check_printable): Ditto.
+	(val_print_optimized_out): New.
+
+2011-01-25  Pedro Alves  <pedro@codesourcery.com>
+
 	* infcmd.c (default_print_registers_info): Allocate values so to
 	never pass a NULL value to val_print.
 

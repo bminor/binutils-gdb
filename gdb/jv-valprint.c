@@ -407,7 +407,7 @@ java_print_value_fields (struct type *type, const gdb_byte *valaddr,
 	      else if (!value_bits_valid (val, TYPE_FIELD_BITPOS (type, i),
 					  TYPE_FIELD_BITSIZE (type, i)))
 		{
-		  fputs_filtered (_("<value optimized out>"), stream);
+		  val_print_optimized_out (stream);
 		}
 	      else
 		{
@@ -434,7 +434,7 @@ java_print_value_fields (struct type *type, const gdb_byte *valaddr,
 		  struct value *v = value_static_field (type, i);
 
 		  if (v == NULL)
-		    fputs_filtered ("<optimized out>", stream);
+		    val_print_optimized_out (stream);
 		  else
 		    {
 		      struct value_print_options opts;

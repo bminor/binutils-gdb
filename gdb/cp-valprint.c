@@ -316,7 +316,7 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 					  TYPE_FIELD_BITPOS (type, i),
 					  TYPE_FIELD_BITSIZE (type, i)))
 		{
-		  fputs_filtered (_("<value optimized out>"), stream);
+		  val_print_optimized_out (stream);
 		}
 	      else
 		{
@@ -343,7 +343,7 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 		  struct value *v = value_static_field (type, i);
 
 		  if (v == NULL)
-		    fputs_filtered ("<optimized out>", stream);
+		    val_print_optimized_out (stream);
 		  else
 		    cp_print_static_field (TYPE_FIELD_TYPE (type, i),
 					   v, stream, recurse + 1,
