@@ -273,6 +273,12 @@ extern const gdb_byte *value_contents_all (struct value *);
    plan to check the validity manually.  */
 extern const gdb_byte *value_contents_for_printing (struct value *value);
 
+/* Like value_contents_for_printing, but accepts a constant value
+   pointer.  Unlike value_contents_for_printing however, the pointed
+   value must _not_ be lazy.  */
+extern const gdb_byte *
+  value_contents_for_printing_const (const struct value *value);
+
 extern int value_fetch_lazy (struct value *val);
 extern int value_contents_equal (struct value *val1, struct value *val2);
 
@@ -308,7 +314,7 @@ extern enum lval_type *deprecated_value_lval_hack (struct value *);
    lval == lval_register, return the byte offset into the registers
    structure.  Otherwise, return 0.  The returned address
    includes the offset, if any.  */
-extern CORE_ADDR value_address (struct value *);
+extern CORE_ADDR value_address (const struct value *);
 
 /* Like value_address, except the result does not include value's
    offset.  */

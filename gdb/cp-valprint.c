@@ -488,6 +488,7 @@ cp_print_value (struct type *type, struct type *real_type,
       struct type *baseclass = check_typedef (TYPE_BASECLASS (type, i));
       char *basename = TYPE_NAME (baseclass);
       const gdb_byte *base_valaddr;
+      const struct value *base_val;
 
       if (BASETYPE_VIA_VIRTUAL (type, i))
 	{
@@ -509,7 +510,7 @@ cp_print_value (struct type *type, struct type *real_type,
 
       boffset = baseclass_offset (type, i, valaddr + offset,
 				  address + offset);
-      skip = ((boffset == -1) || (boffset + offset) < 0) ? 1 : -1;
+      skip = ((boffset == -1) || (boffset + offset) < 0);
 
       if (BASETYPE_VIA_VIRTUAL (type, i))
 	{
@@ -525,20 +526,28 @@ cp_print_value (struct type *type, struct type *real_type,
 		 large.  */
 	      gdb_byte *buf = alloca (TYPE_LENGTH (baseclass));
 
-	      base_valaddr = buf;
 	      if (target_read_memory (address + boffset, buf,
 				      TYPE_LENGTH (baseclass)) != 0)
 		skip = 1;
-	      address = address + boffset;
+	      base_val = value_from_contents_and_address (baseclass,
+							  buf,
+							  address + boffset);
 	      thisoffset = 0;
 	      boffset = 0;
 	      thistype = baseclass;
+	      base_valaddr = value_contents_for_printing_const (base_val);
 	    }
 	  else
-	    base_valaddr = valaddr;
+	    {
+	      base_valaddr = valaddr;
+	      base_val = val;
+	    }
 	}
       else
-	base_valaddr = valaddr;
+	{
+	  base_valaddr = valaddr;
+	  base_val = val;
+	}
 
       /* Now do the printing.  */
       if (options->pretty)
@@ -553,7 +562,7 @@ cp_print_value (struct type *type, struct type *real_type,
       fputs_filtered ("> = ", stream);
 
 
-      if (skip >= 1)
+      if (skip)
 	fprintf_filtered (stream, "<invalid address>");
       else
 	{
@@ -564,15 +573,17 @@ cp_print_value (struct type *type, struct type *real_type,
 	  if (!options->raw)
 	    result = apply_val_pretty_printer (baseclass, base_valaddr,
 					       thisoffset + boffset,
-					       address,
-					       stream, recurse,
-					       val, options,
-					       current_language);
+					       value_address (base_val),
+					       stream, recurse, base_val,
+					       options, current_language);
+
+
 	  	  
 	  if (!result)
 	    cp_print_value_fields (baseclass, thistype, base_valaddr,
-				   thisoffset + boffset, address,
-				   stream, recurse, val, options,
+				   thisoffset + boffset,
+				   value_address (base_val),
+				   stream, recurse, base_val, options,
 				   ((struct type **)
 				    obstack_base (&dont_print_vb_obstack)),
 				   0);

@@ -1,5 +1,16 @@
 2011-01-25  Pedro Alves  <pedro@codesourcery.com>
 
+	* cp-valprint.c (cp_print_value): Treat the 'skip' local as
+	boolean.  Make sure to always pass a value that matches the
+	contents buffer to callees.  Preserve `address' for following
+	iterations.
+	* value.c (value_contents_for_printing_const): New.
+	(value_address): Constify value argument.
+	* value.h (value_contents_for_printing_const): Declare.
+	(value_address): Constify value argument.
+
+2011-01-25  Pedro Alves  <pedro@codesourcery.com>
+
 	* regcache.c (struct regcache_descr): Rename
 	sizeof_raw_register_valid_p field to sizeof_raw_register_status,
 	and sizeof_cooked_register_valid_p to

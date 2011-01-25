@@ -435,6 +435,13 @@ value_contents_for_printing (struct value *value)
 }
 
 const gdb_byte *
+value_contents_for_printing_const (const struct value *value)
+{
+  gdb_assert (!value->lazy);
+  return value->contents;
+}
+
+const gdb_byte *
 value_contents_all (struct value *value)
 {
   const gdb_byte *result = value_contents_for_printing (value);
@@ -596,7 +603,7 @@ deprecated_value_lval_hack (struct value *value)
 }
 
 CORE_ADDR
-value_address (struct value *value)
+value_address (const struct value *value)
 {
   if (value->lval == lval_internalvar
       || value->lval == lval_internalvar_component)
