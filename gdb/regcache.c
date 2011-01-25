@@ -53,7 +53,7 @@ struct regcache_descr
      cache.  */
   int nr_raw_registers;
   long sizeof_raw_registers;
-  long sizeof_raw_register_valid_p;
+  long sizeof_raw_register_status;
 
   /* The cooked register space.  Each cooked register in the range
      [0..NR_RAW_REGISTERS) is direct-mapped onto the corresponding raw
@@ -63,7 +63,7 @@ struct regcache_descr
      gdbarch_pseudo_register_read and gdbarch_pseudo_register_write.  */
   int nr_cooked_registers;
   long sizeof_cooked_registers;
-  long sizeof_cooked_register_valid_p;
+  long sizeof_cooked_register_status;
 
   /* Offset and size (in 8 bit bytes), of reach register in the
      register cache.  All registers (including those in the range
@@ -92,9 +92,8 @@ init_regcache_descr (struct gdbarch *gdbarch)
      either mapped onto raw-registers or memory.  */
   descr->nr_cooked_registers = gdbarch_num_regs (gdbarch)
 			       + gdbarch_num_pseudo_regs (gdbarch);
-  descr->sizeof_cooked_register_valid_p = gdbarch_num_regs (gdbarch)
-					  + gdbarch_num_pseudo_regs 
-					      (gdbarch);
+  descr->sizeof_cooked_register_status
+    = gdbarch_num_regs (gdbarch) + gdbarch_num_pseudo_regs (gdbarch);
 
   /* Fill in a table of register types.  */
   descr->register_type
@@ -106,7 +105,7 @@ init_regcache_descr (struct gdbarch *gdbarch)
   /* Construct a strictly RAW register cache.  Don't allow pseudo's
      into the register cache.  */
   descr->nr_raw_registers = gdbarch_num_regs (gdbarch);
-  descr->sizeof_raw_register_valid_p = gdbarch_num_regs (gdbarch);
+  descr->sizeof_raw_register_status = gdbarch_num_regs (gdbarch);
 
   /* Lay out the register cache.
 
@@ -194,11 +193,8 @@ struct regcache
      full [0 .. gdbarch_num_regs + gdbarch_num_pseudo_regs) while a read/write
      register cache can only hold [0 .. gdbarch_num_regs).  */
   gdb_byte *registers;
-  /* Register cache status:
-     register_valid_p[REG] == 0 if REG value is not in the cache
-                            > 0 if REG value is in the cache
-                            < 0 if REG value is permanently unavailable */
-  signed char *register_valid_p;
+  /* Register cache status.  */
+  signed char *register_status;
   /* Is this a read-only cache?  A read-only cache is used for saving
      the target's register state (e.g, across an inferior function
      call or just before forcing a function return).  A read-only
@@ -227,15 +223,15 @@ regcache_xmalloc_1 (struct gdbarch *gdbarch, struct address_space *aspace,
     {
       regcache->registers
 	= XCALLOC (descr->sizeof_cooked_registers, gdb_byte);
-      regcache->register_valid_p
-	= XCALLOC (descr->sizeof_cooked_register_valid_p, gdb_byte);
+      regcache->register_status
+	= XCALLOC (descr->sizeof_cooked_register_status, gdb_byte);
     }
   else
     {
       regcache->registers
 	= XCALLOC (descr->sizeof_raw_registers, gdb_byte);
-      regcache->register_valid_p
-	= XCALLOC (descr->sizeof_raw_register_valid_p, gdb_byte);
+      regcache->register_status
+	= XCALLOC (descr->sizeof_raw_register_status, gdb_byte);
     }
   regcache->aspace = aspace;
   regcache->ptid = minus_one_ptid;
@@ -254,7 +250,7 @@ regcache_xfree (struct regcache *regcache)
   if (regcache == NULL)
     return;
   xfree (regcache->registers);
-  xfree (regcache->register_valid_p);
+  xfree (regcache->register_status);
   xfree (regcache);
 }
 
@@ -306,8 +302,8 @@ regcache_save (struct regcache *dst, regcache_cooked_read_ftype *cooked_read,
   gdb_assert (dst->readonly_p);
   /* Clear the dest.  */
   memset (dst->registers, 0, dst->descr->sizeof_cooked_registers);
-  memset (dst->register_valid_p, 0,
-	  dst->descr->sizeof_cooked_register_valid_p);
+  memset (dst->register_status, 0,
+	  dst->descr->sizeof_cooked_register_status);
   /* Copy over any registers (identified by their membership in the
      save_reggroup) and mark them as valid.  The full [0 .. gdbarch_num_regs +
      gdbarch_num_pseudo_regs) range is checked since some architectures need
@@ -322,7 +318,7 @@ regcache_save (struct regcache *dst, regcache_cooked_read_ftype *cooked_read,
 	    {
 	      memcpy (register_buffer (dst, regnum), buf,
 		      register_size (gdbarch, regnum));
-	      dst->register_valid_p[regnum] = 1;
+	      dst->register_status[regnum] = REG_VALID;
 	    }
 	}
     }
@@ -361,7 +357,7 @@ do_cooked_read (void *src, int regnum, gdb_byte *buf)
 {
   struct regcache *regcache = src;
 
-  if (!regcache->register_valid_p[regnum] && regcache->readonly_p)
+  if (regcache->register_status[regnum] == REG_UNKNOWN && regcache->readonly_p)
     /* Don't even think about fetching a register from a read-only
        cache when the register isn't yet valid.  There isn't a target
        from which the register value can be fetched.  */
@@ -393,14 +389,15 @@ regcache_cpy_no_passthrough (struct regcache *dst, struct regcache *src)
   gdb_assert (src != NULL && dst != NULL);
   gdb_assert (src->descr->gdbarch == dst->descr->gdbarch);
   /* NOTE: cagney/2002-05-17: Don't let the caller do a no-passthrough
-     move of data into the current regcache.  Doing this would be
-     silly - it would mean that valid_p would be completely invalid.  */
+     move of data into a thread's regcache.  Doing this would be silly
+     - it would mean that regcache->register_status would be
+     completely invalid.  */
   gdb_assert (dst->readonly_p && src->readonly_p);
 
   memcpy (dst->registers, src->registers,
 	  dst->descr->sizeof_cooked_registers);
-  memcpy (dst->register_valid_p, src->register_valid_p,
-	  dst->descr->sizeof_cooked_register_valid_p);
+  memcpy (dst->register_status, src->register_status,
+	  dst->descr->sizeof_cooked_register_status);
 }
 
 struct regcache *
@@ -414,7 +411,7 @@ regcache_dup (struct regcache *src)
 }
 
 int
-regcache_valid_p (const struct regcache *regcache, int regnum)
+regcache_register_status (const struct regcache *regcache, int regnum)
 {
   gdb_assert (regcache != NULL);
   gdb_assert (regnum >= 0);
@@ -423,7 +420,7 @@ regcache_valid_p (const struct regcache *regcache, int regnum)
   else
     gdb_assert (regnum < regcache->descr->nr_raw_registers);
 
-  return regcache->register_valid_p[regnum];
+  return regcache->register_status[regnum];
 }
 
 void
@@ -433,7 +430,7 @@ regcache_invalidate (struct regcache *regcache, int regnum)
   gdb_assert (regnum >= 0);
   gdb_assert (!regcache->readonly_p);
   gdb_assert (regnum < regcache->descr->nr_raw_registers);
-  regcache->register_valid_p[regnum] = 0;
+  regcache->register_status[regnum] = REG_UNKNOWN;
 }
 
 
@@ -586,7 +583,7 @@ regcache_raw_read (struct regcache *regcache, int regnum, gdb_byte *buf)
      On the bright side, at least there is a regcache object.  */
   if (!regcache->readonly_p)
     {
-      if (!regcache_valid_p (regcache, regnum))
+      if (regcache_register_status (regcache, regnum) == REG_UNKNOWN)
 	{
 	  struct cleanup *old_chain = save_inferior_ptid ();
 
@@ -601,7 +598,7 @@ regcache_raw_read (struct regcache *regcache, int regnum, gdb_byte *buf)
 	 that a register is in one of the possible states: valid,
 	 undefined, unknown.  The last of which isn't yet
 	 possible.  */
-      gdb_assert (regcache_valid_p (regcache, regnum));
+      gdb_assert (regcache_register_status (regcache, regnum) == REG_VALID);
 #endif
     }
   /* Copy the value directly into the register cache.  */
@@ -674,8 +671,8 @@ regcache_cooked_read (struct regcache *regcache, int regnum, gdb_byte *buf)
     regcache_raw_read (regcache, regnum, buf);
   else if (regcache->readonly_p
 	   && regnum < regcache->descr->nr_cooked_registers
-	   && regcache->register_valid_p[regnum])
-    /* Read-only register cache, perhaps the cooked value was cached?  */
+	   && regcache->register_status[regnum] == REG_VALID)
+    /* Read-only register cache, and the cooked value was cached.  */
     memcpy (buf, register_buffer (regcache, regnum),
 	    regcache->descr->sizeof_register[regnum]);
   else
@@ -758,7 +755,7 @@ regcache_raw_write (struct regcache *regcache, int regnum,
 
   /* If we have a valid copy of the register, and new value == old
      value, then don't bother doing the actual store.  */
-  if (regcache_valid_p (regcache, regnum)
+  if (regcache_register_status (regcache, regnum) == REG_VALID
       && (memcmp (register_buffer (regcache, regnum), buf,
 		  regcache->descr->sizeof_register[regnum]) == 0))
     return;
@@ -769,7 +766,7 @@ regcache_raw_write (struct regcache *regcache, int regnum,
   target_prepare_to_store (regcache);
   memcpy (register_buffer (regcache, regnum), buf,
 	  regcache->descr->sizeof_register[regnum]);
-  regcache->register_valid_p[regnum] = 1;
+  regcache->register_status[regnum] = REG_VALID;
   target_store_registers (regcache, regnum);
 
   do_cleanups (old_chain);
@@ -893,12 +890,18 @@ regcache_raw_supply (struct regcache *regcache, int regnum, const void *buf)
   size = regcache->descr->sizeof_register[regnum];
 
   if (buf)
-    memcpy (regbuf, buf, size);
+    {
+      memcpy (regbuf, buf, size);
+      regcache->register_status[regnum] = REG_VALID;
+    }
   else
-    memset (regbuf, 0, size);
-
-  /* Mark the register as cached.  */
-  regcache->register_valid_p[regnum] = 1;
+    {
+      /* This memset not strictly necessary, but better than garbage
+	 in case the register value manages to escape somewhere (due
+	 to a bug, no less).  */
+      memset (regbuf, 0, size);
+      regcache->register_status[regnum] = REG_UNAVAILABLE;
+    }
 }
 
 /* Collect register REGNUM from REGCACHE and store its contents in BUF.  */
@@ -1022,8 +1025,8 @@ regcache_dump (struct regcache *regcache, struct ui_file *file,
 		      regcache->descr->nr_cooked_registers);
   fprintf_unfiltered (file, "sizeof_raw_registers %ld\n",
 		      regcache->descr->sizeof_raw_registers);
-  fprintf_unfiltered (file, "sizeof_raw_register_valid_p %ld\n",
-		      regcache->descr->sizeof_raw_register_valid_p);
+  fprintf_unfiltered (file, "sizeof_raw_register_status %ld\n",
+		      regcache->descr->sizeof_raw_register_status);
   fprintf_unfiltered (file, "gdbarch_num_regs %d\n", 
 		      gdbarch_num_regs (gdbarch));
   fprintf_unfiltered (file, "gdbarch_num_pseudo_regs %d\n",
@@ -1134,8 +1137,10 @@ regcache_dump (struct regcache *regcache, struct ui_file *file,
 	    fprintf_unfiltered (file, "Raw value");
 	  else if (regnum >= regcache->descr->nr_raw_registers)
 	    fprintf_unfiltered (file, "<cooked>");
-	  else if (!regcache_valid_p (regcache, regnum))
+	  else if (regcache_register_status (regcache, regnum) == REG_UNKNOWN)
 	    fprintf_unfiltered (file, "<invalid>");
+	  else if (regcache_register_status (regcache, regnum) == REG_UNAVAILABLE)
+	    fprintf_unfiltered (file, "<unavailable>");
 	  else
 	    {
 	      regcache_raw_read (regcache, regnum, buf);
@@ -1153,6 +1158,8 @@ regcache_dump (struct regcache *regcache, struct ui_file *file,
 	    fprintf_unfiltered (file, "Cooked value");
 	  else
 	    {
+	      /* FIXME: no way for cooked reads to signal unavailable
+		 yet.  */
 	      regcache_cooked_read (regcache, regnum, buf);
 	      fprintf_unfiltered (file, "0x");
 	      dump_endian_bytes (file,

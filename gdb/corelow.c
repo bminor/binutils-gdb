@@ -615,9 +615,9 @@ get_core_registers (struct target_ops *ops,
 				 ".reg2", 2, "floating-point", 0);
     }
 
-  /* Supply dummy value for all registers not found in the core.  */
+  /* Mark all registers not found in the core as unavailable.  */
   for (i = 0; i < gdbarch_num_regs (get_regcache_arch (regcache)); i++)
-    if (!regcache_valid_p (regcache, i))
+    if (regcache_register_status (regcache, i) == REG_UNKNOWN)
       regcache_raw_supply (regcache, i, NULL);
 }
 

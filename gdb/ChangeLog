@@ -1,5 +1,36 @@
 2011-01-25  Pedro Alves  <pedro@codesourcery.com>
 
+	* regcache.c (struct regcache_descr): Rename
+	sizeof_raw_register_valid_p field to sizeof_raw_register_status,
+	and sizeof_cooked_register_valid_p to
+	sizeof_cooked_register_status.
+	(init_regcache_descr): Adjust.
+	(struct regcache): Rename register_valid_p field to
+	register_status.
+	(regcache_xmalloc_1, regcache_xfree, regcache_save)
+	(do_cooked_read): Adjust.
+	(regcache_valid_p): Rename to ...
+	(regcache_register_status): ... this.  Adjust.
+	(regcache_invalidate): Adjust.
+	(regcache_raw_read, regcache_cooked_read, regcache_raw_write):
+	Adjust.
+	(regcache_raw_supply): Adjust.  If buf i NULL, mark the register
+	as unavailable, not valid.
+	(regcache_dump): Adjust.
+	* regcache.h (enum register_status): New.
+	(regcache_register_status): Declare.
+	(regcache_invalidate): Delete declaration.
+	* corelow.c (get_core_registers): Adjust.
+	* tracepoint.c (tfile_fetch_registers): Adjust.
+	* trad-frame.c (REG_VALUE): Rename to ...
+	(TF_REG_VALUE): ... this.
+	(REG_UNKNOWN): Rename to ...
+	(TF_REG_UNKNOWN): ... this.
+	(trad_frame_set_value, trad_frame_set_unknown): Adjust.
+	* mi/mi-main.c (register_changed_p): Adjust.
+
+2011-01-25  Pedro Alves  <pedro@codesourcery.com>
+
 	* regcache.c (struct regcache_descr): Remove outdated comment.
 	(init_regcache_descr): Remove sizeof_raw_register_valid_p
 	overallocate hack.

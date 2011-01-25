@@ -3844,7 +3844,7 @@ tfile_fetch_registers (struct target_ops *ops,
 	      /* Make sure we stay within block bounds.  */
 	      if (offset + regsize >= trace_regblock_size)
 		break;
-	      if (!regcache_valid_p (regcache, regn))
+	      if (regcache_register_status (regcache, regn) == REG_UNKNOWN)
 		{
 		  if (regno == regn)
 		    {

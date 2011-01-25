@@ -42,6 +42,27 @@ extern struct gdbarch *get_regcache_arch (const struct regcache *regcache);
 
 extern struct address_space *get_regcache_aspace (const struct regcache *);
 
+enum register_status
+  {
+    /* The register value is not in the cache, and we don't know yet
+       whether it's available in the target (or traceframe).  */
+    REG_UNKNOWN = 0,
+
+    /* The register value is valid and cached.  */
+    REG_VALID = 1,
+
+    /* The register value is unavailable.  E.g., we're inspecting a
+       traceframe, and this register wasn't collected.  Note that this
+       is different a different "unavailable" from saying the register
+       does not exist in the target's architecture --- in that case,
+       the target should have given us a target description that does
+       not include the register in the first place.  */
+    REG_UNAVAILABLE = -1
+  };
+
+enum register_status regcache_register_status (const struct regcache *regcache,
+					       int regnum);
+
 /* Transfer a raw register [0..NUM_REGS) between core-gdb and the
    regcache.  */
 
@@ -64,8 +85,6 @@ void regcache_raw_read_part (struct regcache *regcache, int regnum,
 			     int offset, int len, gdb_byte *buf);
 void regcache_raw_write_part (struct regcache *regcache, int regnum,
 			      int offset, int len, const gdb_byte *buf);
-
-int regcache_valid_p (const struct regcache *regcache, int regnum);
 
 void regcache_invalidate (struct regcache *regcache, int regnum);
 

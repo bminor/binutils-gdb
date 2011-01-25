@@ -1023,13 +1023,13 @@ register_changed_p (int regnum, struct regcache *prev_regs,
   gdb_byte this_buffer[MAX_REGISTER_SIZE];
 
   /* Registers not valid in this frame return count as unchanged.  */
-  if (!regcache_valid_p (this_regs, regnum))
+  if (regcache_register_status (this_regs, regnum) == REG_UNKNOWN)
     return 0;
 
   /* First time through or after gdbarch change consider all registers as
      changed.  Same for registers not valid in the previous frame.  */
   if (!prev_regs || get_regcache_arch (prev_regs) != gdbarch
-      || !regcache_valid_p (prev_regs, regnum))
+      || regcache_register_status (prev_regs, regnum) == REG_UNKNOWN)
     return 1;
 
   /* Get register contents and compare.  */
