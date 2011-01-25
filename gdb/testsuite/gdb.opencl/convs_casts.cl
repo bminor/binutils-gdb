@@ -17,39 +17,41 @@
 
    Contributed by Ken Werner <ken.werner@de.ibm.com>  */
 
-int opencl_version = __OPENCL_VERSION__;
+__constant int opencl_version = __OPENCL_VERSION__;
 
 #ifdef HAVE_cl_khr_fp64
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
-int have_cl_khr_fp64 = 1;
+__constant int have_cl_khr_fp64 = 1;
 #else
-int have_cl_khr_fp64 = 0;
+__constant int have_cl_khr_fp64 = 0;
 #endif
 
 #ifdef HAVE_cl_khr_fp16
 #pragma OPENCL EXTENSION cl_khr_fp16 : enable
-int have_cl_khr_fp16 = 1;
+__constant int have_cl_khr_fp16 = 1;
 #else
-int have_cl_khr_fp16 = 0;
-#endif
-
-char c = 123;
-uchar uc = 123;
-short s = 123;
-ushort us = 123;
-int i = 123;
-uint ui = 123;
-long l = 123;
-ulong ul = 123;
-#ifdef cl_khr_fp16
-half h = 123.0;
-#endif
-float f = 123.0;
-#ifdef cl_khr_fp64
-double d = 123.0;
+__constant int have_cl_khr_fp16 = 0;
 #endif
 
 __kernel void testkernel (__global int *data)
 {
+  char c = 123;
+  uchar uc = 123;
+  short s = 123;
+  ushort us = 123;
+  int i = 123;
+  uint ui = 123;
+  long l = 123;
+  ulong ul = 123;
+#ifdef cl_khr_fp16
+  half h = 123.0;
+#endif
+  float f = 123.0;
+#ifdef cl_khr_fp64
+  double d = 123.0;
+#endif
+
+  /* marker! */
+
   data[get_global_id(0)] = 1;
 }

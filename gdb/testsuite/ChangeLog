@@ -1,3 +1,17 @@
+2011-01-25  Ken Werner  <ken.werner@de.ibm.com>
+
+	* gdb.opencl/convs_casts.cl: Move program scope variables into the
+	OpenCL kernel function. Add a comment as marker. Add address space
+	qualifiers for the remaining program scope variables.
+	* gdb.opencl/datatypes.cl: Likewise.
+	* gdb.opencl/operators.cl: Likewise.
+	* gdb.opencl/vec_comps.cl: Likewise.
+	* gdb.opencl/convs_casts.exp: Replace gdb_test_multiple by gdb_test.
+	Add breakpoint at the marker comment.
+	* gdb.opencl/datatypes.exp: Likewise.
+	* gdb.opencl/operators.exp: Likewise.
+	* gdb.opencl/vec_comps.exp: Likewise.
+
 2011-01-24  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.base/printcmds.c (some_struct): New struct and instance.

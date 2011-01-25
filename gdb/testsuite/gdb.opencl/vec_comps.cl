@@ -17,43 +17,45 @@
 
    Contributed by Ken Werner <ken.werner@de.ibm.com>  */
 
-int opencl_version = __OPENCL_VERSION__;
+__constant int opencl_version = __OPENCL_VERSION__;
 
 #ifdef HAVE_cl_khr_fp64
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
-int have_cl_khr_fp64 = 1;
+__constant int have_cl_khr_fp64 = 1;
 #else
-int have_cl_khr_fp64 = 0;
+__constant int have_cl_khr_fp64 = 0;
 #endif
 
 #ifdef HAVE_cl_khr_fp16
 #pragma OPENCL EXTENSION cl_khr_fp16 : enable
-int have_cl_khr_fp16 = 1;
+__constant int have_cl_khr_fp16 = 1;
 #else
-int have_cl_khr_fp16 = 0;
-#endif
-
-#define CREATE_VEC(TYPE, NAME)\
-  TYPE NAME =\
-  (TYPE)  (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
-
-CREATE_VEC(char16, c16)
-CREATE_VEC(uchar16, uc16)
-CREATE_VEC(short16, s16)
-CREATE_VEC(ushort16, us16)
-CREATE_VEC(int16, i16)
-CREATE_VEC(uint16, ui16)
-CREATE_VEC(long16, l16)
-CREATE_VEC(ulong16, ul16)
-#ifdef cl_khr_fp16
-CREATE_VEC(half16, h16)
-#endif
-CREATE_VEC(float16, f16)
-#ifdef cl_khr_fp64
-CREATE_VEC(double16, d16)
+__constant int have_cl_khr_fp16 = 0;
 #endif
 
 __kernel void testkernel (__global int *data)
 {
+#define CREATE_VEC(TYPE, NAME)\
+  TYPE NAME =\
+  (TYPE)  (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
+
+  CREATE_VEC(char16, c16)
+  CREATE_VEC(uchar16, uc16)
+  CREATE_VEC(short16, s16)
+  CREATE_VEC(ushort16, us16)
+  CREATE_VEC(int16, i16)
+  CREATE_VEC(uint16, ui16)
+  CREATE_VEC(long16, l16)
+  CREATE_VEC(ulong16, ul16)
+#ifdef cl_khr_fp16
+  CREATE_VEC(half16, h16)
+#endif
+  CREATE_VEC(float16, f16)
+#ifdef cl_khr_fp64
+  CREATE_VEC(double16, d16)
+#endif
+
+  /* marker! */
+
   data[get_global_id(0)] = 1;
 }
