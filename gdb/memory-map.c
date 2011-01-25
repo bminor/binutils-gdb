@@ -178,25 +178,22 @@ const struct gdb_xml_element memory_map_elements[] = {
 VEC(mem_region_s) *
 parse_memory_map (const char *memory_map)
 {
-  struct gdb_xml_parser *parser;
   VEC(mem_region_s) *result = NULL;
-  struct cleanup *before_deleting_result, *back_to;
+  struct cleanup *back_to;
   struct memory_map_parsing_data data = { NULL };
 
-  back_to = make_cleanup (null_cleanup, NULL);
-  parser = gdb_xml_create_parser_and_cleanup (_("target memory map"),
-					      memory_map_elements, &data);
-
-  /* Note: 'clear_result' will zero 'result'.  */
-  before_deleting_result = make_cleanup (clear_result, &result);
   data.memory_map = &result;
-
-  if (gdb_xml_parse (parser, memory_map) == 0)
-    /* Parsed successfully, don't need to delete the result.  */
-    discard_cleanups (before_deleting_result);
+  back_to = make_cleanup (clear_result, &result);
+  if (gdb_xml_parse_quick (_("target memory map"), NULL, memory_map_elements,
+			   memory_map, &data) == 0)
+    {
+      /* Parsed successfully, keep the result.  */
+      discard_cleanups (back_to);
+      return result;
+    }
 
   do_cleanups (back_to);
-  return result;
+  return NULL;
 }
 
 #endif /* HAVE_LIBEXPAT */

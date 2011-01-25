@@ -505,7 +505,6 @@ tdesc_parse_xml (const char *document, xml_fetch_another fetcher,
 		 void *fetcher_baton)
 {
   struct cleanup *back_to, *result_cleanup;
-  struct gdb_xml_parser *parser;
   struct tdesc_parsing_data data;
   struct tdesc_xml_cache *cache;
   char *expanded_text;
@@ -531,16 +530,14 @@ tdesc_parse_xml (const char *document, xml_fetch_another fetcher,
       }
 
   back_to = make_cleanup (null_cleanup, NULL);
-  parser = gdb_xml_create_parser_and_cleanup (_("target description"),
-					      tdesc_elements, &data);
-  gdb_xml_use_dtd (parser, "gdb-target.dtd");
 
   memset (&data, 0, sizeof (struct tdesc_parsing_data));
   data.tdesc = allocate_target_description ();
   result_cleanup = make_cleanup_free_target_description (data.tdesc);
   make_cleanup (xfree, expanded_text);
 
-  if (gdb_xml_parse (parser, expanded_text) == 0)
+  if (gdb_xml_parse_quick (_("target description"), "gdb-target.dtd",
+			   tdesc_elements, expanded_text, &data) == 0)
     {
       /* Parsed successfully.  */
       struct tdesc_xml_cache new_cache;

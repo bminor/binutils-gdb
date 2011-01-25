@@ -197,6 +197,18 @@ void gdb_xml_use_dtd (struct gdb_xml_parser *parser, const char *dtd_name);
 
 int gdb_xml_parse (struct gdb_xml_parser *parser, const char *buffer);
 
+/* Parse a XML document.  DOCUMENT is the data to parse, which should
+   be NUL-terminated. If non-NULL, use the compiled-in DTD named
+   DTD_NAME to drive the parsing.
+
+   The return value is 0 for success or -1 for error.  It may throw,
+   but only if something unexpected goes wrong during parsing; parse
+   errors will be caught, warned about, and reported as failure.  */
+
+int gdb_xml_parse_quick (const char *name, const char *dtd_name,
+			 const struct gdb_xml_element *elements,
+			 const char *document, void *user_data);
+
 /* Issue a debugging message from one of PARSER's handlers.  */
 
 void gdb_xml_debug (struct gdb_xml_parser *parser, const char *format, ...)

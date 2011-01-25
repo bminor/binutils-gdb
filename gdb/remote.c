@@ -2595,25 +2595,16 @@ remote_threads_info (struct target_ops *ops)
 					 TARGET_OBJECT_THREADS, NULL);
 
       struct cleanup *back_to = make_cleanup (xfree, xml);
+
       if (xml && *xml)
 	{
-	  struct gdb_xml_parser *parser;
 	  struct threads_parsing_context context;
-	  struct cleanup *clear_parsing_context;
 
-	  context.items = 0;
-	  /* Note: this parser cleanup is already guarded by BACK_TO
-	     above.  */
-	  parser = gdb_xml_create_parser_and_cleanup (_("threads"),
-						      threads_elements,
-						      &context);
+	  context.items = NULL;
+	  make_cleanup (clear_threads_parsing_context, &context);
 
-	  gdb_xml_use_dtd (parser, "threads.dtd");
-
-	  clear_parsing_context
-	    = make_cleanup (clear_threads_parsing_context, &context);
-
-	  if (gdb_xml_parse (parser, xml) == 0)
+	  if (gdb_xml_parse_quick (_("threads"), "threads.dtd",
+				   threads_elements, xml, &context) == 0)
 	    {
 	      int i;
 	      struct thread_item *item;
@@ -2640,8 +2631,6 @@ remote_threads_info (struct target_ops *ops)
 		    }
 		}
 	    }
-
-	  do_cleanups (clear_parsing_context);
 	}
 
       do_cleanups (back_to);

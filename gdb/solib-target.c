@@ -227,24 +227,20 @@ const struct gdb_xml_element library_list_elements[] = {
 static VEC(lm_info_p) *
 solib_target_parse_libraries (const char *library)
 {
-  struct gdb_xml_parser *parser;
   VEC(lm_info_p) *result = NULL;
-  struct cleanup *before_deleting_result, *back_to;
+  struct cleanup *back_to = make_cleanup (solib_target_free_library_list,
+					  &result);
 
-  back_to = make_cleanup (null_cleanup, NULL);
-  parser = gdb_xml_create_parser_and_cleanup (_("target library list"),
-					      library_list_elements, &result);
-  gdb_xml_use_dtd (parser, "library-list.dtd");
-
-  before_deleting_result = make_cleanup (solib_target_free_library_list,
-					 &result);
-
-  if (gdb_xml_parse (parser, library) == 0)
-    /* Parsed successfully, don't need to delete the result.  */
-    discard_cleanups (before_deleting_result);
+  if (gdb_xml_parse_quick (_("target library list"), "library-list.dtd",
+			   library_list_elements, library, &result) == 0)
+    {
+      /* Parsed successfully, keep the result.  */
+      discard_cleanups (back_to);
+      return result;
+    }
 
   do_cleanups (back_to);
-  return result;
+  return NULL;
 }
 #endif
 

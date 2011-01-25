@@ -1,3 +1,21 @@
+2011-01-25  Pedro Alves  <pedro@codesourcery.com>
+
+	Simplify XML parsing a bit.
+
+	* xml-support.h (gdb_xml_parse_quick): Declare.
+	* xml-support.c (gdb_xml_create_parser_and_cleanup_1): Renamed
+	from gdb_xml_create_parser_and_cleanup, and added `old_chain'
+	parameter.
+	(gdb_xml_create_parser_and_cleanup): Reimplement on top of
+	gdb_xml_create_parser_and_cleanup_1.
+	(gdb_xml_parse_quick): New.
+	* memory-map.c (parse_memory_map): Use gdb_xml_parse_quick.
+	* osdata.c (osdata_parse): Ditto.
+	* remote.c (remote_threads_info): Ditto.
+	* solib-target.c (solib_target_parse_libraries): Ditto.
+	* xml-syscall.c (syscall_parse_xml): Ditto.
+	* xml-tdesc.c (tdesc_parse_xml): Ditto.
+
 2011-01-24  Kevin Buettner  <kevinb@redhat.com>
 
 	* configure.tgt (mips*-*-elf): New; just like mips*-*-*, but

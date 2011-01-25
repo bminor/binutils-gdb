@@ -224,17 +224,13 @@ syscall_parse_xml (const char *document, xml_fetch_another fetcher,
                    void *fetcher_baton)
 {
   struct cleanup *result_cleanup;
-  struct gdb_xml_parser *parser;
   struct syscall_parsing_data data;
 
-  parser = gdb_xml_create_parser_and_cleanup (_("syscalls info"),
-					      syselements, &data);
-
-  memset (&data, 0, sizeof (struct syscall_parsing_data));
   data.sysinfo = allocate_syscalls_info ();
   result_cleanup = make_cleanup_free_syscalls_info (data.sysinfo);
 
-  if (gdb_xml_parse (parser, document) == 0)
+  if (gdb_xml_parse_quick (_("syscalls info"), NULL,
+			   syselements, document, &data) == 0)
     {
       /* Parsed successfully.  */
       discard_cleanups (result_cleanup);
