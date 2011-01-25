@@ -1,6 +1,11 @@
+2011-01-25  Ian Lance Taylor  <iant@google.com>
+
+	* script.cc (script_add_extern): Rewrite to use
+	add_symbol_reference.
+
 2011-01-25  Doug Kwan  <dougkwan@google.com>
 
-	* gold/icf.cc (get_section_contents): Always lock section's object.
+	* icf.cc (get_section_contents): Always lock section's object.
 
 2011-01-24  Ian Lance Taylor  <iant@google.com>
 
