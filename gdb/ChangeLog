@@ -1,5 +1,10 @@
 2011-01-25  Pedro Alves  <pedro@codesourcery.com>
 
+	* infcmd.c (default_print_registers_info): Allocate values so to
+	never pass a NULL value to val_print.
+
+2011-01-25  Pedro Alves  <pedro@codesourcery.com>
+
 	* cp-valprint.c (cp_print_value): Treat the 'skip' local as
 	boolean.  Make sure to always pass a value that matches the
 	contents buffer to callees.  Preserve `address' for following
