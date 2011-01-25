@@ -1,5 +1,10 @@
 2011-01-25  Pedro Alves  <pedro@codesourcery.com>
 
+	* mi/mi-main.c (get_register): Use get_frame_register_value rather
+	than frame_register, and always pass a valid value to val_print.
+
+2011-01-25  Pedro Alves  <pedro@codesourcery.com>
+
 	Centralize printing "<optimized out>".
 
 	* valprint.h (val_print_optimized_out): Declare.

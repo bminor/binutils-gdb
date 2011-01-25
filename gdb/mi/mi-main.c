@@ -1116,27 +1116,26 @@ static void
 get_register (struct frame_info *frame, int regnum, int format)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
-  gdb_byte buffer[MAX_REGISTER_SIZE];
-  int optim;
-  int realnum;
   CORE_ADDR addr;
   enum lval_type lval;
   static struct ui_stream *stb = NULL;
+  struct value *val;
 
   stb = ui_out_stream_new (uiout);
 
   if (format == 'N')
     format = 0;
 
-  frame_register (frame, regnum, &optim, &lval, &addr, &realnum, buffer);
+  val = get_frame_register_value (frame, regnum);
 
-  if (optim)
+  if (value_optimized_out (val))
     error ("Optimized out");
 
   if (format == 'r')
     {
       int j;
       char *ptr, buf[1024];
+      const gdb_byte *valaddr = value_contents_for_printing (val);
 
       strcpy (buf, "0x");
       ptr = buf + 2;
@@ -1145,7 +1144,7 @@ get_register (struct frame_info *frame, int regnum, int format)
 	  int idx = gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG ?
 		    j : register_size (gdbarch, regnum) - 1 - j;
 
-	  sprintf (ptr, "%02x", (unsigned char) buffer[idx]);
+	  sprintf (ptr, "%02x", (unsigned char) valaddr[idx]);
 	  ptr += 2;
 	}
       ui_out_field_string (uiout, "value", buf);
@@ -1157,8 +1156,10 @@ get_register (struct frame_info *frame, int regnum, int format)
 
       get_formatted_print_options (&opts, format);
       opts.deref_ref = 1;
-      val_print (register_type (gdbarch, regnum), buffer, 0, 0,
-		 stb->stream, 0, NULL, &opts, current_language);
+      val_print (value_type (val),
+		 value_contents_for_printing (val),
+		 value_embedded_offset (val), 0,
+		 stb->stream, 0, val, &opts, current_language);
       ui_out_field_stream (uiout, "value", stb);
       ui_out_stream_delete (stb);
     }
