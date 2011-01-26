@@ -194,6 +194,8 @@ struct objfile
 
     char *name;
 
+    CORE_ADDR addr_low;
+
     /* Some flag bits for this objfile.  */
 
     unsigned short flags;

@@ -1,3 +1,10 @@
+2011-01-25  Mathieu Lacage  <mathieu.lacage@inria.fr>
+
+	PR/symtab 11766:
+	* gdb/objfiles.h (struct objfile) <addr_low>: New field.
+	* gdb/solib.c (solib_read_symbols): Check for addr_low in
+	equality test for objfile, initialize addr_low if needed.
+
 2011-01-25  Pedro Alves  <pedro@codesourcery.com>
 
 	* tui/tui-regs.c (tui_register_format): Remove dead code.

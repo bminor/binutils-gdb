@@ -638,7 +638,8 @@ solib_read_symbols (struct so_list *so, int flags)
 	  /* Have we already loaded this shared object?  */
 	  ALL_OBJFILES (so->objfile)
 	    {
-	      if (strcmp (so->objfile->name, so->so_name) == 0)
+	      if (strcmp (so->objfile->name, so->so_name) == 0
+		  && so->objfile->addr_low == so->addr_low)
 		break;
 	    }
 	  if (so->objfile != NULL)
@@ -648,6 +649,7 @@ solib_read_symbols (struct so_list *so, int flags)
 							    so->sections_end);
 	  so->objfile = symbol_file_add_from_bfd (so->abfd,
 						  flags, sap, OBJF_SHARED);
+	  so->objfile->addr_low = so->addr_low;
 	  free_section_addr_info (sap);
 	}
 
