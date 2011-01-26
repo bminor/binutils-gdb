@@ -676,9 +676,9 @@ mips_readchar (int timeout)
     }
 
   if (ch == SERIAL_EOF)
-    mips_error ("End of file from remote");
+    mips_error (_("End of file from remote"));
   if (ch == SERIAL_ERROR)
-    mips_error ("Error reading from remote: %s", safe_strerror (errno));
+    mips_error (_("Error reading from remote: %s"), safe_strerror (errno));
   if (remote_debug > 1)
     {
       /* Don't use _filtered; we can't deal with a QUIT out of
@@ -771,8 +771,8 @@ mips_receive_header (unsigned char *hdr, int *pgarbage, int ch, int timeout)
 
 	      if (mips_syn_garbage > 0
 		  && *pgarbage > mips_syn_garbage)
-		mips_error ("Debug protocol failure:  more "
-			    "than %d characters before a sync.",
+		mips_error (_("Debug protocol failure:  more "
+			    "than %d characters before a sync."),
 			    mips_syn_garbage);
 	    }
 	}
@@ -860,7 +860,7 @@ mips_send_packet (const char *s, int get_ack)
 
   len = strlen (s);
   if (len > DATA_MAXLEN)
-    mips_error ("MIPS protocol data packet too long: %s", s);
+    mips_error (_("MIPS protocol data packet too long: %s"), s);
 
   packet = (unsigned char *) alloca (HDR_LENGTH + len + TRLR_LENGTH + 1);
 
@@ -898,7 +898,7 @@ mips_send_packet (const char *s, int get_ack)
 
       if (serial_write (mips_desc, packet,
 			HDR_LENGTH + len + TRLR_LENGTH) != 0)
-	mips_error ("write to target failed: %s", safe_strerror (errno));
+	mips_error (_("write to target failed: %s"), safe_strerror (errno));
 
       if (!get_ack)
 	return;
@@ -1006,7 +1006,7 @@ mips_send_packet (const char *s, int get_ack)
 	}
     }
 
-  mips_error ("Remote did not acknowledge packet");
+  mips_error (_("Remote did not acknowledge packet"));
 }
 
 /* Receive and acknowledge a packet, returning the data in BUFF (which
@@ -1037,7 +1037,7 @@ mips_receive_packet (char *buff, int throw_error, int timeout)
       if (mips_receive_header (hdr, &garbage, ch, timeout) != 0)
 	{
 	  if (throw_error)
-	    mips_error ("Timed out waiting for remote packet");
+	    mips_error (_("Timed out waiting for remote packet"));
 	  else
 	    return -1;
 	}
@@ -1077,7 +1077,7 @@ mips_receive_packet (char *buff, int throw_error, int timeout)
 	  if (rch == SERIAL_TIMEOUT)
 	    {
 	      if (throw_error)
-		mips_error ("Timed out waiting for remote packet");
+		mips_error (_("Timed out waiting for remote packet"));
 	      else
 		return -1;
 	    }
@@ -1099,7 +1099,7 @@ mips_receive_packet (char *buff, int throw_error, int timeout)
       if (err == -1)
 	{
 	  if (throw_error)
-	    mips_error ("Timed out waiting for packet");
+	    mips_error (_("Timed out waiting for packet"));
 	  else
 	    return -1;
 	}
@@ -1159,7 +1159,8 @@ mips_receive_packet (char *buff, int throw_error, int timeout)
       if (serial_write (mips_desc, ack, HDR_LENGTH + TRLR_LENGTH) != 0)
 	{
 	  if (throw_error)
-	    mips_error ("write to target failed: %s", safe_strerror (errno));
+	    mips_error (_("write to target failed: %s"),
+	                safe_strerror (errno));
 	  else
 	    return -1;
 	}
@@ -1199,7 +1200,7 @@ mips_receive_packet (char *buff, int throw_error, int timeout)
   if (serial_write (mips_desc, ack, HDR_LENGTH + TRLR_LENGTH) != 0)
     {
       if (throw_error)
-	mips_error ("write to target failed: %s", safe_strerror (errno));
+	mips_error (_("write to target failed: %s"), safe_strerror (errno));
       else
 	return -1;
     }
@@ -1287,7 +1288,7 @@ mips_request (int cmd,
 	      &rpid, &rcmd, &rerrflg, response_string) != 4
       || !read_hex_value (response_string, &rresponse)
       || (cmd != '\0' && rcmd != cmd))
-    mips_error ("Bad response from remote board");
+    mips_error (_("Bad response from remote board"));
 
   if (rerrflg != 0)
     {
@@ -1363,7 +1364,7 @@ mips_enter_debug (void)
     char buff[DATA_MAXLEN + 1];
 
     if (mips_receive_packet (buff, 1, 3) < 0)
-      mips_error ("Failed to initialize (didn't receive packet).");
+      mips_error (_("Failed to initialize (didn't receive packet)."));
   }
 }
 
@@ -1413,7 +1414,7 @@ mips_initialize (void)
 
   if (mips_initializing)
     {
-      warning ("internal error: mips_initialize called twice");
+      warning (_("internal error: mips_initialize called twice"));
       return;
     }
 
@@ -1487,7 +1488,7 @@ mips_initialize (void)
 	  }
 	  break;
 	case 4:
-	  mips_error ("Failed to initialize.");
+	  mips_error (_("Failed to initialize."));
 	}
 
       if (mips_expect (mips_monitor_prompt))
@@ -1848,7 +1849,7 @@ mips_wait (struct target_ops *ops,
   rstatus = mips_request ('\000', 0, 0, &err, -1, buff);
   mips_wait_flag = 0;
   if (err)
-    mips_error ("Remote failure: %s", safe_strerror (errno));
+    mips_error (_("Remote failure: %s"), safe_strerror (errno));
 
   /* On returning from a continue, the PMON monitor seems to start
      echoing back the messages we send prior to sending back the
@@ -2046,7 +2047,7 @@ mips_fetch_registers (struct target_ops *ops,
 	    val = mips_request ('r', pmon_reg, 0,
 				&err, mips_receive_wait, NULL);
 	  if (err)
-	    mips_error ("Can't read register %d: %s", regno,
+	    mips_error (_("Can't read register %d: %s"), regno,
 			safe_strerror (errno));
 	}
     }
@@ -2085,7 +2086,8 @@ mips_store_registers (struct target_ops *ops,
 		val,
 		&err, mips_receive_wait, NULL);
   if (err)
-    mips_error ("Can't write register %d: %s", regno, safe_strerror (errno));
+    mips_error (_("Can't write register %d: %s"), regno,
+                safe_strerror (errno));
 }
 
 /* Fetch a word from the target board.  Return word fetched in location
@@ -2319,8 +2321,8 @@ mips_create_inferior (struct target_ops *ops, char *execfile,
 
   if (args && *args)
     {
-      warning ("\
-Can't pass arguments to remote MIPS board; arguments ignored.");
+      warning (_("\
+Can't pass arguments to remote MIPS board; arguments ignored."));
       /* And don't try to use them on the next "run" command.  */
       execute_command ("set args", 0);
     }
@@ -2578,8 +2580,8 @@ mips_common_breakpoint (int set, CORE_ADDR addr, int len, enum break_type type)
 	  /* Clear the table entry and tell PMON to clear the breakpoint.  */
 	  if (i == MAX_LSI_BREAKPOINTS)
 	    {
-	      warning ("\
-mips_common_breakpoint: Attempt to clear bogus breakpoint at %s\n",
+	      warning (_("\
+mips_common_breakpoint: Attempt to clear bogus breakpoint at %s"),
 		       paddress (target_gdbarch, addr));
 	      return 1;
 	    }
@@ -2593,8 +2595,8 @@ mips_common_breakpoint: Attempt to clear bogus breakpoint at %s\n",
 
 	  nfields = sscanf (buf, "0x%x b 0x0 0x%x", &rpid, &rerrflg);
 	  if (nfields != 2)
-	    mips_error ("mips_common_breakpoint: "
-			"Bad response from remote board: %s",
+	    mips_error (_("mips_common_breakpoint: "
+			"Bad response from remote board: %s"),
 			buf);
 
 	  return (mips_check_lsi_error (addr, rerrflg));
@@ -2646,8 +2648,8 @@ mips_common_breakpoint: Attempt to clear bogus breakpoint at %s\n",
 	  nfields = sscanf (buf, "0x%x %c 0x%x 0x%x",
 			    &rpid, &rcmd, &rresponse, &rerrflg);
 	  if (nfields != 4 || rcmd != cmd || rresponse > 255)
-	    mips_error ("mips_common_breakpoint: "
-			"Bad response from remote board: %s",
+	    mips_error (_("mips_common_breakpoint: "
+			"Bad response from remote board: %s"),
 			buf);
 
 	  if (rerrflg != 0)
@@ -2718,8 +2720,8 @@ mips_common_breakpoint: Attempt to clear bogus breakpoint at %s\n",
 			&rpid, &rcmd, &rerrflg, &rresponse);
 
       if (nfields != 4 || rcmd != cmd)
-	mips_error ("mips_common_breakpoint: "
-		    "Bad response from remote board: %s",
+	mips_error (_("mips_common_breakpoint: "
+		    "Bad response from remote board: %s"),
 		    buf);
 
       if (rerrflg != 0)
@@ -2767,7 +2769,7 @@ send_srec (char *srec, int len, CORE_ADDR addr)
 			      paddress (target_gdbarch, addr));
 	  continue;
 	default:
-	  error (_("Download got unexpected ack char: 0x%x, retrying.\n"),
+	  error (_("Download got unexpected ack char: 0x%x, retrying."),
 		 ch);
 	}
     }

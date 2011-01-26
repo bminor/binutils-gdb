@@ -1,3 +1,8 @@
+2011-01-26  Kevin Buettner  <kevinb@redhat.com>
+
+	* remote-mips.c: Add internationalization mark ups.  Remove
+	trailing \n from already marked up strings.
+
 2011-01-26  Tom Tromey  <tromey@redhat.com>
 
 	* python/py-prettyprint.c (print_string_repr): Clear
