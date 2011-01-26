@@ -109,7 +109,7 @@ blpy_get_start (PyObject *self, void *closure)
 
   BLPY_REQUIRE_VALID (self, block);
 
-  return PyLong_FromUnsignedLongLong (BLOCK_START (block));
+  return gdb_py_object_from_ulongest (BLOCK_START (block));
 }
 
 static PyObject *
@@ -119,7 +119,7 @@ blpy_get_end (PyObject *self, void *closure)
 
   BLPY_REQUIRE_VALID (self, block);
 
-  return PyLong_FromUnsignedLongLong (BLOCK_END (block));
+  return gdb_py_object_from_ulongest (BLOCK_END (block));
 }
 
 static PyObject *
@@ -268,12 +268,12 @@ blpy_block_syms_dealloc (PyObject *obj)
 PyObject *
 gdbpy_block_for_pc (PyObject *self, PyObject *args)
 {
-  unsigned PY_LONG_LONG pc;
+  gdb_py_ulongest pc;
   struct block *block;
   struct obj_section *section;
   struct symtab *symtab;
 
-  if (!PyArg_ParseTuple (args, "K", &pc))
+  if (!PyArg_ParseTuple (args, GDB_PY_LLU_ARG, &pc))
     return NULL;
 
   section = find_pc_mapped_section (pc);

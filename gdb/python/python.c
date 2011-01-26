@@ -407,16 +407,9 @@ gdbpy_solib_name (PyObject *self, PyObject *args)
 {
   char *soname;
   PyObject *str_obj;
-#ifdef PY_LONG_LONG
-  unsigned PY_LONG_LONG pc;
-  /* To be compatible with Python 2.4 the format strings are not const.  */
-  char *format = "K";
-#else
-  unsigned long pc;
-  char *format = "k";
-#endif
+  gdb_py_longest pc;
 
-  if (!PyArg_ParseTuple (args, format, &pc))
+  if (!PyArg_ParseTuple (args, GDB_PY_LL_ARG, &pc))
     return NULL;
 
   soname = solib_name_from_address (current_program_space, pc);

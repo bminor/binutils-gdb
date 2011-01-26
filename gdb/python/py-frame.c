@@ -201,7 +201,7 @@ frapy_pc (PyObject *self, PyObject *args)
     }
   GDB_PY_HANDLE_EXCEPTION (except);
 
-  return PyLong_FromUnsignedLongLong (pc);
+  return gdb_py_long_from_ulongest (pc);
 }
 
 /* Implementation of gdb.Frame.block (self) -> gdb.Block.

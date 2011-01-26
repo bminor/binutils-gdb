@@ -232,7 +232,9 @@ set_parameter_value (parmpy_object *self, PyObject *value)
 	    return -1;
 	  }
 
-	l = PyInt_AsLong (value);
+	if (! gdb_py_int_as_long (value, &l))
+	  return -1;
+
 	if (self->type == var_uinteger)
 	  {
 	    ok = (l >= 0 && l <= UINT_MAX);

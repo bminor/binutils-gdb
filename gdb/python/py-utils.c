@@ -304,39 +304,73 @@ get_addr_from_python (PyObject *obj, CORE_ADDR *addr)
 {
   if (gdbpy_is_value_object (obj))
     *addr = value_as_address (value_object_to_value (obj));
-  else if (PyLong_Check (obj))
-    {
-      /* Assume CORE_ADDR corresponds to unsigned long.  */
-      *addr = PyLong_AsUnsignedLong (obj);
-      if (PyErr_Occurred () != NULL)
-	return 0;
-    }
-  else if (PyInt_Check (obj))
-    {
-      long val;
-
-      /* Assume CORE_ADDR corresponds to unsigned long.  */
-      val = PyInt_AsLong (obj);
-
-      if (val >= 0)
-	*addr = val;
-      else
-      {
-	/* If no error ocurred, VAL is indeed negative.  */
-	if (PyErr_Occurred () != NULL)
-	  return 0;
-
-	PyErr_SetString (PyExc_ValueError,
-			 _("Supplied address is negative."));
-	return 0;
-      }
-    }
   else
     {
-      PyErr_SetString (PyExc_TypeError,
-		       _("Invalid type for address."));
-      return 0;
+      PyObject *num = PyNumber_Long (obj);
+      gdb_py_ulongest val;
+
+      if (num == NULL)
+	return 0;
+
+      val = gdb_py_long_as_ulongest (num);
+      Py_XDECREF (num);
+      if (PyErr_Occurred ())
+	return 0;
+
+      if (sizeof (val) > sizeof (CORE_ADDR) && ((CORE_ADDR) val) != val)
+	{
+	  PyErr_SetString (PyExc_ValueError,
+			   _("Overflow converting to address."));
+	  return 0;
+	}
+
+      *addr = val;
     }
 
   return 1;
+}
+
+/* Convert a LONGEST to the appropriate Python object -- either an
+   integer object or a long object, depending on its value.  */
+
+PyObject *
+gdb_py_object_from_longest (LONGEST l)
+{
+#ifdef HAVE_LONG_LONG		/* Defined by Python.  */
+  /* If we have 'long long', and the value overflows a 'long', use a
+     Python Long; otherwise use a Python Int.  */
+  if (sizeof (l) > sizeof (long)
+      && (l > PyInt_GetMax () || l < (- (LONGEST) PyInt_GetMax ()) - 1))
+    return PyLong_FromLongLong (l);
+#endif
+  return PyInt_FromLong (l);
+}
+
+/* Convert a ULONGEST to the appropriate Python object -- either an
+   integer object or a long object, depending on its value.  */
+
+PyObject *
+gdb_py_object_from_ulongest (ULONGEST l)
+{
+#ifdef HAVE_LONG_LONG		/* Defined by Python.  */
+  /* If we have 'long long', and the value overflows a 'long', use a
+     Python Long; otherwise use a Python Int.  */
+  if (sizeof (l) > sizeof (unsigned long) && l > PyInt_GetMax ())
+    return PyLong_FromUnsignedLongLong (l);
+#endif
+
+  if (l > PyInt_GetMax ())
+    return PyLong_FromUnsignedLong (l);
+
+  return PyInt_FromLong (l);
+}
+
+/* Like PyInt_AsLong, but returns 0 on failure, 1 on success, and puts
+   the value into an out parameter.  */
+
+int
+gdb_py_int_as_long (PyObject *obj, long *result)
+{
+  *result = PyInt_AsLong (obj);
+  return ! (*result == -1 && PyErr_Occurred ());
 }

@@ -73,6 +73,32 @@ typedef int Py_ssize_t;
 #define PyEval_ReleaseLock()
 #endif
 
+/* Python supplies HAVE_LONG_LONG and some `long long' support when it
+   is available.  These defines let us handle the differences more
+   cleanly.  */
+#ifdef HAVE_LONG_LONG
+
+#define GDB_PY_LL_ARG "L"
+#define GDB_PY_LLU_ARG "K"
+typedef PY_LONG_LONG gdb_py_longest;
+typedef unsigned PY_LONG_LONG gdb_py_ulongest;
+#define gdb_py_long_from_longest PyLong_FromLongLong
+#define gdb_py_long_from_ulongest PyLong_FromUnsignedLongLong
+#define gdb_py_long_as_ulongest PyLong_AsUnsignedLongLong
+
+#else /* HAVE_LONG_LONG */
+
+#define GDB_PY_LL_ARG "L"
+#define GDB_PY_LLU_ARG "K"
+typedef long gdb_py_longest;
+typedef unsigned long gdb_py_ulongest;
+#define gdb_py_long_from_longest PyLong_FromLong
+#define gdb_py_long_from_ulongest PyLong_FromUnsignedLong
+#define gdb_py_long_as_ulongest PyLong_AsUnsignedLong
+
+#endif /* HAVE_LONG_LONG */
+
+
 /* In order to be able to parse symtab_and_line_to_sal_object function 
    a real symtab_and_line structure is needed.  */
 #include "symtab.h"
@@ -242,5 +268,9 @@ extern PyObject *gdbpy_gdberror_exc;
 extern PyObject *gdbpy_convert_exception (struct gdb_exception);
 
 int get_addr_from_python (PyObject *obj, CORE_ADDR *addr);
+
+PyObject *gdb_py_object_from_longest (LONGEST l);
+PyObject *gdb_py_object_from_ulongest (ULONGEST l);
+int gdb_py_int_as_long (PyObject *, long *);
 
 #endif /* GDB_PYTHON_INTERNAL_H */

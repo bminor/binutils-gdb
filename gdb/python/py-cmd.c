@@ -279,9 +279,14 @@ cmdpy_completer (struct cmd_list_element *command, char *text, char *word)
     {
       /* User code may also return one of the completion constants,
 	 thus requesting that sort of completion.  */
-      long value = PyInt_AsLong (resultobj);
+      long value;
 
-      if (value >= 0 && value < (long) N_COMPLETERS)
+      if (! gdb_py_int_as_long (resultobj, &value))
+	{
+	  /* Ignore.  */
+	  PyErr_Clear ();
+	}
+      else if (value >= 0 && value < (long) N_COMPLETERS)
 	result = completers[value].completer (command, text, word);
     }
 

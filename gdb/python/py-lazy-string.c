@@ -54,7 +54,7 @@ stpy_get_address (PyObject *self, void *closure)
 {
   lazy_string_object *self_string = (lazy_string_object *) self;
 
-  return PyLong_FromUnsignedLongLong (self_string->address);
+  return gdb_py_long_from_ulongest (self_string->address);
 }
 
 static PyObject *

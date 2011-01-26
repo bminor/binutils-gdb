@@ -307,13 +307,13 @@ valpy_get_dynamic_type (PyObject *self, void *closure)
 static PyObject *
 valpy_lazy_string (PyObject *self, PyObject *args, PyObject *kw)
 {
-  int length = -1;
+  gdb_py_longest length = -1;
   struct value *value = ((value_object *) self)->value;
   const char *user_encoding = NULL;
   static char *keywords[] = { "encoding", "length", NULL };
   PyObject *str_obj;
 
-  if (!PyArg_ParseTupleAndKeywords (args, kw, "|si", keywords,
+  if (!PyArg_ParseTupleAndKeywords (args, kw, "|s" GDB_PY_LL_ARG, keywords,
 				    &user_encoding, &length))
     return NULL;
 
@@ -987,14 +987,7 @@ valpy_int (PyObject *self)
     }
   GDB_PY_HANDLE_EXCEPTION (except);
 
-#ifdef HAVE_LONG_LONG		/* Defined by Python.  */
-  /* If we have 'long long', and the value overflows a 'long', use a
-     Python Long; otherwise use a Python Int.  */
-  if (sizeof (l) > sizeof (long) && (l > PyInt_GetMax ()
-				     || l < (- (LONGEST) PyInt_GetMax ()) - 1))
-    return PyLong_FromLongLong (l);
-#endif
-  return PyInt_FromLong (l);
+  return gdb_py_object_from_longest (l);
 }
 
 /* Implements conversion to long.  */
@@ -1019,11 +1012,7 @@ valpy_long (PyObject *self)
     }
   GDB_PY_HANDLE_EXCEPTION (except);
 
-#ifdef HAVE_LONG_LONG		/* Defined by Python.  */
-  return PyLong_FromLongLong (l);
-#else
-  return PyLong_FromLong (l);
-#endif
+  return gdb_py_long_from_longest (l);
 }
 
 /* Implements conversion to float.  */

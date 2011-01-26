@@ -276,13 +276,13 @@ typy_strip_typedefs (PyObject *self, PyObject *args)
 static PyObject *
 typy_array (PyObject *self, PyObject *args)
 {
-  int n1, n2;
+  long n1, n2;
   PyObject *n2_obj = NULL;
   struct type *array = NULL;
   struct type *type = ((type_object *) self)->type;
   volatile struct gdb_exception except;
 
-  if (! PyArg_ParseTuple (args, "i|O", &n1, &n2_obj))
+  if (! PyArg_ParseTuple (args, "l|O", &n1, &n2_obj))
     return NULL;
 
   if (n2_obj)
@@ -293,8 +293,8 @@ typy_array (PyObject *self, PyObject *args)
 			   _("Array bound must be an integer"));
 	  return NULL;
 	}
-      n2 = (int) PyInt_AsLong (n2_obj);
-      if (PyErr_Occurred ())
+
+      if (! gdb_py_int_as_long (n2_obj, &n2))
 	return NULL;
     }
   else

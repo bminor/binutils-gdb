@@ -211,7 +211,7 @@ static int
 bppy_set_thread (PyObject *self, PyObject *newvalue, void *closure)
 {
   breakpoint_object *self_bp = (breakpoint_object *) self;
-  int id;
+  long id;
 
   BPPY_SET_REQUIRE_VALID (self_bp);
 
@@ -223,7 +223,9 @@ bppy_set_thread (PyObject *self, PyObject *newvalue, void *closure)
     }
   else if (PyInt_Check (newvalue))
     {
-      id = (int) PyInt_AsLong (newvalue);
+      if (! gdb_py_int_as_long (newvalue, &id))
+	return -1;
+
       if (! valid_thread_id (id))
 	{
 	  PyErr_SetString (PyExc_RuntimeError, 
@@ -250,7 +252,7 @@ static int
 bppy_set_task (PyObject *self, PyObject *newvalue, void *closure)
 {
   breakpoint_object *self_bp = (breakpoint_object *) self;
-  int id;
+  long id;
 
   BPPY_SET_REQUIRE_VALID (self_bp);
 
@@ -262,7 +264,9 @@ bppy_set_task (PyObject *self, PyObject *newvalue, void *closure)
     }
   else if (PyInt_Check (newvalue))
     {
-      id = (int) PyInt_AsLong (newvalue);
+      if (! gdb_py_int_as_long (newvalue, &id))
+	return -1;
+
       if (! valid_task_id (id))
 	{
 	  PyErr_SetString (PyExc_RuntimeError, 
@@ -324,7 +328,9 @@ bppy_set_ignore_count (PyObject *self, PyObject *newvalue, void *closure)
       return -1;
     }
 
-  value = PyInt_AsLong (newvalue);
+  if (! gdb_py_int_as_long (newvalue, &value))
+    return -1;
+
   if (value < 0)
     value = 0;
   set_ignore_count (self_bp->number, (int) value, 0);
@@ -346,11 +352,19 @@ bppy_set_hit_count (PyObject *self, PyObject *newvalue, void *closure)
 		       _("Cannot delete `hit_count' attribute."));
       return -1;
     }
-  else if (! PyInt_Check (newvalue) || PyInt_AsLong (newvalue) != 0)
+  else
     {
-      PyErr_SetString (PyExc_AttributeError,
-		       _("The value of `hit_count' must be zero."));
-      return -1;
+      long value;
+
+      if (! gdb_py_int_as_long (newvalue, &value))
+	return -1;
+
+      if (value != 0)
+	{
+	  PyErr_SetString (PyExc_AttributeError,
+			   _("The value of `hit_count' must be zero."));
+	  return -1;
+	}
     }
 
   self_bp->bp->hit_count = 0;

@@ -1,3 +1,42 @@
+2011-01-26  Tom Tromey  <tromey@redhat.com>
+
+	* python/python.c (gdbpy_solib_name): Use gdb_py_longest and
+	GDB_PY_LL_ARG.
+	* python/python-internal.h (GDB_PY_LL_ARG, GDB_PY_LLU_ARG): New
+	macros.
+	(gdb_py_longest, gdb_py_ulongest): New typedefs.
+	(gdb_py_long_from_longest, gdb_py_long_from_ulongest)
+	(gdb_py_long_as_ulongest): New defines.
+	(gdb_py_object_from_longest, gdb_py_object_from_ulongest)
+	(gdb_py_int_as_long): Declare.
+	* python/py-value.c (valpy_lazy_string): Use gdb_py_longest,
+	GDB_PY_LL_ARG, gdb_py_object_from_longest.
+	(valpy_long): Add comment.
+	* python/py-utils.c (get_addr_from_python): Use
+	gdb_py_long_as_ulongest.  Handle overflow properly.
+	(gdb_py_object_from_longest): New function.
+	(gdb_py_object_from_ulongest): Likewise.
+	(gdb_py_int_as_long): Likewise.
+	* python/py-type.c (typy_array): Use gdb_py_int_as_long.
+	* python/py-symtab.c (salpy_get_pc): Use
+	gdb_py_long_from_ulongest.
+	(salpy_get_line): Use PyInt_FromLong.
+	* python/py-param.c (set_parameter_value): Use
+	gdb_py_int_as_long.
+	* python/py-lazy-string.c (stpy_get_address): Use
+	gdb_py_long_from_ulongest.
+	* python/py-frame.c (frapy_pc): Use gdb_py_long_from_ulongest.
+	* python/py-cmd.c (cmdpy_completer): Use gdb_py_int_as_long.
+	* python/py-breakpoint.c (bppy_set_thread): Use
+	gdb_py_int_as_long.
+	(bppy_set_task): Likewise.
+	(bppy_set_ignore_count): Likewise.
+	(bppy_set_hit_count): Likewise.
+	* python/py-block.c (blpy_get_start): Use
+	gdb_py_object_from_ulongest.
+	(blpy_get_end): Likewise.
+	(gdbpy_block_for_pc): Use gdb_py_ulongest and GDB_PY_LLU_ARG.
+
 2011-01-25  Mathieu Lacage  <mathieu.lacage@inria.fr>
 
 	PR/symtab 11766:

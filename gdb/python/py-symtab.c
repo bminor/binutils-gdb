@@ -186,7 +186,7 @@ salpy_get_pc (PyObject *self, void *closure)
 
   SALPY_REQUIRE_VALID (self, sal);
 
-  return PyLong_FromUnsignedLongLong (sal->pc);
+  return gdb_py_long_from_ulongest (sal->pc);
 }
 
 static PyObject *
@@ -196,7 +196,7 @@ salpy_get_line (PyObject *self, void *closure)
 
   SALPY_REQUIRE_VALID (self, sal);
 
-  return PyLong_FromUnsignedLongLong (sal->line);
+  return PyInt_FromLong (sal->line);
 }
 
 static PyObject *
