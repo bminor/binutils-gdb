@@ -1,3 +1,9 @@
+2011-01-26  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.python/py-prettyprint.exp (run_lang_tests): Ensure no blank
+	space before string output.  Add test for "set print pretty off"
+	case.
+
 2011-01-25  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.base/frame-args.exp: Adjust.

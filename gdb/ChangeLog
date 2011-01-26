@@ -1,5 +1,12 @@
 2011-01-26  Tom Tromey  <tromey@redhat.com>
 
+	* python/py-prettyprint.c (print_string_repr): Clear
+	'addressprint' option when calling val_print_string.
+	(print_children): Handle Val_pretty_default.  Clear 'addressprint'
+	option when calling val_print_string.
+
+2011-01-26  Tom Tromey  <tromey@redhat.com>
+
 	* python/python.c (gdbpy_solib_name): Use gdb_py_longest and
 	GDB_PY_LL_ARG.
 	* python/python-internal.h (GDB_PY_LL_ARG, GDB_PY_LLU_ARG): New

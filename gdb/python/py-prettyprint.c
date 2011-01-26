@@ -325,13 +325,15 @@ print_string_repr (PyObject *printer, const char *hint,
 	  long length;
 	  struct type *type;
 	  char *encoding = NULL;
+	  struct value_print_options local_opts = *options;
 
 	  make_cleanup (free_current_contents, &encoding);
 	  gdbpy_extract_lazy_string (py_str, &addr, &type,
 				     &length, &encoding);
 
+	  local_opts.addressprint = 0;
 	  val_print_string (type, encoding, addr, (int) length,
-			    stream, options);
+			    stream, &local_opts);
 	}
       else
 	{
@@ -499,7 +501,15 @@ print_children (PyObject *printer, const char *hint,
 
   /* Use the prettyprint_arrays option if we are printing an array,
      and the pretty option otherwise.  */
-  pretty = is_array ? options->prettyprint_arrays : options->pretty;
+  if (is_array)
+    pretty = options->prettyprint_arrays;
+  else
+    {
+      if (options->pretty == Val_prettyprint)
+	pretty = 1;
+      else
+	pretty = options->prettyprint_structs;
+    }
 
   /* Manufacture a dummy Python frame to work around Python 2.4 bug,
      where it insists on having a non-NULL tstate->frame when
@@ -598,12 +608,14 @@ print_children (PyObject *printer, const char *hint,
 	  struct type *type;
 	  long length;
 	  char *encoding = NULL;
+	  struct value_print_options local_opts = *options;
 
 	  make_cleanup (free_current_contents, &encoding);
 	  gdbpy_extract_lazy_string (py_v, &addr, &type, &length, &encoding);
 
+	  local_opts.addressprint = 0;
 	  val_print_string (type, encoding, addr, (int) length, stream,
-			    options);
+			    &local_opts);
 
 	  do_cleanups (inner_cleanup);
 	}
