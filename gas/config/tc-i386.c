@@ -2371,7 +2371,12 @@ md_begin ()
 
   if (flag_code == CODE_64BIT)
     {
+#if defined (OBJ_COFF) && defined (TE_PE)
+      x86_dwarf2_return_column = (OUTPUT_FLAVOR == bfd_target_coff_flavour
+				  ? 32 : 16);
+#else
       x86_dwarf2_return_column = 16;
+#endif
       x86_cie_data_alignment = -8;
     }
   else
