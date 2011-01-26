@@ -4893,8 +4893,14 @@ display_gdb_index (struct dwarf_section *section,
 
   /* Prior versions are obsolete, and future versions may not be
      backwards compatible.  */
-  if (version != 3)
+  switch (version)
     {
+    case 3:
+      warn (_("The address table data in version 3 may be wrong.\n"));
+      break;
+    case 4:
+      break;
+    default:
       warn (_("Unsupported version %lu.\n"), (unsigned long) version);
       return 0;
     }

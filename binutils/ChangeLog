@@ -1,3 +1,8 @@
+2011-01-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Doug Evans  <dje@google.com>
+
+	* dwarf.c (display_gdb_index): Support version 4, warn on version 3.
+
 2011-01-19  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* readelf.c (process_object): Free dynamic_section after use.
