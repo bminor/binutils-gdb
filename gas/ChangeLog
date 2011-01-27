@@ -1,3 +1,9 @@
+2011-01-27  DJ Delorie  <dj@redhat.com>
+
+	* config/tc-rx.c (md_convert_frag): If we can't compute the target
+	address, zero out the values stored in the object file to make
+	objdump's output consistent.
+
 2011-01-26  Kai Tietz  <kai.tietz@onevision.com>
 
 	* config/tc-i386.c (md_begin): Set for x64 windows COFF target

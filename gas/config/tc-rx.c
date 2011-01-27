@@ -1603,19 +1603,28 @@ md_convert_frag (bfd *   abfd ATTRIBUTE_UNUSED,
       && fragP->tc_frag_data->relax[0].type == RX_RELAX_DISP)
     ri = 1;
 
+  /* We used a new frag for this opcode, so the opcode address should
+     be the frag address.  */
+  mypc = fragP->fr_address + (fragP->fr_opcode - fragP->fr_literal);
+
   /* Try to get the target address.  If we fail here, we just use the
      largest format.  */
   if (rx_frag_fix_value (fragP, segment, 0, & addr0,
 			 fragP->tc_frag_data->relax[ri].type != RX_RELAX_BRANCH, 0))
-    keep_reloc = 1;
+    {
+      /* We don't know the target address.  */
+      keep_reloc = 1;
+      addr0 = 0;
+      disp = 0;
+    }
+  else
+    {
+      /* We know the target address, and it's in addr0.  */
+      disp = (int) addr0 - (int) mypc;
+    }
 
   if (linkrelax)
     keep_reloc = 1;
-
-  /* We used a new frag for this opcode, so the opcode address should
-     be the frag address.  */
-  mypc = fragP->fr_address + (fragP->fr_opcode - fragP->fr_literal);
-  disp = (int) addr0 - (int) mypc;
 
   reloc_type = BFD_RELOC_NONE;
   reloc_adjust = 0;
