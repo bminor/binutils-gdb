@@ -3212,6 +3212,24 @@ static void tfile_interp_line (char *line,
 			       struct uploaded_tp **utpp,
 			       struct uploaded_tsv **utsvp);
 
+/* Read SIZE bytes into READBUF from the trace frame, starting at
+   TRACE_FD's current position.  Note that this call `read'
+   underneath, hence it advances the file's seek position.  Throws an
+   error if the `read' syscall fails, or less than SIZE bytes are
+   read.  */
+
+static void
+tfile_read (gdb_byte *readbuf, int size)
+{
+  int gotten;
+
+  gotten = read (trace_fd, readbuf, size);
+  if (gotten < 0)
+    perror_with_name (trace_filename);
+  else if (gotten < size)
+    error (_("Premature end of file while reading trace file"));
+}
+
 static void
 tfile_open (char *filename, int from_tty)
 {
@@ -3222,7 +3240,7 @@ tfile_open (char *filename, int from_tty)
   char header[TRACE_HEADER_SIZE];
   char linebuf[1000]; /* Should be max remote packet size or so.  */
   char byte;
-  int bytes, i, gotten;
+  int bytes, i;
   struct trace_status *ts;
   struct uploaded_tp *uploaded_tps = NULL;
   struct uploaded_tsv *uploaded_tsvs = NULL;
@@ -3259,11 +3277,7 @@ tfile_open (char *filename, int from_tty)
 
   bytes = 0;
   /* Read the file header and test for validity.  */
-  gotten = read (trace_fd, &header, TRACE_HEADER_SIZE);
-  if (gotten < 0)
-    perror_with_name (trace_filename);
-  else if (gotten < TRACE_HEADER_SIZE)
-    error (_("Premature end of file while reading trace file"));
+  tfile_read ((gdb_byte *) &header, TRACE_HEADER_SIZE);
 
   bytes += TRACE_HEADER_SIZE;
   if (!(header[0] == 0x7f
@@ -3287,11 +3301,7 @@ tfile_open (char *filename, int from_tty)
   i = 0;
   while (1)
     {
-      gotten = read (trace_fd, &byte, 1);
-      if (gotten < 0)
-	perror_with_name (trace_filename);
-      else if (gotten < 1)
-	error (_("Premature end of file while reading trace file"));
+      tfile_read (&byte, 1);
 
       ++bytes;
       if (byte == '\n')
@@ -3679,17 +3689,12 @@ tfile_get_traceframe_address (off_t tframe_offset)
   short tpnum;
   struct breakpoint *tp;
   off_t saved_offset = cur_offset;
-  int gotten;
 
   /* FIXME dig pc out of collected registers.  */
 
   /* Fall back to using tracepoint address.  */
   lseek (trace_fd, tframe_offset, SEEK_SET);
-  gotten = read (trace_fd, &tpnum, 2);
-  if (gotten < 0)
-    perror_with_name (trace_filename);
-  else if (gotten < 2)
-    error (_("Premature end of file while reading trace file"));
+  tfile_read ((gdb_byte *) &tpnum, 2);
   tpnum = (short) extract_signed_integer ((gdb_byte *) &tpnum, 2,
 					  gdbarch_byte_order
 					      (target_gdbarch));
@@ -3715,7 +3720,7 @@ tfile_trace_find (enum trace_find_type type, int num,
 		  ULONGEST addr1, ULONGEST addr2, int *tpp)
 {
   short tpnum;
-  int tfnum = 0, found = 0, gotten;
+  int tfnum = 0, found = 0;
   unsigned int data_size;
   struct breakpoint *tp;
   off_t offset, tframe_offset;
@@ -3726,22 +3731,14 @@ tfile_trace_find (enum trace_find_type type, int num,
   while (1)
     {
       tframe_offset = offset;
-      gotten = read (trace_fd, &tpnum, 2);
-      if (gotten < 0)
-	perror_with_name (trace_filename);
-      else if (gotten < 2)
-	error (_("Premature end of file while reading trace file"));
+      tfile_read ((gdb_byte *) &tpnum, 2);
       tpnum = (short) extract_signed_integer ((gdb_byte *) &tpnum, 2,
 					      gdbarch_byte_order
 						  (target_gdbarch));
       offset += 2;
       if (tpnum == 0)
 	break;
-      gotten = read (trace_fd, &data_size, 4);	
-      if (gotten < 0)
-	perror_with_name (trace_filename);
-      else if (gotten < 4)
-	error (_("Premature end of file while reading trace file"));
+      tfile_read ((gdb_byte *) &data_size, 4);
       data_size = (unsigned int) extract_unsigned_integer
                                      ((gdb_byte *) &data_size, 4,
 				      gdbarch_byte_order (target_gdbarch));
@@ -3795,6 +3792,90 @@ tfile_trace_find (enum trace_find_type type, int num,
   return -1;
 }
 
+/* Prototype of the callback passed to tframe_walk_blocks.  */
+typedef int (*walk_blocks_callback_func) (char blocktype, void *data);
+
+/* Callback for traceframe_walk_blocks, used to find a given block
+   type in a traceframe.  */
+
+static int
+match_blocktype (char blocktype, void *data)
+{
+  char *wantedp = data;
+
+  if (*wantedp == blocktype)
+    return 1;
+
+  return 0;
+}
+
+/* Walk over all traceframe block starting at POS offset from
+   CUR_OFFSET, and call CALLBACK for each block found, passing in DATA
+   unmodified.  If CALLBACK returns true, this returns the position in
+   the traceframe where the block is found, relative to the start of
+   the traceframe (cur_offset).  Returns -1 if no callback call
+   returned true, indicating that all blocks have been walked.  */
+
+static int
+traceframe_walk_blocks (walk_blocks_callback_func callback,
+			int pos, void *data)
+{
+  /* Iterate through a traceframe's blocks, looking for a block of the
+     requested type.  */
+
+  lseek (trace_fd, cur_offset + pos, SEEK_SET);
+  while (pos < cur_data_size)
+    {
+      unsigned short mlen;
+      char block_type;
+
+      tfile_read (&block_type, 1);
+
+      ++pos;
+
+      if ((*callback) (block_type, data))
+	return pos;
+
+      switch (block_type)
+	{
+	case 'R':
+	  lseek (trace_fd, cur_offset + pos + trace_regblock_size, SEEK_SET);
+	  pos += trace_regblock_size;
+	  break;
+	case 'M':
+	  lseek (trace_fd, cur_offset + pos + 8, SEEK_SET);
+	  tfile_read ((gdb_byte *) &mlen, 2);
+          mlen = (unsigned short)
+                extract_unsigned_integer ((gdb_byte *) &mlen, 2,
+                                          gdbarch_byte_order
+                                              (target_gdbarch));
+	  lseek (trace_fd, mlen, SEEK_CUR);
+	  pos += (8 + 2 + mlen);
+	  break;
+	case 'V':
+	  lseek (trace_fd, cur_offset + pos + 4 + 8, SEEK_SET);
+	  pos += (4 + 8);
+	  break;
+	default:
+	  error ("Unknown block type '%c' (0x%x) in trace frame",
+		 block_type, block_type);
+	  break;
+	}
+    }
+
+  return -1;
+}
+
+/* Convenience wrapper around traceframe_walk_blocks.  Looks for the
+   position offset of a block of type TYPE_WANTED in the current trace
+   frame, starting at POS.  Returns -1 if no such block was found.  */
+
+static int
+traceframe_find_block_type (char type_wanted, int pos)
+{
+  return traceframe_walk_blocks (match_blocktype, pos, &type_wanted);
+}
+
 /* Look for a block of saved registers in the traceframe, and get the
    requested register from it.  */
 
@@ -3804,7 +3885,7 @@ tfile_fetch_registers (struct target_ops *ops,
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   char block_type;
-  int pos, offset, regn, regsize, gotten, pc_regno;
+  int pos, offset, regn, regsize, pc_regno;
   unsigned short mlen;
   char *regs;
 
@@ -3815,79 +3896,38 @@ tfile_fetch_registers (struct target_ops *ops,
 
   regs = alloca (trace_regblock_size);
 
-  lseek (trace_fd, cur_offset, SEEK_SET);
-  pos = 0;
-  while (pos < cur_data_size)
+  if (traceframe_find_block_type ('R', 0) >= 0)
     {
-      gotten = read (trace_fd, &block_type, 1);
-      if (gotten < 0)
-	perror_with_name (trace_filename);
-      else if (gotten < 1)
-	error (_("Premature end of file while reading trace file"));
+      tfile_read (regs, trace_regblock_size);
 
-      ++pos;
-      switch (block_type)
+      /* Assume the block is laid out in GDB register number order,
+	 each register with the size that it has in GDB.  */
+      offset = 0;
+      for (regn = 0; regn < gdbarch_num_regs (gdbarch); regn++)
 	{
-	case 'R':
-	  gotten = read (trace_fd, regs, trace_regblock_size);
-	  if (gotten < 0)
-	    perror_with_name (trace_filename);
-	  else if (gotten < trace_regblock_size)
-	    error (_("Premature end of file while reading trace file"));
-
-	  /* Assume the block is laid out in GDB register number order,
-	     each register with the size that it has in GDB.  */
-	  offset = 0;
-	  for (regn = 0; regn < gdbarch_num_regs (gdbarch); regn++)
+	  regsize = register_size (gdbarch, regn);
+	  /* Make sure we stay within block bounds.  */
+	  if (offset + regsize >= trace_regblock_size)
+	    break;
+	  if (regcache_register_status (regcache, regn) == REG_UNKNOWN)
 	    {
-	      regsize = register_size (gdbarch, regn);
-	      /* Make sure we stay within block bounds.  */
-	      if (offset + regsize >= trace_regblock_size)
-		break;
-	      if (regcache_register_status (regcache, regn) == REG_UNKNOWN)
+	      if (regno == regn)
 		{
-		  if (regno == regn)
-		    {
-		      regcache_raw_supply (regcache, regno, regs + offset);
-		      break;
-		    }
-		  else if (regno == -1)
-		    {
-		      regcache_raw_supply (regcache, regn, regs + offset);
-		    }
+		  regcache_raw_supply (regcache, regno, regs + offset);
+		  break;
 		}
-	      offset += regsize;
+	      else if (regno == -1)
+		{
+		  regcache_raw_supply (regcache, regn, regs + offset);
+		}
 	    }
-	  return;
-	case 'M':
-	  lseek (trace_fd, 8, SEEK_CUR);
-	  gotten = read (trace_fd, &mlen, 2);
-	  if (gotten < 0)
-	    perror_with_name (trace_filename);
-	  else if (gotten < 2)
-	    error (_("Premature end of file while reading trace file"));
-          mlen = (unsigned short)
-		 extract_unsigned_integer ((gdb_byte *) &mlen, 2,
-					   gdbarch_byte_order
-					       (target_gdbarch));
-	  lseek (trace_fd, mlen, SEEK_CUR);
-	  pos += (8 + 2 + mlen);
-	  break;
-	case 'V':
-	  lseek (trace_fd, 4 + 8, SEEK_CUR);
-	  pos += (4 + 8);
-	  break;
-	default:
-	  error (_("Unknown block type '%c' (0x%x) in trace frame"),
-		 block_type, block_type);
-	  break;
+	  offset += regsize;
 	}
+      return;
     }
 
-  /* We get here if no register data has been found.  Although we
-     don't like making up numbers, GDB has all manner of troubles when
-     the target says some register is not available.  Filling in with
-     zeroes is a reasonable fallback.  */
+  /* We get here if no register data has been found.  Mark registers
+     as unavailable.  */
   for (regn = 0; regn < gdbarch_num_regs (gdbarch); regn++)
     regcache_raw_supply (regcache, regn, NULL);
 
@@ -3930,10 +3970,7 @@ tfile_xfer_partial (struct target_ops *ops, enum target_object object,
 		    const char *annex, gdb_byte *readbuf,
 		    const gdb_byte *writebuf, ULONGEST offset, LONGEST len)
 {
-  char block_type;
-  int pos, gotten;
-  ULONGEST maddr, amt;
-  unsigned short mlen;
+  int pos;
 
   /* We're only doing regular memory for now.  */
   if (object != TARGET_OBJECT_MEMORY)
@@ -3942,72 +3979,36 @@ tfile_xfer_partial (struct target_ops *ops, enum target_object object,
   if (readbuf == NULL)
     error (_("tfile_xfer_partial: trace file is read-only"));
 
-  lseek (trace_fd, cur_offset, SEEK_SET);
+  /* Iterate through the traceframe's blocks, looking for memory.  */
   pos = 0;
-  while (pos < cur_data_size)
+  while ((pos = traceframe_find_block_type ('M', pos)) >= 0)
     {
-      gotten = read (trace_fd, &block_type, 1);
-      if (gotten < 0)
-	perror_with_name (trace_filename);
-      else if (gotten < 1)
-	error (_("Premature end of file while reading trace file"));
-      ++pos;
-      switch (block_type)
-	{
-	case 'R':
-	  lseek (trace_fd, trace_regblock_size, SEEK_CUR);
-	  pos += trace_regblock_size;
-	  break;
-	case 'M':
-	  gotten = read (trace_fd, &maddr, 8);
-	  if (gotten < 0)
-	    perror_with_name (trace_filename);
-	  else if (gotten < 8)
-	    error (_("Premature end of file while reading trace file"));
-          maddr = extract_unsigned_integer ((gdb_byte *) &maddr, 8,
-					    gdbarch_byte_order
-						(target_gdbarch));
-	  gotten = read (trace_fd, &mlen, 2);
-	  if (gotten < 0)
-	    perror_with_name (trace_filename);
-	  else if (gotten < 2)
-	    error (_("Premature end of file while reading trace file"));
-          mlen = (unsigned short)
-		 extract_unsigned_integer ((gdb_byte *) &mlen, 2,
-					   gdbarch_byte_order
-					       (target_gdbarch));
-	  /* If the block includes the first part of the desired
-	     range, return as much it has; GDB will re-request the
-	     remainder, which might be in a different block of this
-	     trace frame.  */
-	  if (maddr <= offset && offset < (maddr + mlen))
-  	    {
-	      amt = (maddr + mlen) - offset;
-	      if (amt > len)
-		amt = len;
+      ULONGEST maddr, amt;
+      unsigned short mlen;
 
-	      gotten = read (trace_fd, readbuf, amt);
-	      if (gotten < 0)
-		perror_with_name (trace_filename);
-	      /* While it's acceptable to return less than was
-		 originally asked for, it's not acceptable to return
-		 less than what this block claims to contain.  */
-	      else if (gotten < amt)
-		error (_("Premature end of file while reading trace file"));
-	      return amt;
-  	    }
-	  lseek (trace_fd, mlen, SEEK_CUR);
-	  pos += (8 + 2 + mlen);
-	  break;
-	case 'V':
-	  lseek (trace_fd, 4 + 8, SEEK_CUR);
-	  pos += (4 + 8);
-	  break;
-	default:
-	  error (_("Unknown block type '%c' (0x%x) in traceframe"),
-		 block_type, block_type);
-	  break;
+      tfile_read ((gdb_byte *) &maddr, 8);
+      maddr = extract_unsigned_integer ((gdb_byte *) &maddr, 8,
+					gdbarch_byte_order (target_gdbarch));
+      tfile_read ((gdb_byte *) &mlen, 2);
+      mlen = (unsigned short)
+	extract_unsigned_integer ((gdb_byte *) &mlen, 2,
+				  gdbarch_byte_order (target_gdbarch));
+
+      /* If the block includes the first part of the desired range,
+	 return as much it has; GDB will re-request the remainder,
+	 which might be in a different block of this trace frame.  */
+      if (maddr <= offset && offset < (maddr + mlen))
+	{
+	  amt = (maddr + mlen) - offset;
+	  if (amt > len)
+	    amt = len;
+
+	  tfile_read (readbuf, amt);
+	  return amt;
 	}
+
+      /* Skip over this block.  */
+      pos += (8 + 2 + mlen);
     }
 
   /* It's unduly pedantic to refuse to look at the executable for
@@ -4022,14 +4023,16 @@ tfile_xfer_partial (struct target_ops *ops, enum target_object object,
 
       for (s = exec_bfd->sections; s; s = s->next)
 	{
-	  if ((s->flags & SEC_LOAD) == 0 ||
-	      (s->flags & SEC_READONLY) == 0)
+	  if ((s->flags & SEC_LOAD) == 0
+	      || (s->flags & SEC_READONLY) == 0)
 	    continue;
 
 	  vma = s->vma;
 	  size = bfd_get_section_size (s);
 	  if (vma <= offset && offset < (vma + size))
 	    {
+	      ULONGEST amt;
+
 	      amt = (vma + size) - offset;
 	      if (amt > len)
 		amt = len;
@@ -4051,70 +4054,28 @@ tfile_xfer_partial (struct target_ops *ops, enum target_object object,
 static int
 tfile_get_trace_state_variable_value (int tsvnum, LONGEST *val)
 {
-  char block_type;
-  int pos, vnum, gotten;
-  unsigned short mlen;
+  int pos;
 
-  lseek (trace_fd, cur_offset, SEEK_SET);
   pos = 0;
-  while (pos < cur_data_size)
+  while ((pos = traceframe_find_block_type ('V', pos)) >= 0)
     {
-      gotten = read (trace_fd, &block_type, 1);
-      if (gotten < 0)
-	perror_with_name (trace_filename);
-      else if (gotten < 1)
-	error (_("Premature end of file while reading trace file"));
-      ++pos;
-      switch (block_type)
-	{
-	case 'R':
-	  lseek (trace_fd, trace_regblock_size, SEEK_CUR);
-	  pos += trace_regblock_size;
-	  break;
-	case 'M':
-	  lseek (trace_fd, 8, SEEK_CUR);
-	  gotten = read (trace_fd, &mlen, 2);
-	  if (gotten < 0)
-	    perror_with_name (trace_filename);
-	  else if (gotten < 2)
-	    error (_("Premature end of file while reading trace file"));
-          mlen = (unsigned short)
-		 extract_unsigned_integer ((gdb_byte *) &mlen, 2,
+      int vnum;
+
+      tfile_read ((gdb_byte *) &vnum, 4);
+      vnum = (int) extract_signed_integer ((gdb_byte *) &vnum, 4,
 					   gdbarch_byte_order
-					       (target_gdbarch));
-	  lseek (trace_fd, mlen, SEEK_CUR);
-	  pos += (8 + 2 + mlen);
-	  break;
-	case 'V':
-	  gotten = read (trace_fd, &vnum, 4);
-	  if (gotten < 0)
-	    perror_with_name (trace_filename);
-	  else if (gotten < 4)
-	    error (_("Premature end of file while reading trace file"));
-          vnum = (int) extract_signed_integer ((gdb_byte *) &vnum, 4,
-					       gdbarch_byte_order
-						   (target_gdbarch));
-	  if (tsvnum == vnum)
-	    {
-	      gotten = read (trace_fd, val, 8);
-	      if (gotten < 0)
-		perror_with_name (trace_filename);
-	      else if (gotten < 8)
-		error (_("Premature end of file while reading trace file"));
-              *val = extract_signed_integer ((gdb_byte *)val, 8,
-					     gdbarch_byte_order
-						 (target_gdbarch));
-	      return 1;
-	    }
-	  lseek (trace_fd, 8, SEEK_CUR);
-	  pos += (4 + 8);
-	  break;
-	default:
-	  error (_("Unknown block type '%c' (0x%x) in traceframe"),
-		 block_type, block_type);
-	  break;
+					   (target_gdbarch));
+      if (tsvnum == vnum)
+	{
+	  tfile_read ((gdb_byte *) val, 8);
+	  *val = extract_signed_integer ((gdb_byte *) val, 8,
+					 gdbarch_byte_order
+					 (target_gdbarch));
+	  return 1;
 	}
+      pos += (4 + 8);
     }
+
   /* Didn't find anything.  */
   return 0;
 }

@@ -1,3 +1,17 @@
+2011-01-27  Pedro Alves  <pedro@codesourcery.com>
+
+	* tracepoint.c (tfile_read): New.
+	(tfile_open): Use it.
+	(tfile_get_traceframe_address): Use it.
+	(tfile_trace_find): Use it.
+	(walk_blocks_callback_func): New typedef.
+	(match_blocktype): New function.
+	(traceframe_walk_blocks): New function.
+	(traceframe_find_block_type): New function.
+	(tfile_fetch_registers, tfile_xfer_partial)
+	(tfile_get_trace_state_variable_value): Use
+	traceframe_find_block_type and tfile_read.
+
 2011-01-26  Kevin Buettner  <kevinb@redhat.com>
 
 	* remote-mips.c: Add internationalization mark ups.  Remove
