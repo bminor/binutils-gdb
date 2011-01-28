@@ -3970,8 +3970,6 @@ tfile_xfer_partial (struct target_ops *ops, enum target_object object,
 		    const char *annex, gdb_byte *readbuf,
 		    const gdb_byte *writebuf, ULONGEST offset, LONGEST len)
 {
-  int pos;
-
   /* We're only doing regular memory for now.  */
   if (object != TARGET_OBJECT_MEMORY)
     return -1;
@@ -3979,36 +3977,42 @@ tfile_xfer_partial (struct target_ops *ops, enum target_object object,
   if (readbuf == NULL)
     error (_("tfile_xfer_partial: trace file is read-only"));
 
-  /* Iterate through the traceframe's blocks, looking for memory.  */
-  pos = 0;
-  while ((pos = traceframe_find_block_type ('M', pos)) >= 0)
+  if (traceframe_number != -1)
     {
-      ULONGEST maddr, amt;
-      unsigned short mlen;
+      int pos = 0;
 
-      tfile_read ((gdb_byte *) &maddr, 8);
-      maddr = extract_unsigned_integer ((gdb_byte *) &maddr, 8,
-					gdbarch_byte_order (target_gdbarch));
-      tfile_read ((gdb_byte *) &mlen, 2);
-      mlen = (unsigned short)
-	extract_unsigned_integer ((gdb_byte *) &mlen, 2,
-				  gdbarch_byte_order (target_gdbarch));
-
-      /* If the block includes the first part of the desired range,
-	 return as much it has; GDB will re-request the remainder,
-	 which might be in a different block of this trace frame.  */
-      if (maddr <= offset && offset < (maddr + mlen))
+      /* Iterate through the traceframe's blocks, looking for
+	 memory.  */
+      while ((pos = traceframe_find_block_type ('M', pos)) >= 0)
 	{
-	  amt = (maddr + mlen) - offset;
-	  if (amt > len)
-	    amt = len;
+	  ULONGEST maddr, amt;
+	  unsigned short mlen;
+	  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
 
-	  tfile_read (readbuf, amt);
-	  return amt;
+	  tfile_read ((gdb_byte *) &maddr, 8);
+	  maddr = extract_unsigned_integer ((gdb_byte *) &maddr, 8,
+					    byte_order);
+	  tfile_read ((gdb_byte *) &mlen, 2);
+	  mlen = (unsigned short)
+	    extract_unsigned_integer ((gdb_byte *) &mlen, 2, byte_order);
+
+	  /* If the block includes the first part of the desired
+	     range, return as much it has; GDB will re-request the
+	     remainder, which might be in a different block of this
+	     trace frame.  */
+	  if (maddr <= offset && offset < (maddr + mlen))
+	    {
+	      amt = (maddr + mlen) - offset;
+	      if (amt > len)
+		amt = len;
+
+	      tfile_read (readbuf, amt);
+	      return amt;
+	    }
+
+	  /* Skip over this block.  */
+	  pos += (8 + 2 + mlen);
 	}
-
-      /* Skip over this block.  */
-      pos += (8 + 2 + mlen);
     }
 
   /* It's unduly pedantic to refuse to look at the executable for
@@ -4095,13 +4099,13 @@ tfile_has_memory (struct target_ops *ops)
 static int
 tfile_has_stack (struct target_ops *ops)
 {
-  return 1;
+  return traceframe_number != -1;
 }
 
 static int
 tfile_has_registers (struct target_ops *ops)
 {
-  return 1;
+  return traceframe_number != -1;
 }
 
 static void

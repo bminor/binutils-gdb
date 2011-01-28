@@ -1,5 +1,14 @@
 2011-01-28  Pedro Alves  <pedro@codesourcery.com>
 
+	* tracepoint.c (tfile_xfer_partial): If there's no traceframe
+	selected, don't try iterating over the traceframe's blocks.
+	(tfile_has_stack): If there's no traceframe selected, then there's
+	no stack.
+	(tfile_has_registers): If there's no traceframe selected, then
+	there's no registers.
+
+2011-01-28  Pedro Alves  <pedro@codesourcery.com>
+
 	* target.c (memory_xfer_partial): No need to restore shadows if we
 	haven't read anything.
 

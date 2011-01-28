@@ -92,6 +92,14 @@ Trace buffer has 256 bytes of 4096 bytes free \\(93% full\\).*
 Looking at trace frame 0, tracepoint .*" \
     "tstatus on trace file"
 
+gdb_test "tfind end" "No longer looking at any trace frame" "leave tfind mode"
+
+gdb_test "backtrace" "No stack\." \
+    "no stack if no traceframe selected"
+
+gdb_test "info registers" "The program has no registers now\." \
+    "no registers if no traceframe selected"
+
 # Now start afresh, using only a trace file.
 
 gdb_exit

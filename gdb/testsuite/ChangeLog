@@ -1,3 +1,8 @@
+2011-01-28  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.trace/tfile.exp: Test that with no traceframe selected,
+	there's no stack or registers.
+
 2011-01-26  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.python/py-prettyprint.exp (run_lang_tests): Ensure no blank
