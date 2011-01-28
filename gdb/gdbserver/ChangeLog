@@ -1,3 +1,8 @@
+2011-01-28  Pedro Alves  <pedro@codesourcery.com>
+
+	* i387-fp.c (i387_xsave_to_cache): Make passing NULL as register
+	buffer explicit.
+
 2011-01-25  Pedro Alves  <pedro@codesourcery.com>
 
 	* server.h (decode_xfer_write): Change prototype.
