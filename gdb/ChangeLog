@@ -1,3 +1,8 @@
+2011-01-28  Pedro Alves  <pedro@codesourcery.com>
+
+	* mips-tdep.c (mips_print_register): Use get_frame_register_value
+	and val_print_scalar_formatted.
+
 2011-01-27  Pedro Alves  <pedro@codesourcery.com>
 
 	* tracepoint.c (tfile_read): New.

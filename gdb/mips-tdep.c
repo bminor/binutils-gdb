@@ -4683,9 +4683,9 @@ mips_print_register (struct ui_file *file, struct frame_info *frame,
 		     int regnum)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
-  gdb_byte raw_buffer[MAX_REGISTER_SIZE];
   int offset;
   struct value_print_options opts;
+  struct value *val;
 
   if (TYPE_CODE (register_type (gdbarch, regnum)) == TYPE_CODE_FLT)
     {
@@ -4693,8 +4693,8 @@ mips_print_register (struct ui_file *file, struct frame_info *frame,
       return;
     }
 
-  /* Get the data in raw format.  */
-  if (!frame_register_read (frame, regnum, raw_buffer))
+  val = get_frame_register_value (frame, regnum);
+  if (value_optimized_out (val))
     {
       fprintf_filtered (file, "%s: [Invalid]",
 			gdbarch_register_name (gdbarch, regnum));
@@ -4712,16 +4712,12 @@ mips_print_register (struct ui_file *file, struct frame_info *frame,
   else
     fprintf_filtered (file, ": ");
 
-  if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
-    offset =
-      register_size (gdbarch, regnum) - register_size (gdbarch, regnum);
-  else
-    offset = 0;
-
   get_formatted_print_options (&opts, 'x');
-  print_scalar_formatted (raw_buffer + offset,
-			  register_type (gdbarch, regnum), &opts, 0,
-			  file);
+  val_print_scalar_formatted (value_type (val),
+			      value_contents_for_printing (val),
+			      value_embedded_offset (val),
+			      val,
+			      &opts, 0, file);
 }
 
 /* Replacement for generic do_registers_info.
