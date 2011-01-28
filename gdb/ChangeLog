@@ -1,5 +1,10 @@
 2011-01-28  Pedro Alves  <pedro@codesourcery.com>
 
+	* target.c (memory_xfer_partial): No need to restore shadows if we
+	haven't read anything.
+
+2011-01-28  Pedro Alves  <pedro@codesourcery.com>
+
 	* mips-tdep.c (mips_print_register): Use get_frame_register_value
 	and val_print_scalar_formatted.
 

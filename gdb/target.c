@@ -1414,7 +1414,7 @@ memory_xfer_partial (struct target_ops *ops, enum target_object object,
     }
   while (ops != NULL);
 
-  if (readbuf && !show_memory_breakpoints)
+  if (res > 0 && readbuf != NULL && !show_memory_breakpoints)
     breakpoint_restore_shadows (readbuf, memaddr, reg_len);
 
   /* Make sure the cache gets updated no matter what - if we are writing
