@@ -255,7 +255,6 @@ the native maintainer when resolving ABI issues.
 	alpha		--target=alpha-elf ,-Werror
 
 	arm		--target=arm-elf ,-Werror
-			Richard Earnshaw	rearnsha@arm.com
 
 	avr		--target=avr ,-Werror
 			Tristan Gingold		gingold@adacore.com
@@ -429,6 +428,7 @@ under no obligation to review posted patches - but, of course, are invited
 to do so!
 
 PowerPC			Andrew Cagney		cagney@gnu.org
+ARM			Richard Earnshaw	rearnsha@arm.com
 CRIS			Hans-Peter Nilsson	hp@axis.com
 IA64			Jeff Johnston		jjohnstn@redhat.com
 MIPS			Joel Brobecker		brobecker@adacore.com
