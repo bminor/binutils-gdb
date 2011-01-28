@@ -98,6 +98,8 @@ init_register_cache (struct regcache *regcache, unsigned char *regbuf)
 	 garbage.  */
       regcache->registers = xcalloc (1, register_bytes);
       regcache->registers_owned = 1;
+      regcache->register_status = xcalloc (1, num_registers);
+      gdb_assert (REG_UNAVAILABLE == 0);
     }
   else
 #else
@@ -108,6 +110,9 @@ init_register_cache (struct regcache *regcache, unsigned char *regbuf)
     {
       regcache->registers = regbuf;
       regcache->registers_owned = 0;
+#ifndef IN_PROCESS_AGENT
+      regcache->register_status = NULL;
+#endif
     }
 
   regcache->registers_valid = 0;
@@ -136,6 +141,7 @@ free_register_cache (struct regcache *regcache)
     {
       if (regcache->registers_owned)
 	free (regcache->registers);
+      free (regcache->register_status);
       free (regcache);
     }
 }
@@ -146,6 +152,10 @@ void
 regcache_cpy (struct regcache *dst, struct regcache *src)
 {
   memcpy (dst->registers, src->registers, register_bytes);
+#ifndef IN_PROCESS_AGENT
+  if (dst->register_status != NULL && src->register_status != NULL)
+    memcpy (dst->register_status, src->register_status, num_registers);
+#endif
   dst->registers_valid = src->registers_valid;
 }
 
@@ -209,8 +219,23 @@ void
 registers_to_string (struct regcache *regcache, char *buf)
 {
   unsigned char *registers = regcache->registers;
+  int i;
 
-  convert_int_to_ascii (registers, buf, register_bytes);
+  for (i = 0; i < num_registers; i++)
+    {
+      if (regcache->register_status[i] == REG_VALID)
+	{
+	  convert_int_to_ascii (registers, buf, register_size (i));
+	  buf += register_size (i) * 2;
+	}
+      else
+	{
+	  memset (buf, 'x', register_size (i) * 2);
+	  buf += register_size (i) * 2;
+	}
+      registers += register_size (i);
+    }
+  *buf = '\0';
 }
 
 void
@@ -273,22 +298,74 @@ register_data (struct regcache *regcache, int n, int fetch)
   return regcache->registers + (reg_defs[n].offset / 8);
 }
 
+/* Supply register N, whose contents are stored in BUF, to REGCACHE.
+   If BUF is NULL, the register's value is recorded as
+   unavailable.  */
+
 void
 supply_register (struct regcache *regcache, int n, const void *buf)
 {
   if (buf)
-    memcpy (register_data (regcache, n, 0), buf, register_size (n));
+    {
+      memcpy (register_data (regcache, n, 0), buf, register_size (n));
+#ifndef IN_PROCESS_AGENT
+      if (regcache->register_status != NULL)
+	regcache->register_status[n] = REG_VALID;
+#endif
+    }
   else
-    memset (register_data (regcache, n, 0), 0, register_size (n));
+    {
+      memset (register_data (regcache, n, 0), 0, register_size (n));
+#ifndef IN_PROCESS_AGENT
+      if (regcache->register_status != NULL)
+	regcache->register_status[n] = REG_UNAVAILABLE;
+#endif
+    }
 }
+
+/* Supply register N with value zero to REGCACHE.  */
+
+void
+supply_register_zeroed (struct regcache *regcache, int n)
+{
+  memset (register_data (regcache, n, 0), 0, register_size (n));
+#ifndef IN_PROCESS_AGENT
+  if (regcache->register_status != NULL)
+    regcache->register_status[n] = REG_VALID;
+#endif
+}
+
+/* Supply the whole register set whose contents are stored in BUF, to
+   REGCACHE.  If BUF is NULL, all the registers' values are recorded
+   as unavailable.  */
 
 void
 supply_regblock (struct regcache *regcache, const void *buf)
 {
   if (buf)
-    memcpy (regcache->registers, buf, register_bytes);
+    {
+      memcpy (regcache->registers, buf, register_bytes);
+#ifndef IN_PROCESS_AGENT
+      {
+	int i;
+
+	for (i = 0; i < num_registers; i++)
+	  regcache->register_status[i] = REG_VALID;
+      }
+#endif
+    }
   else
-    memset (regcache->registers, 0, register_bytes);
+    {
+      memset (regcache->registers, 0, register_bytes);
+#ifndef IN_PROCESS_AGENT
+      {
+	int i;
+
+	for (i = 0; i < num_registers; i++)
+	  regcache->register_status[i] = REG_UNAVAILABLE;
+      }
+#endif
+    }
 }
 
 #ifndef IN_PROCESS_AGENT

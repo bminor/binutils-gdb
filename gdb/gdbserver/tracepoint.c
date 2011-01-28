@@ -4840,8 +4840,7 @@ fetch_traceframe_registers (int tfnum, struct regcache *regcache, int regnum)
   dataptr = traceframe_find_regblock (tframe, tfnum);
   if (dataptr == NULL)
     {
-      /* We don't like making up numbers, but GDB has all manner of
-	 troubles when the target says there are no registers.  */
+      /* Mark registers unavailable.  */
       supply_regblock (regcache, NULL);
 
       /* We can generally guess at a PC, although this will be

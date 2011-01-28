@@ -1,5 +1,25 @@
 2011-01-28  Pedro Alves  <pedro@codesourcery.com>
 
+	* regcache.c (init_register_cache): Initialize
+	regcache->register_status.
+	(free_register_cache): Release regcache->register_status.
+	(regcache_cpy): Copy register_status.
+	(registers_to_string): Print 'x's for unavailable registers.
+	(supply_register): Mark the register's status valid or
+	unavailable, depending on whether a buffer was passed in or not.
+	(supply_register_zeroed): New.
+	(supply_regblock): Mark the registers' status valid or
+	unavailable, depending on whether a buffer was passed in or not.
+	* regcache.h (REG_UNAVAILABLE, REG_VALID): New defines.
+	(struct regcache): New `register_status' field.
+	(supply_register_zeroed): Declare.
+	* i387-fp.c (i387_xsave_to_cache): Zero out registers using
+	supply_register_zeroed, rather than passing a NULL buffer to
+	supply_register.
+	* tracepoint.c (fetch_traceframe_registers): Update comment.
+
+2011-01-28  Pedro Alves  <pedro@codesourcery.com>
+
 	* i387-fp.c (i387_xsave_to_cache): Make passing NULL as register
 	buffer explicit.
 

@@ -23,15 +23,31 @@
 struct inferior_list_entry;
 struct thread_info;
 
+/* The register exists, it has a value, but we don't know what it is.
+   Used when inspecting traceframes.  */
+#define REG_UNAVAILABLE 0
+
+/* We know the register's value (and we have it cached).  */
+#define REG_VALID 1
+
 /* The data for the register cache.  Note that we have one per
    inferior; this is primarily for simplicity, as the performance
    benefit is minimal.  */
 
 struct regcache
 {
+  /* Whether the REGISTERS buffer's contents are valid.  If false, we
+     haven't fetched the registers from the target yet.  Not that this
+     register cache is _not_ pass-through, unlike GDB's.  Note that
+     "valid" here is unrelated to whether the registers are available
+     in a traceframe.  For that, check REGISTER_STATUS below.  */
   int registers_valid;
   int registers_owned;
   unsigned char *registers;
+#ifndef IN_PROCESS_AGENT
+  /* One of REG_UNAVAILBLE or REG_VALID.  */
+  unsigned char *register_status;
+#endif
 };
 
 struct regcache *init_register_cache (struct regcache *regcache,
@@ -83,6 +99,8 @@ extern const char **gdbserver_expedite_regs;
 extern const char *gdbserver_xmltarget;
 
 void supply_register (struct regcache *regcache, int n, const void *buf);
+
+void supply_register_zeroed (struct regcache *regcache, int n);
 
 void supply_register_by_name (struct regcache *regcache,
 			      const char *name, const void *buf);

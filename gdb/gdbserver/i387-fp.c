@@ -482,7 +482,7 @@ i387_xsave_to_cache (struct regcache *regcache, const void *buf)
       if ((clear_bv & I386_XSTATE_X87) != 0)
 	{
 	  for (i = 0; i < 8; i++)
-	    supply_register (regcache, i + st0_regnum, NULL);
+	    supply_register_zeroed (regcache, i + st0_regnum);
 	}
       else
 	{
@@ -499,7 +499,7 @@ i387_xsave_to_cache (struct regcache *regcache, const void *buf)
       if ((clear_bv & I386_XSTATE_SSE))
 	{
 	  for (i = 0; i < num_xmm_registers; i++)
-	    supply_register (regcache, i + xmm0_regnum, NULL);
+	    supply_register_zeroed (regcache, i + xmm0_regnum);
 	}
       else
 	{
@@ -516,7 +516,7 @@ i387_xsave_to_cache (struct regcache *regcache, const void *buf)
       if ((clear_bv & I386_XSTATE_AVX) != 0)
 	{
 	  for (i = 0; i < num_xmm_registers; i++)
-	    supply_register (regcache, i + ymm0h_regnum, NULL);
+	    supply_register_zeroed (regcache, i + ymm0h_regnum);
 	}
       else
 	{
