@@ -2785,6 +2785,7 @@ ppc_elf_link_hash_newfunc (struct bfd_hash_entry *entry,
       ppc_elf_hash_entry (entry)->linker_section_pointer = NULL;
       ppc_elf_hash_entry (entry)->dyn_relocs = NULL;
       ppc_elf_hash_entry (entry)->tls_mask = 0;
+      ppc_elf_hash_entry (entry)->has_sda_refs = 0;
     }
 
   return entry;
