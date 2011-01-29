@@ -1,3 +1,8 @@
+2011-01-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.cp/noparam.exp: New file.
+	* gdb.cp/noparam.cc: New file.
+
 2011-01-28  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.trace/tfile.exp: Test that with no traceframe selected,
