@@ -190,7 +190,8 @@ store_fpregister (const struct regcache *regcache, int regno)
     }
 
   /* Store fpsr.  */
-  if (ARM_FPS_REGNUM == regno && regcache_valid_p (regcache, ARM_FPS_REGNUM))
+  if (ARM_FPS_REGNUM == regno
+      && REG_VALID == regcache_register_status (regcache, ARM_FPS_REGNUM))
     regcache_raw_collect (regcache, ARM_FPS_REGNUM, fp + NWFPE_FPSR_OFFSET);
 
   /* Store the floating point register.  */
@@ -226,12 +227,12 @@ store_fpregs (const struct regcache *regcache)
     }
 
   /* Store fpsr.  */
-  if (regcache_valid_p (regcache, ARM_FPS_REGNUM))
+  if (REG_VALID == regcache_register_status (regcache, ARM_FPS_REGNUM))
     regcache_raw_collect (regcache, ARM_FPS_REGNUM, fp + NWFPE_FPSR_OFFSET);
 
   /* Store the floating point registers.  */
   for (regno = ARM_F0_REGNUM; regno <= ARM_F7_REGNUM; regno++)
-    if (regcache_valid_p (regcache, regno))
+    if (REG_VALID == regcache_register_status (regcache, regno))
       collect_nwfpe_register (regcache, regno, fp);
 
   ret = ptrace (PTRACE_SETFPREGS, tid, 0, fp);
@@ -328,7 +329,7 @@ store_register (const struct regcache *regcache, int regno)
   int ret, tid;
   elf_gregset_t regs;
   
-  if (!regcache_valid_p (regcache, regno))
+  if (REG_VALID != regcache_register_status (regcache, regno))
     return;
 
   /* Get the thread id for the ptrace call.  */
@@ -378,11 +379,11 @@ store_regs (const struct regcache *regcache)
 
   for (regno = ARM_A1_REGNUM; regno <= ARM_PC_REGNUM; regno++)
     {
-      if (regcache_valid_p (regcache, regno))
+      if (REG_VALID == regcache_register_status (regcache, regno))
 	regcache_raw_collect (regcache, regno, (char *) &regs[regno]);
     }
 
-  if (arm_apcs_32 && regcache_valid_p (regcache, ARM_PS_REGNUM))
+  if (arm_apcs_32 && REG_VALID == regcache_register_status (regcache, ARM_PS_REGNUM))
     regcache_raw_collect (regcache, ARM_PS_REGNUM,
 			 (char *) &regs[ARM_CPSR_GREGNUM]);
 
@@ -446,17 +447,20 @@ store_wmmx_regs (const struct regcache *regcache)
     }
 
   for (regno = 0; regno < 16; regno++)
-    if (regcache_valid_p (regcache, regno + ARM_WR0_REGNUM))
+    if (REG_VALID == regcache_register_status (regcache,
+					       regno + ARM_WR0_REGNUM))
       regcache_raw_collect (regcache, regno + ARM_WR0_REGNUM,
 			    &regbuf[regno * 8]);
 
   for (regno = 0; regno < 2; regno++)
-    if (regcache_valid_p (regcache, regno + ARM_WCSSF_REGNUM))
+    if (REG_VALID == regcache_register_status (regcache,
+					       regno + ARM_WCSSF_REGNUM))
       regcache_raw_collect (regcache, regno + ARM_WCSSF_REGNUM,
 			    &regbuf[16 * 8 + regno * 4]);
 
   for (regno = 0; regno < 4; regno++)
-    if (regcache_valid_p (regcache, regno + ARM_WCGR0_REGNUM))
+    if (REG_VALID == regcache_register_status (regcache,
+					       regno + ARM_WCGR0_REGNUM))
       regcache_raw_collect (regcache, regno + ARM_WCGR0_REGNUM,
 			    &regbuf[16 * 8 + 2 * 4 + regno * 4]);
 

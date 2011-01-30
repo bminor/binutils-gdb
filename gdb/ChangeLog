@@ -1,3 +1,10 @@
+2011-01-31  Yao Qi  <yao@codesourcery.com>
+
+	* arm-linux-nat.c: Update calls to regcache_register_status
+	instead of regcache_valid_p.
+	* aix-thread.c: Likewise.
+	* i386gnu-nat.c: Likewise.
+
 2011-01-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix crash.
