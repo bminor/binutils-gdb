@@ -1,3 +1,10 @@
+2011-02-01  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_next_input_section): Use elf_gp value
+	for toc pointer on any section having makes_toc_func_call set.
+	(check_pasted_section): Ensure pasted .init/.fini fragments use
+	the same toc if any has makes_toc_func_call set.
+
 2011-01-28  Joseph Myers  <joseph@codesourcery.com>
 
 	* elf32-ppc.c (ppc_elf_link_hash_newfunc): Initialize has_sda_refs
