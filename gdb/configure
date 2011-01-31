@@ -659,6 +659,8 @@ TARGET_SYSTEM_ROOT
 CONFIG_LDFLAGS
 RDYNAMIC
 ALLOCA
+PYTHON_LIBS
+PYTHON_CPPFLAGS
 PYTHON_CFLAGS
 python_prog_path
 LTLIBEXPAT
@@ -10633,25 +10635,15 @@ fi
       fi
     fi
   else
-    # Fall back to gdb 7.0/7.1 behaviour.
-    if test -z ${python_prefix}; then
-      python_includes=
-      python_libs=
-    else
-      python_includes="-I${python_prefix}/include"
-      python_libs="-L${python_prefix}/lib"
-    fi
+    # We do not have a python executable we can use to determine where
+    # to find the Python headers and libs.  We cannot guess the include
+    # path from the python_prefix either, because that include path
+    # depends on the Python version.  So, there is nothing much we can
+    # do except assume that the compiler will be able to find those files.
+    python_includes=
+    python_libs=
     have_python_config=no
   fi
-
-  # Having "/pythonX.Y" in the include path is awkward.
-  # All those python headers get bubbled up to the top inviting lots
-  # of random collisions.  GDB originally didn't use python-config to
-  # find the compilation parameters and includes "pythonX.Y/" in the
-  # path of the, umm, include file.  So strip away this part of the
-  # output of python-config --includes.
-  python_includes=`echo "${python_includes} " \
-                        | sed -e 's,/python[0-9]*[.][0-9]* , ,g'`
 
   # If we have python-config, only try the configuration it provides.
   # Otherwise fallback on the old way of trying different versions of
@@ -10677,7 +10669,7 @@ $as_echo_n "checking for ${version}... " >&6; }
   found_usable_python=no
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
-#include "${version}/Python.h"
+#include "Python.h"
 int
 main ()
 {
@@ -10689,12 +10681,13 @@ _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
   have_libpython=${version}
                   found_usable_python=yes
-else
-  CPPFLAGS=$save_CPPFLAGS
-                  LIBS=$save_LIBS
+                  PYTHON_CPPFLAGS=$new_CPPFLAGS
+                  PYTHON_LIBS=$new_LIBS
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
+  CPPFLAGS=$save_CPPFLAGS
+  LIBS=$save_LIBS
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: ${found_usable_python}" >&5
 $as_echo "${found_usable_python}" >&6; }
 
@@ -10719,7 +10712,7 @@ $as_echo_n "checking for ${version}... " >&6; }
   found_usable_python=no
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
-#include "${version}/Python.h"
+#include "Python.h"
 int
 main ()
 {
@@ -10731,12 +10724,13 @@ _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
   have_libpython=${version}
                   found_usable_python=yes
-else
-  CPPFLAGS=$save_CPPFLAGS
-                  LIBS=$save_LIBS
+                  PYTHON_CPPFLAGS=$new_CPPFLAGS
+                  PYTHON_LIBS=$new_LIBS
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
+  CPPFLAGS=$save_CPPFLAGS
+  LIBS=$save_LIBS
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: ${found_usable_python}" >&5
 $as_echo "${found_usable_python}" >&6; }
 
@@ -10756,7 +10750,7 @@ $as_echo_n "checking for ${version}... " >&6; }
   found_usable_python=no
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
-#include "${version}/Python.h"
+#include "Python.h"
 int
 main ()
 {
@@ -10768,12 +10762,13 @@ _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
   have_libpython=${version}
                   found_usable_python=yes
-else
-  CPPFLAGS=$save_CPPFLAGS
-                  LIBS=$save_LIBS
+                  PYTHON_CPPFLAGS=$new_CPPFLAGS
+                  PYTHON_LIBS=$new_LIBS
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
+  CPPFLAGS=$save_CPPFLAGS
+  LIBS=$save_LIBS
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: ${found_usable_python}" >&5
 $as_echo "${found_usable_python}" >&6; }
 
@@ -10793,7 +10788,7 @@ $as_echo_n "checking for ${version}... " >&6; }
   found_usable_python=no
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
-#include "${version}/Python.h"
+#include "Python.h"
 int
 main ()
 {
@@ -10805,12 +10800,13 @@ _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
   have_libpython=${version}
                   found_usable_python=yes
-else
-  CPPFLAGS=$save_CPPFLAGS
-                  LIBS=$save_LIBS
+                  PYTHON_CPPFLAGS=$new_CPPFLAGS
+                  PYTHON_LIBS=$new_LIBS
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
+  CPPFLAGS=$save_CPPFLAGS
+  LIBS=$save_LIBS
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: ${found_usable_python}" >&5
 $as_echo "${found_usable_python}" >&6; }
 
@@ -10830,7 +10826,7 @@ $as_echo_n "checking for ${version}... " >&6; }
   found_usable_python=no
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
-#include "${version}/Python.h"
+#include "Python.h"
 int
 main ()
 {
@@ -10842,12 +10838,13 @@ _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
   have_libpython=${version}
                   found_usable_python=yes
-else
-  CPPFLAGS=$save_CPPFLAGS
-                  LIBS=$save_LIBS
+                  PYTHON_CPPFLAGS=$new_CPPFLAGS
+                  PYTHON_LIBS=$new_LIBS
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
+  CPPFLAGS=$save_CPPFLAGS
+  LIBS=$save_LIBS
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: ${found_usable_python}" >&5
 $as_echo "${found_usable_python}" >&6; }
 
@@ -10986,6 +10983,8 @@ else
   CONFIG_SRCS="$CONFIG_SRCS python/python.c python/py-value.c \
 	python/py-prettyprint.c python/py-auto-load.c"
 fi
+
+
 
 
 # ------------------------- #

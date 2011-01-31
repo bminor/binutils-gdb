@@ -408,8 +408,13 @@ PROFILE_CFLAGS = @PROFILE_CFLAGS@
 # when running make.  I.E.  "make CFLAGS=-Wmissing-prototypes".
 CFLAGS = @CFLAGS@
 
-# Set by configure, for e.g. expat.
-INTERNAL_CPPFLAGS = @CPPFLAGS@
+# Set by configure, for e.g. expat.  Python installations are such that
+# C headers are included using their basename (for example, we #include
+# <Python.h> rather than, say, <python/Python.h>).  Since the file names
+# are sometimes a little generic, we think that the risk of collision
+# with other header files is high.  If that happens, we try to mitigate
+# a bit the consequences by putting the Python includes last in the list.
+INTERNAL_CPPFLAGS = @CPPFLAGS@ @PYTHON_CPPFLAGS@
 
 # Need to pass this to testsuite for "make check".  Probably should be
 # consistent with top-level Makefile.in and gdb/testsuite/Makefile.in
@@ -444,10 +449,10 @@ INTERNAL_LDFLAGS = $(CFLAGS) $(GLOBAL_CFLAGS) $(MH_LDFLAGS) $(LDFLAGS) $(CONFIG_
 # If you have the Cygnus libraries installed,
 # you can use 'CLIBS=$(INSTALLED_LIBS)' 'CDEPS='
 INSTALLED_LIBS=-lbfd -lreadline -lopcodes -liberty -ldecnumber \
-	$(XM_CLIBS) $(NAT_CLIBS) $(GDBTKLIBS) @LIBS@ \
+	$(XM_CLIBS) $(NAT_CLIBS) $(GDBTKLIBS) @LIBS@ @PYTHON_LIBS@ \
 	-lintl -liberty $(LIBGNU)
 CLIBS = $(SIM) $(READLINE) $(OPCODES) $(BFD) $(INTL) $(LIBIBERTY) $(LIBDECNUMBER) \
-	$(XM_CLIBS) $(NAT_CLIBS) $(GDBTKLIBS) @LIBS@ \
+	$(XM_CLIBS) $(NAT_CLIBS) $(GDBTKLIBS) @LIBS@ @PYTHON_LIBS@ \
 	$(LIBEXPAT) \
 	$(LIBIBERTY) $(WIN32LIBS) $(LIBGNU)
 CDEPS = $(XM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE_DEPS) \

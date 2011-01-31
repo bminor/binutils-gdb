@@ -610,12 +610,14 @@ AC_DEFUN([AC_TRY_LIBPYTHON],
   CPPFLAGS="$CPPFLAGS $new_CPPFLAGS"
   LIBS="$LIBS $new_LIBS"
   found_usable_python=no
-  AC_LINK_IFELSE(AC_LANG_PROGRAM([[#include "${version}/Python.h"]],
+  AC_LINK_IFELSE(AC_LANG_PROGRAM([[#include "Python.h"]],
                                  [[Py_Initialize ();]]),
                  [have_libpython_var=${version}
-                  found_usable_python=yes],
-                 [CPPFLAGS=$save_CPPFLAGS
-                  LIBS=$save_LIBS])
+                  found_usable_python=yes
+                  PYTHON_CPPFLAGS=$new_CPPFLAGS
+                  PYTHON_LIBS=$new_LIBS])
+  CPPFLAGS=$save_CPPFLAGS
+  LIBS=$save_LIBS
   AC_MSG_RESULT([${found_usable_python}])
 ])
 
@@ -744,25 +746,15 @@ else
       fi
     fi
   else
-    # Fall back to gdb 7.0/7.1 behaviour.
-    if test -z ${python_prefix}; then
-      python_includes=
-      python_libs=
-    else
-      python_includes="-I${python_prefix}/include"
-      python_libs="-L${python_prefix}/lib"
-    fi
+    # We do not have a python executable we can use to determine where
+    # to find the Python headers and libs.  We cannot guess the include
+    # path from the python_prefix either, because that include path
+    # depends on the Python version.  So, there is nothing much we can
+    # do except assume that the compiler will be able to find those files.
+    python_includes=
+    python_libs=
     have_python_config=no
   fi
-
-  # Having "/pythonX.Y" in the include path is awkward.
-  # All those python headers get bubbled up to the top inviting lots
-  # of random collisions.  GDB originally didn't use python-config to
-  # find the compilation parameters and includes "pythonX.Y/" in the
-  # path of the, umm, include file.  So strip away this part of the
-  # output of python-config --includes.
-  python_includes=`echo "${python_includes} " \
-                        | sed -e 's,/python[[0-9]]*[[.]][[0-9]]* , ,g'`
 
   # If we have python-config, only try the configuration it provides.
   # Otherwise fallback on the old way of trying different versions of
@@ -881,6 +873,8 @@ else
 	python/py-prettyprint.c python/py-auto-load.c"
 fi
 AC_SUBST(PYTHON_CFLAGS)
+AC_SUBST(PYTHON_CPPFLAGS)
+AC_SUBST(PYTHON_LIBS)
 
 # ------------------------- #
 # Checks for header files.  #

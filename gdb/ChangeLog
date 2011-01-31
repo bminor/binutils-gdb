@@ -1,5 +1,18 @@
 2011-01-31  Joel Brobecker  <brobecker@adacore.com>
 
+	* configure.ac: Remove fallback behavior for building
+	against Python.  Remove tweaking of Python include path.
+	Add PYTHON_CPPFLAGS and PYTHON_LIBS substitution.
+	(AC_TRY_LIBPYTHON):  Adjust program used in linking test.
+	If link is successful, set PYTHON_CPPFLAGS and PYTHON_LIBS.
+	Always restore CPPFLAGS and LIBS after linking test.
+	* configure: Regenerated.
+	* Makefile.in (INTERNAL_CPPFLAGS): Add @PYTHON_CPPFLAGS@.
+	(INSTALLED_LIBS, CLIBS): Add @PYTHON_LIBS@.
+	* python/python-internal.h: Adjust includes of Python .h files.
+
+2011-01-31  Joel Brobecker  <brobecker@adacore.com>
+
 	* tracepoint.c (traceframe_walk_blocks): Add missing i18n markup
 	in error message.
 

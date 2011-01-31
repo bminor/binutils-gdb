@@ -41,25 +41,17 @@
    around technique as above.  */
 #undef _FILE_OFFSET_BITS
 
+/* Include the Python header files using angle brackets rather than
+   double quotes.  On case-insensitive filesystems, this prevents us
+   from including our python/python.h header file.  */
+#include <Python.h>
+#include <frameobject.h>
 #if HAVE_LIBPYTHON2_4
-#include "python2.4/Python.h"
-#include "python2.4/frameobject.h"
 /* Py_ssize_t is not defined until 2.5.
    Logical type for Py_ssize_t is Py_intptr_t, but that fails in 64-bit
    compilation due to several apparent mistakes in python2.4 API, so we
    use 'int' instead.  */
 typedef int Py_ssize_t;
-#elif HAVE_LIBPYTHON2_5
-#include "python2.5/Python.h"
-#include "python2.5/frameobject.h"
-#elif HAVE_LIBPYTHON2_6
-#include "python2.6/Python.h"
-#include "python2.6/frameobject.h"
-#elif HAVE_LIBPYTHON2_7
-#include "python2.7/Python.h"
-#include "python2.7/frameobject.h"
-#else
-#error "Unable to find usable Python.h"
 #endif
 
 /* If Python.h does not define WITH_THREAD, then the various
