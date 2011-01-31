@@ -1,3 +1,10 @@
+2011-01-31  Sami Wagiaalla  <swagiaal@redhat.com>
+
+	* gdb.cp/nsnested.cc: New.
+	* gdb.cp/nsnested.exp: New.
+	* gdb.cp/nsnoimports.exp: New.
+	* gdb.cp/nsnoimports.cc: New.
+
 2011-01-31  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.base/interact.exp: Add extra tests that verify that
