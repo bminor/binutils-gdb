@@ -1,3 +1,26 @@
+2011-01-31  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* breakpoint.h (remove_jit_event_breakpoints): New prototype.
+	* breakpoint.c (remove_jit_event_breakpoints): New function.
+	* jit.c (jit_descriptor_addr): Delete.
+	(registering_code): Delete.
+	(clear_int): Delete.
+	(jit_inferior_data): New variable.
+	(struct jit_inferior_data): New type.
+	(get_jit_inferior_data): New function.
+	(jit_inferior_data_cleanup): New function.
+	(jit_read_descriptor): Adjust.
+	(jit_register_code): Adjust.
+	(jit_breakpoint_re_set_internal): New function; move code here ...
+	(jit_inferior_init): ... from here.
+	(jit_breakpoint_re_set): Adjust.
+	(jit_reset_inferior_data_and_breakpoints): New function.
+	(jit_inferior_created_observer): Adjust.
+	(jit_inferior_exit_hook): Adjust.
+	(jit_executable_changed_observer): New function.
+	(jit_event_handler): Adjust.
+	(_initialize_jit): Adjust.
+
 2011-01-31  Michael Snyder  <msnyder@vmware.com>
 
 	* m32r-tdep.c (m32r_gdbarch_init): Replace accidentally deleted
