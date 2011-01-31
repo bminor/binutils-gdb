@@ -1,5 +1,14 @@
 2011-01-31  Joel Brobecker  <brobecker@adacore.com>
 
+	* configure.ac: Add handling of Python distribution on Windows.
+	* python-config.py: If the LIBS, SYSLIBS, LIBPL and/or LINKFORSHARED
+	sysconfig variables are not defined, then do not use them.
+	On Windows, if LIBPL is not defined, then use prefix + '/libs'
+	instead.  On Windows, return all paths using forward-slashes
+	rather than backslashes.
+
+2011-01-31  Joel Brobecker  <brobecker@adacore.com>
+
 	* configure.ac: Remove fallback behavior for building
 	against Python.  Remove tweaking of Python include path.
 	Add PYTHON_CPPFLAGS and PYTHON_LIBS substitution.

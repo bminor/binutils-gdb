@@ -669,6 +669,13 @@ else
       # Assume the python binary is ${with_python}/bin/python.
       python_prog="${with_python}/bin/python"
       python_prefix=
+      # If python does not exit ${with_python}/bin, then try in
+      # ${with_python}.  On Windows/MinGW, this is where the Python
+      # executable is.
+      if test ! -x "${python_prog}"; then
+        python_prog="${with_python}/python"
+        python_prefix=
+      fi
       if test ! -x "${python_prog}"; then
         # Fall back to gdb 7.0/7.1 behaviour.
         python_prog=missing
@@ -763,7 +770,7 @@ else
   have_libpython=no
   if test "${have_python_config}" = yes; then
     python_version=`echo " ${python_libs} " \
-                         | sed -e 's,^.* -l\(python[[0-9]]*[[.]][[0-9]]*\) .*$,\1,'`
+                         | sed -e 's,^.* -l\(python[[0-9]]*[[.]]\?[[0-9]]*\).*$,\1,'`
     case "${python_version}" in
     python*)
       AC_TRY_LIBPYTHON(${python_version}, have_libpython,
@@ -791,13 +798,13 @@ else
                        ${python_includes}, "${python_libs} -lpython2.4")
     fi
   fi
-  if test "${have_libpython}" = python2.7; then
+  if test "${have_libpython}" = python2.7 -o "${have_libpython}" = python27; then
     AC_DEFINE(HAVE_LIBPYTHON2_7, 1, [Define if Python 2.7 is being used.])
-  elif test "${have_libpython}" = python2.6; then
+  elif test "${have_libpython}" = python2.6 -o "${have_libpython}" = python26; then
     AC_DEFINE(HAVE_LIBPYTHON2_6, 1, [Define if Python 2.6 is being used.])
-  elif test "${have_libpython}" = python2.5; then
+  elif test "${have_libpython}" = python2.5 -o "${have_libpython}" = python25; then
     AC_DEFINE(HAVE_LIBPYTHON2_5, 1, [Define if Python 2.5 is being used.])
-  elif test "${have_libpython}" = python2.4; then
+  elif test "${have_libpython}" = python2.4 -o "${have_libpython}" = python24; then
     AC_DEFINE(HAVE_LIBPYTHON2_4, 1, [Define if Python 2.4 is being used.])
   fi
 

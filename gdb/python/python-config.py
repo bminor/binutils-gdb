@@ -30,28 +30,48 @@ opt_flags = [flag for (flag, val) in opts]
 if '--help' in opt_flags:
     exit_with_usage(code=0)
 
+def to_unix_path(path):
+    """On Windows, returns the given path with all backslashes
+    converted into forward slashes.  This is to help prevent problems
+    when using the paths returned by this script with cygwin tools.
+    In particular, cygwin bash treats backslashes as a special character.
+
+    On Unix systems, returns the path unchanged.
+    """
+    if os.name == 'nt':
+        path = path.replace('\\', '/')
+    return path
+
 for opt in opt_flags:
     if opt == '--prefix':
-        print sysconfig.PREFIX
+        print to_unix_path(sysconfig.PREFIX)
 
     elif opt == '--exec-prefix':
-        print sysconfig.EXEC_PREFIX
+        print to_unix_path(sysconfig.EXEC_PREFIX)
 
     elif opt in ('--includes', '--cflags'):
         flags = ['-I' + sysconfig.get_python_inc(),
                  '-I' + sysconfig.get_python_inc(plat_specific=True)]
         if opt == '--cflags':
             flags.extend(getvar('CFLAGS').split())
-        print ' '.join(flags)
+        print to_unix_path(' '.join(flags))
 
     elif opt in ('--libs', '--ldflags'):
-        libs = getvar('LIBS').split() + getvar('SYSLIBS').split()
+        libs = []
+        if getvar('LIBS') is not None:
+            libs.extend(getvar('LIBS').split())
+        if getvar('SYSLIBS') is not None:
+            libs.extend(getvar('SYSLIBS').split())
         libs.append('-lpython'+pyver)
         # add the prefix/lib/pythonX.Y/config dir, but only if there is no
         # shared library in prefix/lib/.
         if opt == '--ldflags':
             if not getvar('Py_ENABLE_SHARED'):
-                libs.insert(0, '-L' + getvar('LIBPL'))
-            libs.extend(getvar('LINKFORSHARED').split())
-        print ' '.join(libs)
+                if getvar('LIBPL') is not None:
+                    libs.insert(0, '-L' + getvar('LIBPL'))
+                elif os.name == 'nt':
+                    libs.insert(0, '-L' + sysconfig.PREFIX + '/libs')
+            if getvar('LINKFORSHARED') is not None:
+                libs.extend(getvar('LINKFORSHARED').split())
+        print to_unix_path(' '.join(libs))
 
