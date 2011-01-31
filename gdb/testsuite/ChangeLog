@@ -1,3 +1,11 @@
+2011-01-31  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdb.opencl/convs_casts.exp: Use tbreak instead of break to
+	proceed to initial kernel entry point.
+	* gdb.opencl/datatypes.exp: Likewise.
+	* gdb.opencl/operators.exp: Likewise.
+	* gdb.opencl/vec_comps.exp: Likewise.
+
 2011-01-31  Sami Wagiaalla  <swagiaal@redhat.com>
 
 	* gdb.cp/nsnested.cc: New.

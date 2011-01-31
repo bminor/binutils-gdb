@@ -40,14 +40,14 @@ if { [gdb_compile_opencl_hostapp "${clprogram}" "${testfile}" "" ] != "" } {
 clean_restart ${testfile}
 
 # Set breakpoint at the OpenCL kernel
-gdb_test "break testkernel" \
+gdb_test "tbreak testkernel" \
     "" \
     "Set pending breakpoint" \
     ".*Function \"testkernel\" not defined.*Make breakpoint pending.*y or \\\[n\\\]. $" \
     "y"
 
 gdb_run_cmd
-gdb_test "" ".*Breakpoint.*1.*testkernel.*" "run"
+gdb_test "" ".*reakpoint.*1.*testkernel.*" "run"
 
 # Continue to the marker
 gdb_breakpoint [gdb_get_line_number "marker" "${clprogram}"]
