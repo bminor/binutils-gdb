@@ -930,7 +930,7 @@ m32r_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_write_pc (gdbarch, m32r_write_pc);
   set_gdbarch_unwind_sp (gdbarch, m32r_unwind_sp);
 
-
+  set_gdbarch_num_regs (gdbarch, M32R_NUM_REGS);
   set_gdbarch_sp_regnum (gdbarch, M32R_SP_REGNUM);
   set_gdbarch_register_name (gdbarch, m32r_register_name);
   set_gdbarch_register_type (gdbarch, m32r_register_type);
