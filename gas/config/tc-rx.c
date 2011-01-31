@@ -548,7 +548,7 @@ const pseudo_typeS md_pseudo_table[] =
   /* The manual documents ".stk" but the compiler emits ".stack".  */
   { "stack",    rx_nop,         0 },
 
-  /* Theae are Renesas as100 assembler pseudo-ops that we do support.  */
+  /* These are Renesas as100 assembler pseudo-ops that we do support.  */
   { "addr",     rx_cons,        3 },
   { "align",    s_align_bytes,  2 },
   { "byte",     rx_cons,        1 },
@@ -1142,6 +1142,9 @@ static unsigned char *nops[] = { NULL, nop_1, nop_2, nop_3, nop_4, nop_5, nop_6,
 void
 rx_handle_align (fragS * frag)
 {
+  /* If handling an alignment frag, use an optimal NOP pattern.
+     Only do this if a fill value has not already been provided.
+     FIXME: This test fails if the provided fill value is zero.  */
   if ((frag->fr_type == rs_align
        || frag->fr_type == rs_align_code)
       && subseg_text_p (now_seg))
@@ -1151,16 +1154,19 @@ rx_handle_align (fragS * frag)
 		   - frag->fr_fix);
       unsigned char *base = (unsigned char *)frag->fr_literal + frag->fr_fix;
 
-      if (count > BIGGEST_NOP)
+      if (* base == 0)
 	{
-	  base[0] = 0x2e;
-	  base[1] = count;
-	  frag->fr_var = 2;
-	}
-      else if (count > 0)
-	{
-	  memcpy (base, nops[count], count);
-	  frag->fr_var = count;
+	  if (count > BIGGEST_NOP)
+	    {
+	      base[0] = 0x2e;
+	      base[1] = count;
+	      frag->fr_var = 2;
+	    }
+	  else if (count > 0)
+	    {
+	      memcpy (base, nops[count], count);
+	      frag->fr_var = count;
+	    }
 	}
     }
 

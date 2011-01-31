@@ -102,16 +102,16 @@ Disassembly of section \.text:
   f6:	fb f2 00 00 00 80             	mov\.l	#0x80000000, r15
   fc:	fb 02 ff ff ff 7f             	mov\.l	#0x7fffffff, r0
  102:	fb f2 ff ff ff 7f             	mov\.l	#0x7fffffff, r15
- 108:	cf 00                         	mov\.b	r0, r0
- 10a:	cf 0f                         	mov\.b	r0, r15
+ 108:	cf 10                         	mov\.b	r1, r0
+ 10a:	cf 1f                         	mov\.b	r1, r15
  10c:	cf f0                         	mov\.b	r15, r0
  10e:	cf ff                         	mov\.b	r15, r15
- 110:	df 00                         	mov\.w	r0, r0
- 112:	df 0f                         	mov\.w	r0, r15
+ 110:	df 10                         	mov\.w	r1, r0
+ 112:	df 1f                         	mov\.w	r1, r15
  114:	df f0                         	mov\.w	r15, r0
  116:	df ff                         	mov\.w	r15, r15
- 118:	ef 00                         	mov\.l	r0, r0
- 11a:	ef 0f                         	mov\.l	r0, r15
+ 118:	ef 10                         	mov\.l	r1, r0
+ 11a:	ef 1f                         	mov\.l	r1, r15
  11c:	ef f0                         	mov\.l	r15, r0
  11e:	ef ff                         	mov\.l	r15, r15
  120:	3c 00 00                      	mov\.b	#0, \[r0\]
@@ -258,36 +258,36 @@ Disassembly of section \.text:
  375:	fe 6f 0f                      	mov\.l	\[r15, r0\], r15
  378:	fe 6f f0                      	mov\.l	\[r15, r15\], r0
  37b:	fe 6f ff                      	mov\.l	\[r15, r15\], r15
- 37e:	c3 00                         	mov\.b	r0, \[r0\]
- 380:	c3 f0                         	mov\.b	r0, \[r15\]
- 382:	c7 00 fc                      	mov\.b	r0, 252\[r0\]
- 385:	c7 f0 fc                      	mov\.b	r0, 252\[r15\]
- 388:	cb 00 fc ff                   	mov\.b	r0, 65532\[r0\]
- 38c:	cb f0 fc ff                   	mov\.b	r0, 65532\[r15\]
+ 37e:	c3 01                         	mov\.b	r1, \[r0\]
+ 380:	c3 f1                         	mov\.b	r1, \[r15\]
+ 382:	c7 01 fc                      	mov\.b	r1, 252\[r0\]
+ 385:	c7 f1 fc                      	mov\.b	r1, 252\[r15\]
+ 388:	cb 01 fc ff                   	mov\.b	r1, 65532\[r0\]
+ 38c:	cb f1 fc ff                   	mov\.b	r1, 65532\[r15\]
  390:	c3 0f                         	mov\.b	r15, \[r0\]
  392:	c3 ff                         	mov\.b	r15, \[r15\]
  394:	c7 0f fc                      	mov\.b	r15, 252\[r0\]
  397:	c7 ff fc                      	mov\.b	r15, 252\[r15\]
  39a:	cb 0f fc ff                   	mov\.b	r15, 65532\[r0\]
  39e:	cb ff fc ff                   	mov\.b	r15, 65532\[r15\]
- 3a2:	d3 00                         	mov\.w	r0, \[r0\]
- 3a4:	d3 f0                         	mov\.w	r0, \[r15\]
- 3a6:	d7 00 7e                      	mov\.w	r0, 252\[r0\]
- 3a9:	d7 f0 7e                      	mov\.w	r0, 252\[r15\]
- 3ac:	db 00 fe 7f                   	mov\.w	r0, 65532\[r0\]
- 3b0:	db f0 fe 7f                   	mov\.w	r0, 65532\[r15\]
+ 3a2:	d3 01                         	mov\.w	r1, \[r0\]
+ 3a4:	d3 f1                         	mov\.w	r1, \[r15\]
+ 3a6:	d7 01 7e                      	mov\.w	r1, 252\[r0\]
+ 3a9:	d7 f1 7e                      	mov\.w	r1, 252\[r15\]
+ 3ac:	db 01 fe 7f                   	mov\.w	r1, 65532\[r0\]
+ 3b0:	db f1 fe 7f                   	mov\.w	r1, 65532\[r15\]
  3b4:	d3 0f                         	mov\.w	r15, \[r0\]
  3b6:	d3 ff                         	mov\.w	r15, \[r15\]
  3b8:	d7 0f 7e                      	mov\.w	r15, 252\[r0\]
  3bb:	d7 ff 7e                      	mov\.w	r15, 252\[r15\]
  3be:	db 0f fe 7f                   	mov\.w	r15, 65532\[r0\]
  3c2:	db ff fe 7f                   	mov\.w	r15, 65532\[r15\]
- 3c6:	e3 00                         	mov\.l	r0, \[r0\]
- 3c8:	e3 f0                         	mov\.l	r0, \[r15\]
- 3ca:	e7 00 3f                      	mov\.l	r0, 252\[r0\]
- 3cd:	e7 f0 3f                      	mov\.l	r0, 252\[r15\]
- 3d0:	eb 00 ff 3f                   	mov\.l	r0, 65532\[r0\]
- 3d4:	eb f0 ff 3f                   	mov\.l	r0, 65532\[r15\]
+ 3c6:	e3 01                         	mov\.l	r1, \[r0\]
+ 3c8:	e3 f1                         	mov\.l	r1, \[r15\]
+ 3ca:	e7 01 3f                      	mov\.l	r1, 252\[r0\]
+ 3cd:	e7 f1 3f                      	mov\.l	r1, 252\[r15\]
+ 3d0:	eb 01 ff 3f                   	mov\.l	r1, 65532\[r0\]
+ 3d4:	eb f1 ff 3f                   	mov\.l	r1, 65532\[r15\]
  3d8:	e3 0f                         	mov\.l	r15, \[r0\]
  3da:	e3 ff                         	mov\.l	r15, \[r15\]
  3dc:	e7 0f 3f                      	mov\.l	r15, 252\[r0\]

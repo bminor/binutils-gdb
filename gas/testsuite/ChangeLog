@@ -1,3 +1,24 @@
+2011-01-31  Nick Clifton  <nickc@redhat.com>
+
+	* gas/all/align.d: Skip for the RX.
+	* gas/elf/group1a.d: Likewise.
+	* gas/elf/groupautoa.d: Likewise.
+	* gas/elf/elf.exp: Do not run section5 test for the RX port.
+	* gas/elf/section4.d: Likewise.
+	* gas/elf/section7.d: Likewise.
+	* gas/macros/semi.s: Fill with a non-zero pattern.
+	* gas/macros/semi.d: Expect non-zero fill value.
+	* gas/rx/bcnd.d: Update expected disassembly.
+	* gas/rx/bra.d: Likewise.
+	* gas/rx/macros.inc: Add reg1 macro.
+	* gas/rx/max.sm: Use reg1 macro to avoid generating illegal NOP
+	instruction.
+	* gas/rx/mov.sm: Likewise.
+	* gas/rx/max.d: Update expected disassembly.
+	* gas/rx/mov.d: Likewise.
+	* gas/rx/rx-asm-good.s: Use Renesas section names.
+	* gas/rx/rx-asm-good.d: Update expected disassembly.
+
 2011-01-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/12409
