@@ -1,6 +1,6 @@
 /* PowerPC64-specific support for 64-bit ELF.
    Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008,
-   2009, 2010 Free Software Foundation, Inc.
+   2009, 2010, 2011 Free Software Foundation, Inc.
    Written by Linus Nordberg, Swox AB <info@swox.com>,
    based on elf32-ppc.c by Ian Lance Taylor.
    Largely rewritten by Alan Modra.
@@ -10580,14 +10580,28 @@ ppc64_elf_next_input_section (struct bfd_link_info *info, asection *isec)
 	  if (elf_gp (isec->owner) != 0)
 	    htab->toc_curr = elf_gp (isec->owner);
 	}
-      else if (!isec->call_check_done
-	       && toc_adjusting_stub_needed (info, isec) < 0)
-	return FALSE;
+      else
+	{
+	  if (!isec->call_check_done
+	      && toc_adjusting_stub_needed (info, isec) < 0)
+	    return FALSE;
+	  /* If we make a local call from this section, ie. a branch
+	     without a following nop, then we have no place to put a
+	     toc restoring insn.  We must use the same toc group as
+	     the callee.
+	     Testing makes_toc_func_call actually tests for *any*
+	     calls to functions that need a good toc pointer.  A more
+	     precise test would be better, as this one will set
+	     incorrect values for pasted .init/.fini fragments.
+	     (Fixed later in check_pasted_section.)  */
+	  if (isec->makes_toc_func_call
+	      && elf_gp (isec->owner) != 0)
+	    htab->toc_curr = elf_gp (isec->owner);
+	}
     }
 
   /* Functions that don't use the TOC can belong in any TOC group.
-     Use the last TOC base.  This happens to make _init and _fini
-     pasting work, because the fragments generally don't use the TOC.  */
+     Use the last TOC base.  */
   htab->stub_group[isec->id].toc_off = htab->toc_curr;
   return TRUE;
 }
@@ -10614,6 +10628,15 @@ check_pasted_section (struct bfd_link_info *info, const char *name)
 	    else if (toc_off != htab->stub_group[i->id].toc_off)
 	      return FALSE;
 	  }
+
+      if (toc_off == 0)
+	for (i = o->map_head.s; i != NULL; i = i->map_head.s)
+	  if (i->makes_toc_func_call)
+	    {
+	      toc_off = htab->stub_group[i->id].toc_off;
+	      break;
+	    }
+
       /* Make sure the whole pasted function uses the same toc offset.  */
       if (toc_off != 0)
 	for (i = o->map_head.s; i != NULL; i = i->map_head.s)
