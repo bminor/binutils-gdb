@@ -546,12 +546,17 @@ command_loop (void)
     }
 }
 
+/* When nonzero, cause dont_repeat to do nothing.  This should only be
+   set via prevent_dont_repeat.  */
+
+static int suppress_dont_repeat = 0;
+
 /* Commands call this if they do not want to be repeated by null lines.  */
 
 void
 dont_repeat (void)
 {
-  if (server_command)
+  if (suppress_dont_repeat || server_command)
     return;
 
   /* If we aren't reading from standard input, we are saving the last
@@ -560,6 +565,19 @@ dont_repeat (void)
   if (instream == stdin)
     *line = 0;
 }
+
+/* Prevent dont_repeat from working, and return a cleanup that
+   restores the previous state.  */
+
+struct cleanup *
+prevent_dont_repeat (void)
+{
+  struct cleanup *result = make_cleanup_restore_integer (&suppress_dont_repeat);
+
+  suppress_dont_repeat = 1;
+  return result;
+}
+
 
 /* Read a line from the stream "instream" without command line editing.
 

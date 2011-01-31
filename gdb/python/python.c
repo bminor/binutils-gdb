@@ -375,6 +375,7 @@ execute_gdb_command (PyObject *self, PyObject *args, PyObject *kw)
       char *copy = xstrdup (arg);
       struct cleanup *cleanup = make_cleanup (xfree, copy);
 
+      prevent_dont_repeat ();
       if (to_string)
 	result = execute_command_to_string (copy, from_tty);
       else

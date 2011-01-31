@@ -1,5 +1,15 @@
 2011-01-31  Tom Tromey  <tromey@redhat.com>
 
+	PR python/12216:
+	* python/python.c (execute_gdb_command): Call
+	prevent_dont_repeat.
+	* top.c (suppress_dont_repeat): New global.
+	(dont_repeat): Use it.
+	(prevent_dont_repeat): New function.
+	* command.h (prevent_dont_repeat): Declare.
+
+2011-01-31  Tom Tromey  <tromey@redhat.com>
+
 	* infcmd.c (finish_backward): Use breakpoint_set_silent.
 	* python/py-breakpoint.c (bppy_set_silent): Use
 	breakpoint_set_silent.
