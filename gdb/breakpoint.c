@@ -5958,6 +5958,19 @@ create_jit_event_breakpoint (struct gdbarch *gdbarch, CORE_ADDR address)
   return b;
 }
 
+/* Remove JIT code registration and unregistration breakpoint(s).  */
+
+void
+remove_jit_event_breakpoints (void)
+{
+  struct breakpoint *b, *b_tmp;
+
+  ALL_BREAKPOINTS_SAFE (b, b_tmp)
+    if (b->type == bp_jit_event
+	&& b->loc->pspace == current_program_space)
+      delete_breakpoint (b);
+}
+
 void
 remove_solib_event_breakpoints (void)
 {

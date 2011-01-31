@@ -24,6 +24,7 @@
 #include "command.h"
 #include "gdbcmd.h"
 #include "gdbcore.h"
+#include "inferior.h"
 #include "observer.h"
 #include "objfiles.h"
 #include "symfile.h"
@@ -37,18 +38,7 @@ static const char *const jit_break_name = "__jit_debug_register_code";
 
 static const char *const jit_descriptor_name = "__jit_debug_descriptor";
 
-/* This is the address of the JIT descriptor in the inferior.  */
-
-static CORE_ADDR jit_descriptor_addr = 0;
-
-/* This is a boolean indicating whether we're currently registering code.  This
-   is used to avoid re-entering the registration code.  We want to check for
-   new JITed every time a new object file is loaded, but we want to avoid
-   checking for new code while we're registering object files for JITed code.
-   Therefore, we flip this variable to 1 before registering new object files,
-   and set it to 0 before returning.  */
-
-static int registering_code = 0;
+static const struct inferior_data *jit_inferior_data = NULL;
 
 /* Non-zero if we want to see trace of jit level stuff.  */
 
@@ -59,14 +49,6 @@ show_jit_debug (struct ui_file *file, int from_tty,
 		struct cmd_list_element *c, const char *value)
 {
   fprintf_filtered (file, _("JIT debugging is %s.\n"), value);
-}
-
-/* Helper cleanup function to clear an integer flag like the one above.  */
-
-static void
-clear_int (void *int_addr)
-{
-  *((int *) int_addr) = 0;
 }
 
 struct target_buffer
@@ -146,12 +128,47 @@ bfd_open_from_target_memory (CORE_ADDR addr, ULONGEST size, char *target)
                           mem_bfd_iovec_stat);
 }
 
+/* Per-inferior structure recording the addresses in the inferior.  */
+
+struct jit_inferior_data
+{
+  CORE_ADDR breakpoint_addr;  /* &__jit_debug_register_code()  */
+  CORE_ADDR descriptor_addr;  /* &__jit_debug_descriptor  */
+};
+
+/* Return jit_inferior_data for current inferior.  Allocate if not already
+   present.  */
+
+static struct jit_inferior_data *
+get_jit_inferior_data (void)
+{
+  struct inferior *inf;
+  struct jit_inferior_data *inf_data;
+
+  inf = current_inferior ();
+  inf_data = inferior_data (inf, jit_inferior_data);
+  if (inf_data == NULL)
+    {
+      inf_data = XZALLOC (struct jit_inferior_data);
+      set_inferior_data (inf, jit_inferior_data, inf_data);
+    }
+
+  return inf_data;
+}
+
+static void
+jit_inferior_data_cleanup (struct inferior *inf, void *arg)
+{
+  xfree (arg);
+}
+
 /* Helper function for reading the global JIT descriptor from remote
    memory.  */
 
 static void
 jit_read_descriptor (struct gdbarch *gdbarch,
-		     struct jit_descriptor *descriptor)
+		     struct jit_descriptor *descriptor,
+		     CORE_ADDR descriptor_addr)
 {
   int err;
   struct type *ptr_type;
@@ -167,7 +184,7 @@ jit_read_descriptor (struct gdbarch *gdbarch,
   desc_buf = alloca (desc_size);
 
   /* Read the descriptor.  */
-  err = target_read_memory (jit_descriptor_addr, desc_buf, desc_size);
+  err = target_read_memory (descriptor_addr, desc_buf, desc_size);
   if (err)
     error (_("Unable to read JIT descriptor from remote memory!"));
 
@@ -278,16 +295,8 @@ JITed symbol file is not an object file, ignoring it.\n"));
         ++i;
       }
 
-  /* Raise this flag while we register code so we won't trigger any
-     re-registration.  */
-  registering_code = 1;
-  my_cleanups = make_cleanup (clear_int, &registering_code);
-
   /* This call takes ownership of sai.  */
   objfile = symbol_file_add_from_bfd (nbfd, 0, sai, OBJF_SHARED);
-
-  /* Clear the registering_code flag.  */
-  do_cleanups (my_cleanups);
 
   /* Remember a mapping from entry_addr to objfile.  */
   entry_addr_ptr = xmalloc (sizeof (CORE_ADDR));
@@ -323,67 +332,85 @@ jit_find_objf_with_entry_addr (CORE_ADDR entry_addr)
   return NULL;
 }
 
-/* (Re-)Initialize the jit breakpoint handler, and register any already
-   created translations.  */
+/* (Re-)Initialize the jit breakpoint if necessary.
+   Return 0 on success.  */
+
+static int
+jit_breakpoint_re_set_internal (struct gdbarch *gdbarch,
+				struct jit_inferior_data *inf_data)
+{
+  if (inf_data->breakpoint_addr == 0)
+    {
+      struct minimal_symbol *reg_symbol;
+
+      /* Lookup the registration symbol.  If it is missing, then we assume
+	 we are not attached to a JIT.  */
+      reg_symbol = lookup_minimal_symbol (jit_break_name, NULL, NULL);
+      if (reg_symbol == NULL)
+	return 1;
+      inf_data->breakpoint_addr = SYMBOL_VALUE_ADDRESS (reg_symbol);
+      if (inf_data->breakpoint_addr == 0)
+	return 2;
+    }
+  else
+    return 0;
+
+  if (jit_debug)
+    fprintf_unfiltered (gdb_stdlog,
+			"jit_breakpoint_re_set_internal, "
+			"breakpoint_addr = %s\n",
+			paddress (gdbarch, inf_data->breakpoint_addr));
+
+  /* Put a breakpoint in the registration symbol.  */
+  create_jit_event_breakpoint (gdbarch, inf_data->breakpoint_addr);
+
+  return 0;
+}
+
+/* Register any already created translations.  */
 
 static void
 jit_inferior_init (struct gdbarch *gdbarch)
 {
-  struct minimal_symbol *reg_symbol;
-  struct minimal_symbol *desc_symbol;
-  CORE_ADDR reg_addr;
   struct jit_descriptor descriptor;
   struct jit_code_entry cur_entry;
+  struct jit_inferior_data *inf_data;
   CORE_ADDR cur_entry_addr;
 
   if (jit_debug)
-    fprintf_unfiltered (gdb_stdlog,
-			"jit_inferior_init, registering_code = %d\n",
-			registering_code);
+    fprintf_unfiltered (gdb_stdlog, "jit_inferior_init\n");
 
-  /* When we register code, GDB resets its breakpoints in case symbols have
-     changed.  That in turn calls this handler, which makes us look for new
-     code again.  To avoid being re-entered, we check this flag.  */
-  if (registering_code)
+  inf_data = get_jit_inferior_data ();
+  if (jit_breakpoint_re_set_internal (gdbarch, inf_data) != 0)
     return;
 
-  /* Lookup the registration symbol.  If it is missing, then we assume we are
-     not attached to a JIT.  */
-  reg_symbol = lookup_minimal_symbol (jit_break_name, NULL, NULL);
-  if (reg_symbol == NULL)
-    return;
-  reg_addr = SYMBOL_VALUE_ADDRESS (reg_symbol);
-  if (reg_addr == 0)
-    return;
+  if (inf_data->descriptor_addr == 0)
+    {
+      struct minimal_symbol *desc_symbol;
 
-  if (jit_debug)
-    fprintf_unfiltered (gdb_stdlog, "jit_inferior_init, reg_addr = %s\n",
-			paddress (gdbarch, reg_addr));
+      /* Lookup the descriptor symbol and cache the addr.  If it is
+	 missing, we assume we are not attached to a JIT and return early.  */
+      desc_symbol = lookup_minimal_symbol (jit_descriptor_name, NULL, NULL);
+      if (desc_symbol == NULL)
+	return;
 
-  /* Lookup the descriptor symbol and cache the addr.  If it is missing, we
-     assume we are not attached to a JIT and return early.  */
-  desc_symbol = lookup_minimal_symbol (jit_descriptor_name, NULL, NULL);
-  if (desc_symbol == NULL)
-    return;
-  jit_descriptor_addr = SYMBOL_VALUE_ADDRESS (desc_symbol);
-  if (jit_descriptor_addr == 0)
-    return;
+      inf_data->descriptor_addr = SYMBOL_VALUE_ADDRESS (desc_symbol);
+      if (inf_data->descriptor_addr == 0)
+	return;
+    }
 
   if (jit_debug)
     fprintf_unfiltered (gdb_stdlog,
-			"jit_inferior_init, jit_descriptor_addr = %s\n",
-			paddress (gdbarch, jit_descriptor_addr));
+			"jit_inferior_init, descriptor_addr = %s\n",
+			paddress (gdbarch, inf_data->descriptor_addr));
 
   /* Read the descriptor so we can check the version number and load
      any already JITed functions.  */
-  jit_read_descriptor (gdbarch, &descriptor);
+  jit_read_descriptor (gdbarch, &descriptor, inf_data->descriptor_addr);
 
   /* Check that the version number agrees with that we support.  */
   if (descriptor.version != 1)
     error (_("Unsupported JIT protocol version in descriptor!"));
-
-  /* Put a breakpoint in the registration symbol.  */
-  create_jit_event_breakpoint (gdbarch, reg_addr);
 
   /* If we've attached to a running program, we need to check the descriptor
      to register any functions that were already generated.  */
@@ -416,6 +443,26 @@ jit_inferior_created_hook (void)
 void
 jit_breakpoint_re_set (void)
 {
+  jit_breakpoint_re_set_internal (target_gdbarch,
+				  get_jit_inferior_data ());
+}
+
+/* Reset inferior_data, so sybols will be looked up again, and jit_breakpoint
+   will be reset.  */
+
+static void
+jit_reset_inferior_data_and_breakpoints (void)
+{
+  struct jit_inferior_data *inf_data;
+
+  /* Force jit_inferior_init to re-lookup of jit symbol addresses.  */
+  inf_data = get_jit_inferior_data ();
+  inf_data->breakpoint_addr = 0;
+  inf_data->descriptor_addr = 0;
+
+  /* Remove any existing JIT breakpoint(s).  */
+  remove_jit_event_breakpoints ();
+
   jit_inferior_init (target_gdbarch);
 }
 
@@ -424,7 +471,7 @@ jit_breakpoint_re_set (void)
 static void
 jit_inferior_created_observer (struct target_ops *objfile, int from_tty)
 {
-  jit_inferior_init (target_gdbarch);
+  jit_reset_inferior_data_and_breakpoints ();
 }
 
 /* This function cleans up any code entries left over when the
@@ -437,13 +484,15 @@ jit_inferior_exit_hook (struct inferior *inf)
   struct objfile *objf;
   struct objfile *temp;
 
-  /* We need to reset the descriptor addr so that next time we load up the
-     inferior we look for it again.  */
-  jit_descriptor_addr = 0;
-
   ALL_OBJFILES_SAFE (objf, temp)
     if (objfile_data (objf, jit_objfile_data) != NULL)
       jit_unregister_code (objf);
+}
+
+static void
+jit_executable_changed_observer (void)
+{
+  jit_reset_inferior_data_and_breakpoints ();
 }
 
 void
@@ -455,7 +504,8 @@ jit_event_handler (struct gdbarch *gdbarch)
   struct objfile *objf;
 
   /* Read the descriptor from remote memory.  */
-  jit_read_descriptor (gdbarch, &descriptor);
+  jit_read_descriptor (gdbarch, &descriptor,
+		       get_jit_inferior_data ()->descriptor_addr);
   entry_addr = descriptor.relevant_entry;
 
   /* Do the corresponding action.  */
@@ -500,5 +550,8 @@ _initialize_jit (void)
 
   observer_attach_inferior_created (jit_inferior_created_observer);
   observer_attach_inferior_exit (jit_inferior_exit_hook);
+  observer_attach_executable_changed (jit_executable_changed_observer);
   jit_objfile_data = register_objfile_data ();
+  jit_inferior_data =
+    register_inferior_data_with_cleanup (jit_inferior_data_cleanup);
 }

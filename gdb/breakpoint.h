@@ -1083,6 +1083,8 @@ extern struct breakpoint *create_solib_event_breakpoint (struct gdbarch *,
 extern struct breakpoint *create_thread_event_breakpoint (struct gdbarch *,
 							  CORE_ADDR);
 
+extern void remove_jit_event_breakpoints (void);
+
 extern void remove_solib_event_breakpoints (void);
 
 extern void remove_thread_event_breakpoints (void);
