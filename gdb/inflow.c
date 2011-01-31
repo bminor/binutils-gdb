@@ -165,7 +165,7 @@ int
 gdb_has_a_terminal (void)
 {
   if (interactive_mode != AUTO_BOOLEAN_AUTO)
-    return interactive_mode = AUTO_BOOLEAN_TRUE;
+    return interactive_mode == AUTO_BOOLEAN_TRUE;
 
   switch (gdb_has_a_terminal_flag)
     {

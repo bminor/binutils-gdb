@@ -1,3 +1,9 @@
+2011-01-31  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.base/interact.exp: Add extra tests that verify that
+	the value of the interactive-mode setting does not change
+	after the script is sourced.
+
 2011-01-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.cp/noparam.exp: New file.

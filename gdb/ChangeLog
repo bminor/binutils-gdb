@@ -1,3 +1,8 @@
+2011-01-31  Joel Brobecker  <brobecker@adacore.com>
+
+	* inflow.c (gdb_has_a_terminal): Fix typo in interactive_mode
+	value test.
+
 2011-01-31  Yao Qi  <yao@codesourcery.com>
 
 	* arm-linux-nat.c: Update calls to regcache_register_status

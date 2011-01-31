@@ -28,21 +28,36 @@ set script_output "\\$\[0-9\]+ = 1\[\r\n\]+\\$\[0-9\]+ = 2.*"
 gdb_exit
 gdb_start
 
-# Test sourcing of the script with interactive mode `auto'
+# Test sourcing of the script with interactive mode `auto'.
+# Verify that evaluating the script does not cause an unexpected
+# change of the interactive-mode setting.
 gdb_test_no_output "set interactive-mode auto"
 gdb_test "source zzz-gdbscript" "$script_output" \
          "source script with interactive-mode auto"
 gdb_test "print 3" "= 3" "sanity check with interactive-mode auto"
+gdb_test "show interactive-mode" \
+         "Debugger's interactive mode is auto \\(currently .*\\)\\." \
+         "show interactive-mode (auto)"
 
-# Test sourcing of the script with interactive mode `on'
+# Test sourcing of the script with interactive mode `on'.
+# Verify that evaluating the script does not cause an unexpected
+# change of the interactive-mode setting.
 gdb_test_no_output "set interactive-mode on"
 gdb_test "source zzz-gdbscript" "$script_output" \
          "source script with interactive-mode on"
 gdb_test "print 4" "= 4" "sanity check with interactive-mode on"
+gdb_test "show interactive-mode" \
+         "Debugger's interactive mode is on\\." \
+         "show interactive-mode (on)"
 
-# Test sourcing of the script with interactive mode `of'
+# Test sourcing of the script with interactive mode `off'.
+# Verify that evaluating the script does not cause an unexpected
+# change of the interactive-mode setting.
 gdb_test_no_output "set interactive-mode off"
 gdb_test "source zzz-gdbscript" "$script_output" \
          "source script with interactive-mode off"
 gdb_test "print 5" "= 5" "sanity check with interactive-mode off"
+gdb_test "show interactive-mode" \
+         "Debugger's interactive mode is off\\." \
+         "show interactive-mode (off)"
 
