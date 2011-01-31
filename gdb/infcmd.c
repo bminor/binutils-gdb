@@ -1545,7 +1545,7 @@ finish_backward (struct symbol *function)
 				  bp_breakpoint);
       /* Tell the breakpoint to keep quiet.  We won't be done
          until we've done another reverse single-step.  */
-      make_breakpoint_silent (breakpoint);
+      breakpoint_set_silent (breakpoint, 1);
       old_chain = make_cleanup_delete_breakpoint (breakpoint);
       proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 0);
       /* We will be stopped when proceed returns.  */

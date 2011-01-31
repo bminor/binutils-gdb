@@ -1,5 +1,20 @@
 2011-01-31  Tom Tromey  <tromey@redhat.com>
 
+	* infcmd.c (finish_backward): Use breakpoint_set_silent.
+	* python/py-breakpoint.c (bppy_set_silent): Use
+	breakpoint_set_silent.
+	(bppy_set_thread): Use breakpoint_set_thread.
+	(bppy_set_task): Use breakpoint_set_task.
+	* breakpoint.h (breakpoint_set_silent, breakpoint_set_thread)
+	(breakpoint_set_task): Declare.
+	(make_breakpoint_silent): Remove.
+	* breakpoint.c (breakpoint_set_silent): New function.
+	(breakpoint_set_thread): Likewise.
+	(breakpoint_set_task): Likewise.
+	(make_breakpoint_silent): Remove.
+
+2011-01-31  Tom Tromey  <tromey@redhat.com>
+
 	* breakpoint.h (user_breakpoint_p): Declare.
 	* breakpoint.c (user_breakpoint_p): New function.
 	(breakpoint_1): Use it.

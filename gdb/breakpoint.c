@@ -940,6 +940,46 @@ breakpoint_set_commands (struct breakpoint *b,
   observer_notify_breakpoint_modified (b->number);
 }
 
+/* Set the internal `silent' flag on the breakpoint.  Note that this
+   is not the same as the "silent" that may appear in the breakpoint's
+   commands.  */
+
+void
+breakpoint_set_silent (struct breakpoint *b, int silent)
+{
+  int old_silent = b->silent;
+
+  b->silent = silent;
+  if (old_silent != silent)
+    observer_notify_breakpoint_modified (b->number);
+}
+
+/* Set the thread for this breakpoint.  If THREAD is -1, make the
+   breakpoint work for any thread.  */
+
+void
+breakpoint_set_thread (struct breakpoint *b, int thread)
+{
+  int old_thread = b->thread;
+
+  b->thread = thread;
+  if (old_thread != thread)
+    observer_notify_breakpoint_modified (b->number);
+}
+
+/* Set the task for this breakpoint.  If TASK is 0, make the
+   breakpoint work for any task.  */
+
+void
+breakpoint_set_task (struct breakpoint *b, int task)
+{
+  int old_task = b->task;
+
+  b->task = task;
+  if (old_task != task)
+    observer_notify_breakpoint_modified (b->number);
+}
+
 void
 check_tracepoint_command (char *line, void *closure)
 {
@@ -10736,13 +10776,6 @@ set_ignore_count (int bptnum, int count, int from_tty)
     }
 
   error (_("No breakpoint number %d."), bptnum);
-}
-
-void
-make_breakpoint_silent (struct breakpoint *b)
-{
-  /* Silence the breakpoint.  */
-  b->silent = 1;
 }
 
 /* Command to set ignore-count of breakpoint N to COUNT.  */

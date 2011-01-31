@@ -1063,6 +1063,12 @@ extern void enable_breakpoint (struct breakpoint *);
 extern void breakpoint_set_commands (struct breakpoint *b, 
 				     struct command_line *commands);
 
+extern void breakpoint_set_silent (struct breakpoint *b, int silent);
+
+extern void breakpoint_set_thread (struct breakpoint *b, int thread);
+
+extern void breakpoint_set_task (struct breakpoint *b, int task);
+
 /* Clear the "inserted" flag in all breakpoints.  */
 extern void mark_breakpoints_out (void);
 
@@ -1139,9 +1145,6 @@ extern int catch_syscall_enabled (void);
    syscall_number.  Used for "filtering" the catchpoints.
    Returns 0 if not, greater than 0 if we are.  */
 extern int catching_syscall_number (int syscall_number);
-
-/* Tell a breakpoint to be quiet.  */
-extern void make_breakpoint_silent (struct breakpoint *);
 
 /* Return a tracepoint with the given number if found.  */
 extern struct breakpoint *get_tracepoint (int num);
