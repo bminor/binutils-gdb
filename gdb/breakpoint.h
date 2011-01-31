@@ -1184,4 +1184,6 @@ extern void end_rbreak_breakpoints (void);
 extern struct breakpoint *iterate_over_breakpoints (int (*) (struct breakpoint *,
 							     void *), void *);
 
+extern int user_breakpoint_p (struct breakpoint *);
+
 #endif /* !defined (BREAKPOINT_H) */

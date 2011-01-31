@@ -1,3 +1,10 @@
+2011-01-31  Tom Tromey  <tromey@redhat.com>
+
+	* breakpoint.h (user_breakpoint_p): Declare.
+	* breakpoint.c (user_breakpoint_p): New function.
+	(breakpoint_1): Use it.
+	(save_breakpoints): Likewise.
+
 2011-01-31  Joel Brobecker  <brobecker@adacore.com>
 
 	* configure.ac: Add handling of Python distribution on Windows.

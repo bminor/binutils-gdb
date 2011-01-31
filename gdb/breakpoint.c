@@ -5064,6 +5064,15 @@ user_settable_breakpoint (const struct breakpoint *b)
 	  || is_watchpoint (b));
 }
 
+/* Return true if this breakpoint was set by the user, false if it is
+   internal or momentary.  */
+
+int
+user_breakpoint_p (struct breakpoint *b)
+{
+  return user_settable_breakpoint (b) && b->number > 0;
+}
+
 /* Print information on user settable breakpoint (watchpoint, etc)
    number BNUM.  If BNUM is -1 print all user-settable breakpoints.
    If ALLFLAG is non-zero, include non-user-settable breakpoints.  If
@@ -5096,8 +5105,7 @@ breakpoint_1 (int bnum, int allflag,
 	if (filter && !filter (b))
 	  continue;
 	
-	if (allflag || (user_settable_breakpoint (b)
-			&& b->number > 0))
+	if (allflag || user_breakpoint_p (b))
 	  {
 	    int addr_bit, type_len;
 
@@ -5169,8 +5177,7 @@ breakpoint_1 (int bnum, int allflag,
 	
 	/* We only print out user settable breakpoints unless the
 	   allflag is set.  */
-	if (allflag || (user_settable_breakpoint (b)
-			&& b->number > 0))
+	if (allflag || user_breakpoint_p (b))
 	  print_one_breakpoint (b, &last_loc, print_address_bits, allflag);
       }
   }
@@ -11727,7 +11734,7 @@ save_breakpoints (char *filename, int from_tty,
   ALL_BREAKPOINTS (tp)
   {
     /* Skip internal and momentary breakpoints.  */
-    if (!user_settable_breakpoint (tp) || tp->number < 0)
+    if (!user_breakpoint_p (tp))
       continue;
 
     /* If we have a filter, only save the breakpoints it accepts.  */
@@ -11765,7 +11772,7 @@ save_breakpoints (char *filename, int from_tty,
   ALL_BREAKPOINTS (tp)
   {
     /* Skip internal and momentary breakpoints.  */
-    if (!user_settable_breakpoint (tp) || tp->number < 0)
+    if (!user_breakpoint_p (tp))
       continue;
 
     /* If we have a filter, only save the breakpoints it accepts.  */
