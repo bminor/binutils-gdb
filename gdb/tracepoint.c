@@ -3857,7 +3857,7 @@ traceframe_walk_blocks (walk_blocks_callback_func callback,
 	  pos += (4 + 8);
 	  break;
 	default:
-	  error ("Unknown block type '%c' (0x%x) in trace frame",
+	  error (_("Unknown block type '%c' (0x%x) in trace frame"),
 		 block_type, block_type);
 	  break;
 	}
