@@ -534,6 +534,27 @@ print_subexp_standard (struct expression *exp, int *pos,
       fprintf_unfiltered (stream, ")");
       return;
 
+    case TYPE_INSTANCE:
+      {
+	LONGEST count = exp->elts[pc + 1].longconst;
+
+	/* The COUNT.  */
+	(*pos)++;
+	fputs_unfiltered ("TypesInstance(", stream);
+	while (count-- > 0)
+	  {
+	    type_print (exp->elts[(*pos)++].type, "", stream, 0);
+	    if (count > 0)
+	      fputs_unfiltered (",", stream);
+	  }
+	fputs_unfiltered (",", stream);
+	/* Ending COUNT and ending TYPE_INSTANCE.  */
+	(*pos) += 2;
+	print_subexp (exp, pos, stream, PREC_PREFIX);
+	fputs_unfiltered (")", stream);
+	return;
+      }
+
       /* Default ops */
 
     default:
@@ -935,6 +956,29 @@ dump_subexp_body_standard (struct expression *exp,
 
 	fprintf_filtered (stream, "Field name: `%.*s'", len, elem_name);
 	elt += 4 + BYTES_TO_EXP_ELEM (len + 1);
+      }
+      break;
+    case TYPE_INSTANCE:
+      {
+	char *elem_name;
+	LONGEST len;
+
+	len = exp->elts[elt++].longconst;
+	fprintf_filtered (stream, "%s TypeInstance: ", plongest (len));
+	while (len-- > 0)
+	  {
+	    fprintf_filtered (stream, "Type @");
+	    gdb_print_host_address (exp->elts[elt].type, stream);
+	    fprintf_filtered (stream, " (");
+	    type_print (exp->elts[elt].type, NULL, stream, 0);
+	    fprintf_filtered (stream, ")");
+	    elt++;
+	    if (len > 0)
+	      fputs_filtered (", ", stream);
+	  }
+	/* Ending LEN and ending TYPE_INSTANCE.  */
+	elt += 2;
+	elt = dump_subexp (exp, stream, elt);
       }
       break;
     default:
