@@ -1,3 +1,16 @@
+2011-02-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix debug printing of BINOP_IN, OP_OBJC_MSGCALL,
+	OP_F77_UNDETERMINED_ARGLIST, OP_COMPLEX, OP_OBJC_SELECTOR, OP_NAME,
+	OP_OBJC_NSSTRING, OP_F90_RANGE and OP_DECFLOAT.
+	* ada-operator.inc: Rename the file to ...
+	* ada-operator.def: ... here, wrap all the entries by macro OP.
+	* expprint.c (op_name_standard): Remove all the entries.  Include
+	"std-operator.def" instead.
+	* expression.h (enum exp_opcode): Include "std-operator.def" and
+	"ada-operator.def".  Move all the entries ...
+	* std-operator.def: ... here, wrap all the entries by macro OP.
+
 2011-01-31  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* breakpoint.h (remove_jit_event_breakpoints): New prototype.
