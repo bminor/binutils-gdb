@@ -9,7 +9,7 @@ rm -f e${EMULATION_NAME}.c
 (echo;echo;echo;echo;echo)>e${EMULATION_NAME}.c # there, now line numbers match ;-)
 fragment <<EOF
 /* Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
-   2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+   2005, 2006, 2007, 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils.
 
@@ -688,12 +688,7 @@ gld${EMULATION_NAME}_handle_option (int optc)
     case OPTION_BASE_FILE:
       link_info.base_file = fopen (optarg, FOPEN_WB);
       if (link_info.base_file == NULL)
-	{
-	  /* xgettext:c-format */
-	  fprintf (stderr, _("%s: Can't open base file %s\n"),
-		   program_name, optarg);
-	  xexit (1);
-	}
+	einfo (_("%F%P: cannot open base file %s\n"), optarg);
       break;
 
       /* PE options.  */
@@ -946,8 +941,8 @@ gld_${EMULATION_NAME}_set_symbols (void)
       long val = init[j].value;
       lang_assignment_statement_type *rv;
 
-      rv = lang_add_assignment (exp_assop ('=', GET_INIT_SYMBOL_NAME (j),
-					   exp_intop (val)));
+      rv = lang_add_assignment (exp_assign (GET_INIT_SYMBOL_NAME (j),
+					    exp_intop (val)));
       if (init[j].size == sizeof (short))
 	*(short *) init[j].ptr = val;
       else if (init[j].size == sizeof (int))
@@ -1219,6 +1214,8 @@ debug_section_p (bfd *abfd ATTRIBUTE_UNUSED, asection *sect, void *obj)
 static void
 gld_${EMULATION_NAME}_after_open (void)
 {
+  after_open_default ();
+
 #ifdef DLL_SUPPORT
   if (pe_dll_extra_pe_debug)
     {
@@ -1720,8 +1717,8 @@ gld_${EMULATION_NAME}_unrecognized_file (lang_input_statement_type *entry ATTRIB
 		= pe_def_file->base_address;
 	      init[IMAGEBASEOFF].inited = 1;
 	      if (image_base_statement)
-		image_base_statement->exp = exp_assop ('=', "__image_base__",
-						       exp_intop (pe.ImageBase));
+		image_base_statement->exp = exp_assign ("__image_base__",
+							exp_intop (pe.ImageBase));
 	    }
 
 	  if (pe_def_file->stack_reserve != -1
@@ -2086,7 +2083,7 @@ gld_${EMULATION_NAME}_open_dynamic_archive
   unsigned int i;
 
 
-  if (! entry->is_archive)
+  if (! entry->maybe_archive)
     return FALSE;
 
   filename = entry->filename;

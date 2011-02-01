@@ -78,6 +78,7 @@ message (int level ATTRIBUTE_UNUSED,
   va_start (args, format);
   printf ("bfd plugin: ");
   vprintf (format, args);
+  putchar ('\n');
   va_end (args);
   return LDPS_OK;
 }

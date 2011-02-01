@@ -1,5 +1,98 @@
 2011-02-01  Alan Modra  <amodra@gmail.com>
 
+	Backport from mainline
+	2011-01-22  Richard Sandiford  <rdsandiford@googlemail.com>
+	* elfxx-mips.c (_bfd_mips_elf_merge_private_bfd_data): Ignore
+	common sections too.
+
+	2011-01-14  Alan Modra  <amodra@gmail.com>
+	* bfd.c (bfd_perror): Flush stdout before and stderr after printing
+	error.
+	(_bfd_default_error_handler): Likewise.
+	* elf.c (print_segment_map): Likewise.
+	* libbfd.c (warn_deprecated): Likewise.
+	* som.c (som_sizeof_headers): No need to do so here.
+	* coff-i860.c: Replace use of printf for error messages with
+	_bfd_error_handler.
+	* coff-ppc.c: Likewise.
+	* coff-sh.c: Likewise.
+	* elf32-bfin.c: Likewise.
+	* elf32-dlx.c: Likewise.
+	* elf32-mep.c: Likewise.
+	* elf32-v850.c: Likewise.
+	* mach-o.c: Likewise.
+	* pef.c: Likewise.
+
+	2010-12-24  Alan Modra  <amodra@gmail.com>
+	* compress.c (decompress_contents): Style.
+	(bfd_get_full_section_contents): Do not decompress directly into
+	caller buffer or directly return cached section contents.
+	Check malloc return for compressed_buffer.
+
+	2010-12-13  Alan Modra  <amodra@gmail.com>
+	* aoutx.h (aout_link_check_ar_symbols): Formatting.
+	* cofflink.c (coff_link_check_ar_symbols): Likewise.
+	* elflink.c (elf_link_add_archive_symbols): Likewise.
+	* pdp11.c (aout_link_check_ar_symbols): Likewise.
+	* xcofflink.c (xcoff_link_check_dynamic_ar_symbols,
+	xcoff_link_check_dynamic_ar_symbols): Likewise.
+	* aoutx.h (aout_link_check_archive_element): Simplify code dealing
+	with add_archive_element substitute BFD.
+	* cofflink.c (coff_link_check_archive_element): Likewise.
+	* ecoff.c (ecoff_link_check_archive_element): Likewise.
+	(ecoff_link_add_archive_symbols): Likewise.
+	* linker.c (generic_link_check_archive_element): Likewise.
+	* pdp11.c (aout_link_check_archive_element): Likewise.
+	* vms-alpha.c (alpha_vms_link_add_archive_symbols): Likewise.
+	* xcofflink.c (xcoff_link_check_archive_element): Likewise.
+	* aoutx.h (aout_link_check_archive_element): Free symbols from old
+	bfd if !keep_memory.
+	* cofflink.c (coff_link_check_archive_element): Likewise.
+	* pdp11.c (aout_link_check_archive_element): Likewise.
+	* xcofflink.c (xcoff_link_check_archive_element): Likewise.
+
+	2010-12-12  H.J. Lu  <hongjiu.lu@intel.com>
+	* elflink.c (elf_link_add_archive_symbols): Remove subsbfd.
+
+	2010-12-06  Dmitry Gorbachev  <d.g.gorbachev@gmail.com>
+	PR ld/12288
+	* plugin.c (message): Add putchar for the trailing `\n'.
+
+	2010-12-04  Alan Modra  <amodra@gmail.com>
+	PR ld/12277
+	* elflink.c (elf_link_output_extsym): Set bfd_error on symbol
+	and section errors.  Allow better translation of error messages.
+
+	2010-11-24  Joel Brobecker  <brobecker@adacore.com>
+	* Makefile.am (OPTIONAL_BACKENDS): Add rs6000-core.lo.
+	(OPTIONAL_BACKENDS_CFILES): Add rs6000-core.c.
+	* Makefile.in: Regenerate.
+
+	2010-11-24  Alan Modra  <amodra@gmail.com>
+	PR ld/12253
+	* elf-eh-frame.c (_bfd_elf_write_section_eh_frame): Correct
+	DW_EH_PE_datarel handling.  Truncate .eh_frame_hdr address to
+	ptr_size.
+
+	2010-11-08  Alan Modra  <amodra@gmail.com>
+	* hash.c (bfd_hash_hash): Extract from..
+	(bfd_hash_lookup): ..here.
+	(bfd_hash_rename): New function.
+	* section.c (bfd_rename_section): New function.
+	* bfd-in.h (bfd_hash_rename): Declare.
+	* bfd-in2.h: Regenerate.
+	* elf.c (_bfd_elf_make_section_from_shdr): Rename input sections
+	when compressing or decompressing.  Don't assert name match.
+	* elf64-hppa.c (get_reloc_section): Don't assert name match.
+	* elfxx-ia64.c (get_reloc_section): Likewise.
+
+	2010-11-05  Joseph Myers  <joseph@codesourcery.com>
+	* elf-attrs.c (_bfd_elf_merge_unknown_attribute_low,
+	_bfd_elf_merge_unknown_attribute_list): Correct test for matching
+	string attributes.
+
+2011-02-01  Alan Modra  <amodra@gmail.com>
+
 	* elf64-ppc.c (ppc64_elf_next_input_section): Use elf_gp value
 	for toc pointer on any section having makes_toc_func_call set.
 	(check_pasted_section): Ensure pasted .init/.fini fragments use

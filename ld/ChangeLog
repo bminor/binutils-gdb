@@ -1,3 +1,219 @@
+2011-02-01  Alan Modra  <amodra@gmail.com>
+
+	Backport from mainline
+	2011-01-22  H.J. Lu  <hongjiu.lu@intel.com>
+	* Makefile.am (CXX): Removed.
+	* configure.in: Add AC_PROG_CXX.
+	* Makefile.in: Regenerated.
+	* configure: Likewise.
+
+	2011-01-22  Richard Sandiford  <rdsandiford@googlemail.com>
+	* plugin.c (plugin_get_ir_dummy_bfd): Copy across the bfd's
+	private data and GP size.
+
+	2011-01-21  Alan Modra  <amodra@gmail.com>
+	* ldexp.c (fold_binary): Set result section for arithmetic and
+	logical operations to NULL when both operands are in same section.
+	* ld.texinfo (Expression Section): Describe this.
+
+	2011-01-14  Alan Modra  <amodra@gmail.com>
+	* ldmain.c (main): Flush stdout before and stderr after printing
+	message.
+	* ldmisc.c (einfo): Similarly.
+	* plugin.c (message): Likewise.
+	* emultempl/ppc64elf.em: Likewise.
+	* emultempl/xtensaelf.em: Likewise.
+	* emulparams/elf32mcore.sh: Use einfo rather than printf.
+	* emultempl/beos.em: Likewise.
+	* emultempl/pe.em: Likewise.
+	* emultempl/pep.em: Likewise.
+
+	2011-01-14  Alan Modra  <amodra@gmail.com>
+	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Don't
+	attempt to put non-alloc orphans before debug sections, just place
+	them after .comment.
+
+	2011-01-14  J. Park  <grassman@gmail.com>
+	PR ld/12339
+	* ldlang.c (sort_def_symbol): Handle bfd_link_hash_warning symbols.
+
+	2011-01-14  Alan Modra  <amodra@gmail.com>
+	* Makefile.am: Sort emulation rules.
+	(eelf32am33lin.c): Delete.
+	(ALL_EMULATION_SOURCES): Sort, add missing entries.
+	(ALL_64_EMULATION_SOURCES): Likewise.
+	* Makefile.in: Regenerate.
+
+	2011-01-13  Alan Modra  <amodra@gmail.com>
+	PR ld/12356
+	* ld.texinfo (Miscellaneous Commands): Describe LD_FEATURE.
+	(Expression Section): Update.
+	* ld.h (ld_config_type): Add sane_expr.
+	* ldgram.y (ifile_p1): Add LD_FEATURE.
+	* ldlex.l (LD_FEATYRE): New.
+	* ldemul.c (after_parse_default): Delete code handling ld_compatibility.
+	* ldexp.h (struct ldexp_control): Delete uses_defined.
+	* ldexp.c: Remove all uses of uses_defined.
+	(fold_name): Test config.sane_expr rather than ld_compatibility.
+	(exp_fold_tree_1): Likewise.  Adjust handling of assignments
+	during first phase.
+	* ldlang.h (ld_compatibility): Delete.
+	(lang_ld_feature): Declare.
+	* ldlang.c (ld_compatibility): Delete.
+	(open_input_bfds): Only handle assignments for --defsym.
+	(lang_ld_feature): New function.
+
+	2011-01-13  Alan Modra  <amodra@gmail.com>
+	PR ld/12356
+	* ldexp.h (exp_assop): Delete.
+	(exp_assign, exp_defsym): Declare.
+	* ldexp.c (exp_assop): Make static, handle all assignment variations.
+	(exp_assign, exp_defsym): New functions.
+	(exp_provide): Use exp_assop.
+	* ldgram.y (defsym_expr): Use exp_defsym.
+	* ldctor.c, * ldgram.y, * ldlang.c, * mri.c, * emultempl/beos.em,
+	* emultempl/pe.em, * emultempl/pep.em, * emultempl/spuelf.em,
+	* emultempl/xtensaelf.em: Update exp_assop -> exp_assign.
+
+	2011-01-12  Alan Modra  <amodra@gmail.com>
+	PR ld/12380
+	* ldexp.h (enum phase_enum): Comment.  Add exp_dataseg_done.
+	* ldexp.c (fold_unary <DATA_SEGMENT_END>): Rearrange code.  Test
+	for exp_dataseg_done rather than expld.phase == lang_final_phase_enum
+	to detect when we've finished sizing sections.
+	(fold_binary <DATA_SEGMENT_ALIGN>): Likewise.
+	(fold_binary <DATA_SEGMENT_RELRO_END>): Likewise.  Also test
+	that we are not inside an output section statement.
+	* ldlang.c (lang_size_sections): Set exp_dataseg_done on exit if
+	not exp_dataseg_relro_adjust or exp_dataseg_adjust.  Don't set
+	lang_final_phase_enum here.
+	(lang_process): Set lang_final_phase_enum here.
+
+	2011-01-05  H.J. Lu  <hongjiu.lu@intel.com>
+	PR ld/12364
+	* plugin.c (get_symbols): Check if owner_sec->owner is NULL
+	before accessing its flags field.
+
+	2011-01-01  H.J. Lu  <hongjiu.lu@intel.com>
+	* ldver.c (ldversion): Update copyright to 2011.
+
+	2010-12-20  Alan Modra  <amodra@gmail.com>
+	* ld.texinfo (Expression Section): Describe treatment of numbers
+	and absolute symbols.
+	* ldemul.c (after_open_default): Look up __ld_compatibility.
+	* ldexp.c (fold_name): Convert absolute symbols to numbers when
+	inside output section definitions, or when __ld_compatibility >= 221.
+	(exp_fold_tree_1): Convert numbers to absolute when not in output
+	section definition and __ld_compatibility < 221.  Don't always
+	convert values outside an output section definition to absolute.
+	* ldexp.h (uses_defined): Comment.
+	* ldlang.c (ld_compatibility): New variable.
+	* ldlang.h (ld_compatibility): Declare.
+	* emultempl/aix.em, * emultempl/armcoff.em, * emultempl/beos.em,
+	* emultempl/elf32.em, * emultempl/genelf.em, * emultempl/lnk960.em,
+	* emultempl/m68kcoff.em, * emultempl/mmo.em, * emultempl/pe.em,
+	* emultempl/pep.em, * emultempl/sunos.em, * emultempl/z80.em: Call
+	after_open_default from after_open function.
+
+	2010-12-20  Alan Modra  <amodra@gmail.com>
+	PR ld/12001
+	Revert 2010-11-03 Nick Clifton
+	* ldlang.c (ldlang_def_chain_list): Delete.
+	(insert_defined, ldlang_add_def, lang_place_defineds): Delete.
+	(lang_process): Don't call lang_place_defineds.
+	(lang_add_assignment): Don't do anything special for --defsym.
+	* ldexp.h (struct ldexp_control): Add uses_defined.
+	(exp_fold_tree_no_dot): Declare.
+	* ldexp.c (exp_fold_tree): Clear uses_defined.
+	(exp_fold_tree_no_dot): Likewise.  Make global.
+	(fold_name <DEFINED>): Set uses_defined.
+	(exp_fold_tree_1 <etree_assign>): Define symbol during first phase
+	even when the value being assigned isn't valid.
+	* ldlang.c (open_input_bfds): Process assignment statements.
+	(lang_process): Bump lang_statement_iteration.
+	(scan_for_self_assignment): Formatting.
+	(print_assignment): Style.
+
+	2010-12-13  Alan Modra  <amodra@gmail.com>
+	* ldlang.c (load_symbols): Correct last change.
+
+	2010-12-12  H.J. Lu  <hongjiu.lu@intel.com>
+	* ldlang.c (load_symbols): Optimize for add_archive_element.
+
+	2010-12-06  H.J. Lu  <hongjiu.lu@intel.com>
+	PR ld/12288
+	* plugin.c (message): Don't add the trailing `\n' for
+	LDPL_ERROR.
+
+	2010-12-06  H.J. Lu  <hongjiu.lu@intel.com>
+	PR ld/12288
+	* testplug.c: Remove the trailing `\n' from TV_MESSAGE.
+
+	2010-12-06  Dmitry Gorbachev  <d.g.gorbachev@gmail.com>
+	PR ld/12288
+	* plugin.c (message): Use putchar for the trailing `\n'.
+
+	2010-12-06  H.J. Lu  <hongjiu.lu@intel.com>
+		    Dmitry Gorbachev  <d.g.gorbachev@gmail.com>
+	PR ld/12289
+	* ldmain.c (main): Don't call plugin_call_cleanup.
+	* plugin.c (plugin_call_cleanup): Make it static.
+	(message): Don't call plugin_call_cleanup.
+	(plugin_load_plugins): Call xatexit with plugin_call_cleanup.
+
+	2010-12-05  H.J. Lu  <hongjiu.lu@intel.com>
+	PR ld/12289
+	* plugin.c (message): Call plugin_call_cleanup on fatal
+	error.
+
+	2010-12-05  H.J. Lu  <hongjiu.lu@intel.com>
+	* plugin.c (message): Add a space after `:' in error message.
+
+	2010-12-05  H.J. Lu  <hongjiu.lu@intel.com>
+	* plugin.c (asymbol_from_plugin_symbol): Add the trailing `\n'
+	to einfo.
+	(get_symbols): Likewise.
+	(plugin_notice): Likewise.
+	(plugin_multiple_definition): Likewise.
+
+	2010-12-05  H.J. Lu  <hongjiu.lu@intel.com>
+	PR ld/12288
+	* plugin.c (message): Add the trailing `\n'.
+
+	2010-12-05  H.J. Lu  <hongjiu.lu@intel.com>
+	* ldfile.c (ldfile_open_file_search): Check maybe_archive instead
+	of is_archive.
+	* emultempl/aix.em: Likewise.
+	* emultempl/elf32.em: Likewise.
+	* emultempl/linux.em: Likewise.
+	* emultempl/pe.em: Likewise.
+	* emultempl/pep.em: Likewise.
+	* emultempl/sunos.em: Likewise.
+	* emultempl/vms.em: Likewise.
+	* ldlang.c (new_afile): Set maybe_archive instead of is_archive..
+	* ldlang.h (lang_input_statement_struct): Replace is_archive
+	with maybe_archive.
+
+	2010-12-05  H.J. Lu  <hongjiu.lu@intel.com>
+	* plugin.c (asymbol_from_plugin_symbol): Properly convert LTO
+	plugin visibility to ELF visibility.
+	(is_visible_from_outside): Re-indent.
+
+	2010-11-21  H.J. Lu  <hongjiu.lu@intel.com>
+	* ldfile.c: Re-indent plugin code.
+	* ldlang.c: Likewise.
+	* ldmain.c: Likewise.
+	* plugin.c: Likewise.
+
+	2010-11-20  H.J. Lu  <hongjiu.lu@intel.com>
+	PR ld/12246
+	* plugin.c (asymbol_from_plugin_symbol): Set alignment of
+	common symbol to 1 for For ELF targets.
+
+	2010-11-20  H.J. Lu  <hongjiu.lu@intel.com>
+	PR ld/12247
+	* lexsup.c (parse_args): Properly report loading plugin error.
+
 2010-12-21  Alan Modra  <amodra@gmail.com>
 
 	* po/ja.po: Update.

@@ -172,7 +172,7 @@ expr_build_dot (void)
   expressionS e;
 
   current_location (&e);
-  return make_expr_symbol (&e);
+  return symbol_clone_if_forward_ref (make_expr_symbol (&e));
 }
 
 /* Build any floating-point literal here.
@@ -705,7 +705,7 @@ current_location (expressionS *expressionp)
   else
     {
       expressionp->X_op = O_symbol;
-      expressionp->X_add_symbol = symbol_temp_new_now ();
+      expressionp->X_add_symbol = &dot_symbol;
       expressionp->X_add_number = 0;
     }
 }
@@ -1325,7 +1325,9 @@ operand (expressionS *expressionP, enum expr_mode mode)
 	  /* If we have an absolute symbol or a reg, then we know its
 	     value now.  */
 	  segment = S_GET_SEGMENT (symbolP);
-	  if (mode != expr_defer && segment == absolute_section)
+	  if (mode != expr_defer
+	      && segment == absolute_section
+	      && !S_FORCE_RELOC (symbolP, 0))
 	    {
 	      expressionP->X_op = O_constant;
 	      expressionP->X_add_number = S_GET_VALUE (symbolP);
@@ -1373,8 +1375,13 @@ operand (expressionS *expressionP, enum expr_mode mode)
   if (expressionP->X_add_symbol)
     symbol_mark_used (expressionP->X_add_symbol);
 
-  expressionP->X_add_symbol = symbol_clone_if_forward_ref (expressionP->X_add_symbol);
-  expressionP->X_op_symbol = symbol_clone_if_forward_ref (expressionP->X_op_symbol);
+  if (mode != expr_defer)
+    {
+      expressionP->X_add_symbol
+	= symbol_clone_if_forward_ref (expressionP->X_add_symbol);
+      expressionP->X_op_symbol
+	= symbol_clone_if_forward_ref (expressionP->X_op_symbol);
+    }
 
   switch (expressionP->X_op)
     {
@@ -1835,7 +1842,9 @@ expr (int rankarg,		/* Larger # is higher rank.  */
 #ifdef md_allow_local_subtract
 	       && md_allow_local_subtract (resultP, & right, rightseg)
 #endif
-	       && (SEG_NORMAL (rightseg)
+	       && ((SEG_NORMAL (rightseg)
+		    && !S_FORCE_RELOC (resultP->X_add_symbol, 0)
+		    && !S_FORCE_RELOC (right.X_add_symbol, 0))
 		   || right.X_add_symbol == resultP->X_add_symbol)
 	       && frag_offset_fixed_p (symbol_get_frag (resultP->X_add_symbol),
 				       symbol_get_frag (right.X_add_symbol),
@@ -1949,7 +1958,10 @@ expr (int rankarg,		/* Larger # is higher rank.  */
 	  else if (op_left == O_subtract)
 	    {
 	      resultP->X_add_number -= right.X_add_number;
-	      if (retval == rightseg && SEG_NORMAL (retval))
+	      if (retval == rightseg
+		  && SEG_NORMAL (retval)
+		  && !S_FORCE_RELOC (resultP->X_add_symbol, 0)
+		  && !S_FORCE_RELOC (right.X_add_symbol, 0))
 		{
 		  retval = absolute_section;
 		  rightseg = absolute_section;

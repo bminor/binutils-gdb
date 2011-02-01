@@ -55,6 +55,7 @@
 #include "elf-bfd.h"
 #include "progress.h"
 #include "bucomm.h"
+#include "elfcomm.h"
 #include "dwarf.h"
 #include "getopt.h"
 #include "safe-ctype.h"
@@ -206,7 +207,7 @@ usage (FILE *stream, int status)
   -W[lLiaprmfFsoRt] or\n\
   --dwarf[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,\n\
           =frames-interp,=str,=loc,=Ranges,=pubtypes,\n\
-          =trace_info,=trace_abbrev,=trace_aranges]\n\
+          =gdb_index,=trace_info,=trace_abbrev,=trace_aranges]\n\
                            Display DWARF info in the file\n\
   -t, --syms               Display the contents of the symbol table(s)\n\
   -T, --dynamic-syms       Display the contents of the dynamic symbol table\n\
@@ -511,8 +512,6 @@ dump_headers (bfd *abfd)
 
   if (wide_output)
     printf (_("  Flags"));
-  if (abfd->flags & HAS_LOAD_PAGE)
-    printf (_("  Pg"));
   printf ("\n");
 
   bfd_map_over_sections (abfd, dump_section_header, NULL);

@@ -8220,7 +8220,6 @@ alpha_vms_link_add_archive_symbols (bfd *abfd, struct bfd_link_info *info)
       symindex symidx;
       bfd *element;
       bfd *orig_element;
-      bfd *subsbfd;
 
       h = *pundef;
       next_pundef = &(*pundef)->u.undef.next;
@@ -8278,14 +8277,10 @@ alpha_vms_link_add_archive_symbols (bfd *abfd, struct bfd_link_info *info)
       /* Unlike the generic linker, we know that this element provides
 	 a definition for an undefined symbol and we know that we want
 	 to include it.  We don't need to check anything.  */
-      subsbfd = NULL;
-      if (! (*info->callbacks->add_archive_element)
-				(info, element, h->root.string, &subsbfd))
+      if (!(*info->callbacks
+	    ->add_archive_element) (info, element, h->root.string, &element))
 	return FALSE;
-      /* Potentially, the add_archive_element hook may have set a
-	 substitute BFD for us.  */
-      if (! alpha_vms_link_add_object_symbols (subsbfd ? subsbfd : element,
-				info))
+      if (!alpha_vms_link_add_object_symbols (element, info))
 	return FALSE;
 
       orig_element->archive_pass = pass;

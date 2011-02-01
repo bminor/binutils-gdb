@@ -249,7 +249,7 @@ typedef struct lang_input_statement_struct
 
   const char *target;
 
-  unsigned int is_archive : 1;
+  unsigned int maybe_archive : 1;
 
   /* 1 means search a set of directories for this file.  */
   unsigned int search_dirs_flag : 1;
@@ -649,5 +649,8 @@ extern bfd_boolean load_symbols
 extern bfd_boolean
 ldlang_override_segment_assignment
   (struct bfd_link_info *, bfd *, asection *, asection *, bfd_boolean);
+
+extern void
+lang_ld_feature (char *);
 
 #endif

@@ -3196,7 +3196,6 @@ copy_main (int argc, char *argv[])
   struct section_list *p;
   struct stat statbuf;
   const bfd_arch_info_type *input_arch = NULL;
-  struct dwarf_debug_section *d;
 
   while ((c = getopt_long (argc, argv, "b:B:i:I:j:K:N:s:O:d:F:L:G:R:SpgxXHhVvW:w",
 			   copy_options, (int *) 0)) != EOF)
@@ -3911,22 +3910,6 @@ copy_main (int argc, char *argv[])
   if (tmpname == NULL)
     fatal (_("warning: could not create temporary file whilst copying '%s', (error: %s)"),
 	   input_filename, strerror (errno));
-
-  switch (do_debug_sections)
-    {
-    case compress:
-      for (d = dwarf_debug_sections; d->uncompressed_name; d++)
-	add_section_rename (d->uncompressed_name, d->compressed_name,
-			    (flagword) -1);
-      break;
-    case decompress:
-      for (d = dwarf_debug_sections; d->uncompressed_name; d++)
-	add_section_rename (d->compressed_name, d->uncompressed_name,
-			    (flagword) -1);
-      break;
-    default:
-      break;
-    }
 
   copy_file (input_filename, tmpname, input_target, output_target, input_arch);
   if (status == 0)

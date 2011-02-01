@@ -8,7 +8,7 @@ fi
 fragment <<EOF
 /* This file is part of GLD, the Gnu Linker.
    Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
-   2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+   2005, 2006, 2007, 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils.
 
@@ -270,11 +270,7 @@ gld${EMULATION_NAME}_handle_option (int optc)
     case OPTION_BASE_FILE:
       link_info.base_file = fopen (optarg, FOPEN_WB);
       if (link_info.base_file == NULL)
-	{
-	  fprintf (stderr, "%s: Can't open base file %s\n",
-		   program_name, optarg);
-	  xexit (1);
-	}
+	einfo (_("%F%P: cannot open base file %s\n"), optarg);
       break;
 
       /* PE options */
@@ -351,7 +347,7 @@ gld_${EMULATION_NAME}_set_symbols (void)
   for (j = 0; init[j].ptr; j++)
     {
       long val = init[j].value;
-      lang_add_assignment (exp_assop ('=', init[j].symbol, exp_intop (val)));
+      lang_add_assignment (exp_assign (init[j].symbol, exp_intop (val)));
       if (init[j].size == sizeof(short))
 	*(short *)init[j].ptr = val;
       else if (init[j].size == sizeof(int))
@@ -376,6 +372,8 @@ gld_${EMULATION_NAME}_set_symbols (void)
 static void
 gld_${EMULATION_NAME}_after_open (void)
 {
+  after_open_default ();
+
   /* Pass the wacky PE command line options into the output bfd.
      FIXME: This should be done via a function, rather than by
      including an internal BFD header.  */

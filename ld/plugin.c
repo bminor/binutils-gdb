@@ -1,5 +1,5 @@
 /* Plugin control for the GNU linker.
-   Copyright 2010 Free Software Foundation, Inc.
+   Copyright 2010, 2011 Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils.
 
@@ -107,6 +107,9 @@ static bfd_boolean no_more_claiming = FALSE;
    effect (when not resolving IR vs. real symbols) ourselves by ensuring
    TRUE is returned from the hook.  */
 static bfd_boolean plugin_cached_allow_multiple_defs = FALSE;
+
+/* Call 'cleanup' hook for all plugins at exit.  */
+static void plugin_call_cleanup (void);
 
 /* List of tags to set in the constant leading part of the tv array. */
 static const enum ld_plugin_tag tv_header_tags[] =
@@ -234,6 +237,8 @@ plugin_get_ir_dummy_bfd (const char *name, bfd *srctemplate)
 		     srctemplate);
   bfd_set_arch_info (abfd, bfd_get_arch_info (srctemplate));
   bfd_make_writable (abfd);
+  bfd_copy_private_bfd_data (srctemplate, abfd);
+  bfd_set_gp_size (abfd, bfd_get_gp_size (abfd));
   /* Create a minimal set of sections to own the symbols.  */
   sec = bfd_make_section_old_way (abfd, ".text");
   bfd_set_section_flags (abfd, sec,
@@ -261,15 +266,15 @@ is_ir_dummy_bfd (const bfd *abfd)
 /* Helpers to convert between BFD and GOLD symbol formats.  */
 static enum ld_plugin_status
 asymbol_from_plugin_symbol (bfd *abfd, asymbol *asym,
-				const struct ld_plugin_symbol *ldsym)
+			    const struct ld_plugin_symbol *ldsym)
 {
   flagword flags = BSF_NO_FLAGS;
   struct bfd_section *section;
 
   asym->the_bfd = abfd;
-  asym->name = ldsym->version
+  asym->name = (ldsym->version
 		? concat (ldsym->name, "@", ldsym->version, NULL)
-		: ldsym->name;
+		: ldsym->name);
   asym->value = 0;
   switch (ldsym->def)
     {
@@ -292,6 +297,9 @@ asymbol_from_plugin_symbol (bfd *abfd, asymbol *asym,
       flags = BSF_GLOBAL;
       section = bfd_com_section_ptr;
       asym->value = ldsym->size;
+      /* For ELF targets, set alignment of common symbol to 1.  */
+      if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
+	((elf_symbol_type *) asym)->internal_elf_sym.st_value = 1;
       break;
 
     default:
@@ -304,10 +312,31 @@ asymbol_from_plugin_symbol (bfd *abfd, asymbol *asym,
   if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
     {
       elf_symbol_type *elfsym = elf_symbol_from (abfd, asym);
+      unsigned char visibility;
+
       if (!elfsym)
-	einfo (_("%P%F: %s: non-ELF symbol in ELF BFD!"), asym->name);
-      elfsym->internal_elf_sym.st_other &= ~3;
-      elfsym->internal_elf_sym.st_other |= ldsym->visibility;
+	einfo (_("%P%F: %s: non-ELF symbol in ELF BFD!\n"), asym->name);
+      switch (ldsym->visibility)
+	{
+	default:
+	  einfo (_("%P%F: unknown ELF symbol visibility: %d!\n"),
+		 ldsym->visibility);
+	case LDPV_DEFAULT:
+	  visibility = STV_DEFAULT;
+	  break;
+	case LDPV_PROTECTED:
+	  visibility = STV_PROTECTED;
+	  break;
+	case LDPV_INTERNAL:
+	  visibility = STV_INTERNAL;
+	  break;
+	case LDPV_HIDDEN:
+	  visibility = STV_HIDDEN;
+	  break;
+	}
+      elfsym->internal_elf_sym.st_other
+	= (visibility | (elfsym->internal_elf_sym.st_other
+			 & ~ELF_ST_VISIBILITY (-1)));
     }
 
   return LDPS_OK;
@@ -386,7 +415,7 @@ release_input_file (const void *handle)
    universe of claimed objects.  */
 static inline bfd_boolean
 is_visible_from_outside (struct ld_plugin_symbol *lsym, asection *section,
-			struct bfd_link_hash_entry *blhe)
+			 struct bfd_link_hash_entry *blhe)
 {
   /* Section's owner may be NULL if it is the absolute
      section, fortunately is_ir_dummy_bfd handles that.  */
@@ -404,7 +433,7 @@ is_visible_from_outside (struct ld_plugin_symbol *lsym, asection *section,
 	  return vis == STV_DEFAULT || vis == STV_PROTECTED;
 	}
       /* On non-ELF targets, we can safely make inferences by considering
-         what visibility the plugin would have liked to apply when it first
+	 what visibility the plugin would have liked to apply when it first
 	 sent us the symbol.  During ELF symbol processing, visibility only
 	 ever becomes more restrictive, not less, when symbols are merged,
 	 so this is a conservative estimate; it may give false positives,
@@ -413,8 +442,8 @@ is_visible_from_outside (struct ld_plugin_symbol *lsym, asection *section,
 	 opportunities during LTRANS at worst; it will not give false
 	 negatives, which can lead to the disastrous conclusion that the
 	 related symbol is IRONLY.  (See GCC PR46319 for an example.)  */
-      return lsym->visibility == LDPV_DEFAULT
-	  || lsym->visibility == LDPV_PROTECTED;
+      return (lsym->visibility == LDPV_DEFAULT
+	      || lsym->visibility == LDPV_PROTECTED);
     }
   return FALSE;
 }
@@ -433,7 +462,7 @@ get_symbols (const void *handle, int nsyms, struct ld_plugin_symbol *syms)
       asection *owner_sec;
 
       blhe = bfd_link_hash_lookup (link_info.hash, syms[n].name,
-				FALSE, FALSE, TRUE);
+				   FALSE, FALSE, TRUE);
       if (!blhe)
 	{
 	  syms[n].resolution = LDPR_UNKNOWN;
@@ -442,48 +471,50 @@ get_symbols (const void *handle, int nsyms, struct ld_plugin_symbol *syms)
 
       /* Determine resolution from blhe type and symbol's original type.  */
       if (blhe->type == bfd_link_hash_undefined
-		|| blhe->type == bfd_link_hash_undefweak)
+	  || blhe->type == bfd_link_hash_undefweak)
 	{
 	  syms[n].resolution = LDPR_UNDEF;
 	  continue;
 	}
       if (blhe->type != bfd_link_hash_defined
-		&& blhe->type != bfd_link_hash_defweak
-		&& blhe->type != bfd_link_hash_common)
+	  && blhe->type != bfd_link_hash_defweak
+	  && blhe->type != bfd_link_hash_common)
 	{
 	  /* We should not have a new, indirect or warning symbol here.  */
-	  einfo ("%P%F: %s: plugin symbol table corrupt (sym type %d)",
-		called_plugin->name, blhe->type);
+	  einfo ("%P%F: %s: plugin symbol table corrupt (sym type %d)\n",
+		 called_plugin->name, blhe->type);
 	}
 
       /* Find out which section owns the symbol.  Since it's not undef,
 	 it must have an owner; if it's not a common symbol, both defs
 	 and weakdefs keep it in the same place. */
       owner_sec = (blhe->type == bfd_link_hash_common)
-		? blhe->u.c.p->section
-		: blhe->u.def.section;
+	? blhe->u.c.p->section
+	: blhe->u.def.section;
 
       /* We need to know if the sym is referenced from non-IR files.  Or
-         even potentially-referenced, perhaps in a future final link if
+	 even potentially-referenced, perhaps in a future final link if
 	 this is a partial one, perhaps dynamically at load-time if the
 	 symbol is externally visible.  */
       ironly = !is_visible_from_outside (&syms[n], owner_sec, blhe)
 	&& !bfd_hash_lookup (non_ironly_hash, syms[n].name, FALSE, FALSE);
 
       /* If it was originally undefined or common, then it has been
-         resolved; determine how.  */
-      if (syms[n].def == LDPK_UNDEF || syms[n].def == LDPK_WEAKUNDEF
+	 resolved; determine how.  */
+      if (syms[n].def == LDPK_UNDEF
+	  || syms[n].def == LDPK_WEAKUNDEF
 	  || syms[n].def == LDPK_COMMON)
 	{
 	  if (owner_sec->owner == link_info.output_bfd)
 	    syms[n].resolution = LDPR_RESOLVED_EXEC;
 	  else if (owner_sec->owner == abfd)
-	    syms[n].resolution = (ironly)
-				? LDPR_PREVAILING_DEF_IRONLY
-				: LDPR_PREVAILING_DEF;
+	    syms[n].resolution = (ironly
+				  ? LDPR_PREVAILING_DEF_IRONLY
+				  : LDPR_PREVAILING_DEF);
 	  else if (is_ir_dummy_bfd (owner_sec->owner))
 	    syms[n].resolution = LDPR_RESOLVED_IR;
-	  else if (owner_sec->owner->flags & DYNAMIC)
+	  else if (owner_sec->owner != NULL
+		   && (owner_sec->owner->flags & DYNAMIC) != 0)
 	    syms[n].resolution =  LDPR_RESOLVED_DYN;
 	  else
 	    syms[n].resolution = LDPR_RESOLVED_EXEC;
@@ -491,22 +522,22 @@ get_symbols (const void *handle, int nsyms, struct ld_plugin_symbol *syms)
 	}
 
       /* Was originally def, or weakdef.  Does it prevail?  If the
-         owner is the original dummy bfd that supplied it, then this
+	 owner is the original dummy bfd that supplied it, then this
 	 is the definition that has prevailed.  */
       if (owner_sec->owner == link_info.output_bfd)
 	syms[n].resolution = LDPR_PREEMPTED_REG;
       else if (owner_sec->owner == abfd)
 	{
-	  syms[n].resolution = (ironly)
+	  syms[n].resolution = (ironly
 				? LDPR_PREVAILING_DEF_IRONLY
-				: LDPR_PREVAILING_DEF;
+				: LDPR_PREVAILING_DEF);
 	  continue;
 	}
 
       /* Was originally def, weakdef, or common, but has been pre-empted.  */
       syms[n].resolution = is_ir_dummy_bfd (owner_sec->owner)
-				? LDPR_PREEMPTED_IR
-				: LDPR_PREEMPTED_REG;
+	? LDPR_PREEMPTED_IR
+	: LDPR_PREEMPTED_REG;
     }
   return LDPS_OK;
 }
@@ -517,7 +548,7 @@ add_input_file (const char *pathname)
 {
   ASSERT (called_plugin);
   if (!lang_add_input_file (xstrdup (pathname), lang_input_file_is_file_enum,
-	NULL))
+			    NULL))
     return LDPS_ERR;
   return LDPS_OK;
 }
@@ -528,7 +559,7 @@ add_input_library (const char *pathname)
 {
   ASSERT (called_plugin);
   if (!lang_add_input_file (xstrdup (pathname), lang_input_file_is_l_enum,
-	NULL))
+			    NULL))
     return LDPS_ERR;
   return LDPS_OK;
 }
@@ -554,18 +585,23 @@ message (int level, const char *format, ...)
     {
     case LDPL_INFO:
       vfinfo (stdout, format, args, FALSE);
+      putchar ('\n');
       break;
     case LDPL_WARNING:
       vfinfo (stdout, format, args, TRUE);
+      putchar ('\n');
       break;
     case LDPL_FATAL:
     case LDPL_ERROR:
     default:
-      {
-	char *newfmt = ACONCAT ((level == LDPL_FATAL ? "%F" : "%X",
-				format, NULL));
-	vfinfo (stderr, newfmt, args, TRUE);
-      }
+	{
+	  char *newfmt = ACONCAT ((level == LDPL_FATAL
+				   ? "%P%F: " : "%P%X: ",
+				   format, "\n", NULL));
+	  fflush (stdout);
+	  vfinfo (stderr, newfmt, args, TRUE);
+	  fflush (stderr);
+	}
       break;
     }
 
@@ -592,56 +628,57 @@ set_tv_header (struct ld_plugin_tv *tv)
 #define TVU(x) tv[i].tv_u.tv_ ## x
       switch (tv[i].tv_tag)
 	{
-	  case LDPT_MESSAGE:
-	    TVU(message) = message;
-	    break;
-	  case LDPT_API_VERSION:
-	    TVU(val) = LD_PLUGIN_API_VERSION;
-	    break;
-	  case LDPT_GNU_LD_VERSION:
-	    TVU(val) = major * 100 + minor;
-	    break;
-	  case LDPT_LINKER_OUTPUT:
-	    TVU(val) = link_info.relocatable ? LDPO_REL
-			: (link_info.shared ? LDPO_DYN : LDPO_EXEC);
-	    break;
-	  case LDPT_OUTPUT_NAME:
-	    TVU(string) = output_filename;
-	    break;
-	  case LDPT_REGISTER_CLAIM_FILE_HOOK:
-	    TVU(register_claim_file) = register_claim_file;
-	    break;
-	  case LDPT_REGISTER_ALL_SYMBOLS_READ_HOOK:
-	    TVU(register_all_symbols_read) = register_all_symbols_read;
-	    break;
-	  case LDPT_REGISTER_CLEANUP_HOOK:
-	    TVU(register_cleanup) = register_cleanup;
-	    break;
-	  case LDPT_ADD_SYMBOLS:
-	    TVU(add_symbols) = add_symbols;
-	    break;
-	  case LDPT_GET_INPUT_FILE:
-	    TVU(get_input_file) = get_input_file;
-	    break;
-	  case LDPT_RELEASE_INPUT_FILE:
-	    TVU(release_input_file) = release_input_file;
-	    break;
-	  case LDPT_GET_SYMBOLS:
-	    TVU(get_symbols) = get_symbols;
-	    break;
-	  case LDPT_ADD_INPUT_FILE:
-	    TVU(add_input_file) = add_input_file;
-	    break;
-	  case LDPT_ADD_INPUT_LIBRARY:
-	    TVU(add_input_library) = add_input_library;
-	    break;
-	  case LDPT_SET_EXTRA_LIBRARY_PATH:
-	    TVU(set_extra_library_path) = set_extra_library_path;
-	    break;
-	  default:
-	    /* Added a new entry to the array without adding
-	       a new case to set up its value is a bug.  */
-	    FAIL ();
+	case LDPT_MESSAGE:
+	  TVU(message) = message;
+	  break;
+	case LDPT_API_VERSION:
+	  TVU(val) = LD_PLUGIN_API_VERSION;
+	  break;
+	case LDPT_GNU_LD_VERSION:
+	  TVU(val) = major * 100 + minor;
+	  break;
+	case LDPT_LINKER_OUTPUT:
+	  TVU(val) = (link_info.relocatable
+		      ? LDPO_REL
+		      : (link_info.shared ? LDPO_DYN : LDPO_EXEC));
+	  break;
+	case LDPT_OUTPUT_NAME:
+	  TVU(string) = output_filename;
+	  break;
+	case LDPT_REGISTER_CLAIM_FILE_HOOK:
+	  TVU(register_claim_file) = register_claim_file;
+	  break;
+	case LDPT_REGISTER_ALL_SYMBOLS_READ_HOOK:
+	  TVU(register_all_symbols_read) = register_all_symbols_read;
+	  break;
+	case LDPT_REGISTER_CLEANUP_HOOK:
+	  TVU(register_cleanup) = register_cleanup;
+	  break;
+	case LDPT_ADD_SYMBOLS:
+	  TVU(add_symbols) = add_symbols;
+	  break;
+	case LDPT_GET_INPUT_FILE:
+	  TVU(get_input_file) = get_input_file;
+	  break;
+	case LDPT_RELEASE_INPUT_FILE:
+	  TVU(release_input_file) = release_input_file;
+	  break;
+	case LDPT_GET_SYMBOLS:
+	  TVU(get_symbols) = get_symbols;
+	  break;
+	case LDPT_ADD_INPUT_FILE:
+	  TVU(add_input_file) = add_input_file;
+	  break;
+	case LDPT_ADD_INPUT_LIBRARY:
+	  TVU(add_input_library) = add_input_library;
+	  break;
+	case LDPT_SET_EXTRA_LIBRARY_PATH:
+	  TVU(set_extra_library_path) = set_extra_library_path;
+	  break;
+	default:
+	  /* Added a new entry to the array without adding
+	     a new case to set up its value is a bug.  */
+	  FAIL ();
 	}
 #undef TVU
     }
@@ -684,6 +721,8 @@ plugin_load_plugins (void)
   if (!curplug)
     return 0;
 
+  xatexit (plugin_call_cleanup);
+
   /* First pass over plugins to find max # args needed so that we
      can size and allocate the tv array.  */
   while (curplug)
@@ -706,13 +745,13 @@ plugin_load_plugins (void)
       if (!onloadfn)
 	onloadfn = dlsym (curplug->dlhandle, "_onload");
       if (!onloadfn)
-        return set_plugin_error (curplug->name);
+	return set_plugin_error (curplug->name);
       set_tv_plugin_args (curplug, &my_tv[tv_header_size]);
       called_plugin = curplug;
       rv = (*onloadfn) (my_tv);
       called_plugin = NULL;
       if (rv != LDPS_OK)
-        return set_plugin_error (curplug->name);
+	return set_plugin_error (curplug->name);
       curplug = curplug->next;
     }
 
@@ -780,8 +819,8 @@ plugin_call_all_symbols_read (void)
   return plugin_error_p () ? -1 : 0;
 }
 
-/* Call 'cleanup' hook for all plugins.  */
-int
+/* Call 'cleanup' hook for all plugins at exit.  */
+static void
 plugin_call_cleanup (void)
 {
   plugin_t *curplug = plugins_list;
@@ -800,7 +839,9 @@ plugin_call_cleanup (void)
 	}
       curplug = curplug->next;
     }
-  return plugin_error_p () ? -1 : 0;
+  if (plugin_error_p ())
+    info_msg (_("%P: %s: error in plugin cleanup (ignored)\n"),
+	      plugin_error_plugin ());
 }
 
 /* Lazily init the non_ironly hash table.  */
@@ -810,7 +851,7 @@ init_non_ironly_hash (void)
   if (non_ironly_hash == NULL)
     {
       non_ironly_hash =
-          (struct bfd_hash_table *) xmalloc (sizeof (struct bfd_hash_table));
+	(struct bfd_hash_table *) xmalloc (sizeof (struct bfd_hash_table));
       if (!bfd_hash_table_init_n (non_ironly_hash,
 				  bfd_hash_newfunc,
 				  sizeof (struct bfd_hash_entry),
@@ -829,8 +870,8 @@ init_non_ironly_hash (void)
    contributed by IR files.  */
 bfd_boolean
 plugin_notice (struct bfd_link_info *info ATTRIBUTE_UNUSED,
-		const char *name, bfd *abfd,
-		asection *section, bfd_vma value ATTRIBUTE_UNUSED)
+	       const char *name, bfd *abfd,
+	       asection *section, bfd_vma value ATTRIBUTE_UNUSED)
 {
   bfd_boolean is_ref = bfd_is_und_section (section);
   bfd_boolean is_dummy = is_ir_dummy_bfd (abfd);
@@ -841,10 +882,10 @@ plugin_notice (struct bfd_link_info *info ATTRIBUTE_UNUSED,
   if (is_ref && !is_dummy)
     {
       /* This is a ref from a non-IR file, so note the ref'd symbol
-         in the non-IR-only hash.  */
+	 in the non-IR-only hash.  */
       if (!bfd_hash_lookup (non_ironly_hash, name, TRUE, TRUE))
-        einfo (_("%P%X: %s: hash table failure adding symbol %s"),
-		abfd->filename, name);
+	einfo (_("%P%X: %s: hash table failure adding symbol %s\n"),
+	       abfd->filename, name);
     }
   else if (!is_ref && is_dummy)
     {
@@ -867,19 +908,19 @@ plugin_notice (struct bfd_link_info *info ATTRIBUTE_UNUSED,
    effect (before we disabled it to ensure we got called back).  */
 bfd_boolean
 plugin_multiple_definition (struct bfd_link_info *info, const char *name,
-		bfd *obfd, asection *osec ATTRIBUTE_UNUSED,
-		bfd_vma oval ATTRIBUTE_UNUSED,
-		bfd *nbfd, asection *nsec, bfd_vma nval)
+			    bfd *obfd, asection *osec ATTRIBUTE_UNUSED,
+			    bfd_vma oval ATTRIBUTE_UNUSED,
+			    bfd *nbfd, asection *nsec, bfd_vma nval)
 {
   if (is_ir_dummy_bfd (obfd))
     {
-      struct bfd_link_hash_entry *blhe = bfd_link_hash_lookup (info->hash,
-					name, FALSE, FALSE, FALSE);
+      struct bfd_link_hash_entry *blhe
+	= bfd_link_hash_lookup (info->hash, name, FALSE, FALSE, FALSE);
       if (!blhe)
-	einfo (_("%P%X: %s: can't find IR symbol '%s'"), nbfd->filename,
-		name);
+	einfo (_("%P%X: %s: can't find IR symbol '%s'\n"), nbfd->filename,
+	       name);
       else if (blhe->type != bfd_link_hash_defined)
-	einfo (_("%P%x: %s: bad IR symbol type %d"), name, blhe->type);
+	einfo (_("%P%x: %s: bad IR symbol type %d\n"), name, blhe->type);
       /* Replace it with new details.  */
       blhe->u.def.section = nsec;
       blhe->u.def.value = nval;

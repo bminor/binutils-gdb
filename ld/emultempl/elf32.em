@@ -13,7 +13,7 @@ fragment <<EOF
 
 /* ${ELFSIZE} bit ELF emulation code for ${EMULATION_NAME}
    Copyright 1991, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-   2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009
+   2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011
    Free Software Foundation, Inc.
    Written by Steve Chamberlain <sac@cygnus.com>
    ELF support by Ian Lance Taylor <ian@cygnus.com>
@@ -1059,6 +1059,8 @@ gld${EMULATION_NAME}_after_open (void)
   struct bfd_link_needed_list *needed, *l;
   struct elf_link_hash_table *htab;
 
+  after_open_default ();
+
   htab = elf_hash_table (&link_info);
   if (!is_elf_hash_table (htab))
     return;
@@ -1618,7 +1620,7 @@ gld${EMULATION_NAME}_open_dynamic_archive
   const char *filename;
   char *string;
 
-  if (! entry->is_archive)
+  if (! entry->maybe_archive)
     return FALSE;
 
   filename = entry->filename;
@@ -1672,7 +1674,7 @@ gld${EMULATION_NAME}_open_dynamic_archive
   if (bfd_check_format (entry->the_bfd, bfd_object)
       && (entry->the_bfd->flags & DYNAMIC) != 0)
     {
-      ASSERT (entry->is_archive && entry->search_dirs_flag);
+      ASSERT (entry->maybe_archive && entry->search_dirs_flag);
 
       /* Rather than duplicating the logic above.  Just use the
 	 filename we recorded earlier.  */
@@ -1786,7 +1788,7 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
       { ".sdata",
 	SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_DATA | SEC_SMALL_DATA,
 	0, 0, 0, 0 },
-      { 0,
+      { ".comment",
 	SEC_HAS_CONTENTS,
 	0, 0, 0, 0 },
     };
@@ -1878,7 +1880,6 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
 
   if (!orphan_init_done)
     {
-      lang_output_section_statement_type *lookup;
       struct orphan_save *ho;
 
       for (ho = hold; ho < hold + sizeof (hold) / sizeof (hold[0]); ++ho)
@@ -1888,16 +1889,6 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
 	    if (ho->os != NULL && ho->os->flags == 0)
 	      ho->os->flags = ho->flags;
 	  }
-      lookup = hold[orphan_bss].os;
-      if (lookup == NULL)
-	lookup = &lang_output_section_statement.head->output_section_statement;
-      for (; lookup != NULL; lookup = lookup->next)
-	if ((lookup->bfd_section != NULL
-	     && (lookup->bfd_section->flags & SEC_DEBUGGING) != 0)
-	    || strcmp (lookup->name, ".comment") == 0)
-	  break;
-      hold[orphan_nonalloc].os = lookup ? lookup->prev : NULL;
-      hold[orphan_nonalloc].name = ".comment";
       orphan_init_done = 1;
     }
 

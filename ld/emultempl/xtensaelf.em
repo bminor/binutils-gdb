@@ -1,5 +1,5 @@
 # This shell script emits a C file. -*- C -*-
-#   Copyright 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010
+#   Copyright 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011
 #   Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
@@ -1817,8 +1817,10 @@ ld_local_file_relocations_fit (lang_statement_union_type *statement,
 		  bfd_vma target_addr = e->tgt->output_offset & ~3;
 		  if (l32r_addr < target_addr)
 		    {
+		      fflush (stdout);
 		      fprintf (stderr, "Warning: "
 			       "l32r target section before l32r\n");
+		      fflush (stderr);
 		      return FALSE;
 		    }
 
@@ -1885,7 +1887,7 @@ ld_xtensa_insert_page_offsets (bfd_vma dot,
 		etree_type *name_op = exp_nameop (NAME, ".");
 		etree_type *addend_op = exp_intop (1 << xtensa_page_power);
 		etree_type *add_op = exp_binop ('+', name_op, addend_op);
-		etree_type *assign_op = exp_assop ('=', ".", add_op);
+		etree_type *assign_op = exp_assign (".", add_op);
 
 		lang_assignment_statement_type *assign_stmt;
 		lang_statement_union_type *assign_union;

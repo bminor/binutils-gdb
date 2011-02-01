@@ -59,7 +59,7 @@ decompress_contents (bfd_byte *compressed_buffer,
       rc = inflateReset (&strm);
     }
   rc = inflateEnd (&strm);
-  return rc != Z_OK || strm.avail_out != 0 ? FALSE: TRUE;
+  return rc == Z_OK && strm.avail_out == 0;
 }
 #endif
 
@@ -157,8 +157,8 @@ bfd_get_full_section_contents (bfd *abfd, sec_ptr sec, bfd_byte **ptr)
 {
   bfd_size_type sz = sec->rawsize ? sec->rawsize : sec->size;
   bfd_byte *p = *ptr;
-  bfd_boolean need_free, ret;
 #ifdef HAVE_ZLIB_H
+  bfd_boolean ret;
   bfd_size_type compressed_size;
   bfd_size_type uncompressed_size;
   bfd_size_type rawsize;
@@ -177,88 +177,77 @@ bfd_get_full_section_contents (bfd *abfd, sec_ptr sec, bfd_byte **ptr)
 	  p = (bfd_byte *) bfd_malloc (sz);
 	  if (p == NULL)
 	    return FALSE;
-	  need_free = TRUE;
-	  *ptr = p;
 	}
-      else
-	need_free = FALSE;
-      ret = bfd_get_section_contents (abfd, sec, p, 0, sz);
-      if (!ret && need_free)
-	free (p);
-      return ret;
-
-    case COMPRESS_SECTION_DONE:
-      if (p)
-	memcpy (p, sec->contents, sz);
-      else
-	*ptr = sec->contents;
+      if (!bfd_get_section_contents (abfd, sec, p, 0, sz))
+	{
+	  if (*ptr != p)
+	    free (p);
+	  return FALSE;
+	}
+      *ptr = p;
       return TRUE;
 
     case DECOMPRESS_SECTION_SIZED:
-      break;
+#ifndef HAVE_ZLIB_H
+      bfd_set_error (bfd_error_invalid_operation);
+      return FALSE;
+#else
+      /* Read in the full compressed section contents.  */
+      uncompressed_size = sec->size;
+      compressed_size = sec->compressed_size;
+      compressed_buffer = (bfd_byte *) bfd_malloc (compressed_size);
+      if (compressed_buffer == NULL)
+	return FALSE;
+      rawsize = sec->rawsize;
+      /* Clear rawsize, set size to compressed size and set compress_status
+	 to COMPRESS_SECTION_NONE.  If the compressed size is bigger than
+	 the uncompressed size, bfd_get_section_contents will fail.  */
+      sec->rawsize = 0;
+      sec->size = compressed_size;
+      sec->compress_status = COMPRESS_SECTION_NONE;
+      ret = bfd_get_section_contents (abfd, sec, compressed_buffer,
+				      0, compressed_size);
+      /* Restore rawsize and size.  */
+      sec->rawsize = rawsize;
+      sec->size = uncompressed_size;
+      sec->compress_status = DECOMPRESS_SECTION_SIZED;
+      if (!ret)
+	goto fail_compressed;
+
+      uncompressed_buffer = (bfd_byte *) bfd_malloc (uncompressed_size);
+      if (uncompressed_buffer == NULL)
+	goto fail_compressed;
+
+      if (!decompress_contents (compressed_buffer, compressed_size,
+				uncompressed_buffer, uncompressed_size))
+	{
+	  bfd_set_error (bfd_error_bad_value);
+	  free (uncompressed_buffer);
+	fail_compressed:
+	  free (compressed_buffer);
+	  return FALSE;
+	}
+
+      free (compressed_buffer);
+      sec->contents = uncompressed_buffer;
+      sec->compress_status = COMPRESS_SECTION_DONE;
+      /* Fall thru */
+#endif
+
+    case COMPRESS_SECTION_DONE:
+      if (p == NULL)
+	{
+	  p = (bfd_byte *) bfd_malloc (sz);
+	  if (p == NULL)
+	    return FALSE;
+	  *ptr = p;
+	}
+      memcpy (p, sec->contents, sz);
+      return TRUE;
 
     default:
       abort ();
     }
-
-#ifndef HAVE_ZLIB_H
-  bfd_set_error (bfd_error_invalid_operation);
-  return FALSE;
-#else
-  /* Read in the full compressed section contents.  */
-  uncompressed_size = sec->size;
-  compressed_size = sec->compressed_size;
-  compressed_buffer = (bfd_byte *) bfd_malloc (compressed_size);
-  rawsize = sec->rawsize;
-  /* Clear rawsize, set size to compressed size and set compress_status
-     to COMPRESS_SECTION_NONE.  If the compressed size is bigger than
-     the uncompressed size, bfd_get_section_contents will fail.  */
-  sec->rawsize = 0;
-  sec->size = compressed_size;
-  sec->compress_status = COMPRESS_SECTION_NONE;
-  ret = bfd_get_section_contents (abfd, sec, compressed_buffer,
-				  0, compressed_size);
-  /* Restore rawsize and size.  */
-  sec->rawsize = rawsize;
-  sec->size = uncompressed_size;
-  if (!ret)
-    {
-fail_compressed:
-      sec->compress_status = DECOMPRESS_SECTION_SIZED;
-      free (compressed_buffer);
-      return ret;
-    }
-
-  /* Decompress to caller buffer directly if it is provided. */
-  if (p)
-    uncompressed_buffer = p;
-  else
-    {
-      uncompressed_buffer = (bfd_byte *) bfd_malloc (uncompressed_size);
-      if (uncompressed_buffer == NULL)
-	goto fail_compressed;
-    }
-
-  if (!decompress_contents (compressed_buffer, compressed_size,
-			    uncompressed_buffer, uncompressed_size))
-    {
-      sec->compress_status = DECOMPRESS_SECTION_SIZED;
-      free (compressed_buffer);
-      if (p == NULL)
-	free (uncompressed_buffer);
-      bfd_set_error (bfd_error_bad_value);
-      return FALSE;
-    }
-
-  free (compressed_buffer);
-  if (p == NULL)
-    *ptr = uncompressed_buffer;
-
-  sec->contents = uncompressed_buffer;
-  sec->compress_status = COMPRESS_SECTION_DONE;
-
-  return TRUE;
-#endif
 }
 
 /*

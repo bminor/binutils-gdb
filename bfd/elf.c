@@ -1,7 +1,7 @@
 /* ELF executable support for BFD.
 
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-   2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010
+   2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -822,11 +822,7 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
   const struct elf_backend_data *bed;
 
   if (hdr->bfd_section != NULL)
-    {
-      BFD_ASSERT (strcmp (name,
-			  bfd_get_section_name (abfd, hdr->bfd_section)) == 0);
-      return TRUE;
-    }
+    return TRUE;
 
   newsect = bfd_make_section_anyway (abfd, name);
   if (newsect == NULL)
@@ -1016,6 +1012,7 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
 	  || (name[1] == 'z' && name[7] == '_')))
     {
       enum { nothing, compress, decompress } action = nothing;
+      char *new_name;
 
       if (bfd_is_section_compressed (abfd, newsect))
 	{
@@ -1030,6 +1027,7 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
 	    action = compress;
 	}
 
+      new_name = NULL;
       switch (action)
 	{
 	case nothing:
@@ -1042,6 +1040,17 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
 		 abfd, name);
 	      return FALSE;
 	    }
+	  if (name[1] != 'z')
+	    {
+	      unsigned int len = strlen (name);
+
+	      new_name = bfd_alloc (abfd, len + 2);
+	      if (new_name == NULL)
+		return FALSE;
+	      new_name[0] = '.';
+	      new_name[1] = 'z';
+	      memcpy (new_name + 2, name + 1, len);
+	    }
 	  break;
 	case decompress:
 	  if (!bfd_init_section_decompress_status (abfd, newsect))
@@ -1051,8 +1060,20 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
 		 abfd, name);
 	      return FALSE;
 	    }
+	  if (name[1] == 'z')
+	    {
+	      unsigned int len = strlen (name);
+
+	      new_name = bfd_alloc (abfd, len);
+	      if (new_name == NULL)
+		return FALSE;
+	      new_name[0] = '.';
+	      memcpy (new_name + 1, name + 2, len - 1);
+	    }
 	  break;
 	}
+      if (new_name != NULL)
+	bfd_rename_section (abfd, newsect, new_name);
     }
 
   return TRUE;
@@ -4251,10 +4272,12 @@ print_segment_map (const struct elf_segment_map *m)
 		  (unsigned int) m->p_type);
       pt = buf;
     }
+  fflush (stdout);
   fprintf (stderr, "%s:", pt);
   for (j = 0; j < m->count; j++)
     fprintf (stderr, " %s", m->sections [j]->name);
   putc ('\n',stderr);
+  fflush (stderr);
 }
 
 static bfd_boolean

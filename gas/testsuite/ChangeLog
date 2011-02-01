@@ -1,3 +1,11 @@
+2011-02-01  Alan Modra  <amodra@gmail.com>
+
+	Backport from mainline
+	2010-12-02  Richard Sandiford  <richard.sandiford@linaro.org>
+	* gas/i386/ifunc-2.s, gas/i386/ifunc-2.l: New test.
+	* gas/i386/ifunc-3.s, gas/i386/ifunc-3.d: Likeise.
+	* gas/i386/i386.exp: Run them.
+
 2010-11-15  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* gas/mips/elf-rel28.s, gas/mips/elf-rel28-n32.d,

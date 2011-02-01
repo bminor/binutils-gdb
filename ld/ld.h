@@ -291,6 +291,10 @@ typedef struct {
      on the command line.  */
   bfd_boolean only_cmd_line_lib_dirs;
 
+  /* If set, numbers and absolute symbols are simply treated as
+     numbers everywhere.  */
+  bfd_boolean sane_expr;
+
   /* The rpath separation character.  Usually ':'.  */
   char rpath_separator;
 

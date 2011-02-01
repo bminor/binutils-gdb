@@ -28,6 +28,7 @@ extern symbolS *symbol_rootP;	/* all the symbol nodes */
 extern symbolS *symbol_lastP;	/* last struct symbol we made, or NULL */
 
 extern symbolS abs_symbol;
+extern symbolS dot_symbol;
 
 extern int symbol_table_frozen;
 
@@ -60,6 +61,7 @@ symbolS *symbol_temp_make (void);
 symbolS *colon (const char *sym_name);
 void local_colon (int n);
 void symbol_begin (void);
+void dot_symbol_init (void);
 void symbol_print_statistics (FILE *);
 void symbol_table_insert (symbolS * symbolP);
 valueT resolve_symbol_value (symbolS *);

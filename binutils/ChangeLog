@@ -1,3 +1,139 @@
+2011-02-01  Alan Modra  <amodra@gmail.com>
+
+	Backport from mainline
+	2011-01-19  Maciej W. Rozycki  <macro@codesourcery.com>
+	* readelf.c (process_object): Free dynamic_section after use.
+
+	2011-01-18  H.J. Lu  <hongjiu.lu@intel.com>
+	PR binutils/12408
+	* readelf.c (process_archive): Free and reset dump_sects
+	after processing each archive member.
+
+	2011-01-11  Andreas Schwab  <schwab@redhat.com>
+	* readelf.c (print_symbol): Handle symbol characters as unsigned.
+	Whitespace fixes.
+
+	2011-01-06  Vladimir Siminov  <sv@sw.ru>
+	* bucomm.c (get_file_size): Check for negative sizes and issue a
+	warning message if encountered.
+
+	2011-01-01  H.J. Lu  <hongjiu.lu@intel.com>
+	* version.c (print_version): Update copyright to 2011.
+
+	2010-12-15  Kai Tietz  <kai.tietz@onevision.com>
+	* dwarf.c (display_gdb_index): Fix printf types for
+	used formatters.
+
+	2010-12-03  Doug Evans  <dje@google.com>
+	* dwarf.c: #include "bfd_stdint.h".
+	(do_gdb_index): New global.
+	(display_gdb_index): New function.
+	(dwarf_select_sections_by_names) Add "gdb_index".
+	(dwarf_select_sections_all): Set do_gdb_index.
+	(debug_displays): Add .gdb_index.
+	* dwarf.h (do_gdb_index): Declare.
+	* objdump.c (usage): Add gdb_index.
+	* readelf.c (usage): Add gdb_index.
+	(process_section_headers): Process ".gdb_index".
+	* doc/binutils.texi (readelf): Document gdb_index dump.
+	(objdump): Ditto.
+
+	2010-11-26  Alan Modra  <amodra@gmail.com>
+	* dwarf.c (decode_location_expression, display_debug_frames): Move
+	code handling DW_EH_PE_pcrel into..
+	(get_encoded_value): ..here.
+
+	2010-11-21  H.J. Lu  <hongjiu.lu@intel.com>
+	PR binutils/12235
+	* elfcomm.c: New.
+	* elfcomm.h: Likewise.
+	* Makefile.am (HFILES): Add elfcomm.h.
+	(CFILES): Add elfcomm.c.
+	(ELFLIBS): New.
+	(readelf_SOURCES): Add $(ELFLIBS).
+	(elfedit_SOURCES): Likewise.
+	(objdump_SOURCES): Likewise.
+	* Makefile.in: Regenerated.
+	* dwarf.c: Include "elfcomm.h".
+	(byte_get): Removed.
+	(byte_get_little_endian): Likewise.
+	(byte_get_big_endian): Likewise.
+	(byte_get_signed): Likewise.
+	(error): Likewise.
+	(warn): Likewise.
+	* dwarf.h (dwarf_vma): Defined with HOST_WIDEST_INT.
+	(dwarf_size_type): Likewise.
+	(byte_get): Removed.
+	(byte_get_signed): Likewise.
+	(byte_get_little_endian): Likewise.
+	(byte_get_big_endian): Likewise.
+	(error): Likewise.
+	(warn): Likewise.
+	* elfedit.c: Include "elfcomm.h".  Don't include "aout/ar.h".
+	Call error () instead of non_fatal ().
+	(streq): Removed.
+	(strneq): Likewise.
+	(const_strneq): Likewise.
+	(non_fatal): Likewise.
+	(BYTE_GET): Likewise.
+	(BYTE_PUT): Likewise.
+	(byte_get): Likewise.
+	(byte_put): Likewise.
+	(byte_get_little_endian): Likewise.
+	(byte_get_big_endian): Likewise.
+	(byte_put_little_endian): Likewise.
+	(byte_put_big_endian): Likewise.
+	(adjust_relative_path): Likewise.
+	(archive_info): Likewise.
+	(setup_archive): Likewise.
+	(release_archive): Likewise.
+	(setup_nested_archive): Likewise.
+	(get_archive_member_name): Likewise.
+	(get_archive_member_name_at): Likewise.
+	(make_qualified_name): Likewise.
+	* objdump.c: Include "elfcomm.h".
+	* readelf.c: Include "elfcomm.h".  Don't include "aout/ar.h".
+	(BYTE_GET): Removed.
+	(BYTE_GET_SIGNED): Removed.
+	(streq): Likewise.
+	(strneq): Likewise.
+	(const_strneq): Likewise.
+	(byte_put): Likewise.
+	(byte_put_little_endian): Likewise.
+	(byte_put_big_endian): Likewise.
+	(adjust_relative_path): Likewise.
+	(archive_info): Likewise.
+	(setup_archive): Likewise.
+	(release_archive): Likewise.
+	(setup_nested_archive): Likewise.
+	(get_archive_member_name): Likewise.
+	(get_archive_member_name_at): Likewise.
+	(make_qualified_name): Likewise.
+
+	2010-11-18  Alan Modra  <amodra@gmail.com>
+	PR binutils/11742
+	* readelf.c (get_archive_member_name): Formatting.  Properly
+	handle full size ar_name.
+
+	2010-11-17  Alan Modra  <amodra@gmail.com>
+	* ar.c (print_contents): Don't internationalize strings without words.
+	* dwarf.c (process_extended_line_op): Likewise.
+	(process_debug_info): Likwise.
+	(display_debug_lines_raw): Likewise.
+	(display_debug_lines_decoded): Likewise.
+	(display_debug_abbrev): Likewise.
+	* readelf.c (process_file_header): Likewise.
+	(GET_OP): Likewise.
+	(decode_arm_unwind): Likewise.
+	(process_mips_specific): Likewise.
+	* resrc.c (run_cmd): Likewise.
+	(rcparse_warning): Likewise.
+	* objdump.c (dump_headers): Don't print "Pg".
+
+	2010-11-08  Alan Modra  <amodra@gmail.com>
+	* objcopy.c (copy_main): No need to rename sections when compressing
+	or decompressing.
+
 2010-12-21  Alan Modra  <amodra@gmail.com>
 
 	* po/ja.po: Update.

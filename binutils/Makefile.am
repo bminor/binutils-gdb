@@ -84,7 +84,7 @@ AM_CPPFLAGS = -I. -I$(srcdir) -I../bfd -I$(BFDDIR) -I$(INCDIR) \
 
 HFILES = \
 	arsup.h binemul.h bucomm.h budbg.h \
-	coffgrok.h debug.h dlltool.h dwarf.h nlmconv.h \
+	coffgrok.h debug.h dlltool.h dwarf.h elfcomm.h nlmconv.h \
 	sysdep.h unwind-ia64.h windres.h winduni.h windint.h \
 	windmc.h
 
@@ -95,7 +95,7 @@ CFILES = \
 	addr2line.c ar.c arsup.c bin2c.c binemul.c bucomm.c \
 	coffdump.c coffgrok.c cxxfilt.c \
 	dwarf.c debug.c dlltool.c dllwrap.c \
-	emul_aix.c emul_vanilla.c filemode.c \
+	elfcomm.c emul_aix.c emul_vanilla.c filemode.c \
 	ieee.c is-ranlib.c is-strip.c maybe-ranlib.c maybe-strip.c \
 	nlmconv.c nm.c not-ranlib.c not-strip.c \
 	objcopy.c objdump.c prdbg.c \
@@ -115,6 +115,9 @@ WRITE_DEBUG_SRCS = $(DEBUG_SRCS) wrstabs.c
 
 # Code shared by all the binutils.
 BULIBS = bucomm.c version.c filemode.c
+
+# Code shared by the ELF related programs.
+ELFLIBS = elfcomm.c
 
 BFDLIB = ../bfd/libbfd.la
 
@@ -192,17 +195,17 @@ objcopy_SOURCES = objcopy.c not-strip.c rename.c $(WRITE_DEBUG_SRCS) $(BULIBS)
 
 strings_SOURCES = strings.c $(BULIBS)
 
-readelf_SOURCES = readelf.c version.c unwind-ia64.c dwarf.c
+readelf_SOURCES = readelf.c version.c unwind-ia64.c dwarf.c $(ELFLIBS)
 readelf_LDADD   = $(LIBINTL) $(LIBIBERTY)
 
-elfedit_SOURCES = elfedit.c version.c
+elfedit_SOURCES = elfedit.c version.c $(ELFLIBS)
 elfedit_LDADD = $(LIBINTL) $(LIBIBERTY)
 
 strip_new_SOURCES = objcopy.c is-strip.c rename.c $(WRITE_DEBUG_SRCS) $(BULIBS)
 
 nm_new_SOURCES = nm.c $(BULIBS)
 
-objdump_SOURCES = objdump.c dwarf.c prdbg.c $(DEBUG_SRCS) $(BULIBS)
+objdump_SOURCES = objdump.c dwarf.c prdbg.c $(DEBUG_SRCS) $(BULIBS) $(ELFLIBS)
 objdump_LDADD = $(OPCODES) $(BFDLIB) $(LIBIBERTY) $(LIBINTL)
 
 objdump.@OBJEXT@:objdump.c

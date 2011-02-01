@@ -2602,13 +2602,6 @@ get_reloc_section (bfd *abfd,
   if (srel_name == NULL)
     return NULL;
 
-  BFD_ASSERT ((CONST_STRNEQ (srel_name, ".rela")
-	       && strcmp (bfd_get_section_name (abfd, sec),
-			  srel_name+5) == 0)
-	      || (CONST_STRNEQ (srel_name, ".rel")
-		  && strcmp (bfd_get_section_name (abfd, sec),
-			     srel_name+4) == 0));
-
   dynobj = ia64_info->root.dynobj;
   if (!dynobj)
     ia64_info->root.dynobj = dynobj = abfd;

@@ -1395,6 +1395,11 @@ that @code{md_pcrel_from} does not take a section argument.
 @cindex tc_frob_label
 If you define this macro, GAS will call it each time a label is defined.
 
+@item tc_new_dot_label
+@cindex tc_new_dot_label
+If you define this macro, GAS will call it each time a fake label is created
+off the special dot symbol.
+
 @item md_section_align
 @cindex md_section_align
 GAS will call this function for each section at the end of the assembly, to

@@ -319,6 +319,7 @@ ppcboot.c
 reloc.c
 reloc16.c
 riscix.c
+rs6000-core.c
 sco5-core.c
 section.c
 simple.c

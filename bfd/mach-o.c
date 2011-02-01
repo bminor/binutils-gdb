@@ -1,6 +1,6 @@
 /* Mach-O support for BFD.
    Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008,
-   2009, 2010
+   2009, 2010, 2011
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -378,8 +378,7 @@ bfd_mach_o_canonicalize_symtab (bfd *abfd, asymbol **alocation)
 
   if (bfd_mach_o_read_symtab_symbols (abfd) != 0)
     {
-      fprintf (stderr,
-               "bfd_mach_o_canonicalize_symtab: unable to load symbols\n");
+      (*_bfd_error_handler) (_("bfd_mach_o_canonicalize_symtab: unable to load symbols"));
       return 0;
     }
 
@@ -1251,9 +1250,8 @@ bfd_mach_o_write_contents (bfd *abfd)
 	case BFD_MACH_O_LC_SUB_FRAMEWORK:
 	  break;
 	default:
-	  fprintf (stderr,
-		   "unable to write unknown load command 0x%lx\n",
-		   (unsigned long) cur->type);
+	  (*_bfd_error_handler) (_("unable to write unknown load command 0x%lx"),
+				 (unsigned long) cur->type);
 	  return FALSE;
 	}
     }
@@ -1653,8 +1651,8 @@ bfd_mach_o_read_symtab_symbol (bfd *abfd,
   if (bfd_seek (abfd, symoff, SEEK_SET) != 0
       || bfd_bread ((void *) buf, symwidth, abfd) != symwidth)
     {
-      fprintf (stderr, "bfd_mach_o_read_symtab_symbol: unable to read %d bytes at %lu\n",
-	       symwidth, (unsigned long) symoff);
+      (*_bfd_error_handler) (_("bfd_mach_o_read_symtab_symbol: unable to read %d bytes at %lu"),
+			     symwidth, (unsigned long) symoff);
       return -1;
     }
 
@@ -1670,8 +1668,9 @@ bfd_mach_o_read_symtab_symbol (bfd *abfd,
 
   if (stroff >= sym->strsize)
     {
-      fprintf (stderr, "bfd_mach_o_read_symtab_symbol: symbol name out of range (%lu >= %lu)\n",
-	       (unsigned long) stroff, (unsigned long) sym->strsize);
+      (*_bfd_error_handler) (_("bfd_mach_o_read_symtab_symbol: symbol name out of range (%lu >= %lu)"),
+			     (unsigned long) stroff,
+			     (unsigned long) sym->strsize);
       return -1;
     }
 
@@ -1754,23 +1753,23 @@ bfd_mach_o_read_symtab_symbol (bfd *abfd,
 	      /* Mach-O uses 0 to mean "no section"; not an error.  */
 	      if (section != 0)
 		{
-		  fprintf (stderr, "bfd_mach_o_read_symtab_symbol: "
-			   "symbol \"%s\" specified invalid section %d (max %lu): setting to undefined\n",
-			   s->symbol.name, section, mdata->nsects);
+		  (*_bfd_error_handler) (_("bfd_mach_o_read_symtab_symbol: "
+					   "symbol \"%s\" specified invalid section %d (max %lu): setting to undefined"),
+					 s->symbol.name, section, mdata->nsects);
 		}
 	      s->symbol.section = bfd_und_section_ptr;
 	    }
 	  break;
 	case BFD_MACH_O_N_INDR:
-	  fprintf (stderr, "bfd_mach_o_read_symtab_symbol: "
-		   "symbol \"%s\" is unsupported 'indirect' reference: setting to undefined\n",
-		   s->symbol.name);
+	  (*_bfd_error_handler) (_("bfd_mach_o_read_symtab_symbol: "
+				   "symbol \"%s\" is unsupported 'indirect' reference: setting to undefined"),
+				 s->symbol.name);
 	  s->symbol.section = bfd_und_section_ptr;
 	  break;
 	default:
-	  fprintf (stderr, "bfd_mach_o_read_symtab_symbol: "
-		   "symbol \"%s\" specified invalid type field 0x%x: setting to undefined\n",
-		   s->symbol.name, symtype);
+	  (*_bfd_error_handler) (_("bfd_mach_o_read_symtab_symbol: "
+				   "symbol \"%s\" specified invalid type field 0x%x: setting to undefined"),
+				 s->symbol.name, symtype);
 	  s->symbol.section = bfd_und_section_ptr;
 	  break;
 	}
@@ -1838,7 +1837,7 @@ bfd_mach_o_read_symtab_symbols (bfd *abfd)
 
   if (sym->symbols == NULL)
     {
-      fprintf (stderr, "bfd_mach_o_read_symtab_symbols: unable to allocate memory for symbols\n");
+      (*_bfd_error_handler) (_("bfd_mach_o_read_symtab_symbols: unable to allocate memory for symbols"));
       return -1;
     }
 
@@ -1872,8 +1871,8 @@ bfd_mach_o_read_dysymtab_symbol (bfd *abfd,
   if (bfd_seek (abfd, isymoff, SEEK_SET) != 0
       || bfd_bread ((void *) buf, 4, abfd) != 4)
     {
-      fprintf (stderr, "bfd_mach_o_read_dysymtab_symbol: unable to read %lu bytes at %lu\n",
-	       (unsigned long) 4, isymoff);
+      (*_bfd_error_handler) (_("bfd_mach_o_read_dysymtab_symbol: unable to read %lu bytes at %lu"),
+			       (unsigned long) 4, isymoff);
       return -1;
     }
   sym_index = bfd_h_get_32 (abfd, buf);
@@ -2554,8 +2553,8 @@ bfd_mach_o_read_command (bfd *abfd, bfd_mach_o_load_command *command)
 	return -1;
       break;
     default:
-      fprintf (stderr, "unable to read unknown load command 0x%lx\n",
-	       (unsigned long) command->type);
+      (*_bfd_error_handler) (_("unable to read unknown load command 0x%lx"),
+			     (unsigned long) command->type);
       break;
     }
 
@@ -2734,8 +2733,8 @@ bfd_mach_o_scan (bfd *abfd,
 				   &cputype, &cpusubtype);
   if (cputype == bfd_arch_unknown)
     {
-      fprintf (stderr, "bfd_mach_o_scan: unknown architecture 0x%lx/0x%lx\n",
-	       header->cputype, header->cpusubtype);
+      (*_bfd_error_handler) (_("bfd_mach_o_scan: unknown architecture 0x%lx/0x%lx"),
+			     header->cputype, header->cpusubtype);
       return -1;
     }
 
@@ -2830,8 +2829,8 @@ bfd_mach_o_header_p (bfd *abfd,
   if (! (header.byteorder == BFD_ENDIAN_BIG
 	 || header.byteorder == BFD_ENDIAN_LITTLE))
     {
-      fprintf (stderr, "unknown header byte-order value 0x%lx\n",
-	       (unsigned long) header.byteorder);
+      (*_bfd_error_handler) (_("unknown header byte-order value 0x%lx"),
+			     (unsigned long) header.byteorder);
       goto wrong;
     }
 

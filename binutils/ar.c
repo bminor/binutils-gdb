@@ -820,8 +820,7 @@ print_contents (bfd *abfd)
     fatal (_("internal stat error on %s"), bfd_get_filename (abfd));
 
   if (verbose)
-    /* xgettext:c-format */
-    printf (_("\n<%s>\n\n"), bfd_get_filename (abfd));
+    printf ("\n<%s>\n\n", bfd_get_filename (abfd));
 
   bfd_seek (abfd, (file_ptr) 0, SEEK_SET);
 

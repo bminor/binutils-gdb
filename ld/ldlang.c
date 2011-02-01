@@ -1,6 +1,6 @@
 /* Linker command language support.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010
+   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011
    Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils.
@@ -1015,7 +1015,7 @@ new_afile (const char *name,
     {
     case lang_input_file_is_symbols_only_enum:
       p->filename = name;
-      p->is_archive = FALSE;
+      p->maybe_archive = FALSE;
       p->real = TRUE;
       p->local_sym_name = name;
       p->just_syms_flag = TRUE;
@@ -1023,14 +1023,14 @@ new_afile (const char *name,
       break;
     case lang_input_file_is_fake_enum:
       p->filename = name;
-      p->is_archive = FALSE;
+      p->maybe_archive = FALSE;
       p->real = FALSE;
       p->local_sym_name = name;
       p->just_syms_flag = FALSE;
       p->search_dirs_flag = FALSE;
       break;
     case lang_input_file_is_l_enum:
-      p->is_archive = TRUE;
+      p->maybe_archive = TRUE;
       p->filename = name;
       p->real = TRUE;
       p->local_sym_name = concat ("-l", name, (const char *) NULL);
@@ -1039,7 +1039,7 @@ new_afile (const char *name,
       break;
     case lang_input_file_is_marker_enum:
       p->filename = name;
-      p->is_archive = FALSE;
+      p->maybe_archive = FALSE;
       p->real = FALSE;
       p->local_sym_name = name;
       p->just_syms_flag = FALSE;
@@ -1048,7 +1048,7 @@ new_afile (const char *name,
     case lang_input_file_is_search_file_enum:
       p->sysrooted = ldlang_sysrooted_script;
       p->filename = name;
-      p->is_archive = FALSE;
+      p->maybe_archive = FALSE;
       p->real = TRUE;
       p->local_sym_name = name;
       p->just_syms_flag = FALSE;
@@ -1056,7 +1056,7 @@ new_afile (const char *name,
       break;
     case lang_input_file_is_file_enum:
       p->filename = name;
-      p->is_archive = FALSE;
+      p->maybe_archive = FALSE;
       p->real = TRUE;
       p->local_sym_name = name;
       p->just_syms_flag = FALSE;
@@ -1756,7 +1756,7 @@ lang_insert_orphan (asection *s,
 	  sprintf (symname + (symname[0] != 0), "__start_%s", secname);
 	  e_align = exp_unop (ALIGN_K,
 			      exp_intop ((bfd_vma) 1 << s->alignment_power));
-	  lang_add_assignment (exp_assop ('=', ".", e_align));
+	  lang_add_assignment (exp_assign (".", e_align));
 	  lang_add_assignment (exp_provide (symname,
 					    exp_unop (ABSOLUTE,
 						      exp_nameop (NAME, ".")),
@@ -2037,6 +2037,9 @@ static bfd_boolean
 sort_def_symbol (struct bfd_link_hash_entry *hash_entry,
 		 void *info ATTRIBUTE_UNUSED)
 {
+  if (hash_entry->type == bfd_link_hash_warning)
+    hash_entry = (struct bfd_link_hash_entry *) hash_entry->u.i.link;
+
   if (hash_entry->type == bfd_link_hash_defined
       || hash_entry->type == bfd_link_hash_defweak)
     {
@@ -2717,15 +2720,15 @@ load_symbols (lang_input_statement_type *entry,
 		  loaded = FALSE;
 		}
 
-	      subsbfd = NULL;
-	      if (! ((*link_info.callbacks->add_archive_element)
-		     (&link_info, member, "--whole-archive", &subsbfd)))
+	      subsbfd = member;
+	      if (!(*link_info.callbacks
+		    ->add_archive_element) (&link_info, member,
+					    "--whole-archive", &subsbfd))
 		abort ();
 
 	      /* Potentially, the add_archive_element hook may have set a
 		 substitute BFD for us.  */
-	      if (! bfd_link_add_symbols (subsbfd ? subsbfd : member,
-					&link_info))
+	      if (!bfd_link_add_symbols (subsbfd, &link_info))
 		{
 		  einfo (_("%F%B: could not read symbols: %E\n"), member);
 		  loaded = FALSE;
@@ -3196,6 +3199,11 @@ open_input_bfds (lang_statement_union_type *s, bfd_boolean force)
 		}
 	    }
 	  break;
+	case lang_assignment_statement_enum:
+	  if (s->assignment_statement.exp->assign.hidden)
+	    /* This is from a --defsym on the command line.  */
+	    exp_fold_tree_no_dot (s->assignment_statement.exp);
+	  break;
 	default:
 	  break;
 	}
@@ -3340,65 +3348,6 @@ lang_place_undefineds (void)
 
   for (ptr = ldlang_undef_chain_list_head; ptr != NULL; ptr = ptr->next)
     insert_undefined (ptr->name);
-}
-
-typedef struct bfd_sym_chain ldlang_def_chain_list_type;
-
-static ldlang_def_chain_list_type ldlang_def_chain_list_head;
-
-/* Insert NAME as defined in the symbol table.  */
-
-static void
-insert_defined (const char *name)
-{
-  struct bfd_link_hash_entry *h;
-
-  h = bfd_link_hash_lookup (link_info.hash, name, TRUE, FALSE, TRUE);
-  if (h == NULL)
-    einfo (_("%P%F: bfd_link_hash_lookup failed: %E\n"));
-  if (h->type == bfd_link_hash_new
-      || h->type == bfd_link_hash_undefined
-      || h->type == bfd_link_hash_undefweak)
-    {
-      h->type = bfd_link_hash_defined;
-      h->u.def.section = bfd_abs_section_ptr;
-      h->u.def.value   = 0;
-    }
-}
-
-/* Like lang_add_undef, but this time for symbols defined on the
-   command line.  */
-
-static void
-ldlang_add_def (const char *const name)
-{
-  if (link_info.output_bfd != NULL)
-    insert_defined (xstrdup (name));
-  else
-    {
-      ldlang_def_chain_list_type *new_def;
-
-      new_def = (ldlang_def_chain_list_type *) stat_alloc (sizeof (*new_def));
-      new_def->next = ldlang_def_chain_list_head.next;
-      ldlang_def_chain_list_head.next = new_def;
-
-      new_def->name = xstrdup (name);
-    }
-}
-
-/* Run through the list of defineds created above and place them
-   into the linker hash table as defined symbols belonging to the
-   script file.  */
-
-static void
-lang_place_defineds (void)
-{
-  ldlang_def_chain_list_type *ptr;
-
-  for (ptr = ldlang_def_chain_list_head.next;
-       ptr != NULL;
-       ptr = ptr->next)
-    insert_defined (ptr->name);
 }
 
 /* Check for all readonly or some readwrite sections.  */
@@ -3929,12 +3878,12 @@ scan_for_self_assignment (const char * dst, etree_type * rhs)
   switch (rhs->type.node_class)
     {
     case etree_binary:
-      return scan_for_self_assignment (dst, rhs->binary.lhs)
-	||   scan_for_self_assignment (dst, rhs->binary.rhs);
+      return (scan_for_self_assignment (dst, rhs->binary.lhs)
+	      || scan_for_self_assignment (dst, rhs->binary.rhs));
 
     case etree_trinary:
-      return scan_for_self_assignment (dst, rhs->trinary.lhs)
-	||   scan_for_self_assignment (dst, rhs->trinary.rhs);
+      return (scan_for_self_assignment (dst, rhs->trinary.lhs)
+	      || scan_for_self_assignment (dst, rhs->trinary.rhs));
 
     case etree_assign:
     case etree_provided:
@@ -3989,7 +3938,7 @@ print_assignment (lang_assignment_statement_type *assignment,
 
       is_dot = (dst[0] == '.' && dst[1] == 0);
       tree = assignment->exp->assign.src;
-      computation_is_valid = is_dot || (scan_for_self_assignment (dst, tree) == FALSE);
+      computation_is_valid = is_dot || !scan_for_self_assignment (dst, tree);
     }
 
   osec = output_section->bfd_section;
@@ -5428,9 +5377,11 @@ lang_size_sections (bfd_boolean *relax, bfd_boolean check_regions)
 	  lang_reset_memory_regions ();
 	  one_lang_size_sections_pass (relax, check_regions);
 	}
+      else
+	expld.dataseg.phase = exp_dataseg_done;
     }
-
-  expld.phase = lang_final_phase_enum;
+  else
+    expld.dataseg.phase = exp_dataseg_done;
 }
 
 /* Worker function for lang_do_assignments.  Recursiveness goes here.  */
@@ -6408,7 +6359,6 @@ lang_process (void)
 
   /* Add to the hash table all undefineds on the command line.  */
   lang_place_undefineds ();
-  lang_place_defineds ();
 
   if (!bfd_section_already_linked_table_init ())
     einfo (_("%P%F: Failed to create hash table\n"));
@@ -6418,22 +6368,22 @@ lang_process (void)
   open_input_bfds (statement_list.head, FALSE);
 
 #ifdef ENABLE_PLUGINS
-  {
-    union lang_statement_union **listend;
-    /* Now all files are read, let the plugin(s) decide if there
-       are any more to be added to the link before we call the
-       emulation's after_open hook.  */
-    listend = statement_list.tail;
-    ASSERT (!*listend);
-    if (plugin_call_all_symbols_read ())
-      einfo (_("%P%F: %s: plugin reported error after all symbols read\n"),
-	plugin_error_plugin ());
-    /* If any new files were added, they will be on the end of the
-       statement list, and we can open them now by getting open_input_bfds
-       to carry on from where it ended last time.  */
-    if (*listend)
-      open_input_bfds (*listend, FALSE);
-  }
+    {
+      union lang_statement_union **listend;
+      /* Now all files are read, let the plugin(s) decide if there
+	 are any more to be added to the link before we call the
+	 emulation's after_open hook.  */
+      listend = statement_list.tail;
+      ASSERT (!*listend);
+      if (plugin_call_all_symbols_read ())
+	einfo (_("%P%F: %s: plugin reported error after all symbols read\n"),
+	       plugin_error_plugin ());
+      /* If any new files were added, they will be on the end of the
+	 statement list, and we can open them now by getting open_input_bfds
+	 to carry on from where it ended last time.  */
+      if (*listend)
+	open_input_bfds (*listend, FALSE);
+    }
 #endif /* ENABLE_PLUGINS */
 
   link_info.gc_sym_list = &entry_symbol;
@@ -6470,6 +6420,7 @@ lang_process (void)
 
   /* Run through the contours of the script and attach input sections
      to the correct output sections.  */
+  lang_statement_iteration++;
   map_input_to_output_sections (statement_list.head, NULL, NULL);
 
   process_insert_statements ();
@@ -6523,7 +6474,7 @@ lang_process (void)
 
   /* Do all the assignments, now that we know the final resting places
      of all the symbols.  */
-
+  expld.phase = lang_final_phase_enum;
   lang_do_assignments ();
 
   ldemul_finish ();
@@ -6692,10 +6643,6 @@ lang_assignment_statement_type *
 lang_add_assignment (etree_type *exp)
 {
   lang_assignment_statement_type *new_stmt;
-
-  extern int parsing_defsym;
-  if (parsing_defsym)
-    ldlang_add_def (exp->assign.dst);
 
   new_stmt = new_stat (lang_assignment_statement, stat_ptr);
   new_stmt->exp = exp;
@@ -7236,7 +7183,7 @@ lang_leave_overlay (etree_type *lma_expr,
      overlay region.  */
   if (overlay_list != NULL)
     overlay_list->os->update_dot_tree
-      = exp_assop ('=', ".", exp_binop ('+', overlay_vma, overlay_max));
+      = exp_assign (".", exp_binop ('+', overlay_vma, overlay_max));
 
   l = overlay_list;
   while (l != NULL)
@@ -7851,4 +7798,33 @@ lang_append_dynamic_list_cpp_new (void)
 				     FALSE);
 
   lang_append_dynamic_list (dynamic);
+}
+
+/* Scan a space and/or comma separated string of features.  */
+
+void
+lang_ld_feature (char *str)
+{
+  char *p, *q;
+
+  p = str;
+  while (*p)
+    {
+      char sep;
+      while (*p == ',' || ISSPACE (*p))
+	++p;
+      if (!*p)
+	break;
+      q = p + 1;
+      while (*q && *q != ',' && !ISSPACE (*q))
+	++q;
+      sep = *q;
+      *q = 0;
+      if (strcasecmp (p, "SANE_EXPR") == 0)
+	config.sane_expr = TRUE;
+      else
+	einfo (_("%X%P: unknown feature `%s'\n"), p);
+      *q = sep;
+      p = q;
+    }
 }

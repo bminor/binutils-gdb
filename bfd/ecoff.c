@@ -3600,7 +3600,7 @@ ecoff_link_check_archive_element (bfd *abfd,
       EXTR esym;
       bfd_boolean def;
       const char *name;
-      bfd *subsbfd;
+      bfd *oldbfd;
       struct bfd_link_hash_entry *h;
 
       (*swap_ext_in) (abfd, (void *) ext_ptr, &esym);
@@ -3645,18 +3645,17 @@ ecoff_link_check_archive_element (bfd *abfd,
 	continue;
 
       /* Include this element.  */
-      subsbfd = NULL;
-      if (! (*info->callbacks->add_archive_element)
-					(info, abfd, name, &subsbfd))
+      oldbfd = abfd;
+      if (!(*info->callbacks
+	    ->add_archive_element) (info, abfd, name, &abfd))
 	goto error_return;
       /* Potentially, the add_archive_element hook may have set a
 	 substitute BFD for us.  */
-      if (subsbfd
+      if (abfd != oldbfd
 	  && !reread_ext_syms_and_strs (&symhdr, &external_ext_size, &esize,
-				&external_ext, &ssext, subsbfd, backend))
+					&external_ext, &ssext, abfd, backend))
 	goto error_return;
-      if (! ecoff_link_add_externals (subsbfd ? subsbfd : abfd, info,
-				external_ext, ssext))
+      if (! ecoff_link_add_externals (abfd, info, external_ext, ssext))
 	goto error_return;
 
       *pneeded = TRUE;
@@ -3733,7 +3732,6 @@ ecoff_link_add_archive_symbols (bfd *abfd, struct bfd_link_info *info)
       unsigned int file_offset;
       const char *name;
       bfd *element;
-      bfd *subsbfd;
 
       h = *pundef;
 
@@ -3820,13 +3818,10 @@ ecoff_link_add_archive_symbols (bfd *abfd, struct bfd_link_info *info)
       /* Unlike the generic linker, we know that this element provides
 	 a definition for an undefined symbol and we know that we want
 	 to include it.  We don't need to check anything.  */
-      subsbfd = NULL;
-      if (! (*info->callbacks->add_archive_element)
-					(info, element, name, &subsbfd))
+      if (!(*info->callbacks
+	    ->add_archive_element) (info, element, name, &element))
 	return FALSE;
-      /* Potentially, the add_archive_element hook may have set a
-	 substitute BFD for us.  */
-      if (! ecoff_link_add_object_symbols (subsbfd ? subsbfd : element, info))
+      if (! ecoff_link_add_object_symbols (element, info))
 	return FALSE;
 
       pundef = &(*pundef)->u.undef.next;

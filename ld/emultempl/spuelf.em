@@ -1,5 +1,6 @@
 # This shell script emits a C file. -*- C -*-
-#   Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+#   Copyright 2006, 2007, 2008, 2009, 2010, 2011
+#   Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -164,7 +165,7 @@ spu_place_special_section (asection *s, asection *o, const char *output_name)
 
 	  push_stat_ptr (&os->children);
 	  e_size = exp_intop (params.line_size - s->size);
-	  lang_add_assignment (exp_assop ('=', ".", e_size));
+	  lang_add_assignment (exp_assign (".", e_size));
 	  pop_stat_ptr ();
 	}
       lang_add_section (&os->children, s, os);

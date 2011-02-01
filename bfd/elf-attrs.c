@@ -613,7 +613,7 @@ _bfd_elf_merge_unknown_attribute_low (bfd *ibfd, bfd *obfd, int tag)
 
   /* Only pass on attributes that match in both inputs.  */
   if (in_attr[tag].i != out_attr[tag].i
-      || in_attr[tag].s != out_attr[tag].s
+      || (in_attr[tag].s == NULL) != (out_attr[tag].s == NULL)
       || (in_attr[tag].s != NULL && out_attr[tag].s != NULL
 	  && strcmp (in_attr[tag].s, out_attr[tag].s) != 0))
     {
@@ -673,7 +673,7 @@ _bfd_elf_merge_unknown_attribute_list (bfd *ibfd, bfd *obfd)
 
 	  /*  Only pass on attributes that match in both inputs.  */
 	  if (in_list->attr.i != out_list->attr.i
-	      || in_list->attr.s != out_list->attr.s
+	      || (in_list->attr.s == NULL) != (out_list->attr.s == NULL)
 	      || (in_list->attr.s && out_list->attr.s
 		  && strcmp (in_list->attr.s, out_list->attr.s) != 0))
 	    {

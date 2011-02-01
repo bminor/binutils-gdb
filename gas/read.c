@@ -629,6 +629,7 @@ read_a_source_file (char *name)
 	  was_new_line = is_end_of_line[(unsigned char) input_line_pointer[-1]];
 	  if (was_new_line)
 	    {
+	      symbol_set_value_now (&dot_symbol);
 #ifdef md_start_line_hook
 	      md_start_line_hook ();
 #endif
@@ -1128,6 +1129,7 @@ read_a_source_file (char *name)
       md_after_pass_hook ();
 #endif
     }
+  symbol_set_value_now (&dot_symbol);
 
  quit:
 

@@ -1,3 +1,13 @@
+2011-02-01  Alan Modra  <amodra@gmail.com>
+
+	Backport from mainline
+	2010-12-20  Alan Modra  <amodra@gmail.com>
+	PR ld/12001
+	* ld-scripts/default-script2.d: Revert 2010-11-03 change.
+
+	2010-12-05  H.J. Lu  <hongjiu.lu@intel.com>
+	* ld-plugin/plugin-vis-1.d: Updated.
+
 2010-11-25  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	* ld-arm/arm-elf.exp (armeabitests): Replace --defsym argument in

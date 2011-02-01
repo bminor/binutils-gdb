@@ -1,6 +1,7 @@
 /* ppc-opc.c -- PowerPC opcode list
    Copyright 1994, 1995, 1996, 1997, 1998, 2000, 2001, 2002, 2003, 2004,
-   2005, 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+   2005, 2006, 2007, 2008, 2009, 2010, 2011
+   Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support
 
    This file is part of the GNU opcodes library.
@@ -1909,7 +1910,7 @@ extract_dm (unsigned long insn,
 #define POWER7	PPC_OPCODE_POWER7
 #define CELL	PPC_OPCODE_CELL
 #define PPC64	PPC_OPCODE_64 | PPC_OPCODE_64_BRIDGE
-#define NON32	(PPC_OPCODE_64 | PPC_OPCODE_POWER4 | PPC_OPCODE_PPCPS	\
+#define NON32	(PPC_OPCODE_64 | PPC_OPCODE_POWER4	\
 		 | PPC_OPCODE_EFS | PPC_OPCODE_E500MC | PPC_OPCODE_TITAN)
 #define PPC403	PPC_OPCODE_403
 #define PPC405	PPC_OPCODE_405
@@ -1932,7 +1933,7 @@ extract_dm (unsigned long insn,
 #define MFDEC1	PPC_OPCODE_POWER
 #define MFDEC2	PPC_OPCODE_PPC | PPC_OPCODE_601 | PPC_OPCODE_BOOKE | PPC_OPCODE_TITAN
 #define BOOKE	PPC_OPCODE_BOOKE
-#define NO371	PPC_OPCODE_BOOKE | PPC_OPCODE_PPCPS | PPC_OPCODE_EFS
+#define NO371	PPC_OPCODE_BOOKE | PPC_OPCODE_EFS
 #define PPCE300 PPC_OPCODE_E300
 #define PPCSPE	PPC_OPCODE_SPE
 #define PPCISEL PPC_OPCODE_ISEL
