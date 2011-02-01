@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: opcodes 2.20.90\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
 "POT-Creation-Date: 2010-11-05 11:32+0100\n"
-"PO-Revision-Date: 2011-01-09 09:35+0100\n"
+"PO-Revision-Date: 2011-01-26 09:35+0100\n"
 "Last-Translator: Keld Simonsen <keld@keldix.com>\n"
 "Language-Team: Danish <dansk@dansk-gruppen.dk>\n"
 "MIME-Version: 1.0\n"
@@ -39,11 +39,11 @@ msgstr "indeksregistret er i indlæsningsintervallet"
 
 #: arc-opc.c:401 arc-opc.c:418
 msgid "attempt to set readonly register"
-msgstr ""
+msgstr "forsøg på at skrive i register, der kun kan læses fra"
 
 #: arc-opc.c:406 arc-opc.c:423
 msgid "attempt to read writeonly register"
-msgstr ""
+msgstr "forsøg på at læse register, der kun kan skrives i"
 
 #: arc-opc.c:428
 #, c-format
@@ -82,7 +82,7 @@ msgstr ""
 
 #: arc-opc.c:856
 msgid "ld operand error"
-msgstr ""
+msgstr "fejl bed ld-operand"
 
 #: arc-opc.c:943
 msgid "jump flags, but no .f seen"
@@ -179,25 +179,25 @@ msgid "Unknown error %d\n"
 msgstr "Ukendt fejl %d\n"
 
 #: dis-buf.c:69
-#, fuzzy, c-format
+#, c-format
 msgid "Address 0x%s is out of bounds.\n"
-msgstr "Adressen 0x%x ligger uden for tilladte grænser.\n"
+msgstr "Adressen 0x%s ligger uden for tilladt område.\n"
 
 #: fr30-asm.c:93 m32c-asm.c:872 m32c-asm.c:879
 msgid "Register number is not valid"
-msgstr ""
+msgstr "Registernummer er ikke gyldig "
 
 #: fr30-asm.c:95
 msgid "Register must be between r0 and r7"
-msgstr ""
+msgstr "Register skal være mellem r0 og r7"
 
 #: fr30-asm.c:97
 msgid "Register must be between r8 and r15"
-msgstr ""
+msgstr "Register skal være mellem r0 og r15"
 
 #: fr30-asm.c:116 m32c-asm.c:910
 msgid "Register list is not valid"
-msgstr ""
+msgstr "Registerliste er ugyldig"
 
 #: fr30-asm.c:310 frv-asm.c:1263 ip2k-asm.c:511 iq2000-asm.c:459
 #: lm32-asm.c:349 m32c-asm.c:1584 m32r-asm.c:328 mep-asm.c:1286 mt-asm.c:595
@@ -292,9 +292,9 @@ msgstr "operanden er uden for intervallet (%ld er ikke mellem %ld og %lu)"
 #: fr30-ibld.c:185 frv-ibld.c:185 ip2k-ibld.c:185 iq2000-ibld.c:185
 #: lm32-ibld.c:185 m32c-ibld.c:185 m32r-ibld.c:185 mep-ibld.c:185
 #: mt-ibld.c:185 openrisc-ibld.c:185 xc16x-ibld.c:185 xstormy16-ibld.c:185
-#, fuzzy, c-format
+#, c-format
 msgid "operand out of range (0x%lx not between 0 and 0x%lx)"
-msgstr "operanden uden for intervallet (%lu ikke mellem 0 og %lu)"
+msgstr "operanden uden for intervallet (0x%lx ikke mellem 0 og 0x%lx)"
 
 #: fr30-ibld.c:727 frv-ibld.c:853 ip2k-ibld.c:604 iq2000-ibld.c:710
 #: lm32-ibld.c:631 m32c-ibld.c:1728 m32r-ibld.c:662 mep-ibld.c:1205
@@ -340,7 +340,7 @@ msgstr "Ukendt felt %d ved indstilling af vma-operand.\n"
 
 #: frv-asm.c:608
 msgid "missing `]'"
-msgstr ""
+msgstr "manglende ']'"
 
 #: frv-asm.c:611 frv-asm.c:621
 #, fuzzy
@@ -349,12 +349,11 @@ msgstr "umiddelbar værdi er uden for intervallet"
 
 #: frv-asm.c:908
 msgid "Value of A operand must be 0 or 1"
-msgstr ""
+msgstr "Værdi af A-operand skal være 0 eller 1"
 
 #: frv-asm.c:944
-#, fuzzy
 msgid "register number must be even"
-msgstr "umiddelbar værdi skal være lige"
+msgstr "registernummer skal være lige"
 
 #. -- assembler routines inserted here.
 #. -- asm.c
@@ -363,17 +362,17 @@ msgstr "umiddelbar værdi skal være lige"
 #: m32c-asm.c:276 m32c-asm.c:334 m32c-asm.c:355 m32r-asm.c:53 mep-asm.c:241
 #: mep-asm.c:259 mep-asm.c:274 mep-asm.c:289 mep-asm.c:301 openrisc-asm.c:54
 msgid "missing `)'"
-msgstr ""
+msgstr "manglende ')'"
 
 #: h8300-dis.c:314
-#, fuzzy, c-format
+#, c-format
 msgid "Hmmmm 0x%x"
-msgstr "Hmmmm %x"
+msgstr "Hmmmm 0x%x"
 
 #: h8300-dis.c:695
-#, fuzzy, c-format
+#, c-format
 msgid "Don't understand 0x%x \n"
-msgstr "Forstår ikke %x \n"
+msgstr "Forstår ikke 0x%x \n"
 
 #: h8500-dis.c:124
 #, c-format

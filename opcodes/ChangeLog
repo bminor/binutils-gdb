@@ -1,3 +1,7 @@
+2011-02-01  Nick Clifton  <nickc@redhat.com>
+
+	* po/da.po: Updated Danish translation.
+
 2011-01-21  Dave Murphy  <davem@devkitpro.org>
 
 	* ppc-opc.c (NON32, NO371): Remove PPC_OPCODE_PPCPS.
