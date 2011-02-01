@@ -1,3 +1,10 @@
+2011-02-01  Ian Lance Taylor  <iant@google.com>
+
+	Backport from mainline:
+	2011-01-25  Ian Lance Taylor  <iant@google.com>
+	* script.cc (script_add_extern): Rewrite to use
+	add_symbol_reference.
+
 2011-02-01  Alan Modra  <amodra@gmail.com>
 
 	Backport from mainline

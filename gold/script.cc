@@ -1,6 +1,6 @@
 // script.cc -- handle linker scripts for gold.
 
-// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -2576,12 +2576,8 @@ yyerror(void* closurev, const char* message)
 extern "C" void
 script_add_extern(void* closurev, const char* name, size_t length)
 {
-  // We treat exactly like -u NAME.  FIXME: If it seems useful, we
-  // could handle this after the command line has been read, by adding
-  // entries to the symbol table directly.
-  std::string arg("--undefined=");
-  arg.append(name, length);
-  script_parse_option(closurev, arg.c_str(), arg.size());
+  Parser_closure* closure = static_cast<Parser_closure*>(closurev);
+  closure->script_options()->add_symbol_reference(name, length);
 }
 
 // Called by the bison parser to add a file to the link.
