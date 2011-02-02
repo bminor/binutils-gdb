@@ -451,39 +451,55 @@ arm_smash_text_address (struct gdbarch *gdbarch, CORE_ADDR val)
 }
 
 /* Return 1 if PC is the start of a compiler helper function which
-   can be safely ignored during prologue skipping.  */
+   can be safely ignored during prologue skipping.  IS_THUMB is true
+   if the function is known to be a Thumb function due to the way it
+   is being called.  */
 static int
-skip_prologue_function (CORE_ADDR pc)
+skip_prologue_function (struct gdbarch *gdbarch, CORE_ADDR pc, int is_thumb)
 {
+  enum bfd_endian byte_order_for_code = gdbarch_byte_order_for_code (gdbarch);
   struct minimal_symbol *msym;
-  const char *name;
 
   msym = lookup_minimal_symbol_by_pc (pc);
-  if (msym == NULL || SYMBOL_VALUE_ADDRESS (msym) != pc)
-    return 0;
+  if (msym != NULL
+      && SYMBOL_VALUE_ADDRESS (msym) == pc
+      && SYMBOL_LINKAGE_NAME (msym) != NULL)
+    {
+      const char *name = SYMBOL_LINKAGE_NAME (msym);
 
-  name = SYMBOL_LINKAGE_NAME (msym);
-  if (name == NULL)
-    return 0;
+      /* The GNU linker's Thumb call stub to foo is named
+	 __foo_from_thumb.  */
+      if (strstr (name, "_from_thumb") != NULL)
+	name += 2;
 
-  /* The GNU linker's Thumb call stub to foo is named
-     __foo_from_thumb.  */
-  if (strstr (name, "_from_thumb") != NULL)
-    name += 2;
+      /* On soft-float targets, __truncdfsf2 is called to convert promoted
+	 arguments to their argument types in non-prototyped
+	 functions.  */
+      if (strncmp (name, "__truncdfsf2", strlen ("__truncdfsf2")) == 0)
+	return 1;
+      if (strncmp (name, "__aeabi_d2f", strlen ("__aeabi_d2f")) == 0)
+	return 1;
 
-  /* On soft-float targets, __truncdfsf2 is called to convert promoted
-     arguments to their argument types in non-prototyped
-     functions.  */
-  if (strncmp (name, "__truncdfsf2", strlen ("__truncdfsf2")) == 0)
-    return 1;
-  if (strncmp (name, "__aeabi_d2f", strlen ("__aeabi_d2f")) == 0)
-    return 1;
+      /* Internal functions related to thread-local storage.  */
+      if (strncmp (name, "__tls_get_addr", strlen ("__tls_get_addr")) == 0)
+	return 1;
+      if (strncmp (name, "__aeabi_read_tp", strlen ("__aeabi_read_tp")) == 0)
+	return 1;
+    }
+  else
+    {
+      /* If we run against a stripped glibc, we may be unable to identify
+	 special functions by name.  Check for one important case,
+	 __aeabi_read_tp, by comparing the *code* against the default
+	 implementation (this is hand-written ARM assembler in glibc).  */
 
-  /* Internal functions related to thread-local storage.  */
-  if (strncmp (name, "__tls_get_addr", strlen ("__tls_get_addr")) == 0)
-    return 1;
-  if (strncmp (name, "__aeabi_read_tp", strlen ("__aeabi_read_tp")) == 0)
-    return 1;
+      if (!is_thumb
+	  && read_memory_unsigned_integer (pc, 4, byte_order_for_code)
+	     == 0xe3e00a0f /* mov r0, #0xffff0fff */
+	  && read_memory_unsigned_integer (pc + 4, 4, byte_order_for_code)
+	     == 0xe240f01f) /* sub pc, r0, #31 */
+	return 1;
+    }
 
   return 0;
 }
@@ -842,7 +858,8 @@ thumb_analyze_prologue (struct gdbarch *gdbarch,
 	      if (bit (inst2, 12) == 0)
 		nextpc = nextpc & 0xfffffffc;
 
-	      if (!skip_prologue_function (nextpc))
+	      if (!skip_prologue_function (gdbarch, nextpc,
+					   bit (inst2, 12) != 0))
 		break;
 	    }
 
@@ -1814,7 +1831,7 @@ arm_analyze_prologue (struct gdbarch *gdbarch,
 	     the stack.  */
 	  CORE_ADDR dest = BranchDest (current_pc, insn);
 
-	  if (skip_prologue_function (dest))
+	  if (skip_prologue_function (gdbarch, dest, 0))
 	    continue;
 	  else
 	    break;

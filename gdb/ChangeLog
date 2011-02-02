@@ -1,5 +1,13 @@
 2011-02-02  Ulrich Weigand  <ulrich.weigand@linaro.org>
 
+	* arm-tdep.c (skip_prologue_function): Add GDBARCH and IS_THUMB
+	arguments.  Skip in-prologue calls to glibc __aeabi_read_tp
+	implementation even if no symbols are available.
+	(thumb_analyze_prologue): Update call to skip_prologue_function.
+	(arm_analyze_prologue): Likewise.
+
+2011-02-02  Ulrich Weigand  <ulrich.weigand@linaro.org>
+
 	* arm-tdep.c: Include "observer.h".
 	(arm_prologue_this_id): Use frame PC if get_frame_func returns 0.
 	(arm_exidx_data_key): New static variable.
