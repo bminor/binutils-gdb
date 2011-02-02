@@ -1,5 +1,24 @@
 2011-02-02  Ulrich Weigand  <ulrich.weigand@linaro.org>
 
+	* arm-tdep.c: Include "observer.h".
+	(arm_prologue_this_id): Use frame PC if get_frame_func returns 0.
+	(arm_exidx_data_key): New static variable.
+	(struct arm_exidx_entry, arm_exidx_entry_s): New data types.
+	(struct arm_exidx_data): Likewise.
+	(arm_exidx_data_free): New function.
+	(arm_compare_exidx_entries): Likewise.
+	(arm_obj_section_from_vma): Likewise.
+	(arm_exidx_new_objfile): Likewise.
+	(arm_find_exidx_entry): Likewise.
+	(arm_exidx_fill_cache): Likewise.
+	(arm_exidx_unwind_sniffer): Likewise.
+	(arm_exidx_unwind): New global variable.
+	(arm_gdbarch_init): Append unwinder arm_exidx_unwind.
+	(_initialize_arm_tdep): Attach arm_exidx_new_objfile to new_objfile
+	observer.  Register arm_exidx_data_key as objfile data.
+
+2011-02-02  Ulrich Weigand  <ulrich.weigand@linaro.org>
+
 	* arm-tdep.c (arm_analyze_load_stack_chk_guard): Avoid build break
 	due to accessing uninitialized variable.  Fix indentation.
 

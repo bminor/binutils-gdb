@@ -43,6 +43,7 @@
 #include "prologue-value.h"
 #include "target-descriptions.h"
 #include "user-regs.h"
+#include "observer.h"
 
 #include "arm-tdep.h"
 #include "gdb/sim-arm.h"
@@ -2042,7 +2043,13 @@ arm_prologue_this_id (struct frame_info *this_frame,
   if (cache->prev_sp == 0)
     return;
 
+  /* Use function start address as part of the frame ID.  If we cannot
+     identify the start address (due to missing symbol information),
+     fall back to just using the current PC.  */
   func = get_frame_func (this_frame);
+  if (!func)
+    func = pc;
+
   id = frame_id_build (cache->prev_sp, func);
   *this_id = id;
 }
@@ -2111,6 +2118,744 @@ struct frame_unwind arm_prologue_unwind = {
   arm_prologue_prev_register,
   NULL,
   default_frame_sniffer
+};
+
+/* Maintain a list of ARM exception table entries per objfile, similar to the
+   list of mapping symbols.  We only cache entries for standard ARM-defined
+   personality routines; the cache will contain only the frame unwinding
+   instructions associated with the entry (not the descriptors).  */
+
+static const struct objfile_data *arm_exidx_data_key;
+
+struct arm_exidx_entry
+{
+  bfd_vma addr;
+  gdb_byte *entry;
+};
+typedef struct arm_exidx_entry arm_exidx_entry_s;
+DEF_VEC_O(arm_exidx_entry_s);
+
+struct arm_exidx_data
+{
+  VEC(arm_exidx_entry_s) **section_maps;
+};
+
+static void
+arm_exidx_data_free (struct objfile *objfile, void *arg)
+{
+  struct arm_exidx_data *data = arg;
+  unsigned int i;
+
+  for (i = 0; i < objfile->obfd->section_count; i++)
+    VEC_free (arm_exidx_entry_s, data->section_maps[i]);
+}
+
+static inline int
+arm_compare_exidx_entries (const struct arm_exidx_entry *lhs,
+			   const struct arm_exidx_entry *rhs)
+{
+  return lhs->addr < rhs->addr;
+}
+
+static struct obj_section *
+arm_obj_section_from_vma (struct objfile *objfile, bfd_vma vma)
+{
+  struct obj_section *osect;
+
+  ALL_OBJFILE_OSECTIONS (objfile, osect)
+    if (bfd_get_section_flags (objfile->obfd,
+			       osect->the_bfd_section) & SEC_ALLOC)
+      {
+	bfd_vma start, size;
+	start = bfd_get_section_vma (objfile->obfd, osect->the_bfd_section);
+	size = bfd_get_section_size (osect->the_bfd_section);
+
+	if (start <= vma && vma < start + size)
+	  return osect;
+      }
+
+  return NULL;
+}
+
+/* Parse contents of exception table and exception index sections
+   of OBJFILE, and fill in the exception table entry cache.
+
+   For each entry that refers to a standard ARM-defined personality
+   routine, extract the frame unwinding instructions (from either
+   the index or the table section).  The unwinding instructions
+   are normalized by:
+    - extracting them from the rest of the table data
+    - converting to host endianness
+    - appending the implicit 0xb0 ("Finish") code
+
+   The extracted and normalized instructions are stored for later
+   retrieval by the arm_find_exidx_entry routine.  */
+ 
+static void
+arm_exidx_new_objfile (struct objfile *objfile)
+{
+  struct cleanup *cleanups = make_cleanup (null_cleanup, NULL);
+  struct arm_exidx_data *data;
+  asection *exidx, *extab;
+  bfd_vma exidx_vma = 0, extab_vma = 0;
+  bfd_size_type exidx_size = 0, extab_size = 0;
+  gdb_byte *exidx_data = NULL, *extab_data = NULL;
+  LONGEST i;
+
+  /* If we've already touched this file, do nothing.  */
+  if (!objfile || objfile_data (objfile, arm_exidx_data_key) != NULL)
+    return;
+
+  /* Read contents of exception table and index.  */
+  exidx = bfd_get_section_by_name (objfile->obfd, ".ARM.exidx");
+  if (exidx)
+    {
+      exidx_vma = bfd_section_vma (objfile->obfd, exidx);
+      exidx_size = bfd_get_section_size (exidx);
+      exidx_data = xmalloc (exidx_size);
+      make_cleanup (xfree, exidx_data);
+
+      if (!bfd_get_section_contents (objfile->obfd, exidx,
+				     exidx_data, 0, exidx_size))
+	{
+	  do_cleanups (cleanups);
+	  return;
+	}
+    }
+
+  extab = bfd_get_section_by_name (objfile->obfd, ".ARM.extab");
+  if (extab)
+    {
+      extab_vma = bfd_section_vma (objfile->obfd, extab);
+      extab_size = bfd_get_section_size (extab);
+      extab_data = xmalloc (extab_size);
+      make_cleanup (xfree, extab_data);
+
+      if (!bfd_get_section_contents (objfile->obfd, extab,
+				     extab_data, 0, extab_size))
+	{
+	  do_cleanups (cleanups);
+	  return;
+	}
+    }
+
+  /* Allocate exception table data structure.  */
+  data = OBSTACK_ZALLOC (&objfile->objfile_obstack, struct arm_exidx_data);
+  set_objfile_data (objfile, arm_exidx_data_key, data);
+  data->section_maps = OBSTACK_CALLOC (&objfile->objfile_obstack,
+				       objfile->obfd->section_count,
+				       VEC(arm_exidx_entry_s) *);
+
+  /* Fill in exception table.  */
+  for (i = 0; i < exidx_size / 8; i++)
+    {
+      struct arm_exidx_entry new_exidx_entry;
+      bfd_vma idx = bfd_h_get_32 (objfile->obfd, exidx_data + i * 8);
+      bfd_vma val = bfd_h_get_32 (objfile->obfd, exidx_data + i * 8 + 4);
+      bfd_vma addr = 0, word = 0;
+      int n_bytes = 0, n_words = 0;
+      struct obj_section *sec;
+      gdb_byte *entry = NULL;
+
+      /* Extract address of start of function.  */
+      idx = ((idx & 0x7fffffff) ^ 0x40000000) - 0x40000000;
+      idx += exidx_vma + i * 8;
+
+      /* Find section containing function and compute section offset.  */
+      sec = arm_obj_section_from_vma (objfile, idx);
+      if (sec == NULL)
+	continue;
+      idx -= bfd_get_section_vma (objfile->obfd, sec->the_bfd_section);
+
+      /* Determine address of exception table entry.  */
+      if (val == 1)
+	{
+	  /* EXIDX_CANTUNWIND -- no exception table entry present.  */
+	}
+      else if ((val & 0xff000000) == 0x80000000)
+	{
+	  /* Exception table entry embedded in .ARM.exidx
+	     -- must be short form.  */
+	  word = val;
+	  n_bytes = 3;
+	}
+      else if (!(val & 0x80000000))
+	{
+	  /* Exception table entry in .ARM.extab.  */
+	  addr = ((val & 0x7fffffff) ^ 0x40000000) - 0x40000000;
+	  addr += exidx_vma + i * 8 + 4;
+
+	  if (addr >= extab_vma && addr + 4 <= extab_vma + extab_size)
+	    {
+	      word = bfd_h_get_32 (objfile->obfd,
+				   extab_data + addr - extab_vma);
+	      addr += 4;
+
+	      if ((word & 0xff000000) == 0x80000000)
+		{
+		  /* Short form.  */
+		  n_bytes = 3;
+		}
+	      else if ((word & 0xff000000) == 0x81000000
+		       || (word & 0xff000000) == 0x82000000)
+		{
+		  /* Long form.  */
+		  n_bytes = 2;
+		  n_words = ((word >> 16) & 0xff);
+		}
+	      else if (!(word & 0x80000000))
+		{
+		  bfd_vma pers;
+		  struct obj_section *pers_sec;
+		  int gnu_personality = 0;
+
+		  /* Custom personality routine.  */
+		  pers = ((word & 0x7fffffff) ^ 0x40000000) - 0x40000000;
+		  pers = UNMAKE_THUMB_ADDR (pers + addr - 4);
+
+		  /* Check whether we've got one of the variants of the
+		     GNU personality routines.  */
+		  pers_sec = arm_obj_section_from_vma (objfile, pers);
+		  if (pers_sec)
+		    {
+		      static const char *personality[] = 
+			{
+			  "__gcc_personality_v0",
+			  "__gxx_personality_v0",
+			  "__gcj_personality_v0",
+			  "__gnu_objc_personality_v0",
+			  NULL
+			};
+
+		      CORE_ADDR pc = pers + obj_section_offset (pers_sec);
+		      int k;
+
+		      for (k = 0; personality[k]; k++)
+			if (lookup_minimal_symbol_by_pc_name
+			      (pc, personality[k], objfile))
+			  {
+			    gnu_personality = 1;
+			    break;
+			  }
+		    }
+
+		  /* If so, the next word contains a word count in the high
+		     byte, followed by the same unwind instructions as the
+		     pre-defined forms.  */
+		  if (gnu_personality
+		      && addr + 4 <= extab_vma + extab_size)
+		    {
+		      word = bfd_h_get_32 (objfile->obfd,
+					   extab_data + addr - extab_vma);
+		      addr += 4;
+		      n_bytes = 3;
+		      n_words = ((word >> 24) & 0xff);
+		    }
+		}
+	    }
+	}
+
+      /* Sanity check address.  */
+      if (n_words)
+	if (addr < extab_vma || addr + 4 * n_words > extab_vma + extab_size)
+	  n_words = n_bytes = 0;
+
+      /* The unwind instructions reside in WORD (only the N_BYTES least
+	 significant bytes are valid), followed by N_WORDS words in the
+	 extab section starting at ADDR.  */
+      if (n_bytes || n_words)
+	{
+	  gdb_byte *p = entry = obstack_alloc (&objfile->objfile_obstack,
+					       n_bytes + n_words * 4 + 1);
+
+	  while (n_bytes--)
+	    *p++ = (gdb_byte) ((word >> (8 * n_bytes)) & 0xff);
+
+	  while (n_words--)
+	    {
+	      word = bfd_h_get_32 (objfile->obfd,
+				   extab_data + addr - extab_vma);
+	      addr += 4;
+
+	      *p++ = (gdb_byte) ((word >> 24) & 0xff);
+	      *p++ = (gdb_byte) ((word >> 16) & 0xff);
+	      *p++ = (gdb_byte) ((word >> 8) & 0xff);
+	      *p++ = (gdb_byte) (word & 0xff);
+	    }
+
+	  /* Implied "Finish" to terminate the list.  */
+	  *p++ = 0xb0;
+	}
+
+      /* Push entry onto vector.  They are guaranteed to always
+	 appear in order of increasing addresses.  */
+      new_exidx_entry.addr = idx;
+      new_exidx_entry.entry = entry;
+      VEC_safe_push (arm_exidx_entry_s,
+		     data->section_maps[sec->the_bfd_section->index],
+		     &new_exidx_entry);
+    }
+
+  do_cleanups (cleanups);
+}
+
+/* Search for the exception table entry covering MEMADDR.  If one is found,
+   return a pointer to its data.  Otherwise, return 0.  If START is non-NULL,
+   set *START to the start of the region covered by this entry.  */
+
+static gdb_byte *
+arm_find_exidx_entry (CORE_ADDR memaddr, CORE_ADDR *start)
+{
+  struct obj_section *sec;
+
+  sec = find_pc_section (memaddr);
+  if (sec != NULL)
+    {
+      struct arm_exidx_data *data;
+      VEC(arm_exidx_entry_s) *map;
+      struct arm_exidx_entry map_key = { memaddr - obj_section_addr (sec), 0 };
+      unsigned int idx;
+
+      data = objfile_data (sec->objfile, arm_exidx_data_key);
+      if (data != NULL)
+	{
+	  map = data->section_maps[sec->the_bfd_section->index];
+	  if (!VEC_empty (arm_exidx_entry_s, map))
+	    {
+	      struct arm_exidx_entry *map_sym;
+
+	      idx = VEC_lower_bound (arm_exidx_entry_s, map, &map_key,
+				     arm_compare_exidx_entries);
+
+	      /* VEC_lower_bound finds the earliest ordered insertion
+		 point.  If the following symbol starts at this exact
+		 address, we use that; otherwise, the preceding
+		 exception table entry covers this address.  */
+	      if (idx < VEC_length (arm_exidx_entry_s, map))
+		{
+		  map_sym = VEC_index (arm_exidx_entry_s, map, idx);
+		  if (map_sym->addr == map_key.addr)
+		    {
+		      if (start)
+			*start = map_sym->addr + obj_section_addr (sec);
+		      return map_sym->entry;
+		    }
+		}
+
+	      if (idx > 0)
+		{
+		  map_sym = VEC_index (arm_exidx_entry_s, map, idx - 1);
+		  if (start)
+		    *start = map_sym->addr + obj_section_addr (sec);
+		  return map_sym->entry;
+		}
+	    }
+	}
+    }
+
+  return NULL;
+}
+
+/* Given the current frame THIS_FRAME, and its associated frame unwinding
+   instruction list from the ARM exception table entry ENTRY, allocate and
+   return a prologue cache structure describing how to unwind this frame.
+
+   Return NULL if the unwinding instruction list contains a "spare",
+   "reserved" or "refuse to unwind" instruction as defined in section
+   "9.3 Frame unwinding instructions" of the "Exception Handling ABI
+   for the ARM Architecture" document.  */
+
+static struct arm_prologue_cache *
+arm_exidx_fill_cache (struct frame_info *this_frame, gdb_byte *entry)
+{
+  CORE_ADDR vsp = 0;
+  int vsp_valid = 0;
+
+  struct arm_prologue_cache *cache;
+  cache = FRAME_OBSTACK_ZALLOC (struct arm_prologue_cache);
+  cache->saved_regs = trad_frame_alloc_saved_regs (this_frame);
+
+  for (;;)
+    {
+      gdb_byte insn;
+
+      /* Whenever we reload SP, we actually have to retrieve its
+	 actual value in the current frame.  */
+      if (!vsp_valid)
+	{
+	  if (trad_frame_realreg_p (cache->saved_regs, ARM_SP_REGNUM))
+	    {
+	      int reg = cache->saved_regs[ARM_SP_REGNUM].realreg;
+	      vsp = get_frame_register_unsigned (this_frame, reg);
+	    }
+	  else
+	    {
+	      CORE_ADDR addr = cache->saved_regs[ARM_SP_REGNUM].addr;
+	      vsp = get_frame_memory_unsigned (this_frame, addr, 4);
+	    }
+
+	  vsp_valid = 1;
+	}
+
+      /* Decode next unwind instruction.  */
+      insn = *entry++;
+
+      if ((insn & 0xc0) == 0)
+	{
+	  int offset = insn & 0x3f;
+	  vsp += (offset << 2) + 4;
+	}
+      else if ((insn & 0xc0) == 0x40)
+	{
+	  int offset = insn & 0x3f;
+	  vsp -= (offset << 2) + 4;
+	}
+      else if ((insn & 0xf0) == 0x80)
+	{
+	  int mask = ((insn & 0xf) << 8) | *entry++;
+	  int i;
+
+	  /* The special case of an all-zero mask identifies
+	     "Refuse to unwind".  We return NULL to fall back
+	     to the prologue analyzer.  */
+	  if (mask == 0)
+	    return NULL;
+
+	  /* Pop registers r4..r15 under mask.  */
+	  for (i = 0; i < 12; i++)
+	    if (mask & (1 << i))
+	      {
+	        cache->saved_regs[4 + i].addr = vsp;
+		vsp += 4;
+	      }
+
+	  /* Special-case popping SP -- we need to reload vsp.  */
+	  if (mask & (1 << (ARM_SP_REGNUM - 4)))
+	    vsp_valid = 0;
+	}
+      else if ((insn & 0xf0) == 0x90)
+	{
+	  int reg = insn & 0xf;
+
+	  /* Reserved cases.  */
+	  if (reg == ARM_SP_REGNUM || reg == ARM_PC_REGNUM)
+	    return NULL;
+
+	  /* Set SP from another register and mark VSP for reload.  */
+	  cache->saved_regs[ARM_SP_REGNUM] = cache->saved_regs[reg];
+	  vsp_valid = 0;
+	}
+      else if ((insn & 0xf0) == 0xa0)
+	{
+	  int count = insn & 0x7;
+	  int pop_lr = (insn & 0x8) != 0;
+	  int i;
+
+	  /* Pop r4..r[4+count].  */
+	  for (i = 0; i <= count; i++)
+	    {
+	      cache->saved_regs[4 + i].addr = vsp;
+	      vsp += 4;
+	    }
+
+	  /* If indicated by flag, pop LR as well.  */
+	  if (pop_lr)
+	    {
+	      cache->saved_regs[ARM_LR_REGNUM].addr = vsp;
+	      vsp += 4;
+	    }
+	}
+      else if (insn == 0xb0)
+	{
+	  /* We could only have updated PC by popping into it; if so, it
+	     will show up as address.  Otherwise, copy LR into PC.  */
+	  if (!trad_frame_addr_p (cache->saved_regs, ARM_PC_REGNUM))
+	    cache->saved_regs[ARM_PC_REGNUM]
+	      = cache->saved_regs[ARM_LR_REGNUM];
+
+	  /* We're done.  */
+	  break;
+	}
+      else if (insn == 0xb1)
+	{
+	  int mask = *entry++;
+	  int i;
+
+	  /* All-zero mask and mask >= 16 is "spare".  */
+	  if (mask == 0 || mask >= 16)
+	    return NULL;
+
+	  /* Pop r0..r3 under mask.  */
+	  for (i = 0; i < 4; i++)
+	    if (mask & (1 << i))
+	      {
+		cache->saved_regs[i].addr = vsp;
+		vsp += 4;
+	      }
+	}
+      else if (insn == 0xb2)
+	{
+	  ULONGEST offset = 0;
+	  unsigned shift = 0;
+
+	  do
+	    {
+	      offset |= (*entry & 0x7f) << shift;
+	      shift += 7;
+	    }
+	  while (*entry++ & 0x80);
+
+	  vsp += 0x204 + (offset << 2);
+	}
+      else if (insn == 0xb3)
+	{
+	  int start = *entry >> 4;
+	  int count = (*entry++) & 0xf;
+	  int i;
+
+	  /* Only registers D0..D15 are valid here.  */
+	  if (start + count >= 16)
+	    return NULL;
+
+	  /* Pop VFP double-precision registers D[start]..D[start+count].  */
+	  for (i = 0; i <= count; i++)
+	    {
+	      cache->saved_regs[ARM_D0_REGNUM + start + i].addr = vsp;
+	      vsp += 8;
+	    }
+
+	  /* Add an extra 4 bytes for FSTMFDX-style stack.  */
+	  vsp += 4;
+	}
+      else if ((insn & 0xf8) == 0xb8)
+	{
+	  int count = insn & 0x7;
+	  int i;
+
+	  /* Pop VFP double-precision registers D[8]..D[8+count].  */
+	  for (i = 0; i <= count; i++)
+	    {
+	      cache->saved_regs[ARM_D0_REGNUM + 8 + i].addr = vsp;
+	      vsp += 8;
+	    }
+
+	  /* Add an extra 4 bytes for FSTMFDX-style stack.  */
+	  vsp += 4;
+	}
+      else if (insn == 0xc6)
+	{
+	  int start = *entry >> 4;
+	  int count = (*entry++) & 0xf;
+	  int i;
+
+	  /* Only registers WR0..WR15 are valid.  */
+	  if (start + count >= 16)
+	    return NULL;
+
+	  /* Pop iwmmx registers WR[start]..WR[start+count].  */
+	  for (i = 0; i <= count; i++)
+	    {
+	      cache->saved_regs[ARM_WR0_REGNUM + start + i].addr = vsp;
+	      vsp += 8;
+	    }
+	}
+      else if (insn == 0xc7)
+	{
+	  int mask = *entry++;
+	  int i;
+
+	  /* All-zero mask and mask >= 16 is "spare".  */
+	  if (mask == 0 || mask >= 16)
+	    return NULL;
+
+	  /* Pop iwmmx general-purpose registers WCGR0..WCGR3 under mask.  */
+	  for (i = 0; i < 4; i++)
+	    if (mask & (1 << i))
+	      {
+		cache->saved_regs[ARM_WCGR0_REGNUM + i].addr = vsp;
+		vsp += 4;
+	      }
+	}
+      else if ((insn & 0xf8) == 0xc0)
+	{
+	  int count = insn & 0x7;
+	  int i;
+
+	  /* Pop iwmmx registers WR[10]..WR[10+count].  */
+	  for (i = 0; i <= count; i++)
+	    {
+	      cache->saved_regs[ARM_WR0_REGNUM + 10 + i].addr = vsp;
+	      vsp += 8;
+	    }
+	}
+      else if (insn == 0xc8)
+	{
+	  int start = *entry >> 4;
+	  int count = (*entry++) & 0xf;
+	  int i;
+
+	  /* Only registers D0..D31 are valid.  */
+	  if (start + count >= 16)
+	    return NULL;
+
+	  /* Pop VFP double-precision registers
+	     D[16+start]..D[16+start+count].  */
+	  for (i = 0; i <= count; i++)
+	    {
+	      cache->saved_regs[ARM_D0_REGNUM + 16 + start + i].addr = vsp;
+	      vsp += 8;
+	    }
+	}
+      else if (insn == 0xc9)
+	{
+	  int start = *entry >> 4;
+	  int count = (*entry++) & 0xf;
+	  int i;
+
+	  /* Pop VFP double-precision registers D[start]..D[start+count].  */
+	  for (i = 0; i <= count; i++)
+	    {
+	      cache->saved_regs[ARM_D0_REGNUM + start + i].addr = vsp;
+	      vsp += 8;
+	    }
+	}
+      else if ((insn & 0xf8) == 0xd0)
+	{
+	  int count = insn & 0x7;
+	  int i;
+
+	  /* Pop VFP double-precision registers D[8]..D[8+count].  */
+	  for (i = 0; i <= count; i++)
+	    {
+	      cache->saved_regs[ARM_D0_REGNUM + 8 + i].addr = vsp;
+	      vsp += 8;
+	    }
+	}
+      else
+	{
+	  /* Everything else is "spare".  */
+	  return NULL;
+	}
+    }
+
+  /* If we restore SP from a register, assume this was the frame register.
+     Otherwise just fall back to SP as frame register.  */
+  if (trad_frame_realreg_p (cache->saved_regs, ARM_SP_REGNUM))
+    cache->framereg = cache->saved_regs[ARM_SP_REGNUM].realreg;
+  else
+    cache->framereg = ARM_SP_REGNUM;
+
+  /* Determine offset to previous frame.  */
+  cache->framesize
+    = vsp - get_frame_register_unsigned (this_frame, cache->framereg);
+
+  /* We already got the previous SP.  */
+  cache->prev_sp = vsp;
+
+  return cache;
+}
+
+/* Unwinding via ARM exception table entries.  Note that the sniffer
+   already computes a filled-in prologue cache, which is then used
+   with the same arm_prologue_this_id and arm_prologue_prev_register
+   routines also used for prologue-parsing based unwinding.  */
+
+static int
+arm_exidx_unwind_sniffer (const struct frame_unwind *self,
+			  struct frame_info *this_frame,
+			  void **this_prologue_cache)
+{
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
+  enum bfd_endian byte_order_for_code = gdbarch_byte_order_for_code (gdbarch);
+  CORE_ADDR addr_in_block, exidx_region, func_start;
+  struct arm_prologue_cache *cache;
+  gdb_byte *entry;
+
+  /* See if we have an ARM exception table entry covering this address.  */
+  addr_in_block = get_frame_address_in_block (this_frame);
+  entry = arm_find_exidx_entry (addr_in_block, &exidx_region);
+  if (!entry)
+    return 0;
+
+  /* The ARM exception table does not describe unwind information
+     for arbitrary PC values, but is guaranteed to be correct only
+     at call sites.  We have to decide here whether we want to use
+     ARM exception table information for this frame, or fall back
+     to using prologue parsing.  (Note that if we have DWARF CFI,
+     this sniffer isn't even called -- CFI is always preferred.)
+
+     Before we make this decision, however, we check whether we
+     actually have *symbol* information for the current frame.
+     If not, prologue parsing would not work anyway, so we might
+     as well use the exception table and hope for the best.  */
+  if (find_pc_partial_function (addr_in_block, NULL, &func_start, NULL))
+    {
+      int exc_valid = 0;
+
+      /* If the next frame is "normal", we are at a call site in this
+	 frame, so exception information is guaranteed to be valid.  */
+      if (get_next_frame (this_frame)
+	  && get_frame_type (get_next_frame (this_frame)) == NORMAL_FRAME)
+	exc_valid = 1;
+
+      /* We also assume exception information is valid if we're currently
+	 blocked in a system call.  The system library is supposed to
+	 ensure this, so that e.g. pthread cancellation works.  */
+      if (arm_frame_is_thumb (this_frame))
+	{
+	  LONGEST insn;
+
+	  if (safe_read_memory_integer (get_frame_pc (this_frame) - 2, 2,
+					byte_order_for_code, &insn)
+	      && (insn & 0xff00) == 0xdf00 /* svc */)
+	    exc_valid = 1;
+	}
+      else
+	{
+	  LONGEST insn;
+
+	  if (safe_read_memory_integer (get_frame_pc (this_frame) - 4, 4,
+					byte_order_for_code, &insn)
+	      && (insn & 0x0f000000) == 0x0f000000 /* svc */)
+	    exc_valid = 1;
+	}
+	
+      /* Bail out if we don't know that exception information is valid.  */
+      if (!exc_valid)
+	return 0;
+
+     /* The ARM exception index does not mark the *end* of the region
+	covered by the entry, and some functions will not have any entry.
+	To correctly recognize the end of the covered region, the linker
+	should have inserted dummy records with a CANTUNWIND marker.
+
+	Unfortunately, current versions of GNU ld do not reliably do
+	this, and thus we may have found an incorrect entry above.
+	As a (temporary) sanity check, we only use the entry if it
+	lies *within* the bounds of the function.  Note that this check
+	might reject perfectly valid entries that just happen to cover
+	multiple functions; therefore this check ought to be removed
+	once the linker is fixed.  */
+      if (func_start > exidx_region)
+	return 0;
+    }
+
+  /* Decode the list of unwinding instructions into a prologue cache.
+     Note that this may fail due to e.g. a "refuse to unwind" code.  */
+  cache = arm_exidx_fill_cache (this_frame, entry);
+  if (!cache)
+    return 0;
+
+  *this_prologue_cache = cache;
+  return 1;
+}
+
+struct frame_unwind arm_exidx_unwind = {
+  NORMAL_FRAME,
+  arm_prologue_this_id,
+  arm_prologue_prev_register,
+  NULL,
+  arm_exidx_unwind_sniffer
 };
 
 static struct arm_prologue_cache *
@@ -7751,6 +8496,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Add some default predicates.  */
   frame_unwind_append_unwinder (gdbarch, &arm_stub_unwind);
   dwarf2_append_unwinders (gdbarch);
+  frame_unwind_append_unwinder (gdbarch, &arm_exidx_unwind);
   frame_unwind_append_unwinder (gdbarch, &arm_prologue_unwind);
 
   /* Now we have tuned the configuration, set a few final things,
@@ -7852,6 +8598,11 @@ _initialize_arm_tdep (void)
 
   arm_objfile_data_key
     = register_objfile_data_with_cleanup (NULL, arm_objfile_data_free);
+
+  /* Add ourselves to objfile event chain.  */
+  observer_attach_new_objfile (arm_exidx_new_objfile);
+  arm_exidx_data_key
+    = register_objfile_data_with_cleanup (NULL, arm_exidx_data_free);
 
   /* Register an ELF OS ABI sniffer for ARM binaries.  */
   gdbarch_register_osabi_sniffer (bfd_arch_arm,
