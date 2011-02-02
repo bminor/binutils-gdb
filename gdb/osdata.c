@@ -68,7 +68,7 @@ osdata_start_osdata (struct gdb_xml_parser *parser,
   if (data->osdata)
     gdb_xml_error (parser, _("Seen more than on osdata element"));
 
-  type = VEC_index (gdb_xml_value_s, attributes, 0)->value;
+  type = xml_find_attribute (attributes, "type")->value;
   osdata = XZALLOC (struct osdata);
   osdata->type = xstrdup (type);
   data->osdata = osdata;
@@ -95,7 +95,7 @@ osdata_start_column (struct gdb_xml_parser *parser,
                     void *user_data, VEC(gdb_xml_value_s) *attributes)
 {
   struct osdata_parsing_data *data = user_data;
-  const char *name = VEC_index (gdb_xml_value_s, attributes, 0)->value;
+  const char *name = xml_find_attribute (attributes, "name")->value;
 
   data->property_name = xstrdup (name);
 }

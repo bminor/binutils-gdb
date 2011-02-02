@@ -220,6 +220,12 @@ void gdb_xml_debug (struct gdb_xml_parser *parser, const char *format, ...)
 void gdb_xml_error (struct gdb_xml_parser *parser, const char *format, ...)
      ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (2, 0);
 
+/* Find the attribute named NAME in the set of parsed attributes
+   ATTRIBUTES.  Returns NULL if not found.  */
+
+struct gdb_xml_value *xml_find_attribute (VEC(gdb_xml_value_s) *attributes,
+					  const char *name);
+
 /* Parse an integer attribute into a ULONGEST.  */
 
 extern gdb_xml_attribute_handler gdb_xml_parse_attr_ulongest;

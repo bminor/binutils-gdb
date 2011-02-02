@@ -2505,13 +2505,14 @@ start_thread (struct gdb_xml_parser *parser,
 
   struct thread_item item;
   char *id;
+  struct gdb_xml_value *attr;
 
-  id = VEC_index (gdb_xml_value_s, attributes, 0)->value;
+  id = xml_find_attribute (attributes, "id")->value;
   item.ptid = read_ptid (id, NULL);
 
-  if (VEC_length (gdb_xml_value_s, attributes) > 1)
-    item.core = *(ULONGEST *) VEC_index (gdb_xml_value_s,
-					 attributes, 1)->value;
+  attr = xml_find_attribute (attributes, "core");
+  if (attr != NULL)
+    item.core = *(ULONGEST *) attr->value;
   else
     item.core = -1;
 

@@ -1,3 +1,20 @@
+2011-02-02  Pedro Alves  <pedro@codesourcery.com>
+
+	* xml-support.c (xml_find_attribute): New.
+	(xinclude_start_include): Use it.
+	* xml-support.h (xml_find_attribute): Declare.
+	* memory-map.c (memory_map_start_memory)
+	(memory_map_start_property): Use xml_find_attribute.
+	* osdata.c (osdata_start_osdata, osdata_start_column): Use
+	xml_find_attribute.
+	* remote.c (start_thread): Use xml_find_attribute.
+	* solib-target.c (library_list_start_segment)
+	(library_list_start_section, library_list_start_library)
+	(library_list_start_list): Use xml_find_attribute.
+	* xml-tdesc.c (tdesc_start_target, tdesc_start_feature)
+	(tdesc_start_union, tdesc_start_struct, tdesc_start_flags)
+	(tdesc_start_field): Use xml_find_attribute.
+
 2011-02-02  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* opencl-lang.c (STRINGIFY): Rename to OCL_STRING.

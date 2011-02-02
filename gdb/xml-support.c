@@ -138,6 +138,22 @@ gdb_xml_error (struct gdb_xml_parser *parser, const char *format, ...)
   throw_verror (XML_PARSE_ERROR, format, ap);
 }
 
+/* Find the attribute named NAME in the set of parsed attributes
+   ATTRIBUTES.  Returns NULL if not found.  */
+
+struct gdb_xml_value *
+xml_find_attribute (VEC(gdb_xml_value_s) *attributes, const char *name)
+{
+  struct gdb_xml_value *value;
+  int ix;
+
+  for (ix = 0; VEC_iterate (gdb_xml_value_s, attributes, ix, value); ix++)
+    if (strcmp (value->name, name) == 0)
+      return value;
+
+  return NULL;
+}
+
 /* Clean up a vector of parsed attribute values.  */
 
 static void
@@ -758,7 +774,7 @@ xinclude_start_include (struct gdb_xml_parser *parser,
 			void *user_data, VEC(gdb_xml_value_s) *attributes)
 {
   struct xinclude_parsing_data *data = user_data;
-  char *href = VEC_index (gdb_xml_value_s, attributes, 0)->value;
+  char *href = xml_find_attribute (attributes, "href")->value;
   struct cleanup *back_to;
   char *text, *output;
 

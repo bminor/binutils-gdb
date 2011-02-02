@@ -64,9 +64,9 @@ memory_map_start_memory (struct gdb_xml_parser *parser,
   struct mem_region *r = VEC_safe_push (mem_region_s, *data->memory_map, NULL);
   ULONGEST *start_p, *length_p, *type_p;
 
-  start_p = VEC_index (gdb_xml_value_s, attributes, 0)->value;
-  length_p = VEC_index (gdb_xml_value_s, attributes, 1)->value;
-  type_p = VEC_index (gdb_xml_value_s, attributes, 2)->value;
+  start_p = xml_find_attribute (attributes, "start")->value;
+  length_p = xml_find_attribute (attributes, "length")->value;
+  type_p = xml_find_attribute (attributes, "type")->value;
 
   mem_region_init (r);
   r->lo = *start_p;
@@ -101,7 +101,7 @@ memory_map_start_property (struct gdb_xml_parser *parser,
   struct memory_map_parsing_data *data = user_data;
   char *name;
 
-  name = VEC_index (gdb_xml_value_s, attributes, 0)->value;
+  name = xml_find_attribute (attributes, "name")->value;
   snprintf (data->property_name, sizeof (data->property_name), "%s", name);
 }
 
