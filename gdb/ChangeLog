@@ -1,3 +1,9 @@
+2011-02-02  Joel Brobecker  <brobecker@adacore.com>
+
+	* configure.ac: Work around non-GNU sed limitation when computing
+	python version number.
+	* configure: Regenerate.
+
 2011-02-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix debug printing of TYPE_INSTANCE.

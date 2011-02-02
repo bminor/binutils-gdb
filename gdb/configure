@@ -10658,8 +10658,23 @@ fi
 
   have_libpython=no
   if test "${have_python_config}" = yes; then
+    # Determine the Python version by extracting "-lpython<version>"
+    # part of the python_libs. <version> is usually X.Y with X and Y
+    # being decimal numbers, but can also be XY (seen on Windows).
+    #
+    # The extraction is performed using sed with a regular expression.
+    # Initially, the regexp used was using the '?' quantifier to make
+    # the dot in the version number optional.  Unfortunately, this
+    # does not work with non-GNU versions of sed because, because of
+    # what looks like a limitation (the '?' quantifier does not work
+    # with back-references).  We work around this limitation by using
+    # the '*' quantifier instead.  It means that, in theory, we might
+    # match unexpected version strings such as "-lpython2..7", but
+    # this seems unlikely in practice.  And even if that happens,
+    # an error will be triggered later on, when checking that version
+    # number.
     python_version=`echo " ${python_libs} " \
-                         | sed -e 's,^.* -l\(python[0-9]*[.]\?[0-9]*\).*$,\1,'`
+                         | sed -e 's,^.* -l\(python[0-9]*[.]*[0-9]*\).*$,\1,'`
     case "${python_version}" in
     python*)
 
