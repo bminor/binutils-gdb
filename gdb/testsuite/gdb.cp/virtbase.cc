@@ -88,6 +88,37 @@ public:
   RTTI_data() : data(1) {}
 };
 
+/* These classes are for testing pointer adjustment when printing a
+   pointer into a virtual base, with print object on.  */
+struct VirtualBase {
+  int x;
+
+  virtual ~VirtualBase() {}
+};
+
+struct VirtualMiddleA : public virtual VirtualBase {
+  /* Make sure the vbase offset of Virtual::VirtualBaseB is larger
+     than what fits in one byte.  */
+  int y[300];
+
+  virtual ~VirtualMiddleA() {}
+};
+
+struct VirtualMiddleB : public virtual VirtualBase {
+  int y;
+
+  virtual ~VirtualMiddleB() {}
+};
+
+struct Virtual : public virtual VirtualMiddleA, public virtual VirtualMiddleB {
+  int z;
+
+  virtual ~Virtual() {}
+};
+
+Virtual virtual_o;
+VirtualMiddleB *virtual_middle_b = &virtual_o;
+
 int main() {
   ph::Derived tst;
   tst.get_y();

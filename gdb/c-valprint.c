@@ -706,8 +706,7 @@ c_value_print (struct value *val, struct ui_file *stream,
                   type = lookup_reference_type (real_type);
                 }
 	      /* JYG: Need to adjust pointer value.  */
-	      /* NOTE: cagney/2005-01-02: THIS IS BOGUS.  */
-              value_contents_writeable (val)[0] -= top;
+	      val = value_from_pointer (type, value_as_address (val) - top);
 
               /* Note: When we look up RTTI entries, we don't get any 
                  information on const or volatile attributes.  */

@@ -1,5 +1,12 @@
 2011-02-02  Pedro Alves  <pedro@codesourcery.com>
 
+	* c-valprint.c (c_value_print): When doing virtual base pointer
+	adjustment, create a new value with adjusted contents rather than
+	changing the contents of the value being printed (and getting it
+	wrong).
+
+2011-02-02  Pedro Alves  <pedro@codesourcery.com>
+
 	* xml-support.c (xml_find_attribute): New.
 	(xinclude_start_include): Use it.
 	* xml-support.h (xml_find_attribute): Declare.
