@@ -1,3 +1,8 @@
+2011-02-02  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* opencl-lang.c (STRINGIFY): Rename to OCL_STRING.
+	(BUILD_OCL_VTYPES): Update.
+
 2011-02-02  Joel Brobecker  <brobecker@adacore.com>
 
 	* configure.ac: Work around non-GNU sed limitation when computing

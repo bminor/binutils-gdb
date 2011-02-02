@@ -1116,27 +1116,27 @@ build_opencl_types (struct gdbarch *gdbarch)
     = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct builtin_opencl_type);
 
 /* Helper macro to create strings.  */
-#define STRINGIFY(S) #S
+#define OCL_STRING(S) #S
 /* This macro allocates and assigns the type struct pointers
    for the vector types.  */
 #define BUILD_OCL_VTYPES(TYPE)\
   builtin_opencl_type->builtin_##TYPE##2\
     = init_vector_type (builtin_opencl_type->builtin_##TYPE, 2);\
-  TYPE_NAME (builtin_opencl_type->builtin_##TYPE##2) = STRINGIFY(TYPE ## 2);\
+  TYPE_NAME (builtin_opencl_type->builtin_##TYPE##2) = OCL_STRING(TYPE ## 2);\
   builtin_opencl_type->builtin_##TYPE##3\
     = init_vector_type (builtin_opencl_type->builtin_##TYPE, 3);\
-  TYPE_NAME (builtin_opencl_type->builtin_##TYPE##3) = STRINGIFY(TYPE ## 3);\
+  TYPE_NAME (builtin_opencl_type->builtin_##TYPE##3) = OCL_STRING(TYPE ## 3);\
   TYPE_LENGTH (builtin_opencl_type->builtin_##TYPE##3)\
     = 4 * TYPE_LENGTH (builtin_opencl_type->builtin_##TYPE);\
   builtin_opencl_type->builtin_##TYPE##4\
     = init_vector_type (builtin_opencl_type->builtin_##TYPE, 4);\
-  TYPE_NAME (builtin_opencl_type->builtin_##TYPE##4) = STRINGIFY(TYPE ## 4);\
+  TYPE_NAME (builtin_opencl_type->builtin_##TYPE##4) = OCL_STRING(TYPE ## 4);\
   builtin_opencl_type->builtin_##TYPE##8\
     = init_vector_type (builtin_opencl_type->builtin_##TYPE, 8);\
-  TYPE_NAME (builtin_opencl_type->builtin_##TYPE##8) = STRINGIFY(TYPE ## 8);\
+  TYPE_NAME (builtin_opencl_type->builtin_##TYPE##8) = OCL_STRING(TYPE ## 8);\
   builtin_opencl_type->builtin_##TYPE##16\
     = init_vector_type (builtin_opencl_type->builtin_##TYPE, 16);\
-  TYPE_NAME (builtin_opencl_type->builtin_##TYPE##16) = STRINGIFY(TYPE ## 16)
+  TYPE_NAME (builtin_opencl_type->builtin_##TYPE##16) = OCL_STRING(TYPE ## 16)
 
   builtin_opencl_type->builtin_char
     = arch_integer_type (gdbarch, 8, 0, "char");
