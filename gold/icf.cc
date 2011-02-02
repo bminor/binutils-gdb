@@ -652,16 +652,17 @@ match_sections(unsigned int iteration_num,
 }
 
 // During safe icf (--icf=safe), only fold functions that are ctors or dtors.
-// This function returns true if the mangled function name is a ctor or a
-// dtor.
+// This function returns true if the section name is that of a ctor or a dtor.
 
 static bool
-is_function_ctor_or_dtor(const char* mangled_func_name)
+is_function_ctor_or_dtor(const std::string& section_name)
 {
-  if ((is_prefix_of("_ZN", mangled_func_name)
-       || is_prefix_of("_ZZ", mangled_func_name))
-      && (is_gnu_v3_mangled_ctor(mangled_func_name)
-          || is_gnu_v3_mangled_dtor(mangled_func_name)))
+  const char* mangled_func_name = strrchr(section_name.c_str(), '.');
+  gold_assert(mangled_func_name != NULL);
+  if ((is_prefix_of("._ZN", mangled_func_name)
+       || is_prefix_of("._ZZ", mangled_func_name))
+      && (is_gnu_v3_mangled_ctor(mangled_func_name + 1)
+          || is_gnu_v3_mangled_dtor(mangled_func_name + 1)))
     {
       return true;
     }
@@ -696,7 +697,7 @@ Icf::find_identical_sections(const Input_objects* input_objects,
 
       for (unsigned int i = 0;i < (*p)->shnum(); ++i)
         {
-	  const char* section_name = (*p)->section_name(i).c_str();
+	  const std::string section_name = (*p)->section_name(i);
           if (!is_section_foldable_candidate(section_name))
             continue;
           if (!(*p)->is_section_included(i))
@@ -704,13 +705,11 @@ Icf::find_identical_sections(const Input_objects* input_objects,
           if (parameters->options().gc_sections()
               && symtab->gc()->is_section_garbage(*p, i))
               continue;
-	  const char* mangled_func_name = strrchr(section_name, '.');
-	  gold_assert(mangled_func_name != NULL);
 	  // With --icf=safe, check if the mangled function name is a ctor
 	  // or a dtor.  The mangled function name can be obtained from the
 	  // section name by stripping the section prefix.
 	  if (parameters->options().icf_safe_folding()
-              && !is_function_ctor_or_dtor(mangled_func_name + 1)
+              && !is_function_ctor_or_dtor(section_name)
 	      && (!target.can_check_for_function_pointers()
                   || section_has_function_pointers(*p, i)))
             {

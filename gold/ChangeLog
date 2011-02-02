@@ -1,3 +1,11 @@
+2011-02-02  Sriraman Tallam  <tmsriram@google.com>
+
+	* icf.h (is_section_foldable_candidate): Change type of parameter
+        to std::string.
+	* icf.cc (Icf::find_identical_sections): Change type of local variable
+        section_name to be std::string.
+	(is_function_ctor_or_dtor): Change type of parameter to std::string.
+
 2011-01-25  Ian Lance Taylor  <iant@google.com>
 
 	* script.cc (script_add_extern): Rewrite to use

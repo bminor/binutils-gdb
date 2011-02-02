@@ -168,10 +168,11 @@ class Icf
 // earlier gcc versions, like 4.0.3, put constructors and destructors in
 // .gnu.linkonce.t sections and hence should be included too.
 inline bool
-is_section_foldable_candidate(const char* section_name)
+is_section_foldable_candidate(const std::string& section_name)
 {
-  return (is_prefix_of(".text", section_name)
-          || is_prefix_of(".gnu.linkonce.t", section_name));
+  const char* section_name_cstr = section_name.c_str();
+  return (is_prefix_of(".text", section_name_cstr)
+          || is_prefix_of(".gnu.linkonce.t", section_name_cstr));
 }
 
 } // End of namespace gold.
