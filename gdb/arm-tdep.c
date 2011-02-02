@@ -1198,29 +1198,30 @@ arm_analyze_load_stack_chk_guard(CORE_ADDR pc, struct gdbarch *gdbarch,
     }
   else
     {
-       unsigned int insn
-	 = read_memory_unsigned_integer (pc, 4, byte_order_for_code);
+      unsigned int insn
+	= read_memory_unsigned_integer (pc, 4, byte_order_for_code);
 
-       if ((insn & 0x0e5f0000) == 0x041f0000) /* ldr Rd, #immed */
-	 {
-	   address = bits (insn, 0, 11);
-	   *destreg = bits (insn, 12, 15);
-	   *offset = 4;
-	 }
-       else if ((insn & 0x0ff00000) == 0x03000000) /* movw Rd, #const */
-	 {
-	   low = EXTRACT_MOVW_MOVT_IMM_A (insn);
+      if ((insn & 0x0e5f0000) == 0x041f0000) /* ldr Rd, #immed */
+	{
+	  address = bits (insn, 0, 11);
+	  *destreg = bits (insn, 12, 15);
+	  *offset = 4;
+	}
+      else if ((insn & 0x0ff00000) == 0x03000000) /* movw Rd, #const */
+	{
+	  low = EXTRACT_MOVW_MOVT_IMM_A (insn);
 
-	   insn
-	     = read_memory_unsigned_integer (pc + 4, 4, byte_order_for_code);
+	  insn
+	    = read_memory_unsigned_integer (pc + 4, 4, byte_order_for_code);
 
-	   if ((insn & 0x0ff00000) == 0x03400000)       /* movt Rd, #const */
-	     high = EXTRACT_MOVW_MOVT_IMM_A (insn);
-
-	   address = (high << 16 | low);
-	   *destreg = bits (insn, 12, 15);
-	   *offset = 8;
-	 }
+	  if ((insn & 0x0ff00000) == 0x03400000) /* movt Rd, #const */
+	    {
+	      high = EXTRACT_MOVW_MOVT_IMM_A (insn);
+	      *destreg = bits (insn, 12, 15);
+	      *offset = 8;
+	      address = (high << 16 | low);
+	    }
+	}
     }
 
   return address;
