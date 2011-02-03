@@ -77,12 +77,21 @@ compare_lines (const void *mle1p, const void *mle2p)
   mle1 = (struct dis_line_entry *) mle1p;
   mle2 = (struct dis_line_entry *) mle2p;
 
-  val = mle1->line - mle2->line;
-
-  if (val != 0)
-    return val;
-
-  return mle1->start_pc - mle2->start_pc;
+  /* End of sequence markers have a line number of 0 but don't want to
+     be sorted to the head of the list, instead sort by PC.  */
+  if (mle1->line == 0 || mle2->line == 0)
+    {
+      val = mle1->start_pc - mle2->start_pc;
+      if (val == 0)
+        val = mle1->line - mle2->line;
+    }
+  else
+    {
+      val = mle1->line - mle2->line;
+      if (val == 0)
+        val = mle1->start_pc - mle2->start_pc;
+    }
+  return val;
 }
 
 static int
