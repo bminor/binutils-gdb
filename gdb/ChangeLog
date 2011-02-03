@@ -1,3 +1,8 @@
+2011-02-03  Ulrich Weigand  <ulrich.weigand@linaro.org>
+
+	* arm-tdep.c (arm_skip_stack_protector): Accept any symbol that
+	starts with __stack_chk_guard as stack guard symbol.
+
 2011-02-03  Andrew Burgess  <aburgess@broadcom.com>
 
 	* disasm.c (compare_lines): Handle the end of sequence markers

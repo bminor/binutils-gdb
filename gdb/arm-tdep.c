@@ -1296,7 +1296,8 @@ arm_skip_stack_protector(CORE_ADDR pc, struct gdbarch *gdbarch)
      instruction sequence is not for stack protector.  If symbol is
      removed, we conservatively think this sequence is for stack protector.  */
   if (stack_chk_guard
-      && strcmp (SYMBOL_LINKAGE_NAME(stack_chk_guard), "__stack_chk_guard"))
+      && strncmp (SYMBOL_LINKAGE_NAME (stack_chk_guard), "__stack_chk_guard",
+		  strlen ("__stack_chk_guard")) != 0)
    return pc;
 
   if (is_thumb)
