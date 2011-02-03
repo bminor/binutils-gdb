@@ -1,3 +1,19 @@
+2011-02-04  Bernd Schmidt  <bernds@codesourcery.com>
+
+	* doc/as.texinfo (Target TIC6X options): Don't mention "-matomic".
+	* doc/c-tic6x.texi (TIC6X Directives): Don't mention ".atomic".
+	(TIC6X Options): Don't mention "-matomic".
+	* config/tc-tic6x.c (OPTION_MATOMIC, OPTION_MNO_ATOMIC): Delete.
+	(md_longopts): Remove corresponding entries.
+	(md_parse_option): Don't handle them.
+	(md_show_usage): Don't document them.
+	(tic6x_atomic): Delete variable.
+	(tic6x_update_features): Always copy tic6x_arch_enable to
+	tic6x_features.
+	(tic6x_arch_enable): Remove references to TIC6X_INSN_ATOMIC.
+	(s_tic6x_atomic, s_tic6x_noatomic): Remove functions.
+	(md_pseudo_table): Remove ".atomic" and ".noatomic".
+
 2011-01-31  Nick Clifton  <nickc@redhat.com>
 
 	* write.c (write_contents): Include output file name and bfd error

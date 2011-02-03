@@ -36,20 +36,6 @@ all instructions are permitted.
 The following values of @var{arch} are accepted: @code{c62x},
 @code{c64x}, @code{c64x+}, @code{c67x}, @code{c67x+}, @code{c674x}.
 
-@cindex @code{-matomic} command line option, TIC6X
-@cindex @code{-mno-atomic} command line option, TIC6X
-@item -matomic
-@itemx -mno-atomic
-Enable or disable the optional C64x+ atomic operation instructions.
-By default, they are enabled if no @option{-march} option is given, or
-if an architecture is specified with @option{-march} that implies
-these instructions are present (currently, there are no such
-architectures); they are disabled if an architecture is specified with
-@option{-march} on which the instructions are optional or not
-present.  This option overrides such a default from the architecture,
-independent of the order in which the @option{-march} or
-@option{-matomic} or @option{-mno-atomic} options are passed.
-
 @cindex @code{-mdsbt} command line option, TIC6X
 @cindex @code{-mno-dsbt} command line option, TIC6X
 @item -mdsbt
@@ -144,13 +130,6 @@ subsequent directive overriding it.
 @cindex @code{.arch} directive, TIC6X
 @item .arch @var{arch}
 This has the same effect as @option{-march=@var{arch}}.
-
-@cindex @code{.atomic} directive, TIC6X
-@cindex @code{.noatomic} directive, TIC6X
-@item .atomic
-@itemx .noatomic
-These have the same effects as @option{-matomic} and
-@option{-mno-atomic}.
 
 @cindex @code{.c6xabi_attribute} directive, TIC6X
 @item .c6xabi_attribute @var{tag}, @var{value}

@@ -1,3 +1,12 @@
+2011-02-04  Bernd Schmidt  <bernds@codesourcery.com>
+
+	* gas/tic6x/dir-junk.l: Remove tests for .atomic and .noatomic.
+	* gas/tic6x/dir-junk.s: Likewise.
+	* gas/tic6x/insns-c674x-bad.d: Remove test.
+	* gas/tic6x/insns-c674x-bad.l: Likewise.
+	* gas/tic6x/insns-c674x-bad.s: Likewise.
+	* gas/tic6x/insns-atomic.d: Remove "-matomic" switch.
+
 2011-01-31  Nick Clifton  <nickc@redhat.com>
 
 	* gas/all/align.d: Skip for the RX.

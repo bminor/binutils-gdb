@@ -1,5 +1,5 @@
 /* TI C6X assembler.
-   Copyright 2010
+   Copyright 2010, 2011
    Free Software Foundation, Inc.
    Contributed by Joseph Myers <joseph@codesourcery.com>
    		  Bernd Schmidt  <bernds@codesourcery.com>
@@ -46,8 +46,6 @@ const char *md_shortopts = "";
 enum
   {
     OPTION_MARCH = OPTION_MD_BASE,
-    OPTION_MATOMIC,
-    OPTION_MNO_ATOMIC,
     OPTION_MBIG_ENDIAN,
     OPTION_MLITTLE_ENDIAN,
     OPTION_MDSBT,
@@ -61,8 +59,6 @@ enum
 struct option md_longopts[] =
   {
     { "march", required_argument, NULL, OPTION_MARCH },
-    { "matomic", no_argument, NULL, OPTION_MATOMIC },
-    { "mno-atomic", no_argument, NULL, OPTION_MNO_ATOMIC },
     { "mbig-endian", no_argument, NULL, OPTION_MBIG_ENDIAN },
     { "mlittle-endian", no_argument, NULL, OPTION_MLITTLE_ENDIAN },
     { "mdsbt", no_argument, NULL, OPTION_MDSBT },
@@ -75,20 +71,14 @@ struct option md_longopts[] =
   };
 size_t md_longopts_size = sizeof (md_longopts);
 
-/* Whether to enable atomic instructions.  1 to enable them, 0 to
-   disable, -1 to default from architecture.  */
-static int tic6x_atomic = -1;
-
 /* The instructions enabled based only on the selected architecture
-   (all instructions, if no architecture specified).  Atomic
-   instructions may be enabled or disabled separately.  */
+   (all instructions, if no architecture specified).  */
 static unsigned short tic6x_arch_enable = (TIC6X_INSN_C62X
 					   | TIC6X_INSN_C64X
 					   | TIC6X_INSN_C64XP
 					   | TIC6X_INSN_C67X
 					   | TIC6X_INSN_C67XP
-					   | TIC6X_INSN_C674X
-					   | TIC6X_INSN_ATOMIC);
+					   | TIC6X_INSN_C674X);
 
 /* The instructions enabled based on the current set of features
    (architecture, as modified by other options).  */
@@ -233,14 +223,6 @@ md_parse_option (int c, char *arg)
       tic6x_use_arch (arg);
       break;
 
-    case OPTION_MATOMIC:
-      tic6x_atomic = 1;
-      break;
-
-    case OPTION_MNO_ATOMIC:
-      tic6x_atomic = 0;
-      break;
-
     case OPTION_MBIG_ENDIAN:
       target_big_endian = 1;
       break;
@@ -287,8 +269,6 @@ md_show_usage (FILE *stream ATTRIBUTE_UNUSED)
   fputc ('\n', stream);
   fprintf (stream, _("TMS320C6000 options:\n"));
   fprintf (stream, _("  -march=ARCH             enable instructions from architecture ARCH\n"));
-  fprintf (stream, _("  -matomic                enable atomic operation instructions\n"));
-  fprintf (stream, _("  -mno-atomic             disable atomic operation instructions\n"));
   fprintf (stream, _("  -mbig-endian            generate big-endian code\n"));
   fprintf (stream, _("  -mlittle-endian         generate little-endian code\n"));
   fprintf (stream, _("  -mdsbt                  code uses DSBT addressing\n"));
@@ -315,23 +295,7 @@ md_show_usage (FILE *stream ATTRIBUTE_UNUSED)
 static void
 tic6x_update_features (void)
 {
-  switch (tic6x_atomic)
-    {
-    case -1:
-      tic6x_features = tic6x_arch_enable;
-      break;
-
-    case 0:
-      tic6x_features = tic6x_arch_enable & ~TIC6X_INSN_ATOMIC;
-      break;
-
-    case 1:
-      tic6x_features = tic6x_arch_enable | TIC6X_INSN_ATOMIC;
-      break;
-
-    default:
-      abort ();
-    }
+  tic6x_features = tic6x_arch_enable;
 
   tic6x_num_registers
     = (tic6x_arch_enable & (TIC6X_INSN_C64X | TIC6X_INSN_C67XP)) ? 32 : 16;
@@ -373,26 +337,6 @@ s_tic6x_arch (int ignored ATTRIBUTE_UNUSED)
   tic6x_use_arch (arch);
   tic6x_update_features ();
   *input_line_pointer = c;
-  demand_empty_rest_of_line ();
-}
-
-/* Parse a .atomic directive.  */
-
-static void
-s_tic6x_atomic (int ignored ATTRIBUTE_UNUSED)
-{
-  tic6x_atomic = 1;
-  tic6x_update_features ();
-  demand_empty_rest_of_line ();
-}
-
-/* Parse a .noatomic directive.  */
-
-static void
-s_tic6x_noatomic (int ignored ATTRIBUTE_UNUSED)
-{
-  tic6x_atomic = 0;
-  tic6x_update_features ();
   demand_empty_rest_of_line ();
 }
 
@@ -450,9 +394,7 @@ tic6x_convert_symbolic_attribute (const char *name)
 const pseudo_typeS md_pseudo_table[] =
   {
     { "arch", s_tic6x_arch, 0 },
-    { "atomic", s_tic6x_atomic, 0 },
     { "c6xabi_attribute", s_tic6x_c6xabi_attribute, 0 },
-    { "noatomic", s_tic6x_noatomic, 0 },
     { "nocmp", s_tic6x_nocmp, 0 },
     { "word", cons, 4 },
     { 0, 0, 0 }
