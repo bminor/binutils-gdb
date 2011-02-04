@@ -1,3 +1,14 @@
+2011-02-04  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	Fix some typos.
+	* breakpoint.c (update_watchpoint): Fix name of the
+	update_global_location_list function.
+	(print_one_breakpoint): Fix typo.
+	(_initialize_breakpoint): Remove extra space in hbreak help
+	string.
+	* breakpoint.h (struct bp_location) <length>: Fix field
+	description.
+
 2011-02-04  Pedro Alves  <pedro@codesourcery.com>
 
 	* regcache.c (registers_changed_ptid): Don't explictly always

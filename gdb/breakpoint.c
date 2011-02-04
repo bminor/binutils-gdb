@@ -1374,8 +1374,8 @@ update_watchpoint (struct breakpoint *b, int reparse)
   if (!watchpoint_in_thread_scope (b))
     return;
 
-  /* We don't free locations.  They are stored in bp_location array
-     and update_global_locations will eventually delete them and
+  /* We don't free locations.  They are stored in the bp_location array
+     and update_global_location_list will eventually delete them and
      remove breakpoints if needed.  */
   b->loc = NULL;
 
@@ -5012,7 +5012,7 @@ print_one_breakpoint (struct breakpoint *b,
 	 situation.
 
 	 Note that while hardware watchpoints have several locations
-	 internally, that's no a property exposed to user.  */
+	 internally, that's not a property exposed to user.  */
       if (b->loc 
 	  && !is_hardware_watchpoint (b)
 	  && (b->loc->next || !b->loc->enabled)
@@ -12097,7 +12097,7 @@ BREAK_ARGS_HELP ("tbreak")));
   set_cmd_completer (c, location_completer);
 
   c = add_com ("hbreak", class_breakpoint, hbreak_command, _("\
-Set a hardware assisted  breakpoint.\n\
+Set a hardware assisted breakpoint.\n\
 Like \"break\" except the breakpoint requires hardware support,\n\
 some target hardware may not have this support.\n\
 \n"

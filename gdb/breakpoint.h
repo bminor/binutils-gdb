@@ -324,8 +324,8 @@ struct bp_location
      bp_loc_other.  */
   CORE_ADDR address;
 
-  /* For hardware watchpoints, the size of data ad ADDRESS being
-     watches.  */
+  /* For hardware watchpoints, the size of the memory region being
+     watched.  */
   int length;
 
   /* Type of hardware watchpoint.  */
