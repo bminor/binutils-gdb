@@ -3,6 +3,8 @@
 
 *** Changes since GDB 7.2
 
+* The "catch syscall" command now works on mips*-linux* targets.
+
 * The -data-disassemble MI command now supports modes 2 and 3 for
   dumping the instruction opcodes.
 

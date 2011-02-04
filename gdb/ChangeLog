@@ -1,5 +1,9 @@
 2011-02-04 David Daney <ddaney@caviumnetworks.com>
 
+	* NEWS: Add item for "catch syscall" on mips*-linux* targets.
+
+2011-02-04 David Daney <ddaney@caviumnetworks.com>
+
 	* mips-linux-tdep.c: Include xml-syscall.h.
 	(mips_linux_get_syscall_number): New function.
 	(mips_linux_init_abi): Add calls to
