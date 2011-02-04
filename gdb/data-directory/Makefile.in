@@ -46,7 +46,8 @@ SYSCALLS_FILES = \
 	gdb-syscalls.dtd \
 	ppc-linux.xml ppc64-linux.xml \
 	i386-linux.xml amd64-linux.xml \
-	sparc-linux.xml sparc64-linux.xml
+	sparc-linux.xml sparc64-linux.xml \
+	mips-o32-linux.xml mips-n32-linux.xml mips-n64-linux.xml
 
 PYTHON_DIR = python
 PYTHON_INSTALL_DIR = $(DESTDIR)$(GDB_DATADIR)/$(PYTHON_DIR)

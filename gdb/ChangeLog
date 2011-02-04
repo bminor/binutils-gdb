@@ -1,3 +1,15 @@
+2011-02-04 David Daney <ddaney@caviumnetworks.com>
+
+	* mips-linux-tdep.c: Include xml-syscall.h.
+	(mips_linux_get_syscall_number): New function.
+	(mips_linux_init_abi): Add calls to
+	mips_linux_get_syscall_number() and set_xml_syscall_file_name().
+	* data-directory/Makefile.in (SYSCALLS_FILES): Add
+	mips-o32-linux.xml, mips-n32-linux.xml and mips-n64-linux.xml
+	* syscalls/mips-n32-linux.xml: New file.
+	* syscalls/mips-n64-linux.xml: New file.
+	* syscalls/mips-o32-linux.xml: New file.
+
 2011-02-04  Ulrich Weigand  <ulrich.weigand@linaro.org>
 
 	* dwarf2read.c (dwarf2_ranges_read): Skip empty range entries.

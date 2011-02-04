@@ -40,6 +40,7 @@
 #include "mips-linux-tdep.h"
 #include "glibc-tdep.h"
 #include "linux-tdep.h"
+#include "xml-syscall.h"
 
 static struct target_so_ops mips_svr4_so_ops;
 
@@ -1207,6 +1208,38 @@ mips_linux_syscall_next_pc (struct frame_info *frame)
   return pc + 4;
 }
 
+/* Return the current system call's number present in the
+   v0 register.  When the function fails, it returns -1.  */
+
+static LONGEST
+mips_linux_get_syscall_number (struct gdbarch *gdbarch,
+			       ptid_t ptid)
+{
+  struct regcache *regcache = get_thread_regcache (ptid);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  int regsize = register_size (gdbarch, MIPS_V0_REGNUM);
+  /* The content of a register */
+  gdb_byte buf[8];
+  /* The result */
+  LONGEST ret;
+
+  /* Make sure we're in a known ABI */
+  gdb_assert (tdep->mips_abi == MIPS_ABI_O32
+	      || tdep->mips_abi == MIPS_ABI_N32
+	      || tdep->mips_abi == MIPS_ABI_N64);
+
+  gdb_assert (regsize <= sizeof (buf));
+
+  /* Getting the system call number from the register.
+     syscall number is in v0 or $2.  */
+  regcache_cooked_read (regcache, MIPS_V0_REGNUM, buf);
+
+  ret = extract_signed_integer (buf, regsize, byte_order);
+
+  return ret;
+}
+
 /* Initialize one of the GNU/Linux OS ABIs.  */
 
 static void
@@ -1219,6 +1252,9 @@ mips_linux_init_abi (struct gdbarch_info info,
 
   linux_init_abi (info, gdbarch);
 
+  /* Get the syscall number from the arch's register.  */
+  set_gdbarch_get_syscall_number (gdbarch, mips_linux_get_syscall_number);
+
   switch (abi)
     {
       case MIPS_ABI_O32:
@@ -1228,6 +1264,7 @@ mips_linux_init_abi (struct gdbarch_info info,
 	  (gdbarch, svr4_ilp32_fetch_link_map_offsets);
 	tramp_frame_prepend_unwinder (gdbarch, &mips_linux_o32_sigframe);
 	tramp_frame_prepend_unwinder (gdbarch, &mips_linux_o32_rt_sigframe);
+	set_xml_syscall_file_name ("syscalls/mips-o32-linux.xml");
 	break;
       case MIPS_ABI_N32:
 	set_gdbarch_get_longjmp_target (gdbarch,
@@ -1241,6 +1278,7 @@ mips_linux_init_abi (struct gdbarch_info info,
 	   does not distinguish between quiet and signalling NaNs).  */
 	set_gdbarch_long_double_format (gdbarch, floatformats_ia64_quad);
 	tramp_frame_prepend_unwinder (gdbarch, &mips_linux_n32_rt_sigframe);
+	set_xml_syscall_file_name ("syscalls/mips-n32-linux.xml");
 	break;
       case MIPS_ABI_N64:
 	set_gdbarch_get_longjmp_target (gdbarch,
@@ -1254,6 +1292,7 @@ mips_linux_init_abi (struct gdbarch_info info,
 	   does not distinguish between quiet and signalling NaNs).  */
 	set_gdbarch_long_double_format (gdbarch, floatformats_ia64_quad);
 	tramp_frame_prepend_unwinder (gdbarch, &mips_linux_n64_rt_sigframe);
+	set_xml_syscall_file_name ("syscalls/mips-n64-linux.xml");
 	break;
       default:
 	break;

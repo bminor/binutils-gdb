@@ -1,3 +1,7 @@
+2011-02-04 David Daney <ddaney@caviumnetworks.com>
+
+	* gdb.base/catch-syscall.exp: Enable for mips*-linux*.
+
 2011-02-03  Andrew Burgess  <aburgess@broadcom.com>
 
 	* gdb.base/disasm-end-cu-1.c, gdb.base/disasm-end-cu-2.c,
