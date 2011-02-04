@@ -1,3 +1,9 @@
+2011-02-04  Ulrich Weigand  <ulrich.weigand@linaro.org>
+
+	* dwarf2read.c (dwarf2_ranges_read): Skip empty range entries.
+	Complain about inverted range entries.
+	(dwarf2_record_block_ranges): Likewise.
+
 2011-02-04  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	Fix some typos.

@@ -5863,10 +5863,22 @@ dwarf2_ranges_read (unsigned offset, CORE_ADDR *low_return,
 	  return 0;
 	}
 
+      if (range_beginning > range_end)
+	{
+	  /* Inverted range entries are invalid.  */
+	  complaint (&symfile_complaints,
+		     _("Invalid .debug_ranges data (inverted range)"));
+	  return 0;
+	}
+
+      /* Empty range entries have no effect.  */
+      if (range_beginning == range_end)
+	continue;
+
       range_beginning += base;
       range_end += base;
 
-      if (ranges_pst != NULL && range_beginning < range_end)
+      if (ranges_pst != NULL)
 	addrmap_set_empty (objfile->psymtabs_addrmap,
 			   range_beginning + baseaddr,
 			   range_end - 1 + baseaddr,
@@ -6148,6 +6160,19 @@ dwarf2_record_block_ranges (struct die_info *die, struct block *block,
 			       "(no base address)"));
                   return;
                 }
+
+	      if (start > end)
+		{
+		  /* Inverted range entries are invalid.  */
+		  complaint (&symfile_complaints,
+			     _("Invalid .debug_ranges data "
+			       "(inverted range)"));
+		  return;
+		}
+
+	      /* Empty range entries have no effect.  */
+	      if (start == end)
+		continue;
 
               record_block_range (block,
                                   baseaddr + base + start,
