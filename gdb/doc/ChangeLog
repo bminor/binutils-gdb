@@ -1,3 +1,8 @@
+2011-02-04  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.texinfo (GDB/MI Async Records): Document that symbols-loaded
+	is not useful.
+
 2011-01-25  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.texinfo: s/value optimized out/optimized out/g

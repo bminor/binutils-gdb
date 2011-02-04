@@ -24771,11 +24771,12 @@ opaque identifier of the library.  For remote debugging case,
 @var{target-name} and @var{host-name} fields give the name of the
 library file on the target, and on the host respectively.  For native
 debugging, both those fields have the same value.  The
-@var{symbols-loaded} field reports if the debug symbols for this
-library are loaded.  The @var{thread-group} field, if present,
-specifies the id of the thread group in whose context the library was loaded.
-If the field is absent, it means the library was loaded in the context
-of all present thread groups.
+@var{symbols-loaded} field is emitted only for backward compatibility
+and should not be relied on to convey any useful information.  The
+@var{thread-group} field, if present, specifies the id of the thread
+group in whose context the library was loaded.  If the field is
+absent, it means the library was loaded in the context of all present
+thread groups.
 
 @item =library-unloaded,...
 Reports that a library was unloaded by the program.  This notification
