@@ -97,6 +97,7 @@ typedef unsigned long gdb_py_ulongest;
 
 /* Also needed to parse enum var_types. */
 #include "command.h"
+#include "breakpoint.h"
 
 #include "exceptions.h"
 
@@ -104,11 +105,18 @@ struct block;
 struct value;
 struct language_defn;
 struct program_space;
+struct bpstats;
 
 extern PyObject *gdb_module;
 extern PyTypeObject value_object_type;
 extern PyTypeObject block_object_type;
 extern PyTypeObject symbol_object_type;
+extern PyTypeObject event_object_type;
+extern PyTypeObject events_object_type;
+extern PyTypeObject stop_event_object_type;
+
+/* Defined in py-breakpoint.c */
+typedef struct breakpoint_object breakpoint_object;
 
 typedef struct
 {
@@ -161,6 +169,7 @@ PyObject *objfpy_get_printers (PyObject *, void *);
 thread_object *create_thread_object (struct thread_info *tp);
 thread_object *find_thread_object (ptid_t ptid);
 PyObject *find_inferior_object (int pid);
+PyObject *inferior_to_inferior_object (struct inferior *inferior);
 
 struct block *block_object_to_block (PyObject *obj);
 struct symbol *symbol_object_to_symbol (PyObject *obj);
@@ -187,6 +196,15 @@ void gdbpy_initialize_lazy_string (void);
 void gdbpy_initialize_parameters (void);
 void gdbpy_initialize_thread (void);
 void gdbpy_initialize_inferior (void);
+void gdbpy_initialize_eventregistry (void);
+void gdbpy_initialize_event (void);
+void gdbpy_initialize_py_events (void);
+void gdbpy_initialize_stop_event (void);
+void gdbpy_initialize_signal_event (void);
+void gdbpy_initialize_breakpoint_event (void);
+void gdbpy_initialize_continue_event (void);
+void gdbpy_initialize_exited_event (void);
+void gdbpy_initialize_thread_event (void);
 
 struct cleanup *make_cleanup_py_decref (PyObject *py);
 

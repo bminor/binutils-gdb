@@ -20704,6 +20704,7 @@ situation, a Python @code{KeyboardInterrupt} exception is thrown.
 * Selecting Pretty-Printers::   How GDB chooses a pretty-printer.
 * Writing a Pretty-Printer::    Writing a Pretty-Printer.
 * Inferiors In Python::         Python representation of inferiors (processes)
+* Events In Python::            Listening for events from @value{GDBN}.
 * Threads In Python::           Accessing inferior threads from Python.
 * Commands In Python::          Implementing new commands in Python.
 * Parameters In Python::        Adding new @value{GDBN} parameters.
@@ -21796,7 +21797,7 @@ my_library.so:
 
 @node Inferiors In Python
 @subsubsection Inferiors In Python
-@cindex inferiors in python
+@cindex inferiors in Python
 
 @findex gdb.Inferior
 Programs which are being run under @value{GDBN} are called inferiors
@@ -21865,6 +21866,123 @@ object returned from @code{gdb.read_memory}.  Returns a Python @code{Long}
 containing the address where the pattern was found, or @code{None} if
 the pattern could not be found.
 @end defmethod
+@end table
+
+@node Events In Python
+@subsubsection Events In Python
+@cindex inferior events in Python
+
+@value{GDBN} provides a general event facility so that Python code can be
+notified of various state changes, particularly changes that occur in
+the inferior.
+
+An @dfn{event} is just an object that describes some state change.  The
+type of the object and its attributes will vary depending on the details
+of the change.  All the existing events are described below.
+
+In order to be notified of an event, you must register an event handler
+with an @dfn{event registry}.  An event registry is an object in the
+@code{gdb.events} module which dispatches particular events.  A registry
+provides methods to register and unregister event handlers:
+
+@table @code
+@defmethod EventRegistry connect object
+Add the given callable @var{object} to the registry.  This object will be
+called when an event corresponding to this registry occurs.
+@end defmethod
+
+@defmethod EventRegistry disconnect object
+Remove the given @var{object} from the registry.  Once removed, the object
+will no longer receive notifications of events.
+@end defmethod
+@end table
+
+Here is an example:
+
+@smallexample
+def exit_handler (event):
+    print "event type: exit"
+    print "exit code: %d" % (event.exit_code)
+
+gdb.events.exited.connect (exit_handler)
+@end smallexample
+
+In the above example we connect our handler @code{exit_handler} to the
+registry @code{events.exited}.  Once connected, @code{exit_handler} gets
+called when the inferior exits.  The argument @dfn{event} in this example is
+of type @code{gdb.ExitedEvent}.  As you can see in the example the
+@code{ExitedEvent} object has an attribute which indicates the exit code of
+the inferior.
+
+The following is a listing of the event registries that are available and
+details of the events they emit:
+
+@table @code
+
+@item events.cont
+Emits @code{gdb.ThreadEvent}.
+
+Some events can be thread specific when @value{GDBN} is running in non-stop
+mode.  When represented in Python, these events all extend
+@code{gdb.ThreadEvent}.  Note, this event is not emitted directly; instead,
+events which are emitted by this or other modules might extend this event.
+Examples of these events are @code{gdb.BreakpointEvent} and
+@code{gdb.ContinueEvent}.
+
+@table @code
+@defivar ThreadEvent inferior_thread
+In non-stop mode this attribute will be set to the specific thread which was
+involved in the emitted event. Otherwise, it will be set to @code{None}.
+@end defivar
+@end table
+
+Emits @code{gdb.ContinueEvent} which extends @code{gdb.ThreadEvent}.
+
+This event indicates that the inferior has been continued after a stop. For
+inherited attribute refer to @code{gdb.ThreadEvent} above.
+
+@item events.exited
+Emits @code{events.ExitedEvent} which indicates that the inferior has exited.
+@code{events.ExitedEvent} has one attribute:
+@table @code
+@defivar ExitedEvent exit_code
+An integer representing the exit code which the inferior has returned.
+@end defivar
+@end table
+
+@item events.stop
+Emits @code{gdb.StopEvent} which extends @code{gdb.ThreadEvent}.
+
+Indicates that the inferior has stopped.  All events emitted by this registry
+extend StopEvent.  As a child of @code{gdb.ThreadEvent}, @code{gdb.StopEvent}
+will indicate the stopped thread when @value{GDBN} is running in non-stop
+mode.  Refer to @code{gdb.ThreadEvent} above for more details.
+
+Emits @code{gdb.SignalEvent} which extends @code{gdb.StopEvent}.
+
+This event indicates that the inferior or one of its threads has received as
+signal.  @code{gdb.SignalEvent} has the following attributes:
+
+@table @code
+@defivar SignalEvent stop_signal
+A string representing the signal received by the inferior.  A list of possible
+signal values can be obtained by running the command @code{info signals} in
+the @value{GDBN} command prompt.
+@end defivar
+@end table
+
+Also emits  @code{gdb.BreakpointEvent} which extends @code{gdb.StopEvent}.
+
+@code{gdb.BreakpointEvent} event indicates that a breakpoint has been hit, and
+has the following attributes:
+
+@table @code
+@defivar BreakpointEvent breakpoint
+A reference to the breakpoint that was hit of type @code{gdb.Breakpoint}.
+@xref{Breakpoints In Python}, for details of the @code{gdb.Breakpoint} object.
+@end defivar
+@end table
+
 @end table
 
 @node Threads In Python

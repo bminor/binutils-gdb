@@ -1,3 +1,32 @@
+2011-02-04  Sami Wagiaalla  <swagiaal@redhat.com>
+                Oguz Kayral <oguzkayral@gmail.com>
+
+	* python/py-inferior.c (python_on_normal_stop): New function.
+	(python_on_resume): New function.
+	(python_inferior_exit): New function.
+	(gdbpy_initialize_inferior): Add normal_stop, target_resumed, and
+	inferior_exit observers.
+	* python/py-evtregistry.c: New file.
+	* python/py-threadevent.c : New file.
+	* python/py-event.c: New file.
+	* python/py-evts.c: New file.
+	* python/py-continueevent.c: New file.
+	* python/py-bpevent.c: New file.
+	* python/py-signalevent.c: New file.
+	* python/py-exetiedevent.c: New file.
+	* python/py-breakpoint.c (gdbpy_breakpoint_from_bpstats): New function.
+	Move struct breakpoint_object from here...
+	* python/python-internal.h: ... to here.
+	* python/py-event.h: New file.
+	* python/py-events.h: New file.
+	* Makefile.in (SUBDIR_PYTHON_OBS): Add py-breakpointstopevent.o,
+	py-continueevent.o, py-event.o, py-eventregistry.o, py-events.o,
+	py-exitedevent.o, py-signalstopevent.o, and py-stopevent.o.
+	(SUBDIR_PYTHON_SRCS): Add py-breakpointstopevent.c,
+	py-continueevent.c, py-event.c, py-eventregistry.c, py-events.c,
+	py-exitedevent.c, py-signalstopevent.c, and py-stopevent.c.
+	Add build rules for all the above.
+
 2011-02-04  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2read.c (dwarf2_section_empty_p): New function.

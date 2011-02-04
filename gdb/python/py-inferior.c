@@ -26,6 +26,9 @@
 #include "python-internal.h"
 #include "arch-utils.h"
 #include "language.h"
+#include "gdb_signals.h"
+#include "py-event.h"
+#include "py-stopevent.h"
 
 struct threadlist_entry {
   thread_object *thread_obj;
@@ -73,6 +76,59 @@ static PyTypeObject membuf_object_type;
       }								\
   } while (0)
 
+static void
+python_on_normal_stop (struct bpstats *bs, int print_frame)
+{
+  struct cleanup *cleanup;
+  enum target_signal stop_signal;
+
+  if (!find_thread_ptid (inferior_ptid))
+      return;
+
+  stop_signal = inferior_thread ()->suspend.stop_signal;
+
+  cleanup = ensure_python_env (get_current_arch (), current_language);
+
+  if (emit_stop_event (bs, stop_signal) < 0)
+    gdbpy_print_stack ();
+
+  do_cleanups (cleanup);
+}
+
+static void
+python_on_resume (ptid_t ptid)
+{
+  struct cleanup *cleanup;
+
+  cleanup = ensure_python_env (get_current_arch (), current_language);
+
+  if (emit_continue_event (ptid) < 0)
+    gdbpy_print_stack ();
+
+  do_cleanups (cleanup);
+}
+
+static void
+python_inferior_exit (struct inferior *inf)
+{
+  struct cleanup *cleanup;
+  LONGEST exit_code = -1;
+  ptid_t ptidp;
+  struct target_waitstatus status;
+
+  cleanup = ensure_python_env (get_current_arch (), current_language);
+
+  get_last_target_status (&ptidp, &status);
+
+  exit_code = status.value.integer;
+
+  if (exit_code >= 0
+      && emit_exited_event (exit_code) < 0)
+    gdbpy_print_stack ();
+
+  do_cleanups (cleanup);
+}
+
 /* Return a borrowed reference to the Python object of type Inferior
    representing INFERIOR.  If the object has already been created,
    return it,  otherwise, create it.  Return NULL on failure.  */
@@ -108,8 +164,8 @@ inferior_to_inferior_object (struct inferior *inferior)
 
 /* Finds the Python Inferior object for the given PID.  Returns a
    borrowed reference, or NULL if PID does not match any inferior
-   obect.
-  */
+   object.  */
+
 PyObject *
 find_inferior_object (int pid)
 {
@@ -590,6 +646,9 @@ gdbpy_initialize_inferior (void)
 
   observer_attach_new_thread (add_thread_object);
   observer_attach_thread_exit (delete_thread_object);
+  observer_attach_normal_stop (python_on_normal_stop);
+  observer_attach_target_resumed (python_on_resume);
+  observer_attach_inferior_exit (python_inferior_exit);
 
   if (PyType_Ready (&membuf_object_type) < 0)
     return;

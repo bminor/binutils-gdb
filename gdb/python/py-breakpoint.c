@@ -29,9 +29,6 @@
 #include "cli/cli-script.h"
 #include "ada-lang.h"
 
-/* From breakpoint.c.  */
-typedef struct breakpoint_object breakpoint_object;
-
 static PyTypeObject breakpoint_object_type;
 
 /* Number of live breakpoints.  */
