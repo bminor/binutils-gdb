@@ -530,6 +530,7 @@ void
 registers_changed_ptid (ptid_t ptid)
 {
   struct regcache_list *list, **list_link;
+  int wildcard = ptid_equal (ptid, minus_one_ptid);
 
   list = current_regcache;
   list_link = &current_regcache;
@@ -550,13 +551,24 @@ registers_changed_ptid (ptid_t ptid)
       list = *list_link;
     }
 
-  current_regcache = NULL;
+  if (wildcard || ptid_equal (ptid, current_thread_ptid))
+    {
+      current_thread_ptid = null_ptid;
+      current_thread_arch = NULL;
+    }
 
-  current_thread_ptid = null_ptid;
-  current_thread_arch = NULL;
+  if (wildcard || ptid_equal (ptid, inferior_ptid))
+    {
+      /* We just deleted the regcache of the current thread.  Need to
+	 forget about any frames we have cached, too.  */
+      reinit_frame_cache ();
+    }
+}
 
-  /* Need to forget about any frames we have cached, too.  */
-  reinit_frame_cache ();
+void
+registers_changed (void)
+{
+  registers_changed_ptid (minus_one_ptid);
 
   /* Force cleanup of any alloca areas if using C alloca instead of
      a builtin alloca.  This particular call is used to clean up
@@ -564,12 +576,6 @@ registers_changed_ptid (ptid_t ptid)
      during lengthy interactions between gdb and the target before
      gdb gives control to the user (ie watchpoints).  */
   alloca (0);
-}
-
-void
-registers_changed (void)
-{
-  registers_changed_ptid (minus_one_ptid);
 }
 
 void

@@ -1,3 +1,12 @@
+2011-02-04  Pedro Alves  <pedro@codesourcery.com>
+
+	* regcache.c (registers_changed_ptid): Don't explictly always
+	clear `current_regcache'.  Only clear current_thread_ptid and
+	current_thread_arch when PTID matches.  Only reinit the frame
+	cache if PTID matches the current inferior_ptid.  Move alloca(0)
+	call to ...
+	(registers_changed): ... here.
+
 2011-02-03  Ulrich Weigand  <ulrich.weigand@linaro.org>
 
 	* arm-tdep.c (arm_skip_stack_protector): Accept any symbol that
