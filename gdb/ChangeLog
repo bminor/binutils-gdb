@@ -1,3 +1,13 @@
+2011-02-04  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2read.c (dwarf2_section_empty_p): New function.
+	(dwarf2_read_section): Use dwarf2_section_empty_p.
+	(dwarf2_section_size): New function.
+	(dwarf2_get_section_info): Unconditionally read section.
+	(dwarf2_read_index): Use dwarf2_section_empty_p.
+	(partial_read_comp_unit_head): Use dwarf2_section_size.
+	(dwarf2_symbol_mark_computed): Likewise.
+
 2011-02-04 David Daney <ddaney@caviumnetworks.com>
 
 	* NEWS: Add item for "catch syscall" on mips*-linux* targets.

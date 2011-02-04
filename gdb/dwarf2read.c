@@ -1509,6 +1509,14 @@ zlib_decompress_section (struct objfile *objfile, asection *sectp,
 #endif
 }
 
+/* A helper function that decides whether a section is empty.  */
+
+static int
+dwarf2_section_empty_p (struct dwarf2_section_info *info)
+{
+  return info->asection == NULL || info->size == 0;
+}
+
 /* Read the contents of the section SECTP from object file specified by
    OBJFILE, store info about the section into INFO.
    If the section is compressed, uncompress it before returning.  */
@@ -1527,7 +1535,7 @@ dwarf2_read_section (struct objfile *objfile, struct dwarf2_section_info *info)
   info->was_mmapped = 0;
   info->readin = 1;
 
-  if (info->asection == NULL || info->size == 0)
+  if (dwarf2_section_empty_p (info))
     return;
 
   /* Check if the file has a 4-byte header indicating compression.  */
@@ -1592,6 +1600,22 @@ dwarf2_read_section (struct objfile *objfile, struct dwarf2_section_info *info)
 	   bfd_get_filename (abfd));
 }
 
+/* A helper function that returns the size of a section in a safe way.
+   If you are positive that the section has been read before using the
+   size, then it is safe to refer to the dwarf2_section_info object's
+   "size" field directly.  In other cases, you must call this
+   function, because for compressed sections the size field is not set
+   correctly until the section has been read.  */
+
+static bfd_size_type
+dwarf2_section_size (struct objfile *objfile,
+		     struct dwarf2_section_info *info)
+{
+  if (!info->readin)
+    dwarf2_read_section (objfile, info);
+  return info->size;
+}
+
 /* Fill in SECTP, BUFP and SIZEP with section info, given OBJFILE and
    SECTION_NAME.  */
 
@@ -1620,9 +1644,7 @@ dwarf2_get_section_info (struct objfile *objfile, const char *section_name,
   else
     gdb_assert_not_reached ("unexpected section");
 
-  if (info->asection != NULL && info->size != 0 && info->buffer == NULL)
-    /* We haven't read this section in yet.  Do it now.  */
-    dwarf2_read_section (objfile, info);
+  dwarf2_read_section (objfile, info);
 
   *sectp = info->asection;
   *bufp = info->buffer;
@@ -2008,8 +2030,7 @@ dwarf2_read_index (struct objfile *objfile)
   offset_type types_list_elements = 0;
   int i;
 
-  if (dwarf2_per_objfile->gdb_index.asection == NULL
-      || dwarf2_per_objfile->gdb_index.size == 0)
+  if (dwarf2_section_empty_p (&dwarf2_per_objfile->gdb_index))
     return 0;
 
   /* Older elfutils strip versions could keep the section in the main
@@ -2823,7 +2844,9 @@ partial_read_comp_unit_head (struct comp_unit_head *header, gdb_byte *info_ptr,
 	   "(is %d, should be 2, 3, or 4) [in module %s]"), header->version,
 	   bfd_get_filename (abfd));
 
-  if (header->abbrev_offset >= dwarf2_per_objfile->abbrev.size)
+  if (header->abbrev_offset
+      >= dwarf2_section_size (dwarf2_per_objfile->objfile,
+			      &dwarf2_per_objfile->abbrev))
     error (_("Dwarf Error: bad offset (0x%lx) in compilation unit header "
 	   "(offset 0x%lx + 6) [in module %s]"),
 	   (long) header->abbrev_offset,
@@ -14390,7 +14413,8 @@ dwarf2_symbol_mark_computed (struct attribute *attr, struct symbol *sym,
       /* ".debug_loc" may not exist at all, or the offset may be outside
 	 the section.  If so, fall through to the complaint in the
 	 other branch.  */
-      && DW_UNSND (attr) < dwarf2_per_objfile->loc.size)
+      && DW_UNSND (attr) < dwarf2_section_size (dwarf2_per_objfile->objfile,
+						&dwarf2_per_objfile->loc))
     {
       struct dwarf2_loclist_baton *baton;
 
