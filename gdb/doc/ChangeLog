@@ -1,3 +1,8 @@
+2011-02-04  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdbint.texinfo (Formatting): Mention some formatting guidelines
+	for casts and unary operators.
+
 2011-02-04  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (GDB/MI Async Records): Document that symbols-loaded

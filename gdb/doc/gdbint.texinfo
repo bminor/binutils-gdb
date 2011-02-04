@@ -5785,7 +5785,8 @@ compiler.
 
 @cindex source code formatting
 The standard GNU recommendations for formatting must be followed
-strictly.
+strictly.  Any @value{GDBN}-specific deviation from GNU
+recomendations is described below.
 
 A function declaration should not have its name in column zero.  A
 function definition should have its name in column zero.
@@ -5827,6 +5828,27 @@ and not:
 void * foo;
 void* foo;
 @end smallexample
+
+In addition, whitespace around casts and unary operators should follow
+the following guidelines:
+
+@multitable @columnfractions .2 .2 .8
+@item Use... @tab ...instead of @tab
+
+@item @code{!x}
+@tab @code{! x}
+@item @code{~x}
+@tab @code{~ x}
+@item @code{-x}
+@tab @code{- x}
+@tab (unary minus)
+@item @code{(foo) x}
+@tab @code{(foo)x}
+@tab (cast)
+@item @code{*x}
+@tab @code{* x}
+@tab (pointer dereference)
+@end multitable
 
 @subsection Comments
 
