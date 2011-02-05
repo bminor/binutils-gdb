@@ -1,3 +1,9 @@
+2014-08-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* bfin-dis.c (ifetch): New function.
+	(_print_insn_bfin, print_insn_bfin): Call new ifetch and return
+	-1 when it errors.
+
 2014-07-29  Matthew Fortune  <matthew.fortune@imgtec.com>
 
 	* micromips-opc.c (COD): Rename throughout to...

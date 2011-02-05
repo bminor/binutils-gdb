@@ -4640,23 +4640,41 @@ decode_pseudodbg_assert_0 (TIword iw0, TIword iw1, disassemble_info *outf)
 }
 
 static int
+ifetch (bfd_vma pc, disassemble_info *outf, TIword *iw)
+{
+  bfd_byte buf[2];
+  int status;
+
+  status = (*outf->read_memory_func) (pc & ~0x01, buf, 2, outf);
+  if (status != 0)
+    {
+      (*outf->memory_error_func) (status, pc, outf);
+      return -1;
+    }
+
+  *iw = bfd_getl16 (buf);
+  return 0;
+}
+
+static int
 _print_insn_bfin (bfd_vma pc, disassemble_info *outf)
 {
-  bfd_byte buf[4];
   TIword iw0;
   TIword iw1;
-  int status;
   int rv = 0;
 
-  status = (*outf->read_memory_func) (pc & ~0x1, buf, 2, outf);
-  /* FIXME */
-  (void) status;
-  status = (*outf->read_memory_func) ((pc + 2) & ~0x1, buf + 2, 2, outf);
-  /* FIXME */
-  (void) status;
+  if (ifetch (pc, outf, &iw0))
+    return -1;
 
-  iw0 = bfd_getl16 (buf);
-  iw1 = bfd_getl16 (buf + 2);
+  if ((iw0 & 0xc000) == 0xc000)
+    {
+      /* 32-bit insn.  */
+      if (ifetch (pc + 2, outf, &iw1))
+	return -1;
+    }
+  else
+    /* 16-bit insn.  */
+    iw1 = 0;
 
   if ((iw0 & 0xf7ff) == 0xc003 && iw1 == 0x1800)
     {
@@ -4752,17 +4770,15 @@ _print_insn_bfin (bfd_vma pc, disassemble_info *outf)
 int
 print_insn_bfin (bfd_vma pc, disassemble_info *outf)
 {
-  bfd_byte buf[2];
-  unsigned short iw0;
-  int status;
-  int count = 0;
+  TIword iw0;
+  int count;
 
-  status = (*outf->read_memory_func) (pc & ~0x01, buf, 2, outf);
-  /* FIXME */
-  (void) status;
-  iw0 = bfd_getl16 (buf);
+  if (ifetch (pc, outf, &iw0) == -1)
+    return -1;
 
-  count += _print_insn_bfin (pc, outf);
+  count = _print_insn_bfin (pc, outf);
+  if (count == -1)
+    return -1;
 
   /* Proper display of multiple issue instructions.  */
 
@@ -4775,10 +4791,14 @@ print_insn_bfin (bfd_vma pc, disassemble_info *outf)
       parallel = 1;
       OUTS (outf, " || ");
       len = _print_insn_bfin (pc + 4, outf);
+      if (len == -1)
+	return -1;
       OUTS (outf, " || ");
       if (len != 2)
 	legal = 0;
       len = _print_insn_bfin (pc + 6, outf);
+      if (len == -1)
+	return -1;
       if (len != 2)
 	legal = 0;
 
