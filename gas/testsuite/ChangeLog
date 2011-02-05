@@ -1,5 +1,9 @@
 2014-08-13  Mike Frysinger  <vapier@gentoo.org>
 
+	* gas/bfin/parallel_illegal.d: Add missing semicolons.
+
+2014-08-13  Mike Frysinger  <vapier@gentoo.org>
+
 	* gas/bfin/load.d: Update output.
 	* gas/bfin/load.s: Add .data section.
 

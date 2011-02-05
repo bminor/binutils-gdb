@@ -1,5 +1,19 @@
 2014-08-13  Mike Frysinger  <vapier@gentoo.org>
 
+	* bfin-dis.c (comment, parallel): Move from global scope ...
+	(struct private): ... to this new struct.
+	(decode_ProgCtrl_0, decode_CaCTRL_0, decode_PushPopReg_0,
+	decode_PushPopMultiple_0, decode_ccMV_0, decode_CCflag_0,
+	decode_CC2dreg_0, decode_CC2stat_0, decode_BRCC_0, decode_UJUMP_0,
+	decode_LOGI2op_0, decode_COMPI2opD_0, decode_COMPI2opP_0,
+	decode_dagMODik_0, decode_LoopSetup_0, decode_LDIMMhalf_0,
+	decode_CALLa_0, decode_linkage_0, decode_pseudoDEBUG_0,
+	decode_pseudoOChar_0, decode_pseudodbg_assert_0, _print_insn_bfin,
+	print_insn_bfin): Declare private struct.  Use priv's comment and
+	parallel members.
+
+2014-08-13  Mike Frysinger  <vapier@gentoo.org>
+
 	* bfin-dis.c (ifetch): Do not align pc to 2 bytes.
 	(_print_insn_bfin): Add check for unaligned pc.
 
