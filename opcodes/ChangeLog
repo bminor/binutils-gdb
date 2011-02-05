@@ -1,3 +1,9 @@
+2014-08-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* bfin-dis.c (struct private): Add iw0.
+	(_print_insn_bfin): Assign iw0 to priv.iw0.
+	(print_insn_bfin): Drop ifetch and use priv.iw0.
+
 2014-08-13  Mike Frysinger  <vapier@gentoo.org>
 
 	* bfin-dis.c (comment, parallel): Move from global scope ...
