@@ -1,3 +1,8 @@
+2011-02-04  Jeffrey Yasskin  <jyasskin@google.com>
+
+	* symtab.cc (Odr_violation_compare::operator()): Sort by just the
+	filename.
+
 2011-02-02  Sriraman Tallam  <tmsriram@google.com>
 
 	* icf.h (is_section_foldable_candidate): Change type of parameter
