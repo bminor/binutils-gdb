@@ -1,7 +1,7 @@
 /* corefile.c
 
    Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008, 2009,
-   2010  Free Software Foundation, Inc.
+   2010, 2011  Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -573,6 +573,20 @@ core_create_function_syms (void)
   int cxxclass;
   long i;
   struct function_map * found;
+  int core_has_func_syms = 0;
+
+  switch (core_bfd->xvec->flavour)
+    {
+    default:
+      break;
+    case bfd_target_coff_flavour:
+    case bfd_target_ecoff_flavour:
+    case bfd_target_xcoff_flavour:
+    case bfd_target_elf_flavour:
+    case bfd_target_nlm_flavour:
+    case bfd_target_som_flavour:
+      core_has_func_syms = 1;
+    }
 
   /* Pass 1 - determine upper bound on number of function names.  */
   symtab.len = 0;
@@ -678,7 +692,8 @@ core_create_function_syms (void)
 	  }
       }
 
-      symtab.limit->is_func = (core_syms[i]->flags & BSF_FUNCTION) != 0; 
+      symtab.limit->is_func = (!core_has_func_syms
+			       || (core_syms[i]->flags & BSF_FUNCTION) != 0);
       symtab.limit->is_bb_head = TRUE;
 
       if (cxxclass == 't')

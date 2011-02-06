@@ -1,3 +1,9 @@
+2011-02-07  Alan Modra  <amodra@gmail.com>
+
+	PR gprof/12468
+	* corefile.c (core_create_function_syms): Set is_func for targets
+	that have no BSF_FUNCTION syms.
+
 2010-12-21  Alan Modra  <amodra@gmail.com>
 
 	* po/ja.po: New translation.
