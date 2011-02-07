@@ -513,6 +513,50 @@ proc gdb_collect_globals_test { } {
 	    "collect globals: cease trace debugging"
 }
 
+# Test that when we've collected all fields of a structure
+# individually, we can print the whole structure in one go.
+proc gdb_collect_global_in_pieces_test { } {
+    global gdb_prompt
+
+    prepare_for_trace_test
+
+    # Find the comment-identified line for setting this tracepoint.
+    set testline 0
+    set msg "collect global in pieces: find tracepoint line"
+    gdb_test_multiple "list globals_test_func, +30" "$msg" {
+	-re "\[\r\n\](\[0-9\]+)\[^\r\n\]+ Set_Tracepoint_Here .*$gdb_prompt" {
+	    set testline $expect_out(1,string)
+	    pass "$msg"
+	}
+    }
+
+    if {$testline == 0} {
+	return
+    }
+
+    gdb_test "trace $testline" \
+	"Tracepoint \[0-9\]+ at .*" \
+	"collect global in pieces: set tracepoint"
+    gdb_trace_setactions "collect global in pieces: define actions" \
+	    "" \
+	    "collect global_pieces.a, global_pieces.b" \
+	    "^$"
+
+    # Begin the test.
+    run_trace_experiment "global in pieces" globals_test_func
+
+    gdb_test "print /x global_pieces.a" " = 0x12345678" \
+	"collect global in pieces: print piece a"
+    gdb_test "print /x global_pieces.b" " = 0x87654321" \
+	"collect global in pieces: print piece b"
+
+    gdb_test "print /x global_pieces" " = \{a = 0x12345678, b = 0x87654321\}" \
+	"collect global in pieces: print whole object"
+
+    gdb_test "tfind none" "#0  end .*" \
+	"collect global in pieces: cease trace debugging"
+}
+
 proc gdb_trace_collection_test {} {
     global fpreg
     global spreg
@@ -548,6 +592,7 @@ proc gdb_trace_collection_test {} {
     gdb_collect_registers_test "\$regs"
     gdb_collect_registers_test "\$$fpreg, \$$spreg, \$$pcreg"
     gdb_collect_globals_test
+    gdb_collect_global_in_pieces_test
     
     #
     # Expression tests:

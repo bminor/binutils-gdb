@@ -1,3 +1,11 @@
+2011-02-07  Pedro Alves  <pedro@codesourcery.com>
+
+	* server.c (gdb_read_memory): Change return semantics to allow
+	partial transfers.
+	(handle_search_memory_1): Adjust.
+	(process_serial_event) <'m' packet>: Handle partial transfers.
+	* tracepoint.c (traceframe_read_mem): Handle partial transfers.
+
 2011-01-28  Pedro Alves  <pedro@codesourcery.com>
 
 	* regcache.c (init_register_cache): Initialize

@@ -1,3 +1,10 @@
+2011-02-07  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.trace/collection.c (global_pieces): New.
+	* gdb.trace/collection.exp (gdb_collect_global_in_pieces_test):
+	New procedure.
+	(gdb_trace_collection_test): Call it.
+
 2011-02-04  Sami Wagiaalla  <swagiaal@redhat.com>
 
 	* gdb.python/py-evthreads.c: New file.

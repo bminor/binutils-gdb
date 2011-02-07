@@ -27,6 +27,14 @@ test_struct  globalstruct;
 test_struct *globalp;
 int          globalarr[16];
 
+struct global_pieces {
+  unsigned int a;
+  unsigned int b;
+} global_pieces =
+  {
+    0x12345678, 0x87654321
+  };
+
 /*
  * Additional globals used in arithmetic tests
  */

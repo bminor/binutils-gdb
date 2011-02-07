@@ -556,12 +556,20 @@ monitor_show_help (void)
   monitor_output ("    Quit GDBserver\n");
 }
 
-/* Read trace frame or inferior memory.  */
+/* Read trace frame or inferior memory.  Returns the number of bytes
+   actually read, zero when no further transfer is possible, and -1 on
+   error.  Return of a positive value smaller than LEN does not
+   indicate there's no more to be read, only the end of the transfer.
+   E.g., when GDB reads memory from a traceframe, a first request may
+   be served from a memory block that does not cover the whole request
+   length.  A following request gets the rest served from either
+   another block (of the same traceframe) or from the read-only
+   regions.  */
 
 static int
 gdb_read_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len)
 {
-  int ret;
+  int res;
 
   if (current_traceframe >= 0)
     {
@@ -572,22 +580,24 @@ gdb_read_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len)
 			       memaddr, myaddr, len, &nbytes))
 	return EIO;
       /* Data read from trace buffer, we're done.  */
-      if (nbytes == length)
-	return 0;
+      if (nbytes > 0)
+	return nbytes;
       if (!in_readonly_region (memaddr, length))
-	return EIO;
+	return -1;
       /* Otherwise we have a valid readonly case, fall through.  */
       /* (assume no half-trace half-real blocks for now) */
     }
 
-  ret = prepare_to_access_memory ();
-  if (ret == 0)
+  res = prepare_to_access_memory ();
+  if (res == 0)
     {
-      ret = read_inferior_memory (memaddr, myaddr, len);
+      res = read_inferior_memory (memaddr, myaddr, len);
       done_accessing_memory ();
-    }
 
-  return ret;
+      return res == 0 ? len : -1;
+    }
+  else
+    return -1;
 }
 
 /* Write trace frame or inferior memory.  Actually, writing to trace
@@ -623,7 +633,8 @@ handle_search_memory_1 (CORE_ADDR start_addr, CORE_ADDR search_space_len,
 {
   /* Prime the search buffer.  */
 
-  if (gdb_read_memory (start_addr, search_buf, search_buf_size) != 0)
+  if (gdb_read_memory (start_addr, search_buf, search_buf_size)
+      != search_buf_size)
     {
       warning ("Unable to access target memory at 0x%lx, halting search.",
 	       (long) start_addr);
@@ -675,7 +686,7 @@ handle_search_memory_1 (CORE_ADDR start_addr, CORE_ADDR search_space_len,
 			: chunk_size);
 
 	  if (gdb_read_memory (read_addr, search_buf + keep_len,
-			       nr_to_read) != 0)
+			       nr_to_read) != search_buf_size)
 	    {
 	      warning ("Unable to access target memory "
 		       "at 0x%lx, halting search.",
@@ -2664,6 +2675,7 @@ process_serial_event (void)
   int i = 0;
   int signal;
   unsigned int len;
+  int res;
   CORE_ADDR mem_addr;
   int pid;
   unsigned char sig;
@@ -2902,10 +2914,11 @@ process_serial_event (void)
     case 'm':
       require_running (own_buf);
       decode_m_packet (&own_buf[1], &mem_addr, &len);
-      if (gdb_read_memory (mem_addr, mem_buf, len) == 0)
-	convert_int_to_ascii (mem_buf, own_buf, len);
-      else
+      res = gdb_read_memory (mem_addr, mem_buf, len);
+      if (res < 0)
 	write_enn (own_buf);
+      else
+	convert_int_to_ascii (mem_buf, own_buf, res);
       break;
     case 'M':
       require_running (own_buf);

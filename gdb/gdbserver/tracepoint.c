@@ -4909,12 +4909,17 @@ traceframe_read_mem (int tfnum, CORE_ADDR addr,
       trace_debug ("traceframe %d has %d bytes at %s",
 		   tfnum, mlen, paddress (maddr));
 
-      /* Check that requested data is in bounds.  */
-      if (maddr <= addr && (addr + length) <= (maddr + mlen))
+      /* If the block includes the first part of the desired range,
+	 return as much it has; GDB will re-request the remainder,
+	 which might be in a different block of this trace frame.  */
+      if (maddr <= addr && addr < (maddr + mlen))
 	{
-	  /* Block includes the requested range, copy it out.  */
-	  memcpy (buf, dataptr + (addr - maddr), length);
-	  *nbytes = length;
+	  ULONGEST amt = (maddr + mlen) - addr;
+	  if (amt > length)
+	    amt = length;
+
+	  memcpy (buf, dataptr + (addr - maddr), amt);
+	  *nbytes = amt;
 	  return 0;
 	}
 
