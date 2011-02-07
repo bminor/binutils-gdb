@@ -44,7 +44,7 @@ clean_restart $executable
 gdb_load_shlibs ${binlibfile}
 
 gdb_test_no_output "set env LD_LIBRARY_PATH=:"
-gdb_test "cd ${binlibfiledir}" "Working directory [string_to_regexp ${binlibfiledir}]\\."
+gdb_test "cd ${binlibfiledir}" "Working directory [string_to_regexp ${binlibfiledir}]\\." "cd OBJDIR/${subdir}"
 
 set test "library loaded"
 if [runto_main] {

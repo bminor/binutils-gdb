@@ -1,3 +1,11 @@
+2011-02-07  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* gdb.base/break-interp.exp: Remove ${objdir} from test messages.
+	* gdb.base/jit.exp: Likewise.
+	* gdb.base/pie-execl.exp: Likewise.
+	* gdb.base/solib-nodir.exp: Likewise.
+	* gdb.base/solib-overlap.exp: Likewise.
+
 2011-02-07  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.trace/collection.c (global_pieces): New.

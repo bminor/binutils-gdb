@@ -390,7 +390,7 @@ proc test_ld {file ifmain trynosym displacement} {
 	global objdir binfile_test
 
 	# ld.so needs some executable to run to reach _dl_debug_state.
-	gdb_test_no_output "set args ${objdir}/${subdir}/$binfile_test"
+	gdb_test_no_output "set args ${objdir}/${subdir}/$binfile_test" "set args OBJDIR/${subdir}/$binfile_test"
     }
 
     reach "_dl_debug_state" "run" $displacement

@@ -60,25 +60,28 @@ foreach prelink_lib1 {0x40000000 0x50000000} {
 
     # Library file.
     set binfile_lib1 ${objdir}/${subdir}/${libname}1-${prelink_lib1}.so
+    set binfile_lib1_test_msg OBJDIR/${subdir}/${libname}1-${prelink_lib1}.so
     set binfile_lib2 ${objdir}/${subdir}/${libname}2-${prelink_lib1}.so
+    set binfile_lib2_test_msg OBJDIR/${subdir}/${libname}2-${prelink_lib1}.so
     set lib_flags {debug}
     # Binary file.
     set binfile_base ${testfile}-${prelink_lib1}
     set binfile ${objdir}/${subdir}/${binfile_base}
+    set binfile_test_msg OBJDIR/${subdir}/${binfile_base}
     set bin_flags [list debug shlib=${binfile_lib1} shlib=${binfile_lib2}]
     set escapedbinfile  [string_to_regexp ${binfile}]
 
     if { [gdb_compile_shlib ${srcfile_lib} ${binfile_lib1} $lib_flags] != ""
 	 || [gdb_compile_shlib ${srcfile_lib} ${binfile_lib2} $lib_flags] != ""
 	 || [gdb_compile ${srcfile} ${binfile} executable $bin_flags] != "" } {
-	untested "Could not compile ${binfile_lib1}, ${binfile_lib2} or ${binfile}."
+	untested "Could not compile ${binfile_lib1_test_msg}, ${binfile_lib2_test_msg} or ${binfile_test_msg}."
 	return -1
     }
 
     if {[catch "system \"prelink -N -r ${prelink_lib1} ${binfile_lib1}\""] != 0
 	|| [catch "system \"prelink -N -r ${prelink_lib2} ${binfile_lib2}\""] != 0} {
 	# Maybe we don't have prelink.
-	untested "Could not prelink ${binfile_lib1} or ${binfile_lib2}."
+	untested "Could not prelink ${binfile_lib1_test_msg} or ${binfile_lib2_test_msg}."
 	return -1
     }
 
@@ -101,7 +104,7 @@ foreach prelink_lib1 {0x40000000 0x50000000} {
 
     if { [gdb_compile_shlib ${srcfile_lib} ${binfile_lib1} $lib_flags] != ""
 	 || [gdb_compile_shlib ${srcfile_lib} ${binfile_lib2} $lib_flags] != ""} {
-	untested "Could not recompile ${binfile_lib1} or ${binfile_lib2}."
+	untested "Could not recompile ${binfile_lib1_test_msg} or ${binfile_lib2_test_msg}."
 	remote_exec build "kill -9 ${testpid}"
 	return -1
     }
