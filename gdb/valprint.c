@@ -293,20 +293,28 @@ val_print_optimized_out (struct ui_file *stream)
   fprintf_filtered (stream, _("<optimized out>"));
 }
 
-/* Print using the given LANGUAGE the data of type TYPE located at VALADDR
-   (within GDB), which came from the inferior at address ADDRESS, onto
-   stdio stream STREAM according to OPTIONS.
+/* Print using the given LANGUAGE the data of type TYPE located at
+   VALADDR + EMBEDDED_OFFSET (within GDB), which came from the
+   inferior at address ADDRESS + EMBEDDED_OFFSET, onto stdio stream
+   STREAM according to OPTIONS.  VAL is the whole object that came
+   from ADDRESS.  VALADDR must point to the head of VAL's contents
+   buffer.
 
-   If the data are a string pointer, returns the number of string characters
-   printed.
+   The language printers will pass down an adjusted EMBEDDED_OFFSET to
+   further helper subroutines as subfields of TYPE are printed.  In
+   such cases, VALADDR is passed down unadjusted, as well as VAL, so
+   that VAL can be queried for metadata about the contents data being
+   printed, using EMBEDDED_OFFSET as an offset into VAL's contents
+   buffer.  For example: "has this field been optimized out", or "I'm
+   printing an object while inspecting a traceframe; has this
+   particular piece of data been collected?".
 
-   FIXME:  The data at VALADDR is in target byte order.  If gdb is ever
-   enhanced to be able to debug more than the single target it was compiled
-   for (specific CPU type and thus specific target byte ordering), then
-   either the print routines are going to have to take this into account,
-   or the data is going to have to be passed into here already converted
-   to the host byte ordering, whichever is more convenient.  */
+   RECURSE indicates the amount of indentation to supply before
+   continuation lines; this amount is roughly twice the value of
+   RECURSE.
 
+   If the data is printed as a string, returns the number of string
+   characters printed.  */
 
 int
 val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,

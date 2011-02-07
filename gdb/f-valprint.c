@@ -242,12 +242,9 @@ Type node corrupt! F77 arrays cannot have %d subscripts (%d Max)"),
 }
 
 
-/* Print data of type TYPE located at VALADDR (within GDB), which came from
-   the inferior at address ADDRESS, onto stdio stream STREAM according to
-   OPTIONS.  The data at VALADDR is in target byte order.
-
-   If the data are a string pointer, returns the number of string characters
-   printed.  */
+/* See val_print for a description of the various parameters of this
+   function; they are identical.  The semantics of the return value is
+   also identical to val_print.  */
 
 int
 f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,

@@ -1,3 +1,17 @@
+2011-02-07  Pedro Alves  <pedro@codesourcery.com>
+
+	* valprint.c (val_print): Extend comment.
+	* ada-valprint.c (ada_valprint): Rewrite comment deferring
+	interface explanation to val_print.
+	(ada_val_print_array): Adjust comment to current interface.
+	(print_field_values): Adjust comment to current interface.
+	* c-valprint.c (c_val_print): Rewrite comment deferring interface
+	explanation to val_print.
+	* f-valprint.c (f_val_print): Ditto.
+	* jv-valprint.c (java_val_print): Ditto.
+	* m2-valprint.c (m2_val_print): Ditto.
+	* p-valprint.c (pascal_val_print): Ditto.
+
 2011-02-07  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* breakpoint.c (parse_breakpoint_sals): Fix description.
