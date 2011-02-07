@@ -1,5 +1,9 @@
+2011-02-07  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* breakpoint.c (parse_breakpoint_sals): Fix description.
+
 2011-02-04  Sami Wagiaalla  <swagiaal@redhat.com>
-                Oguz Kayral <oguzkayral@gmail.com>
+	    Oguz Kayral <oguzkayral@gmail.com>
 
 	* python/py-inferior.c (python_on_normal_stop): New function.
 	(python_on_resume): New function.

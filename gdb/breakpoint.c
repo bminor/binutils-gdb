@@ -7485,10 +7485,13 @@ create_breakpoints_sal (struct gdbarch *gdbarch,
     }
 }
 
-/* Parse ARG which is assumed to be a SAL specification possibly
+/* Parse ADDRESS which is assumed to be a SAL specification possibly
    followed by conditionals.  On return, SALS contains an array of SAL
    addresses found.  ADDR_STRING contains a vector of (canonical)
-   address strings.  ARG points to the end of the SAL.  */
+   address strings.  ADDRESS points to the end of the SAL.
+
+   The array and the line spec strings are allocated on the heap, it is
+   the caller's responsibility to free them.  */
 
 static void
 parse_breakpoint_sals (char **address,
