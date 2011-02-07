@@ -71,9 +71,10 @@ if { [istarget m68*-*-*] || [istarget fido*-*-*] } then {
 
     gas_test_error "p11673.s" "-march=isab" "movel immediate with offset unsupported on isab"
 
-    if { [istarget *-*-netbsd] } then {
+    if { [istarget *-*-*aout] || [istarget *-*-netbsd] || [istarget *-*-openbsd*] } then {
       run_dump_test p3041
       run_dump_test p3041data
+      run_dump_test p3041pcrel
     }
 
     set testname "68000 operands"

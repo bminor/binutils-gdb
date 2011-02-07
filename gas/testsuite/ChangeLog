@@ -1,3 +1,10 @@
+2011-02-07  Vincent Riviere  <vincent.riviere@freesbee.fr>
+
+	PR gas/3041
+	* gas/m68k/p3041pcrel.s, * gas/m68k/p3041pcrel.d: New test.
+	* gas/m68k/all.exp: Add "p3041pcrel" and enable p3041 tests for
+	all m68k-aout targets.
+
 2011-02-04  Bernd Schmidt  <bernds@codesourcery.com>
 
 	* gas/tic6x/dir-junk.l: Remove tests for .atomic and .noatomic.
