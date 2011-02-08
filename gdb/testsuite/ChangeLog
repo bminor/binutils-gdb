@@ -1,5 +1,11 @@
 2011-02-08  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* gdb.opencl/callfuncs.cl: New file.
+	* gdb.opencl/callfuncs.exp: New test.
+	* gdb.opencl/Makefile.in (EXECUTABLES): Add callfuncs.
+
+2011-02-08  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* gdb.arch/altivec-abi.c (vec_func): Make use of intv_on_stack_f
 	when computing result.
 	* gdb.arch/altivec-abi.exp: Update expected results.

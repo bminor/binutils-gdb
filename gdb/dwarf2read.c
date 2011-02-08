@@ -7955,7 +7955,12 @@ read_subroutine_type (struct die_info *die, struct dwarf2_cu *cu)
      the subroutine die.  Otherwise set the calling convention to
      the default value DW_CC_normal.  */
   attr = dwarf2_attr (die, DW_AT_calling_convention, cu);
-  TYPE_CALLING_CONVENTION (ftype) = attr ? DW_UNSND (attr) : DW_CC_normal;
+  if (attr)
+    TYPE_CALLING_CONVENTION (ftype) = DW_UNSND (attr);
+  else if (cu->producer && strstr (cu->producer, "IBM XL C for OpenCL"))
+    TYPE_CALLING_CONVENTION (ftype) = DW_CC_GDB_IBM_OpenCL;
+  else
+    TYPE_CALLING_CONVENTION (ftype) = DW_CC_normal;
 
   /* We need to add the subroutine type to the die immediately so
      we don't infinitely recurse when dealing with parameters

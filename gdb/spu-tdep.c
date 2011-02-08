@@ -44,6 +44,7 @@
 #include "block.h"
 #include "observer.h"
 #include "infcall.h"
+#include "dwarf2.h"
 
 #include "spu-tdep.h"
 
@@ -1448,6 +1449,13 @@ spu_return_value (struct gdbarch *gdbarch, struct type *func_type,
 		  gdb_byte *out, const gdb_byte *in)
 {
   enum return_value_convention rvc;
+  int opencl_vector = 0;
+
+  if (func_type
+      && TYPE_CALLING_CONVENTION (func_type) == DW_CC_GDB_IBM_OpenCL
+      && TYPE_CODE (type) == TYPE_CODE_ARRAY
+      && TYPE_VECTOR (type))
+    opencl_vector = 1;
 
   if (TYPE_LENGTH (type) <= (SPU_ARGN_REGNUM - SPU_ARG1_REGNUM + 1) * 16)
     rvc = RETURN_VALUE_REGISTER_CONVENTION;
@@ -1459,7 +1467,10 @@ spu_return_value (struct gdbarch *gdbarch, struct type *func_type,
       switch (rvc)
 	{
 	case RETURN_VALUE_REGISTER_CONVENTION:
-	  spu_value_to_regcache (regcache, SPU_ARG1_REGNUM, type, in);
+	  if (opencl_vector && TYPE_LENGTH (type) == 2)
+	    regcache_cooked_write_part (regcache, SPU_ARG1_REGNUM, 2, 2, in);
+	  else
+	    spu_value_to_regcache (regcache, SPU_ARG1_REGNUM, type, in);
 	  break;
 
 	case RETURN_VALUE_STRUCT_CONVENTION:
@@ -1472,7 +1483,10 @@ spu_return_value (struct gdbarch *gdbarch, struct type *func_type,
       switch (rvc)
 	{
 	case RETURN_VALUE_REGISTER_CONVENTION:
-	  spu_regcache_to_value (regcache, SPU_ARG1_REGNUM, type, out);
+	  if (opencl_vector && TYPE_LENGTH (type) == 2)
+	    regcache_cooked_read_part (regcache, SPU_ARG1_REGNUM, 2, 2, out);
+	  else
+	    spu_regcache_to_value (regcache, SPU_ARG1_REGNUM, type, out);
 	  break;
 
 	case RETURN_VALUE_STRUCT_CONVENTION:

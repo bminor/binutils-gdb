@@ -30,6 +30,7 @@
 #include "target.h"
 #include "objfiles.h"
 #include "infcall.h"
+#include "dwarf2.h"
 
 /* Pass the arguments in either registers, or in the stack.  Using the
    ppc sysv ABI, the first eight words of the argument list (that might
@@ -50,6 +51,8 @@ ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  struct type *ftype;
+  int opencl_abi = 0;
   ULONGEST saved_sp;
   int argspace = 0;		/* 0 is an initial wrong guess.  */
   int write_pass;
@@ -58,6 +61,13 @@ ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
   regcache_cooked_read_unsigned (regcache, gdbarch_sp_regnum (gdbarch),
 				 &saved_sp);
+
+  ftype = check_typedef (value_type (function));
+  if (TYPE_CODE (ftype) == TYPE_CODE_PTR)
+    ftype = check_typedef (TYPE_TARGET_TYPE (ftype));
+  if (TYPE_CODE (ftype) == TYPE_CODE_FUNC
+      && TYPE_CALLING_CONVENTION (ftype) == DW_CC_GDB_IBM_OpenCL)
+    opencl_abi = 1;
 
   /* Go through the argument list twice.
 
@@ -327,6 +337,126 @@ ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		 Hence we increase freg even when writing to memory.  */
 	      freg += 2;
 	    }
+	  else if (len < 16
+		   && TYPE_CODE (type) == TYPE_CODE_ARRAY
+		   && TYPE_VECTOR (type)
+		   && opencl_abi)
+	    {
+	      /* OpenCL vectors shorter than 16 bytes are passed as if
+		 a series of independent scalars.  */
+	      struct type *eltype = check_typedef (TYPE_TARGET_TYPE (type));
+	      int i, nelt = TYPE_LENGTH (type) / TYPE_LENGTH (eltype);
+
+	      for (i = 0; i < nelt; i++)
+		{
+		  const gdb_byte *elval = val + i * TYPE_LENGTH (eltype);
+
+		  if (TYPE_CODE (eltype) == TYPE_CODE_FLT && !tdep->soft_float)
+		    {
+		      if (freg <= 8)
+			{
+			  if (write_pass)
+			    {
+			      int regnum = tdep->ppc_fp0_regnum + freg;
+			      gdb_byte regval[MAX_REGISTER_SIZE];
+			      struct type *regtype
+				= register_type (gdbarch, regnum);
+			      convert_typed_floating (elval, eltype,
+						      regval, regtype);
+			      regcache_cooked_write (regcache, regnum, regval);
+			    }
+			  freg++;
+			}
+		      else
+			{
+			  argoffset = align_up (argoffset, len);
+			  if (write_pass)
+			    write_memory (sp + argoffset, val, len);
+			  argoffset += len;
+			}
+		    }
+		  else if (TYPE_LENGTH (eltype) == 8)
+		    {
+		      if (greg > 9)
+			{
+			  /* Just in case GREG was 10.  */
+			  greg = 11;
+			  argoffset = align_up (argoffset, 8);
+			  if (write_pass)
+			    write_memory (sp + argoffset, elval,
+					  TYPE_LENGTH (eltype));
+			  argoffset += 8;
+			}
+		      else
+			{
+			  /* Must start on an odd register - r3/r4 etc.  */
+			  if ((greg & 1) == 0)
+			    greg++;
+			  if (write_pass)
+			    {
+			      int regnum = tdep->ppc_gp0_regnum + greg;
+			      regcache_cooked_write (regcache,
+						     regnum + 0, elval + 0);
+			      regcache_cooked_write (regcache,
+						     regnum + 1, elval + 4);
+			    }
+			  greg += 2;
+			}
+		    }
+		  else
+		    {
+		      gdb_byte word[MAX_REGISTER_SIZE];
+		      store_unsigned_integer (word, tdep->wordsize, byte_order,
+					      unpack_long (eltype, elval));
+
+		      if (greg <= 10)
+			{
+			  if (write_pass)
+			    regcache_cooked_write (regcache,
+						   tdep->ppc_gp0_regnum + greg,
+						   word);
+			  greg++;
+			}
+		      else
+			{
+			  argoffset = align_up (argoffset, tdep->wordsize);
+			  if (write_pass)
+			    write_memory (sp + argoffset, word, tdep->wordsize);
+			  argoffset += tdep->wordsize;
+			}
+		    }
+		}
+	    }
+	  else if (len >= 16
+		   && TYPE_CODE (type) == TYPE_CODE_ARRAY
+		   && TYPE_VECTOR (type)
+		   && opencl_abi)
+	    {
+	      /* OpenCL vectors 16 bytes or longer are passed as if
+		 a series of AltiVec vectors.  */
+	      int i;
+
+	      for (i = 0; i < len / 16; i++)
+		{
+		  const gdb_byte *elval = val + i * 16;
+
+		  if (vreg <= 13)
+		    {
+		      if (write_pass)
+			regcache_cooked_write (regcache,
+					       tdep->ppc_vr0_regnum + vreg,
+					       elval);
+		      vreg++;
+		    }
+		  else
+		    {
+		      argoffset = align_up (argoffset, 16);
+		      if (write_pass)
+			write_memory (sp + argoffset, elval, 16);
+		      argoffset += 16;
+		    }
+		}
+	    }
 	  else if (len == 16
 		   && TYPE_CODE (type) == TYPE_CODE_ARRAY
 		   && TYPE_VECTOR (type)
@@ -552,13 +682,21 @@ get_decimal_float_return_value (struct gdbarch *gdbarch, struct type *valtype,
    when returned in general-purpose registers.  */
 
 static enum return_value_convention
-do_ppc_sysv_return_value (struct gdbarch *gdbarch, struct type *type,
-			  struct regcache *regcache, gdb_byte *readbuf,
-			  const gdb_byte *writebuf, int broken_gcc)
+do_ppc_sysv_return_value (struct gdbarch *gdbarch, struct type *func_type,
+			  struct type *type, struct regcache *regcache,
+			  gdb_byte *readbuf, const gdb_byte *writebuf,
+			  int broken_gcc)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  int opencl_abi = 0;
+
+  if (func_type
+      && TYPE_CALLING_CONVENTION (func_type) == DW_CC_GDB_IBM_OpenCL)
+    opencl_abi = 1;
+
   gdb_assert (tdep->wordsize == 4);
+
   if (TYPE_CODE (type) == TYPE_CODE_FLT
       && TYPE_LENGTH (type) <= 8
       && !tdep->soft_float)
@@ -689,6 +827,83 @@ do_ppc_sysv_return_value (struct gdbarch *gdbarch, struct type *type,
 	  regcache_cooked_write_unsigned (regcache, tdep->ppc_gp0_regnum + 3,
 					  unpack_long (type, writebuf));
 	}
+      return RETURN_VALUE_REGISTER_CONVENTION;
+    }
+  /* OpenCL vectors < 16 bytes are returned as distinct
+     scalars in f1..f2 or r3..r10.  */
+  if (TYPE_CODE (type) == TYPE_CODE_ARRAY
+      && TYPE_VECTOR (type)
+      && TYPE_LENGTH (type) < 16
+      && opencl_abi)
+    {
+      struct type *eltype = check_typedef (TYPE_TARGET_TYPE (type));
+      int i, nelt = TYPE_LENGTH (type) / TYPE_LENGTH (eltype);
+
+      for (i = 0; i < nelt; i++)
+	{
+	  int offset = i * TYPE_LENGTH (eltype);
+
+	  if (TYPE_CODE (eltype) == TYPE_CODE_FLT)
+	    {
+	      int regnum = tdep->ppc_fp0_regnum + 1 + i;
+	      gdb_byte regval[MAX_REGISTER_SIZE];
+	      struct type *regtype = register_type (gdbarch, regnum);
+
+	      if (writebuf != NULL)
+		{
+		  convert_typed_floating (writebuf + offset, eltype,
+					  regval, regtype);
+		  regcache_cooked_write (regcache, regnum, regval);
+		}
+	      if (readbuf != NULL)
+		{
+		  regcache_cooked_read (regcache, regnum, regval);
+		  convert_typed_floating (regval, regtype,
+					  readbuf + offset, eltype);
+		}
+	    }
+	  else
+	    {
+	      int regnum = tdep->ppc_gp0_regnum + 3 + i;
+	      ULONGEST regval;
+
+	      if (writebuf != NULL)
+		{
+		  regval = unpack_long (eltype, writebuf + offset);
+		  regcache_cooked_write_unsigned (regcache, regnum, regval);
+		}
+	      if (readbuf != NULL)
+		{
+		  regcache_cooked_read_unsigned (regcache, regnum, &regval);
+		  store_unsigned_integer (readbuf + offset,
+					  TYPE_LENGTH (eltype), byte_order,
+					  regval);
+		}
+	    }
+	}
+
+      return RETURN_VALUE_REGISTER_CONVENTION;
+    }
+  /* OpenCL vectors >= 16 bytes are returned in v2..v9.  */
+  if (TYPE_CODE (type) == TYPE_CODE_ARRAY
+      && TYPE_VECTOR (type)
+      && TYPE_LENGTH (type) >= 16
+      && opencl_abi)
+    {
+      int n_regs = TYPE_LENGTH (type) / 16;
+      int i;
+
+      for (i = 0; i < n_regs; i++)
+	{
+	  int offset = i * 16;
+	  int regnum = tdep->ppc_vr0_regnum + 2 + i;
+
+	  if (writebuf != NULL)
+	    regcache_cooked_write (regcache, regnum, writebuf + offset);
+	  if (readbuf != NULL)
+	    regcache_cooked_read (regcache, regnum, readbuf + offset);
+	}
+
       return RETURN_VALUE_REGISTER_CONVENTION;
     }
   if (TYPE_LENGTH (type) == 16
@@ -826,8 +1041,8 @@ ppc_sysv_abi_return_value (struct gdbarch *gdbarch, struct type *func_type,
 			   struct type *valtype, struct regcache *regcache,
 			   gdb_byte *readbuf, const gdb_byte *writebuf)
 {
-  return do_ppc_sysv_return_value (gdbarch, valtype, regcache, readbuf,
-				   writebuf, 0);
+  return do_ppc_sysv_return_value (gdbarch, func_type, valtype, regcache,
+				   readbuf, writebuf, 0);
 }
 
 enum return_value_convention
@@ -837,8 +1052,8 @@ ppc_sysv_abi_broken_return_value (struct gdbarch *gdbarch,
 				  struct regcache *regcache,
 				  gdb_byte *readbuf, const gdb_byte *writebuf)
 {
-  return do_ppc_sysv_return_value (gdbarch, valtype, regcache, readbuf,
-				   writebuf, 1);
+  return do_ppc_sysv_return_value (gdbarch, func_type, valtype, regcache,
+				   readbuf, writebuf, 1);
 }
 
 /* The helper function for 64-bit SYSV push_dummy_call.  Converts the
@@ -899,6 +1114,8 @@ ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch,
   CORE_ADDR func_addr = find_function_addr (function, NULL);
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  struct type *ftype;
+  int opencl_abi = 0;
   ULONGEST back_chain;
   /* See for-loop comment below.  */
   int write_pass;
@@ -924,6 +1141,13 @@ ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch,
      before this and use that as the BACK_CHAIN.  */
   regcache_cooked_read_unsigned (regcache, gdbarch_sp_regnum (gdbarch),
 				 &back_chain);
+
+  ftype = check_typedef (value_type (function));
+  if (TYPE_CODE (ftype) == TYPE_CODE_PTR)
+    ftype = check_typedef (TYPE_TARGET_TYPE (ftype));
+  if (TYPE_CODE (ftype) == TYPE_CODE_FUNC
+      && TYPE_CALLING_CONVENTION (ftype) == DW_CC_GDB_IBM_OpenCL)
+    opencl_abi = 1;
 
   /* Go through the argument list twice.
 
@@ -1132,6 +1356,109 @@ ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch,
 	      freg += 2;
 	      greg += 2;
 	      gparam = align_up (gparam + TYPE_LENGTH (type), tdep->wordsize);
+	    }
+	  else if (TYPE_LENGTH (type) < 16
+		   && TYPE_CODE (type) == TYPE_CODE_ARRAY
+		   && TYPE_VECTOR (type)
+		   && opencl_abi)
+	    {
+	      /* OpenCL vectors shorter than 16 bytes are passed as if
+		 a series of independent scalars.  */
+	      struct type *eltype = check_typedef (TYPE_TARGET_TYPE (type));
+	      int i, nelt = TYPE_LENGTH (type) / TYPE_LENGTH (eltype);
+
+	      for (i = 0; i < nelt; i++)
+		{
+		  const gdb_byte *elval = val + i * TYPE_LENGTH (eltype);
+
+		  if (TYPE_CODE (eltype) == TYPE_CODE_FLT)
+		    {
+		      if (write_pass)
+			{
+			  gdb_byte regval[MAX_REGISTER_SIZE];
+			  const gdb_byte *p;
+
+			  if (TYPE_LENGTH (eltype) == 4)
+			    {
+			      memcpy (regval, elval, 4);
+			      memcpy (regval + 4, elval, 4);
+			      p = regval;
+			    }
+			  else
+			    p = elval;
+
+			  write_memory (gparam, p, 8);
+
+			  if (freg <= 13)
+			    {
+			      int regnum = tdep->ppc_fp0_regnum + freg;
+			      struct type *regtype
+				= register_type (gdbarch, regnum);
+
+			      convert_typed_floating (elval, eltype,
+						      regval, regtype);
+			      regcache_cooked_write (regcache, regnum, regval);
+			    }
+
+			  if (greg <= 10)
+			    regcache_cooked_write (regcache,
+						   tdep->ppc_gp0_regnum + greg,
+						   regval);
+			}
+
+		      freg++;
+		      greg++;
+		      gparam = align_up (gparam + 8, tdep->wordsize);
+		    }
+		  else
+		    {
+		      if (write_pass)
+			{
+			  ULONGEST word = unpack_long (eltype, elval);
+			  if (greg <= 10)
+			    regcache_cooked_write_unsigned
+			      (regcache, tdep->ppc_gp0_regnum + greg, word);
+
+			  write_memory_unsigned_integer
+			    (gparam, tdep->wordsize, byte_order, word);
+			}
+
+		      greg++;
+		      gparam = align_up (gparam + TYPE_LENGTH (eltype),
+					 tdep->wordsize);
+		    }
+		}
+	    }
+	  else if (TYPE_LENGTH (type) >= 16
+		   && TYPE_CODE (type) == TYPE_CODE_ARRAY
+		   && TYPE_VECTOR (type)
+		   && opencl_abi)
+	    {
+	      /* OpenCL vectors 16 bytes or longer are passed as if
+		 a series of AltiVec vectors.  */
+	      int i;
+
+	      for (i = 0; i < TYPE_LENGTH (type) / 16; i++)
+		{
+		  const gdb_byte *elval = val + i * 16;
+
+		  gparam = align_up (gparam, 16);
+		  greg += greg & 1;
+
+		  if (write_pass)
+		    {
+		      if (vreg <= 13)
+			regcache_cooked_write (regcache,
+					       tdep->ppc_vr0_regnum + vreg,
+					       elval);
+
+		      write_memory (gparam, elval, 16);
+		    }
+
+		  greg += 2;
+		  vreg++;
+		  gparam += 16;
+		}
 	    }
 	  else if (TYPE_LENGTH (type) == 16 && TYPE_VECTOR (type)
 		   && TYPE_CODE (type) == TYPE_CODE_ARRAY
@@ -1358,6 +1685,11 @@ ppc64_sysv_abi_return_value (struct gdbarch *gdbarch, struct type *func_type,
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  int opencl_abi = 0;
+
+  if (func_type
+      && TYPE_CALLING_CONVENTION (func_type) == DW_CC_GDB_IBM_OpenCL)
+    opencl_abi = 1;
 
   /* This function exists to support a calling convention that
      requires floating-point registers.  It shouldn't be used on
@@ -1418,6 +1750,83 @@ ppc64_sysv_abi_return_value (struct gdbarch *gdbarch, struct type *func_type,
 	regcache_cooked_write (regcache, tdep->ppc_gp0_regnum + 3, writebuf);
       if (readbuf != NULL)
 	regcache_cooked_read (regcache, tdep->ppc_gp0_regnum + 3, readbuf);
+      return RETURN_VALUE_REGISTER_CONVENTION;
+    }
+  /* OpenCL vectors < 16 bytes are returned as distinct
+     scalars in f1..f2 or r3..r10.  */
+  if (TYPE_CODE (valtype) == TYPE_CODE_ARRAY
+      && TYPE_VECTOR (valtype)
+      && TYPE_LENGTH (valtype) < 16
+      && opencl_abi)
+    {
+      struct type *eltype = check_typedef (TYPE_TARGET_TYPE (valtype));
+      int i, nelt = TYPE_LENGTH (valtype) / TYPE_LENGTH (eltype);
+
+      for (i = 0; i < nelt; i++)
+	{
+	  int offset = i * TYPE_LENGTH (eltype);
+
+	  if (TYPE_CODE (eltype) == TYPE_CODE_FLT)
+	    {
+	      int regnum = tdep->ppc_fp0_regnum + 1 + i;
+	      gdb_byte regval[MAX_REGISTER_SIZE];
+	      struct type *regtype = register_type (gdbarch, regnum);
+
+	      if (writebuf != NULL)
+		{
+		  convert_typed_floating (writebuf + offset, eltype,
+					  regval, regtype);
+		  regcache_cooked_write (regcache, regnum, regval);
+		}
+	      if (readbuf != NULL)
+		{
+		  regcache_cooked_read (regcache, regnum, regval);
+		  convert_typed_floating (regval, regtype,
+					  readbuf + offset, eltype);
+		}
+	    }
+	  else
+	    {
+	      int regnum = tdep->ppc_gp0_regnum + 3 + i;
+	      ULONGEST regval;
+
+	      if (writebuf != NULL)
+		{
+		  regval = unpack_long (eltype, writebuf + offset);
+		  regcache_cooked_write_unsigned (regcache, regnum, regval);
+		}
+	      if (readbuf != NULL)
+		{
+		  regcache_cooked_read_unsigned (regcache, regnum, &regval);
+		  store_unsigned_integer (readbuf + offset,
+					  TYPE_LENGTH (eltype), byte_order,
+					  regval);
+		}
+	    }
+	}
+
+      return RETURN_VALUE_REGISTER_CONVENTION;
+    }
+  /* OpenCL vectors >= 16 bytes are returned in v2..v9.  */
+  if (TYPE_CODE (valtype) == TYPE_CODE_ARRAY
+      && TYPE_VECTOR (valtype)
+      && TYPE_LENGTH (valtype) >= 16
+      && opencl_abi)
+    {
+      int n_regs = TYPE_LENGTH (valtype) / 16;
+      int i;
+
+      for (i = 0; i < n_regs; i++)
+	{
+	  int offset = i * 16;
+	  int regnum = tdep->ppc_vr0_regnum + 2 + i;
+
+	  if (writebuf != NULL)
+	    regcache_cooked_write (regcache, regnum, writebuf + offset);
+	  if (readbuf != NULL)
+	    regcache_cooked_read (regcache, regnum, readbuf + offset);
+	}
+
       return RETURN_VALUE_REGISTER_CONVENTION;
     }
   /* Array type has more than one use.  */

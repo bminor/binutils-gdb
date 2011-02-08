@@ -1,5 +1,23 @@
 2011-02-08  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* dwarf2read.c (read_subroutine_type): Set special calling
+	convention flag for functions compiled by IBM XL C for OpenCL.
+	* ppc-sysv-tdep.c: Include "dwarf2.h"
+	(ppc_sysv_abi_push_dummy_call): Implement IBM OpenCL vector types
+	calling convention.
+	(do_ppc_sysv_return_value): Add FUNC_TYPE argument.  Implement
+	IBM OpenCL vector types calling convention.
+	(ppc_sysv_abi_return_value): Pass through FUNC_TYPE.
+	(ppc_sysv_abi_broken_return_value): Likewise.
+	(ppc64_sysv_abi_push_dummy_call): Implement IBM OpenCL vector
+	types calling convention.
+	(ppc64_sysv_abi_return_value): Likewise.
+	* spu-tdep.c: Include "dwarf2.h"
+	(spu_return_value): Implement IBM OpenCL vector types calling
+	convention.
+
+2011-02-08  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* ppc-sysv-tdep.c (ppc64_sysv_abi_push_dummy_call): Implement
 	correct ABI for AltiVec vector arguments.
 
