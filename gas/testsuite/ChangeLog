@@ -1,5 +1,12 @@
 2011-02-08  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR gas/6957
+	* gas/i386/nops-1-i686.d: Updated.
+	* gas/i386/nops-3-i686.d: Likewise.
+	* gas/i386/nops-4-i686.d: Likewise.
+
+2011-02-08  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* gas/i386/i386.exp: Run nops-4a-i686 and nops-6.
 
 	* gas/i386/nops-4a-i686.d: New.

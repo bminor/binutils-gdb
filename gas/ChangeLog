@@ -1,5 +1,11 @@
 2011-02-08  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR gas/6957
+	* config/tc-i386.c (i386_align_code): Use f32_patt when tuning
+	for i686.
+
+2011-02-08  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* config/tc-i386.c (set_cpu_arch): Also update cpu_arch_isa_flags
 	for ISA extensions.
 	(md_parse_option): Likewise.
