@@ -8372,34 +8372,35 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 
 	  /* We shouldn't have local or global symbols defined in the TOC,
 	     but handle them anyway.  */
-	  for (sym = local_syms;
-	       sym < local_syms + symtab_hdr->sh_info;
-	       ++sym)
-	    if (sym->st_value != 0
-		&& bfd_section_from_elf_index (ibfd, sym->st_shndx) == toc)
-	      {
-		unsigned long i;
+	  if (local_syms != NULL)
+	    for (sym = local_syms;
+		 sym < local_syms + symtab_hdr->sh_info;
+		 ++sym)
+	      if (sym->st_value != 0
+		  && bfd_section_from_elf_index (ibfd, sym->st_shndx) == toc)
+		{
+		  unsigned long i;
 
-		if (sym->st_value > toc->rawsize)
-		  i = toc->rawsize >> 3;
-		else
-		  i = sym->st_value >> 3;
+		  if (sym->st_value > toc->rawsize)
+		    i = toc->rawsize >> 3;
+		  else
+		    i = sym->st_value >> 3;
 
-		if ((skip[i] & (ref_from_discarded | can_optimize)) != 0)
-		  {
-		    if (local_toc_syms)
-		      (*_bfd_error_handler)
-			(_("%s defined on removed toc entry"),
-			 bfd_elf_sym_name (ibfd, symtab_hdr, sym, NULL));
-		    do
-		      ++i;
-		    while ((skip[i] & (ref_from_discarded | can_optimize)));
-		    sym->st_value = (bfd_vma) i << 3;
-		  }
+		  if ((skip[i] & (ref_from_discarded | can_optimize)) != 0)
+		    {
+		      if (local_toc_syms)
+			(*_bfd_error_handler)
+			  (_("%s defined on removed toc entry"),
+			   bfd_elf_sym_name (ibfd, symtab_hdr, sym, NULL));
+		      do
+			++i;
+		      while ((skip[i] & (ref_from_discarded | can_optimize)));
+		      sym->st_value = (bfd_vma) i << 3;
+		    }
 
-		sym->st_value -= skip[i];
-		symtab_hdr->contents = (unsigned char *) local_syms;
-	      }
+		  sym->st_value -= skip[i];
+		  symtab_hdr->contents = (unsigned char *) local_syms;
+		}
 
 	  /* Adjust any global syms defined in this toc input section.  */
 	  if (toc_inf.global_toc_syms)
