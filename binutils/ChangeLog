@@ -1,3 +1,14 @@
+2011-02-08  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/12467
+	* readelf.c (process_program_headers): Issue a warning if there
+	are no program headers but the file header has a non-zero program
+	header offset.
+	(process_section_headers): Issue a warning if there are no section
+	headers but the file header has a non-zero section header offset.
+	(process_section_groups): Reword the no section message so that it
+	can be distinguished from the one issued by process_section_headers.
+
 2011-01-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Doug Evans  <dje@google.com>
 

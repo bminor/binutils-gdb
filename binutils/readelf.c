@@ -3638,7 +3638,11 @@ process_program_headers (FILE * file)
 
   if (elf_header.e_phnum == 0)
     {
-      if (do_segments)
+      /* PR binutils/12467.  */
+      if (elf_header.e_phoff != 0)
+	warn (_("possibly corrupt ELF header - it has a non-zero program"
+		" header offset, but no program headers"));
+      else if (do_segments)
 	printf (_("\nThere are no program headers in this file.\n"));
       return 0;
     }
@@ -4377,7 +4381,11 @@ process_section_headers (FILE * file)
 
   if (elf_header.e_shnum == 0)
     {
-      if (do_sections)
+      /* PR binutils/12467.  */
+      if (elf_header.e_shoff != 0)
+	warn (_("possibly corrupt ELF file header - it has a non-zero"
+		" section header offset, but no section headers\n"));
+      else if (do_sections)
 	printf (_("\nThere are no sections in this file.\n"));
 
       return 1;
@@ -4860,7 +4868,7 @@ process_section_groups (FILE * file)
   if (elf_header.e_shnum == 0)
     {
       if (do_section_groups)
-	printf (_("\nThere are no sections in this file.\n"));
+	printf (_("\nThere are no sections to group in this file.\n"));
 
       return 1;
     }

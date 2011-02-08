@@ -1,3 +1,10 @@
+2011-02-08  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/12467
+	* elf.c (assign_file_positions_for_load_sections): Set the program
+	header offset and entry size to zero if there are no program
+	headers.
+
 2011-02-08  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (ppc64_elf_edit_toc): Don't segfault on NULL

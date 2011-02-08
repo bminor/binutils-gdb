@@ -4334,8 +4334,18 @@ assign_file_positions_for_load_sections (bfd *abfd,
 	header_pad = m->header_size;
     }
 
-  elf_elfheader (abfd)->e_phoff = bed->s->sizeof_ehdr;
-  elf_elfheader (abfd)->e_phentsize = bed->s->sizeof_phdr;
+  if (alloc)
+    {
+      elf_elfheader (abfd)->e_phoff = bed->s->sizeof_ehdr;
+      elf_elfheader (abfd)->e_phentsize = bed->s->sizeof_phdr;
+    }
+  else
+    {
+      /* PR binutils/12467.  */
+      elf_elfheader (abfd)->e_phoff = 0;
+      elf_elfheader (abfd)->e_phentsize = 0;
+    }
+  
   elf_elfheader (abfd)->e_phnum = alloc;
 
   if (elf_tdata (abfd)->program_header_size == (bfd_size_type) -1)
