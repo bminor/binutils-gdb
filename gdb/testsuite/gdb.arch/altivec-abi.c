@@ -71,7 +71,7 @@ vec_func (vector short vshort_f,             /* goes in v2 */
    vector unsigned char vuchar_res;
 
    vint_res  = vec_add (vint_f, intv_on_stack_f);
-   vint_res  = vec_add (vint_f, y_f);
+   vint_res  = vec_add (vint_res, y_f);
    vuint_res  = vec_add (vuint_f, ((vector unsigned int) {5,6,7,8}));
    vshort_res  = vec_add (vshort_f, x_f);
    vushort_res  = vec_add (vushort_f,

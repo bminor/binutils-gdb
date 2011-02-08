@@ -1,3 +1,9 @@
+2011-02-08  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdb.arch/altivec-abi.c (vec_func): Make use of intv_on_stack_f
+	when computing result.
+	* gdb.arch/altivec-abi.exp: Update expected results.
+
 2011-02-07  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* gdb.base/break-interp.exp: Remove ${objdir} from test messages.

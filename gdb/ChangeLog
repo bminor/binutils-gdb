@@ -1,3 +1,8 @@
+2011-02-08  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* ppc-sysv-tdep.c (ppc64_sysv_abi_push_dummy_call): Implement
+	correct ABI for AltiVec vector arguments.
+
 2011-02-07  Pedro Alves  <pedro@codesourcery.com>
 
 	* valprint.c (val_print): Extend comment.

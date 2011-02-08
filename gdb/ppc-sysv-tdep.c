@@ -902,9 +902,6 @@ ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch,
   ULONGEST back_chain;
   /* See for-loop comment below.  */
   int write_pass;
-  /* Size of the Altivec's vector parameter region, the final value is
-     computed in the for-loop below.  */
-  LONGEST vparam_size = 0;
   /* Size of the general parameter region, the final value is computed
      in the for-loop below.  */
   LONGEST gparam_size = 0;
@@ -948,28 +945,21 @@ ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch,
       /* Next available vector register for vector arguments.  */
       int vreg = 2;
       /* The address, at which the next general purpose parameter
-         (integer, struct, float, ...) should be saved.  */
+         (integer, struct, float, vector, ...) should be saved.  */
       CORE_ADDR gparam;
-      /* Address, at which the next Altivec vector parameter should be
-         saved.  */
-      CORE_ADDR vparam;
 
       if (!write_pass)
 	{
-	  /* During the first pass, GPARAM and VPARAM are more like
-	     offsets (start address zero) than addresses.  That way
-	     they accumulate the total stack space each region
-	     requires.  */
+	  /* During the first pass, GPARAM is more like an offset
+	     (start address zero) than an address.  That way it
+	     accumulates the total stack space required.  */
 	  gparam = 0;
-	  vparam = 0;
 	}
       else
 	{
-	  /* Decrement the stack pointer making space for the Altivec
-	     and general on-stack parameters.  Set vparam and gparam
-	     to their corresponding regions.  */
-	  vparam = align_down (sp - vparam_size, 16);
-	  gparam = align_down (vparam - gparam_size, 16);
+	  /* Decrement the stack pointer making space for the on-stack
+	     stack parameters.  Set gparam to that region.  */
+	  gparam = align_down (sp - gparam_size, 16);
 	  /* Add in space for the TOC, link editor double word,
 	     compiler double word, LR save area, CR save area.  */
 	  sp = align_down (gparam - 48, 16);
@@ -1147,24 +1137,25 @@ ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch,
 		   && TYPE_CODE (type) == TYPE_CODE_ARRAY
 		   && tdep->ppc_vr0_regnum >= 0)
 	    {
-	      /* In the Altivec ABI, vectors go in the vector
-	         registers v2 .. v13, or when that runs out, a vector
-	         annex which goes above all the normal parameters.
-	         NOTE: cagney/2003-09-21: This is a guess based on the
-	         PowerOpen Altivec ABI.  */
-	      if (vreg <= 13)
+	      /* In the Altivec ABI, vectors go in the vector registers
+		 v2 .. v13, as well as the parameter area -- always at
+		 16-byte aligned addresses.  */
+
+	      gparam = align_up (gparam, 16);
+	      greg += greg & 1;
+
+	      if (write_pass)
 		{
-		  if (write_pass)
+		  if (vreg <= 13)
 		    regcache_cooked_write (regcache,
 					   tdep->ppc_vr0_regnum + vreg, val);
-		  vreg++;
+
+		  write_memory (gparam, val, TYPE_LENGTH (type));
 		}
-	      else
-		{
-		  if (write_pass)
-		    write_memory (vparam, val, TYPE_LENGTH (type));
-		  vparam = align_up (vparam + TYPE_LENGTH (type), 16);
-		}
+
+	      greg += 2;
+	      vreg++;
+	      gparam += 16;
 	    }
 	  else if ((TYPE_CODE (type) == TYPE_CODE_INT
 		    || TYPE_CODE (type) == TYPE_CODE_ENUM
@@ -1307,9 +1298,8 @@ ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch,
 
       if (!write_pass)
 	{
-	  /* Save the true region sizes ready for the second pass.  */
-	  vparam_size = vparam;
-	  /* Make certain that the general parameter save area is at
+	  /* Save the true region sizes ready for the second pass.
+	     Make certain that the general parameter save area is at
 	     least the minimum 8 registers (or doublewords) in size.  */
 	  if (greg < 8)
 	    gparam_size = 8 * tdep->wordsize;

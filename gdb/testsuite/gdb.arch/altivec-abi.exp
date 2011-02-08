@@ -91,7 +91,8 @@ proc altivec_abi_tests { extra_flags force_abi } {
     # the last one will go on the stack.
     set msg "call inferior function with vectors (1)"
     gdb_test "p vec_func(vshort,vushort,vint,vuint,vchar,vuchar,vfloat,x,y,a,b,c,intv_on_stack)" \
-	".\[0-9\]+ = .2, 2, 2, 2." "call inferior function with vectors (1)"
+	".\[0-9\]+ = .14, 36, 58, 80." "call inferior function with vectors (1)"
+
 
     # Let's call the function again with dummy arguments.  This is to clean
     # up the contents of the vector registers before the next call.
@@ -114,7 +115,7 @@ proc altivec_abi_tests { extra_flags force_abi } {
 	"step into vec_fun"
 
     set pattern2 $pattern
-    append pattern2 " at.*altivec-abi.c.*main.*result = vec_func .vshort,.*goes in v2.*Value returned is.*= .2, 2, 2, 2."
+    append pattern2 " at.*altivec-abi.c.*main.*result = vec_func .vshort,.*goes in v2.*Value returned is.*= .14, 36, 58, 80."
 
     # Let's see if the result is returned correctly.
     gdb_test "finish" "Run till exit from .0.*$pattern2" \
