@@ -699,6 +699,8 @@ is_visible_from_outside(Symbol* lsym)
     return true;
   if (parameters->options().relocatable())
     return true;
+  if (parameters->options().is_undefined(lsym->name()))
+    return true;
   if (parameters->options().export_dynamic() || parameters->options().shared())
     return lsym->is_externally_visible();
   return false;

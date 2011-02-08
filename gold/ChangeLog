@@ -1,3 +1,8 @@
+2010-02-08  Rafael Ávila de Espíndola <respindola@mozilla.com>
+
+	* plugin.cc (is_visible_from_outside): Return true for symbols
+	in the -u option.
+
 2011-02-04  Jeffrey Yasskin  <jyasskin@google.com>
 
 	* symtab.cc (Odr_violation_compare::operator()): Sort by just the
