@@ -6256,7 +6256,7 @@ reswitch_prefix_add:
         case 0x660f3804:    /* pmaddubsw */
         case 0x660f3805:    /* phsubw */
         case 0x660f3806:    /* phsubd */
-        case 0x660f3807:    /* phaddsw */
+        case 0x660f3807:    /* phsubsw */
         case 0x660f3808:    /* psignb */
         case 0x660f3809:    /* psignw */
         case 0x660f380a:    /* psignd */
@@ -6409,7 +6409,7 @@ reswitch_prefix_add:
         case 0x660fed:      /* paddsw */
         case 0x660fee:      /* pmaxsw */
         case 0x660fef:      /* pxor */
-        case 0x660ff0:      /* lddqu */
+        case 0xf20ff0:      /* lddqu */
         case 0x660ff1:      /* psllw */
         case 0x660ff2:      /* pslld */
         case 0x660ff3:      /* psllq */
@@ -6525,7 +6525,7 @@ reswitch_prefix_add:
         case 0x0f3804:    /* pmaddubsw */
         case 0x0f3805:    /* phsubw */
         case 0x0f3806:    /* phsubd */
-        case 0x0f3807:    /* phaddsw */
+        case 0x0f3807:    /* phsubsw */
         case 0x0f3808:    /* psignb */
         case 0x0f3809:    /* psignw */
         case 0x0f380a:    /* psignd */

@@ -1,3 +1,11 @@
+2011-02-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR 12361.
+	* i386-tdep.c (i386_process_record) <0x660f3807>: Fix the comment to
+	phsubsw.
+	(i386_process_record) <lddqu>: Fix the opcode to 0xf20ff0.
+	(i386_process_record) <0x0f3807>: Fix the comment to phsubsw.
+
 2011-02-08  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* dwarf2read.c (read_subroutine_type): Set special calling
