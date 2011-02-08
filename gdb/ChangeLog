@@ -1,5 +1,11 @@
 2011-02-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* i386-tdep.c (i386_process_record): Rename l suffixes to d suffixes
+	in comments for pcmpgtd, pcmpeqd, psubd, paddd, pcmpgtd, pcmpeqd,
+	psubd and paddd.
+
+2011-02-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	PR 12361.
 	* i386-tdep.c (i386_process_record) <0x660f3807>: Fix the comment to
 	phsubsw.

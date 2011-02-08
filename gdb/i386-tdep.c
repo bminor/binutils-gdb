@@ -6347,7 +6347,7 @@ reswitch_prefix_add:
         case 0x660f63:      /* packsswb */
         case 0x660f64:      /* pcmpgtb */
         case 0x660f65:      /* pcmpgtw */
-        case 0x660f66:      /* pcmpgtl */
+        case 0x660f66:      /* pcmpgtd */
         case 0x660f67:      /* packuswb */
         case 0x660f68:      /* punpckhbw */
         case 0x660f69:      /* punpckhwd */
@@ -6363,7 +6363,7 @@ reswitch_prefix_add:
         case 0xf30f70:      /* pshufhw */
         case 0x660f74:      /* pcmpeqb */
         case 0x660f75:      /* pcmpeqw */
-        case 0x660f76:      /* pcmpeql */
+        case 0x660f76:      /* pcmpeqd */
         case 0x660f7c:      /* haddpd */
         case 0xf20f7c:      /* haddps */
         case 0x660f7d:      /* hsubpd */
@@ -6418,11 +6418,11 @@ reswitch_prefix_add:
         case 0x660ff6:      /* psadbw */
         case 0x660ff8:      /* psubb */
         case 0x660ff9:      /* psubw */
-        case 0x660ffa:      /* psubl */
+        case 0x660ffa:      /* psubd */
         case 0x660ffb:      /* psubq */
         case 0x660ffc:      /* paddb */
         case 0x660ffd:      /* paddw */
-        case 0x660ffe:      /* paddl */
+        case 0x660ffe:      /* paddd */
           if (i386_record_modrm (&ir))
 	    return -1;
           ir.reg |= rex_r;
@@ -6558,7 +6558,7 @@ reswitch_prefix_add:
         case 0x0f63:      /* packsswb */
         case 0x0f64:      /* pcmpgtb */
         case 0x0f65:      /* pcmpgtw */
-        case 0x0f66:      /* pcmpgtl */
+        case 0x0f66:      /* pcmpgtd */
         case 0x0f67:      /* packuswb */
         case 0x0f68:      /* punpckhbw */
         case 0x0f69:      /* punpckhwd */
@@ -6569,7 +6569,7 @@ reswitch_prefix_add:
         case 0x0f70:      /* pshufw */
         case 0x0f74:      /* pcmpeqb */
         case 0x0f75:      /* pcmpeqw */
-        case 0x0f76:      /* pcmpeql */
+        case 0x0f76:      /* pcmpeqd */
         case 0x0fc4:      /* pinsrw */
         case 0x0fd1:      /* psrlw */
         case 0x0fd2:      /* psrld */
@@ -6607,11 +6607,11 @@ reswitch_prefix_add:
         case 0x0ff6:      /* psadbw */
         case 0x0ff8:      /* psubb */
         case 0x0ff9:      /* psubw */
-        case 0x0ffa:      /* psubl */
+        case 0x0ffa:      /* psubd */
         case 0x0ffb:      /* psubq */
         case 0x0ffc:      /* paddb */
         case 0x0ffd:      /* paddw */
-        case 0x0ffe:      /* paddl */
+        case 0x0ffe:      /* paddd */
           if (i386_record_modrm (&ir))
 	    return -1;
           if (!i386_mmx_regnum_p (gdbarch, I387_MM0_REGNUM (tdep) + ir.reg))
