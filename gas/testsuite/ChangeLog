@@ -1,3 +1,11 @@
+2011-02-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/i386.exp: Run nops-4a-i686 and nops-6.
+
+	* gas/i386/nops-4a-i686.d: New.
+	* gas/i386/nops-6.d: Likewise.
+	* gas/i386/nops-6.s: Likewise.
+
 2011-02-07  Vincent Riviere  <vincent.riviere@freesbee.fr>
 
 	PR gas/3041
