@@ -1,3 +1,7 @@
+2011-02-08  Michael Snyder  <msnyder@vmware.com>
+
+	* linux-nat.c (linux_nat_filter_event): Fix typo in comment.
+
 2011-02-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* i386-tdep.c (i386_process_record): Rename l suffixes to d suffixes

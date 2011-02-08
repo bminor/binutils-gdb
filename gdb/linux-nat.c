@@ -3064,7 +3064,7 @@ linux_nat_filter_event (int lwpid, int status, int options)
 
   /* Make sure we don't report an event for the exit of an LWP not in
      our list, i.e. not part of the current process.  This can happen
-     if we detach from a program we original forked and then it
+     if we detach from a program we originally forked and then it
      exits.  */
   if (!WIFSTOPPED (status) && !lp)
     return NULL;
