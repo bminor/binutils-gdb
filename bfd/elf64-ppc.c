@@ -7907,7 +7907,7 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
       asection *toc, *sec;
       Elf_Internal_Shdr *symtab_hdr;
       Elf_Internal_Sym *local_syms;
-      Elf_Internal_Rela *relstart, *rel;
+      Elf_Internal_Rela *relstart, *rel, *toc_relocs;
       unsigned long *skip, *drop;
       unsigned char *used;
       unsigned char *keep, last, some_unused;
@@ -7922,6 +7922,7 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 	  || elf_discarded_section (toc))
 	continue;
 
+      toc_relocs = NULL;
       local_syms = NULL;
       symtab_hdr = &elf_symtab_hdr (ibfd);
 
@@ -8017,12 +8018,12 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 	  && toc->reloc_count != 0)
 	{
 	  /* Read toc relocs.  */
-	  relstart = _bfd_elf_link_read_relocs (ibfd, toc, NULL, NULL,
-						info->keep_memory);
-	  if (relstart == NULL)
+	  toc_relocs = _bfd_elf_link_read_relocs (ibfd, toc, NULL, NULL,
+						  info->keep_memory);
+	  if (toc_relocs == NULL)
 	    goto error_ret;
 
-	  for (rel = relstart; rel < relstart + toc->reloc_count; ++rel)
+	  for (rel = toc_relocs; rel < toc_relocs + toc->reloc_count; ++rel)
 	    {
 	      enum elf_ppc64_reloc_type r_type;
 	      unsigned long r_symndx;
@@ -8039,6 +8040,10 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 	      if (!get_sym_h (&h, &sym, &sym_sec, NULL, &local_syms,
 			      r_symndx, ibfd))
 		goto error_ret;
+
+	      if (sym_sec == NULL
+		  || elf_discarded_section (sym_sec))
+		continue;
 
 	      if (!SYMBOL_CALLS_LOCAL (info, h))
 		continue;
@@ -8078,11 +8083,8 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 		}
 
 	      skip[rel->r_offset >> 3]
-		|= can_optimize | ((rel - relstart) << 2);
+		|= can_optimize | ((rel - toc_relocs) << 2);
 	    }
-
-	  if (elf_section_data (toc)->relocs != relstart)
-	    free (relstart);
 	}
 
       if (skip == NULL)
@@ -8099,6 +8101,9 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 	      && relstart != NULL
 	      && elf_section_data (sec)->relocs != relstart)
 	    free (relstart);
+	  if (toc_relocs != NULL
+	      && elf_section_data (toc)->relocs != toc_relocs)
+	    free (toc_relocs);
 	  if (skip != NULL)
 	    free (skip);
 	  return FALSE;
@@ -8338,7 +8343,7 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 		  else if ((skip[val >> 3] & can_optimize) != 0)
 		    {
 		      Elf_Internal_Rela *tocrel
-			= elf_section_data (toc)->relocs + (skip[val >> 3] >> 2);
+			= toc_relocs + (skip[val >> 3] >> 2);
 		      unsigned long tsym = ELF64_R_SYM (tocrel->r_info);
 
 		      switch (r_type)
@@ -8418,15 +8423,9 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 	      Elf_Internal_Rela *wrel;
 	      bfd_size_type sz;
 
-	      /* Read toc relocs.  */
-	      relstart = _bfd_elf_link_read_relocs (ibfd, toc, NULL, NULL,
-						    TRUE);
-	      if (relstart == NULL)
-		goto error_ret;
-
 	      /* Remove unused toc relocs, and adjust those we keep.  */
-	      wrel = relstart;
-	      for (rel = relstart; rel < relstart + toc->reloc_count; ++rel)
+	      wrel = toc_relocs;
+	      for (rel = toc_relocs; rel < toc_relocs + toc->reloc_count; ++rel)
 		if ((skip[rel->r_offset >> 3]
 		     & (ref_from_discarded | can_optimize)) == 0)
 		  {
@@ -8439,12 +8438,15 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 					    &local_syms, NULL, NULL))
 		  goto error_ret;
 
-	      toc->reloc_count = wrel - relstart;
+	      elf_section_data (toc)->relocs = toc_relocs;
+	      toc->reloc_count = wrel - toc_relocs;
 	      rel_hdr = _bfd_elf_single_rel_hdr (toc);
 	      sz = rel_hdr->sh_entsize;
 	      rel_hdr->sh_size = toc->reloc_count * sz;
 	    }
 	}
+      else if (elf_section_data (toc)->relocs != toc_relocs)
+	free (toc_relocs);
 
       if (local_syms != NULL
 	  && symtab_hdr->contents != (unsigned char *) local_syms)
