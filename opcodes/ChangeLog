@@ -1,3 +1,9 @@
+2011-02-09  Michael Snyder  <msnyder@vmware.com>
+
+	* i386-dis.c (OP_J): Parenthesize expression to prevent 
+	truncated addresses.
+	(print_insn): Fix indentation off-by-one.
+
 2011-02-01  Nick Clifton  <nickc@redhat.com>
 
 	* po/da.po: Updated Danish translation.

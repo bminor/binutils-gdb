@@ -1,6 +1,6 @@
 /* Print i386 instructions for GDB, the GNU debugger.
    Copyright 1988, 1989, 1991, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010
+   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011
    Free Software Foundation, Inc.
 
    This file is part of the GNU opcodes library.
@@ -11702,9 +11702,9 @@ print_insn (bfd_vma pc, disassemble_info *info)
       modrm.rm = *codep & 7;
     }
 
-   need_vex = 0;
-   need_vex_reg = 0;
-   vex_w_done = 0;
+  need_vex = 0;
+  need_vex_reg = 0;
+  vex_w_done = 0;
 
   if (dp->name == NULL && dp->op[0].bytemode == FLOATCODE)
     {
@@ -13817,7 +13817,7 @@ OP_J (int bytemode, int sizeflag)
       oappend (INTERNAL_DISASSEMBLER_ERROR);
       return;
     }
-  disp = ((start_pc + codep - start_codep + disp) & mask) | segment;
+  disp = ((start_pc + (codep - start_codep) + disp) & mask) | segment;
   set_op (disp, 0);
   print_operand_value (scratchbuf, 1, disp);
   oappend (scratchbuf);
