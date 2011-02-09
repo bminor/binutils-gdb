@@ -1,3 +1,9 @@
+2011-02-09  Alan Modra  <amodra@gmail.com>
+
+	* ld-elfvsb/elfvsb.exp: Don't run any non-PIC tests on powerpc*-linux.
+	* ld-gc/gc.exp: Ensure powerpc64 test continues to fail.
+	* ld-srec/srec.exp: Don't edit toc on powerpc64.
+
 2011-02-01  Alan Modra  <amodra@gmail.com>
 
 	Backport from mainline

@@ -27,6 +27,11 @@ if ![check_gc_sections_available] {
 set cflags "-ffunction-sections -fdata-sections"
 set objfile "tmpdir/gc.o"
 
+if [istarget powerpc64*-*-*] {
+    # otherwise with -mcmodel=medium gcc we get XPASSes.
+    set cflags "$cflags -mminimal-toc"
+}
+
 if { [is_remote host] || [which $CC] != 0 } {
     ld_compile "$CC -c $CFLAGS $cflags" $srcdir/$subdir/gc.c $objfile
 }
