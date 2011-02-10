@@ -771,6 +771,7 @@ ARM code in mind.
 Specify that PIC code has been generated.
 @end table
 @end ifset
+@c man end
 
 @ifset Blackfin
 
@@ -791,6 +792,7 @@ the Blackfin processor family.
 
 @end ifset
 
+@c man begin OPTIONS
 @ifset CRIS
 See the info pages for documentation of the CRIS-specific options.
 @end ifset
@@ -1288,6 +1290,7 @@ Assemble for a little endian target.
 See the info pages for documentation of the MMIX-specific options.
 @end ifset
 
+@c man end
 @ifset PPC
 
 @ifclear man
@@ -1307,6 +1310,7 @@ PowerPC processor.
 
 @end ifset
 
+@c man begin OPTIONS
 @ifset RX
 See the info pages for documentation of the RX-specific options.
 @end ifset
