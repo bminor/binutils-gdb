@@ -1,3 +1,10 @@
+2011-02-10  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-ppc.c (md_show_usage): Remove -l and -b.  Add -K PIC.
+	* doc/as.texinfo: Refer to and include c-ppc.texi for PowerPC options.
+	(Overview <Target PowerPC options>): Add a number of missing options.
+	* doc/c-ppc.texi: Likewise.  Add markup for use in manpage generation.
+
 2011-02-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/6957

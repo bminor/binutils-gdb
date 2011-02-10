@@ -1244,12 +1244,13 @@ PowerPC options:\n\
 -mrelocatable           support for GCC's -mrelocatble option\n\
 -mrelocatable-lib       support for GCC's -mrelocatble-lib option\n\
 -memb                   set PPC_EMB bit in ELF flags\n\
--mlittle, -mlittle-endian, -l, -le\n\
+-mlittle, -mlittle-endian, -le\n\
                         generate code for a little endian machine\n\
--mbig, -mbig-endian, -b, -be\n\
+-mbig, -mbig-endian, -be\n\
                         generate code for a big endian machine\n\
 -msolaris               generate code for Solaris\n\
 -mno-solaris            do not generate code for Solaris\n\
+-K PIC                  set EF_PPC_RELOCATABLE_LIB in ELF flags\n\
 -V                      print assembler version number\n\
 -Qy, -Qn                ignored\n"));
 #endif
