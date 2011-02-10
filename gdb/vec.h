@@ -353,10 +353,10 @@
    void VEC_T_block_remove (VEC(T) *v, unsigned ix, unsigned len);
 
    Remove LEN elements starting at the IXth.  Ordering is retained.
-   This is an O(1) operation.  */
+   This is an O(N) operation due to memmove.  */
 
 #define VEC_block_remove(T,V,I,L)	\
-	(VEC_OP(T,block_remove)(V,I,L) VEC_ASSERT_INFO)
+	(VEC_OP(T,block_remove)(V,I,L VEC_ASSERT_INFO))
 
 /* Get the address of the array of elements
    T *VEC_T_address (VEC(T) v)

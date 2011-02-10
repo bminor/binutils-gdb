@@ -1,3 +1,12 @@
+2011-02-10  Pedro Alves  <pedro@codesourcery.com>
+
+	* vec.h (VEC_block_remove): Place VEC_ASSERT_INFO on the right
+	side of the parenthesis.
+
+	Merge from GCC:
+	2010-07-13  Jakub Jelinek  <jakub@redhat.com>
+        * vec.h (VEC_block_remove): Fix comment.
+
 2011-02-08  Michael Snyder  <msnyder@vmware.com>
 
 	* linux-nat.c (linux_nat_filter_event): Fix typo in comment.
