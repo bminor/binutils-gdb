@@ -161,7 +161,8 @@ Generate code for Solaris.
 Do not generate code for Solaris.
 
 @item -nops=@var{count}
-When aligning, more than @var{count} nops uses a branch.
+If an alignment directive inserts more than @var{count} nops, put a
+branch at the beginning to skip execution of the nops.
 @end table
 @c man end
 
