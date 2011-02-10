@@ -1,6 +1,6 @@
 defined = addr1;
 SECTIONS {
-	.data.cacheline_aligned : { *(.data.cacheline_aligned) }
+	.text : { *(.text) }
 	. = ALIGN (0x1000);
 	.data : { *(.data) }
 	addr1  = ADDR (.data);

@@ -67,5 +67,7 @@ set prms_id 0
 run_dump_test "defined2"
 run_dump_test "defined3"
 run_dump_test "defined4"
-run_dump_test "defined5"
+if ![is_aout_format] {
+    run_dump_test "defined5"
+}
 set LDFLAGS "$saved_LDFLAGS"

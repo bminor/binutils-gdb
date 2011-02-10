@@ -1,5 +1,9 @@
 2011-02-10  Alan Modra  <amodra@gmail.com>
 
+	* ld-scripts/defined.exp: Don't run defined5 for AOUT.
+	* ld-scripts/defined5.s: Use .text for "defined" section.
+	* ld-scripts/defined5.t: Adjust.
+
 	* ld-gc/start.d: Exclude frv-*-linux*.
 	* ld-misc/defsym1.d: Likewise.
 
