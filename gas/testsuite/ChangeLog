@@ -1,3 +1,7 @@
+2011-02-10  Kai Tietz  <kai.tietz@onevision.com>
+
+	* gas/cfi/cfi-x86_64.d: Adjust for x64 PE+.
+
 2011-02-10  Vincent Rivière  <vincent.riviere@freesbee.fr>
 
 	* gas/m68k/cpu32.d: Set explicit architecture for objdump.
