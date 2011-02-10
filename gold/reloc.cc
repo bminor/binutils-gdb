@@ -1,6 +1,6 @@
 // reloc.cc -- relocate input files for gold.
 
-// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -685,9 +685,6 @@ Sized_relobj<size, big_endian>::do_relocate(const Symbol_table* symtab,
   // Write out the local symbols.
   this->write_local_symbols(of, layout->sympool(), layout->dynpool(),
 			    layout->symtab_xindex(), layout->dynsym_xindex());
-
-  // We should no longer need the local symbol values.
-  this->clear_local_symbols();
 }
 
 // Sort a Read_multiple vector by file offset.
