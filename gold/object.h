@@ -1,6 +1,6 @@
 // object.h -- support for an object file for linking in gold  -*- C++ -*-
 
-// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -2164,15 +2164,6 @@ class Sized_relobj : public Relobj
 		      const Stringpool_template<char>*,
 		      Output_symtab_xindex*,
 		      Output_symtab_xindex*);
-
-  // Clear the local symbol information.
-  void
-  clear_local_symbols()
-  {
-    this->local_values_.clear();
-    this->local_got_offsets_.clear();
-    this->local_plt_offsets_.clear();
-  }
 
   // Record a mapping from discarded section SHNDX to the corresponding
   // kept section.

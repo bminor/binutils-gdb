@@ -1,3 +1,10 @@
+2011-02-09  Ian Lance Taylor  <iant@google.com>
+
+	PR gold/12316
+	* object.h (class Sized_relobj): Remove clear_local_symbols.
+	* reloc.cc (Sized_relobj::do_relocate): Don't call
+	clear_local_symbols.
+
 2011-02-04  Jeffrey Yasskin  <jyasskin@google.com>
 
 	* symtab.cc (Odr_violation_compare::operator()): Sort by just the
