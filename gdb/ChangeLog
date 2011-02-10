@@ -5,7 +5,7 @@
 
 	Merge from GCC:
 	2010-07-13  Jakub Jelinek  <jakub@redhat.com>
-        * vec.h (VEC_block_remove): Fix comment.
+	* vec.h (VEC_block_remove): Fix comment.
 
 2011-02-08  Michael Snyder  <msnyder@vmware.com>
 
