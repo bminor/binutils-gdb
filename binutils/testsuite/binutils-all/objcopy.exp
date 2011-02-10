@@ -538,7 +538,8 @@ proc copy_setup { } {
 	set add_libs ""
     }
 
-    if { [istarget *-*-linux*] } {
+    if { [istarget *-*-linux*]
+	 || [istarget *-*-gnu*] } {
 	foreach i $gcc_gas_flag {
 	    set flags "additional_flags=$i $flags"
 	}

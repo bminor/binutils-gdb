@@ -3,7 +3,7 @@
 #source: empty.s
 #readelf: -h
 #name: Update ELF header 2
-#target: *-*-linux*
+#target: *-*-linux* *-*-gnu*
 
 #...
 ELF Header:

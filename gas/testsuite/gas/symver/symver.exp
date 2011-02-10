@@ -6,7 +6,7 @@ proc run_error_test { name opts } {
     set testname "symver $name"
     set file $srcdir/$subdir/$name
     gas_run ${name}.s $opts ">&dump.out"
-    if { [regexp_diff "dump.out" "${file}.l" ""] } then {
+    if { [regexp_diff "dump.out" "${file}.l"] } then {
 	fail $testname
 	verbose "output is [file_contents "dump.out"]" 2
 	return
@@ -18,7 +18,8 @@ proc run_error_test { name opts } {
 if { ([istarget "*-*-elf*"]		
       || [istarget "m6811-*"]
       || [istarget "m6812-*"]
-      || [istarget "*-*-linux*"])
+      || [istarget "*-*-linux*"]
+      || [istarget "*-*-gnu*"])
      && ![istarget *-*-linux*aout*]
      && ![istarget *-*-linux*oldld*] } then {
 

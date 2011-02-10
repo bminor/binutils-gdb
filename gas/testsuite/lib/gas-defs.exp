@@ -1,5 +1,5 @@
 # Copyright (C) 1993, 1994, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-# 2004, 2005, 2007, 2008, 2009  Free Software Foundation, Inc.
+# 2004, 2005, 2007, 2008, 2009, 2010  Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,6 +20,13 @@
 # dejagnu@gnu.org
 
 # This file was written by Ken Raeburn (raeburn@cygnus.com).
+
+proc load_common_lib { name } {
+    global srcdir
+    load_file $srcdir/../../binutils/testsuite/lib/$name
+}
+
+load_common_lib binutils-common.exp
 
 proc gas_version {} {
     global AS
@@ -277,112 +284,6 @@ proc gas_init { args } {
     return
 }
 
-# True if the object format is known to be ELF.
-#
-proc is_elf_format {} {
-    if { ![istarget *-*-sysv4*]
-	 && ![istarget *-*-unixware*]
-	 && ![istarget *-*-elf*]
-	 && ![istarget *-*-eabi*]
-	 && ![istarget *-*-rtems*]
-	 && ![istarget hppa*64*-*-hpux*]
-	 && ![istarget ia64-*-hpux*]
-	 && ![istarget *-*-linux*]
-	 && ![istarget frv-*-uclinux*]
-	 && ![istarget bfin-*-uclinux]
-	 && ![istarget sh*-*-uclinux*]
-	 && ![istarget *-*-irix5*]
-	 && ![istarget *-*-irix6*]
-	 && ![istarget *-*-netbsd*]
-	 && ![istarget *-*-openbsd*]
-	 && ![istarget *-*-solaris2*] } {
-	return 0
-    }
-
-    if { [istarget *-*-linux*aout*]
-	 || [istarget *-*-linux*oldld*]
-	 || [istarget h8500-*-rtems*]
-	 || [istarget i960-*-rtems*]
-	 || [istarget *-*-rtemscoff*] } {
-	return 0
-    }
-
-    if { ![istarget *-*-netbsdelf*]
-	 && ([istarget *-*-netbsd*aout*]
-	     || [istarget *-*-netbsdpe*]
-	     || [istarget arm*-*-netbsd*]
-	     || [istarget sparc-*-netbsd*]
-	     || [istarget i*86-*-netbsd*]
-	     || [istarget m68*-*-netbsd*]
-	     || [istarget vax-*-netbsd*]
-	     || [istarget ns32k-*-netbsd*]) } {
-    	return 0
-    }
-
-    if { [istarget arm-*-openbsd*]
-	 || [istarget i386-*-openbsd\[0-2\].*]
-	 || [istarget i386-*-openbsd3.\[0-2\]]
-	 || [istarget m68*-*-openbsd*]
-	 || [istarget ns32k-*-openbsd*]
-	 || [istarget sparc-*-openbsd\[0-2\].*]
-	 || [istarget sparc-*-openbsd3.\[0-1\]]
-	 || [istarget vax-*-openbsd*] } {
-	return 0
-    }
-
-    return 1
-}
-
-# True if the object format is known to be a.out.
-#
-proc is_aout_format {} {
-    if { [istarget *-*-netbsdelf]
-	 || [istarget sparc64-*-netbsd*]
-	 || [istarget sparc64-*-openbsd*] } {
-	return 0
-    }
-    if { [istarget *-*-*\[ab\]out*]
-	 || [istarget *-*-linux*oldld*]
-	 || [istarget *-*-bsd*]
-	 || [istarget *-*-msdos*]
-	 || [istarget arm-*-netbsd*]
-	 || [istarget arm-*-openbsd*]
-	 || [istarget arm-*-riscix*]
-	 || [istarget i?86-*-freebsd\[12\]*]
-	 || [istarget i?86-*-netbsd*]
-	 || [istarget i?86-*-openbsd\[0-2\]*]
-	 || [istarget i?86-*-openbsd3.\[0-2\]*]
-	 || [istarget i?86-*-vsta]
-	 || [istarget i?86-*-mach*]
-	 || [istarget m68*-*-netbsd*]
-	 || [istarget m68*-*-openbsd*]
-	 || [istarget ns32k-*-*]
-	 || [istarget pdp11-*-*]
-	 || [istarget sparc*-*-sunos4*]
-	 || [istarget sparc*-*-netbsd*]
-	 || [istarget sparc*-*-openbsd\[0-2\]*]
-	 || [istarget sparc*-*-openbsd3.\[0-1\]*]
-	 || [istarget sparc*-fujitsu-none]
-	 || [istarget vax-dec-ultrix*]
-	 || [istarget vax-*-netbsd] } {
-	return 1
-    }
-    return 0
-}
-
-# True if the object format is known to be PE COFF.
-#
-proc is_pecoff_format {} {
-    if { ![istarget *-*-mingw*]
-	 && ![istarget *-*-cygwin*]
-	 && ![istarget *-*-cegcc*]
-	 && ![istarget *-*-pe*] } {
-	return 0
-    }
-
-    return 1
-}
-
 # Internal procedure: return the names of the standard sections
 #
 proc get_standard_section_names {} {
@@ -526,8 +427,8 @@ proc run_dump_tests { testcases {extra_options {}} } {
 #
 # After the option lines come regexp lines.  `run_dump_test' calls
 # `regexp_diff' to compare the output of the dumping tool against the
-# regexps in FILE.d.  `regexp_diff' is defined later in this file; see
-# further comments there.
+# regexps in FILE.d.  `regexp_diff' is defined in binutils-common.exp;
+# see further comments there.
 
 proc run_dump_test { name {extra_options {}} } {
     global subdir srcdir
@@ -778,7 +679,7 @@ proc run_dump_test { name {extra_options {}} } {
 	    }
 	    set stderrfile $srcdir/$subdir/$opts(stderr)
 	    verbose "wrote pruned stderr to dump.stderr" 3
-	    if { [regexp_diff "dump.stderr" "$stderrfile" ""] } then {
+	    if { [regexp_diff "dump.stderr" "$stderrfile"] } then {
 		if { $opts(error) != "" } {
 		    verbose -log "$exitstat with: <$comp_output>, expected: <$opts(error)>"
 		    if [regexp $opts(error) $comp_output] {
@@ -938,120 +839,6 @@ expect_after -i {
     eof				{ perror "eof" }
 }
 
-# regexp_diff, based on simple_diff taken from ld test suite.
-#	Compares two files line-by-line.
-#	FILE_1 contains strings, FILE_2 contains regexps and #-comments
-#	Blank lines are ignored in either file.
-#	Subsitutions in REF_SUBST are applied on FILE_2 lines.
-#	Returns non-zero if differences exist.
-#
-proc regexp_diff { file_1 file_2 ref_subst} {
-
-    set eof -1
-    set end_1 0
-    set end_2 0
-    set differences 0
-    set diff_pass 0
-
-    if [file exists $file_1] then {
-	set file_a [open $file_1 r]
-    } else {
-	perror "$file_1 doesn't exist"
-	return 1
-    }
-
-    if [file exists $file_2] then {
-	set file_b [open $file_2 r]
-    } else {
-	perror "$file_2 doesn't exist"
-	close $file_a
-	return 1
-    }
-
-    verbose " Regexp-diff'ing: $file_1 $file_2" 2
-
-    while { 1 } {
-	set line_a ""
-	set line_b ""
-	while { [string length $line_a] == 0 } {
-            # Ignore blank line in FILE_1.
-	    if { [gets $file_a line_a] == $eof } {
-		set end_1 1
-		break
-	    }
-	}
-	while { [string length $line_b] == 0 || [string match "#*" $line_b] } {
-	    if [ string match "#pass" $line_b ] {
-		set end_2 1
-		set diff_pass 1
-		break
-	    } elseif [ string match "#..." $line_b ] {
-		if { [gets $file_b line_b] == $eof } {
-		    set end_2 1
-		    set diff_pass 1
-		    break
-		}
-                # Substitute on the reference.
-                foreach {name value} $ref_subst {
-                    regsub -- $name $line_b $value line_b
-                }
-		verbose "looking for \"^$line_b$\"" 3
-		while { ![regexp "^$line_b$" "$line_a"] } {
-		    verbose "skipping    \"$line_a\"" 3
-		    if { [gets $file_a line_a] == $eof } {
-			set end_1 1
-			break
-		    }
-		}
-		break
-	    }
-	    if { [gets $file_b line_b] == $eof } {
-		set end_2 1
-		break
-	    }
-	}
-
-        if { $diff_pass } {
-            break
-        } elseif { $end_1 && $end_2 } {
-            break
-        } elseif { $end_1 } {
-            send_log "extra regexps in $file_2 starting with \"^$line_b$\"\nEOF from $file_1\n"
-            verbose "extra regexps in $file_2 starting with \"^$line_b$\"\nEOF from $file_1" 3
-            set differences 1
-            break
-        } elseif { $end_2 } {
-            send_log "extra lines in $file_1 starting with \"^$line_a$\"\nEOF from $file_2\n"
-            verbose "extra lines in $file_1 starting with \"^$line_a$\"\nEOF from $file_2\n" 3
-            set differences 1
-            break
-        } else {
-            # Substitute on the reference.
-            foreach {name value} $ref_subst {
-                regsub -- $name $line_b $value line_b
-            }
-            verbose "regexp \"^$line_b$\"\nline   \"$line_a\"" 3
-            if ![regexp "^$line_b$" "$line_a"] {
-		send_log "regexp_diff match failure\n"
-		send_log "regexp \"^$line_b$\"\nline   \"$line_a\"\n"
-		verbose "regexp_diff match failure\n" 3
-		set differences 1
-            }
-        }
-    }
-
-    if { $differences == 0 && !$diff_pass && [eof $file_a] != [eof $file_b] } {
-	send_log "$file_1 and $file_2 are different lengths\n"
-	verbose "$file_1 and $file_2 are different lengths" 3
-	set differences 1
-    }
-
-    close $file_a
-    close $file_b
-
-    return $differences
-}
-
 proc file_contents { filename } {
     set file [open $filename r]
     set contents [read $file]
@@ -1107,7 +894,7 @@ proc run_list_test { name {opts {}} {testname {}} } {
     }
     set file $srcdir/$subdir/$name
     gas_run ${name}.s $opts ">&dump.out"
-    if { [regexp_diff "dump.out" "${file}.l" ""] } then {
+    if { [regexp_diff "dump.out" "${file}.l"] } then {
 	fail $testname
 	verbose "output is [file_contents "dump.out"]" 2
 	return
@@ -1126,7 +913,7 @@ proc run_list_test_stdin { name {opts {}} {testname {}} } {
     }
     set file $srcdir/$subdir/$name
     gas_run_stdin ${name}.s $opts ">&dump.out"
-    if { [regexp_diff "dump.out" "${file}.l" ""] } then {
+    if { [regexp_diff "dump.out" "${file}.l"] } then {
 	fail $testname
 	verbose "output is [file_contents "dump.out"]" 2
 	return

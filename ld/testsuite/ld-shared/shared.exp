@@ -1,6 +1,6 @@
 # Expect script for ld-shared tests
 #   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-#   2004, 2005, 2007, 2008, 2009
+#   2004, 2005, 2007, 2008, 2009, 2010
 #   Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
@@ -38,6 +38,7 @@ if { ![istarget hppa*64*-*-hpux*] \
      && ![istarget i?86-*-unixware] \
      && ![istarget i?86-*-elf*] \
      && ![istarget i?86-*-linux*] \
+     && ![istarget i?86-*-gnu*] \
      && ![istarget ia64-*-elf*] \
      && ![istarget ia64-*-linux*] \
      && ![istarget m68k-*-linux*] \
