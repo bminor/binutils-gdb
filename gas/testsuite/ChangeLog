@@ -1,3 +1,7 @@
+2011-02-10  Alan Modra  <amodra@gmail.com>
+
+	* gas/elf/dwarf2-4.s: Don't use @.
+
 2011-02-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/6957
