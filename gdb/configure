@@ -993,6 +993,7 @@ YACC
 YFLAGS
 XMKMF'
 ac_subdirs_all='testsuite
+common
 gdbtk
 multi-ice
 gdbserver'
@@ -7887,6 +7888,8 @@ fi
 
 
 subdirs="$subdirs testsuite"
+
+subdirs="$subdirs common"
 
 
 # Check whether to support alternative target configurations

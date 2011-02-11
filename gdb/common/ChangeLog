@@ -1,0 +1,9 @@
+2011-02-11  Yao Qi  <yao@codesourcery.com>
+
+	Build libcommon.a.
+
+	* Makefile.in: New.
+	* configure.ac: New.
+	* aclocal.m4: New.
+	* configure: Generate.
+

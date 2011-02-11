@@ -1,0 +1,76 @@
+
+srcdir = @srcdir@
+ACLOCAL = @ACLOCAL@
+AUTOCONF = @AUTOCONF@
+AUTOHEADER = @AUTOHEADER@
+RANLIB = @RANLIB@
+COMMON_CPU_OBJ = @COMMON_CPU_OBJ@
+
+BFD_DIR = ../../bfd
+BFD_SRC = $(srcdir)/$(BFD_DIR)
+BFD_CFLAGS = -I$(BFD_DIR) -I$(BFD_SRC)
+
+INCLUDES = -I. -I../ -I$(srcdir) -I$(srcdir)/../../include @GDB_INCLUDE@
+
+libcommon_a_OBJS = signals.o $(COMMON_CPU_OBJ)
+libcommon_a_SOURCES = signals.c $(COMMON_CPU_SRC)
+
+all: libcommon.a
+
+signals.o: $(srcdir)/signals.c
+	$(COMPILE) $(srcdir)/signals.c
+
+COMPILE = source='$<' object='$@' libtool=no $(CC) $(DEFS) $(INCLUDES) @GDB_FLAGS@ $(CPPFLAGS) $(ALL_CFLAGS) -c
+
+# Implicit rules
+
+.c.o:
+	$(COMPILE) $(srcdir)/$<
+
+
+.SUFFIXES:
+.SUFFIXES: .c .o .obj
+
+libcommon.a: $(libcommon_a_OBJS)
+	-rm -f $@
+	$(AR) $(ARFLAGS) $@ $(libcommon_a_OBJS)
+	$(RANLIB) $@
+
+# Rules to rebuild the configuration
+
+Makefile: $(srcdir)/Makefile.in config.status
+	$(SHELL) ./config.status Makefile
+
+config.status: $(srcdir)/configure
+	$(SHELL) ./config.status --recheck
+
+$(srcdir)/configure: $(srcdir)/aclocal.m4
+	cd $(srcdir) && $(AUTOCONF)
+
+aclocal_deps = \
+	$(srcdir)/../../config/stdint.m4 \
+	$(srcdir)/../../config/warnings.m4 \
+	$(srcdir)/../../config/override.m4 \
+	$(srcdir)/configure.ac
+
+$(srcdir)/aclocal.m4: $(aclocal_deps)
+	cd $(srcdir) && $(ACLOCAL) -I ../config
+
+config.h: stamp-h1
+	test -f config.h || (rm -f stamp-h1 && $(MAKE) stamp-h1)
+
+stamp-h1: $(srcdir)/config.in config.status
+	-rm -f stamp-h1
+	$(SHELL) ./config.status config.h
+
+$(srcdir)/config.in: $(srcdir)/configure
+	cd $(srcdir) && $(AUTOHEADER)
+	-rm -f stamp-h1
+
+clean mostlyclean:
+	-rm -f *~ *.o a.out
+	-rm libcommon.a
+
+distclean maintainer-clean realclean: clean
+	-rm -f *~
+	-rm -f Makefile config.status config.log

@@ -45,6 +45,8 @@ includedir = @includedir@
 
 SHELL = /bin/sh
 EXEEXT = @EXEEXT@
+PWD_COMMAND = $${PWDCMD-pwd}
+RANLIB = @RANLIB@
 
 INSTALL = @INSTALL@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -130,10 +132,14 @@ DEPFILES = @GDBSERVER_DEPFILES@
 
 LIBOBJS = @LIBOBJS@
 
+LIBCOMMON_DIR = common
+LIBCOMMON = $(LIBCOMMON_DIR)/libcommon.a
+LIBCOMMON_SRC = $(srcdir)/$(LIBCOMMON_DIR)
+
 SOURCES = $(SFILES)
 TAGFILES = $(SOURCES) ${HFILES} ${ALLPARAM} ${POSSLIBS}
 
-OBS = inferiors.o regcache.o remote-utils.o server.o signals.o target.o \
+OBS = inferiors.o regcache.o remote-utils.o server.o target.o \
 	utils.o version.o \
 	mem-break.o hostio.o event-loop.o tracepoint.o \
 	$(XML_BUILTIN) \
@@ -190,6 +196,32 @@ FLAGS_TO_PASS = \
 
 all: gdbserver$(EXEEXT) gdbreplay$(EXEEXT) $(extra_libraries)
 
+$(LIBCOMMON): $(LIBCOMMON_DIR)/Makefile
+	@$(MAKE) $(FLAGS_TO_PASS) DO=all --directory=common
+
+common/Makefile: configure-common config.status
+        CONFIG_FILES="common/Makefile" \
+          CONFIG_COMMANDS="depfiles" \
+          CONFIG_HEADERS= \
+          CONFIG_LINKS= \
+          $(SHELL) config.status
+
+configure-common: 
+	@: $(MAKE); $(unstage)
+	@r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+        test ! -f common/Makefile || exit 0; \
+        $(SHELL) $(srcdir)/../../mkinstalldirs common ; \
+        $(HOST_EXPORTS)  \
+        echo Configuring in common; \
+        cd "common" || exit 1; \
+        commondir="$$s/../common"; \
+        srcdiroption="--srcdir=$${commondir}"; \
+	$(SHELL) $${commondir}/configure --enable-gdbserver=yes \
+          $(HOST_CONFIGARGS) --build=${build_alias} --host=${host_alias} \
+          --target=${target_alias} $${srcdiroption}  \
+          || exit 1
+
 # Traditionally "install" depends on "all".  But it may be useful
 # not to; for example, if the user has made some trivial change to a
 # source file and doesn't care about rebuilding or just wants to save the
@@ -224,10 +256,10 @@ html:
 install-html:
 clean-info:
 
-gdbserver$(EXEEXT): $(OBS) ${ADD_DEPS} ${CDEPS}
+gdbserver$(EXEEXT): $(OBS) ${ADD_DEPS} ${CDEPS} $(LIBCOMMON)
 	rm -f gdbserver$(EXEEXT)
 	${CC-LD} $(INTERNAL_CFLAGS) $(INTERNAL_LDFLAGS) -o gdbserver$(EXEEXT) $(OBS) \
-	  $(GDBSERVER_LIBS) $(XM_CLIBS)
+	$(LIBCOMMON) $(GDBSERVER_LIBS) $(XM_CLIBS)
 
 gdbreplay$(EXEEXT): $(GDBREPLAY_OBS)
 	rm -f gdbreplay$(EXEEXT)
@@ -381,9 +413,6 @@ thread-db.o: thread-db.c $(server_h) $(linux_low_h) $(gdb_proc_service_h)
 tracepoint.o: tracepoint.c $(server_h)
 utils.o: utils.c $(server_h)
 gdbreplay.o: gdbreplay.c config.h
-
-signals.o: ../common/signals.c $(server_h) $(signals_def)
-	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $< -DGDBSERVER
 
 # We build memmem.c without -Werror because this file is not under
 # our control.  On LynxOS, the compiler generates some warnings

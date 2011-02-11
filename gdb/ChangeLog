@@ -1,3 +1,10 @@
+2011-02-11  Yao Qi  <yao@codesourcery.com>
+
+	* Makefile.in: Remove signals.o from COMMON_OBS.  Link
+	libcommon.a.
+	* configure.ac: Add common to sub dir.
+	* configure: Regenerate.
+
 2011-02-10  Pedro Alves  <pedro@codesourcery.com>
 
 	* vec.h (VEC_block_remove): Place VEC_ASSERT_INFO on the right

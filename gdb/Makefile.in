@@ -88,6 +88,8 @@ DEPMODE = @CCDEPMODE@
 DEPDIR = @DEPDIR@
 depcomp = $(SHELL) $(srcdir)/../depcomp
 
+PWD_COMMAND = $${PWDCMD-pwd}
+
 # Note that these are overridden by GNU make-specific code below if
 # GNU make is used.  The overrides implement dependency tracking.
 COMPILE.pre = $(CC)
@@ -139,6 +141,10 @@ LIBDECNUMBER_DIR = ../libdecnumber
 LIBDECNUMBER = $(LIBDECNUMBER_DIR)/libdecnumber.a
 LIBDECNUMBER_SRC = $(srcdir)/$(LIBDECNUMBER_DIR)
 LIBDECNUMBER_CFLAGS = -I$(LIBDECNUMBER_DIR) -I$(LIBDECNUMBER_SRC)
+
+LIBCOMMON_DIR = common
+LIBCOMMON = $(LIBCOMMON_DIR)/libcommon.a
+LIBCOMMON_SRC = $(srcdir)/$(LIBCOMMON_DIR)
 
 # Where is the READLINE library?  Typically in ../readline.
 READLINE_DIR = ../readline
@@ -331,7 +337,6 @@ SUBDIR_PYTHON_DEPS =
 SUBDIR_PYTHON_LDFLAGS=
 SUBDIR_PYTHON_CFLAGS=
 
-
 # Opcodes currently live in one of two places.  Either they are in the
 # opcode library, typically ../opcodes, or they are in a header file
 # in INCLUDE_DIR.
@@ -473,9 +478,10 @@ INSTALLED_LIBS=-lbfd -lreadline -lopcodes -liberty -ldecnumber \
 CLIBS = $(SIM) $(READLINE) $(OPCODES) $(BFD) $(INTL) $(LIBIBERTY) $(LIBDECNUMBER) \
 	$(XM_CLIBS) $(NAT_CLIBS) $(GDBTKLIBS) @LIBS@ @PYTHON_LIBS@ \
 	$(LIBEXPAT) \
-	$(LIBIBERTY) $(WIN32LIBS) $(LIBGNU)
+	$(LIBIBERTY) $(WIN32LIBS) $(LIBGNU) $(LIBCOMMON)
 CDEPS = $(XM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE_DEPS) \
-	$(OPCODES) $(INTL_DEPS) $(LIBIBERTY) $(CONFIG_DEPS) $(LIBGNU)
+	$(OPCODES) $(INTL_DEPS) $(LIBIBERTY) $(CONFIG_DEPS) $(LIBGNU) \
+        $(LIBCOMMON)
 
 ADD_FILES = $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 ADD_DEPS = $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
@@ -860,7 +866,6 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	memattr.o mem-break.o target.o parse.o language.o buildsym.o \
 	findcmd.o \
 	std-regs.o \
-	signals.o \
 	exec.o reverse.o \
 	bcache.o objfiles.o observer.o minsyms.o maint.o demangle.o \
 	dbxread.o coffread.o coff-pe-read.o \
@@ -897,13 +902,13 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 TSOBS = inflow.o
 
 SUBDIRS = doc @subdirs@ data-directory
-CLEANDIRS = $(SUBDIRS) gnulib
+CLEANDIRS = $(SUBDIRS) gnulib common
 
 # List of subdirectories in the build tree that must exist.
 # This is used to force build failures in existing trees when
 # a new directory is added.
 # The format here is for the `case' shell command.
-REQUIRED_SUBDIRS = doc | testsuite | gnulib | data-directory
+REQUIRED_SUBDIRS = doc | testsuite | gnulib | data-directory | common
 
 # For now, shortcut the "configure GDB for fewer languages" stuff.
 YYFILES = c-exp.c \
@@ -1170,6 +1175,26 @@ all-lib: gnulib/Makefile
 	@$(MAKE) $(FLAGS_TO_PASS) DO=all DODIRS=gnulib subdir_do
 .PHONY: all-lib
 
+# 
+$(LIBCOMMON): $(LIBCOMMON_DIR)/Makefile
+	@$(MAKE) $(FLAGS_TO_PASS) DO=all DODIRS=common subdir_do
+
+configure-common: 
+	@: $(MAKE); $(unstage)
+	@r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+        test ! -f common/Makefile || exit 0; \
+        $(SHELL) $(srcdir)/../mkinstalldirs common ; \
+        $(HOST_EXPORTS)  \
+        echo Configuring in common; \
+        cd "common" || exit 1; \
+        commondir="$$s/common"; \
+        srcdiroption="--srcdir=$${commondir}"; \
+	$(SHELL) $${commondir}/configure --enable-gdbserver=no \
+          $(HOST_CONFIGARGS) --build=${build_alias} --host=${host_alias} \
+          --target=${target_alias} $${srcdiroption}  \
+          || exit 1
+
 # Convenience rule to handle recursion.
 .PHONY: all-data-directory
 all-data-directory: data-directory/Makefile
@@ -1304,6 +1329,13 @@ data-directory/Makefile: data-directory/Makefile.in config.status @frags@
 	  CONFIG_HEADERS= \
 	  CONFIG_LINKS= \
 	  $(SHELL) config.status
+
+common/Makefile: configure-common common/Makefile.in config.status @frags@
+        CONFIG_FILES="common/Makefile" \
+          CONFIG_COMMANDS="depfiles" \
+          CONFIG_HEADERS= \
+          CONFIG_LINKS= \
+          $(SHELL) config.status
 
 config.h: stamp-h ; @true
 stamp-h: $(srcdir)/config.in config.status
@@ -1903,16 +1935,6 @@ mi-symbol-cmds.o: $(srcdir)/mi/mi-symbol-cmds.c
 
 mi-common.o: $(srcdir)/mi/mi-common.c
 	$(COMPILE) $(srcdir)/mi/mi-common.c
-	$(POSTCOMPILE)
-
-#
-# gdb/common/ dependencies
-#
-# Need to explicitly specify the compile rule as make will do nothing
-# or try to compile the object file into the sub-directory.
-
-signals.o: $(srcdir)/common/signals.c
-	$(COMPILE) $(srcdir)/common/signals.c
 	$(POSTCOMPILE)
 
 #

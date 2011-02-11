@@ -1,3 +1,9 @@
+2011-02-11  Yao Qi  <yao@codesourcery.com>
+
+	* configure.ac: Call AC_PROG_RANLIB.
+	* Makefile.in: Remove signals.o from OBS.  Link libcommon.a.
+	* configure: Regenerate.
+
 2011-02-07  Pedro Alves  <pedro@codesourcery.com>
 
 	* server.c (gdb_read_memory): Change return semantics to allow
