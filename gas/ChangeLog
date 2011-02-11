@@ -1,5 +1,13 @@
 2011-02-11  Mike Frysinger  <vapier@gentoo.org>
 
+	* doc/c-bfin.texi (Instruction Delimiting): Fix occur typo.
+	(Modify Registers): Fix subtracted typo.
+	(.byte2): Extend and swap descriptions with .byte4.
+	(.byte4): Extend and swap descriptions with .byte2.
+	(.db, .dw, .dd): Document behavior.
+
+2011-02-11  Mike Frysinger  <vapier@gentoo.org>
+
 	* config/bfin-parse.y (TESTSET): Reject REG_SP and REG_FP.
 
 2011-02-11  Alan Modra  <amodra@gmail.com>

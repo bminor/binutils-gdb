@@ -125,7 +125,7 @@ set off by a "||" token.
 a0 = r3.h * r2.l || r1 = [p3++] || r4 = [i2++];
 @end smallexample
 
-Multiple instructions can occour on the same line.  Each must be
+Multiple instructions can occur on the same line.  Each must be
 terminated by a semicolon character.
 
 @item Register Names
@@ -218,7 +218,7 @@ addresses of data structures.  Abbreviated I-register or Ireg.
 
 @item Modify Registers
 The set of 32-bit registers (M0, M1, M2, M3) that normally contain
-offset values that are added and subracted to one of the index
+offset values that are added and subtracted to one of the index
 registers.  Abbreviated as Mreg.
 
 @item Length Registers
@@ -250,15 +250,25 @@ The following directives are provided for compatibility with the VDSP assembler.
 
 @table @code
 @item .byte2
-Initializes a four byte data object.
-@item .byte4
 Initializes a two byte data object.
+
+This maps to the @code{.short} directive.
+@item .byte4
+Initializes a four byte data object.
+
+This maps to the @code{.int} directive.
 @item .db
-TBD
-@item .dd
-TBD
+Initializes a single byte data object.
+
+This directive is a synonym for @code{.byte}.
 @item .dw
-TBD
+Initializes a two byte data object.
+
+This directive is a synonym for @code{.byte2}.
+@item .dd
+Initializes a four byte data object.
+
+This directive is a synonym for @code{.byte4}.
 @item .var
 Define and initialize a 32 bit data object.
 @end table
