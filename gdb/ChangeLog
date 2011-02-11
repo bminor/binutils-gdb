@@ -1,3 +1,9 @@
+2011-02-11  Pedro Alves  <pedro@codesourcery.com>
+
+	* infrun.c (proceed): Move switching out and in of tfind mode from
+	here ...
+	(fetch_inferior_event): ... to here.
+
 2011-02-11  Yao Qi  <yao@codesourcery.com>
 
 	* Makefile.in: Remove signals.o from COMMON_OBS.  Link
