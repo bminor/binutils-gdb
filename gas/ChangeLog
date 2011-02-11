@@ -1,3 +1,7 @@
+2011-02-11  Mike Frysinger  <vapier@gentoo.org>
+
+	* config/bfin-parse.y (TESTSET): Reject REG_SP and REG_FP.
+
 2011-02-11  Alan Modra  <amodra@gmail.com>
 
 	* doc/c-ppc.texi (PowerPC-Opts <-nops>): Clarify.
