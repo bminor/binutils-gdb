@@ -1954,16 +1954,6 @@ proceed (CORE_ADDR addr, enum target_signal siggnal, int step)
 			"infrun: proceed (addr=%s, signal=%d, step=%d)\n",
 			paddress (gdbarch, addr), siggnal, step);
 
-  /* We're handling a live event, so make sure we're doing live
-     debugging.  If we're looking at traceframes while the target is
-     running, we're going to need to get back to that mode after
-     handling the event.  */
-  if (non_stop)
-    {
-      make_cleanup_restore_current_traceframe ();
-      set_traceframe_number (-1);
-    }
-
   if (non_stop)
     /* In non-stop, each thread is handled individually.  The context
        must already be set to the right thread here.  */
@@ -2606,6 +2596,16 @@ fetch_inferior_event (void *client_data)
 
   /* We'll update this if & when we switch to a new thread.  */
   previous_inferior_ptid = inferior_ptid;
+
+  /* We're handling a live event, so make sure we're doing live
+     debugging.  If we're looking at traceframes while the target is
+     running, we're going to need to get back to that mode after
+     handling the event.  */
+  if (non_stop)
+    {
+      make_cleanup_restore_current_traceframe ();
+      set_traceframe_number (-1);
+    }
 
   if (non_stop)
     /* In non-stop mode, the user/frontend should not notice a thread
