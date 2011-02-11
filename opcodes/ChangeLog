@@ -1,3 +1,11 @@
+2011-02-11  Mike Frysinger  <vapier@gentoo.org>
+
+	* bfin-dis.c (reg_names): Add const.
+	(decode_dregs_lo, decode_dregs_hi, decode_dregs, decode_dregs_byte,
+	decode_pregs, decode_iregs, decode_mregs, decode_dpregs, decode_gregs,
+	decode_regs, decode_regs_lo, decode_regs_hi, decode_statbits,
+	decode_counters, decode_allregs): Likewise.
+
 2011-02-09  Michael Snyder  <msnyder@vmware.com>
 
 	* i386-dis.c (OP_J): Parenthesize expression to prevent 
