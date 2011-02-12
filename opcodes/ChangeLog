@@ -1,5 +1,9 @@
 2011-02-12  Mike Frysinger  <vapier@gentoo.org>
 
+	* bfin-dis.c (decode_pseudoDEBUG_0): Add space after PRNT.
+
+2011-02-12  Mike Frysinger  <vapier@gentoo.org>
+
 	* bfin-dis.c (machine_registers): Delete REG_GP.
 	(reg_names): Delete "GP".
 	(decode_allregs): Change REG_GP to REG_LASTREG.

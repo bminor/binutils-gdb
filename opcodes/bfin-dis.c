@@ -4654,7 +4654,7 @@ decode_pseudoDEBUG_0 (TIword iw0, disassemble_info *outf)
     }
   else if (fn == 1)
     {
-      OUTS (outf, "PRNT");
+      OUTS (outf, "PRNT ");
       OUTS (outf, allregs (reg, grp));
     }
   else
