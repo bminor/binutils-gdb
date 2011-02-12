@@ -1,3 +1,7 @@
+2011-02-12  Yao Qi  <yao@codesourcery.com>
+
+	* Makefile.in (CLEANDIRS): Remove duplicated common dir.
+
 2011-02-11  Pedro Alves  <pedro@codesourcery.com>
 
 	* infrun.c (proceed): Move switching out and in of tfind mode from
