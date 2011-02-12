@@ -1,5 +1,11 @@
 2011-02-12  Mike Frysinger  <vapier@gentoo.org>
 
+	* bfin-dis.c (machine_registers): Delete REG_GP.
+	(reg_names): Delete "GP".
+	(decode_allregs): Change REG_GP to REG_LASTREG.
+
+2011-02-12  Mike Frysinger  <vapier@gentoo.org>
+
 	* bfin.h (M_S2RND, M_T, M_W32, M_FU, M_TFU, M_IS, M_ISS2, M_IH,
 	M_IU): Define.
 	(is_macmod_pmove, is_macmod_hmove): New functions.
