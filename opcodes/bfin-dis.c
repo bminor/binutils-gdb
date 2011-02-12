@@ -25,16 +25,6 @@
 
 #include "opcode/bfin.h"
 
-#define M_S2RND 1
-#define M_T     2
-#define M_W32   3
-#define M_FU    4
-#define M_TFU   6
-#define M_IS    8
-#define M_ISS2  9
-#define M_IH    11
-#define M_IU    12
-
 #ifndef PRINTF
 #define PRINTF printf
 #endif
