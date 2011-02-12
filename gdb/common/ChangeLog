@@ -1,5 +1,9 @@
 2011-02-11  Yao Qi  <yao@codesourcery.com>
 
+	* Makefile.in: Add copyright header.
+
+2011-02-11  Yao Qi  <yao@codesourcery.com>
+
 	Build libcommon.a.
 
 	* Makefile.in: New.
