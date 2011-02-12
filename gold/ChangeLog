@@ -1,3 +1,8 @@
+2011-02-11  Sriraman Tallam  <tmsriram@google.com>
+
+	* output.cc (Output_section::add_input_section): Delay fill
+	generation for section ordering.
+
 2011-02-09  Ian Lance Taylor  <iant@google.com>
 
 	PR gold/12316

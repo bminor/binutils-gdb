@@ -2111,12 +2111,14 @@ Output_section::add_input_section(Layout* layout,
 
   // Determine if we want to delay code-fill generation until the output
   // section is written.  When the target is relaxing, we want to delay fill
-  // generating to avoid adjusting them during relaxation.
+  // generating to avoid adjusting them during relaxation.  Also, if we are
+  // sorting input sections we must delay fill generation.
   if (!this->generate_code_fills_at_write_
       && !have_sections_script
       && (sh_flags & elfcpp::SHF_EXECINSTR) != 0
       && parameters->target().has_code_fill()
-      && parameters->target().may_relax())
+      && (parameters->target().may_relax()
+          || parameters->options().section_ordering_file()))
     {
       gold_assert(this->fills_.empty());
       this->generate_code_fills_at_write_ = true;
