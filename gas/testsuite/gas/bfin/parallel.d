@@ -37,7 +37,7 @@ Disassembly of section .text:
   74:	fc b9 0a 9c 
   78:	30 cc 00 40 	A1 = ABS A1 \|\| FP = \[SP\] \|\| R3 = \[I2--\];
   7c:	77 91 93 9c 
-  80:	10 cc 00 c0 	A1 = ABS A0, A0 = ABS A0 \|\| R4 = \[P5 \+ 0x38\] \|\| R0.H = W\[I0\];
+  80:	10 cc 00 c0 	A1 = ABS A1, A0 = ABS A0 \|\| R4 = \[P5 \+ 0x38\] \|\| R0.H = W\[I0\];
   84:	ac a3 40 9d 
   88:	07 cc 10 80 	R0 = ABS R2 \|\| B\[SP\] = R0 \|\| R1.H = W\[I1\+\+\];
   8c:	30 9b 49 9c 

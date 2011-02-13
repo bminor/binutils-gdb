@@ -3476,7 +3476,7 @@ decode_dsp32alu_0 (TIword iw0, TIword iw1, disassemble_info *outf)
       OUTS (outf, " = (A0 += A1)");
     }
   else if (aop == 3 && HL == 0 && aopcde == 16)
-    OUTS (outf, "A1 = ABS A0, A0 = ABS A0");
+    OUTS (outf, "A1 = ABS A1, A0 = ABS A0");
 
   else if (aop == 0 && aopcde == 23 && HL == 1)
     {

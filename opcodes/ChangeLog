@@ -1,5 +1,9 @@
 2011-02-13  Mike Frysinger  <vapier@gentoo.org>
 
+	* bfin-dis.c (decode_dsp32alu_0): Fix typo with A1 reg.
+
+2011-02-13  Mike Frysinger  <vapier@gentoo.org>
+
 	* bfin-dis.c (decode_dsp32mult_0): Add 1 to dst for mac1.  Output
 	dregs only when P is set, and dregs_lo otherwise.
 

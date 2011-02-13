@@ -10,7 +10,7 @@ Disassembly of section .text:
    4:	10 c4 [0-3][[:xdigit:]] 40 	A0 = ABS A1;
    8:	30 c4 [0-3][[:xdigit:]] 00 	A1 = ABS A0;
    c:	30 c4 [0-3][[:xdigit:]] 40 	A1 = ABS A1;
-  10:	10 c4 [0-3][[:xdigit:]] c0 	A1 = ABS A0, A0 = ABS A0;
+  10:	10 c4 [0-3][[:xdigit:]] c0 	A1 = ABS A1, A0 = ABS A0;
   14:	07 c4 10 80 	R0 = ABS R2;
 
 00000018 <add>:
