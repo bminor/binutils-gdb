@@ -1,4 +1,9 @@
-2011-02-12  Mike Frysinger  <vapier@gentoo.org>
+2011-02-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* gas/bfin/arithmetic.d, gas/bfin/parallel.d, gas/bfin/parallel3.d,
+	gas/bfin/vector.d, gas/bfin/vector2.d: Add ".L" to dsp mult insns.
+
+2011-02-13  Mike Frysinger  <vapier@gentoo.org>
 
 	* gas/bfin/video.d, gas/bfin/video.s, gas/bfin/video2.d,
 	gas/bfin/video2.s: Remove BYTEOP2M insns.

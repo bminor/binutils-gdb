@@ -3084,7 +3084,7 @@ decode_dsp32mult_0 (TIword iw0, TIword iw1, disassemble_info *outf)
 
   if (w1)
     {
-      OUTS (outf, P ? dregs (dst | 1) : dregs_hi (dst));
+      OUTS (outf, P ? dregs (dst + 1) : dregs_hi (dst));
       OUTS (outf, " = ");
       decode_multfunc (h01, h11, src0, src1, outf);
 
@@ -3099,7 +3099,7 @@ decode_dsp32mult_0 (TIword iw0, TIword iw1, disassemble_info *outf)
 
   if (w0)
     {
-      OUTS (outf, dregs (dst));
+      OUTS (outf, P ? dregs (dst) : dregs_lo (dst));
       OUTS (outf, " = ");
       decode_multfunc (h00, h10, src0, src1, outf);
     }

@@ -1,5 +1,10 @@
 2011-02-13  Mike Frysinger  <vapier@gentoo.org>
 
+	* bfin-dis.c (decode_dsp32mult_0): Add 1 to dst for mac1.  Output
+	dregs only when P is set, and dregs_lo otherwise.
+
+2011-02-13  Mike Frysinger  <vapier@gentoo.org>
+
 	* bfin-dis.c (decode_dsp32alu_0): Delete BYTEOP2M code.
 
 2011-02-12  Mike Frysinger  <vapier@gentoo.org>
