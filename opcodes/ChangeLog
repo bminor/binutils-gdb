@@ -1,3 +1,7 @@
+2011-02-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* bfin-dis.c (decode_dsp32alu_0): Delete BYTEOP2M code.
+
 2011-02-12  Mike Frysinger  <vapier@gentoo.org>
 
 	* bfin-dis.c (decode_pseudoDEBUG_0): Add space after PRNT.

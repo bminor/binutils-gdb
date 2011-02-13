@@ -455,7 +455,7 @@ dsp32shiftimm in slot1 and P-reg Store in slot2 Not Supported");
 
 /* Vector Specific.  */
 %token BYTEOP16P BYTEOP16M
-%token BYTEOP1P BYTEOP2P BYTEOP2M BYTEOP3P
+%token BYTEOP1P BYTEOP2P BYTEOP3P
 %token BYTEUNPACK BYTEPACK
 %token PACK
 %token SAA
@@ -1050,22 +1050,6 @@ asm_1:
 	    {
 	      notethat ("dsp32alu: dregs = BYTEOP2P (dregs_pair , dregs_pair ) (rnd_op)\n");
 	      $$ = DSP32ALU (22, $13.r0, 0, &$1, &$5, &$9, $13.s0, $13.x0, $13.aop);
-	    }
-	}
-
-	| REG ASSIGN BYTEOP2M LPAREN REG COLON expr COMMA REG COLON expr RPAREN
-	  rnd_op
-	{
-	  if (!IS_DREG ($1))
-	    return yyerror ("Dregs expected");
-	  else if (!valid_dreg_pair (&$5, $7))
-	    return yyerror ("Bad dreg pair");
-	  else if (!valid_dreg_pair (&$9, $11))
-	    return yyerror ("Bad dreg pair");
-	  else
-	    {
-	      notethat ("dsp32alu: dregs = BYTEOP2M (dregs_pair , dregs_pair ) (rnd_op)\n");
-	      $$ = DSP32ALU (22, $13.r0, 0, &$1, &$5, &$9, $13.s0, $13.x0, $13.aop + 2);
 	    }
 	}
 

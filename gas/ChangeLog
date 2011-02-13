@@ -1,3 +1,9 @@
+2011-02-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* config/bfin-lex.l (BYTEOP2M): Remove tokenization.
+	* config/bfin-parse.y (BYTEOP2M): Delete token.
+	(asm_1): Remove BYTEOP2M insn matching.
+
 2011-02-12  Mike Frysinger  <vapier@gentoo.org>
 
 	* config/bfin-defs.h: Include opcode/bfin.h.
