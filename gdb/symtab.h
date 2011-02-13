@@ -738,8 +738,7 @@ struct section_offsets
 
 struct symtab
 {
-
-  /* Chain of all existing symtabs.  */
+  /* Unordered chain of all existing symtabs of this objfile.  */
 
   struct symtab *next;
 

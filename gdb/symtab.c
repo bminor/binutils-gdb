@@ -1904,6 +1904,7 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
   struct blockvector *bv;
   struct minimal_symbol *msymbol;
   struct minimal_symbol *mfunsym;
+  struct objfile *objfile;
 
   /* Info on best line seen so far, and where it starts, and its file.  */
 
@@ -2031,13 +2032,17 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
     }
 
   bv = BLOCKVECTOR (s);
+  objfile = s->objfile;
 
   /* Look at all the symtabs that share this blockvector.
      They all have the same apriori range, that we found was right;
      but they have different line tables.  */
 
-  for (; s && BLOCKVECTOR (s) == bv; s = s->next)
+  ALL_OBJFILE_SYMTABS (objfile, s)
     {
+      if (BLOCKVECTOR (s) != bv)
+	continue;
+
       /* Find the best line in this symtab.  */
       l = LINETABLE (s);
       if (!l)
