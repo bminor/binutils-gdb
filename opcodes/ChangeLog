@@ -1,3 +1,7 @@
+2011-02-13  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* configure: Regenerate.
+
 2011-02-13  Mike Frysinger  <vapier@gentoo.org>
 
 	* bfin-dis.c (decode_dsp32alu_0): Fix typo with A1 reg.
