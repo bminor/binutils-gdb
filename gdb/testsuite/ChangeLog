@@ -1,3 +1,9 @@
+2011-02-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix const/volatile qualifiers of C++ types, PR c++/12328.
+	* gdb.cp/overload-const.exp: New file.
+	* gdb.cp/overload-const.cc: New file.
+
 2011-02-08  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* gdb.opencl/callfuncs.cl: New file.

@@ -388,9 +388,12 @@ c_type_print_modifier (struct type *type, struct ui_file *stream,
 /* Print out the arguments of TYPE, which should have TYPE_CODE_METHOD
    or TYPE_CODE_FUNC, to STREAM.  Artificial arguments, such as "this"
    in non-static methods, are displayed if SHOW_ARTIFICIAL is
-   non-zero.  LANGUAGE is the language in which TYPE was defined.
-   This is a necessary evil since this code is used by the C, C++, and
-   Java backends.  */
+   non-zero.  If SHOW_ARTIFICIAL is zero and LANGUAGE is language_cplus
+   the topmost parameter types get removed their possible const and volatile
+   qualifiers to match demangled linkage name parameters part of such function
+   type.  LANGUAGE is the language in which TYPE was defined.  This is
+   a necessary evil since this code is used by the C, C++, and Java backends.
+   */
 
 void
 c_type_print_args (struct type *type, struct ui_file *stream,
@@ -406,6 +409,8 @@ c_type_print_args (struct type *type, struct ui_file *stream,
 
   for (i = 0; i < TYPE_NFIELDS (type); i++)
     {
+      struct type *param_type;
+
       if (TYPE_FIELD_ARTIFICIAL (type, i) && !show_artificial)
 	continue;
 
@@ -415,12 +420,24 @@ c_type_print_args (struct type *type, struct ui_file *stream,
 	  wrap_here ("    ");
 	}
 
+      param_type = TYPE_FIELD_TYPE (type, i);
+
+      if (language == language_cplus && !show_artificial)
+	{
+	  /* C++ standard, 13.1 Overloadable declarations, point 3, item:
+	     - Parameter declarations that differ only in the presence or
+	       absence of const and/or volatile are equivalent.
+
+	     And the const/volatile qualifiers are not present in the mangled
+	     names as produced by GCC.  */
+
+	  param_type = make_cv_type (0, 0, param_type, NULL);
+	}
+
       if (language == language_java)
-	java_print_type (TYPE_FIELD_TYPE (type, i),
-			 "", stream, -1, 0);
+	java_print_type (param_type, "", stream, -1, 0);
       else
-	c_print_type (TYPE_FIELD_TYPE (type, i),
-		      "", stream, -1, 0);
+	c_print_type (param_type, "", stream, -1, 0);
       printed_any = 1;
     }
 

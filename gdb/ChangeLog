@@ -1,5 +1,12 @@
 2011-02-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Fix const/volatile qualifiers of C++ types, PR c++/12328.
+	* c-typeprint.c (c_type_print_args): Update the function comment.  New
+	variable param_type, initialize it.  Remove const/volatile qualifiers
+	for language_cplus and !show_artificial.  Use param_type.
+
+2011-02-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* symtab.c (find_pc_sect_line): New variable objfile, initialize it
 	from S.  Iterate S using ALL_OBJFILE_SYMTABS.  Verify BV for each S.
 	* symtab.h (struct symtab) <next>: Comment extension.
