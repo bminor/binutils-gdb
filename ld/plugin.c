@@ -108,9 +108,6 @@ static bfd_boolean no_more_claiming = FALSE;
    TRUE is returned from the hook.  */
 static bfd_boolean plugin_cached_allow_multiple_defs = FALSE;
 
-/* Call 'cleanup' hook for all plugins at exit.  */
-static void plugin_call_cleanup (void);
-
 /* List of tags to set in the constant leading part of the tv array. */
 static const enum ld_plugin_tag tv_header_tags[] =
 {
@@ -721,8 +718,6 @@ plugin_load_plugins (void)
   if (!curplug)
     return 0;
 
-  xatexit (plugin_call_cleanup);
-
   /* First pass over plugins to find max # args needed so that we
      can size and allocate the tv array.  */
   while (curplug)
@@ -820,7 +815,7 @@ plugin_call_all_symbols_read (void)
 }
 
 /* Call 'cleanup' hook for all plugins at exit.  */
-static void
+void
 plugin_call_cleanup (void)
 {
   plugin_t *curplug = plugins_list;

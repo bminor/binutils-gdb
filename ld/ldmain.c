@@ -174,15 +174,14 @@ static struct bfd_link_callbacks link_callbacks =
 struct bfd_link_info link_info;
 
 static void
-remove_output (void)
+ld_cleanup (void)
 {
-  if (output_filename)
-    {
-      if (link_info.output_bfd)
-	bfd_cache_close (link_info.output_bfd);
-      if (delete_output_file_on_failure)
-	unlink_if_ordinary (output_filename);
-    }
+  bfd_cache_close_all ();
+#ifdef ENABLE_PLUGINS
+  plugin_call_cleanup ();
+#endif
+  if (output_filename && delete_output_file_on_failure)
+    unlink_if_ordinary (output_filename);
 }
 
 int
@@ -211,7 +210,7 @@ main (int argc, char **argv)
 
   bfd_set_error_program_name (program_name);
 
-  xatexit (remove_output);
+  xatexit (ld_cleanup);
 
   /* Set up the sysroot directory.  */
   ld_sysroot = get_sysroot (argc, argv);
