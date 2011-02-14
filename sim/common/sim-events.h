@@ -93,7 +93,7 @@ struct _sim_events {
   unsigned long elapsed_wallclock;
   SIM_ELAPSED_TIME resume_wallclock;
   signed64 time_of_event;
-  int time_from_event;
+  signed64 time_from_event;
   int trace;
 };
 

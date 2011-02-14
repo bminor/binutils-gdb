@@ -1,3 +1,7 @@
+2011-02-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-events.h (_sim_events.time_from_event): Change type to signed64.
+
 2011-01-12  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-hw.c (sim_hw_uninstall): Uncomment hw_tree_delete.
