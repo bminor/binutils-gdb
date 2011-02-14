@@ -1,3 +1,10 @@
+2011-02-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* ldlang.c (lang_vers_match): Declare a new c_sym, assign it to
+	the bfd_demangle of sym, change users of sym to c_sym when not
+	already demangling, and free when done.  Change callers of
+	cplus_demangle to bfd_demangle.
+
 2011-02-14  Alan Modra  <amodra@gmail.com>
 
 	* ldmain.c (remove_output): Rename to..

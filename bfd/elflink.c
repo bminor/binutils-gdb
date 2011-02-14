@@ -5710,11 +5710,12 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 	    {
 	      const char *verstr, *name;
 	      size_t namelen, verlen, newlen;
-	      char *newname, *p;
+	      char *newname, *p, leading_char;
 	      struct elf_link_hash_entry *newh;
 
+	      leading_char = bfd_get_symbol_leading_char (output_bfd);
 	      name = d->pattern;
-	      namelen = strlen (name);
+	      namelen = strlen (name) + (leading_char != '\0');
 	      verstr = t->name;
 	      verlen = strlen (verstr);
 	      newlen = namelen + verlen + 3;
@@ -5722,7 +5723,8 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 	      newname = (char *) bfd_malloc (newlen);
 	      if (newname == NULL)
 		return FALSE;
-	      memcpy (newname, name, namelen);
+	      newname[0] = leading_char;
+	      memcpy (newname + (leading_char != '\0'), name, namelen);
 
 	      /* Check the hidden versioned definition.  */
 	      p = newname + namelen;
