@@ -1927,7 +1927,7 @@ disconnect_tracing (int from_tty)
      confusing upon reconnection.  Just use these calls instead of
      full tfind_1 behavior because we're in the middle of detaching,
      and there's no point to updating current stack frame etc.  */
-  set_traceframe_number (-1);
+  set_current_traceframe (-1);
   set_traceframe_context (NULL);
 }
 
@@ -2935,7 +2935,7 @@ get_traceframe_number (void)
    if NUM is already current.  */
 
 void
-set_traceframe_number (int num)
+set_current_traceframe (int num)
 {
   int newnum;
 
@@ -2959,6 +2959,15 @@ set_traceframe_number (int num)
   clear_traceframe_info ();
 }
 
+/* Make the traceframe NUM be the current trace frame, and do nothing
+   more.  */
+
+void
+set_traceframe_number (int num)
+{
+  traceframe_number = num;
+}
+
 /* A cleanup used when switching away and back from tfind mode.  */
 
 struct current_traceframe_cleanup
@@ -2972,7 +2981,7 @@ do_restore_current_traceframe_cleanup (void *arg)
 {
   struct current_traceframe_cleanup *old = arg;
 
-  set_traceframe_number (old->traceframe_number);
+  set_current_traceframe (old->traceframe_number);
 }
 
 static void
@@ -2993,6 +3002,12 @@ make_cleanup_restore_current_traceframe (void)
 
   return make_cleanup_dtor (do_restore_current_traceframe_cleanup, old,
 			    restore_current_traceframe_cleanup_dtor);
+}
+
+struct cleanup *
+make_cleanup_restore_traceframe_number (void)
+{
+  return make_cleanup_restore_integer (&traceframe_number);
 }
 
 /* Given a number and address, return an uploaded tracepoint with that
@@ -3247,6 +3262,7 @@ char *trace_filename;
 int trace_fd = -1;
 off_t trace_frames_offset;
 off_t cur_offset;
+int cur_traceframe_number;
 int cur_data_size;
 int trace_regblock_size;
 
@@ -3337,6 +3353,8 @@ tfile_open (char *filename, int from_tty)
   ts->buffer_free = 0;
   ts->disconnected_tracing = 0;
   ts->circular_buffer = 0;
+
+  cur_traceframe_number = -1;
 
   /* Read through a section of newline-terminated lines that
      define things like tracepoints.  */
@@ -3752,6 +3770,28 @@ tfile_get_traceframe_address (off_t tframe_offset)
   return addr;
 }
 
+/* Make tfile's selected traceframe match GDB's selected
+   traceframe.  */
+
+static void
+set_tfile_traceframe (void)
+{
+  int newnum;
+
+  if (cur_traceframe_number == get_traceframe_number ())
+    return;
+
+  /* Avoid recursion, tfile_trace_find calls us again.  */
+  cur_traceframe_number = get_traceframe_number ();
+
+  newnum = target_trace_find (tfind_number,
+			      get_traceframe_number (), 0, 0, NULL);
+
+  /* Should not happen.  If it does, all bets are off.  */
+  if (newnum != get_traceframe_number ())
+    warning (_("could not set tfile's traceframe"));
+}
+
 /* Given a type of search and some parameters, scan the collection of
    traceframes in the file looking for a match.  When found, return
    both the traceframe and tracepoint number, otherwise -1 for
@@ -3767,6 +3807,12 @@ tfile_trace_find (enum trace_find_type type, int num,
   struct breakpoint *tp;
   off_t offset, tframe_offset;
   ULONGEST tfaddr;
+
+  /* Lookups other than by absolute frame number depend on the current
+     trace selected, so make sure it is correct on the tfile end
+     first.  */
+  if (type != tfind_number)
+    set_tfile_traceframe ();
 
   lseek (trace_fd, trace_frames_offset, SEEK_SET);
   offset = trace_frames_offset;
@@ -3820,6 +3866,7 @@ tfile_trace_find (enum trace_find_type type, int num,
 	    *tpp = tpnum;
 	  cur_offset = offset;
 	  cur_data_size = data_size;
+	  cur_traceframe_number = tfnum;
 	  return tfnum;
 	}
       /* Skip past the traceframe's data.  */
@@ -3936,6 +3983,8 @@ tfile_fetch_registers (struct target_ops *ops,
   if (!trace_regblock_size)
     return;
 
+  set_tfile_traceframe ();
+
   regs = alloca (trace_regblock_size);
 
   if (traceframe_find_block_type ('R', 0) >= 0)
@@ -4019,7 +4068,9 @@ tfile_xfer_partial (struct target_ops *ops, enum target_object object,
   if (readbuf == NULL)
     error (_("tfile_xfer_partial: trace file is read-only"));
 
-  if (traceframe_number != -1)
+  set_tfile_traceframe ();
+
+ if (traceframe_number != -1)
     {
       int pos = 0;
 
@@ -4101,6 +4152,8 @@ static int
 tfile_get_trace_state_variable_value (int tsvnum, LONGEST *val)
 {
   int pos;
+
+  set_tfile_traceframe ();
 
   pos = 0;
   while ((pos = traceframe_find_block_type ('V', pos)) >= 0)

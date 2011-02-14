@@ -1,5 +1,45 @@
 2011-02-14  Pedro Alves  <pedro@codesourcery.com>
 
+	* target.c (target_read_live_memory): New function.
+	(memory_xfer_live_readonly_partial): New.
+	(memory_xfer_partial): If reading from a traceframe, fallback to
+	reading unavailable read-only memory from read-only regions of
+	live target memory.
+	* tracepoint.c (disconnect_tracing): Adjust.
+	(set_current_traceframe): New, factored out from
+	set_traceframe_number.
+	(set_traceframe_number): Reimplement to only change the traceframe
+	number on the GDB side.
+	(do_restore_current_traceframe_cleanup): Adjust.
+	(make_cleanup_restore_traceframe_number): New.
+	(cur_traceframe_number): New global.
+	(tfile_open): Set cur_traceframe_number to no traceframe.
+	(set_tfile_traceframe): New function.
+	(tfile_trace_find): If looking up a traceframe using any method
+	other than by number, make sure the current tfile traceframe
+	matches gdb's current traceframe.  Update the current tfile
+	traceframe if the lookup succeeded.
+	(tfile_fetch_registers, tfile_xfer_partial)
+	(tfile_get_trace_state_variable_value): Make sure the remote
+	traceframe matches gdb's current traceframe.
+	* remote.c (remote_traceframe_number): New global.
+	(remote_open_1): Set it to -1.
+	(set_remote_traceframe): New function.
+	(remote_fetch_registers, remote_store_registers)
+	(remote_xfer_memory, remote_xfer_partial)
+	(remote_get_trace_state_variable_value): Make sure the remote
+	traceframe matches gdb's current traceframe.
+	(remote_trace_find): If looking up a traceframe using any method
+	other than by number, make sure the current remote traceframe
+	matches gdb's current traceframe.  Update the current remote
+	traceframe if the lookup succeeded.
+	* infrun.c (fetch_inferior_event): Adjust.
+	* tracepoint.h (set_current_traceframe): Declare.
+	(get_traceframe_number, set_traceframe_number): Add describing
+	comments.
+
+2011-02-14  Pedro Alves  <pedro@codesourcery.com>
+
 	Mark pieces of values as unavailable if the corresponding memory
 	is unavailable.
 

@@ -1353,6 +1353,10 @@ static ptid_t any_thread_ptid;
 static ptid_t general_thread;
 static ptid_t continue_thread;
 
+/* This the traceframe which we last selected on the remote system.
+   It will be -1 if no traceframe is selected.  */
+static int remote_traceframe_number = -1;
+
 /* Find out if the stub attached to PID (and hence GDB should offer to
    detach instead of killing it when bailing out).  */
 
@@ -4002,6 +4006,7 @@ remote_open_1 (char *name, int from_tty,
 
   general_thread = not_sent_ptid;
   continue_thread = not_sent_ptid;
+  remote_traceframe_number = -1;
 
   /* Probe for ability to use "ThreadInfo" query, as required.  */
   use_threadinfo_query = 1;
@@ -5770,6 +5775,28 @@ fetch_registers_using_g (struct regcache *regcache)
   process_g_packet (regcache);
 }
 
+/* Make the remote selected traceframe match GDB's selected
+   traceframe.  */
+
+static void
+set_remote_traceframe (void)
+{
+  int newnum;
+
+  if (remote_traceframe_number == get_traceframe_number ())
+    return;
+
+  /* Avoid recursion, remote_trace_find calls us again.  */
+  remote_traceframe_number = get_traceframe_number ();
+
+  newnum = target_trace_find (tfind_number,
+			      get_traceframe_number (), 0, 0, NULL);
+
+  /* Should not happen.  If it does, all bets are off.  */
+  if (newnum != get_traceframe_number ())
+    warning (_("could not set remote traceframe"));
+}
+
 static void
 remote_fetch_registers (struct target_ops *ops,
 			struct regcache *regcache, int regnum)
@@ -5777,6 +5804,7 @@ remote_fetch_registers (struct target_ops *ops,
   struct remote_arch_state *rsa = get_remote_arch_state ();
   int i;
 
+  set_remote_traceframe ();
   set_general_thread (inferior_ptid);
 
   if (regnum >= 0)
@@ -5934,6 +5962,7 @@ remote_store_registers (struct target_ops *ops,
   struct remote_arch_state *rsa = get_remote_arch_state ();
   int i;
 
+  set_remote_traceframe ();
   set_general_thread (inferior_ptid);
 
   if (regnum >= 0)
@@ -6502,6 +6531,7 @@ remote_xfer_memory (CORE_ADDR mem_addr, gdb_byte *buffer, int mem_len,
 {
   int res;
 
+  set_remote_traceframe ();
   set_general_thread (inferior_ptid);
 
   if (should_write)
@@ -8084,6 +8114,7 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
   char *p2;
   char query_type;
 
+  set_remote_traceframe ();
   set_general_thread (inferior_ptid);
 
   rs = get_remote_state ();
@@ -9972,6 +10003,12 @@ remote_trace_find (enum trace_find_type type, int num,
   char *p, *reply;
   int target_frameno = -1, target_tracept = -1;
 
+  /* Lookups other than by absolute frame number depend on the current
+     trace selected, so make sure it is correct on the remote end
+     first.  */
+  if (type != tfind_number)
+    set_remote_traceframe ();
+
   p = rs->buf;
   strcpy (p, "QTFrame:");
   p = strchr (p, '\0');
@@ -10009,6 +10046,8 @@ remote_trace_find (enum trace_find_type type, int num,
 	target_frameno = (int) strtol (p, &reply, 16);
 	if (reply == p)
 	  error (_("Unable to parse trace frame number"));
+	/* Don't update our remote traceframe number cache on failure
+	   to select a remote traceframe.  */
 	if (target_frameno == -1)
 	  return -1;
 	break;
@@ -10029,6 +10068,8 @@ remote_trace_find (enum trace_find_type type, int num,
       }
   if (tpp)
     *tpp = target_tracept;
+
+  remote_traceframe_number = target_frameno;
   return target_frameno;
 }
 
@@ -10038,6 +10079,8 @@ remote_get_trace_state_variable_value (int tsvnum, LONGEST *val)
   struct remote_state *rs = get_remote_state ();
   char *reply;
   ULONGEST uval;
+
+  set_remote_traceframe ();
 
   sprintf (rs->buf, "qTV:%x", tsvnum);
   putpkt (rs->buf);

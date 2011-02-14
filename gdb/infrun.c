@@ -2631,7 +2631,7 @@ fetch_inferior_event (void *client_data)
   if (non_stop)
     {
       make_cleanup_restore_current_traceframe ();
-      set_traceframe_number (-1);
+      set_current_traceframe (-1);
     }
 
   if (non_stop)
