@@ -1,5 +1,14 @@
 2011-02-14  Pedro Alves  <pedro@codesourcery.com>
 
+	* value.c (struct internalvar) <enum internalvar_kind>: Remove
+	INTERNALVAR_POINTER.
+	<pointer>: Delete.
+	(value_of_internalvar): Remove INTERNALVAR_POINTER handling.
+	(set_internalvar): Remove special TYPE_CODE_PTR handling.
+	(preserve_one_internalvar): Remove INTERNALVAR_POINTER handling.
+
+2011-02-14  Pedro Alves  <pedro@codesourcery.com>
+
 	* value.h (value_available_contents_eq): Declare.
 	* value.c (find_first_range_overlap): New function.
 	(value_available_contents_eq): New function.

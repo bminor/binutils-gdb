@@ -1444,9 +1444,6 @@ struct internalvar
       /* The variable holds an integer value.  */
       INTERNALVAR_INTEGER,
 
-      /* The variable holds a pointer value.  */
-      INTERNALVAR_POINTER,
-
       /* The variable holds a GDB-provided string.  */
       INTERNALVAR_STRING,
 
@@ -1477,13 +1474,6 @@ struct internalvar
 	  struct type *type;
 	  LONGEST val;
         } integer;
-
-      /* A pointer value used with INTERNALVAR_POINTER.  */
-      struct
-        {
-	  struct type *type;
-	  CORE_ADDR val;
-        } pointer;
 
       /* A string value used with INTERNALVAR_STRING.  */
       char *string;
@@ -1636,10 +1626,6 @@ value_of_internalvar (struct gdbarch *gdbarch, struct internalvar *var)
 	val = value_from_longest (var->u.integer.type, var->u.integer.val);
       break;
 
-    case INTERNALVAR_POINTER:
-      val = value_from_pointer (var->u.pointer.type, var->u.pointer.val);
-      break;
-
     case INTERNALVAR_STRING:
       val = value_cstring (var->u.string, strlen (var->u.string),
 			   builtin_type (gdbarch)->builtin_char);
@@ -1768,12 +1754,6 @@ set_internalvar (struct internalvar *var, struct value *val)
       new_kind = INTERNALVAR_INTEGER;
       new_data.integer.type = value_type (val);
       new_data.integer.val = value_as_long (val);
-      break;
-
-    case TYPE_CODE_PTR:
-      new_kind = INTERNALVAR_POINTER;
-      new_data.pointer.type = value_type (val);
-      new_data.pointer.val = value_as_address (val);
       break;
 
     default:
@@ -1972,12 +1952,6 @@ preserve_one_internalvar (struct internalvar *var, struct objfile *objfile,
       if (var->u.integer.type && TYPE_OBJFILE (var->u.integer.type) == objfile)
 	var->u.integer.type
 	  = copy_type_recursive (objfile, var->u.integer.type, copied_types);
-      break;
-
-    case INTERNALVAR_POINTER:
-      if (TYPE_OBJFILE (var->u.pointer.type) == objfile)
-	var->u.pointer.type
-	  = copy_type_recursive (objfile, var->u.pointer.type, copied_types);
       break;
 
     case INTERNALVAR_VALUE:
