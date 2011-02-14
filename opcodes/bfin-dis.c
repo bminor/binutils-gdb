@@ -2623,6 +2623,9 @@ decode_LoopSetup_0 (TIword iw0, TIword iw1, bfd_vma pc, disassemble_info *outf)
   if (parallel)
     return 0;
 
+  if (reg > 7)
+    return 0;
+
   if (rop == 0)
     {
       OUTS (outf, "LSETUP");
