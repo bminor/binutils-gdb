@@ -50,6 +50,7 @@
 #include "source.h"
 #include "ax.h"
 #include "ax-gdb.h"
+#include "memrange.h"
 
 /* readline include files */
 #include "readline/readline.h"
@@ -129,21 +130,6 @@ extern void output_command (char *, int);
 
 typedef struct trace_state_variable tsv_s;
 DEF_VEC_O(tsv_s);
-
-/* Defines a [START, START + LENGTH) memory range.  */
-
-struct mem_range
-{
-  /* Lowest address in the range.  */
-  CORE_ADDR start;
-
-  /* Length of the range.  */
-  int length;
-};
-
-typedef struct mem_range mem_range_s;
-
-DEF_VEC_O(mem_range_s);
 
 /* An object describing the contents of a traceframe.  */
 
@@ -4595,6 +4581,49 @@ get_traceframe_info (void)
     traceframe_info = target_traceframe_info ();
 
   return traceframe_info;
+}
+
+/* Return in RESULT, the set of collected memory in the current
+   traceframe, found within the LEN bytes range starting at MEMADDR.
+   Returns true if the target supports the query, otherwise returns
+   false.  */
+
+int
+traceframe_available_memory (VEC(mem_range_s) **result,
+			     CORE_ADDR memaddr, ULONGEST len)
+{
+  struct traceframe_info *info = get_traceframe_info ();
+
+  if (info != NULL)
+    {
+      struct mem_range *r;
+      int i;
+
+      *result = NULL;
+
+      for (i = 0; VEC_iterate (mem_range_s, info->memory, i, r); i++)
+	if (mem_ranges_overlap (r->start, r->length, memaddr, len))
+	  {
+	    ULONGEST lo1, hi1, lo2, hi2;
+	    struct mem_range *nr;
+
+	    lo1 = memaddr;
+	    hi1 = memaddr + len;
+
+	    lo2 = r->start;
+	    hi2 = r->start + r->length;
+
+	    nr = VEC_safe_push (mem_range_s, *result, NULL);
+
+	    nr->start = max (lo1, lo2);
+	    nr->length = min (hi1, hi2) - nr->start;
+	  }
+
+      normalize_mem_ranges (*result);
+      return 1;
+    }
+
+  return 0;
 }
 
 /* module initialization */

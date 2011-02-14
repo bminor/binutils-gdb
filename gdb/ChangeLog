@@ -1,5 +1,18 @@
 2011-02-14  Pedro Alves  <pedro@codesourcery.com>
 
+	* Makefile.in (SFILES): Add memrange.c.
+	(HFILES_NO_SRCDIR): Add memrange.h.
+	(COMMON_OBS): Add memrange.o.
+	* memrange.c: New file.
+	* memrange.h: New file.
+	* tracepoint.c: Include memrange.h.
+	(struct mem_range): Delete.
+	(mem_range_s): Delete.
+	(traceframe_available_memory): New function.
+	* tracepoint.h (traceframe_available_memory): Declare.
+
+2011-02-14  Pedro Alves  <pedro@codesourcery.com>
+
 	* target.h (struct traceframe_info): Forward declare.
 	(enum target_object): Add TARGET_OBJECT_TRACEFRAME_INFO.
 	(struct target_ops) <to_traceframe_info>: New field.

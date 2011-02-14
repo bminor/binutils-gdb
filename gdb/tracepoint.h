@@ -22,6 +22,7 @@
 
 #include "breakpoint.h"
 #include "target.h"
+#include "memrange.h"
 
 /* A trace state variable is a value managed by a target being
    traced.  A trace state variable (or tsv for short) can be accessed
@@ -237,5 +238,8 @@ extern void tfind_1 (enum trace_find_type type, int num,
 extern void trace_save (const char *filename, int target_does_save);
 
 extern struct traceframe_info *parse_traceframe_info (const char *tframe_info);
+
+extern int traceframe_available_memory (VEC(mem_range_s) **result,
+					CORE_ADDR memaddr, ULONGEST len);
 
 #endif	/* TRACEPOINT_H */

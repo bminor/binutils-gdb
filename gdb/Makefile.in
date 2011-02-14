@@ -717,7 +717,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	m2-exp.y m2-lang.c m2-typeprint.c m2-valprint.c \
 	macrotab.c macroexp.c macrocmd.c macroscope.c main.c maint.c \
 	mdebugread.c memattr.c mem-break.c minsyms.c mipsread.c memory-map.c \
-	mi/mi-common.c \
+	memrange.c mi/mi-common.c \
 	objc-exp.y objc-lang.c \
 	objfiles.c osabi.c observer.c osdata.c \
 	opencl-lang.c \
@@ -776,7 +776,7 @@ gdbserver/mem-break.h gdbserver/wincecompat.h gdbserver/target.h \
 gdbserver/linux-low.h gdbserver/gdb_proc_service.h \
 gdbserver/regcache.h gdbthread.h dwarf2-frame.h nbsd-nat.h dcache.h \
 amd64-nat.h s390-tdep.h arm-linux-tdep.h exceptions.h macroscope.h \
-gdbarch.h bsd-uthread.h gdb_thread_db.h gdb_stat.h memory-map.h	\
+gdbarch.h bsd-uthread.h gdb_thread_db.h gdb_stat.h memory-map.h	memrange.h \
 mdebugread.h m88k-tdep.h stabsread.h hppa-linux-offsets.h linux-fork.h \
 ser-unix.h inf-ptrace.h terminal.h ui-out.h frame-base.h \
 f-lang.h dwarf2loc.h value.h sparc-tdep.h defs.h target-descriptions.h \
@@ -894,7 +894,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	trad-frame.o \
 	tramp-frame.o \
 	solib.o solib-target.o \
-	prologue-value.o memory-map.o xml-support.o xml-syscall.o \
+	prologue-value.o memory-map.o memrange.o xml-support.o xml-syscall.o \
 	target-descriptions.o target-memory.o xml-tdesc.o xml-builtin.o \
 	inferior.o osdata.o gdb_usleep.o record.o gcore.o \
 	jit.o progspace.o
