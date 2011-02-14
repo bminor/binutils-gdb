@@ -1,5 +1,10 @@
 2011-02-14  Pedro Alves  <pedro@codesourcery.com>
 
+	* value.c (value_bits_valid, value_bits_synthetic_pointer):
+	No longer handle NULL values.
+
+2011-02-14  Pedro Alves  <pedro@codesourcery.com>
+
 	* exceptions.h (NOT_AVAILABLE_ERROR): New error.
 	* value.c: Include "exceptions.h".
 	(require_available): Throw NOT_AVAILABLE_ERROR instead of a

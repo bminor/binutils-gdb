@@ -998,7 +998,7 @@ value_entirely_optimized_out (const struct value *value)
 int
 value_bits_valid (const struct value *value, int offset, int length)
 {
-  if (value == NULL || !value->optimized_out)
+  if (!value->optimized_out)
     return 1;
   if (value->lval != lval_computed
       || !value->location.computed.funcs->check_validity)
@@ -1011,7 +1011,7 @@ int
 value_bits_synthetic_pointer (const struct value *value,
 			      int offset, int length)
 {
-  if (value == NULL || value->lval != lval_computed
+  if (value->lval != lval_computed
       || !value->location.computed.funcs->check_synthetic_pointer)
     return 0;
   return value->location.computed.funcs->check_synthetic_pointer (value,
