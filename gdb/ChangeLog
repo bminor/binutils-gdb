@@ -1,5 +1,10 @@
 2011-02-14  Pedro Alves  <pedro@codesourcery.com>
 
+	* c-valprint.c (c_val_print): Print a string with unavailable
+	contents as an array.
+
+2011-02-14  Pedro Alves  <pedro@codesourcery.com>
+
 	* value.h (unpack_bits_as_long): Delete declaration.
 	(unpack_value_bits_as_long): Declare.
 	(unpack_value_field_as_long): Declare.

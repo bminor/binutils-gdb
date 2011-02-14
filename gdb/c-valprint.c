@@ -187,6 +187,8 @@ c_val_print (struct type *type, const gdb_byte *valaddr,
 	     long as the entire array is valid.  */
           if (c_textual_element_type (unresolved_elttype,
 				      options->format)
+	      && value_bytes_available (original_value, embedded_offset,
+					TYPE_LENGTH (type))
 	      && value_bits_valid (original_value,
 				   TARGET_CHAR_BIT * embedded_offset,
 				   TARGET_CHAR_BIT * TYPE_LENGTH (type)))
