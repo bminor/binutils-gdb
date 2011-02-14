@@ -1,5 +1,18 @@
 2011-02-14  Pedro Alves  <pedro@codesourcery.com>
 
+	* value.h (value_contents_copy, value_contents_copy_raw): Declare.
+	* value.c (value_contents_copy_raw, value_contents_copy): New
+	functions.
+	(value_primitive_field): Use value_contents_copy_raw instead of
+	memcpy.
+	* valops.c (value_fetch_lazy): Use value_contents_copy instead of
+	memcpy.
+	(value_array, value_slice): Ditto.
+	* valarith.c (value_subscripted_rvalue): Use
+	value_contents_copy_raw instead of memcpy.
+
+2011-02-14  Pedro Alves  <pedro@codesourcery.com>
+
 	<unavailable> references.
 
 	* valops.c (get_value_at): Use value_from_contents_and_address,

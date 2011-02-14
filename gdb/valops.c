@@ -1044,12 +1044,16 @@ value_fetch_lazy (struct value *val)
       if (value_lazy (new_val))
 	value_fetch_lazy (new_val);
 
-      /* If the register was not saved, mark it unavailable.  */
+      /* If the register was not saved, mark it optimized out.  */
       if (value_optimized_out (new_val))
 	set_value_optimized_out (val, 1);
       else
-	memcpy (value_contents_raw (val), value_contents (new_val),
-		TYPE_LENGTH (type));
+	{
+	  set_value_lazy (val, 0);
+	  value_contents_copy (val, value_embedded_offset (val),
+			       new_val, value_embedded_offset (new_val),
+			       TYPE_LENGTH (type));
+	}
 
       if (frame_debug)
 	{
@@ -1765,9 +1769,8 @@ value_ind (struct value *arg1)
   return 0;			/* For lint -- never reached.  */
 }
 
-/* Create a value for an array by allocating space in GDB, copying
-   copying the data into that space, and then setting up an array
-   value.
+/* Create a value for an array by allocating space in GDB, copying the
+   data into that space, and then setting up an array value.
 
    The array bounds are set from LOWBOUND and HIGHBOUND, and the array
    is populated from the values passed in ELEMVEC.
@@ -1809,11 +1812,8 @@ value_array (int lowbound, int highbound, struct value **elemvec)
     {
       val = allocate_value (arraytype);
       for (idx = 0; idx < nelem; idx++)
-	{
-	  memcpy (value_contents_all_raw (val) + (idx * typelength),
-		  value_contents_all (elemvec[idx]),
-		  typelength);
-	}
+	value_contents_copy (val, idx * typelength, elemvec[idx], 0,
+			     typelength);
       return val;
     }
 
@@ -1822,9 +1822,7 @@ value_array (int lowbound, int highbound, struct value **elemvec)
 
   val = allocate_value (arraytype);
   for (idx = 0; idx < nelem; idx++)
-    memcpy (value_contents_writeable (val) + (idx * typelength),
-	    value_contents_all (elemvec[idx]),
-	    typelength);
+    value_contents_copy (val, idx * typelength, elemvec[idx], 0, typelength);
   return val;
 }
 
@@ -3711,9 +3709,8 @@ value_slice (struct value *array, int lowbound, int length)
       else
 	{
 	  slice = allocate_value (slice_type);
-	  memcpy (value_contents_writeable (slice),
-		  value_contents (array) + offset,
-		  TYPE_LENGTH (slice_type));
+	  value_contents_copy (slice, 0, array, offset,
+			       TYPE_LENGTH (slice_type));
 	}
 
       set_value_component_location (slice, array);

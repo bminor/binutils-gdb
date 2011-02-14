@@ -214,6 +214,31 @@ proc gdb_collect_globals_test { } {
 
     gdb_test "p \$__" " = <unavailable>" "last examined value was <unavailable>"
 
+    # This tests that building the array does not require accessing
+    # g_int's contents.
+    gdb_test "print { 1, g_int, 3 }" \
+	" = \\{1, <unavailable>, 3\\}" \
+	"build array from unavailable value"
+
+    # Note, depends on previous test.
+    gdb_test "print \$\[1\]" \
+	" = <unavailable>" \
+	"subscript a non-memory rvalue array, accessing an unvailable element"
+
+    # Access a field of a non-lazy value, making sure the
+    # unavailable-ness is propagated.  History values are easy
+    # non-lazy values, so use those.  The first test just sets up for
+    # the second.
+    gdb_test "print g_smallstruct" " = \\{member = <unavailable>\\}"
+    gdb_test "print \$.member" " = <unavailable>"
+
+    # Cast to baseclass, checking the unavailable-ness is propagated.
+    gdb_test "print (small_struct) g_smallstruct_b" " = \\{member = <unavailable>\\}"
+
+    # Same cast, but starting from a non-lazy, value.
+    gdb_test "print g_smallstruct_b" " = \\{<small_struct> = \\{member = <unavailable>\\}, <No data fields>\\}"
+    gdb_test "print (small_struct) \$" " = \\{member = <unavailable>\\}"
+
     gdb_test "tfind none" \
 	"#0  end .*" \
 	"cease trace debugging"

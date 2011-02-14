@@ -840,6 +840,64 @@ value_contents_all (struct value *value)
   return result;
 }
 
+/* Copy LENGTH bytes of SRC value's contents starting at SRC_OFFSET,
+   into DST value's contents, starting at DST_OFFSET.  If unavailable
+   contents are being copied from SRC, the corresponding DST contents
+   are marked unavailable accordingly.  Neither DST nor SRC may be
+   lazy values.  */
+
+void
+value_contents_copy_raw (struct value *dst, int dst_offset,
+			 struct value *src, int src_offset, int length)
+{
+  range_s *r;
+  int i;
+
+  /* A lazy DST would make that this copy operation useless, since as
+     soon as DST's contents were un-lazied (by a later value_contents
+     call, say), the contents would be overwritten.  A lazy SRC would
+     mean we'd be copying garbage.  */
+  gdb_assert (!dst->lazy && !src->lazy);
+
+  /* Copy the data.  */
+  memcpy (value_contents_all_raw (dst) + dst_offset,
+	  value_contents_all_raw (src) + src_offset,
+	  length);
+
+  /* Copy the meta-data, adjusted.  */
+  for (i = 0; VEC_iterate (range_s, src->unavailable, i, r); i++)
+    {
+      ULONGEST h, l;
+
+      l = max (r->offset, src_offset);
+      h = min (r->offset + r->length, src_offset + length);
+
+      if (l < h)
+	mark_value_bytes_unavailable (dst,
+				      dst_offset + (l - src_offset),
+				      h - l);
+    }
+}
+
+/* Copy LENGTH bytes of SRC value's contents starting at SRC_OFFSET
+   byte, into DST value's contents, starting at DST_OFFSET.  If
+   unavailable contents are being copied from SRC, the corresponding
+   DST contents are marked unavailable accordingly.  DST must not be
+   lazy.  If SRC is lazy, it will be fetched now.  If SRC is not valid
+   (is optimized out), an error is thrown.  */
+
+void
+value_contents_copy (struct value *dst, int dst_offset,
+		     struct value *src, int src_offset, int length)
+{
+  require_not_optimized_out (src);
+
+  if (src->lazy)
+    value_fetch_lazy (src);
+
+  value_contents_copy_raw (dst, dst_offset, src, src_offset, length);
+}
+
 int
 value_lazy (struct value *value)
 {
@@ -2413,8 +2471,8 @@ value_primitive_field (struct value *arg1, int offset,
   else if (fieldno < TYPE_N_BASECLASSES (arg_type))
     {
       /* This field is actually a base subobject, so preserve the
-         entire object's contents for later references to virtual
-         bases, etc.  */
+	 entire object's contents for later references to virtual
+	 bases, etc.  */
 
       /* Lazy register values with offsets are not supported.  */
       if (VALUE_LVAL (arg1) == lval_register && value_lazy (arg1))
@@ -2425,8 +2483,8 @@ value_primitive_field (struct value *arg1, int offset,
       else
 	{
 	  v = allocate_value (value_enclosing_type (arg1));
-	  memcpy (value_contents_all_raw (v), value_contents_all_raw (arg1),
-		  TYPE_LENGTH (value_enclosing_type (arg1)));
+	  value_contents_copy_raw (v, 0, arg1, 0,
+				   TYPE_LENGTH (value_enclosing_type (arg1)));
 	}
       v->type = type;
       v->offset = value_offset (arg1);
@@ -2447,9 +2505,9 @@ value_primitive_field (struct value *arg1, int offset,
       else
 	{
 	  v = allocate_value (type);
-	  memcpy (value_contents_raw (v),
-		  value_contents_raw (arg1) + offset,
-		  TYPE_LENGTH (type));
+	  value_contents_copy_raw (v, value_embedded_offset (v),
+				   arg1, value_embedded_offset (arg1) + offset,
+				   TYPE_LENGTH (type));
 	}
       v->offset = (value_offset (arg1) + offset
 		   + value_embedded_offset (arg1));

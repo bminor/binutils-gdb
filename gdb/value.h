@@ -492,6 +492,12 @@ extern struct value *read_var_value (struct symbol *var,
 extern struct value *allocate_value (struct type *type);
 extern struct value *allocate_value_lazy (struct type *type);
 extern void allocate_value_contents (struct value *value);
+extern void value_contents_copy (struct value *dst, int dst_offset,
+				 struct value *src, int src_offset,
+				 int length);
+extern void value_contents_copy_raw (struct value *dst, int dst_offset,
+				     struct value *src, int src_offset,
+				     int length);
 
 extern struct value *allocate_repeat_value (struct type *type, int count);
 

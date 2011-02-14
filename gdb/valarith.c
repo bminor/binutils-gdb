@@ -210,8 +210,9 @@ value_subscripted_rvalue (struct value *array, LONGEST index, int lowerbound)
   else
     {
       v = allocate_value (elt_type);
-      memcpy (value_contents_writeable (v),
-	      value_contents (array) + elt_offs, elt_size);
+      value_contents_copy (v, value_embedded_offset (v),
+			   array, value_embedded_offset (array) + elt_offs,
+			   elt_size);
     }
 
   set_value_component_location (v, array);

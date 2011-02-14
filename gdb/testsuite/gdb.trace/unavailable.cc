@@ -30,6 +30,15 @@ typedef struct TEST_STRUCT {
   double memberd;
 } test_struct;
 
+struct small_struct
+{
+  int member;
+};
+
+struct small_struct_b : public small_struct
+{
+};
+
 typedef int test_array [4];
 
 /* Global variables to be collected.  */
@@ -41,6 +50,8 @@ double       globald;
 test_struct  globalstruct;
 test_struct *globalp;
 int          globalarr[16];
+small_struct g_smallstruct;
+small_struct_b g_smallstruct_b;
 
 /* Strings.  */
 
