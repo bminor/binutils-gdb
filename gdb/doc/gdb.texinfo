@@ -2683,7 +2683,7 @@ whose form varies depending on the particular system.  For example, on
 @sc{gnu}/Linux, you might see
 
 @smallexample
-[New Thread 46912507313328 (LWP 25582)]
+[New Thread 0x41e02940 (LWP 25582)]
 @end smallexample
 
 @noindent
