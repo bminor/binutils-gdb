@@ -690,6 +690,11 @@ apply_val_pretty_printer (struct type *type, const gdb_byte *valaddr,
   struct cleanup *cleanups;
   int result = 0;
   enum string_repr_result print_result;
+
+  /* No pretty-printer support for unavailable values.  */
+  if (!value_bytes_available (val, embedded_offset, TYPE_LENGTH (type)))
+    return 0;
+
   cleanups = ensure_python_env (gdbarch, language);
 
   /* Instantiate the printer.  */

@@ -1,3 +1,34 @@
+2011-02-14  Pedro Alves  <pedro@codesourcery.com>
+
+	Base support for <unavailable> value contents.
+
+	gdb/
+	* value.h (value_bytes_available): Declare.
+	(mark_value_bytes_unavailable): Declare.
+	* value.c (struct range): New struct.
+	(range_s): New typedef.
+	(ranges_overlap): New function.
+	(range_lessthan): New function.
+	(ranges_contain_p): New function.
+	(struct value) <unavailable>: New field.
+	(value_bytes_available): New function.
+	(mark_value_bytes_unavailable): New function.
+	(require_not_optimized_out): Constify parameter.
+	(require_available): New function.
+	(value_contents_all, value_contents): Require all bytes be
+	available.
+	(value_free): Free `unavailable'.
+	(value_copy): Copy `unavailable'.
+	* valprint.h (val_print_unavailable): Declare.
+	* valprint.c (valprint_check_validity): Rename `offset' parameter
+	to `embedded_offset'.  If printing a scalar, check whether the
+	value chunk is available.
+	(val_print_unavailable): New.
+	(val_print_scalar_formatted): Check whether the value is
+	available.
+	* python/py-prettyprint.c (apply_val_pretty_printer): Refuse
+	pretty-printing unavailable values.
+
 2011-02-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix const/volatile qualifiers of C++ types, PR c++/12328.

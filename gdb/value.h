@@ -360,6 +360,20 @@ extern int value_bits_valid (const struct value *value,
 extern int value_bits_synthetic_pointer (const struct value *value,
 					 int offset, int length);
 
+/* Given a value, determine whether the contents bytes starting at
+   OFFSET and extending for LENGTH bytes are available.  This returns
+   nonzero if all bytes in the given range are available, zero if any
+   byte is unavailable.  */
+
+extern int value_bytes_available (const struct value *value,
+				  int offset, int length);
+
+/* Mark VALUE's content bytes starting at OFFSET and extending for
+   LENGTH bytes as unavailable.  */
+
+extern void mark_value_bytes_unavailable (struct value *value,
+					  int offset, int length);
+
 
 
 #include "symtab.h"

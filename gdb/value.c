@@ -63,6 +63,110 @@ struct internal_function
   void *cookie;
 };
 
+/* Defines an [OFFSET, OFFSET + LENGTH) range.  */
+
+struct range
+{
+  /* Lowest offset in the range.  */
+  int offset;
+
+  /* Length of the range.  */
+  int length;
+};
+
+typedef struct range range_s;
+
+DEF_VEC_O(range_s);
+
+/* Returns true if the ranges defined by [offset1, offset1+len1) and
+   [offset2, offset2+len2) overlap.  */
+
+static int
+ranges_overlap (int offset1, int len1,
+		int offset2, int len2)
+{
+  ULONGEST h, l;
+
+  l = max (offset1, offset2);
+  h = min (offset1 + len1, offset2 + len2);
+  return (l < h);
+}
+
+/* Returns true if the first argument is strictly less than the
+   second, useful for VEC_lower_bound.  We keep ranges sorted by
+   offset and coalesce overlapping and contiguous ranges, so this just
+   compares the starting offset.  */
+
+static int
+range_lessthan (const range_s *r1, const range_s *r2)
+{
+  return r1->offset < r2->offset;
+}
+
+/* Returns true if RANGES contains any range that overlaps [OFFSET,
+   OFFSET+LENGTH).  */
+
+static int
+ranges_contain (VEC(range_s) *ranges, int offset, int length)
+{
+  range_s what;
+  int i;
+
+  what.offset = offset;
+  what.length = length;
+
+  /* We keep ranges sorted by offset and coalesce overlapping and
+     contiguous ranges, so to check if a range list contains a given
+     range, we can do a binary search for the position the given range
+     would be inserted if we only considered the starting OFFSET of
+     ranges.  We call that position I.  Since we also have LENGTH to
+     care for (this is a range afterall), we need to check if the
+     _previous_ range overlaps the I range.  E.g.,
+
+         R
+         |---|
+       |---|    |---|  |------| ... |--|
+       0        1      2            N
+
+       I=1
+
+     In the case above, the binary search would return `I=1', meaning,
+     this OFFSET should be inserted at position 1, and the current
+     position 1 should be pushed further (and before 2).  But, `0'
+     overlaps with R.
+
+     Then we need to check if the I range overlaps the I range itself.
+     E.g.,
+
+              R
+              |---|
+       |---|    |---|  |-------| ... |--|
+       0        1      2             N
+
+       I=1
+  */
+
+  i = VEC_lower_bound (range_s, ranges, &what, range_lessthan);
+
+  if (i > 0)
+    {
+      struct range *bef = VEC_index (range_s, ranges, i - 1);
+
+      if (ranges_overlap (bef->offset, bef->length, offset, length))
+	return 1;
+    }
+
+  if (i < VEC_length (range_s, ranges))
+    {
+      struct range *r = VEC_index (range_s, ranges, i);
+
+      if (ranges_overlap (r->offset, r->length, offset, length))
+	return 1;
+    }
+
+  return 0;
+}
+
 static struct cmd_list_element *functionlist;
 
 struct value
@@ -206,6 +310,11 @@ struct value
      valid if lazy is nonzero.  */
   gdb_byte *contents;
 
+  /* Unavailable ranges in CONTENTS.  We mark unavailable ranges,
+     rather than available, since the common and default case is for a
+     value to be available.  This is filled in at value read time.  */
+  VEC(range_s) *unavailable;
+
   /* The number of references to this value.  When a value is created,
      the value chain holds a reference, so REFERENCE_COUNT is 1.  If
      release_value is called, this value is removed from the chain but
@@ -213,6 +322,179 @@ struct value
      The caller must arrange for a call to value_free later.  */
   int reference_count;
 };
+
+int
+value_bytes_available (const struct value *value, int offset, int length)
+{
+  gdb_assert (!value->lazy);
+
+  return !ranges_contain (value->unavailable, offset, length);
+}
+
+void
+mark_value_bytes_unavailable (struct value *value, int offset, int length)
+{
+  range_s newr;
+  int i;
+
+  /* Insert the range sorted.  If there's overlap or the new range
+     would be contiguous with an existing range, merge.  */
+
+  newr.offset = offset;
+  newr.length = length;
+
+  /* Do a binary search for the position the given range would be
+     inserted if we only considered the starting OFFSET of ranges.
+     Call that position I.  Since we also have LENGTH to care for
+     (this is a range afterall), we need to check if the _previous_
+     range overlaps the I range.  E.g., calling R the new range:
+
+       #1 - overlaps with previous
+
+	   R
+	   |-...-|
+	 |---|     |---|  |------| ... |--|
+	 0         1      2            N
+
+	 I=1
+
+     In the case #1 above, the binary search would return `I=1',
+     meaning, this OFFSET should be inserted at position 1, and the
+     current position 1 should be pushed further (and become 2).  But,
+     note that `0' overlaps with R, so we want to merge them.
+
+     A similar consideration needs to be taken if the new range would
+     be contiguous with the previous range:
+
+       #2 - contiguous with previous
+
+	    R
+	    |-...-|
+	 |--|       |---|  |------| ... |--|
+	 0          1      2            N
+
+	 I=1
+
+     If there's no overlap with the previous range, as in:
+
+       #3 - not overlapping and not contiguous
+
+	       R
+	       |-...-|
+	  |--|         |---|  |------| ... |--|
+	  0            1      2            N
+
+	 I=1
+
+     or if I is 0:
+
+       #4 - R is the range with lowest offset
+
+	  R
+	 |-...-|
+	         |--|       |---|  |------| ... |--|
+	         0          1      2            N
+
+	 I=0
+
+     ... we just push the new range to I.
+
+     All the 4 cases above need to consider that the new range may
+     also overlap several of the ranges that follow, or that R may be
+     contiguous with the following range, and merge.  E.g.,
+
+       #5 - overlapping following ranges
+
+	  R
+	 |------------------------|
+	         |--|       |---|  |------| ... |--|
+	         0          1      2            N
+
+	 I=0
+
+       or:
+
+	    R
+	    |-------|
+	 |--|       |---|  |------| ... |--|
+	 0          1      2            N
+
+	 I=1
+
+  */
+
+  i = VEC_lower_bound (range_s, value->unavailable, &newr, range_lessthan);
+  if (i > 0)
+    {
+      struct range *bef = VEC_index (range_s, value->unavailable, i - i);
+
+      if (ranges_overlap (bef->offset, bef->length, offset, length))
+	{
+	  /* #1 */
+	  ULONGEST l = min (bef->offset, offset);
+	  ULONGEST h = max (bef->offset + bef->length, offset + length);
+
+	  bef->offset = l;
+	  bef->length = h - l;
+	  i--;
+	}
+      else if (offset == bef->offset + bef->length)
+	{
+	  /* #2 */
+	  bef->length += length;
+	  i--;
+	}
+      else
+	{
+	  /* #3 */
+	  VEC_safe_insert (range_s, value->unavailable, i, &newr);
+	}
+    }
+  else
+    {
+      /* #4 */
+      VEC_safe_insert (range_s, value->unavailable, i, &newr);
+    }
+
+  /* Check whether the ranges following the one we've just added or
+     touched can be folded in (#5 above).  */
+  if (i + 1 < VEC_length (range_s, value->unavailable))
+    {
+      struct range *t;
+      struct range *r;
+      int removed = 0;
+      int next = i + 1;
+
+      /* Get the range we just touched.  */
+      t = VEC_index (range_s, value->unavailable, i);
+      removed = 0;
+
+      i = next;
+      for (; VEC_iterate (range_s, value->unavailable, i, r); i++)
+	if (r->offset <= t->offset + t->length)
+	  {
+	    ULONGEST l, h;
+
+	    l = min (t->offset, r->offset);
+	    h = max (t->offset + t->length, r->offset + r->length);
+
+	    t->offset = l;
+	    t->length = h - l;
+
+	    removed++;
+	  }
+	else
+	  {
+	    /* If we couldn't merge this one, we won't be able to
+	       merge following ones either, since the ranges are
+	       always sorted by OFFSET.  */
+	    break;
+	  }
+
+      if (removed != 0)
+	VEC_block_remove (range_s, value->unavailable, next, removed);
+    }
+}
 
 /* Prototypes for local functions.  */
 
@@ -420,10 +702,17 @@ value_enclosing_type (struct value *value)
 }
 
 static void
-require_not_optimized_out (struct value *value)
+require_not_optimized_out (const struct value *value)
 {
   if (value->optimized_out)
     error (_("value has been optimized out"));
+}
+
+static void
+require_available (const struct value *value)
+{
+  if (!VEC_empty (range_s, value->unavailable))
+    error (_("value is not available"));
 }
 
 const gdb_byte *
@@ -446,6 +735,7 @@ value_contents_all (struct value *value)
 {
   const gdb_byte *result = value_contents_for_printing (value);
   require_not_optimized_out (value);
+  require_available (value);
   return result;
 }
 
@@ -478,6 +768,7 @@ value_contents (struct value *value)
 {
   const gdb_byte *result = value_contents_writeable (value);
   require_not_optimized_out (value);
+  require_available (value);
   return result;
 }
 
@@ -703,6 +994,7 @@ value_free (struct value *val)
 	}
 
       xfree (val->contents);
+      VEC_free (range_s, val->unavailable);
     }
   xfree (val);
 }
@@ -833,6 +1125,7 @@ value_copy (struct value *arg)
 	      TYPE_LENGTH (value_enclosing_type (arg)));
 
     }
+  val->unavailable = VEC_copy (range_s, arg->unavailable);
   val->parent = arg->parent;
   if (val->parent)
     value_incref (val->parent);

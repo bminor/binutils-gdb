@@ -260,7 +260,7 @@ scalar_type_p (struct type *type)
 static int
 valprint_check_validity (struct ui_file *stream,
 			 struct type *type,
-			 int offset,
+			 int embedded_offset,
 			 const struct value *val)
 {
   CHECK_TYPEDEF (type);
@@ -269,17 +269,23 @@ valprint_check_validity (struct ui_file *stream,
       && TYPE_CODE (type) != TYPE_CODE_STRUCT
       && TYPE_CODE (type) != TYPE_CODE_ARRAY)
     {
-      if (! value_bits_valid (val, TARGET_CHAR_BIT * offset,
-			      TARGET_CHAR_BIT * TYPE_LENGTH (type)))
+      if (!value_bits_valid (val, TARGET_CHAR_BIT * embedded_offset,
+			     TARGET_CHAR_BIT * TYPE_LENGTH (type)))
 	{
 	  val_print_optimized_out (stream);
 	  return 0;
 	}
 
-      if (value_bits_synthetic_pointer (val, TARGET_CHAR_BIT * offset,
+      if (value_bits_synthetic_pointer (val, TARGET_CHAR_BIT * embedded_offset,
 					TARGET_CHAR_BIT * TYPE_LENGTH (type)))
 	{
 	  fputs_filtered (_("<synthetic pointer>"), stream);
+	  return 0;
+	}
+
+      if (!value_bytes_available (val, embedded_offset, TYPE_LENGTH (type)))
+	{
+	  val_print_unavailable (stream);
 	  return 0;
 	}
     }
@@ -291,6 +297,12 @@ void
 val_print_optimized_out (struct ui_file *stream)
 {
   fprintf_filtered (stream, _("<optimized out>"));
+}
+
+void
+val_print_unavailable (struct ui_file *stream)
+{
+  fprintf_filtered (stream, _("<unavailable>"));
 }
 
 /* Print using the given LANGUAGE the data of type TYPE located at
@@ -560,6 +572,8 @@ val_print_scalar_formatted (struct type *type,
   if (!value_bits_valid (val, TARGET_CHAR_BIT * embedded_offset,
 			      TARGET_CHAR_BIT * TYPE_LENGTH (type)))
     val_print_optimized_out (stream);
+  else if (!value_bytes_available (val, embedded_offset, TYPE_LENGTH (type)))
+    val_print_unavailable (stream);
   else
     print_scalar_formatted (valaddr + embedded_offset, type,
 			    options, size, stream);
