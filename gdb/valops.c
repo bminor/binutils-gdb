@@ -1456,11 +1456,12 @@ value_repeat (struct value *arg1, int count)
 
   val = allocate_repeat_value (value_enclosing_type (arg1), count);
 
-  read_memory (value_address (arg1),
-	       value_contents_all_raw (val),
-	       TYPE_LENGTH (value_enclosing_type (val)));
   VALUE_LVAL (val) = lval_memory;
   set_value_address (val, value_address (arg1));
+
+  read_value_memory (val, 0, value_stack (val), value_address (val),
+		     value_contents_all_raw (val),
+		     TYPE_LENGTH (value_enclosing_type (val)));
 
   return val;
 }

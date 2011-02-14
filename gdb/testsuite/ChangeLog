@@ -1,5 +1,10 @@
 2011-02-14  Pedro Alves  <pedro@codesourcery.com>
 
+	* gdb.trace/unavailable.exp (gdb_collect_globals_test): Test that
+	value repeat handles unavailableness.
+
+2011-02-14  Pedro Alves  <pedro@codesourcery.com>
+
 	* gdb.trace/unavailable.exp (gdb_collect_globals_test): Add new
 	tests for building arrays from unavailable values, subscripting
 	non-memory rvalue unvailable arrays, and accessing fields or

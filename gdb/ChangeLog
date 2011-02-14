@@ -1,5 +1,10 @@
 2011-02-14  Pedro Alves  <pedro@codesourcery.com>
 
+	* valops.c (value_repeat): Use read_value_memory instead of
+	read_memory.
+
+2011-02-14  Pedro Alves  <pedro@codesourcery.com>
+
 	* value.h (value_contents_copy, value_contents_copy_raw): Declare.
 	* value.c (value_contents_copy_raw, value_contents_copy): New
 	functions.

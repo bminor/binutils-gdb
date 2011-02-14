@@ -155,6 +155,9 @@ proc gdb_collect_globals_test { } {
 
     gdb_test_no_output "set print repeat 10"
 
+    # Check that value repeat handles unavailable-ness.
+    gdb_test "print *tarray@3" " = \\{\\{a = 0, b = <unavailable>\\}, \\{a = 0, b = <unavailable>\\}, \\{a = <unavailable>, b = <unavailable>\\}\\}"
+
     # Static fields
 
     gdb_test "print struct_b.static_struct_a" \
