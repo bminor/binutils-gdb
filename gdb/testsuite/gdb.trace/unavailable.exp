@@ -92,6 +92,9 @@ proc gdb_collect_globals_test { } {
 	"collect struct_b.struct_a.array\[2\]" "^$" \
 	"collect struct_b.struct_a.array\[100\]" "^$" \
 	\
+	"collect a" "^$" \
+	"collect c" "^$" \
+	\
 	"collect tarray\[0\].a" "^$" \
 	"collect tarray\[1\].a" "^$" \
 	"collect tarray\[3\].a" "^$" \
@@ -144,6 +147,15 @@ proc gdb_collect_globals_test { } {
     gdb_test "print /x struct_b.struct_a.array\[0\]" " = <unavailable>"
 
     gdb_test "print /x struct_b.struct_a.array\[2\]" " = 0xaaaaaaaa"
+
+    # Check the target doesn't overcollect.  GDB used to merge memory
+    # ranges to collect if they were close enough (collecting the hole
+    # as well), but does not do that anymore.  It's plausible that a
+    # target may do this on its end, but as of this writing, no known
+    # target does it.
+    gdb_test "print {a, b, c}" \
+	" = \\{1, <unavailable>, 3\\}" \
+	"No overcollect of almost but not quite adjacent memory ranges"
 
     # Check <unavailable> isn't confused with 0 in array element repetitions
 

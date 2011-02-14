@@ -1,5 +1,13 @@
 2011-02-14  Pedro Alves  <pedro@codesourcery.com>
 
+	* gdb.trace/unavailable.cc (a, b, c): New globals.
+	(main): Set and clear them.
+	* gdb.trace/unavailable.exp (gdb_collect_globals_test): Collect
+	`a' and `c', and check that `b' isn't collected, although `a' and
+	`c' are.
+
+2011-02-14  Pedro Alves  <pedro@codesourcery.com>
+
 	* gdb.trace/unavailable.cc (struct Virtual): New.
 	(virtualp): New global pointer.
 	* gdb.trace/unavailable.exp (gdb_collect_globals_test): Test

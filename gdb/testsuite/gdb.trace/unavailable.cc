@@ -71,6 +71,25 @@ struct tuple
 
 struct tuple tarray[8];
 
+/* Test for overcollection.  GDB used to merge memory ranges to
+   collect if they were close enough --- say, collect `a' and 'c'
+   below, and you'd get 'b' as well.  This had been presumably done to
+   cater for some target's inefficient trace buffer layout, but it is
+   really not GDB's business to assume how the target manages its
+   buffer.  If the target wants to overcollect, that's okay, since it
+   knows what is and what isn't safe to touch (think memory mapped
+   registers), and knows it's buffer layout.
+
+   The test assumes these three variables are laid out consecutively
+   in memory.  Unfortunately, we can't use an array instead, since the
+   agent expression generator does not even do constant folding,
+   meaning that anything that's more complicated than collecting a
+   global will generate an agent expression action to evaluate on the
+   target, instead of a simple "collect memory" action.  */
+int a;
+int b;
+int c;
+
 /* Random tests.  */
 
 struct StructA
@@ -185,6 +204,7 @@ main (int argc, char **argv, char **envp)
   memcpy (g_string_unavail, g_const_string, sizeof (g_const_string));
   memcpy (g_string_partial, g_const_string, sizeof (g_const_string));
   g_string_p = g_const_string;
+  a = 1; b = 2; c = 3;
 
   /* Call test functions, so they can be traced and data collected.  */
   i = 0;
@@ -211,6 +231,8 @@ main (int argc, char **argv, char **envp)
   memset (g_string_unavail, 0, sizeof (g_string_unavail));
   memset (g_string_partial, 0, sizeof (g_string_partial));
   g_string_p = NULL;
+
+  a = b = c = 0;
 
   g_int = 0;
 

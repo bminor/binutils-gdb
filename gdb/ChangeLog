@@ -1,5 +1,10 @@
 2011-02-14  Pedro Alves  <pedro@codesourcery.com>
 
+	* tracepoint.c (memrange_sortmerge): Don't merge ranges that are
+	almost but not quite adjacent.
+
+2011-02-14  Pedro Alves  <pedro@codesourcery.com>
+
 	* value.h (value_entirely_available): Declare.
 	* value.c (value_entirely_available): New function.
 	* c-valprint.c (c_value_print): Don't try fetching the pointer's

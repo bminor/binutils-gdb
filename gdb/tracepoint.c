@@ -841,13 +841,12 @@ memrange_sortmerge (struct collection_list *memranges)
     {
       for (a = 0, b = 1; b < memranges->next_memrange; b++)
 	{
-	  if (memranges->list[a].type == memranges->list[b].type &&
-	      memranges->list[b].start - memranges->list[a].end <=
-	      MAX_REGISTER_SIZE)
+	  /* If memrange b overlaps or is adjacent to memrange a,
+	     merge them.  */
+	  if (memranges->list[a].type == memranges->list[b].type
+	      && memranges->list[b].start <= memranges->list[a].end)
 	    {
-	      /* memrange b starts before memrange a ends; merge them.  */
-	      if (memranges->list[b].end > memranges->list[a].end)
-		memranges->list[a].end = memranges->list[b].end;
+	      memranges->list[a].end = memranges->list[b].end;
 	      continue;		/* next b, same a */
 	    }
 	  a++;			/* next a */
