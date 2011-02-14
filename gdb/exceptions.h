@@ -49,9 +49,12 @@ typedef int return_mask;
 
 enum errors {
   GDB_NO_ERROR,
+
   /* Any generic error, the corresponding text is in
      exception.message.  */
   GENERIC_ERROR,
+
+  /* Something requested was not found.  */
   NOT_FOUND_ERROR,
 
   /* Thread library lacks support necessary for finding thread local
@@ -77,6 +80,10 @@ enum errors {
 
   /* Feature is not supported in this copy of GDB.  */
   UNSUPPORTED_ERROR,
+
+  /* Value not available.  E.g., a register was not collected in a
+     traceframe.  */
+  NOT_AVAILABLE_ERROR,
 
   /* Add more errors here.  */
   NR_ERRORS

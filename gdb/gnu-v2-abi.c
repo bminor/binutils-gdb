@@ -28,6 +28,7 @@
 #include "demangle.h"
 #include "cp-abi.h"
 #include "cp-support.h"
+#include "exceptions.h"
 
 #include <ctype.h>
 
@@ -334,17 +335,15 @@ vb_match (struct type *type, int index, struct type *basetype)
   return 0;
 }
 
-/* Compute the offset of the baseclass which is
-   the INDEXth baseclass of class TYPE,
-   for value at VALADDR (in host) at ADDRESS (in target).
-   The result is the offset of the baseclass value relative
-   to (the address of)(ARG) + OFFSET.
-
-   -1 is returned on error.  */
+/* Compute the offset of the baseclass which is the INDEXth baseclass
+   of class TYPE, for value at VALADDR (in host) at ADDRESS (in
+   target).  The result is the offset of the baseclass value relative
+   to (the address of)(ARG) + OFFSET.  */
 
 static int
 gnuv2_baseclass_offset (struct type *type, int index,
-			const bfd_byte *valaddr, CORE_ADDR address)
+			const bfd_byte *valaddr, int embedded_offset,
+			CORE_ADDR address, const struct value *val)
 {
   struct type *basetype = TYPE_BASECLASS (type, index);
 
@@ -360,24 +359,41 @@ gnuv2_baseclass_offset (struct type *type, int index,
 	{
 	  if (vb_match (type, i, basetype))
 	    {
-	      CORE_ADDR addr
-		= unpack_pointer (TYPE_FIELD_TYPE (type, i),
-				  valaddr + (TYPE_FIELD_BITPOS (type, i) / 8));
+	      struct type *field_type;
+	      int field_offset;
+	      int field_length;
+	      CORE_ADDR addr;
 
-	      return addr - (LONGEST) address;
+	      field_type = check_typedef (TYPE_FIELD_TYPE (type, i));
+	      field_offset = TYPE_FIELD_BITPOS (type, i) / 8;
+	      field_length = TYPE_LENGTH (field_type);
+
+	      if (!value_bytes_available (val, embedded_offset + field_offset,
+					  field_length))
+		throw_error (NOT_AVAILABLE_ERROR,
+			     _("Virtual baseclass pointer is not available"));
+
+	      addr = unpack_pointer (field_type,
+				     valaddr + embedded_offset + field_offset);
+
+	      return addr - (LONGEST) address + embedded_offset;
 	    }
 	}
       /* Not in the fields, so try looking through the baseclasses.  */
       for (i = index + 1; i < n_baseclasses; i++)
 	{
+	  /* Don't go through baseclass_offset, as that wraps
+	     exceptions, thus, inner exceptions would be wrapped more
+	     than once.  */
 	  int boffset =
-	    baseclass_offset (type, i, valaddr, address);
+	    gnuv2_baseclass_offset (type, i, valaddr,
+				    embedded_offset, address, val);
 
 	  if (boffset)
 	    return boffset;
 	}
-      /* Not found.  */
-      return -1;
+
+      error (_("Baseclass offset not found"));
     }
 
   /* Baseclass is easily computed.  */

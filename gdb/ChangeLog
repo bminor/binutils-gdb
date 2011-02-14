@@ -1,5 +1,58 @@
 2011-02-14  Pedro Alves  <pedro@codesourcery.com>
 
+	* exceptions.h (NOT_AVAILABLE_ERROR): New error.
+	* value.c: Include "exceptions.h".
+	(require_available): Throw NOT_AVAILABLE_ERROR instead of a
+	generic error.
+	* cp-abi.c: Include gdb_assert.h.
+	(baseclass_offset): Add `embedded_offset' and `val' parameters.
+	Assert the method is implemented.  Wrap NOT_AVAILABLE_ERROR
+	errors.
+	* cp-abi.h (baseclass_offset): Add `embedded_offset' and `val'
+	parameters.  No longer returns -1 on error.
+	(struct cp_abi_ops) <baseclass_offset>: Add `embedded_offset' and
+	`val' parameters.
+	* cp-valprint.c: Include exceptions.h.
+	(cp_print_value): Handle NOT_AVAILABLE_ERROR errors when fetching
+	the baseclass_offset.  Handle unavailable base classes.  Use
+	val_print_invalid_address.
+	* p-valprint.c: Include exceptions.h.
+	(pascal_object_print_value): Handle NOT_AVAILABLE_ERROR errors
+	when fetching the baseclass_offset.  No longer expect
+	baseclass_offset returning -1.  Handle unavailable base classes.
+	Use val_print_invalid_address.
+	* valops.c (dynamic_cast_check_1): Rename `contents' parameter to
+	`valaddr' parameter, and change its type to gdb_byte pointer.  Add
+	`embedded_offset' and `val' parameters.  Adjust.
+	(dynamic_cast_check_2): Rename `contents' parameter to `valaddr'
+	parameter, and change its type to gdb_byte pointer.  Add
+	`embedded_offset' and `val' parameters.  Adjust.  No longer expect
+	baseclass_offset returning -1.
+	(value_dynamic_cast): Use value_contents_for_printing rather than
+	value_contents.  Adjust.
+	(search_struct_field): No longer expect baseclass_offset returning
+	-1.
+	(search_struct_method): If reading memory from the target is
+	necessary, wrap it in a new value to pass to baseclass_offset.  No
+	longer expect baseclass_offset returning -1.
+	(find_method_list): No longer expect baseclass_offset returning
+	-1.  Use value_contents_for_printing rather than value_contents.
+	* valprint.c (val_print_invalid_address): New function.
+	* valprint.h (val_print_invalid_address): Declare.
+	* gdbtypes.c (is_unique_ancestor_worker): New `embedded_offset'
+	and `val' parameters.  No longer expect baseclass_offset returning
+	-1.  Adjust.
+	* gnu-v2-abi.c: Include "exceptions.h".
+	(gnuv2_baseclass_offset): Add `embedded_offset' and `val'
+	parameters.  Handle unavailable memory.  Recurse through
+	gnuv2_baseclass_offset directly, rather than through
+	baseclass_offset.  No longer returns -1 on not found, instead
+	throw an error.
+	* gnu-v3-abi.c (gnuv3_baseclass_offset): Add `embedded_offset' and
+	`val' parameters.  Adjust.
+
+2011-02-14  Pedro Alves  <pedro@codesourcery.com>
+
 	* tracepoint.c (memrange_sortmerge): Don't merge ranges that are
 	almost but not quite adjacent.
 

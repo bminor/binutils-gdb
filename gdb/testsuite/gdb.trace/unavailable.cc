@@ -133,13 +133,44 @@ struct StructA StructB::static_struct_a;
 StructRef g_structref(0x12345678);
 StructRef *g_structref_p = &g_structref;
 
+class Base
+{
+protected:
+  int x;
+
+public:
+  Base(void) { x = 2; };
+};
+
+class Middle: public virtual Base
+{
+protected:
+  int y;
+
+public:
+  Middle(void): Base() { y = 3; };
+};
+
+class Derived: public virtual Middle {
+protected:
+  int z;
+
+public:
+  Derived(void): Middle() { z = 4; };
+};
+
+Derived derived_unavail;
+Derived derived_partial;
+Derived derived_whole;
+
 struct Virtual {
   int z;
 
   virtual ~Virtual() {}
 };
 
-Virtual *virtualp;
+Virtual virtual_partial;
+Virtual *virtualp = &virtual_partial;
 
 /* Test functions.  */
 

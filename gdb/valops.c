@@ -652,8 +652,10 @@ value_reinterpret_cast (struct type *type, struct value *arg)
 
 static int
 dynamic_cast_check_1 (struct type *desired_type,
-		      const bfd_byte *contents,
+		      const gdb_byte *valaddr,
+		      int embedded_offset,
 		      CORE_ADDR address,
+		      struct value *val,
 		      struct type *search_type,
 		      CORE_ADDR arg_addr,
 		      struct type *arg_type,
@@ -663,25 +665,25 @@ dynamic_cast_check_1 (struct type *desired_type,
 
   for (i = 0; i < TYPE_N_BASECLASSES (search_type) && result_count < 2; ++i)
     {
-      int offset = baseclass_offset (search_type, i, contents, address);
+      int offset = baseclass_offset (search_type, i, valaddr, embedded_offset,
+				     address, val);
 
-      if (offset == -1)
-	error (_("virtual baseclass botch"));
       if (class_types_same_p (desired_type, TYPE_BASECLASS (search_type, i)))
 	{
-	  if (address + offset >= arg_addr
-	      && address + offset < arg_addr + TYPE_LENGTH (arg_type))
+	  if (address + embedded_offset + offset >= arg_addr
+	      && address + embedded_offset + offset < arg_addr + TYPE_LENGTH (arg_type))
 	    {
 	      ++result_count;
 	      if (!*result)
 		*result = value_at_lazy (TYPE_BASECLASS (search_type, i),
-					 address + offset);
+					 address + embedded_offset + offset);
 	    }
 	}
       else
 	result_count += dynamic_cast_check_1 (desired_type,
-					      contents + offset,
-					      address + offset,
+					      valaddr,
+					      embedded_offset + offset,
+					      address, val,
 					      TYPE_BASECLASS (search_type, i),
 					      arg_addr,
 					      arg_type,
@@ -697,8 +699,10 @@ dynamic_cast_check_1 (struct type *desired_type,
 
 static int
 dynamic_cast_check_2 (struct type *desired_type,
-		      const bfd_byte *contents,
+		      const gdb_byte *valaddr,
+		      int embedded_offset,
 		      CORE_ADDR address,
+		      struct value *val,
 		      struct type *search_type,
 		      struct value **result)
 {
@@ -711,20 +715,20 @@ dynamic_cast_check_2 (struct type *desired_type,
       if (! BASETYPE_VIA_PUBLIC (search_type, i))
 	continue;
 
-      offset = baseclass_offset (search_type, i, contents, address);
-      if (offset == -1)
-	error (_("virtual baseclass botch"));
+      offset = baseclass_offset (search_type, i, valaddr, embedded_offset,
+				 address, val);
       if (class_types_same_p (desired_type, TYPE_BASECLASS (search_type, i)))
 	{
 	  ++result_count;
 	  if (*result == NULL)
 	    *result = value_at_lazy (TYPE_BASECLASS (search_type, i),
-				     address + offset);
+				     address + embedded_offset + offset);
 	}
       else
 	result_count += dynamic_cast_check_2 (desired_type,
-					      contents + offset,
-					      address + offset,
+					      valaddr,
+					      embedded_offset + offset,
+					      address, val,
 					      TYPE_BASECLASS (search_type, i),
 					      result);
     }
@@ -822,7 +826,9 @@ value_dynamic_cast (struct type *type, struct value *arg)
 	return tem;
       result = NULL;
       if (dynamic_cast_check_1 (TYPE_TARGET_TYPE (resolved_type),
-				value_contents (tem), value_address (tem),
+				value_contents_for_printing (tem),
+				value_embedded_offset (tem),
+				value_address (tem), tem,
 				rtti_type, addr,
 				arg_type,
 				&result) == 1)
@@ -834,7 +840,9 @@ value_dynamic_cast (struct type *type, struct value *arg)
   result = NULL;
   if (is_public_ancestor (arg_type, rtti_type)
       && dynamic_cast_check_2 (TYPE_TARGET_TYPE (resolved_type),
-			       value_contents (tem), value_address (tem),
+			       value_contents_for_printing (tem),
+			       value_embedded_offset (tem),
+			       value_address (tem), tem,
 			       rtti_type, &result) == 1)
     return value_cast (type,
 		       is_ref ? value_ref (result) : value_addr (result));
@@ -1323,6 +1331,7 @@ value_assign (struct value *toval, struct value *fromval)
 		int offset = value_offset (parent) + value_offset (toval);
 		int changed_len;
 		gdb_byte buffer[sizeof (LONGEST)];
+		int optim, unavail;
 
 		changed_len = (value_bitpos (toval)
 			       + value_bitsize (toval)
@@ -2075,12 +2084,10 @@ search_struct_field (const char *name, struct value *arg1, int offset,
 	  struct value *v2;
 
 	  boffset = baseclass_offset (type, i,
-				      value_contents (arg1) + offset,
-				      value_address (arg1)
-				      + value_embedded_offset (arg1)
-				      + offset);
-	  if (boffset == -1)
-	    error (_("virtual baseclass botch"));
+				      value_contents_for_printing (arg1),
+				      value_embedded_offset (arg1) + offset,
+				      value_address (arg1),
+				      arg1);
 
 	  /* The virtual base class pointer might have been clobbered
 	     by the user program.  Make sure that it still points to a
@@ -2202,10 +2209,13 @@ search_struct_method (const char *name, struct value **arg1p,
   for (i = TYPE_N_BASECLASSES (type) - 1; i >= 0; i--)
     {
       int base_offset;
+      int skip = 0;
+      int this_offset;
 
       if (BASETYPE_VIA_VIRTUAL (type, i))
 	{
 	  struct type *baseclass = check_typedef (TYPE_BASECLASS (type, i));
+	  struct value *base_val;
 	  const gdb_byte *base_valaddr;
 
 	  /* The virtual base class pointer might have been
@@ -2215,19 +2225,28 @@ search_struct_method (const char *name, struct value **arg1p,
 	  if (offset < 0 || offset >= TYPE_LENGTH (type))
 	    {
 	      gdb_byte *tmp = alloca (TYPE_LENGTH (baseclass));
+	      CORE_ADDR address = value_address (*arg1p);
 
-	      if (target_read_memory (value_address (*arg1p) + offset,
+	      if (target_read_memory (address + offset,
 				      tmp, TYPE_LENGTH (baseclass)) != 0)
 		error (_("virtual baseclass botch"));
-	      base_valaddr = tmp;
+
+	      base_val = value_from_contents_and_address (baseclass,
+							  tmp,
+							  address + offset);
+	      base_valaddr = value_contents_for_printing (base_val);
+	      this_offset = 0;
 	    }
 	  else
-	    base_valaddr = value_contents (*arg1p) + offset;
+	    {
+	      base_val = *arg1p;
+	      base_valaddr = value_contents_for_printing (*arg1p);
+	      this_offset = offset;
+	    }
 
 	  base_offset = baseclass_offset (type, i, base_valaddr,
-					  value_address (*arg1p) + offset);
-	  if (base_offset == -1)
-	    error (_("virtual baseclass botch"));
+					  this_offset, value_address (base_val),
+					  base_val);
 	}
       else
 	{
@@ -2405,12 +2424,10 @@ find_method_list (struct value **argp, const char *method,
 
       if (BASETYPE_VIA_VIRTUAL (type, i))
 	{
-	  base_offset = value_offset (*argp) + offset;
 	  base_offset = baseclass_offset (type, i,
-					  value_contents (*argp) + base_offset,
-					  value_address (*argp) + base_offset);
-	  if (base_offset == -1)
-	    error (_("virtual baseclass botch"));
+					  value_contents_for_printing (*argp),
+					  value_offset (*argp) + offset,
+					  value_address (*argp), *argp);
 	}
       else /* Non-virtual base, simply use bit position from debug
 	      info.  */

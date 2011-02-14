@@ -2101,7 +2101,8 @@ is_public_ancestor (struct type *base, struct type *dclass)
 static int
 is_unique_ancestor_worker (struct type *base, struct type *dclass,
 			   int *offset,
-			   const bfd_byte *contents, CORE_ADDR address)
+			   const gdb_byte *valaddr, int embedded_offset,
+			   CORE_ADDR address, struct value *val)
 {
   int i, count = 0;
 
@@ -2110,11 +2111,13 @@ is_unique_ancestor_worker (struct type *base, struct type *dclass,
 
   for (i = 0; i < TYPE_N_BASECLASSES (dclass) && count < 2; ++i)
     {
-      struct type *iter = check_typedef (TYPE_BASECLASS (dclass, i));
-      int this_offset = baseclass_offset (dclass, i, contents, address);
+      struct type *iter;
+      int this_offset;
 
-      if (this_offset == -1)
-	error (_("virtual baseclass botch"));
+      iter = check_typedef (TYPE_BASECLASS (dclass, i));
+
+      this_offset = baseclass_offset (dclass, i, valaddr, embedded_offset,
+				      address, val);
 
       if (class_types_same_p (base, iter))
 	{
@@ -2136,8 +2139,9 @@ is_unique_ancestor_worker (struct type *base, struct type *dclass,
 	}
       else
 	count += is_unique_ancestor_worker (base, iter, offset,
-					    contents + this_offset,
-					    address + this_offset);
+					    valaddr,
+					    embedded_offset + this_offset,
+					    address, val);
     }
 
   return count;
@@ -2152,8 +2156,9 @@ is_unique_ancestor (struct type *base, struct value *val)
   int offset = -1;
 
   return is_unique_ancestor_worker (base, value_type (val), &offset,
-				    value_contents (val),
-				    value_address (val)) == 1;
+				    value_contents_for_printing (val),
+				    value_embedded_offset (val),
+				    value_address (val), val) == 1;
 }
 
 

@@ -1,5 +1,15 @@
 2011-02-14  Pedro Alves  <pedro@codesourcery.com>
 
+	* gdb.trace/unavailable.cc (class Base, class Middle, class
+	Derived): New types.
+	(derived_unavail, derived_partial, derived_whole): New globals.
+	(virtual_partial): New global.
+	(virtualp): Point at virtual_partial.
+	* gdb.trace/unavailable.exp (gdb_collect_globals_test): Add tests
+	related to unavailable vptr.
+
+2011-02-14  Pedro Alves  <pedro@codesourcery.com>
+
 	* gdb.trace/unavailable.cc (a, b, c): New globals.
 	(main): Set and clear them.
 	* gdb.trace/unavailable.exp (gdb_collect_globals_test): Collect

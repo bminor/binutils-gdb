@@ -25,7 +25,7 @@
 #include "exceptions.h"
 #include "gdbcmd.h"
 #include "ui-out.h"
-
+#include "gdb_assert.h"
 #include "gdb_string.h"
 
 static struct cp_abi_ops *find_cp_abi (const char *short_name);
@@ -70,14 +70,30 @@ is_operator_name (const char *name)
 }
 
 int
-baseclass_offset (struct type *type, int index,
-		  const bfd_byte *valaddr,
-		  CORE_ADDR address)
+baseclass_offset (struct type *type, int index, const gdb_byte *valaddr,
+		  int embedded_offset, CORE_ADDR address,
+		  const struct value *val)
 {
-  if (current_cp_abi.baseclass_offset == NULL)
-    error (_("ABI doesn't define required function baseclass_offset"));
-  return (*current_cp_abi.baseclass_offset) (type, index,
-					     valaddr, address);
+  volatile struct gdb_exception ex;
+  int res = 0;
+
+  gdb_assert (current_cp_abi.baseclass_offset != NULL);
+
+  TRY_CATCH (ex, RETURN_MASK_ERROR)
+    {
+      res = (*current_cp_abi.baseclass_offset) (type, index, valaddr,
+						embedded_offset,
+						address, val);
+    }
+
+  if (ex.reason < 0 && ex.error == NOT_AVAILABLE_ERROR)
+    throw_error (NOT_AVAILABLE_ERROR,
+		 _("Cannot determine virtual baseclass offset "
+		   "of incomplete object"));
+  else if (ex.reason < 0)
+    throw_exception (ex);
+  else
+    return res;
 }
 
 struct value *

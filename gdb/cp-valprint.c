@@ -37,6 +37,7 @@
 #include "cp-support.h"
 #include "language.h"
 #include "python/python.h"
+#include "exceptions.h"
 
 /* Controls printing of vtbl's.  */
 static void
@@ -482,12 +483,13 @@ cp_print_value (struct type *type, struct type *real_type,
 
   for (i = 0; i < n_baseclasses; i++)
     {
-      int boffset;
+      int boffset = 0;
       int skip;
       struct type *baseclass = check_typedef (TYPE_BASECLASS (type, i));
       char *basename = TYPE_NAME (baseclass);
-      const gdb_byte *base_valaddr;
-      const struct value *base_val;
+      const gdb_byte *base_valaddr = NULL;
+      const struct value *base_val = NULL;
+      volatile struct gdb_exception ex;
 
       if (BASETYPE_VIA_VIRTUAL (type, i))
 	{
@@ -507,45 +509,53 @@ cp_print_value (struct type *type, struct type *real_type,
       thisoffset = offset;
       thistype = real_type;
 
-      boffset = baseclass_offset (type, i, valaddr + offset,
-				  address + offset);
-      skip = ((boffset == -1) || (boffset + offset) < 0);
-
-      if (BASETYPE_VIA_VIRTUAL (type, i))
+      TRY_CATCH (ex, RETURN_MASK_ERROR)
 	{
-	  /* The virtual base class pointer might have been clobbered
-	     by the user program.  Make sure that it still points to a
-	     valid memory location.  */
+	  boffset = baseclass_offset (type, i, valaddr, offset, address, val);
+	}
+      if (ex.reason < 0 && ex.error == NOT_AVAILABLE_ERROR)
+	skip = -1;
+      else if (ex.reason < 0)
+	skip = 1;
+      else
+ 	{
+	  skip = 0;
 
-	  if (boffset != -1
-	      && ((boffset + offset) < 0
-		  || (boffset + offset) >= TYPE_LENGTH (real_type)))
+	  if (BASETYPE_VIA_VIRTUAL (type, i))
 	    {
-	      /* FIXME (alloca): unsafe if baseclass is really really
-		 large.  */
-	      gdb_byte *buf = alloca (TYPE_LENGTH (baseclass));
+	      /* The virtual base class pointer might have been
+		 clobbered by the user program. Make sure that it
+		 still points to a valid memory location.  */
 
-	      if (target_read_memory (address + boffset, buf,
-				      TYPE_LENGTH (baseclass)) != 0)
-		skip = 1;
-	      base_val = value_from_contents_and_address (baseclass,
-							  buf,
-							  address + boffset);
-	      thisoffset = 0;
-	      boffset = 0;
-	      thistype = baseclass;
-	      base_valaddr = value_contents_for_printing_const (base_val);
+	      if ((boffset + offset) < 0
+		  || (boffset + offset) >= TYPE_LENGTH (real_type))
+		{
+		  /* FIXME (alloca): unsafe if baseclass is really
+		     really large.  */
+		  gdb_byte *buf = alloca (TYPE_LENGTH (baseclass));
+
+		  if (target_read_memory (address + boffset, buf,
+					  TYPE_LENGTH (baseclass)) != 0)
+		    skip = 1;
+		  base_val = value_from_contents_and_address (baseclass,
+							      buf,
+							      address + boffset);
+		  thisoffset = 0;
+		  boffset = 0;
+		  thistype = baseclass;
+		  base_valaddr = value_contents_for_printing_const (base_val);
+		}
+	      else
+		{
+		  base_valaddr = valaddr;
+		  base_val = val;
+		}
 	    }
 	  else
 	    {
 	      base_valaddr = valaddr;
 	      base_val = val;
 	    }
-	}
-      else
-	{
-	  base_valaddr = valaddr;
-	  base_val = val;
 	}
 
       /* Now do the printing.  */
@@ -560,9 +570,10 @@ cp_print_value (struct type *type, struct type *real_type,
       fputs_filtered (basename ? basename : "", stream);
       fputs_filtered ("> = ", stream);
 
-
-      if (skip)
-	fprintf_filtered (stream, "<invalid address>");
+      if (skip < 0)
+	val_print_unavailable (stream);
+      else if (skip > 0)
+	val_print_invalid_address (stream);
       else
 	{
 	  int result = 0;

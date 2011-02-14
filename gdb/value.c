@@ -39,7 +39,7 @@
 #include "objfiles.h"
 #include "valprint.h"
 #include "cli/cli-decode.h"
-
+#include "exceptions.h"
 #include "python/python.h"
 
 #include "tracepoint.h"
@@ -826,7 +826,7 @@ static void
 require_available (const struct value *value)
 {
   if (!VEC_empty (range_s, value->unavailable))
-    error (_("value is not available"));
+    throw_error (NOT_AVAILABLE_ERROR, _("value is not available"));
 }
 
 const gdb_byte *

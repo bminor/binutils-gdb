@@ -156,4 +156,6 @@ extern void val_print_optimized_out (struct ui_file *stream);
 
 extern void val_print_unavailable (struct ui_file *stream);
 
+extern void val_print_invalid_address (struct ui_file *stream);
+
 #endif

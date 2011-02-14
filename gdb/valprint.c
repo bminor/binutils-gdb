@@ -305,6 +305,12 @@ val_print_unavailable (struct ui_file *stream)
   fprintf_filtered (stream, _("<unavailable>"));
 }
 
+void
+val_print_invalid_address (struct ui_file *stream)
+{
+  fprintf_filtered (stream, _("<invalid address>"));
+}
+
 /* Print using the given LANGUAGE the data of type TYPE located at
    VALADDR + EMBEDDED_OFFSET (within GDB), which came from the
    inferior at address ADDRESS + EMBEDDED_OFFSET, onto stdio stream

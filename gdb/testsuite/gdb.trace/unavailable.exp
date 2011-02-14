@@ -87,6 +87,9 @@ proc gdb_collect_globals_test { } {
 	    "Tracepoint \[0-9\]+ at .*" \
 	    "set tracepoint"
 
+    # We collect the initial sizeof(pointer) bytes of derived_partial
+    # in an attempt of collecting the vptr.  Not portable, but should
+    # work everywhere we need to care.
     gdb_trace_setactions "define actions" \
 	"" \
 	"collect struct_b.struct_a.array\[2\]" "^$" \
@@ -106,7 +109,12 @@ proc gdb_collect_globals_test { } {
 	"collect g_string_partial\[1\]" "^$" \
 	"collect g_string_partial\[2\]" "^$" \
 	\
-	"collect g_structref_p" "^$"
+	"collect g_structref_p" "^$" \
+	\
+	"collect *((char *)&derived_partial)@sizeof\(void *\)" "^$" \
+	"collect derived_whole" "^$" \
+	\
+	"collect virtual_partial.z" "^$"
 
     # Begin the test.
     run_trace_experiment globals_test_func
@@ -256,13 +264,53 @@ proc gdb_collect_globals_test { } {
 
     gdb_test_no_output "set print object on"
 
+    set old_pf_prefix_2 $pf_prefix
+    set pf_prefix "$pf_prefix print object on:"
+
     # With print object on, printing a pointer may need to fetch the
     # pointed-to object, to check its run-time type.  Make sure that
     # fails gracefully and transparently when the pointer itself is
     # unavailable.
     gdb_test "print virtualp" " = \\(Virtual \\*\\) <unavailable>"
 
+    # no vtable pointer available
+    gdb_test "print derived_unavail" \
+	" = {<Middle> = <unavailable>, _vptr.Derived = <unavailable>, z = <unavailable>}"
+
+    # vtable pointer available, but nothing else
+    gdb_test "print derived_partial" \
+	" = \\(Derived\\) {<Middle> = {<Base> = <unavailable>, _vptr.Middle = <unavailable>, y = <unavailable>}, _vptr.Derived = $hex, z = <unavailable>}"
+
+    # whole object available
+    gdb_test "print derived_whole" \
+	" = \\(Derived\\) {<Middle> = {<Base> = {x = 2}, _vptr.Middle = $hex, y = 3}, _vptr.Derived = $hex, z = 4}"
+
+    set pf_prefix $old_pf_prefix_2
+
     gdb_test_no_output "set print object off"
+
+    set pf_prefix "$pf_prefix print object off:"
+
+    gdb_test "print virtualp" " = \\(Virtual \\*\\) <unavailable>"
+
+    # no vtable pointer available
+    gdb_test "print derived_unavail" \
+	" = {<Middle> = <unavailable>, _vptr.Derived = <unavailable>, z = <unavailable>}"
+
+    # vtable pointer available, but nothing else
+    gdb_test "print derived_partial" \
+	" = {<Middle> = {<Base> = <unavailable>, _vptr.Middle = <unavailable>, y = <unavailable>}, _vptr.Derived = $hex, z = <unavailable>}"
+
+    # whole object available
+    gdb_test "print derived_whole" \
+	" = {<Middle> = {<Base> = {x = 2}, _vptr.Middle = $hex, y = 3}, _vptr.Derived = $hex, z = 4}"
+
+    set pf_prefix $old_pf_prefix_2
+
+    # An instance of a virtual class where we collected everything but
+    # the vptr.
+    gdb_test "print virtual_partial" \
+	" = {_vptr.Virtual = <unavailable>, z = 0}"
 
     gdb_test "tfind none" \
 	"#0  end .*" \
