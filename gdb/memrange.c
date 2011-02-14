@@ -31,7 +31,8 @@ mem_ranges_overlap (CORE_ADDR start1, int len1,
   return (l < h);
 }
 
-/* qsort comparison function, that compares mem_ranges.  */
+/* qsort comparison function, that compares mem_ranges.  Ranges are
+   sorted in ascending START order.  */
 
 static int
 compare_mem_ranges (const void *ap, const void *bp)
@@ -50,6 +51,10 @@ compare_mem_ranges (const void *ap, const void *bp)
 void
 normalize_mem_ranges (VEC(mem_range_s) *ranges)
 {
+  /* This function must not use any VEC operation on RANGES that
+     reallocates the memory block as that invalidates the RANGES
+     pointer, which callers expect to remain valid.  */
+
   if (!VEC_empty (mem_range_s, ranges))
     {
       struct mem_range *ra, *rb;
@@ -68,7 +73,8 @@ normalize_mem_ranges (VEC(mem_range_s) *ranges)
 	     merge them.  */
 	  if (rb->start <= ra->start + ra->length)
 	    {
-	      ra->length = (rb->start + rb->length) - ra->start;
+	      ra->length = max (ra->length,
+				(rb->start - ra->start) + rb->length);
 	      continue;		/* next b, same a */
 	    }
 	  a++;			/* next a */

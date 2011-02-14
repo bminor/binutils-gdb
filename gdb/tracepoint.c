@@ -4635,10 +4635,11 @@ get_traceframe_info (void)
   return traceframe_info;
 }
 
-/* Return in RESULT, the set of collected memory in the current
-   traceframe, found within the LEN bytes range starting at MEMADDR.
-   Returns true if the target supports the query, otherwise returns
-   false.  */
+/* If the target supports the query, return in RESULT the set of
+   collected memory in the current traceframe, found within the LEN
+   bytes range starting at MEMADDR.  Returns true if the target
+   supports the query, otherwise returns false, and RESULT is left
+   undefined.  */
 
 int
 traceframe_available_memory (VEC(mem_range_s) **result,

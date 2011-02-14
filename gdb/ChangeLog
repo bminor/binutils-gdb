@@ -1,4 +1,13 @@
 2011-02-14  Pedro Alves  <pedro@codesourcery.com>
+
+	* memrange.c (compare_mem_ranges): Mention sort order in
+	describing comment.
+	(normalize_mem_ranges): Add comment.  Fix ra->length calculation.
+	* tracepoint.c (traceframe_available_memory): Extend comment to
+	mention what happens to RESULT when the target does not support
+	the query.
+
+2011-02-14  Pedro Alves  <pedro@codesourcery.com>
 	    Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* value.c (mark_value_bytes_unavailable): Fix indexing the `bef'
