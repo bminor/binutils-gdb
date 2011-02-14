@@ -1,5 +1,13 @@
 2011-02-14  Pedro Alves  <pedro@codesourcery.com>
 
+	* gdb.trace/unavailable.cc (struct Virtual): New.
+	(virtualp): New global pointer.
+	* gdb.trace/unavailable.exp (gdb_collect_globals_test): Test
+	printing a pointer to an object whose type has a vtable, with
+	print object on.
+
+2011-02-14  Pedro Alves  <pedro@codesourcery.com>
+
 	* gdb.trace/unavailable.exp (gdb_collect_globals_test): Test that
 	value repeat handles unavailableness.
 

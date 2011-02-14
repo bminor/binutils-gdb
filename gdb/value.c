@@ -331,6 +331,19 @@ value_bytes_available (const struct value *value, int offset, int length)
   return !ranges_contain (value->unavailable, offset, length);
 }
 
+int
+value_entirely_available (struct value *value)
+{
+  /* We can only tell whether the whole value is available when we try
+     to read it.  */
+  if (value->lazy)
+    value_fetch_lazy (value);
+
+  if (VEC_empty (range_s, value->unavailable))
+    return 1;
+  return 0;
+}
+
 void
 mark_value_bytes_unavailable (struct value *value, int offset, int length)
 {

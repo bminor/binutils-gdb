@@ -103,7 +103,7 @@ proc gdb_collect_globals_test { } {
 	"collect g_string_partial\[1\]" "^$" \
 	"collect g_string_partial\[2\]" "^$" \
 	\
-	"collect g_structref_p" "^$" \
+	"collect g_structref_p" "^$"
 
     # Begin the test.
     run_trace_experiment globals_test_func
@@ -241,6 +241,16 @@ proc gdb_collect_globals_test { } {
     # Same cast, but starting from a non-lazy, value.
     gdb_test "print g_smallstruct_b" " = \\{<small_struct> = \\{member = <unavailable>\\}, <No data fields>\\}"
     gdb_test "print (small_struct) \$" " = \\{member = <unavailable>\\}"
+
+    gdb_test_no_output "set print object on"
+
+    # With print object on, printing a pointer may need to fetch the
+    # pointed-to object, to check its run-time type.  Make sure that
+    # fails gracefully and transparently when the pointer itself is
+    # unavailable.
+    gdb_test "print virtualp" " = \\(Virtual \\*\\) <unavailable>"
+
+    gdb_test_no_output "set print object off"
 
     gdb_test "tfind none" \
 	"#0  end .*" \

@@ -368,6 +368,10 @@ extern int value_bits_synthetic_pointer (const struct value *value,
 extern int value_bytes_available (const struct value *value,
 				  int offset, int length);
 
+/* Like value_bytes_available, but return false if any byte in the
+   whole object is unavailable.  */
+extern int value_entirely_available (struct value *value);
+
 /* Mark VALUE's content bytes starting at OFFSET and extending for
    LENGTH bytes as unavailable.  */
 

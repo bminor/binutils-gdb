@@ -114,6 +114,13 @@ struct StructA StructB::static_struct_a;
 StructRef g_structref(0x12345678);
 StructRef *g_structref_p = &g_structref;
 
+struct Virtual {
+  int z;
+
+  virtual ~Virtual() {}
+};
+
+Virtual *virtualp;
 
 /* Test functions.  */
 
