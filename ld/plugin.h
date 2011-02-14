@@ -1,5 +1,5 @@
 /* Plugin control for the GNU linker.
-   Copyright 2010 Free Software Foundation, Inc.
+   Copyright 2010, 2011 Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils.
 
@@ -49,6 +49,9 @@ extern int plugin_call_claim_file (const struct ld_plugin_input_file *file,
 
 /* Call 'all symbols read' hook for all plugins.  */
 extern int plugin_call_all_symbols_read (void);
+
+/* Call 'cleanup' hook for all plugins at exit.  */
+extern void plugin_call_cleanup (void);
 
 /* Generate a dummy BFD to represent an IR file, for any callers of
    plugin_call_claim_file to use as the handle in the ld_plugin_input_file
