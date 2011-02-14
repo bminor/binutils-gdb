@@ -1,0 +1,242 @@
+# Copyright 1998, 2005, 2007, 2008, 2009, 2010, 2011
+# Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+load_lib "trace-support.exp"
+
+set testfile "unavailable"
+set srcfile ${testfile}.cc
+set executable $testfile
+set binfile $objdir/$subdir/$executable
+
+if { [gdb_compile "$srcdir/$subdir/$srcfile" $binfile \
+	executable {debug nowarnings c++}] != "" } {
+    untested unavailable.exp
+    return -1
+}
+
+set ws "\[\r\n\t \]+"
+set cr "\[\r\n\]+"
+
+#
+# Utility procs
+#
+
+proc prepare_for_trace_test {} {
+    global executable
+
+    clean_restart $executable
+
+    runto_main
+
+    gdb_test "break begin" ".*" ""
+    gdb_test "break end" ".*" ""
+}
+
+proc run_trace_experiment { test_func } {
+    global gdb_prompt
+
+    gdb_test "continue" \
+	".*Breakpoint \[0-9\]+, begin .*" \
+	"advance to begin"
+
+    gdb_test_no_output "tstart" "start trace experiment"
+
+    gdb_test "continue" \
+	    "Continuing.*Breakpoint \[0-9\]+, end.*" \
+	    "run trace experiment"
+    gdb_test "tstop" \
+	    "\[\r\n\]+" \
+	    "stop trace experiment"
+    gdb_test "tfind start" \
+	    "#0  $test_func .*" \
+	    "tfind test frame"
+}
+
+#
+# Test procs
+#
+
+proc gdb_collect_globals_test { } {
+    global ws
+    global cr
+    global gdb_prompt
+    global hex
+    global pf_prefix
+
+    set old_pf_prefix $pf_prefix
+    set pf_prefix "$pf_prefix collect globals:"
+
+    prepare_for_trace_test
+
+    set testline [gdb_get_line_number "set globals_test_func tracepoint here"]
+
+    gdb_test "trace $testline" \
+	    "Tracepoint \[0-9\]+ at .*" \
+	    "set tracepoint"
+
+    gdb_trace_setactions "define actions" \
+	"" \
+	"collect struct_b.struct_a.array\[2\]" "^$" \
+	"collect struct_b.struct_a.array\[100\]" "^$" \
+	\
+	"collect tarray\[0\].a" "^$" \
+	"collect tarray\[1\].a" "^$" \
+	"collect tarray\[3\].a" "^$" \
+	"collect tarray\[3\].b" "^$" \
+	"collect tarray\[4\].b" "^$" \
+	"collect tarray\[5\].b" "^$" \
+	\
+	"collect g_string_p" "^$" \
+	"collect g_string_partial\[1\]" "^$" \
+	"collect g_string_partial\[2\]" "^$" \
+	\
+	"collect g_structref_p" "^$" \
+
+    # Begin the test.
+    run_trace_experiment globals_test_func
+
+    gdb_test "print globalc" " = <unavailable>"
+    gdb_test "print globali" " = <unavailable>"
+    gdb_test "print globalf" " = <unavailable>"
+    gdb_test "print globald" " = <unavailable>"
+
+    gdb_test "print globalstruct.memberc" " = <unavailable>"
+    gdb_test "print globalstruct.memberi" " = <unavailable>"
+    gdb_test "print globalstruct.memberf" " = <unavailable>"
+    gdb_test "print globalstruct.memberd" " = <unavailable>"
+
+    gdb_test "print globalstruct" \
+	    " = {memberc = <unavailable>, memberi = <unavailable>, memberf = <unavailable>, memberd = <unavailable>}"
+
+    gdb_test "print globalp == &globalstruct" \
+	    "value is not available" \
+	    "can't compare using non collected global pointer"
+
+    gdb_test "print globalarr\[1\]" " = <unavailable>"
+    gdb_test "print globalarr\[2\]" " = <unavailable>"
+    gdb_test "print globalarr\[3\]" " = <unavailable>"
+
+    gdb_test "print struct_b" \
+	" = {d = <unavailable>, ef = <unavailable>, struct_a = {a = <unavailable>, b = <unavailable>, array = {<unavailable>, <unavailable>, -1431655766, <unavailable> <repeats 97 times>, -1431655766, <unavailable> <repeats 9899 times>}, ptr = <unavailable>, bitfield = <unavailable>}, s = <unavailable>, static static_struct_a = {a = <unavailable>, b = <unavailable>, array = {<unavailable> <repeats 10000 times>}, ptr = <unavailable>, bitfield = <unavailable>}, string = <unavailable>}"
+
+    gdb_test "print /x struct_b" \
+	" = {d = <unavailable>, ef = <unavailable>, struct_a = {a = <unavailable>, b = <unavailable>, array = {<unavailable>, <unavailable>, 0xaaaaaaaa, <unavailable> <repeats 97 times>, 0xaaaaaaaa, <unavailable> <repeats 9899 times>}, ptr = <unavailable>, bitfield = <unavailable>}, s = <unavailable>, static static_struct_a = {a = <unavailable>, b = <unavailable>, array = {<unavailable> <repeats 10000 times>}, ptr = <unavailable>, bitfield = <unavailable>}, string = <unavailable>}"
+
+    gdb_test "print /x struct_b.struct_a" \
+	" = {a = <unavailable>, b = <unavailable>, array = {<unavailable>, <unavailable>, 0xaaaaaaaa, <unavailable> <repeats 97 times>, 0xaaaaaaaa, <unavailable> <repeats 9899 times>}, ptr = <unavailable>, bitfield = <unavailable>}"
+
+    gdb_test "print /x struct_b.struct_a.array" \
+	" = {<unavailable>, <unavailable>, 0xaaaaaaaa, <unavailable> <repeats 97 times>, 0xaaaaaaaa, <unavailable> <repeats 9899 times>}"
+
+    gdb_test "print /x struct_b.struct_a.array\[0\]" " = <unavailable>"
+
+    gdb_test "print /x struct_b.struct_a.array\[2\]" " = 0xaaaaaaaa"
+
+    # Check <unavailable> isn't confused with 0 in array element repetitions
+
+    gdb_test_no_output "set print repeat 1"
+
+    gdb_test "print /x tarray" \
+	" = \{\{a = 0x0, b = <unavailable>\} <repeats 2 times>, \{a = <unavailable>, b = <unavailable>\}, \{a = 0x0, b = 0x0\}, \{a = <unavailable>, b = 0x0\} <repeats 2 times>, \{a = <unavailable>, b = <unavailable>\} <repeats 2 times>\}" \
+	"<unavailable> is not the same as 0 in array element repetitions"
+
+    gdb_test_no_output "set print repeat 10"
+
+    # Static fields
+
+    gdb_test "print struct_b.static_struct_a" \
+	" = {a = <unavailable>, b = <unavailable>, array = {<unavailable> <repeats 10000 times>}, ptr = <unavailable>, bitfield = <unavailable>}"
+
+    # Bitfields
+
+    gdb_test "print struct_b.struct_a.bitfield" " = <unavailable>"
+
+    # References
+
+    gdb_test "print g_int" " = <unavailable>"
+
+    gdb_test "print g_ref" \
+	"\\(int &\\) @$hex: <unavailable>" \
+	"global reference shows address but not value"
+
+    gdb_test "print *&g_ref" \
+	"\\$\[0-9\]+ = <unavailable>$cr" \
+	"referenced integer was not collected (taking address of reference)"
+
+    gdb_test "print *g_structref_p" \
+	" = {d = <unavailable>, ref = <unavailable>}"
+
+    # Strings
+
+    # Const string is always available, even when not collected.
+    gdb_test "print g_const_string" \
+	" = \"hello world\"$cr" \
+	"non collected const string is still printable"
+
+    gdb_test "print g_string_p" \
+	" = $hex \"hello world\"" \
+	"printing constant string through collected pointer"
+
+    gdb_test "print g_string_unavail" \
+	" = \{<unavailable> <repeats 12 times>\}" \
+	"printing non collected string"
+
+    # Incomplete strings print as an array.
+    gdb_test "print g_string_partial" \
+	"\\$\[0-9\]+ = \{<unavailable>, 101 'e', 108 'l', <unavailable>, <unavailable>, <unavailable>, <unavailable>, <unavailable>, <unavailable>, <unavailable>, <unavailable>, <unavailable>\}" \
+	"printing partially collected string"
+
+    # It is important for this test that the last examined value is
+    # <unavailable>, to exercise the case of the $__ convenience
+    # variable being set to <unavailable> without error.
+    set msg "examining partially collected object"
+    gdb_test_multiple "x /10x &struct_b" "$msg" {
+	-re "$hex <struct_b>:${ws}<unavailable>${ws}<unavailable>${ws}<unavailable>${ws}<unavailable>$cr$hex <struct_b\\+16>:${ws}<unavailable>${ws}<unavailable>${ws}0xaaaaaaaa${ws}<unavailable>$cr$hex <struct_b\\+32>:${ws}<unavailable>${ws}<unavailable>$cr$gdb_prompt $" {
+	    pass "$msg"
+	}
+	-re "value is not available" {
+	    fail "$msg"
+	}
+    }
+
+    gdb_test "p \$__" " = <unavailable>" "last examined value was <unavailable>"
+
+    gdb_test "tfind none" \
+	"#0  end .*" \
+	"cease trace debugging"
+
+    set pf_prefix $old_pf_prefix
+}
+
+proc gdb_trace_collection_test {} {
+    gdb_collect_globals_test
+}
+
+clean_restart $executable
+runto_main
+
+# We generously give ourselves one "pass" if we successfully
+# detect that this test cannot be run on this target!
+if { ![gdb_target_supports_trace] } then {
+    pass "Current target does not support trace"
+    return 1;
+}
+
+# Body of test encased in a proc so we can return prematurely.
+gdb_trace_collection_test
+
+# Finished!
+gdb_test "tfind none" ".*" ""

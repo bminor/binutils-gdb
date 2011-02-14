@@ -1,3 +1,7 @@
+2011-02-14  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.trace/unavailable.cc, gdb.trace/unavailable.exp: New files.
+
 2011-02-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix const/volatile qualifiers of C++ types, PR c++/12328.
