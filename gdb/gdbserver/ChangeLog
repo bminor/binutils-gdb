@@ -1,3 +1,18 @@
+2011-02-14  Pedro Alves  <pedro@codesourcery.com>
+
+	* server.c (handle_qxfer_traceframe_info): New.
+	(qxfer_packets): Register "traceframe-info".
+	(handle_query): Report support for qXfer:traceframe-info:read+.
+	* tracepoint.c (match_blocktype): New.
+	(traceframe_find_block_type): Rename to ...
+	(traceframe_walk_blocks): ... this.  Add callback filter argument,
+	and use it.
+	(traceframe_find_block_type): New, reimplemented on top of
+	traceframe_walk_blocks.
+	(build_traceframe_info_xml): New.
+	(traceframe_read_info): New.
+	* server.h (traceframe_read_info): Declare.
+
 2011-02-11  Yao Qi  <yao@codesourcery.com>
 
 	* configure.ac: Call AC_PROG_RANLIB.

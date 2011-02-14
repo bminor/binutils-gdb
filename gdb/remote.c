@@ -1205,6 +1205,7 @@ enum {
   PACKET_qXfer_osdata,
   PACKET_qXfer_threads,
   PACKET_qXfer_statictrace_read,
+  PACKET_qXfer_traceframe_info,
   PACKET_qGetTIBAddr,
   PACKET_qGetTLSAddr,
   PACKET_qSupported,
@@ -3683,6 +3684,8 @@ static struct protocol_feature remote_protocol_features[] = {
     PACKET_qXfer_osdata },
   { "qXfer:threads:read", PACKET_DISABLE, remote_supported_packet,
     PACKET_qXfer_threads },
+  { "qXfer:traceframe-info:read", PACKET_DISABLE, remote_supported_packet,
+    PACKET_qXfer_traceframe_info },
   { "QPassSignals", PACKET_DISABLE, remote_supported_packet,
     PACKET_QPassSignals },
   { "QStartNoAckMode", PACKET_DISABLE, remote_supported_packet,
@@ -8211,6 +8214,11 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
       return remote_read_qxfer (ops, "threads", annex, readbuf, offset, len,
 				&remote_protocol_packets[PACKET_qXfer_threads]);
 
+    case TARGET_OBJECT_TRACEFRAME_INFO:
+      gdb_assert (annex == NULL);
+      return remote_read_qxfer
+	(ops, "traceframe-info", annex, readbuf, offset, len,
+	 &remote_protocol_packets[PACKET_qXfer_traceframe_info]);
     default:
       return -1;
     }
@@ -10157,6 +10165,26 @@ remote_set_circular_trace_buffer (int val)
     error (_("Bogus reply from target: %s"), reply);
 }
 
+static struct traceframe_info *
+remote_traceframe_info (void)
+{
+  char *text;
+
+  text = target_read_stralloc (&current_target,
+			       TARGET_OBJECT_TRACEFRAME_INFO, NULL);
+  if (text != NULL)
+    {
+      struct traceframe_info *info;
+      struct cleanup *back_to = make_cleanup (xfree, text);
+
+      info = parse_traceframe_info (text);
+      do_cleanups (back_to);
+      return info;
+    }
+
+  return NULL;
+}
+
 static void
 init_remote_ops (void)
 {
@@ -10248,6 +10276,7 @@ Specify the serial device it is connected to\n\
     = remote_static_tracepoint_marker_at;
   remote_ops.to_static_tracepoint_markers_by_strid
     = remote_static_tracepoint_markers_by_strid;
+  remote_ops.to_traceframe_info = remote_traceframe_info;
 }
 
 /* Set up the extended remote vector by making a copy of the standard
@@ -10669,6 +10698,10 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qXfer_siginfo_write],
                          "qXfer:siginfo:write", "write-siginfo-object", 0);
+
+  add_packet_config_cmd
+    (&remote_protocol_packets[PACKET_qXfer_traceframe_info],
+     "qXfer:trace-frame-info:read", "traceframe-info", 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qGetTLSAddr],
 			 "qGetTLSAddr", "get-thread-local-storage-address",

@@ -16698,6 +16698,10 @@ are:
 @item @code{query-attached}
 @tab @code{qAttached}
 @tab Querying remote process attach state.
+
+@item @code{traceframe-info}
+@tab @code{qXfer:traceframe-info:read}
+@tab Traceframe info
 @end multitable
 
 @node Remote Stub
@@ -30848,6 +30852,8 @@ Target descriptions (@pxref{Target Descriptions})
 Remote shared library lists (@pxref{Library List Format})
 @item
 MS-Windows shared libraries (@pxref{Shared Libraries})
+@item
+Traceframe info (@pxref{Traceframe Info Format})
 @end itemize
 
 @item zlib
@@ -31670,6 +31676,7 @@ Show the current setting of the target wait timeout.
 * Library List Format::
 * Memory Map Format::
 * Thread List Format::
+* Traceframe Info Format::
 @end menu
 
 @node Overview
@@ -33220,6 +33227,11 @@ These are the currently defined stub features and their properties:
 @tab @samp{-}
 @tab Yes
 
+@item @samp{qXfer:traceframe-info:read}
+@tab No
+@tab @samp{-}
+@tab Yes
+
 
 @item @samp{QNonStop}
 @tab No
@@ -33321,6 +33333,10 @@ The remote stub understands the @samp{qXfer:siginfo:write} packet
 @item qXfer:threads:read
 The remote stub understands the @samp{qXfer:threads:read} packet
 (@pxref{qXfer threads read}).
+
+@item qXfer:traceframe-info:read
+The remote stub understands the @samp{qXfer:traceframe-info:read}
+packet (@pxref{qXfer traceframe info read}).
 
 @item QNonStop
 The remote stub understands the @samp{QNonStop} packet
@@ -33556,6 +33572,16 @@ by supplying an appropriate @samp{qSupported} response
 Access the list of threads on target.  @xref{Thread List Format}.  The
 annex part of the generic @samp{qXfer} packet must be empty
 (@pxref{qXfer read}).
+
+This packet is not probed by default; the remote stub must request it,
+by supplying an appropriate @samp{qSupported} response (@pxref{qSupported}).
+
+@item qXfer:traceframe-info:read::@var{offset},@var{length}
+@anchor{qXfer traceframe info read}
+
+Return a description of the current traceframe's contents.
+@xref{Traceframe Info Format}.  The annex part of the generic
+@samp{qXfer} packet must be empty (@pxref{qXfer read}).
 
 This packet is not probed by default; the remote stub must request it,
 by supplying an appropriate @samp{qSupported} response (@pxref{qSupported}).
@@ -35850,6 +35876,58 @@ identifies the thread (@pxref{thread-id syntax}).  The
 @samp{core} attribute, if present, specifies which processor core
 the thread was last executing on.  The content of the of @samp{thread}
 element is interpreted as human-readable auxilliary information.
+
+@node Traceframe Info Format
+@section Traceframe Info Format
+@cindex traceframe info format
+
+To be able to know which objects in the inferior can be examined when
+inspecting a tracepoint hit, @value{GDBN} needs to obtain the list of
+memory ranges, registers and trace state variables that have been
+collected in a traceframe.
+
+This list is obtained using the @samp{qXfer:traceframe-info:read}
+(@pxref{qXfer traceframe info read}) packet and is an XML document.
+
+@value{GDBN} must be linked with the Expat library to support XML
+traceframe info discovery.  @xref{Expat}.
+
+The top-level structure of the document is shown below:
+
+@smallexample
+<?xml version="1.0"?>
+<!DOCTYPE traceframe-info
+          PUBLIC "+//IDN gnu.org//DTD GDB Memory Map V1.0//EN"
+                 "http://sourceware.org/gdb/gdb-traceframe-info.dtd">
+<traceframe-info>
+   block...
+</traceframe-info>
+@end smallexample
+
+Each traceframe block can be either:
+
+@itemize
+
+@item
+A region of collected memory starting at @var{addr} and extending for
+@var{length} bytes from there:
+
+@smallexample
+<memory start="@var{addr}" length="@var{length}"/>
+@end smallexample
+
+@end itemize
+
+The formal DTD for the traceframe info format is given below:
+
+@smallexample
+<!ELEMENT traceframe-info  (memory)* >
+<!ATTLIST traceframe-info  version CDATA   #FIXED  "1.0">
+
+<!ELEMENT memory        EMPTY>
+<!ATTLIST memory        start   CDATA   #REQUIRED
+                        length  CDATA   #REQUIRED>
+@end smallexample
 
 @include agentexpr.texi
 

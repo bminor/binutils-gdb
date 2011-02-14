@@ -236,4 +236,6 @@ extern void tfind_1 (enum trace_find_type type, int num,
 
 extern void trace_save (const char *filename, int target_does_save);
 
+extern struct traceframe_info *parse_traceframe_info (const char *tframe_info);
+
 #endif	/* TRACEPOINT_H */

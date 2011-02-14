@@ -1,8 +1,40 @@
 2011-02-14  Pedro Alves  <pedro@codesourcery.com>
 
+	* target.h (struct traceframe_info): Forward declare.
+	(enum target_object): Add TARGET_OBJECT_TRACEFRAME_INFO.
+	(struct target_ops) <to_traceframe_info>: New field.
+	(target_traceframe_info): New.
+	* target.c (update_current_target): Inherit and default
+	to_traceframe_info.
+	* remote.c (PACKET_qXfer_traceframe_info): New.
+	(remote_protocol_features): Register qXfer:traceframe-info:read.
+	(remote_xfer_partial): Handle TARGET_OBJECT_TRACEFRAME_INFO.
+	(remote_traceframe_info): New.
+	(init_remote_ops): Install it.
+	(_initialize_remote): Install "set/show remote traceframe-info"
+	commands.
+	* tracepoint.h (parse_traceframe_info): Declare.
+	* tracepoint.c (struct mem_range): New.
+	(mem_range_s): New typedef.
+	(struct traceframe_info): New.
+	(traceframe_info): New global.
+	(free_traceframe_info): New function.
+	(clear_traceframe_info): New function.
+	(start_tracing, tfind_1, set_traceframe_number): Clear traceframe
+	info.
+	(build_traceframe_info): New function.
+	(tfile_traceframe_info): New function.
+	(init_tfile_ops): Install tfile_traceframe_info.
+	(traceframe_info_start_memory, free_result): New functions.
+	(memory_attributes, traceframe_info_elements): New globals.
+	(parse_traceframe_info, get_traceframe_info): New functions.
+	* features/traceframe-info.dtd: New file.
+	* Makefile.in (XMLFILES): Add traceframe-info.dtd.
+
+2011-02-14  Pedro Alves  <pedro@codesourcery.com>
+
 	Base support for <unavailable> value contents.
 
-	gdb/
 	* value.h (value_bytes_available): Declare.
 	(mark_value_bytes_unavailable): Declare.
 	* value.c (struct range): New struct.

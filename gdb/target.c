@@ -681,6 +681,7 @@ update_current_target (void)
       INHERIT (to_set_permissions, t);
       INHERIT (to_static_tracepoint_marker_at, t);
       INHERIT (to_static_tracepoint_markers_by_strid, t);
+      INHERIT (to_traceframe_info, t);
       INHERIT (to_magic, t);
       /* Do not inherit to_memory_map.  */
       /* Do not inherit to_flash_erase.  */
@@ -889,6 +890,9 @@ update_current_target (void)
 	    return_zero);
   de_fault (to_static_tracepoint_markers_by_strid,
 	    (VEC(static_tracepoint_marker_p) * (*) (const char *))
+	    tcomplain);
+  de_fault (to_traceframe_info,
+	    (struct traceframe_info * (*) (void))
 	    tcomplain);
 #undef de_fault
 

@@ -36,7 +36,7 @@ struct trace_status;
 struct uploaded_tsv;
 struct uploaded_tp;
 struct static_tracepoint_marker;
-
+struct traceframe_info;
 struct expression;
 
 /* This include file defines the interface between the main part
@@ -275,6 +275,8 @@ enum target_object
      The size of the data transfered is always 8 bytes (the size of an
      address on ia64).  */
   TARGET_OBJECT_HPUX_SOLIB_GOT,
+  /* Traceframe info, in XML format.  */
+  TARGET_OBJECT_TRACEFRAME_INFO,
   /* Possible future objects: TARGET_OBJECT_FILE, ...  */
 };
 
@@ -735,6 +737,12 @@ struct target_ops
        markers if ID is NULL.  */
     VEC(static_tracepoint_marker_p) *(*to_static_tracepoint_markers_by_strid)
       (const char *id);
+
+    /* Return a traceframe info object describing the current
+       traceframe's contents.  This method should not cache data;
+       higher layers take care of caching, invalidating, and
+       re-fetching when necessary.  */
+    struct traceframe_info *(*to_traceframe_info) (void);
 
     int to_magic;
     /* Need sub-structure for target machine related rather than comm related?
@@ -1457,6 +1465,9 @@ extern int target_search_memory (CORE_ADDR start_addr,
 
 #define target_static_tracepoint_markers_by_strid(marker_id) \
   (*current_target.to_static_tracepoint_markers_by_strid) (marker_id)
+
+#define target_traceframe_info() \
+  (*current_target.to_traceframe_info) ()
 
 /* Command logging facility.  */
 

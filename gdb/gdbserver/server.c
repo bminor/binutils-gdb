@@ -1118,6 +1118,56 @@ handle_qxfer_threads (const char *annex,
   return len;
 }
 
+/* Handle qXfer:traceframe-info:read.  */
+
+static int
+handle_qxfer_traceframe_info (const char *annex,
+			      gdb_byte *readbuf, const gdb_byte *writebuf,
+			      ULONGEST offset, LONGEST len)
+{
+  static char *result = 0;
+  static unsigned int result_length = 0;
+
+  if (writebuf != NULL)
+    return -2;
+
+  if (!target_running () || annex[0] != '\0' || current_traceframe == -1)
+    return -1;
+
+  if (offset == 0)
+    {
+      struct buffer buffer;
+
+      /* When asked for data at offset 0, generate everything and
+	 store into 'result'.  Successive reads will be served off
+	 'result'.  */
+      free (result);
+
+      buffer_init (&buffer);
+
+      traceframe_read_info (current_traceframe, &buffer);
+
+      result = buffer_finish (&buffer);
+      result_length = strlen (result);
+      buffer_free (&buffer);
+    }
+
+  if (offset >= result_length)
+    {
+      /* We're out of data.  */
+      free (result);
+      result = NULL;
+      result_length = 0;
+      return 0;
+    }
+
+  if (len > result_length - offset)
+    len = result_length - offset;
+
+  memcpy (readbuf, result + offset, len);
+  return len;
+}
+
 static const struct qxfer qxfer_packets[] =
   {
     { "auxv", handle_qxfer_auxv },
@@ -1128,6 +1178,7 @@ static const struct qxfer qxfer_packets[] =
     { "spu", handle_qxfer_spu },
     { "statictrace", handle_qxfer_statictrace },
     { "threads", handle_qxfer_threads },
+    { "traceframe-info", handle_qxfer_traceframe_info },
   };
 
 static int
@@ -1485,6 +1536,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	    strcat (own_buf, ";FastTracepoints+");
 	  strcat (own_buf, ";StaticTracepoints+");
 	  strcat (own_buf, ";qXfer:statictrace:read+");
+	  strcat (own_buf, ";qXfer:traceframe-info:read+");
 	}
 
       return;

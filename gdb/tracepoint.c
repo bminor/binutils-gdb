@@ -130,6 +130,29 @@ extern void output_command (char *, int);
 typedef struct trace_state_variable tsv_s;
 DEF_VEC_O(tsv_s);
 
+/* Defines a [START, START + LENGTH) memory range.  */
+
+struct mem_range
+{
+  /* Lowest address in the range.  */
+  CORE_ADDR start;
+
+  /* Length of the range.  */
+  int length;
+};
+
+typedef struct mem_range mem_range_s;
+
+DEF_VEC_O(mem_range_s);
+
+/* An object describing the contents of a traceframe.  */
+
+struct traceframe_info
+{
+  /* Collected memory.  */
+  VEC(mem_range_s) *memory;
+};
+
 static VEC(tsv_s) *tvariables;
 
 /* The next integer to assign to a variable.  */
@@ -147,6 +170,12 @@ static struct symbol *traceframe_fun;
 
 /* Symtab and line for last traceframe collected.  */
 static struct symtab_and_line traceframe_sal;
+
+/* The traceframe info of the current traceframe.  NULL if we haven't
+   yet attempted to fetch it, or if the target does not support
+   fetching this object, or if we're not inspecting a traceframe
+   presently.  */
+static struct traceframe_info *traceframe_info;
 
 /* Tracing command lists.  */
 static struct cmd_list_element *tfindlist;
@@ -206,6 +235,29 @@ struct trace_status *
 current_trace_status ()
 {
   return &trace_status;
+}
+
+/* Destroy INFO.  */
+
+static void
+free_traceframe_info (struct traceframe_info *info)
+{
+  if (info != NULL)
+    {
+      VEC_free (mem_range_s, info->memory);
+
+      xfree (info);
+    }
+}
+
+/* Free and and clear the traceframe info cache of the current
+   traceframe.  */
+
+static void
+clear_traceframe_info (void)
+{
+  free_traceframe_info (traceframe_info);
+  traceframe_info = NULL;
 }
 
 /* Set traceframe number to NUM.  */
@@ -1597,6 +1649,7 @@ start_tracing (void)
   set_tracepoint_num (-1);
   set_traceframe_context (NULL);
   current_trace_status()->running = 1;
+  clear_traceframe_info ();
 }
 
 /* tstart command:
@@ -1964,6 +2017,7 @@ tfind_1 (enum trace_find_type type, int num,
   registers_changed ();
   target_dcache_invalidate ();
   set_traceframe_num (target_frameno);
+  clear_traceframe_info ();
   set_tracepoint_num (tp ? tp->number : target_tracept);
   if (target_frameno == -1)
     set_traceframe_context (NULL);
@@ -2915,6 +2969,8 @@ set_traceframe_number (int num)
   /* Changing the traceframe changes our view of registers and of the
      frame chain.  */
   registers_changed ();
+
+  clear_traceframe_info ();
 }
 
 /* A cleanup used when switching away and back from tfind mode.  */
@@ -4108,6 +4164,56 @@ tfile_has_registers (struct target_ops *ops)
   return traceframe_number != -1;
 }
 
+/* Callback for traceframe_walk_blocks.  Builds a traceframe_info
+   object for the tfile target's current traceframe.  */
+
+static int
+build_traceframe_info (char blocktype, void *data)
+{
+  struct traceframe_info *info = data;
+
+  switch (blocktype)
+    {
+    case 'M':
+      {
+	struct mem_range *r;
+	ULONGEST maddr;
+	unsigned short mlen;
+
+	tfile_read ((gdb_byte *) &maddr, 8);
+	tfile_read ((gdb_byte *) &mlen, 2);
+
+	r = VEC_safe_push (mem_range_s, info->memory, NULL);
+
+	r->start = maddr;
+	r->length = mlen;
+	break;
+      }
+    case 'V':
+    case 'R':
+    case 'S':
+      {
+	break;
+      }
+    default:
+      warning (_("Unhandled trace block type (%d) '%c ' "
+		 "while building trace frame info."),
+	       blocktype, blocktype);
+      break;
+    }
+
+  return 0;
+}
+
+static struct traceframe_info *
+tfile_traceframe_info (void)
+{
+  struct traceframe_info *info = XCNEW (struct traceframe_info);
+
+  traceframe_walk_blocks (build_traceframe_info, 0, info);
+  return info;
+}
+
 static void
 init_tfile_ops (void)
 {
@@ -4129,6 +4235,7 @@ init_tfile_ops (void)
   tfile_ops.to_has_memory = tfile_has_memory;
   tfile_ops.to_has_stack = tfile_has_stack;
   tfile_ops.to_has_registers = tfile_has_registers;
+  tfile_ops.to_traceframe_info = tfile_traceframe_info;
   tfile_ops.to_magic = OPS_MAGIC;
 }
 
@@ -4378,6 +4485,116 @@ sdata_make_value (struct gdbarch *gdbarch, struct internalvar *var)
     }
   else
     return allocate_value (builtin_type (gdbarch)->builtin_void);
+}
+
+#if !defined(HAVE_LIBEXPAT)
+
+struct traceframe_info *
+parse_traceframe_info (const char *tframe_info)
+{
+  static int have_warned;
+
+  if (!have_warned)
+    {
+      have_warned = 1;
+      warning (_("Can not parse XML trace frame info; XML support "
+		 "was disabled at compile time"));
+    }
+
+  return NULL;
+}
+
+#else /* HAVE_LIBEXPAT */
+
+#include "xml-support.h"
+
+/* Handle the start of a <memory> element.  */
+
+static void
+traceframe_info_start_memory (struct gdb_xml_parser *parser,
+			      const struct gdb_xml_element *element,
+			      void *user_data, VEC(gdb_xml_value_s) *attributes)
+{
+  struct traceframe_info *info = user_data;
+  struct mem_range *r = VEC_safe_push (mem_range_s, info->memory, NULL);
+  ULONGEST *start_p, *length_p;
+
+  start_p = xml_find_attribute (attributes, "start")->value;
+  length_p = xml_find_attribute (attributes, "length")->value;
+
+  r->start = *start_p;
+  r->length = *length_p;
+}
+
+/* Discard the constructed trace frame info (if an error occurs).  */
+
+static void
+free_result (void *p)
+{
+  struct traceframe_info *result = p;
+
+  free_traceframe_info (result);
+}
+
+/* The allowed elements and attributes for an XML memory map.  */
+
+static const struct gdb_xml_attribute memory_attributes[] = {
+  { "start", GDB_XML_AF_NONE, gdb_xml_parse_attr_ulongest, NULL },
+  { "length", GDB_XML_AF_NONE, gdb_xml_parse_attr_ulongest, NULL },
+  { NULL, GDB_XML_AF_NONE, NULL, NULL }
+};
+
+static const struct gdb_xml_element traceframe_info_children[] = {
+  { "memory", memory_attributes, NULL,
+    GDB_XML_EF_REPEATABLE | GDB_XML_EF_OPTIONAL,
+    traceframe_info_start_memory, NULL },
+  { NULL, NULL, NULL, GDB_XML_EF_NONE, NULL, NULL }
+};
+
+static const struct gdb_xml_element traceframe_info_elements[] = {
+  { "traceframe-info", NULL, traceframe_info_children, GDB_XML_EF_NONE,
+    NULL, NULL },
+  { NULL, NULL, NULL, GDB_XML_EF_NONE, NULL, NULL }
+};
+
+/* Parse a traceframe-info XML document.  */
+
+struct traceframe_info *
+parse_traceframe_info (const char *tframe_info)
+{
+  struct traceframe_info *result;
+  struct cleanup *back_to;
+
+  result = XCNEW (struct traceframe_info);
+  back_to = make_cleanup (free_result, result);
+
+  if (gdb_xml_parse_quick (_("trace frame info"),
+			   "traceframe-info.dtd", traceframe_info_elements,
+			   tframe_info, result) == 0)
+    {
+      /* Parsed successfully, keep the result.  */
+      discard_cleanups (back_to);
+
+      return result;
+    }
+
+  do_cleanups (back_to);
+  return NULL;
+}
+
+#endif /* HAVE_LIBEXPAT */
+
+/* Returns the traceframe_info object for the current traceframe.
+   This is where we avoid re-fetching the object from the target if we
+   already have it cached.  */
+
+struct traceframe_info *
+get_traceframe_info (void)
+{
+  if (traceframe_info == NULL)
+    traceframe_info = target_traceframe_info ();
+
+  return traceframe_info;
 }
 
 /* module initialization */

@@ -1,3 +1,15 @@
+2011-02-14  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.texinfo (Remote Configuration): Mention set/show remote
+	traceframe-info.
+	(Tools/Packages Optional for Building GDB): Mention that expat is
+	used for traceframe info.
+	(Remote Protocol) <Menu>: Add "Traceframe Info Format".
+	(General Query Packets) <qSupported>: Describe the
+	qXfer:traceframe-info:read feature.
+	(qXfer::read): Describe qXfer:traceframe-info:read.
+	(Traceframe Info Format): New section.
+
 2011-02-04  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdbint.texinfo (Formatting): Mention some formatting guidelines

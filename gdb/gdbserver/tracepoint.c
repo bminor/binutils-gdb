@@ -4741,9 +4741,34 @@ agent_tsv_read (struct traceframe *tframe, int n)
 
 #ifndef IN_PROCESS_AGENT
 
+/* Callback for traceframe_walk_blocks, used to find a given block
+   type in a traceframe.  */
+
+static int
+match_blocktype (char blocktype, unsigned char *dataptr, void *data)
+{
+  char *wantedp = data;
+
+  if (*wantedp == blocktype)
+    return 1;
+
+  return 0;
+}
+
+/* Walk over all traceframe blocks of the traceframe buffer starting
+   at DATABASE, of DATASIZE bytes long, and call CALLBACK for each
+   block found, passing in DATA unmodified.  If CALLBACK returns true,
+   this returns a pointer to where the block is found.  Returns NULL
+   if no callback call returned true, indicating that all blocks have
+   been walked.  */
+
 static unsigned char *
-traceframe_find_block_type (unsigned char *database, unsigned int datasize,
-			    int tfnum, char type_wanted)
+traceframe_walk_blocks (unsigned char *database, unsigned int datasize,
+			int tfnum,
+			int (*callback) (char blocktype,
+					 unsigned char *dataptr,
+					 void *data),
+			void *data)
 {
   unsigned char *dataptr;
 
@@ -4769,9 +4794,10 @@ traceframe_find_block_type (unsigned char *database, unsigned int datasize,
 	  datasize = dataptr - database;
 	  dataptr = database = trace_buffer_lo;
 	}
+
       blocktype = *dataptr++;
 
-      if (type_wanted == blocktype)
+      if ((*callback) (blocktype, dataptr, data))
 	return dataptr;
 
       switch (blocktype)
@@ -4803,6 +4829,18 @@ traceframe_find_block_type (unsigned char *database, unsigned int datasize,
     }
 
   return NULL;
+}
+
+/* Look for the block of type TYPE_WANTED in the trameframe starting
+   at DATABASE of DATASIZE bytes long.  TFNUM is the traceframe
+   number.  */
+
+static unsigned char *
+traceframe_find_block_type (unsigned char *database, unsigned int datasize,
+			    int tfnum, char type_wanted)
+{
+  return traceframe_walk_blocks (database, datasize, tfnum,
+				 match_blocktype, &type_wanted);
 }
 
 static unsigned char *
@@ -5041,6 +5079,72 @@ traceframe_read_sdata (int tfnum, ULONGEST offset,
   trace_debug ("traceframe %d has no static trace data", tfnum);
 
   *nbytes = 0;
+  return 0;
+}
+
+/* Callback for traceframe_walk_blocks.  Builds a traceframe-info
+   object.  DATA is pointer to a struct buffer holding the
+   traceframe-info object being built.  */
+
+static int
+build_traceframe_info_xml (char blocktype, unsigned char *dataptr, void *data)
+{
+  struct buffer *buffer = data;
+
+  switch (blocktype)
+    {
+    case 'M':
+      {
+	unsigned short mlen;
+	CORE_ADDR maddr;
+
+	memcpy (&maddr, dataptr, sizeof (maddr));
+	dataptr += sizeof (maddr);
+	memcpy (&mlen, dataptr, sizeof (mlen));
+	dataptr += sizeof (mlen);
+	buffer_xml_printf (buffer,
+			   "<memory start=\"0x%s\" length=\"0x%s\"/>\n",
+			   paddress (maddr), phex_nz (mlen, sizeof (mlen)));
+	break;
+      }
+    case 'V':
+    case 'R':
+    case 'S':
+      {
+	break;
+      }
+    default:
+      warning ("Unhandled trace block type (%d) '%c ' "
+	       "while building trace frame info.",
+	       blocktype, blocktype);
+      break;
+    }
+
+  return 0;
+}
+
+/* Build a traceframe-info object for traceframe number TFNUM into
+   BUFFER.  */
+
+int
+traceframe_read_info (int tfnum, struct buffer *buffer)
+{
+  struct traceframe *tframe;
+
+  trace_debug ("traceframe_read_info");
+
+  tframe = find_traceframe (tfnum);
+
+  if (!tframe)
+    {
+      trace_debug ("traceframe %d not found", tfnum);
+      return 1;
+    }
+
+  buffer_grow_str (buffer, "<traceframe-info>\n");
+  traceframe_walk_blocks (tframe->data, tframe->data_size,
+			  tfnum, build_traceframe_info_xml, buffer);
+  buffer_grow_str0 (buffer, "</traceframe-info>\n");
   return 0;
 }
 
