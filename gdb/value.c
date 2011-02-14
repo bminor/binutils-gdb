@@ -439,7 +439,7 @@ mark_value_bytes_unavailable (struct value *value, int offset, int length)
   i = VEC_lower_bound (range_s, value->unavailable, &newr, range_lessthan);
   if (i > 0)
     {
-      struct range *bef = VEC_index (range_s, value->unavailable, i - i);
+      struct range *bef = VEC_index (range_s, value->unavailable, i - 1);
 
       if (ranges_overlap (bef->offset, bef->length, offset, length))
 	{
