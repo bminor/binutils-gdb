@@ -1,5 +1,18 @@
 2011-02-14  Pedro Alves  <pedro@codesourcery.com>
 
+	Mark pieces of values as unavailable if the corresponding memory
+	is unavailable.
+
+	* valops.c: Include tracepoint.h.
+	(value_fetch_lazy): Use read_value_memory.
+	(read_value_memory): New.
+	* value.h (read_value_memory): Declare.
+	* dwarf2loc.c (read_pieced_value): Use read_value_memory.
+	* exec.c (section_table_available_memory): New function.
+	* exec.h (section_table_available_memory): Declare.
+
+2011-02-14  Pedro Alves  <pedro@codesourcery.com>
+
 	* Makefile.in (SFILES): Add memrange.c.
 	(HFILES_NO_SRCDIR): Add memrange.h.
 	(COMMON_OBS): Add memrange.o.

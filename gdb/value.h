@@ -374,6 +374,17 @@ extern int value_bytes_available (const struct value *value,
 extern void mark_value_bytes_unavailable (struct value *value,
 					  int offset, int length);
 
+/* Read LENGTH bytes of memory starting at MEMADDR into BUFFER, which
+   is (or will be copied to) VAL's contents buffer offset by
+   EMBEDDED_OFFSET (that is, to &VAL->contents[EMBEDDED_OFFSET]).
+   Marks value contents ranges as unavailable if the corresponding
+   memory is likewise unavailable.  STACK indicates whether the memory
+   is known to be stack memory.  */
+
+extern void read_value_memory (struct value *val, int offset,
+			       int stack, CORE_ADDR memaddr,
+			       gdb_byte *buffer, size_t length);
+
 
 
 #include "symtab.h"

@@ -603,10 +603,10 @@ read_pieced_value (struct value *v)
 	  break;
 
 	case DWARF_VALUE_MEMORY:
-	  if (p->v.mem.in_stack_memory)
-	    read_stack (p->v.mem.addr + source_offset, buffer, this_size);
-	  else
-	    read_memory (p->v.mem.addr + source_offset, buffer, this_size);
+	  read_value_memory (v, offset,
+			     p->v.mem.in_stack_memory,
+			     p->v.mem.addr + source_offset,
+			     buffer, this_size);
 	  break;
 
 	case DWARF_VALUE_STACK:

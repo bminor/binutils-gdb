@@ -572,6 +572,43 @@ map_vmap (bfd *abfd, bfd *arch)
 }
 
 
+VEC(mem_range_s) *
+section_table_available_memory (VEC(mem_range_s) *memory,
+				CORE_ADDR memaddr, LONGEST len,
+				struct target_section *sections,
+				struct target_section *sections_end)
+{
+  struct target_section *p;
+  ULONGEST memend = memaddr + len;
+
+  for (p = sections; p < sections_end; p++)
+    {
+      if ((bfd_get_section_flags (p->bfd, p->the_bfd_section)
+	   & SEC_READONLY) == 0)
+	continue;
+
+      /* Copy the meta-data, adjusted.  */
+      if (mem_ranges_overlap (p->addr, p->endaddr - p->addr, memaddr, len))
+	{
+	  ULONGEST lo1, hi1, lo2, hi2;
+	  struct mem_range *r;
+
+	  lo1 = memaddr;
+	  hi1 = memaddr + len;
+
+	  lo2 = p->addr;
+	  hi2 = p->endaddr;
+
+	  r = VEC_safe_push (mem_range_s, memory, NULL);
+
+	  r->start = max (lo1, lo2);
+	  r->length = min (hi1, hi2) - r->start;
+	}
+    }
+
+  return memory;
+}
+
 int
 section_table_xfer_memory_partial (gdb_byte *readbuf, const gdb_byte *writebuf,
 				   ULONGEST offset, LONGEST len,

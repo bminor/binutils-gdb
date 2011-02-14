@@ -38,7 +38,7 @@
 #include "cp-support.h"
 #include "dfp.h"
 #include "user-regs.h"
-
+#include "tracepoint.h"
 #include <errno.h>
 #include "gdb_string.h"
 #include "gdb_assert.h"
@@ -1009,12 +1009,8 @@ value_fetch_lazy (struct value *val)
       int length = TYPE_LENGTH (check_typedef (value_enclosing_type (val)));
 
       if (length)
-	{
-	  if (value_stack (val))
-	    read_stack (addr, value_contents_all_raw (val), length);
-	  else
-	    read_memory (addr, value_contents_all_raw (val), length);
-	}
+	read_value_memory (val, 0, value_stack (val),
+			   addr, value_contents_all_raw (val), length);
     }
   else if (VALUE_LVAL (val) == lval_register)
     {
@@ -1113,6 +1109,89 @@ value_fetch_lazy (struct value *val)
   return 0;
 }
 
+void
+read_value_memory (struct value *val, int embedded_offset,
+		   int stack, CORE_ADDR memaddr,
+		   gdb_byte *buffer, size_t length)
+{
+  if (length)
+    {
+      VEC(mem_range_s) *available_memory;
+
+      if (get_traceframe_number () < 0
+	  || !traceframe_available_memory (&available_memory, memaddr, length))
+	{
+	  if (stack)
+	    read_stack (memaddr, buffer, length);
+	  else
+	    read_memory (memaddr, buffer, length);
+	}
+      else
+	{
+	  struct target_section_table *table;
+	  struct cleanup *old_chain;
+	  CORE_ADDR unavail;
+	  mem_range_s *r;
+	  int i;
+
+	  /* Fallback to reading from read-only sections.  */
+	  table = target_get_section_table (&exec_ops);
+	  available_memory =
+	    section_table_available_memory (available_memory,
+					    memaddr, length,
+					    table->sections,
+					    table->sections_end);
+
+	  old_chain = make_cleanup (VEC_cleanup(mem_range_s),
+				    &available_memory);
+
+	  normalize_mem_ranges (available_memory);
+
+	  /* Mark which bytes are unavailable, and read those which
+	     are available.  */
+
+	  unavail = memaddr;
+
+	  for (i = 0;
+	       VEC_iterate (mem_range_s, available_memory, i, r);
+	       i++)
+	    {
+	      if (mem_ranges_overlap (r->start, r->length,
+				      memaddr, length))
+		{
+		  CORE_ADDR lo1, hi1, lo2, hi2;
+		  CORE_ADDR start, end;
+
+		  /* Get the intersection window.  */
+		  lo1 = memaddr;
+		  hi1 = memaddr + length;
+		  lo2 = r->start;
+		  hi2 = r->start + r->length;
+		  start = max (lo1, lo2);
+		  end = min (hi1, hi2);
+
+		  gdb_assert (end - memaddr <= length);
+
+		  if (start > unavail)
+		    mark_value_bytes_unavailable (val,
+						  (embedded_offset
+						   + unavail - memaddr),
+						  start - unavail);
+		  unavail = end;
+
+		  read_memory (start, buffer + start - memaddr, end - start);
+		}
+	    }
+
+	  if (unavail != memaddr + length)
+	    mark_value_bytes_unavailable (val,
+					  embedded_offset + unavail - memaddr,
+					  (memaddr + length) - unavail);
+
+	  do_cleanups (old_chain);
+	}
+    }
+}
 
 /* Store the contents of FROMVAL into the location of TOVAL.
    Return a new value with the location of TOVAL and contents of FROMVAL.  */
