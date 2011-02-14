@@ -75,9 +75,9 @@ sim_core_uninstall (SIM_DESC sd)
       curr = curr->next;
       if (tbd->free_buffer != NULL) {
 	SIM_ASSERT(tbd->buffer != NULL);
-	zfree(tbd->free_buffer);
+	free(tbd->free_buffer);
       }
-      zfree(tbd);
+      free(tbd);
     }
     core->common.map[map].first = NULL;
   }
@@ -424,8 +424,8 @@ sim_core_map_detach (SIM_DESC sd,
 	  sim_core_mapping *dead = (*entry);
 	  (*entry) = dead->next;
 	  if (dead->free_buffer != NULL)
-	    zfree (dead->free_buffer);
-	  zfree (dead);
+	    free (dead->free_buffer);
+	  free (dead);
 	  return;
 	}
     }

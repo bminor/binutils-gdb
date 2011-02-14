@@ -206,7 +206,7 @@ hw_handle_remove_ihandle (struct hw *hw,
 	{
 	  struct hw_handle_mapping *delete = *current_map;
 	  *current_map = delete->next;
-	  zfree (delete);
+	  free (delete);
 	  return;
 	}
       current_map = &(*current_map)->next;
@@ -227,7 +227,7 @@ hw_handle_remove_phandle (struct hw *hw,
 	{
 	  struct hw_handle_mapping *delete = *current_map;
 	  *current_map = delete->next;
-	  zfree (delete);
+	  free (delete);
 	  return;
 	}
       current_map = &(*current_map)->next;

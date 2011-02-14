@@ -101,7 +101,7 @@ detach_device_interrupt_edge(device *me,
       if (old_edge->disposition == permenant_object)
 	device_error(me, "attempt to delete permenant interrupt");
       *list = old_edge->next;
-      zfree(old_edge);
+      free(old_edge);
       return;
     }
   }
@@ -120,7 +120,7 @@ clean_device_interrupt_edges(device_interrupt_edge **list)
       break;
     case tempoary_object:
       *list = old_edge->next;
-      zfree(old_edge);
+      free(old_edge);
       break;
     }
   }
@@ -590,9 +590,9 @@ device_instance_delete(device_instance *instance)
     device_error(me, "no delete method");
   instance->callback->delete(instance);
   if (instance->args != NULL)
-    zfree(instance->args);
+    free(instance->args);
   if (instance->path != NULL)
-    zfree(instance->path);
+    free(instance->path);
   if (instance->child == NULL) {
     /* only remove leaf nodes */
     device_instance **curr = &me->instances;
@@ -614,7 +614,7 @@ device_instance_delete(device_instance *instance)
     instance->child->parent = NULL;
   }
   cap_remove(me->ihandles, instance);
-  zfree(instance);
+  free(instance);
 }
 
 INLINE_DEVICE\
@@ -791,7 +791,7 @@ device_set_property(device *me,
       device_error(me, "conflict between type of new and old value for property %s", property);
     /* replace its value */
     if (value->array != NULL)
-      zfree((void*)value->array);
+      free((void*)value->array);
     new_array = (sizeof_array > 0
 		 ? zalloc(sizeof_array)
 		 : (void*)0);
@@ -822,7 +822,7 @@ clean_device_properties(device *me)
       /* zap the current value, will be initialized later */
       ASSERT(current->init_array != NULL);
       if (current->value->array != NULL) {
-	zfree((void*)current->value->array);
+	free((void*)current->value->array);
 	current->value->array = NULL;
       }
       delete_point = &(*delete_point)->next;
@@ -832,9 +832,9 @@ clean_device_properties(device *me)
       ASSERT(current->init_array == NULL);
       *delete_point = current->next;
       if (current->value->array != NULL)
-	zfree((void*)current->value->array);
-      zfree(current->value);
-      zfree(current);
+	free((void*)current->value->array);
+      free(current->value);
+      free(current);
       break;
     }
   }
@@ -1239,7 +1239,7 @@ device_add_range_array_property(device *me,
 		      cells, sizeof_cells,
 		      NULL, permenant_object);
 
-  zfree(cells);
+  free(cells);
 }
 
 INLINE_DEVICE\
@@ -1330,7 +1330,7 @@ device_add_reg_array_property(device *me,
 		      cells, sizeof_cells,
 		      NULL, permenant_object);
 
-  zfree(cells);
+  free(cells);
 }
 
 INLINE_DEVICE\

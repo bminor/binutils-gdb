@@ -1,3 +1,7 @@
+2011-02-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* table.c (table_push): Change zfree to free.
+
 2009-08-22  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* config.in: Regenerate.

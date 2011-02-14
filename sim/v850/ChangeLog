@@ -1,3 +1,7 @@
+2011-02-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* simops.c (OP_10007E0): Change zfree to free.
+
 2011-01-11  Andrew Burgess  <aburgess@broadcom.com>
 
 	* interp.c (sim_store_register): Update return value to

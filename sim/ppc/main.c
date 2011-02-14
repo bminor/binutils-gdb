@@ -253,12 +253,6 @@ zalloc(long size)
   return memory;
 }
 
-void
-zfree(void *chunk)
-{
-  free(chunk);
-}
-
 /* When a CNTRL-C occures, queue an event to shut down the simulation */
 
 static RETSIGTYPE

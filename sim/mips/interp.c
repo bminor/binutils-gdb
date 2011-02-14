@@ -1285,7 +1285,7 @@ sim_monitor (SIM_DESC sd,
       {
 	char *path = fetch_str (sd, A0);
 	V0 = sim_io_open (sd, path, (int)A1);
-	zfree (path);
+	free (path);
 	break;
       }
 
@@ -1296,7 +1296,7 @@ sim_monitor (SIM_DESC sd,
 	char *buf = zalloc (nr);
 	V0 = sim_io_read (sd, fd, buf, nr);
 	sim_write (sd, A1, buf, nr);
-	zfree (buf);
+	free (buf);
       }
       break;
 
@@ -1311,7 +1311,7 @@ sim_monitor (SIM_DESC sd,
 	    sim_io_flush_stdout (sd);
 	else if (fd == 2)
 	    sim_io_flush_stderr (sd);
-	zfree (buf);
+	free (buf);
 	break;
       }
 

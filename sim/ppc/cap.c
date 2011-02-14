@@ -123,7 +123,7 @@ cap_remove(cap *db,
     if ((*current_map)->internal == internal) {
       cap_mapping *delete = *current_map;
       *current_map = delete->next;
-      zfree(delete);
+      free(delete);
       return;
     }
     current_map = &(*current_map)->next;

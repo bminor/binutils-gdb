@@ -1648,7 +1648,7 @@ OP_10007E0 ()
 	    char **argv = fetch_argv (simulator, PARM2);
 	    char **envp = fetch_argv (simulator, PARM3);
 	    RETVAL = execve (path, argv, envp);
-	    zfree (path);
+	    free (path);
 	    freeargv (argv);
 	    freeargv (envp);
 	    break;
@@ -1663,7 +1663,7 @@ OP_10007E0 ()
 	    char *path = fetch_str (simulator, PARM1);
 	    char **argv = fetch_argv (simulator, PARM2);
 	    RETVAL = execv (path, argv);
-	    zfree (path);
+	    free (path);
 	    freeargv (argv);
 	    break;
 	  }
@@ -1706,7 +1706,7 @@ OP_10007E0 ()
 	    char *buf = zalloc (PARM3);
 	    RETVAL = sim_io_read (simulator, PARM1, buf, PARM3);
 	    sim_write (simulator, PARM2, buf, PARM3);
-	    zfree (buf);
+	    free (buf);
 	    break;
 	  }
 #endif
@@ -1720,7 +1720,7 @@ OP_10007E0 ()
 	      RETVAL = sim_io_write_stdout (simulator, buf, PARM3);
 	    else
 	      RETVAL = sim_io_write (simulator, PARM1, buf, PARM3);
-	    zfree (buf);
+	    free (buf);
 	    break;
 	  }
 #endif
@@ -1742,7 +1742,7 @@ OP_10007E0 ()
 	  {
 	    char *buf = fetch_str (simulator, PARM1);
 	    RETVAL = sim_io_open (simulator, buf, PARM2);
-	    zfree (buf);
+	    free (buf);
 	    break;
 	  }
 #endif
@@ -1775,7 +1775,7 @@ OP_10007E0 ()
 
 	    RETVAL = stat (path, &host_stat);
 
-	    zfree (path);
+	    free (path);
 	    buf = PARM2;
 
 	    /* Just wild-assed guesses.  */
@@ -1801,7 +1801,7 @@ OP_10007E0 ()
 	  {
 	    char *path = fetch_str (simulator, PARM1);
 	    RETVAL = chown (path, PARM2, PARM3);
-	    zfree (path);
+	    free (path);
 	  }
 	  break;
 #endif
@@ -1813,7 +1813,7 @@ OP_10007E0 ()
 	  {
 	    char *path = fetch_str (simulator, PARM1);
 	    RETVAL = chmod (path, PARM2);
-	    zfree (path);
+	    free (path);
 	  }
 	  break;
 #endif

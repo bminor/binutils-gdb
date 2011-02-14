@@ -228,7 +228,7 @@ sim_module_uninstall (SIM_DESC sd)
     for (d = modules->init_list; d != NULL; d = n)
       {
 	n = d->next;
-	zfree (d);
+	free (d);
       }
   }
 
@@ -238,7 +238,7 @@ sim_module_uninstall (SIM_DESC sd)
     for (d = modules->resume_list; d != NULL; d = n)
       {
 	n = d->next;
-	zfree (d);
+	free (d);
       }
   }
 
@@ -248,7 +248,7 @@ sim_module_uninstall (SIM_DESC sd)
     for (d = modules->suspend_list; d != NULL; d = n)
       {
 	n = d->next;
-	zfree (d);
+	free (d);
       }
   }
 
@@ -258,7 +258,7 @@ sim_module_uninstall (SIM_DESC sd)
     for (d = modules->uninstall_list; d != NULL; d = n)
       {
 	n = d->next;
-	zfree (d);
+	free (d);
       }
   }
 
@@ -268,11 +268,11 @@ sim_module_uninstall (SIM_DESC sd)
     for (d = modules->info_list; d != NULL; d = n)
       {
 	n = d->next;
-	zfree (d);
+	free (d);
       }
   }
 
-  zfree (modules);
+  free (modules);
   STATE_MODULES (sd) = NULL;
 }
 

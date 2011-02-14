@@ -1,3 +1,29 @@
+2011-02-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* hw-alloc.c (hw_alloc_data): Delete zalloc_p.
+	(hw_zalloc, hw_malloc): Delete zalloc_p reference.
+	(hw_free): Drop zfree logic and always call free.
+	* hw-base.c (hw_delete): Change zfree to free.
+	* hw-handles.c (hw_handle_remove_ihandle): Likewise.
+	(hw_handle_remove_phandle): Likewise.
+	* hw-instances.c (hw_instance_delete): Likewise.
+	* hw-tree.c (parse_reg_property): Likewise.
+	(parse_ranges_property): Likewise.
+	(parse_string_property): Likewise.
+	* sim-core.c (sim_core_uninstall): Likewise.
+	* sim-cpu.c (sim_cpu_free_all): Likewise.
+	* sim-hw.c (sim_hw_uninstall): Likewise.
+	* sim-memopt.c (do_memopt_delete): Likewise.
+	(sim_memory_uninstall): Likewise.
+	* sim-module.c (sim_module_uninstall): Likewise.
+	* sim-options.c (sim_parse_args): Likewise.
+	* sim-profile.c (profile_pc_cleanup): Likewise.
+	(profile_uninstall): Likewise.
+	* sim-watch.c (do_watchpoint_delete): Likewise.
+	* sim-utils.c (zfree): Delete.
+	(sim_state_free): Change zfree to free.
+	* sim-utils.h (zfree): Delete.
+
 2011-02-13  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-events.h (_sim_events.time_from_event): Change type to signed64.

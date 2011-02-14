@@ -93,9 +93,9 @@ core_init(core *memory)
       curr = curr->next;
       if (tbd->free_buffer != NULL) {
 	ASSERT(tbd->buffer != NULL);
-	zfree(tbd->free_buffer);
+	free(tbd->free_buffer);
       }
-      zfree(tbd);
+      free(tbd);
     }
     map->first = NULL;
   }

@@ -111,7 +111,7 @@ disklabel_delete(device_instance *instance)
 {
   disklabel *label = device_instance_data(instance);
   device_instance_delete(label->raw_disk);
-  zfree(label);
+  free(label);
 }
 
 

@@ -28,8 +28,6 @@ void *zalloc (unsigned long size);
 #define ZALLOC(TYPE) (TYPE*)zalloc(sizeof (TYPE))
 #define NZALLOC(TYPE,N) (TYPE*)zalloc(sizeof (TYPE) * (N))
 
-void zfree(void*);
-
 /* Turn VALUE into a string with commas.  */
 char *sim_add_commas (char *, int, unsigned long);
 

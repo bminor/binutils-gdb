@@ -88,9 +88,9 @@ hw_instance_delete (struct hw_instance *instance)
     hw_abort (me, "no delete method");
   instance->method->delete(instance);
   if (instance->args != NULL)
-    zfree (instance->args);
+    free (instance->args);
   if (instance->path != NULL)
-    zfree (instance->path);
+    free (instance->path);
   if (instance->child == NULL)
     {
       /* only remove leaf nodes */
@@ -116,7 +116,7 @@ hw_instance_delete (struct hw_instance *instance)
       instance->child->parent = NULL;
     }
   cap_remove (me->ihandles, instance);
-  zfree (instance);
+  free (instance);
 #endif
 }
 

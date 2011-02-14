@@ -62,12 +62,6 @@ zalloc (unsigned long size)
   return xcalloc (1, size);
 }
 
-void
-zfree (void *data)
-{
-  free (data);
-}
-
 /* Allocate a sim_state struct.  */
 
 SIM_DESC
@@ -118,7 +112,7 @@ sim_state_free (SIM_DESC sd)
   SIM_STATE_FREE (sd);
 #endif
 
-  zfree (sd);
+  free (sd);
 }
 
 /* Return a pointer to the cpu data for CPU_NAME, or NULL if not found.  */

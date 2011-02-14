@@ -500,7 +500,7 @@ profile_pc_cleanup (SIM_DESC sd)
       sim_cpu *cpu = STATE_CPU (sd, n);
       PROFILE_DATA *data = CPU_PROFILE_DATA (cpu);
       if (PROFILE_PC_COUNT (data) != NULL)
-	zfree (PROFILE_PC_COUNT (data));
+	free (PROFILE_PC_COUNT (data));
       PROFILE_PC_COUNT (data) = NULL;
       if (PROFILE_PC_EVENT (data) != NULL)
 	sim_events_deschedule (sd, PROFILE_PC_EVENT (data));
@@ -1307,6 +1307,6 @@ profile_uninstall (SIM_DESC sd)
 	}
 
       if (PROFILE_INSN_COUNT (data) != NULL)
-	zfree (PROFILE_INSN_COUNT (data));
+	free (PROFILE_INSN_COUNT (data));
     }
 }

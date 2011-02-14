@@ -583,7 +583,7 @@ tx3904sio_fifo_push(struct hw* me, struct tx3904sio_fifo* fifo, char it)
       char* next_buf = zalloc(next_size);
       memcpy(next_buf, fifo->buffer, fifo->used);
 
-      if(fifo->buffer != NULL) zfree(fifo->buffer);
+      if(fifo->buffer != NULL) free(fifo->buffer);
       fifo->buffer = next_buf;
       fifo->size = next_size;
     }
@@ -599,7 +599,7 @@ tx3904sio_fifo_reset(struct hw* me, struct tx3904sio_fifo* fifo)
   /* HW_TRACE ((me, "reset fifo")); */
   fifo->used = 0;
   fifo->size = 0;
-  zfree(fifo->buffer);
+  free(fifo->buffer);
   fifo->buffer = 0;
 }
 

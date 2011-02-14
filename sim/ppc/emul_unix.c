@@ -240,7 +240,7 @@ do_unix_read(os_emul_data *emul,
   if (status > 0)
     emul_write_buffer(scratch_buffer, buf, status, processor, cia);
 
-  zfree(scratch_buffer);
+  free(scratch_buffer);
 }
 
 
@@ -270,7 +270,7 @@ do_unix_write(os_emul_data *emul,
   /* write */
   status = write(d, scratch_buffer, nbytes);
   emul_write_status(processor, status, errno);
-  zfree(scratch_buffer);
+  free(scratch_buffer);
 
   flush_stdoutput();
 }

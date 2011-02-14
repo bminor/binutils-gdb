@@ -547,7 +547,7 @@ parse_reg_property(device *current,
   device_add_reg_array_property(current, property_name,
 				regs, nr_regs);
 
-  zfree(regs);
+  free(regs);
 }
 
 
@@ -584,7 +584,7 @@ parse_ranges_property(device *current,
   /* create it */
   device_add_range_array_property(current, property_name, ranges, nr_ranges);
 
-  zfree(ranges);
+  free(ranges);
 }
 
 
@@ -770,9 +770,9 @@ parse_string_property(device *current,
   /* flush the created string */
   while (nr_strings > 0) {
     nr_strings--;
-    zfree(strings[nr_strings]);
+    free(strings[nr_strings]);
   }
-  zfree(strings);
+  free(strings);
 }
 
 

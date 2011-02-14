@@ -203,7 +203,7 @@ open_disk_image(device *me,
   if (disk->image != NULL)
     fclose(disk->image);
   if (disk->name != NULL)
-    zfree(disk->name);
+    free(disk->name);
   disk->name = strdup(name);
   disk->image = fopen(disk->name, disk->read_only ? "r" : "r+");
   if (disk->image == NULL) {
@@ -351,7 +351,7 @@ hw_disk_instance_delete(device_instance *instance)
   hw_disk_instance *data = device_instance_data(instance);
   DITRACE(disk, ("delete - instance=%ld\n",
 		 (unsigned long)device_instance_to_external(instance)));
-  zfree(data);
+  free(data);
 }
 
 static int

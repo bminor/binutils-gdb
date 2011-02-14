@@ -669,11 +669,11 @@ sim_parse_args (SIM_DESC sd, char **argv)
 	}
     }
 
-  zfree (long_options);
-  zfree (short_options);
-  zfree (handlers);
-  zfree (opt_cpu);
-  zfree (orig_val);
+  free (long_options);
+  free (short_options);
+  free (handlers);
+  free (opt_cpu);
+  free (orig_val);
   return result;
 }
 

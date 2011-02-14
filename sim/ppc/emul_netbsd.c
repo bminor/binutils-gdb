@@ -258,7 +258,7 @@ write_direntries(unsigned_word addr,
     nbytes -= in->d_reclen;
     addr += in->d_reclen;
     buf += in->d_reclen;
-    zfree(out);
+    free(out);
   }
 }
 #endif
@@ -346,7 +346,7 @@ do_read(os_emul_data *emul,
   if (status > 0)
     emul_write_buffer(scratch_buffer, buf, status, processor, cia);
 
-  zfree(scratch_buffer);
+  free(scratch_buffer);
 }
 
 
@@ -377,7 +377,7 @@ do_write(os_emul_data *emul,
   /* write */
   status = write(d, scratch_buffer, nbytes);
   emul_write_status(processor, status, errno);
-  zfree(scratch_buffer);
+  free(scratch_buffer);
 
   flush_stdoutput();
 }
@@ -916,7 +916,7 @@ do_getdirentries(os_emul_data *emul,
   if (status > 0)
     write_direntries(buf_addr, buf, status, processor, cia);
   if (buf != NULL)
-    zfree(buf);
+    free(buf);
 }
 #endif
 

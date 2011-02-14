@@ -511,7 +511,7 @@ hw_delete (struct hw *me)
   delete_hw_alloc_data (me);
 
   /* finally */
-  zfree (me);
+  free (me);
 }
 
 void

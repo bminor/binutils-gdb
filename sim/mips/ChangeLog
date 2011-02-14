@@ -1,3 +1,9 @@
+2011-02-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* dv-tx3904sio.c (tx3904sio_fifo_push): Change zfree to free.
+	(tx3904sio_fifo_reset): Likewise.
+	* interp.c (sim_monitor): Likewise.
+
 2010-04-14  Mike Frysinger  <vapier@gentoo.org>
 
 	* interp.c (sim_write): Add const to buffer arg.

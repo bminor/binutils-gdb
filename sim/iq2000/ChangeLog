@@ -1,3 +1,7 @@
+2011-02-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* iq2000.c (do_syscall): Change zfree to free.
+
 2010-02-11  Doug Evans  <dje@sebabeach.org>
 
 	* cpu.h, * decode.c, * model.c, * sem-switch.c, * sem.c: Regenerate.

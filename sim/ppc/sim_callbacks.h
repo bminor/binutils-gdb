@@ -114,6 +114,4 @@ void *zalloc
 
 #define ZALLOC(TYPE) (TYPE*)zalloc(sizeof (TYPE))
 
-void zfree(void*);
-
 #endif

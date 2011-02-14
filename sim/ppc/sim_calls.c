@@ -390,8 +390,3 @@ zalloc(long size)
   memset(memory, 0, size);
   return memory;
 }
-
-void zfree(void *data)
-{
-  free(data);
-}

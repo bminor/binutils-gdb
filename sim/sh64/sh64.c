@@ -594,7 +594,7 @@ trap_handler (SIM_CPU *current_cpu, int shmedia_abi_p, UQI trapnum, PCADDR pc)
 	    SET_H_GR (ret_reg,
 		      sim_io_write (CPU_STATE (current_cpu),
 				    PARM1, buf, PARM3));
-	    zfree (buf);
+	    free (buf);
 	    break;
 
 	  case SYS_lseek:
@@ -614,7 +614,7 @@ trap_handler (SIM_CPU *current_cpu, int shmedia_abi_p, UQI trapnum, PCADDR pc)
 		      sim_io_read (CPU_STATE (current_cpu),
 				   PARM1, buf, PARM3));
 	    sim_write (CPU_STATE (current_cpu), PARM2, buf, PARM3);
-	    zfree (buf);
+	    free (buf);
 	    break;
 	    
 	  case SYS_open:
@@ -622,7 +622,7 @@ trap_handler (SIM_CPU *current_cpu, int shmedia_abi_p, UQI trapnum, PCADDR pc)
 	    SET_H_GR (ret_reg,
 		      sim_io_open (CPU_STATE (current_cpu),
 				   buf, PARM2));
-	    zfree (buf);
+	    free (buf);
 	    break;
 
 	  case SYS_close:

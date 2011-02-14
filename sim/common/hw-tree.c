@@ -561,7 +561,7 @@ parse_reg_property (struct hw *current,
   hw_add_reg_array_property (current, property_name,
 			     regs, nr_regs);
   
-  zfree (regs);
+  free (regs);
 }
 
 
@@ -598,7 +598,7 @@ parse_ranges_property (struct hw *current,
   /* create it */
   hw_add_range_array_property (current, property_name, ranges, nr_ranges);
   
-  zfree (ranges);
+  free (ranges);
 }
 
 
@@ -750,9 +750,9 @@ parse_string_property (struct hw *current,
   while (nr_strings > 0)
     {
       nr_strings--;
-      zfree (strings[nr_strings]);
+      free (strings[nr_strings]);
     }
-  zfree(strings);
+  free(strings);
 }
 
 

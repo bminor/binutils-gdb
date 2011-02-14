@@ -131,7 +131,7 @@ table_push (table *root,
       ff = fopen (dup_name, "rb");
       if (ff)
 	break;
-      /* zfree (dup_name); */
+      /* free (dup_name); */
       if (include->next == NULL)
 	{
 	  if (line != NULL)

@@ -101,7 +101,7 @@ do_watchpoint_delete (SIM_DESC sd,
 	  sim_watch_point *dead = (*entry);
 	  (*entry) = (*entry)->next;
 	  sim_events_deschedule (sd, dead->event);
-	  zfree (dead);
+	  free (dead);
 	  status = SIM_RC_OK;
 	}
       else

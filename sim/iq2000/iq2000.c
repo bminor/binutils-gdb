@@ -107,7 +107,7 @@ do_syscall (SIM_CPU *current_cpu, PCADDR pc)
       SET_H_GR (ret_reg,
 		sim_io_write (CPU_STATE (current_cpu),
 			      PARM1, buf, PARM3));
-      zfree (buf);
+      free (buf);
       break;
 
     case SYS_lseek:
@@ -127,7 +127,7 @@ do_syscall (SIM_CPU *current_cpu, PCADDR pc)
 		sim_io_read (CPU_STATE (current_cpu),
 			     PARM1, buf, PARM3));
       sim_write (CPU_STATE (current_cpu), CPU2DATA(PARM2), buf, PARM3);
-      zfree (buf);
+      free (buf);
       break;
 	    
     case SYS_open:
@@ -135,7 +135,7 @@ do_syscall (SIM_CPU *current_cpu, PCADDR pc)
       SET_H_GR (ret_reg,
 		sim_io_open (CPU_STATE (current_cpu),
 			     buf, PARM2));
-      zfree (buf);
+      free (buf);
       break;
 
     case SYS_close:

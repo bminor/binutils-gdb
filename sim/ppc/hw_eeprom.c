@@ -735,7 +735,7 @@ static void
 hw_eeprom_instance_delete(device_instance *instance)
 {
   hw_eeprom_instance *data = device_instance_data(instance);
-  zfree(data);
+  free(data);
 }
 
 static int

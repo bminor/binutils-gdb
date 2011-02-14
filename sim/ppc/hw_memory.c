@@ -138,7 +138,7 @@ hw_memory_set_available(device *me,
   }
   /* update */
   device_set_array_property(me, "available", available, sizeof_available);
-  zfree(available);
+  free(available);
 }
 
 
@@ -155,7 +155,7 @@ hw_memory_init_address(device *me)
       hw_memory_chunk *dead_chunk = curr_chunk;
       curr_chunk = dead_chunk->next;
       dead_chunk->next = NULL;
-      zfree(dead_chunk);
+      free(dead_chunk);
     }
   }
 
@@ -483,7 +483,7 @@ hw_memory_instance_release(device_instance *instance,
       ASSERT(chunk->address + chunk->size == delete->address);
       chunk->size += delete->size;
       chunk->next = delete->next;
-      zfree(delete);
+      free(delete);
     }
     else {
       chunk = chunk->next;

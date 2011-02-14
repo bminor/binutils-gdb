@@ -405,7 +405,7 @@ update_for_binary_section(bfd *abfd,
 				1 /*violate_read_only*/)
 	!= section_size)
       device_error(me, "broken transfer\n");
-    zfree(section_init); /* only free if load */
+    free(section_init); /* only free if load */
   }
 }
 

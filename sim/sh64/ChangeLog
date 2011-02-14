@@ -1,3 +1,7 @@
+2011-02-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* sh64.c (trap_handler): Change zfree to free.
+
 2010-10-09  Alan Modra  <amodra@gmail.com>
 
 	* sh-desc.h: Regenerate.

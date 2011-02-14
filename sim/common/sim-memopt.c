@@ -283,7 +283,7 @@ do_memopt_delete (SIM_DESC sd,
 	munmap ((*entry)->buffer, (*entry)->munmap_length);
       else
 #endif
-	zfree ((*entry)->buffer);
+	free ((*entry)->buffer);
     }
 
   /* delete it and its aliases */
@@ -294,7 +294,7 @@ do_memopt_delete (SIM_DESC sd,
       sim_memopt *dead = alias;
       alias = alias->alias;
       sim_core_detach (sd, NULL, dead->level, dead->space, dead->addr);
-      zfree (dead);
+      free (dead);
     }
   return SIM_RC_OK;
 }
@@ -630,7 +630,7 @@ sim_memory_uninstall (SIM_DESC sd)
 	    munmap ((*entry)->buffer, (*entry)->munmap_length);
 	  else
 #endif
-	    zfree ((*entry)->buffer);
+	    free ((*entry)->buffer);
 	}
 
       /* delete it and its aliases */
@@ -644,7 +644,7 @@ sim_memory_uninstall (SIM_DESC sd)
 	  sim_memopt *dead = alias;
 	  alias = alias->alias;
 	  sim_core_detach (sd, NULL, dead->level, dead->space, dead->addr);
-	  zfree (dead);
+	  free (dead);
 	}
     }
 }

@@ -29,7 +29,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 struct hw_alloc_data {
   void *alloc;
-  int zalloc_p;
   struct hw_alloc_data *next;
 };
 
@@ -55,7 +54,6 @@ hw_zalloc (struct hw *me, unsigned long size)
 {
   struct hw_alloc_data *memory = ZALLOC (struct hw_alloc_data);
   memory->alloc = zalloc (size);
-  memory->zalloc_p = 1;
   memory->next = me->alloc_of_hw;
   me->alloc_of_hw = memory;
   return memory->alloc;
@@ -66,7 +64,6 @@ hw_malloc (struct hw *me, unsigned long size)
 {
   struct hw_alloc_data *memory = ZALLOC (struct hw_alloc_data);
   memory->alloc = zalloc (size);
-  memory->zalloc_p = 0;
   memory->next = me->alloc_of_hw;
   me->alloc_of_hw = memory;
   return memory->alloc;
@@ -85,11 +82,8 @@ hw_free (struct hw *me,
 	{
 	  struct hw_alloc_data *die = (*memory);
 	  (*memory) = die->next;
-	  if (die->zalloc_p)
-	    zfree (die->alloc);
-	  else
-	    free (die->alloc);
-	  zfree (die);
+	  free (die->alloc);
+	  free (die);
 	  return;
 	}
     }

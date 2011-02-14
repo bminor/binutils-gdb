@@ -1,3 +1,42 @@
+2011-02-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* cap.c (cap_remove): Change zfree to free.
+	* corefile.c (core_init): Likewise.
+	* device.c (detach_device_interrupt_edge): Likewise.
+	(clean_device_interrupt_edges): Likewise.
+	(device_instance_delete): Likewise.
+	(device_set_property): Likewise.
+	(clean_device_properties): Likewise.
+	(device_add_range_array_property): Likewise.
+	(device_add_reg_array_property): Likewise.
+	* emul_bugapi.c (emul_bugapi_do_read): Likewise.
+	(emul_bugapi_do_write)
+	* emul_netbsd.c (write_direntries): Likewise.
+	(do_read): Likewise.
+	(do_write): Likewise.
+	(do_getdirentries): Likewise.
+	* emul_unix.c (do_unix_read): Likewise.
+	(do_unix_write): Likewise.
+	* events.c (event_queue_init): Likewise.
+	(event_queue_deschedule): Likewise.
+	(event_queue_process): Likewise.
+	* hw_disk.c (open_disk_image): Likewise.
+	(hw_disk_instance_delete): Likewise.
+	* hw_eeprom.c (hw_eeprom_instance_delete): Likewise.
+	* hw_htab.c (htab_dma_binary): Likewise.
+	* hw_init.c (update_for_binary_section): Likewise.
+	* hw_memory.c (hw_memory_set_available): Likewise.
+	(hw_memory_init_address): Likewise.
+	(hw_memory_instance_release): Likewise.
+	* pk_disklabel.c (disklabel_delete): Likewise.
+	* table.c (table_push): Likewise.
+	* tree.c (parse_reg_property): Likewise.
+	(parse_ranges_property): Likewise.
+	(parse_string_property): Likewise.
+	* main.c (zfree): Delete.
+	* sim_calls.c (zfree): Likewise.
+	* sim_callbacks.h (zfree): Likewise.
+
 2011-01-11  Andrew Burgess  <aburgess@broadcom.com>
 
 	* gdb-sim.c (sim_store_register): Update return value to

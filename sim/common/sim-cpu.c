@@ -62,7 +62,7 @@ sim_cpu_free_all (SIM_DESC sd)
 void
 sim_cpu_free (sim_cpu *cpu)
 {
-  zfree (cpu);
+  free (cpu);
 }
 
 /* PC utilities.  */

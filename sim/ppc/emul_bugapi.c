@@ -383,7 +383,7 @@ emul_bugapi_do_read(os_emul_data *bugapi,
       status--;
   }
 
-  zfree(scratch_buffer);
+  free(scratch_buffer);
   return status;
 }
 
@@ -472,7 +472,7 @@ emul_bugapi_do_write(os_emul_data *bugapi,
       /* write */
       device_instance_write(bugapi->output, scratch_buffer, nbytes);
 
-      zfree(scratch_buffer);
+      free(scratch_buffer);
     }
 
   if (suffix)

@@ -486,7 +486,7 @@ htab_dma_binary(bfd *abfd,
 			      1 /*violate_read_only*/)
       != section_size)
     device_error(me, "broken dma transfer");
-  zfree(section_init); /* only free if load */
+  free(section_init); /* only free if load */
 }
 
 /* create a memory map from a binaries virtual addresses to a copy of
