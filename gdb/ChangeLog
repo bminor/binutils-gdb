@@ -1,5 +1,12 @@
 2011-02-14  Pedro Alves  <pedro@codesourcery.com>
 
+	<unavailable> references.
+
+	* valops.c (get_value_at): Use value_from_contents_and_address,
+	avoiding read_memory.
+
+2011-02-14  Pedro Alves  <pedro@codesourcery.com>
+
 	* c-valprint.c (c_val_print): Print a string with unavailable
 	contents as an array.
 

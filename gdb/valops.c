@@ -917,18 +917,10 @@ get_value_at (struct type *type, CORE_ADDR addr, int lazy)
   if (TYPE_CODE (check_typedef (type)) == TYPE_CODE_VOID)
     error (_("Attempt to dereference a generic pointer."));
 
-  if (lazy)
-    {
-      val = allocate_value_lazy (type);
-    }
-  else
-    {
-      val = allocate_value (type);
-      read_memory (addr, value_contents_all_raw (val), TYPE_LENGTH (type));
-    }
+  val = value_from_contents_and_address (type, NULL, addr);
 
-  VALUE_LVAL (val) = lval_memory;
-  set_value_address (val, addr);
+  if (!lazy)
+    value_fetch_lazy (val);
 
   return val;
 }
