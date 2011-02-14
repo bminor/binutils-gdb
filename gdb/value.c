@@ -1675,15 +1675,24 @@ value_of_internalvar (struct gdbarch *gdbarch, struct internalvar *var)
 int
 get_internalvar_integer (struct internalvar *var, LONGEST *result)
 {
-  switch (var->kind)
+  if (var->kind == INTERNALVAR_INTEGER)
     {
-    case INTERNALVAR_INTEGER:
       *result = var->u.integer.val;
       return 1;
-
-    default:
-      return 0;
     }
+
+  if (var->kind == INTERNALVAR_VALUE)
+    {
+      struct type *type = check_typedef (value_type (var->u.value));
+
+      if (TYPE_CODE (type) == TYPE_CODE_INT)
+	{
+	  *result = value_as_long (var->u.value);
+	  return 1;
+	}
+    }
+
+  return 0;
 }
 
 static int
@@ -1748,12 +1757,6 @@ set_internalvar (struct internalvar *var, struct value *val)
       get_internalvar_function (VALUE_INTERNALVAR (val),
 				&new_data.fn.function);
       /* Copies created here are never canonical.  */
-      break;
-
-    case TYPE_CODE_INT:
-      new_kind = INTERNALVAR_INTEGER;
-      new_data.integer.type = value_type (val);
-      new_data.integer.val = value_as_long (val);
       break;
 
     default:

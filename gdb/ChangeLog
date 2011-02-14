@@ -1,5 +1,11 @@
 2011-02-14  Pedro Alves  <pedro@codesourcery.com>
 
+	* value.c (get_internalvar_integer): Also return the int value of
+	TYPE_CODE_INT INTERNALVAR_VALUE values.
+	(set_internalvar): Don't special case TYPE_CODE_INT.
+
+2011-02-14  Pedro Alves  <pedro@codesourcery.com>
+
 	* value.c (struct internalvar) <enum internalvar_kind>: Remove
 	INTERNALVAR_POINTER.
 	<pointer>: Delete.
