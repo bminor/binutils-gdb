@@ -410,7 +410,7 @@ extern int value_available_contents_eq (const struct value *val1, int offset1,
    memory is likewise unavailable.  STACK indicates whether the memory
    is known to be stack memory.  */
 
-extern void read_value_memory (struct value *val, int offset,
+extern void read_value_memory (struct value *val, int embedded_offset,
 			       int stack, CORE_ADDR memaddr,
 			       gdb_byte *buffer, size_t length);
 

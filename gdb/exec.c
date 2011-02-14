@@ -574,12 +574,11 @@ map_vmap (bfd *abfd, bfd *arch)
 
 VEC(mem_range_s) *
 section_table_available_memory (VEC(mem_range_s) *memory,
-				CORE_ADDR memaddr, LONGEST len,
+				CORE_ADDR memaddr, ULONGEST len,
 				struct target_section *sections,
 				struct target_section *sections_end)
 {
   struct target_section *p;
-  ULONGEST memend = memaddr + len;
 
   for (p = sections; p < sections_end; p++)
     {

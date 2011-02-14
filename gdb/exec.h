@@ -52,7 +52,7 @@ extern int resize_section_table (struct target_section_table *, int);
 
 extern VEC(mem_range_s) *
   section_table_available_memory (VEC(mem_range_s) *ranges,
-				  CORE_ADDR memaddr, LONGEST len,
+				  CORE_ADDR memaddr, ULONGEST len,
 				  struct target_section *sections,
 				  struct target_section *sections_end);
 

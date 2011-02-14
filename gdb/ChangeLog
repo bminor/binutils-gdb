@@ -1,6 +1,15 @@
 2011-02-14  Pedro Alves  <pedro@codesourcery.com>
 	    Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* exec.c (section_table_available_memory): Change `len' parameter
+	type to ULONGEST.
+	* exec.h (section_table_available_memory): Ditto.
+	* value.h (read_value_memory): Rename the `offset' parameter to
+	`embedded_offset'.
+
+2011-02-14  Pedro Alves  <pedro@codesourcery.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* memrange.c (compare_mem_ranges): Mention sort order in
 	describing comment.
 	(normalize_mem_ranges): Add comment.  Fix ra->length calculation.
