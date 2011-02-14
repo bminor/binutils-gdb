@@ -430,11 +430,25 @@ extern LONGEST unpack_long (struct type *type, const gdb_byte *valaddr);
 extern DOUBLEST unpack_double (struct type *type, const gdb_byte *valaddr,
 			       int *invp);
 extern CORE_ADDR unpack_pointer (struct type *type, const gdb_byte *valaddr);
-LONGEST unpack_bits_as_long (struct type *field_type, const gdb_byte *valaddr,
-			     int bitpos, int bitsize);
+
+extern int unpack_value_bits_as_long (struct type *field_type,
+				      const gdb_byte *valaddr,
+				      int embedded_offset, int bitpos,
+				      int bitsize,
+				      const struct value *original_value,
+				      LONGEST *result);
+
 extern LONGEST unpack_field_as_long (struct type *type,
 				     const gdb_byte *valaddr,
 				     int fieldno);
+extern int unpack_value_field_as_long (struct type *type, const gdb_byte *valaddr,
+				int embedded_offset, int fieldno,
+				const struct value *val, LONGEST *result);
+
+extern struct value *value_field_bitfield (struct type *type, int fieldno,
+					   const gdb_byte *valaddr,
+					   int embedded_offset,
+					   const struct value *val);
 
 extern void pack_long (gdb_byte *buf, struct type *type, LONGEST num);
 

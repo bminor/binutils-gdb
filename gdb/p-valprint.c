@@ -810,9 +810,7 @@ pascal_object_print_value_fields (struct type *type, const gdb_byte *valaddr,
 		{
 		  struct value_print_options opts = *options;
 
-		  v = value_from_longest (TYPE_FIELD_TYPE (type, i),
-				   unpack_field_as_long (type,
-							 valaddr + offset, i));
+		  v = value_field_bitfield (type, i, valaddr, offset, val);
 
 		  opts.deref_ref = 0;
 		  common_val_print (v, stream, recurse + 1, &opts,
@@ -831,9 +829,7 @@ pascal_object_print_value_fields (struct type *type, const gdb_byte *valaddr,
 		     v4.17 specific.  */
 		  struct value *v;
 
-		  v = value_from_longest
-		    (TYPE_FIELD_TYPE (type, i),
-		     unpack_field_as_long (type, valaddr + offset, i));
+		  v = value_field_bitfield (type, i, valaddr, offset, val);
 
 		  if (v == NULL)
 		    val_print_optimized_out (stream);

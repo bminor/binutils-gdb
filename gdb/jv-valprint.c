@@ -416,9 +416,7 @@ java_print_value_fields (struct type *type, const gdb_byte *valaddr,
 		{
 		  struct value_print_options opts;
 
-		  v = value_from_longest
-		    (TYPE_FIELD_TYPE (type, i),
-		     unpack_field_as_long (type, valaddr + offset, i));
+		  v = value_field_bitfield (type, i, valaddr, offset, val);
 
 		  opts = *options;
 		  opts.deref_ref = 0;

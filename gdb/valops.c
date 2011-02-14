@@ -989,11 +989,7 @@ value_fetch_lazy (struct value *val)
       enum bfd_endian byte_order = gdbarch_byte_order (get_type_arch (type));
       struct value *parent = value_parent (val);
       LONGEST offset = value_offset (val);
-      LONGEST num = unpack_bits_as_long (value_type (val),
-					 (value_contents_for_printing (parent)
-					  + offset),
-					 value_bitpos (val),
-					 value_bitsize (val));
+      LONGEST num;
       int length = TYPE_LENGTH (type);
 
       if (!value_bits_valid (val,
@@ -1001,7 +997,17 @@ value_fetch_lazy (struct value *val)
 			     value_bitsize (val)))
 	error (_("value has been optimized out"));
 
-      store_signed_integer (value_contents_raw (val), length, byte_order, num);
+      if (!unpack_value_bits_as_long (value_type (val),
+				      value_contents_for_printing (parent),
+				      offset,
+				      value_bitpos (val),
+				      value_bitsize (val), parent, &num))
+	mark_value_bytes_unavailable (val,
+				      value_embedded_offset (val),
+				      length);
+      else
+	store_signed_integer (value_contents_raw (val), length,
+			      byte_order, num);
     }
   else if (VALUE_LVAL (val) == lval_memory)
     {

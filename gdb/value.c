@@ -2532,30 +2532,24 @@ value_fn_field (struct value **arg1p, struct fn_field *f,
 }
 
 
-/* Unpack a bitfield of the specified FIELD_TYPE, from the anonymous
-   object at VALADDR.  The bitfield starts at BITPOS bits and contains
-   BITSIZE bits.
 
-   Extracting bits depends on endianness of the machine.  Compute the
-   number of least significant bits to discard.  For big endian machines,
-   we compute the total number of bits in the anonymous object, subtract
-   off the bit count from the MSB of the object to the MSB of the
-   bitfield, then the size of the bitfield, which leaves the LSB discard
-   count.  For little endian machines, the discard count is simply the
-   number of bits from the LSB of the anonymous object to the LSB of the
-   bitfield.
+/* Helper function for both unpack_value_bits_as_long and
+   unpack_bits_as_long.  See those functions for more details on the
+   interface; the only difference is that this function accepts either
+   a NULL or a non-NULL ORIGINAL_VALUE.  */
 
-   If the field is signed, we also do sign extension.  */
-
-LONGEST
-unpack_bits_as_long (struct type *field_type, const gdb_byte *valaddr,
-		     int bitpos, int bitsize)
+static int
+unpack_value_bits_as_long_1 (struct type *field_type, const gdb_byte *valaddr,
+			     int embedded_offset, int bitpos, int bitsize,
+			     const struct value *original_value,
+			     LONGEST *result)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (get_type_arch (field_type));
   ULONGEST val;
   ULONGEST valmask;
   int lsbcount;
   int bytes_read;
+  int read_offset;
 
   /* Read the minimum number of bytes required; there may not be
      enough bytes to read an entire ULONGEST.  */
@@ -2565,7 +2559,14 @@ unpack_bits_as_long (struct type *field_type, const gdb_byte *valaddr,
   else
     bytes_read = TYPE_LENGTH (field_type);
 
-  val = extract_unsigned_integer (valaddr + bitpos / 8,
+  read_offset = bitpos / 8;
+
+  if (original_value != NULL
+      && !value_bytes_available (original_value, embedded_offset + read_offset,
+				 bytes_read))
+    return 0;
+
+  val = extract_unsigned_integer (valaddr + embedded_offset + read_offset,
 				  bytes_read, byte_order);
 
   /* Extract bits.  See comment above.  */
@@ -2591,20 +2592,118 @@ unpack_bits_as_long (struct type *field_type, const gdb_byte *valaddr,
 	    }
 	}
     }
-  return (val);
+
+  *result = val;
+  return 1;
 }
 
-/* Unpack a field FIELDNO of the specified TYPE, from the anonymous object at
-   VALADDR.  See unpack_bits_as_long for more details.  */
+/* Unpack a bitfield of the specified FIELD_TYPE, from the object at
+   VALADDR + EMBEDDED_OFFSET, and store the result in *RESULT.
+   VALADDR points to the contents of ORIGINAL_VALUE, which must not be
+   NULL.  The bitfield starts at BITPOS bits and contains BITSIZE
+   bits.
 
-LONGEST
-unpack_field_as_long (struct type *type, const gdb_byte *valaddr, int fieldno)
+   Returns false if the value contents are unavailable, otherwise
+   returns true, indicating a valid value has been stored in *RESULT.
+
+   Extracting bits depends on endianness of the machine.  Compute the
+   number of least significant bits to discard.  For big endian machines,
+   we compute the total number of bits in the anonymous object, subtract
+   off the bit count from the MSB of the object to the MSB of the
+   bitfield, then the size of the bitfield, which leaves the LSB discard
+   count.  For little endian machines, the discard count is simply the
+   number of bits from the LSB of the anonymous object to the LSB of the
+   bitfield.
+
+   If the field is signed, we also do sign extension.  */
+
+int
+unpack_value_bits_as_long (struct type *field_type, const gdb_byte *valaddr,
+			   int embedded_offset, int bitpos, int bitsize,
+			   const struct value *original_value,
+			   LONGEST *result)
+{
+  gdb_assert (original_value != NULL);
+
+  return unpack_value_bits_as_long_1 (field_type, valaddr, embedded_offset,
+				      bitpos, bitsize, original_value, result);
+
+}
+
+/* Unpack a field FIELDNO of the specified TYPE, from the object at
+   VALADDR + EMBEDDED_OFFSET.  VALADDR points to the contents of
+   ORIGINAL_VALUE.  See unpack_value_bits_as_long for more
+   details.  */
+
+static int
+unpack_value_field_as_long_1 (struct type *type, const gdb_byte *valaddr,
+			      int embedded_offset, int fieldno,
+			      const struct value *val, LONGEST *result)
 {
   int bitpos = TYPE_FIELD_BITPOS (type, fieldno);
   int bitsize = TYPE_FIELD_BITSIZE (type, fieldno);
   struct type *field_type = TYPE_FIELD_TYPE (type, fieldno);
 
-  return unpack_bits_as_long (field_type, valaddr, bitpos, bitsize);
+  return unpack_value_bits_as_long_1 (field_type, valaddr, embedded_offset,
+				      bitpos, bitsize, val,
+				      result);
+}
+
+/* Unpack a field FIELDNO of the specified TYPE, from the object at
+   VALADDR + EMBEDDED_OFFSET.  VALADDR points to the contents of
+   ORIGINAL_VALUE, which must not be NULL.  See
+   unpack_value_bits_as_long for more details.  */
+
+int
+unpack_value_field_as_long (struct type *type, const gdb_byte *valaddr,
+			    int embedded_offset, int fieldno,
+			    const struct value *val, LONGEST *result)
+{
+  gdb_assert (val != NULL);
+
+  return unpack_value_field_as_long_1 (type, valaddr, embedded_offset,
+				       fieldno, val, result);
+}
+
+/* Unpack a field FIELDNO of the specified TYPE, from the anonymous
+   object at VALADDR.  See unpack_value_bits_as_long for more details.
+   This function differs from unpack_value_field_as_long in that it
+   operates without a struct value object.  */
+
+LONGEST
+unpack_field_as_long (struct type *type, const gdb_byte *valaddr, int fieldno)
+{
+  LONGEST result;
+
+  unpack_value_field_as_long_1 (type, valaddr, 0, fieldno, NULL, &result);
+  return result;
+}
+
+/* Return a new value with type TYPE, which is FIELDNO field of the
+   object at VALADDR + EMBEDDEDOFFSET.  VALADDR points to the contents
+   of VAL.  If the VAL's contents required to extract the bitfield
+   from are unavailable, the new value is correspondingly marked as
+   unavailable.  */
+
+struct value *
+value_field_bitfield (struct type *type, int fieldno,
+		      const gdb_byte *valaddr,
+		      int embedded_offset, const struct value *val)
+{
+  LONGEST l;
+
+  if (!unpack_value_field_as_long (type, valaddr, embedded_offset, fieldno,
+				   val, &l))
+    {
+      struct type *field_type = TYPE_FIELD_TYPE (type, fieldno);
+      struct value *retval = allocate_value (field_type);
+      mark_value_bytes_unavailable (retval, 0, TYPE_LENGTH (field_type));
+      return retval;
+    }
+  else
+    {
+      return value_from_longest (TYPE_FIELD_TYPE (type, fieldno), l);
+    }
 }
 
 /* Modify the value of a bitfield.  ADDR points to a block of memory in

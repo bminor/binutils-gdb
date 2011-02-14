@@ -1,5 +1,36 @@
 2011-02-14  Pedro Alves  <pedro@codesourcery.com>
 
+	* value.h (unpack_bits_as_long): Delete declaration.
+	(unpack_value_bits_as_long): Declare.
+	(unpack_value_field_as_long): Declare.
+	(value_field_bitfield): Declare.
+	* value.c (unpack_bits_as_long): Rename to...
+	(unpack_value_bits_as_long_1): ... this.  Add embedded_offset and
+	value parameters.  Return the extracted result in a new output
+	parameter.  If the value contents are unavailable, return false,
+	otherwise return true.
+	(unpack_value_bits_as_long): New.
+	(unpack_field_as_long): Rename to...
+	(unpack_value_field_as_long_1): ... this.  Add embedded_offset and
+	Add embedded_offset and value parameters.  Return the extracted
+	result in a new output parameter. If the value contents are
+	unavailable, return false, otherwise return true.
+	(unpack_value_field_as_long): New.
+	(unpack_field_as_long_1): New.
+	(unpack_field_as_long): Reimplement as wrapper around
+	unpack_value_field_as_long_1.
+	(value_field_bitfield): New function.
+	* valops.c (value_fetch_lazy): When fetching a bitfield, use
+	unpack_value_bits_as_long.  Mark the value as unavailable, if it
+	is unavailable.
+	* jv-valprint.c (java_print_value_fields): Use
+	value_field_bitfield.
+	* p-valprint.c (pascal_object_print_value_fields): Use
+	value_field_bitfield.
+	* cp-valprint.c (cp_print_value_fields): Use value_field_bitfield.
+
+2011-02-14  Pedro Alves  <pedro@codesourcery.com>
+
 	* value.c (get_internalvar_integer): Also return the int value of
 	TYPE_CODE_INT INTERNALVAR_VALUE values.
 	(set_internalvar): Don't special case TYPE_CODE_INT.

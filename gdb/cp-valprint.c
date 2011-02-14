@@ -323,9 +323,8 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 		  struct value_print_options opts = *options;
 
 		  opts.deref_ref = 0;
-		  v = value_from_longest
-		    (TYPE_FIELD_TYPE (type, i), 
-		     unpack_field_as_long (type, valaddr + offset, i));
+
+		  v = value_field_bitfield (type, i, valaddr, offset, val);
 
 		  common_val_print (v, stream, recurse + 1, &opts,
 				    current_language);
