@@ -129,19 +129,19 @@ fmtconst (const_forms_t cf, TIword x, bfd_vma pc, disassemble_info *outf)
       if (constant_formats[cf].pcrel)
 	ea += pc;
 
-     /* truncate to 32-bits for proper symbol lookup/matching */
-     ea = (bu32)ea;
+      /* truncate to 32-bits for proper symbol lookup/matching */
+      ea = (bu32)ea;
 
-     if (outf->symbol_at_address_func (ea, outf) || !constant_formats[cf].exact)
-       {
+      if (outf->symbol_at_address_func (ea, outf) || !constant_formats[cf].exact)
+	{
 	  outf->print_address_func (ea, outf);
 	  return "";
-       }
-     else
-       {
+	}
+      else
+	{
 	  sprintf (buf, "%lx", (unsigned long) x);
 	  return buf;
-       }
+	}
     }
 
   /* Negative constants have an implied sign bit.  */
@@ -319,7 +319,7 @@ static const enum machine_registers decode_pregs[] =
 
 #define pregs(x)	REGNAME (decode_pregs[(x) & 7])
 #define spfp(x)		REGNAME (decode_spfp[(x) & 1])
-#define dregs_hilo(x,i)	REGNAME (decode_dregs_hilo[((i) << 3)|x])
+#define dregs_hilo(x, i)	REGNAME (decode_dregs_hilo[((i) << 3) | (x)])
 #define accum_ext(x)	REGNAME (decode_accum_ext[(x) & 1])
 #define accum_word(x)	REGNAME (decode_accum_word[(x) & 1])
 #define accum(x)	REGNAME (decode_accum[(x) & 1])
@@ -358,7 +358,7 @@ static const enum machine_registers decode_gregs[] =
   REG_P0, REG_P1, REG_P2, REG_P3, REG_P4, REG_P5, REG_SP, REG_FP,
 };
 
-#define gregs(x,i) REGNAME (decode_gregs[((i) << 3)|x])
+#define gregs(x, i) REGNAME (decode_gregs[((i) << 3) | (x)])
 
 /* [dregs pregs (iregs mregs) (bregs lregs)].  */
 static const enum machine_registers decode_regs[] =
@@ -369,7 +369,7 @@ static const enum machine_registers decode_regs[] =
   REG_B0, REG_B1, REG_B2, REG_B3, REG_L0, REG_L1, REG_L2, REG_L3,
 };
 
-#define regs(x,i) REGNAME (decode_regs[((i) << 3)|x])
+#define regs(x, i) REGNAME (decode_regs[((i) << 3) | (x)])
 
 /* [dregs pregs (iregs mregs) (bregs lregs) Low Half].  */
 static const enum machine_registers decode_regs_lo[] =
@@ -380,7 +380,8 @@ static const enum machine_registers decode_regs_lo[] =
   REG_BL0, REG_BL1, REG_BL2, REG_BL3, REG_LL0, REG_LL1, REG_LL2, REG_LL3,
 };
 
-#define regs_lo(x,i) REGNAME (decode_regs_lo[((i) << 3)|x])
+#define regs_lo(x, i) REGNAME (decode_regs_lo[((i) << 3) | (x)])
+
 /* [dregs pregs (iregs mregs) (bregs lregs) High Half].  */
 static const enum machine_registers decode_regs_hi[] =
 {
@@ -390,7 +391,7 @@ static const enum machine_registers decode_regs_hi[] =
   REG_BH0, REG_BH1, REG_BH2, REG_BH3, REG_LH0, REG_LH1, REG_LH2, REG_LH3,
 };
 
-#define regs_hi(x,i) REGNAME (decode_regs_hi[((i) << 3)|x])
+#define regs_hi(x, i) REGNAME (decode_regs_hi[((i) << 3) | (x)])
 
 static const enum machine_registers decode_statbits[] =
 {
@@ -443,7 +444,7 @@ static const enum machine_registers decode_allregs[] =
 #define allreg(r,g)	(!IS_RESERVEDREG (g, r))
 #define mostreg(r,g)	(!(IS_DREG (g, r) || IS_PREG (g, r) || IS_RESERVEDREG (g, r)))
 
-#define allregs(x,i)	REGNAME (decode_allregs[((i) << 3) | x])
+#define allregs(x, i)	REGNAME (decode_allregs[((i) << 3) | (x)])
 #define uimm16s4(x)	fmtconst (c_uimm16s4, x, 0, outf)
 #define uimm16s4d(x)	fmtconst (c_uimm16s4d, x, 0, outf)
 #define pcrel4(x)	fmtconst (c_pcrel4, x, pc, outf)
@@ -560,7 +561,7 @@ aligndir (int r0, disassemble_info *outf)
 }
 
 static int
-decode_multfunc (int h0, int h1, int src0, int src1, disassemble_info * outf)
+decode_multfunc (int h0, int h1, int src0, int src1, disassemble_info *outf)
 {
   const char *s0, *s1;
 
@@ -581,7 +582,7 @@ decode_multfunc (int h0, int h1, int src0, int src1, disassemble_info * outf)
 }
 
 static int
-decode_macfunc (int which, int op, int h0, int h1, int src0, int src1, disassemble_info * outf)
+decode_macfunc (int which, int op, int h0, int h1, int src0, int src1, disassemble_info *outf)
 {
   const char *a;
   const char *sop = "<unknown op>";
@@ -674,13 +675,13 @@ struct saved_state
   int msize;
   unsigned char *memory;
   unsigned long bfd_mach;
-}  saved_state;
+} saved_state;
 
 #define DREG(x)         (saved_state.dpregs[x])
-#define GREG(x,i)       DPREG ((x) | (i << 3))
+#define GREG(x, i)      DPREG ((x) | ((i) << 3))
 #define DPREG(x)        (saved_state.dpregs[x])
 #define DREG(x)         (saved_state.dpregs[x])
-#define PREG(x)         (saved_state.dpregs[x + 8])
+#define PREG(x)         (saved_state.dpregs[(x) + 8])
 #define SPREG           PREG (6)
 #define FPREG           PREG (7)
 #define IREG(x)         (saved_state.iregs[x])
@@ -1379,7 +1380,7 @@ decode_REGMV_0 (TIword iw0, disassemble_info *outf)
   int src = ((iw0 >> RegMv_src_bits) & RegMv_src_mask);
   int dst = ((iw0 >> RegMv_dst_bits) & RegMv_dst_mask);
 
- /* Reserved slots cannot be a src/dst.  */
+  /* Reserved slots cannot be a src/dst.  */
   if (IS_RESERVEDREG (gs, src) || IS_RESERVEDREG (gd, dst))
     goto invalid_move;
 
@@ -2086,16 +2087,16 @@ decode_dagMODik_0 (TIword iw0, disassemble_info *outf)
   else
     return 0;
 
- if (! parallel )
-   {
-     OUTS (outf, ";\t\t/* (  ");
-     if (op == 0 || op == 1)
-       OUTS (outf, "2");
-     else if (op == 2 || op == 3)
+  if (! parallel)
+    {
+      OUTS (outf, ";\t\t/* (  ");
+      if (op == 0 || op == 1)
+	OUTS (outf, "2");
+      else if (op == 2 || op == 3)
 	OUTS (outf, "4");
-     OUTS (outf, ") */");
-    comment = 1;
-  }
+      OUTS (outf, ") */");
+      comment = 1;
+    }
 
   return 2;
 }
@@ -2739,7 +2740,7 @@ decode_LDIMMhalf_0 (TIword iw0, TIword iw1, disassemble_info *outf)
       OUTS (outf, " (X)");
     }
   else if (H == 0 && S == 1 && Z == 0)
-   {
+    {
       OUTS (outf, regs (reg, grp));
       OUTS (outf, " = ");
       OUTS (outf, imm16 (hword));
@@ -2796,14 +2797,14 @@ decode_LDIMMhalf_0 (TIword iw0, TIword iw1, disassemble_info *outf)
     }
   if (S == 1 || Z == 1)
     {
-       OUTS (outf, ";\t\t/*\t\t");
-       OUTS (outf, regs (reg, grp));
-       OUTS (outf, "=0x");
-       OUTS (outf, huimm32e (*pval));
-       OUTS (outf, "(");
-       OUTS (outf, imm32 (*pval));
-       OUTS (outf, ") */");
-       comment = 1;
+      OUTS (outf, ";\t\t/*\t\t");
+      OUTS (outf, regs (reg, grp));
+      OUTS (outf, "=0x");
+      OUTS (outf, huimm32e (*pval));
+      OUTS (outf, "(");
+      OUTS (outf, imm32 (*pval));
+      OUTS (outf, ") */");
+      comment = 1;
     }
   return 4;
 }
@@ -4364,7 +4365,6 @@ decode_dsp32shiftimm_0 (TIword iw0, TIword iw1, disassemble_info *outf)
   int sopcde   = ((iw0 >> (DSP32ShiftImm_sopcde_bits - 16)) & DSP32ShiftImm_sopcde_mask);
   int HLs      = ((iw1 >> DSP32ShiftImm_HLs_bits) & DSP32ShiftImm_HLs_mask);
 
-
   if (sop == 0 && sopcde == 0)
     {
       OUTS (outf, (HLs & 2) ? dregs_hi (dst0) : dregs_lo (dst0));
@@ -4692,8 +4692,8 @@ _print_insn_bfin (bfd_vma pc, disassemble_info *outf)
     {
       if (parallel)
 	{
-	   OUTS (outf, "ILLEGAL");
-	   return 0;
+	  OUTS (outf, "ILLEGAL");
+	  return 0;
 	}
       OUTS (outf, "MNOP");
       return 4;
@@ -4779,7 +4779,6 @@ _print_insn_bfin (bfd_vma pc, disassemble_info *outf)
   return rv;
 }
 
-
 int
 print_insn_bfin (bfd_vma pc, disassemble_info *outf)
 {
@@ -4808,7 +4807,7 @@ print_insn_bfin (bfd_vma pc, disassemble_info *outf)
       len = _print_insn_bfin (pc + 4, outf);
       outf->fprintf_func (outf->stream, " || ");
       if (len != 2)
-	  legal = 0;
+	legal = 0;
       len = _print_insn_bfin (pc + 6, outf);
       if (len != 2)
 	legal = 0;

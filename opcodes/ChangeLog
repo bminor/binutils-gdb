@@ -1,5 +1,9 @@
 2011-02-14  Mike Frysinger  <vapier@gentoo.org>
 
+	* bfin-dis.c: Add whitespace/parenthesis where needed.
+
+2011-02-14  Mike Frysinger  <vapier@gentoo.org>
+
 	* bfin-dis.c (decode_LoopSetup_0): Return when reg is greater
 	than 7.
 
