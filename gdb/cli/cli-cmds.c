@@ -1533,13 +1533,13 @@ Generic command for showing things about the debugger."),
   /* Another way to get at the same thing.  */
   add_info ("set", show_command, _("Show all GDB settings."));
 
-  add_cmd ("commands", no_class, show_commands, _("\
+  add_cmd ("commands", no_set_class, show_commands, _("\
 Show the history of commands you typed.\n\
 You can supply a command number to start with, or a `+' to start after\n\
 the previous command number shown."),
 	   &showlist);
 
-  add_cmd ("version", no_class, show_version,
+  add_cmd ("version", no_set_class, show_version,
 	   _("Show what version of GDB this is."), &showlist);
 
   add_com ("while", class_support, while_command, _("\

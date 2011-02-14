@@ -3074,7 +3074,7 @@ A few convenience variables are given values automatically:\n\
 \"$__\" holds the contents of the last address examined with \"x\"."),
 	   &showlist);
 
-  add_cmd ("values", no_class, show_values, _("\
+  add_cmd ("values", no_set_class, show_values, _("\
 Elements of value history around item number IDX (or last ten)."),
 	   &showlist);
 
