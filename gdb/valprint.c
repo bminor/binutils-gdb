@@ -1242,9 +1242,11 @@ val_print_array_elements (struct type *type,
       rep1 = i + 1;
       reps = 1;
       while (rep1 < len
-	     && memcmp (valaddr + embedded_offset + i * eltlen,
-			valaddr + embedded_offset + rep1 * eltlen,
-			eltlen) == 0)
+	     && value_available_contents_eq (val,
+					     embedded_offset + i * eltlen,
+					     val,
+					     embedded_offset + rep1 * eltlen,
+					     eltlen))
 	{
 	  ++reps;
 	  ++rep1;

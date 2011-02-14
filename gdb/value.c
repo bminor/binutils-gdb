@@ -496,6 +496,107 @@ mark_value_bytes_unavailable (struct value *value, int offset, int length)
     }
 }
 
+/* Find the first range in RANGES that overlaps the range defined by
+   OFFSET and LENGTH, starting at element POS in the RANGES vector,
+   Returns the index into RANGES where such overlapping range was
+   found, or -1 if none was found.  */
+
+static int
+find_first_range_overlap (VEC(range_s) *ranges, int pos,
+			  int offset, int length)
+{
+  range_s *r;
+  int i;
+
+  for (i = pos; VEC_iterate (range_s, ranges, i, r); i++)
+    if (ranges_overlap (r->offset, r->length, offset, length))
+      return i;
+
+  return -1;
+}
+
+int
+value_available_contents_eq (const struct value *val1, int offset1,
+			     const struct value *val2, int offset2,
+			     int length)
+{
+  int org_len = length;
+  int org_offset1 = offset1;
+  int org_offset2 = offset2;
+  int idx1 = 0, idx2 = 0;
+  int prev_avail;
+
+  /* This routine is used by printing routines, where we should
+     already have read the value.  Note that we only know whether a
+     value chunk is available if we've tried to read it.  */
+  gdb_assert (!val1->lazy && !val2->lazy);
+
+  /* The offset from either ORG_OFFSET1 or ORG_OFFSET2 where the
+     available contents we haven't compared yet start.  */
+  prev_avail = 0;
+
+  while (length > 0)
+    {
+      range_s *r1, *r2;
+      ULONGEST l1, h1;
+      ULONGEST l2, h2;
+
+      idx1 = find_first_range_overlap (val1->unavailable, idx1,
+				       offset1, length);
+      idx2 = find_first_range_overlap (val2->unavailable, idx2,
+				       offset2, length);
+
+      /* The usual case is for both values to be completely available.  */
+      if (idx1 == -1 && idx2 == -1)
+	return (memcmp (val1->contents + org_offset1 + prev_avail,
+			val2->contents + org_offset2 + prev_avail,
+			org_len - prev_avail) == 0);
+      /* The contents only match equal if the available set matches as
+	 well.  */
+      else if (idx1 == -1 || idx2 == -1)
+	return 0;
+
+      gdb_assert (idx1 != -1 && idx2 != -1);
+
+      r1 = VEC_index (range_s, val1->unavailable, idx1);
+      r2 = VEC_index (range_s, val2->unavailable, idx2);
+
+      /* Get the unavailable windows intersected by the incoming
+	 ranges.  The first and last ranges that overlap the argument
+	 range may be wider than said incoming arguments ranges.  */
+      l1 = max (offset1, r1->offset);
+      h1 = min (offset1 + length, r1->offset + r1->length);
+
+      l2 = max (offset2, r2->offset);
+      h2 = min (offset2 + length, r2->offset + r2->length);
+
+      /* Make them relative to the respective start offsets, so we can
+	 compare them for equality.  */
+      l1 -= offset1;
+      h1 -= offset1;
+
+      l2 -= offset2;
+      h2 -= offset2;
+
+      /* Different availability, no match.  */
+      if (l1 != l2 || h1 != h2)
+	return 0;
+
+      /* Compare the _available_ contents.  */
+      if (memcmp (val1->contents + org_offset1 + prev_avail,
+		  val2->contents + org_offset2 + prev_avail,
+		  l2 - prev_avail) != 0)
+	return 0;
+
+      prev_avail += h1;
+      length -= h1;
+      offset1 += h1;
+      offset2 += h1;
+    }
+
+  return 1;
+}
+
 /* Prototypes for local functions.  */
 
 static void show_values (char *, int);

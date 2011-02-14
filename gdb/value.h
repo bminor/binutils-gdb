@@ -374,6 +374,31 @@ extern int value_bytes_available (const struct value *value,
 extern void mark_value_bytes_unavailable (struct value *value,
 					  int offset, int length);
 
+/* Compare LENGTH bytes of VAL1's contents starting at OFFSET1 with
+   LENGTH bytes of VAL2's contents starting at OFFSET2.  Returns true
+   iff the set of available contents match.  Unavailable contents
+   compare equal with unavailable contents, and different with any
+   available byte.  For example, if 'x's represent an unavailable
+   byte, and 'V' and 'Z' represent different available bytes, in a
+   value with length 16:
+
+   offset:   0   4   8   12  16
+   contents: xxxxVVVVxxxxVVZZ
+
+   then:
+
+   value_available_contents_eq(val, 0, val, 8, 6) => 1
+   value_available_contents_eq(val, 0, val, 4, 4) => 1
+   value_available_contents_eq(val, 0, val, 8, 8) => 0
+   value_available_contents_eq(val, 4, val, 12, 2) => 1
+   value_available_contents_eq(val, 4, val, 12, 4) => 0
+   value_available_contents_eq(val, 3, val, 4, 4) => 0
+*/
+
+extern int value_available_contents_eq (const struct value *val1, int offset1,
+					const struct value *val2, int offset2,
+					int length);
+
 /* Read LENGTH bytes of memory starting at MEMADDR into BUFFER, which
    is (or will be copied to) VAL's contents buffer offset by
    EMBEDDED_OFFSET (that is, to &VAL->contents[EMBEDDED_OFFSET]).

@@ -179,8 +179,11 @@ java_value_print (struct value *val, struct ui_file *stream,
 		  set_value_lazy (next_v, 1);
 		  set_value_offset (next_v, value_offset (next_v)
 				    + TYPE_LENGTH (el_type));
-		  if (memcmp (value_contents (v), value_contents (next_v),
-			      TYPE_LENGTH (el_type)) != 0)
+		  value_fetch_lazy (next_v);
+		  if (!(value_available_contents_eq
+			(v, value_embedded_offset (v),
+			 next_v, value_embedded_offset (next_v),
+			 TYPE_LENGTH (el_type))))
 		    break;
 		}
 

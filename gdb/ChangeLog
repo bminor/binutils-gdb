@@ -1,5 +1,17 @@
 2011-02-14  Pedro Alves  <pedro@codesourcery.com>
 
+	* value.h (value_available_contents_eq): Declare.
+	* value.c (find_first_range_overlap): New function.
+	(value_available_contents_eq): New function.
+	* valprint.c (val_print_array_elements): Use
+	value_available_contents_eq.
+	* ada-valprint.c (val_print_packed_array_elements): Use
+	value_available_contents_eq.
+	* jv-valprint.c (java_value_print): Use
+	value_available_contents_eq.
+
+2011-02-14  Pedro Alves  <pedro@codesourcery.com>
+
 	* target.c (target_read_live_memory): New function.
 	(memory_xfer_live_readonly_partial): New.
 	(memory_xfer_partial): If reading from a traceframe, fallback to
