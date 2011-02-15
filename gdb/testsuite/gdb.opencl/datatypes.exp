@@ -44,7 +44,7 @@ gdb_test_no_output "set language opencl" "No prompt when setting the language to
 
 # Check OpenCL data types (GDB)
 gdb_test "whatis bool" "type = bool"
-gdb_test "p sizeof(bool)" " = 4"
+gdb_test "p sizeof(bool)" " = 1"
 
 gdb_test "whatis char" "type = char"
 gdb_test "p sizeof(char)" " = 1"
@@ -229,7 +229,7 @@ set have_cl_khr_fp16 [get_integer_valueof "have_cl_khr_fp16" 0]
 
 # Check OpenCL data types (DWARF)
 gdb_test "whatis b" "type = bool"
-gdb_test "p sizeof(b)" " = 4"
+gdb_test "p sizeof(b)" " = 1"
 gdb_test "print b" " = 0"
 
 gdb_test "whatis c" "type = char"

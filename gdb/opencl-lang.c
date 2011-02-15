@@ -1172,7 +1172,7 @@ build_opencl_types (struct gdbarch *gdbarch)
     = arch_float_type (gdbarch, 64, "double", floatformats_ieee_double);
   BUILD_OCL_VTYPES (double);
   builtin_opencl_type->builtin_bool
-    = arch_boolean_type (gdbarch, 32, 1, "bool");
+    = arch_boolean_type (gdbarch, 8, 1, "bool");
   builtin_opencl_type->builtin_unsigned_char
     = arch_integer_type (gdbarch, 8, 1, "unsigned char");
   builtin_opencl_type->builtin_unsigned_short

@@ -1,3 +1,7 @@
+2011-02-15  Ken Werner  <ken.werner@de.ibm.com>
+
+	* gdb.opencl/datatypes.exp: Expect the size of a bool to be one byte.
+
 2011-02-15  Yao Qi  <yao@codesourcery.com>
 
 	PR tdep/12352
