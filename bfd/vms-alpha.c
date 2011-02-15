@@ -8255,7 +8255,10 @@ alpha_vms_link_add_archive_symbols (bfd *abfd, struct bfd_link_info *info)
 	return FALSE;
 
       if (element->archive_pass == -1 || element->archive_pass == pass)
-        continue;
+        {
+          /* Next symbol if this archive is wrong or already handled.  */
+          continue;
+        }
 
       if (! bfd_check_format (element, bfd_object))
         {
