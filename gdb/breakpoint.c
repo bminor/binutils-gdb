@@ -2218,9 +2218,10 @@ create_internal_breakpoint (struct gdbarch *gdbarch,
 }
 
 static void
-create_overlay_event_breakpoint (char *func_name)
+create_overlay_event_breakpoint (void)
 {
   struct objfile *objfile;
+  const char *const func_name = "_ovly_debug_event";
 
   ALL_OBJFILES (objfile)
     {
@@ -2251,48 +2252,64 @@ create_overlay_event_breakpoint (char *func_name)
 }
 
 static void
-create_longjmp_master_breakpoint (char *func_name)
+create_longjmp_master_breakpoint (void)
 {
   struct program_space *pspace;
-  struct objfile *objfile;
   struct cleanup *old_chain;
 
   old_chain = save_current_program_space ();
 
   ALL_PSPACES (pspace)
-  ALL_OBJFILES (objfile)
-    {
-      struct breakpoint *b;
-      struct minimal_symbol *m;
+  {
+    struct objfile *objfile;
 
-      if (!gdbarch_get_longjmp_target_p (get_objfile_arch (objfile)))
+    set_current_program_space (pspace);
+
+    ALL_OBJFILES (objfile)
+    {
+      const char *const longjmp_names[]
+	= { "longjmp", "_longjmp", "siglongjmp", "_siglongjmp" };
+      const int num_longjmp_names
+	= sizeof (longjmp_names) / sizeof (longjmp_names[0]);
+      int i;
+      struct gdbarch *gdbarch;
+
+      gdbarch = get_objfile_arch (objfile);
+      if (!gdbarch_get_longjmp_target_p (gdbarch))
 	continue;
 
-      set_current_program_space (pspace);
+      for (i = 0; i < num_longjmp_names; i++)
+	{
+	  struct breakpoint *b;
+	  struct minimal_symbol *m;
+	  const char *func_name;
 
-      m = lookup_minimal_symbol_text (func_name, objfile);
-      if (m == NULL)
-        continue;
+	  func_name = longjmp_names[i];
+	  m = lookup_minimal_symbol_text (func_name, objfile);
+	  if (m == NULL)
+	    continue;
 
-      b = create_internal_breakpoint (get_objfile_arch (objfile),
-				      SYMBOL_VALUE_ADDRESS (m),
-                                      bp_longjmp_master);
-      b->addr_string = xstrdup (func_name);
-      b->enable_state = bp_disabled;
+	  b = create_internal_breakpoint (gdbarch,
+					  SYMBOL_VALUE_ADDRESS (m),
+					  bp_longjmp_master);
+	  b->addr_string = xstrdup (func_name);
+	  b->enable_state = bp_disabled;
+	}
     }
+  }
   update_global_location_list (1);
 
   do_cleanups (old_chain);
 }
 
-/* Create a master std::terminate breakpoint.  The actual function
-   looked for is named FUNC_NAME.  */
+/* Create a master std::terminate breakpoint.  */
 static void
-create_std_terminate_master_breakpoint (const char *func_name)
+create_std_terminate_master_breakpoint (void)
 {
   struct program_space *pspace;
   struct objfile *objfile;
   struct cleanup *old_chain;
+  const char *const func_name = "std::terminate()";
 
   old_chain = save_current_program_space ();
 
@@ -2462,12 +2479,9 @@ update_breakpoints_after_exec (void)
       }
   }
   /* FIXME what about longjmp breakpoints?  Re-create them here?  */
-  create_overlay_event_breakpoint ("_ovly_debug_event");
-  create_longjmp_master_breakpoint ("longjmp");
-  create_longjmp_master_breakpoint ("_longjmp");
-  create_longjmp_master_breakpoint ("siglongjmp");
-  create_longjmp_master_breakpoint ("_siglongjmp");
-  create_std_terminate_master_breakpoint ("std::terminate()");
+  create_overlay_event_breakpoint ();
+  create_longjmp_master_breakpoint ();
+  create_std_terminate_master_breakpoint ();
   create_exception_master_breakpoint ();
 }
 
@@ -10719,12 +10733,9 @@ breakpoint_re_set (void)
 
   do_cleanups (old_chain);
 
-  create_overlay_event_breakpoint ("_ovly_debug_event");
-  create_longjmp_master_breakpoint ("longjmp");
-  create_longjmp_master_breakpoint ("_longjmp");
-  create_longjmp_master_breakpoint ("siglongjmp");
-  create_longjmp_master_breakpoint ("_siglongjmp");
-  create_std_terminate_master_breakpoint ("std::terminate()");
+  create_overlay_event_breakpoint ();
+  create_longjmp_master_breakpoint ();
+  create_std_terminate_master_breakpoint ();
   create_exception_master_breakpoint ();
 }
 

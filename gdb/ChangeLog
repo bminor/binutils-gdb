@@ -1,3 +1,13 @@
+2011-02-15  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* breakpoint.c ((create_overlay_event_breakpoint): Const-propagate
+	parameter value.
+	(create_longjmp_master_breakpoint): Loop over longjmp names.
+	(create_std_terminate_master_breakpoint): Const-propagate parameter
+	value.
+	(update_breakpoints_after_exec): Adjust.
+	(breakpoint_re_set): Adjust.
+
 2011-02-15  Michael Snyder  <msnyder@vmware.com>
 
 	* command.h (enum command_class): New class 'no_set_class', for
