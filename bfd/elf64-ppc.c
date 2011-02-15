@@ -8424,6 +8424,12 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 	      bfd_size_type sz;
 
 	      /* Remove unused toc relocs, and adjust those we keep.  */
+	      if (toc_relocs == NULL)
+		toc_relocs = _bfd_elf_link_read_relocs (ibfd, toc, NULL, NULL,
+							info->keep_memory);
+	      if (toc_relocs == NULL)
+		goto error_ret;
+
 	      wrel = toc_relocs;
 	      for (rel = toc_relocs; rel < toc_relocs + toc->reloc_count; ++rel)
 		if ((skip[rel->r_offset >> 3]
@@ -8445,7 +8451,8 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 	      rel_hdr->sh_size = toc->reloc_count * sz;
 	    }
 	}
-      else if (elf_section_data (toc)->relocs != toc_relocs)
+      else if (toc_relocs != NULL
+	       && elf_section_data (toc)->relocs != toc_relocs)
 	free (toc_relocs);
 
       if (local_syms != NULL
