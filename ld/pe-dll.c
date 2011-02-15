@@ -720,9 +720,8 @@ process_def_file_and_drectve (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *
 	      if (lang_elf_version_info && would_export)
 		{
 		  bfd_boolean hide = 0;
-		  char ofs = pe_details->underscored && symbols[j]->name[0] == '_';
 		  (void) bfd_find_version_for_sym (lang_elf_version_info,
-				symbols[j]->name + ofs, &hide);
+				symbols[j]->name, &hide);
 		  would_export = !hide;
 		}
 	      if (would_export)

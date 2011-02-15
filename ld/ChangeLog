@@ -1,3 +1,8 @@
+2011-02-15  Kai Tietz  <kai.tietz@onevision.com>
+
+	* pe-dll.c (process_def_file_and_drectve): Don't strip
+	leading underscore from symbol by calling bfd_find_version_for_sym.
+
 2011-02-14  Mike Frysinger  <vapier@gentoo.org>
 
 	* ldlang.c (lang_vers_match): Declare a new c_sym, assign it to
