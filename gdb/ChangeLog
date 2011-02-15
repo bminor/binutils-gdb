@@ -1,3 +1,9 @@
+2011-02-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* Makefile.in (ACLOCAL_AMFLAGS): Add `-I ../config'.
+	* aclocal.m4: Regenerated with aclocal-1.11.1.
+	* common/configure: Regenerate with autoconf-2.64.
+
 2011-02-15  Ken Werner  <ken.werner@de.ibm.com>
 
 	* opencl-lang.c (build_opencl_types): Set the size of the built-in

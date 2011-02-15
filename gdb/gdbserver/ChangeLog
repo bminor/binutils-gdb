@@ -1,3 +1,7 @@
+2011-02-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* aclocal.m4: Regenerated with aclocal-1.11.1.
+
 2011-02-14  Pedro Alves  <pedro@codesourcery.com>
 
 	* server.c (handle_qxfer_traceframe_info): New.

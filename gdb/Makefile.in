@@ -1349,7 +1349,7 @@ config.status: $(srcdir)/configure configure.tgt configure.host
 	$(SHELL) config.status --recheck
 
 ACLOCAL = aclocal
-ACLOCAL_AMFLAGS = -I gnulib/m4
+ACLOCAL_AMFLAGS = -I gnulib/m4 -I ../config
 aclocal_m4_deps = \
 	configure.ac \
 	gnulib/m4/extensions.m4 \
