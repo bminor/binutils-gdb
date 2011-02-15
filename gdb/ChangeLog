@@ -1,3 +1,15 @@
+2011-02-15  Michael Snyder  <msnyder@vmware.com>
+
+	* command.h (enum command_class): New class 'no_set_class', for
+	"show" commands without a corresponding "set" command.
+	* value.c (_initialize_values): Use 'no_set_class' for "show values".
+	* copying.c (_initialize_copying): Ditto for "show copying" and
+	"show warranty".
+	* cli/cli-cmds.c (init_cli_cmds): Ditto for "show commands" and
+	"show version".
+	* cli/cli-setshow.c (cmd_show_list): Skip "show" commands for
+	which there is no corresponding "set" command (eg. "show copying").
+
 2011-02-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* Makefile.in (ACLOCAL_AMFLAGS): Add `-I ../config'.
@@ -29,18 +41,6 @@
 	data from the VMX register.
 	(efpr_pseudo_register_write): Use regcache_raw_write_part to read
 	and write data from/to the VMX register.
-
-2011-02-14  Michael Snyder  <msnyder@vmware.com>
-
-	* command.h (enum command_class): New class 'no_set_class', for
-	"show" commands without a corresponding "set" command.
-	* value.c (_initialize_values): Use 'no_set_class' for "show values".
-	* copying.c (_initialize_copying): Ditto for "show copying" and
-	"show warranty".
-	* cli/cli-cmds.c (init_cli_cmds): Ditto for "show commands" and
-	"show version".
-	* cli/cli-setshow.c (cmd_show_list): Skip "show" commands for
-	which there is no corresponding "set" command (eg. "show copying").
 
 2011-02-14  Pedro Alves  <pedro@codesourcery.com>
 	    Jan Kratochvil  <jan.kratochvil@redhat.com>

@@ -43,6 +43,7 @@
 #include "observer.h"
 #include "annotate.h"
 #include "cli/cli-decode.h"
+#include "gdb_regex.h"
 
 /* Definition of struct thread_info exported to gdbthread.h.  */
 
@@ -954,18 +955,54 @@ No selected thread.  See `help thread'.\n");
     }
 }
 
-
 /* Print information about currently known threads 
 
- * Note: this has the drawback that it _really_ switches
- *       threads, which frees the frame cache.  A no-side
- *       effects info-threads command would be nicer.
- */
+   Optional ARG is a thread id, or list of thread ids.
+
+   Note: this has the drawback that it _really_ switches
+         threads, which frees the frame cache.  A no-side
+         effects info-threads command would be nicer.  */
 
 static void
 info_threads_command (char *arg, int from_tty)
 {
-  print_thread_info (uiout, -1, -1);
+  int tid = -1;
+
+  if (arg == NULL || *arg == '\0')
+    {
+      print_thread_info (uiout, -1, -1);
+      return;
+    }
+
+  while (arg != NULL && *arg != '\0')
+    {
+      int tmp_tid = strtol (arg, &arg, 0);
+      unsigned int highrange;
+
+      if (tmp_tid <= 0)
+	error ("invalid thread id %d\n", tmp_tid);
+
+      tid = tmp_tid;
+      print_thread_info (uiout, tid, -1);
+
+      while (*arg == ' ' || *arg == '\t')
+	++arg;
+
+      if (*arg == '-')
+	{
+	  /* Do a range of threads.  Must be in ascending order.  */
+	  ++arg;	/* Skip the hyphen.  */
+	  highrange = strtoul (arg, &arg, 0);
+	  if (highrange < tid)
+	    error (_("inverted range"));
+
+	  /* Do the threads in the range (first one already done).  */
+	  while (tid < highrange)
+	    {
+	      print_thread_info (uiout, ++tid, -1);
+	    }
+	}
+    }
 }
 
 /* Switch from one thread to another.  */
@@ -1313,6 +1350,60 @@ thread_name_command (char *arg, int from_tty)
   info->name = arg ? xstrdup (arg) : NULL;
 }
 
+/* Find thread ids with a name, target pid, or extra info matching ARG.  */
+
+static void
+thread_find_command (char *arg, int from_tty)
+{
+  struct thread_info *tp;
+  char *tmp;
+  unsigned long match = 0;
+
+  if (arg == NULL || *arg == '\0')
+    error (_("Command requires an argument."));
+
+  tmp = re_comp (arg);
+  if (tmp != 0)
+    error (_("Invalid regexp (%s): %s"), tmp, arg);
+
+  update_thread_list ();
+  for (tp = thread_list; tp; tp = tp->next)
+    {
+      if (tp->name != NULL && re_exec (tp->name))
+	{
+	  printf_filtered (_("Thread %d has name '%s'\n"),
+			   tp->num, tp->name);
+	  match++;
+	}
+
+      tmp = target_thread_name (tp);
+      if (tmp != NULL && re_exec (tmp))
+	{
+	  printf_filtered (_("Thread %d has target name '%s'\n"),
+			   tp->num, tmp);
+	  match++;
+	}
+
+      tmp = target_pid_to_str (tp->ptid);
+      if (tmp != NULL && re_exec (tmp))
+	{
+	  printf_filtered (_("Thread %d has target id '%s'\n"),
+			   tp->num, tmp);
+	  match++;
+	}
+
+      tmp = target_extra_thread_info (tp);
+      if (tmp != NULL && re_exec (tmp))
+	{
+	  printf_filtered (_("Thread %d has extra info '%s'\n"),
+			   tp->num, tmp);
+	  match++;
+	}
+    }
+  if (!match)
+    printf_filtered (_("No threads match '%s'\n"), arg);
+}
+
 /* Print notices when new threads are attached and detached.  */
 int print_thread_events = 1;
 static void
@@ -1403,8 +1494,11 @@ _initialize_thread (void)
 {
   static struct cmd_list_element *thread_apply_list = NULL;
 
-  add_info ("threads", info_threads_command,
-	    _("IDs of currently known threads."));
+  add_info ("threads", info_threads_command, 
+	    _("Display currently known threads.\n\
+Usage: info threads [ID]...\n\
+Optional arguments are thread IDs with spaces between.\n\
+If no arguments, all threads are displayed."));
 
   add_prefix_cmd ("thread", class_run, thread_command, _("\
 Use this command to switch between threads.\n\
@@ -1422,6 +1516,12 @@ The new thread ID must be currently known."),
 	   _("Set the current thread's name.\n\
 Usage: thread name [NAME]\n\
 If NAME is not given, then any existing name is removed."), &thread_cmd_list);
+
+  add_cmd ("find", class_run, thread_find_command, _("\
+Find threads that match a regular expression.\n\
+Usage: thread find REGEXP\n\
+Will display thread ids whose name, target ID, or extra info matches REGEXP."),
+	   &thread_cmd_list);
 
   if (!xdb_commands)
     add_com_alias ("t", "thread", class_run, 1);

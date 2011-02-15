@@ -3,6 +3,10 @@
 
 *** Changes since GDB 7.2
 
+* GDB has a new command: "thread find [REGEXP]".
+  It finds the thread id whose name, target id, or thread extra info
+  matches the given regular expression.
+
 * The "catch syscall" command now works on mips*-linux* targets.
 
 * The -data-disassemble MI command now supports modes 2 and 3 for

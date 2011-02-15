@@ -281,6 +281,8 @@ gdb_test "help info symbol" "Describe what symbol is at location ADDR.*"
 gdb_test "help info target" "Names of targets and files being debugged\.\[\r\n\]+Shows the entire stack of targets currently in use \\(including the exec-file,\[\r\n\]+core-file, and process, if any\\), as well as the symbol file name\." "help info target"
 # test help info terminal
 gdb_test "help info terminal" "Print inferior's saved terminal status\." "help info terminal"
+# test help info threads
+gdb_test "help info threads" "Display currently known threads.*" "help info threads"
 # test help info types
 gdb_test "help info types" "All type names, or those matching REGEXP\." "help info types"
 # test help info variables
@@ -644,6 +646,14 @@ test_prefix_command_help "target" {
 }
 # test help tbreak
 gdb_test "help tbreak" "Set a temporary breakpoint.*" "help tbreak"
+#test help thread
+gdb_test "help thread" "Use this command to switch between threads.*" "help thread"
+# test help thread apply
+gdb_test "help thread apply" "Apply a command to a list of threads.*" "help thread apply"
+# test help thread find
+gdb_test "help thread find" "Find threads that match a regular.*" help thread find"
+# test help thread name
+gdb_test "help thread name" "Set the current thread's name.*" "help thread name"
 # test help tty
 gdb_test "help tty" "Set terminal for future runs of program being debugged\.\[\r\n\]+Usage: set inferior-tty /dev/pts/1" "help tty"
 # test help until "u" abbreviation

@@ -2706,9 +2706,11 @@ number---always a single integer---with each thread in your program.
 
 @table @code
 @kindex info threads
-@item info threads
-Display a summary of all threads currently in your
-program.  @value{GDBN} displays for each thread (in this order):
+@item info threads @r{[}@var{id}@dots{}@r{]}
+Display a summary of all threads currently in your program.  Optional 
+argument @var{id}@dots{} is one or more thread ids separated by spaces, and
+means to print information only about the specified thread or threads.
+@value{GDBN} displays for each thread (in this order):
 
 @enumerate
 @item
@@ -2804,6 +2806,25 @@ determine the name of the thread as given by the OS.  On these
 systems, a name specified with @samp{thread name} will override the
 system-give name, and removing the user-specified name will cause
 @value{GDBN} to once again display the system-specified name.
+
+@kindex thread find
+@cindex search for a thread
+@item thread find [@var{regexp}]
+Search for and display thread ids whose name or @var{systag}
+matches the supplied regular expression.
+
+As well as being the complement to the @samp{thread name} command, 
+this command also allows you to identify a thread by its target 
+@var{systag}.  For instance, on @sc{gnu}/Linux, the target @var{systag}
+is the LWP id.
+
+@smallexample
+(@value{GDBN}) thread find 26688
+Thread 4 has target id 'Thread 0x41e02940 (LWP 26688)'
+(@value{GDBN}) info thread 4
+  Id   Target Id         Frame 
+  4    Thread 0x41e02940 (LWP 26688) 0x00000031ca6cd372 in select ()
+@end smallexample
 
 @kindex set print thread-events
 @cindex print messages on thread start and exit

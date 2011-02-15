@@ -356,6 +356,8 @@ gdb_test "info sources" "No symbol table is loaded.  Use the \"file\" command.*"
 gdb_test_no_output "info target" "info target"
 #test info terminal
 gdb_test "info terminal" "No saved terminal information." "info terminal"
+# test info threads
+gdb_test "info threads" "No threads." "info threads"
 #test info types
 gdb_test "info types" "All defined types:" "info types"
 #test info variables
@@ -779,6 +781,14 @@ if ![istarget "*-*-udi*"] then {
 gdb_test "target" "Argument required .target name.*" "target"
 #test tbreak
 gdb_test "tbreak" "No default breakpoint address now." "tbreak"
+#test thread
+gdb_test "thread" "No thread selected" "thread"
+#test thread apply
+gdb_test "thread apply" "Please specify a thread ID list" "thread apply"
+#test thread find
+gdb_test "thread find" "Command requires an argument." "thread find"
+#test thread name
+gdb_test "thread name" "No thread selected" "thread name"
 #test tty
 gdb_test "tty" "Argument required .filename to set it to\..*" "tty"
 #test until "u" abbreviation

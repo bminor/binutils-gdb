@@ -1,5 +1,10 @@
 2011-02-14  Michael Snyder  <msnyder@vmware.com>
 
+	* gdb.texinfo (threads): Document argument for "info threads" cmd.
+	Document new command "thread find".
+
+2011-02-14  Michael Snyder  <msnyder@vmware.com>
+
 	* gdb.texinfo (Threads): Update example of new thread message.
 
 2011-02-14  Pedro Alves  <pedro@codesourcery.com>

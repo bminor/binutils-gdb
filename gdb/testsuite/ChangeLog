@@ -1,3 +1,9 @@
+2011-02-15  Michael Snyder  <msnyder@vmware.com>
+
+	* gdb.base/default.exp: Add tests for thread commands.
+	* gdb.base/help.exp: Add tests for thread commands.
+	* gdb.threads/thread-find.exp: New test for thread find command.
+
 2011-02-15  Ken Werner  <ken.werner@de.ibm.com>
 
 	* gdb.opencl/datatypes.exp: Expect the size of a bool to be one byte.
@@ -461,7 +467,7 @@
 	updated.
 	* lib/gdb.exp (INTERNAL_GDBFLAGS): Add -data-directory.
 
-2010-11-29  Michael Snyder  <msnyder@msnyder-server.eng.vmware.com>
+2010-11-29  Michael Snyder  <msnyder@vmware.com>
 
 	* gdb.base/callfuncs.exp: Test for skip_float_tests.
 	* gdb.base/call-sc.exp: Ditto.
