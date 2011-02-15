@@ -1,3 +1,9 @@
+2011-02-15  Pedro Alves  <pedro@codesourcery.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* target.c (memory_xfer_live_readonly_partial): Document where to
+	look for interface description.
+
 2011-02-15  Yao Qi  <yao@codesourcery.com>
 
 	PR tdep/12352

@@ -1297,7 +1297,10 @@ target_read_live_memory (enum target_object object,
 
 /* Using the set of read-only target sections of OPS, read live
    read-only memory.  Note that the actual reads start from the
-   top-most target again.  */
+   top-most target again.
+
+   For interface/parameters/return description see target.h,
+   to_xfer_partial.  */
 
 static LONGEST
 memory_xfer_live_readonly_partial (struct target_ops *ops,
