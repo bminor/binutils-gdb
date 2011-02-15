@@ -99,7 +99,7 @@
 /* Determine if regnum is a POWER7 Extended FP register.  */
 #define IS_EFP_PSEUDOREG(tdep, regnum) ((tdep)->ppc_efpr0_regnum >= 0 \
     && (regnum) >= (tdep)->ppc_efpr0_regnum \
-    && (regnum) < (tdep)->ppc_efpr0_regnum + ppc_num_fprs)
+    && (regnum) < (tdep)->ppc_efpr0_regnum + ppc_num_efprs)
 
 /* The list of available "set powerpc ..." and "show powerpc ..."
    commands.  */
@@ -2721,9 +2721,9 @@ efpr_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   int reg_index = reg_nr - tdep->ppc_efpr0_regnum;
 
-  /* Read the portion that overlaps the VMX registers.  */
-  regcache_raw_read (regcache, tdep->ppc_vr0_regnum +
-		     reg_index, buffer);
+  /* Read the portion that overlaps the VMX register.  */
+  regcache_raw_read_part (regcache, tdep->ppc_vr0_regnum + reg_index, 0,
+			  register_size (gdbarch, reg_nr), buffer);
 }
 
 /* Write method for POWER7 Extended FP pseudo-registers.  */
@@ -2734,9 +2734,9 @@ efpr_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   int reg_index = reg_nr - tdep->ppc_efpr0_regnum;
 
-  /* Write the portion that overlaps the VMX registers.  */
-  regcache_raw_write (regcache, tdep->ppc_vr0_regnum +
-		      reg_index, buffer);
+  /* Write the portion that overlaps the VMX register.  */
+  regcache_raw_write_part (regcache, tdep->ppc_vr0_regnum + reg_index, 0,
+			   register_size (gdbarch, reg_nr), buffer);
 }
 
 static void

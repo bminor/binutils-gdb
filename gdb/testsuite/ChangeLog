@@ -1,3 +1,12 @@
+2011-02-15  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* gdb.arch/vsx-regs.exp: Add "vector_register1_vr" and
+	"vector_register2_vr" test strings.  Test the extended floating
+	point registers (F32~F63).
+	* lib/gdb.exp (skip_vsx_tests): Update compile flags for the
+	IBM XL C compiler.  Make the test program use a register provided
+	by the compiler for the lxvd2x instruction.
+
 2011-02-14  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.trace/unavailable.cc (class Base, class Middle, class

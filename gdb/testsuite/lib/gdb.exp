@@ -1686,7 +1686,7 @@ proc skip_vsx_tests {} {
     if [test_compiler_info gcc*] {
         set compile_flags "$compile_flags additional_flags=-mvsx"
     } elseif [test_compiler_info xlc*] {
-        set compile_flags "$compile_flags additional_flags=-qvsx"
+        set compile_flags "$compile_flags additional_flags=-qasm=gcc"
     } else {
         verbose "Could not compile with vsx support, returning 1" 2
         return 1
@@ -1697,10 +1697,11 @@ proc skip_vsx_tests {} {
 
     set f [open $src "w"]
     puts $f "int main() {"
+    puts $f "  double a\[2\] = { 1.0, 2.0 };"
     puts $f "#ifdef __MACH__"
-    puts $f "  asm volatile (\"lxvd2x v0,v0,v0\");"
+    puts $f "  asm volatile (\"lxvd2x v0,v0,%\[addr\]\" : : \[addr\] \"r\" (a));"
     puts $f "#else"
-    puts $f "  asm volatile (\"lxvd2x 0,0,0\");"
+    puts $f "  asm volatile (\"lxvd2x 0,0,%\[addr\]\" : : \[addr\] \"r\" (a));"
     puts $f "#endif"
     puts $f "  return 0; }"
     close $f

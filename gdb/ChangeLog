@@ -1,3 +1,12 @@
+2011-02-15  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* rs6000-tdep.c (IS_EFP_PSEUDOREG): Use correct constant for
+	the EFP register set size.
+	(efpr_pseudo_register_read): Use regcache_raw_read_part to read
+	data from the VMX register.
+	(efpr_pseudo_register_write): Use regcache_raw_write_part to read
+	and write data from/to the VMX register.
+
 2011-02-14  Michael Snyder  <msnyder@vmware.com>
 
 	* command.h (enum command_class): New class 'no_set_class', for
