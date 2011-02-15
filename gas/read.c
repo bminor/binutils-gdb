@@ -521,11 +521,10 @@ pobegin (void)
   pop_table_name = "standard";
   pop_insert (potable);
 
-#ifdef TARGET_USE_CFIPOP
+  /* Now CFI ones.  */
   pop_table_name = "cfi";
   pop_override_ok = 1;
   cfi_pop_insert ();
-#endif
 }
 
 #define HANDLE_CONDITIONAL_ASSEMBLY()					\

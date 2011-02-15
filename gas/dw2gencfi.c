@@ -1757,6 +1757,43 @@ cfi_finish (void)
 }
 
 #else /* TARGET_USE_CFIPOP */
+
+/* Emit an intelligable error message for missing support.  */
+
+static void
+dot_cfi_dummy (int ignored ATTRIBUTE_UNUSED)
+{
+  as_bad (_("CFI is not supported for this target"));
+  ignore_rest_of_line ();
+}
+
+const pseudo_typeS cfi_pseudo_table[] =
+  {
+    { "cfi_sections", dot_cfi_dummy, 0 },
+    { "cfi_startproc", dot_cfi_dummy, 0 },
+    { "cfi_endproc", dot_cfi_dummy, 0 },
+    { "cfi_def_cfa", dot_cfi_dummy, 0 },
+    { "cfi_def_cfa_register", dot_cfi_dummy, 0 },
+    { "cfi_def_cfa_offset", dot_cfi_dummy, 0 },
+    { "cfi_adjust_cfa_offset", dot_cfi_dummy, 0 },
+    { "cfi_offset", dot_cfi_dummy, 0 },
+    { "cfi_rel_offset", dot_cfi_dummy, 0 },
+    { "cfi_register", dot_cfi_dummy, 0 },
+    { "cfi_return_column", dot_cfi_dummy, 0 },
+    { "cfi_restore", dot_cfi_dummy, 0 },
+    { "cfi_undefined", dot_cfi_dummy, 0 },
+    { "cfi_same_value", dot_cfi_dummy, 0 },
+    { "cfi_remember_state", dot_cfi_dummy, 0 },
+    { "cfi_restore_state", dot_cfi_dummy, 0 },
+    { "cfi_window_save", dot_cfi_dummy, 0 },
+    { "cfi_escape", dot_cfi_dummy, 0 },
+    { "cfi_signal_frame", dot_cfi_dummy, 0 },
+    { "cfi_personality", dot_cfi_dummy, 0 },
+    { "cfi_lsda", dot_cfi_dummy, 0 },
+    { "cfi_val_encoded_addr", dot_cfi_dummy, 0 },
+    { NULL, NULL, 0 }
+  };
+
 void
 cfi_finish (void)
 {

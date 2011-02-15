@@ -1,3 +1,9 @@
+2011-02-15  Richard Henderson  <rth@redhat.com>
+
+	* dw2gencfi.c (dot_cfi_dummy): New.
+	(cfi_pseudo_table) [!TARGET_USE_CFIPOP]: New.
+	* read.c (pobegin): Unconditionally call cfi_pop_insert.
+
 2011-02-13  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* configure: Regenerate.
