@@ -1,5 +1,20 @@
 2011-02-15  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
+	* breakpoint.c (longjmp_names): New variable.
+	(struct breakpoint_objfile_data): New type.
+	(breakpoint_objfile_key): New variable.
+	(msym_not_found): New variable.
+	(msym_not_found_p): New predicate.
+	(get_breakpoint_objfile_data): New function.
+	(create_overlay_event_breakpoint): Check per-objfile cache for
+	symbols first.
+	(create_longjmp_master_breakpoint): Likewise.
+	(create_std_terminate_master_breakpoint): Likewise.
+	(create_exception_master_breakpoint): Likewise.
+	(_initialize_breakpoint): Register per-objfile data key.
+
+2011-02-15  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
 	* breakpoint.c ((create_overlay_event_breakpoint): Const-propagate
 	parameter value.
 	(create_longjmp_master_breakpoint): Loop over longjmp names.
