@@ -1,3 +1,8 @@
+2011-02-15  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_edit_toc): Reinstate second read of
+	toc relocs.  Fuss over free(NULL).
+
 2011-02-14  Mike Frysinger  <vapier@gentoo.org>
 
 	* elflink.c (bfd_elf_size_dynamic_sections): Add
