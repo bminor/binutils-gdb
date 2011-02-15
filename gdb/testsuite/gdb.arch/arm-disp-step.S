@@ -48,6 +48,10 @@ test_ret_end:
 	bl test_ldm_stm_pc
 #endif
 
+	/* Test str in ARM mode and Thumb-2 */
+#if !defined(__thumb__)
+	bl test_str_pc
+#endif
 	/* Return */
 	mov     sp, r7
 	sub     sp, sp, #4
@@ -117,4 +121,37 @@ test_ldm_stm_pc_ret:
 .L1:
 	.word	test_ldm_stm_pc_ret
 	.size test_ldm_stm_pc, .-test_ldm_stm_pc
+#endif
+
+#if !defined(__thumb__)
+#if defined (__thumb2__)
+	.code   16
+	.thumb_func
+#endif
+	.global test_str_pc
+	.type test_str_pc, %function
+test_str_pc:
+	str     pc, [sp, #-4]
+	ldr	r0, [sp, #-4]
+	sub	r0, r0, pc
+	/* compute offset again without displaced stepping.  */
+	str     pc, [sp, #-4]
+	ldr	r1, [sp, #-4]
+	sub	r1, r1, pc
+
+	/* r0 should be equal to r1.  */
+	cmp	r0, r1
+	bne	pc_offset_wrong
+
+	.global pc_offset_right
+pc_offset_right:
+	b	test_str_pc_end
+
+	.global pc_offset_wrong
+pc_offset_wrong:
+	nop
+
+	.global test_str_pc_end
+test_str_pc_end:
+	bx lr
 #endif

@@ -1,3 +1,9 @@
+2011-02-15  Yao Qi  <yao@codesourcery.com>
+
+	PR tdep/12352
+	* gdb.arch/arm-disp-step.S : New test for str instruction.
+	* gdb.arch/arm-disp-step.exp : Likewise.
+
 2011-02-15  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* gdb.arch/vsx-regs.exp: Add "vector_register1_vr" and

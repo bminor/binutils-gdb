@@ -126,6 +126,42 @@ proc test_ldr_from_pc {} {
 	".*bx lr.*"
 }
 
+###########################################
+
+proc test_str_pc {} {
+    global srcfile
+    gdb_test_multiple "break *test_str_pc" "break test_str_pc" {
+	-re "Breakpoint.*at.* file .*$srcfile, line.*" {
+	    pass "break test_str_pc"
+	}
+	-re "No symbol.*" {
+	    pass "break test_str_pc"
+	    return
+	}
+    }
+    gdb_test "break *test_str_pc_end" \
+	"Breakpoint.*at.* file .*$srcfile, line.*" \
+	"break test_str_pc_end"
+
+    # Set breakpoint on both lables pc_offset_right and pc_offset_wrong
+    gdb_test "break *pc_offset_right" \
+	"Breakpoint.*at.* file .*$srcfile, line.*" \
+	"break pc_offset_right"
+    gdb_test "break *pc_offset_wrong" \
+	"Breakpoint.*at.* file .*$srcfile, line.*" \
+	"break pc_offset_wrong"
+
+    gdb_continue_to_breakpoint "continue to test_str_pc" \
+	".*str.*pc\,.*\[sp, #-4\].*"
+    # If breakpoint on lable pc_offset_wrong is hit, that means the offset
+    # computed in displaced stepping is different from offset computed
+    # without displaced stepping.  Report a failure.
+    gdb_continue_to_breakpoint "continue to pc_offset_right" \
+	".*b.*test_str_pc_end.*"
+    gdb_continue_to_breakpoint "continue to test_str_pc_end" \
+	".*bx lr.*"
+}
+
 # Get things started.
 
 clean_restart ${testfile}
@@ -165,6 +201,7 @@ test_ldr_from_pc
 
 test_ldm_stm_pc
 
+test_str_pc
 ##########################################
 
 # Done, run program to exit.

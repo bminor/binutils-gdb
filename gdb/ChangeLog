@@ -1,3 +1,9 @@
+2011-02-15  Yao Qi  <yao@codesourcery.com>
+
+	PR tdep/12352
+	* arm-tdep.c (copy_ldr_str_ldrb_strb): Replace PC with SP in
+	order to store PC value on stack instead of text section.
+
 2011-02-15  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* rs6000-tdep.c (IS_EFP_PSEUDOREG): Use correct constant for

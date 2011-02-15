@@ -5930,16 +5930,24 @@ copy_ldr_str_ldrb_strb (struct gdbarch *gdbarch, uint32_t insn,
 
   /* To write PC we can do:
 
-     scratch+0:  str pc, temp  (*temp = scratch + 8 + offset)
-     scratch+4:  ldr r4, temp
-     scratch+8:  sub r4, r4, pc  (r4 = scratch + 8 + offset - scratch - 8 - 8)
-     scratch+12: add r4, r4, #8  (r4 = offset)
-     scratch+16: add r0, r0, r4
-     scratch+20: str r0, [r2, #imm] (or str r0, [r2, r3])
-     scratch+24: <temp>
+     Before this sequence of instructions:
+     r0 is the PC value got from displaced_read_reg, so r0 = from + 8;
+     r2 is the Rn value got from dispalced_read_reg.
+
+     Insn1: push {pc} Write address of STR instruction + offset on stack
+     Insn2: pop  {r4} Read it back from stack, r4 = addr(Insn1) + offset
+     Insn3: sub r4, r4, pc   r4 = addr(Insn1) + offset - pc
+                                = addr(Insn1) + offset - addr(Insn3) - 8
+                                = offset - 16
+     Insn4: add r4, r4, #8   r4 = offset - 8
+     Insn5: add r0, r0, r4   r0 = from + 8 + offset - 8
+                                = from + offset
+     Insn6: str r0, [r2, #imm] (or str r0, [r2, r3])
 
      Otherwise we don't know what value to write for PC, since the offset is
-     architecture-dependent (sometimes PC+8, sometimes PC+12).  */
+     architecture-dependent (sometimes PC+8, sometimes PC+12).  More details
+     of this can be found in Section "Saving from r15" in
+     http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui0204g/Cihbjifh.html */
 
   if (load || rt != 15)
     {
@@ -5960,9 +5968,8 @@ copy_ldr_str_ldrb_strb (struct gdbarch *gdbarch, uint32_t insn,
     {
       /* We need to use r4 as scratch.  Make sure it's restored afterwards.  */
       dsc->u.ldst.restore_r4 = 1;
-
-      dsc->modinsn[0] = 0xe58ff014;  /* str pc, [pc, #20].  */
-      dsc->modinsn[1] = 0xe59f4010;  /* ldr r4, [pc, #16].  */
+      dsc->modinsn[0] = 0xe92d8000;  /* push {pc} */
+      dsc->modinsn[1] = 0xe8bd0010;  /* pop  {r4} */
       dsc->modinsn[2] = 0xe044400f;  /* sub r4, r4, pc.  */
       dsc->modinsn[3] = 0xe2844008;  /* add r4, r4, #8.  */
       dsc->modinsn[4] = 0xe0800004;  /* add r0, r0, r4.  */
