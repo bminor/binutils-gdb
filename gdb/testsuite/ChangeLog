@@ -1,3 +1,10 @@
+2011-02-16  Ken Werner  <ken.werner@de.ibm.com>
+
+	* gdb.opencl/datatypes.exp: Allow "false" when printing the content of
+	a bool variable. Expect correct OpenCL names for vector types. Use the
+	uc3 variable name instead of referring to the uchar3 built-in type.
+	Escape the asterisk at the half pointer test.
+
 2011-02-16  Pedro Alves  <pedro@codesourcery.com>
 
 	* collection.c (globalarr2): New global.
