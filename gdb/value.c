@@ -844,11 +844,15 @@ value_contents_all (struct value *value)
   return result;
 }
 
-/* Copy LENGTH bytes of SRC value's contents starting at SRC_OFFSET,
-   into DST value's contents, starting at DST_OFFSET.  If unavailable
-   contents are being copied from SRC, the corresponding DST contents
-   are marked unavailable accordingly.  Neither DST nor SRC may be
-   lazy values.  */
+/* Copy LENGTH bytes of SRC value's (all) contents
+   (value_contents_all) starting at SRC_OFFSET, into DST value's (all)
+   contents, starting at DST_OFFSET.  If unavailable contents are
+   being copied from SRC, the corresponding DST contents are marked
+   unavailable accordingly.  Neither DST nor SRC may be lazy
+   values.
+
+   It is assumed the contents of DST in the [DST_OFFSET,
+   DST_OFFSET+LENGTH) range are wholly available.  */
 
 void
 value_contents_copy_raw (struct value *dst, int dst_offset,
@@ -862,6 +866,11 @@ value_contents_copy_raw (struct value *dst, int dst_offset,
      call, say), the contents would be overwritten.  A lazy SRC would
      mean we'd be copying garbage.  */
   gdb_assert (!dst->lazy && !src->lazy);
+
+  /* The overwritten DST range gets unavailability ORed in, not
+     replaced.  Make sure to remember to implement replacing if it
+     turns out actually necessary.  */
+  gdb_assert (value_bytes_available (dst, dst_offset, length));
 
   /* Copy the data.  */
   memcpy (value_contents_all_raw (dst) + dst_offset,
@@ -883,12 +892,16 @@ value_contents_copy_raw (struct value *dst, int dst_offset,
     }
 }
 
-/* Copy LENGTH bytes of SRC value's contents starting at SRC_OFFSET
-   byte, into DST value's contents, starting at DST_OFFSET.  If
-   unavailable contents are being copied from SRC, the corresponding
-   DST contents are marked unavailable accordingly.  DST must not be
-   lazy.  If SRC is lazy, it will be fetched now.  If SRC is not valid
-   (is optimized out), an error is thrown.  */
+/* Copy LENGTH bytes of SRC value's (all) contents
+   (value_contents_all) starting at SRC_OFFSET byte, into DST value's
+   (all) contents, starting at DST_OFFSET.  If unavailable contents
+   are being copied from SRC, the corresponding DST contents are
+   marked unavailable accordingly.  DST must not be lazy.  If SRC is
+   lazy, it will be fetched now.  If SRC is not valid (is optimized
+   out), an error is thrown.
+
+   It is assumed the contents of DST in the [DST_OFFSET,
+   DST_OFFSET+LENGTH) range are wholly available.  */
 
 void
 value_contents_copy (struct value *dst, int dst_offset,

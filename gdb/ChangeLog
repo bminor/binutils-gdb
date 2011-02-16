@@ -1,6 +1,14 @@
 2011-02-16  Pedro Alves  <pedro@codesourcery.com>
 	    Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* value.c (value_contents_copy_raw): Extend describing comment.
+	Assert that the destination contents we're overwriting are wholly
+	available.
+	* value.h (value_contents_copy): Extend describing comment.
+
+2011-02-16  Pedro Alves  <pedro@codesourcery.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* value.c (value_available_contents_eq): Remove redundant local
 	variables.  Fix available contents comparision.
 	* value.h (value_available_contents_eq): Extend describing
