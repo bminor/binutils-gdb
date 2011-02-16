@@ -1,5 +1,9 @@
 2011-02-16  Tom Tromey  <tromey@redhat.com>
 
+	* dwarf2loc.c (unimplemented): Fix typo.
+
+2011-02-16  Tom Tromey  <tromey@redhat.com>
+
 	* dwarf2loc.c (unimplemented): Handle unnamed opcodes.
 	(compile_dwarf_to_ax) <default>: Use unimplemented.
 	<DW_OP_deref>: Update.

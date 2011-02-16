@@ -1340,7 +1340,8 @@ unimplemented (unsigned int op)
     error (_("DWARF operator %s cannot be translated to an agent expression"),
 	   name);
   else
-    error (_("Unknown DWARF operator 0x%02x cannot be to an agent expression"),
+    error (_("Unknown DWARF operator 0x%02x cannot be translated "
+	     "to an agent expression"),
 	   op);
 }
 
