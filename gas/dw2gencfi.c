@@ -1758,7 +1758,7 @@ cfi_finish (void)
 
 #else /* TARGET_USE_CFIPOP */
 
-/* Emit an intelligable error message for missing support.  */
+/* Emit an intelligible error message for missing support.  */
 
 static void
 dot_cfi_dummy (int ignored ATTRIBUTE_UNUSED)
