@@ -479,7 +479,8 @@ proc gdb_collect_globals_test { } {
 	    "collect globalc, globali, globalf, globald" "^$" \
 	    "collect globalstruct, globalp, globalarr" "^$" \
 	    "collect \{int \[4\]\}$globalarr2_addr" "^$" \
-	    "collect \{int \[2\]\}$globalarr2_addr" "^$"
+	    "collect \{int \[2\]\}$globalarr2_addr" "^$" \
+	    "collect \{int \[4\]\}globalarr3" "^$"
 
     # Begin the test.
     run_trace_experiment "globals" globals_test_func
@@ -529,6 +530,14 @@ proc gdb_collect_globals_test { } {
     gdb_test "print globalarr2" \
 	"\\$\[0-9\]+ = \\{0, 1, 2, 3\\}$cr" \
 	"collect globals: collected global array 2"
+
+    # GDB would internal error collecting UNOP_MEMVAL's whose address
+    # expression wasn't an rvalue (that's regtested in the
+    # corresponding 'collect' action above).  This just double checks
+    # we actually did collect what we wanted.
+    gdb_test "print globalarr3" \
+	"\\$\[0-9\]+ = \\{3, 2, 1, 0\\}$cr" \
+	"collect globals: collected global array 3"
 
     gdb_test "tfind none" \
 	    "#0  end .*" \

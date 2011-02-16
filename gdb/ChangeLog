@@ -1,3 +1,8 @@
+2011-02-16  Tom Tromey  <tromey@redhat.com>
+
+	* ax-gdb.c.c (gen_expr) <UNOP_MEMVAL>: Handle value kinds other
+	than axs_rvalue.
+
 2011-02-16  Yao Qi  <yao@qiyaows>
 
 	* infrun.c (get_displaced_step_closure_by_addr): New.

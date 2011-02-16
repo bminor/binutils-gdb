@@ -2044,14 +2044,13 @@ gen_expr (struct expression *exp, union exp_element **pc,
 
 	(*pc) += 3;
 	gen_expr (exp, pc, ax, value);
-	/* I'm not sure I understand UNOP_MEMVAL entirely.  I think
-	   it's just a hack for dealing with minsyms; you take some
-	   integer constant, pretend it's the address of an lvalue of
-	   the given type, and dereference it.  */
-	if (value->kind != axs_rvalue)
-	  /* This would be weird.  */
-	  internal_error (__FILE__, __LINE__,
-			  _("gen_expr: OP_MEMVAL operand isn't an rvalue???"));
+
+	/* If we have an axs_rvalue or an axs_lvalue_memory, then we
+	   already have the right value on the stack.  For
+	   axs_lvalue_register, we must convert.  */
+	if (value->kind == axs_lvalue_register)
+	  require_rvalue (ax, value);
+
 	value->type = type;
 	value->kind = axs_lvalue_memory;
       }
