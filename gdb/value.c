@@ -533,20 +533,12 @@ value_available_contents_eq (const struct value *val1, int offset1,
 			     const struct value *val2, int offset2,
 			     int length)
 {
-  int org_len = length;
-  int org_offset1 = offset1;
-  int org_offset2 = offset2;
   int idx1 = 0, idx2 = 0;
-  int prev_avail;
 
   /* This routine is used by printing routines, where we should
      already have read the value.  Note that we only know whether a
      value chunk is available if we've tried to read it.  */
   gdb_assert (!val1->lazy && !val2->lazy);
-
-  /* The offset from either ORG_OFFSET1 or ORG_OFFSET2 where the
-     available contents we haven't compared yet start.  */
-  prev_avail = 0;
 
   while (length > 0)
     {
@@ -561,9 +553,9 @@ value_available_contents_eq (const struct value *val1, int offset1,
 
       /* The usual case is for both values to be completely available.  */
       if (idx1 == -1 && idx2 == -1)
-	return (memcmp (val1->contents + org_offset1 + prev_avail,
-			val2->contents + org_offset2 + prev_avail,
-			org_len - prev_avail) == 0);
+	return (memcmp (val1->contents + offset1,
+			val2->contents + offset2,
+			length) == 0);
       /* The contents only match equal if the available set matches as
 	 well.  */
       else if (idx1 == -1 || idx2 == -1)
@@ -596,12 +588,11 @@ value_available_contents_eq (const struct value *val1, int offset1,
 	return 0;
 
       /* Compare the _available_ contents.  */
-      if (memcmp (val1->contents + org_offset1 + prev_avail,
-		  val2->contents + org_offset2 + prev_avail,
-		  l2 - prev_avail) != 0)
+      if (memcmp (val1->contents + offset1,
+		  val2->contents + offset2,
+		  l1) != 0)
 	return 0;
 
-      prev_avail += h1;
       length -= h1;
       offset1 += h1;
       offset2 += h1;

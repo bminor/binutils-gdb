@@ -379,12 +379,21 @@ extern void mark_value_bytes_unavailable (struct value *value,
 					  int offset, int length);
 
 /* Compare LENGTH bytes of VAL1's contents starting at OFFSET1 with
-   LENGTH bytes of VAL2's contents starting at OFFSET2.  Returns true
-   iff the set of available contents match.  Unavailable contents
-   compare equal with unavailable contents, and different with any
-   available byte.  For example, if 'x's represent an unavailable
-   byte, and 'V' and 'Z' represent different available bytes, in a
-   value with length 16:
+   LENGTH bytes of VAL2's contents starting at OFFSET2.
+
+   Note that "contents" refers to the whole value's contents
+   (value_contents_all), without any embedded offset adjustment.  For
+   example, to compare a complete object value with itself, including
+   its enclosing type chunk, you'd do:
+
+     int len = TYPE_LENGTH (check_typedef (value_enclosing_type (val)));
+     value_available_contents (val, 0, val, 0, len);
+
+   Returns true iff the set of available contents match.  Unavailable
+   contents compare equal with unavailable contents, and different
+   with any available byte.  For example, if 'x's represent an
+   unavailable byte, and 'V' and 'Z' represent different available
+   bytes, in a value with length 16:
 
    offset:   0   4   8   12  16
    contents: xxxxVVVVxxxxVVZZ
