@@ -369,6 +369,20 @@ arm_pc_is_thumb (struct gdbarch *gdbarch, CORE_ADDR memaddr)
   struct obj_section *sec;
   struct minimal_symbol *sym;
   char type;
+  struct displaced_step_closure* dsc
+    = get_displaced_step_closure_by_addr(memaddr);
+
+  /* If checking the mode of displaced instruction in copy area, the mode
+     should be determined by instruction on the original address.  */
+  if (dsc)
+    {
+      if (debug_displaced)
+	fprintf_unfiltered (gdb_stdlog,
+			    "displaced: check mode of %.8lx instead of %.8lx\n",
+			    (unsigned long) dsc->insn_addr,
+			    (unsigned long) memaddr);
+      memaddr = dsc->insn_addr;
+    }
 
   /* If bit 0 of the address is set, assume this is a Thumb address.  */
   if (IS_THUMB_ADDR (memaddr))

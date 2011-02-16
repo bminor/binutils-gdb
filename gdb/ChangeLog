@@ -1,3 +1,11 @@
+2011-02-16  Yao Qi  <yao@qiyaows>
+
+	* infrun.c (get_displaced_step_closure_by_addr): New.
+	* inferior.h: Declare it.
+	* arm-tdep.c: (arm_pc_is_thumb): Call
+	get_displaced_step_closure_by_addr.  Adjust MEMADDR if it
+	returns non-NULL.
+
 2011-02-16  Pedro Alves  <pedro@codesourcery.com>
 	    Jan Kratochvil  <jan.kratochvil@redhat.com>
 

@@ -1078,6 +1078,24 @@ add_displaced_stepping_state (int pid)
   return state;
 }
 
+/* If inferior is in displaced stepping, and ADDR equals to starting address
+   of copy area, return corresponding displaced_step_closure.  Otherwise,
+   return NULL.  */
+
+struct displaced_step_closure*
+get_displaced_step_closure_by_addr (CORE_ADDR addr)
+{
+  struct displaced_step_inferior_state *displaced
+    = get_displaced_stepping_state (ptid_get_pid (inferior_ptid));
+
+  /* If checking the mode of displaced instruction in copy area.  */
+  if (displaced && !ptid_equal (displaced->step_ptid, null_ptid)
+     && (displaced->step_copy == addr))
+    return displaced->step_closure;
+
+  return NULL;
+}
+
 /* Remove the displaced stepping state of process PID.  */
 
 static void
