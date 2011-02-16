@@ -12497,7 +12497,7 @@ dwarf_form_name (unsigned form)
 /* Convert a DWARF stack opcode into its string name.  */
 
 const char *
-dwarf_stack_op_name (unsigned op, int def)
+dwarf_stack_op_name (unsigned op)
 {
   switch (op)
     {
@@ -12819,7 +12819,7 @@ dwarf_stack_op_name (unsigned op, int def)
     case DW_OP_GNU_implicit_pointer:
       return "DW_OP_GNU_implicit_pointer";
     default:
-      return def ? "OP_<unknown>" : NULL;
+      return NULL;
     }
 }
 
@@ -13743,8 +13743,17 @@ decode_locdesc (struct dwarf_block *blk, struct dwarf2_cu *cu)
 	  break;
 
 	default:
-	  complaint (&symfile_complaints, _("unsupported stack op: '%s'"),
-		     dwarf_stack_op_name (op, 1));
+	  {
+	    const char *name = dwarf_stack_op_name (op);
+
+	    if (name)
+	      complaint (&symfile_complaints, _("unsupported stack op: '%s'"),
+			 name);
+	    else
+	      complaint (&symfile_complaints, _("unsupported stack op: '%02x'"),
+			 op);
+	  }
+
 	  return (stack[stacki]);
 	}
 
