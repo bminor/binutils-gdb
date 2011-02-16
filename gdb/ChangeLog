@@ -1,3 +1,8 @@
+2011-02-16  Yao Qi  <yao@codesourcery.com>
+
+	* thread.c (info_threads_command): Add missing i18n markup and remove
+	trailing newline.
+
 2011-02-15  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* breakpoint.c (longjmp_names): New variable.

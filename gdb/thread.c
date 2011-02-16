@@ -980,7 +980,7 @@ info_threads_command (char *arg, int from_tty)
       unsigned int highrange;
 
       if (tmp_tid <= 0)
-	error ("invalid thread id %d\n", tmp_tid);
+	error (_("invalid thread id %d"), tmp_tid);
 
       tid = tmp_tid;
       print_thread_info (uiout, tid, -1);
