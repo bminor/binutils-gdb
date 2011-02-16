@@ -1,5 +1,9 @@
 2011-02-16  Tom Tromey  <tromey@redhat.com>
 
+	* ax.h (struct aop_map) <name>: Now const.
+
+2011-02-16  Tom Tromey  <tromey@redhat.com>
+
 	* ax-gdb.c.c (gen_expr) <UNOP_MEMVAL>: Handle value kinds other
 	than axs_rvalue.
 

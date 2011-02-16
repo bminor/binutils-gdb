@@ -274,7 +274,7 @@ struct aop_map
 
     /* The name of the opcode.  Null means that this entry is not a
        valid opcode --- a hole in the opcode space.  */
-    char *name;
+    const char *name;
 
     /* All opcodes take no operands from the bytecode stream, or take
        unsigned integers of various sizes.  If this is a positive number
