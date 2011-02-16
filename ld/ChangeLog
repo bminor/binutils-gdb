@@ -1,3 +1,8 @@
+2011-02-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* emulparams/elf32_x86_64.sh (LIBPATH_SUFFIX): Changed to
+	x32 for x32.
+
 2011-02-15  Kai Tietz  <kai.tietz@onevision.com>
 
 	* pe-dll.c (process_def_file_and_drectve): Don't strip

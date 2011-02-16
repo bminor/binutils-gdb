@@ -28,7 +28,7 @@ fi
 case "$target" in
   x86_64*-linux*|i[3-7]86-*-linux-*)
     case "$EMULATION_NAME" in
-      *32*) LIBPATH_SUFFIX=32 ;;
+      *32*) LIBPATH_SUFFIX=x32 ;;
       *64*) LIBPATH_SUFFIX=64 ;;
     esac
     ;;
