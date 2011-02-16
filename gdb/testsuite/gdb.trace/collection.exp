@@ -457,13 +457,29 @@ proc gdb_collect_globals_test { } {
 	}
     }
 
+    # Use use this to test collecting overlapping memory ranges
+    # (making use of UNOP_MEMVAL, as objects don't usually overlap
+    # other objects).  Note that globalarr2 should not be collected in
+    # any other way so that a regression test below can be effective.
+
+    set globalarr2_addr ""
+    set test "get address of globalarr2"
+    gdb_test_multiple "p /x &globalarr2" $test {
+	-re " = (0x\[0-9a-f\]+)\r\n$gdb_prompt $" {
+	    set globalarr2_addr $expect_out(1,string)
+	    pass $test
+	}
+    }
+
     gdb_test "trace $testline" \
 	    "Tracepoint \[0-9\]+ at .*" \
 	    "collect globals: set tracepoint"
     gdb_trace_setactions "collect globals: define actions" \
 	    "" \
 	    "collect globalc, globali, globalf, globald" "^$" \
-	    "collect globalstruct, globalp, globalarr" "^$"
+	    "collect globalstruct, globalp, globalarr" "^$" \
+	    "collect \{int \[4\]\}$globalarr2_addr" "^$" \
+	    "collect \{int \[2\]\}$globalarr2_addr" "^$"
 
     # Begin the test.
     run_trace_experiment "globals" globals_test_func
@@ -507,6 +523,12 @@ proc gdb_collect_globals_test { } {
     gdb_test "print globalarr\[3\]" \
 	    "\\$\[0-9\]+ = 3$cr" \
 	    "collect globals: collected global array element #3"
+
+    # Check that we didn't mess up sort&merging memory ranges to
+    # collect.
+    gdb_test "print globalarr2" \
+	"\\$\[0-9\]+ = \\{0, 1, 2, 3\\}$cr" \
+	"collect globals: collected global array 2"
 
     gdb_test "tfind none" \
 	    "#0  end .*" \

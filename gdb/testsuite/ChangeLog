@@ -1,3 +1,11 @@
+2011-02-16  Pedro Alves  <pedro@codesourcery.com>
+
+	* collection.c (globalarr2): New global.
+	(main): Initialize it before collecting, and and clear it
+	afterwards.
+	* collection.exp (gdb_collect_globals_test): Test collecting
+	overlapping memory ranges.
+
 2011-02-15  Michael Snyder  <msnyder@vmware.com>
 
 	* gdb.base/default.exp: Add tests for thread commands.

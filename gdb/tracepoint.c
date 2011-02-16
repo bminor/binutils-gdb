@@ -846,7 +846,8 @@ memrange_sortmerge (struct collection_list *memranges)
 	  if (memranges->list[a].type == memranges->list[b].type
 	      && memranges->list[b].start <= memranges->list[a].end)
 	    {
-	      memranges->list[a].end = memranges->list[b].end;
+	      if (memranges->list[b].end > memranges->list[a].end)
+		memranges->list[a].end = memranges->list[b].end;
 	      continue;		/* next b, same a */
 	    }
 	  a++;			/* next a */

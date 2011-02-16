@@ -1,6 +1,12 @@
 2011-02-16  Pedro Alves  <pedro@codesourcery.com>
 	    Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	gdb/
+	* tracepoint.c (memrange_sortmerge): Fix list A's end calculation.
+
+2011-02-16  Pedro Alves  <pedro@codesourcery.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* value.c (value_contents_copy_raw): Extend describing comment.
 	Assert that the destination contents we're overwriting are wholly
 	available.
