@@ -1,3 +1,7 @@
+2011-02-17  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.dwarf2/dw2-ranges.exp: Simplify using clean_restart.
+
 2011-02-16  Pedro Alves  <pedro@codesourcery.com>
 
 	* collection.c (globalarr3): New global.
