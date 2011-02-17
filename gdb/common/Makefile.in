@@ -91,3 +91,20 @@ clean mostlyclean:
 distclean maintainer-clean realclean: clean
 	-rm -f *~
 	-rm -f Makefile config.status config.log
+
+.PHONY: install
+install: all
+
+.PHONY: install-only
+install-only:
+
+.PHONY: uninstall
+uninstall: 
+
+.PHONY: check installcheck info dvi pdf html
+.PHONY: install-info install-pdf install-html clean-info
+check installcheck:
+info dvi pdf html:
+install-info install-pdf install-html:
+clean-info:
+
