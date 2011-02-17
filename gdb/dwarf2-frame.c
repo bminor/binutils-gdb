@@ -38,6 +38,8 @@
 
 #include "complaints.h"
 #include "dwarf2-frame.h"
+#include "ax.h"
+#include "dwarf2loc.h"
 
 struct comp_unit;
 
@@ -428,13 +430,11 @@ Not implemented: computing unwound register using explicit value operator"));
 
 static void
 execute_cfa_program (struct dwarf2_fde *fde, const gdb_byte *insn_ptr,
-		     const gdb_byte *insn_end, struct frame_info *this_frame,
-		     struct dwarf2_frame_state *fs)
+		     const gdb_byte *insn_end, struct gdbarch *gdbarch,
+		     CORE_ADDR pc, struct dwarf2_frame_state *fs)
 {
   int eh_frame_p = fde->eh_frame_p;
-  CORE_ADDR pc = get_frame_pc (this_frame);
   int bytes_read;
-  struct gdbarch *gdbarch = get_frame_arch (this_frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
   while (insn_ptr < insn_end && fs->pc <= pc)
@@ -902,6 +902,85 @@ dwarf2_frame_find_quirks (struct dwarf2_frame_state *fs,
 }
 
 
+void
+dwarf2_compile_cfa_to_ax (struct agent_expr *expr, struct axs_value *loc,
+			  struct gdbarch *gdbarch,
+			  CORE_ADDR pc,
+			  struct dwarf2_per_cu_data *data)
+{
+  const int num_regs = gdbarch_num_regs (gdbarch)
+		       + gdbarch_num_pseudo_regs (gdbarch);
+  struct dwarf2_fde *fde;
+  CORE_ADDR text_offset, cfa;
+  struct dwarf2_frame_state fs;
+  int addr_size;
+
+  memset (&fs, 0, sizeof (struct dwarf2_frame_state));
+
+  fs.pc = pc;
+
+  /* Find the correct FDE.  */
+  fde = dwarf2_frame_find_fde (&fs.pc, &text_offset);
+  if (fde == NULL)
+    error (_("Could not compute CFA; needed to translate this expression"));
+
+  /* Extract any interesting information from the CIE.  */
+  fs.data_align = fde->cie->data_alignment_factor;
+  fs.code_align = fde->cie->code_alignment_factor;
+  fs.retaddr_column = fde->cie->return_address_register;
+  addr_size = fde->cie->addr_size;
+
+  /* Check for "quirks" - known bugs in producers.  */
+  dwarf2_frame_find_quirks (&fs, fde);
+
+  /* First decode all the insns in the CIE.  */
+  execute_cfa_program (fde, fde->cie->initial_instructions,
+		       fde->cie->end, gdbarch, pc, &fs);
+
+  /* Save the initialized register set.  */
+  fs.initial = fs.regs;
+  fs.initial.reg = dwarf2_frame_state_copy_regs (&fs.regs);
+
+  /* Then decode the insns in the FDE up to our target PC.  */
+  execute_cfa_program (fde, fde->instructions, fde->end, gdbarch, pc, &fs);
+
+  /* Calculate the CFA.  */
+  switch (fs.regs.cfa_how)
+    {
+    case CFA_REG_OFFSET:
+      {
+	int regnum = gdbarch_dwarf2_reg_to_regnum (gdbarch, fs.regs.cfa_reg);
+
+	if (regnum == -1)
+	  error (_("Unable to access DWARF register number %d"),
+		 (int) fs.regs.cfa_reg); /* FIXME */
+	ax_reg (expr, regnum);
+
+	if (fs.regs.cfa_offset != 0)
+	  {
+	    if (fs.armcc_cfa_offsets_reversed)
+	      ax_const_l (expr, -fs.regs.cfa_offset);
+	    else
+	      ax_const_l (expr, fs.regs.cfa_offset);
+	    ax_simple (expr, aop_add);
+	  }
+      }
+      break;
+
+    case CFA_EXP:
+      ax_const_l (expr, text_offset);
+      dwarf2_compile_expr_to_ax (expr, loc, gdbarch, addr_size,
+				 fs.regs.cfa_exp,
+				 fs.regs.cfa_exp + fs.regs.cfa_exp_len,
+				 data);
+      break;
+
+    default:
+      internal_error (__FILE__, __LINE__, _("Unknown CFA rule."));
+    }
+}
+
+
 struct dwarf2_frame_cache
 {
   /* DWARF Call Frame Address.  */
@@ -979,14 +1058,15 @@ dwarf2_frame_cache (struct frame_info *this_frame, void **this_cache)
 
   /* First decode all the insns in the CIE.  */
   execute_cfa_program (fde, fde->cie->initial_instructions,
-		       fde->cie->end, this_frame, fs);
+		       fde->cie->end, gdbarch, get_frame_pc (this_frame), fs);
 
   /* Save the initialized register set.  */
   fs->initial = fs->regs;
   fs->initial.reg = dwarf2_frame_state_copy_regs (&fs->regs);
 
   /* Then decode the insns in the FDE up to our target PC.  */
-  execute_cfa_program (fde, fde->instructions, fde->end, this_frame, fs);
+  execute_cfa_program (fde, fde->instructions, fde->end, gdbarch,
+		       get_frame_pc (this_frame), fs);
 
   /* Calculate the CFA.  */
   switch (fs->regs.cfa_how)

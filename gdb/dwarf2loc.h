@@ -25,6 +25,8 @@ struct symbol_computed_ops;
 struct objfile;
 struct dwarf2_per_cu_data;
 struct dwarf2_loclist_baton;
+struct agent_expr;
+struct axs_value;
 
 /* This header is private to the DWARF-2 reader.  It is shared between
    dwarf2read.c and dwarf2loc.c.  */
@@ -105,5 +107,26 @@ struct dwarf2_loclist_baton
 
 extern const struct symbol_computed_ops dwarf2_locexpr_funcs;
 extern const struct symbol_computed_ops dwarf2_loclist_funcs;
+
+/* Compile a DWARF location expression to an agent expression.
+   
+   EXPR is the agent expression we are building.
+   LOC is the agent value we modify.
+   ARCH is the architecture.
+   ADDR_SIZE is the size of addresses, in bytes.
+   OP_PTR is the start of the location expression.
+   OP_END is one past the last byte of the location expression.
+   
+   This will throw an exception for various kinds of errors -- for
+   example, if the expression cannot be compiled, or if the expression
+   is invalid.  */
+
+extern void dwarf2_compile_expr_to_ax (struct agent_expr *expr,
+				       struct axs_value *loc,
+				       struct gdbarch *arch,
+				       unsigned int addr_size,
+				       const gdb_byte *op_ptr,
+				       const gdb_byte *op_end,
+				       struct dwarf2_per_cu_data *per_cu);
 
 #endif /* dwarf2loc.h */
