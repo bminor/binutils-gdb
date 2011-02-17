@@ -1,9 +1,3 @@
-2011-02-16  H.J. Lu  <hongjiu.lu@intel.com>
-
-	* elf64-x86-64.c (elf_x86_64_check_relocs): Check relocation
-	overflow only for ABI_64_P.
-	(elf_x86_64_relocate_section): Likewise.
-
 2011-02-15  Tristan Gingold  <gingold@adacore.com>
 
 	* vms-alpha.c (alpha_vms_link_add_archive_symbols): Add a comment.

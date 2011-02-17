@@ -1498,7 +1498,6 @@ not_pointer:
 	     sections we don't care about, such as debug sections or
 	     non-constant sections.  */
 	  if (info->shared
-	      && ABI_64_P (abfd)
 	      && (sec->flags & SEC_ALLOC) != 0
 	      && (sec->flags & SEC_READONLY) != 0)
 	    {
@@ -3149,7 +3148,6 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 	     for shared library since it may not be local when used
 	     as function address.  */
 	  if (info->shared
-	      && ABI_64_P (output_bfd)
 	      && h
 	      && h->def_regular
 	      && h->type == STT_FUNC
