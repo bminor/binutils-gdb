@@ -9,11 +9,12 @@
 
 2011-02-16  Pedro Alves  <pedro@codesourcery.com>
 
-	* collection.c (globalarr3): New global.
+	* gdb.trace/collection.c (globalarr3): New global.
 	(main): Initialize it before collecting, and and clear it
 	afterwards.
-	* collection.exp (gdb_collect_globals_test): Test collecting with
-	'{type} addr', where the addr expression is not an rvalue.
+	* gdb.trace/collection.exp (gdb_collect_globals_test): Test
+	collecting with '{type} addr', where the addr expression is not an
+	rvalue.
 
 2011-02-16  Ken Werner  <ken.werner@de.ibm.com>
 
@@ -24,11 +25,11 @@
 
 2011-02-16  Pedro Alves  <pedro@codesourcery.com>
 
-	* collection.c (globalarr2): New global.
+	* gdb.trace/collection.c (globalarr2): New global.
 	(main): Initialize it before collecting, and and clear it
 	afterwards.
-	* collection.exp (gdb_collect_globals_test): Test collecting
-	overlapping memory ranges.
+	* gdb.trace/collection.exp (gdb_collect_globals_test): Test
+	collecting overlapping memory ranges.
 
 2011-02-15  Michael Snyder  <msnyder@vmware.com>
 
