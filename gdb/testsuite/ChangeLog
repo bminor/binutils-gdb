@@ -1,3 +1,7 @@
+2011-02-17  Michael Snyder  <msnyder@vmware.com>
+
+	* gdb.threads/thread-find.exp: Fix regular expressions.
+
 2011-02-17  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/packed_array: Expand testcase to test printing of
