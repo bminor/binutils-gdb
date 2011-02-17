@@ -50,3 +50,9 @@ gdb_test "ptype &var" \
 gdb_test "print &var" \
          "= \\(access array \\(\\.\\.\\.\\) of boolean\\) \\(4 => true, false, true, false, true\\)" \
          "print &var"
+
+# Print the value of U_Var, an unconstrainted packed array.
+
+gdb_test "print u_var" \
+         "= \\(true, false, false, true, true, false\\)"
+

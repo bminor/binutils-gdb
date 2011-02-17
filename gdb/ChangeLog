@@ -1,3 +1,8 @@
+2011-02-17  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_type_of_array): Fix the size of the array
+	in the case of an unconstrained packed array.
+
 2011-02-17  Yao Qi  <yao@codesourcery.com>
 
 	* common/Makefile.in: Add more targets for make.

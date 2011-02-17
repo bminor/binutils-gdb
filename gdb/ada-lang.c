@@ -1823,8 +1823,25 @@ ada_type_of_array (struct value *arr, int bounds)
           elt_type = create_array_type (array_type, elt_type, range_type);
 
 	  if (ada_is_unconstrained_packed_array_type (value_type (arr)))
-	    TYPE_FIELD_BITSIZE (elt_type, 0) =
-	      decode_packed_array_bitsize (value_type (arr));
+	    {
+	      /* We need to store the element packed bitsize, as well as
+	         recompute the array size, because it was previously
+		 computed based on the unpacked element size.  */
+	      LONGEST lo = value_as_long (low);
+	      LONGEST hi = value_as_long (high);
+
+	      TYPE_FIELD_BITSIZE (elt_type, 0) =
+		decode_packed_array_bitsize (value_type (arr));
+	      /* If the array has no element, then the size is already
+	         zero, and does not need to be recomputed.  */
+	      if (lo < hi)
+		{
+		  int array_bitsize =
+		        (hi - lo + 1) * TYPE_FIELD_BITSIZE (elt_type, 0);
+
+		  TYPE_LENGTH (array_type) = (array_bitsize + 7) / 8;
+		}
+	    }
         }
 
       return lookup_pointer_type (elt_type);
