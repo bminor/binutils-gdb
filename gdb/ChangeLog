@@ -1,3 +1,7 @@
+2011-02-18  Tom Tromey  <tromey@redhat.com>
+
+	* Makefile.in (HFILES_NO_SRCDIR): Don't mention ada-operator.inc.
+
 2011-02-18  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Tom Tromey  <tromey@redhat.com>
 

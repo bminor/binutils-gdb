@@ -812,7 +812,7 @@ config/rs6000/nm-rs6000.h top.h bsd-kvm.h gdb-stabs.h reggroups.h \
 annotate.h sim-regno.h dictionary.h dfp.h main.h frame-unwind.h	\
 remote-fileio.h i386-linux-tdep.h vax-tdep.h objc-lang.h \
 sentinel-frame.h bcache.h symfile.h windows-tdep.h linux-tdep.h \
-gdb_usleep.h jit.h xml-syscall.h ada-operator.inc microblaze-tdep.h \
+gdb_usleep.h jit.h xml-syscall.h microblaze-tdep.h \
 psymtab.h psympriv.h progspace.h bfin-tdep.h ia64-hpux-tdep.h
 
 # Header files that already have srcdir in them, or which are in objdir.
