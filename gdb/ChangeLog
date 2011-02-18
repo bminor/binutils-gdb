@@ -1,5 +1,14 @@
 2011-02-18  Tom Tromey  <tromey@redhat.com>
 
+	* ax-general.c (aop_map): Add pick and rot.
+	* dwarf2loc.c (compile_dwarf_to_ax) <DW_OP_over>: Reimplement.
+	<DW_OP_rot>: Implement.
+	* ax.h (enum agent_op) <aop_pick, aop_rot>: New constants.
+	(ax_pick): Declare.
+	* ax-general.c (ax_pick): New function.
+
+2011-02-18  Tom Tromey  <tromey@redhat.com>
+
 	* Makefile.in (HFILES_NO_SRCDIR): Don't mention ada-operator.inc.
 
 2011-02-18  Jan Kratochvil  <jan.kratochvil@redhat.com>

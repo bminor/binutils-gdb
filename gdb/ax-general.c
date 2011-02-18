@@ -143,6 +143,17 @@ ax_simple (struct agent_expr *x, enum agent_op op)
   x->buf[x->len++] = op;
 }
 
+/* Append a pick operator to EXPR.  DEPTH is the stack item to pick,
+   with 0 being top of stack.  */
+void
+ax_pick (struct agent_expr *x, int depth)
+{
+  if (depth < 0 || depth > 255)
+    error (_("GDB bug: ax-general.c (ax_pick): stack depth out of range"));
+  ax_simple (x, aop_pick);
+  append_const (x, 1, depth);
+}
+
 
 /* Append a sign-extension or zero-extension instruction to EXPR, to
    extend an N-bit value.  */
@@ -376,6 +387,9 @@ struct aop_map aop_map[] =
   {"tracev", 2, 0, 0, 1},	/* 0x2e */
   {0, 0, 0, 0, 0},		/* 0x2f */
   {"trace16", 2, 0, 1, 1},	/* 0x30 */
+  {0, 0, 0, 0, 0},		/* 0x31 */
+  {"pick", 1, 0, 0, 1},		/* 0x32 */
+  {"rot", 0, 0, 3, 3},		/* 0x33 */
 };
 
 

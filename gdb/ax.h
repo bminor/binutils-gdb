@@ -204,6 +204,8 @@ enum agent_op
     aop_setv = 0x2d,
     aop_tracev = 0x2e,
     aop_trace16 = 0x30,
+    aop_pick = 0x32,
+    aop_rot = 0x33,
     aop_last
   };
 
@@ -220,6 +222,10 @@ extern struct cleanup *make_cleanup_free_agent_expr (struct agent_expr *);
 
 /* Append a simple operator OP to EXPR.  */
 extern void ax_simple (struct agent_expr *EXPR, enum agent_op OP);
+
+/* Append a pick operator to EXPR.  DEPTH is the stack item to pick,
+   with 0 being top of stack.  */
+extern void ax_pick (struct agent_expr *EXPR, int DEPTH);
 
 /* Append the floating-point prefix, for the next bytecode.  */
 #define ax_float(EXPR) (ax_simple ((EXPR), aop_float))

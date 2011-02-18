@@ -517,6 +517,8 @@ enum gdb_agent_op
     gdb_agent_op_setv = 0x2d,
     gdb_agent_op_tracev = 0x2e,
     gdb_agent_op_trace16 = 0x30,
+    gdb_agent_op_pick = 0x32,
+    gdb_agent_op_rot = 0x33,
     gdb_agent_op_last
   };
 
@@ -571,6 +573,9 @@ static const char *gdb_agent_op_names [gdb_agent_op_last] =
     "tracev",
     "?undef?",
     "trace16",
+    "?undef?",
+    "pick",
+    "rot"
   };
 
 struct agent_expr
@@ -4596,6 +4601,23 @@ eval_agent_expr (struct tracepoint_hit_ctx *ctx,
 	case gdb_agent_op_pop:
 	  if (--sp >= 0)
 	    top = stack[sp];
+	  break;
+
+	case gdb_agent_op_pick:
+	  arg = aexpr->bytes[pc++];
+	  stack[sp] = top;
+	  top = stack[sp - arg];
+	  ++sp;
+	  break;
+
+	case gdb_agent_op_rot:
+	  {
+	    ULONGEST tem = stack[sp - 1];
+
+	    stack[sp - 1] = stack[sp - 2];
+	    stack[sp - 2] = top;
+	    top = tem;
+	  }
 	  break;
 
 	case gdb_agent_op_zero_ext:

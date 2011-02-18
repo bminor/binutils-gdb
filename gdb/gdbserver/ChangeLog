@@ -1,3 +1,11 @@
+2011-02-18  Tom Tromey  <tromey@redhat.com>
+
+	* tracepoint.c (enum gdb_agent_op) <gdb_agent_op_pick,
+	gdb_agent_op_rot>: New constants.
+	(gdb_agent_op_names): Add pick and roll.
+	(eval_agent_expr) <gdb_agent_op_pick, gdb_agent_op_rot>: New
+	cases.
+
 2011-02-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* aclocal.m4: Regenerated with aclocal-1.11.1.

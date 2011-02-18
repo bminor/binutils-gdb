@@ -1,3 +1,7 @@
+2011-02-18  Tom Tromey  <tromey@redhat.com>
+
+	* agentexpr.texi (Bytecode Descriptions): Document pick and rot.
+
 2011-02-14  Michael Snyder  <msnyder@vmware.com>
 
 	* gdb.texinfo (threads): Document argument for "info threads" cmd.
