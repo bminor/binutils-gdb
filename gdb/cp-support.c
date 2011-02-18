@@ -778,11 +778,13 @@ make_symbol_overload_list_namespace (const char *func_name,
 
   /* Look in the static block.  */
   block = block_static_block (get_selected_block (0));
-  make_symbol_overload_list_block (name, block);
+  if (block)
+    make_symbol_overload_list_block (name, block);
 
   /* Look in the global block.  */
   block = block_global_block (block);
-  make_symbol_overload_list_block (name, block);
+  if (block)
+    make_symbol_overload_list_block (name, block);
 
 }
 

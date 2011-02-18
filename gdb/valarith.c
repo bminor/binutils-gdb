@@ -315,15 +315,9 @@ unop_user_defined_p (enum exp_opcode op, struct value *arg1)
   if (op == UNOP_ADDR)
     return 0;
   type1 = check_typedef (value_type (arg1));
-  for (;;)
-    {
-      if (TYPE_CODE (type1) == TYPE_CODE_STRUCT)
-	return 1;
-      else if (TYPE_CODE (type1) == TYPE_CODE_REF)
-	type1 = TYPE_TARGET_TYPE (type1);
-      else
-	return 0;
-    }
+  if (TYPE_CODE (type1) == TYPE_CODE_REF)
+    type1 = check_typedef (TYPE_TARGET_TYPE (type1));
+  return TYPE_CODE (type1) == TYPE_CODE_STRUCT;
 }
 
 /* Try to find an operator named OPERATOR which takes NARGS arguments

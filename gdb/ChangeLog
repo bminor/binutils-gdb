@@ -1,3 +1,10 @@
+2011-02-18  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Tom Tromey  <tromey@redhat.com>
+
+	* cp-support.c (make_symbol_overload_list_namespace): Do not call
+	make_symbol_overload_list_block with NULL BLOCK.
+	* valarith.c (unop_user_defined_p): Resolve also TYPE_CODE_TYPEDEF.
+
 2011-02-18  Pedro Alves  <pedro@codesourcery.com>
 
 	* breakpoint.c (get_number_trailer): No longer accept a NULL PP.
