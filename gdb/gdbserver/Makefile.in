@@ -382,7 +382,7 @@ IPAGENT_CFLAGS = $(CPPFLAGS) $(INTERNAL_CFLAGS) $(UST_CFLAGS) \
 	-fvisibility=hidden
 
 # In-process agent object rules
-tracepoint-ipa.o: tracepoint.c $(server_h)
+tracepoint-ipa.o: tracepoint.c $(server_h) $(srcdir)/../common/ax.def
 	$(CC) -c $(IPAGENT_CFLAGS) $< -o tracepoint-ipa.o
 utils-ipa.o: utils.c $(server_h)
 	$(CC) -c $(IPAGENT_CFLAGS) $< -o utils-ipa.o
@@ -410,7 +410,7 @@ remote-utils.o: remote-utils.c terminal.h $(server_h)
 server.o: server.c $(server_h)
 target.o: target.c $(server_h)
 thread-db.o: thread-db.c $(server_h) $(linux_low_h) $(gdb_proc_service_h)
-tracepoint.o: tracepoint.c $(server_h)
+tracepoint.o: tracepoint.c $(server_h) $(srcdir)/../common/ax.def
 utils.o: utils.c $(server_h)
 gdbreplay.o: gdbreplay.c config.h
 

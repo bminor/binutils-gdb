@@ -338,58 +338,11 @@ ax_tsv (struct agent_expr *x, enum agent_op op, int num)
 
 struct aop_map aop_map[] =
 {
-  {0, 0, 0, 0, 0},
-  {"float", 0, 0, 0, 0},	/* 0x01 */
-  {"add", 0, 0, 2, 1},		/* 0x02 */
-  {"sub", 0, 0, 2, 1},		/* 0x03 */
-  {"mul", 0, 0, 2, 1},		/* 0x04 */
-  {"div_signed", 0, 0, 2, 1},	/* 0x05 */
-  {"div_unsigned", 0, 0, 2, 1},	/* 0x06 */
-  {"rem_signed", 0, 0, 2, 1},	/* 0x07 */
-  {"rem_unsigned", 0, 0, 2, 1},	/* 0x08 */
-  {"lsh", 0, 0, 2, 1},		/* 0x09 */
-  {"rsh_signed", 0, 0, 2, 1},	/* 0x0a */
-  {"rsh_unsigned", 0, 0, 2, 1},	/* 0x0b */
-  {"trace", 0, 0, 2, 0},	/* 0x0c */
-  {"trace_quick", 1, 0, 1, 1},	/* 0x0d */
-  {"log_not", 0, 0, 1, 1},	/* 0x0e */
-  {"bit_and", 0, 0, 2, 1},	/* 0x0f */
-  {"bit_or", 0, 0, 2, 1},	/* 0x10 */
-  {"bit_xor", 0, 0, 2, 1},	/* 0x11 */
-  {"bit_not", 0, 0, 1, 1},	/* 0x12 */
-  {"equal", 0, 0, 2, 1},	/* 0x13 */
-  {"less_signed", 0, 0, 2, 1},	/* 0x14 */
-  {"less_unsigned", 0, 0, 2, 1},	/* 0x15 */
-  {"ext", 1, 0, 1, 1},		/* 0x16 */
-  {"ref8", 0, 8, 1, 1},		/* 0x17 */
-  {"ref16", 0, 16, 1, 1},	/* 0x18 */
-  {"ref32", 0, 32, 1, 1},	/* 0x19 */
-  {"ref64", 0, 64, 1, 1},	/* 0x1a */
-  {"ref_float", 0, 0, 1, 1},	/* 0x1b */
-  {"ref_double", 0, 0, 1, 1},	/* 0x1c */
-  {"ref_long_double", 0, 0, 1, 1},	/* 0x1d */
-  {"l_to_d", 0, 0, 1, 1},	/* 0x1e */
-  {"d_to_l", 0, 0, 1, 1},	/* 0x1f */
-  {"if_goto", 2, 0, 1, 0},	/* 0x20 */
-  {"goto", 2, 0, 0, 0},		/* 0x21 */
-  {"const8", 1, 8, 0, 1},	/* 0x22 */
-  {"const16", 2, 16, 0, 1},	/* 0x23 */
-  {"const32", 4, 32, 0, 1},	/* 0x24 */
-  {"const64", 8, 64, 0, 1},	/* 0x25 */
-  {"reg", 2, 0, 0, 1},		/* 0x26 */
-  {"end", 0, 0, 0, 0},		/* 0x27 */
-  {"dup", 0, 0, 1, 2},		/* 0x28 */
-  {"pop", 0, 0, 1, 0},		/* 0x29 */
-  {"zero_ext", 1, 0, 1, 1},	/* 0x2a */
-  {"swap", 0, 0, 2, 2},		/* 0x2b */
-  {"getv", 2, 0, 0, 1},		/* 0x2c */
-  {"setv", 2, 0, 0, 1},		/* 0x2d */
-  {"tracev", 2, 0, 0, 1},	/* 0x2e */
-  {0, 0, 0, 0, 0},		/* 0x2f */
-  {"trace16", 2, 0, 1, 1},	/* 0x30 */
-  {0, 0, 0, 0, 0},		/* 0x31 */
-  {"pick", 1, 0, 0, 1},		/* 0x32 */
-  {"rot", 0, 0, 3, 3},		/* 0x33 */
+  {0, 0, 0, 0, 0}
+#define DEFOP(NAME, SIZE, DATA_SIZE, CONSUMED, PRODUCED, VALUE) \
+  , { # NAME, SIZE, DATA_SIZE, CONSUMED, PRODUCED }
+#include "ax.def"
+#undef DEFOP
 };
 
 

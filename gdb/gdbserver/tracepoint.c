@@ -470,112 +470,19 @@ write_inferior_uinteger (CORE_ADDR symaddr, unsigned int val)
 
 enum gdb_agent_op
   {
-    gdb_agent_op_float = 0x01,
-    gdb_agent_op_add = 0x02,
-    gdb_agent_op_sub = 0x03,
-    gdb_agent_op_mul = 0x04,
-    gdb_agent_op_div_signed = 0x05,
-    gdb_agent_op_div_unsigned = 0x06,
-    gdb_agent_op_rem_signed = 0x07,
-    gdb_agent_op_rem_unsigned = 0x08,
-    gdb_agent_op_lsh = 0x09,
-    gdb_agent_op_rsh_signed = 0x0a,
-    gdb_agent_op_rsh_unsigned = 0x0b,
-    gdb_agent_op_trace = 0x0c,
-    gdb_agent_op_trace_quick = 0x0d,
-    gdb_agent_op_log_not = 0x0e,
-    gdb_agent_op_bit_and = 0x0f,
-    gdb_agent_op_bit_or = 0x10,
-    gdb_agent_op_bit_xor = 0x11,
-    gdb_agent_op_bit_not = 0x12,
-    gdb_agent_op_equal = 0x13,
-    gdb_agent_op_less_signed = 0x14,
-    gdb_agent_op_less_unsigned = 0x15,
-    gdb_agent_op_ext = 0x16,
-    gdb_agent_op_ref8 = 0x17,
-    gdb_agent_op_ref16 = 0x18,
-    gdb_agent_op_ref32 = 0x19,
-    gdb_agent_op_ref64 = 0x1a,
-    gdb_agent_op_ref_float = 0x1b,
-    gdb_agent_op_ref_double = 0x1c,
-    gdb_agent_op_ref_long_double = 0x1d,
-    gdb_agent_op_l_to_d = 0x1e,
-    gdb_agent_op_d_to_l = 0x1f,
-    gdb_agent_op_if_goto = 0x20,
-    gdb_agent_op_goto = 0x21,
-    gdb_agent_op_const8 = 0x22,
-    gdb_agent_op_const16 = 0x23,
-    gdb_agent_op_const32 = 0x24,
-    gdb_agent_op_const64 = 0x25,
-    gdb_agent_op_reg = 0x26,
-    gdb_agent_op_end = 0x27,
-    gdb_agent_op_dup = 0x28,
-    gdb_agent_op_pop = 0x29,
-    gdb_agent_op_zero_ext = 0x2a,
-    gdb_agent_op_swap = 0x2b,
-    gdb_agent_op_getv = 0x2c,
-    gdb_agent_op_setv = 0x2d,
-    gdb_agent_op_tracev = 0x2e,
-    gdb_agent_op_trace16 = 0x30,
-    gdb_agent_op_pick = 0x32,
-    gdb_agent_op_rot = 0x33,
+#define DEFOP(NAME, SIZE, DATA_SIZE, CONSUMED, PRODUCED, VALUE)  \
+    gdb_agent_op_ ## NAME = VALUE,
+#include "ax.def"
+#undef DEFOP
     gdb_agent_op_last
   };
 
 static const char *gdb_agent_op_names [gdb_agent_op_last] =
   {
-    "?undef?",
-    "float",
-    "add",
-    "sub",
-    "mul",
-    "div_signed",
-    "div_unsigned",
-    "rem_signed",
-    "rem_unsigned",
-    "lsh",
-    "rsh_signed",
-    "rsh_unsigned",
-    "trace",
-    "trace_quick",
-    "log_not",
-    "bit_and",
-    "bit_or",
-    "bit_xor",
-    "bit_not",
-    "equal",
-    "less_signed",
-    "less_unsigned",
-    "ext",
-    "ref8",
-    "ref16",
-    "ref32",
-    "ref64",
-    "ref_float",
-    "ref_double",
-    "ref_long_double",
-    "l_to_d",
-    "d_to_l",
-    "if_goto",
-    "goto",
-    "const8",
-    "const16",
-    "const32",
-    "const64",
-    "reg",
-    "end",
-    "dup",
-    "pop",
-    "zero_ext",
-    "swap",
-    "getv",
-    "setv",
-    "tracev",
-    "?undef?",
-    "trace16",
-    "?undef?",
-    "pick",
-    "rot"
+    "?undef?"
+#define DEFOP(NAME, SIZE, DATA_SIZE, CONSUMED, PRODUCED, VALUE)  , # NAME
+#include "ax.def"
+#undef DEFOP
   };
 
 struct agent_expr
@@ -4297,6 +4204,16 @@ unparse_agent_expr (struct agent_expr *aexpr)
 
 #endif
 
+/* A wrapper for gdb_agent_op_names that does some bounds-checking.  */
+
+static const char *
+gdb_agent_op_name (int op)
+{
+  if (op < 0 || op >= gdb_agent_op_last || gdb_agent_op_names[op] == NULL)
+    return "?undef?";
+  return gdb_agent_op_names[op];
+}
+
 /* The agent expression evaluator, as specified by the GDB docs. It
    returns 0 if everything went OK, and a nonzero error code
    otherwise.  */
@@ -4690,7 +4607,7 @@ eval_agent_expr (struct tracepoint_hit_ctx *ctx,
 	}
 
       trace_debug ("Op %s -> sp=%d, top=0x%s",
-		   gdb_agent_op_names[op], sp, pulongest (top));
+		   gdb_agent_op_name (op), sp, pulongest (top));
     }
 }
 
@@ -6000,11 +5917,11 @@ compile_bytecodes (struct agent_expr *aexpr)
       if (emit_error)
 	{
 	  trace_debug ("Error %d while emitting code for %s\n",
-		       emit_error, gdb_agent_op_names[op]);
+		       emit_error, gdb_agent_op_name (op));
 	  return expr_eval_unhandled_opcode;
 	}
 
-      trace_debug ("Op %s compiled\n", gdb_agent_op_names[op]);
+      trace_debug ("Op %s compiled\n", gdb_agent_op_name (op));
     }
 
   /* Now fill in real addresses as goto destinations.  */

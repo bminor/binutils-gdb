@@ -1,5 +1,12 @@
 2011-02-18  Tom Tromey  <tromey@redhat.com>
 
+	* Makefile.in (tracepoint-ipa.o): Depend on ax.def.
+	(tracepoint.o): Likewise.
+	* tracepoint.c (enum gdb_agent_op): Use ax.def.
+	(gdb_agent_op_names): Likewise.
+
+2011-02-18  Tom Tromey  <tromey@redhat.com>
+
 	* tracepoint.c (enum gdb_agent_op) <gdb_agent_op_pick,
 	gdb_agent_op_rot>: New constants.
 	(gdb_agent_op_names): Add pick and roll.
