@@ -1,3 +1,9 @@
+2011-02-18  John David Anglin  <dave.anglin@nrc-cnnrc.gc.ca>
+
+	PR ld/12376
+	emulparams/hppalinux.sh (DATA_ADDR): Define.
+	(SHLIB_DATA_ADDR): Likewise.
+
 2011-02-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* emulparams/elf32_x86_64.sh (LIBPATH_SUFFIX): Changed to
