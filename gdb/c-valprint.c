@@ -230,7 +230,7 @@ c_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	  break;
 	}
       /* Array of unspecified length: treat like pointer to first elt.  */
-      addr = address;
+      addr = address + embedded_offset;
       goto print_unpacked_pointer;
 
     case TYPE_CODE_MEMBERPTR:
