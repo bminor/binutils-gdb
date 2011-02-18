@@ -1,3 +1,9 @@
+2011-02-18  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* c-valprint.c (c_val_print): Add embedded_offset to address
+	for arrays of unspecified length.
+	* p-valprint.c (pascal_val_print): Likewise.
+
 2011-02-18  Yao Qi  <yao@codesourcery.com>
 
 	* gdb/arm-tdep.c (arm_displaced_step_copy_insn): Move code to ...
