@@ -1,3 +1,10 @@
+2010-02-18  Rafael Ávila de Espíndola <respindola@mozilla.com>
+
+	* symtab.cc (Symbol::should_add_dynsym_entry) Return false for
+	plugin only symbols.
+	(Symbol_table::sized_finalize_symbol) Mark symbol only present
+	in plugin files as not needed in the symbol table.
+
 2011-02-11  Sriraman Tallam  <tmsriram@google.com>
 
 	* output.cc (Output_section::add_input_section): Delay fill

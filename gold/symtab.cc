@@ -310,6 +310,11 @@ Sized_symbol<size>::allocate_common(Output_data* od, Value_type value)
 inline bool
 Symbol::should_add_dynsym_entry(Symbol_table* symtab) const
 {
+  // If the symbol is only present on plugin files, the plugin decided we
+  // don't need it.
+  if (!this->in_real_elf())
+    return false;
+
   // If the symbol is used by a dynamic relocation, we need to add it.
   if (this->needs_dynsym_entry())
     return true;
@@ -2590,6 +2595,15 @@ Symbol_table::sized_finalize_symbol(Symbol* unsized_sym)
       gold_assert(!sym->has_symtab_index());
       sym->set_symtab_index(-1U);
       gold_assert(sym->dynsym_index() == -1U);
+      return false;
+    }
+
+  // If the symbol is only present on plugin files, the plugin decided we
+  // don't need it.
+  if (!sym->in_real_elf())
+    {
+      gold_assert(!sym->has_symtab_index());
+      sym->set_symtab_index(-1U);
       return false;
     }
 
