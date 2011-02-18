@@ -167,6 +167,11 @@ static struct display *display_chain;
 
 static int display_number;
 
+/* Walk the following statement or block through all displays.  */
+
+#define ALL_DISPLAYS(B)				\
+  for (B = display_chain; B; B = B->next)
+
 /* Prototypes for exported functions.  */
 
 void output_command (char *, int);
@@ -1555,35 +1560,26 @@ clear_displays (void)
     }
 }
 
-/* Delete the auto-display number NUM.  */
+/* Delete the auto-display DISPLAY.  */
 
 static void
-delete_display (int num)
+delete_display (struct display *display)
 {
-  struct display *d1, *d;
+  struct display *d;
 
-  if (!display_chain)
-    error (_("No display number %d."), num);
+  gdb_assert (display != NULL);
 
-  if (display_chain->number == num)
-    {
-      d1 = display_chain;
-      display_chain = d1->next;
-      free_display (d1);
-    }
-  else
-    for (d = display_chain;; d = d->next)
+  if (display_chain == display)
+    display_chain = display->next;
+
+  ALL_DISPLAYS (d)
+    if (d->next == display)
       {
-	if (d->next == 0)
-	  error (_("No display number %d."), num);
-	if (d->next->number == num)
-	  {
-	    d1 = d->next;
-	    d->next = d1->next;
-	    free_display (d1);
-	    break;
-	  }
+	d->next = display->next;
+	break;
       }
+
+  free_display (display);
 }
 
 /* Delete some values from the auto-display chain.
@@ -1607,18 +1603,24 @@ undisplay_command (char *args, int from_tty)
   while (*p)
     {
       p1 = p;
-      while (*p1 >= '0' && *p1 <= '9')
-	p1++;
-      if (*p1 && *p1 != ' ' && *p1 != '\t')
-	error (_("Arguments must be display numbers."));
 
-      num = atoi (p);
+      num = get_number_or_range (&p1);
+      if (num == 0)
+	warning (_("bad display number at or near '%s'"), p);
+      else
+	{
+	  struct display *d;
 
-      delete_display (num);
+	  ALL_DISPLAYS (d)
+	    if (d->number == num)
+	      break;
+	  if (d == NULL)
+	    printf_unfiltered (_("No display number %d.\n"), num);
+	  else
+	    delete_display (d);
+	}
 
       p = p1;
-      while (*p == ' ' || *p == '\t')
-	p++;
     }
   dont_repeat ();
 }

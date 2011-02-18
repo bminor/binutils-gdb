@@ -561,8 +561,6 @@ struct program_space *default_breakpoint_pspace;
    name of a convenience variable.  Making it an expression wouldn't
    work well for map_breakpoint_numbers (e.g. "4 + 5 + 6").
 
-   If the string is a NULL pointer, that denotes the last breakpoint.
-   
    TRAILER is a character which can be found after the number; most
    commonly this is `-'.  If you don't want a trailer, use \0.  */
 
@@ -572,10 +570,7 @@ get_number_trailer (char **pp, int trailer)
   int retval = 0;	/* default */
   char *p = *pp;
 
-  if (p == NULL)
-    /* Empty line means refer to the last breakpoint.  */
-    return breakpoint_count;
-  else if (*p == '$')
+  if (*p == '$')
     {
       /* Make a copy of the name, so we can null-terminate it
          to pass to lookup_internalvar().  */
@@ -651,7 +646,7 @@ get_number (char **pp)
    is completed.  The call that completes the range will advance
    pointer PP past <number2>.  */
 
-int 
+int
 get_number_or_range (char **pp)
 {
   static int last_retval, end_value;

@@ -1191,4 +1191,6 @@ extern struct breakpoint *iterate_over_breakpoints (int (*) (struct breakpoint *
 
 extern int user_breakpoint_p (struct breakpoint *);
 
+extern int get_number_or_range (char **pp);
+
 #endif /* !defined (BREAKPOINT_H) */
