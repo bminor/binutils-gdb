@@ -913,18 +913,10 @@ arm_linux_displaced_step_copy_insn (struct gdbarch *gdbarch,
     }
   else
     {
-      enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-      uint32_t insn = read_memory_unsigned_integer (from, 4, byte_order);
-
-      if (debug_displaced)
-	fprintf_unfiltered (gdb_stdlog, "displaced: stepping insn %.8lx "
-			    "at %.8lx\n", (unsigned long) insn,
-			    (unsigned long) from);
-
       /* Override the default handling of SVC instructions.  */
       dsc->u.svc.copy_svc_os = arm_linux_copy_svc;
 
-      arm_process_displaced_insn (gdbarch, insn, from, to, regs, dsc);
+      arm_process_displaced_insn (gdbarch, from, to, regs, dsc);
     }
 
   arm_displaced_init_closure (gdbarch, from, to, dsc);

@@ -1,3 +1,12 @@
+2011-02-18  Yao Qi  <yao@codesourcery.com>
+
+	* gdb/arm-tdep.c (arm_displaced_step_copy_insn): Move code to ...
+	(arm_process_displaced_insn): .. here. Remove parameter INSN.
+	(thumb_process_displaced_insn): New.
+	* gdb/arm-linux-tdep.c (arm_linux_displaced_step_copy_insn): Update
+	call to arm_process_displaced_insn.
+	* gdb/arm-tdep.h : Update declaration of arm_process_displaced_insn.
+
 2011-02-17  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2loc.h (dwarf2_compile_expr_to_ax): Declare.
