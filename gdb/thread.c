@@ -976,32 +976,12 @@ info_threads_command (char *arg, int from_tty)
 
   while (arg != NULL && *arg != '\0')
     {
-      int tmp_tid = strtol (arg, &arg, 0);
-      unsigned int highrange;
+      tid = get_number_or_range (&arg);
 
-      if (tmp_tid <= 0)
-	error (_("invalid thread id %d"), tmp_tid);
+      if (tid <= 0)
+	error (_("invalid thread id %d"), tid);
 
-      tid = tmp_tid;
       print_thread_info (uiout, tid, -1);
-
-      while (*arg == ' ' || *arg == '\t')
-	++arg;
-
-      if (*arg == '-')
-	{
-	  /* Do a range of threads.  Must be in ascending order.  */
-	  ++arg;	/* Skip the hyphen.  */
-	  highrange = strtoul (arg, &arg, 0);
-	  if (highrange < tid)
-	    error (_("inverted range"));
-
-	  /* Do the threads in the range (first one already done).  */
-	  while (tid < highrange)
-	    {
-	      print_thread_info (uiout, ++tid, -1);
-	    }
-	}
     }
 }
 
