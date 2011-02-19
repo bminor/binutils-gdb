@@ -1,3 +1,12 @@
+2011-02-19  Michael Snyder  <msnyder@vmware.com>
+
+	* reverse.c (delete_one_bookmark): Argument is now bookmark
+	id rather than pointer to bookmark struct.
+	(delete_bookmark_command): Use get_number_or_range.
+	(goto_bookmark_command): Parse with get_number instead of strtoul.
+	(bookmark_1): New function.  Print info for one bookmark.
+	(bookmarks_info): Use get_number_or_range and bookmark_1.
+
 2011-02-18  Michael Snyder  <msnyder@vmware.com>
 
 	* thread.c (info_threads_command): Re-implement using 

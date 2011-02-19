@@ -173,9 +173,14 @@ save_bookmark_command (char *args, int from_tty)
 /* Implement "delete bookmark" command.  */
 
 static int
-delete_one_bookmark (struct bookmark *b)
+delete_one_bookmark (int num)
 {
-  struct bookmark *b1;
+  struct bookmark *b1, *b;
+
+  /* Find bookmark with corresponding number.  */
+  ALL_BOOKMARKS (b)
+    if (b->number == num)
+      break;
 
   /* Special case, first item in list.  */
   if (b == bookmark_chain)
@@ -215,7 +220,7 @@ static void
 delete_bookmark_command (char *args, int from_tty)
 {
   struct bookmark *b;
-  unsigned long num;
+  int num;
 
   if (bookmark_chain == NULL)
     {
@@ -231,15 +236,13 @@ delete_bookmark_command (char *args, int from_tty)
       return;
     }
 
-  num = strtoul (args, NULL, 0);
-  /* Find bookmark with corresponding number.  */
-  ALL_BOOKMARKS (b)
-    if (b->number == num)
-      break;
-
-  if (!delete_one_bookmark (b))
-    /* Not found.  */
-    error (_("delete bookmark: no bookmark found for '%s'."), args);
+  while (args != NULL && *args != '\0')
+    {
+      num = get_number_or_range (&args);
+      if (!delete_one_bookmark (num))
+	/* Not found.  */
+	warning (_("No bookmark #%d."), num);
+    }
 }
 
 /* Implement "goto-bookmark" command.  */
@@ -272,7 +275,7 @@ goto_bookmark_command (char *args, int from_tty)
     }
 
   /* General case.  Bookmark identified by bookmark number.  */
-  num = strtoul (args, NULL, 0);
+  num = get_number (&args);
   ALL_BOOKMARKS (b)
     if (b->number == num)
       break;
@@ -287,33 +290,48 @@ goto_bookmark_command (char *args, int from_tty)
   error (_("goto-bookmark: no bookmark found for '%s'."), args);
 }
 
+static int
+bookmark_1 (int bnum)
+{
+  struct gdbarch *gdbarch = get_regcache_arch (get_current_regcache ());
+  struct bookmark *b;
+  int matched = 0;
+
+  ALL_BOOKMARKS (b)
+  {
+    if (bnum == -1 || bnum == b->number)
+      {
+	printf_filtered ("   %d       %s    '%s'\n",
+			 b->number,
+			 paddress (gdbarch, b->pc),
+			 b->opaque_data);
+	matched++;
+      }
+  }
+
+  if (bnum > 0 && matched == 0)
+    printf_filtered ("No bookmark #%d\n", bnum);
+
+  return matched;
+}
+
 /* Implement "info bookmarks" command.  */
 
 static void
 bookmarks_info (char *args, int from_tty)
 {
-  struct bookmark *b;
   int bnum = -1;
-  struct gdbarch *gdbarch;
-
-  if (args)
-    bnum = parse_and_eval_long (args);
 
   if (!bookmark_chain)
-    {
-      printf_filtered (_("No bookmarks.\n"));
-      return;
-    }
-
-  gdbarch = get_regcache_arch (get_current_regcache ());
-  printf_filtered (_("Bookmark    Address     Opaque\n"));
-  printf_filtered (_("   ID                    Data\n"));
-
-  ALL_BOOKMARKS (b)
-    printf_filtered ("   %d       %s    '%s'\n",
-		     b->number,
-		     paddress (gdbarch, b->pc),
-		     b->opaque_data);
+    printf_filtered (_("No bookmarks.\n"));
+  else if (args == NULL || *args == '\0')
+    bookmark_1 (-1);
+  else
+    while (args != NULL && *args != '\0')
+      {
+	bnum = get_number_or_range (&args);
+	bookmark_1 (bnum);
+      }
 }
 
 
@@ -370,7 +388,8 @@ execution history that can be returned to later in the same debug \n\
 session."));
   add_cmd ("bookmark", class_bookmark, delete_bookmark_command, _("\
 Delete a bookmark from the bookmark list.\n\
-Argument is a bookmark number, or no argument to delete all bookmarks.\n"),
+Argument is a bookmark number or numbers,\n\
+ or no argument to delete all bookmarks.\n"),
 	   &deletelist);
   add_com ("goto-bookmark", class_bookmark, goto_bookmark_command, _("\
 Go to an earlier-bookmarked point in the program's execution history.\n\
