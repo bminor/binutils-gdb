@@ -1212,7 +1212,6 @@ static void
 thread_apply_command (char *tidlist, int from_tty)
 {
   char *cmd;
-  char *p;
   struct cleanup *old_chain;
   char *saved_cmd;
 
@@ -1231,51 +1230,29 @@ thread_apply_command (char *tidlist, int from_tty)
   while (tidlist < cmd)
     {
       struct thread_info *tp;
-      int start, end;
+      int start;
+      char *p = tidlist;
 
-      start = strtol (tidlist, &p, 10);
-      if (p == tidlist)
-	error (_("Error parsing %s"), tidlist);
-      tidlist = p;
-
-      while (*tidlist == ' ' || *tidlist == '\t')
-	tidlist++;
-
-      if (*tidlist == '-')	/* Got a range of IDs?  */
-	{
-	  tidlist++;		/* Skip the - */
-	  end = strtol (tidlist, &p, 10);
-	  if (p == tidlist)
-	    error (_("Error parsing %s"), tidlist);
-	  tidlist = p;
-
-	  while (*tidlist == ' ' || *tidlist == '\t')
-	    tidlist++;
-	}
-      else
-	end = start;
+      start = get_number_or_range (&tidlist);
 
       make_cleanup_restore_current_thread ();
 
-      for (; start <= end; start++)
+      tp = find_thread_id (start);
+
+      if (!tp)
+	warning (_("Unknown thread %d."), start);
+      else if (!thread_alive (tp))
+	warning (_("Thread %d has terminated."), start);
+      else
 	{
-	  tp = find_thread_id (start);
+	  switch_to_thread (tp->ptid);
 
-	  if (!tp)
-	    warning (_("Unknown thread %d."), start);
-	  else if (!thread_alive (tp))
-	    warning (_("Thread %d has terminated."), start);
-	  else
-	    {
-	      switch_to_thread (tp->ptid);
+	  printf_filtered (_("\nThread %d (%s):\n"), tp->num,
+			   target_pid_to_str (inferior_ptid));
+	  execute_command (cmd, from_tty);
 
-	      printf_filtered (_("\nThread %d (%s):\n"), tp->num,
-			       target_pid_to_str (inferior_ptid));
-	      execute_command (cmd, from_tty);
-
-	      /* Restore exact command used previously.  */
-	      strcpy (cmd, saved_cmd);
-	    }
+	  /* Restore exact command used previously.  */
+	  strcpy (cmd, saved_cmd);
 	}
     }
 
