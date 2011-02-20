@@ -1,3 +1,14 @@
+2011-02-19  Mike Frysinger  <vapier@gentoo.org>
+
+	* bfin-dis.c (saved_state): Mark static.  Change a[01]x to ax[] and
+	a[01]w to aw[].  Delete ac0, ac0_copy, ac1, an, aq, av0, av0s, av1,
+	av1s, az, cc, v, v_copy, vs, rnd_mod, v_internal, pc, ticks, insts,
+	exception, end_of_registers, msize, memory, bfd_mach.
+	(CCREG, PCREG, A0XREG, A0WREG, A1XREG, A1WREG, LC0REG, LT0REG,
+	LB0REG, LC1REG, LT1REG, LB1REG): Delete
+	(AXREG, AWREG, LCREG, LTREG, LBREG): Define.
+	(get_allreg): Change to new defines.  Fallback to abort().
+
 2011-02-14  Mike Frysinger  <vapier@gentoo.org>
 
 	* bfin-dis.c: Add whitespace/parenthesis where needed.

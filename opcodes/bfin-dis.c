@@ -654,27 +654,12 @@ decode_optmode (int mod, int MM, disassemble_info *outf)
   OUTS (outf, ")");
 }
 
-struct saved_state
+static struct saved_state
 {
   bu32 dpregs[16], iregs[4], mregs[4], bregs[4], lregs[4];
-  bu32 a0x, a0w, a1x, a1w;
+  bu32 ax[2], aw[2];
   bu32 lt[2], lc[2], lb[2];
-  int ac0, ac0_copy, ac1, an, aq;
-  int av0, av0s, av1, av1s, az, cc, v, v_copy, vs;
-  int rnd_mod;
-  int v_internal;
-  bu32 pc, rets;
-
-  int ticks;
-  int insts;
-
-  int exception;
-
-  int end_of_registers;
-
-  int msize;
-  unsigned char *memory;
-  unsigned long bfd_mach;
+  bu32 rets;
 } saved_state;
 
 #define DREG(x)         (saved_state.dpregs[x])
@@ -688,19 +673,12 @@ struct saved_state
 #define MREG(x)         (saved_state.mregs[x])
 #define BREG(x)         (saved_state.bregs[x])
 #define LREG(x)         (saved_state.lregs[x])
-#define A0XREG          (saved_state.a0x)
-#define A0WREG          (saved_state.a0w)
-#define A1XREG          (saved_state.a1x)
-#define A1WREG          (saved_state.a1w)
-#define CCREG           (saved_state.cc)
-#define LC0REG          (saved_state.lc[0])
-#define LT0REG          (saved_state.lt[0])
-#define LB0REG          (saved_state.lb[0])
-#define LC1REG          (saved_state.lc[1])
-#define LT1REG          (saved_state.lt[1])
-#define LB1REG          (saved_state.lb[1])
+#define AXREG(x)        (saved_state.ax[x])
+#define AWREG(x)        (saved_state.aw[x])
+#define LCREG(x)        (saved_state.lc[x])
+#define LTREG(x)        (saved_state.lt[x])
+#define LBREG(x)        (saved_state.lb[x])
 #define RETSREG         (saved_state.rets)
-#define PCREG           (saved_state.pc)
 
 static bu32 *
 get_allreg (int grp, int reg)
@@ -718,29 +696,29 @@ get_allreg (int grp, int reg)
      REG_LASTREG */
   switch (fullreg >> 2)
     {
-    case 0: case 1: return &DREG (reg); break;
-    case 2: case 3: return &PREG (reg); break;
-    case 4: return &IREG (reg & 3); break;
-    case 5: return &MREG (reg & 3); break;
-    case 6: return &BREG (reg & 3); break;
-    case 7: return &LREG (reg & 3); break;
+    case 0: case 1: return &DREG (reg);
+    case 2: case 3: return &PREG (reg);
+    case 4: return &IREG (reg & 3);
+    case 5: return &MREG (reg & 3);
+    case 6: return &BREG (reg & 3);
+    case 7: return &LREG (reg & 3);
     default:
       switch (fullreg)
 	{
-	case 32: return &saved_state.a0x;
-	case 33: return &saved_state.a0w;
-	case 34: return &saved_state.a1x;
-	case 35: return &saved_state.a1w;
-	case 39: return &saved_state.rets;
-	case 48: return &LC0REG;
-	case 49: return &LT0REG;
-	case 50: return &LB0REG;
-	case 51: return &LC1REG;
-	case 52: return &LT1REG;
-	case 53: return &LB1REG;
+	case 32: return &AXREG (0);
+	case 33: return &AWREG (0);
+	case 34: return &AXREG (1);
+	case 35: return &AWREG (1);
+	case 39: return &RETSREG;
+	case 48: return &LCREG (0);
+	case 49: return &LTREG (0);
+	case 50: return &LBREG (0);
+	case 51: return &LCREG (1);
+	case 52: return &LTREG (1);
+	case 53: return &LBREG (1);
 	}
-      return 0;
     }
+  abort ();
 }
 
 static int
