@@ -19,8 +19,8 @@
 # thread other than the thread the local watchpoint was set in stops
 # for a breakpoint.
 
-if [target_info exists gdb,no_hardware_watchpoints] {
-    return 0;
+if {[skip_hw_watchpoint_multi_tests]} {
+    return 0
 }
 
 set testfile "local-watch-wrong-thread"

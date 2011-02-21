@@ -25,8 +25,8 @@ if $tracelevel then {
 
 # This test verifies that a watchpoint is detected in the proper thread
 # so the test is only meaningful on a system with hardware watchpoints.
-if [target_info exists gdb,no_hardware_watchpoints] {
-    return 0;
+if {[skip_hw_watchpoint_tests]} {
+    return 0
 }
 
 set testfile watch_thread_num

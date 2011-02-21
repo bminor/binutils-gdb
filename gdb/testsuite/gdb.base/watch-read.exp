@@ -27,9 +27,8 @@
 set testfile "watch-read"
 set srcfile ${testfile}.c
 
-if { [target_info exists gdb,no_hardware_watchpoints] } {
-    untested ${testfile}.exp
-    return -1
+if {[skip_hw_watchpoint_access_tests]} {
+    return 0
 }
 
 if { [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile}] } {

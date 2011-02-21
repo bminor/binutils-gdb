@@ -1,3 +1,22 @@
+2011-02-21  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* lib/gdb.exp (skip_hw_breakpoint_tests): New procedure.
+	(skip_hw_watchpoint_tests): Likewise.
+	(skip_hw_watchpoint_multi_tests): Likewise.
+	(skip_hw_watchpoint_access_tests): Likewise.
+
+	* gdb.base/hbreak.exp: Use appropriate skip_hw_..._tests checks.
+	* gdb.base/pr11022.exp: Likewise.
+	* gdb.base/watch-read.exp: Likewise.
+	* gdb.base/watch_thread_num.exp: Likewise.
+	* gdb.base/watchpoint-hw-hit-once.exp: Likewise.
+	* gdb.base/watchpoint-hw.exp: Likewise.
+	* gdb.base/watchpoint.exp: Likewise.
+	* gdb.threads/local-watch-wrong-thread.exp: Likewise.
+	* gdb.threads/watchthreads-reorder.exp: Likewise.
+	* gdb.threads/watchthreads.exp: Likewise.
+	* gdb.threads/watchthreads2.exp: Likewise.
+
 2011-02-21  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/packed_array.exp: Add xfail for "print u_var" if

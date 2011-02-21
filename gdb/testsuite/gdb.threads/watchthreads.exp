@@ -24,8 +24,8 @@ if $tracelevel {
 
 # This test verifies that a watchpoint is detected in the proper thread
 # so the test is only meaningful on a system with hardware watchpoints.
-if [target_info exists gdb,no_hardware_watchpoints] {
-    return 0;
+if {[skip_hw_watchpoint_multi_tests]} {
+    return 0
 }
 
 proc target_no_stopped_data { } {

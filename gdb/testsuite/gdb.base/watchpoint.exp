@@ -688,10 +688,10 @@ proc test_inaccessible_watchpoint {} {
 	    "$watchpoint_msg \[0-9\]+: \-location: \\*global_ptr"
 	delete_breakpoints
 
-	# This step requires two HW watchpoints.  Since PPC Server only has
-	# a single one, it will use a SW watchpoint in this case.
-	if [istarget powerpc64-*] {
-	    set watchpoint_msg "Watchpoint"
+	# This step requires two HW watchpoints.  Since some platforms only
+	# have a single one, accept either SW or HW watchpoint in this case.
+	if {[skip_hw_watchpoint_multi_tests]} {
+	    set watchpoint_msg "(Watchpoint|Hardware watchpoint)"
 	}
 
 	gdb_test "watch *global_ptr" "$watchpoint_msg \[0-9\]+: \\\*global_ptr"

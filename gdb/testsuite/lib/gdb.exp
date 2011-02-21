@@ -1783,6 +1783,76 @@ proc skip_inline_var_tests {} {
     return 0
 }
 
+# Return a 1 if we should skip tests that require hardware breakpoints
+
+proc skip_hw_breakpoint_tests {} {
+    # Skip tests if requested by the board (note that no_hardware_watchpoints
+    # disables both watchpoints and breakpoints)
+    if { [target_info exists gdb,no_hardware_watchpoints]} {
+	return 1
+    }
+
+    # These targets support hardware breakpoints natively
+    if { [istarget "i?86-*-*"] 
+	 || [istarget "x86_64-*-*"]
+	 || [istarget "ia64-*-*"] } {
+	return 0
+    }
+
+    return 1
+}
+
+# Return a 1 if we should skip tests that require hardware watchpoints
+
+proc skip_hw_watchpoint_tests {} {
+    # Skip tests if requested by the board
+    if { [target_info exists gdb,no_hardware_watchpoints]} {
+	return 1
+    }
+
+    # These targets support hardware watchpoints natively
+    if { [istarget "i?86-*-*"] 
+	 || [istarget "x86_64-*-*"]
+	 || [istarget "ia64-*-*"] 
+	 || [istarget "powerpc*-*-linux*"]
+	 || [istarget "s390*-*-*"] } {
+	return 0
+    }
+
+    return 1
+}
+
+# Return a 1 if we should skip tests that require *multiple* hardware
+# watchpoints to be active at the same time
+
+proc skip_hw_watchpoint_multi_tests {} {
+    if { [skip_hw_watchpoint_tests] } {
+	return 1
+    }
+
+    # These targets support just a single hardware watchpoint
+    if { [istarget "powerpc*-*-linux*"] } {
+	return 1
+    }
+
+    return 0
+}
+
+# Return a 1 if we should skip tests that require read/access watchpoints
+
+proc skip_hw_watchpoint_access_tests {} {
+    if { [skip_hw_watchpoint_tests] } {
+	return 1
+    }
+
+    # These targets support just write watchpoints
+    if { [istarget "s390*-*-*"] } {
+	return 1
+    }
+
+    return 0
+}
+
 set compiler_info		"unknown"
 set gcc_compiled		0
 set hp_cc_compiler		0
