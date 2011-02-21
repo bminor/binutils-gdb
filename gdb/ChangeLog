@@ -1,5 +1,9 @@
 2011-02-21  Tom Tromey  <tromey@redhat.com>
 
+	* breakpoint.c (catch_syscall_command_1): Fix typo.
+
+2011-02-21  Tom Tromey  <tromey@redhat.com>
+
 	* reverse.c: Include cli-utils.h.
 	* printcmd.c: Include cli-utils.h.
 	(string_printf): Use skip_spaces.

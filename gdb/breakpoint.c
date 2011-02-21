@@ -9330,7 +9330,7 @@ catch_syscall_command_1 (char *arg, int from_tty,
   /* Checking if the feature if supported.  */
   if (gdbarch_get_syscall_number_p (gdbarch) == 0)
     error (_("The feature 'catch syscall' is not supported on \
-this architeture yet."));
+this architecture yet."));
 
   tempflag = get_cmd_context (command) == CATCH_TEMPORARY;
 
