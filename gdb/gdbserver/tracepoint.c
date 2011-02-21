@@ -4214,6 +4214,16 @@ gdb_agent_op_name (int op)
   return gdb_agent_op_names[op];
 }
 
+int
+tp_printf (const char *format, ...)
+{
+  va_list ap;
+  va_start (ap, format);
+  vprintf (format, ap);
+  va_end (ap);
+  return 0;
+}
+
 /* The agent expression evaluator, as specified by the GDB docs. It
    returns 0 if everything went OK, and a nonzero error code
    otherwise.  */
@@ -4571,6 +4581,40 @@ eval_agent_expr (struct tracepoint_hit_ctx *ctx,
 	  arg = aexpr->bytes[pc++];
 	  arg = (arg << 8) + aexpr->bytes[pc++];
 	  agent_tsv_read (tframe, arg);
+	  break;
+
+	case gdb_agent_op_printf:
+	  {
+	    void *argv;
+	    arg = aexpr->bytes[pc++];
+	    argv = (void *) (unsigned long) top;
+	    if (--sp >= 0)
+	      top = stack[sp];
+
+	    if (arg)
+	      {
+		if (strstr ((char *) (aexpr->bytes + pc), "%s"))
+		  {
+		    int			i;
+		    unsigned char	buf[100];
+
+		    for (i = 0; i < 100; i++)
+		      {
+			agent_mem_read (tframe, buf + i,
+					(CORE_ADDR) ((unsigned long)argv + i),
+					1);
+			if (!buf[i])
+			  break;
+		      }
+		    tp_printf ((char *) (aexpr->bytes + pc), buf);
+		  }
+		else
+	          tp_printf ((char *) (aexpr->bytes + pc), argv);
+	      }
+	    else
+	      tp_printf ((char *) (aexpr->bytes + pc));
+	    pc += strlen ((char *) aexpr->bytes + pc) + 1;
+	  }
 	  break;
 
 	  /* GDB never (currently) generates any of these ops.  */

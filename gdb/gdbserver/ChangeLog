@@ -1,3 +1,8 @@
+2011-02-21  Hui Zhu  <teawater@gmail.com>
+
+	* tracepoint.c (tp_printf): New function.
+	(eval_agent_expr): Handle gdb_agent_op_printf.
+
 2011-02-18  Tom Tromey  <tromey@redhat.com>
 
 	* Makefile.in (tracepoint-ipa.o): Depend on ax.def.
