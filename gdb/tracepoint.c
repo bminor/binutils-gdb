@@ -51,6 +51,7 @@
 #include "ax.h"
 #include "ax-gdb.h"
 #include "memrange.h"
+#include "printcmd.h"
 
 /* readline include files */
 #include "readline/readline.h"
@@ -763,6 +764,28 @@ validate_actionline (char **line, struct breakpoint *t)
 	error (_("while-stepping step count `%s' is malformed."), *line);
     }
 
+  else if (cmd_cfunc_eq (c, printf_command))
+    {
+      char fbuf[101];
+
+      for (loc = t->loc; loc; loc = loc->next)
+	{
+	  int nargs;
+	  aexpr = new_agent_expr (loc->gdbarch, loc->address);
+	  old_chain = make_cleanup_free_agent_expr (aexpr);
+	  string_printf (p, NULL, gen_printf_expr_callback,
+			 loc, aexpr);
+	  ax_simple (aexpr, aop_end);
+	  /* The agent expr include expr for arguments, format string, 1 byte
+	     for aop_printf, 1 byte for the number of arguments, 1 byte for
+	     size of format string, 1 byte for blank after format string
+	     and 1 byte for aop_end.  */
+	  if (aexpr->len > MAX_AGENT_EXPR_LEN)
+	    error (_("Expression is too complicated."));
+	  do_cleanups (old_chain);
+	}
+    }
+
   else if (cmd_cfunc_eq (c, end_actions_pseudocommand))
     ;
 
@@ -1473,6 +1496,22 @@ encode_actions_1 (struct command_line *action,
 
 	  encode_actions_1 (action->body_list[0], t, tloc, frame_reg,
 			    frame_offset, stepping_list, NULL);
+	}
+      else if (cmd_cfunc_eq (cmd, printf_command))
+	{
+          char fbuf[101];
+	  struct cleanup *old_chain = NULL;
+
+	  aexpr = new_agent_expr (tloc->gdbarch, tloc->address);
+	  old_chain = make_cleanup_free_agent_expr (aexpr);
+	  string_printf (action_exp, NULL, gen_printf_expr_callback,
+			 tloc, aexpr);
+	  ax_simple (aexpr, aop_end);
+
+	  ax_reqs (aexpr);
+	  report_agent_reqs_errors (aexpr);
+	  discard_cleanups (old_chain);
+	  add_aexpr (collect, aexpr);
 	}
       else
 	error (_("Invalid tracepoint command '%s'"), action->line);

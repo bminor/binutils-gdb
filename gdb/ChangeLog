@@ -1,3 +1,23 @@
+2011-02-21  Hui Zhu  <teawater@gmail.com>
+
+	* Makefile.in (HFILES_NO_SRCDIR): Add printcmd.h.
+	* ax-gdb.c (gen_printf_expr_callback): New function.
+	* ax-gdb.h (gen_printf_expr_callback): Forward declare.
+	* ax-general.c (ax_memcpy): New function.
+	(ax_print): Handle "printf".
+	(ax_reqs): Ditto.
+	* ax.h (ax_memcpy): Forward declare.
+	* common/ax.def (invalid2): Removed.
+	(printf): New entry.
+	* printcmd.c (printcmd.h): New include.
+	(string_printf): New function.
+	(ui_printf): Removed.
+	(printf_command): Remove static.  Call string_printf.
+	(eval_command): Call string_printf.
+	* printcmd.h: New file.
+	* tracepoint.c (validate_actionline,
+	encode_actions_1): handle printf_command.
+
 2011-02-19  Michael Snyder  <msnyder@vmware.com>
 
 	* reverse.c (delete_one_bookmark): Argument is now bookmark

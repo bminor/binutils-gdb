@@ -330,6 +330,14 @@ ax_tsv (struct agent_expr *x, enum agent_op op, int num)
   x->buf[x->len + 2] = (num) & 0xff;
   x->len += 3;
 }
+
+void
+ax_memcpy (struct agent_expr *x, const void *src, size_t n)
+{
+  grow_expr (x, n);
+  memcpy (x->buf + x->len, src, n);
+  x->len += n;
+}
 
 
 
@@ -368,6 +376,7 @@ ax_print (struct ui_file *f, struct agent_expr *x)
   for (i = 0; i < x->len;)
     {
       enum agent_op op = x->buf[i];
+      int op_size;
 
       if (op >= (sizeof (aop_map) / sizeof (aop_map[0]))
 	  || !aop_map[op].name)
@@ -376,7 +385,19 @@ ax_print (struct ui_file *f, struct agent_expr *x)
 	  i++;
 	  continue;
 	}
-      if (i + 1 + aop_map[op].op_size > x->len)
+      if (op == aop_printf)
+        {
+	  if (i + 2 >= x->len)
+	    {
+	      fprintf_filtered (f, _("%3d  <bad opcode %02x>\n"), i, op);
+	      i++;
+	      continue;
+	    }
+	  op_size = 1 + strlen (x->buf + i + 2) + 1;
+	}
+      else
+	op_size = aop_map[op].op_size;
+      if (i + 1 + op_size > x->len)
 	{
 	  fprintf_filtered (f, _("%3d  <incomplete opcode %s>\n"),
 			    i, aop_map[op].name);
@@ -384,15 +405,15 @@ ax_print (struct ui_file *f, struct agent_expr *x)
 	}
 
       fprintf_filtered (f, "%3d  %s", i, aop_map[op].name);
-      if (aop_map[op].op_size > 0)
+      if (op_size > 0)
 	{
 	  fputs_filtered (" ", f);
 
 	  print_longest (f, 'd', 0,
-			 read_const (x, i + 1, aop_map[op].op_size));
+			 read_const (x, i + 1, op_size));
 	}
       fprintf_filtered (f, "\n");
-      i += 1 + aop_map[op].op_size;
+      i += 1 + op_size;
 
       is_float = (op == aop_float);
     }
@@ -460,6 +481,8 @@ ax_reqs (struct agent_expr *ax)
   /* Pointer to a description of the present op.  */
   struct aop_map *op;
 
+  int op_size = 0, consumed = 0;
+
   memset (targets, 0, ax->len * sizeof (targets[0]));
   memset (boundary, 0, ax->len * sizeof (boundary[0]));
 
@@ -467,7 +490,7 @@ ax_reqs (struct agent_expr *ax)
   ax->flaw = agent_flaw_none;
   ax->max_data_size = 0;
 
-  for (i = 0; i < ax->len; i += 1 + op->op_size)
+  for (i = 0; i < ax->len; i += 1 + op_size)
     {
       if (ax->buf[i] > (sizeof (aop_map) / sizeof (aop_map[0])))
 	{
@@ -483,7 +506,23 @@ ax_reqs (struct agent_expr *ax)
 	  return;
 	}
 
-      if (i + 1 + op->op_size > ax->len)
+      if (ax->buf[i] == aop_printf)
+        {
+	  if (i + 2 >= ax->len)
+	    {
+	      ax->flaw = agent_flaw_incomplete_instruction;
+	      return;
+	    }
+	  consumed = ax->buf[i + 1];
+	  op_size = 1 + strlen (ax->buf + i + 2) + 1;
+	}
+      else
+        {
+	  op_size = op->op_size;
+	  consumed = op->consumed;
+        }
+
+      if (i + 1 + op_size > ax->len)
 	{
 	  ax->flaw = agent_flaw_incomplete_instruction;
 	  return;
@@ -501,7 +540,7 @@ ax_reqs (struct agent_expr *ax)
       boundary[i] = 1;
       heights[i] = height;
 
-      height -= op->consumed;
+      height -= consumed;
       if (height < ax->min_height)
 	ax->min_height = height;
       height += op->produced;

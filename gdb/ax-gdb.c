@@ -2445,6 +2445,65 @@ gen_eval_for_expr (CORE_ADDR scope, struct expression *expr)
   return ax;
 }
 
+void
+gen_printf_expr_callback (char *fbuf, char **expp, void *loc_v, void *aexpr_v)
+{
+  struct bp_location	*loc = loc_v;
+  struct agent_expr	*aexpr = aexpr_v;
+
+  if (expp)
+    {
+      struct cleanup *old_chain = NULL;
+      struct expression *expr = NULL;
+      union exp_element *pc;
+      struct axs_value value;
+
+      expr = parse_exp_1 (expp, block_for_pc (loc->address), 1);
+      old_chain = make_cleanup (free_current_contents, &expr);
+
+      pc = expr->elts;
+      trace_kludge = 0;
+      value.optimized_out = 0;
+      gen_expr (expr, &pc, aexpr, &value);
+
+      if (value.optimized_out)
+        error (_("value has been optimized out"));
+      switch (value.kind)
+        {
+	case axs_lvalue_memory:
+	  if (TYPE_CODE (value.type) != TYPE_CODE_ARRAY)
+	    {
+	      int length = TYPE_LENGTH (check_typedef (value.type));
+	      switch (length)
+		{
+		case 4:
+		  ax_simple (aexpr, aop_ref32);
+		  break;
+		case 8:
+		  ax_simple (aexpr, aop_ref64);
+		  break;
+		default:
+		  error (_("Size of value is not OK."));
+		  break;
+		}
+	    }
+	  break;
+	case axs_lvalue_register:
+	  ax_reg (aexpr, value.u.reg);
+	  break;
+        }
+
+      do_cleanups (old_chain);
+    }
+
+  ax_simple (aexpr, aop_printf);
+  if (expp)
+    ax_simple (aexpr, 1);
+  else
+    ax_simple (aexpr, 0);
+  ax_memcpy (aexpr, fbuf, strlen (fbuf) + 1);
+}
+
 static void
 agent_command (char *exp, int from_tty)
 {
