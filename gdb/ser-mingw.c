@@ -221,10 +221,10 @@ ser_windows_close (struct serial *scb)
 {
   struct ser_windows_state *state;
 
-  /* Stop any pending selects. On Windows 95 OS, CancelIo function does not
-     exist. In that case, it can be replaced by a call to CloseHandle, but
-     this is not necessary here as we do close the Windows handle by calling
-     close (scb->fd) below.  */
+  /* Stop any pending selects.  On Windows 95 OS, CancelIo function does
+     not exist.  In that case, it can be replaced by a call to CloseHandle,
+     but this is not necessary here as we do close the Windows handle
+     by calling close (scb->fd) below.  */
   if (CancelIo)
     CancelIo ((HANDLE) _get_osfhandle (scb->fd));
   state = scb->state;

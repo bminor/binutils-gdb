@@ -1,8 +1,12 @@
 2011-02-21  Pierre Muller  <muller@ics.u-strasbg.fr>
 
+	* ser-mingw.c (ser_windows_close): Reformat comment to better conform
+	to GNU coding standards.
+
+2011-02-21  Pierre Muller  <muller@ics.u-strasbg.fr>
+
 	Allow use of mingw native on Windows 95 OS.
-	* src/gdb/ser-mingw.c (CancelIo): New macro for dynamically loaded
-	DLL entry.
+	* ser-mingw.c (CancelIo): New macro for dynamically loaded DLL entry.
 	(ser_windows_close): Only call CancelIo if function exists.
 	(_initialize_ser_windows): Use LoadLirary/GetProcAddress
 	to check for existence of CancelIo function in kernel32 DLL.
