@@ -1,3 +1,10 @@
+2011-02-21  Matthew Gretton-Dann <matthew.gretton-dann@arm.com>
+	    Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* lib/gdb.exp (skip_hw_breakpoint_tests): Add arm*-*-* target.
+	(skip_hw_watchpoint_tests): Likewise.
+	(skip_hw_watchpoint_multi_tests): Likewise.
+
 2011-02-21  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* lib/gdb.exp (skip_hw_breakpoint_tests): New procedure.

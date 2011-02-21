@@ -309,6 +309,10 @@ extern void arm_displaced_step_fixup (struct gdbarch *,
 				      struct displaced_step_closure *,
 				      CORE_ADDR, CORE_ADDR, struct regcache *);
 
+/* Is the instruction at the given memory address a Thumb or ARM
+   instruction?  */
+extern int arm_pc_is_thumb (struct gdbarch *, CORE_ADDR);
+
 /* Functions exported from armbsd-tdep.h.  */
 
 /* Return the appropriate register set for the core section identified

@@ -1,3 +1,45 @@
+2011-02-21  Matthew Gretton-Dann <matthew.gretton-dann@arm.com>
+	    Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* arm-linux-nat.c: Include "observer.h" and "gdbthread.h".
+	(PTRACE_GETHBPREGS, PTRACE_SETHBPREGS): Define.
+	(struct arm_linux_hwbp_cap): New type.
+	(arm_linux_get_hwbp_cap): New function.
+	(arm_linux_get_hw_breakpoint_count): Likewise.
+	(arm_linux_get_hw_watchpoint_count): Likewise.
+	(arm_linux_can_use_hw_breakpoint): Likewise.
+	(arm_hwbp_type): New type.
+	(arm_hwbp_control_t): Likewise.
+	(struct arm_linux_hw_breakpoint): Likewise.
+	(struct arm_linux_thread_points): Likewise.
+	(arm_threads): New global variable.
+	(arm_linux_find_breakpoints_by_tid): New function.
+	(arm_hwbp_control_initialize): Likewise.
+	(arm_hwbp_control_is_enabled): Likewise.
+	(arm_hwbp_control_disable): Likewise.
+	(arm_linux_hw_breakpoint_initialize): Likewise.
+	(arm_linux_get_hwbp_type): Likewise.
+	(arm_linux_hw_watchpoint_initialize): Likewise.
+	(arm_linux_hw_breakpoint_equal): Likewise.
+	(arm_linux_insert_hw_breakpoint1): Likewise.
+	(arm_linux_remove_hw_breakpoint1): Likewise.
+	(arm_linux_insert_hw_breakpoint): Likewise.
+	(arm_linux_remove_hw_breakpoint): Likewise.
+	(arm_linux_region_ok_for_hw_watchpoint): Likewise.
+	(arm_linux_insert_watchpoint): Likewise.
+	(arm_linux_remove_watchpoint): Likewise.
+	(arm_linux_stopped_data_address): Likewise.
+	(arm_linux_stopped_by_watchpoint): Likewise.
+	(arm_linux_watchpoint_addr_within_range): Likewise.
+	(arm_linux_new_thread): Likewise.
+	(arm_linux_thread_exit): Likewise.
+	(_initialize_arm_linux_nat): Install hardware breakpoint/watchpoint
+	related target callbacks.  Register arm_linux_new_thread and
+	arm_linux_thread_exit.
+	* arm-tdep.h (arm_pc_is_thumb): Add prototype.
+	* arm-tdep.c (arm_pc_is_thumb): Make global.
+	(arm_gdbarch_init): Call set_gdbarch_have_nonsteppable_watchpoint.
+
 2011-02-21  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* breakpoint.c (update_watchpoint): Do not attempt to recreate

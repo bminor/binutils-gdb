@@ -363,7 +363,7 @@ static CORE_ADDR arm_get_next_pc_raw (struct frame_info *frame,
    function.  This function should be called for addresses unrelated to
    any executing frame; otherwise, prefer arm_frame_is_thumb.  */
 
-static int
+int
 arm_pc_is_thumb (struct gdbarch *gdbarch, CORE_ADDR memaddr)
 {
   struct obj_section *sec;
@@ -8552,6 +8552,9 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      binaries are always marked.  */
   if (tdep->arm_abi == ARM_ABI_AUTO)
     tdep->arm_abi = ARM_ABI_APCS;
+
+  /* Watchpoints are not steppable.  */
+  set_gdbarch_have_nonsteppable_watchpoint (gdbarch, 1);
 
   /* We used to default to FPA for generic ARM, but almost nobody
      uses that now, and we now provide a way for the user to force

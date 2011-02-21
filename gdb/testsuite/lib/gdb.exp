@@ -1795,7 +1795,8 @@ proc skip_hw_breakpoint_tests {} {
     # These targets support hardware breakpoints natively
     if { [istarget "i?86-*-*"] 
 	 || [istarget "x86_64-*-*"]
-	 || [istarget "ia64-*-*"] } {
+	 || [istarget "ia64-*-*"] 
+	 || [istarget "arm*-*-*"]} {
 	return 0
     }
 
@@ -1814,6 +1815,7 @@ proc skip_hw_watchpoint_tests {} {
     if { [istarget "i?86-*-*"] 
 	 || [istarget "x86_64-*-*"]
 	 || [istarget "ia64-*-*"] 
+	 || [istarget "arm*-*-*"]
 	 || [istarget "powerpc*-*-linux*"]
 	 || [istarget "s390*-*-*"] } {
 	return 0
@@ -1831,7 +1833,8 @@ proc skip_hw_watchpoint_multi_tests {} {
     }
 
     # These targets support just a single hardware watchpoint
-    if { [istarget "powerpc*-*-linux*"] } {
+    if { [istarget "arm*-*-*"]
+	 || [istarget "powerpc*-*-linux*"] } {
 	return 1
     }
 
