@@ -2908,9 +2908,11 @@ remote_close (int quitting)
   remote_desc = NULL;
 
   /* We don't have a connection to the remote stub anymore.  Get rid
-     of all the inferiors and their threads we were controlling.  */
-  discard_all_inferiors ();
+     of all the inferiors and their threads we were controlling.
+     Reset inferior_ptid to null_ptid first, as otherwise has_stack_frame
+     will be unable to find the thread corresponding to (pid, 0, 0).  */
   inferior_ptid = null_ptid;
+  discard_all_inferiors ();
 
   /* We're no longer interested in any of these events.  */
   discard_pending_stop_replies (-1);

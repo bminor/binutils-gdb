@@ -1,3 +1,8 @@
+2011-02-18  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* remote.c (remote_close): Reset INFERIOR_PTID to NULL_PTID
+	before calling discard_all_inferiors.
+
 2011-02-21  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* opencl-lang.c (STRUCT_OCL_TYPE): Remove.
