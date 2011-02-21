@@ -1,3 +1,8 @@
+2011-02-21  Hui Zhu  <teawater@gmail.com>
+
+	* agentexpr.texi (Bytecode Descriptions): Add printf.
+	* gdb.texinfo (Tracepoint Action Lists): Add printf.
+
 2011-02-18  Tom Tromey  <tromey@redhat.com>
 
 	* agentexpr.texi (Bytecode Descriptions): Document pick and rot.

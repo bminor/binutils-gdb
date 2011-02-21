@@ -489,6 +489,13 @@ named @code{trace_quick16}, for consistency.
 Record the value of trace state variable number @var{n} in the trace
 buffer.  The handling of @var{n} is as described for @code{getv}.
 
+@item @code{printf} (0x31) @var{n} @var{template}: @result{}
+Print the values in the stack under the control of the string template.
+The end of @var{template} is 0x00.
+If @var{n} is 0, just output the string template.
+If @var{n} is 1, pop a value from the stack and print it under the control
+of the string template.
+
 @item @code{end} (0x27): @result{}
 Stop executing bytecode; the result should be the top element of the
 stack.  If the purpose of the expression was to compute an lvalue or a
