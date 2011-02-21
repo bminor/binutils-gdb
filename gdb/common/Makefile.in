@@ -23,6 +23,10 @@ AUTOHEADER = @AUTOHEADER@
 RANLIB = @RANLIB@
 COMMON_CPU_OBJ = @COMMON_CPU_OBJ@
 
+# CFLAGS is specifically reserved for setting from the command line
+# when running make.  I.E.  "make CFLAGS=-Wmissing-prototypes".
+CFLAGS = @CFLAGS@
+
 BFD_DIR = ../../bfd
 BFD_SRC = $(srcdir)/$(BFD_DIR)
 BFD_CFLAGS = -I$(BFD_DIR) -I$(BFD_SRC)
@@ -37,7 +41,8 @@ all: libcommon.a
 signals.o: $(srcdir)/signals.c
 	$(COMPILE) $(srcdir)/signals.c
 
-COMPILE = source='$<' object='$@' libtool=no $(CC) $(DEFS) $(INCLUDES) @GDB_FLAGS@ $(CPPFLAGS) $(ALL_CFLAGS) -c
+COMPILE = source='$<' object='$@' libtool=no $(CC) $(DEFS) $(INCLUDES) \
+	@GDB_FLAGS@ $(CPPFLAGS) $(ALL_CFLAGS) $(CFLAGS) -c
 
 # Implicit rules
 
