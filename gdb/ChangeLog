@@ -1,3 +1,13 @@
+2011-02-21  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* opencl-lang.c (STRUCT_OCL_TYPE): Remove.
+	(struct builtin_opencl_type): Remove.
+	(builtin_opencl_type): Change return type to "struct type **".
+	(lookup_opencl_vector_type): Update caller.
+	(opencl_language_arch_info): Copy primitive type vector from gdbarch.
+	(build_opencl_types): Install plain array of "struct type *"
+	instead of "struct builtin_opencl_type".
+
 2011-02-21  Matthew Gretton-Dann <matthew.gretton-dann@arm.com>
 	    Ulrich Weigand  <uweigand@de.ibm.com>
 
