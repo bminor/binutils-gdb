@@ -1,3 +1,8 @@
+2011-02-21  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* config/tc-mips.c (mips_ip) <'o'>: Remove duplicate
+	initialization of offset_reloc.
+
 2011-02-15  Richard Henderson  <rth@redhat.com>
 
 	* dw2gencfi.c (dot_cfi_dummy): New.

@@ -10075,9 +10075,6 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 	      /* Check whether there is only a single bracketed expression
 		 left.  If so, it must be the base register and the
 		 constant must be zero.  */
-	      offset_reloc[0] = BFD_RELOC_LO16;
-	      offset_reloc[1] = BFD_RELOC_UNUSED;
-	      offset_reloc[2] = BFD_RELOC_UNUSED;
 	      if (*s == '(' && strchr (s + 1, '(') == 0)
 		{
 		  offset_expr.X_op = O_constant;
