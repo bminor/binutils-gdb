@@ -161,6 +161,27 @@ get_number_or_range (char **pp)
   return last_retval;
 }
 
+/* Accept a number and a string-form list of numbers such as is 
+   accepted by get_number_or_range.  Return TRUE if the number is
+   in the list.
+
+   By definition, an empty list includes all numbers.  This is to 
+   be interpreted as typing a command such as "delete break" with 
+   no arguments.  */
+
+int
+number_is_in_list (char *list, int number)
+{
+  if (list == NULL || *list == '\0')
+    return 1;
+
+  while (list != NULL && *list != '\0')
+    if (get_number_or_range (&list) == number)
+      return 1;
+
+  return 0;
+}
+
 /* See documentation in cli-utils.h.  */
 
 char *

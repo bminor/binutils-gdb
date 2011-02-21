@@ -45,6 +45,16 @@ extern int get_number (char **);
 
 extern int get_number_or_range (char **);
 
+/* Accept a number and a string-form list of numbers such as is 
+   accepted by get_number_or_range.  Return TRUE if the number is
+   in the list.
+
+   By definition, an empty list includes all numbers.  This is to 
+   be interpreted as typing a command such as "delete break" with 
+   no arguments.  */
+
+extern int number_is_in_list (char *list, int number);
+
 /* Skip leading whitespace characters in INP, returning an updated
    pointer.  If INP is NULL, return NULL.  */
 

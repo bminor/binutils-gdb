@@ -303,28 +303,28 @@ set see5 0
 set see6 0
 
 gdb_test_multiple "info threads 2 4 6" "info threads 2 4 6" {
-    -re ". 1 \[^\r\n\]*\"threadname_1\" \[^\r\n\]*" {
-	set see1 1
-	exp_continue
-    }
-    -re ". 2 \[^\r\n\]*\"threadname_2\" \[^\r\n\]*" {
-	set see2 1
-	exp_continue
-    }
-    -re ". 3 \[^\r\n\]*\"threadname_3\" \[^\r\n\]*" {
-	set see3 1
-	exp_continue
-    }
-    -re ". 4 \[^\r\n\]*\"threadname_4\" \[^\r\n\]*" {
-	set see4 1
+    -re ". 6 \[^\r\n\]*\"threadname_6\" \[^\r\n\]*" {
+	set see6 1
 	exp_continue
     }
     -re ". 5 \[^\r\n\]*\"threadname_5\" \[^\r\n\]*" {
 	set see5 1
 	exp_continue
     }
-    -re ". 6 \[^\r\n\]*\"threadname_6\" \[^\r\n\]*" {
-	set see6 1
+    -re ". 4 \[^\r\n\]*\"threadname_4\" \[^\r\n\]*" {
+	set see4 1
+	exp_continue
+    }
+    -re ". 3 \[^\r\n\]*\"threadname_3\" \[^\r\n\]*" {
+	set see3 1
+	exp_continue
+    }
+    -re ". 2 \[^\r\n\]*\"threadname_2\" \[^\r\n\]*" {
+	set see2 1
+	exp_continue
+    }
+    -re ". 1 \[^\r\n\]*\"threadname_1\" \[^\r\n\]*" {
+	set see1 1
 	exp_continue
     }
     -re "$gdb_prompt $" {
@@ -348,28 +348,28 @@ set see5 0
 set see6 0
 
 gdb_test_multiple "info threads 3-5" "info threads 3-5" {
-    -re ". 1 .*\"threadname_1\" \[^\r\n\]*" {
-	set see1 1
-	exp_continue
-    }
-    -re ". 2 .*\"threadname_2\" \[^\r\n\]*" {
-	set see2 1
-	exp_continue
-    }
-    -re ". 3 .*\"threadname_3\" \[^\r\n\]*" {
-	set see3 1
-	exp_continue
-    }
-    -re ". 4 .*\"threadname_4\" \[^\r\n\]*" {
-	set see4 1
+    -re ". 6 .*\"threadname_6\" \[^\r\n\]*" {
+	set see6 1
 	exp_continue
     }
     -re ". 5 .*\"threadname_5\" \[^\r\n\]*" {
 	set see5 1
 	exp_continue
     }
-    -re ". 6 .*\"threadname_6\" \[^\r\n\]*" {
-	set see6 1
+    -re ". 4 .*\"threadname_4\" \[^\r\n\]*" {
+	set see4 1
+	exp_continue
+    }
+    -re ". 3 .*\"threadname_3\" \[^\r\n\]*" {
+	set see3 1
+	exp_continue
+    }
+    -re ". 2 .*\"threadname_2\" \[^\r\n\]*" {
+	set see2 1
+	exp_continue
+    }
+    -re ". 1 .*\"threadname_1\" \[^\r\n\]*" {
+	set see1 1
 	exp_continue
     }
     -re "$gdb_prompt $" {

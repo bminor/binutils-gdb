@@ -1,3 +1,17 @@
+2011-02-21  Michael Snyder  <msnyder@vmware.com>
+
+	* gdbthread.h (print_thread_info): Change prototype.
+	* thread.c (print_thread_info): Accept char* instead of int for
+	requested_threads argument.  Use new function number_is_in_list
+	to determine which threads to list.
+	(info_threads_command): Pass char* to print_thread_info.
+	* cli/cli-utils.c (number_is_in_list): New function.
+	* cli/cli-utils.h (number_is_in_list): Export.
+	* mi/mi-main.c (mi_cmd_thread_info): Pass char* to 
+	print_thread_info.
+	(print_one_inferior): Ditto.
+	(mi_cmd_list_thread_groups): Ditto.
+
 2011-02-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* common/Makefile.in (CFLAGS): New.

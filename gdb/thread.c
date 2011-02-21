@@ -44,6 +44,7 @@
 #include "annotate.h"
 #include "cli/cli-decode.h"
 #include "gdb_regex.h"
+#include "cli/cli-utils.h"
 
 /* Definition of struct thread_info exported to gdbthread.h.  */
 
@@ -755,7 +756,7 @@ finish_thread_state_cleanup (void *arg)
 }
 
 /* Prints the list of threads and their details on UIOUT.
-   This is a version of 'info_thread_command' suitable for
+   This is a version of 'info_threads_command' suitable for
    use from MI.
    If REQUESTED_THREAD is not -1, it's the GDB id of the thread
    that should be printed.  Otherwise, all threads are
@@ -766,7 +767,7 @@ finish_thread_state_cleanup (void *arg)
    is printed if it belongs to the specified process.  Otherwise,
    an error is raised.  */
 void
-print_thread_info (struct ui_out *uiout, int requested_thread, int pid)
+print_thread_info (struct ui_out *uiout, char *requested_threads, int pid)
 {
   struct thread_info *tp;
   ptid_t current_ptid;
@@ -791,7 +792,7 @@ print_thread_info (struct ui_out *uiout, int requested_thread, int pid)
 
       for (tp = thread_list; tp; tp = tp->next)
 	{
-	  if (requested_thread != -1 && tp->num != requested_thread)
+	  if (!number_is_in_list (requested_threads, tp->num))
 	    continue;
 
 	  if (pid != -1 && PIDGET (tp->ptid) != pid)
@@ -805,10 +806,11 @@ print_thread_info (struct ui_out *uiout, int requested_thread, int pid)
 
       if (n_threads == 0)
 	{
-	  if (requested_thread == -1)
+	  if (requested_threads == NULL || *requested_threads == '\0')
 	    ui_out_message (uiout, 0, _("No threads.\n"));
 	  else
-	    ui_out_message (uiout, 0, _("No thread %d.\n"), requested_thread);
+	    ui_out_message (uiout, 0, _("No threads match '%s'.\n"),
+			    requested_threads);
 	  do_cleanups (old_chain);
 	  return;
 	}
@@ -827,12 +829,12 @@ print_thread_info (struct ui_out *uiout, int requested_thread, int pid)
       struct cleanup *chain2;
       int core;
 
-      if (requested_thread != -1 && tp->num != requested_thread)
+      if (!number_is_in_list (requested_threads, tp->num))
 	continue;
 
       if (pid != -1 && PIDGET (tp->ptid) != pid)
 	{
-	  if (requested_thread != -1)
+	  if (requested_threads != NULL && *requested_threads != '\0')
 	    error (_("Requested thread not found in requested process"));
 	  continue;
 	}
@@ -935,7 +937,7 @@ print_thread_info (struct ui_out *uiout, int requested_thread, int pid)
      the "info threads" command.  */
   do_cleanups (old_chain);
 
-  if (pid == -1 && requested_thread == -1)
+  if (pid == -1 && requested_threads == NULL)
     {
       gdb_assert (current_thread != -1
 		  || !thread_list
@@ -966,23 +968,7 @@ No selected thread.  See `help thread'.\n");
 static void
 info_threads_command (char *arg, int from_tty)
 {
-  int tid = -1;
-
-  if (arg == NULL || *arg == '\0')
-    {
-      print_thread_info (uiout, -1, -1);
-      return;
-    }
-
-  while (arg != NULL && *arg != '\0')
-    {
-      tid = get_number_or_range (&arg);
-
-      if (tid <= 0)
-	error (_("invalid thread id %d"), tid);
-
-      print_thread_info (uiout, tid, -1);
-    }
+  print_thread_info (uiout, arg, -1);
 }
 
 /* Switch from one thread to another.  */

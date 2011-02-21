@@ -503,15 +503,10 @@ mi_cmd_thread_list_ids (char *command, char **argv, int argc)
 void
 mi_cmd_thread_info (char *command, char **argv, int argc)
 {
-  int thread = -1;
-  
   if (argc != 0 && argc != 1)
     error ("Invalid MI command");
 
-  if (argc == 1)
-    thread = atoi (argv[0]);
-
-  print_thread_info (uiout, thread, -1);
+  print_thread_info (uiout, argv[0], -1);
 }
 
 struct collect_cores_data
@@ -607,7 +602,7 @@ print_one_inferior (struct inferior *inferior, void *xdata)
 	}
 
       if (top_data->recurse)
-	print_thread_info (uiout, -1, inferior->pid);
+	print_thread_info (uiout, NULL, inferior->pid);
 
       do_cleanups (back_to);
     }
@@ -872,7 +867,7 @@ mi_cmd_list_thread_groups (char *command, char **argv, int argc)
       if (!inf)
 	error ("Non-existent thread group id '%d'", id);
       
-      print_thread_info (uiout, -1, inf->pid);
+      print_thread_info (uiout, NULL, inf->pid);
     }
   else
     {

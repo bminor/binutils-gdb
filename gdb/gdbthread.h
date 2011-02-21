@@ -377,7 +377,7 @@ extern struct cmd_list_element *thread_cmd_list;
    `set print thread-events'.  */
 extern int print_thread_events;
 
-extern void print_thread_info (struct ui_out *uiout, int thread,
+extern void print_thread_info (struct ui_out *uiout, char *threads,
 			       int pid);
 
 extern struct cleanup *make_cleanup_restore_current_thread (void);

@@ -1,3 +1,8 @@
+2011-02-21  Michael Snyder  <msnyder@vmware.com>
+
+	* gdb.threads/thread-find.exp: Update patterns for changes in
+	output of "info threads" command.
+
 2011-02-21  Matthew Gretton-Dann <matthew.gretton-dann@arm.com>
 	    Ulrich Weigand  <uweigand@de.ibm.com>
 
