@@ -1,3 +1,8 @@
+2011-02-21  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* breakpoint.c (update_watchpoint): Do not attempt to recreate
+	per-frame locations while within a function epilogue.
+
 2011-02-21  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* ser-mingw.c (ser_windows_close): Reformat comment to better conform

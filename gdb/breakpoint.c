@@ -1369,11 +1369,6 @@ update_watchpoint (struct breakpoint *b, int reparse)
   if (!watchpoint_in_thread_scope (b))
     return;
 
-  /* We don't free locations.  They are stored in the bp_location array
-     and update_global_location_list will eventually delete them and
-     remove breakpoints if needed.  */
-  b->loc = NULL;
-
   if (b->disposition == disp_del_at_next_stop)
     return;
  
@@ -1384,7 +1379,15 @@ update_watchpoint (struct breakpoint *b, int reparse)
     within_current_scope = 1;
   else
     {
-      struct frame_info *fi;
+      struct frame_info *fi = get_current_frame ();
+      struct gdbarch *frame_arch = get_frame_arch (fi);
+      CORE_ADDR frame_pc = get_frame_pc (fi);
+
+      /* If we're in a function epilogue, unwinding may not work
+	 properly, so do not attempt to recreate locations at this
+	 point.  See similar comments in watchpoint_check.  */
+      if (gdbarch_in_function_epilogue_p (frame_arch, frame_pc))
+	return;
 
       /* Save the current frame's ID so we can restore it after
          evaluating the watchpoint expression on its own frame.  */
@@ -1399,6 +1402,11 @@ update_watchpoint (struct breakpoint *b, int reparse)
       if (within_current_scope)
 	select_frame (fi);
     }
+
+  /* We don't free locations.  They are stored in the bp_location array
+     and update_global_location_list will eventually delete them and
+     remove breakpoints if needed.  */
+  b->loc = NULL;
 
   if (within_current_scope && reparse)
     {
