@@ -45,6 +45,11 @@ struct ser_windows_state
   HANDLE except_event;
 };
 
+/* CancelIo is not available for Windows 95 OS, so we need to use
+   LoadLibrary/GetProcAddress to avoid a startup failure.  */
+#define CancelIo dyn_CancelIo
+static BOOL WINAPI (*CancelIo) (HANDLE);
+
 /* Open up a real live device for serial I/O.  */
 
 static int
@@ -216,8 +221,12 @@ ser_windows_close (struct serial *scb)
 {
   struct ser_windows_state *state;
 
-  /* Stop any pending selects.  */
-  CancelIo ((HANDLE) _get_osfhandle (scb->fd));
+  /* Stop any pending selects. On Windows 95 OS, CancelIo function does not
+     exist. In that case, it can be replaced by a call to CloseHandle, but
+     this is not necessary here as we do close the Windows handle by calling
+     close (scb->fd) below.  */
+  if (CancelIo)
+    CancelIo ((HANDLE) _get_osfhandle (scb->fd));
   state = scb->state;
   CloseHandle (state->ov.hEvent);
   CloseHandle (state->except_event);
@@ -1208,8 +1217,19 @@ _initialize_ser_windows (void)
   WSADATA wsa_data;
   struct serial_ops *ops;
 
-  /* First register the serial port driver.  */
+  HMODULE hm = NULL;
 
+  /* First find out if kernel32 exports CancelIo function.  */
+  hm = LoadLibrary ("kernel32.dll");
+  if (hm)
+    {
+      CancelIo = (void *) GetProcAddress (hm, "CancelIo");
+      FreeLibrary (hm);
+    }
+  else
+    CancelIo = NULL;
+
+  /* Now register the serial port driver.  */
   ops = XMALLOC (struct serial_ops);
   memset (ops, 0, sizeof (struct serial_ops));
   ops->name = "hardwire";

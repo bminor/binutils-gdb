@@ -1,3 +1,12 @@
+2011-02-21  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	Allow use of mingw native on Windows 95 OS.
+	* src/gdb/ser-mingw.c (CancelIo): New macro for dynamically loaded
+	DLL entry.
+	(ser_windows_close): Only call CancelIo if function exists.
+	(_initialize_ser_windows): Use LoadLirary/GetProcAddress
+	to check for existence of CancelIo function in kernel32 DLL.
+
 2011-02-21  Hui Zhu  <teawater@gmail.com>
 
 	* Makefile.in (HFILES_NO_SRCDIR): Add printcmd.h.
