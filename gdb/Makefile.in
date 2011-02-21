@@ -193,12 +193,12 @@ SUBDIR_CLI_OBS = \
 	cli-dump.o \
 	cli-decode.o cli-script.o cli-cmds.o cli-setshow.o \
 	cli-logging.o \
-	cli-interp.o
+	cli-interp.o cli-utils.o
 SUBDIR_CLI_SRCS = \
 	cli/cli-dump.c \
 	cli/cli-decode.c cli/cli-script.c cli/cli-cmds.c cli/cli-setshow.c \
 	cli/cli-logging.c \
-	cli/cli-interp.c
+	cli/cli-interp.c cli/cli-utils.c
 SUBDIR_CLI_DEPS =
 SUBDIR_CLI_LDFLAGS=
 SUBDIR_CLI_CFLAGS=
@@ -767,7 +767,7 @@ exec.h m32r-tdep.h osabi.h gdbcore.h solib-som.h \
 i386bsd-nat.h xml-support.h xml-tdesc.h alphabsd-tdep.h gdb_obstack.h \
 ia64-tdep.h ada-lang.h varobj.h frv-tdep.h nto-tdep.h serial.h \
 c-lang.h d-lang.h frame.h event-loop.h block.h cli/cli-setshow.h	\
-cli/cli-decode.h cli/cli-cmds.h cli/cli-dump.h \
+cli/cli-decode.h cli/cli-cmds.h cli/cli-dump.h cli/cli-utils.h \
 cli/cli-script.h macrotab.h symtab.h version.h gnulib/wchar.in.h \
 gnulib/string.in.h gnulib/str-two-way.h \
 gnulib/stdint.in.h remote.h gdb.h sparc-nat.h gdbserver/win32-low.h \
@@ -1754,6 +1754,10 @@ cli-script.o: $(srcdir)/cli/cli-script.c
 
 cli-setshow.o: $(srcdir)/cli/cli-setshow.c
 	$(COMPILE) $(srcdir)/cli/cli-setshow.c
+	$(POSTCOMPILE)
+
+cli-utils.o: $(srcdir)/cli/cli-utils.c
+	$(COMPILE) $(srcdir)/cli/cli-utils.c
 	$(POSTCOMPILE)
 
 

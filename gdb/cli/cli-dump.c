@@ -32,19 +32,10 @@
 #include "target.h"
 #include "readline/readline.h"
 #include "gdbcore.h"
+#include "cli/cli-utils.h"
 
 #define XMALLOC(TYPE) ((TYPE*) xmalloc (sizeof (TYPE)))
 
-
-char *
-skip_spaces (char *chp)
-{
-  if (chp == NULL)
-    return NULL;
-  while (isspace (*chp))
-    chp++;
-  return chp;
-}
 
 char *
 scan_expression_with_cleanup (char **cmd, const char *def)

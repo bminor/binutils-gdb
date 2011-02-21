@@ -50,6 +50,7 @@
 #include "charset.h"
 #include "arch-utils.h"
 #include "printcmd.h"
+#include "cli/cli-utils.h"
 
 #ifdef TUI
 #include "tui/tui.h"		/* For tui_active et al.   */
@@ -1983,9 +1984,7 @@ string_printf (char *arg, struct ui_file *stream, printf_callback callback,
   if (s == 0)
     error_no_arg (_("format-control string and values to print"));
 
-  /* Skip white space before format string.  */
-  while (*s == ' ' || *s == '\t')
-    s++;
+  s = skip_spaces (s);
 
   /* A format string should follow, enveloped in double quotes.  */
   if (*s++ != '"')
@@ -2049,16 +2048,14 @@ string_printf (char *arg, struct ui_file *stream, printf_callback callback,
   /* Skip over " and following space and comma.  */
   s++;
   *f++ = '\0';
-  while (*s == ' ' || *s == '\t')
-    s++;
+  s = skip_spaces (s);
 
   if (*s != ',' && *s != 0)
     error (_("Invalid argument syntax"));
 
   if (*s == ',')
     s++;
-  while (*s == ' ' || *s == '\t')
-    s++;
+  s = skip_spaces (s);
 
   /* Need extra space for the '\0's.  Doubling the size is sufficient.  */
   substrings = alloca (strlen (string) * 2);

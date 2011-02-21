@@ -1,3 +1,27 @@
+2011-02-21  Tom Tromey  <tromey@redhat.com>
+
+	* reverse.c: Include cli-utils.h.
+	* printcmd.c: Include cli-utils.h.
+	(string_printf): Use skip_spaces.
+	* cli/cli-utils.h: New file.
+	* cli/cli-utils.c: New file.
+	* cli/cli-dump.h (skip_spaces): Move to cli-utils.h.
+	* cli/cli-dump.c (skip_spaces): Move to cli-utils.c.
+	* breakpoint.h (get_number, get_number_or_range): Move to
+	cli-utils.h.
+	* breakpoint.c: Include cli-utils.h.
+	(get_number_trailer, get_number, get_number_or_range)
+	(ep_skip_leading_whitespace): Move to cli-utils.c.
+	(create_breakpoint_sal, find_condition_and_thread)
+	(decode_static_tracepoint_spec, watch_command_1)
+	(watch_maybe_just_location, ep_parse_optional_if_clause)
+	(catch_fork_command_1, catch_exec_command_1)
+	(catch_syscall_command_1): Use skip_spaces, skip_to_space.
+	* Makefile.in (SUBDIR_CLI_OBS): Add cli-utils.o.
+	(SUBDIR_CLI_SRCS): Add cli-utils.c.
+	(HFILES_NO_SRCDIR): Add cli-utils.h.
+	(cli-utils.o): New target.
+
 2011-02-18  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* remote.c (remote_close): Reset INFERIOR_PTID to NULL_PTID

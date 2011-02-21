@@ -24,6 +24,7 @@
 #include "top.h"
 #include "cli/cli-cmds.h"
 #include "cli/cli-decode.h"
+#include "cli/cli-utils.h"
 #include "inferior.h"
 #include "regcache.h"
 

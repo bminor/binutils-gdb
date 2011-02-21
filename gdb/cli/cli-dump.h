@@ -32,6 +32,4 @@ extern char *scan_expression_with_cleanup (char **cmd, const char *defname);
 
 extern FILE *fopen_with_cleanup (const char *filename, const char *mode);
 
-extern char *skip_spaces (char *inp);
-
 #endif

@@ -62,6 +62,7 @@
 #include "jit.h"
 #include "xml-syscall.h"
 #include "parser-defs.h"
+#include "cli/cli-utils.h"
 
 /* readline include files */
 #include "readline/readline.h"
@@ -142,8 +143,6 @@ static void commands_command (char *, int);
 
 static void condition_command (char *, int);
 
-static int get_number_trailer (char **, int);
-
 typedef enum
   {
     mark_inserted,
@@ -184,8 +183,6 @@ static void catch_exception_command_1 (enum exception_event_kind ex_event,
 				       char *arg, int tempflag, int from_tty);
 
 static void tcatch_command (char *arg, int from_tty);
-
-static void ep_skip_leading_whitespace (char **s);
 
 static void detach_single_step_breakpoints (void);
 
@@ -553,159 +550,6 @@ int default_breakpoint_line;
 struct program_space *default_breakpoint_pspace;
 
 
-/* *PP is a string denoting a breakpoint.  Get the number of the
-   breakpoint.  Advance *PP after the string and any trailing
-   whitespace.
-
-   Currently the string can either be a number or "$" followed by the
-   name of a convenience variable.  Making it an expression wouldn't
-   work well for map_breakpoint_numbers (e.g. "4 + 5 + 6").
-
-   TRAILER is a character which can be found after the number; most
-   commonly this is `-'.  If you don't want a trailer, use \0.  */
-
-static int
-get_number_trailer (char **pp, int trailer)
-{
-  int retval = 0;	/* default */
-  char *p = *pp;
-
-  if (*p == '$')
-    {
-      /* Make a copy of the name, so we can null-terminate it
-         to pass to lookup_internalvar().  */
-      char *varname;
-      char *start = ++p;
-      LONGEST val;
-
-      while (isalnum (*p) || *p == '_')
-	p++;
-      varname = (char *) alloca (p - start + 1);
-      strncpy (varname, start, p - start);
-      varname[p - start] = '\0';
-      if (get_internalvar_integer (lookup_internalvar (varname), &val))
-	retval = (int) val;
-      else
-	{
-	  printf_filtered (_("Convenience variable must "
-			     "have integer value.\n"));
-	  retval = 0;
-	}
-    }
-  else
-    {
-      if (*p == '-')
-	++p;
-      while (*p >= '0' && *p <= '9')
-	++p;
-      if (p == *pp)
-	/* There is no number here.  (e.g. "cond a == b").  */
-	{
-	  /* Skip non-numeric token.  */
-	  while (*p && !isspace((int) *p))
-	    ++p;
-	  /* Return zero, which caller must interpret as error.  */
-	  retval = 0;
-	}
-      else
-	retval = atoi (*pp);
-    }
-  if (!(isspace (*p) || *p == '\0' || *p == trailer))
-    {
-      /* Trailing junk: return 0 and let caller print error msg.  */
-      while (!(isspace (*p) || *p == '\0' || *p == trailer))
-	++p;
-      retval = 0;
-    }
-  while (isspace (*p))
-    p++;
-  *pp = p;
-  return retval;
-}
-
-
-/* Like get_number_trailer, but don't allow a trailer.  */
-int
-get_number (char **pp)
-{
-  return get_number_trailer (pp, '\0');
-}
-
-/* Parse a number or a range.
-   A number will be of the form handled by get_number.
-   A range will be of the form <number1> - <number2>, and 
-   will represent all the integers between number1 and number2,
-   inclusive.
-
-   While processing a range, this fuction is called iteratively;
-   At each call it will return the next value in the range.
-
-   At the beginning of parsing a range, the char pointer PP will
-   be advanced past <number1> and left pointing at the '-' token.
-   Subsequent calls will not advance the pointer until the range
-   is completed.  The call that completes the range will advance
-   pointer PP past <number2>.  */
-
-int
-get_number_or_range (char **pp)
-{
-  static int last_retval, end_value;
-  static char *end_ptr;
-  static int in_range = 0;
-
-  if (**pp != '-')
-    {
-      /* Default case: pp is pointing either to a solo number, 
-	 or to the first number of a range.  */
-      last_retval = get_number_trailer (pp, '-');
-      if (**pp == '-')
-	{
-	  char **temp;
-
-	  /* This is the start of a range (<number1> - <number2>).
-	     Skip the '-', parse and remember the second number,
-	     and also remember the end of the final token.  */
-
-	  temp = &end_ptr; 
-	  end_ptr = *pp + 1; 
-	  while (isspace ((int) *end_ptr))
-	    end_ptr++;	/* skip white space */
-	  end_value = get_number (temp);
-	  if (end_value < last_retval) 
-	    {
-	      error (_("inverted range"));
-	    }
-	  else if (end_value == last_retval)
-	    {
-	      /* Degenerate range (number1 == number2).  Advance the
-		 token pointer so that the range will be treated as a
-		 single number.  */ 
-	      *pp = end_ptr;
-	    }
-	  else
-	    in_range = 1;
-	}
-    }
-  else if (! in_range)
-    error (_("negative value"));
-  else
-    {
-      /* pp points to the '-' that betokens a range.  All
-	 number-parsing has already been done.  Return the next
-	 integer value (one greater than the saved previous value).
-	 Do not advance the token pointer 'pp' until the end of range
-	 is reached.  */
-
-      if (++last_retval == end_value)
-	{
-	  /* End of range reached; advance token pointer.  */
-	  *pp = end_ptr;
-	  in_range = 0;
-	}
-    }
-  return last_retval;
-}
-
 /* Return the breakpoint with the specified number, or NULL
    if the number does not refer to an existing breakpoint.  */
 
@@ -7383,12 +7227,9 @@ create_breakpoint_sal (struct gdbarch *gdbarch,
 		  char *marker_str;
 		  int i;
 
-		  while (*p == ' ' || *p == '\t')
-		    p++;
+		  p = skip_spaces (p);
 
-		  endp = p;
-		  while (*endp != ' ' && *endp != '\t' && *endp != '\0')
-		    endp++;
+		  endp = skip_to_space (p);
 
 		  marker_str = savestring (p, endp - p);
 		  b->static_trace_marker_id = marker_str;
@@ -7783,13 +7624,9 @@ find_condition_and_thread (char *tok, CORE_ADDR pc,
       char *cond_start = NULL;
       char *cond_end = NULL;
 
-      while (*tok == ' ' || *tok == '\t')
-	tok++;
+      tok = skip_spaces (tok);
       
-      end_tok = tok;
-      
-      while (*end_tok != ' ' && *end_tok != '\t' && *end_tok != '\000')
-	end_tok++;
+      end_tok = skip_to_space (tok);
       
       toklen = end_tok - tok;
       
@@ -7848,12 +7685,9 @@ decode_static_tracepoint_spec (char **arg_p)
   char *marker_str;
   int i;
 
-  while (*p == ' ' || *p == '\t')
-    p++;
+  p = skip_spaces (p);
 
-  endp = p;
-  while (*endp != ' ' && *endp != '\t' && *endp != '\0')
-    endp++;
+  endp = skip_to_space (p);
 
   marker_str = savestring (p, endp - p);
   old_chain = make_cleanup (xfree, marker_str);
@@ -8618,13 +8452,8 @@ watch_command_1 (char *arg, int accessflag, int from_tty,
   else if (val != NULL)
     release_value (val);
 
-  tok = arg;
-  while (*tok == ' ' || *tok == '\t')
-    tok++;
-  end_tok = tok;
-
-  while (*end_tok != ' ' && *end_tok != '\t' && *end_tok != '\000')
-    end_tok++;
+  tok = skip_spaces (arg);
+  end_tok = skip_to_space (tok);
 
   toklen = end_tok - tok;
   if (toklen >= 1 && strncmp (tok, "if", toklen) == 0)
@@ -8908,7 +8737,7 @@ watch_maybe_just_location (char *arg, int accessflag, int from_tty)
       && (check_for_argument (&arg, "-location", sizeof ("-location") - 1)
 	  || check_for_argument (&arg, "-l", sizeof ("-l") - 1)))
     {
-      ep_skip_leading_whitespace (&arg);
+      arg = skip_spaces (arg);
       just_location = 1;
     }
 
@@ -9065,15 +8894,6 @@ until_break_command (char *arg, int from_tty, int anywhere)
     do_cleanups (old_chain);
 }
 
-static void
-ep_skip_leading_whitespace (char **s)
-{
-  if ((s == NULL) || (*s == NULL))
-    return;
-  while (isspace (**s))
-    *s += 1;
-}
-
 /* This function attempts to parse an optional "if <cond>" clause
    from the arg string.  If one is not found, it returns NULL.
 
@@ -9095,7 +8915,7 @@ ep_parse_optional_if_clause (char **arg)
 
   /* Skip any extra leading whitespace, and record the start of the
      condition string.  */
-  ep_skip_leading_whitespace (arg);
+  *arg = skip_spaces (*arg);
   cond_string = *arg;
 
   /* Assume that the condition occupies the remainder of the arg
@@ -9130,7 +8950,7 @@ catch_fork_command_1 (char *arg, int from_tty,
 
   if (!arg)
     arg = "";
-  ep_skip_leading_whitespace (&arg);
+  arg = skip_spaces (arg);
 
   /* The allowed syntax is:
      catch [v]fork
@@ -9174,7 +8994,7 @@ catch_exec_command_1 (char *arg, int from_tty,
 
   if (!arg)
     arg = "";
-  ep_skip_leading_whitespace (&arg);
+  arg = skip_spaces (arg);
 
   /* The allowed syntax is:
      catch exec
@@ -9324,7 +9144,7 @@ catch_exception_command_1 (enum exception_event_kind ex_event, char *arg,
 
   if (!arg)
     arg = "";
-  ep_skip_leading_whitespace (&arg);
+  arg = skip_spaces (arg);
 
   cond_string = ep_parse_optional_if_clause (&arg);
 
@@ -9514,7 +9334,7 @@ this architeture yet."));
 
   tempflag = get_cmd_context (command) == CATCH_TEMPORARY;
 
-  ep_skip_leading_whitespace (&arg);
+  arg = skip_spaces (arg);
 
   /* We need to do this first "dummy" translation in order
      to get the syscall XML file loaded or, most important,

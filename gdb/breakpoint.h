@@ -1039,10 +1039,6 @@ extern enum command_control_type commands_from_control_command
 
 extern void clear_breakpoint_hit_counts (void);
 
-extern int get_number (char **);
-
-extern int get_number_or_range (char **);
-
 extern struct breakpoint *get_breakpoint (int num);
 
 /* The following are for displays, which aren't really breakpoints,
