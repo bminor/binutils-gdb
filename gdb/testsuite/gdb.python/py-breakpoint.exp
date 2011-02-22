@@ -28,9 +28,6 @@ if { [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile}] } {
     return -1
 }
 
-# Start with a fresh gdb.
-clean_restart ${testfile}
-
 # Skip all tests if Python scripting is not enabled.
 if { [skip_python_tests] } { continue }
 
@@ -64,7 +61,7 @@ gdb_test "python print blist\[1\].hit_count" "1" "Check breakpoint hit count"
 gdb_py_test_silent_cmd "python blist\[1\].ignore_count = 4" "Set breakpoint hit count" 0
 gdb_continue_to_breakpoint "Break at multiply."
 gdb_test "python print blist\[1\].hit_count" "6" "Check breakpoint hit count"
-gdb_test "print result" "545" "Check expected variable result after 6 iterations"
+gdb_test "print result" " = 545" "Check expected variable result after 6 iterations"
 
 # Test breakpoint is enabled and disabled correctly..
 gdb_breakpoint [gdb_get_line_number "Break at add."]
@@ -148,7 +145,7 @@ if ![runto_main] then {
     return 0
 }
 
-# Test invisible breakpooints.
+# Test invisible breakpoints.
 delete_breakpoints
 set ibp_location [gdb_get_line_number "Break at multiply."]
 gdb_py_test_silent_cmd  "python ibp = gdb.Breakpoint(\"$ibp_location\", internal=False)" "Set invisible breakpoint" 0

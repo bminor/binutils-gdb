@@ -1,5 +1,11 @@
 2011-02-22  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.python/py-breakpoint.exp: Remove unnecessary call to
+	clean_restart.  Be a little stricter in the expected output
+	for one of the tests.  Fix a typo in one of the comments.
+
+2011-02-22  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.python/py-block.exp: Simplify using prepare_for_testing.
 	Delete variable binfile, no longer use.  Add or modify test
 	comments to make them unique.
