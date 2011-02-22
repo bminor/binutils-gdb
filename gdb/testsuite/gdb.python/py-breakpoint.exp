@@ -193,5 +193,5 @@ if ![runto_main] then {
 delete_breakpoints
 gdb_py_test_silent_cmd  "python wp1 = gdb.Breakpoint (\"result\", type=gdb.BP_WATCHPOINT, wp_class=gdb.WP_WRITE, internal=True )" "Set watchpoint" 0
 gdb_test "info breakpoints" "No breakpoints or watchpoints.*" "Check info breakpoints does not show invisible breakpoints"
-gdb_test "maint info breakpoints" ".*hw watchpoint.*result.*" "Check maint info breakpoints shows invisible breakpoints"
+gdb_test "maint info breakpoints" ".*watchpoint.*result.*" "Check maint info breakpoints shows invisible breakpoints"
 gdb_test "continue" ".*\[Ww\]atchpoint.*result.*Old value = 0.*New value = 25.*" "Test watchpoint write"
