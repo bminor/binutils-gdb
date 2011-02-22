@@ -1,5 +1,9 @@
 2011-02-22  Mike Frysinger  <vapier@gentoo.org>
 
+	* bfin-dis.c (OUTS): Remove p NULL check and txt NUL check.
+
+2011-02-22  Mike Frysinger  <vapier@gentoo.org>
+
 	* bfin-dis.c (print_insn_bfin): Change outf->fprintf_func to OUTS.
 
 2011-02-19  Mike Frysinger  <vapier@gentoo.org>
