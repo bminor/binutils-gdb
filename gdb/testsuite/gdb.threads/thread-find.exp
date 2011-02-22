@@ -428,3 +428,12 @@ gdb_test_multiple "info threads 3-3" "info threads 3-3" {
     }
 }
 
+# Test bad input
+
+gdb_test "info thread foo" \
+    "Args must be numbers or '.' variables." \
+    "info thread foo"
+
+gdb_test "info thread foo -1" \
+    "Args must be numbers or '.' variables." \
+    "info thread foo -1"

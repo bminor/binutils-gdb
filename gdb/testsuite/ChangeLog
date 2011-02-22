@@ -1,3 +1,8 @@
+2011-02-22  Michael Snyder  <msnyder@vmware.com>
+
+	* gdb.threads/thread-find.exp: Add tests for bad input to 
+	info threads.
+
 2011-02-22  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.python/py-breakpoint.exp: Fix the expected output of
