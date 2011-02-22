@@ -18,4 +18,4 @@ clean mostlyclean:
 	-rm -f *.o ${OBJS}  *.class *.exe *~ core jmain jmisc jnpe jprint
 
 distclean maintainer-clean realclean: clean
-	-rm -f Makefile config.status config.log
+	-rm -f Makefile config.status config.log gdb.log gdb.sum

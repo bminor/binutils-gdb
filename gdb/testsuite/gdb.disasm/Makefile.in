@@ -10,4 +10,4 @@ clean mostlyclean:
 	-rm -f *.o *.diff *~ *.bad core h8300s hppa mn10300 sh3
 
 distclean maintainer-clean realclean: clean
-	-rm -f Makefile config.status config.log
+	-rm -f Makefile config.status config.log gdb.log gdb.sum

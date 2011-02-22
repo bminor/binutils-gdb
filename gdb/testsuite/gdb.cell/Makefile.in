@@ -16,5 +16,5 @@ clean mostlyclean:
 distclean maintainer-clean realclean: clean
 	-rm -f *~ core
 	-rm -f Makefile config.status config.log
-	-rm -f *-init.exp
+	-rm -f *-init.exp gdb.log gdb.sum
 	-rm -fr *.log summary detail *.plog *.sum *.psum site.*

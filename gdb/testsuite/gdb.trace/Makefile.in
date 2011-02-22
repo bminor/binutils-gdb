@@ -15,4 +15,4 @@ clean mostlyclean:
 	-rm -f *.o *.diff *~ *.bad core sh3 hppa mn10300 $(PROGS)
 
 distclean maintainer-clean realclean: clean
-	-rm -f Makefile config.status config.log
+	-rm -f Makefile config.status config.log gdb.log gdb.sum

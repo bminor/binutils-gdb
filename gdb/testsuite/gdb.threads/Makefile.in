@@ -19,4 +19,4 @@ clean mostlyclean:
 	-rm -f *~ *.o a.out xgdb *.x *.ci *.tmp core* $(EXECUTABLES) gcore.test
 
 distclean maintainer-clean realclean: clean
-	-rm -f Makefile config.status config.log config.h
+	-rm -f Makefile config.status config.log config.h gdb.log gdb.sum

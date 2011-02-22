@@ -16,4 +16,4 @@ clean mostlyclean:
 	-rm -f core $(EXECUTABLES) $(MISCELLANEOUS)
 
 distclean maintainer-clean realclean: clean
-	-rm -f Makefile config.status config.log
+	-rm -f Makefile config.status config.log gdb.log gdb.sum

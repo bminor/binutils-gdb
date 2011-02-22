@@ -23,4 +23,4 @@ clean mostlyclean:
 	-rm -f $(MISCELLANEOUS)
 
 distclean maintainer-clean realclean: clean
-	-rm -f Makefile config.status config.log
+	-rm -f Makefile config.status config.log gdb.log gdb.sum

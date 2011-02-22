@@ -1,5 +1,23 @@
 2011-02-22  Michael Snyder  <msnyder@vmware.com>
 
+	* Makefile.in: Make more clean.
+	* gdb.ada/Makefile.in: Ditto.
+	* gdb.arch/Makefile.in: Ditto.
+	* gdb.asm/Makefile.in: Ditto.
+	* gdb.base/Makefile.in: Ditto.
+	* gdb.cp/Makefile.in: Ditto.
+	* gdb.dwarf2/Makefile.in: Ditto.
+	* gdb.java/Makefile.in: Ditto.
+	* gdb.mi/Makefile.in: Ditto.
+	* gdb.modula2/Makefile.in: Ditto.
+	* gdb.python/Makefile.in: Ditto.
+	* gdb.server/Makefile.in: Ditto.
+	* gdb.stabs/Makefile.in: Ditto.
+	* gdb.threads/Makefile.in: Ditto.
+	* gdb.trace/Makefile.in: Ditto.
+
+2011-02-22  Michael Snyder  <msnyder@vmware.com>
+
 	* gdb.threads/thread-find.exp: Add tests for bad input to 
 	info threads.
 
