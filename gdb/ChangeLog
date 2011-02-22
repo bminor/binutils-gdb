@@ -1,3 +1,7 @@
+2011-02-22  Michael Snyder  <msnyder@vmware.com>
+
+	* cli/cli-utils.c (number_is_in_list): Check for zero return.
+
 2011-02-22  Pedro Alves  <pedro@codesourcery.com>
 
 	* frame-unwind.h: Fix comment to mention the this frame, not the

@@ -175,10 +175,15 @@ number_is_in_list (char *list, int number)
   if (list == NULL || *list == '\0')
     return 1;
 
-  while (list != NULL && *list != '\0')
-    if (get_number_or_range (&list) == number)
-      return 1;
+  while (*list != '\0')
+    {
+      int gotnum = get_number_or_range (&list);
 
+      if (gotnum == 0)
+	error (_("Args must be numbers or '$' variables."));
+      if (gotnum == number)
+	return 1;
+    }
   return 0;
 }
 
