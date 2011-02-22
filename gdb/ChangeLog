@@ -1,3 +1,11 @@
+2011-02-22  Doug Evans  <dje@google.com>
+
+	Add gdb.lookup_global_symbol python function.
+	* NEWS: Add entry.
+	* python/py-symbol.c (gdbpy_lookup_global_symbol): New function.
+	* python/python-internal.h (gdbpy_lookup_global_symbol): Declare it.
+	* python/python.c (GdbMethods): Add entry for lookup_global_symbol.
+
 2011-02-22  Tom Tromey  <tromey@redhat.com>
 
 	* language.c (language_class_name_from_physname): Rename

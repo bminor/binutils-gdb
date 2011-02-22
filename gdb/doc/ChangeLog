@@ -1,3 +1,9 @@
+2011-02-22  Doug Evans  <dje@google.com>
+
+	* gdb.texinfo (Symbols In Python): Document lookup_global_symbol.
+	Clarify behaviour of lookup_symbol when `block' argument is omitted,
+	add description of result, fix @defun formatting.
+
 2011-02-21  Hui Zhu  <teawater@gmail.com>
 
 	* agentexpr.texi (Bytecode Descriptions): Add printf.

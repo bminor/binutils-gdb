@@ -39,6 +39,13 @@ gdb_load ${binfile}
 # Skip all tests if Python scripting is not enabled.
 if { [skip_python_tests] } { continue }
 
+# Test looking up a global symbol before we runto_main as this is the
+# point where we don't have a current frame, and we don't want to
+# require one.
+gdb_py_test_silent_cmd "python main_func = gdb.lookup_global_symbol(\"main\")" "Lookup main" 1
+gdb_test "python print main_func.is_function" "True" "Test main_func.is_function"
+gdb_test "python print gdb.lookup_global_symbol(\"junk\")" "None" "Test lookup_global_symbol(\"junk\")"
+
 if ![runto_main] then {
     fail "Can't run to main"
     return 0

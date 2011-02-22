@@ -236,6 +236,7 @@ sympy_dealloc (PyObject *obj)
    A tuple with 2 elements is always returned.  The first is the symbol
    object or None, the second is a boolean with the value of
    is_a_field_of_this (see comment in lookup_symbol_in_language).  */
+
 PyObject *
 gdbpy_lookup_symbol (PyObject *self, PyObject *args, PyObject *kw)
 {
@@ -292,6 +293,39 @@ gdbpy_lookup_symbol (PyObject *self, PyObject *args, PyObject *kw)
   PyTuple_SET_ITEM (ret_tuple, 1, bool_obj);
 
   return ret_tuple;
+}
+
+/* Implementation of
+   gdb.lookup_global_symbol (name [, domain]) -> symbol or None.  */
+
+PyObject *
+gdbpy_lookup_global_symbol (PyObject *self, PyObject *args, PyObject *kw)
+{
+  int domain = VAR_DOMAIN;
+  const char *name;
+  static char *keywords[] = { "name", "domain", NULL };
+  struct symbol *symbol;
+  PyObject *sym_obj;
+
+  if (! PyArg_ParseTupleAndKeywords (args, kw, "s|i", keywords, &name,
+				     &domain))
+    return NULL;
+
+  symbol = lookup_symbol_global (name, NULL, domain);
+
+  if (symbol)
+    {
+      sym_obj = symbol_to_symbol_object (symbol);
+      if (!sym_obj)
+	return NULL;
+    }
+  else
+    {
+      sym_obj = Py_None;
+      Py_INCREF (Py_None);
+    }
+
+  return sym_obj;
 }
 
 /* This function is called when an objfile is about to be freed.

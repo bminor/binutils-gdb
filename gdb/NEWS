@@ -38,6 +38,8 @@
 
 * Python scripting
 
+  ** New function gdb.lookup_global_symbol looks up a global symbol.
+
   ** GDB values in Python are now callable if the value represents a
      function.  For example, if 'some_value' represents a function that
      takes two integer parameters and returns a value, you can call

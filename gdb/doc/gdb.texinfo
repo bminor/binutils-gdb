@@ -22829,7 +22829,7 @@ The following symbol-related functions are available in the @code{gdb}
 module:
 
 @findex gdb.lookup_symbol
-@defun lookup_symbol name [block] [domain]
+@defun lookup_symbol name @r{[}block@r{]} @r{[}domain@r{]}
 This function searches for a symbol by name.  The search scope can be
 restricted to the parameters defined in the optional domain and block
 arguments.
@@ -22837,10 +22837,33 @@ arguments.
 @var{name} is the name of the symbol.  It must be a string.  The
 optional @var{block} argument restricts the search to symbols visible
 in that @var{block}.  The @var{block} argument must be a
-@code{gdb.Block} object.  The optional @var{domain} argument restricts
+@code{gdb.Block} object.  If omitted, the block for the current frame
+is used.  The optional @var{domain} argument restricts
 the search to the domain type.  The @var{domain} argument must be a
 domain constant defined in the @code{gdb} module and described later
 in this chapter.
+
+The result is a tuple of two elements.
+The first element is a @code{gdb.Symbol} object or @code{None} if the symbol
+is not found.
+If the symbol is found, the second element is @code{True} if the symbol
+is a field of a method's object (e.g., @code{this} in @code{C++}),
+otherwise it is @code{False}.
+If the symbol is not found, the second element is @code{False}.
+@end defun
+
+@findex gdb.lookup_global_symbol
+@defun lookup_global_symbol name @r{[}domain@r{]}
+This function searches for a global symbol by name.
+The search scope can be restricted to by the domain argument.
+
+@var{name} is the name of the symbol.  It must be a string.
+The optional @var{domain} argument restricts the search to the domain type.
+The @var{domain} argument must be a domain constant defined in the @code{gdb}
+module and described later in this chapter.
+
+The result is a @code{gdb.Symbol} object or @code{None} if the symbol
+is not found.
 @end defun
 
 A @code{gdb.Symbol} object has the following attributes:
