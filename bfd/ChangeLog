@@ -1,3 +1,8 @@
+2011-02-22  Andreas Schwab  <schwab@redhat.com>
+
+	* elf32-m68k.c (elf_m68k_finish_dynamic_symbol): For a TLS_GD
+	relocation read the value from the second GOT slot.
+
 2011-02-15  Tristan Gingold  <gingold@adacore.com>
 
 	* vms-alpha.c (alpha_vms_link_add_archive_symbols): Add a comment.
