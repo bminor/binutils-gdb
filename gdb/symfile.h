@@ -475,15 +475,6 @@ extern char *obconcat (struct obstack *obstackp, ...) ATTRIBUTE_SENTINEL;
 
 extern int auto_solib_add;
 
-/* For systems that support it, a threshold size in megabytes.  If
-   automatically adding a new library's symbol table to those already
-   known to the debugger would cause the total shared library symbol
-   size to exceed this threshhold, then the shlib's symbols are not
-   added.  The threshold is ignored if the user explicitly asks for a
-   shlib to be added, such as when using the "sharedlibrary" command.  */
-
-extern int auto_solib_limit;
-
 /* From symfile.c */
 
 extern void set_initial_language (void);

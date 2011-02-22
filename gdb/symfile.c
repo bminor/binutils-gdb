@@ -176,16 +176,6 @@ show_symbol_reloading (struct ui_file *file, int from_tty,
    report all the functions that are actually present.  */
 
 int auto_solib_add = 1;
-
-/* For systems that support it, a threshold size in megabytes.  If
-   automatically adding a new library's symbol table to those already
-   known to the debugger would cause the total shared library symbol
-   size to exceed this threshhold, then the shlib's symbols are not
-   added.  The threshold is ignored if the user explicitly asks for a
-   shlib to be added, such as when using the "sharedlibrary"
-   command.  */
-
-int auto_solib_limit;
 
 
 /* Make a null terminated copy of the string at PTR with SIZE characters in

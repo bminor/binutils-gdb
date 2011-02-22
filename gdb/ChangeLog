@@ -1,3 +1,8 @@
+2011-02-22  Tom Tromey  <tromey@redhat.com>
+
+	* symfile.c (auto_solib_limit): Remove.
+	* symfile.h (auto_solib_limit): Remove.
+
 2011-02-22  Joel Brobecker  <brobecker@adacore.com>
 
 	* Makefile.in (INSTALLED_LIBS): Delete.  Update comment.
