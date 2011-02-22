@@ -1,3 +1,9 @@
+2011-02-22  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.python/py-block.exp: Simplify using prepare_for_testing.
+	Delete variable binfile, no longer use.  Add or modify test
+	comments to make them unique.
+
 2011-02-21  Michael Snyder  <msnyder@vmware.com>
 
 	* Makefile.in: Update for make clean.
