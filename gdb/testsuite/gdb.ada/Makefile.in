@@ -24,6 +24,7 @@ EXECUTABLES = \
   fun_in_declare/foo \
   funcall_param/foo \
   homonym/homonym_main \
+  info_types \
   interface/foo \
   lang_switch/lang_switch \
   nested/hello \

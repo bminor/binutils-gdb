@@ -7,7 +7,7 @@ all:
 #### host, target, and site specific Makefile frags come in here.
 
 clean mostlyclean:
-	-rm -f *.o *~ core tmp.c tmp.s weird.s errs
+	-rm -f *.o *~ core tmp.c tmp.s weird.s errs exclfwd gdb11479
 
 distclean maintainer-clean realclean: clean
 	-rm -f Makefile config.status config.log

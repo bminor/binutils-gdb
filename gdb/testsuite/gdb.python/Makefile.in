@@ -2,8 +2,9 @@ VPATH = @srcdir@
 srcdir = @srcdir@
 
 EXECUTABLES = py-type py-value py-prettyprint py-template py-block \
-		py-symbol py-mi py-breakpoint py-inferior py-infthread \
-		py-shared python lib-types
+	py-symbol py-mi py-breakpoint py-inferior py-infthread \
+	py-shared python lib-types py-events py-evthreads py-frame \
+	py-pp-maint py-progspace py-section-script
 
 MISCELLANEOUS = py-shared-sl.sl
 

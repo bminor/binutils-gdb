@@ -1,13 +1,15 @@
 VPATH = @srcdir@
 srcdir = @srcdir@
 
-EXECUTABLES = altivec-abi altivec-regs
+EXECUTABLES = altivec-abi altivec-regs amd64-byte amd64-disp-step \
+	amd64-dword amd64-i386-address amd64-word i386-permbkpt \
+	i386-signal i386-sse
 
 all info install-info dvi install uninstall installcheck check:
 	@echo "Nothing to be done for $@..."
 
 clean mostlyclean:
-	-rm -f *~ *.o a.out *.x *.ci *.tmp
+	-rm -f *~ *.o a.out *.x *.ci *.tmp gcore.test system-gcore
 	-rm -f core core.coremaker coremaker.core corefile $(EXECUTABLES)
 
 distclean maintainer-clean realclean: clean

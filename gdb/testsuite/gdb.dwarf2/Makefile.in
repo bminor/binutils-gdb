@@ -21,7 +21,8 @@
 VPATH = @srcdir@
 srcdir = @srcdir@
 
-EXECUTABLES = *.x pr10770
+EXECUTABLES = *.x pr10770 dw2-cp-infcall-ref-static dw2-inline-param \
+	dw2-noloc dw2-ranges dw2-ref-missing-frame dw2-unresolved
 
 all info install-info dvi install uninstall installcheck check:
 	@echo "Nothing to be done for $@..."

@@ -15,7 +15,7 @@ all info install-info dvi install uninstall installcheck check:
 	  EXPECT=${EXPECT}
 
 clean mostlyclean:
-	-rm -f *.o ${OBJS}  *.class *.exe *~ core
+	-rm -f *.o ${OBJS}  *.class *.exe *~ core jmain jmisc jnpe jprint
 
 distclean maintainer-clean realclean: clean
 	-rm -f Makefile config.status config.log

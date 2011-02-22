@@ -34,7 +34,7 @@ EXEEXT = @EXEEXT@
 SUBDIRS = @subdirs@
 RPATH_ENVVAR = @RPATH_ENVVAR@
 ALL_SUBDIRS = gdb.ada gdb.arch gdb.asm gdb.base gdb.cp gdb.disasm \
-	gdb.dwarf2 \
+	gdb.dwarf2 gdb.stabs \
 	gdb.fortran gdb.server gdb.java gdb.mi gdb.multi \
 	gdb.objc gdb.opencl gdb.opt gdb.pascal gdb.python gdb.threads \
 	gdb.trace gdb.xml \
@@ -212,7 +212,8 @@ subdirs:
 	done
 
 clean mostlyclean:
-	-rm -f *~ core *.o a.out xgdb *.x *.grt
+	-rm -f *~ core *.o a.out xgdb *.x *.grt bigcore.corefile
+	-rm - core.*
 	if [ x"${ALL_SUBDIRS}" != x ] ; then \
 	    for dir in ${ALL_SUBDIRS}; \
 	    do \

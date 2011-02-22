@@ -1,7 +1,7 @@
 VPATH = @srcdir@
 srcdir = @srcdir@
 
-EXECUTABLES =
+EXECUTABLES = asm-source
 MISCELLANEOUS = arch.inc
 
 all info install-info dvi install uninstall installcheck check:
