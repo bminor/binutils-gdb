@@ -468,13 +468,8 @@ INTERNAL_LDFLAGS = $(CFLAGS) $(GLOBAL_CFLAGS) $(MH_LDFLAGS) $(LDFLAGS) $(CONFIG_
 # it doesn't work, then refer to libiberty.
 
 # Libraries and corresponding dependencies for compiling gdb.
-# {X,T}M_CLIBS, defined in *config files, have host- and target-dependent libs.
+# XM_CLIBS, defined in *config files, have host-dependent libs.
 # LIBIBERTY appears twice on purpose.
-# If you have the Cygnus libraries installed,
-# you can use 'CLIBS=$(INSTALLED_LIBS)' 'CDEPS='
-INSTALLED_LIBS=-lbfd -lreadline -lopcodes -liberty -ldecnumber \
-	$(XM_CLIBS) $(NAT_CLIBS) $(GDBTKLIBS) @LIBS@ @PYTHON_LIBS@ \
-	-lintl -liberty $(LIBGNU)
 CLIBS = $(SIM) $(READLINE) $(OPCODES) $(BFD) $(INTL) $(LIBIBERTY) $(LIBDECNUMBER) \
 	$(XM_CLIBS) $(NAT_CLIBS) $(GDBTKLIBS) @LIBS@ @PYTHON_LIBS@ \
 	$(LIBEXPAT) \
