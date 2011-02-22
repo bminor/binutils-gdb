@@ -1,3 +1,8 @@
+2011-02-22  Tom Tromey  <tromey@redhat.com>
+
+	* language.c (language_class_name_from_physname): Rename
+	'curr_language' argument to 'lang'; use in body.
+
 2011-02-22  Michael Snyder  <msnyder@vmware.com>
 
 	* cli/cli-utils.c (number_is_in_list): Check for zero return.

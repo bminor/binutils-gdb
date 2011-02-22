@@ -1014,12 +1014,11 @@ language_demangle (const struct language_defn *current_language,
 
 /* Return class name from physname or NULL.  */
 char *
-language_class_name_from_physname (const struct language_defn *curr_language,
+language_class_name_from_physname (const struct language_defn *lang,
 				   const char *physname)
 {
-  if (current_language != NULL
-      && current_language->la_class_name_from_physname)
-    return current_language->la_class_name_from_physname (physname);
+  if (lang != NULL && lang->la_class_name_from_physname)
+    return lang->la_class_name_from_physname (physname);
   return NULL;
 }
 
