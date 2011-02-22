@@ -4781,9 +4781,9 @@ print_insn_bfin (bfd_vma pc, disassemble_info *outf)
       int len;
 
       parallel = 1;
-      outf->fprintf_func (outf->stream, " || ");
+      OUTS (outf, " || ");
       len = _print_insn_bfin (pc + 4, outf);
-      outf->fprintf_func (outf->stream, " || ");
+      OUTS (outf, " || ");
       if (len != 2)
 	legal = 0;
       len = _print_insn_bfin (pc + 6, outf);
@@ -4794,7 +4794,7 @@ print_insn_bfin (bfd_vma pc, disassemble_info *outf)
 	count = 8;
       else
 	{
-	  outf->fprintf_func (outf->stream, ";\t\t/* ILLEGAL PARALLEL INSTRUCTION */");
+	  OUTS (outf, ";\t\t/* ILLEGAL PARALLEL INSTRUCTION */");
 	  comment = 1;
 	  count = 0;
 	}
@@ -4802,7 +4802,7 @@ print_insn_bfin (bfd_vma pc, disassemble_info *outf)
     }
 
   if (!comment)
-    outf->fprintf_func (outf->stream, ";");
+    OUTS (outf, ";");
 
   if (count == 0)
     return 2;

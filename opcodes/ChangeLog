@@ -1,3 +1,7 @@
+2011-02-22  Mike Frysinger  <vapier@gentoo.org>
+
+	* bfin-dis.c (print_insn_bfin): Change outf->fprintf_func to OUTS.
+
 2011-02-19  Mike Frysinger  <vapier@gentoo.org>
 
 	* bfin-dis.c (saved_state): Mark static.  Change a[01]x to ax[] and
