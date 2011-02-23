@@ -352,7 +352,7 @@ gdb_expect  {
         -re "^help info watchpoints $"\
             { send_gdb "\n"
               gdb_expect {
-                      -re "Status of watchpoints, .*\r\n.*$gdb_prompt $"\
+                      -re "Status of specified watchpoints.*\r\n.*$gdb_prompt $"\
                           { pass "complete help info wat" }
                       -re ".*$gdb_prompt $" { fail "complete help info wat"}
                       timeout   {fail "(timeout) complete help info wat"}

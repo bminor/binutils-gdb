@@ -238,7 +238,9 @@ gdb_test "help info all-registers" "List of all registers and their contents, fo
 # test help info args
 gdb_test "help info args" "Argument variables of current stack frame\." "help info args"
 # test help info breakpoints
-gdb_test "help info breakpoints" "Status of user-settable breakpoints, or breakpoint number NUMBER\..*\[\r\n\]+breakpoint set\." "help info breakpoints"
+gdb_test "help info breakpoints" \
+    "Status of specified breakpoints .all user-settable breakpoints if no argument.*\[\r\n\]+breakpoint set\." \
+    "help info breakpoints"
 # test help info catch
 gdb_test "help info catch" "Exceptions that can be caught in the current stack frame\." "help info catch"
 # test help info copying
@@ -290,7 +292,9 @@ gdb_test "help info variables" "All global and static variable names, or those m
 # test help info warranty
 gdb_test "help info warranty" "Various kinds of warranty you do not have\." "help info warranty"
 # test help info watchpoints
-gdb_test "help info watchpoints" "Status of watchpoints, or watchpoint number NUMBER\." "help info watchpoints"
+gdb_test "help info watchpoints" \
+    "Status of specified watchpoints .all watchpoints if no argument.\." \
+    "help info watchpoints"
 # test help inspect
 gdb_test "help inspect" "Same as \"print\" command, except that if you are running in the epoch\[\r\n\]+environment, the value is printed in its own window\." "help inspect"
 # test help jump

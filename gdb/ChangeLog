@@ -1,4 +1,19 @@
-2011-02-22  Michael Snyder  <msnyder@vmware.com>
+2011-02-23  Michael Snyder  <msnyder@vmware.com>
+
+	* breakpoint.c (breakpoint_1): Change first argument from an int
+	to a char pointer, so that the function now accepts a list of
+	breakpoints rather than just one.  Use new function 
+	'number_is_in_list' to implement.
+	(breakpoints_info): Pass char * instead of int to breakpoint_1.
+	(watchpoints_info): Ditto.
+	(tracepoints_info): Ditto.
+	(maintenance_info_breakpoints): Ditto.
+	(_initialize_breakpoint): Update help strings to reflect the fact
+	that these functions can now take more than one argument.
+	* cli/cli-utils.c (number_is_in_list): New function.
+	* cli/cli-utils.h (number_is_in_list): Export.
+
+2011-02-23  Michael Snyder  <msnyder@vmware.com>
 
 	* memattr.c (mem_enable_command): Use get_number_or_range.
 	(mem_disable_command): Ditto.

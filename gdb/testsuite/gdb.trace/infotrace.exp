@@ -73,7 +73,7 @@ gdb_test "info tracepoint $asm_test_num" \
 
 # 2.3 info tracepoint (invalid tracepoint number)
 gdb_test "info tracepoint [expr $c_test_num + $asm_test_num]" \
-    "No tracepoint number [expr $c_test_num + $asm_test_num]." \
+    "No tracepoint matching '[expr $c_test_num + $asm_test_num]'." \
     "2.3: info tracepoint (invalid tracepoint number)"
 
 # 2.4 info tracepoints (list of numbers)
@@ -89,6 +89,6 @@ gdb_test_multiple "info tracepoints $c_test_num $asm_test_num " \
 
 # 2.5 help info trace
 gdb_test "help info tracepoints" \
-    "Status of tracepoints, or tracepoint number NUMBER.*" \
+    "Status of specified tracepoints .all tracepoints if no argument.*" \
     "2.5: help info tracepoints"
 

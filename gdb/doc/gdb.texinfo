@@ -3438,12 +3438,12 @@ optionally be surrounded by spaces.
 
 @kindex info breakpoints
 @cindex @code{$_} and @code{info breakpoints}
-@item info breakpoints @r{[}@var{n}@r{]}
-@itemx info break @r{[}@var{n}@r{]}
+@item info breakpoints @r{[}@var{n}@dots{}@r{]}
+@itemx info break @r{[}@var{n}@dots{}@r{]}
 Print a table of all breakpoints, watchpoints, and catchpoints set and
 not deleted.  Optional argument @var{n} means print information only
-about the specified breakpoint (or watchpoint or catchpoint).  For
-each breakpoint, following columns are printed:
+about the specified breakpoint(s) (or watchpoint(s) or catchpoint(s)).
+For each breakpoint, following columns are printed:
 
 @table @emph
 @item Breakpoint Numbers
@@ -3763,8 +3763,8 @@ by the program.
 Set a watchpoint that will break when @var{expr} is either read from
 or written into by the program.
 
-@kindex info watchpoints @r{[}@var{n}@r{]}
-@item info watchpoints
+@kindex info watchpoints @r{[}@var{n}@dots{}@r{]}
+@item info watchpoints @r{[}@var{n}@dots{}@r{]}
 This command prints a list of watchpoints, using the same format as
 @code{info break} (@pxref{Set Breaks}).
 @end table
@@ -10289,10 +10289,10 @@ tracepoint hit.
 @subsection Listing Tracepoints
 
 @table @code
-@kindex info tracepoints
-@kindex info tp
+@kindex info tracepoints @r{[}@var{n}@dots{}@r{]}
+@kindex info tp @r{[}@var{n}@dots{}@r{]}
 @cindex information about tracepoints
-@item info tracepoints @r{[}@var{num}@r{]}
+@item info tracepoints @r{[}@var{num}@dots{}@r{]}
 Display information about the tracepoint @var{num}.  If you don't
 specify a tracepoint number, displays information about all the
 tracepoints defined so far.  The format is similar to that used for

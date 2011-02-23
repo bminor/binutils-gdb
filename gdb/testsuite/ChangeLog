@@ -1,4 +1,12 @@
-2011-02-22  Michael Snyder  <msnyder@vmware.com>
+2011-02-23  Michael Snyder  <msnyder@vmware.com>
+
+	* gdb.base/break.exp: Add tests for "info break" with arguments.
+	* gdb.trace/infotrace.exp: Update patterns for error and help.
+	* gdb.base/completion.exp: Update pattern.
+	* gdb.base/ena-dis-br.exp: Update pattern.
+	* gdb.base/help.exp: Update patterns.
+
+2011-02-23  Michael Snyder  <msnyder@vmware.com>
 
 	* gdb.base/memattr.exp: New test.
 	* gdb.base/memattr.c: Test load for memattr.exp.

@@ -150,6 +150,94 @@ gdb_test "info break" \
 \[0-9\]+\[\t \]+breakpoint     keep y.* in multi_line_while_conditional at .*$srcfile:$bp_location4" \
     "breakpoint info"
 
+#
+# Test info breakpoint with arguments
+#
+
+set see1 0
+set see2 0
+set see3 0
+set see4 0
+set see5 0
+set see6 0
+
+gdb_test_multiple "info break 2 4 6" "info break 2 4 6" {
+    -re "1\[\t \]+breakpoint *keep y\[^\r\n\]*:$main_line\[^\r\n\]*" {
+	set see1 1
+	exp_continue
+    }
+    -re "2\[\t \]+breakpoint *keep y\[^\r\n\]* in marker2 at \[^\r\n\]*" {
+	set see2 1
+	exp_continue
+    }
+    -re "3\[\t \]+breakpoint *keep y\[^\r\n\]*$bp_location7\[^\r\n\]*" {
+	set see3 1
+	exp_continue
+    }
+    -re "4\[\t \]+breakpoint *keep y\[^\r\n\]*$bp_location1\[^\r\n\]*" {
+	set see4 1
+	exp_continue
+    }
+    -re "5\[\t \]+breakpoint *keep y\[^\r\n\]*$bp_location1\[^\r\n\]*" {
+	set see5 1
+	exp_continue
+    }
+    -re "6\[\t \]+breakpoint *keep y\[^\r\n\]*$bp_location2\[^\r\n\]*" {
+	set see6 1
+	exp_continue
+    }
+    -re ".*$gdb_prompt $" {
+	if { !$see1 && $see2 && !$see3 && $see4 && !$see5 && $see6 } then {
+	    pass "info break 2 4 6"
+	} else {
+	    fail "info break 2 4 6"
+	}
+    }
+}
+
+set see1 0
+set see2 0
+set see3 0
+set see4 0
+set see5 0
+set see6 0
+
+gdb_test_multiple "info break 3-5" "info break 3-5" {
+    -re "1\[\t \]+breakpoint *keep y.* in main at .*:$main_line\[^\r\n\]*" {
+	set see1 1
+	exp_continue
+    }
+    -re "2\[\t \]+breakpoint *keep y\[^\r\n\]* in marker2 at \[^\r\n\]*" {
+	set see2 1
+	exp_continue
+    }
+    -re "3\[\t \]+breakpoint *keep y\[^\r\n\]*$bp_location7\[^\r\n\]*" {
+	set see3 1
+	exp_continue
+    }
+    -re "4\[\t \]+breakpoint *keep y\[^\r\n\]*$bp_location1\[^\r\n\]*" {
+	set see4 1
+	exp_continue
+    }
+    -re "5\[\t \]+breakpoint *keep y\[^\r\n\]*$bp_location1\[^\r\n\]*" {
+	set see5 1
+	exp_continue
+    }
+    -re "6\[\t \]+breakpoint *keep y\[^\r\n\]*$bp_location2\[^\r\n\]*" {
+	set see6 1
+	exp_continue
+    }
+    -re ".*$gdb_prompt $" {
+	if { !$see1 && !$see2 && $see3 && $see4 && $see5 && !$see6 } then {
+	    pass "info break 3-5"
+	} else {
+	    fail "info break 3-5"
+	}
+    }
+}
+
+gdb_test "print !$see1 && !$see2 && $see3 && $see4 && $see5 && !$see6" "" ""
+
 # FIXME: The rest of this test doesn't work with anything that can't
 # handle arguments.
 # Huh? There doesn't *appear* to be anything that passes arguments

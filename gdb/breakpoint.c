@@ -133,7 +133,8 @@ static void breakpoints_info (char *, int);
 
 static void watchpoints_info (char *, int);
 
-static int breakpoint_1 (int, int, int (*) (const struct breakpoint *));
+static int breakpoint_1 (char *, int, 
+			 int (*) (const struct breakpoint *));
 
 static int breakpoint_cond_eval (void *);
 
@@ -5102,7 +5103,7 @@ user_breakpoint_p (struct breakpoint *b)
    breakpoints listed.  */
 
 static int
-breakpoint_1 (int bnum, int allflag, 
+breakpoint_1 (char *args, int allflag, 
 	      int (*filter) (const struct breakpoint *))
 {
   struct breakpoint *b;
@@ -5119,28 +5120,36 @@ breakpoint_1 (int bnum, int allflag,
      required for address fields.  */
   nr_printable_breakpoints = 0;
   ALL_BREAKPOINTS (b)
-    if (bnum == -1
-	|| bnum == b->number)
-      {
-	/* If we have a filter, only list the breakpoints it accepts.  */
-	if (filter && !filter (b))
-	  continue;
-	
-	if (allflag || user_breakpoint_p (b))
-	  {
-	    int addr_bit, type_len;
+    {
+      /* If we have a filter, only list the breakpoints it accepts.  */
+      if (filter && !filter (b))
+	continue;
 
-	    addr_bit = breakpoint_address_bits (b);
-	    if (addr_bit > print_address_bits)
-	      print_address_bits = addr_bit;
+      /* If we have an "args" string, it is a list of breakpoints to 
+	 accept.  Skip the others.  */
+      if (args != NULL && *args != '\0')
+	{
+	  if (allflag && parse_and_eval_long (args) != b->number)
+	    continue;
+	  if (!allflag && !number_is_in_list (args, b->number))
+	    continue;
+	}
 
-	    type_len = strlen (bptype_string (b->type));
-	    if (type_len > print_type_col_width)
-	      print_type_col_width = type_len;
+      if (allflag || user_breakpoint_p (b))
+	{
+	  int addr_bit, type_len;
 
-	    nr_printable_breakpoints++;
-	  }
-      }
+	  addr_bit = breakpoint_address_bits (b);
+	  if (addr_bit > print_address_bits)
+	    print_address_bits = addr_bit;
+
+	  type_len = strlen (bptype_string (b->type));
+	  if (type_len > print_type_col_width)
+	    print_type_col_width = type_len;
+
+	  nr_printable_breakpoints++;
+	}
+    }
 
   if (opts.addressprint)
     bkpttbl_chain 
@@ -5169,16 +5178,16 @@ breakpoint_1 (int bnum, int allflag,
     annotate_field (3);
   ui_out_table_header (uiout, 3, ui_left, "enabled", "Enb");	/* 4 */
   if (opts.addressprint)
-	{
-	  if (nr_printable_breakpoints > 0)
-	    annotate_field (4);
-	  if (print_address_bits <= 32)
-	    ui_out_table_header (uiout, 10, ui_left, 
-				 "addr", "Address");		/* 5 */
-	  else
-	    ui_out_table_header (uiout, 18, ui_left, 
-				 "addr", "Address");		/* 5 */
-	}
+    {
+      if (nr_printable_breakpoints > 0)
+	annotate_field (4);
+      if (print_address_bits <= 32)
+	ui_out_table_header (uiout, 10, ui_left, 
+			     "addr", "Address");		/* 5 */
+      else
+	ui_out_table_header (uiout, 18, ui_left, 
+			     "addr", "Address");		/* 5 */
+    }
   if (nr_printable_breakpoints > 0)
     annotate_field (5);
   ui_out_table_header (uiout, 40, ui_noalign, "what", "What");	/* 6 */
@@ -5187,22 +5196,34 @@ breakpoint_1 (int bnum, int allflag,
     annotate_breakpoints_table ();
 
   ALL_BREAKPOINTS (b)
-  {
-    QUIT;
-    if (bnum == -1
-	|| bnum == b->number)
-      {
-	/* If we have a filter, only list the breakpoints it accepts.  */
-	if (filter && !filter (b))
-	  continue;
-	
-	/* We only print out user settable breakpoints unless the
-	   allflag is set.  */
-	if (allflag || user_breakpoint_p (b))
-	  print_one_breakpoint (b, &last_loc, print_address_bits, allflag);
-      }
-  }
-  
+    {
+      QUIT;
+      /* If we have a filter, only list the breakpoints it accepts.  */
+      if (filter && !filter (b))
+	continue;
+
+      /* If we have an "args" string, it is a list of breakpoints to 
+	 accept.  Skip the others.  */
+
+      if (args != NULL && *args != '\0')
+	{
+	  if (allflag)	/* maintenance info breakpoint */
+	    {
+	      if (parse_and_eval_long (args) != b->number)
+		continue;
+	    }
+	  else		/* all others */
+	    {
+	      if (!number_is_in_list (args, b->number))
+		continue;
+	    }
+	}
+      /* We only print out user settable breakpoints unless the
+	 allflag is set.  */
+      if (allflag || user_breakpoint_p (b))
+	print_one_breakpoint (b, &last_loc, print_address_bits, allflag);
+    }
+
   do_cleanups (bkpttbl_chain);
 
   if (nr_printable_breakpoints == 0)
@@ -5211,12 +5232,12 @@ breakpoint_1 (int bnum, int allflag,
 	 empty list.  */
       if (!filter)
 	{
-	  if (bnum == -1)
+	  if (args == NULL || *args == '\0')
 	    ui_out_message (uiout, 0, "No breakpoints or watchpoints.\n");
 	  else
 	    ui_out_message (uiout, 0, 
-			    "No breakpoint or watchpoint number %d.\n",
-			    bnum);
+			    "No breakpoint or watchpoint matching '%s'.\n",
+			    args);
 	}
     }
   else
@@ -5252,46 +5273,31 @@ default_collect_info (void)
 }
   
 static void
-breakpoints_info (char *bnum_exp, int from_tty)
+breakpoints_info (char *args, int from_tty)
 {
-  int bnum = -1;
-
-  if (bnum_exp)
-    bnum = parse_and_eval_long (bnum_exp);
-
-  breakpoint_1 (bnum, 0, NULL);
+  breakpoint_1 (args, 0, NULL);
 
   default_collect_info ();
 }
 
 static void
-watchpoints_info (char *wpnum_exp, int from_tty)
+watchpoints_info (char *args, int from_tty)
 {
-  int wpnum = -1, num_printed;
-
-  if (wpnum_exp)
-    wpnum = parse_and_eval_long (wpnum_exp);
-
-  num_printed = breakpoint_1 (wpnum, 0, is_watchpoint);
+  int num_printed = breakpoint_1 (args, 0, is_watchpoint);
 
   if (num_printed == 0)
     {
-      if (wpnum == -1)
+      if (args == NULL || *args == '\0')
 	ui_out_message (uiout, 0, "No watchpoints.\n");
       else
-	ui_out_message (uiout, 0, "No watchpoint number %d.\n", wpnum);
+	ui_out_message (uiout, 0, "No watchpoint matching '%s'.\n", args);
     }
 }
 
 static void
-maintenance_info_breakpoints (char *bnum_exp, int from_tty)
+maintenance_info_breakpoints (char *args, int from_tty)
 {
-  int bnum = -1;
-
-  if (bnum_exp)
-    bnum = parse_and_eval_long (bnum_exp);
-
-  breakpoint_1 (bnum, 1, NULL);
+  breakpoint_1 (args, 1, NULL);
 
   default_collect_info ();
 }
@@ -11510,21 +11516,18 @@ create_tracepoint_from_upload (struct uploaded_tp *utp)
    omitted.  */
 
 static void
-tracepoints_info (char *tpnum_exp, int from_tty)
+tracepoints_info (char *args, int from_tty)
 {
-  int tpnum = -1, num_printed;
+  int num_printed;
 
-  if (tpnum_exp)
-    tpnum = parse_and_eval_long (tpnum_exp);
-
-  num_printed = breakpoint_1 (tpnum, 0, is_tracepoint);
+  num_printed = breakpoint_1 (args, 0, is_tracepoint);
 
   if (num_printed == 0)
     {
-      if (tpnum == -1)
+      if (args == NULL || *args == '\0')
 	ui_out_message (uiout, 0, "No tracepoints.\n");
       else
-	ui_out_message (uiout, 0, "No tracepoint number %d.\n", tpnum);
+	ui_out_message (uiout, 0, "No tracepoint matching '%s'.\n", args);
     }
 
   default_collect_info ();
@@ -12214,7 +12217,7 @@ breakpoint set."));
     }
 
   add_info ("breakpoints", breakpoints_info, _("\
-Status of user-settable breakpoints, or breakpoint number NUMBER.\n\
+Status of specified breakpoints (all user-settable breakpoints if no argument).\n\
 The \"Type\" column indicates one of:\n\
 \tbreakpoint     - normal breakpoint\n\
 \twatchpoint     - watchpoint\n\
@@ -12362,9 +12365,7 @@ the memory to which it refers."));
   set_cmd_completer (c, expression_completer);
 
   add_info ("watchpoints", watchpoints_info, _("\
-Status of watchpoints, or watchpoint number NUMBER."));
-
-
+Status of specified watchpoints (all watchpoints if no argument)."));
 
   /* XXX: cagney/2005-02-23: This should be a boolean, and should
      respond to changes - contrary to the description.  */
@@ -12430,7 +12431,7 @@ Do \"help tracepoints\" for info on other tracepoint commands."));
   set_cmd_completer (c, location_completer);
 
   add_info ("tracepoints", tracepoints_info, _("\
-Status of tracepoints, or tracepoint number NUMBER.\n\
+Status of specified tracepoints (all tracepoints if no argument).\n\
 Convenience variable \"$tpnum\" contains the number of the\n\
 last tracepoint set."));
 

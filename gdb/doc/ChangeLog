@@ -1,3 +1,9 @@
+2011-02-23  Michael Snyder  <msnyder@vmware.com>
+
+	* gdb.texinfo (Set Breaks): Add @dots{} to arguments of info break.
+	(Set Watchpoints): Add @dots{} to argument of info watchpoints.
+	(Listing Tracepoints): Add @dots{} to argument of info tracepoints.
+
 2011-02-22  Doug Evans  <dje@google.com>
 
 	* gdb.texinfo (Symbols In Python): Document lookup_global_symbol.
