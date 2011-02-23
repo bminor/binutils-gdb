@@ -22847,7 +22847,7 @@ The result is a tuple of two elements.
 The first element is a @code{gdb.Symbol} object or @code{None} if the symbol
 is not found.
 If the symbol is found, the second element is @code{True} if the symbol
-is a field of a method's object (e.g., @code{this} in @code{C++}),
+is a field of a method's object (e.g., @code{this} in C@t{++}),
 otherwise it is @code{False}.
 If the symbol is not found, the second element is @code{False}.
 @end defun

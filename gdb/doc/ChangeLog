@@ -1,3 +1,7 @@
+2011-02-23  Doug Evans  <dje@google.com>
+
+	* gdb.texinfo (Symbols In Python): Fix mention of C++, use C@t{++}.
+
 2011-02-23  Michael Snyder  <msnyder@vmware.com>
 
 	* gdb.texinfo (Set Breaks): Add @dots{} to arguments of info break.
