@@ -1,3 +1,7 @@
+2011-02-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-elf/new.cc: Don't include <exception_defines.h>.
+
 2011-02-10  Alan Modra  <amodra@gmail.com>
 
 	* ld-scripts/defined.exp: Don't run defined5 for AOUT.
