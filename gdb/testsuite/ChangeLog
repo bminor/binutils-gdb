@@ -1,3 +1,8 @@
+2011-02-22  Michael Snyder  <msnyder@vmware.com>
+
+	* gdb.base/memattr.exp: New test.
+	* gdb.base/memattr.c: Test load for memattr.exp.
+
 2011-02-22  Doug Evans  <dje@google.com>
 
 	* gdb.python/py-symbol.exp: Test lookup_global_symbol.

@@ -1,3 +1,11 @@
+2011-02-22  Michael Snyder  <msnyder@vmware.com>
+
+	* memattr.c (mem_enable_command): Use get_number_or_range.
+	(mem_disable_command): Ditto.
+	(mem_delete_command): Ditto.
+	(_initialize_mem): Tweak usage message to reflect multiple
+	arguments.
+
 2011-02-22  Doug Evans  <dje@google.com>
 
 	Add gdb.lookup_global_symbol python function.

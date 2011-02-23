@@ -27,6 +27,7 @@
 #include "language.h"
 #include "vec.h"
 #include "gdb_string.h"
+#include "breakpoint.h"
 
 const struct mem_attrib default_mem_attrib =
 {
@@ -562,8 +563,6 @@ mem_enable (int num)
 static void
 mem_enable_command (char *args, int from_tty)
 {
-  char *p = args;
-  char *p1;
   int num;
   struct mem_region *m;
   int ix;
@@ -572,26 +571,16 @@ mem_enable_command (char *args, int from_tty)
 
   target_dcache_invalidate ();
 
-  if (p == 0)
-    {
+  if (args == NULL || *args == '\0')
+    { /* Enable all mem regions.  */
       for (ix = 0; VEC_iterate (mem_region_s, mem_region_list, ix, m); ix++)
 	m->enabled_p = 1;
     }
   else
-    while (*p)
+    while (args != NULL && *args != '\0')
       {
-	p1 = p;
-	while (*p1 >= '0' && *p1 <= '9')
-	  p1++;
-	if (*p1 && *p1 != ' ' && *p1 != '\t')
-	  error (_("Arguments must be memory region numbers."));
-
-	num = atoi (p);
+	num = get_number_or_range (&args);
 	mem_enable (num);
-
-	p = p1;
-	while (*p == ' ' || *p == '\t')
-	  p++;
       }
 }
 
@@ -616,8 +605,6 @@ mem_disable (int num)
 static void
 mem_disable_command (char *args, int from_tty)
 {
-  char *p = args;
-  char *p1;
   int num;
   struct mem_region *m;
   int ix;
@@ -626,26 +613,16 @@ mem_disable_command (char *args, int from_tty)
 
   target_dcache_invalidate ();
 
-  if (p == 0)
+  if (args == NULL || *args == '\0')
     {
       for (ix = 0; VEC_iterate (mem_region_s, mem_region_list, ix, m); ix++)
 	m->enabled_p = 0;
     }
   else
-    while (*p)
+    while (args != NULL && *args != '\0')
       {
-	p1 = p;
-	while (*p1 >= '0' && *p1 <= '9')
-	  p1++;
-	if (*p1 && *p1 != ' ' && *p1 != '\t')
-	  error (_("Arguments must be memory region numbers."));
-
-	num = atoi (p);
+	num = get_number_or_range (&args);
 	mem_disable (num);
-
-	p = p1;
-	while (*p == ' ' || *p == '\t')
-	  p++;
       }
 }
 
@@ -679,15 +656,13 @@ mem_delete (int num)
 static void
 mem_delete_command (char *args, int from_tty)
 {
-  char *p = args;
-  char *p1;
   int num;
 
   require_user_regions (from_tty);
 
   target_dcache_invalidate ();
 
-  if (p == 0)
+  if (args == NULL || *args == '\0')
     {
       if (query (_("Delete all memory regions? ")))
 	mem_clear ();
@@ -695,20 +670,10 @@ mem_delete_command (char *args, int from_tty)
       return;
     }
 
-  while (*p)
+  while (args != NULL && *args != '\0')
     {
-      p1 = p;
-      while (*p1 >= '0' && *p1 <= '9')
-	p1++;
-      if (*p1 && *p1 != ' ' && *p1 != '\t')
-	error (_("Arguments must be memory region numbers."));
-
-      num = atoi (p);
+      num = get_number_or_range (&args);
       mem_delete (num);
-
-      p = p1;
-      while (*p == ' ' || *p == '\t')
-	p++;
     }
 
   dont_repeat ();
@@ -739,19 +704,19 @@ where <mode>  may be rw (read/write), ro (read-only) or wo (write-only),\n\
   add_cmd ("mem", class_vars, mem_enable_command, _("\
 Enable memory region.\n\
 Arguments are the code numbers of the memory regions to enable.\n\
-Usage: enable mem <code number>\n\
+Usage: enable mem <code number>...\n\
 Do \"info mem\" to see current list of code numbers."), &enablelist);
 
   add_cmd ("mem", class_vars, mem_disable_command, _("\
 Disable memory region.\n\
 Arguments are the code numbers of the memory regions to disable.\n\
-Usage: disable mem <code number>\n\
+Usage: disable mem <code number>...\n\
 Do \"info mem\" to see current list of code numbers."), &disablelist);
 
   add_cmd ("mem", class_vars, mem_delete_command, _("\
 Delete memory region.\n\
 Arguments are the code numbers of the memory regions to delete.\n\
-Usage: delete mem <code number>\n\
+Usage: delete mem <code number>...\n\
 Do \"info mem\" to see current list of code numbers."), &deletelist);
 
   add_info ("mem", mem_info_command,
