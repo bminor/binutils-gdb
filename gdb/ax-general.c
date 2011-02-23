@@ -145,6 +145,7 @@ ax_simple (struct agent_expr *x, enum agent_op op)
 
 /* Append a pick operator to EXPR.  DEPTH is the stack item to pick,
    with 0 being top of stack.  */
+
 void
 ax_pick (struct agent_expr *x, int depth)
 {

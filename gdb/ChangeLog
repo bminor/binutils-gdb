@@ -1,3 +1,7 @@
+2011-02-23  Tom Tromey  <tromey@redhat.com>
+
+	* ax-general.c (ax_pick): Add missing newline.
+
 2011-02-23  Michael Snyder  <msnyder@vmware.com>
 
 	* breakpoint.c (breakpoint_1): Change first argument from an int
