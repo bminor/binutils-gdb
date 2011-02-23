@@ -1,3 +1,30 @@
+2011-02-23  Kai Tietz  <kai.tietz@onevision.com>
+
+	* dwarf.c (read_leb128): Use bfd_vma instead of
+	long type.
+	(dwarf_vmatoa): New helper routine.
+	(process_extended_line_op): Use for adr bfd_vma
+	type and print those typed values via BFD_VMA_FMT
+	or via dwarf_vmatoa for localized prints.
+	(fetch_indirect_string): Adjust offset's type.
+	(decode_location_expression): Adjust argument types
+	and uvalue type.
+	(read_and_display_attr_value): Likewise.
+	(read_and_display_attr): Likewise.
+	(decode_location_expression): Adjust printf format.
+	(process_debug_info): Likewise.
+	(display_debug_lines_raw): Likewise.
+	(display_debug_lines_decoded): Likewise.
+	(display_debug_pubnames): Likewise.
+	(display_debug_loc): Likewise.
+	(display_debug_aranges): Likewise.
+	* dwarf.h (DWARF2_External_LineInfo,
+	DWARF2_Internal_LineInfo, DWARF2_External_PubNames,
+	DWARF2_Internal_PubNames, DWARF2_External_CompUnit,
+	DWARF2_Internal_CompUnit, DWARF2_External_ARange,
+	DWARF2_Internal_ARange): Added..
+	(read_leb128): Adjust return type.
+
 2011-02-13  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* configure: Regenerate.
