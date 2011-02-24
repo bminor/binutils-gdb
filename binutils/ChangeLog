@@ -1,3 +1,8 @@
+2011-02-24  Zachary T Welch  <zwelch@codesourcery.com>
+
+	* readelf.c (decode_arm_unwind): Implement decoding of remaining
+	ARM unwind instructions (i.e. VFP/NEON and Intel Wireless MMX).
+
 2011-02-23  Kai Tietz  <kai.tietz@onevision.com>
 
 	* dwarf.c (read_leb128): Use bfd_vma instead of

@@ -278,10 +278,13 @@ print_mode;
    already been called and verified that the string exists.  */
 #define GET_DYNAMIC_NAME(offset)	(dynamic_strings + offset)
 
-#define REMOVE_ARCH_BITS(ADDR) do {		\
-    if (elf_header.e_machine == EM_ARM)		\
-      (ADDR) &= ~1;				\
-  } while (0)
+#define REMOVE_ARCH_BITS(ADDR)			\
+  do						\
+    {						\
+      if (elf_header.e_machine == EM_ARM)	\
+	(ADDR) &= ~1;				\
+    }						\
+  while (0)
 
 static void *
 get_data (void * var, FILE * file, long offset, size_t size, size_t nmemb,
@@ -1879,7 +1882,7 @@ get_machine_name (unsigned e_machine)
     case EM_S390_OLD:
     case EM_S390:		return "IBM S/390";
     case EM_SCORE:		return "SUNPLUS S+Core";
-    case EM_XSTORMY16:		return "Sanyo Xstormy16 CPU core";
+    case EM_XSTORMY16:		return "Sanyo XStormy16 CPU core";
     case EM_OPENRISC:
     case EM_OR32:		return "OpenRISC";
     case EM_ARC_A5:		return "ARC International ARCompact processor";
@@ -6468,11 +6471,13 @@ decode_arm_unwind (struct arm_unw_aux_info *aux,
       if ((op & 0xc0) == 0x00)
 	{
 	  int offset = ((op & 0x3f) << 2) + 4;
+
 	  printf ("     vsp = vsp + %d", offset);
 	}
       else if ((op & 0xc0) == 0x40)
 	{
 	  int offset = ((op & 0x3f) << 2) + 4;
+
 	  printf ("     vsp = vsp - %d", offset);
 	}
       else if ((op & 0xf0) == 0x80)
@@ -6511,6 +6516,7 @@ decode_arm_unwind (struct arm_unw_aux_info *aux,
 	  int end = 4 + (op & 0x07);
 	  int first = 1;
 	  int i;
+
 	  printf ("     pop {");
 	  for (i = 4; i <= end; i++)
 	    {
@@ -6540,6 +6546,7 @@ decode_arm_unwind (struct arm_unw_aux_info *aux,
 	      unsigned int mask = op2 & 0x0f;
 	      int first = 1;
 	      int i;
+
 	      printf ("pop {");
 	      for (i = 0; i < 12; i++)
 		if (mask & (1 << i))
@@ -6558,6 +6565,7 @@ decode_arm_unwind (struct arm_unw_aux_info *aux,
 	  unsigned char buf[9];
 	  unsigned int i, len;
 	  unsigned long offset;
+
 	  for (i = 0; i < sizeof (buf); i++)
 	    {
 	      GET_OP (buf[i]);
@@ -6570,18 +6578,76 @@ decode_arm_unwind (struct arm_unw_aux_info *aux,
 	  offset = offset * 4 + 0x204;
 	  printf ("vsp = vsp + %ld", offset);
 	}
-      else
+      else if (op == 0xb3 || op == 0xc8 || op == 0xc9)
 	{
-	  if (op == 0xb3 || op == 0xc6 || op == 0xc7 || op == 0xc8 || op == 0xc9)
-	    {
-	      GET_OP (op2);
-	      printf (_("[unsupported two-byte opcode]"));
-	    }
+	  unsigned int first, last;
+
+	  GET_OP (op2);
+	  first = op2 >> 4;
+	  last = op2 & 0x0f;
+	  if (op == 0xc8)
+	    first = first + 16;
+	  printf ("pop {D%d", first);
+	  if (last)
+	    printf ("-D%d", first + last);
+	  printf ("}");
+	}
+      else if ((op & 0xf8) == 0xb8 || (op & 0xf8) == 0xd0)
+	{
+	  unsigned int count = op & 0x07;
+
+	  printf ("pop {D8");
+	  if (count)
+	    printf ("-D%d", 8 + count);
+	  printf ("}");
+	}
+      else if (op >= 0xc0 && op <= 0xc5)
+	{
+	  unsigned int count = op & 0x07;
+
+	  printf ("     pop {wR10");
+	  if (count)
+	    printf ("-wR%d", 10 + count);
+	  printf ("}");
+	}
+      else if (op == 0xc6)
+	{
+	  unsigned int first, last;
+
+	  GET_OP (op2);
+	  first = op2 >> 4;
+	  last = op2 & 0x0f;
+	  printf ("pop {wR%d", first);
+	  if (last)
+	    printf ("-wR%d", first + last);
+	  printf ("}");
+	}
+      else if (op == 0xc7)
+	{
+	  GET_OP (op2);
+	  if (op2 == 0 || (op2 & 0xf0) != 0)
+	    printf (_("[Spare]"));
 	  else
 	    {
-	      printf (_("     [unsupported opcode]"));
+	      unsigned int mask = op2 & 0x0f;
+	      int first = 1;
+	      int i;
+
+	      printf ("pop {");
+	      for (i = 0; i < 4; i++)
+		if (mask & (1 << i))
+		  {
+		    if (first)
+		      first = 0;
+		    else
+		      printf (", ");
+		    printf ("wCGR%d", i);
+		  }
+	      printf ("}");
 	    }
 	}
+      else
+	printf (_("     [unsupported opcode]"));
       printf ("\n");
     }
 
