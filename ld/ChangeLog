@@ -1,3 +1,8 @@
+2011-02-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/12507
+	* plugin.c (get_symbols): Don't mark entry symbol IR only.
+
 2011-02-18  John David Anglin  <dave.anglin@nrc-cnnrc.gc.ca>
 
 	PR ld/12376

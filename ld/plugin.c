@@ -493,8 +493,10 @@ get_symbols (const void *handle, int nsyms, struct ld_plugin_symbol *syms)
 	 even potentially-referenced, perhaps in a future final link if
 	 this is a partial one, perhaps dynamically at load-time if the
 	 symbol is externally visible.  */
-      ironly = !is_visible_from_outside (&syms[n], owner_sec, blhe)
-	&& !bfd_hash_lookup (non_ironly_hash, syms[n].name, FALSE, FALSE);
+      ironly = (!is_visible_from_outside (&syms[n], owner_sec, blhe)
+		&& !bfd_hash_lookup (non_ironly_hash, syms[n].name,
+				     FALSE, FALSE)
+		&& strcmp (syms[n].name, entry_symbol.name) != 0);
 
       /* If it was originally undefined or common, then it has been
 	 resolved; determine how.  */
