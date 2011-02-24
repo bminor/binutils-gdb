@@ -1,3 +1,8 @@
+2011-02-24  Michael Snyder  <msnyder@vmware.com>
+
+	* Makefile.in (clean): Make clean should remove generated files
+	observer.h and observer.inc.
+
 2011-02-24  Joel Brobecker  <brobecker@adacore.com>
 
 	Revert the following patch (not approved yet):
