@@ -213,8 +213,6 @@ extern void ax_reg_mask (struct agent_expr *ax, int reg);
 
 /* Assemble code to operate on a trace state variable.  */
 extern void ax_tsv (struct agent_expr *expr, enum agent_op op, int num);
-
-extern void ax_memcpy (struct agent_expr *x, const void *src, size_t n);
 
 
 /* Functions for printing out expressions, and otherwise debugging

@@ -49,7 +49,6 @@
 #include "parser-defs.h"
 #include "charset.h"
 #include "arch-utils.h"
-#include "printcmd.h"
 #include "cli/cli-utils.h"
 
 #ifdef TUI
@@ -1962,9 +1961,10 @@ print_variable_and_value (const char *name, struct symbol *var,
   fprintf_filtered (stream, "\n");
 }
 
-void
-string_printf (char *arg, struct ui_file *stream, printf_callback callback,
-	       void *loc_v, void *aexpr_v)
+/* printf "printf format string" ARG to STREAM.  */
+
+static void
+ui_printf (char *arg, struct ui_file *stream)
 {
   char *f = NULL;
   char *s = arg;
@@ -1975,8 +1975,6 @@ string_printf (char *arg, struct ui_file *stream, printf_callback callback,
   int nargs = 0;
   int allocated_args = 20;
   struct cleanup *old_cleanups;
-  struct bp_location *loc = loc_v;
-  struct agent_expr *aexpr = aexpr_v;
 
   val_args = xmalloc (allocated_args * sizeof (struct value *));
   old_cleanups = make_cleanup (free_current_contents, &val_args);
@@ -2295,41 +2293,25 @@ string_printf (char *arg, struct ui_file *stream, printf_callback callback,
     /* Now, parse all arguments and evaluate them.
        Store the VALUEs in VAL_ARGS.  */
 
-    if (callback)
-      current_substring = substrings;
     while (*s != '\0')
       {
 	char *s1;
 
-	s1 = s;
 	if (nargs == allocated_args)
 	  val_args = (struct value **) xrealloc ((char *) val_args,
 						 (allocated_args *= 2)
 						 * sizeof (struct value *));
-	if (callback)
-	  {
-	    if (nargs >= nargs_wanted)
-	      error (_("Wrong number of arguments for specified "
-		       "format-string"));
-	    callback (current_substring, &s1, loc, aexpr);
-	    current_substring += strlen (current_substring) + 1;
-	  }
-	else
-	  val_args[nargs] = parse_to_comma_and_eval (&s1);
+	s1 = s;
+	val_args[nargs] = parse_to_comma_and_eval (&s1);
 
 	nargs++;
 	s = s1;
 	if (*s == ',')
 	  s++;
       }
-    if (callback)
-      callback (last_arg, NULL, loc, aexpr);
 
     if (nargs != nargs_wanted)
       error (_("Wrong number of arguments for specified format-string"));
-
-    if (!stream)
-      goto after_print;
 
     /* Now actually print them.  */
     current_substring = substrings;
@@ -2685,17 +2667,15 @@ string_printf (char *arg, struct ui_file *stream, printf_callback callback,
        by default, which will warn here if there is no argument.  */
     fprintf_filtered (stream, last_arg, 0);
   }
-
-after_print:
   do_cleanups (old_cleanups);
 }
 
 /* Implement the "printf" command.  */
 
-void
+static void
 printf_command (char *arg, int from_tty)
 {
-  string_printf (arg, gdb_stdout, NULL, NULL, NULL);
+  ui_printf (arg, gdb_stdout);
 }
 
 /* Implement the "eval" command.  */
@@ -2707,7 +2687,7 @@ eval_command (char *arg, int from_tty)
   struct cleanup *cleanups = make_cleanup_ui_file_delete (ui_out);
   char *expanded;
 
-  string_printf (arg, ui_out, NULL, NULL, NULL);
+  ui_printf (arg, ui_out);
 
   expanded = ui_file_xstrdup (ui_out, NULL);
   make_cleanup (xfree, expanded);
