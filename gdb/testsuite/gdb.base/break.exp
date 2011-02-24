@@ -236,8 +236,6 @@ gdb_test_multiple "info break 3-5" "info break 3-5" {
     }
 }
 
-gdb_test "print !$see1 && !$see2 && $see3 && $see4 && $see5 && !$see6" "" ""
-
 # FIXME: The rest of this test doesn't work with anything that can't
 # handle arguments.
 # Huh? There doesn't *appear* to be anything that passes arguments

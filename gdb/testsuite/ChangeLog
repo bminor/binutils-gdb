@@ -1,3 +1,8 @@
+2011-02-24  Michael Snyder  <msnyder@vmware.com>
+
+	* gdb.base/break.exp: Remove debugging 'printf' accidentally
+	left behind in previous check-in.
+
 2011-02-23  Michael Snyder  <msnyder@vmware.com>
 
 	* gdb.base/break.exp: Add tests for "info break" with arguments.
