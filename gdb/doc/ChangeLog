@@ -1,3 +1,10 @@
+2011-02-24  Joel Brobecker  <brobecker@adacore.com>
+
+	Revert the following patch (code patch was not approved):
+	2011-02-21  Hui Zhu  <teawater@gmail.com>
+	* agentexpr.texi (bytecode descriptions): add printf.
+	* gdb.texinfo (tracepoint action lists): add printf.
+
 2011-02-23  Doug Evans  <dje@google.com>
 
 	* gdb.texinfo (Symbols In Python): Fix mention of C++, use C@t{++}.

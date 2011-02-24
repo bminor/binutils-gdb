@@ -10242,12 +10242,6 @@ state variables (@pxref{Trace State Variables}) without adding those
 values to the trace buffer, as would be the case if the @code{collect}
 action were used.
 
-@kindex printf
-@item printf @var{template}, @var{expressions}@dots{}
-Print the values of one or more @var{expressions} under the control of
-the string @var{template} in @code{gdbserver} part.
-The command format is with simple @code{printf} (@pxref{Output, printf}).
-
 @kindex while-stepping @r{(tracepoints)}
 @item while-stepping @var{n}
 Perform @var{n} single-step instruction traces after the tracepoint,
