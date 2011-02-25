@@ -1,3 +1,8 @@
+2011-02-25  Alan Modra  <amodra@gmail.com>
+
+	* ld-mn10300/i135409-3.s: Correct .size label reference.
+	* ld-sh/sh64/stolib.s: Likewise.
+
 2011-02-10  Alan Modra  <amodra@gmail.com>
 
 	* ld-gc/start.d: Exclude frv-*-linux*.
