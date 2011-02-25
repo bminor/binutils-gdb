@@ -1,6 +1,6 @@
 /* ELF object file format
    Copyright 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010
+   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -1889,23 +1889,11 @@ elf_frob_symbol (symbolS *symp, int *puntp)
 
   if (sy_obj->size != NULL)
     {
-      switch (sy_obj->size->X_op)
-	{
-	case O_subtract:
-	  S_SET_SIZE (symp,
-		      (S_GET_VALUE (sy_obj->size->X_add_symbol)
-		       + sy_obj->size->X_add_number
-		       - S_GET_VALUE (sy_obj->size->X_op_symbol)));
-	  break;
-	case O_constant:
-	  S_SET_SIZE (symp,
-		      (S_GET_VALUE (sy_obj->size->X_add_symbol)
-		       + sy_obj->size->X_add_number));
-	  break;
-	default:
-	  as_bad (_(".size expression too complicated to fix up"));
-	  break;
-	}
+      if (resolve_expression (sy_obj->size)
+	  && sy_obj->size->X_op == O_constant)
+	S_SET_SIZE (symp, sy_obj->size->X_add_number);
+      else
+	as_bad (_(".size expression does not evaluate to a constant"));
       free (sy_obj->size);
       sy_obj->size = NULL;
     }

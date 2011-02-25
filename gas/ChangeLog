@@ -1,3 +1,8 @@
+2011-02-25  Alan Modra  <amodra@gmail.com>
+
+	PR gas/12519
+	* config/obj-elf.c (elf_frob_symbol): Properly handle size expression.
+
 2011-02-21  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* config/tc-mips.c (mips_ip) <'o'>: Remove duplicate

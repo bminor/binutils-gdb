@@ -1,3 +1,8 @@
+2011-02-25  Alan Modra  <amodra@gmail.com>
+
+	* ld-mn10300/i135409-3.s: Correct .size label reference.
+	* ld-sh/sh64/stolib.s: Likewise.
+
 2011-02-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-elf/new.cc: Don't include <exception_defines.h>.
