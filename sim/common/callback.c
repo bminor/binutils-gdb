@@ -121,7 +121,7 @@ fdbad (p, fd)
 {
   if (fd < 0 || fd > MAX_CALLBACK_FDS || p->fd_buddy[fd] < 0)
     {
-      p->last_errno = EINVAL;
+      p->last_errno = EBADF;
       return -1;
     }
   return 0;
