@@ -90,7 +90,7 @@ DEFOP (tracev, 2, 0, 0, 1, 0x2e)
 DEFOP (invalid, 0, 0, 0, 0, 0x2f)
 DEFOP (trace16, 2, 0, 1, 1, 0x30)
 /* We need something here just to make the tables come out ok.  */
-DEFOP (invalid2, 0, 0, 0, 0, 0x2f)
+DEFOP (invalid2, 0, 0, 0, 0, 0x31)
 /* The "consumed" number for pick is wrong, but there's no way to
    express the right thing.  */
 DEFOP (pick, 1, 0, 0, 1, 0x32)
