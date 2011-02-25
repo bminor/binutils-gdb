@@ -1,3 +1,7 @@
+2011-02-25  Michael Snyder  <msnyder@vmware.com>
+
+	* gdb.multi/base.exp: Add tests for info inferiors with args.
+
 2011-02-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.dwarf2/dw2-ranges.S: Rename to ...

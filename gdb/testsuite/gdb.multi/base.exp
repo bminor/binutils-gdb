@@ -61,6 +61,60 @@ gdb_test "add-inferior -exec ${binfile3}" \
 gdb_test "info inferiors" \
     "Executable.*${exec3}.*${exec2}.*${exec1}.*"
 
+# Test info inferiors with args
+
+set see1 0
+set see2 0
+set see3 0
+
+gdb_test_multiple "info inferior 2 3" "info inferior 2 3" {
+    -re ". 3 \[^\r\n\]*${exec3}" {
+	set see3 1
+	exp_continue
+    }
+    -re ". 2 \[^\r\n\]*${exec2}" {
+	set see2 1
+	exp_continue
+    }
+    -re ". 1 \[^\r\n\]*${exec1}" {
+	set see1 1
+	exp_continue
+    }
+    -re "$gdb_prompt $" {
+	if { !$see1 && $see2 && $see3 } then {
+	    pass "info inferior 2 3"
+	} else {
+	    fail "info inferior 2 3"
+	}
+    }
+}
+
+set see1 0
+set see2 0
+set see3 0
+
+gdb_test_multiple "info inferior 1-2" "info inferior 1-2" {
+    -re ". 3 \[^\r\n\]*${exec3}" {
+	set see3 1
+	exp_continue
+    }
+    -re ". 2 \[^\r\n\]*${exec2}" {
+	set see2 1
+	exp_continue
+    }
+    -re ". 1 \[^\r\n\]*${exec1}" {
+	set see1 1
+	exp_continue
+    }
+    -re "$gdb_prompt $" {
+	if { $see1 && $see2 && !$see3 } then {
+	    pass "info inferior 1-2"
+	} else {
+	    fail "info inferior 1-2"
+	}
+    }
+}
+
 # Test that we have multiple symbol tables.
 
 gdb_test "inferior 1" ".*" "switch to inferior 1"

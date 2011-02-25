@@ -30,6 +30,7 @@
 #include "gdbcore.h"
 #include "symfile.h"
 #include "environ.h"
+#include "cli/cli-utils.h"
 
 void _initialize_inferiors (void);
 
@@ -533,10 +534,12 @@ number_of_inferiors (void)
 /* Prints the list of inferiors and their details on UIOUT.  This is a
    version of 'info_inferior_command' suitable for use from MI.
 
-   If REQUESTED_INFERIOR is not -1, it's the GDB id of the inferior that
-   should be printed.  Otherwise, all inferiors are printed.  */
-void
-print_inferior (struct ui_out *uiout, int requested_inferior)
+   If REQUESTED_INFERIORS is not NULL, it's a list of GDB ids of the
+   inferiors that should be printed.  Otherwise, all inferiors are
+   printed.  */
+
+static void
+print_inferior (struct ui_out *uiout, char *requested_inferiors)
 {
   struct inferior *inf;
   struct cleanup *old_chain;
@@ -545,7 +548,7 @@ print_inferior (struct ui_out *uiout, int requested_inferior)
   /* Compute number of inferiors we will print.  */
   for (inf = inferior_list; inf; inf = inf->next)
     {
-      if (requested_inferior != -1 && inf->num != requested_inferior)
+      if (!number_is_in_list (requested_inferiors, inf->num))
 	continue;
 
       ++inf_count;
@@ -569,7 +572,7 @@ print_inferior (struct ui_out *uiout, int requested_inferior)
     {
       struct cleanup *chain2;
 
-      if (requested_inferior != -1 && inf->num != requested_inferior)
+      if (!number_is_in_list (requested_inferiors, inf->num))
 	continue;
 
       chain2 = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
@@ -726,16 +729,7 @@ inferior_command (char *args, int from_tty)
 static void
 info_inferiors_command (char *args, int from_tty)
 {
-  int requested = -1;
-
-  if (args && *args)
-    {
-      requested = parse_and_eval_long (args);
-      if (!valid_gdb_inferior_id (requested))
-	error (_("Inferior ID %d not known."), requested);
-    }
-
-  print_inferior (uiout, requested);
+  print_inferior (uiout, args);
 }
 
 /* remove-inferior ID */
@@ -1048,8 +1042,8 @@ initialize_inferiors (void)
   current_inferior_->pspace = current_program_space;
   current_inferior_->aspace = current_program_space->aspace;
 
-  add_info ("inferiors", info_inferiors_command,
-	    _("IDs of currently known inferiors."));
+  add_info ("inferiors", info_inferiors_command, 
+	    _("IDs of specified inferiors (all inferiors if no argument)."));
 
   add_com ("add-inferior", no_class, add_inferior_command, _("\
 Add a new inferior.\n\

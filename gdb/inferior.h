@@ -616,12 +616,6 @@ extern struct inferior *iterate_over_inferiors (int (*) (struct inferior *,
 							 void *),
 						void *);
 
-/* Prints the list of inferiors and their details on UIOUT.
-
-   If REQUESTED_INFERIOR is not -1, it's the GDB id of the inferior
-   that should be printed.  Otherwise, all inferiors are printed.  */
-extern void print_inferior (struct ui_out *uiout, int requested_inferior);
-
 /* Returns true if the inferior list is not empty.  */
 extern int have_inferiors (void);
 
