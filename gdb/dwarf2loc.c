@@ -2430,27 +2430,23 @@ disassemble_dwarf_expression (struct ui_file *stream,
 	case DW_OP_breg29:
 	case DW_OP_breg30:
 	case DW_OP_breg31:
-	  data = read_sleb128 (data, end, &ul);
-	  fprintf_filtered (stream, " %s [$%s]", pulongest (ul),
+	  data = read_sleb128 (data, end, &l);
+	  fprintf_filtered (stream, " %s [$%s]", plongest (l),
 			    gdbarch_register_name (arch, op - DW_OP_breg0));
 	  break;
 
 	case DW_OP_bregx:
-	  {
-	    ULONGEST offset;
-
-	    data = read_uleb128 (data, end, &ul);
-	    data = read_sleb128 (data, end, &offset);
-	    fprintf_filtered (stream, " register %s [$%s] offset %s",
-			      pulongest (ul),
-			      gdbarch_register_name (arch, (int) ul),
-			      pulongest (offset));
-	  }
+	  data = read_uleb128 (data, end, &ul);
+	  data = read_sleb128 (data, end, &l);
+	  fprintf_filtered (stream, " register %s [$%s] offset %s",
+			    pulongest (ul),
+			    gdbarch_register_name (arch, (int) ul),
+			    plongest (l));
 	  break;
 
 	case DW_OP_fbreg:
-	  data = read_sleb128 (data, end, &ul);
-	  fprintf_filtered (stream, " %s", pulongest (ul));
+	  data = read_sleb128 (data, end, &l);
+	  fprintf_filtered (stream, " %s", plongest (l));
 	  break;
 
 	case DW_OP_xderef_size:

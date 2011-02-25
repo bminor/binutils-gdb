@@ -1,3 +1,11 @@
+2011-02-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf2loc.c (disassemble_dwarf_expression) <DW_OP_breg[0-9]+>: Use
+	L and plongest.
+	(disassemble_dwarf_expression) <DW_OP_bregx>: Drop variable offset,
+	use L and plongest.
+	(disassemble_dwarf_expression) <DW_OP_fbreg>: Use L and plongest.
+
 2011-02-24  Michael Snyder  <msnyder@vmware.com>
 
 	* Makefile.in (clean): Make clean should remove generated files
