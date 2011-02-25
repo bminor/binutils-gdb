@@ -1,7 +1,7 @@
 2011-02-25  H.J. Lu  <hongjiu.lu@intel.com>
 
-	* config/tc-i386.c (reloc): Don't sign-checking 4-byte
-	relocations if 64bit relocations aren't allowed.
+	* config/tc-i386.c (reloc): Don't sign-check 4-byte relocations
+	if 64bit relocations aren't allowed.
 
 2011-02-25  Alan Modra  <amodra@gmail.com>
 
