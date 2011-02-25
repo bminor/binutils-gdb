@@ -1,3 +1,12 @@
+2011-02-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/12519
+	* gas/elf/bad-size.d: New.
+	* gas/elf/bad-size.err: Likewise.
+	* gas/elf/bad-size.s: Likewise.
+
+	* gas/elf/elf.exp: Run bad-size.
+
 2011-02-13  Mike Frysinger  <vapier@gentoo.org>
 
 	* gas/bfin/arithmetic.d, gas/bfin/parallel.d: Change A0 to A1.
