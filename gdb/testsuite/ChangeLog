@@ -1,3 +1,16 @@
+2011-02-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.dwarf2/dw2-ranges.S: Rename to ...
+	* gdb.dwarf2/dw2-ranges.c: ... here, convert it to C.
+	* gdb.dwarf2/dw2-ranges.exp: Skip the testcase on !$gcc_compiled.
+	Rename srcfile, srcfile2 and srcfile3, new asmfile, asmfile2 and
+	asmfile3.  Comment the STABS (#3) file compilation.  Compile
+	everything through assembler.  Provide KFAIL for symtab/12497.
+	* gdb.dwarf2/dw2-ranges2.S: Rename to ...
+	* gdb.dwarf2/dw2-ranges2.c: ... here, convert it to C.
+	* gdb.dwarf2/dw2-ranges3.S: Rename to ...
+	* gdb.dwarf2/dw2-ranges3.c: ... here, convert it to C.
+
 2011-02-24  Michael Snyder  <msnyder@vmware.com>
 
 	* gdb.base/break.exp: Remove debugging 'printf' accidentally

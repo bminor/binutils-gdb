@@ -23,24 +23,47 @@ if {![dwarf2_support]} {
     return 0  
 }
 
+# The .c files use __attribute__.
+if [get_compiler_info unused] {
+    return -1;
+}
+if !$gcc_compiled {
+    verbose "Skipping DW_AT_ranges test."
+    return 0  
+}
+
 set testfile "dw2-ranges"
-set srcfile ${testfile}.S
-set srcfile2 ${testfile}2.S
-set srcfile3 ${testfile}3.S
+set srcfile ${testfile}.c
+set srcfile2 ${testfile}2.c
+set srcfile3 ${testfile}3.c
+set asmfile ${objdir}/${subdir}/${testfile}.s
+set asmfile2 ${objdir}/${subdir}/${testfile}2.s
+set asmfile3 ${objdir}/${subdir}/${testfile}3.s
 set objfile ${objdir}/${subdir}/${testfile}.o
 set objfile2 ${objdir}/${subdir}/${testfile}2.o
 set objfile3 ${objdir}/${subdir}/${testfile}3.o
 set binfile ${objdir}/${subdir}/${testfile}
 
-if {[gdb_compile "${srcdir}/${subdir}/${srcfile}" "${objfile}" object {additional_flags=-gdwarf-2}] != "" } {
+# Generate .s without debug info but provide debug info by the assembler.
+# This way we get DW_TAG_compile_unit DIE and only that DIE.
+
+if {[gdb_compile "${srcdir}/${subdir}/${srcfile}" "${asmfile}" assembly {}] != ""
+    || [gdb_compile "${asmfile}" "${objfile}" object {additional_flags=-gdwarf-2}] != "" } {
     return -1
 }
-if {[gdb_compile "${srcdir}/${subdir}/${srcfile2}" "${objfile2}" object {additional_flags=-gdwarf-2}] != "" } {
+if {[gdb_compile "${srcdir}/${subdir}/${srcfile2}" "${asmfile2}" assembly {}] != ""
+    || [gdb_compile "${asmfile2}" "${objfile2}" object {additional_flags=-gdwarf-2}] != "" } {
     return -1
 }
-if {[gdb_compile "${srcdir}/${subdir}/${srcfile3}" "${objfile3}" object {additional_flags=-gstabs}] != "" } {
+
+# STABS compilation is intentional as it tests the STABS lookup where is no
+# partial_symtab->psymtabs_addrmap supported for that CU (Compilation Unit) in
+# a file containing psymtabs_addrmap-supporting DWARF CUs.
+if {[gdb_compile "${srcdir}/${subdir}/${srcfile3}" "${asmfile3}" assembly {}] != ""
+    || [gdb_compile "${asmfile3}" "${objfile3}" object {additional_flags=-gstabs}] != "" } {
     return -1
 }
+
 if {[gdb_compile "${objfile} ${objfile2} ${objfile3}" "${binfile}" executable {}] != "" } {
     return -1
 }
@@ -62,4 +85,13 @@ gdb_test "info line main" "Line \[0-9\]* of .* starts at address .* and ends at 
 gdb_test "info line func" "Line \[0-9\]* of .* starts at address .* and ends at .*"
 gdb_test "info line main2" "Line \[0-9\]* of .* starts at address .* and ends at .*"
 gdb_test "info line func2" "Line \[0-9\]* of .* starts at address .* and ends at .*"
-gdb_test "info line main3" "Line \[0-9\]* of .* starts at address .* and ends at .*"
+
+set test "info line main3"
+gdb_test_multiple $test $test {
+    -re "Line \[0-9\]* of .* starts at address .* and ends at .*\r\n$gdb_prompt $" {
+	pass $test
+    }
+    -re "Line \[0-9\]* of .* is at address .* but contains no code\\.\r\n$gdb_prompt $" {
+	kfail symtab/12497 $test
+    }
+}

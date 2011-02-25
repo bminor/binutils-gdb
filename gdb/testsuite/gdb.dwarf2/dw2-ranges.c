@@ -19,18 +19,16 @@
    DW_AT_ranges as the linker could place both sections at arbitrary locations.
    */
 
-	/* Such directive is required by GAS for builds without `-g'.  */
-	.file	1 "dw2-ranges3.S"
+/* `.fini' section is here to make sure `dw2-ranges.c'
+   vs. `dw2-ranges2.c' overlap their DW_AT_ranges with each other.  */
 
-	/* Without this directive GAS will not emit DWARF2 unless we provide an
-	   instruction to assemble.  We want to avoid any instructions to
-	   remain architecture independent.  */
-	.loc_mark_labels	1
+void __attribute__ ((section (".fini")))
+func (void)
+{
+}
 
-	.text
-
-	.globl	main3
-	.func	main3
-main3:	.int	0
-	.endfunc
-	.size	main3, . - main3
+int
+main (void)
+{
+  return 0;
+}
