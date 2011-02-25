@@ -1,3 +1,10 @@
+2011-02-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/12516
+	* ld-elf/dynamic1.d: New.
+	* ld-elf/dynamic1.ld: Likewise.
+	* ld-elf/dynamic1.s: Likewise.
+
 2011-02-25  Alan Modra  <amodra@gmail.com>
 
 	* ld-mn10300/i135409-3.s: Correct .size label reference.
