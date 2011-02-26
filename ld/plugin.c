@@ -495,8 +495,7 @@ get_symbols (const void *handle, int nsyms, struct ld_plugin_symbol *syms)
 	 symbol is externally visible.  */
       ironly = (!is_visible_from_outside (&syms[n], owner_sec, blhe)
 		&& !bfd_hash_lookup (non_ironly_hash, syms[n].name,
-				     FALSE, FALSE)
-		&& strcmp (syms[n].name, entry_symbol.name) != 0);
+				     FALSE, FALSE));
 
       /* If it was originally undefined or common, then it has been
 	 resolved; determine how.  */
@@ -845,6 +844,8 @@ plugin_call_cleanup (void)
 static void
 init_non_ironly_hash (void)
 {
+  struct bfd_sym_chain *sym;
+
   if (non_ironly_hash == NULL)
     {
       non_ironly_hash =
@@ -854,6 +855,12 @@ init_non_ironly_hash (void)
 				  sizeof (struct bfd_hash_entry),
 				  61))
 	einfo (_("%P%F: bfd_hash_table_init failed: %E\n"));
+
+      for (sym = &entry_symbol; sym != NULL; sym = sym->next)
+	if (sym->name
+	    && !bfd_hash_lookup (non_ironly_hash, sym->name, TRUE, TRUE))
+	  einfo (_("%P%X: hash table failure adding symbol %s\n"),
+		 sym->name);
     }
 }
 
