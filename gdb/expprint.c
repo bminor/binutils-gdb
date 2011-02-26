@@ -767,6 +767,7 @@ dump_subexp_body_standard (struct expression *exp,
     case TERNOP_SLICE:
     case TERNOP_SLICE_COUNT:
       elt = dump_subexp (exp, stream, elt);
+      /* FALL THROUGH */
     case BINOP_ADD:
     case BINOP_SUB:
     case BINOP_MUL:
@@ -803,6 +804,7 @@ dump_subexp_body_standard (struct expression *exp,
     case STRUCTOP_MEMBER:
     case STRUCTOP_MPTR:
       elt = dump_subexp (exp, stream, elt);
+      /* FALL THROUGH */
     case UNOP_NEG:
     case UNOP_LOGICAL_NOT:
     case UNOP_COMPLEMENT:

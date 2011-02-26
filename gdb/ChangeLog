@@ -1,5 +1,8 @@
 2011-02-26  Michael Snyder  <msnyder@vmware.com>
 
+	* expprint.c (dump_subexp_body_standard): Document that case
+	statement is meant to fall through.
+
 	* amd64-linux-tdep.c (amd64_linux_syscall_record): Delete
 	dead if statement.  Condition can't be false.
 
