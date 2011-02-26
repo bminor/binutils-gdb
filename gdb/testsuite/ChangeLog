@@ -1,3 +1,8 @@
+2011-02-26  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.python/py-frame.exp: Simplify the initialization phase
+	using prepare_for_testing.
+
 2011-02-25  Michael Snyder  <msnyder@vmware.com>
 
 	* gdb.multi/base.exp: Add tests for info inferiors with args.
