@@ -1,3 +1,9 @@
+2011-02-26  Michael Snyder  <msnyder@vmware.com>
+
+	* utils.c (decimal2str): Eliminate dead code and dead param.
+	(pulongest): Drop dead param from call to decimal2str.
+	(plongest): Ditto.
+
 2011-02-24  Joel Brobecker  <brobecker@adacore.com>
 
 	Revert the following patch (not approved yet):
