@@ -587,9 +587,9 @@ i387_supply_fxsave (struct regcache *regcache, int regnum, const void *fxsave)
 
 		    if (val[0] & (1 << fpreg))
 		      {
-			int regnum = (fpreg + 8 - top) % 8 
-				       + I387_ST0_REGNUM (tdep);
-			tag = i387_tag (FXSAVE_ADDR (tdep, regs, regnum));
+			int thisreg = (fpreg + 8 - top) % 8 
+			               + I387_ST0_REGNUM (tdep);
+			tag = i387_tag (FXSAVE_ADDR (tdep, regs, thisreg));
 		      }
 		    else
 		      tag = 3;		/* Empty */
