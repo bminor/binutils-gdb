@@ -1,5 +1,8 @@
 2011-02-26  Michael Snyder  <msnyder@vmware.com>
 
+	* i386-nat.c (i386_length_and_rw_bits): Document that case
+	statement is meant to fall through.
+
 	* expprint.c (dump_subexp_body_standard): Document that case
 	statement is meant to fall through.
 

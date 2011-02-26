@@ -297,6 +297,7 @@ Invalid hardware breakpoint type %d in i386_length_and_rw_bits.\n"),
       case 8:
         if (TARGET_HAS_DR_LEN_8)
  	  return (DR_LEN_8 | rw);
+	/* ELSE FALL THROUGH */
       default:
 	internal_error (__FILE__, __LINE__, _("\
 Invalid hardware breakpoint length %d in i386_length_and_rw_bits.\n"), len);
