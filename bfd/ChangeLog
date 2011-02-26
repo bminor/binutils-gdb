@@ -1,3 +1,8 @@
+2011-02-25  Rafael Ávila de Espíndola <respindola@mozilla.com>
+
+	* plugin.c (bfd_plugin_object_p): Correctly set the filesize
+	and handle claim_file seeking. Only try to load the plugin once.
+
 2011-02-22  Andreas Schwab  <schwab@redhat.com>
 
 	* elf32-m68k.c (elf_m68k_finish_dynamic_symbol): For a TLS_GD
