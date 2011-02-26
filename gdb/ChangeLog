@@ -1,5 +1,8 @@
 2011-02-26  Michael Snyder  <msnyder@vmware.com>
 
+	* i387-tdep.c (i387_supply_xsave): Avoid shadowing a function
+	param with a local variable of the same name.
+
 	* linux-low.c (linux_nat_xfer_osdata): Rename local variable so
 	that it does not shadow a function parameter.
 
