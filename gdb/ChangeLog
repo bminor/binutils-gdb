@@ -1,3 +1,8 @@
+2011-02-26  Michael Snyder  <msnyder@vmware.com>
+
+	* amd64-linux-tdep.c (amd64_linux_syscall_record): Delete
+	dead if statement.  Condition can't be false.
+
 2011-02-25  Michael Snyder  <msnyder@vmware.com>
 
 	* arm-tdep.c: Fix typos in comments.

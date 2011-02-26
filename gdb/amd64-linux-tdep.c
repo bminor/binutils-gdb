@@ -1174,25 +1174,24 @@ amd64_linux_syscall_record (struct regcache *regcache)
       break;
 
     case amd64_sys_arch_prctl:
-      if (syscall_native == amd64_sys_arch_prctl)
-        {
-          ULONGEST arg3;
+      {
+	ULONGEST arg3;
 
-          regcache_raw_read_unsigned (regcache, amd64_linux_record_tdep.arg3,
-                                      &arg3);
-          if (arg3 == RECORD_ARCH_GET_FS || arg3 == RECORD_ARCH_GET_GS)
-            {
-	      CORE_ADDR addr;
+	regcache_raw_read_unsigned (regcache, amd64_linux_record_tdep.arg3,
+				    &arg3);
+	if (arg3 == RECORD_ARCH_GET_FS || arg3 == RECORD_ARCH_GET_GS)
+	  {
+	    CORE_ADDR addr;
 
-	      regcache_raw_read_unsigned (regcache,
-                                          amd64_linux_record_tdep.arg2,
-                                          &addr);
-	      if (record_arch_list_add_mem (addr,
-                                            amd64_linux_record_tdep.size_ulong))
-                return -1;
-            }
-          goto record_regs;
-        }
+	    regcache_raw_read_unsigned (regcache,
+					amd64_linux_record_tdep.arg2,
+					&addr);
+	    if (record_arch_list_add_mem (addr,
+					  amd64_linux_record_tdep.size_ulong))
+	      return -1;
+	  }
+	goto record_regs;
+      }
       break;
     }
 
