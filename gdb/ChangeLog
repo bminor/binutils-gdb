@@ -1,5 +1,8 @@
 2011-02-26  Michael Snyder  <msnyder@vmware.com>
 
+	* linux-low.c (linux_nat_xfer_osdata): Rename local variable so
+	that it does not shadow a function parameter.
+
 	* i386-nat.c (i386_length_and_rw_bits): Document that case
 	statement is meant to fall through.
 

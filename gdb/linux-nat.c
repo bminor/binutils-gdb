@@ -5145,16 +5145,16 @@ linux_nat_xfer_osdata (struct target_ops *ops, enum target_object object,
 
 		  if ((f = fopen (pathname, "r")) != NULL)
 		    {
-		      size_t len = fread (cmd, 1, sizeof (cmd) - 1, f);
+		      size_t length = fread (cmd, 1, sizeof (cmd) - 1, f);
 
-		      if (len > 0)
+		      if (length > 0)
 			{
 			  int i;
 
-			  for (i = 0; i < len; i++)
+			  for (i = 0; i < length; i++)
 			    if (cmd[i] == '\0')
 			      cmd[i] = ' ';
-			  cmd[len] = '\0';
+			  cmd[length] = '\0';
 
 			  obstack_xml_printf (
 			    &obstack,
