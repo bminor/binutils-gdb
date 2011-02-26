@@ -40,7 +40,7 @@
 
 #include "sparc64-tdep.h"
 
-/* This file implements the The SPARC 64-bit ABI as defined by the
+/* This file implements the SPARC 64-bit ABI as defined by the
    section "Low-Level System Information" of the SPARC Compliance
    Definition (SCD) 2.4.1, which is the 64-bit System V psABI for
    SPARC.  */

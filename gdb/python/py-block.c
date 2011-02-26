@@ -173,7 +173,7 @@ blpy_dealloc (PyObject *obj)
 /* Given a block, and a block_object that has previously been
    allocated and initialized, populate the block_object with the
    struct block data.  Also, register the block_object life-cycle
-   with the life-cycle of the the object file associated with this
+   with the life-cycle of the object file associated with this
    block, if needed.  */
 static void
 set_block (block_object *obj, struct block *block,

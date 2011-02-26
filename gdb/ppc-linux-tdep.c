@@ -1509,7 +1509,7 @@ ppc_linux_init_abi (struct gdbarch_info info,
       /* Until November 2001, gcc did not comply with the 32 bit SysV
 	 R4 ABI requirement that structures less than or equal to 8
 	 bytes should be returned in registers.  Instead GCC was using
-	 the the AIX/PowerOpen ABI - everything returned in memory
+	 the AIX/PowerOpen ABI - everything returned in memory
 	 (well ignoring vectors that is).  When this was corrected, it
 	 wasn't fixed for GNU/Linux native platform.  Use the
 	 PowerOpen struct convention.  */

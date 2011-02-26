@@ -231,12 +231,12 @@ salpy_dealloc (PyObject *self)
   self_sal->ob_type->tp_free (self);
 }
 
-/* Given a sal, and a sal_object that has previously been
-   allocated and initialized, populate the sal_object with the
-   struct sal data.  Also, register the sal_object life-cycle with the
-   life-cycle of the the object file associated with this sal, if
-   needed.  If a failure occurs during the sal population,  this
-   function will return NULL.  */
+/* Given a sal, and a sal_object that has previously been allocated
+   and initialized, populate the sal_object with the struct sal data.
+   Also, register the sal_object life-cycle with the life-cycle of the
+   object file associated with this sal, if needed.  If a failure
+   occurs during the sal population, this function will return
+   NULL.  */
 static int
 set_sal (sal_object *sal_obj, struct symtab_and_line sal)
 {
@@ -282,7 +282,7 @@ set_sal (sal_object *sal_obj, struct symtab_and_line sal)
 /* Given a symtab, and a symtab_object that has previously been
    allocated and initialized, populate the symtab_object with the
    struct symtab data.  Also, register the symtab_object life-cycle
-   with the life-cycle of the the object file associated with this
+   with the life-cycle of the object file associated with this
    symtab, if needed.  */
 static void
 set_symtab (symtab_object *obj, struct symtab *symtab)

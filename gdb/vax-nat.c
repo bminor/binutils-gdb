@@ -45,7 +45,7 @@
 #include "vax-tdep.h"
 #include "inf-ptrace.h"
 
-/* Address of the user structure.  This is the the value for 32V; 3BSD
+/* Address of the user structure.  This is the value for 32V; 3BSD
    uses a different value, but hey, who's still using those systems?  */
 static CORE_ADDR vax_kernel_u_addr = 0x80020000;
 

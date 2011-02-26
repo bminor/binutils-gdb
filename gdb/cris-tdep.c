@@ -2567,7 +2567,7 @@ asrq_op (unsigned short inst, inst_env_type *inst_env)
           return;
         }
       /* The shift size is given as a 5 bit quick value, i.e. we don't
-         want the the sign bit of the quick value.  */
+         want the sign bit of the quick value.  */
       shift_steps = cris_get_asr_shift_steps (inst);
       value = inst_env->reg[REG_PC];
       if (value & SIGNED_DWORD_MASK)
@@ -2891,7 +2891,7 @@ none_reg_mode_jump_op (unsigned short inst, inst_env_type *inst_env)
         {
           check_assign (inst, inst_env);
 
-          /* Get the new value for the the PC.  */
+          /* Get the new value for the PC.  */
           newpc = 
             read_memory_unsigned_integer ((CORE_ADDR) inst_env->prefix_value,
                                           4, inst_env->byte_order);

@@ -355,7 +355,7 @@ spu_gdbarch_id (struct gdbarch *gdbarch)
   int id = tdep->id;
 
   /* The objfile architecture of a standalone SPU executable does not
-     provide an SPU ID.  Retrieve it from the the objfile's relocated
+     provide an SPU ID.  Retrieve it from the objfile's relocated
      address range in this special case.  */
   if (id == -1
       && symfile_objfile && symfile_objfile->obfd

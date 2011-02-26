@@ -142,7 +142,7 @@ extern int step_stop_if_no_debug;
 
 /* If set, the inferior should be controlled in non-stop mode.  In
    this mode, each thread is controlled independently.  Execution
-   commands apply only to the the selected thread by default, and stop
+   commands apply only to the selected thread by default, and stop
    events stop only the thread that had the event -- the other threads
    are kept running freely.  */
 extern int non_stop;

@@ -34,7 +34,7 @@
 #include "python-internal.h"
 
 /* Even though Python scalar types directly map to host types, we use
-   target types here to remain consistent with the the values system in
+   target types here to remain consistent with the values system in
    GDB (which uses target arithmetic).  */
 
 /* Python's integer type corresponds to C's long type.  */

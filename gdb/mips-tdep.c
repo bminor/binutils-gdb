@@ -3138,8 +3138,8 @@ mips_eabi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	      len -= partial_len;
 	      val += partial_len;
 
-	      /* Compute the the offset into the stack at which we
-	         will copy the next parameter.
+	      /* Compute the offset into the stack at which we will
+	         copy the next parameter.
 
 	         In the new EABI (and the NABI32), the stack_offset
 	         only needs to be adjusted when it has been used.  */
@@ -3530,8 +3530,8 @@ mips_n32n64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	      len -= partial_len;
 	      val += partial_len;
 
-	      /* Compute the the offset into the stack at which we
-	         will copy the next parameter.
+	      /* Compute the offset into the stack at which we will
+	         copy the next parameter.
 
 	         In N32 (N64?), the stack_offset only needs to be
 	         adjusted when it has been used.  */
@@ -4010,8 +4010,8 @@ mips_o32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	      len -= partial_len;
 	      val += partial_len;
 
-	      /* Compute the the offset into the stack at which we
-	         will copy the next parameter.
+	      /* Compute the offset into the stack at which we will
+	         copy the next parameter.
 
 	         In older ABIs, the caller reserved space for
 	         registers that contained arguments.  This was loosely
@@ -4418,8 +4418,8 @@ mips_o64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	      len -= partial_len;
 	      val += partial_len;
 
-	      /* Compute the the offset into the stack at which we
-	         will copy the next parameter.
+	      /* Compute the offset into the stack at which we will
+	         copy the next parameter.
 
 	         In older ABIs, the caller reserved space for
 	         registers that contained arguments.  This was loosely
@@ -5312,7 +5312,7 @@ mips_breakpoint_from_pc (struct gdbarch *gdbarch,
    and the target PC is in $2.
    * If the PC at the start of __mips16_call_stub_{s,d}f_{0..10}, i.e.
    before the jal instruction, this is effectively a call stub
-   and the the target PC is in $2.  Otherwise this is effectively
+   and the target PC is in $2.  Otherwise this is effectively
    a return stub and the target PC is in $18.
 
    See the source code for the stubs in gcc/config/mips/mips16.S for
@@ -5344,7 +5344,7 @@ mips_skip_mips16_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 
       /* If the PC at the start of __mips16_call_stub_{s,d}f_{0..10}, i.e.
          before the jal instruction, this is effectively a call stub
-         and the the target PC is in $2.  Otherwise this is effectively
+         and the target PC is in $2.  Otherwise this is effectively
          a return stub and the target PC is in $18.  */
       else if (name[19] == 's' || name[19] == 'd')
 	{

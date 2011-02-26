@@ -107,7 +107,7 @@ static struct target_ops core_ops;
 
 /* Link a new core_fns into the global core_file_fns list.  Called on
    gdb startup by the _initialize routine in each core file register
-   reader, to register information about each format the the reader is
+   reader, to register information about each format the reader is
    prepared to handle.  */
 
 void

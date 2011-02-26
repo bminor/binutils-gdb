@@ -650,8 +650,8 @@ tui_refresh_all_win (void)
 }
 
 
-/* Resize all the windows based on the the terminal size.  This
-   function gets called from within the readline sinwinch handler.  */
+/* Resize all the windows based on the terminal size.  This function
+   gets called from within the readline sinwinch handler.  */
 void
 tui_resize_all (void)
 {

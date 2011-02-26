@@ -105,7 +105,7 @@ bsd_uthread_check_magic (CORE_ADDR addr)
 #define BSD_UTHREAD_PS_RUNNING	0
 #define BSD_UTHREAD_PS_DEAD	18
 
-/* Address of the pointer to the the thread structure for the running
+/* Address of the pointer to the thread structure for the running
    thread.  */
 static CORE_ADDR bsd_uthread_thread_run_addr;
 

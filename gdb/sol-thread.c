@@ -204,7 +204,7 @@ td_err_string (td_err_e errcode)
   return buf;
 }
 
-/* Return the the libthread_db state string assicoated with STATECODE.
+/* Return the libthread_db state string assicoated with STATECODE.
    If STATECODE is unknown, return an appropriate message.  */
 
 static char *

@@ -1,5 +1,40 @@
 2011-02-25  Michael Snyder  <msnyder@vmware.com>
 
+	* arm-tdep.c: Fix typos in comments.
+	* bsd-uthread.c: Ditto.
+	* completer.c: Ditto.
+	* corelow.c: Ditto.
+	* cp-namespace.c: Ditto.
+	* cp-support.c: Ditto.
+	* cris-tdep.c: Ditto.
+	* dbxread.c: Ditto.
+	* dwarf2read.c: Ditto.
+	* frame.h: Ditto.
+	* gdbtypes.h: Ditto.
+	* inferior.h: Ditto.
+	* mdebugread.c: Ditto.
+	* mips-tdep.c: Ditto.
+	* ppc-linux-nat.c: Ditto.
+	* ppc-linux-tdep.c: Ditto.
+	* printcmd.c: Ditto.
+	* sol-thread.c: Ditto.
+	* solib-frv.c: Ditto.
+	* solist.h: Ditto.
+	* sparc64-tdep.c: Ditto.
+	* spu-tdep.c: Ditto.
+	* stabsread.c: Ditto.
+	* symfile.c: Ditto.
+	* valops.c: Ditto.
+	* varobj.c: Ditto.
+	* vax-nat.c: Ditto.
+	* python/py-block.c: Ditto.
+	* python/py-symbol.c: Ditto.
+	* python/py-symtab.c: Ditto.
+	* python/py-value.c: Ditto.
+	* tui/tui-win.c: Ditto.
+
+2011-02-25  Michael Snyder  <msnyder@vmware.com>
+
 	* inferior.c (print_inferior): Accept a string instead of an int
 	for requested_inferiors, and use get_number_or_range to parse it.
 	(info_inferiors_command): Pass args string to print_inferior.

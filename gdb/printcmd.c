@@ -333,8 +333,8 @@ print_formatted (struct value *val, int size,
       || TYPE_CODE (type) == TYPE_CODE_NAMESPACE)
     value_print (val, stream, options);
   else
-    /* User specified format, so don't look to the the type to
-       tell us what to do.  */
+    /* User specified format, so don't look to the type to tell us
+       what to do.  */
     val_print_scalar_formatted (type,
 				value_contents_for_printing (val),
 				value_embedded_offset (val),

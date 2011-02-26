@@ -719,7 +719,7 @@ cp_lookup_nested_type (struct type *parent_type,
 /* FIXME: carlton/2004-01-16: The problem that this is trying to
    address is that, unfortunately, sometimes NAME is wrong: it may not
    include the name of namespaces enclosing the type in question.
-   lookup_transparent_type gets called when the the type in question
+   lookup_transparent_type gets called when the type in question
    is a declaration, and we're trying to find its definition; but, for
    declarations, our type name deduction mechanism doesn't work.
    There's nothing we can do to fix this in general, I think, in the
@@ -752,10 +752,9 @@ cp_lookup_transparent_type (const char *name)
   return cp_lookup_transparent_type_loop (name, scope, 0);
 }
 
-/* Lookup the the type definition associated to NAME in
-   namespaces/classes containing SCOPE whose name is strictly longer
-   than LENGTH.  LENGTH must be the index of the start of a component
-   of SCOPE.  */
+/* Lookup the type definition associated to NAME in namespaces/classes
+   containing SCOPE whose name is strictly longer than LENGTH.  LENGTH
+   must be the index of the start of a component of SCOPE.  */
 
 static struct type *
 cp_lookup_transparent_type_loop (const char *name,

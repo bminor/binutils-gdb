@@ -1303,7 +1303,7 @@ varobj_set_value (struct varobj *var, char *expression)
      after assignment, and the first thing value_assign
      does is coerce the input.
      For example, if we are assigning an array to a pointer variable we
-     should compare the pointer with the the array's address, not with the
+     should compare the pointer with the array's address, not with the
      array's content.  */
   value = coerce_array (value);
 

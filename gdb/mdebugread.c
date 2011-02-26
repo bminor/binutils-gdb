@@ -3860,7 +3860,7 @@ parse_partial_symbols (struct objfile *objfile)
 }
 
 /* If the current psymbol has an enumerated type, we need to add
-   all the the enum constants to the partial symbol table.  */
+   all the enum constants to the partial symbol table.  */
 
 static void
 handle_psymbol_enumerators (struct objfile *objfile, FDR *fh, int stype,

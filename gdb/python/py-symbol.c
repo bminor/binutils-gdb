@@ -170,7 +170,7 @@ sympy_is_variable (PyObject *self, void *closure)
 /* Given a symbol, and a symbol_object that has previously been
    allocated and initialized, populate the symbol_object with the
    struct symbol data.  Also, register the symbol_object life-cycle
-   with the life-cycle of the the object file associated with this
+   with the life-cycle of the object file associated with this
    symbol, if needed.  */
 static void
 set_symbol (symbol_object *obj, struct symbol *symbol)

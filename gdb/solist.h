@@ -85,8 +85,8 @@ struct target_so_ops
     void (*relocate_section_addresses) (struct so_list *so,
                                         struct target_section *);
 
-    /* Free the the link map info and any other private data
-       structures associated with a so_list entry.  */
+    /* Free the link map info and any other private data structures
+       associated with a so_list entry.  */
     void (*free_so) (struct so_list *so);
 
     /* Reset or free private data structures not associated with

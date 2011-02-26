@@ -1112,7 +1112,7 @@ struct builtin_type
 {
   /* Integral types.  */
 
-  /* Implicit size/sign (based on the the architecture's ABI).  */
+  /* Implicit size/sign (based on the architecture's ABI).  */
   struct type *builtin_void;
   struct type *builtin_char;
   struct type *builtin_short;

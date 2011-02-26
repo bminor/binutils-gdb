@@ -2616,9 +2616,9 @@ find_overload_match (struct type **arg_types, int nargs,
     {
       const char *qualified_name = NULL;
 
-      /* If the the overload match is being search for both
-         as a method and non member function, the first argument
-         must now be dereferenced.  */
+      /* If the overload match is being search for both as a method
+         and non member function, the first argument must now be
+         dereferenced.  */
       if (method == BOTH)
 	arg_types[0] = TYPE_TARGET_TYPE (arg_types[0]);
 
@@ -2693,9 +2693,9 @@ find_overload_match (struct type **arg_types, int nargs,
       switch (compare_badness (func_badness, method_badness))
         {
 	  case 0: /* Top two contenders are equally good.  */
-	    /* FIXME: GDB does not support the general ambiguous
-	     case.  All candidates should be collected and presented
-	     the the user.  */
+	    /* FIXME: GDB does not support the general ambiguous case.
+	     All candidates should be collected and presented the
+	     user.  */
 	    error (_("Ambiguous overload resolution"));
 	    break;
 	  case 1: /* Incomparable top contenders.  */
@@ -3177,7 +3177,7 @@ value_aggregate_elt (struct type *curtype, char *name,
 }
 
 /* Compares the two method/function types T1 and T2 for "equality" 
-   with respect to the the methods' parameters.  If the types of the
+   with respect to the methods' parameters.  If the types of the
    two parameter lists are the same, returns 1; 0 otherwise.  This
    comparison may ignore any artificial parameters in T1 if
    SKIP_ARTIFICIAL is non-zero.  This function will ALWAYS skip

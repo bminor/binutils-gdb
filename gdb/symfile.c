@@ -1697,8 +1697,7 @@ get_section_index (struct objfile *objfile, char *section_name)
 
 /* Link SF into the global symtab_fns list.  Called on startup by the
    _initialize routine in each object file format reader, to register
-   information about each format the the reader is prepared to
-   handle.  */
+   information about each format the reader is prepared to handle.  */
 
 void
 add_symtab_fns (const struct sym_fns *sf)

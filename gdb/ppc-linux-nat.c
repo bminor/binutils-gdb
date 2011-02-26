@@ -264,7 +264,7 @@ typedef char gdb_vrregset_t[SIZEOF_VRREGS];
 
 typedef char gdb_vsxregset_t[SIZEOF_VSXREGS];
 
-/* On PPC processors that support the the Signal Processing Extension
+/* On PPC processors that support the Signal Processing Extension
    (SPE) APU, the general-purpose registers are 64 bits long.
    However, the ordinary Linux kernel PTRACE_PEEKUSER / PTRACE_POKEUSER
    ptrace calls only access the lower half of each register, to allow
@@ -275,7 +275,7 @@ typedef char gdb_vsxregset_t[SIZEOF_VSXREGS];
 
    GDB itself continues to claim the general-purpose registers are 32
    bits long.  It has unnamed raw registers that hold the upper halves
-   of the gprs, and the the full 64-bit SIMD views of the registers,
+   of the gprs, and the full 64-bit SIMD views of the registers,
    'ev0' -- 'ev31', are pseudo-registers that splice the top and
    bottom halves together.
 

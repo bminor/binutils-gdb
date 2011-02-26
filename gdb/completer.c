@@ -914,10 +914,10 @@ line_completion_function (const char *text, int matches,
 }
 
 /* Skip over the possibly quoted word STR (as defined by the quote
-   characters QUOTECHARS and the the word break characters
-   BREAKCHARS).  Returns pointer to the location after the "word".  If
-   either QUOTECHARS or BREAKCHARS is NULL, use the same values used
-   by the completer.  */
+   characters QUOTECHARS and the word break characters BREAKCHARS).
+   Returns pointer to the location after the "word".  If either
+   QUOTECHARS or BREAKCHARS is NULL, use the same values used by the
+   completer.  */
 
 char *
 skip_quoted_chars (char *str, char *quotechars, char *breakchars)

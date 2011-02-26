@@ -7155,8 +7155,9 @@ arm_extract_return_value (struct type *type, struct regcache *regs,
 	   || TYPE_CODE (type) == TYPE_CODE_REF
 	   || TYPE_CODE (type) == TYPE_CODE_ENUM)
     {
-      /* If the the type is a plain integer, then the access is
-	 straight-forward.  Otherwise we have to play around a bit more.  */
+      /* If the type is a plain integer, then the access is
+	 straight-forward.  Otherwise we have to play around a bit
+	 more.  */
       int len = TYPE_LENGTH (type);
       int regno = ARM_A1_REGNUM;
       ULONGEST tmp;

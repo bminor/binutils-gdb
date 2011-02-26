@@ -837,7 +837,7 @@ make_symbol_overload_list_adl_namespace (struct type *type,
       }
 }
 
-/* Adds the the overload list overload candidates for FUNC_NAME found
+/* Adds the overload list overload candidates for FUNC_NAME found
    through argument dependent lookup.  */
 
 struct symbol **

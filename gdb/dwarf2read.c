@@ -10594,7 +10594,7 @@ dwarf_decode_lines (struct line_header *lh, const char *comp_dir, bfd *abfd,
 	       address increment value corresponding to special opcode
 	       255.  I.e., this value is scaled by the minimum
 	       instruction length since special opcode 255 would have
-	       scaled the the increment.  */
+	       scaled the increment.  */
 	    case DW_LNS_const_add_pc:
 	      {
 		CORE_ADDR adjust = (255 - lh->opcode_base) / lh->line_range;

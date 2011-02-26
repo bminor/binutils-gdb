@@ -1312,7 +1312,7 @@ read_dbx_symtab (struct objfile *objfile)
 
          *) The assignment to namestring.
          *) The call to strchr.
-         *) The addition of a partial symbol the the two partial
+         *) The addition of a partial symbol the two partial
          symbol lists.  This last is a large section of code, so
          I've imbedded it in the following macro.  */
 
