@@ -624,22 +624,31 @@ detach_inferior_command (char *args, int from_tty)
   struct thread_info *tp;
 
   if (!args || !*args)
-    error (_("Requires argument (inferior id to detach)"));
+    error (_("Requires argument (inferior id(s) to detach)"));
 
-  num = parse_and_eval_long (args);
+  while (*args != '\0')
+    {
+      num = get_number_or_range (&args);
 
-  if (!valid_gdb_inferior_id (num))
-    error (_("Inferior ID %d not known."), num);
+      if (!valid_gdb_inferior_id (num))
+	{
+	  warning (_("Inferior ID %d not known."), num);
+	  continue;
+	}
 
-  pid = gdb_inferior_id_to_pid (num);
+      pid = gdb_inferior_id_to_pid (num);
 
-  tp = any_thread_of_process (pid);
-  if (!tp)
-    error (_("Inferior has no threads."));
+      tp = any_thread_of_process (pid);
+      if (!tp)
+	{
+	  warning (_("Inferior ID %d has no threads."), num);
+	  continue;
+	}
 
-  switch_to_thread (tp->ptid);
+      switch_to_thread (tp->ptid);
 
-  detach_command (NULL, from_tty);
+      detach_command (NULL, from_tty);
+    }
 }
 
 static void
@@ -649,22 +658,31 @@ kill_inferior_command (char *args, int from_tty)
   struct thread_info *tp;
 
   if (!args || !*args)
-    error (_("Requires argument (inferior id to kill)"));
+    error (_("Requires argument (inferior id(s) to kill)"));
 
-  num = parse_and_eval_long (args);
+  while (*args != '\0')
+    {
+      num = get_number_or_range (&args);
 
-  if (!valid_gdb_inferior_id (num))
-    error (_("Inferior ID %d not known."), num);
+      if (!valid_gdb_inferior_id (num))
+	{
+	  warning (_("Inferior ID %d not known."), num);
+	  continue;
+	}
 
-  pid = gdb_inferior_id_to_pid (num);
+      pid = gdb_inferior_id_to_pid (num);
 
-  tp = any_thread_of_process (pid);
-  if (!tp)
-    error (_("Inferior has no threads."));
+      tp = any_thread_of_process (pid);
+      if (!tp)
+	{
+	  warning (_("Inferior ID %d has no threads."), num);
+	  continue;
+	}
 
-  switch_to_thread (tp->ptid);
+      switch_to_thread (tp->ptid);
 
-  target_kill ();
+      target_kill ();
+    }
 
   bfd_cache_close_all ();
 }
@@ -740,19 +758,34 @@ remove_inferior_command (char *args, int from_tty)
   int num;
   struct inferior *inf;
 
-  num = parse_and_eval_long (args);
-  inf = find_inferior_id (num);
+  if (args == NULL || *args == '\0')
+    error (_("Requires an argument (inferior id(s) to remove)"));
 
-  if (inf == NULL)
-    error (_("Inferior ID %d not known."), num);
+  while (*args != '\0')
+    {
+      num = get_number_or_range (&args);
+      inf = find_inferior_id (num);
 
-  if (inf == current_inferior ())
-    error (_("Can not remove current symbol inferior."));
+      if (inf == NULL)
+	{
+	  warning (_("Inferior ID %d not known."), num);
+	  continue;
+	}
+
+      if (inf == current_inferior ())
+	{
+	  warning (_("Can not remove current symbol inferior %d."), num);
+	  continue;
+	}
     
-  if (inf->pid != 0)
-    error (_("Can not remove an active inferior."));
+      if (inf->pid != 0)
+	{
+	  warning (_("Can not remove active inferior %d."), num);
+	  continue;
+	}
 
-  delete_inferior_1 (inf, 1);
+      delete_inferior_1 (inf, 1);
+    }
 }
 
 struct inferior *
@@ -1048,13 +1081,13 @@ initialize_inferiors (void)
   add_com ("add-inferior", no_class, add_inferior_command, _("\
 Add a new inferior.\n\
 Usage: add-inferior [-copies <N>] [-exec <FILENAME>]\n\
-N is the optional number of inferior to add, default is 1.\n\
+N is the optional number of inferiors to add, default is 1.\n\
 FILENAME is the file name of the executable to use\n\
 as main program."));
 
-  add_com ("remove-inferior", no_class, remove_inferior_command, _("\
-Remove inferior ID.\n\
-Usage: remove-inferior ID"));
+  add_com ("remove-inferiors", no_class, remove_inferior_command, _("\
+Remove inferior ID (or list of IDs).\n\
+Usage: remove-inferiors ID..."));
 
   add_com ("clone-inferior", no_class, clone_inferior_command, _("\
 Clone inferior ID.\n\
@@ -1064,12 +1097,12 @@ executable loaded as the copied inferior.  If -copies is not specified,\n\
 adds 1 copy.  If ID is not specified, it is the current inferior\n\
 that is cloned."));
 
-  add_cmd ("inferior", class_run, detach_inferior_command, _("\
-Detach from inferior ID."),
+  add_cmd ("inferiors", class_run, detach_inferior_command, _("\
+Detach from inferior ID (or list of IDS)."),
 	   &detachlist);
 
-  add_cmd ("inferior", class_run, kill_inferior_command, _("\
-Kill inferior ID."),
+  add_cmd ("inferiors", class_run, kill_inferior_command, _("\
+Kill inferior ID (or list of IDs)."),
 	   &killlist);
 
   add_cmd ("inferior", class_run, inferior_command, _("\

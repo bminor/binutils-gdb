@@ -2465,7 +2465,7 @@ You can get multiple executables into a debugging session via the
 systems @value{GDBN} can add inferiors to the debug session
 automatically by following calls to @code{fork} and @code{exec}.  To
 remove inferiors from the debugging session use the
-@w{@code{remove-inferior}} command.
+@w{@code{remove-inferiors}} command.
 
 @table @code
 @kindex add-inferior
@@ -2498,37 +2498,37 @@ Added inferior 2.
 
 You can now simply switch focus to inferior 2 and run it.
 
-@kindex remove-inferior
-@item remove-inferior @var{infno}
-Removes the inferior @var{infno}.  It is not possible to remove an
-inferior that is running with this command.  For those, use the
-@code{kill} or @code{detach} command first.
+@kindex remove-inferiors
+@item remove-inferiors @var{infno}@dots{}
+Removes the inferior or inferiors @var{infno}@dots{}.  It is not
+possible to remove an inferior that is running with this command.  For
+those, use the @code{kill} or @code{detach} command first.
 
 @end table
 
 To quit debugging one of the running inferiors that is not the current
 inferior, you can either detach from it by using the @w{@code{detach
 inferior}} command (allowing it to run independently), or kill it
-using the @w{@code{kill inferior}} command:
+using the @w{@code{kill inferiors}} command:
 
 @table @code
-@kindex detach inferior @var{infno}
-@item detach inferior @var{infno}
-Detach from the inferior identified by @value{GDBN} inferior number
-@var{infno}.  Note that the inferior's entry still stays on the list
-of inferiors shown by @code{info inferiors}, but its Description will
-show @samp{<null>}.
+@kindex detach inferiors @var{infno}@dots{}
+@item detach inferior @var{infno}@dots{}
+Detach from the inferior or inferiors identified by @value{GDBN}
+inferior number(s) @var{infno}@dots.  Note that the inferior's entry
+still stays on the list of inferiors shown by @code{info inferiors},
+but its Description will show @samp{<null>}.
 
-@kindex kill inferior @var{infno}
-@item kill inferior @var{infno}
-Kill the inferior identified by @value{GDBN} inferior number
-@var{infno}.  Note that the inferior's entry still stays on the list
-of inferiors shown by @code{info inferiors}, but its Description will
-show @samp{<null>}.
+@kindex kill inferiors @var{infno}@dots{}
+@item kill inferiors @var{infno}@dots{}
+Kill the inferior or inferiors identified by @value{GDBN} inferior
+number(s) @var{infno}@dots{}.  Note that the inferior's entry still
+stays on the list of inferiors shown by @code{info inferiors}, but its
+Description will show @samp{<null>}.
 @end table
 
 After the successful completion of a command such as @code{detach},
-@code{detach inferior}, @code{kill} or @code{kill inferior}, or after
+@code{detach inferiors}, @code{kill} or @code{kill inferiors}, or after
 a normal process exit, the inferior is still valid and listed with
 @code{info inferiors}, ready to be restarted.
 
@@ -2986,8 +2986,8 @@ to another by using the @code{inferior} command (@pxref{Inferiors and
 Programs, ,Debugging Multiple Inferiors and Programs}).
 
 To quit debugging one of the forked processes, you can either detach
-from it by using the @w{@code{detach inferior}} command (allowing it
-to run independently), or kill it using the @w{@code{kill inferior}}
+from it by using the @w{@code{detach inferiors}} command (allowing it
+to run independently), or kill it using the @w{@code{kill inferiors}}
 command.  @xref{Inferiors and Programs, ,Debugging Multiple Inferiors
 and Programs}.
 
