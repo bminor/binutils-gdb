@@ -134,7 +134,10 @@ require_data (char *p, int p_len, char **data, int *data_len)
     }
 
   if (escaped)
-    return -1;
+    {
+      xfree (data);
+      return -1;
+    }
 
   *data_len = output_index;
   return 0;

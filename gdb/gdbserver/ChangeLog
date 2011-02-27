@@ -1,3 +1,8 @@
+2011-02-27  Michael Snyder  <msnyder@vmware.com>
+
+	* hostio.c (require_data): Free malloc memory before returning
+	error.
+
 2011-02-26  Michael Snyder  <msnyder@vmware.com>
 
 	* linux-low.c (list_threads): Call closedir for dirent.
