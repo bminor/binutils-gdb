@@ -4518,6 +4518,7 @@ list_threads (int pid, struct buffer *buffer, char **cores)
 		}
 	    }
 	}
+      closedir (dir);
     }
 
   if (cores)
