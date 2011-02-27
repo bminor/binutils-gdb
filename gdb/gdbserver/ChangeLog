@@ -1,5 +1,7 @@
 2011-02-27  Michael Snyder  <msnyder@vmware.com>
 
+	* linux-low.c (linux_xfer_siginfo): Fix fencepost error.
+
 	* linux-amd64-ipa.c (gdb_agent_get_raw_reg): Fix fencepost error
 	in comparison.
 
