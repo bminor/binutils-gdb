@@ -1,5 +1,7 @@
 2011-02-26  Michael Snyder  <msnyder@vmware.com>
 
+	* breakpoint.c (reattach_breakpoints): Avoid resource leak (ui_file).
+
 	* maint.c (maintenance_do_deprecate): Plug a memory leak.
 
 	* dwarf2loc.c (insert_bits): Avoid shadowing a function param

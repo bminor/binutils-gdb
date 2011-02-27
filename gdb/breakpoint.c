@@ -1989,7 +1989,7 @@ reattach_breakpoints (int pid)
   struct cleanup *old_chain;
   struct bp_location *bl, **blp_tmp;
   int val;
-  struct ui_file *tmp_error_stream = mem_fileopen ();
+  struct ui_file *tmp_error_stream;
   int dummy1 = 0, dummy2 = 0;
   struct inferior *inf;
   struct thread_info *tp;
@@ -2003,6 +2003,7 @@ reattach_breakpoints (int pid)
 
   inferior_ptid = tp->ptid;
 
+  tmp_error_stream = mem_fileopen ();
   make_cleanup_ui_file_delete (tmp_error_stream);
 
   ALL_BP_LOCATIONS (bl, blp_tmp)
