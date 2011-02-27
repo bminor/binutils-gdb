@@ -45,7 +45,7 @@ dynamic_array_type (struct type *type, const gdb_byte *valaddr,
       struct type *elttype;
       struct type *true_type;
       struct type *ptr_type;
-      struct value *val;
+      struct value *ival;
       int length;
 
       length = unpack_field_as_long (type, valaddr + embedded_offset, 0);
@@ -58,12 +58,12 @@ dynamic_array_type (struct type *type, const gdb_byte *valaddr,
       true_type = check_typedef (elttype);
 
       true_type = lookup_array_range_type (true_type, 0, length - 1);
-      val = value_at (true_type, addr);
+      ival = value_at (true_type, addr);
 
       return d_val_print (true_type,
-			  value_contents_for_printing (val),
-			  value_embedded_offset (val), addr,
-			  stream, recurse + 1, val, options);
+			  value_contents_for_printing (ival),
+			  value_embedded_offset (ival), addr,
+			  stream, recurse + 1, ival, options);
     }
   return -1;
 }

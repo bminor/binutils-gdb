@@ -1,5 +1,10 @@
 2011-02-27  Michael Snyder  <msnyder@vmware.com>
 
+	* d-valprint.c (dynamic_array_type): Avoid shadowing a function
+	param with a local variable of the same name.
+
+2011-02-27  Michael Snyder  <msnyder@vmware.com>
+
 	* value.c (value_from_history_ref): New function.
 	* value.h (value_from_history_ref): Export.
 	* cli/cli-utils.c (get_number_trailer): Use value_from_history_ref
