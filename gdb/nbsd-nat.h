@@ -21,7 +21,7 @@
 #ifndef NBSD_NAT_H
 #define NBSD_NAT_H
 
-/* Return a the name of file that can be opened to get the symbols for
+/* Return the name of a file that can be opened to get the symbols for
    the child process identified by PID.  */
 
 extern char *nbsd_pid_to_exec_file (int pid);

@@ -126,7 +126,7 @@ struct dwarf_expr_context
   /* Location of the value.  */
   enum dwarf_value_location location;
 
-  /* For DWARF_VALUE_LITERAL, a the current literal value's length and
+  /* For DWARF_VALUE_LITERAL, the current literal value's length and
      data.  For DWARF_VALUE_IMPLICIT_POINTER, LEN is the offset of the
      target DIE.  */
   ULONGEST len;

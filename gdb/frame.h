@@ -344,7 +344,7 @@ void set_current_sal_from_frame (struct frame_info *, int);
    low-level unwinder, the stack part [typically] being the
    top-of-stack of the previous frame, and the function part being the
    function's start address.  Since the correct identification of a
-   frameless function requires both the a stack and function address,
+   frameless function requires both a stack and function address,
    the old get_frame_base method was not sufficient.
 
    get_frame_base_address: get_frame_locals_address:

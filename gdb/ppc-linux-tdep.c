@@ -167,7 +167,7 @@
    word) to be written back to the now initialized PLT entry thus
    destroying a portion of the initialization that had occurred only a
    short time ago.  When execution continued, the zero word would be
-   executed as an instruction an an illegal instruction trap was
+   executed as an instruction an illegal instruction trap was
    generated instead.  (0 is not a legal instruction.)
 
    The fix for this problem was fairly straightforward.  The function

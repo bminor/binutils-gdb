@@ -794,7 +794,7 @@ ps_get_thread_area (const struct ps_prochandle *ph,
      call.
 
      Is this function needed?  I'm guessing that the `base' is the
-     address of a a descriptor that libthread_db uses to find the
+     address of a descriptor that libthread_db uses to find the
      thread local address base that GDB needs.  Perhaps that
      descriptor is defined by the ABI.  Anyway, given that
      libthread_db calls this function without prompting (gdb

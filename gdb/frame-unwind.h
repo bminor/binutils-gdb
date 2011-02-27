@@ -148,7 +148,7 @@ struct frame_unwind
    search list (so it is sniffed before previously registered
    unwinders).  By using a prepend, later calls can install unwinders
    that override earlier calls.  This allows, for instance, an OSABI
-   to install a a more specific sigtramp unwinder that overrides the
+   to install a more specific sigtramp unwinder that overrides the
    traditional brute-force unwinder.  */
 extern void frame_unwind_prepend_unwinder (struct gdbarch *,
 					   const struct frame_unwind *);

@@ -1,3 +1,21 @@
+2011-02-27  Michael Snyder  <msnyder@vmware.com>
+
+	* darwin-nat-info.c: Fix comment typo.
+	* dwarf2expr.h: Ditto.
+	* fbsd-nat.c: Ditto.
+	* fbsd-nat.h: Ditto.
+	* frame-unwind.h: Ditto.
+	* frame.h: Ditto.
+	* hppa-hpux-tdep.c: Ditto.
+	* i386-linux-nat.c: Ditto.
+	* linux-nat.c: Ditto.
+	* nbsd-nat.c: Ditto.
+	* nbsd-nat.h: Ditto.
+	* ppc-linux-tdep.c: Ditto.
+	* serial.c: Ditto.
+	* ui-file.h: Ditto.
+	* tui/tui-winsource.c: Ditto.
+
 2011-02-26  Michael Snyder  <msnyder@vmware.com>
 
 	* breakpoint.c (reattach_breakpoints): Avoid resource leak (ui_file).

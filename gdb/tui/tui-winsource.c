@@ -642,7 +642,7 @@ tui_alloc_source_buffer (struct tui_win_info *win_info)
 }
 
 
-/* Answer whether the a particular line number or address is displayed
+/* Answer whether a particular line number or address is displayed
    in the current source window.  */
 int
 tui_line_is_displayed (int line, 
@@ -673,7 +673,7 @@ tui_line_is_displayed (int line,
 }
 
 
-/* Answer whether the a particular line number or address is displayed
+/* Answer whether a particular line number or address is displayed
    in the current source window.  */
 int
 tui_addr_is_displayed (CORE_ADDR addr, 

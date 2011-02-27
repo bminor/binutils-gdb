@@ -817,7 +817,7 @@ info_mach_exceptions_command (char *args, int from_tty)
 	}
       else if (strcmp (args, "host") == 0)
 	{
-	  /* FIXME: This need a the privilegied host port!  */
+	  /* FIXME: This need a privilegied host port!  */
 	  kret = host_get_exception_ports
 	    (darwin_host_self, EXC_MASK_ALL, info.masks,
 	     &info.count, info.ports, info.behaviors, info.flavors);

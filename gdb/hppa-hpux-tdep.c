@@ -1073,7 +1073,7 @@ static CORE_ADDR
 hppa_hpux_find_dummy_bpaddr (CORE_ADDR addr)
 {
   /* In order for us to restore the space register to its starting state, 
-     we need the dummy trampoline to return to the an instruction address in 
+     we need the dummy trampoline to return to an instruction address in 
      the same space as where we started the call.  We used to place the 
      breakpoint near the current pc, however, this breaks nested dummy calls 
      as the nested call will hit the breakpoint address and terminate 

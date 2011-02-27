@@ -34,7 +34,7 @@
 #include "elf-bfd.h"
 #include "fbsd-nat.h"
 
-/* Return a the name of file that can be opened to get the symbols for
+/* Return the name of a file that can be opened to get the symbols for
    the child process identified by PID.  */
 
 char *

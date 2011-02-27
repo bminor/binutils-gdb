@@ -106,7 +106,7 @@ extern struct ui_file *mem_fileopen (void);
 
 
 
-/* Open/create a an STDIO based UI_FILE using the already open FILE.  */
+/* Open/create a STDIO based UI_FILE using the already open FILE.  */
 extern struct ui_file *stdio_fileopen (FILE *file);
 
 /* Open NAME returning an STDIO based UI_FILE.  */

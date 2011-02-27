@@ -2828,7 +2828,7 @@ status_callback (struct lwp_info *lp, void *data)
   if (lp->waitstatus.kind != TARGET_WAITKIND_IGNORE)
     {
       /* A ptrace event, like PTRACE_FORK|VFORK|EXEC, syscall event,
-	 or a a pending process exit.  Note that `W_EXITCODE(0,0) ==
+	 or a pending process exit.  Note that `W_EXITCODE(0,0) ==
 	 0', so a clean process exit can not be stored pending in
 	 lp->status, it is indistinguishable from
 	 no-pending-status.  */
