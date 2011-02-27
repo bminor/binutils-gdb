@@ -3403,7 +3403,7 @@ rbreak_command (char *regexp, int from_tty)
   struct cleanup *old_chain;
   char *string = NULL;
   int len = 0;
-  char **files = NULL;
+  char **files = NULL, *file_name;
   int nfiles = 0;
 
   if (regexp)
@@ -3413,7 +3413,6 @@ rbreak_command (char *regexp, int from_tty)
       if (colon && *(colon + 1) != ':')
 	{
 	  int colon_index;
-	  char * file_name;
 
 	  colon_index = colon - regexp;
 	  file_name = alloca (colon_index + 1);

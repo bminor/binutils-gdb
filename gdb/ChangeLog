@@ -1,5 +1,8 @@
 2011-02-27  Michael Snyder  <msnyder@vmware.com>
 
+	* symtab.c (rbreak_command): Move variable 'file_name' to 
+	outer scope.
+
 	* d-valprint.c (dynamic_array_type): Avoid shadowing a function
 	param with a local variable of the same name.
 
