@@ -23,8 +23,8 @@
 /* *PP is a string denoting a number.  Get the number of the.  Advance
    *PP after the string and any trailing whitespace.
 
-   Currently the string can either be a number or "$" followed by the
-   name of a convenience variable.  */
+   Currently the string can either be a number,  or "$" followed by the
+   name of a convenience variable, or ("$" or "$$") followed by digits.  */
 
 extern int get_number (char **);
 

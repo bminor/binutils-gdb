@@ -236,6 +236,129 @@ gdb_test_multiple "info break 3-5" "info break 3-5" {
     }
 }
 
+#
+# Test disable/enable with arguments
+#
+
+# Test with value history
+
+gdb_test "print 1" "" ""
+gdb_test "print 2" "" ""
+gdb_test "print 3" "" ""
+gdb_test "print 4" "" ""
+gdb_test "print 5" "" ""
+gdb_test "print 6" "" ""
+
+# $2 is 2 and $$ is 5
+gdb_test_no_output "disable \$2 \$\$" "disable using history values"
+
+set see1 0
+set see2 0
+set see3 0
+set see4 0
+set see5 0
+set see6 0
+
+gdb_test_multiple "info break" "check disable with history values" {
+    -re "1\[\t \]+breakpoint *keep y.* in main at .*:$main_line\[^\r\n\]*" {
+	set see1 1
+	exp_continue
+    }
+    -re "2\[\t \]+breakpoint *keep n\[^\r\n\]* in marker2 at \[^\r\n\]*" {
+	set see2 1
+	exp_continue
+    }
+    -re "3\[\t \]+breakpoint *keep y\[^\r\n\]*$bp_location7\[^\r\n\]*" {
+	set see3 1
+	exp_continue
+    }
+    -re "4\[\t \]+breakpoint *keep y\[^\r\n\]*$bp_location1\[^\r\n\]*" {
+	set see4 1
+	exp_continue
+    }
+    -re "5\[\t \]+breakpoint *keep n\[^\r\n\]*$bp_location1\[^\r\n\]*" {
+	set see5 1
+	exp_continue
+    }
+    -re "6\[\t \]+breakpoint *keep y\[^\r\n\]*$bp_location2\[^\r\n\]*" {
+	set see6 1
+	exp_continue
+    }
+    -re ".*$gdb_prompt $" {
+	if { $see1 && $see2 && $see3 && $see4 && $see5 && $see6 } then {
+	    pass "check disable with history values"
+	} else {
+	    fail "check disable with history values"
+	}
+    }
+}
+
+gdb_test "enable" "" ""
+gdb_test "set \$foo = 3" "" ""
+gdb_test "set \$bar = 6" "" ""
+gdb_test_no_output "disable \$foo \$bar" "disable with convenience values"
+
+set see1 0
+set see2 0
+set see3 0
+set see4 0
+set see5 0
+set see6 0
+
+gdb_test_multiple "info break" "check disable with convenience values" {
+    -re "1\[\t \]+breakpoint *keep y.* in main at .*:$main_line\[^\r\n\]*" {
+	set see1 1
+	exp_continue
+    }
+    -re "2\[\t \]+breakpoint *keep y\[^\r\n\]* in marker2 at \[^\r\n\]*" {
+	set see2 1
+	exp_continue
+    }
+    -re "3\[\t \]+breakpoint *keep n\[^\r\n\]*$bp_location7\[^\r\n\]*" {
+	set see3 1
+	exp_continue
+    }
+    -re "4\[\t \]+breakpoint *keep y\[^\r\n\]*$bp_location1\[^\r\n\]*" {
+	set see4 1
+	exp_continue
+    }
+    -re "5\[\t \]+breakpoint *keep y\[^\r\n\]*$bp_location1\[^\r\n\]*" {
+	set see5 1
+	exp_continue
+    }
+    -re "6\[\t \]+breakpoint *keep n\[^\r\n\]*$bp_location2\[^\r\n\]*" {
+	set see6 1
+	exp_continue
+    }
+    -re ".*$gdb_prompt $" {
+	if { $see1 && $see2 && $see3 && $see4 && $see5 && $see6 } then {
+	    pass "check disable with convenience values"
+	} else {
+	    fail "check disable with convenience values"
+	}
+    }
+}
+
+# test with bad values
+
+gdb_test "enable" "" ""
+gdb_test "disable 10" "No breakpoint number 10." \
+    "disable non-existent breakpoint 10"
+
+gdb_test "set \$baz 1.234"
+gdb_test "disable \$baz" \
+    "Convenience variable must have integer value.*" \
+    "disable with non-integer convenience var"
+gdb_test "disable \$grbx" \
+    "Convenience variable must have integer value.*" \
+    "disable with non-existent convenience var"
+gdb_test "disable \$10" \
+    "History has not yet reached .10." \
+    "disable with non-existent history value"
+gdb_test "disable \$1foo" \
+    "Convenience variable must have integer value.*" \
+    "disable with badly formed history value"
+
 # FIXME: The rest of this test doesn't work with anything that can't
 # handle arguments.
 # Huh? There doesn't *appear* to be anything that passes arguments

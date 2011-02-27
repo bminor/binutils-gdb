@@ -41,7 +41,7 @@
 #include "cli/cli-decode.h"
 #include "exceptions.h"
 #include "python/python.h"
-
+#include <ctype.h>
 #include "tracepoint.h"
 
 /* Prototypes for exported functions.  */
@@ -2989,6 +2989,59 @@ value_from_decfloat (struct type *type, const gdb_byte *dec)
 
   memcpy (value_contents_raw (val), dec, TYPE_LENGTH (type));
   return val;
+}
+
+/* Extract a value from the history file.  Input will be of the form
+   $digits or $$digits.  See block comment above 'write_dollar_variable'
+   for details.  */
+
+struct value *
+value_from_history_ref (char *h, char **endp)
+{
+  int index, len;
+
+  if (h[0] == '$')
+    len = 1;
+  else
+    return NULL;
+
+  if (h[1] == '$')
+    len = 2;
+
+  /* Find length of numeral string.  */
+  for (; isdigit (h[len]); len++)
+    ;
+
+  /* Make sure numeral string is not part of an identifier.  */
+  if (h[len] == '_' || isalpha (h[len]))
+    return NULL;
+
+  /* Now collect the index value.  */
+  if (h[1] == '$')
+    {
+      if (len == 2)
+	{
+	  /* For some bizarre reason, "$$" is equivalent to "$$1", 
+	     rather than to "$$0" as it ought to be!  */
+	  index = -1;
+	  *endp += len;
+	}
+      else
+	index = -strtol (&h[2], endp, 10);
+    }
+  else
+    {
+      if (len == 1)
+	{
+	  /* "$" is equivalent to "$0".  */
+	  index = 0;
+	  *endp += len;
+	}
+      else
+	index = strtol (&h[1], endp, 10);
+    }
+
+  return access_value_history (index);
 }
 
 struct value *

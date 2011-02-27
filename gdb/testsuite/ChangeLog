@@ -1,11 +1,11 @@
+2011-02-27  Michael Snyder  <msnyder@vmware.com>
+
+	* gdb.multi/base.exp: Add test for remove-inferiors.
+
 2011-02-26  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.python/py-frame.exp: Simplify the initialization phase
 	using prepare_for_testing.
-
-2011-02-25  Michael Snyder  <msnyder@vmware.com>
-
-	* gdb.multi/base.exp: Add test for remove-inferiors.
 
 2011-02-25  Michael Snyder  <msnyder@vmware.com>
 
@@ -23,6 +23,11 @@
 	* gdb.dwarf2/dw2-ranges2.c: ... here, convert it to C.
 	* gdb.dwarf2/dw2-ranges3.S: Rename to ...
 	* gdb.dwarf2/dw2-ranges3.c: ... here, convert it to C.
+
+2011-02-24  Michael Snyder  <msnyder@vmware.com>
+
+	* gdb.base/break.exp: Add tests for delete breakpoints using
+	convenience variables and value history references.
 
 2011-02-24  Michael Snyder  <msnyder@vmware.com>
 

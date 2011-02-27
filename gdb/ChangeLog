@@ -1,5 +1,21 @@
 2011-02-27  Michael Snyder  <msnyder@vmware.com>
 
+	* value.c (value_from_history_ref): New function.
+	* value.h (value_from_history_ref): Export.
+	* cli/cli-utils.c (get_number_trailer): Use value_from_history_ref
+	to parse value history references.
+	* cli/cli-utils.h (get_number_trailer): Update comment.
+
+2011-02-27  Michael Snyder  <msnyder@vmware.com>
+
+	* inferior.c (detach_inferior_command): Use get_number_or_range.
+	(kill_inferior_command): Ditto.
+	(remove_inferior_command): Ditto.
+	(initialize_inferiors): Make command names plural.
+	Update help strings.
+
+2011-02-27  Michael Snyder  <msnyder@vmware.com>
+
 	* darwin-nat-info.c: Fix comment typo.
 	* dwarf2expr.h: Ditto.
 	* fbsd-nat.c: Ditto.
@@ -75,14 +91,6 @@
 	* python/py-symtab.c: Ditto.
 	* python/py-value.c: Ditto.
 	* tui/tui-win.c: Ditto.
-
-2011-02-25  Michael Snyder  <msnyder@vmware.com>
-
-	* inferior.c (detach_inferior_command): Use get_number_or_range.
-	(kill_inferior_command): Ditto.
-	(remove_inferior_command): Ditto.
-	(initialize_inferiors): Make command names plural.
-	Update help strings.
 
 2011-02-25  Michael Snyder  <msnyder@vmware.com>
 

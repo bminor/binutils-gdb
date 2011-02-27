@@ -1,4 +1,4 @@
-2011-02-25  Michael Snyder  <msnyder@vmware.com>
+2011-02-27  Michael Snyder  <msnyder@vmware.com>
 
 	* gdb.texinfo (Inferiors and Programs): Update commands to show 
 	that they can accept multiple arguments.
