@@ -359,6 +359,7 @@ queue_middle_tasks(const General_options& options,
            p != input_objects->relobj_end();
            ++p)
         {
+          Task_lock_obj<Object> tlo(task, *p);
           (*p)->layout(symtab, layout, NULL);
         }
     }

@@ -125,8 +125,17 @@ Copy_relocs<sh_type, size, big_endian>::emit_copy_reloc(
   bool is_ordinary;
   unsigned int shndx = sym->shndx(&is_ordinary);
   gold_assert(is_ordinary);
-  typename elfcpp::Elf_types<size>::Elf_WXword addralign =
-    sym->object()->section_addralign(shndx);
+  typename elfcpp::Elf_types<size>::Elf_WXword addralign;
+
+  {
+    // Lock the object so we can read from it.  This is only called
+    // single-threaded from scan_relocs, so it is OK to lock.
+    // Unfortunately we have no way to pass in a Task token.
+    const Task* dummy_task = reinterpret_cast<const Task*>(-1);
+    Object* obj = sym->object();
+    Task_lock_obj<Object> tl(dummy_task, obj);
+    addralign = obj->section_addralign(shndx);
+  }
 
   typename Sized_symbol<size>::Value_type value = sym->value();
   while ((value & (addralign - 1)) != 0)

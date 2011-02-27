@@ -347,6 +347,12 @@ Mapfile::print_discarded_sections(const Input_objects* input_objects)
        ++p)
     {
       Relobj* relobj = *p;
+      // Lock the object so we can read from it.  This is only called
+      // single-threaded from Layout_task_runner, so it is OK to lock.
+      // Unfortunately we have no way to pass in a Task token.
+      const Task* dummy_task = reinterpret_cast<const Task*>(-1);
+      Task_lock_obj<Object> tl(dummy_task, relobj);
+
       unsigned int shnum = relobj->shnum();
       for (unsigned int i = 0; i < shnum; ++i)
 	{
