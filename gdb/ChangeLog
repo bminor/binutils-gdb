@@ -1,5 +1,8 @@
 2011-02-26  Michael Snyder  <msnyder@vmware.com>
 
+	* dwarf2loc.c (insert_bits): Avoid shadowing a function param
+	with a local variable of the same name.
+
 	* i387-tdep.c (i387_supply_fxsave): Avoid shadowing a function
 	param with a local variable of the same name.
 	(i387_supply_xsave): Ditto.

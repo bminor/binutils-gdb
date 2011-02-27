@@ -422,7 +422,7 @@ insert_bits (unsigned int datum,
 {
   unsigned int mask;
 
-  gdb_assert (dest_offset_bits >= 0 && dest_offset_bits + nbits <= 8);
+  gdb_assert (dest_offset_bits + nbits <= 8);
 
   mask = (1 << nbits) - 1;
   if (bits_big_endian)
@@ -1159,7 +1159,7 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 	case DWARF_VALUE_LITERAL:
 	  {
 	    bfd_byte *contents;
-	    const bfd_byte *data;
+	    const bfd_byte *ldata;
 	    size_t n = ctx->len;
 
 	    if (byte_offset + TYPE_LENGTH (type) > n)
@@ -1168,12 +1168,12 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 	    retval = allocate_value (type);
 	    contents = value_contents_raw (retval);
 
-	    data = ctx->data + byte_offset;
+	    ldata = ctx->data + byte_offset;
 	    n -= byte_offset;
 
 	    if (n > TYPE_LENGTH (type))
 	      n = TYPE_LENGTH (type);
-	    memcpy (contents, data, n);
+	    memcpy (contents, ldata, n);
 	  }
 	  break;
 
