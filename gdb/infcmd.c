@@ -2907,7 +2907,7 @@ This command is a combination of tbreak and jump."));
   if (xdb_commands)
     add_com_alias ("g", "go", class_run, 1);
 
-  c = add_com ("continue", class_run, continue_command, _("\
+  add_com ("continue", class_run, continue_command, _("\
 Continue program being debugged, after signal or breakpoint.\n\
 If proceeding from breakpoint, a number N may be used as an argument,\n\
 which means to set the ignore count of that breakpoint to N - 1 (so that\n\
@@ -2941,8 +2941,8 @@ You may specify arguments to give to your program, just as with the\n\
 \"run\" command."));
   set_cmd_completer (c, filename_completer);
 
-  c = add_com ("interrupt", class_run, interrupt_target_command,
-	       _("Interrupt the execution of the debugged program.\n\
+  add_com ("interrupt", class_run, interrupt_target_command,
+	   _("Interrupt the execution of the debugged program.\n\
 If non-stop mode is enabled, interrupt only the current thread,\n\
 otherwise all the threads in the program are stopped.  To \n\
 interrupt all running threads in non-stop mode, use the -a option."));
