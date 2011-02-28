@@ -10469,7 +10469,7 @@ frames, oldest first, until there is enough room to continue
 collecting.  This is especially useful if your tracepoints are being
 hit too often, and your trace gets terminated prematurely because the
 buffer is full.  To ask for a circular trace buffer, simply set
-@samp{circular_trace_buffer} to on.  You can set this at any time,
+@samp{circular-trace-buffer} to on.  You can set this at any time,
 including during tracing; if the agent can do it, it will change
 buffer handling on the fly, otherwise it will not take effect until
 the next run.
