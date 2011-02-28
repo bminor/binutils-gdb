@@ -920,6 +920,7 @@ write_object_renaming (struct block *orig_left_context,
         break;
       case 'L':
 	slice_state = LOWER_BOUND;
+	/* FALLTHROUGH */
       case 'S':
 	renaming_expr += 1;
 	if (isdigit (*renaming_expr))

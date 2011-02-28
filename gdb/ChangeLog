@@ -1,3 +1,8 @@
+2011-02-28  Joel Brobecker  <brobecker@adacore.com>
+
+	From Michael Snyder  <msnyder@vmware.com>
+	* ada-exp.y (write_object_renaming): Add FALLTHROUGH comment.
+
 2011-02-27  Michael Snyder  <msnyder@vmware.com>
 
 	* objc-lang.c (selectors_info): Prevent string overrun.
