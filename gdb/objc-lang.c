@@ -720,7 +720,9 @@ selectors_info (char *regexp, int from_tty)
 	strcpy(myregexp, ".*]");
       else
 	{
-	  strncpy(myregexp, regexp, sizeof (myregexp) - 1);
+	  if (sizeof (myregexp) < strlen (regexp) + 1)
+	    error (_("Regexp is too long: %s"), regexp);
+	  strcpy(myregexp, regexp);
 	  if (myregexp[strlen(myregexp) - 1] == '$') /* end of selector */
 	    myregexp[strlen(myregexp) - 1] = ']';    /* end of method name */
 	  else

@@ -1,3 +1,7 @@
+2011-02-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* objc-lang.c (selectors_info): Error on too long REGEXP.
+
 2011-02-28  Michael Snyder  <msnyder@vmware.com>
 
 	* linux-record.c (record_linux_system_call): Add missing
