@@ -1,5 +1,11 @@
 2011-02-28  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* breakpoint.c (print_one_breakpoint_location): Remove unused
+	argument PRINT_ADDRESS_BITS.  Update callers.
+	(print_one_breakpoint): Likewise.
+
+2011-02-28  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* breakpoint.c (wrap_indent_at_field): New function.
 	(print_breakpoint_location): Use it instead of WRAP_INDENT argument.
 	Allocate ui_stream locally instead of using STB argument.

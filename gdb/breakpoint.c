@@ -4708,7 +4708,6 @@ print_one_breakpoint_location (struct breakpoint *b,
 			       struct bp_location *loc,
 			       int loc_number,
 			       struct bp_location **last_loc,
-			       int print_address_bits,
 			       int allflag)
 {
   struct command_line *l;
@@ -4999,11 +4998,9 @@ print_one_breakpoint_location (struct breakpoint *b,
 static void
 print_one_breakpoint (struct breakpoint *b,
 		      struct bp_location **last_loc, 
-		      int print_address_bits,
 		      int allflag)
 {
-  print_one_breakpoint_location (b, NULL, 0, last_loc,
-				 print_address_bits, allflag);
+  print_one_breakpoint_location (b, NULL, 0, last_loc, allflag);
 
   /* If this breakpoint has custom print function,
      it's already printed.  Otherwise, print individual
@@ -5025,8 +5022,7 @@ print_one_breakpoint (struct breakpoint *b,
 	  struct bp_location *loc;
 	  int n = 1;
 	  for (loc = b->loc; loc; loc = loc->next, ++n)
-	    print_one_breakpoint_location (b, loc, n, last_loc,
-					   print_address_bits, allflag);
+	    print_one_breakpoint_location (b, loc, n, last_loc, allflag);
 	}
     }
 }
@@ -5070,9 +5066,7 @@ do_captured_breakpoint_query (struct ui_out *uiout, void *data)
     {
       if (args->bnum == b->number)
 	{
-	  int print_address_bits = breakpoint_address_bits (b);
-
-	  print_one_breakpoint (b, &dummy_loc, print_address_bits, 0);
+	  print_one_breakpoint (b, &dummy_loc, 0);
 	  return GDB_RC_OK;
 	}
     }
@@ -5243,7 +5237,7 @@ breakpoint_1 (char *args, int allflag,
       /* We only print out user settable breakpoints unless the
 	 allflag is set.  */
       if (allflag || user_breakpoint_p (b))
-	print_one_breakpoint (b, &last_loc, print_address_bits, allflag);
+	print_one_breakpoint (b, &last_loc, allflag);
     }
 
   do_cleanups (bkpttbl_chain);
