@@ -1,5 +1,7 @@
 2011-02-28  Michael Snyder  <msnyder@vmware.com>
 
+	* jv-lang.c (java_primitive_type_from_name): Add missing break.
+
 	* opencl-lang.c (lval_func_check_validity): Rename inner variables.
 	(lval_func_check_synthetic_pointer): Ditto.
 	(lval_func_free_closure): Fix use-after-free.

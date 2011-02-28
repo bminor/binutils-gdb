@@ -699,6 +699,7 @@ java_primitive_type_from_name (struct gdbarch *gdbarch,
     case 'c':
       if (namelen == 4 && memcmp (name, "char", 4) == 0)
 	return builtin->builtin_char;
+      break;
     case 'd':
       if (namelen == 6 && memcmp (name, "double", 6) == 0)
 	return builtin->builtin_double;
