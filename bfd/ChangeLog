@@ -1,18 +1,9 @@
-2011-02-15  Alan Modra  <amodra@gmail.com>
+2011-02-28  Alan Modra  <amodra@gmail.com>
 
-	* elf64-ppc.c (ppc64_elf_edit_toc): Reinstate second read of
-	toc relocs.  Fuss over free(NULL).
-
-2011-02-09  Alan Modra  <amodra@gmail.com>
-
-	* elf64-ppc.c (ppc64_elf_edit_toc): Don't free toc relocs until
-	we are done.  When optimising large toc, check that a global
-	symbol on a toc reloc is defined in a kept section.
-
-2011-02-08  Alan Modra  <amodra@gmail.com>
-
-	* elf64-ppc.c (ppc64_elf_edit_toc): Don't segfault on NULL
-	local_syms when looking for local symbols in .toc.
+	PR 12513
+	* archive.c (bfd_slurp_bsd_armap_f2): Sanity check parsed_size and
+	stringsize.  Properly sanity check symdef_count.  Remove redundant
+	bfd_release.
 
 2011-02-01  Alan Modra  <amodra@gmail.com>
 
