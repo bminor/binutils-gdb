@@ -1,3 +1,7 @@
+2011-02-28  Michael Snyder  <msnyder@vmware.com>
+
+	* opencl-lang.c (lval_func_free_closure): Fix use-after-free.
+
 2011-02-28  Tom Tromey  <tromey@redhat.com>
 
 	* psymtab.c (expand_partial_symbol_tables): Use
