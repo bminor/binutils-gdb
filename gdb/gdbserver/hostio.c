@@ -135,7 +135,7 @@ require_data (char *p, int p_len, char **data, int *data_len)
 
   if (escaped)
     {
-      xfree (data);
+      free (data);
       return -1;
     }
 

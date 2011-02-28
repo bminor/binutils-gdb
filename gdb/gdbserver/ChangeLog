@@ -1,3 +1,7 @@
+2011-02-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* hostio.c (require_data): Use free, not xfree.
+
 2011-02-27  Michael Snyder  <msnyder@vmware.com>
 
 	* server.c (handle_query): Discard unused value.
