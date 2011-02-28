@@ -1,5 +1,9 @@
 2011-02-28  Michael Snyder  <msnyder@vmware.com>
 
+	* utils.c (nquery): Call va_end before return;
+	(yquery): Ditto.
+	(query): Ditto.
+
 	* proc-service.c (ps_plog): Call va_end before return.
 
 2011-02-28  Tom Tromey  <tromey@redhat.com>

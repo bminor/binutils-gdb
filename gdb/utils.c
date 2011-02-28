@@ -1845,10 +1845,12 @@ int
 nquery (const char *ctlstr, ...)
 {
   va_list args;
+  int ret;
 
   va_start (args, ctlstr);
-  return defaulted_query (ctlstr, 'n', args);
+  ret = defaulted_query (ctlstr, 'n', args);
   va_end (args);
+  return ret;
 }
 
 /* Ask user a y-or-n question and return 0 if answer is no, 1 if
@@ -1861,10 +1863,12 @@ int
 yquery (const char *ctlstr, ...)
 {
   va_list args;
+  int ret;
 
   va_start (args, ctlstr);
-  return defaulted_query (ctlstr, 'y', args);
+  ret = defaulted_query (ctlstr, 'y', args);
   va_end (args);
+  return ret;
 }
 
 /* Ask user a y-or-n question and return 1 iff answer is yes.
@@ -1876,10 +1880,12 @@ int
 query (const char *ctlstr, ...)
 {
   va_list args;
+  int ret;
 
   va_start (args, ctlstr);
-  return defaulted_query (ctlstr, '\0', args);
+  ret = defaulted_query (ctlstr, '\0', args);
   va_end (args);
+  return ret;
 }
 
 /* A helper for parse_escape that converts a host character to a
