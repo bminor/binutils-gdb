@@ -1,3 +1,10 @@
+2011-02-28  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* gas/mips/relax-swap1.l: Adjust for message capitalization
+	correction.
+	* gas/mips/relax-swap2.l: Likewise.
+	* gas/mips/relax.l: Likewise.
+
 2011-02-25  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/ilp32/ilp32.exp: Run reloc64.

@@ -1,3 +1,8 @@
+2011-02-28  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* config/tc-mips.c (md_convert_frag): Correct message
+	capitalization.
+
 2011-02-28  Alan Modra  <amodra@gmail.com>
 
 	* symbols.c (report_op_error): Remove unnecessary forward declaration.

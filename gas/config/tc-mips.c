@@ -14437,7 +14437,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 	  int i;
 
 	  as_warn_where (fragp->fr_file, fragp->fr_line,
-			 _("relaxed out-of-range branch into a jump"));
+			 _("Relaxed out-of-range branch into a jump"));
 
 	  if (RELAX_BRANCH_UNCOND (fragp->fr_subtype))
 	    goto uncond;
