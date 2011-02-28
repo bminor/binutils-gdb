@@ -10063,7 +10063,7 @@ just as with breakpoints.
 
 Unlike breakpoint conditions, @value{GDBN} does not actually evaluate
 the conditional expression itself.  Instead, @value{GDBN} encodes the
-expression into an agent expression (@pxref{Agent Expressions}
+expression into an agent expression (@pxref{Agent Expressions})
 suitable for execution on the target, independently of @value{GDBN}.
 Global variables become raw memory locations, locals become stack
 accesses, and so forth.
