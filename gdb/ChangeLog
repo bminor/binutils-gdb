@@ -1,5 +1,7 @@
 2011-02-28  Michael Snyder  <msnyder@vmware.com>
 
+	* coffread.c (coff_end_symtab): Delete unused variable.
+
 	* dwarf2read.c (dw2_get_file_names): Discard unused value.
 	(dwarf2_add_typedef): Delete unused variable.
 	(read_namespace): Ditto.

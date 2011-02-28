@@ -405,12 +405,10 @@ complete_symtab (char *name, CORE_ADDR start_addr, unsigned int size)
 static void
 coff_end_symtab (struct objfile *objfile)
 {
-  struct symtab *symtab;
-
   last_source_start_addr = current_source_start_addr;
 
-  symtab = end_symtab (current_source_end_addr, objfile,
-		       SECT_OFF_TEXT (objfile));
+  end_symtab (current_source_end_addr, objfile,
+	      SECT_OFF_TEXT (objfile));
 
   /* Reinitialize for beginning of new file.  */
   last_source_file = NULL;
