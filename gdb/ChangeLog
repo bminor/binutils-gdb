@@ -1,5 +1,8 @@
 2011-02-27  Michael Snyder  <msnyder@vmware.com>
 
+	* tui/tui-stack.c (tui_get_function_from_frame): Fix off by one
+	error in strncpy.
+
 	* symtab.c (rbreak_command): Move variable 'file_name' to 
 	outer scope.
 

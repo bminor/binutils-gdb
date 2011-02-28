@@ -227,7 +227,7 @@ tui_get_function_from_frame (struct frame_info *fi)
      them because the status line is too short to display them.  */
   if (*p == '<')
     p++;
-  strncpy (name, p, sizeof (name));
+  strncpy (name, p, sizeof (name) - 1);
   p = strchr (name, '(');
   if (!p)
     p = strchr (name, '>');
