@@ -1,3 +1,11 @@
+2011-02-28  Kai Tietz  <kai.tietz@onevision.com>
+
+	* basic_blocks.c (cmp_bb): Use filename_(n)cmp.
+	* cg_print.c (order_and_dump_functions_by_arcs): Likewise.
+	(cg_print_file_ordering): Likewise.
+	* corefile.c (read_function_mappings): Likewise.
+	(core_create_line_syms): Likewise.
+
 2011-02-13  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* configure: Regenerate.
