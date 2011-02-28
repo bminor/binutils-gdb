@@ -1,5 +1,7 @@
 2011-02-28  Michael Snyder  <msnyder@vmware.com>
 
+	* opencl-lang.c (evaluate_subexp_opencl): Discard unused value.
+
 	* p-valprint.c (pascal_val_print): Discard unused value.
 
 	* utils.c (nquery): Call va_end before return;

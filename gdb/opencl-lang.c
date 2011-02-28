@@ -776,7 +776,7 @@ evaluate_subexp_opencl (struct type *expect_type, struct expression *exp,
 
       if (noside == EVAL_SKIP)
 	{
-	  arg2 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+	  evaluate_subexp (NULL_TYPE, exp, pos, noside);
 
 	  return value_from_longest (builtin_type (exp->gdbarch)->
 				     builtin_int, 1);
