@@ -2515,7 +2515,7 @@ using the @w{@code{kill inferiors}} command:
 @kindex detach inferiors @var{infno}@dots{}
 @item detach inferior @var{infno}@dots{}
 Detach from the inferior or inferiors identified by @value{GDBN}
-inferior number(s) @var{infno}@dots.  Note that the inferior's entry
+inferior number(s) @var{infno}@dots{}.  Note that the inferior's entry
 still stays on the list of inferiors shown by @code{info inferiors},
 but its Description will show @samp{<null>}.
 
