@@ -1,3 +1,11 @@
+2011-02-28  Alan Modra  <amodra@gmail.com>
+
+	* symbols.c (report_op_error): Remove unnecessary forward declaration.
+	Add "op" parameter.  Report operator and operand segments in error
+	message, not operand symbols.
+	(resolve_symbol_value): Always set segment for equated symbols, not
+	just when finalizing.  Adjust report_op_error calls.
+
 2011-02-25  Alan Modra  <amodra@gmail.com>
 
 	PR gas/12519
