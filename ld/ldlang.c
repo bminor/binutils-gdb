@@ -23,6 +23,7 @@
 #include "sysdep.h"
 #include "bfd.h"
 #include "libiberty.h"
+#include "filenames.h"
 #include "safe-ctype.h"
 #include "obstack.h"
 #include "bfdlink.h"
@@ -2446,7 +2447,7 @@ wild_sort (lang_wild_statement_type *wild,
 	      la = FALSE;
 	    }
 
-	  i = strcmp (fn, ln);
+	  i = filename_cmp (fn, ln);
 	  if (i > 0)
 	    continue;
 	  else if (i < 0)
@@ -2459,7 +2460,7 @@ wild_sort (lang_wild_statement_type *wild,
 	      if (la)
 		ln = ls->section->owner->filename;
 
-	      i = strcmp (fn, ln);
+	      i = filename_cmp (fn, ln);
 	      if (i > 0)
 		continue;
 	      else if (i < 0)
@@ -2572,7 +2573,7 @@ lookup_name (const char *name)
       const char *filename = search->local_sym_name;
 
       if (filename != NULL
-	  && strcmp (filename, name) == 0)
+	  && filename_cmp (filename, name) == 0)
 	break;
     }
 
@@ -2639,7 +2640,7 @@ check_excluded_libs (bfd *abfd)
 	  return;
 	}
 
-      if (strncmp (lib->name, filename, len) == 0
+      if (filename_ncmp (lib->name, filename, len) == 0
 	  && (filename[len] == '\0'
 	      || (filename[len] == '.' && filename[len + 1] == 'a'
 		  && filename[len + 2] == '\0')))

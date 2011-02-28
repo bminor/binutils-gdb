@@ -443,7 +443,7 @@ ldfile_open_file (lang_input_statement_type *entry)
       if (ldfile_try_open_bfd (entry->filename, entry))
 	return;
 
-      if (strcmp (entry->filename, entry->local_sym_name) != 0)
+      if (filename_cmp (entry->filename, entry->local_sym_name) != 0)
 	einfo (_("%P: cannot find %s (%s): %E\n"),
 	       entry->filename, entry->local_sym_name);
       else

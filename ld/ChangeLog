@@ -1,3 +1,24 @@
+2011-02-28  Kai Tietz  <kai.tietz@onevision.com>
+
+	* emultempl/beos.em (sort_by_file_name): Use filename_(n)cmp.
+	* emultempl/elf32.em (gld${EMULATION_NAME}_vercheck):
+	Likewise.
+	(gld${EMULATION_NAME}_stat_needed): Likewise.
+	(gld${EMULATION_NAME}_check_needed): Likewise.
+	* emultempl/pe.em (gld_${EMULATION_NAME}_after_open): Likewise.
+	(gld_${EMULATION_NAME}_unrecognized_file): Likewise.
+	* emultempl/pep.em (gld_${EMULATION_NAME}_after_open): Likewise.
+	(gld_${EMULATION_NAME}_unrecognized_file): Likewise.
+	* ldfile.c (ldfile_open_file): Likewise.
+	* ldlang.c (wild_sort): Likewise.
+	(lookup_name): Likewise.
+	(check_excluded_libs): Likewise.
+	* ldmisc.c (vfinfo): Likewise.
+	* pe-dll.c (libnamencmp): Likewise.
+	(auto_export): Likewise.
+	(pe_dll_generate_implib): Likewise.
+	* testplug.c (onclaim_file): Likewise.
+
 2011-02-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/12507

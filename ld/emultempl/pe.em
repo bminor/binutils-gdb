@@ -56,6 +56,7 @@ fragment <<EOF
 #include "bfdlink.h"
 #include "getopt.h"
 #include "libiberty.h"
+#include "filenames.h"
 #include "ld.h"
 #include "ldmain.h"
 #include "ldexp.h"
@@ -1405,8 +1406,9 @@ gld_${EMULATION_NAME}_after_open (void)
 			    ? bfd_get_filename (blhe->u.def.section->owner->my_archive)
 			    : bfd_get_filename (blhe->u.def.section->owner);
 
-			if (strcmp (bfd_get_filename (is->the_bfd->my_archive),
-				    other_bfd_filename) == 0)
+			if (filename_cmp (bfd_get_filename
+					    (is->the_bfd->my_archive),
+					  other_bfd_filename) == 0)
 			  continue;
 
 			/* Rename this implib to match the other one.  */
@@ -1460,7 +1462,7 @@ gld_${EMULATION_NAME}_after_open (void)
 		       extension, and use that for the remainder of the
 		       comparisons.  */
 		    pnt = strrchr (is3->the_bfd->filename, '.');
-		    if (pnt != NULL && strcmp (pnt, ".dll") == 0)
+		    if (pnt != NULL && filename_cmp (pnt, ".dll") == 0)
 		      break;
 		  }
 
@@ -1477,11 +1479,11 @@ gld_${EMULATION_NAME}_after_open (void)
 			/* Skip static members, ie anything with a .obj
 			   extension.  */
 			pnt = strrchr (is2->the_bfd->filename, '.');
-			if (pnt != NULL && strcmp (pnt, ".obj") == 0)
+			if (pnt != NULL && filename_cmp (pnt, ".obj") == 0)
 			  continue;
 
-			if (strcmp (is3->the_bfd->filename,
-				    is2->the_bfd->filename))
+			if (filename_cmp (is3->the_bfd->filename,
+					  is2->the_bfd->filename))
 			  {
 			    is_ms_arch = 0;
 			    break;
@@ -1495,7 +1497,7 @@ gld_${EMULATION_NAME}_after_open (void)
 	       then leave the filename alone.  */
 	    pnt = strrchr (is->the_bfd->filename, '.');
 
-	    if (is_ms_arch && (strcmp (pnt, ".dll") == 0))
+	    if (is_ms_arch && (filename_cmp (pnt, ".dll") == 0))
 	      {
 		int idata2 = 0, reloc_count=0;
 		asection *sec;
@@ -1668,7 +1670,7 @@ gld_${EMULATION_NAME}_unrecognized_file (lang_input_statement_type *entry ATTRIB
 #ifdef DLL_SUPPORT
   const char *ext = entry->filename + strlen (entry->filename) - 4;
 
-  if (strcmp (ext, ".def") == 0 || strcmp (ext, ".DEF") == 0)
+  if (filename_cmp (ext, ".def") == 0 || filename_cmp (ext, ".DEF") == 0)
     {
       pe_def_file = def_file_parse (entry->filename, pe_def_file);
 

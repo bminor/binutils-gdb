@@ -40,6 +40,7 @@ fragment <<EOF
 #include "bfdlink.h"
 #include "getopt.h"
 #include "libiberty.h"
+#include "filenames.h"
 #include "ld.h"
 #include "ldmain.h"
 #include "ldexp.h"
@@ -396,13 +397,13 @@ sort_by_file_name (const void *a, const void *b)
   const lang_statement_union_type *const *rb = b;
   int i, a_sec, b_sec;
 
-  i = strcmp ((*ra)->input_section.section->owner->my_archive->filename,
-	      (*rb)->input_section.section->owner->my_archive->filename);
+  i = filename_cmp ((*ra)->input_section.section->owner->my_archive->filename,
+		    (*rb)->input_section.section->owner->my_archive->filename);
   if (i != 0)
     return i;
 
-  i = strcmp ((*ra)->input_section.section->owner->filename,
-		 (*rb)->input_section.section->owner->filename);
+  i = filename_cmp ((*ra)->input_section.section->owner->filename,
+		    (*rb)->input_section.section->owner->filename);
   if (i != 0)
     return i;
   /* the tail idata4/5 are the only ones without relocs to an

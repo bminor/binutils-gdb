@@ -40,6 +40,7 @@ fragment <<EOF
 #include "sysdep.h"
 #include "bfd.h"
 #include "libiberty.h"
+#include "filenames.h"
 #include "safe-ctype.h"
 #include "getopt.h"
 #include "md5.h"
@@ -200,7 +201,7 @@ gld${EMULATION_NAME}_vercheck (lang_input_statement_type *s)
     {
       const char *suffix;
 
-      if (strcmp (soname, l->name) == 0)
+      if (filename_cmp (soname, l->name) == 0)
 	{
 	  /* Probably can't happen, but it's an easy check.  */
 	  continue;
@@ -215,7 +216,7 @@ gld${EMULATION_NAME}_vercheck (lang_input_statement_type *s)
 
       suffix += sizeof ".so." - 1;
 
-      if (strncmp (soname, l->name, suffix - l->name) == 0)
+      if (filename_ncmp (soname, l->name, suffix - l->name) == 0)
 	{
 	  /* Here we know that S is a dynamic object FOO.SO.VER1, and
 	     the object we are considering needs a dynamic object
@@ -290,7 +291,7 @@ gld${EMULATION_NAME}_stat_needed (lang_input_statement_type *s)
   if (soname == NULL)
     soname = lbasename (s->filename);
 
-  if (strncmp (soname, global_needed->name, suffix - global_needed->name) == 0)
+  if (filename_ncmp (soname, global_needed->name, suffix - global_needed->name) == 0)
     einfo ("%P: warning: %s, needed by %B, may conflict with %s\n",
 	   global_needed->name, global_needed->by, soname);
 }
@@ -855,7 +856,7 @@ gld${EMULATION_NAME}_check_needed (lang_input_statement_type *s)
       && (bfd_elf_get_dyn_lib_class (s->the_bfd) & DYN_AS_NEEDED) != 0)
     return;
 
-  if (strcmp (s->filename, global_needed->name) == 0)
+  if (filename_cmp (s->filename, global_needed->name) == 0)
     {
       global_found = s;
       return;
@@ -865,7 +866,7 @@ gld${EMULATION_NAME}_check_needed (lang_input_statement_type *s)
     {
       const char *f = strrchr (s->filename, '/');
       if (f != NULL
-	  && strcmp (f + 1, global_needed->name) == 0)
+	  && filename_cmp (f + 1, global_needed->name) == 0)
 	{
 	  global_found = s;
 	  return;
@@ -874,7 +875,7 @@ gld${EMULATION_NAME}_check_needed (lang_input_statement_type *s)
 
   soname = bfd_elf_get_dt_soname (s->the_bfd);
   if (soname != NULL
-      && strcmp (soname, global_needed->name) == 0)
+      && filename_cmp (soname, global_needed->name) == 0)
     {
       global_found = s;
       return;

@@ -24,6 +24,7 @@
 #include "bfd.h"
 #include "bfdlink.h"
 #include "libiberty.h"
+#include "filenames.h"
 #include "safe-ctype.h"
 
 #include <time.h>
@@ -343,7 +344,7 @@ static const autofilter_entry_type autofilter_liblist[] =
   returning zero if so or -1 if not.  */
 static int libnamencmp (const char *libname, const autofilter_entry_type *afptr)
 {
-  if (strncmp (libname, afptr->name, afptr->len))
+  if (filename_ncmp (libname, afptr->name, afptr->len))
     return -1;
 
   libname += afptr->len;
@@ -619,13 +620,13 @@ auto_export (bfd *abfd, def_file *d, const char *n)
       if (ex->type == EXCLUDELIBS)
 	{
 	  if (libname
-	      && ((strcmp (libname, ex->string) == 0)
+	      && ((filename_cmp (libname, ex->string) == 0)
 		   || (strcasecmp ("ALL", ex->string) == 0)))
 	    return 0;
 	}
       else if (ex->type == EXCLUDEFORIMPLIB)
 	{
-	  if (strcmp (abfd->filename, ex->string) == 0)
+	  if (filename_cmp (abfd->filename, ex->string) == 0)
 	    return 0;
 	}
       else if (strcmp (n, ex->string) == 0)
@@ -2701,7 +2702,7 @@ pe_dll_generate_implib (def_file *def, const char *impfilename, struct bfd_link_
 	{
 	  if (ex->type != EXCLUDEFORIMPLIB)
 	    continue;
-	  found = (strcmp (ex->string, ibfd->filename) == 0);
+	  found = (filename_cmp (ex->string, ibfd->filename) == 0);
 	}
       /* If it matched, we must open a fresh BFD for it (the original
         input BFD is still needed for the DLL's final link) and add
@@ -2731,7 +2732,7 @@ pe_dll_generate_implib (def_file *def, const char *impfilename, struct bfd_link_
 	      newbfd = NULL;
 	      while ((newbfd = bfd_openr_next_archived_file (arbfd, newbfd)) != 0)
 		{
-		  if (strcmp (newbfd->filename, ibfd->filename) == 0)
+		  if (filename_cmp (newbfd->filename, ibfd->filename) == 0)
 		    break;
 		}
 	      if (!newbfd)

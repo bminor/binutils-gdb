@@ -25,6 +25,7 @@
 #include "bfd.h"
 #include "bfdlink.h"
 #include "libiberty.h"
+#include "filenames.h"
 #include "demangle.h"
 #include <stdarg.h>
 #include "ld.h"
@@ -231,7 +232,7 @@ vfinfo (FILE *fp, const char *fmt, va_list arg, bfd_boolean is_warning)
 			   bfd_get_filename (bfd_my_archive (i->the_bfd)));
 		fprintf (fp, "%s", i->local_sym_name);
 		if (bfd_my_archive (i->the_bfd) == NULL
-		    && strcmp (i->local_sym_name, i->filename) != 0)
+		    && filename_cmp (i->local_sym_name, i->filename) != 0)
 		  fprintf (fp, " (%s)", i->filename);
 	      }
 	      break;
@@ -318,7 +319,7 @@ vfinfo (FILE *fp, const char *fmt, va_list arg, bfd_boolean is_warning)
 			    || last_function == NULL
 			    || last_bfd != abfd
 			    || (filename != NULL
-				&& strcmp (last_file, filename) != 0)
+				&& filename_cmp (last_file, filename) != 0)
 			    || strcmp (last_function, functionname) != 0)
 			  {
 			    lfinfo (fp, _("%B: In function `%T':\n"),

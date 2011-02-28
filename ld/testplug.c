@@ -23,6 +23,7 @@
 #include "plugin-api.h"
 /* For ARRAY_SIZE macro only - we don't link the library itself.  */
 #include "libiberty.h"
+#include "filenames.h"
 
 extern enum ld_plugin_status onload (struct ld_plugin_tv *tv);
 static enum ld_plugin_status onclaim_file (const struct ld_plugin_input_file *file,
@@ -519,7 +520,7 @@ onclaim_file (const struct ld_plugin_input_file *file, int *claimed)
   claim_file_t *claimfile = claimfiles_list;
   while (claimfile)
     {
-      if (!strcmp (file->name, claimfile->file.name))
+      if (!filename_cmp (file->name, claimfile->file.name))
 	break;
       claimfile = claimfile->next;
     }
