@@ -770,6 +770,8 @@ Do you want to stop the program?"),
         if (record_linux_sockaddr (regcache, tdep, tmpulongest, len))
           return -1;
       }
+      break;
+
     case gdb_sys_recv:
       {
         ULONGEST size;

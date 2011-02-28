@@ -1,3 +1,8 @@
+2011-02-28  Michael Snyder  <msnyder@vmware.com>
+
+	* linux-record.c (record_linux_system_call): Add missing
+	break statement.
+
 2011-02-28  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* breakpoint.c (print_one_breakpoint_location): Remove unused
