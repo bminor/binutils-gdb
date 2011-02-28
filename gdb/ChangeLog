@@ -1,5 +1,7 @@
 2011-02-28  Michael Snyder  <msnyder@vmware.com>
 
+	* stabsread.c (rs6000_builtin_type): Missing break statement.
+
 	* dbxread.c (process_one_symbol): Discard unused value.
 
 	* coffread.c (coff_end_symtab): Delete unused variable.

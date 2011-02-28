@@ -2124,6 +2124,7 @@ rs6000_builtin_type (int typenum, struct objfile *objfile)
     case 9:
       rettype = init_type (TYPE_CODE_INT, 4, TYPE_FLAG_UNSIGNED,
 			   "unsigned", objfile);
+      break;
     case 10:
       rettype = init_type (TYPE_CODE_INT, 4, TYPE_FLAG_UNSIGNED,
 			   "unsigned long", objfile);
