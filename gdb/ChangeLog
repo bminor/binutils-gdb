@@ -1,5 +1,10 @@
 2011-02-28  Michael Snyder  <msnyder@vmware.com>
 
+	* dwarf2read.c (dw2_get_file_names): Discard unused value.
+	(dwarf2_add_typedef): Delete unused variable.
+	(read_namespace): Ditto.
+	(dwarf_decode_macros): Ditto.
+
 	* m2-lang.c (evaluate_subexp_modula2): Discard unused variable.
 
 	* opencl-lang.c (evaluate_subexp_opencl): Discard unused value.

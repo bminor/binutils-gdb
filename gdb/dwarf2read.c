@@ -2172,8 +2172,8 @@ dw2_get_file_names (struct objfile *objfile,
   if (this_cu->from_debug_types)
     info_ptr += 8 /*signature*/ + cu.header.offset_size;
   init_cu_die_reader (&reader_specs, &cu);
-  info_ptr = read_full_die (&reader_specs, &comp_unit_die, info_ptr,
-			    &has_children);
+  read_full_die (&reader_specs, &comp_unit_die, info_ptr,
+		 &has_children);
 
   lh = NULL;
   slot = NULL;
@@ -6425,7 +6425,6 @@ dwarf2_add_typedef (struct field_info *fip, struct die_info *die,
 		    struct dwarf2_cu *cu)
 {
   struct objfile *objfile = cu->objfile;
-  struct gdbarch *gdbarch = get_objfile_arch (objfile);
   struct typedef_field_list *new_field;
   struct attribute *attr;
   struct typedef_field *fp;
@@ -7590,7 +7589,6 @@ static void
 read_namespace (struct die_info *die, struct dwarf2_cu *cu)
 {
   struct objfile *objfile = cu->objfile;
-  const char *name;
   int is_anonymous;
 
   /* Add a symbol associated to this if we haven't seen the namespace
@@ -7604,7 +7602,7 @@ read_namespace (struct die_info *die, struct dwarf2_cu *cu)
       type = read_type_die (die, cu);
       new_symbol (die, type, cu);
 
-      name = namespace_name (die, &is_anonymous, cu);
+      namespace_name (die, &is_anonymous, cu);
       if (is_anonymous)
 	{
 	  const char *previous_prefix = determine_prefix (die, cu);
@@ -14327,11 +14325,10 @@ dwarf_decode_macros (struct line_header *lh, unsigned int offset,
           {
             unsigned int bytes_read;
             int constant;
-            char *string;
 
             constant = read_unsigned_leb128 (abfd, mac_ptr, &bytes_read);
             mac_ptr += bytes_read;
-            string = read_direct_string (abfd, mac_ptr, &bytes_read);
+            read_direct_string (abfd, mac_ptr, &bytes_read);
             mac_ptr += bytes_read;
 
             /* We don't recognize any vendor extensions.  */
