@@ -1,3 +1,8 @@
+2011-02-28  Michael Snyder  <msnyder@vmware.com>
+
+	* utils.c (decimal2str): Initialize 'width' to nine, then
+	don't mess with it.
+
 2011-02-28  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* hostio.c (require_data): Free *data, not data.

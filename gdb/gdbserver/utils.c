@@ -263,18 +263,15 @@ decimal2str (char *sign, ULONGEST addr)
   unsigned long temp[3];
   char *str = get_cell ();
   int i = 0;
-  int width;
+  int width = 9;
 
   do
     {
       temp[i] = addr % (1000 * 1000 * 1000);
       addr /= (1000 * 1000 * 1000);
       i++;
-      width -= 9;
     }
   while (addr != 0 && i < (sizeof (temp) / sizeof (temp[0])));
-
-  width = 9;
 
   switch (i)
     {
