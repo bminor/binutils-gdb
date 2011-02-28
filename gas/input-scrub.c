@@ -21,6 +21,7 @@
    02110-1301, USA.  */
 
 #include "as.h"
+#include "filenames.h"
 #include "input-file.h"
 #include "sb.h"
 #include "listing.h"
@@ -474,7 +475,7 @@ new_logical_line_flags (char *fname, /* DON'T destroy it!  We point to it!  */
 
   if (fname
       && (logical_input_file == NULL
-	  || strcmp (logical_input_file, fname)))
+	  || filename_cmp (logical_input_file, fname)))
     {
       logical_input_file = fname;
       return 1;

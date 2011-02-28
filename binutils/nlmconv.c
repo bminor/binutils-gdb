@@ -37,6 +37,7 @@
 #include "sysdep.h"
 #include "bfd.h"
 #include "libiberty.h"
+#include "filenames.h"
 #include "safe-ctype.h"
 
 #include "ansidecl.h"
@@ -268,7 +269,7 @@ main (int argc, char **argv)
 	  ++optind;
 	  if (optind < argc)
 	    show_usage (stderr, 1);
-	  if (strcmp (input_file, output_file) == 0)
+	  if (filename_cmp (input_file, output_file) == 0)
 	    {
 	      fatal (_("input and output files must be different"));
 	    }

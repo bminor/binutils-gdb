@@ -20,6 +20,7 @@
    02110-1301, USA.  */
 
 #include "as.h"
+#include "filenames.h"
 #include "obstack.h"
 #include "subsegs.h"
 #include "ecoff.h"
@@ -521,7 +522,7 @@ generate_asm_file (int type, char *file)
   char *bufp;
 
   if (last_file != NULL
-      && strcmp (last_file, file) == 0)
+      && filename_cmp (last_file, file) == 0)
     return;
 
   /* Rather than try to do this in some efficient fashion, we just
@@ -605,7 +606,7 @@ stabs_generate_asm_lineno (void)
       prev_lineno = lineno;
     }
   else if (lineno == prev_lineno
-	   && strcmp (file, prev_file) == 0)
+	   && filename_cmp (file, prev_file) == 0)
     {
       /* Same file/line as last time.  */
       return;
@@ -614,7 +615,7 @@ stabs_generate_asm_lineno (void)
     {
       /* Remember file/line for next time.  */
       prev_lineno = lineno;
-      if (strcmp (file, prev_file) != 0)
+      if (filename_cmp (file, prev_file) != 0)
 	{
 	  free (prev_file);
 	  prev_file = xstrdup (file);

@@ -1348,7 +1348,7 @@ show_line (bfd *abfd, asection *section, bfd_vma addr_offset)
       unsigned l;
 
       for (pp = &print_files; *pp != NULL; pp = &(*pp)->next)
-	if (strcmp ((*pp)->filename, filename) == 0)
+	if (filename_cmp ((*pp)->filename, filename) == 0)
 	  break;
       p = *pp;
 
@@ -2856,7 +2856,7 @@ dump_reloc_set (bfd *abfd, asection *sec, arelent **relpp, long relcount)
 	      && (linenumber != last_line
 		  || (filename != NULL
 		      && last_filename != NULL
-		      && strcmp (filename, last_filename) != 0)))
+		      && filename_cmp (filename, last_filename) != 0)))
 	    {
 	      printf ("%s:%u\n", filename == NULL ? "???" : filename, linenumber);
 	      last_line = linenumber;

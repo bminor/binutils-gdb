@@ -1,3 +1,16 @@
+2011-02-28  Kai Tietz  <kai.tietz@onevision.com>
+
+	* depend.c (register_dependency): Use filename_(n)cmp.
+	* dwarf2dbg.c (get_filenum): Likewise.
+	* ecoff.c (add_file): Likewise.
+	(ecoff_generate_asm_lineno): Likewise.
+	* input-scrub.c (new_logical_line_flags): Likewise.
+	* listing.c (file_info): Likewise.
+	(listing_newline): Likewise.
+	* remap.c (remap_debug_filename): Likewise.
+	* stabs.c (generate_asm_file): Likewise.
+	(stabs_generate_asm_lineno): Likewise.
+
 2011-02-28  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* config/tc-mips.c (append_insn): Disable branch relaxation for

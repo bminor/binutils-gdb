@@ -3035,7 +3035,8 @@ strip_main (int argc, char *argv[])
 	   It has already been checked in get_file_size().  */
 	stat (argv[i], &statbuf);
 
-      if (output_file == NULL || strcmp (argv[i], output_file) == 0)
+      if (output_file == NULL
+	  || filename_cmp (argv[i], output_file) == 0)
 	tmpname = make_tempname (argv[i]);
       else
 	tmpname = output_file;
@@ -3902,7 +3903,8 @@ copy_main (int argc, char *argv[])
 
   /* If there is no destination file, or the source and destination files
      are the same, then create a temp and rename the result into the input.  */
-  if (output_filename == NULL || strcmp (input_filename, output_filename) == 0)
+  if (output_filename == NULL
+      || filename_cmp (input_filename, output_filename) == 0)
     tmpname = make_tempname (input_filename);
   else
     tmpname = output_filename;

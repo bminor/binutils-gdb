@@ -4938,7 +4938,7 @@ ieee_finish_compilation_unit (struct ieee_handle *info)
       if (! ieee_change_buffer (info, &info->linenos)
 	  || ! ieee_write_byte (info, (int) ieee_be_record_enum))
 	return FALSE;
-      if (strcmp (info->filename, info->lineno_filename) != 0)
+      if (filename_cmp (info->filename, info->lineno_filename) != 0)
 	{
 	  /* We were not in the main file.  We just closed the
              included line number block, and now we must close the
@@ -7339,15 +7339,17 @@ ieee_lineno (void *p, const char *filename, unsigned long lineno, bfd_vma addr)
 	  info->lineno_filename = info->filename;
 	}
 
-      if (strcmp (info->pending_lineno_filename, info->lineno_filename) != 0)
+      if (filename_cmp (info->pending_lineno_filename,
+			info->lineno_filename) != 0)
 	{
-	  if (strcmp (info->filename, info->lineno_filename) != 0)
+	  if (filename_cmp (info->filename, info->lineno_filename) != 0)
 	    {
 	      /* We were not in the main file.  Close the block for the
 		 included file.  */
 	      if (! ieee_write_byte (info, (int) ieee_be_record_enum))
 		return FALSE;
-	      if (strcmp (info->filename, info->pending_lineno_filename) == 0)
+	      if (filename_cmp (info->filename,
+				info->pending_lineno_filename) == 0)
 		{
 		  /* We need a new NN record, and we aren't about to
 		     output one.  */
@@ -7359,7 +7361,8 @@ ieee_lineno (void *p, const char *filename, unsigned long lineno, bfd_vma addr)
 		    return FALSE;
 		}
 	    }
-	  if (strcmp (info->filename, info->pending_lineno_filename) != 0)
+	  if (filename_cmp (info->filename,
+			    info->pending_lineno_filename) != 0)
 	    {
 	      /* We are not changing to the main file.  Open a block for
 		 the new included file.  */

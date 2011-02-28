@@ -1,3 +1,16 @@
+2011-02-28  Kai Tietz  <kai.tietz@onevision.com>
+
+	* debug.c (debug_start_source): Use filename_(n)cmp.
+	* ieee.c (ieee_finish_compilation_unit): Likewise.
+	(ieee_lineno): Likewise.
+	* nlmconv.c (main): Likewise.
+	* objcopy.c (strip_main): Likewise.
+	(copy_main): Likewise.
+	* objdump.c (show_line): Likewise.
+	(dump_reloc_set): Likewise.
+	* srconv.c (main): Likewise.
+	* wrstabs.c (stab_lineno): Likewise.
+
 2011-02-24  Zachary T Welch  <zwelch@codesourcery.com>
 
 	* readelf.c (decode_arm_unwind): Implement decoding of remaining

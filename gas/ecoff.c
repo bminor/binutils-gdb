@@ -2257,7 +2257,7 @@ add_file (const char *file_name, int indx ATTRIBUTE_UNUSED, int fake)
        fil_ptr = fil_ptr->next_file)
     {
       if (first_ch == fil_ptr->name[0]
-	  && strcmp (file_name, fil_ptr->name) == 0
+	  && filename_cmp (file_name, fil_ptr->name) == 0
 	  && fil_ptr->fdr.fMerge)
 	{
 	  cur_file_ptr = fil_ptr;
@@ -2325,7 +2325,7 @@ add_file (const char *file_name, int indx ATTRIBUTE_UNUSED, int fake)
 void
 ecoff_new_file (const char *name, int appfile ATTRIBUTE_UNUSED)
 {
-  if (cur_file_ptr != NULL && strcmp (cur_file_ptr->name, name) == 0)
+  if (cur_file_ptr != NULL && filename_cmp (cur_file_ptr->name, name) == 0)
     return;
   add_file (name, 0, 0);
 
@@ -5200,7 +5200,7 @@ ecoff_generate_asm_lineno (void)
   as_where (&filename, &lineno);
 
   if (current_stabs_filename == (char *) NULL
-      || strcmp (current_stabs_filename, filename))
+      || filename_cmp (current_stabs_filename, filename))
     add_file (filename, 0, 1);
 
   list = allocate_lineno_list ();

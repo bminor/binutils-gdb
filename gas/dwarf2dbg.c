@@ -431,14 +431,14 @@ get_filenum (const char *filename, unsigned int num)
   if (num == 0 && last_used)
     {
       if (! files[last_used].dir
-	  && strcmp (filename, files[last_used].filename) == 0)
+	  && filename_cmp (filename, files[last_used].filename) == 0)
 	return last_used;
       if (files[last_used].dir
-	  && strncmp (filename, dirs[files[last_used].dir],
-		      last_used_dir_len) == 0
+	  && filename_ncmp (filename, dirs[files[last_used].dir],
+			    last_used_dir_len) == 0
 	  && IS_DIR_SEPARATOR (filename [last_used_dir_len])
-	  && strcmp (filename + last_used_dir_len + 1,
-		     files[last_used].filename) == 0)
+	  && filename_cmp (filename + last_used_dir_len + 1,
+			   files[last_used].filename) == 0)
 	return last_used;
     }
 
@@ -460,7 +460,7 @@ get_filenum (const char *filename, unsigned int num)
       --dir_len;
 #endif
       for (dir = 1; dir < dirs_in_use; ++dir)
-	if (strncmp (filename, dirs[dir], dir_len) == 0
+	if (filename_ncmp (filename, dirs[dir], dir_len) == 0
 	    && dirs[dir][dir_len] == '\0')
 	  break;
 
@@ -485,7 +485,7 @@ get_filenum (const char *filename, unsigned int num)
       for (i = 1; i < files_in_use; ++i)
 	if (files[i].dir == dir
 	    && files[i].filename
-	    && strcmp (file, files[i].filename) == 0)
+	    && filename_cmp (file, files[i].filename) == 0)
 	  {
 	    last_used = i;
 	    last_used_dir_len = dir_len;
