@@ -1,3 +1,10 @@
+2011-02-28  Alan Modra  <amodra@gmail.com>
+
+	PR 12513
+	* archive.c (bfd_slurp_bsd_armap_f2): Sanity check parsed_size and
+	stringsize.  Properly sanity check symdef_count.  Remove redundant
+	bfd_release.
+
 2011-02-25  Rafael Ávila de Espíndola <respindola@mozilla.com>
 
 	* plugin.c (bfd_plugin_object_p): Correctly set the filesize
