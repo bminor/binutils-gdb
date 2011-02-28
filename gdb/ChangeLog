@@ -1,3 +1,8 @@
+2011-02-28  Tom Tromey  <tromey@redhat.com>
+
+	* psymtab.c (expand_partial_symbol_tables): Use
+	ALL_OBJFILE_PSYMTABS.
+
 2011-02-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* objc-lang.c (selectors_info): Error on too long REGEXP.

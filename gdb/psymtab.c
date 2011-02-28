@@ -933,9 +933,7 @@ expand_partial_symbol_tables (struct objfile *objfile)
 {
   struct partial_symtab *psymtab;
 
-  for (psymtab = objfile->psymtabs;
-       psymtab != NULL;
-       psymtab = psymtab->next)
+  ALL_OBJFILE_PSYMTABS (objfile, psymtab)
     {
       psymtab_to_symtab (psymtab);
     }
