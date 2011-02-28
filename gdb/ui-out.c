@@ -1141,6 +1141,28 @@ ui_out_data (struct ui_out *uiout)
   return uiout->data;
 }
 
+/* Access table field parameters.  */
+int
+ui_out_query_field (struct ui_out *uiout, int colno,
+		    int *width, int *alignment, char **col_name)
+{
+  struct ui_out_hdr *hdr;
+
+  if (!uiout->table.flag)
+    return 0;
+
+  for (hdr = uiout->table.header_first; hdr; hdr = hdr->next)
+    if (hdr->colno == colno)
+      {
+	*width = hdr->width;
+	*alignment = hdr->alignment;
+	*col_name = hdr->col_name;
+	return 1;
+      }
+
+  return 0;
+}
+
 /* Initalize private members at startup.  */
 
 struct ui_out *

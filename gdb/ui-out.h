@@ -156,6 +156,9 @@ extern int ui_out_get_verblvl (struct ui_out *uiout);
 
 extern int ui_out_test_flags (struct ui_out *uiout, int mask);
 
+extern int ui_out_query_field (struct ui_out *uiout, int colno,
+			       int *width, int *alignment, char **col_name);
+
 #if 0
 extern void ui_out_result_begin (struct ui_out *uiout, char *class);
 

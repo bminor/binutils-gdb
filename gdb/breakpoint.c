@@ -4565,12 +4565,40 @@ bpstat_causes_stop (bpstat bs)
 
 
 
+/* Compute a string of spaces suitable to indent the next line
+   so it starts at the position corresponding to the table column
+   named COL_NAME in the currently active table of UIOUT.  */
+
+static char *
+wrap_indent_at_field (struct ui_out *uiout, const char *col_name)
+{
+  static char wrap_indent[80];
+  int i, total_width, width, align;
+  char *text;
+
+  total_width = 0;
+  for (i = 1; ui_out_query_field (uiout, i, &width, &align, &text); i++)
+    {
+      if (strcmp (text, col_name) == 0)
+	{
+	  gdb_assert (total_width < sizeof wrap_indent);
+	  memset (wrap_indent, ' ', total_width);
+	  wrap_indent[total_width] = 0;
+
+	  return wrap_indent;
+	}
+
+      total_width += width + 1;
+    }
+
+  return NULL;
+}
+
 /* Print the LOC location out of the list of B->LOC locations.  */
 
-static void print_breakpoint_location (struct breakpoint *b,
-				       struct bp_location *loc,
-				       char *wrap_indent,
-				       struct ui_stream *stb)
+static void
+print_breakpoint_location (struct breakpoint *b,
+			   struct bp_location *loc)
 {
   struct cleanup *old_chain = save_current_program_space ();
 
@@ -4589,8 +4617,9 @@ static void print_breakpoint_location (struct breakpoint *b,
 	  ui_out_text (uiout, "in ");
 	  ui_out_field_string (uiout, "func",
 			       SYMBOL_PRINT_NAME (sym));
-	  ui_out_wrap_hint (uiout, wrap_indent);
-	  ui_out_text (uiout, " at ");
+	  ui_out_text (uiout, " ");
+	  ui_out_wrap_hint (uiout, wrap_indent_at_field (uiout, "what"));
+	  ui_out_text (uiout, "at ");
 	}
       ui_out_field_string (uiout, "file", b->source_file);
       ui_out_text (uiout, ":");
@@ -4608,9 +4637,14 @@ static void print_breakpoint_location (struct breakpoint *b,
     }
   else if (loc)
     {
+      struct ui_stream *stb = ui_out_stream_new (uiout);
+      struct cleanup *stb_chain = make_cleanup_ui_out_stream_delete (stb);
+
       print_address_symbolic (loc->gdbarch, loc->address, stb->stream,
 			      demangle, "");
       ui_out_field_stream (uiout, "at", stb);
+
+      do_cleanups (stb_chain);
     }
   else
     ui_out_field_string (uiout, "pending", b->addr_string);
@@ -4679,9 +4713,6 @@ print_one_breakpoint_location (struct breakpoint *b,
 {
   struct command_line *l;
   static char bpenables[] = "nynny";
-  char wrap_indent[80];
-  struct ui_stream *stb = ui_out_stream_new (uiout);
-  struct cleanup *old_chain = make_cleanup_ui_out_stream_delete (stb);
   struct cleanup *bkpt_chain;
 
   int header_of_multiple = 0;
@@ -4743,15 +4774,6 @@ print_one_breakpoint_location (struct breakpoint *b,
 
   
   /* 5 and 6 */
-  strcpy (wrap_indent, "                           ");
-  if (opts.addressprint)
-    {
-      if (print_address_bits <= 32)
-	strcat (wrap_indent, "           ");
-      else
-	strcat (wrap_indent, "                   ");
-    }
-
   if (b->ops != NULL && b->ops->print_one != NULL)
     {
       /* Although the print_one can possibly print all locations,
@@ -4816,7 +4838,7 @@ print_one_breakpoint_location (struct breakpoint *b,
 	  }
 	annotate_field (5);
 	if (!header_of_multiple)
-	  print_breakpoint_location (b, loc, wrap_indent, stb);
+	  print_breakpoint_location (b, loc);
 	if (b->loc)
 	  *last_loc = b->loc;
 	break;
@@ -4972,7 +4994,6 @@ print_one_breakpoint_location (struct breakpoint *b,
     }
 	
   do_cleanups (bkpt_chain);
-  do_cleanups (old_chain);
 }
 
 static void

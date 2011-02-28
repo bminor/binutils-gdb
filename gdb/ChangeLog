@@ -1,3 +1,12 @@
+2011-02-28  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* breakpoint.c (wrap_indent_at_field): New function.
+	(print_breakpoint_location): Use it instead of WRAP_INDENT argument.
+	Allocate ui_stream locally instead of using STB argument.
+	(print_one_breakpoint_location): Update call.
+	* ui-out.c (ui_out_query_field): New function.
+	* ui-out.h (ui_out_query_field): Add prototype.
+
 2011-02-28  Joel Brobecker  <brobecker@adacore.com>
 
 	From Michael Snyder  <msnyder@vmware.com>
