@@ -1,5 +1,9 @@
 # Source file used to test relaxation.
 
+	.ifdef	atk0
+	.set	at=$k0
+	.endif
+
 	.text
 foo:
 	b	bar

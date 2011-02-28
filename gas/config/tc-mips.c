@@ -918,18 +918,20 @@ static int mips_relax_branch;
 
 
    but it's not clear that it would actually improve performance.  */
-#define RELAX_BRANCH_ENCODE(uncond, likely, link, toofar) \
-  ((relax_substateT) \
-   (0xc0000000 \
-    | ((toofar) ? 1 : 0) \
-    | ((link) ? 2 : 0) \
-    | ((likely) ? 4 : 0) \
-    | ((uncond) ? 8 : 0)))
+#define RELAX_BRANCH_ENCODE(at, uncond, likely, link, toofar)	\
+  ((relax_substateT)						\
+   (0xc0000000							\
+    | ((at) & 0x1f)						\
+    | ((toofar) ? 0x20 : 0)					\
+    | ((link) ? 0x40 : 0)					\
+    | ((likely) ? 0x80 : 0)					\
+    | ((uncond) ? 0x100 : 0)))
 #define RELAX_BRANCH_P(i) (((i) & 0xf0000000) == 0xc0000000)
-#define RELAX_BRANCH_UNCOND(i) (((i) & 8) != 0)
-#define RELAX_BRANCH_LIKELY(i) (((i) & 4) != 0)
-#define RELAX_BRANCH_LINK(i) (((i) & 2) != 0)
-#define RELAX_BRANCH_TOOFAR(i) (((i) & 1) != 0)
+#define RELAX_BRANCH_UNCOND(i) (((i) & 0x100) != 0)
+#define RELAX_BRANCH_LIKELY(i) (((i) & 0x80) != 0)
+#define RELAX_BRANCH_LINK(i) (((i) & 0x40) != 0)
+#define RELAX_BRANCH_TOOFAR(i) (((i) & 0x20) != 0)
+#define RELAX_BRANCH_AT(i) ((i) & 0x1f)
 
 /* For mips16 code, we use an entirely different form of relaxation.
    mips16 supports two versions of most instructions which take
@@ -2940,7 +2942,8 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 			      : (pinfo & INSN_COND_BRANCH_LIKELY) ? 1
 			      : 0)), 4,
 			RELAX_BRANCH_ENCODE
-			(pinfo & INSN_UNCOND_BRANCH_DELAY,
+			(AT,
+			 pinfo & INSN_UNCOND_BRANCH_DELAY,
 			 pinfo & INSN_COND_BRANCH_LIKELY,
 			 pinfo & INSN_WRITE_GPR_31,
 			 0),
@@ -14145,7 +14148,8 @@ relaxed_branch_length (fragS *fragp, asection *sec, int update)
 
   if (fragp && update && toofar != RELAX_BRANCH_TOOFAR (fragp->fr_subtype))
     fragp->fr_subtype
-      = RELAX_BRANCH_ENCODE (RELAX_BRANCH_UNCOND (fragp->fr_subtype),
+      = RELAX_BRANCH_ENCODE (RELAX_BRANCH_AT (fragp->fr_subtype),
+			     RELAX_BRANCH_UNCOND (fragp->fr_subtype),
 			     RELAX_BRANCH_LIKELY (fragp->fr_subtype),
 			     RELAX_BRANCH_LINK (fragp->fr_subtype),
 			     toofar);
@@ -14555,8 +14559,11 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 	    }
 	  else
 	    {
+	      unsigned long at = RELAX_BRANCH_AT (fragp->fr_subtype);
+
 	      /* lw/ld $at, <sym>($gp)  R_MIPS_GOT16 */
-	      insn = HAVE_64BIT_ADDRESSES ? 0xdf810000 : 0x8f810000;
+	      insn = HAVE_64BIT_ADDRESSES ? 0xdf800000 : 0x8f800000;
+	      insn |= at << OP_SH_RT;
 	      exp.X_op = O_symbol;
 	      exp.X_add_symbol = fragp->fr_symbol;
 	      exp.X_add_number = fragp->fr_offset;
@@ -14583,7 +14590,8 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 		}
 
 	      /* d/addiu $at, $at, <sym>  R_MIPS_LO16 */
-	      insn = HAVE_64BIT_ADDRESSES ? 0x64210000 : 0x24210000;
+	      insn = HAVE_64BIT_ADDRESSES ? 0x64000000 : 0x24000000;
+	      insn |= at << OP_SH_RS | at << OP_SH_RT;
 
 	      fixp = fix_new_exp (fragp, buf - (bfd_byte *)fragp->fr_literal,
 				  4, &exp, FALSE, BFD_RELOC_LO16);
@@ -14595,9 +14603,10 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 
 	      /* j(al)r $at.  */
 	      if (RELAX_BRANCH_LINK (fragp->fr_subtype))
-		insn = 0x0020f809;
+		insn = 0x0000f809;
 	      else
-		insn = 0x00200008;
+		insn = 0x00000008;
+	      insn |= at << OP_SH_RS;
 
 	      md_number_to_chars ((char *) buf, insn, 4);
 	      buf += 4;

@@ -1,5 +1,20 @@
 2011-02-28  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* config/tc-mips.c (RELAX_BRANCH_ENCODE): Encode the temporary
+	register to use.
+	(RELAX_BRANCH_UNCOND): Adjust accordingly.
+	(RELAX_BRANCH_LIKELY): Likewise.
+	(RELAX_BRANCH_LINK): Likewise.
+	(RELAX_BRANCH_TOOFAR): Likewise.
+	(RELAX_BRANCH_AT): New macro.
+	(append_insn): Encode the temporary register to use in standard
+	MIPS branch relaxation.
+	(relaxed_branch_length): Update according to changes to
+	RELAX_BRANCH_ENCODE.
+	(md_convert_frag): Use the encoded register as the temporary.
+
+2011-02-28  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* config/tc-mips.c (mips_fix_adjustable): On REL targets also
 	reject PC-relative relocations.
 
