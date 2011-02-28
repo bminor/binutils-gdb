@@ -263,11 +263,11 @@ lval_func_check_validity (const struct value *v, int offset, int length)
 
   for (i = start; i < end; i++)
     {
-      int startoffset = (i == start) ? startrest : 0;
-      int length = (i == end) ? endrest : elsize;
+      int comp_offset = (i == start) ? startrest : 0;
+      int comp_length = (i == end) ? endrest : elsize;
 
-      if (!value_bits_valid (c->val, c->indices[i] * elsize + startoffset,
-			     length))
+      if (!value_bits_valid (c->val, c->indices[i] * elsize + comp_offset,
+			     comp_length))
 	return 0;
     }
 
@@ -317,12 +317,12 @@ lval_func_check_synthetic_pointer (const struct value *v,
 
   for (i = start; i < end; i++)
     {
-      int startoffset = (i == start) ? startrest : 0;
-      int length = (i == end) ? endrest : elsize;
+      int comp_offset = (i == start) ? startrest : 0;
+      int comp_length = (i == end) ? endrest : elsize;
 
       if (!value_bits_synthetic_pointer (c->val,
-					 c->indices[i] * elsize + startoffset,
-					 length))
+					 c->indices[i] * elsize + comp_offset,
+					 comp_length))
 	return 0;
     }
 

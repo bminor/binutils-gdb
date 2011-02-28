@@ -1,6 +1,8 @@
 2011-02-28  Michael Snyder  <msnyder@vmware.com>
 
-	* opencl-lang.c (lval_func_free_closure): Fix use-after-free.
+	* opencl-lang.c (lval_func_check_validity): Rename inner variables.
+	(lval_func_check_synthetic_pointer): Ditto.
+	(lval_func_free_closure): Fix use-after-free.
 
 2011-02-28  Tom Tromey  <tromey@redhat.com>
 
