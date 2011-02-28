@@ -189,6 +189,7 @@ ps_plog (const char *fmt, ...)
 
   va_start (args, fmt);
   vfprintf_filtered (gdb_stderr, fmt, args);
+  va_end (args);
 }
 
 /* Search for the symbol named NAME within the object named OBJ within

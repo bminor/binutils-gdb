@@ -1,3 +1,7 @@
+2011-02-28  Michael Snyder  <msnyder@vmware.com>
+
+	* proc-service.c (ps_plog): Call va_end before return.
+
 2011-02-28  Tom Tromey  <tromey@redhat.com>
 
 	* python/python.c (gdbpy_value_cst): New global.
