@@ -1,5 +1,15 @@
 2011-02-28  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* gas/mips/branch-misc-2.d: Adjust for relocation change.
+	* gas/mips/branch-misc-2pic.d: Likewise.
+	* gas/mips/branch-misc-4.d: New test for PC-relative relocation
+	overflow.
+	* gas/mips/branch-misc-4-64.d: Likewise.
+	* gas/mips/branch-misc-4.s: Source for the new tests.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
+2011-02-28  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* gas/mips/relax-swap1.l: Adjust for message capitalization
 	correction.
 	* gas/mips/relax-swap2.l: Likewise.

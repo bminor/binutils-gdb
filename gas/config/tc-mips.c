@@ -14248,8 +14248,12 @@ mips_fix_adjustable (fixS *fixp)
       && (S_GET_SEGMENT (fixp->fx_addsy)->flags & SEC_MERGE) != 0)
     return 0;
 
-  /* There is no place to store an in-place offset for JALR relocations.  */
-  if (fixp->fx_r_type == BFD_RELOC_MIPS_JALR && HAVE_IN_PLACE_ADDENDS)
+  /* There is no place to store an in-place offset for JALR relocations.
+     Likewise an in-range offset of PC-relative relocations may overflow
+     the in-place relocatable field if recalculated against the start
+     address of the symbol's containing section.  */
+  if (HAVE_IN_PLACE_ADDENDS
+      && (fixp->fx_pcrel || fixp->fx_r_type == BFD_RELOC_MIPS_JALR))
     return 0;
 
 #ifdef OBJ_ELF

@@ -1,5 +1,10 @@
 2011-02-28  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* config/tc-mips.c (mips_fix_adjustable): On REL targets also
+	reject PC-relative relocations.
+
+2011-02-28  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* config/tc-mips.c (md_convert_frag): Correct message
 	capitalization.
 
