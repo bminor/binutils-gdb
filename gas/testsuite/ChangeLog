@@ -1,5 +1,11 @@
 2011-02-28  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* gas/mips/relax-bposge.l: New test for DSP branch relaxation.
+	* gas/mips/relax-bposge.s: Source for the new test.
+	* gas/mips/mips.exp: Run the new test.
+
+2011-02-28  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* gas/mips/relax-at.d: New test for branch relaxation with .set
 	at.
 	* gas/mips/relax.s: Update to support the new test.

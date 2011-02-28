@@ -707,6 +707,8 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "relax-swap1-mips1"
     run_dump_test "relax-swap1-mips2"
     run_dump_test "relax-swap2"
+    run_list_test_arches "relax-bposge" "-mdsp -relax-branch" \
+					[mips_arch_list_matching mips64r2]
 
     run_list_test "illegal" "-32"
     run_list_test "baddata1" "-32"

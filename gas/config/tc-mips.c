@@ -2933,6 +2933,8 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	 out that the branch was out-of-range, we'll get an error.  */
       && !mips_opts.warn_about_macros
       && (mips_opts.at || mips_pic == NO_PIC)
+      /* Don't relax BPOSGE32/64 as they have no complementing branches.  */
+      && !(ip->insn_mo->membership & (INSN_DSP64 | INSN_DSP))
       && !mips_opts.mips16)
     {
       relaxed_branch = TRUE;
