@@ -1,3 +1,7 @@
+2011-02-28  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* mips-opc.c (mips_builtin_opcodes): Add "pref" macro.
+
 2011-02-22  Mike Frysinger  <vapier@gentoo.org>
 
 	* bfin-dis.c (OUTS): Remove p NULL check and txt NUL check.

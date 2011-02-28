@@ -1,5 +1,9 @@
 2011-02-28  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* config/tc-mips.c (macro): Handle M_PREF_AB.
+
+2011-02-28  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* config/tc-mips.c (RELAX_BRANCH_ENCODE): Encode the temporary
 	register to use.
 	(RELAX_BRANCH_UNCOND): Adjust accordingly.

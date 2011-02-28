@@ -6526,6 +6526,9 @@ macro (struct mips_cl_insn *ip)
     case M_CACHE_AB:
       s = "cache";
       goto st;
+    case M_PREF_AB:
+      s = "pref";
+      goto st;
     case M_SDC1_AB:
       s = "sdc1";
       coproc = 1;
@@ -6567,7 +6570,7 @@ macro (struct mips_cl_insn *ip)
 	  || mask == M_L_DAB
 	  || mask == M_S_DAB)
 	fmt = "T,o(b)";
-      else if (mask == M_CACHE_AB)
+      else if (mask == M_CACHE_AB || mask == M_PREF_AB)
 	fmt = "k,o(b)";
       else if (coproc)
 	fmt = "E,o(b)";
