@@ -1,5 +1,7 @@
 2011-02-28  Michael Snyder  <msnyder@vmware.com>
 
+	* python/py-cmd.c (cmdpy_init): Fix memory leak.
+
 	* breakpoint.c (catch_syscall_completer): Free malloced list.
 
 	* jv-lang.c (java_primitive_type_from_name): Add missing break.

@@ -481,7 +481,10 @@ cmdpy_init (PyObject *self, PyObject *args, PyObject *kw)
 	  pfx_name[out] = '\0';
 	}
       else if (cmp < 0)
+	{
+	  xfree (cmd_name);
 	  return -1;
+	}
     }
   if (PyObject_HasAttr (self, gdbpy_doc_cst))
     {
