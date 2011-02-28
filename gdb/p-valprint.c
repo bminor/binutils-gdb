@@ -149,7 +149,7 @@ pascal_val_print (struct type *type, const gdb_byte *valaddr,
 	  print_address_demangle (gdbarch, addr, stream, demangle);
 	  break;
 	}
-      elttype = check_typedef (TYPE_TARGET_TYPE (type));
+      check_typedef (TYPE_TARGET_TYPE (type));
 
       addr = unpack_pointer (type, valaddr + embedded_offset);
     print_unpacked_pointer:
