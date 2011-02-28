@@ -1326,13 +1326,12 @@ evaluate_subexp_standard (struct type *expect_type,
 
 	if (method)
 	  {
-	    struct block *b;
 	    CORE_ADDR funaddr;
 	    struct type *val_type;
 
 	    funaddr = find_function_addr (method, &val_type);
 
-	    b = block_for_pc (funaddr);
+	    block_for_pc (funaddr);
 
 	    CHECK_TYPEDEF (val_type);
 	  
@@ -2233,8 +2232,8 @@ evaluate_subexp_standard (struct type *expect_type,
 	}
 
     case BINOP_RANGE:
-      arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
-      arg2 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+      evaluate_subexp (NULL_TYPE, exp, pos, noside);
+      evaluate_subexp (NULL_TYPE, exp, pos, noside);
       if (noside == EVAL_SKIP)
 	goto nosideret;
       error (_("':' operator used in invalid context"));
@@ -2399,7 +2398,7 @@ evaluate_subexp_standard (struct type *expect_type,
       arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
       if (noside == EVAL_SKIP)
 	{
-	  arg2 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+	  evaluate_subexp (NULL_TYPE, exp, pos, noside);
 	  goto nosideret;
 	}
 
@@ -2426,7 +2425,7 @@ evaluate_subexp_standard (struct type *expect_type,
       arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
       if (noside == EVAL_SKIP)
 	{
-	  arg2 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+	  evaluate_subexp (NULL_TYPE, exp, pos, noside);
 	  goto nosideret;
 	}
 
