@@ -1,5 +1,7 @@
 2011-02-27  Michael Snyder  <msnyder@vmware.com>
 
+	* objc-lang.c (selectors_info): Prevent string overrun.
+
 	* tui/tui-stack.c (tui_get_function_from_frame): Fix off by one
 	error in strncpy.
 
