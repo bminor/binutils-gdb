@@ -1,5 +1,7 @@
 2011-02-28  Michael Snyder  <msnyder@vmware.com>
 
+	* dbxread.c (read_dbx_symtab): Discard unused value.
+
 	* eval.c (evaluate_subexp_standard): Delete unused variable,
 	and discard unused values.
 
