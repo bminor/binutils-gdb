@@ -1,3 +1,18 @@
+2011-02-28  Kai Tietz  <kai.tietz@onevision.com>
+
+	* archive.c (_bfd_find_nested_archive): Use filename_(n)cmp.
+	(adjust_relative_path): Likewise.
+	(_bfd_construct_extended_name_table): Likewise.
+	* corefile.c (generic_core_file_matches_executable_p): Likewise.
+	* elf32-bfin.c (bfinfdpic_relocate_section): Likewise.
+	* elf32-frv.c (elf32_frv_relocate_section): Likewise.
+	* elf32-spu.c (sort_bfds): Likewise.
+	(spu_elf_auto_overlay): Likewise.
+	* syms.c (_bfd_stab_section_find_nearest_line): Likewise.
+	* xcofflink.c (xcoff_set_import_path): Likewise.
+	* xtensa-isa.c (xtensa_regfile_lookup): Likewise.
+	(xtensa_regfile_lookup_shortname): Likewise.
+
 2011-02-28  Alan Modra  <amodra@gmail.com>
 
 	PR 12513

@@ -758,9 +758,9 @@ xcoff_set_import_path (struct bfd_link_info *info,
 	   *pp != NULL;
 	   pp = &(*pp)->next, ++c)
 	{
-	  if (strcmp ((*pp)->path, imppath) == 0
-	      && strcmp ((*pp)->file, impfile) == 0
-	      && strcmp ((*pp)->member, impmember) == 0)
+	  if (filename_cmp ((*pp)->path, imppath) == 0
+	      && filename_cmp ((*pp)->file, impfile) == 0
+	      && filename_cmp ((*pp)->member, impmember) == 0)
 	    break;
 	}
 

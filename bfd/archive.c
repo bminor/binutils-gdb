@@ -348,7 +348,7 @@ _bfd_find_nested_archive (bfd *arch_bfd, const char *filename)
        abfd != NULL;
        abfd = abfd->archive_next)
     {
-      if (strcmp (filename, abfd->filename) == 0)
+      if (filename_cmp (filename, abfd->filename) == 0)
         return abfd;
     }
   abfd = bfd_openr (filename, NULL);
@@ -1359,7 +1359,7 @@ adjust_relative_path (const char * path, const char * ref_path)
       while (*e2 && ! IS_DIR_SEPARATOR (*e2))
 	++e2;
       if (*e1 == '\0' || *e2 == '\0' || e1 - pathp != e2 - refp
-	  || strncmp (pathp, refp, e1 - pathp) != 0)
+	  || filename_ncmp (pathp, refp, e1 - pathp) != 0)
 	break;
       pathp = e1 + 1;
       refp = e2 + 1;
@@ -1464,7 +1464,7 @@ _bfd_construct_extended_name_table (bfd *abfd,
           /* If the path is the same as the previous path seen,
              reuse it.  This can happen when flattening a thin
              archive that contains other archives.  */
-          if (last_filename && strcmp (last_filename, filename) == 0)
+          if (last_filename && filename_cmp (last_filename, filename) == 0)
             continue;
 
           last_filename = filename;
@@ -1510,7 +1510,7 @@ _bfd_construct_extended_name_table (bfd *abfd,
       else
 	{
 	  struct ar_hdr *hdr = arch_hdr (current);
-	  if (strncmp (normal, hdr->ar_name, thislen) != 0
+	  if (filename_ncmp (normal, hdr->ar_name, thislen) != 0
 	      || (thislen < sizeof hdr->ar_name
 		  && hdr->ar_name[thislen] != ar_padchar (current)))
 	    {
@@ -1558,7 +1558,7 @@ _bfd_construct_extended_name_table (bfd *abfd,
              archive that contains other archives.
              If the path is relative, adjust it relative to
              the containing archive.  */
-          if (last_filename && strcmp (last_filename, filename) == 0)
+          if (last_filename && filename_cmp (last_filename, filename) == 0)
             normal = last_filename;
           else if (! IS_ABSOLUTE_PATH (filename)
                    && ! IS_ABSOLUTE_PATH (abfd->filename))
