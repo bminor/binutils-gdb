@@ -9,6 +9,9 @@
 
 2011-02-28  Michael Snyder  <msnyder@vmware.com>
 
+	* python/py-param.c (set_parameter_value): Add missing
+	break statement.
+
 	* linux-record.c (record_linux_system_call): Add missing
 	break statement.
 

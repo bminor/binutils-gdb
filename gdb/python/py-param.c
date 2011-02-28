@@ -214,9 +214,8 @@ set_parameter_value (parmpy_object *self, PyObject *value)
 	    self->value.autoboolval = AUTO_BOOLEAN_TRUE;
 	  else 
 	    self->value.autoboolval = AUTO_BOOLEAN_FALSE;
-
-	  break;
 	}
+      break;
 
     case var_integer:
     case var_zinteger:
