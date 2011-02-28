@@ -1,5 +1,7 @@
 2011-02-27  Michael Snyder  <msnyder@vmware.com>
 
+	* server.c (handle_query): Discard unused value.
+
 	* hostio.c (require_data): Free malloc memory before returning
 	error.
 

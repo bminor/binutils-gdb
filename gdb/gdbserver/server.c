@@ -1357,7 +1357,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 
       sprintf (own_buf, "QC");
       own_buf += 2;
-      own_buf = write_ptid (own_buf, gdb_id);
+      write_ptid (own_buf, gdb_id);
       return;
     }
 
