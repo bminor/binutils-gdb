@@ -1,5 +1,10 @@
 2011-02-28  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* mips-opc.c (mips_builtin_opcodes): Correct register use
+	annotation of "alnv.ps".
+
+2011-02-28  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* mips-opc.c (mips_builtin_opcodes): Add "pref" macro.
 
 2011-02-22  Mike Frysinger  <vapier@gentoo.org>

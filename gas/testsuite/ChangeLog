@@ -1,5 +1,12 @@
 2011-02-28  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* gas/mips/alnv_ps-swap.d: New test for ALNV.PS instruction
+	branch swapping.
+	* gas/mips/alnv_ps-swap.s: Source for the new test.
+	* gas/mips/mips.exp: Run the new test.
+
+2011-02-28  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* gas/mips/relax-bposge.l: New test for DSP branch relaxation.
 	* gas/mips/relax-bposge.s: Source for the new test.
 	* gas/mips/mips.exp: Run the new test.
