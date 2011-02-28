@@ -1,3 +1,11 @@
+2011-02-28  Alan Modra  <amodra@gmail.com>
+
+	* symbols.c (report_op_error): Remove unnecessary forward declaration.
+	Add "op" parameter.  Report operator and operand segments in error
+	message, not operand symbols.
+	(resolve_symbol_value): Always set segment for equated symbols, not
+	just when finalizing.  Adjust report_op_error calls.
+
 2011-02-25  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (reloc): Don't sign-check 4-byte relocations
