@@ -1,3 +1,7 @@
+2011-02-28  Michael Snyder  <msnyder@vmware.com>
+
+	* gdb.cp/overload.cc: Change initializer value to integer.
+
 2011-02-27  Michael Snyder  <msnyder@vmware.com>
 
 	* gdb.multi/base.exp: Add test for remove-inferiors.
