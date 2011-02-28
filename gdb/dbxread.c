@@ -2853,7 +2853,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
 	   N_SO, the linker did not relocate them (sigh).  */
 	valu += last_source_start_addr;
 
-      new = push_context (desc, valu);
+      push_context (desc, valu);
       break;
 
     case N_RBRAC:
