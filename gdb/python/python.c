@@ -62,6 +62,7 @@ PyObject *gdbpy_children_cst;
 PyObject *gdbpy_display_hint_cst;
 PyObject *gdbpy_doc_cst;
 PyObject *gdbpy_enabled_cst;
+PyObject *gdbpy_value_cst;
 
 /* The GdbError exception.  */
 PyObject *gdbpy_gdberror_exc;
@@ -1015,6 +1016,7 @@ Enables or disables printing of Python stack traces."),
   gdbpy_display_hint_cst = PyString_FromString ("display_hint");
   gdbpy_doc_cst = PyString_FromString ("__doc__");
   gdbpy_enabled_cst = PyString_FromString ("enabled");
+  gdbpy_value_cst = PyString_FromString ("value");
 
   /* Release the GIL while gdb runs.  */
   PyThreadState_Swap (NULL);

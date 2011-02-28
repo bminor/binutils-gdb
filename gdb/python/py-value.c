@@ -1162,9 +1162,8 @@ convert_value_from_python (PyObject *obj)
       else if (gdbpy_is_lazy_string (obj))
 	{
 	  PyObject *result;
-	  PyObject *function = PyString_FromString ("value");
 
-	  result = PyObject_CallMethodObjArgs (obj, function,  NULL);
+	  result = PyObject_CallMethodObjArgs (obj, gdbpy_value_cst,  NULL);
 	  value = value_copy (((value_object *) result)->value);
 	}
       else
