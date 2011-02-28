@@ -11360,8 +11360,11 @@ catch_syscall_completer (struct cmd_list_element *cmd,
                          char *text, char *word)
 {
   const char **list = get_syscall_names ();
+  char **retlist
+    = (list == NULL) ? NULL : complete_on_enum (list, text, word);
 
-  return (list == NULL) ? NULL : complete_on_enum (list, text, word);
+  xfree (list);
+  return retlist;
 }
 
 /* Tracepoint-specific operations.  */
