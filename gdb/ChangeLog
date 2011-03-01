@@ -1,5 +1,7 @@
 2011-02-28  Michael Snyder  <msnyder@vmware.com>
 
+	* linux-nat.c (linux_handle_extended_wait): Delete unused variable.
+
 	* remote.c (remote_get_noisy_reply): Discard unused value.
 	(remote_vcont_resume): Ditto.
 	(remote_stop_ns): Ditto.

@@ -2198,8 +2198,6 @@ linux_handle_extended_wait (struct lwp_info *lp, int status,
       if (event == PTRACE_EVENT_FORK
 	  && linux_fork_checkpointing_p (GET_PID (lp->ptid)))
 	{
-	  struct fork_info *fp;
-
 	  /* Handle checkpointing by linux-fork.c here as a special
 	     case.  We don't want the follow-fork-mode or 'catch fork'
 	     to interfere with this.  */
@@ -2209,9 +2207,8 @@ linux_handle_extended_wait (struct lwp_info *lp, int status,
 	  detach_breakpoints (new_pid);
 
 	  /* Retain child fork in ptrace (stopped) state.  */
-	  fp = find_fork_pid (new_pid);
-	  if (!fp)
-	    fp = add_fork (new_pid);
+	  if (!find_fork_pid (new_pid))
+	    add_fork (new_pid);
 
 	  /* Report as spurious, so that infrun doesn't want to follow
 	     this fork.  We're actually doing an infcall in
