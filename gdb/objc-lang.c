@@ -720,6 +720,7 @@ selectors_info (char *regexp, int from_tty)
 	strcpy(myregexp, ".*]");
       else
 	{
+	  /* Allow a few extra bytes because of the strcat below.  */
 	  if (sizeof (myregexp) < strlen (regexp) + 4)
 	    error (_("Regexp is too long: %s"), regexp);
 	  strcpy(myregexp, regexp);
@@ -863,6 +864,7 @@ classes_info (char *regexp, int from_tty)
     strcpy(myregexp, ".* ");	/* Null input: match all objc classes.  */
   else
     {
+      /* Allow a few extra bytes because of the strcat below.  */
       if (sizeof (myregexp) < strlen (regexp) + 4)
 	error (_("Regexp is too long: %s"), regexp);
       strcpy(myregexp, regexp);
