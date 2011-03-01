@@ -1316,7 +1316,11 @@ coff_getfilename (union internal_auxent *aux_entry)
   char *result;
 
   if (aux_entry->x_file.x_n.x_zeroes == 0)
-    strcpy (buffer, stringtab + aux_entry->x_file.x_n.x_offset);
+    {
+      if (strlen (stringtab + aux_entry->x_file.x_n.x_offset) >= BUFSIZ)
+	internal_error (__FILE__, __LINE__, _("coff file name too long"));
+      strcpy (buffer, stringtab + aux_entry->x_file.x_n.x_offset);
+    }
   else
     {
       strncpy (buffer, aux_entry->x_file.x_fname, FILNMLEN);

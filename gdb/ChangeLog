@@ -1,5 +1,7 @@
 2011-02-28  Michael Snyder  <msnyder@vmware.com>
 
+	* coffread.c (coff_getfilename): Add check to avoid overflow.
+
 	* objc-lang.c (selectors_info): Add a small safety margin to 
 	avoid overflow.
 	(classes_info): Error out on too long REGEXP.
