@@ -5634,7 +5634,7 @@ ada_make_symbol_completion_list (char *text0, char *word)
   {
     const size_t completions_size = 
       VEC_length (char_ptr, completions) * sizeof (char *);
-    char **result = malloc (completions_size);
+    char **result = xmalloc (completions_size);
     
     memcpy (result, VEC_address (char_ptr, completions), completions_size);
 
