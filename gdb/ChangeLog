@@ -1,5 +1,7 @@
 2011-03-01  Michael Snyder  <msnyder@vmware.com>
 
+	* linespec.c (decode_line_1): Check for null before dereference.
+
 	* reverse.c (record_restore): Move null-check to before pointer
 	dereference.
 
