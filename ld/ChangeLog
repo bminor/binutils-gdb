@@ -1,3 +1,9 @@
+2011-03-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/12529
+	* testplug.c: Don't include "filenames.h".
+	(onclaim_file): Don't use filename_cmp.
+
 2011-02-28  Kai Tietz  <kai.tietz@onevision.com>
 
 	* emultempl/beos.em (sort_by_file_name): Use filename_(n)cmp.
