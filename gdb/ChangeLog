@@ -1,5 +1,8 @@
 2011-02-28  Michael Snyder  <msnyder@vmware.com>
 
+	* dwarf2read.c (add_partial_symbol): Discard unused values.
+	(read_base_type): Delete unused variable.
+
 	* dbxread.c (read_dbx_symtab): Discard unused value.
 
 	* eval.c (evaluate_subexp_standard): Delete unused variable,

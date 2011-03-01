@@ -3837,25 +3837,25 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
              of the global scope.  But in Ada, we want to be able to access
              nested procedures globally.  So all Ada subprograms are stored
              in the global scope.  */
-	  /*prim_record_minimal_symbol (actual_name, pdi->lowpc + baseaddr,
+	  /* prim_record_minimal_symbol (actual_name, pdi->lowpc + baseaddr,
 	     mst_text, objfile); */
-	  psym = add_psymbol_to_list (actual_name, strlen (actual_name),
-				      built_actual_name,
-				      VAR_DOMAIN, LOC_BLOCK,
-				      &objfile->global_psymbols,
-				      0, pdi->lowpc + baseaddr,
-				      cu->language, objfile);
+	  add_psymbol_to_list (actual_name, strlen (actual_name),
+			       built_actual_name,
+			       VAR_DOMAIN, LOC_BLOCK,
+			       &objfile->global_psymbols,
+			       0, pdi->lowpc + baseaddr,
+			       cu->language, objfile);
 	}
       else
 	{
-	  /*prim_record_minimal_symbol (actual_name, pdi->lowpc + baseaddr,
+	  /* prim_record_minimal_symbol (actual_name, pdi->lowpc + baseaddr,
 	     mst_file_text, objfile); */
-	  psym = add_psymbol_to_list (actual_name, strlen (actual_name),
-				      built_actual_name,
-				      VAR_DOMAIN, LOC_BLOCK,
-				      &objfile->static_psymbols,
-				      0, pdi->lowpc + baseaddr,
-				      cu->language, objfile);
+	  add_psymbol_to_list (actual_name, strlen (actual_name),
+			       built_actual_name,
+			       VAR_DOMAIN, LOC_BLOCK,
+			       &objfile->static_psymbols,
+			       0, pdi->lowpc + baseaddr,
+			       cu->language, objfile);
 	}
       break;
     case DW_TAG_constant:
@@ -3866,10 +3866,9 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 	  list = &objfile->global_psymbols;
 	else
 	  list = &objfile->static_psymbols;
-	psym = add_psymbol_to_list (actual_name, strlen (actual_name),
-				    built_actual_name, VAR_DOMAIN, LOC_STATIC,
-				    list, 0, 0, cu->language, objfile);
-
+	add_psymbol_to_list (actual_name, strlen (actual_name),
+			     built_actual_name, VAR_DOMAIN, LOC_STATIC,
+			     list, 0, 0, cu->language, objfile);
       }
       break;
     case DW_TAG_variable:
@@ -3901,12 +3900,12 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 	     table building.  */
 
 	  if (pdi->locdesc || pdi->has_type)
-	    psym = add_psymbol_to_list (actual_name, strlen (actual_name),
-					built_actual_name,
-					VAR_DOMAIN, LOC_STATIC,
-					&objfile->global_psymbols,
-					0, addr + baseaddr,
-					cu->language, objfile);
+	    add_psymbol_to_list (actual_name, strlen (actual_name),
+				 built_actual_name,
+				 VAR_DOMAIN, LOC_STATIC,
+				 &objfile->global_psymbols,
+				 0, addr + baseaddr,
+				 cu->language, objfile);
 	}
       else
 	{
@@ -3917,14 +3916,14 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 		xfree (actual_name);
 	      return;
 	    }
-	  /*prim_record_minimal_symbol (actual_name, addr + baseaddr,
+	  /* prim_record_minimal_symbol (actual_name, addr + baseaddr,
 	     mst_file_data, objfile); */
-	  psym = add_psymbol_to_list (actual_name, strlen (actual_name),
-				      built_actual_name,
-				      VAR_DOMAIN, LOC_STATIC,
-				      &objfile->static_psymbols,
-				      0, addr + baseaddr,
-				      cu->language, objfile);
+	  add_psymbol_to_list (actual_name, strlen (actual_name),
+			       built_actual_name,
+			       VAR_DOMAIN, LOC_STATIC,
+			       &objfile->static_psymbols,
+			       0, addr + baseaddr,
+			       cu->language, objfile);
 	}
       break;
     case DW_TAG_typedef:
@@ -8184,7 +8183,6 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
 static struct type *
 read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
 {
-  struct gdbarch *gdbarch = get_objfile_arch (cu->objfile);
   struct type *base_type;
   struct type *range_type;
   struct attribute *attr;
