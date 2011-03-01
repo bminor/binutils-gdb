@@ -1,5 +1,9 @@
 2011-02-28  Michael Snyder  <msnyder@vmware.com>
 
+	* objc-lang.c (selectors_info): Add a small safety margin to 
+	avoid overflow.
+	(classes_info): Error out on too long REGEXP.
+
 	* infrun.c (handle_inferior_event): Remove unused function call.
 
 	* fork-child.c (fork_inferior): Remove ifdef'd code and

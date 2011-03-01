@@ -720,7 +720,7 @@ selectors_info (char *regexp, int from_tty)
 	strcpy(myregexp, ".*]");
       else
 	{
-	  if (sizeof (myregexp) < strlen (regexp) + 1)
+	  if (sizeof (myregexp) < strlen (regexp) + 4)
 	    error (_("Regexp is too long: %s"), regexp);
 	  strcpy(myregexp, regexp);
 	  if (myregexp[strlen(myregexp) - 1] == '$') /* end of selector */
@@ -863,6 +863,8 @@ classes_info (char *regexp, int from_tty)
     strcpy(myregexp, ".* ");	/* Null input: match all objc classes.  */
   else
     {
+      if (sizeof (myregexp) < strlen (regexp) + 4)
+	error (_("Regexp is too long: %s"), regexp);
       strcpy(myregexp, regexp);
       if (myregexp[strlen(myregexp) - 1] == '$')
 	/* In the method name, the end of the class name is marked by ' '.  */
