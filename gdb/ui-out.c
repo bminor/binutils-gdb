@@ -492,7 +492,9 @@ ui_out_field_core_addr (struct ui_out *uiout,
 			struct gdbarch *gdbarch,
 			CORE_ADDR address)
 {
-  char addstr[20];
+  /* Maximum size string returned by hex_string_custom is 50 chars.
+     This buffer must be bigger than that, for safety.  */
+  char addstr[64];
   int addr_bit = gdbarch_addr_bit (gdbarch);
 
   if (addr_bit < (sizeof (CORE_ADDR) * HOST_CHAR_BIT))
