@@ -1065,7 +1065,7 @@ attach_thread (ptid_t ptid, const td_thrhandle_t *th_p,
 
   /* Add the thread to GDB's thread list.  */
   if (tp == NULL)
-    tp = add_thread_with_info (ptid, private);
+    add_thread_with_info (ptid, private);
   else
     tp->private = private;
 
