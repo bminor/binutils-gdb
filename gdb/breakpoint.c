@@ -5504,8 +5504,10 @@ static void
 breakpoint_adjustment_warning (CORE_ADDR from_addr, CORE_ADDR to_addr,
                                int bnum, int have_bnum)
 {
-  char astr1[40];
-  char astr2[40];
+  /* The longest string possibly returned by hex_string_custom
+     is 50 chars.  These must be at least that big for safety.  */
+  char astr1[64];
+  char astr2[64];
 
   strcpy (astr1, hex_string_custom ((unsigned long) from_addr, 8));
   strcpy (astr2, hex_string_custom ((unsigned long) to_addr, 8));

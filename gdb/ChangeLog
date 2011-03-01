@@ -1,5 +1,8 @@
 2011-02-28  Michael Snyder  <msnyder@vmware.com>
 
+	* breakpoint.c (breakpoint_adjustment_warning): Make local char
+	buffers a little bigger, to avoid possibility of an overflow.
+
 	* coffread.c (coff_getfilename): Add check to avoid overflow.
 
 	* objc-lang.c (selectors_info): Add a small safety margin to 
