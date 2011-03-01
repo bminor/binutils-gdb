@@ -1,5 +1,8 @@
 2011-03-01  Michael Snyder  <msnyder@vmware.com>
 
+	* reverse.c (record_restore): Move null-check to before pointer
+	dereference.
+
 	* python/py-utils.c (gdbpy_obj_to_string): Delete unused variable.
 
 	* objc-lang.c (selectors_info): Add explanitory comment.
