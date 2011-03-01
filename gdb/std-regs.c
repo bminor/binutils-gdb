@@ -70,11 +70,8 @@ value_of_builtin_frame_pc_reg (struct frame_info *frame, const void *baton)
       struct value *val = allocate_value (func_ptr_type);
       gdb_byte *buf = value_contents_raw (val);
 
-      if (frame == NULL)
-	memset (buf, 0, TYPE_LENGTH (value_type (val)));
-      else
-	gdbarch_address_to_pointer (gdbarch, func_ptr_type,
-				    buf, get_frame_pc (frame));
+      gdbarch_address_to_pointer (gdbarch, func_ptr_type,
+				  buf, get_frame_pc (frame));
       return val;
     }
 }
