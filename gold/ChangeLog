@@ -1,3 +1,10 @@
+2011-03-01  Ian Lance Taylor  <iant@google.com>
+
+	Backport from mainline:
+	2011-01-04  Cary Coutant  <ccoutant@google.com>
+	* script-sections.cc (Sort_output_sections::operator()): Sort TLS
+	sections before NOBITS sections.
+
 2011-02-27  Ian Lance Taylor  <iant@google.com>
 
 	Backport from mainline:
