@@ -12377,6 +12377,7 @@ process_object (char * file_name, FILE * file)
 
   for (i = ARRAY_SIZE (dynamic_info); i--;)
     dynamic_info[i] = 0;
+  dynamic_info_DT_GNU_HASH = 0;
 
   /* Process the file.  */
   if (show_name)

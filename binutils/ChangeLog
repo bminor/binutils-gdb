@@ -1,3 +1,8 @@
+2011-03-01  Akos Pasztory  <akos.pasztory@gmail.com>
+
+	PR binutils/12523
+	* readelf.c (process_object): Clear dynamic_info_DT_GNU_HASH.
+
 2011-02-28  Kai Tietz  <kai.tietz@onevision.com>
 
 	* debug.c (debug_start_source): Use filename_(n)cmp.
