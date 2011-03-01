@@ -455,7 +455,7 @@ remote_get_noisy_reply (char **buf_p,
 	  from = ul;
 
 	  p = pp + 1;
-	  pp = unpack_varlen_hex (p, &ul);
+	  unpack_varlen_hex (p, &ul);
 	  to = ul;
 
 	  org_to = to;
@@ -4464,7 +4464,7 @@ remote_vcont_resume (ptid_t ptid, int step, enum target_signal siggnal)
 	 so we don't have any TID numbers the inferior will
 	 understand.  Make sure to only send forms that do not specify
 	 a TID.  */
-      p = append_resumption (p, endp, minus_one_ptid, step, siggnal);
+      append_resumption (p, endp, minus_one_ptid, step, siggnal);
     }
   else if (ptid_equal (ptid, minus_one_ptid) || ptid_is_pid (ptid))
     {
@@ -4479,12 +4479,12 @@ remote_vcont_resume (ptid_t ptid, int step, enum target_signal siggnal)
 	}
 
       /* And continue others without a signal.  */
-      p = append_resumption (p, endp, ptid, /*step=*/ 0, TARGET_SIGNAL_0);
+      append_resumption (p, endp, ptid, /*step=*/ 0, TARGET_SIGNAL_0);
     }
   else
     {
       /* Scheduler locking; resume only PTID.  */
-      p = append_resumption (p, endp, ptid, step, siggnal);
+      append_resumption (p, endp, ptid, step, siggnal);
     }
 
   gdb_assert (strlen (rs->buf) < get_remote_packet_size ());
@@ -4711,7 +4711,7 @@ remote_stop_ns (ptid_t ptid)
 	  nptid = ptid;
 	}
 
-      p = write_ptid (p, endp, nptid);
+      write_ptid (p, endp, nptid);
     }
 
   /* In non-stop, we get an immediate OK reply.  The stop reply will
