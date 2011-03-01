@@ -1,5 +1,7 @@
 2011-02-28  Michael Snyder  <msnyder@vmware.com>
 
+	* infrun.c (handle_inferior_event): Remove unused function call.
+
 	* fork-child.c (fork_inferior): Remove ifdef'd code and
 	unused variable.
 
