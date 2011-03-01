@@ -1,5 +1,8 @@
 2011-03-01  Michael Snyder  <msnyder@vmware.com>
 
+	* python/py-prettyprint.c (apply_val_pretty_printer): Remove
+	superfluous null check.
+
 	* std-regs.c (value_of_builtin_frame_pc_reg): Frame can't be null.
 	(value_of_builtin_frame_fp_reg): Ditto.
 
