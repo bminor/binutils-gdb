@@ -367,12 +367,11 @@ fork_inferior (char *exec_file_arg, char *allargs, char **env,
 	  /* Otherwise, we directly exec the target program with
 	     execvp.  */
 	  int i;
-	  char *errstring;
 
 	  execvp (exec_file, argv);
 
 	  /* If we get here, it's an error.  */
-	  errstring = safe_strerror (errno);
+	  safe_strerror (errno);
 	  fprintf_unfiltered (gdb_stderr, "Cannot exec %s ", exec_file);
 
 	  i = 1;
@@ -384,10 +383,6 @@ fork_inferior (char *exec_file_arg, char *allargs, char **env,
 	      i++;
 	    }
 	  fprintf_unfiltered (gdb_stderr, ".\n");
-#if 0
-	  /* This extra info seems to be useless.  */
-	  fprintf_unfiltered (gdb_stderr, "Got error %s.\n", errstring);
-#endif
 	  gdb_flush (gdb_stderr);
 	  _exit (0177);
 	}
