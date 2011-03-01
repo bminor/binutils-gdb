@@ -312,8 +312,8 @@ display_gdb_prompt (char *new_prompt)
       rl_callback_handler_install (new_prompt, input_handler);
     }
   /* new_prompt at this point can be the top of the stack or the one
-     passed in.  */
-  else if (new_prompt)
+     passed in.  It can't be NULL.  */
+  else
     {
       /* Don't use a _filtered function here.  It causes the assumed
          character position to be off, since the newline we read from

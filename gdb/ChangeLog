@@ -1,5 +1,7 @@
 2011-03-01  Michael Snyder  <msnyder@vmware.com>
 
+	* event-top.c (display_gdb_prompt): Remove superfluous null check.
+
 	* python/py-prettyprint.c (apply_val_pretty_printer): VAL may
 	be null.
 
