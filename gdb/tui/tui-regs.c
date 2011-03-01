@@ -689,7 +689,6 @@ tui_register_format (struct frame_info *frame,
   const char *name;
   struct cleanup *cleanups;
   char *p, *s;
-  struct type *type = register_type (gdbarch, regnum);
 
   name = gdbarch_register_name (gdbarch, regnum);
   if (name == 0)
