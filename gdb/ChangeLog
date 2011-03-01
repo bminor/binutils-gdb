@@ -1,5 +1,8 @@
 2011-03-01  Michael Snyder  <msnyder@vmware.com>
 
+	* ada-lang.c (aggregate_assign_others): Rename inner scope variable
+	which shadows function parameter.
+
 	* tracepoint.c (create_tsv_from_upload): Superfluous call
 	to xstrdup.  Callee already calls xstrdup.
 
