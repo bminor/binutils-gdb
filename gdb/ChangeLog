@@ -1,5 +1,7 @@
 2011-03-01  Michael Snyder  <msnyder@vmware.com>
 
+	* cli/cli-dump.c (restore_binary_file): Validate ftell return value.
+
 	* ada-lang.c (ada_make_symbol_completion_list): Replace malloc
 	with xmalloc.
 

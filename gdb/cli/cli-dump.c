@@ -511,7 +511,11 @@ restore_binary_file (char *filename, struct callback_data *data)
 
   /* Get the file size for reading.  */
   if (fseek (file, 0, SEEK_END) == 0)
-    len = ftell (file);
+    {
+      len = ftell (file);
+      if (len < 0)
+	perror_with_name (filename);
+    }
   else
     perror_with_name (filename);
 
