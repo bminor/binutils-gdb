@@ -3190,7 +3190,7 @@ create_tsv_from_upload (struct uploaded_tsv *utsv)
     sprintf (buf, "%s_%d", namebase, try_num++);
 
   /* We have an available name, create the variable.  */
-  tsv = create_trace_state_variable (xstrdup (buf));
+  tsv = create_trace_state_variable (buf);
   tsv->initial_value = utsv->initial_value;
   tsv->builtin = utsv->builtin;
 
