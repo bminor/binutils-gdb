@@ -309,6 +309,9 @@ extern void arm_displaced_step_fixup (struct gdbarch *,
 				      struct displaced_step_closure *,
 				      CORE_ADDR, CORE_ADDR, struct regcache *);
 
+/* Return the bit mask in ARM_PS_REGNUM that indicates Thumb mode.  */
+extern int arm_psr_thumb_bit (struct gdbarch *);
+
 /* Is the instruction at the given memory address a Thumb or ARM
    instruction?  */
 extern int arm_pc_is_thumb (struct gdbarch *, CORE_ADDR);

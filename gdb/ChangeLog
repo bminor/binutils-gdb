@@ -1,3 +1,13 @@
+2011-03-01  Ulrich Weigand  <ulrich.weigand@linaro.org>
+
+	* arm-linux-tdep.c (ARM_LDR_PC_SP_4): Add define.
+	(arm_linux_restart_syscall_init): Handle both on-stack and in-kernel
+	versions of the trampoline.  Handle Thumb vs. ARM addresses.
+	(arm_kernel_linux_restart_syscall_tramp_frame): New global.
+	(arm_linux_init_abi): Install it.
+	* arm-tdep.c (arm_psr_thumb_bit): Make global.
+	* arm-tdep.c (arm_psr_thumb_bit): Add prototype.
+
 2011-02-28  Michael Snyder  <msnyder@vmware.com>
 
 	* ui-out.c (ui_out_field_core_addr): Make local char buffer

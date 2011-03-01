@@ -262,7 +262,7 @@ int arm_apcs_32 = 1;
 
 /* Return the bit mask in ARM_PS_REGNUM that indicates Thumb mode.  */
 
-static int
+int
 arm_psr_thumb_bit (struct gdbarch *gdbarch)
 {
   if (gdbarch_tdep (gdbarch)->is_m)

@@ -239,6 +239,7 @@ static const char arm_linux_thumb2_le_breakpoint[] = { 0xf0, 0xf7, 0x00, 0xa0 };
    whenever OABI support has been enabled in the kernel.  */
 #define ARM_OABI_SYSCALL_RESTART_SYSCALL 0xef900000
 #define ARM_LDR_PC_SP_12		0xe49df00c
+#define ARM_LDR_PC_SP_4			0xe49df004
 
 static void
 arm_linux_sigtramp_cache (struct frame_info *this_frame,
@@ -355,10 +356,36 @@ arm_linux_restart_syscall_init (const struct tramp_frame *self,
 				struct trad_frame_cache *this_cache,
 				CORE_ADDR func)
 {
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
   CORE_ADDR sp = get_frame_register_unsigned (this_frame, ARM_SP_REGNUM);
+  CORE_ADDR pc = get_frame_memory_unsigned (this_frame, sp, 4);
+  CORE_ADDR cpsr = get_frame_register_unsigned (this_frame, ARM_PS_REGNUM);
+  ULONGEST t_bit = arm_psr_thumb_bit (gdbarch);
+  int sp_offset;
 
-  trad_frame_set_reg_addr (this_cache, ARM_PC_REGNUM, sp);
-  trad_frame_set_reg_value (this_cache, ARM_SP_REGNUM, sp + 12);
+  /* There are two variants of this trampoline; with older kernels, the
+     stub is placed on the stack, while newer kernels use the stub from
+     the vector page.  They are identical except that the older version
+     increments SP by 12 (to skip stored PC and the stub itself), while
+     the newer version increments SP only by 4 (just the stored PC).  */
+  if (self->insn[1].bytes == ARM_LDR_PC_SP_4)
+    sp_offset = 4;
+  else
+    sp_offset = 12;
+
+  /* Update Thumb bit in CPSR.  */
+  if (pc & 1)
+    cpsr |= t_bit;
+  else
+    cpsr &= ~t_bit;
+
+  /* Remove Thumb bit from PC.  */
+  pc = gdbarch_addr_bits_remove (gdbarch, pc);
+
+  /* Save previous register values.  */
+  trad_frame_set_reg_value (this_cache, ARM_SP_REGNUM, sp + sp_offset);
+  trad_frame_set_reg_value (this_cache, ARM_PC_REGNUM, pc);
+  trad_frame_set_reg_value (this_cache, ARM_PS_REGNUM, cpsr);
 
   /* Save a frame ID.  */
   trad_frame_set_id (this_cache, frame_id_build (sp, func));
@@ -412,6 +439,17 @@ static struct tramp_frame arm_linux_restart_syscall_tramp_frame = {
   {
     { ARM_OABI_SYSCALL_RESTART_SYSCALL, -1 },
     { ARM_LDR_PC_SP_12, -1 },
+    { TRAMP_SENTINEL_INSN }
+  },
+  arm_linux_restart_syscall_init
+};
+
+static struct tramp_frame arm_kernel_linux_restart_syscall_tramp_frame = {
+  NORMAL_FRAME,
+  4,
+  {
+    { ARM_OABI_SYSCALL_RESTART_SYSCALL, -1 },
+    { ARM_LDR_PC_SP_4, -1 },
     { TRAMP_SENTINEL_INSN }
   },
   arm_linux_restart_syscall_init
@@ -1000,6 +1038,8 @@ arm_linux_init_abi (struct gdbarch_info info,
 				&arm_eabi_linux_rt_sigreturn_tramp_frame);
   tramp_frame_prepend_unwinder (gdbarch,
 				&arm_linux_restart_syscall_tramp_frame);
+  tramp_frame_prepend_unwinder (gdbarch,
+				&arm_kernel_linux_restart_syscall_tramp_frame);
 
   /* Core file support.  */
   set_gdbarch_regset_from_core_section (gdbarch,
