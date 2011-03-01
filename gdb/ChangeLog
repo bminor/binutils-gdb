@@ -1,5 +1,7 @@
 2011-02-28  Michael Snyder  <msnyder@vmware.com>
 
+	* linespec.c (decode_objc): Delete unused variable.
+
 	* tui/tui-regs.c (tui_register_format): Delete unused variable.
 
 	* dwarf2read.c (add_partial_symbol): Discard unused values.
