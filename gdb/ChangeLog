@@ -1,5 +1,7 @@
 2011-03-01  Michael Snyder  <msnyder@vmware.com>
 
+	* linespec.c (decode_line_1): Remove unnecessary null check.
+
 	* tracepoint.c (scope_info): Fix mem leak, remove underused
 	variable.
 

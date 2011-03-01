@@ -726,7 +726,7 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
   char *copy;
   /* This says whether or not something in *ARGPTR is quoted with
      completer_quotes (i.e. with single quotes).  */
-  int is_quoted = 0;
+  int is_quoted;
   /* Is *ARGPTR is enclosed in double quotes?  */
   int is_quote_enclosed;
   int is_objc_method = 0;
@@ -745,14 +745,11 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
   
   /* See if arg is *PC.  */
 
-  if (*argptr)
-    {
-      if (**argptr == '*')
-	return decode_indirect (argptr);
+  if (**argptr == '*')
+    return decode_indirect (argptr);
 
-      is_quoted = (strchr (get_gdb_completer_quote_characters (),
-			   **argptr) != NULL);
-    }
+  is_quoted = (strchr (get_gdb_completer_quote_characters (),
+		       **argptr) != NULL);
 
   if (is_quoted)
     end_quote = skip_quoted (*argptr);
