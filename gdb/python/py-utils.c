@@ -253,7 +253,6 @@ gdbpy_obj_to_string (PyObject *obj)
 char *
 gdbpy_exception_to_string (PyObject *ptype, PyObject *pvalue)
 {
-  PyObject *str_obj = PyObject_Str (pvalue);
   char *str;
 
   /* There are a few cases to consider.
