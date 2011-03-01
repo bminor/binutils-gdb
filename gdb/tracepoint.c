@@ -2327,7 +2327,7 @@ scope_info (char *args, int from_tty)
   struct symbol *sym;
   struct minimal_symbol *msym;
   struct block *block;
-  char **canonical, *symname, *save_args = args;
+  char *symname, *save_args = args;
   struct dict_iterator iter;
   int j, count = 0;
   struct gdbarch *gdbarch;
@@ -2337,7 +2337,7 @@ scope_info (char *args, int from_tty)
     error (_("requires an argument (function, "
 	     "line or *addr) to define a scope"));
 
-  sals = decode_line_1 (&args, 1, NULL, 0, &canonical, NULL);
+  sals = decode_line_1 (&args, 1, NULL, 0, NULL, NULL);
   if (sals.nelts == 0)
     return;		/* Presumably decode_line_1 has already warned.  */
 
