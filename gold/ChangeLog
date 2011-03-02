@@ -1,3 +1,9 @@
+2011-03-02  Simon Baldwin  <simonb@google.com>
+
+	* configure.ac: Add check for gnu_indirect_function support in
+	the toolchain building binutils.
+	* configure: Rebuild.
+
 2011-03-01  Ian Lance Taylor  <iant@google.com>
 
 	Backport from mainline:

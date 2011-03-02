@@ -6384,6 +6384,7 @@ error
 #elif __GLIBC__ < 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ < 11)
 error
 #endif
+__asm__(".type foo, %gnu_indirect_function");
 
 _ACEOF
 if ac_fn_c_try_compile "$LINENO"; then :
