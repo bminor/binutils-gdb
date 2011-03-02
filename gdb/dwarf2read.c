@@ -4849,7 +4849,7 @@ dwarf2_compute_name (char *name, struct die_info *die, struct dwarf2_cu *cu,
 	      xfree (prefixed_name);
 	    }
 	  else
-	    fputs_unfiltered (name ? name : "", buf);
+	    fputs_unfiltered (name, buf);
 
 	  /* Template parameters may be specified in the DIE's DW_AT_name, or
 	     as children with DW_TAG_template_type_param or
