@@ -1,5 +1,8 @@
 2011-03-02  Michael Snyder  <msnyder@vmware.com>
 
+	* linux-nat.c (linux_nat_xfer_partial): Preserve errno around
+	a function call.
+
 	* record.c (record_restore): Move printf to before error return.
 
 2011-03-02  Yao Qi  <yao@codesourcery.com>
