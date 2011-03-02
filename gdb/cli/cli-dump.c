@@ -202,7 +202,9 @@ dump_bfd_file (const char *filename, const char *mode,
 					  | SEC_ALLOC
 					  | SEC_LOAD));
   osection->entsize = 0;
-  bfd_set_section_contents (obfd, osection, buf, 0, len);
+  if (!bfd_set_section_contents (obfd, osection, buf, 0, len))
+    warning (_("writing dump file '%s' (%s)"), filename, 
+	     bfd_errmsg (bfd_get_error ()));
 }
 
 static void
