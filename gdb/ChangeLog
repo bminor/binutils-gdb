@@ -1,5 +1,7 @@
 2011-03-02  Michael Snyder  <msnyder@vmware.com>
 
+	* utils.c (parse_escape): Escape the escape char.
+
 	* python/py-inferior.c (build_inferior_list): Error out if 
 	PyList_Append fails.
 	(gdbpy_inferiors): Error out if build_inferior_list fails.

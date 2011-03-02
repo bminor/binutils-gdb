@@ -2001,10 +2001,9 @@ parse_escape (struct gdbarch *gdbarch, char **string_ptr)
     }
 
   if (!host_char_to_target (gdbarch, c, &target_char))
-    error
-      ("The escape sequence `\%c' is equivalent to plain `%c', which"
-       " has no equivalent\n" "in the `%s' character set.", c, c,
-       target_charset (gdbarch));
+    error ("The escape sequence `\\%c' is equivalent to plain `%c',"
+	   " which has no equivalent\nin the `%s' character set.",
+	   c, c, target_charset (gdbarch));
   return target_char;
 }
 
