@@ -533,7 +533,7 @@ print_scalar_formatted (const void *valaddr, struct type *type,
 	    if (*cp == '\0')
 	      cp--;
 	  }
-	strcpy (buf, cp);
+	strncpy (buf, cp, sizeof (bits));
 	fputs_filtered (buf, stream);
       }
       break;

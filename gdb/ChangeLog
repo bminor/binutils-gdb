@@ -1,5 +1,7 @@
 2011-03-02  Michael Snyder  <msnyder@vmware.com>
 
+	* printcmd.c (print_scalar_formatted): Use strncpy for safety.
+
 	* infcall.c (call_function_by_hand): Add break statements for lint.
 
 	* utils.c (parse_escape): Escape the escape char.
