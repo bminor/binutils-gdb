@@ -37,7 +37,7 @@
 #include "coff/internal.h"
 #include "coff/symconst.h"
 #include "aout/stab_gnu.h"
-
+#include "filenames.h"
 #include "safe-ctype.h"
 
 /* Why isn't this in coff/sym.h?  */
