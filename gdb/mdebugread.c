@@ -2897,7 +2897,7 @@ parse_partial_symbols (struct objfile *objfile)
 
 		  case N_ABS | N_EXT:
 		  record_it:
-		  continue;
+		    continue;
 
 		  /* Standard, local, non-debugger, symbols.  */
 

@@ -1,5 +1,7 @@
 2011-03-02  Michael Snyder  <msnyder@vmware.com>
 
+	* mdebugread.c (parse_partial_symbols): Fix indent.
+
 	* gdbserver/linux-arm-low.c (arm_arch_setup): Replace malloc 
 	with xmalloc.
 
