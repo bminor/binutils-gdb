@@ -1,3 +1,7 @@
+2011-03-02  Cary Coutant  <ccoutant@google.com>
+
+	* testsuite/script_test_9.t: Add TLS segment.
+
 2011-03-02  Simon Baldwin  <simonb@google.com>
 
 	* configure.ac: Add check for gnu_indirect_function support in
