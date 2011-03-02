@@ -1,3 +1,7 @@
+2011-03-02  Michael Snyder  <msnyder@vmware.com>
+
+	* record.c (record_restore): Move printf to before error return.
+
 2011-03-02  Yao Qi  <yao@codesourcery.com>
 
 	* arm-tdep.h (struct displaced_step_closure): Add two new fields
