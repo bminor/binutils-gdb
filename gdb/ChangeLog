@@ -1,5 +1,8 @@
 2011-03-02  Michael Snyder  <msnyder@vmware.com>
 
+	* gdbserver/linux-arm-low.c (arm_arch_setup): Replace malloc 
+	with xmalloc.
+
 	* target-descriptions.c (tdesc_gdb_type): No need to call
 	xstrdup, callee saves a copy.
 

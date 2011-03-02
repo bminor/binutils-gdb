@@ -336,7 +336,7 @@ arm_arch_setup (void)
 	 registers.  Support was added in 2.6.30.  */
       pid = lwpid_of (get_thread_lwp (current_inferior));
       errno = 0;
-      buf = malloc (32 * 8 + 4);
+      buf = xmalloc (32 * 8 + 4);
       if (ptrace (PTRACE_GETVFPREGS, pid, 0, buf) < 0
 	  && errno == EIO)
 	{
