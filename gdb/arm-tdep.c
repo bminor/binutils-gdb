@@ -5106,6 +5106,8 @@ arm_adjust_breakpoint_address (struct gdbarch *gdbarch, CORE_ADDR bpaddr)
 /* NOP instruction (mov r0, r0).  */
 #define ARM_NOP				0xe1a00000
 
+static int displaced_in_arm_mode (struct regcache *regs);
+
 /* Helper for register reads for displaced stepping.  In particular, this
    returns the PC as it would be seen by the instruction at its original
    location.  */
@@ -5117,10 +5119,21 @@ displaced_read_reg (struct regcache *regs, CORE_ADDR from, int regno)
 
   if (regno == 15)
     {
+      /* Compute pipeline offset:
+	 - When executing an ARM instruction, PC reads as the address of the
+	 current instruction plus 8.
+	 - When executing a Thumb instruction, PC reads as the address of the
+	 current instruction plus 4.  */
+
+      if (displaced_in_arm_mode (regs))
+	from += 8;
+      else
+	from += 4;
+
       if (debug_displaced)
 	fprintf_unfiltered (gdb_stdlog, "displaced: read pc value %.8lx\n",
-			    (unsigned long) from + 8);
-      return (ULONGEST) from + 8;  /* Pipeline offset.  */
+			    (unsigned long) from);
+      return (ULONGEST) from;
     }
   else
     {
@@ -6861,6 +6874,8 @@ arm_process_displaced_insn (struct gdbarch *gdbarch, CORE_ADDR from,
   if (!displaced_in_arm_mode (regs))
     return thumb_process_displaced_insn (gdbarch, from, to, regs, dsc);
 
+  dsc->is_thumb = 0;
+  dsc->insn_size = 4;
   insn = read_memory_unsigned_integer (from, 4, byte_order_for_code);
   if (debug_displaced)
     fprintf_unfiltered (gdb_stdlog, "displaced: stepping insn %.8lx "
@@ -6904,23 +6919,49 @@ arm_displaced_init_closure (struct gdbarch *gdbarch, CORE_ADDR from,
 			    CORE_ADDR to, struct displaced_step_closure *dsc)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-  unsigned int i;
+  unsigned int i, len, offset;
   enum bfd_endian byte_order_for_code = gdbarch_byte_order_for_code (gdbarch);
+  int size = dsc->is_thumb? 2 : 4;
+  const unsigned char *bkp_insn;
 
+  offset = 0;
   /* Poke modified instruction(s).  */
   for (i = 0; i < dsc->numinsns; i++)
     {
       if (debug_displaced)
-	fprintf_unfiltered (gdb_stdlog, "displaced: writing insn %.8lx at "
-			    "%.8lx\n", (unsigned long) dsc->modinsn[i],
-			    (unsigned long) to + i * 4);
-      write_memory_unsigned_integer (to + i * 4, 4, byte_order_for_code,
+	{
+	  fprintf_unfiltered (gdb_stdlog, "displaced: writing insn ");
+	  if (size == 4)
+	    fprintf_unfiltered (gdb_stdlog, "%.8lx",
+				dsc->modinsn[i]);
+	  else if (size == 2)
+	    fprintf_unfiltered (gdb_stdlog, "%.4x",
+				(unsigned short)dsc->modinsn[i]);
+
+	  fprintf_unfiltered (gdb_stdlog, " at %.8lx\n",
+			      (unsigned long) to + offset);
+
+	}
+      write_memory_unsigned_integer (to + offset, size,
+				     byte_order_for_code,
 				     dsc->modinsn[i]);
+      offset += size;
+    }
+
+  /* Choose the correct breakpoint instruction.  */
+  if (dsc->is_thumb)
+    {
+      bkp_insn = tdep->thumb_breakpoint;
+      len = tdep->thumb_breakpoint_size;
+    }
+  else
+    {
+      bkp_insn = tdep->arm_breakpoint;
+      len = tdep->arm_breakpoint_size;
     }
 
   /* Put breakpoint afterwards.  */
-  write_memory (to + dsc->numinsns * 4, tdep->arm_breakpoint,
-		tdep->arm_breakpoint_size);
+  write_memory (to + offset, bkp_insn, len);
 
   if (debug_displaced)
     fprintf_unfiltered (gdb_stdlog, "displaced: copy %s->%s: ",
@@ -6956,7 +6997,9 @@ arm_displaced_step_fixup (struct gdbarch *gdbarch,
     dsc->cleanup (gdbarch, regs, dsc);
 
   if (!dsc->wrote_to_pc)
-    regcache_cooked_write_unsigned (regs, ARM_PC_REGNUM, dsc->insn_addr + 4);
+    regcache_cooked_write_unsigned (regs, ARM_PC_REGNUM,
+				    dsc->insn_addr + dsc->insn_size);
+
 }
 
 #include "bfd-in2.h"

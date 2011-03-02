@@ -1,3 +1,13 @@
+2011-03-02  Yao Qi  <yao@codesourcery.com>
+
+	* arm-tdep.h (struct displaced_step_closure): Add two new fields
+	is_thumb and insn_size.
+	* arm-tdep.c (displaced_read_reg): Adjust correct pipeline offset
+	on both ARM and Thumb mode.
+	(arm_process_displaced_insn): Set is_thumb and insn_size.
+	(arm_displaced_init_closure): Handle both 16-bit and 32-bit.
+	(arm_displaced_step_fixup): Likewise.
+
 2011-03-01  Michael Snyder  <msnyder@vmware.com>
 
 	* cli/cli-dump.c (dump_bfd_file): Check error return and warn.
