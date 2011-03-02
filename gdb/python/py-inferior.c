@@ -326,7 +326,9 @@ build_inferior_list (struct inferior *inf, void *arg)
   PyObject *list = arg;
   PyObject *inferior = inferior_to_inferior_object (inf);
 
-  PyList_Append (list, inferior);
+  if (PyList_Append (list, inferior))
+    return 1;
+
   return 0;
 }
 
@@ -343,7 +345,11 @@ gdbpy_inferiors (PyObject *unused, PyObject *unused2)
   if (!list)
     return NULL;
 
-  iterate_over_inferiors (build_inferior_list, list);
+  if (iterate_over_inferiors (build_inferior_list, list))
+    {
+      Py_DECREF (list);
+      return NULL;
+    }
 
   return PyList_AsTuple (list);
 }

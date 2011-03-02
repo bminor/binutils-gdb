@@ -1,5 +1,9 @@
 2011-03-02  Michael Snyder  <msnyder@vmware.com>
 
+	* python/py-inferior.c (build_inferior_list): Error out if 
+	PyList_Append fails.
+	(gdbpy_inferiors): Error out if build_inferior_list fails.
+
 	* linux-nat.c (linux_nat_xfer_partial): Preserve errno around
 	a function call.
 
