@@ -12597,20 +12597,6 @@ _bfd_elf_default_got_elt_size (bfd *abfd,
 
 /* Routines to support the creation of dynamic relocs.  */
 
-/* Return true if NAME is a name of a relocation
-   section associated with section S.  */
-
-static bfd_boolean
-is_reloc_section (bfd_boolean rela, const char * name, asection * s)
-{
-  if (rela)
-    return CONST_STRNEQ (name, ".rela")
-      && strcmp (bfd_get_section_name (NULL, s), name + 5) == 0;
-
-  return CONST_STRNEQ (name, ".rel")
-    && strcmp (bfd_get_section_name (NULL, s), name + 4) == 0;
-}
-
 /* Returns the name of the dynamic reloc section associated with SEC.  */
 
 static const char *
@@ -12618,26 +12604,15 @@ get_dynamic_reloc_section_name (bfd *       abfd,
 				asection *  sec,
 				bfd_boolean is_rela)
 {
-  const char * name;
-  unsigned int strndx = elf_elfheader (abfd)->e_shstrndx;
-  unsigned int shnam = _bfd_elf_single_rel_hdr (sec)->sh_name;
+  char *name;
+  const char *old_name = bfd_get_section_name (NULL, sec);
+  const char *prefix = is_rela ? ".rela" : ".rel";
 
-  name = bfd_elf_string_from_elf_section (abfd, strndx, shnam);
-  if (name == NULL)
+  if (old_name == NULL)
     return NULL;
 
-  if (! is_reloc_section (is_rela, name, sec))
-    {
-      static bfd_boolean complained = FALSE;
-
-      if (! complained)
-	{
-	  (*_bfd_error_handler)
-	    (_("%B: bad relocation section name `%s\'"),  abfd, name);
-	  complained = TRUE;
-	}
-      name = NULL;
-    }
+  name = bfd_alloc (abfd, strlen (prefix) + strlen (old_name) + 1);
+  sprintf (name, "%s%s", prefix, old_name); 
 
   return name;
 }
