@@ -831,9 +831,11 @@ Evaluation of the expression containing the function\n\
 (%s) will be abandoned.\n\
 When the function is done executing, GDB will silently stop."),
 		       e.message, name);
+	  break;	/* lint */
 	case RETURN_QUIT:
 	default:
 	  throw_exception (e);
+	  break;	/* lint */
 	}
     }
 
