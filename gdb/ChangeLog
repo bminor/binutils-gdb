@@ -1,5 +1,7 @@
 2011-03-01  Michael Snyder  <msnyder@vmware.com>
 
+	* jv-lang.c (evaluate_subexp_java): Conditional can't be true.
+
 	* dwarf2read.c (dwarf2_compute_name): NAME cannot be null here.
 
 	* cli/cli-dump.c (restore_binary_file): Validate ftell return value.

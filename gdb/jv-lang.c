@@ -918,8 +918,6 @@ evaluate_subexp_java (struct type *expect_type, struct expression *exp,
 	  type = type_from_class (exp->gdbarch, java_class_from_object (arg1));
 	  arg1 = value_cast (lookup_pointer_type (type), arg1);
 	}
-      if (noside == EVAL_SKIP)
-	goto nosideret;
       return value_ind (arg1);
 
     case BINOP_SUBSCRIPT:
