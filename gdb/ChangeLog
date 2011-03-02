@@ -1,5 +1,8 @@
 2011-03-02  Michael Snyder  <msnyder@vmware.com>
 
+	* target-descriptions.c (tdesc_gdb_type): No need to call
+	xstrdup, callee saves a copy.
+
 	* printcmd.c (print_scalar_formatted): Use strncpy for safety.
 
 	* infcall.c (call_function_by_hand): Add break statements for lint.
