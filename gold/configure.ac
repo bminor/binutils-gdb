@@ -369,7 +369,7 @@ fi
 AC_SUBST(RANDOM_SEED_CFLAGS)
 
 dnl On GNU/Linux ifunc is supported by the dynamic linker in glibc
-dnl 2.11 or later.
+dnl 2.11 or later, and by binutils 2.20.1 or later.
 AC_CACHE_CHECK([for glibc >= 2.11], [gold_cv_lib_glibc2_11],
 [AC_COMPILE_IFELSE([
 #include <features.h>
@@ -378,6 +378,7 @@ error
 #elif __GLIBC__ < 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ < 11)
 error
 #endif
+__asm__(".type foo, %gnu_indirect_function");
 ], [gold_cv_lib_glibc2_11=yes], [gold_cv_lib_glibc2_11=no])])
 
 AM_CONDITIONAL(IFUNC, test "$gold_cv_lib_glibc2_11" = "yes")
