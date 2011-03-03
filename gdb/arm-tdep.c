@@ -4144,7 +4144,7 @@ shifted_reg_val (struct frame_info *frame, unsigned long inst, int carry,
   else
     shift = bits (inst, 7, 11);
 
-  res = (rm == 15
+  res = (rm == ARM_PC_REGNUM
 	 ? (pc_val + (bit (inst, 4) ? 12 : 8))
 	 : get_frame_register_unsigned (frame, rm));
 
@@ -4498,7 +4498,7 @@ thumb_get_next_pc_raw (struct frame_info *frame, CORE_ADDR pc, int insert_bkpt)
 
 	  rn = bits (inst1, 0, 3);
 	  base = get_frame_register_unsigned (frame, rn);
-	  if (rn == 15)
+	  if (rn == ARM_PC_REGNUM)
 	    {
 	      base = (base + 4) & ~(CORE_ADDR) 0x3;
 	      if (bit (inst1, 7))
@@ -4665,16 +4665,19 @@ arm_get_next_pc_raw (struct frame_info *frame, CORE_ADDR pc, int insert_bkpt)
 		|| bits (this_instr, 4, 27) == 0x12fff3)
 	      {
 		rn = bits (this_instr, 0, 3);
-		nextpc = (rn == 15) ? pc_val + 8
-				    : get_frame_register_unsigned (frame, rn);
+		nextpc = ((rn == ARM_PC_REGNUM)
+			  ? (pc_val + 8)
+			  : get_frame_register_unsigned (frame, rn));
+
 		return nextpc;
 	      }
 
 	    /* Multiply into PC.  */
 	    c = (status & FLAG_C) ? 1 : 0;
 	    rn = bits (this_instr, 16, 19);
-	    operand1 = (rn == 15) ? pc_val + 8
-				  : get_frame_register_unsigned (frame, rn);
+	    operand1 = ((rn == ARM_PC_REGNUM)
+			? (pc_val + 8)
+			: get_frame_register_unsigned (frame, rn));
 
 	    if (bit (this_instr, 25))
 	      {
@@ -4774,8 +4777,10 @@ arm_get_next_pc_raw (struct frame_info *frame, CORE_ADDR pc, int insert_bkpt)
 
 		  /* byte write to PC */
 		  rn = bits (this_instr, 16, 19);
-		  base = (rn == 15) ? pc_val + 8
-				    : get_frame_register_unsigned (frame, rn);
+		  base = ((rn == ARM_PC_REGNUM)
+			  ? (pc_val + 8)
+			  : get_frame_register_unsigned (frame, rn));
+
 		  if (bit (this_instr, 24))
 		    {
 		      /* pre-indexed */
@@ -5117,7 +5122,7 @@ displaced_read_reg (struct regcache *regs, CORE_ADDR from, int regno)
 {
   ULONGEST ret;
 
-  if (regno == 15)
+  if (regno == ARM_PC_REGNUM)
     {
       /* Compute pipeline offset:
 	 - When executing an ARM instruction, PC reads as the address of the
@@ -5231,7 +5236,7 @@ void
 displaced_write_reg (struct regcache *regs, struct displaced_step_closure *dsc,
 		     int regno, ULONGEST val, enum pc_write_style write_pc)
 {
-  if (regno == 15)
+  if (regno == ARM_PC_REGNUM)
     {
       if (debug_displaced)
 	fprintf_unfiltered (gdb_stdlog, "displaced: writing pc %.8lx\n",
@@ -5481,11 +5486,11 @@ cleanup_branch (struct gdbarch *gdbarch, struct regcache *regs,
 
   if (dsc->u.branch.link)
     {
-      ULONGEST pc = displaced_read_reg (regs, from, 15);
-      displaced_write_reg (regs, dsc, 14, pc - 4, CANNOT_WRITE_PC);
+      ULONGEST pc = displaced_read_reg (regs, from, ARM_PC_REGNUM);
+      displaced_write_reg (regs, dsc, ARM_LR_REGNUM, pc - 4, CANNOT_WRITE_PC);
     }
 
-  displaced_write_reg (regs, dsc, 15, dsc->u.branch.dest, write_pc);
+  displaced_write_reg (regs, dsc, ARM_PC_REGNUM, dsc->u.branch.dest, write_pc);
 }
 
 /* Copy B/BL/BLX instructions with immediate destinations.  */
@@ -5976,7 +5981,7 @@ copy_ldr_str_ldrb_strb (struct gdbarch *gdbarch, uint32_t insn,
      of this can be found in Section "Saving from r15" in
      http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui0204g/Cihbjifh.html */
 
-  if (load || rt != 15)
+  if (load || rt != ARM_PC_REGNUM)
     {
       dsc->u.ldst.restore_r4 = 0;
 
@@ -6077,7 +6082,7 @@ cleanup_block_load_all (struct gdbarch *gdbarch, struct regcache *regs,
       uint32_t memword;
 
       if (inc)
-	while (regno <= 15 && (regmask & (1 << regno)) == 0)
+	while (regno <= ARM_PC_REGNUM && (regmask & (1 << regno)) == 0)
 	  regno++;
       else
 	while (regno >= 0 && (regmask & (1 << regno)) == 0)
@@ -6159,7 +6164,7 @@ cleanup_block_load_pc (struct gdbarch *gdbarch,
   ULONGEST from = dsc->insn_addr;
   uint32_t status = displaced_read_reg (regs, from, ARM_PS_REGNUM);
   int load_executed = condition_true (dsc->u.block.cond, status), i;
-  unsigned int mask = dsc->u.block.regmask, write_reg = 15;
+  unsigned int mask = dsc->u.block.regmask, write_reg = ARM_PC_REGNUM;
   unsigned int regs_loaded = bitcount (mask);
   unsigned int num_to_shuffle = regs_loaded, clobbered;
 
@@ -6246,10 +6251,10 @@ copy_block_xfer (struct gdbarch *gdbarch, uint32_t insn, struct regcache *regs,
 
   /* Block transfers which don't mention PC can be run directly
      out-of-line.  */
-  if (rn != 15 && (insn & 0x8000) == 0)
+  if (rn != ARM_PC_REGNUM && (insn & 0x8000) == 0)
     return copy_unmodified (gdbarch, insn, "ldm/stm", dsc);
 
-  if (rn == 15)
+  if (rn == ARM_PC_REGNUM)
     {
       warning (_("displaced: Unpredictable LDM or STM with "
 		 "base register r15"));

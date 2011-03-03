@@ -1,3 +1,14 @@
+2011-03-03  Yao Qi  <yao@codesourcery.com>
+
+	* gdb/arm-tdep.c (shifted_reg_val): Replace magic number 15 with
+	ARM_PC_REGNUM.
+	(thumb_get_next_pc_raw, arm_get_next_pc_raw): Likewise.
+	(displaced_write_reg, displaced_read_reg): Likewise.
+	(copy_ldr_str_ldrb_strb, cleanup_block_load_all): Likewise.
+	(cleanup_block_load_pc, copy_block_xfer): Likewise.
+	(cleanup_branch): Replace magic number 14 and 15 with
+	ARM_LR_REGNUM and ARM_PC_REGNUM respectively.
+
 2011-03-02  Michael Snyder  <msnyder@vmware.com>
 
 	* maint.c (maintenance_do_deprecate): No need to check for NULL.
