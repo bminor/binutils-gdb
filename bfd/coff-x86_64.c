@@ -546,7 +546,7 @@ coff_amd64_rtype_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
 {
   reloc_howto_type *howto;
 
-  if (rel->r_type > ARRAY_SIZE (howto_table))
+  if (rel->r_type >= ARRAY_SIZE (howto_table))
     {
       bfd_set_error (bfd_error_bad_value);
       return NULL;

@@ -1,5 +1,7 @@
 2011-03-03  Michael Snyder  <msnyder@vmware.com>
 
+	* coff-x86_64.c (coff_amd64_rtype_to_howto): Fencepost error.
+
 	* aoutx.h (aout_final_link): Use sizeof int not sizeof int*.
 	(aout_link_write_other_symbol): Missing break statement.
 
