@@ -1,3 +1,7 @@
+2011-03-03  Michael Snyder  <msnyder@vmware.com>
+
+	* archive.c (_bfd_slurp_extended_name_table): Fail if bfd_seek fails.
+
 2011-03-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf64-x86-64.c (elf_x86_64_check_tls_transition): Supprt TLS

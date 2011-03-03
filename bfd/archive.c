@@ -1220,7 +1220,9 @@ _bfd_slurp_extended_name_table (bfd *abfd)
 
   /* FIXME:  Formatting sucks here, and in case of failure of BFD_READ,
      we probably don't want to return TRUE.  */
-  bfd_seek (abfd, bfd_ardata (abfd)->first_file_filepos, SEEK_SET);
+  if (bfd_seek (abfd, bfd_ardata (abfd)->first_file_filepos, SEEK_SET) != 0)
+    return FALSE;
+
   if (bfd_bread (nextname, 16, abfd) == 16)
     {
       if (bfd_seek (abfd, (file_ptr) -16, SEEK_CUR) != 0)
