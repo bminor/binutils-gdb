@@ -1,5 +1,7 @@
 2011-03-02  Michael Snyder  <msnyder@vmware.com>
 
+	* maint.c (maintenance_do_deprecate): No need to check for NULL.
+
 	* cli/cli-script.c (script_from_file): Add break for lint.
 
 	* mdebugread.c (parse_partial_symbols): Fix indent.

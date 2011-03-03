@@ -644,9 +644,7 @@ maintenance_do_deprecate (char *text, int deprecate)
       cmd->flags |= MALLOCED_REPLACEMENT;
       return;
     }
-  /* If we get here, don't leak!  */
-  if (replacement != NULL)
-    xfree (replacement);
+  xfree (replacement);
 }
 
 /* Maintenance set/show framework.  */
