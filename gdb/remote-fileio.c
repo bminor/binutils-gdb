@@ -1173,20 +1173,15 @@ remote_fileio_func_fstat (char *buf)
   if (fd == FIO_FD_CONSOLE_IN || fd == FIO_FD_CONSOLE_OUT)
     {
       remote_fileio_to_fio_uint (1, fst.fst_dev);
+      memset (&st, 0, sizeof (st));
       st.st_mode = S_IFCHR | (fd == FIO_FD_CONSOLE_IN ? S_IRUSR : S_IWUSR);
       st.st_nlink = 1;
 #ifdef HAVE_GETUID
       st.st_uid = getuid ();
-#else
-      st.st_uid = 0;
 #endif
 #ifdef HAVE_GETGID
       st.st_gid = getgid ();
-#else
-      st.st_gid = 0;
 #endif
-      st.st_rdev = 0;
-      st.st_size = 0;
 #ifdef HAVE_STRUCT_STAT_ST_BLKSIZE
       st.st_blksize = 512;
 #endif

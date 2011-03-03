@@ -6,6 +6,9 @@
 
 2011-03-03  Michael Snyder  <msnyder@vmware.com>
 
+	* remote-fileio.c (remote_fileio_func_fstat): Initialize all
+	fields of struct 'st' to zero.
+
 	* tui/tui-winsource.c (tui_update_source_window_as_is): Initialize
 	sal.pspace before calling set_current_source_symtab_and_line.
 
