@@ -1,3 +1,7 @@
+2011-03-03  Joel Brobecker  <brobecker@adacore.com>
+
+	* utils.c (parse_escape): Add i18n markup in error message.
+
 2011-03-03  Yao Qi  <yao@codesourcery.com>
 
 	* gdb/arm-tdep.c (shifted_reg_val): Replace magic number 15 with
