@@ -1,3 +1,8 @@
+2011-03-03  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.python/py-inferior.exp: Avoid searching pattern beyond
+	end of buffer.
+
 2011-03-02  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.python/py-inferior.exp: Use gdb_test_no_output instead of

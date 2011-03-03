@@ -171,15 +171,15 @@ set CHUNK_SIZE 16000 ;
 gdb_test_no_output "set *(int32_t*) &search_buf\[0*${CHUNK_SIZE}+100\] = 0x12345678"
 gdb_test_no_output "set *(int32_t*) &search_buf\[1*${CHUNK_SIZE}+100\] = 0x12345678"
 gdb_test_no_output "py start_addr = gdb.selected_frame ().read_var ('search_buf')"
-gdb_test_no_output "py length = gdb.selected_frame ().read_var ('search_buf_size')"
+gdb_test_no_output "py end_addr = start_addr + gdb.selected_frame ().read_var ('search_buf_size')"
 gdb_test_no_output "py pattern = pack('${python_pack_char}I', 0x12345678)"
-gdb_test_no_output "py first = gdb.inferiors()\[0\].search_memory (start_addr,length, pattern)"
+gdb_test_no_output "py first = gdb.inferiors()\[0\].search_memory (start_addr,end_addr - start_addr, pattern)"
 gdb_test "py print first" "${one_pattern_found}" "search spanning large range 1st result"
 gdb_test_no_output "py start_addr = first + 1"
-gdb_test_no_output "py second = gdb.inferiors()\[0\].search_memory (start_addr, length, pattern)"
+gdb_test_no_output "py second = gdb.inferiors()\[0\].search_memory (start_addr, end_addr - start_addr, pattern)"
 gdb_test "py print second" "${one_pattern_found}" "search spanning large range 2nd result"
 gdb_test_no_output "py start_addr = second + 1"
-gdb_test_no_output "py third = gdb.inferiors()\[0\].search_memory (start_addr, length, pattern)"
+gdb_test_no_output "py third = gdb.inferiors()\[0\].search_memory (start_addr, end_addr - start_addr, pattern)"
 gdb_test "py print third" "${pattern_not_found}" "search spanning large range 3rd result"
 
 # For native targets, test a pattern straddling a chunk boundary.
@@ -188,6 +188,6 @@ if [isnative] {
     gdb_test_no_output "set *(int32_t*) &search_buf\[${CHUNK_SIZE}-1\] = 0xfdb97531"
     gdb_test_no_output "py pattern = pack('${python_pack_char}I', 0xfdb97531)"
     gdb_test_no_output "py start_addr = gdb.selected_frame ().read_var ('search_buf')"
-    gdb_test "py print gdb.inferiors()\[0\].search_memory (start_addr, length, pattern)" \
+    gdb_test "py print gdb.inferiors()\[0\].search_memory (start_addr, end_addr - start_addr, pattern)" \
       "${one_pattern_found}" "find pattern straddling chunk boundary"
 }
