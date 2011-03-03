@@ -1,5 +1,7 @@
 2011-03-02  Michael Snyder  <msnyder@vmware.com>
 
+	* cli/cli-script.c (script_from_file): Add break for lint.
+
 	* mdebugread.c (parse_partial_symbols): Fix indent.
 
 	* gdbserver/linux-arm-low.c (arm_arch_setup): Replace malloc 
