@@ -1,3 +1,9 @@
+2011-03-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf64-x86-64.c (elf_x86_64_check_tls_transition): Supprt TLS
+	x32 IE->LE transition.
+	(elf_x86_64_relocate_section): Likewise.
+
 2011-03-02  Bernd Schmidt  <bernds@codesourcery.com>
 
         * elflink.c (is_reloc_section): Remove function.

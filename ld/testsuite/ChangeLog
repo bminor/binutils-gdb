@@ -1,3 +1,10 @@
+2011-03-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-x86-64/tlsie4.dd: New.
+	* ld-x86-64/tlsie4.s: Likewise.
+
+	* ld-x86-64/x86-64.exp (x86_64tests): Add tlsie4.
+
 2011-02-25  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/12516
