@@ -1,3 +1,9 @@
+2011-03-03  Yao Qi  <yao@codesourcery.com>
+
+	* Makefile.in (configure-common): Remove.  Let Makefile
+	in dir common to rebuild itself.
+	(common/Makefile): Likewise.
+
 2011-03-03  Joel Brobecker  <brobecker@adacore.com>
 
 	* utils.c (parse_escape): Add i18n markup in error message.
