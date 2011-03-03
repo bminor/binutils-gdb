@@ -34,9 +34,10 @@ EXEEXT = @EXEEXT@
 SUBDIRS = @subdirs@
 RPATH_ENVVAR = @RPATH_ENVVAR@
 ALL_SUBDIRS = gdb.ada gdb.arch gdb.asm gdb.base gdb.cell gdb.cp gdb.disasm \
-	gdb.dwarf2 gdb.fortran gdb.gdb gdb.java gdb.mi gdb.modula2 gdb.multi \
+	gdb.dwarf2 gdb.fortran gdb.gdb gdb.hp \
+	gdb.java gdb.mi gdb.modula2 gdb.multi \
 	gdb.objc gdb.opencl gdb.opt gdb.pascal gdb.python gdb.server \
-	gdb.reverse gdb.threads gdb.trace gdb.xml \
+	gdb.stabs gdb.reverse gdb.threads gdb.trace gdb.xml \
 	$(SUBDIRS)
 
 EXPECT = `if [ -f $${rootme}/../../expect/expect ] ; then \

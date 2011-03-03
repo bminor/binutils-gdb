@@ -10,7 +10,4 @@ clean mostlyclean:
 	-rm -f *.o *~ core tmp.c tmp.s weird.s errs exclfwd gdb11479
 
 distclean maintainer-clean realclean: clean
-	-rm -f Makefile config.status config.log gdb.log gdb.sum
-
-Makefile: $(srcdir)/Makefile.in $(srcdir)/configure.ac
-	$(SHELL) ./config.status --recheck
+	-rm -f Makefile gdb.log gdb.sum

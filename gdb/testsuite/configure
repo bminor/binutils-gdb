@@ -661,7 +661,6 @@ SHELL'
 ac_subst_files=''
 ac_user_opts='
 enable_option_checking
-with_stabs
 enable_gdbtk
 enable_shared
 '
@@ -674,10 +673,7 @@ LDFLAGS
 LIBS
 CPPFLAGS
 CPP'
-ac_subdirs_all='gdb.hp
-gdb.cell
-gdb.stabs
-gdb.gdbtk'
+ac_subdirs_all='gdb.gdbtk'
 
 # Initialize some variables set by options.
 ac_init_help=
@@ -1292,11 +1288,6 @@ Optional Features:
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
   --enable-gtk            enable gdbtk graphical user interface (GUI)
   --enable-shared         build shared libraries deault=yes
-
-Optional Packages:
-  --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
-  --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
-  --with-stabs            arrange to use stabs instead of host debug format
 
 Some influential environment variables:
   CC          C compiler command
@@ -2220,72 +2211,12 @@ $as_echo "no" >&6; }
 fi
 
 
-# Add HP-specific tests when appropriate.
-case $target in
-  hppa*-*-hpux*)
-
-
-subdirs="$subdirs gdb.hp"
- ;;
-esac
-
-# Add Cell/B.E. specific tests when appropriate.
-# We need support for both PowerPC and SPU targets configured in.
-case $target in
-  powerpc*-*-linux*)
-    have_spu_target=no
-    for targ in `echo $enable_targets | sed 's/,/ /g'`
-      do
-        case "${targ}" in
-          spu*|all) have_spu_target=yes ;;
-        esac
-      done
-    if test x$have_spu_target = xyes; then
-      subdirs="$subdirs gdb.cell"
-
-    fi
-    ;;
-esac
-
-# With stabs.
-
-# Check whether --with-stabs was given.
-if test "${with_stabs+set}" = set; then :
-  withval=$with_stabs;
-else
-  # We enable stabs tests by default on selected targets.
-case $target in
-   powerpc-*-aix* \
- | rs6000-*-aix*  \
- | *-*-*bsd*      \
- | *-*-go32*      \
- | *-*-linux*     \
- | *-*-lynxos*    \
- | *-sun-*        \
- | hppa*-*-*      \
- | *-*-elf*       \
- | *-*-cygwin*    \
- | *-*-mingw*     \
- )
-    with_stabs=yes ;;
- *)
-    with_stabs=no ;;
-esac
-fi
-
-
-# Add stabs tests when appropriate.
-if test $with_stabs = yes; then
-   subdirs="$subdirs gdb.stabs"
-
-fi
-
 # Enable gdbtk.
 # Check whether --enable-gdbtk was given.
 if test "${enable_gdbtk+set}" = set; then :
   enableval=$enable_gdbtk;
 else
-  if test -d $srcdir/gdb.gdbtk; then
+  if test -d $srcdir/../gdbtk && test -d $srcdir/gdb.gdbtk; then
     enable_gdbtk=yes
   else
     enable_gdbtk=no
@@ -2300,7 +2231,9 @@ esac
 
 # Add gdbtk tests when appropriate.
 if test $enable_gdbtk = yes; then
-   subdirs="$subdirs gdb.gdbtk"
+
+
+subdirs="$subdirs gdb.gdbtk"
 
 fi
 
@@ -3515,7 +3448,7 @@ done
 
 
 
-ac_config_files="$ac_config_files Makefile gdb.ada/Makefile gdb.arch/Makefile gdb.asm/Makefile gdb.base/Makefile gdb.cp/Makefile gdb.disasm/Makefile gdb.dwarf2/Makefile gdb.fortran/Makefile gdb.server/Makefile gdb.java/Makefile gdb.mi/Makefile gdb.modula2/Makefile gdb.multi/Makefile gdb.objc/Makefile gdb.opencl/Makefile gdb.opt/Makefile gdb.pascal/Makefile gdb.python/Makefile gdb.reverse/Makefile gdb.threads/Makefile gdb.trace/Makefile gdb.xml/Makefile"
+ac_config_files="$ac_config_files Makefile gdb.ada/Makefile gdb.arch/Makefile gdb.asm/Makefile gdb.base/Makefile gdb.cell/Makefile gdb.cp/Makefile gdb.disasm/Makefile gdb.dwarf2/Makefile gdb.fortran/Makefile gdb.server/Makefile gdb.java/Makefile gdb.hp/Makefile gdb.hp/gdb.objdbg/Makefile gdb.hp/gdb.base-hp/Makefile gdb.hp/gdb.aCC/Makefile gdb.hp/gdb.compat/Makefile gdb.hp/gdb.defects/Makefile gdb.mi/Makefile gdb.modula2/Makefile gdb.multi/Makefile gdb.objc/Makefile gdb.opencl/Makefile gdb.opt/Makefile gdb.pascal/Makefile gdb.python/Makefile gdb.reverse/Makefile gdb.stabs/Makefile gdb.threads/Makefile gdb.trace/Makefile gdb.xml/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -4220,12 +4153,19 @@ do
     "gdb.arch/Makefile") CONFIG_FILES="$CONFIG_FILES gdb.arch/Makefile" ;;
     "gdb.asm/Makefile") CONFIG_FILES="$CONFIG_FILES gdb.asm/Makefile" ;;
     "gdb.base/Makefile") CONFIG_FILES="$CONFIG_FILES gdb.base/Makefile" ;;
+    "gdb.cell/Makefile") CONFIG_FILES="$CONFIG_FILES gdb.cell/Makefile" ;;
     "gdb.cp/Makefile") CONFIG_FILES="$CONFIG_FILES gdb.cp/Makefile" ;;
     "gdb.disasm/Makefile") CONFIG_FILES="$CONFIG_FILES gdb.disasm/Makefile" ;;
     "gdb.dwarf2/Makefile") CONFIG_FILES="$CONFIG_FILES gdb.dwarf2/Makefile" ;;
     "gdb.fortran/Makefile") CONFIG_FILES="$CONFIG_FILES gdb.fortran/Makefile" ;;
     "gdb.server/Makefile") CONFIG_FILES="$CONFIG_FILES gdb.server/Makefile" ;;
     "gdb.java/Makefile") CONFIG_FILES="$CONFIG_FILES gdb.java/Makefile" ;;
+    "gdb.hp/Makefile") CONFIG_FILES="$CONFIG_FILES gdb.hp/Makefile" ;;
+    "gdb.hp/gdb.objdbg/Makefile") CONFIG_FILES="$CONFIG_FILES gdb.hp/gdb.objdbg/Makefile" ;;
+    "gdb.hp/gdb.base-hp/Makefile") CONFIG_FILES="$CONFIG_FILES gdb.hp/gdb.base-hp/Makefile" ;;
+    "gdb.hp/gdb.aCC/Makefile") CONFIG_FILES="$CONFIG_FILES gdb.hp/gdb.aCC/Makefile" ;;
+    "gdb.hp/gdb.compat/Makefile") CONFIG_FILES="$CONFIG_FILES gdb.hp/gdb.compat/Makefile" ;;
+    "gdb.hp/gdb.defects/Makefile") CONFIG_FILES="$CONFIG_FILES gdb.hp/gdb.defects/Makefile" ;;
     "gdb.mi/Makefile") CONFIG_FILES="$CONFIG_FILES gdb.mi/Makefile" ;;
     "gdb.modula2/Makefile") CONFIG_FILES="$CONFIG_FILES gdb.modula2/Makefile" ;;
     "gdb.multi/Makefile") CONFIG_FILES="$CONFIG_FILES gdb.multi/Makefile" ;;
@@ -4235,6 +4175,7 @@ do
     "gdb.pascal/Makefile") CONFIG_FILES="$CONFIG_FILES gdb.pascal/Makefile" ;;
     "gdb.python/Makefile") CONFIG_FILES="$CONFIG_FILES gdb.python/Makefile" ;;
     "gdb.reverse/Makefile") CONFIG_FILES="$CONFIG_FILES gdb.reverse/Makefile" ;;
+    "gdb.stabs/Makefile") CONFIG_FILES="$CONFIG_FILES gdb.stabs/Makefile" ;;
     "gdb.threads/Makefile") CONFIG_FILES="$CONFIG_FILES gdb.threads/Makefile" ;;
     "gdb.trace/Makefile") CONFIG_FILES="$CONFIG_FILES gdb.trace/Makefile" ;;
     "gdb.xml/Makefile") CONFIG_FILES="$CONFIG_FILES gdb.xml/Makefile" ;;

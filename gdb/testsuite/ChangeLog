@@ -1,3 +1,38 @@
+2011-03-03  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.hp/gdb.aCC/Makefile.in (Makefile): Remove.
+	* gdb.hp/gdb.aCC/configure (Makefile): Remove.
+	* gdb.hp/gdb.aCC/configure.ac: Remove.
+	* gdb.hp/gdb.base-hp/Makefile.in (Makefile): Remove.
+	* gdb.hp/gdb.base-hp/configure (Makefile): Remove.
+	* gdb.hp/gdb.base-hp/configure.ac: Remove.
+	* gdb.hp/gdb.compat/Makefile.in (Makefile): Remove.
+	* gdb.hp/gdb.compat/configure (Makefile): Remove.
+	* gdb.hp/gdb.compat/configure.ac: Remove.
+	* gdb.hp/gdb.defects/Makefile.in (Makefile): Remove.
+	* gdb.hp/gdb.defects/configure (Makefile): Remove.
+	* gdb.hp/gdb.defects/configure.ac: Remove.
+	* gdb.hp/gdb.objdbg/Makefile.in (Makefile): Remove.
+	* gdb.hp/gdb.objdbg/configure (Makefile): Remove.
+	* gdb.hp/gdb.objdbg/configure.ac: Remove.
+	* gdb.hp/configure.ac: Remove.
+	* gdb.hp/configure: Remove.
+	* gdb.hp/Makefile.in (SUBDIRS): No longer a configure
+	substitution.
+	(Makefile): Remove rule.
+	* gdb.cell/configure.ac: Remove.
+	* gdb.cell/configure: Remove.
+	* gdb.stabs/Makefile.in (Makefile): Remove.
+	(distclean): Don't remove config.status or config.log.
+	* gdb.stabs/configure (Makefile): Remove.
+	* gdb.stabs/configure.ac: Remove.
+	* configure: Rebuild.
+	* configure.ac: Don't AC_CONFIG_SUBDIRS in gdb.hp or gdb.stabs.
+	Remove stabs- and cell-specific logic.  Test for existence of
+	../gdbtk before configuring gdb.gdbtk.  Build Makefiles in gdb.hp
+	subdirectories, gdb.cell, and and gdb.stabs.
+	* Makefile.in (ALL_SUBDIRS): Add gdb.hp and gdb.stabs.
+
 2011-03-03  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.python/py-inferior.exp: Avoid searching pattern beyond

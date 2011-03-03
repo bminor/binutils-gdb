@@ -37,60 +37,10 @@ esac
 AM_CONDITIONAL(GMAKE, test "$MAKE_IS_GNU" = yes)
 AC_PROG_MAKE_SET
 
-# Add HP-specific tests when appropriate.
-case $target in
-  hppa*-*-hpux*)
-    AC_CONFIG_SUBDIRS(gdb.hp) ;;
-esac
-
-# Add Cell/B.E. specific tests when appropriate.
-# We need support for both PowerPC and SPU targets configured in.
-case $target in
-  powerpc*-*-linux*)
-    have_spu_target=no
-    for targ in `echo $enable_targets | sed 's/,/ /g'`
-      do
-        case "${targ}" in
-          spu*|all) have_spu_target=yes ;;
-        esac
-      done
-    if test x$have_spu_target = xyes; then
-      AC_CONFIG_SUBDIRS(gdb.cell)
-    fi
-    ;;
-esac
-
-# With stabs.
-AC_ARG_WITH(stabs,
-[  --with-stabs            arrange to use stabs instead of host debug format],,
-[# We enable stabs tests by default on selected targets.
-case $target in
-   powerpc-*-aix* \
- | rs6000-*-aix*  \
- | *-*-*bsd*      \
- | *-*-go32*      \
- | *-*-linux*     \
- | *-*-lynxos*    \
- | *-sun-*        \
- | hppa*-*-*      \
- | *-*-elf*       \
- | *-*-cygwin*    \
- | *-*-mingw*     \
- )
-    with_stabs=yes ;;
- *)
-    with_stabs=no ;;
-esac])
-
-# Add stabs tests when appropriate.
-if test $with_stabs = yes; then
-   AC_CONFIG_SUBDIRS(gdb.stabs)
-fi
-
 # Enable gdbtk.
 AC_ARG_ENABLE(gdbtk,
 [  --enable-gtk            enable gdbtk graphical user interface (GUI)],,
-  [if test -d $srcdir/gdb.gdbtk; then
+  [if test -d $srcdir/../gdbtk && test -d $srcdir/gdb.gdbtk; then
     enable_gdbtk=yes
   else
     enable_gdbtk=no
@@ -141,9 +91,12 @@ AC_EXEEXT
 AC_OUTPUT([Makefile \
   gdb.ada/Makefile \
   gdb.arch/Makefile gdb.asm/Makefile gdb.base/Makefile \
-  gdb.cp/Makefile gdb.disasm/Makefile gdb.dwarf2/Makefile \
+  gdb.cell/Makefile gdb.cp/Makefile gdb.disasm/Makefile gdb.dwarf2/Makefile \
   gdb.fortran/Makefile gdb.server/Makefile gdb.java/Makefile \
+  gdb.hp/Makefile gdb.hp/gdb.objdbg/Makefile gdb.hp/gdb.base-hp/Makefile \
+  gdb.hp/gdb.aCC/Makefile gdb.hp/gdb.compat/Makefile \
+  gdb.hp/gdb.defects/Makefile \
   gdb.mi/Makefile gdb.modula2/Makefile gdb.multi/Makefile \
   gdb.objc/Makefile gdb.opencl/Makefile gdb.opt/Makefile gdb.pascal/Makefile \
-  gdb.python/Makefile gdb.reverse/Makefile \
+  gdb.python/Makefile gdb.reverse/Makefile gdb.stabs/Makefile \
   gdb.threads/Makefile gdb.trace/Makefile gdb.xml/Makefile])
