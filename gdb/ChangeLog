@@ -1,3 +1,9 @@
+2011-03-03  Tom Tromey  <tromey@redhat.com>
+
+	PR gdb/12538:
+	* dwarf2read.c (process_psymtab_comp_unit): Handle case where
+	DW_STRING is NULL.
+
 2011-03-03  Michael Snyder  <msnyder@vmware.com>
 
 	* tui/tui-winsource.c (tui_update_source_window_as_is): Initialize

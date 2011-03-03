@@ -3191,6 +3191,7 @@ process_psymtab_comp_unit (struct objfile *objfile,
   struct attribute *attr;
   CORE_ADDR best_lowpc = 0, best_highpc = 0;
   struct die_reader_specs reader_specs;
+  const char *filename;
 
   init_one_comp_unit (&cu, objfile);
   back_to_inner = make_cleanup (free_stack_comp_unit, &cu);
@@ -3250,8 +3251,12 @@ process_psymtab_comp_unit (struct objfile *objfile,
 
   /* Allocate a new partial symbol table structure.  */
   attr = dwarf2_attr (comp_unit_die, DW_AT_name, &cu);
+  if (attr == NULL || !DW_STRING (attr))
+    filename = "";
+  else
+    filename = DW_STRING (attr);
   pst = start_psymtab_common (objfile, objfile->section_offsets,
-			      (attr != NULL) ? DW_STRING (attr) : "",
+			      filename,
 			      /* TEXTLOW and TEXTHIGH are set below.  */
 			      0,
 			      objfile->global_psymbols.next,
