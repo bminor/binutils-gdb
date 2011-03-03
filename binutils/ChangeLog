@@ -1,3 +1,9 @@
+2011-03-03  Mike Frysinger  <vapier@gentoo.org>
+
+	* objdump.c (usage): Fix single typo.
+	* po/bg.po, po/binutils.pot, po/da.po, po/es.po, po/fi.po,
+	po/fr.po, po/id.po, po/ja.po, po/ru.po, po/vi.po: Likewise.
+
 2011-03-01  Akos Pasztory  <akos.pasztory@gmail.com>
 
 	PR binutils/12523
