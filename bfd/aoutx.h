@@ -3637,6 +3637,7 @@ aout_link_write_other_symbol (struct aout_link_hash_entry *h, void * data)
     case bfd_link_hash_undefweak:
       type = N_WEAKU;
       val = 0;
+      break;
     case bfd_link_hash_indirect:
       /* We ignore these symbols, since the indirected symbol is
 	 already in the hash table.  */
@@ -5448,7 +5449,7 @@ NAME (aout, final_link) (bfd *abfd,
   /* Allocate buffers to hold section contents and relocs.  */
   aout_info.contents = (bfd_byte *) bfd_malloc (max_contents_size);
   aout_info.relocs = bfd_malloc (max_relocs_size);
-  aout_info.symbol_map = (int *) bfd_malloc (max_sym_count * sizeof (int *));
+  aout_info.symbol_map = (int *) bfd_malloc (max_sym_count * sizeof (int));
   aout_info.output_syms = (struct external_nlist *)
       bfd_malloc ((max_sym_count + 1) * sizeof (struct external_nlist));
   if ((aout_info.contents == NULL && max_contents_size != 0)
