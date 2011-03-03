@@ -2148,7 +2148,7 @@ scan_unit_for_symbols (struct comp_unit *unit)
 	{
 	  info_ptr = read_attribute (&attr, &abbrev->attrs[i], unit, info_ptr);
 	  if (info_ptr == NULL)
-	    return FALSE;
+	    goto fail;
 
 	  if (func)
 	    {

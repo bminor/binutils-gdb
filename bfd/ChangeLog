@@ -1,5 +1,7 @@
 2011-03-03  Michael Snyder  <msnyder@vmware.com>
 
+	* dwarf2.c (scan_unit_for_symbols): Stop memory leak.
+
 	* archive.c (_bfd_slurp_extended_name_table): Fail if bfd_seek fails.
 
 2011-03-03  H.J. Lu  <hongjiu.lu@intel.com>
