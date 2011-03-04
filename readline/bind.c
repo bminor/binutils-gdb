@@ -2068,6 +2068,7 @@ rl_function_dumper (print_readably)
 	    }
 	}
     }
+  free (names);
 }
 
 /* Print all of the current functions and their bindings to

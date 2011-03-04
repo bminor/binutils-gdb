@@ -1,3 +1,7 @@
+2011-03-04  Michael Snyder  <msnyder@vmware.com>
+
+	* bind.c (rl_function_dumper): Free allocated memory.
+
 2009-08-22  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* configure: Regenerate.
