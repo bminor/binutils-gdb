@@ -1,5 +1,7 @@
 2011-03-04  Michael Snyder  <msnyder@vmware.com>
 
+	* breakpoint.c (create_breakpoint): Add missing break statement.
+
 	Reverting this patch:
 	* infcall.c (call_function_by_hand): Add break statements for lint.
 

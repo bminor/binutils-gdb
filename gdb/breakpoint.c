@@ -7843,6 +7843,7 @@ create_breakpoint (struct gdbarch *gdbarch,
 	default:
 	  throw_exception (e);
 	}
+      break;
     default:
       if (!sals.nelts)
 	return 0;
