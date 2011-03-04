@@ -6848,6 +6848,7 @@ putpkt_binary (char *buf, int cnt)
 	    case '-':
 	      if (remote_debug)
 		fprintf_unfiltered (gdb_stdlog, "Nak\n");
+	      /* FALLTHROUGH */
 	    case SERIAL_TIMEOUT:
 	      tcount++;
 	      if (tcount > 3)

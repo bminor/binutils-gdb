@@ -1,3 +1,7 @@
+2011-03-04  Michael Snyder  <msnyder@vmware.com>
+
+	* remote.c (putpkt_binary): Document that case stmt falls through.
+
 2011-03-04  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* breakpointc (print_it_typical): Move NULL check from here...
