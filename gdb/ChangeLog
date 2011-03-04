@@ -1,5 +1,10 @@
 2011-03-04  Michael Snyder  <msnyder@vmware.com>
 
+	Reverting this patch:
+	* cli/cli-script.c (script_from_file): Add break for lint.
+
+2011-03-04  Michael Snyder  <msnyder@vmware.com>
+
 	* solib.c (reload_shared_libraries_1): Close memory leak.
 
 2011-03-03  Tom Tromey  <tromey@redhat.com>

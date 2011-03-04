@@ -1641,7 +1641,6 @@ script_from_file (FILE *stream, const char *file)
 	throw_error (e.error,
 		     _("%s:%d: Error in sourced command file:\n%s"),
 		     source_file_name, source_line_number, e.message);
-	break;	/* lint */
       default:
 	internal_error (__FILE__, __LINE__, _("bad reason"));
       }
