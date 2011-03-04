@@ -195,6 +195,7 @@ syscall_start_syscall (struct gdb_xml_parser *parser,
                         _("Unknown attribute name '%s'."), attrs[i].name);
     }
 
+  gdb_assert (name);
   syscall_create_syscall_desc (data->sysinfo, name, number);
 }
 

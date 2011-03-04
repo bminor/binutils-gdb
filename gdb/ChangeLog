@@ -1,3 +1,7 @@
+2011-03-04  Michael Snyder  <msnyder@vmware.com>
+
+	* xml-syscall.c (syscall_start_syscall): Assert name is non null.
+
 2011-03-04  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* eval.c (parse_and_eval_address_1): Remove function.
