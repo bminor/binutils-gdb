@@ -493,6 +493,12 @@ serial_get_tty_state (struct serial *scb)
   return scb->ops->get_tty_state (scb);
 }
 
+serial_ttystate
+serial_copy_tty_state (struct serial *scb, serial_ttystate ttystate)
+{
+  return scb->ops->copy_tty_state (scb, ttystate);
+}
+
 int
 serial_set_tty_state (struct serial *scb, serial_ttystate ttystate)
 {

@@ -1,3 +1,23 @@
+2011-03-04  Ulrich Weigand  <ulrich.weigand@linaro.org>
+
+	* inflow.c (terminal_init_inferior_with_pgrp): Copy ttystate.
+	(terminal_save_ours): Remove misleading comment.
+	(inflow_inferior_data_cleanup): Free ttystate.
+	(inflow_inferior_exit): Likewise.
+	(copy_terminal_info): Copy ttystate.
+
+	* serial.c (serial_copy_tty_state): New function.
+	* serial.h (serial_copy_tty_state): Add prototype.
+	(struct serial_ops): Add copy_tty_state callback.
+	* ser-base.c (ser_base_copy_tty_state): New function.
+	* ser-base.h (ser_base_copy_tty_state): Add prototype.
+	* ser-go32.c (dos_copy_tty_state): New function.
+	(dos_ops): Install copy_tty_state callback.
+	* ser-mingw.c (_initialize_ser_windows): Likewise.
+	* ser-pipe.c (_initialize_ser_pipe): Likewise.
+	* ser-unix.c (hardwire_copy_tty_state): New function.
+	(_initialize_ser_hardwire): Install it.
+
 2011-03-04  Michael Snyder  <msnyder@vmware.com>
 
 	* breakpoint.c (create_breakpoint): Add missing break statement.

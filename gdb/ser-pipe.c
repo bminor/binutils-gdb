@@ -214,6 +214,7 @@ _initialize_ser_pipe (void)
   ops->send_break = ser_base_send_break;
   ops->go_raw = ser_base_raw;
   ops->get_tty_state = ser_base_get_tty_state;
+  ops->copy_tty_state = ser_base_copy_tty_state;
   ops->set_tty_state = ser_base_set_tty_state;
   ops->print_tty_state = ser_base_print_tty_state;
   ops->noflush_set_tty_state = ser_base_noflush_set_tty_state;

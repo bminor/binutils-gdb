@@ -188,6 +188,17 @@ hardwire_get_tty_state (struct serial *scb)
   return (serial_ttystate) state;
 }
 
+static serial_ttystate
+hardwire_copy_tty_state (struct serial *scb, serial_ttystate ttystate)
+{
+  struct hardwire_ttystate *state;
+
+  state = (struct hardwire_ttystate *) xmalloc (sizeof *state);
+  *state = *(struct hardwire_ttystate *) ttystate;
+
+  return (serial_ttystate) state;
+}
+
 static int
 hardwire_set_tty_state (struct serial *scb, serial_ttystate ttystate)
 {
@@ -911,6 +922,7 @@ _initialize_ser_hardwire (void)
   ops->send_break = hardwire_send_break;
   ops->go_raw = hardwire_raw;
   ops->get_tty_state = hardwire_get_tty_state;
+  ops->copy_tty_state = hardwire_copy_tty_state;
   ops->set_tty_state = hardwire_set_tty_state;
   ops->print_tty_state = hardwire_print_tty_state;
   ops->noflush_set_tty_state = hardwire_noflush_set_tty_state;

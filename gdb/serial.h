@@ -129,6 +129,12 @@ extern void serial_raw (struct serial *scb);
 
 extern serial_ttystate serial_get_tty_state (struct serial *scb);
 
+/* Return a pointer to a newly malloc'd ttystate containing a copy
+   of the state in TTYSTATE.  */
+
+extern serial_ttystate serial_copy_tty_state (struct serial *scb,
+					      serial_ttystate ttystate);
+
 /* Set the state of the tty to TTYSTATE.  The change is immediate.
    When changing to or from raw mode, input might be discarded.
    Returns 0 for success, negative value for error (in which case
@@ -250,6 +256,7 @@ struct serial_ops
     int (*send_break) (struct serial *);
     void (*go_raw) (struct serial *);
     serial_ttystate (*get_tty_state) (struct serial *);
+    serial_ttystate (*copy_tty_state) (struct serial *, serial_ttystate);
     int (*set_tty_state) (struct serial *, serial_ttystate);
     void (*print_tty_state) (struct serial *, serial_ttystate,
 			     struct ui_file *);

@@ -652,6 +652,17 @@ dos_get_tty_state (struct serial *scb)
   return (serial_ttystate) state;
 }
 
+static serial_ttystate
+dos_copy_tty_state (struct serial *scb, serial_ttystate ttystate)
+{
+  struct dos_ttystate *state;
+
+  state = (struct dos_ttystate *) xmalloc (sizeof *state);
+  *state = *(struct dos_ttystate *) ttystate;
+
+  return (serial_ttystate) state;
+}
+
 static int
 dos_set_tty_state (struct serial *scb, serial_ttystate ttystate)
 {
@@ -851,6 +862,7 @@ static struct serial_ops dos_ops =
   dos_sendbreak,
   dos_raw,
   dos_get_tty_state,
+  dos_copy_tty_state,
   dos_set_tty_state,
   dos_print_tty_state,
   dos_noflush_set_tty_state,

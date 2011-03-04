@@ -224,10 +224,9 @@ terminal_init_inferior_with_pgrp (int pgrp)
       struct inferior *inf = current_inferior ();
       struct terminal_info *tinfo = get_inflow_inferior_data (inf);
 
-      /* We could just as well copy our_ttystate (if we felt like
-         adding a new function serial_copy_tty_state()).  */
       xfree (tinfo->ttystate);
-      tinfo->ttystate = serial_get_tty_state (stdin_serial);
+      tinfo->ttystate = serial_copy_tty_state (stdin_serial,
+					       our_terminal_info.ttystate);
 
 #ifdef PROCESS_GROUP_TYPE
       tinfo->process_group = pgrp;
@@ -249,8 +248,6 @@ terminal_save_ours (void)
 {
   if (gdb_has_a_terminal ())
     {
-      /* We could just as well copy our_ttystate (if we felt like adding
-         a new function serial_copy_tty_state).  */
       xfree (our_terminal_info.ttystate);
       our_terminal_info.ttystate = serial_get_tty_state (stdin_serial);
     }
@@ -495,6 +492,7 @@ inflow_inferior_data_cleanup (struct inferior *inf, void *arg)
   if (info != NULL)
     {
       xfree (info->run_terminal);
+      xfree (info->ttystate);
       xfree (info);
     }
 }
@@ -532,6 +530,7 @@ inflow_inferior_exit (struct inferior *inf)
   if (info != NULL)
     {
       xfree (info->run_terminal);
+      xfree (info->ttystate);
       xfree (info);
       set_inferior_data (inf, inflow_inferior_data, NULL);
     }
@@ -544,10 +543,19 @@ copy_terminal_info (struct inferior *to, struct inferior *from)
 
   tinfo_to = get_inflow_inferior_data (to);
   tinfo_from = get_inflow_inferior_data (from);
+
+  xfree (tinfo_to->run_terminal);
+  xfree (tinfo_to->ttystate);
+
   *tinfo_to = *tinfo_from;
+
   if (tinfo_from->run_terminal)
     tinfo_to->run_terminal
       = xstrdup (tinfo_from->run_terminal);
+
+  if (tinfo_from->ttystate)
+    tinfo_to->ttystate
+      = serial_copy_tty_state (stdin_serial, tinfo_from->ttystate);
 }
 
 void

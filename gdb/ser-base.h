@@ -32,6 +32,8 @@ extern int ser_base_flush_input (struct serial *scb);
 extern int ser_base_send_break (struct serial *scb);
 extern void ser_base_raw (struct serial *scb);
 extern serial_ttystate ser_base_get_tty_state (struct serial *scb);
+extern serial_ttystate ser_base_copy_tty_state (struct serial *scb,
+						serial_ttystate ttystate);
 extern int ser_base_set_tty_state (struct serial *scb,
 				   serial_ttystate ttystate);
 extern void ser_base_print_tty_state (struct serial *scb,
