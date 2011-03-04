@@ -1,3 +1,7 @@
+2011-03-04  Yao Qi  <yao@codesourcery.com>
+
+	* Makefile.in: Remove GNU make feature --directory.
+
 2011-02-28  Michael Snyder  <msnyder@vmware.com>
 
 	* utils.c (decimal2str): Initialize 'width' to nine, then

@@ -197,7 +197,7 @@ FLAGS_TO_PASS = \
 all: gdbserver$(EXEEXT) gdbreplay$(EXEEXT) $(extra_libraries)
 
 $(LIBCOMMON): $(LIBCOMMON_DIR)/Makefile
-	@$(MAKE) $(FLAGS_TO_PASS) DO=all --directory=common
+	@$(MAKE) $(FLAGS_TO_PASS) DO=all DODIRS=common subdir_do
 
 common/Makefile: configure-common config.status
         CONFIG_FILES="common/Makefile" \
