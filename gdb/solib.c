@@ -1326,6 +1326,7 @@ reload_shared_libraries_1 (int from_tty)
 	SYMFILE_DEFER_BP_RESET | (from_tty ? SYMFILE_VERBOSE : 0);
 
       filename = tilde_expand (so->so_original_name);
+      make_cleanup (xfree, filename);
       abfd = solib_bfd_open (filename);
       if (abfd != NULL)
 	{
