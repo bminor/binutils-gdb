@@ -1,3 +1,8 @@
+2011-03-04  Alan Modra  <amodra@gmail.com>
+
+	* archive.c (bsd_write_armap): Don't call stat in deterministic
+	mode, and don't use st_mtime if stat returns error.
+
 2011-03-03  Michael Snyder  <msnyder@vmware.com>
 
 	* elf64-x86-64.c (elf_x86_64_relocate_section): Remove dead code.
