@@ -10930,7 +10930,7 @@ disable_command (char *args, int from_tty)
       case bp_none:
 	warning (_("attempted to disable apparently deleted breakpoint #%d?"),
 		 bpt->number);
-	continue;
+	break;
       case bp_breakpoint:
       case bp_tracepoint:
       case bp_fast_tracepoint:
@@ -10942,8 +10942,9 @@ disable_command (char *args, int from_tty)
       case bp_read_watchpoint:
       case bp_access_watchpoint:
 	disable_breakpoint (bpt);
+	break;
       default:
-	continue;
+	break;
       }
   else if (strchr (args, '.'))
     {
@@ -11031,7 +11032,7 @@ enable_command (char *args, int from_tty)
       case bp_none:
 	warning (_("attempted to enable apparently deleted breakpoint #%d?"),
 		 bpt->number);
-	continue;
+	break;
       case bp_breakpoint:
       case bp_tracepoint:
       case bp_fast_tracepoint:
@@ -11043,8 +11044,9 @@ enable_command (char *args, int from_tty)
       case bp_read_watchpoint:
       case bp_access_watchpoint:
 	enable_breakpoint (bpt);
+	break;
       default:
-	continue;
+	break;
       }
   else if (strchr (args, '.'))
     {

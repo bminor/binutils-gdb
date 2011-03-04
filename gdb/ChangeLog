@@ -1,3 +1,9 @@
+2011-03-04  Michael Snyder  <msnyder@msnyder-server.eng.vmware.com>
+
+	* breakpoint.c (enable_command): Use break instead of continue,
+	and fill in a missing break.
+	(disable_command): Ditto.
+
 2011-03-04  Ulrich Weigand  <ulrich.weigand@linaro.org>
 
 	* inflow.c (terminal_init_inferior_with_pgrp): Copy ttystate.
