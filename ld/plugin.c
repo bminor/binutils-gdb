@@ -36,6 +36,9 @@
 #include <Windows.h>
 #endif
 
+/* Report plugin symbols.  */
+bfd_boolean report_plugin_symbols;
+
 /* The suffix to append to the name of the real (claimed) object file
    when generating a dummy BFD to hold the IR symbols sent from the
    plugin.  */
@@ -463,7 +466,7 @@ get_symbols (const void *handle, int nsyms, struct ld_plugin_symbol *syms)
       if (!blhe)
 	{
 	  syms[n].resolution = LDPR_UNKNOWN;
-	  continue;
+	  goto report_symbol;
 	}
 
       /* Determine resolution from blhe type and symbol's original type.  */
@@ -471,7 +474,7 @@ get_symbols (const void *handle, int nsyms, struct ld_plugin_symbol *syms)
 	  || blhe->type == bfd_link_hash_undefweak)
 	{
 	  syms[n].resolution = LDPR_UNDEF;
-	  continue;
+	  goto report_symbol;
 	}
       if (blhe->type != bfd_link_hash_defined
 	  && blhe->type != bfd_link_hash_defweak
@@ -516,7 +519,7 @@ get_symbols (const void *handle, int nsyms, struct ld_plugin_symbol *syms)
 	    syms[n].resolution =  LDPR_RESOLVED_DYN;
 	  else
 	    syms[n].resolution = LDPR_RESOLVED_EXEC;
-	  continue;
+	  goto report_symbol;
 	}
 
       /* Was originally def, or weakdef.  Does it prevail?  If the
@@ -529,13 +532,18 @@ get_symbols (const void *handle, int nsyms, struct ld_plugin_symbol *syms)
 	  syms[n].resolution = (ironly
 				? LDPR_PREVAILING_DEF_IRONLY
 				: LDPR_PREVAILING_DEF);
-	  continue;
+	  goto report_symbol;
 	}
 
       /* Was originally def, weakdef, or common, but has been pre-empted.  */
-      syms[n].resolution = is_ir_dummy_bfd (owner_sec->owner)
-	? LDPR_PREEMPTED_IR
-	: LDPR_PREEMPTED_REG;
+      syms[n].resolution = (is_ir_dummy_bfd (owner_sec->owner)
+			    ? LDPR_PREEMPTED_IR
+			    : LDPR_PREEMPTED_REG);
+
+report_symbol:
+      if (report_plugin_symbols)
+	einfo ("%P: %B: symbol `%s' definition: %d, resolution: %d\n",
+	       abfd, syms[n].name, syms[n].def, syms[n].resolution);
     }
   return LDPS_OK;
 }

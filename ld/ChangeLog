@@ -1,3 +1,16 @@
+2011-03-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld.texinfo: Document --verbose[=NUMBER].
+
+	* lexsup.c (ld_options): Update --verbose.
+	(parse_args): Set report_plugin_symbols.
+
+	* plugin.c (report_plugin_symbols): New.
+	(get_symbols): Report plugin symbols if report_plugin_symbols
+	is TRUE.
+
+	* plugin.h (report_plugin_symbols): New.
+
 2011-03-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/12529

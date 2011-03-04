@@ -21,6 +21,8 @@
 #ifndef GLD_PLUGIN_H
 #define GLD_PLUGIN_H
 
+/* Report plugin symbols.  */
+extern bfd_boolean report_plugin_symbols;
 
 /* This is the only forward declaration we need to avoid having
    to include the plugin-api.h header in order to use this file.  */

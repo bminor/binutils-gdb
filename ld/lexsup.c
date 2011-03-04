@@ -560,8 +560,9 @@ static const struct ld_option ld_options[] =
 		   "                                ignore-all, report-all, ignore-in-object-files,\n"
 		   "                                ignore-in-shared-libs"),
     TWO_DASHES },
-  { {"verbose", no_argument, NULL, OPTION_VERBOSE},
-    '\0', NULL, N_("Output lots of information during link"), TWO_DASHES },
+  { {"verbose", optional_argument, NULL, OPTION_VERBOSE},
+    '\0', N_("[=NUMBER]"),
+    N_("Output lots of information during link"), TWO_DASHES },
   { {"dll-verbose", no_argument, NULL, OPTION_VERBOSE}, /* Linux.  */
     '\0', NULL, NULL, NO_HELP },
   { {"version-script", required_argument, NULL, OPTION_VERSION_SCRIPT },
@@ -1326,6 +1327,14 @@ parse_args (unsigned argc, char **argv)
 	  version_printed = TRUE;
 	  trace_file_tries = TRUE;
 	  overflow_cutoff_limit = -2;
+	  if (optarg != NULL)
+	    {
+	      char *end;
+	      int level = strtoul (optarg, &end, 0);
+	      if (*end)
+		einfo (_("%P%F: invalid number `%s'\n"), optarg);
+	      report_plugin_symbols = level > 1;
+	    }
 	  break;
 	case 'v':
 	  ldversion (0);
