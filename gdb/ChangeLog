@@ -1,6 +1,9 @@
 2011-03-04  Michael Snyder  <msnyder@vmware.com>
 
 	Reverting this patch:
+	* infcall.c (call_function_by_hand): Add break statements for lint.
+
+	Reverting this patch:
 	* cli/cli-script.c (script_from_file): Add break for lint.
 
 2011-03-04  Michael Snyder  <msnyder@vmware.com>
