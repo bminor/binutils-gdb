@@ -3012,18 +3012,6 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 	      relocation = (base_got->output_section->vma
 			    + base_got->output_offset + off);
 
-	      if (r_type != R_X86_64_GOTPCREL
-		  && r_type != R_X86_64_GOTPCREL64)
-		{
-		  asection *gotplt;
-		  if (htab->elf.splt != NULL)
-		    gotplt = htab->elf.sgotplt;
-		  else
-		    gotplt = htab->elf.igotplt;
-		  relocation -= (gotplt->output_section->vma
-				 - gotplt->output_offset);
-		}
-
 	      goto do_relocation;
 	    }
 	}

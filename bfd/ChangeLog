@@ -1,5 +1,7 @@
 2011-03-03  Michael Snyder  <msnyder@vmware.com>
 
+	* elf64-x86-64.c (elf_x86_64_relocate_section): Remove dead code.
+
 	* coff-x86_64.c (coff_amd64_rtype_to_howto): Fencepost error.
 
 	* aoutx.h (aout_final_link): Use sizeof int not sizeof int*.
