@@ -980,7 +980,7 @@ decode_indirect (char **argptr)
   CORE_ADDR pc;
   
   (*argptr)++;
-  pc = parse_and_eval_address_1 (argptr);
+  pc = value_as_address (parse_to_comma_and_eval (argptr));
 
   values.sals = (struct symtab_and_line *)
     xmalloc (sizeof (struct symtab_and_line));

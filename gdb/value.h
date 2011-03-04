@@ -662,8 +662,6 @@ extern struct type *parse_and_eval_type (char *p, int length);
 
 extern CORE_ADDR parse_and_eval_address (char *exp);
 
-extern CORE_ADDR parse_and_eval_address_1 (char **expptr);
-
 extern LONGEST parse_and_eval_long (char *exp);
 
 extern void unop_promote (const struct language_defn *language,

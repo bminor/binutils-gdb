@@ -1,3 +1,10 @@
+2011-03-04  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* eval.c (parse_and_eval_address_1): Remove function.
+	* linespec.c (decode_indirect): Call parse_to_comma_and_eval
+	instead of parse_and_eval_address_1.
+	* value.h (parse_and_eval_address_1): Remove prototype.
+
 2011-03-04  Michael Snyder  <msnyder@vmware.com>
 
 	* remote.c (putpkt_binary): Document that case stmt falls through.
