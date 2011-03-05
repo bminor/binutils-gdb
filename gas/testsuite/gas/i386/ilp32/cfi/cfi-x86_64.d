@@ -7,7 +7,7 @@ Contents of the .eh_frame section:
   Version:               1
   Augmentation:          "zR"
   Code alignment factor: 1
-  Data alignment factor: -4
+  Data alignment factor: -8
   Return address column: 16
   Augmentation data:     1b
 
@@ -55,7 +55,7 @@ Contents of the .eh_frame section:
   Version:               1
   Augmentation:          "zR"
   Code alignment factor: 1
-  Data alignment factor: -4
+  Data alignment factor: -8
   Return address column: 16
   Augmentation data:     1b
 
@@ -88,7 +88,7 @@ Contents of the .eh_frame section:
   Version:               1
   Augmentation:          "zR"
   Code alignment factor: 1
-  Data alignment factor: -4
+  Data alignment factor: -8
   Return address column: 16
   Augmentation data:     1b
 

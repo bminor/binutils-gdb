@@ -502,9 +502,6 @@ unsigned int x86_dwarf2_return_column;
 /* The dwarf2 data alignment, adjusted for 32 or 64 bit.  */
 int x86_cie_data_alignment;
 
-/* The dwarf2 stack alignment, adjusted for 32 or 64 bit.  */
-static int x86_cie_stack_alignment;
-
 /* Interface to relax_segment.
    There are 3 major relax states for 386 jump insns because the
    different types of jumps add different sizes to frags when we're
@@ -2381,15 +2378,12 @@ md_begin ()
 #else
       x86_dwarf2_return_column = 16;
 #endif
-      if (!x86_cie_data_alignment)
-	x86_cie_data_alignment = -8;
-      x86_cie_stack_alignment = -8;
+      x86_cie_data_alignment = -8;
     }
   else
     {
       x86_dwarf2_return_column = 8;
       x86_cie_data_alignment = -4;
-      x86_cie_stack_alignment = -4;
     }
 }
 
@@ -8642,7 +8636,6 @@ i386_target_format (void)
 	    use_rela_relocations = 1;
 	    object_64bit = 1;
 	    disallow_64bit_reloc = 1;
-	    x86_cie_data_alignment = -4;
 	    format = ELF_TARGET_FORMAT32;
 	    break;
 	  }
@@ -9052,8 +9045,8 @@ tc_x86_frame_initial_instructions (void)
       input_line_pointer = saved_input;
     }
 
-  cfi_add_CFA_def_cfa (sp_regno[flag_code >> 1], -x86_cie_stack_alignment);
-  cfi_add_CFA_offset (x86_dwarf2_return_column, x86_cie_stack_alignment);
+  cfi_add_CFA_def_cfa (sp_regno[flag_code >> 1], -x86_cie_data_alignment);
+  cfi_add_CFA_offset (x86_dwarf2_return_column, x86_cie_data_alignment);
 }
 
 int

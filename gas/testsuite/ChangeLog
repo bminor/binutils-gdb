@@ -1,7 +1,3 @@
-2011-03-04  H.J. Lu  <hongjiu.lu@intel.com>
-
-	* gas/i386/ilp32/cfi/cfi-x86_64.d: Updated.
-
 2011-02-28  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* gas/mips/alnv_ps-swap.d: New test for ALNV.PS instruction
