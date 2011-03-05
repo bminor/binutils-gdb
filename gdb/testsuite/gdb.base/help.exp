@@ -655,7 +655,7 @@ gdb_test "help thread" "Use this command to switch between threads.*" "help thre
 # test help thread apply
 gdb_test "help thread apply" "Apply a command to a list of threads.*" "help thread apply"
 # test help thread find
-gdb_test "help thread find" "Find threads that match a regular.*" help thread find"
+gdb_test "help thread find" "Find threads that match a regular.*" "help thread find"
 # test help thread name
 gdb_test "help thread name" "Set the current thread's name.*" "help thread name"
 # test help tty

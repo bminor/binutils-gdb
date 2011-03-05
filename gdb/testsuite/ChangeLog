@@ -1,3 +1,7 @@
+2011-03-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/help.exp (help thread find): Fix one forgotten quote.
+
 2011-03-03  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.hp/gdb.aCC/Makefile.in (Makefile): Remove.
