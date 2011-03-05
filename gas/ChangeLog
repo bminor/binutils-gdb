@@ -1,3 +1,12 @@
+2011-03-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (x86_cie_stack_alignment): New.
+	(md_begin): Set x86_cie_data_alignment if it isn't set.  Set
+	x86_cie_stack_alignment.
+	(i386_target_format): Set x86_cie_data_alignment to -4 for x32.
+	(tc_x86_frame_initial_instructions): Use x86_cie_stack_alignment
+	instead of x86_cie_data_alignment on SP and RA.
+
 2011-03-02  Nick Clifton  <nickc@redhat.com>
 
 	* ecoff.c: Incldue filenames.h
