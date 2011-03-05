@@ -136,6 +136,9 @@ LIBCOMMON_DIR = common
 LIBCOMMON = $(LIBCOMMON_DIR)/libcommon.a
 LIBCOMMON_SRC = $(srcdir)/$(LIBCOMMON_DIR)
 
+CLEANDIRS = $(LIBCOMMON_DIR)
+REQUIRED_SUBDIRS = $(LIBCOMMON_DIR)
+
 SOURCES = $(SFILES)
 TAGFILES = $(SOURCES) ${HFILES} ${ALLPARAM} ${POSSLIBS}
 
@@ -291,6 +294,7 @@ TAGS:	${TAGFILES}
 tags: TAGS
 
 clean:
+	@$(MAKE) $(FLAGS_TO_PASS) DO=clean "DODIRS=$(CLEANDIRS)" subdir_do
 	rm -f *.o ${ADD_FILES} *~
 	rm -f version.c
 	rm -f gdbserver$(EXEEXT) gdbreplay$(EXEEXT) core make.log
@@ -314,12 +318,29 @@ clean:
 	rm -f i386-mmx.c i386-mmx-linux.c
 
 maintainer-clean realclean distclean: clean
+	@$(MAKE) $(FLAGS_TO_PASS) DO=$@ "DODIRS=$(CLEANDIRS)" subdir_do
 	rm -f nm.h tm.h xm.h config.status config.h stamp-h config.log
 	rm -f Makefile
 
 config.h: stamp-h ; @true
 stamp-h: config.in config.status
 	CONFIG_FILES="" CONFIG_HEADERS=config.h:config.in $(SHELL) ./config.status
+
+subdir_do: force
+	@for i in $(DODIRS); do \
+		case $$i in \
+		$(REQUIRED_SUBDIRS)) \
+			if [ ! -f ./$$i/Makefile ] ; then \
+				echo "Missing $$i/Makefile" >&2 ; \
+				exit 1 ; \
+			fi ;; \
+		esac ; \
+		if [ -f ./$$i/Makefile ] ; then \
+			if (cd ./$$i; \
+				$(MAKE) $(FLAGS_TO_PASS) $(DO)) ; then true ; \
+			else exit 1 ; fi ; \
+		else true ; fi ; \
+	done
 
 Makefile: Makefile.in config.status
 	CONFIG_HEADERS="" $(SHELL) ./config.status

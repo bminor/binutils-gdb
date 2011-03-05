@@ -1,3 +1,10 @@
+2011-03-05  Yao Qi  <yao@codesourcery.com>
+
+	* Makefile.in (CLEANDIRS, REQUIRED_SUBDIRS): New variable.
+	(subdir_do): New make target.  Copied from gdb/Makefile.
+	(maintainer-clean, realclean, distclean, clean): Call corresponding
+	make targets in common/Makefile.
+
 2011-03-04  Yao Qi  <yao@codesourcery.com>
 
 	* Makefile.in: Remove GNU make feature --directory.
