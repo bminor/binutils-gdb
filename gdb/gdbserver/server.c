@@ -121,7 +121,7 @@ queue_stop_reply (ptid_t ptid, struct target_waitstatus *status)
 {
   struct vstop_notif *new_notif;
 
-  new_notif = malloc (sizeof (*new_notif));
+  new_notif = xmalloc (sizeof (*new_notif));
   new_notif->next = NULL;
   new_notif->ptid = ptid;
   new_notif->status = *status;

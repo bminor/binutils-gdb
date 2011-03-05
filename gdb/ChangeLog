@@ -1,5 +1,7 @@
 2011-03-04  Michael Snyder  <msnyder@vmware.com>
 
+	* gdbserver/server.c (queue_stop_reply): Call xmalloc not malloc.
+
 	* xml-syscall.c (syscall_start_syscall): Assert name is non null.
 
 2011-03-04  Thiago Jung Bauermann  <bauerman@br.ibm.com>
