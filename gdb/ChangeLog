@@ -1,5 +1,7 @@
 2011-03-04  Michael Snyder  <msnyder@vmware.com>
 
+	* linux-fork.c (inferior_call_waitptid): Fix copy/paste error.
+
 	* symfile.c (simple_overlay_update): Check for null return value
 	from lookup_minimal_symbol.
 

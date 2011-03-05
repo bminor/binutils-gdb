@@ -443,7 +443,7 @@ inferior_call_waitpid (ptid_t pptid, int pid)
       oldfp = find_fork_ptid (inferior_ptid);
       gdb_assert (oldfp != NULL);
       newfp = find_fork_ptid (pptid);
-      gdb_assert (oldfp != NULL);
+      gdb_assert (newfp != NULL);
       fork_save_infrun_state (oldfp, 1);
       remove_breakpoints ();
       fork_load_infrun_state (newfp);
