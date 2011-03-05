@@ -1,5 +1,12 @@
 2011-03-05  Michael Snyder  <msnyder@vmware.com>
 
+	* dwarf2expr.c (execute_stack_op): Delete superfluous semicolon.
+	* mdebugread.c (parse_symbol): Ditto.
+	* parse.c (parse_exp_in_context): Ditto.
+	* source.c (add_path): Ditto.
+	* utils.c (gnu_debuglink_crc32): Ditto.
+	* varobj.c (variable_language): Ditto.
+
 	* linux-tdep.c (linux_get_siginfo_type): Stop memory leak.
 
 2011-03-04  Michael Snyder  <msnyder@vmware.com>

@@ -943,7 +943,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 			   tsym.st);
 	      }
 	  }
-      end_of_fields:;
+      end_of_fields:
 
 	/* In an stBlock, there is no way to distinguish structs,
 	   unions, and enums at this point.  This is a bug in the

@@ -3733,7 +3733,7 @@ gnu_debuglink_crc32 (unsigned long crc, unsigned char *buf, size_t len)
   crc = ~crc & 0xffffffff;
   for (end = buf + len; buf < end; ++buf)
     crc = crc32_table[(crc ^ *buf) & 0xff] ^ (crc >> 8);
-  return ~crc & 0xffffffff;;
+  return ~crc & 0xffffffff;
 }
 
 ULONGEST

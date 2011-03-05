@@ -2358,7 +2358,7 @@ variable_language (struct varobj *var)
 static int
 number_of_children (struct varobj *var)
 {
-  return (*var->root->lang->number_of_children) (var);;
+  return (*var->root->lang->number_of_children) (var);
 }
 
 /* What is the expression for the root varobj VAR? Returns a malloc'd
