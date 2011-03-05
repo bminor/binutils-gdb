@@ -76,20 +76,20 @@ linux_get_siginfo_type (struct gdbarch *gdbarch)
   append_composite_type_field (sigval_type, "sival_ptr", void_ptr_type);
 
   /* __pid_t */
-  pid_type = arch_type (gdbarch, TYPE_CODE_TYPEDEF, TYPE_LENGTH (int_type),
-			xstrdup ("__pid_t"));
+  pid_type = arch_type (gdbarch, TYPE_CODE_TYPEDEF,
+			TYPE_LENGTH (int_type), "__pid_t");
   TYPE_TARGET_TYPE (pid_type) = int_type;
   TYPE_TARGET_STUB (pid_type) = 1;
 
   /* __uid_t */
-  uid_type = arch_type (gdbarch, TYPE_CODE_TYPEDEF, TYPE_LENGTH (uint_type),
-			xstrdup ("__uid_t"));
+  uid_type = arch_type (gdbarch, TYPE_CODE_TYPEDEF,
+			TYPE_LENGTH (uint_type), "__uid_t");
   TYPE_TARGET_TYPE (uid_type) = uint_type;
   TYPE_TARGET_STUB (uid_type) = 1;
 
   /* __clock_t */
-  clock_type = arch_type (gdbarch, TYPE_CODE_TYPEDEF, TYPE_LENGTH (long_type),
-			  xstrdup ("__clock_t"));
+  clock_type = arch_type (gdbarch, TYPE_CODE_TYPEDEF,
+			  TYPE_LENGTH (long_type), "__clock_t");
   TYPE_TARGET_TYPE (clock_type) = long_type;
   TYPE_TARGET_STUB (clock_type) = 1;
 

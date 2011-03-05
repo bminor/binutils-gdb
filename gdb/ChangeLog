@@ -1,3 +1,7 @@
+2011-03-05  Michael Snyder  <msnyder@vmware.com>
+
+	* linux-tdep.c (linux_get_siginfo_type): Stop memory leak.
+
 2011-03-04  Michael Snyder  <msnyder@vmware.com>
 
 	* linux-fork.c (inferior_call_waitptid): Fix copy/paste error.
