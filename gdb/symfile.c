@@ -3432,15 +3432,24 @@ simple_overlay_update (struct obj_section *osect)
   if (osect)
     /* Have we got a cached copy of the target's overlay table?  */
     if (cache_ovly_table != NULL)
-      /* Does its cached location match what's currently in the symtab?  */
-      if (cache_ovly_table_base ==
-	  SYMBOL_VALUE_ADDRESS (lookup_minimal_symbol ("_ovly_table",
-						       NULL, NULL)))
-	/* Then go ahead and try to look up this single section in the
-	   cache.  */
-	if (simple_overlay_update_1 (osect))
-	  /* Found it!  We're done.  */
-	  return;
+      {
+	/* Does its cached location match what's currently in the
+	   symtab?  */
+	struct minimal_symbol *minsym
+	  = lookup_minimal_symbol ("_ovly_table", NULL, NULL);
+
+	if (minsym == NULL)
+	  error (_("Error reading inferior's overlay table: couldn't "
+		   "find `_ovly_table' array\n"
+		   "in inferior.  Use `overlay manual' mode."));
+	
+	if (cache_ovly_table_base == SYMBOL_VALUE_ADDRESS (minsym))
+	  /* Then go ahead and try to look up this single section in
+	     the cache.  */
+	  if (simple_overlay_update_1 (osect))
+	    /* Found it!  We're done.  */
+	    return;
+      }
 
   /* Cached table no good: need to read the entire table anew.
      Or else we want all the sections, in which case it's actually
