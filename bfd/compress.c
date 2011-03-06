@@ -100,6 +100,9 @@ bfd_compress_section_contents (bfd *abfd ATTRIBUTE_UNUSED,
   compressed_size = compressBound (uncompressed_size) + 12;
   compressed_buffer = (bfd_byte *) bfd_malloc (compressed_size);
 
+  if (compressed_buffer == NULL)
+    return FALSE;
+
   if (compress ((Bytef*) compressed_buffer + 12,
 		&compressed_size,
 		(const Bytef*) uncompressed_buffer,

@@ -1,5 +1,7 @@
 2011-03-06  Michael Snyder  <msnyder@vmware.com>
 
+	* compress.c (bfd_compress_section_contents): Check for out of mem.
+
 	* elf64-x86-64.c (elf_x86_64_relocate_section): Document
 	that case statement falls through intentionally.
 
