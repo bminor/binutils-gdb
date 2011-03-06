@@ -3128,7 +3128,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 		     internal symbol, we have updated addend.  */
 		  continue;
 		}
-
+	      /* FALLTHROUGH */
 	    case R_386_PC32:
 	    case R_386_PLT32:
 	      goto do_relocation;
