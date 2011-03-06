@@ -1,3 +1,9 @@
+2011-03-05  Mike Frysinger  <vapier@gentoo.org>
+
+	* MAINTAINERS: Add bfin entry.
+	* configure.tgt (bfin-*-*): Handle bfin targets.
+	* configure: Regenerate.
+
 2011-01-05  Mike Frysinger  <vapier@gentoo.org>
 
 	* .gitignore: Add /*/hw-config.h.

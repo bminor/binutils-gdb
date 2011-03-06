@@ -23,6 +23,9 @@ case "${target}" in
    avr*-*-*)
        SIM_ARCH(avr)
        ;;
+   bfin-*-*)
+       SIM_ARCH(bfin)
+       ;;
    cr16*-*-*)
        SIM_ARCH(cr16)
        sim_testsuite=yes

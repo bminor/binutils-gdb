@@ -1,3 +1,8 @@
+2011-03-05  Mike Frysinger  <vapier@gentoo.org>
+
+	* gennltvals.sh: Handle bfin targets.
+	* nltvals.def: Regenerate.
+
 2011-02-25  Kevin Buettner  <kevinb@redhat.com>
 
 	* callback.c (fdbad): Return EBADF rather than EINVAL for bad

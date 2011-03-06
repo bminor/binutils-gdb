@@ -1,0 +1,28 @@
+need to review ASTAT write behavior
+
+how to model RETE and IVG0 bit in IPEND ...
+
+model the loop buffer ?  this means no ifetches because they're cached.
+see page 4-26 in Blackfin PRM under hardware loops.
+
+handle DSPID at 0xffe05000
+
+CEC should handle multiple exceptions at same address.  would need
+exception processing to be delayed ?  at least needs a stack for
+the CEC to pop things off.
+
+R0 = [SP++]; gets traced as R0 = [P6++];
+
+merge dv-bfin_evt with dv-bfin_cec since the EVT regs are part of the CEC
+
+fix single stepping over debug assert instructions in hardware
+
+exception in IVG5 causes double fault ?
+
+add a "file" option to the async banks to back it
+
+tests:
+	- check AN bits with Dreg subtraction
+		R0 = R1 - R2;
+	- check astat bits with vector add/sub +|+
+	- check acc with VIT_MAX and similiar insns
