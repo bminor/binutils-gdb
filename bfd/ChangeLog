@@ -1,5 +1,8 @@
 2011-03-06  Michael Snyder  <msnyder@vmware.com>
 
+	* elf64-x86-64.c (elf_x86_64_relocate_section): Document
+	that case statement falls through intentionally.
+
 	* elf32-i386.c (elf_i386_relocate_section): Document fall through.
 
 2011-03-04  Alan Modra  <amodra@gmail.com>

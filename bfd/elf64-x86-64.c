@@ -2887,6 +2887,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 	    case R_X86_64_32:
 	      if (ABI_64_P (output_bfd))
 		goto do_relocation;
+	      /* FALLTHROUGH */
 	    case R_X86_64_64: 
 	      if (rel->r_addend != 0)
 		{
@@ -2950,7 +2951,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 		     internal symbol, we have updated addend.  */
 		  continue;
 		}
-
+	      /* FALLTHROUGH */
 	    case R_X86_64_PC32:
 	    case R_X86_64_PC64:
 	    case R_X86_64_PLT32:
