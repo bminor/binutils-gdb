@@ -912,6 +912,7 @@ execute_stack_op (struct dwarf_expr_context *ctx,
       /* Most things push a result value.  */
       dwarf_expr_push (ctx, result, in_stack_memory);
     no_push:
+      ;
     }
 
   /* To simplify our main caller, if the result is an implicit

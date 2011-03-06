@@ -1,3 +1,8 @@
+2011-03-05  Michael Snyder  <msnyder@vmware.com>
+
+	* source.c (add_path): Replace semicolon at end of block.
+	* dwarf2expr.c (execute_stack_op): Ditto.
+
 2011-03-05  Mike Frysinger  <vapier@gentoo.org>
 
 	* bfin-tdep.c: Include sim-regno.h and gdb/sim-bfin.h.
