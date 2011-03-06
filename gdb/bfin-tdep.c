@@ -32,6 +32,8 @@
 #include "trad-frame.h"
 #include "dis-asm.h"
 #include "gdb_assert.h"
+#include "sim-regno.h"
+#include "gdb/sim-bfin.h"
 #include "dwarf2-frame.h"
 #include "symtab.h"
 #include "elf-bfd.h"

@@ -1,3 +1,9 @@
+2011-03-05  Mike Frysinger  <vapier@gentoo.org>
+
+	* bfin-tdep.c: Include sim-regno.h and gdb/sim-bfin.h.
+	* configure.tgt (bfin-*-*linux*): Define gdb_sim.
+	(bfin-*-*): Likewise.
+
 2011-03-05  Michael Snyder  <msnyder@vmware.com>
 
 	* dwarf2expr.c (execute_stack_op): Delete superfluous semicolon.
