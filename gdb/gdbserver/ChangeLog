@@ -1,3 +1,7 @@
+2011-03-06  Yao Qi  <yao@codesourcery.com>
+
+	* Makefile.in (REQUIRED_SUBDIRS): Remove $(LIBCOMMON_DIR).
+
 2011-03-05  Yao Qi  <yao@codesourcery.com>
 
 	* Makefile.in (CLEANDIRS, REQUIRED_SUBDIRS): New variable.
