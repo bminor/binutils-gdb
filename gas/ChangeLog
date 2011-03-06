@@ -1,3 +1,8 @@
+2011-03-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/obj-elf.c (elf_frob_symbol): Mention symbol name in
+	non-constant .size expression.
+
 2011-03-02  Nick Clifton  <nickc@redhat.com>
 
 	* ecoff.c: Incldue filenames.h

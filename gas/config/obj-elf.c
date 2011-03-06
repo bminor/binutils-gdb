@@ -1879,6 +1879,7 @@ void
 elf_frob_symbol (symbolS *symp, int *puntp)
 {
   struct elf_obj_sy *sy_obj;
+  expressionS *size;
 
 #ifdef NEED_ECOFF_DEBUG
   if (ECOFF_DEBUGGING)
@@ -1887,13 +1888,50 @@ elf_frob_symbol (symbolS *symp, int *puntp)
 
   sy_obj = symbol_get_obj (symp);
 
-  if (sy_obj->size != NULL)
+  size = sy_obj->size;
+  if (size != NULL)
     {
-      if (resolve_expression (sy_obj->size)
-	  && sy_obj->size->X_op == O_constant)
-	S_SET_SIZE (symp, sy_obj->size->X_add_number);
+      if (resolve_expression (size)
+	  && size->X_op == O_constant)
+	S_SET_SIZE (symp, size->X_add_number);
       else
-	as_bad (_(".size expression does not evaluate to a constant"));
+	{
+	  const char *op_name = NULL;
+	  const char *add_name = NULL;
+
+	  if (size->X_op == O_subtract)
+	    {
+	      op_name = S_GET_NAME (size->X_op_symbol);
+	      add_name = S_GET_NAME (size->X_add_symbol);
+	      if (strcmp (op_name, FAKE_LABEL_NAME) == 0)
+		op_name = NULL;
+	      if (strcmp (add_name, FAKE_LABEL_NAME) == 0)
+		add_name = NULL;
+
+	      if (op_name && add_name)
+		as_bad (_(".size expression with symbols `%s' and `%s' "
+			  "does not evaluate to a constant"),
+			op_name, add_name);
+	      else
+		{
+		  const char *name;
+
+		  if (op_name)
+		    name = op_name;
+		  else if (add_name)
+		    name = add_name;
+		  else
+		    name = NULL;
+
+		  if (name)
+		    as_bad (_(".size expression with symbol `%s' "
+			      "does not evaluate to a constant"), name);
+		}
+	    }
+	  
+	  if (!op_name && !add_name)
+	    as_bad (_(".size expression does not evaluate to a constant"));
+	}
       free (sy_obj->size);
       sy_obj->size = NULL;
     }

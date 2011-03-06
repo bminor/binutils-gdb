@@ -1,3 +1,7 @@
+2011-03-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/elf/bad-size.err: Updated.
+
 2011-02-28  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* gas/mips/alnv_ps-swap.d: New test for ALNV.PS instruction
