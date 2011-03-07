@@ -510,7 +510,7 @@ struct target_ops
     int (*to_has_memory) (struct target_ops *);
     int (*to_has_stack) (struct target_ops *);
     int (*to_has_registers) (struct target_ops *);
-    int (*to_has_execution) (struct target_ops *);
+    int (*to_has_execution) (struct target_ops *, ptid_t);
     int to_has_thread_control;	/* control thread execution */
     int to_attach_no_wait;
     /* ASYNC target controls */
@@ -1189,8 +1189,13 @@ extern int target_has_registers_1 (void);
    case this will become true after target_create_inferior or
    target_attach.  */
 
-extern int target_has_execution_1 (void);
-#define target_has_execution target_has_execution_1 ()
+extern int target_has_execution_1 (ptid_t);
+
+/* Like target_has_execution_1, but always passes inferior_ptid.  */
+
+extern int target_has_execution_current (void);
+
+#define target_has_execution target_has_execution_current ()
 
 /* Default implementations for process_stratum targets.  Return true
    if there's a selected inferior, false otherwise.  */
@@ -1199,7 +1204,8 @@ extern int default_child_has_all_memory (struct target_ops *ops);
 extern int default_child_has_memory (struct target_ops *ops);
 extern int default_child_has_stack (struct target_ops *ops);
 extern int default_child_has_registers (struct target_ops *ops);
-extern int default_child_has_execution (struct target_ops *ops);
+extern int default_child_has_execution (struct target_ops *ops,
+					ptid_t the_ptid);
 
 /* Can the target support the debugger control of thread execution?
    Can it lock the thread scheduler?  */

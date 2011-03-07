@@ -1610,6 +1610,14 @@ m32r_return_one (struct target_ops *target)
   return 1;
 }
 
+/* Implementation of the to_has_execution method.  */
+
+static int
+m32r_has_execution (struct target_ops *target, ptid_t the_ptid)
+{
+  return 1;
+}
+
 /* Define the target subroutine names.  */
 
 struct target_ops m32r_ops;
@@ -1650,7 +1658,7 @@ init_m32r_ops (void)
   m32r_ops.to_has_memory = m32r_return_one;
   m32r_ops.to_has_stack = m32r_return_one;
   m32r_ops.to_has_registers = m32r_return_one;
-  m32r_ops.to_has_execution = m32r_return_one;
+  m32r_ops.to_has_execution = m32r_has_execution;
   m32r_ops.to_magic = OPS_MAGIC;
 };
 

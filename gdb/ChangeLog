@@ -1,3 +1,24 @@
+2011-03-07  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_has_execution>: Add ptid_t
+	parameter.
+	(target_has_execution_1): Update.
+	(target_has_execution_current): Declare.
+	(target_has_execution): Call target_has_execution_current.
+	(default_child_has_execution): Update.
+	* target.c (default_child_has_execution): Add 'the_ptid'
+	parameter.
+	(target_has_execution_1): Likewise.
+	(target_has_execution_current): New function.
+	(add_target): Update.
+	(init_dummy_target): Update.
+	* remote-m32r-sdi.c (m32r_has_execution): New function.
+	(init_m32r_ops): Use it.
+	* record.c (record_core_has_execution): Now static.  Add
+	'the_ptid' parameter.
+	* inferior.c (have_live_inferiors): Don't save current thread.
+	Use target_has_execution_1.
+
 2011-03-07  Yao Qi  <yao@codesourcery.com>
 
 	* Makefile.in (aclocal_m4_deps): Remove gnulib/m4/memcmp.m4.

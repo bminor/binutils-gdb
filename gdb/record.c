@@ -1923,8 +1923,8 @@ record_core_remove_breakpoint (struct gdbarch *gdbarch,
 
 /* "to_has_execution" method for prec over corefile.  */
 
-int
-record_core_has_execution (struct target_ops *ops)
+static int
+record_core_has_execution (struct target_ops *ops, ptid_t the_ptid)
 {
   return 1;
 }

@@ -314,11 +314,11 @@ default_child_has_registers (struct target_ops *ops)
 }
 
 int
-default_child_has_execution (struct target_ops *ops)
+default_child_has_execution (struct target_ops *ops, ptid_t the_ptid)
 {
   /* If there's no thread selected, then we can't make it run through
      hoops.  */
-  if (ptid_equal (inferior_ptid, null_ptid))
+  if (ptid_equal (the_ptid, null_ptid))
     return 0;
 
   return 1;
@@ -374,15 +374,21 @@ target_has_registers_1 (void)
 }
 
 int
-target_has_execution_1 (void)
+target_has_execution_1 (ptid_t the_ptid)
 {
   struct target_ops *t;
 
   for (t = current_target.beneath; t != NULL; t = t->beneath)
-    if (t->to_has_execution (t))
+    if (t->to_has_execution (t, the_ptid))
       return 1;
 
   return 0;
+}
+
+int
+target_has_execution_current (void)
+{
+  return target_has_execution_1 (inferior_ptid);
 }
 
 /* Add a possible target architecture to the list.  */
@@ -407,7 +413,7 @@ add_target (struct target_ops *t)
     t->to_has_registers = (int (*) (struct target_ops *)) return_zero;
 
   if (t->to_has_execution == NULL)
-    t->to_has_execution = (int (*) (struct target_ops *)) return_zero;
+    t->to_has_execution = (int (*) (struct target_ops *, ptid_t)) return_zero;
 
   if (!target_structs)
     {
@@ -3218,7 +3224,8 @@ init_dummy_target (void)
   dummy_target.to_has_memory = (int (*) (struct target_ops *)) return_zero;
   dummy_target.to_has_stack = (int (*) (struct target_ops *)) return_zero;
   dummy_target.to_has_registers = (int (*) (struct target_ops *)) return_zero;
-  dummy_target.to_has_execution = (int (*) (struct target_ops *)) return_zero;
+  dummy_target.to_has_execution
+    = (int (*) (struct target_ops *, ptid_t)) return_zero;
   dummy_target.to_stopped_by_watchpoint = return_zero;
   dummy_target.to_stopped_data_address =
     (int (*) (struct target_ops *, CORE_ADDR *)) return_zero;

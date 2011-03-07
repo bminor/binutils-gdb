@@ -462,10 +462,7 @@ have_inferiors (void)
 int
 have_live_inferiors (void)
 {
-  struct cleanup *old_chain;
   struct inferior *inf;
-
-  old_chain = make_cleanup_restore_current_thread ();
 
   for (inf = inferior_list; inf; inf = inf->next)
     if (inf->pid != 0)
@@ -473,16 +470,9 @@ have_live_inferiors (void)
 	struct thread_info *tp;
 	
 	tp = any_thread_of_process (inf->pid);
-	if (tp)
-	  {
-	    switch_to_thread (tp->ptid);
-
-	    if (target_has_execution)
-	      break;
-	  }
+	if (tp && target_has_execution_1 (tp->ptid))
+	  break;
       }
-
-  do_cleanups (old_chain);
 
   return inf != NULL;
 }
