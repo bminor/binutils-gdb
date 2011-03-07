@@ -1,5 +1,9 @@
 2011-03-07  Joel Brobecker  <brobecker@adacore.com>
 
+	* objc-lang.c (selectors_info): Minor reformatting.
+
+2011-03-07  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c (compare_names): Add FALLTHROUGH comment.
 
 2011-03-07  Joel Brobecker  <brobecker@adacore.com>
