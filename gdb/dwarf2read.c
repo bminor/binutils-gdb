@@ -2767,7 +2767,6 @@ dwarf2_initialize_objfile (struct objfile *objfile)
   if (dwarf2_read_index (objfile))
     return 1;
 
-  dwarf2_build_psymtabs (objfile);
   return 0;
 }
 

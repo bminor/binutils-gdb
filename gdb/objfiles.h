@@ -436,6 +436,11 @@ struct objfile
 
 #define OBJF_USERLOADED	(1 << 3)	/* User loaded */
 
+/* Set if we have tried to read partial symtabs for this objfile.
+   This is used to allow lazy reading of partial symtabs.  */
+
+#define OBJF_PSYMTABS_READ (1 << 4)
+
 /* The object file that contains the runtime common minimal symbols
    for SunOS4.  Note that this objfile has no associated BFD.  */
 

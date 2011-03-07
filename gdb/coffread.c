@@ -2191,6 +2191,7 @@ static const struct sym_fns coff_sym_fns =
 				   for sym_read() */
   coff_symfile_read,		/* sym_read: read a symbol file into
 				   symtab */
+  NULL,				/* sym_read_psymbols */
   coff_symfile_finish,		/* sym_finish: finished with file,
 				   cleanup */
   default_symfile_offsets,	/* sym_offsets: xlate external to

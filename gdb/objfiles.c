@@ -907,7 +907,14 @@ objfile_relocate (struct objfile *objfile, struct section_offsets *new_offsets)
 int
 objfile_has_partial_symbols (struct objfile *objfile)
 {
-  return objfile->sf ? objfile->sf->qf->has_symbols (objfile) : 0;
+  if (!objfile->sf)
+    return 0;
+  /* If we have not read psymbols, but we have a function capable of
+     reading them, then that is an indication that they are in fact
+     available.  */
+  if ((objfile->flags & OBJF_PSYMTABS_READ) == 0)
+    return objfile->sf->sym_read_psymbols != NULL;
+  return objfile->sf->qf->has_symbols (objfile);
 }
 
 /* Return non-zero if OBJFILE has full symbols.  */

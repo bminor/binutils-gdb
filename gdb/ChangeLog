@@ -1,5 +1,44 @@
 2011-03-07  Tom Tromey  <tromey@redhat.com>
 
+	* xcoffread.c (xcoff_sym_fns): Update.
+	* symfile.h (struct sym_fns) <sym_read_psymbols>: New field.
+	(enum symfile_add_flags) <SYMFILE_NO_READ>: New constant.
+	* symfile.c (syms_from_objfile): Handle SYMFILE_NO_READ.
+	(symbol_file_add_with_addrs_or_offsets): Likewise.
+	(reread_symbols): Handle OBJF_PSYMTABS_READ.
+	* somread.c (som_sym_fns): Update.
+	* psymtab.h (require_partial_symbols): Declare.
+	* psymtab.c (require_partial_symbols): New function.
+	(ALL_OBJFILE_PSYMTABS_REQUIRED): New macro.
+	(ALL_OBJFILE_PSYMTABS): Undef.
+	(ALL_PSYMTABS): Move from psympriv.h.
+	(lookup_partial_symtab, find_pc_sect_psymtab)
+	(lookup_symbol_aux_psymtabs, relocate_psymtabs)
+	(find_last_source_symtab_from_partial)
+	(forget_cached_source_info_partial)
+	(print_psymtab_stats_for_objfile, read_symtabs_for_function)
+	(expand_partial_symbol_tables, read_psymtabs_with_filename)
+	(map_symbol_names_psymtab, map_symbol_filenames_psymtab)
+	(find_symbol_file_from_partial, map_matching_symbols_psymtab)
+	(expand_symtabs_matching_via_partial, maintenance_info_psymtabs):
+	Use ALL_OBJFILE_PSYMTABS_REQUIRED.
+	* psympriv.h (ALL_PSYMTABS): Move to psymtab.c.
+	* objfiles.h (OBJF_PSYMTABS_READ): New macro.
+	* objfiles.c (objfile_has_partial_symbols): Handle lazily-read
+	psymtabs.
+	* mipsread.c (ecoff_sym_fns): Update.
+	* machoread.c (macho_sym_fns): Update.
+	* elfread.c (elf_symfile_read): Set up for lazy psymtab reading.
+	(read_psyms): New function.
+	(elf_sym_fns, elf_sym_fns_gdb_index): Update.
+	(elf_sym_fns_lazy_psyms): New global.
+	* dwarf2read.c (dwarf2_initialize_objfile): Don't call
+	dwarf2_build_psymtabs.
+	* dbxread.c (aout_sym_fns): Update.
+	* coffread.c (coff_sym_fns): Update.
+
+2011-03-07  Tom Tromey  <tromey@redhat.com>
+
 	* infrun.c (print_exited_reason): Include inferior id and pid in
 	message.
 

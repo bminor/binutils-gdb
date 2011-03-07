@@ -843,6 +843,7 @@ static const struct sym_fns macho_sym_fns = {
   macho_new_init,               /* init anything gbl to entire symtab */
   macho_symfile_init,           /* read initial info, setup for sym_read() */
   macho_symfile_read,           /* read a symbol file into symtab */
+  NULL,				/* sym_read_psymbols */
   macho_symfile_finish,         /* finished with file, cleanup */
   macho_symfile_offsets,        /* xlate external to internal form */
   default_symfile_segments,	/* Get segment information from a file.  */

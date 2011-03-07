@@ -1019,6 +1019,9 @@ syms_from_objfile (struct objfile *objfile,
 
   (*objfile->sf->sym_read) (objfile, add_flags);
 
+  if ((add_flags & SYMFILE_NO_READ) == 0)
+    require_partial_symbols (objfile, 0);
+
   /* Discard cleanups as symbol reading was successful.  */
 
   discard_cleanups (old_chain);
@@ -1079,9 +1082,15 @@ symbol_file_add_with_addrs_or_offsets (bfd *abfd,
   struct cleanup *my_cleanups;
   const char *name = bfd_get_filename (abfd);
   const int from_tty = add_flags & SYMFILE_VERBOSE;
+  const int should_print = ((from_tty || info_verbose)
+			    && (readnow_symbol_files
+				|| (add_flags & SYMFILE_NO_READ) == 0));
 
   if (readnow_symbol_files)
-    flags |= OBJF_READNOW;
+    {
+      flags |= OBJF_READNOW;
+      add_flags &= ~SYMFILE_NO_READ;
+    }
 
   my_cleanups = make_cleanup_bfd_close (abfd);
 
@@ -1100,7 +1109,7 @@ symbol_file_add_with_addrs_or_offsets (bfd *abfd,
   /* We either created a new mapped symbol table, mapped an existing
      symbol table file which has not had initial symbol reading
      performed, or need to read an unmapped symbol table.  */
-  if (from_tty || info_verbose)
+  if (should_print)
     {
       if (deprecated_pre_add_symbol_hook)
 	deprecated_pre_add_symbol_hook (name);
@@ -1121,7 +1130,7 @@ symbol_file_add_with_addrs_or_offsets (bfd *abfd,
 
   if ((flags & OBJF_READNOW))
     {
-      if (from_tty || info_verbose)
+      if (should_print)
 	{
 	  printf_unfiltered (_("expanding to full symbols..."));
 	  wrap_here ("");
@@ -1132,15 +1141,14 @@ symbol_file_add_with_addrs_or_offsets (bfd *abfd,
 	objfile->sf->qf->expand_all_symtabs (objfile);
     }
 
-  if ((from_tty || info_verbose)
-      && !objfile_has_symbols (objfile))
+  if (should_print && !objfile_has_symbols (objfile))
     {
       wrap_here ("");
       printf_unfiltered (_("(no debugging symbols found)..."));
       wrap_here ("");
     }
 
-  if (from_tty || info_verbose)
+  if (should_print)
     {
       if (deprecated_post_add_symbol_hook)
 	deprecated_post_add_symbol_hook ();
@@ -2497,6 +2505,12 @@ reread_symbols (void)
 	  /* Do not set flags as this is safe and we don't want to be
              verbose.  */
 	  (*objfile->sf->sym_read) (objfile, 0);
+	  if ((objfile->flags & OBJF_PSYMTABS_READ) != 0)
+	    {
+	      objfile->flags &= ~OBJF_PSYMTABS_READ;
+	      require_partial_symbols (objfile, 0);
+	    }
+
 	  if (!objfile_has_symbols (objfile))
 	    {
 	      wrap_here ("");

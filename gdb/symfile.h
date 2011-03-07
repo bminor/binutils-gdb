@@ -326,6 +326,13 @@ struct sym_fns
 
   void (*sym_read) (struct objfile *, int);
 
+  /* Read the partial symbols for an objfile.  This may be NULL, in
+     which case gdb assumes that sym_read already read the partial
+     symbols.  This may only be non-NULL if the objfile actually does
+     have debuginfo available.  */
+
+  void (*sym_read_psymbols) (struct objfile *);
+
   /* Called when we are finished with an objfile.  Should do all
      cleanup that is specific to the object file format for the
      particular objfile.  */
@@ -408,7 +415,11 @@ enum symfile_add_flags
     SYMFILE_MAINLINE = 1 << 2,
 
     /* Do not call breakpoint_re_set when adding this symbol file.  */
-    SYMFILE_DEFER_BP_RESET = 1 << 3
+    SYMFILE_DEFER_BP_RESET = 1 << 3,
+
+    /* Do not immediately read symbols for this file.  By default,
+       symbols are read when the objfile is created.  */
+    SYMFILE_NO_READ = 1 << 4
   };
 
 extern void syms_from_objfile (struct objfile *,

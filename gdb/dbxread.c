@@ -3587,6 +3587,7 @@ static const struct sym_fns aout_sym_fns =
   dbx_new_init,			/* init anything gbl to entire symtab */
   dbx_symfile_init,		/* read initial info, setup for sym_read() */
   dbx_symfile_read,		/* read a symbol file into symtab */
+  NULL,				/* sym_read_psymbols */
   dbx_symfile_finish,		/* finished with file, cleanup */
   default_symfile_offsets, 	/* parse user's offsets to internal form */
   default_symfile_segments,	/* Get segment information from a file.  */

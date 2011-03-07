@@ -38,4 +38,12 @@ extern const struct quick_symbol_functions psym_functions;
 
 extern const struct quick_symbol_functions dwarf2_gdb_index_functions;
 
+/* Ensure that the partial symbols for OBJFILE have been loaded.  If
+   VERBOSE is non-zero, then this will print a message when symbols
+   are loaded.  This function always returns its argument, as a
+   convenience.  */
+
+extern struct objfile *require_partial_symbols (struct objfile *objfile,
+						int verbose);
+
 #endif /* PSYMTAB_H */

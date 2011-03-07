@@ -183,10 +183,4 @@ extern void discard_psymtab (struct partial_symtab *);
 #define	ALL_OBJFILE_PSYMTABS(objfile, p) \
     for ((p) = (objfile) -> psymtabs; (p) != NULL; (p) = (p) -> next)
 
-/* Traverse all psymtabs in all objfiles.  */
-
-#define	ALL_PSYMTABS(objfile, p) \
-  ALL_OBJFILES (objfile)	 \
-    ALL_OBJFILE_PSYMTABS (objfile, p)
-
 #endif /* PSYMPRIV_H */

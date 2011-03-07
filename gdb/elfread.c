@@ -40,8 +40,9 @@
 
 extern void _initialize_elfread (void);
 
-/* Forward declaration.  */
+/* Forward declarations.  */
 static const struct sym_fns elf_sym_fns_gdb_index;
+static const struct sym_fns elf_sym_fns_lazy_psyms;
 
 /* The struct elfinfo is available only during ELF symbol table and
    psymtab reading.  It is destroyed at the completion of psymtab-reading.
@@ -887,14 +888,24 @@ elf_symfile_read (struct objfile *objfile, int symfile_flags)
 				bfd_section_size (abfd, str_sect));
     }
 
-  if (dwarf2_has_info (objfile) && dwarf2_initialize_objfile (objfile))
-    objfile->sf = &elf_sym_fns_gdb_index;
-
+  if (dwarf2_has_info (objfile))
+    {
+      if (dwarf2_initialize_objfile (objfile))
+	objfile->sf = &elf_sym_fns_gdb_index;
+      else
+	{
+	  /* It is ok to do this even if the stabs reader made some
+	     partial symbols, because OBJF_PSYMTABS_READ has not been
+	     set, and so our lazy reader function will still be called
+	     when needed.  */
+	  objfile->sf = &elf_sym_fns_lazy_psyms;
+	}
+    }
   /* If the file has its own symbol tables it has no separate debug
      info.  `.dynsym'/`.symtab' go to MSYMBOLS, `.debug_info' goes to
      SYMTABS/PSYMTABS.  `.gnu_debuglink' may no longer be present with
      `.note.gnu.build-id'.  */
-  if (!objfile_has_partial_symbols (objfile))
+  else if (!objfile_has_partial_symbols (objfile))
     {
       char *debugfile;
 
@@ -911,6 +922,15 @@ elf_symfile_read (struct objfile *objfile, int symfile_flags)
 	  xfree (debugfile);
 	}
     }
+}
+
+/* Callback to lazily read psymtabs.  */
+
+static void
+read_psyms (struct objfile *objfile)
+{
+  if (dwarf2_has_info (objfile))
+    dwarf2_build_psymtabs (objfile);
 }
 
 /* This cleans up the objfile's deprecated_sym_stab_info pointer, and
@@ -1057,6 +1077,25 @@ static const struct sym_fns elf_sym_fns =
   elf_new_init,			/* init anything gbl to entire symtab */
   elf_symfile_init,		/* read initial info, setup for sym_read() */
   elf_symfile_read,		/* read a symbol file into symtab */
+  NULL,				/* sym_read_psymbols */
+  elf_symfile_finish,		/* finished with file, cleanup */
+  default_symfile_offsets,	/* Translate ext. to int. relocation */
+  elf_symfile_segments,		/* Get segment information from a file.  */
+  NULL,
+  default_symfile_relocate,	/* Relocate a debug section.  */
+  &psym_functions
+};
+
+/* The same as elf_sym_fns, but not registered and lazily reads
+   psymbols.  */
+
+static const struct sym_fns elf_sym_fns_lazy_psyms =
+{
+  bfd_target_elf_flavour,
+  elf_new_init,			/* init anything gbl to entire symtab */
+  elf_symfile_init,		/* read initial info, setup for sym_read() */
+  elf_symfile_read,		/* read a symbol file into symtab */
+  read_psyms,			/* sym_read_psymbols */
   elf_symfile_finish,		/* finished with file, cleanup */
   default_symfile_offsets,	/* Translate ext. to int. relocation */
   elf_symfile_segments,		/* Get segment information from a file.  */
@@ -1073,6 +1112,7 @@ static const struct sym_fns elf_sym_fns_gdb_index =
   elf_new_init,			/* init anything gbl to entire symab */
   elf_symfile_init,		/* read initial info, setup for sym_red() */
   elf_symfile_read,		/* read a symbol file into symtab */
+  NULL,				/* sym_read_psymbols */
   elf_symfile_finish,		/* finished with file, cleanup */
   default_symfile_offsets,	/* Translate ext. to int. relocatin */
   elf_symfile_segments,		/* Get segment information from a file.  */

@@ -433,6 +433,7 @@ static const struct sym_fns som_sym_fns =
   som_new_init,			/* init anything gbl to entire symtab */
   som_symfile_init,		/* read initial info, setup for sym_read() */
   som_symfile_read,		/* read a symbol file into symtab */
+  NULL,				/* sym_read_psymbols */
   som_symfile_finish,		/* finished with file, cleanup */
   som_symfile_offsets,		/* Translate ext. to int. relocation */
   default_symfile_segments,	/* Get segment information from a file.  */
