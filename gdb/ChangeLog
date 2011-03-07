@@ -1,3 +1,7 @@
+2011-03-06  Michael Snyder  <msnyder@vmware.com>
+
+	* main.c (captured_main): Fix memory leak.
+
 2011-03-07  Andreas Schwab  <schwab@linux-m68k.org>
 
 	* ada-lang.c (compare_names): Call is_name_suffix with string1

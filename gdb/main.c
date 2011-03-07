@@ -352,11 +352,14 @@ captured_main (void *data)
 				    GDB_DATADIR_RELOCATABLE);
 
 #ifdef WITH_PYTHON_PATH
-  /* For later use in helping Python find itself.  */
-  python_libdir = relocate_directory (argv[0],
-				      concat (WITH_PYTHON_PATH,
-					      SLASH_STRING, "lib", NULL),
-				      PYTHON_PATH_RELOCATABLE);
+  {
+    /* For later use in helping Python find itself.  */
+    char *tmp = concat (WITH_PYTHON_PATH, SLASH_STRING, "lib", NULL);
+
+    python_libdir = relocate_directory (argv[0], tmp,
+					PYTHON_PATH_RELOCATABLE);
+    xfree (tmp);
+  }
 #endif
 
 #ifdef RELOC_SRCDIR
