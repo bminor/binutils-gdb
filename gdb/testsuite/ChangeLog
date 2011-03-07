@@ -1,3 +1,10 @@
+2011-03-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.trace/report.exp (12.1: trace report #1): New match for the
+	initial commands echo.  New match for `Found trace'.  Anchor all the
+	other matches.  Anchor and match for `No trace frame found' the final
+	match.
+
 2011-03-07  Tom Tromey  <tromey@redhat.com>
 
 	* Makefile.in (TAGS): New target.

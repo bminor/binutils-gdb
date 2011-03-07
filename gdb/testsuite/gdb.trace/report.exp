@@ -296,31 +296,37 @@ gdb_test_multiple "print \$trace_file" "11.4: test \$trace_file" {
 #
 
 gdb_test_multiple "while \$trace_frame != -1\n  output \$trace_file\n  printf \", line \%d \(tracepoint #\%d\)\\n\", \$trace_line, \$tracepoint\n  tfind\n  end" "12.1: trace report #1" {
-    -re " line $testline1 .tracepoint .$tdp1" {
+    -re ">  end\r\n" {
+	exp_continue
+    }
+    -re "^Found trace frame \[0-9\]+, tracepoint \[0-9\]+\r\n" {
+	exp_continue
+    }
+    -re "^\[^\r\n\]* line $testline1 .tracepoint .$tdp1\\)\r\n" {
 	set linecount1 [expr $linecount1 + 1]
 	exp_continue
     }
-    -re " line $testline2 .tracepoint .$tdp2" {
+    -re "^\[^\r\n\]* line $testline2 .tracepoint .$tdp2\\)\r\n" {
 	set linecount2 [expr $linecount2 + 1]
 	exp_continue
     }
-    -re " line $testline3 .tracepoint .$tdp3" {
+    -re "^\[^\r\n\]* line $testline3 .tracepoint .$tdp3\\)\r\n" {
 	set linecount3 [expr $linecount3 + 1]
 	exp_continue
     }
-    -re " line $testline4 .tracepoint .$tdp4" {
+    -re "^\[^\r\n\]* line $testline4 .tracepoint .$tdp4\\)\r\n" {
 	set linecount4 [expr $linecount4 + 1]
 	exp_continue
     }
-    -re " line $testline5 .tracepoint .$tdp5" {
+    -re "^\[^\r\n\]* line $testline5 .tracepoint .$tdp5\\)\r\n" {
 	set linecount5 [expr $linecount5 + 1]
 	exp_continue
     }
-    -re " line $testline6 .tracepoint .$tdp6" {
+    -re "^\[^\r\n\]* line $testline6 .tracepoint .$tdp6\\)\r\n" {
 	set linecount6 [expr $linecount6 + 1]
 	exp_continue
     }
-    -re ".*$gdb_prompt $" {
+    -re "^No trace frame found\r\n$gdb_prompt $" {
 	if { ($linecount1 < 4) || ($linecount2 < 4) || ($linecount3 < 4) || ($linecount4 < 4) || ($linecount5 < 4) || ($linecount6 < 4) } {
 	    fail "12.1: trace report #1"
 	} else {
