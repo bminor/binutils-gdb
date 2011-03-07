@@ -4757,7 +4757,7 @@ compare_names (const char *string1, const char *string2)
     case '_':
       if (*string2 == '\0')
 	{
-	  if (is_name_suffix (string2))
+	  if (is_name_suffix (string1))
 	    return 0;
 	  else
 	    return -1;

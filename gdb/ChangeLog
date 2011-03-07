@@ -1,3 +1,8 @@
+2011-03-07  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* ada-lang.c (compare_names): Call is_name_suffix with string1
+	instead of string2.
+
 2011-03-07  Tom Tromey  <tromey@redhat.com>
 
 	* xcoffread.c (xcoff_sym_fns): Update.
