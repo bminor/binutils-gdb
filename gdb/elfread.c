@@ -460,8 +460,7 @@ elf_symtab_read (struct objfile *objfile, int type,
 			     need to allocate max_index aadditional
 			     elements.  */
 			  size = (sizeof (struct stab_section_info) 
-				  + (sizeof (CORE_ADDR)
-				     * max_index));
+				  + (sizeof (CORE_ADDR) * max_index));
 			  sectinfo = (struct stab_section_info *)
 			    xmalloc (size);
 			  memset (sectinfo, 0, size);

@@ -1,5 +1,9 @@
 2011-03-07  Joel Brobecker  <brobecker@adacore.com>
 
+	* elfread.c (elf_symtab_read): Minor reformatting.
+
+2011-03-07  Joel Brobecker  <brobecker@adacore.com>
+
 	* objc-lang.c (selectors_info): Minor reformatting.
 
 2011-03-07  Joel Brobecker  <brobecker@adacore.com>
