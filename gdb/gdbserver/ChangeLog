@@ -1,3 +1,7 @@
+2011-03-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* remote-utils.c (putpkt_binary_1): Calculate BUF2 size dynamically.
+
 2011-03-06  Yao Qi  <yao@codesourcery.com>
 
 	* Makefile.in (REQUIRED_SUBDIRS): Remove $(LIBCOMMON_DIR).
