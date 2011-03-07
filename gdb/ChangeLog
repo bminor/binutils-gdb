@@ -1,5 +1,7 @@
 2011-03-06  Michael Snyder  <msnyder@vmware.com>
 
+	* elfread.c (elf_symtab_read): Stop memory leak.
+
 	* main.c (captured_main): Fix memory leak.
 
 2011-03-07  Andreas Schwab  <schwab@linux-m68k.org>
