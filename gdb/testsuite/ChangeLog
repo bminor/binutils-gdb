@@ -1,5 +1,9 @@
 2011-03-07  Tom Tromey  <tromey@redhat.com>
 
+	* Makefile.in (TAGS): New target.
+
+2011-03-07  Tom Tromey  <tromey@redhat.com>
+
 	* lib/opencl.exp (skip_opencl_tests): Update for exit message
 	change.
 	* lib/mi-support.exp (mi_gdb_test): Update for exit message

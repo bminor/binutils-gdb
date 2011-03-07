@@ -243,3 +243,7 @@ Makefile : Makefile.in config.status $(host_makefile_frag)
 
 config.status: configure
 	$(SHELL) config.status --recheck
+
+TAGS: force
+	etags --language=none --regex='/proc[ \t]+\([^ \t]+\)/\1/' \
+	  `find $(srcdir) -name '*.exp' -print`
