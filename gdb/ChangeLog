@@ -1,3 +1,12 @@
+2011-03-07  Joel Brobecker  <brobecker@adacore.com>
+	    Michael Snyder  <msnyder@vmware.com>
+
+	* ada-valprint.c (ada_val_print_array): Move the declaration of
+	"byte_order" and "elttype" inside the block where these variables
+	are actually used.  Remove some special handling for the case
+	where "elttype" and "eltlen" are null.  Replace by a comment
+	and a couple of assertion checks.
+
 2011-03-05  Michael Snyder  <msnyder@vmware.com>
 
 	* source.c (add_path): Replace semicolon at end of block.

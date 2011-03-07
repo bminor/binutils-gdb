@@ -605,25 +605,25 @@ ada_val_print_array (struct type *type, const gdb_byte *valaddr,
 		     const struct value *val,
 		     const struct value_print_options *options)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (get_type_arch (type));
-  struct type *elttype = TYPE_TARGET_TYPE (type);
   int result = 0;
 
   /* For an array of chars, print with string syntax.  */
   if (ada_is_string_type (type)
       && (options->format == 0 || options->format == 's'))
     {
+      enum bfd_endian byte_order = gdbarch_byte_order (get_type_arch (type));
+      struct type *elttype = TYPE_TARGET_TYPE (type);
       unsigned int eltlen;
       unsigned int len;
 
-      if (elttype == NULL)
-        eltlen = 0;
-      else
-        eltlen = TYPE_LENGTH (elttype);
-      if (eltlen == 0)
-        len = 0;
-      else
-        len = TYPE_LENGTH (type) / eltlen;
+      /* We know that ELTTYPE cannot possibly be null, because we found
+	 that TYPE is a string-like type.  Similarly, the size of ELTTYPE
+	 should also be non-null, since it's a character-like type.  */
+      gdb_assert (elttype != NULL);
+      gdb_assert (TYPE_LENGTH (elttype) != 0);
+
+      eltlen = TYPE_LENGTH (elttype);
+      len = TYPE_LENGTH (type) / eltlen;
 
       if (options->prettyprint_arrays)
         print_spaces_filtered (2 + 2 * recurse, stream);
