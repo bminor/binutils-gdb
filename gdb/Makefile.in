@@ -1330,7 +1330,6 @@ aclocal_m4_deps = \
 	gnulib/m4/include_next.m4 \
 	gnulib/m4/longlong.m4 \
 	gnulib/m4/memchr.m4 \
-	gnulib/m4/memcmp.m4 \
 	gnulib/m4/memmem.m4 \
 	gnulib/m4/onceonly_2_57.m4 \
 	gnulib/m4/stdint.m4 \

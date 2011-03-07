@@ -1,3 +1,7 @@
+2011-03-07  Yao Qi  <yao@codesourcery.com>
+
+	* Makefile.in (aclocal_m4_deps): Remove gnulib/m4/memcmp.m4.
+
 2011-03-07  Joel Brobecker  <brobecker@adacore.com>
 
 	* elfread.c (elf_symtab_read): Minor reformatting.
