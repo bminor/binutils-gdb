@@ -4762,6 +4762,7 @@ compare_names (const char *string1, const char *string2)
 	  else
 	    return -1;
 	}
+      /* FALLTHROUGH */
     default:
       if (*string2 == '(')
 	return strcmp_iw_ordered (string1, string2);

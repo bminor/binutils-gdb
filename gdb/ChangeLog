@@ -1,4 +1,8 @@
 2011-03-07  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (compare_names): Add FALLTHROUGH comment.
+
+2011-03-07  Joel Brobecker  <brobecker@adacore.com>
 	    Michael Snyder  <msnyder@vmware.com>
 
 	* ada-valprint.c (ada_val_print_array): Move the declaration of
