@@ -1,5 +1,7 @@
 2011-03-06  Michael Snyder  <msnyder@vmware.com>
 
+	* dwarf2loc.c (indirect_pieced_value): Assert 'piece' not null.
+
 	* ser-unix.c (hardwire_get_tty_state): Stop memory leak.
 
 	* mi/mi-cmd-env.c (_initialize_mi_cmd_env): Free environment.

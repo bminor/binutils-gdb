@@ -976,6 +976,7 @@ indirect_pieced_value (struct value *value)
   frame = get_selected_frame (_("No frame selected."));
   byte_offset = value_as_address (value);
 
+  gdb_assert (piece);
   baton = dwarf2_fetch_die_location_block (piece->v.ptr.die, c->per_cu,
 					   get_frame_address_in_block_wrapper,
 					   frame);
