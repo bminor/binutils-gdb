@@ -1,3 +1,7 @@
+2011-03-07  Tom Tromey  <tromey@redhat.com>
+
+	* Makefile.in (TAGS): Rewrite.
+
 2011-03-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.trace/report.exp (12.1: trace report #1): New match for the
