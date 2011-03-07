@@ -1,3 +1,8 @@
+2011-03-07  Ian Lance Taylor  <iant@google.com>
+
+	PR gold/12525
+	* options.h (class General_options): Add -dy and -dn.
+
 2011-03-02  Cary Coutant  <ccoutant@google.com>
 
 	* testsuite/script_test_9.t: Add TLS segment.
