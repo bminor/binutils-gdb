@@ -279,4 +279,5 @@ _initialize_mi_cmd_env (void)
   if (!env)
     env = "";
   orig_path = xstrdup (env);
+  free_environ (environment);
 }
