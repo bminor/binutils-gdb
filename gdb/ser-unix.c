@@ -183,7 +183,10 @@ hardwire_get_tty_state (struct serial *scb)
   state = (struct hardwire_ttystate *) xmalloc (sizeof *state);
 
   if (get_tty_state (scb, state))
-    return NULL;
+    {
+      xfree (state);
+      return NULL;
+    }
 
   return (serial_ttystate) state;
 }
