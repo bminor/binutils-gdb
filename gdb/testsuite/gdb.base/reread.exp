@@ -149,8 +149,7 @@ if [is_remote target] {
 
     # This time, let the program run to completion.  If GDB checks the
     # executable file's timestamp now, it won't notice any change.
-    gdb_test "continue" ".*Program exited.*" \
-            "second pass: continue to completion"
+    gdb_continue_to_end "second pass"
     
     # Now move the newer executable into place, and re-run.  GDB
     # should still notice that the executable file has changed,

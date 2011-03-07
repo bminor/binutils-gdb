@@ -166,8 +166,7 @@ proc check_for_program_end {} {
     # Deleting the catchpoints
     delete_breakpoints
 
-    set thistest "successful program end"
-    gdb_test "continue" "Program exited normally.*" $thistest
+    gdb_continue_to_end
 
 }
 
@@ -231,7 +230,7 @@ proc test_catch_syscall_with_wrong_args {} {
     # If it doesn't, everything is right (since we don't have
     # a syscall named "mlock" in it).  Otherwise, this is a failure.
     set thistest "catch syscall with unused syscall ($syscall_name)"
-    gdb_test "continue" "Program exited normally.*" $thistest
+    gdb_continue_to_end $thistest
 }
 
 proc test_catch_syscall_restarting_inferior {} {

@@ -42,7 +42,7 @@ if [istarget "*-*-vxworks*"] then {
     set timeout 120
     verbose "Timeout is now $timeout seconds" 2
     gdb_expect {
-	 "Program exited normally" {
+	 "$inferior_exited_re normally" {
 	    unresolved "run \"$testfile\" with no args"
 	}
 	 -re "usage:  factorial <number>" {
@@ -57,19 +57,19 @@ if [istarget "*-*-vxworks*"] then {
     gdb_expect -re "$gdb_prompt $" {}
 } else {
     gdb_expect {
-	-re ".*usage:  factorial <number>.*Program exited with code 01\.\r\n$gdb_prompt $" {
+	-re ".*usage:  factorial <number>.*$inferior_exited_re with code 01.\r\n$gdb_prompt $" {
 	    pass "run \"$testfile\" with no args"
 	    pass "no spurious messages at program exit"
 	}
-	-re ".*usage:  factorial <number>.*Program exited with code 01.*$gdb_prompt $" {
+	-re ".*usage:  factorial <number>.*$inferior_exited_re with code 01.*$gdb_prompt $" {
 	    pass "run \"$testfile\" with no args"
 	    fail "no spurious messages at program exit"
 	}
-	-re ".*usage:  factorial <number>.* EXIT code 1.*Program exited normally\.\r\n$gdb_prompt $" {
+	-re ".*usage:  factorial <number>.* EXIT code 1.*$inferior_exited_re normally.\r\n$gdb_prompt $" {
 	    pass "run \"$testfile\" with no args (exit wrapper)"
 	    pass "no spurious messages at program exit"
 	}
-	-re ".*usage:  factorial <number>.* EXIT code 1.*Program exited normally.*$gdb_prompt $" {
+	-re ".*usage:  factorial <number>.* EXIT code 1.*$inferior_exited_re normally.*$gdb_prompt $" {
 	    pass "run \"$testfile\" with no args (exit wrapper)"
 	    fail "no spurious messages at program exit"
 	}
@@ -97,7 +97,7 @@ if [istarget "*-*-vxworks*"] then {
     set timeout 120
     verbose "Timeout is now $timeout seconds" 2
     gdb_expect {
-	 "Program exited normally" {
+	 "$inferior_exited_re normally" {
 	    unresolved "run \"$testfile\" with arg"
 	}
 	 "120" {
@@ -129,7 +129,7 @@ if [istarget "*-*-vxworks*"] then {
     set timeout 120
     verbose "Timeout is now $timeout seconds" 2
     gdb_expect {
-	 "Program exited normally" {
+	 "$inferior_exited_re normally" {
 	    unresolved "run \"$testfile\" again with same args"
 	}
 	 "120" { pass "run \"$testfile\" again with same args" }
@@ -161,7 +161,7 @@ if [istarget "*-*-vxworks*"] then {
     set timeout 120
     verbose "Timeout is now $timeout seconds" 2
     gdb_expect {
-	 "Program exited normally" {
+	 "$inferior_exited_re normally" {
 	    unresolved "run after setting args to nil"
 	}
 	 "usage:  factorial <number>" {
@@ -202,7 +202,7 @@ if [istarget "*-*-vxworks*"] then {
     set timeout 120
     verbose "Timeout is now $timeout seconds" 2
     gdb_expect {
-	 "Program exited normally" {
+	 "$inferior_exited_re normally" {
 	    unresolved "run \"$testfile\" again after setting args"
 	}
 	 "720" {

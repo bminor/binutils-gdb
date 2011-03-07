@@ -83,7 +83,7 @@ gdb_test_multiple "step" "${test}" {
 	send_gdb "step\n"
 	exp_continue
     }
-    -re "Program exited normally.*${gdb_prompt} $" {
+    -re "$inferior_exited_re normally.*${gdb_prompt} $" {
 	kfail gdb/1613 "$test (program exited)"
     }
     -re "(while ..done|return 0).*${gdb_prompt} $" {

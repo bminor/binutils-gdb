@@ -258,7 +258,7 @@ proc do_attach_tests {} {
 
     # Allow the test process to exit, to cleanup after ourselves.
 
-    gdb_test "continue" "Program exited normally." "after attach2, exit"
+    gdb_continue_to_end "after attach2, exit"
 
     # Make sure we don't leave a process around to confuse
     # the next test run (and prevent the compile by keeping
@@ -365,7 +365,7 @@ proc do_call_attach_tests {} {
     # Get rid of the process
     
     gdb_test "p should_exit = 1"
-    gdb_test "c" "Program exited normally."
+    gdb_continue_to_end
    
     # Be paranoid
    

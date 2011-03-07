@@ -57,12 +57,13 @@ proc set_bp { where } {
 proc step_it { cmd } {
     global gdb_prompt
     global program_exited
+    global inferior_exited_re
 
     send_gdb "$cmd\n"
     gdb_expect {
 	-re "0x\[0-9A-Fa-f\]* *in.*\r\n$gdb_prompt $" { pass "step_it"; return 0 }
 	-re "0x\[0-9A-Fa-f\]* *\[0-9\]*.*\r\n$gdb_prompt $" { pass "step_it"; return 1 }
-	-re "Program exited .*\n$gdb_prompt $" {
+	-re "$inferior_exited_re .*\n$gdb_prompt $" {
 		set program_exited 1
 		return -1
 	    }
@@ -81,6 +82,7 @@ proc step_source {} {
 
 proc continue_all {} {
     global gdb_prompt
+    global inferior_exited_re
 
     send_gdb "continue\n"
     gdb_expect {
@@ -88,7 +90,7 @@ proc continue_all {} {
 	    pass "continue_all"
 	    return 0
 	}
-	-re "Program exited .*\n$gdb_prompt $" {
+	-re "$inferior_exited_re .*\n$gdb_prompt $" {
 	    set program_exited 1
 	    return 1;
 	}

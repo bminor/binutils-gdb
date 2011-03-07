@@ -72,7 +72,7 @@ proc gdb_cell_embedspu {source dest options} {
 # Return 0 if so, 1 if it does not.
 proc skip_cell_tests {} {
     global skip_cell_tests_saved
-    global srcdir subdir gdb_prompt
+    global srcdir subdir gdb_prompt inferior_exited_re
 
     # Use the cached value, if it exists.
     set me "skip_cell_tests"
@@ -136,11 +136,11 @@ proc skip_cell_tests {} {
     gdb_load "$exe"
     gdb_run_cmd
     gdb_expect {
-        -re ".*Program exited normally.*${gdb_prompt} $" {
+        -re ".*$inferior_exited_re normally.*${gdb_prompt} $" {
             verbose -log "\n$me: Cell/B.E. hardware detected"
             set skip_cell_tests_saved 0
         }
-        -re ".*Program exited with code.*${gdb_prompt} $" {
+        -re ".*$inferior_exited_re with code.*${gdb_prompt} $" {
             verbose -log "\n$me: Cell/B.E. hardware not detected"
             set skip_cell_tests_saved 1
         }

@@ -129,7 +129,7 @@ gdb_test_no_output "disable 1" "disable breakpoint: disable"
 
 gdb_run_cmd
 gdb_expect {
-    -re "Program exited normally.*$gdb_prompt $" {
+    -re "$inferior_exited_re normally.*$gdb_prompt $" {
 	pass "disable breakpoint: run to breakpoint"
     }
     -re "$gdb_prompt $" {

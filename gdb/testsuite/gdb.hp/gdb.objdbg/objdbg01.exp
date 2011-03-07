@@ -130,10 +130,10 @@ for {set filenum 0} {$filenum < 2} {incr filenum 1} {
         gdb_test "s 1" ".*25.*"
         if [istarget "hppa64-*-*"] {
             gdb_test "s 1" "0x\[0-9a-f\]+ in .*"
-            gdb_test "c" ".*Program exited normally.*"
+	    gdb_continue_to_end
         } else {
             gdb_test "s 1" "0x\[0-9a-f\]+ in _start .*"
-            gdb_test "s 1" ".*Program exited normally.*"
+            gdb_continue_to_end "" "s 1"
         }
     }
 

@@ -68,7 +68,7 @@ gdb_test_sequence "bt" "backtrace for nexti" {
 }
 
 proc advance { i } {
-    global gdb_prompt
+    global gdb_prompt inferior_exited_re
     set prefix "$i from handler"
 
     # Get us back into the handler
@@ -88,7 +88,7 @@ proc advance { i } {
 	    send_gdb "$i\n"
 	    exp_continue -continue_timer
 	}
-	-re "Program exited normally.*${gdb_prompt} $" {
+	-re "$inferior_exited_re normally.*${gdb_prompt} $" {
 	    setup_kfail gdb/1639 powerpc-*-*bsd*
 	    fail "$test (program exited)"
 	}
@@ -105,7 +105,7 @@ proc advance { i } {
 }
 
 proc advancei { i } {
-    global gdb_prompt
+    global gdb_prompt inferior_exited_re
     set prefix "$i from handleri"
     set program_exited 0
 
@@ -144,7 +144,7 @@ proc advancei { i } {
 	-re "main .*${gdb_prompt} $" {
 	    fail "$test (in main)"
 	}
-	-re "Program exited normally.*${gdb_prompt} $" {
+	-re "$inferior_exited_re normally.*${gdb_prompt} $" {
 	    fail "$test (program exited)"
 	    set program_exited 1
 	}
@@ -170,7 +170,7 @@ proc advancei { i } {
 	    send_gdb "y\n"
 	    exp_continue -continue_timer
 	}
-	-re "Program exited normally.*${gdb_prompt} $" {
+	-re "$inferior_exited_re normally.*${gdb_prompt} $" {
 	    kfail gdb/1639 "$test (program exited)"
 	    set program_exited 1
 	}

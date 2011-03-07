@@ -177,7 +177,7 @@ gdb_expect {
         unsupported "continue to first thread: system does not support TLS"
         return -1
     }
-    -re ".*Program exited normally.*$gdb_prompt $" {
+    -re ".*$inferior_exited_re normally.*$gdb_prompt $" {
         fail "continue to first thread: program runaway"
     }
     -re ".*Pass 0 done.*Pass 1 done.*$gdb_prompt $" {

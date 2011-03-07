@@ -150,7 +150,7 @@ gdb_test_multiple "finish" "$test" {
     -re ".*${decimal}.*callee.*NEXTI.*$gdb_prompt $" {
 	pass "$test"
     }
-    -re ".*(Program received|Program exited).*$gdb_prompt $" {
+    -re ".*(Program received|$inferior_exited_re).*$gdb_prompt $" {
 	# Oops... We ran to the end of the program...  Better reset     
 	if {![runto_main]} then {
 	    fail "$test (Can't run to main)"

@@ -59,7 +59,7 @@ gdb_run_cmd
 # When the prompt comes back we'll be at the Set DFP rounding mode breakpoint.
 # Unless the program bails out after checking AT_HWCAP.
 gdb_expect {
-  -re "Program exited with code 01.\[\r\n\]+$gdb_prompt $" {
+  -re "$inferior_exited_re with code 01.\[\r\n\]+$gdb_prompt $" {
     unsupported "This machine doesn't support Decimal Floating Point."
     return -1
   }

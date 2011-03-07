@@ -142,13 +142,7 @@ if [runto csub] then {
 
     if [target_info exists gdb,noresults] { return }
 
-    if [target_info exists use_gdb_stub] {
-	gdb_breakpoint "exit"
-	gdb_test "cont" "Breakpoint .*exit.*" "continue to exit in langs.exp"
-    } else {
-	gdb_test "cont" "Program exited normally\\..*" \
-		"continue to exit in langs.exp"
-    }
+    gdb_continue_to_end "langs.exp"
 }
 
 gdb_exit

@@ -141,8 +141,6 @@ gdb_test "continue" \
          "Continuing\.$eol$catchpoint_msg$eol.*SPOT4" \
          "continuing to unhandled exception"
 
-gdb_test "continue" \
-         "Continuing\..*Program exited.*" \
-         "continuing to program completion"
+gdb_continue_to_end 
 
 

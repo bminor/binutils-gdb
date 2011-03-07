@@ -31,6 +31,7 @@ proc gdb_compile_opencl_hostapp {clsource executable options} {
 # it does not.
 proc skip_opencl_tests {} {
     global skip_opencl_tests_saved srcdir objdir subdir gdb_prompt
+    global inferior_exited_re
 
     # Use the cached value, if it exists.  Cache value per "board" to handle
     # runs with multiple options (e.g. unix/{-m32,-64}) correctly.
@@ -59,11 +60,11 @@ proc skip_opencl_tests {} {
     clean_restart "$executable"
     gdb_run_cmd
     gdb_expect 30 {
-        -re ".*Program exited normally.*${gdb_prompt} $" {
+        -re ".*$inferior_exited_re normally.*${gdb_prompt} $" {
             verbose -log "\n$me: OpenCL support detected"
             set skip_opencl_tests_saved($board) 0
         }
-        -re ".*Program exited with code.*${gdb_prompt} $" {
+        -re ".*$inferior_exited_re code.*${gdb_prompt} $" {
             verbose -log "\n$me: OpenCL support not detected"
             set skip_opencl_tests_saved($board) 1
         }

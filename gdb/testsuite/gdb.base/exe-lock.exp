@@ -50,9 +50,7 @@ if ![runto_main] then {
     continue
 }
 
-gdb_test "continue" \
-         ".*Program exited normally\\." \
-         "continue until program exits"
+gdb_continue_to_end
 
 # Try deleting the executable file, now that the program has exited,
 # and make sure that the deletion worked by verifying that the exe

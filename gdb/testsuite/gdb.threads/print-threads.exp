@@ -59,7 +59,7 @@ if ![istarget "*-*-ultrix*"] then {
 }
 
 proc test_all_threads { name kill } {
-    global gdb_prompt
+    global gdb_prompt inferior_exited_re
 
     set i 0
     set j 0
@@ -80,7 +80,7 @@ proc test_all_threads { name kill } {
 	    send_gdb "continue\n"
 	    exp_continue
 	}
-	-re "Program exited normally\\.\[\r\n\]+$gdb_prompt" {
+	-re "$inferior_exited_re normally.\[\r\n\]+$gdb_prompt" {
 	    pass "program exited normally"
 	    if {$i == 5} {
 		pass "all threads ran once ($name)"

@@ -77,8 +77,7 @@ gdb_test_no_output "delete \$bpnum" "delete watchpoint"
 gdb_test "continue" "Continuing\\..*Breakpoint \[0-9\]+, func \\(\\) at .*$spu_file.c:.*" \
 	 "run until breakpoint hit"
 
-gdb_test "continue" "Continuing\\..*Program exited normally.*" \
-	 "run until end"
+gdb_continue_to_end
 
 gdb_exit
 

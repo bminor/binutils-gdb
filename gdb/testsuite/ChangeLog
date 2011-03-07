@@ -1,3 +1,64 @@
+2011-03-07  Tom Tromey  <tromey@redhat.com>
+
+	* lib/opencl.exp (skip_opencl_tests): Update for exit message
+	change.
+	* lib/mi-support.exp (mi_gdb_test): Update for exit message
+	change.
+	* lib/gdb.exp (gdb_test_multiple): Update comment.  Update for
+	exit message change.
+	(skip_altivec_tests): Update for exit message change.
+	(skip_vsx_tests): Likewise.
+	(gdb_continue_to_end): Likewise.  Add 'command' argument.
+	* lib/cell.exp (skip_cell_tests): Update for exit message change.
+	* gdb.threads/tls.exp: Update for exit message change.
+	* gdb.threads/thread-unwindonsignal.exp: Use
+	gdb_continue_to_end.
+	* gdb.threads/step.exp (step_it): Update for exit message change.
+	(continue_all): Likewise.
+	* gdb.threads/print-threads.exp (test_all_threads): Update for
+	exit message change.
+	* gdb.threads/interrupted-hand-call.exp: Use
+	gdb_continue_to_end.
+	* gdb.threads/execl.exp: Use gdb_continue_to_end.
+	* gdb.python/py-prettyprint.exp (run_lang_tests): Use
+	gdb_continue_to_end.
+	* gdb.hp/gdb.objdbg/objdbg02.exp: Use gdb_continue_to_end.
+	* gdb.hp/gdb.objdbg/objdbg01.exp: Use gdb_continue_to_end.
+	* gdb.hp/gdb.defects/solib-d.exp: Update for exit message change.
+	* gdb.cp/method.exp: Update for exit message change.
+	* gdb.cp/mb-templates.exp: Update for exit message change.
+	* gdb.cp/mb-inline.exp: Use gdb_continue_to_end.
+	* gdb.cp/annota3.exp: Update for exit message change.
+	* gdb.cp/annota2.exp: Update for exit message change.
+	* gdb.cell/fork.exp: Use gdb_continue_to_end.
+	* gdb.base/term.exp: Update for exit message change.
+	* gdb.base/step-test.exp (test_i): Update for exit message change.
+	* gdb.base/sigstep.exp (advance): Update for exit message change.
+	(advancei): Likewise.
+	* gdb.base/siginfo.exp: Update for exit message change.
+	* gdb.base/shlib-call.exp: Use gdb_continue_to_end.
+	* gdb.base/reread.exp: Use gdb_continue_to_end.
+	* gdb.base/langs.exp: Use gdb_continue_to_end.
+	* gdb.base/interrupt.exp: Update for exit message change.
+	* gdb.base/gdb1555.exp: Update for exit message change.
+	* gdb.base/exe-lock.exp: Use gdb_continue_to_end.
+	* gdb.base/ending-run.exp: Update for exit message change.
+	* gdb.base/chng-syms.exp: Update for exit message change.
+	* gdb.base/checkpoint.exp: Update for exit message change.
+	* gdb.base/catch-syscall.exp (check_for_program_end): Use
+	gdb_continue_to_end.
+	(test_catch_syscall_with_wrong_args): Likewise.
+	* gdb.base/call-signal-resume.exp: Use gdb_continue_to_end.
+	* gdb.base/break-interp.exp (test_ld): Update for exit message
+	change.
+	* gdb.base/bang.exp: Update for exit message change.
+	* gdb.base/attach.exp (do_attach_tests): Use gdb_continue_to_end.
+	(do_call_attach_tests): Likewise.
+	* gdb.base/a2-run.exp: Update for exit message change.
+	* gdb.arch/ppc-dfp.exp: Update for exit message change.
+	* gdb.ada/tasks.exp: Use gdb_continue_to_end.
+	* gdb.ada/catch_ex.exp: Use gdb_continue_to_end.
+
 2011-03-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/help.exp (help thread find): Fix one forgotten quote.

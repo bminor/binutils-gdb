@@ -575,6 +575,7 @@ proc mi_gdb_test { args } {
     global verbose
     global mi_gdb_prompt
     global GDB expect_out
+    global inferior_exited_re
     upvar timeout timeout
 
     set command [lindex $args 0]
@@ -698,7 +699,7 @@ proc mi_gdb_test { args } {
             fail "$message"
 	    set result 1
 	}
-	 -re "Program exited with code \[0-9\]+.*$mi_gdb_prompt\[ \]*$" {
+	 -re "$inferior_exited_re with code \[0-9\]+.*$mi_gdb_prompt\[ \]*$" {
 	    if ![string match "" $message] then {
 		set errmsg "$message (the program exited)"
 	    } else {

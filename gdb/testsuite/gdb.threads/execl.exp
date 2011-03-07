@@ -71,5 +71,4 @@ gdb_test_multiple "info threads" "$test" {
     }
 }
 
-gdb_test "continue" ".*Program exited normally\\." \
-    "continue to end"
+gdb_continue_to_end

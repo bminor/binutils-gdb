@@ -101,9 +101,7 @@ gdb_expect {
     }
 }
 
-gdb_test "continue" \
-    ".*Program exited normally.*" \
-    "continue with disabled breakpoint 1.2"
+gdb_continue_to_end "disabled breakpoint 1.2"
 
 # Make sure we can set a breakpoint on a source statement that spans
 # multiple lines.

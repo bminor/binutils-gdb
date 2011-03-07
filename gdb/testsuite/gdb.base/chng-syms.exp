@@ -100,7 +100,7 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
 
     gdb_run_cmd
     gdb_expect {
-	-re ".*Program exited normally.*$gdb_prompt $" {
+	-re ".*$inferior_exited_re normally.*$gdb_prompt $" {
 	    pass "running with invalidated bpt condition after executable changes" 
 	}
 	-re ".*Breakpoint .*,( 0x.* in)? (\[^ \]*)exit .*$gdb_prompt $" {

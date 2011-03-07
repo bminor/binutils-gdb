@@ -47,7 +47,7 @@ gdb_test_no_output "set width 0"
 gdb_test "info terminal" "No saved terminal information.*" "test info terminal"
 gdb_run_cmd 5
 gdb_expect {
-    -re ".*120.*Program exited normally.*$gdb_prompt $" {
+    -re ".*120.*$inferior_exited_re normally.*$gdb_prompt $" {
 	gdb_test "info terminal" "No saved terminal information.*" "test info terminal #2"
     }
     default {

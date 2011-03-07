@@ -365,7 +365,7 @@ proc test_attach {file displacement {relink_args ""}} {
 }
 
 proc test_ld {file ifmain trynosym displacement} {
-    global srcdir subdir gdb_prompt expect_out
+    global srcdir subdir gdb_prompt expect_out inferior_exited_re
 
     # First test normal `file'-command loaded $FILE with symbols.
 
@@ -494,7 +494,7 @@ proc test_ld {file ifmain trynosym displacement} {
 		}
 		exp_continue
 	    }
-	    -re "Program exited (normally|with code \[0-9\]+)\\.\r\n$gdb_prompt $" {
+	    -re "$inferior_exited_re (normally|with code \[0-9\]+).\r\n$gdb_prompt $" {
 		# Do not check the binary filename as it may be truncated.
 		pass $test
 	    }

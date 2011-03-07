@@ -146,7 +146,6 @@ gdb_test "continue" "Breakpoint \[0-9\]*, handle_signal.*" \
 
 # Continue one last time, the program should exit normally.
 
-gdb_test "continue" "Program exited normally." \
-    "continue to program exit"
+gdb_continue_to_end
 
 return 0

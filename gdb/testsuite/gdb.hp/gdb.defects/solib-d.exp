@@ -132,7 +132,7 @@ gdb_expect {
     -re ".*solib-d1.*$gdb_prompt $" {
         pass "Catch implicit load at startup"
     }
-    -re "Program exited.*$gdb_prompt $" {
+    -re "Inferior \[0-9\]+ exited.*$gdb_prompt $" {
         fail "CLLbs14756 || CLLbs16090 came back ???"
     }
     timeout { fail "(timeout) implicit library load" }
@@ -228,7 +228,7 @@ gdb_expect {
     -re "Stopped due to shared library event.*$gdb_prompt $" {
         pass "stop for shlib event"
     }
-    -re "Program exited.*$gdb_prompt $" {
+    -re "Inferior \[0-9\]+ exited.*$gdb_prompt $" {
         fail "Bug CLLbs16090 came back ?"
     }
     timeout { fail "(timeout) stop for shlib event " }

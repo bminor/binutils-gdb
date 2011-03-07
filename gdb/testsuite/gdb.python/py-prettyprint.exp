@@ -105,7 +105,7 @@ proc run_lang_tests {lang} {
     gdb_test "print nstype" " = {.0. = 7, .1. = 42}" \
 	"print nstype on one line"
 
-    gdb_test "continue" "Program exited normally\."
+    gdb_continue_to_end
 
     remote_file host delete ${remote_python_file}
 }

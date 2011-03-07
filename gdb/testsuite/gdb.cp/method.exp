@@ -175,10 +175,10 @@ gdb_test_multiple "ptype A" "ptype A" {
 }
 
 gdb_test_multiple "cont" "finish program" {
-    -re "Continuing.\r\n\r\nProgram exited normally.*$gdb_prompt $" {
+    -re "Continuing.\r\n$inferior_exited_re normally.*$gdb_prompt $" {
 	pass "finish program"
     }
-    -re "Continuing.* EXIT code 0.*Program exited normally.*$gdb_prompt $" {
+    -re "Continuing.* EXIT code 0.*$inferior_exited_re normally.*$gdb_prompt $" {
 	pass "finish program (exit wrapper)" 
     }
 }
