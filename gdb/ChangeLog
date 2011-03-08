@@ -1,3 +1,7 @@
+2011-03-08  Michael Snyder  <msnyder@vmware.com>
+
+	* i386-tdep.c (i386_process_record): Document fall through.
+
 2011-03-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix DWARF-3+ DW_AT_accessibility default assumption.
@@ -32,7 +36,7 @@
 	(arm_catch_kernel_helper_return): Likewise.
 	* gdb/arm-tdep.h : Update function declarations.
 
-2011-03-06  Michael Snyder  <msnyder@vmware.com>
+2011-03-07  Michael Snyder  <msnyder@vmware.com>
 
 	* dwarf2loc.c (indirect_pieced_value): Assert 'piece' not null.
 

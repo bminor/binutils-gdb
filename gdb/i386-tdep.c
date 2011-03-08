@@ -4543,6 +4543,7 @@ Do you want to stop the program?"),
 	  ir.addr -= 1;
 	  goto no_support;
 	}
+      /* FALLTHROUGH */
     case 0x0fb2:    /* lss Gv */
     case 0x0fb4:    /* lfs Gv */
     case 0x0fb5:    /* lgs Gv */
@@ -5322,6 +5323,7 @@ Do you want to stop the program?"),
           ir.addr -= 1;
           goto no_support;
         }
+      /* FALLTHROUGH */
     case 0xf5:    /* cmc */
     case 0xf8:    /* clc */
     case 0xf9:    /* stc */
