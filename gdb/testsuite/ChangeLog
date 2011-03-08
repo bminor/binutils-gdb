@@ -1,3 +1,8 @@
+2011-03-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.server/ext-run.exp
+	(load new file without any gdbserver inferior): New test.
+
 2011-01-14  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.base/wchar.c, gdb.base/wchar.exp: New testcases.

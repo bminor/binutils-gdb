@@ -57,4 +57,9 @@ if { [istarget *-*-linux*] } {
 }
 
 gdb_test "kill" "" "kill" "Kill the program being debugged.*" "y"
+
+gdb_load $binfile
+gdb_test "monitor help" "The following monitor commands.*" \
+        "load new file without any gdbserver inferior"
+
 gdb_test_no_output "monitor exit"

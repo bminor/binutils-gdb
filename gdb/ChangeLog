@@ -1,3 +1,8 @@
+2011-03-08  Pedro Alves  <pedro@codesourcery.com>
+
+	* remote.c (remote_check_symbols): Skip if the target has no
+	execution.
+
 2011-02-18  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* c-valprint.c (c_val_print): Add embedded_offset to address
