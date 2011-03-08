@@ -302,7 +302,8 @@ extern void
   arm_displaced_init_closure (struct gdbarch *gdbarch, CORE_ADDR from,
 			      CORE_ADDR to, struct displaced_step_closure *dsc);
 extern ULONGEST
-  displaced_read_reg (struct regcache *regs, CORE_ADDR from, int regno);
+  displaced_read_reg (struct regcache *regs, struct displaced_step_closure *dsc,
+		      int regno);
 extern void
   displaced_write_reg (struct regcache *regs,
 		       struct displaced_step_closure *dsc, int regno,

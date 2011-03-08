@@ -801,11 +801,10 @@ static int
 arm_linux_copy_svc (struct gdbarch *gdbarch, uint32_t insn, CORE_ADDR to,
 		    struct regcache *regs, struct displaced_step_closure *dsc)
 {
-  CORE_ADDR from = dsc->insn_addr;
   CORE_ADDR return_to = 0;
 
   struct frame_info *frame;
-  unsigned int svc_number = displaced_read_reg (regs, from, 7);
+  unsigned int svc_number = displaced_read_reg (regs, dsc, 7);
   int is_sigreturn = 0;
 
   if (debug_displaced)
@@ -918,7 +917,7 @@ arm_catch_kernel_helper_return (struct gdbarch *gdbarch, CORE_ADDR from,
      Insn: ldr pc, [r14, #4]
      Cleanup: r14 <- tmp[0], pc <- tmp[0].  */
 
-  dsc->tmp[0] = displaced_read_reg (regs, from, ARM_LR_REGNUM);
+  dsc->tmp[0] = displaced_read_reg (regs, dsc, ARM_LR_REGNUM);
   displaced_write_reg (regs, dsc, ARM_LR_REGNUM, (ULONGEST) to + 4,
 		       CANNOT_WRITE_PC);
   write_memory_unsigned_integer (to + 8, 4, byte_order, from);
