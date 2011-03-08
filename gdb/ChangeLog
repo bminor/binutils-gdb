@@ -4,6 +4,17 @@
 
 2011-03-08  Michael Snyder  <msnyder@vmware.com>
 
+	* i386-tdep.c (i386_follow_jump): Check return value of
+	target_read_memory.
+	(i386_analyze_struct_return): Ditto.
+	(i386_skip_probe): Ditto.
+	(i386_match_insn): Ditto.
+	(i386_skip_noop): Ditto.
+	(i386_analyze_frame_setup): Ditto.
+	(i386_analyze_register_saves): Ditto.
+	(i386_skip_prologue): Ditto.
+	(i386_skip_main_prologue): Ditto.
+
 	* target.c (read_whatever_is_readable): Fix memory leak.
 
 	* i386-tdep.c (i386_process_record): Document fall through.
