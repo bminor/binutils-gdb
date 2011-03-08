@@ -6238,13 +6238,25 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
     }
   fip->nfields++;
 
-  /* Handle accessibility and virtuality of field.
-     The default accessibility for members is public, the default
-     accessibility for inheritance is private.  */
-  if (die->tag != DW_TAG_inheritance)
-    new_field->accessibility = DW_ACCESS_public;
+  if (cu->header.version < 3)
+    {
+      /* The default DWARF 2 accessibility for members is public, the default
+	 accessibility for inheritance is private.  */
+
+      if (die->tag != DW_TAG_inheritance)
+	new_field->accessibility = DW_ACCESS_public;
+      else
+	new_field->accessibility = DW_ACCESS_private;
+    }
   else
-    new_field->accessibility = DW_ACCESS_private;
+    {
+      /* DWARF 3 specifies the default accessibility explicitly.  */
+
+      if (die->parent->tag == DW_TAG_class_type)
+	new_field->accessibility = DW_ACCESS_private;
+      else
+	new_field->accessibility = DW_ACCESS_public;
+    }
   new_field->virtuality = DW_VIRTUALITY_none;
 
   attr = dwarf2_attr (die, DW_AT_accessibility, cu);
