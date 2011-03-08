@@ -3435,10 +3435,19 @@ remote_check_symbols (struct objfile *objfile)
   struct minimal_symbol *sym;
   int end;
 
+  /* The remote side has no concept of inferiors that aren't running
+     yet, it only knows about running processes.  If we're connected
+     but our current inferior is not running, we should not invite the
+     remote target to request symbol lookups related to its
+     (unrelated) current process.  */
+  if (!target_has_execution)
+    return;
+
   if (remote_protocol_packets[PACKET_qSymbol].support == PACKET_DISABLE)
     return;
 
-  /* Make sure the remote is pointing at the right process.  */
+  /* Make sure the remote is pointing at the right process.  Note
+     there's no way to select "no process".  */
   set_general_process ();
 
   /* Allocate a message buffer.  We can't reuse the input buffer in RS,

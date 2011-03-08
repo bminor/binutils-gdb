@@ -1,3 +1,8 @@
+2011-03-08  Pedro Alves  <pedro@codesourcery.com>
+
+	* remote.c (remote_check_symbols): Skip if the target has no
+	execution.
+
 2011-03-08  Joel Brobecker  <brobecker@adacore.com>
 
 	* target.c (read_whatever_is_readable): Reformat comment,
