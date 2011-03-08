@@ -43,7 +43,7 @@ typedef enum
 
 /*  Xtensa register group.  */
 
-#define XTENSA_MAX_COPROCESSOR	0x08  /* Number of Xtensa coprocessors.  */
+#define XTENSA_MAX_COPROCESSOR	0x10  /* Number of Xtensa coprocessors.  */
 
 typedef enum 
 {
