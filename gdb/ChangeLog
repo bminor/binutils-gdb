@@ -1,5 +1,7 @@
 2011-03-08  Michael Snyder  <msnyder@vmware.com>
 
+	* target.c (read_whatever_is_readable): Fix memory leak.
+
 	* i386-tdep.c (i386_process_record): Document fall through.
 
 2011-03-08  Jan Kratochvil  <jan.kratochvil@redhat.com>

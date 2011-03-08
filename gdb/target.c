@@ -1968,7 +1968,10 @@ read_whatever_is_readable (struct target_ops *ops,
 
   /* If we previously failed to read 1 byte, nothing can be done here.  */
   if (end - begin <= 1)
-    return;
+    {
+      xfree (buf);
+      return;
+    }
 
   /* Check that either first or the last byte is readable, and give up
      if not.  This heuristic is meant to permit reading accessible memory
@@ -1987,6 +1990,7 @@ read_whatever_is_readable (struct target_ops *ops,
     }
   else
     {
+      xfree (buf);
       return;
     }
 
