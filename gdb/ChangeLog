@@ -1,3 +1,8 @@
+2011-03-08  Joel Brobecker  <brobecker@adacore.com>
+
+	* target.c (read_whatever_is_readable): Reformat comment,
+	with a minor typo fix. Minor reformatting of the code.
+
 2011-03-08  Yao Qi  <yao@codesourcery.com>
 
 	* arm-tdep.c: Remove prototype declaration displaced_in_arm_mode.

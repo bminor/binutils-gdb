@@ -1934,33 +1934,33 @@ target_read (struct target_ops *ops,
   return len;
 }
 
-/** Assuming that the entire [begin, end) range of memory cannot be read,
-    try to read whatever subrange is possible to read.
+/* Assuming that the entire [begin, end) range of memory cannot be
+   read, try to read whatever subrange is possible to read.
 
-    The function results, in RESULT, either zero or one memory block.
-    If there's a readable subrange at the beginning, it is completely
-    read and returned.  Any further readable subrange will not be read.
-    Otherwise, if there's a readable subrange at the end, it will be
-    completely read and returned.  Any readable subranges before it (obviously,
-    not starting at the beginning), will be ignored.  In other cases --
-    either no readable subrange, or readable subrange (s) that is neither
-    at the beginning, or end, nothing is returned.
+   The function returns, in RESULT, either zero or one memory block.
+   If there's a readable subrange at the beginning, it is completely
+   read and returned.  Any further readable subrange will not be read.
+   Otherwise, if there's a readable subrange at the end, it will be
+   completely read and returned.  Any readable subranges before it
+   (obviously, not starting at the beginning), will be ignored.  In
+   other cases -- either no readable subrange, or readable subrange(s)
+   that is neither at the beginning, or end, nothing is returned.
 
-    The purpose of this function is to handle a read across a boundary of
-    accessible memory in a case when memory map is not available.  The above
-    restrictions are fine for this case, but will give incorrect results if
-    the memory is 'patchy'.  However, supporting 'patchy' memory would require
-    trying to read every single byte, and it seems unacceptable solution.
-    Explicit memory map is recommended for this case -- and
-    target_read_memory_robust will take care of reading multiple ranges
-    then.  */
+   The purpose of this function is to handle a read across a boundary
+   of accessible memory in a case when memory map is not available.
+   The above restrictions are fine for this case, but will give
+   incorrect results if the memory is 'patchy'.  However, supporting
+   'patchy' memory would require trying to read every single byte,
+   and it seems unacceptable solution.  Explicit memory map is
+   recommended for this case -- and target_read_memory_robust will
+   take care of reading multiple ranges then.  */
 
 static void
 read_whatever_is_readable (struct target_ops *ops,
 			   ULONGEST begin, ULONGEST end,
 			   VEC(memory_read_result_s) **result)
 {
-  gdb_byte *buf = xmalloc (end-begin);
+  gdb_byte *buf = xmalloc (end - begin);
   ULONGEST current_begin = begin;
   ULONGEST current_end = end;
   int forward;
@@ -2000,8 +2000,8 @@ read_whatever_is_readable (struct target_ops *ops,
       ULONGEST first_half_begin, first_half_end;
       ULONGEST second_half_begin, second_half_end;
       LONGEST xfer;
-
       ULONGEST middle = current_begin + (current_end - current_begin)/2;
+
       if (forward)
 	{
 	  first_half_begin = current_begin;
@@ -2053,6 +2053,7 @@ read_whatever_is_readable (struct target_ops *ops,
     {
       /* The [current_end, end) range has been read.  */
       LONGEST rlen = end - current_end;
+
       r.data = xmalloc (rlen);
       memcpy (r.data, buf + current_end - begin, rlen);
       r.begin = current_end;
