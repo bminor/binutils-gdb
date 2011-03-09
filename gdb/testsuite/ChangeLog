@@ -1,3 +1,8 @@
+2011-03-09  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.ada/catch_ex.exp: Use explicit gdb_test rather than
+	gdb_continue_to_end.
+
 2011-03-09  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdb.base/memattr.exp: Adjust regexps to accept spaces as well as
