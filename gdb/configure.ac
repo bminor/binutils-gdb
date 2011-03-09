@@ -109,7 +109,6 @@ AS_HELP_STRING([--with-relocated-sources=PATH], [automatically relocate this pat
 ])
 
 AC_CONFIG_SUBDIRS(testsuite)
-AC_CONFIG_SUBDIRS(common)
 
 # Check whether to support alternative target configurations
 AC_ARG_ENABLE(targets,

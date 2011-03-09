@@ -45,8 +45,6 @@ includedir = @includedir@
 
 SHELL = /bin/sh
 EXEEXT = @EXEEXT@
-PWD_COMMAND = $${PWDCMD-pwd}
-RANLIB = @RANLIB@
 
 INSTALL = @INSTALL@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -132,17 +130,10 @@ DEPFILES = @GDBSERVER_DEPFILES@
 
 LIBOBJS = @LIBOBJS@
 
-LIBCOMMON_DIR = common
-LIBCOMMON = $(LIBCOMMON_DIR)/libcommon.a
-LIBCOMMON_SRC = $(srcdir)/$(LIBCOMMON_DIR)
-
-CLEANDIRS = $(LIBCOMMON_DIR)
-REQUIRED_SUBDIRS = no-required-subdir-yet
-
 SOURCES = $(SFILES)
 TAGFILES = $(SOURCES) ${HFILES} ${ALLPARAM} ${POSSLIBS}
 
-OBS = inferiors.o regcache.o remote-utils.o server.o target.o \
+OBS = inferiors.o regcache.o remote-utils.o server.o signals.o target.o \
 	utils.o version.o \
 	mem-break.o hostio.o event-loop.o tracepoint.o \
 	$(XML_BUILTIN) \
@@ -199,32 +190,6 @@ FLAGS_TO_PASS = \
 
 all: gdbserver$(EXEEXT) gdbreplay$(EXEEXT) $(extra_libraries)
 
-$(LIBCOMMON): $(LIBCOMMON_DIR)/Makefile
-	@$(MAKE) $(FLAGS_TO_PASS) DO=all DODIRS=common subdir_do
-
-common/Makefile: configure-common config.status
-        CONFIG_FILES="common/Makefile" \
-          CONFIG_COMMANDS="depfiles" \
-          CONFIG_HEADERS= \
-          CONFIG_LINKS= \
-          $(SHELL) config.status
-
-configure-common: 
-	@: $(MAKE); $(unstage)
-	@r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-        test ! -f common/Makefile || exit 0; \
-        $(SHELL) $(srcdir)/../../mkinstalldirs common ; \
-        $(HOST_EXPORTS)  \
-        echo Configuring in common; \
-        cd "common" || exit 1; \
-        commondir="$$s/../common"; \
-        srcdiroption="--srcdir=$${commondir}"; \
-	$(SHELL) $${commondir}/configure --enable-gdbserver=yes \
-          $(HOST_CONFIGARGS) --build=${build_alias} --host=${host_alias} \
-          --target=${target_alias} $${srcdiroption}  \
-          || exit 1
-
 # Traditionally "install" depends on "all".  But it may be useful
 # not to; for example, if the user has made some trivial change to a
 # source file and doesn't care about rebuilding or just wants to save the
@@ -259,10 +224,10 @@ html:
 install-html:
 clean-info:
 
-gdbserver$(EXEEXT): $(OBS) ${ADD_DEPS} ${CDEPS} $(LIBCOMMON)
+gdbserver$(EXEEXT): $(OBS) ${ADD_DEPS} ${CDEPS}
 	rm -f gdbserver$(EXEEXT)
 	${CC-LD} $(INTERNAL_CFLAGS) $(INTERNAL_LDFLAGS) -o gdbserver$(EXEEXT) $(OBS) \
-	$(LIBCOMMON) $(GDBSERVER_LIBS) $(XM_CLIBS)
+	  $(GDBSERVER_LIBS) $(XM_CLIBS)
 
 gdbreplay$(EXEEXT): $(GDBREPLAY_OBS)
 	rm -f gdbreplay$(EXEEXT)
@@ -294,7 +259,6 @@ TAGS:	${TAGFILES}
 tags: TAGS
 
 clean:
-	@$(MAKE) $(FLAGS_TO_PASS) DO=clean "DODIRS=$(CLEANDIRS)" subdir_do
 	rm -f *.o ${ADD_FILES} *~
 	rm -f version.c
 	rm -f gdbserver$(EXEEXT) gdbreplay$(EXEEXT) core make.log
@@ -325,22 +289,6 @@ maintainer-clean realclean distclean: clean
 config.h: stamp-h ; @true
 stamp-h: config.in config.status
 	CONFIG_FILES="" CONFIG_HEADERS=config.h:config.in $(SHELL) ./config.status
-
-subdir_do: force
-	@for i in $(DODIRS); do \
-		case $$i in \
-		$(REQUIRED_SUBDIRS)) \
-			if [ ! -f ./$$i/Makefile ] ; then \
-				echo "Missing $$i/Makefile" >&2 ; \
-				exit 1 ; \
-			fi ;; \
-		esac ; \
-		if [ -f ./$$i/Makefile ] ; then \
-			if (cd ./$$i; \
-				$(MAKE) $(FLAGS_TO_PASS) $(DO)) ; then true ; \
-			else exit 1 ; fi ; \
-		else true ; fi ; \
-	done
 
 Makefile: Makefile.in config.status
 	CONFIG_HEADERS="" $(SHELL) ./config.status
@@ -434,6 +382,9 @@ thread-db.o: thread-db.c $(server_h) $(linux_low_h) $(gdb_proc_service_h)
 tracepoint.o: tracepoint.c $(server_h) $(srcdir)/../common/ax.def
 utils.o: utils.c $(server_h)
 gdbreplay.o: gdbreplay.c config.h
+
+signals.o: ../common/signals.c $(server_h) $(signals_def)
+	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $< -DGDBSERVER
 
 # We build memmem.c without -Werror because this file is not under
 # our control.  On LynxOS, the compiler generates some warnings

@@ -1,3 +1,23 @@
+2011-03-09  Yao Qi  <yao@codesourcery.com>
+
+	Revert:
+	2011-03-04  Yao Qi  <yao@codesourcery.com>
+
+	* Makefile.in: Remove GNU make feature --directory.
+
+	2011-03-05  Yao Qi  <yao@codesourcery.com>
+
+	* Makefile.in (CLEANDIRS, REQUIRED_SUBDIRS): New variable.
+	(subdir_do): New make target.  Copied from gdb/Makefile.
+	(maintainer-clean, realclean, distclean, clean): Call corresponding
+	make targets in common/Makefile.
+
+	2011-02-11  Yao Qi  <yao@codesourcery.com>
+
+	* configure.ac: Call AC_PROG_RANLIB.
+	* Makefile.in: Remove signals.o from OBS.  Link libcommon.a.
+	* configure: Regenerate.
+
 2011-03-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* remote-utils.c (putpkt_binary_1): Calculate BUF2 size dynamically.
