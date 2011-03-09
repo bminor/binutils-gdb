@@ -1,3 +1,21 @@
+2011-03-09  Tom Tromey  <tromey@redhat.com>
+
+	* lib/gdb.exp (inferior_exited_re): Match. leading `['.  Wrap in
+	parentheses.
+	(gdb_continue_to_end): Add "allow_extra" parameter.  Use
+	$command.
+	* gdb.threads/thread-unwindonsignal.exp: Pass "allow_extra"
+	argument to gdb_continue_to_end.
+	* gdb.threads/interrupted-hand-call.exp: Pass "allow_extra"
+	argument to gdb_continue_to_end.
+	* gdb.cp/annota3.exp: Fix regex.
+	* gdb.cp/annota2.exp: Fix regex.
+	* gdb.base/shlib-call.exp: Pass "allow_extra" argument to
+	gdb_continue_to_end.
+	* gdb.base/call-signal-resume.exp: Revert earlier patch.
+	* gdb.ada/tasks.exp: Pass "allow_extra" argument to
+	gdb_continue_to_end.
+
 2011-03-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.server/ext-run.exp

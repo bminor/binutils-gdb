@@ -146,6 +146,7 @@ gdb_test "continue" "Breakpoint \[0-9\]*, handle_signal.*" \
 
 # Continue one last time, the program should exit normally.
 
-gdb_continue_to_end
+gdb_test "continue" "$inferior_exited_re normally." \
+    "continue to program exit"
 
 return 0

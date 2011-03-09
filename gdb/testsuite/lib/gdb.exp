@@ -99,7 +99,7 @@ if ![info exists env(EXEEXT)] {
 
 set octal "\[0-7\]+"
 
-set inferior_exited_re "Inferior \[0-9\]+ \\(.*\\) exited"
+set inferior_exited_re "(\\\[Inferior \[0-9\]+ \\(.*\\) exited)"
 
 ### Only procedures should come after this point.
 
@@ -3062,8 +3062,12 @@ proc gdb_get_line_number { text { file "" } } {
 #	default is used.
 # COMMAND is the command to invoke.  If not given, "continue" is
 #	used.
+# ALLOW_EXTRA is a flag indicating whether the test should expect
+#	extra output between the "Continuing." line and the program
+#	exiting.  By default it is zero; if nonzero, any extra output
+#	is accepted.
 
-proc gdb_continue_to_end {{mssg ""} {command continue}} {
+proc gdb_continue_to_end {{mssg ""} {command continue} {allow_extra 0}} {
   global inferior_exited_re
 
   if {$mssg == ""} {
@@ -3071,18 +3075,23 @@ proc gdb_continue_to_end {{mssg ""} {command continue}} {
   } else {
       set text "continue until exit at $mssg"
   }
+  if {$allow_extra} {
+      set extra ".*"
+  } else {
+      set extra ""
+  }
   if [target_info exists use_gdb_stub] {
     if {![gdb_breakpoint "exit"]} {
       return 0
     }
-    gdb_test "continue" "Continuing..*Breakpoint .*exit.*" \
+    gdb_test $command "Continuing..*Breakpoint .*exit.*" \
 	$text
   } else {
     # Continue until we exit.  Should not stop again.
     # Don't bother to check the output of the program, that may be
     # extremely tough for some remote systems.
-    gdb_test "continue"\
-      "Continuing.\[\r\n0-9\]+(... EXIT code 0\[\r\n\]+|$inferior_exited_re normally).*"\
+    gdb_test $command \
+      "Continuing.\[\r\n0-9\]+${extra}(... EXIT code 0\[\r\n\]+|$inferior_exited_re normally).*"\
 	$text
   }
 }
