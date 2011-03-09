@@ -1,5 +1,11 @@
 2011-03-09  Yao Qi  <yao@codesourcery.com>
 
+	* common/Makefile.in: Remove.
+	* common/configure: Remove.
+	* common/configure.ac: Remove.
+
+2011-03-09  Yao Qi  <yao@codesourcery.com>
+
 	Revert:
 	2011-02-11  Yao Qi  <yao@codesourcery.com>
 
