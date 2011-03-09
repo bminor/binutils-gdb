@@ -91,6 +91,11 @@ static int xtensa_debug_level = 0;
 #define CALLINC(ps)		(((ps) & PS_CALLINC_MASK) >> PS_CALLINC_SHIFT)
 #define WINSIZE(ra)		(4 * (( (ra) >> 30) & 0x3))
 
+/* On TX,  hardware can be configured without Exception Option.
+   There is no PS register in this case.  Inside XT-GDB,  let us treat
+   it as a virtual read-only register always holding the same value.  */
+#define TX_PS			0x20
+
 /* ABI-independent macros.  */
 #define ARG_NOF(gdbarch) \
   (gdbarch_tdep (gdbarch)->call_abi \
@@ -115,6 +120,16 @@ static int xtensa_debug_level = 0;
 
 #define PS_WOE			(1<<18)
 #define PS_EXC			(1<<4)
+
+static inline int
+windowing_enabled (struct gdbarch *gdbarch, unsigned int ps)
+{
+  /* If we know CALL0 ABI is set explicitly,  say it is Call0.  */
+  if (gdbarch_tdep (gdbarch)->call_abi == CallAbiCall0Only)
+    return 0;
+
+  return ((ps & PS_EXC) == 0 && (ps & PS_WOE) != 0);
+}
 
 /* Convert a live A-register number to the corresponding AR-register
    number.  */
@@ -144,12 +159,6 @@ areg_number (struct gdbarch *gdbarch, int ar_regnum, unsigned int wb)
     return -1;
   areg = (areg - wb * 4) & (tdep->num_aregs - 1);
   return (areg > 15) ? -1 : areg;
-}
-
-static inline int
-windowing_enabled (CORE_ADDR ps)
-{
-  return ((ps & PS_EXC) == 0 && (ps & PS_WOE) != 0);
 }
 
 /* Return the window size of the previous call to the function from which we
@@ -692,6 +701,13 @@ xtensa_pseudo_register_write (struct gdbarch *gdbarch,
 		    _("invalid register number %d"), regnum);
 }
 
+static inline char xtensa_hextochar (int xdigit)
+{
+  static char hex[]="0123456789abcdef";
+
+  return hex[xdigit & 0x0f];
+}
+
 static struct reggroup *xtensa_ar_reggroup;
 static struct reggroup *xtensa_user_reggroup;
 static struct reggroup *xtensa_vectra_reggroup;
@@ -700,18 +716,18 @@ static struct reggroup *xtensa_cp[XTENSA_MAX_COPROCESSOR];
 static void
 xtensa_init_reggroups (void)
 {
+  int i;
+  char cpname[] = "cp0";
+
   xtensa_ar_reggroup = reggroup_new ("ar", USER_REGGROUP);
   xtensa_user_reggroup = reggroup_new ("user", USER_REGGROUP);
   xtensa_vectra_reggroup = reggroup_new ("vectra", USER_REGGROUP);
 
-  xtensa_cp[0] = reggroup_new ("cp0", USER_REGGROUP);
-  xtensa_cp[1] = reggroup_new ("cp1", USER_REGGROUP);
-  xtensa_cp[2] = reggroup_new ("cp2", USER_REGGROUP);
-  xtensa_cp[3] = reggroup_new ("cp3", USER_REGGROUP);
-  xtensa_cp[4] = reggroup_new ("cp4", USER_REGGROUP);
-  xtensa_cp[5] = reggroup_new ("cp5", USER_REGGROUP);
-  xtensa_cp[6] = reggroup_new ("cp6", USER_REGGROUP);
-  xtensa_cp[7] = reggroup_new ("cp7", USER_REGGROUP);
+  for (i = 0; i < XTENSA_MAX_COPROCESSOR; i++)
+    {
+      cpname[2] = xtensa_hextochar (i);
+      xtensa_cp[i] = reggroup_new (cpname, USER_REGGROUP);
+    }
 }
 
 static void
@@ -1187,23 +1203,26 @@ xtensa_frame_cache (struct frame_info *this_frame, void **this_cache)
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   unsigned int fp_regnum;
-  char op1;
-  int  windowed;
+  int  windowed, ps_regnum;
 
   if (*this_cache)
     return *this_cache;
 
-  ps = get_frame_register_unsigned (this_frame, gdbarch_ps_regnum (gdbarch));
-  windowed = windowing_enabled (ps);
+  pc = get_frame_register_unsigned (this_frame, gdbarch_pc_regnum (gdbarch));
+  ps_regnum = gdbarch_ps_regnum (gdbarch);
+  ps = (ps_regnum >= 0)
+    ? get_frame_register_unsigned (this_frame, ps_regnum) : TX_PS;
+
+  windowed = windowing_enabled (gdbarch, ps);
 
   /* Get pristine xtensa-frame.  */
   cache = xtensa_alloc_frame_cache (windowed);
   *this_cache = cache;
 
-  pc = get_frame_register_unsigned (this_frame, gdbarch_pc_regnum (gdbarch));
-
   if (windowed)
     {
+      char op1;
+
       /* Get WINDOWBASE, WINDOWSTART, and PS registers.  */
       wb = get_frame_register_unsigned (this_frame, 
 					gdbarch_tdep (gdbarch)->wb_regnum);
@@ -1228,7 +1247,7 @@ xtensa_frame_cache (struct frame_info *this_frame, void **this_cache)
 	     just about to execute ENTRY.  SP hasn't been set yet.
 	     We can assume any frame size, because it does not
 	     matter, and, let's fake frame base in cache.  */
-	  cache->base = cache->prev_sp + 16;
+	  cache->base = cache->prev_sp - 16;
 
 	  cache->pc = pc;
 	  cache->ra = (cache->pc & 0xc0000000) | (ra & 0x3fffffff);
@@ -1820,9 +1839,10 @@ xtensa_push_dummy_call (struct gdbarch *gdbarch,
 
   if (gdbarch_tdep (gdbarch)->call_abi != CallAbiCall0Only)
     {
+      ULONGEST val;
       ra = (bp_addr & 0x3fffffff) | 0x40000000;
-      regcache_raw_read (regcache, gdbarch_ps_regnum (gdbarch), buf);
-      ps = extract_unsigned_integer (buf, 4, byte_order) & ~0x00030000;
+      regcache_raw_read_unsigned (regcache, gdbarch_ps_regnum (gdbarch), &val);
+      ps = (unsigned long) val & ~0x00030000;
       regcache_cooked_write_unsigned
 	(regcache, gdbarch_tdep (gdbarch)->a0_base + 4, ra);
       regcache_cooked_write_unsigned (regcache,

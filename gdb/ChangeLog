@@ -1,6 +1,14 @@
 2011-03-08  Maxim Grigoriev  <maxim2405@gmail.com>
 
-	* xtensa-tdep.h (XTENSA_MAX_COPROCESSOR) Update.
+	* xtensa-tdep.c (TX_PS): New.
+	(windowing_enabled): Update to count for Call0 ABI.
+	(xtensa_hextochar): New.
+	(xtensa_init_reggroups): Make algorithm generic.
+	(xtensa_frame_cache): Use TX_PS on Tiny Xtensa.
+
+2011-03-08  Maxim Grigoriev  <maxim2405@gmail.com>
+
+	* xtensa-tdep.h (XTENSA_MAX_COPROCESSOR): Update.
 
 2011-03-08  Michael Snyder  <msnyder@vmware.com>
 
