@@ -1,3 +1,12 @@
+2011-03-08  Ian Lance Taylor  <iant@google.com>
+
+	PR gold/12525
+	* fileread.cc: #include <climits>.
+	(GOLD_IOV_MAX): Define.
+	(File_read::read_multiple): Limit number of entries by iov_max.
+	* fileread.h (class File_read): Always set max_readv_entries to
+	128.
+
 2011-03-07  Ian Lance Taylor  <iant@google.com>
 
 	PR gold/12525
