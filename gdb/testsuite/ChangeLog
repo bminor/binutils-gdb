@@ -1,3 +1,8 @@
+2011-03-09  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.base/memattr.exp: Adjust regexps to accept spaces as well as
+	tabs.
+
 2011-03-09  Tom Tromey  <tromey@redhat.com>
 
 	* lib/gdb.exp (inferior_exited_re): Match. leading `['.  Wrap in
