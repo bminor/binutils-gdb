@@ -178,7 +178,7 @@ static int init_lineno (bfd *, long, int);
 
 static char *getsymname (struct internal_syment *);
 
-static char *coff_getfilename (union internal_auxent *);
+static const char *coff_getfilename (union internal_auxent *);
 
 static void free_stringtab (void);
 
@@ -366,7 +366,7 @@ coff_alloc_type (int index)
    it indicates the start of data for one original source file.  */
 
 static void
-coff_start_symtab (char *name)
+coff_start_symtab (const char *name)
 {
   start_symtab (
   /* We fill in the filename later.  start_symtab puts this pointer
@@ -388,7 +388,7 @@ coff_start_symtab (char *name)
    text.  */
 
 static void
-complete_symtab (char *name, CORE_ADDR start_addr, unsigned int size)
+complete_symtab (const char *name, CORE_ADDR start_addr, unsigned int size)
 {
   if (last_source_file != NULL)
     xfree (last_source_file);
@@ -713,7 +713,7 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
   int in_source_file = 0;
   int next_file_symnum = -1;
   /* Name of the current file.  */
-  char *filestring = "";
+  const char *filestring = "";
   int depth = 0;
   int fcn_first_line = 0;
   CORE_ADDR fcn_first_line_addr = 0;
@@ -1308,12 +1308,12 @@ getsymname (struct internal_syment *symbol_entry)
    Return only the last component of the name.  Result is in static
    storage and is only good for temporary use.  */
 
-static char *
+static const char *
 coff_getfilename (union internal_auxent *aux_entry)
 {
   static char buffer[BUFSIZ];
   char *temp;
-  char *result;
+  const char *result;
 
   if (aux_entry->x_file.x_n.x_zeroes == 0)
     {
@@ -1331,8 +1331,7 @@ coff_getfilename (union internal_auxent *aux_entry)
   /* FIXME: We should not be throwing away the information about what
      directory.  It should go into dirname of the symtab, or some such
      place.  */
-  if ((temp = strrchr (result, '/')) != NULL)
-    result = temp + 1;
+  result = lbasename (result);
   return (result);
 }
 

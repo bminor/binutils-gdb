@@ -324,20 +324,10 @@ tui_readline_output (int error, gdb_client_data data)
    final slash.  Otherwise, we return what we were passed.
 
    Comes from readline/complete.c.  */
-static char *
-printable_part (char *pathname)
+static const char *
+printable_part (const char *pathname)
 {
-  char *temp;
-
-  temp = rl_filename_completion_desired
-    ? strrchr (pathname, '/') : (char *)NULL;
-#if defined (__MSDOS__)
-  if (rl_filename_completion_desired 
-      && temp == 0 && isalpha (pathname[0]) 
-      && pathname[1] == ':')
-    temp = pathname + 1;
-#endif
-  return (temp ? ++temp : pathname);
+  return rl_filename_completion_desired ? lbasename (pathname) : pathname;
 }
 
 /* Output TO_PRINT to rl_outstream.  If VISIBLE_STATS is defined and
@@ -366,10 +356,10 @@ printable_part (char *pathname)
     } while (0)
 
 static int
-print_filename (char *to_print, char *full_pathname)
+print_filename (const char *to_print, const char *full_pathname)
 {
   int printed_len = 0;
-  char *s;
+  const char *s;
 
   for (s = to_print; *s; s++)
     {
@@ -416,7 +406,7 @@ tui_rl_display_match_list (char **matches, int len, int max)
   
   int count, limit, printed_len;
   int i, j, k, l;
-  char *temp;
+  const char *temp;
 
   /* Screen dimension correspond to the TUI command window.  */
   int screenwidth = TUI_CMD_WIN->generic.width;

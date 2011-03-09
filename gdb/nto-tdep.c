@@ -127,13 +127,7 @@ nto_find_and_open_solib (char *solib, unsigned o_flags, char **temp_pathname)
   sprintf (buf, PATH_FMT, arch_path, arch_path, arch_path, arch_path,
 	   arch_path);
 
-  /* Don't assume basename() isn't destructive.  */
-  base = strrchr (solib, '/');
-  if (!base)
-    base = solib;
-  else
-    base++;			/* Skip over '/'.  */
-
+  base = lbasename (solib);
   ret = openp (buf, 1, base, o_flags, temp_pathname);
   if (ret < 0 && base != solib)
     {

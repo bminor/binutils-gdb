@@ -1,3 +1,22 @@
+2011-03-09  Pedro Alves  <pedro@codesourcery.com>
+
+	* cli/cli-cmds.c (shell_escape): Use lbasename.
+	* coffread.c (coff_start_symtab): Constify parameter.
+	(complete_symtab): Constify `name' parameter.
+	(coff_symtab_read): Constify `filestring' local.
+	(coff_getfilename): Constify return and `result' local.
+	Use lbasename.
+	* fbsd-nat.c (fbsd_make_corefile_notes): Use lbasename.
+	* linux-fork.c (info_checkpoints_command): Use lbasename.
+	* linux-nat.c (linux_nat_make_corefile_notes): Use lbasename.
+	* minsyms.c (lookup_minimal_symbol): Use lbasename.
+	* nto-tdep.c (nto_find_and_open_solib): Use lbasename.
+	* procfs.c (procfs_make_note_section): Use lbasename.
+	* tui/tui-io.c (printable_part): Constity return and parameter.
+	Use lbasename.
+	(print_filename): Constify parameters, and local `s'.
+	(tui_rl_display_match_list): Constify local `temp'.
+
 2011-03-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Revert:

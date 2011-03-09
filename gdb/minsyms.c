@@ -198,12 +198,7 @@ lookup_minimal_symbol (const char *name, const char *sfile,
   const char *modified_name;
 
   if (sfile != NULL)
-    {
-      char *p = strrchr (sfile, '/');
-
-      if (p != NULL)
-	sfile = p + 1;
-    }
+    sfile = lbasename (sfile);
 
   /* For C++, canonicalize the input name.  */
   modified_name = name;

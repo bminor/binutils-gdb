@@ -4491,7 +4491,7 @@ linux_nat_make_corefile_notes (bfd *obfd, int *note_size)
 
   if (get_exec_file (0))
     {
-      strncpy (fname, strrchr (get_exec_file (0), '/') + 1, sizeof (fname));
+      strncpy (fname, lbasename (get_exec_file (0)), sizeof (fname));
       strncpy (psargs, get_exec_file (0), sizeof (psargs));
       if (get_inferior_args ())
 	{
