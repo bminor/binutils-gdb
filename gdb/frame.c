@@ -1247,6 +1247,14 @@ get_selected_frame (const char *message)
   return selected_frame;
 }
 
+/* If there is a selected frame, return it.  Otherwise, return NULL.  */
+
+struct frame_info *
+get_selected_frame_if_set (void)
+{
+  return selected_frame;
+}
+
 /* This is a variant of get_selected_frame() which can be called when
    the inferior does not have a frame; in that case it will return
    NULL instead of calling error().  */

@@ -260,6 +260,9 @@ extern void reinit_frame_cache (void);
    and then return that thread's previously selected frame.  */
 extern struct frame_info *get_selected_frame (const char *message);
 
+/* If there is a selected frame, return it.  Otherwise, return NULL.  */
+extern struct frame_info *get_selected_frame_if_set (void);
+
 /* Select a specific frame.  NULL, apparently implies re-select the
    inner most frame.  */
 extern void select_frame (struct frame_info *);

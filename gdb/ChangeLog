@@ -1,3 +1,11 @@
+2011-03-09  Tom Tromey  <tromey@redhat.com>
+
+	* thread.c (restore_selected_frame): Handle frame_level == -1.
+	(make_cleanup_restore_current_thread): Use
+	get_selected_frame_if_set.
+	* frame.h (get_selected_frame_if_set): Declare.
+	* frame.c (get_selected_frame_if_set): New function.
+
 2011-03-09  Pedro Alves  <pedro@codesourcery.com>
 
 	* cli/cli-cmds.c (shell_escape): Use lbasename.
