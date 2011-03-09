@@ -26,7 +26,7 @@
 #include <stdint.h>
 #endif
 
-/* This file is built for both both GDBserver, and the in-process
+/* This file is built for both GDBserver, and the in-process
    agent (IPA), a shared library that includes a tracing agent that is
    loaded by the inferior to support fast tracepoints.  Fast
    tracepoints (or more accurately, jump based tracepoints) are
