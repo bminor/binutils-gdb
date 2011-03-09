@@ -73,6 +73,7 @@ mi_cmd_disassemble (char *command, char **argv, int argc)
   int how_many = -1;
   CORE_ADDR low = 0;
   CORE_ADDR high = 0;
+  struct cleanup *cleanups = make_cleanup (null_cleanup, NULL);
 
   /* Options processing stuff. */
   int optind = 0;
@@ -103,6 +104,7 @@ mi_cmd_disassemble (char *command, char **argv, int argc)
 	case FILE_OPT:
 	  file_string = xstrdup (optarg);
 	  file_seen = 1;
+	  make_cleanup (xfree, file_string);
 	  break;
 	case LINE_OPT:
 	  line_num = atoi (optarg);
@@ -169,4 +171,6 @@ mi_cmd_disassemble (char *command, char **argv, int argc)
   		   file_string,
   		   disasm_flags,
 		   how_many, low, high);
+
+  do_cleanups (cleanups);
 }
