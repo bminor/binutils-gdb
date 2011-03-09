@@ -1,5 +1,26 @@
 2011-03-08  Maxim Grigoriev  <maxim2405@gmail.com>
 
+	* xtensa-tdep.c (xtensa_read_register): New function.
+	(xtensa_write_register): New function.
+	(xtensa_find_register_by_name): New function.
+	(xtensa_windowed_frame_cache): Update comments in type description.
+	(xtensa_frame_cache): Likewise.
+	(xtensa_window_interrupt_insn): New function.
+	(xtensa_frame_cache): Add analysis for Xtensa Window Exception frames.
+	(xtensa_insn_kind): Add new instructions.
+	(rwx_special_register): New function.
+	(call0_classify_opcode): Add new instructions to the analysis.
+	(a0_saved, a7_saved, a11_saved): New variables.
+	(a0_was_saved, a7_was_saved, a11_was_saved): New variables.
+	(execute_l32e): New function.
+	(execute_s32e): New function.
+	(xtensa_exception_handler_t): New type.
+	(execute_code): New function.
+	(xtensa_window_interrupt_frame_cache): New function to conduct frame
+	analysis for Xtensa Window Exception handlers.
+
+2011-03-08  Maxim Grigoriev  <maxim2405@gmail.com>
+
 	* xtensa-tdep.c (TX_PS): New.
 	(windowing_enabled): Update to count for Call0 ABI.
 	(xtensa_hextochar): New.
