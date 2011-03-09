@@ -1,3 +1,7 @@
+2011-03-09  Pedro Alves  <pedro@codesourcery.com>
+
+	* nto-tdep.c (nto_find_and_open_solib): Constify local `base'.
+
 2011-03-09  Tom Tromey  <tromey@redhat.com>
 
 	* thread.c (restore_selected_frame): Handle frame_level == -1.
