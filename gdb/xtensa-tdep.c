@@ -813,6 +813,11 @@ xtensa_register_reggroup_p (struct gdbarch *gdbarch,
   xtensa_register_group_t rg = reg->group;
   int cp_number;
 
+  if (group == save_reggroup)
+    /* Every single register should be included into the list of registers
+       to be watched for changes while using -data-list-changed-registers.  */
+    return 1;
+
   /* First, skip registers that are not visible to this target
      (unknown and unmapped registers when not using ISS).  */
 
@@ -828,13 +833,11 @@ xtensa_register_reggroup_p (struct gdbarch *gdbarch,
     return rg & xtRegisterGroupFloat;
   if (group == general_reggroup)
     return rg & xtRegisterGroupGeneral;
-  if (group == float_reggroup)
-    return rg & xtRegisterGroupFloat;
   if (group == system_reggroup)
     return rg & xtRegisterGroupState;
   if (group == vector_reggroup || group == xtensa_vectra_reggroup)
     return rg & xtRegisterGroupVectra;
-  if (group == save_reggroup || group == restore_reggroup)
+  if (group == restore_reggroup)
     return (regnum < gdbarch_num_regs (gdbarch)
 	    && (reg->flags & SAVE_REST_FLAGS) == SAVE_REST_VALID);
   if ((cp_number = xtensa_coprocessor_register_group (group)) >= 0)

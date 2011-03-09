@@ -1,5 +1,10 @@
 2011-03-08  Maxim Grigoriev  <maxim2405@gmail.com>
 
+	* xtensa-tdep.c (xtensa_register_reggroup_p): Count in all registers
+	while executing MI command -data-list-changed-registers.
+
+2011-03-08  Maxim Grigoriev  <maxim2405@gmail.com>
+
 	* xtensa-tdep.c (xtensa_read_register): New function.
 	(xtensa_write_register): New function.
 	(xtensa_find_register_by_name): New function.
