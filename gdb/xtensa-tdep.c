@@ -2000,6 +2000,75 @@ xtensa_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr,
 
 /* Call0 ABI support routines.  */
 
+/* Return true, if PC points to "ret" or "ret.n".  */ 
+
+static int
+call0_ret (CORE_ADDR start_pc, CORE_ADDR finish_pc)
+{
+#define RETURN_RET goto done
+  xtensa_isa isa;
+  xtensa_insnbuf ins, slot;
+  char ibuf[XTENSA_ISA_BSZ];
+  CORE_ADDR ia, bt, ba;
+  xtensa_format ifmt;
+  int ilen, islots, is;
+  xtensa_opcode opc;
+  const char *opcname;
+  int found_ret = 0;
+
+  isa = xtensa_default_isa;
+  gdb_assert (XTENSA_ISA_BSZ >= xtensa_isa_maxlength (isa));
+  ins = xtensa_insnbuf_alloc (isa);
+  slot = xtensa_insnbuf_alloc (isa);
+  ba = 0;
+
+  for (ia = start_pc, bt = ia; ia < finish_pc ; ia += ilen)
+    {
+      if (ia + xtensa_isa_maxlength (isa) > bt)
+        {
+	  ba = ia;
+	  bt = (ba + XTENSA_ISA_BSZ) < finish_pc
+	    ? ba + XTENSA_ISA_BSZ : finish_pc;
+	  if (target_read_memory (ba, ibuf, bt - ba) != 0 )
+	    RETURN_RET;
+	}
+
+      xtensa_insnbuf_from_chars (isa, ins, &ibuf[ia-ba], 0);
+      ifmt = xtensa_format_decode (isa, ins);
+      if (ifmt == XTENSA_UNDEFINED)
+	RETURN_RET;
+      ilen = xtensa_format_length (isa, ifmt);
+      if (ilen == XTENSA_UNDEFINED)
+	RETURN_RET;
+      islots = xtensa_format_num_slots (isa, ifmt);
+      if (islots == XTENSA_UNDEFINED)
+	RETURN_RET;
+      
+      for (is = 0; is < islots; ++is)
+	{
+	  if (xtensa_format_get_slot (isa, ifmt, is, ins, slot))
+	    RETURN_RET;
+	  
+	  opc = xtensa_opcode_decode (isa, ifmt, is, slot);
+	  if (opc == XTENSA_UNDEFINED) 
+	    RETURN_RET;
+	  
+	  opcname = xtensa_opcode_name (isa, opc);
+	  
+	  if ((strcasecmp (opcname, "ret.n") == 0)
+	      || (strcasecmp (opcname, "ret") == 0))
+	    {
+	      found_ret = 1;
+	      RETURN_RET;
+	    }
+	}
+    }
+ done:
+  xtensa_insnbuf_free(isa, slot);
+  xtensa_insnbuf_free(isa, ins);
+  return found_ret;
+}
+
 /* Call0 opcode class.  Opcodes are preclassified according to what they
    mean for Call0 prologue analysis, and their number of significant operands.
    The purpose of this is to simplify prologue analysis by separating 
@@ -2873,14 +2942,19 @@ xtensa_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
   prologue_sal = find_pc_line (start_pc, 0);
   if (prologue_sal.line != 0) /* Found debug info.  */
     {
-      /* In Call0, it is possible to have a function with only one instruction
-	 ('ret') resulting from a 1-line optimized function that does nothing.
-	 In that case, prologue_sal.end may actually point to the start of the
-	 next function in the text section, causing a breakpoint to be set at
-	 the wrong place.  Check if the end address is in a different function,
-	 and if so return the start PC.  We know we have symbol info.  */
+      /* In Call0,  it is possible to have a function with only one instruction
+	 ('ret') resulting from a one-line optimized function that does nothing.
+	 In that case,  prologue_sal.end may actually point to the start of the
+	 next function in the text section,  causing a breakpoint to be set at
+	 the wrong place.  Check,  if the end address is within a different
+	 function,  and if so return the start PC.  We know we have symbol
+	 information.  */
 
       CORE_ADDR end_func;
+
+      if ((gdbarch_tdep (gdbarch)->call_abi == CallAbiCall0Only)
+	  && call0_ret (start_pc, prologue_sal.end))
+	return start_pc;
 
       find_pc_partial_function (prologue_sal.end, NULL, &end_func, NULL);
       if (end_func != start_pc)

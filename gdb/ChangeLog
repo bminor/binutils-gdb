@@ -1,5 +1,10 @@
 2011-03-08  Maxim Grigoriev  <maxim2405@gmail.com>
 
+	* xtensa-tdep.c (call0_ret): New function.
+	(xtensa_skip_prologue): Speed up analysis.
+
+2011-03-08  Maxim Grigoriev  <maxim2405@gmail.com>
+
 	* xtensa-tdep.c (xtensa_register_reggroup_p): Count in all registers
 	while executing MI command -data-list-changed-registers.
 
