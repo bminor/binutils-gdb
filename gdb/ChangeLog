@@ -1,3 +1,11 @@
+2011-03-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Revert:
+	2011-03-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	Fix DWARF-3+ DW_AT_accessibility default assumption.
+	* dwarf2read.c (dwarf2_add_field): Fix new_field->accessibility for
+	cu->header.version >= 3.
+
 2011-03-09  Yao Qi  <yao@codesourcery.com>
 
 	* common/Makefile.in: Remove.
