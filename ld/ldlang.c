@@ -86,6 +86,13 @@ static void print_statement_list (lang_statement_union_type *,
 static void print_statements (void);
 static void print_input_section (asection *, bfd_boolean);
 static bfd_boolean lang_one_common (struct bfd_link_hash_entry *, void *);
+#ifdef ENABLE_PLUGINS
+static void lang_list_insert_after (lang_statement_list_type *destlist,
+				    lang_statement_list_type *srclist,
+				    lang_statement_union_type **field);
+static void lang_list_remove_tail (lang_statement_list_type *destlist,
+				   lang_statement_list_type *origlist);
+#endif /* ENABLE_PLUGINS */
 static void lang_record_phdrs (void);
 static void lang_do_version_exports_section (void);
 static void lang_finalize_version_expr_head
@@ -1127,6 +1134,10 @@ new_afile (const char *name,
   p->whole_archive = whole_archive;
   p->loaded = FALSE;
   p->missing_file = FALSE;
+#ifdef ENABLE_PLUGINS
+  p->claimed = FALSE;
+  p->claim_archive = FALSE;
+#endif /* ENABLE_PLUGINS */
 
   lang_statement_append (&input_file_chain,
 			 (lang_statement_union_type *) p,
@@ -6395,6 +6406,40 @@ lang_relax_sections (bfd_boolean need_layout)
     }
 }
 
+#ifdef ENABLE_PLUGINS
+/* Find the insert point for the plugin's replacement files.  We
+   place them after the first claimed real object file, or if the
+   first claimed object is an archive member, after the last real
+   object file immediately preceding the archive.  In the event
+   no objects have been claimed at all, we return the first dummy
+   object file on the list as the insert point; that works, but
+   the callee must be careful when relinking the file_chain as it
+   is not actually on that chain, only the statement_list and the
+   input_file list; in that case, the replacement files must be
+   inserted at the head of the file_chain.  */
+
+static lang_input_statement_type *
+find_replacements_insert_point (void)
+{
+  lang_input_statement_type *claim1, *lastobject;
+  lastobject = &input_file_chain.head->input_statement;
+  for (claim1 = &file_chain.head->input_statement;
+       claim1 != NULL;
+       claim1 = &claim1->next->input_statement)
+    {
+      if (claim1->claimed)
+	return claim1->claim_archive ? lastobject : claim1;
+      /* Update lastobject if this is a real object file.  */
+      if (claim1->the_bfd && (claim1->the_bfd->my_archive == NULL))
+	lastobject = claim1;
+    }
+  /* No files were claimed by the plugin.  Choose the last object
+     file found on the list (maybe the first, dummy entry) as the
+     insert point.  */
+  return lastobject;
+}
+#endif /* ENABLE_PLUGINS */
+
 void
 lang_process (void)
 {
@@ -6421,21 +6466,54 @@ lang_process (void)
   open_input_bfds (statement_list.head, FALSE);
 
 #ifdef ENABLE_PLUGINS
+  if (plugin_active_plugins_p ())
     {
-      union lang_statement_union **listend;
+      lang_statement_list_type added;
+      lang_statement_list_type files, inputfiles;
       /* Now all files are read, let the plugin(s) decide if there
 	 are any more to be added to the link before we call the
-	 emulation's after_open hook.  */
-      listend = statement_list.tail;
-      ASSERT (!*listend);
+	 emulation's after_open hook.  We create a private list of
+	 input statements for this purpose, which we will eventually
+	 insert into the global statment list after the first claimed
+	 file.  */
+      added = *stat_ptr;
+      /* We need to manipulate all three chains in synchrony.  */
+      files = file_chain;
+      inputfiles = input_file_chain;
       if (plugin_call_all_symbols_read ())
 	einfo (_("%P%F: %s: plugin reported error after all symbols read\n"),
 	       plugin_error_plugin ());
-      /* If any new files were added, they will be on the end of the
-	 statement list, and we can open them now by getting open_input_bfds
-	 to carry on from where it ended last time.  */
-      if (*listend)
-	open_input_bfds (*listend, FALSE);
+      /* Open any newly added files, updating the file chains.  */
+      open_input_bfds (added.head, FALSE);
+      /* Restore the global list pointer now they have all been added.  */
+      lang_list_remove_tail (stat_ptr, &added);
+      /* And detach the fresh ends of the file lists.  */
+      lang_list_remove_tail (&file_chain, &files);
+      lang_list_remove_tail (&input_file_chain, &inputfiles);
+      /* Were any new files added?  */
+      if (added.head != NULL)
+	{
+	  /* If so, we will insert them into the statement list immediately
+	     after the first input file that was claimed by the plugin.  */
+	  lang_input_statement_type *claim1 = find_replacements_insert_point ();
+	  /* If a plugin adds input files without having claimed any, we
+	     don't really have a good idea where to place them.  Just putting
+	     them at the start or end of the list is liable to leave them
+	     outside the crtbegin...crtend range.  */
+	  ASSERT (claim1 != NULL);
+	  /* Splice the new statement list into the old one after claim1.  */
+	  lang_list_insert_after (stat_ptr, &added, &claim1->header.next);
+	  /* Likewise for the file chains.  */
+	  lang_list_insert_after (&input_file_chain, &inputfiles,
+				  &claim1->next_real_file);
+	  /* We must be careful when relinking file_chain; we may need to
+	     insert the new files at the head of the list if the insert
+	     point chosen is the dummy first input file.  */
+	  if (claim1->filename)
+	    lang_list_insert_after (&file_chain, &files, &claim1->next);
+	  else
+	    lang_list_insert_after (&file_chain, &files, &file_chain.head);
+	}
     }
 #endif /* ENABLE_PLUGINS */
 
@@ -6857,6 +6935,40 @@ lang_statement_append (lang_statement_list_type *list,
   *(list->tail) = element;
   list->tail = field;
 }
+
+#ifdef ENABLE_PLUGINS
+/* Insert SRCLIST into DESTLIST after given element by chaining
+   on FIELD as the next-pointer.  (Counterintuitively does not need
+   a pointer to the actual after-node itself, just its chain field.)  */
+
+static void
+lang_list_insert_after (lang_statement_list_type *destlist,
+			lang_statement_list_type *srclist,
+			lang_statement_union_type **field)
+{
+  *(srclist->tail) = *field;
+  *field = srclist->head;
+  if (destlist->tail == field)
+    destlist->tail = srclist->tail;
+}
+
+/* Detach new nodes added to DESTLIST since the time ORIGLIST
+   was taken as a copy of it and leave them in ORIGLIST.  */
+
+static void
+lang_list_remove_tail (lang_statement_list_type *destlist,
+		       lang_statement_list_type *origlist)
+{
+  union lang_statement_union **savetail;
+  /* Check that ORIGLIST really is an earlier state of DESTLIST.  */
+  ASSERT (origlist->head == destlist->head);
+  savetail = origlist->tail;
+  origlist->head = *(savetail);
+  origlist->tail = destlist->tail;
+  destlist->tail = savetail;
+  *savetail = NULL;
+}
+#endif /* ENABLE_PLUGINS */
 
 /* Set the output format type.  -oformat overrides scripts.  */
 

@@ -287,8 +287,13 @@ typedef struct lang_input_statement_struct
   /* Set if the file does not exist.  */
   unsigned int missing_file : 1;
 
+#ifdef ENABLE_PLUGINS
   /* Set if the file was claimed by a plugin.  */
   unsigned int claimed : 1;
+
+  /* Set if the file was claimed from an archive.  */
+  unsigned int claim_archive : 1;
+#endif /* ENABLE_PLUGINS */
 
 } lang_input_statement_type;
 

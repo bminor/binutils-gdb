@@ -833,6 +833,7 @@ add_archive_element (struct bfd_link_info *info,
 	      /* Substitute the dummy BFD.  */
 	      input->the_bfd = file.handle;
 	      input->claimed = TRUE;
+	      input->claim_archive = TRUE;
 	      bfd_make_readable (input->the_bfd);
 	      *subsbfd = input->the_bfd;
 	    }

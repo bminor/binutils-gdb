@@ -1,5 +1,18 @@
 2011-03-10  Dave Korn  <dave.korn.cygwin@gmail.com>
 
+	* ldlang.h (lang_input_statement_type): Add new 'claim_archive' flag,
+	wrapping both it and 'claim' flag in #ifdef ENABLE_PLUGINS.
+	* ldmain.c (add_archive_element): Set it if the member is claimed.
+	* ldlang.c (new_afile): Initialise claim_archive and claimed members.
+	(find_replacements_insert_point): New helper function.
+	(lang_process): After adding and opening replacement files passed
+	from plugin, splice them into correct place in statement list and
+	file chains to preserve critical link order.
+	(lang_list_insert_after): New helper function.
+	(lang_list_remove_tail): Likewise.
+
+2011-03-10  Dave Korn  <dave.korn.cygwin@gmail.com>
+
 	* plugin.c (IRONLY_SUFFIX): Revise to nicely human-readable form.
 	(IRONLY_SUFFIX_LEN): Delete.
 	(plugin_get_ir_dummy_bfd): Don't append IRONLY_SUFFIX.
