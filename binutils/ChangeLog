@@ -1,3 +1,7 @@
+2011-03-10  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (get_machine_name): Update EM_V850 entry.
+
 2011-03-03  Mike Frysinger  <vapier@gentoo.org>
 
 	* objdump.c (usage): Fix single typo.
