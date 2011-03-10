@@ -282,7 +282,6 @@ clean:
 	rm -f i386-mmx.c i386-mmx-linux.c
 
 maintainer-clean realclean distclean: clean
-	@$(MAKE) $(FLAGS_TO_PASS) DO=$@ "DODIRS=$(CLEANDIRS)" subdir_do
 	rm -f nm.h tm.h xm.h config.status config.h stamp-h config.log
 	rm -f Makefile
 
