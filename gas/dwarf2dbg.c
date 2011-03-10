@@ -1080,7 +1080,7 @@ emit_fixed_inc_line_addr (int line_delta, addressT addr_delta, fragS *frag,
       symbolS *to_sym;
       expressionS exp;
 
-      gas_assert (pexp->X_op = O_subtract);
+      gas_assert (pexp->X_op == O_subtract);
       to_sym = pexp->X_add_symbol;
 
       *p++ = DW_LNS_extended_op;
@@ -1328,6 +1328,7 @@ out_file_list (void)
       size = strlen (dir) + 1;
       cp = frag_more (size);
       memcpy (cp, dir, size);
+      xfree ((char *) dir);
     }
   /* Terminate it.  */
   out_byte ('\0');
@@ -1684,6 +1685,7 @@ out_debug_info (segT info_seg, segT abbrev_seg, segT line_seg, segT ranges_seg)
       memcpy (p, dirname, len);
       INSERT_DIR_SEPARATOR (p, len);
 #endif
+      xfree ((char *) dirname);
     }
   len = strlen (files[1].filename) + 1;
   p = frag_more (len);
@@ -1694,6 +1696,7 @@ out_debug_info (segT info_seg, segT abbrev_seg, segT line_seg, segT ranges_seg)
   len = strlen (comp_dir) + 1;
   p = frag_more (len);
   memcpy (p, comp_dir, len);
+  xfree ((char *) comp_dir);
 
   /* DW_AT_producer */
   sprintf (producer, "GNU AS %s", VERSION);

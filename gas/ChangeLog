@@ -1,3 +1,10 @@
+2011-03-09  Michael Snyder  <msnyder@vmware.com>
+
+	* dwarf2dbg.c (out_file_list): Free malloced 'dir'.
+	(out_debug_info): Free malloced 'dirname' and 'comp_dir'.
+	(emit_fixed_inc_line_addr): Assign instead of conditional
+	in assert.
+
 2011-03-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/obj-elf.c (elf_frob_symbol): Mention symbol name in
