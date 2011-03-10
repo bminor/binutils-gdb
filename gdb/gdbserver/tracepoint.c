@@ -2463,7 +2463,7 @@ cmd_qtv (char *own_buf)
   char *packet = own_buf;
 
   packet += strlen ("qTV:");
-  packet = unpack_varlen_hex (packet, &num);
+  unpack_varlen_hex (packet, &num);
 
   if (current_traceframe >= 0)
     {
@@ -3033,7 +3033,7 @@ cmd_qtframe (char *own_buf)
   if (strncmp (packet, "pc:", strlen ("pc:")) == 0)
     {
       packet += strlen ("pc:");
-      packet = unpack_varlen_hex (packet, &pc);
+      unpack_varlen_hex (packet, &pc);
       trace_debug ("Want to find next traceframe at pc=0x%s", paddress (pc));
       tframe = find_next_traceframe_in_range (pc, pc, 1, &tfnum);
     }
@@ -3042,7 +3042,7 @@ cmd_qtframe (char *own_buf)
       packet += strlen ("range:");
       packet = unpack_varlen_hex (packet, &lo);
       ++packet;
-      packet = unpack_varlen_hex (packet, &hi);
+      unpack_varlen_hex (packet, &hi);
       trace_debug ("Want to find next traceframe in the range 0x%s to 0x%s",
 		   paddress (lo), paddress (hi));
       tframe = find_next_traceframe_in_range (lo, hi, 1, &tfnum);
@@ -3052,7 +3052,7 @@ cmd_qtframe (char *own_buf)
       packet += strlen ("outside:");
       packet = unpack_varlen_hex (packet, &lo);
       ++packet;
-      packet = unpack_varlen_hex (packet, &hi);
+      unpack_varlen_hex (packet, &hi);
       trace_debug ("Want to find next traceframe "
 		   "outside the range 0x%s to 0x%s",
 		   paddress (lo), paddress (hi));
@@ -3061,7 +3061,7 @@ cmd_qtframe (char *own_buf)
   else if (strncmp (packet, "tdp:", strlen ("tdp:")) == 0)
     {
       packet += strlen ("tdp:");
-      packet = unpack_varlen_hex (packet, &num);
+      unpack_varlen_hex (packet, &num);
       tpnum = (int) num;
       trace_debug ("Want to find next traceframe for tracepoint %d", tpnum);
       tframe = find_next_traceframe_by_tracepoint (tpnum, &tfnum);
@@ -3383,7 +3383,7 @@ cmd_qtbuffer (char *own_buf)
 
   packet = unpack_varlen_hex (packet, &offset);
   ++packet; /* skip a comma */
-  packet = unpack_varlen_hex (packet, &num);
+  unpack_varlen_hex (packet, &num);
 
   trace_debug ("Want to get trace buffer, %d bytes at offset 0x%s",
 	       (int) num, pulongest (offset));
@@ -3433,7 +3433,7 @@ cmd_bigqtbuffer (char *own_buf)
   if (strncmp ("circular:", packet, strlen ("circular:")) == 0)
     {
       packet += strlen ("circular:");
-      packet = unpack_varlen_hex (packet, &val);
+      unpack_varlen_hex (packet, &val);
       circular_trace_buffer = val;
       trace_debug ("Trace buffer is now %s",
 		   circular_trace_buffer ? "circular" : "linear");

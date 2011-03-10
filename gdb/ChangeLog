@@ -1,5 +1,10 @@
 2011-03-10  Michael Snyder  <msnyder@vmware.com>
 
+	* tracepoint.c (cmd_qtv): Discard unused value 'packet'.
+	(cmd_qtframe): Ditto.
+	(cmd_qtbuffer): Ditto.
+	(cmd_bigqtbuffer): Ditto.
+
 	* gdbserver/tracepoint.c (tracepoint_finish_step): Fix
 	loop variable.
 
