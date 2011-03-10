@@ -1,5 +1,13 @@
 2011-03-10  Dave Korn  <dave.korn.cygwin@gmail.com>
 
+	* plugin.c (IRONLY_SUFFIX): Revise to nicely human-readable form.
+	(IRONLY_SUFFIX_LEN): Delete.
+	(plugin_get_ir_dummy_bfd): Don't append IRONLY_SUFFIX.
+	(is_ir_dummy_bfd): Don't look for suffix; check claimed flag of
+	enclosing lang input statement instead.
+
+2011-03-10  Dave Korn  <dave.korn.cygwin@gmail.com>
+
 	* emultempl/pe.em (gld_${EMULATION_NAME}_place_orphan): Preserve
 	alignment of input sections when creating orphan output sections
 	during relocatable link.

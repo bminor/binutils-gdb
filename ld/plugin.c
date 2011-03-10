@@ -41,12 +41,8 @@ bfd_boolean report_plugin_symbols;
 
 /* The suffix to append to the name of the real (claimed) object file
    when generating a dummy BFD to hold the IR symbols sent from the
-   plugin.  */
-#define IRONLY_SUFFIX		".ironly\004"
-
-/* This is sizeof an array of chars, not sizeof a const char *.  We
-   also have to avoid inadvertently counting the trailing NUL.  */
-#define IRONLY_SUFFIX_LEN	(sizeof (IRONLY_SUFFIX) - 1)
+   plugin.  For cosmetic use only; appears in maps, crefs etc.  */
+#define IRONLY_SUFFIX " (symbol from plugin)"
 
 /* Stores a single argument passed to a plugin.  */
 typedef struct plugin_arg
@@ -253,14 +249,14 @@ plugin_get_ir_dummy_bfd (const char *name, bfd *srctemplate)
 static bfd_boolean
 is_ir_dummy_bfd (const bfd *abfd)
 {
-  size_t namlen;
-
-  if (abfd == NULL)
-    return FALSE;
-  namlen = strlen (abfd->filename);
-  if (namlen < IRONLY_SUFFIX_LEN)
-    return FALSE;
-  return !strcmp (abfd->filename + namlen - IRONLY_SUFFIX_LEN, IRONLY_SUFFIX);
+  /* ABFD can sometimes legitimately be NULL, e.g. when called from one
+     of the linker callbacks for a symbol in the *ABS* or *UND* sections.
+     Likewise, the usrdata field may be NULL if ABFD was added by the
+     backend without a corresponding input statement, as happens e.g.
+     when processing DT_NEEDED dependencies.  */
+  return abfd
+	 && abfd->usrdata
+	 && ((lang_input_statement_type *)(abfd->usrdata))->claimed;
 }
 
 /* Helpers to convert between BFD and GOLD symbol formats.  */
