@@ -3676,6 +3676,7 @@ tracepoint_finished_step (struct thread_info *tinfo, CORE_ADDR stop_pc)
 	  /* Unlink.  */
 	  *wstep_link = wstep->next;
 	  release_while_stepping_state (wstep);
+	  wstep = *wstep_link;
 	  continue;
 	}
 

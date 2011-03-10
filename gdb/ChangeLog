@@ -1,5 +1,8 @@
 2011-03-10  Michael Snyder  <msnyder@vmware.com>
 
+	* gdbserver/tracepoint.c (tracepoint_finish_step): Fix
+	loop variable.
+
 	* gdbserver/server.c (handle_v_run): Free alloced buffer on early
 	return.
 
