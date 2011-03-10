@@ -1,5 +1,9 @@
 2011-03-10  Dave Korn  <dave.korn.cygwin@gmail.com>
 
+	* plugin.c (get_symbols): Use wrapped lookup for undefined symbols.
+
+2011-03-10  Dave Korn  <dave.korn.cygwin@gmail.com>
+
 	* ldlang.c (lang_check): Don't run checks on dummy IR BFDs.
 
 2011-03-10  Dave Korn  <dave.korn.cygwin@gmail.com>

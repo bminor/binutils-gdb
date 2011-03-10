@@ -456,9 +456,12 @@ get_symbols (const void *handle, int nsyms, struct ld_plugin_symbol *syms)
       struct bfd_link_hash_entry *blhe;
       bfd_boolean ironly;
       asection *owner_sec;
-
-      blhe = bfd_link_hash_lookup (link_info.hash, syms[n].name,
-				   FALSE, FALSE, TRUE);
+      if (syms[n].def != LDPK_UNDEF)
+	blhe = bfd_link_hash_lookup (link_info.hash, syms[n].name,
+				     FALSE, FALSE, TRUE);
+      else
+	blhe = bfd_wrapped_link_hash_lookup (link_info.output_bfd, &link_info,
+					     syms[n].name, FALSE, FALSE, TRUE);
       if (!blhe)
 	{
 	  syms[n].resolution = LDPR_UNKNOWN;
