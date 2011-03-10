@@ -1748,10 +1748,17 @@ gld_${EMULATION_NAME}_place_orphan (asection *s,
 		     ->output_section_statement);
 	}
 
-      /* All sections in an executable must be aligned to a page boundary.  */
+      /* All sections in an executable must be aligned to a page boundary.
+	 In a relocatable link, just preserve the incoming alignment; the
+	 address is discarded by lang_insert_orphan in that case, anyway.  */
       address = exp_unop (ALIGN_K, exp_nameop (NAME, "__section_alignment__"));
       os = lang_insert_orphan (s, secname, constraint, after, place, address,
 			       &add_child);
+      if (link_info.relocatable)
+	{
+	  os->section_alignment = s->alignment_power;
+	  os->bfd_section->alignment_power = s->alignment_power;
+	}
     }
 
   /* If the section name has a '\$', sort it with the other '\$'

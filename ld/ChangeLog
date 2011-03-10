@@ -1,3 +1,10 @@
+2011-03-10  Dave Korn  <dave.korn.cygwin@gmail.com>
+
+	* emultempl/pe.em (gld_${EMULATION_NAME}_place_orphan): Preserve
+	alignment of input sections when creating orphan output sections
+	during relocatable link.
+	* emultempl/pep.em (gld_${EMULATION_NAME}_place_orphan): Likewise.
+
 2011-03-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld.texinfo: Document --verbose[=NUMBER].
