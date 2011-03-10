@@ -25,6 +25,7 @@
 
 #include <vector>
 #include <map>
+#include <limits.h>
 
 #include "elfcpp.h"
 #include "elfcpp_swap.h"
@@ -44,14 +45,25 @@ struct Offset_to_lineno_entry
 {
   off_t offset;
   int header_num;  // which file-list to use (i.e. which .o file are we in)
-  int file_num;    // a pointer into files_
-  int line_num;    // the line number in the source file
+  // A pointer into files_.
+  unsigned int file_num : sizeof(int) * CHAR_BIT - 1;
+  // True if this was the last entry for the current offset, meaning
+  // it's the line that actually applies.
+  unsigned int last_line_for_offset : 1;
+  // The line number in the source file.  -1 to indicate end-of-function.
+  int line_num;
 
-  // When we add entries to the table, we always use the last entry
-  // with a given offset.  Given proper DWARF info, this should ensure
-  // that the offset is a sufficient sort key.
+  // This sorts by offsets first, and then puts the correct line to
+  // report for a given offset at the beginning of the run of equal
+  // offsets (so that asking for 1 line gives the best answer).  This
+  // is not a total ordering.
   bool operator<(const Offset_to_lineno_entry& that) const
-  { return this->offset < that.offset; }
+  {
+    if (this->offset != that.offset)
+      return this->offset < that.offset;
+    // Note the '>' which makes this sort 'true' first.
+    return this->last_line_for_offset > that.last_line_for_offset;
+  }
 };
 
 // This class is used to read the line information from the debugging
@@ -70,10 +82,13 @@ class Dwarf_line_info
   // Given a section number and an offset, returns the associated
   // file and line-number, as a string: "file:lineno".  If unable
   // to do the mapping, returns the empty string.  You must call
-  // read_line_mappings() before calling this function.
+  // read_line_mappings() before calling this function.  If
+  // 'other_lines' is non-NULL, fills that in with other line
+  // numbers assigned to the same offset.
   std::string
-  addr2line(unsigned int shndx, off_t offset)
-  { return do_addr2line(shndx, offset); }
+  addr2line(unsigned int shndx, off_t offset,
+            std::vector<std::string>* other_lines)
+  { return this->do_addr2line(shndx, offset, other_lines); }
 
   // A helper function for a single addr2line lookup.  It also keeps a
   // cache of the last CACHE_SIZE Dwarf_line_info objects it created;
@@ -83,7 +98,7 @@ class Dwarf_line_info
   // NOTE: Not thread-safe, so only call from one thread at a time.
   static std::string
   one_addr2line(Object* object, unsigned int shndx, off_t offset,
-                size_t cache_size);
+                size_t cache_size, std::vector<std::string>* other_lines);
 
   // This reclaims all the memory that one_addr2line may have cached.
   // Use this when you know you will not be calling one_addr2line again.
@@ -92,7 +107,8 @@ class Dwarf_line_info
 
  private:
   virtual std::string
-  do_addr2line(unsigned int shndx, off_t offset) = 0;
+  do_addr2line(unsigned int shndx, off_t offset,
+               std::vector<std::string>* other_lines) = 0;
 };
 
 template<int size, bool big_endian>
@@ -106,7 +122,12 @@ class Sized_dwarf_line_info : public Dwarf_line_info
 
  private:
   std::string
-  do_addr2line(unsigned int shndx, off_t offset);
+  do_addr2line(unsigned int shndx, off_t offset,
+               std::vector<std::string>* other_lines);
+
+  // Formats a file and line number to a string like "dirname/filename:lineno".
+  std::string
+  format_file_lineno(const Offset_to_lineno_entry& lineno) const;
 
   // Start processing line info, and populates the offset_map_.
   // If SHNDX is non-negative, only store debug information that

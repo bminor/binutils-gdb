@@ -1560,6 +1560,33 @@ class Symbol_table
   typedef Unordered_map<Symbol_table_key, Symbol*, Symbol_table_hash,
 			Symbol_table_eq> Symbol_table_type;
 
+  // A map from symbol name (as a pointer into the namepool) to all
+  // the locations the symbols is (weakly) defined (and certain other
+  // conditions are met).  This map will be used later to detect
+  // possible One Definition Rule (ODR) violations.
+  struct Symbol_location
+  {
+    Object* object;         // Object where the symbol is defined.
+    unsigned int shndx;     // Section-in-object where the symbol is defined.
+    off_t offset;           // Offset-in-section where the symbol is defined.
+    bool operator==(const Symbol_location& that) const
+    {
+      return (this->object == that.object
+              && this->shndx == that.shndx
+              && this->offset == that.offset);
+    }
+  };
+
+  struct Symbol_location_hash
+  {
+    size_t operator()(const Symbol_location& loc) const
+    { return reinterpret_cast<uintptr_t>(loc.object) ^ loc.offset ^ loc.shndx; }
+  };
+
+  typedef Unordered_map<const char*,
+                        Unordered_set<Symbol_location, Symbol_location_hash> >
+  Odr_map;
+
   // Make FROM a forwarder symbol to TO.
   void
   make_forwarder(Symbol* from, Symbol* to);
@@ -1707,6 +1734,12 @@ class Symbol_table
   do_allocate_commons_list(Layout*, Commons_section_type, Commons_type*,
 			   Mapfile*, Sort_commons_order);
 
+  // Returns all of the lines attached to LOC, not just the one the
+  // instruction actually came from.  This helps the ODR checker avoid
+  // false positives.
+  static std::vector<std::string>
+  linenos_from_loc(const Task* task, const Symbol_location& loc);
+
   // Implement detect_odr_violations.
   template<int size, bool big_endian>
   void
@@ -1759,33 +1792,6 @@ class Symbol_table
   // A map from symbols with COPY relocs to the dynamic objects where
   // they are defined.
   typedef Unordered_map<const Symbol*, Dynobj*> Copied_symbol_dynobjs;
-
-  // A map from symbol name (as a pointer into the namepool) to all
-  // the locations the symbols is (weakly) defined (and certain other
-  // conditions are met).  This map will be used later to detect
-  // possible One Definition Rule (ODR) violations.
-  struct Symbol_location
-  {
-    Object* object;         // Object where the symbol is defined.
-    unsigned int shndx;     // Section-in-object where the symbol is defined.
-    off_t offset;           // Offset-in-section where the symbol is defined.
-    bool operator==(const Symbol_location& that) const
-    {
-      return (this->object == that.object
-              && this->shndx == that.shndx
-              && this->offset == that.offset);
-    }
-  };
-
-  struct Symbol_location_hash
-  {
-    size_t operator()(const Symbol_location& loc) const
-    { return reinterpret_cast<uintptr_t>(loc.object) ^ loc.offset ^ loc.shndx; }
-  };
-
-  typedef Unordered_map<const char*,
-                        Unordered_set<Symbol_location, Symbol_location_hash> >
-  Odr_map;
 
   // We increment this every time we see a new undefined symbol, for
   // use in archive groups.

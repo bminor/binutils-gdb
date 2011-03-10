@@ -1,3 +1,41 @@
+2011-03-09  Jeffrey Yasskin  <jyasskin@google.com>
+
+	* dwarf_reader.cc (Sized_dwarf_line_info): Include all lines,
+	but mark earlier ones as non-canonical
+	(offset_to_iterator): Update search target and example
+	(do_addr2line): Return extra lines in a vector*
+	(format_file_lineno): Extract from do_addr2line
+	(one_addr2line): Add vector* out-param
+	* dwarf_reader.h (Offset_to_lineno_entry): New field recording
+	when a lineno entry appeared last for its instruction
+	(Dwarf_line_info): Add vector* out-param
+	* object.cc (Relocate_info): Pass NULL for the vector* out-param
+	* symtab.cc (Odr_violation_compare): Include the lineno in the
+	comparison again.
+	(linenos_from_loc): New. Combine the canonical line for an
+	address with its other lines.
+	(True_if_intersect): New. Helper functor to make
+	std::set_intersection a query.
+	(detect_odr_violations): Compare sets of lines instead of just
+	one line for each function. This became less deterministic, but
+	has fewer false positives.
+	* symtab.h: Declarations.
+	* testsuite/Makefile.am (odr_violation2.o): Compile with -O2 to
+	mix an optimized and non-optimized object in the same binary
+	(odr_violation2.so): Same.
+	* testsuite/Makefile.in: Regenerate from Makefile.am.
+	* testsuite/debug_msg.cc (main): Make OdrDerived classes.
+	* testsuite/debug_msg.sh: Update line numbers and add
+	assertions.
+	* testsuite/odr_violation1.cc: Use OdrDerived, in a
+	non-optimized context.
+	* testsuite/odr_violation2.cc: Make sure Ordering::operator()
+	isn't inlined, and use OdrDerived in an optimized context.
+	* testsuite/odr_header1.h: Defines OdrDerived, where
+	optimization will change the
+	first-instruction-in-the-destructor's file and line number.
+	* testsuite/odr_header2.h: Defines OdrBase.
+
 2011-03-09  Ian Lance Taylor  <iant@google.com>
 
 	* fileread.cc (File_read::clear_views): Don't delete the whole

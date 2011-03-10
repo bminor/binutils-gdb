@@ -2582,7 +2582,7 @@ Relocate_info<size, big_endian>::location(size_t, off_t offset) const
 
   Sized_dwarf_line_info<size, big_endian> line_info(this->object);
   // This will be "" if we failed to parse the debug info for any reason.
-  file_and_lineno = line_info.addr2line(this->data_shndx, offset);
+  file_and_lineno = line_info.addr2line(this->data_shndx, offset, NULL);
 
   std::string ret(this->object->name());
   ret += ':';
