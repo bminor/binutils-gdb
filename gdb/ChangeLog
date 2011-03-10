@@ -1,3 +1,7 @@
+2011-03-10  Andreas Tobler  <andreast-list@fgznet.ch>
+
+	* fbsd-nat.c (fbsd_make_corefile_notes): Constify local `fname'.
+
 2011-03-09  Maxim Grigoriev  <maxim2405@gmail.com>
 
 	* xtensa-tdep.c (xtensa_read_register: Add comment.

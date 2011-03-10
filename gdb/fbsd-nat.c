@@ -202,7 +202,7 @@ fbsd_make_corefile_notes (bfd *obfd, int *note_size)
 
   if (get_exec_file (0))
     {
-      char *fname = lbasename (get_exec_file (0));
+      const char *fname = lbasename (get_exec_file (0));
       char *psargs = xstrdup (fname);
 
       if (get_inferior_args ())
