@@ -1,5 +1,8 @@
 2011-03-10  Michael Snyder  <msnyder@vmware.com>
 
+	* p-typeprint.c (pascal_type_print_method_args): Don't use 
+	pointer until after null-check.
+
 	* tracepoint.c (cmd_qtv): Discard unused value 'packet'.
 	(cmd_qtframe): Ditto.
 	(cmd_qtbuffer): Ditto.
