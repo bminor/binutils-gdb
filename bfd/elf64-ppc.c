@@ -11655,7 +11655,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
       bfd_boolean unresolved_reloc;
       bfd_boolean warned;
       unsigned int insn;
-      bfd_vma mask;
+      unsigned int mask;
       struct ppc_stub_hash_entry *stub_entry;
       bfd_vma max_br_offset;
       bfd_vma from;
@@ -13191,8 +13191,8 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	  if (((relocation + addend) & mask) != 0)
 	    {
 	      (*_bfd_error_handler)
-		(_("%B: error: relocation %s not a multiple of %d"),
-		 input_bfd,
+		(_("%B(%A+0x%lx): error: %s not a multiple of %u"),
+		 input_bfd, input_section, (long) rel->r_offset,
 		 ppc64_elf_howto_table[r_type]->name,
 		 mask + 1);
 	      bfd_set_error (bfd_error_bad_value);
