@@ -1,3 +1,34 @@
+2011-03-10  Tom Tromey  <tromey@redhat.com>
+
+	* tracepoint.c (trace_actions_command): Update.
+	* thread.c (thread_apply_command): Update.
+	* reverse.c (delete_bookmark_command): Update.
+	(bookmarks_info): Update.
+	* printcmd.c (undisplay_command): Update.
+	* memattr.c (mem_enable_command): Update.
+	(mem_disable_command): Update.
+	(mem_delete_command): Update.
+	* inferior.c (detach_inferior_command): Update.
+	(kill_inferior_command): Update.
+	(remove_inferior_command): Update.
+	* cli/cli-utils.h (struct get_number_or_range_state): New.
+	(init_number_or_range): Declare.
+	(get_number_or_range): Update.
+	* cli/cli-utils.c (init_number_or_range): New function.
+	(get_number_or_range): Change 'pp' parameter to 'state'.  Remove
+	static variables.
+	(number_is_in_list): Update.
+	* breakpoint.h (get_tracepoint_by_number): Update.
+	* breakpoint.c (map_breakpoint_numbers): Update for change to
+	get_number_or_range.
+	(find_location_by_number): Use get_number, not
+	get_number_or_range.
+	(trace_pass_set_count): New function.
+	(trace_pass_command): Update for change to get_number_or_range.
+	Rework loop logic.
+	(get_tracepoint_by_number): Remove 'multi_p' parameter; add
+	'state' parameter.
+
 2011-03-10  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* python/py-param.c (add_setshow_generic): Add set/show callback

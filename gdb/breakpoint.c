@@ -10804,21 +10804,23 @@ map_breakpoint_numbers (char *args, void (*function) (struct breakpoint *,
 						      void *),
 			void *data)
 {
-  char *p = args;
-  char *p1;
   int num;
   struct breakpoint *b, *tmp;
   int match;
+  struct get_number_or_range_state state;
 
-  if (p == 0)
+  if (args == 0)
     error_no_arg (_("one or more breakpoint numbers"));
 
-  while (*p)
-    {
-      match = 0;
-      p1 = p;
+  init_number_or_range (&state, args);
 
-      num = get_number_or_range (&p1);
+  while (!state.finished)
+    {
+      char *p = state.string;
+
+      match = 0;
+
+      num = get_number_or_range (&state);
       if (num == 0)
 	{
 	  warning (_("bad breakpoint number at or near '%s'"), p);
@@ -10838,7 +10840,6 @@ map_breakpoint_numbers (char *args, void (*function) (struct breakpoint *,
 	  if (match == 0)
 	    printf_unfiltered (_("No breakpoint number %d.\n"), num);
 	}
-      p = p1;
     }
 }
 
@@ -10855,7 +10856,7 @@ find_location_by_number (char *number)
   *dot = '\0';
 
   p1 = number;
-  bp_num = get_number_or_range (&p1);
+  bp_num = get_number (&p1);
   if (bp_num == 0)
     error (_("Bad breakpoint number '%s'"), number);
 
@@ -10869,7 +10870,7 @@ find_location_by_number (char *number)
     error (_("Bad breakpoint number '%s'"), number);
   
   p1 = dot+1;
-  loc_num = get_number_or_range (&p1);
+  loc_num = get_number (&p1);
   if (loc_num == 0)
     error (_("Bad breakpoint location number '%s'"), number);
 
@@ -11613,6 +11614,18 @@ delete_trace_command (char *arg, int from_tty)
     map_breakpoint_numbers (arg, do_delete_breakpoint, NULL);
 }
 
+/* Helper function for trace_pass_command.  */
+
+static void
+trace_pass_set_count (struct breakpoint *bp, int count, int from_tty)
+{
+  bp->pass_count = count;
+  observer_notify_tracepoint_modified (bp->number);
+  if (from_tty)
+    printf_filtered (_("Setting tracepoint %d's passcount to %d\n"),
+		     bp->number, count);
+}
+
 /* Set passcount for tracepoint.
 
    First command argument is passcount, second is tracepoint number.
@@ -11622,9 +11635,8 @@ delete_trace_command (char *arg, int from_tty)
 static void
 trace_pass_command (char *args, int from_tty)
 {
-  struct breakpoint *t1 = (struct breakpoint *) -1, *t2;
+  struct breakpoint *t1;
   unsigned int count;
-  int all = 0;
 
   if (args == 0 || *args == 0)
     error (_("passcount command requires an "
@@ -11638,32 +11650,32 @@ trace_pass_command (char *args, int from_tty)
   if (*args && strncasecmp (args, "all", 3) == 0)
     {
       args += 3;			/* Skip special argument "all".  */
-      all = 1;
       if (*args)
 	error (_("Junk at end of arguments."));
+
+      ALL_TRACEPOINTS (t1)
+      {
+	trace_pass_set_count (t1, count, from_tty);
+      }
+    }
+  else if (*args == '\0')
+    {
+      t1 = get_tracepoint_by_number (&args, NULL, 1);
+      if (t1)
+	trace_pass_set_count (t1, count, from_tty);
     }
   else
-    t1 = get_tracepoint_by_number (&args, 1, 1);
-
-  do
     {
-      if (t1)
+      struct get_number_or_range_state state;
+
+      init_number_or_range (&state, args);
+      while (!state.finished)
 	{
-	  ALL_TRACEPOINTS (t2)
-	    if (t1 == (struct breakpoint *) -1 || t1 == t2)
-	      {
-		t2->pass_count = count;
-		observer_notify_tracepoint_modified (t2->number);
-		if (from_tty)
-		  printf_filtered (_("Setting tracepoint %d's "
-				     "passcount to %d\n"),
-				   t2->number, count);
-	      }
-	  if (! all && *args)
-	    t1 = get_tracepoint_by_number (&args, 1, 0);
+	  t1 = get_tracepoint_by_number (&args, &state, 1);
+	  if (t1)
+	    trace_pass_set_count (t1, count, from_tty);
 	}
     }
-  while (*args);
 }
 
 struct breakpoint *
@@ -11695,18 +11707,25 @@ get_tracepoint_by_number_on_target (int num)
 }
 
 /* Utility: parse a tracepoint number and look it up in the list.
-   If MULTI_P is true, there might be a range of tracepoints in ARG.
-   if OPTIONAL_P is true, then if the argument is missing, the most
+   If STATE is not NULL, use, get_number_or_range_state and ignore ARG.
+   If OPTIONAL_P is true, then if the argument is missing, the most
    recent tracepoint (tracepoint_count) is returned.  */
 struct breakpoint *
-get_tracepoint_by_number (char **arg, int multi_p, int optional_p)
+get_tracepoint_by_number (char **arg,
+			  struct get_number_or_range_state *state,
+			  int optional_p)
 {
   extern int tracepoint_count;
   struct breakpoint *t;
   int tpnum;
   char *instring = arg == NULL ? NULL : *arg;
 
-  if (arg == NULL || *arg == NULL || ! **arg)
+  if (state)
+    {
+      gdb_assert (!state->finished);
+      tpnum = get_number_or_range (state);
+    }
+  else if (arg == NULL || *arg == NULL || ! **arg)
     {
       if (optional_p)
 	tpnum = tracepoint_count;
@@ -11714,7 +11733,7 @@ get_tracepoint_by_number (char **arg, int multi_p, int optional_p)
 	error_no_arg (_("tracepoint number"));
     }
   else
-    tpnum = multi_p ? get_number_or_range (arg) : get_number (arg);
+    tpnum = get_number (arg);
 
   if (tpnum <= 0)
     {
@@ -11733,9 +11752,6 @@ get_tracepoint_by_number (char **arg, int multi_p, int optional_p)
       return t;
     }
 
-  /* FIXME: if we are in the middle of a range we don't want to give
-     a message.  The current interface to get_number_or_range doesn't
-     allow us to discover this.  */
   printf_unfiltered ("No tracepoint number %d.\n", tpnum);
   return NULL;
 }

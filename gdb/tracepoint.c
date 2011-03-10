@@ -581,7 +581,7 @@ trace_actions_command (char *args, int from_tty)
   struct breakpoint *t;
   struct command_line *l;
 
-  t = get_tracepoint_by_number (&args, 0, 1);
+  t = get_tracepoint_by_number (&args, NULL, 1);
   if (t)
     {
       char *tmpbuf =

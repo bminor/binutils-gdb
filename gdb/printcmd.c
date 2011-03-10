@@ -1589,9 +1589,8 @@ delete_display (struct display *display)
 static void
 undisplay_command (char *args, int from_tty)
 {
-  char *p = args;
-  char *p1;
   int num;
+  struct get_number_or_range_state state;
 
   if (args == 0)
     {
@@ -1601,11 +1600,12 @@ undisplay_command (char *args, int from_tty)
       return;
     }
 
-  while (*p)
+  init_number_or_range (&state, args);
+  while (!state.finished)
     {
-      p1 = p;
+      char *p = state.string;
 
-      num = get_number_or_range (&p1);
+      num = get_number_or_range (&state);
       if (num == 0)
 	warning (_("bad display number at or near '%s'"), p);
       else
@@ -1620,8 +1620,6 @@ undisplay_command (char *args, int from_tty)
 	  else
 	    delete_display (d);
 	}
-
-      p = p1;
     }
   dont_repeat ();
 }

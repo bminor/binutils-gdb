@@ -117,19 +117,25 @@ get_number (char **pp)
 
 /* See documentation in cli-utils.h.  */
 
-int
-get_number_or_range (char **pp)
+void
+init_number_or_range (struct get_number_or_range_state *state,
+		      char *string)
 {
-  static int last_retval, end_value;
-  static char *end_ptr;
-  static int in_range = 0;
+  memset (state, 0, sizeof (*state));
+  state->string = string;
+}
 
-  if (**pp != '-')
+/* See documentation in cli-utils.h.  */
+
+int
+get_number_or_range (struct get_number_or_range_state *state)
+{
+  if (*state->string != '-')
     {
-      /* Default case: pp is pointing either to a solo number, 
-	 or to the first number of a range.  */
-      last_retval = get_number_trailer (pp, '-');
-      if (**pp == '-')
+      /* Default case: state->string is pointing either to a solo
+	 number, or to the first number of a range.  */
+      state->last_retval = get_number_trailer (&state->string, '-');
+      if (*state->string == '-')
 	{
 	  char **temp;
 
@@ -137,44 +143,43 @@ get_number_or_range (char **pp)
 	     Skip the '-', parse and remember the second number,
 	     and also remember the end of the final token.  */
 
-	  temp = &end_ptr; 
-	  end_ptr = *pp + 1; 
-	  while (isspace ((int) *end_ptr))
-	    end_ptr++;	/* skip white space */
-	  end_value = get_number (temp);
-	  if (end_value < last_retval) 
+	  temp = &state->end_ptr; 
+	  state->end_ptr = skip_spaces (state->string + 1);
+	  state->end_value = get_number (temp);
+	  if (state->end_value < state->last_retval) 
 	    {
 	      error (_("inverted range"));
 	    }
-	  else if (end_value == last_retval)
+	  else if (state->end_value == state->last_retval)
 	    {
 	      /* Degenerate range (number1 == number2).  Advance the
 		 token pointer so that the range will be treated as a
 		 single number.  */ 
-	      *pp = end_ptr;
+	      state->string = state->end_ptr;
 	    }
 	  else
-	    in_range = 1;
+	    state->in_range = 1;
 	}
     }
-  else if (! in_range)
+  else if (! state->in_range)
     error (_("negative value"));
   else
     {
-      /* pp points to the '-' that betokens a range.  All
+      /* state->string points to the '-' that betokens a range.  All
 	 number-parsing has already been done.  Return the next
 	 integer value (one greater than the saved previous value).
-	 Do not advance the token pointer 'pp' until the end of range
+	 Do not advance the token pointer until the end of range
 	 is reached.  */
 
-      if (++last_retval == end_value)
+      if (++state->last_retval == state->end_value)
 	{
 	  /* End of range reached; advance token pointer.  */
-	  *pp = end_ptr;
-	  in_range = 0;
+	  state->string = state->end_ptr;
+	  state->in_range = 0;
 	}
     }
-  return last_retval;
+  state->finished = *state->string == '\0';
+  return state->last_retval;
 }
 
 /* Accept a number and a string-form list of numbers such as is 
@@ -188,12 +193,15 @@ get_number_or_range (char **pp)
 int
 number_is_in_list (char *list, int number)
 {
+  struct get_number_or_range_state state;
+
   if (list == NULL || *list == '\0')
     return 1;
 
-  while (*list != '\0')
+  init_number_or_range (&state, list);
+  while (!state.finished)
     {
-      int gotnum = get_number_or_range (&list);
+      int gotnum = get_number_or_range (&state);
 
       if (gotnum == 0)
 	error (_("Args must be numbers or '$' variables."));

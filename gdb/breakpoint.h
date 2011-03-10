@@ -28,6 +28,7 @@
 struct value;
 struct block;
 struct breakpoint_object;
+struct get_number_or_range_state;
 
 /* This is the maximum number of bytes a breakpoint instruction can
    take.  Feel free to increase it.  It's just used in a few places to
@@ -1150,9 +1151,10 @@ extern struct breakpoint *get_tracepoint (int num);
 extern struct breakpoint *get_tracepoint_by_number_on_target (int num);
 
 /* Find a tracepoint by parsing a number in the supplied string.  */
-extern struct breakpoint *get_tracepoint_by_number (char **arg, 
-						    int multi_p,
-						    int optional_p);
+extern struct breakpoint *
+     get_tracepoint_by_number (char **arg, 
+			       struct get_number_or_range_state *state,
+			       int optional_p);
 
 /* Return a vector of all tracepoints currently defined.  The vector
    is newly allocated; the caller should free when done with it.  */
@@ -1186,7 +1188,5 @@ extern struct breakpoint *iterate_over_breakpoints (int (*) (struct breakpoint *
 							     void *), void *);
 
 extern int user_breakpoint_p (struct breakpoint *);
-
-extern int get_number_or_range (char **pp);
 
 #endif /* !defined (BREAKPOINT_H) */

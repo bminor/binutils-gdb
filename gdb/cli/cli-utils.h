@@ -28,6 +28,40 @@
 
 extern int get_number (char **);
 
+/* An object of this type is passed to get_number_or_range.  It must
+   be initialized by calling init_number_or_range.  This type is
+   defined here so that it can be stack-allocated, but all members
+   other than `finished' and `string' should be treated as opaque.  */
+
+struct get_number_or_range_state
+{
+  /* Non-zero if parsing has completed.  */
+  int finished;
+
+  /* The string being parsed.  When parsing has finished, this points
+     past the last parsed token.  */
+  char *string;
+
+  /* Last value returned.  */
+  int last_retval;
+
+  /* When parsing a range, the final value in the range.  */
+  int end_value;
+
+  /* When parsing a range, a pointer past the final token in the
+     range.  */
+  char *end_ptr;
+
+  /* Non-zero when parsing a range.  */
+  int in_range;
+};
+
+/* Initialize a get_number_or_range_state for use with
+   get_number_or_range_state.  STRING is the string to be parsed.  */
+
+extern void init_number_or_range (struct get_number_or_range_state *state,
+				  char *string);
+
 /* Parse a number or a range.
    A number will be of the form handled by get_number.
    A range will be of the form <number1> - <number2>, and 
@@ -37,13 +71,13 @@ extern int get_number (char **);
    While processing a range, this fuction is called iteratively;
    At each call it will return the next value in the range.
 
-   At the beginning of parsing a range, the char pointer PP will
+   At the beginning of parsing a range, the char pointer STATE->string will
    be advanced past <number1> and left pointing at the '-' token.
    Subsequent calls will not advance the pointer until the range
    is completed.  The call that completes the range will advance
-   pointer PP past <number2>.  */
+   the pointer past <number2>.  */
 
-extern int get_number_or_range (char **);
+extern int get_number_or_range (struct get_number_or_range_state *state);
 
 /* Accept a number and a string-form list of numbers such as is 
    accepted by get_number_or_range.  Return TRUE if the number is

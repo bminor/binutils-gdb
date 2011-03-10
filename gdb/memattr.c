@@ -28,6 +28,7 @@
 #include "vec.h"
 #include "gdb_string.h"
 #include "breakpoint.h"
+#include "cli/cli-utils.h"
 
 const struct mem_attrib default_mem_attrib =
 {
@@ -577,11 +578,16 @@ mem_enable_command (char *args, int from_tty)
 	m->enabled_p = 1;
     }
   else
-    while (args != NULL && *args != '\0')
-      {
-	num = get_number_or_range (&args);
-	mem_enable (num);
-      }
+    {
+      struct get_number_or_range_state state;
+
+      init_number_or_range (&state, args);
+      while (!state.finished)
+	{
+	  num = get_number_or_range (&state);
+	  mem_enable (num);
+	}
+    }
 }
 
 
@@ -619,11 +625,16 @@ mem_disable_command (char *args, int from_tty)
 	m->enabled_p = 0;
     }
   else
-    while (args != NULL && *args != '\0')
-      {
-	num = get_number_or_range (&args);
-	mem_disable (num);
-      }
+    {
+      struct get_number_or_range_state state;
+
+      init_number_or_range (&state, args);
+      while (!state.finished)
+	{
+	  num = get_number_or_range (&state);
+	  mem_disable (num);
+	}
+    }
 }
 
 /* Delete the memory region number NUM.  */
@@ -657,6 +668,7 @@ static void
 mem_delete_command (char *args, int from_tty)
 {
   int num;
+  struct get_number_or_range_state state;
 
   require_user_regions (from_tty);
 
@@ -670,9 +682,10 @@ mem_delete_command (char *args, int from_tty)
       return;
     }
 
-  while (args != NULL && *args != '\0')
+  init_number_or_range (&state, args);
+  while (!state.finished)
     {
-      num = get_number_or_range (&args);
+      num = get_number_or_range (&state);
       mem_delete (num);
     }
 

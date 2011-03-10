@@ -222,6 +222,7 @@ delete_bookmark_command (char *args, int from_tty)
 {
   struct bookmark *b;
   int num;
+  struct get_number_or_range_state state;
 
   if (bookmark_chain == NULL)
     {
@@ -237,9 +238,10 @@ delete_bookmark_command (char *args, int from_tty)
       return;
     }
 
-  while (args != NULL && *args != '\0')
+  init_number_or_range (&state, args);
+  while (!state.finished)
     {
-      num = get_number_or_range (&args);
+      num = get_number_or_range (&state);
       if (!delete_one_bookmark (num))
 	/* Not found.  */
 	warning (_("No bookmark #%d."), num);
@@ -328,11 +330,16 @@ bookmarks_info (char *args, int from_tty)
   else if (args == NULL || *args == '\0')
     bookmark_1 (-1);
   else
-    while (args != NULL && *args != '\0')
-      {
-	bnum = get_number_or_range (&args);
-	bookmark_1 (bnum);
-      }
+    {
+      struct get_number_or_range_state state;
+
+      init_number_or_range (&state, args);
+      while (!state.finished)
+	{
+	  bnum = get_number_or_range (&state);
+	  bookmark_1 (bnum);
+	}
+    }
 }
 
 
