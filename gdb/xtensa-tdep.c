@@ -161,6 +161,7 @@ areg_number (struct gdbarch *gdbarch, int ar_regnum, unsigned int wb)
   return (areg > 15) ? -1 : areg;
 }
 
+/* Read Xtensa register directly from the hardware.  */ 
 static inline unsigned long
 xtensa_read_register (int regnum)
 {
@@ -170,6 +171,7 @@ xtensa_read_register (int regnum)
   return (unsigned long) value;
 }
 
+/* Write Xtensa register directly to the hardware.  */ 
 static inline void
 xtensa_write_register (int regnum, ULONGEST value)
 {
@@ -732,11 +734,13 @@ xtensa_pseudo_register_write (struct gdbarch *gdbarch,
 		    _("invalid register number %d"), regnum);
 }
 
-static inline char xtensa_hextochar (int xdigit)
-{
-  static char hex[]="0123456789abcdef";
+/* Return a character representation of a hex-decimal digit.
+   The value of "xdigit" is assumed to be in a range [0..15].  */
 
-  return hex[xdigit & 0x0f];
+static inline
+char xtensa_hextochar (int xdigit)
+{
+  return '0' + xdigit;
 }
 
 static struct reggroup *xtensa_ar_reggroup;
@@ -1280,8 +1284,8 @@ xtensa_frame_cache (struct frame_info *this_frame, void **this_cache)
 
   pc = get_frame_register_unsigned (this_frame, gdbarch_pc_regnum (gdbarch));
   ps_regnum = gdbarch_ps_regnum (gdbarch);
-  ps = (ps_regnum >= 0)
-    ? get_frame_register_unsigned (this_frame, ps_regnum) : TX_PS;
+  ps = (ps_regnum >= 0
+	? get_frame_register_unsigned (this_frame, ps_regnum) : TX_PS);
 
   windowed = windowing_enabled (gdbarch, ps);
 
@@ -1916,6 +1920,7 @@ xtensa_push_dummy_call (struct gdbarch *gdbarch,
   if (gdbarch_tdep (gdbarch)->call_abi != CallAbiCall0Only)
     {
       ULONGEST val;
+
       ra = (bp_addr & 0x3fffffff) | 0x40000000;
       regcache_raw_read_unsigned (regcache, gdbarch_ps_regnum (gdbarch), &val);
       ps = (unsigned long) val & ~0x00030000;
@@ -2074,7 +2079,8 @@ call0_ret (CORE_ADDR start_pc, CORE_ADDR finish_pc)
    The purpose of this is to simplify prologue analysis by separating 
    instruction decoding (libisa) from the semantics of prologue analysis.  */
 
-typedef enum {
+typedef enum
+{
   c0opc_illegal,       /* Unknown to libisa (invalid) or 'ill' opcode.  */
   c0opc_uninteresting, /* Not interesting for Call0 prologue analysis.  */
   c0opc_flow,	       /* Flow control insn.  */
@@ -2642,7 +2648,7 @@ static int a0_was_saved;
 static int a7_was_saved;
 static int a11_was_saved;
 
-/* Simulate L32E insn:  AT <-- ref (AS + offset).  */
+/* Simulate L32E instruction:  AT <-- ref (AS + offset).  */
 static void
 execute_l32e (struct gdbarch *gdbarch, int at, int as, int offset, CORE_ADDR wb)
 {
@@ -2671,7 +2677,7 @@ execute_l32e (struct gdbarch *gdbarch, int at, int as, int offset, CORE_ADDR wb)
   xtensa_write_register (atreg, spilled_value);
 }
 
-/* Simulate S32E insn:  AT --> ref (AS + offset).  */
+/* Simulate S32E instruction:  AT --> ref (AS + offset).  */
 static void
 execute_s32e (struct gdbarch *gdbarch, int at, int as, int offset, CORE_ADDR wb)
 {
@@ -2687,13 +2693,14 @@ execute_s32e (struct gdbarch *gdbarch, int at, int as, int offset, CORE_ADDR wb)
 
 #define XTENSA_MAX_WINDOW_INTERRUPT_HANDLER_LEN  200
 
-typedef enum {
+typedef enum
+{
   xtWindowOverflow,
   xtWindowUnderflow,
   xtNoExceptionHandler
 } xtensa_exception_handler_t;
 
-/* Execute insn stream from current PC until hitting RFWU or RFWO.
+/* Execute instruction stream from current PC until hitting RFWU or RFWO.
    Return type of Xtensa Window Interrupt Handler on success.  */
 static xtensa_exception_handler_t
 execute_code (struct gdbarch *gdbarch, CORE_ADDR current_pc, CORE_ADDR wb)

@@ -1,3 +1,13 @@
+2011-03-09  Maxim Grigoriev  <maxim2405@gmail.com>
+
+	* xtensa-tdep.c (xtensa_read_register: Add comment.
+	(xtensa_write_register): Likewise.
+	(xtensa_hextochar): Add comment and update to match coding conventions.
+	(xtensa_frame_cache, xtensa_return_value): Follow coding conventions.
+	(execute_l32e, execute_s32e, execute_code): Update comments.
+	(xtensa_exception_handler_t): Update to match coding conventions.
+	(xtensa_insn_kind): Likewise.
+
 2011-03-09  Michael Snyder  <msnyder@vmware.com>
 
 	* mi-cmd-disas.c (mi_cmd_disassemble): Fix memory leak.
