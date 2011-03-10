@@ -717,7 +717,9 @@ File_read::clear_views(Clear_views_mode mode)
 	should_delete = false;
       else if (mode == CLEAR_VIEWS_ALL)
 	should_delete = true;
-      else if (p->second->should_cache() && keep_files_mapped)
+      else if ((p->second->should_cache()
+		|| p->second == this->whole_file_view_)
+	       && keep_files_mapped)
 	should_delete = false;
       else if (this->object_count_ > 1
       	       && p->second->accessed()
