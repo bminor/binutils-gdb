@@ -1949,16 +1949,16 @@ handle_v_run (char *own_buf)
 
       if (program_argv == NULL)
 	{
-	  /* FIXME: new_argv memory leak */
 	  write_enn (own_buf);
+	  freeargv (new_argv);
 	  return 0;
 	}
 
       new_argv[0] = strdup (program_argv[0]);
       if (new_argv[0] == NULL)
 	{
-	  /* FIXME: new_argv memory leak */
 	  write_enn (own_buf);
+	  freeargv (new_argv);
 	  return 0;
 	}
     }
