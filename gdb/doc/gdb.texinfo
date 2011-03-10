@@ -22418,6 +22418,22 @@ parameter.  It can be read and assigned to just as any other
 attribute.  @value{GDBN} does validation when assignments are made.
 @end defivar
 
+There are two methods that should be implemented in any
+@code{Parameter} class.  These are:
+
+@defop Operation {parameter} get_set_string self
+@value{GDBN} will call this method when a @var{parameter}'s value has
+been changed via the @code{set} API (for example, @kbd{set foo off}).
+The @code{value} attribute has already been populated with the new
+value and may be used in output.  This method must return a string.
+@end defop
+
+@defop Operation {parameter} get_show_string self svalue
+@value{GDBN} will call this method when a @var{parameter}'s
+@code{show} API has been invoked (for example, @kbd{show foo}).  The
+argument @code{svalue} receives the string representation of the
+current value.  This method must return a string.
+@end defop
 
 When a new parameter is defined, its type must be specified.  The
 available types are represented by constants defined in the @code{gdb}

@@ -1,3 +1,12 @@
+2011-03-10  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* python/py-param.c (add_setshow_generic): Add set/show callback
+	parameters.  Register Python object context.
+	(get_show_value): New function.
+	(get_set_value): New function.
+	(call_doc_function): New function.
+	(get_doc_string): Move behind get_show_value/get_set_value.
+
 2011-03-10  Andreas Tobler  <andreast-list@fgznet.ch>
 
 	* fbsd-nat.c (fbsd_make_corefile_notes): Constify local `fname'.

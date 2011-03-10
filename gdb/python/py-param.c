@@ -26,6 +26,8 @@
 #include "gdbcmd.h"
 #include "cli/cli-decode.h"
 #include "completer.h"
+#include "language.h"
+#include "arch-utils.h"
 
 /* Parameter constants and their values.  */
 struct parm_constant
@@ -288,6 +290,164 @@ set_attr (PyObject *obj, PyObject *attr_name, PyObject *val)
   return PyObject_GenericSetAttr (obj, attr_name, val);
 }
 
+/* A helper function which returns a documentation string for an
+   object. */
+
+static char *
+get_doc_string (PyObject *object, PyObject *attr)
+{
+  char *result = NULL;
+
+  if (PyObject_HasAttr (object, attr))
+    {
+      PyObject *ds_obj = PyObject_GetAttr (object, attr);
+
+      if (ds_obj && gdbpy_is_string (ds_obj))
+	{
+	  result = python_string_to_host_string (ds_obj);
+	  if (result == NULL)
+	    gdbpy_print_stack ();
+	}
+      Py_XDECREF (ds_obj);
+    }
+  if (! result)
+    result = xstrdup (_("This command is not documented."));
+  return result;
+}
+
+/* Helper function which will execute a METHOD in OBJ passing the
+   argument ARG.  ARG can be NULL.  METHOD should return a Python
+   string.  If this function returns NULL, there has been an error and
+   the appropriate exception set.  */
+static char *
+call_doc_function (PyObject *obj, PyObject *method, PyObject *arg)
+{
+  char *data = NULL;
+  PyObject *result = PyObject_CallMethodObjArgs (obj, method, arg, NULL);
+
+  if (! result)
+    return NULL;
+
+  if (gdbpy_is_string (result))
+    {
+      data = python_string_to_host_string (result);
+      if (! data)
+	return NULL;
+    }
+  else
+    {
+      PyErr_SetString (PyExc_RuntimeError,
+		       _("Parameter must return a string value."));
+      return NULL;
+    }
+
+  return data;
+}
+
+/* A callback function that is registered against the respective
+   add_setshow_* set_doc prototype.  This function will either call
+   the Python function "get_set_string" or extract the Python
+   attribute "set_doc" and return the contents as a string.  If
+   neither exist, insert a string indicating the Parameter is not
+   documented.  */
+static void
+get_set_value (char *args, int from_tty,
+	       struct cmd_list_element *c)
+{
+  PyObject *obj = (PyObject *) get_cmd_context (c);
+  char *set_doc_string;
+  struct cleanup *cleanup = ensure_python_env (get_current_arch (),
+					       current_language);
+  PyObject *set_doc_func = PyString_FromString ("get_set_string");
+
+  if (! set_doc_func)
+    goto error;
+
+  make_cleanup_py_decref (set_doc_func);
+
+  if (PyObject_HasAttr (obj, set_doc_func))
+    {
+      set_doc_string = call_doc_function (obj, set_doc_func, NULL);
+      if (! set_doc_string)
+	goto error;
+    }
+  else
+    {
+      /* We have to preserve the existing < GDB 7.3 API.  If a
+	 callback function does not exist, then attempt to read the
+	 set_doc attribute.  */
+      set_doc_string  = get_doc_string (obj, set_doc_cst);
+    }
+
+  make_cleanup (xfree, set_doc_string);
+  fprintf_filtered (gdb_stdout, "%s\n", set_doc_string);
+
+  do_cleanups (cleanup);
+  return;
+
+ error:
+  gdbpy_print_stack ();
+  do_cleanups (cleanup);
+  return;
+}
+
+/* A callback function that is registered against the respective
+   add_setshow_* show_doc prototype.  This function will either call
+   the Python function "get_show_string" or extract the Python
+   attribute "show_doc" and return the contents as a string.  If
+   neither exist, insert a string indicating the Parameter is not
+   documented.  */
+static void
+get_show_value (struct ui_file *file, int from_tty,
+		struct cmd_list_element *c,
+		const char *value)
+{
+  PyObject *obj = (PyObject *) get_cmd_context (c);
+  char *show_doc_string = NULL;
+  struct cleanup *cleanup = ensure_python_env (get_current_arch (),
+					       current_language);
+  PyObject *show_doc_func = PyString_FromString ("get_show_string");
+
+  if (! show_doc_func)
+    goto error;
+
+  make_cleanup_py_decref (show_doc_func);
+
+  if (PyObject_HasAttr (obj, show_doc_func))
+    {
+      PyObject *val_obj = PyString_FromString (value);
+
+      if (! val_obj)
+	goto error;
+
+      make_cleanup_py_decref (val_obj);
+
+      show_doc_string = call_doc_function (obj, show_doc_func, val_obj);
+      if (! show_doc_string)
+	goto error;
+
+      make_cleanup (xfree, show_doc_string);
+
+      fprintf_filtered (file, "%s\n", show_doc_string);
+    }
+  else
+    {
+      /* We have to preserve the existing < GDB 7.3 API.  If a
+	 callback function does not exist, then attempt to read the
+	 show_doc attribute.  */
+      show_doc_string  = get_doc_string (obj, show_doc_cst);
+      make_cleanup (xfree, show_doc_string);
+      fprintf_filtered (file, "%s %s\n", show_doc_string, value);
+    }
+
+  do_cleanups (cleanup);
+  return;
+
+ error:
+  gdbpy_print_stack ();
+  do_cleanups (cleanup);
+  return;
+}
 
 
 /* A helper function that dispatches to the appropriate add_setshow
@@ -299,74 +459,98 @@ add_setshow_generic (int parmclass, enum command_class cmdclass,
 		     struct cmd_list_element **set_list,
 		     struct cmd_list_element **show_list)
 {
+  struct cmd_list_element *param = NULL;
+  char *tmp_name = NULL;
+
   switch (parmclass)
     {
     case var_boolean:
-      add_setshow_boolean_cmd (cmd_name, cmdclass, &self->value.intval,
-			       set_doc, show_doc, help_doc,
-			       NULL, NULL, set_list, show_list);
+
+      add_setshow_boolean_cmd (cmd_name, cmdclass,
+			       &self->value.intval, set_doc, show_doc,
+			       help_doc, get_set_value, get_show_value,
+			       set_list, show_list);
+
       break;
 
     case var_auto_boolean:
       add_setshow_auto_boolean_cmd (cmd_name, cmdclass,
 				    &self->value.autoboolval,
 				    set_doc, show_doc, help_doc,
-				    NULL, NULL, set_list, show_list);
+				    get_set_value, get_show_value,
+				    set_list, show_list);
       break;
 
     case var_uinteger:
-      add_setshow_uinteger_cmd (cmd_name, cmdclass, &self->value.uintval,
-				set_doc, show_doc, help_doc,
-				NULL, NULL, set_list, show_list);
+      add_setshow_uinteger_cmd (cmd_name, cmdclass,
+				&self->value.uintval, set_doc, show_doc,
+				help_doc, get_set_value, get_show_value,
+				set_list, show_list);
       break;
 
     case var_integer:
-      add_setshow_integer_cmd (cmd_name, cmdclass, &self->value.intval,
-			       set_doc, show_doc, help_doc,
-			       NULL, NULL, set_list, show_list);
-      break;
+      add_setshow_integer_cmd (cmd_name, cmdclass,
+			       &self->value.intval, set_doc, show_doc,
+			       help_doc, get_set_value, get_show_value,
+			       set_list, show_list); break;
 
     case var_string:
-      add_setshow_string_cmd (cmd_name, cmdclass, &self->value.stringval,
-			      set_doc, show_doc, help_doc,
-			      NULL, NULL, set_list, show_list);
-      break;
+      add_setshow_string_cmd (cmd_name, cmdclass,
+			      &self->value.stringval, set_doc, show_doc,
+			      help_doc, get_set_value, get_show_value,
+			      set_list, show_list); break;
 
     case var_string_noescape:
       add_setshow_string_noescape_cmd (cmd_name, cmdclass,
 				       &self->value.stringval,
 				       set_doc, show_doc, help_doc,
-				       NULL, NULL, set_list, show_list);
+				       get_set_value, get_show_value,
+				       set_list, show_list);
+
       break;
 
     case var_optional_filename:
       add_setshow_optional_filename_cmd (cmd_name, cmdclass,
-					 &self->value.stringval,
-					 set_doc, show_doc, help_doc,
-					 NULL, NULL, set_list, show_list);
+					 &self->value.stringval, set_doc,
+					 show_doc, help_doc, get_set_value,
+					 get_show_value, set_list,
+					 show_list);
       break;
 
     case var_filename:
-      add_setshow_filename_cmd (cmd_name, cmdclass, &self->value.stringval,
-				set_doc, show_doc, help_doc,
-				NULL, NULL, set_list, show_list);
-      break;
+      add_setshow_filename_cmd (cmd_name, cmdclass,
+				&self->value.stringval, set_doc, show_doc,
+				help_doc, get_set_value, get_show_value,
+				set_list, show_list); break;
 
     case var_zinteger:
-      add_setshow_zinteger_cmd (cmd_name, cmdclass, &self->value.intval,
-				set_doc, show_doc, help_doc,
-				NULL, NULL, set_list, show_list);
+      add_setshow_zinteger_cmd (cmd_name, cmdclass,
+				&self->value.intval, set_doc, show_doc,
+				help_doc, get_set_value, get_show_value,
+				set_list, show_list);
       break;
 
     case var_enum:
       add_setshow_enum_cmd (cmd_name, cmdclass, self->enumeration,
-			    &self->value.cstringval,
-			    set_doc, show_doc, help_doc,
-			    NULL, NULL, set_list, show_list);
+			    &self->value.cstringval, set_doc, show_doc,
+			    help_doc, get_set_value, get_show_value,
+			    set_list, show_list);
       /* Initialize the value, just in case.  */
       self->value.cstringval = self->enumeration[0];
       break;
     }
+
+  /* Lookup created parameter, and register Python object against the
+     parameter context.  Perform this task against both lists.  */
+  tmp_name = cmd_name;
+  param = lookup_cmd (&tmp_name, *show_list, "", 0, 1);
+  if (param)
+    set_cmd_context (param, self);
+
+  tmp_name = cmd_name;
+  param = lookup_cmd (&tmp_name, *set_list, "", 0, 1);
+  if (param)
+    set_cmd_context (param, self);
 }
 
 /* A helper which computes enum values.  Returns 1 on success.  Returns 0 on
@@ -432,29 +616,6 @@ compute_enum_values (parmpy_object *self, PyObject *enum_values)
 
   discard_cleanups (back_to);
   return 1;
-}
-
-/* A helper function which returns a documentation string for an
-   object.  */
-static char *
-get_doc_string (PyObject *object, PyObject *attr)
-{
-  char *result = NULL;
-
-  if (PyObject_HasAttr (object, attr))
-    {
-      PyObject *ds_obj = PyObject_GetAttr (object, attr);
-
-      if (ds_obj && gdbpy_is_string (ds_obj))
-	{
-	  result = python_string_to_host_string (ds_obj);
-	  if (result == NULL)
-	    gdbpy_print_stack ();
-	}
-    }
-  if (! result)
-    result = xstrdup (_("This command is not documented."));
-  return result;
 }
 
 /* Object initializer; sets up gdb-side structures for command.

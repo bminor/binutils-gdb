@@ -1,3 +1,9 @@
+2011-03-10  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* gdb.python/py-parameter.exp: Update tests to the new Python
+	parameter API. Add "no documentation" test.  Add deprecated API
+	backward compatibility test.
+
 2011-03-09  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.ada/catch_ex.exp: Use explicit gdb_test rather than

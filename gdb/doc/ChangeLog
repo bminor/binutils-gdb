@@ -1,3 +1,8 @@
+2011-03-10  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* gdb.texinfo (Parameters In Python): Document get_set_string and
+	get_show_string methods.
+
 2011-02-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.texinfo (Tracepoint Conditions): Fix missing parenthesis.
