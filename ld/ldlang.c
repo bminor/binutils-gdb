@@ -5754,6 +5754,11 @@ lang_check (void)
 
   for (file = file_chain.head; file != NULL; file = file->input_statement.next)
     {
+#ifdef ENABLE_PLUGINS
+      /* Don't check format of files claimed by plugin.  */
+      if (file->input_statement.claimed)
+	continue;
+#endif /* ENABLE_PLUGINS */
       input_bfd = file->input_statement.the_bfd;
       compatible
 	= bfd_arch_get_compatible (input_bfd, link_info.output_bfd,

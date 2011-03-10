@@ -1,5 +1,9 @@
 2011-03-10  Dave Korn  <dave.korn.cygwin@gmail.com>
 
+	* ldlang.c (lang_check): Don't run checks on dummy IR BFDs.
+
+2011-03-10  Dave Korn  <dave.korn.cygwin@gmail.com>
+
 	* ldlang.h (lang_input_statement_type): Add new 'claim_archive' flag,
 	wrapping both it and 'claim' flag in #ifdef ENABLE_PLUGINS.
 	* ldmain.c (add_archive_element): Set it if the member is claimed.
