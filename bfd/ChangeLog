@@ -1,3 +1,11 @@
+2011-03-10  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (bfd_elf64_bfd_link_just_syms): Define.
+	(ppc64_elf_link_just_syms): New function.
+	(opd_entry_value): Don't assume big-endian host.
+	(get_r2off): New function.
+	(ppc_build_one_stub, ppc_size_one_stub): Use it here.
+
 2011-03-06  Michael Snyder  <msnyder@vmware.com>
 
 	* compress.c (bfd_compress_section_contents): Check for out of mem.
@@ -33,8 +41,8 @@
 
 2011-03-02  Bernd Schmidt  <bernds@codesourcery.com>
 
-        * elflink.c (is_reloc_section): Remove function.
-        (get_dynamic_reloc_section_name): Construct string manually.
+	* elflink.c (is_reloc_section): Remove function.
+	(get_dynamic_reloc_section_name): Construct string manually.
 
 2011-02-28  Kai Tietz  <kai.tietz@onevision.com>
 
