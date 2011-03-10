@@ -1,5 +1,10 @@
 2011-03-10  Alan Modra  <amodra@gmail.com>
 
+	* elf64-ppc.c (ppc64_elf_relocate_section): Provide section/offset
+	for LO_DS error message and correct multiple.
+
+2011-03-10  Alan Modra  <amodra@gmail.com>
+
 	* elf64-ppc.c (bfd_elf64_bfd_link_just_syms): Define.
 	(ppc64_elf_link_just_syms): New function.
 	(opd_entry_value): Don't assume big-endian host.
