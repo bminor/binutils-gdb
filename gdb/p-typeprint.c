@@ -156,18 +156,18 @@ void
 pascal_type_print_method_args (char *physname, char *methodname,
 			       struct ui_file *stream)
 {
+  int is_constructor = (strncmp (physname, "__ct__", 6) == 0);
+  int is_destructor = (strncmp (physname, "__dt__", 6) == 0);
+
+  if (is_constructor || is_destructor)
+    {
+      physname += 6;
+    }
+
   fputs_filtered (methodname, stream);
 
   if (physname && (*physname != 0))
     {
-      int is_constructor = (strncmp (physname, "__ct__", 6) == 0);
-      int is_destructor = (strncmp (physname, "__dt__", 6) == 0);
-
-      if (is_constructor || is_destructor)
-	{
-	  physname += 6;
-	}
-
       fputs_filtered (" (", stream);
       /* We must demangle this.  */
       while (isdigit (physname[0]))
