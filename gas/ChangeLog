@@ -1,3 +1,9 @@
+2011-03-10  Alan Modra  <amodra@gmail.com>
+
+	* gas/config/obj-elf.h (ELF_TARGET_SYMBOL_FIELDS,
+	TARGET_SYMBOL_FIELDS): Don't define.
+	* gas/config/tc-arc.c (arc_common): Use correct symbol "local" field.
+
 2011-03-09  Michael Snyder  <msnyder@vmware.com>
 
 	* dwarf2dbg.c (out_file_list): Free malloced 'dir'.

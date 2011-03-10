@@ -1,6 +1,6 @@
 /* tc-arc.c -- Assembler for the ARC
    Copyright 1994, 1995, 1997, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
-   2006, 2007, 2009  Free Software Foundation, Inc.
+   2006, 2007, 2009, 2011  Free Software Foundation, Inc.
    Contributed by Doug Evans (dje@cygnus.com).
 
    This file is part of GAS, the GNU Assembler.
@@ -934,7 +934,7 @@ arc_common (int localScope)
       S_SET_SIZE       (symbolP, size);
       S_SET_SEGMENT    (symbolP, bss_section);
       S_CLEAR_EXTERNAL (symbolP);
-      symbolP->local = 1;
+      symbol_get_obj (symbolP)->local = 1;
       subseg_set (old_sec, old_subsec);
     }
   else
