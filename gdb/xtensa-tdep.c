@@ -1421,7 +1421,8 @@ static int xtensa_session_once_reported = 1;
 /* Report a problem with prologue analysis while doing backtracing.
    But, do it only once to avoid annoyng repeated messages.  */
 
-static void warning_once ()
+static void
+warning_once (void)
 {
   if (xtensa_session_once_reported == 0)
     warning (_("\

@@ -1,3 +1,7 @@
+2011-03-11  Maxim Grigoriev  <maxim2405@gmail.com>
+
+	* xtensa-tdep.c (warning_once): Correct style issues.
+
 2011-03-11  Yao Qi  <yao@codesourcery.com>
 
 	* arm-tdep.c (copy_ldr_str_ldrb_strb): Remove redundant statements.
