@@ -6003,9 +6003,6 @@ copy_ldr_str_ldrb_strb (struct gdbarch *gdbarch, uint32_t insn,
       else
 	dsc->modinsn[5] = (insn & 0xfff00ff0) | 0x20003;
 
-      dsc->modinsn[6] = 0x0;  /* breakpoint location.  */
-      dsc->modinsn[7] = 0x0;  /* scratch space.  */
-
       dsc->numinsns = 6;
     }
 

@@ -1,3 +1,7 @@
+2011-03-11  Yao Qi  <yao@codesourcery.com>
+
+	* arm-tdep.c (copy_ldr_str_ldrb_strb): Remove redundant statements.
+
 2011-03-11  Andreas Schwab  <schwab@redhat.com>
 
 	* common/aclocal.m4: Remove.
