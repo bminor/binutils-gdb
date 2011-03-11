@@ -1077,6 +1077,7 @@ delete_async_signal_handler (async_signal_handler ** async_handler_ptr)
       prev_ptr = sighandler_list.first_handler;
       while (prev_ptr && prev_ptr->next_handler != (*async_handler_ptr))
 	prev_ptr = prev_ptr->next_handler;
+      gdb_assert (prev_ptr);
       prev_ptr->next_handler = (*async_handler_ptr)->next_handler;
       if (sighandler_list.last_handler == (*async_handler_ptr))
 	sighandler_list.last_handler = prev_ptr;
@@ -1185,6 +1186,7 @@ delete_async_event_handler (async_event_handler **async_handler_ptr)
       prev_ptr = async_event_handler_list.first_handler;
       while (prev_ptr && prev_ptr->next_handler != *async_handler_ptr)
 	prev_ptr = prev_ptr->next_handler;
+      gdb_assert (prev_ptr);
       prev_ptr->next_handler = (*async_handler_ptr)->next_handler;
       if (async_event_handler_list.last_handler == (*async_handler_ptr))
 	async_event_handler_list.last_handler = prev_ptr;

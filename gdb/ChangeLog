@@ -1,5 +1,8 @@
 2011-03-11  Michael Snyder  <msnyder@vmware.com>
 
+	* event-loop-c (delete_async_signal_handler): Assert prev_ptr.
+	(delete_async_event_handler): Ditto.
+
 	* python/py-breakpoint.c (bppy_set_condition): Stop memory leak.
 
 	* python/py-breakpoint.c (bppy_get_commands): Fix memory leak.
