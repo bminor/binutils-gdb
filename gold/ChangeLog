@@ -1,3 +1,10 @@
+2011-03-11  Jeffrey Yasskin  <jyasskin@google.com>
+
+	PR gold/12572
+	* testsuite/odr_violation2.cc: Add comment to make all error line
+	numbers double digits.
+	* testsuite/debug_msg.sh: Adjust expected errors.
+
 2011-03-09  Jeffrey Yasskin  <jyasskin@google.com>
 
 	* dwarf_reader.cc (Sized_dwarf_line_info): Include all lines,

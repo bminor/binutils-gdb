@@ -6,11 +6,14 @@ class Ordering {
   bool operator()(int a, int b) __attribute__((never_inline));
 };
 
+// This comment makes the line numbers in Ordering::operator() all have
+// two digits, which causes gold's output to be independent of which
+// instruction the compiler optimizes into the front of the function.
 bool Ordering::operator()(int a, int b) {
   // Optimization makes this operator() a different size than the one
   // in odr_violation1.cc.
-    return a + 1 > b + 1;
-  }
+  return a + 1 > b + 1;
+}
 
 void SortDescending(int array[], int size) {
   std::sort(array, array + size, Ordering());
