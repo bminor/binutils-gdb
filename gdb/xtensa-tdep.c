@@ -982,24 +982,30 @@ extern xtensa_isa xtensa_default_isa;
 
 typedef struct xtensa_c0reg
 {
-    int	    fr_reg;	/* original register from which register content
-			   is derived, or C0_CONST, or C0_INEXP.  */
-    int	    fr_ofs;	/* constant offset from reg, or immediate value.  */
-    int	    to_stk;	/* offset from original SP to register (4-byte
-			   aligned), or C0_NOSTK if register has not
-			   been saved.  */
+  int fr_reg;  /* original register from which register content
+		  is derived, or C0_CONST, or C0_INEXP.  */
+  int fr_ofs;  /* constant offset from reg, or immediate value.  */
+  int to_stk;  /* offset from original SP to register (4-byte aligned),
+		  or C0_NOSTK if register has not been saved.  */
 } xtensa_c0reg_t;
-
 
 /* Frame cache part for Call0 ABI.  */
 typedef struct xtensa_call0_frame_cache
 {
-  int c0_frmsz;				/* Stack frame size.  */
-  int c0_hasfp;				/* Current frame uses frame
-					   pointer.  */
-  int fp_regnum;			/* A-register used as FP.  */
-  int c0_fp;				/* Actual value of frame pointer.  */
-  xtensa_c0reg_t c0_rt[C0_NREGS];	/* Register tracking information.  */
+  int c0_frmsz;			   /* Stack frame size.  */
+  int c0_hasfp;			   /* Current frame uses frame pointer.  */
+  int fp_regnum;		   /* A-register used as FP.  */
+  int c0_fp;			   /* Actual value of frame pointer.  */
+  int c0_fpalign;		   /* Dinamic adjustment for the stack
+				      pointer. It's an AND mask. Zero,
+				      if alignment was not adjusted.  */
+  int c0_old_sp;		   /* In case of dynamic adjustment, it is
+				      a register holding unaligned sp. 
+				      C0_INEXP, when undefined.  */
+  int c0_sp_ofs;		   /* If "c0_old_sp" was spilled it's a
+				      stack offset. C0_NOSTK otherwise.  */
+					   
+  xtensa_c0reg_t c0_rt[C0_NREGS];  /* Register tracking information.  */
 } xtensa_call0_frame_cache_t;
 
 typedef struct xtensa_frame_cache
@@ -1040,6 +1046,9 @@ xtensa_alloc_frame_cache (int windowed)
       cache->c0.c0_hasfp  =  0;
       cache->c0.fp_regnum = -1;
       cache->c0.c0_fp     = -1;
+      cache->c0.c0_fpalign =  0;
+      cache->c0.c0_old_sp  =  C0_INEXP;
+      cache->c0.c0_sp_ofs  =  C0_NOSTK;
 
       for (i = 0; i < C0_NREGS; i++)
 	{
@@ -1261,8 +1270,7 @@ done:
 
 static void
 call0_frame_cache (struct frame_info *this_frame,
-		   xtensa_frame_cache_t *cache,
-		   CORE_ADDR pc, CORE_ADDR litbase);
+		   xtensa_frame_cache_t *cache, CORE_ADDR pc);
 
 static void
 xtensa_window_interrupt_frame_cache (struct frame_info *this_frame,
@@ -1408,11 +1416,7 @@ xtensa_frame_cache (struct frame_info *this_frame, void **this_cache)
     }
   else	/* Call0 framework.  */
     {
-      unsigned int litbase_regnum = gdbarch_tdep (gdbarch)->litbase_regnum;
-      CORE_ADDR litbase = (litbase_regnum == -1)
-	? 0 : get_frame_register_unsigned (this_frame, litbase_regnum);
-
-      call0_frame_cache (this_frame, cache, pc, litbase);
+      call0_frame_cache (this_frame, cache, pc);  
       fp_regnum = cache->c0.fp_regnum;
     }
 
@@ -1420,6 +1424,22 @@ xtensa_frame_cache (struct frame_info *this_frame, void **this_cache)
 
   return cache;
 }
+
+static int xtensa_session_once_reported = 1;
+
+/* Report a problem with prologue analysis while doing backtracing.
+   But, do it only once to avoid annoyng repeated messages.  */
+
+static inline void warning_once ()
+{
+  if (xtensa_session_once_reported == 0)
+    warning (_("\
+\nUnrecognised function prologue. Stack trace cannot be resolved. \
+This message will not be repeated in this session.\n"));
+
+  xtensa_session_once_reported = 1;
+}
+
 
 static void
 xtensa_frame_this_id (struct frame_info *this_frame,
@@ -2088,6 +2108,7 @@ typedef enum
   c0opc_break,	       /* Debugger software breakpoints.  */
   c0opc_add,	       /* Adding two registers.  */
   c0opc_addi,	       /* Adding a register and an immediate.  */
+  c0opc_and,	       /* Bitwise "and"-ing two registers.  */
   c0opc_sub,	       /* Subtracting a register from a register.  */
   c0opc_mov,	       /* Moving a register to a register.  */
   c0opc_movi,	       /* Moving an immediate to a register.  */
@@ -2159,6 +2180,8 @@ call0_classify_opcode (xtensa_isa isa, xtensa_opcode opc)
   else if (strcasecmp (opcname, "add") == 0 
 	   || strcasecmp (opcname, "add.n") == 0)
     opclass = c0opc_add;
+  else if (strcasecmp (opcname, "and") == 0)
+    opclass = c0opc_and;
   else if (strcasecmp (opcname, "addi") == 0 
 	   || strcasecmp (opcname, "addi.n") == 0
 	   || strcasecmp (opcname, "addmi") == 0)
@@ -2190,16 +2213,16 @@ call0_classify_opcode (xtensa_isa isa, xtensa_opcode opc)
    be within a bundle.  Updates the destination register tracking info
    accordingly.  The pc is needed only for pc-relative load instructions
    (eg. l32r).  The SP register number is needed to identify stores to
-   the stack frame.  */
+   the stack frame.  Returns 0, if analysis was succesfull, non-zero
+   otherwise.  */
 
-static void
-call0_track_op (struct gdbarch *gdbarch,
-		xtensa_c0reg_t dst[], xtensa_c0reg_t src[],
+static int
+call0_track_op (struct gdbarch *gdbarch, xtensa_c0reg_t dst[], xtensa_c0reg_t src[],
 		xtensa_insn_kind opclass, int nods, unsigned odv[],
-		CORE_ADDR pc, CORE_ADDR litbase, int spreg)
+		CORE_ADDR pc, int spreg, xtensa_frame_cache_t *cache)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  unsigned litaddr, litval;
+  unsigned litbase, litaddr, litval;
 
   switch (opclass)
     {
@@ -2224,6 +2247,39 @@ call0_track_op (struct gdbarch *gdbarch,
 	}
       else dst[odv[0]].fr_reg = C0_INEXP;
       break;
+    case c0opc_and:
+      /* 3 operands:  dst, src1, src2.  */
+      gdb_assert (nods == 3);
+      if (cache->c0.c0_fpalign == 0)
+	{
+	  /* Handle dynamic stack alignment.  */
+	  if ((src[odv[0]].fr_reg == spreg) && (src[odv[1]].fr_reg == spreg))
+	    {
+	      if (src[odv[2]].fr_reg == C0_CONST)
+		cache->c0.c0_fpalign = src[odv[2]].fr_ofs;
+	      break;
+	    }
+	  else if ((src[odv[0]].fr_reg == spreg)
+		   && (src[odv[2]].fr_reg == spreg))
+	    {
+	      if (src[odv[1]].fr_reg == C0_CONST)
+		cache->c0.c0_fpalign = src[odv[1]].fr_ofs;
+	      break;
+	    }
+	  /* else fall through.  */
+	}
+      if      (src[odv[1]].fr_reg == C0_CONST)
+        {
+	  dst[odv[0]].fr_reg = src[odv[2]].fr_reg;
+	  dst[odv[0]].fr_ofs = src[odv[2]].fr_ofs & src[odv[1]].fr_ofs;
+	}
+      else if (src[odv[2]].fr_reg == C0_CONST)
+        {
+	  dst[odv[0]].fr_reg = src[odv[1]].fr_reg;
+	  dst[odv[0]].fr_ofs = src[odv[1]].fr_ofs & src[odv[2]].fr_ofs;
+	}
+      else dst[odv[0]].fr_reg = C0_INEXP;
+      break;
     case c0opc_sub:
       /* 3 operands: dst, src1, src2.  */
       gdb_assert (nods == 3);
@@ -2237,6 +2293,13 @@ call0_track_op (struct gdbarch *gdbarch,
     case c0opc_mov:
       /* 2 operands: dst, src [, src].  */
       gdb_assert (nods == 2);
+      /* First, check if it's a special case of saving unaligned SP
+	 to a spare register in case of dynamic stack adjustment.
+	 But, only do it one time.  The second time could be initializing
+	 frame pointer.  We don't want to overwrite the first one.  */
+      if ((odv[1] == spreg) && (cache->c0.c0_old_sp == C0_INEXP))
+	cache->c0.c0_old_sp = odv[0];
+
       dst[odv[0]].fr_reg = src[odv[1]].fr_reg;
       dst[odv[0]].fr_ofs = src[odv[1]].fr_ofs;
       break;
@@ -2249,6 +2312,10 @@ call0_track_op (struct gdbarch *gdbarch,
     case c0opc_l32r:
       /* 2 operands: dst, literal offset.  */
       gdb_assert (nods == 2);
+      /* litbase = xtensa_get_litbase (pc);  can be also used.  */
+      litbase = (gdbarch_tdep (gdbarch)->litbase_regnum == -1)
+	? 0 : xtensa_read_register
+		(gdbarch_tdep (gdbarch)->litbase_regnum);
       litaddr = litbase & 1
 		  ? (litbase & ~1) + (signed)odv[1]
 		  : (pc + 3  + (signed)odv[1]) & ~3;
@@ -2259,6 +2326,13 @@ call0_track_op (struct gdbarch *gdbarch,
     case c0opc_s32i:
       /* 3 operands: value, base, offset.  */
       gdb_assert (nods == 3 && spreg >= 0 && spreg < C0_NREGS);
+      /* First, check if it's a spill for saved unaligned SP,
+	 when dynamic stack adjustment was applied to this frame.  */
+      if ((cache->c0.c0_fpalign != 0)		/* Dynamic stack adjustment.  */
+	  && (odv[1] == spreg)			/* SP usage indicates spill.  */
+	  && (odv[0] == cache->c0.c0_old_sp))	/* Old SP register spilled.  */
+	cache->c0.c0_sp_ofs = odv[2];
+
       if (src[odv[1]].fr_reg == spreg	     /* Store to stack frame.  */
 	  && (src[odv[1]].fr_ofs & 3) == 0   /* Alignment preserved.  */
 	  &&  src[odv[0]].fr_reg >= 0	     /* Value is from a register.  */
@@ -2270,20 +2344,29 @@ call0_track_op (struct gdbarch *gdbarch,
 	  dst[src[odv[0]].fr_reg].to_stk = src[odv[1]].fr_ofs + odv[2];
 	}
       break;
+      /* If we end up inside Window Overflow / Underflow interrupt handler
+	 report an error because these handlers should have been handled
+	 already in a different way.  */
+    case c0opc_l32e:
+    case c0opc_s32e:
+    case c0opc_rfwo:
+    case c0opc_rfwu:
+      return 1;
     default:
-	gdb_assert_not_reached ("unexpected instruction kind");
+      return 1;
     }
+  return 0;
 }
 
-/* Analyze prologue of the function at start address to determine if it uses 
+/* Analyze prologue of the function at start address to determine if it uses
    the Call0 ABI, and if so track register moves and linear modifications
-   in the prologue up to the PC or just beyond the prologue, whichever is first.
-   An 'entry' instruction indicates non-Call0 ABI and the end of the prologue.
-   The prologue may overlap non-prologue instructions but is guaranteed to end
-   by the first flow-control instruction (jump, branch, call or return).
-   Since an optimized function may move information around and change the
-   stack frame arbitrarily during the prologue, the information is guaranteed
-   valid only at the point in the function indicated by the PC.
+   in the prologue up to the PC or just beyond the prologue, whichever is
+   first. An 'entry' instruction indicates non-Call0 ABI and the end of the
+   prologue. The prologue may overlap non-prologue instructions but is
+   guaranteed to end by the first flow-control instruction (jump, branch,
+   call or return).  Since an optimized function may move information around
+   and change the stack frame arbitrarily during the prologue, the information
+   is guaranteed valid only at the point in the function indicated by the PC.
    May be used to skip the prologue or identify the ABI, w/o tracking.
 
    Returns:   Address of first instruction after prologue, or PC (whichever 
@@ -2293,21 +2376,17 @@ call0_track_op (struct gdbarch *gdbarch,
       pc      Program counter to stop at.  Use 0 to continue to end of prologue.
 	      If 0, avoids infinite run-on in corrupt code memory by bounding
 	      the scan to the end of the function if that can be determined.
-      nregs   Number of general registers to track (size of rt[] array).
+      nregs   Number of general registers to track.
    InOut args:
-      rt[]    Array[nregs] of xtensa_c0reg structures for register tracking info.
-	      If NULL, registers are not tracked.
-   Output args:
-      call0   If != NULL, *call0 is set non-zero if Call0 ABI used, else 0
-	      (more accurately, non-zero until 'entry' insn is encountered).
+      cache   Xtensa frame cache.
 
       Note that these may produce useful results even if decoding fails
       because they begin with default assumptions that analysis may change.  */
 
 static CORE_ADDR
 call0_analyze_prologue (struct gdbarch *gdbarch,
-			CORE_ADDR start, CORE_ADDR pc, CORE_ADDR litbase,
-			int nregs, xtensa_c0reg_t rt[], int *call0)
+			CORE_ADDR start, CORE_ADDR pc,
+			int nregs, xtensa_frame_cache_t *cache)
 {
   CORE_ADDR ia;		    /* Current insn address in prologue.  */
   CORE_ADDR ba = 0;	    /* Current address at base of insn buffer.  */
@@ -2359,15 +2438,8 @@ call0_analyze_prologue (struct gdbarch *gdbarch,
   else
     body_pc = min (pc, body_pc);
 
-  if (call0 != NULL)
-      *call0 = 1;
-
-  if (rt != NULL)
-    {
-      rtmp = (xtensa_c0reg_t*) alloca(nregs * sizeof(xtensa_c0reg_t));
-      /* rt is already initialized in xtensa_alloc_frame_cache().  */
-    }
-  else nregs = 0;
+  cache->call0 = 1;
+  rtmp = (xtensa_c0reg_t*) alloca(nregs * sizeof(xtensa_c0reg_t));
 
   if (!xtensa_default_isa)
     xtensa_default_isa = xtensa_isa_init (0, 0);
@@ -2386,9 +2458,8 @@ call0_analyze_prologue (struct gdbarch *gdbarch,
         {
 	  ba = ia;
 	  bt = (ba + XTENSA_ISA_BSZ) < body_pc ? ba + XTENSA_ISA_BSZ : body_pc;
-	  read_memory (ba, ibuf, bt - ba);
-	  /* If there is a memory reading error read_memory () will report it
-	     and then throw an exception, stopping command execution.  */
+	  if (target_read_memory (ba, ibuf, bt - ba) != 0 )
+	    error (_("Unable to read target memory ..."));
 	}
 
       /* Decode format information.  */
@@ -2418,7 +2489,7 @@ call0_analyze_prologue (struct gdbarch *gdbarch,
 	 register changes do not take effect within this bundle.  */
 
       for (j = 0; j < nregs; ++j)
-	rtmp[j] = rt[j];
+	rtmp[j] = cache->c0.c0_rt[j];
 
       for (is = 0; is < islots; ++is)
         {
@@ -2429,8 +2500,7 @@ call0_analyze_prologue (struct gdbarch *gdbarch,
 	    goto done;
 
 	  opc = xtensa_opcode_decode (isa, ifmt, is, slot);
-	  DEBUGVERB ("[call0_analyze_prologue] instr "
-		     "addr = 0x%08x, opc = %d\n", 
+	  DEBUGVERB ("[call0_analyze_prologue] instr addr = 0x%08x, opc = %d\n", 
 		     (unsigned)ia, opc);
 	  if (opc == XTENSA_UNDEFINED) 
 	    opclass = c0opc_illegal;
@@ -2449,23 +2519,20 @@ call0_analyze_prologue (struct gdbarch *gdbarch,
 	    case c0opc_uninteresting:
 	      continue;
 
-	    case c0opc_flow:
+	    case c0opc_flow:  /* Flow control instructions stop analysis.  */
+	    case c0opc_rwxsr: /* RSR, WSR, XSR instructions stop analysis.  */
 	      goto done;
 
 	    case c0opc_entry:
-	      if (call0 != NULL)
-		*call0 = 0;
+	      cache->call0 = 0;
 	      ia += ilen;	       	/* Skip over 'entry' insn.  */
 	      goto done;
 
 	    default:
-	      if (call0 != NULL)
-		*call0 = 1;
+	      cache->call0 = 1;
 	    }
 
 	  /* Only expected opcodes should get this far.  */
-	  if (rt == NULL)
-	    continue;
 
 	  /* Extract and decode the operands.  */
 	  nods = xtensa_opcode_num_operands (isa, opc);
@@ -2491,7 +2558,13 @@ call0_analyze_prologue (struct gdbarch *gdbarch,
 	  if (opclass == c0opc_mov && nods == 3)
 	    {
 	      if (odv[2] == odv[1])
-		nods = 2;
+		{
+		  nods = 2;
+		  if ((odv[0] == 1) && (odv[1] != 1))
+		    /* OR  A1, An, An  , where n != 1.
+		       This means we are inside epilogue already.  */
+		    goto done;
+		}
 	      else
 		{
 		  opclass = c0opc_uninteresting;
@@ -2500,8 +2573,10 @@ call0_analyze_prologue (struct gdbarch *gdbarch,
 	    }
 
 	  /* Track register movement and modification for this operation.  */
-	  call0_track_op (gdbarch, rt, rtmp, opclass,
-			  nods, odv, ia, litbase, 1);
+	  fail = call0_track_op (gdbarch, cache->c0.c0_rt, rtmp,
+				 opclass, nods, odv, ia, 1, cache);
+	  if (fail)
+	    goto done;
 	}
     }
 done:
@@ -2516,39 +2591,38 @@ done:
 
 static void
 call0_frame_cache (struct frame_info *this_frame,
-		   xtensa_frame_cache_t *cache,
-		   CORE_ADDR pc, CORE_ADDR litbase)
+		   xtensa_frame_cache_t *cache, CORE_ADDR pc)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR start_pc;		/* The beginning of the function.  */
   CORE_ADDR body_pc=UINT_MAX;	/* PC, where prologue analysis stopped.  */
   CORE_ADDR sp, fp, ra;
-  int fp_regnum, c0_hasfp, c0_frmsz, prev_sp, to_stk;
+  int fp_regnum = C0_SP, c0_hasfp = 0, c0_frmsz = 0, prev_sp = 0, to_stk;
  
+  sp = get_frame_register_unsigned
+    (this_frame, gdbarch_tdep (gdbarch)->a0_base + 1);
+  fp = sp; /* Assume FP == SP until proven otherwise.  */
+
   /* Find the beginning of the prologue of the function containing the PC
      and analyze it up to the PC or the end of the prologue.  */
 
   if (find_pc_partial_function (pc, NULL, &start_pc, NULL))
     {
-      body_pc = call0_analyze_prologue (gdbarch, start_pc, pc, litbase,
-					C0_NREGS,
-					&cache->c0.c0_rt[0],
-					&cache->call0);
+      body_pc = call0_analyze_prologue (gdbarch, start_pc, pc, C0_NREGS, cache);
 
       if (body_pc == XTENSA_ISA_BADPC)
-	error (_("Xtensa-specific internal error: CALL0 prologue \
-analysis failed in this frame. GDB command execution stopped."));
+	{
+	  warning_once ();
+	  ra = 0;
+	  goto finish_frame_analysis;
+	}
     }
   
-  sp = get_frame_register_unsigned
-    (this_frame, gdbarch_tdep (gdbarch)->a0_base + 1);
-  fp = sp; /* Assume FP == SP until proven otherwise.  */
-
   /* Get the frame information and FP (if used) at the current PC.
      If PC is in the prologue, the prologue analysis is more reliable
-     than DWARF info.  We don't not know for sure if PC is in the prologue,
-     but we know no calls have yet taken place, so we can almost
+     than DWARF info.  We don't not know for sure, if PC is in the prologue,
+     but we do know no calls have yet taken place, so we can almost
      certainly rely on the prologue analysis.  */
 
   if (body_pc <= pc)
@@ -2571,7 +2645,35 @@ analysis failed in this frame. GDB command execution stopped."));
       start_pc = pc;
    }
 
-  prev_sp = fp + c0_frmsz;
+  if (cache->c0.c0_fpalign)
+    {
+      /* This frame has a special prologue with a dynamic stack adjustment
+	 to force an alignment, which is bigger than standard 16 bytes.  */
+
+      CORE_ADDR unaligned_sp;
+
+      if (cache->c0.c0_old_sp == C0_INEXP)
+	/* This can't be.  Prologue code should be consistent.
+	   Unaligned stack pointer should be saved in a spare register.  */
+	{
+	  warning_once ();
+	  ra = 0;
+	  goto finish_frame_analysis;
+	}
+
+      if (cache->c0.c0_sp_ofs == C0_NOSTK)
+	/* Saved unaligned value of SP is kept in a register.  */
+	unaligned_sp = get_frame_register_unsigned
+	  (this_frame, gdbarch_tdep (gdbarch)->a0_base + cache->c0.c0_old_sp);
+      else
+	/* Get the value from stack.  */
+	unaligned_sp = (CORE_ADDR)
+	  read_memory_integer (fp + cache->c0.c0_sp_ofs, 4, byte_order);
+
+      prev_sp = unaligned_sp + c0_frmsz;
+    }
+  else
+    prev_sp = fp + c0_frmsz;
 
   /* Frame size from debug info or prologue tracking does not account for 
      alloca() and other dynamic allocations.  Adjust frame size by FP - SP.  */
@@ -2579,8 +2681,6 @@ analysis failed in this frame. GDB command execution stopped."));
     {
       fp = get_frame_register_unsigned (this_frame, fp_regnum);
 
-      /* Recalculate previous SP.  */
-      prev_sp = fp + c0_frmsz;
       /* Update the stack frame size.  */
       c0_frmsz += fp - sp;
     }
@@ -2597,23 +2697,21 @@ analysis failed in this frame. GDB command execution stopped."));
   else if (cache->c0.c0_rt[C0_RA].fr_reg == C0_CONST
 	   && cache->c0.c0_rt[C0_RA].fr_ofs == 0)
     {
-      /* Special case for terminating backtrace at a function that
-	 wants to be seen as the outermost.  Such a function will
-	 clear it's RA (A0) register to 0 in the prologue instead of
-	 saving its original value.  */
+      /* Special case for terminating backtrace at a function that wants to
+	 be seen as the outermost one.  Such a function will clear it's RA (A0)
+	 register to 0 in the prologue instead of saving its original value.  */
       ra = 0;
     }
   else
     {
-      /* RA was copied to another register or (before any function
-	 call) may still be in the original RA register.  This is not
-	 always reliable: even in a leaf function, register tracking
-	 stops after prologue, and even in prologue, non-prologue
-	 instructions (not tracked) may overwrite RA or any register
-	 it was copied to.  If likely in prologue or before any call,
-	 use retracking info and hope for the best (compiler should
-	 have saved RA in stack if not in a leaf function).  If not in
-	 prologue, too bad.  */
+      /* RA was copied to another register or (before any function call) may
+	 still be in the original RA register.  This is not always reliable:
+	 even in a leaf function, register tracking stops after prologue, and
+	 even in prologue, non-prologue instructions (not tracked) may overwrite
+	 RA or any register it was copied to.  If likely in prologue or before
+	 any call, use retracking info and hope for the best (compiler should
+	 have saved RA in stack if not in a leaf function).  If not in prologue,
+	 too bad.  */
 
       int i;
       for (i = 0; 
@@ -2631,6 +2729,7 @@ analysis failed in this frame. GDB command execution stopped."));
       else ra = 0;
     }
   
+ finish_frame_analysis:
   cache->pc = start_pc;
   cache->ra = ra;
   /* RA == 0 marks the outermost frame.  Do not go past it.  */
@@ -2971,7 +3070,8 @@ xtensa_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
     }
 
   /* No debug line info.  Analyze prologue for Call0 or simply skip ENTRY.  */
-  body_pc = call0_analyze_prologue (gdbarch, start_pc, 0, 0, 0, NULL, NULL);
+  body_pc = call0_analyze_prologue (gdbarch, start_pc, 0, 0,
+				    xtensa_alloc_frame_cache (0));
   return body_pc != 0 ? body_pc : start_pc;
 }
 
@@ -3122,6 +3222,7 @@ xtensa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Verify our configuration.  */
   xtensa_verify_config (gdbarch);
+  xtensa_session_once_reported = 0;
 
   /* Pseudo-Register read/write.  */
   set_gdbarch_pseudo_register_read (gdbarch, xtensa_pseudo_register_read);

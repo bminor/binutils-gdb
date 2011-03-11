@@ -1,3 +1,23 @@
+2011-03-10  Maxim Grigoriev  <maxim2405@gmail.com>
+
+	* xtensa-tdep.c (xtensa_c0reg_t): Update comments.
+	(xtensa_call0_frame_cache_t): Update comments. New fields added.
+	(xtensa_alloc_frame_cache): Add initialization for new fields.
+	(xtensa_frame_cache): Change the way how call0_frame_cache () is called.
+	(warning_once): New function.
+	(xtensa_insn_kind): New item c0opc_and.
+	(call0_classify_opcode): Add the case for AND instruction.
+	(call0_track_op): Change arguments. New local variable litbase. Add the
+	case to handle c0opc_and. Update algorithms for c0opc_mov, c0opc_l32r,
+	c0opc_s32i to take into account dynamic stack adjustments in prologue.
+	Add cases for c0opc_l32e, c0opc_s32e, c0opc_rfwo, c0opc_rfwu.
+	(call0_analyze_prologue): Update the comments. Change arguments.
+	Add the variety of updates to handle extended prologues, which now can
+	conduct dynamic stack adjustments.
+	(call0_frame_cache): Likewise.
+	(xtensa_skip_prologue): Update call0_analyze_prologue () function call.
+	(xtensa_gdbarch_init): Initialize xtensa_session_once_reported.
+
 2011-03-10  Michael Snyder  <msnyder@vmware.com>
 
 	* tracepoint.c (cmd_qtv): Discard unused value 'packet'.
@@ -57,7 +77,7 @@
 
 2011-03-09  Maxim Grigoriev  <maxim2405@gmail.com>
 
-	* xtensa-tdep.c (xtensa_read_register: Add comment.
+	* xtensa-tdep.c (xtensa_read_register): Add comment.
 	(xtensa_write_register): Likewise.
 	(xtensa_hextochar): Add comment and update to match coding conventions.
 	(xtensa_frame_cache, xtensa_return_value): Follow coding conventions.
