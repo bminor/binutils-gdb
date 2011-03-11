@@ -457,6 +457,10 @@ bppy_set_condition (PyObject *self, PyObject *newvalue, void *closure)
     {
       set_breakpoint_condition (self_bp->bp, exp, 0);
     }
+
+  if (newvalue != Py_None)
+    xfree (exp);
+
   GDB_PY_SET_HANDLE_EXCEPTION (except);
 
   return 0;
