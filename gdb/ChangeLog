@@ -1,3 +1,7 @@
+2011-03-11  Michael Snyder  <msnyder@vmware.com>
+
+	* top.c (set_verbose): Assert showcmd was found.
+
 2011-03-11  Maxim Grigoriev  <maxim2405@gmail.com>
 
 	* xtensa-tdep.c (warning_once): Correct style issues.
