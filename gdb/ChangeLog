@@ -1,5 +1,7 @@
 2011-03-11  Michael Snyder  <msnyder@vmware.com>
 
+	* python/py-breakpoint.c (bppy_get_commands): Fix memory leak.
+
 	* top.c (set_verbose): Assert showcmd was found.
 
 2011-03-11  Maxim Grigoriev  <maxim2405@gmail.com>
