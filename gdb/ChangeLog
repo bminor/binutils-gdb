@@ -1,5 +1,12 @@
 2011-03-10  Maxim Grigoriev  <maxim2405@gmail.com>
 
+	* xtensa-tdep.c (windowing_enabled): Remove inline attribute.
+	(xtensa_write_register, xtensa_read_register): Likewise.
+	(xtensa_hextochar): Removed.
+	(xtensa_init_reggroups): Replace xtensa_hextochar () by explicit code.
+
+2011-03-10  Maxim Grigoriev  <maxim2405@gmail.com>
+
 	* xtensa-tdep.c (xtensa_c0reg_t): Update comments.
 	(xtensa_call0_frame_cache_t): Update comments.  New fields added.
 	(xtensa_alloc_frame_cache): Add initialization for new fields.

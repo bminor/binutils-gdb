@@ -121,7 +121,7 @@ static int xtensa_debug_level = 0;
 #define PS_WOE			(1<<18)
 #define PS_EXC			(1<<4)
 
-static inline int
+static int
 windowing_enabled (struct gdbarch *gdbarch, unsigned int ps)
 {
   /* If we know CALL0 ABI is set explicitly,  say it is Call0.  */
@@ -162,7 +162,7 @@ areg_number (struct gdbarch *gdbarch, int ar_regnum, unsigned int wb)
 }
 
 /* Read Xtensa register directly from the hardware.  */ 
-static inline unsigned long
+static unsigned long
 xtensa_read_register (int regnum)
 {
   ULONGEST value;
@@ -172,7 +172,7 @@ xtensa_read_register (int regnum)
 }
 
 /* Write Xtensa register directly to the hardware.  */ 
-static inline void
+static void
 xtensa_write_register (int regnum, ULONGEST value)
 {
   regcache_raw_write_unsigned (get_current_regcache (), regnum, value);
@@ -734,15 +734,6 @@ xtensa_pseudo_register_write (struct gdbarch *gdbarch,
 		    _("invalid register number %d"), regnum);
 }
 
-/* Return a character representation of a hex-decimal digit.
-   The value of "xdigit" is assumed to be in a range [0..15].  */
-
-static inline
-char xtensa_hextochar (int xdigit)
-{
-  return '0' + xdigit;
-}
-
 static struct reggroup *xtensa_ar_reggroup;
 static struct reggroup *xtensa_user_reggroup;
 static struct reggroup *xtensa_vectra_reggroup;
@@ -760,7 +751,7 @@ xtensa_init_reggroups (void)
 
   for (i = 0; i < XTENSA_MAX_COPROCESSOR; i++)
     {
-      cpname[2] = xtensa_hextochar (i);
+      cpname[2] = '0' + i;
       xtensa_cp[i] = reggroup_new (cpname, USER_REGGROUP);
     }
 }
@@ -1430,7 +1421,7 @@ static int xtensa_session_once_reported = 1;
 /* Report a problem with prologue analysis while doing backtracing.
    But, do it only once to avoid annoyng repeated messages.  */
 
-static inline void warning_once ()
+static void warning_once ()
 {
   if (xtensa_session_once_reported == 0)
     warning (_("\
