@@ -1,3 +1,7 @@
+2011-03-11  Andreas Schwab  <schwab@redhat.com>
+
+	* common/aclocal.m4: Remove.
+
 2011-03-10  Maxim Grigoriev  <maxim2405@gmail.com>
 
 	* xtensa-tdep.c (windowing_enabled): Remove inline attribute.
@@ -489,7 +493,7 @@
 
 	* mdebugread.c (parse_partial_symbols): Fix indent.
 
-	* gdbserver/linux-arm-low.c (arm_arch_setup): Replace malloc 
+	* gdbserver/linux-arm-low.c (arm_arch_setup): Replace malloc
 	with xmalloc.
 
 	* target-descriptions.c (tdesc_gdb_type): No need to call
@@ -501,7 +505,7 @@
 
 	* utils.c (parse_escape): Escape the escape char.
 
-	* python/py-inferior.c (build_inferior_list): Error out if 
+	* python/py-inferior.c (build_inferior_list): Error out if
 	PyList_Append fails.
 	(gdbpy_inferiors): Error out if build_inferior_list fails.
 
@@ -585,7 +589,7 @@
 
 	* coffread.c (coff_getfilename): Add check to avoid overflow.
 
-	* objc-lang.c (selectors_info): Add a small safety margin to 
+	* objc-lang.c (selectors_info): Add a small safety margin to
 	avoid overflow.
 	(classes_info): Error out on too long REGEXP.
 
@@ -703,7 +707,7 @@
 	* tui/tui-stack.c (tui_get_function_from_frame): Fix off by one
 	error in strncpy.
 
-	* symtab.c (rbreak_command): Move variable 'file_name' to 
+	* symtab.c (rbreak_command): Move variable 'file_name' to
 	outer scope.
 
 	* d-valprint.c (dynamic_array_type): Avoid shadowing a function
@@ -858,7 +862,7 @@
 
 	* breakpoint.c (breakpoint_1): Change first argument from an int
 	to a char pointer, so that the function now accepts a list of
-	breakpoints rather than just one.  Use new function 
+	breakpoints rather than just one.  Use new function
 	'number_is_in_list' to implement.
 	(breakpoints_info): Pass char * instead of int to breakpoint_1.
 	(watchpoints_info): Ditto.
@@ -917,7 +921,7 @@
 	(info_threads_command): Pass char* to print_thread_info.
 	* cli/cli-utils.c (number_is_in_list): New function.
 	* cli/cli-utils.h (number_is_in_list): Export.
-	* mi/mi-main.c (mi_cmd_thread_info): Pass char* to 
+	* mi/mi-main.c (mi_cmd_thread_info): Pass char* to
 	print_thread_info.
 	(print_one_inferior): Ditto.
 	(mi_cmd_list_thread_groups): Ditto.
@@ -1061,7 +1065,7 @@
 
 2011-02-18  Michael Snyder  <msnyder@vmware.com>
 
-	* thread.c (info_threads_command): Re-implement using 
+	* thread.c (info_threads_command): Re-implement using
 	get_number_or_range.
 	(thread_apply_command): Ditto.
 
@@ -2404,7 +2408,7 @@
 	(DEFAULT_HPUX_MAJOR_RELEASE): New macro.
 	(hpux_major_release): Make global, change default value to
 	DEFAULT_HPUX_MAJOR_RELEASE.
-	(get_hpux_major_release): Simply return HPUX_MAJOR_RELEASE. 
+	(get_hpux_major_release): Simply return HPUX_MAJOR_RELEASE.
 	* hppa-hpux-nat.c: Add <sys/utsname.h> include.
 	Add "solib-som.h" header.
 	(set_hpux_major_release): New function.
@@ -2620,11 +2624,11 @@
 	Make value allocations more lazy.
 	* ada-lang.c (coerce_unspec_val_to_type): Use allocate_value_lazy
 	instead of allocate_value and set_value_lazy when possible.
-	* dwarf2loc.c (dwarf2_evaluate_loc_desc_full): Use allocate_value_lazy 
+	* dwarf2loc.c (dwarf2_evaluate_loc_desc_full): Use allocate_value_lazy
 	instead of allocate_value and set_value_lazy.
 	* findvar.c (value_of_register_lazy): Likewise.
 	(read_var_value): Remove V preallocation, call just check_typedef in
-	advance.  Move allocate_value to LOC_CONST, LOC_LABEL, 
+	advance.  Move allocate_value to LOC_CONST, LOC_LABEL,
 	LOC_CONST_BYTES.  Use allocate_value_lazy in LOC_STATIC, LOC_ARG,
 	LOC_REF_ARG, LOC_LOCAL, LOC_BLOCK.  Set ADDR instead of
 	set_value_address and break in LOC_BLOCK.  Use allocate_value_lazy and
@@ -2756,7 +2760,7 @@
 	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	Implement support for PowerPC BookE ranged watchpoints.
-	* breakpoint.h 
+	* breakpoint.h
 	(struct breakpoint_ops) <resources_needed>: New method.
 	Initialize to NULL in all existing breakpoint_ops instances.
 	(struct breakpoint) <exact>: New field.
@@ -2806,7 +2810,7 @@
 	<insert_location>: ... this.  Return int instead of void.
 	Accept pointer to struct bp_location instead of pointer to
 	struct breakpoint.  Adapt all implementations.
-	(breakpoint_ops) <remove>: Rename to... 
+	(breakpoint_ops) <remove>: Rename to...
 	<remove_location>: ... this.  Accept pointer to struct bp_location
 	instead of pointer to struct breakpoint.  Adapt all implementations.
 	* breakpoint.c (insert_catchpoint): Delete function.
@@ -3063,7 +3067,7 @@
 
 	* mi/mi-cmd-disas.c (mi_cmd_disassemble): Mark up error message
 	for i18n.
-	* tui/tui-layout.c (tui_set_layout_for_display_command): 
+	* tui/tui-layout.c (tui_set_layout_for_display_command):
 	Split line so that operator goes to beginning of line.
 	* tui/tui-winsource.c (tui_horizontal_source_scroll): Move
 	assignment out of if statement.
