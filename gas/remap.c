@@ -65,8 +65,9 @@ add_debug_prefix_map (const char *arg)
   debug_prefix_maps = map;
 }
 
-/* Perform user-specified mapping of debug filename prefixes.  Return
-   the new name corresponding to FILENAME.  */
+/* Perform user-specified mapping of debug filename prefixes.  Returns
+   a newly allocated buffer containing the name corresponding to FILENAME.
+   It is the caller's responsibility to free the buffer.  */
 
 const char *
 remap_debug_filename (const char *filename)
@@ -80,7 +81,7 @@ remap_debug_filename (const char *filename)
     if (filename_ncmp (filename, map->old_prefix, map->old_len) == 0)
       break;
   if (!map)
-    return filename;
+    return xstrdup (filename);
   name = filename + map->old_len;
   name_len = strlen (name) + 1;
   s = (char *) alloca (name_len + map->new_len);

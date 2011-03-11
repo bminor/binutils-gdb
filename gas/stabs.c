@@ -502,6 +502,7 @@ stabs_generate_asm_file (void)
       dir2 = (char *) alloca (strlen (dir) + 2);
       sprintf (dir2, "%s%s", dir, "/");
       generate_asm_file (N_SO, dir2);
+      xfree ((char *) dir);
     }
   generate_asm_file (N_SO, file);
 }

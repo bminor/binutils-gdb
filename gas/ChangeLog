@@ -1,3 +1,10 @@
+2011-03-11  Nick Clifton  <nickc@redhat.com>
+
+	* remap.c (remap_debug_filename): Always allocate a buffer for the
+	returned pointer.
+	* stabs.c (stabs_generate_asm_file): Free the pointer returned by
+	remap_debug_filename.
+
 2011-03-10  Michael Snyder  <msnyder@vmware.com>
 
 	Revert the following change:
