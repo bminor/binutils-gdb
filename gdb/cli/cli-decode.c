@@ -1228,7 +1228,7 @@ lookup_cmd_1 (char **text, struct cmd_list_element *clist,
 	/* Will be modified in calling routine
 	   if we know what the prefix command is.  */
 	*result_list = 0;
-      return (struct cmd_list_element *) -1;	/* Ambiguous.  */
+      return CMD_LIST_AMBIGUOUS;	/* Ambiguous.  */
     }
 
   /* We've matched something on this list.  Move text pointer forward.  */
@@ -1261,7 +1261,7 @@ lookup_cmd_1 (char **text, struct cmd_list_element *clist,
 	    *result_list = clist;
 	  return found;
 	}
-      else if (c == (struct cmd_list_element *) -1)
+      else if (c == CMD_LIST_AMBIGUOUS)
 	{
 	  /* We've gotten this far properly, but the next step is
 	     ambiguous.  We need to set the result list to the best
@@ -1346,7 +1346,7 @@ lookup_cmd (char **line, struct cmd_list_element *list, char *cmdtype,
       else
 	return 0;
     }
-  else if (c == (struct cmd_list_element *) -1)
+  else if (c == CMD_LIST_AMBIGUOUS)
     {
       /* Ambigous.  Local values should be off prefixlist or called
          values.  */
@@ -1569,7 +1569,7 @@ lookup_cmd_composition (char *text,
 	  *cmd = find_cmd (command, len, cur_list, 1, &nfound);
 	}
       
-      if (*cmd == (struct cmd_list_element *) -1)
+      if (*cmd == CMD_LIST_AMBIGUOUS)
 	{
 	  return 0;              /* ambiguous */
 	}

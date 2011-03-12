@@ -1425,8 +1425,7 @@ set_verbose (char *args, int from_tty, struct cmd_list_element *c)
   struct cmd_list_element *showcmd;
 
   showcmd = lookup_cmd_1 (&cmdname, showlist, NULL, 1);
-  gdb_assert (showcmd != NULL
-	      && showcmd != (struct cmd_list_element *) -1);
+  gdb_assert (showcmd != NULL && showcmd != CMD_LIST_AMBIGUOUS);
 
   if (info_verbose)
     {

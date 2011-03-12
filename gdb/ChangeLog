@@ -1,5 +1,11 @@
 2011-03-11  Michael Snyder  <msnyder@vmware.com>
 
+	* cli/cli-decode.h (CMD_LIST_AMBIGUOUS): Define.
+	* cli/cli-decode.c (lookup_cmd_1): Use CMD_LIST_AMBIGUOUS.
+	(lookup_cmd): Test for CMD_LIST_AMBIGUOUS.
+	* completer.c (complete_line_internal): Use CMD_LIST_AMBIGUOUS.
+	* top.c (set_verbose): Use CMD_LIST_AMBIGUOUS.
+
 	* event-loop-c (delete_async_signal_handler): Assert prev_ptr.
 	(delete_async_event_handler): Ditto.
 

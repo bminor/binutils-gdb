@@ -590,7 +590,7 @@ complete_line_internal (const char *text,
     {
       /* An empty line we want to consider ambiguous; that is, it
 	 could be any command.  */
-      c = (struct cmd_list_element *) -1;
+      c = CMD_LIST_AMBIGUOUS;
       result_list = 0;
     }
   else
@@ -610,7 +610,7 @@ complete_line_internal (const char *text,
 	 possible completions.  */
       list = NULL;
     }
-  else if (c == (struct cmd_list_element *) -1)
+  else if (c == CMD_LIST_AMBIGUOUS)
     {
       char *q;
 

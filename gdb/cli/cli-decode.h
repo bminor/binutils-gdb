@@ -210,6 +210,9 @@ struct cmd_list_element
     struct cmd_list_element *alias_chain;
   };
 
+/* Flag for an ambiguous cmd_list result.  */
+#define CMD_LIST_AMBIGUOUS ((struct cmd_list_element *) -1)
+
 /* API to the manipulation of command lists.  */
 
 extern struct cmd_list_element *add_cmd (char *, enum command_class,
