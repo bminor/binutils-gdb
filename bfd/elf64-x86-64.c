@@ -865,18 +865,34 @@ elf_x86_64_check_tls_transition (bfd *abfd,
 
       if (r_type == R_X86_64_TLSGD)
 	{
-	  /* Check transition from GD access model.  Only
+	  /* Check transition from GD access model.  For 64bit, only
 		.byte 0x66; leaq foo@tlsgd(%rip), %rdi
+		.word 0x6666; rex64; call __tls_get_addr
+	     can transit to different access model.  For 32bit, only
+		leaq foo@tlsgd(%rip), %rdi
 		.word 0x6666; rex64; call __tls_get_addr
 	     can transit to different access model.  */
 
-	  static x86_64_opcode32 leaq = { { 0x66, 0x48, 0x8d, 0x3d } },
-				 call = { { 0x66, 0x66, 0x48, 0xe8 } };
-	  if (offset < 4
-	      || (offset + 12) > sec->size
-	      || bfd_get_32 (abfd, contents + offset - 4) != leaq.i
+	  static x86_64_opcode32 call = { { 0x66, 0x66, 0x48, 0xe8 } };
+	  if ((offset + 12) > sec->size
 	      || bfd_get_32 (abfd, contents + offset + 4) != call.i)
 	    return FALSE;
+
+	  if (ABI_64_P (abfd))
+	    {
+	      static x86_64_opcode32 leaq = { { 0x66, 0x48, 0x8d, 0x3d } };
+	      if (offset < 4
+		  || bfd_get_32 (abfd, contents + offset - 4) != leaq.i)
+		return FALSE;
+	    }
+	  else
+	    {
+	      static x86_64_opcode16 lea = { { 0x8d, 0x3d } };
+	      if (offset < 3
+		  || bfd_get_8 (abfd, contents + offset - 3) != 0x48
+		  || bfd_get_16 (abfd, contents + offset - 2) != lea.i)
+		return FALSE;
+	    }
 	}
       else
 	{
@@ -3434,15 +3450,26 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 
 	      if (ELF32_R_TYPE (rel->r_info) == R_X86_64_TLSGD)
 		{
-		  /* GD->LE transition.
+		  /* GD->LE transition.  For 64bit, change
 		     .byte 0x66; leaq foo@tlsgd(%rip), %rdi
 		     .word 0x6666; rex64; call __tls_get_addr
-		     Change it into:
+		     into:
 		     movq %fs:0, %rax
+		     leaq foo@tpoff(%rax), %rax
+		     For 32bit, change
+		     leaq foo@tlsgd(%rip), %rdi
+		     .word 0x6666; rex64; call __tls_get_addr
+		     into:
+		     movl %fs:0, %eax
 		     leaq foo@tpoff(%rax), %rax */
-		  memcpy (contents + roff - 4,
-			  "\x64\x48\x8b\x04\x25\0\0\0\0\x48\x8d\x80\0\0\0",
-			  16);
+		  if (ABI_64_P (output_bfd))
+		    memcpy (contents + roff - 4,
+			    "\x64\x48\x8b\x04\x25\0\0\0\0\x48\x8d\x80\0\0\0",
+			    16);
+		  else
+		    memcpy (contents + roff - 3,
+			    "\x64\x8b\x04\x25\0\0\0\0\x48\x8d\x80\0\0\0",
+			    15);
 		  bfd_put_32 (output_bfd,
 			      elf_x86_64_tpoff (info, relocation),
 			      contents + roff + 8);
@@ -3670,15 +3697,26 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 
 	      if (ELF32_R_TYPE (rel->r_info) == R_X86_64_TLSGD)
 		{
-		  /* GD->IE transition.
+		  /* GD->IE transition.  For 64bit, change
 		     .byte 0x66; leaq foo@tlsgd(%rip), %rdi
 		     .word 0x6666; rex64; call __tls_get_addr@plt
-		     Change it into:
+		     into:
 		     movq %fs:0, %rax
+		     addq foo@gottpoff(%rip), %rax
+		     For 32bit, change
+		     leaq foo@tlsgd(%rip), %rdi
+		     .word 0x6666; rex64; call __tls_get_addr@plt
+		     into:
+		     movl %fs:0, %eax
 		     addq foo@gottpoff(%rip), %rax */
-		  memcpy (contents + roff - 4,
-			  "\x64\x48\x8b\x04\x25\0\0\0\0\x48\x03\x05\0\0\0",
-			  16);
+		  if (ABI_64_P (output_bfd))
+		    memcpy (contents + roff - 4,
+			    "\x64\x48\x8b\x04\x25\0\0\0\0\x48\x03\x05\0\0\0",
+			    16);
+		  else
+		    memcpy (contents + roff - 3,
+			    "\x64\x8b\x04\x25\0\0\0\0\x48\x03\x05\0\0\0",
+			    15);
 
 		  relocation = (htab->elf.sgot->output_section->vma
 				+ htab->elf.sgot->output_offset + off
@@ -3747,12 +3785,18 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 	    {
 	      /* LD->LE transition:
 		 leaq foo@tlsld(%rip), %rdi; call __tls_get_addr.
-		 We change it into:
-		 .word 0x6666; .byte 0x66; movl %fs:0, %rax.  */
+		 For 64bit, we change it into:
+		 .word 0x6666; .byte 0x66; movq %fs:0, %rax.
+		 For 32bit, we change it into:
+		 nopl 0x0(%rax); movl %fs:0, %eax.  */
 
 	      BFD_ASSERT (r_type == R_X86_64_TPOFF32);
-	      memcpy (contents + rel->r_offset - 3,
-		      "\x66\x66\x66\x64\x48\x8b\x04\x25\0\0\0", 12);
+	      if (ABI_64_P (output_bfd))
+		memcpy (contents + rel->r_offset - 3,
+			"\x66\x66\x66\x64\x48\x8b\x04\x25\0\0\0", 12);
+	      else
+		memcpy (contents + rel->r_offset - 3,
+			"\x0f\x1f\x40\x00\x64\x8b\x04\x25\0\0\0", 12);
 	      /* Skip R_X86_64_PC32/R_X86_64_PLT32.  */
 	      rel++;
 	      continue;

@@ -1,3 +1,19 @@
+2011-03-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-x86-64/tlsgd4.dd: New.
+	* ld-x86-64/tlsgd4.s: Likewise.
+	* ld-x86-64/tlsgd5.dd: Likewise.
+	* ld-x86-64/tlsgd5a.s: Likewise.
+	* ld-x86-64/tlsgd5b.s: Likewise.
+	* ld-x86-64/tlsgd6.dd: Likewise.
+	* ld-x86-64/tlsgd6a.s: Likewise.
+	* ld-x86-64/tlsgd6b.s: Likewise.
+	* ld-x86-64/tlsld2.dd: Likewise.
+	* ld-x86-64/tlsld2.s: Likewise.
+
+	* ld-x86-64/x86-64.exp (x86_64tests): Add tlsgd4, libtlsgd5.so,
+	tlsgd5, libtlsgd6.so, tlsgd6 and tlsld2.
+
 2011-03-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-x86-64/tlsie4.dd: New.

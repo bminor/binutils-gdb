@@ -90,6 +90,22 @@ set x86_64tests {
     {"TLS X32 IE->LE transition" "-melf32_x86_64"
      "--x32" {tlsie4.s}
      {{objdump -dwr tlsie4.dd}} "tlsie4"}
+    {"TLS X32 GD->LE transition" "-melf32_x86_64"
+     "--x32" {tlsgd4.s}
+     {{objdump -dwr tlsgd4.dd}} "tlsgd4"}
+    {"Helper TLS GD->IE transition DSO" "-shared -melf_x86_64"
+     "--64" {tlsgd5b.s} {} "libtlsgd5.so"}
+    {"TLS GD->IE transition" "-melf_x86_64 tmpdir/libtlsgd5.so"
+     "--64" {tlsgd5a.s}
+     {{objdump -dwr tlsgd5.dd}} "tlsgd5"}
+    {"Helper TLS X32 GD->IE transition DSO" "-shared -melf32_x86_64"
+     "--x32" {tlsgd6b.s} {} "libtlsgd6.so"}
+    {"TLS X32 GD->IE transition" "-melf32_x86_64 tmpdir/libtlsgd6.so"
+     "--x32" {tlsgd6a.s}
+     {{objdump -dwr tlsgd6.dd}} "tlsgd6"}
+    {"TLS X32 LD->LE transition" "-melf32_x86_64"
+     "--x32" {tlsld2.s}
+     {{objdump -dwr tlsld2.dd}} "tlsld2"}
 }
 
 run_ld_link_tests $x86_64tests

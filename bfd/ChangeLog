@@ -1,3 +1,10 @@
+2011-03-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf64-x86-64.c (elf_x86_64_check_tls_transition): Supprt TLS
+	x32 GD->IE and GD->LE transitions.
+	(elf_x86_64_relocate_section): Supprt TLS x32 GD->IE, GD->LE
+	and LD->LE transitions.
+
 2011-03-10  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (ppc64_elf_relocate_section): Provide section/offset
