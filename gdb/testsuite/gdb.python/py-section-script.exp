@@ -41,14 +41,17 @@ if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debu
     return -1
 }
 
+# Start with a fresh gdb.
+gdb_exit
+gdb_start
+
+# Skip all tests if Python scripting is not enabled.
+if { [skip_python_tests] } { continue }
+
 # Make this available to gdb before the program starts, it is
 # automagically loaded by gdb.
 set remote_python_file [remote_download host ${srcdir}/${subdir}/${testfile}.py]
 
-# Start with a fresh gdb.
-
-gdb_exit
-gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 
