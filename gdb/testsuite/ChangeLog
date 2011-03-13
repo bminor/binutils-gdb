@@ -1,3 +1,7 @@
+2011-03-12  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdb.base/solib-weak.exp: Allow "." prefix for ppc64.
+
 2011-03-10  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* gdb.python/py-parameter.exp: Update tests to the new Python
