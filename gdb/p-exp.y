@@ -117,8 +117,7 @@ int yyparse (void);
 
 static int yylex (void);
 
-void
-yyerror (char *);
+void yyerror (char *);
 
 static char * uptok (char *, int);
 %}
@@ -154,8 +153,7 @@ static char * uptok (char *, int);
 
 %{
 /* YYSTYPE gets defined by %union */
-static int
-parse_number (char *, int, int, YYSTYPE *);
+static int parse_number (char *, int, int, YYSTYPE *);
 
 static struct type *current_type;
 static struct internalvar *intvar;

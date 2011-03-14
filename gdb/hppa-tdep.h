@@ -240,8 +240,7 @@ extern struct minimal_symbol *
   hppa_lookup_stub_minimal_symbol (const char *name,
                                    enum unwind_stub_types stub_type);
 
-extern struct hppa_objfile_private *
-hppa_init_objfile_priv_data (struct objfile *objfile);
+extern struct hppa_objfile_private * hppa_init_objfile_priv_data (struct objfile *objfile);
 
 extern int hppa_in_solib_call_trampoline (struct gdbarch *gdbarch,
 					  CORE_ADDR pc, char *name);

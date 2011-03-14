@@ -107,14 +107,11 @@
 #define	YYDEBUG	0		/* Default to no yydebug support.  */
 #endif
 
-int
-yyparse (void);
+int yyparse (void);
 
-static int
-yylex (void);
+static int yylex (void);
 
-void
-yyerror (char *);
+void yyerror (char *);
 
 %}
 
@@ -150,8 +147,7 @@ yyerror (char *);
 
 %{
 /* YYSTYPE gets defined by %union.  */
-static int
-parse_number (char *, int, int, YYSTYPE *);
+static int parse_number (char *, int, int, YYSTYPE *);
 %}
 
 %type <voidval> exp exp1 type_exp start variable qualified_name lcurly

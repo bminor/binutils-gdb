@@ -76,8 +76,8 @@ dld_cache_t;
 
 static dld_cache_t dld_cache;
 
-static int
-read_dynamic_info (asection *dyninfo_sect, dld_cache_t *dld_cache_p);
+static int read_dynamic_info (asection *dyninfo_sect,
+			      dld_cache_t *dld_cache_p);
 
 static void
 pa64_relocate_section_addresses (struct so_list *so,

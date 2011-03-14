@@ -296,8 +296,9 @@ static int is_root_p (struct varobj *var);
 
 #if HAVE_PYTHON
 
-static struct varobj *
-varobj_add_child (struct varobj *var, const char *name, struct value *value);
+static struct varobj * varobj_add_child (struct varobj *var,
+					 const char *name,
+					 struct value *value);
 
 #endif /* HAVE_PYTHON */
 

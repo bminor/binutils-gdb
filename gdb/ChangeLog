@@ -1,3 +1,19 @@
+2011-03-14  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	Fix ARI warning about function names in first column.
+	Put prototype declaration on same line as return type.
+	* objc-exp.y: Ditto.
+	* p-exp.y: Ditto.
+	* python/py-stopevent.h: Ditto.
+	For long function names, split parameters to
+	allow function name on same line as return type.
+	* solib-pa64.c: Ditto.
+	* varobj.c: Ditto.
+	* varobj.h: Ditto.
+	For long function declaration, use single line.
+	* hppa-tdep.h: Ditto.
+	* inferior.h: Ditto.
+
 2011-03-14  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* python/python.h: Declare gdbpy_should_stop and

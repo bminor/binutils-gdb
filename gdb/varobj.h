@@ -167,8 +167,8 @@ extern int varobj_editable_p (struct varobj *var);
 
 extern int varobj_floating_p (struct varobj *var);
 
-extern void 
-varobj_set_visualizer (struct varobj *var, const char *visualizer);
+extern void varobj_set_visualizer (struct varobj *var,
+				   const char *visualizer);
 
 extern void varobj_enable_pretty_printing (void);
 
