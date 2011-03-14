@@ -1101,6 +1101,7 @@ display_rel_file (bfd *abfd, bfd *archive_bfd)
     print_size_symbols (abfd, dynamic, symsizes, symcount, archive_bfd);
 
   free (minisyms);
+  free (symsizes);
 }
 
 static void
