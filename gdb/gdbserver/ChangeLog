@@ -1,3 +1,7 @@
+2011-03-14  Michael Snyder  <msnyder@vmware.com>
+
+	* gdbserver/hostio.c (handle_close): Remove unnecessary null test.
+
 2011-03-10  Joel Brobecker  <brobecker@adacore.com>
 
 	* Makefile.in (maintainer-clean realclean distclean): Remove
@@ -43,6 +47,11 @@
 	* Makefile.in: Remove GNU make feature --directory.
 
 2011-02-28  Michael Snyder  <msnyder@vmware.com>
+
+	* tracepoint.c (cmd_qtv): Discard unused value 'packet'.
+	(cmd_qtframe): Ditto.
+	(cmd_qtbuffer): Ditto.
+	(cmd_bigqtbuffer): Ditto.
 
 	* utils.c (decimal2str): Initialize 'width' to nine, then
 	don't mess with it.

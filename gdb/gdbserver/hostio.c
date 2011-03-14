@@ -418,7 +418,8 @@ handle_close (char *own_buf)
     }
 
   open_fd_p = &open_fds;
-  while (*open_fd_p && (*open_fd_p)->fd != fd)
+  /* We know that fd is in the list, thanks to require_valid_fd.  */
+  while ((*open_fd_p)->fd != fd)
     open_fd_p = &(*open_fd_p)->next;
 
   old_fd = *open_fd_p;
