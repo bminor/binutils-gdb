@@ -1,5 +1,11 @@
 2011-03-14  Richard Sandiford  <richard.sandiford@linaro.org>
 
+	* elf32-arm.c (elf32_arm_check_relocs): Always assign a dynobj.
+	(elf32_arm_finish_dynamic_sections): Move sgot != NULL assertion
+	into the PLT block.
+
+2011-03-14  Richard Sandiford  <richard.sandiford@linaro.org>
+
 	* elf32-arm.c (elf32_arm_check_relocs): Use call_reloc_p,
 	may_need_local_target_p and may_become_dynamic_p to classify
 	the relocation type.  Don't check info->symbolic or h->def_regular

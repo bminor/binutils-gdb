@@ -67,7 +67,7 @@ arm_elf_before_allocation (void)
 
   /* We should be able to set the size of the interworking stub section.  We
      can't do it until later if we have dynamic sections, though.  */
-  if (! elf_hash_table (&link_info)->dynamic_sections_created)
+  if (elf_hash_table (&link_info)->dynobj == NULL)
     {
       /* Here we rummage through the found bfds to collect glue information.  */
       LANG_FOR_EACH_INPUT_STATEMENT (is)

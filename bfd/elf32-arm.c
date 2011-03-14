@@ -11398,7 +11398,11 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	return FALSE;
     }
 
-  dynobj = elf_hash_table (info)->dynobj;
+  if (htab->root.dynobj == NULL)
+    htab->root.dynobj = abfd;
+
+  dynobj = htab->root.dynobj;
+
   symtab_hdr = & elf_symtab_hdr (abfd);
   sym_hashes = elf_sym_hashes (abfd);
   nsyms = NUM_SHDR_ENTRIES (symtab_hdr);
@@ -11544,13 +11548,9 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
 	  case R_ARM_GOTOFF32:
 	  case R_ARM_GOTPC:
-	    if (htab->root.sgot == NULL)
-	      {
-		if (htab->root.dynobj == NULL)
-		  htab->root.dynobj = abfd;
-		if (!create_got_section (htab->root.dynobj, info))
-		  return FALSE;
-	      }
+	    if (htab->root.sgot == NULL
+		&& !create_got_section (htab->root.dynobj, info))
+	      return FALSE;
 	    break;
 
 	  case R_ARM_PC24:
@@ -13132,7 +13132,6 @@ elf32_arm_finish_dynamic_sections (bfd * output_bfd, struct bfd_link_info * info
   dynobj = elf_hash_table (info)->dynobj;
 
   sgot = htab->root.sgotplt;
-  BFD_ASSERT (htab->symbian_p || sgot != NULL);
   sdyn = bfd_get_section_by_name (dynobj, ".dynamic");
 
   if (elf_hash_table (info)->dynamic_sections_created)
@@ -13142,6 +13141,7 @@ elf32_arm_finish_dynamic_sections (bfd * output_bfd, struct bfd_link_info * info
 
       splt = htab->root.splt;
       BFD_ASSERT (splt != NULL && sdyn != NULL);
+      BFD_ASSERT (htab->symbian_p || sgot != NULL);
 
       dyncon = (Elf32_External_Dyn *) sdyn->contents;
       dynconend = (Elf32_External_Dyn *) (sdyn->contents + sdyn->size);
