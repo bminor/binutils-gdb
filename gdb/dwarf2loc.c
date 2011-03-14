@@ -282,8 +282,8 @@ dwarf_expr_dwarf_call (struct dwarf_expr_context *ctx, size_t die_offset)
 {
   struct dwarf_expr_baton *debaton = ctx->baton;
 
-  return per_cu_dwarf_call (ctx, die_offset, debaton->per_cu,
-			    ctx->get_frame_pc, ctx->baton);
+  per_cu_dwarf_call (ctx, die_offset, debaton->per_cu,
+		     ctx->get_frame_pc, ctx->baton);
 }
 
 struct piece_closure
@@ -1274,8 +1274,8 @@ needs_frame_dwarf_call (struct dwarf_expr_context *ctx, size_t die_offset)
 {
   struct needs_frame_baton *nf_baton = ctx->baton;
 
-  return per_cu_dwarf_call (ctx, die_offset, nf_baton->per_cu,
-			    ctx->get_frame_pc, ctx->baton);
+  per_cu_dwarf_call (ctx, die_offset, nf_baton->per_cu,
+		     ctx->get_frame_pc, ctx->baton);
 }
 
 /* Return non-zero iff the location expression at DATA (length SIZE)
