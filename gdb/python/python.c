@@ -30,6 +30,7 @@
 #include "exceptions.h"
 #include "event-loop.h"
 #include "serial.h"
+#include "python.h"
 
 #include <ctype.h>
 
@@ -39,7 +40,6 @@ static int gdbpy_should_print_stack = 1;
 
 #ifdef HAVE_PYTHON
 
-#include "python.h"
 #include "libiberty.h"
 #include "cli/cli-decode.h"
 #include "charset.h"
@@ -862,6 +862,22 @@ source_python_script (FILE *stream, const char *file)
 {
   throw_error (UNSUPPORTED_ERROR,
 	       _("Python scripting is not supported in this copy of GDB."));
+}
+
+int
+gdbpy_should_stop (struct breakpoint_object *bp_obj)
+{
+  internal_error (__FILE__, __LINE__,
+		  _("gdbpy_should_stop called when Python scripting is  " \
+		    "not supported."));
+}
+
+int
+gdbpy_breakpoint_has_py_cond (struct breakpoint_object *bp_obj)
+{
+  internal_error (__FILE__, __LINE__,
+		  _("gdbpy_breakpoint_has_py_cond called when Python " \
+		    "scripting is not supported."));
 }
 
 #endif /* HAVE_PYTHON */

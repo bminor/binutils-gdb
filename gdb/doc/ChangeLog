@@ -1,3 +1,9 @@
+2011-03-14  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* gdb.texinfo (Breakpoints In Python): Add description and example
+	of Python stop function operation.
+
+
 2011-03-10  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* gdb.texinfo (Parameters In Python): Document get_set_string and

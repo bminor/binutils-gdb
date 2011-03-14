@@ -1,3 +1,21 @@
+2011-03-14  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* python/python.h: Declare gdbpy_should_stop and
+	gdbpy_breakpoint_has_py_cond.
+	* python/python.c: Add python.h to includes.  Remove python.h from
+	HAVE_PYTHON definition
+	(gdbpy_should_stop): New dummy function.
+	(gdbpy_breakpoint_has_py_cond): New dummy function.
+	* python/py-breakpoint.c (bppy_init): Rewrite to allow
+	sub-classing capabilities.
+	(gdbpy_should_stop): New function.
+	(gdbpy_breakpoint_has_py_cond): New function.
+	(local_setattro): New function.
+	* breakpoint.c (condition_command): Add check for Python 'stop'
+	operation.
+	(bpstat_check_breakpoint_conditions): Execute Python 'stop'
+	operation function as part of stop/continue tests.
+
 2011-03-14  Tom Tromey  <tromey@redhat.com>
 
 	PR gdb/12576:

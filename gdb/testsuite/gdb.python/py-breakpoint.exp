@@ -195,3 +195,101 @@ gdb_py_test_silent_cmd  "python wp1 = gdb.Breakpoint (\"result\", type=gdb.BP_WA
 gdb_test "info breakpoints" "No breakpoints or watchpoints.*" "Check info breakpoints does not show invisible breakpoints"
 gdb_test "maint info breakpoints" ".*watchpoint.*result.*" "Check maint info breakpoints shows invisible breakpoints"
 gdb_test "continue" ".*\[Ww\]atchpoint.*result.*Old value = 0.*New value = 25.*" "Test watchpoint write"
+
+# Breakpoints that have an evaluation function.
+
+# Start with a fresh gdb.
+clean_restart ${testfile}
+
+if ![runto_main] then {
+    fail "Cannot run to main."
+    return 0
+}
+delete_breakpoints
+
+gdb_py_test_multiple "Sub-class a breakpoint" \
+  "python" "" \
+  "class bp_eval (gdb.Breakpoint):" "" \
+  "   inf_i = 0" "" \
+  "   count = 0" "" \
+  "   def stop (self):" "" \
+  "      self.count = self.count + 1" "" \
+  "      self.inf_i = gdb.parse_and_eval(\"i\")" "" \
+  "      if self.inf_i == 3:" "" \
+  "        return True" "" \
+  "      return False" "" \
+  "end" ""
+
+gdb_py_test_multiple "Sub-class a second breakpoint" \
+  "python" "" \
+  "class bp_also_eval (gdb.Breakpoint):" "" \
+  "   count = 0" "" \
+  "   def stop (self):" "" \
+  "      self.count = self.count + 1" "" \
+  "      if self.count == 9:" "" \
+  "        return True" "" \
+  "      return False" "" \
+  "end" ""
+
+gdb_py_test_multiple "Sub-class a third breakpoint" \
+  "python" "" \
+  "class basic (gdb.Breakpoint):" "" \
+  "   count = 0" "" \
+  "end" ""
+
+set bp_location2 [gdb_get_line_number "Break at multiply."]
+set end_location [gdb_get_line_number "Break at end."]
+gdb_py_test_silent_cmd  "python eval_bp1 = bp_eval(\"$bp_location2\")" "Set breakpoint" 0
+gdb_py_test_silent_cmd  "python also_eval_bp1 = bp_also_eval(\"$bp_location2\")" "Set breakpoint" 0
+gdb_py_test_silent_cmd  "python never_eval_bp1 = bp_also_eval(\"$end_location\")" "Set breakpoint" 0
+gdb_continue_to_breakpoint "Break at multiply." ".*/$srcfile:$bp_location2.*"
+gdb_test "print i" "3" "Check inferior value matches python accounting"
+gdb_test "python print eval_bp1.inf_i" "3" "Check python accounting matches inferior"
+gdb_test "python print also_eval_bp1.count" "4" \
+    "Check non firing same-location breakpoint eval function was also called at each stop."
+gdb_test "python print eval_bp1.count" "4" \
+    "Check non firing same-location breakpoint eval function was also called at each stop."
+
+delete_breakpoints
+set cond_bp [gdb_get_line_number "Break at multiply."]
+gdb_py_test_silent_cmd  "python eval_bp1 = bp_eval(\"$cond_bp\")" "Set breakpoint" 0
+set test_cond {cond $bpnum}
+gdb_test "$test_cond \"foo==3\"" "Cannot set a condition where a Python.*" \
+    "Check you cannot add a CLI condition to a Python breakpoint that" \
+    "has defined stop"
+gdb_py_test_silent_cmd  "python eval_bp2 = basic(\"$cond_bp\")" "Set breakpoint" 0
+gdb_py_test_silent_cmd  "python eval_bp2.condition = \"1==1\"" "Set a condition" 0
+gdb_py_test_multiple "Construct an eval function" \
+  "python" "" \
+  "def stop_func ():" "" \
+  "   return True" "" \
+  "end" ""
+
+gdb_test "python eval_bp2.stop = stop_func"  \
+    "RuntimeError: Cannot set 'stop' method.*" \
+    "Assign stop function to a breakpoint that has a condition"
+
+delete_breakpoints
+gdb_breakpoint [gdb_get_line_number "Break at multiply."]
+gdb_py_test_silent_cmd  "python check_eval = bp_eval(\"$bp_location2\")" "Set breakpoint" 0
+gdb_test "python print check_eval.count" "0" \
+    "Test that evaluate function has not been yet executed (ie count = 0)"
+gdb_continue_to_breakpoint "Break at multiply." ".*/$srcfile:$bp_location2.*"
+gdb_test "python print check_eval.count" "1" \
+    "Test that evaluate function is run when location also has normal bp"
+
+gdb_py_test_multiple "Sub-class a watchpoint" \
+  "python" "" \
+  "class wp_eval (gdb.Breakpoint):" "" \
+  "   def stop (self):" "" \
+  "      self.result = gdb.parse_and_eval(\"result\")" "" \
+  "      if self.result == 788:" "" \
+  "        return True" "" \
+  "      return False" "" \
+  "end" ""
+
+delete_breakpoints
+gdb_py_test_silent_cmd  "python wp1 = wp_eval (\"result\", type=gdb.BP_WATCHPOINT, wp_class=gdb.WP_WRITE)" "Set watchpoint" 0
+gdb_test "continue" ".*\[Ww\]atchpoint.*result.*Old value =.*New value = 788.*" "Test watchpoint write"
+gdb_test "python print never_eval_bp1.count" "0" \
+    "Check that this unrelated breakpoints eval function was never called."

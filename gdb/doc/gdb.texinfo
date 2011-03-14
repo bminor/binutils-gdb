@@ -23115,6 +23115,34 @@ argument defines the class of watchpoint to create, if @var{type} is
 assumed to be a @var{WP_WRITE} class.
 @end defmethod
 
+@defop Operation {gdb.Breakpoint} stop (self)
+The @code{gdb.Breakpoint} class can be sub-classed and, in
+particular, you may choose to implement the @code{stop} method.
+If this method is defined as a sub-class of @code{gdb.Breakpoint},
+it will be called when the inferior reaches any location of a
+breakpoint which instantiates that sub-class.  If the method returns
+@code{True}, the inferior will be stopped at the location of the
+breakpoint, otherwise the inferior will continue.
+
+If there are multiple breakpoints at the same location with a
+@code{stop} method, each one will be called regardless of the
+return status of the previous.  This ensures that all @code{stop}
+methods have a chance to execute at that location.  In this scenario
+if one of the methods returns @code{True} but the others return
+@code{False}, the inferior will still be stopped.
+
+Example @code{stop} implementation:
+
+@smallexample
+class MyBreakpoint (gdb.Breakpoint):
+      def stop (self):
+        inf_val = gdb.parse_and_eval("foo")
+        if inf_val == 3:
+          return True
+        return False
+@end smallexample
+@end defop
+
 The available watchpoint types represented by constants are defined in the
 @code{gdb} module:
 

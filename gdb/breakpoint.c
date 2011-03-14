@@ -72,6 +72,7 @@
 #undef savestring
 
 #include "mi/mi-common.h"
+#include "python/python.h"
 
 /* Arguments to pass as context to some catch command handlers.  */
 #define CATCH_PERMANENT ((void *) (uintptr_t) 0)
@@ -643,6 +644,14 @@ condition_command (char *arg, int from_tty)
   ALL_BREAKPOINTS (b)
     if (b->number == bnum)
       {
+	/* Check if this breakpoint has a Python object assigned to
+	   it, and if it has a definition of the "stop"
+	   method.  This method and conditions entered into GDB from
+	   the CLI are mutually exclusive.  */
+	if (b->py_bp_object
+	    && gdbpy_breakpoint_has_py_cond (b->py_bp_object))
+	  error (_("Cannot set a condition where a Python 'stop' "
+		   "method has been defined in the breakpoint."));
 	set_breakpoint_condition (b, p, from_tty);
 	return;
       }
@@ -4069,6 +4078,11 @@ bpstat_check_breakpoint_conditions (bpstat bs, ptid_t ptid)
     {
       int value_is_zero = 0;
       struct expression *cond;
+
+      /* Evaluate Python breakpoints that have a "stop"
+	 method implemented.  */
+      if (b->py_bp_object)
+	bs->stop = gdbpy_should_stop (b->py_bp_object);
 
       if (is_watchpoint (b))
 	cond = b->cond_exp;

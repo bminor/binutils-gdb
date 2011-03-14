@@ -1,3 +1,7 @@
+2010-03-14  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* gdb.python/py-breakpoint.exp: Add Python stop operations tests.
+
 2011-03-13  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* gdb.python/py-section-script.exp: Skip test if no Python support.
