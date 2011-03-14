@@ -919,7 +919,7 @@ growbuf_by_size (count)
    a string, it is simply doubled (I.E. 'this''is''one''string') */
 
 static int
-match_string_literal ()
+match_string_literal (void)
 {
   char *tokptr = lexptr;
 
@@ -951,7 +951,7 @@ match_string_literal ()
 /* Read one token, getting characters through lexptr.  */
 
 static int
-yylex ()
+yylex (void)
 {
   int c;
   int namelen;

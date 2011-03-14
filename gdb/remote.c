@@ -3112,7 +3112,7 @@ struct start_remote_args
 
 /* Send interrupt_sequence to remote target.  */
 static void
-send_interrupt_sequence ()
+send_interrupt_sequence (void)
 {
   if (interrupt_sequence_mode == interrupt_sequence_control_c)
     serial_write (remote_desc, "\x03", 1);

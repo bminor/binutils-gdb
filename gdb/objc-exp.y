@@ -1218,7 +1218,7 @@ static const struct token tokentab2[] =
 /* Read one token, getting characters through lexptr.  */
 
 static int
-yylex ()
+yylex (void)
 {
   int c, tokchr;
   int namelen;

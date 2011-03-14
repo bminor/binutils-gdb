@@ -42,7 +42,7 @@ add_new_registry (eventregistry_object **registryp, char *name)
 }
 
 void
-gdbpy_initialize_py_events ()
+gdbpy_initialize_py_events (void)
 {
   gdb_py_events.module = Py_InitModule ("events", NULL);
 

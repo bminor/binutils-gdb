@@ -845,7 +845,7 @@ mep_pseudo_cr_index (int pseudo)
    from the ELF header's e_flags field of the current executable
    file.  */
 static CONFIG_ATTR
-current_me_module ()
+current_me_module (void)
 {
   if (target_has_registers)
     {
@@ -868,7 +868,7 @@ current_me_module ()
    then use the 'module_opt' field we computed when we build the
    gdbarch object for this module.  */
 static unsigned int
-current_options ()
+current_options (void)
 {
   if (target_has_registers)
     {
@@ -885,7 +885,7 @@ current_options ()
 /* Return the width of the current me_module's coprocessor data bus,
    in bits.  This is either 32 or 64.  */
 static int
-current_cop_data_bus_width ()
+current_cop_data_bus_width (void)
 {
   return me_module_cop_data_bus_width (current_me_module ());
 }
@@ -894,7 +894,7 @@ current_cop_data_bus_width ()
 /* Return the keyword table of coprocessor general-purpose register
    names appropriate for the me_module we're dealing with.  */
 static CGEN_KEYWORD *
-current_cr_names ()
+current_cr_names (void)
 {
   const CGEN_HW_ENTRY *hw
     = me_module_register_set (current_me_module (), "h-cr-", HW_H_CR);
@@ -906,7 +906,7 @@ current_cr_names ()
 /* Return non-zero if the coprocessor general-purpose registers are
    floating-point values, zero otherwise.  */
 static int
-current_cr_is_float ()
+current_cr_is_float (void)
 {
   const CGEN_HW_ENTRY *hw
     = me_module_register_set (current_me_module (), "h-cr-", HW_H_CR);
@@ -918,7 +918,7 @@ current_cr_is_float ()
 /* Return the keyword table of coprocessor control register names
    appropriate for the me_module we're dealing with.  */
 static CGEN_KEYWORD *
-current_ccr_names ()
+current_ccr_names (void)
 {
   const CGEN_HW_ENTRY *hw
     = me_module_register_set (current_me_module (), "h-ccr-", HW_H_CCR);

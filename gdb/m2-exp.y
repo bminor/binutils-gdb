@@ -808,7 +808,7 @@ static struct keyword keytab[] =
    compatible  */
 
 static int
-yylex ()
+yylex (void)
 {
   int c;
   int namelen;

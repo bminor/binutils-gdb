@@ -11952,7 +11952,7 @@ save_tracepoints_command (char *args, int from_tty)
 /* Create a vector of all tracepoints.  */
 
 VEC(breakpoint_p) *
-all_tracepoints ()
+all_tracepoints (void)
 {
   VEC(breakpoint_p) *tp_vec = 0;
   struct breakpoint *tp;

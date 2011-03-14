@@ -1,3 +1,24 @@
+2011-03-14  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	Fix ARI warning about functions without parameters that do not
+	use (void).
+	* breakpoint.c (all_tracepoints): Replace () by (void).
+	* f-exp.y (match_string_literal): Ditto.
+	(yylex): Ditto.
+	* m2-exp.y (yylex): Ditto.
+	* mep-tdep.c (current_me_module): Ditto.
+	(current_options): Ditto.
+	(current_cop_data_bus_width): Ditto.
+	(current_cr_names): Ditto.
+	(current_cr_is_float): Ditto.
+	(current_ccr_names): Ditto.
+	* objc-exp.y (yylex): Ditto.
+	* p-exp.y (yylex): Ditto.
+	* remote.c (send_interrupt_sequence): Ditto.
+	* tracepoint.c (current_trace_status): Ditto.
+	* python/py-evts.c (gdbpy_initialize_py_events): Ditto.
+	* python/py-prettyprint.c (push_dummy_python_frame): Ditto.
+
 2011-03-11  Michael Snyder  <msnyder@vmware.com>
 
 	* cli/cli-decode.h (CMD_LIST_AMBIGUOUS): Define.

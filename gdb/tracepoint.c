@@ -218,7 +218,7 @@ char *stop_reason_names[] = {
 };
 
 struct trace_status *
-current_trace_status ()
+current_trace_status (void)
 {
   return &trace_status;
 }

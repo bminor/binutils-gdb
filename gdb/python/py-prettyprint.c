@@ -394,7 +394,7 @@ py_restore_tstate (void *p)
 /* Create a dummy PyFrameObject, needed to work around
    a Python-2.4 bug with generators.  */
 static PyObject *
-push_dummy_python_frame ()
+push_dummy_python_frame (void)
 {
   PyObject *empty_string, *null_tuple, *globals;
   PyCodeObject *code;

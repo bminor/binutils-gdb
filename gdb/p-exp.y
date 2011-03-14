@@ -1120,7 +1120,7 @@ static int last_was_structop;
 /* Read one token, getting characters through lexptr.  */
 
 static int
-yylex ()
+yylex (void)
 {
   int c;
   int namelen;
