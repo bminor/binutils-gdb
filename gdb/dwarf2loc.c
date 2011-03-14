@@ -1,6 +1,6 @@
 /* DWARF 2 location expression support for GDB.
 
-   Copyright (C) 2003, 2005, 2007, 2008, 2009, 2010
+   Copyright (C) 2003, 2005, 2007, 2008, 2009, 2010, 2011
    Free Software Foundation, Inc.
 
    Contributed by Daniel Jacobowitz, MontaVista Software, Inc.
@@ -260,7 +260,7 @@ dwarf_expr_dwarf_call (struct dwarf_expr_context *ctx, size_t die_offset)
 {
   struct dwarf_expr_baton *debaton = ctx->baton;
 
-  return per_cu_dwarf_call (ctx, die_offset, debaton->per_cu);
+  per_cu_dwarf_call (ctx, die_offset, debaton->per_cu);
 }
 
 struct piece_closure
@@ -1070,7 +1070,7 @@ needs_frame_dwarf_call (struct dwarf_expr_context *ctx, size_t die_offset)
 {
   struct needs_frame_baton *nf_baton = ctx->baton;
 
-  return per_cu_dwarf_call (ctx, die_offset, nf_baton->per_cu);
+  per_cu_dwarf_call (ctx, die_offset, nf_baton->per_cu);
 }
 
 /* Return non-zero iff the location expression at DATA (length SIZE)

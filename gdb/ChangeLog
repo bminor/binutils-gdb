@@ -1,3 +1,9 @@
+2011-03-14  Tom Tromey  <tromey@redhat.com>
+
+	PR gdb/12576:
+	* dwarf2loc.c (dwarf_expr_dwarf_call): Remove 'return'.
+	(needs_frame_dwarf_call): Likewise.
+
 2011-03-08  Pedro Alves  <pedro@codesourcery.com>
 
 	* remote.c (remote_check_symbols): Skip if the target has no
