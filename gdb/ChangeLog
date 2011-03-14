@@ -1,3 +1,7 @@
+2011-03-14  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* NEWS: Delete duplicate entry. Fix typo.
+
 2011-03-14  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	Fix ARI warning about function names in first column.

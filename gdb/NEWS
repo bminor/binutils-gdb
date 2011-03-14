@@ -70,15 +70,7 @@
 
   ** Python Support for Inferior events.
      Python scripts can add observers to be notified of events
-     occurring the in process being debugged.
-     The following events are currently supported:
-     - gdb.events.cont Continue event.
-     - gdb.events.exited Inferior exited event.
-     - gdb.events.stop Signal received, and Breakpoint hit events.
-
-  ** Python Support for Inferior events.
-     Python scripts can add observers to be notified of events
-     occurring the in process being debugged.
+     occurring in the process being debugged.
      The following events are currently supported:
      - gdb.events.cont Continue event.
      - gdb.events.exited Inferior exited event.
