@@ -1,3 +1,9 @@
+2011-03-14  Ian Lance Taylor  <iant@google.com>
+
+	* script-sections.cc (Sort_output_sections::script_compare):
+	Rename from is_before, change return type.
+	(Sort_output_sections::operator()): Adjust accordingly.
+
 2011-03-11  Jeffrey Yasskin  <jyasskin@google.com>
 
 	PR gold/12572
