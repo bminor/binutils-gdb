@@ -1,5 +1,15 @@
 2011-03-14  Richard Sandiford  <richard.sandiford@linaro.org>
 
+	* elf32-arm.c (elf32_arm_final_link_relocate): Always fill in the
+	GOT entry here, rather than leaving it to finish_dynamic_symbol.
+	Only create a dynamic relocation for local references if
+	info->shared.
+	(allocate_dynrelocs_for_symbol): Update dynamic relocation
+	allocation accordingly.
+	(elf32_arm_finish_dynamic_symbol): Don't initialise the GOT entry here.
+
+2011-03-14  Richard Sandiford  <richard.sandiford@linaro.org>
+
 	* elf32-arm.c (elf32_arm_allocate_dynrelocs): New function.
 	(elf32_arm_add_dynreloc): Likewise.
 	(elf32_arm_adjust_dynamic_symbol): Use elf32_arm_allocate_dynrelocs

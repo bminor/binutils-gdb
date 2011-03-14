@@ -295,6 +295,14 @@ set armelftests {
     {"Data only mapping symbols" "-T data-only-map.ld -Map map" "" {data-only-map.s}
      {{objdump -dr data-only-map.d}}
      "data-only-map"}
+    {"GOT relocations in executables (setup)" "-shared"
+     "" {exec-got-1a.s}
+     {}
+     "exec-got-1.so"}
+    {"GOT relocations in executables" "tmpdir/exec-got-1.so"
+     "" {exec-got-1b.s}
+     {{readelf --relocs exec-got-1.d}}
+     "exec-got-1"}
 }
 
 run_ld_link_tests $armelftests
@@ -582,3 +590,5 @@ run_dump_test "attr-merge-vfp-5r"
 run_dump_test "attr-merge-vfp-6"
 run_dump_test "attr-merge-vfp-6r"
 run_dump_test "attr-merge-incompatible"
+run_dump_test "unresolved-1"
+run_dump_test "unresolved-1-dyn"

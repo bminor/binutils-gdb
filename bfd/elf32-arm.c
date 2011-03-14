@@ -8278,45 +8278,67 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
       if (h != NULL)
 	{
 	  bfd_vma off;
-	  bfd_boolean dyn;
 
 	  off = h->got.offset;
 	  BFD_ASSERT (off != (bfd_vma) -1);
-	  dyn = globals->root.dynamic_sections_created;
-
-	  if (! WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info->shared, h)
-	      || (info->shared
-		  && SYMBOL_REFERENCES_LOCAL (info, h))
-	      || (ELF_ST_VISIBILITY (h->other)
-		  && h->root.type == bfd_link_hash_undefweak))
+	  if ((off & 1) != 0)
 	    {
-	      /* This is actually a static link, or it is a -Bsymbolic link
-		 and the symbol is defined locally.  We must initialize this
-		 entry in the global offset table.  Since the offset must
-		 always be a multiple of 4, we use the least significant bit
-		 to record whether we have initialized it already.
-
-		 When doing a dynamic link, we create a .rel(a).got relocation
-		 entry to initialize the value.  This is done in the
-		 finish_dynamic_symbol routine.  */
-	      if ((off & 1) != 0)
-		off &= ~1;
-	      else
-		{
-		  /* If we are addressing a Thumb function, we need to
-		     adjust the address by one, so that attempts to
-		     call the function pointer will correctly
-		     interpret it as Thumb code.  */
-		  if (sym_flags == STT_ARM_TFUNC)
-		    value |= 1;
-
-		  bfd_put_32 (output_bfd, value, sgot->contents + off);
-		  h->got.offset |= 1;
-		}
+	      /* We have already processsed one GOT relocation against
+		 this symbol.  */
+	      off &= ~1;
+	      if (globals->root.dynamic_sections_created
+		  && !SYMBOL_REFERENCES_LOCAL (info, h))
+		*unresolved_reloc_p = FALSE;
 	    }
 	  else
-	    *unresolved_reloc_p = FALSE;
+	    {
+	      Elf_Internal_Rela outrel;
 
+	      if (!SYMBOL_REFERENCES_LOCAL (info, h))
+		{
+		  /* If the symbol doesn't resolve locally in a static
+		     object, we have an undefined reference.  If the
+		     symbol doesn't resolve locally in a dynamic object,
+		     it should be resolved by the dynamic linker.  */
+		  if (globals->root.dynamic_sections_created)
+		    {
+		      outrel.r_info = ELF32_R_INFO (h->dynindx, R_ARM_GLOB_DAT);
+		      *unresolved_reloc_p = FALSE;
+		    }
+		  else
+		    outrel.r_info = 0;
+		  outrel.r_addend = 0;
+		}
+	      else
+		{
+		  if (info->shared)
+		    outrel.r_info = ELF32_R_INFO (0, R_ARM_RELATIVE);
+		  else
+		    outrel.r_info = 0;
+		  outrel.r_addend = value;
+		  if (sym_flags == STT_ARM_TFUNC)
+		    outrel.r_addend |= 1;
+		}
+
+	      /* The GOT entry is initialized to zero by default.
+		 See if we should install a different value.  */
+	      if (outrel.r_addend != 0
+		  && (outrel.r_info == 0 || globals->use_rel))
+		{
+		  bfd_put_32 (output_bfd, outrel.r_addend,
+			      sgot->contents + off);
+		  outrel.r_addend = 0;
+		}
+
+	      if (outrel.r_info != 0)
+		{
+		  outrel.r_offset = (sgot->output_section->vma
+				     + sgot->output_offset
+				     + off);
+		  elf32_arm_add_dynreloc (output_bfd, info, srelgot, &outrel);
+		}
+	      h->got.offset |= 1;
+	    }
 	  value = sgot->output_offset + off;
 	}
       else
@@ -12222,10 +12244,14 @@ allocate_dynrelocs_for_symbol (struct elf_link_hash_entry *h, void * inf)
 	      if ((tls_type & GOT_TLS_GD) && indx != 0)  
 		elf32_arm_allocate_dynrelocs (info, htab->root.srelgot, 1);
 	    }
-	  else if ((ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
-		    || h->root.type != bfd_link_hash_undefweak)
-		   && (info->shared
-	    	   || WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, 0, h)))
+	  else if (!SYMBOL_REFERENCES_LOCAL (info, h))
+	    {
+	      if (htab->root.dynamic_sections_created)
+		/* Reserve room for the GOT entry's R_ARM_GLOB_DAT relocation.  */
+		elf32_arm_allocate_dynrelocs (info, htab->root.srelgot, 1);
+	    }
+	  else if (info->shared)
+	    /* Reserve room for the GOT entry's R_ARM_RELATIVE relocation.  */
 	    elf32_arm_allocate_dynrelocs (info, htab->root.srelgot, 1);
 	}
     }
@@ -13014,53 +13040,6 @@ elf32_arm_finish_dynamic_symbol (bfd * output_bfd,
 	  if (!h->ref_regular_nonweak)
 	    sym->st_value = 0;
 	}
-    }
-
-  if (h->got.offset != (bfd_vma) -1
-      && (! GOT_TLS_GD_ANY_P (elf32_arm_hash_entry (h)->tls_type)) 
-      && (elf32_arm_hash_entry (h)->tls_type & GOT_TLS_IE) == 0)
-    {
-      asection * sgot;
-      asection * srel;
-      Elf_Internal_Rela rel;
-      bfd_vma offset;
-
-      /* This symbol has an entry in the global offset table.  Set it
-	 up.  */
-      sgot = htab->root.sgot;
-      srel = htab->root.srelgot;
-      BFD_ASSERT (sgot != NULL && srel != NULL);
-
-      offset = (h->got.offset & ~(bfd_vma) 1);
-      rel.r_addend = 0;
-      rel.r_offset = (sgot->output_section->vma
-		      + sgot->output_offset
-		      + offset);
-
-      /* If this is a static link, or it is a -Bsymbolic link and the
-	 symbol is defined locally or was forced to be local because
-	 of a version file, we just want to emit a RELATIVE reloc.
-	 The entry in the global offset table will already have been
-	 initialized in the relocate_section function.  */
-      if (info->shared
-	  && SYMBOL_REFERENCES_LOCAL (info, h))
-	{
-	  BFD_ASSERT ((h->got.offset & 1) != 0);
-	  rel.r_info = ELF32_R_INFO (0, R_ARM_RELATIVE);
-	  if (!htab->use_rel)
-	    {
-	      rel.r_addend = bfd_get_32 (output_bfd, sgot->contents + offset);
-	      bfd_put_32 (output_bfd, (bfd_vma) 0, sgot->contents + offset);
-	    }
-	}
-      else
-	{
-	  BFD_ASSERT ((h->got.offset & 1) == 0);
-	  bfd_put_32 (output_bfd, (bfd_vma) 0, sgot->contents + offset);
-	  rel.r_info = ELF32_R_INFO (h->dynindx, R_ARM_GLOB_DAT);
-	}
-
-      elf32_arm_add_dynreloc (output_bfd, info, srel, &rel);
     }
 
   if (h->needs_copy)
