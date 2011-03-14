@@ -11243,7 +11243,10 @@ elf32_arm_gc_sweep_hook (bfd *                     abfd,
     {
       unsigned long r_symndx;
       struct elf_link_hash_entry *h = NULL;
+      struct elf32_arm_link_hash_entry *eh;
       int r_type;
+      bfd_boolean may_become_dynamic_p;
+      bfd_boolean may_need_local_target_p;
 
       r_symndx = ELF32_R_SYM (rel->r_info);
       if (r_symndx >= symtab_hdr->sh_info)
@@ -11253,6 +11256,10 @@ elf32_arm_gc_sweep_hook (bfd *                     abfd,
 		 || h->root.type == bfd_link_hash_warning)
 	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 	}
+      eh = (struct elf32_arm_link_hash_entry *) h;
+
+      may_become_dynamic_p = FALSE;
+      may_need_local_target_p = FALSE;
 
       r_type = ELF32_R_TYPE (rel->r_info);
       r_type = arm_real_reloc_type (globals, r_type);
@@ -11278,10 +11285,6 @@ elf32_arm_gc_sweep_hook (bfd *                     abfd,
 	  globals->tls_ldm_got.refcount -= 1;
 	  break;
 
-	case R_ARM_ABS32:
-	case R_ARM_ABS32_NOI:
-	case R_ARM_REL32:
-	case R_ARM_REL32_NOI:
 	case R_ARM_PC24:
 	case R_ARM_PLT32:
 	case R_ARM_CALL:
@@ -11290,6 +11293,20 @@ elf32_arm_gc_sweep_hook (bfd *                     abfd,
 	case R_ARM_THM_CALL:
 	case R_ARM_THM_JUMP24:
 	case R_ARM_THM_JUMP19:
+	  may_need_local_target_p = TRUE;
+	  break;
+
+	case R_ARM_ABS12:
+	  if (!globals->vxworks_p)
+	    {
+	      may_need_local_target_p = TRUE;
+	      break;
+	    }
+	  /* Fall through.  */
+	case R_ARM_ABS32:
+	case R_ARM_ABS32_NOI:
+	case R_ARM_REL32:
+	case R_ARM_REL32_NOI:
 	case R_ARM_MOVW_ABS_NC:
 	case R_ARM_MOVT_ABS:
 	case R_ARM_MOVW_PREL_NC:
@@ -11299,38 +11316,44 @@ elf32_arm_gc_sweep_hook (bfd *                     abfd,
 	case R_ARM_THM_MOVW_PREL_NC:
 	case R_ARM_THM_MOVT_PREL:
 	  /* Should the interworking branches be here also?  */
-
-	  if (h != NULL)
-	    {
-	      struct elf32_arm_link_hash_entry *eh;
-	      struct elf_dyn_relocs **pp;
-	      struct elf_dyn_relocs *p;
-
-	      eh = (struct elf32_arm_link_hash_entry *) h;
-
-	      if (h->plt.refcount > 0)
-		{
-		  h->plt.refcount -= 1;
-		  if (r_type == R_ARM_THM_CALL)
-		    eh->plt_maybe_thumb_refcount--;
-
-		  if (r_type == R_ARM_THM_JUMP24
-		      || r_type == R_ARM_THM_JUMP19)
-		    eh->plt_thumb_refcount--;
-		}
-
-	      for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
-		if (p->sec == sec)
-		  {
-		    /* Everything must go for SEC.  */
-		    *pp = p->next;
-		    break;
-		  }
-	    }
+	  if ((info->shared || globals->root.is_relocatable_executable)
+	      && (sec->flags & SEC_ALLOC) != 0
+	      && (h != NULL
+		  || (r_type != R_ARM_REL32 && r_type != R_ARM_REL32_NOI)))
+	    may_become_dynamic_p = TRUE;
+	  else
+	    may_need_local_target_p = TRUE;
 	  break;
 
 	default:
 	  break;
+	}
+
+      if (may_need_local_target_p && h != NULL)
+	{
+	  BFD_ASSERT (h->plt.refcount > 0);
+	  h->plt.refcount -= 1;
+
+	  if (r_type == R_ARM_THM_CALL)
+	    eh->plt_maybe_thumb_refcount--;
+
+	  if (r_type == R_ARM_THM_JUMP24
+	      || r_type == R_ARM_THM_JUMP19)
+	    eh->plt_thumb_refcount--;
+	}
+
+      if (may_become_dynamic_p && h != NULL)
+	{
+	  struct elf_dyn_relocs **pp;
+	  struct elf_dyn_relocs *p;
+
+	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
+	    if (p->sec == sec)
+	      {
+		/* Everything must go for SEC.  */
+		*pp = p->next;
+		break;
+	      }
 	}
     }
 
@@ -11350,7 +11373,9 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
   bfd *dynobj;
   asection *sreloc;
   struct elf32_arm_link_hash_table *htab;
-  bfd_boolean needs_plt;
+  bfd_boolean call_reloc_p;
+  bfd_boolean may_become_dynamic_p;
+  bfd_boolean may_need_local_target_p;
   unsigned long nsyms;
 
   if (info->relocatable)
@@ -11412,6 +11437,10 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	}
 
       eh = (struct elf32_arm_link_hash_entry *) h;
+
+      call_reloc_p = FALSE;
+      may_become_dynamic_p = FALSE;
+      may_need_local_target_p = FALSE;
 
       /* Could be done earlier, if h were already available.  */
       r_type = elf32_arm_tls_transition (info, r_type, h);
@@ -11524,13 +11553,6 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      }
 	    break;
 
-	  case R_ARM_ABS12:
-	    /* VxWorks uses dynamic R_ARM_ABS12 relocations for
-	       ldr __GOTT_INDEX__ offsets.  */
-	    if (!htab->vxworks_p)
-	      break;
-	    /* Fall through.  */
-
 	  case R_ARM_PC24:
 	  case R_ARM_PLT32:
 	  case R_ARM_CALL:
@@ -11539,8 +11561,19 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  case R_ARM_THM_CALL:
 	  case R_ARM_THM_JUMP24:
 	  case R_ARM_THM_JUMP19:
-	    needs_plt = 1;
-	    goto normal_reloc;
+	    call_reloc_p = TRUE;
+	    may_need_local_target_p = TRUE;
+	    break;
+
+	  case R_ARM_ABS12:
+	    /* VxWorks uses dynamic R_ARM_ABS12 relocations for
+	       ldr __GOTT_INDEX__ offsets.  */
+	    if (!htab->vxworks_p)
+	      {
+		may_need_local_target_p = TRUE;
+		break;
+	      }
+	    /* Fall through.  */
 
 	  case R_ARM_MOVW_ABS_NC:
 	  case R_ARM_MOVT_ABS:
@@ -11565,134 +11598,19 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  case R_ARM_MOVT_PREL:
 	  case R_ARM_THM_MOVW_PREL_NC:
 	  case R_ARM_THM_MOVT_PREL:
-	    needs_plt = 0;
-	  normal_reloc:
 
 	    /* Should the interworking branches be listed here?  */
-	    if (h != NULL)
-	      {
-		/* If this reloc is in a read-only section, we might
-		   need a copy reloc.  We can't check reliably at this
-		   stage whether the section is read-only, as input
-		   sections have not yet been mapped to output sections.
-		   Tentatively set the flag for now, and correct in
-		   adjust_dynamic_symbol.  */
-		if (!info->shared)
-		  h->non_got_ref = 1;
-
-		/* We may need a .plt entry if the function this reloc
-		   refers to is in a different object.  We can't tell for
-		   sure yet, because something later might force the
-		   symbol local.  */
-		if (needs_plt)
-		  h->needs_plt = 1;
-
-		/* If we create a PLT entry, this relocation will reference
-		   it, even if it's an ABS32 relocation.  */
-		h->plt.refcount += 1;
-
-		/* It's too early to use htab->use_blx here, so we have to
-		   record possible blx references separately from
-		   relocs that definitely need a thumb stub.  */
-
-		if (r_type == R_ARM_THM_CALL)
-		  eh->plt_maybe_thumb_refcount += 1;
-
-		if (r_type == R_ARM_THM_JUMP24
-		    || r_type == R_ARM_THM_JUMP19)
-		  eh->plt_thumb_refcount += 1;
-	      }
-
-	    /* If we are creating a shared library or relocatable executable,
-	       and this is a reloc against a global symbol, or a non PC
-	       relative reloc against a local symbol, then we need to copy
-	       the reloc into the shared library.  However, if we are linking
-	       with -Bsymbolic, we do not need to copy a reloc against a
-               global symbol which is defined in an object we are
-               including in the link (i.e., DEF_REGULAR is set).  At
-               this point we have not seen all the input files, so it is
-               possible that DEF_REGULAR is not set now but will be set
-               later (it is never cleared).  We account for that
-               possibility below by storing information in the
-               dyn_relocs field of the hash table entry.  */
+	    /* If we are creating a shared library or relocatable
+	       executable, and this is a reloc against a global symbol,
+	       or a non-PC-relative reloc against a local symbol,
+	       then we may need to copy the reloc into the output.  */
 	    if ((info->shared || htab->root.is_relocatable_executable)
 		&& (sec->flags & SEC_ALLOC) != 0
-		&& ((r_type == R_ARM_ABS32 || r_type == R_ARM_ABS32_NOI)
-		    || (h != NULL && ! needs_plt
-			&& (! info->symbolic || ! h->def_regular))))
-	      {
-		struct elf_dyn_relocs *p, **head;
-
-	        /* When creating a shared object, we must copy these
-                   reloc types into the output file.  We create a reloc
-                   section in dynobj and make room for this reloc.  */
-  	        if (sreloc == NULL)
-		  {
-		    sreloc = _bfd_elf_make_dynamic_reloc_section
-		      (sec, dynobj, 2, abfd, ! htab->use_rel);
-
-		    if (sreloc == NULL)
-		      return FALSE;
-
-		    /* BPABI objects never have dynamic relocations mapped.  */
-		    if (htab->symbian_p)
-		      {
-			flagword flags;
-
-			flags = bfd_get_section_flags (dynobj, sreloc);
-			flags &= ~(SEC_LOAD | SEC_ALLOC);
-			bfd_set_section_flags (dynobj, sreloc, flags);
-		      }
-		  }
-
-		/* If this is a global symbol, we count the number of
-		   relocations we need for this symbol.  */
-		if (h != NULL)
-		  {
-		    head = &((struct elf32_arm_link_hash_entry *) h)->dyn_relocs;
-		  }
-		else
-		  {
-		    /* Track dynamic relocs needed for local syms too.
-		       We really need local syms available to do this
-		       easily.  Oh well.  */
-		    asection *s;
-		    void *vpp;
-		    Elf_Internal_Sym *isym;
-
-		    isym = bfd_sym_from_r_symndx (&htab->sym_cache,
-						  abfd, r_symndx);
-		    if (isym == NULL)
-		      return FALSE;
-
-		    s = bfd_section_from_elf_index (abfd, isym->st_shndx);
-		    if (s == NULL)
-		      s = sec;
-
-		    vpp = &elf_section_data (s)->local_dynrel;
-		    head = (struct elf_dyn_relocs **) vpp;
-		  }
-
-		p = *head;
-		if (p == NULL || p->sec != sec)
-		  {
-		    bfd_size_type amt = sizeof *p;
-
-		    p = (struct elf_dyn_relocs *)
-                        bfd_alloc (htab->root.dynobj, amt);
-		    if (p == NULL)
-		      return FALSE;
-		    p->next = *head;
-		    *head = p;
-		    p->sec = sec;
-		    p->count = 0;
-		    p->pc_count = 0;
-		  }
-
-		if (r_type == R_ARM_REL32 || r_type == R_ARM_REL32_NOI)
-		  p->pc_count += 1;
-		p->count += 1;
-	      }
+		&& (h != NULL
+		    || (r_type != R_ARM_REL32 && r_type != R_ARM_REL32_NOI)))
+	      may_become_dynamic_p = TRUE;
+	    else
+	      may_need_local_target_p = TRUE;
 	    break;
 
         /* This relocation describes the C++ object vtable hierarchy.
@@ -11711,6 +11629,112 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
             return FALSE;
           break;
         }
+
+      if (h != NULL)
+	{
+	  if (call_reloc_p)
+	    /* We may need a .plt entry if the function this reloc
+	       refers to is in a different object, regardless of the
+	       symbol's type.  We can't tell for sure yet, because
+	       something later might force the symbol local.  */
+	    h->needs_plt = 1;
+	  else if (may_need_local_target_p)
+	    /* If this reloc is in a read-only section, we might
+	       need a copy reloc.  We can't check reliably at this
+	       stage whether the section is read-only, as input
+	       sections have not yet been mapped to output sections.
+	       Tentatively set the flag for now, and correct in
+	       adjust_dynamic_symbol.  */
+	    h->non_got_ref = 1;
+	}
+
+      if (may_need_local_target_p && h != NULL)
+	{
+	  /* If the symbol is a function that doesn't bind locally,
+	     this relocation will need a PLT entry.  */
+	  h->plt.refcount += 1;
+
+	  /* It's too early to use htab->use_blx here, so we have to
+	     record possible blx references separately from
+	     relocs that definitely need a thumb stub.  */
+
+	  if (r_type == R_ARM_THM_CALL)
+	    eh->plt_maybe_thumb_refcount += 1;
+
+	  if (r_type == R_ARM_THM_JUMP24
+	      || r_type == R_ARM_THM_JUMP19)
+	    eh->plt_thumb_refcount += 1;
+	}
+
+      if (may_become_dynamic_p)
+	{
+	  struct elf_dyn_relocs *p, **head;
+
+	  /* Create a reloc section in dynobj.  */
+	  if (sreloc == NULL)
+	    {
+	      sreloc = _bfd_elf_make_dynamic_reloc_section
+		(sec, dynobj, 2, abfd, ! htab->use_rel);
+
+	      if (sreloc == NULL)
+		return FALSE;
+
+	      /* BPABI objects never have dynamic relocations mapped.  */
+	      if (htab->symbian_p)
+		{
+		  flagword flags;
+
+		  flags = bfd_get_section_flags (dynobj, sreloc);
+		  flags &= ~(SEC_LOAD | SEC_ALLOC);
+		  bfd_set_section_flags (dynobj, sreloc, flags);
+		}
+	    }
+
+	  /* If this is a global symbol, count the number of
+	     relocations we need for this symbol.  */
+	  if (h != NULL)
+	    head = &((struct elf32_arm_link_hash_entry *) h)->dyn_relocs;
+	  else
+	    {
+	      /* Track dynamic relocs needed for local syms too.
+		 We really need local syms available to do this
+		 easily.  Oh well.  */
+	      asection *s;
+	      void *vpp;
+	      Elf_Internal_Sym *isym;
+
+	      isym = bfd_sym_from_r_symndx (&htab->sym_cache,
+					    abfd, r_symndx);
+	      if (isym == NULL)
+		return FALSE;
+
+	      s = bfd_section_from_elf_index (abfd, isym->st_shndx);
+	      if (s == NULL)
+		s = sec;
+
+	      vpp = &elf_section_data (s)->local_dynrel;
+	      head = (struct elf_dyn_relocs **) vpp;
+	    }
+
+	  p = *head;
+	  if (p == NULL || p->sec != sec)
+	    {
+	      bfd_size_type amt = sizeof *p;
+
+	      p = (struct elf_dyn_relocs *) bfd_alloc (htab->root.dynobj, amt);
+	      if (p == NULL)
+		return FALSE;
+	      p->next = *head;
+	      *head = p;
+	      p->sec = sec;
+	      p->count = 0;
+	      p->pc_count = 0;
+	    }
+
+	  if (r_type == R_ARM_REL32 || r_type == R_ARM_REL32_NOI)
+	    p->pc_count += 1;
+	  p->count += 1;
+	}
     }
 
   return TRUE;

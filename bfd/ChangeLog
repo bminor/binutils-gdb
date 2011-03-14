@@ -1,5 +1,15 @@
 2011-03-14  Richard Sandiford  <richard.sandiford@linaro.org>
 
+	* elf32-arm.c (elf32_arm_check_relocs): Use call_reloc_p,
+	may_need_local_target_p and may_become_dynamic_p to classify
+	the relocation type.  Don't check info->symbolic or h->def_regular
+	when deciding whether to record a potential dynamic reloc.
+	Don't treat potential dynamic relocs as PLT references.
+	(elf32_arm_gc_sweep_hook): Update to match.  Assert that we don't
+	try to make the PLT reference count go negative.
+
+2011-03-14  Richard Sandiford  <richard.sandiford@linaro.org>
+
 	* elf32-arm.c (elf32_arm_final_link_relocate): Always fill in the
 	GOT entry here, rather than leaving it to finish_dynamic_symbol.
 	Only create a dynamic relocation for local references if

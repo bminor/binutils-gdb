@@ -80,6 +80,14 @@ set armelftests {
     {"Simple PIC shared library" "-shared" "" {arm-lib-plt32.s}
      {{objdump -fdw arm-lib-plt32.d} {objdump -Rw arm-lib-plt32.r}}
      "arm-lib-plt32.so"}
+    {"Indirect cross-library function reference (set-up)"
+     "-shared" "" {arm-lib-plt-2a.s}
+     {}
+     "arm-lib-plt-2a.so"}
+    {"Indirect cross-library function reference"
+     "-shared tmpdir/arm-lib-plt-2a.so" "" {arm-lib-plt-2b.s}
+     {{objdump -dr arm-lib-plt-2.dd} {readelf --relocs arm-lib-plt-2.rd}}
+     "arm-lib-plt-2b.so"}
     {"Simple dynamic application" "tmpdir/arm-lib.so" "" {arm-app.s}
      {{objdump -fdw arm-app.d} {objdump -Rw arm-app.r}}
      "arm-app"}

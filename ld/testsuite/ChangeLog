@@ -1,5 +1,11 @@
 2011-03-14  Richard Sandiford  <richard.sandiford@linaro.org>
 
+	* ld-arm/arm-lib-plt-2a.s, ld-arm/arm-lib-plt-2b.s,
+	ld-arm/arm-lib-plt-2.dd, ld-arm/arm-lib-plt-2.rd: New tests.
+	* ld-arm/arm-elf.exp: Run them.
+
+2011-03-14  Richard Sandiford  <richard.sandiford@linaro.org>
+
 	* ld-arm/exec-got-1a.s, ld-arm/exec-got-1b.s, ld-arm/exec-got-1.d,
 	ld-arm/unresolved-1.s, ld-arm/unresolved-1.d,
 	ld-arm/unresolved-1-dyn.d: New tests.
