@@ -3157,6 +3157,8 @@ set_pe_subsystem (const char *s)
 	pe_section_alignment = PE_DEF_SECTION_ALIGNMENT;
       break;
     }
+  if (s != subsystem)
+    free ((char *) subsystem);
 }
 
 /* Convert EFI target to PEI target.  */

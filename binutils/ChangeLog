@@ -1,5 +1,7 @@
 2011-03-14  Michael Snyder  <msnyder@vmware.com>
 
+	* objcopy.c (set_pe_subsystem): Free subsystem.
+
 	* wrstabs.c (stab_start_struct_type): Close memory leak.
 
 	* readelf.c (process_version_sections): Free symbols.
