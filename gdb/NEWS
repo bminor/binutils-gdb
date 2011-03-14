@@ -38,6 +38,10 @@
 
 * Python scripting
 
+  ** Breakpoints can now be sub-classed in Python, and in particular
+     you may implement a 'stop' function that is executed each time
+     the inferior reaches that breakpoint.   
+
   ** New function gdb.lookup_global_symbol looks up a global symbol.
 
   ** GDB values in Python are now callable if the value represents a
