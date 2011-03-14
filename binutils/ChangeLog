@@ -1,5 +1,7 @@
 2011-03-14  Michael Snyder  <msnyder@vmware.com>
 
+	* wrstabs.c (stab_start_struct_type): Close memory leak.
+
 	* readelf.c (process_version_sections): Free symbols.
 
 	* nm.c (display_rel_file): Free symsizes.

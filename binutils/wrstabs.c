@@ -1312,9 +1312,7 @@ stab_start_struct_type (void *p, const char *tag, unsigned int id,
   struct stab_write_handle *info = (struct stab_write_handle *) p;
   long tindex;
   bfd_boolean definition;
-  char *buf;
-
-  buf = (char *) xmalloc (40);
+  char buf[40];
 
   if (id == 0)
     {
