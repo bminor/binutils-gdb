@@ -3204,7 +3204,7 @@ pa_ip (char *str)
   const char *args;
   int match = FALSE;
   int comma = 0;
-  int cmpltr, nullif, flag, cond, num;
+  int cmpltr, nullif, flag, cond, need_cond, num;
   int immediate_check = 0, pos = -1, len = -1;
   unsigned long opcode;
   struct pa_opcode *insn;
@@ -3264,6 +3264,7 @@ pa_ip (char *str)
       opcode = insn->match;
       strict = (insn->flags & FLAG_STRICT);
       memset (&the_insn, 0, sizeof (the_insn));
+      need_cond = 1;
 
       the_insn.reloc = R_HPPA_NONE;
 
@@ -3758,6 +3759,8 @@ pa_ip (char *str)
 		  else
 		    break;
 
+		  /* Condition is not required with "dc".  */
+		  need_cond = 0;
 		  INSERT_FIELD_AND_CONTINUE (opcode, flag, 11);
 
 		/* Handle 32 bit carry for ADD.  */
@@ -3826,6 +3829,8 @@ pa_ip (char *str)
 		  else
 		    break;
 
+		  /* Condition is not required with "db".  */
+		  need_cond = 0;
 		  INSERT_FIELD_AND_CONTINUE (opcode, flag, 11);
 
 		/* Handle 32 bit borrow for SUB.  */
@@ -3969,12 +3974,6 @@ pa_ip (char *str)
 
 		  /* Handle an add condition.  */
 		  case 'A':
-		    /* PR gas/11395
-		       If we are looking for 64-bit add conditions and we
-		       do not have the ",*" prefix, then we have no match.  */
-		    if (*s != ',')
-		      break;
-		    /* Fall through.  */
 		  case 'a':
 		    cmpltr = 0;
 		    flag = 0;
@@ -4057,6 +4056,11 @@ pa_ip (char *str)
 			  as_bad (_("Invalid Add Condition: %s"), name);
 			*s = c;
 		      }
+		    /* Except with "dc", we have a match failure with
+		       'A' if we don't have a doubleword condition.  */
+		    else if (*args == 'A' && need_cond)
+		      break;
+
 		    opcode |= cmpltr << 13;
 		    INSERT_FIELD_AND_CONTINUE (opcode, flag, 12);
 
@@ -4136,8 +4140,11 @@ pa_ip (char *str)
 			    s += 2;
 			  }
 			else
-			  as_bad (_("Invalid Bit Branch Condition: %c"), *s);
+			  as_bad (_("Invalid Branch On Bit Condition: %c"), *s);
 		      }
+		    else
+		      as_bad (_("Missing Branch On Bit Condition"));
+
 		    INSERT_FIELD_AND_CONTINUE (opcode, cmpltr, 15);
 
 		  /* Handle a compare/subtract condition.  */
@@ -4225,6 +4232,11 @@ pa_ip (char *str)
 				  name);
 			*s = c;
 		      }
+		    /* Except with "db", we have a match failure with
+		       'S' if we don't have a doubleword condition.  */
+		    else if (*args == 'S' && need_cond)
+		      break;
+
 		    opcode |= cmpltr << 13;
 		    INSERT_FIELD_AND_CONTINUE (opcode, flag, 12);
 
@@ -4283,7 +4295,7 @@ pa_ip (char *str)
 
 		    INSERT_FIELD_AND_CONTINUE (opcode, cmpltr, 13);
 
-		    /* Handle a logical instruction condition.  */
+		  /* Handle a logical instruction condition.  */
 		  case 'L':
 		  case 'l':
 		    cmpltr = 0;
@@ -4347,6 +4359,10 @@ pa_ip (char *str)
 			  as_bad (_("Invalid Logical Instruction Condition."));
 			*s = c;
 		      }
+		    /* 32-bit is default for no condition.  */
+		    else if (*args == 'L')
+		      break;
+
 		    opcode |= cmpltr << 13;
 		    INSERT_FIELD_AND_CONTINUE (opcode, flag, 12);
 
@@ -4405,6 +4421,7 @@ pa_ip (char *str)
 			  as_bad (_("Invalid Shift/Extract/Deposit Condition."));
 			*s = c;
 		      }
+
 		    INSERT_FIELD_AND_CONTINUE (opcode, cmpltr, 13);
 
 		  /* Handle a unit instruction condition.  */
@@ -4516,6 +4533,10 @@ pa_ip (char *str)
 			else if (*args != 'U' || (*s != ' ' && *s != '\t'))
 			  as_bad (_("Invalid Unit Instruction Condition."));
 		      }
+		    /* 32-bit is default for no condition.  */
+		    else if (*args == 'U')
+		      break;
+
 		    opcode |= cmpltr << 13;
 		    INSERT_FIELD_AND_CONTINUE (opcode, flag, 12);
 
