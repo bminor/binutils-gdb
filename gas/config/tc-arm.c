@@ -19750,7 +19750,7 @@ md_pcrel_from_section (fixS * fixP, segT seg)
     case BFD_RELOC_THUMB_PCREL_BRANCH23:
       if (fixP->fx_addsy
 	  && (S_GET_SEGMENT (fixP->fx_addsy) == seg)
-	  && (!S_IS_EXTERNAL (fixP->fx_addsy))
+	  && !S_FORCE_RELOC (fixP->fx_addsy, TRUE)
 	  && ARM_IS_FUNC (fixP->fx_addsy)
  	  && ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v5t))
  	base = fixP->fx_where + fixP->fx_frag->fr_address;
@@ -19761,7 +19761,7 @@ md_pcrel_from_section (fixS * fixP, segT seg)
     case BFD_RELOC_THUMB_PCREL_BLX:
       if (fixP->fx_addsy
 	  && (S_GET_SEGMENT (fixP->fx_addsy) == seg)
-	  && (!S_IS_EXTERNAL (fixP->fx_addsy))
+	  && !S_FORCE_RELOC (fixP->fx_addsy, TRUE)
  	  && THUMB_IS_FUNC (fixP->fx_addsy)
  	  && ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v5t))
  	base = fixP->fx_where + fixP->fx_frag->fr_address;
@@ -19772,7 +19772,7 @@ md_pcrel_from_section (fixS * fixP, segT seg)
     case BFD_RELOC_ARM_PCREL_BLX:
       if (fixP->fx_addsy
 	  && (S_GET_SEGMENT (fixP->fx_addsy) == seg)
-	  && (!S_IS_EXTERNAL (fixP->fx_addsy))
+	  && !S_FORCE_RELOC (fixP->fx_addsy, TRUE)
  	  && ARM_IS_FUNC (fixP->fx_addsy)
  	  && ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v5t))
  	base = fixP->fx_where + fixP->fx_frag->fr_address;
@@ -19781,7 +19781,7 @@ md_pcrel_from_section (fixS * fixP, segT seg)
     case BFD_RELOC_ARM_PCREL_CALL:
       if (fixP->fx_addsy
 	  && (S_GET_SEGMENT (fixP->fx_addsy) == seg)
-	  && (!S_IS_EXTERNAL (fixP->fx_addsy))
+	  && !S_FORCE_RELOC (fixP->fx_addsy, TRUE)
  	  && THUMB_IS_FUNC (fixP->fx_addsy)
  	  && ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v5t))
  	base = fixP->fx_where + fixP->fx_frag->fr_address;
@@ -20595,7 +20595,7 @@ md_apply_fix (fixS *	fixP,
 
       if (ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v5t)
 	  && fixP->fx_addsy
-	  && !S_IS_EXTERNAL (fixP->fx_addsy)
+	  && !S_FORCE_RELOC (fixP->fx_addsy, TRUE)
 	  && (S_GET_SEGMENT (fixP->fx_addsy) == seg)
 	  && THUMB_IS_FUNC (fixP->fx_addsy))
 	/* Flip the bl to blx. This is a simple flip
@@ -20615,7 +20615,7 @@ md_apply_fix (fixS *	fixP,
     case BFD_RELOC_ARM_PCREL_JUMP:
       if (ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v5t)
 	  && fixP->fx_addsy
-	  && !S_IS_EXTERNAL (fixP->fx_addsy)
+	  && !S_FORCE_RELOC (fixP->fx_addsy, TRUE)
 	  && (S_GET_SEGMENT (fixP->fx_addsy) == seg)
 	  && THUMB_IS_FUNC (fixP->fx_addsy))
 	{
@@ -20638,7 +20638,7 @@ md_apply_fix (fixS *	fixP,
       temp = 1;
       if (ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v5t)
 	  && fixP->fx_addsy
-	  && !S_IS_EXTERNAL (fixP->fx_addsy)
+	  && !S_FORCE_RELOC (fixP->fx_addsy, TRUE)
 	  && (S_GET_SEGMENT (fixP->fx_addsy) == seg)
 	  && ARM_IS_FUNC (fixP->fx_addsy))
 	{
@@ -20746,8 +20746,7 @@ md_apply_fix (fixS *	fixP,
     case BFD_RELOC_THUMB_PCREL_BRANCH20:
       if (fixP->fx_addsy
 	  && (S_GET_SEGMENT (fixP->fx_addsy) == seg)
-	  && !S_IS_EXTERNAL (fixP->fx_addsy)
-	  && S_IS_DEFINED (fixP->fx_addsy)
+	  && !S_FORCE_RELOC (fixP->fx_addsy, TRUE)
 	  && ARM_IS_FUNC (fixP->fx_addsy)
 	  && ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v5t))
 	{
@@ -20785,8 +20784,7 @@ md_apply_fix (fixS *	fixP,
 	 about it.  */
 
       if (fixP->fx_addsy
-	  && S_IS_DEFINED (fixP->fx_addsy)
-	  && !S_IS_EXTERNAL (fixP->fx_addsy)
+	  && !S_FORCE_RELOC (fixP->fx_addsy, TRUE)
 	  && (S_GET_SEGMENT (fixP->fx_addsy) == seg)
 	  && THUMB_IS_FUNC (fixP->fx_addsy))
 	{
@@ -20810,8 +20808,7 @@ md_apply_fix (fixS *	fixP,
 	 is converted to a blx.  */
       if (fixP->fx_addsy
 	  && (S_GET_SEGMENT (fixP->fx_addsy) == seg)
-	  && !S_IS_EXTERNAL (fixP->fx_addsy)
-	  && S_IS_DEFINED (fixP->fx_addsy)
+	  && !S_FORCE_RELOC (fixP->fx_addsy, TRUE)
 	  && ARM_IS_FUNC (fixP->fx_addsy)
 	  && ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v5t))
 	{
@@ -23716,7 +23713,7 @@ arm_apply_sym_value (struct fix * fixP)
 {
   if (fixP->fx_addsy
       && ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v5t)
-      && !S_IS_EXTERNAL (fixP->fx_addsy))
+      && !S_FORCE_RELOC (fixP->fx_addsy, TRUE))
     {
       switch (fixP->fx_r_type)
 	{

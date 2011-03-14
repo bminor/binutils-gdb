@@ -4525,7 +4525,7 @@ get_sym_code_type (struct disassemble_info *info,
   type = ELF_ST_TYPE (es->internal_elf_sym.st_info);
 
   /* If the symbol has function type then use that.  */
-  if (type == STT_FUNC)
+  if (type == STT_FUNC || type == STT_GNU_IFUNC)
     {
       if (ARM_SYM_BRANCH_TYPE (&es->internal_elf_sym) == ST_BRANCH_TO_THUMB)
 	*map_type = MAP_THUMB;

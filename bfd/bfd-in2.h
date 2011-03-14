@@ -3186,6 +3186,9 @@ pc-relative or some form of GOT-indirect relocation.  */
 /* Annotation of BX instructions.  */
   BFD_RELOC_ARM_V4BX,
 
+/* ARM support for STT_GNU_IFUNC.  */
+  BFD_RELOC_ARM_IRELATIVE,
+
 /* These relocs are only used within the ARM assembler.  They are not
 (at present) written to any object files.  */
   BFD_RELOC_ARM_IMMEDIATE,

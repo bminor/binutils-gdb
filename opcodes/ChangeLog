@@ -1,5 +1,9 @@
 2011-03-14  Richard Sandiford  <richard.sandiford@linaro.org>
 
+	* arm-dis.c (get_sym_code_type): Treat STT_GNU_IFUNCs as code.
+
+2011-03-14  Richard Sandiford  <richard.sandiford@linaro.org>
+
 	* arm-dis.c (get_sym_code_type): Don't check for STT_ARM_TFUNC.
 	Use branch types instead.
 	(print_insn): Likewise.

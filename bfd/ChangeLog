@@ -1,5 +1,103 @@
 2011-03-14  Richard Sandiford  <richard.sandiford@linaro.org>
 
+	* reloc.c (BFD_RELOC_ARM_IRELATIVE): New relocation.
+	* bfd-in2.h: Regenerate.
+	* elf32-arm.c (elf32_arm_howto_table_2): Rename existing definition
+	to elf32_arm_howto_table_3 and replace with a single R_ARM_IRELATIVE
+	entry.
+	(elf32_arm_howto_from_type): Update accordingly.
+	(elf32_arm_reloc_map): Map BFD_RELOC_ARM_IRELATIVE to R_ARM_IRELATIVE.
+	(elf32_arm_reloc_name_lookup): Handle elf32_arm_howto_table_3.
+	(arm_plt_info): New structure, split out from elf32_arm_link_hash_entry
+	with an extra noncall_refcount field.
+	(arm_local_iplt_info): New structure.
+	(elf_arm_obj_tdata): Add local_iplt.
+	(elf32_arm_local_iplt): New accessor macro.
+	(elf32_arm_link_hash_entry): Replace plt_thumb_refcount,
+	plt_maybe_thumb_refcount and plt_got_offset with an arm_plt_info.
+	Change tls_type to a bitfield and add is_iplt.
+	(elf32_arm_link_hash_newfunc): Update accordingly.
+	(elf32_arm_allocate_local_sym_info): New function.
+	(elf32_arm_create_local_iplt): Likewise.
+	(elf32_arm_get_plt_info): Likewise.
+	(elf32_arm_plt_needs_thumb_stub_p): Likewise.
+	(elf32_arm_get_local_dynreloc_list): Likewise.
+	(create_ifunc_sections): Likewise.
+	(elf32_arm_copy_indirect_symbol): Update after the changes to
+	elf32_arm_link_hash_entry.  Assert the is_iplt has not yet been set.
+	(arm_type_of_stub): Add an st_type argument.  Use elf32_arm_get_plt_info
+	to get PLT information.  Assert that all STT_GNU_IFUNC references
+	are turned into PLT references.
+	(arm_build_one_stub): Pass the symbol type to
+	elf32_arm_final_link_relocate.
+	(elf32_arm_size_stubs): Pass the symbol type to arm_type_of_stub.
+	(elf32_arm_allocate_irelocs): New function.
+	(elf32_arm_add_dynreloc): In static objects, use .rel.iplt for
+	all R_ARM_IRELATIVE.
+	(elf32_arm_allocate_plt_entry): New function.
+	(elf32_arm_populate_plt_entry): Likewise.
+	(elf32_arm_final_link_relocate): Add an st_type parameter.
+	Set srelgot to null for static objects.  Use separate variables
+	to record which st_value and st_type should be used when generating
+	a dynamic relocation.  Use elf32_arm_get_plt_info to find the
+	symbol's PLT information, setting has_iplt_entry, splt,
+	plt_offset and gotplt_offset accordingly.  Check whether
+	STT_GNU_IFUNC symbols should resolve to an .iplt entry, and change
+	the relocation target accordingly.  Broaden assert to include
+	.iplts.  Don't set sreloc for static relocations.  Assert that
+	we only generate dynamic R_ARM_RELATIVE relocations for R_ARM_ABS32
+	and R_ARM_ABS32_NOI.  Generate R_ARM_IRELATIVE relocations instead
+	of R_ARM_RELATIVE relocations if the target is an STT_GNU_IFUNC
+	symbol.  Pass the symbol type to arm_type_of_stub.  Conditionally
+	resolve GOT references to the .igot.plt entry.
+	(elf32_arm_relocate_section): Update the call to
+	elf32_arm_final_link_relocate.
+	(elf32_arm_gc_sweep_hook): Use elf32_arm_get_plt_info to get PLT
+	information.  Treat R_ARM_REL32 and R_ARM_REL32_NOI as call
+	relocations in shared libraries and relocatable executables.
+	Count non-call PLT references.  Use elf32_arm_get_local_dynreloc_list
+	to get the list of dynamic relocations for a local symbol.
+	(elf32_arm_check_relocs): Always create ifunc sections.  Set isym
+	at the same time as setting h.  Use elf32_arm_allocate_local_sym_info
+	to allocate local symbol information.  Treat R_ARM_REL32 and
+	R_ARM_REL32_NOI as call relocations in shared libraries and
+	relocatable executables.  Record PLT information for local
+	STT_GNU_IFUNC functions as well as global functions.   Count
+	non-call PLT references.  Use elf32_arm_get_local_dynreloc_list
+	to get the list of dynamic relocations for a local symbol.
+	(elf32_arm_adjust_dynamic_symbol): Handle STT_GNU_IFUNC symbols.
+	Don't remove STT_GNU_IFUNC PLTs unless all references have been
+	removed.  Update after the changes to elf32_arm_link_hash_entry.
+	(allocate_dynrelocs_for_symbol): Decide whether STT_GNU_IFUNC PLT
+	entries should live in .plt or .iplt.  Check whether the .igot.plt
+	and .got entries can be combined.  Use elf32_arm_allocate_plt_entry
+	to allocate .plt and .(i)got.plt entries.  Detect which .got
+	entries will need R_ARM_IRELATIVE relocations and use
+	elf32_arm_allocate_irelocs to allocate them.  Likewise other
+	non-.got dynamic relocations.
+	(elf32_arm_size_dynamic_sections): Allocate .iplt, .igot.plt
+	and dynamic relocations for local STT_GNU_IFUNC symbols.
+	Check whether the .igot.plt and .got entries can be combined.
+	Detect which .got entries will need R_ARM_IRELATIVE relocations
+	and use elf32_arm_allocate_irelocs to allocate them.  Use stashed
+	section pointers intead of strcmp checks.  Handle iplt and igotplt.
+	(elf32_arm_finish_dynamic_symbol): Use elf32_arm_populate_plt_entry
+	to fill in .plt, .got.plt and .rel(a).plt entries.  Point
+	STT_GNU_IFUNC symbols at an .iplt entry if non-call relocations
+	resolve to it.
+	(elf32_arm_output_plt_map_1): New function, split out from
+	elf32_arm_output_plt_map.  Handle .iplt entries.  Use
+	elf32_arm_plt_needs_thumb_stub_p.
+	(elf32_arm_output_plt_map): Call it.
+	(elf32_arm_output_arch_local_syms): Add mapping symbols for
+	local .iplt entries.
+	(elf32_arm_swap_symbol_in): Handle Thumb STT_GNU_IFUNC symbols.
+	(elf32_arm_swap_symbol_out): Likewise.
+	(elf32_arm_add_symbol_hook): New function.
+	(elf_backend_add_symbol_hook): Define for all targets.
+
+2011-03-14  Richard Sandiford  <richard.sandiford@linaro.org>
+
 	* elf-bfd.h (elf_link_hash_entry): Add target_internal.
 	* elf.c (swap_out_syms): Set st_target_internal for each
 	Elf_Internal_Sym.

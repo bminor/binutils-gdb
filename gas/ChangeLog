@@ -1,5 +1,11 @@
 2011-03-14  Richard Sandiford  <richard.sandiford@linaro.org>
 
+	* config/tc-arm.c (md_pcrel_from_section): Use S_FORCE_RELOC to
+	determine whether a relocation is needed.
+	(md_apply_fix, arm_apply_sym_value): Likewise.
+
+2011-03-14  Richard Sandiford  <richard.sandiford@linaro.org>
+
 	* config/tc-arm.c (arm_adjust_symtab): Set the branch type
 	for Thumb symbols.
 
