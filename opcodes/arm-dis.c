@@ -4525,9 +4525,12 @@ get_sym_code_type (struct disassemble_info *info,
   type = ELF_ST_TYPE (es->internal_elf_sym.st_info);
 
   /* If the symbol has function type then use that.  */
-  if (type == STT_FUNC || type == STT_ARM_TFUNC)
+  if (type == STT_FUNC)
     {
-      *map_type = (type == STT_ARM_TFUNC) ? MAP_THUMB : MAP_ARM;
+      if (ARM_SYM_BRANCH_TYPE (&es->internal_elf_sym) == ST_BRANCH_TO_THUMB)
+	*map_type = MAP_THUMB;
+      else
+	*map_type = MAP_ARM;
       return TRUE;
     }
 
@@ -4807,7 +4810,9 @@ print_insn (bfd_vma pc, struct disassemble_info *info, bfd_boolean little)
 	  es = *(elf_symbol_type **)(info->symbols);
 	  type = ELF_ST_TYPE (es->internal_elf_sym.st_info);
 
-	  is_thumb = (type == STT_ARM_TFUNC) || (type == STT_ARM_16BIT);
+	  is_thumb = ((ARM_SYM_BRANCH_TYPE (&es->internal_elf_sym)
+		       == ST_BRANCH_TO_THUMB)
+		      || type == STT_ARM_16BIT);
 	}
     }
 

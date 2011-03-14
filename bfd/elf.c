@@ -6542,6 +6542,7 @@ swap_out_syms (bfd *abfd,
     sym.st_info = 0;
     sym.st_other = 0;
     sym.st_shndx = SHN_UNDEF;
+    sym.st_target_internal = 0;
     bed->s->swap_symbol_out (abfd, &sym, outbound_syms, outbound_shndx);
     outbound_syms += bed->s->sizeof_sym;
     if (outbound_shndx != NULL)
@@ -6741,9 +6742,16 @@ Unable to find equivalent output section for symbol '%s' from section '%s'"),
 	}
 
       if (type_ptr != NULL)
-	sym.st_other = type_ptr->internal_elf_sym.st_other;
+	{
+	  sym.st_other = type_ptr->internal_elf_sym.st_other;
+	  sym.st_target_internal
+	    = type_ptr->internal_elf_sym.st_target_internal;
+	}
       else
-	sym.st_other = 0;
+	{
+	  sym.st_other = 0;
+	  sym.st_target_internal = 0;
+	}
 
       bed->s->swap_symbol_out (abfd, &sym, outbound_syms, outbound_shndx);
       outbound_syms += bed->s->sizeof_sym;

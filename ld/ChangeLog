@@ -1,5 +1,10 @@
 2011-03-14  Richard Sandiford  <richard.sandiford@linaro.org>
 
+	* emultempl/armelf.em (gld${EMULATION_NAME}_finish): Check
+	eh->target_internal.
+
+2011-03-14  Richard Sandiford  <richard.sandiford@linaro.org>
+
 	* emultempl/armelf.em (arm_elf_before_allocation): Check dynobj
 	instead of dynamic_sections_created.
 

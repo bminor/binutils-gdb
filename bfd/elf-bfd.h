@@ -153,6 +153,9 @@ struct elf_link_hash_entry
   /* Symbol st_other value, symbol visibility.  */
   unsigned int other : 8;
 
+  /* The symbol's st_target_internal value (see Elf_Internal_Sym).  */
+  unsigned int target_internal : 8;
+
   /* Symbol is referenced by a non-shared object (other than the object
      in which it is defined).  */
   unsigned int ref_regular : 1;

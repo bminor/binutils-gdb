@@ -1,3 +1,8 @@
+2011-03-14  Richard Sandiford  <richard.sandiford@linaro.org>
+
+	* config/tc-arm.c (arm_adjust_symtab): Set the branch type
+	for Thumb symbols.
+
 2011-03-11  Nick Clifton  <nickc@redhat.com>
 
 	* remap.c (remap_debug_filename): Always allocate a buffer for the

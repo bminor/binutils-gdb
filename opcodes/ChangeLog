@@ -1,3 +1,9 @@
+2011-03-14  Richard Sandiford  <richard.sandiford@linaro.org>
+
+	* arm-dis.c (get_sym_code_type): Don't check for STT_ARM_TFUNC.
+	Use branch types instead.
+	(print_insn): Likewise.
+
 2011-02-28  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* mips-opc.c (mips_builtin_opcodes): Correct register use

@@ -22011,8 +22011,8 @@ arm_adjust_symtab (void)
 	      /* If it's a .thumb_func, declare it as so,
 		 otherwise tag label as .code 16.  */
 	      if (THUMB_IS_FUNC (sym))
-		elf_sym->internal_elf_sym.st_info =
-		  ELF_ST_INFO (bind, STT_ARM_TFUNC);
+		elf_sym->internal_elf_sym.st_target_internal
+		  = ST_BRANCH_TO_THUMB;
 	      else if (EF_ARM_EABI_VERSION (meabi_flags) < EF_ARM_EABI_VER4)
 		elf_sym->internal_elf_sym.st_info =
 		  ELF_ST_INFO (bind, STT_ARM_16BIT);

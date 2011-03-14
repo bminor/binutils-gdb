@@ -962,6 +962,7 @@ i370_elf_finish_dynamic_sections (bfd *output_bfd,
       sym.st_name = 0;
       sym.st_info = ELF_ST_INFO (STB_LOCAL, STT_SECTION);
       sym.st_other = 0;
+      sym.st_target_internal = 0;
 
       for (s = output_bfd->sections; s != NULL; s = s->next)
 	{

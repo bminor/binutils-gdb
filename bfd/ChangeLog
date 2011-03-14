@@ -1,5 +1,47 @@
 2011-03-14  Richard Sandiford  <richard.sandiford@linaro.org>
 
+	* elf-bfd.h (elf_link_hash_entry): Add target_internal.
+	* elf.c (swap_out_syms): Set st_target_internal for each
+	Elf_Internal_Sym.
+	* elfcode.h (elf_swap_symbol_in): Likewise.
+	* elf32-i370.c (i370_elf_finish_dynamic_sections): Likewise.
+	* elf32-sh-symbian.c (sh_symbian_relocate_section): Likewise.
+	* elf64-sparc.c (elf64_sparc_output_arch_syms): Likewise.
+	* elfxx-sparc.c (_bfd_sparc_elf_size_dynamic_sections): Likewise.
+	* elflink.c (elf_link_output_extsym): Likewise.
+	(bfd_elf_final_link): Likewise.
+	(elf_link_add_object_symbols): Copy st_target_internal
+	to the hash table if we see a definition.
+	(_bfd_elf_copy_link_hash_symbol_type): Copy target_internal.
+	* elf32-arm.c (elf32_arm_stub_hash_entry): Replace st_type with
+	a branch_type field.
+	(a8_erratum_fix, a8_erratum_reloc): Likewise.
+	(arm_type_of_stub): Replace actual_st_type with an
+	actual_branch_type parameter.
+	(arm_build_one_stub): Use branch types rather than st_types to
+	determine the type of branch.
+	(cortex_a8_erratum_scan): Likewise.
+	(elf32_arm_size_stubs): Likewise.
+	(bfd_elf32_arm_process_before_allocation): Likewise.
+	(allocate_dynrelocs_for_symbol): Likewise.
+	(elf32_arm_finish_dynamic_sections): Likewise.
+	(elf32_arm_final_link_relocate): Replace sym_flags parameter with
+	a branch_type parameter.
+	(elf32_arm_relocate_section): Update call accordingly.
+	(elf32_arm_adjust_dynamic_symbol): Don't check STT_ARM_TFUNC.
+	(elf32_arm_output_map_sym): Initialize st_target_internal.
+	(elf32_arm_output_stub_sym): Likewise.
+	(elf32_arm_symbol_processing): Delete.
+	(elf32_arm_swap_symbol_in): Convert STT_ARM_TFUNCs into STT_FUNCs.
+	Use st_target_internal to record the branch type.
+	(elf32_arm_swap_symbol_out): Use st_target_internal to test for
+	Thumb functions.
+	(elf32_arm_is_function_type): Delete.
+	(elf_backend_symbol_processing): Likewise.
+	(elf_backend_is_function_type): Likewise.
+
+2011-03-14  Richard Sandiford  <richard.sandiford@linaro.org>
+
 	* elf32-arm.c (elf32_arm_check_relocs): Always assign a dynobj.
 	(elf32_arm_finish_dynamic_sections): Move sgot != NULL assertion
 	into the PLT block.

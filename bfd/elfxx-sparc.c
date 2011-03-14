@@ -2743,6 +2743,7 @@ _bfd_sparc_elf_size_dynamic_sections (bfd *output_bfd,
 		entry->isym.st_info = ELF_ST_INFO (app_regs [reg].bind,
 						   STT_REGISTER);
 		entry->isym.st_shndx = app_regs [reg].shndx;
+		entry->isym.st_target_internal = 0;
 		entry->next = NULL;
 		entry->input_bfd = output_bfd;
 		entry->input_indx = -1;
