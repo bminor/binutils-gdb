@@ -1,5 +1,7 @@
 2011-03-14  Michael Snyder  <msnyder@vmware.com>
 
+	* readelf.c (process_version_sections): Free symbols.
+
 	* nm.c (display_rel_file): Free symsizes.
 
 2011-03-10  Nick Clifton  <nickc@redhat.com>

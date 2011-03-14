@@ -8053,7 +8053,10 @@ process_version_sections (FILE * file)
                                         string_sec->sh_size,
                                         _("version string table"));
 	    if (!strtab)
-	      break;
+	      {
+		free (symbols);
+		break;
+	      }
 
 	    printf (_("\nVersion symbols section '%s' contains %d entries:\n"),
 		    SECTION_NAME (section), total);
@@ -8073,6 +8076,7 @@ process_version_sections (FILE * file)
 	    if (!edata)
 	      {
 		free (strtab);
+		free (symbols);
 		break;
 	      }
 
