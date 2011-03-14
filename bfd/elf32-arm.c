@@ -6913,6 +6913,41 @@ elf32_arm_begin_write_processing (bfd *abfd ATTRIBUTE_UNUSED,
 			  link_info);
 }
 
+/* Reserve space for COUNT dynamic relocations in relocation selection
+   SRELOC.  */
+
+static void
+elf32_arm_allocate_dynrelocs (struct bfd_link_info *info, asection *sreloc,
+			      bfd_size_type count)
+{
+  struct elf32_arm_link_hash_table *htab;
+
+  htab = elf32_arm_hash_table (info);
+  BFD_ASSERT (htab->root.dynamic_sections_created);
+  if (sreloc == NULL)
+    abort ();
+  sreloc->size += RELOC_SIZE (htab) * count;
+}
+
+/* Add relocation REL to the end of relocation section SRELOC.  */
+
+static void
+elf32_arm_add_dynreloc (bfd *output_bfd, struct bfd_link_info *info,
+			asection *sreloc, Elf_Internal_Rela *rel)
+{
+  bfd_byte *loc;
+  struct elf32_arm_link_hash_table *htab;
+
+  htab = elf32_arm_hash_table (info);
+  if (sreloc == NULL)
+    abort ();
+  loc = sreloc->contents;
+  loc += sreloc->reloc_count++ * RELOC_SIZE (htab);
+  if (sreloc->reloc_count * RELOC_SIZE (htab) > sreloc->size)
+    abort ();
+  SWAP_RELOC_OUT (htab) (output_bfd, rel, loc);
+}
+
 /* Some relocations map to different relocations depending on the
    target.  Return the real relocation.  */
 
@@ -7348,7 +7383,6 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	  && r_type != R_ARM_PLT32)
 	{
 	  Elf_Internal_Rela outrel;
-	  bfd_byte *loc;
 	  bfd_boolean skip, relocate;
 
 	  *unresolved_reloc_p = FALSE;
@@ -7437,9 +7471,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 		outrel.r_addend += value;
 	    }
 
-	  loc = sreloc->contents;
-	  loc += sreloc->reloc_count++ * RELOC_SIZE (globals);
-	  SWAP_RELOC_OUT (globals) (output_bfd, &outrel, loc);
+	  elf32_arm_add_dynreloc (output_bfd, info, sreloc, &outrel);
 
 	  /* If this reloc is against an external symbol, we do not want to
 	     fiddle with the addend.  Otherwise, we need to include the symbol
@@ -8316,7 +8348,6 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	      if (info->shared)
 		{
 		  Elf_Internal_Rela outrel;
-		  bfd_byte *loc;
 
 		  BFD_ASSERT (srelgot != NULL);
 
@@ -8325,9 +8356,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 				     + sgot->output_offset
 				     + off);
 		  outrel.r_info = ELF32_R_INFO (0, R_ARM_RELATIVE);
-		  loc = srelgot->contents;
-		  loc += srelgot->reloc_count++ * RELOC_SIZE (globals);
-		  SWAP_RELOC_OUT (globals) (output_bfd, &outrel, loc);
+		  elf32_arm_add_dynreloc (output_bfd, info, srelgot, &outrel);
 		}
 
 	      local_got_offsets[r_symndx] |= 1;
@@ -8367,7 +8396,6 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	    if (info->shared)
 	      {
 		Elf_Internal_Rela outrel;
-		bfd_byte *loc;
 
 		if (srelgot == NULL)
 		  abort ();
@@ -8381,9 +8409,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 		  bfd_put_32 (output_bfd, outrel.r_addend,
 			      sgot->contents + off);
 
-		loc = srelgot->contents;
-		loc += srelgot->reloc_count++ * RELOC_SIZE (globals);
-		SWAP_RELOC_OUT (globals) (output_bfd, &outrel, loc);
+		elf32_arm_add_dynreloc (output_bfd, info, srelgot, &outrel);
 	      }
 	    else
 	      bfd_put_32 (output_bfd, 1, sgot->contents + off);
@@ -8449,7 +8475,6 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	  {
 	    bfd_boolean need_relocs = FALSE;
 	    Elf_Internal_Rela outrel;
-	    bfd_byte *loc = NULL;
 	    int cur_off = off;
 
 	    /* The GOT entries have not been initialized yet.  Do it
@@ -8467,6 +8492,8 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 
 	    if (tls_type & GOT_TLS_GDESC)
 	      {
+		bfd_byte *loc;
+
 		/* We should have relaxed, unless this is an undefined
 		   weak symbol.  */
 		BFD_ASSERT ((h && (h->root.type == bfd_link_hash_undefweak))
@@ -8518,10 +8545,8 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 		    if (globals->use_rel)
 		      bfd_put_32 (output_bfd, outrel.r_addend,
 				  sgot->contents + cur_off);
-		    loc = srelgot->contents;
-		    loc += srelgot->reloc_count++ * RELOC_SIZE (globals);
 
-		    SWAP_RELOC_OUT (globals) (output_bfd, &outrel, loc);
+		    elf32_arm_add_dynreloc (output_bfd, info, srelgot, &outrel);
 
 		    if (indx == 0)
 		      bfd_put_32 (output_bfd, value - dtpoff_base (info),
@@ -8537,10 +8562,8 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 			  bfd_put_32 (output_bfd, outrel.r_addend,
 				      sgot->contents + cur_off + 4);
 
-		    	loc = srelgot->contents;
-		   	loc += srelgot->reloc_count++ * RELOC_SIZE (globals);
-
-			SWAP_RELOC_OUT (globals) (output_bfd, &outrel, loc);
+			elf32_arm_add_dynreloc (output_bfd, info,
+						srelgot, &outrel);
 		      }
 		  }
 		else
@@ -8576,10 +8599,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 		      bfd_put_32 (output_bfd, outrel.r_addend,
 				  sgot->contents + cur_off);
 
-		    loc = srelgot->contents;
-		    loc += srelgot->reloc_count++ * RELOC_SIZE (globals);
-
-		    SWAP_RELOC_OUT (globals) (output_bfd, &outrel, loc);
+		    elf32_arm_add_dynreloc (output_bfd, info, srelgot, &outrel);
 		  }
 		else
 		  bfd_put_32 (output_bfd, tpoff (info, value),
@@ -11979,8 +11999,7 @@ elf32_arm_adjust_dynamic_symbol (struct bfd_link_info * info,
       asection *srel;
 
       srel = bfd_get_section_by_name (dynobj, RELOC_SECTION (globals, ".bss"));
-      BFD_ASSERT (srel != NULL);
-      srel->size += RELOC_SIZE (globals);
+      elf32_arm_allocate_dynrelocs (info, srel, 1);
       h->needs_copy = 1;
     }
 
@@ -11991,7 +12010,7 @@ elf32_arm_adjust_dynamic_symbol (struct bfd_link_info * info,
    dynamic relocs.  */
 
 static bfd_boolean
-allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
+allocate_dynrelocs_for_symbol (struct elf_link_hash_entry *h, void * inf)
 {
   struct bfd_link_info *info;
   struct elf32_arm_link_hash_table *htab;
@@ -12082,7 +12101,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 	    }
 
 	  /* We also need to make an entry in the .rel(a).plt section.  */
-	  htab->root.srelplt->size += RELOC_SIZE (htab);
+	  elf32_arm_allocate_dynrelocs (info, htab->root.srelplt, 1);
 	  htab->next_tls_desc_index++;
 
 	  /* VxWorks executables have a second set of relocations for
@@ -12093,12 +12112,12 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 	      /* There is a relocation for the initial PLT entry:
 		 an R_ARM_32 relocation for _GLOBAL_OFFSET_TABLE_.  */
 	      if (h->plt.offset == htab->plt_header_size)
-		htab->srelplt2->size += RELOC_SIZE (htab);
+		elf32_arm_allocate_dynrelocs (info, htab->srelplt2, 1);
 
 	      /* There are two extra relocations for each subsequent
 		 PLT entry: an R_ARM_32 relocation for the GOT entry,
 		 and an R_ARM_32 relocation for the PLT entry.  */
-	      htab->srelplt2->size += RELOC_SIZE (htab) * 2;
+	      elf32_arm_allocate_dynrelocs (info, htab->srelplt2, 2);
 	    }
 	}
       else
@@ -12186,14 +12205,14 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 		  || h->root.type != bfd_link_hash_undefweak))
 	    {
 	      if (tls_type & GOT_TLS_IE)
-		htab->root.srelgot->size += RELOC_SIZE (htab);
+		elf32_arm_allocate_dynrelocs (info, htab->root.srelgot, 1);
 
 	      if (tls_type & GOT_TLS_GD)
-		htab->root.srelgot->size += RELOC_SIZE (htab);
+		elf32_arm_allocate_dynrelocs (info, htab->root.srelgot, 1);
 
 	      if (tls_type & GOT_TLS_GDESC) 
 		{
-		  htab->root.srelplt->size += RELOC_SIZE (htab); 
+		  elf32_arm_allocate_dynrelocs (info, htab->root.srelplt, 1);
 		  /* GDESC needs a trampoline to jump to.  */
 		  htab->tls_trampoline = -1;
 		}
@@ -12201,13 +12220,13 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 	      /* Only GD needs it.  GDESC just emits one relocation per
 		 2 entries.  */
 	      if ((tls_type & GOT_TLS_GD) && indx != 0)  
-		htab->root.srelgot->size += RELOC_SIZE (htab); 
+		elf32_arm_allocate_dynrelocs (info, htab->root.srelgot, 1);
 	    }
 	  else if ((ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
 		    || h->root.type != bfd_link_hash_undefweak)
 		   && (info->shared
 	    	   || WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, 0, h)))
-	    htab->root.srelgot->size += RELOC_SIZE (htab);
+	    elf32_arm_allocate_dynrelocs (info, htab->root.srelgot, 1);
 	}
     }
   else
@@ -12355,7 +12374,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
   for (p = eh->dyn_relocs; p != NULL; p = p->next)
     {
       asection *sreloc = elf_section_data (p->sec)->sreloc;
-      sreloc->size += p->count * RELOC_SIZE (htab);
+      elf32_arm_allocate_dynrelocs (info, sreloc, p->count);
     }
 
   return TRUE;
@@ -12477,7 +12496,7 @@ elf32_arm_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
 	      else if (p->count != 0)
 		{
 		  srel = elf_section_data (p->sec)->sreloc;
-		  srel->size += p->count * RELOC_SIZE (htab);
+		  elf32_arm_allocate_dynrelocs (info, srel, p->count);
 		  if ((p->sec->output_section->flags & SEC_READONLY) != 0)
 		    info->flags |= DF_TEXTREL;
 		}
@@ -12528,11 +12547,11 @@ elf32_arm_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
 
 	      if ((info->shared && !(*local_tls_type & GOT_TLS_GDESC))
 		  || *local_tls_type & GOT_TLS_GD)
-		srel->size += RELOC_SIZE (htab);
+		elf32_arm_allocate_dynrelocs (info, srel, 1);
 
 	      if (info->shared && *local_tls_type & GOT_TLS_GDESC)
 		{
-		  htab->root.srelplt->size += RELOC_SIZE (htab);
+		  elf32_arm_allocate_dynrelocs (info, htab->root.srelplt, 1);
 		  htab->tls_trampoline = -1;
 		}
 	    }
@@ -12548,14 +12567,14 @@ elf32_arm_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
       htab->tls_ldm_got.offset = htab->root.sgot->size;
       htab->root.sgot->size += 8;
       if (info->shared)
-	htab->root.srelgot->size += RELOC_SIZE (htab);
+	elf32_arm_allocate_dynrelocs (info, htab->root.srelgot, 1);
     }
   else
     htab->tls_ldm_got.offset = -1;
 
   /* Allocate global sym .plt and .got entries, and space for global
      sym dynamic relocs.  */
-  elf_link_hash_traverse (& htab->root, allocate_dynrelocs, info);
+  elf_link_hash_traverse (& htab->root, allocate_dynrelocs_for_symbol, info);
 
   /* Here we rummage through the found bfds to collect glue information.  */
   for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
@@ -13004,7 +13023,6 @@ elf32_arm_finish_dynamic_symbol (bfd * output_bfd,
       asection * sgot;
       asection * srel;
       Elf_Internal_Rela rel;
-      bfd_byte *loc;
       bfd_vma offset;
 
       /* This symbol has an entry in the global offset table.  Set it
@@ -13042,15 +13060,13 @@ elf32_arm_finish_dynamic_symbol (bfd * output_bfd,
 	  rel.r_info = ELF32_R_INFO (h->dynindx, R_ARM_GLOB_DAT);
 	}
 
-      loc = srel->contents + srel->reloc_count++ * RELOC_SIZE (htab);
-      SWAP_RELOC_OUT (htab) (output_bfd, &rel, loc);
+      elf32_arm_add_dynreloc (output_bfd, info, srel, &rel);
     }
 
   if (h->needs_copy)
     {
       asection * s;
       Elf_Internal_Rela rel;
-      bfd_byte *loc;
 
       /* This symbol needs a copy reloc.  Set it up.  */
       BFD_ASSERT (h->dynindx != -1
@@ -13065,8 +13081,7 @@ elf32_arm_finish_dynamic_symbol (bfd * output_bfd,
 		      + h->root.u.def.section->output_section->vma
 		      + h->root.u.def.section->output_offset);
       rel.r_info = ELF32_R_INFO (h->dynindx, R_ARM_COPY);
-      loc = s->contents + s->reloc_count++ * RELOC_SIZE (htab);
-      SWAP_RELOC_OUT (htab) (output_bfd, &rel, loc);
+      elf32_arm_add_dynreloc (output_bfd, info, s, &rel);
     }
 
   /* Mark _DYNAMIC and _GLOBAL_OFFSET_TABLE_ as absolute.  On VxWorks,

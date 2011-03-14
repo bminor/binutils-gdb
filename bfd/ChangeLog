@@ -1,3 +1,16 @@
+2011-03-14  Richard Sandiford  <richard.sandiford@linaro.org>
+
+	* elf32-arm.c (elf32_arm_allocate_dynrelocs): New function.
+	(elf32_arm_add_dynreloc): Likewise.
+	(elf32_arm_adjust_dynamic_symbol): Use elf32_arm_allocate_dynrelocs
+	to allocate dynamic relocations.
+	(elf32_arm_size_dynamic_sections): Likewise.
+	(allocate_dynrelocs): Likewise.  Rename to
+	allocate_dynrelocs_for_symbol.
+	(elf32_arm_final_link_relocate): Use elf32_arm_add_dynreloc to
+	create dynamic relocations.
+	(elf32_arm_finish_dynamic_symbol): Likewise.
+
 2011-03-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf64-x86-64.c (elf_x86_64_check_tls_transition): Supprt TLS
