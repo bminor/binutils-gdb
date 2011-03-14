@@ -127,12 +127,6 @@
 	(cmd_qtbuffer): Ditto.
 	(cmd_bigqtbuffer): Ditto.
 
-	* gdbserver/tracepoint.c (tracepoint_finish_step): Fix
-	loop variable.
-
-	* gdbserver/server.c (handle_v_run): Free alloced buffer on early
-	return.
-
 2011-03-10  Tom Tromey  <tromey@redhat.com>
 
 	* tracepoint.c (trace_actions_command): Update.
@@ -480,8 +474,6 @@
 	* symfile.c (simple_overlay_update): Check for null return value
 	from lookup_minimal_symbol.
 
-	* gdbserver/server.c (queue_stop_reply): Call xmalloc not malloc.
-
 	* xml-syscall.c (syscall_start_syscall): Assert name is non null.
 
 2011-03-04  Thiago Jung Bauermann  <bauerman@br.ibm.com>
@@ -582,9 +574,6 @@
 	* cli/cli-script.c (script_from_file): Add break for lint.
 
 	* mdebugread.c (parse_partial_symbols): Fix indent.
-
-	* gdbserver/linux-arm-low.c (arm_arch_setup): Replace malloc
-	with xmalloc.
 
 	* target-descriptions.c (tdesc_gdb_type): No need to call
 	xstrdup, callee saves a copy.

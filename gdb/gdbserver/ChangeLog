@@ -1,11 +1,17 @@
 2011-03-14  Michael Snyder  <msnyder@vmware.com>
 
-	* gdbserver/hostio.c (handle_close): Remove unnecessary null test.
+	* hostio.c (handle_close): Remove unnecessary null test.
 
 2011-03-10  Joel Brobecker  <brobecker@adacore.com>
 
 	* Makefile.in (maintainer-clean realclean distclean): Remove
 	"make ...  subdir_do" command.
+
+2011-03-10  Michael Snyder  <msnyder@vmware.com>
+
+	* tracepoint.c (tracepoint_finish_step): Fix loop variable.
+
+	* server.c (handle_v_run): Free alloced buffer on early return.
 
 2011-03-09  Yao Qi  <yao@codesourcery.com>
 
@@ -45,6 +51,14 @@
 2011-03-04  Yao Qi  <yao@codesourcery.com>
 
 	* Makefile.in: Remove GNU make feature --directory.
+
+2011-03-04  Michael Snyder  <msnyder@vmware.com>
+
+	* server.c (queue_stop_reply): Call xmalloc not malloc.
+
+2011-03-02  Michael Snyder  <msnyder@vmware.com>
+
+	* linux-arm-low.c (arm_arch_setup): Replace malloc with xmalloc.
 
 2011-02-28  Michael Snyder  <msnyder@vmware.com>
 
