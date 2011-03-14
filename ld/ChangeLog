@@ -1,3 +1,12 @@
+2011-03-13  John David Anglin  <dave.anglin@nrc-cnnrc.gc.ca>
+
+	Backport from mainline:
+	2011-02-18  John David Anglin  <dave.anglin@nrc-cnnrc.gc.ca>
+
+	PR ld/12376
+	emulparams/hppalinux.sh (DATA_ADDR): Define.
+	(SHLIB_DATA_ADDR): Likewise.
+
 2011-02-14  Alan Modra  <amodra@gmail.com>
 
 	* ldmain.c (remove_output): Rename to..
