@@ -3851,7 +3851,7 @@ decode_dsp32mult_0 (SIM_CPU *cpu, bu16 iw0, bu16 iw1)
   int h01  = ((iw1 >> DSP32Mac_h01_bits) & DSP32Mac_h01_mask);
 
   bu32 res = DREG (dst);
-  bu32 sat0 = 0, sat1 = 0;
+  bu32 sat0 = 0, sat1 = 0, v_i0 = 0, v_i1 = 0;
   char _buf[128], *buf = _buf;
   int _MM = MM;
 
@@ -3874,7 +3874,7 @@ decode_dsp32mult_0 (SIM_CPU *cpu, bu16 iw0, bu16 iw1)
   if (w1)
     {
       bu64 r = decode_multfunc (cpu, h01, h11, src0, src1, mmod, MM, &sat1);
-      bu32 res1 = extract_mult (cpu, r, mmod, MM, P, NULL);
+      bu32 res1 = extract_mult (cpu, r, mmod, MM, P, &v_i1);
 
       buf += sprintf (buf, P ? "R%i" : "R%i.H", dst + P);
       buf += sprintf (buf, " = R%i.%c * R%i.%c",
@@ -3902,7 +3902,7 @@ decode_dsp32mult_0 (SIM_CPU *cpu, bu16 iw0, bu16 iw1)
   if (w0)
     {
       bu64 r = decode_multfunc (cpu, h00, h10, src0, src1, mmod, 0, &sat0);
-      bu32 res0 = extract_mult (cpu, r, mmod, 0, P, NULL);
+      bu32 res0 = extract_mult (cpu, r, mmod, 0, P, &v_i0);
 
       buf += sprintf (buf, P ? "R%i" : "R%i.L", dst);
       buf += sprintf (buf, " = R%i.%c * R%i.%c",
@@ -3926,10 +3926,12 @@ decode_dsp32mult_0 (SIM_CPU *cpu, bu16 iw0, bu16 iw1)
 
   if (w0 || w1)
     {
-      STORE (ASTATREG (v), sat0 | sat1);
-      STORE (ASTATREG (v_copy), sat0 | sat1);
-      if (sat0 | sat1)
-	STORE (ASTATREG (vs), 1);
+      bu32 v = sat0 | sat1 | v_i0 | v_i1;
+
+      STORE (ASTATREG (v), v);
+      STORE (ASTATREG (v_copy), v);
+      if (v)
+	STORE (ASTATREG (vs), v);
     }
 }
 

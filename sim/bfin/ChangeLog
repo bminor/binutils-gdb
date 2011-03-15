@@ -1,5 +1,11 @@
 2011-03-15  Robin Getz  <robin.getz@analog.com>
 
+	* bfin-sim.c (decode_dsp32mult_0): Declare v_i0 and v_i1.  Pass to
+	the extract_mult functions.  Include these when updating the V, VS,
+	and V_COPY bits.
+
+2011-03-15  Robin Getz  <robin.getz@analog.com>
+
 	* bfin-sim.c (astat_names): New global bit array.
 	(decode_CC2stat_0): Delete local astat_name and astat_names.
 	(decode_psedodbg_assert_0): Move hardcoded offset into a variable.
