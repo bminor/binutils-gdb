@@ -29,6 +29,19 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 
+/* ElfW is coming from linux. On other platforms it does not exist.
+   Let us define it here. */
+#ifndef ElfW
+# if (defined  (_LP64) || defined (__LP64__)) 
+#   define WORDSIZE 64
+# else
+#   define WORDSIZE 32
+# endif /* _LP64 || __LP64__  */
+#define ElfW(type)      _ElfW (Elf, WORDSIZE, type)
+#define _ElfW(e,w,t)    _ElfW_1 (e, w, _##t)
+#define _ElfW_1(e,w,t)  e##w##t
+#endif /* !ElfW  */
+
 typedef enum
 {
   JIT_NOACTION = 0,

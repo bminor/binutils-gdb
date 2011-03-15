@@ -1,3 +1,7 @@
+2011-03-15  Andreas Tobler  <andreast@fgznet.ch>
+
+	* gdb.base/jit-main.c: Define ElfW for non glibc elf targets.
+
 2011-03-15  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* lib/gdb.exp (gdb_unload): Add another termination case.
