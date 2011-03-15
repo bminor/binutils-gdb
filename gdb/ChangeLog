@@ -1,3 +1,8 @@
+2011-03-15  Ulrich Weigand  <ulrich.weigand@linaro.org>
+
+	* infcall.c (call_function_by_hand): Function return value is
+	always a non_lval, even when using struct_return.
+
 2011-03-15  Pedro Alves  <pedro@codesourcery.com>
 
 	* printcmd.c (ALL_DISPLAYS_SAFE): New.

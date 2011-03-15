@@ -1010,29 +1010,29 @@ When the function is done executing, GDB will silently stop."),
     restore_infcall_control_state (inf_status);
 
     /* Figure out the value returned by the function.  */
+    retval = allocate_value (values_type);
 
     if (lang_struct_return)
-      retval = value_at (values_type, struct_addr);
-    else if (TYPE_CODE (target_values_type) == TYPE_CODE_VOID)
+      read_value_memory (retval, 0, 1, struct_addr,
+			 value_contents_raw (retval),
+			 TYPE_LENGTH (values_type));
+    else if (TYPE_CODE (target_values_type) != TYPE_CODE_VOID)
       {
 	/* If the function returns void, don't bother fetching the
 	   return value.  */
-	retval = allocate_value (values_type);
-      }
-    else
-      {
 	switch (gdbarch_return_value (gdbarch, value_type (function),
 				      target_values_type, NULL, NULL, NULL))
 	  {
 	  case RETURN_VALUE_REGISTER_CONVENTION:
 	  case RETURN_VALUE_ABI_RETURNS_ADDRESS:
 	  case RETURN_VALUE_ABI_PRESERVES_ADDRESS:
-	    retval = allocate_value (values_type);
 	    gdbarch_return_value (gdbarch, value_type (function), values_type,
 				  retbuf, value_contents_raw (retval), NULL);
 	    break;
 	  case RETURN_VALUE_STRUCT_CONVENTION:
-	    retval = value_at (values_type, struct_addr);
+	    read_value_memory (retval, 0, 1, struct_addr,
+			       value_contents_raw (retval),
+			       TYPE_LENGTH (values_type));
 	    break;
 	  }
       }
