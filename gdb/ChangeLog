@@ -1,5 +1,7 @@
 2011-03-15  Michael Snyder  <msnyder@vmware.com>
 
+	* objc-lang.c (selectors_info): Check strchr for null result.
+
 	* stabsread.c (define_symbol): Guard against bad stabstring input.
 
 2011-03-15  Pierre Muller  <muller@ics.u-strasbg.fr>

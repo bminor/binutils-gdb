@@ -752,6 +752,13 @@ selectors_info (char *regexp, int from_tty)
 	    continue;
 	  /* Find selector part.  */
 	  name = (char *) strchr (name+2, ' ');
+	  if (name == NULL)
+	    {
+	      complaint (&symfile_complaints, 
+			 _("Bad method name '%s'"), 
+			 SYMBOL_NATURAL_NAME (msymbol));
+	      continue;
+	    }
 	  if (regexp == NULL || re_exec(++name) != 0)
 	    { 
 	      char *mystart = name;
