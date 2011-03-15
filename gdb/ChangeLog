@@ -1,4 +1,10 @@
-2011-03-15  Ulrich Weigand  <ulrich.weigand@linaro.org>
+2011-03-15  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* ppc-sysv-tdep.c (ppc64_sysv_abi_push_dummy_call): Add support
+	for the "generic" vector ABI used with GCC 4.3 and later.
+	(ppc64_sysv_abi_return_value): Likewise.
+
+2011-03-15  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* infcall.c (call_function_by_hand): Function return value is
 	always a non_lval, even when using struct_return.

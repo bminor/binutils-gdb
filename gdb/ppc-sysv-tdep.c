@@ -1119,6 +1119,9 @@ ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch,
   ULONGEST back_chain;
   /* See for-loop comment below.  */
   int write_pass;
+  /* Size of the by-reference parameter copy region, the final value is
+     computed in the for-loop below.  */
+  LONGEST refparam_size = 0;
   /* Size of the general parameter region, the final value is computed
      in the for-loop below.  */
   LONGEST gparam_size = 0;
@@ -1171,19 +1174,26 @@ ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch,
       /* The address, at which the next general purpose parameter
          (integer, struct, float, vector, ...) should be saved.  */
       CORE_ADDR gparam;
+      /* The address, at which the next by-reference parameter
+	 (non-Altivec vector, variably-sized type) should be saved.  */
+      CORE_ADDR refparam;
 
       if (!write_pass)
 	{
-	  /* During the first pass, GPARAM is more like an offset
-	     (start address zero) than an address.  That way it
-	     accumulates the total stack space required.  */
+	  /* During the first pass, GPARAM and REFPARAM are more like
+	     offsets (start address zero) than addresses.  That way
+	     they accumulate the total stack space each region
+	     requires.  */
 	  gparam = 0;
+	  refparam = 0;
 	}
       else
 	{
-	  /* Decrement the stack pointer making space for the on-stack
-	     stack parameters.  Set gparam to that region.  */
-	  gparam = align_down (sp - gparam_size, 16);
+	  /* Decrement the stack pointer making space for the Altivec
+	     and general on-stack parameters.  Set refparam and gparam
+	     to their corresponding regions.  */
+	  refparam = align_down (sp - refparam_size, 16);
+	  gparam = align_down (refparam - gparam_size, 16);
 	  /* Add in space for the TOC, link editor double word,
 	     compiler double word, LR save area, CR save area.  */
 	  sp = align_down (gparam - 48, 16);
@@ -1462,7 +1472,7 @@ ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch,
 	    }
 	  else if (TYPE_LENGTH (type) == 16 && TYPE_VECTOR (type)
 		   && TYPE_CODE (type) == TYPE_CODE_ARRAY
-		   && tdep->ppc_vr0_regnum >= 0)
+		   && tdep->vector_abi == POWERPC_VEC_ALTIVEC)
 	    {
 	      /* In the Altivec ABI, vectors go in the vector registers
 		 v2 .. v13, as well as the parameter area -- always at
@@ -1483,6 +1493,30 @@ ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch,
 	      greg += 2;
 	      vreg++;
 	      gparam += 16;
+	    }
+	  else if (TYPE_LENGTH (type) >= 16 && TYPE_VECTOR (type)
+		   && TYPE_CODE (type) == TYPE_CODE_ARRAY)
+	    {
+	      /* Non-Altivec vectors are passed by reference.  */
+
+	      /* Copy value onto the stack ...  */
+	      refparam = align_up (refparam, 16);
+	      if (write_pass)
+		write_memory (refparam, val, TYPE_LENGTH (type));
+
+	      /* ... and pass a pointer to the copy as parameter.  */
+	      if (write_pass)
+		{
+		  if (greg <= 10)
+		    regcache_cooked_write_unsigned (regcache,
+						    tdep->ppc_gp0_regnum +
+						    greg, refparam);
+		  write_memory_unsigned_integer (gparam, tdep->wordsize,
+						 byte_order, refparam);
+		}
+	      greg++;
+	      gparam = align_up (gparam + tdep->wordsize, tdep->wordsize);
+	      refparam = align_up (refparam + TYPE_LENGTH (type), tdep->wordsize);
 	    }
 	  else if ((TYPE_CODE (type) == TYPE_CODE_INT
 		    || TYPE_CODE (type) == TYPE_CODE_ENUM
@@ -1625,8 +1659,9 @@ ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch,
 
       if (!write_pass)
 	{
-	  /* Save the true region sizes ready for the second pass.
-	     Make certain that the general parameter save area is at
+	  /* Save the true region sizes ready for the second pass.  */
+	  refparam_size = refparam;
+	  /* Make certain that the general parameter save area is at
 	     least the minimum 8 registers (or doublewords) in size.  */
 	  if (greg < 8)
 	    gparam_size = 8 * tdep->wordsize;
@@ -1849,7 +1884,8 @@ ppc64_sysv_abi_return_value (struct gdbarch *gdbarch, struct type *func_type,
 	}
       /* A VMX vector is returned in v2.  */
       if (TYPE_CODE (valtype) == TYPE_CODE_ARRAY
-        && TYPE_VECTOR (valtype) && tdep->ppc_vr0_regnum >= 0)
+	  && TYPE_VECTOR (valtype)
+	  && tdep->vector_abi == POWERPC_VEC_ALTIVEC)
         {
           if (readbuf)
             regcache_cooked_read (regcache, tdep->ppc_vr0_regnum + 2, readbuf);

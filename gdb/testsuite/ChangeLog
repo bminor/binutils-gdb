@@ -1,3 +1,10 @@
+2011-03-15  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdb.arch/altivec-abi.exp: Skip "generic" tests on 64-bit when
+	using a GCC 4.1 or 4.2 compiler.  Add an additional test variant
+	"generic ABI, auto".
+	(altivec_abi_tests): Accept vectors returned by reference.
+
 2010-03-14  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* gdb.python/py-breakpoint.exp: Add Python stop operations tests.

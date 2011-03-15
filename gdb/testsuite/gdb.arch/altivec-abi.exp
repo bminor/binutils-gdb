@@ -118,8 +118,17 @@ proc altivec_abi_tests { extra_flags force_abi } {
     append pattern2 " at.*altivec-abi.c.*main.*result = vec_func .vshort,.*goes in v2.*Value returned is.*= .14, 36, 58, 80."
 
     # Let's see if the result is returned correctly.
-    gdb_test "finish" "Run till exit from .0.*$pattern2" \
-	"vector value returned correctly"
+    set message "vector value returned correctly"
+    gdb_test_multiple "finish" $message {
+	-re "Run till exit from .0.*$pattern2.*$gdb_prompt $" {
+	    pass $message
+	}
+	-re "Run till exit from .0.*Cannot determine contents.*$gdb_prompt $" {
+	    # This happens in those cases where the vector is returned by
+	    # reference (generic vectors on 64-bit GNU/Linux).
+	    pass $message
+	}
+    }
 
     # can we print the args correctly for this function?
     gdb_test "break struct_of_vector_func" "" ""
@@ -150,9 +159,17 @@ if [test_compiler_info gcc*] {
     # On GNU/Linux, we can mix -mabi=no-altivec and -mabi=altivec.
     # So test some combinations.
     if { [istarget "powerpc*-linux*"] } {
-	set binfile ${objdir}/${subdir}/${testfile}-ge-ge
-	set pf_prefix "${saved_prefix} generic ABI, forced:"
-	altivec_abi_tests "additional_flags=-maltivec additional_flags=-mabi=no-altivec" "generic"
+	# On 64-bit GNU/Linux with GCC 4.1 and 4.2, -mabi=no-altivec
+	# was broken, so skip those tests there.
+	if { ![is_lp64_target] || ![test_compiler_info "gcc-4-\[12\]-*"] } {
+	    set binfile ${objdir}/${subdir}/${testfile}-ge-ge
+	    set pf_prefix "${saved_prefix} generic ABI, forced:"
+	    altivec_abi_tests "additional_flags=-maltivec additional_flags=-mabi=no-altivec" "generic"
+
+	    set binfile ${objdir}/${subdir}/${testfile}-ge-auto
+	    set pf_prefix "${saved_prefix} generic ABI, auto:"
+	    altivec_abi_tests "additional_flags=-maltivec additional_flags=-mabi=no-altivec" "auto"
+	}
 
 	set binfile ${objdir}/${subdir}/${testfile}-av-av
 	set pf_prefix "${saved_prefix} AltiVec ABI, forced:"
