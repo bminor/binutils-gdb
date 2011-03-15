@@ -56,7 +56,8 @@ struct bfin_trace
 #define mmr_base()      offsetof(struct bfin_trace, tbufctl)
 #define mmr_offset(mmr) (offsetof(struct bfin_trace, mmr) - mmr_base())
 
-static const char * const mmr_names[] = {
+static const char * const mmr_names[] =
+{
   "TBUFCTL", "TBUFSTAT", [mmr_offset (tbuf) / 4] = "TBUF",
 };
 #define mmr_name(off) (mmr_names[(off) / 4] ? : "<INV>")

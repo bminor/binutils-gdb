@@ -39,7 +39,8 @@ exit 0
 */
 #endif
 
-static CB_TARGET_DEFS_MAP cb_linux_syscall_map[] = {
+static CB_TARGET_DEFS_MAP cb_linux_syscall_map[] =
+{
 #ifdef CB_SYS_restart_syscall
 # define TARGET_LINUX_SYS_restart_syscall 0
   { CB_SYS_restart_syscall, TARGET_LINUX_SYS_restart_syscall },
@@ -1283,7 +1284,8 @@ static CB_TARGET_DEFS_MAP cb_linux_syscall_map[] = {
   { -1, -1 }
 };
 
-static CB_TARGET_DEFS_MAP cb_linux_errno_map[] = {
+static CB_TARGET_DEFS_MAP cb_linux_errno_map[] =
+{
 #ifdef EPERM
 # define TARGET_LINUX_EPERM 1
   { EPERM, TARGET_LINUX_EPERM },
@@ -1787,7 +1789,8 @@ static CB_TARGET_DEFS_MAP cb_linux_errno_map[] = {
   { 0, 0 }
 };
 
-static CB_TARGET_DEFS_MAP cb_linux_open_map[] = {
+static CB_TARGET_DEFS_MAP cb_linux_open_map[] =
+{
 #ifdef O_ACCMODE
 # define TARGET_LINUX_O_ACCMODE 0003
   { O_ACCMODE, TARGET_LINUX_O_ACCMODE },
@@ -1839,7 +1842,8 @@ static CB_TARGET_DEFS_MAP cb_linux_open_map[] = {
   { -1, -1 }
 };
 
-static CB_TARGET_DEFS_MAP cb_linux_signal_map[] = {
+static CB_TARGET_DEFS_MAP cb_linux_signal_map[] =
+{
 #ifdef SIGHUP
 # define TARGET_LINUX_SIGHUP 1
   { SIGHUP, TARGET_LINUX_SIGHUP },

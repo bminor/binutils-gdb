@@ -63,7 +63,8 @@ struct bfin_mmu
 #define mmr_offset(mmr) (offsetof(struct bfin_mmu, mmr) - mmr_base())
 #define mmr_idx(mmr)    (mmr_offset (mmr) / 4)
 
-static const char * const mmr_names[BFIN_COREMMR_MMU_SIZE / 4] = {
+static const char * const mmr_names[BFIN_COREMMR_MMU_SIZE / 4] =
+{
   "SRAM_BASE_ADDRESS", "DMEM_CONTROL", "DCPLB_FAULT_STATUS", "DCPLB_FAULT_ADDR",
   [mmr_idx (dcplb_addr[0])] = "DCPLB_ADDR0",
   "DCPLB_ADDR1", "DCPLB_ADDR2", "DCPLB_ADDR3", "DCPLB_ADDR4", "DCPLB_ADDR5",

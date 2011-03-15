@@ -70,24 +70,28 @@ struct bfin_sic
 #define mmr_offset(mmr) (offsetof(struct bfin_sic, mmr) - mmr_base())
 #define mmr_idx(mmr)    (mmr_offset (mmr) / 4)
 
-static const char * const bf52x_mmr_names[] = {
+static const char * const bf52x_mmr_names[] =
+{
   "SWRST", "SYSCR", "SIC_RVECT", "SIC_IMASK0", "SIC_IAR0", "SIC_IAR1",
   "SIC_IAR2", "SIC_IAR3", "SIC_ISR0", "SIC_IWR0",
   [mmr_idx (bf52x.imask1)] = "SIC_IMASK1", "SIC_IAR4", "SIC_IAR5",
   "SIC_IAR6", "SIC_IAR7", "SIC_ISR1", "SIC_IWR1",
 };
-static const char * const bf537_mmr_names[] = {
+static const char * const bf537_mmr_names[] =
+{
   "SWRST", "SYSCR", "SIC_RVECT", "SIC_IMASK", "SIC_IAR0", "SIC_IAR1",
   "SIC_IAR2", "SIC_IAR3", "SIC_ISR", "SIC_IWR",
 };
-static const char * const bf54x_mmr_names[] = {
+static const char * const bf54x_mmr_names[] =
+{
   "SWRST", "SYSCR", "SIC_RVECT", "SIC_IMASK0", "SIC_IMASK1", "SIC_IMASK2",
   "SIC_ISR0", "SIC_ISR1", "SIC_ISR2", "SIC_IWR0", "SIC_IWR1", "SIC_IWR2",
   "SIC_IAR0", "SIC_IAR1", "SIC_IAR2", "SIC_IAR3",
   "SIC_IAR4", "SIC_IAR5", "SIC_IAR6", "SIC_IAR7",
   "SIC_IAR8", "SIC_IAR9", "SIC_IAR10", "SIC_IAR11",
 };
-static const char * const bf561_mmr_names[] = {
+static const char * const bf561_mmr_names[] =
+{
   "SWRST", "SYSCR", "SIC_RVECT", "SIC_IMASK0", "SIC_IMASK1",
   "SIC_IAR0", "SIC_IAR1", "SIC_IAR2", "SIC_IAR3",
   "SIC_IAR4", "SIC_IAR5", "SIC_IAR6", "SIC_IAR7",
@@ -557,7 +561,8 @@ bfin_sic_561_io_read_buffer (struct hw *me, void *dest, int space,
   { "ivg14", IVG14, 0, output_port, }, \
   { "ivg15", IVG15, 0, output_port, },
 
-static const struct hw_port_descriptor bfin_sic_50x_ports[] = {
+static const struct hw_port_descriptor bfin_sic_50x_ports[] =
+{
   BFIN_SIC_TO_CEC_PORTS
   /* SIC0 */
   { "pll",            0, 0, input_port, },
@@ -620,7 +625,8 @@ static const struct hw_port_descriptor bfin_sic_50x_ports[] = {
   { NULL, 0, 0, 0, },
 };
 
-static const struct hw_port_descriptor bfin_sic_51x_ports[] = {
+static const struct hw_port_descriptor bfin_sic_51x_ports[] =
+{
   BFIN_SIC_TO_CEC_PORTS
   /* SIC0 */
   { "pll",            0, 0, input_port, },
@@ -683,7 +689,8 @@ static const struct hw_port_descriptor bfin_sic_51x_ports[] = {
   { NULL, 0, 0, 0, },
 };
 
-static const struct hw_port_descriptor bfin_sic_52x_ports[] = {
+static const struct hw_port_descriptor bfin_sic_52x_ports[] =
+{
   BFIN_SIC_TO_CEC_PORTS
   /* SIC0 */
   { "pll",            0, 0, input_port, },
@@ -769,7 +776,8 @@ bfin_sic_52x_port_event (struct hw *me, int my_port, struct hw *source,
   bfin_sic_52x_forward_interrupts (me, sic);
 }
 
-static const struct hw_port_descriptor bfin_sic_533_ports[] = {
+static const struct hw_port_descriptor bfin_sic_533_ports[] =
+{
   BFIN_SIC_TO_CEC_PORTS
   { "pll",            0, 0, input_port, },
   { "dma_stat",       1, 0, input_port, },
@@ -816,7 +824,8 @@ bfin_sic_533_port_event (struct hw *me, int my_port, struct hw *source,
   bfin_sic_537_forward_interrupts (me, sic);
 }
 
-static const struct hw_port_descriptor bfin_sic_537_ports[] = {
+static const struct hw_port_descriptor bfin_sic_537_ports[] =
+{
   BFIN_SIC_TO_CEC_PORTS
   { "pll",            0, 0, input_port, },
   { "dma_stat",      10, 0, input_port, },
@@ -886,7 +895,8 @@ bfin_sic_537_port_event (struct hw *me, int my_port, struct hw *source,
   bfin_sic_537_forward_interrupts (me, sic);
 }
 
-static const struct hw_port_descriptor bfin_sic_538_ports[] = {
+static const struct hw_port_descriptor bfin_sic_538_ports[] =
+{
   BFIN_SIC_TO_CEC_PORTS
   /* SIC0 */
   { "pll",            0, 0, input_port, },
@@ -944,7 +954,8 @@ static const struct hw_port_descriptor bfin_sic_538_ports[] = {
   { NULL, 0, 0, 0, },
 };
 
-static const struct hw_port_descriptor bfin_sic_54x_ports[] = {
+static const struct hw_port_descriptor bfin_sic_54x_ports[] =
+{
   BFIN_SIC_TO_CEC_PORTS
   /* SIC0 */
   { "pll",            0, 0, input_port, },
@@ -1076,7 +1087,8 @@ bfin_sic_54x_port_event (struct hw *me, int my_port, struct hw *source,
   bfin_sic_54x_forward_interrupts (me, sic);
 }
 
-static const struct hw_port_descriptor bfin_sic_561_ports[] = {
+static const struct hw_port_descriptor bfin_sic_561_ports[] =
+{
   BFIN_SIC_TO_CEC_PORTS
   /* SIC0 */
   { "pll",            0, 0, input_port, },
@@ -1172,7 +1184,8 @@ bfin_sic_561_port_event (struct hw *me, int my_port, struct hw *source,
   bfin_sic_561_forward_interrupts (me, sic);
 }
 
-static const struct hw_port_descriptor bfin_sic_59x_ports[] = {
+static const struct hw_port_descriptor bfin_sic_59x_ports[] =
+{
   BFIN_SIC_TO_CEC_PORTS
   { "pll",            0, 0, input_port, },
   { "dma_stat",       1, 0, input_port, },

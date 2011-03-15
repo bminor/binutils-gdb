@@ -93,7 +93,8 @@ struct bfin_emac
 #define mmr_offset(mmr) (offsetof(struct bfin_emac, mmr) - mmr_base())
 #define mmr_idx(mmr)    (mmr_offset (mmr) / 4)
 
-static const char * const mmr_names[BFIN_MMR_EMAC_SIZE / 4] = {
+static const char * const mmr_names[BFIN_MMR_EMAC_SIZE / 4] =
+{
   "EMAC_OPMODE", "EMAC_ADDRLO", "EMAC_ADDRHI", "EMAC_HASHLO", "EMAC_HASHHI",
   "EMAC_STAADD", "EMAC_STADAT", "EMAC_FLC", "EMAC_VLAN1", "EMAC_VLAN2", NULL,
   "EMAC_WKUP_CTL", "EMAC_WKUP_FFMSK0", "EMAC_WKUP_FFMSK1", "EMAC_WKUP_FFMSK2",
@@ -488,7 +489,8 @@ bfin_emac_dma_write_buffer (struct hw *me, const void *source,
   return ret;
 }
 
-static const struct hw_port_descriptor bfin_emac_ports[] = {
+static const struct hw_port_descriptor bfin_emac_ports[] =
+{
   { "tx",   DV_PORT_TX,   0, output_port, },
   { "rx",   DV_PORT_RX,   0, output_port, },
   { "stat", DV_PORT_STAT, 0, output_port, },

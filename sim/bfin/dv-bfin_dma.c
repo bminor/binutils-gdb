@@ -68,7 +68,8 @@ struct bfin_dma
 #define mmr_base()      offsetof(struct bfin_dma, next_desc_ptr)
 #define mmr_offset(mmr) (offsetof(struct bfin_dma, mmr) - mmr_base())
 
-static const char * const mmr_names[] = {
+static const char * const mmr_names[] =
+{
   "NEXT_DESC_PTR", "START_ADDR", "CONFIG", "<INV>", "X_COUNT", "X_MODIFY",
   "Y_COUNT", "Y_MODIFY", "CURR_DESC_PTR", "CURR_ADDR", "IRQ_STATUS",
   "PERIPHERAL_MAP", "CURR_X_COUNT", "<INV>", "CURR_Y_COUNT", "<INV>",
@@ -494,7 +495,8 @@ bfin_dma_dma_write_buffer (struct hw *me, const void *source,
   return ret;
 }
 
-static const struct hw_port_descriptor bfin_dma_ports[] = {
+static const struct hw_port_descriptor bfin_dma_ports[] =
+{
   { "di", 0, 0, output_port, }, /* DMA Interrupt */
   { NULL, 0, 0, 0, },
 };

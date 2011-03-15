@@ -58,14 +58,17 @@ struct bfin_ebiu_amc
 #define mmr_offset(mmr) (offsetof(struct bfin_ebiu_amc, mmr) - mmr_base())
 #define mmr_idx(mmr)    (mmr_offset (mmr) / 4)
 
-static const char * const bf50x_mmr_names[] = {
+static const char * const bf50x_mmr_names[] =
+{
   "EBIU_AMGCTL", "EBIU_AMBCTL0", "EBIU_AMBCTL1",
   [mmr_idx (bf50x.mode)] = "EBIU_MODE", "EBIU_FCTL",
 };
-static const char * const bf53x_mmr_names[] = {
+static const char * const bf53x_mmr_names[] =
+{
   "EBIU_AMGCTL", "EBIU_AMBCTL0", "EBIU_AMBCTL1",
 };
-static const char * const bf54x_mmr_names[] = {
+static const char * const bf54x_mmr_names[] =
+{
   "EBIU_AMGCTL", "EBIU_AMBCTL0", "EBIU_AMBCTL1",
   "EBIU_MSBCTL", "EBIU_ARBSTAT", "EBIU_MODE", "EBIU_FCTL",
 };

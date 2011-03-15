@@ -49,7 +49,8 @@ struct bfin_spi
 #define mmr_base()      offsetof(struct bfin_spi, ctl)
 #define mmr_offset(mmr) (offsetof(struct bfin_spi, mmr) - mmr_base())
 
-static const char * const mmr_names[] = {
+static const char * const mmr_names[] =
+{
   "SPI_CTL", "SPI_FLG", "SPI_STAT", "SPI_TDBR",
   "SPI_RDBR", "SPI_BAUD", "SPI_SHADOW",
 };
@@ -168,7 +169,8 @@ bfin_spi_dma_write_buffer (struct hw *me, const void *source,
   return 0;
 }
 
-static const struct hw_port_descriptor bfin_spi_ports[] = {
+static const struct hw_port_descriptor bfin_spi_ports[] =
+{
   { "stat", 0, 0, output_port, },
   { NULL, 0, 0, 0, },
 };

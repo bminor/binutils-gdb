@@ -41,7 +41,8 @@ struct eth_phy
 #define reg_offset(reg) (offsetof(struct eth_phy, reg) - reg_base())
 #define reg_idx(reg)    (reg_offset (reg) / 4)
 
-static const char * const reg_names[] = {
+static const char * const reg_names[] =
+{
   [MII_BMCR       ] = "MII_BMCR",
   [MII_BMSR       ] = "MII_BMSR",
   [MII_PHYSID1    ] = "MII_PHYSID1",

@@ -46,7 +46,8 @@ static struct {
   void (*UpdateRect) (SDL_Surface *screen, Sint32 x, Sint32 y, Uint32 w, Uint32 h);
 } sdl;
 
-static const char * const sdl_syms[] = {
+static const char * const sdl_syms[] =
+{
   "SDL_Init",
   "SDL_Quit",
   "SDL_SetVideoMode",
@@ -222,19 +223,24 @@ bfin_gui_update (void *state, const void *source, unsigned nr_bytes)
   _FORMAT(((((rcnt) + (gcnt) + (bcnt) + (acnt)) + 7) / 8) * 8, \
 	  rcnt, gcnt, bcnt, acnt, rsh, gsh, bsh, ash)
 
-static const SDL_PixelFormat sdl_rgb_565 = {
+static const SDL_PixelFormat sdl_rgb_565 =
+{
   FORMAT (5, 6, 5, 0, 11, 5, 0, 0)
 };
-static const SDL_PixelFormat sdl_bgr_565 = {
+static const SDL_PixelFormat sdl_bgr_565 =
+{
   FORMAT (5, 6, 5, 0, 0, 5, 11, 0)
 };
-static const SDL_PixelFormat sdl_rgb_888 = {
+static const SDL_PixelFormat sdl_rgb_888 =
+{
   FORMAT (8, 8, 8, 0, 16, 8, 0, 0)
 };
-static const SDL_PixelFormat sdl_bgr_888 = {
+static const SDL_PixelFormat sdl_bgr_888 =
+{
   FORMAT (8, 8, 8, 0, 0, 8, 16, 0)
 };
-static const SDL_PixelFormat sdl_rgba_8888 = {
+static const SDL_PixelFormat sdl_rgba_8888 =
+{
   FORMAT (8, 8, 8, 8, 24, 16, 8, 0)
 };
 

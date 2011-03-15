@@ -1,3 +1,23 @@
+2011-03-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* bfroms/bf50x-0.0.h, bfroms/bf51x-0.0.h, bfroms/bf51x-0.1.h,
+	bfroms/bf51x-0.2.h, bfroms/bf526-0.0.h, bfroms/bf526-0.1.h,
+	bfroms/bf527-0.0.h, bfroms/bf527-0.1.h, bfroms/bf527-0.2.h,
+	bfroms/bf533-0.1.h, bfroms/bf533-0.2.h, bfroms/bf533-0.3.h,
+	bfroms/bf537-0.0.h, bfroms/bf537-0.1.h, bfroms/bf537-0.3.h,
+	bfroms/bf538-0.0.h, bfroms/bf54x-0.0.h, bfroms/bf54x-0.1.h,
+	bfroms/bf54x-0.2.h, bfroms/bf54x_l1-0.0.h, bfroms/bf54x_l1-0.1.h,
+	bfroms/bf54x_l1-0.2.h, bfroms/bf561-0.5.h, bfroms/bf59x-0.0.h,
+	bfroms/bf59x_l1-0.1.h, dv-bfin_cec.c, dv-bfin_ctimer.c,
+	dv-bfin_dma.c, dv-bfin_dmac.c, dv-bfin_ebiu_amc.c,
+	dv-bfin_ebiu_ddrc.c, dv-bfin_ebiu_sdc.c, dv-bfin_emac.c,
+	dv-bfin_eppi.c, dv-bfin_evt.c, dv-bfin_gptimer.c, dv-bfin_jtag.c,
+	dv-bfin_mmu.c, dv-bfin_nfc.c, dv-bfin_otp.c, dv-bfin_pll.c,
+	dv-bfin_ppi.c, dv-bfin_rtc.c, dv-bfin_sic.c, dv-bfin_spi.c,
+	dv-bfin_trace.c, dv-bfin_twi.c, dv-bfin_uart.c, dv-bfin_uart2.c,
+	dv-bfin_wdog.c, dv-bfin_wp.c, dv-eth_phy.c, gui.c,
+	linux-fixed-code.h, linux-targ-map.h, machs.c, Makefile.in: Fix style.
+
 2011-03-15  Robin Getz  <robin.getz@analog.com>
 
 	* bfin-sim.c (decode_dsp32alu_0): Set AZ based on val for 16bit adds

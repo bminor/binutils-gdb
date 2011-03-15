@@ -84,13 +84,15 @@ bfin_dmac_default_pmap (struct hw *dma)
     return CTYPE;	/* MDMA */
 }
 
-static const char *bfin_dmac_50x_pmap[] = {
+static const char *bfin_dmac_50x_pmap[] =
+{
   "ppi@0", "rsi", "sport@0", "sport@0", "sport@1", "sport@1",
   "spi@0", "spi@1", "uart2@0", "uart2@0", "uart2@1", "uart2@1",
 };
 
 /* XXX: Need to figure out how to handle portmuxed DMA channels.  */
-static const struct hw_port_descriptor bfin_dmac_50x_ports[] = {
+static const struct hw_port_descriptor bfin_dmac_50x_ports[] =
+{
   { "ppi@0",       0, 0, input_port, },
   { "rsi",         1, 0, input_port, },
   { "sport@0_rx",  2, 0, input_port, },
@@ -106,13 +108,15 @@ static const struct hw_port_descriptor bfin_dmac_50x_ports[] = {
   { NULL, 0, 0, 0, },
 };
 
-static const char *bfin_dmac_51x_pmap[] = {
+static const char *bfin_dmac_51x_pmap[] =
+{
   "ppi@0", "emac", "emac", "sport@0", "sport@0", "sport@1",
   "sport@1", "spi@0", "uart@0", "uart@0", "uart@1", "uart@1",
 };
 
 /* XXX: Need to figure out how to handle portmuxed DMA channels.  */
-static const struct hw_port_descriptor bfin_dmac_51x_ports[] = {
+static const struct hw_port_descriptor bfin_dmac_51x_ports[] =
+{
   { "ppi@0",       0, 0, input_port, },
   { "emac_rx",     1, 0, input_port, },
   { "emac_tx",     2, 0, input_port, },
@@ -130,14 +134,16 @@ static const struct hw_port_descriptor bfin_dmac_51x_ports[] = {
   { NULL, 0, 0, 0, },
 };
 
-static const char *bfin_dmac_52x_pmap[] = {
+static const char *bfin_dmac_52x_pmap[] =
+{
   "ppi@0", "emac", "emac", "sport@0", "sport@0", "sport@1",
   "sport@1", "spi", "uart@0", "uart@0", "uart@1", "uart@1",
 };
 
 /* XXX: Need to figure out how to handle portmuxed DMA channels
         like PPI/NFC here which share DMA0.  */
-static const struct hw_port_descriptor bfin_dmac_52x_ports[] = {
+static const struct hw_port_descriptor bfin_dmac_52x_ports[] =
+{
   { "ppi@0",       0, 0, input_port, },
 /*{ "nfc",         0, 0, input_port, },*/
   { "emac_rx",     1, 0, input_port, },
@@ -156,12 +162,14 @@ static const struct hw_port_descriptor bfin_dmac_52x_ports[] = {
   { NULL, 0, 0, 0, },
 };
 
-static const char *bfin_dmac_533_pmap[] = {
+static const char *bfin_dmac_533_pmap[] =
+{
   "ppi@0", "sport@0", "sport@0", "sport@1", "sport@1", "spi",
   "uart@0", "uart@0",
 };
 
-static const struct hw_port_descriptor bfin_dmac_533_ports[] = {
+static const struct hw_port_descriptor bfin_dmac_533_ports[] =
+{
   { "ppi@0",       0, 0, input_port, },
   { "sport@0_tx",  1, 0, input_port, },
   { "sport@0_rx",  2, 0, input_port, },
@@ -173,12 +181,14 @@ static const struct hw_port_descriptor bfin_dmac_533_ports[] = {
   { NULL, 0, 0, 0, },
 };
 
-static const char *bfin_dmac_537_pmap[] = {
+static const char *bfin_dmac_537_pmap[] =
+{
   "ppi@0", "emac", "emac", "sport@0", "sport@0", "sport@1",
   "sport@1", "spi", "uart@0", "uart@0", "uart@1", "uart@1",
 };
 
-static const struct hw_port_descriptor bfin_dmac_537_ports[] = {
+static const struct hw_port_descriptor bfin_dmac_537_ports[] =
+{
   { "ppi@0",       0, 0, input_port, },
   { "emac_rx",     1, 0, input_port, },
   { "emac_tx",     2, 0, input_port, },
@@ -194,12 +204,14 @@ static const struct hw_port_descriptor bfin_dmac_537_ports[] = {
   { NULL, 0, 0, 0, },
 };
 
-static const char *bfin_dmac0_538_pmap[] = {
+static const char *bfin_dmac0_538_pmap[] =
+{
   "ppi@0", "sport@0", "sport@0", "sport@1", "sport@1", "spi@0",
   "uart@0", "uart@0",
 };
 
-static const struct hw_port_descriptor bfin_dmac0_538_ports[] = {
+static const struct hw_port_descriptor bfin_dmac0_538_ports[] =
+{
   { "ppi@0",       0, 0, input_port, },
   { "sport@0_rx",  1, 0, input_port, },
   { "sport@0_tx",  2, 0, input_port, },
@@ -211,12 +223,14 @@ static const struct hw_port_descriptor bfin_dmac0_538_ports[] = {
   { NULL, 0, 0, 0, },
 };
 
-static const char *bfin_dmac1_538_pmap[] = {
+static const char *bfin_dmac1_538_pmap[] =
+{
   "sport@2", "sport@2", "sport@3", "sport@3", NULL, NULL,
   "spi@1", "spi@2", "uart@1", "uart@1", "uart@2", "uart@2",
 };
 
-static const struct hw_port_descriptor bfin_dmac1_538_ports[] = {
+static const struct hw_port_descriptor bfin_dmac1_538_ports[] =
+{
   { "sport@2_rx",  0, 0, input_port, },
   { "sport@2_tx",  1, 0, input_port, },
   { "sport@3_rx",  2, 0, input_port, },
@@ -230,12 +244,14 @@ static const struct hw_port_descriptor bfin_dmac1_538_ports[] = {
   { NULL, 0, 0, 0, },
 };
 
-static const char *bfin_dmac0_54x_pmap[] = {
+static const char *bfin_dmac0_54x_pmap[] =
+{
   "sport@0", "sport@0", "sport@1", "sport@1", "spi@0", "spi@1",
   "uart2@0", "uart2@0", "uart2@1", "uart2@1", "atapi", "atapi",
 };
 
-static const struct hw_port_descriptor bfin_dmac0_54x_ports[] = {
+static const struct hw_port_descriptor bfin_dmac0_54x_ports[] =
+{
   { "sport@0_rx",  0, 0, input_port, },
   { "sport@0_tx",  1, 0, input_port, },
   { "sport@1_rx",  2, 0, input_port, },
@@ -251,13 +267,15 @@ static const struct hw_port_descriptor bfin_dmac0_54x_ports[] = {
   { NULL, 0, 0, 0, },
 };
 
-static const char *bfin_dmac1_54x_pmap[] = {
+static const char *bfin_dmac1_54x_pmap[] =
+{
   "eppi@0", "eppi@1", "eppi@2", "pixc", "pixc", "pixc",
   "sport@2", "sport@2", "sport@3", "sport@3", "sdh",
   "spi@2", "uart2@2", "uart2@2", "uart2@3", "uart2@3",
 };
 
-static const struct hw_port_descriptor bfin_dmac1_54x_ports[] = {
+static const struct hw_port_descriptor bfin_dmac1_54x_ports[] =
+{
   { "eppi@0",      0, 0, input_port, },
   { "eppi@1",      1, 0, input_port, },
   { "eppi@2",      2, 0, input_port, },
@@ -278,11 +296,13 @@ static const struct hw_port_descriptor bfin_dmac1_54x_ports[] = {
   { NULL, 0, 0, 0, },
 };
 
-static const char *bfin_dmac0_561_pmap[] = {
+static const char *bfin_dmac0_561_pmap[] =
+{
   "sport@0", "sport@0", "sport@1", "sport@1", "spi", "uart@0", "uart@0",
 };
 
-static const struct hw_port_descriptor bfin_dmac0_561_ports[] = {
+static const struct hw_port_descriptor bfin_dmac0_561_ports[] =
+{
   { "sport@0_rx",  0, 0, input_port, },
   { "sport@0_tx",  1, 0, input_port, },
   { "sport@1_rx",  2, 0, input_port, },
@@ -293,22 +313,26 @@ static const struct hw_port_descriptor bfin_dmac0_561_ports[] = {
   { NULL, 0, 0, 0, },
 };
 
-static const char *bfin_dmac1_561_pmap[] = {
+static const char *bfin_dmac1_561_pmap[] =
+{
   "ppi@0", "ppi@1",
 };
 
-static const struct hw_port_descriptor bfin_dmac1_561_ports[] = {
+static const struct hw_port_descriptor bfin_dmac1_561_ports[] =
+{
   { "ppi@0",       0, 0, input_port, },
   { "ppi@1",       1, 0, input_port, },
   { NULL, 0, 0, 0, },
 };
 
-static const char *bfin_dmac_59x_pmap[] = {
+static const char *bfin_dmac_59x_pmap[] =
+{
   "ppi@0", "sport@0", "sport@0", "sport@1", "sport@1", "spi@0",
   "spi@1", "uart@0", "uart@0",
 };
 
-static const struct hw_port_descriptor bfin_dmac_59x_ports[] = {
+static const struct hw_port_descriptor bfin_dmac_59x_ports[] =
+{
   { "ppi@0",       0, 0, input_port, },
   { "sport@0_tx",  1, 0, input_port, },
   { "sport@0_rx",  2, 0, input_port, },

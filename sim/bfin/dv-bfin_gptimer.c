@@ -44,7 +44,8 @@ struct bfin_gptimer
 #define mmr_base()      offsetof(struct bfin_gptimer, config)
 #define mmr_offset(mmr) (offsetof(struct bfin_gptimer, mmr) - mmr_base())
 
-static const char * const mmr_names[] = {
+static const char * const mmr_names[] =
+{
   "TIMER_CONFIG", "TIMER_COUNTER", "TIMER_PERIOD", "TIMER_WIDTH",
 };
 #define mmr_name(off) mmr_names[(off) / 4]
@@ -129,7 +130,8 @@ bfin_gptimer_io_read_buffer (struct hw *me, void *dest, int space,
   return nr_bytes;
 }
 
-static const struct hw_port_descriptor bfin_gptimer_ports[] = {
+static const struct hw_port_descriptor bfin_gptimer_ports[] =
+{
   { "stat", 0, 0, output_port, },
   { NULL, 0, 0, 0, },
 };

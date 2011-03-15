@@ -42,7 +42,8 @@ struct bfin_pll
 #define mmr_base()      offsetof(struct bfin_pll, pll_ctl)
 #define mmr_offset(mmr) (offsetof(struct bfin_pll, mmr) - mmr_base())
 
-static const char * const mmr_names[] = {
+static const char * const mmr_names[] =
+{
   "PLL_CTL", "PLL_DIV", "VR_CTL", "PLL_STAT", "PLL_LOCKCNT", "CHIPID",
 };
 #define mmr_name(off) mmr_names[(off) / 4]
@@ -117,7 +118,8 @@ bfin_pll_io_read_buffer (struct hw *me, void *dest,
   return nr_bytes;
 }
 
-static const struct hw_port_descriptor bfin_pll_ports[] = {
+static const struct hw_port_descriptor bfin_pll_ports[] =
+{
   { "pll", 0, 0, output_port, },
   { NULL, 0, 0, 0, },
 };

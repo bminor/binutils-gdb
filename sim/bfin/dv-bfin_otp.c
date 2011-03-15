@@ -52,7 +52,8 @@ struct bfin_otp
 #define mmr_offset(mmr) (offsetof(struct bfin_otp, mmr) - mmr_base())
 #define mmr_idx(mmr)    (mmr_offset (mmr) / 4)
 
-static const char * const mmr_names[] = {
+static const char * const mmr_names[] =
+{
   "OTP_CONTROL", "OTP_BEN", "OTP_STATUS", "OTP_TIMING",
   [mmr_idx (data0)] = "OTP_DATA0", "OTP_DATA1", "OTP_DATA2", "OTP_DATA3",
 };

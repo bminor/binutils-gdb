@@ -60,7 +60,8 @@ struct bfin_uart
 #define mmr_base()      offsetof(struct bfin_uart, dll)
 #define mmr_offset(mmr) (offsetof(struct bfin_uart, mmr) - mmr_base())
 
-static const char * const mmr_names[] = {
+static const char * const mmr_names[] =
+{
   "UART_RBR/UART_THR", "UART_IER", "UART_IIR", "UART_LCR", "UART_MCR",
   "UART_LSR", "UART_MSR", "UART_SCR", "<INV>", "UART_GCTL",
 };
@@ -374,7 +375,8 @@ bfin_uart_dma_write_buffer (struct hw *me, const void *source,
   return ret;
 }
 
-static const struct hw_port_descriptor bfin_uart_ports[] = {
+static const struct hw_port_descriptor bfin_uart_ports[] =
+{
   { "tx",   DV_PORT_TX,   0, output_port, },
   { "rx",   DV_PORT_RX,   0, output_port, },
   { "stat", DV_PORT_STAT, 0, output_port, },

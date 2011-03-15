@@ -44,7 +44,8 @@ struct bfin_rtc
 #define mmr_base()      offsetof(struct bfin_rtc, stat)
 #define mmr_offset(mmr) (offsetof(struct bfin_rtc, mmr) - mmr_base())
 
-static const char * const mmr_names[] = {
+static const char * const mmr_names[] =
+{
   "RTC_STAT", "RTC_ICTL", "RTC_ISTAT", "RTC_SWCNT", "RTC_ALARM", "RTC_PREN",
 };
 #define mmr_name(off) mmr_names[(off) / 4]
@@ -138,7 +139,8 @@ bfin_rtc_io_read_buffer (struct hw *me, void *dest,
   return nr_bytes;
 }
 
-static const struct hw_port_descriptor bfin_rtc_ports[] = {
+static const struct hw_port_descriptor bfin_rtc_ports[] =
+{
   { "rtc", 0, 0, output_port, },
   { NULL, 0, 0, 0, },
 };

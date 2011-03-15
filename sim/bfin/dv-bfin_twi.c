@@ -62,7 +62,8 @@ struct bfin_twi
 #define mmr_offset(mmr) (offsetof(struct bfin_twi, mmr) - mmr_base())
 #define mmr_idx(mmr)    (mmr_offset (mmr) / 4)
 
-static const char * const mmr_names[] = {
+static const char * const mmr_names[] =
+{
   "TWI_CLKDIV", "TWI_CONTROL", "TWI_SLAVE_CTL", "TWI_SLAVE_STAT",
   "TWI_SLAVE_ADDR", "TWI_MASTER_CTL", "TWI_MASTER_STAT", "TWI_MASTER_ADDR",
   "TWI_INT_STAT", "TWI_INT_MASK", "TWI_FIFO_CTL", "TWI_FIFO_STAT",
@@ -173,7 +174,8 @@ bfin_twi_io_read_buffer (struct hw *me, void *dest, int space,
   return nr_bytes;
 }
 
-static const struct hw_port_descriptor bfin_twi_ports[] = {
+static const struct hw_port_descriptor bfin_twi_ports[] =
+{
   { "stat", 0, 0, output_port, },
   { NULL, 0, 0, 0, },
 };

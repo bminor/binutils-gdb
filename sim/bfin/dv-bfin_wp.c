@@ -54,7 +54,8 @@ struct bfin_wp
 #define mmr_offset(mmr) (offsetof(struct bfin_wp, mmr) - mmr_base())
 #define mmr_idx(mmr)    (mmr_offset (mmr) / 4)
 
-static const char * const mmr_names[] = {
+static const char * const mmr_names[] =
+{
   [mmr_idx (iactl)] = "WPIACTL",
   [mmr_idx (ia)]    = "WPIA0", "WPIA1", "WPIA2", "WPIA3", "WPIA4", "WPIA5",
   [mmr_idx (iacnt)] = "WPIACNT0", "WPIACNT1", "WPIACNT2",

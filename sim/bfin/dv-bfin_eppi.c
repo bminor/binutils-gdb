@@ -57,7 +57,8 @@ struct bfin_eppi
 #define mmr_base()      offsetof(struct bfin_eppi, status)
 #define mmr_offset(mmr) (offsetof(struct bfin_eppi, mmr) - mmr_base())
 
-static const char * const mmr_names[] = {
+static const char * const mmr_names[] =
+{
   "EPPI_STATUS", "EPPI_HCOUNT", "EPPI_HDELAY", "EPPI_VCOUNT", "EPPI_VDELAY",
   "EPPI_FRAME", "EPPI_LINE", "EPPI_CLKDIV", "EPPI_CONTROL", "EPPI_FS1W_HBL",
   "EPPI_FS1P_AVPL", "EPPI_FS2W_LVB", "EPPI_FS2P_LAVF", "EPPI_CLIP", "EPPI_ERR",
@@ -207,7 +208,8 @@ bfin_eppi_dma_write_buffer (struct hw *me, const void *source,
   return bfin_gui_update (eppi->gui_state, source, nr_bytes);
 }
 
-static const struct hw_port_descriptor bfin_eppi_ports[] = {
+static const struct hw_port_descriptor bfin_eppi_ports[] =
+{
   { "stat", 0, 0, output_port, },
   { NULL, 0, 0, 0, },
 };
