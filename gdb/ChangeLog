@@ -1,3 +1,10 @@
+2011-03-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf2read.c (dwarf2_get_pc_bounds): Require HIGH strictly higher
+	than LOW.  Comment it.
+	(read_partial_die): Call complaint for inappropriate zero LOWPC or
+	HIGHPC not strictly higher than LOWPC.
+
 2011-03-15  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	Fix formatting of function declarations returning a pointer in

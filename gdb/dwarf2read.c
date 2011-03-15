@@ -5982,7 +5982,8 @@ dwarf2_get_pc_bounds (struct die_info *die, CORE_ADDR *lowpc,
 	}
     }
 
-  if (high < low)
+  /* read_partial_die has also the strict LOW < HIGH requirement.  */
+  if (high <= low)
     return 0;
 
   /* When using the GNU linker, .gnu.linkonce. sections are used to
@@ -9127,19 +9128,41 @@ read_partial_die (struct partial_die_info *part_die,
 	}
     }
 
-  /* When using the GNU linker, .gnu.linkonce. sections are used to
-     eliminate duplicate copies of functions and vtables and such.
-     The linker will arbitrarily choose one and discard the others.
-     The AT_*_pc values for such functions refer to local labels in
-     these sections.  If the section from that file was discarded, the
-     labels are not in the output, so the relocs get a value of 0.
-     If this is a discarded function, mark the pc bounds as invalid,
-     so that GDB will ignore it.  */
-  if (has_low_pc_attr && has_high_pc_attr
-      && part_die->lowpc < part_die->highpc
-      && (part_die->lowpc != 0
-	  || dwarf2_per_objfile->has_section_at_zero))
-    part_die->has_pc_info = 1;
+  if (has_low_pc_attr && has_high_pc_attr)
+    {
+      /* When using the GNU linker, .gnu.linkonce. sections are used to
+	 eliminate duplicate copies of functions and vtables and such.
+	 The linker will arbitrarily choose one and discard the others.
+	 The AT_*_pc values for such functions refer to local labels in
+	 these sections.  If the section from that file was discarded, the
+	 labels are not in the output, so the relocs get a value of 0.
+	 If this is a discarded function, mark the pc bounds as invalid,
+	 so that GDB will ignore it.  */
+      if (part_die->lowpc == 0 && !dwarf2_per_objfile->has_section_at_zero)
+	{
+	  struct gdbarch *gdbarch = get_objfile_arch (cu->objfile);
+
+	  complaint (&symfile_complaints,
+		     _("DW_AT_low_pc %s is zero "
+		       "for DIE at 0x%x [in module %s]"),
+		     paddress (gdbarch, part_die->lowpc),
+		     part_die->offset, cu->objfile->name);
+	}
+      /* dwarf2_get_pc_bounds has also the strict low < high requirement.  */
+      else if (part_die->lowpc >= part_die->highpc)
+	{
+	  struct gdbarch *gdbarch = get_objfile_arch (cu->objfile);
+
+	  complaint (&symfile_complaints,
+		     _("DW_AT_low_pc %s is not < DW_AT_high_pc %s "
+		       "for DIE at 0x%x [in module %s]"),
+		     paddress (gdbarch, part_die->lowpc),
+		     paddress (gdbarch, part_die->highpc),
+		     part_die->offset, cu->objfile->name);
+	}
+      else
+	part_die->has_pc_info = 1;
+    }
 
   return info_ptr;
 }

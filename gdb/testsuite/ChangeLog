@@ -1,3 +1,13 @@
+2011-03-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.dwarf2/dw2-empty-pc-range.S: New file.
+	* gdb.dwarf2/dw2-empty-pc-range.exp: New file.
+	* gdb.dwarf2/pr11465.S: New .text labels text_start and text_end.
+	Provide a stub byte there.
+	(DW_TAG_compile_unit): Set DW_AT_low_pc, DW_AT_high_pc and
+	DW_AT_entry_pc.
+	(dieb4, dieda): Set DW_AT_high_pc higher than DW_AT_low_pc.
+
 2011-03-15  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* gdb.arch/altivec-abi.exp: Skip "generic" tests on 64-bit when

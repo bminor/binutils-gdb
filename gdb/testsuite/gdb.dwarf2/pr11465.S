@@ -36,7 +36,12 @@
 */
 
 	.text
-_ZN1N1cE:	
+text_start:
+_ZN1N1cE:
+	/* Valid function must have non-empty PC range.  */
+	.byte 0
+text_end:
+
 	.section	.debug_info
 d:
 	.long	.Ldebug_info_end - 1f /* Length of CU info */
@@ -49,9 +54,9 @@ dieb:	.uleb128 0x1		/* DW_TAG_compile_unit */
 	.byte	0x4		/* DW_AT_language */
 	.long	.LASF5		/* DW_AT_name */
 	.long	.LASF6		/* DW_AT_comp_dir */
-	.long	0x0		/* DW_AT_low_pc */
-	.long	0x0		/* DW_AT_high_pc */
-	.long	0x0		/* DW_AT_entry_pc */
+	.long	text_start	/* DW_AT_low_pc */
+	.long	text_end	/* DW_AT_high_pc */
+	.long	text_start	/* DW_AT_entry_pc */
 die29:	.uleb128 0x2		/* DW_TAG_namespace */
 	.string	"N"		/* DW_AT_name */
 die32:	.uleb128 0x3		/* DW_TAG_class_type */
@@ -112,7 +117,7 @@ dieaf:	.uleb128 0xe		/* DW_TAG_const_type */
 dieb4:	.uleb128 0xf		/* DW_TAG_subprogram */
 	.long	die95-d		/* DW_AT_abstract_origin */
 	.long	_ZN1N1cE	/* DW_AT_low_pc */
-	.long	_ZN1N1cE	/* DW_AT_high_pc */
+	.long	_ZN1N1cE + 1	/* DW_AT_high_pc */
 diec9:	.uleb128 0x10		/* DW_TAG_subprogram */
 	.long	die9f-d		/* DW_AT_abstract_origin */
 	.byte	2f-1f		/* DW_AT_location */
@@ -131,7 +136,7 @@ dieda:	.uleb128 0x11		/* DW_TAG_subprogram */
 	.long	.LASF8		/* DW_AT_name */
 	.long	dief2-d		/* DW_AT_type */
 	.long	_ZN1N1cE	/* DW_AT_low_pc */
-	.long	_ZN1N1cE	/* DW_AT_high_pc */
+	.long	_ZN1N1cE + 1	/* DW_AT_high_pc */
 dief2:	.uleb128 0x12		/* DW_TAG_base_type */
 	.byte	0x4		/* DW_AT_byte_size */
 	.byte	0x5		/* DW_AT_encoding */
