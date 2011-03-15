@@ -636,6 +636,12 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
     {
       p += 2;
       p = strchr (p, ':');
+      if (p == NULL)
+	{
+	  complaint (&symfile_complaints, 
+		     _("Bad stabs string '%s'"), string);
+	  return NULL;
+	}
     }
 
   /* If a nameless stab entry, all we need is the type, not the symbol.

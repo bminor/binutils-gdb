@@ -1,3 +1,7 @@
+2011-03-15  Michael Snyder  <msnyder@vmware.com>
+
+	* stabsread.c (define_symbol): Guard against bad stabstring input.
+
 2011-03-15  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	Remove trailing spaces and tabulations from pascal language
