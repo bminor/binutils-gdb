@@ -1,3 +1,7 @@
+2011-03-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* ld-elfvers/vers.exp (vers19): Add -Wl,-rpath-link,. to linker flags.
+
 2011-03-14  Richard Sandiford  <richard.sandiford@linaro.org>
 
 	* ld-arm/ifunc-1.s, ld-arm/ifunc-1.dd, ld-arm/ifunc-1.gd,
