@@ -4128,7 +4128,7 @@ decode_dsp32alu_0 (SIM_CPU *cpu, bu16 iw0, bu16 iw1)
 	SET_DREG_L (dst0, val);
 
       SET_ASTATREG (an, val & 0x8000);
-
+      SET_ASTATREG (az, val == 0);
     }
   else if ((aop == 0 || aop == 2) && aopcde == 9 && s == 1)
     {

@@ -1,5 +1,10 @@
 2011-03-15  Robin Getz  <robin.getz@analog.com>
 
+	* bfin-sim.c (decode_dsp32alu_0): Set AZ based on val for 16bit adds
+	and subs.
+
+2011-03-15  Robin Getz  <robin.getz@analog.com>
+
 	* bfin-sim.c (decode_macfunc): Move acc STOREs behind op != 3 check.
 
 2011-03-15  Robin Getz  <robin.getz@analog.com>
