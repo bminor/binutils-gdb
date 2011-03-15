@@ -75,6 +75,42 @@ unhandled_instruction (SIM_CPU *cpu, const char *insn)
   illegal_instruction (cpu);
 }
 
+static const char * const astat_names[] =
+{
+  [ 0] = "AZ",
+  [ 1] = "AN",
+  [ 2] = "AC0_COPY",
+  [ 3] = "V_COPY",
+  [ 4] = "ASTAT_4",
+  [ 5] = "CC",
+  [ 6] = "AQ",
+  [ 7] = "ASTAT_7",
+  [ 8] = "RND_MOD",
+  [ 9] = "ASTAT_9",
+  [10] = "ASTAT_10",
+  [11] = "ASTAT_11",
+  [12] = "AC0",
+  [13] = "AC1",
+  [14] = "ASTAT_14",
+  [15] = "ASTAT_15",
+  [16] = "AV0",
+  [17] = "AV0S",
+  [18] = "AV1",
+  [19] = "AV1S",
+  [20] = "ASTAT_20",
+  [21] = "ASTAT_21",
+  [22] = "ASTAT_22",
+  [23] = "ASTAT_23",
+  [24] = "V",
+  [25] = "VS",
+  [26] = "ASTAT_26",
+  [27] = "ASTAT_27",
+  [28] = "ASTAT_28",
+  [29] = "ASTAT_29",
+  [30] = "ASTAT_30",
+  [31] = "ASTAT_31",
+};
+
 typedef enum
 {
   c_0, c_1, c_4, c_2, c_uimm2, c_uimm3, c_imm3, c_pcrel4,
@@ -2280,37 +2316,12 @@ decode_CC2stat_0 (SIM_CPU *cpu, bu16 iw0)
   bu32 pval;
 
   const char * const op_names[] = { "", "|", "&", "^" } ;
-  const char *astat_name;
-  const char * const astat_names[32] = {
-    [ 0] = "AZ",
-    [ 1] = "AN",
-    [ 2] = "AC0_COPY",
-    [ 3] = "V_COPY",
-    [ 5] = "CC",
-    [ 6] = "AQ",
-    [ 8] = "RND_MOD",
-    [12] = "AC0",
-    [13] = "AC1",
-    [16] = "AV0",
-    [17] = "AV0S",
-    [18] = "AV1",
-    [19] = "AV1S",
-    [24] = "V",
-    [25] = "VS",
-  };
-  astat_name = astat_names[cbit];
-  if (!astat_name)
-    {
-      static char astat_bit[12];
-      sprintf (astat_bit, "ASTAT[%i]", cbit);
-      astat_name = astat_bit;
-    }
 
   PROFILE_COUNT_INSN (cpu, pc, BFIN_INSN_CC2stat);
   TRACE_EXTRACT (cpu, "%s: D:%i op:%i cbit:%i", __func__, D, op, cbit);
 
-  TRACE_INSN (cpu, "%s %s= %s;", D ? astat_name : "CC",
-	      op_names[op], D ? "CC" : astat_name);
+  TRACE_INSN (cpu, "%s %s= %s;", D ? astat_names[cbit] : "CC",
+	      op_names[op], D ? "CC" : astat_names[cbit]);
 
   /* CC = CC; is invalid.  */
   if (cbit == 5)
@@ -2337,10 +2348,7 @@ decode_CC2stat_0 (SIM_CPU *cpu, bu16 iw0)
 	case 2: pval &= CCREG; break;
 	case 3: pval ^= CCREG; break;
 	}
-      if (astat_names[cbit])
-	TRACE_REGISTER (cpu, "wrote ASTAT[%s] = %i", astat_name, pval);
-      else
-	TRACE_REGISTER (cpu, "wrote %s = %i", astat_name, pval);
+      TRACE_REGISTER (cpu, "wrote ASTAT[%s] = %i", astat_names[cbit], pval);
       SET_ASTAT ((ASTAT & ~(1 << cbit)) | (pval << cbit));
     }
 }
@@ -5899,6 +5907,7 @@ decode_psedodbg_assert_0 (SIM_CPU *cpu, bu16 iw0, bu16 iw1, bu32 pc)
   int dbgop    = ((iw0 >> (PseudoDbg_Assert_dbgop_bits - 16)) & PseudoDbg_Assert_dbgop_mask);
   int grp      = ((iw0 >> (PseudoDbg_Assert_grp_bits - 16)) & PseudoDbg_Assert_grp_mask);
   int regtest  = ((iw0 >> (PseudoDbg_Assert_regtest_bits - 16)) & PseudoDbg_Assert_regtest_mask);
+  int offset;
   bu16 actual;
   bu32 val = reg_read (cpu, grp, regtest);
   const char *reg_name = get_allreg_name (grp, regtest);
@@ -5912,22 +5921,51 @@ decode_psedodbg_assert_0 (SIM_CPU *cpu, bu16 iw0, bu16 iw1, bu32 pc)
     {
       dbg_name = dbgop == 0 ? "DBGA" : "DBGAL";
       dbg_appd = dbgop == 0 ? ".L" : "";
-      actual = val;
+      offset = 0;
     }
   else if (dbgop == 1 || dbgop == 3)
     {
       dbg_name = dbgop == 1 ? "DBGA" : "DBGAH";
       dbg_appd = dbgop == 1 ? ".H" : "";
-      actual = val >> 16;
+      offset = 16;
     }
   else
     illegal_instruction (cpu);
 
+  actual = val >> offset;
+
   TRACE_INSN (cpu, "%s (%s%s, 0x%x);", dbg_name, reg_name, dbg_appd, expected);
   if (actual != expected)
     {
-      sim_io_printf (sd, "FAIL at %#x: %s (%s%s, 0x%04x), actual value %#x\n",
+      sim_io_printf (sd, "FAIL at %#x: %s (%s%s, 0x%04x); actual value %#x\n",
 		     pc, dbg_name, reg_name, dbg_appd, expected, actual);
+
+      /* Decode the actual ASTAT bits that are different.  */
+      if (grp == 4 && regtest == 6)
+	{
+	  int i;
+
+	  sim_io_printf (sd, "Expected ASTAT:\n");
+	  for (i = 0; i < 16; ++i)
+	    sim_io_printf (sd, " %8s%c%i%s",
+			   astat_names[i + offset],
+			   (((expected >> i) & 1) != ((actual >> i) & 1))
+				? '!' : ' ',
+			   (expected >> i) & 1,
+			   i == 7 ? "\n" : "");
+	  sim_io_printf (sd, "\n");
+
+	  sim_io_printf (sd, "Actual ASTAT:\n");
+	  for (i = 0; i < 16; ++i)
+	    sim_io_printf (sd, " %8s%c%i%s",
+			   astat_names[i + offset],
+			   (((expected >> i) & 1) != ((actual >> i) & 1))
+				? '!' : ' ',
+			   (actual >> i) & 1,
+			   i == 7 ? "\n" : "");
+	  sim_io_printf (sd, "\n");
+	}
+
       cec_exception (cpu, VEC_SIM_DBGA);
       SET_DREG (0, 1);
     }

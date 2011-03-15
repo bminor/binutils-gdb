@@ -1,3 +1,10 @@
+2011-03-15  Robin Getz  <robin.getz@analog.com>
+
+	* bfin-sim.c (astat_names): New global bit array.
+	(decode_CC2stat_0): Delete local astat_name and astat_names.
+	(decode_psedodbg_assert_0): Move hardcoded offset into a variable.
+	Print out ASTAT bit values when checking an ASTAT register.
+
 2010-03-15  Robin Getz  <robin.getz@analog.com>
 
 	* bfin-sim.c (extract_mult): Handle M_IU.
