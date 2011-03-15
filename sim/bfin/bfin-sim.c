@@ -1479,6 +1479,8 @@ extract_mult (SIM_CPU *cpu, bu64 res, int mmod, int MM,
       case 0:
       case M_IS:
 	return saturate_s32 (res, overflow);
+      case M_IU:
+	return saturate_u32 (res, overflow);
       case M_FU:
 	if (MM)
 	  return saturate_s32 (res, overflow);

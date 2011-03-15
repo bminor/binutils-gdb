@@ -1,3 +1,7 @@
+2010-03-15  Robin Getz  <robin.getz@analog.com>
+
+	* bfin-sim.c (extract_mult): Handle M_IU.
+
 2011-03-05  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in, TODO, aclocal.m4, bfin-sim.c, bfin-sim.h,
