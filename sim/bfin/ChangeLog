@@ -1,5 +1,12 @@
 2011-03-15  Robin Getz  <robin.getz@analog.com>
 
+	* bfin-sim.c (decode_macfunc): New neg parameter.  Set when the
+	high bit is set after extract_mult.
+	(decode_dsp32mac_0): Declare n_1 and n_0.  Pass to the decode_macfunc
+	functions.  Use these to update the AN bit.
+
+2011-03-15  Robin Getz  <robin.getz@analog.com>
+
 	* bfin-sim.c (decode_dsp32mult_0): Declare v_i0 and v_i1.  Pass to
 	the extract_mult functions.  Include these when updating the V, VS,
 	and V_COPY bits.
