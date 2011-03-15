@@ -73,12 +73,12 @@
 #define	yylval	pascal_lval
 #define	yychar	pascal_char
 #define	yydebug	pascal_debug
-#define	yypact	pascal_pact	
-#define	yyr1	pascal_r1			
-#define	yyr2	pascal_r2			
-#define	yydef	pascal_def		
-#define	yychk	pascal_chk		
-#define	yypgo	pascal_pgo		
+#define	yypact	pascal_pact
+#define	yyr1	pascal_r1
+#define	yyr2	pascal_r2
+#define	yydef	pascal_def
+#define	yychk	pascal_chk
+#define	yypgo	pascal_pgo
 #define	yyact	pascal_act
 #define	yyexca	pascal_exca
 #define yyerrflag pascal_errflag
@@ -181,7 +181,7 @@ static int search_field;
    Contexts where this distinction is not important can use the
    nonterminal "name", which matches either NAME or TYPENAME.  */
 
-%token <sval> STRING 
+%token <sval> STRING
 %token <sval> FIELDNAME
 %token <voidval> COMPLETE
 %token <ssym> NAME /* BLOCKNAME defined below to give it higher precedence.  */
@@ -260,12 +260,12 @@ exp1	:	exp
 /* Expressions, not including the comma operator.  */
 exp	:	exp '^'   %prec UNARY
 			{ write_exp_elt_opcode (UNOP_IND);
-			  if (current_type) 
+			  if (current_type)
 			    current_type = TYPE_TARGET_TYPE (current_type); }
 	;
 
 exp	:	'@' exp    %prec UNARY
-			{ write_exp_elt_opcode (UNOP_ADDR); 
+			{ write_exp_elt_opcode (UNOP_ADDR);
 			  if (current_type)
 			    current_type = TYPE_POINTER_TYPE (current_type); }
 	;
@@ -288,16 +288,16 @@ exp	:	DECREMENT  '(' exp ')'   %prec UNARY
 
 
 field_exp	:	exp '.'	%prec UNARY
-			{ search_field = 1; } 
+			{ search_field = 1; }
 	;
 
-exp	:	field_exp FIELDNAME 
+exp	:	field_exp FIELDNAME
 			{ write_exp_elt_opcode (STRUCTOP_STRUCT);
-			  write_exp_string ($2); 
+			  write_exp_string ($2);
 			  write_exp_elt_opcode (STRUCTOP_STRUCT);
-			  search_field = 0; 
+			  search_field = 0;
 			  if (current_type)
-			    { 
+			    {
 			      while (TYPE_CODE (current_type)
 				     == TYPE_CODE_PTR)
 				current_type =
@@ -306,16 +306,17 @@ exp	:	field_exp FIELDNAME
 				current_type, $2.ptr, 0);
 			    }
 			 }
-	; 
+	;
+
 
 exp	:	field_exp name
 			{ mark_struct_expression ();
 			  write_exp_elt_opcode (STRUCTOP_STRUCT);
 			  write_exp_string ($2);
 			  write_exp_elt_opcode (STRUCTOP_STRUCT);
-			  search_field = 0; 
+			  search_field = 0;
 			  if (current_type)
-			    { 
+			    {
 			      while (TYPE_CODE (current_type)
 				     == TYPE_CODE_PTR)
 				current_type =
@@ -338,21 +339,21 @@ exp	:	field_exp COMPLETE
 
 exp	:	exp '['
 			/* We need to save the current_type value.  */
-			{ char *arrayname; 
+			{ char *arrayname;
 			  int arrayfieldindex;
 			  arrayfieldindex = is_pascal_string_type (
 				current_type, NULL, NULL,
-				NULL, NULL, &arrayname); 
-			  if (arrayfieldindex) 
+				NULL, NULL, &arrayname);
+			  if (arrayfieldindex)
 			    {
 			      struct stoken stringsval;
 			      stringsval.ptr = alloca (strlen (arrayname) + 1);
 			      stringsval.length = strlen (arrayname);
 			      strcpy (stringsval.ptr, arrayname);
 			      current_type = TYPE_FIELD_TYPE (current_type,
-				arrayfieldindex - 1); 
+				arrayfieldindex - 1);
 			      write_exp_elt_opcode (STRUCTOP_STRUCT);
-			      write_exp_string (stringsval); 
+			      write_exp_string (stringsval);
 			      write_exp_elt_opcode (STRUCTOP_STRUCT);
 			    }
 			  push_current_type ();  }
@@ -371,7 +372,7 @@ exp	:	exp '('
 		arglist ')'	%prec ARROW
 			{ write_exp_elt_opcode (OP_FUNCALL);
 			  write_exp_elt_longcst ((LONGEST) end_arglist ());
-			  write_exp_elt_opcode (OP_FUNCALL); 
+			  write_exp_elt_opcode (OP_FUNCALL);
 			  pop_current_type ();
 			  if (current_type)
  	  		    current_type = TYPE_TARGET_TYPE (current_type);
@@ -396,7 +397,7 @@ exp	:	type '(' exp ')' %prec UNARY
 			    }
 			  write_exp_elt_opcode (UNOP_CAST);
 			  write_exp_elt_type ($1);
-			  write_exp_elt_opcode (UNOP_CAST); 
+			  write_exp_elt_opcode (UNOP_CAST);
 			  current_type = $1; }
 	;
 
@@ -413,9 +414,9 @@ exp	:	exp '*' exp
 exp	:	exp '/' {
 			  if (current_type && is_integral_type (current_type))
 			    leftdiv_is_integer = 1;
-			} 
+			}
 		exp
-			{ 
+			{
 			  if (leftdiv_is_integer && current_type
 			      && is_integral_type (current_type))
 			    {
@@ -426,7 +427,7 @@ exp	:	exp '/' {
 			      leftdiv_is_integer = 0;
 			    }
 
-			  write_exp_elt_opcode (BINOP_DIV); 
+			  write_exp_elt_opcode (BINOP_DIV);
 			}
 	;
 
@@ -455,37 +456,37 @@ exp	:	exp RSH exp
 	;
 
 exp	:	exp '=' exp
-			{ write_exp_elt_opcode (BINOP_EQUAL); 
+			{ write_exp_elt_opcode (BINOP_EQUAL);
 			  current_type = parse_type->builtin_bool;
 			}
 	;
 
 exp	:	exp NOTEQUAL exp
-			{ write_exp_elt_opcode (BINOP_NOTEQUAL); 
+			{ write_exp_elt_opcode (BINOP_NOTEQUAL);
 			  current_type = parse_type->builtin_bool;
 			}
 	;
 
 exp	:	exp LEQ exp
-			{ write_exp_elt_opcode (BINOP_LEQ); 
+			{ write_exp_elt_opcode (BINOP_LEQ);
 			  current_type = parse_type->builtin_bool;
 			}
 	;
 
 exp	:	exp GEQ exp
-			{ write_exp_elt_opcode (BINOP_GEQ); 
+			{ write_exp_elt_opcode (BINOP_GEQ);
 			  current_type = parse_type->builtin_bool;
 			}
 	;
 
 exp	:	exp '<' exp
-			{ write_exp_elt_opcode (BINOP_LESS); 
+			{ write_exp_elt_opcode (BINOP_LESS);
 			  current_type = parse_type->builtin_bool;
 			}
 	;
 
 exp	:	exp '>' exp
-			{ write_exp_elt_opcode (BINOP_GTR); 
+			{ write_exp_elt_opcode (BINOP_GTR);
 			  current_type = parse_type->builtin_bool;
 			}
 	;
@@ -578,7 +579,7 @@ exp	:	SIZEOF '(' type ')'	%prec UNARY
 
 exp	:	SIZEOF  '(' exp ')'      %prec UNARY
 			{ write_exp_elt_opcode (UNOP_SIZEOF); }
-	
+
 exp	:	STRING
 			{ /* C strings are converted into array constants with
 			     an explicit null byte added at the end.  Thus
@@ -605,13 +606,13 @@ exp	:	STRING
 
 /* Object pascal  */
 exp	:	THIS
-			{ 
+			{
 			  struct value * this_val;
 			  struct type * this_type;
 			  write_exp_elt_opcode (OP_THIS);
-			  write_exp_elt_opcode (OP_THIS); 
+			  write_exp_elt_opcode (OP_THIS);
 			  /* We need type of this.  */
-			  this_val = value_of_this (0); 
+			  this_val = value_of_this (0);
 			  if (this_val)
 			    this_type = value_type (this_val);
 			  else
@@ -624,7 +625,7 @@ exp	:	THIS
 				  write_exp_elt_opcode (UNOP_IND);
 				}
 			    }
-		
+
 			  current_type = this_type;
 			}
 	;
@@ -759,7 +760,7 @@ variable:	name_not_typename
 			      write_exp_string ($1.stoken);
 			      write_exp_elt_opcode (STRUCTOP_PTR);
 			      /* We need type of this.  */
-			      this_val = value_of_this (0); 
+			      this_val = value_of_this (0);
 			      if (this_val)
 				this_type = value_type (this_val);
 			      else
@@ -769,7 +770,7 @@ variable:	name_not_typename
 				  this_type,
 				  copy_name ($1.stoken), 0);
 			      else
-				current_type = NULL; 
+				current_type = NULL;
 			    }
 			  else
 			    {
@@ -958,7 +959,7 @@ parse_number (char *p, int len, int parsed_float, YYSTYPE *putithere)
 	 FIXME: This check is wrong; for example it doesn't find overflow
 	 on 0x123456789 when LONGEST is 32 bits.  */
       if (c != 'l' && c != 'u' && n != 0)
-	{	
+	{
 	  if ((unsigned_p && (ULONGEST) prevn >= (ULONGEST) n))
 	    error ("Numeric constant too large.");
 	}
@@ -1047,7 +1048,7 @@ push_current_type (void)
   tpnew->next = tp_top;
   tpnew->stored = current_type;
   current_type = NULL;
-  tp_top = tpnew; 
+  tp_top = tpnew;
 }
 
 static void
@@ -1130,7 +1131,7 @@ yylex (void)
   static char *tempbuf;
   static int tempbufsize;
   int saw_structop = last_was_structop;
- 
+
   last_was_structop = 0;
  retry:
 
@@ -1591,10 +1592,10 @@ yylex (void)
 	tempbuf = (char *) realloc (tempbuf, namelen + 1);
 	strncpy (tempbuf, tokstart, namelen); tempbuf [namelen] = 0;
 	yylval.sval.ptr = tempbuf;
-	yylval.sval.length = namelen; 
+	yylval.sval.length = namelen;
 	free (uptokstart);
 	return FIELDNAME;
-      } 
+      }
     /* Call lookup_symtab, not lookup_partial_symtab, in case there are
        no psymtabs (coff, xcoff, or some future change to blow away the
        psymtabs once once symbols are read).  */

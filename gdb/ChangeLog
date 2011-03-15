@@ -1,3 +1,12 @@
+2011-03-15  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	Remove trailing spaces and tabulations from pascal language
+	support sources.
+	p-exp.y: Ditto.
+	p-lang.c: Ditto.
+	p-lang.h: Ditto.
+	p-valprint.c: Ditto.
+
 2011-03-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* dwarf2read.c (dwarf2_get_pc_bounds): Require HIGH strictly higher

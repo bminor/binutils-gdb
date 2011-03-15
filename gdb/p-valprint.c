@@ -68,7 +68,7 @@ pascal_val_print (struct type *type, const gdb_byte *valaddr,
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_ARRAY:
-      if (get_array_bounds (type, &low_bound, &high_bound)) 
+      if (get_array_bounds (type, &low_bound, &high_bound))
 	{
 	  len = high_bound - low_bound + 1;
 	  elttype = check_typedef (TYPE_TARGET_TYPE (type));
@@ -317,7 +317,7 @@ pascal_val_print (struct type *type, const gdb_byte *valaddr,
 	      len = extract_unsigned_integer (valaddr + embedded_offset
 					      + length_pos, length_size,
 					      byte_order);
-	      LA_PRINT_STRING (stream, char_type, 
+	      LA_PRINT_STRING (stream, char_type,
 			       valaddr + embedded_offset + string_pos,
 			       len, NULL, 0, options);
 	    }
@@ -590,7 +590,7 @@ pascal_value_print (struct value *val, struct ui_file *stream,
     {
       /* Hack:  remove (char *) for char strings.  Their
          type is indicated by the quoted string anyway.  */
-      if (TYPE_CODE (type) == TYPE_CODE_PTR 
+      if (TYPE_CODE (type) == TYPE_CODE_PTR
 	  && TYPE_NAME (type) == NULL
 	  && TYPE_NAME (TYPE_TARGET_TYPE (type)) != NULL
 	  && strcmp (TYPE_NAME (TYPE_TARGET_TYPE (type)), "char") == 0)
