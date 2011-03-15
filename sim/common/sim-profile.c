@@ -190,7 +190,7 @@ set_profile_option_mask (SIM_DESC sd, const char *name, int mask, const char *ar
 		}
 	    }
 	}
-    }  
+    }
 
   return SIM_RC_OK;
 }
@@ -414,7 +414,7 @@ profile_option_handler (SIM_DESC sd,
 	    {
 	      PROFILE_PC_START (CPU_PROFILE_DATA (STATE_CPU (sd, cpu_nr))) = base;
 	      PROFILE_PC_END (CPU_PROFILE_DATA (STATE_CPU (sd, cpu_nr))) = bound;
-	    }	      
+	    }
 	  for (cpu_nr = 0; cpu_nr < MAX_NR_PROCESSORS; ++cpu_nr)
 	    CPU_PROFILE_FLAGS (STATE_CPU (sd, cpu_nr))[PROFILE_PC_IDX] = 1;
 	}
@@ -535,7 +535,7 @@ profile_pc_event (SIM_DESC sd,
     PROFILE_PC_COUNT (profile) [i] += 1; /* Overflow? */
   else
     PROFILE_PC_COUNT (profile) [PROFILE_PC_NR_BUCKETS (profile)] += 1;
-  PROFILE_PC_EVENT (profile) = 
+  PROFILE_PC_EVENT (profile) =
     sim_events_schedule (sd, PROFILE_PC_FREQ (profile), profile_pc_event, cpu);
 }
 
@@ -698,7 +698,7 @@ profile_print_pc (sim_cpu *cpu, int verbose)
   /* FIXME: Is this the best place for this code? */
   {
     FILE *pf = fopen ("gmon.out", "wb");
-    
+
     if (pf == NULL)
       sim_io_eprintf (sd, "Failed to open \"gmon.out\" profile file\n");
     else

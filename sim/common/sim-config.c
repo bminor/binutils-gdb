@@ -224,8 +224,8 @@ sim_config (SIM_DESC sd)
 		      config_stdio_to_a (current_stdio));
       return SIM_RC_FAIL;
     }
-  
-  
+
+
   /* check the value of MSB */
   if (WITH_TARGET_WORD_MSB != 0
       && WITH_TARGET_WORD_MSB != (WITH_TARGET_WORD_BITSIZE - 1))
@@ -234,8 +234,8 @@ sim_config (SIM_DESC sd)
 		      WITH_TARGET_WORD_BITSIZE, WITH_TARGET_WORD_MSB);
       return SIM_RC_FAIL;
     }
-  
-  
+
+
   /* set the environment */
 #if (WITH_TREE_PROPERTIES)
   if (STATE_ENVIRONMENT (sd) == ALL_ENVIRONMENT)
@@ -256,8 +256,8 @@ sim_config (SIM_DESC sd)
 #endif
   if (STATE_ENVIRONMENT (sd) == ALL_ENVIRONMENT)
     STATE_ENVIRONMENT (sd) = DEFAULT_ENVIRONMENT;
-  
-  
+
+
   /* set the alignment */
 #if (WITH_TREE_PROPERTIES)
   if (current_alignment == 0)
@@ -270,7 +270,7 @@ sim_config (SIM_DESC sd)
     current_alignment = WITH_ALIGNMENT;
   if (current_alignment == 0)
     current_alignment = WITH_DEFAULT_ALIGNMENT;
-  
+
   /* verify the alignment */
   if (CURRENT_ALIGNMENT == 0)
     {
@@ -284,13 +284,13 @@ sim_config (SIM_DESC sd)
 		      config_alignment_to_a (current_alignment));
       return SIM_RC_FAIL;
     }
-  
+
 #if defined (WITH_FLOATING_POINT)
-  
+
   /* set the floating point */
   if (current_floating_point == 0)
     current_floating_point = WITH_FLOATING_POINT;
-  
+
   /* verify the floating point */
   if (CURRENT_FLOATING_POINT == 0)
     {
@@ -304,7 +304,7 @@ sim_config (SIM_DESC sd)
 		      config_alignment_to_a (current_floating_point));
       return SIM_RC_FAIL;
     }
-  
+
 #endif
   return SIM_RC_OK;
 }
@@ -374,9 +374,9 @@ print_sim_config (SIM_DESC sd)
 #if defined (WITH_RESERVED_BITS)
   sim_io_printf (sd, "WITH_RESERVED_BITS = %d\n", WITH_RESERVED_BITS);
 #endif
-		 
+
 #if defined (WITH_PROFILE)
   sim_io_printf (sd, "WITH_PROFILE = %d\n", WITH_PROFILE);
 #endif
-		 
+
 }

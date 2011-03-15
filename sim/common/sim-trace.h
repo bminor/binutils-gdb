@@ -394,7 +394,7 @@ do { \
   if (TRACE_ALU_P (CPU)) \
     trace_input0 (SD, CPU, TRACE_ALU_IDX); \
 } while (0)
-    
+
 #define TRACE_ALU_INPUT1(V0) \
 do { \
   if (TRACE_ALU_P (CPU)) \
@@ -466,7 +466,7 @@ do { \
   if (TRACE_FPU_P (CPU)) \
     trace_input0 (SD, CPU, TRACE_FPU_IDX); \
 } while (0)
-    
+
 #define TRACE_FP_INPUT1(V0) \
 do { \
   if (TRACE_FPU_P (CPU)) \
@@ -490,7 +490,7 @@ do { \
   if (TRACE_FPU_P (CPU)) \
     trace_input_word1 (SD, CPU, TRACE_FPU_IDX, (V0)); \
 } while (0)
-    
+
 #define TRACE_FP_RESULT(R0) \
 do { \
   if (TRACE_FPU_P (CPU)) \

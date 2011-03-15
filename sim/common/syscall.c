@@ -93,7 +93,7 @@ get_string (cb, sc, buf, buflen, addr)
 	 path name along with the syscall request, and cache the file
 	 name somewhere (or otherwise tweak this as desired).  */
       unsigned int count = (*sc->read_mem) (cb, sc, addr, p, 1);
-				    
+
       if (count != 1)
 	return EINVAL;
       if (*p == 0)

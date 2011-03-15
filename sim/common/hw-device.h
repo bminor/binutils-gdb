@@ -341,7 +341,7 @@ typedef int (hw_unit_encode_method)
       const hw_unit *unit,
       char *encoded,
       int sizeof_buf);
-     
+
 #define hw_unit_encode(bus, unit, encoded, sizeof_encoded) \
 ((bus)->to_unit_encode (bus, unit, encoded, sizeof_encoded))
 

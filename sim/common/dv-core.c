@@ -24,11 +24,11 @@
 #include "hw-main.h"
 
 /* DEVICE
-   
+
    core - root of the device tree
-   
+
    DESCRIPTION
-   
+
    The core device, positioned at the root of the device tree appears
    to its child devices as a normal device just like every other
    device in the tree.

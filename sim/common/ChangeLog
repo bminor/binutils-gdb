@@ -1,3 +1,15 @@
+2011-03-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* callback.c, cgen-engine.h, dv-core.c, dv-glue.c, dv-pal.c,
+	hw-base.c, hw-device.c, hw-device.h, hw-handles.c, hw-instances.c,
+	hw-ports.c, hw-ports.h, hw-properties.c, hw-tree.c, nrun.c,
+	run-sim.h, run.c, sim-alu.h, sim-assert.h, sim-base.h, sim-basics.h,
+	sim-config.c, sim-core.c, sim-core.h, sim-engine.h, sim-events.c,
+	sim-events.h, sim-fpu.c, sim-hw.c, sim-inline.h, sim-load.c,
+	sim-memopt.c, sim-n-core.h, sim-options.c, sim-profile.c,
+	sim-signal.c, sim-trace.c, sim-trace.h, sim-utils.c, sim-watch.c,
+	syscall.c: Trim trailing whitespace.
+
 2011-03-05  Mike Frysinger  <vapier@gentoo.org>
 
 	* gennltvals.sh: Handle bfin targets.

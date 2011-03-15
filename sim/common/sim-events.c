@@ -74,7 +74,7 @@ typedef enum {
   watch_sim_le_2,
   watch_sim_le_4,
   watch_sim_le_8,
-  
+
   /* wallclock */
   watch_clock,
 
@@ -111,7 +111,7 @@ struct _sim_event {
 
 /* The event queue maintains a single absolute time using two
    variables.
-   
+
    TIME_OF_EVENT: this holds the time at which the next event is ment
    to occur.  If no next event it will hold the time of the last
    event.
@@ -387,7 +387,7 @@ sim_events_remain_time (SIM_DESC sd, sim_event *event)
 {
   if (event == 0)
     return 0;
-  
+
   return (event->time_of_event - sim_events_time (sd));
 }
 
@@ -447,10 +447,10 @@ insert_sim_event (SIM_DESC sd,
 
   if (delta < 0)
     sim_io_error (sd, "what is past is past!\n");
-  
+
   /* compute when the event should occur */
   time_of_event = sim_events_time (sd) + delta;
-  
+
   /* find the queue insertion point - things are time ordered */
   prev = &events->queue;
   curr = events->queue;
@@ -462,12 +462,12 @@ insert_sim_event (SIM_DESC sd,
       curr = curr->next;
     }
   SIM_ASSERT (curr == NULL || time_of_event < curr->time_of_event);
-  
+
   /* insert it */
   new_event->next = curr;
   *prev = new_event;
   new_event->time_of_event = time_of_event;
-  
+
   /* adjust the time until the first event */
   update_time_from_event (sd);
 }
@@ -554,7 +554,7 @@ sim_events_schedule_after_signal (SIM_DESC sd,
   sigfillset(&new_mask);
   sigprocmask (SIG_SETMASK, &new_mask, &old_mask);
 #endif
-  
+
   /* allocate an event entry from the signal buffer */
   new_event = &events->held [events->nr_held];
   events->nr_held ++;
@@ -563,7 +563,7 @@ sim_events_schedule_after_signal (SIM_DESC sd,
       sim_engine_abort (NULL, NULL, NULL_CIA,
 			"sim_events_schedule_after_signal - buffer oveflow");
     }
-  
+
   new_event->data = data;
   new_event->handler = handler;
   new_event->time_of_event = delta_time; /* work it out later */
@@ -575,7 +575,7 @@ sim_events_schedule_after_signal (SIM_DESC sd,
   /*-UNLOCK-*/
   sigprocmask (SIG_SETMASK, &old_mask, NULL);
 #endif
-  
+
   ETRACE ((_ETRACE,
 	   "signal scheduled at %ld - tag 0x%lx - time %ld, handler 0x%lx, data 0x%lx\n",
 	   (long)sim_events_time(sd),
@@ -1105,7 +1105,7 @@ sim_events_process (SIM_DESC sd)
   if (events->nr_held > 0)
     {
       int i;
-      
+
 #if defined(HAVE_SIGPROCMASK) && defined(SIG_SETMASK)
       /*-LOCK-*/
       sigset_t old_mask;
@@ -1123,14 +1123,14 @@ sim_events_process (SIM_DESC sd)
 			       entry->data);
 	}
       events->nr_held = 0;
-      
+
 #if defined(HAVE_SIGPROCMASK) && defined(SIG_SETMASK)
       /*-UNLOCK-*/
       sigprocmask(SIG_SETMASK, &old_mask, NULL);
 #endif
-      
+
     }
-  
+
   /* Process any watchpoints. Be careful to allow a watchpoint to
      appear/disappear under our feet.
      To ensure that watchpoints are processed only once per cycle,
@@ -1162,7 +1162,7 @@ sim_events_process (SIM_DESC sd)
 	  events->watchedpoints = to_do;
 	}
     }
-  
+
   /* consume all events for this or earlier times.  Be careful to
      allow an event to appear/disappear under our feet */
   while (events->queue->time_of_event <
@@ -1184,13 +1184,13 @@ sim_events_process (SIM_DESC sd)
       sim_events_free (sd, to_do);
       handler (sd, data);
     }
-  
+
   /* put things back where they belong ready for the next iteration */
   events->watchpoints = events->watchedpoints;
   events->watchedpoints = NULL;
   if (events->watchpoints != NULL)
     events->work_pending = 1;
-  
+
   /* advance the time */
   SIM_ASSERT (events->time_from_event >= events->nr_ticks_to_process);
   SIM_ASSERT (events->queue != NULL); /* always poll event */

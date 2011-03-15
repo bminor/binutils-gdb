@@ -184,7 +184,7 @@ do_memopt_add (SIM_DESC sd,
       if (mmap_next_fd >= 0)
 	{
 	  /* Some kernels will SIGBUS the application if mmap'd file
-	     is not large enough.  */ 
+	     is not large enough.  */
 	  if (s.st_size < bytes)
 	    {
 	      sim_io_error (sd,
@@ -199,9 +199,9 @@ do_memopt_add (SIM_DESC sd,
 			    strerror(errno));
 	    }
 	}
-#endif 
+#endif
 
-      /* Need heap allocation? */ 
+      /* Need heap allocation? */
       if (free_buffer == NULL)
 	{
 	  /* If filling with non-zero value, do not use clearing allocator. */
@@ -385,7 +385,7 @@ memory_option_handler (SIM_DESC sd, sim_cpu *cpu, int opt,
 	  parse_addr (arg, &level, &space, &addr);
 	  return do_memopt_delete (sd, level, space, addr);
 	}
-    
+
     case OPTION_MEMORY_REGION:
       {
 	char *chp = arg;

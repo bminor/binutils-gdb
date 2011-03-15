@@ -150,7 +150,7 @@ merge_device_file (struct sim_state *sd,
   struct hw *current = STATE_HW (sd)->tree;
   int line_nr;
   char device_path[1000];
-  
+
   /* try opening the file */
   description = fopen (file_name, "r");
   if (description == NULL)
@@ -158,7 +158,7 @@ merge_device_file (struct sim_state *sd,
       perror (file_name);
       return SIM_RC_FAIL;
     }
-  
+
   line_nr = 0;
   while (fgets (device_path, sizeof(device_path), description))
     {
@@ -267,7 +267,7 @@ hw_option_handler (struct sim_state *sd, sim_cpu *cpu, int opt,
 	sim_hw_print (sd, sim_io_vprintf);
 	return SIM_RC_OK;
       }
-  
+
     case OPTION_HW_FILE:
       {
 	return merge_device_file (sd, arg);
@@ -333,7 +333,7 @@ sim_hw_uninstall (struct sim_state *sd)
 /* CPU: The simulation is running and the current CPU/CIA
    initiates a data transfer. */
 
-void 
+void
 sim_cpu_hw_io_read_buffer (sim_cpu *cpu,
 			   sim_cia cia,
 			   struct hw *hw,
@@ -349,7 +349,7 @@ sim_cpu_hw_io_read_buffer (sim_cpu *cpu,
     sim_engine_abort (sd, cpu, cia, "broken CPU read");
 }
 
-void 
+void
 sim_cpu_hw_io_write_buffer (sim_cpu *cpu,
 			    sim_cia cia,
 			    struct hw *hw,
@@ -370,7 +370,7 @@ sim_cpu_hw_io_write_buffer (sim_cpu *cpu,
 
 /* SYSTEM: A data transfer is being initiated by the system. */
 
-unsigned 
+unsigned
 sim_hw_io_read_buffer (struct sim_state *sd,
 		       struct hw *hw,
 		       void *dest,

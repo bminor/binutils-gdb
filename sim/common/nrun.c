@@ -102,11 +102,11 @@ main (int argc, char **argv)
       prog_bfd = bfd_openr (name, 0);
       if (prog_bfd == NULL)
 	{
-	  fprintf (stderr, "%s: can't open \"%s\": %s\n", 
+	  fprintf (stderr, "%s: can't open \"%s\": %s\n",
 		   myname, name, bfd_errmsg (bfd_get_error ()));
 	  exit (1);
 	}
-      if (!bfd_check_format (prog_bfd, bfd_object)) 
+      if (!bfd_check_format (prog_bfd, bfd_object))
 	{
 	  fprintf (stderr, "%s: \"%s\" is not an object file: %s\n",
 		   myname, name, bfd_errmsg (bfd_get_error ()));
@@ -155,10 +155,10 @@ main (int argc, char **argv)
       /* remain on breakpoint or signals in oe mode*/
       while (((reason == sim_signalled) &&
 	      (sigrc == sim_signal_to_host (sd, SIM_SIGTRAP))) ||
-	     ((reason == sim_stopped) && 
+	     ((reason == sim_stopped) &&
 	      (STATE_ENVIRONMENT (sd) == OPERATING_ENVIRONMENT)));
     }
-  else 
+  else
     {
       do
 	{
@@ -175,28 +175,28 @@ main (int argc, char **argv)
 	  sim_resume (sd, 0, sigrc);
 	  signal (SIGINT, prev_sigint);
 	  sim_stop_reason (sd, &reason, &sigrc);
-	  
+
 	  if ((reason == sim_stopped) &&
 	      (sigrc == sim_signal_to_host (sd, SIM_SIGINT)))
 	    break; /* exit on control-C */
-	  
+
 	  /* remain on signals in oe mode */
 	} while ((reason == sim_stopped) &&
 		 (STATE_ENVIRONMENT (sd) == OPERATING_ENVIRONMENT));
-      
+
     }
   /* Print any stats the simulator collected.  */
   if (STATE_VERBOSE_P (sd))
     sim_info (sd, 0);
-  
+
   /* Shutdown the simulator.  */
   sim_close (sd, 0);
-  
+
   /* If reason is sim_exited, then sigrc holds the exit code which we want
      to return.  If reason is sim_stopped or sim_signalled, then sigrc holds
      the signal that the simulator received; we want to return that to
      indicate failure.  */
-  
+
   /* Why did we stop? */
   switch (reason)
     {

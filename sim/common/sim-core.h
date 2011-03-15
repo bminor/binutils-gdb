@@ -278,7 +278,7 @@ DECLARE_SIM_CORE_WRITE_N(aligned,4,4)
 DECLARE_SIM_CORE_WRITE_N(aligned,8,8)
 DECLARE_SIM_CORE_WRITE_N(aligned,16,16)
 
-#define sim_core_write_unaligned_1 sim_core_write_aligned_1 
+#define sim_core_write_unaligned_1 sim_core_write_aligned_1
 DECLARE_SIM_CORE_WRITE_N(unaligned,2,2)
 DECLARE_SIM_CORE_WRITE_N(unaligned,4,4)
 DECLARE_SIM_CORE_WRITE_N(unaligned,8,8)

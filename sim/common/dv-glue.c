@@ -31,13 +31,13 @@
 #endif
 
 /* DEVICE
-   
+
 
    glue - glue to interconnect and test hardware ports
-   
+
 
    DESCRIPTION
-   
+
 
    The glue device provides two functions.  Firstly, it provides a
    mechanism for inspecting and driving the port network.  Secondly,
@@ -70,7 +70,7 @@
 
 
    PROPERTIES
-   
+
 
    reg = <address> <size> (required)
 
@@ -88,7 +88,7 @@
 
    PORTS
 
-   
+
    int[0..] (input, output)
 
    Both an input and an output port.
@@ -137,11 +137,11 @@
    |  write_string("AND is ");
    |  write_int(ans);
    |  write_line();
-   
+
 
    BUGS
 
-   
+
    A future implementation of this device may support multiple
    interrupt ranges.
 
@@ -192,7 +192,7 @@ static void
 hw_glue_finish (struct hw *me)
 {
   struct hw_glue *glue = HW_ZALLOC (me, struct hw_glue);
-  
+
   /* establish our own methods */
   set_hw_data (me, glue);
   set_hw_io_read_buffer (me, hw_glue_io_read_buffer);
@@ -202,7 +202,7 @@ hw_glue_finish (struct hw *me)
 
   /* attach to our parent bus */
   do_hw_attach_regs (me);
-  
+
   /* establish the output registers */
   {
     reg_property_spec unit;
@@ -233,7 +233,7 @@ hw_glue_finish (struct hw *me)
     glue->nr_outputs = glue->sizeof_output / sizeof (unsigned_word);
     glue->output = hw_zalloc (me, glue->sizeof_output);
   }
-  
+
   /* establish the input ports */
   {
     const struct hw_property *ranges;
@@ -256,7 +256,7 @@ hw_glue_finish (struct hw *me)
     glue->sizeof_input = glue->nr_inputs * sizeof (unsigned);
     glue->input = hw_zalloc (me, glue->sizeof_input);
   }
-  
+
   /* determine our type */
   {
     const char *name = hw_name(me);
@@ -267,7 +267,7 @@ hw_glue_finish (struct hw *me)
     else
       hw_abort (me, "unimplemented glue type");
   }
-  
+
   HW_TRACE ((me, "int-number %d, nr_inputs %d, nr_outputs %d",
 	     glue->int_number, glue->nr_inputs, glue->nr_outputs));
 }

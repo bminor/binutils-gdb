@@ -82,13 +82,13 @@ sim_load_file (sd, myname, callback, prog, prog_bfd, verbose_p, lma_p, do_write)
       result_bfd = bfd_openr (prog, 0);
       if (result_bfd == NULL)
 	{
-	  eprintf (callback, "%s: can't open \"%s\": %s\n", 
+	  eprintf (callback, "%s: can't open \"%s\": %s\n",
 		   myname, prog, bfd_errmsg (bfd_get_error ()));
 	  return NULL;
 	}
     }
 
-  if (!bfd_check_format (result_bfd, bfd_object)) 
+  if (!bfd_check_format (result_bfd, bfd_object))
     {
       eprintf (callback, "%s: \"%s\" is not an object file: %s\n",
 	       myname, prog, bfd_errmsg (bfd_get_error ()));
@@ -102,9 +102,9 @@ sim_load_file (sd, myname, callback, prog, prog_bfd, verbose_p, lma_p, do_write)
     start_time = time (NULL);
 
   found_loadable_section = 0;
-  for (s = result_bfd->sections; s; s = s->next) 
+  for (s = result_bfd->sections; s; s = s->next)
     {
-      if (s->flags & SEC_LOAD) 
+      if (s->flags & SEC_LOAD)
 	{
 	  bfd_size_type size;
 

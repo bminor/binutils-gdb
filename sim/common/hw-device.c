@@ -50,7 +50,7 @@ hw_ioctl (struct hw *me,
   va_end(ap);
   return status;
 }
-      
+
 char *
 hw_strdup (struct hw *me, const char *str)
 {

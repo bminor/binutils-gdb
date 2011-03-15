@@ -55,7 +55,7 @@
 	   if (events-were-next)
 	     next-cpu-nr = 0;
 
-           .... // prime main loop 
+           .... // prime main loop
 
            while (1)
              {

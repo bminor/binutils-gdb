@@ -44,27 +44,27 @@
 /* manipulate/lookup device names */
 
 typedef struct _name_specifier {
-  
+
   /* components in the full length name */
   char *path;
   char *property;
   char *value;
-  
+
   /* current device */
   char *family;
   char *name;
   char *unit;
   char *args;
-  
+
   /* previous device */
   char *last_name;
   char *last_family;
   char *last_unit;
   char *last_args;
-  
+
   /* work area */
   char buf[1024];
-  
+
 } name_specifier;
 
 
@@ -78,7 +78,7 @@ split_device_specifier (struct hw *current,
 			name_specifier *spec)
 {
   char *chp = NULL;
-  
+
   /* expand any leading alias if present */
   if (current != NULL
       && *device_specifier != '\0'
@@ -114,18 +114,18 @@ split_device_specifier (struct hw *current,
     {
       strcpy(spec->buf, device_specifier);
     }
-  
+
   /* check no overflow */
   if (strlen(spec->buf) >= sizeof(spec->buf))
     hw_abort (NULL, "split_device_specifier: buffer overflow\n");
-  
+
   /* strip leading spaces */
   chp = spec->buf;
   while (*chp != '\0' && isspace(*chp))
     chp++;
   if (*chp == '\0')
     return 0;
-  
+
   /* find the path and terminate it with null */
   spec->path = chp;
   while (*chp != '\0' && !isspace(*chp))
@@ -135,12 +135,12 @@ split_device_specifier (struct hw *current,
       *chp = '\0';
       chp++;
     }
-  
+
   /* and any value */
   while (*chp != '\0' && isspace(*chp))
     chp++;
   spec->value = chp;
-  
+
   /* now go back and chop the property off of the path */
   if (spec->value[0] == '\0')
     {
@@ -165,7 +165,7 @@ split_device_specifier (struct hw *current,
       spec->property = chp+1;
     }
   }
-  
+
   /* and mark the rest as invalid */
   spec->name = NULL;
   spec->family = NULL;
@@ -175,7 +175,7 @@ split_device_specifier (struct hw *current,
   spec->last_family = NULL;
   spec->last_unit = NULL;
   spec->last_args = NULL;
-  
+
   return 1;
 }
 
@@ -239,7 +239,7 @@ split_device_name (name_specifier *spec)
   chp = strchr (spec->name, '/');
   if (chp == NULL)
     spec->path = strchr (spec->name, '\0');
-  else 
+  else
     {
       spec->path = chp+1;
       *chp = '\0';
@@ -365,15 +365,15 @@ split_find_device (struct hw *current,
       else
 	break;
     }
-  
+
   /* now go through the path proper */
-  
+
   if (current == NULL)
     {
       split_device_name (spec);
       return NULL;
     }
-  
+
   while (split_device_name (spec))
     {
       struct hw *child;
@@ -398,7 +398,7 @@ split_find_device (struct hw *current,
 	return current; /* search failed */
       current = child;
     }
-  
+
   return current;
 }
 
@@ -411,10 +411,10 @@ split_fill_path (struct hw *current,
   /* break it up */
   if (!split_device_specifier (current, device_specifier, spec))
     hw_abort (current, "error parsing %s\n", device_specifier);
-  
+
   /* fill our tree with its contents */
   current = split_find_device (current, spec);
-  
+
   /* add any additional devices as needed */
   if (spec->name != NULL)
     {
@@ -431,7 +431,7 @@ split_fill_path (struct hw *current,
 	}
       while (split_device_name (spec));
     }
-  
+
   return current;
 }
 
@@ -540,13 +540,13 @@ parse_reg_property (struct hw *current,
   int reg_nr;
   reg_property_spec *regs;
   const char *chp;
-  
+
   /* determine the number of reg entries by counting tokens */
   nr_regs = count_entries (current, property_name, property_value, 2);
-  
+
   /* create working space */
   regs = zalloc (nr_regs * sizeof (*regs));
-  
+
   /* fill it in */
   chp = property_value;
   for (reg_nr = 0; reg_nr < nr_regs; reg_nr++)
@@ -556,11 +556,11 @@ parse_reg_property (struct hw *current,
       chp = parse_size (current, hw_parent(current),
 			chp, &regs[reg_nr].size);
     }
-  
+
   /* create it */
   hw_add_reg_array_property (current, property_name,
 			     regs, nr_regs);
-  
+
   free (regs);
 }
 
@@ -576,13 +576,13 @@ parse_ranges_property (struct hw *current,
   int range_nr;
   range_property_spec *ranges;
   const char *chp;
-  
+
   /* determine the number of ranges specified */
   nr_ranges = count_entries (current, property_name, property_value, 3);
-  
+
   /* create a property of that size */
   ranges = zalloc (nr_ranges * sizeof(*ranges));
-  
+
   /* fill it in */
   chp = property_value;
   for (range_nr = 0; range_nr < nr_ranges; range_nr++)
@@ -594,10 +594,10 @@ parse_ranges_property (struct hw *current,
       chp = parse_size (current, current,
 			chp, &ranges[range_nr].size);
     }
-  
+
   /* create it */
   hw_add_range_array_property (current, property_name, ranges, nr_ranges);
-  
+
   free (ranges);
 }
 
@@ -654,7 +654,7 @@ parse_string_property (struct hw *current,
   const char *chp;
   int nr_strings;
   int approx_nr_strings;
-  
+
   /* get an estimate as to the number of strings by counting double
      quotes */
   approx_nr_strings = 2;
@@ -664,22 +664,22 @@ parse_string_property (struct hw *current,
 	approx_nr_strings++;
     }
   approx_nr_strings = (approx_nr_strings) / 2;
-  
+
   /* create a string buffer for that many (plus a null) */
   strings = (char**) zalloc ((approx_nr_strings + 1) * sizeof(char*));
-  
+
   /* now find all the strings */
   chp = property_value;
   nr_strings = 0;
   while (1)
     {
-      
+
       /* skip leading space */
       while (*chp != '\0' && isspace (*chp))
 	chp += 1;
       if (*chp == '\0')
 	break;
-      
+
       /* copy it in */
       if (*chp == '"')
 	{
@@ -733,7 +733,7 @@ parse_string_property (struct hw *current,
 		  property_name);
     }
   ASSERT (strings[nr_strings] == NULL); /* from zalloc */
-  
+
   /* install it */
   if (nr_strings == 0)
     hw_add_string_property (current, property_name, "");
@@ -745,7 +745,7 @@ parse_string_property (struct hw *current,
       hw_add_string_array_property (current, property_name,
 				    specs, nr_strings);
     }
-  
+
   /* flush the created string */
   while (nr_strings > 0)
     {
@@ -765,10 +765,10 @@ parse_ihandle_property (struct hw *current,
 			const char *value)
 {
   ihandle_runtime_property_spec ihandle;
-  
+
   /* pass the full path */
   ihandle.full_path = value;
-  
+
   /* save this ready for the ihandle create */
   hw_add_ihandle_runtime_property (current, property,
 				   &ihandle);
@@ -806,7 +806,7 @@ hw_tree_parse (struct hw *current,
     va_end (ap);
     return current;
 }
-  
+
 struct hw *
 hw_tree_vparse (struct hw *current,
 		const char *fmt,
@@ -814,15 +814,15 @@ hw_tree_vparse (struct hw *current,
 {
   char device_specifier[1024];
   name_specifier spec;
-  
+
   /* format the path */
   vsprintf (device_specifier, fmt, ap);
   if (strlen (device_specifier) >= sizeof (device_specifier))
     hw_abort (NULL, "device_tree_add_deviced: buffer overflow\n");
-  
+
   /* construct the tree down to the final struct hw */
   current = split_fill_path (current, device_specifier, &spec);
-  
+
   /* is there an interrupt spec */
   if (spec.property == NULL
       && spec.value != NULL)
@@ -862,7 +862,7 @@ hw_tree_vparse (struct hw *current,
 	  break;
 	}
     }
-  
+
   /* is there a property */
   if (spec.property != NULL)
     {
@@ -1102,7 +1102,7 @@ print_properties (struct hw *me,
       if (property->original != NULL)
 	{
 	  p->print (p->file, " !");
-	  p->print (p->file, "%s/%s", 
+	  p->print (p->file, "%s/%s",
 		     hw_path (property->original->owner),
 		     property->original->name);
 	}
@@ -1259,17 +1259,17 @@ hw_tree_find_device (struct hw *root,
 {
   struct hw *node;
   name_specifier spec;
-  
+
   /* parse the path */
   split_device_specifier (root, path_to_device, &spec);
   if (spec.value != NULL)
     return NULL; /* something wierd */
-  
+
   /* now find it */
   node = split_find_device (root, &spec);
   if (spec.name != NULL)
     return NULL; /* not a leaf */
-  
+
   return node;
 }
 

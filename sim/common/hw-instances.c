@@ -156,7 +156,7 @@ int
 hw_instance_call_method (struct hw_instance *instance,
 			 const char *method_name,
 			 int n_stack_args,
-			 unsigned_cell stack_args[/*n_stack_args*/],	
+			 unsigned_cell stack_args[/*n_stack_args*/],
 			 int n_stack_returns,
 			 unsigned_cell stack_returns[/*n_stack_args*/])
 {

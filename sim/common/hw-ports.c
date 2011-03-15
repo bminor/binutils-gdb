@@ -251,7 +251,7 @@ hw_port_decode (struct hw *me,
     {
       const struct hw_port_descriptor *ports =
 	me->ports_of_hw->ports;
-      if (ports != NULL) 
+      if (ports != NULL)
 	{
 	  while (ports->name != NULL)
 	    {

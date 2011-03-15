@@ -44,13 +44,13 @@
 
 /* DEVICE
 
-   
+
    pal - glue logic device containing assorted junk
 
-   
+
    DESCRIPTION
 
-   
+
    Typical hardware dependant hack.  This device allows the firmware
    to gain access to all the things the firmware needs (but the OS
    doesn't).
@@ -74,10 +74,10 @@
 
    RESET (write): halts the simulator.  The value written to the
    register is used as an exit status.
-   
+
    PROCESSOR ID (read): returns the processor identifier (0 .. N-1) of
    the processor performing the read.
-   
+
    INTERRUPT (write): This register must be written using a two byte
    store.  The low byte specifies a port and the upper byte specifies
    the a level.  LEVEL is driven on the specified port.  By
@@ -122,7 +122,7 @@
 
 
    PROPERTIES
-   
+
 
    reg = <address> <size> (required)
 
@@ -429,7 +429,7 @@ hw_pal_io_write_buffer (struct hw *me,
 {
   hw_pal_device *hw_pal = (hw_pal_device*) hw_data (me);
   unsigned_1 *byte = (unsigned_1 *) source;
-  
+
   switch (addr & hw_pal_address_mask)
     {
 
@@ -467,12 +467,12 @@ hw_pal_io_write_buffer (struct hw *me,
       do_counter_write (me, hw_pal, "countdown",
 			&hw_pal->countdown, source, nr_bytes);
       break;
-      
+
     case hw_pal_timer:
       do_counter_write (me, hw_pal, "timer",
 			&hw_pal->timer, source, nr_bytes);
       break;
-      
+
     }
   return nr_bytes;
 }
