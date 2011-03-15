@@ -366,7 +366,7 @@ extern int debug_displaced;
 void displaced_step_dump_bytes (struct ui_file *file,
                                 const gdb_byte *buf, size_t len);
 
-struct displaced_step_closure* get_displaced_step_closure_by_addr (CORE_ADDR addr);
+struct displaced_step_closure *get_displaced_step_closure_by_addr (CORE_ADDR addr);
 
 /* Possible values for gdbarch_call_dummy_location.  */
 #define ON_STACK 1

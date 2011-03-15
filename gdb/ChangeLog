@@ -1,3 +1,11 @@
+2011-03-15  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	Fix formatting of function declarations returning a pointer in
+	previous commit.
+	* varobj.c (varobj_add_child): Ditto.
+	* hppa-tdep.h (hppa_init_objfile_priv_data): Ditto.
+	* inferior.h (get_displaced_step_closure_by_addr): Ditto.
+
 2011-03-15  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* ppc-sysv-tdep.c (ppc64_sysv_abi_push_dummy_call): Add support
