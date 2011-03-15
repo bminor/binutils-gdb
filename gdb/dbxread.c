@@ -3289,6 +3289,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
 
      Generally this is used so that an alias can refer to its main
      symbol.  */
+  gdb_assert (name);
   if (name[0] == '#')
     {
       /* Initialize symbol reference names and determine if this is a
