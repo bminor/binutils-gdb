@@ -1,3 +1,17 @@
+2011-03-15  Pedro Alves  <pedro@codesourcery.com>
+
+	* printcmd.c (ALL_DISPLAYS_SAFE): New.
+	(map_display_numbers): New.
+	(do_delete_display): New.
+	(undisplay_command): Use map_display_numbers.
+	(do_enable_disable_display): New.
+	(enable_disable_display_command): New function.
+	(enable_display): Delete.
+	(enable_display_command): New.
+	(disable_display_command): Reimplement.
+	(_initialize_printcmd): Adjust "enable display" command to use
+	`enable_display_command' as callback.
+
 2011-03-14  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* NEWS: Add Python breakpoint 'stop' operation.

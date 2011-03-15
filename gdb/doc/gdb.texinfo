@@ -7647,7 +7647,11 @@ is a common name for the program counter; @pxref{Registers, ,Registers}).
 @kindex undisplay
 @item undisplay @var{dnums}@dots{}
 @itemx delete display @var{dnums}@dots{}
-Remove item numbers @var{dnums} from the list of expressions to display.
+Remove items from the list of expressions to display.  Specify the
+numbers of the displays that you want affected with the command
+argument @var{dnums}.  It can be a single display number, one of the
+numbers shown in the first field of the @samp{info display} display;
+or it could be a range of display numbers, as in @code{2-4}.
 
 @code{undisplay} does not repeat if you press @key{RET} after using it.
 (Otherwise you would just get the error @samp{No display number @dots{}}.)
@@ -7656,12 +7660,20 @@ Remove item numbers @var{dnums} from the list of expressions to display.
 @item disable display @var{dnums}@dots{}
 Disable the display of item numbers @var{dnums}.  A disabled display
 item is not printed automatically, but is not forgotten.  It may be
-enabled again later.
+enabled again later.  Specify the numbers of the displays that you
+want affected with the command argument @var{dnums}.  It can be a
+single display number, one of the numbers shown in the first field of
+the @samp{info display} display; or it could be a range of display
+numbers, as in @code{2-4}.
 
 @kindex enable display
 @item enable display @var{dnums}@dots{}
 Enable display of item numbers @var{dnums}.  It becomes effective once
 again in auto display of its expression, until you specify otherwise.
+Specify the numbers of the displays that you want affected with the
+command argument @var{dnums}.  It can be a single display number, one
+of the numbers shown in the first field of the @samp{info display}
+display; or it could be a range of display numbers, as in @code{2-4}.
 
 @item display
 Display the current values of the expressions on the list, just as is

@@ -168,10 +168,17 @@ static struct display *display_chain;
 
 static int display_number;
 
-/* Walk the following statement or block through all displays.  */
+/* Walk the following statement or block through all displays.
+   ALL_DISPLAYS_SAFE does so even if the statement deletes the current
+   display.  */
 
 #define ALL_DISPLAYS(B)				\
   for (B = display_chain; B; B = B->next)
+
+#define ALL_DISPLAYS_SAFE(B,TMP)		\
+  for (B = display_chain;			\
+       B ? (TMP = B->next, 1): 0;		\
+       B = TMP)
 
 /* Prototypes for exported functions.  */
 
@@ -1583,24 +1590,24 @@ delete_display (struct display *display)
   free_display (display);
 }
 
-/* Delete some values from the auto-display chain.
-   Specify the element numbers.  */
+/* Call FUNCTION on each of the displays whose numbers are given in
+   ARGS.  DATA is passed unmodified to FUNCTION.  */
 
 static void
-undisplay_command (char *args, int from_tty)
+map_display_numbers (char *args,
+		     void (*function) (struct display *,
+				       void *),
+		     void *data)
 {
-  int num;
   struct get_number_or_range_state state;
+  struct display *b, *tmp;
+  int num;
 
-  if (args == 0)
-    {
-      if (query (_("Delete all auto-display expressions? ")))
-	clear_displays ();
-      dont_repeat ();
-      return;
-    }
+  if (args == NULL)
+    error_no_arg (_("one or more display numbers"));
 
   init_number_or_range (&state, args);
+
   while (!state.finished)
     {
       char *p = state.string;
@@ -1610,17 +1617,44 @@ undisplay_command (char *args, int from_tty)
 	warning (_("bad display number at or near '%s'"), p);
       else
 	{
-	  struct display *d;
+	  struct display *d, *tmp;
 
-	  ALL_DISPLAYS (d)
+	  ALL_DISPLAYS_SAFE (d, tmp)
 	    if (d->number == num)
 	      break;
 	  if (d == NULL)
 	    printf_unfiltered (_("No display number %d.\n"), num);
 	  else
-	    delete_display (d);
+	    function (d, data);
 	}
     }
+}
+
+/* Callback for map_display_numbers, that deletes a display.  */
+
+static void
+do_delete_display (struct display *d, void *data)
+{
+  delete_display (d);
+}
+
+/* "undisplay" command.  */
+
+static void
+undisplay_command (char *args, int from_tty)
+{
+  int num;
+  struct get_number_or_range_state state;
+
+  if (args == NULL)
+    {
+      if (query (_("Delete all auto-display expressions? ")))
+	clear_displays ();
+      dont_repeat ();
+      return;
+    }
+
+  map_display_numbers (args, do_delete_display, NULL);
   dont_repeat ();
 }
 
@@ -1823,71 +1857,47 @@ Num Enb Expression\n"));
     }
 }
 
+/* Callback fo map_display_numbers, that enables or disables the
+   passed in display D.  */
+
 static void
-enable_display (char *args, int from_tty)
+do_enable_disable_display (struct display *d, void *data)
 {
-  char *p = args;
-  char *p1;
-  int num;
-  struct display *d;
-
-  if (p == 0)
-    {
-      for (d = display_chain; d; d = d->next)
-	d->enabled_p = 1;
-    }
-  else
-    while (*p)
-      {
-	p1 = p;
-	while (*p1 >= '0' && *p1 <= '9')
-	  p1++;
-	if (*p1 && *p1 != ' ' && *p1 != '\t')
-	  error (_("Arguments must be display numbers."));
-
-	num = atoi (p);
-
-	for (d = display_chain; d; d = d->next)
-	  if (d->number == num)
-	    {
-	      d->enabled_p = 1;
-	      goto win;
-	    }
-	printf_unfiltered (_("No display number %d.\n"), num);
-      win:
-	p = p1;
-	while (*p == ' ' || *p == '\t')
-	  p++;
-      }
+  d->enabled_p = *(int *) data;
 }
+
+/* Implamentation of both the "disable display" and "enable display"
+   commands.  ENABLE decides what to do.  */
+
+static void
+enable_disable_display_command (char *args, int from_tty, int enable)
+{
+  if (args == NULL)
+    {
+      struct display *d;
+
+      ALL_DISPLAYS (d)
+	d->enabled_p = enable;
+      return;
+    }
+
+  map_display_numbers (args, do_enable_disable_display, &enable);
+}
+
+/* The "enable display" command.  */
+
+static void
+enable_display_command (char *args, int from_tty)
+{
+  enable_disable_display_command (args, from_tty, 1);
+}
+
+/* The "disable display" command.  */
 
 static void
 disable_display_command (char *args, int from_tty)
 {
-  char *p = args;
-  char *p1;
-  struct display *d;
-
-  if (p == 0)
-    {
-      for (d = display_chain; d; d = d->next)
-	d->enabled_p = 0;
-    }
-  else
-    while (*p)
-      {
-	p1 = p;
-	while (*p1 >= '0' && *p1 <= '9')
-	  p1++;
-	if (*p1 && *p1 != ' ' && *p1 != '\t')
-	  error (_("Arguments must be display numbers."));
-
-	disable_display (atoi (p));
-
-	p = p1;
-	while (*p == ' ' || *p == '\t')
-	  p++;
-      }
+  enable_disable_display_command (args, from_tty, 0);
 }
 
 /* display_chain items point to blocks and expressions.  Some expressions in
@@ -2749,7 +2759,7 @@ and examining is done as in the \"x\" command.\n\n\
 With no argument, display all currently requested auto-display expressions.\n\
 Use \"undisplay\" to cancel display requests previously made."));
 
-  add_cmd ("display", class_vars, enable_display, _("\
+  add_cmd ("display", class_vars, enable_display_command, _("\
 Enable some expressions to be displayed when program stops.\n\
 Arguments are the code numbers of the expressions to resume displaying.\n\
 No argument means enable all automatic-display expressions.\n\
