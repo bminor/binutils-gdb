@@ -202,7 +202,8 @@ bfin_wdog_finish (struct hw *me)
   wdog->ctl = WDDIS;
 }
 
-const struct hw_descriptor dv_bfin_wdog_descriptor[] = {
+const struct hw_descriptor dv_bfin_wdog_descriptor[] =
+{
   {"bfin_wdog", bfin_wdog_finish,},
   {NULL, NULL},
 };

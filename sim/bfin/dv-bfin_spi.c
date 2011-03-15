@@ -225,7 +225,8 @@ bfin_spi_finish (struct hw *me)
   spi->stat = 0x0001;
 }
 
-const struct hw_descriptor dv_bfin_spi_descriptor[] = {
+const struct hw_descriptor dv_bfin_spi_descriptor[] =
+{
   {"bfin_spi", bfin_spi_finish,},
   {NULL, NULL},
 };

@@ -227,7 +227,8 @@ bfin_ppi_finish (struct hw *me)
   ppi->color = bfin_gui_color (color);
 }
 
-const struct hw_descriptor dv_bfin_ppi_descriptor[] = {
+const struct hw_descriptor dv_bfin_ppi_descriptor[] =
+{
   {"bfin_ppi", bfin_ppi_finish,},
   {NULL, NULL},
 };

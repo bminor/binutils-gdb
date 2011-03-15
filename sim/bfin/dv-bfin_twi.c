@@ -223,7 +223,8 @@ bfin_twi_finish (struct hw *me)
   attach_bfin_twi_regs (me, twi);
 }
 
-const struct hw_descriptor dv_bfin_twi_descriptor[] = {
+const struct hw_descriptor dv_bfin_twi_descriptor[] =
+{
   {"bfin_twi", bfin_twi_finish,},
   {NULL, NULL},
 };

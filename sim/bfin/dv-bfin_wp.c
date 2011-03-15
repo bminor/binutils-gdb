@@ -183,7 +183,8 @@ bfin_wp_finish (struct hw *me)
   attach_bfin_wp_regs (me, wp);
 }
 
-const struct hw_descriptor dv_bfin_wp_descriptor[] = {
+const struct hw_descriptor dv_bfin_wp_descriptor[] =
+{
   {"bfin_wp", bfin_wp_finish,},
   {NULL, NULL},
 };

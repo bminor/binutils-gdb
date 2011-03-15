@@ -302,7 +302,8 @@ bfin_otp_finish (struct hw *me)
   bfin_otp_write_page_val (otp, FPS03, (void *)part_str);
 }
 
-const struct hw_descriptor dv_bfin_otp_descriptor[] = {
+const struct hw_descriptor dv_bfin_otp_descriptor[] =
+{
   {"bfin_otp", bfin_otp_finish,},
   {NULL, NULL},
 };

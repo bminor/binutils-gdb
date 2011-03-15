@@ -201,7 +201,8 @@ eth_phy_finish (struct hw *me)
 
 #endif
 
-const struct hw_descriptor dv_eth_phy_descriptor[] = {
+const struct hw_descriptor dv_eth_phy_descriptor[] =
+{
   {"eth_phy", eth_phy_finish,},
   {NULL, NULL},
 };

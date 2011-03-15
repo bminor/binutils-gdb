@@ -256,7 +256,8 @@ bfin_mmu_finish (struct hw *me)
   mmu->imem_control = 0x00000001;
 }
 
-const struct hw_descriptor dv_bfin_mmu_descriptor[] = {
+const struct hw_descriptor dv_bfin_mmu_descriptor[] =
+{
   {"bfin_mmu", bfin_mmu_finish,},
   {NULL, NULL},
 };

@@ -200,7 +200,8 @@ bfin_trace_finish (struct hw *me)
   attach_bfin_trace_regs (me, trace);
 }
 
-const struct hw_descriptor dv_bfin_trace_descriptor[] = {
+const struct hw_descriptor dv_bfin_trace_descriptor[] =
+{
   {"bfin_trace", bfin_trace_finish,},
   {NULL, NULL},
 };

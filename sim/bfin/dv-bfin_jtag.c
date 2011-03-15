@@ -152,7 +152,8 @@ bfin_jtag_finish (struct hw *me)
   jtag->dspid = bfin_model_get_dspid (hw_system (me));
 }
 
-const struct hw_descriptor dv_bfin_jtag_descriptor[] = {
+const struct hw_descriptor dv_bfin_jtag_descriptor[] =
+{
   {"bfin_jtag", bfin_jtag_finish,},
   {NULL, NULL},
 };

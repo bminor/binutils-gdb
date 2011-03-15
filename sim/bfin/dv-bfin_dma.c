@@ -549,7 +549,8 @@ bfin_dma_finish (struct hw *me)
   dma->peripheral_map = bfin_dmac_default_pmap (me);
 }
 
-const struct hw_descriptor dv_bfin_dma_descriptor[] = {
+const struct hw_descriptor dv_bfin_dma_descriptor[] =
+{
   {"bfin_dma", bfin_dma_finish,},
   {NULL, NULL},
 };

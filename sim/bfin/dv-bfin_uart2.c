@@ -254,7 +254,8 @@ bfin_uart_finish (struct hw *me)
   uart->lsr = 0x0060;
 }
 
-const struct hw_descriptor dv_bfin_uart2_descriptor[] = {
+const struct hw_descriptor dv_bfin_uart2_descriptor[] =
+{
   {"bfin_uart2", bfin_uart_finish,},
   {NULL, NULL},
 };

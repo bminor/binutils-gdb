@@ -179,7 +179,8 @@ bfin_gptimer_finish (struct hw *me)
   attach_bfin_gptimer_regs (me, gptimer);
 }
 
-const struct hw_descriptor dv_bfin_gptimer_descriptor[] = {
+const struct hw_descriptor dv_bfin_gptimer_descriptor[] =
+{
   {"bfin_gptimer", bfin_gptimer_finish,},
   {NULL, NULL},
 };

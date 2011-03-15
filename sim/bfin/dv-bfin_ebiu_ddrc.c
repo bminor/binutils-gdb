@@ -179,7 +179,8 @@ bfin_ebiu_ddrc_finish (struct hw *me)
   ddrc->rstctl = 0x0002;
 }
 
-const struct hw_descriptor dv_bfin_ebiu_ddrc_descriptor[] = {
+const struct hw_descriptor dv_bfin_ebiu_ddrc_descriptor[] =
+{
   {"bfin_ebiu_ddrc", bfin_ebiu_ddrc_finish,},
   {NULL, NULL},
 };

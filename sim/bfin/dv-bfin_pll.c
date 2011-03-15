@@ -183,7 +183,8 @@ bfin_pll_finish (struct hw *me)
   pll->pll_lockcnt = 0x300;
 }
 
-const struct hw_descriptor dv_bfin_pll_descriptor[] = {
+const struct hw_descriptor dv_bfin_pll_descriptor[] =
+{
   {"bfin_pll", bfin_pll_finish,},
   {NULL, NULL},
 };

@@ -121,7 +121,8 @@ bfin_evt_finish (struct hw *me)
   attach_bfin_evt_regs (me, evt);
 }
 
-const struct hw_descriptor dv_bfin_evt_descriptor[] = {
+const struct hw_descriptor dv_bfin_evt_descriptor[] =
+{
   {"bfin_evt", bfin_evt_finish,},
   {NULL, NULL},
 };

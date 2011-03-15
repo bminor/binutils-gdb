@@ -599,7 +599,8 @@ bfin_emac_finish (struct hw *me)
   bfin_emac_tap_init (me);
 }
 
-const struct hw_descriptor dv_bfin_emac_descriptor[] = {
+const struct hw_descriptor dv_bfin_emac_descriptor[] =
+{
   {"bfin_emac", bfin_emac_finish,},
   {NULL, NULL},
 };

@@ -267,7 +267,8 @@ bfin_eppi_finish (struct hw *me)
   eppi->color = bfin_gui_color (color);
 }
 
-const struct hw_descriptor dv_bfin_eppi_descriptor[] = {
+const struct hw_descriptor dv_bfin_eppi_descriptor[] =
+{
   {"bfin_eppi", bfin_eppi_finish,},
   {NULL, NULL},
 };

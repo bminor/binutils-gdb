@@ -237,7 +237,8 @@ bfin_nfc_finish (struct hw *me)
   nfc->irqmask = 0x001F;
 }
 
-const struct hw_descriptor dv_bfin_nfc_descriptor[] = {
+const struct hw_descriptor dv_bfin_nfc_descriptor[] =
+{
   {"bfin_nfc", bfin_nfc_finish,},
   {NULL, NULL},
 };

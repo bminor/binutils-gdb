@@ -263,7 +263,8 @@ bfin_ctimer_finish (struct hw *me)
   /* Initialize the Core Timer.  */
 }
 
-const struct hw_descriptor dv_bfin_ctimer_descriptor[] = {
+const struct hw_descriptor dv_bfin_ctimer_descriptor[] =
+{
   {"bfin_ctimer", bfin_ctimer_finish,},
   {NULL, NULL},
 };
