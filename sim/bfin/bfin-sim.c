@@ -1662,13 +1662,13 @@ decode_macfunc (SIM_CPU *cpu, int which, int op, int h0, int h1, int src0,
 
       if (acc & 0x8000000000ull)
 	*neg = 1;
-    }
 
-  STORE (AXREG (which), (acc >> 32) & 0xff);
-  STORE (AWREG (which), acc & 0xffffffff);
-  STORE (ASTATREG (av[which]), sat);
-  if (sat)
-    STORE (ASTATREG (avs[which]), sat);
+      STORE (AXREG (which), (acc >> 32) & 0xff);
+      STORE (AWREG (which), acc & 0xffffffff);
+      STORE (ASTATREG (av[which]), sat);
+      if (sat)
+	STORE (ASTATREG (avs[which]), sat);
+    }
 
   ret = extract_mult (cpu, acc, mmod, MM, fullword, overflow);
 

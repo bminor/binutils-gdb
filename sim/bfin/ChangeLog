@@ -1,5 +1,9 @@
 2011-03-15  Robin Getz  <robin.getz@analog.com>
 
+	* bfin-sim.c (decode_macfunc): Move acc STOREs behind op != 3 check.
+
+2011-03-15  Robin Getz  <robin.getz@analog.com>
+
 	* bfin-sim.c (decode_macfunc): New neg parameter.  Set when the
 	high bit is set after extract_mult.
 	(decode_dsp32mac_0): Declare n_1 and n_0.  Pass to the decode_macfunc
