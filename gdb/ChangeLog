@@ -1,5 +1,7 @@
 2011-03-15  Michael Snyder  <msnyder@vmware.com>
 
+	* frame.c (find_frame_sal): Assert sym is not null.
+
 	* dbxread.c (process_one_symbol): Assert 'name' is not null.
 
 	* objc-lang.c (selectors_info): Check strchr for null result.

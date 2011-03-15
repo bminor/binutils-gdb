@@ -1899,6 +1899,8 @@ find_frame_sal (struct frame_info *frame, struct symtab_and_line *sal)
       else
 	sym = inline_skipped_symbol (inferior_ptid);
 
+      /* If frame is inline, it certainly has symbols.  */
+      gdb_assert (sym);
       init_sal (sal);
       if (SYMBOL_LINE (sym) != 0)
 	{
