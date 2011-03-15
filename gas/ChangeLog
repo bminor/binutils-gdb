@@ -1,3 +1,8 @@
+2011-03-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* config/tc-bfin.c (bfin_cpus[]): Add 0.4 for
+	bf542/bf544/bf547/bf548/bf549.
+
 2011-03-14  Richard Sandiford  <richard.sandiford@linaro.org>
 
 	* config/tc-arm.c (md_pcrel_from_section): Use S_FORCE_RELOC to
