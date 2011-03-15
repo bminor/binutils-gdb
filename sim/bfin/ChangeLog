@@ -1,5 +1,20 @@
 2011-03-15  Mike Frysinger  <vapier@gentoo.org>
 
+	* Makefile.in (dv-bfin_gpio.o): New target.
+	* configure.ac (SIM_AC_OPTION_HARDWARE): Add bfin_gpio.
+	* configure: Regenerate.
+	* dv-bfin_gpio.c, dv-bfin_gpio.h: New files.
+	* machs.c: Include dv-bfin_gpio.h.
+	(bf50x_mem, bf51x_mem, bf52x_mem, bf531_mem, bf532_mem, bf533_mem,
+	bf534_mem, bf536_mem, bf537_mem, bf538_mem, bf561_mem, bf592_mem):
+	Delete GPIO memory stubs.
+	(bf50x_dev, bf512_dev, bf516_dev, bf522_dev, bf526_dev, bf533_dev,
+	bf534_dev, bf537_dev, bf538_dev, bf561_dev, bf592_dev): Add GPIO
+	peripheral devices.
+	(bfin_model_hw_tree_init): Hook up GPIO interrupts to SIC.
+
+2011-03-15  Mike Frysinger  <vapier@gentoo.org>
+
 	* bfroms/bf50x-0.0.h, bfroms/bf51x-0.0.h, bfroms/bf51x-0.1.h,
 	bfroms/bf51x-0.2.h, bfroms/bf526-0.0.h, bfroms/bf526-0.1.h,
 	bfroms/bf527-0.0.h, bfroms/bf527-0.1.h, bfroms/bf527-0.2.h,

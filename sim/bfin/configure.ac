@@ -27,6 +27,7 @@ SIM_AC_OPTION_HARDWARE(yes,,\
 	bfin_emac \
 	bfin_eppi \
 	bfin_evt \
+	bfin_gpio \
 	bfin_gptimer \
 	bfin_jtag \
 	bfin_mmu \
