@@ -1,3 +1,17 @@
+2011-03-16  Keith Seitz  <keiths@redhat.com>
+
+	PR c++/12273
+	* gdb.cp/cmpd-minsyms.exp: New test.
+	* gdb.cp/cmpd-minsyms.cc: New file.
+
+	PR c++/11734
+	* gdb.cp/ovsrch.exp: New test.
+	* gdb.cp/ovsrch.h: New file.
+	* gdb.cp/ovsrch1.cc: New file.
+	* gdb.cp/ovsrch2.cc: New file.
+	* gdb.cp/ovsrch3.cc: New file.
+	* gdb.cp/ovsrch4.cc: New file.
+
 2011-03-16  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	PR gdb/12528
