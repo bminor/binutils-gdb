@@ -1,3 +1,21 @@
+2011-03-16  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	Fix ARI warnings about new lines at the end of messages, which
+	are unneeded as there is a new line added at the end of the message
+	automatically.
+	* darwin-nat.c (darwin_stop_inferior): Ditto.
+	* dec-thread.c (dec_thread_get_ada_task_ptid): Ditto.
+	* dfp.c (decimal_to_number): Ditto.
+	* exec.c (print_section_info): Ditto.
+	* i386-darwin-nat.c (darwin_set_sstep): Ditto.
+	* osdata.c (get_osdata): Ditto.
+	* record.c (bfdcore_write): Ditto.
+	* remote-mips.c (mips_readchar): Ditto.
+	* remote.c (read_ptid): Ditto.
+	* ser-mingw.c (ser_windows_raw): Ditto.
+	* tracepoint.c (add_local_symbols): Ditto.
+	* windows-nat.c (fake_create_process): Ditto.
+
 2011-03-16  Tom Tromey  <tromey@redhat.com>
 
 	* tracepoint.c (stop_tracing): Don't declare.

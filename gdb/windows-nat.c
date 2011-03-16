@@ -1289,7 +1289,7 @@ fake_create_process (void)
     open_process_used = 1;
   else
     {
-      error (_("OpenProcess call failed, GetLastError = %lud\n"),
+      error (_("OpenProcess call failed, GetLastError = %lud"),
        GetLastError ());
       /*  We can not debug anything in that case.  */
     }

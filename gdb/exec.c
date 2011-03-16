@@ -728,7 +728,7 @@ print_section_info (struct target_section_table *t, bfd *abfd)
 	    }
 	}
       if (p == t->sections_end)
-	warning (_("Cannot find section for the entry point of %s.\n"),
+	warning (_("Cannot find section for the entry point of %s."),
 		 bfd_get_filename (abfd));
 
       entry_point = gdbarch_addr_bits_remove (gdbarch, 

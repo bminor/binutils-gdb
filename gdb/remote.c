@@ -1876,7 +1876,7 @@ read_ptid (char *buf, char **obuf)
       /* Multi-process ptid.  */
       pp = unpack_varlen_hex (p + 1, &pid);
       if (*pp != '.')
-	error (_("invalid remote ptid: %s\n"), p);
+	error (_("invalid remote ptid: %s"), p);
 
       p = pp;
       pp = unpack_varlen_hex (p + 1, &tid);

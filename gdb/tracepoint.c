@@ -1122,7 +1122,7 @@ add_local_symbols (struct collection_list *collect,
       block = block_for_pc (pc);
       if (block == NULL)
 	{
-	  warning (_("Can't collect args; no symbol table info available.\n"));
+	  warning (_("Can't collect args; no symbol table info available."));
 	  return;
 	}
 

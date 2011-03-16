@@ -2373,7 +2373,7 @@ bfdcore_write (bfd *obfd, asection *osec, void *buf, int len, int *offset)
   if (ret)
     *offset += len;
   else
-    error (_("Failed to write %d bytes to core file %s ('%s').\n"),
+    error (_("Failed to write %d bytes to core file %s ('%s')."),
 	   len, bfd_get_filename (obfd),
 	   bfd_errmsg (bfd_get_error ()));
 }

@@ -134,7 +134,7 @@ decimal_to_number (const gdb_byte *from, int len, decNumber *to)
 	decimal128ToNumber ((decimal128 *) from, to);
 	break;
       default:
-	error (_("Unknown decimal floating point type.\n"));
+	error (_("Unknown decimal floating point type."));
 	break;
     }
 }

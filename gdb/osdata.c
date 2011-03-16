@@ -267,7 +267,7 @@ get_osdata (const char *type)
     }
 
   if (!osdata)
-    error (_("Can not fetch data now.\n"));
+    error (_("Can not fetch data now."));
 
   return osdata;
 }

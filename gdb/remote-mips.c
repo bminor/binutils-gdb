@@ -672,7 +672,7 @@ mips_readchar (int timeout)
   if (ch == SERIAL_TIMEOUT && timeout == -1)	/* Watchdog went off.  */
     {
       target_mourn_inferior ();
-      error (_("Watchdog has expired.  Target detached.\n"));
+      error (_("Watchdog has expired.  Target detached."));
     }
 
   if (ch == SERIAL_EOF)

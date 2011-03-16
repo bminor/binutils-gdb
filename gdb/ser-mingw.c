@@ -172,7 +172,7 @@ ser_windows_raw (struct serial *scb)
   scb->current_timeout = 0;
 
   if (SetCommState (h, &state) == 0)
-    warning (_("SetCommState failed\n"));
+    warning (_("SetCommState failed"));
 }
 
 static int

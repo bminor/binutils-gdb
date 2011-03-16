@@ -1236,7 +1236,7 @@ darwin_stop_inferior (struct inferior *inf)
 
   res = kill (inf->pid, SIGSTOP);
   if (res != 0)
-    warning (_("cannot kill: %s\n"), safe_strerror (errno));
+    warning (_("cannot kill: %s"), safe_strerror (errno));
 
   /* Wait until the process is really stopped.  */
   while (1)

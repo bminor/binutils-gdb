@@ -581,7 +581,7 @@ darwin_set_sstep (thread_t thread, int enable)
       break;
 #endif
     default:
-      error (_("darwin_set_sstep: unknown flavour: %d\n"), regs.tsh.flavor);
+      error (_("darwin_set_sstep: unknown flavour: %d"), regs.tsh.flavor);
     }
 }
 
