@@ -1,5 +1,5 @@
 /* dwarf.c -- display DWARF contents of a BFD binary file
-   Copyright 2005, 2006, 2007, 2008, 2009, 2010
+   Copyright 2005, 2006, 2007, 2008, 2009, 2010, 2011
    Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
@@ -563,6 +563,9 @@ get_TAG_name (unsigned long tag)
     case DW_TAG_upc_shared_type:	return "DW_TAG_upc_shared_type";
     case DW_TAG_upc_strict_type:	return "DW_TAG_upc_strict_type";
     case DW_TAG_upc_relaxed_type:	return "DW_TAG_upc_relaxed_type";
+      /* GNU values.  */
+    case DW_TAG_GNU_call_site:		return "DW_TAG_GNU_call_site";
+    case DW_TAG_GNU_call_site_parameter:return "DW_TAG_GNU_call_site_parameter";
     default:
       {
 	static char buffer[100];
@@ -1004,6 +1007,17 @@ decode_location_expression (unsigned char * data,
 	  display_block (data, uvalue);
 	  data += uvalue;
 	  break;
+	case DW_OP_GNU_entry_value:
+	  uvalue = read_leb128 (data, &bytes_read, 0);
+	  data += bytes_read;
+	  printf ("DW_OP_GNU_entry_value: (");
+	  if (decode_location_expression (data, pointer_size, offset_size,
+					  dwarf_version, uvalue,
+					  cu_offset, section))
+	    need_frame_base = 1;
+	  putchar (')');
+	  data += uvalue;
+	  break;
 
 	  /* GNU extensions.  */
 	case DW_OP_GNU_push_tls_address:
@@ -1343,6 +1357,10 @@ read_and_display_attr_value (unsigned long attribute,
 	case DW_AT_segment:
 	case DW_AT_static_link:
 	case DW_AT_use_location:
+	case DW_AT_GNU_call_site_value:
+	case DW_AT_GNU_call_site_data_value:
+	case DW_AT_GNU_call_site_target:
+	case DW_AT_GNU_call_site_target_clobbered:
     	  if (form == DW_FORM_data4
 	      || form == DW_FORM_data8
 	      || form == DW_FORM_sec_offset)
@@ -1587,6 +1605,10 @@ read_and_display_attr_value (unsigned long attribute,
     case DW_AT_segment:
     case DW_AT_static_link:
     case DW_AT_use_location:
+    case DW_AT_GNU_call_site_value:
+    case DW_AT_GNU_call_site_data_value:
+    case DW_AT_GNU_call_site_target:
+    case DW_AT_GNU_call_site_target_clobbered:
       if (form == DW_FORM_data4
 	  || form == DW_FORM_data8
 	  || form == DW_FORM_sec_offset)
@@ -1805,6 +1827,14 @@ get_AT_name (unsigned long attribute)
     case DW_AT_GNU_odr_signature:		return "DW_AT_GNU_odr_signature";
     case DW_AT_use_GNAT_descriptive_type:	return "DW_AT_use_GNAT_descriptive_type";
     case DW_AT_GNAT_descriptive_type:		return "DW_AT_GNAT_descriptive_type";
+    case DW_AT_GNU_call_site_value:		return "DW_AT_GNU_call_site_value";
+    case DW_AT_GNU_call_site_data_value:	return "DW_AT_GNU_call_site_data_value";
+    case DW_AT_GNU_call_site_target:		return "DW_AT_GNU_call_site_target";
+    case DW_AT_GNU_call_site_target_clobbered:	return "DW_AT_GNU_call_site_target_clobbered";
+    case DW_AT_GNU_tail_call:			return "DW_AT_GNU_tail_call";
+    case DW_AT_GNU_all_tail_call_sites:		return "DW_AT_GNU_all_tail_call_sites";
+    case DW_AT_GNU_all_call_sites:		return "DW_AT_GNU_all_call_sites";
+    case DW_AT_GNU_all_source_call_sites:	return "DW_AT_GNU_all_source_call_sites";
 
       /* UPC extension.  */
     case DW_AT_upc_threads_scaled:	return "DW_AT_upc_threads_scaled";

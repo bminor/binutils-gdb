@@ -1,3 +1,23 @@
+2011-03-16  Jakub Jelinek  <jakub@redhat.com>
+
+	* dwarf.c (dw_TAG_name): Handle DW_TAG_GNU_call_site_parameter.
+	(read_and_display_attr_value): Handle DW_AT_GNU_call_site_data_value,
+	DW_AT_GNU_call_site_target and DW_AT_GNU_call_site_target_clobbered.
+	(get_AT_name): Handle DW_AT_GNU_call_site_value,
+	DW_AT_GNU_call_site_data_value, DW_AT_GNU_call_site_target,
+	DW_AT_GNU_call_site_target_clobbered, DW_AT_GNU_tail_call,
+	DW_AT_GNU_all_tail_call_sites, DW_AT_GNU_all_call_sites and
+	DW_AT_GNU_all_source_call_sites.
+	(decode_location_expression) <case DW_OP_GNU_entry_value>: Adjust
+	handling.
+
+2011-03-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf.c (get_TAG_name): Handle DW_TAG_GNU_call_site.
+	(decode_location_expression): Handle DW_OP_GNU_entry_value.
+	(read_and_display_attr_value): Handle DW_AT_GNU_call_site_value.
+	(get_AT_name): Likewise.
+
 2011-03-14  Michael Snyder  <msnyder@vmware.com>
 
 	* objcopy.c (set_pe_subsystem): Free subsystem.
