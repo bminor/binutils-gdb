@@ -99,4 +99,8 @@ extern char *skip_spaces (char *inp);
 
 extern char *skip_to_space (char *inp);
 
+/* Reverse S to the last non-whitespace character without skipping past
+   START.  */
+
+extern char *remove_trailing_whitespace (const char *start, char *s);
 #endif /* CLI_UTILS_H */

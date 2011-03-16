@@ -1,3 +1,42 @@
+2011-03-16  Keith Seitz  <keiths@redhat.com>
+
+	* linespec.c (find_methods): Canonicalize NAME before looking
+	up the symbol.
+	(name_end): New function.
+	(keep_name_info): New function.
+	(decode_line_1): Use keep_name_info.
+	(decode_compound): Likewise.
+	* cli/cli-utils.h (remove_trailing_whitespace): New function.
+	* cli/cli-utils.c (remove_trailing_whitespace): Likewise.
+
+	PR c++/12273
+	* linespec.c (locate_first_half): Keep overload information, too.
+	(decode_compound): Use a string to represent break characters
+	to escape the loop.
+	If P points to a break character, do not increment it.
+	For C++ and Java, keep overload information and relevant keywords.
+	If we cannot find a symbol, search the minimal symbols.
+
+	PR c++/11734
+	* linespec.c (decode_compound): Rename SAVED_ARG to
+	THE_REAL_SAVED_ARG.
+	Make a copy of THE_REAL_SAVED_ARG in SAVED_ARG and strip
+	single-quotes.
+	Pass a valid block to lookup_symbol.
+	(lookup_prefix_sym): Likewise.
+	(find_method): Construct search name based on SYM_CLASS instead
+	of SAVED_ARG.
+	* psymtab.c (lookup_partial_symbol): Add language parameter.
+	(lookup_symbol_aux_psymtabs): Likewise.
+	Don't assume that the psymtab we found was the right one. Search
+	for the desired symbol in the symtab to be certain.
+	(psymtab_search_name): New function.
+	(lookup_partial_symbol): Use psymtab_search_name.
+	Add language parameter.
+	(read_symtabs_for_function): Add language parameter and pass to
+	lookup_partial_symbol.
+	(find_symbol_file_from_partial): Likewise.
+
 2011-03-16  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	PR gdb/12528

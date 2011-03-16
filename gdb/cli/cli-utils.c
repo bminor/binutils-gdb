@@ -234,3 +234,14 @@ skip_to_space (char *chp)
     chp++;
   return chp;
 }
+
+/* See documentation in cli-utils.h.  */
+
+char *
+remove_trailing_whitespace (const char *start, char *s)
+{
+  while (s > start && isspace (*(s - 1)))
+    --s;
+
+  return s;
+}

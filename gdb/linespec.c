@@ -41,6 +41,8 @@
 #include "mi/mi-cmds.h"
 #include "target.h"
 #include "arch-utils.h"
+#include <ctype.h>
+#include "cli/cli-utils.h"
 
 /* We share this one with symtab.c, but it is not exported widely.  */
 
@@ -213,6 +215,19 @@ find_methods (struct type *t, char *name, enum language language,
   int i1 = 0;
   int ibase;
   char *class_name = type_name_no_tag (t);
+  struct cleanup *cleanup;
+  char *canon;
+
+  /* NAME is typed by the user: it needs to be canonicalized before
+     passing to lookup_symbol.  */
+  canon = cp_canonicalize_string (name);
+  if (canon != NULL)
+    {
+      name = canon;
+      cleanup = make_cleanup (xfree, name);
+    }
+  else
+    cleanup = make_cleanup (null_cleanup, NULL);
 
   /* Ignore this class if it doesn't have a name.  This is ugly, but
      unless we figure out how to get the physname without the name of
@@ -275,6 +290,7 @@ find_methods (struct type *t, char *name, enum language language,
       i1 += find_methods (TYPE_BASECLASS (t, ibase), name,
 			  language, sym_arr + i1);
 
+  do_cleanups (cleanup);
   return i1;
 }
 
@@ -663,6 +679,65 @@ find_method_overload_end (char *p)
 
   return p;
 }
+
+/* Does P point to a sequence of characters which implies the end
+   of a name?  Terminals include "if" and "thread" clauses. */
+
+static int
+name_end (char *p)
+{
+  while (isspace (*p))
+    ++p;
+  if (*p == 'i' && p[1] == 'f'
+      && (isspace (p[2]) || p[2] == '\0' || p[2] == '('))
+    return 1;
+
+  if (strncmp (p, "thread", 6) == 0
+      && (isspace (p[6]) || p[6] == '\0'))
+    return 1;
+
+  return 0;
+}
+
+/* Keep important information used when looking up a name.  This includes
+   template parameters, overload information, and important keywords.  */
+
+static char *
+keep_name_info (char *ptr)
+{
+  char *p = ptr;
+  char *start = ptr;
+
+  /* Keep any template parameters.  */
+  if (name_end (ptr))
+    return remove_trailing_whitespace (start, ptr);
+
+  while (isspace (*p))
+    ++p;
+  if (*p == '<')
+    ptr = p = find_template_name_end (ptr);
+
+  if (name_end (ptr))
+    return remove_trailing_whitespace (start, ptr);
+
+  /* Keep method overload information.  */
+  if (*p == '(')
+    ptr = p = find_method_overload_end (p);
+
+  if (name_end (ptr))
+    return remove_trailing_whitespace (start, ptr);
+
+  /* Keep important keywords.  */  
+  while (isspace (*p))
+    ++p;
+  if (strncmp (p, "const", 5) == 0
+      && (isspace (p[5]) || p[5] == '\0'
+	  || strchr (get_gdb_completer_quote_characters (), p[5]) != NULL))
+    ptr = p = p + 5;
+
+  return remove_trailing_whitespace (start, ptr);
+}
+
 
 /* The parser of linespec itself.  */
 
@@ -871,17 +946,8 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
       p = skip_quoted (*argptr);
     }
 
-  /* Keep any template parameters.  */
-  if (*p == '<')
-    p = find_template_name_end (p);
-
-  /* Keep method overload information.  */
-  if (*p == '(')
-    p = find_method_overload_end (p);
-
-  /* Make sure we keep important kewords like "const".  */
-  if (strncmp (p, " const", 6) == 0)
-    p += 6;
+  /* Keep any important naming information.  */
+  p = keep_name_info (p);
 
   copy = (char *) alloca (p - *argptr + 1);
   memcpy (copy, *argptr, p - *argptr);
@@ -1057,6 +1123,10 @@ locate_first_half (char **argptr, int *is_quote_enclosed)
 	    error (_("malformed template specification in command"));
 	  p = temp_end;
 	}
+
+      if (p[0] == '(')
+	p = find_method_overload_end (p);
+
       /* Check for a colon and a plus or minus and a [ (which
          indicates an Objective-C method).  */
       if (is_objc_method_format (p))
@@ -1224,7 +1294,7 @@ decode_objc (char **argptr, int funfirstline, struct symtab *file_symtab,
 
 static struct symtabs_and_lines
 decode_compound (char **argptr, int funfirstline, char ***canonical,
-		 char *saved_arg, char *p, int *not_found_ptr)
+		 char *the_real_saved_arg, char *p, int *not_found_ptr)
 {
   struct symtabs_and_lines values;
   char *p2;
@@ -1235,6 +1305,23 @@ decode_compound (char **argptr, int funfirstline, char ***canonical,
   struct symbol *sym_class;
   struct type *t;
   char *saved_java_argptr = NULL;
+  char *saved_arg;
+
+  /* If the user specified any completer quote characters in the input,
+     strip them.  They are superfluous.  */
+  saved_arg = alloca (strlen (the_real_saved_arg) + 1);
+  {
+    char *dst = saved_arg;
+    char *src = the_real_saved_arg;
+    char *quotes = get_gdb_completer_quote_characters ();
+    while (*src != '\0')
+      {
+	if (strchr (quotes, *src) == NULL)
+	  *dst++ = *src;
+	++src;
+      }
+    *dst = '\0';
+  }
 
   /* First check for "global" namespace specification, of the form
      "::foo".  If found, skip over the colons and jump to normal
@@ -1251,8 +1338,10 @@ decode_compound (char **argptr, int funfirstline, char ***canonical,
         find_method.
 
      2) AAA::inA isn't the name of a class.  In that case, either the
-        user made a typo or AAA::inA is the name of a namespace.
-        Either way, we just look up AAA::inA::fun with lookup_symbol.
+        user made a typo, AAA::inA is the name of a namespace, or it is
+        the name of a minimal symbol.
+        We just look up AAA::inA::fun with lookup_symbol.  If that fails,
+        try lookup_minimal_symbol.
 
      Thus, our first task is to find everything before the last set of
      double-colons and figure out if it's the name of a class.  So we
@@ -1273,6 +1362,8 @@ decode_compound (char **argptr, int funfirstline, char ***canonical,
 
   while (1)
     {
+      static char *break_characters = " \t(";
+
       /* Move pointer up to next possible class/namespace token.  */
 
       p = p2 + 1;	/* Restart with old value +1.  */
@@ -1283,8 +1374,9 @@ decode_compound (char **argptr, int funfirstline, char ***canonical,
       /* PASS2: p2->"::fun", p->":fun" */
 
       /* Move pointer ahead to next double-colon.  */
-      while (*p && (p[0] != ' ') && (p[0] != '\t') && (p[0] != '\'')
-	     && (*p != '('))
+      while (*p
+	     && strchr (break_characters, *p) == NULL
+	     && strchr (get_gdb_completer_quote_characters (), *p) == NULL)
 	{
 	  if (current_language->la_language == language_cplus)
 	    p += cp_validate_operator (p);
@@ -1308,9 +1400,12 @@ decode_compound (char **argptr, int funfirstline, char ***canonical,
 	  else if ((p[0] == ':') && (p[1] == ':'))
 	    break;	/* Found double-colon.  */
 	  else
-	    /* PASS2: We'll keep getting here, until p->"", at which point
-	       we exit this loop.  */
-	    p++;
+	    {
+	      /* PASS2: We'll keep getting here, until P points to one of the
+		 break characters, at which point we exit this loop.  */
+	      if (*p && strchr (break_characters, *p) == NULL)
+		p++;
+	    }
 	}
 
       if (*p != ':')
@@ -1319,7 +1414,7 @@ decode_compound (char **argptr, int funfirstline, char ***canonical,
 			   unsuccessfully all the components of the
 			   string, and p->""(PASS2).  */
 
-      /* We get here if p points to ' ', '\t', '\'', "::" or ""(i.e
+      /* We get here if p points to one of the break characters or "" (i.e.,
 	 string ended).  */
       /* Save restart for next time around.  */
       p2 = p;
@@ -1379,18 +1474,8 @@ decode_compound (char **argptr, int funfirstline, char ***canonical,
 	      p += cp_validate_operator (p - 8) - 8;
 	    }
 
-	  /* Keep any template parameters.  */
-	  if (*p == '<')
-	    p = find_template_name_end (p);
-
-	  /* Keep method overload information.  */
-	  a = strchr (p, '(');
-	  if (a != NULL)
-	    p = find_method_overload_end (a);
-
-	  /* Make sure we keep important kewords like "const".  */
-	  if (strncmp (p, " const", 6) == 0)
-	    p += 6;
+	  /* Keep any important naming information.  */
+	  p = keep_name_info (p);
 
 	  /* Java may append typenames,  so assume that if there is
 	     anything else left in *argptr, it must be a typename.  */
@@ -1470,6 +1555,10 @@ decode_compound (char **argptr, int funfirstline, char ***canonical,
   /* We couldn't find a class, so we're in case 2 above.  We check the
      entire name as a symbol instead.  */
 
+  if (current_language->la_language == language_cplus
+      || current_language->la_language == language_java)
+    p = keep_name_info (p);
+
   copy = (char *) alloca (p - saved_arg2 + 1);
   memcpy (copy, saved_arg2, p - saved_arg2);
   /* Note: if is_quoted should be true, we snuff out quote here
@@ -1479,15 +1568,24 @@ decode_compound (char **argptr, int funfirstline, char ***canonical,
   *argptr = (*p == '\'') ? p + 1 : p;
 
   /* Look up entire name.  */
-  sym = lookup_symbol (copy, 0, VAR_DOMAIN, 0);
+  sym = lookup_symbol (copy, get_selected_block (0), VAR_DOMAIN, 0);
   if (sym)
     return symbol_found (funfirstline, canonical, copy, sym, NULL);
+  else
+    {
+      struct minimal_symbol *msym;
 
-  /* Couldn't find any interpretation as classes/namespaces, so give
-     up.  The quotes are important if copy is empty.  */
+      /* Couldn't find any interpretation as classes/namespaces.  As a last
+	 resort, try the minimal symbol tables.  */
+      msym = lookup_minimal_symbol (copy, NULL, NULL);
+      if (msym != NULL)
+	return minsym_found (funfirstline, msym);
+    }    
+
+  /* Couldn't find a minimal symbol, either, so give up.  */
   if (not_found_ptr)
     *not_found_ptr = 1;
-  cplusplus_error (saved_arg,
+  cplusplus_error (the_real_saved_arg,
 		   "Can't find member of namespace, "
 		   "class, struct, or union named \"%s\"\n",
 		   copy);
@@ -1526,7 +1624,7 @@ lookup_prefix_sym (char **argptr, char *p)
   /* At this point p1->"::inA::fun", p->"inA::fun" copy->"AAA",
      argptr->"inA::fun".  */
 
-  sym = lookup_symbol (copy, 0, STRUCT_DOMAIN, 0);
+  sym = lookup_symbol (copy, get_selected_block (0), STRUCT_DOMAIN, 0);
   if (sym == NULL)
     {
       /* Typedefs are in VAR_DOMAIN so the above symbol lookup will
@@ -1594,20 +1692,32 @@ find_method (int funfirstline, char ***canonical, char *saved_arg,
       /* If we were given a specific overload instance, use that
 	 (or error if no matches were found).  Otherwise ask the user
 	 which one to use.  */
-      if (strchr (saved_arg, '(') != NULL)
+      if (strchr (copy, '('))
 	{
 	  int i;
-	  char *name = saved_arg;
-	  char *canon = cp_canonicalize_string (name);
+	  char *name;
+	  char *canon;
 	  struct cleanup *cleanup;
 
+	  /* Construct the proper search name based on SYM_CLASS and COPY.
+	     SAVED_ARG may contain a valid name, but that name might not be
+	     what is actually stored in the symbol table.  For example,
+	     if SAVED_ARG (and SYM_CLASS) were found via an import
+	     ("using namespace" in C++), then the physname of
+	     SYM_CLASS ("A::myclass") may not be the same as SAVED_ARG
+	     ("myclass").  */
+	  name = xmalloc (strlen (SYMBOL_NATURAL_NAME (sym_class))
+			  + 2 /* "::" */ + strlen (copy) + 1);
+	  strcpy (name, SYMBOL_NATURAL_NAME (sym_class));
+	  strcat (name, "::");
+	  strcat (name, copy);
+	  canon = cp_canonicalize_string (name);
 	  if (canon != NULL)
 	    {
+	      xfree (name);
 	      name = canon;
-	      cleanup = make_cleanup (xfree, canon);
 	    }
-	  else
-	    cleanup = make_cleanup (null_cleanup, NULL);
+	  cleanup = make_cleanup (xfree, name);
 
 	  for (i = 0; i < i1; ++i)
 	    {
