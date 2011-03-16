@@ -284,6 +284,9 @@ Options:\n\
   --execstack             require executable stack for this object\n"));
   fprintf (stream, _("\
   --noexecstack           don't require executable stack for this object\n"));
+  fprintf (stream, _("\
+  --size-check=[error|warning]\n\
+			  ELF .size directive check (default --size-check=error)\n"));
 #endif
   fprintf (stream, _("\
   -f                      skip whitespace and comment preprocessing\n"));
@@ -443,6 +446,7 @@ parse_args (int * pargc, char *** pargv)
       OPTION_TARGET_HELP,
       OPTION_EXECSTACK,
       OPTION_NOEXECSTACK,
+      OPTION_SIZE_CHECK,
       OPTION_ALTERNATE,
       OPTION_AL,
       OPTION_HASH_TABLE_SIZE,
@@ -476,6 +480,7 @@ parse_args (int * pargc, char *** pargv)
 #if defined OBJ_ELF || defined OBJ_MAYBE_ELF
     ,{"execstack", no_argument, NULL, OPTION_EXECSTACK}
     ,{"noexecstack", no_argument, NULL, OPTION_NOEXECSTACK}
+    ,{"size-check", required_argument, NULL, OPTION_SIZE_CHECK}
 #endif
     ,{"fatal-warnings", no_argument, NULL, OPTION_WARN_FATAL}
     ,{"gdwarf-2", no_argument, NULL, OPTION_GDWARF2}
@@ -812,6 +817,15 @@ This program has absolutely no warranty.\n"));
 	case OPTION_NOEXECSTACK:
 	  flag_noexecstack = 1;
 	  flag_execstack = 0;
+	  break;
+
+	case OPTION_SIZE_CHECK:
+	  if (strcasecmp (optarg, "error") == 0)
+	    flag_size_check = size_check_error;
+	  else if (strcasecmp (optarg, "warning") == 0)
+	    flag_size_check = size_check_warning;
+	  else
+	    as_fatal (_("Invalid --size-check= option: `%s'"), optarg);
 	  break;
 #endif
 	case 'Z':

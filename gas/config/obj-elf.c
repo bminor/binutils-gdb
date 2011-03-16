@@ -1898,6 +1898,12 @@ elf_frob_symbol (symbolS *symp, int *puntp)
 	{
 	  const char *op_name = NULL;
 	  const char *add_name = NULL;
+	  PRINTF_LIKE ((*as_error));
+
+	  if (flag_size_check == size_check_error)
+	    as_error = as_bad;
+	  else
+	    as_error = as_warn;
 
 	  if (size->X_op == O_subtract)
 	    {
@@ -1909,9 +1915,9 @@ elf_frob_symbol (symbolS *symp, int *puntp)
 		add_name = NULL;
 
 	      if (op_name && add_name)
-		as_bad (_(".size expression with symbols `%s' and `%s' "
-			  "does not evaluate to a constant"),
-			op_name, add_name);
+		as_error (_(".size expression with symbols `%s' and "
+			    "`%s' does not evaluate to a constant"),
+			  op_name, add_name);
 	      else
 		{
 		  const char *name;
@@ -1924,13 +1930,15 @@ elf_frob_symbol (symbolS *symp, int *puntp)
 		    name = NULL;
 
 		  if (name)
-		    as_bad (_(".size expression with symbol `%s' "
-			      "does not evaluate to a constant"), name);
+		    as_error (_(".size expression with symbol `%s' "
+				"does not evaluate to a constant"),
+			      name);
 		}
 	    }
 	  
 	  if (!op_name && !add_name)
-	    as_bad (_(".size expression does not evaluate to a constant"));
+	    as_error (_(".size expression does not evaluate to a "
+			"constant"));
 	}
       free (sy_obj->size);
       sy_obj->size = NULL;

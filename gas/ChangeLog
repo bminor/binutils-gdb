@@ -1,3 +1,15 @@
+2011-03-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* as.c (show_usage): Add --size-check=.
+	(parse_args): Add and handle OPTION_SIZE_CHECK.
+
+	* as.h (flag_size_check): New.
+
+	* config/obj-elf.c (elf_frob_symbol): Use as_bad to report
+	bad .size directive only for --size-check=error.
+
+	* doc/as.texinfo: Document --size-check=.
+
 2011-03-14  Mike Frysinger  <vapier@gentoo.org>
 
 	* config/tc-bfin.c (bfin_cpus[]): Add 0.4 for

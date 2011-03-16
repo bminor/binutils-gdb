@@ -1,3 +1,11 @@
+2011-03-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/bad-size.d: New.
+	* gas/i386/bad-size.s: Likewise.
+	* gas/i386/bad-size.warn: Likewise.
+
+	* gas/i386/i386.exp: Run bad-size for ELF targets.
+
 2011-03-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/elf/bad-size.err: Revert the last change.
