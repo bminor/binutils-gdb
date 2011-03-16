@@ -1,3 +1,8 @@
+2011-03-16  Tom Tromey  <tromey@redhat.com>
+
+	* tracepoint.c (stop_tracing): Don't declare.
+	* event-top.c (after_char_processing_hook): Add `(void)'.
+
 2011-03-16  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* NEWS: Add Parameter sub-classing description.

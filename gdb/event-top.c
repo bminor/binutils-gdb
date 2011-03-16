@@ -165,7 +165,7 @@ readline_input_state;
 
 /* This hook is called by rl_callback_read_char_wrapper after each
    character is processed.  */
-void (*after_char_processing_hook) ();
+void (*after_char_processing_hook) (void);
 
 
 /* Wrapper function for calling into the readline library.  The event
