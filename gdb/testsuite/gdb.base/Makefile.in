@@ -5,7 +5,8 @@ EXECUTABLES = a2-run advance all-types annota1 annota1-watch_thread_num \
 	annota3 anon args arrayidx async attach attach-pie-misread \
 	attach2 auxv bang\! bfp-test bigcore bitfields bitfields2 \
 	break break-always break-entry break-interp-test breako2 \
-	breakpoint-shadow call-ar-st call-rt-st call-sc-t* call-signals \
+	breakpoint-shadow break-on-linker-gcd-function \
+	call-ar-st call-rt-st call-sc-t* call-signals \
 	call-strs callexit callfuncs callfwmall charset checkpoint \
 	chng-syms code_elim1 code_elim2 commands compiler complex \
 	condbreak consecutive constvars coremaker cursal cvexpr \

@@ -1,3 +1,9 @@
+2011-03-16  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	PR gdb/12528
+	* dwarf2read.c (noop_record_line): New function.
+	(dwarf_decode_lines): Ignore line tables for GCd functions.
+
 2011-03-16  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	Fix ARI warnings about new lines at the end of messages, which
