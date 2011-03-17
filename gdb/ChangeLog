@@ -1,3 +1,12 @@
+2011-03-17  Joel Brobecker  <brobecker@gnat.com>
+
+	PR gdb/12116:
+	* configure.ac: Add getthrds declaration check.
+	* configure, config.in: Regenerate.
+	* aix-thread.c (getthrds): Declare only if not already declared
+	in procinfo.h.  More declaration out of get_signaled_thread to
+	global scope.
+
 2011-03-17  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* python/py-symtab.c: Populate symtab_object_methods,

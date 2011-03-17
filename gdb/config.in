@@ -118,6 +118,10 @@
    */
 #undef HAVE_DECL_GETOPT
 
+/* Define to 1 if you have the declaration of `getthrds', and to 0 if you
+   don't. */
+#undef HAVE_DECL_GETTHRDS
+
 /* Define to 1 if you have the declaration of `malloc', and to 0 if you don't.
    */
 #undef HAVE_DECL_MALLOC
