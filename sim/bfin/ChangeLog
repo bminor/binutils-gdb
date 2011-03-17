@@ -1,3 +1,11 @@
+2011-03-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (AC_CHECK_FUNCS): Check for kill and pread.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+	* interp.c (bfin_syscall): Check for HAVE_{KILL,PREAD} before using
+	kill or pread.
+
 2011-03-15  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in (dv-bfin_gpio.o): New target.
