@@ -1401,24 +1401,16 @@ read_dbx_symtab (struct objfile *objfile)
 	  goto record_it;
 
 	case N_UNDF | N_EXT:
-	  if (nlist.n_value != 0)
-	    {
-	      /* This is a "Fortran COMMON" symbol.  See if the target
-		 environment knows where it has been relocated to.  */
+	  /* The case (nlist.n_value != 0) is a "Fortran COMMON" symbol.
+	     We used to rely on the target to tell us whether it knows
+	     where the symbol has been relocated to, but none of the
+	     target implementations actually provided that operation.
+	     So we just ignore the symbol, the same way we would do if
+	     we had a target-side symbol lookup which returned no match.
 
-	      CORE_ADDR reladdr;
-
-	      namestring = set_namestring (objfile, &nlist);
-	      if (target_lookup_symbol (namestring, &reladdr))
-		{
-		  continue;	/* Error in lookup; ignore symbol for now.  */
-		}
-	      nlist.n_type ^= (N_BSS ^ N_UNDF);	/* Define it as a
-						   bss-symbol.  */
-	      nlist.n_value = reladdr;
-	      goto bss_ext_symbol;
-	    }
-	  continue;		/* Just undefined, not COMMON.  */
+	     All other symbols (with nlist.n_value == 0), are really
+	     undefined, and so we ignore them too.  */
+	  continue;
 
 	case N_UNDF:
 	  if (processing_acc_compilation && nlist.n_strx == 1)

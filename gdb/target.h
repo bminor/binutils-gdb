@@ -479,7 +479,6 @@ struct target_ops
     void (*to_terminal_info) (char *, int);
     void (*to_kill) (struct target_ops *);
     void (*to_load) (char *, int);
-    int (*to_lookup_symbol) (char *, CORE_ADDR *);
     void (*to_create_inferior) (struct target_ops *, 
 				char *, char *, char **, int);
     void (*to_post_startup_inferior) (ptid_t);
@@ -1015,17 +1014,6 @@ extern void target_kill (void);
    arguments, as it pleases.  */
 
 extern void target_load (char *arg, int from_tty);
-
-/* Look up a symbol in the target's symbol table.  NAME is the symbol
-   name.  ADDRP is a CORE_ADDR * pointing to where the value of the
-   symbol should be returned.  The result is 0 if successful, nonzero
-   if the symbol does not exist in the target environment.  This
-   function should not call error() if communication with the target
-   is interrupted, since it is called from symbol reading, but should
-   return nonzero, possibly doing a complain().  */
-
-#define target_lookup_symbol(name, addrp) \
-     (*current_target.to_lookup_symbol) (name, addrp)
 
 /* Start an inferior process and set inferior_ptid to its pid.
    EXEC_FILE is the file to run.

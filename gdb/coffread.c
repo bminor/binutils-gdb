@@ -902,22 +902,14 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 
 	    if (cs->c_secnum == N_UNDEF)
 	      {
-		/* This is a common symbol.  See if the target
-		   environment knows where it has been relocated to.  */
-		CORE_ADDR reladdr;
-
-		if (target_lookup_symbol (cs->c_name, &reladdr))
-		  {
-		    /* Error in lookup; ignore symbol.  */
-		    break;
-		  }
-		tmpaddr = reladdr;
-		/* The address has already been relocated; make sure that
-		   objfile_relocate doesn't relocate it again.  */
-		sec = -2;
-		ms_type = cs->c_sclass == C_EXT
-		  || cs->c_sclass == C_THUMBEXT ?
-		  mst_bss : mst_file_bss;
+		/* This is a common symbol.  We used to rely on
+		   the target to tell us whether it knows where
+		   the symbol has been relocated to, but none of
+		   the target implementations actually provided
+		   that operation.  So we just ignore the symbol,
+		   the same way we would do if we had a target-side
+		   symbol lookup which returned no match.  */
+		break;
 	      }
  	    else if (cs->c_secnum == N_ABS)
  	      {

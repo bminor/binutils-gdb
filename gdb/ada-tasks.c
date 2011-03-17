@@ -300,7 +300,7 @@ read_fat_string_value (char *dest, struct value *val, int max_len)
 }
 
 /* Return the address of the Known_Tasks array maintained in
-   the Ada Runtime.  Return NULL if the array could not be found,
+   the Ada Runtime.  Return zero if the array could not be found,
    meaning that the inferior program probably does not use tasking.
 
    In order to provide a fast response time, this function caches
@@ -317,13 +317,9 @@ get_known_tasks_addr (void)
       struct minimal_symbol *msym;
 
       msym = lookup_minimal_symbol (KNOWN_TASKS_NAME, NULL, NULL);
-      if (msym != NULL)
-        known_tasks_addr = SYMBOL_VALUE_ADDRESS (msym);
-      else
-        {
-          if (target_lookup_symbol (KNOWN_TASKS_NAME, &known_tasks_addr) != 0)
-            return 0;
-        }
+      if (msym == NULL)
+        return 0;
+      known_tasks_addr = SYMBOL_VALUE_ADDRESS (msym);
 
       /* FIXME: brobecker 2003-03-05: Here would be a much better place
          to attach the ada-tasks observers, instead of doing this

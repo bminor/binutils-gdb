@@ -1,5 +1,17 @@
 2011-03-17  Joel Brobecker  <brobecker@gnat.com>
 
+	* target.h (struct target_ops): Remove to_lookup_symbol field.
+	(target_lookup_symbol): Delete macro.
+	* target.c (nosymbol, debug_to_lookup_symbol): Delete.
+	(update_current_target, setup_target_debug): Remove handling
+	of to_lookup_symbol target_ops field.
+	* ada-tasks.c (get_known_tasks_addr): Remove use of
+	target_lookup_symbol.
+	* coffread.c (coff_symtab_read): Likewise.
+	* dbxread.c (read_dbx_symtab): Ditto.
+
+2011-03-17  Joel Brobecker  <brobecker@gnat.com>
+
 	PR gdb/12116:
 	* configure.ac: Add getthrds declaration check.
 	* configure, config.in: Regenerate.

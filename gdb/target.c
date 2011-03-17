@@ -54,8 +54,6 @@ static int default_watchpoint_addr_within_range (struct target_ops *,
 
 static int default_region_ok_for_hw_watchpoint (CORE_ADDR, int);
 
-static int nosymbol (char *, CORE_ADDR *);
-
 static void tcomplain (void) ATTRIBUTE_NORETURN;
 
 static int nomemory (CORE_ADDR, char *, int, int, struct target_ops *);
@@ -148,8 +146,6 @@ static void debug_to_terminal_ours (void);
 static void debug_to_terminal_info (char *, int);
 
 static void debug_to_load (char *, int);
-
-static int debug_to_lookup_symbol (char *, CORE_ADDR *);
 
 static int debug_to_can_run (void);
 
@@ -532,12 +528,6 @@ noprocess (void)
   error (_("You can't do that without a process to debug."));
 }
 
-static int
-nosymbol (char *name, CORE_ADDR *addrp)
-{
-  return 1;			/* Symbol does not exist in target env.  */
-}
-
 static void
 default_terminal_info (char *args, int from_tty)
 {
@@ -621,7 +611,6 @@ update_current_target (void)
       INHERIT (to_terminal_info, t);
       /* Do not inherit to_kill.  */
       INHERIT (to_load, t);
-      INHERIT (to_lookup_symbol, t);
       /* Do no inherit to_create_inferior.  */
       INHERIT (to_post_startup_inferior, t);
       INHERIT (to_insert_fork_catchpoint, t);
@@ -774,9 +763,6 @@ update_current_target (void)
   de_fault (to_load,
 	    (void (*) (char *, int))
 	    tcomplain);
-  de_fault (to_lookup_symbol,
-	    (int (*) (char *, CORE_ADDR *))
-	    nosymbol);
   de_fault (to_post_startup_inferior,
 	    (void (*) (ptid_t))
 	    target_ignore);
@@ -3800,18 +3786,6 @@ debug_to_load (char *args, int from_tty)
   fprintf_unfiltered (gdb_stdlog, "target_load (%s, %d)\n", args, from_tty);
 }
 
-static int
-debug_to_lookup_symbol (char *name, CORE_ADDR *addrp)
-{
-  int retval;
-
-  retval = debug_target.to_lookup_symbol (name, addrp);
-
-  fprintf_unfiltered (gdb_stdlog, "target_lookup_symbol (%s, xxx)\n", name);
-
-  return retval;
-}
-
 static void
 debug_to_post_startup_inferior (ptid_t ptid)
 {
@@ -4011,7 +3985,6 @@ setup_target_debug (void)
   current_target.to_terminal_save_ours = debug_to_terminal_save_ours;
   current_target.to_terminal_info = debug_to_terminal_info;
   current_target.to_load = debug_to_load;
-  current_target.to_lookup_symbol = debug_to_lookup_symbol;
   current_target.to_post_startup_inferior = debug_to_post_startup_inferior;
   current_target.to_insert_fork_catchpoint = debug_to_insert_fork_catchpoint;
   current_target.to_remove_fork_catchpoint = debug_to_remove_fork_catchpoint;
