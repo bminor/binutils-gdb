@@ -1,3 +1,11 @@
+2011-03-17  Alan Modra  <amodra@gmail.com>
+
+	PR 12569
+	* expr.c (operand): Correct passing of "mode" to expr.
+	* read.c (do_org): Allow expr_section.
+	(get_known_segmented_expression): Don't assert anything about the
+	segment.
+
 2011-03-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* as.c (show_usage): Add --size-check=.
