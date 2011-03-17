@@ -1,3 +1,14 @@
+2010-03-17  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* gdb.python/Makefile.in: Add py-objfile.
+	* gdb.python/py-objfile.exp: New file.
+	* gdb.python/py-objfile.c: New file.
+	* gdb.python/py-block.exp: Add is_valid tests.
+	* gdb.python/py-inferior.exp: Ditto.
+	* gdb.python/py-infthread.exp: Ditto.
+	* gdb.python/py-symbol.exp: Ditto.
+	* gdb.python/py-symtab.exp: Ditto.
+
 2011-03-16  Keith Seitz  <keiths@redhat.com>
 
 	PR c++/12273

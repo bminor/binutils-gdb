@@ -64,3 +64,10 @@ gdb_test "python print gdb.selected_thread().name == name" "True" \
 gdb_test "python print 'result =', t0.is_stopped ()" " = True" "test InferiorThread.is_stopped"
 gdb_test "python print 'result =', t0.is_running ()" " = False" "test InferiorThread.is_running"
 gdb_test "python print 'result =', t0.is_exited ()" " = False" "test InferiorThread.is_exited"
+
+# Test InferiorThread is_valid.  This must always be the last test in
+# this testcase as it kills the inferior.
+
+gdb_test "python print 'result =', t0.is_valid ()" " = True" "test InferiorThread.is_valid"
+gdb_test_no_output "kill inferior 1" "kill inferior 1"
+gdb_test "python print 'result =', t0.is_valid ()" " = False" "test InferiorThread.is_valid"

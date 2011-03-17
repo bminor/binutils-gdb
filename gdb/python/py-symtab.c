@@ -138,6 +138,21 @@ stpy_fullname (PyObject *self, PyObject *args)
   Py_RETURN_NONE;
 }
 
+/* Implementation of gdb.Symtab.is_valid (self) -> Boolean.
+   Returns True if this Symbol table still exists in GDB.  */
+
+static PyObject *
+stpy_is_valid (PyObject *self, PyObject *args)
+{
+  struct symtab *symtab = NULL;
+
+  symtab = symtab_object_to_symtab (self);
+  if (symtab == NULL)
+    Py_RETURN_FALSE;
+
+  Py_RETURN_TRUE;
+}
+
 static PyObject *
 salpy_str (PyObject *self)
 {
@@ -210,6 +225,21 @@ salpy_get_symtab (PyObject *self, void *closure)
   Py_INCREF (self_sal->symtab);
 
   return (PyObject *) self_sal->symtab;
+}
+
+/* Implementation of gdb.Symtab_and_line.is_valid (self) -> Boolean.
+   Returns True if this Symbol table and line object still exists GDB.  */
+
+static PyObject *
+salpy_is_valid (PyObject *self, PyObject *args)
+{
+  struct symtab_and_line *sal;
+
+  sal = sal_object_to_symtab_and_line (self);
+  if (sal == NULL)
+    Py_RETURN_FALSE;
+
+  Py_RETURN_TRUE;
 }
 
 static void
@@ -441,6 +471,9 @@ static PyGetSetDef symtab_object_getset[] = {
 };
 
 static PyMethodDef symtab_object_methods[] = {
+  { "is_valid", stpy_is_valid, METH_NOARGS,
+    "is_valid () -> Boolean.\n\
+Return true if this symbol table is valid, false if not." },
   { "fullname", stpy_fullname, METH_NOARGS,
     "fullname () -> String.\n\
 Return the symtab's full source filename." },
@@ -489,6 +522,13 @@ static PyGetSetDef sal_object_getset[] = {
   {NULL}  /* Sentinel */
 };
 
+static PyMethodDef sal_object_methods[] = {
+  { "is_valid", salpy_is_valid, METH_NOARGS,
+    "is_valid () -> Boolean.\n\
+Return true if this symbol table and line is valid, false if not." },
+  {NULL}  /* Sentinel */
+};
+
 static PyTypeObject sal_object_type = {
   PyObject_HEAD_INIT (NULL)
   0,				  /*ob_size*/
@@ -518,7 +558,7 @@ static PyTypeObject sal_object_type = {
   0,				  /*tp_weaklistoffset */
   0,				  /*tp_iter */
   0,				  /*tp_iternext */
-  0,				  /*tp_methods */
+  sal_object_methods,		  /*tp_methods */
   0,				  /*tp_members */
   sal_object_getset		  /*tp_getset */
 };

@@ -263,6 +263,36 @@ blpy_block_syms_dealloc (PyObject *obj)
   Py_XDECREF (iter_obj->source);
 }
 
+/* Implementation of gdb.Block.is_valid (self) -> Boolean.
+   Returns True if this block object still exists in GDB.  */
+
+static PyObject *
+blpy_is_valid (PyObject *self, PyObject *args)
+{
+  struct block *block;
+
+  block = block_object_to_block (self);
+  if (block == NULL)
+    Py_RETURN_FALSE;
+
+  Py_RETURN_TRUE;
+}
+
+/* Implementation of gdb.BlockIterator.is_valid (self) -> Boolean.
+   Returns True if this block iterator object still exists in GDB  */
+
+static PyObject *
+blpy_iter_is_valid (PyObject *self, PyObject *args)
+{
+  block_syms_iterator_object *iter_obj =
+    (block_syms_iterator_object *) self;
+
+  if (iter_obj->source->block == NULL)
+    Py_RETURN_FALSE;
+
+  Py_RETURN_TRUE;
+}
+
 /* Return the innermost lexical block containing the specified pc value,
    or 0 if there is none.  */
 PyObject *
@@ -342,6 +372,13 @@ gdbpy_initialize_blocks (void)
 
 
 
+static PyMethodDef block_object_methods[] = {
+  { "is_valid", blpy_is_valid, METH_NOARGS,
+    "is_valid () -> Boolean.\n\
+Return true if this block is valid, false if not." },
+  {NULL}  /* Sentinel */
+};
+
 static PyGetSetDef block_object_getset[] = {
   { "start", blpy_get_start, NULL, "Start address of the block.", NULL },
   { "end", blpy_get_end, NULL, "End address of the block.", NULL },
@@ -381,9 +418,16 @@ PyTypeObject block_object_type = {
   0,				  /* tp_weaklistoffset */
   blpy_iter,			  /* tp_iter */
   0,				  /* tp_iternext */
-  0,				  /* tp_methods */
+  block_object_methods,		  /* tp_methods */
   0,				  /* tp_members */
   block_object_getset		  /* tp_getset */
+};
+
+static PyMethodDef block_iterator_object_methods[] = {
+  { "is_valid", blpy_iter_is_valid, METH_NOARGS,
+    "is_valid () -> Boolean.\n\
+Return true if this block iterator is valid, false if not." },
+  {NULL}  /* Sentinel */
 };
 
 static PyTypeObject block_syms_iterator_object_type = {
@@ -415,5 +459,5 @@ static PyTypeObject block_syms_iterator_object_type = {
   0,				  /*tp_weaklistoffset */
   blpy_block_syms_iter,           /*tp_iter */
   blpy_block_syms_iternext,	  /*tp_iternext */
-  0				  /*tp_methods */
+  block_iterator_object_methods   /*tp_methods */
 };

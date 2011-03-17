@@ -1,3 +1,12 @@
+2011-03-17  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* gdb.texinfo (Blocks In Python): Add is_valid method description.
+	(Inferiors In Python): Likewise.
+	(Threads In Python): Likewise.
+	(Symbols In Python): Likewise.
+	(Objfiles In Python): Likewise.
+	(Symbol Tables In Python): Likewise.
+
 2011-03-15  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.texinfo (Auto Display) <undisplay, enable display, disable
@@ -7,7 +16,6 @@
 
 	* gdb.texinfo (Breakpoints In Python): Add description and example
 	of Python stop function operation.
-
 
 2011-03-10  Phil Muldoon  <pmuldoon@redhat.com>
 

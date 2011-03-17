@@ -606,6 +606,20 @@ infpy_search_memory (PyObject *self, PyObject *args, PyObject *kw)
     Py_RETURN_NONE;
 }
 
+/* Implementation of gdb.Inferior.is_valid (self) -> Boolean.
+   Returns True if this inferior object still exists in GDB.  */
+
+static PyObject *
+infpy_is_valid (PyObject *self, PyObject *args)
+{
+  inferior_object *inf = (inferior_object *) self;
+
+  if (! inf->inferior)
+    Py_RETURN_FALSE;
+
+  Py_RETURN_TRUE;
+}
+
 
 /* Clear the INFERIOR pointer in an Inferior object and clear the
    thread list.  */
@@ -676,6 +690,9 @@ static PyGetSetDef inferior_object_getset[] =
 
 static PyMethodDef inferior_object_methods[] =
 {
+  { "is_valid", infpy_is_valid, METH_NOARGS,
+    "is_valid () -> Boolean.\n\
+Return true if this inferior is valid, false if not." },
   { "threads", infpy_threads, METH_NOARGS,
     "Return all the threads of this inferior." },
   { "read_memory", (PyCFunction) infpy_read_memory,

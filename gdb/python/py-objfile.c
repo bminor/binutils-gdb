@@ -118,6 +118,20 @@ objfpy_set_printers (PyObject *o, PyObject *value, void *ignore)
   return 0;
 }
 
+/* Implementation of gdb.Objfile.is_valid (self) -> Boolean.
+   Returns True if this object file still exists in GDB.  */
+
+static PyObject *
+objfpy_is_valid (PyObject *self, PyObject *args)
+{
+  objfile_object *obj = (objfile_object *) self;
+
+  if (! obj->objfile)
+    Py_RETURN_FALSE;
+
+  Py_RETURN_TRUE;
+}
+
 
 
 /* Clear the OBJFILE pointer in an Objfile object and remove the
@@ -181,6 +195,15 @@ gdbpy_initialize_objfile (void)
 
 
 
+static PyMethodDef objfile_object_methods[] =
+{
+  { "is_valid", objfpy_is_valid, METH_NOARGS,
+    "is_valid () -> Boolean.\n\
+Return true if this object file is valid, false if not." },
+
+  { NULL }
+};
+
 static PyGetSetDef objfile_getset[] =
 {
   { "filename", objfpy_get_filename, NULL,
@@ -220,7 +243,7 @@ static PyTypeObject objfile_object_type =
   0,				  /* tp_weaklistoffset */
   0,				  /* tp_iter */
   0,				  /* tp_iternext */
-  0,				  /* tp_methods */
+  objfile_object_methods,	  /* tp_methods */
   0,				  /* tp_members */
   objfile_getset,		  /* tp_getset */
   0,				  /* tp_base */

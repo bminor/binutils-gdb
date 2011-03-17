@@ -62,3 +62,20 @@ gdb_py_test_silent_cmd "python block = frame.block()" "Get Frame 2's block" 0
 gdb_test "python print block" "<gdb.Block object at $hex>" \
          "Check Frame 2's block not None"
 gdb_test "python print block.function" "main" "main block"
+
+
+# Test Block is_valid.  This must always be the last test in this
+# testcase as it unloads the object file.
+delete_breakpoints
+gdb_py_test_silent_cmd "python frame = gdb.selected_frame()" "Get Frame" 0
+gdb_py_test_silent_cmd "python block = frame.block()" "Get Frame block" 0
+gdb_py_test_silent_cmd "python block_iter = iter (block)" "Get Frame block" 0
+gdb_test "python print block.is_valid()" "True" \
+         "Check block validity"
+gdb_test "python print block_iter.is_valid()" "True" \
+         "Check block validity"
+gdb_unload
+gdb_test "python print block.is_valid()" "False" \
+         "Check block validity"
+gdb_test "python print block_iter.is_valid()" "False" \
+         "Check block validity"

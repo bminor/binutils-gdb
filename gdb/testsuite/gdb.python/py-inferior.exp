@@ -191,3 +191,23 @@ if [isnative] {
     gdb_test "py print gdb.inferiors()\[0\].search_memory (start_addr, end_addr - start_addr, pattern)" \
       "${one_pattern_found}" "find pattern straddling chunk boundary"
 }
+
+# Test Inferior is_valid.  This must always be the last test in
+# this testcase as it kills the inferior.
+
+gdb_py_test_silent_cmd "python inf_list = gdb.inferiors()" "get initial list" 1
+gdb_test "python print len(inf_list)" "1" "Get inferior list length"
+gdb_test "python print inf_list\[0\].is_valid()" "True" \
+         "Check inferior validity"
+gdb_test "add-inferior" "Added inferior 2.*" "add empty inferior 2"
+gdb_py_test_silent_cmd "python inf_list = gdb.inferiors()" "get new list" 1
+gdb_test "python print len(inf_list)" "2" "Get inferior list length"
+gdb_test "python print inf_list\[0\].is_valid()" "True" \
+         "Check inferior validity"
+gdb_test "python print inf_list\[1\].is_valid()" "True" \
+         "Check inferior validity"
+gdb_test_no_output "remove-inferiors 2" "remove-inferiors 2"
+gdb_test "python print inf_list\[0\].is_valid()" "False" \
+         "Check inferior validity"
+gdb_test "python print inf_list\[1\].is_valid()" "True" \
+         "Check inferior validity"

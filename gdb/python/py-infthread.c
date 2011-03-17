@@ -222,7 +222,20 @@ thpy_is_exited (PyObject *self, PyObject *args)
   Py_RETURN_FALSE;
 }
 
+/* Implementation of gdb.InfThread.is_valid (self) -> Boolean.
+   Returns True if this inferior Thread object still exists
+   in GDB.  */
 
+static PyObject *
+thpy_is_valid (PyObject *self, PyObject *args)
+{
+  thread_object *thread_obj = (thread_object *) self;
+
+  if (! thread_obj->thread)
+    Py_RETURN_FALSE;
+
+  Py_RETURN_TRUE;
+}
 
 /* Implementation of gdb.selected_thread () -> gdb.InferiorThread.
    Returns the selected thread object.  */
@@ -269,6 +282,9 @@ static PyGetSetDef thread_object_getset[] =
 
 static PyMethodDef thread_object_methods[] =
 {
+  { "is_valid", thpy_is_valid, METH_NOARGS,
+    "is_valid () -> Boolean.\n\
+Return true if this inferior thread is valid, false if not." },
   { "switch", thpy_switch, METH_NOARGS,
     "switch ()\n\
 Makes this the GDB selected thread." },

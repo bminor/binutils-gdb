@@ -167,6 +167,21 @@ sympy_is_variable (PyObject *self, void *closure)
 			      || class == LOC_OPTIMIZED_OUT));
 }
 
+/* Implementation of gdb.Symbol.is_valid (self) -> Boolean.
+   Returns True if this Symbol still exists in GDB.  */
+
+static PyObject *
+sympy_is_valid (PyObject *self, PyObject *args)
+{
+  struct symbol *symbol = NULL;
+
+  symbol = symbol_object_to_symbol (self);
+  if (symbol == NULL)
+    Py_RETURN_FALSE;
+
+  Py_RETURN_TRUE;
+}
+
 /* Given a symbol, and a symbol_object that has previously been
    allocated and initialized, populate the symbol_object with the
    struct symbol data.  Also, register the symbol_object life-cycle
@@ -420,6 +435,13 @@ to display demangled or mangled names.", NULL },
   { NULL }  /* Sentinel */
 };
 
+static PyMethodDef symbol_object_methods[] = {
+  { "is_valid", sympy_is_valid, METH_NOARGS,
+    "is_valid () -> Boolean.\n\
+Return true if this symbol is valid, false if not." },
+  {NULL}  /* Sentinel */
+};
+
 PyTypeObject symbol_object_type = {
   PyObject_HEAD_INIT (NULL)
   0,				  /*ob_size*/
@@ -449,7 +471,7 @@ PyTypeObject symbol_object_type = {
   0,				  /*tp_weaklistoffset */
   0,				  /*tp_iter */
   0,				  /*tp_iternext */
-  0,				  /*tp_methods */
+  symbol_object_methods,	  /*tp_methods */
   0,				  /*tp_members */
   symbol_object_getset		  /*tp_getset */
 };

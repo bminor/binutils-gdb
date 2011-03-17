@@ -128,3 +128,19 @@ gdb_test "python print cplusfunc.name" "SimpleClass::valueofi().*" "Test func.na
 gdb_test "python print cplusfunc.print_name" "SimpleClass::valueofi().*" "Test func.print_name"
 gdb_test "python print cplusfunc.linkage_name" "SimpleClass::valueofi().*" "Test func.linkage_name"
 gdb_test "python print cplusfunc.addr_class == gdb.SYMBOL_LOC_BLOCK" "True" "Test func.addr_class"
+
+# Test is_valid when the objfile is unloaded.  This must be the last
+# test as it unloads the object file in GDB.
+# Start with a fresh gdb.
+clean_restart ${testfile}
+if ![runto_main] then {
+    fail "Cannot run to main."
+    return 0
+}
+gdb_breakpoint [gdb_get_line_number "Break at end."]
+gdb_continue_to_breakpoint "Break at end."
+gdb_py_test_silent_cmd "python a = gdb.lookup_symbol(\'a\')" "Get variable a" 0
+gdb_test "python print a\[0\].is_valid()" "True" "Test symbol validity"
+delete_breakpoints
+gdb_unload
+gdb_test "python print a\[0\].is_valid()" "False" "Test symbol validity"

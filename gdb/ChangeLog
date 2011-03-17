@@ -1,3 +1,22 @@
+2011-03-17  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* python/py-symtab.c: Populate symtab_object_methods,
+	sal_object_methods.
+	(stpy_is_valid): New function.
+	(salpy_is_valid): Ditto.
+	* python/py-symbol.c: Declare symbol_object_methods.  Populate.
+	(sympy_is_valid): New function.
+	* python/py-objfile.c: Declare objfile_object_methods.  Populate.
+	(objfpy_is_valid): New function.
+	* python/py-inferior.c: Populate inferior_object_methods.
+	(infpy_is_valid): New function.
+	* python/py-infthread.c: Populate thread_object_methods.
+	(thpy_is_valid): New function.
+	* python/py-block.c: Declare block_object_methods.  Populate.  Declare
+	block_iterator_object_methods.  Populate.
+	(blpy_is_valid): New function.
+	(blpy_iter_is_valid): Ditto.
+
 2011-03-16  Keith Seitz  <keiths@redhat.com>
 
 	* linespec.c (find_methods): Canonicalize NAME before looking

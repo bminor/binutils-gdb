@@ -21870,6 +21870,14 @@ started by @value{GDBN} itself.
 A @code{gdb.Inferior} object has the following methods:
 
 @table @code
+@defmethod Inferior is_valid
+Returns @code{True} if the @code{gdb.Inferior} object is valid,
+@code{False} if not.  A @code{gdb.Inferior} object will become invalid
+if the inferior no longer exists within @value{GDBN}.  All other
+@code{gdb.Inferior} methods will throw an exception if it is invalid
+at the time the method is called.
+@end defmethod
+
 @defmethod Inferior threads
 This method returns a tuple holding all the threads which are valid
 when it is called.  If there are no valid threads, the method will
@@ -22069,6 +22077,14 @@ does not  use that identifier.
 A @code{gdb.InferiorThread} object has the following methods:
 
 @table @code
+@defmethod InferiorThread is_valid
+Returns @code{True} if the @code{gdb.InferiorThread} object is valid,
+@code{False} if not.  A @code{gdb.InferiorThread} object will become
+invalid if the thread exits, or the inferior that the thread belongs
+is deleted.  All other @code{gdb.InferiorThread} methods will throw an
+exception if it is invalid at the time the method is called.
+@end defmethod
+
 @defmethod InferiorThread switch
 This changes @value{GDBN}'s currently selected thread to the one represented
 by this object.
@@ -22662,6 +22678,16 @@ which is used to format the value.  @xref{Pretty Printing API}, for more
 information.
 @end defivar
 
+A @code{gdb.Objfile} object has the following methods:
+
+@defmethod Objfile is_valid
+Returns @code{True} if the @code{gdb.Objfile} object is valid,
+@code{False} if not.  A @code{gdb.Objfile} object can become invalid
+if the object file it refers to is not loaded in @value{GDBN} any
+longer.  All other @code{gdb.Objfile} methods will throw an exception
+if it is invalid at the time the method is called.
+@end defmethod
+
 @node Frames In Python
 @subsubsection Accessing inferior stack frames from Python.
 
@@ -22813,6 +22839,20 @@ block cannot be found for the @var{pc} value specified, the function
 will return @code{None}.
 @end defun
 
+A @code{gdb.Block} object has the following methods:
+
+@table @code
+@defmethod Block is_valid
+Returns @code{True} if the @code{gdb.Block} object is valid,
+@code{False} if not.  A block object can become invalid if the block it
+refers to doesn't exist anymore in the inferior.  All other
+@code{gdb.Block} methods will throw an exception if it is invalid at
+the time the method is called.  This method is also made available to
+the Python iterator object that @code{gdb.Block} provides in an iteration
+context and via the Python @code{iter} built-in function.
+@end defmethod
+@end table
+
 A @code{gdb.Block} object has the following attributes:
 
 @table @code
@@ -22933,6 +22973,18 @@ of a symbol.  Each address class is a constant defined in the
 @defivar Symbol is_variable
 @code{True} if the symbol is a variable.
 @end defivar
+@end table
+
+A @code{gdb.Symbol} object has the following methods:
+
+@table @code
+@defmethod Symbol is_valid
+Returns @code{True} if the @code{gdb.Symbol} object is valid,
+@code{False} if not.  A @code{gdb.Symbol} object can become invalid if
+the symbol it refers to does not exist in @value{GDBN} any longer.
+All other @code{gdb.Symbol} methods will throw an exception if it is
+invalid at the time the method is called.
+@end defmethod
 @end table
 
 The available domain categories in @code{gdb.Symbol} are represented
@@ -23079,6 +23131,19 @@ attribute is not writable.
 @end defivar
 @end table
 
+A @code{gdb.Symtab_and_line} object has the following methods:
+
+@table @code
+@defmethod Symtab_and_line is_valid
+Returns @code{True} if the @code{gdb.Symtab_and_line} object is valid,
+@code{False} if not.  A @code{gdb.Symtab_and_line} object can become
+invalid if the Symbol table and line object it refers to does not
+exist in @value{GDBN} any longer.  All other
+@code{gdb.Symtab_and_line} methods will throw an exception if it is
+invalid at the time the method is called.
+@end defmethod
+@end table
+
 A @code{gdb.Symtab} object has the following attributes:
 
 @table @code
@@ -23092,9 +23157,17 @@ This attribute is not writable.
 @end defivar
 @end table
 
-The following methods are provided:
+A @code{gdb.Symtab} object has the following methods:
 
 @table @code
+@defmethod Symtab is_valid
+Returns @code{True} if the @code{gdb.Symtab} object is valid,
+@code{False} if not.  A @code{gdb.Symtab} object can become invalid if
+the symbol table it refers to does not exist in @value{GDBN} any
+longer.  All other @code{gdb.Symtab} methods will throw an exception
+if it is invalid at the time the method is called.
+@end defmethod
+
 @defmethod Symtab fullname
 Return the symbol table's source absolute file name.
 @end defmethod
