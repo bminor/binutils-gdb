@@ -1,3 +1,11 @@
+2011-03-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/12589
+	* gas/i386/pr12589-1.d: New.
+	* gas/i386/pr12589-1.s: Likewise.
+
+	* gas/i386/i386.exp: Run pr12589-1.
+
 2011-03-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/bad-size.d: New.
