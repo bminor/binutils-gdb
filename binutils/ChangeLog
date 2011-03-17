@@ -1,3 +1,9 @@
+2011-03-17  Alan Modra  <amodra@gmail.com>
+
+	PR 12590
+	* ar.c (ranlib_main): Init arg_index properly.
+	(usage): Describe --target.
+
 2011-03-16  Jakub Jelinek  <jakub@redhat.com>
 
 	* dwarf.c (dw_TAG_name): Handle DW_TAG_GNU_call_site_parameter.
