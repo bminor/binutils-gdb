@@ -1,5 +1,25 @@
 2011-03-18  Pedro Alves  <pedro@codesourcery.com>
 
+	* findvar.c (value_of_register): Mark the value as unavailable, if
+	the register is unavailable.
+	* frame.h (frame_register_unwind): New `unavailablep' parameter.
+	(frame_register): New `unavailablep' parameter.
+	(frame_register_read): Update comment.
+	* frame.c (frame_register_unwind): New `unavailablep' parameter.
+	Set it if the register is unavailable.  If the register is
+	unavailable, clear the output buffer.
+	(frame_register): New `unavailablep' parameter.  Pass it down.
+	(frame_unwind_register): Adjust.
+	(put_frame_register): Adjust.
+	(frame_register_read): Adjust.  Also return false if the register
+	is not available.
+	(frame_register_unwind_location): Adjust.
+	* sentinel-frame.c (sentinel_frame_prev_register): If the register
+	is unavailable, mark the value accordingly.
+	* stack.c (frame_info): Handle unavailable registers.
+
+2011-03-18  Pedro Alves  <pedro@codesourcery.com>
+
 	* mi/mi-main.c (register_changed_p): Handle REG_UNAVAILABLE, and
 	simplify, using regcache_cooked_read.
 

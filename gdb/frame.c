@@ -757,8 +757,9 @@ frame_pop (struct frame_info *this_frame)
 
 void
 frame_register_unwind (struct frame_info *frame, int regnum,
-		       int *optimizedp, enum lval_type *lvalp,
-		       CORE_ADDR *addrp, int *realnump, gdb_byte *bufferp)
+		       int *optimizedp, int *unavailablep,
+		       enum lval_type *lvalp, CORE_ADDR *addrp,
+		       int *realnump, gdb_byte *bufferp)
 {
   struct value *value;
 
@@ -775,13 +776,19 @@ frame_register_unwind (struct frame_info *frame, int regnum,
   gdb_assert (value != NULL);
 
   *optimizedp = value_optimized_out (value);
+  *unavailablep = !value_entirely_available (value);
   *lvalp = VALUE_LVAL (value);
   *addrp = value_address (value);
   *realnump = VALUE_REGNUM (value);
 
-  if (bufferp && !*optimizedp)
-    memcpy (bufferp, value_contents_all (value),
-	    TYPE_LENGTH (value_type (value)));
+  if (bufferp)
+    {
+      if (!*optimizedp && !*unavailablep)
+	memcpy (bufferp, value_contents_all (value),
+		TYPE_LENGTH (value_type (value)));
+      else
+	memset (bufferp, 0, TYPE_LENGTH (value_type (value)));
+    }
 
   /* Dispose of the new value.  This prevents watchpoints from
      trying to watch the saved frame pointer.  */
@@ -791,7 +798,7 @@ frame_register_unwind (struct frame_info *frame, int regnum,
 
 void
 frame_register (struct frame_info *frame, int regnum,
-		int *optimizedp, enum lval_type *lvalp,
+		int *optimizedp, int *unavailablep, enum lval_type *lvalp,
 		CORE_ADDR *addrp, int *realnump, gdb_byte *bufferp)
 {
   /* Require all but BUFFERP to be valid.  A NULL BUFFERP indicates
@@ -805,20 +812,21 @@ frame_register (struct frame_info *frame, int regnum,
   /* Obtain the register value by unwinding the register from the next
      (more inner frame).  */
   gdb_assert (frame != NULL && frame->next != NULL);
-  frame_register_unwind (frame->next, regnum, optimizedp, lvalp, addrp,
-			 realnump, bufferp);
+  frame_register_unwind (frame->next, regnum, optimizedp, unavailablep,
+			 lvalp, addrp, realnump, bufferp);
 }
 
 void
 frame_unwind_register (struct frame_info *frame, int regnum, gdb_byte *buf)
 {
   int optimized;
+  int unavailable;
   CORE_ADDR addr;
   int realnum;
   enum lval_type lval;
 
-  frame_register_unwind (frame, regnum, &optimized, &lval, &addr,
-			 &realnum, buf);
+  frame_register_unwind (frame, regnum, &optimized, &unavailable,
+			 &lval, &addr, &realnum, buf);
 }
 
 void
@@ -940,10 +948,12 @@ put_frame_register (struct frame_info *frame, int regnum,
   struct gdbarch *gdbarch = get_frame_arch (frame);
   int realnum;
   int optim;
+  int unavail;
   enum lval_type lval;
   CORE_ADDR addr;
 
-  frame_register (frame, regnum, &optim, &lval, &addr, &realnum, NULL);
+  frame_register (frame, regnum, &optim, &unavail,
+		  &lval, &addr, &realnum, NULL);
   if (optim)
     error (_("Attempt to assign to a value that was optimized out."));
   switch (lval)
@@ -978,13 +988,15 @@ frame_register_read (struct frame_info *frame, int regnum,
 		     gdb_byte *myaddr)
 {
   int optimized;
+  int unavailable;
   enum lval_type lval;
   CORE_ADDR addr;
   int realnum;
 
-  frame_register (frame, regnum, &optimized, &lval, &addr, &realnum, myaddr);
+  frame_register (frame, regnum, &optimized, &unavailable,
+		  &lval, &addr, &realnum, myaddr);
 
-  return !optimized;
+  return !optimized && !unavailable;
 }
 
 int
@@ -1425,8 +1437,10 @@ frame_register_unwind_location (struct frame_info *this_frame, int regnum,
 
   while (this_frame != NULL)
     {
-      frame_register_unwind (this_frame, regnum, optimizedp, lvalp,
-			     addrp, realnump, NULL);
+      int unavailable;
+
+      frame_register_unwind (this_frame, regnum, optimizedp, &unavailable,
+			     lvalp, addrp, realnump, NULL);
 
       if (*optimizedp)
 	break;

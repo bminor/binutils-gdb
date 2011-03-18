@@ -1,3 +1,10 @@
+2011-03-18  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.trace/unavailable.exp (fpreg, spreg, pcreg): Define.
+	(test_register, test_register_unavailable): New procedures.
+	(gdb_unavailable_registers_test): New procedure.
+	(gdb_trace_collection_test): Call it.
+
 2011-03-18  Phil Muldoon  <pmuldoon@redhat.com>
 
         PR python/12149

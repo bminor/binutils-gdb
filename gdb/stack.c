@@ -1186,6 +1186,7 @@ frame_info (char *addr_exp, int from_tty)
   {
     enum lval_type lval;
     int optimized;
+    int unavailable;
     CORE_ADDR addr;
     int realnum;
     int count;
@@ -1202,9 +1203,9 @@ frame_info (char *addr_exp, int from_tty)
 	/* Find out the location of the saved stack pointer with out
            actually evaluating it.  */
 	frame_register_unwind (fi, gdbarch_sp_regnum (gdbarch),
-			       &optimized, &lval, &addr,
+			       &optimized, &unavailable, &lval, &addr,
 			       &realnum, NULL);
-	if (!optimized && lval == not_lval)
+	if (!optimized && !unavailable && lval == not_lval)
 	  {
 	    enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 	    int sp_size = register_size (gdbarch, gdbarch_sp_regnum (gdbarch));
@@ -1212,7 +1213,7 @@ frame_info (char *addr_exp, int from_tty)
 	    CORE_ADDR sp;
 
 	    frame_register_unwind (fi, gdbarch_sp_regnum (gdbarch),
-				   &optimized, &lval, &addr,
+				   &optimized, &unavailable, &lval, &addr,
 				   &realnum, value);
 	    /* NOTE: cagney/2003-05-22: This is assuming that the
                stack pointer was packed as an unsigned integer.  That
@@ -1223,14 +1224,14 @@ frame_info (char *addr_exp, int from_tty)
 	    printf_filtered ("\n");
 	    need_nl = 0;
 	  }
-	else if (!optimized && lval == lval_memory)
+	else if (!optimized && !unavailable && lval == lval_memory)
 	  {
 	    printf_filtered (" Previous frame's sp at ");
 	    fputs_filtered (paddress (gdbarch, addr), gdb_stdout);
 	    printf_filtered ("\n");
 	    need_nl = 0;
 	  }
-	else if (!optimized && lval == lval_register)
+	else if (!optimized && !unavailable && lval == lval_register)
 	  {
 	    printf_filtered (" Previous frame's sp in %s\n",
 			     gdbarch_register_name (gdbarch, realnum));
@@ -1248,11 +1249,11 @@ frame_info (char *addr_exp, int from_tty)
 	{
 	  /* Find out the location of the saved register without
              fetching the corresponding value.  */
-	  frame_register_unwind (fi, i, &optimized, &lval, &addr, &realnum,
-				 NULL);
+	  frame_register_unwind (fi, i, &optimized, &unavailable,
+				 &lval, &addr, &realnum, NULL);
 	  /* For moment, only display registers that were saved on the
 	     stack.  */
-	  if (!optimized && lval == lval_memory)
+	  if (!optimized && !unavailable && lval == lval_memory)
 	    {
 	      if (count == 0)
 		puts_filtered (" Saved registers:\n ");

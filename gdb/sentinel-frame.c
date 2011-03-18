@@ -61,7 +61,10 @@ sentinel_frame_prev_register (struct frame_info *this_frame,
   /* Use the regcache_cooked_read() method so that it, on the fly,
      constructs either a raw or pseudo register from the raw
      register cache.  */
-  regcache_cooked_read (cache->regcache, regnum, value_contents_raw (value));
+  if (regcache_cooked_read (cache->regcache,
+			    regnum,
+			    value_contents_raw (value)) == REG_UNAVAILABLE)
+    mark_value_bytes_unavailable (value, 0, register_size (gdbarch, regnum));
 
   return value;
 }

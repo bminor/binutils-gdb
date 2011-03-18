@@ -30,9 +30,47 @@ if { [gdb_compile "$srcdir/$subdir/$srcfile" $binfile \
 set ws "\[\r\n\t \]+"
 set cr "\[\r\n\]+"
 
+if [istarget "x86_64-*"] then {
+    set fpreg "rbp"
+    set spreg "rsp"
+    set pcreg "rip"
+} elseif [istarget "i?86-*"] then {
+    set fpreg "ebp"
+    set spreg "esp"
+    set pcreg "eip"
+} else {
+    set fpreg "fp"
+    set spreg "sp"
+    set pcreg "pc"
+}
+
 #
 # Utility procs
 #
+
+proc test_register { reg } {
+    global gdb_prompt
+    global hex
+    global cr
+
+    gdb_test_multiple "print /x $reg" "collected $reg" {
+	-re "\\$\[0-9\]+ = \[x0\]+$cr$gdb_prompt $" {
+	    fail "collected $reg (zero)"
+	}
+	-re "\\$\[0-9\]+ = $hex$cr$gdb_prompt $" {
+	    pass "collected $reg"
+	}
+	-re "\[Ee\]rror.*$gdb_prompt $" {
+	    fail "collected $reg (error)"
+	}
+    }
+}
+
+proc test_register_unavailable { reg } {
+    gdb_test "print /x $reg" \
+	"<unavailable>" \
+	"correctly report $reg as unavailable"
+}
 
 proc prepare_for_trace_test {} {
     global executable
@@ -68,6 +106,63 @@ proc run_trace_experiment { test_func } {
 #
 # Test procs
 #
+
+proc gdb_unavailable_registers_test { } {
+    global gdb_prompt
+    global spreg
+    global pcreg
+    global pf_prefix
+
+    set old_pf_prefix $pf_prefix
+    set pf_prefix "$pf_prefix unavailable registers:"
+
+    prepare_for_trace_test
+
+    # We'll simply re-use the globals_test_function for this test
+    gdb_test "trace globals_test_func" \
+	    "Tracepoint \[0-9\]+ at .*" \
+	    "set tracepoint"
+
+    # Collect nothing.
+
+    # Begin the test.
+    run_trace_experiment globals_test_func
+
+    # On some archs, the $sp/$pc are a real raw registers.  On others,
+    # like x86, they're user registers.  Test both variants.
+    test_register_unavailable "\$$spreg"
+    test_register_unavailable "\$sp"
+
+    # Test reading uncollected pseudo-registers.  The set of which
+    # depends on target.
+    if [istarget "x86_64-*"] then {
+	# Check the raw register first.
+	test_register_unavailable "\$rax"
+	test_register_unavailable "\$eax"
+	test_register_unavailable "\$ax"
+    } elseif [istarget "i?86-*"] then {
+	# Check the raw register first.
+	test_register_unavailable "\$eax"
+	test_register_unavailable "\$ax"
+    }
+
+    # GDBserver always provides the PC value of regular tracepoint
+    # hits, since it's the same as the tracepoint's address.
+    test_register "\$$pcreg"
+    test_register "\$pc"
+
+    gdb_test "info registers" \
+	"\\*value not available\\*.*\\*value not available\\*" \
+	"info registers, multiple registers not available"
+
+    gdb_test "info registers \$$spreg" \
+	"\\*value not available\\*" \
+	"info registers \$$spreg reports not available"
+
+    gdb_test "tfind none" "#0  end .*" "cease trace debugging"
+
+    set pf_prefix $old_pf_prefix
+}
 
 proc gdb_collect_globals_test { } {
     global ws
@@ -321,6 +416,7 @@ proc gdb_collect_globals_test { } {
 
 proc gdb_trace_collection_test {} {
     gdb_collect_globals_test
+    gdb_unavailable_registers_test
 }
 
 clean_restart $executable
