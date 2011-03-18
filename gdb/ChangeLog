@@ -1,5 +1,10 @@
 2011-03-18  Pedro Alves  <pedro@codesourcery.com>
 
+	* mi/mi-main.c (register_changed_p): Handle REG_UNAVAILABLE, and
+	simplify, using regcache_cooked_read.
+
+2011-03-18  Pedro Alves  <pedro@codesourcery.com>
+
 	* regcache.h (regcache_raw_read, regcache_raw_read_signed)
 	(regcache_raw_read_unsigned, regcache_raw_read_signed)
 	(regcache_raw_read_unsigned, regcache_raw_read_part)
