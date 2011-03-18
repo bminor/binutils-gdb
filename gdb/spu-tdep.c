@@ -45,7 +45,7 @@
 #include "observer.h"
 #include "infcall.h"
 #include "dwarf2.h"
-
+#include "exceptions.h"
 #include "spu-tdep.h"
 
 
@@ -1594,8 +1594,21 @@ spu_software_single_step (struct frame_info *frame)
 	target += SPUADDR_ADDR (pc);
       else if (reg != -1)
 	{
-	  get_frame_register_bytes (frame, reg, 0, 4, buf);
-	  target += extract_unsigned_integer (buf, 4, byte_order) & -4;
+	  int optim, unavail;
+
+	  if (get_frame_register_bytes (frame, reg, 0, 4, buf,
+					 &optim, &unavail))
+	    target += extract_unsigned_integer (buf, 4, byte_order) & -4;
+	  else
+	    {
+	      if (optim)
+		error (_("Could not determine address of "
+			 "single-step breakpoint."));
+	      if (unavail)
+		throw_error (NOT_AVAILABLE_ERROR,
+			     _("Could not determine address of "
+			       "single-step breakpoint."));
+	    }
 	}
 
       target = target & lslr;
@@ -1618,9 +1631,13 @@ spu_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   gdb_byte buf[4];
   CORE_ADDR jb_addr;
+  int optim, unavail;
 
   /* Jump buffer is pointed to by the argument register $r3.  */
-  get_frame_register_bytes (frame, SPU_ARG1_REGNUM, 0, 4, buf);
+  if (!get_frame_register_bytes (frame, SPU_ARG1_REGNUM, 0, 4, buf,
+				 &optim, &unavail))
+    return 0;
+
   jb_addr = extract_unsigned_integer (buf, 4, byte_order);
   if (target_read_memory (SPUADDR (tdep->id, jb_addr), buf, 4))
     return 0;

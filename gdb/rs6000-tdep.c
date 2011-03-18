@@ -2504,20 +2504,27 @@ rs6000_convert_register_p (struct gdbarch *gdbarch, int regnum,
 	     != TYPE_LENGTH (builtin_type (gdbarch)->builtin_double));
 }
 
-static void
+static int
 rs6000_register_to_value (struct frame_info *frame,
                           int regnum,
                           struct type *type,
-                          gdb_byte *to)
+                          gdb_byte *to,
+			  int *optimizedp, int *unavailablep)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
   gdb_byte from[MAX_REGISTER_SIZE];
   
   gdb_assert (TYPE_CODE (type) == TYPE_CODE_FLT);
 
-  get_frame_register (frame, regnum, from);
+  if (!get_frame_register_bytes (frame, regnum, 0,
+				 register_size (gdbarch, regnum),
+				 from, optimizedp, unavailablep))
+    return 0;
+
   convert_typed_floating (from, builtin_type (gdbarch)->builtin_double,
 			  to, type);
+  *optimizedp = *unavailablep = 0;
+  return 1;
 }
 
 static void

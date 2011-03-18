@@ -2262,14 +2262,14 @@ set_gdbarch_convert_register_p (struct gdbarch *gdbarch,
   gdbarch->convert_register_p = convert_register_p;
 }
 
-void
-gdbarch_register_to_value (struct gdbarch *gdbarch, struct frame_info *frame, int regnum, struct type *type, gdb_byte *buf)
+int
+gdbarch_register_to_value (struct gdbarch *gdbarch, struct frame_info *frame, int regnum, struct type *type, gdb_byte *buf, int *optimizedp, int *unavailablep)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->register_to_value != NULL);
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_register_to_value called\n");
-  gdbarch->register_to_value (frame, regnum, type, buf);
+  return gdbarch->register_to_value (frame, regnum, type, buf, optimizedp, unavailablep);
 }
 
 void

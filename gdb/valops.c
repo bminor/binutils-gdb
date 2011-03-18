@@ -1343,8 +1343,16 @@ value_assign (struct value *toval, struct value *fromval)
 			   "don't fit in a %d bit word."),
 			 (int) sizeof (LONGEST) * HOST_CHAR_BIT);
 
-		get_frame_register_bytes (frame, value_reg, offset,
-					  changed_len, buffer);
+		if (!get_frame_register_bytes (frame, value_reg, offset,
+					       changed_len, buffer,
+					       &optim, &unavail))
+		  {
+		    if (optim)
+		      error (_("value has been optimized out"));
+		    if (unavail)
+		      throw_error (NOT_AVAILABLE_ERROR,
+				   _("value is not available"));
+		  }
 
 		modify_field (type, buffer, value_as_long (fromval),
 			      value_bitpos (toval), value_bitsize (toval));

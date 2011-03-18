@@ -1,5 +1,39 @@
 2011-03-18  Pedro Alves  <pedro@codesourcery.com>
 
+	* dwarf2loc.c (read_pieced_value): Handle get_frame_register_bytes
+	returning that the register piece is unavailable/optimized out.
+	(write_pieced_value): Handle get_frame_register_bytes returning
+	that the register piece is unavailable/optimized out when doing a
+	read-modify write of a bitfield.
+	* findvar.c (value_from_register): Handle get_frame_register_bytes
+	returning that the register piece is unavailable/optimized out.
+	* frame.c (get_frame_register_bytes): New parameters `optimizedp'
+	and `unavailablep'.  Throw error on bad debug info.  Use
+	frame_register instead of frame_register_read, to fill in the new
+	arguments.
+	* frame.h (get_frame_register_bytes): New parameters `optimizedp'
+	and `unavailablep'.
+	* valops.c: (value_assign): Adjust, and handle
+	get_frame_register_bytes failing.
+	* spu-tdep.c: Include exceptions.h.
+	(spu_software_single_step): Adjust, and handle
+	get_frame_register_bytes failing.
+	(spu_get_longjmp_target): Ditto.
+	* gdbarch.sh (register_to_value): Change to return int.  New
+	parameters `optimizedp' and `unavailablep'.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* i386-tdep.c (i386_register_to_value): Adjust to new
+	gdbarch_register_to_value interface.
+	* i387-tdep.c (i387_register_to_value): Ditto.
+	* i387-tdep.h (i387_register_to_value): Ditto.
+	* alpha-tdep.c (alpha_register_to_value): Ditto.
+	* ia64-tdep.c (ia64_register_to_value): Ditto.
+	* m68k-tdep.c (m68k_register_to_value): Ditto.
+	* mips-tdep.c (mips_register_to_value): Ditto.
+	* rs6000-tdep.c (rs6000_register_to_value): Ditto.
+
+2011-03-18  Pedro Alves  <pedro@codesourcery.com>
+
 	* gdb.trace/unavailable.exp (fpreg, spreg, pcreg): Define.
 	(test_register, test_register_unavailable): New procedures.
 	(gdb_unavailable_registers_test): New procedure.

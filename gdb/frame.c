@@ -1001,7 +1001,8 @@ frame_register_read (struct frame_info *frame, int regnum,
 
 int
 get_frame_register_bytes (struct frame_info *frame, int regnum,
-			  CORE_ADDR offset, int len, gdb_byte *myaddr)
+			  CORE_ADDR offset, int len, gdb_byte *myaddr,
+			  int *optimizedp, int *unavailablep)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
   int i;
@@ -1028,11 +1029,8 @@ get_frame_register_bytes (struct frame_info *frame, int regnum,
       maxsize += thissize;
     }
   if (len > maxsize)
-    {
-      warning (_("Bad debug information detected: "
-		 "Attempt to read %d bytes from registers."), len);
-      return 0;
-    }
+    error (_("Bad debug information detected: "
+	     "Attempt to read %d bytes from registers."), len);
 
   /* Copy the data.  */
   while (len > 0)
@@ -1044,14 +1042,25 @@ get_frame_register_bytes (struct frame_info *frame, int regnum,
 
       if (curr_len == register_size (gdbarch, regnum))
 	{
-	  if (!frame_register_read (frame, regnum, myaddr))
+	  enum lval_type lval;
+	  CORE_ADDR addr;
+	  int realnum;
+
+	  frame_register (frame, regnum, optimizedp, unavailablep,
+			  &lval, &addr, &realnum, myaddr);
+	  if (*optimizedp || *unavailablep)
 	    return 0;
 	}
       else
 	{
 	  gdb_byte buf[MAX_REGISTER_SIZE];
+	  enum lval_type lval;
+	  CORE_ADDR addr;
+	  int realnum;
 
-	  if (!frame_register_read (frame, regnum, buf))
+	  frame_register (frame, regnum, optimizedp, unavailablep,
+			  &lval, &addr, &realnum, buf);
+	  if (*optimizedp || *unavailablep)
 	    return 0;
 	  memcpy (myaddr, buf + offset, curr_len);
 	}
@@ -1062,6 +1071,8 @@ get_frame_register_bytes (struct frame_info *frame, int regnum,
       regnum++;
     }
 
+  *optimizedp = 0;
+  *unavailablep = 0;
   return 1;
 }
 

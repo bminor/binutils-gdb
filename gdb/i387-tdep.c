@@ -307,9 +307,10 @@ i387_convert_register_p (struct gdbarch *gdbarch, int regnum,
 /* Read a value of type TYPE from register REGNUM in frame FRAME, and
    return its contents in TO.  */
 
-void
+int
 i387_register_to_value (struct frame_info *frame, int regnum,
-			struct type *type, gdb_byte *to)
+			struct type *type, gdb_byte *to,
+			int *optimizedp, int *unavailablep)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
   gdb_byte from[I386_MAX_REGISTER_SIZE];
@@ -321,12 +322,18 @@ i387_register_to_value (struct frame_info *frame, int regnum,
     {
       warning (_("Cannot convert floating-point register value "
 	       "to non-floating-point type."));
-      return;
+      *optimizedp = *unavailablep = 0;
+      return 0;
     }
 
   /* Convert to TYPE.  */
-  get_frame_register (frame, regnum, from);
+  if (!get_frame_register_bytes (frame, regnum, 0, TYPE_LENGTH (type),
+				 from, optimizedp, unavailablep))
+    return 0;
+
   convert_typed_floating (from, i387_ext_type (gdbarch), to, type);
+  *optimizedp = *unavailablep = 0;
+  return 1;
 }
 
 /* Write the contents FROM of a value of type TYPE into register

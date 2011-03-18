@@ -2746,21 +2746,17 @@ i386_convert_register_p (struct gdbarch *gdbarch,
 /* Read a value of type TYPE from register REGNUM in frame FRAME, and
    return its contents in TO.  */
 
-static void
+static int
 i386_register_to_value (struct frame_info *frame, int regnum,
-			struct type *type, gdb_byte *to)
+			struct type *type, gdb_byte *to,
+			int *optimizedp, int *unavailablep)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
   int len = TYPE_LENGTH (type);
 
-  /* FIXME: kettenis/20030609: What should we do if REGNUM isn't
-     available in FRAME (i.e. if it wasn't saved)?  */
-
   if (i386_fp_regnum_p (gdbarch, regnum))
-    {
-      i387_register_to_value (frame, regnum, type, to);
-      return;
-    }
+    return i387_register_to_value (frame, regnum, type, to,
+				   optimizedp, unavailablep);
 
   /* Read a value spread across multiple registers.  */
 
@@ -2771,11 +2767,18 @@ i386_register_to_value (struct frame_info *frame, int regnum,
       gdb_assert (regnum != -1);
       gdb_assert (register_size (gdbarch, regnum) == 4);
 
-      get_frame_register (frame, regnum, to);
+      if (!get_frame_register_bytes (frame, regnum, 0,
+				     register_size (gdbarch, regnum),
+				     to, optimizedp, unavailablep))
+	return 0;
+
       regnum = i386_next_regnum (regnum);
       len -= 4;
       to += 4;
     }
+
+  *optimizedp = *unavailablep = 0;
+  return 1;
 }
 
 /* Write the contents FROM of a value of type TYPE into register

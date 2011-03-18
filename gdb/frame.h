@@ -520,10 +520,13 @@ extern void put_frame_register (struct frame_info *frame, int regnum,
 				const gdb_byte *buf);
 
 /* Read LEN bytes from one or multiple registers starting with REGNUM
-   in frame FRAME, starting at OFFSET, into BUF.  */
+   in frame FRAME, starting at OFFSET, into BUF.  If the register
+   contents are optimized out or unavailable, set *OPTIMIZEDP,
+   *UNAVAILABLEP accordingly.  */
 extern int get_frame_register_bytes (struct frame_info *frame, int regnum,
 				     CORE_ADDR offset, int len,
-				     gdb_byte *myaddr);
+				     gdb_byte *myaddr,
+				     int *optimizedp, int *unavailablep);
 
 /* Write LEN bytes to one or multiple registers starting with REGNUM
    in frame FRAME, starting at OFFSET, into BUF.  */

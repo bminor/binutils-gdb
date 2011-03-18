@@ -628,6 +628,7 @@ value_from_register (struct type *type, int regnum, struct frame_info *frame)
   struct gdbarch *gdbarch = get_frame_arch (frame);
   struct type *type1 = check_typedef (type);
   struct value *v;
+  int optim, unavail, ok;
 
   if (gdbarch_convert_register_p (gdbarch, regnum, type1))
     {
@@ -642,8 +643,9 @@ value_from_register (struct type *type, int regnum, struct frame_info *frame)
       VALUE_LVAL (v) = lval_register;
       VALUE_FRAME_ID (v) = get_frame_id (frame);
       VALUE_REGNUM (v) = regnum;
-      gdbarch_register_to_value (gdbarch,
-				 frame, regnum, type1, value_contents_raw (v));
+      ok = gdbarch_register_to_value (gdbarch, frame, regnum, type1,
+				      value_contents_raw (v), &optim,
+				      &unavail);
     }
   else
     {
@@ -653,10 +655,19 @@ value_from_register (struct type *type, int regnum, struct frame_info *frame)
       v = gdbarch_value_from_register (gdbarch, type, regnum, frame);
 
       /* Get the data.  */
-      if (!get_frame_register_bytes (frame, regnum, value_offset (v), len,
-				     value_contents_raw (v)))
-	set_value_optimized_out (v, 1);
+      ok = get_frame_register_bytes (frame, regnum, value_offset (v), len,
+				     value_contents_raw (v),
+				     &optim, &unavail);
     }
+
+  if (!ok)
+    {
+      if (optim)
+	set_value_optimized_out (v, 1);
+      if (unavail)
+	mark_value_bytes_unavailable (v, 0, TYPE_LENGTH (type));
+    }
+
   return v;
 }
 

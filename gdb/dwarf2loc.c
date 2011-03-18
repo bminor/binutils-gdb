@@ -591,8 +591,20 @@ read_pieced_value (struct value *v)
 
 	    if (gdb_regnum != -1)
 	      {
-		get_frame_register_bytes (frame, gdb_regnum, reg_offset, 
-					  this_size, buffer);
+		int optim, unavail;
+
+		if (!get_frame_register_bytes (frame, gdb_regnum, reg_offset,
+					       this_size, buffer,
+					       &optim, &unavail))
+		  {
+		    /* Just so garbage doesn't ever shine through.  */
+		    memset (buffer, 0, this_size);
+
+		    if (optim)
+		      set_value_optimized_out (v, 1);
+		    if (unavail)
+		      mark_value_bytes_unavailable (v, offset, this_size);
+		  }
 	      }
 	    else
 	      {
@@ -776,8 +788,22 @@ write_pieced_value (struct value *to, struct value *from)
 	      {
 		if (need_bitwise)
 		  {
-		    get_frame_register_bytes (frame, gdb_regnum, reg_offset,
-					      this_size, buffer);
+		    int optim, unavail;
+
+		    if (!get_frame_register_bytes (frame, gdb_regnum, reg_offset,
+						   this_size, buffer,
+						   &optim, &unavail))
+		      {
+			if (optim)
+			  error (_("Can't do read-modify-write to "
+				   "update bitfield; containing word has been "
+				   "optimized out"));
+			if (unavail)
+			  throw_error (NOT_AVAILABLE_ERROR,
+				       _("Can't do read-modify-write to update "
+					 "bitfield; containing word "
+					 "is unavailable"));
+		      }
 		    copy_bitwise (buffer, dest_offset_bits,
 				  contents, source_offset_bits,
 				  this_size_bits,

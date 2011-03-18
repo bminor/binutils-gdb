@@ -737,9 +737,10 @@ mips_convert_register_p (struct gdbarch *gdbarch,
       || mips_convert_register_gpreg_case_p (gdbarch, regnum, type);
 }
 
-static void
+static int
 mips_register_to_value (struct frame_info *frame, int regnum,
-			struct type *type, gdb_byte *to)
+			struct type *type, gdb_byte *to,
+			int *optimizedp, int *unavailablep)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
 
@@ -747,14 +748,29 @@ mips_register_to_value (struct frame_info *frame, int regnum,
     {
       get_frame_register (frame, regnum + 0, to + 4);
       get_frame_register (frame, regnum + 1, to + 0);
+
+      if (!get_frame_register_bytes (frame, regnum + 0, 0, 4, to + 4,
+				     optimizedp, unavailablep))
+	return 0;
+
+      if (!get_frame_register_bytes (frame, regnum + 1, 0, 4, to + 0,
+				     optimizedp, unavailablep))
+	return 0;
+      *optimizedp = *unavailablep = 0;
+      return 1;
     }
   else if (mips_convert_register_gpreg_case_p (gdbarch, regnum, type))
     {
       int len = TYPE_LENGTH (type);
-      if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
-	get_frame_register_bytes (frame, regnum, 8 - len, len, to);
-      else
-	get_frame_register_bytes (frame, regnum, 0, len, to);
+      CORE_ADDR offset;
+
+      offset = gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG ? 8 - len : 0;
+      if (!get_frame_register_bytes (frame, regnum, offset, len, to,
+				     optimizedp, unavailablep))
+	return 0;
+
+      *optimizedp = *unavailablep = 0;
+      return 1;
     }
   else
     {
