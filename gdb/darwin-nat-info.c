@@ -51,7 +51,7 @@
 
 #define CHECK_ARGS(what, args) do { \
   if ((NULL == args) || ((args[0] != '0') && (args[1] != 'x'))) \
-    error("%s must be specified with 0x...", what);		\
+    error(_("%s must be specified with 0x..."), what);		\
 } while (0)
 
 #define PRINT_FIELD(structure, field) \

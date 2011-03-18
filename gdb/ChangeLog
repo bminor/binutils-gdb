@@ -1,6 +1,15 @@
 2011-03-18  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	ARI fixes: Add missing internationalization markups throughout
+	C source files.
+	* darwin-nat-info.c: Ditto.
+	* record.c: Ditto.
+	* remote.c: Ditto.
+	* mi/mi-main.c: Ditto.
+
+2011-03-18  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	ARI fixes: Add missing internationalization markups throughout
 	yacc files.
 	* c-exp.y: Ditto.
 	* cp-name-parser.y: Ditto.

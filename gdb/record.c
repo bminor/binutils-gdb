@@ -739,8 +739,8 @@ record_exec_insn (struct regcache *regcache, struct gdbarch *gdbarch,
               {
                 entry->u.mem.mem_entry_not_accessible = 1;
                 if (record_debug)
-                  warning ("Process record: error reading memory at "
-			   "addr = %s len = %d.",
+                  warning (_("Process record: error reading memory at "
+			     "addr = %s len = %d."),
                            paddress (gdbarch, entry->u.mem.addr),
                            entry->u.mem.len);
               }
@@ -752,8 +752,8 @@ record_exec_insn (struct regcache *regcache, struct gdbarch *gdbarch,
                   {
                     entry->u.mem.mem_entry_not_accessible = 1;
                     if (record_debug)
-                      warning ("Process record: error writing memory at "
-			       "addr = %s len = %d.",
+                      warning (_("Process record: error writing memory at "
+				 "addr = %s len = %d."),
                                paddress (gdbarch, entry->u.mem.addr),
                                entry->u.mem.len);
                   }

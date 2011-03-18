@@ -3537,7 +3537,7 @@ remote_set_permissions (void)
   /* If the target didn't like the packet, warn the user.  Do not try
      to undo the user's settings, that would just be maddening.  */
   if (strcmp (rs->buf, "OK") != 0)
-    warning ("Remote refused setting permissions with: %s", rs->buf);
+    warning (_("Remote refused setting permissions with: %s"), rs->buf);
 }
 
 /* This type describes each known response to the qSupported
@@ -4549,7 +4549,7 @@ remote_resume (struct target_ops *ops,
     {
       /* We don't pass signals to the target in reverse exec mode.  */
       if (info_verbose && siggnal != TARGET_SIGNAL_0)
-	warning (" - Can't pass signal %d to target in reverse: ignored.\n",
+	warning (_(" - Can't pass signal %d to target in reverse: ignored."),
 		 siggnal);
 
       if (step 
