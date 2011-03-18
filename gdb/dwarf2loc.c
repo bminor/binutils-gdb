@@ -1076,6 +1076,7 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
   struct dwarf_expr_context *ctx;
   struct cleanup *old_chain;
   struct objfile *objfile = dwarf2_per_cu_objfile (per_cu);
+  volatile struct gdb_exception ex;
 
   if (byte_offset < 0)
     invalid_synthetic_pointer ();
@@ -1106,7 +1107,22 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
   ctx->get_tls_address = dwarf_expr_tls_address;
   ctx->dwarf_call = dwarf_expr_dwarf_call;
 
-  dwarf_expr_eval (ctx, data, size);
+  TRY_CATCH (ex, RETURN_MASK_ERROR)
+    {
+      dwarf_expr_eval (ctx, data, size);
+    }
+  if (ex.reason < 0)
+    {
+      if (ex.error == NOT_AVAILABLE_ERROR)
+	{
+	  retval = allocate_value (type);
+	  mark_value_bytes_unavailable (retval, 0, TYPE_LENGTH (type));
+	  return retval;
+	}
+      else
+	throw_exception (ex);
+    }
+
   if (ctx->num_pieces > 0)
     {
       struct piece_closure *c;

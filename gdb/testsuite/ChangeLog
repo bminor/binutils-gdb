@@ -1,5 +1,10 @@
 2011-03-18  Pedro Alves  <pedro@codesourcery.com>
 
+	* dwarf2loc.c (dwarf2_evaluate_loc_desc): Catch
+	NOT_AVAILABLE_ERROR when evaluating the location expression.
+
+2011-03-18  Pedro Alves  <pedro@codesourcery.com>
+
 	* dwarf2loc.c (read_pieced_value): Handle get_frame_register_bytes
 	returning that the register piece is unavailable/optimized out.
 	(write_pieced_value): Handle get_frame_register_bytes returning
