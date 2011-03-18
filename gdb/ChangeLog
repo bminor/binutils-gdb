@@ -1,3 +1,10 @@
+2011-03-18  Kwok Cheung Yeung  <kcy@codesourcery.com>
+
+	* amd64-tdep.c (amd64_relocate_instruction): Fix ordering of arguments
+        to store_signed_integer.  Add debug message when relocating CALL
+        instructions.  Fix formatting of debug message.
+        * i386-tdep.c (i386_relocate_instruction): Ditto.
+
 2011-03-14  Tom Tromey  <tromey@redhat.com>
 
 	PR gdb/12576:
