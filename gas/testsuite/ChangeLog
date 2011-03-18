@@ -1,3 +1,10 @@
+2011-03-18  Alan Modra  <amodra@gmail.com>
+
+	* gas/elf/bad-size.err: Adjust expected error.
+	* gas/i386/bad-size.warn: Likewise.
+	* gas/i386/inval-equ-2.l: Likewise.
+	* gas/symver/symver2.l: Likewise.
+
 2011-03-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/12589

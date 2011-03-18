@@ -1,2 +1,2 @@
 .*bad-size\.s: Assembler messages:
-.*bad-size\.s:6: Error: .*
+.*bad-size\.s:.* Error: .*

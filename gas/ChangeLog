@@ -1,5 +1,12 @@
 2011-03-18  Alan Modra  <amodra@gmail.com>
 
+	* input-scrub.c (line_numberT): Delete.
+	(input_scrub_close): Reset line counters.
+	* messages.c (as_show_where): Don't print invalid line number.
+	(as_warn_internal, as_bad_internal): Likewise.
+
+2011-03-18  Alan Modra  <amodra@gmail.com>
+
 	* read.c (read_a_source_file): Remove md_after_pass_hook.
 	Move "quit" label before set of dot_symbol.
 	* config/tc-d10v.h (md_after_pass_hook): Don't define.
