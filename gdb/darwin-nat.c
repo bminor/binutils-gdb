@@ -196,7 +196,7 @@ mach_check_error (kern_return_t ret, const char *file,
   if (func == NULL)
     func = _("[UNKNOWN]");
 
-  warning (_("Mach error at \"%s:%u\" in function \"%s\": %s (0x%lx)\n"),
+  warning (_("Mach error at \"%s:%u\" in function \"%s\": %s (0x%lx)"),
 	   file, line, func, mach_error_string (ret), (unsigned long) ret);
 }
 
