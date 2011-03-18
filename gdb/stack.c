@@ -1629,6 +1629,14 @@ print_frame_local_vars (struct frame_info *frame, int num_tabs,
 {
   struct print_variable_and_value_data cb_data;
   struct block *block;
+  CORE_ADDR pc;
+
+  if (!get_frame_pc_if_available (frame, &pc))
+    {
+      fprintf_filtered (stream,
+			_("PC unavailable, cannot determine locals.\n"));
+      return;
+    }
 
   block = get_frame_block (frame, 0);
   if (block == 0)
@@ -1781,6 +1789,13 @@ print_frame_arg_vars (struct frame_info *frame, struct ui_file *stream)
 {
   struct print_variable_and_value_data cb_data;
   struct symbol *func;
+  CORE_ADDR pc;
+
+  if (!get_frame_pc_if_available (frame, &pc))
+    {
+      fprintf_filtered (stream, _("PC unavailable, cannot determine args.\n"));
+      return;
+    }
 
   func = get_frame_function (frame);
   if (func == NULL)
