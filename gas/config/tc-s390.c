@@ -398,6 +398,8 @@ md_parse_option (int c, char *arg)
 	    current_cpu = S390_OPCODE_Z10;
 	  else if (strcmp (arg + 5, "z196") == 0)
 	    current_cpu = S390_OPCODE_Z196;
+	  else if (strcmp (arg + 5, "all") == 0)
+	    current_cpu = S390_OPCODE_MAXCPU - 1;
 	  else
 	    {
 	      as_bad (_("invalid switch -m%s"), arg);

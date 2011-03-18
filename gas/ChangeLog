@@ -1,3 +1,8 @@
+2011-03-18  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+
+	* config/tc-s390.c (md_parse_option): Add -march=all option which
+	switches to the highest available CPU.
+
 2011-03-17  Alan Modra  <amodra@gmail.com>
 
 	PR 12569
