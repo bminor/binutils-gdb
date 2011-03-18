@@ -190,6 +190,7 @@ static void
 tui_selected_frame_level_changed_hook (int level)
 {
   struct frame_info *fi;
+  CORE_ADDR pc;
 
   /* Negative level means that the selected frame was cleared.  */
   if (level < 0)
@@ -199,28 +200,29 @@ tui_selected_frame_level_changed_hook (int level)
   /* Ensure that symbols for this frame are read in.  Also, determine
      the source language of this frame, and switch to it if
      desired.  */
-  if (fi)
+  if (get_frame_pc_if_available (fi, &pc))
     {
       struct symtab *s;
-      
-      s = find_pc_symtab (get_frame_pc (fi));
+
+      s = find_pc_symtab (pc);
       /* elz: This if here fixes the problem with the pc not being
-         displayed in the tui asm layout, with no debug symbols.  The
-         value of s would be 0 here, and select_source_symtab would
-         abort the command by calling the 'error' function.  */
+	 displayed in the tui asm layout, with no debug symbols.  The
+	 value of s would be 0 here, and select_source_symtab would
+	 abort the command by calling the 'error' function.  */
       if (s)
-        select_source_symtab (s);
+	select_source_symtab (s);
+    }
 
-      /* Display the frame position (even if there is no symbols).  */
-      tui_show_frame_info (fi);
+  /* Display the frame position (even if there is no symbols or the PC
+     is not known).  */
+  tui_show_frame_info (fi);
 
-      /* Refresh the register window if it's visible.  */
-      if (tui_is_window_visible (DATA_WIN))
-        {
-          tui_refreshing_registers = 1;
-          tui_check_data_values (fi);
-          tui_refreshing_registers = 0;
-        }
+  /* Refresh the register window if it's visible.  */
+  if (tui_is_window_visible (DATA_WIN))
+    {
+      tui_refreshing_registers = 1;
+      tui_check_data_values (fi);
+      tui_refreshing_registers = 0;
     }
 }
 

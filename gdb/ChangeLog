@@ -1,5 +1,12 @@
 2011-03-18  Pedro Alves  <pedro@codesourcery.com>
 
+	* tui/tui-hooks.c (tui_selected_frame_level_changed_hook): Assume
+	there's always a frame.  Use get_frame_pc_if_available instead of
+	get_frame_pc, and if there's no PC available, don't look up a
+	symtab.
+
+2011-03-18  Pedro Alves  <pedro@codesourcery.com>
+
 	* stack.c (print_frame_local_vars, print_frame_arg_vars): Handle
 	unavailable PC.
 
