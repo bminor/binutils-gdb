@@ -1,5 +1,11 @@
 2011-03-18  Pedro Alves  <pedro@codesourcery.com>
 
+	* frame.h (frame_unwind_caller_pc_if_available): Declare.
+	* frame.c (frame_unwind_caller_pc_if_available): New.
+	* stack.c (frame_info): Handle unavailable PC.
+
+2011-03-18  Pedro Alves  <pedro@codesourcery.com>
+
 	* frame.c (frame_unwind_pc): Rename to ...
 	(frame_unwind_pc_if_available): ... this.  New `pc' output
 	parameter.  Change return type to int.  Gracefully handle

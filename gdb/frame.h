@@ -562,6 +562,14 @@ extern void put_frame_register_bytes (struct frame_info *frame, int regnum,
 
 extern CORE_ADDR frame_unwind_caller_pc (struct frame_info *frame);
 
+/* Same as frame_unwind_caller_pc, but returns a boolean indication of
+   whether the caller PC is determinable (when the PC is unavailable,
+   it will not be), instead of possibly throwing an error trying to
+   read unavailable memory or registers.  */
+
+extern int frame_unwind_caller_pc_if_available (struct frame_info *this_frame,
+						CORE_ADDR *pc);
+
 /* Discard the specified frame.  Restoring the registers to the state
    of the caller.  */
 extern void frame_pop (struct frame_info *frame);

@@ -711,6 +711,13 @@ frame_unwind_caller_pc (struct frame_info *this_frame)
 }
 
 int
+frame_unwind_caller_pc_if_available (struct frame_info *this_frame,
+				     CORE_ADDR *pc)
+{
+  return frame_unwind_pc_if_available (skip_inlined_frames (this_frame), pc);
+}
+
+int
 get_frame_func_if_available (struct frame_info *this_frame, CORE_ADDR *pc)
 {
   struct frame_info *next_frame = this_frame->next;

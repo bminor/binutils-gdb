@@ -1031,6 +1031,9 @@ frame_info (char *addr_exp, int from_tty)
   int selected_frame_p;
   struct gdbarch *gdbarch;
   struct cleanup *back_to = make_cleanup (null_cleanup, NULL);
+  CORE_ADDR frame_pc;
+  int frame_pc_p;
+  CORE_ADDR caller_pc;
 
   fi = parse_frame_specification_1 (addr_exp, "No stack.", &selected_frame_p);
   gdbarch = get_frame_arch (fi);
@@ -1049,11 +1052,10 @@ frame_info (char *addr_exp, int from_tty)
        get_frame_pc().  */
     pc_regname = "pc";
 
+  frame_pc_p = get_frame_pc_if_available (fi, &frame_pc);
   find_frame_sal (fi, &sal);
   func = get_frame_function (fi);
-  /* FIXME: cagney/2002-11-28: Why bother?  Won't sal.symtab contain
-     the same value?  */
-  s = find_pc_symtab (get_frame_pc (fi));
+  s = sal.symtab;
   if (func)
     {
       funname = SYMBOL_PRINT_NAME (func);
@@ -1074,11 +1076,11 @@ frame_info (char *addr_exp, int from_tty)
 	    }
 	}
     }
-  else
+  else if (frame_pc_p)
     {
       struct minimal_symbol *msymbol;
 
-      msymbol = lookup_minimal_symbol_by_pc (get_frame_pc (fi));
+      msymbol = lookup_minimal_symbol_by_pc (frame_pc);
       if (msymbol != NULL)
 	{
 	  funname = SYMBOL_PRINT_NAME (msymbol);
@@ -1099,7 +1101,10 @@ frame_info (char *addr_exp, int from_tty)
   fputs_filtered (paddress (gdbarch, get_frame_base (fi)), gdb_stdout);
   printf_filtered (":\n");
   printf_filtered (" %s = ", pc_regname);
-  fputs_filtered (paddress (gdbarch, get_frame_pc (fi)), gdb_stdout);
+  if (frame_pc_p)
+    fputs_filtered (paddress (gdbarch, get_frame_pc (fi)), gdb_stdout);
+  else
+    fputs_filtered ("<unavailable>", gdb_stdout);
 
   wrap_here ("   ");
   if (funname)
@@ -1114,7 +1119,10 @@ frame_info (char *addr_exp, int from_tty)
   puts_filtered ("; ");
   wrap_here ("    ");
   printf_filtered ("saved %s ", pc_regname);
-  fputs_filtered (paddress (gdbarch, frame_unwind_caller_pc (fi)), gdb_stdout);
+  if (frame_unwind_caller_pc_if_available (fi, &caller_pc))
+    fputs_filtered (paddress (gdbarch, caller_pc), gdb_stdout);
+  else
+    fputs_filtered ("<unavailable>", gdb_stdout);
   printf_filtered ("\n");
 
   if (calling_frame_info == NULL)
