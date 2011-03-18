@@ -1,3 +1,12 @@
+2011-03-18  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* common/signals.c (target_signal_from_host): Add _ markup to error
+	function call message.
+	(target_signal_to_host): Add _ markup and remove trailing new line
+	from warning call message.
+	(target_signal_from_command): Add _ markup to error function call
+	message.
+
 2011-03-18  Phil Muldoon  <pmuldoon@redhat.com>
 
         PR python/12149
