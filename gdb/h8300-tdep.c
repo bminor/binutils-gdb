@@ -1149,17 +1149,17 @@ h8300_register_type (struct gdbarch *gdbarch, int regno)
     }
 }
 
-static void
+static enum register_status
 h8300_pseudo_register_read (struct gdbarch *gdbarch,
 			    struct regcache *regcache, int regno,
 			    gdb_byte *buf)
 {
   if (regno == E_PSEUDO_CCR_REGNUM (gdbarch))
-    regcache_raw_read (regcache, E_CCR_REGNUM, buf);
+    return regcache_raw_read (regcache, E_CCR_REGNUM, buf);
   else if (regno == E_PSEUDO_EXR_REGNUM (gdbarch))
-    regcache_raw_read (regcache, E_EXR_REGNUM, buf);
+    return regcache_raw_read (regcache, E_EXR_REGNUM, buf);
   else
-    regcache_raw_read (regcache, regno, buf);
+    return regcache_raw_read (regcache, regno, buf);
 }
 
 static void

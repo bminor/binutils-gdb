@@ -687,10 +687,13 @@ get_frame_func (struct frame_info *this_frame)
   return next_frame->prev_func.addr;
 }
 
-static int
+static enum register_status
 do_frame_register_read (void *src, int regnum, gdb_byte *buf)
 {
-  return frame_register_read (src, regnum, buf);
+  if (!frame_register_read (src, regnum, buf))
+    return REG_UNAVAILABLE;
+  else
+    return REG_VALID;
 }
 
 struct regcache *

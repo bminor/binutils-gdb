@@ -275,13 +275,14 @@ amd64_pseudo_register_name (struct gdbarch *gdbarch, int regnum)
     return i386_pseudo_register_name (gdbarch, regnum);
 }
 
-static void
+static enum register_status
 amd64_pseudo_register_read (struct gdbarch *gdbarch,
 			    struct regcache *regcache,
 			    int regnum, gdb_byte *buf)
 {
   gdb_byte raw_buf[MAX_REGISTER_SIZE];
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  enum register_status status;
 
   if (i386_byte_regnum_p (gdbarch, regnum))
     {
@@ -291,25 +292,33 @@ amd64_pseudo_register_read (struct gdbarch *gdbarch,
       if (gpnum >= AMD64_NUM_LOWER_BYTE_REGS)
 	{
 	  /* Special handling for AH, BH, CH, DH.  */
-	  regcache_raw_read (regcache,
-			     gpnum - AMD64_NUM_LOWER_BYTE_REGS, raw_buf);
-	  memcpy (buf, raw_buf + 1, 1);
+	  status = regcache_raw_read (regcache,
+				      gpnum - AMD64_NUM_LOWER_BYTE_REGS,
+				      raw_buf);
+	  if (status == REG_VALID)
+	    memcpy (buf, raw_buf + 1, 1);
 	}
       else
 	{
-	  regcache_raw_read (regcache, gpnum, raw_buf);
-	  memcpy (buf, raw_buf, 1);
+	  status = regcache_raw_read (regcache, gpnum, raw_buf);
+	  if (status == REG_VALID)
+	    memcpy (buf, raw_buf, 1);
 	}
+
+      return status;
     }
   else if (i386_dword_regnum_p (gdbarch, regnum))
     {
       int gpnum = regnum - tdep->eax_regnum;
       /* Extract (always little endian).  */
-      regcache_raw_read (regcache, gpnum, raw_buf);
-      memcpy (buf, raw_buf, 4);
+      status = regcache_raw_read (regcache, gpnum, raw_buf);
+      if (status == REG_VALID)
+	memcpy (buf, raw_buf, 4);
+
+      return status;
     }
   else
-    i386_pseudo_register_read (gdbarch, regcache, regnum, buf);
+    return i386_pseudo_register_read (gdbarch, regcache, regnum, buf);
 }
 
 static void

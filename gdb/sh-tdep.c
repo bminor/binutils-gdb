@@ -2300,43 +2300,68 @@ dr_reg_base_num (struct gdbarch *gdbarch, int dr_regnum)
   return fp_regnum;
 }
 
-static void
+/* Concatenate PORTIONS contiguous raw registers starting at
+   BASE_REGNUM into BUFFER.  */
+
+static enum register_status
+pseudo_register_read_portions (struct gdbarch *gdbarch,
+			       struct regcache *regcache,
+			       int portions,
+			       int base_regnum, gdb_byte *buffer)
+{
+  int portion;
+
+  for (portion = 0; portion < portions; portion++)
+    {
+      enum register_status status;
+      gdb_byte *b;
+
+      b = buffer + register_size (gdbarch, base_regnum) * portion;
+      status = regcache_raw_read (regcache, base_regnum + portion, b);
+      if (status != REG_VALID)
+	return status;
+    }
+
+  return REG_VALID;
+}
+
+static enum register_status
 sh_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 			 int reg_nr, gdb_byte *buffer)
 {
-  int base_regnum, portion;
+  int base_regnum;
   char temp_buffer[MAX_REGISTER_SIZE];
+  enum register_status status;
 
   if (reg_nr == PSEUDO_BANK_REGNUM)
-    regcache_raw_read (regcache, BANK_REGNUM, buffer);
-  else
-  if (reg_nr >= DR0_REGNUM && reg_nr <= DR_LAST_REGNUM)
+    return regcache_raw_read (regcache, BANK_REGNUM, buffer);
+  else if (reg_nr >= DR0_REGNUM && reg_nr <= DR_LAST_REGNUM)
     {
       base_regnum = dr_reg_base_num (gdbarch, reg_nr);
 
       /* Build the value in the provided buffer.  */
       /* Read the real regs for which this one is an alias.  */
-      for (portion = 0; portion < 2; portion++)
-	regcache_raw_read (regcache, base_regnum + portion,
-			   (temp_buffer
-			    + register_size (gdbarch,
-					     base_regnum) * portion));
-      /* We must pay attention to the endiannes.  */
-      sh_register_convert_to_virtual (reg_nr,
-				      register_type (gdbarch, reg_nr),
-				      temp_buffer, buffer);
+      status = pseudo_register_read_portions (gdbarch, regcache,
+					      2, base_regnum, temp_buffer);
+      if (status == REG_VALID)
+	{
+	  /* We must pay attention to the endiannes. */
+	  sh_register_convert_to_virtual (reg_nr,
+					  register_type (gdbarch, reg_nr),
+					  temp_buffer, buffer);
+	}
+      return status;
     }
   else if (reg_nr >= FV0_REGNUM && reg_nr <= FV_LAST_REGNUM)
     {
       base_regnum = fv_reg_base_num (gdbarch, reg_nr);
 
       /* Read the real regs for which this one is an alias.  */
-      for (portion = 0; portion < 4; portion++)
-	regcache_raw_read (regcache, base_regnum + portion,
-			   ((char *) buffer
-			    + register_size (gdbarch,
-					     base_regnum) * portion));
+      return pseudo_register_read_portions (gdbarch, regcache,
+					    4, base_regnum, buffer);
     }
+  else
+    gdb_assert_not_reached ("invalid pseudo register number");
 }
 
 static void

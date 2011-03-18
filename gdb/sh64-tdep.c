@@ -1619,15 +1619,40 @@ sh64_register_convert_to_raw (struct gdbarch *gdbarch, struct type *type,
 	     "with non DR register number"));
 }
 
-static void
+/* Concatenate PORTIONS contiguous raw registers starting at
+   BASE_REGNUM into BUFFER.  */
+
+static enum register_status
+pseudo_register_read_portions (struct gdbarch *gdbarch,
+			       struct regcache *regcache,
+			       int portions,
+			       int base_regnum, gdb_byte *buffer)
+{
+  int portion;
+
+  for (portion = 0; portion < portions; portion++)
+    {
+      enum register_status status;
+      gdb_byte *b;
+
+      b = buffer + register_size (gdbarch, base_regnum) * portion;
+      status = regcache_raw_read (regcache, base_regnum + portion, b);
+      if (status != REG_VALID)
+	return status;
+    }
+
+  return REG_VALID;
+}
+
+static enum register_status
 sh64_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 			   int reg_nr, gdb_byte *buffer)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int base_regnum;
-  int portion;
   int offset = 0;
   char temp_buffer[MAX_REGISTER_SIZE];
+  enum register_status status;
 
   if (reg_nr >= DR0_REGNUM 
       && reg_nr <= DR_LAST_REGNUM)
@@ -1637,19 +1662,20 @@ sh64_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
       /* Build the value in the provided buffer.  */ 
       /* DR regs are double precision registers obtained by
 	 concatenating 2 single precision floating point registers.  */
-      for (portion = 0; portion < 2; portion++)
-	regcache_raw_read (regcache, base_regnum + portion, 
-			   (temp_buffer
-			    + register_size (gdbarch, base_regnum) * portion));
+      status = pseudo_register_read_portions (gdbarch, regcache,
+					      2, base_regnum, temp_buffer);
+      if (status == REG_VALID)
+	{
+	  /* We must pay attention to the endianness.  */
+	  sh64_register_convert_to_virtual (gdbarch, reg_nr,
+					    register_type (gdbarch, reg_nr),
+					    temp_buffer, buffer);
+	}
 
-      /* We must pay attention to the endianness.  */
-      sh64_register_convert_to_virtual (gdbarch, reg_nr,
-					register_type (gdbarch, reg_nr),
-					temp_buffer, buffer);
-
+      return status;
     }
 
-  else if (reg_nr >= FPP0_REGNUM 
+  else if (reg_nr >= FPP0_REGNUM
 	   && reg_nr <= FPP_LAST_REGNUM)
     {
       base_regnum = sh64_fpp_reg_base_num (gdbarch, reg_nr);
@@ -1657,10 +1683,8 @@ sh64_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
       /* Build the value in the provided buffer.  */ 
       /* FPP regs are pairs of single precision registers obtained by
 	 concatenating 2 single precision floating point registers.  */
-      for (portion = 0; portion < 2; portion++)
-	regcache_raw_read (regcache, base_regnum + portion, 
-			   ((char *) buffer
-			    + register_size (gdbarch, base_regnum) * portion));
+      return pseudo_register_read_portions (gdbarch, regcache,
+					    2, base_regnum, buffer);
     }
 
   else if (reg_nr >= FV0_REGNUM 
@@ -1671,10 +1695,8 @@ sh64_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
       /* Build the value in the provided buffer.  */ 
       /* FV regs are vectors of single precision registers obtained by
 	 concatenating 4 single precision floating point registers.  */
-      for (portion = 0; portion < 4; portion++)
-	regcache_raw_read (regcache, base_regnum + portion, 
-			   ((char *) buffer
-			    + register_size (gdbarch, base_regnum) * portion));
+      return pseudo_register_read_portions (gdbarch, regcache,
+					    4, base_regnum, buffer);
     }
 
   /* sh compact pseudo registers.  1-to-1 with a shmedia register.  */
@@ -1684,11 +1706,14 @@ sh64_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
       base_regnum = sh64_compact_reg_base_num (gdbarch, reg_nr);
 
       /* Build the value in the provided buffer.  */ 
-      regcache_raw_read (regcache, base_regnum, temp_buffer);
+      status = regcache_raw_read (regcache, base_regnum, temp_buffer);
+      if (status != REG_VALID)
+	return status;
       if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
 	offset = 4;
       memcpy (buffer,
 	      temp_buffer + offset, 4); /* get LOWER 32 bits only????  */
+      return REG_VALID;
     }
 
   else if (reg_nr >= FP0_C_REGNUM
@@ -1699,7 +1724,7 @@ sh64_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
       /* Build the value in the provided buffer.  */ 
       /* Floating point registers map 1-1 to the media fp regs,
 	 they have the same size and endianness.  */
-      regcache_raw_read (regcache, base_regnum, buffer);
+      return regcache_raw_read (regcache, base_regnum, buffer);
     }
 
   else if (reg_nr >= DR0_C_REGNUM 
@@ -1709,15 +1734,16 @@ sh64_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 
       /* DR_C regs are double precision registers obtained by
 	 concatenating 2 single precision floating point registers.  */
-      for (portion = 0; portion < 2; portion++)
-	regcache_raw_read (regcache, base_regnum + portion, 
-			   (temp_buffer
-			    + register_size (gdbarch, base_regnum) * portion));
-
-      /* We must pay attention to the endianness.  */
-      sh64_register_convert_to_virtual (gdbarch, reg_nr, 
-					register_type (gdbarch, reg_nr),
-					temp_buffer, buffer);
+      status = pseudo_register_read_portions (gdbarch, regcache,
+					      2, base_regnum, temp_buffer);
+      if (status == REG_VALID)
+	{
+	  /* We must pay attention to the endianness.  */
+	  sh64_register_convert_to_virtual (gdbarch, reg_nr,
+					    register_type (gdbarch, reg_nr),
+					    temp_buffer, buffer);
+	}
+      return status;
     }
 
   else if (reg_nr >= FV0_C_REGNUM 
@@ -1728,10 +1754,8 @@ sh64_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
       /* Build the value in the provided buffer.  */ 
       /* FV_C regs are vectors of single precision registers obtained by
 	 concatenating 4 single precision floating point registers.  */
-      for (portion = 0; portion < 4; portion++)
-	regcache_raw_read (regcache, base_regnum + portion, 
-			   ((char *) buffer
-			    + register_size (gdbarch, base_regnum) * portion));
+      return pseudo_register_read_portions (gdbarch, regcache,
+					    4, base_regnum, buffer);
     }
 
   else if (reg_nr == FPSCR_C_REGNUM)
@@ -1762,11 +1786,15 @@ sh64_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
        */
       /* *INDENT-ON* */
       /* Get FPSCR into a local buffer.  */
-      regcache_raw_read (regcache, fpscr_base_regnum, temp_buffer);
+      status = regcache_raw_read (regcache, fpscr_base_regnum, temp_buffer);
+      if (status != REG_VALID)
+	return status;
       /* Get value as an int.  */
       fpscr_value = extract_unsigned_integer (temp_buffer, 4, byte_order);
       /* Get SR into a local buffer */
-      regcache_raw_read (regcache, sr_base_regnum, temp_buffer);
+      status = regcache_raw_read (regcache, sr_base_regnum, temp_buffer);
+      if (status != REG_VALID)
+	return status;
       /* Get value as an int.  */
       sr_value = extract_unsigned_integer (temp_buffer, 4, byte_order);
       /* Build the new value.  */
@@ -1776,6 +1804,8 @@ sh64_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
       /* Store that in out buffer!!!  */
       store_unsigned_integer (buffer, 4, byte_order, fpscr_c_value);
       /* FIXME There is surely an endianness gotcha here.  */
+
+      return REG_VALID;
     }
 
   else if (reg_nr == FPUL_C_REGNUM)
@@ -1784,8 +1814,10 @@ sh64_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 
       /* FPUL_C register is floating point register 32,
 	 same size, same endianness.  */
-      regcache_raw_read (regcache, base_regnum, buffer);
+      return regcache_raw_read (regcache, base_regnum, buffer);
     }
+  else
+    gdb_assert_not_reached ("invalid pseudo register number");
 }
 
 static void

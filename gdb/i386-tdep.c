@@ -2541,18 +2541,21 @@ i386_mmx_regnum_to_fp_regnum (struct regcache *regcache, int regnum)
   return (I387_ST0_REGNUM (tdep) + fpreg);
 }
 
-void
+enum register_status
 i386_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 			   int regnum, gdb_byte *buf)
 {
   gdb_byte raw_buf[MAX_REGISTER_SIZE];
+  enum register_status status;
 
   if (i386_mmx_regnum_p (gdbarch, regnum))
     {
       int fpnum = i386_mmx_regnum_to_fp_regnum (regcache, regnum);
 
       /* Extract (always little endian).  */
-      regcache_raw_read (regcache, fpnum, raw_buf);
+      status = regcache_raw_read (regcache, fpnum, raw_buf);
+      if (status != REG_VALID)
+	return status;
       memcpy (buf, raw_buf, register_size (gdbarch, regnum));
     }
   else
@@ -2564,14 +2567,18 @@ i386_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 	  regnum -= tdep->ymm0_regnum;
 
 	  /* Extract (always little endian).  Read lower 128bits.  */
-	  regcache_raw_read (regcache,
-			     I387_XMM0_REGNUM (tdep) + regnum,
-			     raw_buf);
+	  status = regcache_raw_read (regcache,
+				      I387_XMM0_REGNUM (tdep) + regnum,
+				      raw_buf);
+	  if (status != REG_VALID)
+	    return status;
 	  memcpy (buf, raw_buf, 16);
 	  /* Read upper 128bits.  */
-	  regcache_raw_read (regcache,
-			     tdep->ymm0h_regnum + regnum,
-			     raw_buf);
+	  status = regcache_raw_read (regcache,
+				      tdep->ymm0h_regnum + regnum,
+				      raw_buf);
+	  if (status != REG_VALID)
+	    return status;
 	  memcpy (buf + 16, raw_buf, 16);
 	}
       else if (i386_word_regnum_p (gdbarch, regnum))
@@ -2579,7 +2586,9 @@ i386_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 	  int gpnum = regnum - tdep->ax_regnum;
 
 	  /* Extract (always little endian).  */
-	  regcache_raw_read (regcache, gpnum, raw_buf);
+	  status = regcache_raw_read (regcache, gpnum, raw_buf);
+	  if (status != REG_VALID)
+	    return status;
 	  memcpy (buf, raw_buf, 2);
 	}
       else if (i386_byte_regnum_p (gdbarch, regnum))
@@ -2591,7 +2600,9 @@ i386_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 
 	  /* Extract (always little endian).  We read both lower and
 	     upper registers.  */
-	  regcache_raw_read (regcache, gpnum % 4, raw_buf);
+	  status = regcache_raw_read (regcache, gpnum % 4, raw_buf);
+	  if (status != REG_VALID)
+	    return status;
 	  if (gpnum >= 4)
 	    memcpy (buf, raw_buf + 1, 1);
 	  else
@@ -2600,6 +2611,8 @@ i386_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
       else
 	internal_error (__FILE__, __LINE__, _("invalid regnum"));
     }
+
+  return REG_VALID;
 }
 
 void

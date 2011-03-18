@@ -320,38 +320,52 @@ sparc64_register_type (struct gdbarch *gdbarch, int regnum)
   internal_error (__FILE__, __LINE__, _("invalid regnum"));
 }
 
-static void
+static enum register_status
 sparc64_pseudo_register_read (struct gdbarch *gdbarch,
 			      struct regcache *regcache,
 			      int regnum, gdb_byte *buf)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  enum register_status status;
+
   gdb_assert (regnum >= SPARC64_NUM_REGS);
 
   if (regnum >= SPARC64_D0_REGNUM && regnum <= SPARC64_D30_REGNUM)
     {
       regnum = SPARC_F0_REGNUM + 2 * (regnum - SPARC64_D0_REGNUM);
-      regcache_raw_read (regcache, regnum, buf);
-      regcache_raw_read (regcache, regnum + 1, buf + 4);
+      status = regcache_raw_read (regcache, regnum, buf);
+      if (status == REG_VALID)
+	status = regcache_raw_read (regcache, regnum + 1, buf + 4);
+      return status;
     }
   else if (regnum >= SPARC64_D32_REGNUM && regnum <= SPARC64_D62_REGNUM)
     {
       regnum = SPARC64_F32_REGNUM + (regnum - SPARC64_D32_REGNUM);
-      regcache_raw_read (regcache, regnum, buf);
+      return regcache_raw_read (regcache, regnum, buf);
     }
   else if (regnum >= SPARC64_Q0_REGNUM && regnum <= SPARC64_Q28_REGNUM)
     {
       regnum = SPARC_F0_REGNUM + 4 * (regnum - SPARC64_Q0_REGNUM);
-      regcache_raw_read (regcache, regnum, buf);
-      regcache_raw_read (regcache, regnum + 1, buf + 4);
-      regcache_raw_read (regcache, regnum + 2, buf + 8);
-      regcache_raw_read (regcache, regnum + 3, buf + 12);
+
+      status = regcache_raw_read (regcache, regnum, buf);
+      if (status == REG_VALID)
+	status = regcache_raw_read (regcache, regnum + 1, buf + 4);
+      if (status == REG_VALID)
+	status = regcache_raw_read (regcache, regnum + 2, buf + 8);
+      if (status == REG_VALID)
+	status = regcache_raw_read (regcache, regnum + 3, buf + 12);
+
+      return status;
     }
   else if (regnum >= SPARC64_Q32_REGNUM && regnum <= SPARC64_Q60_REGNUM)
     {
       regnum = SPARC64_F32_REGNUM + 2 * (regnum - SPARC64_Q32_REGNUM);
-      regcache_raw_read (regcache, regnum, buf);
-      regcache_raw_read (regcache, regnum + 1, buf + 8);
+
+      status = regcache_raw_read (regcache, regnum, buf);
+      if (status == REG_VALID)
+	status = regcache_raw_read (regcache, regnum + 1, buf + 8);
+
+      return status;
     }
   else if (regnum == SPARC64_CWP_REGNUM
 	   || regnum == SPARC64_PSTATE_REGNUM
@@ -360,7 +374,10 @@ sparc64_pseudo_register_read (struct gdbarch *gdbarch,
     {
       ULONGEST state;
 
-      regcache_raw_read_unsigned (regcache, SPARC64_STATE_REGNUM, &state);
+      status = regcache_raw_read_unsigned (regcache, SPARC64_STATE_REGNUM, &state);
+      if (status != REG_VALID)
+	return status;
+
       switch (regnum)
 	{
 	case SPARC64_CWP_REGNUM:
@@ -378,6 +395,8 @@ sparc64_pseudo_register_read (struct gdbarch *gdbarch,
 	}
       store_unsigned_integer (buf, 8, byte_order, state);
     }
+
+  return REG_VALID;
 }
 
 static void

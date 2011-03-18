@@ -300,14 +300,17 @@ frv_register_type (struct gdbarch *gdbarch, int reg)
     return builtin_type (gdbarch)->builtin_int32;
 }
 
-static void
+static enum register_status
 frv_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
                           int reg, gdb_byte *buffer)
 {
+  enum register_status status;
+
   if (reg == iacc0_regnum)
     {
-      regcache_raw_read (regcache, iacc0h_regnum, buffer);
-      regcache_raw_read (regcache, iacc0l_regnum, (bfd_byte *) buffer + 4);
+      status = regcache_raw_read (regcache, iacc0h_regnum, buffer);
+      if (status == REG_VALID)
+	status = regcache_raw_read (regcache, iacc0l_regnum, (bfd_byte *) buffer + 4);
     }
   else if (accg0_regnum <= reg && reg <= accg7_regnum)
     {
@@ -316,14 +319,22 @@ frv_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 
       int raw_regnum = accg0123_regnum + (reg - accg0_regnum) / 4;
       int byte_num = (reg - accg0_regnum) % 4;
-      bfd_byte buf[4];
+      gdb_byte buf[4];
 
-      regcache_raw_read (regcache, raw_regnum, buf);
-      memset (buffer, 0, 4);
-      /* FR-V is big endian, so put the requested byte in the first byte
-         of the buffer allocated to hold the pseudo-register.  */
-      ((bfd_byte *) buffer)[0] = buf[byte_num];
+      status = regcache_raw_read (regcache, raw_regnum, buf);
+      if (status == REG_VALID)
+	{
+	  memset (buffer, 0, 4);
+	  /* FR-V is big endian, so put the requested byte in the
+	     first byte of the buffer allocated to hold the
+	     pseudo-register.  */
+	  buffer[0] = buf[byte_num];
+	}
     }
+  else
+    gdb_assert_not_reached ("invalid pseudo register number");
+
+  return status;
 }
 
 static void

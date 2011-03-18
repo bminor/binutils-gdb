@@ -373,16 +373,20 @@ sparc32_register_type (struct gdbarch *gdbarch, int regnum)
   return builtin_type (gdbarch)->builtin_int32;
 }
 
-static void
+static enum register_status
 sparc32_pseudo_register_read (struct gdbarch *gdbarch,
 			      struct regcache *regcache,
 			      int regnum, gdb_byte *buf)
 {
+  enum register_status status;
+
   gdb_assert (regnum >= SPARC32_D0_REGNUM && regnum <= SPARC32_D30_REGNUM);
 
   regnum = SPARC_F0_REGNUM + 2 * (regnum - SPARC32_D0_REGNUM);
-  regcache_raw_read (regcache, regnum, buf);
-  regcache_raw_read (regcache, regnum + 1, buf + 4);
+  status = regcache_raw_read (regcache, regnum, buf);
+  if (status == REG_VALID)
+    status = regcache_raw_read (regcache, regnum + 1, buf + 4);
+  return status;
 }
 
 static void

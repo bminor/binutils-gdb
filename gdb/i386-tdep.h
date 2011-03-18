@@ -311,9 +311,10 @@ extern int i386_ymm_regnum_p (struct gdbarch *gdbarch, int regnum);
 extern const char *i386_pseudo_register_name (struct gdbarch *gdbarch,
 					      int regnum);
 
-extern void i386_pseudo_register_read (struct gdbarch *gdbarch,
-				       struct regcache *regcache,
-				       int regnum, gdb_byte *buf);
+extern enum register_status i386_pseudo_register_read (struct gdbarch *gdbarch,
+						       struct regcache *regcache,
+						       int regnum,
+						       gdb_byte *buf);
 extern void i386_pseudo_register_write (struct gdbarch *gdbarch,
 					struct regcache *regcache,
 					int regnum, const gdb_byte *buf);

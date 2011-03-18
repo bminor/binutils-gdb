@@ -564,7 +564,7 @@ mips_tdesc_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
    gdbarch_num_regs .. 2 * gdbarch_num_regs) back onto the corresponding raw
    registers.  Take care of alignment and size problems.  */
 
-static void
+static enum register_status
 mips_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 			   int cookednum, gdb_byte *buf)
 {
@@ -572,18 +572,22 @@ mips_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
   gdb_assert (cookednum >= gdbarch_num_regs (gdbarch)
 	      && cookednum < 2 * gdbarch_num_regs (gdbarch));
   if (register_size (gdbarch, rawnum) == register_size (gdbarch, cookednum))
-    regcache_raw_read (regcache, rawnum, buf);
+    return regcache_raw_read (regcache, rawnum, buf);
   else if (register_size (gdbarch, rawnum) >
 	   register_size (gdbarch, cookednum))
     {
       if (gdbarch_tdep (gdbarch)->mips64_transfers_32bit_regs_p)
-	regcache_raw_read_part (regcache, rawnum, 0, 4, buf);
+	return regcache_raw_read_part (regcache, rawnum, 0, 4, buf);
       else
 	{
 	  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 	  LONGEST regval;
-	  regcache_raw_read_signed (regcache, rawnum, &regval);
-	  store_signed_integer (buf, 4, byte_order, regval);
+	  enum register_status status;
+
+	  status = regcache_raw_read_signed (regcache, rawnum, &regval);
+	  if (status == REG_VALID)
+	    store_signed_integer (buf, 4, byte_order, regval);
+	  return status;
 	}
     }
   else

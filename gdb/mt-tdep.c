@@ -524,9 +524,9 @@ mt_select_coprocessor (struct gdbarch *gdbarch,
    Additionally there is an array of coprocessor registers which track
    the coprocessor registers for each coprocessor.  */
 
-static void
+static enum register_status
 mt_pseudo_register_read (struct gdbarch *gdbarch,
-			  struct regcache *regcache, int regno, gdb_byte *buf)
+			 struct regcache *regcache, int regno, gdb_byte *buf)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
@@ -534,34 +534,45 @@ mt_pseudo_register_read (struct gdbarch *gdbarch,
     {
     case MT_COPRO_REGNUM:
     case MT_COPRO_PSEUDOREG_REGNUM:
-      regcache_raw_read (regcache, MT_COPRO_REGNUM, buf);
-      break;
+      return regcache_raw_read (regcache, MT_COPRO_REGNUM, buf);
     case MT_MAC_REGNUM:
     case MT_MAC_PSEUDOREG_REGNUM:
       if (gdbarch_bfd_arch_info (gdbarch)->mach == bfd_mach_mrisc2
 	  || gdbarch_bfd_arch_info (gdbarch)->mach == bfd_mach_ms2)
 	{
+	  enum register_status status;
 	  ULONGEST oldmac = 0, ext_mac = 0;
 	  ULONGEST newmac;
 
-	  regcache_cooked_read_unsigned (regcache, MT_MAC_REGNUM, &oldmac);
+	  status = regcache_cooked_read_unsigned (regcache, MT_MAC_REGNUM, &oldmac);
+	  if (status != REG_VALID)
+	    return status;
+
 	  regcache_cooked_read_unsigned (regcache, MT_EXMAC_REGNUM, &ext_mac);
+	  if (status != REG_VALID)
+	    return status;
+
 	  newmac =
 	    (oldmac & 0xffffffff) | ((long long) (ext_mac & 0xff) << 32);
 	  store_signed_integer (buf, 8, byte_order, newmac);
+
+	  return REG_VALID;
 	}
       else
-	regcache_raw_read (regcache, MT_MAC_REGNUM, buf);
+	return regcache_raw_read (regcache, MT_MAC_REGNUM, buf);
       break;
     default:
       {
 	unsigned index = mt_select_coprocessor (gdbarch, regcache, regno);
 	
 	if (index == MT_COPRO_PSEUDOREG_MAC_REGNUM)
-	  mt_pseudo_register_read (gdbarch, regcache,
-				   MT_MAC_PSEUDOREG_REGNUM, buf);
+	  return mt_pseudo_register_read (gdbarch, regcache,
+					  MT_MAC_PSEUDOREG_REGNUM, buf);
 	else if (index < MT_NUM_REGS - MT_CPR0_REGNUM)
-	  regcache_raw_read (regcache, index + MT_CPR0_REGNUM, buf);
+	  return regcache_raw_read (regcache, index + MT_CPR0_REGNUM, buf);
+	else
+	  /* ??? */
+	  return REG_VALID;
       }
       break;
     }

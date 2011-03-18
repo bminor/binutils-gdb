@@ -1,3 +1,109 @@
+2011-03-18  Pedro Alves  <pedro@codesourcery.com>
+
+	* regcache.h (regcache_raw_read, regcache_raw_read_signed)
+	(regcache_raw_read_unsigned, regcache_raw_read_signed)
+	(regcache_raw_read_unsigned, regcache_raw_read_part)
+	(regcache_cooked_read, regcache_cooked_read_signed)
+	(regcache_cooked_read_unsigned, regcache_cooked_read_part)
+	(regcache_cooked_read_ftype): Change return to enum
+	register_status.
+	* regcache.c: Include exceptions.h
+	(regcache_save): Adjust to handle REG_UNAVAILABLE registers.
+	(do_cooked_read): Change return to enum register_status.  Always
+	forward to regcache_cooked_read.
+	(regcache_raw_read): Change return to enum register_status.  If
+	the register is not REG_VALID, memset the buffer.  Return the
+	register's status.
+	(regcache_raw_read_signed): Handle non-REG_VALID registers and
+	return the register's status.
+	(regcache_raw_read_unsigned): Ditto.
+	(regcache_cooked_read): Change return to enum register_status.
+	Assert that with read-only regcaches, the register's status must
+	be known.  If the regcache is read-only, and the register is not
+	REG_VALID, memset the buffer.  Return the register's status.
+	(regcache_cooked_read_signed): Change return to enum
+	register_status.  Handle non-REG_VALID registers and return the
+	register's status.
+	(regcache_cooked_read_unsigned): Change return to enum
+	register_status.  Handle non-REG_VALID registers and return the
+	register's status.
+	(regcache_xfer_part, regcache_raw_read_part)
+	(regcache_cooked_read_part): Change return to enum
+	register_status.  Return the register's status.
+	(regcache_read_pc): Throw NOT_AVAILABLE_ERROR if the register is
+	unavailable.
+	(regcache_dump): Handle unavailable cooked registers.
+	* frame.c (do_frame_register_read): Adjust interface to match
+	regcache_cooked_read_ftype.
+	* gdbarch.sh (pseudo_register_read): Change return to enum
+	register_status.
+	* gdbarch.h, gdbarch.c: Regenerate.
+
+	* i386-tdep.h (i386_pseudo_register_read): Change return to enum
+	register_status.
+	* i386-tdep.c (i386_pseudo_register_read): Change return to enum
+	register_status.  If reading a raw register indicates the raw
+	register is not valid, return the raw register's status,
+	otherwise, return REG_VALID.
+	* amd64-tdep.c (amd64_pseudo_register_read): Change return to enum
+	register_status.  Handle non-REG_VALID raw registers and return
+	the register's status.
+	* arm-tdep.c (arm_neon_quad_read)
+	(arm_pseudo_read): Change return to enum register_status.  Handle
+	non-REG_VALID raw registers and return the register's status.
+	* avr-tdep.c (avr_pseudo_register_read): Ditto.
+	* frv-tdep.c (frv_pseudo_register_read): Ditto.
+	* h8300-tdep.c (h8300_pseudo_register_read): Ditto.
+	* hppa-tdep.c (hppa_pseudo_register_read): Ditto.
+	* m32c-tdep.c (m32c_move_reg_t): Change return to enum
+	register_status.
+	(m32c_raw_read, m32c_raw_write, m32c_banked_read)
+	(m32c_banked_write, m32c_sb_read, m32c_sb_write, m32c_part_read)
+	(m32c_part_write, m32c_cat_read, m32c_cat_write)
+	(m32c_r3r2r1r0_read, m32c_r3r2r1r0_write)
+	(m32c_pseudo_register_read): Change return to enum
+	register_status.  Adjust.
+	* m68hc11-tdep.c (m68hc11_pseudo_register_read): Change return to
+	enum register_status.  Return the register's status.
+	* mep-tdep.c (mep_pseudo_cr32_read): Change return to enum
+	register_status.  Return the register's status.
+	(mep_pseudo_cr64_read, mep_pseudo_register_read): Ditto.
+	* mips-tdep.c (mips_pseudo_register_read): Ditto.
+	* mt-tdep.c (mt_pseudo_register_read): Ditto.
+	* rs6000-tdep.c (move_ev_register_func): New typedef.
+	(e500_move_ev_register): Use it.  Change return to enum
+	register_status.  Return the register's status.
+	(do_regcache_raw_read): New function.
+	(do_regcache_raw_write): New function.
+	(e500_pseudo_register_read): Change return to enum
+	register_status.  Return the register's status.  Use
+	do_regcache_raw_read.
+	(e500_pseudo_register_write): Adjust.  Use do_regcache_raw_write.
+	(dfp_pseudo_register_read): Change return to enum register_status.
+	Return the register's status.
+	(vsx_pseudo_register_read): Ditto.
+	(efpr_pseudo_register_read): Ditto.
+	(rs6000_pseudo_register_read): Ditto.
+	* s390-tdep.c (s390_pseudo_register_read): Change return to enum
+	register_status.  Return the register's status.
+	* sh64-tdep.c (pseudo_register_read_portions): New function.
+	(sh64_pseudo_register_read): Change return to enum
+	register_status.  Use pseudo_register_read_portions.  Return the
+	register's status.
+	* ia64-tdep.c (ia64_pseudo_register_read): Change return to enum
+	register_status.  Return the register's status.
+	* sh-tdep.c (pseudo_register_read_portions): New function.
+	(sh_pseudo_register_read): Change return to enum register_status.
+	Use pseudo_register_read_portions.  Return the register's status.
+	* sparc-tdep.c (sparc32_pseudo_register_read): Change return to
+	enum register_status.  Return the register's status.
+	* sparc64-tdep.c (sparc64_pseudo_register_read): Ditto.
+	* spu-tdep.c (spu_pseudo_register_read_spu)
+	(spu_pseudo_register_read): Ditto.
+	* xtensa-tdep.c (xtensa_register_read_masked)
+	(xtensa_pseudo_register_read): Ditto.
+	* bfin-tdep.c (bfin_pseudo_register_read): Ditto.
+
 2011-03-18  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* python/py-value.c (valpy_getitem): Fix formatting of error function

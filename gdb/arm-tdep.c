@@ -213,9 +213,9 @@ static void convert_from_extended (const struct floatformat *, const void *,
 static void convert_to_extended (const struct floatformat *, void *,
 				 const void *, int);
 
-static void arm_neon_quad_read (struct gdbarch *gdbarch,
-				struct regcache *regcache,
-				int regnum, gdb_byte *buf);
+static enum register_status arm_neon_quad_read (struct gdbarch *gdbarch,
+						struct regcache *regcache,
+						int regnum, gdb_byte *buf);
 static void arm_neon_quad_write (struct gdbarch *gdbarch,
 				 struct regcache *regcache,
 				 int regnum, const gdb_byte *buf);
@@ -7899,13 +7899,14 @@ arm_write_pc (struct regcache *regcache, CORE_ADDR pc)
    ABI, even if a NEON unit is not present.  REGNUM is the index of
    the quad register, in [0, 15].  */
 
-static void
+static enum register_status
 arm_neon_quad_read (struct gdbarch *gdbarch, struct regcache *regcache,
 		    int regnum, gdb_byte *buf)
 {
   char name_buf[4];
   gdb_byte reg_buf[8];
   int offset, double_regnum;
+  enum register_status status;
 
   sprintf (name_buf, "d%d", regnum << 1);
   double_regnum = user_reg_map_name_to_regnum (gdbarch, name_buf,
@@ -7917,15 +7918,21 @@ arm_neon_quad_read (struct gdbarch *gdbarch, struct regcache *regcache,
   else
     offset = 0;
 
-  regcache_raw_read (regcache, double_regnum, reg_buf);
+  status = regcache_raw_read (regcache, double_regnum, reg_buf);
+  if (status != REG_VALID)
+    return status;
   memcpy (buf + offset, reg_buf, 8);
 
   offset = 8 - offset;
-  regcache_raw_read (regcache, double_regnum + 1, reg_buf);
+  status = regcache_raw_read (regcache, double_regnum + 1, reg_buf);
+  if (status != REG_VALID)
+    return status;
   memcpy (buf + offset, reg_buf, 8);
+
+  return REG_VALID;
 }
 
-static void
+static enum register_status
 arm_pseudo_read (struct gdbarch *gdbarch, struct regcache *regcache,
 		 int regnum, gdb_byte *buf)
 {
@@ -7939,9 +7946,11 @@ arm_pseudo_read (struct gdbarch *gdbarch, struct regcache *regcache,
 
   if (gdbarch_tdep (gdbarch)->have_neon_pseudos && regnum >= 32 && regnum < 48)
     /* Quad-precision register.  */
-    arm_neon_quad_read (gdbarch, regcache, regnum - 32, buf);
+    return arm_neon_quad_read (gdbarch, regcache, regnum - 32, buf);
   else
     {
+      enum register_status status;
+
       /* Single-precision register.  */
       gdb_assert (regnum < 32);
 
@@ -7955,8 +7964,10 @@ arm_pseudo_read (struct gdbarch *gdbarch, struct regcache *regcache,
       double_regnum = user_reg_map_name_to_regnum (gdbarch, name_buf,
 						   strlen (name_buf));
 
-      regcache_raw_read (regcache, double_regnum, reg_buf);
-      memcpy (buf, reg_buf + offset, 4);
+      status = regcache_raw_read (regcache, double_regnum, reg_buf);
+      if (status == REG_VALID)
+	memcpy (buf, reg_buf + offset, 4);
+      return status;
     }
 }
 

@@ -212,8 +212,8 @@ extern void set_gdbarch_virtual_frame_pointer (struct gdbarch *gdbarch, gdbarch_
 
 extern int gdbarch_pseudo_register_read_p (struct gdbarch *gdbarch);
 
-typedef void (gdbarch_pseudo_register_read_ftype) (struct gdbarch *gdbarch, struct regcache *regcache, int cookednum, gdb_byte *buf);
-extern void gdbarch_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache, int cookednum, gdb_byte *buf);
+typedef enum register_status (gdbarch_pseudo_register_read_ftype) (struct gdbarch *gdbarch, struct regcache *regcache, int cookednum, gdb_byte *buf);
+extern enum register_status gdbarch_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache, int cookednum, gdb_byte *buf);
 extern void set_gdbarch_pseudo_register_read (struct gdbarch *gdbarch, gdbarch_pseudo_register_read_ftype *pseudo_register_read);
 
 extern int gdbarch_pseudo_register_write_p (struct gdbarch *gdbarch);

@@ -354,19 +354,22 @@ avr_write_pc (struct regcache *regcache, CORE_ADDR val)
                                   avr_convert_iaddr_to_raw (val));
 }
 
-static void
+static enum register_status
 avr_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
                           int regnum, gdb_byte *buf)
 {
   ULONGEST val;
+  enum register_status status;
 
   switch (regnum)
     {
     case AVR_PSEUDO_PC_REGNUM:
-      regcache_raw_read_unsigned (regcache, AVR_PC_REGNUM, &val);
+      status = regcache_raw_read_unsigned (regcache, AVR_PC_REGNUM, &val);
+      if (status != REG_VALID)
+	return status;
       val >>= 1;
       store_unsigned_integer (buf, 4, gdbarch_byte_order (gdbarch), val);
-      break;
+      return status;
     default:
       internal_error (__FILE__, __LINE__, _("invalid regnum"));
     }

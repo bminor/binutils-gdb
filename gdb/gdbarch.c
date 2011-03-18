@@ -1682,14 +1682,14 @@ gdbarch_pseudo_register_read_p (struct gdbarch *gdbarch)
   return gdbarch->pseudo_register_read != NULL;
 }
 
-void
+enum register_status
 gdbarch_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache, int cookednum, gdb_byte *buf)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->pseudo_register_read != NULL);
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_pseudo_register_read called\n");
-  gdbarch->pseudo_register_read (gdbarch, regcache, cookednum, buf);
+  return gdbarch->pseudo_register_read (gdbarch, regcache, cookednum, buf);
 }
 
 void
