@@ -1,5 +1,80 @@
 2011-03-18  Pedro Alves  <pedro@codesourcery.com>
 
+	* frame.h (frame_unwind_caller_pc_if_available): Declare.
+	* frame.c (frame_unwind_caller_pc_if_available): New.
+	* stack.c (frame_info): Handle unavailable PC.
+
+2011-03-18  Pedro Alves  <pedro@codesourcery.com>
+
+	* frame.c (frame_unwind_pc): Rename to ...
+	(frame_unwind_pc_if_available): ... this.  New `pc' output
+	parameter.  Change return type to int.  Gracefully handle
+	gdbarch_unwind_pc throwing NOT_AVAILABLE_ERROR.  Return 0 if that
+	happened, or 1 otherwise.
+	(frame_unwind_pc): Reimplement on top of
+	frame_unwind_pc_if_available.
+	(get_frame_func): Rename to ...
+	(get_frame_func_if_available): New `pc' output parameter.  Change
+	return type to int.  Gracefully handle the PC not being available.
+	(get_frame_func): Reimplement on top of
+	get_frame_func_if_available.
+	(select_frame): Handle the PC being unavailable.
+	(get_prev_frame): Handle the PC being unavailable.
+	(get_frame_pc_if_available): New.
+	(get_frame_address_in_block_if_available): New.
+	(find_frame_sal): Handle the frame PC not being available.
+	* frame.h (get_frame_pc_if_available): Declare.
+	(get_frame_address_in_block_if_available): Declare.
+	(get_frame_func_if_available): Declare.
+	* stack.c (print_frame_info): Handle the PC being unavailable.
+	(find_frame_funname): Ditto.
+	(print_frame): Handle the PC being unavailable.
+	(get_frame_language): Ditto.
+	* blockframe.c (get_frame_block): Ditto.
+	* macroscope.c (default_macro_scope): Ditto.
+	* tui/tui-stack.c (tui_show_frame_info): Ditto.
+
+2011-03-18  Pedro Alves  <pedro@codesourcery.com>
+
+	* dwarf2loc.c (dwarf2_evaluate_loc_desc): Catch
+	NOT_AVAILABLE_ERROR when evaluating the location expression.
+
+2011-03-18  Pedro Alves  <pedro@codesourcery.com>
+
+	* dwarf2loc.c (read_pieced_value): Handle get_frame_register_bytes
+	returning that the register piece is unavailable/optimized out.
+	(write_pieced_value): Handle get_frame_register_bytes returning
+	that the register piece is unavailable/optimized out when doing a
+	read-modify write of a bitfield.
+	* findvar.c (value_from_register): Handle get_frame_register_bytes
+	returning that the register piece is unavailable/optimized out.
+	* frame.c (get_frame_register_bytes): New parameters `optimizedp'
+	and `unavailablep'.  Throw error on bad debug info.  Use
+	frame_register instead of frame_register_read, to fill in the new
+	arguments.
+	* frame.h (get_frame_register_bytes): New parameters `optimizedp'
+	and `unavailablep'.
+	* valops.c: (value_assign): Adjust, and handle
+	get_frame_register_bytes failing.
+	* spu-tdep.c: Include exceptions.h.
+	(spu_software_single_step): Adjust, and handle
+	get_frame_register_bytes failing.
+	(spu_get_longjmp_target): Ditto.
+	* gdbarch.sh (register_to_value): Change to return int.  New
+	parameters `optimizedp' and `unavailablep'.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* i386-tdep.c (i386_register_to_value): Adjust to new
+	gdbarch_register_to_value interface.
+	* i387-tdep.c (i387_register_to_value): Ditto.
+	* i387-tdep.h (i387_register_to_value): Ditto.
+	* alpha-tdep.c (alpha_register_to_value): Ditto.
+	* ia64-tdep.c (ia64_register_to_value): Ditto.
+	* m68k-tdep.c (m68k_register_to_value): Ditto.
+	* mips-tdep.c (mips_register_to_value): Ditto.
+	* rs6000-tdep.c (rs6000_register_to_value): Ditto.
+
+2011-03-18  Pedro Alves  <pedro@codesourcery.com>
+
 	* findvar.c (value_of_register): Mark the value as unavailable, if
 	the register is unavailable.
 	* frame.h (frame_register_unwind): New `unavailablep' parameter.
