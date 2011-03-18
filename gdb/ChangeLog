@@ -1,5 +1,10 @@
 2011-03-18  Pedro Alves  <pedro@codesourcery.com>
 
+	* tracepoint.c (set_traceframe_context): Handle unavailable PC
+	gracefully.
+
+2011-03-18  Pedro Alves  <pedro@codesourcery.com>
+
 	* frame.h (frame_unwind_caller_pc_if_available): Declare.
 	* frame.c (frame_unwind_caller_pc_if_available): New.
 	* stack.c (frame_info): Handle unavailable PC.
