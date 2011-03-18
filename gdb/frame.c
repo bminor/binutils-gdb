@@ -619,15 +619,17 @@ frame_find_by_id (struct frame_id id)
   return NULL;
 }
 
-static CORE_ADDR
-frame_unwind_pc (struct frame_info *this_frame)
+static int
+frame_unwind_pc_if_available (struct frame_info *this_frame, CORE_ADDR *pc)
 {
   if (!this_frame->prev_pc.p)
     {
-      CORE_ADDR pc;
-
       if (gdbarch_unwind_pc_p (frame_unwind_arch (this_frame)))
 	{
+	  volatile struct gdb_exception ex;
+	  struct gdbarch *prev_gdbarch;
+	  CORE_ADDR pc = 0;
+
 	  /* The right way.  The `pure' way.  The one true way.  This
 	     method depends solely on the register-unwind code to
 	     determine the value of registers in THIS frame, and hence
@@ -644,20 +646,62 @@ frame_unwind_pc (struct frame_info *this_frame)
 	     frame.  This is all in stark contrast to the old
 	     FRAME_SAVED_PC which would try to directly handle all the
 	     different ways that a PC could be unwound.  */
-	  pc = gdbarch_unwind_pc (frame_unwind_arch (this_frame), this_frame);
+	  prev_gdbarch = frame_unwind_arch (this_frame);
+
+	  TRY_CATCH (ex, RETURN_MASK_ERROR)
+	    {
+	      pc = gdbarch_unwind_pc (prev_gdbarch, this_frame);
+	    }
+	  if (ex.reason < 0 && ex.error == NOT_AVAILABLE_ERROR)
+	    {
+	      this_frame->prev_pc.p = -1;
+
+	      if (frame_debug)
+		fprintf_unfiltered (gdb_stdlog,
+				    "{ frame_unwind_pc (this_frame=%d)"
+				    " -> <unavailable> }\n",
+				    this_frame->level);
+	    }
+	  else if (ex.reason < 0)
+	    {
+	      throw_exception (ex);
+	    }
+	  else
+	    {
+	      this_frame->prev_pc.value = pc;
+	      this_frame->prev_pc.p = 1;
+	      if (frame_debug)
+		fprintf_unfiltered (gdb_stdlog,
+				    "{ frame_unwind_pc (this_frame=%d) "
+				    "-> %s }\n",
+				    this_frame->level,
+				    hex_string (this_frame->prev_pc.value));
+	    }
 	}
       else
 	internal_error (__FILE__, __LINE__, _("No unwind_pc method"));
-      this_frame->prev_pc.value = pc;
-      this_frame->prev_pc.p = 1;
-      if (frame_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "{ frame_unwind_caller_pc "
-			    "(this_frame=%d) -> %s }\n",
-			    this_frame->level,
-			    hex_string (this_frame->prev_pc.value));
     }
-  return this_frame->prev_pc.value;
+  if (this_frame->prev_pc.p < 0)
+    {
+      *pc = -1;
+      return 0;
+    }
+  else
+    {
+      *pc = this_frame->prev_pc.value;
+      return 1;
+    }
+}
+
+static CORE_ADDR
+frame_unwind_pc (struct frame_info *this_frame)
+{
+  CORE_ADDR pc;
+
+  if (!frame_unwind_pc_if_available (this_frame, &pc))
+    throw_error (NOT_AVAILABLE_ERROR, _("PC not available"));
+  else
+    return pc;
 }
 
 CORE_ADDR
@@ -666,25 +710,59 @@ frame_unwind_caller_pc (struct frame_info *this_frame)
   return frame_unwind_pc (skip_inlined_frames (this_frame));
 }
 
-CORE_ADDR
-get_frame_func (struct frame_info *this_frame)
+int
+get_frame_func_if_available (struct frame_info *this_frame, CORE_ADDR *pc)
 {
   struct frame_info *next_frame = this_frame->next;
 
   if (!next_frame->prev_func.p)
     {
+      CORE_ADDR addr_in_block;
+
       /* Make certain that this, and not the adjacent, function is
          found.  */
-      CORE_ADDR addr_in_block = get_frame_address_in_block (this_frame);
-      next_frame->prev_func.p = 1;
-      next_frame->prev_func.addr = get_pc_function_start (addr_in_block);
-      if (frame_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "{ get_frame_func (this_frame=%d) -> %s }\n",
-			    this_frame->level,
-			    hex_string (next_frame->prev_func.addr));
+      if (!get_frame_address_in_block_if_available (this_frame, &addr_in_block))
+	{
+	  next_frame->prev_func.p = -1;
+	  if (frame_debug)
+	    fprintf_unfiltered (gdb_stdlog,
+				"{ get_frame_func (this_frame=%d)"
+				" -> unavailable }\n",
+				this_frame->level);
+	}
+      else
+	{
+	  next_frame->prev_func.p = 1;
+	  next_frame->prev_func.addr = get_pc_function_start (addr_in_block);
+	  if (frame_debug)
+	    fprintf_unfiltered (gdb_stdlog,
+				"{ get_frame_func (this_frame=%d) -> %s }\n",
+				this_frame->level,
+				hex_string (next_frame->prev_func.addr));
+	}
     }
-  return next_frame->prev_func.addr;
+
+  if (next_frame->prev_func.p < 0)
+    {
+      *pc = -1;
+      return 0;
+    }
+  else
+    {
+      *pc = next_frame->prev_func.addr;
+      return 1;
+    }
+}
+
+CORE_ADDR
+get_frame_func (struct frame_info *this_frame)
+{
+  CORE_ADDR pc;
+
+  if (!get_frame_func_if_available (this_frame, &pc))
+    throw_error (NOT_AVAILABLE_ERROR, _("PC not available"));
+
+  return pc;
 }
 
 static enum register_status
@@ -1298,8 +1376,6 @@ deprecated_safe_get_selected_frame (void)
 void
 select_frame (struct frame_info *fi)
 {
-  struct symtab *s;
-
   selected_frame = fi;
   /* NOTE: cagney/2002-05-04: FI can be NULL.  This occurs when the
      frame is being invalidated.  */
@@ -1319,23 +1395,28 @@ select_frame (struct frame_info *fi)
      source language of this frame, and switch to it if desired.  */
   if (fi)
     {
-      /* We retrieve the frame's symtab by using the frame PC.  However
-         we cannot use the frame PC as-is, because it usually points to
-         the instruction following the "call", which is sometimes the
-         first instruction of another function.  So we rely on
-         get_frame_address_in_block() which provides us with a PC which
-         is guaranteed to be inside the frame's code block.  */
-      s = find_pc_symtab (get_frame_address_in_block (fi));
-      if (s
-	  && s->language != current_language->la_language
-	  && s->language != language_unknown
-	  && language_mode == language_mode_auto)
+      CORE_ADDR pc;
+
+      /* We retrieve the frame's symtab by using the frame PC.
+	 However we cannot use the frame PC as-is, because it usually
+	 points to the instruction following the "call", which is
+	 sometimes the first instruction of another function.  So we
+	 rely on get_frame_address_in_block() which provides us with a
+	 PC which is guaranteed to be inside the frame's code
+	 block.  */
+      if (get_frame_address_in_block_if_available (fi, &pc))
 	{
-	  set_language (s->language);
+	  struct symtab *s = find_pc_symtab (pc);
+
+	  if (s
+	      && s->language != current_language->la_language
+	      && s->language != language_unknown
+	      && language_mode == language_mode_auto)
+	    set_language (s->language);
 	}
     }
 }
-	
+
 /* Create an arbitrary (i.e. address specified by user) or innermost frame.
    Always returns a non-NULL value.  */
 
@@ -1755,10 +1836,14 @@ inside_entry_func (struct frame_info *this_frame)
 struct frame_info *
 get_prev_frame (struct frame_info *this_frame)
 {
+  CORE_ADDR frame_pc;
+  int frame_pc_p;
+
   /* There is always a frame.  If this assertion fails, suspect that
      something should be calling get_selected_frame() or
      get_current_frame().  */
   gdb_assert (this_frame != NULL);
+  frame_pc_p = get_frame_pc_if_available (this_frame, &frame_pc);
 
   /* tausq/2004-12-07: Dummy frames are skipped because it doesn't make much
      sense to stop unwinding at a dummy frame.  One place where a dummy
@@ -1773,6 +1858,7 @@ get_prev_frame (struct frame_info *this_frame)
   if (this_frame->level >= 0
       && get_frame_type (this_frame) == NORMAL_FRAME
       && !backtrace_past_main
+      && frame_pc_p
       && inside_main_func (this_frame))
     /* Don't unwind past main().  Note, this is done _before_ the
        frame has been marked as previously unwound.  That way if the
@@ -1819,6 +1905,7 @@ get_prev_frame (struct frame_info *this_frame)
   if (this_frame->level >= 0
       && get_frame_type (this_frame) == NORMAL_FRAME
       && !backtrace_past_entry
+      && frame_pc_p
       && inside_entry_func (this_frame))
     {
       frame_debug_got_null_frame (this_frame, "inside entry func");
@@ -1832,7 +1919,7 @@ get_prev_frame (struct frame_info *this_frame)
       && (get_frame_type (this_frame) == NORMAL_FRAME
 	  || get_frame_type (this_frame) == INLINE_FRAME)
       && get_frame_type (get_next_frame (this_frame)) == NORMAL_FRAME
-      && get_frame_pc (this_frame) == 0)
+      && frame_pc_p && frame_pc == 0)
     {
       frame_debug_got_null_frame (this_frame, "zero PC");
       return NULL;
@@ -1846,6 +1933,28 @@ get_frame_pc (struct frame_info *frame)
 {
   gdb_assert (frame->next != NULL);
   return frame_unwind_pc (frame->next);
+}
+
+int
+get_frame_pc_if_available (struct frame_info *frame, CORE_ADDR *pc)
+{
+  volatile struct gdb_exception ex;
+
+  gdb_assert (frame->next != NULL);
+
+  TRY_CATCH (ex, RETURN_MASK_ERROR)
+    {
+      *pc = frame_unwind_pc (frame->next);
+    }
+  if (ex.reason < 0)
+    {
+      if (ex.error == NOT_AVAILABLE_ERROR)
+	return 0;
+      else
+	throw_exception (ex);
+    }
+
+  return 1;
 }
 
 /* Return an address that falls within THIS_FRAME's code block.  */
@@ -1908,11 +2017,30 @@ get_frame_address_in_block (struct frame_info *this_frame)
   return pc;
 }
 
+int
+get_frame_address_in_block_if_available (struct frame_info *this_frame,
+					 CORE_ADDR *pc)
+{
+  volatile struct gdb_exception ex;
+
+  TRY_CATCH (ex, RETURN_MASK_ERROR)
+    {
+      *pc = get_frame_address_in_block (this_frame);
+    }
+  if (ex.reason < 0 && ex.error == NOT_AVAILABLE_ERROR)
+    return 0;
+  else if (ex.reason < 0)
+    throw_exception (ex);
+  else
+    return 1;
+}
+
 void
 find_frame_sal (struct frame_info *frame, struct symtab_and_line *sal)
 {
   struct frame_info *next_frame;
   int notcurrent;
+  CORE_ADDR pc;
 
   /* If the next frame represents an inlined function call, this frame's
      sal is the "call site" of that inlined function, which can not
@@ -1953,8 +2081,14 @@ find_frame_sal (struct frame_info *frame, struct symtab_and_line *sal)
      PC and such a PC indicates the current (rather than next)
      instruction/line, consequently, for such cases, want to get the
      line containing fi->pc.  */
-  notcurrent = (get_frame_pc (frame) != get_frame_address_in_block (frame));
-  (*sal) = find_pc_line (get_frame_pc (frame), notcurrent);
+  if (!get_frame_pc_if_available (frame, &pc))
+    {
+      init_sal (sal);
+      return;
+    }
+
+  notcurrent = (pc != get_frame_address_in_block (frame));
+  (*sal) = find_pc_line (pc, notcurrent);
 }
 
 /* Per "frame.h", return the ``address'' of the frame.  Code should

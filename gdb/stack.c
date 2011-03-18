@@ -654,8 +654,14 @@ print_frame_info (struct frame_info *frame, int print_level,
     }
 
   if (print_what != LOCATION)
-    set_default_breakpoint (1, sal.pspace,
-			    get_frame_pc (frame), sal.symtab, sal.line);
+    {
+      CORE_ADDR pc;
+
+      if (get_frame_pc_if_available (frame, &pc))
+	set_default_breakpoint (1, sal.pspace, pc, sal.symtab, sal.line);
+      else
+	set_default_breakpoint (0, 0, 0, 0, 0);
+    }
 
   annotate_frame_end ();
 
@@ -740,9 +746,13 @@ find_frame_funname (struct frame_info *frame, char **funname,
     }
   else
     {
-      struct minimal_symbol *msymbol = 
-	lookup_minimal_symbol_by_pc (get_frame_address_in_block (frame));
+      struct minimal_symbol *msymbol;
+      CORE_ADDR pc;
 
+      if (!get_frame_address_in_block_if_available (frame, &pc))
+	return;
+
+      msymbol = lookup_minimal_symbol_by_pc (pc);
       if (msymbol != NULL)
 	{
 	  *funname = SYMBOL_PRINT_NAME (msymbol);
@@ -763,6 +773,10 @@ print_frame (struct frame_info *frame, int print_level,
   struct cleanup *old_chain, *list_chain;
   struct value_print_options opts;
   struct symbol *func;
+  CORE_ADDR pc = 0;
+  int pc_p;
+
+  pc_p = get_frame_pc_if_available (frame, &pc);
 
   stb = ui_out_stream_new (uiout);
   old_chain = make_cleanup_ui_out_stream_delete (stb);
@@ -770,7 +784,7 @@ print_frame (struct frame_info *frame, int print_level,
   find_frame_funname (frame, &funname, &funlang, &func);
 
   annotate_frame_begin (print_level ? frame_relative_level (frame) : 0,
-			gdbarch, get_frame_pc (frame));
+			gdbarch, pc);
 
   list_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "frame");
 
@@ -782,11 +796,15 @@ print_frame (struct frame_info *frame, int print_level,
     }
   get_user_print_options (&opts);
   if (opts.addressprint)
-    if (frame_show_address (frame, sal) || !sal.symtab
+    if (!sal.symtab
+	|| frame_show_address (frame, sal)
 	|| print_what == LOC_AND_ADDRESS)
       {
 	annotate_frame_address ();
-	ui_out_field_core_addr (uiout, "addr", gdbarch, get_frame_pc (frame));
+	if (pc_p)
+	  ui_out_field_core_addr (uiout, "addr", gdbarch, pc);
+	else
+	  ui_out_field_string (uiout, "addr", "<unavailable>");
 	annotate_frame_address_end ();
 	ui_out_text (uiout, " in ");
       }
@@ -836,7 +854,7 @@ print_frame (struct frame_info *frame, int print_level,
       annotate_frame_source_end ();
     }
 
-  if (!funname || (!sal.symtab || !sal.symtab->filename))
+  if (pc_p && (!funname || (!sal.symtab || !sal.symtab->filename)))
     {
 #ifdef PC_SOLIB
       char *lib = PC_SOLIB (get_frame_pc (frame));
@@ -2142,6 +2160,10 @@ get_frame_language (void)
 
   if (frame)
     {
+      volatile struct gdb_exception ex;
+      CORE_ADDR pc = 0;
+      struct symtab *s;
+
       /* We determine the current frame language by looking up its
          associated symtab.  To retrieve this symtab, we use the frame
          PC.  However we cannot use the frame PC as is, because it
@@ -2150,11 +2172,22 @@ get_frame_language (void)
          we rely on get_frame_address_in_block(), it provides us with
          a PC that is guaranteed to be inside the frame's code
          block.  */
-      CORE_ADDR pc = get_frame_address_in_block (frame);
-      struct symtab *s = find_pc_symtab (pc);
 
-      if (s)
-	return s->language;
+      TRY_CATCH (ex, RETURN_MASK_ERROR)
+	{
+	  pc = get_frame_address_in_block (frame);
+	}
+      if (ex.reason < 0)
+	{
+	  if (ex.error != NOT_AVAILABLE_ERROR)
+	    throw_exception (ex);
+	}
+      else
+	{
+	  s = find_pc_symtab (pc);
+	  if (s != NULL)
+	    return s->language;
+	}
     }
 
   return language_unknown;

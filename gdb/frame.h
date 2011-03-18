@@ -284,6 +284,12 @@ extern struct frame_info *frame_find_by_id (struct frame_id id);
    This replaced: frame->pc; */
 extern CORE_ADDR get_frame_pc (struct frame_info *);
 
+/* Same as get_frame_pc, but return a boolean indication of whether
+   the PC is actually available, instead of throwing an error.  */
+
+extern int get_frame_pc_if_available (struct frame_info *frame,
+				      CORE_ADDR *pc);
+
 /* An address (not necessarily aligned to an instruction boundary)
    that falls within THIS frame's code block.
 
@@ -299,6 +305,15 @@ extern CORE_ADDR get_frame_pc (struct frame_info *);
 
 extern CORE_ADDR get_frame_address_in_block (struct frame_info *this_frame);
 
+/* Same as get_frame_address_in_block, but returns a boolean
+   indication of whether the frame address is determinable (when the
+   PC is unavailable, it will not be), instead of possibly throwing an
+   error trying to read an unavailable PC.  */
+
+extern int
+  get_frame_address_in_block_if_available (struct frame_info *this_frame,
+					   CORE_ADDR *pc);
+
 /* The frame's inner-most bound.  AKA the stack-pointer.  Confusingly
    known as top-of-stack.  */
 
@@ -308,6 +323,13 @@ extern CORE_ADDR get_frame_sp (struct frame_info *);
    address of the function containing that resume address, or zero if
    that function isn't known.  */
 extern CORE_ADDR get_frame_func (struct frame_info *fi);
+
+/* Same as get_frame_func, but returns a boolean indication of whether
+   the frame function is determinable (when the PC is unavailable, it
+   will not be), instead of possibly throwing an error trying to read
+   an unavailable PC.  */
+
+extern int get_frame_func_if_available (struct frame_info *fi, CORE_ADDR *);
 
 /* Closely related to the resume address, various symbol table
    attributes that are determined by the PC.  Note that for a normal

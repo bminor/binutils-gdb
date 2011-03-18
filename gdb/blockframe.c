@@ -58,9 +58,12 @@
 struct block *
 get_frame_block (struct frame_info *frame, CORE_ADDR *addr_in_block)
 {
-  const CORE_ADDR pc = get_frame_address_in_block (frame);
+  CORE_ADDR pc;
   struct block *bl;
   int inline_count;
+
+  if (!get_frame_address_in_block_if_available (frame, &pc))
+    return NULL;
 
   if (addr_in_block)
     *addr_in_block = pc;

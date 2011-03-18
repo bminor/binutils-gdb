@@ -102,12 +102,13 @@ default_macro_scope (void)
   struct symtab_and_line sal;
   struct macro_scope *ms;
   struct frame_info *frame;
+  CORE_ADDR pc;
 
   /* If there's a selected frame, use its PC.  */
   frame = deprecated_safe_get_selected_frame ();
-  if (frame)
-    sal = find_pc_line (get_frame_pc (frame), 0);
-  
+  if (frame && get_frame_pc_if_available (frame, &pc))
+    sal = find_pc_line (pc, 0);
+
   /* Fall back to the current listing position.  */
   else
     {

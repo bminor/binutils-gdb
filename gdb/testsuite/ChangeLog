@@ -1,5 +1,35 @@
 2011-03-18  Pedro Alves  <pedro@codesourcery.com>
 
+	* frame.c (frame_unwind_pc): Rename to ...
+	(frame_unwind_pc_if_available): ... this.  New `pc' output
+	parameter.  Change return type to int.  Gracefully handle
+	gdbarch_unwind_pc throwing NOT_AVAILABLE_ERROR.  Return 0 if that
+	happened, or 1 otherwise.
+	(frame_unwind_pc): Reimplement on top of
+	frame_unwind_pc_if_available.
+	(get_frame_func): Rename to ...
+	(get_frame_func_if_available): New `pc' output parameter.  Change
+	return type to int.  Gracefully handle the PC not being available.
+	(get_frame_func): Reimplement on top of
+	get_frame_func_if_available.
+	(select_frame): Handle the PC being unavailable.
+	(get_prev_frame): Handle the PC being unavailable.
+	(get_frame_pc_if_available): New.
+	(get_frame_address_in_block_if_available): New.
+	(find_frame_sal): Handle the frame PC not being available.
+	* frame.h (get_frame_pc_if_available): Declare.
+	(get_frame_address_in_block_if_available): Declare.
+	(get_frame_func_if_available): Declare.
+	* stack.c (print_frame_info): Handle the PC being unavailable.
+	(find_frame_funname): Ditto.
+	(print_frame): Handle the PC being unavailable.
+	(get_frame_language): Ditto.
+	* blockframe.c (get_frame_block): Ditto.
+	* macroscope.c (default_macro_scope): Ditto.
+	* tui/tui-stack.c (tui_show_frame_info): Ditto.
+
+2011-03-18  Pedro Alves  <pedro@codesourcery.com>
+
 	* dwarf2loc.c (dwarf2_evaluate_loc_desc): Catch
 	NOT_AVAILABLE_ERROR when evaluating the location expression.
 
