@@ -1,5 +1,9 @@
 2011-03-18  Kwok Cheung Yeung  <kcy@codesourcery.com>
 
+	* MAINTAINERS: Add myself as a write-after-approval maintainer.
+
+2011-03-18  Kwok Cheung Yeung  <kcy@codesourcery.com>
+
 	* amd64-tdep.c (amd64_relocate_instruction): Fix ordering of arguments
         to store_signed_integer.  Add debug message when relocating CALL
         instructions.  Fix formatting of debug message.
