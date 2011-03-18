@@ -1,3 +1,13 @@
+2011-03-18  Phil Muldoon  <pmuldoon@redhat.com>
+
+        PR python/12149
+
+	* python/python.c (gdbpy_write): Accept a stream argument and
+	operate to the appropriate stream.
+	(gdbpy_flush): Likewise.
+	(_initialize_python): Add stream constants.
+	(finish_python_initialization): Add GdbOutputErrorFile class.
+
 2011-03-18  Kwok Cheung Yeung  <kcy@codesourcery.com>
 
 	* MAINTAINERS: Add myself as a write-after-approval maintainer.

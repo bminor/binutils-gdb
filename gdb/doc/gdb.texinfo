@@ -20877,18 +20877,64 @@ this.  For example:
 @end smallexample
 @end defun
 
-@findex gdb.write
-@defun write string
-Print a string to @value{GDBN}'s paginated standard output stream.
+@findex gdb.write 
+@defun write string @r{[}stream{]} 
+Print a string to @value{GDBN}'s paginated output stream.  The
+optional @var{stream} determines the stream to print to.  The default
+stream is @value{GDBN}'s standard output stream.  Possible stream
+values are:
+
+@table @code
+@findex STDOUT
+@findex gdb.STDOUT
+@item STDOUT
+@value{GDBN}'s standard output stream.
+
+@findex STDERR
+@findex gdb.STDERR
+@item STDERR
+@value{GDBN}'s standard error stream.
+
+@findex STDLOG
+@findex gdb.STDLOG
+@item STDLOG
+@value{GDBN}'s log stream (@pxref{Logging Output}).
+@end table
+
 Writing to @code{sys.stdout} or @code{sys.stderr} will automatically
-call this function.
+call this function and will automatically direct the output to the
+relevant stream.
 @end defun
 
 @findex gdb.flush
 @defun flush
-Flush @value{GDBN}'s paginated standard output stream.  Flushing
-@code{sys.stdout} or @code{sys.stderr} will automatically call this
-function.
+Flush the buffer of a @value{GDBN} paginated stream so that the
+contents are displayed immediately.  @value{GDBN} will flush the
+contents of a stream automatically when it encounters a newline in the
+buffer.  The optional @var{stream} determines the stream to flush.  The
+default stream is @value{GDBN}'s standard output stream.  Possible
+stream values are: 
+
+@table @code
+@findex STDOUT
+@findex gdb.STDOUT
+@item STDOUT
+@value{GDBN}'s standard output stream.
+
+@findex STDERR
+@findex gdb.STDERR
+@item STDERR
+@value{GDBN}'s standard error stream.
+
+@findex STDLOG
+@findex gdb.STDLOG
+@item STDLOG
+@value{GDBN}'s log stream (@pxref{Logging Output}).
+
+@end table
+
+Flushing @code{sys.stdout} or @code{sys.stderr} will automatically
+call this function for the relevant stream.
 @end defun
 
 @findex gdb.target_charset

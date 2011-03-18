@@ -170,3 +170,11 @@ gdb_test "python print len(symtab)" "2" "Test decode_line func1 length"
 gdb_test "python print len(symtab\[1\])" "1" "Test decode_line func1 length"
 gdb_test "python print symtab\[1\]\[0\].symtab" "gdb/testsuite/gdb.python/python-1.c.*" "Test decode_line func1 filename"
 gdb_test "python print symtab\[1\]\[0\].line" "19" "Test decode_line func1 line number"
+
+# gdb.write
+gdb_test "python print sys.stderr" ".*__main__.GdbOutputErrorFile instance at.*" "Test stderr location"
+gdb_test "python print sys.stdout" ".*__main__.GdbOutputFile instance at.*" "Test stdout location"
+gdb_test "python gdb.write(\"Foo\\n\")" "Foo" "Test default write"
+gdb_test "python gdb.write(\"Error stream\\n\", stream=gdb.STDERR)" "Error stream" "Test stderr write"
+gdb_test "python gdb.write(\"Normal stream\\n\", stream=gdb.STDOUT)" "Normal stream" "Test stdout write"
+gdb_test "python gdb.write(\"Log stream\\n\", stream=gdb.STDLOG)" "Log stream" "Test stdlog write"

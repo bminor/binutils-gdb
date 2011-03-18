@@ -1,3 +1,9 @@
+2011-03-18  Phil Muldoon  <pmuldoon@redhat.com>
+
+        PR python/12149
+
+	* gdb.python/python.exp: Add gdb.write tests.
+
 2010-03-17  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* gdb.python/Makefile.in: Add py-objfile.

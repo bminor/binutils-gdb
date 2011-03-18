@@ -1,3 +1,9 @@
+2011-03-18  Phil Muldoon  <pmuldoon@redhat.com>
+
+        PR python/12149
+
+	* gdb.texinfo (Basic Python): Update gdb.write and flush text.
+
 2011-03-17  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* gdb.texinfo (Blocks In Python): Add is_valid method description.
