@@ -1568,14 +1568,14 @@ yylex (void)
 	c = cp_parse_escape (&lexptr);
       else if (c == '\'')
 	{
-	  yyerror ("empty character constant");
+	  yyerror (_("empty character constant"));
 	  return ERROR;
 	}
 
       c = *lexptr++;
       if (c != '\'')
 	{
-	  yyerror ("invalid character constant");
+	  yyerror (_("invalid character constant"));
 	  return ERROR;
 	}
 
@@ -1699,7 +1699,7 @@ yylex (void)
 
 	    memcpy (err_copy, tokstart, p - tokstart);
 	    err_copy[p - tokstart] = 0;
-	    yyerror ("invalid number");
+	    yyerror (_("invalid number"));
 	    return ERROR;
 	  }
 	lexptr = p;
@@ -1775,14 +1775,14 @@ yylex (void)
 
     case '"':
       /* These can't occur in C++ names.  */
-      yyerror ("unexpected string literal");
+      yyerror (_("unexpected string literal"));
       return ERROR;
     }
 
   if (!(c == '_' || c == '$' || ISALPHA (c)))
     {
       /* We must have come across a bad character (e.g. ';').  */
-      yyerror ("invalid character");
+      yyerror (_("invalid character"));
       return ERROR;
     }
 

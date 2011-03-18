@@ -517,9 +517,9 @@ variable:	name_not_typename
 			      if (msymbol != NULL)
 				write_exp_msymbol (msymbol);
 			      else if (!have_full_symbols () && !have_partial_symbols ())
-				error ("No symbol table is loaded.  Use the \"file\" command.");
+				error (_("No symbol table is loaded.  Use the \"file\" command."));
 			      else
-				error ("No symbol \"%s\" in current context.",
+				error (_("No symbol \"%s\" in current context."),
 				       copy_name ($1.stoken));
 			    }
 			}
@@ -758,7 +758,7 @@ parse_number (p, len, parsed_float, putithere)
       if (RANGE_CHECK && n != 0)
 	{
 	  if ((unsigned_p && (unsigned)prevn >= (unsigned)n))
-	    range_error("Overflow on numeric constant.");	 
+	    range_error (_("Overflow on numeric constant."));
 	}
       prevn = n;
     }
@@ -1099,7 +1099,7 @@ yylex (void)
 	    
 	    memcpy (err_copy, tokstart, p - tokstart);
 	    err_copy[p - tokstart] = 0;
-	    error ("Invalid number \"%s\".", err_copy);
+	    error (_("Invalid number \"%s\"."), err_copy);
 	  }
 	lexptr = p;
 	return toktype;
@@ -1133,7 +1133,7 @@ yylex (void)
   if (!(c == '_' || c == '$' || c ==':'
 	|| (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')))
     /* We must have come across a bad character (e.g. ';').  */
-    error ("Invalid character '%c' in expression.", c);
+    error (_("Invalid character '%c' in expression."), c);
   
   namelen = 0;
   for (c = tokstart[namelen];
@@ -1224,5 +1224,5 @@ yyerror (msg)
   if (prev_lexptr)
     lexptr = prev_lexptr;
 
-  error ("A %s in expression, near `%s'.", (msg ? msg : "error"), lexptr);
+  error (_("A %s in expression, near `%s'."), (msg ? msg : "error"), lexptr);
 }

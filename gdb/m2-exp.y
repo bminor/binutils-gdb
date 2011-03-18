@@ -329,21 +329,21 @@ exp	:	set
 	;
 
 exp	:	exp IN set
-			{ error("Sets are not implemented.");}
+			{ error (_("Sets are not implemented."));}
 	;
 
 exp	:	INCL '(' exp ',' exp ')'
-			{ error("Sets are not implemented.");}
+			{ error (_("Sets are not implemented."));}
 	;
 
 exp	:	EXCL '(' exp ',' exp ')'
-			{ error("Sets are not implemented.");}
+			{ error (_("Sets are not implemented."));}
 	;
 
 set	:	'{' arglist '}'
-			{ error("Sets are not implemented.");}
+			{ error (_("Sets are not implemented."));}
 	|	type '{' arglist '}'
-			{ error("Sets are not implemented.");}
+			{ error (_("Sets are not implemented."));}
 	;
 
 
@@ -562,7 +562,7 @@ fblock	:	block COLONCOLON BLOCKNAME
 			    = lookup_symbol (copy_name ($3), $1,
 					     VAR_DOMAIN, 0);
 			  if (!tem || SYMBOL_CLASS (tem) != LOC_BLOCK)
-			    error ("No function \"%s\" in specified context.",
+			    error (_("No function \"%s\" in specified context."),
 				   copy_name ($3));
 			  $$ = tem;
 			}
@@ -586,7 +586,7 @@ variable:	block COLONCOLON NAME
 			  sym = lookup_symbol (copy_name ($3), $1,
 					       VAR_DOMAIN, 0);
 			  if (sym == 0)
-			    error ("No symbol \"%s\" in specified context.",
+			    error (_("No symbol \"%s\" in specified context."),
 				   copy_name ($3));
 
 			  write_exp_elt_opcode (OP_VAR_VALUE);
@@ -633,9 +633,9 @@ variable:	NAME
 			      if (msymbol != NULL)
 				write_exp_msymbol (msymbol);
 			      else if (!have_full_symbols () && !have_partial_symbols ())
-				error ("No symbol table is loaded.  Use the \"symbol-file\" command.");
+				error (_("No symbol table is loaded.  Use the \"symbol-file\" command."));
 			      else
-				error ("No symbol \"%s\" in current context.",
+				error (_("No symbol \"%s\" in current context."),
 				       copy_name ($1));
 			    }
 			}
@@ -692,9 +692,9 @@ parse_number (olen)
 	return FLOAT;
       }
     if (p[c] == '.' && base != 10)
-       error("Floating point numbers must be base 10.");
+       error (_("Floating point numbers must be base 10."));
     if (base == 10 && (p[c] < '0' || p[c] > '9'))
-       error("Invalid digit \'%c\' in number.",p[c]);
+       error (_("Invalid digit \'%c\' in number."),p[c]);
  }
 
   while (len-- > 0)
@@ -702,7 +702,7 @@ parse_number (olen)
       c = *p++;
       n *= base;
       if( base == 8 && (c == '8' || c == '9'))
-	 error("Invalid digit \'%c\' in octal number.",c);
+	 error (_("Invalid digit \'%c\' in octal number."),c);
       if (c >= '0' && c <= '9')
 	i = c - '0';
       else
@@ -723,7 +723,7 @@ parse_number (olen)
       {
 	 if((unsigned_p && (unsigned)prevn >= (unsigned)n) ||
 	    ((!unsigned_p && number_sign==-1) && -prevn <= -n))
-	    range_error("Overflow on numeric constant.");
+	    range_error (_("Overflow on numeric constant."));
       }
 	 prevn=n;
     }
@@ -743,7 +743,7 @@ parse_number (olen)
      return UINT;
   }
   else if((unsigned_p && (n<0))) {
-     range_error("Overflow on numeric constant -- number too large.");
+     range_error (_("Overflow on numeric constant -- number too large."));
      /* But, this can return if range_check == range_warn.  */
   }
   yylval.lval = n;
@@ -905,7 +905,7 @@ yylex (void)
 	      }
 	  }
       if(c != quote)
-	 error("Unterminated string or character constant.");
+	 error (_("Unterminated string or character constant."));
       yylval.sval.ptr = tokstart + 1;
       yylval.sval.length = namelen - 1;
       lexptr += namelen + 1;
@@ -952,7 +952,7 @@ yylex (void)
 
 	    memcpy (err_copy, tokstart, p - tokstart);
 	    err_copy[p - tokstart] = 0;
-	    error ("Invalid number \"%s\".", err_copy);
+	    error (_("Invalid number \"%s\"."), err_copy);
 	  }
 	lexptr = p;
 	return toktype;
@@ -961,7 +961,7 @@ yylex (void)
   if (!(c == '_' || c == '$'
 	|| (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')))
     /* We must have come across a bad character (e.g. ';').  */
-    error ("Invalid character '%c' in expression.", c);
+    error (_("Invalid character '%c' in expression."), c);
 
   /* It's a name.  See how long it is.  */
   namelen = 0;
@@ -1038,14 +1038,14 @@ yylex (void)
 	  return BLOCKNAME;
 
        case LOC_UNDEF:
-	  error("internal:  Undefined class in m2lex()");
+	  error (_("internal:  Undefined class in m2lex()"));
 
        case LOC_LABEL:
        case LOC_UNRESOLVED:
-	  error("internal:  Unforseen case in m2lex()");
+	  error (_("internal:  Unforseen case in m2lex()"));
 
        default:
-	  error ("unhandled token in m2lex()");
+	  error (_("unhandled token in m2lex()"));
 	  break;
        }
     }
@@ -1090,5 +1090,5 @@ yyerror (msg)
   if (prev_lexptr)
     lexptr = prev_lexptr;
 
-  error ("A %s in expression, near `%s'.", (msg ? msg : "error"), lexptr);
+  error (_("A %s in expression, near `%s'."), (msg ? msg : "error"), lexptr);
 }

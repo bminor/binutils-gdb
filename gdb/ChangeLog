@@ -1,5 +1,16 @@
 2011-03-18  Pierre Muller  <muller@ics.u-strasbg.fr>
 
+	ARI fixes: Add missing internationalization markups throughout
+	yacc files.
+	* c-exp.y: Ditto.
+	* cp-name-parser.y: Ditto.
+	* f-exp.y: Ditto.
+	* m2-exp.y: Ditto.
+	* objc-exp.y: Ditto.
+	* p-exp.y: Ditto.
+
+2011-03-18  Pierre Muller  <muller@ics.u-strasbg.fr>
+
 	ARI fixes: Messages should have no trailing new lines.
 	* darwin-nat.c (mach_check_error): Remove trailing new line from
 	warning function call message.

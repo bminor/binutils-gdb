@@ -644,7 +644,7 @@ block	:	BLOCKNAME
 				$$ = BLOCKVECTOR_BLOCK (BLOCKVECTOR (tem),
 							STATIC_BLOCK);
 			      else
-				error ("No file or function \"%s\".",
+				error (_("No file or function \"%s\"."),
 				       copy_name ($1.stoken));
 			    }
 			}
@@ -655,7 +655,7 @@ block	:	block COLONCOLON name
 			    = lookup_symbol (copy_name ($3), $1,
 					     VAR_DOMAIN, (int *) NULL);
 			  if (!tem || SYMBOL_CLASS (tem) != LOC_BLOCK)
-			    error ("No function \"%s\" in specified context.",
+			    error (_("No function \"%s\" in specified context."),
 				   copy_name ($3));
 			  $$ = SYMBOL_BLOCK_VALUE (tem); }
 	;
@@ -665,7 +665,7 @@ variable:	block COLONCOLON name
 			  sym = lookup_symbol (copy_name ($3), $1,
 					       VAR_DOMAIN, (int *) NULL);
 			  if (sym == 0)
-			    error ("No symbol \"%s\" in specified context.",
+			    error (_("No symbol \"%s\" in specified context."),
 				   copy_name ($3));
 
 			  write_exp_elt_opcode (OP_VAR_VALUE);
@@ -680,7 +680,7 @@ qualified_name:	typebase COLONCOLON name
 			  struct type *type = $1;
 			  if (TYPE_CODE (type) != TYPE_CODE_STRUCT
 			      && TYPE_CODE (type) != TYPE_CODE_UNION)
-			    error ("`%s' is not defined as an aggregate type.",
+			    error (_("`%s' is not defined as an aggregate type."),
 				   TYPE_NAME (type));
 
 			  write_exp_elt_opcode (OP_SCOPE);
@@ -714,10 +714,10 @@ variable:	qualified_name
 			    write_exp_msymbol (msymbol);
 			  else if (!have_full_symbols ()
 				   && !have_partial_symbols ())
-			    error ("No symbol table is loaded.  "
-				   "Use the \"file\" command.");
+			    error (_("No symbol table is loaded.  "
+				   "Use the \"file\" command."));
 			  else
-			    error ("No symbol \"%s\" in current context.",
+			    error (_("No symbol \"%s\" in current context."),
 				   name);
 			}
 	;
@@ -783,10 +783,10 @@ variable:	name_not_typename
 				write_exp_msymbol (msymbol);
 			      else if (!have_full_symbols ()
 				       && !have_partial_symbols ())
-				error ("No symbol table is loaded.  "
-				       "Use the \"file\" command.");
+				error (_("No symbol table is loaded.  "
+				       "Use the \"file\" command."));
 			      else
-				error ("No symbol \"%s\" in current context.",
+				error (_("No symbol \"%s\" in current context."),
 				       copy_name ($1.stoken));
 			    }
 			}
@@ -961,7 +961,7 @@ parse_number (char *p, int len, int parsed_float, YYSTYPE *putithere)
       if (c != 'l' && c != 'u' && n != 0)
 	{
 	  if ((unsigned_p && (ULONGEST) prevn >= (ULONGEST) n))
-	    error ("Numeric constant too large.");
+	    error (_("Numeric constant too large."));
 	}
       prevn = n;
     }
@@ -1188,7 +1188,7 @@ yylex (void)
       if (c == '\\')
 	c = parse_escape (parse_gdbarch, &lexptr);
       else if (c == '\'')
-	error ("Empty character constant.");
+	error (_("Empty character constant."));
 
       yylval.typed_val_int.val = c;
       yylval.typed_val_int.type = parse_type->builtin_char;
@@ -1201,13 +1201,13 @@ yylex (void)
 	    {
 	      lexptr = tokstart + namelen;
 	      if (lexptr[-1] != '\'')
-		error ("Unmatched single quote.");
+		error (_("Unmatched single quote."));
 	      namelen -= 2;
               tokstart++;
               uptokstart = uptok(tokstart,namelen);
 	      goto tryname;
 	    }
-	  error ("Invalid character constant.");
+	  error (_("Invalid character constant."));
 	}
       return INT;
 
@@ -1299,7 +1299,7 @@ yylex (void)
 
 	    memcpy (err_copy, tokstart, p - tokstart);
 	    err_copy[p - tokstart] = 0;
-	    error ("Invalid number \"%s\".", err_copy);
+	    error (_("Invalid number \"%s\"."), err_copy);
 	  }
 	lexptr = p;
 	return toktype;
@@ -1372,7 +1372,7 @@ yylex (void)
       } while ((*tokptr != '"') && (*tokptr != '\0'));
       if (*tokptr++ != '"')
 	{
-	  error ("Unterminated string in expression.");
+	  error (_("Unterminated string in expression."));
 	}
       tempbuf[tempbufindex] = '\0';	/* See note above.  */
       yylval.sval.ptr = tempbuf;
@@ -1384,7 +1384,7 @@ yylex (void)
   if (!(c == '_' || c == '$'
 	|| (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')))
     /* We must have come across a bad character (e.g. ';').  */
-    error ("Invalid character '%c' in expression.", c);
+    error (_("Invalid character '%c' in expression."), c);
 
   /* It's a name.  See how long it is.  */
   namelen = 0;
@@ -1739,5 +1739,5 @@ yyerror (msg)
   if (prev_lexptr)
     lexptr = prev_lexptr;
 
-  error ("A %s in expression, near `%s'.", (msg ? msg : "error"), lexptr);
+  error (_("A %s in expression, near `%s'."), (msg ? msg : "error"), lexptr);
 }
