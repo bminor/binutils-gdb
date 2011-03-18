@@ -1,3 +1,12 @@
+2011-03-18  Alan Modra  <amodra@gmail.com>
+
+	* read.c (read_a_source_file): Remove md_after_pass_hook.
+	Move "quit" label before set of dot_symbol.
+	* config/tc-d10v.h (md_after_pass_hook): Don't define.
+	* config/tc-d30v.h (md_after_pass_hook): Likewise.
+	* config/tc-m32r.h (md_after_pass_hook): Likewise.
+	(md_cleanup): Define to call m32r_fill_insn.
+
 2011-03-18  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
 
 	* config/tc-s390.c (md_parse_option): Add -march=all option which

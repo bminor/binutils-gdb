@@ -1123,14 +1123,10 @@ read_a_source_file (char *name)
 	  /* Report unknown char as error.  */
 	  demand_empty_rest_of_line ();
 	}
-
-#ifdef md_after_pass_hook
-      md_after_pass_hook ();
-#endif
     }
-  symbol_set_value_now (&dot_symbol);
 
  quit:
+  symbol_set_value_now (&dot_symbol);
 
 #ifdef md_cleanup
   md_cleanup ();
