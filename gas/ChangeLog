@@ -1,5 +1,10 @@
 2011-03-18  Alan Modra  <amodra@gmail.com>
 
+	* config/obj-elf.c (elf_frob_symbol): Report S_SET_SIZE symbol
+	on .size expression errors rather than symbols in the size expression.
+
+2011-03-18  Alan Modra  <amodra@gmail.com>
+
 	* input-scrub.c (line_numberT): Delete.
 	(input_scrub_close): Reset line counters.
 	* messages.c (as_show_where): Don't print invalid line number.
