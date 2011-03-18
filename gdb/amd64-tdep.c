@@ -1575,7 +1575,14 @@ amd64_relocate_instruction (struct gdbarch *gdbarch,
       /* Adjust the destination offset.  */
       rel32 = extract_signed_integer (insn + 1, 4, byte_order);
       newrel = (oldloc - *to) + rel32;
-      store_signed_integer (insn + 1, 4, newrel, byte_order);
+      store_signed_integer (insn + 1, 4, byte_order, newrel);
+
+      if (debug_displaced)
+	fprintf_unfiltered (gdb_stdlog,
+			    "Adjusted insn rel32=%s at %s to"
+			    " rel32=%s at %s\n",
+			    hex_string (rel32), paddress (gdbarch, oldloc),
+			    hex_string (newrel), paddress (gdbarch, *to));
 
       /* Write the adjusted jump into its displaced location.  */
       append_insns (to, 5, insn);
@@ -1598,11 +1605,11 @@ amd64_relocate_instruction (struct gdbarch *gdbarch,
     {
       rel32 = extract_signed_integer (insn + offset, 4, byte_order);
       newrel = (oldloc - *to) + rel32;
-      store_signed_integer (insn + offset, 4, newrel, byte_order);
+      store_signed_integer (insn + offset, 4, byte_order, newrel);
       if (debug_displaced)
 	fprintf_unfiltered (gdb_stdlog,
-			    "Adjusted insn rel32=0x%s at 0x%s to"
-			    " rel32=0x%s at 0x%s\n",
+			    "Adjusted insn rel32=%s at %s to"
+			    " rel32=%s at %s\n",
 			    hex_string (rel32), paddress (gdbarch, oldloc),
 			    hex_string (newrel), paddress (gdbarch, *to));
     }
