@@ -96,6 +96,12 @@ int vsnprintf(char *str, size_t size, const char *format, va_list ap);
 #endif
 #endif
 
+/* Define underscore macro, if not available, to be able to use it inside
+   code shared with gdb in common directory.  */
+#ifndef _
+#define _(String) (String)
+#endif
+
 /* A type used for binary buffers.  */
 typedef unsigned char gdb_byte;
 

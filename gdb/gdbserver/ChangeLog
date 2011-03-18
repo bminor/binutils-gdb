@@ -1,3 +1,7 @@
+2011-03-18  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* gdbserver/server.h (Macro _): Define it if not available.
+
 2011-03-14  Michael Snyder  <msnyder@vmware.com>
 
 	* hostio.c (handle_close): Remove unnecessary null test.
