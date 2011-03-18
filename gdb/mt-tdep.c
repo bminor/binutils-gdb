@@ -1115,6 +1115,7 @@ mt_frame_base_address (struct frame_info *this_frame,
 
 static const struct frame_unwind mt_frame_unwind = {
   NORMAL_FRAME,
+  default_frame_unwind_stop_reason,
   mt_frame_this_id,
   mt_frame_prev_register,
   NULL,

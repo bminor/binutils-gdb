@@ -1472,6 +1472,7 @@ ppu2spu_dealloc_cache (struct frame_info *self, void *this_cache)
 
 static const struct frame_unwind ppu2spu_unwind = {
   ARCH_FRAME,
+  default_frame_unwind_stop_reason,
   ppu2spu_this_id,
   ppu2spu_prev_register,
   NULL,

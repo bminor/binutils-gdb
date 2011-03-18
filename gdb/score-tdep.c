@@ -1369,6 +1369,7 @@ score_prologue_prev_register (struct frame_info *this_frame,
 static const struct frame_unwind score_prologue_unwind =
 {
   NORMAL_FRAME,
+  default_frame_unwind_stop_reason,
   score_prologue_this_id,
   score_prologue_prev_register,
   NULL,

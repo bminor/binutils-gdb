@@ -25,7 +25,7 @@
 #include "inline-frame.h"
 #include "value.h"
 #include "regcache.h"
-
+#include "exceptions.h"
 #include "gdb_assert.h"
 #include "gdb_obstack.h"
 
@@ -103,14 +103,31 @@ frame_unwind_find_by_frame (struct frame_info *this_frame, void **this_cache)
   for (entry = table->list; entry != NULL; entry = entry->next)
     {
       struct cleanup *old_cleanup;
+      volatile struct gdb_exception ex;
+      int res = 0;
 
       old_cleanup = frame_prepare_for_sniffer (this_frame, entry->unwinder);
-      if (entry->unwinder->sniffer (entry->unwinder, this_frame,
-				    this_cache))
+
+      TRY_CATCH (ex, RETURN_MASK_ERROR)
 	{
-	  discard_cleanups (old_cleanup);
-	  return;
+	  res = entry->unwinder->sniffer (entry->unwinder, this_frame,
+					  this_cache);
 	}
+      if (ex.reason < 0 && ex.error == NOT_AVAILABLE_ERROR)
+	{
+	  /* This usually means that not even the PC is available,
+	     thus most unwinders aren't able to determine if they're
+	     the best fit.  Keep trying.  Fallback prologue unwinders
+	     should always accept the frame.  */
+	}
+      else if (ex.reason < 0)
+	throw_exception (ex);
+      else if (res)
+        {
+          discard_cleanups (old_cleanup);
+          return;
+        }
+
       do_cleanups (old_cleanup);
     }
   internal_error (__FILE__, __LINE__, _("frame_unwind_find_by_frame failed"));
@@ -125,6 +142,16 @@ default_frame_sniffer (const struct frame_unwind *self,
 		       void **this_prologue_cache)
 {
   return 1;
+}
+
+/* A default frame unwinder stop_reason callback that always claims
+   the frame is unwindable.  */
+
+enum unwind_stop_reason
+default_frame_unwind_stop_reason (struct frame_info *this_frame,
+				  void **this_cache)
+{
+  return UNWIND_NO_REASON;
 }
 
 /* Helper functions for value-based register unwinding.  These return

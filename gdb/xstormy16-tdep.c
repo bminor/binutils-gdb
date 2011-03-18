@@ -742,6 +742,7 @@ xstormy16_frame_base_address (struct frame_info *this_frame, void **this_cache)
 
 static const struct frame_unwind xstormy16_frame_unwind = {
   NORMAL_FRAME,
+  default_frame_unwind_stop_reason,
   xstormy16_frame_this_id,
   xstormy16_frame_prev_register,
   NULL,

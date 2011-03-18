@@ -912,6 +912,12 @@ frame_unwind_register (struct frame_info *frame, int regnum, gdb_byte *buf)
 
   frame_register_unwind (frame, regnum, &optimized, &unavailable,
 			 &lval, &addr, &realnum, buf);
+
+  if (optimized)
+    error (_("Register %d was optimized out"), regnum);
+  if (unavailable)
+    throw_error (NOT_AVAILABLE_ERROR,
+		 _("Register %d is not available"), regnum);
 }
 
 void
@@ -1606,6 +1612,15 @@ get_prev_frame_1 (struct frame_info *this_frame)
      frame.  */
   if (get_frame_type (this_frame) == INLINE_FRAME)
     return get_prev_frame_raw (this_frame);
+
+  /* Check that this frame is unwindable.  If it isn't, don't try to
+     unwind to the prev frame.  */
+  this_frame->stop_reason
+    = this_frame->unwind->stop_reason (this_frame,
+				       &this_frame->prologue_cache);
+
+  if (this_frame->stop_reason != UNWIND_NO_REASON)
+    return NULL;
 
   /* Check that this frame's ID was valid.  If it wasn't, don't try to
      unwind to the prev frame.  Be careful to not apply this test to
@@ -2332,6 +2347,9 @@ frame_stop_reason_string (enum unwind_stop_reason reason)
     {
     case UNWIND_NULL_ID:
       return _("unwinder did not report frame ID");
+
+    case UNWIND_UNAVAILABLE:
+      return _("Not enough registers or memory available to unwind further");
 
     case UNWIND_INNER_ID:
       return _("previous frame inner to this frame (corrupt stack?)");

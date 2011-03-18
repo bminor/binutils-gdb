@@ -2225,6 +2225,7 @@ hppa_frame_unwind_sniffer (const struct frame_unwind *self,
 static const struct frame_unwind hppa_frame_unwind =
 {
   NORMAL_FRAME,
+  default_frame_unwind_stop_reason,
   hppa_frame_this_id,
   hppa_frame_prev_register,
   NULL,
@@ -2335,6 +2336,7 @@ hppa_fallback_frame_prev_register (struct frame_info *this_frame,
 static const struct frame_unwind hppa_fallback_frame_unwind =
 {
   NORMAL_FRAME,
+  default_frame_unwind_stop_reason,
   hppa_fallback_frame_this_id,
   hppa_fallback_frame_prev_register,
   NULL,
@@ -2431,6 +2433,7 @@ hppa_stub_unwind_sniffer (const struct frame_unwind *self,
 
 static const struct frame_unwind hppa_stub_frame_unwind = {
   NORMAL_FRAME,
+  default_frame_unwind_stop_reason,
   hppa_stub_frame_this_id,
   hppa_stub_frame_prev_register,
   NULL,

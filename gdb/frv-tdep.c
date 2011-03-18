@@ -1494,6 +1494,7 @@ frv_frame_prev_register (struct frame_info *this_frame,
 
 static const struct frame_unwind frv_frame_unwind = {
   NORMAL_FRAME,
+  default_frame_unwind_stop_reason,
   frv_frame_this_id,
   frv_frame_prev_register,
   NULL,

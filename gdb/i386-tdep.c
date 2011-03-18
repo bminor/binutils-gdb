@@ -45,7 +45,7 @@
 #include "dis-asm.h"
 #include "disasm.h"
 #include "remote.h"
-
+#include "exceptions.h"
 #include "gdb_assert.h"
 #include "gdb_string.h"
 
@@ -804,6 +804,7 @@ struct i386_frame_cache
 {
   /* Base address.  */
   CORE_ADDR base;
+  int base_p;
   LONGEST sp_offset;
   CORE_ADDR pc;
 
@@ -828,6 +829,7 @@ i386_alloc_frame_cache (void)
   cache = FRAME_OBSTACK_ZALLOC (struct i386_frame_cache);
 
   /* Base address.  */
+  cache->base_p = 0;
   cache->base = 0;
   cache->sp_offset = -4;
   cache->pc = 0;
@@ -1608,20 +1610,16 @@ i386_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
 
 /* Normal frames.  */
 
-static struct i386_frame_cache *
-i386_frame_cache (struct frame_info *this_frame, void **this_cache)
+static void
+i386_frame_cache_1 (struct frame_info *this_frame,
+		    struct i386_frame_cache *cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  struct i386_frame_cache *cache;
   gdb_byte buf[4];
   int i;
 
-  if (*this_cache)
-    return *this_cache;
-
-  cache = i386_alloc_frame_cache ();
-  *this_cache = cache;
+  cache->pc = get_frame_func (this_frame);
 
   /* In principle, for normal frames, %ebp holds the frame pointer,
      which holds the base address for the current stack frame.
@@ -1635,22 +1633,14 @@ i386_frame_cache (struct frame_info *this_frame, void **this_cache)
   get_frame_register (this_frame, I386_EBP_REGNUM, buf);
   cache->base = extract_unsigned_integer (buf, 4, byte_order);
   if (cache->base == 0)
-    return cache;
+    return;
 
   /* For normal frames, %eip is stored at 4(%ebp).  */
   cache->saved_regs[I386_EIP_REGNUM] = 4;
 
-  cache->pc = get_frame_func (this_frame);
   if (cache->pc != 0)
     i386_analyze_prologue (gdbarch, cache->pc, get_frame_pc (this_frame),
 			   cache);
-
-  if (cache->saved_sp_reg != -1)
-    {
-      /* Saved stack pointer has been saved.  */
-      get_frame_register (this_frame, cache->saved_sp_reg, buf);
-      cache->saved_sp = extract_unsigned_integer (buf, 4, byte_order);
-    }
 
   if (cache->locals < 0)
     {
@@ -1664,6 +1654,10 @@ i386_frame_cache (struct frame_info *this_frame, void **this_cache)
 
       if (cache->saved_sp_reg != -1)
 	{
+	  /* Saved stack pointer has been saved.  */
+	  get_frame_register (this_frame, cache->saved_sp_reg, buf);
+	  cache->saved_sp = extract_unsigned_integer (buf, 4, byte_order);
+
 	  /* We're halfway aligning the stack.  */
 	  cache->base = ((cache->saved_sp - 4) & 0xfffffff0) - 4;
 	  cache->saved_regs[I386_EIP_REGNUM] = cache->saved_sp - 4;
@@ -1691,9 +1685,17 @@ i386_frame_cache (struct frame_info *this_frame, void **this_cache)
 	cache->saved_regs[I386_EBP_REGNUM] = 0;
     }
 
+  if (cache->saved_sp_reg != -1)
+    {
+      /* Saved stack pointer has been saved (but the SAVED_SP_REG
+	 register may be unavailable).  */
+      if (cache->saved_sp == 0
+	  && frame_register_read (this_frame, cache->saved_sp_reg, buf))
+	cache->saved_sp = extract_unsigned_integer (buf, 4, byte_order);
+    }
   /* Now that we have the base address for the stack frame we can
      calculate the value of %esp in the calling frame.  */
-  if (cache->saved_sp == 0)
+  else if (cache->saved_sp == 0)
     cache->saved_sp = cache->base + 8;
 
   /* Adjust all the saved registers such that they contain addresses
@@ -1701,6 +1703,28 @@ i386_frame_cache (struct frame_info *this_frame, void **this_cache)
   for (i = 0; i < I386_NUM_SAVED_REGS; i++)
     if (cache->saved_regs[i] != -1)
       cache->saved_regs[i] += cache->base;
+
+  cache->base_p = 1;
+}
+
+static struct i386_frame_cache *
+i386_frame_cache (struct frame_info *this_frame, void **this_cache)
+{
+  volatile struct gdb_exception ex;
+  struct i386_frame_cache *cache;
+
+  if (*this_cache)
+    return *this_cache;
+
+  cache = i386_alloc_frame_cache ();
+  *this_cache = cache;
+
+  TRY_CATCH (ex, RETURN_MASK_ERROR)
+    {
+      i386_frame_cache_1 (this_frame, cache);
+    }
+  if (ex.reason < 0 && ex.error != NOT_AVAILABLE_ERROR)
+    throw_exception (ex);
 
   return cache;
 }
@@ -1717,6 +1741,22 @@ i386_frame_this_id (struct frame_info *this_frame, void **this_cache,
 
   /* See the end of i386_push_dummy_call.  */
   (*this_id) = frame_id_build (cache->base + 8, cache->pc);
+}
+
+static enum unwind_stop_reason
+i386_frame_unwind_stop_reason (struct frame_info *this_frame,
+			       void **this_cache)
+{
+  struct i386_frame_cache *cache = i386_frame_cache (this_frame, this_cache);
+
+  if (!cache->base_p)
+    return UNWIND_UNAVAILABLE;
+
+  /* This marks the outermost frame.  */
+  if (cache->base == 0)
+    return UNWIND_OUTERMOST;
+
+  return UNWIND_NO_REASON;
 }
 
 static struct value *
@@ -1758,8 +1798,18 @@ i386_frame_prev_register (struct frame_info *this_frame, void **this_cache,
   if (regnum == I386_EIP_REGNUM && cache->pc_in_eax)
     return frame_unwind_got_register (this_frame, regnum, I386_EAX_REGNUM);
 
-  if (regnum == I386_ESP_REGNUM && cache->saved_sp)
-    return frame_unwind_got_constant (this_frame, regnum, cache->saved_sp);
+  if (regnum == I386_ESP_REGNUM)
+    {
+      /* If the SP has been saved, but we don't know where, then this
+	 means that SAVED_SP_REG register was found unavailable back
+	 when we built the cache.  */
+      if (cache->saved_sp == 0 && cache->saved_sp_reg != -1)
+	return frame_unwind_got_register (this_frame, regnum,
+					  cache->saved_sp_reg);
+      else
+	return frame_unwind_got_constant (this_frame, regnum,
+					  cache->saved_sp);
+    }
 
   if (regnum < I386_NUM_SAVED_REGS && cache->saved_regs[regnum] != -1)
     return frame_unwind_got_memory (this_frame, regnum,
@@ -1771,6 +1821,7 @@ i386_frame_prev_register (struct frame_info *this_frame, void **this_cache,
 static const struct frame_unwind i386_frame_unwind =
 {
   NORMAL_FRAME,
+  i386_frame_unwind_stop_reason,
   i386_frame_this_id,
   i386_frame_prev_register,
   NULL,
@@ -1814,6 +1865,7 @@ i386_epilogue_frame_cache (struct frame_info *this_frame, void **this_cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  volatile struct gdb_exception ex;
   struct i386_frame_cache *cache;
   gdb_byte buf[4];
 
@@ -1823,21 +1875,41 @@ i386_epilogue_frame_cache (struct frame_info *this_frame, void **this_cache)
   cache = i386_alloc_frame_cache ();
   *this_cache = cache;
 
-  /* Cache base will be %esp plus cache->sp_offset (-4).  */
-  get_frame_register (this_frame, I386_ESP_REGNUM, buf);
-  cache->base = extract_unsigned_integer (buf, 4, 
-					  byte_order) + cache->sp_offset;
+  TRY_CATCH (ex, RETURN_MASK_ERROR)
+    {
+      /* Cache base will be %esp plus cache->sp_offset (-4).  */
+      get_frame_register (this_frame, I386_ESP_REGNUM, buf);
+      cache->base = extract_unsigned_integer (buf, 4,
+					      byte_order) + cache->sp_offset;
 
-  /* Cache pc will be the frame func.  */
-  cache->pc = get_frame_pc (this_frame);
+      /* Cache pc will be the frame func.  */
+      cache->pc = get_frame_pc (this_frame);
 
-  /* The saved %esp will be at cache->base plus 8.  */
-  cache->saved_sp = cache->base + 8;
+      /* The saved %esp will be at cache->base plus 8.  */
+      cache->saved_sp = cache->base + 8;
 
-  /* The saved %eip will be at cache->base plus 4.  */
-  cache->saved_regs[I386_EIP_REGNUM] = cache->base + 4;
+      /* The saved %eip will be at cache->base plus 4.  */
+      cache->saved_regs[I386_EIP_REGNUM] = cache->base + 4;
+
+      cache->base_p = 1;
+    }
+  if (ex.reason < 0 && ex.error != NOT_AVAILABLE_ERROR)
+    throw_exception (ex);
 
   return cache;
+}
+
+static enum unwind_stop_reason
+i386_epilogue_frame_unwind_stop_reason (struct frame_info *this_frame,
+					void **this_cache)
+{
+  struct i386_frame_cache *cache
+    = i386_epilogue_frame_cache (this_frame, this_cache);
+
+  if (!cache->base_p)
+    return UNWIND_UNAVAILABLE;
+
+  return UNWIND_NO_REASON;
 }
 
 static void
@@ -1848,12 +1920,16 @@ i386_epilogue_frame_this_id (struct frame_info *this_frame,
   struct i386_frame_cache *cache = i386_epilogue_frame_cache (this_frame,
 							      this_cache);
 
+  if (!cache->base_p)
+    return;
+
   (*this_id) = frame_id_build (cache->base + 8, cache->pc);
 }
 
 static const struct frame_unwind i386_epilogue_frame_unwind =
 {
   NORMAL_FRAME,
+  i386_epilogue_frame_unwind_stop_reason,
   i386_epilogue_frame_this_id,
   i386_frame_prev_register,
   NULL, 
@@ -1869,6 +1945,7 @@ i386_sigtramp_frame_cache (struct frame_info *this_frame, void **this_cache)
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  volatile struct gdb_exception ex;
   struct i386_frame_cache *cache;
   CORE_ADDR addr;
   gdb_byte buf[4];
@@ -1878,28 +1955,48 @@ i386_sigtramp_frame_cache (struct frame_info *this_frame, void **this_cache)
 
   cache = i386_alloc_frame_cache ();
 
-  get_frame_register (this_frame, I386_ESP_REGNUM, buf);
-  cache->base = extract_unsigned_integer (buf, 4, byte_order) - 4;
-
-  addr = tdep->sigcontext_addr (this_frame);
-  if (tdep->sc_reg_offset)
+  TRY_CATCH (ex, RETURN_MASK_ERROR)
     {
-      int i;
+      get_frame_register (this_frame, I386_ESP_REGNUM, buf);
+      cache->base = extract_unsigned_integer (buf, 4, byte_order) - 4;
 
-      gdb_assert (tdep->sc_num_regs <= I386_NUM_SAVED_REGS);
+      addr = tdep->sigcontext_addr (this_frame);
+      if (tdep->sc_reg_offset)
+	{
+	  int i;
 
-      for (i = 0; i < tdep->sc_num_regs; i++)
-	if (tdep->sc_reg_offset[i] != -1)
-	  cache->saved_regs[i] = addr + tdep->sc_reg_offset[i];
+	  gdb_assert (tdep->sc_num_regs <= I386_NUM_SAVED_REGS);
+
+	  for (i = 0; i < tdep->sc_num_regs; i++)
+	    if (tdep->sc_reg_offset[i] != -1)
+	      cache->saved_regs[i] = addr + tdep->sc_reg_offset[i];
+	}
+      else
+	{
+	  cache->saved_regs[I386_EIP_REGNUM] = addr + tdep->sc_pc_offset;
+	  cache->saved_regs[I386_ESP_REGNUM] = addr + tdep->sc_sp_offset;
+	}
+
+      cache->base_p = 1;
     }
-  else
-    {
-      cache->saved_regs[I386_EIP_REGNUM] = addr + tdep->sc_pc_offset;
-      cache->saved_regs[I386_ESP_REGNUM] = addr + tdep->sc_sp_offset;
-    }
+  if (ex.reason < 0 && ex.error != NOT_AVAILABLE_ERROR)
+    throw_exception (ex);
 
   *this_cache = cache;
   return cache;
+}
+
+static enum unwind_stop_reason
+i386_sigtramp_frame_unwind_stop_reason (struct frame_info *this_frame,
+					void **this_cache)
+{
+  struct i386_frame_cache *cache =
+    i386_sigtramp_frame_cache (this_frame, this_cache);
+
+  if (!cache->base_p)
+    return UNWIND_UNAVAILABLE;
+
+  return UNWIND_NO_REASON;
 }
 
 static void
@@ -1908,6 +2005,9 @@ i386_sigtramp_frame_this_id (struct frame_info *this_frame, void **this_cache,
 {
   struct i386_frame_cache *cache =
     i386_sigtramp_frame_cache (this_frame, this_cache);
+
+  if (!cache->base_p)
+    return;
 
   /* See the end of i386_push_dummy_call.  */
   (*this_id) = frame_id_build (cache->base + 8, get_frame_pc (this_frame));
@@ -1956,6 +2056,7 @@ i386_sigtramp_frame_sniffer (const struct frame_unwind *self,
 static const struct frame_unwind i386_sigtramp_frame_unwind =
 {
   SIGTRAMP_FRAME,
+  i386_sigtramp_frame_unwind_stop_reason,
   i386_sigtramp_frame_this_id,
   i386_sigtramp_frame_prev_register,
   NULL,

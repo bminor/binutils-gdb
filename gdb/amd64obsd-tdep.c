@@ -437,6 +437,7 @@ static const struct frame_unwind amd64obsd_trapframe_unwind = {
      frame, but SIGTRAMP_FRAME would print <signal handler called>,
      which really is not what we want here.  */
   NORMAL_FRAME,
+  default_frame_unwind_stop_reason,
   amd64obsd_trapframe_this_id,
   amd64obsd_trapframe_prev_register,
   NULL,

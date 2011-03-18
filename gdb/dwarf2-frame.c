@@ -40,6 +40,7 @@
 #include "dwarf2-frame.h"
 #include "ax.h"
 #include "dwarf2loc.h"
+#include "exceptions.h"
 
 struct comp_unit;
 
@@ -986,6 +987,10 @@ struct dwarf2_frame_cache
   /* DWARF Call Frame Address.  */
   CORE_ADDR cfa;
 
+  /* Set if the return address column was marked as unavailable
+     (required non-collected memory or registers to compute).  */
+  int unavailable_retaddr;
+
   /* Set if the return address column was marked as undefined.  */
   int undefined_retaddr;
 
@@ -1013,6 +1018,7 @@ dwarf2_frame_cache (struct frame_info *this_frame, void **this_cache)
   struct dwarf2_frame_cache *cache;
   struct dwarf2_frame_state *fs;
   struct dwarf2_fde *fde;
+  volatile struct gdb_exception ex;
 
   if (*this_cache)
     return *this_cache;
@@ -1020,10 +1026,10 @@ dwarf2_frame_cache (struct frame_info *this_frame, void **this_cache)
   /* Allocate a new cache.  */
   cache = FRAME_OBSTACK_ZALLOC (struct dwarf2_frame_cache);
   cache->reg = FRAME_OBSTACK_CALLOC (num_regs, struct dwarf2_frame_state_reg);
+  *this_cache = cache;
 
   /* Allocate and initialize the frame state.  */
-  fs = XMALLOC (struct dwarf2_frame_state);
-  memset (fs, 0, sizeof (struct dwarf2_frame_state));
+  fs = XZALLOC (struct dwarf2_frame_state);
   old_chain = make_cleanup (dwarf2_frame_state_free, fs);
 
   /* Unwind the PC.
@@ -1068,26 +1074,39 @@ dwarf2_frame_cache (struct frame_info *this_frame, void **this_cache)
   execute_cfa_program (fde, fde->instructions, fde->end, gdbarch,
 		       get_frame_pc (this_frame), fs);
 
-  /* Calculate the CFA.  */
-  switch (fs->regs.cfa_how)
+  TRY_CATCH (ex, RETURN_MASK_ERROR)
     {
-    case CFA_REG_OFFSET:
-      cache->cfa = read_reg (this_frame, fs->regs.cfa_reg);
-      if (fs->armcc_cfa_offsets_reversed)
-	cache->cfa -= fs->regs.cfa_offset;
-      else
-	cache->cfa += fs->regs.cfa_offset;
-      break;
+      /* Calculate the CFA.  */
+      switch (fs->regs.cfa_how)
+	{
+	case CFA_REG_OFFSET:
+	  cache->cfa = read_reg (this_frame, fs->regs.cfa_reg);
+	  if (fs->armcc_cfa_offsets_reversed)
+	    cache->cfa -= fs->regs.cfa_offset;
+	  else
+	    cache->cfa += fs->regs.cfa_offset;
+	  break;
 
-    case CFA_EXP:
-      cache->cfa =
-	execute_stack_op (fs->regs.cfa_exp, fs->regs.cfa_exp_len,
-			  cache->addr_size, cache->text_offset,
-			  this_frame, 0, 0);
-      break;
+	case CFA_EXP:
+	  cache->cfa =
+	    execute_stack_op (fs->regs.cfa_exp, fs->regs.cfa_exp_len,
+			      cache->addr_size, cache->text_offset,
+			      this_frame, 0, 0);
+	  break;
 
-    default:
-      internal_error (__FILE__, __LINE__, _("Unknown CFA rule."));
+	default:
+	  internal_error (__FILE__, __LINE__, _("Unknown CFA rule."));
+	}
+    }
+  if (ex.reason < 0)
+    {
+      if (ex.error == NOT_AVAILABLE_ERROR)
+	{
+	  cache->unavailable_retaddr = 1;
+	  return cache;
+	}
+
+      throw_exception (ex);
     }
 
   /* Initialize the register state.  */
@@ -1193,8 +1212,23 @@ incomplete CFI data; unspecified registers (e.g., %s) at %s"),
 
   do_cleanups (old_chain);
 
-  *this_cache = cache;
   return cache;
+}
+
+static enum unwind_stop_reason
+dwarf2_frame_unwind_stop_reason (struct frame_info *this_frame,
+				 void **this_cache)
+{
+  struct dwarf2_frame_cache *cache
+    = dwarf2_frame_cache (this_frame, this_cache);
+
+  if (cache->unavailable_retaddr)
+    return UNWIND_UNAVAILABLE;
+
+  if (cache->undefined_retaddr)
+    return UNWIND_OUTERMOST;
+
+  return UNWIND_NO_REASON;
 }
 
 static void
@@ -1203,6 +1237,9 @@ dwarf2_frame_this_id (struct frame_info *this_frame, void **this_cache,
 {
   struct dwarf2_frame_cache *cache =
     dwarf2_frame_cache (this_frame, this_cache);
+
+  if (cache->unavailable_retaddr)
+    return;
 
   if (cache->undefined_retaddr)
     return;
@@ -1321,6 +1358,7 @@ dwarf2_frame_sniffer (const struct frame_unwind *self,
 static const struct frame_unwind dwarf2_frame_unwind =
 {
   NORMAL_FRAME,
+  dwarf2_frame_unwind_stop_reason,
   dwarf2_frame_this_id,
   dwarf2_frame_prev_register,
   NULL,
@@ -1330,6 +1368,7 @@ static const struct frame_unwind dwarf2_frame_unwind =
 static const struct frame_unwind dwarf2_signal_frame_unwind =
 {
   SIGTRAMP_FRAME,
+  dwarf2_frame_unwind_stop_reason,
   dwarf2_frame_this_id,
   dwarf2_frame_prev_register,
   NULL,

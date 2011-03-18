@@ -936,6 +936,7 @@ alpha_sigtramp_frame_sniffer (const struct frame_unwind *self,
 
 static const struct frame_unwind alpha_sigtramp_frame_unwind = {
   SIGTRAMP_FRAME,
+  default_frame_unwind_stop_reason,
   alpha_sigtramp_frame_this_id,
   alpha_sigtramp_frame_prev_register,
   NULL,
@@ -1351,6 +1352,7 @@ alpha_heuristic_frame_prev_register (struct frame_info *this_frame,
 
 static const struct frame_unwind alpha_heuristic_frame_unwind = {
   NORMAL_FRAME,
+  default_frame_unwind_stop_reason,
   alpha_heuristic_frame_this_id,
   alpha_heuristic_frame_prev_register,
   NULL,

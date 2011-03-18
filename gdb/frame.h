@@ -457,11 +457,18 @@ enum unwind_stop_reason
        error.  But that's a project for another day.  */
     UNWIND_NULL_ID,
 
+    /* This frame is the outermost.  */
+    UNWIND_OUTERMOST,
+
     /* All the conditions after this point are considered errors;
        abnormal stack termination.  If a backtrace stops for one
        of these reasons, we'll let the user know.  This marker
        is not a valid stop reason.  */
     UNWIND_FIRST_ERROR,
+
+    /* Can't unwind further, because that would require knowing the
+       values of registers or memory that haven't been collected.  */
+    UNWIND_UNAVAILABLE,
 
     /* This frame ID looks like it ought to belong to a NEXT frame,
        but we got it for a PREV frame.  Normally, this is a sign of

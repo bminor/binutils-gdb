@@ -2028,6 +2028,7 @@ mips_insn16_frame_sniffer (const struct frame_unwind *self,
 static const struct frame_unwind mips_insn16_frame_unwind =
 {
   NORMAL_FRAME,
+  default_frame_unwind_stop_reason,
   mips_insn16_frame_this_id,
   mips_insn16_frame_prev_register,
   NULL,
@@ -2381,6 +2382,7 @@ mips_insn32_frame_sniffer (const struct frame_unwind *self,
 static const struct frame_unwind mips_insn32_frame_unwind =
 {
   NORMAL_FRAME,
+  default_frame_unwind_stop_reason,
   mips_insn32_frame_this_id,
   mips_insn32_frame_prev_register,
   NULL,
@@ -2505,6 +2507,7 @@ mips_stub_frame_sniffer (const struct frame_unwind *self,
 static const struct frame_unwind mips_stub_frame_unwind =
 {
   NORMAL_FRAME,
+  default_frame_unwind_stop_reason,
   mips_stub_frame_this_id,
   mips_stub_frame_prev_register,
   NULL,

@@ -753,6 +753,7 @@ hppa_hpux_sigtramp_unwind_sniffer (const struct frame_unwind *self,
 
 static const struct frame_unwind hppa_hpux_sigtramp_frame_unwind = {
   SIGTRAMP_FRAME,
+  default_frame_unwind_stop_reason,
   hppa_hpux_sigtramp_frame_this_id,
   hppa_hpux_sigtramp_frame_prev_register,
   NULL,

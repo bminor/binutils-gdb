@@ -2146,6 +2146,7 @@ arm_prologue_prev_register (struct frame_info *this_frame,
 
 struct frame_unwind arm_prologue_unwind = {
   NORMAL_FRAME,
+  default_frame_unwind_stop_reason,
   arm_prologue_this_id,
   arm_prologue_prev_register,
   NULL,
@@ -2884,6 +2885,7 @@ arm_exidx_unwind_sniffer (const struct frame_unwind *self,
 
 struct frame_unwind arm_exidx_unwind = {
   NORMAL_FRAME,
+  default_frame_unwind_stop_reason,
   arm_prologue_this_id,
   arm_prologue_prev_register,
   NULL,
@@ -2939,6 +2941,7 @@ arm_stub_unwind_sniffer (const struct frame_unwind *self,
 
 struct frame_unwind arm_stub_unwind = {
   NORMAL_FRAME,
+  default_frame_unwind_stop_reason,
   arm_stub_this_id,
   arm_prologue_prev_register,
   NULL,

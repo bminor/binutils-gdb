@@ -38,7 +38,7 @@
 #include "symfile.h"
 #include "disasm.h"
 #include "gdb_assert.h"
-
+#include "exceptions.h"
 #include "amd64-tdep.h"
 #include "i387-tdep.h"
 
@@ -1635,6 +1635,7 @@ struct amd64_frame_cache
 {
   /* Base address.  */
   CORE_ADDR base;
+  int base_p;
   CORE_ADDR sp_offset;
   CORE_ADDR pc;
 
@@ -1656,6 +1657,7 @@ amd64_init_frame_cache (struct amd64_frame_cache *cache)
 
   /* Base address.  */
   cache->base = 0;
+  cache->base_p = 0;
   cache->sp_offset = -8;
   cache->pc = 0;
 
@@ -1913,32 +1915,19 @@ amd64_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
 
 /* Normal frames.  */
 
-static struct amd64_frame_cache *
-amd64_frame_cache (struct frame_info *this_frame, void **this_cache)
+static void
+amd64_frame_cache_1 (struct frame_info *this_frame,
+		     struct amd64_frame_cache *cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  struct amd64_frame_cache *cache;
   gdb_byte buf[8];
   int i;
-
-  if (*this_cache)
-    return *this_cache;
-
-  cache = amd64_alloc_frame_cache ();
-  *this_cache = cache;
 
   cache->pc = get_frame_func (this_frame);
   if (cache->pc != 0)
     amd64_analyze_prologue (gdbarch, cache->pc, get_frame_pc (this_frame),
 			    cache);
-
-  if (cache->saved_sp_reg != -1)
-    {
-      /* Stack pointer has been saved.  */
-      get_frame_register (this_frame, cache->saved_sp_reg, buf);
-      cache->saved_sp = extract_unsigned_integer(buf, 8, byte_order);
-    }
 
   if (cache->frameless_p)
     {
@@ -1951,6 +1940,10 @@ amd64_frame_cache (struct frame_info *this_frame, void **this_cache)
 
       if (cache->saved_sp_reg != -1)
 	{
+	  /* Stack pointer has been saved.  */
+	  get_frame_register (this_frame, cache->saved_sp_reg, buf);
+	  cache->saved_sp = extract_unsigned_integer (buf, 8, byte_order);
+
 	  /* We're halfway aligning the stack.  */
 	  cache->base = ((cache->saved_sp - 8) & 0xfffffffffffffff0LL) - 8;
 	  cache->saved_regs[AMD64_RIP_REGNUM] = cache->saved_sp - 8;
@@ -1988,7 +1981,46 @@ amd64_frame_cache (struct frame_info *this_frame, void **this_cache)
     if (cache->saved_regs[i] != -1)
       cache->saved_regs[i] += cache->base;
 
+  cache->base_p = 1;
+}
+
+static struct amd64_frame_cache *
+amd64_frame_cache (struct frame_info *this_frame, void **this_cache)
+{
+  volatile struct gdb_exception ex;
+  struct amd64_frame_cache *cache;
+
+  if (*this_cache)
+    return *this_cache;
+
+  cache = amd64_alloc_frame_cache ();
+  *this_cache = cache;
+
+  TRY_CATCH (ex, RETURN_MASK_ERROR)
+    {
+      amd64_frame_cache_1 (this_frame, cache);
+    }
+  if (ex.reason < 0 && ex.error != NOT_AVAILABLE_ERROR)
+    throw_exception (ex);
+
   return cache;
+}
+
+static enum unwind_stop_reason
+amd64_frame_unwind_stop_reason (struct frame_info *this_frame,
+				void **this_cache)
+{
+  struct amd64_frame_cache *cache =
+    amd64_frame_cache (this_frame, this_cache);
+
+  if (!cache->base_p)
+    return UNWIND_UNAVAILABLE;
+
+  /* This marks the outermost frame.  */
+  if (cache->base == 0)
+    return UNWIND_OUTERMOST;
+
+  return UNWIND_NO_REASON;
 }
 
 static void
@@ -1997,6 +2029,9 @@ amd64_frame_this_id (struct frame_info *this_frame, void **this_cache,
 {
   struct amd64_frame_cache *cache =
     amd64_frame_cache (this_frame, this_cache);
+
+  if (!cache->base_p)
+    return;
 
   /* This marks the outermost frame.  */
   if (cache->base == 0)
@@ -2028,6 +2063,7 @@ amd64_frame_prev_register (struct frame_info *this_frame, void **this_cache,
 static const struct frame_unwind amd64_frame_unwind =
 {
   NORMAL_FRAME,
+  amd64_frame_unwind_stop_reason,
   amd64_frame_this_id,
   amd64_frame_prev_register,
   NULL,
@@ -2047,6 +2083,7 @@ amd64_sigtramp_frame_cache (struct frame_info *this_frame, void **this_cache)
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  volatile struct gdb_exception ex;
   struct amd64_frame_cache *cache;
   CORE_ADDR addr;
   gdb_byte buf[8];
@@ -2057,18 +2094,38 @@ amd64_sigtramp_frame_cache (struct frame_info *this_frame, void **this_cache)
 
   cache = amd64_alloc_frame_cache ();
 
-  get_frame_register (this_frame, AMD64_RSP_REGNUM, buf);
-  cache->base = extract_unsigned_integer (buf, 8, byte_order) - 8;
+  TRY_CATCH (ex, RETURN_MASK_ERROR)
+    {
+      get_frame_register (this_frame, AMD64_RSP_REGNUM, buf);
+      cache->base = extract_unsigned_integer (buf, 8, byte_order) - 8;
 
-  addr = tdep->sigcontext_addr (this_frame);
-  gdb_assert (tdep->sc_reg_offset);
-  gdb_assert (tdep->sc_num_regs <= AMD64_NUM_SAVED_REGS);
-  for (i = 0; i < tdep->sc_num_regs; i++)
-    if (tdep->sc_reg_offset[i] != -1)
-      cache->saved_regs[i] = addr + tdep->sc_reg_offset[i];
+      addr = tdep->sigcontext_addr (this_frame);
+      gdb_assert (tdep->sc_reg_offset);
+      gdb_assert (tdep->sc_num_regs <= AMD64_NUM_SAVED_REGS);
+      for (i = 0; i < tdep->sc_num_regs; i++)
+	if (tdep->sc_reg_offset[i] != -1)
+	  cache->saved_regs[i] = addr + tdep->sc_reg_offset[i];
+
+      cache->base_p = 1;
+    }
+  if (ex.reason < 0 && ex.error != NOT_AVAILABLE_ERROR)
+    throw_exception (ex);
 
   *this_cache = cache;
   return cache;
+}
+
+static enum unwind_stop_reason
+amd64_sigtramp_frame_unwind_stop_reason (struct frame_info *this_frame,
+					 void **this_cache)
+{
+  struct amd64_frame_cache *cache =
+    amd64_sigtramp_frame_cache (this_frame, this_cache);
+
+  if (!cache->base_p)
+    return UNWIND_UNAVAILABLE;
+
+  return UNWIND_NO_REASON;
 }
 
 static void
@@ -2077,6 +2134,9 @@ amd64_sigtramp_frame_this_id (struct frame_info *this_frame,
 {
   struct amd64_frame_cache *cache =
     amd64_sigtramp_frame_cache (this_frame, this_cache);
+
+  if (!cache->base_p)
+    return;
 
   (*this_id) = frame_id_build (cache->base + 16, get_frame_pc (this_frame));
 }
@@ -2124,6 +2184,7 @@ amd64_sigtramp_frame_sniffer (const struct frame_unwind *self,
 static const struct frame_unwind amd64_sigtramp_frame_unwind =
 {
   SIGTRAMP_FRAME,
+  amd64_sigtramp_frame_unwind_stop_reason,
   amd64_sigtramp_frame_this_id,
   amd64_sigtramp_frame_prev_register,
   NULL,
@@ -2185,6 +2246,7 @@ amd64_epilogue_frame_cache (struct frame_info *this_frame, void **this_cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  volatile struct gdb_exception ex;
   struct amd64_frame_cache *cache;
   gdb_byte buf[8];
 
@@ -2194,21 +2256,41 @@ amd64_epilogue_frame_cache (struct frame_info *this_frame, void **this_cache)
   cache = amd64_alloc_frame_cache ();
   *this_cache = cache;
 
-  /* Cache base will be %esp plus cache->sp_offset (-8).  */
-  get_frame_register (this_frame, AMD64_RSP_REGNUM, buf);
-  cache->base = extract_unsigned_integer (buf, 8, 
-					  byte_order) + cache->sp_offset;
+  TRY_CATCH (ex, RETURN_MASK_ERROR)
+    {
+      /* Cache base will be %esp plus cache->sp_offset (-8).  */
+      get_frame_register (this_frame, AMD64_RSP_REGNUM, buf);
+      cache->base = extract_unsigned_integer (buf, 8,
+					      byte_order) + cache->sp_offset;
 
-  /* Cache pc will be the frame func.  */
-  cache->pc = get_frame_pc (this_frame);
+      /* Cache pc will be the frame func.  */
+      cache->pc = get_frame_pc (this_frame);
 
-  /* The saved %esp will be at cache->base plus 16.  */
-  cache->saved_sp = cache->base + 16;
+      /* The saved %esp will be at cache->base plus 16.  */
+      cache->saved_sp = cache->base + 16;
 
-  /* The saved %eip will be at cache->base plus 8.  */
-  cache->saved_regs[AMD64_RIP_REGNUM] = cache->base + 8;
+      /* The saved %eip will be at cache->base plus 8.  */
+      cache->saved_regs[AMD64_RIP_REGNUM] = cache->base + 8;
+
+      cache->base_p = 1;
+    }
+  if (ex.reason < 0 && ex.error != NOT_AVAILABLE_ERROR)
+    throw_exception (ex);
 
   return cache;
+}
+
+static enum unwind_stop_reason
+amd64_epilogue_frame_unwind_stop_reason (struct frame_info *this_frame,
+					 void **this_cache)
+{
+  struct amd64_frame_cache *cache
+    = amd64_epilogue_frame_cache (this_frame, this_cache);
+
+  if (!cache->base_p)
+    return UNWIND_UNAVAILABLE;
+
+  return UNWIND_NO_REASON;
 }
 
 static void
@@ -2219,12 +2301,16 @@ amd64_epilogue_frame_this_id (struct frame_info *this_frame,
   struct amd64_frame_cache *cache = amd64_epilogue_frame_cache (this_frame,
 							       this_cache);
 
+  if (!cache->base_p)
+    return;
+
   (*this_id) = frame_id_build (cache->base + 8, cache->pc);
 }
 
 static const struct frame_unwind amd64_epilogue_frame_unwind =
 {
   NORMAL_FRAME,
+  amd64_epilogue_frame_unwind_stop_reason,
   amd64_epilogue_frame_this_id,
   amd64_frame_prev_register,
   NULL, 

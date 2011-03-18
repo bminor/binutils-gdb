@@ -51,9 +51,10 @@ sentinel_frame_prev_register (struct frame_info *this_frame,
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   struct frame_unwind_cache *cache = *this_prologue_cache;
   struct value *value;
+  struct type *regtype = register_type (gdbarch, regnum);
 
   /* Return the actual value.  */
-  value = allocate_value (register_type (gdbarch, regnum));
+  value = allocate_value (regtype);
   VALUE_LVAL (value) = lval_register;
   VALUE_REGNUM (value) = regnum;
   VALUE_FRAME_ID (value) = get_frame_id (this_frame);
@@ -64,7 +65,7 @@ sentinel_frame_prev_register (struct frame_info *this_frame,
   if (regcache_cooked_read (cache->regcache,
 			    regnum,
 			    value_contents_raw (value)) == REG_UNAVAILABLE)
-    mark_value_bytes_unavailable (value, 0, register_size (gdbarch, regnum));
+    mark_value_bytes_unavailable (value, 0, TYPE_LENGTH (regtype));
 
   return value;
 }
@@ -92,6 +93,7 @@ sentinel_frame_prev_arch (struct frame_info *this_frame,
 const struct frame_unwind sentinel_frame_unwind =
 {
   SENTINEL_FRAME,
+  default_frame_unwind_stop_reason,
   sentinel_frame_this_id,
   sentinel_frame_prev_register,
   NULL,

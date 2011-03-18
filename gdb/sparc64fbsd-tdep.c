@@ -202,6 +202,7 @@ sparc64fbsd_sigtramp_frame_sniffer (const struct frame_unwind *self,
 static const struct frame_unwind sparc64fbsd_sigtramp_frame_unwind =
 {
   SIGTRAMP_FRAME,
+  default_frame_unwind_stop_reason,
   sparc64fbsd_sigtramp_frame_this_id,
   sparc64fbsd_sigtramp_frame_prev_register,
   NULL,

@@ -254,6 +254,7 @@ sparc32nbsd_sigcontext_frame_sniffer (const struct frame_unwind *self,
 static const struct frame_unwind sparc32nbsd_sigcontext_frame_unwind =
 {
   SIGTRAMP_FRAME,
+  default_frame_unwind_stop_reason,
   sparc32nbsd_sigcontext_frame_this_id,
   sparc32nbsd_sigcontext_frame_prev_register,
   NULL,

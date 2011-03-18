@@ -239,6 +239,7 @@ ppcobsd_sigtramp_frame_prev_register (struct frame_info *this_frame,
 
 static const struct frame_unwind ppcobsd_sigtramp_frame_unwind = {
   SIGTRAMP_FRAME,
+  default_frame_unwind_stop_reason,
   ppcobsd_sigtramp_frame_this_id,
   ppcobsd_sigtramp_frame_prev_register,
   NULL,

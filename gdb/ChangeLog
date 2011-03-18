@@ -1,3 +1,151 @@
+2012-03-18  Pedro Alves  <pedro@codesourcery.com>
+
+	* frame.c (frame_unwind_register): Throw an error if unwinding the
+	register failed.
+	* get_prev_frame_1 (get_prev_frame_1): Ask the unwinder if there's
+	an unwind stop reason.
+	(frame_stop_reason_string): Handle UNWIND_UNAVAILABLE.
+	* frame.h (enum unwind_stop_reason) <UNWIND_OUTERMOST,
+	UNWIND_UNAVAILABLE>: New.
+	* inline-frame.c (inline_frame_unwind): Install
+	default_frame_unwind_stop_reason.
+	* frame-unwind.c: Include "exceptions.h".
+	(frame_unwind_find_by_frame): Swallow NOT_AVAILABLE_ERROR errors.
+	(default_frame_unwind_stop_reason): New.
+	* frame-unwind.h (frame_unwind_stop_reason_ftype): New typedef.
+	(default_frame_unwind_stop_reason): Declare.
+	(struct frame_unwind) <stop_reason>: New function pointer.
+
+	* dummy-frame.c: Install default_frame_unwind_stop_reason.
+	* dwarf2-frame.c: Include exceptions.h.
+	(struct dwarf2_frame_cache) <unavailable_retaddr>: New field.
+	(dwarf2_frame_cache): Swallow NOT_AVAILABLE_ERROR errors when
+	computing the CFA.  If such an error was thrown, set
+	unavailable_retaddr.
+	(dwarf2_frame_unwind_stop_reason): New.
+	(dwarf2_frame_this_id): Don't build a frame id if the CFA was
+	unavailable.
+	(dwarf2_frame_unwind): Install dwarf2_frame_unwind_stop_reason.
+	(dwarf2_signal_frame_unwind): Ditto.
+
+	* amd64-tdep.c: Include "exceptions.h".
+	(struct amd64_frame_cache): New field "base_p".
+	(amd64_init_frame_cache): Clear it.
+	(amd64_frame_cache_1): New, factored out from amd64_frame_cache.
+	Avoid reading registers with functions that throw if the register
+	is not necessary to compute the frame base.
+	(amd64_frame_cache): Reimplement wrapping amd64_frame_cache_1, and
+	swallowing NOT_AVAILABLE_ERROR.
+	(amd64_frame_unwind_stop_reason): New.
+	(amd64_frame_this_id): Don't build a frame id if the frame base
+	was unavailable.
+	(amd64_frame_unwind): Install amd64_frame_unwind_stop_reason.
+	(amd64_sigtramp_frame_cache): Swallow NOT_AVAILABLE_ERROR, and set
+	base_p if the frame base was computable.
+	(amd64_sigtramp_frame_unwind_stop_reason): New.
+	(amd64_sigtramp_frame_this_id): Don't build a frame id if the
+	frame base was unavailable.
+	(amd64_sigtramp_frame_unwind): Install
+	amd64_sigtramp_frame_unwind_stop_reason.
+	(amd64_epilogue_frame_cache): Swallow NOT_AVAILABLE_ERROR, and set
+	base_p if the frame base was computable.
+	(amd64_epilogue_frame_unwind_stop_reason): New.
+	(amd64_epilogue_frame_this_id): Don't build a frame id if the
+	frame base was unavailable.
+	(amd64_epilogue_frame_unwind): Install
+	amd64_epilogue_frame_unwind_stop_reason.
+	* i386-tdep.c: Include "exceptions.h".
+	(struct i386_frame_cache): New field "base_p".
+	(i386_init_frame_cache): Clear it.
+	(i386_frame_cache_1): New, factored out from amd64_frame_cache.
+	Avoid reading registers with functions that throw if the register
+	is not necessary to compute the frame base.
+	(i386_frame_cache): Reimplement wrapping amd64_frame_cache_1, and
+	swallowing NOT_AVAILABLE_ERROR.
+	(i386_frame_unwind_stop_reason): New.
+	(i386_frame_this_id): Don't build a frame id if the frame base was
+	unavailable.
+	(i386_frame_prev_register): Handle unavailable SP.
+	(i386_frame_unwind): Install i386_frame_unwind_stop_reason.
+	(i386_epilogue_frame_cache): Swallow NOT_AVAILABLE_ERROR, and set
+	base_p if the frame base was computable.
+	(i386_epilogue_frame_unwind_stop_reason): New.
+	(i386_epilogue_frame_this_id): Don't build a frame id if the frame
+	base was unavailable.
+	(i386_epilogue_frame_unwind): Install
+	i386_epilogue_frame_unwind_stop_reason.
+	(i386_sigtramp_frame_cache): Swallow NOT_AVAILABLE_ERROR, and set
+	base_p if the frame base was computable.
+	(i386_sigtramp_frame_unwind_stop_reason): New.
+	(i386_sigtramp_frame_this_id): Don't build a frame id if the frame
+	base was unavailable.
+	(i386_sigtramp_frame_unwind): Install
+	i386_sigtramp_frame_unwind_stop_reason.
+	* sentinel-frame.c (sentinel_frame_prev_register): Use the value
+	type's size, not the register's.
+	(sentinel_frame_unwind): Install default_frame_unwind_stop_reason.
+
+	* alpha-mdebug-tdep.c (alpha_mdebug_frame_unwind): Install
+	default_frame_unwind_stop_reason.
+	* alpha-tdep.c (alpha_sigtramp_frame_unwind)
+	(alpha_heuristic_frame_unwind): Ditto.
+	* amd64obsd-tdep.c (amd64obsd_trapframe_unwind): Ditto.
+	* arm-tdep.c (arm_prologue_unwind, arm_stub_unwind): Ditto.
+	* avr-tdep.c (avr_frame_unwind): Ditto.
+	* cris-tdep.c (cris_sigtramp_frame_unwind, cris_frame_unwind):
+	Ditto.
+	* frv-linux-tdep.c (frv_linux_sigtramp_frame_unwind): Ditto.
+	* frv-tdep.c (frv_frame_unwind): Ditto.
+	* h8300-tdep.c (h8300_frame_unwind): Ditto.
+	* hppa-hpux-tdep.c (hppa_hpux_sigtramp_frame_unwind): Ditto.
+	* hppa-linux-tdep.c (hppa_linux_sigtramp_frame_unwind): Ditto.
+	* hppa-tdep.c (hppa_frame_unwind, hppa_fallback_frame_unwind)
+	(hppa_stub_frame_unwind): Ditto.
+	* i386obsd-tdep.c (i386obsd_trapframe_unwind): Ditto.
+	* ia64-tdep.c (ia64_frame_unwind, ia64_sigtramp_frame_unwind)
+	(ia64_libunwind_frame_unwind)
+	(ia64_libunwind_sigtramp_frame_unwind): Ditto.
+	* iq2000-tdep.c (iq2000_frame_unwind): Ditto.
+	* lm32-tdep.c (lm32_frame_unwind): Ditto.
+	* m32c-tdep.c (m32c_unwind): Ditto.
+	* m32r-linux-tdep.c (m32r_linux_sigtramp_frame_unwind): Ditto.
+	* m32r-tdep.c (m32r_frame_unwind): Ditto.
+	* m68hc11-tdep.c (m68hc11_frame_unwind): Ditto.
+	* m68k-tdep.c (m68k_frame_unwind): Ditto.
+	* m68klinux-tdep.c (m68k_linux_sigtramp_frame_unwind): Ditto.
+	* m88k-tdep.c (m88k_frame_unwind): Ditto.
+	* mep-tdep.c (mep_frame_unwind): Ditto.
+	* microblaze-tdep.c (microblaze_frame_unwind): Ditto.
+	* mips-tdep.c (mips_insn16_frame_unwind, mips_insn32_frame_unwind)
+	(mips_stub_frame_unwind): Ditto.
+	* mn10300-tdep.c (mn10300_frame_unwind): Ditto.
+	* moxie-tdep.c (moxie_frame_unwind): Ditto.
+	* mt-tdep.c (mt_frame_unwind): Ditto.
+	* ppc-linux-tdep.c (ppu2spu_unwind): Ditto.
+	* ppcobsd-tdep.c (ppcobsd_sigtramp_frame_unwind): Ditto.
+	* rs6000-tdep.c (rs6000_frame_unwind): Ditto.
+	* s390-tdep.c (s390_frame_unwind, s390_stub_frame_unwind)
+	(s390_sigtramp_frame_unwind): Ditto.
+	* score-tdep.c (score_prologue_unwind): Ditto.
+	* sh-tdep.c (sh_frame_unwind): Ditto.
+	* sh64-tdep.c (sh64_frame_unwind): Ditto.
+	* sparc-sol2-tdep.c (sparc32_sol2_sigtramp_frame_unwind): Ditto.
+	* sparc-tdep.c (sparc32_frame_unwind): Ditto.
+	* sparc64-sol2-tdep.c (sparc64_sol2_sigtramp_frame_unwind): Ditto.
+	* sparc64-tdep.c (sparc64_frame_unwind): Ditto.
+	* sparc64fbsd-tdep.c (sparc64fbsd_sigtramp_frame_unwind): Ditto.
+	* sparc64nbsd-tdep.c (sparc64nbsd_sigcontext_frame_unwind): Ditto.
+	* sparc64obsd-tdep.c (sparc64obsd_frame_unwind)
+	(sparc64obsd_trapframe_unwind): Ditto.
+	* sparcnbsd-tdep.c (sparc32nbsd_sigcontext_frame_unwind): Ditto.
+	* sparcobsd-tdep.c (sparc32obsd_sigtramp_frame_unwind): Ditto.
+	* spu-tdep.c (spu_frame_unwind, spu2ppu_unwind): Ditto.
+	* v850-tdep.c (v850_frame_unwind): Ditto.
+	* vax-tdep.c (vax_frame_unwind): Ditto.
+	* vaxobsd-tdep.c (vaxobsd_sigtramp_frame_unwind): Ditto.
+	* xstormy16-tdep.c (frame_unwind xstormy16_frame_unwind): Ditto.
+	* xtensa-tdep.c (xtensa_unwind): Ditto.
+
 2011-03-18  Pedro Alves  <pedro@codesourcery.com>
 
 	* tui/tui-hooks.c (tui_selected_frame_level_changed_hook): Assume

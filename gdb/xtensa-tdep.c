@@ -1549,6 +1549,7 @@ static const struct frame_unwind
 xtensa_unwind =
 {
   NORMAL_FRAME,
+  default_frame_unwind_stop_reason,
   xtensa_frame_this_id,
   xtensa_frame_prev_register,
   NULL,
