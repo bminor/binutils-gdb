@@ -1,5 +1,14 @@
 2011-03-18  Pedro Alves  <pedro@codesourcery.com>
 
+	* gdb.trace/unavailable.cc (args_test_func, local_test_func)
+	(reglocal_test_func, statlocal_test_func): New functions.
+	(globals_test_func): Call new functions.
+	* gdb.trace/unavailable.exp (gdb_collect_args_test)
+	(gdb_collect_locals_test): New procedure.
+	(gdb_trace_collection_test): Call new procedures.
+
+2011-03-18  Pedro Alves  <pedro@codesourcery.com>
+
 	* gdb.trace/unavailable.exp (fpreg, spreg, pcreg): Define.
 	(test_register, test_register_unavailable): New procedures.
 	(gdb_unavailable_registers_test): New procedure.

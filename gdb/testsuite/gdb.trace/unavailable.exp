@@ -107,6 +107,132 @@ proc run_trace_experiment { test_func } {
 # Test procs
 #
 
+proc gdb_collect_args_test {} {
+    global cr
+    global gdb_prompt
+    global pf_prefix
+
+    set old_pf_prefix $pf_prefix
+    set pf_prefix "$pf_prefix unavailable arguments:"
+
+    prepare_for_trace_test
+
+    gdb_test "trace args_test_func" \
+	"Tracepoint \[0-9\]+ at .*" \
+	"set tracepoint"
+
+    # Begin the test.
+    run_trace_experiment args_test_func
+
+    # Test printing the variables, and also their addresses.  We
+    # haven't collected any stack, so there's no way GDB can figure
+    # out the latter.
+
+    gdb_test "print argc" " = <unavailable>"
+    gdb_test "print &argc" \
+	"Can't take address of \"argc\" which isn't an lvalue\."
+
+    gdb_test "print argi" " = <unavailable>"
+    gdb_test "print &argi" \
+	"Can't take address of \"argi\" which isn't an lvalue\."
+
+    gdb_test "print argf" " = <unavailable>"
+    gdb_test "print &argf" \
+	"Can't take address of \"argf\" which isn't an lvalue\."
+
+    gdb_test "print argd" " = <unavailable>"
+    gdb_test "print &argd" \
+	"Can't take address of \"argd\" which isn't an lvalue\."
+
+    # struct arg as one of several args (near end of list)
+
+    gdb_test "print argstruct" \
+	" = \{memberc = <unavailable>, memberi = <unavailable>, memberf = <unavailable>, memberd = <unavailable>\}"
+
+    gdb_test "print argstruct.memberc" " = <unavailable>"
+    gdb_test "print argstruct.memberi" " = <unavailable>"
+    gdb_test "print argstruct.memberf" " = <unavailable>"
+    gdb_test "print argstruct.memberd" " = <unavailable>"
+
+    gdb_test "print argarray" " = \\(int \\*\\) <unavailable>"
+
+    gdb_test "print &argarray" \
+	"Can't take address of \"argarray\" which isn't an lvalue\."
+
+    gdb_test "print argarray\[0\]" "value is not available"
+
+    # Test "info args"
+    set r ""
+    set r "${r}argc = <unavailable>${cr}"
+    set r "${r}argi = <unavailable>${cr}"
+    set r "${r}argf = <unavailable>${cr}"
+    set r "${r}argd = <unavailable>${cr}"
+    set r "${r}argstruct = {memberc = <unavailable>, memberi = <unavailable>, memberf = <unavailable>, memberd = <unavailable>}${cr}"
+    set r "${r}argarray = <unavailable>${cr}"
+    gdb_test "info args" "$r" "info args"
+
+    gdb_test "tfind none" \
+	"#0  end .*" \
+	"cease trace debugging"
+
+    set pf_prefix $old_pf_prefix
+}
+
+proc gdb_collect_locals_test { func msg } {
+    global cr
+    global gdb_prompt
+    global pf_prefix
+
+    set old_pf_prefix $pf_prefix
+    set pf_prefix "$pf_prefix unavailable locals: $msg:"
+
+    prepare_for_trace_test
+
+    set testline [gdb_get_line_number "set $func tracepoint here"]
+
+    gdb_test "trace $testline" \
+	    "Tracepoint \[0-9\]+ at .*" \
+	    "set tracepoint"
+
+    # Begin the test.
+    run_trace_experiment $func
+
+    gdb_test "print locc" " = <unavailable>"
+    gdb_test "print loci" " = <unavailable>"
+    gdb_test "print locf" " = <unavailable>"
+    gdb_test "print locd" " = <unavailable>"
+
+    gdb_test "print locst.memberc" " = <unavailable>"
+    gdb_test "print locst.memberi" " = <unavailable>"
+    gdb_test "print locst.memberf" " = <unavailable>"
+    gdb_test "print locst.memberd" " = <unavailable>"
+
+    gdb_test "print locar\[0\]" " = <unavailable>"
+    gdb_test "print locar\[1\]" " = <unavailable>"
+    gdb_test "print locar\[2\]" " = <unavailable>"
+    gdb_test "print locar\[3\]" " = <unavailable>"
+
+    # Test "info locals"
+    set r ""
+    set r "${r}locf = <unavailable>${cr}"
+    set r "${r}locd = <unavailable>${cr}"
+    set r "${r}locst = {memberc = <unavailable>, memberi = <unavailable>, memberf = <unavailable>, memberd = <unavailable>}${cr}"
+    set r "${r}locar = {<unavailable>, <unavailable>, <unavailable>, <unavailable>}${cr}"
+    set r "${r}i = <unavailable>${cr}"
+    if { $func == "local_test_func" } {
+	set r "${r}locdefst = {<No data fields>}${cr}"
+    }
+    set r "${r}locc = <unavailable>${cr}"
+    set r "${r}loci = <unavailable>${cr}"
+    gdb_test "info locals" "$r" "info locals"
+
+    gdb_test "tfind none" \
+	"#0  end .*" \
+	"cease trace debugging"
+
+    set pf_prefix $old_pf_prefix
+}
+
 proc gdb_unavailable_registers_test { } {
     global gdb_prompt
     global spreg
@@ -417,6 +543,11 @@ proc gdb_collect_globals_test { } {
 proc gdb_trace_collection_test {} {
     gdb_collect_globals_test
     gdb_unavailable_registers_test
+
+    gdb_collect_args_test
+    gdb_collect_locals_test local_test_func "auto locals"
+    gdb_collect_locals_test reglocal_test_func "register locals"
+    gdb_collect_locals_test statlocal_test_func "static locals"
 }
 
 clean_restart $executable
