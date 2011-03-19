@@ -1,3 +1,10 @@
+2011-03-19  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-ppc.c (md_show_usage): Remove -l and -b.  Add -K PIC.
+	* doc/as.texinfo (Overview <Target PowerPC options>): Add a number
+	of missing options.
+	* doc/c-ppc.texi: Likewise.
+
 2011-03-18  Alan Modra  <amodra@gmail.com>
 
 	* config/obj-elf.c (elf_frob_symbol): Report S_SET_SIZE symbol

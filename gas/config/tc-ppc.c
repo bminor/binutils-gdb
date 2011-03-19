@@ -1,6 +1,7 @@
 /* tc-ppc.c -- Assemble for the PowerPC or POWER (RS/6000)
    Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-   2004, 2005, 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+   2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011
+   Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of GAS, the GNU Assembler.
@@ -1244,12 +1245,13 @@ PowerPC options:\n\
 -mrelocatable           support for GCC's -mrelocatble option\n\
 -mrelocatable-lib       support for GCC's -mrelocatble-lib option\n\
 -memb                   set PPC_EMB bit in ELF flags\n\
--mlittle, -mlittle-endian, -l, -le\n\
+-mlittle, -mlittle-endian, -le\n\
                         generate code for a little endian machine\n\
--mbig, -mbig-endian, -b, -be\n\
+-mbig, -mbig-endian, -be\n\
                         generate code for a big endian machine\n\
 -msolaris               generate code for Solaris\n\
 -mno-solaris            do not generate code for Solaris\n\
+-K PIC                  set EF_PPC_RELOCATABLE_LIB in ELF flags\n\
 -V                      print assembler version number\n\
 -Qy, -Qn                ignored\n"));
 #endif
