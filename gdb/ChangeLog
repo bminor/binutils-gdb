@@ -1,3 +1,8 @@
+2011-03-21  Ulrich Weigand  <ulrich.weigand@linaro.org>
+
+	* arm-tdep.c (arm_analyze_prologue): Do not abort parsing when
+	encountering a load via a non-SP register.
+
 2011-03-21  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* tramp-frame.c (tramp_frame_prepend_unwinder): Set stop_reason
