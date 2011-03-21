@@ -1,3 +1,8 @@
+2011-03-21  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* tramp-frame.c (tramp_frame_prepend_unwinder): Set stop_reason
+	field in returned unwinder.
+
 2012-03-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* ada-lang.c (replace_operator_with_call): Copy also GDBARCH.
