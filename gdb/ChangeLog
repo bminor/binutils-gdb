@@ -1,3 +1,9 @@
+2011-03-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf2read.c (producer_is_gxx_lt_4_6): New function.
+	(dwarf2_add_field): Fix new_field->accessibility for
+	cu->header.version >= 3 while verifying also producer_is_gxx_lt_4_6.
+
 2011-03-21  Ulrich Weigand  <ulrich.weigand@linaro.org>
 
 	* arm-tdep.c (arm_analyze_prologue): Do not abort parsing when

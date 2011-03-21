@@ -6209,6 +6209,27 @@ dwarf2_record_block_ranges (struct die_info *die, struct block *block,
     }
 }
 
+/* Check for GCC PR debug/45124 fix which is not present in any G++ version up
+   to 4.5.any hwile it is present already in G++ 4.6.0 - the PR has been fixed
+   during 4.6.0 experimental.  */
+
+static int
+producer_is_gxx_lt_4_6 (const char *producer)
+{
+  int major, minor;
+
+  /* Whitespaces are ignored in both PRODUCER and the format string.  */
+  if (sscanf (producer, "GNU C++ %d.%d", &major, &minor) != 2)
+    {
+      /* For non-GCC compilers expect their behavior is DWARF version
+	 compliant.  */
+
+      return 0;
+    }
+
+  return major < 4 || (major == 4 && minor < 6);
+}
+
 /* Add an aggregate field to the field list.  */
 
 static void
@@ -6239,13 +6260,28 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
     }
   fip->nfields++;
 
-  /* Handle accessibility and virtuality of field.
-     The default accessibility for members is public, the default
-     accessibility for inheritance is private.  */
-  if (die->tag != DW_TAG_inheritance)
-    new_field->accessibility = DW_ACCESS_public;
+  if (cu->header.version < 3 || producer_is_gxx_lt_4_6 (cu->producer))
+    {
+      /* The default DWARF 2 accessibility for members is public, the default
+	 accessibility for inheritance is private.  */
+
+      if (die->tag != DW_TAG_inheritance)
+	new_field->accessibility = DW_ACCESS_public;
+      else
+	new_field->accessibility = DW_ACCESS_private;
+    }
   else
-    new_field->accessibility = DW_ACCESS_private;
+    {
+      /* DWARF 3+ defines the default accessibility a different way - see
+	 below - than DWARF 2 has defined.  The same rules apply now for
+	 DW_TAG_inheritance as for the members and it only depends on the
+	 container kind.  */
+
+      if (die->parent->tag == DW_TAG_class_type)
+	new_field->accessibility = DW_ACCESS_private;
+      else
+	new_field->accessibility = DW_ACCESS_public;
+    }
   new_field->virtuality = DW_VIRTUALITY_none;
 
   attr = dwarf2_attr (die, DW_AT_accessibility, cu);
