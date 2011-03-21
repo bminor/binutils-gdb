@@ -1,3 +1,8 @@
+2012-03-21  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (replace_operator_with_call): Use xzalloc instead
+	of xmalloc.
+
 2012-03-18  Pedro Alves  <pedro@codesourcery.com>
 
 	* frame.c (frame_unwind_register): Throw an error if unwinding the
