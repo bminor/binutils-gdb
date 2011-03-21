@@ -1,3 +1,7 @@
+2011-03-21  Eric B. Weddington  <eric.weddington@atmel.com>
+
+	* config/tc-avr.c (md_show_usage): Add "Assembler" text to output.
+
 2011-03-18  Alan Modra  <amodra@gmail.com>
 
 	* config/obj-elf.c (elf_frob_symbol): Report S_SET_SIZE symbol

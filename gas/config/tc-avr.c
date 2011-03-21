@@ -398,7 +398,7 @@ void
 md_show_usage (FILE *stream)
 {
   fprintf (stream,
-      _("AVR options:\n"
+      _("AVR Assembler options:\n"
 	"  -mmcu=[avr-name] select microcontroller variant\n"
 	"                   [avr-name] can be:\n"
 	"                   avr1  - classic AVR core without data RAM\n"
