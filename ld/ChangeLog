@@ -1,3 +1,7 @@
+2011-03-21  Eric B. Weddington  <eric.weddington@atmel.com>
+
+	* scripttempl/avr.sc: Add fuse, lock, and signature memory regions.
+
 2011-03-14  Richard Sandiford  <richard.sandiford@linaro.org>
 
 	* emultempl/armelf.em (gld${EMULATION_NAME}_finish): Check

@@ -7,6 +7,9 @@ MEMORY
   text   (rx)   : ORIGIN = 0, LENGTH = $TEXT_LENGTH
   data   (rw!x) : ORIGIN = $DATA_ORIGIN, LENGTH = $DATA_LENGTH
   eeprom (rw!x) : ORIGIN = 0x810000, LENGTH = 64K
+  fuse      (rw!x) : ORIGIN = 0x820000, LENGTH = 1K
+  lock      (rw!x) : ORIGIN = 0x830000, LENGTH = 1K
+  signature (rw!x) : ORIGIN = 0x840000, LENGTH = 1K
 }
 
 SECTIONS
@@ -195,6 +198,24 @@ SECTIONS
     *(.eeprom*)
     ${RELOCATING+ __eeprom_end = . ; }
   } ${RELOCATING+ > eeprom}
+
+  .fuse ${RELOCATING-0}:
+  {
+    KEEP(*(.fuse))
+    KEEP(*(.lfuse))
+    KEEP(*(.hfuse))
+    KEEP(*(.efuse))
+  } ${RELOCATING+ > fuse}
+
+  .lock ${RELOCATING-0}:
+  {
+    KEEP(*(.lock*))
+  } ${RELOCATING+ > lock}
+
+  .signature ${RELOCATING-0}:
+  {
+    KEEP(*(.signature*))
+  } ${RELOCATING+ > signature}
 
   /* Stabs debugging sections.  */
   .stab 0 : { *(.stab) }
