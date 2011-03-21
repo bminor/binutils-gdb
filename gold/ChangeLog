@@ -1,3 +1,13 @@
+2011-03-21  Sriraman Tallam  <tmsriram@google.com>
+
+	* testsuite/icf_safe_so_test.sh: Add #!/bin/sh to start.
+	Change == to -eq.
+	* testsuite/icf_string_merge_test.sh: Add #!/bin/sh to start.
+	* testsuite/icf_safe_test.sh: Add #!/bin/sh to start.
+	Change == to -eq.
+	* testsuite/icf_sht_rel_addend_test.sh: Add #!/bin/sh to start.
+	* testsuite/icf_preemptible_functions_test.sh: Add #!/bin/sh to start.
+
 2011-03-14  Ian Lance Taylor  <iant@google.com>
 
 	* script-sections.cc (Sort_output_sections::script_compare):
