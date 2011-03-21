@@ -84,4 +84,10 @@ void sim_io_poll_quit (SIM_DESC sd);
 /* Returns -1 and sets (host) EAGAIN if not ready. */
 int sim_io_poll_read (SIM_DESC sd, int, char *, int);
 
+#include <sys/types.h>
+#include <sys/stat.h>
+
+int sim_io_stat (SIM_DESC sd, const char *path, struct stat *buf);
+
+int sim_io_fstat (SIM_DESC sd, int fd, struct stat *buf);
 #endif

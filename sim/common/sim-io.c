@@ -387,3 +387,15 @@ sim_io_poll_read (SIM_DESC sd,
   return sim_io_read (sd, sim_io_fd, buf, sizeof_buf);
 #endif
 }
+
+int
+sim_io_stat (SIM_DESC sd, const char *path, struct stat *buf)
+{
+  return STATE_CALLBACK (sd)->stat (STATE_CALLBACK (sd), path, buf);
+}
+
+int
+sim_io_fstat (SIM_DESC sd, int fd, struct stat *buf)
+{
+  return STATE_CALLBACK (sd)->fstat (STATE_CALLBACK (sd), fd, buf);
+}

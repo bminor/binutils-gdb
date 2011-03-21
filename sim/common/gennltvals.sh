@@ -20,7 +20,7 @@ $shell ${srccom}/gentvals.sh "" signal ${srcroot}/newlib/libc/include \
 	"signal.h sys/signal.h" 'SIG[A-Z0-9]*' "${cpp}"
 
 $shell ${srccom}/gentvals.sh "" open ${srcroot}/newlib/libc/include \
-	"fcntl.h sys/fcntl.h" 'O_[A-Z0-9]*' "${cpp}"
+	"fcntl.h sys/fcntl.h sys/_default_fcntl.h" 'O_[A-Z0-9]*' "${cpp}"
 
 # Unfortunately, each newlib/libgloss port has seen fit to define their own
 # syscall.h file.  This means that system call numbers can vary for each port.
