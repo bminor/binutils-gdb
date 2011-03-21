@@ -3661,6 +3661,7 @@ replace_operator_with_call (struct expression **expp, int pc, int nargs,
 
   newexp->nelts = exp->nelts + 7 - oplen;
   newexp->language_defn = exp->language_defn;
+  newexp->gdbarch = exp->gdbarch;
   memcpy (newexp->elts, exp->elts, EXP_ELEM_TO_BYTES (pc));
   memcpy (newexp->elts + pc + 7, exp->elts + pc + oplen,
           EXP_ELEM_TO_BYTES (exp->nelts - pc - oplen));

@@ -1,3 +1,7 @@
+2012-03-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* ada-lang.c (replace_operator_with_call): Copy also GDBARCH.
+
 2012-03-21  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (replace_operator_with_call): Use xzalloc instead
