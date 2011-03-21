@@ -1629,6 +1629,8 @@ OP_10007E0 ()
 
 #define MEMPTR(x) (map (x))
 
+      RETERR = 0;
+
       switch (FUNC)
 	{
 
@@ -1636,6 +1638,7 @@ OP_10007E0 ()
 #ifdef TARGET_SYS_fork
 	case TARGET_SYS_fork:
 	  RETVAL = fork ();
+	  RETERR = errno;
 	  break;
 #endif
 #endif
@@ -1651,6 +1654,7 @@ OP_10007E0 ()
 	    free (path);
 	    freeargv (argv);
 	    freeargv (envp);
+	    RETERR = errno;
 	    break;
 	  }
 #endif
@@ -1665,6 +1669,7 @@ OP_10007E0 ()
 	    RETVAL = execv (path, argv);
 	    free (path);
 	    freeargv (argv);
+	    RETERR = errno;
 	    break;
 	  }
 #endif
@@ -1682,6 +1687,7 @@ OP_10007E0 ()
 	    SW (buf, host_fd[0]);
 	    buf += sizeof(uint16);
 	    SW (buf, host_fd[1]);
+	    RETERR = errno;
 	  }
 	  break;
 #endif
@@ -1695,6 +1701,7 @@ OP_10007E0 ()
 
 	    RETVAL = wait (&status);
 	    SW (PARM1, status);
+	    RETERR = errno;
 	  }
 	  break;
 #endif
@@ -1707,6 +1714,8 @@ OP_10007E0 ()
 	    RETVAL = sim_io_read (simulator, PARM1, buf, PARM3);
 	    sim_write (simulator, PARM2, buf, PARM3);
 	    free (buf);
+	    if ((int) RETVAL < 0)
+	      RETERR = sim_io_get_errno (simulator);
 	    break;
 	  }
 #endif
@@ -1721,6 +1730,8 @@ OP_10007E0 ()
 	    else
 	      RETVAL = sim_io_write (simulator, PARM1, buf, PARM3);
 	    free (buf);
+	    if ((int) RETVAL < 0)
+	      RETERR = sim_io_get_errno (simulator);
 	    break;
 	  }
 #endif
@@ -1728,12 +1739,16 @@ OP_10007E0 ()
 #ifdef TARGET_SYS_lseek
 	case TARGET_SYS_lseek:
 	  RETVAL = sim_io_lseek (simulator, PARM1, PARM2, PARM3);
+	  if ((int) RETVAL < 0)
+	    RETERR = sim_io_get_errno (simulator);
 	  break;
 #endif
 
 #ifdef TARGET_SYS_close
 	case TARGET_SYS_close:
 	  RETVAL = sim_io_close (simulator, PARM1);
+	  if ((int) RETVAL < 0)
+	    RETERR = sim_io_get_errno (simulator);
 	  break;
 #endif
 
@@ -1743,6 +1758,8 @@ OP_10007E0 ()
 	    char *buf = fetch_str (simulator, PARM1);
 	    RETVAL = sim_io_open (simulator, buf, PARM2);
 	    free (buf);
+	    if ((int) RETVAL < 0)
+	      RETERR = sim_io_get_errno (simulator);
 	    break;
 	  }
 #endif
@@ -1764,7 +1781,6 @@ OP_10007E0 ()
 	  break;
 #endif
 
-#if !defined(__GO32__) && !defined(_WIN32)
 #ifdef TARGET_SYS_stat
 	case TARGET_SYS_stat:	/* added at hmsi */
 	  /* stat system call */
@@ -1773,7 +1789,7 @@ OP_10007E0 ()
 	    reg_t buf;
 	    char *path = fetch_str (simulator, PARM1);
 
-	    RETVAL = stat (path, &host_stat);
+	    RETVAL = sim_io_stat (simulator, path, &host_stat);
 
 	    free (path);
 	    buf = PARM2;
@@ -1790,9 +1806,67 @@ OP_10007E0 ()
 	    store_mem (buf + 20, 4, host_stat.st_atime);
 	    store_mem (buf + 28, 4, host_stat.st_mtime);
 	    store_mem (buf + 36, 4, host_stat.st_ctime);
+
+	    if ((int) RETVAL < 0)
+	      RETERR = sim_io_get_errno (simulator);
 	  }
 	  break;
 #endif
+
+#ifdef TARGET_SYS_fstat
+	case TARGET_SYS_fstat:
+	  /* fstat system call */
+	  {
+	    struct stat host_stat;
+	    reg_t buf;
+
+	    RETVAL = sim_io_fstat (simulator, PARM1, &host_stat);
+
+	    buf = PARM2;
+
+	    /* Just wild-assed guesses.  */
+	    store_mem (buf, 2, host_stat.st_dev);
+	    store_mem (buf + 2, 2, host_stat.st_ino);
+	    store_mem (buf + 4, 4, host_stat.st_mode);
+	    store_mem (buf + 8, 2, host_stat.st_nlink);
+	    store_mem (buf + 10, 2, host_stat.st_uid);
+	    store_mem (buf + 12, 2, host_stat.st_gid);
+	    store_mem (buf + 14, 2, host_stat.st_rdev);
+	    store_mem (buf + 16, 4, host_stat.st_size);
+	    store_mem (buf + 20, 4, host_stat.st_atime);
+	    store_mem (buf + 28, 4, host_stat.st_mtime);
+	    store_mem (buf + 36, 4, host_stat.st_ctime);
+
+	    if ((int) RETVAL < 0)
+	      RETERR = sim_io_get_errno (simulator);
+	  }
+	  break;
+#endif
+
+#ifdef TARGET_SYS_rename
+	case TARGET_SYS_rename:
+	  {
+	    char *oldpath = fetch_str (simulator, PARM1);
+	    char *newpath = fetch_str (simulator, PARM2);
+	    RETVAL = sim_io_rename (simulator, oldpath, newpath);
+	    free (oldpath);
+	    free (newpath);
+	    if ((int) RETVAL < 0)
+	      RETERR = sim_io_get_errno (simulator);
+	  }
+	  break;
+#endif
+
+#ifdef TARGET_SYS_unlink
+	case TARGET_SYS_unlink:
+	  {
+	    char *path = fetch_str (simulator, PARM1);
+	    RETVAL = sim_io_unlink (simulator, path);
+	    free (path);
+	    if ((int) RETVAL < 0)
+	      RETERR = sim_io_get_errno (simulator);
+	  }
+	  break;
 #endif
 
 #ifdef HAVE_CHOWN
@@ -1802,6 +1876,7 @@ OP_10007E0 ()
 	    char *path = fetch_str (simulator, PARM1);
 	    RETVAL = chown (path, PARM2, PARM3);
 	    free (path);
+	    RETERR = errno;
 	  }
 	  break;
 #endif
@@ -1814,6 +1889,7 @@ OP_10007E0 ()
 	    char *path = fetch_str (simulator, PARM1);
 	    RETVAL = chmod (path, PARM2);
 	    free (path);
+	    RETERR = errno;
 	  }
 	  break;
 #endif
@@ -1826,6 +1902,7 @@ OP_10007E0 ()
 	    time_t now;
 	    RETVAL = time (&now);
 	    store_mem (PARM1, 4, now);
+	    RETERR = errno;
 	  }
 	  break;
 #endif
@@ -1841,6 +1918,7 @@ OP_10007E0 ()
 	    store_mem (PARM1 + 4, 4, tms.tms_stime);
 	    store_mem (PARM1 + 8, 4, tms.tms_cutime);
 	    store_mem (PARM1 + 12, 4, tms.tms_cstime);
+	    reterr = errno;
 	    break;
 	  }
 #endif
@@ -1857,6 +1935,7 @@ OP_10007E0 ()
 	    store_mem (PARM1 + 4, 4, t.tv_usec);
 	    store_mem (PARM2, 4, tz.tz_minuteswest);
 	    store_mem (PARM2 + 4, 4, tz.tz_dsttime);
+	    RETERR = errno;
 	    break;
 	  }
 #endif
@@ -1878,7 +1957,6 @@ OP_10007E0 ()
 	default:
 	  abort ();
 	}
-      RETERR = errno;
       errno = save_errno;
 
       return 4;

@@ -1,3 +1,10 @@
+2011-03-21  Kevin Buettner  <kevinb@redhat.com>
+
+	* simops (OP_10007E0): Update errno handling as most traps
+	do not invoke the host's functionality directly.  Invoke
+	sim_io_stat() instead of stat() for implementing TARGET_SYS_stat.
+	Implement TARGET_SYS_fstat, TARGET_SYS_rename, and TARGET_SYS_unlink.
+
 2011-02-14  Mike Frysinger  <vapier@gentoo.org>
 
 	* simops.c (OP_10007E0): Change zfree to free.
