@@ -4990,7 +4990,7 @@ dwarf2_compute_name (char *name, struct die_info *die, struct dwarf2_cu *cu,
 	    {
 	      struct type *type = read_type_die (die, cu);
 
-	      c_type_print_args (type, buf, 0, cu->language);
+	      c_type_print_args (type, buf, 1, cu->language);
 
 	      if (cu->language == language_java)
 		{

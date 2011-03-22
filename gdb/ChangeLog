@@ -1,3 +1,11 @@
+2011-03-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Code cleanup.
+	* c-typeprint.c (c_type_print_args): Change parameter show_artificial
+	to linkage_name.  Invert its value.  Update the function comment.
+	(c_type_print_varspec_suffix): Invert it at the caller.
+	* dwarf2read.c (dwarf2_compute_name): Invert it at the caller.
+
 2011-03-22  Pedro Alves  <pedro@codesourcery.com>
 
 	* infcmd.c (post_create_inferior): Ignore NOT_AVAILABLE_ERROR

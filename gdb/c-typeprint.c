@@ -387,17 +387,16 @@ c_type_print_modifier (struct type *type, struct ui_file *stream,
 
 /* Print out the arguments of TYPE, which should have TYPE_CODE_METHOD
    or TYPE_CODE_FUNC, to STREAM.  Artificial arguments, such as "this"
-   in non-static methods, are displayed if SHOW_ARTIFICIAL is
-   non-zero.  If SHOW_ARTIFICIAL is zero and LANGUAGE is language_cplus
-   the topmost parameter types get removed their possible const and volatile
-   qualifiers to match demangled linkage name parameters part of such function
-   type.  LANGUAGE is the language in which TYPE was defined.  This is
-   a necessary evil since this code is used by the C, C++, and Java backends.
-   */
+   in non-static methods, are displayed if LINKAGE_NAME is zero.  If
+   LINKAGE_NAME is non-zero and LANGUAGE is language_cplus the topmost
+   parameter types get removed their possible const and volatile qualifiers to
+   match demangled linkage name parameters part of such function type.
+   LANGUAGE is the language in which TYPE was defined.  This is a necessary
+   evil since this code is used by the C, C++, and Java backends.  */
 
 void
 c_type_print_args (struct type *type, struct ui_file *stream,
-		   int show_artificial, enum language language)
+		   int linkage_name, enum language language)
 {
   int i, len;
   struct field *args;
@@ -411,7 +410,7 @@ c_type_print_args (struct type *type, struct ui_file *stream,
     {
       struct type *param_type;
 
-      if (TYPE_FIELD_ARTIFICIAL (type, i) && !show_artificial)
+      if (TYPE_FIELD_ARTIFICIAL (type, i) && linkage_name)
 	continue;
 
       if (printed_any)
@@ -422,7 +421,7 @@ c_type_print_args (struct type *type, struct ui_file *stream,
 
       param_type = TYPE_FIELD_TYPE (type, i);
 
-      if (language == language_cplus && !show_artificial)
+      if (language == language_cplus && linkage_name)
 	{
 	  /* C++ standard, 13.1 Overloadable declarations, point 3, item:
 	     - Parameter declarations that differ only in the presence or
@@ -658,8 +657,7 @@ c_type_print_varspec_suffix (struct type *type,
       if (passed_a_ptr)
 	fprintf_filtered (stream, ")");
       if (!demangled_args)
-	c_type_print_args (type, stream, 1,
-			   current_language->la_language);
+	c_type_print_args (type, stream, 0, current_language->la_language);
       c_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream,
 				   show, passed_a_ptr, 0);
       break;
