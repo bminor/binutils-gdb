@@ -1220,12 +1220,17 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 	  }
 	  break;
 
+	case DWARF_VALUE_OPTIMIZED_OUT:
+	  retval = allocate_value (type);
+	  VALUE_LVAL (retval) = not_lval;
+	  set_value_optimized_out (retval, 1);
+	  break;
+
 	  /* DWARF_VALUE_IMPLICIT_POINTER was converted to a pieced
 	     operation by execute_stack_op.  */
 	case DWARF_VALUE_IMPLICIT_POINTER:
 	  /* DWARF_VALUE_OPTIMIZED_OUT can't occur in this context --
 	     it can only be encountered when making a piece.  */
-	case DWARF_VALUE_OPTIMIZED_OUT:
 	default:
 	  internal_error (__FILE__, __LINE__, _("invalid location type"));
 	}

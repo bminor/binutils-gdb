@@ -1,3 +1,9 @@
+2011-03-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.dwarf2/dw2-entry-value-main.c: New file.
+	* gdb.dwarf2/dw2-entry-value.S: New file.
+	* gdb.dwarf2/dw2-entry-value.exp: New file.
+
 2011-03-22  Phil Muldoon  <pmuldoon@redhat.com>
 
         PR python/12183

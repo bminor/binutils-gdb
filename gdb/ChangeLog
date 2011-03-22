@@ -1,5 +1,12 @@
 2011-03-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* dwarf2expr.c (execute_stack_op): Handle DW_OP_GNU_entry_value.  New
+	label abort_expression.
+	* dwarf2loc.c (dwarf2_evaluate_loc_desc_full): Handle
+	DWARF_VALUE_OPTIMIZED_OUT.
+
+2011-03-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Code cleanup.
 	* c-typeprint.c (c_type_print_args): Change parameter show_artificial
 	to linkage_name.  Invert its value.  Update the function comment.
