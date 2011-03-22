@@ -1,3 +1,10 @@
+2011-03-22  Phil Muldoon  <pmuldoon@redhat.com>
+
+        PR python/12183
+
+	* python/py-function.c (fnpy_call): Treat GdbErrors differently to
+	other error classes.  Do not print stack trace.
+
 2011-03-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* dwarf2read.c (producer_is_gxx_lt_4_6): New function.

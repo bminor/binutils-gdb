@@ -1,3 +1,9 @@
+2011-03-22  Phil Muldoon  <pmuldoon@redhat.com>
+
+        PR python/12183
+
+	* gdb.python/py-function.exp: Add GdbError tests.
+
 2011-03-18  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.trace/unavailable.cc (args_test_func, local_test_func)

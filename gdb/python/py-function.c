@@ -79,8 +79,55 @@ fnpy_call (struct gdbarch *gdbarch, const struct language_defn *language,
 
   if (!result)
     {
-      gdbpy_print_stack ();
-      error (_("Error while executing Python code."));
+      PyObject *ptype, *pvalue, *ptraceback;
+      char *msg;
+
+      PyErr_Fetch (&ptype, &pvalue, &ptraceback);
+
+      /* Try to fetch an error message contained within ptype, pvalue.
+	 When fetching the error message we need to make our own copy,
+	 we no longer own ptype, pvalue after the call to PyErr_Restore.  */
+
+      msg = gdbpy_exception_to_string (ptype, pvalue);
+      make_cleanup (xfree, msg);
+
+      if (msg == NULL)
+	{
+	  /* An error occurred computing the string representation of the
+	     error message.  This is rare, but we should inform the user.  */
+
+	  printf_filtered (_("An error occurred in a Python "
+			     "convenience function\n"
+			     "and then another occurred computing the "
+			     "error message.\n"));
+	  gdbpy_print_stack ();
+	}
+
+      /* Don't print the stack for gdb.GdbError exceptions.
+	 It is generally used to flag user errors.
+
+	 We also don't want to print "Error occurred in Python command"
+	 for user errors.  However, a missing message for gdb.GdbError
+	 exceptions is arguably a bug, so we flag it as such.  */
+
+      if (!PyErr_GivenExceptionMatches (ptype, gdbpy_gdberror_exc)
+	  || msg == NULL || *msg == '\0')
+	{
+	  PyErr_Restore (ptype, pvalue, ptraceback);
+	  gdbpy_print_stack ();
+	  if (msg != NULL && *msg != '\0')
+	    error (_("Error occurred in Python convenience function: %s"),
+		   msg);
+	  else
+	    error (_("Error occurred in Python convenience function."));
+	}
+      else
+	{
+	  Py_XDECREF (ptype);
+	  Py_XDECREF (pvalue);
+	  Py_XDECREF (ptraceback);
+	  error ("%s", msg);
+	}
     }
 
   value = convert_value_from_python (result);

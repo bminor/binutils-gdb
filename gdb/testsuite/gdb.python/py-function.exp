@@ -69,3 +69,29 @@ gdb_py_test_multiple "input int-returning function" \
 
 gdb_test "print \$yes() && \$yes()" " = 1" "call yes with &&"
 gdb_test "print \$yes() || \$yes()" " = 1" "call yes with ||"
+
+gdb_py_test_multiple "Test GDBError" \
+  "python" "" \
+  "class GDBError(gdb.Function):" "" \
+  "    def __init__(self):" "" \
+  "        gdb.Function.__init__(self, 'gdberror')" "" \
+  "    def invoke(self):" "" \
+  "        raise gdb.GdbError(\"This is a GdbError\")" "" \
+  "GDBError ()" "" \
+  "end" ""
+
+gdb_test "print \$gdberror()" "This is a GdbError.*" \
+    "Test GdbError.  There should not be a stack trace"
+
+gdb_py_test_multiple "Test Normal Error" \
+  "python" "" \
+  "class NormalError(gdb.Function):" "" \
+  "    def __init__(self):" "" \
+  "        gdb.Function.__init__(self, 'normalerror')" "" \
+  "    def invoke(self):" "" \
+  "        raise RuntimeError(\"This is a Normal Error\")" "" \
+  "NormalError ()" "" \
+  "end" ""
+
+gdb_test "print \$normalerror()" "Traceback.*File.*line 5.*in invoke.*RuntimeError.*This is a Normal Error.*" \
+    "Test a Runtime error.  There should be a stack trace."
