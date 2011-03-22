@@ -2,7 +2,7 @@
 
 # final_layout.sh -- test --final-layout
 
-# Copyright 2010 Free Software Foundation, Inc.
+# Copyright 2010, 2011 Free Software Foundation, Inc.
 # Written by Sriraman Tallam <tmsriram@google.com>.
 
 # This file is part of gold.
