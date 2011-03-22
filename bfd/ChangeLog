@@ -1,5 +1,9 @@
 2011-03-22  Eric B. Weddington  <eric.weddington@atmel.com>
 
+	* bfd-in2.h: Regenerate.
+
+2011-03-22  Eric B. Weddington  <eric.weddington@atmel.com>
+
 	* archures.c: Add AVR XMEGA architecture information.
 	* cpu-avr.c (arch_info_struct): Likewise.
 	* elf32-avr.c (bfd_elf_avr_final_write_processing): Likewise.
