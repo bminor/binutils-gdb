@@ -1,3 +1,7 @@
+2011-03-22  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* NEWS: Document gdb.Write stream keyword.
+
 2011-03-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Revert:
