@@ -1,6 +1,7 @@
 2011-03-21  Ian Lance Taylor  <iant@google.com>
 
 	* testsuite/final_layout.sh: Rewrite to not use dc.
+	* testsuite/relro_test.sh: Fail if dc is not present.
 
 2011-03-21  Sriraman Tallam  <tmsriram@google.com>
 
