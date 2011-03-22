@@ -1,3 +1,15 @@
+2011-03-22  Eric B. Weddington  <eric.weddington@atmel.com>
+
+	* config/tc-avr.c (struct avr_opcodes_s): Add opcode field.
+	(AVR_INSN): Change definition to match.
+	(avr_opcodes): Likewise, change to match.
+	(mcu_types): Add XMEGA architecture names and new XMEGA device names.
+	(md_show_usage): Add XMEGA architecture names.
+	(avr_operand): Add 'E' constraint for DES instruction of XMEGA devices.
+	Add support for SPM Z+ instruction.
+	* doc/c-avr.texi: Add documentation for XMEGA architectures and
+	devices.
+
 2011-03-21  Eric B. Weddington  <eric.weddington@atmel.com>
 
 	* config/tc-avr.c (md_show_usage): Add "Assembler" text to output.

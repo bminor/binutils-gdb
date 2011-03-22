@@ -85,6 +85,27 @@ atmega128rfa1, at90can128, at90usb1286, at90usb1287, m3000).
 Instruction set avr6 is for the enhanced AVR core with a 3-byte PC (MCU types:
 atmega2560, atmega2561).
 
+Instruction set avrxmega2 is for the XMEGA AVR core with 8K to 64K program
+memory space and less than 64K data space (MCU types: atxmega16a4, atxmega16d4,
+atxmega32d4).
+
+Instruction set avrxmega3 is for the XMEGA AVR core with 8K to 64K program
+memory space and greater than 64K data space (MCU types: atxmega32a4).
+
+Instruction set avrxmega4 is for the XMEGA AVR core with up to 64K program
+memory space and less than 64K data space (MCU types: atxmega64a3, atxmega64d3).
+
+Instruction set avrxmega5 is for the XMEGA AVR core with up to 64K program 
+memory space and greater than 64K data space (MCU types: atxmega64a1).
+
+Instruction set avrxmega6 is for the XMEGA AVR core with up to 256K program
+memory space and less than 64K data space (MCU types: atxmega128a3,
+atxmega128d3, atxmega192a3, atxmega192d3, atxmega256a3, atxmega256a3b,
+atxmega192d3).
+
+Instruction set avrxmega7 is for the XMEGA AVR core with up to 256K program
+memory space and greater than 64K data space (MCU types: atxmega128a1).
+
 @cindex @code{-mall-opcodes} command line option, AVR
 @item -mall-opcodes
 Accept all AVR opcodes, even if not supported by @code{-mmcu}.

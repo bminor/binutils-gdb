@@ -71,8 +71,10 @@ avr_elf_${EMULATION_NAME}_before_allocation (void)
 
   gld${EMULATION_NAME}_before_allocation ();
 
-  /* We only need stubs for the avr6 family.  */
-  if (strcmp ("${EMULATION_NAME}","avr6"))
+  /* We only need stubs for avr6, avrxmega6, and avrxmega7. */
+  if (strcmp ("${EMULATION_NAME}","avr6") 
+      && strcmp ("${EMULATION_NAME}","avrxmega6")
+      && strcmp ("${EMULATION_NAME}","avrxmega7") )
     avr_no_stubs = TRUE;
 
   avr_elf_set_global_bfd_parameters ();

@@ -376,6 +376,13 @@ DESCRIPTION
 .#define bfd_mach_avr5		5
 .#define bfd_mach_avr51		51
 .#define bfd_mach_avr6		6
+.#define bfd_mach_avrxmega1 101
+.#define bfd_mach_avrxmega2 102
+.#define bfd_mach_avrxmega3 103
+.#define bfd_mach_avrxmega4 104
+.#define bfd_mach_avrxmega5 105
+.#define bfd_mach_avrxmega6 106
+.#define bfd_mach_avrxmega7 107
 .  bfd_arch_bfin,        {* ADI Blackfin *}
 .#define bfd_mach_bfin          1
 .  bfd_arch_cr16,       {* National Semiconductor CompactRISC (ie CR16). *}

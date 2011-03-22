@@ -1298,6 +1298,34 @@ bfd_elf_avr_final_write_processing (bfd *abfd,
     case bfd_mach_avr6:
       val = E_AVR_MACH_AVR6;
       break;
+
+    case bfd_mach_avrxmega1:
+      val = E_AVR_MACH_XMEGA1;
+      break;
+
+    case bfd_mach_avrxmega2:
+      val = E_AVR_MACH_XMEGA2;
+      break;
+
+    case bfd_mach_avrxmega3:
+      val = E_AVR_MACH_XMEGA3;
+      break;
+
+    case bfd_mach_avrxmega4:
+      val = E_AVR_MACH_XMEGA4;
+      break;
+
+    case bfd_mach_avrxmega5:
+      val = E_AVR_MACH_XMEGA5;
+      break;
+
+    case bfd_mach_avrxmega6:
+      val = E_AVR_MACH_XMEGA6;
+      break;
+
+    case bfd_mach_avrxmega7:
+      val = E_AVR_MACH_XMEGA7;
+      break;
     }
 
   elf_elfheader (abfd)->e_machine = EM_AVR;
@@ -1359,6 +1387,34 @@ elf32_avr_object_p (bfd *abfd)
 
 	case E_AVR_MACH_AVR6:
 	  e_set = bfd_mach_avr6;
+	  break;
+
+	case E_AVR_MACH_XMEGA1:
+	  e_set = bfd_mach_avrxmega1;
+	  break;
+
+	case E_AVR_MACH_XMEGA2:
+	  e_set = bfd_mach_avrxmega2;
+	  break;
+
+	case E_AVR_MACH_XMEGA3:
+	  e_set = bfd_mach_avrxmega3;
+	  break;
+
+	case E_AVR_MACH_XMEGA4:
+	  e_set = bfd_mach_avrxmega4;
+	  break;
+
+	case E_AVR_MACH_XMEGA5:
+	  e_set = bfd_mach_avrxmega5;
+	  break;
+
+	case E_AVR_MACH_XMEGA6:
+	  e_set = bfd_mach_avrxmega6;
+	  break;
+
+	case E_AVR_MACH_XMEGA7:
+	  e_set = bfd_mach_avrxmega7;
 	  break;
 	}
     }

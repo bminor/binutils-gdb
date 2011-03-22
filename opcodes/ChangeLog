@@ -1,3 +1,10 @@
+2011-03-22  Eric B. Weddington  <eric.weddington@atmel.com>
+
+	* avr-dis.c (avr_operand): Add opcode_str parameter. Check for
+	post-increment to support LPM Z+ instruction. Add support for 'E'
+	constraint for DES instruction.
+	(print_insn_avr): Adjust calls to avr_operand. Rename variable.
+
 2011-03-14  Richard Sandiford  <richard.sandiford@linaro.org>
 
 	* arm-dis.c (get_sym_code_type): Treat STT_GNU_IFUNCs as code.
