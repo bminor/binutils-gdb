@@ -1,3 +1,10 @@
+2011-03-22  Pedro Alves  <pedro@codesourcery.com>
+
+	* infcmd.c (post_create_inferior): Ignore NOT_AVAILABLE_ERROR
+	errors when reading the `stop_pc'.
+	* printcmd.c (pc_prefix): Use get_frame_pc_if_available instead of
+	get_frame_pc.
+
 2011-03-22  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* NEWS: Document gdb.Write stream keyword.

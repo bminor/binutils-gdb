@@ -759,9 +759,7 @@ pc_prefix (CORE_ADDR addr)
       CORE_ADDR pc;
 
       frame = get_selected_frame (NULL);
-      pc = get_frame_pc (frame);
-
-      if (pc == addr)
+      if (get_frame_pc_if_available (frame, &pc) && pc == addr)
 	return "=> ";
     }
   return "   ";
