@@ -1,3 +1,9 @@
+2011-03-23  Eric B. Weddington  <eric.weddington@atmel.com>
+
+	* config/tc-avr.c (mcu_types): Add new xmega devices: atxmega64a1u,
+	atxmega128a1u, atxmega16x1, atxmega32x1, atxmega128b1, atxmega256a3bu.
+	* doc/c-avr.texi: Document new device names.
+
 2011-03-22  Eric B. Weddington  <eric.weddington@atmel.com>
 
 	* config/tc-avr.c (struct avr_opcodes_s): Add opcode field.
