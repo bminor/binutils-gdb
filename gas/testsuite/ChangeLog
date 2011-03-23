@@ -1,5 +1,12 @@
 2011-02-10  Vincent Rivière  <vincent.riviere@freesbee.fr>
 
+	PR gas/6957
+	* gas/i386/nops-1-i686.d: Updated.
+	* gas/i386/nops-3-i686.d: Likewise.
+	* gas/i386/nops-4-i686.d: Likewise.
+
+2011-02-08  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* gas/m68k/cpu32.d: Set explicit architecture for objdump.
 	* gas/m68k/mcf-coproc.d: Likewise.
 	* gas/m68k/mcf-wdebug.d: Likewise.

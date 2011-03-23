@@ -1,5 +1,11 @@
 2011-03-19  Alan Modra  <amodra@gmail.com>
 
+	PR gas/6957
+	* config/tc-i386.c (i386_align_code): Use f32_patt when tuning
+	for i686.
+
+2011-02-08  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* config/tc-ppc.c (md_show_usage): Remove -l and -b.  Add -K PIC.
 	* doc/as.texinfo (Overview <Target PowerPC options>): Add a number
 	of missing options.
