@@ -1,3 +1,9 @@
+2010-03-23  Rafael Ávila de Espíndola <respindola@mozilla.com>
+
+	* plugin.cc (get_view): New.
+	(Plugin::load): Pass get_view to the plugin.
+	(Plugin_manager::get_view): New.
+
 2011-03-21  Ian Lance Taylor  <iant@google.com>
 
 	* testsuite/final_layout.sh: Rewrite to not use dc.

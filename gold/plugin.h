@@ -245,6 +245,9 @@ class Plugin_manager
   ld_plugin_status
   get_input_file(unsigned int handle, struct ld_plugin_input_file* file);
 
+  ld_plugin_status
+  get_view(unsigned int handle, const void **viewp);
+
   // Release an input file.
   ld_plugin_status
   release_input_file(unsigned int handle);

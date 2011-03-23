@@ -69,6 +69,9 @@ static enum ld_plugin_status
 get_input_file(const void *handle, struct ld_plugin_input_file *file);
 
 static enum ld_plugin_status
+get_view(const void *handle, const void **viewp);
+
+static enum ld_plugin_status
 release_input_file(const void *handle);
 
 static enum ld_plugin_status
@@ -130,7 +133,7 @@ Plugin::load()
   sscanf(ver, "%d.%d", &major, &minor);
 
   // Allocate and populate a transfer vector.
-  const int tv_fixed_size = 16;
+  const int tv_fixed_size = 17;
   int tv_size = this->args_.size() + tv_fixed_size;
   ld_plugin_tv* tv = new ld_plugin_tv[tv_size];
 
@@ -187,6 +190,10 @@ Plugin::load()
   ++i;
   tv[i].tv_tag = LDPT_GET_INPUT_FILE;
   tv[i].tv_u.tv_get_input_file = get_input_file;
+
+  ++i;
+  tv[i].tv_tag = LDPT_GET_VIEW;
+  tv[i].tv_u.tv_get_view = get_view;
 
   ++i;
   tv[i].tv_tag = LDPT_RELEASE_INPUT_FILE;
@@ -632,6 +639,35 @@ Plugin_manager::release_input_file(unsigned int handle)
     return LDPS_BAD_HANDLE;
 
   obj->unlock(this->task_);
+  return LDPS_OK;
+}
+
+ld_plugin_status
+Plugin_manager::get_view(unsigned int handle, const void **viewp)
+{
+  off_t offset;
+  size_t filesize;
+  Input_file *input_file;
+  if (this->objects_.size() == handle)
+    {
+      // We are being called from the claim_file hook.
+      const struct ld_plugin_input_file &f = this->plugin_input_file_;
+      offset = f.offset;
+      filesize = f.filesize;
+      input_file = this->input_file_;
+    }
+  else
+    {
+      // An already claimed file.
+      Pluginobj* obj = this->object(handle);
+      if (obj == NULL)
+        return LDPS_BAD_HANDLE;
+      offset = obj->offset();
+      filesize = obj->filesize();
+      input_file = obj->input_file();
+    }
+  *viewp = (void*) input_file->file().get_view(offset, 0, filesize, false,
+                                               false);
   return LDPS_OK;
 }
 
@@ -1245,6 +1281,15 @@ release_input_file(const void* handle)
   unsigned int obj_index =
       static_cast<unsigned int>(reinterpret_cast<intptr_t>(handle));
   return parameters->options().plugins()->release_input_file(obj_index);
+}
+
+static enum ld_plugin_status
+get_view(const void *handle, const void **viewp)
+{
+  gold_assert(parameters->options().has_plugins());
+  unsigned int obj_index =
+      static_cast<unsigned int>(reinterpret_cast<intptr_t>(handle));
+  return parameters->options().plugins()->get_view(obj_index, viewp);
 }
 
 // Get the symbol resolution info for a plugin-claimed input file.
