@@ -1,3 +1,43 @@
+2011-03-23  Kai Tietz  <ktietz@redhat.com>
+
+	* breakpoint.c (clear_command): Use filename_cmp
+	instead of strcmp for comparison.
+	* buildsym.c (watch_main_source_file_lossage): Likewise.
+	(patch_subfile_names): Use IS_DIR_SEPARATOR instead of
+	checking just for slash.
+	* dbxread.c (read_dbx_symtab): Use lbasename instead of
+	strrchr and filename_cmp instead of strcmp for filenames.
+	(add_old_header_file): Use filename_cmp
+	instead of strcmp for comparison.
+	* exec.c (exec_set_section_address): Likewise.
+	* macrotab.c (macro_lookup_inclusion): Likewise.
+	(macro_lookup_inclusion): Likewise.
+	* elfread.c (_initialize_elfread): Likewise.
+	(elfstab_offset_sections): Likewise.
+	(elfstab_offset_sections): Use lbasename instead of
+	strrchr.
+	* mdebugread.c (parse_partial_symbols): Likewise.
+	(arse_partial_symbols): Use filename_(n)cmp instead of
+	str(n)cmp for comparison.
+	* minsyms.c (lookup_minimal_symbol): Likewise.
+	* psymtab.c (read_psymtabs_with_filename): Likewise.
+	* solib.c (solib_read_symbols): Likewise.
+	(reload_shared_libraries_1): Likewise.
+	* symmisc.c (maintenance_print_symbols): Likewise.
+	* symfile.c (separate_debug_file_exists): Likewise.
+	(reread_symbols): Likewise.
+	(find_separate_debug_file_by_debuglink): Likewise.
+	* remote-fileio.c (remote_fileio_func_rename): Likewise.
+	* source.c (add_path): Likewise.
+	* symtab.c (filename_seen): Likewise.
+	(file_matches): Likewise.
+	(print_symbol_info): Likewise.
+	(maybe_add_partial_symtab_filename): Likewise.
+	(make_source_files_completion_list): Likewise.
+	* xml-syscall.c (init_sysinfo): Likewise.
+	* windows-nat.c (_initialize_check_for_gdb_ini): Use
+	IS_DIR_SEPARATOR for checking for trailing path separator.
+
 2011-03-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* dwarf2expr.c (execute_stack_op): Handle DW_OP_GNU_entry_value.  New

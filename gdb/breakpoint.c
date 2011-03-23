@@ -39,6 +39,7 @@
 #include "language.h"
 #include "gdb_string.h"
 #include "demangle.h"
+#include "filenames.h"
 #include "annotate.h"
 #include "symfile.h"
 #include "objfiles.h"
@@ -9524,8 +9525,8 @@ clear_command (char *arg, int from_tty)
 				    && b->source_file != NULL
 				    && sal.symtab != NULL
 				    && sal.pspace == loc->pspace
-				    && strcmp (b->source_file,
-					       sal.symtab->filename) == 0
+				    && filename_cmp (b->source_file,
+						     sal.symtab->filename) == 0
 				    && b->line_number == sal.line);
 		  if (pc_match || line_match)
 		    {

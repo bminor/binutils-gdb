@@ -37,6 +37,7 @@
 #include "complaints.h"
 #include "demangle.h"
 #include "psympriv.h"
+#include "filenames.h"
 
 extern void _initialize_elfread (void);
 
@@ -707,7 +708,8 @@ find_separate_debug_file_by_buildid (struct objfile *objfile)
       build_id_name = build_id_to_debug_filename (build_id);
       xfree (build_id);
       /* Prevent looping on a stripped .debug file.  */
-      if (build_id_name != NULL && strcmp (build_id_name, objfile->name) == 0)
+      if (build_id_name != NULL
+	  && filename_cmp (build_id_name, objfile->name) == 0)
         {
 	  warning (_("\"%s\": separate debug info file has no debug info"),
 		   build_id_name);
@@ -1023,12 +1025,10 @@ elfstab_offset_sections (struct objfile *objfile, struct partial_symtab *pst)
   struct stab_section_info *maybe = dbx->stab_section_info;
   struct stab_section_info *questionable = 0;
   int i;
-  char *p;
 
   /* The ELF symbol info doesn't include path names, so strip the path
      (if any) from the psymtab filename.  */
-  while (0 != (p = strchr (filename, '/')))
-    filename = p + 1;
+  filename = lbasename (filename);
 
   /* FIXME:  This linear search could speed up significantly
      if it was chained in the right order to match how we search it,
@@ -1036,7 +1036,7 @@ elfstab_offset_sections (struct objfile *objfile, struct partial_symtab *pst)
   for (; maybe; maybe = maybe->next)
     {
       if (filename[0] == maybe->filename[0]
-	  && strcmp (filename, maybe->filename) == 0)
+	  && filename_cmp (filename, maybe->filename) == 0)
 	{
 	  /* We found a match.  But there might be several source files
 	     (from different directories) with the same name.  */

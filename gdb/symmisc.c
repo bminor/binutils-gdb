@@ -23,6 +23,7 @@
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "bfd.h"
+#include "filenames.h"
 #include "symfile.h"
 #include "objfiles.h"
 #include "breakpoint.h"
@@ -475,7 +476,7 @@ maintenance_print_symbols (char *args, int from_tty)
 
   immediate_quit++;
   ALL_SYMTABS (objfile, s)
-    if (symname == NULL || strcmp (symname, s->filename) == 0)
+    if (symname == NULL || filename_cmp (symname, s->filename) == 0)
     dump_symtab (objfile, s, outfile);
   immediate_quit--;
   do_cleanups (cleanups);

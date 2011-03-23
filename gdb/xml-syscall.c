@@ -281,7 +281,7 @@ static void
 init_sysinfo (void)
 {
   /* Should we re-read the XML info for this target?  */
-  if (my_gdb_datadir && strcmp (my_gdb_datadir, gdb_datadir) != 0)
+  if (my_gdb_datadir && filename_cmp (my_gdb_datadir, gdb_datadir) != 0)
     {
       /* The data-directory changed from the last time we used it.
 	 It means that we have to re-read the XML info.  */

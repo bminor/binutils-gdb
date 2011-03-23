@@ -2761,7 +2761,7 @@ filename_seen (const char *file, int add, int *first)
 
   /* Is FILE in tab?  */
   for (p = tab; p < tab + tab_cur_size; p++)
-    if (strcmp (*p, file) == 0)
+    if (filename_cmp (*p, file) == 0)
       return 1;
 
   /* No; maybe add it to tab.  */
@@ -2862,7 +2862,7 @@ file_matches (const char *file, char *files[], int nfiles)
     {
       for (i = 0; i < nfiles; i++)
 	{
-	  if (strcmp (files[i], lbasename (file)) == 0)
+	  if (filename_cmp (files[i], lbasename (file)) == 0)
 	    return 1;
 	}
     }
@@ -3260,7 +3260,7 @@ static void
 print_symbol_info (domain_enum kind, struct symtab *s, struct symbol *sym,
 		   int block, char *last)
 {
-  if (last == NULL || strcmp (last, s->filename) != 0)
+  if (last == NULL || filename_cmp (last, s->filename) != 0)
     {
       fputs_filtered ("\nFile ", gdb_stdout);
       fputs_filtered (s->filename, gdb_stdout);
@@ -4073,7 +4073,7 @@ not_interesting_fname (const char *fname)
 
   for (i = 0; illegal_aliens[i]; i++)
     {
-      if (strcmp (fname, illegal_aliens[i]) == 0)
+      if (filename_cmp (fname, illegal_aliens[i]) == 0)
 	return 1;
     }
   return 0;
@@ -4102,12 +4102,7 @@ maybe_add_partial_symtab_filename (const char *filename, const char *fullname,
   if (not_interesting_fname (filename))
     return;
   if (!filename_seen (filename, 1, data->first)
-#if HAVE_DOS_BASED_FILE_SYSTEM
-      && strncasecmp (filename, data->text, data->text_len) == 0
-#else
-      && strncmp (filename, data->text, data->text_len) == 0
-#endif
-      )
+      && filename_ncmp (filename, data->text, data->text_len) == 0)
     {
       /* This file matches for a completion; add it to the
 	 current list of matches.  */
@@ -4120,12 +4115,7 @@ maybe_add_partial_symtab_filename (const char *filename, const char *fullname,
 
       if (base_name != filename
 	  && !filename_seen (base_name, 1, data->first)
-#if HAVE_DOS_BASED_FILE_SYSTEM
-	  && strncasecmp (base_name, data->text, data->text_len) == 0
-#else
-	  && strncmp (base_name, data->text, data->text_len) == 0
-#endif
-	  )
+	  && filename_ncmp (base_name, data->text, data->text_len) == 0)
 	add_filename_to_list (base_name, data->text, data->word,
 			      data->list, data->list_used, data->list_alloced);
     }
@@ -4159,12 +4149,7 @@ make_source_files_completion_list (char *text, char *word)
       if (not_interesting_fname (s->filename))
 	continue;
       if (!filename_seen (s->filename, 1, &first)
-#if HAVE_DOS_BASED_FILE_SYSTEM
-	  && strncasecmp (s->filename, text, text_len) == 0
-#else
-	  && strncmp (s->filename, text, text_len) == 0
-#endif
-	  )
+	  && filename_ncmp (s->filename, text, text_len) == 0)
 	{
 	  /* This file matches for a completion; add it to the current
 	     list of matches.  */
@@ -4180,12 +4165,7 @@ make_source_files_completion_list (char *text, char *word)
 	  base_name = lbasename (s->filename);
 	  if (base_name != s->filename
 	      && !filename_seen (base_name, 1, &first)
-#if HAVE_DOS_BASED_FILE_SYSTEM
-	      && strncasecmp (base_name, text, text_len) == 0
-#else
-	      && strncmp (base_name, text, text_len) == 0
-#endif
-	      )
+	      && filename_ncmp (base_name, text, text_len) == 0)
 	    add_filename_to_list (base_name, text, word,
 				  &list, &list_used, &list_alloced);
 	}

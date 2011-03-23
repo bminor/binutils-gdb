@@ -45,6 +45,7 @@
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "gdbcore.h"
+#include "filenames.h"
 #include "objfiles.h"
 #include "gdb_obstack.h"
 #include "buildsym.h"
@@ -2959,7 +2960,7 @@ parse_partial_symbols (struct objfile *objfile)
 		      CORE_ADDR valu;
 		      static int prev_so_symnum = -10;
 		      static int first_so_symnum;
-		      char *p;
+		      const char *p;
 		      int prev_textlow_not_set;
 
 		      valu = sh.value + ANOFFSET (objfile->section_offsets,
@@ -3012,9 +3013,8 @@ parse_partial_symbols (struct objfile *objfile)
 			 the second the file name.  If pst exists, is
 			 empty, and has a filename ending in '/', we assume
 			 the previous N_SO was a directory name.  */
-
-		      p = strrchr (namestring, '/');
-		      if (p && *(p + 1) == '\000')
+		      p = lbasename (namestring);
+		      if (p != namestring && *p == '\000')
 			continue;		/* Simply ignore directory
 						   name SOs.  */
 
@@ -3065,15 +3065,15 @@ parse_partial_symbols (struct objfile *objfile)
 			 work (I suppose the psymtab_include_list could be
 			 hashed or put in a binary tree, if profiling shows
 			 this is a major hog).  */
-		      if (pst && strcmp (namestring, pst->filename) == 0)
+		      if (pst && filename_cmp (namestring, pst->filename) == 0)
 			continue;
 
 		      {
 			int i;
 
 			for (i = 0; i < includes_used; i++)
-			  if (strcmp (namestring,
-				      psymtab_include_list[i]) == 0)
+			  if (filename_cmp (namestring,
+					    psymtab_include_list[i]) == 0)
 			    {
 			      i = -1;
 			      break;

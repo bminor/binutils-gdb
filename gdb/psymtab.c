@@ -1067,7 +1067,7 @@ read_psymtabs_with_filename (struct objfile *objfile, const char *filename)
 
   ALL_OBJFILE_PSYMTABS_REQUIRED (objfile, p)
     {
-      if (strcmp (filename, p->filename) == 0)
+      if (filename_cmp (filename, p->filename) == 0)
 	PSYMTAB_TO_SYMTAB (p);
     }
 }
@@ -1735,7 +1735,7 @@ print-psymbols takes an output file name and optional symbol file name"));
 
   immediate_quit++;
   ALL_PSYMTABS (objfile, ps)
-    if (symname == NULL || strcmp (symname, ps->filename) == 0)
+    if (symname == NULL || filename_cmp (symname, ps->filename) == 0)
     dump_psymtab (objfile, ps, outfile);
   immediate_quit--;
   do_cleanups (cleanups);

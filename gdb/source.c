@@ -569,15 +569,10 @@ add_path (char *dirname, char **which_path, int parse_separators)
 	p = *which_path;
 	while (1)
 	  {
-	    /* FIXME: strncmp loses in interesting ways on MS-DOS and
-	       MS-Windows because of case-insensitivity and two different
-	       but functionally identical slash characters.  We need a
-	       special filesystem-dependent file-name comparison function.
-
-	       Actually, even on Unix I would use realpath() or its work-
-	       alike before comparing.  Then all the code above which
+	    /* FIXME: we should use realpath() or its work-alike
+	       before comparing.  Then all the code above which
 	       removes excess slashes and dots could simply go away.  */
-	    if (!strncmp (p, name, len)
+	    if (!filename_ncmp (p, name, len)
 		&& (p[len] == '\0' || p[len] == DIRNAME_SEPARATOR))
 	      {
 		/* Found it in the search path, remove old copy.  */

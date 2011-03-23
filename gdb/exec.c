@@ -25,6 +25,7 @@
 #include "target.h"
 #include "gdbcmd.h"
 #include "language.h"
+#include "filenames.h"
 #include "symfile.h"
 #include "objfiles.h"
 #include "completer.h"
@@ -845,7 +846,7 @@ exec_set_section_address (const char *filename, int index, CORE_ADDR address)
   table = current_target_sections;
   for (p = table->sections; p < table->sections_end; p++)
     {
-      if (strcmp (filename, p->bfd->filename) == 0
+      if (filename_cmp (filename, p->bfd->filename) == 0
 	  && index == p->the_bfd_section->index)
 	{
 	  p->endaddr += address - p->addr;

@@ -21,6 +21,7 @@
 #include "defs.h"
 #include "gdb_obstack.h"
 #include "splay-tree.h"
+#include "filenames.h"
 #include "symtab.h"
 #include "symfile.h"
 #include "objfiles.h"
@@ -500,7 +501,7 @@ struct macro_source_file *
 macro_lookup_inclusion (struct macro_source_file *source, const char *name)
 {
   /* Is SOURCE itself named NAME?  */
-  if (strcmp (name, source->filename) == 0)
+  if (filename_cmp (name, source->filename) == 0)
     return source;
 
   /* The filename in the source structure is probably a full path, but
@@ -510,11 +511,12 @@ macro_lookup_inclusion (struct macro_source_file *source, const char *name)
     int src_name_len = strlen (source->filename);
 
     /* We do mean < here, and not <=; if the lengths are the same,
-       then the strcmp above should have triggered, and we need to
+       then the filename_cmp above should have triggered, and we need to
        check for a slash here.  */
     if (name_len < src_name_len
-        && source->filename[src_name_len - name_len - 1] == '/'
-        && strcmp (name, source->filename + src_name_len - name_len) == 0)
+        && IS_DIR_SEPARATOR (source->filename[src_name_len - name_len - 1])
+        && filename_cmp (name,
+			 source->filename + src_name_len - name_len) == 0)
       return source;
   }
 

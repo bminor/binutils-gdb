@@ -638,7 +638,7 @@ solib_read_symbols (struct so_list *so, int flags)
 	  /* Have we already loaded this shared object?  */
 	  ALL_OBJFILES (so->objfile)
 	    {
-	      if (strcmp (so->objfile->name, so->so_name) == 0
+	      if (filename_cmp (so->objfile->name, so->so_name) == 0
 		  && so->objfile->addr_low == so->addr_low)
 		break;
 	    }
@@ -762,7 +762,7 @@ update_solib_list (int from_tty, struct target_ops *target)
 	    }
 	  else
 	    {
-	      if (! strcmp (gdb->so_original_name, i->so_original_name))
+	      if (! filename_cmp (gdb->so_original_name, i->so_original_name))
 		break;	      
 	    }
 
@@ -1339,7 +1339,7 @@ reload_shared_libraries_1 (int from_tty)
 	 symbol file, close that.  */
       if ((found_pathname == NULL && was_loaded)
 	  || (found_pathname != NULL
-	      && strcmp (found_pathname, so->so_name) != 0))
+	      && filename_cmp (found_pathname, so->so_name) != 0))
 	{
 	  if (so->objfile && ! (so->objfile->flags & OBJF_USERLOADED))
 	    free_objfile (so->objfile);
@@ -1351,7 +1351,7 @@ reload_shared_libraries_1 (int from_tty)
 	 file, open it.  */
       if (found_pathname != NULL
 	  && (!was_loaded
-	      || strcmp (found_pathname, so->so_name) != 0))
+	      || filename_cmp (found_pathname, so->so_name) != 0))
 	{
 	  volatile struct gdb_exception e;
 

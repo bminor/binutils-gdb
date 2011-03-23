@@ -643,7 +643,7 @@ void
 patch_subfile_names (struct subfile *subfile, char *name)
 {
   if (subfile != NULL && subfile->dirname == NULL && subfile->name != NULL
-      && subfile->name[strlen (subfile->name) - 1] == '/')
+      && IS_DIR_SEPARATOR (subfile->name[strlen (subfile->name) - 1]))
     {
       subfile->dirname = subfile->name;
       subfile->name = xstrdup (name);
@@ -878,7 +878,7 @@ watch_main_source_file_lossage (void)
 	   subfile->next;
 	   subfile = subfile->next)
 	{
-	  if (strcmp (lbasename (subfile->name), mainbase) == 0)
+	  if (filename_cmp (lbasename (subfile->name), mainbase) == 0)
 	    {
 	      ++nr_matches;
 	      mainsub_alias = subfile;
