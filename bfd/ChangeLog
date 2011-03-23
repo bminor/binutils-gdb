@@ -1,3 +1,11 @@
+2011-03-24  Alan Modra  <amodra@gmail.com>
+
+	* elf32-ppc.c (ppc_elf_tls_optimize): Catch more cases where
+	old-style __tls_get_addr calls without marker relocs don't match
+	their arg setup insn one for one.  If such mismatches are found
+	report the reloc and don't do any tls optimization.
+	* elf64-ppc.c (ppc64_elf_tls_optimize): Likewise.
+
 2011-03-10  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (ppc64_elf_relocate_section): Provide section/offset

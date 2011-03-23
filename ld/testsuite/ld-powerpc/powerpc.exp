@@ -1,5 +1,6 @@
 # Expect script for ld-powerpc tests
-#   Copyright 2002, 2003, 2005, 2006, 2007, 2008, 2009 Free Software Foundation
+#   Copyright 2002, 2003, 2005, 2006, 2007, 2008, 2009, 2010, 2011
+#   Free Software Foundation
 #
 # This file is part of the GNU Binutils.
 #
@@ -123,6 +124,18 @@ set ppcelftests {
     {"TLS32 markers" "-melf32ppc" "-a32"  {tlsmark32.s tlslib32.s}
      {{objdump -dr tlsmark32.d}}
       "tlsmark32"}
+    {"TLS32 opt 1" "-melf32ppc" "-a32"  {tlsopt1_32.s tlslib32.s}
+     {{objdump -dr tlsopt1_32.d}}
+      "tlsopt1_32"}
+    {"TLS32 opt 2" "-melf32ppc" "-a32"  {tlsopt2_32.s tlslib32.s}
+     {{objdump -dr tlsopt2_32.d}}
+      "tlsopt2_32"}
+    {"TLS32 opt 3" "-melf32ppc" "-a32"  {tlsopt3_32.s tlslib32.s}
+     {{objdump -dr tlsopt3_32.d}}
+      "tlsopt3_32"}
+    {"TLS32 opt 4" "-melf32ppc" "-a32"  {tlsopt4_32.s tlslib32.s}
+     {{objdump -dr tlsopt4_32.d}}
+      "tlsopt4_32"}
     {"Shared library with global symbol" "-shared -melf32ppc" "-a32" {sdalib.s}
      {} "sdalib.so"}
     {"Dynamic application with SDA" "-melf32ppc tmpdir/sdalib.so" "-a32" {sdadyn.s}
@@ -176,6 +189,18 @@ set ppc64elftests {
     {"TLS markers" "-melf64ppc" "-a64"  {tlsmark.s tlslib.s}
      {{objdump -dr tlsmark.d}}
       "tlsmark"}
+    {"TLS opt 1" "-melf64ppc" "-a64"  {tlsopt1.s tlslib.s}
+     {{objdump -dr tlsopt1.d}}
+      "tlsopt1"}
+    {"TLS opt 2" "-melf64ppc" "-a64"  {tlsopt2.s tlslib.s}
+     {{objdump -dr tlsopt2.d}}
+      "tlsopt2"}
+    {"TLS opt 3" "-melf64ppc" "-a64"  {tlsopt3.s tlslib.s}
+     {{objdump -dr tlsopt3.d}}
+      "tlsopt3"}
+    {"TLS opt 4" "-melf64ppc" "-a64"  {tlsopt4.s tlslib.s}
+     {{objdump -dr tlsopt4.d}}
+      "tlsopt4"}
     {"sym@tocbase" "-shared -melf64ppc" "-a64" {symtocbase-1.s symtocbase-2.s}
 	{{objdump -dj.data symtocbase.d}} "symtocbase.so"}
     {"TOC opt" "-melf64ppc" "-a64"  {tocopt.s}
