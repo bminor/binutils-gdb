@@ -38,8 +38,11 @@ static char *default_arch = DEFAULT_ARCH;
 /* Either 32 or 64, selects file format.  */
 static int s390_arch_size = 0;
 
+/* If no -march option was given default to the highest available CPU.
+   Since with S/390 a newer CPU always supports everything from its
+   predecessors this will accept every valid asm input.  */
+static unsigned int current_cpu = S390_OPCODE_MAXCPU - 1;
 static unsigned int current_mode_mask = 0;
-static unsigned int current_cpu = -1U;
 
 /* Whether to use user friendly register names. Default is TRUE.  */
 #ifndef TARGET_REG_NAMES_P
@@ -328,17 +331,11 @@ init_default_arch (void)
 
   if (current_mode_mask == 0)
     {
-      if (s390_arch_size == 32)
+      /* Default to z/Architecture mode if the CPU supports it.  */
+      if (current_cpu < S390_OPCODE_Z900)
 	current_mode_mask = 1 << S390_OPCODE_ESA;
       else
 	current_mode_mask = 1 << S390_OPCODE_ZARCH;
-    }
-  if (current_cpu == -1U)
-    {
-      if (current_mode_mask == (1 << S390_OPCODE_ESA))
-	current_cpu = S390_OPCODE_G5;
-      else
-	current_cpu = S390_OPCODE_Z900;
     }
 }
 
