@@ -1,3 +1,8 @@
+2011-03-23  Joseph Myers  <joseph@codesourcery.com>
+
+	* lexsup.c (parse_args): Only set report_plugin_symbols if plugins
+	are enabled.  Mark level as possibly unused.
+
 2011-03-22  Eric B. Weddington  <eric.weddington@atmel.com>
 
 	* Makefile.am (ALL_EMULATION_SOURCES): Add AVR XMEGA architectures.
