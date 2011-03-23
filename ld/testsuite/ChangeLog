@@ -1,3 +1,19 @@
+2011-03-24  Alan Modra  <amodra@gmail.com>
+
+	* ld-powerpc/tlsmark.s: Delete non-optimizable section.
+	* ld-powerpc/tlsmark32.s: Likewise.
+	* ld-powerpc/tlsmark.d: Adjust to suit.
+	* ld-powerpc/tlsmark32.d: Likewise.
+	* ld-powerpc/tlsopt1.d, * ld-powerpc/tlsopt1.s: New.
+	* ld-powerpc/tlsopt2.d, * ld-powerpc/tlsopt2.s: New.
+	* ld-powerpc/tlsopt3.d, * ld-powerpc/tlsopt3.s: New.
+	* ld-powerpc/tlsopt4.d, * ld-powerpc/tlsopt4.s: New.
+	* ld-powerpc/tlsopt1_32.d, * ld-powerpc/tlsopt1_32.s: New.
+	* ld-powerpc/tlsopt2_32.d, * ld-powerpc/tlsopt2_32.s: New.
+	* ld-powerpc/tlsopt3_32.d, * ld-powerpc/tlsopt3_32.s: New.
+	* ld-powerpc/tlsopt4_32.d, * ld-powerpc/tlsopt4_32.s: New.
+	* ld-powerpc/powerpc.exp: Run new tests.
+
 2011-03-15  Mike Frysinger  <vapier@gentoo.org>
 
 	* ld-elfvers/vers.exp (vers19): Add -Wl,-rpath-link,. to linker flags.

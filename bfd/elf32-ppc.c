@@ -4631,10 +4631,15 @@ ppc_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED,
     return TRUE;
 
   htab = ppc_elf_hash_table (info);
+  if (htab == NULL)
+    return FALSE;
+
   /* Make two passes through the relocs.  First time check that tls
      relocs involved in setting up a tls_get_addr call are indeed
-     followed by such a call.  If they are not, exclude them from
-     the optimizations done on the second pass.  */
+     followed by such a call.  If they are not, don't do any tls
+     optimization.  On the second pass twiddle tls_mask flags to
+     notify relocate_section that optimization can be done, and
+     adjust got and plt refcounts.  */
   for (pass = 0; pass < 2; ++pass)
     for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
       {
@@ -4646,6 +4651,7 @@ ppc_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED,
 	  if (sec->has_tls_reloc && !bfd_is_abs_section (sec->output_section))
 	    {
 	      Elf_Internal_Rela *relstart, *rel, *relend;
+	      int expecting_tls_get_addr = 0;
 
 	      /* Read the relocations.  */
 	      relstart = _bfd_elf_link_read_relocs (ibfd, sec, NULL, NULL,
@@ -4662,7 +4668,6 @@ ppc_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED,
 		  char *tls_mask;
 		  char tls_set, tls_clear;
 		  bfd_boolean is_local;
-		  int expecting_tls_get_addr;
 		  bfd_signed_vma *got_count;
 
 		  r_symndx = ELF32_R_SYM (rel->r_info);
@@ -4677,13 +4682,34 @@ ppc_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED,
 			h = (struct elf_link_hash_entry *) h->root.u.i.link;
 		    }
 
-		  expecting_tls_get_addr = 0;
 		  is_local = FALSE;
 		  if (h == NULL
 		      || !h->def_dynamic)
 		    is_local = TRUE;
 
 		  r_type = ELF32_R_TYPE (rel->r_info);
+		  /* If this section has old-style __tls_get_addr calls
+		     without marker relocs, then check that each
+		     __tls_get_addr call reloc is preceded by a reloc
+		     that conceivably belongs to the __tls_get_addr arg
+		     setup insn.  If we don't find matching arg setup
+		     relocs, don't do any tls optimization.  */
+		  if (pass == 0
+		      && sec->has_tls_get_addr_call
+		      && h != NULL
+		      && h == htab->tls_get_addr
+		      && !expecting_tls_get_addr
+		      && is_branch_reloc (r_type))
+		    {
+		      info->callbacks->minfo ("%C __tls_get_addr lost arg, "
+					      "TLS optimization disabled\n",
+					      ibfd, sec, rel->r_offset);
+		      if (elf_section_data (sec)->relocs != relstart)
+			free (relstart);
+		      return TRUE;
+		    }
+
+		  expecting_tls_get_addr = 0;
 		  switch (r_type)
 		    {
 		    case R_PPC_GOT_TLSLD16:
@@ -4760,9 +4786,13 @@ ppc_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED,
 		      /* Uh oh, we didn't find the expected call.  We
 			 could just mark this symbol to exclude it
 			 from tls optimization but it's safer to skip
-			 the entire section.  */
-		      sec->has_tls_reloc = 0;
-		      break;
+			 the entire optimization.  */
+		      info->callbacks->minfo (_("%C arg lost __tls_get_addr, "
+						"TLS optimization disabled\n"),
+					      ibfd, sec, rel->r_offset);
+		      if (elf_section_data (sec)->relocs != relstart)
+			free (relstart);
+		      return TRUE;
 		    }
 
 		  if (expecting_tls_get_addr)
