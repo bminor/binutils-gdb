@@ -20,9 +20,27 @@
 
 struct symtab;
 
+/* An instance of this may be filled in by decode_line_1.  The caller
+   must call init_linespec_result to initialize it.  */
+
+struct linespec_result
+{
+  /* If non-NULL, an array of canonical names for returned
+     symtab_and_line objects.  The array has as many elements as the
+     `nelts' field in the symtabs_and_line returned by decode_line_1.
+     An element in the array may be NULL.  The array and each non-NULL
+     element in it are allocated with xmalloc and must be freed by the
+     caller.  */
+  char **canonical;
+};
+
+/* Initialize a linespec_result.  */
+
+extern void init_linespec_result (struct linespec_result *);
+
 extern struct symtabs_and_lines
 	decode_line_1 (char **argptr, int funfirstline,
 		       struct symtab *default_symtab, int default_line,
-		       char ***canonical, int *not_found_ptr);
+		       struct linespec_result *canonical, int *not_found_ptr);
 
 #endif /* defined (LINESPEC_H) */

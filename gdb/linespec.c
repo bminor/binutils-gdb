@@ -60,12 +60,12 @@ static char *locate_first_half (char **argptr, int *is_quote_enclosed);
 static struct symtabs_and_lines decode_objc (char **argptr,
 					     int funfirstline,
 					     struct symtab *file_symtab,
-					     char ***canonical,
+					     struct linespec_result *canonical,
 					     char *saved_arg);
 
 static struct symtabs_and_lines decode_compound (char **argptr,
 						 int funfirstline,
-						 char ***canonical,
+						 struct linespec_result *canonical,
 						 char *saved_arg,
 						 char *p,
 						 int *not_found_ptr);
@@ -73,7 +73,7 @@ static struct symtabs_and_lines decode_compound (char **argptr,
 static struct symbol *lookup_prefix_sym (char **argptr, char *p);
 
 static struct symtabs_and_lines find_method (int funfirstline,
-					     char ***canonical,
+					     struct linespec_result *canonical,
 					     char *saved_arg,
 					     char *copy,
 					     struct type *t,
@@ -97,14 +97,15 @@ static int add_constructors (int method_counter, struct type *t,
 			     struct symbol **sym_arr);
 
 static void build_canonical_line_spec (struct symtab_and_line *,
-				       char *, char ***);
+				       char *, struct linespec_result *);
 
 static char *find_toplevel_char (char *s, char c);
 
 static int is_objc_method_format (const char *s);
 
 static struct symtabs_and_lines decode_line_2 (struct symbol *[],
-					       int, int, char ***);
+					       int, int,
+					       struct linespec_result *);
 
 static struct symtab *symtab_from_filename (char **argptr,
 					    char *p, int is_quote_enclosed,
@@ -114,28 +115,28 @@ static struct
 symtabs_and_lines decode_all_digits (char **argptr,
 				     struct symtab *default_symtab,
 				     int default_line,
-				     char ***canonical,
+				     struct linespec_result *canonical,
 				     struct symtab *file_symtab,
 				     char *q);
 
 static struct symtabs_and_lines decode_dollar (char *copy,
 					       int funfirstline,
 					       struct symtab *default_symtab,
-					       char ***canonical,
+					       struct linespec_result *canonical,
 					       struct symtab *file_symtab);
 
-static int decode_label (char *copy, char ***canonical,
+static int decode_label (char *copy, struct linespec_result *canonical,
 			 struct symtabs_and_lines *result);
 
 static struct symtabs_and_lines decode_variable (char *copy,
 						 int funfirstline,
-						 char ***canonical,
+						 struct linespec_result *canonical,
 						 struct symtab *file_symtab,
 						 int *not_found_ptr);
 
 static struct
 symtabs_and_lines symbol_found (int funfirstline,
-				char ***canonical,
+				struct linespec_result *canonical,
 				char *copy,
 				struct symbol *sym,
 				struct symtab *file_symtab);
@@ -405,7 +406,7 @@ add_constructors (int method_counter, struct type *t,
 
 static void
 build_canonical_line_spec (struct symtab_and_line *sal, char *symname,
-			   char ***canonical)
+			   struct linespec_result *canonical)
 {
   char **canonical_arr;
   char *canonical_name;
@@ -414,11 +415,11 @@ build_canonical_line_spec (struct symtab_and_line *sal, char *symname,
 
   if (s == (struct symtab *) NULL
       || s->filename == (char *) NULL
-      || canonical == (char ***) NULL)
+      || canonical == NULL)
     return;
 
   canonical_arr = (char **) xmalloc (sizeof (char *));
-  *canonical = canonical_arr;
+  canonical->canonical = canonical_arr;
 
   filename = s->filename;
   if (symname != NULL)
@@ -498,7 +499,7 @@ is_objc_method_format (const char *s)
 
 static struct symtabs_and_lines
 decode_line_2 (struct symbol *sym_arr[], int nelts, int funfirstline,
-	       char ***canonical)
+	       struct linespec_result *canonical)
 {
   struct symtabs_and_lines values, return_values;
   char *args, *arg1;
@@ -524,7 +525,7 @@ decode_line_2 (struct symbol *sym_arr[], int nelts, int funfirstline,
       canonical_arr = (char **) xmalloc (nelts * sizeof (char *));
       make_cleanup (xfree, canonical_arr);
       memset (canonical_arr, 0, nelts * sizeof (char *));
-      *canonical = canonical_arr;
+      canonical->canonical = canonical_arr;
     }
 
   i = 0;
@@ -791,7 +792,8 @@ keep_name_info (char *ptr)
 
 struct symtabs_and_lines
 decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
-	       int default_line, char ***canonical, int *not_found_ptr)
+	       int default_line, struct linespec_result *canonical,
+	       int *not_found_ptr)
 {
   char *p;
   char *q;
@@ -1187,7 +1189,7 @@ locate_first_half (char **argptr, int *is_quote_enclosed)
 
 struct symtabs_and_lines
 decode_objc (char **argptr, int funfirstline, struct symtab *file_symtab,
-	     char ***canonical, char *saved_arg)
+	     struct linespec_result *canonical, char *saved_arg)
 {
   struct symtabs_and_lines values;
   struct symbol **sym_arr = NULL;
@@ -1293,7 +1295,8 @@ decode_objc (char **argptr, int funfirstline, struct symtab *file_symtab,
    pointing to "AAA::inA::fun" and P pointing to "::inA::fun".  */
 
 static struct symtabs_and_lines
-decode_compound (char **argptr, int funfirstline, char ***canonical,
+decode_compound (char **argptr, int funfirstline,
+		 struct linespec_result *canonical,
 		 char *the_real_saved_arg, char *p, int *not_found_ptr)
 {
   struct symtabs_and_lines values;
@@ -1652,7 +1655,8 @@ lookup_prefix_sym (char **argptr, char *p)
    symbol is SYM_CLASS.  */
 
 static struct symtabs_and_lines
-find_method (int funfirstline, char ***canonical, char *saved_arg,
+find_method (int funfirstline, struct linespec_result *canonical,
+	     char *saved_arg,
 	     char *copy, struct type *t, struct symbol *sym_class,
 	     int *not_found_ptr)
 {
@@ -1815,7 +1819,7 @@ symtab_from_filename (char **argptr, char *p, int is_quote_enclosed,
 
 static struct symtabs_and_lines
 decode_all_digits (char **argptr, struct symtab *default_symtab,
-		   int default_line, char ***canonical,
+		   int default_line, struct linespec_result *canonical,
 		   struct symtab *file_symtab, char *q)
 
 {
@@ -1904,7 +1908,7 @@ decode_all_digits (char **argptr, struct symtab *default_symtab,
 
 static struct symtabs_and_lines
 decode_dollar (char *copy, int funfirstline, struct symtab *default_symtab,
-	       char ***canonical, struct symtab *file_symtab)
+	       struct linespec_result *canonical, struct symtab *file_symtab)
 {
   LONGEST valx;
   int index = 0;
@@ -1984,7 +1988,8 @@ decode_dollar (char *copy, int funfirstline, struct symtab *default_symtab,
    This function returns 1 if a label was found, 0 otherwise.  */
 
 static int
-decode_label (char *copy, char ***canonical, struct symtabs_and_lines *result)
+decode_label (char *copy, struct linespec_result *canonical,
+	      struct symtabs_and_lines *result)
 {
   struct symbol *sym;
 
@@ -2002,7 +2007,8 @@ decode_label (char *copy, char ***canonical, struct symtabs_and_lines *result)
    the location pointed to and do not issue an error message.  */ 
 
 static struct symtabs_and_lines
-decode_variable (char *copy, int funfirstline, char ***canonical,
+decode_variable (char *copy, int funfirstline,
+		 struct linespec_result *canonical,
 		 struct symtab *file_symtab, int *not_found_ptr)
 {
   struct symbol *sym;
@@ -2044,7 +2050,7 @@ decode_variable (char *copy, int funfirstline, char ***canonical,
    corresponding struct symtabs_and_lines.  */
 
 static struct symtabs_and_lines
-symbol_found (int funfirstline, char ***canonical, char *copy,
+symbol_found (int funfirstline, struct linespec_result *canonical, char *copy,
 	      struct symbol *sym, struct symtab *file_symtab)
 {
   struct symtabs_and_lines values;
@@ -2129,4 +2135,10 @@ minsym_found (int funfirstline, struct minimal_symbol *msymbol)
 
   values.nelts = 1;
   return values;
+}
+
+void
+init_linespec_result (struct linespec_result *lr)
+{
+  memset (lr, 0, sizeof (*lr));
 }

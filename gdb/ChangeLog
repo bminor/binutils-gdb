@@ -1,3 +1,25 @@
+2011-03-24  Tom Tromey  <tromey@redhat.com>
+
+	* symtab.c (decode_line_spec): Update.
+	* linespec.c (build_canonical_line_spec): Change type of
+	'canonical'.
+	(decode_line_2, decode_line_1, decode_objc, decode_compound)
+	(find_method, decode_all_digits, decode_dollar, decode_label)
+	(symbol_found): Likewise.
+	(init_linespec_result): New function.
+	* breakpoint.c (struct captured_parse_breakpoint_args)
+	<canonical_p>: New field, replaces addr_string_p.
+	(create_breakpoints_sal): Add 'canonical' parameter, replacing
+	'addr_string'.
+	(parse_breakpoint_sals): Likewise.
+	(do_captured_parse_breakpoint): Update.
+	(create_breakpoint): Use struct linespec_result.
+	(until_break_command): Update.
+	(breakpoint_re_set_one): Update.
+	(decode_line_spec_1): Update.
+	* linespec.h (struct linespec_result): New.
+	(init_linespec_result): Declare.
+
 2011-03-23  Pedro Alves  <pedro@codesourcery.com>
 
 	* regcache.c (regcache_raw_read): If the target didn't supply a

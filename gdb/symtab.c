@@ -4381,7 +4381,7 @@ decode_line_spec (char *string, int funfirstline)
 
   sals = decode_line_1 (&string, funfirstline,
 			cursal.symtab, cursal.line,
-			(char ***) NULL, NULL);
+			NULL, NULL);
 
   if (*string)
     error (_("Junk at end of line specification: %s"), string);

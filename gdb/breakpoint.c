@@ -5955,7 +5955,7 @@ struct captured_parse_breakpoint_args
   {
     char **arg_p;
     struct symtabs_and_lines *sals_p;
-    char ***addr_string_p;
+    struct linespec_result *canonical_p;
     int *not_found_ptr;
   };
 
@@ -7480,7 +7480,8 @@ expand_line_sal_maybe (struct symtab_and_line sal)
 
 static void
 create_breakpoints_sal (struct gdbarch *gdbarch,
-			struct symtabs_and_lines sals, char **addr_string,
+			struct symtabs_and_lines sals,
+			struct linespec_result *canonical,
 			char *cond_string,
 			enum bptype type, enum bpdisp disposition,
 			int thread, int task, int ignore_count,
@@ -7494,7 +7495,7 @@ create_breakpoints_sal (struct gdbarch *gdbarch,
       struct symtabs_and_lines expanded = 
 	expand_line_sal_maybe (sals.sals[i]);
 
-      create_breakpoint_sal (gdbarch, expanded, addr_string[i],
+      create_breakpoint_sal (gdbarch, expanded, canonical->canonical[i],
 			     cond_string, type, disposition,
 			     thread, task, ignore_count, ops,
 			     from_tty, enabled, internal);
@@ -7512,12 +7513,11 @@ create_breakpoints_sal (struct gdbarch *gdbarch,
 static void
 parse_breakpoint_sals (char **address,
 		       struct symtabs_and_lines *sals,
-		       char ***addr_string,
+		       struct linespec_result *canonical,
 		       int *not_found_ptr)
 {
   char *addr_start = *address;
 
-  *addr_string = NULL;
   /* If no arg given, or if first arg is 'if ', use the default
      breakpoint.  */
   if ((*address) == NULL
@@ -7566,15 +7566,15 @@ parse_breakpoint_sals (char **address,
  	      || ((strchr ("+-", (*address)[0]) != NULL)
  		  && ((*address)[1] != '['))))
 	*sals = decode_line_1 (address, 1, default_breakpoint_symtab,
-			       default_breakpoint_line, addr_string, 
+			       default_breakpoint_line, canonical, 
 			       not_found_ptr);
       else
 	*sals = decode_line_1 (address, 1, (struct symtab *) NULL, 0,
-		               addr_string, not_found_ptr);
+		               canonical, not_found_ptr);
     }
   /* For any SAL that didn't have a canonical string, fill one in.  */
-  if (sals->nelts > 0 && *addr_string == NULL)
-    *addr_string = xcalloc (sals->nelts, sizeof (char **));
+  if (sals->nelts > 0 && canonical->canonical == NULL)
+    canonical->canonical = xcalloc (sals->nelts, sizeof (char **));
   if (addr_start != (*address))
     {
       int i;
@@ -7582,9 +7582,9 @@ parse_breakpoint_sals (char **address,
       for (i = 0; i < sals->nelts; i++)
 	{
 	  /* Add the string if not present.  */
-	  if ((*addr_string)[i] == NULL)
-	    (*addr_string)[i] = savestring (addr_start, 
-					    (*address) - addr_start);
+	  if (canonical->canonical[i] == NULL)
+	    canonical->canonical[i] = savestring (addr_start, 
+						  (*address) - addr_start);
 	}
     }
 }
@@ -7639,7 +7639,7 @@ do_captured_parse_breakpoint (struct ui_out *ui, void *data)
 {
   struct captured_parse_breakpoint_args *args = data;
   
-  parse_breakpoint_sals (args->arg_p, args->sals_p, args->addr_string_p, 
+  parse_breakpoint_sals (args->arg_p, args->sals_p, args->canonical_p, 
 		         args->not_found_ptr);
 }
 
@@ -7783,7 +7783,7 @@ create_breakpoint (struct gdbarch *gdbarch,
   struct symtab_and_line pending_sal;
   char *copy_arg;
   char *addr_start = arg;
-  char **addr_string;
+  struct linespec_result canonical;
   struct cleanup *old_chain;
   struct cleanup *bkpt_chain = NULL;
   struct captured_parse_breakpoint_args parse_args;
@@ -7795,11 +7795,11 @@ create_breakpoint (struct gdbarch *gdbarch,
 
   sals.sals = NULL;
   sals.nelts = 0;
-  addr_string = NULL;
+  init_linespec_result (&canonical);
 
   parse_args.arg_p = &arg;
   parse_args.sals_p = &sals;
-  parse_args.addr_string_p = &addr_string;
+  parse_args.canonical_p = &canonical;
   parse_args.not_found_ptr = &not_found;
 
   if (type_wanted == bp_static_tracepoint && is_marker_spec (arg))
@@ -7809,9 +7809,9 @@ create_breakpoint (struct gdbarch *gdbarch,
       sals = decode_static_tracepoint_spec (&arg);
 
       copy_arg = savestring (addr_start, arg - addr_start);
-      addr_string = xcalloc (sals.nelts, sizeof (char **));
+      canonical.canonical = xcalloc (sals.nelts, sizeof (char **));
       for (i = 0; i < sals.nelts; i++)
-	addr_string[i] = xstrdup (copy_arg);
+	canonical.canonical[i] = xstrdup (copy_arg);
       goto done;
     }
 
@@ -7848,7 +7848,7 @@ create_breakpoint (struct gdbarch *gdbarch,
 	     breakpoint behavior is on and thus a pending breakpoint
 	     is defaulted on behalf of the user.  */
 	  copy_arg = xstrdup (addr_start);
-	  addr_string = &copy_arg;
+	  canonical.canonical = &copy_arg;
 	  sals.nelts = 1;
 	  sals.sals = &pending_sal;
 	  pending_sal.pc = 0;
@@ -7873,8 +7873,8 @@ create_breakpoint (struct gdbarch *gdbarch,
       /* Make sure that all storage allocated to SALS gets freed.  */
       make_cleanup (xfree, sals.sals);
       
-      /* Cleanup the addr_string array but not its contents.  */
-      make_cleanup (xfree, addr_string);
+      /* Cleanup the canonical array but not its contents.  */
+      make_cleanup (xfree, canonical.canonical);
     }
 
   /* ----------------------------- SNIP -----------------------------
@@ -7883,12 +7883,12 @@ create_breakpoint (struct gdbarch *gdbarch,
      then the memory is not reclaimed.  */
   bkpt_chain = make_cleanup (null_cleanup, 0);
 
-  /* Mark the contents of the addr_string for cleanup.  These go on
+  /* Mark the contents of the canonical for cleanup.  These go on
      the bkpt_chain and only occur if the breakpoint create fails.  */
   for (i = 0; i < sals.nelts; i++)
     {
-      if (addr_string[i] != NULL)
-	make_cleanup (xfree, addr_string[i]);
+      if (canonical.canonical[i] != NULL)
+	make_cleanup (xfree, canonical.canonical[i]);
     }
 
   /* Resolve all line numbers to PC's and verify that the addresses
@@ -7935,7 +7935,7 @@ create_breakpoint (struct gdbarch *gdbarch,
 	 expand multiple locations for each sal, given than SALS
 	 already should contain all sals for MARKER_ID.  */
       if (type_wanted == bp_static_tracepoint
-	  && is_marker_spec (addr_string[0]))
+	  && is_marker_spec (canonical.canonical[0]))
 	{
 	  int i;
 
@@ -7950,7 +7950,7 @@ create_breakpoint (struct gdbarch *gdbarch,
 	      expanded.sals[0] = sals.sals[i];
 	      old_chain = make_cleanup (xfree, expanded.sals);
 
-	      create_breakpoint_sal (gdbarch, expanded, addr_string[i],
+	      create_breakpoint_sal (gdbarch, expanded, canonical.canonical[i],
 				     cond_string, type_wanted,
 				     tempflag ? disp_del : disp_donttouch,
 				     thread, task, ignore_count, ops,
@@ -7975,7 +7975,7 @@ create_breakpoint (struct gdbarch *gdbarch,
 	    }
 	}
       else
-	create_breakpoints_sal (gdbarch, sals, addr_string, cond_string,
+	create_breakpoints_sal (gdbarch, sals, &canonical, cond_string,
 				type_wanted,
 				tempflag ? disp_del : disp_donttouch,
 				thread, task, ignore_count, ops, from_tty,
@@ -7990,7 +7990,7 @@ create_breakpoint (struct gdbarch *gdbarch,
       b = set_raw_breakpoint_without_location (gdbarch, type_wanted);
       set_breakpoint_number (internal, b);
       b->thread = -1;
-      b->addr_string = addr_string[0];
+      b->addr_string = canonical.canonical[0];
       b->cond_string = NULL;
       b->ignore_count = ignore_count;
       b->disposition = tempflag ? disp_del : disp_donttouch;
@@ -8858,10 +8858,9 @@ until_break_command (char *arg, int from_tty, int anywhere)
 
   if (default_breakpoint_valid)
     sals = decode_line_1 (&arg, 1, default_breakpoint_symtab,
-			  default_breakpoint_line, (char ***) NULL, NULL);
+			  default_breakpoint_line, NULL, NULL);
   else
-    sals = decode_line_1 (&arg, 1, (struct symtab *) NULL, 
-			  0, (char ***) NULL, NULL);
+    sals = decode_line_1 (&arg, 1, (struct symtab *) NULL, 0, NULL, NULL);
 
   if (sals.nelts != 1)
     error (_("Couldn't get information on specified line."));
@@ -10544,7 +10543,7 @@ breakpoint_re_set_one (void *bint)
 	    }
 	  else
 	    sals = decode_line_1 (&s, 1, (struct symtab *) NULL, 0,
-				  (char ***) NULL, not_found_ptr);
+				  NULL, not_found_ptr);
 	}
       if (e.reason < 0)
 	{
@@ -11150,10 +11149,10 @@ decode_line_spec_1 (char *string, int funfirstline)
     sals = decode_line_1 (&string, funfirstline,
 			  default_breakpoint_symtab,
 			  default_breakpoint_line,
-			  (char ***) NULL, NULL);
+			  NULL, NULL);
   else
     sals = decode_line_1 (&string, funfirstline,
-			  (struct symtab *) NULL, 0, (char ***) NULL, NULL);
+			  (struct symtab *) NULL, 0, NULL, NULL);
   if (*string)
     error (_("Junk at end of line specification: %s"), string);
   return sals;
