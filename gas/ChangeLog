@@ -1,3 +1,10 @@
+2011-03-24  Eric B. Weddington  <eric.weddington@atmel.com>
+
+	* config/tc-avr.c (mcu_types): Add new devices: atmega325pa,
+	atmega3250pa, atmega3290pa, atmega16hvbrevb, atmega32hvbrevb,
+	at90pwm161.
+	* doc/c-avr.texi: Document new device names.
+
 2011-03-24  Mike Frysinger  <vapier@gentoo.org>
 
 	* config/bfin-parse.y (dual 32bit add/sub): Return yyerror when dest
