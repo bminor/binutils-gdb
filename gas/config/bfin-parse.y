@@ -1,5 +1,5 @@
 /* bfin-parse.y  ADI Blackfin parser
-   Copyright 2005, 2006, 2007, 2008, 2009, 2010
+   Copyright 2005, 2006, 2007, 2008, 2009, 2010, 2011
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -898,6 +898,9 @@ asm_1:
 
 	| REG ASSIGN REG_A PLUS REG_A COMMA REG ASSIGN REG_A MINUS REG_A amod1
 	{
+	  if (REG_SAME ($1, $7))
+	    return yyerror ("Resource conflict in dest reg");
+
 	  if (IS_DREG ($1) && IS_DREG ($7) && !REG_SAME ($3, $5)
 	      && IS_A1 ($9) && !IS_A1 ($11))
 	    {
@@ -941,6 +944,8 @@ asm_1:
 	  if (!IS_DREG ($1) || !IS_DREG ($3) || !IS_DREG ($5) || !IS_DREG ($7))
 	    return yyerror ("Dregs expected");
 
+	  if (REG_SAME ($1, $7))
+	    return yyerror ("Resource conflict in dest reg");
 
 	  if ($4.r0 == 1 && $10.r0 == 2)
 	    {

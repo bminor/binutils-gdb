@@ -95,3 +95,8 @@
 .*:120: Error: Destination Dregs \(full\) must differ by one.
 .*:121: Error: Destination Dregs \(half\) must match.
 .*:122: Error: Destination Dreg sizes \(full or half\) must match.
+.*:124: Error: Resource conflict in dest reg.
+.*:125: Error: Differing source registers.
+.*:126: Error: Resource conflict in dest reg.
+.*:127: Error: Differing source registers.
+.*:129: Error: Register mismatch.

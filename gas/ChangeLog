@@ -1,5 +1,12 @@
 2011-03-24  Mike Frysinger  <vapier@gentoo.org>
 
+	* config/bfin-parse.y (dual 32bit add/sub): Return yyerror when dest
+	reg $1 is the same as dest reg $7.
+	(quad 16bit add/sub): Return yyerror when dest reg $1 is the same as
+	dest reg $7.
+
+2011-03-24  Mike Frysinger  <vapier@gentoo.org>
+
 	* config/bfin-parse.y (check_macfuncs): Clarify error message when
 	P is mismatched.  Check destination regno are off by one when P is
 	set, or are equal when P is not set.

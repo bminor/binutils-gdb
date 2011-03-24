@@ -1,5 +1,10 @@
 2011-03-24  Mike Frysinger  <vapier@gentoo.org>
 
+	* gas/bfin/expected_errors.s: Add invalid vector add/sub insn tests.
+	* gas/bfin/expected_errors.l: Add new error messages.
+
+2011-03-24  Mike Frysinger  <vapier@gentoo.org>
+
 	* gas/bfin/16bit_illegals.d, gas/bfin/16bit_illegals.s: Delete.
 	* gas/bfin/allinsn16.d, gas/bfin/allinsn16.s: New files.
 	* gas/bfin/bfin.exp: Change 16bit_illegals to allinsn16.
