@@ -1,5 +1,9 @@
 2011-03-23  Mike Frysinger  <vapier@gentoo.org>
 
+	* TODO: Document some known SIC issues.
+
+2011-03-23  Mike Frysinger  <vapier@gentoo.org>
+
 	* devices.h (dv_w1c): Fix typos in documentation of "bits" arg.
 	* dv-bfin_cec.c (bfin_cec_io_write_buffer): Pass 0xffee to dv_w1c_4.
 	* dv-bfin_emac.c (bfin_emac_io_write_buffer): Pass 0xe1 to dv_w1c_4
