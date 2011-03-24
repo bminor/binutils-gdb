@@ -6361,6 +6361,9 @@ Specifies the line @var{linenum} in the source file @var{filename}.
 Specifies the line that begins the body of the function @var{function}.
 For example, in C, this is the line with the open brace.
 
+@item @var{function}:@var{label}
+Specifies the line where @var{label} appears in @var{function}.
+
 @item @var{filename}:@var{function}
 Specifies the line that begins the body of the function @var{function}
 in the file @var{filename}.  You only need the file name with a

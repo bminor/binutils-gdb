@@ -1,3 +1,8 @@
+2011-03-24  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.base/label.exp: Use `main:there' linespec.  Add re-running
+	test.
+
 2011-03-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.dwarf2/dw2-entry-value-main.c: New file.

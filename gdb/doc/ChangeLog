@@ -1,3 +1,8 @@
+2011-03-24  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.texinfo (Specify Location): Document `function:label'
+	linespec.
+
 2011-03-18  Phil Muldoon  <pmuldoon@redhat.com>
 
         PR python/12149

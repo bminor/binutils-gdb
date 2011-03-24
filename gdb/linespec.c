@@ -111,6 +111,9 @@ static struct symtab *symtab_from_filename (char **argptr,
 					    char *p, int is_quote_enclosed,
 					    int *not_found_ptr);
 
+static struct symbol *find_function_symbol (char **argptr, char *p,
+					    int is_quote_enclosed);
+
 static struct
 symtabs_and_lines decode_all_digits (char **argptr,
 				     struct symtab *default_symtab,
@@ -125,7 +128,8 @@ static struct symtabs_and_lines decode_dollar (char *copy,
 					       struct linespec_result *canonical,
 					       struct symtab *file_symtab);
 
-static int decode_label (char *copy, struct linespec_result *canonical,
+static int decode_label (struct symbol *function_symbol,
+			 char *copy, struct linespec_result *canonical,
 			 struct symtabs_and_lines *result);
 
 static struct symtabs_and_lines decode_variable (char *copy,
@@ -139,7 +143,8 @@ symtabs_and_lines symbol_found (int funfirstline,
 				struct linespec_result *canonical,
 				char *copy,
 				struct symbol *sym,
-				struct symtab *file_symtab);
+				struct symtab *file_symtab,
+				struct symbol *function_symbol);
 
 static struct
 symtabs_and_lines minsym_found (int funfirstline,
@@ -813,6 +818,13 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
   /* The "first half" of the linespec.  */
   char *first_half;
 
+  /* If we are parsing `function:label', this holds the symbol for the
+     function.  */
+  struct symbol *function_symbol = NULL;
+  /* If FUNCTION_SYMBOL is not NULL, then this is the exception that
+     was thrown when trying to parse a filename.  */
+  volatile struct gdb_exception file_exception;
+
   if (not_found_ptr)
     *not_found_ptr = 0;
 
@@ -885,8 +897,22 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
       /* No, the first part is a filename; set file_symtab to be that file's
 	 symtab.  Also, move argptr past the filename.  */
 
-      file_symtab = symtab_from_filename (argptr, p, is_quote_enclosed,
-					  not_found_ptr);
+      TRY_CATCH (file_exception, RETURN_MASK_ERROR)
+	{
+	  file_symtab = symtab_from_filename (argptr, p, is_quote_enclosed,
+					      not_found_ptr);
+	}
+      /* If that failed, maybe we have `function:label'.  */
+      if (file_exception.reason < 0)
+	{
+	  function_symbol = find_function_symbol (argptr, p, is_quote_enclosed);
+	  /* If we did not find a function, re-throw the original
+	     exception.  */
+	  if (!function_symbol)
+	    throw_exception (file_exception);
+	  if (not_found_ptr)
+	    *not_found_ptr = 0;
+	}
 
       /* Check for single quotes on the non-filename part.  */
       if (!is_quoted)
@@ -900,6 +926,8 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
     }
 
   /* file_symtab is specified file's symtab, or 0 if no file specified.
+     If we are parsing `function:symbol', then FUNCTION_SYMBOL is the
+     function before the `:'.
      arg no longer contains the file name.  */
 
   /* If the filename was quoted, we must re-check the quotation.  */
@@ -921,7 +949,8 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
   while (*q >= '0' && *q <= '9')
     q++;
 
-  if (q != *argptr && (*q == 0 || *q == ' ' || *q == '\t' || *q == ','))
+  if (q != *argptr && (*q == 0 || *q == ' ' || *q == '\t' || *q == ',')
+      && function_symbol == NULL)
     /* We found a token consisting of all digits -- at least one digit.  */
     return decode_all_digits (argptr, default_symtab, default_line,
 			      canonical, file_symtab, q);
@@ -972,7 +1001,7 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
      (e.g. HP-UX millicode routines such as $$dyncall), or it may
      be history value, or it may be a convenience variable.  */
 
-  if (*copy == '$')
+  if (*copy == '$' && function_symbol == NULL)
     return decode_dollar (copy, funfirstline, default_symtab,
 			  canonical, file_symtab);
 
@@ -982,8 +1011,15 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
   if (!file_symtab)
     {
       struct symtabs_and_lines label_result;
-      if (decode_label (copy, canonical, &label_result))
+      if (decode_label (function_symbol, copy, canonical, &label_result))
 	return label_result;
+    }
+
+  if (function_symbol)
+    {
+      if (not_found_ptr)
+	*not_found_ptr = 1;
+      throw_exception (file_exception);
     }
 
   /* Look up that token as a variable.
@@ -1573,7 +1609,7 @@ decode_compound (char **argptr, int funfirstline,
   /* Look up entire name.  */
   sym = lookup_symbol (copy, get_selected_block (0), VAR_DOMAIN, 0);
   if (sym)
-    return symbol_found (funfirstline, canonical, copy, sym, NULL);
+    return symbol_found (funfirstline, canonical, copy, sym, NULL, NULL);
   else
     {
       struct minimal_symbol *msym;
@@ -1811,6 +1847,44 @@ symtab_from_filename (char **argptr, char *p, int is_quote_enclosed,
   return file_symtab;
 }
 
+/* Look up a function symbol in *ARGPTR.  If found, advance *ARGPTR
+   and return the symbol.  If not found, return NULL.  */
+
+static struct symbol *
+find_function_symbol (char **argptr, char *p, int is_quote_enclosed)
+{
+  char *p1;
+  char *copy;
+  struct symbol *function_symbol;
+
+  p1 = p;
+  while (p != *argptr && p[-1] == ' ')
+    --p;
+  if ((*p == '"') && is_quote_enclosed)
+    --p;
+  copy = (char *) alloca (p - *argptr + 1);
+  memcpy (copy, *argptr, p - *argptr);
+  /* It may have the ending quote right after the file name.  */
+  if ((is_quote_enclosed && copy[p - *argptr - 1] == '"')
+      || copy[p - *argptr - 1] == '\'')
+    copy[p - *argptr - 1] = 0;
+  else
+    copy[p - *argptr] = 0;
+
+  function_symbol = lookup_symbol (copy, get_selected_block (0),
+				   VAR_DOMAIN, 0);
+  if (!function_symbol || SYMBOL_CLASS (function_symbol) != LOC_BLOCK)
+    return NULL;
+
+  /* Discard the file name from the arg.  */
+  p = p1 + 1;
+  while (*p == ' ' || *p == '\t')
+    p++;
+  *argptr = p;
+
+  return function_symbol;
+}
+
 
 
 /* This decodes a line where the argument is all digits (possibly
@@ -1945,7 +2019,7 @@ decode_dollar (char *copy, int funfirstline, struct symtab *default_symtab,
       need_canonical = 1;
       /* Symbol was found --> jump to normal symbol processing.  */
       if (sym)
-	return symbol_found (funfirstline, canonical, copy, sym, NULL);
+	return symbol_found (funfirstline, canonical, copy, sym, NULL, NULL);
 
       /* If symbol was not found, look in minimal symbol tables.  */
       msymbol = lookup_minimal_symbol (copy, NULL, NULL);
@@ -1981,6 +2055,8 @@ decode_dollar (char *copy, int funfirstline, struct symtab *default_symtab,
 
 /* A helper for decode_line_1 that tries to find a label.  The label
    is searched for in the current block.
+   FUNCTION_SYMBOL is the enclosing function; or NULL if none
+   specified.
    COPY is the name of the label to find.
    CANONICAL is the same as the "canonical" argument to decode_line_1.
    RESULT is a pointer to a symtabs_and_lines structure which will be
@@ -1988,15 +2064,31 @@ decode_dollar (char *copy, int funfirstline, struct symtab *default_symtab,
    This function returns 1 if a label was found, 0 otherwise.  */
 
 static int
-decode_label (char *copy, struct linespec_result *canonical,
+decode_label (struct symbol *function_symbol, char *copy,
+	      struct linespec_result *canonical,
 	      struct symtabs_and_lines *result)
 {
   struct symbol *sym;
+  struct block *block;
 
-  sym = lookup_symbol (copy, get_selected_block (0), LABEL_DOMAIN, 0);
+  if (function_symbol)
+    block = SYMBOL_BLOCK_VALUE (function_symbol);
+  else
+    {
+      block = get_selected_block (0);
+      for (;
+	   block && !BLOCK_FUNCTION (block);
+	   block = BLOCK_SUPERBLOCK (block))
+	;
+      if (!block)
+	return 0;
+      function_symbol = BLOCK_FUNCTION (block);
+    }
+
+  sym = lookup_symbol (copy, block, LABEL_DOMAIN, 0);
 
   if (sym != NULL)
-    *result = symbol_found (0, canonical, copy, sym, NULL);
+    *result = symbol_found (0, canonical, copy, sym, NULL, function_symbol);
 
   return sym != NULL;
 }
@@ -2022,7 +2114,7 @@ decode_variable (char *copy, int funfirstline,
 		       VAR_DOMAIN, 0);
 
   if (sym != NULL)
-    return symbol_found (funfirstline, canonical, copy, sym, file_symtab);
+    return symbol_found (funfirstline, canonical, copy, sym, file_symtab, NULL);
 
   msymbol = lookup_minimal_symbol (copy, NULL, NULL);
 
@@ -2051,7 +2143,8 @@ decode_variable (char *copy, int funfirstline,
 
 static struct symtabs_and_lines
 symbol_found (int funfirstline, struct linespec_result *canonical, char *copy,
-	      struct symbol *sym, struct symtab *file_symtab)
+	      struct symbol *sym, struct symtab *file_symtab,
+	      struct symbol *function_symbol)
 {
   struct symtabs_and_lines values;
   
@@ -2083,16 +2176,29 @@ symbol_found (int funfirstline, struct linespec_result *canonical, char *copy,
     {
       if (funfirstline && SYMBOL_CLASS (sym) != LOC_LABEL)
 	error (_("\"%s\" is not a function"), copy);
-      else if (SYMBOL_LINE (sym) != 0)
+      else if (SYMBOL_VALUE_ADDRESS (sym) != 0)
 	{
 	  /* We know its line number.  */
 	  values.sals = (struct symtab_and_line *)
 	    xmalloc (sizeof (struct symtab_and_line));
 	  values.nelts = 1;
-	  memset (&values.sals[0], 0, sizeof (values.sals[0]));
+	  init_sal (&values.sals[0]);
 	  values.sals[0].symtab = SYMBOL_SYMTAB (sym);
 	  values.sals[0].line = SYMBOL_LINE (sym);
+	  values.sals[0].pc = SYMBOL_VALUE_ADDRESS (sym);
 	  values.sals[0].pspace = SYMTAB_PSPACE (SYMBOL_SYMTAB (sym));
+	  values.sals[0].explicit_pc = 1;
+
+	  if (canonical)
+	    {
+	      canonical->special_display = 1;
+	      canonical->canonical = xmalloc (sizeof (char *));
+	      canonical->canonical[0]
+		= xstrprintf ("%s:%s",
+			      SYMBOL_NATURAL_NAME (function_symbol),
+			      SYMBOL_NATURAL_NAME (sym));
+	    }
+
 	  return values;
 	}
       else

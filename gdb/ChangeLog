@@ -1,5 +1,19 @@
 2011-03-24  Tom Tromey  <tromey@redhat.com>
 
+	PR breakpoints/11816:
+	* linespec.c (decode_line_1): Parse `function:label' linespecs.
+	(decode_compound): Update.
+	(find_function_symbol): New function.
+	(decode_dollar): Update.
+	(decode_label): Add 'function_symbol' parameter.  Handle
+	function-relative labels.
+	(decode_variable): Update.
+	(symbol_found): Add 'function_symbol' parameter.  Use label's PC,
+	not its line.  Set `special_display' and canonical name for
+	labels.
+
+2011-03-24  Tom Tromey  <tromey@redhat.com>
+
 	* linespec.h (struct linespec_result) <special_display>: New
 	field.
 	* breakpoint.h (struct breakpoint) <display_canonical>: New
