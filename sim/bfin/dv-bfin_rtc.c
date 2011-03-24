@@ -80,7 +80,7 @@ bfin_rtc_io_write_buffer (struct hw *me, const void *source,
       /* XXX: Ignore these since we are wired to host.  */
       break;
     case mmr_offset(istat):
-      dv_w1c_2 (value16p, value, 1 << 14);
+      dv_w1c_2 (value16p, value, ~(1 << 14));
       break;
     case mmr_offset(alarm):
       break;

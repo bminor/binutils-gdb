@@ -81,8 +81,8 @@ static inline void dv_store_4 (void *ptr, bu32 val)
   dv_store_2 (ptr, val);
 }
 
-/* Helpers for MMRs where all bits are W1C except for the specified
-   bits -- those ones are RO.  */
+/* Helpers for MMRs where only the specified bits are W1C.  The
+   rest are left unmodified.  */
 #define dv_w1c(ptr, val, bits) (*(ptr) &= ~((val) & (bits)))
 static inline void dv_w1c_2 (bu16 *ptr, bu16 val, bu16 bits)
 {

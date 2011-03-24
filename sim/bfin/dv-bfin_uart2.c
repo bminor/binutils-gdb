@@ -97,10 +97,10 @@ bfin_uart_io_write_buffer (struct hw *me, const void *source,
       uart->ier |= value;
       break;
     case mmr_offset(ier_clear):
-      dv_w1c_2 (&uart->ier, value, 0);
+      dv_w1c_2 (&uart->ier, value, -1);
       break;
     case mmr_offset(lsr):
-      dv_w1c_2 (valuep, value, TEMT | THRE | DR);
+      dv_w1c_2 (valuep, value, TFI | BI | FE | PE | OE);
       break;
     case mmr_offset(rbr):
       /* XXX: Writes are ignored ?  */

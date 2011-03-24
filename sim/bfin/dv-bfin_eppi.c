@@ -106,7 +106,7 @@ bfin_eppi_io_write_buffer (struct hw *me, const void *source,
     {
     case mmr_offset(status):
       dv_bfin_mmr_require_16 (me, addr, nr_bytes, true);
-      dv_w1c_2 (value16p, value, 0);
+      dv_w1c_2 (value16p, value, 0x1ff);
       break;
     case mmr_offset(hcount):
     case mmr_offset(hdelay):

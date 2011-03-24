@@ -149,7 +149,7 @@ bfin_otp_io_write_buffer (struct hw *me, const void *source, int space,
     case mmr_offset(status):
       dv_bfin_mmr_require_16 (me, addr, nr_bytes, true);
       /* XXX: All bits seem to be W1C.  */
-      dv_w1c_2 (value16p, value, 0);
+      dv_w1c_2 (value16p, value, -1);
       break;
     case mmr_offset(timing):
     case mmr_offset(data0):

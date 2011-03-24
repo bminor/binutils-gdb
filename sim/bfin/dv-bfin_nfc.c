@@ -108,7 +108,7 @@ bfin_nfc_io_write_buffer (struct hw *me, const void *source, int space,
       *valuep = value;
       break;
     case mmr_offset(irqstat):
-      dv_w1c_2 (valuep, value, 0);
+      dv_w1c_2 (valuep, value, -1);
       break;
     default:
       dv_bfin_mmr_invalid (me, addr, nr_bytes, true);

@@ -224,7 +224,7 @@ bfin_emac_io_write_buffer (struct hw *me, const void *source,
       dv_w1c_4_partial (valuep, value, 0xf20);
       break;
     case mmr_offset(systat):
-      dv_w1c_4 (valuep, value, 0x1e);
+      dv_w1c_4 (valuep, value, 0xe1);
       break;
     case mmr_offset(staadd):
       *valuep = value | STABUSY;
@@ -242,7 +242,7 @@ bfin_emac_io_write_buffer (struct hw *me, const void *source,
     case mmr_offset(tx_stky):
     case mmr_offset(mmc_rirqs):
     case mmr_offset(mmc_tirqs):
-      dv_w1c_4 (valuep, value, 0);
+      dv_w1c_4 (valuep, value, -1);
       break;
     case mmr_offset(mmc_ctl):
       /* Writing to bit 0 clears all counters.  */

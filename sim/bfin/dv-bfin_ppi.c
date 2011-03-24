@@ -105,7 +105,7 @@ bfin_ppi_io_write_buffer (struct hw *me, const void *source, int space,
       *valuep = value;
       break;
     case mmr_offset(status):
-      dv_w1c_2 (valuep, value, (1 << 10));
+      dv_w1c_2 (valuep, value, ~(1 << 10));
       break;
     default:
       dv_bfin_mmr_invalid (me, addr, nr_bytes, true);

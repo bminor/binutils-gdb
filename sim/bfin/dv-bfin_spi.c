@@ -88,7 +88,7 @@ bfin_spi_io_write_buffer (struct hw *me, const void *source, int space,
   switch (mmr_off)
     {
     case mmr_offset(stat):
-      dv_w1c_2 (valuep, value, SPIF | TXS | RXS);
+      dv_w1c_2 (valuep, value, ~(SPIF | TXS | RXS));
       break;
     case mmr_offset(tdbr):
       *valuep = value;

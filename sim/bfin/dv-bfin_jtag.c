@@ -63,7 +63,7 @@ bfin_jtag_io_write_buffer (struct hw *me, const void *source, int space,
   switch (mmr_off)
     {
     case mmr_offset(dbgstat):
-      dv_w1c_4 (valuep, value, ~0xc);
+      dv_w1c_4 (valuep, value, 0xc);
       break;
     case mmr_offset(dspid):
       /* Discard writes to these.  */

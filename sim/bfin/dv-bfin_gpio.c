@@ -92,7 +92,7 @@ bfin_gpio_io_write_buffer (struct hw *me, const void *source, int space,
     case mmr_offset(clear):
     case mmr_offset(maska_clear):
     case mmr_offset(maskb_clear):
-      dv_w1c_2 (valuep, value, 0);
+      dv_w1c_2 (valuep, value, -1);
       break;
     case mmr_offset(set):
     case mmr_offset(maska_set):

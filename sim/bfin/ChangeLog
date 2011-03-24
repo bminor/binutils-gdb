@@ -1,5 +1,22 @@
 2011-03-23  Mike Frysinger  <vapier@gentoo.org>
 
+	* devices.h (dv_w1c): Fix typos in documentation of "bits" arg.
+	* dv-bfin_cec.c (bfin_cec_io_write_buffer): Pass 0xffee to dv_w1c_4.
+	* dv-bfin_emac.c (bfin_emac_io_write_buffer): Pass 0xe1 to dv_w1c_4
+	for systat MMR and -1 to dv_w1c_4 for [rt]x_stky/mmc_[rt]irqs MMRs.
+	* dv-bfin_eppi.c (bfin_eppi_io_write_buffer): Pass 0x1ff to dv_w1c_2.
+	* dv-bfin_gpio.c (bfin_gpio_io_write_buffer): Invert bits to dv_w1c_2.
+	* dv-bfin_jtag.c (bfin_jtag_io_write_buffer): Invert bits to dv_w1c_4.
+	* dv-bfin_nfc.c (bfin_nfc_io_write_buffer): Invert bits to dv_w1c_2.
+	* dv-bfin_otp.c (bfin_otp_io_write_buffer): Invert bits to dv_w1c_2.
+	* dv-bfin_ppi.c (bfin_ppi_io_write_buffer): Invert bits to dv_w1c_2.
+	* dv-bfin_rtc.c (bfin_rtc_io_write_buffer): Invert bits to dv_w1c_2.
+	* dv-bfin_spi.c (bfin_spi_io_write_buffer): Invert bits to dv_w1c_2.
+	* dv-bfin_twi.c (bfin_twi_io_write_buffer): Invert bits to dv_w1c_2.
+	* dv-bfin_uart2.c (bfin_uart_io_write_buffer): Invert bits to dv_w1c_2.
+
+2011-03-23  Mike Frysinger  <vapier@gentoo.org>
+
 	* dv-bfin_uart.h (TFI, BI, FE, PE, OE): Define.
 
 2011-03-23  Mike Frysinger  <vapier@gentoo.org>
