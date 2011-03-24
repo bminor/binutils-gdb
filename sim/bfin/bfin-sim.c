@@ -4185,9 +4185,6 @@ decode_dsp32alu_0 (SIM_CPU *cpu, bu16 iw0, bu16 iw1)
 		  src0 + 1, src0, src1 + 1, src1, opts[HL + (aop << 1)],
 		  s ? ", r" : "");
 
-      if (src0 == src1)
-	illegal_instruction_combination (cpu);
-
       s0L = DREG (src0);
       s0H = DREG (src0 + 1);
       s1L = DREG (src1);
@@ -4305,9 +4302,6 @@ decode_dsp32alu_0 (SIM_CPU *cpu, bu16 iw0, bu16 iw1)
       TRACE_INSN (cpu, "R%i = BYTEOP3P (R%i:%i, R%i:%i) (%s%s);", dst0,
 		  src0 + 1, src0, src1 + 1, src1, HL ? "HI" : "LO",
 		  s ? ", R" : "");
-
-      if (src0 == src1)
-	illegal_instruction_combination (cpu);
 
       s0L = DREG (src0);
       s0H = DREG (src0 + 1);
@@ -4795,9 +4789,6 @@ decode_dsp32alu_0 (SIM_CPU *cpu, bu16 iw0, bu16 iw1)
 
       TRACE_INSN (cpu, "R%i = BYTEOP1P (R%i:%i, R%i:%i)%s;", dst0,
 		  src0 + 1, src0, src1 + 1, src1, opts[s + (aop << 1)]);
-
-      if (src0 == src1)
-	illegal_instruction_combination (cpu);
 
       s0L = DREG (src0);
       s0H = DREG (src0 + 1);

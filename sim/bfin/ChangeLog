@@ -1,3 +1,8 @@
+2011-03-23  Robin Getz  <robin.getz@analog.com>
+
+	* bfin-sim.c (decode_dsp32alu_0): Drop the src0/src1 check for
+	BYTEOP1P, BYTEOP2P, and BYTEOP3P insns.
+
 2011-03-23  Mike Frysinger  <vapier@gentoo.org>
 
 	* machs.c (bf50x_dev, bf512_dev, bf516_dev, bf522_dev, bf526_dev,
