@@ -90,3 +90,5 @@
 .*:113: Error: Preg expected in address. Input text was \).
 .*:114: Error: Preg expected in address. Input text was \).
 .*:115: Error: Dreg expected for destination operand. Input text was \).
+.*:117: Error: Illegal dest register combination. Input text was \).
+.*:118: Error: Illegal source register combination. Input text was \).

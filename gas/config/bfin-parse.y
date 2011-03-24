@@ -868,6 +868,9 @@ asm_1:
 	}
 	| LPAREN REG COMMA REG RPAREN ASSIGN SEARCH REG LPAREN searchmod RPAREN
 	{
+	  if (REG_SAME ($2, $4))
+	    return yyerror ("Illegal dest register combination");
+
 	  if (IS_DREG ($2) && IS_DREG ($4) && IS_DREG ($8))
 	    {
 	      notethat ("dsp32alu: (dregs , dregs ) = SEARCH dregs (searchmod)\n");
@@ -2388,6 +2391,9 @@ asm_1:
 
 	| BITMUX LPAREN REG COMMA REG COMMA REG_A RPAREN asr_asl
 	{
+	  if (REG_SAME ($3, $5))
+	    return yyerror ("Illegal source register combination");
+
 	  if (IS_DREG ($3) && IS_DREG ($5) && !IS_A1 ($7))
 	    {
 	      notethat ("dsp32shift: BITMUX (dregs , dregs , A0) (ASR)\n");

@@ -1,3 +1,8 @@
+2011-03-23  Mike Frysinger  <vapier@gentoo.org>
+
+	* gas/bfin/expected_errors.s: Add invalid SEARCH/BITMUX insns.
+	* gas/bfin/expected_errors.l: Add expected errors.
+
 2011-03-18  Alan Modra  <amodra@gmail.com>
 
 	* gas/elf/bad-size.err: Adjust expected error.
