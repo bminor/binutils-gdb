@@ -1,5 +1,10 @@
 2011-03-23  Robin Getz  <robin.getz@analog.com>
 
+	* bfin-sim.c (decode_dsp32shift_0): Set acc0 to the unextended
+	value for the VIT_MAX insn, and mask off the result when done.
+
+2011-03-23  Robin Getz  <robin.getz@analog.com>
+
 	* bfin-sim.c (decode_dsp32alu_0): Set A1 to a1_lo when up_hi is false,
 	and set A0 to a0_lo when up_lo is false.
 
