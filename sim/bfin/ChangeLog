@@ -1,3 +1,17 @@
+2011-03-23  Mike Frysinger  <vapier@gentoo.org>
+
+	* dv-bfin_sic.c (ENC, DEC_PIN, DEC_SIC): Define.
+	(bfin_sic_50x_ports, bfin_sic_51x_ports, bfin_sic_52x_ports,
+	bfin_sic_533_ports, bfin_sic_537_ports, bfin_sic_538_ports,
+	bfin_sic_54x_ports, bfin_sic_561_ports, bfin_sic_59x_ports):
+	Encode ids with the ENC macro.
+	(bfin_sic_52x_port_event, bfin_sic_537_port_event,
+	bfin_sic_54x_port_event, bfin_sic_561_port_event): Set idx
+	from my_port with DEC_SIC, and set bit from my_port with DEC_PIN.
+	(bfin_sic_533_port_event): Delete.
+	(bfin_sic_finish): Call set_hw_port_event with
+	bfin_sic_537_port_event for BF533 and BF59x targets.
+
 2011-03-23  Robin Getz  <robin.getz@analog.com>
 
 	* bfin-sim.c (decode_dsp32alu_0): Drop the src0/src1 check for
