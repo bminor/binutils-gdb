@@ -3105,7 +3105,7 @@ lookup_signatured_type (struct objfile *objfile, ULONGEST sig)
   if (dwarf2_per_objfile->signatured_types == NULL)
     {
       complaint (&symfile_complaints,
-		 _("missing `.debug_types' section for DW_FORM_sig8 die"));
+		 _("missing `.debug_types' section for DW_FORM_ref_sig8 die"));
       return 0;
     }
 
@@ -4217,7 +4217,7 @@ skip_one_die (gdb_byte *buffer, gdb_byte *info_ptr,
 	  break;
 	case DW_FORM_data8:
 	case DW_FORM_ref8:
-	case DW_FORM_sig8:
+	case DW_FORM_ref_sig8:
 	  info_ptr += 8;
 	  break;
 	case DW_FORM_string:
@@ -9184,7 +9184,7 @@ find_partial_die_in_comp_unit (unsigned int offset, struct dwarf2_cu *cu)
 /* Find a partial DIE at OFFSET, which may or may not be in CU,
    except in the case of .debug_types DIEs which do not reference
    outside their CU (they do however referencing other types via
-   DW_FORM_sig8).  */
+   DW_FORM_ref_sig8).  */
 
 static struct partial_die_info *
 find_partial_die (unsigned int offset, struct dwarf2_cu *cu)
@@ -9487,7 +9487,7 @@ read_attribute_value (struct attribute *attr, unsigned form,
       DW_ADDR (attr) = cu->header.offset + read_8_bytes (abfd, info_ptr);
       info_ptr += 8;
       break;
-    case DW_FORM_sig8:
+    case DW_FORM_ref_sig8:
       /* Convert the signature to something we can record in DW_UNSND
 	 for later lookup.
          NOTE: This is NULL if the type wasn't found.  */
@@ -11497,7 +11497,7 @@ lookup_die_type (struct die_info *die, struct attribute *attr,
 
       this_type = get_die_type_at_offset (offset, cu->per_cu);
     }
-  else if (attr->form == DW_FORM_sig8)
+  else if (attr->form == DW_FORM_ref_sig8)
     {
       struct signatured_type *sig_type = DW_SIGNATURED_TYPE (attr);
       struct dwarf2_cu *sig_cu;
@@ -12537,8 +12537,8 @@ dwarf_form_name (unsigned form)
       return "DW_FORM_exprloc";
     case DW_FORM_flag_present:
       return "DW_FORM_flag_present";
-    case DW_FORM_sig8:
-      return "DW_FORM_sig8";
+    case DW_FORM_ref_sig8:
+      return "DW_FORM_ref_sig8";
     default:
       return "DW_FORM_<unknown>";
     }
@@ -13089,7 +13089,7 @@ dump_die_shallow (struct ui_file *f, int indent, struct die_info *die)
 	  fprintf_unfiltered (f, "section offset: %s",
 			      pulongest (DW_UNSND (&die->attrs[i])));
 	  break;
-	case DW_FORM_sig8:
+	case DW_FORM_ref_sig8:
 	  if (DW_SIGNATURED_TYPE (&die->attrs[i]) != NULL)
 	    fprintf_unfiltered (f, "signatured type, offset: 0x%x",
 				DW_SIGNATURED_TYPE (&die->attrs[i])->offset);
@@ -13291,7 +13291,7 @@ follow_die_ref_or_sig (struct die_info *src_die, struct attribute *attr,
 
   if (is_ref_attr (attr))
     die = follow_die_ref (src_die, attr, ref_cu);
-  else if (attr->form == DW_FORM_sig8)
+  else if (attr->form == DW_FORM_ref_sig8)
     die = follow_die_sig (src_die, attr, ref_cu);
   else
     {
@@ -13322,7 +13322,7 @@ follow_die_offset (unsigned int offset, struct dwarf2_cu **ref_cu)
     {
       /* .debug_types CUs cannot reference anything outside their CU.
 	 If they need to, they have to reference a signatured type via
-	 DW_FORM_sig8.  */
+	 DW_FORM_ref_sig8.  */
       if (! offset_in_cu_p (&cu->header, offset))
 	return NULL;
     }

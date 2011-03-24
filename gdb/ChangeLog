@@ -1,3 +1,15 @@
+2011-03-24  Mark Wielaard  <mjw@redhat.com>
+
+        * dwarf2read.c (lookup_signatured_type): Use DW_FORM_ref_sig8 in
+        complaint.
+        (skip_one_die): Use DW_FORM_ref_sig8, not DW_FORM_sig8.
+        (find_partial_die_in_comp_unit): Likewise in comment.
+        (read_attribute_value): Likewise.
+        (lookup_die_type): Likewise.
+        (dwarf_form_name): Likewise.
+        (dump_die_shallow): Likewise.
+        (follow_die_ref_or_sig): Likewise.
+
 2011-03-24  Tom Tromey  <tromey@redhat.com>
 
 	PR breakpoints/11816:
