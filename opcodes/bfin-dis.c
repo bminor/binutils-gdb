@@ -3010,13 +3010,16 @@ decode_dsp32mac_0 (TIword iw0, TIword iw1, disassemble_info *outf)
 	{
 	  if (MM)
 	    OUTS (outf, " (M)");
-	  MM = 0;
 	  OUTS (outf, ", ");
 	}
     }
 
   if (w0 == 1 || op0 != 3)
     {
+      /* Clear MM option since it only matters for MAC1, and if we made
+         it this far, we've already shown it or we want to ignore it.  */
+      MM = 0;
+
       if (w0)
 	OUTS (outf, P ? dregs (dst) : dregs_lo (dst));
 

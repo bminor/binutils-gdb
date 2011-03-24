@@ -1,3 +1,7 @@
+2011-03-24  Mike Frysinger  <vapier@gentoo.org>
+
+	* bfin-dis.c (decode_dsp32mac_0): Move MM zeroing down to MAC0 logic.
+
 2011-03-22  Eric B. Weddington  <eric.weddington@atmel.com>
 
 	* avr-dis.c (avr_operand): Add opcode_str parameter. Check for
