@@ -25,6 +25,11 @@ struct symtab;
 
 struct linespec_result
 {
+  /* If non-zero, the linespec should be displayed to the user.  This
+     is used by "unusual" linespecs where the ordinary `info break'
+     display mechanism would do the wrong thing.  */
+  int special_display;
+
   /* If non-NULL, an array of canonical names for returned
      symtab_and_line objects.  The array has as many elements as the
      `nelts' field in the symtabs_and_line returned by decode_line_1.

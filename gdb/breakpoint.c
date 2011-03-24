@@ -4622,7 +4622,9 @@ print_breakpoint_location (struct breakpoint *b,
   if (loc != NULL)
     set_current_program_space (loc->pspace);
 
-  if (b->source_file && loc)
+  if (b->display_canonical)
+    ui_out_field_string (uiout, "what", b->addr_string);
+  else if (b->source_file && loc)
     {
       struct symbol *sym 
 	= find_pc_sect_function (loc->address, loc->section);
@@ -7205,7 +7207,7 @@ create_breakpoint_sal (struct gdbarch *gdbarch,
 		       enum bptype type, enum bpdisp disposition,
 		       int thread, int task, int ignore_count,
 		       struct breakpoint_ops *ops, int from_tty,
-		       int enabled, int internal)
+		       int enabled, int internal, int display_canonical)
 {
   struct breakpoint *b = NULL;
   int i;
@@ -7314,6 +7316,7 @@ create_breakpoint_sal (struct gdbarch *gdbarch,
 	}
     }   
 
+  b->display_canonical = display_canonical;
   if (addr_string)
     b->addr_string = addr_string;
   else
@@ -7498,7 +7501,8 @@ create_breakpoints_sal (struct gdbarch *gdbarch,
       create_breakpoint_sal (gdbarch, expanded, canonical->canonical[i],
 			     cond_string, type, disposition,
 			     thread, task, ignore_count, ops,
-			     from_tty, enabled, internal);
+			     from_tty, enabled, internal,
+			     canonical->special_display);
     }
 }
 
@@ -7954,7 +7958,8 @@ create_breakpoint (struct gdbarch *gdbarch,
 				     cond_string, type_wanted,
 				     tempflag ? disp_del : disp_donttouch,
 				     thread, task, ignore_count, ops,
-				     from_tty, enabled, internal);
+				     from_tty, enabled, internal,
+				     canonical.special_display);
 
 	      do_cleanups (old_chain);
 

@@ -1,5 +1,17 @@
 2011-03-24  Tom Tromey  <tromey@redhat.com>
 
+	* linespec.h (struct linespec_result) <special_display>: New
+	field.
+	* breakpoint.h (struct breakpoint) <display_canonical>: New
+	field.
+	* breakpoint.c (print_breakpoint_location): Respect
+	display_canonical.
+	(create_breakpoint_sal): Add 'display_canonical' parameter.
+	(create_breakpoints_sal): Update.
+	(create_breakpoint): Update.
+
+2011-03-24  Tom Tromey  <tromey@redhat.com>
+
 	* symtab.c (decode_line_spec): Update.
 	* linespec.c (build_canonical_line_spec): Change type of
 	'canonical'.

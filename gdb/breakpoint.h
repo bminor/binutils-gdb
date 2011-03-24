@@ -472,6 +472,8 @@ struct breakpoint
     /* Non-zero means a silent breakpoint (don't print frame info
        if we stop here).  */
     unsigned char silent;
+    /* Non-zero means display ADDR_STRING to the user verbatim.  */
+    unsigned char display_canonical;
     /* Number of stops at this breakpoint that should
        be continued automatically before really stopping.  */
     int ignore_count;
