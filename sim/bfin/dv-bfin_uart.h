@@ -34,16 +34,21 @@ unsigned bfin_uart_read_buffer (struct hw *, unsigned char *, unsigned);
 void bfin_uart_reschedule (struct hw *);
 
 /* UART_LCR */
-#define DLAB (1 << 7)
+#define DLAB	(1 << 7)
 
 /* UART_LSR */
-#define TEMT (1 << 6)
-#define THRE (1 << 5)
-#define DR (1 << 0)
+#define TFI	(1 << 7)
+#define TEMT	(1 << 6)
+#define THRE	(1 << 5)
+#define BI	(1 << 4)
+#define FE	(1 << 3)
+#define PE	(1 << 2)
+#define OE	(1 << 1)
+#define DR	(1 << 0)
 
 /* UART_IER */
-#define ERBFI (1 << 0)
-#define ETBEI (1 << 1)
-#define ELSI  (1 << 2)
+#define ERBFI	(1 << 0)
+#define ETBEI	(1 << 1)
+#define ELSI	(1 << 2)
 
 #endif

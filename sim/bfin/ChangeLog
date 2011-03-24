@@ -1,5 +1,9 @@
 2011-03-23  Mike Frysinger  <vapier@gentoo.org>
 
+	* dv-bfin_uart.h (TFI, BI, FE, PE, OE): Define.
+
+2011-03-23  Mike Frysinger  <vapier@gentoo.org>
+
 	* dv-bfin_twi.h (LOSTARB): Rename from LOSTARG.
 
 2011-03-23  Robin Getz  <robin.getz@analog.com>
