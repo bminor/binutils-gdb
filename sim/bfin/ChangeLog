@@ -1,3 +1,7 @@
+2011-03-23  Mike Frysinger  <vapier@gentoo.org>
+
+	* dv-bfin_twi.h (LOSTARB): Rename from LOSTARG.
+
 2011-03-23  Robin Getz  <robin.getz@analog.com>
 
 	* bfin-sim.c (decode_dsp32shift_0): Set acc0 to the unextended

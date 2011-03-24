@@ -26,7 +26,7 @@
 
 /* TWI_MASTER_STAT Masks */
 #define MPROG		(1 << 0)
-#define LOSTARG		(1 << 1)
+#define LOSTARB		(1 << 1)
 #define ANAK		(1 << 2)
 #define DNAK		(1 << 3)
 #define BUFRDERR	(1 << 4)
