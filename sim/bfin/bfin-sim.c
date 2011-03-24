@@ -5041,11 +5041,16 @@ decode_dsp32alu_0 (SIM_CPU *cpu, bu16 iw0, bu16 iw1)
 	  SET_AREG (1, src_hi);
 	  SET_DREG (dst1, PREG (0));
 	}
+      else
+	SET_AREG (1, a1_lo);
+
       if (up_lo)
 	{
 	  SET_AREG (0, src_lo);
 	  SET_DREG (dst0, PREG (0));
 	}
+      else
+	SET_AREG (0, a0_lo);
     }
   else
     illegal_instruction (cpu);
