@@ -1,3 +1,8 @@
+2011-03-23  Pedro Alves  <pedro@codesourcery.com>
+
+	* regcache.c (regcache_raw_read): If the target didn't supply a
+	given raw register, mark it as unavailable.
+
 2011-03-23  Kai Tietz  <ktietz@redhat.com>
 
 	* breakpoint.c (clear_command): Use filename_cmp

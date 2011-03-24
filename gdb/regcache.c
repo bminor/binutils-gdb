@@ -586,25 +586,20 @@ regcache_raw_read (struct regcache *regcache, int regnum, gdb_byte *buf)
      to the current thread.  This switching shouldn't be necessary
      only there is still only one target side register cache.  Sigh!
      On the bright side, at least there is a regcache object.  */
-  if (!regcache->readonly_p)
+  if (!regcache->readonly_p
+      && regcache_register_status (regcache, regnum) == REG_UNKNOWN)
     {
-      if (regcache_register_status (regcache, regnum) == REG_UNKNOWN)
-	{
-	  struct cleanup *old_chain = save_inferior_ptid ();
+      struct cleanup *old_chain = save_inferior_ptid ();
 
-	  inferior_ptid = regcache->ptid;
-	  target_fetch_registers (regcache, regnum);
-	  do_cleanups (old_chain);
-	}
-#if 0
-      /* FIXME: cagney/2004-08-07: At present a number of targets
-	 forget (or didn't know that they needed) to set this leading to
-	 panics.  Also is the problem that targets need to indicate
-	 that a register is in one of the possible states: valid,
-	 undefined, unknown.  The last of which isn't yet
-	 possible.  */
-      gdb_assert (regcache_register_status (regcache, regnum) == REG_VALID);
-#endif
+      inferior_ptid = regcache->ptid;
+      target_fetch_registers (regcache, regnum);
+      do_cleanups (old_chain);
+
+      /* A number of targets can't access the whole set of raw
+	 registers (because the debug API provides no means to get at
+	 them).  */
+      if (regcache->register_status[regnum] == REG_UNKNOWN)
+	regcache->register_status[regnum] = REG_UNAVAILABLE;
     }
 
   if (regcache->register_status[regnum] != REG_VALID)
