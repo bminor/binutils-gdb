@@ -4431,24 +4431,26 @@ decode_dsp32alu_0 (SIM_CPU *cpu, bu16 iw0, bu16 iw1)
   else if ((aop == 0 || aop == 1) && (HL == 0 || HL == 1) && aopcde == 14)
     {
       bs40 src_acc = get_extended_acc (cpu, aop);
+      int v = 0;
 
       TRACE_INSN (cpu, "A%i = - A%i;", HL, aop);
 
-      SET_AREG (HL, saturate_s40 (-src_acc));
+      SET_AREG (HL, saturate_s40_astat (-src_acc, &v));
 
       SET_ASTATREG (az, AWREG (HL) == 0 && AXREG (HL) == 0);
       SET_ASTATREG (an, AXREG (HL) >> 7);
-      SET_ASTATREG (ac0, src_acc == 0);
       if (HL == 0)
 	{
-	  SET_ASTATREG (av0, src_acc < 0);
-	  if (ASTATREG (av0))
+	  SET_ASTATREG (ac0, !src_acc);
+	  SET_ASTATREG (av0, v);
+	  if (v)
 	    SET_ASTATREG (av0s, 1);
 	}
       else
 	{
-	  SET_ASTATREG (av1, src_acc < 0);
-	  if (ASTATREG (av1))
+	  SET_ASTATREG (ac1, !src_acc);
+	  SET_ASTATREG (av1, v);
+	  if (v)
 	    SET_ASTATREG (av1s, 1);
 	}
     }

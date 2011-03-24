@@ -1,3 +1,9 @@
+2011-03-23  Robin Getz  <robin.getz@analog.com>
+
+	* bfin-sim.c (decode_dsp32alu_0): Call saturate_s40_astat instead of
+	saturate_s40, and use the v parameter to update the AV bit.  Set the
+	AC bit only when the final result is 0.
+
 2011-03-23  Mike Frysinger  <vapier@gentoo.org>
 
 	* dv-bfin_sic.c (ENC, DEC_PIN, DEC_SIC): Define.
