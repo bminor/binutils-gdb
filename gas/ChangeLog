@@ -1,3 +1,9 @@
+2011-03-24  Mike Frysinger  <vapier@gentoo.org>
+
+	* config/bfin-parse.y (check_macfuncs): Clarify error message when
+	P is mismatched.  Check destination regno are off by one when P is
+	set, or are equal when P is not set.
+
 2011-03-23  Mike Frysinger  <vapier@gentoo.org>
 
 	* config/bfin-parse.y (SEARCH): Return yyerror when dest reg $2 is

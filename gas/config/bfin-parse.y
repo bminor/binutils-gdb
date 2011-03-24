@@ -336,11 +336,15 @@ check_macfuncs (Macfunc *aa, Opt_mode *opa,
       aa->s1.regno |= (ab->s1.regno & CODE_MASK);
     }
 
-  if (aa->w == ab->w  && aa->P != ab->P)
+  if (aa->w == ab->w && aa->P != ab->P)
+    return yyerror ("Destination Dreg sizes (full or half) must match");
+
+  if (aa->w && ab->w)
     {
-      return yyerror ("macfuncs must differ");
-      if (aa->w && (aa->dst.regno - ab->dst.regno != 1))
-	return yyerror ("Destination Dregs must differ by one");
+      if (aa->P && (aa->dst.regno - ab->dst.regno) != 1)
+	return yyerror ("Destination Dregs (full) must differ by one");
+      if (!aa->P && aa->dst.regno != ab->dst.regno)
+	return yyerror ("Destination Dregs (half) must match");
     }
 
   /* Make sure mod flags get ORed, too.  */

@@ -116,3 +116,7 @@
 
 	(R3, R3) = SEARCH R0 (GE);
 	BITMUX (R4, R4, A0) (ASR);
+
+	R0 = A0, R3 = A1;
+	R0.L = A0, R1.H = A1;
+	R0 = A0, R1.H = A1;

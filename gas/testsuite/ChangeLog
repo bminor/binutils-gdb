@@ -1,3 +1,8 @@
+2011-03-24  Mike Frysinger  <vapier@gentoo.org>
+
+	* gas/bfin/expected_errors.s: Add invalid dsp mult insn tests.
+	* gas/bfin/expected_errors.l: Add new error messages.
+
 2011-03-23  Mike Frysinger  <vapier@gentoo.org>
 
 	* gas/bfin/expected_errors.s: Add invalid SEARCH/BITMUX insns.
