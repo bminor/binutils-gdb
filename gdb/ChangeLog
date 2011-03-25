@@ -1,3 +1,8 @@
+2011-03-25  Tom Tromey  <tromey@redhat.com>
+
+	* linespec.c (symbol_found): Restore line-based result for
+	non-LOC_LABEL symbols.
+
 2011-03-25  Kai Tietz  <ktietz@redhat.com>
 
 	* tui/tui-source.c (tui_set_source_content): Use filename_cmp

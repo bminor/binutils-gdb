@@ -2174,9 +2174,7 @@ symbol_found (int funfirstline, struct linespec_result *canonical, char *copy,
     }
   else
     {
-      if (funfirstline && SYMBOL_CLASS (sym) != LOC_LABEL)
-	error (_("\"%s\" is not a function"), copy);
-      else if (SYMBOL_VALUE_ADDRESS (sym) != 0)
+      if (SYMBOL_CLASS (sym) == LOC_LABEL && SYMBOL_VALUE_ADDRESS (sym) != 0)
 	{
 	  /* We know its line number.  */
 	  values.sals = (struct symtab_and_line *)
@@ -2199,6 +2197,20 @@ symbol_found (int funfirstline, struct linespec_result *canonical, char *copy,
 			      SYMBOL_NATURAL_NAME (sym));
 	    }
 
+	  return values;
+	}
+      else if (funfirstline)
+	error (_("\"%s\" is not a function"), copy);
+      else if (SYMBOL_LINE (sym) != 0)
+	{
+	  /* We know its line number.  */
+	  values.sals = (struct symtab_and_line *)
+	    xmalloc (sizeof (struct symtab_and_line));
+	  values.nelts = 1;
+	  memset (&values.sals[0], 0, sizeof (values.sals[0]));
+	  values.sals[0].symtab = SYMBOL_SYMTAB (sym);
+	  values.sals[0].line = SYMBOL_LINE (sym);
+	  values.sals[0].pspace = SYMTAB_PSPACE (SYMBOL_SYMTAB (sym));
 	  return values;
 	}
       else
