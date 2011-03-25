@@ -1,3 +1,10 @@
+2011-03-25  Andrew Burgess  <aburgess@broadcom.com>
+
+	* lib/gdb.exp (default_gdb_start,gdb_init): Clear the GREP_OPTIONS
+	environment variable to make grep output more predictable. Move
+	all the environment setup into gdb_init so it's done once per test
+	case rather than each time we start gdb.
+
 2011-03-24  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.base/label.exp: Use `main:there' linespec.  Add re-running

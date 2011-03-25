@@ -1311,24 +1311,8 @@ proc default_gdb_start { } {
     global gdb_prompt
     global timeout
     global gdb_spawn_id;
-    global env
 
     gdb_stop_suppressing_tests;
-
-    set env(LC_CTYPE) C
-
-    # Don't let a .inputrc file or an existing setting of INPUTRC mess up
-    # the test results.  Even if /dev/null doesn't exist on the particular
-    # platform, the readline library will use the default setting just by
-    # failing to open the file.  OTOH, opening /dev/null successfully will
-    # also result in the default settings being used since nothing will be
-    # read from this file.
-    set env(INPUTRC) "/dev/null"
-
-    # The gdb.base/readline.exp arrow key test relies on the standard VT100
-    # bindings, so make sure that an appropriate terminal is selected.
-    # The same bug doesn't show up if we use ^P / ^N instead.
-    set env(TERM) "vt100"
 
     verbose "Spawning $GDB $INTERNAL_GDBFLAGS $GDBFLAGS"
 
@@ -2796,10 +2780,29 @@ proc gdb_init { args } {
 	set banned_variables_traced 1
     }
 
-    # We set LC_ALL and LANG to C so that we get the same messages as
-    # expected.
+    # We set LC_ALL, LC_CTYPE, and LANG to C so that we get the same
+    # messages as expected.
     setenv LC_ALL C
+    setenv LC_CTYPE C
     setenv LANG C
+
+    # Don't let a .inputrc file or an existing setting of INPUTRC mess up
+    # the test results.  Even if /dev/null doesn't exist on the particular
+    # platform, the readline library will use the default setting just by
+    # failing to open the file.  OTOH, opening /dev/null successfully will
+    # also result in the default settings being used since nothing will be
+    # read from this file.
+    setenv INPUTRC "/dev/null"
+
+    # The gdb.base/readline.exp arrow key test relies on the standard VT100
+    # bindings, so make sure that an appropriate terminal is selected.
+    # The same bug doesn't show up if we use ^P / ^N instead.
+    setenv TERM "vt100"
+
+    # Some tests (for example gdb.base/maint.exp) shell out from gdb to use
+    # grep.  Clear GREP_OPTIONS to make the behavoiur predictable, 
+    # especially having color output turned on can cause tests to fail.
+    setenv GREP_OPTIONS ""
 
     return [eval default_gdb_init $args];
 }
