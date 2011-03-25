@@ -1,6 +1,7 @@
 2011-03-25  Michael Snyder  <msnyder@vmware.com>
 
 	* strings.c (print_strings): Plug memory leak.
+	* ar.c (move_members): Plug memory leak.
 
 2011-03-25  Pierre Muller  <muller@ics.u-strasbg.fr>
 
