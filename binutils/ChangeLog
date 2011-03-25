@@ -12,6 +12,12 @@
 	(tg_class_static_member): Likewise.
 	(tg_class_method_variant): Likewise.
 	(tg_class_static_method_variant): Likewise.
+	* stabs.c (parse_stab_enum_type): Fix memory leaks.
+	(parse_stab_struct_type): Ditto.
+	(parse_stab_struct_fields): Ditto.
+	(parse_stab_one_struct_field): Ditto.
+	(parse_stab_members): Ditto.
+	(stab_demangle_qualified): Ditto.
 
 2011-03-25  Pierre Muller  <muller@ics.u-strasbg.fr>
 
