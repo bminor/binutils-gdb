@@ -1118,6 +1118,7 @@ delete_members (bfd *arch, char **files_to_delete)
   bfd_boolean found;
   bfd_boolean something_changed = FALSE;
   int match_count;
+  const char * tmp = NULL;
 
   for (; *files_to_delete != NULL; ++files_to_delete)
     {
@@ -1139,8 +1140,10 @@ delete_members (bfd *arch, char **files_to_delete)
       current_ptr_ptr = &(arch->archive_next);
       while (*current_ptr_ptr)
 	{
-	  if (FILENAME_CMP (normalize (*files_to_delete, arch),
-			    (*current_ptr_ptr)->filename) == 0)
+	  if (tmp != NULL)
+	    free ((char *) tmp);
+	  tmp = normalize (*files_to_delete, arch);
+	  if (FILENAME_CMP (tmp, (*current_ptr_ptr)->filename) == 0)
 	    {
 	      ++match_count;
 	      if (counted_name_mode
@@ -1177,6 +1180,9 @@ delete_members (bfd *arch, char **files_to_delete)
     write_archive (arch);
   else
     output_filename = NULL;
+
+  if (tmp != NULL)
+    free ((char *) tmp);
 }
 
 

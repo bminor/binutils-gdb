@@ -2,6 +2,7 @@
 
 	* strings.c (print_strings): Plug memory leak.
 	* ar.c (move_members): Plug memory leak.
+	(delete_members): Plug memory leak.
 
 2011-03-25  Pierre Muller  <muller@ics.u-strasbg.fr>
 
