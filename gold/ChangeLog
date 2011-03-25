@@ -1,3 +1,8 @@
+2011-03-25  Cary Coutant  <ccoutant@google.com>
+
+	* testsuite/Makefile.am (final_layout.stdout): Use -n option with nm.
+	* testsuite/Makefile.in: Regenerate.
+
 2010-03-23  Rafael Ávila de Espíndola <respindola@mozilla.com>
 
 	* plugin.cc (get_view): New.

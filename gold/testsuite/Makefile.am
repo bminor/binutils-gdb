@@ -209,7 +209,7 @@ final_layout_sequence.txt:
 final_layout: final_layout.o final_layout_sequence.txt gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -Wl,--section-ordering-file,final_layout_sequence.txt final_layout.o
 final_layout.stdout: final_layout
-	$(TEST_NM) final_layout > final_layout.stdout
+	$(TEST_NM) -n final_layout > final_layout.stdout
 
 check_PROGRAMS += icf_virtual_function_folding_test
 MOSTLYCLEANFILES += icf_virtual_function_folding_test
