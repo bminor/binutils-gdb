@@ -945,19 +945,19 @@ static const struct sec_flags_struct evax_section_flags[] =
       0 },
     { EVAX_CODE_NAME,
       EGPS__V_PIC | EGPS__V_REL | EGPS__V_SHR | EGPS__V_EXE,
-      SEC_CODE,
+      SEC_CODE | SEC_READONLY,
       EGPS__V_PIC | EGPS__V_REL | EGPS__V_SHR | EGPS__V_EXE,
-      SEC_CODE | SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD },
+      SEC_CODE | SEC_READONLY | SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD },
     { EVAX_LITERAL_NAME,
       EGPS__V_PIC | EGPS__V_REL | EGPS__V_SHR | EGPS__V_RD | EGPS__V_NOMOD,
       SEC_DATA | SEC_READONLY,
       EGPS__V_PIC | EGPS__V_REL | EGPS__V_SHR | EGPS__V_RD,
-      SEC_DATA | SEC_HAS_CONTENTS | SEC_ALLOC | SEC_READONLY | SEC_LOAD },
+      SEC_DATA | SEC_READONLY | SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD },
     { EVAX_LINK_NAME,
       EGPS__V_REL | EGPS__V_RD,
       SEC_DATA | SEC_READONLY,
       EGPS__V_REL | EGPS__V_RD,
-      SEC_DATA | SEC_HAS_CONTENTS | SEC_ALLOC | SEC_READONLY | SEC_LOAD },
+      SEC_DATA | SEC_READONLY | SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD },
     { EVAX_DATA_NAME,
       EGPS__V_REL | EGPS__V_RD | EGPS__V_WRT | EGPS__V_NOMOD,
       SEC_DATA,
@@ -972,12 +972,12 @@ static const struct sec_flags_struct evax_section_flags[] =
       EGPS__V_PIC | EGPS__V_REL | EGPS__V_RD,
       SEC_DATA | SEC_READONLY,
       EGPS__V_PIC | EGPS__V_REL | EGPS__V_RD,
-      SEC_DATA | SEC_HAS_CONTENTS | SEC_ALLOC | SEC_READONLY | SEC_LOAD },
+      SEC_DATA | SEC_READONLY | SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD },
     { EVAX_READONLY_NAME,
       EGPS__V_PIC | EGPS__V_REL | EGPS__V_SHR | EGPS__V_RD | EGPS__V_NOMOD,
       SEC_DATA | SEC_READONLY,
       EGPS__V_PIC | EGPS__V_REL | EGPS__V_SHR | EGPS__V_RD,
-      SEC_DATA | SEC_HAS_CONTENTS | SEC_ALLOC | SEC_READONLY | SEC_LOAD },
+      SEC_DATA | SEC_READONLY | SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD },
     { EVAX_LOCAL_NAME,
       EGPS__V_REL | EGPS__V_RD | EGPS__V_WRT,
       SEC_DATA,
@@ -987,7 +987,7 @@ static const struct sec_flags_struct evax_section_flags[] =
       EGPS__V_PIC | EGPS__V_OVR,
       SEC_DATA | SEC_READONLY,
       EGPS__V_PIC | EGPS__V_OVR,
-      SEC_DATA | SEC_HAS_CONTENTS | SEC_ALLOC | SEC_READONLY | SEC_LOAD },
+      SEC_DATA | SEC_READONLY | SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD },
     { NULL,
       EGPS__V_REL | EGPS__V_RD | EGPS__V_WRT,
       SEC_DATA,
@@ -2901,7 +2901,7 @@ alpha_vms_create_eisd_for_section (bfd *abfd, asection *sec)
 
   if (sec->flags & SEC_CODE)
     eisd->u.eisd.flags |= EISD__M_EXE;
-  else if (!(sec->flags & SEC_READONLY))
+  if (!(sec->flags & SEC_READONLY))
     eisd->u.eisd.flags |= EISD__M_WRT | EISD__M_CRF;
 
   /* If relocations or fixup will be applied, make this isect writeable.  */

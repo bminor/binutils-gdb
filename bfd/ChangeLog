@@ -1,3 +1,9 @@
+2011-03-25  Tristan Gingold  <gingold@adacore.com>
+
+	* vms-alpha.c (evax_section_flags): Make $CODE$ section read-only.
+	Minor reordering.
+	(alpha_vms_create_eisd_for_section): Make code sections read-only.
+
 2011-03-24  Alan Modra  <amodra@gmail.com>
 
 	* elf32-ppc.c (ppc_elf_tls_optimize): Catch more cases where
