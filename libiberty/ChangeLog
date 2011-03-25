@@ -1,8 +1,3 @@
-2011-03-04  Michael Snyder  <msnyder@vmware.com>
-
-	* cplus-dem.c (ada_demangle): Stop memory leak.
-	Also fix a one line indent problem.
-
 2011-02-28  Kai Tietz  <kai.tietz@onevision.com>
 
 	* filename_cmp.c (filename_ncmp): New function.
