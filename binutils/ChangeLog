@@ -19,6 +19,7 @@
 	(parse_stab_members): Likewise.
 	(stab_demangle_qualified): Likewise.
 	* objdump.c (dump_reloc_set): Free malloced memory.
+	* bucomm.c (make_tempname): Stop memory leak.
 
 2011-03-25  Pierre Muller  <muller@ics.u-strasbg.fr>
 

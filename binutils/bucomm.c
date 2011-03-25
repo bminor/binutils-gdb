@@ -511,7 +511,10 @@ make_tempname (char *filename)
   fd = open (tmpname, O_RDWR | O_CREAT | O_EXCL, 0600);
 #endif
   if (fd == -1)
-    return NULL;
+    {
+      free (tmpname);
+      return NULL;
+    }
   close (fd);
   return tmpname;
 }
