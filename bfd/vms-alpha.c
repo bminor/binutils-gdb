@@ -4710,7 +4710,7 @@ _bfd_vms_find_nearest_dst_line (bfd *abfd, asection *section,
   *func = NULL;
   *line = 0;
 
-  if (PRIV (dst_section) == NULL || !(abfd->flags & (EXEC_P | DYNAMIC)))
+  if (PRIV (dst_section) == NULL)
     return FALSE;
 
   if (PRIV (modules) == NULL)
