@@ -7793,10 +7793,8 @@ coff_sym_is_thumb (int val)
 static void
 arm_elf_make_msymbol_special(asymbol *sym, struct minimal_symbol *msym)
 {
-  /* Thumb symbols are of type STT_LOPROC, (synonymous with
-     STT_ARM_TFUNC).  */
-  if (ELF_ST_TYPE (((elf_symbol_type *)sym)->internal_elf_sym.st_info)
-      == STT_LOPROC)
+  if (ARM_SYM_BRANCH_TYPE (&((elf_symbol_type *)sym)->internal_elf_sym)
+      == ST_BRANCH_TO_THUMB)
     MSYMBOL_SET_SPECIAL (msym);
 }
 

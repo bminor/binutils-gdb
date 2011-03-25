@@ -1,3 +1,8 @@
+2011-03-25  Ulrich Weigand  <ulrich.weigand@linaro.org>
+
+	* arm-tdep.c (arm_elf_make_msymbol_special): Use ARM_SYM_BRANCH_TYPE
+	instead of checking for STT_ARM_TFUNC symbol type.
+
 2011-03-25  Tom Tromey  <tromey@redhat.com>
 
 	* linespec.c (symbol_found): Restore line-based result for
