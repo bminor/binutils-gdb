@@ -4,6 +4,9 @@
 	* ar.c (move_members): Plug memory leak.
 	(delete_members): Plug memory leak.
 	(write_archive): Plug memory leak.
+	* ieee.c (ieee_add_bb11): Plug memory leak.
+	(ieee_function_type): Likewise.
+	(ieee_class_baseclass): Likewise.
 
 2011-03-25  Pierre Muller  <muller@ics.u-strasbg.fr>
 
