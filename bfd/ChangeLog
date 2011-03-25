@@ -1,3 +1,7 @@
+2011-03-25  Michael Snyder  <msnyder@vmware.com>
+
+	* coffcode.h (coff_set_alignment_hook): Check return of bfd_seek.
+
 2011-03-25  Tristan Gingold  <gingold@adacore.com>
 
 	* vms-alpha.c (_bfd_vms_find_nearest_dst_line): Allow the use
