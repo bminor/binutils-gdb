@@ -28,6 +28,7 @@
 #include "value.h"
 #include "source.h"
 #include "objfiles.h"
+#include "filenames.h"
 
 #include "tui/tui.h"
 #include "tui/tui-data.h"
@@ -458,7 +459,7 @@ tui_update_breakpoint_info (struct tui_win_info *win,
 		      || line->line_or_addr.loa == LOA_ADDRESS);
           if ((win == TUI_SRC_WIN
                && bp->source_file
-               && (strcmp (src->filename, bp->source_file) == 0)
+               && (filename_cmp (src->filename, bp->source_file) == 0)
 	       && line->line_or_addr.loa == LOA_LINE
                && bp->line_number == line->line_or_addr.u.line_no)
               || (win == TUI_DISASM_WIN

@@ -1,3 +1,10 @@
+2011-03-25  Kai Tietz  <ktietz@redhat.com>
+
+	* tui/tui-source.c (tui_set_source_content): Use filename_cmp
+	instead of strcmp for comparison.
+	(tui_source_is_displayed): Likewise.
+	* tui/tui-winsource.c (tui_update_breakpoint_info): Likewise.
+
 2011-03-24  Mark Wielaard  <mjw@redhat.com>
 
         * dwarf2read.c (lookup_signatured_type): Use DW_FORM_ref_sig8 in
