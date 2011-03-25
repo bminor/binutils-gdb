@@ -1,5 +1,11 @@
 2011-03-24  Mike Frysinger  <vapier@gentoo.org>
 
+	* dv-bfin_gpio.c (bfin_gpio_port_event): Split dir/inen bit checking.
+	Normalize "level" to 0/1 values.  Shift "level" over by "my_port".
+	Invert port->both bit check.
+
+2011-03-24  Mike Frysinger  <vapier@gentoo.org>
+
 	* dv-bfin_gpio.c (bfin_gpio_io_write_buffer): Subtract 2 from the
 	valuep pointer for clear MMRs, 4 for set MMRs, and 6 for toggle MMRs.
 
