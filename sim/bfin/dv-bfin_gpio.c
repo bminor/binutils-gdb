@@ -92,16 +92,22 @@ bfin_gpio_io_write_buffer (struct hw *me, const void *source, int space,
     case mmr_offset(clear):
     case mmr_offset(maska_clear):
     case mmr_offset(maskb_clear):
+      /* We want to clear the related data MMR.  */
+      valuep -= 2;
       dv_w1c_2 (valuep, value, -1);
       break;
     case mmr_offset(set):
     case mmr_offset(maska_set):
     case mmr_offset(maskb_set):
+      /* We want to set the related data MMR.  */
+      valuep -= 4;
       *valuep |= value;
       break;
     case mmr_offset(toggle):
     case mmr_offset(maska_toggle):
     case mmr_offset(maskb_toggle):
+      /* We want to toggle the related data MMR.  */
+      valuep -= 6;
       *valuep ^= value;
       break;
     default:
