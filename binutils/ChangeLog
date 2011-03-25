@@ -7,6 +7,11 @@
 	* ieee.c (ieee_add_bb11): Plug memory leak.
 	(ieee_function_type): Likewise.
 	(ieee_class_baseclass): Likewise.
+	* prdbg.c (pr_function_type): Close memory leaks.
+	(pr_method_type): Likewise.
+	(tg_class_static_member): Likewise.
+	(tg_class_method_variant): Likewise.
+	(tg_class_static_method_variant): Likewise.
 
 2011-03-25  Pierre Muller  <muller@ics.u-strasbg.fr>
 
