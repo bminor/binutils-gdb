@@ -1,5 +1,15 @@
 2011-03-24  Mike Frysinger  <vapier@gentoo.org>
 
+	* dv-bfin_gpio.c (bfin_gpio_port_event): Call HW_TRACE at every
+	major code flow point.
+	* dv-bfin_sic.c (bfin_sic_forward_interrupts): Call HW_TRACE just
+	before calling hw_port_event on ourselves.
+	(bfin_sic_52x_port_event, bfin_sic_537_port_event,
+	bfin_sic_54x_port_event, bfin_sic_561_port_event): Call HW_TRACE
+	at the start of the function.
+
+2011-03-24  Mike Frysinger  <vapier@gentoo.org>
+
 	* dv-bfin_gpio.c (bfin_gpio_port_event): Split dir/inen bit checking.
 	Normalize "level" to 0/1 values.  Shift "level" over by "my_port".
 	Invert port->both bit check.

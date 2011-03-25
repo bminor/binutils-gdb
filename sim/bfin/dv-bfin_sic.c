@@ -127,6 +127,7 @@ bfin_sic_forward_interrupts (struct hw *me, bu32 *isr, bu32 *imask, bu32 *iar)
       iar_idx = my_port / 8;
       iar_off = (my_port % 8) * 4;
       iar_val = (iar[iar_idx] & (0xf << iar_off)) >> iar_off;
+      HW_TRACE ((me, "forwarding int %i to CEC", IVG7 + iar_val));
       hw_port_event (me, IVG7 + iar_val, 1);
     }
 }
@@ -763,7 +764,11 @@ bfin_sic_52x_port_event (struct hw *me, int my_port, struct hw *source,
 {
   struct bfin_sic *sic = hw_data (me);
   bu32 idx = DEC_SIC (my_port);
-  bu32 bit = 1 << DEC_PIN (my_port);
+  bu32 pin = DEC_PIN (my_port);
+  bu32 bit = 1 << pin;
+
+  HW_TRACE ((me, "processing system int from %i (SIC %u pin %u)",
+	     my_port, idx, pin));
 
   /* SIC only exists to forward interrupts from the system to the CEC.  */
   switch (idx)
@@ -873,7 +878,12 @@ bfin_sic_537_port_event (struct hw *me, int my_port, struct hw *source,
 			 int source_port, int level)
 {
   struct bfin_sic *sic = hw_data (me);
-  bu32 bit = 1 << DEC_PIN (my_port);
+  bu32 idx = DEC_SIC (my_port);
+  bu32 pin = DEC_PIN (my_port);
+  bu32 bit = 1 << pin;
+
+  HW_TRACE ((me, "processing system int from %i (SIC %u pin %u)",
+	     my_port, idx, pin));
 
   /* SIC only exists to forward interrupts from the system to the CEC.  */
   sic->bf537.isr |= bit;
@@ -1056,7 +1066,11 @@ bfin_sic_54x_port_event (struct hw *me, int my_port, struct hw *source,
 {
   struct bfin_sic *sic = hw_data (me);
   bu32 idx = DEC_SIC (my_port);
-  bu32 bit = 1 << DEC_PIN (my_port);
+  bu32 pin = DEC_PIN (my_port);
+  bu32 bit = 1 << pin;
+
+  HW_TRACE ((me, "processing system int from %i (SIC %u pin %u)",
+	     my_port, idx, pin));
 
   /* SIC only exists to forward interrupts from the system to the CEC.  */
   switch (idx)
@@ -1156,7 +1170,11 @@ bfin_sic_561_port_event (struct hw *me, int my_port, struct hw *source,
 {
   struct bfin_sic *sic = hw_data (me);
   bu32 idx = DEC_SIC (my_port);
-  bu32 bit = 1 << DEC_PIN (my_port);
+  bu32 pin = DEC_PIN (my_port);
+  bu32 bit = 1 << pin;
+
+  HW_TRACE ((me, "processing system int from %i (SIC %u pin %u)",
+	     my_port, idx, pin));
 
   /* SIC only exists to forward interrupts from the system to the CEC.  */
   switch (idx)
