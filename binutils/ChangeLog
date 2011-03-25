@@ -1,3 +1,31 @@
+2011-03-25  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	Replace bfd_vma type and analog types by dwarf_vma and analogs.
+	Use dwarf specific print functions to display these type values.
+	* dwarf.h (dwarf_signed_vma): New type;
+	(DWARF2_External_LineInfo): Replace bfd_vma by dwarf_vma.
+	(DWARF2_External_PubNames): Likewise.
+	(DWARF2_External_CompUnit): Likewise.
+	(DWARF2_External_ARange): Likewise.
+	(read_leb128): Change return type to dwarf_vma.
+	* dwarf.c (print_dwarf_vma): Use __MINGW32__ conditional and
+	check byte_size values.
+	(dwarf_vmatoa): Change parameter type to dwarf_vma.
+	(dwarf_svmatoa): New static function.
+	(read_leb128): Change return type to dwarf_vma.
+	(read_sleb128): New static function.
+	(struct State_Machine_Registers): Change address field type to
+	dwarf_vma.
+	(process_extended_line_op): Adapt to type changes.
+	(fetch_indirect_string): Likewise.
+	(idisplay_block): Likewise.
+	(decode_location_expression): Likewise.
+	(read_and_display_attr_value): Likewise.
+	(process_debug_info): Likewise.
+	(display_debug_lines_raw): Likewise.
+	(display_debug_lines_decoded): Likewise.
+	(SLEB macro): Use new read_sleb128 function.
+
 2011-03-17  Alan Modra  <amodra@gmail.com>
 
 	PR 12590

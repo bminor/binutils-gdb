@@ -1,5 +1,5 @@
 /* dwarf.h - DWARF support header file
-   Copyright 2005, 2007, 2008, 2009, 2010
+   Copyright 2005, 2007, 2008, 2009, 2010, 2011
    Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
@@ -19,8 +19,9 @@
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
    MA 02110-1301, USA.  */
 
-typedef unsigned HOST_WIDEST_INT dwarf_vma;
-typedef unsigned HOST_WIDEST_INT dwarf_size_type;
+typedef unsigned HOST_WIDEST_INT  dwarf_vma;
+typedef HOST_WIDEST_INT           dwarf_signed_vma;
+typedef unsigned HOST_WIDEST_INT  dwarf_size_type;
 
 /* Structure found in the .debug_line section.  */
 typedef struct
@@ -38,7 +39,7 @@ DWARF2_External_LineInfo;
 
 typedef struct
 {
-  bfd_vma	 li_length;
+  dwarf_vma	 li_length;
   unsigned short li_version;
   unsigned int   li_prologue_length;
   unsigned char  li_min_insn_length;
@@ -62,10 +63,10 @@ DWARF2_External_PubNames;
 
 typedef struct
 {
-  bfd_vma	 pn_length;
+  dwarf_vma	 pn_length;
   unsigned short pn_version;
-  bfd_vma	 pn_offset;
-  bfd_vma	 pn_size;
+  dwarf_vma	 pn_offset;
+  dwarf_vma	 pn_size;
 }
 DWARF2_Internal_PubNames;
 
@@ -81,9 +82,9 @@ DWARF2_External_CompUnit;
 
 typedef struct
 {
-  bfd_vma	 cu_length;
+  dwarf_vma	 cu_length;
   unsigned short cu_version;
-  bfd_vma	 cu_abbrev_offset;
+  dwarf_vma	 cu_abbrev_offset;
   unsigned char  cu_pointer_size;
 }
 DWARF2_Internal_CompUnit;
@@ -100,9 +101,9 @@ DWARF2_External_ARange;
 
 typedef struct
 {
-  bfd_vma	 ar_length;
+  dwarf_vma	 ar_length;
   unsigned short ar_version;
-  bfd_vma	 ar_info_offset;
+  dwarf_vma	 ar_info_offset;
   unsigned char  ar_pointer_size;
   unsigned char  ar_segment_size;
 }
@@ -165,15 +166,15 @@ typedef struct
   unsigned int   pointer_size;
   unsigned int   offset_size;
   int            dwarf_version;
-  bfd_vma	 cu_offset;
-  bfd_vma	 base_address;
+  dwarf_vma	 cu_offset;
+  dwarf_vma	 base_address;
   /* This is an array of offsets to the location list table.  */
-  bfd_vma	*loc_offsets;
-  int		*have_frame_base;
+  dwarf_vma *    loc_offsets;
+  int *          have_frame_base;
   unsigned int   num_loc_offsets;
   unsigned int   max_loc_offsets;
   /* List of .debug_ranges offsets seen in this .debug_info.  */
-  bfd_vma	*range_lists;
+  dwarf_vma *    range_lists;
   unsigned int   num_range_lists;
   unsigned int   max_range_lists;
 }
@@ -203,8 +204,7 @@ extern void init_dwarf_regnames (unsigned int);
 extern void init_dwarf_regnames_i386 (void);
 extern void init_dwarf_regnames_x86_64 (void);
 
-extern int load_debug_section (enum dwarf_section_display_enum,
-			       void *);
+extern int load_debug_section (enum dwarf_section_display_enum, void *);
 extern void free_debug_section (enum dwarf_section_display_enum);
 
 extern void free_debug_memory (void);
@@ -213,9 +213,8 @@ extern void dwarf_select_sections_by_names (const char *);
 extern void dwarf_select_sections_by_letters (const char *);
 extern void dwarf_select_sections_all (void);
 
-void *cmalloc (size_t, size_t);
-void *xcmalloc (size_t, size_t);
-void *xcrealloc (void *, size_t, size_t);
+void * cmalloc (size_t, size_t);
+void * xcmalloc (size_t, size_t);
+void * xcrealloc (void *, size_t, size_t);
 
-bfd_vma read_leb128 (unsigned char *data,
-		     unsigned int *length_return, int sign);
+dwarf_vma read_leb128 (unsigned char *, unsigned int *, int);
