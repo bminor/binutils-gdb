@@ -1069,6 +1069,7 @@ write_archive (bfd *iarch)
 
   if (smart_rename (new_name, old_name, 0) != 0)
     xexit (1);
+  free (old_name);
 }
 
 /* Return a pointer to the pointer to the entry which should be rplacd'd
