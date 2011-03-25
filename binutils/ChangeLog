@@ -1,3 +1,7 @@
+2011-03-25  Michael Snyder  <msnyder@vmware.com>
+
+	* strings.c (print_strings): Plug memory leak.
+
 2011-03-25  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	Replace bfd_vma type and analog types by dwarf_vma and analogs.
