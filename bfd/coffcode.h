@@ -1856,7 +1856,7 @@ coff_set_alignment_hook (bfd * abfd ATTRIBUTE_UNUSED,
   if (hdr->s_flags & IMAGE_SCN_LNK_NRELOC_OVFL)
     {
       struct external_reloc dst;
-      struct internal_reloc an;
+      struct internal_reloc n;
       file_ptr oldpos = bfd_tell (abfd);
       bfd_size_type relsz = bfd_coff_relsz (abfd);
 
