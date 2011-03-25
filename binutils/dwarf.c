@@ -2072,7 +2072,7 @@ process_debug_info (struct dwarf_section *section,
 		  dwarf_vmatoa ("x", cu_offset));
 	  printf (_("   Length:        0x%s (%s)\n"),
 		  dwarf_vmatoa ("x", compunit.cu_length),
-		  initial_length_size == 8 ? "64-bit" : "32-bit");
+		  offset_size == 8 ? "64-bit" : "32-bit");
 	  printf (_("   Version:       %d\n"), compunit.cu_version);
 	  printf (_("   Abbrev Offset: %s\n"),
 		  dwarf_vmatoa ("d", compunit.cu_abbrev_offset));

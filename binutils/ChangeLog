@@ -1,3 +1,8 @@
+2011-03-25  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* dwarf.c (process_debug_info): Use offset_size to determine
+	the bit-size of the computation unit's offset.
+
 2011-03-25  Michael Snyder  <msnyder@vmware.com>
 
 	* strings.c (print_strings): Plug memory leak.
