@@ -674,8 +674,8 @@ decode_location_expression (unsigned char * data,
       switch (op)
 	{
 	case DW_OP_addr:
-	  printf ("DW_OP_addr: %lx",
-		  (unsigned long) byte_get (data, pointer_size));
+         printf ("DW_OP_addr: %s",
+                 dwarf_vmatoa ("x", byte_get (data, pointer_size)));
 	  data += pointer_size;
 	  break;
 	case DW_OP_deref:
@@ -1926,7 +1926,7 @@ process_debug_info (struct dwarf_section *section,
       && num_debug_info_entries == 0
       && ! do_types)
     {
-      unsigned long length;
+      dwarf_vma length;
 
       /* First scan the section to get the number of comp units.  */
       for (section_begin = start, num_units = 0; section_begin < end;
@@ -1944,7 +1944,8 @@ process_debug_info (struct dwarf_section *section,
 	    }
 	  else if (length >= 0xfffffff0 && length < 0xffffffff)
 	    {
-	      warn (_("Reserved length value (%lx) found in section %s\n"), length, section->name);
+	      warn (_("Reserved length value (0x%s) found in section %s\n"),
+		    dwarf_vmatoa ("x", length), section->name);
 	      return 0;
 	    }
 	  else
@@ -1955,7 +1956,8 @@ process_debug_info (struct dwarf_section *section,
 	     relocations to an object file.  */
 	  if ((signed long) length <= 0)
 	    {
-	      warn (_("Corrupt unit length (%lx) found in section %s\n"), length, section->name);
+	      warn (_("Corrupt unit length (0x%s) found in section %s\n"),
+		    dwarf_vmatoa ("x", length), section->name);
 	      return 0;
 	    }
 	}
@@ -2002,7 +2004,7 @@ process_debug_info (struct dwarf_section *section,
       int offset_size;
       int initial_length_size;
       unsigned char signature[8] = { 0 };
-      unsigned long type_offset = 0;
+      dwarf_vma type_offset = 0;
 
       hdrptr = start;
 
@@ -2084,7 +2086,8 @@ process_debug_info (struct dwarf_section *section,
 	      for (i = 0; i < 8; i++)
 	        printf ("%02x", signature[i]);
 	      printf ("\n");
-	      printf (_("   Type Offset:   0x%lx\n"), type_offset);
+             printf (_("   Type Offset:   0x%s\n"),
+                     dwarf_vmatoa ("x", type_offset));
 	    }
 	}
 

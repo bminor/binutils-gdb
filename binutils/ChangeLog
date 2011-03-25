@@ -2,6 +2,10 @@
 
 	* dwarf.c (process_debug_info): Use offset_size to determine
 	the bit-size of the computation unit's offset.
+	(decode_location_expression): Use dwarf_vmatoa function to display
+	DW_OP_addr OP.
+	(process_debug_info): Use dwarf_vma type for local variables
+	length and type_offset.
 
 2011-03-25  Michael Snyder  <msnyder@vmware.com>
 
