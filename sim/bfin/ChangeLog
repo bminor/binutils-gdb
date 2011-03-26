@@ -1,3 +1,7 @@
+2011-03-26  Robin Getz  <robin.getz@analog.com>
+
+	* bfin-sim.c (decode_dsp32alu_0): Set VS when V is set.
+
 2011-03-24  Mike Frysinger  <vapier@gentoo.org>
 
 	* dv-bfin_gpio.c (bfin_gpio_port_event): Call HW_TRACE at every

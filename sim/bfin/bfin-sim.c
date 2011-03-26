@@ -4122,6 +4122,9 @@ decode_dsp32alu_0 (SIM_CPU *cpu, bu16 iw0, bu16 iw1)
 
       SET_ASTATREG (ac0, ac0_i);
       SET_ASTATREG (v, v_i);
+      if (v_i)
+	SET_ASTATREG (vs, v_i);
+
       if (HL)
 	SET_DREG_H (dst0, val << 16);
       else
