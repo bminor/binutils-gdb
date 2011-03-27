@@ -1,5 +1,10 @@
 2011-03-26  Robin Getz  <robin.getz@analog.com>
 
+	* bfin-sim.c (decode_dsp32alu_0): Set result to 0x7FFFFFFF when
+	the result was 0x80000000 for RND12 subtraction.
+
+2011-03-26  Robin Getz  <robin.getz@analog.com>
+
 	* bfin-sim.c (decode_dsp32alu_0): Set VS when V is set.
 
 2011-03-24  Mike Frysinger  <vapier@gentoo.org>

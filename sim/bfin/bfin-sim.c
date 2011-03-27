@@ -4009,7 +4009,12 @@ decode_dsp32alu_0 (SIM_CPU *cpu, bu16 iw0, bu16 iw1)
 
       /* If subtract, just invert and add one.  */
       if (aop & 0x1)
-	val1 = ~val1 + 1;
+	{
+	  if (val1 == 0x80000000)
+	    val1 = 0x7FFFFFFF;
+	  else
+	    val1 = ~val1 + 1;
+	}
 
       /* Get the sign bits, since we need them later.  */
       sBit1 = !!(val0 & 0x80000000);
