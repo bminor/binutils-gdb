@@ -1,3 +1,8 @@
+2011-03-27  Ian Lance Taylor  <iant@google.com>
+
+	* archive.cc (Archive::interpret_header): Return -1 if something
+	goes wrong.  Change callers accordingly.
+
 2011-03-25  Cary Coutant  <ccoutant@google.com>
 
 	* testsuite/Makefile.am (final_layout.stdout): Use -n option with nm.

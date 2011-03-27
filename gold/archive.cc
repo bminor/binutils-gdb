@@ -109,9 +109,11 @@ Archive::setup()
 
   // The first member of the archive should be the symbol table.
   std::string armap_name;
-  section_size_type armap_size =
-    convert_to_section_size_type(this->read_header(sarmag, false,
-						   &armap_name, NULL));
+  off_t header_size = this->read_header(sarmag, false, &armap_name, NULL);
+  if (header_size == -1)
+    return;
+
+  section_size_type armap_size = convert_to_section_size_type(header_size);
   off_t off = sarmag;
   if (armap_name.empty())
     {
@@ -128,8 +130,11 @@ Archive::setup()
   if ((off & 1) != 0)
     ++off;
   std::string xname;
-  section_size_type extended_size =
-    convert_to_section_size_type(this->read_header(off, true, &xname, NULL));
+  header_size = this->read_header(off, true, &xname, NULL);
+  if (header_size == -1)
+    return;
+
+  section_size_type extended_size = convert_to_section_size_type(header_size);
   if (xname == "/")
     {
       const unsigned char* p = this->get_view(off + sizeof(Archive_header),
@@ -227,8 +232,8 @@ Archive::read_header(off_t off, bool cache, std::string* pname,
 }
 
 // Interpret the header of HDR, the header of the archive member at
-// file offset OFF.  Fail if something goes wrong.  Return the size of
-// the member.  Set *PNAME to the name of the member.
+// file offset OFF.  Return the size of the member, or -1 if something
+// has gone wrong.  Set *PNAME to the name of the member.
 
 off_t
 Archive::interpret_header(const Archive_header* hdr, off_t off,
@@ -238,7 +243,7 @@ Archive::interpret_header(const Archive_header* hdr, off_t off,
     {
       gold_error(_("%s: malformed archive header at %zu"),
 		 this->name().c_str(), static_cast<size_t>(off));
-      return this->input_file_->file().filesize() - off;
+      return -1;
     }
 
   const int size_string_size = sizeof hdr->ar_size;
@@ -258,7 +263,7 @@ Archive::interpret_header(const Archive_header* hdr, off_t off,
     {
       gold_error(_("%s: malformed archive header size at %zu"),
 		 this->name().c_str(), static_cast<size_t>(off));
-      return this->input_file_->file().filesize() - off;
+      return -1;
     }
 
   if (hdr->ar_name[0] != '/')
@@ -269,7 +274,7 @@ Archive::interpret_header(const Archive_header* hdr, off_t off,
 	{
 	  gold_error(_("%s: malformed archive header name at %zu"),
 		     this->name().c_str(), static_cast<size_t>(off));
-	  return this->input_file_->file().filesize() - off;
+	  return -1;
 	}
       pname->assign(hdr->ar_name, name_end - hdr->ar_name);
       if (nested_off != NULL)
@@ -300,7 +305,7 @@ Archive::interpret_header(const Archive_header* hdr, off_t off,
 	{
 	  gold_error(_("%s: bad extended name index at %zu"),
 		     this->name().c_str(), static_cast<size_t>(off));
-	  return this->input_file_->file().filesize() - off;
+	  return -1;
 	}
 
       const char* name = this->extended_names_.data() + x;
@@ -310,7 +315,7 @@ Archive::interpret_header(const Archive_header* hdr, off_t off,
 	{
 	  gold_error(_("%s: bad extended name entry at header %zu"),
 		     this->name().c_str(), static_cast<size_t>(off));
-	  return this->input_file_->file().filesize() - off;
+	  return -1;
 	}
       pname->assign(name, name_end - 1 - name);
       if (nested_off != NULL)
@@ -418,9 +423,16 @@ Archive::const_iterator::read_next_header()
       this->archive_->file().read(this->off_, sizeof(Archive_header), buf);
 
       const Archive_header* hdr = reinterpret_cast<const Archive_header*>(buf);
-      this->header_.size =
-	this->archive_->interpret_header(hdr, this->off_, &this->header_.name,
-					 &this->header_.nested_off);
+      off_t size = this->archive_->interpret_header(hdr, this->off_,
+						    &this->header_.name,
+						    &this->header_.nested_off);
+      if (size == -1)
+	{
+	  this->header_.off = filesize;
+	  return;
+	}
+
+      this->header_.size = size;
       this->header_.off = this->off_;
 
       // Skip special members.
@@ -462,6 +474,8 @@ Archive::get_file_and_offset(off_t off, Input_file** input_file, off_t* memoff,
   off_t nested_off;
 
   *memsize = this->read_header(off, false, member_name, &nested_off);
+  if (*memsize == -1)
+    return false;
 
   *input_file = this->input_file_;
   *memoff = off + static_cast<off_t>(sizeof(Archive_header));
