@@ -236,7 +236,6 @@ find_function_addr (struct value *function, struct type **retval_type)
 {
   struct type *ftype = check_typedef (value_type (function));
   struct gdbarch *gdbarch = get_type_arch (ftype);
-  enum type_code code = TYPE_CODE (ftype);
   struct type *value_type = NULL;
   CORE_ADDR funaddr;
 
@@ -244,24 +243,22 @@ find_function_addr (struct value *function, struct type **retval_type)
      part of it.  */
 
   /* Determine address to call.  */
-  if (code == TYPE_CODE_FUNC || code == TYPE_CODE_METHOD)
-    {
-      funaddr = value_address (function);
-      value_type = TYPE_TARGET_TYPE (ftype);
-    }
-  else if (code == TYPE_CODE_PTR)
+  if (TYPE_CODE (ftype) == TYPE_CODE_FUNC
+      || TYPE_CODE (ftype) == TYPE_CODE_METHOD)
+    funaddr = value_address (function);
+  else if (TYPE_CODE (ftype) == TYPE_CODE_PTR)
     {
       funaddr = value_as_address (function);
       ftype = check_typedef (TYPE_TARGET_TYPE (ftype));
       if (TYPE_CODE (ftype) == TYPE_CODE_FUNC
 	  || TYPE_CODE (ftype) == TYPE_CODE_METHOD)
-	{
-	  funaddr = gdbarch_convert_from_func_ptr_addr (gdbarch, funaddr,
-							&current_target);
-	  value_type = TYPE_TARGET_TYPE (ftype);
-	}
+	funaddr = gdbarch_convert_from_func_ptr_addr (gdbarch, funaddr,
+						      &current_target);
     }
-  else if (code == TYPE_CODE_INT)
+  if (TYPE_CODE (ftype) == TYPE_CODE_FUNC
+      || TYPE_CODE (ftype) == TYPE_CODE_METHOD)
+    value_type = TYPE_TARGET_TYPE (ftype);
+  else if (TYPE_CODE (ftype) == TYPE_CODE_INT)
     {
       /* Handle the case of functions lacking debugging info.
          Their values are characters since their addresses are char.  */

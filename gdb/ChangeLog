@@ -1,5 +1,11 @@
 2011-03-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Code cleanup for later STT_GNU_IFUNC support.
+	* infcall.c (find_function_addr): Remove variable code, use explicit
+	dereferences for it.  Move VALUE_TYPE initialization later.
+
+2011-03-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	GDB find_pc_partial_function support for STT_GNU_IFUNC.
 	* blockframe.c (cache_pc_function_is_gnu_ifunc): New variable.
 	(clear_pc_function_cache): Clear it.
