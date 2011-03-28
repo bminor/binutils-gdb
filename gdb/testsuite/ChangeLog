@@ -1,5 +1,12 @@
 2011-03-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Test STT_GNU_IFUNC support.
+	* gdb.base/gnu-ifunc-lib.c: New file.
+	* gdb.base/gnu-ifunc.c: New file.
+	* gdb.base/gnu-ifunc.exp: New file.
+
+2011-03-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Support a ring of related breakpoints.
 	* gdb.base/watchpoint-delete.c: New file.
 	* gdb.base/watchpoint-delete.exp: New file.
