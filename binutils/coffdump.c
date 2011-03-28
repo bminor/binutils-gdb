@@ -444,7 +444,7 @@ coff_dump (struct coff_ofile *ptr)
 
   printf ("Coff dump");
   nl ();
-  printf ("#souces %d", ptr->nsources);
+  printf ("#sources %d", ptr->nsources);
   nl ();
   dump_coff_sfile (ptr->source_head);
 
@@ -458,7 +458,7 @@ static void
 show_usage (FILE *file, int status)
 {
   fprintf (file, _("Usage: %s [option(s)] in-file\n"), program_name);
-  fprintf (file, _(" Print a human readable interpretation of a SYSROFF object file\n"));
+  fprintf (file, _(" Print a human readable interpretation of a COFF object file\n"));
   fprintf (file, _(" The options are:\n\
   @<file>                Read options from <file>\n\
   -h --help              Display this information\n\

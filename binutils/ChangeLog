@@ -1,3 +1,8 @@
+2011-03-28  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* coffdump.c (coff_dump): Correct spelling error.
+	(show_usage): Replace SYSROFF by COFF.
+
 2011-03-25  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* coffdump.c (dump_coff_scope): Use double typecast for pointer P
