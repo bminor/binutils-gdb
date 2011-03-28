@@ -228,6 +228,21 @@ value_arg_coerce (struct gdbarch *gdbarch, struct value *arg,
   return value_cast (type, arg);
 }
 
+/* Return the return type of a function with its first instruction exactly at
+   the PC address.  Return NULL otherwise.  */
+
+static struct type *
+find_function_return_type (CORE_ADDR pc)
+{
+  struct symbol *sym = find_pc_function (pc);
+
+  if (sym != NULL && BLOCK_START (SYMBOL_BLOCK_VALUE (sym)) == pc
+      && SYMBOL_TYPE (sym) != NULL)
+    return TYPE_TARGET_TYPE (SYMBOL_TYPE (sym));
+
+  return NULL;
+}
+
 /* Determine a function's address and its return type from its value.
    Calls error() if the function is not valid for calling.  */
 
@@ -257,7 +272,19 @@ find_function_addr (struct value *function, struct type **retval_type)
     }
   if (TYPE_CODE (ftype) == TYPE_CODE_FUNC
       || TYPE_CODE (ftype) == TYPE_CODE_METHOD)
-    value_type = TYPE_TARGET_TYPE (ftype);
+    {
+      value_type = TYPE_TARGET_TYPE (ftype);
+
+      if (TYPE_GNU_IFUNC (ftype))
+	{
+	  funaddr = gnu_ifunc_resolve_addr (gdbarch, funaddr);
+
+	  /* Skip querying the function symbol if no RETVAL_TYPE has been
+	     asked for.  */
+	  if (retval_type)
+	    value_type = find_function_return_type (funaddr);
+	}
+    }
   else if (TYPE_CODE (ftype) == TYPE_CODE_INT)
     {
       /* Handle the case of functions lacking debugging info.

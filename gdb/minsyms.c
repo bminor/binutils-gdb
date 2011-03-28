@@ -708,6 +708,39 @@ in_gnu_ifunc_stub (CORE_ADDR pc)
   return msymbol && MSYMBOL_TYPE (msymbol) == mst_text_gnu_ifunc;
 }
 
+/* See elf_gnu_ifunc_resolve_addr for its real implementation.  */
+
+static CORE_ADDR
+stub_gnu_ifunc_resolve_addr (struct gdbarch *gdbarch, CORE_ADDR pc)
+{
+  error (_("GDB cannot resolve STT_GNU_IFUNC symbol at address %s without "
+	   "the ELF support compiled in."),
+	 paddress (gdbarch, pc));
+}
+
+/* See elf_gnu_ifunc_resolve_name for its real implementation.  */
+
+static int
+stub_gnu_ifunc_resolve_name (const char *function_name,
+			     CORE_ADDR *function_address_p)
+{
+  error (_("GDB cannot resolve STT_GNU_IFUNC symbol \"%s\" without "
+	   "the ELF support compiled in."),
+	 function_name);
+}
+
+/* See elf_gnu_ifunc_fns for its real implementation.  */
+
+static const struct gnu_ifunc_fns stub_gnu_ifunc_fns =
+{
+  stub_gnu_ifunc_resolve_addr,
+  stub_gnu_ifunc_resolve_name,
+};
+
+/* A placeholder for &elf_gnu_ifunc_fns.  */
+
+const struct gnu_ifunc_fns *gnu_ifunc_fns_p = &stub_gnu_ifunc_fns;
+
 /* Find the minimal symbol named NAME, and return both the minsym
    struct and its objfile.  This only checks the linkage name.  Sets
    *OBJFILE_P and returns the minimal symbol, if it is found.  If it

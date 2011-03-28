@@ -1,5 +1,27 @@
 2011-03-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	STT_GNU_IFUNC reader implementation.
+	* elfread.c: Include gdbtypes.h, value.h and infcall.h.
+	(SYMBOL_GOT_PLT_SUFFIX, elf_rel_plt_read)
+	(elf_objfile_gnu_ifunc_cache_data, struct elf_gnu_ifunc_cache)
+	(elf_gnu_ifunc_cache_hash, elf_gnu_ifunc_cache_eq)
+	(elf_gnu_ifunc_record_cache, elf_gnu_ifunc_resolve_by_cache)
+	(elf_gnu_ifunc_resolve_by_got, elf_gnu_ifunc_resolve_name)
+	(elf_gnu_ifunc_resolve_addr): New.
+	(elf_symfile_read): Call elf_rel_plt_read.
+	(elf_gnu_ifunc_fns): New.
+	(_initialize_elfread): Initialize elf_objfile_gnu_ifunc_cache_data.
+	Install elf_gnu_ifunc_fns.
+	* infcall.c (find_function_return_type): New function.
+	(find_function_addr): Resolve TYPE_GNU_IFUNC functions, if possible.
+	* minsyms.c (stub_gnu_ifunc_resolve_addr)
+	(stub_gnu_ifunc_resolve_name): New functions.
+	(stub_gnu_ifunc_fns, gnu_ifunc_fns_p): New variables.
+	* symtab.h (struct gnu_ifunc_fns, gnu_ifunc_resolve_addr)
+	(gnu_ifunc_resolve_name, gnu_ifunc_fns_p): New.
+
+2011-03-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Code cleanup for later STT_GNU_IFUNC support.
 	* infcall.c (find_function_addr): Remove variable code, use explicit
 	dereferences for it.  Move VALUE_TYPE initialization later.

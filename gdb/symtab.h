@@ -1044,6 +1044,24 @@ extern struct minimal_symbol *lookup_minimal_symbol_by_pc (CORE_ADDR);
 
 extern int in_gnu_ifunc_stub (CORE_ADDR pc);
 
+/* Functions for resolving STT_GNU_IFUNC symbols which are implemented only
+   for ELF symbol files.  */
+
+struct gnu_ifunc_fns
+{
+  /* See elf_gnu_ifunc_resolve_addr for its real implementation.  */
+  CORE_ADDR (*gnu_ifunc_resolve_addr) (struct gdbarch *gdbarch, CORE_ADDR pc);
+
+  /* See elf_gnu_ifunc_resolve_name for its real implementation.  */
+  int (*gnu_ifunc_resolve_name) (const char *function_name,
+				 CORE_ADDR *function_address_p);
+};
+
+#define gnu_ifunc_resolve_addr gnu_ifunc_fns_p->gnu_ifunc_resolve_addr
+#define gnu_ifunc_resolve_name gnu_ifunc_fns_p->gnu_ifunc_resolve_name
+
+extern const struct gnu_ifunc_fns *gnu_ifunc_fns_p;
+
 extern struct minimal_symbol *
     lookup_minimal_symbol_and_objfile (const char *,
 				       struct objfile **);
