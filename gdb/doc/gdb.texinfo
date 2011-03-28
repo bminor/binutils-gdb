@@ -9832,7 +9832,7 @@ investigating what the target is actually doing.  @value{GDBN}'s
 support for static tracing includes being able to list instrumentation
 points, and attach them with @value{GDBN} defined high level
 tracepoints that expose the whole range of convenience of
-@value{GDBN}'s tracepoints support.  Namelly, support for collecting
+@value{GDBN}'s tracepoints support.  Namely, support for collecting
 registers values and values of global or local (to the instrumentation
 point) variables; tracepoint conditions and trace state variables.
 The act of installing a @value{GDBN} static tracepoint on an

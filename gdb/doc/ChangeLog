@@ -1,3 +1,7 @@
+2011-03-28  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.texinfo (Set Tracepoints): Fix typo.
+
 2011-03-24  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (Specify Location): Document `function:label'
