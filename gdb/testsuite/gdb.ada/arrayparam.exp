@@ -42,17 +42,18 @@ gdb_test "print call_me (\"bonjour\")" \
          "print call_me (\"bonjour\")"
 
 # Verify that the array was passed properly by checking the global
-# variables that Call_Me sets as side-effects.
+# variables that Call_Me sets as side-effects.  Use the package name to avoid
+# name clash with debug info of system libraries.
 
-gdb_test "print first" \
+gdb_test "print pck.first" \
          "= 98 'b'" \
          "print first after function call"
 
-gdb_test "print last" \
+gdb_test "print pck.last" \
          "= 114 'r'" \
-         "print lasta after function call"
+         "print last after function call"
 
-gdb_test "print length" \
+gdb_test "print pck.length" \
          "= 7" \
          "print length after function call"
 

@@ -15,11 +15,11 @@
 
 package Pck is
    package First is
-      I : Integer := 48;
+      IntegerVar : Integer := 48;
    end First;
 
    package Second is
-      I : Integer := 74;
+      IntegerVar : Integer := 74;
    end Second;
 
    procedure Do_Nothing (Val : in out Integer);

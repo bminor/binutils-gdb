@@ -17,6 +17,6 @@ with Pck; use Pck;
 
 procedure Foo is
 begin
-   Do_Nothing (First.I);  -- STOP
-   Do_Nothing (Second.I);
+   Do_Nothing (First.IntegerVar);  -- STOP
+   Do_Nothing (Second.IntegerVar);
 end Foo;
