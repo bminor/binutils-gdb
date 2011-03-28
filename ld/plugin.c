@@ -33,7 +33,7 @@
 #include "plugin-api.h"
 #include "elf-bfd.h"
 #if !defined (HAVE_DLFCN_H) && defined (HAVE_WINDOWS_H)
-#include <Windows.h>
+#include <windows.h>
 #endif
 
 /* Report plugin symbols.  */

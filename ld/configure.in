@@ -173,7 +173,7 @@ AC_SEARCH_LIBS([dlopen],[dl],[],[enable_plugins=no],[])
 AC_CHECK_FUNCS([dlopen dlsym dlclose],[],[enable_plugins=no])
 # We also support plugins on Windows (MinGW).
 if test x$enable_plugins = xno ; then
-  AC_CHECK_HEADERS([Windows.h],[enable_plugins=yes],[],[AC_INCLUDES_DEFAULT])
+  AC_CHECK_HEADERS([windows.h],[enable_plugins=yes],[],[AC_INCLUDES_DEFAULT])
 fi
 AM_CONDITIONAL([ENABLE_PLUGINS], [test x$enable_plugins = xyes])
 
