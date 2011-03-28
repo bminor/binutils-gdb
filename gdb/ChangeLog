@@ -1,5 +1,16 @@
 2011-03-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	GDB find_pc_partial_function support for STT_GNU_IFUNC.
+	* blockframe.c (cache_pc_function_is_gnu_ifunc): New variable.
+	(clear_pc_function_cache): Clear it.
+	(find_pc_partial_function): Rename to ...
+	(find_pc_partial_function_gnu_ifunc): ... this function.  New
+	parameter is_gnu_ifunc_p, describe it.  Set *IS_GNU_IFUNC_P.
+	(find_pc_partial_function): New wrapper for this function.
+	* symtab.h (find_pc_partial_function_gnu_ifunc): New declaration.
+
+2011-03-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	GDB internal type support for STT_GNU_IFUNC.
 	* elfread.c (record_minimal_symbol): Support mst_text_gnu_ifunc.
 	(elf_symtab_read): Set mst_text_gnu_ifunc for
