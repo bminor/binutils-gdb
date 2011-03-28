@@ -334,8 +334,9 @@ lookup_minimal_symbol_text (const char *name, struct objfile *objf)
 	       msymbol = msymbol->hash_next)
 	    {
 	      if (strcmp (SYMBOL_LINKAGE_NAME (msymbol), name) == 0 &&
-		  (MSYMBOL_TYPE (msymbol) == mst_text ||
-		   MSYMBOL_TYPE (msymbol) == mst_file_text))
+		  (MSYMBOL_TYPE (msymbol) == mst_text
+		   || MSYMBOL_TYPE (msymbol) == mst_text_gnu_ifunc
+		   || MSYMBOL_TYPE (msymbol) == mst_file_text))
 		{
 		  switch (MSYMBOL_TYPE (msymbol))
 		    {
@@ -697,6 +698,16 @@ lookup_minimal_symbol_by_pc (CORE_ADDR pc)
   return lookup_minimal_symbol_by_pc_section (pc, NULL);
 }
 
+/* Return non-zero iff PC is in an STT_GNU_IFUNC function resolver.  */
+
+int
+in_gnu_ifunc_stub (CORE_ADDR pc)
+{
+  struct minimal_symbol *msymbol = lookup_minimal_symbol_by_pc (pc);
+
+  return msymbol && MSYMBOL_TYPE (msymbol) == mst_text_gnu_ifunc;
+}
+
 /* Find the minimal symbol named NAME, and return both the minsym
    struct and its objfile.  This only checks the linkage name.  Sets
    *OBJFILE_P and returns the minimal symbol, if it is found.  If it
@@ -766,6 +777,7 @@ prim_record_minimal_symbol (const char *name, CORE_ADDR address,
   switch (ms_type)
     {
     case mst_text:
+    case mst_text_gnu_ifunc:
     case mst_file_text:
     case mst_solib_trampoline:
       section = SECT_OFF_TEXT (objfile);
@@ -1231,7 +1243,8 @@ find_solib_trampoline_target (struct frame_info *frame, CORE_ADDR pc)
     {
       ALL_MSYMBOLS (objfile, msymbol)
       {
-	if (MSYMBOL_TYPE (msymbol) == mst_text
+	if ((MSYMBOL_TYPE (msymbol) == mst_text
+	    || MSYMBOL_TYPE (msymbol) == mst_text_gnu_ifunc)
 	    && strcmp (SYMBOL_LINKAGE_NAME (msymbol),
 		       SYMBOL_LINKAGE_NAME (tsymbol)) == 0)
 	  return SYMBOL_VALUE_ADDRESS (msymbol);

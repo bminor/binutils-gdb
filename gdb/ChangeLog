@@ -1,5 +1,35 @@
 2011-03-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	GDB internal type support for STT_GNU_IFUNC.
+	* elfread.c (record_minimal_symbol): Support mst_text_gnu_ifunc.
+	(elf_symtab_read): Set mst_text_gnu_ifunc for
+	BSF_GNU_INDIRECT_FUNCTION.
+	* eval.c (evaluate_subexp_standard): Support TYPE_GNU_IFUNC.
+	* gdbtypes.c (init_type): Support TYPE_FLAG_GNU_IFUNC,
+	builtin_func_func, nodebug_text_gnu_ifunc_symbol and
+	nodebug_got_plt_symbol.
+	* gdbtypes.h (enum type_flag_value): New entry TYPE_FLAG_GNU_IFUNC.
+	(TYPE_GNU_IFUNC): New.
+	(struct main_type): New field flag_gnu_ifunc.
+	(struct builtin_type): New field builtin_func_func.
+	(struct objfile_type): New fields nodebug_text_gnu_ifunc_symbol and
+	nodebug_got_plt_symbol.
+	* minsyms.c (lookup_minimal_symbol_text): Support mst_text_gnu_ifunc.
+	(in_gnu_ifunc_stub): New.
+	(prim_record_minimal_symbol, find_solib_trampoline_target): Support
+	mst_text_gnu_ifunc.
+	* parse.c (write_exp_msymbol): New variable ifunc_msym.  Detect and
+	support mst_text_gnu_ifunc.  Support mst_slot_got_plt.
+	* solib-svr4.c (svr4_in_dynsym_resolve_code): Return true also for
+	in_gnu_ifunc_stub.
+	* symmisc.c (dump_msymbols): Support mst_text_gnu_ifunc.
+	* symtab.c (search_symbols): Likewise.
+	* symtab.h (enum minimal_symbol_type): New fields mst_text_gnu_ifunc
+	and mst_slot_got_plt.
+	(in_gnu_ifunc_stub): New declaration.
+
+2011-03-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Support a ring of related breakpoints.
 	* breakpoint.c (watchpoint_del_at_next_stop): New, move here code from
 	other functions, add gdb_assert.

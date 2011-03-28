@@ -290,6 +290,9 @@ enum minimal_symbol_type
 {
   mst_unknown = 0,		/* Unknown type, the default */
   mst_text,			/* Generally executable instructions */
+  mst_text_gnu_ifunc,		/* Executable code returning address
+				   of executable code */
+  mst_slot_got_plt,		/* GOT entries for .plt sections */
   mst_data,			/* Generally initialized data */
   mst_bss,			/* Generally uninitialized data */
   mst_abs,			/* Generally absolute (nonrelocatable) */
@@ -1033,6 +1036,8 @@ extern struct minimal_symbol *lookup_minimal_symbol_by_pc_name
 				(CORE_ADDR, const char *, struct objfile *);
 
 extern struct minimal_symbol *lookup_minimal_symbol_by_pc (CORE_ADDR);
+
+extern int in_gnu_ifunc_stub (CORE_ADDR pc);
 
 extern struct minimal_symbol *
     lookup_minimal_symbol_and_objfile (const char *,

@@ -1902,6 +1902,8 @@ init_type (enum type_code code, int length, int flags,
     TYPE_STUB_SUPPORTED (type) = 1;
   if (flags & TYPE_FLAG_FIXED_INSTANCE)
     TYPE_FIXED_INSTANCE (type) = 1;
+  if (flags & TYPE_FLAG_GNU_IFUNC)
+    TYPE_GNU_IFUNC (type) = 1;
 
   if (name)
     TYPE_NAME (type) = obsavestring (name, strlen (name),
@@ -3772,6 +3774,8 @@ gdbtypes_post_init (struct gdbarch *gdbarch)
     = lookup_pointer_type (builtin_type->builtin_void);
   builtin_type->builtin_func_ptr
     = lookup_pointer_type (lookup_function_type (builtin_type->builtin_void));
+  builtin_type->builtin_func_func
+    = lookup_function_type (builtin_type->builtin_func_ptr);
 
   /* This type represents a GDB internal function.  */
   builtin_type->internal_fn
@@ -3885,6 +3889,18 @@ objfile_type (struct objfile *objfile)
 		 "<text variable, no debug info>", objfile);
   TYPE_TARGET_TYPE (objfile_type->nodebug_text_symbol)
     = objfile_type->builtin_int;
+  objfile_type->nodebug_text_gnu_ifunc_symbol
+    = init_type (TYPE_CODE_FUNC, 1, TYPE_FLAG_GNU_IFUNC,
+		 "<text gnu-indirect-function variable, no debug info>",
+		 objfile);
+  TYPE_TARGET_TYPE (objfile_type->nodebug_text_gnu_ifunc_symbol)
+    = objfile_type->nodebug_text_symbol;
+  objfile_type->nodebug_got_plt_symbol
+    = init_type (TYPE_CODE_PTR, gdbarch_addr_bit (gdbarch) / 8, 0,
+		 "<text from jump slot in .got.plt, no debug info>",
+		 objfile);
+  TYPE_TARGET_TYPE (objfile_type->nodebug_got_plt_symbol)
+    = objfile_type->nodebug_text_symbol;
   objfile_type->nodebug_data_symbol
     = init_type (TYPE_CODE_INT,
 		 gdbarch_int_bit (gdbarch) / HOST_CHAR_BIT, 0,

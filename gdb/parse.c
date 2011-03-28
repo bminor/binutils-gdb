@@ -487,9 +487,22 @@ write_exp_msymbol (struct minimal_symbol *msymbol)
   pc = gdbarch_convert_from_func_ptr_addr (gdbarch, addr, &current_target);
   if (pc != addr)
     {
+      struct minimal_symbol *ifunc_msym = lookup_minimal_symbol_by_pc (pc);
+
       /* In this case, assume we have a code symbol instead of
 	 a data symbol.  */
-      type = mst_text;
+
+      if (ifunc_msym != NULL && MSYMBOL_TYPE (ifunc_msym) == mst_text_gnu_ifunc
+	  && SYMBOL_VALUE_ADDRESS (ifunc_msym) == pc)
+	{
+	  /* A function descriptor has been resolved but PC is still in the
+	     STT_GNU_IFUNC resolver body (such as because inferior does not
+	     run to be able to call it).  */
+
+	  type = mst_text_gnu_ifunc;
+	}
+      else
+	type = mst_text;
       section = NULL;
       addr = pc;
     }
@@ -521,11 +534,20 @@ write_exp_msymbol (struct minimal_symbol *msymbol)
       write_exp_elt_type (objfile_type (objfile)->nodebug_text_symbol);
       break;
 
+    case mst_text_gnu_ifunc:
+      write_exp_elt_type (objfile_type (objfile)
+					       ->nodebug_text_gnu_ifunc_symbol);
+      break;
+
     case mst_data:
     case mst_file_data:
     case mst_bss:
     case mst_file_bss:
       write_exp_elt_type (objfile_type (objfile)->nodebug_data_symbol);
+      break;
+
+    case mst_slot_got_plt:
+      write_exp_elt_type (objfile_type (objfile)->nodebug_got_plt_symbol);
       break;
 
     default:

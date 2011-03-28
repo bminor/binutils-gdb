@@ -1832,6 +1832,8 @@ evaluate_subexp_standard (struct type *expect_type,
 	      return value_zero (builtin_type (exp->gdbarch)->builtin_int,
 				 not_lval);
 	    }
+	  else if (TYPE_GNU_IFUNC (ftype))
+	    return allocate_value (TYPE_TARGET_TYPE (TYPE_TARGET_TYPE (ftype)));
 	  else if (TYPE_TARGET_TYPE (ftype))
 	    return allocate_value (TYPE_TARGET_TYPE (ftype));
 	  else

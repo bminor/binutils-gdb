@@ -1276,7 +1276,8 @@ svr4_in_dynsym_resolve_code (CORE_ADDR pc)
 	   && pc < info->interp_text_sect_high)
 	  || (pc >= info->interp_plt_sect_low
 	      && pc < info->interp_plt_sect_high)
-	  || in_plt_section (pc, NULL));
+	  || in_plt_section (pc, NULL)
+	  || in_gnu_ifunc_stub (pc));
 }
 
 /* Given an executable's ABFD and target, compute the entry-point

@@ -185,7 +185,8 @@ record_minimal_symbol (const char *name, int name_len, int copy_name,
 {
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
 
-  if (ms_type == mst_text || ms_type == mst_file_text)
+  if (ms_type == mst_text || ms_type == mst_file_text
+      || ms_type == mst_text_gnu_ifunc)
     address = gdbarch_smash_text_address (gdbarch, address);
 
   return prim_record_minimal_symbol_full (name, name_len, copy_name, address,
@@ -394,7 +395,10 @@ elf_symtab_read (struct objfile *objfile, int type,
 	    {
 	      if (sym->flags & (BSF_GLOBAL | BSF_WEAK))
 		{
-		  ms_type = mst_text;
+		  if (sym->flags & BSF_GNU_INDIRECT_FUNCTION)
+		    ms_type = mst_text_gnu_ifunc;
+		  else
+		    ms_type = mst_text;
 		}
 	      else if ((sym->name[0] == '.' && sym->name[1] == 'L')
 		       || ((sym->flags & BSF_LOCAL)

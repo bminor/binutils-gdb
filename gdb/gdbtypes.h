@@ -170,6 +170,7 @@ enum type_flag_value
   TYPE_FLAG_VECTOR = (1 << 15),
   TYPE_FLAG_FIXED_INSTANCE = (1 << 16),
   TYPE_FLAG_STUB_SUPPORTED = (1 << 17),
+  TYPE_FLAG_GNU_IFUNC = (1 << 18),
 
   /* Used for error-checking.  */
   TYPE_FLAG_MIN = TYPE_FLAG_UNSIGNED
@@ -270,6 +271,12 @@ enum type_instance_flag_value
    characters (or elements of strings) unless this flag is set.  */
 
 #define TYPE_NOTTEXT(t)	(TYPE_INSTANCE_FLAGS (t) & TYPE_INSTANCE_FLAG_NOTTEXT)
+
+/* Used only for TYPE_CODE_FUNC where it specifies the real function
+   address is returned by this function call.  TYPE_TARGET_TYPE determines the
+   final returned function type to be presented to user.  */
+
+#define TYPE_GNU_IFUNC(t)	(TYPE_MAIN_TYPE (t)->flag_gnu_ifunc)
 
 /* Type owner.  If TYPE_OBJFILE_OWNED is true, the type is owned by
    the objfile retrieved as TYPE_OBJFILE.  Otherweise, the type is
@@ -387,6 +394,7 @@ struct main_type
   unsigned int flag_varargs : 1;
   unsigned int flag_vector : 1;
   unsigned int flag_stub_supported : 1;
+  unsigned int flag_gnu_ifunc : 1;
   unsigned int flag_fixed_instance : 1;
   unsigned int flag_objfile_owned : 1;
   /* True if this type was declared with "class" rather than
@@ -1178,6 +1186,10 @@ struct builtin_type
      (*) () can server as a generic function pointer.  */
   struct type *builtin_func_ptr;
 
+  /* `function returning pointer to function (returning void)' type.
+     The final void return type is not significant for it.  */
+  struct type *builtin_func_func;
+
 
   /* Special-purpose types.  */
 
@@ -1218,6 +1230,8 @@ struct objfile_type
 
   /* Types used for symbols with no debug information.  */
   struct type *nodebug_text_symbol;
+  struct type *nodebug_text_gnu_ifunc_symbol;
+  struct type *nodebug_got_plt_symbol;
   struct type *nodebug_data_symbol;
   struct type *nodebug_unknown_symbol;
   struct type *nodebug_tls_symbol;

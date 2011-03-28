@@ -3006,7 +3006,7 @@ search_symbols (char *regexp, domain_enum kind, int nfiles, char *files[],
   static const enum minimal_symbol_type types3[]
     = {mst_file_data, mst_solib_trampoline, mst_abs, mst_unknown};
   static const enum minimal_symbol_type types4[]
-    = {mst_file_bss, mst_text, mst_abs, mst_unknown};
+    = {mst_file_bss, mst_text_gnu_ifunc, mst_abs, mst_unknown};
   enum minimal_symbol_type ourtype;
   enum minimal_symbol_type ourtype2;
   enum minimal_symbol_type ourtype3;
