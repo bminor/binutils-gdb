@@ -1,5 +1,11 @@
 2011-03-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Support a ring of related breakpoints.
+	* gdb.base/watchpoint-delete.c: New file.
+	* gdb.base/watchpoint-delete.exp: New file.
+
+2011-03-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdb.ada/arrayparam.exp (print first after function call): Use
 	explicit package name.  Add a comment
 	(print lasta after function call): Rename ...

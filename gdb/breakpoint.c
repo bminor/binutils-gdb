@@ -1159,6 +1159,25 @@ watchpoint_in_thread_scope (struct breakpoint *b)
 	      && !is_executing (inferior_ptid)));
 }
 
+/* Set watchpoint B to disp_del_at_next_stop, even including its possible
+   associated bp_watchpoint_scope breakpoint.  */
+
+static void
+watchpoint_del_at_next_stop (struct breakpoint *b)
+{
+  gdb_assert (is_watchpoint (b));
+
+  if (b->related_breakpoint != b)
+    {
+      gdb_assert (b->related_breakpoint->type == bp_watchpoint_scope);
+      gdb_assert (b->related_breakpoint->related_breakpoint == b);
+      b->related_breakpoint->disposition = disp_del_at_next_stop;
+      b->related_breakpoint->related_breakpoint = b->related_breakpoint;
+      b->related_breakpoint = b;
+    }
+  b->disposition = disp_del_at_next_stop;
+}
+
 /* Assuming that B is a watchpoint:
    - Reparse watchpoint expression, if REPARSE is non-zero
    - Evaluate expression and store the result in B->val
@@ -1217,6 +1236,8 @@ update_watchpoint (struct breakpoint *b, int reparse)
   int within_current_scope;
   struct frame_id saved_frame_id;
   int frame_saved;
+
+  gdb_assert (is_watchpoint (b));
 
   /* If this is a local watchpoint, we only want to check if the
      watchpoint frame is in scope if the current thread is the thread
@@ -1453,13 +1474,7 @@ update_watchpoint (struct breakpoint *b, int reparse)
 Watchpoint %d deleted because the program has left the block\n\
 in which its expression is valid.\n"),
 		       b->number);
-      if (b->related_breakpoint)
-	{
-	  b->related_breakpoint->disposition = disp_del_at_next_stop;
-	  b->related_breakpoint->related_breakpoint = NULL;
-	  b->related_breakpoint= NULL;
-	}
-      b->disposition = disp_del_at_next_stop;
+      watchpoint_del_at_next_stop (b);
     }
 
   /* Restore the selected frame.  */
@@ -3714,6 +3729,8 @@ watchpoint_check (void *p)
   gdb_assert (bs->breakpoint_at != NULL);
   b = bs->breakpoint_at;
 
+  gdb_assert (is_watchpoint (b));
+
   /* If this is a local watchpoint, we only want to check if the
      watchpoint frame is in scope if the current thread is the thread
      that was used to create the watchpoint.  */
@@ -3823,13 +3840,7 @@ watchpoint_check (void *p)
 		   " deleted because the program has left the block in\n\
 which its expression is valid.\n");     
 
-      if (b->related_breakpoint)
-	{
-	  b->related_breakpoint->disposition = disp_del_at_next_stop;
-	  b->related_breakpoint->related_breakpoint = NULL;
-	  b->related_breakpoint = NULL;
-	}
-      b->disposition = disp_del_at_next_stop;
+      watchpoint_del_at_next_stop (b);
 
       return WP_DELETED;
     }
@@ -4034,9 +4045,7 @@ bpstat_check_watchpoint (bpstat bs)
 	    case 0:
 	      /* Error from catch_errors.  */
 	      printf_filtered (_("Watchpoint %d deleted.\n"), b->number);
-	      if (b->related_breakpoint)
-		b->related_breakpoint->disposition = disp_del_at_next_stop;
-	      b->disposition = disp_del_at_next_stop;
+	      watchpoint_del_at_next_stop (b);
 	      /* We've already printed what needs to be printed.  */
 	      bs->print_it = print_it_done;
 	      break;
@@ -4247,7 +4256,7 @@ bpstat_stop_status (struct address_space *aspace,
 	     watchpoint as triggered so that we will handle the
 	     out-of-scope event.  We'll get to the watchpoint next
 	     iteration.  */
-	  if (b->type == bp_watchpoint_scope)
+	  if (b->type == bp_watchpoint_scope && b->related_breakpoint != b)
 	    b->related_breakpoint->watchpoint_triggered = watch_triggered_yes;
 	}
     }
@@ -5700,6 +5709,7 @@ set_raw_breakpoint_without_location (struct gdbarch *gdbarch,
   b->ops = NULL;
   b->condition_not_parsed = 0;
   b->py_bp_object = NULL;
+  b->related_breakpoint = b;
 
   /* Add this breakpoint to the end of the chain so that a list of
      breakpoints will come out in order of increasing numbers.  */
@@ -10063,12 +10073,20 @@ delete_breakpoint (struct breakpoint *bpt)
 
   /* At least avoid this stale reference until the reference counting
      of breakpoints gets resolved.  */
-  if (bpt->related_breakpoint != NULL)
+  if (bpt->related_breakpoint != bpt)
     {
-      gdb_assert (bpt->related_breakpoint->related_breakpoint == bpt);
-      bpt->related_breakpoint->disposition = disp_del_at_next_stop;
-      bpt->related_breakpoint->related_breakpoint = NULL;
-      bpt->related_breakpoint = NULL;
+      struct breakpoint *related;
+
+      if (bpt->type == bp_watchpoint_scope)
+	watchpoint_del_at_next_stop (bpt->related_breakpoint);
+      else if (bpt->related_breakpoint->type == bp_watchpoint_scope)
+	watchpoint_del_at_next_stop (bpt);
+
+      /* Unlink bpt from the bpt->related_breakpoint ring.  */
+      for (related = bpt; related->related_breakpoint != bpt;
+	   related = related->related_breakpoint);
+      related->related_breakpoint = bpt->related_breakpoint;
+      bpt->related_breakpoint = bpt;
     }
 
   observer_notify_breakpoint_deleted (bpt->number);
@@ -10849,11 +10867,25 @@ map_breakpoint_numbers (char *args, void (*function) (struct breakpoint *,
 	  ALL_BREAKPOINTS_SAFE (b, tmp)
 	    if (b->number == num)
 	      {
-		struct breakpoint *related_breakpoint = b->related_breakpoint;
+		struct breakpoint *related_breakpoint;
+
 		match = 1;
-		function (b, data);
-		if (related_breakpoint)
-		  function (related_breakpoint, data);
+		related_breakpoint = b;
+		do
+		  {
+		    struct breakpoint *next_related_b;
+
+		    /* FUNCTION can be also delete_breakpoint.  */
+		    next_related_b = related_breakpoint->related_breakpoint;
+		    function (related_breakpoint, data);
+
+		    /* For delete_breakpoint of the last entry of the ring we
+		       were traversing we would never get back to B.  */
+		    if (next_related_b == related_breakpoint)
+		      break;
+		    related_breakpoint = next_related_b;
+		  }
+		while (related_breakpoint != b);
 		break;
 	      }
 	  if (match == 0)

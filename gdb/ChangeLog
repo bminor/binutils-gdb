@@ -1,3 +1,18 @@
+2011-03-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Support a ring of related breakpoints.
+	* breakpoint.c (watchpoint_del_at_next_stop): New, move here code from
+	other functions, add gdb_assert.
+	(update_watchpoint, watchpoint_check): Add gdb_assert.  Use
+	watchpoint_del_at_next_stop.
+	(bpstat_check_watchpoint): Use watchpoint_del_at_next_stop.
+	(bpstat_stop_status): Handle ring in related_breakpoint.
+	(set_raw_breakpoint_without_location): Initialize ring in
+	related_breakpoint.
+	(delete_breakpoint): Handle ring in related_breakpoint, use
+	watchpoint_del_at_next_stop.
+	(map_breakpoint_numbers): Handle ring in related_breakpoint.
+
 2011-03-28  Tom Tromey  <tromey@redhat.com>
 
 	PR symtab/12441:
