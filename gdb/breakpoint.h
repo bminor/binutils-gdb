@@ -149,6 +149,19 @@ enum bptype
 
     /* Event for JIT compiled code generation or deletion.  */
     bp_jit_event,
+
+    /* Breakpoint is placed at the STT_GNU_IFUNC resolver.  When hit GDB
+       inserts new bp_gnu_ifunc_resolver_return at the caller.
+       bp_gnu_ifunc_resolver is still being kept here as a different thread
+       may still hit it before bp_gnu_ifunc_resolver_return is hit by the
+       original thread.  */
+    bp_gnu_ifunc_resolver,
+
+    /* On its hit GDB now know the resolved address of the target
+       STT_GNU_IFUNC function.  Associated bp_gnu_ifunc_resolver can be
+       deleted now and the breakpoint moved to the target function entry
+       point.  */
+    bp_gnu_ifunc_resolver_return,
   };
 
 /* States of enablement of breakpoint.  */
@@ -889,6 +902,9 @@ extern int breakpoint_thread_match (struct address_space *,
 				    CORE_ADDR, ptid_t);
 
 extern void until_break_command (char *, int, int);
+
+extern void update_breakpoint_locations (struct breakpoint *b,
+					 struct symtabs_and_lines sals);
 
 extern void breakpoint_re_set (void);
 

@@ -3504,6 +3504,8 @@ print_it_typical (bpstat bs)
     case bp_tracepoint:
     case bp_fast_tracepoint:
     case bp_jit_event:
+    case bp_gnu_ifunc_resolver:
+    case bp_gnu_ifunc_resolver_return:
     default:
       result = PRINT_UNKNOWN;
       break;
@@ -4378,7 +4380,7 @@ handle_jit_event (void)
 /* Decide what infrun needs to do with this bpstat.  */
 
 struct bpstat_what
-bpstat_what (bpstat bs)
+bpstat_what (bpstat bs_head)
 {
   struct bpstat_what retval;
   /* We need to defer calling `solib_add', as adding new symbols
@@ -4386,12 +4388,13 @@ bpstat_what (bpstat bs)
      and hence may clear unprocessed entries in the BS chain.  */
   int shlib_event = 0;
   int jit_event = 0;
+  bpstat bs;
 
   retval.main_action = BPSTAT_WHAT_KEEP_CHECKING;
   retval.call_dummy = STOP_NONE;
   retval.is_longjmp = 0;
 
-  for (; bs != NULL; bs = bs->next)
+  for (bs = bs_head; bs != NULL; bs = bs->next)
     {
       /* Extract this BS's action.  After processing each BS, we check
 	 if its action overrides all we've seem so far.  */
@@ -4521,6 +4524,16 @@ bpstat_what (bpstat bs)
 	     out already.  */
 	  internal_error (__FILE__, __LINE__,
 			  _("bpstat_what: tracepoint encountered"));
+	  break;
+	case bp_gnu_ifunc_resolver:
+	  /* Step over it (and insert bp_gnu_ifunc_resolver_return).  */
+	  this_action = BPSTAT_WHAT_SINGLE;
+	  break;
+	case bp_gnu_ifunc_resolver_return:
+	  /* The breakpoint will be removed, execution will restart from the
+	     PC of the former breakpoint.  */
+	  this_action = BPSTAT_WHAT_KEEP_CHECKING;
+	  break;
 	default:
 	  internal_error (__FILE__, __LINE__,
 			  _("bpstat_what: unhandled bptype %d"), (int) bptype);
@@ -4528,6 +4541,9 @@ bpstat_what (bpstat bs)
 
       retval.main_action = max (retval.main_action, this_action);
     }
+
+  /* These operations may affect the bs->breakpoint_at state so they are
+     delayed after MAIN_ACTION is decided above.  */
 
   if (shlib_event)
     {
@@ -4556,6 +4572,23 @@ bpstat_what (bpstat bs)
 	fprintf_unfiltered (gdb_stdlog, "bpstat_what: bp_jit_event\n");
 
       handle_jit_event ();
+    }
+
+  for (bs = bs_head; bs != NULL; bs = bs->next)
+    {
+      struct breakpoint *b = bs->breakpoint_at;
+
+      if (b == NULL)
+	continue;
+      switch (b->type)
+	{
+	case bp_gnu_ifunc_resolver:
+	  gnu_ifunc_resolver_stop (b);
+	  break;
+	case bp_gnu_ifunc_resolver_return:
+	  gnu_ifunc_resolver_return_stop (b);
+	  break;
+	}
     }
 
   return retval;
@@ -4715,6 +4748,8 @@ bptype_string (enum bptype type)
     {bp_fast_tracepoint, "fast tracepoint"},
     {bp_static_tracepoint, "static tracepoint"},
     {bp_jit_event, "jit events"},
+    {bp_gnu_ifunc_resolver, "STT_GNU_IFUNC resolver"},
+    {bp_gnu_ifunc_resolver_return, "STT_GNU_IFUNC resolver return"},
   };
 
   if (((int) type >= (sizeof (bptypes) / sizeof (bptypes[0])))
@@ -4849,6 +4884,8 @@ print_one_breakpoint_location (struct breakpoint *b,
       case bp_fast_tracepoint:
       case bp_static_tracepoint:
       case bp_jit_event:
+      case bp_gnu_ifunc_resolver:
+      case bp_gnu_ifunc_resolver_return:
 	if (opts.addressprint)
 	  {
 	    annotate_field (4);
@@ -5124,7 +5161,8 @@ user_settable_breakpoint (const struct breakpoint *b)
 	  || b->type == bp_catchpoint
 	  || b->type == bp_hardware_breakpoint
 	  || is_tracepoint (b)
-	  || is_watchpoint (b));
+	  || is_watchpoint (b)
+	  || b->type == bp_gnu_ifunc_resolver);
 }
 
 /* Return true if this breakpoint was set by the user, false if it is
@@ -5620,6 +5658,8 @@ allocate_bp_location (struct breakpoint *bpt)
     case bp_longjmp_master:
     case bp_std_terminate_master:
     case bp_exception_master:
+    case bp_gnu_ifunc_resolver:
+    case bp_gnu_ifunc_resolver_return:
       loc->loc_type = bp_loc_software_breakpoint;
       break;
     case bp_hardware_breakpoint:
@@ -5726,9 +5766,12 @@ set_raw_breakpoint_without_location (struct gdbarch *gdbarch,
   return b;
 }
 
-/* Initialize loc->function_name.  */
+/* Initialize loc->function_name.  EXPLICIT_LOC says no indirect function
+   resolutions should be made as the user specified the location explicitly
+   enough.  */
+
 static void
-set_breakpoint_location_function (struct bp_location *loc)
+set_breakpoint_location_function (struct bp_location *loc, int explicit_loc)
 {
   gdb_assert (loc->owner != NULL);
 
@@ -5736,8 +5779,33 @@ set_breakpoint_location_function (struct bp_location *loc)
       || loc->owner->type == bp_hardware_breakpoint
       || is_tracepoint (loc->owner))
     {
-      find_pc_partial_function (loc->address, &(loc->function_name), 
-				NULL, NULL);
+      int is_gnu_ifunc;
+
+      find_pc_partial_function_gnu_ifunc (loc->address, &loc->function_name,
+					  NULL, NULL, &is_gnu_ifunc);
+
+      if (is_gnu_ifunc && !explicit_loc)
+	{
+	  struct breakpoint *b = loc->owner;
+
+	  gdb_assert (loc->pspace == current_program_space);
+	  if (gnu_ifunc_resolve_name (loc->function_name,
+				      &loc->requested_address))
+	    {
+	      /* Recalculate ADDRESS based on new REQUESTED_ADDRESS.  */
+	      loc->address = adjust_breakpoint_address (loc->gdbarch,
+							loc->requested_address,
+							b->type);
+	    }
+	  else if (b->type == bp_breakpoint && b->loc == loc
+	           && loc->next == NULL && b->related_breakpoint == b)
+	    {
+	      /* Create only the whole new breakpoint of this type but do not
+		 mess more complicated breakpoints with multiple locations.  */
+	      b->type = bp_gnu_ifunc_resolver;
+	    }
+	}
+
       if (loc->function_name)
 	loc->function_name = xstrdup (loc->function_name);
     }
@@ -5812,7 +5880,8 @@ set_raw_breakpoint (struct gdbarch *gdbarch,
   b->loc->section = sal.section;
   b->line_number = sal.line;
 
-  set_breakpoint_location_function (b->loc);
+  set_breakpoint_location_function (b->loc,
+				    sal.explicit_pc || sal.explicit_line);
 
   breakpoints_changed ();
 
@@ -6929,7 +6998,7 @@ clone_momentary_breakpoint (struct breakpoint *orig)
 
   copy = set_raw_breakpoint_without_location (orig->gdbarch, orig->type);
   copy->loc = allocate_bp_location (copy);
-  set_breakpoint_location_function (copy->loc);
+  set_breakpoint_location_function (copy->loc, 1);
 
   copy->loc->gdbarch = orig->loc->gdbarch;
   copy->loc->requested_address = orig->loc->requested_address;
@@ -7029,6 +7098,7 @@ mention (struct breakpoint *b)
 	do_cleanups (ui_out_chain);
 	break;
       case bp_breakpoint:
+      case bp_gnu_ifunc_resolver:
 	if (ui_out_is_mi_like_p (uiout))
 	  {
 	    say_where = 0;
@@ -7039,6 +7109,8 @@ mention (struct breakpoint *b)
 	else
 	  printf_filtered (_("Breakpoint"));
 	printf_filtered (_(" %d"), b->number);
+	if (b->type == bp_gnu_ifunc_resolver)
+	  printf_filtered (_(" at gnu-indirect-function resolver"));
 	say_where = 1;
 	break;
       case bp_hardware_breakpoint:
@@ -7098,6 +7170,7 @@ mention (struct breakpoint *b)
       case bp_longjmp_master:
       case bp_std_terminate_master:
       case bp_exception_master:
+      case bp_gnu_ifunc_resolver_return:
 	break;
       }
 
@@ -7158,7 +7231,8 @@ add_location_to_breakpoint (struct breakpoint *b,
   gdb_assert (loc->pspace != NULL);
   loc->section = sal->section;
 
-  set_breakpoint_location_function (loc);
+  set_breakpoint_location_function (loc,
+				    sal->explicit_pc || sal->explicit_line);
   return loc;
 }
 
@@ -10399,7 +10473,7 @@ update_static_tracepoint (struct breakpoint *b, struct symtab_and_line sal)
   return sal;
 }
 
-static void
+void
 update_breakpoint_locations (struct breakpoint *b,
 			     struct symtabs_and_lines sals)
 {
@@ -10531,6 +10605,7 @@ breakpoint_re_set_one (void *bint)
     case bp_tracepoint:
     case bp_fast_tracepoint:
     case bp_static_tracepoint:
+    case bp_gnu_ifunc_resolver:
       /* Do not attempt to re-set breakpoints disabled during startup.  */
       if (b->enable_state == bp_startup_disabled)
 	return 0;
@@ -10701,6 +10776,7 @@ breakpoint_re_set_one (void *bint)
     case bp_exception:
     case bp_exception_resume:
     case bp_jit_event:
+    case bp_gnu_ifunc_resolver_return:
       break;
     }
 

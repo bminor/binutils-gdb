@@ -1,5 +1,50 @@
 2011-03-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Support resolution of STT_GNU_IFUNC via breakpoints.
+	* breakpoint.c (print_it_typical): Support bp_gnu_ifunc_resolver and
+	bp_gnu_ifunc_resolver_return.
+	(bpstat_what): Rename parameter to bs_head, new variable bs, adjust
+	the loop.  Support bp_gnu_ifunc_resolver and
+	bp_gnu_ifunc_resolver_return.  New comment after the loop.  New loop
+	for bp_gnu_ifunc_resolver and bp_gnu_ifunc_resolver_return
+	breakpoints.
+	(bptype_string, print_one_breakpoint_location): Support
+	bp_gnu_ifunc_resolver and bp_gnu_ifunc_resolver_return.
+	(user_settable_breakpoint): Return true also for
+	bp_gnu_ifunc_resolver.
+	(allocate_bp_location): Support bp_gnu_ifunc_resolver and
+	bp_gnu_ifunc_resolver_return.
+	(set_breakpoint_location_function): New parameter explicit_loc,
+	describe it.  Call find_pc_partial_function_gnu_ifunc with new
+	variable IS_GNU_IFUNC and adjust the address for STT_GNU_IFUNC if
+	EXPLICIT_LOC is not set.
+	(set_raw_breakpoint): Set EXPLICIT_LOC for
+	set_breakpoint_location_function.
+	(clone_momentary_breakpoint): Use true for EXPLICIT_LOC of
+	set_breakpoint_location_function.
+	(mention): Support bp_gnu_ifunc_resolver and
+	bp_gnu_ifunc_resolver_return.
+	(add_location_to_breakpoint): Set EXPLICIT_LOC for
+	set_breakpoint_location_function.
+	(update_breakpoint_locations): Remove static.
+	(breakpoint_re_set_one): Support bp_gnu_ifunc_resolver and
+	bp_gnu_ifunc_resolver_return.
+	* breakpoint.h (enum bptype): New fields bp_gnu_ifunc_resolver and
+	bp_gnu_ifunc_resolver_return.
+	(update_breakpoint_locations): New declaration.
+	* elfread.c: Include gdbthread.h and regcache.h.
+	(elf_gnu_ifunc_resolver_stop, elf_gnu_ifunc_resolver_return_stop): New
+	functions.
+	(elf_gnu_ifunc_fns): Install them.
+	* minsyms.c (stub_gnu_ifunc_resolver_stop)
+	(stub_gnu_ifunc_resolver_return_stop): New functions.
+	(stub_gnu_ifunc_fns): Install them.
+	* symtab.h (struct gnu_ifunc_fns): New fields gnu_ifunc_resolver_stop
+	and gnu_ifunc_resolver_return_stop.
+	(gnu_ifunc_resolver_stop, gnu_ifunc_resolver_return_stop): New.
+
+2011-03-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	STT_GNU_IFUNC reader implementation.
 	* elfread.c: Include gdbtypes.h, value.h and infcall.h.
 	(SYMBOL_GOT_PLT_SUFFIX, elf_rel_plt_read)

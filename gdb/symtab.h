@@ -1055,10 +1055,19 @@ struct gnu_ifunc_fns
   /* See elf_gnu_ifunc_resolve_name for its real implementation.  */
   int (*gnu_ifunc_resolve_name) (const char *function_name,
 				 CORE_ADDR *function_address_p);
+
+  /* See elf_gnu_ifunc_resolver_stop for its real implementation.  */
+  void (*gnu_ifunc_resolver_stop) (struct breakpoint *b);
+
+  /* See elf_gnu_ifunc_resolver_return_stop for its real implementation.  */
+  void (*gnu_ifunc_resolver_return_stop) (struct breakpoint *b);
 };
 
 #define gnu_ifunc_resolve_addr gnu_ifunc_fns_p->gnu_ifunc_resolve_addr
 #define gnu_ifunc_resolve_name gnu_ifunc_fns_p->gnu_ifunc_resolve_name
+#define gnu_ifunc_resolver_stop gnu_ifunc_fns_p->gnu_ifunc_resolver_stop
+#define gnu_ifunc_resolver_return_stop \
+  gnu_ifunc_fns_p->gnu_ifunc_resolver_return_stop
 
 extern const struct gnu_ifunc_fns *gnu_ifunc_fns_p;
 

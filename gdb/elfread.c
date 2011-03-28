@@ -41,6 +41,8 @@
 #include "gdbtypes.h"
 #include "value.h"
 #include "infcall.h"
+#include "gdbthread.h"
+#include "regcache.h"
 
 extern void _initialize_elfread (void);
 
@@ -948,6 +950,111 @@ elf_gnu_ifunc_resolve_addr (struct gdbarch *gdbarch, CORE_ADDR pc)
   return address;
 }
 
+/* Handle inferior hit of bp_gnu_ifunc_resolver, see its definition.  */
+
+static void
+elf_gnu_ifunc_resolver_stop (struct breakpoint *b)
+{
+  struct breakpoint *b_return;
+  struct frame_info *prev_frame = get_prev_frame (get_current_frame ());
+  struct frame_id prev_frame_id = get_stack_frame_id (prev_frame);
+  CORE_ADDR prev_pc = get_frame_pc (prev_frame);
+  int thread_id = pid_to_thread_id (inferior_ptid);
+
+  gdb_assert (b->type == bp_gnu_ifunc_resolver);
+
+  for (b_return = b->related_breakpoint; b_return != b;
+       b_return = b_return->related_breakpoint)
+    {
+      gdb_assert (b_return->type == bp_gnu_ifunc_resolver_return);
+      gdb_assert (b_return->loc != NULL && b_return->loc->next == NULL);
+      gdb_assert (frame_id_p (b_return->frame_id));
+
+      if (b_return->thread == thread_id
+	  && b_return->loc->requested_address == prev_pc
+	  && frame_id_eq (b_return->frame_id, prev_frame_id))
+	break;
+    }
+
+  if (b_return == b)
+    {
+      struct symtab_and_line sal;
+
+      /* No need to call find_pc_line for symbols resolving as this is only
+	 a helper breakpointer never shown to the user.  */
+
+      init_sal (&sal);
+      sal.pspace = current_inferior ()->pspace;
+      sal.pc = prev_pc;
+      sal.section = find_pc_overlay (sal.pc);
+      sal.explicit_pc = 1;
+      b_return = set_momentary_breakpoint (get_frame_arch (prev_frame), sal,
+					   prev_frame_id,
+					   bp_gnu_ifunc_resolver_return);
+
+      /* Add new b_return to the ring list b->related_breakpoint.  */
+      gdb_assert (b_return->related_breakpoint == b_return);
+      b_return->related_breakpoint = b->related_breakpoint;
+      b->related_breakpoint = b_return;
+    }
+}
+
+/* Handle inferior hit of bp_gnu_ifunc_resolver_return, see its definition.  */
+
+static void
+elf_gnu_ifunc_resolver_return_stop (struct breakpoint *b)
+{
+  struct gdbarch *gdbarch = get_frame_arch (get_current_frame ());
+  struct type *func_func_type = builtin_type (gdbarch)->builtin_func_func;
+  struct type *value_type = TYPE_TARGET_TYPE (func_func_type);
+  struct regcache *regcache = get_thread_regcache (inferior_ptid);
+  struct value *value;
+  CORE_ADDR resolved_address, resolved_pc;
+  struct symtab_and_line sal;
+  struct symtabs_and_lines sals;
+
+  gdb_assert (b->type == bp_gnu_ifunc_resolver_return);
+
+  value = allocate_value (value_type);
+  gdbarch_return_value (gdbarch, func_func_type, value_type, regcache,
+			value_contents_raw (value), NULL);
+  resolved_address = value_as_address (value);
+  resolved_pc = gdbarch_convert_from_func_ptr_addr (gdbarch,
+						    resolved_address,
+						    &current_target);
+
+  while (b->related_breakpoint != b)
+    {
+      struct breakpoint *b_next = b->related_breakpoint;
+
+      switch (b->type)
+	{
+	case bp_gnu_ifunc_resolver:
+	  break;
+	case bp_gnu_ifunc_resolver_return:
+	  delete_breakpoint (b);
+	  break;
+	default:
+	  internal_error (__FILE__, __LINE__,
+			  _("handle_inferior_event: Invalid "
+			    "gnu-indirect-function breakpoint type %d"),
+			  (int) b->type);
+	}
+      b = b_next;
+    }
+  gdb_assert (b->type == bp_gnu_ifunc_resolver);
+
+  gdb_assert (current_program_space == b->pspace);
+  elf_gnu_ifunc_record_cache (b->addr_string, resolved_pc);
+
+  sal = find_pc_line (resolved_pc, 0);
+  sals.nelts = 1;
+  sals.sals = &sal;
+
+  b->type = bp_breakpoint;
+  update_breakpoint_locations (b, sals);
+}
+
 struct build_id
   {
     size_t size;
@@ -1502,6 +1609,8 @@ static const struct gnu_ifunc_fns elf_gnu_ifunc_fns =
 {
   elf_gnu_ifunc_resolve_addr,
   elf_gnu_ifunc_resolve_name,
+  elf_gnu_ifunc_resolver_stop,
+  elf_gnu_ifunc_resolver_return_stop
 };
 
 void
