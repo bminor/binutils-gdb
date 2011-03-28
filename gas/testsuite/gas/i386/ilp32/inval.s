@@ -4,7 +4,3 @@
 	movabs foo,%rax
 	movabsq xxx,%rax
 	movabsq foo,%rax
-
-	.data
-xxx:
-	.quad foo

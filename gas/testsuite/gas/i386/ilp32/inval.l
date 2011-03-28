@@ -3,7 +3,6 @@
 .*:4: Error: .*
 .*:5: Error: .*
 .*:6: Error: .*
-.*:10: Error: .*
 GAS LISTING .*
 
 
@@ -19,11 +18,6 @@ GAS LISTING .*
 [ 	]*5[ 	]+00000000 
 [ 	]*5[ 	]+0000
 [ 	]*6[ 	]+\?\?\?\? 48A10000 		movabsq foo,%rax
+\*\*\*\*  Error:cannot represent relocation type BFD_RELOC_[ 	]*64[ 	]+in x32 mode
 [ 	]*6[ 	]+00000000 
 [ 	]*6[ 	]+0000
-[ 	]*7[ 	]+
-[ 	]*8[ 	]+\.data
-[ 	]*9[ 	]+xxx:
-[ 	]*10[ 	]+\?\?\?\? 00000000 		\.quad foo
-\*\*\*\*  Error:cannot represent relocation type BFD_RELOC_[ 	]*64[ 	]+in x32 mode
-[ 	]*10[ 	]+00000000 

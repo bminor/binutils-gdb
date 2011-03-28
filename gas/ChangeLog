@@ -1,3 +1,8 @@
+2011-03-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (handle_quad): New.
+	(md_pseudo_table): Add "quad".
+
 2011-03-26  John Marino  <binutils@marino.st>
 
 	* configure.tgt: Fix support for *-*-dragonfly*.
