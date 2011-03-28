@@ -1,5 +1,10 @@
 2011-03-25  Pierre Muller  <muller@ics.u-strasbg.fr>
 
+	* coffdump.c (dump_coff_scope): Use double typecast for pointer P
+	to allow compilation for all targets.
+
+2011-03-25  Pierre Muller  <muller@ics.u-strasbg.fr>
+
 	* dwarf.c (process_debug_info): Use offset_size to determine
 	the bit-size of the computation unit's offset.
 	(decode_location_expression): Use dwarf_vmatoa function to display

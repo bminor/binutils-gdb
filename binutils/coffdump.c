@@ -365,7 +365,7 @@ dump_coff_scope (struct coff_scope *p)
   if (p)
     {
       tab (1);
-      printf ("List of blocks %lx ",(unsigned long) p);
+      printf ("List of blocks %" BFD_VMA_FMT "x ",(bfd_vma) (uintptr_t) p);
 
       if (p->sec)
 	printf( "  %s %x..%x",  p->sec->name,p->offset, p->offset + p->size -1);
