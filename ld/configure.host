@@ -18,7 +18,12 @@ HOSTING_LIBS='`if [ -f ../gcc/libgcc.a ]; then libgcc=../gcc/libgcc.a; else libg
 
 case "${host}" in
 
-*-*-freebsd* | *-*-kfreebsd*-gnu | *-*-dragonfly*)
+*-*-dragonfly*)
+  HOSTING_CRT0='-dynamic-linker `[ -f \`${CC} --print-prog-name=ld-elf.so.2\` ] || echo /usr/libexec/``${CC} --print-prog-name=ld-elf.so.2` `${CC} --print-file-name=crt1.o` `${CC} --print-file-name=crti.o` `${CC} --print-file-name=crtbegin.o`'
+  HOSTING_LIBS='-L`dirname \`${CC} --print-file-name=libc.so\`` '"$HOSTING_LIBS"' `if [ -f ../gcc/crtend.o ]; then echo ../gcc/crtend.o; else ${CC} --print-file-name=crtend.o; fi` `${CC} --print-file-name=crtn.o`'
+  ;;
+
+*-*-freebsd* | *-*-kfreebsd*-gnu)
   HOSTING_CRT0='-dynamic-linker `[ -f \`${CC} --print-prog-name=ld-elf.so.1\` ] || echo /usr/libexec/``${CC} --print-prog-name=ld-elf.so.1` `${CC} --print-file-name=crt1.o` `${CC} --print-file-name=crti.o` `${CC} --print-file-name=crtbegin.o`'
   HOSTING_LIBS='-L`dirname \`${CC} --print-file-name=libc.so\`` '"$HOSTING_LIBS"' `if [ -f ../gcc/crtend.o ]; then echo ../gcc/crtend.o; else ${CC} --print-file-name=crtend.o; fi` `${CC} --print-file-name=crtn.o`'
   ;;
@@ -200,7 +205,10 @@ sparc64-*-solaris2* | sparcv9-*-solaris2*)
   HOSTING_LIBS="$HOSTING_LIBS"' `if [ -f ../gcc/crtend.o ]; then echo ../gcc/crtend.o; else ${CC} -print-file-name=crtend.o; fi` `if [ -f ../gcc/crtn.o ]; then echo ../gcc/crtn.o; else ${CC} -print-file-name=crtn.o; fi`'
   ;;
 
-*-*-freebsd* | *-*-kfreebsd*-gnu | *-*-dragonfly*)
+*-*-dragonfly*)
+  ;;
+
+*-*-freebsd* | *-*-kfreebsd*-gnu)
   ;;
 
 *-*-linux* | *-*-gnu*)

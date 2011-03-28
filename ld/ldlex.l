@@ -60,7 +60,9 @@ const char *lex_string = NULL;
 #undef YY_INPUT
 #define YY_INPUT(buf,result,max_size) result = yy_input (buf, max_size)
 
+#ifndef YY_NO_UNPUT
 #define YY_NO_UNPUT
+#endif
 
 #define MAX_INCLUDE_DEPTH 10
 static YY_BUFFER_STATE include_stack[MAX_INCLUDE_DEPTH];

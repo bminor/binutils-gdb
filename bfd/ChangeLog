@@ -1,3 +1,9 @@
+2011-03-26  John Marino  <binutils@marino.st>
+
+	* config.bfd: Add x86_64-*-dragonfly*, fix i386-*-dragonfly*.
+	* configure.in: Delete unused bfd_elf32_i386_dragonfly_vec.
+	* configure: Regenerate.
+
 2011-03-25  Michael Snyder  <msnyder@vmware.com>
 
 	* coffcode.h (coff_set_alignment_hook): Check return of bfd_seek.

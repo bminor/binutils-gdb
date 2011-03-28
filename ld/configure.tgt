@@ -249,7 +249,11 @@ x86_64-*-elf*)		targ_emul=elf_x86_64
 i[3-7]86-*-kaos*)	targ_emul=elf_i386 ;;
 i[3-7]86-*-freebsdaout* | i[3-7]86-*-freebsd[12].* | i[3-7]86-*-freebsd[12])
 			targ_emul=i386bsd ;;
-i[3-7]86-*-freebsd* | i[3-7]86-*-kfreebsd*-gnu | i[3-7]86-*-dragonfly*)
+i[3-7]86-*-dragonfly*)	targ_emul=elf_i386
+			targ_extra_emuls="i386bsd" ;;
+x86_64-*-dragonfly*)	targ_emul=elf_x86_64
+			targ_extra_emuls="elf_i386 elf_l1om" ;;
+i[3-7]86-*-freebsd* | i[3-7]86-*-kfreebsd*-gnu)
 		        targ_emul=elf_i386_fbsd
 			targ_extra_emuls="elf_i386 i386bsd" ;;
 x86_64-*-freebsd* | x86_64-*-kfreebsd*-gnu)
@@ -683,7 +687,11 @@ esac
 NATIVE_LIB_DIRS='/usr/local/lib /lib /usr/lib'
 case "${target}" in
 
-*-*-freebsd* | *-*-dragonfly*)
+*-*-dragonfly*)
+  NATIVE_LIB_DIRS='/usr/lib /usr/pkg/lib /usr/local/lib'
+  ;;
+
+*-*-freebsd*)
   NATIVE_LIB_DIRS='/lib /usr/lib /usr/local/lib'
   ;;
 
@@ -721,9 +729,6 @@ i[03-9x]86-*-cygwin*)
   ;;
 
 *-*-linux*)
-  ;;
-
-*-*-freebsd* | *-*-dragonfly*)
   ;;
 
 *-*-netbsd*)

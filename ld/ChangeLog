@@ -1,3 +1,9 @@
+2011-03-26  John Marino  <binutils@marino.st>
+
+	* configure.host: Update *-*-dragonfly* host entry.
+	* configure.tgt: Update *-*-dragonfly* target entry.
+	* ldlex.l: Prevent redefinition of YY_NO_UNPUT.
+
 2011-03-28  Joseph Myers  <joseph@codesourcery.com>
 
 	* configure.in: Check for windows.h, not Windows.h.

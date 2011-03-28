@@ -1,3 +1,9 @@
+2011-03-26  John Marino  <binutils@marino.st>
+
+	* configure.tgt: Fix support for *-*-dragonfly*.
+	* config/tc-i386.c: define SVR4_COMMENT_CHARS for dragonfly.
+	* config/te-dragonfly.h: New file.
+
 2011-03-24  Eric B. Weddington  <eric.weddington@atmel.com>
 
 	* config/tc-avr.c (mcu_types): Add new devices: atmega325pa,
