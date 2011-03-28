@@ -1,3 +1,9 @@
+2011-03-28  Tom Tromey  <tromey@redhat.com>
+
+	PR symtab/12441:
+	* dwarf2read.c (prepare_one_comp_unit): Don't call set_cu_language
+	with `language_minimal'.
+
 2011-03-25  Ulrich Weigand  <ulrich.weigand@linaro.org>
 
 	* arm-tdep.c (arm_elf_make_msymbol_special): Use ARM_SYM_BRANCH_TYPE

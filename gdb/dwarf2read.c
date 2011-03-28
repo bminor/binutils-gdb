@@ -14679,7 +14679,10 @@ prepare_one_comp_unit (struct dwarf2_cu *cu, struct die_info *comp_unit_die)
   if (attr)
     set_cu_language (DW_UNSND (attr), cu);
   else
-    set_cu_language (language_minimal, cu);
+    {
+      cu->language = language_minimal;
+      cu->language_defn = language_def (cu->language);
+    }
 }
 
 /* Release one cached compilation unit, CU.  We unlink it from the tree
