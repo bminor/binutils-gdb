@@ -1,6 +1,6 @@
 /* Coff file dumper.
-   Copyright 1994, 1995, 1998, 1999, 2000, 2001, 2002, 2003, 2005, 2007
-   Free Software Foundation, Inc.
+   Copyright 1994, 1995, 1998, 1999, 2000, 2001, 2002, 2003, 2005, 2007,
+   2011 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -27,6 +27,7 @@
 
 #include "sysdep.h"
 #include "bfd.h"
+#include "bfd_stdint.h"
 #include "libiberty.h"
 #include "bucomm.h"
 
