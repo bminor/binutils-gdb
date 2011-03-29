@@ -1,3 +1,10 @@
+2011-03-29  Richard Henderson  <rth@redhat.com>
+
+	* elf64-alpha.c (elf64_alpha_gc_mark_hook): New.
+	(elf64_alpha_gc_sweep_hook): New.
+	(elf_backend_gc_mark_hook, elf_backend_gc_sweep_hook): New.
+	(elf_backend_can_gc_sections): New.
+
 2011-03-26  John Marino  <binutils@marino.st>
 
 	* config.bfd: Add x86_64-*-dragonfly*, fix i386-*-dragonfly*.

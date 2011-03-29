@@ -1,6 +1,6 @@
 /* Alpha specific support for 64-bit ELF
    Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
-   2006, 2007, 2008, 2009, 2010  Free Software Foundation, Inc.
+   2006, 2007, 2008, 2009, 2010, 2011  Free Software Foundation, Inc.
    Contributed by Richard Henderson <rth@tamu.edu>.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -1982,6 +1982,93 @@ elf64_alpha_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      if (sec->flags & SEC_READONLY)
 		info->flags |= DF_TEXTREL;
 	    }
+	}
+    }
+
+  return TRUE;
+}
+
+/* Return the section that should be marked against GC for a given
+   relocation.  */
+
+static asection *
+elf64_alpha_gc_mark_hook (asection *sec, struct bfd_link_info *info,
+			  Elf_Internal_Rela *rel,
+			  struct elf_link_hash_entry *h, Elf_Internal_Sym *sym)
+{
+  /* These relocations don't really reference a symbol.  Instead we store
+     extra data in their addend slot.  Ignore the symbol.  */
+  switch (ELF64_R_TYPE (rel->r_info))
+    {
+    case R_ALPHA_LITUSE:
+    case R_ALPHA_GPDISP:
+    case R_ALPHA_HINT:
+      return NULL;
+    }
+
+  return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
+}
+
+/* Update the got entry reference counts for the section being removed.  */
+
+static bfd_boolean
+elf64_alpha_gc_sweep_hook (bfd *abfd, struct bfd_link_info *info,
+			   asection *sec, const Elf_Internal_Rela *relocs)
+{
+  Elf_Internal_Shdr *symtab_hdr;
+  struct alpha_elf_link_hash_entry **sym_hashes;
+  const Elf_Internal_Rela *rel, *relend;
+
+  if (info->relocatable)
+    return TRUE;
+
+  symtab_hdr = &elf_symtab_hdr (abfd);
+  sym_hashes = alpha_elf_sym_hashes (abfd);
+
+  relend = relocs + sec->reloc_count;
+  for (rel = relocs; rel < relend; rel++)
+    {
+      unsigned long r_symndx, r_type;
+      struct alpha_elf_link_hash_entry *h = NULL;
+      struct alpha_elf_got_entry *gotent;
+
+      r_symndx = ELF64_R_SYM (rel->r_info);
+      if (r_symndx >= symtab_hdr->sh_info)
+	{
+	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+	  while (h->root.root.type == bfd_link_hash_indirect
+		 || h->root.root.type == bfd_link_hash_warning)
+	    h = (struct alpha_elf_link_hash_entry *) h->root.root.u.i.link;
+	}
+
+      r_type = ELF64_R_TYPE (rel->r_info);
+      switch (r_type)
+	{
+	case R_ALPHA_LITERAL:
+	  /* ??? Ignore re-computation of gotent_flags.  We're not
+	     carrying a use-count for each bit in that mask.  */
+
+	case R_ALPHA_TLSGD:
+	case R_ALPHA_GOTDTPREL:
+	case R_ALPHA_GOTTPREL:
+	  /* Fetch the got entry from the tables.  */
+	  gotent = get_got_entry (abfd, h, r_type, r_symndx, rel->r_addend);
+
+	  /* The got entry *must* exist, since we should have created it
+	     before during check_relocs.  Also note that get_got_entry
+	     assumed this was going to be another use, and so incremented
+	     the use count again.  Thus the use count must be at least the
+	     one real use and the "use" we just added.  */
+	  if (gotent == NULL || gotent->use_count < 2)
+	    {
+	      abort ();
+	      return FALSE;
+	    }
+	  gotent->use_count -= 2;
+	  break;
+
+	default:
+	  break;
 	}
     }
 
@@ -5383,6 +5470,10 @@ static const struct elf_size_info alpha_elf_size_info =
   elf64_alpha_final_link
 #define elf_backend_reloc_type_class \
   elf64_alpha_reloc_type_class
+
+#define elf_backend_can_gc_sections	1
+#define elf_backend_gc_mark_hook	elf64_alpha_gc_mark_hook
+#define elf_backend_gc_sweep_hook	elf64_alpha_gc_sweep_hook
 
 #define elf_backend_ecoff_debug_swap \
   &elf64_alpha_ecoff_debug_swap
