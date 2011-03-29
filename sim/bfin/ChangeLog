@@ -1,3 +1,7 @@
+2011-03-29  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate after common/aclocal.m4 changes.
+
 2011-03-28  Robin Getz  <robin.getz@analog.com>
 
 	* bfin-sim.c (decode_dsp32alu_0): Cast high 16bits of A0.W to bs16

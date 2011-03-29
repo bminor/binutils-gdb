@@ -5074,7 +5074,7 @@ fi
 if test ""; then
   hardware=""
 else
-  hardware="core pal glue"
+  hardware="cfi core pal glue"
 fi
 hardware="$hardware \
 	bfin_cec \
