@@ -4523,23 +4523,16 @@ decode_dsp32alu_0 (SIM_CPU *cpu, bu16 iw0, bu16 iw1)
     }
   else if (aop == 1 && aopcde == 12)
     {
-      bu32 val0 = ((AWREG (0) >> 16) + (AWREG (0) & 0xFFFF)) & 0xFFFF;
-      bu32 val1 = ((AWREG (1) >> 16) + (AWREG (1) & 0xFFFF)) & 0xFFFF;
+      bs32 val0 = (bs16)(AWREG (0) >> 16) + (bs16)AWREG (0);
+      bs32 val1 = (bs16)(AWREG (1) >> 16) + (bs16)AWREG (1);
 
       TRACE_INSN (cpu, "R%i = A1.L + A1.H, R%i = A0.L + A0.H;", dst1, dst0);
 
       if (dst0 == dst1)
 	illegal_instruction_combination (cpu);
 
-      if (val0 & 0x8000)
-	val0 |= 0xFFFF0000;
-
-      if (val1 & 0x8000)
-	val1 |= 0xFFFF0000;
-
       SET_DREG (dst0, val0);
       SET_DREG (dst1, val1);
-      /* XXX: ASTAT ?  */
     }
   else if (aopcde == 1)
     {

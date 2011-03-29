@@ -1,3 +1,10 @@
+2011-03-28  Robin Getz  <robin.getz@analog.com>
+
+	* bfin-sim.c (decode_dsp32alu_0): Cast high 16bits of A0.W to bs16
+	and add to casted low 16bits of A0.L and store in val0.  Cast high
+	16bits of A1.W to bs16 and add to casted low 16bits of A1.L and
+	store in val1.  Delete bit checks of val0 and val1.
+
 2011-03-26  Robin Getz  <robin.getz@analog.com>
 
 	* bfin-sim.c (decode_dsp32alu_0): Set result to 0x7FFFFFFF when
