@@ -1,3 +1,7 @@
+2019-02-14  Thomas Schwinge  <thomas@codesourcery.com>
+
+	* config/i386/nm-i386gnu.h (gnu_target_pid_to_str): Remove.
+
 2019-02-14  Frederic Konrad  <konrad@adacore.com>
 
 	* riscv-rdep.c (riscv_type_alignment): Handle TYPE_CODE_RANGE.

@@ -24,8 +24,6 @@
 #include <mach/exception.h>
 #include "regcache.h"
 
-extern char *gnu_target_pid_to_str (int pid);
-
 /* Thread flavors used in re-setting the T bit.  */
 #define THREAD_STATE_FLAVOR		i386_REGS_SEGS_STATE
 #define THREAD_STATE_SIZE		i386_THREAD_STATE_COUNT
