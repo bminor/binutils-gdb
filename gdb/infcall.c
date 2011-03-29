@@ -252,7 +252,8 @@ find_function_addr (struct value *function, struct type **retval_type)
   struct type *ftype = check_typedef (value_type (function));
   struct gdbarch *gdbarch = get_type_arch (ftype);
   struct type *value_type = NULL;
-  CORE_ADDR funaddr;
+  /* Initialize it just to avoid a GCC false warning.  */
+  CORE_ADDR funaddr = 0;
 
   /* If it's a member function, just look at the function
      part of it.  */

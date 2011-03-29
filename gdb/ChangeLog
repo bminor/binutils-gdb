@@ -1,3 +1,8 @@
+2011-03-29  Andreas Tobler  <andreast-list@fgznet.ch>
+
+	Fix false GCC warning.
+	* infcall.c (find_function_addr): Initialize funaddr.
+
 2011-03-29  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	Fix mingw compilation with --enable-targets=all.
