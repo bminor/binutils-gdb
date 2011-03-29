@@ -866,6 +866,8 @@ asm_1:
 	{
 	  if (!IS_DREG ($2) || !IS_DREG ($4))
 	    return yyerror ("Dregs expected");
+	  else if (REG_SAME ($2, $4))
+	    return yyerror ("Illegal dest register combination");
 	  else if (!valid_dreg_pair (&$8, $10))
 	    return yyerror ("Bad dreg pair");
 	  else

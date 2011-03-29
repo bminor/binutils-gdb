@@ -105,3 +105,4 @@
 .*:134: Error: Illegal dest register combination.
 .*:135: Error: Illegal dest register combination.
 .*:136: Error: Illegal dest register combination.
+.*:137: Error: Illegal dest register combination.
