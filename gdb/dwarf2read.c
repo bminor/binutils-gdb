@@ -9363,6 +9363,25 @@ fixup_partial_die (struct partial_die_info *part_die,
 	  || part_die->tag == DW_TAG_union_type))
     guess_partial_die_structure_name (part_die, cu);
 
+  /* GCC might emit a nameless struct or union that has a linkage
+     name.  See http://gcc.gnu.org/bugzilla/show_bug.cgi?id=47510.  */
+  if (part_die->name == NULL
+      && (part_die->tag == DW_TAG_structure_type
+	  || part_die->tag == DW_TAG_union_type
+	  || part_die->tag == DW_TAG_class_type)
+      && part_die->linkage_name != NULL)
+    {
+      char *demangled;
+
+      demangled = cplus_demangle (part_die->linkage_name, DMGL_TYPES);
+      if (demangled)
+	{
+	  part_die->name = obsavestring (demangled, strlen (demangled),
+					 &cu->objfile->objfile_obstack);
+	  xfree (demangled);
+	}
+    }
+
   part_die->fixup_called = 1;
 }
 
@@ -11960,7 +11979,11 @@ dwarf2_name (struct die_info *die, struct dwarf2_cu *cu)
   struct attribute *attr;
 
   attr = dwarf2_attr (die, DW_AT_name, cu);
-  if (!attr || !DW_STRING (attr))
+  if ((!attr || !DW_STRING (attr))
+      && die->tag != DW_TAG_class_type
+      && die->tag != DW_TAG_interface_type
+      && die->tag != DW_TAG_structure_type
+      && die->tag != DW_TAG_union_type)
     return NULL;
 
   switch (die->tag)
@@ -12011,9 +12034,36 @@ dwarf2_name (struct die_info *die, struct dwarf2_cu *cu)
 	 structures or unions.  These were of the form "._%d" in GCC 4.1,
 	 or simply "<anonymous struct>" or "<anonymous union>" in GCC 4.3
 	 and GCC 4.4.  We work around this problem by ignoring these.  */
-      if (strncmp (DW_STRING (attr), "._", 2) == 0
-	  || strncmp (DW_STRING (attr), "<anonymous", 10) == 0)
+      if (attr && DW_STRING (attr)
+	  && (strncmp (DW_STRING (attr), "._", 2) == 0
+	      || strncmp (DW_STRING (attr), "<anonymous", 10) == 0))
 	return NULL;
+
+      /* GCC might emit a nameless typedef that has a linkage name.  See
+	 http://gcc.gnu.org/bugzilla/show_bug.cgi?id=47510.  */
+      if (!attr || DW_STRING (attr) == NULL)
+	{
+	  char *demangled;
+
+	  attr = dwarf2_attr (die, DW_AT_linkage_name, cu);
+	  if (attr == NULL)
+	    attr = dwarf2_attr (die, DW_AT_MIPS_linkage_name, cu);
+
+	  if (attr == NULL || DW_STRING (attr) == NULL)
+	    return NULL;
+
+	  demangled = cplus_demangle (DW_STRING (attr), DMGL_TYPES);
+
+	  if (demangled)
+	    {
+	      /* FIXME: we already did this for the partial symbol... */
+	      DW_STRING (attr)
+		= obsavestring (demangled, strlen (demangled),
+				&cu->objfile->objfile_obstack);
+	      DW_STRING_IS_CANONICAL (attr) = 1;
+	      xfree (demangled);
+	    }
+	}
       break;
 
     default:

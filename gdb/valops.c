@@ -3339,25 +3339,32 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 	      int ii;
 
 	      j = -1;
-	      for (ii = 0; ii < TYPE_FN_FIELDLIST_LENGTH (t, i);
-		   ++ii)
+	      for (ii = 0; ii < len; ++ii)
 		{
 		  /* Skip artificial methods.  This is necessary if,
 		     for example, the user wants to "print
 		     subclass::subclass" with only one user-defined
-		     constructor.  There is no ambiguity in this
-		     case.  */
+		     constructor.  There is no ambiguity in this case.
+		     We are careful here to allow artificial methods
+		     if they are the unique result.  */
 		  if (TYPE_FN_FIELD_ARTIFICIAL (f, ii))
-		    continue;
+		    {
+		      if (j == -1)
+			j = ii;
+		      continue;
+		    }
 
 		  /* Desired method is ambiguous if more than one
 		     method is defined.  */
-		  if (j != -1)
+		  if (j != -1 && !TYPE_FN_FIELD_ARTIFICIAL (f, j))
 		    error (_("non-unique member `%s' requires "
 			     "type instantiation"), name);
 
 		  j = ii;
 		}
+
+	      if (j == -1)
+		error (_("no matching member function"));
 	    }
 
 	  if (TYPE_FN_FIELD_STATIC_P (f, j))

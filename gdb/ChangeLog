@@ -1,3 +1,11 @@
+2011-03-29  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2read.c (fixup_partial_die): Handle linkage name on
+	otherwise anonymous types.
+	(dwarf2_name): Likewise.
+	* valops.c (value_struct_elt_for_reference): Refine artificial
+	type logic.  Call error if j==-1.
+
 2011-03-29  Andreas Tobler  <andreast-list@fgznet.ch>
 
 	Fix false GCC warning.
