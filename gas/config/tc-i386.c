@@ -9182,19 +9182,19 @@ handle_quad (int nbytes)
       if (exp.X_op != O_constant)
 	nbytes = 4;
       emit_expr (&exp, (unsigned int) nbytes);
+      /* Zero-extends to 8 bytes if not constant.  */
+      if (nbytes == 4)
+	{
+	  memset (&exp, '\0', sizeof (exp));
+	  exp.X_op = O_constant;
+	  emit_expr (&exp, nbytes);
+	}
+      nbytes = 8;
     }
   while (*input_line_pointer++ == ',');
 
   input_line_pointer--;		/* Put terminator back into stream.  */
 
   demand_empty_rest_of_line ();
-
-  /* Zero-extends to 8 bytes if not constant.  */
-  if (nbytes == 4)
-    {
-      memset (&exp, '\0', sizeof (exp));
-      exp.X_op = O_constant;
-      emit_expr (&exp, nbytes);
-    }
 }
 #endif /* OBJ_ELF || OBJ_MAYBE_ELF */
