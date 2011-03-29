@@ -1,5 +1,9 @@
 2011-03-29  Mike Frysinger  <vapier@gentoo.org>
 
+	* .gitignore: New file.
+
+2011-03-29  Mike Frysinger  <vapier@gentoo.org>
+
 	* NEWS: Mention new cfi device simulation.
 
 2011-03-29  Tom Tromey  <tromey@redhat.com>
