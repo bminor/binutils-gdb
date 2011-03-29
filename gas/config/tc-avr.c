@@ -24,6 +24,8 @@
 #include "as.h"
 #include "safe-ctype.h"
 #include "subsegs.h"
+#include "dw2gencfi.h"
+
 
 struct avr_opcodes_s
 {
@@ -1542,4 +1544,19 @@ avr_cons_fix_new (fragS *frag,
 	as_bad (_("illegal %srelocation size: %d"), "`pm' ", nbytes);
       exp_mod_pm = 0;
     }
+}
+
+void
+tc_cfi_frame_initial_instructions (void)
+{
+  /* AVR6 pushes 3 bytes for calls.  */
+  int return_size = (avr_mcu->mach == bfd_mach_avr6 ? 3 : 2);
+
+  /* The CFA is the caller's stack location before the call insn.  */
+  /* Note that the stack pointer is dwarf register number 32.  */
+  cfi_add_CFA_def_cfa (32, return_size);
+
+  /* Note that AVR consistently uses post-decrement, which means that things
+     do not line up the same way as for targers that use pre-decrement.  */
+  cfi_add_CFA_offset (DWARF2_DEFAULT_RETURN_COLUMN, 1-return_size);
 }

@@ -5081,12 +5081,13 @@ s_alpha_align (int ignore ATTRIBUTE_UNUSED)
   if (align != 0)
     {
       alpha_auto_align_on = 1;
-      alpha_align (align, pfill, alpha_insn_label, 1);
+      alpha_align (align, pfill, NULL, 1);
     }
   else
     {
       alpha_auto_align_on = 0;
     }
+  alpha_insn_label = NULL;
 
   demand_empty_rest_of_line ();
 }

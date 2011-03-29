@@ -1,3 +1,9 @@
+2011-03-29  Richard Henderson  <rth@redhat.com>
+
+	PR 12610
+	* config/tc-alpha.c (s_alpha_align): Don't auto-align a previous
+	label; zap alpha_insn_label.
+
 2011-03-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (handle_quad): Properly handle multiple
