@@ -886,6 +886,9 @@ asm_1:
 	| REG ASSIGN A_ONE_DOT_L PLUS A_ONE_DOT_H COMMA
 	  REG ASSIGN A_ZERO_DOT_L PLUS A_ZERO_DOT_H
 	{
+	  if (REG_SAME ($1, $7))
+	    return yyerror ("Illegal dest register combination");
+
 	  if (IS_DREG ($1) && IS_DREG ($7))
 	    {
 	      notethat ("dsp32alu: dregs = A1.l + A1.h, dregs = A0.l + A0.h  \n");

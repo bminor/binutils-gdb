@@ -1,3 +1,10 @@
+2011-03-28  Mike Frysinger  <vapier@gentoo.org>
+
+	* gas/bfin/expected_errors.s: Add invalid 16bit acc add insn tests.
+	* gas/bfin/expected_errors.l: Add new error messages.
+	* testsuite/gas/bfin/video2.s: Drop invalid 16bit acc add insn.
+	* testsuite/gas/bfin/video2.d: Updated disassembly output.
+
 2011-03-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/ilp32/inval.s: Remove .quad.

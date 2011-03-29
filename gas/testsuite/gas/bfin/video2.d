@@ -50,7 +50,6 @@ Disassembly of section .text:
 [ 0-9a-f]+:	37 c4 10 0a 	R5 = BYTEOP3P \(R3:2, R1:0\) \(HI\);
 [ 0-9a-f]+:	17 c4 10 2c 	R6 = BYTEOP3P \(R3:2, R1:0\) \(LO, R\);
 [ 0-9a-f]+:	37 c4 10 2e 	R7 = BYTEOP3P \(R3:2, R1:0\) \(HI, R\);
-[ 0-9a-f]+:	0c c4 00 40 	R0 = A1.L \+ A1.H, R0 = A0.L \+ A0.H;
 [ 0-9a-f]+:	0c c4 00 42 	R0 = A1.L \+ A1.H, R1 = A0.L \+ A0.H;
 [ 0-9a-f]+:	0c c4 80 46 	R2 = A1.L \+ A1.H, R3 = A0.L \+ A0.H;
 [ 0-9a-f]+:	0c c4 00 4b 	R4 = A1.L \+ A1.H, R5 = A0.L \+ A0.H;

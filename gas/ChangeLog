@@ -1,3 +1,8 @@
+2011-03-28  Mike Frysinger  <vapier@gentoo.org>
+
+	* config/bfin-parse.y (16bit acc add): Return yyerror when dest
+	reg $1 is the same as dest reg $7.
+
 2011-03-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (handle_quad): New.
