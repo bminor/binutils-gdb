@@ -101,3 +101,5 @@
 .*:127: Error: Differing source registers.
 .*:129: Error: Register mismatch.
 .*:131: Error: Illegal dest register combination. Input text was A0.H.
+.*:133: Error: Illegal dest register combination.
+.*:134: Error: Illegal dest register combination.
