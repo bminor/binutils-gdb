@@ -33,6 +33,7 @@
 #include "exceptions.h"
 #include "gdb_string.h"
 #include "gdb_stat.h"
+#include "gdb_usleep.h"
 #include "regcache.h"
 #include <ctype.h>
 #include "mips-tdep.h"
@@ -1350,7 +1351,7 @@ mips_enter_debug (void)
   else				/* Assume IDT monitor by default.  */
     mips_send_command ("db tty0\r", 0);
 
-  sleep (1);
+  gdb_usleep (1000000);
   serial_write (mips_desc, "\r", sizeof "\r" - 1);
 
   /* We don't need to absorb any spurious characters here, since the

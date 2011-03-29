@@ -1,3 +1,9 @@
+2011-03-29  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	Fix mingw compilation with --enable-targets=all.
+	* remote-mips.c (gdb_usleep.h): Include header.
+	(mips_enter_debug): Use gdb_usleep instead of sleep.
+
 2011-03-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Support resolution of STT_GNU_IFUNC via breakpoints.
