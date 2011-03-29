@@ -182,6 +182,8 @@ Analog Devices, Inc. Blackfin Processor	bfin-*
 
   ** The --map-info flag lists all known core mappings.
 
+  ** CFI flashes may be simulated via the "cfi" device.
+
 *** Changes in GDB 7.2
 
 * Shared library support for remote targets by default

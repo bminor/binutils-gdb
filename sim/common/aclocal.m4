@@ -573,7 +573,7 @@ fi
 if test "[$2]"; then
   hardware="[$2]"
 else
-  hardware="core pal glue"
+  hardware="cfi core pal glue"
 fi
 hardware="$hardware [$3]"
 sim_hw_cflags="-DWITH_HW=1"

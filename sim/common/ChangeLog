@@ -1,3 +1,9 @@
+2011-03-29  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4 (SIM_AC_OPTION_HARDWARE): Add cfi to default list.
+	* Make-common.in (dv-cfi.o): New rule.
+	* dv-cfi.c, dv-cfi.h: New files.
+
 2011-03-21  Kevin Buettner  <kevinb@redhat.com>
 
 	* gennltvals.sh: Search sys/_default_fcntl.h, in addition to

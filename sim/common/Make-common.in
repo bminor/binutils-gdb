@@ -575,6 +575,9 @@ hw-tree.o: $(srccom)/hw-tree.c $(hw_main_headers) $(hw-tree_h)
 
 # Devices.
 
+dv-cfi.o: $(srccom)/dv-cfi.c $(hw_main_headers) $(sim_main_headers)
+	$(CC) -c $(srccom)/dv-cfi.c $(ALL_CFLAGS)
+
 dv-core.o: $(srccom)/dv-core.c $(hw_main_headers) $(sim_main_headers)
 	$(CC) -c $(srccom)/dv-core.c $(ALL_CFLAGS)
 
