@@ -1,5 +1,10 @@
 2011-03-29  Mike Frysinger  <vapier@gentoo.org>
 
+	* config/bfin-parse.y (BYTEOP16M): Return yyerror when dest
+	reg $2 is the same as dest reg $4.
+
+2011-03-29  Mike Frysinger  <vapier@gentoo.org>
+
 	* config/bfin-parse.y (BYTEOP16P): Return yyerror when dest
 	reg $2 is the same as dest reg $4.
 

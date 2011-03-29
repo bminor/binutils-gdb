@@ -132,3 +132,5 @@
 
 	(R0, R0) = BYTEOP16P (R1:0, R3:2);
 	(R7, R7) = BYTEOP16P (R1:0, R3:2);
+	(R1, R1) = BYTEOP16M (R1:0, R3:2);
+	(R4, R4) = BYTEOP16M (R1:0, R3:2);

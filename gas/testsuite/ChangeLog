@@ -1,5 +1,10 @@
 2011-03-29  Mike Frysinger  <vapier@gentoo.org>
 
+	* gas/bfin/expected_errors.s: Add invalid BYTEOP16M insn tests.
+	* gas/bfin/expected_errors.l: Add new error messages.
+
+2011-03-29  Mike Frysinger  <vapier@gentoo.org>
+
 	* gas/bfin/expected_errors.s: Add invalid BYTEOP16P insn tests.
 	* gas/bfin/expected_errors.l: Add new error messages.
 

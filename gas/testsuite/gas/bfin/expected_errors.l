@@ -103,3 +103,5 @@
 .*:131: Error: Illegal dest register combination. Input text was A0.H.
 .*:133: Error: Illegal dest register combination.
 .*:134: Error: Illegal dest register combination.
+.*:135: Error: Illegal dest register combination.
+.*:136: Error: Illegal dest register combination.
