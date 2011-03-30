@@ -1,3 +1,7 @@
+2011-03-30  Michael Snyder  <msnyder@msnyder-server.eng.vmware.com>
+
+	* readelf.c (process_gnu_liblist): Stop memory leak.
+
 2011-03-29  Alan Modra  <amodra@gmail.com>
 
 	* coffdump.c: Include bfd_stdint.h

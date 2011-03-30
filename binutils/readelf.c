@@ -11846,6 +11846,7 @@ process_gnu_liblist (FILE * file)
 	      || section->sh_entsize != sizeof (Elf32_External_Lib))
 	    {
 	      free (elib);
+	      free (strtab);
 	      break;
 	    }
 
@@ -11887,6 +11888,7 @@ process_gnu_liblist (FILE * file)
 	    }
 
 	  free (elib);
+	  free (strtab);
 	}
     }
 
