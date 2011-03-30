@@ -1,6 +1,6 @@
 /* macro.c - macro support for gas
    Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-   2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+   2004, 2005, 2006, 2007, 2008, 2011 Free Software Foundation, Inc.
 
    Written by Steve and Judy Chamberlain of Cygnus Support,
       sac@cygnus.com
@@ -119,7 +119,7 @@ buffer_and_nest (const char *from, const char *to, sb *ptr,
 
   int more = get_line (ptr);
 
-  if (to_len == 4 && strcasecmp(to, "ENDR") == 0)
+  if (to_len == 4 && strcasecmp (to, "ENDR") == 0)
     {
       from = NULL;
       from_len = 0;
@@ -384,7 +384,7 @@ get_any_string (int idx, sb *in, sb *out)
 	}
       else
 	{
-	  char *br_buf = (char *) xmalloc(1);
+	  char *br_buf = (char *) xmalloc (1);
 	  char *in_br = br_buf;
 
 	  *in_br = '\0';
@@ -407,7 +407,10 @@ get_any_string (int idx, sb *in, sb *out)
 			 && in->ptr[idx] != tchar)
 		    sb_add_char (out, in->ptr[idx++]);
 		  if (idx == in->len)
-		    return idx;
+		    {
+		      free (br_buf);
+		      return idx;
+		    }
 		  break;
 		case '(':
 		case '[':
@@ -415,9 +418,9 @@ get_any_string (int idx, sb *in, sb *out)
 		    --in_br;
 		  else
 		    {
-		      br_buf = (char *) xmalloc(strlen(in_br) + 2);
-		      strcpy(br_buf + 1, in_br);
-		      free(in_br);
+		      br_buf = (char *) xmalloc (strlen (in_br) + 2);
+		      strcpy (br_buf + 1, in_br);
+		      free (in_br);
 		      in_br = br_buf;
 		    }
 		  *in_br = tchar;
@@ -434,7 +437,7 @@ get_any_string (int idx, sb *in, sb *out)
 	      sb_add_char (out, tchar);
 	      ++idx;
 	    }
-	  free(br_buf);
+	  free (br_buf);
 	}
     }
 
@@ -488,6 +491,7 @@ do_formals (macro_entry *macro, int idx, sb *in)
 	{
 	  if (macro->formal_count)
 	    --idx;
+	  del_formal (formal);	/* 'formal' goes out of scope.  */
 	  break;
 	}
       idx = sb_skip_white (idx, in);

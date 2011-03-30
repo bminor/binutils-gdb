@@ -1,6 +1,8 @@
 2011-03-30  Michael Snyder  <msnyder@vmware.com>
 
 	* obj-elf.c (obj_elf_section): Free malloced name.
+	* macro.c (get_any_string): Free malloced br_buf.
+	(do_formals): Free 'formal'.
 
 2011-03-30  Tristan Gingold  <gingold@adacore.com>
 
