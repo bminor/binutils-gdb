@@ -1,3 +1,9 @@
+2011-03-30  Nick Clifton  <nickc@redhat.com>
+
+	* po/eo.po: New Esperanto translation.
+	* configure.in (ALL_LINGUAS): Add eo.
+	* configure: Regenerate.
+
 2011-02-28  Kai Tietz  <kai.tietz@onevision.com>
 
 	* basic_blocks.c (cmp_bb): Use filename_(n)cmp.

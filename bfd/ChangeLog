@@ -1,3 +1,7 @@
+2011-03-30  Nick Clifton  <nickc@redhat.com>
+
+	* po/da.po: Updated Danish translation.
+
 2011-03-29  Richard Henderson  <rth@redhat.com>
 
 	* elf64-alpha.c (elf64_alpha_gc_mark_hook): New.
