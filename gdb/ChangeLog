@@ -1,3 +1,10 @@
+2011-03-30  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* breakpoint.c (breakpoint_re_set_one): Factor out breakpoint-resetting
+	code from here ...
+	(re_set_breakpoint): ... to here ...
+	(addr_string_to_sals): ... and here.
+
 2011-03-29  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* Makefile.in (SFILES): Add missing C sources.

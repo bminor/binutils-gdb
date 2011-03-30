@@ -10576,6 +10576,123 @@ update_breakpoint_locations (struct breakpoint *b,
   update_global_location_list (1);
 }
 
+/* Find the SaL locations corresponding to the given ADDR_STRING.
+   On return, FOUND will be 1 if any SaL was found, zero otherwise.  */
+
+static struct symtabs_and_lines
+addr_string_to_sals (struct breakpoint *b, char *addr_string, int *found)
+{
+  char *s;
+  int marker_spec, not_found;
+  struct symtabs_and_lines sals;
+  struct gdb_exception e;
+
+  s = addr_string;
+  marker_spec = b->type == bp_static_tracepoint && is_marker_spec (s);
+
+  TRY_CATCH (e, RETURN_MASK_ERROR)
+    {
+      if (marker_spec)
+	{
+	  sals = decode_static_tracepoint_spec (&s);
+	  if (sals.nelts > b->static_trace_marker_id_idx)
+	    {
+	      sals.sals[0] = sals.sals[b->static_trace_marker_id_idx];
+	      sals.nelts = 1;
+	    }
+	  else
+	    error (_("marker %s not found"), b->static_trace_marker_id);
+	}
+      else
+	sals = decode_line_1 (&s, 1, (struct symtab *) NULL, 0,
+			      NULL, &not_found);
+    }
+  if (e.reason < 0)
+    {
+      int not_found_and_ok = 0;
+      /* For pending breakpoints, it's expected that parsing will
+	 fail until the right shared library is loaded.  User has
+	 already told to create pending breakpoints and don't need
+	 extra messages.  If breakpoint is in bp_shlib_disabled
+	 state, then user already saw the message about that
+	 breakpoint being disabled, and don't want to see more
+	 errors.  */
+      if (not_found 
+	  && (b->condition_not_parsed 
+	      || (b->loc && b->loc->shlib_disabled)
+	      || b->enable_state == bp_disabled))
+	not_found_and_ok = 1;
+
+      if (!not_found_and_ok)
+	{
+	  /* We surely don't want to warn about the same breakpoint
+	     10 times.  One solution, implemented here, is disable
+	     the breakpoint on error.  Another solution would be to
+	     have separate 'warning emitted' flag.  Since this
+	     happens only when a binary has changed, I don't know
+	     which approach is better.  */
+	  b->enable_state = bp_disabled;
+	  throw_exception (e);
+	}
+    }
+
+  if (!not_found)
+    {
+      gdb_assert (sals.nelts == 1);
+
+      resolve_sal_pc (&sals.sals[0]);
+      if (b->condition_not_parsed && s && s[0])
+	{
+	  char *cond_string = 0;
+	  int thread = -1;
+	  int task = 0;
+
+	  find_condition_and_thread (s, sals.sals[0].pc,
+				     &cond_string, &thread, &task);
+	  if (cond_string)
+	    b->cond_string = cond_string;
+	  b->thread = thread;
+	  b->task = task;
+	  b->condition_not_parsed = 0;
+	}
+
+      if (b->type == bp_static_tracepoint && !marker_spec)
+	sals.sals[0] = update_static_tracepoint (b, sals.sals[0]);
+    }
+
+  *found = !not_found;
+
+  return sals;
+}
+
+/* Reevaluate a hardware or software breakpoint and recreate its locations.
+   This is necessary after symbols are read (e.g., an executable or DSO
+   was loaded, or the inferior just started).  */
+
+static void
+re_set_breakpoint (struct breakpoint *b)
+{
+  int found;
+  struct symtabs_and_lines sals;
+  struct symtabs_and_lines expanded = {0};
+  struct cleanup *cleanups = make_cleanup (null_cleanup, NULL);
+
+  input_radix = b->input_radix;
+  save_current_space_and_thread ();
+  switch_to_program_space_and_thread (b->pspace);
+  set_language (b->language);
+
+  sals = addr_string_to_sals (b, b->addr_string, &found);
+  if (found)
+    {
+      make_cleanup (xfree, sals.sals);
+      expanded = expand_line_sal_maybe (sals.sals[0]);
+    }
+
+  update_breakpoint_locations (b, expanded);
+  do_cleanups (cleanups);
+}
+
 /* Reset a breakpoint given it's struct breakpoint * BINT.
    The value we return ends up being the return value from catch_errors.
    Unused in this case.  */
@@ -10585,14 +10702,6 @@ breakpoint_re_set_one (void *bint)
 {
   /* Get past catch_errs.  */
   struct breakpoint *b = (struct breakpoint *) bint;
-  int not_found = 0;
-  int *not_found_ptr = &not_found;
-  struct symtabs_and_lines sals = {0};
-  struct symtabs_and_lines expanded = {0};
-  char *s;
-  struct gdb_exception e;
-  struct cleanup *cleanups = make_cleanup (null_cleanup, NULL);
-  int marker_spec = 0;
 
   switch (b->type)
     {
@@ -10617,89 +10726,7 @@ breakpoint_re_set_one (void *bint)
 	  return 0;
 	}
 
-      input_radix = b->input_radix;
-      s = b->addr_string;
-
-      save_current_space_and_thread ();
-      switch_to_program_space_and_thread (b->pspace);
-
-      marker_spec = b->type == bp_static_tracepoint && is_marker_spec (s);
-
-      set_language (b->language);
-      TRY_CATCH (e, RETURN_MASK_ERROR)
-	{
-	  if (marker_spec)
-	    {
-	      sals = decode_static_tracepoint_spec (&s);
-	      if (sals.nelts > b->static_trace_marker_id_idx)
-		{
-		  sals.sals[0] = sals.sals[b->static_trace_marker_id_idx];
-		  sals.nelts = 1;
-		}
-	      else
-		error (_("marker %s not found"), b->static_trace_marker_id);
-	    }
-	  else
-	    sals = decode_line_1 (&s, 1, (struct symtab *) NULL, 0,
-				  NULL, not_found_ptr);
-	}
-      if (e.reason < 0)
-	{
-	  int not_found_and_ok = 0;
-	  /* For pending breakpoints, it's expected that parsing will
-	     fail until the right shared library is loaded.  User has
-	     already told to create pending breakpoints and don't need
-	     extra messages.  If breakpoint is in bp_shlib_disabled
-	     state, then user already saw the message about that
-	     breakpoint being disabled, and don't want to see more
-	     errors.  */
-	  if (not_found 
-	      && (b->condition_not_parsed 
-		  || (b->loc && b->loc->shlib_disabled)
-		  || b->enable_state == bp_disabled))
-	    not_found_and_ok = 1;
-
-	  if (!not_found_and_ok)
-	    {
-	      /* We surely don't want to warn about the same breakpoint
-		 10 times.  One solution, implemented here, is disable
-		 the breakpoint on error.  Another solution would be to
-		 have separate 'warning emitted' flag.  Since this
-		 happens only when a binary has changed, I don't know
-		 which approach is better.  */
-	      b->enable_state = bp_disabled;
-	      throw_exception (e);
-	    }
-	}
-
-      if (!not_found)
-	{
-	  gdb_assert (sals.nelts == 1);
-
-	  resolve_sal_pc (&sals.sals[0]);
-	  if (b->condition_not_parsed && s && s[0])
-	    {
-	      char *cond_string = 0;
-	      int thread = -1;
-	      int task = 0;
-
-	      find_condition_and_thread (s, sals.sals[0].pc,
-					 &cond_string, &thread, &task);
-	      if (cond_string)
-		b->cond_string = cond_string;
-	      b->thread = thread;
-	      b->task = task;
-	      b->condition_not_parsed = 0;
-	    }
-
-	  if (b->type == bp_static_tracepoint && !marker_spec)
-	    sals.sals[0] = update_static_tracepoint (b, sals.sals[0]);
-
-	  expanded = expand_line_sal_maybe (sals.sals[0]);
-	}
-
-      make_cleanup (xfree, sals.sals);
-      update_breakpoint_locations (b, expanded);
+      re_set_breakpoint (b);
       break;
 
     case bp_watchpoint:
@@ -10780,7 +10807,6 @@ breakpoint_re_set_one (void *bint)
       break;
     }
 
-  do_cleanups (cleanups);
   return 0;
 }
 
