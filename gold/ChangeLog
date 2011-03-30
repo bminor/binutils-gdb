@@ -1,3 +1,68 @@
+2011-03-29 Cary Coutant  <ccoutant@google.com>
+
+	* archive.cc (Library_base::should_include_member): Move
+	method here from class Archive.
+	(Archive::Archive): Initialize base class.
+	(Archive::should_include_member): Move to base class.
+	(Archive::do_for_all_unused_symbols): New function.
+	(Add_archive_symbols::run): Remove redundant access to
+	incremental_inputs.
+	(Lib_group::Lib_group): Initialize base class.
+	(Lib_group::do_filename): New function.
+	(Lib_group::include_member): Pass pointer to Lib_group to
+	report_object.
+	(Lib_group::do_for_all_unused_symbols): New function.
+	(Add_lib_group_symbols::run): Report archive information for
+	incremental links.
+	* archive.h (class Library_base): New base class.
+	(class Archive): Derive from Library_base.
+	(Archive::filename): Move to base class.
+	(Archive::set_incremental_info): Likewise.
+	(Archive::incremental_info): Likewise.
+	(Archive::Should_include): Likewise.
+	(Archive::should_include_member): Likewise.
+	(Archive::Armap_entry): Remove.
+	(Archive::Unused_symbol_iterator): Remove.
+	(Archive::unused_symbols_begin): Remove.
+	(Archive::unused_symbols_end): Remove.
+	(Archive::do_filename): New function.
+	(Archive::do_get_mtime): New function.
+	(Archive::do_for_all_unused_symbols): New function.
+	(Archive::task_): Move to base class.
+	(Archive::incremental_info_): Likewise.
+	(class Lib_group): Derive from Library_base.
+	(Lib_group::do_filename): New function.
+	(Lib_group::do_get_mtime): New function.
+	(Lib_group::do_for_all_unused_symbols): New function.
+	(Lib_group::task_): Move to base class.
+	* dynobj.cc (Sized_dynobj::do_for_all_global_symbols): New
+	function.
+	* dynobj.h (Sized_dynobj::do_for_all_global_symbols): New
+	function.
+	* incremental.cc (Incremental_inputs::report_archive_begin):
+	Use Library_base; call library's get_mtime; add incremental inputs
+	entry before members.
+	(class Unused_symbol_visitor): New class.
+	(Incremental_inputs::report_archive_end): Use Library_base; use
+	visitor class to record unused symbols; don't add incremental inputs
+	entry after members.
+	(Incremental_inputs::report_object): Use Library_base.
+	* incremental.h
+	(Incremental_archive_entry::Incremental_archive_entry): Remove
+	unused Archive parameter.
+	(Incremental_inputs::report_archive_begin): Use Library_base.
+	(Incremental_inputs::report_archive_end): Likewise.
+	(Incremental_inputs::report_object): Likewise.
+	* object.cc (Sized_relobj::do_for_all_global_symbols): New
+	function.
+	* object.h (Object::for_all_global_symbols): New function.
+	(Object::do_for_all_global_symbols): New function.
+	(Sized_relobj::do_for_all_global_symbols): New function.
+	* plugin.cc (Sized_pluginobj::do_for_all_global_symbols):  New
+	function.
+	* plugin.h (Sized_pluginobj::do_for_all_global_symbols):  New
+	function.
+
 2011-03-27  Ian Lance Taylor  <iant@google.com>
 
 	* archive.cc (Archive::interpret_header): Return -1 if something

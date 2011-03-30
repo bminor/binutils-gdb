@@ -1691,6 +1691,31 @@ Sized_relobj<size, big_endian>::do_should_include_member(Symbol_table* symtab,
   return Archive::SHOULD_INCLUDE_UNKNOWN;
 }
 
+// Iterate over global defined symbols, calling a visitor class V for each.
+
+template<int size, bool big_endian>
+void
+Sized_relobj<size, big_endian>::do_for_all_global_symbols(
+    Read_symbols_data* sd,
+    Library_base::Symbol_visitor_base* v)
+{
+  const char* sym_names =
+      reinterpret_cast<const char*>(sd->symbol_names->data());
+  const unsigned char* syms =
+      sd->symbols->data() + sd->external_symbols_offset;
+  const int sym_size = elfcpp::Elf_sizes<size>::sym_size;
+  size_t symcount = ((sd->symbols_size - sd->external_symbols_offset)
+                     / sym_size);
+  const unsigned char* p = syms;
+
+  for (size_t i = 0; i < symcount; ++i, p += sym_size)
+    {
+      elfcpp::Sym<size, big_endian> sym(p);
+      if (sym.get_st_shndx() != elfcpp::SHN_UNDEF)
+	v->visit(sym_names + sym.get_st_name());
+    }
+}
+
 // Return whether the local symbol SYMNDX has a PLT offset.
 
 template<int size, bool big_endian>

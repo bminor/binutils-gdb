@@ -451,8 +451,7 @@ class Incremental_object_entry : public Incremental_input_entry
 class Incremental_archive_entry : public Incremental_input_entry
 {
  public:
-  Incremental_archive_entry(Stringpool::Key filename_key, Archive*,
-			    Timespec mtime)
+  Incremental_archive_entry(Stringpool::Key filename_key, Timespec mtime)
     : Incremental_input_entry(filename_key, mtime), members_(), unused_syms_()
   { }
 
@@ -531,16 +530,16 @@ class Incremental_inputs
 
   // Record the initial info for archive file ARCHIVE.
   void
-  report_archive_begin(Archive* arch);
+  report_archive_begin(Library_base* arch);
 
   // Record the final info for archive file ARCHIVE.
   void
-  report_archive_end(Archive* arch);
+  report_archive_end(Library_base* arch);
 
   // Record the info for object file OBJ.  If ARCH is not NULL,
   // attach the object file to the archive.
   void
-  report_object(Object* obj, Archive* arch);
+  report_object(Object* obj, Library_base* arch);
 
   // Record an input section belonging to object file OBJ.
   void

@@ -422,6 +422,12 @@ class Object
 			Read_symbols_data* sd, std::string* why)
   { return this->do_should_include_member(symtab, layout, sd, why); }
 
+  // Iterate over global symbols, calling a visitor class V for each.
+  void
+  for_all_global_symbols(Read_symbols_data* sd,
+			 Library_base::Symbol_visitor_base* v)
+  { return this->do_for_all_global_symbols(sd, v); }
+
   // Functions and types for the elfcpp::Elf_file interface.  This
   // permit us to use Object as the File template parameter for
   // elfcpp::Elf_file.
@@ -571,6 +577,11 @@ class Object
   virtual Archive::Should_include
   do_should_include_member(Symbol_table* symtab, Layout*, Read_symbols_data*,
                            std::string* why) = 0;
+
+  // Iterate over global symbols, calling a visitor class V for each.
+  virtual void
+  do_for_all_global_symbols(Read_symbols_data* sd,
+			    Library_base::Symbol_visitor_base* v) = 0;
 
   // Return the location of the contents of a section.  Implemented by
   // child class.
@@ -1809,6 +1820,11 @@ class Sized_relobj : public Relobj
   Archive::Should_include
   do_should_include_member(Symbol_table* symtab, Layout*, Read_symbols_data*,
                            std::string* why);
+
+  // Iterate over global symbols, calling a visitor class V for each.
+  void
+  do_for_all_global_symbols(Read_symbols_data* sd,
+			    Library_base::Symbol_visitor_base* v);
 
   // Read the relocs.
   void

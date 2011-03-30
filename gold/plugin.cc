@@ -985,6 +985,22 @@ Sized_pluginobj<size, big_endian>::do_should_include_member(
   return Archive::SHOULD_INCLUDE_UNKNOWN;
 }
 
+// Iterate over global symbols, calling a visitor class V for each.
+
+template<int size, bool big_endian>
+void
+Sized_pluginobj<size, big_endian>::do_for_all_global_symbols(
+    Read_symbols_data*,
+    Library_base::Symbol_visitor_base* v)
+{
+  for (int i = 0; i < this->nsyms_; ++i)
+    {
+      const struct ld_plugin_symbol& sym = this->syms_[i];
+      if (sym.def != LDPK_UNDEF)
+	v->visit(sym.name);
+    }
+}
+
 // Get the size of a section.  Not used for plugin objects.
 
 template<int size, bool big_endian>

@@ -449,6 +449,11 @@ class Sized_pluginobj : public Pluginobj
   do_should_include_member(Symbol_table* symtab, Layout*, Read_symbols_data*,
                            std::string* why);
 
+  // Iterate over global symbols, calling a visitor class V for each.
+  void
+  do_for_all_global_symbols(Read_symbols_data* sd,
+			    Library_base::Symbol_visitor_base* v);
+
   // Get the size of a section.
   uint64_t
   do_section_size(unsigned int shndx);
