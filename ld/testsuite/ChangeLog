@@ -1,3 +1,10 @@
+2011-03-30  Richard Henderson  <rth@redhat.com>
+
+	* ld-elf/elf.exp: Force 32-bit start address for alpha.
+	* ld-elf/group8a.d: Don't disable for alpha.
+	* ld-elf/group8b.d: Likewise.
+	* ld-gc/start.s: Use .dc.a instead of .long.
+
 2011-03-24  Alan Modra  <amodra@gmail.com>
 
 	* ld-powerpc/tlsmark.s: Delete non-optimizable section.
