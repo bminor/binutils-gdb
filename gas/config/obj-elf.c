@@ -984,6 +984,7 @@ obj_elf_section (int push)
 	  if (beg == NULL)
 	    {
 	      ignore_rest_of_line ();
+	      xfree (name);
 	      return;
 	    }
 	  attr |= obj_elf_parse_section_letters (beg, strlen (beg), &clone);
@@ -1003,6 +1004,7 @@ obj_elf_section (int push)
 		  if (beg == NULL)
 		    {
 		      ignore_rest_of_line ();
+		      xfree (name);
 		      return;
 		    }
 		  type = obj_elf_section_type (beg, strlen (beg), TRUE);
@@ -1084,6 +1086,7 @@ obj_elf_section (int push)
 		{
 		  as_bad (_("character following name is not '#'"));
 		  ignore_rest_of_line ();
+		  xfree (name);
 		  return;
 		}
 	      beg = ++input_line_pointer;

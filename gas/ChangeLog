@@ -1,3 +1,7 @@
+2011-03-30  Michael Snyder  <msnyder@vmware.com>
+
+	* obj-elf.c (obj_elf_section): Free malloced name.
+
 2011-03-30  Tristan Gingold  <gingold@adacore.com>
 
 	* config/tc-ppc.c (ppc_frob_symbol): Convert stsym symbols value
