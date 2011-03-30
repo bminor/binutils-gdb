@@ -1,3 +1,49 @@
+2011-03-30 Cary Coutant  <ccoutant@google.com>
+
+	* archive.cc (Archive::include_member): Adjust call to report_object.
+	(Add_archive_symbols::run): Add script_info to call to
+	report_archive_begin.
+	(Lib_group::include_member): Adjust call to report_object.
+	(Add_lib_group_symbols::run): Adjust call to report_object.
+	* incremental-dump.cc (dump_incremental_inputs): Remove unnecessary
+	blocks.  Add object count for script input files.
+	* incremental.cc (Incremental_inputs::report_archive_begin): Add
+	script_info parameter; change all callers.
+	(Incremental_inputs::report_object): Add script_info parameter;
+	change all callers.
+	(Incremental_inputs::report_script): Store backpointer to
+	incremental info entry.
+	(Output_section_incremental_inputs::set_final_data_size): Record
+	additional information for scripts.
+	(Output_section_incremental_inputs::write_info_blocks): Likewise.
+	* incremental.h (Incremental_script_entry::add_object): New function.
+	(Incremental_script_entry::get_object_count): New function.
+	(Incremental_script_entry::get_object): New function.
+	(Incremental_script_entry::objects_): New data member; adjust
+	constructor.
+	(Incremental_inputs::report_archive_begin): Add script_info parameter.
+	(Incremental_inputs::report_object): Add script_info parameter.
+	(Incremental_inputs_reader::get_object_count): New function.
+	(Incremental_inputs_reader::get_object_offset): New function.
+	* options.cc (Input_arguments::add_file): Return reference to
+	new input argument.
+	* options.h (Input_argument::set_script_info): New function.
+	(Input_argument::script_info): New function.
+	(Input_argument::script_info_): New data member; adjust all
+	constructors.
+	(Input_file_group::add_file): Return reference to new input argument.
+	(Input_file_lib::add_file): Likewise.
+	(Input_arguments::add_file): Likewise.
+	* readsyms.cc (Add_symbols::run): Adjust call to report_object.
+	* script.cc (Parser_closure::Parser_closure): Add script_info
+	parameter; adjust all callers.
+	(Parser_closure::script_info): New function.
+	(Parser_closure::script_info_): New data member.
+	(read_input_script): Report scripts earlier to incremental info.
+	(script_add_file): Set script_info in Input_argument.
+	(script_add_library): Likewise.
+	* script.h (Script_options::Script_info): Rewrite class.
+
 2011-03-29 Cary Coutant  <ccoutant@google.com>
 
 	* archive.cc (Library_base::should_include_member): Move

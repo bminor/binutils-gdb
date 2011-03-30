@@ -1206,7 +1206,8 @@ class Parser_closure
                  Command_line* command_line,
 		 Script_options* script_options,
 		 Lex* lex,
-		 bool skip_on_incompatible_target)
+		 bool skip_on_incompatible_target,
+		 Script_info* script_info)
     : filename_(filename), posdep_options_(posdep_options),
       parsing_defsym_(parsing_defsym), in_group_(in_group),
       is_in_sysroot_(is_in_sysroot),
@@ -1214,7 +1215,8 @@ class Parser_closure
       found_incompatible_target_(false),
       command_line_(command_line), script_options_(script_options),
       version_script_info_(script_options->version_script_info()),
-      lex_(lex), lineno_(0), charpos_(0), lex_mode_stack_(), inputs_(NULL)
+      lex_(lex), lineno_(0), charpos_(0), lex_mode_stack_(), inputs_(NULL),
+      script_info_(script_info)
   {
     // We start out processing C symbols in the default lex mode.
     this->language_stack_.push_back(Version_script_info::LANGUAGE_C);
@@ -1365,6 +1367,11 @@ class Parser_closure
     this->language_stack_.pop_back();
   }
 
+  // Return a pointer to the incremental info.
+  Script_info*
+  script_info()
+  { return this->script_info_; }
+
  private:
   // The name of the file we are reading.
   const char* filename_;
@@ -1401,6 +1408,8 @@ class Parser_closure
   std::vector<Version_script_info::Language> language_stack_;
   // New input files found to add to the link.
   Input_arguments* inputs_;
+  // Pointer to incremental linking info.
+  Script_info* script_info_;
 };
 
 // FILE was found as an argument on the command line.  Try to read it
@@ -1422,6 +1431,15 @@ read_input_script(Workqueue* workqueue, Symbol_table* symtab, Layout* layout,
 
   Lex lex(input_string.c_str(), input_string.length(), PARSING_LINKER_SCRIPT);
 
+  Script_info* script_info = NULL;
+  if (layout->incremental_inputs() != NULL)
+    {
+      const std::string& filename = input_file->filename();
+      Timespec mtime = input_file->file().get_mtime();
+      script_info = new Script_info();
+      layout->incremental_inputs()->report_script(filename, script_info, mtime);
+    }
+
   Parser_closure closure(input_file->filename().c_str(),
 			 input_argument->file().options(),
 			 false,
@@ -1430,7 +1448,8 @@ read_input_script(Workqueue* workqueue, Symbol_table* symtab, Layout* layout,
                          NULL,
 			 layout->script_options(),
 			 &lex,
-			 input_file->will_search_for());
+			 input_file->will_search_for(),
+			 script_info);
 
   bool old_saw_sections_clause =
     layout->script_options()->saw_sections_clause();
@@ -1474,16 +1493,6 @@ read_input_script(Workqueue* workqueue, Symbol_table* symtab, Layout* layout,
 					     layout, dirsearch, 0, mapfile, &*p,
 					     input_group, NULL, this_blocker, nb));
       this_blocker = nb;
-    }
-
-  if (layout->incremental_inputs() != NULL)
-    {
-      // Like new Read_symbols(...) above, we rely on closure.inputs()
-      // getting leaked by closure.
-      const std::string& filename = input_file->filename();
-      Script_info* info = new Script_info(closure.inputs());
-      Timespec mtime = input_file->file().get_mtime();
-      layout->incremental_inputs()->report_script(filename, info, mtime);
     }
 
   *used_next_blocker = true;
@@ -1535,7 +1544,8 @@ read_script_file(const char* filename, Command_line* cmdline,
                          cmdline,
 			 script_options,
 			 &lex,
-			 false);
+			 false,
+			 NULL);
   if (yyparse(&closure) != 0)
     {
       input_file.file().unlock(task);
@@ -1594,7 +1604,7 @@ Script_options::define_symbol(const char* definition)
   Position_dependent_options posdep_options;
 
   Parser_closure closure("command line", posdep_options, true,
-			 false, false, NULL, this, &lex, false);
+			 false, false, NULL, this, &lex, false, NULL);
 
   if (yyparse(&closure) != 0)
     return false;
@@ -2620,7 +2630,8 @@ script_add_file(void* closurev, const char* name, size_t length)
 			   Input_file_argument::INPUT_FILE_TYPE_FILE,
 			   extra_search_path, false,
 			   closure->position_dependent_options());
-  closure->inputs()->add_file(file);
+  Input_argument& arg = closure->inputs()->add_file(file);
+  arg.set_script_info(closure->script_info());
 }
 
 // Called by the bison parser to add a library to the link.
@@ -2638,7 +2649,8 @@ script_add_library(void* closurev, const char* name, size_t length)
 			   Input_file_argument::INPUT_FILE_TYPE_LIBRARY,
 			   "", false,
 			   closure->position_dependent_options());
-  closure->inputs()->add_file(file);
+  Input_argument& arg = closure->inputs()->add_file(file);
+  arg.set_script_info(closure->script_info());
 }
 
 // Called by the bison parser to start a group.  If we are already in

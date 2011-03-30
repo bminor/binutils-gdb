@@ -158,40 +158,33 @@ dump_incremental_inputs(const char* argv0, const char* filename,
       switch (input_type)
 	{
 	case INCREMENTAL_INPUT_OBJECT:
-	  {
-	    printf("Object\n");
-	    printf("    Input section count: %d\n",
-		   input_file.get_input_section_count());
-	    printf("    Symbol count: %d\n",
-		   input_file.get_global_symbol_count());
-	  }
+	  printf("Object\n");
+	  printf("    Input section count: %d\n",
+		 input_file.get_input_section_count());
+	  printf("    Symbol count: %d\n",
+		 input_file.get_global_symbol_count());
 	  break;
 	case INCREMENTAL_INPUT_ARCHIVE_MEMBER:
-	  {
-	    printf("Archive member\n");
-	    printf("    Input section count: %d\n",
-		   input_file.get_input_section_count());
-	    printf("    Symbol count: %d\n",
-		   input_file.get_global_symbol_count());
-	  }
+	  printf("Archive member\n");
+	  printf("    Input section count: %d\n",
+		 input_file.get_input_section_count());
+	  printf("    Symbol count: %d\n",
+		 input_file.get_global_symbol_count());
 	  break;
 	case INCREMENTAL_INPUT_ARCHIVE:
-	  {
-	    printf("Archive\n");
-	    printf("    Member count: %d\n", input_file.get_member_count());
-	    printf("    Unused symbol count: %d\n",
-		   input_file.get_unused_symbol_count());
-	  }
+	  printf("Archive\n");
+	  printf("    Member count: %d\n", input_file.get_member_count());
+	  printf("    Unused symbol count: %d\n",
+		 input_file.get_unused_symbol_count());
 	  break;
 	case INCREMENTAL_INPUT_SHARED_LIBRARY:
-	  {
-	    printf("Shared library\n");
-	    printf("    Symbol count: %d\n",
-		   input_file.get_global_symbol_count());
-	  }
+	  printf("Shared library\n");
+	  printf("    Symbol count: %d\n",
+		 input_file.get_global_symbol_count());
 	  break;
 	case INCREMENTAL_INPUT_SCRIPT:
 	  printf("Linker script\n");
+	  printf("    Object count: %d\n", input_file.get_object_count());
 	  break;
 	default:
 	  fprintf(stderr, "%s: invalid file type for object %u: %d\n",

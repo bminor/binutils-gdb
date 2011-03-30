@@ -590,7 +590,8 @@ Add_symbols::run(Workqueue*)
       Incremental_inputs* incremental_inputs =
           this->layout_->incremental_inputs();
       if (incremental_inputs != NULL)
-	incremental_inputs->report_object(this->object_, NULL);
+	incremental_inputs->report_object(this->object_, NULL,
+					  this->input_argument_->script_info());
       this->object_->layout(this->symtab_, this->layout_, this->sd_);
       this->object_->add_symbols(this->symtab_, this->sd_, this->layout_);
       delete this->sd_;

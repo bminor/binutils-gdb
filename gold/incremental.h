@@ -342,8 +342,28 @@ class Incremental_script_entry : public Incremental_input_entry
  public:
   Incremental_script_entry(Stringpool::Key filename_key, Script_info* script,
 			   Timespec mtime)
-    : Incremental_input_entry(filename_key, mtime), script_(script)
+    : Incremental_input_entry(filename_key, mtime), script_(script), objects_()
   { }
+
+  // Add a member object to the archive.
+  void
+  add_object(Incremental_input_entry* obj_entry)
+  {
+    this->objects_.push_back(obj_entry);
+  }
+
+  // Return the number of objects included by this script.
+  unsigned int
+  get_object_count()
+  { return this->objects_.size(); }
+
+  // Return the Nth object.
+  Incremental_input_entry*
+  get_object(unsigned int n)
+  {
+    gold_assert(n < this->objects_.size());
+    return this->objects_[n];
+  }
 
  protected:
   virtual Incremental_input_type
@@ -358,6 +378,8 @@ class Incremental_script_entry : public Incremental_input_entry
  private:
   // Information about the script file.
   Script_info* script_;
+  // Objects that have been included by this script.
+  std::vector<Incremental_input_entry*> objects_;
 };
 
 // Class for recording input object files.
@@ -530,7 +552,7 @@ class Incremental_inputs
 
   // Record the initial info for archive file ARCHIVE.
   void
-  report_archive_begin(Library_base* arch);
+  report_archive_begin(Library_base* arch, Script_info* script_info);
 
   // Record the final info for archive file ARCHIVE.
   void
@@ -539,7 +561,7 @@ class Incremental_inputs
   // Record the info for object file OBJ.  If ARCH is not NULL,
   // attach the object file to the archive.
   void
-  report_object(Object* obj, Library_base* arch);
+  report_object(Object* obj, Library_base* arch, Script_info* script_info);
 
   // Record an input section belonging to object file OBJ.
   void
@@ -763,6 +785,23 @@ class Incremental_inputs_reader
 	default:
 	  gold_unreachable();
 	}
+    }
+
+    // Return the object count -- for scripts only.
+    unsigned int
+    get_object_count() const
+    {
+      gold_assert(this->type_ == INCREMENTAL_INPUT_SCRIPT);
+      return Swap32::readval(this->inputs_->p_ + this->info_offset_);
+    }
+
+    // Return the input file offset for object N -- for scripts only.
+    unsigned int
+    get_object_offset(unsigned int n) const
+    {
+      gold_assert(this->type_ == INCREMENTAL_INPUT_SCRIPT);
+      return Swap32::readval(this->inputs_->p_ + this->info_offset_
+			     + 4 + n * 4);
     }
 
     // Return the member count -- for archives only.

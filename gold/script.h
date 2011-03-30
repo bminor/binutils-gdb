@@ -57,6 +57,7 @@ struct Version_expression_list;
 struct Version_tree;
 struct Version_expression;
 class Lazy_demangler;
+class Incremental_script_entry;
 
 // This class represents an expression in a linker script.
 
@@ -554,17 +555,22 @@ class Script_options
 class Script_info
 {
  public:
-  Script_info(Input_arguments* inputs)
-    : inputs_(inputs)
+  Script_info()
+    : incremental_script_entry_(NULL)
   { }
 
-  // Returns the input files included because of this script.
-  Input_arguments*
-  inputs()
-  { return this->inputs_; }
+  // Store a pointer to the incremental information for this script.
+  void
+  set_incremental_info(Incremental_script_entry* entry)
+  { this->incremental_script_entry_ = entry; }
+
+  // Return the pointer to the incremental information for this script.
+  Incremental_script_entry*
+  incremental_info() const
+  { return this->incremental_script_entry_; }
 
  private:
-  Input_arguments* inputs_;
+  Incremental_script_entry* incremental_script_entry_;
 };
 
 // FILE was found as an argument on the command line, but was not

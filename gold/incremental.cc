@@ -436,7 +436,8 @@ Incremental_inputs::report_command_line(int argc, const char* const* argv)
 // input objects until report_archive_end is called.
 
 void
-Incremental_inputs::report_archive_begin(Library_base* arch)
+Incremental_inputs::report_archive_begin(Library_base* arch,
+					 Script_info* script_info)
 {
   Stringpool::Key filename_key;
   Timespec mtime = arch->get_mtime();
@@ -446,6 +447,13 @@ Incremental_inputs::report_archive_begin(Library_base* arch)
       new Incremental_archive_entry(filename_key, mtime);
   arch->set_incremental_info(entry);
   this->inputs_.push_back(entry);
+
+  if (script_info != NULL)
+    {
+      Incremental_script_entry* script_entry = script_info->incremental_info();
+      gold_assert(script_entry != NULL);
+      script_entry->add_object(entry);
+    }
 }
 
 // Visitor class for processing the unused global symbols in a library.
@@ -496,7 +504,8 @@ Incremental_inputs::report_archive_end(Library_base* arch)
 // Add_symbols task after finding out the type of the file.
 
 void
-Incremental_inputs::report_object(Object* obj, Library_base* arch)
+Incremental_inputs::report_object(Object* obj, Library_base* arch,
+				  Script_info* script_info)
 {
   Stringpool::Key filename_key;
   Timespec mtime = obj->input_file()->file().get_mtime();
@@ -511,6 +520,13 @@ Incremental_inputs::report_object(Object* obj, Library_base* arch)
       Incremental_archive_entry* arch_entry = arch->incremental_info();
       gold_assert(arch_entry != NULL);
       arch_entry->add_object(obj_entry);
+    }
+
+  if (script_info != NULL)
+    {
+      Incremental_script_entry* script_entry = script_info->incremental_info();
+      gold_assert(script_entry != NULL);
+      script_entry->add_object(obj_entry);
     }
 
   this->current_object_ = obj;
@@ -548,6 +564,7 @@ Incremental_inputs::report_script(const std::string& filename,
   Incremental_script_entry* entry =
       new Incremental_script_entry(filename_key, script, mtime);
   this->inputs_.push_back(entry);
+  script->set_incremental_info(entry);
 }
 
 // Finalize the incremental link information.  Called from
@@ -640,8 +657,15 @@ Output_section_incremental_inputs<size, big_endian>::set_final_data_size()
       switch ((*p)->type())
 	{
 	case INCREMENTAL_INPUT_SCRIPT:
-	  // No supplemental info for a script.
-	  (*p)->set_info_offset(0);
+	  {
+	    Incremental_script_entry *entry = (*p)->script_entry();
+	    gold_assert(entry != NULL);
+	    (*p)->set_info_offset(info_offset);
+	    // Object count.
+	    info_offset += 4;
+	    // Each member.
+	    info_offset += (entry->get_object_count() * 4);
+	  }
 	  break;
 	case INCREMENTAL_INPUT_OBJECT:
 	case INCREMENTAL_INPUT_ARCHIVE_MEMBER:
@@ -845,7 +869,25 @@ Output_section_incremental_inputs<size, big_endian>::write_info_blocks(
       switch ((*p)->type())
 	{
 	case INCREMENTAL_INPUT_SCRIPT:
-	  // No supplemental info for a script.
+	  {
+	    gold_assert(static_cast<unsigned int>(pov - oview)
+			== (*p)->get_info_offset());
+	    Incremental_script_entry* entry = (*p)->script_entry();
+	    gold_assert(entry != NULL);
+
+	    // Write the object count.
+	    unsigned int nobjects = entry->get_object_count();
+	    Swap32::writeval(pov, nobjects);
+	    pov += 4;
+
+	    // For each object, write the offset to its input file entry.
+	    for (unsigned int i = 0; i < nobjects; ++i)
+	      {
+		Incremental_input_entry* obj = entry->get_object(i);
+		Swap32::writeval(pov, obj->get_offset());
+		pov += 4;
+	      }
+	  }
 	  break;
 
 	case INCREMENTAL_INPUT_OBJECT:

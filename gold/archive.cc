@@ -960,7 +960,7 @@ Archive::include_member(Symbol_table* symtab, Layout* layout,
     {
       {
 	if (layout->incremental_inputs() != NULL)
-	  layout->incremental_inputs()->report_object(obj, this);
+	  layout->incremental_inputs()->report_object(obj, this, NULL);
 	Read_symbols_data sd;
 	obj->read_symbols(&sd);
 	obj->layout(symtab, layout, &sd);
@@ -1040,7 +1040,8 @@ Add_archive_symbols::run(Workqueue* workqueue)
   // For an incremental link, begin recording layout information.
   Incremental_inputs* incremental_inputs = this->layout_->incremental_inputs();
   if (incremental_inputs != NULL)
-    incremental_inputs->report_archive_begin(this->archive_);
+    incremental_inputs->report_archive_begin(this->archive_,
+					this->input_argument_->script_info());
 
   bool added = this->archive_->add_symbols(this->symtab_, this->layout_,
 					   this->input_objects_,
@@ -1196,7 +1197,7 @@ Lib_group::include_member(Symbol_table* symtab, Layout* layout,
   if (input_objects->add_object(obj))
     {
       if (layout->incremental_inputs() != NULL)
-	layout->incremental_inputs()->report_object(obj, this);
+	layout->incremental_inputs()->report_object(obj, this, NULL);
       obj->layout(symtab, layout, sd);
       obj->add_symbols(symtab, sd, layout);
     }
@@ -1256,7 +1257,7 @@ Add_lib_group_symbols::run(Workqueue*)
   // For an incremental link, begin recording layout information.
   Incremental_inputs* incremental_inputs = this->layout_->incremental_inputs();
   if (incremental_inputs != NULL)
-    incremental_inputs->report_archive_begin(this->lib_);
+    incremental_inputs->report_archive_begin(this->lib_, NULL);
 
   this->lib_->add_symbols(this->symtab_, this->layout_, this->input_objects_);
 

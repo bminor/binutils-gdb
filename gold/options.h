@@ -1599,17 +1599,17 @@ class Input_argument
  public:
   // Create a file or library argument.
   explicit Input_argument(Input_file_argument file)
-    : is_file_(true), file_(file), group_(NULL), lib_(NULL)
+    : is_file_(true), file_(file), group_(NULL), lib_(NULL), script_info_(NULL)
   { }
 
   // Create a group argument.
   explicit Input_argument(Input_file_group* group)
-    : is_file_(false), group_(group), lib_(NULL)
+    : is_file_(false), group_(group), lib_(NULL), script_info_(NULL)
   { }
 
   // Create a lib argument.
   explicit Input_argument(Input_file_lib* lib)
-    : is_file_(false), group_(NULL), lib_(lib)
+    : is_file_(false), group_(NULL), lib_(lib), script_info_(NULL)
   { }
 
   // Return whether this is a file.
@@ -1667,11 +1667,22 @@ class Input_argument
     return this->lib_;
   }
 
+  // If a script generated this argument, store a pointer to the script info.
+  // Currently used only for recording incremental link information.
+  void
+  set_script_info(Script_info* info)
+  { this->script_info_ = info; }
+
+  Script_info*
+  script_info() const
+  { return this->script_info_; }
+
  private:
   bool is_file_;
   Input_file_argument file_;
   Input_file_group* group_;
   Input_file_lib* lib_;
+  Script_info* script_info_;
 };
 
 typedef std::vector<Input_argument> Input_argument_list;
@@ -1689,9 +1700,12 @@ class Input_file_group
   { }
 
   // Add a file to the end of the group.
-  void
+  Input_argument&
   add_file(const Input_file_argument& arg)
-  { this->files_.push_back(Input_argument(arg)); }
+  {
+    this->files_.push_back(Input_argument(arg));
+    return this->files_.back();
+  }
 
   // Iterators to iterate over the group contents.
 
@@ -1720,9 +1734,12 @@ class Input_file_lib
   { }
 
   // Add a file to the end of the lib.
-  void
+  Input_argument&
   add_file(const Input_file_argument& arg)
-  { this->files_.push_back(Input_argument(arg)); }
+  {
+    this->files_.push_back(Input_argument(arg));
+    return this->files_.back();
+  }
 
   const Position_dependent_options&
   options() const
@@ -1759,7 +1776,7 @@ class Input_arguments
   { }
 
   // Add a file.
-  void
+  Input_argument&
   add_file(const Input_file_argument& arg);
 
   // Start a group (the --start-group option).

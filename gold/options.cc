@@ -1214,23 +1214,23 @@ Search_directory::add_sysroot(const char* sysroot,
 
 // Add a file to the list.
 
-void
+Input_argument&
 Input_arguments::add_file(const Input_file_argument& file)
 {
   if (this->in_group_)
     {
       gold_assert(!this->input_argument_list_.empty());
       gold_assert(this->input_argument_list_.back().is_group());
-      this->input_argument_list_.back().group()->add_file(file);
+      return this->input_argument_list_.back().group()->add_file(file);
     }
-  else if (this->in_lib_)
+  if (this->in_lib_)
     {
       gold_assert(!this->input_argument_list_.empty());
       gold_assert(this->input_argument_list_.back().is_lib());
-      this->input_argument_list_.back().lib()->add_file(file);
+      return this->input_argument_list_.back().lib()->add_file(file);
     }
-  else
-    this->input_argument_list_.push_back(Input_argument(file));
+  this->input_argument_list_.push_back(Input_argument(file));
+  return this->input_argument_list_.back();
 }
 
 // Start a group.
