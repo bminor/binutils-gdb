@@ -37,6 +37,7 @@
 #include "libiberty.h"
 #include "demangle.h"
 #include "bucomm.h"
+#include "elf-bfd.h"
 
 static bfd_boolean unwind_inlines;	/* -i, unwind inlined functions. */
 static bfd_boolean with_addresses;	/* -a, show addresses.  */
@@ -195,6 +196,8 @@ find_offset_in_section (bfd *abfd, asection *section)
 static void
 translate_addresses (bfd *abfd, asection *section)
 {
+  const struct elf_backend_data * bed;
+
   int read_stdin = (naddr == 0);
 
   for (;;)
@@ -214,6 +217,12 @@ translate_addresses (bfd *abfd, asection *section)
 	  --naddr;
 	  pc = bfd_scan_vma (*addr++, NULL, 16);
 	}
+
+      if (bfd_get_flavour (abfd) == bfd_target_elf_flavour
+	  && (bed = get_elf_backend_data (abfd)) != NULL
+	  && bed->sign_extend_vma
+	  && (pc & (bfd_vma) 1 << (bed->s->arch_size - 1)))
+	pc |= ((bfd_vma) -1) << bed->s->arch_size;
 
       if (with_addresses)
         {

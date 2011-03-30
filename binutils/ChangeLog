@@ -1,3 +1,8 @@
+2011-03-30  Catherine Moore  <clm@codesourcery.com>
+
+	* addr2line.c (translate_addresses): Sign extend the pc
+	if sign_extend_vma is enabled.
+
 2011-03-30  Michael Snyder  <msnyder@msnyder-server.eng.vmware.com>
 
 	* readelf.c (process_gnu_liblist): Stop memory leak.
