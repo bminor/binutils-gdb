@@ -1,3 +1,10 @@
+2011-03-30  Tristan Gingold  <gingold@adacore.com>
+
+	* config/tc-ppc.c (ppc_frob_symbol): Convert stsym symbols value
+	to offset only if within is set.
+	(ppc_stabx): Reformat.  For stsym stabs, add a check and set
+	within only for symbols.
+
 2011-03-29  Richard Henderson  <rth@redhat.com>
 
 	PR 12610
