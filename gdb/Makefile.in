@@ -235,13 +235,16 @@ SUBDIR_TUI_OBS = \
 	tui-io.o \
 	tui-layout.o \
 	tui-out.o \
+	tui-main.o \
 	tui-regs.o \
 	tui-source.o \
 	tui-stack.o \
 	tui-win.o \
 	tui-windata.o \
 	tui-wingeneral.o \
-	tui-winsource.o
+	tui-winsource.o \
+	tui.o
+
 SUBDIR_TUI_SRCS = \
 	tui/tui-command.c \
 	tui/tui-data.c \
@@ -251,6 +254,7 @@ SUBDIR_TUI_SRCS = \
 	tui/tui-interp.c \
 	tui/tui-io.c \
 	tui/tui-layout.c \
+	tui/tui-main.c \
 	tui/tui-out.c \
 	tui/tui-regs.c \
 	tui/tui-source.c \
@@ -260,6 +264,7 @@ SUBDIR_TUI_SRCS = \
 	tui/tui-wingeneral.c \
 	tui/tui-winsource.c \
 	tui/tui.c
+
 SUBDIR_TUI_DEPS =
 SUBDIR_TUI_LDFLAGS=
 SUBDIR_TUI_CFLAGS= \
@@ -732,6 +737,8 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	record.c gcore.c \
 	jit.c \
 	xml-syscall.c \
+	annotate.c common/signals.c copying.c dfp.c gdb.c inf-child.c \
+	regset.c sol-thread.c windows-termcap.c
 
 LINTFILES = $(SFILES) $(YYFILES) $(CONFIG_SRCS) init.c
 
@@ -758,11 +765,8 @@ c-lang.h d-lang.h frame.h event-loop.h block.h cli/cli-setshow.h	\
 cli/cli-decode.h cli/cli-cmds.h cli/cli-dump.h cli/cli-utils.h \
 cli/cli-script.h macrotab.h symtab.h version.h gnulib/wchar.in.h \
 gnulib/string.in.h gnulib/str-two-way.h \
-gnulib/stdint.in.h remote.h gdb.h sparc-nat.h gdbserver/win32-low.h \
-gdbserver/i387-fp.h gdbserver/server.h gdbserver/terminal.h \
-gdbserver/mem-break.h gdbserver/wincecompat.h gdbserver/target.h \
-gdbserver/linux-low.h gdbserver/gdb_proc_service.h \
-gdbserver/regcache.h gdbthread.h dwarf2-frame.h nbsd-nat.h dcache.h \
+gnulib/stdint.in.h remote.h gdb.h sparc-nat.h \
+gdbthread.h dwarf2-frame.h nbsd-nat.h dcache.h \
 amd64-nat.h s390-tdep.h arm-linux-tdep.h exceptions.h macroscope.h \
 gdbarch.h bsd-uthread.h gdb_thread_db.h gdb_stat.h memory-map.h	memrange.h \
 mdebugread.h m88k-tdep.h stabsread.h hppa-linux-offsets.h linux-fork.h \
@@ -801,7 +805,16 @@ annotate.h sim-regno.h dictionary.h dfp.h main.h frame-unwind.h	\
 remote-fileio.h i386-linux-tdep.h vax-tdep.h objc-lang.h \
 sentinel-frame.h bcache.h symfile.h windows-tdep.h linux-tdep.h \
 gdb_usleep.h jit.h xml-syscall.h microblaze-tdep.h \
-psymtab.h psympriv.h progspace.h bfin-tdep.h ia64-hpux-tdep.h
+psymtab.h psympriv.h progspace.h bfin-tdep.h ia64-hpux-tdep.h \
+amd64-darwin-tdep.h charset-list.h common/gdb_signals.h common/i386-xstate.h \
+config/djgpp/langinfo.h config/djgpp/nl_types.h darwin-nat.h \
+dicos-tdep.h filesystem.h gcore.h gdb_wchar.h hppabsd-tdep.h \
+i386-darwin-tdep.h i386-nat.h linux-record.h moxie-tdep.h \
+osdata.h procfs.h python/py-event.h python/py-events.h python/py-stopevent.h \
+python/python-internal.h python/python.h ravenscar-thread.h record.h \
+solib-darwin.h solib-ia64-hpux.h solib-spu.h windows-nat.h xcoffread.h \
+gnulib/extra/arg-nonnull.h gnulib/extra/c++defs.h gnulib/extra/warn-on-use.h \
+gnulib/stddef.in.h inline-frame.h
 
 # Header files that already have srcdir in them, or which are in objdir.
 

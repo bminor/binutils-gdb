@@ -1,3 +1,9 @@
+2011-03-29  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* Makefile.in (SFILES): Add missing C sources.
+	(HFILES_NO_SRCDIR): Remove gdbserver subdirectory headers.
+	Add missing headers.
+
 2011-03-29  Mike Frysinger  <vapier@gentoo.org>
 
 	* .gitignore: New file.
