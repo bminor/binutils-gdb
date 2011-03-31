@@ -1,5 +1,10 @@
 2011-03-31  Tom Tromey  <tromey@redhat.com>
 
+	* python/py-prettyprint.c (print_stack_unless_memory_error): Add
+	missing ">" to message.
+
+2011-03-31  Tom Tromey  <tromey@redhat.com>
+
 	* varobj.c (instantiate_pretty_printer): Remove duplicate
 	'return'.
 
