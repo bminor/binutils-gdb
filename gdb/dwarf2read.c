@@ -12043,7 +12043,7 @@ dwarf2_name (struct die_info *die, struct dwarf2_cu *cu)
 	 http://gcc.gnu.org/bugzilla/show_bug.cgi?id=47510.  */
       if (!attr || DW_STRING (attr) == NULL)
 	{
-	  char *demangled;
+	  char *demangled = NULL;
 
 	  attr = dwarf2_attr (die, DW_AT_linkage_name, cu);
 	  if (attr == NULL)
@@ -12052,7 +12052,10 @@ dwarf2_name (struct die_info *die, struct dwarf2_cu *cu)
 	  if (attr == NULL || DW_STRING (attr) == NULL)
 	    return NULL;
 
-	  demangled = cplus_demangle (DW_STRING (attr), DMGL_TYPES);
+	  /* Avoid demangling DW_STRING (attr) the second time on a second
+	     call for the same DIE.  */
+	  if (!DW_STRING_IS_CANONICAL (attr))
+	    demangled = cplus_demangle (DW_STRING (attr), DMGL_TYPES);
 
 	  if (demangled)
 	    {
