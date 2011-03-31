@@ -2054,7 +2054,6 @@ elf32_tic6x_relocate_section (bfd *output_bfd,
 			      Elf_Internal_Sym *local_syms,
 			      asection **local_sections)
 {
-  bfd *dynobj;
   struct elf32_tic6x_link_hash_table *htab;
   Elf_Internal_Shdr *symtab_hdr;
   struct elf_link_hash_entry **sym_hashes;
@@ -2064,7 +2063,6 @@ elf32_tic6x_relocate_section (bfd *output_bfd,
   bfd_boolean ok = TRUE;
 
   htab = elf32_tic6x_hash_table (info);
-  dynobj = elf_hash_table (info)->dynobj;
   symtab_hdr = & elf_symtab_hdr (input_bfd);
   sym_hashes = elf_sym_hashes (input_bfd);
   local_got_offsets = elf_local_got_offsets (input_bfd);
