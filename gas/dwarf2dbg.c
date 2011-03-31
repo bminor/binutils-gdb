@@ -89,6 +89,10 @@
 #define DWARF2_FILE_SIZE_NAME(FILENAME,DIRNAME) 0
 #endif
 
+#ifndef DWARF2_VERSION
+#define DWARF2_VERSION 2
+#endif
+
 #include "subsegs.h"
 
 #include "dwarf2.h"
@@ -1420,7 +1424,7 @@ out_debug_line (segT line_seg)
   line_end = exp.X_add_symbol;
 
   /* Version.  */
-  out_two (2);
+  out_two (DWARF2_VERSION);
 
   /* Length of the prologue following this length.  */
   prologue_end = symbol_temp_make ();
@@ -1524,7 +1528,7 @@ out_debug_aranges (segT aranges_seg, segT info_seg)
   aranges_end = exp.X_add_symbol;
 
   /* Version.  */
-  out_two (2);
+  out_two (DWARF2_VERSION);
 
   /* Offset to .debug_info.  */
   TC_DWARF2_EMIT_OFFSET (section_symbol (info_seg), sizeof_offset);
@@ -1627,7 +1631,7 @@ out_debug_info (segT info_seg, segT abbrev_seg, segT line_seg, segT ranges_seg)
   info_end = exp.X_add_symbol;
 
   /* DWARF version.  */
-  out_two (2);
+  out_two (DWARF2_VERSION);
 
   /* .debug_abbrev offset */
   TC_DWARF2_EMIT_OFFSET (section_symbol (abbrev_seg), sizeof_offset);
