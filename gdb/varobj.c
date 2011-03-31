@@ -785,7 +785,6 @@ instantiate_pretty_printer (PyObject *constructor, struct value *value)
   printer = PyObject_CallFunctionObjArgs (constructor, val_obj, NULL);
   Py_DECREF (val_obj);
   return printer;
-  return NULL;
 }
 
 #endif
