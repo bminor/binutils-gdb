@@ -1,3 +1,8 @@
+2011-03-30  Tristan Gingold  <gingold@adacore.com>
+
+	* libcoff-in.h (exec_hdr): Remove.
+	* libcoff.h: Regenerate.
+
 2011-03-30  Nick Clifton  <nickc@redhat.com>
 
 	* po/da.po: Updated Danish translation.
