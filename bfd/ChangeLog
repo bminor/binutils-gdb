@@ -1,3 +1,55 @@
+2011-03-31  Bernd Schmidt  <bernds@codesourcery.com>
+
+	* elf32-tic6x.h (struct elf32_tic6x_params): New.
+	(elf32_tic6x_setup): Declare.
+	* elf32-tic6x.c: Include <limits.h>.
+	(ELF_DYNAMIC_LINKER, DEFAULT_STACK_SIZE, PLT_ENTRY_SIZE): Define.
+	(struct elf32_tic6x_link_hash_table, struct elf32_link_hash_entry):
+	New structures.
+	(elf32_tic6x_link_hash_table, is_tic6x_elf): New macros.
+	(tic6x_elf_scom_section, tic6x_elf_scom_symbol,
+	tic6x_elf_scom_symbol_ptr): New static variables.
+	(elf32_tic6x_howto_table, elf32_tic6x_howto_table_rel,
+	elf32_tic6x_reloc_map): Add R_C6000_JUMP_SLOT, R_C6000_EHTYPE,
+	R_C6000_PCR_H16 and R_C6000_PCR_L16.
+	(elf32_tic6x_link_hash_newfunc, elf32_tic6x_link_hash_table_create,
+	elf32_tic6x_link_hash_table_free, elf32_tic6x_setup,
+	elf32_tic6x_using_dsbt, elf32_tic6x_install_rela,
+	elf32_tic6x_create_dynamic_sections, elf32_tic6x_make_got_dynreloc,
+	elf32_tic6x_finish_dynamic_symbol, elf32_tic6x_gc_sweep_hook,
+	elf32_tic6x_adjust_dynamic_symbol): New static functions.
+	(elf32_tic6x_relocate_section): For R_C6000_PCR_S21, convert branches
+	to weak symbols as required by the ABI.
+	Handle GOT and DSBT_INDEX relocs, and copy relocs to the output file
+	as needed when generating DSBT output.
+	(elf32_tic6x_check_relocs, elf32_tic6x_add_symbol_hook,
+	elf32_tic6x_symbol_processing, elf32_tic6x_section_from_bfd_section,
+	elf32_tic6x_allocate_dynrelocs, elf32_tic6x_size_dynamic_sections,
+	elf32_tic6x_always_size_sections, elf32_tic6x_modify_program_headers,
+	elf32_tic6x_finish_dynamic_sections, elf32_tic6x_plt_sym_val,
+	elf32_tic6x_copy_private_data, elf32_tic6x_link_omit_section_dynsym):
+	New static functions.
+	(ELF_MAXPAGESIZE): Define to 0x1000.
+	(bfd_elf32_bfd_copy_private_bfd_data,
+	bfd_elf32_bfd_link_hash_table_create,
+	bfd_elf32_bfd_link_hash_table_free, elf_backend_can_refcount,
+	elf_backend_want_got_plt, elf_backend_want_dynbss,
+	elf_backend_plt_readonly, elf_backend_got_header_size,
+	elf_backend_gc_sweep_hook, elf_backend_modify_program_headers,
+	elf_backend_create_dynamic_sections, elf_backend_adjust_dynamic_symbol,
+	elf_backend_check_relocs, elf_backend_add_symbol_hook,
+	elf_backend_symbol_processing, elf_backend_link_output_symbol_hook,
+	elf_backend_section_from_bfd_section,
+	elf_backend_finish_dynamic_symbol, elf_backend_always_size_sections,
+	elf32_tic6x_size_dynamic_sections, elf_backend_finish_dynamic_sections,
+	elf_backend_omit_section_dynsym, elf_backend_plt_sym_val): Define.
+
+	* bfd/reloc.c (BFD_RELOC_C6000_JUMP_SLOT, BFD_RELOC_C6000_EHTYPE,
+	BFD_RELOC_C6000_PCR_H16, BFD_RELOC_C6000_PCR_S16): Add.
+	* bfd/bfd-in2.h: Regenerate.
+	* bfd/libbfd.h: Regenerate.
+	* config.bfd: Accept tic6x-*-* instead of tic6x-*-elf.
+
 2011-03-31  Tristan Gingold  <gingold@adacore.com>
 
 	* coffcode.h (coff_slurp_symbol_table): Silently discard C_NULL

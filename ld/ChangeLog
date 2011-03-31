@@ -1,3 +1,17 @@
+2011-03-31  Bernd Schmidt  <bernds@codesourcery.com>
+
+	* emulparams/elf32_tic6x_le.sh (BIG_OUTPUT_FORMAT, EXTRA_EM_FILE,
+	GENERATE_SHLIB_SCRIPT): New defines.
+	(TEXT_START_ADDR): Define differently depending on target.
+	(.got): Redefine to include "*(.dsbt)".
+	(SDATA_START_SYMBOLS): Remove, replace with
+	(OTHER_GOT_SYMBOLS): New.
+	(OTHER_BSS_SECTIONS): Define only for ELF targets.
+	* emultempl/tic6xdsbt.em: New file.
+	* gen-doc.texi: Set C6X.
+	* ld.texinfo: Likewise.
+	(Options specific to C6X uClinux targets): New section.
+
 2011-03-29  Alan Modra  <amodra@gmail.com>
 
 	PR ld/12613

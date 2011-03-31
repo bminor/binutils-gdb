@@ -34,6 +34,11 @@
 #define TRUNC(X)	((valueT) (X) & 0xffffffffU)
 #define SEXT(X)		((TRUNC (X) ^ 0x80000000U) - 0x80000000U)
 
+/* Stuff for .scomm symbols.  */
+static segT sbss_section;
+static asection scom_section;
+static asymbol scom_symbol;
+
 const char comment_chars[] = ";";
 const char line_comment_chars[] = "#*;";
 const char line_separator_chars[] = "@";
@@ -349,6 +354,138 @@ s_tic6x_nocmp (int ignored ATTRIBUTE_UNUSED)
   demand_empty_rest_of_line ();
 }
 
+/* .scomm pseudo-op handler.
+
+   This is a new pseudo-op to handle putting objects in .scommon.
+   By doing this the linker won't need to do any work,
+   and more importantly it removes the implicit -G arg necessary to
+   correctly link the object file.  */
+
+static void
+s_tic6x_scomm (int ignore ATTRIBUTE_UNUSED)
+{
+  char *name;
+  char c;
+  char *p;
+  offsetT size;
+  symbolS *symbolP;
+  offsetT align;
+  int align2;
+
+  name = input_line_pointer;
+  c = get_symbol_end ();
+
+  /* Just after name is now '\0'.  */
+  p = input_line_pointer;
+  *p = c;
+  SKIP_WHITESPACE ();
+  if (*input_line_pointer != ',')
+    {
+      as_bad (_("expected comma after symbol name"));
+      ignore_rest_of_line ();
+      return;
+    }
+
+  /* Skip ','.  */
+  input_line_pointer++;
+  if ((size = get_absolute_expression ()) < 0)
+    {
+      /* xgettext:c-format  */
+      as_warn (_("invalid length for .scomm directive"));
+      ignore_rest_of_line ();
+      return;
+    }
+
+  /* The third argument to .scomm is the alignment.  */
+  if (*input_line_pointer != ',')
+    align = 8;
+  else
+    {
+      ++input_line_pointer;
+      align = get_absolute_expression ();
+      if (align <= 0)
+	{
+	  as_warn (_("alignment is not a positive number"));
+	  align = 8;
+	}
+    }
+
+  /* Convert to a power of 2 alignment.  */
+  if (align)
+    {
+      for (align2 = 0; (align & 1) == 0; align >>= 1, ++align2)
+	continue;
+      if (align != 1)
+	{
+	  as_bad (_("alignment is not a power of 2"));
+	  ignore_rest_of_line ();
+	  return;
+	}
+    }
+  else
+    align2 = 0;
+
+  *p = 0;
+  symbolP = symbol_find_or_make (name);
+  *p = c;
+
+  if (S_IS_DEFINED (symbolP))
+    {
+      /* xgettext:c-format  */
+      as_bad (_("attempt to re-define symbol `%s'"),
+	      S_GET_NAME (symbolP));
+      ignore_rest_of_line ();
+      return;
+    }
+
+  if (S_GET_VALUE (symbolP) && S_GET_VALUE (symbolP) != (valueT) size)
+    {
+      /* xgettext:c-format  */
+      as_bad (_("attempt to redefine `%s' with a different length"),
+	      S_GET_NAME (symbolP));
+
+      ignore_rest_of_line ();
+      return;
+    }
+
+  if (symbol_get_obj (symbolP)->local)
+    {
+      segT old_sec = now_seg;
+      int old_subsec = now_subseg;
+      char *pfrag;
+
+      record_alignment (sbss_section, align2);
+      subseg_set (sbss_section, 0);
+
+      if (align2)
+	frag_align (align2, 0, 0);
+
+      if (S_GET_SEGMENT (symbolP) == sbss_section)
+	symbol_get_frag (symbolP)->fr_symbol = 0;
+
+      symbol_set_frag (symbolP, frag_now);
+
+      pfrag = frag_var (rs_org, 1, 1, (relax_substateT) 0, symbolP, size,
+			(char *) 0);
+      *pfrag = 0;
+      S_SET_SIZE (symbolP, size);
+      S_SET_SEGMENT (symbolP, sbss_section);
+      S_CLEAR_EXTERNAL (symbolP);
+      subseg_set (old_sec, old_subsec);
+    }
+  else
+    {
+      S_SET_VALUE (symbolP, (valueT) size);
+      S_SET_ALIGN (symbolP, 1 << align2);
+      S_SET_EXTERNAL (symbolP);
+      S_SET_SEGMENT (symbolP, &scom_section);
+    }
+
+  symbol_get_bfdsym (symbolP)->flags |= BSF_OBJECT;
+
+  demand_empty_rest_of_line ();
+}
+
 /* Track for each attribute whether it has been set explicitly (and so
    should not have a default value set by the assembler).  */
 static bfd_boolean tic6x_attributes_set_explicitly[NUM_KNOWN_OBJ_ATTRIBUTES];
@@ -396,6 +533,7 @@ const pseudo_typeS md_pseudo_table[] =
     { "arch", s_tic6x_arch, 0 },
     { "c6xabi_attribute", s_tic6x_c6xabi_attribute, 0 },
     { "nocmp", s_tic6x_nocmp, 0 },
+    { "scomm",	s_tic6x_scomm, 0 },
     { "word", cons, 4 },
     { 0, 0, 0 }
   };
@@ -411,6 +549,9 @@ void
 md_begin (void)
 {
   tic6x_opcode_id id;
+  flagword applicable;
+  segT seg;
+  subsegT subseg;
 
   bfd_set_arch_mach (stdoutput, TARGET_ARCH, 0);
 
@@ -427,6 +568,32 @@ md_begin (void)
 	  != NULL)
 	as_fatal ("%s", _(errmsg));
     }
+
+  /* Save the current subseg so we can restore it [it's the default one and
+     we don't want the initial section to be .sbss].  */
+  seg = now_seg;
+  subseg = now_subseg;
+
+  /* The sbss section is for local .scomm symbols.  */
+  sbss_section = subseg_new (".bss", 0);
+  seg_info (sbss_section)->bss = 1;
+
+  /* This is copied from perform_an_assembly_pass.  */
+  applicable = bfd_applicable_section_flags (stdoutput);
+  bfd_set_section_flags (stdoutput, sbss_section, applicable & SEC_ALLOC);
+
+  subseg_set (seg, subseg);
+
+  /* We must construct a fake section similar to bfd_com_section
+     but with the name .scommon.  */
+  scom_section                = bfd_com_section;
+  scom_section.name           = ".scommon";
+  scom_section.output_section = & scom_section;
+  scom_section.symbol         = & scom_symbol;
+  scom_section.symbol_ptr_ptr = & scom_section.symbol;
+  scom_symbol                 = * bfd_com_section.symbol;
+  scom_symbol.name            = ".scommon";
+  scom_symbol.section         = & scom_section;
 }
 
 /* Whether the current line being parsed had the "||" parallel bars.  */
@@ -4029,11 +4196,13 @@ arelent *
 tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
 {
   arelent *reloc;
+  asymbol *symbol;
   bfd_reloc_code_real_type r_type;
 
   reloc = xmalloc (sizeof (arelent));
   reloc->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
-  *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
+  symbol = symbol_get_bfdsym (fixp->fx_addsy);
+  *reloc->sym_ptr_ptr = symbol;
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
   reloc->addend = (tic6x_generate_rela ? fixp->fx_offset : 0);
   r_type = fixp->fx_r_type;
@@ -4049,7 +4218,11 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
 
   /* Correct for adjustments bfd_install_relocation will make.  */
   if (reloc->howto->pcrel_offset && reloc->howto->partial_inplace)
-    reloc->addend += reloc->address;
+    {
+      reloc->addend += reloc->address;
+      if (!bfd_is_com_section (symbol))
+	reloc->addend -= symbol->value;
+    }
 
   return reloc;
 }

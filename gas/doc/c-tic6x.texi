@@ -151,4 +151,10 @@ The @var{tag} is either an attribute number or one of
 Disallow use of C64x+ compact instructions in the current text
 section.
 
+@cindex @code{.scomm} directive, TIC6X
+@item .scomm @var{symbol}, @var{size}, @var{align}
+Like @code{.comm}, creating a common symbol @var{symbol} with size @var{size}
+and alignment @var{align}, but unlike when using @code{.comm}, this symbol
+will be placed into the small BSS section by the linker.
+
 @end table

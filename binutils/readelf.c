@@ -1304,8 +1304,10 @@ dump_relocations (FILE * file,
 			sec_name = "ABS";
 		      else if (psym->st_shndx == SHN_COMMON)
 			sec_name = "COMMON";
-		      else if (elf_header.e_machine == EM_MIPS
-			       && psym->st_shndx == SHN_MIPS_SCOMMON)
+		      else if ((elf_header.e_machine == EM_MIPS
+				&& psym->st_shndx == SHN_MIPS_SCOMMON)
+			       || (elf_header.e_machine == EM_TI_C6000
+				   && psym->st_shndx == SHN_TIC6X_SCOMMON))
 			sec_name = "SCOMMON";
 		      else if (elf_header.e_machine == EM_MIPS
 			       && psym->st_shndx == SHN_MIPS_SUNDEFINED)
@@ -8482,8 +8484,10 @@ get_symbol_index_type (unsigned int type)
 		|| elf_header.e_machine == EM_L1OM)
 	       && type == SHN_X86_64_LCOMMON)
 	return "LARGE_COM";
-      else if (type == SHN_MIPS_SCOMMON
-	       && elf_header.e_machine == EM_MIPS)
+      else if ((type == SHN_MIPS_SCOMMON
+		&& elf_header.e_machine == EM_MIPS)
+	       || (type == SHN_TIC6X_SCOMMON
+		   && elf_header.e_machine == EM_TI_C6000))
 	return "SCOM";
       else if (type == SHN_MIPS_SUNDEFINED
 	       && elf_header.e_machine == EM_MIPS)

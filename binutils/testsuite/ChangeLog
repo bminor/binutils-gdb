@@ -1,3 +1,7 @@
+2011-03-31  Bernd Schmidt  <bernds@codesourcery.com>
+
+	* lib/binutils-common.exp (is_elf_format): Accept tic6x*-*-uclinux*.
+
 2011-01-03  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	* lib/binutils-common.exp (regexp_diff): Use "==" instead of "eq".

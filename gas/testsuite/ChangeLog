@@ -1,3 +1,22 @@
+2011-03-31  Bernd Schmidt  <bernds@codesourcery.com>
+
+	* gas/tic6x/scomm-directive-1.s: New test.
+	* gas/tic6x/scomm-directive-1.d: New test.
+	* gas/tic6x/scomm-directive-2.s: New test.
+	* gas/tic6x/scomm-directive-2.d: New test.
+	* gas/tic6x/scomm-directive-3.s: New test.
+	* gas/tic6x/scomm-directive-3.d: New test.
+	* gas/tic6x/scomm-directive-4.s: New test.
+	* gas/tic6x/scomm-directive-4.d: New test.
+	* gas/tic6x/scomm-directive-5.s: New test.
+	* gas/tic6x/scomm-directive-5.d: New test.
+	* gas/tic6x/scomm-directive-6.s: New test.
+	* gas/tic6x/scomm-directive-6.d: New test.
+	* gas/tic6x/scomm-directive-7.s: New test.
+	* gas/tic6x/scomm-directive-7.d: New test.
+	* gas/tic6x/scomm-directive-8.s: New test.
+	* gas/tic6x/scomm-directive-8.d: New test.
+
 2011-03-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/ilp32/quad.d: Add tests for multiple operands.

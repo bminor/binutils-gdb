@@ -22,6 +22,7 @@
 @set UsesEnvVars
 @set GENERIC
 @set ARM
+@set C6X
 @set H8300
 @set HPPA
 @set I960
@@ -2611,6 +2612,35 @@ The image is Terminal Server aware.
 @end table
 
 @c man end
+
+@ifset C6X
+@subsection Options specific to C6X uClinux targets
+
+@c man begin OPTIONS
+
+The C6X uClinux target uses a binary format called DSBT to support shared
+libraries.  Each shared library in the system needs to have a unique index;
+all executables use an index of 0.
+
+@table @gcctabopt
+
+@kindex --dsbt-size
+@item --dsbt-size @var{size}
+This option sets the number of entires in the DSBT of the current executable
+or shared library to @var{size}.  The default is to create a table with 64
+entries.
+
+@kindex --dsbt-index
+@item --dsbt-index @var{index}
+This option sets the DSBT index of the current executable or shared library
+to @var{index}.  The default is 0, which is appropriate for generating
+executables.  If a shared library is generated with a DSBT index of 0, the
+@code{R_C6000_DSBT_INDEX} relocs are copied into the output file.
+
+@end table
+
+@c man end
+@end ifset
 
 @ifset M68HC11
 @subsection Options specific to Motorola 68HC11 and 68HC12 targets

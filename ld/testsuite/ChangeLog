@@ -1,3 +1,87 @@
+2011-03-31  Bernd Schmidt  <bernds@codesourcery.com>
+
+	* ld-scripts/crossref.exp: Add CFLAGS for tic6x*-*-*.
+	* ld-elf/sec-to-seg.exp: Remove tic6x from list of targets defining
+	pagesize to 1.
+	* ld-tic6x/tic6x.exp: Add support for DSBT shared library/executable
+	linking tests.
+	* ld-tic6x/dsbt.ld: New linker script.
+	* ld-tic6x/dsbt-be.ld: New linker script.
+	* ld-tic6x/dsbt-overflow.ld: New linker script.
+	* ld-tic6x/dsbt-inrange.ld: New linker script.
+	* ld-tic6x/shlib-1.s: New test.
+	* ld-tic6x/shlib-2.s: New test.
+	* ld-tic6x/shlib-app-1r.s: New test.
+	* ld-tic6x/shlib-app-1.s: New test.
+	* ld-tic6x/shlib-1.sd: New test.
+	* ld-tic6x/shlib-1.dd: New test.
+	* ld-tic6x/shlib-app-1.rd: New test.
+	* ld-tic6x/shlib-app-1rb.rd: New test.
+	* ld-tic6x/shlib-app-1.sd: New test.
+	* ld-tic6x/static-app-1rb.od: New test.
+	* ld-tic6x/shlib-app-1.dd: New test.
+	* ld-tic6x/shlib-app-1rb.sd: New test.
+	* ld-tic6x/static-app-1b.od: New test.
+	* ld-tic6x/static-app-1r.od: New test.
+	* ld-tic6x/shlib-1rb.rd: New test.
+	* ld-tic6x/shlib-app-1rb.dd: New test.
+	* ld-tic6x/shlib-1rb.sd: New test.
+	* ld-tic6x/shlib-1rb.dd: New test.
+	* ld-tic6x/shlib-app-1b.od: New test.
+	* ld-tic6x/tic6x.exp: New test.
+	* ld-tic6x/static-app-1rb.rd: New test.
+	* ld-tic6x/shlib-app-1r.od: New test.
+	* ld-tic6x/static-app-1.od: New test.
+	* ld-tic6x/static-app-1b.rd: New test.
+	* ld-tic6x/static-app-1r.rd: New test.
+	* ld-tic6x/static-app-1rb.sd: New test.
+	* ld-tic6x/static-app-1b.sd: New test.
+	* ld-tic6x/static-app-1rb.dd: New test.
+	* ld-tic6x/static-app-1r.sd: New test.
+	* ld-tic6x/static-app-1b.dd: New test.
+	* ld-tic6x/shlib-1b.rd: New test.
+	* ld-tic6x/static-app-1r.dd: New test.
+	* ld-tic6x/shlib-app-1b.rd: New test.
+	* ld-tic6x/shlib-1r.rd: New test.
+	* ld-tic6x/shlib-app-1r.rd: New test.
+	* ld-tic6x/shlib-1b.sd: New test.
+	* ld-tic6x/static-app-1.rd: New test.
+	* ld-tic6x/shlib-app-1b.sd: New test.
+	* ld-tic6x/shlib-1r.sd: New test.
+	* ld-tic6x/shlib-1b.dd: New test.
+	* ld-tic6x/shlib-app-1r.sd: New test.
+	* ld-tic6x/shlib-app-1b.dd: New test.
+	* ld-tic6x/shlib-1r.dd: New test.
+	* ld-tic6x/static-app-1.sd: New test.
+	* ld-tic6x/shlib-app-1r.dd: New test.
+	* ld-tic6x/static-app-1.dd: New test.
+	* ld-tic6x/shlib-noindex.rd: New test.
+	* ld-tic6x/shlib-noindex.dd: New test.
+	* ld-tic6x/shlib-noindex.sd: New test.
+	* ld-tic6x/got-reloc-local-1.s: New test.
+	* ld-tic6x/got-reloc-local-2.s: New test.
+	* ld-tic6x/got-reloc-local-r.d: New test.
+	* ld-tic6x/got-reloc-global.s: New test.
+	* ld-tic6x/got-reloc-global-addend-1.d: New test.
+	* ld-tic6x/got-reloc-global-addend-1.s: New test.
+	* ld-tic6x/got-reloc-global-addend-2.d: New test.
+	* ld-tic6x/got-reloc-inrange.d: New test.
+	* ld-tic6x/got-reloc-overflow.d: New test.
+	* ld-tic6x/got-reloc-global-addend-2.s: New test.
+	* ld-tic6x/dsbt-index-error.d: New test.
+	* ld-tic6x/dsbt-index.d: New test.
+	* ld-tic6x/dsbt-index.s: New test.
+	* ld-tic6x/shlib-app-1.od: New test.
+	* ld-tic6x/shlib-app-1rb.od: New test.
+	* ld-tic6x/shlib-1.rd: New test.
+	* ld-tic6x/weak.d: New test.
+	* ld-tic6x/weak-be.d: New test.
+	* ld-tic6x/weak.s: New test.
+	* ld-tic6x/weak-data.d: New test.
+	* ld-tic6x/common.d: New test.
+	* ld-tic6x/common.ld: New test.
+	* ld-tic6x/common.s: New test.
+
 2011-03-30  Richard Henderson  <rth@redhat.com>
 
 	* ld-elf/elf.exp: Force 32-bit start address for alpha.
