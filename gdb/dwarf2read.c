@@ -2045,7 +2045,7 @@ dwarf2_read_index (struct objfile *objfile)
   /* Version check.  */
   version = MAYBE_SWAP (*(offset_type *) addr);
   /* Versions earlier than 3 emitted every copy of a psymbol.  This
-     causes the index to behave very poorly for certain requests.  Version 4
+     causes the index to behave very poorly for certain requests.  Version 3
      contained incomplete addrmap.  So, it seems better to just ignore such
      indices.  */
   if (version < 4)
