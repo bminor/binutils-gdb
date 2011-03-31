@@ -10584,7 +10584,7 @@ addr_string_to_sals (struct breakpoint *b, char *addr_string, int *found)
 {
   char *s;
   int marker_spec, not_found;
-  struct symtabs_and_lines sals;
+  struct symtabs_and_lines sals = {0};
   struct gdb_exception e;
 
   s = addr_string;

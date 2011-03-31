@@ -1,3 +1,8 @@
+2011-03-31  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* breakpoint.c (addr_string_to_sals): Avoid uninitialized
+	variable compiler warning.
+
 2011-03-30  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* breakpoint.c (breakpoint_re_set_one): Factor out breakpoint-resetting
