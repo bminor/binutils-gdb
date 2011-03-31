@@ -1,3 +1,8 @@
+2011-03-31  Ulrich Weigand  <ulrich.weigand@linaro.org>
+
+	* i386-tdep.c (i386_frame_prev_register): Unwind SP from memory
+	if neither saved value nor register available (e.g. signal frame).
+
 2011-03-31  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* macroexp.c (expand): Avoid uninitialized variable

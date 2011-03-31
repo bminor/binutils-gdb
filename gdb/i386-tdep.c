@@ -1798,12 +1798,13 @@ i386_frame_prev_register (struct frame_info *this_frame, void **this_cache,
   if (regnum == I386_EIP_REGNUM && cache->pc_in_eax)
     return frame_unwind_got_register (this_frame, regnum, I386_EAX_REGNUM);
 
-  if (regnum == I386_ESP_REGNUM)
+  if (regnum == I386_ESP_REGNUM
+      && (cache->saved_sp != 0 || cache->saved_sp_reg != -1))
     {
       /* If the SP has been saved, but we don't know where, then this
 	 means that SAVED_SP_REG register was found unavailable back
 	 when we built the cache.  */
-      if (cache->saved_sp == 0 && cache->saved_sp_reg != -1)
+      if (cache->saved_sp == 0)
 	return frame_unwind_got_register (this_frame, regnum,
 					  cache->saved_sp_reg);
       else
