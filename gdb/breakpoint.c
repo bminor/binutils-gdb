@@ -8594,7 +8594,7 @@ break_range_command (char *arg, int from_tty)
   init_linespec_result (&canonical_end);
   arg_start = arg;
 
-  /* We call decode_line_n1 directly here instead of using
+  /* We call decode_line_1 directly here instead of using
      parse_breakpoint_sals because we need to specify the start location's
      symtab and line as the default symtab and line for the end of the
      range.  This makes it possible to have ranges like "foo.c:27, +14",
