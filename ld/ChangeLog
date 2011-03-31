@@ -1,3 +1,10 @@
+2011-03-31  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure.tgt: Add elf_l1om to targ_extra_libpath for
+	 x86_64-*-linux-*.
+
+	* emulparams/elf_l1om.sh: Remove duplicates.
+
 2011-03-31  Bernd Schmidt  <bernds@codesourcery.com>
 
 	* emulparams/elf32_tic6x_le.sh (BIG_OUTPUT_FORMAT, EXTRA_EM_FILE,
