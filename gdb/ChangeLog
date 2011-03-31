@@ -1,5 +1,10 @@
 2011-03-31  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
+	* macroexp.c (expand): Avoid uninitialized variable
+	compiler warning.
+
+2011-03-31  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
 	* breakpoint.c (break_range_command): Fix typo in comment.
 
 2011-03-31  Thiago Jung Bauermann  <bauerman@br.ibm.com>

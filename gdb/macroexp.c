@@ -1183,7 +1183,7 @@ expand (const char *id,
       struct macro_buffer *argv = NULL;
       struct macro_buffer substituted;
       struct macro_buffer substituted_src;
-      struct macro_buffer va_arg_name;
+      struct macro_buffer va_arg_name = {0};
       int is_varargs = 0;
 
       if (def->argc >= 1)
