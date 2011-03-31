@@ -12,7 +12,8 @@ HOSTFILE=alphavms.h
 OBJS:=cpu-ia64.obj,elf64-ia64.obj,\
   vms-misc.obj,vms-lib.obj,elf-strtab.obj,corefile.obj,stabs.obj,\
   merge.obj,elf-eh-frame.obj,elflink.obj,elf-attrs.obj,dwarf1.obj,elf64.obj
-DEFS=SELECT_VECS="&bfd_elf64_ia64_vms_vec",SELECT_ARCHITECTURES="&bfd_ia64_arch"
+DEFS=SELECT_VECS="&bfd_elf64_ia64_vms_vec",\
+ SELECT_ARCHITECTURES="&bfd_ia64_arch","HAVE_bfd_elf64_ia64_vms_vec"=1
 endif
 ifeq ($(ARCH),ALPHA)
 HOSTFILE=alphavms.h

@@ -1,5 +1,9 @@
 2011-03-31  Tristan Gingold  <gingold@adacore.com>
 
+	* makefile.vms (readelf.exe): New target.
+
+2011-03-31  Tristan Gingold  <gingold@adacore.com>
+
 	* makefile.vms (DEBUG_OBJS): Add elfcomm.obj.
 
 2011-03-31  Bernd Schmidt  <bernds@codesourcery.com>
