@@ -1,3 +1,11 @@
+2011-03-31  Tristan Gingold  <gingold@adacore.com>
+
+	* readelf.c (get_ia64_vms_note_type): New function.
+	(print_ia64_vms_note): Ditto.
+	(process_note): Recognize VMS/ia64 specific notes.
+	Display them.
+	(process_corefile_note_segment): Decode VMS notes.
+
 2011-03-30  Catherine Moore  <clm@codesourcery.com>
 
 	* addr2line.c (translate_addresses): Sign extend the pc

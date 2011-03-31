@@ -12048,6 +12048,117 @@ get_netbsd_elfcore_note_type (unsigned e_type)
   return buff;
 }
 
+static const char *
+get_ia64_vms_note_type (unsigned e_type)
+{
+  static char buff[64];
+
+  switch (e_type)
+    {
+    case NT_VMS_MHD:
+      return _("NT_VMS_MHD (module header)");
+    case NT_VMS_LNM:
+      return _("NT_VMS_LNM (language name)");
+    case NT_VMS_SRC:
+      return _("NT_VMS_SRC (source files)");
+    case NT_VMS_TITLE:
+      return _("NT_VMS_TITLE");
+    case NT_VMS_EIDC:
+      return _("NT_VMS_EIDC (consistency check)");
+    case NT_VMS_FPMODE:
+      return _("NT_VMS_FPMODE (FP mode)");
+    case NT_VMS_LINKTIME:
+      return _("NT_VMS_LINKTIME");
+    case NT_VMS_IMGNAM:
+      return _("NT_VMS_IMGNAM (image name)");
+    case NT_VMS_IMGID:
+      return _("NT_VMS_IMGID (image id)");
+    case NT_VMS_LINKID:
+      return _("NT_VMS_LINKID (link id)");
+    case NT_VMS_IMGBID:
+      return _("NT_VMS_IMGBID (build id)");
+    case NT_VMS_GSTNAM:
+      return _("NT_VMS_GSTNAM (sym table name)");
+    case NT_VMS_ORIG_DYN:
+      return _("NT_VMS_ORIG_DYN");
+    case NT_VMS_PATCHTIME:
+      return _("NT_VMS_PATCHTIME");
+    default:
+      snprintf (buff, sizeof (buff), _("Unknown note type: (0x%08x)"), e_type);
+      return buff;
+    }
+}
+
+static int
+print_ia64_vms_note (Elf_Internal_Note * pnote)
+{
+  switch (pnote->type)
+    {
+    case NT_VMS_MHD:
+      if (pnote->descsz > 36)
+        {
+          size_t l = strlen (pnote->descdata + 34);
+          printf (_("    Creation date  : %.17s\n"), pnote->descdata);
+          printf (_("    Last patch date: %.17s\n"), pnote->descdata + 17);
+          printf (_("    Module name    : %s\n"), pnote->descdata + 34);
+          printf (_("    Module version : %s\n"), pnote->descdata + 34 + l + 1);
+        }
+      else
+        printf (_("    Invalid size\n"));
+      break;
+    case NT_VMS_LNM:
+      printf (_("   Language: %s\n"), pnote->descdata);
+      break;
+#ifdef BFD64
+    case NT_VMS_FPMODE:
+      printf (_("   FP mode: 0x%016" BFD_VMA_FMT "x\n"),
+              (bfd_vma)byte_get ((unsigned char *)pnote->descdata, 8));
+      break;
+    case NT_VMS_LINKTIME:
+      printf (_("   Link time: "));
+      print_vms_time
+        ((bfd_int64_t) byte_get ((unsigned char *)pnote->descdata, 8));
+      printf ("\n");
+      break;
+    case NT_VMS_PATCHTIME:
+      printf (_("   Patch time: "));
+      print_vms_time
+        ((bfd_int64_t) byte_get ((unsigned char *)pnote->descdata, 8));
+      printf ("\n");
+      break;
+    case NT_VMS_ORIG_DYN:
+      printf (_("   Major id: %u,  minor id: %u\n"),
+              (unsigned) byte_get ((unsigned char *)pnote->descdata, 4),
+              (unsigned) byte_get ((unsigned char *)pnote->descdata + 4, 4));
+      printf (_("   Manip date  : "));
+      print_vms_time
+        ((bfd_int64_t) byte_get ((unsigned char *)pnote->descdata + 8, 8));
+      printf (_("\n"
+                "   Link flags  : 0x%016" BFD_VMA_FMT "x\n"),
+              (bfd_vma)byte_get ((unsigned char *)pnote->descdata + 16, 8));
+      printf (_("   Header flags: 0x%08x\n"),
+              (unsigned)byte_get ((unsigned char *)pnote->descdata + 24, 4));
+      printf (_("   Image id    : %s\n"), pnote->descdata + 32);
+      break;
+#endif
+    case NT_VMS_IMGNAM:
+      printf (_("    Image name: %s\n"), pnote->descdata);
+      break;
+    case NT_VMS_GSTNAM:
+      printf (_("    Global symbol table name: %s\n"), pnote->descdata);
+      break;
+    case NT_VMS_IMGID:
+      printf (_("    Image id: %s\n"), pnote->descdata);
+      break;
+    case NT_VMS_LINKID:
+      printf (_("    Linker id: %s\n"), pnote->descdata);
+      break;
+    default:
+      break;
+    }
+  return 1;
+}
+
 /* Note that by the ELF standard, the name field is already null byte
    terminated, and namesz includes the terminating null byte.
    I.E. the value of namesz for the name "FSF" is 4.
@@ -12079,13 +12190,21 @@ process_note (Elf_Internal_Note * pnote)
       name = "SPU";
     }
 
+  else if (const_strneq (pnote->namedata, "IPF/VMS"))
+    /* VMS/ia64-specific file notes.  */
+    nt = get_ia64_vms_note_type (pnote->type);
+
   else
     /* Don't recognize this note name; just use the default set of
        note type strings.  */
-      nt = get_note_type (pnote->type);
+    nt = get_note_type (pnote->type);
 
-  printf ("  %s\t\t0x%08lx\t%s\n", name, pnote->descsz, nt);
-  return 1;
+  printf ("  %-10s\t0x%08lx\t%s\n", name, pnote->descsz, nt);
+
+  if (const_strneq (pnote->namedata, "IPF/VMS"))
+    return print_ia64_vms_note (pnote);
+  else
+    return 1;
 }
 
 
@@ -12116,14 +12235,32 @@ process_corefile_note_segment (FILE * file, bfd_vma offset, bfd_vma length)
       Elf_Internal_Note inote;
       char * temp = NULL;
 
-      inote.type     = BYTE_GET (external->type);
-      inote.namesz   = BYTE_GET (external->namesz);
-      inote.namedata = external->name;
-      inote.descsz   = BYTE_GET (external->descsz);
-      inote.descdata = inote.namedata + align_power (inote.namesz, 2);
-      inote.descpos  = offset + (inote.descdata - (char *) pnotes);
+      if (!is_ia64_vms ())
+        {
+          inote.type     = BYTE_GET (external->type);
+          inote.namesz   = BYTE_GET (external->namesz);
+          inote.namedata = external->name;
+          inote.descsz   = BYTE_GET (external->descsz);
+          inote.descdata = inote.namedata + align_power (inote.namesz, 2);
+          inote.descpos  = offset + (inote.descdata - (char *) pnotes);
 
-      next = (Elf_External_Note *) (inote.descdata + align_power (inote.descsz, 2));
+          next = (Elf_External_Note *) (inote.descdata + align_power (inote.descsz, 2));
+        }
+      else
+        {
+          Elf64_External_VMS_Note *vms_external;
+
+          vms_external = (Elf64_External_VMS_Note *)external;
+          inote.type     = BYTE_GET (vms_external->type);
+          inote.namesz   = BYTE_GET (vms_external->namesz);
+          inote.namedata = vms_external->name;
+          inote.descsz   = BYTE_GET (vms_external->descsz);
+          inote.descdata = inote.namedata + align_power (inote.namesz, 3);
+          inote.descpos  = offset + (inote.descdata - (char *) pnotes);
+
+          next = (Elf_External_Note *)
+            (inote.descdata + align_power (inote.descsz, 3));
+        }
 
       if (   ((char *) next > ((char *) pnotes) + length)
 	  || ((char *) next <  (char *) pnotes))
