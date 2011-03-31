@@ -1637,6 +1637,19 @@ booke_remove_point (struct ppc_hw_breakpoint *b, int tid)
   hw_breaks[i].hw_break = NULL;
 }
 
+/* Return the number of registers needed for a ranged breakpoint.  */
+
+static int
+ppc_linux_ranged_break_num_registers (struct target_ops *target)
+{
+  return ((have_ptrace_booke_interface ()
+	   && booke_debug_info.features & PPC_DEBUG_FEATURE_INSN_BP_RANGE)?
+	  2 : -1);
+}
+
+/* Insert the hardware breakpoint described by BP_TGT.  Returns 0 for
+   success, 1 if hardware breakpoints are not supported or -1 for failure.  */
+
 static int
 ppc_linux_insert_hw_breakpoint (struct gdbarch *gdbarch,
 				  struct bp_target_info *bp_tgt)
@@ -1650,11 +1663,23 @@ ppc_linux_insert_hw_breakpoint (struct gdbarch *gdbarch,
 
   p.version = PPC_DEBUG_CURRENT_VERSION;
   p.trigger_type = PPC_BREAKPOINT_TRIGGER_EXECUTE;
-  p.addr_mode = PPC_BREAKPOINT_MODE_EXACT;
   p.condition_mode = PPC_BREAKPOINT_CONDITION_NONE;
   p.addr = (uint64_t) bp_tgt->placed_address;
-  p.addr2 = 0;
   p.condition_value = 0;
+
+  if (bp_tgt->length)
+    {
+      p.addr_mode = PPC_BREAKPOINT_MODE_RANGE_INCLUSIVE;
+
+      /* The breakpoint will trigger if the address of the instruction is
+	 within the defined range, as follows: p.addr <= address < p.addr2.  */
+      p.addr2 = (uint64_t) bp_tgt->placed_address + bp_tgt->length;
+    }
+  else
+    {
+      p.addr_mode = PPC_BREAKPOINT_MODE_EXACT;
+      p.addr2 = 0;
+    }
 
   ALL_LWPS (lp, ptid)
     booke_insert_point (&p, TIDGET (ptid));
@@ -1675,11 +1700,23 @@ ppc_linux_remove_hw_breakpoint (struct gdbarch *gdbarch,
 
   p.version = PPC_DEBUG_CURRENT_VERSION;
   p.trigger_type = PPC_BREAKPOINT_TRIGGER_EXECUTE;
-  p.addr_mode = PPC_BREAKPOINT_MODE_EXACT;
   p.condition_mode = PPC_BREAKPOINT_CONDITION_NONE;
   p.addr = (uint64_t) bp_tgt->placed_address;
-  p.addr2 = 0;
   p.condition_value = 0;
+
+  if (bp_tgt->length)
+    {
+      p.addr_mode = PPC_BREAKPOINT_MODE_RANGE_INCLUSIVE;
+
+      /* The breakpoint will trigger if the address of the instruction is within
+	 the defined range, as follows: p.addr <= address < p.addr2.  */
+      p.addr2 = (uint64_t) bp_tgt->placed_address + bp_tgt->length;
+    }
+  else
+    {
+      p.addr_mode = PPC_BREAKPOINT_MODE_EXACT;
+      p.addr2 = 0;
+    }
 
   ALL_LWPS (lp, ptid)
     booke_remove_point (&p, TIDGET (ptid));
@@ -2392,6 +2429,7 @@ _initialize_ppc_linux_nat (void)
   t->to_watchpoint_addr_within_range = ppc_linux_watchpoint_addr_within_range;
   t->to_can_accel_watchpoint_condition
     = ppc_linux_can_accel_watchpoint_condition;
+  t->to_ranged_break_num_registers = ppc_linux_ranged_break_num_registers;
 
   t->to_read_description = ppc_linux_read_description;
   t->to_auxv_parse = ppc_linux_auxv_parse;

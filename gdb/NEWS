@@ -156,6 +156,12 @@
   libthread_db library with the "set libthread-db-search-path"
   command.  See the user manual for more details on this command.
 
+* When natively debugging programs on PowerPC BookE processors running
+  a Linux kernel version 2.6.34 or later, GDB supports ranged breakpoints,
+  which stop execution of the inferior whenever it executes an instruction
+  at any address within the specified range.  See the "PowerPC Embedded"
+  section in the user manual for more details.
+
 * New features in the GDB remote stub, GDBserver
 
   ** GDBserver is now supported on PowerPC LynxOS (versions 4.x and 5.x),

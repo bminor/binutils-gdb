@@ -532,6 +532,12 @@ extern const char *host_address_to_string (const void *addr);
    This is usually formatted similar to 0x%lx.  */
 extern const char *paddress (struct gdbarch *gdbarch, CORE_ADDR addr);
 
+/* Return a string representation in hexadecimal notation of ADDRESS,
+   which is suitable for printing.  */
+
+extern const char *print_core_address (struct gdbarch *gdbarch,
+				       CORE_ADDR address);
+
 /* %d for LONGEST */
 extern char *plongest (LONGEST l);
 /* %u for ULONGEST */

@@ -492,23 +492,8 @@ ui_out_field_core_addr (struct ui_out *uiout,
 			struct gdbarch *gdbarch,
 			CORE_ADDR address)
 {
-  /* Maximum size string returned by hex_string_custom is 50 chars.
-     This buffer must be bigger than that, for safety.  */
-  char addstr[64];
-  int addr_bit = gdbarch_addr_bit (gdbarch);
-
-  if (addr_bit < (sizeof (CORE_ADDR) * HOST_CHAR_BIT))
-    address &= ((CORE_ADDR) 1 << addr_bit) - 1;
-
-  /* FIXME: cagney/2002-05-03: Need local_address_string() function
-     that returns the language localized string formatted to a width
-     based on gdbarch_addr_bit.  */
-  if (addr_bit <= 32)
-    strcpy (addstr, hex_string_custom (address, 8));
-  else
-    strcpy (addstr, hex_string_custom (address, 16));
-
-  ui_out_field_string (uiout, fldname, addstr);
+  ui_out_field_string (uiout, fldname,
+		       print_core_address (gdbarch, address));
 }
 
 void

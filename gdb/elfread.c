@@ -1011,7 +1011,7 @@ elf_gnu_ifunc_resolver_return_stop (struct breakpoint *b)
   struct value *value;
   CORE_ADDR resolved_address, resolved_pc;
   struct symtab_and_line sal;
-  struct symtabs_and_lines sals;
+  struct symtabs_and_lines sals, sals_end;
 
   gdb_assert (b->type == bp_gnu_ifunc_resolver_return);
 
@@ -1050,9 +1050,10 @@ elf_gnu_ifunc_resolver_return_stop (struct breakpoint *b)
   sal = find_pc_line (resolved_pc, 0);
   sals.nelts = 1;
   sals.sals = &sal;
+  sals_end.nelts = 0;
 
   b->type = bp_breakpoint;
-  update_breakpoint_locations (b, sals);
+  update_breakpoint_locations (b, sals, sals_end);
 }
 
 struct build_id

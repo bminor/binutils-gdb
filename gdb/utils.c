@@ -3224,6 +3224,25 @@ paddress (struct gdbarch *gdbarch, CORE_ADDR addr)
   return hex_string (addr);
 }
 
+/* This function is described in "defs.h".  */
+
+const char *
+print_core_address (struct gdbarch *gdbarch, CORE_ADDR address)
+{
+  int addr_bit = gdbarch_addr_bit (gdbarch);
+
+  if (addr_bit < (sizeof (CORE_ADDR) * HOST_CHAR_BIT))
+    address &= ((CORE_ADDR) 1 << addr_bit) - 1;
+
+  /* FIXME: cagney/2002-05-03: Need local_address_string() function
+     that returns the language localized string formatted to a width
+     based on gdbarch_addr_bit.  */
+  if (addr_bit <= 32)
+    return hex_string_custom (address, 8);
+  else
+    return hex_string_custom (address, 16);
+}
+
 static char *
 decimal2str (char *sign, ULONGEST addr, int width)
 {

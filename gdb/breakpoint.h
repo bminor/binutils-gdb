@@ -231,6 +231,10 @@ struct bp_target_info
      is used to determine the type of breakpoint to insert.  */
   CORE_ADDR placed_address;
 
+  /* If this is a ranged breakpoint, then this field contains the
+     length of the range that will be watched for execution.  */
+  int length;
+
   /* If the breakpoint lives in memory and reading that memory would
      give back the breakpoint, instead of the original contents, then
      the original contents are cached here.  Only SHADOW_LEN bytes of
@@ -339,7 +343,8 @@ struct bp_location
   CORE_ADDR address;
 
   /* For hardware watchpoints, the size of the memory region being
-     watched.  */
+     watched.  For hardware ranged breakpoints, the size of the
+     breakpoint range.  */
   int length;
 
   /* Type of hardware watchpoint.  */
@@ -397,7 +402,8 @@ struct breakpoint_ops
 
   /* Return non-zero if the debugger should tell the user that this
      breakpoint was hit.  */
-  int (*breakpoint_hit) (struct breakpoint *);
+  int (*breakpoint_hit) (const struct bp_location *, struct address_space *,
+			 CORE_ADDR);
 
   /* Tell how many hardware resources (debug registers) are needed
      for this breakpoint.  If this function is not provided, then
@@ -411,6 +417,20 @@ struct breakpoint_ops
   /* Display information about this breakpoint, for "info
      breakpoints".  */
   void (*print_one) (struct breakpoint *, struct bp_location **);
+
+  /* Display extra information about this breakpoint, below the normal
+     breakpoint description in "info breakpoints".
+
+     In the example below, the "address range" line was printed
+     by print_one_detail_ranged_breakpoint.
+
+     (gdb) info breakpoints
+     Num     Type           Disp Enb Address    What
+     2       hw breakpoint  keep y              in main at test-watch.c:70
+	     address range: [0x10000458, 0x100004c7]
+
+   */
+  void (*print_one_detail) (const struct breakpoint *, struct ui_out *);
 
   /* Display information about this breakpoint after setting it
      (roughly speaking; this is called from "mention").  */
@@ -502,6 +522,11 @@ struct breakpoint
 
     /* String we used to set the breakpoint (malloc'd).  */
     char *addr_string;
+
+    /* For a ranged breakpoint, the string we used to find
+       the end of the range (malloc'd).  */
+    char *addr_string_range_end;
+
     /* Architecture we used to set the breakpoint.  */
     struct gdbarch *gdbarch;
     /* Language we used to set the breakpoint.  */
@@ -904,7 +929,8 @@ extern int breakpoint_thread_match (struct address_space *,
 extern void until_break_command (char *, int, int);
 
 extern void update_breakpoint_locations (struct breakpoint *b,
-					 struct symtabs_and_lines sals);
+					 struct symtabs_and_lines sals,
+					 struct symtabs_and_lines sals_end);
 
 extern void breakpoint_re_set (void);
 

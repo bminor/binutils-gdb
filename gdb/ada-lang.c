@@ -10925,6 +10925,7 @@ static struct breakpoint_ops catch_exception_breakpoint_ops =
   NULL, /* resources_needed */
   print_it_catch_exception,
   print_one_catch_exception,
+  NULL, /* print_one_detail */
   print_mention_catch_exception,
   print_recreate_catch_exception
 };
@@ -10964,6 +10965,7 @@ static struct breakpoint_ops catch_exception_unhandled_breakpoint_ops = {
   NULL, /* resources_needed */
   print_it_catch_exception_unhandled,
   print_one_catch_exception_unhandled,
+  NULL, /* print_one_detail */
   print_mention_catch_exception_unhandled,
   print_recreate_catch_exception_unhandled
 };
@@ -11001,6 +11003,7 @@ static struct breakpoint_ops catch_assert_breakpoint_ops = {
   NULL, /* resources_needed */
   print_it_catch_assert,
   print_one_catch_assert,
+  NULL, /* print_one_detail */
   print_mention_catch_assert,
   print_recreate_catch_assert
 };

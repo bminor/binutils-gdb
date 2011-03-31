@@ -594,6 +594,7 @@ update_current_target (void)
       INHERIT (to_can_use_hw_breakpoint, t);
       INHERIT (to_insert_hw_breakpoint, t);
       INHERIT (to_remove_hw_breakpoint, t);
+      /* Do not inherit to_ranged_break_num_registers.  */
       INHERIT (to_insert_watchpoint, t);
       INHERIT (to_remove_watchpoint, t);
       INHERIT (to_stopped_data_address, t);
@@ -3489,6 +3490,21 @@ target_verify_memory (const gdb_byte *data, CORE_ADDR memaddr, ULONGEST size)
     }
 
   tcomplain ();
+}
+
+/* The documentation for this function is in its prototype declaration
+   in target.h.  */
+
+int
+target_ranged_break_num_registers (void)
+{
+  struct target_ops *t;
+
+  for (t = current_target.beneath; t != NULL; t = t->beneath)
+    if (t->to_ranged_break_num_registers != NULL)
+      return t->to_ranged_break_num_registers (t);
+
+  return -1;
 }
 
 static void

@@ -1,3 +1,9 @@
+2011-03-31  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+	    Sergio Durigan Junior  <sergiodj@linux.vnet.ibm.com>
+
+	Implement support for PowerPC BookE ranged breakpoints.
+	* gdb.texinfo (PowerPC Embedded): Document ranged breakpoints.
+
 2011-03-28  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (Set Tracepoints): Fix typo.
@@ -9,7 +15,7 @@
 
 2011-03-18  Phil Muldoon  <pmuldoon@redhat.com>
 
-        PR python/12149
+	PR python/12149
 
 	* gdb.texinfo (Basic Python): Update gdb.write and flush text.
 

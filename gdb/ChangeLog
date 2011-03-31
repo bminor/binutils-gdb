@@ -1,3 +1,68 @@
+2011-03-31  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+	    Sergio Durigan Junior  <sergiodj@linux.vnet.ibm.com>
+
+	Implement support for PowerPC BookE ranged breakpoints.
+	* NEWS: Mention support for ranged breakpoints on embedded PowerPC.
+	* breakpoint.h (struct bp_target_info) <length>: New member
+	variable.
+	(struct breakpoint_ops) <breakpoint_hit>: Take struct bp_location
+	instead of struct breakpoint as argument, and also add ASPACE
+	and BP_ADDR arguments.  Update all callers.
+	(struct breakpoint_ops) <print_one_detail>: New method.
+	(struct breakpoint) <addr_string_range_end>: New member variable.
+	* breakpoint.c (breakpoint_location_address_match): Add function
+	prototype.
+	(insert_bp_location): Set bl->target_info.length.
+	(breakpoint_here_p): Call breakpoint_location_address_match.
+	(moribund_breakpoint_here_p): Likewise.
+	(regular_breakpoint_inserted_here_p): Likewise.
+	(breakpoint_thread_match): Likewise.
+	(bpstat_stop_status): Likewise.
+	(bpstat_check_location): Move call to
+	breakpoint_ops.breakpoint_hit to the top.
+	(print_one_breakpoint_location): Call
+	breakpoint_ops.print_one_detail if available.
+	(breakpoint_address_match_range): New function.
+	(breakpoint_location_address_match): Likewise.
+	(breakpoint_locations_match): Compare the length field of the
+	locations too.
+	(hw_breakpoint_used_count): Count resources used by all locations
+	in a breakpoint, and use breakpoint_ops.resources_needed if
+	available.
+	(breakpoint_hit_ranged_breakpoint): New function.
+	(resources_needed_ranged_breakpoint): Likewise.
+	(print_it_ranged_breakpoint): Likewise.
+	(print_one_ranged_breakpoint): Likewise.
+	(print_one_detail_ranged_breakpoint): Likewise.
+	(print_mention_ranged_breakpoint): Likewise.
+	(print_recreate_ranged_breakpoint): Likewise.
+	(ranged_breakpoint_ops): New structure.
+	(find_breakpoint_range_end): New function.
+	(break_range_command): Likewise.
+	(delete_breakpoint): Free addr_string_range_end.
+	(update_breakpoint_locations): Add SALS_END argument.  Update
+	all callers.  Calculate breakpoint length if a non-zero SALS_END
+	is given.  Call breakpoint_locations_match instead of
+	breakpoint_address_match.
+	(reset_breakpoint): Find SaL of the end of the range if B is a
+	ranged breakpoint.
+	(_initialize_breakpoint): Register break-range command.
+	* defs.h (print_core_address): Add function prototype.
+	* ppc-linux-nat.c (ppc_linux_ranged_break_num_registers): New
+	function.
+	(ppc_linux_insert_hw_breakpoint): Support ranged breakpoints.
+	(ppc_linux_remove_hw_breakpoint): Likewise.
+	(_initialize_ppc_linux_nat): Initialize
+	to_ranged_break_num_registers.
+	* target.c (update_current_target): Add comment about
+	to_ranged_break_num_registers.
+	(target_ranged_break_num_registers): New function.
+	* target.h (struct target_ops) <to_ranged_break_num_registers>:
+	New method.
+	(target_ranged_break_num_registers): Add function prototype.
+	* ui-out.c (ui_out_field_core_addr): Move address-printing logic to ...
+	* utils.c (print_core_address): ... here.
+
 2011-03-31  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* breakpoint.c (addr_string_to_sals): Avoid uninitialized

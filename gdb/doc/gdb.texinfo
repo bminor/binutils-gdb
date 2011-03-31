@@ -18742,9 +18742,27 @@ region using one of the following commands (@pxref{Expressions}):
 (@value{GDBP}) watch @{char[@var{length}]@} @var{address}
 @end smallexample
 
+@cindex ranged breakpoint
+PowerPC embedded processors support hardware accelerated
+@dfn{ranged breakpoints}.  A ranged breakpoint stops execution of
+the inferior whenever it executes an instruction at any address within
+the range it specifies.  To set a ranged breakpoint in @value{GDBN},
+use the @code{break-range} command.
+
 @value{GDBN} provides the following PowerPC-specific commands:
 
 @table @code
+@kindex break-range
+@item break-range @var{start-location}, @var{end-location}
+Set a breakpoint for an address range.
+@var{start-location} and @var{end-location} can specify a function name,
+a line number, an offset of lines from the current line or from the start
+location, or an address of an instruction (see @ref{Specify Location},
+for a list of all the possible ways to specify a @var{location}.)
+The breakpoint will stop execution of the inferior whenever it
+executes an instruction at any address within the specified range,
+(including @var{start-location} and @var{end-location}.)
+
 @kindex set powerpc
 @item set powerpc soft-float
 @itemx show powerpc soft-float

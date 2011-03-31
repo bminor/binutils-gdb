@@ -450,6 +450,7 @@ struct target_ops
     int (*to_insert_breakpoint) (struct gdbarch *, struct bp_target_info *);
     int (*to_remove_breakpoint) (struct gdbarch *, struct bp_target_info *);
     int (*to_can_use_hw_breakpoint) (int, int, int);
+    int (*to_ranged_break_num_registers) (struct target_ops *);
     int (*to_insert_hw_breakpoint) (struct gdbarch *, struct bp_target_info *);
     int (*to_remove_hw_breakpoint) (struct gdbarch *, struct bp_target_info *);
 
@@ -1353,6 +1354,11 @@ extern char *target_thread_name (struct thread_info *);
 
 #define target_remove_hw_breakpoint(gdbarch, bp_tgt) \
      (*current_target.to_remove_hw_breakpoint) (gdbarch, bp_tgt)
+
+/* Return number of debug registers needed for a ranged breakpoint,
+   or -1 if ranged breakpoints are not supported.  */
+
+extern int target_ranged_break_num_registers (void);
 
 /* Return non-zero if target knows the data address which triggered this
    target_stopped_by_watchpoint, in such case place it to *ADDR_P.  Only the
