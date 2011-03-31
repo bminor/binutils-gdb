@@ -1,3 +1,10 @@
+2011-03-31  Tristan Gingold  <gingold@adacore.com>
+
+	* vms-alpha.c (vms_get_remaining_object_record): Fix dec-c warning.
+	(_bfd_vms_write_etir): Ditto.
+	(_bfd_vms_slurp_etir): Avoid to use intptr_t
+	* configure.com: Generate bfd_stdint.h
+
 2011-03-31  Bernd Schmidt  <bernds@codesourcery.com>
 
 	* elf32-tic6x.h (struct elf32_tic6x_params): New.

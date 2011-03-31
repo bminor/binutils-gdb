@@ -257,6 +257,13 @@ $DECK
 $  EOD
 $!
 $!
+$! create bfd_stdint.h
+$!
+$ write sys$output "Generate `bfd_stdint.h'"
+$ create []bfd_stdint.h
+#include <inttypes.h>
+$!
+$!
 $! create targmatch.h
 $!
 $ write sys$output "Generate `targmatch.h'"

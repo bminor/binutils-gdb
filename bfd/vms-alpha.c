@@ -801,7 +801,7 @@ vms_get_remaining_object_record (bfd *abfd, int read_so_far)
   /* Extract record size.  */
   PRIV (recrd.rec_size) = bfd_getl16 (PRIV (recrd.rec) + 2);
 
-  if (PRIV (recrd.rec_size) <= 0)
+  if (PRIV (recrd.rec_size) == 0)
     {
       bfd_set_error (bfd_error_file_truncated);
       return 0;
@@ -1709,7 +1709,7 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
 #if VMS_DEBUG
       _bfd_vms_debug (4, "etir: %s(%d)\n",
                       _bfd_vms_etir_name (cmd), cmd);
-      _bfd_hexdump (8, ptr, cmd_length - 4, (intptr_t) ptr);
+      _bfd_hexdump (8, ptr, cmd_length - 4, 0);
 #endif
 
       switch (cmd)
@@ -3752,7 +3752,7 @@ _bfd_vms_write_etir (bfd * abfd, int objtype ATTRIBUTE_UNUSED)
 	  int pass2_in_progress = 0;
 	  unsigned int irel;
 
-	  if (section->reloc_count <= 0)
+	  if (section->reloc_count == 0)
 	    (*_bfd_error_handler)
 	      (_("SEC_RELOC with no relocs in section %s"), section->name);
 
