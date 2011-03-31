@@ -53,6 +53,9 @@ class ContainerPrinter:
     def children(self):
         return self._iterator(self.val['elements'], self.val['len'])
 
+# Flag to make NoStringContainerPrinter throw an exception.
+exception_flag = False
+
 # Test a printer where to_string is None
 class NoStringContainerPrinter:
     class _iterator:
@@ -67,6 +70,8 @@ class NoStringContainerPrinter:
         def next(self):
             if self.pointer == self.end:
                 raise StopIteration
+            if exception_flag:
+                raise gdb.MemoryError, 'hi bob'
             result = self.pointer
             self.pointer = self.pointer + 1
             return ('[%d]' % int (result - self.start), result.dereference())

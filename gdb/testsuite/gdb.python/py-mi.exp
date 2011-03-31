@@ -274,4 +274,13 @@ mi_gdb_test "-var-set-visualizer nscont gdb.default_visualizer" \
   "\\^done" \
   "choose default visualizer"
 
+mi_gdb_test "python exception_flag = True" ""
+
+mi_create_dynamic_varobj nstype2 nstype2 \
+  "create nstype2 varobj"
+
+mi_list_varobj_children nstype2 {
+    { {nstype2.<error at 0>} {<error at 0>} 6 {char \[6\]} }
+} "list children after setting exception flag"
+
 remote_file host delete ${remote_python_file}

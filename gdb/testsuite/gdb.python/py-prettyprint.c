@@ -212,7 +212,7 @@ main ()
   const struct string_repr cstring = { { "const string" } };
   /* Clearing by being `static' could invoke an other GDB C++ bug.  */
   struct nullstr nullstr;
-  nostring_type nstype;
+  nostring_type nstype, nstype2;
   struct ns ns, ns2;
   struct lazystring estring, estring2;
 
@@ -283,5 +283,7 @@ main ()
   nstype.elements[1] = 42;
   nstype.len = 2;
   
+  nstype2 = nstype;
+
   return 0;      /* break to inspect struct and union */
 }
