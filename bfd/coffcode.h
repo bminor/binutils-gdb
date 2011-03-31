@@ -4896,6 +4896,11 @@ coff_slurp_symbol_table (bfd * abfd)
 		  && src->u.syment.n_value == 0
 		  && src->u.syment.n_scnum == 0)
 		break;
+#ifdef RS6000COFF_C
+              /* XCOFF specific: deleted entry.  */
+              if (src->u.syment.n_value == C_NULL_VALUE)
+                break;
+#endif
 	      /* Fall through.  */
 	    case C_EXTDEF:	/* External definition.  */
 	    case C_ULABEL:	/* Undefined label.  */

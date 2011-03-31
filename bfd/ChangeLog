@@ -1,4 +1,9 @@
-2011-03-30  Tristan Gingold  <gingold@adacore.com>
+2011-03-31  Tristan Gingold  <gingold@adacore.com>
+
+	* coffcode.h (coff_slurp_symbol_table): Silently discard C_NULL
+	entry on xcoff when value is C_NULL_VALUE.
+
+2011-03-31  Tristan Gingold  <gingold@adacore.com>
 
 	* libcoff-in.h (exec_hdr): Remove.
 	* libcoff.h: Regenerate.
