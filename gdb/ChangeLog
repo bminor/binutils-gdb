@@ -1,3 +1,8 @@
+2011-04-01  Ulrich Weigand  <ulrich.weigand@linaro.org>
+
+	* arm-tdep.c (arm_gdbarch_init): Enfore correct register number
+	for "fpscr" in target description.
+
 2011-04-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* dwarf2read.c (find_slot_in_mapped_hash): New variable back_to,
