@@ -1,3 +1,7 @@
+2011-04-01  Tristan Gingold  <gingold@adacore.com>
+
+	* elfxx-ia64.c: include bfd_stdint.h
+
 2011-03-31  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* elf32-tic6x.c (elf32_tic6x_relocate_section): Remove unused variable
