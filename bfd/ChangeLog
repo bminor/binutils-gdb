@@ -1,3 +1,9 @@
+2011-03-26  John Marino  <binutils@marino.st>
+
+	* config.bfd: Add x86_64-*-dragonfly*, fix i386-*-dragonfly*.
+	* configure.in: Delete unused bfd_elf32_i386_dragonfly_vec.
+	* configure: Regenerate.
+
 2011-03-24  Alan Modra  <amodra@gmail.com>
 
 	* elf32-ppc.c (ppc_elf_tls_optimize): Catch more cases where

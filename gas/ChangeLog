@@ -1,3 +1,9 @@
+2011-03-26  John Marino  <binutils@marino.st>
+
+	* configure.tgt: Fix support for *-*-dragonfly*.
+	* config/tc-i386.c: define SVR4_COMMENT_CHARS for dragonfly.
+	* config/te-dragonfly.h: New file.
+
 2010-11-25  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
 
 	* config/tc-s390.c (current_cpu): Initialize with latest CPU.
