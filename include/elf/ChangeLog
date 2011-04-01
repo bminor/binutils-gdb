@@ -1,17 +1,3 @@
-2011-03-31  Bernd Schmidt  <bernds@codesourcery.com>
-
-	* tic6x.h (R_C6000_JUMP_SPLOT, R_C6000_EHTYPE,
-	R_C6000_PCR_H16, R_C6000_PCR_L16): New relocs.
-	(SHN_TIC6X_SCOMMON): Define.
-
-2011-03-31  Tristan Gingold  <gingold@adacore.com>
-
-	* ia64.h (Elf64_External_VMS_Note): New struct.
-	(NT_VMS_MHD, NT_VMS_LNM, NT_VMS_SRC, NT_VMS_TITLE, NT_VMS_EIDC)
-	(NT_VMS_FPMODE, NT_VMS_LINKTIME, NT_VMS_IMGNAM, NT_VMS_IMGID)
-	(NT_VMS_LINKID, NT_VMS_IMGBID, NT_VMS_GSTNAM, NT_VMS_ORIG_DYN)
-	(NT_VMS_PATCHTIME) New macros.
-
 2011-03-14  Richard Sandiford  <richard.sandiford@linaro.org>
 
 	* arm.h (R_ARM_IRELATIVE): New relocation.
