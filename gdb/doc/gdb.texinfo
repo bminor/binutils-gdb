@@ -24947,6 +24947,7 @@ follow development on @email{gdb@@sourceware.org} and
 * GDB/MI Async Records::
 * GDB/MI Frame Information::
 * GDB/MI Thread Information::
+* GDB/MI Ada Exception Information
 @end menu
 
 @node GDB/MI Result Records
@@ -25212,6 +25213,13 @@ The value of this field is an integer number of the processor core the
 thread was last seen on.  This field is optional.
 @end table
 
+@node GDB/MI Ada Exception Information
+@subsection @sc{gdb/mi} Ada Exception Information
+
+Whenever a @code{*stopped} record is emitted because the program
+stopped after hitting an exception catchpoint (@pxref{Set Catchpoints}),
+@value{GDBN} provides the name of the exception that was raised via
+the @code{exception-name} field.
 
 @c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 @node GDB/MI Simple Examples

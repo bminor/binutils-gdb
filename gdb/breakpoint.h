@@ -961,6 +961,10 @@ extern void breakpoint_auto_delete (bpstat);
    is hit.  */
 extern struct command_line *breakpoint_commands (struct breakpoint *b);
 
+/* Return a string image of DISP.  The string is static, and thus should
+   NOT be deallocated after use.  */
+const char *bpdisp_text (enum bpdisp disp);
+
 extern void break_command (char *, int);
 
 extern void hbreak_command_wrapper (char *, int);

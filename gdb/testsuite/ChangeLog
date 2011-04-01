@@ -1,3 +1,7 @@
+2011-04-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/mi_catch_ex: New testcase.
+
 2011-04-01  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.cp/cpexprs.exp (Overloaded methods): No longer try the

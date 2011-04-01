@@ -251,7 +251,7 @@ breakpoint_commands (struct breakpoint *b)
 
 static int breakpoint_proceeded;
 
-static const char *
+const char *
 bpdisp_text (enum bpdisp disp)
 {
   /* NOTE: the following values are a part of MI protocol and

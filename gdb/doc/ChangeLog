@@ -1,3 +1,8 @@
+2011-04-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (GDB/MI Ada Exception Information): Document
+	the "exception-name" field in the *stopped async record.
+
 2011-03-31  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 	    Sergio Durigan Junior  <sergiodj@linux.vnet.ibm.com>
 
