@@ -1,3 +1,8 @@
+2011-04-01  Mike Frysinger  <vapier@gentoo.org>
+
+	* dv-bfin_otp.c (bfin_otp_ports): Declare.
+	(bfin_otp_finish): Call set_hw_ports with bfin_otp_ports.
+
 2011-03-29  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure: Regenerate after common/aclocal.m4 changes.

@@ -236,6 +236,12 @@ attach_bfin_otp_regs (struct hw *me, struct bfin_otp *otp)
   otp->base = attach_address;
 }
 
+static const struct hw_port_descriptor bfin_otp_ports[] =
+{
+  { "stat", 0, 0, output_port, },
+  { NULL, 0, 0, 0, },
+};
+
 static void
 bfin_otp_finish (struct hw *me)
 {
@@ -249,6 +255,7 @@ bfin_otp_finish (struct hw *me)
   set_hw_data (me, otp);
   set_hw_io_read_buffer (me, bfin_otp_io_read_buffer);
   set_hw_io_write_buffer (me, bfin_otp_io_write_buffer);
+  set_hw_ports (me, bfin_otp_ports);
 
   attach_bfin_otp_regs (me, otp);
 
