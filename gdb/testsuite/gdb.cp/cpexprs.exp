@@ -196,12 +196,7 @@ add {base::~base} \
     - \
     -
 
-# Overloaded methods (all are const -- we try to use the void
-# method with and without specifying "const")
-add {base::overload(void)} \
-    {int (const base * const)} \
-    - \
-    {base::overload(void) const}
+# Overloaded methods (all are const)
 add {base::overload(void) const} \
     {int (const base * const)} \
     - \
