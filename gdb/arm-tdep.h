@@ -23,6 +23,7 @@
 /* Forward declarations.  */
 struct gdbarch;
 struct regset;
+struct address_space;
 
 /* Register numbers of various important registers.  */
 
