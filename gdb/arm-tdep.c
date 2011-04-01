@@ -133,6 +133,13 @@ static const char *arm_mode_strings[] =
 static const char *arm_fallback_mode_string = "auto";
 static const char *arm_force_mode_string = "auto";
 
+/* Internal override of the execution mode.  -1 means no override,
+   0 means override to ARM mode, 1 means override to Thumb mode.
+   The effect is the same as if arm_force_mode has been set by the
+   user (except the internal override has precedence over a user's
+   arm_force_mode override).  */
+static int arm_override_mode = -1;
+
 /* Number of different reg name sets (options).  */
 static int num_disassembly_options;
 
@@ -356,9 +363,6 @@ arm_find_mapping_symbol (CORE_ADDR memaddr, CORE_ADDR *start)
   return 0;
 }
 
-static CORE_ADDR arm_get_next_pc_raw (struct frame_info *frame, 
-				      CORE_ADDR pc, int insert_bkpt);
-
 /* Determine if the program counter specified in MEMADDR is in a Thumb
    function.  This function should be called for addresses unrelated to
    any executing frame; otherwise, prefer arm_frame_is_thumb.  */
@@ -387,6 +391,10 @@ arm_pc_is_thumb (struct gdbarch *gdbarch, CORE_ADDR memaddr)
   /* If bit 0 of the address is set, assume this is a Thumb address.  */
   if (IS_THUMB_ADDR (memaddr))
     return 1;
+
+  /* Respect internal mode override if active.  */
+  if (arm_override_mode != -1)
+    return arm_override_mode;
 
   /* If the user wants to override the symbol table, let him.  */
   if (strcmp (arm_force_mode_string, "arm") == 0)
@@ -418,29 +426,9 @@ arm_pc_is_thumb (struct gdbarch *gdbarch, CORE_ADDR memaddr)
      target, then trust the current value of $cpsr.  This lets
      "display/i $pc" always show the correct mode (though if there is
      a symbol table we will not reach here, so it still may not be
-     displayed in the mode it will be executed).  
-   
-     As a further heuristic if we detect that we are doing a single-step we
-     see what state executing the current instruction ends up with us being
-     in.  */
+     displayed in the mode it will be executed).  */
   if (target_has_registers)
-    {
-      struct frame_info *current_frame = get_current_frame ();
-      CORE_ADDR current_pc = get_frame_pc (current_frame);
-      int is_thumb = arm_frame_is_thumb (current_frame);
-      CORE_ADDR next_pc;
-      if (memaddr == current_pc)
-	return is_thumb;
-      else
-	{
-	  struct gdbarch *gdbarch = get_frame_arch (current_frame);
-	  next_pc = arm_get_next_pc_raw (current_frame, current_pc, FALSE);
-	  if (memaddr == gdbarch_addr_bits_remove (gdbarch, next_pc))
-	    return IS_THUMB_ADDR (next_pc);
-	  else
-	    return is_thumb;
-	}
-    }
+    return arm_frame_is_thumb (get_current_frame ());
 
   /* Otherwise we're out of luck; we assume ARM.  */
   return 0;
@@ -4216,7 +4204,7 @@ thumb_advance_itstate (unsigned int itstate)
    another breakpoint by our caller.  */
 
 static CORE_ADDR
-thumb_get_next_pc_raw (struct frame_info *frame, CORE_ADDR pc, int insert_bkpt)
+thumb_get_next_pc_raw (struct frame_info *frame, CORE_ADDR pc)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
   struct address_space *aspace = get_frame_address_space (frame);
@@ -4314,8 +4302,8 @@ thumb_get_next_pc_raw (struct frame_info *frame, CORE_ADDR pc, int insert_bkpt)
 
 	      /* Set a breakpoint on the following instruction.  */
 	      gdb_assert ((itstate & 0x0f) != 0);
-	      if (insert_bkpt)
-	        insert_single_step_breakpoint (gdbarch, aspace, pc);
+	      arm_insert_single_step_breakpoint (gdbarch, aspace,
+						 MAKE_THUMB_ADDR (pc));
 	      cond_negated = (itstate >> 4) & 1;
 
 	      /* Skip all following instructions with the same
@@ -4587,8 +4575,7 @@ thumb_get_next_pc_raw (struct frame_info *frame, CORE_ADDR pc, int insert_bkpt)
 }
 
 /* Get the raw next address.  PC is the current program counter, in 
-   FRAME.  INSERT_BKPT should be TRUE if we want a breakpoint set on 
-   the alternative next instruction if there are two options.
+   FRAME, which is assumed to be executing in ARM mode.
 
    The value returned has the execution state of the next instruction 
    encoded in it.  Use IS_THUMB_ADDR () to see whether the instruction is
@@ -4596,7 +4583,7 @@ thumb_get_next_pc_raw (struct frame_info *frame, CORE_ADDR pc, int insert_bkpt)
    address.  */
 
 static CORE_ADDR
-arm_get_next_pc_raw (struct frame_info *frame, CORE_ADDR pc, int insert_bkpt)
+arm_get_next_pc_raw (struct frame_info *frame, CORE_ADDR pc)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -4605,9 +4592,6 @@ arm_get_next_pc_raw (struct frame_info *frame, CORE_ADDR pc, int insert_bkpt)
   unsigned long this_instr;
   unsigned long status;
   CORE_ADDR nextpc;
-
-  if (arm_frame_is_thumb (frame))
-    return thumb_get_next_pc_raw (frame, pc, insert_bkpt);
 
   pc_val = (unsigned long) pc;
   this_instr = read_memory_unsigned_integer (pc, 4, byte_order_for_code);
@@ -4861,16 +4845,49 @@ arm_get_next_pc_raw (struct frame_info *frame, CORE_ADDR pc, int insert_bkpt)
   return nextpc;
 }
 
+/* Determine next PC after current instruction executes.  Will call either
+   arm_get_next_pc_raw or thumb_get_next_pc_raw.  Error out if infinite
+   loop is detected.  */
+
 CORE_ADDR
 arm_get_next_pc (struct frame_info *frame, CORE_ADDR pc)
 {
-  struct gdbarch *gdbarch = get_frame_arch (frame);
-  CORE_ADDR nextpc = 
-    gdbarch_addr_bits_remove (gdbarch, 
-			      arm_get_next_pc_raw (frame, pc, TRUE));
-  if (nextpc == pc)
-    error (_("Infinite loop detected"));
+  CORE_ADDR nextpc;
+
+  if (arm_frame_is_thumb (frame))
+    {
+      nextpc = thumb_get_next_pc_raw (frame, pc);
+      if (nextpc == MAKE_THUMB_ADDR (pc))
+	error (_("Infinite loop detected"));
+    }
+  else
+    {
+      nextpc = arm_get_next_pc_raw (frame, pc);
+      if (nextpc == pc)
+	error (_("Infinite loop detected"));
+    }
+
   return nextpc;
+}
+
+/* Like insert_single_step_breakpoint, but make sure we use a breakpoint
+   of the appropriate mode (as encoded in the PC value), even if this
+   differs from what would be expected according to the symbol tables.  */
+
+void
+arm_insert_single_step_breakpoint (struct gdbarch *gdbarch,
+				   struct address_space *aspace,
+				   CORE_ADDR pc)
+{
+  struct cleanup *old_chain
+    = make_cleanup_restore_integer (&arm_override_mode);
+
+  arm_override_mode = IS_THUMB_ADDR (pc);
+  pc = gdbarch_addr_bits_remove (gdbarch, pc);
+
+  insert_single_step_breakpoint (gdbarch, aspace, pc);
+
+  do_cleanups (old_chain);
 }
 
 /* single_step() is called just before we want to resume the inferior,
@@ -4883,13 +4900,9 @@ arm_software_single_step (struct frame_info *frame)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
   struct address_space *aspace = get_frame_address_space (frame);
-
-  /* NOTE: This may insert the wrong breakpoint instruction when
-     single-stepping over a mode-changing instruction, if the
-     CPSR heuristics are used.  */
-
   CORE_ADDR next_pc = arm_get_next_pc (frame, get_frame_pc (frame));
-  insert_single_step_breakpoint (gdbarch, aspace, next_pc);
+
+  arm_insert_single_step_breakpoint (gdbarch, aspace, next_pc);
 
   return 1;
 }

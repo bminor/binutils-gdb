@@ -669,18 +669,24 @@ arm_linux_regset_from_core_section (struct gdbarch *gdbarch,
 }
 
 /* Copy the value of next pc of sigreturn and rt_sigrturn into PC,
-   and return 1.  Return 0 if it is not a rt_sigreturn/sigreturn
-   syscall.  */
+   return 1.  In addition, set IS_THUMB depending on whether we
+   will return to ARM or Thumb code.  Return 0 if it is not a
+   rt_sigreturn/sigreturn syscall.  */
 static int
 arm_linux_sigreturn_return_addr (struct frame_info *frame,
 				 unsigned long svc_number,
-				 CORE_ADDR *pc)
+				 CORE_ADDR *pc, int *is_thumb)
 {
   /* Is this a sigreturn or rt_sigreturn syscall?  */
   if (svc_number == 119 || svc_number == 173)
     {
       if (get_frame_type (frame) == SIGTRAMP_FRAME)
 	{
+	  ULONGEST t_bit = arm_psr_thumb_bit (frame_unwind_arch (frame));
+	  CORE_ADDR cpsr
+	    = frame_unwind_register_unsigned (frame, ARM_PS_REGNUM);
+
+	  *is_thumb = (cpsr & t_bit) != 0;
 	  *pc = frame_unwind_caller_pc (frame);
 	  return 1;
 	}
@@ -698,11 +704,11 @@ arm_linux_syscall_next_pc (struct frame_info *frame)
   CORE_ADDR return_addr = 0;
   int is_thumb = arm_frame_is_thumb (frame);
   ULONGEST svc_number = 0;
-  int is_sigreturn = 0;
 
   if (is_thumb)
     {
       svc_number = get_frame_register_unsigned (frame, 7);
+      return_addr = pc + 2;
     }
   else
     {
@@ -721,24 +727,15 @@ arm_linux_syscall_next_pc (struct frame_info *frame)
 	{
 	  svc_number = get_frame_register_unsigned (frame, 7);
 	}
-    }
 
-  is_sigreturn = arm_linux_sigreturn_return_addr (frame, svc_number, 
-						  &return_addr);
-
-  if (is_sigreturn)
-    return return_addr;
-  
-  if (is_thumb)
-    {
-      return_addr = pc + 2;
-      /* Addresses for calling Thumb functions have the bit 0 set.  */
-      return_addr |= 1;
-    }
-  else
-    {
       return_addr = pc + 4;
     }
+
+  arm_linux_sigreturn_return_addr (frame, svc_number, &return_addr, &is_thumb);
+
+  /* Addresses for calling Thumb functions have the bit 0 set.  */
+  if (is_thumb)
+    return_addr |= 1;
 
   return return_addr;
 }
@@ -761,7 +758,7 @@ arm_linux_software_single_step (struct frame_info *frame)
   if (next_pc > 0xffff0000)
     next_pc = get_frame_register_unsigned (frame, ARM_LR_REGNUM);
 
-  insert_single_step_breakpoint (gdbarch, aspace, next_pc);
+  arm_insert_single_step_breakpoint (gdbarch, aspace, next_pc);
 
   return 1;
 }
@@ -806,6 +803,7 @@ arm_linux_copy_svc (struct gdbarch *gdbarch, uint32_t insn, CORE_ADDR to,
   struct frame_info *frame;
   unsigned int svc_number = displaced_read_reg (regs, dsc, 7);
   int is_sigreturn = 0;
+  int is_thumb;
 
   if (debug_displaced)
     fprintf_unfiltered (gdb_stdlog, "displaced: copying Linux svc insn %.8lx\n",
@@ -814,7 +812,7 @@ arm_linux_copy_svc (struct gdbarch *gdbarch, uint32_t insn, CORE_ADDR to,
   frame = get_current_frame ();
 
   is_sigreturn = arm_linux_sigreturn_return_addr(frame, svc_number,
-						 &return_to);
+						 &return_to, &is_thumb);
   if (is_sigreturn)
     {
 	  struct symtab_and_line sal;

@@ -1,3 +1,25 @@
+2011-04-01  Ulrich Weigand  <ulrich.weigand@linaro.org>
+
+	* arm-tdep.h (arm_insert_single_step_breakpoint): Add prototype.
+	* arm-tdep.c (arm_override_mode): New global.
+	(arm_pc_is_thumb): Respect arm_override_mode.  Remove single-step
+	execution mode heuristics.
+	(thumb_get_next_pc_raw): Remove INSERT_BKTP argument; always insert
+	second single-step breakpoint if needed, using
+	arm_insert_single_step_breakpoint.
+	(arm_get_next_pc_raw): Remove INSERT_BKTP argument.  Only handle
+	ARM execution mode, do not call thumb_get_next_pc_raw.
+	(arm_get_next_pc): Encode execution mode in return value.  Call
+	either arm_get_next_pc_raw or thumb_get_next_pc_raw.
+	(arm_insert_single_step_breakpoint): New function.
+	(arm_software_single_step): Call it.
+	* arm-linux-tdep.c (arm_linux_sigreturn_return_addr): Add IS_THUMB
+	argument to return execution mode of sigreturn target.
+	(arm_linux_syscall_next_pc): Use it.
+	(arm_linux_copy_svc): Update call.
+	(arm_linux_software_single_step): Call
+	arm_insert_single_step_breakpoint.
+
 2011-03-31  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* dwarf2read.c (dwarf2_read_index): Fix .gdb_index version number in
