@@ -11286,7 +11286,7 @@ md_apply_fix (fixS *fix, valueT *valP, segT seg ATTRIBUTE_UNUSED)
     }
   if (fix->fx_addsy)
     {
-      switch (fix->fx_r_type)
+      switch ((unsigned) fix->fx_r_type)
 	{
 	case BFD_RELOC_UNUSED:
 	  /* This must be a TAG13 or TAG13b operand.  There are no external
