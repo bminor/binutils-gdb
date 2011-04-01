@@ -1,3 +1,8 @@
+2011-04-01  Tom Tromey  <tromey@redhat.com>
+
+	* utils.c (report_command_stats): Don't print `-' for negative
+	number.
+
 2011-04-01  Eric Botcazou  <ebotcazou@adacore.com>
 
 	* ada-lang.c (ada_is_simple_array_type, ada_value_slice_from_ptr)

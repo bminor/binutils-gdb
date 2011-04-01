@@ -657,10 +657,10 @@ report_command_stats (void *arg)
       long space_diff = space_now - start_stats->start_space;
 
       printf_unfiltered (msg_type == 0
-			 ? _("Space used: %ld (%c%ld during startup)\n")
-			 : _("Space used: %ld (%c%ld for this command)\n"),
+			 ? _("Space used: %ld (%s%ld during startup)\n")
+			 : _("Space used: %ld (%s%ld for this command)\n"),
 			 space_now,
-			 (space_diff >= 0 ? '+' : '-'),
+			 (space_diff >= 0 ? "+" : ""),
 			 space_diff);
 #endif
     }
