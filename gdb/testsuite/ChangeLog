@@ -1,5 +1,10 @@
 2011-04-01  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.ada/arrayptr/foo.adb: Add access to constrained array.
+	* gdb.ada/arrayptr.exp: Add new tests.
+
+2011-04-01  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.ada/mi_catch_ex: New testcase.
 
 2011-04-01  Pedro Alves  <pedro@codesourcery.com>
