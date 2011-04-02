@@ -26,7 +26,8 @@
 #include "sim-io.h"
 #include "sim-assert.h"
 
-struct hw_instance_data {
+struct hw_instance_data
+{
   hw_finish_instance_method *to_finish;
   struct hw_instance *instances;
 };

@@ -40,7 +40,8 @@
 
 #include "hw-config.h"
 
-struct hw_base_data {
+struct hw_base_data
+{
   int finished_p;
   const struct hw_descriptor *descriptor;
   hw_delete_callback *to_delete;
@@ -80,14 +81,16 @@ generic_hw_unit_decode (struct hw *bus,
 	    return -1;
 	  unit++;
 	}
-      if (nr_cells < max_nr_cells) {
-	/* shift everything to correct position */
-	int i;
-	for (i = 1; i <= nr_cells; i++)
-	  phys->cells[max_nr_cells - i] = phys->cells[nr_cells - i];
-	for (i = 0; i < (max_nr_cells - nr_cells); i++)
-	  phys->cells[i] = 0;
-      }
+      if (nr_cells < max_nr_cells)
+	{
+	  /* shift everything to correct position */
+	  int i;
+
+	  for (i = 1; i <= nr_cells; i++)
+	    phys->cells[max_nr_cells - i] = phys->cells[nr_cells - i];
+	  for (i = 0; i < (max_nr_cells - nr_cells); i++)
+	    phys->cells[i] = 0;
+	}
       phys->nr_cells = max_nr_cells;
       return max_nr_cells;
   }
@@ -124,10 +127,11 @@ generic_hw_unit_encode (struct hw *bus,
     {
       for (; i < phys->nr_cells; i++)
 	{
-	  if (pos != buf) {
-	    strcat(pos, ",");
-	    pos = strchr(pos, '\0');
-	  }
+	  if (pos != buf)
+	    {
+	      strcat(pos, ",");
+	      pos = strchr(pos, '\0');
+	    }
 	  if (phys->cells[i] < 10)
 	    sprintf (pos, "%ld", (unsigned long)phys->cells[i]);
 	  else

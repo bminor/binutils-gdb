@@ -37,7 +37,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include <ctype.h>
 
 
-struct hw_port_edge {
+struct hw_port_edge
+{
   int my_port;
   struct hw *dest;
   int dest_port;
@@ -45,13 +46,15 @@ struct hw_port_edge {
   object_disposition disposition;
 };
 
-struct hw_port_data {
+struct hw_port_data
+{
   hw_port_event_method *to_port_event;
   const struct hw_port_descriptor *ports;
   struct hw_port_edge *edges;
 };
 
-const struct hw_port_descriptor empty_hw_ports[] = {
+const struct hw_port_descriptor empty_hw_ports[] =
+{
   { NULL, 0, 0, 0 },
 };
 

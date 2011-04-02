@@ -43,7 +43,8 @@
 
 /* manipulate/lookup device names */
 
-typedef struct _name_specifier {
+typedef struct _name_specifier
+{
 
   /* components in the full length name */
   char *path;
@@ -153,18 +154,20 @@ split_device_specifier (struct hw *current,
       /* an interrupt spec */
       spec->property = NULL;
     }
-  else {
-    chp = strrchr(spec->path, '/');
-    if (chp == NULL)
-      {
-	spec->property = spec->path;
-	spec->path = strchr(spec->property, '\0');
-      }
-    else {
-      *chp = '\0';
-      spec->property = chp+1;
+  else
+    {
+      chp = strrchr(spec->path, '/');
+      if (chp == NULL)
+	{
+	  spec->property = spec->path;
+	  spec->path = strchr(spec->property, '\0');
+	}
+      else
+	{
+	  *chp = '\0';
+	  spec->property = chp+1;
+	}
     }
-  }
 
   /* and mark the rest as invalid */
   spec->name = NULL;
@@ -700,11 +703,12 @@ parse_string_property (struct hw *current,
 	  pos = 0;
 	  while (*chp != '\0' && *chp != '"')
 	    {
-	      if (*chp == '\\' && *(chp+1) != '\0') {
-		strings[nr_strings][pos] = *(chp+1);
-		chp += 2;
-		pos++;
-	      }
+	      if (*chp == '\\' && *(chp+1) != '\0')
+		{
+		  strings[nr_strings][pos] = *(chp+1);
+		  chp += 2;
+		  pos++;
+		}
 	      else
 		{
 		  strings[nr_strings][pos] = *chp;
@@ -982,7 +986,8 @@ hw_tree_traverse (struct hw *root,
 
 
 
-struct printer {
+struct printer
+{
   hw_tree_print_callback *print;
   void *file;
 };
@@ -1006,12 +1011,13 @@ print_size (struct hw *bus,
   for (i = 0; i < size->nr_cells; i++)
     if (size->cells[i] != 0)
       break;
-  if (i < size->nr_cells) {
-    p->print (p->file, " 0x%lx", (unsigned long) size->cells[i]);
-    i++;
-    for (; i < size->nr_cells; i++)
-      p->print (p->file, ",0x%lx", (unsigned long) size->cells[i]);
-  }
+  if (i < size->nr_cells)
+    {
+      p->print (p->file, " 0x%lx", (unsigned long) size->cells[i]);
+      i++;
+      for (; i < size->nr_cells; i++)
+	p->print (p->file, ",0x%lx", (unsigned long) size->cells[i]);
+    }
   else
     p->print (p->file, " 0");
 }
@@ -1025,10 +1031,11 @@ print_reg_property (struct hw *me,
   reg_property_spec reg;
   for (reg_nr = 0;
        hw_find_reg_array_property (me, property->name, reg_nr, &reg);
-       reg_nr++) {
-    print_address (hw_parent (me), &reg.address, p);
-    print_size (me, &reg.size, p);
-  }
+       reg_nr++)
+    {
+      print_address (hw_parent (me), &reg.address, p);
+      print_size (me, &reg.size, p);
+    }
 }
 
 static void
@@ -1054,20 +1061,22 @@ print_string (struct hw *me,
 	      struct printer *p)
 {
   p->print (p->file, " \"");
-  while (*string != '\0') {
-    switch (*string) {
-    case '"':
-      p->print (p->file, "\\\"");
-      break;
-    case '\\':
-      p->print (p->file, "\\\\");
-      break;
-    default:
-      p->print (p->file, "%c", *string);
-      break;
+  while (*string != '\0')
+    {
+      switch (*string)
+	{
+	case '"':
+	  p->print (p->file, "\\\"");
+	  break;
+	case '\\':
+	  p->print (p->file, "\\\\");
+	  break;
+	default:
+	  p->print (p->file, "%c", *string);
+	  break;
+	}
+      string++;
     }
-    string++;
-  }
   p->print (p->file, "\"");
 }
 
@@ -1127,10 +1136,11 @@ print_properties (struct hw *me,
 		  {
 		    unsigned8 *w = (unsigned8*)property->array;
 		    p->print (p->file, " [");
-		    while ((char*)w - (char*)property->array < property->sizeof_array) {
-		      p->print (p->file, " 0x%2x", BE2H_1 (*w));
-		      w++;
-		    }
+		    while ((char*)w - (char*)property->array < property->sizeof_array)
+		      {
+			p->print (p->file, " 0x%2x", BE2H_1 (*w));
+			w++;
+		      }
 		  }
 		break;
 	      }

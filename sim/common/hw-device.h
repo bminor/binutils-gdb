@@ -294,7 +294,8 @@ typedef unsigned (hw_dma_write_buffer_method)
    The number of words determined by the number of {address,size}
    cells attributes of the device. */
 
-typedef struct _hw_unit {
+typedef struct _hw_unit
+{
   int nr_cells;
   unsigned_cell cells[4]; /* unused cells are zero */
 } hw_unit;
@@ -399,7 +400,8 @@ extern char *hw_strdup (struct hw *me, const char *str);
 
    */
 
-typedef enum {
+typedef enum
+{
   hw_ioctl_break, /* unsigned_word requested_break */
   hw_ioctl_set_trace, /* void */
   hw_ioctl_create_stack, /* unsigned_word *sp, char **argv, char **envp */
@@ -475,7 +477,8 @@ struct hw_instance_data;
 /* Finally the hardware device - keep your grubby little mits off of
    these internals! :-) */
 
-struct hw {
+struct hw
+{
 
   /* our relatives */
   struct hw *parent_of_hw;

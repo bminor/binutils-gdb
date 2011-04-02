@@ -26,7 +26,8 @@
 /* The following are valid property types.  The property `array' is
    for generic untyped data. */
 
-typedef enum {
+typedef enum
+{
   array_property,
   boolean_property,
 #if 0
@@ -39,7 +40,8 @@ typedef enum {
   string_array_property,
 } hw_property_type;
 
-struct hw_property {
+struct hw_property
+{
   struct hw *owner;
   const char *name;
   hw_property_type type;
@@ -129,7 +131,8 @@ int hw_find_boolean_property
 
 
 #if 0
-typedef struct _ihandle_runtime_property_spec {
+typedef struct _ihandle_runtime_property_spec
+{
   const char *full_path;
 } ihandle_runtime_property_spec;
 
@@ -171,7 +174,8 @@ int hw_find_integer_array_property
 
 
 
-typedef struct _range_property_spec {
+typedef struct _range_property_spec
+{
   hw_unit child_address;
   hw_unit parent_address;
   hw_unit size;
@@ -191,7 +195,8 @@ int hw_find_range_array_property
 
 
 
-typedef struct _reg_property_spec {
+typedef struct _reg_property_spec
+{
   hw_unit address;
   hw_unit size;
 } reg_property_spec;

@@ -27,7 +27,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include <stdlib.h>
 #endif
 
-struct hw_alloc_data {
+struct hw_alloc_data
+{
   void *alloc;
   struct hw_alloc_data *next;
 };
