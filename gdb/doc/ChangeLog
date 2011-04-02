@@ -1,3 +1,8 @@
+2011-04-02  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (GDB/MI Output Records): Fix menu entry for
+	"GDB/MI Ada Exception Information" node.
+
 2011-04-01  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.texinfo (GDB/MI Ada Exception Information): Document

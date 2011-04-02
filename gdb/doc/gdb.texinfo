@@ -24947,7 +24947,7 @@ follow development on @email{gdb@@sourceware.org} and
 * GDB/MI Async Records::
 * GDB/MI Frame Information::
 * GDB/MI Thread Information::
-* GDB/MI Ada Exception Information
+* GDB/MI Ada Exception Information::
 @end menu
 
 @node GDB/MI Result Records
