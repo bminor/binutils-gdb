@@ -153,11 +153,13 @@
    */
 
 
-enum {
+enum
+{
   max_nr_ports = 2048,
 };
 
-enum hw_glue_type {
+enum hw_glue_type
+{
   glue_undefined = 0,
   glue_io,
   glue_and,
@@ -168,7 +170,8 @@ enum hw_glue_type {
   glue_not,
 };
 
-struct hw_glue {
+struct hw_glue
+{
   enum hw_glue_type type;
   int int_number;
   int *input;
@@ -207,6 +210,7 @@ hw_glue_finish (struct hw *me)
   {
     reg_property_spec unit;
     int reg_nr;
+
     /* find a relevant reg entry */
     reg_nr = 0;
     while (hw_find_reg_array_property (me, "reg", reg_nr, &unit)
@@ -215,12 +219,14 @@ hw_glue_finish (struct hw *me)
 					    &glue->sizeof_output,
 					    me))
       reg_nr++;
+
     /* check out the size */
     if (glue->sizeof_output == 0)
       hw_abort (me, "at least one reg property size must be nonzero");
     if (glue->sizeof_output % sizeof (unsigned_word) != 0)
       hw_abort (me, "reg property size must be %ld aligned",
 		(long) sizeof (unsigned_word));
+
     /* and the address */
     hw_unit_address_to_attach_address (hw_parent (me),
 				       &unit.address,
@@ -230,6 +236,7 @@ hw_glue_finish (struct hw *me)
     if (glue->address % (sizeof (unsigned_word) * max_nr_ports) != 0)
       hw_abort (me, "reg property address must be %ld aligned",
 		(long) (sizeof (unsigned_word) * max_nr_ports));
+
     glue->nr_outputs = glue->sizeof_output / sizeof (unsigned_word);
     glue->output = hw_zalloc (me, glue->sizeof_output);
   }
@@ -237,6 +244,7 @@ hw_glue_finish (struct hw *me)
   /* establish the input ports */
   {
     const struct hw_property *ranges;
+
     ranges = hw_find_property (me, "interrupt-ranges");
     if (ranges == NULL)
       {
@@ -250,6 +258,7 @@ hw_glue_finish (struct hw *me)
     else
       {
 	const unsigned_cell *int_range = ranges->array;
+
 	glue->int_number = BE2H_cell (int_range[0]);
 	glue->nr_inputs = BE2H_cell (int_range[1]);
       }
@@ -260,6 +269,7 @@ hw_glue_finish (struct hw *me)
   /* determine our type */
   {
     const char *name = hw_name(me);
+
     if (strcmp (name, "glue") == 0)
       glue->type = glue_io;
     else if (strcmp (name, "glue-and") == 0)
@@ -281,13 +291,17 @@ hw_glue_io_read_buffer (struct hw *me,
 {
   struct hw_glue *glue = (struct hw_glue *) hw_data (me);
   int reg = ((addr - glue->address) / sizeof (unsigned_word)) % glue->nr_outputs;
+
   if (nr_bytes != sizeof (unsigned_word)
       || (addr % sizeof (unsigned_word)) != 0)
     hw_abort (me, "missaligned read access (%d:0x%lx:%d) not supported",
 	      space, (unsigned long)addr, nr_bytes);
-  *(unsigned_word*)dest = H2BE_4(glue->output[reg]);
+
+  *(unsigned_word *)dest = H2BE_4 (glue->output[reg]);
+
   HW_TRACE ((me, "read - port %d (0x%lx), level %d",
 	     reg, (unsigned long) addr, glue->output[reg]));
+
   return nr_bytes;
 }
 
@@ -301,14 +315,19 @@ hw_glue_io_write_buffer (struct hw *me,
 {
   struct hw_glue *glue = (struct hw_glue *) hw_data (me);
   int reg = ((addr - glue->address) / sizeof (unsigned_word)) % max_nr_ports;
+
   if (nr_bytes != sizeof (unsigned_word)
       || (addr % sizeof (unsigned_word)) != 0)
     hw_abort (me, "missaligned write access (%d:0x%lx:%d) not supported",
 	      space, (unsigned long) addr, nr_bytes);
-  glue->output[reg] = H2BE_4 (*(unsigned_word*)source);
+
+  glue->output[reg] = H2BE_4 (*(unsigned_word *)source);
+
   HW_TRACE ((me, "write - port %d (0x%lx), level %d",
 	     reg, (unsigned long) addr, glue->output[reg]));
+
   hw_port_event (me, reg, glue->output[reg]);
+
   return nr_bytes;
 }
 
@@ -321,16 +340,20 @@ hw_glue_port_event (struct hw *me,
 {
   struct hw_glue *glue = (struct hw_glue *) hw_data (me);
   int i;
+
   if (my_port < glue->int_number
       || my_port >= glue->int_number + glue->nr_inputs)
     hw_abort (me, "port %d outside of valid range", my_port);
+
   glue->input[my_port - glue->int_number] = level;
   switch (glue->type)
     {
     case glue_io:
       {
 	int port = my_port % glue->nr_outputs;
+
 	glue->output[port] = level;
+
 	HW_TRACE ((me, "input - port %d (0x%lx), level %d",
 		   my_port,
 		   (unsigned long) glue->address + port * sizeof (unsigned_word),
@@ -342,8 +365,10 @@ hw_glue_port_event (struct hw *me,
 	glue->output[0] = glue->input[0];
 	for (i = 1; i < glue->nr_inputs; i++)
 	  glue->output[0] &= glue->input[i];
+
 	HW_TRACE ((me, "and - port %d, level %d arrived - output %d",
 		   my_port, level, glue->output[0]));
+
 	hw_port_event (me, 0, glue->output[0]);
 	break;
       }
@@ -356,13 +381,15 @@ hw_glue_port_event (struct hw *me,
 }
 
 
-static const struct hw_port_descriptor hw_glue_ports[] = {
+static const struct hw_port_descriptor hw_glue_ports[] =
+{
   { "int", 0, max_nr_ports, 0 },
   { NULL, 0, 0, 0 }
 };
 
 
-const struct hw_descriptor dv_glue_descriptor[] = {
+const struct hw_descriptor dv_glue_descriptor[] =
+{
   { "glue", hw_glue_finish, },
   { "glue-and", hw_glue_finish, },
   { "glue-nand", hw_glue_finish, },

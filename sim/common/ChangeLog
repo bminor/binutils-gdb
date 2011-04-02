@@ -1,5 +1,9 @@
 2011-04-02  Mike Frysinger  <vapier@gentoo.org>
 
+	* dv-glue.c: Fix up style.
+
+2011-04-02  Mike Frysinger  <vapier@gentoo.org>
+
 	* hw-alloc.c (hw_alloc_data): Adjust brace.
 	* hw-base.c (hw_base_data): Likewise.
 	(generic_hw_unit_decode): Fix indentation.
