@@ -1,3 +1,8 @@
+2011-04-03  Joel Brobecker  <brobecker@adacore.com>
+
+	GDB 7.3 branch created (branch timestamp: 2011-04-01 01:00 UTC)
+	* version.in: Bump version to 7.3.50.20110403-cvs.
+
 2011-04-01  Ulrich Weigand  <ulrich.weigand@linaro.org>
 
 	* arm-tdep.c (arm_gdbarch_init): Enfore correct register number
