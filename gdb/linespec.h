@@ -46,6 +46,6 @@ extern void init_linespec_result (struct linespec_result *);
 extern struct symtabs_and_lines
 	decode_line_1 (char **argptr, int funfirstline,
 		       struct symtab *default_symtab, int default_line,
-		       struct linespec_result *canonical, int *not_found_ptr);
+		       struct linespec_result *canonical);
 
 #endif /* defined (LINESPEC_H) */
