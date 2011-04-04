@@ -1,3 +1,12 @@
+2011-04-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/12627
+	* ld-i386/i386.exp: Run pr12627.
+
+	* ld-i386/pr12627.d: New.
+	* ld-i386/pr12627.s: Likewise.
+	* ld-i386/pr12627.t: Likewise.
+
 2011-03-31  Bernd Schmidt  <bernds@codesourcery.com>
 
 	* ld-scripts/crossref.exp: Add CFLAGS for tic6x*-*-*.
