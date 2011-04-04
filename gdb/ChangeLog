@@ -1,5 +1,10 @@
 2011-04-04  Tom Tromey  <tromey@redhat.com>
 
+	* source.c (find_source_lines): Remove LSEEK_NOT_LINEAR code.
+	(source_line_charpos, source_charpos_line): Remove.
+
+2011-04-04  Tom Tromey  <tromey@redhat.com>
+
 	* symtab.h (domain_enum): Split in two...
 	(enum search_domain): New.
 	(search_symbols): Update.
