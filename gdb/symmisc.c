@@ -79,18 +79,6 @@ struct print_symbol_args
 
 static int print_symbol (void *);
 
-/* Free all the storage associated with the struct symtab <- S.  */
-
-void
-free_symtab (struct symtab *s)
-{
-  /* Free source-related stuff.  */
-  if (s->line_charpos != NULL)
-    xfree (s->line_charpos);
-  if (s->fullname != NULL)
-    xfree (s->fullname);
-  xfree (s);
-}
 
 void
 print_symbol_bcache_statistics (void)

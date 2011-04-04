@@ -335,6 +335,32 @@ show_directories_command (struct ui_file *file, int from_tty,
   show_directories_1 (NULL, from_tty);
 }
 
+/* Forget line positions and file names for the symtabs in a
+   particular objfile.  */
+
+void
+forget_cached_source_info_for_objfile (struct objfile *objfile)
+{
+  struct symtab *s;
+
+  ALL_OBJFILE_SYMTABS (objfile, s)
+    {
+      if (s->line_charpos != NULL)
+	{
+	  xfree (s->line_charpos);
+	  s->line_charpos = NULL;
+	}
+      if (s->fullname != NULL)
+	{
+	  xfree (s->fullname);
+	  s->fullname = NULL;
+	}
+
+      if (objfile->sf)
+	objfile->sf->qf->forget_cached_source_info (objfile);
+    }
+}
+
 /* Forget what we learned about line positions in source files, and
    which directories contain them; must check again now since files
    may be found in a different directory now.  */
@@ -349,22 +375,7 @@ forget_cached_source_info (void)
   ALL_PSPACES (pspace)
     ALL_PSPACE_OBJFILES (pspace, objfile)
     {
-      for (s = objfile->symtabs; s != NULL; s = s->next)
-	{
-	  if (s->line_charpos != NULL)
-	    {
-	      xfree (s->line_charpos);
-	      s->line_charpos = NULL;
-	    }
-	  if (s->fullname != NULL)
-	    {
-	      xfree (s->fullname);
-	      s->fullname = NULL;
-	    }
-	}
-
-      if (objfile->sf)
-	objfile->sf->qf->forget_cached_source_info (objfile);
+      forget_cached_source_info_for_objfile (objfile);
     }
 
   last_source_visited = NULL;

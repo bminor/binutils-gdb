@@ -1,5 +1,16 @@
 2011-04-04  Tom Tromey  <tromey@redhat.com>
 
+	* symtab.h (free_symtab): Remove.
+	(forget_cached_source_info_for_objfile): Declare.
+	* symmisc.c (free_symtab): Remove.
+	* source.c (forget_cached_source_info_for_objfile): New function.
+	(forget_cached_source_info): Use it.
+	* objfiles.c (free_objfile): Simplify check before calling
+	clear_current_source_symtab_and_line.  Call
+	forget_cached_source_info_for_objfile.
+
+2011-04-04  Tom Tromey  <tromey@redhat.com>
+
 	* mdebugread.c (psymtab_to_symtab_1): Copy linetable to obstack.
 	(new_symtab): Don't set `free_code' on symtab.
 	(new_linetable): Properly handle size==0.

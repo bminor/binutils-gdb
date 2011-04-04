@@ -1165,8 +1165,6 @@ void maintenance_check_symtabs (char *, int);
 
 void maintenance_print_statistics (char *, int);
 
-extern void free_symtab (struct symtab *);
-
 /* Symbol-reading stuff in symfile.c and solib.c.  */
 
 extern void clear_solib (void);
@@ -1177,6 +1175,7 @@ extern int identify_source_line (struct symtab *, int, int, CORE_ADDR);
 
 extern void print_source_lines (struct symtab *, int, int, int);
 
+extern void forget_cached_source_info_for_objfile (struct objfile *);
 extern void forget_cached_source_info (void);
 
 extern void select_source_symtab (struct symtab *);

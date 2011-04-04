@@ -632,14 +632,12 @@ free_objfile (struct objfile *objfile)
 
   {
     struct symtab_and_line cursal = get_current_source_symtab_and_line ();
-    struct symtab *s;
 
-    ALL_OBJFILE_SYMTABS (objfile, s)
-      {
-	if (s == cursal.symtab)
-	  clear_current_source_symtab_and_line ();
-      }
+    if (cursal.symtab && cursal.symtab->objfile == objfile)
+      clear_current_source_symtab_and_line ();
   }
+
+  forget_cached_source_info_for_objfile (objfile);
 
   /* The last thing we do is free the objfile struct itself.  */
 
