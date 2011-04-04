@@ -2829,6 +2829,7 @@ dump_reloc_set (bfd *abfd, asection *sec, arelent **relpp, long relcount)
       unsigned int linenumber;
       const char *sym_name;
       const char *section_name;
+      bfd_vma addend2 = 0;
 
       if (start_address != (bfd_vma) -1
 	  && q->address < start_address)
@@ -2884,7 +2885,37 @@ dump_reloc_set (bfd *abfd, asection *sec, arelent **relpp, long relcount)
       if (q->howto == NULL)
 	printf (" *unknown*         ");
       else if (q->howto->name)
-	printf (" %-16s  ", q->howto->name);
+	{
+	  const char *name = q->howto->name;
+
+	  /* R_SPARC_OLO10 relocations contain two addends.
+	     But because 'arelent' lacks enough storage to
+	     store them both, the 64-bit ELF Sparc backend
+	     records this as two relocations.  One R_SPARC_LO10
+	     and one R_SPARC_13, both pointing to the same
+	     address.  This is merely so that we have some
+	     place to store both addend fields.
+
+	     Undo this transformation, otherwise the output
+	     will be confusing.  */
+	  if (abfd->xvec->flavour == bfd_target_elf_flavour
+	      && elf_tdata(abfd)->elf_header->e_machine == EM_SPARCV9
+	      && relcount > 1
+	      && !strcmp (q->howto->name, "R_SPARC_LO10"))
+	    {
+	      arelent *q2 = *(p + 1);
+	      if (q2 != NULL
+		  && q2->howto
+		  && q->address == q2->address
+		  && !strcmp (q2->howto->name, "R_SPARC_13"))
+		{
+		  name = "R_SPARC_OLO10";
+		  addend2 = q2->addend;
+		  p++;
+		}
+	    }
+	  printf (" %-16s  ", name);
+	}
       else
 	printf (" %-16d  ", q->howto->type);
 
@@ -2903,6 +2934,11 @@ dump_reloc_set (bfd *abfd, asection *sec, arelent **relpp, long relcount)
 	{
 	  printf ("+0x");
 	  bfd_printf_vma (abfd, q->addend);
+	}
+      if (addend2)
+	{
+	  printf ("+0x");
+	  bfd_printf_vma (abfd, addend2);
 	}
 
       printf ("\n");
