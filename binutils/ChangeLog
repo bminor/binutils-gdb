@@ -1,3 +1,9 @@
+2011-04-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/12632
+	* objcopy.c (copy_unknown_object): Make the archive element
+	readable.
+
 2011-04-03  David S. Miller  <davem@davemloft.net>
 
 	* objdump.c (dump_reloc_set): Output R_SPARC_OLO10 relocations
