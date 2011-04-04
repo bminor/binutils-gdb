@@ -817,11 +817,11 @@ struct symtab
      for automated testing of gdb but may also be information that is
      useful to the user.  */
 
-  char *debugformat;
+  const char *debugformat;
 
   /* String of producer version information.  May be zero.  */
 
-  char *producer;
+  const char *producer;
 
   /* Full name of file as found by searching the source path.
      NULL if not yet known.  */

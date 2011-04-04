@@ -1,5 +1,18 @@
 2011-04-04  Tom Tromey  <tromey@redhat.com>
 
+	* xcoffread.c (read_xcoff_symtab): Make `debugfmt' const.
+	* symtab.h (struct symtab) <producer, debugformat>: Now const.
+	* symmisc.c (free_symtab): Don't free debugformat.
+	* buildsym.h (struct subfile) <producer, debugformat>: Now const.
+	(record_debugformat, record_producer): Document.
+	* buildsym.c (end_symtab): Don't save debugformat and producer
+	names on obstack.
+	(end_symtab): Don't free debugformat and producer fields.
+	(record_debugformat): Don't call xstrdup.
+	(record_producer): Likewise.
+
+2011-04-04  Tom Tromey  <tromey@redhat.com>
+
 	* source.c (find_source_lines): Remove LSEEK_NOT_LINEAR code.
 	(source_line_charpos, source_charpos_line): Remove.
 

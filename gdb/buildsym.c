@@ -1111,20 +1111,6 @@ end_symtab (CORE_ADDR end_addr, struct objfile *objfile, int section)
 	     the symbols.  */
 	  symtab->language = subfile->language;
 
-	  /* Save the debug format string (if any) in the symtab.  */
-	  if (subfile->debugformat != NULL)
-	    {
-	      symtab->debugformat = obsavestring (subfile->debugformat,
-					      strlen (subfile->debugformat),
-						  &objfile->objfile_obstack);
-	    }
-
-	  /* Similarly for the producer.  */
-	  if (subfile->producer != NULL)
-	    symtab->producer = obsavestring (subfile->producer,
-					     strlen (subfile->producer),
-					     &objfile->objfile_obstack);
-
 	  /* All symtabs for the main file and the subfiles share a
 	     blockvector, so we need to clear primary for everything
 	     but the main file.  */
@@ -1169,12 +1155,6 @@ end_symtab (CORE_ADDR end_addr, struct objfile *objfile, int section)
 	{
 	  xfree ((void *) subfile->line_vector);
 	}
-      if (subfile->debugformat != NULL)
-	{
-	  xfree ((void *) subfile->debugformat);
-	}
-      if (subfile->producer != NULL)
-	xfree (subfile->producer);
 
       nextsub = subfile->next;
       xfree ((void *) subfile);
@@ -1279,20 +1259,15 @@ hashname (char *name)
 
 
 void
-record_debugformat (char *format)
+record_debugformat (const char *format)
 {
-  current_subfile->debugformat = xstrdup (format);
+  current_subfile->debugformat = format;
 }
 
 void
 record_producer (const char *producer)
 {
-  /* The producer is not always provided in the debugging info.
-     Do nothing if PRODUCER is NULL.  */
-  if (producer == NULL)
-    return;
-
-  current_subfile->producer = xstrdup (producer);
+  current_subfile->producer = producer;
 }
 
 /* Merge the first symbol list SRCLIST into the second symbol list

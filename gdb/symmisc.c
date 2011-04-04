@@ -115,8 +115,6 @@ free_symtab (struct symtab *s)
     xfree (s->line_charpos);
   if (s->fullname != NULL)
     xfree (s->fullname);
-  if (s->debugformat != NULL)
-    xfree (s->debugformat);
   xfree (s);
 }
 

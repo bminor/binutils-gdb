@@ -944,7 +944,7 @@ read_xcoff_symtab (struct partial_symtab *pst)
     ((struct coff_symfile_info *) objfile->deprecated_sym_private)->strtbl;
   char *debugsec =
     ((struct coff_symfile_info *) objfile->deprecated_sym_private)->debugsec;
-  char *debugfmt = bfd_xcoff_is_xcoff64 (abfd) ? "XCOFF64" : "XCOFF";
+  const char *debugfmt = bfd_xcoff_is_xcoff64 (abfd) ? "XCOFF64" : "XCOFF";
 
   struct internal_syment symbol[1];
   union internal_auxent main_aux;
