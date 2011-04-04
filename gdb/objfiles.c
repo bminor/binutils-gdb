@@ -247,10 +247,6 @@ allocate_objfile (bfd *abfd, int flags)
   objfile->sect_index_bss = -1;
   objfile->sect_index_rodata = -1;
 
-  /* We don't yet have a C++-specific namespace symtab.  */
-
-  objfile->cp_namespace_symtab = NULL;
-
   /* Add this file onto the tail of the linked list of other such files.  */
 
   objfile->next = NULL;

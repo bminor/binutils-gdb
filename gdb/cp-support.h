@@ -173,9 +173,6 @@ extern struct type *cp_lookup_nested_type (struct type *parent_type,
 					   const char *nested_name,
 					   const struct block *block);
 
-extern void cp_check_possible_namespace_symbols (const char *name,
-						 struct objfile *objfile);
-
 struct type *cp_lookup_transparent_type (const char *name);
 
 /* Functions from cp-name-parser.y.  */

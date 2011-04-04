@@ -1,5 +1,23 @@
 2011-04-04  Tom Tromey  <tromey@redhat.com>
 
+	* symfile.c (reread_symbols): Update.
+	* objfiles.h (struct objfile) <cp_namespace_symtab>: Remove
+	field.
+	* objfiles.c (allocate_objfile): Update.
+	* cp-support.h (cp_check_possible_namespace_symbols): Don't
+	declare.
+	* cp-namespace.c (lookup_symbol_file): Don't call
+	lookup_possible_namespace_symbol.
+	(initialize_namespace_symtab, get_possible_namespace_block)
+	(free_namespace_block, cp_check_possible_namespace_symbols)
+	(check_possible_namespace_symbols_loop)
+	(check_one_possible_namespace_symbol)
+	(lookup_possible_namespace_symbol): Remove.
+	(maintenance_cplus_namespace): Replace with notice.
+	(_initialize_cp_namespace): Deprecate `maint cplus namespace'.
+
+2011-04-04  Tom Tromey  <tromey@redhat.com>
+
 	* xcoffread.c (read_xcoff_symtab): Make `debugfmt' const.
 	* symtab.h (struct symtab) <producer, debugformat>: Now const.
 	* symmisc.c (free_symtab): Don't free debugformat.
