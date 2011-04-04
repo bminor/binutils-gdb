@@ -6066,14 +6066,6 @@ remove_thread_event_breakpoints (void)
       delete_breakpoint (b);
 }
 
-struct captured_parse_breakpoint_args
-  {
-    char **arg_p;
-    struct symtabs_and_lines *sals_p;
-    struct linespec_result *canonical_p;
-    int *not_found_ptr;
-  };
-
 struct lang_and_radix
   {
     enum language lang;
@@ -7774,15 +7766,6 @@ check_fast_tracepoint_sals (struct gdbarch *gdbarch,
     }
 }
 
-static void
-do_captured_parse_breakpoint (struct ui_out *ui, void *data)
-{
-  struct captured_parse_breakpoint_args *args = data;
-  
-  parse_breakpoint_sals (args->arg_p, args->sals_p, args->canonical_p, 
-		         args->not_found_ptr);
-}
-
 /* Given TOK, a string specification of condition and thread, as
    accepted by the 'break' command, extract the condition
    string and thread number and set *COND_STRING and *THREAD.
@@ -7918,7 +7901,7 @@ create_breakpoint (struct gdbarch *gdbarch,
 		   struct breakpoint_ops *ops,
 		   int from_tty, int enabled, int internal)
 {
-  struct gdb_exception e;
+  volatile struct gdb_exception e;
   struct symtabs_and_lines sals;
   struct symtab_and_line pending_sal;
   char *copy_arg;
@@ -7926,7 +7909,6 @@ create_breakpoint (struct gdbarch *gdbarch,
   struct linespec_result canonical;
   struct cleanup *old_chain;
   struct cleanup *bkpt_chain = NULL;
-  struct captured_parse_breakpoint_args parse_args;
   int i;
   int pending = 0;
   int not_found = 0;
@@ -7936,11 +7918,6 @@ create_breakpoint (struct gdbarch *gdbarch,
   sals.sals = NULL;
   sals.nelts = 0;
   init_linespec_result (&canonical);
-
-  parse_args.arg_p = &arg;
-  parse_args.sals_p = &sals;
-  parse_args.canonical_p = &canonical;
-  parse_args.not_found_ptr = &not_found;
 
   if (type_wanted == bp_static_tracepoint && is_marker_spec (arg))
     {
@@ -7955,8 +7932,10 @@ create_breakpoint (struct gdbarch *gdbarch,
       goto done;
     }
 
-  e = catch_exception (uiout, do_captured_parse_breakpoint, 
-		       &parse_args, RETURN_MASK_ALL);
+  TRY_CATCH (e, RETURN_MASK_ALL)
+    {
+      parse_breakpoint_sals (&arg, &sals, &canonical, &not_found);
+    }
 
   /* If caller is interested in rc value from parse, set value.  */
   switch (e.reason)

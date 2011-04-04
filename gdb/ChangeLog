@@ -1,5 +1,12 @@
 2011-04-04  Tom Tromey  <tromey@redhat.com>
 
+	* breakpoint.c (struct captured_parse_breakpoint_args): Remove.
+	(do_captured_parse_breakpoint): Remove.
+	(create_breakpoint): `e' is now volatile.  Remove `parse_args'.
+	Use TRY_CATCH directly.
+
+2011-04-04  Tom Tromey  <tromey@redhat.com>
+
 	* symtab.h (free_symtab): Remove.
 	(forget_cached_source_info_for_objfile): Declare.
 	* symmisc.c (free_symtab): Remove.
