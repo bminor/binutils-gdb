@@ -3097,19 +3097,6 @@ set_stop_requested_callback (struct thread_info *thread, void *data)
   return 0;
 }
 
-/* Stub for catch_exception.  */
-
-struct start_remote_args
-{
-  int from_tty;
-
-  /* The current target.  */
-  struct target_ops *target;
-
-  /* Non-zero if this is an extended-remote target.  */
-  int extended_p;
-};
-
 /* Send interrupt_sequence to remote target.  */
 static void
 send_interrupt_sequence (void)
@@ -3130,9 +3117,8 @@ send_interrupt_sequence (void)
 }
 
 static void
-remote_start_remote (struct ui_out *uiout, void *opaque)
+remote_start_remote (int from_tty, struct target_ops *target, int extended_p)
 {
-  struct start_remote_args *args = opaque;
   struct remote_state *rs = get_remote_state ();
   struct packet_config *noack_config;
   char *wait_status = NULL;
@@ -3179,7 +3165,7 @@ remote_start_remote (struct ui_out *uiout, void *opaque)
 	rs->noack_mode = 1;
     }
 
-  if (args->extended_p)
+  if (extended_p)
     {
       /* Tell the remote that we are using the extended protocol.  */
       putpkt ("!");
@@ -3197,7 +3183,7 @@ remote_start_remote (struct ui_out *uiout, void *opaque)
   /* On OSs where the list of libraries is global to all
      processes, we fetch them early.  */
   if (gdbarch_has_global_solist (target_gdbarch))
-    solib_add (NULL, args->from_tty, args->target, auto_solib_add);
+    solib_add (NULL, from_tty, target, auto_solib_add);
 
   if (non_stop)
     {
@@ -3215,7 +3201,7 @@ remote_start_remote (struct ui_out *uiout, void *opaque)
 	 controlling.  We default to adding them in the running state.
 	 The '?' query below will then tell us about which threads are
 	 stopped.  */
-      remote_threads_info (args->target);
+      remote_threads_info (target);
     }
   else if (rs->non_stop_aware)
     {
@@ -3236,7 +3222,7 @@ remote_start_remote (struct ui_out *uiout, void *opaque)
     {
       if (rs->buf[0] == 'W' || rs->buf[0] == 'X')
 	{
-	  if (!args->extended_p)
+	  if (!extended_p)
 	    error (_("The target is not running (try extended-remote?)"));
 
 	  /* We're connected, but not running.  Drop out before we
@@ -3276,7 +3262,7 @@ remote_start_remote (struct ui_out *uiout, void *opaque)
 	 how to do it some other way, try again.  This is not
 	 supported for non-stop; it could be, but it is tricky if
 	 there are no stopped threads when we connect.  */
-      if (remote_read_description_p (args->target)
+      if (remote_read_description_p (target)
 	  && gdbarch_target_desc (target_gdbarch) == NULL)
 	{
 	  target_clear_description ();
@@ -3289,7 +3275,7 @@ remote_start_remote (struct ui_out *uiout, void *opaque)
       rs->cached_wait_status = 1;
 
       immediate_quit--;
-      start_remote (args->from_tty); /* Initialize gdb process mechanisms.  */
+      start_remote (from_tty); /* Initialize gdb process mechanisms.  */
     }
   else
     {
@@ -3331,7 +3317,7 @@ remote_start_remote (struct ui_out *uiout, void *opaque)
 
       if (thread_count () == 0)
 	{
-	  if (!args->extended_p)
+	  if (!extended_p)
 	    error (_("The target is not running (try extended-remote?)"));
 
 	  /* We're connected, but not running.  Drop out before we
@@ -4060,14 +4046,12 @@ remote_open_1 (char *name, int from_tty,
      all the ``target ....'' commands to share a common callback
      function.  See cli-dump.c.  */
   {
-    struct gdb_exception ex;
-    struct start_remote_args args;
+    volatile struct gdb_exception ex;
 
-    args.from_tty = from_tty;
-    args.target = target;
-    args.extended_p = extended_p;
-
-    ex = catch_exception (uiout, remote_start_remote, &args, RETURN_MASK_ALL);
+    TRY_CATCH (ex, RETURN_MASK_ALL)
+      {
+	remote_start_remote (from_tty, target, extended_p);
+      }
     if (ex.reason < 0)
       {
 	/* Pop the partially set up target - unless something else did

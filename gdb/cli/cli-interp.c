@@ -37,12 +37,6 @@ struct ui_out *cli_uiout;
 static struct gdb_exception safe_execute_command (struct ui_out *uiout,
 						  char *command, 
 						  int from_tty);
-struct captured_execute_command_args
-{
-  char *command;
-  int from_tty;
-};
-
 /* These implement the cli out interpreter: */
 
 static void *
@@ -117,25 +111,15 @@ cli_interpreter_exec (void *data, const char *command_str)
   return result;
 }
 
-static void
-do_captured_execute_command (struct ui_out *uiout, void *data)
-{
-  struct captured_execute_command_args *args =
-    (struct captured_execute_command_args *) data;
-
-  execute_command (args->command, args->from_tty);
-}
-
 static struct gdb_exception
 safe_execute_command (struct ui_out *uiout, char *command, int from_tty)
 {
-  struct gdb_exception e;
-  struct captured_execute_command_args args;
+  volatile struct gdb_exception e;
 
-  args.command = command;
-  args.from_tty = from_tty;
-  e = catch_exception (uiout, do_captured_execute_command, &args,
-		       RETURN_MASK_ALL);
+  TRY_CATCH (e, RETURN_MASK_ALL)
+    {
+      execute_command (command, from_tty);
+    }
   /* FIXME: cagney/2005-01-13: This shouldn't be needed.  Instead the
      caller should print the exception.  */
   exception_print (gdb_stderr, e);

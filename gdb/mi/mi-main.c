@@ -1816,10 +1816,9 @@ mi_cmd_remove_inferior (char *command, char **argv, int argc)
    prompt, display error). */
 
 static void
-captured_mi_execute_command (struct ui_out *uiout, void *data)
+captured_mi_execute_command (struct ui_out *uiout, struct mi_parse *context)
 {
   struct cleanup *cleanup;
-  struct mi_parse *context = (struct mi_parse *) data;
 
   if (do_timings)
     current_command_ts = context->cmd_start;
@@ -1947,7 +1946,7 @@ mi_execute_command (char *cmd, int from_tty)
     }
   else
     {
-      struct gdb_exception result;
+      volatile struct gdb_exception result;
       ptid_t previous_ptid = inferior_ptid;
 
       command->token = token;
@@ -1959,8 +1958,10 @@ mi_execute_command (char *cmd, int from_tty)
 	  timestamp (command->cmd_start);
 	}
 
-      result = catch_exception (uiout, captured_mi_execute_command, command,
-				RETURN_MASK_ALL);
+      TRY_CATCH (result, RETURN_MASK_ALL)
+	{
+	  captured_mi_execute_command (uiout, command);
+	}
       if (result.reason < 0)
 	{
 	  /* The command execution failed and error() was called

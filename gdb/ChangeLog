@@ -1,5 +1,25 @@
 2011-04-04  Tom Tromey  <tromey@redhat.com>
 
+	* cli/cli-interp.c (struct captured_execute_command_args):
+	Remove.
+	(do_captured_execute_command): Remove.
+	(safe_execute_command): Use TRY_CATCH.
+	* cli/cli-script.c (struct wrapped_read_command_file_args):
+	Remove.
+	(wrapped_read_command_file): Remove.
+	(script_from_file): Use TRY_CATCH.
+	* exceptions.c (catch_exception): Remove.
+	* exceptions.h (catch_exception): Remove.
+	(deprecated_throw_reason): Update comment.
+	* mi/mi-main.c (captured_mi_execute_command): Change 'data'
+	argument to 'context'.
+	(mi_execute_command): Use TRY_CATCH.
+	* remote.c (struct start_remote_args): Remove.
+	(remote_start_remote): Update; change arguments.
+	(remote_open_1): Use TRY_CATCH.
+
+2011-04-04  Tom Tromey  <tromey@redhat.com>
+
 	* tracepoint.c (scope_info): Update.
 	* symtab.c (decode_line_spec): Update.
 	* python/python.c (gdbpy_decode_line): Update.

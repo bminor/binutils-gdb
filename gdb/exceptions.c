@@ -458,21 +458,6 @@ catch_exceptions (struct ui_out *uiout,
   return catch_exceptions_with_msg (uiout, func, func_args, NULL, mask);
 }
 
-struct gdb_exception
-catch_exception (struct ui_out *uiout,
-		 catch_exception_ftype *func,
-		 void *func_args,
-		 return_mask mask)
-{
-  volatile struct gdb_exception exception;
-
-  TRY_CATCH (exception, mask)
-    {
-      (*func) (uiout, func_args);
-    }
-  return exception;
-}
-
 int
 catch_exceptions_with_msg (struct ui_out *uiout,
 		  	   catch_exceptions_ftype *func,

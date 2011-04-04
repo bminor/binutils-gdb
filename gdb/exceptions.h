@@ -182,8 +182,8 @@ extern void throw_vfatal (const char *fmt, va_list ap)
 extern void throw_error (enum errors error, const char *fmt, ...)
      ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (2, 3);
 
-/* Instead of deprecated_throw_reason, code should use catch_exception
-   and throw_exception.  */
+/* Instead of deprecated_throw_reason, code should use
+   throw_exception.  */
 extern void deprecated_throw_reason (enum return_reason reason)
      ATTRIBUTE_NORETURN;
 
@@ -233,14 +233,6 @@ extern int catch_exceptions_with_msg (struct ui_out *uiout,
 			     	      void *func_args,
 			     	      char **gdberrmsg,
 				      return_mask mask);
-
-/* This function, in addition, suppresses the printing of the captured
-   error message.  It's up to the client to print it.  */
-
-extern struct gdb_exception catch_exception (struct ui_out *uiout,
-					     catch_exception_ftype *func,
-					     void *func_args,
-					     return_mask mask);
 
 /* If CATCH_ERRORS_FTYPE throws an error, catch_errors() returns zero
    otherwize the result from CATCH_ERRORS_FTYPE is returned.  It is
