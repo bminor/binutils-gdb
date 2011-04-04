@@ -1256,4 +1256,13 @@ void dummy_obstack_deallocate (void *object, void *data);
 extern void initialize_progspace (void);
 extern void initialize_inferiors (void);
 
+/* Special block numbers */
+
+enum block_enum
+{
+  GLOBAL_BLOCK = 0,
+  STATIC_BLOCK = 1,
+  FIRST_LOCAL_BLOCK = 2
+};
+
 #endif /* #ifndef DEFS_H */

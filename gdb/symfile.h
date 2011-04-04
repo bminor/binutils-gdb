@@ -182,7 +182,8 @@ struct quick_symbol_functions
      doesn't make sense to implement both.)  The arguments are as for
      `lookup_symbol'.  */
   void (*pre_expand_symtabs_matching) (struct objfile *objfile,
-				       int kind, const char *name,
+				       enum block_enum block_kind,
+				       const char *name,
 				       domain_enum domain);
 
   /* Print statistics about any indices loaded for OBJFILE.  The
@@ -265,7 +266,7 @@ struct quick_symbol_functions
   void (*expand_symtabs_matching) (struct objfile *objfile,
 				   int (*file_matcher) (const char *, void *),
 				   int (*name_matcher) (const char *, void *),
-				   domain_enum kind,
+				   enum search_domain kind,
 				   void *data);
 
   /* Return the symbol table from OBJFILE that contains PC and

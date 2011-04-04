@@ -110,12 +110,7 @@ struct symbol *lookup_symbol_aux_quick (struct objfile *objfile,
 					const char *name,
 					const domain_enum domain);
 
-static void print_symbol_info (domain_enum,
-			       struct symtab *, struct symbol *, int, char *);
-
 static void print_msymbol_info (struct minimal_symbol *);
-
-static void symtab_symbol_info (char *, domain_enum, int);
 
 void _initialize_symtab (void);
 
@@ -2986,7 +2981,8 @@ search_symbols_name_matches (const char *symname, void *user_data)
    separately alphabetized.  */
 
 void
-search_symbols (char *regexp, domain_enum kind, int nfiles, char *files[],
+search_symbols (char *regexp, enum search_domain kind,
+		int nfiles, char *files[],
 		struct symbol_search **matches)
 {
   struct symtab *s;
@@ -3017,13 +3013,10 @@ search_symbols (char *regexp, domain_enum kind, int nfiles, char *files[],
   struct cleanup *old_chain = NULL;
   struct search_symbols_data datum;
 
-  if (kind < VARIABLES_DOMAIN)
-    error (_("must search on specific domain"));
-
-  ourtype = types[(int) (kind - VARIABLES_DOMAIN)];
-  ourtype2 = types2[(int) (kind - VARIABLES_DOMAIN)];
-  ourtype3 = types3[(int) (kind - VARIABLES_DOMAIN)];
-  ourtype4 = types4[(int) (kind - VARIABLES_DOMAIN)];
+  ourtype = types[kind];
+  ourtype2 = types2[kind];
+  ourtype3 = types3[kind];
+  ourtype4 = types4[kind];
 
   sr = *matches = NULL;
   tail = NULL;
@@ -3257,7 +3250,8 @@ search_symbols (char *regexp, domain_enum kind, int nfiles, char *files[],
    regarding the match to gdb_stdout.  */
 
 static void
-print_symbol_info (domain_enum kind, struct symtab *s, struct symbol *sym,
+print_symbol_info (enum search_domain kind,
+		   struct symtab *s, struct symbol *sym,
 		   int block, char *last)
 {
   if (last == NULL || filename_cmp (last, s->filename) != 0)
@@ -3314,7 +3308,7 @@ print_msymbol_info (struct minimal_symbol *msymbol)
    matches.  */
 
 static void
-symtab_symbol_info (char *regexp, domain_enum kind, int from_tty)
+symtab_symbol_info (char *regexp, enum search_domain kind, int from_tty)
 {
   static const char * const classnames[] =
     {"variable", "function", "type", "method"};
@@ -3331,7 +3325,7 @@ symtab_symbol_info (char *regexp, domain_enum kind, int from_tty)
   printf_filtered (regexp
 		   ? "All %ss matching regular expression \"%s\":\n"
 		   : "All defined %ss:\n",
-		   classnames[(int) (kind - VARIABLES_DOMAIN)], regexp);
+		   classnames[kind], regexp);
 
   for (p = symbols; p != NULL; p = p->next)
     {

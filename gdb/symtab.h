@@ -395,11 +395,13 @@ typedef enum domain_enum_tag
 
   /* LABEL_DOMAIN may be used for names of labels (for gotos).  */
 
-  LABEL_DOMAIN,
+  LABEL_DOMAIN
+} domain_enum;
 
-  /* Searching domains.  These overlap with VAR_DOMAIN, providing
-     some granularity with the search_symbols function.  */
+/* Searching domains, used for `search_symbols'.  */
 
+enum search_domain
+{
   /* Everything in VAR_DOMAIN minus FUNCTIONS_DOMAIN and
      TYPES_DOMAIN.  */
   VARIABLES_DOMAIN,
@@ -409,8 +411,7 @@ typedef enum domain_enum_tag
 
   /* All defined types */
   TYPES_DOMAIN
-}
-domain_enum;
+};
 
 /* An address-class says where to find the value of a symbol.  */
 
@@ -1263,7 +1264,7 @@ struct symbol_search
   struct symbol_search *next;
 };
 
-extern void search_symbols (char *, domain_enum, int, char **,
+extern void search_symbols (char *, enum search_domain, int, char **,
 			    struct symbol_search **);
 extern void free_search_symbols (struct symbol_search *);
 extern struct cleanup *make_cleanup_free_search_symbols (struct symbol_search

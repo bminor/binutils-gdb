@@ -588,7 +588,8 @@ match_partial_symbol (struct partial_symtab *pst, int global,
 
 static void
 pre_expand_symtabs_matching_psymtabs (struct objfile *objfile,
-				      int kind, const char *name,
+				      enum block_enum block_kind,
+				      const char *name,
 				      domain_enum domain)
 {
   /* Nothing.  */
@@ -1244,7 +1245,7 @@ expand_symtabs_matching_via_partial (struct objfile *objfile,
 							  void *),
 				     int (*name_matcher) (const char *,
 							  void *),
-				     domain_enum kind,
+				     enum search_domain kind,
 				     void *data)
 {
   struct partial_symtab *ps;

@@ -129,10 +129,6 @@ struct blockvector
 #define BLOCKVECTOR_BLOCK(blocklist,n) (blocklist)->block[n]
 #define BLOCKVECTOR_MAP(blocklist) ((blocklist)->map)
 
-/* Special block numbers */
-
-enum { GLOBAL_BLOCK = 0, STATIC_BLOCK = 1, FIRST_LOCAL_BLOCK = 2 };
-
 extern struct symbol *block_linkage_function (const struct block *);
 
 extern int block_inlined_p (const struct block *block);

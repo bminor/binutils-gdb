@@ -2426,7 +2426,7 @@ dw2_do_expand_symtabs_matching (struct objfile *objfile, const char *name)
 
 static void
 dw2_pre_expand_symtabs_matching (struct objfile *objfile,
-				 int kind, const char *name,
+				 enum block_enum block_kind, const char *name,
 				 domain_enum domain)
 {
   dw2_do_expand_symtabs_matching (objfile, name);
@@ -2572,7 +2572,7 @@ static void
 dw2_expand_symtabs_matching (struct objfile *objfile,
 			     int (*file_matcher) (const char *, void *),
 			     int (*name_matcher) (const char *, void *),
-			     domain_enum kind,
+			     enum search_domain kind,
 			     void *data)
 {
   int i;

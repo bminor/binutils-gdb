@@ -1,3 +1,24 @@
+2011-04-04  Tom Tromey  <tromey@redhat.com>
+
+	* symtab.h (domain_enum): Split in two...
+	(enum search_domain): New.
+	(search_symbols): Update.
+	* symtab.c (print_symbol_info, symtab_symbol_info): Remove
+	redundant declarations.
+	(search_symbols): Change 'kind' argument to search_domain.
+	Update.
+	(print_symbol_info): Likewise.
+	(symtab_symbol_info): Likewise.
+	* symfile.h (struct quick_symbol_functions)
+	<pre_expand_symtabs_matching>: Change type of 'kind' argument.
+	<expand_symtabs_matching>: Likewise.
+	* psymtab.c (pre_expand_symtabs_matching_psymtabs): Update.
+	(expand_symtabs_matching_via_partial): Update.
+	* dwarf2read.c (dw2_pre_expand_symtabs_matching): Update.
+	(dw2_expand_symtabs_for_function): Update.
+	* block.h: Moved anonymous enum...
+	* defs.h (enum block_enum): ... here.  Now named.
+
 2011-04-03  Joel Brobecker  <brobecker@adacore.com>
 
 	GDB 7.3 branch created (branch timestamp: 2011-04-01 01:00 UTC)
