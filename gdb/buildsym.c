@@ -1100,8 +1100,6 @@ end_symtab (CORE_ADDR end_addr, struct objfile *objfile, int section)
 	    {
 	      symtab->dirname = NULL;
 	    }
-	  symtab->free_code = free_linetable;
-	  symtab->free_func = NULL;
 
 	  /* Use whatever language we have been using for this
 	     subfile, not the one that was deduced in allocate_symtab

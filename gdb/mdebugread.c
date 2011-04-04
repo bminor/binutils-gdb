@@ -4204,7 +4204,7 @@ psymtab_to_symtab_1 (struct partial_symtab *pst, const char *filename)
     {
       /* This symbol table contains ordinary ecoff entries.  */
 
-      int maxlines;
+      int maxlines, size;
       EXTR *ext_ptr;
 
       if (fh == 0)
@@ -4311,7 +4311,14 @@ psymtab_to_symtab_1 (struct partial_symtab *pst, const char *filename)
 	    }
 	}
 
-      LINETABLE (st) = lines;
+      size = lines->nitems;
+      if (size > 1)
+	--size;
+      LINETABLE (st) = obstack_copy (&current_objfile->objfile_obstack,
+				     lines,
+				     (sizeof (struct linetable)
+				      + size * sizeof (lines->item)));
+      xfree (lines);
 
       /* .. and our share of externals.
          XXX use the global list to speed up things here.  How?
@@ -4763,7 +4770,6 @@ new_symtab (const char *name, int maxlines, struct objfile *objfile)
   BLOCK_SUPERBLOCK (BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), STATIC_BLOCK)) =
     BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), GLOBAL_BLOCK);
 
-  s->free_code = free_linetable;
   s->debugformat = "ECOFF";
   return (s);
 }
@@ -4803,7 +4809,9 @@ new_linetable (int size)
 {
   struct linetable *l;
 
-  size = (size - 1) * sizeof (l->item) + sizeof (struct linetable);
+  if (size > 1)
+    --size;
+  size = size * sizeof (l->item) + sizeof (struct linetable);
   l = (struct linetable *) xmalloc (size);
   l->nitems = 0;
   return l;

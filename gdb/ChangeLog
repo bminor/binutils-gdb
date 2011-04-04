@@ -1,5 +1,22 @@
 2011-04-04  Tom Tromey  <tromey@redhat.com>
 
+	* mdebugread.c (psymtab_to_symtab_1): Copy linetable to obstack.
+	(new_symtab): Don't set `free_code' on symtab.
+	(new_linetable): Properly handle size==0.
+	* symtab.h (struct symtab) <free_code, free_func>: Remove.
+	* symmisc.c (free_symtab): Don't free the linetable.  Don't call
+	free_func.
+	* jv-lang.c (struct jv_per_objfile_data): New.
+	(jv_per_objfile_free): Free the data.
+	(get_dynamics_objfile): Allocate a jv_per_objfile_data.
+	(get_java_class_symtab): Set the `dict' field on the
+	jv_per_objfile_data.
+	(free_class_block): Remove.
+	* buildsym.c (end_symtab): Don't set `free_code' or `free_func' on
+	the symtab.
+
+2011-04-04  Tom Tromey  <tromey@redhat.com>
+
 	* symfile.c (reread_symbols): Update.
 	* objfiles.h (struct objfile) <cp_namespace_symtab>: Remove
 	field.

@@ -781,23 +781,6 @@ struct symtab
 
   char *dirname;
 
-  /* This component says how to free the data we point to:
-     free_nothing => do nothing; some other symtab will free
-     the data this one uses.
-     free_linetable => free just the linetable.  FIXME: Is this redundant
-     with the primary field?  */
-
-  enum free_code
-  {
-    free_nothing, free_linetable
-  }
-  free_code;
-
-  /* A function to call to free space, if necessary.  This is IN
-     ADDITION to the action indicated by free_code.  */
-
-  void (*free_func)(struct symtab *symtab);
-
   /* Total number of lines found in source file.  */
 
   int nlines;

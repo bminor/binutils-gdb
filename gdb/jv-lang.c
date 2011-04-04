@@ -72,17 +72,30 @@ static struct symtab *class_symtab = NULL;
 static struct type *java_link_class_type (struct gdbarch *,
 					  struct type *, struct value *);
 
+/* An instance of this structure is used to store some data that must
+   be freed.  */
+
+struct jv_per_objfile_data
+{
+  /* The expandable dictionary we use.  */
+  struct dictionary *dict;
+};
+
 /* A function called when the dynamics_objfile is freed.  We use this
    to clean up some internal state.  */
 static void
-jv_per_objfile_free (struct objfile *objfile, void *ignore)
+jv_per_objfile_free (struct objfile *objfile, void *data)
 {
+  struct jv_per_objfile_data *jv_data = data;
+
   gdb_assert (objfile == dynamics_objfile);
-  /* Clean up all our cached state.  These objects are all allocated
-     in the dynamics_objfile, so we don't need to actually free
-     anything.  */
+  /* Clean up all our cached state.  */
   dynamics_objfile = NULL;
   class_symtab = NULL;
+
+  if (jv_data->dict)
+    dict_free (jv_data->dict);
+  xfree (jv_data);
 }
 
 /* FIXME: carlton/2003-02-04: This is the main or only caller of
@@ -96,21 +109,18 @@ get_dynamics_objfile (struct gdbarch *gdbarch)
 {
   if (dynamics_objfile == NULL)
     {
+      struct jv_per_objfile_data *data;
+
       /* Mark it as shared so that it is cleared when the inferior is
 	 re-run.  */
       dynamics_objfile = allocate_objfile (NULL, OBJF_SHARED);
       dynamics_objfile->gdbarch = gdbarch;
-      /* We don't have any data to store, but this lets us get a
-	 notification when the objfile is destroyed.  Since we have to
-	 store a non-NULL value, we just pick something arbitrary and
-	 safe.  */
-      set_objfile_data (dynamics_objfile, jv_dynamics_objfile_data_key,
-			&dynamics_objfile);
+
+      data = XCNEW (struct jv_per_objfile_data);
+      set_objfile_data (dynamics_objfile, jv_dynamics_objfile_data_key, data);
     }
   return dynamics_objfile;
 }
-
-static void free_class_block (struct symtab *symtab);
 
 static struct symtab *
 get_java_class_symtab (struct gdbarch *gdbarch)
@@ -120,6 +130,7 @@ get_java_class_symtab (struct gdbarch *gdbarch)
       struct objfile *objfile = get_dynamics_objfile (gdbarch);
       struct blockvector *bv;
       struct block *bl;
+      struct jv_per_objfile_data *jv_data;
 
       class_symtab = allocate_symtab ("<java-classes>", objfile);
       class_symtab->language = language_java;
@@ -139,7 +150,10 @@ get_java_class_symtab (struct gdbarch *gdbarch)
       bl = allocate_block (&objfile->objfile_obstack);
       BLOCK_DICT (bl) = dict_create_hashed_expandable ();
       BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK) = bl;
-      class_symtab->free_func = free_class_block;
+
+      /* Arrange to free the dict.  */
+      jv_data = objfile_data (objfile, jv_dynamics_objfile_data_key);
+      jv_data->dict = BLOCK_DICT (bl);
     }
   return class_symtab;
 }
@@ -170,16 +184,6 @@ add_class_symbol (struct type *type, CORE_ADDR addr)
   SYMBOL_DOMAIN (sym) = STRUCT_DOMAIN;
   SYMBOL_VALUE_ADDRESS (sym) = addr;
   return sym;
-}
-
-/* Free the dynamic symbols block.  */
-static void
-free_class_block (struct symtab *symtab)
-{
-  struct blockvector *bv = BLOCKVECTOR (symtab);
-  struct block *bl = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
-
-  dict_free (BLOCK_DICT (bl));
 }
 
 struct type *
