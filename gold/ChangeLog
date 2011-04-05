@@ -1,3 +1,43 @@
+2011-04-05  Cary Coutant  <ccoutant@google.com>
+
+	* incremental-dump.cc (dump_incremental_inputs): Change signature
+	to take a Sized_incremental_binary; change caller.  Use readers
+	in Sized_incremental_binary.
+	* incremental.cc
+	(Sized_incremental_binary::find_incremental_inputs_sections):
+	Rename do_find_incremental_inputs_sections to this.
+	(Sized_incremental_binary::setup_readers): New function.
+	(Sized_incremental_binary::do_check_inputs): Check
+	has_incremental_info_ flag; move setup code to setup_readers;
+	use input readers.
+	(Sized_incremental_binary::do_file_is_unchanged): New function.
+	(Sized_incremental_binary::do_get_input_reader): New function.
+	* incremental.h (class Incremental_binary): Move to end of file.
+	(Incremental_binary::file_is_unchanged): New function.
+	(Incremental_binary::do_file_is_unchanged): New function.
+	(Incremental_binary::Input_reader): New class.
+	(Incremental_binary::get_input_reader): New function.
+	(class Sized_incremental_binary): Move to end of file.
+	(Sized_incremental_binary::Sized_incremental_binary): Setup the
+	input section reader classes.
+	(Sized_incremental_binary::has_incremental_info): New function.
+	(Sized_incremental_binary::inputs_reader): New function.
+	(Sized_incremental_binary::symtab_reader): New function.
+	(Sized_incremental_binary::relocs_reader): New function.
+	(Sized_incremental_binary::got_plt_reader): New function.
+	(Sized_incremental_binary::do_file_is_unchanged): New function.
+	(Sized_incremental_binary::Sized_input_reader): New class.
+	(Sized_incremental_binary::get_input_reader): New function.
+	(Sized_incremental_binary::find_incremental_inputs_sections):
+	Rename do_find_incremental_inputs_sections to this.
+	(Sized_incremental_binary::setup_readers): New function.
+	(Sized_incremental_binary::has_incremental_info_): New data member.
+	(Sized_incremental_binary::inputs_reader_): New data member.
+	(Sized_incremental_binary::symtab_reader_): New data member.
+	(Sized_incremental_binary::relocs_reader_): New data member.
+	(Sized_incremental_binary::got_plt_reader_): New data member.
+	(Sized_incremental_binary::current_input_file_): New data member.
+
 2011-04-05  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	PR gold/12640

@@ -42,6 +42,7 @@ class Incremental_script_entry;
 class Incremental_object_entry;
 class Incremental_archive_entry;
 class Incremental_inputs;
+class Incremental_binary;
 class Object;
 
 // Incremental input type as stored in .gnu_incremental_inputs.
@@ -53,147 +54,6 @@ enum Incremental_input_type
   INCREMENTAL_INPUT_ARCHIVE = 3,
   INCREMENTAL_INPUT_SHARED_LIBRARY = 4,
   INCREMENTAL_INPUT_SCRIPT = 5
-};
-
-// An object representing the ELF file we edit during an incremental build.
-// Similar to Object or Dynobj, but operates on Output_file and contains
-// method specific to file edition (TBD). This is the abstract parent class
-// implemented in Sized_incremental_binary<size, big_endian> for a specific
-// endianness and size.
-
-class Incremental_binary
-{
- public:
-  Incremental_binary(Output_file* output, Target* target)
-    : output_(output), target_(target)
-  { }
-
-  virtual
-  ~Incremental_binary()
-  { }
-
-  // Functions and types for the elfcpp::Elf_file interface.  This
-  // permit us to use Incremental_binary as the File template parameter for
-  // elfcpp::Elf_file.
-
-  // The View class is returned by view.  It must support a single
-  // method, data().  This is trivial, because Output_file::get_output_view
-  // does what we need.
-  class View
-  {
-   public:
-    View(const unsigned char* p)
-      : p_(p)
-    { }
-
-    const unsigned char*
-    data() const
-    { return this->p_; }
-
-   private:
-    const unsigned char* p_;
-  };
-
-  // Return a View.
-  View
-  view(off_t file_offset, section_size_type data_size)
-  { return View(this->output_->get_input_view(file_offset, data_size)); }
-
-  // A location in the file.
-  struct Location
-  {
-    off_t file_offset;
-    off_t data_size;
-
-    Location(off_t fo, section_size_type ds)
-      : file_offset(fo), data_size(ds)
-    { }
-
-    Location()
-      : file_offset(0), data_size(0)
-    { }
-  };
-
-  // Get a View given a Location.
-  View
-  view(Location loc)
-  { return View(this->view(loc.file_offset, loc.data_size)); }
-
-  // Report an error.
-  void
-  error(const char* format, ...) const ATTRIBUTE_PRINTF_2;
-
-  // Find the .gnu_incremental_inputs and related sections.  It selects the
-  // first section of type SHT_GNU_INCREMENTAL_INPUTS,
-  // SHT_GNU_INCREMENTAL_SYMTAB, and SHT_GNU_INCREMENTAL_RELOCS.
-  // Returns false if the sections are not found.
-  bool
-  find_incremental_inputs_sections(unsigned int* p_inputs_shndx,
-				   unsigned int* p_symtab_shndx,
-				   unsigned int* p_relocs_shndx,
-				   unsigned int* p_got_plt_shndx,
-				   unsigned int* p_strtab_shndx)
-  {
-    return do_find_incremental_inputs_sections(p_inputs_shndx, p_symtab_shndx,
-					       p_relocs_shndx, p_got_plt_shndx,
-  					       p_strtab_shndx);
-  }
-
-  // Check the .gnu_incremental_inputs section to see whether an incremental
-  // build is possible.
-  // TODO: on success, should report what files needs to be rebuilt.
-  // INCREMENTAL_INPUTS is used to read the canonical form of the command line
-  // and read the input arguments.  TODO: for items that don't need to be
-  // rebuilt, we should also copy the incremental input information.
-  virtual bool
-  check_inputs(Incremental_inputs* incremental_inputs)
-  { return do_check_inputs(incremental_inputs); }
-
- protected:
-  // Find incremental inputs section.
-  virtual bool
-  do_find_incremental_inputs_sections(unsigned int* p_inputs_shndx,
-				      unsigned int* p_symtab_shndx,
-				      unsigned int* p_relocs_shndx,
-				      unsigned int* p_got_plt_shndx,
-				      unsigned int* p_strtab_shndx) = 0;
-
-  // Check the .gnu_incremental_inputs section to see whether an incremental
-  // build is possible.
-  virtual bool
-  do_check_inputs(Incremental_inputs* incremental_inputs) = 0;
-
- private:
-  // Edited output file object.
-  Output_file* output_;
-  // Target of the output file.
-  Target* target_;
-};
-
-template<int size, bool big_endian>
-class Sized_incremental_binary : public Incremental_binary
-{
- public:
-  Sized_incremental_binary(Output_file* output,
-                           const elfcpp::Ehdr<size, big_endian>& ehdr,
-                           Target* target)
-    : Incremental_binary(output, target), elf_file_(this, ehdr)
-  { }
-
- protected:
-  virtual bool
-  do_find_incremental_inputs_sections(unsigned int* p_inputs_shndx,
-				      unsigned int* p_symtab_shndx,
-				      unsigned int* p_relocs_shndx,
-				      unsigned int* p_got_plt_shndx,
-				      unsigned int* p_strtab_shndx);
-
-  virtual bool
-  do_check_inputs(Incremental_inputs* incremental_inputs);
-
- private:
-  // Output as an ELF file.
-  elfcpp::Elf_file<size, big_endian, Incremental_binary> elf_file_;
 };
 
 // Create an Incremental_binary object for FILE. Returns NULL is this is not
@@ -689,7 +549,12 @@ class Incremental_inputs_reader
   typedef elfcpp::Swap<64, big_endian> Swap64;
 
  public:
-  Incremental_inputs_reader(const unsigned char* p, elfcpp::Elf_strtab& strtab)
+  Incremental_inputs_reader()
+    : p_(NULL), strtab_(NULL, 0), input_file_count_(0)
+  { }
+
+  Incremental_inputs_reader(const unsigned char* p,
+			    const elfcpp::Elf_strtab& strtab)
     : p_(p), strtab_(strtab)
   { this->input_file_count_ = Swap32::readval(this->p_ + 4); }
 
@@ -939,16 +804,29 @@ template<bool big_endian>
 class Incremental_symtab_reader
 {
  public:
-  Incremental_symtab_reader(const unsigned char* p) : p_(p)
+  Incremental_symtab_reader()
+    : p_(NULL), len_(0)
   { }
 
+  Incremental_symtab_reader(const unsigned char* p, off_t len)
+    : p_(p), len_(len)
+  { }
+
+  // Return the count of symbols in this section.
+  unsigned int
+  symbol_count() const
+  { return static_cast<unsigned int>(this->len_ / 4); }
+
   // Return the list head for symbol table entry N.
-  unsigned int get_list_head(unsigned int n) const
+  unsigned int
+  get_list_head(unsigned int n) const
   { return elfcpp::Swap<32, big_endian>::readval(this->p_ + 4 * n); }
 
  private:
   // Base address of the .gnu_incremental_relocs section.
   const unsigned char* p_;
+  // Size of the section.
+  off_t len_;
 };
 
 // Reader class for the .gnu_incremental_relocs section.
@@ -967,8 +845,18 @@ class Incremental_relocs_reader
   // Size of each entry.
   static const unsigned int reloc_size = 8 + 2 * field_size;
 
-  Incremental_relocs_reader(const unsigned char* p) : p_(p)
+  Incremental_relocs_reader()
+    : p_(NULL), len_(0)
   { }
+
+  Incremental_relocs_reader(const unsigned char* p, off_t len)
+    : p_(p), len_(len)
+  { }
+
+  // Return the count of relocations in this section.
+  unsigned int
+  reloc_count() const
+  { return static_cast<unsigned int>(this->len_ / reloc_size); }
 
   // Return the relocation type for relocation entry at offset OFF.
   unsigned int
@@ -1002,6 +890,8 @@ class Incremental_relocs_reader
  private:
   // Base address of the .gnu_incremental_relocs section.
   const unsigned char* p_;
+  // Size of the section.
+  off_t len_;
 };
 
 // Reader class for the .gnu_incremental_got_plt section.
@@ -1010,6 +900,10 @@ template<bool big_endian>
 class Incremental_got_plt_reader
 {
  public:
+  Incremental_got_plt_reader()
+    : p_(NULL), got_count_(0), got_desc_p_(NULL), plt_desc_p_(NULL)
+  { }
+
   Incremental_got_plt_reader(const unsigned char* p) : p_(p)
   {
     this->got_count_ = elfcpp::Swap<32, big_endian>::readval(p);
@@ -1061,6 +955,251 @@ class Incremental_got_plt_reader
   const unsigned char* got_desc_p_;
   // Base address of the PLT descriptor array.
   const unsigned char* plt_desc_p_;
+};
+
+// An object representing the ELF file we edit during an incremental build.
+// Similar to Object or Dynobj, but operates on Output_file and contains
+// methods to support incremental updating. This is the abstract parent class
+// implemented in Sized_incremental_binary<size, big_endian> for a specific
+// endianness and size.
+
+class Incremental_binary
+{
+ public:
+  Incremental_binary(Output_file* output, Target* target)
+    : output_(output), target_(target)
+  { }
+
+  virtual
+  ~Incremental_binary()
+  { }
+
+  // Check the .gnu_incremental_inputs section to see whether an incremental
+  // build is possible.
+  bool
+  check_inputs(Incremental_inputs* incremental_inputs)
+  { return this->do_check_inputs(incremental_inputs); }
+
+  // Return TRUE if the file specified by INPUT_ARGUMENT is unchanged
+  // with respect to the base file.
+  bool
+  file_is_unchanged(const Input_argument* input_argument) const
+  { return this->do_file_is_unchanged(input_argument); }
+
+  // Report an error.
+  void
+  error(const char* format, ...) const ATTRIBUTE_PRINTF_2;
+
+  // Wrapper class for a sized Incremental_input_entry_reader.
+  
+  class Input_reader
+  {
+   public:
+    Input_reader()
+    { }
+
+    virtual
+    ~Input_reader()
+    { }
+
+    const char*
+    filename() const
+    { return this->do_filename(); }
+
+    Timespec
+    get_mtime() const
+    { return this->do_get_mtime(); }
+
+    Incremental_input_type
+    type() const
+    { return this->do_type(); }
+
+   protected:
+    virtual const char*
+    do_filename() const = 0;
+
+    virtual Timespec
+    do_get_mtime() const = 0;
+
+    virtual Incremental_input_type
+    do_type() const = 0;
+  };
+
+  Input_reader*
+  get_input_reader(const char* filename)
+  { return this->do_get_input_reader(filename); }
+
+  // Functions and types for the elfcpp::Elf_file interface.  This
+  // permit us to use Incremental_binary as the File template parameter for
+  // elfcpp::Elf_file.
+
+  // The View class is returned by view.  It must support a single
+  // method, data().  This is trivial, because Output_file::get_output_view
+  // does what we need.
+  class View
+  {
+   public:
+    View(const unsigned char* p)
+      : p_(p)
+    { }
+
+    const unsigned char*
+    data() const
+    { return this->p_; }
+
+   private:
+    const unsigned char* p_;
+  };
+
+  // Return a View.
+  View
+  view(off_t file_offset, section_size_type data_size)
+  { return View(this->output_->get_input_view(file_offset, data_size)); }
+
+  // A location in the file.
+  struct Location
+  {
+    off_t file_offset;
+    off_t data_size;
+
+    Location(off_t fo, section_size_type ds)
+      : file_offset(fo), data_size(ds)
+    { }
+
+    Location()
+      : file_offset(0), data_size(0)
+    { }
+  };
+
+  // Get a View given a Location.
+  View
+  view(Location loc)
+  { return View(this->view(loc.file_offset, loc.data_size)); }
+
+ protected:
+  // Check the .gnu_incremental_inputs section to see whether an incremental
+  // build is possible.
+  virtual bool
+  do_check_inputs(Incremental_inputs* incremental_inputs) = 0;
+
+  // Return TRUE if the file specified by INPUT_ARGUMENT is unchanged
+  // with respect to the base file.
+  virtual bool
+  do_file_is_unchanged(const Input_argument* input_argument) const = 0;
+
+  virtual Input_reader*
+  do_get_input_reader(const char* filename) = 0;
+
+ private:
+  // Edited output file object.
+  Output_file* output_;
+  // Target of the output file.
+  Target* target_;
+};
+
+template<int size, bool big_endian>
+class Sized_incremental_binary : public Incremental_binary
+{
+ public:
+  Sized_incremental_binary(Output_file* output,
+                           const elfcpp::Ehdr<size, big_endian>& ehdr,
+                           Target* target)
+    : Incremental_binary(output, target), elf_file_(this, ehdr),
+      has_incremental_info_(false), inputs_reader_(), symtab_reader_(),
+      relocs_reader_(), got_plt_reader_(), current_input_file_(0)
+  { this->setup_readers(); }
+
+  // Returns TRUE if the file contains incremental info.
+  bool
+  has_incremental_info() const
+  { return this->has_incremental_info_; }
+
+  // Readers for the incremental info sections.
+
+  Incremental_inputs_reader<size, big_endian>
+  inputs_reader() const
+  { return this->inputs_reader_; }
+
+  Incremental_symtab_reader<big_endian>
+  symtab_reader() const
+  { return this->symtab_reader_; }
+
+  Incremental_relocs_reader<size, big_endian>
+  relocs_reader() const
+  { return this->relocs_reader_; }
+
+  Incremental_got_plt_reader<big_endian>
+  got_plt_reader() const
+  { return this->got_plt_reader_; }
+
+ protected:
+  virtual bool
+  do_check_inputs(Incremental_inputs* incremental_inputs);
+
+  // Return TRUE if the file specified by INPUT_ARGUMENT is unchanged
+  // with respect to the base file.
+  virtual bool
+  do_file_is_unchanged(const Input_argument* input_argument) const;
+
+  // Wrapper class for a sized Incremental_input_entry_reader.
+  
+  class Sized_input_reader : public Input_reader
+  {
+   public:
+    typedef Incremental_inputs_reader<size, big_endian> Inputs_reader;
+    typedef typename Inputs_reader::Incremental_input_entry_reader
+        Input_entry_reader;
+
+    Sized_input_reader(Input_entry_reader r)
+      : Input_reader(), reader_(r)
+    { }
+
+    virtual
+    ~Sized_input_reader()
+    { }
+
+   private:
+    const char*
+    do_filename() const
+    { return this->reader_.filename(); }
+
+    Timespec
+    do_get_mtime() const
+    { return this->reader_.get_mtime(); }
+
+    Incremental_input_type
+    do_type() const
+    { return this->reader_.type(); }
+
+    Input_entry_reader reader_;
+  };
+
+  virtual Input_reader*
+  do_get_input_reader(const char* filename);
+
+ private:
+  bool
+  find_incremental_inputs_sections(unsigned int* p_inputs_shndx,
+				   unsigned int* p_symtab_shndx,
+				   unsigned int* p_relocs_shndx,
+				   unsigned int* p_got_plt_shndx,
+				   unsigned int* p_strtab_shndx);
+
+  void
+  setup_readers();
+
+  // Output as an ELF file.
+  elfcpp::Elf_file<size, big_endian, Incremental_binary> elf_file_;
+
+  // Readers for the incremental info sections.
+  bool has_incremental_info_;
+  Incremental_inputs_reader<size, big_endian> inputs_reader_;
+  Incremental_symtab_reader<big_endian> symtab_reader_;
+  Incremental_relocs_reader<size, big_endian> relocs_reader_;
+  Incremental_got_plt_reader<big_endian> got_plt_reader_;
+
+  // Index of the current input file entry.
+  int current_input_file_;
 };
 
 } // End namespace gold.

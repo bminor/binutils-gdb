@@ -154,7 +154,7 @@ Incremental_binary::error(const char* format, ...) const
 
 template<int size, bool big_endian>
 bool
-Sized_incremental_binary<size, big_endian>::do_find_incremental_inputs_sections(
+Sized_incremental_binary<size, big_endian>::find_incremental_inputs_sections(
     unsigned int* p_inputs_shndx,
     unsigned int* p_symtab_shndx,
     unsigned int* p_relocs_shndx,
@@ -206,6 +206,50 @@ Sized_incremental_binary<size, big_endian>::do_find_incremental_inputs_sections(
   return true;
 }
 
+// Set up the readers into the incremental info sections.
+
+template<int size, bool big_endian>
+void
+Sized_incremental_binary<size, big_endian>::setup_readers()
+{
+  unsigned int inputs_shndx;
+  unsigned int symtab_shndx;
+  unsigned int relocs_shndx;
+  unsigned int got_plt_shndx;
+  unsigned int strtab_shndx;
+
+  if (!this->find_incremental_inputs_sections(&inputs_shndx, &symtab_shndx,
+					      &relocs_shndx, &got_plt_shndx,
+					      &strtab_shndx))
+    return;
+
+  Location inputs_location(this->elf_file_.section_contents(inputs_shndx));
+  Location symtab_location(this->elf_file_.section_contents(symtab_shndx));
+  Location relocs_location(this->elf_file_.section_contents(relocs_shndx));
+  Location got_plt_location(this->elf_file_.section_contents(got_plt_shndx));
+  Location strtab_location(this->elf_file_.section_contents(strtab_shndx));
+
+  View inputs_view = this->view(inputs_location);
+  View symtab_view = this->view(symtab_location);
+  View relocs_view = this->view(relocs_location);
+  View got_plt_view = this->view(got_plt_location);
+  View strtab_view = this->view(strtab_location);
+
+  elfcpp::Elf_strtab strtab(strtab_view.data(), strtab_location.data_size);
+
+  this->inputs_reader_ =
+      Incremental_inputs_reader<size, big_endian>(inputs_view.data(), strtab);
+  this->symtab_reader_ =
+      Incremental_symtab_reader<big_endian>(symtab_view.data(),
+					    symtab_location.data_size);
+  this->relocs_reader_ =
+      Incremental_relocs_reader<size, big_endian>(relocs_view.data(),
+						  relocs_location.data_size);
+  this->got_plt_reader_ =
+      Incremental_got_plt_reader<big_endian>(got_plt_view.data());
+  this->has_incremental_info_ = true;
+}
+
 // Determine whether an incremental link based on the existing output file
 // can be done.
 
@@ -214,50 +258,54 @@ bool
 Sized_incremental_binary<size, big_endian>::do_check_inputs(
     Incremental_inputs* incremental_inputs)
 {
-  unsigned int inputs_shndx;
-  unsigned int symtab_shndx;
-  unsigned int relocs_shndx;
-  unsigned int plt_got_shndx;
-  unsigned int strtab_shndx;
-
-  if (!do_find_incremental_inputs_sections(&inputs_shndx, &symtab_shndx,
-					   &relocs_shndx, &plt_got_shndx,
-					   &strtab_shndx))
+  if (!this->has_incremental_info_)
     {
       explain_no_incremental(_("no incremental data from previous build"));
       return false;
     }
 
-  Location inputs_location(this->elf_file_.section_contents(inputs_shndx));
-  Location symtab_location(this->elf_file_.section_contents(symtab_shndx));
-  Location relocs_location(this->elf_file_.section_contents(relocs_shndx));
-  Location strtab_location(this->elf_file_.section_contents(strtab_shndx));
-
-  View inputs_view(view(inputs_location));
-  View symtab_view(view(symtab_location));
-  View relocs_view(view(relocs_location));
-  View strtab_view(view(strtab_location));
-
-  elfcpp::Elf_strtab strtab(strtab_view.data(), strtab_location.data_size);
-
-  Incremental_inputs_reader<size, big_endian>
-      incoming_inputs(inputs_view.data(), strtab);
-
-  if (incoming_inputs.version() != INCREMENTAL_LINK_VERSION)
+  if (this->inputs_reader_.version() != INCREMENTAL_LINK_VERSION)
     {
       explain_no_incremental(_("different version of incremental build data"));
       return false;
     }
 
-  if (incremental_inputs->command_line() != incoming_inputs.command_line())
+  if (incremental_inputs->command_line() != this->inputs_reader_.command_line())
     {
       explain_no_incremental(_("command line changed"));
       return false;
     }
 
-  // TODO: compare incremental_inputs->inputs() with entries in data_view.
-
   return true;
+}
+
+// Return TRUE if the file specified by INPUT_ARGUMENT is unchanged
+// with respect to the base file.
+
+template<int size, bool big_endian>
+bool
+Sized_incremental_binary<size, big_endian>::do_file_is_unchanged(
+    const Input_argument* input_argument) const
+{
+  Incremental_disposition disp =
+      input_argument->file().options().incremental_disposition();
+
+  if (disp != INCREMENTAL_CHECK)
+    return disp == INCREMENTAL_UNCHANGED;
+
+  // FIXME: Handle INCREMENTAL_CHECK.
+  return false;
+}
+
+
+template<int size, bool big_endian>
+Incremental_binary::Input_reader*
+Sized_incremental_binary<size, big_endian>::do_get_input_reader(
+    const char*)
+{
+  unsigned int file_index = this->current_input_file_++;
+  gold_assert(file_index < this->inputs_reader_.input_file_count());
+  return new Sized_input_reader(this->inputs_reader_.input_file(file_index));
 }
 
 namespace
