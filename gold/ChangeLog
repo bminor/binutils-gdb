@@ -1,4 +1,10 @@
-2011-03-30 Cary Coutant  <ccoutant@google.com>
+2011-04-05  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	PR gold/12640
+	* dwarf_reader.cc (Sized_dwarf_line_info): Fix vector bounds
+	violation.
+
+2011-03-30  Cary Coutant  <ccoutant@google.com>
 
 	* archive.cc (Archive::include_member): Adjust call to report_object.
 	(Add_archive_symbols::run): Add script_info to call to
@@ -44,7 +50,7 @@
 	(script_add_library): Likewise.
 	* script.h (Script_options::Script_info): Rewrite class.
 
-2011-03-29 Cary Coutant  <ccoutant@google.com>
+2011-03-29  Cary Coutant  <ccoutant@google.com>
 
 	* archive.cc (Library_base::should_include_member): Move
 	method here from class Archive.

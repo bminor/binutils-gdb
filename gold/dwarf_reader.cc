@@ -188,7 +188,7 @@ Sized_dwarf_line_info<size, big_endian>::read_header_prolog(
   header_.opcode_base = *lineptr;
   lineptr += 1;
 
-  header_.std_opcode_lengths.reserve(header_.opcode_base + 1);
+  header_.std_opcode_lengths.resize(header_.opcode_base + 1);
   header_.std_opcode_lengths[0] = 0;
   for (int i = 1; i < header_.opcode_base; i++)
     {
