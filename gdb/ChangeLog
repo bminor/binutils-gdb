@@ -1,3 +1,9 @@
+2011-04-06  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* ppc-linux-nat.c (check_condition): Add len output parameter.
+	Set it based on the memory region referenced in the condition
+	expression.  Update all callers.
+
 2011-04-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix crash regression on systems featuring .gdb_index.

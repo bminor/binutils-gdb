@@ -1865,10 +1865,11 @@ num_memory_accesses (struct value *v)
    DVC (Data Value Compare) register in BookE processors.  The expression
    must test the watch value for equality with a constant expression.
    If the function returns 1, DATA_VALUE will contain the constant against
-   which the watch value should be compared.  */
+   which the watch value should be compared and LEN will contain the size
+   of the constant.  */
 static int
 check_condition (CORE_ADDR watch_addr, struct expression *cond,
-		 CORE_ADDR *data_value)
+		 CORE_ADDR *data_value, int *len)
 {
   int pc = 1, num_accesses_left, num_accesses_right;
   struct value *left_val, *right_val, *left_chain, *right_chain;
@@ -1900,11 +1901,23 @@ check_condition (CORE_ADDR watch_addr, struct expression *cond,
   if (num_accesses_left == 1 && num_accesses_right == 0
       && VALUE_LVAL (left_val) == lval_memory
       && value_address (left_val) == watch_addr)
-    *data_value = value_as_long (right_val);
+    {
+      *data_value = value_as_long (right_val);
+
+      /* DATA_VALUE is the constant in RIGHT_VAL, but actually has
+	 the same type as the memory region referenced by LEFT_VAL.  */
+      *len = TYPE_LENGTH (check_typedef (value_type (left_val)));
+    }
   else if (num_accesses_left == 0 && num_accesses_right == 1
 	   && VALUE_LVAL (right_val) == lval_memory
 	   && value_address (right_val) == watch_addr)
-    *data_value = value_as_long (left_val);
+    {
+      *data_value = value_as_long (left_val);
+
+      /* DATA_VALUE is the constant in LEFT_VAL, but actually has
+	 the same type as the memory region referenced by RIGHT_VAL.  */
+      *len = TYPE_LENGTH (check_typedef (value_type (right_val)));
+    }
   else
     {
       free_value_chain (left_chain);
@@ -1930,7 +1943,7 @@ ppc_linux_can_accel_watchpoint_condition (CORE_ADDR addr, int len, int rw,
 
   return (have_ptrace_booke_interface ()
 	  && booke_debug_info.num_condition_regs > 0
-	  && check_condition (addr, cond, &data_value));
+	  && check_condition (addr, cond, &data_value, &len));
 }
 
 /* Set up P with the parameters necessary to request a watchpoint covering
@@ -1950,7 +1963,8 @@ create_watchpoint_request (struct ppc_hw_breakpoint *p, CORE_ADDR addr,
 
       use_condition = (insert? can_use_watchpoint_cond_accel ()
 			: booke_debug_info.num_condition_regs > 0);
-      if (cond && use_condition && check_condition (addr, cond, &data_value))
+      if (cond && use_condition && check_condition (addr, cond,
+						    &data_value, &len))
 	calculate_dvc (addr, len, data_value, &p->condition_mode,
 		       &p->condition_value);
       else
