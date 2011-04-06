@@ -1,5 +1,12 @@
 2011-04-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Fix crash regression on systems featuring .gdb_index.
+	* objfiles.c (free_objfile): Move the
+	forget_cached_source_info_for_objfile call earlier.  Comment it.
+	Extend the comment for objfile_free_data.
+
+2011-04-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Fix regression of displaying the debug format.
 	* buildsym.c (end_symtab): Set symtab's debugformat and producer from
 	subfile.

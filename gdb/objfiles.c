@@ -583,6 +583,10 @@ free_objfile (struct objfile *objfile)
      lists.  */
   preserve_values (objfile);
 
+  /* It still may reference data modules have associated with the objfile and
+     the symbol file data.  */
+  forget_cached_source_info_for_objfile (objfile);
+
   /* First do any symbol file specific actions required when we are
      finished with a particular symbol file.  Note that if the objfile
      is using reusable symbol information (via mmalloc) then each of
@@ -595,7 +599,8 @@ free_objfile (struct objfile *objfile)
       (*objfile->sf->sym_finish) (objfile);
     }
 
-  /* Discard any data modules have associated with the objfile.  */
+  /* Discard any data modules have associated with the objfile.  The function
+     still may reference objfile->obfd.  */
   objfile_free_data (objfile);
 
   gdb_bfd_unref (objfile->obfd);
@@ -636,8 +641,6 @@ free_objfile (struct objfile *objfile)
     if (cursal.symtab && cursal.symtab->objfile == objfile)
       clear_current_source_symtab_and_line ();
   }
-
-  forget_cached_source_info_for_objfile (objfile);
 
   /* The last thing we do is free the objfile struct itself.  */
 
