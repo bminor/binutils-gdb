@@ -91,7 +91,7 @@ msymbol_hash_iw (const char *string)
 	++string;
       if (*string && *string != '(')
 	{
-	  hash = hash * 67 + *string - 113;
+	  hash = SYMBOL_HASH_NEXT (hash, *string);
 	  ++string;
 	}
     }
@@ -106,7 +106,7 @@ msymbol_hash (const char *string)
   unsigned int hash = 0;
 
   for (; *string; ++string)
-    hash = hash * 67 + *string - 113;
+    hash = SYMBOL_HASH_NEXT (hash, *string);
   return hash;
 }
 

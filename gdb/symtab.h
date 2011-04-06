@@ -1004,6 +1004,12 @@ extern unsigned int msymbol_hash_iw (const char *);
 
 extern unsigned int msymbol_hash (const char *);
 
+/* Compute the next hash value from previous HASH and the character C.  This
+   is only a GDB in-memory computed value with no external files compatibility
+   requirements.  */
+
+#define SYMBOL_HASH_NEXT(hash, c) ((hash) * 67 + (c) - 113)
+
 extern struct objfile * msymbol_objfile (struct minimal_symbol *sym);
 
 extern void

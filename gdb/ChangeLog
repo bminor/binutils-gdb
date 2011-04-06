@@ -1,3 +1,12 @@
+2011-04-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Code cleanup.
+	* dictionary.c (dict_hash): Use SYMBOL_HASH_NEXT.
+	* dwarf2read.c (mapped_index_string_hash): Refer to SYMBOL_HASH_NEXT
+	in the function comment, a new note on values compatibility.
+	* minsyms.c (msymbol_hash_iw, msymbol_hash): Use SYMBOL_HASH_NEXT.
+	* symtab.h (SYMBOL_HASH_NEXT): New.
+
 2011-04-06  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* ppc-linux-nat.c (check_condition): Add len output parameter.

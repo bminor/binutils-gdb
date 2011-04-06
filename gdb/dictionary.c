@@ -826,7 +826,7 @@ dict_hash (const char *string0)
 	    }
 	  /* FALL THROUGH */
 	default:
-	  hash = hash * 67 + *string - 113;
+	  hash = SYMBOL_HASH_NEXT (hash, *string);
 	  string += 1;
 	  break;
 	}

@@ -1962,11 +1962,11 @@ create_addrmap_from_index (struct objfile *objfile, struct mapped_index *index)
   do_cleanups (cleanup);
 }
 
-/* The hash function for strings in the mapped index.  This is the
-   same as the hashtab.c hash function, but we keep a separate copy to
-   maintain control over the implementation.  This is necessary
-   because the hash function is tied to the format of the mapped index
-   file.  */
+/* The hash function for strings in the mapped index.  This is the same as
+   SYMBOL_HASH_NEXT, but we keep a separate copy to maintain control over the
+   implementation.  This is necessary because the hash function is tied to the
+   format of the mapped index file.  The hash values do not have to match with
+   SYMBOL_HASH_NEXT.  */
 
 static hashval_t
 mapped_index_string_hash (const void *p)
