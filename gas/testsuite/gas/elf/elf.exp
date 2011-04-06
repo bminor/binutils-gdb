@@ -69,8 +69,7 @@ if { ([istarget "*-*-*elf*"]
     if {[istarget "rx-*-*"]} then {
 	set target_machine -rx
     }
-    if { ([istarget "*arm*-*-*"]
-	  || [istarget "xscale*-*-*"]) } {
+    if {[istarget "arm*-*-*"]} {
 
 	if { ([istarget "*-*-*eabi"]
 	      || [istarget "*-*-linux-*"]
@@ -165,8 +164,7 @@ if { ([istarget "*-*-*elf*"]
     # So for these targets we cannot include an IFUNC symbol type
     # in the symbol type test.
     if {   [istarget "msp*-*-*"]
-	|| [istarget "arm*-*-*"]
-	|| [istarget "xscale*-*-*"]} then {
+	|| [istarget "arm*-*-*"]} then {
 	    run_elf_list_test "type-noifunc" "" "" "-s" "| grep \"1 *\\\[FONTC\\\]\""
     } else {
     	    run_dump_test ifunc-1

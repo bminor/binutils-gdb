@@ -1,6 +1,6 @@
 # Expect script for LD selective linking tests
-#   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2009
-#   Free Software Foundation, Inc.
+#   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2009,
+#   2010, 2011 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -139,7 +139,7 @@ foreach testitem $seltests {
     }
 
     # ARM targets need libgcc.a in THUMB mode so that __call_via_r3 is provided
-    if {[istarget arm-*-*] || [istarget xscale-*-*]} {
+    if {[istarget arm-*-*]} {
 	set libgcc [remote_exec host "$compiler -print-libgcc-file-name"]
 	set libgcc [lindex $libgcc 1]
 	regsub -all "\[\r\n\]" $libgcc "" libgcc

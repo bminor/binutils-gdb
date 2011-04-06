@@ -53,7 +53,6 @@ case $targ in
  sparc-*-lynxos* | \
  vax-*-vms* | \
  arm-*-oabi | \
- thumb-*-oabi | \
  a29k-* | \
  hppa*-*-rtems* | \
  *-go32-rtems* | \
@@ -101,11 +100,8 @@ s390*)		 targ_archs=bfd_s390_arch ;;
 sh*)		 targ_archs=bfd_sh_arch ;;
 sparc*)		 targ_archs=bfd_sparc_arch ;;
 spu*)            targ_archs=bfd_spu_arch ;;
-strongarm*)	 targ_archs=bfd_arm_arch ;;
-thumb*)		 targ_archs=bfd_arm_arch ;;
 v850*)		 targ_archs=bfd_v850_arch ;;
 x86_64*)	 targ_archs=bfd_i386_arch ;;
-xscale*)	 targ_archs=bfd_arm_arch ;;
 xtensa*)	 targ_archs=bfd_xtensa_arch ;;
 z80|r800)	 targ_archs=bfd_z80_arch ;;
 z8k*)		 targ_archs=bfd_z8k_arch ;;
@@ -275,7 +271,7 @@ case "${targ}" in
     targ_defvec=bfd_elf32_bigarm_vec
     targ_selvecs=bfd_elf32_littlearm_vec
     ;;
-  arm-*-kaos* | strongarm-*-kaos*)
+  arm-*-kaos*)
     targ_defvec=bfd_elf32_littlearm_vec
     targ_selvecs=bfd_elf32_bigarm_vec
     ;;
@@ -296,44 +292,6 @@ case "${targ}" in
   arm9e-*-elf)
     targ_defvec=bfd_elf32_littlearm_vec
     targ_selvecs=bfd_elf32_bigarm_vec
-    ;;
-
-  thumb-*-coff)
-    targ_defvec=armcoff_little_vec
-    targ_selvecs=armcoff_big_vec
-    targ_underscore=yes
-    ;;
-  thumb-*-elf)
-    targ_defvec=bfd_elf32_littlearm_vec
-    targ_selvecs=bfd_elf32_bigarm_vec
-    ;;
-  thumb-epoc-pe*)
-    targ_defvec=arm_epoc_pe_little_vec
-    targ_selvecs="arm_epoc_pe_little_vec arm_epoc_pe_big_vec arm_epoc_pei_little_vec arm_epoc_pei_big_vec"
-    targ_underscore=no
-    ;;
-  thumb-*-pe*)
-    targ_defvec=armpe_little_vec
-    targ_selvecs="armpe_little_vec armpe_big_vec armpei_little_vec armpei_big_vec"
-    targ_underscore=yes
-    ;;
-  strongarm-*-elf)
-    targ_defvec=bfd_elf32_littlearm_vec
-    targ_selvecs=bfd_elf32_bigarm_vec
-    ;;
-  strongarm-*-coff)
-    targ_defvec=armcoff_little_vec
-    targ_selvecs=armcoff_big_vec
-    targ_underscore=yes
-    ;;
-  xscale-*-elf)
-    targ_defvec=bfd_elf32_littlearm_vec
-    targ_selvecs=bfd_elf32_bigarm_vec
-    ;;
-  xscale-*-coff)
-    targ_defvec=armcoff_little_vec
-    targ_selvecs=armcoff_big_vec
-    targ_underscore=yes
     ;;
 
   avr-*-*)

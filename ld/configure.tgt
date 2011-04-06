@@ -97,18 +97,6 @@ arm*-*-uclinux*)	targ_emul=armelf_linux
 			;;
 arm-*-vxworks)		targ_emul=armelf_vxworks ;;
 arm*-*-conix*)		targ_emul=armelf ;;
-thumb-*-linux-* | thumb-*-uclinux*)	targ_emul=armelf_linux; targ_extra_emuls=armelf ;;
-strongarm-*-coff)	targ_emul=armcoff ;;
-strongarm-*-elf)	targ_emul=armelf ;;
-strongarm-*-kaos*)	targ_emul=armelf ;;
-thumb-*-coff)		targ_emul=armcoff ;;
-thumb-*-elf)		targ_emul=armelf ;;
-thumb-epoc-pe)		targ_emul=arm_epoc_pe ;
-			targ_extra_ofiles="deffilep.o pe-dll.o" ;;
-thumb-*-pe)		targ_emul=armpe ;
-			targ_extra_ofiles="deffilep.o pe-dll.o" ;;
-xscale-*-coff)		targ_emul=armcoff ;;
-xscale-*-elf)		targ_emul=armelf
 			;;
 avr-*-*)		targ_emul=avr2
 			targ_extra_emuls="avr1 avr25 avr3 avr31 avr35 avr4 avr5 avr51 avr6 avrxmega1 avrxmega2 avrxmega3 avrxmega4 avrxmega5 avrxmega6 avrxmega7"

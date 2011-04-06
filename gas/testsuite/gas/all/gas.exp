@@ -285,8 +285,8 @@ case $target_triplet in {
 # We omit the ARM toolchains because they define locals to
 #  start with '.', which eliminates .eos, .text etc from the output.
 # Omit c54x, since .tag and .def mean something different on that target
-if {   ([istarget *-*-coff*] && ![istarget *arm*-*-coff] && ![istarget thumb*-*-coff] && ![istarget xscale-*-coff] && ![istarget *c4x*-*-coff] && ![istarget *c54x*-*-coff]) \
-     ||([istarget *-*-pe*] && ![istarget arm*-*-pe*] && ![istarget thumb*-*-pe*]) \
+if {   ([istarget *-*-coff*] && ![istarget arm*-*-coff] && ![istarget *c4x*-*-coff] && ![istarget *c54x*-*-coff]) \
+     ||([istarget *-*-pe*] && ![istarget arm*-*-pe*]) \
      || [istarget i*86-*-aix*] \
      || [istarget i*86-*-sco*] \
      || [istarget i*86-*-isc*] \

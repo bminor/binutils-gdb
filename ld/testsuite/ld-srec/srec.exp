@@ -1,6 +1,6 @@
 # Test linking directly to S-records.
 # By Ian Lance Taylor, Cygnus Support.
-#   Copyright 1999, 2000, 2001, 2002, 2003, 2005, 2006, 2007, 2009
+#   Copyright 1999, 2000, 2001, 2002, 2003, 2005, 2006, 2007, 2009, 2011
 #   Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
@@ -250,15 +250,10 @@ proc run_srec_test { test objs } {
 	setup_xfail "sh64*-*-*"
     }
 
-    if {[istarget arm*-*-*]       || \
-        [istarget strongarm*-*-*] || \
-        [istarget xscale*-*-*]    || \
-        [istarget thumb-*-*] } {
+    if {[istarget arm*-*-*]} {
         # ARM targets cannot convert format in the linker 
         # using the --oformat command line switch
-	setup_xfail "*arm*-*-*"
-	setup_xfail "xscale-*-*"
-	setup_xfail "thumb-*-*"
+	setup_xfail "arm*-*-*"
     }
 
     # V850 targets need libgcc.a
@@ -342,13 +337,8 @@ setup_xfail "*-*-aix*" "*-*-xcoff*"
 
 # The S-record linker doesn't build ARM/Thumb stubs.
 setup_xfail "arm-*-coff"
-setup_xfail "strongarm*-*-coff"
-setup_xfail "xscale*-*-coff"
 setup_xfail "arm-*-pe*"
 # setup_xfail "arm-*elf*"
-setup_xfail "thumb-*-coff*"
-setup_xfail "thumb-*-pe*"
-setup_xfail "thumb-*-elf*"
 setup_xfail "arm*-*-linux*"
 
 # The S-record linker doesn't include the .{zda} sections.
@@ -395,8 +385,6 @@ setup_xfail "i*86-*-aout*"
 setup_xfail "mips*-*-irix5*" "mips*-*-irix6*" "mips*-*-linux*"
 setup_xfail "*-*-aix*" "*-*-xcoff*"
 setup_xfail "arm*-*-*"
-setup_xfail "strongarm*-*-*"
-setup_xfail "thumb-*-*"
 setup_xfail "v850*-*-elf"
 setup_xfail "alpha*-*-elf*" "alpha*-*-linux-*" "alpha*-*-gnu*"
 setup_xfail "alpha*-*-netbsd*"

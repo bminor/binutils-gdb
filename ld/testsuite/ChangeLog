@@ -1,3 +1,17 @@
+2011-04-06  Joseph Myers  <joseph@codesourcery.com>
+
+	* ld-selective/selective.exp (xscale-*-*): Don't handle.
+	* ld-srec/srec.exp (strongarm*-*-*, xscale*-*-*, thumb-*-*): Don't
+	handle.
+	(*arm*-*-*): Change to arm*-*-*.
+	(strongarm*-*-coff, xscale*-*-coff, thumb-*-coff*, thumb-*-pe*,
+	thumb-*-elf*, strongarm*-*-*, thumb-*-*): Remove xfails.
+	* ld-undefined/undefined.exp (thumb*-*-pe*, thumb*-*-pe*): Remove
+	commented-out xfails.
+	(thumb-elf): Remove reference in comment.
+	* lib/ld-lib.exp (strongarm*-*-*, xscale*-*-*, thumb-*-*): Don't
+	handle.
+
 2011-04-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/12627

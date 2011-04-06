@@ -1,3 +1,10 @@
+2011-04-06  Joseph Myers  <joseph@codesourcery.com>
+
+	* configure.tgt (strongarm*be, strongarm*b, strongarm*,
+	xscale*be|xscale*b, xscale*): Remove architectures.
+	(thumb-*-coff, thumb-*-rtems*, thumb-*-elf, thumb-epoc-pe,
+	thumb-*-pe, xscale-*-coff, xscale-*-elf): Remove targets.
+
 2011-04-01  Tristan Gingold  <gingold@adacore.com>
 
 	* config/tc-ia64.c (md_apply_fix): Add a cast to avoid a warning.

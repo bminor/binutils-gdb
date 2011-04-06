@@ -1,3 +1,13 @@
+2011-04-06  Joseph Myers  <joseph@codesourcery.com>
+
+	* gas/all/gas.exp (*arm*-*-coff): Change to arm*-*-coff.
+	(thumb*-*-coff, thumb*-*-pe*): Don;t handle.
+	* gas/arm/arm.exp (*arm*-*-*): Change to arm*-*-*.
+	(*xscale*-*-*): Don't handle.
+	* gas/cfi/cfi.exp (xscale*-*): Don't handle.
+	* gas/elf/elf.exp (*arm*-*-*): Change to arm*-*-*.
+	(xscale*-*-*): Don't handle.
+
 2011-03-31  Bernd Schmidt  <bernds@codesourcery.com>
 
 	* gas/tic6x/scomm-directive-1.s: New test.

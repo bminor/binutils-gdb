@@ -1,3 +1,10 @@
+2011-04-06  Joseph Myers  <joseph@codesourcery.com>
+
+	* configure.tgt (thumb-*-linux-* | thumb-*-uclinux*,
+	strongarm-*-coff, strongarm-*-elf, strongarm-*-kaos*,
+	thumb-*-coff, thumb-*-elf, thumb-epoc-pe, thumb-*-pe,
+	xscale-*-coff, xscale-*-elf): Remove targets.
+
 2011-03-31  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* configure.tgt: Add elf_l1om to targ_extra_libpath for

@@ -80,13 +80,8 @@ case ${cpu} in
   sparclet*)		cpu_type=sparc arch=sparclet ;;
   sparclite*)		cpu_type=sparc arch=sparclite ;;
   sparc*)		cpu_type=sparc arch=sparclite ;; # ??? See tc-sparc.c.
-  strongarm*be)		cpu_type=arm endian=big ;;
-  strongarm*b)		cpu_type=arm endian=big ;;
-  strongarm*)		cpu_type=arm endian=little ;;
   v850*)		cpu_type=v850 ;;
   x86_64*)		cpu_type=i386 arch=x86_64;;
-  xscale*be|xscale*b)	cpu_type=arm endian=big ;;
-  xscale*)		cpu_type=arm endian=little ;;
   xtensa*)		cpu_type=xtensa arch=xtensa ;;
   *)			cpu_type=${cpu} ;;
 esac
@@ -106,9 +101,9 @@ case ${generic_target} in
   arc-*-elf*)				fmt=elf ;;
 
   arm-*-aout)				fmt=aout ;;
-  arm-*-coff | thumb-*-coff)		fmt=coff ;;
-  arm-*-rtems* | thumb-*-rtems*)	fmt=elf ;;
-  arm-*-elf | thumb-*-elf)		fmt=elf ;;
+  arm-*-coff)				fmt=coff ;;
+  arm-*-rtems*)				fmt=elf ;;
+  arm-*-elf)				fmt=elf ;;
   arm-*-eabi*)				fmt=elf em=armeabi ;;
   arm-*-symbianelf*)			fmt=elf em=symbian ;;
   arm-*-kaos*)				fmt=elf ;;
@@ -121,10 +116,10 @@ case ${generic_target} in
   arm-*-netbsdelf*)			fmt=elf  em=nbsd ;;
   arm-*-*n*bsd*)			fmt=aout em=nbsd ;;
   arm-*-nto*)				fmt=elf ;;
-  arm-epoc-pe | thumb-epoc-pe)		fmt=coff em=epoc-pe ;;
+  arm-epoc-pe)				fmt=coff em=epoc-pe ;;
   arm-wince-pe | arm-*-wince | arm*-*-mingw32ce* | arm*-*-cegcc*)
 					fmt=coff em=wince-pe ;;
-  arm-*-pe | thumb-*-pe)		fmt=coff em=pe ;;
+  arm-*-pe)				fmt=coff em=pe ;;
   arm-*-riscix*)			fmt=aout em=riscix ;;
 
   avr-*-*)				fmt=elf bfd_gas=yes ;;
@@ -408,9 +403,6 @@ case ${generic_target} in
 
   vax-*-netbsdelf*)			fmt=elf em=nbsd ;;
   vax-*-linux-*)			fmt=elf em=linux ;;
-
-  xscale-*-coff)			fmt=coff ;;
-  xscale-*-elf)				fmt=elf ;;
 
   xstormy16-*-*)			fmt=elf ;;
 
