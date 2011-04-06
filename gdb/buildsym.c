@@ -1109,6 +1109,12 @@ end_symtab (CORE_ADDR end_addr, struct objfile *objfile, int section)
 	     the symbols.  */
 	  symtab->language = subfile->language;
 
+	  /* Save the debug format string (if any) in the symtab.  */
+	  symtab->debugformat = subfile->debugformat;
+
+	  /* Similarly for the producer.  */
+	  symtab->producer = subfile->producer;
+
 	  /* All symtabs for the main file and the subfiles share a
 	     blockvector, so we need to clear primary for everything
 	     but the main file.  */

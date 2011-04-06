@@ -1,3 +1,9 @@
+2011-04-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix regression of displaying the debug format.
+	* buildsym.c (end_symtab): Set symtab's debugformat and producer from
+	subfile.
+
 2011-04-04  Tom Tromey  <tromey@redhat.com>
 
 	* cli/cli-interp.c (struct captured_execute_command_args):
