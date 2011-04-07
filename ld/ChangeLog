@@ -1,3 +1,7 @@
+2011-04-07  Eric B. Weddington  <eric.weddington@atmel.com>
+
+	* Makefile.in: Regenerate. Remove stray eavrtiny10 rules.
+
 2011-04-07  Joseph Myers  <joseph@codesourcery.com>
 
 	* configure.tgt: Remove stray ;;.
