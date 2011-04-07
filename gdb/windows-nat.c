@@ -41,7 +41,6 @@
 #include <psapi.h>
 #ifdef __CYGWIN__
 #include <sys/cygwin.h>
-#include <cygwin/version.h>
 #endif
 #include <signal.h>
 
@@ -112,7 +111,6 @@ static struct target_ops windows_ops;
 /* The starting and ending address of the cygwin1.dll text segment.  */
   static CORE_ADDR cygwin_load_start;
   static CORE_ADDR cygwin_load_end;
-# if CYGWIN_VERSION_DLL_MAKE_COMBINED(CYGWIN_VERSION_API_MAJOR,CYGWIN_VERSION_API_MINOR) >= 181
 #   define __USEWIDE
     typedef wchar_t cygwin_buf_t;
     static DWORD WINAPI (*GetModuleFileNameEx) (HANDLE, HMODULE,
@@ -121,21 +119,6 @@ static struct target_ops windows_ops;
 #   define CreateProcess CreateProcessW
 #   define GetModuleFileNameEx_name "GetModuleFileNameExW"
 #   define bad_GetModuleFileNameEx bad_GetModuleFileNameExW
-# else
-#   define CCP_POSIX_TO_WIN_W 1
-#   define CCP_WIN_W_TO_POSIX 3
-#   define cygwin_conv_path(op, from, to, size)  \
-         (op == CCP_WIN_W_TO_POSIX) ? \
-         cygwin_conv_to_full_posix_path (from, to) : \
-         cygwin_conv_to_win32_path (from, to)
-    typedef char cygwin_buf_t;
-    static DWORD WINAPI (*GetModuleFileNameEx) (HANDLE, HMODULE, LPSTR, DWORD);
-#   define STARTUPINFO STARTUPINFOA
-#   define CreateProcess CreateProcessA
-#   define GetModuleFileNameEx_name "GetModuleFileNameExA"
-#   define bad_GetModuleFileNameEx bad_GetModuleFileNameExA
-#   define CW_SET_DOS_FILE_WARNING -1	/* no-op this for older Cygwin */
-# endif
 #endif
 
 static int have_saved_context;	/* True if we've saved context from a

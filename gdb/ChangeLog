@@ -1,3 +1,11 @@
+2011-04-07  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	Remove support for old Cygwin 1.5 versions.
+	* remote-fileio.c: Remove macros used to emulate new cygwin_conv_path
+	function on old Cygwin version.
+	* windows-nat.c: Remove cygwin version check and always define
+	__USEWIDE for Cygwin compilation.
+
 2011-04-07  Yao Qi  <yao@codesourcery.com>
 
 	* arm-linux-tdep.c (arm_linux_copy_svc): Remove parameters INSN
