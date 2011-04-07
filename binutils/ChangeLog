@@ -1,3 +1,13 @@
+2011-04-07  Paul Brook  <paul@codesourcery.com>
+
+	* readelf.c (arm_section_get_word): Handle C6000 relocations.
+	(decode_tic6x_unwind_regmask, decode_arm_unwind_bytecode,
+	decode_tic6x_unwind_bytecode, expand_prel31): New functions.
+	(decode_arm_unwind): Split out common code from ARM specific bits.
+	(dump_arm_unwind): Use expand_prel31.
+	(arm_process_unwind): Handle SHT_C6000_UNWIND sections.
+	(process_unwind): Add SHT_C6000_UNWIND.
+
 2011-04-06  Joseph Myers  <joseph@codesourcery.com>
 
 	* configure.in (thumb-*-pe*): Remove.

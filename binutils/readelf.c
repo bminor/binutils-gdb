@@ -6311,12 +6311,26 @@ arm_section_get_word (struct arm_unw_aux_info *aux,
       if (rp->r_offset < word_offset)
 	continue;
 
-      relname = elf_arm_reloc_type (ELF32_R_TYPE (rp->r_info));
+      switch (elf_header.e_machine)
+	{
+	case EM_ARM:
+	  relname = elf_arm_reloc_type (ELF32_R_TYPE (rp->r_info));
+	  break;
 
-      if (streq (relname, "R_ARM_NONE"))
+	case EM_TI_C6000:
+	  relname = elf_tic6x_reloc_type (ELF32_R_TYPE (rp->r_info));
+	  break;
+
+	default:
+	    abort();
+	}
+
+      if (streq (relname, "R_ARM_NONE")
+	  || streq (relname, "R_C6000_NONE"))
 	continue;
 
-      if (! streq (relname, "R_ARM_PREL31"))
+      if (!(streq (relname, "R_ARM_PREL31")
+	    || streq (relname, "R_C6000_PREL31")))
 	{
 	  warn (_("Skipping unexpected relocation type %s\n"), relname);
 	  continue;
@@ -6336,6 +6350,9 @@ arm_section_get_word (struct arm_unw_aux_info *aux,
       offset += sym->st_value;
       prelval = offset - (arm_sec->sec->sh_addr + rp->r_offset);
 
+      if (streq (relname, "R_C6000_PREL31"))
+	prelval >>= 1;
+
       word = (word & ~ (bfd_vma) 0x7fffffff) | (prelval & 0x7fffffff);
       addr->section = sym->st_shndx;
       addr->offset = offset;
@@ -6348,15 +6365,26 @@ arm_section_get_word (struct arm_unw_aux_info *aux,
   return 1;
 }
 
+static const char *tic6x_unwind_regnames[16] = {
+    "A15", "B15", "B14", "B13", "B12", "B11", "B10", "B3", 
+    "A14", "A13", "A12", "A11", "A10", 
+    "[invalid reg 13]", "[invalid reg 14]", "[invalid reg 15]"};
+
 static void
-decode_arm_unwind (struct arm_unw_aux_info *aux,
-		   unsigned int word, unsigned int remaining,
-		   bfd_vma data_offset, Elf_Internal_Shdr *data_sec,
-		   struct arm_section *data_arm_sec)
+decode_tic6x_unwind_regmask (unsigned int mask)
 {
-  int per_index;
-  unsigned int more_words;
-  struct absaddr addr;
+  int i;
+
+  for (i = 12; mask; mask >>= 1, i--)
+    {
+      if (mask & 1)
+	{
+	  fputs (tic6x_unwind_regnames[i], stdout);
+	  if (mask > 1)
+	    fputs (", ", stdout);
+	}
+    }
+}
 
 #define ADVANCE							\
   if (remaining == 0 && more_words)				\
@@ -6384,77 +6412,14 @@ decode_arm_unwind (struct arm_unw_aux_info *aux,
     }					\
   printf ("0x%02x ", OP)
 
-  if (remaining == 0)
-    {
-      /* Fetch the first word.  */
-      if (!arm_section_get_word (aux, data_arm_sec, data_sec, data_offset,
-				 &word, &addr))
-	return;
-      remaining = 4;
-    }
-
-  if ((word & 0x80000000) == 0)
-    {
-      /* Expand prel31 for personality routine.  */
-      bfd_vma fn;
-      const char *procname;
-
-      fn = word;
-      if (fn & 0x40000000)
-	fn |= ~ (bfd_vma) 0x7fffffff;
-      fn = fn + data_sec->sh_addr + data_offset;
-
-      printf (_("  Personality routine: "));
-      procname = arm_print_vma_and_name (aux, fn, addr);
-      fputc ('\n', stdout);
-
-      /* The GCC personality routines use the standard compact
-	 encoding, starting with one byte giving the number of
-	 words.  */
-      if (procname != NULL
-	  && (const_strneq (procname, "__gcc_personality_v0")
-	      || const_strneq (procname, "__gxx_personality_v0")
-	      || const_strneq (procname, "__gcj_personality_v0")
-	      || const_strneq (procname, "__gnu_objc_personality_v0")))
-	{
-	  remaining = 0;
-	  more_words = 1;
-	  ADVANCE;
-	  if (!remaining)
-	    {
-	      printf (_("  [Truncated data]\n"));
-	      return;
-	    }
-	  more_words = word >> 24;
-	  word <<= 8;
-	  remaining--;
-	}
-      else
-	return;
-    }
-  else
-    {
-      per_index = (word >> 24) & 0x7f;
-      if (per_index != 0 && per_index != 1 && per_index != 2)
-	{
-	  printf (_("  [reserved compact index %d]\n"), per_index);
-	  return;
-	}
-
-      printf (_("  Compact model %d\n"), per_index);
-      if (per_index == 0)
-	{
-	  more_words = 0;
-	  word <<= 8;
-	  remaining--;
-	}
-      else
-	{
-	  more_words = (word >> 16) & 0xff;
-	  word <<= 16;
-	  remaining -= 2;
-	}
-    }
+static void
+decode_arm_unwind_bytecode (struct arm_unw_aux_info *aux,
+			    unsigned int word, unsigned int remaining,
+			    unsigned int more_words,
+			    bfd_vma data_offset, Elf_Internal_Shdr *data_sec,
+			    struct arm_section *data_arm_sec)
+{
+  struct absaddr addr;
 
   /* Decode the unwinding instructions.  */
   while (1)
@@ -6652,6 +6617,271 @@ decode_arm_unwind (struct arm_unw_aux_info *aux,
 	printf (_("     [unsupported opcode]"));
       printf ("\n");
     }
+}
+
+static void
+decode_tic6x_unwind_bytecode (struct arm_unw_aux_info *aux,
+			    unsigned int word, unsigned int remaining,
+			    unsigned int more_words,
+			    bfd_vma data_offset, Elf_Internal_Shdr *data_sec,
+			    struct arm_section *data_arm_sec)
+{
+  struct absaddr addr;
+
+  /* Decode the unwinding instructions.  */
+  while (1)
+    {
+      unsigned int op, op2;
+
+      ADVANCE;
+      if (remaining == 0)
+	break;
+      remaining--;
+      op = word >> 24;
+      word <<= 8;
+
+      printf (_("  0x%02x "), op);
+
+      if ((op & 0xc0) == 0x00)
+	{
+	  int offset = ((op & 0x3f) << 3) + 8;
+	  printf (_("     sp = sp + %d"), offset);
+	}
+      else if ((op & 0xc0) == 0x80)
+	{
+	  GET_OP (op2);
+	  if (op == 0x80 && op2 == 0)
+	    printf (_("Refuse to unwind"));
+	  else
+	    {
+	      unsigned int mask = ((op & 0x1f) << 8) | op2;
+	      if (op & 0x20)
+		printf ("pop compact {");
+	      else
+		printf ("pop {");
+
+	      decode_tic6x_unwind_regmask (mask);
+	      printf("}");
+	    }
+	}
+      else if ((op & 0xf0) == 0xc0)
+	{
+	  unsigned int reg;
+	  unsigned int nregs;
+	  unsigned int i;
+	  const char *name;
+	  struct {
+	      unsigned int offset;
+	      unsigned int reg;
+	  } regpos[16];
+
+	  /* Scan entire instruction first so that GET_OP output is not
+	     interleaved with disassembly.  */
+	  nregs = 0;
+	  for (i = 0; nregs < (op & 0xf); i++)
+	    {
+	      GET_OP (op2);
+	      reg = op2 >> 4;
+	      if (reg != 0xf)
+		{
+		  regpos[nregs].offset = i * 2;
+		  regpos[nregs].reg = reg;
+		  nregs++;
+		}
+
+	      reg = op2 & 0xf;
+	      if (reg != 0xf)
+		{
+		  regpos[nregs].offset = i * 2 + 1;
+		  regpos[nregs].reg = reg;
+		  nregs++;
+		}
+	    }
+
+	  printf (_("pop frame {"));
+	  reg = nregs - 1;
+	  for (i = i * 2; i > 0; i--)
+	    {
+	      if (regpos[reg].offset == i - 1)
+		{
+		  name = tic6x_unwind_regnames[regpos[reg].reg];
+		  if (reg > 0)
+		    reg--;
+		}
+	      else
+		name = _("[pad]");
+
+	      fputs (name, stdout);
+	      if (i > 1)
+		printf (", ");
+	    }
+
+	  printf ("}");
+	}
+      else if (op == 0xd0)
+	printf ("     MOV FP, SP");
+      else if (op == 0xd1)
+	printf ("     __c6xabi_pop_rts");
+      else if (op == 0xd2)
+	{
+	  unsigned char buf[9];
+	  unsigned int i, len;
+	  unsigned long offset;
+	  for (i = 0; i < sizeof (buf); i++)
+	    {
+	      GET_OP (buf[i]);
+	      if ((buf[i] & 0x80) == 0)
+		break;
+	    }
+	  assert (i < sizeof (buf));
+	  offset = read_uleb128 (buf, &len);
+	  assert (len == i + 1);
+	  offset = offset * 8 + 0x408;
+	  printf (_("sp = sp + %ld"), offset);
+	}
+      else if ((op & 0xf0) == 0xe0)
+	{
+	  if ((op & 0x0f) == 7)
+	    printf ("     RETURN");
+	  else
+	    printf ("     MV %s, B3", tic6x_unwind_regnames[op & 0x0f]);
+	}
+      else
+	{
+	  printf (_("     [unsupported opcode]"));
+	}
+      putchar ('\n');
+    }
+}
+
+static bfd_vma
+expand_prel31 (bfd_vma word, bfd_vma where)
+{
+  bfd_vma offset;
+
+  offset = word & 0x7fffffff;
+  if (offset & 0x40000000)
+    offset |= ~ (bfd_vma) 0x7fffffff;
+
+  if (elf_header.e_machine == EM_TI_C6000)
+    offset <<= 1;
+
+  return offset + where;
+}
+
+static void
+decode_arm_unwind (struct arm_unw_aux_info *aux,
+		   unsigned int word, unsigned int remaining,
+		   bfd_vma data_offset, Elf_Internal_Shdr *data_sec,
+		   struct arm_section *data_arm_sec)
+{
+  int per_index;
+  unsigned int more_words = 0;
+  struct absaddr addr;
+
+  if (remaining == 0)
+    {
+      /* Fetch the first word.  */
+      if (!arm_section_get_word (aux, data_arm_sec, data_sec, data_offset,
+				 &word, &addr))
+	return;
+      remaining = 4;
+    }
+
+  if ((word & 0x80000000) == 0)
+    {
+      /* Expand prel31 for personality routine.  */
+      bfd_vma fn;
+      const char *procname;
+
+      fn = expand_prel31 (word, data_sec->sh_addr + data_offset);
+      printf (_("  Personality routine: "));
+      procname = arm_print_vma_and_name (aux, fn, addr);
+      fputc ('\n', stdout);
+
+      /* The GCC personality routines use the standard compact
+	 encoding, starting with one byte giving the number of
+	 words.  */
+      if (procname != NULL
+	  && (const_strneq (procname, "__gcc_personality_v0")
+	      || const_strneq (procname, "__gxx_personality_v0")
+	      || const_strneq (procname, "__gcj_personality_v0")
+	      || const_strneq (procname, "__gnu_objc_personality_v0")))
+	{
+	  remaining = 0;
+	  more_words = 1;
+	  ADVANCE;
+	  if (!remaining)
+	    {
+	      printf (_("  [Truncated data]\n"));
+	      return;
+	    }
+	  more_words = word >> 24;
+	  word <<= 8;
+	  remaining--;
+	  per_index = -1;
+	}
+      else
+	return;
+    }
+  else
+    {
+      
+      per_index = (word >> 24) & 0x7f;
+      printf (_("  Compact model %d\n"), per_index);
+      if (per_index == 0)
+	{
+	  more_words = 0;
+	  word <<= 8;
+	  remaining--;
+	}
+      else if (per_index < 3)
+	{
+	  more_words = (word >> 16) & 0xff;
+	  word <<= 16;
+	  remaining -= 2;
+	}
+    }
+
+  switch (elf_header.e_machine)
+    {
+    case EM_ARM:
+      if (per_index < 3)
+	{
+	  decode_arm_unwind_bytecode (aux, word, remaining, more_words,
+				      data_offset, data_sec, data_arm_sec);
+	}
+      else
+	printf ("  [reserved]\n");
+      break;
+
+    case EM_TI_C6000:
+      if (per_index < 3)
+	{
+	  decode_tic6x_unwind_bytecode (aux, word, remaining, more_words,
+				      data_offset, data_sec, data_arm_sec);
+	}
+      else if (per_index < 5)
+	{
+	  if (((word >> 17) & 0x7f) == 0x7f)
+	    printf (_("  Restore stack from frame pointer\n"));
+	  else
+	    printf (_("  Stack increment %d\n"), (word >> 14) & 0x1fc);
+	  printf (_("  Registers restored: "));
+	  if (per_index == 4)
+	    printf (" (compact) ");
+	  decode_tic6x_unwind_regmask ((word >> 4) & 0x1fff);
+	  putchar ('\n');
+	  printf (_("  Return register: %s\n"),
+		  tic6x_unwind_regnames[word & 0xf]);
+	}
+      else
+	printf ("  [reserved]\n");
+      break;
+
+    default:
+      abort ();
+    }
 
   /* Decode the descriptors.  Not implemented.  */
 }
@@ -6684,10 +6914,7 @@ dump_arm_unwind (struct arm_unw_aux_info *aux, Elf_Internal_Shdr *exidx_sec)
 	  return;
 	}
 
-      fn = exidx_fn & 0x7fffffff;
-      if (fn & 0x40000000)
-	fn |= ~ (bfd_vma) 0x7fffffff;
-      fn = fn + exidx_sec->sh_addr + 8 * i;
+      fn = expand_prel31 (exidx_fn, exidx_sec->sh_addr + 8 * i);
 
       arm_print_vma_and_name (aux, fn, entry_addr);
       fputs (": ", stdout);
@@ -6709,10 +6936,7 @@ dump_arm_unwind (struct arm_unw_aux_info *aux, Elf_Internal_Shdr *exidx_sec)
 	  Elf_Internal_Shdr *table_sec;
 
 	  fputs ("@", stdout);
-	  table = exidx_entry;
-	  if (table & 0x40000000)
-	    table |= ~ (bfd_vma) 0x7fffffff;
-	  table = table + exidx_sec->sh_addr + 8 * i + 4;
+	  table = expand_prel31 (exidx_entry, exidx_sec->sh_addr + 8 * i + 4);
 	  print_vma (table, PREFIX_HEX);
 	  printf ("\n");
 
@@ -6746,6 +6970,7 @@ dump_arm_unwind (struct arm_unw_aux_info *aux, Elf_Internal_Shdr *exidx_sec)
   arm_free_section (&extab_arm_sec);
 }
 
+/* Used for both ARM and C6X unwinding tables.  */
 static int
 arm_process_unwind (FILE *file)
 {
@@ -6754,9 +6979,24 @@ arm_process_unwind (FILE *file)
   Elf_Internal_Shdr *strsec;
   Elf_Internal_Shdr *sec;
   unsigned long i;
+  unsigned int sec_type;
 
   memset (& aux, 0, sizeof (aux));
   aux.file = file;
+
+  switch (elf_header.e_machine)
+    {
+    case EM_ARM:
+      sec_type = SHT_ARM_EXIDX;
+      break;
+
+    case EM_TI_C6000:
+      sec_type = SHT_C6000_UNWIND;
+      break;
+
+    default:
+	abort();
+    }
 
   if (string_table == NULL)
     return 1;
@@ -6773,7 +7013,7 @@ arm_process_unwind (FILE *file)
 				 1, strsec->sh_size, _("string table"));
 	  aux.strtab_size = aux.strtab != NULL ? strsec->sh_size : 0;
 	}
-      else if (sec->sh_type == SHT_ARM_EXIDX)
+      else if (sec->sh_type == sec_type)
 	unwsec = sec;
     }
 
@@ -6782,7 +7022,7 @@ arm_process_unwind (FILE *file)
 
   for (i = 0, sec = section_headers; i < elf_header.e_shnum; ++i, ++sec)
     {
-      if (sec->sh_type == SHT_ARM_EXIDX)
+      if (sec->sh_type == sec_type)
 	{
 	  printf (_("\nUnwind table index '%s' at offset 0x%lx contains %lu entries:\n"),
 		  SECTION_NAME (sec),
@@ -6813,6 +7053,7 @@ process_unwind (FILE * file)
     { EM_ARM, arm_process_unwind },
     { EM_IA_64, ia64_process_unwind },
     { EM_PARISC, hppa_process_unwind },
+    { EM_TI_C6000, arm_process_unwind },
     { 0, 0 }
   };
   int i;
