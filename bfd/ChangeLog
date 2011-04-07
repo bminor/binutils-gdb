@@ -1,3 +1,11 @@
+2011-04-07  Paul Brook  <paul@codesourcery.com>
+ 
+	* elf32-tic6x.c (elf32_tic6x_howto_table): R_C6000_PREL31 is
+	pc-relative.
+	(elf32_tic6x_howto_table_rel): Ditto.
+	(elf32_tic6x_relocate_section): Implement R_C6000_PREL31.
+	(elf32_tic6x_check_relocs): Ditto.
+
 2011-04-06  Joseph Myers  <joseph@codesourcery.com>
 
 	* config.bfd (thumb-*-oabi): Don't handle in list of obsolete

@@ -433,7 +433,7 @@ static reloc_howto_type elf32_tic6x_howto_table[] =
 	 1,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 31,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 TRUE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont,/* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
@@ -441,7 +441,7 @@ static reloc_howto_type elf32_tic6x_howto_table[] =
 	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0x7fffffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 TRUE),			/* pcrel_offset */
   HOWTO (R_C6000_COPY,		/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -1005,7 +1005,7 @@ static reloc_howto_type elf32_tic6x_howto_table_rel[] =
 	 1,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 31,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 TRUE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont,/* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
@@ -1013,7 +1013,7 @@ static reloc_howto_type elf32_tic6x_howto_table_rel[] =
 	 TRUE,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0x7fffffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 TRUE),			/* pcrel_offset */
   HOWTO (R_C6000_COPY,		/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -2440,12 +2440,15 @@ elf32_tic6x_relocate_section (bfd *output_bfd,
 	  break;
 
 	case R_C6000_PREL31:
-	  /* Shared libraries and exception handling support not
-	     implemented.  */
-	  (*_bfd_error_handler) (_("%B: relocation type %d not implemented"),
-				 input_bfd, r_type);
-	  ok = FALSE;
-	  continue;
+	  if (h != NULL
+	      && h->plt.offset != (bfd_vma) -1
+	      && htab->elf.splt != NULL)
+	    {
+	      relocation = (htab->elf.splt->output_section->vma
+			    + htab->elf.splt->output_offset
+			    + h->plt.offset);
+	    }
+	  break;
 
 	case R_C6000_COPY:
 	  /* Invalid in relocatable object.  */
@@ -2623,6 +2626,7 @@ elf32_tic6x_check_relocs (bfd *abfd, struct bfd_link_info *info,
       switch (r_type)
 	{
 	case R_C6000_PCR_S21:
+	case R_C6000_PREL31:
 	  /* This symbol requires a procedure linkage table entry.  We
 	     actually build the entry in adjust_dynamic_symbol,
 	     because this might be a case of linking PIC code which is
