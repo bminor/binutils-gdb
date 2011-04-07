@@ -5493,8 +5493,16 @@ cleanup_branch (struct gdbarch *gdbarch, struct regcache *regs,
 
   if (dsc->u.branch.link)
     {
-      ULONGEST pc = displaced_read_reg (regs, dsc, ARM_PC_REGNUM);
-      displaced_write_reg (regs, dsc, ARM_LR_REGNUM, pc - 4, CANNOT_WRITE_PC);
+      /* The value of LR should be the next insn of current one.  In order
+       not to confuse logic hanlding later insn `bx lr', if current insn mode
+       is Thumb, the bit 0 of LR value should be set to 1.  */
+      ULONGEST next_insn_addr = dsc->insn_addr + dsc->insn_size;
+
+      if (dsc->is_thumb)
+	next_insn_addr |= 0x1;
+
+      displaced_write_reg (regs, dsc, ARM_LR_REGNUM, next_insn_addr,
+			   CANNOT_WRITE_PC);
     }
 
   displaced_write_reg (regs, dsc, ARM_PC_REGNUM, dsc->u.branch.dest, write_pc);

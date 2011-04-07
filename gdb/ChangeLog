@@ -1,3 +1,8 @@
+2011-04-07  Yao Qi  <yao@codesourcery.com>
+
+	* arm-tdep.c (cleanup_branch): Set a correct return address in
+	LR for ARM and Thumb.
+
 2011-04-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Code cleanup.
