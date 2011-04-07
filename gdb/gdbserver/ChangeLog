@@ -1,3 +1,11 @@
+2011-04-07  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	Remove support for old Cygwin 1.5 versions.
+	* win32-low.c (win32_create_inferior): Use new cygwin_path_list
+	function to avoid warning.
+	(win32_add_one_solib): Use cygwin_conv_path function to avoid
+	warning.
+
 2011-03-18  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* gdbserver/server.h (Macro _): Define it if not available.
