@@ -1,5 +1,15 @@
 2011-04-07  Yao Qi  <yao@codesourcery.com>
 
+	* arm-linux-tdep.c (arm_linux_copy_svc): Remove parameters INSN
+	and TO.
+	* arm-tdep.c (cleanup_svc): Handle variable instruction size.
+	(arm_copy_svc): Remove parameters INSN and TO.
+	(decode_svc_copro): Update caller.
+	* arm-tdep.h (struct displaced_step_closure): Remove parameters
+	from function pointer `copy_svc_os'.
+
+2011-04-07  Yao Qi  <yao@codesourcery.com>
+
 	* arm-tdep.c (cleanup_branch): Set a correct return address in
 	LR for ARM and Thumb.
 

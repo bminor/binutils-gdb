@@ -6358,7 +6358,7 @@ static void
 cleanup_svc (struct gdbarch *gdbarch, struct regcache *regs,
 	     struct displaced_step_closure *dsc)
 {
-  CORE_ADDR resume_addr = dsc->insn_addr + 4;
+  CORE_ADDR resume_addr = dsc->insn_addr + dsc->insn_size;
 
   if (debug_displaced)
     fprintf_unfiltered (gdb_stdlog, "displaced: cleanup for svc, resume at "
@@ -6368,12 +6368,9 @@ cleanup_svc (struct gdbarch *gdbarch, struct regcache *regs,
 }
 
 static int
-copy_svc (struct gdbarch *gdbarch, uint32_t insn, CORE_ADDR to,
+copy_svc (struct gdbarch *gdbarch, uint32_t insn,
 	  struct regcache *regs, struct displaced_step_closure *dsc)
 {
-  /* Allow OS-specific code to override SVC handling.  */
-  if (dsc->u.svc.copy_svc_os)
-    return dsc->u.svc.copy_svc_os (gdbarch, insn, to, regs, dsc);
 
   if (debug_displaced)
     fprintf_unfiltered (gdb_stdlog, "displaced: copying svc insn %.8lx\n",
@@ -6385,12 +6382,19 @@ copy_svc (struct gdbarch *gdbarch, uint32_t insn, CORE_ADDR to,
 
   dsc->modinsn[0] = insn;
 
-  dsc->cleanup = &cleanup_svc;
   /* Pretend we wrote to the PC, so cleanup doesn't set PC to the next
      instruction.  */
   dsc->wrote_to_pc = 1;
 
-  return 0;
+  /* Allow OS-specific code to override SVC handling.  */
+  if (dsc->u.svc.copy_svc_os)
+    return dsc->u.svc.copy_svc_os (gdbarch, regs, dsc);
+  else
+    {
+      dsc->cleanup = &cleanup_svc;
+      return 0;
+    }
+
 }
 
 /* Copy undefined instructions.  */
@@ -6843,7 +6847,7 @@ decode_svc_copro (struct gdbarch *gdbarch, uint32_t insn, CORE_ADDR to,
   else if ((op1 & 0x31) == 0x21 && op && (coproc & 0xe) != 0xa)
     return copy_unmodified (gdbarch, insn, "mrc/mrc2", dsc);
   else if ((op1 & 0x30) == 0x30)
-    return copy_svc (gdbarch, insn, to, regs, dsc);
+    return copy_svc (gdbarch, insn, regs, dsc);
   else
     return copy_undef (gdbarch, insn, dsc);  /* Possibly unreachable.  */
 }

@@ -258,8 +258,7 @@ struct displaced_step_closure
     {
       /* If non-NULL, override generic SVC handling (e.g. for a particular
          OS).  */
-      int (*copy_svc_os) (struct gdbarch *gdbarch, uint32_t insn, CORE_ADDR to,
-			  struct regcache *regs,
+      int (*copy_svc_os) (struct gdbarch *gdbarch, struct regcache *regs,
 			  struct displaced_step_closure *dsc);
     } svc;
   } u;
