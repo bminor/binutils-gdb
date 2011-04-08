@@ -1,3 +1,9 @@
+2011-04-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/12654
+	* elf32-i386.c (elf_i386_relocate_section): Check !executable
+	instead of shared for R_386_TLS_LDO_32.
+
 2011-04-08  Tristan Gingold  <gingold@adacore.com>
 
 	* Makefile.am (SOURCE_HFILES): Remove xcoff-target.h
