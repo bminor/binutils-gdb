@@ -1,3 +1,8 @@
+2011-04-08  Hector Oron  <hector.oron@gmail.com>
+
+	PR ld/12643
+	* configure.tgt: Add support for arm-*-gnueabihf targets.
+
 2011-04-07  Eric B. Weddington  <eric.weddington@atmel.com>
 
 	* Makefile.in: Regenerate. Remove stray eavrtiny10 rules.
