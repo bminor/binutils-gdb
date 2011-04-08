@@ -1,3 +1,8 @@
+2011-04-08  Steve Ellcey  <sje@cup.hp.com>
+
+	* Add default_frame_unwind_stop_reason value to libunwind_frame_unwind
+	initalization.
+
 2011-04-03  Joel Brobecker  <brobecker@adacore.com>
 
 	* configure.ac: Disable -Werror by default.
