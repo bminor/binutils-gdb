@@ -711,7 +711,7 @@ SOURCE_HFILES = \
 	libnlm.h liboasys.h libpei.h libxcoff.h mach-o.h \
 	netbsd.h nlm-target.h nlmcode.h nlmswap.h ns32k.h \
 	pef.h pef-traceback.h peicode.h som.h version.h \
-	vms.h xcoff-target.h xsym.h
+	vms.h xsym.h
 
 ## ... and all .h files which are in the build tree.
 BUILD_HFILES = \

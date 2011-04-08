@@ -1,9 +1,16 @@
+2011-04-08  Tristan Gingold  <gingold@adacore.com>
+
+	* Makefile.am (SOURCE_HFILES): Remove xcoff-target.h
+	* coff-pmac: Remove
+	* xcoff-target.h: Remove
+	* Makefile.in: Regenerate.
+
 2011-04-07  Cary Coutant  <ccoutant@google.com>
 
 	* dwarf2.c (scan_unit_for_symbols): Check for DW_AT_specification.
 
 2011-04-07  Paul Brook  <paul@codesourcery.com>
- 
+
 	* elf32-tic6x.c (elf32_tic6x_howto_table): R_C6000_PREL31 is
 	pc-relative.
 	(elf32_tic6x_howto_table_rel): Ditto.
