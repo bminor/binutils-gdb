@@ -1,3 +1,8 @@
+2011-04-08  John Marino  <binutils@marino.st>
+
+	* arlex.l: Prevent redefinition of YY_NO_UNPUT.
+	* syslex.l: Likewise.
+
 2011-04-07  Paul Brook  <paul@codesourcery.com>
 
 	* readelf.c (arm_section_get_word): Handle C6000 relocations.

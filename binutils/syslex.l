@@ -1,7 +1,7 @@
 %option noinput nounput
 
 %{
-/* Copyright 2001, 2003, 2005, 2007 Free Software Foundation, Inc.
+/* Copyright 2001, 2003, 2005, 2007, 2011 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -30,7 +30,9 @@
 #endif
 #include "sysinfo.h"
 
+#ifndef YY_NO_UNPUT
 #define YY_NO_UNPUT
+#endif
 
 #ifndef yywrap
 static int yywrap (void) { return 1; }
