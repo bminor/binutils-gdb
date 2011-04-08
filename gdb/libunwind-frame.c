@@ -237,6 +237,7 @@ libunwind_find_dyn_list (unw_addr_space_t as, unw_dyn_info_t *di, void *arg)
 static const struct frame_unwind libunwind_frame_unwind =
 {
   NORMAL_FRAME,
+  default_frame_unwind_stop_reason,
   libunwind_frame_this_id,
   libunwind_frame_prev_register,
   NULL,
