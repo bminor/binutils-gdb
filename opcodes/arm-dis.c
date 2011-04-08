@@ -45,6 +45,14 @@
 #define NUM_ELEM(a)     (sizeof (a) / sizeof (a)[0])
 #endif
 
+/* Cached mapping symbol state.  */
+enum map_type
+{
+  MAP_ARM,
+  MAP_THUMB,
+  MAP_DATA
+};
+
 struct arm_private_data
 {
   /* The features to use when disassembling optional instructions.  */
@@ -53,6 +61,13 @@ struct arm_private_data
   /* Whether any mapping symbols are present in the provided symbol
      table.  -1 if we do not know yet, otherwise 0 or 1.  */
   int has_mapping_symbols;
+
+  /* Track the last type (although this doesn't seem to be useful) */
+  enum map_type last_type;
+
+  /* Tracking symbol table information */
+  int last_mapping_sym;
+  bfd_vma last_mapping_addr;
 };
 
 struct opcode32
@@ -1641,18 +1656,6 @@ static unsigned int ifthen_next_state;
 /* The address of the insn for which the IT state is valid.  */
 static bfd_vma ifthen_address;
 #define IFTHEN_COND ((ifthen_state >> 4) & 0xf)
-
-/* Cached mapping symbol state.  */
-enum map_type
-{
-  MAP_ARM,
-  MAP_THUMB,
-  MAP_DATA
-};
-
-enum map_type last_type;
-int last_mapping_sym = -1;
-bfd_vma last_mapping_addr = 0;
 
 
 /* Functions.  */
@@ -4635,6 +4638,8 @@ print_insn (bfd_vma pc, struct disassemble_info *info, bfd_boolean little)
       select_arm_features (info->mach, & private.features);
 
       private.has_mapping_symbols = -1;
+      private.last_mapping_sym = -1;
+      private.last_mapping_addr = 0;
 
       info->private_data = & private;
     }
@@ -4658,8 +4663,8 @@ print_insn (bfd_vma pc, struct disassemble_info *info, bfd_boolean little)
       /* Start scanning at the start of the function, or wherever
 	 we finished last time.  */
       start = info->symtab_pos + 1;
-      if (start < last_mapping_sym)
-	start = last_mapping_sym;
+      if (start < private_data->last_mapping_sym)
+	start = private_data->last_mapping_sym;
       found = FALSE;
 
       /* First, look for mapping symbols.  */
@@ -4754,10 +4759,10 @@ print_insn (bfd_vma pc, struct disassemble_info *info, bfd_boolean little)
 	    }
 	}
 
-      last_mapping_sym = last_sym;
-      last_type = type;
-      is_thumb = (last_type == MAP_THUMB);
-      is_data = (last_type == MAP_DATA);
+      private_data->last_mapping_sym = last_sym;
+      private_data->last_type = type;
+      is_thumb = (private_data->last_type == MAP_THUMB);
+      is_data = (private_data->last_type == MAP_DATA);
 
       /* Look a little bit ahead to see if we should print out
 	 two or four bytes of data.  If there's a symbol,

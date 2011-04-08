@@ -1,3 +1,7 @@
+2011-04-07  Paul Carroll<pcarroll@codesourcery.com>
+
+	* arm-dis.c (print_insn): init vars moved into private_data structure.
+
 2011-03-24  Mike Frysinger  <vapier@gentoo.org>
 
 	* bfin-dis.c (decode_dsp32mac_0): Move MM zeroing down to MAC0 logic.
