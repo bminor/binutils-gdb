@@ -57,6 +57,7 @@
 #include "vec.h"
 #include "c-lang.h"
 #include "valprint.h"
+#include <ctype.h>
 
 #include <fcntl.h>
 #include "gdb_string.h"
@@ -6236,6 +6237,81 @@ dwarf2_record_block_ranges (struct die_info *die, struct block *block,
     }
 }
 
+/* Check for GCC PR debug/45124 fix which is not present in any G++ version up
+   to 4.5.any while it is present already in G++ 4.6.0 - the PR has been fixed
+   during 4.6.0 experimental.  */
+
+static int
+producer_is_gxx_lt_4_6 (struct dwarf2_cu *cu)
+{
+  const char *cs;
+  int major, minor, release;
+
+  if (cu->producer == NULL)
+    {
+      /* For unknown compilers expect their behavior is DWARF version
+	 compliant.
+
+	 GCC started to support .debug_types sections by -gdwarf-4 since
+	 gcc-4.5.x.  As the .debug_types sections are missing DW_AT_producer
+	 for their space efficiency GDB cannot workaround gcc-4.5.x -gdwarf-4
+	 combination.  gcc-4.5.x -gdwarf-4 binaries have DW_AT_accessibility
+	 interpreted incorrectly by GDB now - GCC PR debug/48229.  */
+
+      return 0;
+    }
+
+  /* Skip any identifier after "GNU " - such as "C++" or "Java".  */
+
+  if (strncmp (cu->producer, "GNU ", strlen ("GNU ")) != 0)
+    {
+      /* For non-GCC compilers expect their behavior is DWARF version
+	 compliant.  */
+
+      return 0;
+    }
+  cs = &cu->producer[strlen ("GNU ")];
+  while (*cs && !isdigit (*cs))
+    cs++;
+  if (sscanf (cs, "%d.%d.%d", &major, &minor, &release) != 3)
+    {
+      /* Not recognized as GCC.  */
+
+      return 0;
+    }
+
+  return major < 4 || (major == 4 && minor < 6);
+}
+
+/* Return the default accessibility type if it is not overriden by
+   DW_AT_accessibility.  */
+
+static enum dwarf_access_attribute
+dwarf2_default_access_attribute (struct die_info *die, struct dwarf2_cu *cu)
+{
+  if (cu->header.version < 3 || producer_is_gxx_lt_4_6 (cu))
+    {
+      /* The default DWARF 2 accessibility for members is public, the default
+	 accessibility for inheritance is private.  */
+
+      if (die->tag != DW_TAG_inheritance)
+	return DW_ACCESS_public;
+      else
+	return DW_ACCESS_private;
+    }
+  else
+    {
+      /* DWARF 3+ defines the default accessibility a different way.  The same
+	 rules apply now for DW_TAG_inheritance as for the members and it only
+	 depends on the container kind.  */
+
+      if (die->parent->tag == DW_TAG_class_type)
+	return DW_ACCESS_private;
+      else
+	return DW_ACCESS_public;
+    }
+}
+
 /* Add an aggregate field to the field list.  */
 
 static void
@@ -6266,23 +6342,19 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
     }
   fip->nfields++;
 
-  /* Handle accessibility and virtuality of field.
-     The default accessibility for members is public, the default
-     accessibility for inheritance is private.  */
-  if (die->tag != DW_TAG_inheritance)
-    new_field->accessibility = DW_ACCESS_public;
-  else
-    new_field->accessibility = DW_ACCESS_private;
-  new_field->virtuality = DW_VIRTUALITY_none;
-
   attr = dwarf2_attr (die, DW_AT_accessibility, cu);
   if (attr)
     new_field->accessibility = DW_UNSND (attr);
+  else
+    new_field->accessibility = dwarf2_default_access_attribute (die, cu);
   if (new_field->accessibility != DW_ACCESS_public)
     fip->non_public_fields = 1;
+
   attr = dwarf2_attr (die, DW_AT_virtuality, cu);
   if (attr)
     new_field->virtuality = DW_UNSND (attr);
+  else
+    new_field->virtuality = DW_VIRTUALITY_none;
 
   fp = &new_field->field;
 
@@ -6598,6 +6670,7 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
   char *fieldname;
   struct nextfnfield *new_fnfield;
   struct type *this_type;
+  enum dwarf_access_attribute accessibility;
 
   if (cu->language == language_ada)
     error (_("unexpected member function in Ada type"));
@@ -6696,16 +6769,17 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
   /* Get accessibility.  */
   attr = dwarf2_attr (die, DW_AT_accessibility, cu);
   if (attr)
+    accessibility = DW_UNSND (attr);
+  else
+    accessibility = dwarf2_default_access_attribute (die, cu);
+  switch (accessibility)
     {
-      switch (DW_UNSND (attr))
-	{
-	case DW_ACCESS_private:
-	  fnp->is_private = 1;
-	  break;
-	case DW_ACCESS_protected:
-	  fnp->is_protected = 1;
-	  break;
-	}
+    case DW_ACCESS_private:
+      fnp->is_private = 1;
+      break;
+    case DW_ACCESS_protected:
+      fnp->is_protected = 1;
+      break;
     }
 
   /* Check for artificial methods.  */
