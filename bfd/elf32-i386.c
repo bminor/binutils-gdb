@@ -3451,7 +3451,11 @@ elf_i386_relocate_section (bfd *output_bfd,
 
 	      sreloc = elf_section_data (input_section)->sreloc;
 
-	      BFD_ASSERT (sreloc != NULL && sreloc->contents != NULL);
+	      if (sreloc == NULL || sreloc->contents == NULL)
+		{
+		  r = bfd_reloc_notsupported;
+		  goto check_relocation_error;
+		}
 
 	      loc = sreloc->contents;
 	      loc += sreloc->reloc_count++ * sizeof (Elf32_External_Rel);
@@ -4096,6 +4100,7 @@ do_relocation:
 				    contents, rel->r_offset,
 				    relocation, 0);
 
+check_relocation_error:
       if (r != bfd_reloc_ok)
 	{
 	  const char *name;

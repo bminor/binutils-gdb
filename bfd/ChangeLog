@@ -1,5 +1,11 @@
 2011-04-09  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf32-i386.c (elf_i386_relocate_section): Return relocation
+	error on unsupported relocation.
+	* elf64-x86-64.c (elf_x86_64_relocate_section): Likewise.
+
+2011-04-09  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR binutils/12657
 	* hosts/x86-64linux.h (elf_prstatus32): Replace __pid_t with
 	pid_t.

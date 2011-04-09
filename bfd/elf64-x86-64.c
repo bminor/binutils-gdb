@@ -3411,7 +3411,11 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 
 	      sreloc = elf_section_data (input_section)->sreloc;
 
-	      BFD_ASSERT (sreloc != NULL && sreloc->contents != NULL);
+	      if (sreloc == NULL || sreloc->contents == NULL)
+		{
+		  r = bfd_reloc_notsupported;
+		  goto check_relocation_error;
+		}
 
 	      elf_append_rela (output_bfd, sreloc, &outrel);
 
@@ -3868,6 +3872,7 @@ do_relocation:
 				    contents, rel->r_offset,
 				    relocation, rel->r_addend);
 
+check_relocation_error:
       if (r != bfd_reloc_ok)
 	{
 	  const char *name;
@@ -3896,7 +3901,7 @@ do_relocation:
 	  else
 	    {
 	      (*_bfd_error_handler)
-		(_("%B(%A+0x%lx): reloc against `%s': error %d"),
+		(_("%B(%A+0x%lx): reloc against `%s': error %r"),
 		 input_bfd, input_section,
 		 (long) rel->r_offset, name, (int) r);
 	      return FALSE;
