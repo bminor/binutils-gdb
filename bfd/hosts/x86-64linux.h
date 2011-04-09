@@ -1,4 +1,5 @@
-/* Copyright (C) 2006 Free Software Foundation, Inc.
+/* Copyright (C) 2006, 2011
+   Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -153,10 +154,10 @@ struct elf_prstatus32
     short int pr_cursig;		/* Current signal.  */
     unsigned int pr_sigpend;		/* Set of pending signals.  */
     unsigned int pr_sighold;		/* Set of held signals.  */
-    __pid_t pr_pid;
-    __pid_t pr_ppid;
-    __pid_t pr_pgrp;
-    __pid_t pr_sid;
+    pid_t pr_pid;
+    pid_t pr_ppid;
+    pid_t pr_pgrp;
+    pid_t pr_sid;
     struct prstatus32_timeval pr_utime;		/* User time.  */
     struct prstatus32_timeval pr_stime;		/* System time.  */
     struct prstatus32_timeval pr_cutime;	/* Cumulative user time.  */

@@ -1,3 +1,9 @@
+2011-04-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/12657
+	* hosts/x86-64linux.h (elf_prstatus32): Replace __pid_t with
+	pid_t.
+
 2011-04-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/12654
