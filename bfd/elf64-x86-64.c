@@ -3901,7 +3901,7 @@ check_relocation_error:
 	  else
 	    {
 	      (*_bfd_error_handler)
-		(_("%B(%A+0x%lx): reloc against `%s': error %r"),
+		(_("%B(%A+0x%lx): reloc against `%s': error %d"),
 		 input_bfd, input_section,
 		 (long) rel->r_offset, name, (int) r);
 	      return FALSE;
