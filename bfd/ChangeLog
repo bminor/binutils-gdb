@@ -1,3 +1,10 @@
+2011-04-09  Kai Tietz  <ktietz@redhat.com>
+
+	* peXXigen.c (_bfd_XXi_final_link_postscripte): Sort pdata in temporary
+	buffer and use rawsize for sorting.
+	* coffcode.h (coff_compute_section_file_positions): Set rawsize
+	before doing alignment.
+
 2011-04-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_relocate_section): Return relocation

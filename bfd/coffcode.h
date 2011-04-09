@@ -3297,6 +3297,8 @@ coff_compute_section_file_positions (bfd * abfd)
       if (!(current->flags & SEC_HAS_CONTENTS))
 	continue;
 
+      current->rawsize = current->size;
+
 #ifdef COFF_IMAGE_WITH_PE
       /* Make sure we skip empty sections in a PE image.  */
       if (current->size == 0)
@@ -3363,7 +3365,7 @@ coff_compute_section_file_positions (bfd * abfd)
 
 #ifdef COFF_IMAGE_WITH_PE
       /* Set the padded size.  */
-      current->size = (current->size + page_size -1) & -page_size;
+      current->size = (current->size + page_size - 1) & -page_size;
 #endif
 
       sofar += current->size;

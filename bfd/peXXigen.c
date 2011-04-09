@@ -2458,15 +2458,23 @@ _bfd_XXi_final_link_postscript (bfd * abfd, struct coff_final_link_info *pfinfo)
 
     if (sec)
       {
-	bfd_size_type x = sec->rawsize ? sec->rawsize : sec->size;
+	bfd_size_type x = sec->rawsize;
+	bfd_byte *tmp_data = NULL;
 
-	if (x && bfd_get_section_contents (abfd, sec, pfinfo->contents, 0, x))
+	if (x)
+	  tmp_data = bfd_malloc (x);
+
+	if (tmp_data != NULL)
 	  {
-	    qsort (pfinfo->contents,
-	    	   (size_t) ((sec->size <x ? sec->size : x) / 12),
-	    	   12, sort_x64_pdata);
-	    bfd_set_section_contents (pfinfo->output_bfd, sec,
-	    			      pfinfo->contents, 0, x);
+	    if (bfd_get_section_contents (abfd, sec, tmp_data, 0, x))
+	      {
+		qsort (tmp_data,
+		       (size_t) (x / 12),
+		       12, sort_x64_pdata);
+		bfd_set_section_contents (pfinfo->output_bfd, sec,
+					  tmp_data, 0, x);
+	      }
+	    free (tmp_data);
 	  }
       }
   }
