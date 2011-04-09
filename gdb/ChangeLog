@@ -1,5 +1,11 @@
 2011-04-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Fix crash of gdb save-index on a STABS file.
+	* dwarf2read.c (write_psymtabs_to_index): Return also on no
+	PSYMTABS_ADDRMAP.
+
+2011-04-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Fix DW_AT_accessibility compatibility with gcc-4.6+.
 	* dwarf2read.c: Include ctype.h.
 	(producer_is_gxx_lt_4_6, dwarf2_default_access_attribute): New

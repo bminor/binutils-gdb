@@ -15843,8 +15843,9 @@ write_psymtabs_to_index (struct objfile *objfile, const char *dir)
   htab_t cu_index_htab;
   struct psymtab_cu_index_map *psymtab_cu_index_map;
 
-  if (!objfile->psymtabs)
+  if (!objfile->psymtabs || !objfile->psymtabs_addrmap)
     return;
+
   if (dwarf2_per_objfile->using_index)
     error (_("Cannot use an index to create the index"));
 
