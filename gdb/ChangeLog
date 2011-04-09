@@ -1,3 +1,16 @@
+2011-04-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix DW_AT_accessibility compatibility with gcc-4.6+.
+	* dwarf2read.c: Include ctype.h.
+	(producer_is_gxx_lt_4_6, dwarf2_default_access_attribute): New
+	functions.
+	(dwarf2_add_field): Fix new_field->accessibility by calling
+	dwarf2_default_access_attribute.  Restructure setting accessibility
+	vs. virtuality.
+	(dwarf2_add_member_fn): New variable accessibility.  Fix fnp
+	is_private and is_protected by calling
+	dwarf2_default_access_attribute.
+
 2011-04-08  Steve Ellcey  <sje@cup.hp.com>
 
 	* Add default_frame_unwind_stop_reason value to libunwind_frame_unwind
