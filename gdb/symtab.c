@@ -2970,10 +2970,10 @@ search_symbols_name_matches (const char *symname, void *user_data)
    returning the results in *MATCHES.
 
    Only symbols of KIND are searched:
+   VARIABLES_DOMAIN - search all symbols, excluding functions, type names,
+                      and constants (enums)
    FUNCTIONS_DOMAIN - search all functions
    TYPES_DOMAIN     - search all type names
-   VARIABLES_DOMAIN - search all symbols, excluding functions, type names,
-   and constants (enums)
 
    free_search_symbols should be called when *MATCHES is no longer needed.
 
@@ -2996,13 +2996,13 @@ search_symbols (char *regexp, enum search_domain kind,
   char *val;
   int found_misc = 0;
   static const enum minimal_symbol_type types[]
-    = {mst_data, mst_text, mst_abs, mst_unknown};
+    = {mst_data, mst_text, mst_abs};
   static const enum minimal_symbol_type types2[]
-    = {mst_bss, mst_file_text, mst_abs, mst_unknown};
+    = {mst_bss, mst_file_text, mst_abs};
   static const enum minimal_symbol_type types3[]
-    = {mst_file_data, mst_solib_trampoline, mst_abs, mst_unknown};
+    = {mst_file_data, mst_solib_trampoline, mst_abs};
   static const enum minimal_symbol_type types4[]
-    = {mst_file_bss, mst_text_gnu_ifunc, mst_abs, mst_unknown};
+    = {mst_file_bss, mst_text_gnu_ifunc, mst_abs};
   enum minimal_symbol_type ourtype;
   enum minimal_symbol_type ourtype2;
   enum minimal_symbol_type ourtype3;
@@ -3012,6 +3012,8 @@ search_symbols (char *regexp, enum search_domain kind,
   struct symbol_search *tail;
   struct cleanup *old_chain = NULL;
   struct search_symbols_data datum;
+
+  gdb_assert (kind <= TYPES_DOMAIN);
 
   ourtype = types[kind];
   ourtype2 = types2[kind];
@@ -3311,12 +3313,14 @@ static void
 symtab_symbol_info (char *regexp, enum search_domain kind, int from_tty)
 {
   static const char * const classnames[] =
-    {"variable", "function", "type", "method"};
+    {"variable", "function", "type"};
   struct symbol_search *symbols;
   struct symbol_search *p;
   struct cleanup *old_chain;
   char *last_filename = NULL;
   int first = 1;
+
+  gdb_assert (kind <= TYPES_DOMAIN);
 
   /* Must make sure that if we're interrupted, symbols gets freed.  */
   search_symbols (regexp, kind, 0, (char **) NULL, &symbols);

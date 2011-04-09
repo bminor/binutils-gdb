@@ -1,5 +1,17 @@
 2011-04-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Code cleanup.
+	* symtab.c (search_symbols): Reorder the KIND description in the
+	function comment.  Remove the unused 4th element of types, types2,
+	types3 and types4.  New gdb_assert on KIND.
+	(symtab_symbol_info): Remove the unused 4th element of classnames.
+	New gdb_assert on KIND.
+	* symtab.h (enum search_domain): New warning in the enum comment.
+	Assign numbers to the elements VARIABLES_DOMAIN, FUNCTIONS_DOMAIN and
+	TYPES_DOMAIN.
+
+2011-04-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Fix crash of gdb save-index on a STABS file.
 	* dwarf2read.c (write_psymtabs_to_index): Return also on no
 	PSYMTABS_ADDRMAP.

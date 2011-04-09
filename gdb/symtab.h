@@ -398,19 +398,20 @@ typedef enum domain_enum_tag
   LABEL_DOMAIN
 } domain_enum;
 
-/* Searching domains, used for `search_symbols'.  */
+/* Searching domains, used for `search_symbols'.  Element numbers are
+   hardcoded in GDB, check all enum uses before changing it.  */
 
 enum search_domain
 {
   /* Everything in VAR_DOMAIN minus FUNCTIONS_DOMAIN and
      TYPES_DOMAIN.  */
-  VARIABLES_DOMAIN,
+  VARIABLES_DOMAIN = 0,
 
   /* All functions -- for some reason not methods, though.  */
-  FUNCTIONS_DOMAIN,
+  FUNCTIONS_DOMAIN = 1,
 
   /* All defined types */
-  TYPES_DOMAIN
+  TYPES_DOMAIN = 2,
 };
 
 /* An address-class says where to find the value of a symbol.  */
