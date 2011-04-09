@@ -2289,7 +2289,7 @@ bfd_boolean bfd_generic_merge_sections
 
 bfd_byte *bfd_generic_get_relocated_section_contents
    (bfd *abfd,
-    struct bfd_link_info *alink_info,
+    struct bfd_link_info *link_info,
     struct bfd_link_order *link_order,
     bfd_byte *data,
     bfd_boolean relocatable,
