@@ -2772,6 +2772,7 @@ elf32_tic6x_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		  *head = p;
 		  p->sec = sec;
 		  p->count = 0;
+		  p->pc_count = 0;
 		}
 
 	      p->count += 1;
