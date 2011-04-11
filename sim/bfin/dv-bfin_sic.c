@@ -759,6 +759,15 @@ static const struct hw_port_descriptor bfin_sic_52x_ports[] =
 };
 
 static void
+bfin_sic_port_event (struct hw *me, bu32 *isr, bu32 bit, int level)
+{
+  if (level)
+    *isr |= bit;
+  else
+    *isr &= ~bit;
+}
+
+static void
 bfin_sic_52x_port_event (struct hw *me, int my_port, struct hw *source,
 			 int source_port, int level)
 {
@@ -767,14 +776,14 @@ bfin_sic_52x_port_event (struct hw *me, int my_port, struct hw *source,
   bu32 pin = DEC_PIN (my_port);
   bu32 bit = 1 << pin;
 
-  HW_TRACE ((me, "processing system int from %i (SIC %u pin %u)",
-	     my_port, idx, pin));
+  HW_TRACE ((me, "processing level %i from port %i (SIC %u pin %u)",
+	     level, my_port, idx, pin));
 
   /* SIC only exists to forward interrupts from the system to the CEC.  */
   switch (idx)
     {
-    case 0: sic->bf52x.isr0 |= bit; break;
-    case 1: sic->bf52x.isr1 |= bit; break;
+    case 0: bfin_sic_port_event (me, &sic->bf52x.isr0, bit, level); break;
+    case 1: bfin_sic_port_event (me, &sic->bf52x.isr1, bit, level); break;
     }
 
   /* XXX: Handle SIC wakeup source ?
@@ -882,11 +891,11 @@ bfin_sic_537_port_event (struct hw *me, int my_port, struct hw *source,
   bu32 pin = DEC_PIN (my_port);
   bu32 bit = 1 << pin;
 
-  HW_TRACE ((me, "processing system int from %i (SIC %u pin %u)",
-	     my_port, idx, pin));
+  HW_TRACE ((me, "processing level %i from port %i (SIC %u pin %u)",
+	     level, my_port, idx, pin));
 
   /* SIC only exists to forward interrupts from the system to the CEC.  */
-  sic->bf537.isr |= bit;
+  bfin_sic_port_event (me, &sic->bf537.isr, bit, level);
 
   /* XXX: Handle SIC wakeup source ?
   if (sic->bf537.iwr & bit)
@@ -1069,15 +1078,15 @@ bfin_sic_54x_port_event (struct hw *me, int my_port, struct hw *source,
   bu32 pin = DEC_PIN (my_port);
   bu32 bit = 1 << pin;
 
-  HW_TRACE ((me, "processing system int from %i (SIC %u pin %u)",
-	     my_port, idx, pin));
+  HW_TRACE ((me, "processing level %i from port %i (SIC %u pin %u)",
+	     level, my_port, idx, pin));
 
   /* SIC only exists to forward interrupts from the system to the CEC.  */
   switch (idx)
     {
-    case 0: sic->bf54x.isr0 |= bit; break;
-    case 1: sic->bf54x.isr1 |= bit; break;
-    case 2: sic->bf54x.isr2 |= bit; break;
+    case 0: bfin_sic_port_event (me, &sic->bf54x.isr0, bit, level); break;
+    case 1: bfin_sic_port_event (me, &sic->bf54x.isr0, bit, level); break;
+    case 2: bfin_sic_port_event (me, &sic->bf54x.isr0, bit, level); break;
     }
 
   /* XXX: Handle SIC wakeup source ?
@@ -1173,14 +1182,14 @@ bfin_sic_561_port_event (struct hw *me, int my_port, struct hw *source,
   bu32 pin = DEC_PIN (my_port);
   bu32 bit = 1 << pin;
 
-  HW_TRACE ((me, "processing system int from %i (SIC %u pin %u)",
-	     my_port, idx, pin));
+  HW_TRACE ((me, "processing level %i from port %i (SIC %u pin %u)",
+	     level, my_port, idx, pin));
 
   /* SIC only exists to forward interrupts from the system to the CEC.  */
   switch (idx)
     {
-    case 0: sic->bf561.isr0 |= bit; break;
-    case 1: sic->bf561.isr1 |= bit; break;
+    case 0: bfin_sic_port_event (me, &sic->bf561.isr0, bit, level); break;
+    case 1: bfin_sic_port_event (me, &sic->bf561.isr1, bit, level); break;
     }
 
   /* XXX: Handle SIC wakeup source ?

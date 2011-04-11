@@ -1,5 +1,12 @@
 2011-04-11  Mike Frysinger  <vapier@gentoo.org>
 
+	* dv-bfin_sic.c (bfin_sic_port_event): New helper function.
+	(bfin_sic_52x_port_event, bfin_sic_537_port_event,
+	bfin_sic_54x_port_event, bfin_sic_561_port_event): Include level
+	in the trace output, and call the new bfin_sic_port_event func.
+
+2011-04-11  Mike Frysinger  <vapier@gentoo.org>
+
 	* dv-bfin_gpio.c (bfin_gpio_ports): Add p15.
 
 2011-04-01  Mike Frysinger  <vapier@gentoo.org>
