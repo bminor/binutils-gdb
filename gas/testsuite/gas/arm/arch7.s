@@ -79,3 +79,5 @@ label2:
 	msr	control, r0
 	mrs	r0, xpsr
 	msr	xpsr, r0
+
+	svc	0

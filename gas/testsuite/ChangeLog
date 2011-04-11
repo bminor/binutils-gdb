@@ -1,3 +1,10 @@
+2011-04-11  Dan McDonald  <dan@wellkeeper.com>
+
+	PR gas/12296
+	* gas/arm/arch7.s: Add SVC insn.
+	* gas/arm/arch7.d: Add disassembly of SVC insn.
+	* gas/arm/attr-march-armv7.d: Add arch profile tag.
+
 2011-04-06  Joseph Myers  <joseph@codesourcery.com>
 
 	* gas/all/gas.exp (*arm*-*-coff): Change to arm*-*-coff.

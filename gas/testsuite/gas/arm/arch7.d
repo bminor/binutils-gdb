@@ -76,3 +76,4 @@ Disassembly of section .text:
 0+10c <[^>]*> f380 8814 	msr	CONTROL, r0
 0+110 <[^>]*> f3ef 8003 	mrs	r0, PSR
 0+114 <[^>]*> f380 8803 	msr	PSR, r0
+0+118 <[^>]*> df00      	svc	0
