@@ -1,3 +1,7 @@
+2011-04-11  Mike Frysinger  <vapier@gentoo.org>
+
+	* dv-bfin_gpio.c (bfin_gpio_ports): Add p15.
+
 2011-04-01  Mike Frysinger  <vapier@gentoo.org>
 
 	* dv-bfin_otp.c (bfin_otp_ports): Declare.

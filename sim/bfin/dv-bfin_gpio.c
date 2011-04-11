@@ -187,6 +187,7 @@ static const struct hw_port_descriptor bfin_gpio_ports[] =
   { "p12",   12, 0, input_port, },
   { "p13",   13, 0, input_port, },
   { "p14",   14, 0, input_port, },
+  { "p15",   15, 0, input_port, },
   { NULL, 0, 0, 0, },
 };
 
