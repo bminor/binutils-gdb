@@ -1,3 +1,8 @@
+2011-04-11  Nick Clifton  <nickc@redhat.com>
+
+	* binutils-all/arm/simple.s: Fix assembly problems for COFF based
+	ARM toolchaisn by removing .type and .size directives.
+
 2011-04-07  Paul Carroll<pcarroll@codesourcery.com>
 
 	* binutils-all/arm/simple.s: Demo issue with objdump with

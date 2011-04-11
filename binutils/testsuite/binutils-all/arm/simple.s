@@ -8,7 +8,7 @@ l:
     .text
     .align    2
     .global    f1
-    .type    f1, %function
+
 f1:
     str    fp, [sp, #-4]!
     add    fp, sp, #0
@@ -19,10 +19,10 @@ f1:
     bx    lr
     .align    2
     .word    l
-    .size    f1, .-f1
+
     .align    2
     .global    main
-    .type    main, %function
+
 main:
     stmfd    sp!, {fp, lr}
     add    fp, sp, #4
@@ -31,5 +31,5 @@ main:
     .word    1717986919
     .word    -1840700269
     .word    l
-    .size    main, .-main
+
     .ident    "GCC: (Sourcery G++ 2011.03) 4.5.1"
