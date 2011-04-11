@@ -1,3 +1,12 @@
+2011-04-11  Mark Wielaard  <mjw@redhat.com>
+
+	PR 10549
+	* ld-unique: New directory.
+	* ld-unique/unique.exp: New file: Run the UNIQUE tests.
+	* ld-unique/unique.s: New test file.
+	* ld-unique/unique_empty.s: Likewise.
+	* ld-unique/unique_shared.s: Likewise.
+
 2011-04-11  Alan Modra  <amodra@gmail.com>
 
 	* ld-elf/eh-frame-hdr.d: xfail avr.

@@ -4569,10 +4569,14 @@ ppc64_elf_add_symbol_hook (bfd *ibfd,
 			   asection **sec,
 			   bfd_vma *value ATTRIBUTE_UNUSED)
 {
+  if ((ibfd->flags & DYNAMIC) == 0
+      && ELF_ST_BIND (isym->st_info) == STB_GNU_UNIQUE)
+    elf_tdata (info->output_bfd)->has_gnu_symbols = TRUE;
+
   if (ELF_ST_TYPE (isym->st_info) == STT_GNU_IFUNC)
     {
       if ((ibfd->flags & DYNAMIC) == 0)
-	elf_tdata (info->output_bfd)->has_ifunc_symbols = TRUE;
+	elf_tdata (info->output_bfd)->has_gnu_symbols = TRUE;
     }
   else if (ELF_ST_TYPE (isym->st_info) == STT_FUNC)
     ;

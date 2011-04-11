@@ -15230,8 +15230,9 @@ elf32_arm_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
 			   flagword *flagsp, asection **secp, bfd_vma *valp)
 {
   if ((abfd->flags & DYNAMIC) == 0
-      && ELF_ST_TYPE (sym->st_info) == STT_GNU_IFUNC)
-    elf_tdata (info->output_bfd)->has_ifunc_symbols = TRUE;
+      && (ELF_ST_TYPE (sym->st_info) == STT_GNU_IFUNC
+	  || ELF_ST_BIND (sym->st_info) == STB_GNU_UNIQUE))
+    elf_tdata (info->output_bfd)->has_gnu_symbols = TRUE;
 
   if (elf32_arm_hash_table (info)->vxworks_p
       && !elf_vxworks_add_symbol_hook (abfd, info, sym, namep,

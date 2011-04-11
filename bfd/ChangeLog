@@ -1,3 +1,18 @@
+2011-04-11  Mark Wielaard  <mjw@redhat.com>
+
+	PR 10549
+	* elf-bfd.h (has_ifunc_symbols): Renamed to has_gnu_symbols.
+	(has_gnu_symbols): Renamed from has_ifunc_symbols.
+	* elf.c (_bfd_elf_set_osabi): Use new has_gnu_symbols name.
+	* elf32-arm.c (elf32_arm_add_symbol_hook): Set has_gnu_symbols
+	also if STB_GNU_UNIQUE symbol binding was seen.
+	* elf32-i386.c (elf_i386_add_symbol_hook): Likewise.
+	* elf32-ppc.c (ppc_elf_add_symbol_hook): Likewise.
+	* elf32-sparc.c (elf32_sparc_add_symbol_hook): Likewise.
+	* elf64-ppc.c (ppc64_elf_add_symbol_hook): Likewise.
+	* elf64-sparc.c (elf64_sparc_add_symbol_hook): Likewise.
+	* elf64-x86-64.c (elf_x86_64_add_symbol_hook): Likewise.
+
 2011-04-11  Alan Modra  <amodra@gmail.com>
 
 	* bfd-in.h (bfd_get_section_limit): Don't use rawsize with output
