@@ -1,3 +1,8 @@
+2011-04-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_reloc_type_lookup): Fix the out of bound
+	array access for BFD_RELOC_386_IRELATIVE.
+
 2011-04-11  Bernd Schmidt  <bernds@codesourcery.com>
 
 	* elf32-tic6x.c (elf32_tic6x_check_relocs): Initialize pc_count field.
