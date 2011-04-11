@@ -1664,7 +1664,7 @@ getidxregp_image (reg r)
    If the register is illegal for the current instruction,
    issue an error.  */
 static int
-getprocreg_image (reg r)
+getprocreg_image (int r)
 {
   const reg_entry *rreg;
   char *reg_name;
@@ -1702,7 +1702,7 @@ getprocreg_image (reg r)
    If the register is illegal for the current instruction,
    issue an error.  */
 static int
-getprocregp_image (reg r)
+getprocregp_image (int r)
 {
   const reg_entry *rreg;
   char *reg_name;
