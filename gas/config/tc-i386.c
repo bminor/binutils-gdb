@@ -6572,7 +6572,7 @@ x86_cons (expressionS *exp, int size)
       /* Handle @GOTOFF and the like in an expression.  */
       char *save;
       char *gotfree_input_line;
-      int adjust;
+      int adjust = 0;
 
       save = input_line_pointer;
       gotfree_input_line = lex_got (&got_reloc, &adjust, NULL);

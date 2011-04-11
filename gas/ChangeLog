@@ -1,3 +1,7 @@
+2011-04-11  Kai Tietz  <ktietz@redhat.com>
+
+	* config/tc-i386.c (x86_cons): Initialize adjust with zero.
+
 2011-04-11  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-i386.c (x86_cons): Define even for non-ELF targets.
