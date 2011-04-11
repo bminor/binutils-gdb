@@ -1,5 +1,6 @@
 /* tc-cr16.c -- Assembler code for the CR16 CPU core.
-   Copyright 2007, 2008, 2009 Free Software Foundation, Inc.
+   Copyright 2007, 2008, 2009, 2010, 2011
+   Free Software Foundation, Inc.
 
    Contributed by M R Swami Reddy <MR.Swami.Reddy@nsc.com>
 
@@ -1669,7 +1670,7 @@ getprocreg_image (reg r)
   char *reg_name;
 
   /* Check whether the register is in registers table.  */
-  if (r < MAX_REG)
+  if (r >= MAX_REG && r < MAX_PREG)
     rreg = &cr16_pregtab[r - MAX_REG];
   /* Register not found.  */
   else
@@ -1708,7 +1709,7 @@ getprocregp_image (reg r)
   int pregptab_disp = 0;
 
   /* Check whether the register is in registers table.  */
-  if (r < MAX_REG)
+  if (r >= MAX_REG && r < MAX_PREG)
     {
       r = r - MAX_REG;
       switch (r)
