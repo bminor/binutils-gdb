@@ -161,6 +161,18 @@ class pp_ls:
     def display_hint (self):
         return 'string'
 
+class pp_hint_error:
+    "Throw error from display_hint"
+
+    def __init__(self, val):
+        self.val = val
+
+    def to_string(self):
+        return 'hint_error_val'
+
+    def display_hint (self):
+        raise Exception("hint failed")
+
 class pp_outer:
     "Print struct outer"
 
@@ -245,6 +257,9 @@ def register_pretty_printers ():
 
     pretty_printers_dict[re.compile ('^struct outerstruct$')]  = pp_outer
     pretty_printers_dict[re.compile ('^outerstruct$')]  = pp_outer
+
+    pretty_printers_dict[re.compile ('^struct hint_error$')]  = pp_hint_error
+    pretty_printers_dict[re.compile ('^hint_error$')]  = pp_hint_error
 
 pretty_printers_dict = {}
 

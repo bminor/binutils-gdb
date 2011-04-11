@@ -1,3 +1,12 @@
+2011-04-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.python/py-prettyprint.c (struct hint_error): New.
+	(main): New variable hint_error.
+	* gdb.python/py-prettyprint.exp (run_lang_tests): New testcase
+	"print hint_error".
+	* gdb.python/py-prettyprint.py (class pp_hint_error): New.
+	(register_pretty_printers): Register it.
+
 2011-04-04  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.cp/maint.exp (test_help): Update.
