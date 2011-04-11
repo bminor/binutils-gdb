@@ -1,5 +1,8 @@
 2011-04-11  Nick Clifton  <nickc@redhat.com>
 
+	* config/tc-i386.c (x86_cons): Define even for non-ELF targets.
+	* config/tc-i386.h (x86_cons): Always prototype.
+
 	* config/tc-cr16.c (getprocregp_image): Fix type of 'r' parameter
 	in order to avoid a compile time warning.
 	(getprocreg_image): Likewise.

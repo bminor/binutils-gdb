@@ -6559,6 +6559,7 @@ lex_got (enum bfd_reloc_code_real *rel,
   /* Might be a symbol version string.  Don't as_bad here.  */
   return NULL;
 }
+#endif
 
 void
 x86_cons (expressionS *exp, int size)
@@ -6610,7 +6611,6 @@ x86_cons (expressionS *exp, int size)
   if (intel_syntax)
     i386_intel_simplify (exp);
 }
-#endif
 
 static void
 signed_cons (int size)

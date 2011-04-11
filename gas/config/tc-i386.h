@@ -125,8 +125,8 @@ extern const char *i386_comment_chars;
 
 #if (defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)) && !defined (LEX_AT)
 #define TC_PARSE_CONS_EXPRESSION(EXP, NBYTES) x86_cons (EXP, NBYTES)
-extern void x86_cons (expressionS *, int);
 #endif
+extern void x86_cons (expressionS *, int);
 
 #define TC_CONS_FIX_NEW(FRAG,OFF,LEN,EXP) x86_cons_fix_new(FRAG, OFF, LEN, EXP)
 extern void x86_cons_fix_new
