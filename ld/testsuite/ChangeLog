@@ -1,3 +1,7 @@
+2011-04-11  Alan Modra  <amodra@gmail.com>
+
+	* ld-elf/eh-frame-hdr.d: xfail avr.
+
 2011-03-24  Alan Modra  <amodra@gmail.com>
 
 	* ld-powerpc/tlsmark.s: Delete non-optimizable section.
