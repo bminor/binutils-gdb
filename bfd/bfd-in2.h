@@ -7,8 +7,8 @@
 
 /* Main header file for the bfd library -- portable access to object files.
 
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
+   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011
    Free Software Foundation, Inc.
 
    Contributed by Cygnus Support.
@@ -298,8 +298,8 @@ typedef struct bfd_section *sec_ptr;
 #define bfd_set_section_userdata(bfd, ptr, val) (((ptr)->userdata = (val)),TRUE)
 /* Find the address one past the end of SEC.  */
 #define bfd_get_section_limit(bfd, sec) \
-  (((sec)->rawsize ? (sec)->rawsize : (sec)->size) \
-   / bfd_octets_per_byte (bfd))
+  (((bfd)->direction != write_direction && (sec)->rawsize != 0	\
+    ? (sec)->rawsize : (sec)->size) / bfd_octets_per_byte (bfd))
 
 /* Return TRUE if input section SEC has been discarded.  */
 #define elf_discarded_section(sec)				\

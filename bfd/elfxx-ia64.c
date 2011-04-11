@@ -1,6 +1,6 @@
 /* IA-64 support for 64-bit ELF
    Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007,
-   2008, 2009, 2010  Free Software Foundation, Inc.
+   2008, 2009, 2010, 2011  Free Software Foundation, Inc.
    Contributed by David Mosberger-Tang <davidm@hpl.hp.com>
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -215,7 +215,7 @@ static bfd_boolean elfNN_ia64_dynamic_symbol_p
 static bfd_reloc_status_type elfNN_ia64_install_value
   (bfd_byte *hit_addr, bfd_vma val, unsigned int r_type);
 static bfd_boolean elfNN_ia64_choose_gp
-  (bfd *abfd, struct bfd_link_info *info);
+  (bfd *abfd, struct bfd_link_info *info, bfd_boolean final);
 static void elfNN_ia64_relax_ldxmov
   (bfd_byte *contents, bfd_vma off);
 static void elfNN_ia64_dyn_sym_traverse
@@ -1221,7 +1221,7 @@ elfNN_ia64_relax_section (bfd *abfd, asection *sec,
 	      gp = _bfd_get_gp_value (obfd);
 	      if (gp == 0)
 		{
-		  if (!elfNN_ia64_choose_gp (obfd, link_info))
+		  if (!elfNN_ia64_choose_gp (obfd, link_info, FALSE))
 		    goto error_return;
 		  gp = _bfd_get_gp_value (obfd);
 		}
@@ -4298,7 +4298,7 @@ elfNN_ia64_unwind_entry_compare (const PTR a, const PTR b)
 
 /* Make sure we've got ourselves a nice fat __gp value.  */
 static bfd_boolean
-elfNN_ia64_choose_gp (bfd *abfd, struct bfd_link_info *info)
+elfNN_ia64_choose_gp (bfd *abfd, struct bfd_link_info *info, bfd_boolean final)
 {
   bfd_vma min_vma = (bfd_vma) -1, max_vma = 0;
   bfd_vma min_short_vma = min_vma, max_short_vma = 0;
@@ -4321,7 +4321,12 @@ elfNN_ia64_choose_gp (bfd *abfd, struct bfd_link_info *info)
 	continue;
 
       lo = os->vma;
-      hi = os->vma + (os->rawsize ? os->rawsize : os->size);
+      /* When this function is called from elfNN_ia64_final_link
+	 the correct value to use is os->size.  When called from
+	 elfNN_ia64_relax_section we are in the middle of section
+	 sizing; some sections will already have os->size set, others
+	 will have os->size zero and os->rawsize the previous size.  */
+      hi = os->vma + (!final && os->rawsize ? os->rawsize : os->size);
       if (hi < lo)
 	hi = (bfd_vma) -1;
 
@@ -4462,7 +4467,7 @@ elfNN_ia64_final_link (bfd *abfd, struct bfd_link_info *info)
       /* We assume after gp is set, section size will only decrease. We
 	 need to adjust gp for it.  */
       _bfd_set_gp_value (abfd, 0);
-      if (! elfNN_ia64_choose_gp (abfd, info))
+      if (! elfNN_ia64_choose_gp (abfd, info, TRUE))
 	return FALSE;
       gp_val = _bfd_get_gp_value (abfd);
 

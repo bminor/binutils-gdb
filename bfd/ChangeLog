@@ -1,3 +1,18 @@
+2011-04-11  Alan Modra  <amodra@gmail.com>
+
+	* bfd-in.h (bfd_get_section_limit): Don't use rawsize with output
+	sections.
+	* libbfd.c (_bfd_generic_get_section_contents): Likewise.
+	(_bfd_generic_get_section_contents_in_window): Likewise.
+	* section.c (bfd_get_section_contents): Likewise.
+	* compress.c (bfd_get_full_section_contents): Likewise.
+	* elf32-rx.c (rx_final_link): Ignore rawsize.
+	* elf32-microblaze.c (microblaze_elf_relocate_section): Use correct
+	bfd with bfd_get_section_limit.
+	* elfxx-ia64.c (elfNN_ia64_choose_gp): Add "final" parameter.  Use
+	os->size during final link.  Update callers.
+	* bfd-in2.h: Regenerate.
+
 2011-04-10  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	PR ld/12637

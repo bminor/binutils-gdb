@@ -1,6 +1,6 @@
 /* Xilinx MicroBlaze-specific support for 32-bit ELF
 
-   Copyright 2009, 2010 Free Software Foundation, Inc.
+   Copyright 2009, 2010, 2011 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -824,7 +824,7 @@ microblaze_elf_relocate_section (bfd *output_bfd,
 	    }
 
 	  /* Sanity check the address.  */
-	  if (offset > bfd_get_section_limit (output_bfd, input_section))
+	  if (offset > bfd_get_section_limit (input_bfd, input_section))
 	    {
 	      r = bfd_reloc_outofrange;
 	      goto check_reloc;

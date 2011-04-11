@@ -1,5 +1,5 @@
 /* Renesas RX specific support for 32-bit ELF.
-   Copyright (C) 2008, 2009, 2010
+   Copyright (C) 2008, 2009, 2010, 2011
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -3305,13 +3305,12 @@ rx_final_link (bfd * abfd, struct bfd_link_info * info)
 #endif
       if (o->flags & SEC_CODE
 	  && bfd_big_endian (abfd)
-	  && (o->size % 4 || o->rawsize % 4))
+	  && o->size % 4)
 	{
 #ifdef DJDEBUG
 	  fprintf (stderr, "adjusting...\n");
 #endif
 	  o->size += 4 - (o->size % 4);
-	  o->rawsize += 4 - (o->rawsize % 4);
 	}
     }
 
