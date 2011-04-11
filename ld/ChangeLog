@@ -1,3 +1,7 @@
+2011-04-11  Chris Quenelle  <chris.quenelle@oracle.com>
+
+	* scripttempl/elf.sc (.exception_ranges): Add new section.
+
 2011-04-08  Hector Oron  <hector.oron@gmail.com>
 
 	PR ld/12643
