@@ -1,3 +1,33 @@
+2011-04-11  Julian Brown  <julian@codesourcery.com>
+
+	* gas/arm/mrs-msr-thumb-v7-m.s: New.
+	* gas/arm/mrs-msr-thumb-v7-m.d: New.
+	* gas/arm/mrs-msr-thumb-v7-m-bad.d: New.
+	* gas/arm/mrs-msr-thumb-v7-m-bad.l: New.
+	* gas/arm/mrs-msr-thumb-v7-m-bad.s: New.
+	* gas/arm/mrs-msr-thumb-v7e-m.d: New.
+	* gas/arm/mrs-msr-thumb-v7e-m.s: New.
+	* gas/arm/mrs-msr-arm-v7-a-bad.d: New.
+	* gas/arm/mrs-msr-arm-v7-a-bad.l: New.
+	* gas/arm/mrs-msr-arm-v7-a-bad.s: New.
+	* gas/arm/mrs-msr-arm-v7-a.d: New.
+	* gas/arm/mrs-msr-arm-v7-a.s: New.
+	* gas/arm/mrs-msr-arm-v6.d: New.
+	* gas/arm/mrs-msr-arm-v6.s: New.
+	* gas/arm/mrs-msr-thumb-v6t2.d: New.
+	* gas/arm/mrs-msr-thumb-v6t2.s: New.
+	* gas/arm/arch7.d: Fix typo in disassembly for BASEPRI_MAX,
+	bitmasks for IAPSR etc.
+	* gas/arm/arch7.s: Specify bitmask for APSR writes.
+	* gas/arm/archv6m.s: Likewise.
+	* msr-imm-bad.l: Tweak expected disassembly in error message.
+	* msr-reg-bad.l: Likewise.
+	* msr-imm.d: Tweak expected disassembly.
+	* msr-reg.d: Likewise.
+	* msr-reg-thumb.d: Likewise.
+	* msr-imm.s: Specify bitmask on APSR writes.
+	* msr-reg.s: Add comment about deprecated usage.
+
 2011-04-11  Dan McDonald  <dan@wellkeeper.com>
 
 	PR gas/12296

@@ -1,3 +1,16 @@
+2011-04-11  Julian Brown  <julian@codesourcery.com>
+
+	* config/tc-arm.c (parse_psr): Add LHS argument. Improve support
+	for *APSR bitmasks.
+	(operand_parse_code): Replace OP_PSR with OP_wPSR and OP_rPSR.
+	Remove OP_RVC_PSR.
+	(parse_operands): Likewise.
+	(do_mrs): Tweak error message for constraint.
+	(do_t_mrs): Update constraints for changes to APSR support.
+	(do_t_msr): Likewise. Don't set PSR_f flag here.
+	(psrs): Remove "g", "nzcvq", "nzcvqg".
+	(insns): Tweak entries for msr and mrs instructions.
+
 2011-04-11  Kai Tietz  <ktietz@redhat.com>
 
 	* config/tc-i386.c (x86_cons): Initialize adjust with zero.
