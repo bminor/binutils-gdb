@@ -1,3 +1,10 @@
+2011-04-12  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/12532
+	* gas/arm/plt-1.d: Update expected disassembly.
+	* gas/arm/thumb2_bcond.d: Likewise.
+	* gas/arm/weakdef-1.d: Likewise.
+
 2011-04-12  Alan Modra  <amodra@gmail.com>
 
 	* gas/all/gas.exp (do_930509a): Don't xfail h8300 and mn10200.
