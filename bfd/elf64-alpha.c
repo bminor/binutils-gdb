@@ -2927,7 +2927,8 @@ elf64_alpha_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	     linker does that before adjust_dynamic_symbol is called, and
 	     it is that function which decides whether anything needs to
 	     go into these sections.  */
-	  s->flags |= SEC_EXCLUDE;
+	  if (!CONST_STRNEQ (name, ".got"))
+	    s->flags |= SEC_EXCLUDE;
 	}
       else if ((s->flags & SEC_HAS_CONTENTS) != 0)
 	{

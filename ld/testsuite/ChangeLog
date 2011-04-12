@@ -1,3 +1,8 @@
+2011-04-12  Richard Henderson  <rth@redhat.com>
+
+	* ld-alpha/emptygot.s, ld-alpha/emptygot.nm: New test.
+	* ld-alpha/alpha.exp: Run it.
+
 2011-04-11  Mark Wielaard  <mjw@redhat.com>
 
 	PR 10549

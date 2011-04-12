@@ -1,3 +1,8 @@
+2011-04-12  Richard Henderson  <rth@redhat.com>
+
+	* elf64-alpha.c (elf64_alpha_size_dynamic_sections): Do not
+	exclude empty .got sections.
+
 2011-04-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_reloc_type_lookup): Fix the out of bound
