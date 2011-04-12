@@ -1,3 +1,28 @@
+2011-04-12  Ian Lance Taylor  <iant@google.com>
+
+	* configure.ac: Check for sys/mman.h and mmap.  Check for mremap
+	with MREMAP_MAYMOVE.
+	* output.h (class Output_file): Add map_is_allocated_ field.
+	* output.cc: Only #include <sys/mman.h> if it exists.  If mmap is
+	not available, provide stubs.  If mremap is not available, #define
+	it to gold_mremap.
+	(MREMAP_MAYMOVE): Define if not defined.
+	(Output_file::Output_file): Initialize map_is_allocated_.
+	(Output_file::resize): Check map_is_allocated_.
+	(Output_file::map_anonymous): If mmap fails, use malloc.
+	(Output_file::unmap): Don't do anything for an anonymous map.
+	* fileread.cc: Only #include <sys/mman.h> if it exists.  If mmap
+	is not available, provide stubs.
+	(File_read::View::~View): Use free rather than delete[].
+	(File_read::make_view): Use malloc rather than new[].  If mmap
+	fails, use malloc.
+	(File_read::find_or_make_view): Use malloc rather than new[].
+	* gold.h: Remove HAVE_REMAP code.
+	* mremap.c: #include <errno.h>.  Only #include <sys/mman.h> if it
+	exists.  Rename mremap to gold_mremap.  If mmap is not available
+	don't do anything.
+	* configure, config.in: Rebuild.
+
 2011-04-11  Ian Lance Taylor  <iant@google.com>
 
 	* incremental.cc (Sized_incr_relobj::do_add_symbols): Always

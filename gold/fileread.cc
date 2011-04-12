@@ -27,7 +27,10 @@
 #include <climits>
 #include <fcntl.h>
 #include <unistd.h>
+
+#ifdef HAVE_SYS_MMAN_H
 #include <sys/mman.h>
+#endif
 
 #ifdef HAVE_READV
 #include <sys/uio.h>
@@ -45,6 +48,40 @@
 #include "descriptors.h"
 #include "gold-threads.h"
 #include "fileread.h"
+
+// For systems without mmap support.
+#ifndef HAVE_MMAP
+# define mmap gold_mmap
+# define munmap gold_munmap
+# ifndef MAP_FAILED
+#  define MAP_FAILED (reinterpret_cast<void*>(-1))
+# endif
+# ifndef PROT_READ
+#  define PROT_READ 0
+# endif
+# ifndef MAP_PRIVATE
+#  define MAP_PRIVATE 0
+# endif
+
+# ifndef ENOSYS
+#  define ENOSYS EINVAL
+# endif
+
+static void *
+gold_mmap(void *, size_t, int, int, int, off_t)
+{
+  errno = ENOSYS;
+  return MAP_FAILED;
+}
+
+static int
+gold_munmap(void *, size_t)
+{
+  errno = ENOSYS;
+  return -1;
+}
+
+#endif
 
 #ifndef HAVE_READV
 struct iovec { void* iov_base; size_t iov_len; };
@@ -96,7 +133,7 @@ File_read::View::~View()
   switch (this->data_ownership_)
     {
     case DATA_ALLOCATED_ARRAY:
-      delete[] this->data_;
+      free(const_cast<unsigned char*>(this->data_));
       break;
     case DATA_MMAPPED:
       if (::munmap(const_cast<unsigned char*>(this->data_), this->size_) != 0)
@@ -440,33 +477,39 @@ File_read::make_view(off_t start, section_size_type size,
       gold_assert(psize >= size);
     }
 
-  File_read::View* v;
+  void* p;
+  View::Data_ownership ownership;
   if (byteshift != 0)
     {
-      unsigned char* p = new unsigned char[psize + byteshift];
+      p = malloc(psize + byteshift);
+      if (p == NULL)
+	gold_nomem();
       memset(p, 0, byteshift);
-      this->do_read(poff, psize, p + byteshift);
-      v = new File_read::View(poff, psize, p, byteshift, cache,
-                              View::DATA_ALLOCATED_ARRAY);
+      this->do_read(poff, psize, static_cast<unsigned char*>(p) + byteshift);
+      ownership = View::DATA_ALLOCATED_ARRAY;
     }
   else
     {
       this->reopen_descriptor();
-      void* p = ::mmap(NULL, psize, PROT_READ, MAP_PRIVATE,
-                       this->descriptor_, poff);
-      if (p == MAP_FAILED)
-	gold_fatal(_("%s: mmap offset %lld size %lld failed: %s"),
-		   this->filename().c_str(),
-		   static_cast<long long>(poff),
-		   static_cast<long long>(psize),
-		   strerror(errno));
-
-      this->mapped_bytes_ += psize;
-
-      const unsigned char* pbytes = static_cast<const unsigned char*>(p);
-      v = new File_read::View(poff, psize, pbytes, 0, cache,
-                              View::DATA_MMAPPED);
+      p = ::mmap(NULL, psize, PROT_READ, MAP_PRIVATE, this->descriptor_, poff);
+      if (p != MAP_FAILED)
+	{
+	  ownership = View::DATA_MMAPPED;
+	  this->mapped_bytes_ += psize;
+	}
+      else
+	{
+	  p = malloc(psize);
+	  if (p == NULL)
+	    gold_nomem();
+	  this->do_read(poff, psize, p);
+	  ownership = View::DATA_ALLOCATED_ARRAY;
+	}
     }
+
+  const unsigned char* pbytes = static_cast<const unsigned char*>(p);
+  File_read::View* v = new File_read::View(poff, psize, pbytes, byteshift,
+					   cache, ownership);
 
   this->add_view(v);
 
@@ -525,7 +568,10 @@ File_read::find_or_make_view(off_t offset, off_t start,
     {
       gold_assert(aligned);
 
-      unsigned char* pbytes = new unsigned char[v->size() + byteshift];
+      unsigned char* pbytes;
+      pbytes = static_cast<unsigned char*>(malloc(v->size() + byteshift));
+      if (pbytes == NULL)
+	gold_nomem();
       memset(pbytes, 0, byteshift);
       memcpy(pbytes + byteshift, v->data() + v->byteshift(), v->size());
 

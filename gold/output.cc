@@ -1,6 +1,6 @@
 // output.cc -- manage the output file for gold
 
-// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -27,9 +27,13 @@
 #include <cerrno>
 #include <fcntl.h>
 #include <unistd.h>
-#include <sys/mman.h>
 #include <sys/stat.h>
 #include <algorithm>
+
+#ifdef HAVE_SYS_MMAN_H
+#include <sys/mman.h>
+#endif
+
 #include "libiberty.h"
 
 #include "parameters.h"
@@ -40,9 +44,69 @@
 #include "descriptors.h"
 #include "output.h"
 
+// For systems without mmap support.
+#ifndef HAVE_MMAP
+# define mmap gold_mmap
+# define munmap gold_munmap
+# define mremap gold_mremap
+# ifndef MAP_FAILED
+#  define MAP_FAILED (reinterpret_cast<void*>(-1))
+# endif
+# ifndef PROT_READ
+#  define PROT_READ 0
+# endif
+# ifndef PROT_WRITE
+#  define PROT_WRITE 0
+# endif
+# ifndef MAP_PRIVATE
+#  define MAP_PRIVATE 0
+# endif
+# ifndef MAP_ANONYMOUS
+#  define MAP_ANONYMOUS 0
+# endif
+# ifndef MAP_SHARED
+#  define MAP_SHARED 0
+# endif
+
+# ifndef ENOSYS
+#  define ENOSYS EINVAL
+# endif
+
+static void *
+gold_mmap(void *, size_t, int, int, int, off_t)
+{
+  errno = ENOSYS;
+  return MAP_FAILED;
+}
+
+static int
+gold_munmap(void *, size_t)
+{
+  errno = ENOSYS;
+  return -1;
+}
+
+static void *
+gold_mremap(void *, size_t, size_t, int)
+{
+  errno = ENOSYS;
+  return MAP_FAILED;
+}
+
+#endif
+
+#if defined(HAVE_MMAP) && !defined(HAVE_MREMAP)
+# define mremap gold_mremap
+extern "C" void *gold_mremap(void *, size_t, size_t, int);
+#endif
+
 // Some BSD systems still use MAP_ANON instead of MAP_ANONYMOUS
 #ifndef MAP_ANONYMOUS
 # define MAP_ANONYMOUS  MAP_ANON
+#endif
+
+#ifndef MREMAP_MAYMOVE
+# define MREMAP_MAYMOVE 1
 #endif
 
 #ifndef HAVE_POSIX_FALLOCATE
@@ -4415,6 +4479,7 @@ Output_file::Output_file(const char* name)
     file_size_(0),
     base_(NULL),
     map_is_anonymous_(false),
+    map_is_allocated_(false),
     is_temporary_(false)
 {
 }
@@ -4522,10 +4587,23 @@ Output_file::resize(off_t file_size)
   // to unmap to flush to the file, then remap after growing the file.
   if (this->map_is_anonymous_)
     {
-      void* base = ::mremap(this->base_, this->file_size_, file_size,
-                            MREMAP_MAYMOVE);
-      if (base == MAP_FAILED)
-        gold_fatal(_("%s: mremap: %s"), this->name_, strerror(errno));
+      void* base;
+      if (!this->map_is_allocated_)
+	{
+	  base = ::mremap(this->base_, this->file_size_, file_size,
+			  MREMAP_MAYMOVE);
+	  if (base == MAP_FAILED)
+	    gold_fatal(_("%s: mremap: %s"), this->name_, strerror(errno));
+	}
+      else
+	{
+	  base = realloc(this->base_, file_size);
+	  if (base == NULL)
+	    gold_nomem();
+	  if (file_size > this->file_size_)
+	    memset(static_cast<char*>(base) + this->file_size_, 0,
+		   file_size - this->file_size_);
+	}
       this->base_ = static_cast<unsigned char*>(base);
       this->file_size_ = file_size;
     }
@@ -4546,13 +4624,17 @@ Output_file::map_anonymous()
 {
   void* base = ::mmap(NULL, this->file_size_, PROT_READ | PROT_WRITE,
 		      MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-  if (base != MAP_FAILED)
+  if (base == MAP_FAILED)
     {
-      this->map_is_anonymous_ = true;
-      this->base_ = static_cast<unsigned char*>(base);
-      return true;
+      base = malloc(this->file_size_);
+      if (base == NULL)
+	return false;
+      memset(base, 0, this->file_size_);
+      this->map_is_allocated_ = true;
     }
-  return false;
+  this->base_ = static_cast<unsigned char*>(base);
+  this->map_is_anonymous_ = true;
+  return true;
 }
 
 // Map the file into memory.  Return whether the mapping succeeded.
@@ -4624,8 +4706,16 @@ Output_file::map()
 void
 Output_file::unmap()
 {
-  if (::munmap(this->base_, this->file_size_) < 0)
-    gold_error(_("%s: munmap: %s"), this->name_, strerror(errno));
+  if (this->map_is_anonymous_)
+    {
+      // We've already written out the data, so there is no reason to
+      // waste time unmapping or freeing the memory.
+    }
+  else
+    {
+      if (::munmap(this->base_, this->file_size_) < 0)
+	gold_error(_("%s: munmap: %s"), this->name_, strerror(errno));
+    }
   this->base_ = NULL;
 }
 

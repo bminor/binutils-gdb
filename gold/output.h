@@ -1,6 +1,6 @@
 // output.h -- manage the output file for gold   -*- C++ -*-
 
-// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -4221,6 +4221,8 @@ class Output_file
   unsigned char* base_;
   // True iff base_ points to a memory buffer rather than an output file.
   bool map_is_anonymous_;
+  // True if base_ was allocated using new rather than mmap.
+  bool map_is_allocated_;
   // True if this is a temporary file which should not be output.
   bool is_temporary_;
 };

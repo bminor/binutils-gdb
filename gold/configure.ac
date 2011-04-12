@@ -393,8 +393,22 @@ dnl host dependent.  If build == host, we can check getconf LFS_CFLAGS.
 LFS_CFLAGS="-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
 AC_SUBST(LFS_CFLAGS)
 
-AC_CHECK_FUNCS(chsize)
-AC_REPLACE_FUNCS(pread ftruncate mremap ffsll)
+AC_CHECK_HEADERS(sys/mman.h)
+AC_CHECK_FUNCS(chsize mmap)
+AC_REPLACE_FUNCS(pread ftruncate ffsll)
+
+AC_CACHE_CHECK([mremap with MREMAP_MAYMOVE], [gold_cv_lib_mremap_maymove],
+[AC_LINK_IFELSE([
+AC_LANG_PROGRAM([[
+#include <sys/mman.h>
+void f() { mremap (0, 0, 0, MREMAP_MAYMOVE); }
+]])], [gold_cv_lib_mremap_maymove=yes], [gold_cv_lib_mremap_maymove=no])])
+if test "$gold_cv_lib_mremap_maymove" = "yes"; then
+  AC_DEFINE(HAVE_MREMAP, 1,
+    [Define to 1 if you have the mremap function with MREMAP_MAYMOVE support])
+else
+  AC_LIBOBJ(mremap)
+fi
 
 # Link in zlib if we can.  This allows us to write compressed sections.
 AC_SEARCH_LIBS(zlibVersion, z, [AC_CHECK_HEADERS(zlib.h)])

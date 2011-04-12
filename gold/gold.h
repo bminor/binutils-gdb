@@ -1,6 +1,6 @@
 // gold.h -- general definitions for gold   -*- C++ -*-
 
-// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -133,11 +133,6 @@ extern "C" ssize_t pread(int, void*, size_t, off_t);
 
 #ifndef HAVE_FTRUNCATE
 extern "C" int ftruncate(int, off_t);
-#endif
-
-#ifndef HAVE_MREMAP
-#define MREMAP_MAYMOVE 1
-extern "C" void *mremap(void *, size_t, size_t, int, ...);
 #endif
 
 #ifndef HAVE_FFSLL
