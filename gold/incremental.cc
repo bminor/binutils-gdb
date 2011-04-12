@@ -1668,7 +1668,7 @@ Sized_incr_relobj<size, big_endian>::do_add_symbols(
       if (!strtab.get_c_string(gsym.get_st_name(), &name))
 	name = "";
 
-      typename elfcpp::Elf_types<size>::Elf_Addr v;
+      typename elfcpp::Elf_types<size>::Elf_Addr v = gsym.get_st_value();
       unsigned int shndx = gsym.get_st_shndx();
       elfcpp::STB st_bind = gsym.get_st_bind();
       elfcpp::STT st_type = gsym.get_st_type();
@@ -1688,7 +1688,6 @@ Sized_incr_relobj<size, big_endian>::do_add_symbols(
 	{
 	  // Find the input section and calculate the section-relative value.
 	  gold_assert(shndx != elfcpp::SHN_UNDEF);
-	  v = gsym.get_st_value();
 	  Output_section* os = this->ibase_->output_section(shndx);
 	  gold_assert(os != NULL && os->has_fixed_layout());
 	  typename Input_entry_reader::Input_section_info sect =

@@ -1,3 +1,8 @@
+2011-04-11  Ian Lance Taylor  <iant@google.com>
+
+	* incremental.cc (Sized_incr_relobj::do_add_symbols): Always
+	initialize local variable v.
+
 2011-04-11  Cary Coutant  <ccoutant@google.com>
 
 	* archive.cc (Archive::include_member): Adjust call to
