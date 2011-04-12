@@ -243,7 +243,8 @@ if { ![istarget hppa*-*-*] &&
      ![istarget *c54x*-*-*] } then {
     # the vax fails because VMS can apparently actually handle this
     # case in relocs, so gas doesn't handle it itself.
-    setup_xfail "h8300*-*-elf*" "mn10200*-*-*" "mn10300*-*-*" "vax*-*-vms*"
+    # mn10300 emits two relocs to handle the difference of two symbols.
+    setup_xfail "mn10300*-*-*" "vax*-*-vms*"
     do_930509a
 }
 

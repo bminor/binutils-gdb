@@ -1,3 +1,7 @@
+2011-04-12  Alan Modra  <amodra@gmail.com>
+
+	* gas/all/gas.exp (do_930509a): Don't xfail h8300 and mn10200.
+
 2011-04-11  Julian Brown  <julian@codesourcery.com>
 
 	* gas/arm/mrs-msr-thumb-v7-m.s: New.
