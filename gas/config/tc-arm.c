@@ -19075,6 +19075,12 @@ relax_branch (fragS *fragp, asection *sec, int bits, long stretch)
   if (S_IS_DEFINED (fragp->fr_symbol)
       && ARM_IS_FUNC (fragp->fr_symbol))
       return 4;
+
+  /* PR 12532.  Global symbols with default visibility might
+     be preempted, so do not relax relocations to them.  */
+  if ((ELF_ST_VISIBILITY (S_GET_OTHER (fragp->fr_symbol)) == STV_DEFAULT)
+      && (! S_IS_LOCAL (fragp->fr_symbol)))
+    return 4;
 #endif
 
   val = relaxed_symbol_addr (fragp, stretch);

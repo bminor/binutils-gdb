@@ -1,3 +1,9 @@
+2011-04-12  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/12532
+	* config/tc-arm.c (relax_branch): Do not relax branches to
+	preemptable global symbols.
+
 2011-04-11  Julian Brown  <julian@codesourcery.com>
 
 	* config/tc-arm.c (parse_psr): Add LHS argument. Improve support
