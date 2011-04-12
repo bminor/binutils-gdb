@@ -1,5 +1,10 @@
 2011-04-12  Nick Clifton  <nickc@redhat.com>
 
+	PR binutils/12534
+	* gas/arm/thumb32.s: Add PC relative LDRD and STRD insns.
+	* gas/arm/thumb32.l: Update expected output.
+	* gas/arm/thumb32.d: Update expected disassembly.
+
 	PR gas/12532
 	* gas/arm/plt-1.d: Update expected disassembly.
 	* gas/arm/thumb2_bcond.d: Likewise.
