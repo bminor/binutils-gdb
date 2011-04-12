@@ -1,3 +1,403 @@
+2011-04-11  Cary Coutant  <ccoutant@google.com>
+
+	* archive.cc (Archive::include_member): Adjust call to
+	report_object.
+	(Add_archive_symbols::run): Track argument serial numbers.
+	(Lib_group::include_member): Likewise.
+	(Add_lib_group_symbols::run): Adjust call to report_archive_begin.
+	* archive.h (Incremental_archive_entry::Archive_member):
+	Initialize arg_serial_.
+	(Archive_member::arg_serial_): New data member.
+	* dynobj.cc (Dynobj::Dynobj): Allow input_file_ to be NULL.
+	(Sized_dynobj::do_add_symbols): Track symbols when doing an
+	incremental link.
+	(Sized_dynobj::do_for_all_local_got_entries): New function.
+	* dynobj.h: (Sized_dynobj::do_for_all_local_got_entries): New
+	function.
+	* fileread.cc (get_mtime): New function.
+	* fileread.h (get_mtime): New function.
+	* gold.cc (queue_initial_tasks): Check for incremental update.
+	(process_incremental_input): New function.
+	(queue_middle_tasks): Don't force valid target for incremental
+	update.
+	* incremental-dump.cc (find_input_containing_global): Adjust
+	size of symbol info entry.
+	(dump_incremental_inputs): Dump argument serial number and
+	in_system_directory flag; bias shndx by 1; print symbol names
+	when dumping per-file symbol lists; use new symbol info readers.
+	* incremental.cc
+	(Output_section_incremental_inputs:update_data_size): New function.
+	(Sized_incremental_binary::setup_readers): Setup input readers
+	for each input file; build maps for files added from libraries
+	and scripts.
+	(Sized_incremental_binary::check_input_args): New function.
+	(Sized_incremental_binary::do_check_inputs): Build map of argument
+	serial numbers to input arguments.
+	(Sized_incremental_binary::do_file_has_changed): Rename
+	do_file_is_unchanged to this; compare file modification times.
+	(Sized_incremental_binary::do_init_layout): New function.
+	(Sized_incremental_binary::do_reserve_layout): New function.
+	(Sized_incremental_binary::do_get_input_reader): Remove.
+	(Sized_incremental_binary::get_symtab_view): New function.
+	(Incremental_checker::can_incrementally_link_output_file): Remove.
+	(Incremental_inputs::report_command_line): Exclude --debug options.
+	(Incremental_inputs::report_archive_begin): Add parameter; track
+	argument serial numbers; don't put input file entry for archive
+	before archive members.
+	(Incremental_inputs::report_archive_end): Put input file entry
+	for archive after archive members.
+	(Incremental_inputs::report_object): Add parameter; track argument
+	serial numbers and in_system_directory flag.
+	(Incremental_inputs::report_script): Add parameter; track argument
+	serial numbers.
+	(Output_section_incremental_inputs::set_final_data_size): Adjust
+	size of symbol info entry; check for forwarding symbols.
+	(Output_section_incremental_inputs::write_input_files): Write
+	in_system_directory flag and argument serial number.
+	(Output_section_incremental_inputs::write_info_blocks): Map section
+	indices between incremental info and original input file; store
+	input section index for each symbol.
+	(class Local_got_offset_visitor): Derive from Got_offset_list::Visitor;
+	change operator() to visit().
+	(class Global_got_offset_visitor): Likewise.
+	(class Global_symbol_visitor_got_plt):
+	(Output_section_incremental_inputs::write_got_plt): Use new visitor
+	classes.
+	(Sized_incr_relobj::Sized_incr_relobj): New constructor.
+	(Sized_incr_relobj::do_read_symbols): New function.
+	(Sized_incr_relobj::do_layout): New function.
+	(Sized_incr_relobj::do_layout_deferred_sections): New function.
+	(Sized_incr_relobj::do_add_symbols): New function.
+	(Sized_incr_relobj::do_should_include_member): New function.
+	(Sized_incr_relobj::do_for_all_global_symbols): New function.
+	(Sized_incr_relobj::do_for_all_local_got_entries): New function.
+	(Sized_incr_relobj::do_section_size): New function.
+	(Sized_incr_relobj::do_section_name): New function.
+	(Sized_incr_relobj::do_section_contents): New function.
+	(Sized_incr_relobj::do_section_flags): New function.
+	(Sized_incr_relobj::do_section_entsize): New function.
+	(Sized_incr_relobj::do_section_address): New function.
+	(Sized_incr_relobj::do_section_type): New function.
+	(Sized_incr_relobj::do_section_link): New function.
+	(Sized_incr_relobj::do_section_info): New function.
+	(Sized_incr_relobj::do_section_addralign): New function.
+	(Sized_incr_relobj::do_initialize_xindex): New function.
+	(Sized_incr_relobj::do_get_global_symbol_counts): New function.
+	(Sized_incr_relobj::do_read_relocs): New function.
+	(Sized_incr_relobj::do_gc_process_relocs): New function.
+	(Sized_incr_relobj::do_scan_relocs): New function.
+	(Sized_incr_relobj::do_count_local_symbols): New function.
+	(Sized_incr_relobj::do_finalize_local_symbols): New function.
+	(Sized_incr_relobj::do_set_local_dynsym_indexes): New function.
+	(Sized_incr_relobj::do_set_local_dynsym_offset): New function.
+	(Sized_incr_relobj::do_relocate): New function.
+	(Sized_incr_relobj::do_set_section_offset): New function.
+	(Sized_incr_dynobj::Sized_incr_dynobj): New function.
+	(Sized_incr_dynobj::do_read_symbols): New function.
+	(Sized_incr_dynobj::do_layout): New function.
+	(Sized_incr_dynobj::do_add_symbols): New function.
+	(Sized_incr_dynobj::do_should_include_member): New function.
+	(Sized_incr_dynobj::do_for_all_global_symbols): New function.
+	(Sized_incr_dynobj::do_for_all_local_got_entries): New function.
+	(Sized_incr_dynobj::do_section_size): New function.
+	(Sized_incr_dynobj::do_section_name): New function.
+	(Sized_incr_dynobj::do_section_contents): New function.
+	(Sized_incr_dynobj::do_section_flags): New function.
+	(Sized_incr_dynobj::do_section_entsize): New function.
+	(Sized_incr_dynobj::do_section_address): New function.
+	(Sized_incr_dynobj::do_section_type): New function.
+	(Sized_incr_dynobj::do_section_link): New function.
+	(Sized_incr_dynobj::do_section_info): New function.
+	(Sized_incr_dynobj::do_section_addralign): New function.
+	(Sized_incr_dynobj::do_initialize_xindex): New function.
+	(Sized_incr_dynobj::do_get_global_symbol_counts): New function.
+	(make_sized_incremental_object): New function.
+	(Incremental_library::copy_unused_symbols): New function.
+	(Incremental_library::do_for_all_unused_symbols): New function.
+	* incremental.h (enum Incremental_input_flags): New type.
+	(class Incremental_checker): Remove.
+	(Incremental_input_entry::Incremental_input_entry): Add argument
+	serial number.
+	(Incremental_input_entry::arg_serial): New function.
+	(Incremental_input_entry::set_is_in_system_directory): New function.
+	(Incremental_input_entry::is_in_system_directory): New function.
+	(Incremental_input_entry::arg_serial_): New data member.
+	(Incremental_input_entry::is_in_system_directory_): New data member.
+	(class Script_info): Move here from script.h.
+	(Script_info::Script_info): Add filename parameter.
+	(Script_info::filename): New function.
+	(Script_info::filename_): New data member.
+	(Incremental_script_entry::Incremental_script_entry): Add argument
+	serial number.
+	(Incremental_object_entry::Incremental_object_entry): Likewise.
+	(Incremental_object_entry::add_input_section): Build list of input
+	sections with map to original shndx.
+	(Incremental_object_entry::get_input_section_index): New function.
+	(Incremental_object_entry::shndx_): New data member.
+	(Incremental_object_entry::name_key_): Rename; adjust all refs.
+	(Incremental_object_entry::sh_size_): Rename; adjust all refs.
+	(Incremental_archive_entry::Incremental_archive_entry): Add argument
+	serial number.
+	(Incremental_inputs::report_archive_begin): Likewise.
+	(Incremental_inputs::report_object): Likewise.
+	(Incremental_inputs::report_script): Likewise.
+	(class Incremental_global_symbol_reader): New class.
+	(Incremental_input_entry_reader::Incremental_input_entry_reader): Read
+	and store flags and input file type.
+	(Incremental_input_entry_reader::arg_serial): New function.
+	(Incremental_input_entry_reader::type): Extract type from flags.
+	(Incremental_input_entry_reader::is_in_system_directory): New function.
+	(Incremental_input_entry_reader::get_input_section_count): Call
+	accessor function for type.
+	(Incremental_input_entry_reader::get_symbol_offset): Call accessor
+	function for type; adjust size of global symbol entry.
+	(Incremental_input_entry_reader::get_global_symbol_count): Call
+	accessor function for type.
+	(Incremental_input_entry_reader::get_object_count): Likewise.
+	(Incremental_input_entry_reader::get_object_offset): Likewise.
+	(Incremental_input_entry_reader::get_member_count): Likewise.
+	(Incremental_input_entry_reader::get_unused_symbol_count): Likewise.
+	(Incremental_input_entry_reader::get_member_offset): Likewise.
+	(Incremental_input_entry_reader::get_unused_symbol): Likewise.
+	(Incremental_input_entry_reader::Global_symbol_info): Remove.
+	(Incremental_input_entry_reader::get_global_symbol_info): Remove.
+	(Incremental_input_entry_reader::get_global_symbol_reader): New
+	function.
+	(Incremental_input_entry_reader::get_output_symbol_index): New
+	function.
+	(Incremental_input_entry_reader::type_): Remove.
+	(Incremental_input_entry_reader::flags_): New data member.
+	(Incremental_inputs_reader::input_file_offset): New function.
+	(Incremental_inputs_reader::input_file_index): New function.
+	(Incremental_inputs_reader::input_file): Call input_file_offset.
+	(Incremental_inputs_reader::input_file_at_offset): New function.
+	(Incremental_relocs_reader::get_r_type): Reformat.
+	(Incremental_relocs_reader::get_r_shndx): Reformat.
+	(Incremental_relocs_reader::get_r_offset): Reformat.
+	(Incremental_relocs_reader::data): New function.
+	(Incremental_binary::Incremental_binary): Initialize new data members.
+	(Incremental_binary::check_inputs): Add cmdline parameter.
+	(Incremental_binary::file_is_unchanged): Remove.
+	(Input_reader::arg_serial): New function.
+	(Input_reader::get_unused_symbol_count): New function.
+	(Input_reader::get_unused_symbol): New function.
+	(Input_reader::do_arg_serial): New function.
+	(Input_reader::do_get_unused_symbol_count): New function.
+	(Input_reader::do_get_unused_symbol): New function.
+	(Incremental_binary::input_file_count): New function.
+	(Incremental_binary::get_input_reader): Change signature to use
+	index instead of filename.
+	(Incremental_binary::file_has_changed): New function.
+	(Incremental_binary::get_input_argument): New function.
+	(Incremental_binary::get_library): New function.
+	(Incremental_binary::get_script_info): New function.
+	(Incremental_binary::init_layout): New function.
+	(Incremental_binary::reserve_layout): New function.
+	(Incremental_binary::output_file): New function.
+	(Incremental_binary::do_check_inputs): New function.
+	(Incremental_binary::do_file_is_unchanged): Remove.
+	(Incremental_binary::do_file_has_changed): New function.
+	(Incremental_binary::do_init_layout): New function.
+	(Incremental_binary::do_reserve_layout): New function.
+	(Incremental_binary::do_input_file_count): New function.
+	(Incremental_binary::do_get_input_reader): Change signature.
+	(Incremental_binary::input_args_map_): New data member.
+	(Incremental_binary::library_map_): New data member.
+	(Incremental_binary::script_map_): New data member.
+	(Sized_incremental_binary::Sized_incremental_binary): Initialize
+	new data members.
+	(Sized_incremental_binary::output_section): New function.
+	(Sized_incremental_binary::inputs_reader): Add const.
+	(Sized_incremental_binary::symtab_reader): Add const.
+	(Sized_incremental_binary::relocs_reader): Add const.
+	(Sized_incremental_binary::got_plt_reader): Add const.
+	(Sized_incremental_binary::get_symtab_view): New function.
+	(Sized_incremental_binary::Inputs_reader): New typedef.
+	(Sized_incremental_binary::Input_entry_reader): New typedef.
+	(Sized_incremental_binary::do_check_inputs): Add cmdline parameter.
+	(Sized_incremental_binary::do_file_is_unchanged): Remove.
+	(Sized_incremental_binary::do_file_has_changed): New function.
+	(Sized_incremental_binary::do_init_layout): New function.
+	(Sized_incremental_binary::do_reserve_layout): New function.
+	(Sized_input_reader::Inputs_reader): Remove.
+	(Sized_input_reader::Input_entry_reader): Remove.
+	(Sized_input_reader::do_arg_serial): New function.
+	(Sized_input_reader::do_get_unused_symbol_count): New function.
+	(Sized_input_reader::do_get_unused_symbol): New function.
+	(Sized_incremental_binary::do_input_file_count): New function.
+	(Sized_incremental_binary::do_get_input_reader): Change signature;
+	use index instead of filename.
+	(Sized_incremental_binary::section_map_): New data member.
+	(Sized_incremental_binary::input_entry_readers_): New data member.
+	(class Sized_incr_relobj): New class.
+	(class Sized_incr_dynobj): New class.
+	(make_sized_incremental_object): New function.
+	(class Incremental_library): New class.
+	* layout.cc (Free_list::num_lists): New static data member.
+	(Free_list::num_nodes): New static data member.
+	(Free_list::num_removes): New static data member.
+	(Free_list::num_remove_visits): New static data member.
+	(Free_list::num_allocates): New static data member.
+	(Free_list::num_allocate_visits): New static data member.
+	(Free_list::init): New function.
+	(Free_list::remove): New function.
+	(Free_list::allocate): New function.
+	(Free_list::dump): New function.
+	(Free_list::print_stats): New function.
+	(Layout_task_runner::run): Resize output file for incremental updates.
+	(Layout::Layout): Initialize new data members.
+	(Layout::set_incremental_base): New function.
+	(Layout::init_fixed_output_section): New function.
+	(Layout::layout_eh_frame): Do not build .eh_frame_hdr section for
+	incremental updates.
+	(Layout::create_gold_note): Do not create gold note section for
+	incremental updates.
+	(Layout::set_segment_offsets): Do not recalculate RELRO alignment
+	for incremental updates.
+	(Layout::set_section_offsets): For incremental updates, allocate space
+	from free list.
+	(Layout::create_symtab_sections): Layout with offsets relative to
+	start of section; for incremental updates, allocate space from free
+	list.
+	(Layout::create_shdrs): For incremental updates, allocate space from
+	free list.
+	(Layout::finish_dynamic_section): For incremental updates, do not
+	check --as-needed (fixed in subsequent patch).
+	* layout.h (class Free_list): New class.
+	(Layout::set_incremental_base): New function.
+	(Layout::incremental_base): New function.
+	(Layout::init_fixed_output_section): New function.
+	(Layout::allocate): New function.
+	(Layout::incremental_base_): New data member.
+	(Layout::free_list_): New data member.
+	* main.cc (main): Print Free_list statistics.
+	* object.cc (Relobj::finalize_incremental_relocs): Add
+	clear_counts parameter; clear counts only when clear_counts is set.
+	(Sized_relobj::Sized_relobj): Initialize new base class.
+	(Sized_relobj::do_layout): Don't report special sections.
+	(Sized_relobj::do_for_all_local_got_entries): New function.
+	(Sized_relobj::write_local_symbols): Add symtab_off parameter; add
+	symtab_off to all symbol table offsets.
+	(Sized_relobj::do_get_global_symbol_counts): Add typename keyword.
+	* object.h (class Got_offset_list): Move to top of file.
+	(Object::Object): Allow case where input_file == NULL.
+	(Object::~Object): Likewise.
+	(Object::input_file): Assert that input_file != NULL.
+	(Object::lock): Allow case where input_file == NULL.
+	(Object::unlock): Likewise.
+	(Object::is_locked): Likewise.
+	(Object::token): Likewise.
+	(Object::release): Likewise.
+	(Object::is_incremental): New function.
+	(Object::get_mtime): New function.
+	(Object::for_all_local_got_entries): New function.
+	(Object::clear_view_cache_marks): Allow case where input_file == NULL.
+	(Object::set_is_in_system_directory): New function.
+	(Object::is_in_system_directory): New function.
+	(Object::do_is_incremental): New function.
+	(Object::do_get_mtime): New function.
+	(Object::do_for_all_local_got_entries): New function.
+	(Object::is_in_system_directory_): New data member.
+	(Relobj::finalize_incremental_relocs): Add clear_counts parameter.
+	(class Sized_relobj_base): New class.
+	(class Sized_relobj): Derive from Sized_relobj_base.
+	(class Sized_relobj::Symbols): Redeclare from base class.
+	(class Sized_relobj::local_got_offset_list): Remove.
+	(class Sized_relobj::Output_sections): Redeclare from base class.
+	(class Sized_relobj::do_for_all_local_got_entries): New function.
+	(class Sized_relobj::write_local_symbols): Add offset parameter.
+	(class Sized_relobj::local_symbol_offset_): Update comment.
+	(class Sized_relobj::local_dynsym_offset_): Update comment.
+	* options.cc (Input_arguments::add_file): Remove const.
+	* options.h (Input_file_argument::Input_file_argument):
+	Initialize arg_serial_ (all constructors).
+	(Input_file_argument::set_arg_serial): New function.
+	(Input_file_argument::arg_serial): New function.
+	(Input_file_argument::arg_serial_): New data member.
+	(Input_arguments::Input_arguments): Initialize file_count_.
+	(Input_arguments::add_file): Remove const.
+	(Input_arguments::number_of_input_files): New function.
+	(Input_arguments::file_count_): New data member.
+	(Command_line::number_of_input_files): Call
+	Input_arguments::number_of_input_files.
+	* output.cc (Output_segment_headers::Output_segment_headers):
+	Set current size.
+	(Output_section::Input_section::current_data_size): New function.
+	(Output_section::Output_section): Initialize new data members.
+	(Output_section::add_input_section): Don't do merge sections for
+	an incremental link; allocate space from free list for an
+	incremental update.
+	(Output_section::add_output_section_data): Allocate space from
+	free list for an incremental update.
+	(Output_section::update_data_size): New function.
+	(Output_section::set_fixed_layout): New function.
+	(Output_section::reserve): New function.
+	(Output_segment::set_section_addresses): Remove const.
+	(Output_segment::set_section_list_addresses): Remove const; allocate
+	space from free list for an incremental update.
+	(Output_segment::set_offset): Adjust size of RELRO segment for an
+	incremental update.
+	* output.h (Output_data::current_data_size): Move here from
+	child classes.
+	(Output_data::pre_finalize_data_size): New function.
+	(Output_data::update_data_size): New function.
+	(Output_section_headers::update_data_size): new function.
+	(Output_section_data_build::current_data_size): Move to Output_data.
+	(Output_data_strtab::update_data_size): New function.
+	(Output_section::current_data_size): Move to Output_data.
+	(Output_section::set_fixed_layout): New function.
+	(Output_section::has_fixed_layout): New function.
+	(Output_section::reserve): New function.
+	(Output_section::update_data_size): New function.
+	(Output_section::has_fixed_layout_): New data member.
+	(Output_section::free_list_): New data member.
+	(Output_segment::set_section_addresses): Remove const.
+	(Output_segment::set_section_list_addresses): Remove const.
+	* plugin.cc (Sized_pluginobj::do_for_all_local_got_entries):
+	New function.
+	* plugin.h (Sized_pluginobj::do_for_all_local_got_entries):
+	New function.
+	* readsyms.cc (Read_symbols::do_read_symbols): Add library
+	parameter when calling Add_symbols constructor; store argument
+	serial number for members of a lib group.
+	(Add_symbols::locks): Allow case where token == NULL.
+	(Add_symbols::run): Report libraries denoted by --start-lib/--end-lib.
+	(Read_member::~Read_member): New function.
+	(Read_member::is_runnable): New function.
+	(Read_member::locks): New function.
+	(Read_member::run): New function.
+	(Check_script::~Check_script): New function.
+	(Check_script::is_runnable): New function.
+	(Check_script::locks): New function.
+	(Check_script::run): New function.
+	(Check_library::~Check_library): New function.
+	(Check_library::is_runnable): New function.
+	(Check_library::locks): New function.
+	(Check_library::run): New function.
+	* readsyms.h (Add_symbols::Add_symbols): Add library parameter.
+	(Add_symbols::library_): New data member.
+	(class Read_member): New class.
+	(class Check_script): New class.
+	(class Check_library): New class.
+	* reloc.cc (Read_relocs::is_runnable): Allow case where
+	token == NULL.
+	(Read_relocs::locks): Likewise.
+	(Scan_relocs::locks): Likewise.
+	(Relocate_task::locks): Likewise.
+	(Sized_relobj::do_scan_relocs): Tell finalize_incremental_relocs
+	to clear counters.
+	(Sized_relobj::incremental_relocs_scan): Fix comment.
+	(Sized_relobj::do_relocate): Pass output file offset to
+	write_local_symbols.
+	(Sized_relobj::incremental_relocs_write_reltype): Use reloc_size
+	from class declaration.
+	* script.cc (read_input_script): Allocate Script_info; pass
+	argument serial number to report_script.
+	* script.h (class Script_info): Move to incremental.h.
+	* symtab.cc (Symbol_table::add_from_incrobj): New function.
+	* symtab.h (Symbol_table::add_from_incrobj): New function.
+	(Symbol_table::set_file_offset): New function.
+
 2011-04-05  Cary Coutant  <ccoutant@google.com>
 
 	* incremental-dump.cc (dump_incremental_inputs): Change signature

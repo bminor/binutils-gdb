@@ -40,6 +40,7 @@
 #include "symtab.h"
 #include "script.h"
 #include "plugin.h"
+#include "incremental.h"
 
 namespace gold
 {
@@ -1483,6 +1484,37 @@ Symbol_table::add_from_dynobj(
     }
 
   this->record_weak_aliases(&object_symbols);
+}
+
+// Add a symbol from a incremental object file.
+
+template<int size, bool big_endian>
+Symbol*
+Symbol_table::add_from_incrobj(
+    Object* obj,
+    const char* name,
+    const char* ver,
+    elfcpp::Sym<size, big_endian>* sym)
+{
+  unsigned int st_shndx = sym->get_st_shndx();
+  bool is_ordinary = st_shndx < elfcpp::SHN_LORESERVE;
+
+  Stringpool::Key ver_key = 0;
+  bool is_default_version = false;
+  bool is_forced_local = false;
+
+  Stringpool::Key name_key;
+  name = this->namepool_.add(name, true, &name_key);
+
+  Sized_symbol<size>* res;
+  res = this->add_from_object(obj, name, name_key, ver, ver_key,
+		              is_default_version, *sym, st_shndx,
+			      is_ordinary, st_shndx);
+
+  if (is_forced_local)
+    this->force_local(res);
+
+  return res;
 }
 
 // This is used to sort weak aliases.  We sort them first by section
@@ -3417,6 +3449,46 @@ Symbol_table::add_from_dynobj<64, true>(
     const std::vector<const char*>* version_map,
     Sized_relobj<64, true>::Symbols* sympointers,
     size_t* defined);
+#endif
+
+#ifdef HAVE_TARGET_32_LITTLE
+template
+Symbol*
+Symbol_table::add_from_incrobj(
+    Object* obj,
+    const char* name,
+    const char* ver,
+    elfcpp::Sym<32, false>* sym);
+#endif
+
+#ifdef HAVE_TARGET_32_BIG
+template
+Symbol*
+Symbol_table::add_from_incrobj(
+    Object* obj,
+    const char* name,
+    const char* ver,
+    elfcpp::Sym<32, true>* sym);
+#endif
+
+#ifdef HAVE_TARGET_64_LITTLE
+template
+Symbol*
+Symbol_table::add_from_incrobj(
+    Object* obj,
+    const char* name,
+    const char* ver,
+    elfcpp::Sym<64, false>* sym);
+#endif
+
+#ifdef HAVE_TARGET_64_BIG
+template
+Symbol*
+Symbol_table::add_from_incrobj(
+    Object* obj,
+    const char* name,
+    const char* ver,
+    elfcpp::Sym<64, true>* sym);
 #endif
 
 #if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_32_BIG)

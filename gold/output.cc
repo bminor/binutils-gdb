@@ -280,6 +280,7 @@ Output_segment_headers::Output_segment_headers(
     const Layout::Segment_list& segment_list)
   : segment_list_(segment_list)
 {
+  this->set_current_data_size_for_child(this->do_size());
 }
 
 void
@@ -1794,6 +1795,21 @@ Output_symtab_xindex::endian_do_write(unsigned char* const oview)
 
 // Output_section::Input_section methods.
 
+// Return the current data size.  For an input section we store the size here.
+// For an Output_section_data, we have to ask it for the size.
+
+off_t
+Output_section::Input_section::current_data_size() const
+{
+  if (this->is_input_section())
+    return this->u1_.data_size;
+  else
+    {
+      this->u2_.posd->pre_finalize_data_size();
+      return this->u2_.posd->current_data_size();
+    }
+}
+
 // Return the data size.  For an input section we store the size here.
 // For an Output_section_data, we have to ask it for the size.
 
@@ -2003,9 +2019,11 @@ Output_section::Output_section(const char* name, elfcpp::Elf_Word type,
     section_offsets_need_adjustment_(false),
     is_noload_(false),
     always_keeps_input_sections_(false),
+    has_fixed_layout_(false),
     tls_offset_(0),
     checkpoint_(NULL),
-    lookup_maps_(new Output_section_lookup_maps)
+    lookup_maps_(new Output_section_lookup_maps),
+    free_list_()
 {
   // An unallocated section has no address.  Forcing this means that
   // we don't need special treatment for symbols defined in debug
@@ -2086,9 +2104,11 @@ Output_section::add_input_section(Layout* layout,
   // a Output_data_merge.  We don't try to handle relocations for such
   // a section.  We don't try to handle empty merge sections--they
   // mess up the mappings, and are useless anyhow.
+  // FIXME: Need to handle merge sections during incremental update.
   if ((sh_flags & elfcpp::SHF_MERGE) != 0
       && reloc_shndx == 0
-      && shdr.get_sh_size() > 0)
+      && shdr.get_sh_size() > 0
+      && !parameters->incremental())
     {
       // Keep information about merged input sections for rebuilding fast
       // lookup maps if we have sections-script or we do relaxation.
@@ -2105,9 +2125,30 @@ Output_section::add_input_section(Layout* layout,
 	}
     }
 
-  off_t offset_in_section = this->current_data_size_for_child();
-  off_t aligned_offset_in_section = align_address(offset_in_section,
-                                                  addralign);
+  section_size_type input_section_size = shdr.get_sh_size();
+  section_size_type uncompressed_size;
+  if (object->section_is_compressed(shndx, &uncompressed_size))
+    input_section_size = uncompressed_size;
+
+  off_t offset_in_section;
+  off_t aligned_offset_in_section;
+  if (this->has_fixed_layout())
+    {
+      // For incremental updates, find a chunk of unused space in the section.
+      offset_in_section = this->free_list_.allocate(input_section_size,
+						    addralign, 0);
+      if (offset_in_section == -1)
+        gold_fatal(_("out of patch space; relink with --incremental-full"));
+      aligned_offset_in_section = offset_in_section;
+    }
+  else
+    {
+      offset_in_section = this->current_data_size_for_child();
+      aligned_offset_in_section = align_address(offset_in_section,
+						addralign);
+      this->set_current_data_size_for_child(aligned_offset_in_section
+					    + input_section_size);
+    }
 
   // Determine if we want to delay code-fill generation until the output
   // section is written.  When the target is relaxing, we want to delay fill
@@ -2144,14 +2185,6 @@ Output_section::add_input_section(Layout* layout,
         }
     }
 
-  section_size_type input_section_size = shdr.get_sh_size();
-  section_size_type uncompressed_size;
-  if (object->section_is_compressed(shndx, &uncompressed_size))
-    input_section_size = uncompressed_size;
-
-  this->set_current_data_size_for_child(aligned_offset_in_section
-					+ input_section_size);
-
   // We need to keep track of this section if we are already keeping
   // track of sections, or if we are relaxing.  Also, if this is a
   // section which requires sorting, or which may require sorting in
@@ -2178,6 +2211,14 @@ Output_section::add_input_section(Layout* layout,
               this->set_input_section_order_specified();
             }
         }
+      if (this->has_fixed_layout())
+	{
+	  // For incremental updates, finalize the address and offset now.
+	  uint64_t addr = this->address();
+	  isecn.set_address_and_file_offset(addr + aligned_offset_in_section,
+					    aligned_offset_in_section,
+					    this->offset());
+	}
       this->input_sections_.push_back(isecn);
     }
 
@@ -2194,11 +2235,38 @@ Output_section::add_output_section_data(Output_section_data* posd)
 
   if (posd->is_data_size_valid())
     {
-      off_t offset_in_section = this->current_data_size_for_child();
-      off_t aligned_offset_in_section = align_address(offset_in_section,
-						      posd->addralign());
-      this->set_current_data_size_for_child(aligned_offset_in_section
-					    + posd->data_size());
+      off_t offset_in_section;
+      if (this->has_fixed_layout())
+	{
+	  // For incremental updates, find a chunk of unused space.
+	  offset_in_section = this->free_list_.allocate(posd->data_size(),
+							posd->addralign(), 0);
+	  if (offset_in_section == -1)
+	    gold_fatal(_("out of patch space; relink with --incremental-full"));
+	  // Finalize the address and offset now.
+	  uint64_t addr = this->address();
+	  off_t offset = this->offset();
+	  posd->set_address_and_file_offset(addr + offset_in_section,
+					    offset + offset_in_section);
+	}
+      else
+	{
+	  offset_in_section = this->current_data_size_for_child();
+	  off_t aligned_offset_in_section = align_address(offset_in_section,
+							  posd->addralign());
+	  this->set_current_data_size_for_child(aligned_offset_in_section
+						+ posd->data_size());
+	}
+    }
+  else if (this->has_fixed_layout())
+    {
+      // For incremental updates, arrange for the data to have a fixed layout.
+      // This will mean that additions to the data must be allocated from
+      // free space within the containing output section.
+      uint64_t addr = this->address();
+      posd->set_address(addr);
+      posd->set_file_offset(0);
+      // FIXME: Mark *POSD as part of a fixed-layout section.
     }
 }
 
@@ -2711,6 +2779,30 @@ Output_section::find_starting_output_address(const Relobj* object,
 
   // We couldn't find a merge output section for this input section.
   return false;
+}
+
+// Update the data size of an Output_section.
+
+void
+Output_section::update_data_size()
+{
+  if (this->input_sections_.empty())
+      return;
+
+  if (this->must_sort_attached_input_sections()
+      || this->input_section_order_specified())
+    this->sort_attached_input_sections();
+
+  off_t off = this->first_input_offset_;
+  for (Input_section_list::iterator p = this->input_sections_.begin();
+       p != this->input_sections_.end();
+       ++p)
+    {
+      off = align_address(off, p->addralign());
+      off += p->current_data_size();
+    }
+
+  this->set_current_data_size_for_child(off);
 }
 
 // Set the data size of an Output_section.  This is where we handle
@@ -3483,6 +3575,30 @@ Output_section::print_merge_stats()
     p->print_merge_stats(this->name_);
 }
 
+// Set a fixed layout for the section.  Used for incremental update links.
+
+void
+Output_section::set_fixed_layout(uint64_t sh_addr, off_t sh_offset,
+				 off_t sh_size, uint64_t sh_addralign)
+{
+  this->addralign_ = sh_addralign;
+  this->set_current_data_size(sh_size);
+  if ((this->flags_ & elfcpp::SHF_ALLOC) != 0)
+    this->set_address(sh_addr);
+  this->set_file_offset(sh_offset);
+  this->finalize_data_size();
+  this->free_list_.init(sh_size, false);
+  this->has_fixed_layout_ = true;
+}
+
+// Reserve space within the fixed layout for the section.  Used for
+// incremental update links.
+void
+Output_section::reserve(uint64_t sh_offset, uint64_t sh_size)
+{
+  this->free_list_.remove(sh_offset, sh_offset + sh_size);
+}
+
 // Output segment methods.
 
 Output_segment::Output_segment(elfcpp::Elf_Word type, elfcpp::Elf_Word flags)
@@ -3692,7 +3808,7 @@ Output_segment::has_dynamic_reloc_list(const Output_data_list* pdl) const
 // and *PSHNDX.
 
 uint64_t
-Output_segment::set_section_addresses(const Layout* layout, bool reset,
+Output_segment::set_section_addresses(Layout* layout, bool reset,
                                       uint64_t addr,
 				      unsigned int* increase_relro,
 				      bool* has_relro,
@@ -3839,13 +3955,16 @@ Output_segment::set_section_addresses(const Layout* layout, bool reset,
 // structures.
 
 uint64_t
-Output_segment::set_section_list_addresses(const Layout* layout, bool reset,
+Output_segment::set_section_list_addresses(Layout* layout, bool reset,
                                            Output_data_list* pdl,
 					   uint64_t addr, off_t* poff,
 					   unsigned int* pshndx,
                                            bool* in_tls)
 {
   off_t startoff = *poff;
+  // For incremental updates, we may allocate non-fixed sections from
+  // free space in the file.  This keeps track of the high-water mark.
+  off_t maxoff = startoff;
 
   off_t off = startoff;
   for (Output_data_list::iterator p = pdl->begin();
@@ -3855,8 +3974,8 @@ Output_segment::set_section_list_addresses(const Layout* layout, bool reset,
       if (reset)
 	(*p)->reset_address_and_file_offset();
 
-      // When using a linker script the section will most likely
-      // already have an address.
+      // When doing an incremental update or when using a linker script,
+      // the section will most likely already have an address.
       if (!(*p)->is_address_valid())
 	{
           uint64_t align = (*p)->addralign();
@@ -3894,9 +4013,43 @@ Output_segment::set_section_list_addresses(const Layout* layout, bool reset,
                 }
             }
 
-	  off = align_address(off, align);
-	  (*p)->set_address_and_file_offset(addr + (off - startoff), off);
+	  // FIXME: Need to handle TLS and .bss with incremental update.
+	  if (!parameters->incremental_update()
+	      || (*p)->is_section_flag_set(elfcpp::SHF_TLS)
+	      || (*p)->is_section_type(elfcpp::SHT_NOBITS))
+	    {
+	      off = align_address(off, align);
+	      (*p)->set_address_and_file_offset(addr + (off - startoff), off);
+	    }
+	  else
+	    {
+	      // Incremental update: allocate file space from free list.
+	      (*p)->pre_finalize_data_size();
+	      off_t current_size = (*p)->current_data_size();
+	      off = layout->allocate(current_size, align, startoff);
+	      if (off == -1)
+	        {
+		  gold_assert((*p)->output_section() != NULL);
+		  gold_fatal(_("out of patch space for section %s; "
+			       "relink with --incremental-full"),
+			     (*p)->output_section()->name());
+	        }
+	      (*p)->set_address_and_file_offset(addr + (off - startoff), off);
+	      if ((*p)->data_size() > current_size)
+		{
+		  gold_assert((*p)->output_section() != NULL);
+		  gold_fatal(_("%s: section changed size; "
+			       "relink with --incremental-full"),
+			     (*p)->output_section()->name());
+		}
+	    }
 	}
+      else if (parameters->incremental_update())
+        {
+          // For incremental updates, use the fixed offset for the
+          // high-water mark computation.
+          off = (*p)->offset();
+        }
       else
 	{
 	  // The script may have inserted a skip forward, but it
@@ -3930,12 +4083,22 @@ Output_segment::set_section_list_addresses(const Layout* layout, bool reset,
 	  (*p)->finalize_data_size();
 	}
 
+      gold_debug(DEBUG_INCREMENTAL,
+		 "set_section_list_addresses: %08lx %08lx %s",
+		 static_cast<long>(off),
+		 static_cast<long>((*p)->data_size()),
+		 ((*p)->output_section() != NULL
+		  ? (*p)->output_section()->name() : "(special)"));
+
       // We want to ignore the size of a SHF_TLS or SHT_NOBITS
       // section.  Such a section does not affect the size of a
       // PT_LOAD segment.
       if (!(*p)->is_section_flag_set(elfcpp::SHF_TLS)
 	  || !(*p)->is_section_type(elfcpp::SHT_NOBITS))
 	off += (*p)->data_size();
+
+      if (off > maxoff)
+        maxoff = off;
 
       if ((*p)->is_section())
 	{
@@ -3944,8 +4107,8 @@ Output_segment::set_section_list_addresses(const Layout* layout, bool reset,
 	}
     }
 
-  *poff = off;
-  return addr + (off - startoff);
+  *poff = maxoff;
+  return addr + (maxoff - startoff);
 }
 
 // For a non-PT_LOAD segment, set the offset from the sections, if
@@ -4029,7 +4192,15 @@ Output_segment::set_offset(unsigned int increase)
     {
       uint64_t page_align = parameters->target().common_pagesize();
       uint64_t segment_end = this->vaddr_ + this->memsz_;
-      gold_assert(segment_end == align_address(segment_end, page_align));
+      if (parameters->incremental_update())
+	{
+	  // The INCREASE_RELRO calculation is bypassed for an incremental
+	  // update, so we need to adjust the segment size manually here.
+	  segment_end = align_address(segment_end, page_align);
+	  this->memsz_ = segment_end - this->vaddr_;
+	}
+      else
+	gold_assert(segment_end == align_address(segment_end, page_align));
     }
 
   // If this is a TLS segment, align the memory size.  The code in

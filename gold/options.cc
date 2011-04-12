@@ -1215,8 +1215,9 @@ Search_directory::add_sysroot(const char* sysroot,
 // Add a file to the list.
 
 Input_argument&
-Input_arguments::add_file(const Input_file_argument& file)
+Input_arguments::add_file(Input_file_argument& file)
 {
+  file.set_arg_serial(++this->file_count_);
   if (this->in_group_)
     {
       gold_assert(!this->input_argument_list_.empty());

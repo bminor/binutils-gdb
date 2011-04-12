@@ -186,6 +186,11 @@ class Sized_dynobj : public Dynobj
   do_for_all_global_symbols(Read_symbols_data* sd,
 			    Library_base::Symbol_visitor_base* v);
 
+  // Iterate over local symbols, calling a visitor class V for each GOT offset
+  // associated with a local symbol.
+  void
+  do_for_all_local_got_entries(Got_offset_list::Visitor* v) const;
+
   // Get the size of a section.
   uint64_t
   do_section_size(unsigned int shndx)

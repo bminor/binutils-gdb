@@ -349,11 +349,11 @@ Relobj::is_section_name_included(const char* name)
 
 // Finalize the incremental relocation information.  Allocates a block
 // of relocation entries for each symbol, and sets the reloc_bases_
-// array to point to the first entry in each block.  Returns the next
-// available relocation index.
+// array to point to the first entry in each block.  If CLEAR_COUNTS
+// is TRUE, also clear the per-symbol relocation counters.
 
 void
-Relobj::finalize_incremental_relocs(Layout* layout)
+Relobj::finalize_incremental_relocs(Layout* layout, bool clear_counts)
 {
   unsigned int nsyms = this->get_global_symbols()->size();
   this->reloc_bases_ = new unsigned int[nsyms];
@@ -366,7 +366,8 @@ Relobj::finalize_incremental_relocs(Layout* layout)
     {
       this->reloc_bases_[i] = rindex;
       rindex += this->reloc_counts_[i];
-      this->reloc_counts_[i] = 0;
+      if (clear_counts)
+	this->reloc_counts_[i] = 0;
     }
   layout->incremental_inputs()->set_reloc_count(rindex);
 }
@@ -379,7 +380,7 @@ Sized_relobj<size, big_endian>::Sized_relobj(
     Input_file* input_file,
     off_t offset,
     const elfcpp::Ehdr<size, big_endian>& ehdr)
-  : Relobj(name, input_file, offset),
+  : Sized_relobj_base<size, big_endian>(name, input_file, offset),
     elf_file_(this, ehdr),
     symtab_shndx_(-1U),
     local_symbol_count_(0),
@@ -1265,9 +1266,12 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
 
 	  // Add the section to the incremental inputs layout.
 	  Incremental_inputs* incremental_inputs = layout->incremental_inputs();
-	  if (incremental_inputs != NULL)
-	    incremental_inputs->report_input_section(this, i,
-						     discard ? NULL : name,
+	  if (incremental_inputs != NULL
+	      && !discard
+	      && (shdr.get_sh_type() == elfcpp::SHT_PROGBITS
+	          || shdr.get_sh_type() == elfcpp::SHT_NOBITS
+	          || shdr.get_sh_type() == elfcpp::SHT_NOTE))
+	    incremental_inputs->report_input_section(this, i, name,
 						     shdr.get_sh_size());
 
           if (discard)
@@ -1281,7 +1285,7 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
  
       if (is_gc_pass_one && parameters->options().gc_sections())
         {
-          if (is_section_name_included(name)
+          if (this->is_section_name_included(name)
               || shdr.get_sh_type() == elfcpp::SHT_INIT_ARRAY 
               || shdr.get_sh_type() == elfcpp::SHT_FINI_ARRAY)
             {
@@ -1713,6 +1717,26 @@ Sized_relobj<size, big_endian>::do_for_all_global_symbols(
       elfcpp::Sym<size, big_endian> sym(p);
       if (sym.get_st_shndx() != elfcpp::SHN_UNDEF)
 	v->visit(sym_names + sym.get_st_name());
+    }
+}
+
+// Iterate over local symbols, calling a visitor class V for each GOT offset
+// associated with a local symbol.
+
+template<int size, bool big_endian>
+void
+Sized_relobj<size, big_endian>::do_for_all_local_got_entries(
+    Got_offset_list::Visitor* v) const
+{
+  unsigned int nsyms = this->local_symbol_count();
+  for (unsigned int i = 0; i < nsyms; i++)
+    {
+      Local_got_offsets::const_iterator p = this->local_got_offsets_.find(i);
+      if (p != this->local_got_offsets_.end())
+	{
+	  const Got_offset_list* got_offsets = p->second;
+	  got_offsets->for_all_got_offsets(v);
+	}
     }
 }
 
@@ -2199,7 +2223,8 @@ Sized_relobj<size, big_endian>::write_local_symbols(
     const Stringpool* sympool,
     const Stringpool* dynpool,
     Output_symtab_xindex* symtab_xindex,
-    Output_symtab_xindex* dynsym_xindex)
+    Output_symtab_xindex* dynsym_xindex,
+    off_t symtab_off)
 {
   const bool strip_all = parameters->options().strip_all();
   if (strip_all)
@@ -2244,7 +2269,8 @@ Sized_relobj<size, big_endian>::write_local_symbols(
   off_t output_size = this->output_local_symbol_count_ * sym_size;
   unsigned char* oview = NULL;
   if (output_size > 0)
-    oview = of->get_output_view(this->local_symbol_offset_, output_size);
+    oview = of->get_output_view(symtab_off + this->local_symbol_offset_,
+				output_size);
 
   off_t dyn_output_size = this->output_local_dynsym_count_ * sym_size;
   unsigned char* dyn_oview = NULL;
@@ -2324,7 +2350,8 @@ Sized_relobj<size, big_endian>::write_local_symbols(
   if (output_size > 0)
     {
       gold_assert(ov - oview == output_size);
-      of->write_output_view(this->local_symbol_offset_, output_size, oview);
+      of->write_output_view(symtab_off + this->local_symbol_offset_,
+			    output_size, oview);
     }
 
   if (dyn_output_size > 0)
@@ -2450,7 +2477,7 @@ Sized_relobj<size, big_endian>::do_get_global_symbol_counts(
 {
   *defined = this->defined_count_;
   size_t count = 0;
-  for (Symbols::const_iterator p = this->symbols_.begin();
+  for (typename Symbols::const_iterator p = this->symbols_.begin();
        p != this->symbols_.end();
        ++p)
     if (*p != NULL

@@ -203,6 +203,117 @@ class Xindex
   Symtab_xindex symtab_xindex_;
 };
 
+// A GOT offset list.  A symbol may have more than one GOT offset
+// (e.g., when mixing modules compiled with two different TLS models),
+// but will usually have at most one.  GOT_TYPE identifies the type of
+// GOT entry; its values are specific to each target.
+
+class Got_offset_list
+{
+ public:
+  Got_offset_list()
+    : got_type_(-1U), got_offset_(0), got_next_(NULL)
+  { }
+
+  Got_offset_list(unsigned int got_type, unsigned int got_offset)
+    : got_type_(got_type), got_offset_(got_offset), got_next_(NULL)
+  { }
+
+  ~Got_offset_list()
+  {
+    if (this->got_next_ != NULL)
+      {
+        delete this->got_next_;
+        this->got_next_ = NULL;
+      }
+  }
+
+  // Initialize the fields to their default values.
+  void
+  init()
+  {
+    this->got_type_ = -1U;
+    this->got_offset_ = 0;
+    this->got_next_ = NULL;
+  }
+
+  // Set the offset for the GOT entry of type GOT_TYPE.
+  void
+  set_offset(unsigned int got_type, unsigned int got_offset)
+  {
+    if (this->got_type_ == -1U)
+      {
+        this->got_type_ = got_type;
+        this->got_offset_ = got_offset;
+      }
+    else
+      {
+        for (Got_offset_list* g = this; g != NULL; g = g->got_next_)
+          {
+            if (g->got_type_ == got_type)
+              {
+                g->got_offset_ = got_offset;
+                return;
+              }
+          }
+        Got_offset_list* g = new Got_offset_list(got_type, got_offset);
+        g->got_next_ = this->got_next_;
+        this->got_next_ = g;
+      }
+  }
+
+  // Return the offset for a GOT entry of type GOT_TYPE.
+  unsigned int
+  get_offset(unsigned int got_type) const
+  {
+    for (const Got_offset_list* g = this; g != NULL; g = g->got_next_)
+      {
+        if (g->got_type_ == got_type)
+          return g->got_offset_;
+      }
+    return -1U;
+  }
+
+  // Return a pointer to the list, or NULL if the list is empty.
+  const Got_offset_list*
+  get_list() const
+  {
+    if (this->got_type_ == -1U)
+      return NULL;
+    return this;
+  }
+
+  // Abstract visitor class for iterating over GOT offsets.
+  class Visitor
+  {
+   public:
+    Visitor()
+    { }
+
+    virtual
+    ~Visitor()
+    { }
+
+    virtual void
+    visit(unsigned int, unsigned int) = 0;
+  };
+
+  // Loop over all GOT offset entries, calling a visitor class V for each.
+  void
+  for_all_got_offsets(Visitor* v) const
+  {
+    if (this->got_type_ == -1U)
+      return;
+    for (const Got_offset_list* g = this; g != NULL; g = g->got_next_)
+      v->visit(g->got_type_, g->got_offset_);
+  }
+
+ private:
+  unsigned int got_type_;
+  unsigned int got_offset_;
+  Got_offset_list* got_next_;
+};
+
 // Object is an abstract base class which represents either a 32-bit
 // or a 64-bit input object.  This can be a regular object file
 // (ET_REL) or a shared object (ET_DYN).
@@ -220,11 +331,21 @@ class Object
 	 off_t offset = 0)
     : name_(name), input_file_(input_file), offset_(offset), shnum_(-1U),
       is_dynamic_(is_dynamic), is_needed_(false), uses_split_stack_(false),
-      has_no_split_stack_(false), no_export_(false), xindex_(NULL)
-  { input_file->file().add_object(); }
+      has_no_split_stack_(false), no_export_(false),
+      is_in_system_directory_(false), xindex_(NULL)
+  {
+    if (input_file != NULL)
+      {
+	input_file->file().add_object();
+	this->is_in_system_directory_ = input_file->is_in_system_directory();
+      }
+  }
 
   virtual ~Object()
-  { this->input_file_->file().remove_object(); }
+  {
+    if (this->input_file_ != NULL)
+      this->input_file_->file().remove_object();
+  }
 
   // Return the name of the object as we would report it to the tuser.
   const std::string&
@@ -274,41 +395,70 @@ class Object
   // Get the file.  We pass on const-ness.
   Input_file*
   input_file()
-  { return this->input_file_; }
+  {
+    gold_assert(this->input_file_ != NULL);
+    return this->input_file_;
+  }
 
   const Input_file*
   input_file() const
-  { return this->input_file_; }
+  {
+    gold_assert(this->input_file_ != NULL);
+    return this->input_file_;
+  }
 
   // Lock the underlying file.
   void
   lock(const Task* t)
-  { this->input_file()->file().lock(t); }
+  {
+    if (this->input_file_ != NULL)
+      this->input_file_->file().lock(t);
+  }
 
   // Unlock the underlying file.
   void
   unlock(const Task* t)
-  { this->input_file()->file().unlock(t); }
+  {
+    if (this->input_file_ != NULL)
+      this->input_file()->file().unlock(t);
+  }
 
   // Return whether the underlying file is locked.
   bool
   is_locked() const
-  { return this->input_file()->file().is_locked(); }
+  { return this->input_file_ != NULL && this->input_file_->file().is_locked(); }
 
   // Return the token, so that the task can be queued.
   Task_token*
   token()
-  { return this->input_file()->file().token(); }
+  {
+    if (this->input_file_ == NULL)
+      return NULL;
+    return this->input_file()->file().token();
+  }
 
   // Release the underlying file.
   void
   release()
-  { this->input_file_->file().release(); }
+  {
+    if (this->input_file_ != NULL)
+      this->input_file()->file().release();
+  }
 
   // Return whether we should just read symbols from this file.
   bool
   just_symbols() const
   { return this->input_file()->just_symbols(); }
+
+  // Return whether this is an incremental object.
+  bool
+  is_incremental() const
+  { return this->do_is_incremental(); }
+
+  // Return the last modified time of the file.
+  Timespec
+  get_mtime()
+  { return this->do_get_mtime(); }
 
   // Get the number of sections.
   unsigned int
@@ -428,6 +578,12 @@ class Object
 			 Library_base::Symbol_visitor_base* v)
   { return this->do_for_all_global_symbols(sd, v); }
 
+  // Iterate over local symbols, calling a visitor class V for each GOT offset
+  // associated with a local symbol.
+  void
+  for_all_local_got_entries(Got_offset_list::Visitor* v) const
+  { this->do_for_all_local_got_entries(v); }
+
   // Functions and types for the elfcpp::Elf_file interface.  This
   // permit us to use Object as the File template parameter for
   // elfcpp::Elf_file.
@@ -504,7 +660,10 @@ class Object
   // Stop caching views in the underlying file.
   void
   clear_view_cache_marks()
-  { this->input_file()->file().clear_view_cache_marks(); }
+  {
+    if (this->input_file_ != NULL)
+      this->input_file_->file().clear_view_cache_marks();
+  }
 
   // Get the number of global symbols defined by this object, and the
   // number of the symbols whose final definition came from this
@@ -519,10 +678,15 @@ class Object
   get_global_symbols() const
   { return this->do_get_global_symbols(); }
 
+  // Set flag that this object was found in a system directory.
+  void
+  set_is_in_system_directory()
+  { this->is_in_system_directory_ = true; }
+
   // Return whether this object was found in a system directory.
   bool
   is_in_system_directory() const
-  { return this->input_file()->is_in_system_directory(); }
+  { return this->is_in_system_directory_; }
 
   // Return whether we found this object by searching a directory.
   bool
@@ -561,6 +725,20 @@ class Object
   do_pluginobj()
   { return NULL; }
 
+  // Return TRUE if this is an incremental (unchanged) input file.
+  // We return FALSE by default; the incremental object classes
+  // override this method.
+  virtual bool
+  do_is_incremental() const
+  { return false; }
+
+  // Return the last modified time of the file.  This method may be
+  // overridden for subclasses that don't use an actual file (e.g.,
+  // Incremental objects).
+  virtual Timespec
+  do_get_mtime()
+  { return this->input_file()->file().get_mtime(); }
+
   // Read the symbols--implemented by child class.
   virtual void
   do_read_symbols(Read_symbols_data*) = 0;
@@ -582,6 +760,11 @@ class Object
   virtual void
   do_for_all_global_symbols(Read_symbols_data* sd,
 			    Library_base::Symbol_visitor_base* v) = 0;
+
+  // Iterate over local symbols, calling a visitor class V for each GOT offset
+  // associated with a local symbol.
+  virtual void
+  do_for_all_local_got_entries(Got_offset_list::Visitor* v) const = 0;
 
   // Return the location of the contents of a section.  Implemented by
   // child class.
@@ -726,6 +909,8 @@ class Object
   // True if exclude this object from automatic symbol export.
   // This is used only for archive objects.
   bool no_export_ : 1;
+  // True if the object was found in a system directory.
+  bool is_in_system_directory_ : 1;
   // Many sections for objects with more than SHN_LORESERVE sections.
   Xindex* xindex_;
 };
@@ -1019,7 +1204,7 @@ class Relobj : public Object
 
   // Finalize the incremental relocation information.
   void
-  finalize_incremental_relocs(Layout* layout);
+  finalize_incremental_relocs(Layout* layout, bool clear_counts);
 
   // Return the index of the next relocation to be written for global symbol
   // SYMNDX.  Only valid after finalize_incremental_relocs() has been called.
@@ -1443,103 +1628,6 @@ class Symbol_value
   } u_;
 };
 
-// A GOT offset list.  A symbol may have more than one GOT offset
-// (e.g., when mixing modules compiled with two different TLS models),
-// but will usually have at most one.  GOT_TYPE identifies the type of
-// GOT entry; its values are specific to each target.
-
-class Got_offset_list
-{
- public:
-  Got_offset_list()
-    : got_type_(-1U), got_offset_(0), got_next_(NULL)
-  { }
-
-  Got_offset_list(unsigned int got_type, unsigned int got_offset)
-    : got_type_(got_type), got_offset_(got_offset), got_next_(NULL)
-  { }
-
-  ~Got_offset_list()
-  { 
-    if (this->got_next_ != NULL)
-      {
-        delete this->got_next_;
-        this->got_next_ = NULL;
-      }
-  }
-
-  // Initialize the fields to their default values.
-  void
-  init()
-  {
-    this->got_type_ = -1U;
-    this->got_offset_ = 0;
-    this->got_next_ = NULL;
-  }
-
-  // Set the offset for the GOT entry of type GOT_TYPE.
-  void
-  set_offset(unsigned int got_type, unsigned int got_offset)
-  {
-    if (this->got_type_ == -1U)
-      {
-        this->got_type_ = got_type;
-        this->got_offset_ = got_offset;
-      }
-    else
-      {
-        for (Got_offset_list* g = this; g != NULL; g = g->got_next_)
-          {
-            if (g->got_type_ == got_type)
-              {
-                g->got_offset_ = got_offset;
-                return;
-              }
-          }
-        Got_offset_list* g = new Got_offset_list(got_type, got_offset);
-        g->got_next_ = this->got_next_;
-        this->got_next_ = g;
-      }
-  }
-
-  // Return the offset for a GOT entry of type GOT_TYPE.
-  unsigned int
-  get_offset(unsigned int got_type) const
-  {
-    for (const Got_offset_list* g = this; g != NULL; g = g->got_next_)
-      {
-        if (g->got_type_ == got_type)
-          return g->got_offset_;
-      }
-    return -1U;
-  }
-
-  // Return a pointer to the list, or NULL if the list is empty.
-  const Got_offset_list*
-  get_list() const
-  {
-    if (this->got_type_ == -1U)
-      return NULL;
-    return this;
-  }
-
-  // Loop over all GOT offset entries, applying the function F to each.
-  template<typename F>
-  void
-  for_all_got_offsets(F f) const
-  {
-    if (this->got_type_ == -1U)
-      return;
-    for (const Got_offset_list* g = this; g != NULL; g = g->got_next_)
-      f(g->got_type_, g->got_offset_);
-  }
-
- private:
-  unsigned int got_type_;
-  unsigned int got_offset_;
-  Got_offset_list* got_next_;
-};
-
 // This type is used to modify relocations for -fsplit-stack.  It is
 // indexed by relocation index, and means that the relocation at that
 // index should use the symbol from the vector, rather than the one
@@ -1568,14 +1656,41 @@ class Reloc_symbol_changes
 
 typedef std::map<unsigned int, section_size_type> Compressed_section_map;
 
+// Abstract base class for a regular object file, either a real object file
+// or an incremental (unchanged) object.  This is size and endian specific.
+
+template<int size, bool big_endian>
+class Sized_relobj_base : public Relobj
+{
+ public:
+  typedef Relobj::Symbols Symbols;
+
+  Sized_relobj_base(const std::string& name, Input_file* input_file)
+    : Relobj(name, input_file)
+  { }
+
+  Sized_relobj_base(const std::string& name, Input_file* input_file,
+		    off_t offset)
+    : Relobj(name, input_file, offset)
+  { }
+
+  ~Sized_relobj_base()
+  { }
+
+ protected:
+  typedef Relobj::Output_sections Output_sections;
+
+ private:
+};
+
 // A regular object file.  This is size and endian specific.
 
 template<int size, bool big_endian>
-class Sized_relobj : public Relobj
+class Sized_relobj : public Sized_relobj_base<size, big_endian>
 {
  public:
   typedef typename elfcpp::Elf_types<size>::Elf_Addr Address;
-  typedef std::vector<Symbol*> Symbols;
+  typedef typename Sized_relobj_base<size, big_endian>::Symbols Symbols;
   typedef std::vector<Symbol_value<size> > Local_values;
 
   static const Address invalid_address = static_cast<Address>(0) - 1;
@@ -1726,17 +1841,6 @@ class Sized_relobj : public Relobj
       }
   }
 
-  // Return the GOT offset list for the local symbol SYMNDX.
-  const Got_offset_list*
-  local_got_offset_list(unsigned int symndx) const
-  {
-    Local_got_offsets::const_iterator p =
-        this->local_got_offsets_.find(symndx);
-    if (p == this->local_got_offsets_.end())
-      return NULL;
-    return p->second;
-  }
-
   // Return whether the local symbol SYMNDX has a PLT offset.
   bool
   local_has_plt_offset(unsigned int symndx) const;
@@ -1791,6 +1895,9 @@ class Sized_relobj : public Relobj
 			    const Symbol_table* symtab);
 
  protected:
+  typedef typename Sized_relobj_base<size, big_endian>::Output_sections
+      Output_sections;
+
   // Set up.
   virtual void
   do_setup();
@@ -1825,6 +1932,11 @@ class Sized_relobj : public Relobj
   void
   do_for_all_global_symbols(Read_symbols_data* sd,
 			    Library_base::Symbol_visitor_base* v);
+
+  // Iterate over local symbols, calling a visitor class V for each GOT offset
+  // associated with a local symbol.
+  void
+  do_for_all_local_got_entries(Got_offset_list::Visitor* v) const;
 
   // Read the relocs.
   void
@@ -2179,7 +2291,8 @@ class Sized_relobj : public Relobj
 		      const Stringpool_template<char>*,
 		      const Stringpool_template<char>*,
 		      Output_symtab_xindex*,
-		      Output_symtab_xindex*);
+		      Output_symtab_xindex*,
+		      off_t);
 
   // Record a mapping from discarded section SHNDX to the corresponding
   // kept section.
@@ -2269,9 +2382,9 @@ class Sized_relobj : public Relobj
   Symbols symbols_;
   // Number of symbols defined in object file itself.
   size_t defined_count_;
-  // File offset for local symbols.
+  // File offset for local symbols (relative to start of symbol table).
   off_t local_symbol_offset_;
-  // File offset for local dynamic symbols.
+  // File offset for local dynamic symbols (absolute).
   off_t local_dynsym_offset_;
   // Values of local symbols.
   Local_values local_values_;

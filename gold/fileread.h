@@ -52,6 +52,12 @@ struct Timespec
   int nanoseconds;
 };
 
+// Get the last modified time of an unopened file.  Returns false if the
+// file does not exist.
+
+bool
+get_mtime(const char* filename, Timespec* mtime);
+
 class Position_dependent_options;
 class Input_file_argument;
 class Dirsearch;

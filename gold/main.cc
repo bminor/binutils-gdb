@@ -269,6 +269,7 @@ main(int argc, char** argv)
 	      program_name, static_cast<long long>(layout.output_file_size()));
       symtab.print_stats();
       layout.print_stats();
+      Free_list::print_stats();
     }
 
   // Issue defined symbol report.

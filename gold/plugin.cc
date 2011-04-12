@@ -1001,6 +1001,16 @@ Sized_pluginobj<size, big_endian>::do_for_all_global_symbols(
     }
 }
 
+// Iterate over local symbols, calling a visitor class V for each GOT offset
+// associated with a local symbol.
+template<int size, bool big_endian>
+void
+Sized_pluginobj<size, big_endian>::do_for_all_local_got_entries(
+    Got_offset_list::Visitor*) const
+{
+  gold_unreachable();
+}
+
 // Get the size of a section.  Not used for plugin objects.
 
 template<int size, bool big_endian>

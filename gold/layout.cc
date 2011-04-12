@@ -55,6 +55,168 @@
 namespace gold
 {
 
+// Class Free_list.
+
+// The total number of free lists used.
+unsigned int Free_list::num_lists = 0;
+// The total number of free list nodes used.
+unsigned int Free_list::num_nodes = 0;
+// The total number of calls to Free_list::remove.
+unsigned int Free_list::num_removes = 0;
+// The total number of nodes visited during calls to Free_list::remove.
+unsigned int Free_list::num_remove_visits = 0;
+// The total number of calls to Free_list::allocate.
+unsigned int Free_list::num_allocates = 0;
+// The total number of nodes visited during calls to Free_list::allocate.
+unsigned int Free_list::num_allocate_visits = 0;
+
+// Initialize the free list.  Creates a single free list node that
+// describes the entire region of length LEN.  If EXTEND is true,
+// allocate() is allowed to extend the region beyond its initial
+// length.
+
+void
+Free_list::init(off_t len, bool extend)
+{
+  this->list_.push_front(Free_list_node(0, len));
+  this->last_remove_ = this->list_.begin();
+  this->extend_ = extend;
+  this->length_ = len;
+  ++Free_list::num_lists;
+  ++Free_list::num_nodes;
+}
+
+// Remove a chunk from the free list.  Because we start with a single
+// node that covers the entire section, and remove chunks from it one
+// at a time, we do not need to coalesce chunks or handle cases that
+// span more than one free node.  We expect to remove chunks from the
+// free list in order, and we expect to have only a few chunks of free
+// space left (corresponding to files that have changed since the last
+// incremental link), so a simple linear list should provide sufficient
+// performance.
+
+void
+Free_list::remove(off_t start, off_t end)
+{
+  if (start == end)
+    return;
+  gold_assert(start < end);
+
+  ++Free_list::num_removes;
+
+  Iterator p = this->last_remove_;
+  if (p->start_ > start)
+    p = this->list_.begin();
+
+  for (; p != this->list_.end(); ++p)
+    {
+      ++Free_list::num_remove_visits;
+      // Find a node that wholly contains the indicated region.
+      if (p->start_ <= start && p->end_ >= end)
+	{
+	  // Case 1: the indicated region spans the whole node.
+	  // Add some fuzz to avoid creating tiny free chunks.
+	  if (p->start_ + 3 >= start && p->end_ <= end + 3)
+	    p = this->list_.erase(p);
+	  // Case 2: remove a chunk from the start of the node.
+	  else if (p->start_ + 3 >= start)
+	    p->start_ = end;
+	  // Case 3: remove a chunk from the end of the node.
+	  else if (p->end_ <= end + 3)
+	    p->end_ = start;
+	  // Case 4: remove a chunk from the middle, and split
+	  // the node into two.
+	  else
+	    {
+	      Free_list_node newnode(p->start_, start);
+	      p->start_ = end;
+	      this->list_.insert(p, newnode);
+	      ++Free_list::num_nodes;
+	    }
+	  this->last_remove_ = p;
+	  return;
+	}
+    }
+
+  // Did not find a node containing the given chunk.  This could happen
+  // because a small chunk was already removed due to the fuzz.
+  gold_debug(DEBUG_INCREMENTAL,
+	     "Free_list::remove(%d,%d) not found",
+	     static_cast<int>(start), static_cast<int>(end));
+}
+
+// Allocate a chunk of size LEN from the free list.  Returns -1ULL
+// if a sufficiently large chunk of free space is not found.
+// We use a simple first-fit algorithm.
+
+off_t
+Free_list::allocate(off_t len, uint64_t align, off_t minoff)
+{
+  gold_debug(DEBUG_INCREMENTAL,
+  	     "Free_list::allocate(%08lx, %d, %08lx)",
+  	     static_cast<long>(len), static_cast<int>(align),
+  	     static_cast<long>(minoff));
+  if (len == 0)
+    return align_address(minoff, align);
+
+  ++Free_list::num_allocates;
+
+  for (Iterator p = this->list_.begin(); p != this->list_.end(); ++p)
+    {
+      ++Free_list::num_allocate_visits;
+      off_t start = p->start_ > minoff ? p->start_ : minoff;
+      start = align_address(start, align);
+      off_t end = start + len;
+      if (end <= p->end_)
+	{
+	  if (p->start_ + 3 >= start && p->end_ <= end + 3)
+	    this->list_.erase(p);
+	  else if (p->start_ + 3 >= start)
+	    p->start_ = end;
+	  else if (p->end_ <= end + 3)
+	    p->end_ = start;
+	  else
+	    {
+	      Free_list_node newnode(p->start_, start);
+	      p->start_ = end;
+	      this->list_.insert(p, newnode);
+	      ++Free_list::num_nodes;
+	    }
+	  return start;
+	}
+    }
+  return -1;
+}
+
+// Dump the free list (for debugging).
+void
+Free_list::dump()
+{
+  gold_info("Free list:\n     start      end   length\n");
+  for (Iterator p = this->list_.begin(); p != this->list_.end(); ++p)
+    gold_info("  %08lx %08lx %08lx", static_cast<long>(p->start_),
+	      static_cast<long>(p->end_),
+	      static_cast<long>(p->end_ - p->start_));
+}
+
+// Print the statistics for the free lists.
+void
+Free_list::print_stats()
+{
+  fprintf(stderr, _("%s: total free lists: %u\n"),
+          program_name, Free_list::num_lists);
+  fprintf(stderr, _("%s: total free list nodes: %u\n"),
+          program_name, Free_list::num_nodes);
+  fprintf(stderr, _("%s: calls to Free_list::remove: %u\n"),
+          program_name, Free_list::num_removes);
+  fprintf(stderr, _("%s: nodes visited: %u\n"),
+          program_name, Free_list::num_remove_visits);
+  fprintf(stderr, _("%s: calls to Free_list::allocate: %u\n"),
+          program_name, Free_list::num_allocates);
+  fprintf(stderr, _("%s: nodes visited: %u\n"),
+          program_name, Free_list::num_allocate_visits);
+}
+
 // Layout::Relaxation_debug_check methods.
 
 // Check that sections and special data are in reset states.
@@ -150,10 +312,19 @@ Layout_task_runner::run(Workqueue* workqueue, const Task* task)
       this->layout_->print_to_mapfile(this->mapfile_);
     }
 
-  Output_file* of = new Output_file(parameters->options().output_file_name());
-  if (this->options_.oformat_enum() != General_options::OBJECT_FORMAT_ELF)
-    of->set_is_temporary();
-  of->open(file_size);
+  Output_file* of;
+  if (this->layout_->incremental_base() == NULL)
+    {
+      of = new Output_file(parameters->options().output_file_name());
+      if (this->options_.oformat_enum() != General_options::OBJECT_FORMAT_ELF)
+	of->set_is_temporary();
+      of->open(file_size);
+    }
+  else
+    {
+      of = this->layout_->incremental_base()->output_file();
+      of->resize(file_size);
+    }
 
   // Queue up the final set of tasks.
   gold::queue_final_tasks(this->options_, this->input_objects_,
@@ -207,7 +378,9 @@ Layout::Layout(int number_of_input_files, Script_options* script_options)
     record_output_section_data_from_script_(false),
     script_output_section_data_list_(),
     segment_states_(NULL),
-    relaxation_debug_check_(NULL)
+    relaxation_debug_check_(NULL),
+    incremental_base_(NULL),
+    free_list_()
 {
   // Make space for more than enough segments for a typical file.
   // This is just for efficiency--it's OK if we wind up needing more.
@@ -224,6 +397,15 @@ Layout::Layout(int number_of_input_files, Script_options* script_options)
   // The section name pool is worth optimizing in all cases, because
   // it is small, but there are often overlaps due to .rel sections.
   this->namepool_.set_optimize();
+}
+
+// For incremental links, record the base file to be modified.
+
+void
+Layout::set_incremental_base(Incremental_binary* base)
+{
+  this->incremental_base_ = base;
+  this->free_list_.init(base->output_file()->filesize(), true);
 }
 
 // Hash a key we use to look up an output section mapping.
@@ -639,6 +821,41 @@ Layout::choose_output_section(const Relobj* relobj, const char* name,
   return this->get_output_section(name, name_key, type, flags, order, is_relro);
 }
 
+// For incremental links, record the initial fixed layout of a section
+// from the base file, and return a pointer to the Output_section.
+
+template<int size, bool big_endian>
+Output_section*
+Layout::init_fixed_output_section(const char* name,
+				  elfcpp::Shdr<size, big_endian>& shdr)
+{
+  unsigned int sh_type = shdr.get_sh_type();
+
+  // We preserve the layout of PROGBITS, NOBITS, and NOTE sections.
+  // All others will be created from scratch and reallocated.
+  if (sh_type != elfcpp::SHT_PROGBITS
+      && sh_type != elfcpp::SHT_NOBITS
+      && sh_type != elfcpp::SHT_NOTE)
+    return NULL;
+
+  typename elfcpp::Elf_types<size>::Elf_Addr sh_addr = shdr.get_sh_addr();
+  typename elfcpp::Elf_types<size>::Elf_Off sh_offset = shdr.get_sh_offset();
+  typename elfcpp::Elf_types<size>::Elf_WXword sh_size = shdr.get_sh_size();
+  typename elfcpp::Elf_types<size>::Elf_WXword sh_flags = shdr.get_sh_flags();
+  typename elfcpp::Elf_types<size>::Elf_WXword sh_addralign =
+      shdr.get_sh_addralign();
+
+  // Make the output section.
+  Stringpool::Key name_key;
+  name = this->namepool_.add(name, true, &name_key);
+  Output_section* os = this->get_output_section(name, name_key, sh_type,
+  						sh_flags, ORDER_INVALID, false);
+  os->set_fixed_layout(sh_addr, sh_offset, sh_size, sh_addralign);
+  if (sh_type != elfcpp::SHT_NOBITS)
+    this->free_list_.remove(sh_offset, sh_offset + sh_size);
+  return os;
+}
+
 // Return the output section to use for input section SHNDX, with name
 // NAME, with header HEADER, from object OBJECT.  RELOC_SHNDX is the
 // index of a relocation section which applies to this section, or 0
@@ -869,7 +1086,9 @@ Layout::layout_eh_frame(Sized_relobj<size, big_endian>* object,
       this->eh_frame_section_ = os;
       this->eh_frame_data_ = new Eh_frame();
 
-      if (parameters->options().eh_frame_hdr())
+      // For incremental linking, we do not optimize .eh_frame sections
+      // or create a .eh_frame_hdr section.
+      if (parameters->options().eh_frame_hdr() && !parameters->incremental())
 	{
 	  Output_section* hdr_os =
 	    this->choose_output_section(NULL, ".eh_frame_hdr",
@@ -901,14 +1120,15 @@ Layout::layout_eh_frame(Sized_relobj<size, big_endian>* object,
 
   gold_assert(this->eh_frame_section_ == os);
 
-  if (this->eh_frame_data_->add_ehframe_input_section(object,
-						      symbols,
-						      symbols_size,
-						      symbol_names,
-						      symbol_names_size,
-						      shndx,
-						      reloc_shndx,
-						      reloc_type))
+  if (!parameters->incremental()
+      && this->eh_frame_data_->add_ehframe_input_section(object,
+							 symbols,
+							 symbols_size,
+							 symbol_names,
+							 symbol_names_size,
+							 shndx,
+							 reloc_shndx,
+							 reloc_type))
     {
       os->update_flags_for_input_section(shdr.get_sh_flags());
 
@@ -2147,7 +2367,8 @@ Layout::create_note(const char* name, int note_type,
 void
 Layout::create_gold_note()
 {
-  if (parameters->options().relocatable())
+  if (parameters->options().relocatable()
+      || parameters->incremental_update())
     return;
 
   std::string desc = std::string("gold ") + gold::get_version_string();
@@ -2709,7 +2930,10 @@ Layout::set_segment_offsets(const Target* target, Output_segment* load_seg,
 	  // aligned so that the relro data ends at a page boundary,
 	  // we do not try to realign it.
 
-	  if (!are_addresses_set && !has_relro && aligned_addr != addr)
+	  if (!are_addresses_set
+	      && !has_relro
+	      && aligned_addr != addr
+	      && !parameters->incremental_update())
 	    {
 	      uint64_t first_off = (common_pagesize
 				    - (aligned_addr
@@ -2826,6 +3050,9 @@ Layout::set_relocatable_section_offsets(Output_data* file_header,
 off_t
 Layout::set_section_offsets(off_t off, Layout::Section_offset_pass pass)
 {
+  off_t startoff = off;
+  off_t maxoff = off;
+
   for (Section_list::iterator p = this->unattached_section_list_.begin();
        p != this->unattached_section_list_.end();
        ++p)
@@ -2857,16 +3084,53 @@ Layout::set_section_offsets(off_t off, Layout::Section_offset_pass pass)
                    || (*p)->type() != elfcpp::SHT_STRTAB))
         continue;
 
-      off = align_address(off, (*p)->addralign());
-      (*p)->set_file_offset(off);
-      (*p)->finalize_data_size();
+      if (!parameters->incremental_update())
+	{
+	  off = align_address(off, (*p)->addralign());
+	  (*p)->set_file_offset(off);
+	  (*p)->finalize_data_size();
+	}
+      else
+	{
+	  // Incremental update: allocate file space from free list.
+	  (*p)->pre_finalize_data_size();
+	  off_t current_size = (*p)->current_data_size();
+	  off = this->allocate(current_size, (*p)->addralign(), startoff);
+	  if (off == -1)
+	    {
+	      if (is_debugging_enabled(DEBUG_INCREMENTAL))
+	        this->free_list_.dump();
+	      gold_assert((*p)->output_section() != NULL);
+	      gold_fatal(_("out of patch space for section %s; "
+			   "relink with --incremental-full"),
+			 (*p)->output_section()->name());
+	    }
+	  (*p)->set_file_offset(off);
+	  (*p)->finalize_data_size();
+	  if ((*p)->data_size() > current_size)
+	    {
+	      gold_assert((*p)->output_section() != NULL);
+	      gold_fatal(_("%s: section changed size; "
+			   "relink with --incremental-full"),
+			 (*p)->output_section()->name());
+	    }
+	  gold_debug(DEBUG_INCREMENTAL,
+		     "set_section_offsets: %08lx %08lx %s",
+		     static_cast<long>(off),
+		     static_cast<long>((*p)->data_size()),
+		     ((*p)->output_section() != NULL
+		      ? (*p)->output_section()->name() : "(special)"));
+	}
+
       off += (*p)->data_size();
+      if (off > maxoff)
+        maxoff = off;
 
       // At this point the name must be set.
       if (pass != STRTAB_AFTER_POSTPROCESSING_SECTIONS_PASS)
 	this->namepool_.add((*p)->name(), false, NULL);
     }
-  return off;
+  return maxoff;
 }
 
 // Set the section indexes of all the sections not associated with a
@@ -2980,9 +3244,8 @@ Layout::create_symtab_sections(const Input_objects* input_objects,
   else
     gold_unreachable();
 
-  off_t off = *poff;
-  off = align_address(off, align);
-  off_t startoff = off;
+  // Compute file offsets relative to the start of the symtab section.
+  off_t off = 0;
 
   // Save space for the dummy symbol at the start of the section.  We
   // never bother to write this out--it will just be left as zero.
@@ -3015,7 +3278,7 @@ Layout::create_symtab_sections(const Input_objects* input_objects,
     }
 
   unsigned int local_symcount = local_symbol_index;
-  gold_assert(static_cast<off_t>(local_symcount * symsize) == off - startoff);
+  gold_assert(static_cast<off_t>(local_symcount * symsize) == off);
 
   off_t dynoff;
   size_t dyn_global_index;
@@ -3036,6 +3299,7 @@ Layout::create_symtab_sections(const Input_objects* input_objects,
 		  == this->dynsym_section_->data_size() - locsize);
     }
 
+  off_t global_off = off;
   off = symtab->finalize(off, dynoff, dyn_global_index, dyncount,
 			 &this->sympool_, &local_symcount);
 
@@ -3050,8 +3314,7 @@ Layout::create_symtab_sections(const Input_objects* input_objects,
 							  false);
       this->symtab_section_ = osymtab;
 
-      Output_section_data* pos = new Output_data_fixed_space(off - startoff,
-							     align,
+      Output_section_data* pos = new Output_data_fixed_space(off, align,
 							     "** symtab");
       osymtab->add_output_section_data(pos);
 
@@ -3071,7 +3334,7 @@ Layout::create_symtab_sections(const Input_objects* input_objects,
 				      elfcpp::SHT_SYMTAB_SHNDX, 0,
 				      ORDER_INVALID, false);
 
-	  size_t symcount = (off - startoff) / symsize;
+	  size_t symcount = off / symsize;
 	  this->symtab_xindex_ = new Output_symtab_xindex(symcount);
 
 	  osymtab_xindex->add_output_section_data(this->symtab_xindex_);
@@ -3097,13 +3360,30 @@ Layout::create_symtab_sections(const Input_objects* input_objects,
       Output_section_data* pstr = new Output_data_strtab(&this->sympool_);
       ostrtab->add_output_section_data(pstr);
 
-      osymtab->set_file_offset(startoff);
+      off_t symtab_off;
+      if (!parameters->incremental_update())
+	symtab_off = align_address(*poff, align);
+      else
+	{
+	  symtab_off = this->allocate(off, align, *poff);
+          if (off == -1)
+	    gold_fatal(_("out of patch space for symbol table; "
+		         "relink with --incremental-full"));
+	  gold_debug(DEBUG_INCREMENTAL,
+		     "create_symtab_sections: %08lx %08lx .symtab",
+		     static_cast<long>(symtab_off),
+		     static_cast<long>(off));
+	}
+
+      symtab->set_file_offset(symtab_off + global_off);
+      osymtab->set_file_offset(symtab_off);
       osymtab->finalize_data_size();
       osymtab->set_link_section(ostrtab);
       osymtab->set_info(local_symcount);
       osymtab->set_entsize(symsize);
 
-      *poff = off;
+      if (symtab_off + off > *poff)
+	*poff = symtab_off + off;
     }
 }
 
@@ -3150,10 +3430,25 @@ Layout::create_shdrs(const Output_section* shstrtab_section, off_t* poff)
 				      &this->unattached_section_list_,
 				      &this->namepool_,
 				      shstrtab_section);
-  off_t off = align_address(*poff, oshdrs->addralign());
+  off_t off;
+  if (!parameters->incremental_update())
+    off = align_address(*poff, oshdrs->addralign());
+  else
+    {
+      oshdrs->pre_finalize_data_size();
+      off = this->allocate(oshdrs->data_size(), oshdrs->addralign(), *poff);
+      if (off == -1)
+	  gold_fatal(_("out of patch space for section header table; "
+		       "relink with --incremental-full"));
+      gold_debug(DEBUG_INCREMENTAL,
+		 "create_shdrs: %08lx %08lx (section header table)",
+		 static_cast<long>(off),
+		 static_cast<long>(off + oshdrs->data_size()));
+    }
   oshdrs->set_address_and_file_offset(0, off);
   off += oshdrs->data_size();
-  *poff = off;
+  if (off > *poff)
+    *poff = off;
   this->section_headers_ = oshdrs;
 }
 
@@ -3667,6 +3962,7 @@ Layout::finish_dynamic_section(const Input_objects* input_objects,
        ++p)
     {
       if (!(*p)->is_needed()
+	  && !(*p)->is_incremental()
 	  && (*p)->input_file()->options().as_needed())
 	{
 	  // This dynamic object was linked with --as-needed, but it
@@ -4420,6 +4716,38 @@ Close_task_runner::run(Workqueue*, const Task*)
 
 // Instantiate the templates we need.  We could use the configure
 // script to restrict this to only the ones for implemented targets.
+
+#ifdef HAVE_TARGET_32_LITTLE
+template
+Output_section*
+Layout::init_fixed_output_section<32, false>(
+    const char* name,
+    elfcpp::Shdr<32, false>& shdr);
+#endif
+
+#ifdef HAVE_TARGET_32_BIG
+template
+Output_section*
+Layout::init_fixed_output_section<32, true>(
+    const char* name,
+    elfcpp::Shdr<32, true>& shdr);
+#endif
+
+#ifdef HAVE_TARGET_64_LITTLE
+template
+Output_section*
+Layout::init_fixed_output_section<64, false>(
+    const char* name,
+    elfcpp::Shdr<64, false>& shdr);
+#endif
+
+#ifdef HAVE_TARGET_64_BIG
+template
+Output_section*
+Layout::init_fixed_output_section<64, true>(
+    const char* name,
+    elfcpp::Shdr<64, true>& shdr);
+#endif
 
 #ifdef HAVE_TARGET_32_LITTLE
 template

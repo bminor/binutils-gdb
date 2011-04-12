@@ -49,16 +49,23 @@ Dynobj::Dynobj(const std::string& name, Input_file* input_file, off_t offset)
   // object's filename.  The only exception is when the dynamic object
   // is part of an archive (so the filename is the archive's
   // filename).  In that case, we use just the dynobj's name-in-archive.
-  this->soname_ = this->input_file()->found_name();
-  if (this->offset() != 0)
+  if (input_file == NULL)
+    this->soname_ = name;
+  else
     {
-      std::string::size_type open_paren = this->name().find('(');
-      std::string::size_type close_paren = this->name().find(')');
-      if (open_paren != std::string::npos && close_paren != std::string::npos)
+      this->soname_ = input_file->found_name();
+      if (this->offset() != 0)
 	{
-	  // It's an archive, and name() is of the form 'foo.a(bar.so)'.
-	  this->soname_ = this->name().substr(open_paren + 1,
-					      close_paren - (open_paren + 1));
+	  std::string::size_type open_paren = this->name().find('(');
+	  std::string::size_type close_paren = this->name().find(')');
+	  if (open_paren != std::string::npos
+	      && close_paren != std::string::npos)
+	    {
+	      // It's an archive, and name() is of the form 'foo.a(bar.so)'.
+	      open_paren += 1;
+	      this->soname_ = this->name().substr(open_paren,
+						  close_paren - open_paren);
+	    }
 	}
     }
 }
@@ -705,10 +712,11 @@ Sized_dynobj<size, big_endian>::do_add_symbols(Symbol_table* symtab,
   Version_map version_map;
   this->make_version_map(sd, &version_map);
 
-  // If printing symbol counts or a cross reference table, we want to
-  // track symbols.
+  // If printing symbol counts or a cross reference table or
+  // preparing for an incremental link, we want to track symbols.
   if (parameters->options().user_set_print_symbol_counts()
-      || parameters->options().cref())
+      || parameters->options().cref()
+      || parameters->incremental())
     {
       this->symbols_ = new Symbols();
       this->symbols_->resize(symcount);
@@ -785,6 +793,16 @@ Sized_dynobj<size, big_endian>::do_for_all_global_symbols(
 	  && sym.get_st_bind() != elfcpp::STB_LOCAL)
 	v->visit(sym_names + sym.get_st_name());
     }
+}
+
+// Iterate over local symbols, calling a visitor class V for each GOT offset
+// associated with a local symbol.
+
+template<int size, bool big_endian>
+void
+Sized_dynobj<size, big_endian>::do_for_all_local_got_entries(
+    Got_offset_list::Visitor*) const
+{
 }
 
 // Get symbol counts.

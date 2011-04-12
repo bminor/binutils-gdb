@@ -48,7 +48,7 @@ class Incremental_archive_entry;
 struct Archive_member
 {
   Archive_member()
-      : obj_(NULL), sd_(NULL)
+      : obj_(NULL), sd_(NULL), arg_serial_(0)
   { }
   Archive_member(Object* obj, Read_symbols_data* sd)
       : obj_(obj), sd_(sd)
@@ -57,6 +57,8 @@ struct Archive_member
   Object* obj_;
   // The data to pass from read_symbols() to add_symbols().
   Read_symbols_data* sd_;
+  // The serial number of the file in the argument list.
+  unsigned int arg_serial_;
 };
 
 // This class serves as a base class for Archive and Lib_group objects.

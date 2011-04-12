@@ -58,6 +58,25 @@ readv(int, const iovec*, int)
 namespace gold
 {
 
+// Get the last modified time of an unopened file.
+
+bool
+get_mtime(const char* filename, Timespec* mtime)
+{
+  struct stat file_stat;
+
+  if (stat(filename, &file_stat) < 0)
+    return false;
+#ifdef HAVE_STAT_ST_MTIM
+  mtime->seconds = file_stat.st_mtim.tv_sec;
+  mtime->nanoseconds = file_stat.st_mtim.tv_nsec;
+#else
+  mtime->seconds = file_stat.st_mtime;
+  mtime->nanoseconds = 0;
+#endif
+  return true;
+}
+
 // Class File_read.
 
 // A lock for the File_read static variables.
@@ -851,7 +870,7 @@ File_read::get_mtime()
 {
   struct stat file_stat;
   this->reopen_descriptor();
-  
+
   if (fstat(this->descriptor_, &file_stat) < 0)
     gold_fatal(_("%s: stat failed: %s"), this->name_.c_str(),
 	       strerror(errno));

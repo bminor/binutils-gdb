@@ -63,7 +63,7 @@ find_input_containing_global(
       if (offset >= input_file.get_symbol_offset(0)
           && offset < input_file.get_symbol_offset(nsyms))
 	{
-	  *symndx = (offset - input_file.get_symbol_offset(0)) / 16;
+	  *symndx = (offset - input_file.get_symbol_offset(0)) / 20;
 	  return input_file;
 	}
     }
@@ -128,6 +128,10 @@ dump_incremental_inputs(const char* argv0, const char* filename,
 	     static_cast<unsigned long long>(mtime.seconds),
 	     mtime.nanoseconds,
 	     ctime(&mtime.seconds));
+
+      printf("    Serial Number: %d\n", input_file.arg_serial());
+      printf("    In System Directory: %s\n",
+	     input_file.is_in_system_directory() ? "true" : "false");
 
       Incremental_input_type input_type = input_file.type();
       printf("    Type: ");
@@ -195,47 +199,11 @@ dump_incremental_inputs(const char* argv0, const char* filename,
 	{
 	  typename Entry_reader::Input_section_info info(
 	      input_file.get_input_section(shndx));
-	  printf("    %3d  %6d  %8lld  %8lld  %s\n", shndx,
+	  printf("    %3d  %6d  %8lld  %8lld  %s\n", shndx + 1,
 		 info.output_shndx,
 		 static_cast<long long>(info.sh_offset),
 		 static_cast<long long>(info.sh_size),
 		 info.name);
-	}
-    }
-
-  printf("\nGlobal symbols per input file:\n");
-  for (unsigned int i = 0; i < incremental_inputs.input_file_count(); ++i)
-    {
-      Entry_reader input_file(incremental_inputs.input_file(i));
-
-      if (input_file.type() != INCREMENTAL_INPUT_OBJECT
-	  && input_file.type() != INCREMENTAL_INPUT_ARCHIVE_MEMBER)
-	continue;
-
-      const char* objname = input_file.filename();
-      if (objname == NULL)
-	{
-	  fprintf(stderr,"%s: %s: failed to get file name for object %u\n",
-		  argv0, filename, i);
-	  exit(1);
-	}
-
-      printf("[%d] %s\n", i, objname);
-
-      unsigned int nsyms = input_file.get_global_symbol_count();
-      if (nsyms > 0)
-	printf("    %6s  %8s  %8s  %8s  %8s\n",
-	       "outndx", "offset", "chain", "#relocs", "rbase");
-      for (unsigned int symndx = 0; symndx < nsyms; ++symndx)
-	{
-	  typename Entry_reader::Global_symbol_info info(
-	      input_file.get_global_symbol_info(symndx));
-	  printf("    %6d  %8d  %8d  %8d  %8d\n",
-		 info.output_symndx,
-		 input_file.get_symbol_offset(symndx),
-		 info.next_offset,
-		 info.reloc_count,
-		 info.reloc_offset);
 	}
     }
 
@@ -280,8 +248,77 @@ dump_incremental_inputs(const char* argv0, const char* filename,
   unsigned int nsyms = symtab_location.data_size / sym_size;
   unsigned int nglobals = isymtab.symbol_count();
   unsigned int first_global = nsyms - nglobals;
-  unsigned const char* sym_p = symtab_view.data() + first_global * sym_size;
+  unsigned const char* sym_p;
 
+  printf("\nGlobal symbols per input file:\n");
+  for (unsigned int i = 0; i < incremental_inputs.input_file_count(); ++i)
+    {
+      Entry_reader input_file(incremental_inputs.input_file(i));
+
+      if (input_file.type() != INCREMENTAL_INPUT_OBJECT
+	  && input_file.type() != INCREMENTAL_INPUT_ARCHIVE_MEMBER
+	  && input_file.type() != INCREMENTAL_INPUT_SHARED_LIBRARY)
+	continue;
+
+      const char* objname = input_file.filename();
+      if (objname == NULL)
+	{
+	  fprintf(stderr,"%s: %s: failed to get file name for object %u\n",
+		  argv0, filename, i);
+	  exit(1);
+	}
+
+      printf("[%d] %s\n", i, objname);
+
+      unsigned int nsyms = input_file.get_global_symbol_count();
+      if (nsyms > 0)
+	printf("    %6s  %6s  %8s  %8s  %8s  %8s\n",
+	       "outndx", "shndx", "offset", "chain", "#relocs", "rbase");
+      if (input_file.type() == INCREMENTAL_INPUT_SHARED_LIBRARY)
+	{
+	  for (unsigned int symndx = 0; symndx < nsyms; ++symndx)
+	    {
+	      bool is_def;
+	      unsigned int output_symndx =
+		  input_file.get_output_symbol_index(symndx, &is_def);
+	      sym_p = symtab_view.data() + output_symndx * sym_size;
+	      elfcpp::Sym<size, big_endian> sym(sym_p);
+	      const char* symname;
+	      if (!strtab.get_c_string(sym.get_st_name(), &symname))
+		symname = "<unknown>";
+	      printf("    %6d  %6s  %8s  %8s  %8s  %8s  %-5s  %s\n",
+		     output_symndx,
+		     "", "", "", "", "",
+		     is_def ? "DEF" : "UNDEF",
+		     symname);
+	    }
+	}
+      else
+	{
+	  for (unsigned int symndx = 0; symndx < nsyms; ++symndx)
+	    {
+	      Incremental_global_symbol_reader<big_endian> info(
+		  input_file.get_global_symbol_reader(symndx));
+	      unsigned int output_symndx = info.output_symndx();
+	      sym_p = symtab_view.data() + output_symndx * sym_size;
+	      elfcpp::Sym<size, big_endian> sym(sym_p);
+	      const char* symname;
+	      if (!strtab.get_c_string(sym.get_st_name(), &symname))
+		symname = "<unknown>";
+	      printf("    %6d  %6d  %8d  %8d  %8d  %8d  %-5s  %s\n",
+		     output_symndx,
+		     info.shndx(),
+		     input_file.get_symbol_offset(symndx),
+		     info.next_offset(),
+		     info.reloc_count(),
+		     info.reloc_offset(),
+		     info.shndx() != elfcpp::SHN_UNDEF ? "DEF" : "UNDEF",
+		     symname);
+	    }
+	}
+    }
+
+  sym_p = symtab_view.data() + first_global * sym_size;
   printf("\nGlobal symbol table:\n");
   for (unsigned int i = 0; i < nglobals; i++)
     {
@@ -297,19 +334,19 @@ dump_incremental_inputs(const char* argv0, const char* filename,
 	  Entry_reader input_file =
 	      find_input_containing_global<size, big_endian>(incremental_inputs,
 							     offset, &sym_ndx);
-	  typename Entry_reader::Global_symbol_info sym_info(
-	      input_file.get_global_symbol_info(sym_ndx));
+	  Incremental_global_symbol_reader<big_endian> sym_info(
+	      input_file.get_global_symbol_reader(sym_ndx));
 	  printf("    %s (first reloc: %d, reloc count: %d)",
-		 input_file.filename(), sym_info.reloc_offset,
-		 sym_info.reloc_count);
-	  if (sym_info.output_symndx != first_global + i)
-	    printf(" ** wrong output symndx (%d) **", sym_info.output_symndx);
+		 input_file.filename(), sym_info.reloc_offset(),
+		 sym_info.reloc_count());
+	  if (sym_info.output_symndx() != first_global + i)
+	    printf(" ** wrong output symndx (%d) **", sym_info.output_symndx());
 	  printf("\n");
 	  // Dump the relocations from this input file for this symbol.
-	  unsigned int r_off = sym_info.reloc_offset;
-	  for (unsigned int j = 0; j < sym_info.reloc_count; j++)
+	  unsigned int r_off = sym_info.reloc_offset();
+	  for (unsigned int j = 0; j < sym_info.reloc_count(); j++)
 	    {
-	      printf("      %4d  relocation type %3d  shndx %d"
+	      printf("      %4d  relocation type %3d  shndx %2d"
 		     "  offset %016llx  addend %016llx  %s\n",
 		     r_off,
 		     irelocs.get_r_type(r_off),
@@ -319,7 +356,7 @@ dump_incremental_inputs(const char* argv0, const char* filename,
 		     symname);
 	      r_off += irelocs.reloc_size;
 	    }
-	  offset = sym_info.next_offset;
+	  offset = sym_info.next_offset();
 	}
       sym_p += sym_size;
     }

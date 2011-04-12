@@ -56,7 +56,9 @@ Read_relocs::is_runnable()
 void
 Read_relocs::locks(Task_locker* tl)
 {
-  tl->add(this, this->object_->token());
+  Task_token* token = this->object_->token();
+  if (token != NULL)
+    tl->add(this, token);
 }
 
 // Read the relocations and then start a Scan_relocs_task.
@@ -172,7 +174,9 @@ Scan_relocs::is_runnable()
 void
 Scan_relocs::locks(Task_locker* tl)
 {
-  tl->add(this, this->object_->token());
+  Task_token* token = this->object_->token();
+  if (token != NULL)
+    tl->add(this, token);
   tl->add(this, this->next_blocker_);
 }
 
@@ -222,7 +226,9 @@ Relocate_task::locks(Task_locker* tl)
   if (this->input_sections_blocker_ != NULL)
     tl->add(this, this->input_sections_blocker_);
   tl->add(this, this->final_blocker_);
-  tl->add(this, this->object_->token());
+  Task_token* token = this->object_->token();
+  if (token != NULL)
+    tl->add(this, token);
 }
 
 // Run the task.
@@ -483,7 +489,7 @@ Sized_relobj<size, big_endian>::do_scan_relocs(Symbol_table* symtab,
 
   // For incremental links, finalize the allocation of relocations.
   if (layout->incremental_inputs() != NULL)
-    this->finalize_incremental_relocs(layout);
+    this->finalize_incremental_relocs(layout, true);
 
   if (rd->local_symbols != NULL)
     {
@@ -596,7 +602,7 @@ Sized_relobj<size, big_endian>::incremental_relocs_scan(
     }
 }
 
-// Scan the input relocation for --emit-relocs, templatized on the
+// Scan the input relocation for --incremental, templatized on the
 // type of the relocation section.
 
 template<int size, bool big_endian>
@@ -684,7 +690,8 @@ Sized_relobj<size, big_endian>::do_relocate(const Symbol_table* symtab,
 
   // Write out the local symbols.
   this->write_local_symbols(of, layout->sympool(), layout->dynpool(),
-			    layout->symtab_xindex(), layout->dynsym_xindex());
+			    layout->symtab_xindex(), layout->dynsym_xindex(),
+			    layout->symtab_section()->offset());
 }
 
 // Sort a Read_multiple vector by file offset.
@@ -1134,7 +1141,8 @@ Sized_relobj<size, big_endian>::incremental_relocs_write_reltype(
   const unsigned int reloc_size =
       Reloc_types<sh_type, size, big_endian>::reloc_size;
   const unsigned int sizeof_addr = size / 8;
-  const unsigned int incr_reloc_size = 8 + 2 * sizeof_addr;
+  const unsigned int incr_reloc_size =
+      Incremental_relocs_reader<size, big_endian>::reloc_size;
 
   unsigned int out_shndx = output_section->out_shndx();
 

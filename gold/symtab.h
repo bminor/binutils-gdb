@@ -48,6 +48,8 @@ class Sized_pluginobj;
 class Dynobj;
 template<int size, bool big_endian>
 class Sized_dynobj;
+template<int size, bool big_endian>
+class Sized_incrobj;
 class Versions;
 class Version_script_info;
 class Input_objects;
@@ -1336,6 +1338,13 @@ class Symbol_table
 		  typename Sized_relobj<size, big_endian>::Symbols*,
 		  size_t* defined);
 
+  // Add one external symbol from the incremental object OBJ to the symbol
+  // table.  Returns a pointer to the resolved symbol in the symbol table.
+  template<int size, bool big_endian>
+  Symbol*
+  add_from_incrobj(Object* obj, const char* name,
+		   const char* ver, elfcpp::Sym<size, big_endian>* sym);
+
   // Define a special symbol based on an Output_data.  It is a
   // multiple definition error if this symbol is already defined.
   Symbol*
@@ -1465,6 +1474,11 @@ class Symbol_table
   off_t
   finalize(off_t off, off_t dynoff, size_t dyn_global_index, size_t dyncount,
 	   Stringpool* pool, unsigned int* plocal_symcount);
+
+  // Set the final file offset of the symbol table.
+  void
+  set_file_offset(off_t off)
+  { this->offset_ = off; }
 
   // Status code of Symbol_table::compute_final_value.
   enum Compute_final_value_status

@@ -57,6 +57,7 @@ class Input_file_lib;
 class Position_dependent_options;
 class Target;
 class Plugin_manager;
+class Script_info;
 
 // Incremental build action for a specific file, as selected by the user.
 
@@ -1519,7 +1520,7 @@ class Input_file_argument
   //         command line, such as --whole-archive.
   Input_file_argument()
     : name_(), type_(INPUT_FILE_TYPE_FILE), extra_search_path_(""),
-      just_symbols_(false), options_()
+      just_symbols_(false), options_(), arg_serial_(0)
   { }
 
   Input_file_argument(const char* name, Input_file_type type,
@@ -1527,7 +1528,7 @@ class Input_file_argument
                       bool just_symbols,
                       const Position_dependent_options& options)
     : name_(name), type_(type), extra_search_path_(extra_search_path),
-      just_symbols_(just_symbols), options_(options)
+      just_symbols_(just_symbols), options_(options), arg_serial_(0)
   { }
 
   // You can also pass in a General_options instance instead of a
@@ -1539,7 +1540,7 @@ class Input_file_argument
                       bool just_symbols,
                       const General_options& options)
     : name_(name), type_(type), extra_search_path_(extra_search_path),
-      just_symbols_(just_symbols), options_(options)
+      just_symbols_(just_symbols), options_(options), arg_serial_(0)
   { }
 
   const char*
@@ -1581,6 +1582,16 @@ class Input_file_argument
 	    || !this->extra_search_path_.empty());
   }
 
+  // Set the serial number for this argument.
+  void
+  set_arg_serial(unsigned int arg_serial)
+  { this->arg_serial_ = arg_serial; }
+
+  // Get the serial number.
+  unsigned int
+  arg_serial() const
+  { return this->arg_serial_; }
+
  private:
   // We use std::string, not const char*, here for convenience when
   // using script files, so that we do not have to preserve the string
@@ -1590,6 +1601,8 @@ class Input_file_argument
   std::string extra_search_path_;
   bool just_symbols_;
   Position_dependent_options options_;
+  // A unique index for this file argument in the argument list.
+  unsigned int arg_serial_;
 };
 
 // A file or library, or a group, from the command line.
@@ -1772,12 +1785,12 @@ class Input_arguments
   typedef Input_argument_list::const_iterator const_iterator;
 
   Input_arguments()
-    : input_argument_list_(), in_group_(false), in_lib_(false)
+    : input_argument_list_(), in_group_(false), in_lib_(false), file_count_(0)
   { }
 
   // Add a file.
   Input_argument&
-  add_file(const Input_file_argument& arg);
+  add_file(Input_file_argument& arg);
 
   // Start a group (the --start-group option).
   void
@@ -1825,10 +1838,18 @@ class Input_arguments
   empty() const
   { return this->input_argument_list_.empty(); }
 
+  // Return the number of input files.  This may be larger than
+  // input_argument_list_.size(), because of files that are part
+  // of groups or libs.
+  int
+  number_of_input_files() const
+  { return this->file_count_; }
+
  private:
   Input_argument_list input_argument_list_;
   bool in_group_;
   bool in_lib_;
+  unsigned int file_count_;
 };
 
 
@@ -1885,7 +1906,7 @@ class Command_line
   // The number of input files.
   int
   number_of_input_files() const
-  { return this->inputs_.size(); }
+  { return this->inputs_.number_of_input_files(); }
 
   // Iterators to iterate over the list of input files.
 

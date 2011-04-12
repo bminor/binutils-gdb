@@ -48,7 +48,14 @@
 namespace gold
 {
 
+class Object;
+
 const char* program_name;
+
+static Task*
+process_incremental_input(Incremental_binary*, unsigned int, Input_objects*,
+			  Symbol_table*, Layout*, Dirsearch*, Mapfile*,
+			  Task_token*, Task_token*);
 
 void
 gold_exit(bool status)
@@ -178,19 +185,50 @@ queue_initial_tasks(const General_options& options,
     thread_count = cmdline.number_of_input_files();
   workqueue->set_thread_count(thread_count);
 
+  // For incremental links, the base output file.
+  Incremental_binary* ibase = NULL;
+
   if (parameters->incremental())
     {
-      Incremental_checker incremental_checker(
-          parameters->options().output_file_name(),
-          layout->incremental_inputs());
-      if (incremental_checker.can_incrementally_link_output_file())
-        {
-          // TODO: remove when incremental linking implemented.
-          printf("Incremental linking might be possible "
-              "(not implemented yet)\n");
-        }
-      // TODO: If we decide on an incremental build, fewer tasks
-      // should be scheduled.
+      if (options.relocatable())
+	gold_error(_("incremental linking is incompatible with -r"));
+      if (options.emit_relocs())
+	gold_error(_("incremental linking is incompatible with --emit-relocs"));
+      if (options.gc_sections())
+	gold_error(_("incremental linking is incompatible with --gc-sections"));
+      if (options.icf_enabled())
+	gold_error(_("incremental linking is incompatible with --icf"));
+      if (options.has_plugins())
+	gold_error(_("incremental linking is incompatible with --plugin"));
+
+      if (parameters->incremental_update())
+	{
+	  Output_file* of = new Output_file(options.output_file_name());
+	  if (!of->open_for_modification())
+	    gold_info(_("incremental update not possible: "
+			"cannot open %s"),
+		      options.output_file_name());
+	  else
+	    {
+	      ibase = open_incremental_binary(of);
+	      if (ibase != NULL
+		  && ibase->check_inputs(cmdline, layout->incremental_inputs()))
+		ibase->init_layout(layout);
+	      else
+		{
+		  delete ibase;
+		  ibase = NULL;
+		  of->close();
+		}
+	    }
+	  if (ibase == NULL)
+	    {
+	      if (set_parameters_incremental_full())
+		gold_info(_("linking with --incremental-full"));
+	      else
+		gold_fatal(_("restart link with --incremental-full"));
+	    }
+	}
     }
 
   // Read the input files.  We have to add the symbols to the symbol
@@ -198,16 +236,45 @@ queue_initial_tasks(const General_options& options,
   // each input file.  We associate the blocker with the following
   // input file, to give us a convenient place to delete it.
   Task_token* this_blocker = NULL;
-  for (Command_line::const_iterator p = cmdline.begin();
-       p != cmdline.end();
-       ++p)
+  if (ibase == NULL)
     {
-      Task_token* next_blocker = new Task_token(true);
-      next_blocker->add_blocker();
-      workqueue->queue(new Read_symbols(input_objects, symtab, layout,
-					&search_path, 0, mapfile, &*p, NULL,
-					NULL, this_blocker, next_blocker));
-      this_blocker = next_blocker;
+      // Normal link.  Queue a Read_symbols task for each input file
+      // on the command line.
+      for (Command_line::const_iterator p = cmdline.begin();
+	   p != cmdline.end();
+	   ++p)
+	{
+	  Task_token* next_blocker = new Task_token(true);
+	  next_blocker->add_blocker();
+	  workqueue->queue(new Read_symbols(input_objects, symtab, layout,
+					    &search_path, 0, mapfile, &*p, NULL,
+					    NULL, this_blocker, next_blocker));
+	  this_blocker = next_blocker;
+	}
+    }
+  else
+    {
+      // Incremental update link.  Process the list of input files
+      // stored in the base file, and queue a task for each file:
+      // a Read_symbols task for a changed file, and an Add_symbols task
+      // for an unchanged file.  We need to mark all the space used by
+      // unchanged files before we can start any tasks running.
+      unsigned int input_file_count = ibase->input_file_count();
+      std::vector<Task*> tasks;
+      tasks.reserve(input_file_count);
+      for (unsigned int i = 0; i < input_file_count; ++i)
+	{
+	  Task_token* next_blocker = new Task_token(true);
+	  next_blocker->add_blocker();
+	  Task* t = process_incremental_input(ibase, i, input_objects, symtab,
+					      layout, &search_path, mapfile,
+					      this_blocker, next_blocker);
+	  tasks.push_back(t);
+	  this_blocker = next_blocker;
+	}
+      // Now we can queue the tasks.
+      for (unsigned int i = 0; i < tasks.size(); i++)
+	workqueue->queue(tasks[i]);
     }
 
   if (options.has_plugins())
@@ -220,13 +287,11 @@ queue_initial_tasks(const General_options& options,
       this_blocker = next_blocker;
     }
 
-  if (parameters->options().relocatable()
-      && (parameters->options().gc_sections()
-	  || parameters->options().icf_enabled()))
+  if (options.relocatable()
+      && (options.gc_sections() || options.icf_enabled()))
     gold_error(_("cannot mix -r with --gc-sections or --icf"));
 
-  if (parameters->options().gc_sections()
-      || parameters->options().icf_enabled())
+  if (options.gc_sections() || options.icf_enabled())
     {
       workqueue->queue(new Task_function(new Gc_runner(options,
 						       input_objects,
@@ -245,6 +310,129 @@ queue_initial_tasks(const General_options& options,
                                                            mapfile),
                                          this_blocker,
                                          "Task_function Middle_runner"));
+    }
+}
+
+// Process an incremental input file: if it is unchanged from the previous
+// link, return a task to add its symbols from the base file's incremental
+// info; if it has changed, return a normal Read_symbols task.  We create a
+// task for every input file, if only to report the file for rebuilding the
+// incremental info.
+
+static Task*
+process_incremental_input(Incremental_binary* ibase,
+			  unsigned int input_file_index,
+			  Input_objects* input_objects,
+			  Symbol_table* symtab,
+			  Layout* layout,
+			  Dirsearch* search_path,
+			  Mapfile* mapfile,
+			  Task_token* this_blocker,
+			  Task_token* next_blocker)
+{
+  const Incremental_binary::Input_reader* input_reader =
+      ibase->get_input_reader(input_file_index);
+  Incremental_input_type input_type = input_reader->type();
+
+  // Get the input argument corresponding to this input file, matching on
+  // the argument serial number.  If the input file cannot be matched
+  // to an existing input argument, synthesize a new one.
+  const Input_argument* input_argument =
+      ibase->get_input_argument(input_file_index);
+  if (input_argument == NULL)
+    {
+      Input_file_argument file(input_reader->filename(),
+			       Input_file_argument::INPUT_FILE_TYPE_FILE,
+			       "", false, parameters->options());
+      Input_argument* arg = new Input_argument(file);
+      arg->set_script_info(ibase->get_script_info(input_file_index));
+      input_argument = arg;
+    }
+
+  gold_debug(DEBUG_INCREMENTAL, "Incremental object: %s, type %d",
+	     input_reader->filename(), input_type);
+
+  if (input_type == INCREMENTAL_INPUT_SCRIPT)
+    {
+      // Incremental_binary::check_inputs should have cancelled the
+      // incremental update if the script has changed.
+      gold_assert(!ibase->file_has_changed(input_file_index));
+      return new Check_script(layout, ibase, input_file_index, input_reader,
+			      this_blocker, next_blocker);
+    }
+
+  if (input_type == INCREMENTAL_INPUT_ARCHIVE)
+    {
+      Incremental_library* lib = ibase->get_library(input_file_index);
+      gold_assert(lib != NULL);
+      if (lib->filename() == "/group/"
+	  || !ibase->file_has_changed(input_file_index))
+	{
+	  // Queue a task to check that no references have been added to any
+	  // of the library's unused symbols.
+	  return new Check_library(symtab, layout, ibase, input_file_index,
+				   input_reader, this_blocker, next_blocker);
+	}
+      else
+	{
+	  // Queue a Read_symbols task to process the archive normally.
+	  return new Read_symbols(input_objects, symtab, layout, search_path,
+				  0, mapfile, input_argument, NULL, NULL,
+				  this_blocker, next_blocker);
+	}
+    }
+
+  if (input_type == INCREMENTAL_INPUT_ARCHIVE_MEMBER)
+    {
+      // For archive members, check the timestamp of the containing archive.
+      Incremental_library* lib = ibase->get_library(input_file_index);
+      gold_assert(lib != NULL);
+      // Process members of a --start-lib/--end-lib group as normal objects.
+      if (lib->filename() != "/group/")
+	{
+	  if (ibase->file_has_changed(lib->input_file_index()))
+	    {
+	      return new Read_member(input_objects, symtab, layout, mapfile,
+				     input_reader, this_blocker, next_blocker);
+	    }
+	  else
+	    {
+	      // The previous contributions from this file will be kept.
+	      // Mark the pieces of output sections contributed by this
+	      // object.
+	      ibase->reserve_layout(input_file_index);
+	      Object* obj = make_sized_incremental_object(ibase,
+							  input_file_index,
+							  input_type,
+							  input_reader);
+	      return new Add_symbols(input_objects, symtab, layout,
+				     search_path, 0, mapfile, input_argument,
+				     obj, lib, NULL, this_blocker,
+				     next_blocker);
+	    }
+	}
+    }
+
+  // Normal object file or shared library.  Check if the file has changed
+  // since the last incremental link.
+  if (ibase->file_has_changed(input_file_index))
+    {
+      return new Read_symbols(input_objects, symtab, layout, search_path, 0,
+			      mapfile, input_argument, NULL, NULL,
+			      this_blocker, next_blocker);
+    }
+  else
+    {
+      // The previous contributions from this file will be kept.
+      // Mark the pieces of output sections contributed by this object.
+      ibase->reserve_layout(input_file_index);
+      Object* obj = make_sized_incremental_object(ibase,
+						  input_file_index,
+						  input_type,
+						  input_reader);
+      return new Add_symbols(input_objects, symtab, layout, search_path, 0,
+			     mapfile, input_argument, obj, NULL, NULL,
+			     this_blocker, next_blocker);
     }
 }
 
@@ -396,7 +584,8 @@ queue_middle_tasks(const General_options& options,
   // generate an empty file.  Existing builds depend on being able to
   // pass an empty archive to the linker and get an empty object file
   // out.  In order to do this we need to use a default target.
-  if (input_objects->number_of_input_objects() == 0)
+  if (input_objects->number_of_input_objects() == 0
+      && layout->incremental_base() == NULL)
     parameters_force_valid_target();
 
   int thread_count = options.thread_count_middle();

@@ -548,31 +548,6 @@ class Script_options
   Script_sections script_sections_;
 };
 
-// Information about a script input that will persist during the whole linker
-// run. Needed only during an incremental build to retrieve the input files
-// added by this script.
-
-class Script_info
-{
- public:
-  Script_info()
-    : incremental_script_entry_(NULL)
-  { }
-
-  // Store a pointer to the incremental information for this script.
-  void
-  set_incremental_info(Incremental_script_entry* entry)
-  { this->incremental_script_entry_ = entry; }
-
-  // Return the pointer to the incremental information for this script.
-  Incremental_script_entry*
-  incremental_info() const
-  { return this->incremental_script_entry_; }
-
- private:
-  Incremental_script_entry* incremental_script_entry_;
-};
-
 // FILE was found as an argument on the command line, but was not
 // recognized as an ELF file.  Try to read it as a script.  Return
 // true if the file was handled.  This has to handle /usr/lib/libc.so

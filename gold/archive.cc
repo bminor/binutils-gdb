@@ -960,7 +960,7 @@ Archive::include_member(Symbol_table* symtab, Layout* layout,
     {
       {
 	if (layout->incremental_inputs() != NULL)
-	  layout->incremental_inputs()->report_object(obj, this, NULL);
+	  layout->incremental_inputs()->report_object(obj, 0, this, NULL);
 	Read_symbols_data sd;
 	obj->read_symbols(&sd);
 	obj->layout(symtab, layout, &sd);
@@ -1040,8 +1040,12 @@ Add_archive_symbols::run(Workqueue* workqueue)
   // For an incremental link, begin recording layout information.
   Incremental_inputs* incremental_inputs = this->layout_->incremental_inputs();
   if (incremental_inputs != NULL)
-    incremental_inputs->report_archive_begin(this->archive_,
-					this->input_argument_->script_info());
+    {
+      unsigned int arg_serial = this->input_argument_->file().arg_serial();
+      Script_info* script_info = this->input_argument_->script_info();
+      incremental_inputs->report_archive_begin(this->archive_, arg_serial,
+					       script_info);
+    }
 
   bool added = this->archive_->add_symbols(this->symtab_, this->layout_,
 					   this->input_objects_,
@@ -1103,7 +1107,7 @@ Lib_group::Lib_group(const Input_file_lib* lib, Task* task)
 const std::string&
 Lib_group::do_filename() const
 {
-  std::string *filename = new std::string("<group>");
+  std::string *filename = new std::string("/group/");
   return *filename;
 }
 
@@ -1197,7 +1201,8 @@ Lib_group::include_member(Symbol_table* symtab, Layout* layout,
   if (input_objects->add_object(obj))
     {
       if (layout->incremental_inputs() != NULL)
-	layout->incremental_inputs()->report_object(obj, this, NULL);
+	layout->incremental_inputs()->report_object(obj, member.arg_serial_,
+						    this, NULL);
       obj->layout(symtab, layout, sd);
       obj->add_symbols(symtab, sd, layout);
     }
@@ -1257,7 +1262,7 @@ Add_lib_group_symbols::run(Workqueue*)
   // For an incremental link, begin recording layout information.
   Incremental_inputs* incremental_inputs = this->layout_->incremental_inputs();
   if (incremental_inputs != NULL)
-    incremental_inputs->report_archive_begin(this->lib_, NULL);
+    incremental_inputs->report_archive_begin(this->lib_, 0, NULL);
 
   this->lib_->add_symbols(this->symtab_, this->layout_, this->input_objects_);
 

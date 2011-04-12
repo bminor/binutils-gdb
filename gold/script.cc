@@ -1436,8 +1436,10 @@ read_input_script(Workqueue* workqueue, Symbol_table* symtab, Layout* layout,
     {
       const std::string& filename = input_file->filename();
       Timespec mtime = input_file->file().get_mtime();
-      script_info = new Script_info();
-      layout->incremental_inputs()->report_script(filename, script_info, mtime);
+      unsigned int arg_serial = input_argument->file().arg_serial();
+      script_info = new Script_info(filename);
+      layout->incremental_inputs()->report_script(script_info, arg_serial,
+						  mtime);
     }
 
   Parser_closure closure(input_file->filename().c_str(),

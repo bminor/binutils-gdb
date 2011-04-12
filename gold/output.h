@@ -81,6 +81,11 @@ class Output_data
     return this->data_size_;
   }
 
+  // Get the current data size.
+  off_t
+  current_data_size() const
+  { return this->current_data_size_for_child(); }
+
   // Return true if data size is fixed.
   bool
   is_data_size_fixed() const
@@ -191,6 +196,17 @@ class Output_data
     gold_assert(!this->is_offset_valid_);
     this->offset_ = off;
     this->is_offset_valid_ = true;
+  }
+
+  // Update the data size without finalizing it.
+  void
+  pre_finalize_data_size()
+  {
+    if (!this->is_data_size_valid_)
+      {
+	// Tell the child class to update the data size.
+	this->update_data_size();
+      }
   }
 
   // Finalize the data size.
@@ -319,6 +335,17 @@ class Output_data
   virtual void
   do_set_out_shndx(unsigned int)
   { gold_unreachable(); }
+
+  // This is a hook for derived classes to set the preliminary data size.
+  // This is called by pre_finalize_data_size, normally called during
+  // Layout::finalize, before the section address is set, and is used
+  // during an incremental update, when we need to know the size of a
+  // section before allocating space in the output file.  For classes
+  // where the current data size is up to date, this default version of
+  // the method can be inherited.
+  virtual void
+  update_data_size()
+  { }
 
   // This is a hook for derived classes to set the data size.  This is
   // called by finalize_data_size, normally called during
@@ -461,6 +488,11 @@ class Output_section_headers : public Output_data
   void
   do_print_to_mapfile(Mapfile* mapfile) const
   { mapfile->print_output_data(this, _("** section headers")); }
+
+  // Update the data size.
+  void
+  update_data_size()
+  { this->set_data_size(this->do_size()); }
 
   // Set final data size.
   void
@@ -732,11 +764,6 @@ class Output_section_data_build : public Output_section_data
     : Output_section_data(addralign)
   { }
 
-  // Get the current data size.
-  off_t
-  current_data_size() const
-  { return this->current_data_size_for_child(); }
-
   // Set the current data size.
   void
   set_current_data_size(off_t data_size)
@@ -918,6 +945,12 @@ class Output_data_strtab : public Output_section_data
   { }
 
  protected:
+  // This is called to update the section size prior to assigning
+  // the address and file offset.
+  void
+  update_data_size()
+  { this->set_final_data_size(); }
+
   // This is called to set the address and file offset.  Here we make
   // sure that the Stringpool is finalized.
   void
@@ -3035,6 +3068,10 @@ class Output_section : public Output_data
 	}
     }
  
+    // Return the current required size, without finalization.
+    off_t
+    current_data_size() const;
+
     // Return the required size.
     off_t
     data_size() const;
@@ -3258,11 +3295,6 @@ class Output_section : public Output_data
   set_current_data_size(off_t size)
   { this->set_current_data_size_for_child(size); }
 
-  // Get the current size of the output section.
-  off_t
-  current_data_size() const
-  { return this->current_data_size_for_child(); }
-
   // End of linker script support.
 
   // Save states before doing section layout.
@@ -3317,6 +3349,21 @@ class Output_section : public Output_data
   void
   print_merge_stats();
 
+  // Set a fixed layout for the section.  Used for incremental update links.
+  void
+  set_fixed_layout(uint64_t sh_addr, off_t sh_offset, off_t sh_size,
+		   uint64_t sh_addralign);
+
+  // Return TRUE if the section has a fixed layout.
+  bool
+  has_fixed_layout() const
+  { return this->has_fixed_layout_; }
+
+  // Reserve space within the fixed layout for the section.  Used for
+  // incremental update links.
+  void
+  reserve(uint64_t sh_offset, uint64_t sh_size);
+
  protected:
   // Return the output section--i.e., the object itself.
   Output_section*
@@ -3342,6 +3389,13 @@ class Output_section : public Output_data
     gold_assert(this->out_shndx_ == -1U || this->out_shndx_ == shndx);
     this->out_shndx_ = shndx;
   }
+
+  // Update the data size of the Output_section.  For a typical
+  // Output_section, there is nothing to do, but if there are any
+  // Output_section_data objects we need to do a trial layout
+  // here.
+  virtual void
+  update_data_size();
 
   // Set the final data size of the Output_section.  For a typical
   // Output_section, there is nothing to do, but if there are any
@@ -3761,6 +3815,8 @@ class Output_section : public Output_data
   bool is_noload_ : 1;
   // Whether this always keeps input section.
   bool always_keeps_input_sections_ : 1;
+  // Whether this section has a fixed layout, for incremental update links.
+  bool has_fixed_layout_ : 1;
   // For SHT_TLS sections, the offset of this section relative to the base
   // of the TLS segment.
   uint64_t tls_offset_;
@@ -3768,6 +3824,9 @@ class Output_section : public Output_data
   Checkpoint_output_section* checkpoint_;
   // Fast lookup maps for merged and relaxed input sections.
   Output_section_lookup_maps* lookup_maps_;
+  // List of available regions within the section, for incremental
+  // update links.
+  Free_list free_list_;
 };
 
 // An output segment.  PT_LOAD segments are built from collections of
@@ -3910,7 +3969,7 @@ class Output_segment
   // address of the immediately following segment.  Update *POFF and
   // *PSHNDX.  This should only be called for a PT_LOAD segment.
   uint64_t
-  set_section_addresses(const Layout*, bool reset, uint64_t addr,
+  set_section_addresses(Layout*, bool reset, uint64_t addr,
 			unsigned int* increase_relro, bool* has_relro,
 			off_t* poff, unsigned int* pshndx);
 
@@ -3970,7 +4029,7 @@ class Output_segment
 
   // Set the section addresses in an Output_data_list.
   uint64_t
-  set_section_list_addresses(const Layout*, bool reset, Output_data_list*,
+  set_section_list_addresses(Layout*, bool reset, Output_data_list*,
                              uint64_t addr, off_t* poff, unsigned int* pshndx,
                              bool* in_tls);
 
