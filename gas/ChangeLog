@@ -1,3 +1,15 @@
+2011-04-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (i386_mach): Start error message with lower
+	case.
+	(md_begin): Likewise.
+	(md_parse_option): Likewise.
+	(i386_target_format): Likewise.
+	(check_byte_reg): Likewise.
+	(check_long_reg): Likewise.
+	(check_qword_reg): Likewise.
+	(check_word_reg): Likewise.
+
 2011-04-12  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/12532

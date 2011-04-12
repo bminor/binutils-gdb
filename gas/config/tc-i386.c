@@ -2248,7 +2248,7 @@ i386_mach ()
   else if (!strcmp (default_arch, "i386"))
     return bfd_mach_i386_i386;
   else
-    as_fatal (_("Unknown architecture"));
+    as_fatal (_("unknown architecture"));
 }
 
 void
@@ -2282,7 +2282,7 @@ md_begin ()
 				    (void *) core_optab);
 	    if (hash_err)
 	      {
-		as_fatal (_("Internal Error:  Can't hash %s: %s"),
+		as_fatal (_("internal Error:  Can't hash %s: %s"),
 			  (optab - 1)->name,
 			  hash_err);
 	      }
@@ -2304,7 +2304,7 @@ md_begin ()
       {
 	hash_err = hash_insert (reg_hash, regtab->reg_name, (void *) regtab);
 	if (hash_err)
-	  as_fatal (_("Internal Error:  Can't hash %s: %s"),
+	  as_fatal (_("internal Error:  Can't hash %s: %s"),
 		    regtab->reg_name,
 		    hash_err);
       }
@@ -4594,7 +4594,7 @@ check_byte_reg (void)
 	  if (flag_code == CODE_64BIT
 	      && !i.tm.operand_types[op].bitfield.inoutportreg)
 	    {
-	      as_bad (_("Incorrect register `%s%s' used with `%c' suffix"),
+	      as_bad (_("incorrect register `%s%s' used with `%c' suffix"),
 		      register_prefix, i.op[op].regs->reg_name,
 		      i.suffix);
 	      return 0;
@@ -4669,7 +4669,7 @@ check_long_reg (void)
 	   lowering is more complicated.  */
 	if (flag_code == CODE_64BIT)
 	  {
-	    as_bad (_("Incorrect register `%s%s' used with `%c' suffix"),
+	    as_bad (_("incorrect register `%s%s' used with `%c' suffix"),
 		    register_prefix, i.op[op].regs->reg_name,
 		    i.suffix);
 	    return 0;
@@ -4698,7 +4698,7 @@ check_long_reg (void)
 	  }
 	else
 	  {
-	    as_bad (_("Incorrect register `%s%s' used with `%c' suffix"),
+	    as_bad (_("incorrect register `%s%s' used with `%c' suffix"),
 		    register_prefix, i.op[op].regs->reg_name,
 		    i.suffix);
 	    return 0;
@@ -4744,7 +4744,7 @@ check_qword_reg (void)
 	  }
 	else
 	  {
-	    as_bad (_("Incorrect register `%s%s' used with `%c' suffix"),
+	    as_bad (_("incorrect register `%s%s' used with `%c' suffix"),
 		    register_prefix, i.op[op].regs->reg_name,
 		    i.suffix);
 	    return 0;
@@ -4782,7 +4782,7 @@ check_word_reg (void)
 	   lowering is more complicated.  */
 	if (flag_code == CODE_64BIT)
 	  {
-	    as_bad (_("Incorrect register `%s%s' used with `%c' suffix"),
+	    as_bad (_("incorrect register `%s%s' used with `%c' suffix"),
 		    register_prefix, i.op[op].regs->reg_name,
 		    i.suffix);
 	    return 0;
@@ -8244,7 +8244,7 @@ md_parse_option (int c, char *arg)
 	      break;
 	    }
 	if (*l == NULL)
-	  as_fatal (_("No compiled in support for x86_64"));
+	  as_fatal (_("no compiled in support for x86_64"));
 	free (list);
       }
       break;
@@ -8264,7 +8264,7 @@ md_parse_option (int c, char *arg)
 		break;
 	      }
 	  if (*l == NULL)
-	    as_fatal (_("No compiled in support for 32bit x86_64"));
+	    as_fatal (_("no compiled in support for 32bit x86_64"));
 	  free (list);
 	}
       else
@@ -8298,7 +8298,7 @@ md_parse_option (int c, char *arg)
       do
 	{
 	  if (*arch == '.')
-	    as_fatal (_("Invalid -march= option: `%s'"), arg);
+	    as_fatal (_("invalid -march= option: `%s'"), arg);
 	  next = strchr (arch, '+');
 	  if (next)
 	    *next++ = '\0';
@@ -8354,7 +8354,7 @@ md_parse_option (int c, char *arg)
 	    }
 
 	  if (j >= ARRAY_SIZE (cpu_arch))
-	    as_fatal (_("Invalid -march= option: `%s'"), arg);
+	    as_fatal (_("invalid -march= option: `%s'"), arg);
 
 	  arch = next;
 	}
@@ -8363,7 +8363,7 @@ md_parse_option (int c, char *arg)
 
     case OPTION_MTUNE:
       if (*arg == '.')
-	as_fatal (_("Invalid -mtune= option: `%s'"), arg);
+	as_fatal (_("invalid -mtune= option: `%s'"), arg);
       for (j = 0; j < ARRAY_SIZE (cpu_arch); j++)
 	{
 	  if (strcmp (arg, cpu_arch [j].name) == 0)
@@ -8375,7 +8375,7 @@ md_parse_option (int c, char *arg)
 	    }
 	}
       if (j >= ARRAY_SIZE (cpu_arch))
-	as_fatal (_("Invalid -mtune= option: `%s'"), arg);
+	as_fatal (_("invalid -mtune= option: `%s'"), arg);
       break;
 
     case OPTION_MMNEMONIC:
@@ -8384,7 +8384,7 @@ md_parse_option (int c, char *arg)
       else if (strcasecmp (arg, "intel") == 0)
 	intel_mnemonic = 1;
       else
-	as_fatal (_("Invalid -mmnemonic= option: `%s'"), arg);
+	as_fatal (_("invalid -mmnemonic= option: `%s'"), arg);
       break;
 
     case OPTION_MSYNTAX:
@@ -8393,7 +8393,7 @@ md_parse_option (int c, char *arg)
       else if (strcasecmp (arg, "intel") == 0)
 	intel_syntax = 1;
       else
-	as_fatal (_("Invalid -msyntax= option: `%s'"), arg);
+	as_fatal (_("invalid -msyntax= option: `%s'"), arg);
       break;
 
     case OPTION_MINDEX_REG:
@@ -8420,7 +8420,7 @@ md_parse_option (int c, char *arg)
       else if (strcasecmp (arg, "none") == 0)
 	sse_check = sse_check_none;
       else
-	as_fatal (_("Invalid -msse-check= option: `%s'"), arg);
+	as_fatal (_("invalid -msse-check= option: `%s'"), arg);
       break;
 
     case OPTION_MAVXSCALAR:
@@ -8429,7 +8429,7 @@ md_parse_option (int c, char *arg)
       else if (strcasecmp (arg, "256") == 0)
 	avxscalar = vex256;
       else
-	as_fatal (_("Invalid -mavxscalar= option: `%s'"), arg);
+	as_fatal (_("invalid -mavxscalar= option: `%s'"), arg);
       break;
 
     default:
@@ -8595,7 +8595,7 @@ i386_target_format (void)
   else if (!strcmp (default_arch, "i386"))
     update_code_flag (CODE_32BIT, 1);
   else
-    as_fatal (_("Unknown architecture"));
+    as_fatal (_("unknown architecture"));
 
   if (cpu_flags_all_zero (&cpu_arch_isa_flags))
     cpu_arch_isa_flags = cpu_arch[flag_code == CODE_64BIT].flags;
