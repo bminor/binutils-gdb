@@ -685,7 +685,7 @@ proc test_inaccessible_watchpoint {} {
 
 	# The same, but using -location through an indirection.
 	gdb_test "watch -location *global_ptr" \
-	    "$watchpoint_msg \[0-9\]+: \-location: \\*global_ptr"
+	    "$watchpoint_msg \[0-9\]+: \-location \\*global_ptr"
 	delete_breakpoints
 
 	# This step requires two HW watchpoints.  Since some platforms only
