@@ -704,18 +704,17 @@ proc redefine_backtrace_test {} {
     global gdb_prompt
 
     gdb_test_multiple "define backtrace" "define backtrace" {
-	-re "Really redefine built-in.*$" {
-	    send_gdb "y\n"
-	    exp_continue
-	}
-
-	-re "End with"  {
-	    pass "define backtrace in redefine_backtrace_test"
-	}
-        default {
-	    fail "(timeout or eof) define backtrace in redefine_backtrace_test"
+	-re "Really redefine built-in command \"backtrace\"\\? \\(y or n\\) $"  {
+	    pass "define backtrace"
 	}
     }
+
+    gdb_test_multiple "y" "expect response to define backtrace" {
+	-re "End with a line saying just \"end\"\\.\r\n>$"  {
+	    pass "expect response to define backtrace"
+	}
+    }
+
     gdb_test "echo hibob\\n\nend" \
 	    "" \
 	    "enter commands in redefine_backtrace_test"

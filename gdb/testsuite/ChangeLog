@@ -1,3 +1,9 @@
+2011-04-13  Marek Polacek  <mpolacek@redhat.com>
+
+	* gdb.base/commands.exp (redefine_backtrace_test): Fix race. 
+	New testcase `expect response to define backtrace'.  Also remove
+	redundant `default' block.
+
 2011-04-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.python/py-prettyprint.c (struct hint_error): New.
