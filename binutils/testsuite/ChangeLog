@@ -1,3 +1,13 @@
+011-04-11  Kai Tietz
+
+	* binutils-all/windres/windres.exp: Add '// cpparg <option>' command
+	to rc file interpretation to specify addition pre-processor commands
+	as script option.
+	* binutils-all/windres/strtab3.rc: New.
+	* binutils-all/windres/strtab3.rsd: New.
+	* binutils-all/windres/README: Add note about cpparg script option.
+	argument
+
 2011-04-11  Nick Clifton  <nickc@redhat.com>
 
 	* binutils-all/arm/simple.s: Fix assembly problems for COFF based

@@ -1,6 +1,6 @@
 /* windres.c -- a program to manipulate Windows resources
    Copyright 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008,
-   2009 Free Software Foundation, Inc.
+   2009, 2011 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
    Rewritten by Kai Tietz, Onevision.
 
@@ -665,6 +665,7 @@ usage (FILE *stream, int status)
   -O --output-format=<format>  Specify output format\n\
   -F --target=<target>         Specify COFF target\n\
      --preprocessor=<program>  Program to use to preprocess rc file\n\
+     --preprocessor-arg=<arg>  Additional preprocessor argument\n\
   -I --include-dir=<dir>       Include directory when preprocessing rc file\n\
   -D --define <sym>[=<val>]    Define SYM when preprocessing rc file\n\
   -U --undefine <sym>          Undefine SYM when preprocessing rc file\n\
@@ -734,7 +735,8 @@ enum option_values
   OPTION_USE_TEMP_FILE,
   OPTION_NO_USE_TEMP_FILE,
   OPTION_YYDEBUG,
-  OPTION_INCLUDE_DIR
+  OPTION_INCLUDE_DIR,
+  OPTION_PREPROCESSOR_ARG
 };
 
 static const struct option long_options[] =
@@ -745,6 +747,7 @@ static const struct option long_options[] =
   {"output-format", required_argument, 0, 'O'},
   {"target", required_argument, 0, 'F'},
   {"preprocessor", required_argument, 0, OPTION_PREPROCESSOR},
+  {"preprocessor-arg", required_argument, 0, OPTION_PREPROCESSOR_ARG},
   {"include-dir", required_argument, 0, OPTION_INCLUDE_DIR},
   {"define", required_argument, 0, 'D'},
   {"undefine", required_argument, 0, 'U'},
@@ -887,6 +890,24 @@ main (int argc, char **argv)
 
 	case OPTION_PREPROCESSOR:
 	  preprocessor = optarg;
+	  break;
+
+	case OPTION_PREPROCESSOR_ARG:
+	  if (preprocargs == NULL)
+	    {
+	      quotedarg = quot (optarg);
+	      preprocargs = xstrdup (quotedarg);
+	    }
+	  else
+	    {
+	      char *n;
+
+	      quotedarg = quot (optarg);
+	      n = xmalloc (strlen (preprocargs) + strlen (quotedarg) + 2);
+	      sprintf (n, "%s %s", preprocargs, quotedarg);
+	      free (preprocargs);
+	      preprocargs = n;
+	    }
 	  break;
 
 	case 'D':

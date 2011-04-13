@@ -1,3 +1,13 @@
+2011-04-11  Kai Tietz
+
+	* windres.c (usage): Add new --preprocessor-arg option.
+	(option_values): Add new OPTION_PREPROCESSOR_ARG enumerator.
+	(option long_options): Add preprocessor-arg option.
+	(main): Handle it.
+	* doc/binutils.texi: Add documentation for --preprocessor-arg
+	option.
+	* NEWS: Add line about new --preprocessor-arg option for windres.
+
 2011-04-08  John Marino  <binutils@marino.st>
 
 	* arlex.l: Prevent redefinition of YY_NO_UNPUT.
