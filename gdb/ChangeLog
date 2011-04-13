@@ -1,3 +1,8 @@
+2011-04-13  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* breakpoint.c (save_breakpoints): Verify whether
+	breakpoint_ops.print_recreate is defined before calling it.
+
 2011-04-11  Gary Benson  <gbenson@redhat.com>
 
 	Fix failure with --enable-maintainer-mode.

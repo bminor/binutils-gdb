@@ -12337,7 +12337,7 @@ save_breakpoints (char *filename, int from_tty,
     if (filter && !filter (tp))
       continue;
 
-    if (tp->ops != NULL)
+    if (tp->ops != NULL && tp->ops->print_recreate != NULL)
       (tp->ops->print_recreate) (tp, fp);
     else
       {
