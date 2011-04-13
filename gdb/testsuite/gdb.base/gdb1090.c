@@ -36,7 +36,7 @@ void foo ()
   register struct s_2_by_4 s24;
   s24.field_0 = 1170;
   s24.field_1 = 64701;
-  marker (s24);
+  marker (s24); /* break-here */
   return;
 }
 
