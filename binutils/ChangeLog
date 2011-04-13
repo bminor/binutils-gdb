@@ -1,4 +1,4 @@
-2011-04-11  Kai Tietz
+2011-04-11  Kai Tietz  <ktietz@redhat.com>
 
 	* windres.c (usage): Add new --preprocessor-arg option.
 	(option_values): Add new OPTION_PREPROCESSOR_ARG enumerator.
