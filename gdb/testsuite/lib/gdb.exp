@@ -377,6 +377,11 @@ proc gdb_breakpoint { function args } {
 		send_gdb "$pending_response\n"
 		exp_continue
 	}
+	-re "A problem internal to GDB has been detected" {
+		fail "setting breakpoint at $function in runto (GDB internal error)"
+		gdb_internal_error_resync
+		return 0
+	}
 	-re "$gdb_prompt $" {
 		if { $no_message == 0 } {
 			fail "setting breakpoint at $function"
