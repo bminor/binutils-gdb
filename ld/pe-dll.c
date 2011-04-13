@@ -751,10 +751,13 @@ process_def_file_and_drectve (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *
 
 		  if (auto_export (b, pe_def_file, sn))
 		    {
+		      int is_dup = 0;
 		      def_file_export *p;
-		      p=def_file_add_export (pe_def_file, sn, 0, -1, NULL);
+		      p = def_file_add_export (pe_def_file, sn, 0, -1,
+					       NULL, &is_dup);
 		      /* Fill data flag properly, from dlltool.c.  */
-		      p->flag_data = !(symbols[j]->flags & BSF_FUNCTION);
+		      if (!is_dup)
+		        p->flag_data = !(symbols[j]->flags & BSF_FUNCTION);
 		    }
 		}
 	    }
@@ -801,6 +804,7 @@ process_def_file_and_drectve (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *
 
 	  if (strchr (pe_def_file->exports[i].name, '@'))
 	    {
+	      int is_dup = 1;
 	      int lead_at = (*pe_def_file->exports[i].name == '@');
 	      char *tmp = xstrdup (pe_def_file->exports[i].name + lead_at);
 
@@ -808,9 +812,9 @@ process_def_file_and_drectve (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *
 	      if (auto_export (NULL, pe_def_file, tmp))
 		def_file_add_export (pe_def_file, tmp,
 				     pe_def_file->exports[i].internal_name,
-				     -1, NULL);
-	      else
-		free (tmp);
+				     -1, NULL, &is_dup);
+	      if (is_dup)
+	        free (tmp);
 	    }
 	}
     }
@@ -3146,6 +3150,7 @@ pe_implied_import_dll (const char *filename)
 	 exported in buggy auto-import releases.  */
       if (! CONST_STRNEQ (erva + name_rva, "__nm_"))
  	{
+	  int is_dup = 0;
  	  /* is_data is true if the address is in the data, rdata or bss
 	     segment.  */
  	  is_data =
@@ -3154,9 +3159,10 @@ pe_implied_import_dll (const char *filename)
 	    || (func_rva >= bss_start && func_rva < bss_end);
 
 	  imp = def_file_add_import (pe_def_file, erva + name_rva,
-				     dllname, i, 0, NULL);
+				     dllname, i, 0, NULL, &is_dup);
  	  /* Mark symbol type.  */
- 	  imp->data = is_data;
+ 	  if (!is_dup)
+ 	    imp->data = is_data;
 
  	  if (pe_dll_extra_pe_debug)
 	    printf ("%s dll-name: %s sym: %s addr: 0x%lx %s\n",

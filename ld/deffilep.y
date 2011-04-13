@@ -534,15 +534,104 @@ def_file_print (FILE *file, def_file *fdef)
 }
 #endif
 
+/* Helper routine to check for identity of string pointers,
+   which might be NULL.  */
+
+static int
+are_names_equal (const char *s1, const char *s2)
+{
+  if (!s1 && !s2)
+    return 0;
+  if (!s1 || !s2)
+    return (!s1 ? -1 : 1);
+  return strcmp (s1, s2);
+}
+
+static int
+cmp_export_elem (const def_file_export *e, const char *ex_name,
+		 const char *in_name, const char *its_name,
+		 int ord)
+{
+  int r;
+
+  if ((r = are_names_equal (ex_name, e->name)) != 0)
+    return r;
+  if ((r = are_names_equal (in_name, e->internal_name)) != 0)
+    return r;
+  if ((r = are_names_equal (its_name, e->its_name)) != 0)
+    return r;
+  return (ord - e->ordinal);
+}
+
+/* Search the position of the identical element, or returns the position
+   of the next higher element. If last valid element is smaller, then MAX
+   is returned.  */
+
+static int
+find_export_in_list (def_file_export *b, int max,
+		     const char *ex_name, const char *in_name,
+		     const char *its_name, int ord, int *is_ident)
+{
+  int e, l, r, p;
+
+  *is_ident = 0;
+  if (!max)
+    return 0;
+  if ((e = cmp_export_elem (b, ex_name, in_name, its_name, ord)) <= 0)
+    return 0;
+  if (max == 1)
+    return 1;
+  if ((e = cmp_export_elem (b + (max - 1), ex_name, in_name, its_name, ord)) > 0)
+    return max;
+  else if (!e || max == 2)
+    return max - 1;
+  l = 0; r = max - 1;
+  while (l < r)
+    {
+      p = (l + r) / 2;
+      e = cmp_export_elem (b + p, ex_name, in_name, its_name, ord);
+      if (!e)
+        {
+          *is_ident = 1;
+          return p;
+        }
+      else if (e < 0)
+        r = p - 1;
+      else if (e > 0)
+        l = p + 1;
+    }
+  if ((e = cmp_export_elem (b + l, ex_name, in_name, its_name, ord)) > 0)
+    ++l;
+  else if (!e)
+    *is_ident = 1;
+  return l;
+}
+
 def_file_export *
 def_file_add_export (def_file *fdef,
 		     const char *external_name,
 		     const char *internal_name,
 		     int ordinal,
-		     const char *its_name)
+		     const char *its_name,
+		     int *is_dup)
 {
   def_file_export *e;
+  int pos;
   int max_exports = ROUND_UP(fdef->num_exports, 32);
+
+  if (internal_name && !external_name)
+    external_name = internal_name;
+  if (external_name && !internal_name)
+    internal_name = external_name;
+
+  /* We need to avoid duplicates.  */
+  *is_dup = 0;
+  pos = find_export_in_list (fdef->exports, fdef->num_exports,
+		     external_name, internal_name,
+		     its_name, ordinal, is_dup);
+
+  if (*is_dup != 0)
+    return (fdef->exports + pos);
 
   if (fdef->num_exports >= max_exports)
     {
@@ -553,12 +642,11 @@ def_file_add_export (def_file *fdef,
       else
 	fdef->exports = xmalloc (max_exports * sizeof (def_file_export));
     }
-  e = fdef->exports + fdef->num_exports;
+
+  e = fdef->exports + pos;
+  if (pos != fdef->num_exports)
+    memmove (&e[1], e, (sizeof (def_file_export) * (fdef->num_exports - pos)));
   memset (e, 0, sizeof (def_file_export));
-  if (internal_name && !external_name)
-    external_name = internal_name;
-  if (external_name && !internal_name)
-    internal_name = external_name;
   e->name = xstrdup (external_name);
   e->internal_name = xstrdup (internal_name);
   e->its_name = (its_name ? xstrdup (its_name) : NULL);
@@ -594,16 +682,87 @@ def_stash_module (def_file *fdef, const char *name)
   return s;
 }
 
+static int
+cmp_import_elem (const def_file_import *e, const char *ex_name,
+		 const char *in_name, const char *module,
+		 int ord)
+{
+  int r;
+
+  if ((r = are_names_equal (ex_name, e->name)) != 0)
+    return r;
+  if ((r = are_names_equal (in_name, e->internal_name)) != 0)
+    return r;
+  if (ord != e->ordinal)
+    return (ord < e->ordinal ? -1 : 1);
+  return are_names_equal (module, (e->module ? e->module->name : NULL));
+}
+
+/* Search the position of the identical element, or returns the position
+   of the next higher element. If last valid element is smaller, then MAX
+   is returned.  */
+
+static int
+find_import_in_list (def_file_import *b, int max,
+		     const char *ex_name, const char *in_name,
+		     const char *module, int ord, int *is_ident)
+{
+  int e, l, r, p;
+
+  *is_ident = 0;
+  if (!max)
+    return 0;
+  if ((e = cmp_import_elem (b, ex_name, in_name, module, ord)) <= 0)
+    return 0;
+  if (max == 1)
+    return 1;
+  if ((e = cmp_import_elem (b + (max - 1), ex_name, in_name, module, ord)) > 0)
+    return max;
+  else if (!e || max == 2)
+    return max - 1;
+  l = 0; r = max - 1;
+  while (l < r)
+    {
+      p = (l + r) / 2;
+      e = cmp_import_elem (b + p, ex_name, in_name, module, ord);
+      if (!e)
+        {
+          *is_ident = 1;
+          return p;
+        }
+      else if (e < 0)
+        r = p - 1;
+      else if (e > 0)
+        l = p + 1;
+    }
+  if ((e = cmp_import_elem (b + l, ex_name, in_name, module, ord)) > 0)
+    ++l;
+  else if (!e)
+    *is_ident = 1;
+  return l;
+}
+
 def_file_import *
 def_file_add_import (def_file *fdef,
 		     const char *name,
 		     const char *module,
 		     int ordinal,
 		     const char *internal_name,
-		     const char *its_name)
+		     const char *its_name,
+		     int *is_dup)
 {
   def_file_import *i;
+  int pos;
   int max_imports = ROUND_UP (fdef->num_imports, 16);
+
+  /* We need to avoid here duplicates.  */
+  *is_dup = 0;
+  pos = find_import_in_list (fdef->imports, fdef->num_imports,
+			     name,
+			     (!internal_name ? name : internal_name),
+			     module, ordinal, is_dup);
+  if (*is_dup != 0)
+    return fdef->imports + pos;
 
   if (fdef->num_imports >= max_imports)
     {
@@ -615,7 +774,9 @@ def_file_add_import (def_file *fdef,
       else
 	fdef->imports = xmalloc (max_imports * sizeof (def_file_import));
     }
-  i = fdef->imports + fdef->num_imports;
+  i = fdef->imports + pos;
+  if (pos != fdef->num_imports)
+    memmove (&i[1], i, (sizeof (def_file_import) * (fdef->num_imports - pos)));
   memset (i, 0, sizeof (def_file_import));
   if (name)
     i->name = xstrdup (name);
@@ -849,6 +1010,7 @@ def_exports (const char *external_name,
 	     const char *its_name)
 {
   def_file_export *dfe;
+  int is_dup = 0;
 
   if (!internal_name && external_name)
     internal_name = external_name;
@@ -857,7 +1019,13 @@ def_exports (const char *external_name,
 #endif
 
   dfe = def_file_add_export (def, external_name, internal_name, ordinal,
-  							 its_name);
+			     its_name, &is_dup);
+
+  /* We might check here for flag redefinition and warn.  For now we
+     ignore duplicates silently.  */
+  if (is_dup)
+    return;
+
   if (flags & 1)
     dfe->flag_noname = 1;
   if (flags & 2)
@@ -877,15 +1045,16 @@ def_import (const char *internal_name,
 	    const char *its_name)
 {
   char *buf = 0;
-  const char *ext = dllext ? dllext : "dll";    
+  const char *ext = dllext ? dllext : "dll";
+  int is_dup = 0;
    
   buf = xmalloc (strlen (module) + strlen (ext) + 2);
   sprintf (buf, "%s.%s", module, ext);
   module = buf;
 
-  def_file_add_import (def, name, module, ordinal, internal_name, its_name);
-  if (buf)
-    free (buf);
+  def_file_add_import (def, name, module, ordinal, internal_name, its_name,
+		       &is_dup);
+  free (buf);
 }
 
 static void

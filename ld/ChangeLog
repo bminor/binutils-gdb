@@ -1,3 +1,20 @@
+2011-04-13  Kai Tietz  <ktietz@redhat.com>
+
+	PR binutils/12658
+	* deffile.h (def_file_add_export): Add is_dup argument.
+	(def_file_add_import): Likewise.
+	* deffilep.y (are_names_equal): New helper.
+	(cmp_export_elem): New helper.
+	(find_export_in_list): Add search routine for exports.
+	(def_file_add_export): Check for duplicates.
+	(cmp_import_elem): New helper.
+	(find_import_in_list): Add search routine for imports.
+	(def_file_add_import): Check for duplicates.
+	(def_exports): Handle duplicates.
+	(def_imports): Likewise.
+	* pe-dll.c (process_def_file_and_drectve): Likewise.
+	(pe_implied_import_dll): Likewise.
+
 2011-04-11  Chris Quenelle  <chris.quenelle@oracle.com>
 
 	* scripttempl/elf.sc (.exception_ranges): Add new section.
