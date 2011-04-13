@@ -1,3 +1,8 @@
+2011-04-13  Nick Clifton  <nickc@redhat.com>
+
+	* gas/v850/v850e1.s: Add a insn using reg+offset addressing.
+	* gas/v850/v850e1.d: Add expected disassembly.
+
 2011-04-12  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/12534

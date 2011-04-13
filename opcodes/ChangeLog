@@ -1,3 +1,8 @@
+2011-04-13  Nick Clifton  <nickc@redhat.com>
+
+	* v850-dis.c (disassemble): Always print a closing square brace if
+	an opening square brace was printed.
+
 2011-04-12  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/12534
