@@ -1,3 +1,9 @@
+2011-04-14  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+
+	* gas/s390/zarch-machine.s: New testcase.
+	* gas/s390/zarch-machine.d: New testcase output.
+	* gas/s390/s390.exp: Execute the new testcase.
+
 2011-04-13  Nick Clifton  <nickc@redhat.com>
 
 	* gas/v850/v850e1.s: Add a insn using reg+offset addressing.
