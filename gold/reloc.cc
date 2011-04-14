@@ -691,7 +691,7 @@ Sized_relobj<size, big_endian>::do_relocate(const Symbol_table* symtab,
   // Write out the local symbols.
   this->write_local_symbols(of, layout->sympool(), layout->dynpool(),
 			    layout->symtab_xindex(), layout->dynsym_xindex(),
-			    layout->symtab_section()->offset());
+			    layout->symtab_section_offset());
 }
 
 // Sort a Read_multiple vector by file offset.

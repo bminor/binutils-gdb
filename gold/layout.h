@@ -685,6 +685,10 @@ class Layout
     return this->symtab_section_;
   }
 
+  // Return the file offset of the normal symbol table.
+  off_t
+  symtab_section_offset() const;
+
   // Return the dynamic symbol table.
   Output_section*
   dynsym_section() const

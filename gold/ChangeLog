@@ -1,3 +1,9 @@
+2011-04-14 Cary Coutant  <ccoutant@google.com>
+
+	* gold/layout.cc (Layout::symtab_section_offset): New function.
+	* gold/layout.h (Layout::symtab_section_offset): New function.
+	* gold/reloc.cc (Sized_relobj::do_relocate): Call it.
+
 2011-04-12  Ian Lance Taylor  <iant@google.com>
 
 	* configure.ac: Check for sys/mman.h and mmap.  Check for mremap

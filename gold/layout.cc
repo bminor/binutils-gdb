@@ -4371,6 +4371,16 @@ Layout::make_output_segment(elfcpp::Elf_Word type, elfcpp::Elf_Word flags)
   return oseg;
 }
 
+// Return the file offset of the normal symbol table.
+
+off_t
+Layout::symtab_section_offset() const
+{
+  if (this->symtab_section_ != NULL)
+    return this->symtab_section_->offset();
+  return 0;
+}
+
 // Write out the Output_sections.  Most won't have anything to write,
 // since most of the data will come from input sections which are
 // handled elsewhere.  But some Output_sections do have Output_data.
