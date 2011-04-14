@@ -1,3 +1,10 @@
+2011-04-13  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* breakpoint.c (print_exception_catchpoint): Rename to ...
+	(print_it_exception_catchpoint): ... this.
+	(gnu_v3_exception_catchpoint_ops): Update with new name
+	for print_it_exception_catchpoint.
+
 2011-04-13  Edjunior Machado  <emachado@linux.vnet.ibm.com>
 
 	* MAINTAINERS: Add myself for write after approval privileges.

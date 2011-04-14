@@ -9472,7 +9472,7 @@ catch_exec_command_1 (char *arg, int from_tty,
 }
 
 static enum print_stop_action
-print_exception_catchpoint (struct breakpoint *b)
+print_it_exception_catchpoint (struct breakpoint *b)
 {
   int bp_temp, bp_throw;
 
@@ -9563,7 +9563,7 @@ static struct breakpoint_ops gnu_v3_exception_catchpoint_ops = {
   NULL, /* remove */
   NULL, /* breakpoint_hit */
   NULL, /* resources_needed */
-  print_exception_catchpoint,
+  print_it_exception_catchpoint,
   print_one_exception_catchpoint,
   NULL, /* print_one_detail */
   print_mention_exception_catchpoint,
