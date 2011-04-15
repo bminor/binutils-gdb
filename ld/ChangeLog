@@ -1,3 +1,11 @@
+2011-04-15  Alan Modra  <amodra@gmail.com>
+
+	PR ld/12672
+	* ldlang.c (enum open_bfd_mode): New.
+	(open_input_bfds): Replace "force" param with "mode".  Reload
+	archives for rescan.  Update all callers.
+	(lang_process): Make another open_input_bfds pass for plugins.
+
 2011-04-13  Kai Tietz  <ktietz@redhat.com>
 
 	PR binutils/12658
@@ -225,6 +233,15 @@
 	the bfd_demangle of sym, change users of sym to c_sym when not
 	already demangling, and free when done.  Change callers of
 	cplus_demangle to bfd_demangle.
+
+2011-02-14  Alan Modra  <amodra@gmail.com>
+
+	* plugin.c (plugin_get_ir_dummy_bfd): Set SEC_EXCLUDE on dummy
+	.text section, use newer bfd_make_section variant.  Error handling.
+	Correct setting of gp size.
+	(asymbol_from_plugin_symbol): Properly cast last arg of concat.
+	(message): Likewise for ACONCAT.
+	(get_symbols): Formatting.
 
 2011-02-14  Alan Modra  <amodra@gmail.com>
 

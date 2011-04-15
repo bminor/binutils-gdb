@@ -3174,26 +3174,34 @@ init_opb (void)
 
 /* Open all the input files.  */
 
+enum open_bfd_mode
+  {
+    OPEN_BFD_NORMAL = 0,
+    OPEN_BFD_FORCE = 1,
+    OPEN_BFD_RESCAN = 2
+  };
+
 static void
-open_input_bfds (lang_statement_union_type *s, bfd_boolean force)
+open_input_bfds (lang_statement_union_type *s, enum open_bfd_mode mode)
 {
   for (; s != NULL; s = s->header.next)
     {
       switch (s->header.type)
 	{
 	case lang_constructors_statement_enum:
-	  open_input_bfds (constructor_list.head, force);
+	  open_input_bfds (constructor_list.head, mode);
 	  break;
 	case lang_output_section_statement_enum:
-	  open_input_bfds (s->output_section_statement.children.head, force);
+	  open_input_bfds (s->output_section_statement.children.head, mode);
 	  break;
 	case lang_wild_statement_enum:
 	  /* Maybe we should load the file's symbols.  */
-	  if (s->wild_statement.filename
+	  if ((mode & OPEN_BFD_RESCAN) == 0
+	      && s->wild_statement.filename
 	      && !wildcardp (s->wild_statement.filename)
 	      && !archive_path (s->wild_statement.filename))
 	    lookup_name (s->wild_statement.filename);
-	  open_input_bfds (s->wild_statement.children.head, force);
+	  open_input_bfds (s->wild_statement.children.head, mode);
 	  break;
 	case lang_group_statement_enum:
 	  {
@@ -3206,7 +3214,8 @@ open_input_bfds (lang_statement_union_type *s, bfd_boolean force)
 	    do
 	      {
 		undefs = link_info.hash->undefs_tail;
-		open_input_bfds (s->group_statement.children.head, TRUE);
+		open_input_bfds (s->group_statement.children.head,
+				 mode | OPEN_BFD_FORCE);
 	      }
 	    while (undefs != link_info.hash->undefs_tail);
 	  }
@@ -3225,8 +3234,8 @@ open_input_bfds (lang_statement_union_type *s, bfd_boolean force)
 	      /* If we are being called from within a group, and this
 		 is an archive which has already been searched, then
 		 force it to be researched unless the whole archive
-		 has been loaded already.  */
-	      if (force
+		 has been loaded already.  Do the same for a rescan.  */
+	      if (mode != OPEN_BFD_NORMAL
 		  && !s->input_statement.whole_archive
 		  && s->input_statement.loaded
 		  && bfd_check_format (s->input_statement.the_bfd,
@@ -6468,7 +6477,7 @@ lang_process (void)
 
   /* Create a bfd for each input file.  */
   current_target = default_target;
-  open_input_bfds (statement_list.head, FALSE);
+  open_input_bfds (statement_list.head, OPEN_BFD_NORMAL);
 
 #ifdef ENABLE_PLUGINS
   if (plugin_active_plugins_p ())
@@ -6489,7 +6498,7 @@ lang_process (void)
 	einfo (_("%P%F: %s: plugin reported error after all symbols read\n"),
 	       plugin_error_plugin ());
       /* Open any newly added files, updating the file chains.  */
-      open_input_bfds (added.head, FALSE);
+      open_input_bfds (added.head, OPEN_BFD_NORMAL);
       /* Restore the global list pointer now they have all been added.  */
       lang_list_remove_tail (stat_ptr, &added);
       /* And detach the fresh ends of the file lists.  */
@@ -6519,6 +6528,8 @@ lang_process (void)
 	  else
 	    lang_list_insert_after (&file_chain, &files, &file_chain.head);
 	}
+      /* Rescan any archives in case new undefined symbols have appeared.  */
+      open_input_bfds (statement_list.head, OPEN_BFD_RESCAN);
     }
 #endif /* ENABLE_PLUGINS */
 
