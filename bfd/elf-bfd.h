@@ -1476,6 +1476,15 @@ enum
   Tag_compatibility = 32
 };
 
+/* The following struct stores information about every SystemTap section
+   found in the object file.  */
+struct sdt_note
+{
+  struct sdt_note *next;
+  bfd_size_type size;
+  bfd_byte data[1];
+};
+
 /* Some private data is stashed away for future use using the tdata pointer
    in the bfd structure.  */
 
@@ -1632,6 +1641,11 @@ struct elf_obj_tdata
   /* NT_GNU_BUILD_ID note type.  */
   bfd_size_type build_id_size;
   bfd_byte *build_id;
+
+  /* Linked-list containing information about every Systemtap section
+     found in the object file.  Each section corresponds to one entry
+     in the list.  */
+  struct sdt_note *sdt_note_head;
 
   /* True if the bfd contains symbols that have the STT_GNU_IFUNC
      symbol type or STB_GNU_UNIQUE binding.  Used to set the osabi

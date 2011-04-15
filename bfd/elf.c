@@ -8417,6 +8417,35 @@ elfobj_grok_gnu_note (bfd *abfd, Elf_Internal_Note *note)
 }
 
 static bfd_boolean
+elfobj_grok_stapsdt_note_1 (bfd *abfd, Elf_Internal_Note *note)
+{
+  struct sdt_note *cur =
+    (struct sdt_note *) bfd_alloc (abfd, sizeof (struct sdt_note)
+				   + note->descsz);
+
+  cur->next = (struct sdt_note *) (elf_tdata (abfd))->sdt_note_head;
+  cur->size = (bfd_size_type) note->descsz;
+  memcpy (cur->data, note->descdata, note->descsz);
+
+  elf_tdata (abfd)->sdt_note_head = cur;
+
+  return TRUE;
+}
+
+static bfd_boolean
+elfobj_grok_stapsdt_note (bfd *abfd, Elf_Internal_Note *note)
+{
+  switch (note->type)
+    {
+    case NT_STAPSDT:
+      return elfobj_grok_stapsdt_note_1 (abfd, note);
+
+    default:
+      return TRUE;
+    }
+}
+
+static bfd_boolean
 elfcore_netbsd_get_lwpid (Elf_Internal_Note *note, int *lwpidp)
 {
   char *cp;
@@ -9187,6 +9216,12 @@ elf_parse_notes (bfd *abfd, char *buf, size_t size, file_ptr offset)
 	  if (in.namesz == sizeof "GNU" && strcmp (in.namedata, "GNU") == 0)
 	    {
 	      if (! elfobj_grok_gnu_note (abfd, &in))
+		return FALSE;
+	    }
+	  else if (in.namesz == sizeof "stapsdt"
+		   && strcmp (in.namedata, "stapsdt") == 0)
+	    {
+	      if (! elfobj_grok_stapsdt_note (abfd, &in))
 		return FALSE;
 	    }
 	  break;
