@@ -1,5 +1,9 @@
 2011-04-15  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
+	* breakpoint.c (watch_command_1): Remove colon from exp_string.
+
+2011-04-15  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
 	* breakpoint.c (save_breakpoints): Verify whether
 	breakpoint_ops.print_recreate is defined before calling it.
 

@@ -9043,7 +9043,7 @@ watch_command_1 (char *arg, int accessflag, int from_tty,
 					  core_addr_to_string (addr));
       xfree (name);
 
-      b->exp_string = xstrprintf ("-location: %.*s",
+      b->exp_string = xstrprintf ("-location %.*s",
 				  (int) (exp_end - exp_start), exp_start);
 
       /* The above expression is in C.  */
