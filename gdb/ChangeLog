@@ -1,3 +1,7 @@
+2011-04-15  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2read.c (add_index_entry): Use VEC_last, not VEC_length.
+
 2011-04-15  Gary Benson  <gbenson@redhat.com>
 
 	* MAINTAINERS: Add myself to write-after-approval section.

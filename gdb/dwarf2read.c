@@ -15491,7 +15491,7 @@ add_index_entry (struct mapped_symtab *symtab, const char *name,
   /* Don't push an index twice.  Due to how we add entries we only
      have to check the last one.  */ 
   if (VEC_empty (offset_type, (*slot)->cu_indices)
-      || VEC_length (offset_type, (*slot)->cu_indices) != cu_index)
+      || VEC_last (offset_type, (*slot)->cu_indices) != cu_index)
     VEC_safe_push (offset_type, (*slot)->cu_indices, cu_index);
 }
 
