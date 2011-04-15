@@ -1,3 +1,8 @@
+2011-04-15  Maxim Kuvyrkov  <maxim@codesourcery.com>
+
+	* ld-m68k/tls-gd-ie-1.d: Stabilize test.
+	* ld-m68k/tls-gd-3.[sd]: New test.
+
 2011-04-12  Richard Henderson  <rth@redhat.com>
 
 	* ld-alpha/emptygot.s, ld-alpha/emptygot.nm: New test.
