@@ -1,3 +1,9 @@
+2011-04-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* bfin-sim.c (decode_dsp32alu_0): Set DIS_ALGN_EXPT when handling
+	BYTEOP2P, BYTEOP3P, SAA, BYTEOP1P, BYTEOP16P, BYTEOP16M, BYTEPACK,
+	and BYTEUNPACK insns.
+
 2011-04-11  Mike Frysinger  <vapier@gentoo.org>
 
 	* dv-bfin_sic.c (bfin_sic_port_event): New helper function.
