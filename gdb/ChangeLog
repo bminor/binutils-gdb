@@ -1,3 +1,8 @@
+2011-04-15  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* breakpoint.c (save_breakpoints): Verify whether
+	breakpoint_ops.print_recreate is defined before calling it.
+
 2011-04-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix DW_AT_accessibility compatibility with gcc-4.6+.
