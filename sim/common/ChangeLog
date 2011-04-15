@@ -1,3 +1,8 @@
+2011-04-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-options.c (complete_option_list, sim_complete_command):
+	New functions.
+
 2011-04-02  Mike Frysinger  <vapier@gentoo.org>
 
 	* dv-glue.c: Fix up style.

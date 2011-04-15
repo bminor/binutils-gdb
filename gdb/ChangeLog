@@ -1,3 +1,8 @@
+2011-04-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* remote-sim.c (sim_command_completer): New function.
+	(_initialize_remote_sim): Set completer to sim_command_completer.
+
 2011-04-13  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* breakpoint.c (print_exception_catchpoint): Rename to ...

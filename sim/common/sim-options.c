@@ -915,6 +915,57 @@ find_match (SIM_DESC sd, sim_cpu *cpu, char *argv[], int *pargi)
   return matching_opt;
 }
 
+static char **
+complete_option_list (char **ret, size_t *cnt, const struct option_list *ol,
+		      char *text, char *word)
+{
+  const OPTION *opt = NULL;
+  int argi;
+  size_t len = strlen (word);
+
+  for ( ; ol != NULL; ol = ol->next)
+    for (opt = ol->options; OPTION_VALID_P (opt); ++opt)
+      {
+	const char *name = opt->opt.name;
+
+	/* A long option to match against?  */
+	if (!name)
+	  continue;
+
+	/* Does this option actually match?  */
+	if (strncmp (name, word, len))
+	  continue;
+
+	ret = xrealloc (ret, ++*cnt * sizeof (ret[0]));
+	ret[*cnt - 2] = xstrdup (name);
+      }
+
+  return ret;
+}
+
+/* All leading text is stored in @text, while the current word being
+   completed is stored in @word.  Trailing text of @word is not.  */
+char **
+sim_complete_command (SIM_DESC sd, char *text, char *word)
+{
+  char **ret = NULL;
+  size_t cnt = 1;
+  sim_cpu *cpu;
+
+  /* Only complete first word for now.  */
+  if (text != word)
+    return ret;
+
+  cpu = STATE_CPU (sd, 0);
+  if (cpu)
+    ret = complete_option_list (ret, &cnt, CPU_OPTIONS (cpu), text, word);
+  ret = complete_option_list (ret, &cnt, STATE_OPTIONS (sd), text, word);
+
+  if (ret)
+    ret[cnt - 1] = NULL;
+  return ret;
+}
+
 SIM_RC
 sim_args_command (SIM_DESC sd, char *cmd)
 {
