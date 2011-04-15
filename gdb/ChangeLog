@@ -1,3 +1,7 @@
+2011-04-15  Gary Benson  <gbenson@redhat.com>
+
+	* MAINTAINERS: Add myself to write-after-approval section.
+
 2011-04-14  Mike Frysinger  <vapier@gentoo.org>
 
 	* remote-sim.c (sim_command_completer): New function.
