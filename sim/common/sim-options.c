@@ -945,6 +945,7 @@ complete_option_list (char **ret, size_t *cnt, const struct option_list *ol,
 
 /* All leading text is stored in @text, while the current word being
    completed is stored in @word.  Trailing text of @word is not.  */
+
 char **
 sim_complete_command (SIM_DESC sd, char *text, char *word)
 {
