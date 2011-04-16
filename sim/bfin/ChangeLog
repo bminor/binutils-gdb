@@ -1,3 +1,11 @@
+2011-04-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* bfin-sim.c (decode_dsp32alu_0): Call STORE instead of SET_DREG for
+	BYTEOP2P, BYTEOP3P, BYTEOP1P, BYTEOP16P, BYTEOP16M, BYTEPACK, and
+	BYTEUNPACK.
+	(decode_dsp32shift_0): Call STORE instead of SET_DREG for PACK,
+	BITMUX, EXTRACT, DEPOSIT, ALIGN8, ALIGN16, and ALIGN24.
+
 2011-04-14  Mike Frysinger  <vapier@gentoo.org>
 
 	* bfin-sim.c (decode_dsp32alu_0): Set DIS_ALGN_EXPT when handling
