@@ -2787,3 +2787,9 @@ sim_set_callbacks (p)
 {
   callback = p;
 }
+
+char **
+sim_complete_command (SIM_DESC sd, char *text, char *word)
+{
+  return NULL;
+}

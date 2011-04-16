@@ -862,3 +862,9 @@ sim_do_command (SIM_DESC sd, char *cmd)
     printf ("The 'sim' command expects either 'trace' or 'verbose'"
 	    " as a subcommand.\n");
 }
+
+char **
+sim_complete_command (SIM_DESC sd, char *text, char *word)
+{
+  return NULL;
+}

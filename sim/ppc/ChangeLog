@@ -1,3 +1,7 @@
+2011-04-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim_calls.c (sim_complete_command): New stub function.
+
 2011-02-14  Mike Frysinger  <vapier@gentoo.org>
 
 	* cap.c (cap_remove): Change zfree to free.

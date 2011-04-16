@@ -940,3 +940,9 @@ sim_set_callbacks (ptr)
 {
   sim_callback = ptr;
 }
+
+char **
+sim_complete_command (SIM_DESC sd, char *text, char *word)
+{
+  return NULL;
+}
