@@ -1,5 +1,10 @@
 2011-04-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* elfread.c (elf_symtab_read): Do not ignore .L symbols if they are
+	BSF_SYNTHETIC.
+
+2011-04-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Fix Python access to inlined frames.
 	* python/py-frame.c (frapy_read_var): Find BLOCK using get_frame_block.
 	* python/py-symbol.c (gdbpy_lookup_symbol): Likewise.

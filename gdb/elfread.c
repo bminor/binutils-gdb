@@ -412,7 +412,11 @@ elf_symtab_read (struct objfile *objfile, int type,
 		  else
 		    ms_type = mst_text;
 		}
-	      else if ((sym->name[0] == '.' && sym->name[1] == 'L')
+	      /* The BSF_SYNTHETIC check is there to omit ppc64 function
+		 descriptors mistaken for static functions starting with 'L'.
+		 */
+	      else if ((sym->name[0] == '.' && sym->name[1] == 'L'
+			&& (sym->flags & BSF_SYNTHETIC) == 0)
 		       || ((sym->flags & BSF_LOCAL)
 			   && sym->name[0] == '$'
 			   && sym->name[1] == 'L'))

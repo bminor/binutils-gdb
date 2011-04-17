@@ -458,3 +458,8 @@ if {![target_info exists gdb,nosignals] && ![istarget "*-*-uclinux*"]} {
 
     gdb_test {set $sp = $old_sp}
 }
+
+# Test function descriptor resolution - the separate debug info .opd section
+# handling vs. local labels `.L'... as `Lcallfunc' starts with `L'.
+
+gdb_test "print callfunc (Lcallfunc, 5)" " = 12"

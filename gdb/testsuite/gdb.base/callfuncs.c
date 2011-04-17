@@ -510,3 +510,15 @@ int main ()
   t_structs_c(struct_val1);
   return 0 ;
 }
+
+static int
+Lcallfunc (int arg)
+{
+  return arg + 1;
+}
+
+int
+callfunc (int (*func) (int value), int value)
+{
+  return Lcallfunc (0) * 0 + func (value) * 2;
+}
