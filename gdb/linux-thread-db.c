@@ -1335,7 +1335,7 @@ find_new_threads_callback (const td_thrhandle_t *th_p, void *data)
   if (ti.ti_state == TD_THR_UNKNOWN || ti.ti_state == TD_THR_ZOMBIE)
     return 0;			/* A zombie -- ignore.  */
 
-  if (ti.ti_tid == 0 && target_has_execution)
+  if (ti.ti_tid == 0)
     {
       /* A thread ID of zero means that this is the main thread, but
 	 glibc has not yet initialized thread-local storage and the
@@ -1347,10 +1347,13 @@ find_new_threads_callback (const td_thrhandle_t *th_p, void *data)
 	 need this glibc bug workaround.  */
       info->need_stale_parent_threads_check = 0;
 
-      err = info->td_thr_event_enable_p (th_p, 1);
-      if (err != TD_OK)
-	error (_("Cannot enable thread event reporting for LWP %d: %s"),
-	       (int) ti.ti_lid, thread_db_err_str (err));
+      if (target_has_execution)
+	{
+	  err = info->td_thr_event_enable_p (th_p, 1);
+	  if (err != TD_OK)
+	    error (_("Cannot enable thread event reporting for LWP %d: %s"),
+		   (int) ti.ti_lid, thread_db_err_str (err));
+	}
 
       return 0;
     }

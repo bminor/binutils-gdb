@@ -1,5 +1,13 @@
 2011-04-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* gdb.threads/gcore-thread.exp ($core0file): New variable.
+	(clear __stack_user.next, clear stack_used.next)
+	(save a zeroed-threads corefile): New test.
+	Call core_load for $core0file.
+	(zeroed-threads cannot be listed): New test.
+
+2011-04-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdb.threads/gcore-thread.exp ($testfile): Match it the .exp
 	filename.
 	($srcfile): Preserve the original value.

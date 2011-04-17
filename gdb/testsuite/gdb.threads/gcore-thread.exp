@@ -26,6 +26,7 @@ set testfile "gcore-thread"
 set srcfile  pthreads.c
 set binfile  ${objdir}/${subdir}/${testfile}
 set corefile ${objdir}/${subdir}/${testfile}.test
+set core0file ${objdir}/${subdir}/${testfile}0.test
 
 if [istarget "*-*-linux"] then {
     set target_cflags "-D_MIT_POSIX_THREADS"
@@ -110,6 +111,29 @@ if {!$core_supported} {
 }
 
 
+# Test the uninitialized thread list.
+# Provide the case of glibc td_thr_get_info handling of:
+# /* Special case for the main thread before initialization.  */
+
+foreach symbol {__stack_user stack_used} {
+    set test "clear ${symbol}.next"
+    gdb_test_multiple "p *(void **) &${symbol} = 0" $test {
+	-re " = \\(void \\*\\) 0x0\r\n$gdb_prompt $" {
+	    pass $test
+	}
+	-re "No symbol \"${symbol}\" in current context\\.\r\n$gdb_prompt $" {
+	    xfail $test
+	    # Do not do the verification.
+	    set core0file ""
+	}
+    }
+}
+
+if {"$core0file" != ""} {
+    gdb_test "gcore $core0file" "Saved corefile .*" "save a zeroed-threads corefile"
+}
+
+
 # Now restart gdb and load the corefile.
 clean_restart ${testfile}
 
@@ -160,3 +184,11 @@ gdb_test "info threads" ".* thread2 .*" \
 
 gdb_test "info threads" ".*${nl}\\* ${horiz} thread2 .*" \
 	"thread2 is current thread in corefile"
+
+
+# Test the uninitialized thread list.
+
+if {"$core0file" != "" && [load_core $core0file]} {
+
+    gdb_test "info threads" "Cannot find new threads: .*" "zeroed-threads cannot be listed"
+}

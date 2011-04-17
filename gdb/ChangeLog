@@ -1,5 +1,10 @@
 2011-04-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* linux-thread-db.c (find_new_threads_callback): Exit on zero TI_TID
+	even if !TARGET_HAS_EXECUTION.
+
+2011-04-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Fix convert_code_addr_to_desc_addr for ppc64 files after eu-strip.
 	* elfread.c (elf_symfile_read): New variable synth_abfd, pass it to
 	bfd_get_synthetic_symtab.
