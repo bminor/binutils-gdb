@@ -352,6 +352,14 @@ proc test_attach {file displacement {relink_args ""}} {
 	    # test simplicity, we merged this test and the test above by not
 	    # restoring $INTERP after $EXEC prelink.  $INTERP gets restored
 	    # later below.
+	    #
+	    # `(wrong library or version mismatch?)' messages are printed for
+	    # $binfile_lib on platforms converting REL->RELA relocations by
+	    # prelink (such as on i386).  There is no reliable way to verify
+	    # the library file matches the running library in such case but
+	    # GDB at least attempts to set the right displacement.  We test
+	    # `libfunc' is present in the backtrace and therefore the
+	    # displacement has been guessed right.
 
 	    if [prelink$relink $relink_args [file tail $exec]] {
 		# /proc/PID/exe cannot be loaded as it is "EXECNAME (deleted)".

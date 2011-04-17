@@ -20,6 +20,10 @@
 #include <assert.h>
 #include <stdio.h>
 
+/* Force REL->RELA conversion on i386, see "Prelink", March 4, 2004.  */
+volatile int v[2];
+volatile int *vptr = &v[1];
+
 void
 libfunc (const char *action)
 {

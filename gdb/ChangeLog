@@ -1,5 +1,11 @@
 2011-04-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Fix libraries displacement if they change whether they were prelinked.
+	* solib-svr4.c (LM_ADDR_CHECK): Set L_ADDR even if the DYNAMIC pointer
+	does not match.  Comment why.
+
+2011-04-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* corelow.c: Include wrapper.h.
 	(core_open): Call now gdb_target_find_new_threads.
 	* wrapper.c: Include target.h.

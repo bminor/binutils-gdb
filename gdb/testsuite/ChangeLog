@@ -1,5 +1,10 @@
 2011-04-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* gdb.base/break-interp-lib.c (v, vptr): New variables.
+	* gdb.base/break-interp.exp (test_attach): New comment.
+
+2011-04-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdb.threads/gcore-thread.exp ($core0file): New variable.
 	(clear __stack_user.next, clear stack_used.next)
 	(save a zeroed-threads corefile): New test.

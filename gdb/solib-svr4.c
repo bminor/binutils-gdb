@@ -237,11 +237,11 @@ LM_ADDR_CHECK (struct so_list *so, bfd *abfd)
 
 	     Even on PPC it must be zero-aligned at least for MINPAGESIZE.  */
 
+	  l_addr = l_dynaddr - dynaddr;
+
 	  if ((l_addr & (minpagesize - 1)) == 0
 	      && (l_addr & align) == ((l_dynaddr - dynaddr) & align))
 	    {
-	      l_addr = l_dynaddr - dynaddr;
-
 	      if (info_verbose)
 		printf_unfiltered (_("Using PIC (Position Independent Code) "
 				     "prelink displacement %s for \"%s\".\n"),
@@ -249,9 +249,20 @@ LM_ADDR_CHECK (struct so_list *so, bfd *abfd)
 				   so->so_name);
 	    }
 	  else
-	    warning (_(".dynamic section for \"%s\" "
-		       "is not at the expected address "
-		       "(wrong library or version mismatch?)"), so->so_name);
+	    {
+	      /* There is no way to verify the library file matches.  prelink
+		 can during prelinking of an unprelinked file (or unprelinking
+		 of a prelinked file) shift the DYNAMIC segment by arbitrary
+		 offset without any page size alignment.  There is no way to
+		 find out the ELF header and/or Program Headers for a limited
+		 verification if it they match.  One could do a verification
+		 of the DYNAMIC segment.  Still the found address is the best
+		 one GDB could find.  */
+
+	      warning (_(".dynamic section for \"%s\" "
+			 "is not at the expected address "
+			 "(wrong library or version mismatch?)"), so->so_name);
+	    }
 	}
 
     set_addr:
