@@ -1,3 +1,9 @@
+2011-04-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix Python access to inlined frames.
+	* python/py-frame.c (frapy_read_var): Find BLOCK using get_frame_block.
+	* python/py-symbol.c (gdbpy_lookup_symbol): Likewise.
+
 2011-04-15  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2read.c (add_index_entry): Use VEC_last, not VEC_length.

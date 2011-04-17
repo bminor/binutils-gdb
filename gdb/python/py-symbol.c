@@ -275,8 +275,8 @@ gdbpy_lookup_symbol (PyObject *self, PyObject *args, PyObject *kw)
 
       TRY_CATCH (except, RETURN_MASK_ALL)
 	{
-	  selected_frame  = get_selected_frame (_("No frame selected."));
-	  block = block_for_pc (get_frame_address_in_block (selected_frame));
+	  selected_frame = get_selected_frame (_("No frame selected."));
+	  block = get_frame_block (selected_frame, NULL);
 	}
       GDB_PY_HANDLE_EXCEPTION (except);
     }
