@@ -1,5 +1,17 @@
 2011-04-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* gdb.threads/gcore-thread.exp ($testfile): Match it the .exp
+	filename.
+	($srcfile): Preserve the original value.
+	($testfile): Match it the .exp filename.
+	($corefile): New variable.  Substitute it around.
+	Use clean_restart.
+	($prev_timeout): Remove.
+	(load_core): Move core loading into this proc.
+	Fix restore of $timeout if load_core fails.
+
+2011-04-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdb.base/eu-strip-infcall.c: New file.
 	* gdb.base/eu-strip-infcall.exp: New file.
 
