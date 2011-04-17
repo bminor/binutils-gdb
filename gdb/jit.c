@@ -296,7 +296,7 @@ JITed symbol file is not an object file, ignoring it.\n"));
       }
 
   /* This call takes ownership of sai.  */
-  objfile = symbol_file_add_from_bfd (nbfd, 0, sai, OBJF_SHARED);
+  objfile = symbol_file_add_from_bfd (nbfd, 0, sai, OBJF_SHARED, NULL);
 
   /* Remember a mapping from entry_addr to objfile.  */
   entry_addr_ptr = xmalloc (sizeof (CORE_ADDR));

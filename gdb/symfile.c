@@ -1067,6 +1067,9 @@ new_symfile_objfile (struct objfile *objfile, int add_flags)
    syms_from_objfile, above.
    ADDRS is ignored when SYMFILE_MAINLINE bit is set in ADD_FLAGS.
 
+   PARENT is the original objfile if ABFD is a separate debug info file.
+   Otherwise PARENT is NULL.
+
    Upon success, returns a pointer to the objfile that was added.
    Upon failure, jumps back to command level (never returns).  */
 
@@ -1076,7 +1079,7 @@ symbol_file_add_with_addrs_or_offsets (bfd *abfd,
                                        struct section_addr_info *addrs,
                                        struct section_offsets *offsets,
                                        int num_offsets,
-                                       int flags)
+                                       int flags, struct objfile *parent)
 {
   struct objfile *objfile;
   struct cleanup *my_cleanups;
@@ -1105,6 +1108,9 @@ symbol_file_add_with_addrs_or_offsets (bfd *abfd,
 
   objfile = allocate_objfile (abfd, flags);
   discard_cleanups (my_cleanups);
+
+  if (parent)
+    add_separate_debug_objfile (objfile, parent);
 
   /* We either created a new mapped symbol table, mapped an existing
      symbol table file which has not had initial symbol reading
@@ -1196,11 +1202,10 @@ symbol_file_add_separate (bfd *bfd, int symfile_flags, struct objfile *objfile)
     (bfd, symfile_flags,
      sap, NULL, 0,
      objfile->flags & (OBJF_REORDERED | OBJF_SHARED | OBJF_READNOW
-		       | OBJF_USERLOADED));
+		       | OBJF_USERLOADED),
+     objfile);
 
   do_cleanups (my_cleanup);
-
-  add_separate_debug_objfile (new_objfile, objfile);
 }
 
 /* Process the symbol file ABFD, as either the main file or as a
@@ -1211,10 +1216,10 @@ symbol_file_add_separate (bfd *bfd, int symfile_flags, struct objfile *objfile)
 struct objfile *
 symbol_file_add_from_bfd (bfd *abfd, int add_flags,
                           struct section_addr_info *addrs,
-                          int flags)
+                          int flags, struct objfile *parent)
 {
   return symbol_file_add_with_addrs_or_offsets (abfd, add_flags, addrs, 0, 0,
-                                                flags);
+                                                flags, parent);
 }
 
 
@@ -1226,7 +1231,7 @@ symbol_file_add (char *name, int add_flags, struct section_addr_info *addrs,
 		 int flags)
 {
   return symbol_file_add_from_bfd (symfile_bfd_open (name), add_flags, addrs,
-                                   flags);
+                                   flags, NULL);
 }
 
 

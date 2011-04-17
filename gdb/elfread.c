@@ -1234,7 +1234,7 @@ find_separate_debug_file_by_buildid (struct objfile *objfile)
 static void
 elf_symfile_read (struct objfile *objfile, int symfile_flags)
 {
-  bfd *abfd = objfile->obfd;
+  bfd *synth_abfd, *abfd = objfile->obfd;
   struct elfinfo ei;
   struct cleanup *back_to;
   long symcount = 0, dynsymcount = 0, synthcount, storage_needed;
@@ -1305,9 +1305,26 @@ elf_symfile_read (struct objfile *objfile, int symfile_flags)
       elf_rel_plt_read (objfile, dyn_symbol_table);
     }
 
+  /* Contrary to binutils --strip-debug/--only-keep-debug the strip command from
+     elfutils (eu-strip) moves even the .symtab section into the .debug file.
+
+     bfd_get_synthetic_symtab on ppc64 for each function descriptor ELF symbol
+     'name' creates a new BSF_SYNTHETIC ELF symbol '.name' with its code
+     address.  But with eu-strip files bfd_get_synthetic_symtab would fail to
+     read the code address from .opd while it reads the .symtab section from
+     a separate debug info file as the .opd section is SHT_NOBITS there.
+
+     With SYNTH_ABFD the .opd section will be read from the original
+     backlinked binary where it is valid.  */
+
+  if (objfile->separate_debug_objfile_backlink)
+    synth_abfd = objfile->separate_debug_objfile_backlink->obfd;
+  else
+    synth_abfd = abfd;
+
   /* Add synthetic symbols - for instance, names for any PLT entries.  */
 
-  synthcount = bfd_get_synthetic_symtab (abfd, symcount, symbol_table,
+  synthcount = bfd_get_synthetic_symtab (synth_abfd, symcount, symbol_table,
 					 dynsymcount, dyn_symbol_table,
 					 &synthsyms);
   if (synthcount > 0)

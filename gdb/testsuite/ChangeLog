@@ -1,5 +1,10 @@
 2011-04-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* gdb.base/eu-strip-infcall.c: New file.
+	* gdb.base/eu-strip-infcall.exp: New file.
+
+2011-04-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdb.base/callfuncs.c (Lcallfunc, callfunc): New functions.
 	* gdb.base/callfuncs.exp (print callfunc (Lcallfunc, 5)): New test.
 

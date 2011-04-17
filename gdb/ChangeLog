@@ -1,5 +1,23 @@
 2011-04-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Fix convert_code_addr_to_desc_addr for ppc64 files after eu-strip.
+	* elfread.c (elf_symfile_read): New variable synth_abfd, pass it to
+	bfd_get_synthetic_symtab.
+	* jit.c (jit_register_code): Pass NULL to the new parameter parent.
+	* machoread.c (macho_add_oso_symfile): Pass main_objfile to the new
+	parameter parent, remove the call to add_separate_debug_objfile.
+	* solib.c (solib_read_symbols): Pass NULL to the new parameter parent.
+	* symfile-mem.c (symbol_file_add_from_memory): Likewise.
+	* symfile.c (symbol_file_add_with_addrs_or_offsets): New parameter
+	parent, new comment for it, call add_separate_debug_objfile for it.
+	(symbol_file_add_separate): Pass objfile as the parameter parent,
+	remove the call to add_separate_debug_objfile.
+	(symbol_file_add_from_bfd): New parameter parent, pass it.
+	(symbol_file_add): Pass NULL to the new parameter parent.
+	* symfile.h (symbol_file_add_from_bfd): New parameter parent.
+
+2011-04-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* elfread.c (elf_symtab_read): Do not ignore .L symbols if they are
 	BSF_SYNTHETIC.
 

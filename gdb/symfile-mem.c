@@ -109,7 +109,7 @@ symbol_file_add_from_memory (struct bfd *templ, CORE_ADDR addr, char *name,
       }
 
   objf = symbol_file_add_from_bfd (nbfd, from_tty ? SYMFILE_VERBOSE : 0,
-                                   sai, OBJF_SHARED);
+                                   sai, OBJF_SHARED, NULL);
 
   /* This might change our ideas about frames already looked at.  */
   reinit_frame_cache ();

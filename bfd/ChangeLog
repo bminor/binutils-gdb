@@ -1,3 +1,8 @@
+2011-04-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* elf64-ppc.c (ppc64_elf_get_synthetic_symtab): Do not check for
+	SEC_LOAD.
+
 2011-04-15  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* elf-bfd.h (struct sdt_note): New struct.

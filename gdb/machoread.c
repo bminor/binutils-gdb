@@ -397,8 +397,8 @@ macho_add_oso_symfile (oso_el *oso, bfd *abfd,
   objfile = symbol_file_add_from_bfd
     (abfd, symfile_flags & ~(SYMFILE_MAINLINE | SYMFILE_VERBOSE), NULL,
      main_objfile->flags & (OBJF_REORDERED | OBJF_SHARED
-                            | OBJF_READNOW | OBJF_USERLOADED));
-  add_separate_debug_objfile (objfile, main_objfile);
+			    | OBJF_READNOW | OBJF_USERLOADED),
+     main_objfile);
 
   current_oso.main_objfile = NULL;
   if (current_oso.symbol_table)
