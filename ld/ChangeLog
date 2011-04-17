@@ -1,3 +1,41 @@
+2011-04-18  Alan Modra  <amodra@gmail.com>
+
+	PR ld/12365
+	PR ld/12672
+	* ldfile.c (ldfile_try_open_bfd): Don't attempt any plugin action
+	when no_more_claiming.
+	* ldmain.c (add_archive_element): Likewise.
+	(multiple_definition): Remove plugin_multiple_definition call.
+	(notice): Remove plugin_notice call.
+	* ldlang.c (lang_list_insert_after, void lang_list_remove_tail): Move.
+	Delete prototype.
+	(plugin_insert): New static var.
+	(open_input_bfds): Only rescan libs after plugin insert point.
+	(lang_gc_sections): Omit plugin claimed files.
+	(lang_process): Set plugin_insert.  Only rescan when plugin adds
+	objects.
+	* plugin.h (no_more_claiming): Declare.
+	(plugin_notice, plugin_multiple_definition): Don't declare.
+	* plugin.c: Formatting.
+	(orig_notice_all, orig_allow_multiple_defs, orig_callbacks,
+	plugin_callbacks): New static vars.
+	(no_more_claiming): Make global.
+	(plugin_cached_allow_multiple_defs): Delete.
+	(plugin_get_ir_dummy_bfd): Set SEC_EXCLUDE on dummy .text section,
+	use newer bfd_make_section variant.  Make COMMON section too.
+	Error handling.  Correct setting of gp size.
+	(asymbol_from_plugin_symbol): Properly cast last arg of concat.
+	(message): Likewise for ACONCAT.
+	(asymbol_from_plugin_symbol): Use our COMMON section.
+	(get_symbols): When report_plugin_symbols, show visibility too.
+	(init_non_ironly_hash): Move.  Don't test non_ironly_hash.
+	(plugin_load_plugins): Save state of linker callbacks, set up to
+	call plugin_notice instead.  Call init_non_ironly_hash here.
+	(plugin_call_all_symbols_read): Set plugin_multiple_definition in
+	plugin callbacks.
+	(plugin_notice): Rewrite.
+	(plugin_multiple_definition): Make static, call original callback.
+
 2011-04-15  Alan Modra  <amodra@gmail.com>
 
 	PR ld/12672

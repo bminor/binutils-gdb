@@ -1,3 +1,13 @@
+2011-04-18  Alan Modra  <amodra@gmail.com>
+
+	PR ld/12365
+	PR ld/12672
+	* bfd.c (BFD_PLUGIN): Define.
+	(BFD_FLAGS_SAVED, BFD_FLAGS_FOR_BFD_USE_MASK): Add BFD_PLUGIN.
+	* bfd-in2.h: Regenerate.
+	* elflink.c (elf_link_output_extsym): Strip undefined plugin syms.
+	* opncls.c (bfd_make_readable): Don't lose original bfd flags.
+
 2011-04-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* elf64-ppc.c (ppc64_elf_get_synthetic_symtab): Do not check for
