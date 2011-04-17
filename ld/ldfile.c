@@ -313,7 +313,8 @@ success:
      will be needed when and if we want to bfd_create a new
      one using this one as a template.  */
   if (bfd_check_format (entry->the_bfd, bfd_object)
-      && plugin_active_plugins_p ())
+      && plugin_active_plugins_p ()
+      && !no_more_claiming)
     {
       int fd = open (attempt, O_RDONLY | O_BINARY);
       if (fd >= 0)

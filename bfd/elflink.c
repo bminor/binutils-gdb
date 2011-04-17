@@ -8704,6 +8704,11 @@ elf_link_output_extsym (struct elf_link_hash_entry *h, void *data)
 	       || h->root.type == bfd_link_hash_defweak)
 	   && elf_discarded_section (h->root.u.def.section))
     strip = TRUE;
+  else if ((h->root.type == bfd_link_hash_undefined
+	    || h->root.type == bfd_link_hash_undefweak)
+	   && h->root.u.undef.abfd != NULL
+	   && (h->root.u.undef.abfd->flags & BFD_PLUGIN) != 0)
+    strip = TRUE;
   else
     strip = FALSE;
 

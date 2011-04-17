@@ -24,6 +24,10 @@
 /* Report plugin symbols.  */
 extern bfd_boolean report_plugin_symbols;
 
+/* Set at all symbols read time, to avoid recursively offering the plugin
+   its own newly-added input files and libs to claim.  */
+extern bfd_boolean no_more_claiming;
+
 /* This is the only forward declaration we need to avoid having
    to include the plugin-api.h header in order to use this file.  */
 struct ld_plugin_input_file;
@@ -61,18 +65,5 @@ extern void plugin_call_cleanup (void);
    that symbols can be added to it; it must be made readable after the
    add_symbols hook has been called so that it can be read when linking.  */
 extern bfd *plugin_get_ir_dummy_bfd (const char *name, bfd *template);
-
-/* Notice-symbol bfd linker callback hook.  */
-extern bfd_boolean plugin_notice (struct bfd_link_info *info,
-				  const char *name, bfd *abfd,
-				  asection *section, bfd_vma value);
-
-/* Multiple-definition bfd linker callback hook.  */
-extern bfd_boolean plugin_multiple_definition (struct bfd_link_info *info,
-					       const char *name,
-					       bfd *obfd, asection *osec,
-					       bfd_vma oval, bfd *nbfd,
-					       asection *nsec,
-					       bfd_vma nval);
 
 #endif /* !def GLD_PLUGIN_H */

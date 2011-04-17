@@ -152,8 +152,8 @@ set plugin_extra_elf_tests [list \
 			-plugin-opt sym:${_}func2::0:2:0 \
 			-plugin-opt sym:${_}func3::0:3:0 \
 			-plugin-opt dumpresolutions \
-    $testobjfiles $libs" "" "" {{ld plugin-ignore.d} \
-				{readelf -s plugin-vis-1.d}} "main.x" ] \
+			-plugin-opt add:tmpdir/func.o \
+    $testobjfiles $libs --verbose=2" "" "" {{ld plugin-12.d}} "main.x" ] \
 ]
 
 if { !$can_compile || $failed_compile } {
