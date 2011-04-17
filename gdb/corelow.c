@@ -47,6 +47,7 @@
 #include "filenames.h"
 #include "progspace.h"
 #include "objfiles.h"
+#include "wrapper.h"
 
 
 #ifndef O_LARGEFILE
@@ -428,7 +429,7 @@ core_open (char *filename, int from_tty)
      may be a thread_stratum target loaded on top of target core by
      now.  The layer above should claim threads found in the BFD
      sections.  */
-  target_find_new_threads ();
+  gdb_target_find_new_threads ();
 
   p = bfd_core_file_failing_command (core_bfd);
   if (p)

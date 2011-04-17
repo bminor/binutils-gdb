@@ -1,5 +1,13 @@
 2011-04-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* corelow.c: Include wrapper.h.
+	(core_open): Call now gdb_target_find_new_threads.
+	* wrapper.c: Include target.h.
+	(gdb_target_find_new_threads): New.
+	* wrapper.h (gdb_target_find_new_threads): New declaration.
+
+2011-04-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* linux-thread-db.c (find_new_threads_callback): Exit on zero TI_TID
 	even if !TARGET_HAS_EXECUTION.
 

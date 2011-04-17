@@ -48,4 +48,6 @@ extern int gdb_value_ind (struct value *val, struct value ** rval);
 
 extern int gdb_parse_and_eval_type (char *, int, struct type **);
 
+extern int gdb_target_find_new_threads (void);
+
 #endif /* wrapper.h */

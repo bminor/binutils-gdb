@@ -21,6 +21,7 @@
 #include "exceptions.h"
 #include "wrapper.h"
 #include "ui-out.h"
+#include "target.h"
 
 int
 gdb_parse_exp_1 (char **stringptr, struct block *block, int comma,
@@ -160,4 +161,25 @@ gdb_value_struct_elt (struct ui_out *uiout, struct value **result,
   if (except.reason < 0)
     return GDB_RC_FAIL;
   return GDB_RC_OK;
+}
+
+/* Call target_find_new_threads without throwing exception.  Exception is
+   printed if it got thrown.  */
+
+int
+gdb_target_find_new_threads (void)
+{
+  volatile struct gdb_exception except;
+
+  TRY_CATCH (except, RETURN_MASK_ERROR)
+    {
+      target_find_new_threads ();
+    }
+
+  if (except.reason < 0)
+    {
+      exception_print (gdb_stderr, except);
+      return 0;
+    }
+  return 1;
 }
