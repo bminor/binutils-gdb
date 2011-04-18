@@ -1,3 +1,19 @@
+2011-04-18  Kai Tietz  <ktietz@redhat.com>
+
+	* deffilep.y (def_pool_str): New type.
+	(pool_strs): Local static.
+	(def_pool_alloc): Local function.
+	(def_pool_strdup): Likewise.
+	(def_pool_free): Likewise.
+	(opt_name): Replace xmalloc/xstrdup by
+	def_pool_alloc/def_pool_strdup.
+	(dot_name): Likewise.
+	(anylang_id): Likewise.
+	(def_lex): Likewise.
+	(def_file_parse): Call def_pool_free on
+	exit and cleanup directives elements.
+	(def_file_add_directive): Call def_pool_free.
+
 2011-04-18  Paul Brook  <paul@codesourcery.com>
 
 	* emulparams/elf32_tic6x_le.sh: Define OTHER_READONLY_SECTIONS

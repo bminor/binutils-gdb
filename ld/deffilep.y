@@ -78,6 +78,17 @@
 #define yytable	 def_yytable
 #define yycheck	 def_yycheck
 
+typedef struct def_pool_str {
+  struct def_pool_str *next;
+  char data[1];
+} def_pool_str;
+
+static def_pool_str *pool_strs = NULL;
+
+static char *def_pool_alloc (size_t sz);
+static char *def_pool_strdup (const char *str);
+static void def_pool_free (void);
+
 static void def_description (const char *);
 static void def_exports (const char *, const char *, int, int, const char *);
 static void def_heapsize (int, int);
@@ -226,13 +237,13 @@ attr:
 opt_name: ID		{ $$ = $1; }
 	| '.' ID
 	  {
-	    char *name = xmalloc (strlen ($2) + 2);
+	    char *name = def_pool_alloc (strlen ($2) + 2);
 	    sprintf (name, ".%s", $2);
 	    $$ = name;
 	  }
 	| ID '.' ID	
 	  { 
-	    char *name = xmalloc (strlen ($1) + 1 + strlen ($3) + 1);
+	    char *name = def_pool_alloc (strlen ($1) + 1 + strlen ($3) + 1);
 	    sprintf (name, "%s.%s", $1, $3);
 	    $$ = name;
 	  }
@@ -260,13 +271,13 @@ opt_base: BASE	'=' NUMBER	{ $$ = $3;}
 dot_name: ID		{ $$ = $1; }
 	| '.' ID
 	  {
-	    char *name = xmalloc (strlen ($2) + 2);
+	    char *name = def_pool_alloc (strlen ($2) + 2);
 	    sprintf (name, ".%s", $2);
 	    $$ = name;
 	  }
 	| dot_name '.' ID	
 	  { 
-	    char *name = xmalloc (strlen ($1) + 1 + strlen ($3) + 1);
+	    char *name = def_pool_alloc (strlen ($1) + 1 + strlen ($3) + 1);
 	    sprintf (name, "%s.%s", $1, $3);
 	    $$ = name;
 	  }
@@ -275,13 +286,13 @@ dot_name: ID		{ $$ = $1; }
 anylang_id: ID		{ $$ = $1; }
 	| '.' ID
 	  {
-	    char *id = xmalloc (strlen ($2) + 2);
+	    char *id = def_pool_alloc (strlen ($2) + 2);
 	    sprintf (id, ".%s", $2);
 	    $$ = id;
 	  }
 	| anylang_id '.' opt_digits opt_id
 	  {
-	    char *id = xmalloc (strlen ($1) + 1 + strlen ($3) + strlen ($4) + 1);
+	    char *id = def_pool_alloc (strlen ($1) + 1 + strlen ($3) + strlen ($4) + 1);
 	    sprintf (id, "%s.%s%s", $1, $3, $4);
 	    $$ = id;
 	  }
@@ -358,18 +369,23 @@ def_file_parse (const char *filename, def_file *add_to)
     {
       def_file_free (def);
       fclose (the_file);
+      def_pool_free ();
       return 0;
     }
 
   fclose (the_file);
 
-  for (d = directives; d; d = d->next)
+  while ((d = directives) != NULL)
     {
 #if TRACE
       printf ("Adding directive %08x `%s'\n", d->name, d->name);
 #endif
       def_file_add_directive (def, d->name, d->len);
+      directives = d->next;
+      free (d->name);
+      free (d);
     }
+  def_pool_free ();
 
   return def;
 }
@@ -873,6 +889,7 @@ def_file_add_directive (def_file *my_def, const char *param, int len)
     }
 
   def = save_def;
+  def_pool_free ();
 }
 
 /* Parser Callbacks.  */
@@ -1243,7 +1260,7 @@ def_lex (void)
 	}
       if (c != EOF)
 	def_ungetc (c);
-      yylval.digits = xstrdup (buffer);
+      yylval.digits = def_pool_strdup (buffer);
 #if TRACE
       printf ("lex: `%s' returns DIGITS\n", buffer);
 #endif
@@ -1292,7 +1309,7 @@ def_lex (void)
 #if TRACE
       printf ("lex: `%s' returns ID\n", buffer);
 #endif
-      yylval.id = xstrdup (buffer);
+      yylval.id = def_pool_strdup (buffer);
       return ID;
     }
 
@@ -1307,7 +1324,7 @@ def_lex (void)
 	  put_buf (c);
 	  c = def_getc ();
 	}
-      yylval.id = xstrdup (buffer);
+      yylval.id = def_pool_strdup (buffer);
 #if TRACE
       printf ("lex: `%s' returns ID\n", buffer);
 #endif
@@ -1346,4 +1363,39 @@ def_lex (void)
 
   /*printf ("lex: 0x%02x ignored\n", c); */
   return def_lex ();
+}
+
+static char *
+def_pool_alloc (size_t sz)
+{
+  def_pool_str *e;
+
+  e = (def_pool_str *) xmalloc (sizeof (def_pool_str) + sz);
+  e->next = pool_strs;
+  pool_strs = e;
+  return e->data;
+}
+
+static char *
+def_pool_strdup (const char *str)
+{
+  char *s;
+  size_t len;
+  if (!str)
+    return NULL;
+  len = strlen (str) + 1;
+  s = def_pool_alloc (len);
+  memcpy (s, str, len);
+  return s;
+}
+
+static void
+def_pool_free (void)
+{
+  def_pool_str *p;
+  while ((p = pool_strs) != NULL)
+    {
+      pool_strs = p->next;
+      free (p);
+    }
 }
