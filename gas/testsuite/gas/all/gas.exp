@@ -34,12 +34,14 @@ if { ![istarget cris-*-*] && ![istarget crisv32-*-*]
 
 # This test is meaningless for the PA; the difference of two undefined
 # symbols is something that is (and must be) supported on the PA.
+# The same is true for alpha-vms
 #
 # The MN10300 port supports link time relaxation which in turn allows
 # for link time resolution of the differneces of two symbols which are
 # undefined at assembly time.  Hence this test will not pass for the
 # MN10300.  The same thing is true for the RX port as well.
 if { ![istarget hppa*-*-*]
+     && ![istarget alpha*-*-*vms*]
      && ![istarget rx-*-*]
      && ![istarget mn10300-*-*]
      && ![istarget am3*-*-*] } then {

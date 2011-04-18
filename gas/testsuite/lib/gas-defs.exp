@@ -290,6 +290,10 @@ proc get_standard_section_names {} {
     if [istarget "rx-*-*"] {
         return { "P" "D_1" "B_1" }
     }
+    if [istarget "alpha*-*-*vms*"] {
+        # Double quote: for TCL and for sh.
+        return { "\\\$CODE\\\$" "\\\$DATA\\\$" "\\\$BSS\\\$" }
+    }
     return
 }
 
