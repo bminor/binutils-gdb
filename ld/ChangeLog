@@ -1,5 +1,7 @@
 2011-04-18  Kai Tietz  <ktietz@redhat.com>
 
+	* deffilep.y (def_aligncomm): Avoid duplets.
+
 	* deffilep.y (def_pool_str): New type.
 	(pool_strs): Local static.
 	(def_pool_alloc): Local function.

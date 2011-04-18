@@ -1095,13 +1095,39 @@ def_directive (char *str)
 static void
 def_aligncomm (char *str, int align)
 {
-  def_file_aligncomm *c = xmalloc (sizeof (def_file_aligncomm));
+  def_file_aligncomm *c, *p;
+  
+  p = NULL;
+  c = def->aligncomms;
+  while (c != NULL)
+    {
+      int e = strcmp (c->symbol_name, str);
+      if (!e)
+	{
+	  /* Not sure if we want to allow here duplicates with
+	     different alignments, but for now we keep them.  */
+	  e = (int) c->alignment - align;
+	  if (!e)
+	    return;
+	}
+      if (e > 0)
+        break;
+      c = (p = c)->next;
+    }
 
+  c = xmalloc (sizeof (def_file_aligncomm));
   c->symbol_name = xstrdup (str);
   c->alignment = (unsigned int) align;
-
-  c->next = def->aligncomms;
-  def->aligncomms = c;
+  if (!p)
+    {
+      c->next = def->aligncomms;
+      def->aligncomms = c;
+    }
+  else
+    {
+      c->next = p->next;
+      p->next = c;
+    }
 }
 
 static int
