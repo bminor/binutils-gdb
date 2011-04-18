@@ -1,5 +1,17 @@
 2011-04-18  Tristan Gingold  <gingold@adacore.com>
 
+	* gas/macros/app1.s: Export symbol
+	* gas/macros/app2.s: Ditto
+	* gas/macros/app3.s: Ditto
+	* gas/macros/app4.s: Ditto
+	* gas/macros/app4b.s: Ditto
+	* gas/macros/app1.d: Adjust.
+	* gas/macros/app2.d: Ditto.
+	* gas/macros/app3.d: Ditto.
+	* gas/macros/app4.d: Ditto.
+
+2011-04-18  Tristan Gingold  <gingold@adacore.com>
+
 	* lib/gas-defs.exp (get_standard_section_names): Add names for
 	alpha vms.
 	* gas/all/gas.exp: Do not test diff1.s on alpha-vms.
