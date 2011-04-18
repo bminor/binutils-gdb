@@ -1,3 +1,9 @@
+2011-04-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-plugin/plugin-7.d: Update expected LTO linker errors for
+	GCC 4.6.
+	* ld-plugin/plugin-8.d: Likewise.
+
 2011-04-18  Alan Modra  <amodra@gmail.com>
 
 	* ld-plugin/plugin-7.d: Adjust for plugin changes.
