@@ -1,3 +1,9 @@
+2011-04-18  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* ppc-linux-nat.c (check_condition): Add len output parameter.
+	Set it based on the memory region referenced in the condition
+	expression.  Update all callers.
+
 2011-04-15  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* breakpoint.c (watch_command_1): Remove colon from exp_string.
