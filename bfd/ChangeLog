@@ -1,3 +1,7 @@
+2011-04-18  Tristan Gingold  <gingold@adacore.com>
+
+	* coff-rs6000.c: Convert to ISO-C.  Remove PARAMS macro.
+
 2011-04-18  Alan Modra  <amodra@gmail.com>
 
 	PR ld/12365
