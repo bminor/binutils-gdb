@@ -31,6 +31,11 @@ RODATA_NAME="const"
 SDATA_NAME="neardata"
 SBSS_NAME="bss"
 BSS_NAME="far"
+OTHER_READONLY_SECTIONS="
+  .c6xabi.extab ${RELOCATING-0} : { *(.c6xabi.extab${RELOCATING+* .gnu.linkonce.c6xabiextab.*}) }
+  ${RELOCATING+ PROVIDE_HIDDEN (__exidx_start = .); }
+  .c6xabi.exidx ${RELOCATING-0} : { *(.c6xabi.exidx${RELOCATING+* .gnu.linkonce.c6xabiexidx.*}) }
+  ${RELOCATING+ PROVIDE_HIDDEN (__exidx_end = .); }"
 OTHER_SDATA_SECTIONS=".rodata ${RELOCATING-0} : { *(.rodata${RELOCATING+ .rodata.*}) }"
 OTHER_READONLY_RELOC_SECTIONS="
   .rel.rodata   ${RELOCATING-0} : { *(.rel.rodata${RELOCATING+ .rel.rodata.*}) }

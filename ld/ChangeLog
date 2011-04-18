@@ -1,3 +1,8 @@
+2011-04-18  Paul Brook  <paul@codesourcery.com>
+
+	* emulparams/elf32_tic6x_le.sh: Define OTHER_READONLY_SECTIONS
+	for unwinding tables.
+
 2011-04-18  Alan Modra  <amodra@gmail.com>
 
 	PR ld/12365
