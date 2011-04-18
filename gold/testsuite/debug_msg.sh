@@ -2,7 +2,7 @@
 
 # debug_msg.sh -- a test case for printing debug info for missing symbols.
 
-# Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
+# Copyright 2006, 2007, 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
 # Written by Ian Lance Taylor <iant@google.com>.
 
 # This file is part of gold.
@@ -55,21 +55,21 @@ check_missing()
 
 # We don't know how the compiler might order these variables, so we
 # can't test for the actual offset from .data, hence the regexp.
-check debug_msg.err "debug_msg.o: in function fn_array:debug_msg.cc(.data+0x[0-9a-fA-F]*): error: undefined reference to 'undef_fn1()'"
-check debug_msg.err "debug_msg.o: in function fn_array:debug_msg.cc(.data+0x[0-9a-fA-F]*): error: undefined reference to 'undef_fn2()'"
-check debug_msg.err "debug_msg.o: in function badref1:debug_msg.cc(.data+0x[0-9a-fA-F]*): error: undefined reference to 'undef_int'"
+check debug_msg.err "debug_msg.o:debug_msg.cc:function fn_array: error: undefined reference to 'undef_fn1()'"
+check debug_msg.err "debug_msg.o:debug_msg.cc:function fn_array: error: undefined reference to 'undef_fn2()'"
+check debug_msg.err "debug_msg.o:debug_msg.cc:function badref1: error: undefined reference to 'undef_int'"
 
 # These tests check only for the source file's file name (not the complete
 # path) because use of -fdebug-prefix-map may change the path to the source
 # file recorded in the objects.
-check debug_msg.err "debug_msg.o: in function Base::virtfn():.*/debug_msg.cc:50: error: undefined reference to 'undef_fn1()'"
-check debug_msg.err "debug_msg.o: in function Derived::virtfn():.*/debug_msg.cc:55: error: undefined reference to 'undef_fn2()'"
-check debug_msg.err "debug_msg.o: in function int testfn<int>(int):.*/debug_msg.cc:43: error: undefined reference to 'undef_fn1()'"
-check debug_msg.err "debug_msg.o: in function int testfn<int>(int):.*/debug_msg.cc:44: error: undefined reference to 'undef_fn2()'"
-check debug_msg.err "debug_msg.o: in function int testfn<int>(int):.*/debug_msg.cc:.*: error: undefined reference to 'undef_int'"
-check debug_msg.err "debug_msg.o: in function int testfn<double>(double):.*/debug_msg.cc:43: error: undefined reference to 'undef_fn1()'"
-check debug_msg.err "debug_msg.o: in function int testfn<double>(double):.*/debug_msg.cc:44: error: undefined reference to 'undef_fn2()'"
-check debug_msg.err "debug_msg.o: in function int testfn<double>(double):.*/debug_msg.cc:.*: error: undefined reference to 'undef_int'"
+check debug_msg.err ".*/debug_msg.cc:50: error: undefined reference to 'undef_fn1()'"
+check debug_msg.err ".*/debug_msg.cc:55: error: undefined reference to 'undef_fn2()'"
+check debug_msg.err ".*/debug_msg.cc:43: error: undefined reference to 'undef_fn1()'"
+check debug_msg.err ".*/debug_msg.cc:44: error: undefined reference to 'undef_fn2()'"
+check debug_msg.err ".*/debug_msg.cc:.*: error: undefined reference to 'undef_int'"
+check debug_msg.err ".*/debug_msg.cc:43: error: undefined reference to 'undef_fn1()'"
+check debug_msg.err ".*/debug_msg.cc:44: error: undefined reference to 'undef_fn2()'"
+check debug_msg.err ".*/debug_msg.cc:.*: error: undefined reference to 'undef_int'"
 
 # Check we detected the ODR (One Definition Rule) violation.
 check debug_msg.err ": symbol 'Ordering::operator()(int, int)' defined in multiple places (possible ODR violation):"

@@ -1,3 +1,12 @@
+2011-04-17  Ian Lance Taylor  <iant@google.com>
+
+	* object.cc (Relocate_info::location): Simplify location string.
+	* errors.cc (Errors::error_at_location): Don't print program
+	name.
+	(Errors::warning_at_location): Likewise.
+	(Errors::undefined_symbol): Likewise.
+	* testsuite/debug_msg.sh: Update accordingly.
+
 2011-04-14 Cary Coutant  <ccoutant@google.com>
 
 	* gold/layout.cc (Layout::symtab_section_offset): New function.

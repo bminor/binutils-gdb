@@ -1,6 +1,6 @@
 // object.cc -- support for an object file for linking in gold
 
-// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -2621,46 +2621,43 @@ Input_objects::print_cref(const Symbol_table* symtab, FILE* f) const
 
 // Relocate_info methods.
 
-// Return a string describing the location of a relocation.  This is
-// only used in error messages.
+// Return a string describing the location of a relocation when file
+// and lineno information is not available.  This is only used in
+// error messages.
 
 template<int size, bool big_endian>
 std::string
 Relocate_info<size, big_endian>::location(size_t, off_t offset) const
 {
-  // See if we can get line-number information from debugging sections.
-  std::string filename;
-  std::string file_and_lineno;   // Better than filename-only, if available.
-
   Sized_dwarf_line_info<size, big_endian> line_info(this->object);
-  // This will be "" if we failed to parse the debug info for any reason.
-  file_and_lineno = line_info.addr2line(this->data_shndx, offset, NULL);
+  std::string ret = line_info.addr2line(this->data_shndx, offset, NULL);
+  if (!ret.empty())
+    return ret;
 
-  std::string ret(this->object->name());
-  ret += ':';
+  ret = this->object->name();
+
   Symbol_location_info info;
   if (this->object->get_symbol_location_info(this->data_shndx, offset, &info))
     {
-      ret += " in function ";
-      ret += info.enclosing_symbol_name;
-      ret += ":";
-      filename = info.source_file;
+      if (!info.source_file.empty())
+	{
+	  ret += ":";
+	  ret += info.source_file;
+	}
+      size_t len = info.enclosing_symbol_name.length() + 100;
+      char* buf = new char[len];
+      snprintf(buf, len, _(":function %s"),
+	       info.enclosing_symbol_name.c_str());
+      ret += buf;
+      delete[] buf;
+      return ret;
     }
 
-  if (!file_and_lineno.empty())
-    ret += file_and_lineno;
-  else
-    {
-      if (!filename.empty())
-        ret += filename;
-      ret += "(";
-      ret += this->object->section_name(this->data_shndx);
-      char buf[100];
-      // Offsets into sections have to be positive.
-      snprintf(buf, sizeof(buf), "+0x%lx", static_cast<long>(offset));
-      ret += buf;
-      ret += ")";
-    }
+  ret += "(";
+  ret += this->object->section_name(this->data_shndx);
+  char buf[100];
+  snprintf(buf, sizeof buf, "+0x%lx)", static_cast<long>(offset));
+  ret += buf;
   return ret;
 }
 
