@@ -1588,7 +1588,7 @@ process_xcoff_symbol (struct coff_symbol *cs, struct objfile *objfile)
 	  if (*name == ':')
 	    return NULL;
 
-	  pp = (char *) strchr (name, ':');
+	  pp = strchr (name, ':');
 	  if (pp == NULL)
 	    return NULL;
 
@@ -2623,7 +2623,7 @@ scan_xcoff_symtab (struct objfile *objfile)
 	    swap_sym (&symbol, &main_aux[0], &namestring, &sraw_symbol,
 		      &ssymnum, objfile);
 
-	    p = (char *) strchr (namestring, ':');
+	    p = strchr (namestring, ':');
 	    if (!p)
 	      continue;			/* Not a debugging symbol.   */
 
