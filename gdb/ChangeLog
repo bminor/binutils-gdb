@@ -1,4 +1,11 @@
 2011-04-19  Pierre Muller  <muller@ics.u-strasbg.fr>
+	    Pedro Alves  <pedro@codesourcery.com>
+
+	* xstormy16-tdep.c (xstormy16_push_dummy_call): Add local
+	variables to simplify code and avoid == operator at end of
+	line as this is against GNU coding standards.
+
+2011-04-19  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* solib-svr4.c (svr4_keep_data_in_core): Rename local variable
 	lm_name to name_lm to avoid conflict with lm_name function.

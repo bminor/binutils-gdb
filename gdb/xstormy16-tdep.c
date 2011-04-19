@@ -263,12 +263,13 @@ xstormy16_push_dummy_call (struct gdbarch *gdbarch,
       /* Put argument into registers wordwise.  */
       val = value_contents (args[i]);
       for (j = 0; j < typelen; j += xstormy16_reg_size)
-	regcache_cooked_write_unsigned (regcache, argreg++,
-			extract_unsigned_integer (val + j,
-						  typelen - j ==
-						  1 ? 1 :
-						  xstormy16_reg_size,
-						  byte_order));
+	{
+	  ULONGEST regval;
+	  int size = (typelen - j == 1) ? 1 : xstormy16_reg_size;
+
+	  regval = extract_unsigned_integer (val + j, size, byte_order);
+	  regcache_cooked_write_unsigned (regcache, argreg++, regval);
+	}
     }
 
   /* Align SP */
