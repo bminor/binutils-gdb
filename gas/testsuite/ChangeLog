@@ -1,3 +1,11 @@
+2011-04-19  Nick Clifton  <nickc@redhat.com>
+
+	* gas/arm/mrs-msr-thumb-v7e-m.s: Restore name of basepri_max
+	register.
+	* gas/arm/mrs-msr-thumb-v7e-m.d: Likewise.
+	* gas/arm/arch7.d: Likewise.
+	* gas/arm/arch7.s: Likewise.
+
 2011-04-18  Nick Clifton  <nickc@redhat.com>
 
 	* gas/arm/arch7.s: Fix typo basepri_max should be basepri_mask.

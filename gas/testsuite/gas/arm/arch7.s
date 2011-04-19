@@ -60,7 +60,7 @@ label2:
 	mrs	r0, psp
 	mrs	r0, primask
 	mrs	r0, basepri
-	mrs	r0, basepri_mask
+	mrs	r0, basepri_max
 	mrs	r0, faultmask
 	mrs	r0, control
 	msr	apsr_nzcvq, r0
@@ -74,7 +74,7 @@ label2:
 	msr	psp, r0
 	msr	primask, r0
 	msr	basepri, r0
-	msr	BASEPRI_MASK, r0
+	msr	BASEPRI_MAX, r0
 	msr	faultmask, r0
 	msr	control, r0
 	mrs	r0, xpsr

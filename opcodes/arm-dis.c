@@ -3722,7 +3722,7 @@ psr_name (int regno)
     case 9: return "PSP";
     case 16: return "PRIMASK";
     case 17: return "BASEPRI";
-    case 18: return "BASEPRI_MASK";
+    case 18: return "BASEPRI_MAX";
     case 19: return "FAULTMASK";
     case 20: return "CONTROL";
     default: return "<unknown>";

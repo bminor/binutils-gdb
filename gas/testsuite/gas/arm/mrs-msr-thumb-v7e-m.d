@@ -12,4 +12,4 @@ Disassembly of section .text:
 0+08 <[^>]*> f3ef 8610 	mrs	r6, PRIMASK
 0+0c <[^>]*> f384 8c00 	msr	CPSR_fs, r4
 0+10 <[^>]*> f385 8401 	msr	IAPSR, r5
-0+14 <[^>]*> f386 8812 	msr	BASEPRI_MASK, r6
+0+14 <[^>]*> f386 8812 	msr	BASEPRI_MAX, r6
