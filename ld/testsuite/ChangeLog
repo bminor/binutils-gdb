@@ -1,3 +1,7 @@
+2011-04-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-plugin/plugin-ignore.d: Removed.
+
 2011-04-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-plugin/plugin-7.d: Update expected LTO linker errors for
