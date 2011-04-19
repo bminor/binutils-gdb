@@ -448,18 +448,18 @@ struct thread_info *
 any_live_thread_of_process (int pid)
 {
   struct thread_info *tp;
-  struct thread_info *tp_running = NULL;
+  struct thread_info *tp_executing = NULL;
 
   for (tp = thread_list; tp; tp = tp->next)
-    if (ptid_get_pid (tp->ptid) == pid)
+    if (tp->state_ != THREAD_EXITED && ptid_get_pid (tp->ptid) == pid)
       {
-	if (tp->state_ == THREAD_STOPPED)
+	if (tp->executing_)
+	  tp_executing = tp;
+	else
 	  return tp;
-	else if (tp->state_ == THREAD_RUNNING)
-	  tp_running = tp;
       }
 
-  return tp_running;
+  return tp_executing;
 }
 
 /* Print a list of thread ids currently known, and the total number of

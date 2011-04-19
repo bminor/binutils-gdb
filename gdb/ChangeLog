@@ -1,3 +1,10 @@
+2011-04-19  Marc Khouzam  <marc.khouzam@ericsson.com>
+
+	* thread.c (any_live_thread_of_process): Prioritize threads
+	that are not executing.
+	* gdbthread.h (any_live_thread_of_process): Update comment
+	as per above change.
+
 2011-03-18  Kwok Cheung Yeung  <kcy@codesourcery.com>
 
 	* MAINTAINERS: Add myself as a write-after-approval maintainer.
