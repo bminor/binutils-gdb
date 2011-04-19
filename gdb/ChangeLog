@@ -1,3 +1,11 @@
+2011-04-19  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	ARI cleanup.
+	* xtensa-tdep.c (xtensa_register_type): Use xstrprintf instead of
+	sprintf. Simplify code and avoid loosing memory.
+	(xtensa_register_reggroup_p): Extract assignment out of IF clause.
+	(call0_frame_cache): Remove && operator from end of line.
+
 2011-04-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix libraries displacement if they change whether they were prelinked.

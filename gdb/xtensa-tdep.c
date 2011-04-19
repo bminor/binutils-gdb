@@ -318,15 +318,14 @@ xtensa_register_type (struct gdbarch *gdbarch, int regnum)
 
 	      if (tp == NULL)
 		{
-		  char *name = xmalloc (16);
+		  char *name = xstrprintf ("int%d", size * 8);
 		  tp = xmalloc (sizeof (struct ctype_cache));
 		  tp->next = tdep->type_entries;
 		  tdep->type_entries = tp;
 		  tp->size = size;
-
-		  sprintf (name, "int%d", size * 8);
 		  tp->virtual_type
-		    = arch_integer_type (gdbarch, size * 8, 1, xstrdup (name));
+		    = arch_integer_type (gdbarch, size * 8, 1, name);
+		  xfree (name);
 		}
 
 	      reg->ctype = tp->virtual_type;
@@ -843,7 +842,8 @@ xtensa_register_reggroup_p (struct gdbarch *gdbarch,
   if (group == restore_reggroup)
     return (regnum < gdbarch_num_regs (gdbarch)
 	    && (reg->flags & SAVE_REST_FLAGS) == SAVE_REST_VALID);
-  if ((cp_number = xtensa_coprocessor_register_group (group)) >= 0)
+  cp_number = xtensa_coprocessor_register_group (group);
+  if (cp_number >= 0)
     return rg & (xtRegisterGroupCP0 << cp_number);
   else
     return 1;
@@ -2715,9 +2715,9 @@ call0_frame_cache (struct frame_info *this_frame,
 	 too bad.  */
 
       int i;
-      for (i = 0; 
-	   (i < C0_NREGS) &&
-	     (i == C0_RA || cache->c0.c0_rt[i].fr_reg != C0_RA);
+      for (i = 0;
+	   (i < C0_NREGS)
+	   && (i == C0_RA || cache->c0.c0_rt[i].fr_reg != C0_RA);
 	   ++i);
       if (i >= C0_NREGS && cache->c0.c0_rt[C0_RA].fr_reg == C0_RA)
 	i = C0_RA;
