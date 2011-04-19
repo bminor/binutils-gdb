@@ -287,7 +287,7 @@ struct thread_info *first_thread_of_process (int pid);
 extern struct thread_info *any_thread_of_process (int pid);
 
 /* Returns any non-exited thread of process PID, giving preference for
-   already stopped threads.  */
+   not executing threads.  */
 extern struct thread_info *any_live_thread_of_process (int pid);
 
 /* Change the ptid of thread OLD_PTID to NEW_PTID.  */
