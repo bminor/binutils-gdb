@@ -1,3 +1,8 @@
+2011-04-19  Quentin Neill  <quentin.neill@amd.com>
+
+	* i386-gen.c (cpu_flag_init): Remove 3dnow and 3dnowa bits
+	from bdver1 flags.
+
 2011-04-13  Nick Clifton  <nickc@redhat.com>
 
 	* v850-dis.c (disassemble): Always print a closing square brace if
