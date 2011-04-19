@@ -1,3 +1,31 @@
+2011-04-19  Tom Tromey  <tromey@redhat.com>
+
+	* windows-tdep.c (windows_xfer_shared_library):
+	* windows-nat.c (get_module_name, windows_make_so):
+	* v850-tdep.c (v850_handle_pushm):
+	* utils.c (null_cleanup, gdb_realpath):
+	* ui-out.c (get_next_header):
+	* tracepoint.c (clear_traceframe_info):
+	* symtab.c (lookup_symtab):
+	* serial.h (struct serial_ops):
+	* mipsread.c (read_alphacoff_dynamic_symtab):
+	* infcmd.c (print_return_value):
+	* ia64-linux-tdep.c (ia64_linux_sigcontext_register_address):
+	* f-exp.y (parse_number):
+	* exceptions.c (catch_exceptions):
+	* dummy-frame.c (dummy_frame_this_id):
+	* defs.h (struct cleanup):
+	* breakpoint.c (disable_breakpoints_in_unloaded_shlib):
+	* arm-tdep.c (arm_push_dummy_call):
+	* amd64-tdep.h (amd64_collect_xsave):
+	* amd64-tdep.c (amd64_collect_xsave):
+	* alpha-tdep.c (alpha_heuristic_frame_unwind_cache):
+	* README (typing): Remove duplicate words.
+	* cli/cli-decode.c (lookup_cmd_composition): Add comma.
+	* infrun.c (siginfo_value_read): Fix typo.
+	* solib-frv.c (frv_fdpic_find_global_pointer): Likewise.
+	* top.c (source_line_number): Add comma.
+
 2011-04-19  Marc Khouzam  <marc.khouzam@ericsson.com>
 
 	* thread.c (any_live_thread_of_process): Prioritize threads

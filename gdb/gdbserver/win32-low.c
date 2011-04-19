@@ -1204,7 +1204,7 @@ handle_load_dll (void)
     return;
 
   /* The symbols in a dll are offset by 0x1000, which is the
-     the offset from 0 of the first byte in an image - because
+     offset from 0 of the first byte in an image - because
      of the file header and the section alignment. */
 
   load_addr = (CORE_ADDR) (uintptr_t) event->lpBaseOfDll + 0x1000;

@@ -300,7 +300,7 @@ proc test_struct_returns { n } {
 
     # The relevant code looks like "L{n} = fun{n}()".  The test forces
     # "fun{n}" to "return" with an explicit value.  Since that code
-    # snippet will store the the returned value in "L{n}" the return
+    # snippet will store the returned value in "L{n}" the return
     # is tested by examining "L{n}".  This assumes that the
     # compiler implemented this as fun{n}(&L{n}) and hence that when
     # the value isn't stored "L{n}" remains unchanged.  Also check for

@@ -1528,7 +1528,7 @@ lookup_cmd_composition (char *text,
   
   while (1)
     { 
-      /* Go through as many command lists as we need to 
+      /* Go through as many command lists as we need to,
 	 to find the command TEXT refers to.  */
       
       prev_cmd = *cmd;

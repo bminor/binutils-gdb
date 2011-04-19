@@ -765,7 +765,7 @@ parse_number (p, len, parsed_float, putithere)
   
   /* If the number is too big to be an int, or it's got an l suffix
      then it's a long.  Work out if this has to be a long by
-     shifting right and and seeing if anything remains, and the
+     shifting right and seeing if anything remains, and the
      target int size is different to the target long size.
      
      In the expression below, we could have tested

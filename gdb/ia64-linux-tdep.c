@@ -47,7 +47,7 @@ ia64_linux_pc_in_sigtramp (CORE_ADDR pc)
 
 /* IA-64 GNU/Linux specific function which, given a frame address and
    a register number, returns the address at which that register may be
-   found.  0 is returned for registers which aren't stored in the the
+   found.  0 is returned for registers which aren't stored in the
    sigcontext structure.  */
 
 static CORE_ADDR

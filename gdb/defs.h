@@ -258,7 +258,7 @@ enum return_value_convention
    point in the chain.  Use discard_cleanups to remove cleanups
    from the chain back to a given point, not doing them.
 
-   If the argument is pointer to allocated memory, then you need to
+   If the argument is pointer to allocated memory, then you need
    to additionally set the 'free_arg' member to a function that will
    free that memory.  This function will be called both when the cleanup
    is executed and when it's discarded.  */

@@ -581,7 +581,7 @@ free_current_contents (void *ptr)
 }
 
 /* Provide a known function that does nothing, to use as a base for
-   for a possibly long chain of cleanups.  This is useful where we
+   a possibly long chain of cleanups.  This is useful where we
    use the cleanup chain for handling normal cleanups as well as dealing
    with cleanups that need to be done as a result of a call to error().
    In such cases, we may not be certain where the first cleanup is, unless
@@ -3605,7 +3605,7 @@ gdb_realpath (const char *filename)
   /* FIXME: cagney/2002-11-13:
 
      Method 2a: Use realpath() with a NULL buffer.  Some systems, due
-     to the problems described in in method 3, have modified their
+     to the problems described in method 3, have modified their
      realpath() implementation so that it will allocate a buffer when
      NULL is passed in.  Before this can be used, though, some sort of
      configure time test would need to be added.  Otherwize the code

@@ -240,7 +240,7 @@ read_alphacoff_dynamic_symtab (struct section_offsets *section_offsets,
 				 (file_ptr) 0, got_secsize))
     return;
 
-  /* Find the number of local GOT entries and the index for the the
+  /* Find the number of local GOT entries and the index for the
      first dynamic symbol in the GOT.  */
   for (dyninfo_p = dyninfo_secptr, dyninfo_end = dyninfo_p + dyninfo_secsize;
        dyninfo_p < dyninfo_end;

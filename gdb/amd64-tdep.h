@@ -101,7 +101,7 @@ extern void amd64_supply_xsave (struct regcache *regcache, int regnum,
 extern void amd64_collect_fxsave (const struct regcache *regcache, int regnum,
 				  void *fxsave);
 
-/* Similar to amd64_collect_fxsave, but but use XSAVE extended state.  */
+/* Similar to amd64_collect_fxsave, but use XSAVE extended state.  */
 extern void amd64_collect_xsave (const struct regcache *regcache,
 				 int regnum, void *xsave, int gcore);
 

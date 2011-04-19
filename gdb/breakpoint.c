@@ -6154,7 +6154,7 @@ disable_breakpoints_in_shlibs (void)
   }
 }
 
-/* Disable any breakpoints that are in in an unloaded shared library.
+/* Disable any breakpoints that are in an unloaded shared library.
    Only apply to enabled breakpoints, disabled ones can just stay
    disabled.  */
 

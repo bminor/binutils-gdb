@@ -245,7 +245,7 @@ got_symtab:
      PSYMTAB_TO_SYMTAB doesn't return a symtab, even though one has
      been created.  So, we need to run through the symtabs again in
      order to find the file.
-     XXX - This is a crock, and should be fixed inside of the the
+     XXX - This is a crock, and should be fixed inside of the
      symbol parsing routines.  */
   goto got_symtab;
 }

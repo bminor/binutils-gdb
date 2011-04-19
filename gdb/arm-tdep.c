@@ -3558,7 +3558,7 @@ arm_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
   /* Walk through the list of args and determine how large a temporary
      stack is required.  Need to take care here as structs may be
-     passed on the stack, and we have to to push them.  */
+     passed on the stack, and we have to push them.  */
   nstack = 0;
 
   argreg = ARM_A1_REGNUM;

@@ -1,3 +1,11 @@
+2011-04-19  Tom Tromey  <tromey@redhat.com>
+
+	* gdbint.texinfo (Register Information Functions): Remove
+	duplicate "the".
+	* gdb.texinfo (Emacs): Remove duplicate "to".
+	(GDB/MI Variable Objects): Remove duplicate "the".
+	(General Query Packets): Likewise.
+
 2011-04-02  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.texinfo (GDB/MI Output Records): Fix menu entry for

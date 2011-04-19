@@ -1,3 +1,11 @@
+2011-04-19  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.mi/mi-nsmoribund.exp:
+	* gdb.hp/gdb.objdbg/objdbg01.exp:
+	* gdb.base/structs.exp (test_struct_returns):
+	* gdb.base/call-sc.exp (test_scalar_returns):
+	* gdb.base/bigcore.exp: Remove duplicate words.
+
 2011-04-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/break-interp-lib.c (v, vptr): New variables.

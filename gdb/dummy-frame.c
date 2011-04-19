@@ -261,7 +261,7 @@ dummy_frame_prev_register (struct frame_info *this_frame,
 /* Assuming that THIS_FRAME is a dummy, return its ID.  That ID is
    determined by examining the NEXT frame's unwound registers using
    the method dummy_id().  As a side effect, THIS dummy frame's
-   dummy cache is located and and saved in THIS_PROLOGUE_CACHE.  */
+   dummy cache is located and saved in THIS_PROLOGUE_CACHE.  */
 
 static void
 dummy_frame_this_id (struct frame_info *this_frame,

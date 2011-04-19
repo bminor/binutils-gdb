@@ -278,7 +278,7 @@ struct serial_ops
     int (*write_prim)(struct serial *scb, const void *buf, size_t count);
     /* Return that number of bytes that can be read from FD
        without blocking.  Return value of -1 means that the
-       the read will not block even if less that requested bytes
+       read will not block even if less that requested bytes
        are available.  */
     int (*avail)(struct serial *scb, int fd);
 

@@ -24277,7 +24277,7 @@ that can control the execution and describe the state of your program.
 If you specify an absolute file name when prompted for the @kbd{M-x
 gdb} argument, then Emacs sets your current working directory to where
 your program resides.  If you only specify the file name, then Emacs
-sets your current working directory to to the directory associated
+sets your current working directory to the directory associated
 with the previous buffer.  In this case, @value{GDBN} may find your
 program by searching your environment's @code{PATH} variable, but on
 some operating systems it might not find the source.  So, although the
@@ -27276,7 +27276,7 @@ void do_work(...)
 @end smallexample
 
 If a fixed variable object for the @code{state} variable is created in
-this function, and we enter the recursive call, the the variable
+this function, and we enter the recursive call, the variable
 object will report the value of @code{state} in the top-level
 @code{do_work} invocation.  On the other hand, a floating variable
 object will report the value of @code{state} in the current frame.
@@ -33073,7 +33073,7 @@ thread local variable.  (This offset is obtained from the debug
 information associated with the variable.)
 
 @var{lm} is the (big endian, hex encoded) OS/ABI-specific encoding of the
-the load module associated with the thread local storage.  For example,
+load module associated with the thread local storage.  For example,
 a @sc{gnu}/Linux system will pass the link map address of the shared
 object associated with the thread local storage under consideration. 
 Other operating environments may choose to represent the load module

@@ -500,7 +500,7 @@ windows_store_inferior_registers (struct target_ops *ops,
     do_windows_store_inferior_registers (regcache, r);
 }
 
-/* Get the name of a given module at at given base address.  If base_address
+/* Get the name of a given module at given base address.  If base_address
    is zero return the first loaded module (which is always the name of the
    executable).  */
 static int
@@ -743,7 +743,7 @@ windows_make_so (const char *name, LPVOID load_addr)
 	  return so;
 	}
 
-      /* The symbols in a dll are offset by 0x1000, which is the the
+      /* The symbols in a dll are offset by 0x1000, which is the
 	 offset from 0 of the first byte in an image - because of the
 	 file header and the section alignment.  */
       cygwin_load_start = (CORE_ADDR) (uintptr_t) ((char *)

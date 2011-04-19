@@ -6196,7 +6196,7 @@ signals_info (char *signum_exp, int from_tty)
 
 /* The $_siginfo convenience variable is a bit special.  We don't know
    for sure the type of the value until we actually have a chance to
-   fetch the data.  The type can change depending on gdbarch, so it it
+   fetch the data.  The type can change depending on gdbarch, so it is
    also dependent on which thread you have selected.
 
      1. making $_siginfo be an internalvar that creates a new value on

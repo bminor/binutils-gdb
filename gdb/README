@@ -144,7 +144,7 @@ format.  On its own, TeX cannot read, much less typeset a Texinfo file.
 `gdb-VERSION/texinfo' directory.
 
    If you have TeX and a DVI printer program installed, you can typeset
-and print this manual.  First switch to the the `gdb' subdirectory of
+and print this manual.  First switch to the `gdb' subdirectory of
 the main source directory (for example, to `gdb-VERSION/gdb') and then type:
 
       make doc/gdb.dvi

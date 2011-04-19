@@ -442,7 +442,7 @@ throw_error (enum errors error, const char *fmt, ...)
    be replaced by judicious use of QUIT.  */
 
 /* MAYBE: cagney/1999-11-05: catch_errors() in conjunction with
-   error() et al. could maintain a set of flags that indicate the the
+   error() et al. could maintain a set of flags that indicate the
    current state of each of the longjmp buffers.  This would give the
    longjmp code the chance to detect a longjmp botch (before it gets
    to longjmperror()).  Prior to 1999-11-05 this wasn't possible as

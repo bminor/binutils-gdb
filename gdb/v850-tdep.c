@@ -401,7 +401,7 @@ v850_handle_pushm (int insn, int insn2, struct v850_frame_cache *pi,
   else
     reg_table = pushmh_reg_table;
 
-  /* Calculate the total size of the saved registers, and add it it to the
+  /* Calculate the total size of the saved registers, and add it to the
      immediate value used to adjust SP.  */
   for (i = 0; reg_table[i].mask != 0; i++)
     if (list12 & reg_table[i].mask)

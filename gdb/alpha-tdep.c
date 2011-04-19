@@ -1244,7 +1244,7 @@ alpha_heuristic_frame_unwind_cache (struct frame_info *this_frame,
 		 So we recognize only a few registers (t7, t9, ra) within
 		 the procedure prologue as valid return address registers.
 		 If we encounter a return instruction, we extract the
-		 the return address register from it.
+		 return address register from it.
 
 		 FIXME: Rewriting GDB to access the procedure descriptors,
 		 e.g. via the minimal symbol table, might obviate this

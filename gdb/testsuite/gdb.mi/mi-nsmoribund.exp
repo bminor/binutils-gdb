@@ -55,7 +55,7 @@ if { [mi_run_to_main] < 0 } {
     continue
 }
 
-# Keep this in sync with THREADS in the the $srcfile.
+# Keep this in sync with THREADS in the $srcfile.
 set nthreads 10
 
 # Set a breakpoint and let all threads hit it (except the main

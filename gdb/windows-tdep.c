@@ -391,7 +391,7 @@ windows_xfer_shared_library (const char* so_name, CORE_ADDR load_addr,
   obstack_grow_str (obstack, p);
   xfree (p);
   obstack_grow_str (obstack, "\"><segment address=\"");
-  /* The symbols in a dll are offset by 0x1000, which is the the
+  /* The symbols in a dll are offset by 0x1000, which is the
      offset from 0 of the first byte in an image - because of the file
      header and the section alignment.  */
   obstack_grow_str (obstack, paddress (gdbarch, load_addr + 0x1000));

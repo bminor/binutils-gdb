@@ -2662,7 +2662,7 @@ amd64_collect_fxsave (const struct regcache *regcache, int regnum,
     }
 }
 
-/* Similar to amd64_collect_fxsave, but but use XSAVE extended state.  */
+/* Similar to amd64_collect_fxsave, but use XSAVE extended state.  */
 
 void
 amd64_collect_xsave (const struct regcache *regcache, int regnum,

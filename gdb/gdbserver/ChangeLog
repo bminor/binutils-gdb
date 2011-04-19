@@ -1,3 +1,7 @@
+2011-04-19  Tom Tromey  <tromey@redhat.com>
+
+	* win32-low.c (handle_load_dll): Remove duplicate "the".
+
 2011-04-07  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	Remove support for old Cygwin 1.5 versions.

@@ -1394,7 +1394,7 @@ print_return_value (struct type *func_type, struct type *value_type)
   /* FIXME: 2003-09-27: When returning from a nested inferior function
      call, it's possible (with no help from the architecture vector)
      to locate and return/print a "struct return" value.  This is just
-     a more complicated case of what is already being done in in the
+     a more complicated case of what is already being done in the
      inferior function call code.  In fact, when inferior function
      calls are made async, this will likely be made the norm.  */
 

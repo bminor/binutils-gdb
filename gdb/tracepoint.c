@@ -234,7 +234,7 @@ free_traceframe_info (struct traceframe_info *info)
     }
 }
 
-/* Free and and clear the traceframe info cache of the current
+/* Free and clear the traceframe info cache of the current
    traceframe.  */
 
 static void

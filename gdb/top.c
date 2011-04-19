@@ -294,7 +294,7 @@ quit_cover (void *s)
 }
 #endif /* defined SIGHUP */
 
-/* Line number we are currently in in a file which is being sourced.  */
+/* Line number we are currently in, in a file which is being sourced.  */
 /* NOTE 1999-04-29: This variable will be static again, once we modify
    gdb to use the event loop as the default command loop and we merge
    event-top.c into this file, top.c.  */

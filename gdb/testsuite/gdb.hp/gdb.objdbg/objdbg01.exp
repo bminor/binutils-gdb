@@ -62,7 +62,7 @@ if {[gdb_compile "${objdbgdir}/x3.o ${objdbgdir}/x2.o ${objdbgdir}/x1.o" "${binf
 for {set filenum 0} {$filenum < 2} {incr filenum 1} {
 
     # Lets test some commons
-    # Need to restart each to to make sure objects are not loaded
+    # Need to restart each to make sure objects are not loaded
     # Also cross check the address with what is actually in the
     #   object file (call the executable ${symaddrfile} to retrieve the
     #   information).

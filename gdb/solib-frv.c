@@ -1108,7 +1108,7 @@ frv_fdpic_find_global_pointer (CORE_ADDR addr)
       so = so->next;
     }
 
-  /* Didn't find it it any of the shared objects.  So assume it's in the
+  /* Didn't find it in any of the shared objects.  So assume it's in the
      main executable.  */
   return main_got ();
 }

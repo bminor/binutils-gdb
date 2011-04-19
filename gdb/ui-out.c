@@ -1048,7 +1048,7 @@ append_header_to_list (struct ui_out *uiout,
   uiout->table.header_next = uiout->table.header_last;
 }
 
-/* Extract the format information for the NEXT header and and advance
+/* Extract the format information for the NEXT header and advance
    the header pointer.  Return 0 if there was no next header.  */
 
 static int
