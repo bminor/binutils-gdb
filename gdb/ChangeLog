@@ -1,5 +1,10 @@
 2011-04-19  Pierre Muller  <muller@ics.u-strasbg.fr>
 
+	* solib-svr4.c (svr4_keep_data_in_core): Rename local variable
+	lm_name to name_lm to avoid conflict with lm_name function.
+
+2011-04-19  Pierre Muller  <muller@ics.u-strasbg.fr>
+
 	ARI fixes: Use only lowercase function name for static functions.
 	* nto-tdep.c (LM_ADDR): Rename to...
 	(lm_addr): New function name.

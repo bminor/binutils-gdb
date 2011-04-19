@@ -954,7 +954,7 @@ svr4_keep_data_in_core (CORE_ADDR vaddr, unsigned long size)
   struct so_list *new;
   struct cleanup *old_chain;
   struct link_map_offsets *lmo;
-  CORE_ADDR lm_name;
+  CORE_ADDR name_lm;
 
   info = get_svr4_info ();
 
@@ -977,10 +977,10 @@ svr4_keep_data_in_core (CORE_ADDR vaddr, unsigned long size)
   new->lm_info->lm = xzalloc (lmo->link_map_size);
   make_cleanup (xfree, new->lm_info->lm);
   read_memory (ldsomap, new->lm_info->lm, lmo->link_map_size);
-  lm_name = lm_name (new);
+  name_lm = lm_name (new);
   do_cleanups (old_chain);
 
-  return (lm_name >= vaddr && lm_name < vaddr + size);
+  return (name_lm >= vaddr && name_lm < vaddr + size);
 }
 
 /*
