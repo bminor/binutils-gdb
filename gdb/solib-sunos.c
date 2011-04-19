@@ -139,7 +139,7 @@ static CORE_ADDR flag_addr;
 /* link map access functions */
 
 static CORE_ADDR
-LM_ADDR (struct so_list *so)
+lm_addr (struct so_list *so)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
   int lm_addr_offset = offsetof (struct link_map, lm_addr);
@@ -150,7 +150,7 @@ LM_ADDR (struct so_list *so)
 }
 
 static CORE_ADDR
-LM_NEXT (struct so_list *so)
+lm_next (struct so_list *so)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
   int lm_next_offset = offsetof (struct link_map, lm_next);
@@ -162,7 +162,7 @@ LM_NEXT (struct so_list *so)
 }
 
 static CORE_ADDR
-LM_NAME (struct so_list *so)
+lm_name (struct so_list *so)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
   int lm_name_offset = offsetof (struct link_map, lm_name);
@@ -435,10 +435,10 @@ sunos_current_sos (void)
 
       read_memory (lm, new->lm_info->lm, sizeof (struct link_map));
 
-      lm = LM_NEXT (new);
+      lm = lm_next (new);
 
       /* Extract this shared object's name.  */
-      target_read_string (LM_NAME (new), &buffer,
+      target_read_string (lm_name (new), &buffer,
 			  SO_NAME_MAX_PATH_SIZE - 1, &errcode);
       if (errcode != 0)
 	warning (_("Can't read pathname for load map: %s."),
@@ -825,8 +825,8 @@ static void
 sunos_relocate_section_addresses (struct so_list *so,
 				  struct target_section *sec)
 {
-  sec->addr += LM_ADDR (so);
-  sec->endaddr += LM_ADDR (so);
+  sec->addr += lm_addr (so);
+  sec->endaddr += lm_addr (so);
 }
 
 static struct target_so_ops sunos_so_ops;

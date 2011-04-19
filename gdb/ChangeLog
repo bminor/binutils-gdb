@@ -1,5 +1,38 @@
 2011-04-19  Pierre Muller  <muller@ics.u-strasbg.fr>
 
+	ARI fixes: Use only lowercase function name for static functions.
+	* nto-tdep.c (LM_ADDR): Rename to...
+	(lm_addr): New function name.
+	(nto_relocate_section_addresses): Adapt to change above.
+	* solib-sunos.c (LM_ADDR): Rename to...
+	(lm_addr): New function name.
+	(LM_NEXT): Rename to...
+	(lm_next): New function name.
+	(sunos_current_sos, sunos_relocate_section_addresses): Adapt to
+	function name changes above.
+	* solib-svr4.c (LM_ADDR_FROM_LINK_MAP): Rename to...
+	(lm_addr_from_link_map): New function name.
+	(HAS_LM_DYNAMIC_FROM_LINK_MAP): Rename to...
+	(has_lm_dynamic_from_link_map): New function name.
+	(LM_DYNAMIC_FROM_LINK_MAP): Rename to...
+	(lm_dynamic_from_link_map): New function name.
+	(LM_ADDR_CHECK): Rename to...
+	(lm_addr_check): New function name.
+	(LM_NEXT): Rename to...
+	(lm_next): New function name.
+	(LM_PREV): Rename to...
+	(lm_prev): New function name.
+	(LM_NAME): Rename to...
+	(lm_name): New function name.
+	(IGNORE_FIRST_LINK_MAP_ENTRY): Rename to...
+	(ignore_first_link_map_entry): New function name.
+	(svr4_keep_data_in_core): Adapt to function name changes above.
+	(svr4_current_sos): Likewise.
+	(enable_break): Likewise.
+	(svr4_relocate_section_addresses): Likewise.
+
+2011-04-19  Pierre Muller  <muller@ics.u-strasbg.fr>
+
 	ARI cleanup.
 	* xtensa-tdep.c (xtensa_register_type): Use xstrprintf instead of
 	sprintf. Simplify code and avoid loosing memory.

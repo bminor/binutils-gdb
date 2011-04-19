@@ -233,7 +233,7 @@ nto_parse_redirection (char *pargv[], const char **pin, const char **pout,
   return argv;
 }
 
-/* The struct lm_info, LM_ADDR, and nto_truncate_ptr are copied from
+/* The struct lm_info, lm_addr, and nto_truncate_ptr are copied from
    solib-svr4.c to support nto_relocate_section_addresses
    which is different from the svr4 version.  */
 
@@ -259,7 +259,7 @@ struct lm_info
 
 
 static CORE_ADDR
-LM_ADDR (struct so_list *so)
+lm_addr (struct so_list *so)
 {
   if (so->lm_info->l_addr == (CORE_ADDR)-1)
     {
@@ -310,8 +310,8 @@ nto_relocate_section_addresses (struct so_list *so, struct target_section *sec)
   Elf_Internal_Phdr *phdr = find_load_phdr (sec->bfd);
   unsigned vaddr = phdr ? phdr->p_vaddr : 0;
 
-  sec->addr = nto_truncate_ptr (sec->addr + LM_ADDR (so) - vaddr);
-  sec->endaddr = nto_truncate_ptr (sec->endaddr + LM_ADDR (so) - vaddr);
+  sec->addr = nto_truncate_ptr (sec->addr + lm_addr (so) - vaddr);
+  sec->endaddr = nto_truncate_ptr (sec->endaddr + lm_addr (so) - vaddr);
 }
 
 /* This is cheating a bit because our linker code is in libc.so.  If we
