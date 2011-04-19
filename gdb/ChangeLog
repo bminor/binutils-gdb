@@ -1,3 +1,10 @@
+2011-04-19  Marc Khouzam  <marc.khouzam@ericsson.com>
+
+	* thread.c (any_live_thread_of_process): Prioritize threads
+	that are not executing.
+	* gdbthread.h (any_live_thread_of_process): Update comment
+	as per above change.
+
 2011-04-18  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* ppc-linux-nat.c (check_condition): Add len output parameter.
