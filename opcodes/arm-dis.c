@@ -3722,7 +3722,7 @@ psr_name (int regno)
     case 9: return "PSP";
     case 16: return "PRIMASK";
     case 17: return "BASEPRI";
-    case 18: return "BASEPRI_MAX";
+    case 18: return "BASEPRI_MASK";
     case 19: return "FAULTMASK";
     case 20: return "CONTROL";
     default: return "<unknown>";
@@ -4191,15 +4191,6 @@ print_insn_thumb32 (bfd_vma pc, struct disassemble_info *info, long given)
 		      func (stream, "%s", name);
 		    else
 		      func (stream, "(UNDEF: %lu)", sysm);
-		  }
-		else if ((given & 0xff) <= 3)
-		  {
-		    func (stream, "%s_", psr_name (given & 0xff));
-		    
-		    if (given & 0x800)
-		      func (stream, "nzcvq");
-		    if (given & 0x400)
-		      func (stream, "g");
 		  }
 		else
 		  {

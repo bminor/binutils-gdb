@@ -1,3 +1,19 @@
+2011-04-18  Nick Clifton  <nickc@redhat.com>
+
+	* gas/arm/arch7.s: Fix typo basepri_max should be basepri_mask.
+	* gas/arm/mrs-msr-thumb-v7e-m.s: Likewise.
+	* gas/arm/arch7.d: Update expected disassembly.
+	* gas/arm/attr-march-armv7.d: Remove Microcontroller tag.
+	* gas/arm/blx-bad.d: Only run for ELF based targets.
+	* gas/arm/mrs-msr-thumb-v6t2.d: Likewise.
+	* gas/arm/vldm-arm.d: Likewise.
+	* gas/arm/mrs-msr-thumb-v7-m.d: Likewise.
+	Remove qualifiers from PSR and IAPSR regsiter names.
+	* gas/arm/mrs-msr-thumb-v7e-m.d: Likewise.
+	* gas/arm/thumb2_bcond.d: Update expected disassembly to allow for
+	relaxing of branch insns.
+	* gas/arm/thumb32.d: Fix whitespace problems in disassembly.
+
 2011-04-18  Tristan Gingold  <gingold@adacore.com>
 
 	* gas/macros/app1.s: Export symbol

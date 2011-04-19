@@ -1,5 +1,7 @@
 #objdump: -dr --prefix-addresses --show-raw-insn
 #name: MRS/MSR test, architecture v6t2, Thumb mode
+# This test is only valid on ELF based ports.
+#not-target: *-*-*coff *-*-pe *-*-wince *-*-*aout* *-*-netbsd *-*-riscix*
 
 .*:     file format .*
 

@@ -1,3 +1,11 @@
+2011-04-18  Julian Brown  <julian@codesourcery.com>
+	    Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-arm.c (parse_psr): Use selected_cpu not cpu_variant to
+	detect M-profile targets.
+	(do_t_swi): Exclude v7 and higher variants from arm_ext_os test.
+	(v7m_psrs): Fix typo: basepri_max should be basepri_mask.
+
 2011-04-14  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
 
 	* config/tc-s390.c (s390_machine): New prototype.

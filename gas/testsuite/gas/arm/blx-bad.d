@@ -1,5 +1,7 @@
 #objdump: -drw --show-raw-insn
 #name: BLX encoding
+# This test is only valid on ELF based ports.
+#not-target: *-*-*coff *-*-pe *-*-wince *-*-*aout* *-*-netbsd *-*-riscix*
 
 .*:     file format .*arm.*
 
