@@ -1,4 +1,9 @@
 2011-04-19  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* xcoffread.c (process_xcoff_symbol): ARI fix: Avoid assignment
+	inside if clause.
+
+2011-04-19  Pierre Muller  <muller@ics.u-strasbg.fr>
 	    Pedro Alves  <pedro@codesourcery.com>
 
 	* xstormy16-tdep.c (xstormy16_push_dummy_call): Add local

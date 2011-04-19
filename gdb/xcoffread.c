@@ -1585,7 +1585,11 @@ process_xcoff_symbol (struct coff_symbol *cs, struct objfile *objfile)
 	     where we need to, which is not necessarily super-clean,
 	     but seems workable enough.  */
 
-	  if (*name == ':' || (pp = (char *) strchr (name, ':')) == NULL)
+	  if (*name == ':')
+	    return NULL;
+
+	  pp = (char *) strchr (name, ':');
+	  if (pp == NULL)
 	    return NULL;
 
 	  ++pp;
