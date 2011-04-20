@@ -54,10 +54,6 @@ if $tracelevel then {
 
 global usestubs
 
-#
-# test running programs
-#
-
 set testfile "break"
 set srcfile ${testfile}.c
 set srcfile1 ${testfile}1.c
@@ -82,16 +78,26 @@ if  { [gdb_compile "${binfile}0.o ${binfile}1.o" "${binfile}" executable {debug 
 gdb_exit
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
+
+# The commands we test here produce many lines of output; disable "press
+# <return> to continue" prompts.
+gdb_test_no_output "set height 0"
+
+# Tests that require that no program is running
+
+gdb_file_cmd ${binfile}
+
+# Test for a regression where this command would internal-error if the
+# program wasn't running.
+gdb_test "maint print registers" "Name.*Nr.*Rel.*Offset.*Size.*Type.*"
+
+# Tests that can or should be done with a running program
+
 gdb_load ${binfile}
 
 if ![runto_main] then {
         perror "tests suppressed"
 }
-
-
-# The commands we test here produce many lines of output; disable "press 
-# <return> to continue" prompts.
-gdb_test_no_output "set height 0"
 
 
 #

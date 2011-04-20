@@ -1,3 +1,10 @@
+2011-04-20  Pedro Alves  <pedro@codesourcery.com>
+
+	* regcache.c (get_thread_arch_regcache): If creating a regcache for
+	null_ptid, assume and allow a NULL address space, instead of
+	asking the target for the ptid's address space.
+	* infrun.c (ptid_is_pid): Remove assertion.
+
 2011-04-19  Marc Khouzam  <marc.khouzam@ericsson.com>
 
 	* thread.c (any_live_thread_of_process): Prioritize threads
