@@ -1,3 +1,7 @@
+2011-04-20  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.texinfo (Trace File Format): Move node later.
+
 2010-09-01  Marc Khouzam  <marc.khouzam@ericsson.com>
 
 	* gdb.texinfo (GDB/MI Miscellaneous Commands): Document new

@@ -34855,59 +34855,6 @@ element is interpreted as human-readable auxilliary information.
 
 @include agentexpr.texi
 
-@node Trace File Format
-@appendix Trace File Format
-@cindex trace file format
-
-The trace file comes in three parts: a header, a textual description
-section, and a trace frame section with binary data.
-
-The header has the form @code{\x7fTRACE0\n}.  The first byte is
-@code{0x7f} so as to indicate that the file contains binary data,
-while the @code{0} is a version number that may have different values
-in the future.
-
-The description section consists of multiple lines of @sc{ascii} text
-separated by newline characters (@code{0xa}).  The lines may include a
-variety of optional descriptive or context-setting information, such
-as tracepoint definitions or register set size.  @value{GDBN} will
-ignore any line that it does not recognize.  An empty line marks the end
-of this section.
-
-@c FIXME add some specific types of data
-
-The trace frame section consists of a number of consecutive frames.
-Each frame begins with a two-byte tracepoint number, followed by a
-four-byte size giving the amount of data in the frame.  The data in
-the frame consists of a number of blocks, each introduced by a
-character indicating its type (at least register, memory, and trace
-state variable).  The data in this section is raw binary, not a
-hexadecimal or other encoding; its endianness matches the target's
-endianness.
-
-@c FIXME bi-arch may require endianness/arch info in description section
-
-@table @code
-@item R @var{bytes}
-Register block.  The number and ordering of bytes matches that of a
-@code{g} packet in the remote protocol.  Note that these are the
-actual bytes, in target order and @value{GDBN} register order, not a
-hexadecimal encoding.
-
-@item M @var{address} @var{length} @var{bytes}...
-Memory block.  This is a contiguous block of memory, at the 8-byte
-address @var{address}, with a 2-byte length @var{length}, followed by
-@var{length} bytes.
-
-@item V @var{number} @var{value}
-Trace state variable block.  This records the 8-byte signed value
-@var{value} of trace state variable numbered @var{number}.
-
-@end table
-
-Future enhancements of the trace file format may include additional types
-of blocks.
-
 @node Target Descriptions
 @appendix Target Descriptions
 @cindex target descriptions
@@ -35579,6 +35526,59 @@ displayed by @value{GDBN}.  The @samp{cores} column, if present,
 should contain a comma-separated list of cores that this process
 is running on.  Target may provide additional columns,
 which @value{GDBN} currently ignores.
+
+@node Trace File Format
+@appendix Trace File Format
+@cindex trace file format
+
+The trace file comes in three parts: a header, a textual description
+section, and a trace frame section with binary data.
+
+The header has the form @code{\x7fTRACE0\n}.  The first byte is
+@code{0x7f} so as to indicate that the file contains binary data,
+while the @code{0} is a version number that may have different values
+in the future.
+
+The description section consists of multiple lines of @sc{ascii} text
+separated by newline characters (@code{0xa}).  The lines may include a
+variety of optional descriptive or context-setting information, such
+as tracepoint definitions or register set size.  @value{GDBN} will
+ignore any line that it does not recognize.  An empty line marks the end
+of this section.
+
+@c FIXME add some specific types of data
+
+The trace frame section consists of a number of consecutive frames.
+Each frame begins with a two-byte tracepoint number, followed by a
+four-byte size giving the amount of data in the frame.  The data in
+the frame consists of a number of blocks, each introduced by a
+character indicating its type (at least register, memory, and trace
+state variable).  The data in this section is raw binary, not a
+hexadecimal or other encoding; its endianness matches the target's
+endianness.
+
+@c FIXME bi-arch may require endianness/arch info in description section
+
+@table @code
+@item R @var{bytes}
+Register block.  The number and ordering of bytes matches that of a
+@code{g} packet in the remote protocol.  Note that these are the
+actual bytes, in target order and @value{GDBN} register order, not a
+hexadecimal encoding.
+
+@item M @var{address} @var{length} @var{bytes}...
+Memory block.  This is a contiguous block of memory, at the 8-byte
+address @var{address}, with a 2-byte length @var{length}, followed by
+@var{length} bytes.
+
+@item V @var{number} @var{value}
+Trace state variable block.  This records the 8-byte signed value
+@var{value} of trace state variable numbered @var{number}.
+
+@end table
+
+Future enhancements of the trace file format may include additional types
+of blocks.
 
 @include gpl.texi
 
