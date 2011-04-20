@@ -308,7 +308,7 @@ typedef struct {
   bfd_size_type specified_data_size;
 
   /* The size of the hash table to use.  */
-  bfd_size_type hash_table_size;
+  unsigned long hash_table_size;
 
   /* The maximum page size for ELF.  */
   bfd_vma maxpagesize;

@@ -1,6 +1,6 @@
 /* hash.c -- hash table routines for BFD
    Copyright 1993, 1994, 1995, 1997, 1999, 2001, 2002, 2003, 2004, 2005,
-   2006, 2007, 2009, 2010 Free Software Foundation, Inc.
+   2006, 2007, 2009, 2010, 2011  Free Software Foundation, Inc.
    Written by Steve Chamberlain <sac@cygnus.com>
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -352,7 +352,7 @@ higher_prime_number (unsigned long n)
   return *low;
 }
 
-static size_t bfd_default_hash_table_size = DEFAULT_SIZE;
+static unsigned long bfd_default_hash_table_size = DEFAULT_SIZE;
 
 /* Create a new hash table, given a number of entries.  */
 
@@ -364,9 +364,15 @@ bfd_hash_table_init_n (struct bfd_hash_table *table,
 		       unsigned int entsize,
 		       unsigned int size)
 {
-  unsigned int alloc;
+  unsigned long alloc;
 
-  alloc = size * sizeof (struct bfd_hash_entry *);
+  alloc = size;
+  alloc *= sizeof (struct bfd_hash_entry *);
+  if (alloc / sizeof (struct bfd_hash_entry *) != size)
+    {
+      bfd_set_error (bfd_error_no_memory);
+      return FALSE;
+    }
 
   table->memory = (void *) objalloc_create ();
   if (table->memory == NULL)
@@ -645,15 +651,15 @@ bfd_hash_traverse (struct bfd_hash_table *table,
   table->frozen = 0;
 }
 
-void
-bfd_hash_set_default_size (bfd_size_type hash_size)
+unsigned long
+bfd_hash_set_default_size (unsigned long hash_size)
 {
   /* Extend this prime list if you want more granularity of hash table size.  */
-  static const bfd_size_type hash_size_primes[] =
+  static const unsigned long hash_size_primes[] =
     {
-      251, 509, 1021, 2039, 4051, 8599, 16699, 32749
+      251, 509, 1021, 2039, 4051, 8599, 16699, 32749, 65537
     };
-  size_t _index;
+  unsigned int _index;
 
   /* Work out best prime number near the hash_size.  */
   for (_index = 0; _index < ARRAY_SIZE (hash_size_primes) - 1; ++_index)
@@ -661,6 +667,7 @@ bfd_hash_set_default_size (bfd_size_type hash_size)
       break;
 
   bfd_default_hash_table_size = hash_size_primes[_index];
+  return bfd_default_hash_table_size;
 }
 
 /* A few different object file formats (a.out, COFF, ELF) use a string

@@ -1,5 +1,9 @@
 2011-04-20  Alan Modra  <amodra@gmail.com>
 
+	* ld.h (ld_config_type <hash_table_size>): Make it an unsigned long.
+
+2011-04-20  Alan Modra  <amodra@gmail.com>
+
 	PR ld/12365
 	* ldfile.c (ldfile_try_open_bfd): Move code creating and switching
 	to plugin IR BFD..

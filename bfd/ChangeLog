@@ -1,3 +1,12 @@
+2011-04-20  Alan Modra  <amodra@gmail.com>
+
+	* hash.c (bfd_default_hash_table_size): Make it an unsigned long.
+	(bfd_hash_table_init_n): Overflow checking.
+	(bfd_hash_set_default_size): Return current size.  Take unsigned long
+	arg.  Add 65537 to hash_size primes.
+	* bfd-in.h (bfd_hash_set_default_size): Update prototype.
+	* bfd-in2.h: Regenerate.
+
 2011-04-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* elf-bfd.h (RELOC_AGAINST_DISCARDED_SECTION): Fix +1 overrun of

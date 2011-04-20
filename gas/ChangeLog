@@ -1,3 +1,9 @@
+2011-04-20  Alan Modra  <amodra@gmail.com>
+
+	* hash.c (set_gas_hash_table_size): Use bfd_hash_set_default_size.
+	(hash_new_sized): New function, split out from..
+	(hash_new): ..here.
+
 2011-04-19  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-arm.c (v7m_psrs): Revert previous delta.
