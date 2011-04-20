@@ -1,3 +1,9 @@
+2011-04-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.cp/cpcompletion.exp (complete class methods)
+	(complete class methods beginning with F): Move them above runto.  New
+	comment about the runto delimiter.
+
 2011-04-20  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.base/maint.exp: Test that "maint print registers" works

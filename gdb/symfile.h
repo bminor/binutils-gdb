@@ -250,17 +250,18 @@ struct quick_symbol_functions
 
      FILE_MATCHER is called for each file in OBJFILE.  The file name
      and the DATA argument are passed to it.  If it returns zero, this
-     file is skipped.
+     file is skipped.  If FILE_MATCHER is NULL such file is not skipped.
 
-     Otherwise, if the file is not skipped, then NAME_MATCHER is
-     called for each symbol defined in the file.  The symbol's
-     "natural" name and DATA are passed to NAME_MATCHER.
+     Otherwise, if KIND does not match this symbol is skipped.
+     
+     If even KIND matches, then NAME_MATCHER is called for each symbol defined
+     in the file.  The symbol's "natural" name and DATA are passed to
+     NAME_MATCHER.
 
      If NAME_MATCHER returns zero, then this symbol is skipped.
 
-     Otherwise, if this symbol is not skipped, and it matches KIND,
-     then this symbol's symbol table is expanded.
-     
+     Otherwise, this symbol's symbol table is expanded.
+
      DATA is user data that is passed unmodified to the callback
      functions.  */
   void (*expand_symtabs_matching) (struct objfile *objfile,
@@ -280,13 +281,6 @@ struct quick_symbol_functions
 					 CORE_ADDR pc,
 					 struct obj_section *section,
 					 int warn_if_readin);
-
-  /* Call a callback for every symbol defined in OBJFILE.  FUN is the
-     callback.  It is passed the symbol's natural name, and the DATA
-     passed to this function.  */
-  void (*map_symbol_names) (struct objfile *objfile,
-			    void (*fun) (const char *, void *),
-			    void *data);
 
   /* Call a callback for every file defined in OBJFILE whose symtab is
      not already read in.  FUN is the callback.  It is passed the file's name,

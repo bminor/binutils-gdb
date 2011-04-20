@@ -2974,6 +2974,7 @@ search_symbols_name_matches (const char *symname, void *user_data)
                       and constants (enums)
    FUNCTIONS_DOMAIN - search all functions
    TYPES_DOMAIN     - search all type names
+   ALL_DOMAIN       - an internal error for this function
 
    free_search_symbols should be called when *MATCHES is no longer needed.
 
@@ -3665,7 +3666,7 @@ completion_list_add_fields (struct symbol *sym, char *sym_text,
 }
 
 /* Type of the user_data argument passed to add_macro_name or
-   add_partial_symbol_name.  The contents are simply whatever is
+   expand_partial_symbol_name.  The contents are simply whatever is
    needed by completion_list_add_name.  */
 struct add_name_data
 {
@@ -3688,15 +3689,13 @@ add_macro_name (const char *name, const struct macro_definition *ignore,
 			    datum->text, datum->word);
 }
 
-/* A callback for map_partial_symbol_names.  */
-static void
-add_partial_symbol_name (const char *name, void *user_data)
+/* A callback for expand_partial_symbol_names.  */
+static int
+expand_partial_symbol_name (const char *name, void *user_data)
 {
   struct add_name_data *datum = (struct add_name_data *) user_data;
 
-  completion_list_add_name ((char *) name,
-			    datum->sym_text, datum->sym_text_len,
-			    datum->text, datum->word);
+  return strncmp (name, datum->sym_text, datum->sym_text_len) == 0;
 }
 
 char **
@@ -3786,8 +3785,9 @@ default_make_symbol_completion_list_break_on (char *text, char *word,
   datum.word = word;
 
   /* Look through the partial symtabs for all symbols which begin
-     by matching SYM_TEXT.  Add each one that you find to the list.  */
-  map_partial_symbol_names (add_partial_symbol_name, &datum);
+     by matching SYM_TEXT.  Expand all CUs that you find to the list.
+     The real names will get added by COMPLETION_LIST_ADD_SYMBOL below.  */
+  expand_partial_symbol_names (expand_partial_symbol_name, &datum);
 
   /* At this point scan through the misc symbol vectors and add each
      symbol you find to the list.  Eventually we want to ignore

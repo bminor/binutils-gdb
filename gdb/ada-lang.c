@@ -5490,7 +5490,7 @@ symbol_completion_add (VEC(char_ptr) **sv,
 }
 
 /* An object of this type is passed as the user_data argument to the
-   map_partial_symbol_names method.  */
+   expand_partial_symbol_names method.  */
 struct add_partial_datum
 {
   VEC(char_ptr) **completions;
@@ -5502,15 +5502,14 @@ struct add_partial_datum
   int encoded;
 };
 
-/* A callback for map_partial_symbol_names.  */
-static void
-ada_add_partial_symbol_completions (const char *name, void *user_data)
+/* A callback for expand_partial_symbol_names.  */
+static int
+ada_expand_partial_symbol_name (const char *name, void *user_data)
 {
   struct add_partial_datum *data = user_data;
-
-  symbol_completion_add (data->completions, name,
-			 data->text, data->text_len, data->text0, data->word,
-			 data->wild_match, data->encoded);
+  
+  return symbol_completion_match (name, data->text, data->text_len,
+                                  data->wild_match, data->encoded) != NULL;
 }
 
 /* Return a list of possible symbol names completing TEXT0.  The list
@@ -5568,7 +5567,7 @@ ada_make_symbol_completion_list (char *text0, char *word)
     data.word = word;
     data.wild_match = wild_match;
     data.encoded = encoded;
-    map_partial_symbol_names (ada_add_partial_symbol_completions, &data);
+    expand_partial_symbol_names (ada_expand_partial_symbol_name, &data);
   }
 
   /* At this point scan through the misc symbol vectors and add each

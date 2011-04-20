@@ -412,6 +412,9 @@ enum search_domain
 
   /* All defined types */
   TYPES_DOMAIN = 2,
+
+  /* Any type.  */
+  ALL_DOMAIN = 3
 };
 
 /* An address-class says where to find the value of a symbol.  */
