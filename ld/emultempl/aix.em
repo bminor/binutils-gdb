@@ -216,6 +216,7 @@ gld${EMULATION_NAME}_add_options
     {"bexpall", no_argument, NULL, OPTION_EXPALL},
     {"bexpfull", no_argument, NULL, OPTION_EXPFULL},
     {"bexport", required_argument, NULL, OPTION_EXPORT},
+    {"bbigtoc", no_argument, NULL, OPTION_IGNORE},
     {"bf", no_argument, NULL, OPTION_ERNOTOK},
     {"bgc", no_argument, &gc, 1},
     {"bh", required_argument, NULL, OPTION_IGNORE},

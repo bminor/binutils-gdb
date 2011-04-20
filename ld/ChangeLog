@@ -1,3 +1,7 @@
+2011-04-20  Tristan Gingold  <gingold@adacore.com>
+
+	* emultempl/aix.em (_add_options): Ignore -bbigtoc switch.
+
 2011-04-20  Alan Modra  <amodra@gmail.com>
 
 	* ld.h (ld_config_type <hash_table_size>): Make it an unsigned long.
