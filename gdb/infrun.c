@@ -6696,11 +6696,6 @@ ptid_is_pid (ptid_t ptid)
 int
 ptid_match (ptid_t ptid, ptid_t filter)
 {
-  /* Since both parameters have the same type, prevent easy mistakes
-     from happening.  */
-  gdb_assert (!ptid_equal (ptid, minus_one_ptid)
-	      && !ptid_equal (ptid, null_ptid));
-
   if (ptid_equal (filter, minus_one_ptid))
     return 1;
   if (ptid_is_pid (filter)

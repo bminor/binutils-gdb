@@ -453,16 +453,25 @@ get_thread_arch_regcache (ptid_t ptid, struct gdbarch *gdbarch)
 {
   struct regcache_list *list;
   struct regcache *new_regcache;
+  struct address_space *aspace;
 
   for (list = current_regcache; list; list = list->next)
     if (ptid_equal (list->regcache->ptid, ptid)
 	&& get_regcache_arch (list->regcache) == gdbarch)
       return list->regcache;
 
-  new_regcache = regcache_xmalloc_1 (gdbarch,
-				     target_thread_address_space (ptid), 0);
+  /* For the benefit of "maint print registers" & co when debugging an
+     executable, allow dumping the regcache even when there is no
+     thread selected (target_thread_address_space internal-errors if
+     no address space is found).  Note that normal user commands will
+     fail higher up on the call stack due to no
+     target_has_registers.  */
+  aspace = (ptid_equal (null_ptid, ptid)
+	    ? NULL
+	    : target_thread_address_space (ptid));
+
+  new_regcache = regcache_xmalloc_1 (gdbarch, aspace, 0);
   new_regcache->ptid = ptid;
-  gdb_assert (new_regcache->aspace != NULL);
 
   list = xmalloc (sizeof (struct regcache_list));
   list->regcache = new_regcache;

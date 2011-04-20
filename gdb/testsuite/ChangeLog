@@ -1,4 +1,10 @@
+2011-04-20  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.base/maint.exp: Test that "maint print registers" works
+	without a running program.
+
 2011-04-20  Marek Polacek  <mpolacek@redhat.com>
+
 	* gdb.base/setshow.exp: Fix racy tests.
 	($old_gdb_prompt): New variable.
 
