@@ -1,3 +1,32 @@
+2011-04-20  Catherine Moore  <clm@codesourcery.com>
+            David Ung <davidu@mips.com>
+
+	* gas/mips/24k-branch-delay-1.d: New.
+	* gas/mips/24k-branch-delay-1.s: New.
+	* gas/mips/24k-triple-stores-1.d: New.
+	* gas/mips/24k-triple-stores-1.s: New.
+	* gas/mips/24k-triple-stores-2.d: New.
+	* gas/mips/24k-triple-stores-2.s: New.
+	* gas/mips/24k-triple-stores-3.d: New.
+	* gas/mips/24k-triple-stores-3.s: New.
+	* gas/mips/24k-triple-stores-4.s: New.
+	* gas/mips/24k-triple-stores-4.d: New.
+	* gas/mips/24k-triple-stores-5.d: New.
+	* gas/mips/24k-triple-stores-5.s: New.
+	* gas/mips/24k-triple-stores-6.d: New.
+	* gas/mips/24k-triple-stores-6.s: New.
+	* gas/mips/24k-triple-stores-7.d: New.
+	* gas/mips/24k-triple-stores-7.s: New.
+	* gas/mips/24k-triple-stores-8.d: New.
+	* gas/mips/24k-triple-stores-8.s: New.
+	* gas/mips/24k-triple-stores-9.d: New.
+	* gas/mips/24k-triple-stores-9.s: New.
+	* gas/mips/24k-triple-stores-10.d: New.
+	* gas/mips/24k-triple-stores-10.s: New.
+	* gas/mips/24k-triple-stores-11.d: New.
+	* gas/mips/24k-triple-stores-11.s: New.
+	* gas/mips/mips.exp: Invoke new tests.
+
 2011-04-19  Nick Clifton  <nickc@redhat.com>
 
 	* gas/arm/mrs-msr-thumb-v7e-m.s: Restore name of basepri_max
