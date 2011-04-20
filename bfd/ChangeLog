@@ -1,3 +1,7 @@
+2011-04-20  Tristan Gingold  <gingold@adacore.com>
+
+	* config.bfd (alpha*-*-*vms*, ia64*-*-*vms*): Define targ_selvecs.
+
 2011-04-20  Alan Modra  <amodra@gmail.com>
 
 	* hash.c (bfd_default_hash_table_size): Make it an unsigned long.

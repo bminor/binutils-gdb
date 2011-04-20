@@ -172,6 +172,7 @@ case "${targ}" in
     ;;
   alpha*-*-*vms*)
     targ_defvec=vms_alpha_vec
+    targ_selvecs=vms_lib_txt_vec
     want64=true
     ;;
   alpha*-*-*)
@@ -190,6 +191,7 @@ case "${targ}" in
     ;;
   ia64*-*-*vms*)
     targ_defvec=bfd_elf64_ia64_vms_vec
+    targ_selvecs=vms_lib_txt_vec
     want64=true
     ;;
   sparc64-*-freebsd* | sparc64-*-kfreebsd*-gnu)
