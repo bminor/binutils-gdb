@@ -181,6 +181,7 @@ software in general.  We will miss him.
 * Operating System Information:: Getting additional information from
                                  the operating system
 * Trace File Format::		GDB trace file format
+* Index Section Format::        .gdb_index section format
 * Copying::			GNU General Public License says
                                 how you can copy and share GDB
 * GNU Free Documentation License::  The license for this documentation
@@ -36912,6 +36913,129 @@ Trace state variable block.  This records the 8-byte signed value
 
 Future enhancements of the trace file format may include additional types
 of blocks.
+
+@node Index Section Format
+@appendix @code{.gdb_index} section format
+@cindex .gdb_index section format
+@cindex index section format
+
+This section documents the index section that is created by @code{save
+gdb-index} (@pxref{Index Files}).  The index section is
+DWARF-specific; some knowledge of DWARF is assumed in this
+description.
+
+The mapped index file format is designed to be directly
+@code{mmap}able on any architecture.  In most cases, a datum is
+represented using a little-endian 32-bit integer value, called an
+@code{offset_type}.  Big endian machines must byte-swap the values
+before using them.  Exceptions to this rule are noted.  The data is
+laid out such that alignment is always respected.
+
+A mapped index consists of several areas, laid out in order.
+
+@enumerate
+@item
+The file header.  This is a sequence of values, of @code{offset_type}
+unless otherwise noted:
+
+@enumerate
+@item
+The version number, currently 4.  Versions 1, 2 and 3 are obsolete.
+
+@item
+The offset, from the start of the file, of the CU list.
+
+@item
+The offset, from the start of the file, of the types CU list.  Note
+that this area can be empty, in which case this offset will be equal
+to the next offset.
+
+@item
+The offset, from the start of the file, of the address area.
+
+@item
+The offset, from the start of the file, of the symbol table.
+
+@item
+The offset, from the start of the file, of the constant pool.
+@end enumerate
+
+@item
+The CU list.  This is a sequence of pairs of 64-bit little-endian
+values, sorted by the CU offset.  The first element in each pair is
+the offset of a CU in the @code{.debug_info} section.  The second
+element in each pair is the length of that CU.  References to a CU
+elsewhere in the map are done using a CU index, which is just the
+0-based index into this table.  Note that if there are type CUs, then
+conceptually CUs and type CUs form a single list for the purposes of
+CU indices.
+
+@item
+The types CU list.  This is a sequence of triplets of 64-bit
+little-endian values.  In a triplet, the first value is the CU offset,
+the second value is the type offset in the CU, and the third value is
+the type signature.  The types CU list is not sorted.
+
+@item
+The address area.  The address area consists of a sequence of address
+entries.  Each address entry has three elements:
+
+@enumerate
+@item
+The low address.  This is a 64-bit little-endian value.
+
+@item
+The high address.  This is a 64-bit little-endian value.  Like
+@code{DW_AT_high_pc}, the value is one byte beyond the end.
+
+@item
+The CU index.  This is an @code{offset_type} value.
+@end enumerate
+
+@item
+The symbol table.  This is an open-addressed hash table.  The size of
+the hash table is always a power of 2.
+
+Each slot in the hash table consists of a pair of @code{offset_type}
+values.  The first value is the offset of the symbol's name in the
+constant pool.  The second value is the offset of the CU vector in the
+constant pool.
+
+If both values are 0, then this slot in the hash table is empty.  This
+is ok because while 0 is a valid constant pool index, it cannot be a
+valid index for both a string and a CU vector.
+
+The hash value for a table entry is computed by applying an
+iterative hash function to the symbol's name.  Starting with an
+initial value of @code{r = 0}, each (unsigned) character @samp{c} in
+the string is incorporated into the hash using the formula
+@code{r = r * 67 + c - 113}.  The terminating @samp{\0} is not
+incorporated into the hash.
+
+The step size used in the hash table is computed via
+@code{((hash * 17) & (size - 1)) | 1}, where @samp{hash} is the hash
+value, and @samp{size} is the size of the hash table.  The step size
+is used to find the next candidate slot when handling a hash
+collision.
+
+The names of C@t{++} symbols in the hash table are canonicalized.  We
+don't currently have a simple description of the canonicalization
+algorithm; if you intend to create new index sections, you must read
+the code.
+
+@item
+The constant pool.  This is simply a bunch of bytes.  It is organized
+so that alignment is correct: CU vectors are stored first, followed by
+strings.
+
+A CU vector in the constant pool is a sequence of @code{offset_type}
+values.  The first value is the number of CU indices in the vector.
+Each subsequent value is the index of a CU in the CU list.  This
+element in the hash table is used to indicate which CUs define the
+symbol.
+
+A string in the constant pool is zero-terminated.
+@end enumerate
 
 @include gpl.texi
 

@@ -1,3 +1,8 @@
+2011-04-20  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2read.c (save_gdb_index_command): Replace format
+	documentation with a pointer to the manual.
+
 2011-04-20  Pedro Alves  <pedro@codesourcery.com>
 
 	* regcache.c: Include remote.h.

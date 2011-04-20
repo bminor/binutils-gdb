@@ -1,3 +1,8 @@
+2011-04-20  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.texinfo (Index Section Format): New node.
+	(Top): Add new node to menu.
+
 2011-04-20  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.texinfo (Maintenance Commands): Document `maint print
