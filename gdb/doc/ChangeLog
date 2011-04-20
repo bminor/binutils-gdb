@@ -1,3 +1,7 @@
+2011-04-20  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.texinfo (Trace File Format): Move node later.
+
 2011-04-19  Tom Tromey  <tromey@redhat.com>
 
 	* gdbint.texinfo (Register Information Functions): Remove
