@@ -156,6 +156,9 @@ struct mips_cl_insn
 
   /* True for mips16 instructions that jump to an absolute address.  */
   unsigned int mips16_absolute_jump_p : 1;
+
+  /* True if this instruction is complete.  */
+  unsigned int complete_p : 1;
 };
 
 /* The ABI to use.  */
@@ -1384,6 +1387,7 @@ create_insn (struct mips_cl_insn *insn, const struct mips_opcode *mo)
   insn->fixed_p = (mips_opts.noreorder > 0);
   insn->noreorder_p = (mips_opts.noreorder > 0);
   insn->mips16_absolute_jump_p = 0;
+  insn->complete_p = 0;
 }
 
 /* Record the current MIPS16 mode in now_seg.  */
@@ -2680,6 +2684,189 @@ nops_for_vr4130 (const struct mips_cl_insn *hist,
   return 0;
 }
 
+#define BASE_REG_EQ(INSN1, INSN2) 	\
+  ((((INSN1) >> OP_SH_RS) & OP_MASK_RS) \
+      == (((INSN2) >> OP_SH_RS) & OP_MASK_RS))
+
+/* Return the minimum alignment for this store instruction.  */
+
+static int
+fix_24k_align_to (const struct mips_opcode *mo)
+{
+  if (strcmp (mo->name, "sh") == 0)
+    return 2;
+
+  if (strcmp (mo->name, "swc1") == 0
+      || strcmp (mo->name, "swc2") == 0
+      || strcmp (mo->name, "sw") == 0
+      || strcmp (mo->name, "sc") == 0
+      || strcmp (mo->name, "s.s") == 0)
+    return 4;
+
+  if (strcmp (mo->name, "sdc1") == 0
+      || strcmp (mo->name, "sdc2") == 0
+      || strcmp (mo->name, "s.d") == 0)
+    return 8;
+
+  /* sb, swl, swr */
+  return 1;
+}
+
+struct fix_24k_store_info
+  {
+    /* Immediate offset, if any, for this store instruction.  */
+    short off;
+    /* Alignment required by this store instruction.  */
+    int align_to;
+    /* True for register offsets.  */
+    int register_offset;
+  };
+
+/* Comparison function used by qsort.  */
+
+static int
+fix_24k_sort (const void *a, const void *b)
+{
+  const struct fix_24k_store_info *pos1 = a;
+  const struct fix_24k_store_info *pos2 = b;
+
+  return (pos1->off - pos2->off);
+}
+
+/* INSN is a store instruction.  Try to record the store information
+   in STINFO.  Return false if the information isn't known.  */
+
+static bfd_boolean
+fix_24k_record_store_info (struct fix_24k_store_info *stinfo,
+                      const struct mips_cl_insn *insn)
+{
+  /* The instruction must have a known offset.  */
+  if (!insn->complete_p || !strstr (insn->insn_mo->args, "o("))
+    return FALSE;
+
+  stinfo->off = (insn->insn_opcode >> OP_SH_IMMEDIATE) & OP_MASK_IMMEDIATE;
+  stinfo->align_to = fix_24k_align_to (insn->insn_mo);
+  return TRUE;
+}
+
+/* 24K Errata: Lost Data on Stores During Refill. 
+  
+  Problem: The FSB (fetch store buffer) acts as an intermediate buffer
+  for the data cache refills and store data. The following describes
+  the scenario where the store data could be lost.
+  
+  * A data cache miss, due to either a load or a store, causing fill
+    data to be supplied by the memory subsystem
+  * The first three doublewords of fill data are returned and written
+    into the cache
+  * A sequence of four stores occurs in consecutive cycles around the
+    final doubleword of the fill:
+  * Store A
+  * Store B
+  * Store C
+  * Zero, One or more instructions
+  * Store D
+  
+  The four stores A-D must be to different doublewords of the line that
+  is being filled. The fourth instruction in the sequence above permits
+  the fill of the final doubleword to be transferred from the FSB into
+  the cache. In the sequence above, the stores may be either integer
+  (sb, sh, sw, swr, swl, sc) or coprocessor (swc1/swc2, sdc1/sdc2,
+  swxc1, sdxc1, suxc1) stores, as long as the four stores are to
+  different doublewords on the line. If the floating point unit is
+  running in 1:2 mode, it is not possible to create the sequence above
+  using only floating point store instructions.
+
+   In this case, the cache line being filled is incorrectly marked
+   invalid, thereby losing the data from any store to the line that
+   occurs between the original miss and the completion of the five
+   cycle sequence shown above.
+
+  The workarounds are:
+
+  * Run the data cache in write-through mode.
+  * Insert a non-store instruction between
+    Store A and Store B or Store B and Store C.  */
+  
+static int
+nops_for_24k (const struct mips_cl_insn *hist,
+	      const struct mips_cl_insn *insn)
+{
+  struct fix_24k_store_info pos[3];
+  int align, i, base_offset;
+
+  /* If INSN is definitely not a store, there's nothing to worry about.  */
+  if (insn && (insn->insn_mo->pinfo & INSN_STORE_MEMORY) == 0)
+    return 0;
+
+  /* Likewise, the previous instruction wasn't a store.  */
+  if ((hist[0].insn_mo->pinfo & INSN_STORE_MEMORY) == 0)
+    return 0;
+
+  /* If we don't know what came before, assume the worst.  */
+  if (hist[1].frag == NULL)
+    return 1;
+
+  /* If the instruction was not a store, there's nothing to worry about.  */
+  if ((hist[1].insn_mo->pinfo & INSN_STORE_MEMORY) == 0)
+    return 0;
+
+  /* If we don't know the relationship between the store addresses,
+     assume the worst.  */
+  if (insn == NULL
+      || !BASE_REG_EQ (insn->insn_opcode, hist[0].insn_opcode)
+      || !BASE_REG_EQ (insn->insn_opcode, hist[1].insn_opcode))
+    return 1;
+
+  if (!fix_24k_record_store_info (&pos[0], insn)
+      || !fix_24k_record_store_info (&pos[1], &hist[0])
+      || !fix_24k_record_store_info (&pos[2], &hist[1]))
+    return 1;
+
+  qsort (&pos, 3, sizeof (struct fix_24k_store_info), fix_24k_sort);
+
+  /* Pick a value of ALIGN and X such that all offsets are adjusted by
+     X bytes and such that the base register + X is known to be aligned
+     to align bytes.  */
+
+  if (((insn->insn_opcode >> OP_SH_RS) & OP_MASK_RS) == SP)
+    align = 8;
+  else
+    {
+      align = pos[0].align_to;
+      base_offset = pos[0].off;
+      for (i = 1; i < 3; i++)
+	if (align < pos[i].align_to)
+	  {
+	    align = pos[i].align_to;
+	    base_offset = pos[i].off;
+	  }
+      for (i = 0; i < 3; i++)
+	pos[i].off -= base_offset;
+    }
+
+  pos[0].off &= ~align + 1;
+  pos[1].off &= ~align + 1;
+  pos[2].off &= ~align + 1;
+
+  /* If any two stores write to the same chunk, they also write to the
+     same doubleword.  The offsets are still sorted at this point.  */
+  if (pos[0].off == pos[1].off || pos[1].off == pos[2].off)
+    return 0;
+
+  /* A range of at least 9 bytes is needed for the stores to be in
+     non-overlapping doublewords.  */
+  if (pos[2].off - pos[0].off <= 8)
+    return 0;
+
+  if (pos[2].off - pos[1].off >= 24
+      || pos[1].off - pos[0].off >= 24
+      || pos[2].off - pos[0].off >= 32)
+    return 0;
+
+  return 1;
+}
+
 /* Return the number of nops that would be needed if instruction INSN
    immediately followed the MAX_NOPS instructions given by HIST,
    where HIST[0] is the most recent instruction.  If INSN is null,
@@ -2702,6 +2889,13 @@ nops_for_insn (const struct mips_cl_insn *hist,
   if (mips_fix_vr4130)
     {
       tmp_nops = nops_for_vr4130 (hist, insn);
+      if (tmp_nops > nops)
+	nops = tmp_nops;
+    }
+
+  if (mips_fix_24k)
+    {
+      tmp_nops = nops_for_24k (hist, insn);
       if (tmp_nops > nops)
 	nops = tmp_nops;
     }
@@ -2835,6 +3029,82 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
   prev_pinfo2 = history[0].insn_mo->pinfo2;
   pinfo = ip->insn_mo->pinfo;
   pinfo2 = ip->insn_mo->pinfo2;
+
+  if (address_expr == NULL)
+    ip->complete_p = 1;
+  else if (*reloc_type <= BFD_RELOC_UNUSED
+	   && address_expr->X_op == O_constant)
+    {
+      unsigned int tmp;
+
+      ip->complete_p = 1;
+      switch (*reloc_type)
+	{
+	case BFD_RELOC_32:
+	  ip->insn_opcode |= address_expr->X_add_number;
+	  break;
+
+	case BFD_RELOC_MIPS_HIGHEST:
+	  tmp = (address_expr->X_add_number + 0x800080008000ull) >> 48;
+	  ip->insn_opcode |= tmp & 0xffff;
+	  break;
+
+	case BFD_RELOC_MIPS_HIGHER:
+	  tmp = (address_expr->X_add_number + 0x80008000ull) >> 32;
+	  ip->insn_opcode |= tmp & 0xffff;
+	  break;
+
+	case BFD_RELOC_HI16_S:
+	  tmp = (address_expr->X_add_number + 0x8000) >> 16;
+	  ip->insn_opcode |= tmp & 0xffff;
+	  break;
+
+	case BFD_RELOC_HI16:
+	  ip->insn_opcode |= (address_expr->X_add_number >> 16) & 0xffff;
+	  break;
+
+	case BFD_RELOC_UNUSED:
+	case BFD_RELOC_LO16:
+	case BFD_RELOC_MIPS_GOT_DISP:
+	  ip->insn_opcode |= address_expr->X_add_number & 0xffff;
+	  break;
+
+	case BFD_RELOC_MIPS_JMP:
+	  if ((address_expr->X_add_number & 3) != 0)
+	    as_bad (_("jump to misaligned address (0x%lx)"),
+	            (unsigned long) address_expr->X_add_number);
+	  ip->insn_opcode |= (address_expr->X_add_number >> 2) & 0x3ffffff;
+	  ip->complete_p = 0;
+	  break;
+
+	case BFD_RELOC_MIPS16_JMP:
+	  if ((address_expr->X_add_number & 3) != 0)
+	    as_bad (_("jump to misaligned address (0x%lx)"),
+	            (unsigned long) address_expr->X_add_number);
+	  ip->insn_opcode |=
+	    (((address_expr->X_add_number & 0x7c0000) << 3)
+	       | ((address_expr->X_add_number & 0xf800000) >> 7)
+	       | ((address_expr->X_add_number & 0x3fffc) >> 2));
+	  ip->complete_p = 0;
+	  break;
+
+	case BFD_RELOC_16_PCREL_S2:
+	  if ((address_expr->X_add_number & 3) != 0)
+	    as_bad (_("branch to misaligned address (0x%lx)"),
+	            (unsigned long) address_expr->X_add_number);
+	  if (mips_relax_branch)
+	    goto need_reloc;
+	  if ((address_expr->X_add_number + 0x20000) & ~0x3ffff)
+	    as_bad (_("branch address range overflow (0x%lx)"),
+	            (unsigned long) address_expr->X_add_number);
+	  ip->insn_opcode |= (address_expr->X_add_number >> 2) & 0xffff;
+	  ip->complete_p = 0;
+	  break;
+
+	default:
+	  internalError ();
+	}	
+    }
 
   if (mips_relax.sequence != 2 && !mips_opts.noreorder)
     {
@@ -3007,75 +3277,8 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 
   if (address_expr != NULL && *reloc_type <= BFD_RELOC_UNUSED)
     {
-      if (address_expr->X_op == O_constant)
-	{
-	  unsigned int tmp;
-
-	  switch (*reloc_type)
-	    {
-	    case BFD_RELOC_32:
-	      ip->insn_opcode |= address_expr->X_add_number;
-	      break;
-
-	    case BFD_RELOC_MIPS_HIGHEST:
-	      tmp = (address_expr->X_add_number + 0x800080008000ull) >> 48;
-	      ip->insn_opcode |= tmp & 0xffff;
-	      break;
-
-	    case BFD_RELOC_MIPS_HIGHER:
-	      tmp = (address_expr->X_add_number + 0x80008000ull) >> 32;
-	      ip->insn_opcode |= tmp & 0xffff;
-	      break;
-
-	    case BFD_RELOC_HI16_S:
-	      tmp = (address_expr->X_add_number + 0x8000) >> 16;
-	      ip->insn_opcode |= tmp & 0xffff;
-	      break;
-
-	    case BFD_RELOC_HI16:
-	      ip->insn_opcode |= (address_expr->X_add_number >> 16) & 0xffff;
-	      break;
-
-	    case BFD_RELOC_UNUSED:
-	    case BFD_RELOC_LO16:
-	    case BFD_RELOC_MIPS_GOT_DISP:
-	      ip->insn_opcode |= address_expr->X_add_number & 0xffff;
-	      break;
-
-	    case BFD_RELOC_MIPS_JMP:
-	      if ((address_expr->X_add_number & 3) != 0)
-		as_bad (_("jump to misaligned address (0x%lx)"),
-			(unsigned long) address_expr->X_add_number);
-	      ip->insn_opcode |= (address_expr->X_add_number >> 2) & 0x3ffffff;
-	      break;
-
-	    case BFD_RELOC_MIPS16_JMP:
-	      if ((address_expr->X_add_number & 3) != 0)
-		as_bad (_("jump to misaligned address (0x%lx)"),
-			(unsigned long) address_expr->X_add_number);
-	      ip->insn_opcode |=
-		(((address_expr->X_add_number & 0x7c0000) << 3)
-		 | ((address_expr->X_add_number & 0xf800000) >> 7)
-		 | ((address_expr->X_add_number & 0x3fffc) >> 2));
-	      break;
-
-	    case BFD_RELOC_16_PCREL_S2:
-	      if ((address_expr->X_add_number & 3) != 0)
-		as_bad (_("branch to misaligned address (0x%lx)"),
-			(unsigned long) address_expr->X_add_number);
-	      if (mips_relax_branch)
-		goto need_reloc;
-	      if ((address_expr->X_add_number + 0x20000) & ~0x3ffff)
-		as_bad (_("branch address range overflow (0x%lx)"),
-			(unsigned long) address_expr->X_add_number);
-	      ip->insn_opcode |= (address_expr->X_add_number >> 2) & 0xffff;
-	      break;
-
-	    default:
-	      internalError ();
-	    }
-	}
-      else if (*reloc_type < BFD_RELOC_UNUSED)
+      if (!ip->complete_p
+          && *reloc_type < BFD_RELOC_UNUSED)
 	need_reloc:
 	{
 	  reloc_howto_type *howto;

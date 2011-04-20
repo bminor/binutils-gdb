@@ -1,3 +1,17 @@
+2011-04-20  Catherine Moore  <clm@codesourcery.com>
+            David Ung <davidu@mips.com>
+
+	* config/mips.c (mips_cl_insn): Add new field complete_p.
+	(create_insn): Initialize complete_p to zero.
+	(BASE_REG_EQ): New.
+	(fix_24k_align_to): New.
+	(fix_24k_store_info): Declare.
+	(fix_24k_sort): New.
+	(fix_24k_record_store_info): New.
+	(nops_for_24k): New.
+	(nops_for_insn): Call nops_for_24k.
+	(append_insn): Move O_constant expression handling.
+	
 2011-04-20  Alan Modra  <amodra@gmail.com>
 
 	* hash.c (set_gas_hash_table_size): Use bfd_hash_set_default_size.
