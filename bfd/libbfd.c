@@ -979,8 +979,12 @@ bfd_log2 (bfd_vma x)
 {
   unsigned int result = 0;
 
-  while ((x = (x >> 1)) != 0)
+  if (x <= 1)
+    return result;
+  --x;
+  do
     ++result;
+  while ((x >>= 1) != 0);
   return result;
 }
 

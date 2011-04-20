@@ -1,5 +1,9 @@
 2011-04-20  Alan Modra  <amodra@gmail.com>
 
+	* libbfd.c (bfd_log2): Do return rounded up value.
+	* elflink.c (bfd_elf_size_dynsym_hash_dynstr): Replace bfd_log2
+	call with expanded old round down version of the function.
+
 	* archive.c (_bfd_get_elt_at_filepos): Don't release n_nfd.
 	* elflink.c (elf_link_add_object_symbols): Delete redundant code.
 
