@@ -1,3 +1,8 @@
+2011-04-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* elf-bfd.h (RELOC_AGAINST_DISCARDED_SECTION): Fix +1 overrun of
+	memmove elements.
+
 2011-03-26  John Marino  <binutils@marino.st>
 
 	* config.bfd: Add x86_64-*-dragonfly*, fix i386-*-dragonfly*.
