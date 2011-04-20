@@ -1,5 +1,19 @@
 2011-04-20  Pedro Alves  <pedro@codesourcery.com>
 
+	* regcache.c: Include remote.h.
+	(enum regcache_dump_what) <regcache_dump_remote>: New enum value.
+	(regcache_dump): Handle regcache_dump_remote.
+	(maintenance_print_remote_registers): New function.
+	(_initialize_regcache): Install "maint print remote-registers"
+	command.
+	* remote.c (map_regcache_remote_table): New function, factored out
+	from ...
+	(init_remote_state): ... here.
+	(remote_register_number_and_offset): New.
+	* remote.h (remote_register_number_and_offset): Declare.
+
+2011-04-20  Pedro Alves  <pedro@codesourcery.com>
+
 	* regcache.c (get_thread_arch_regcache): If creating a regcache for
 	null_ptid, assume and allow a NULL address space, instead of
 	asking the target for the ptid's address space.

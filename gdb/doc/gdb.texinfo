@@ -31678,18 +31678,22 @@ Takes an optional file parameter.
 @kindex maint print raw-registers
 @kindex maint print cooked-registers
 @kindex maint print register-groups
+@kindex maint print remote-registers
 @item maint print registers @r{[}@var{file}@r{]}
 @itemx maint print raw-registers @r{[}@var{file}@r{]}
 @itemx maint print cooked-registers @r{[}@var{file}@r{]}
 @itemx maint print register-groups @r{[}@var{file}@r{]}
+@itemx maint print remote-registers @r{[}@var{file}@r{]}
 Print @value{GDBN}'s internal register data structures.
 
 The command @code{maint print raw-registers} includes the contents of
-the raw register cache; the command @code{maint print cooked-registers}
-includes the (cooked) value of all registers, including registers which
-aren't available on the target nor visible to user; and the
-command @code{maint print register-groups} includes the groups that each
-register is a member of.  @xref{Registers,, Registers, gdbint,
+the raw register cache; the command @code{maint print
+cooked-registers} includes the (cooked) value of all registers,
+including registers which aren't available on the target nor visible
+to user; the command @code{maint print register-groups} includes the
+groups that each register is a member of; and the command @code{maint
+print remote-registers} includes the remote target's register numbers
+and offsets in the `G' packets.  @xref{Registers,, Registers, gdbint,
 @value{GDBN} Internals}.
 
 These commands take an optional parameter, a file name to which to

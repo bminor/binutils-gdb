@@ -535,24 +535,15 @@ compare_pnums (const void *lhs_, const void *rhs_)
     return 1;
 }
 
-static void *
-init_remote_state (struct gdbarch *gdbarch)
+static int
+map_regcache_remote_table (struct gdbarch *gdbarch, struct packet_reg *regs)
 {
   int regnum, num_remote_regs, offset;
-  struct remote_state *rs = get_remote_state_raw ();
-  struct remote_arch_state *rsa;
   struct packet_reg **remote_regs;
 
-  rsa = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct remote_arch_state);
-
-  /* Use the architecture to build a regnum<->pnum table, which will be
-     1:1 unless a feature set specifies otherwise.  */
-  rsa->regs = GDBARCH_OBSTACK_CALLOC (gdbarch,
-				      gdbarch_num_regs (gdbarch),
-				      struct packet_reg);
   for (regnum = 0; regnum < gdbarch_num_regs (gdbarch); regnum++)
     {
-      struct packet_reg *r = &rsa->regs[regnum];
+      struct packet_reg *r = &regs[regnum];
 
       if (register_size (gdbarch, regnum) == 0)
 	/* Do not try to fetch zero-sized (placeholder) registers.  */
@@ -568,12 +559,12 @@ init_remote_state (struct gdbarch *gdbarch)
      number.  */
 
   remote_regs = alloca (gdbarch_num_regs (gdbarch)
-			  * sizeof (struct packet_reg *));
+			* sizeof (struct packet_reg *));
   for (num_remote_regs = 0, regnum = 0;
        regnum < gdbarch_num_regs (gdbarch);
        regnum++)
-    if (rsa->regs[regnum].pnum != -1)
-      remote_regs[num_remote_regs++] = &rsa->regs[regnum];
+    if (regs[regnum].pnum != -1)
+      remote_regs[num_remote_regs++] = &regs[regnum];
 
   qsort (remote_regs, num_remote_regs, sizeof (struct packet_reg *),
 	 compare_pnums);
@@ -585,9 +576,55 @@ init_remote_state (struct gdbarch *gdbarch)
       offset += register_size (gdbarch, remote_regs[regnum]->regnum);
     }
 
+  return offset;
+}
+
+/* Given the architecture described by GDBARCH, return the remote
+   protocol register's number and the register's offset in the g/G
+   packets of GDB register REGNUM, in PNUM and POFFSET respectively.
+   If the target does not have a mapping for REGNUM, return false,
+   otherwise, return true.  */
+
+int
+remote_register_number_and_offset (struct gdbarch *gdbarch, int regnum,
+				   int *pnum, int *poffset)
+{
+  int sizeof_g_packet;
+  struct packet_reg *regs;
+  struct cleanup *old_chain;
+
+  gdb_assert (regnum < gdbarch_num_regs (gdbarch));
+
+  regs = xcalloc (gdbarch_num_regs (gdbarch), sizeof (struct packet_reg));
+  old_chain = make_cleanup (xfree, regs);
+
+  sizeof_g_packet = map_regcache_remote_table (gdbarch, regs);
+
+  *pnum = regs[regnum].pnum;
+  *poffset = regs[regnum].offset;
+
+  do_cleanups (old_chain);
+
+  return *pnum != -1;
+}
+
+static void *
+init_remote_state (struct gdbarch *gdbarch)
+{
+  struct remote_state *rs = get_remote_state_raw ();
+  struct remote_arch_state *rsa;
+
+  rsa = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct remote_arch_state);
+
+  /* Use the architecture to build a regnum<->pnum table, which will be
+     1:1 unless a feature set specifies otherwise.  */
+  rsa->regs = GDBARCH_OBSTACK_CALLOC (gdbarch,
+				      gdbarch_num_regs (gdbarch),
+				      struct packet_reg);
+
   /* Record the maximum possible size of the g packet - it may turn out
      to be smaller.  */
-  rsa->sizeof_g_packet = offset;
+  rsa->sizeof_g_packet = map_regcache_remote_table (gdbarch, rsa->regs);
 
   /* Default maximum number of characters in a packet body.  Many
      remote stubs have a hardwired buffer size of 400 bytes
