@@ -28,7 +28,8 @@ extern struct psymbol_bcache *psymbol_bcache_init (void);
 extern void psymbol_bcache_free (struct psymbol_bcache *);
 extern struct bcache *psymbol_bcache_get_bcache (struct psymbol_bcache *);
 
-void map_partial_symbol_names (void (*) (const char *, void *), void *);
+void expand_partial_symbol_names (int (*fun) (const char *, void *),
+				  void *data);
 
 void map_partial_symbol_filenames (void (*) (const char *, const char *,
 					     void *),

@@ -408,7 +408,10 @@ typedef enum domain_enum_tag
   FUNCTIONS_DOMAIN,
 
   /* All defined types */
-  TYPES_DOMAIN
+  TYPES_DOMAIN,
+
+  /* Any type.  */
+  ALL_DOMAIN
 }
 domain_enum;
 

@@ -74,6 +74,15 @@ gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 
+# Test that completion is restricted by class name (all methods)
+test_class_complete Foo "" "complete class methods" \
+    [list Foo Foofoo get_foo set_foo ~Foo]
+
+test_class_complete Foo F "complete class methods beginning with F" \
+    [list Foo Foofoo]
+
+# The tests below depend on the current code scope.
+
 set bp_location [gdb_get_line_number "Set breakpoint here" ${testfile}.cc]
 
 if {![runto "${testfile}.cc:$bp_location"]} {
@@ -93,11 +102,3 @@ gdb_test "complete p foo1.Fo" "p foo1\\.Foofoo"
 
 # Test completion with an anonymous struct.
 gdb_test "complete p a.g" "p a\\.get"
-
-# Test that completion is restricted by class name (all methods)
-test_class_complete Foo "" "complete class methods" \
-    [list Foo Foofoo get_foo set_foo ~Foo]
-
-test_class_complete Foo F "complete class methods beginning with F" \
-    [list Foo Foofoo]
-

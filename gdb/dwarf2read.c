@@ -2560,30 +2560,31 @@ dw2_expand_symtabs_matching (struct objfile *objfile,
     return;
   index = dwarf2_per_objfile->index_table;
 
-  for (i = 0; i < (dwarf2_per_objfile->n_comp_units
-		   + dwarf2_per_objfile->n_type_comp_units); ++i)
-    {
-      int j;
-      struct dwarf2_per_cu_data *per_cu = dw2_get_cu (i);
-      struct quick_file_names *file_data;
+  if (file_matcher != NULL)
+    for (i = 0; i < (dwarf2_per_objfile->n_comp_units
+		     + dwarf2_per_objfile->n_type_comp_units); ++i)
+      {
+	int j;
+	struct dwarf2_per_cu_data *per_cu = dw2_get_cu (i);
+	struct quick_file_names *file_data;
 
-      per_cu->v.quick->mark = 0;
-      if (per_cu->v.quick->symtab)
-	continue;
+	per_cu->v.quick->mark = 0;
+	if (per_cu->v.quick->symtab)
+	  continue;
 
-      file_data = dw2_get_file_names (objfile, per_cu);
-      if (file_data == NULL)
-	continue;
+	file_data = dw2_get_file_names (objfile, per_cu);
+	if (file_data == NULL)
+	  continue;
 
-      for (j = 0; j < file_data->num_file_names; ++j)
-	{
-	  if (file_matcher (file_data->file_names[j], data))
-	    {
-	      per_cu->v.quick->mark = 1;
-	      break;
-	    }
-	}
-    }
+	for (j = 0; j < file_data->num_file_names; ++j)
+	  {
+	    if (file_matcher (file_data->file_names[j], data))
+	      {
+		per_cu->v.quick->mark = 1;
+		break;
+	      }
+	  }
+      }
 
   for (iter = 0; iter < index->symbol_table_slots; ++iter)
     {
@@ -2609,7 +2610,7 @@ dw2_expand_symtabs_matching (struct objfile *objfile,
 	  struct dwarf2_per_cu_data *per_cu;
 
 	  per_cu = dw2_get_cu (MAYBE_SWAP (vec[vec_idx + 1]));
-	  if (per_cu->v.quick->mark)
+	  if (file_matcher == NULL || per_cu->v.quick->mark)
 	    dw2_instantiate_symtab (objfile, per_cu);
 	}
     }
@@ -2638,36 +2639,6 @@ dw2_find_pc_sect_symtab (struct objfile *objfile,
 	     paddress (get_objfile_arch (objfile), pc));
 
   return dw2_instantiate_symtab (objfile, data);
-}
-
-static void
-dw2_map_symbol_names (struct objfile *objfile,
-		      void (*fun) (const char *, void *),
-		      void *data)
-{
-  offset_type iter;
-  struct mapped_index *index;
-
-  dw2_setup (objfile);
-
-  /* index_table is NULL if OBJF_READNOW.  */
-  if (!dwarf2_per_objfile->index_table)
-    return;
-  index = dwarf2_per_objfile->index_table;
-
-  for (iter = 0; iter < index->symbol_table_slots; ++iter)
-    {
-      offset_type idx = 2 * iter;
-      const char *name;
-      offset_type *vec, vec_len, vec_idx;
-
-      if (index->symbol_table[idx] == 0 && index->symbol_table[idx + 1] == 0)
-	continue;
-
-      name = (index->constant_pool + MAYBE_SWAP (index->symbol_table[idx]));
-
-      (*fun) (name, data);
-    }
 }
 
 static void
@@ -2726,7 +2697,6 @@ const struct quick_symbol_functions dwarf2_gdb_index_functions =
   dw2_map_matching_symbols,
   dw2_expand_symtabs_matching,
   dw2_find_pc_sect_symtab,
-  dw2_map_symbol_names,
   dw2_map_symbol_filenames
 };
 

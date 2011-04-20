@@ -1,3 +1,39 @@
+2011-04-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* ada-lang.c (struct add_partial_datum): Update the comment for
+	expand_partial_symbol_name.
+	(ada_add_partial_symbol_completions): Rename to ...
+	(ada_expand_partial_symbol_name): ... here, change return type, update
+	function comment, call symbol_completion_match instead of
+	symbol_completion_add.
+	(ada_make_symbol_completion_list): Use now expand_partial_symbol_names
+	and ada_expand_partial_symbol_name.
+	* dwarf2read.c (dw2_expand_symtabs_matching): Support NULL
+	FILE_MATCHER.
+	(dw2_map_symbol_names): Remove.
+	(dwarf2_gdb_index_functions): Unlist dw2_map_symbol_names.
+	* psymtab.c (map_symbol_names_psymtab): Remove.
+	(expand_symtabs_matching_via_partial): Support NULL FILE_MATCHER.
+	Support KIND == ALL_DOMAIN.  Exchange the NAME_MATCHER and KIND check
+	order.
+	(psym_functions): Unlist map_symbol_names_psymtab.
+	(map_partial_symbol_names): Rename to ...
+	(expand_partial_symbol_names): ... here, change the FUN type, call
+	expand_symtabs_matching with ALL_DOMAIN and NULL FILE_MATCHER now.
+	* psymtab.h (map_partial_symbol_names): Rename to ...
+	(expand_partial_symbol_names): ... here, change the FUN type.
+	* symfile.h (struct quick_symbol_functions): Update the description of
+	expand_symtabs_matching.  Remove map_symbol_names.
+	* symtab.c (search_symbols): Add ALL_DOMAIN to the function comment.
+	(struct add_name_data): Update the comment for
+	expand_partial_symbol_name.
+	(add_partial_symbol_name): Rename to ...
+	(expand_partial_symbol_name): ... here.  Replace
+	completion_list_add_name call by strncmp.
+	(default_make_symbol_completion_list_break_on): Use now
+	expand_partial_symbol_names and expand_partial_symbol_name.
+	* symtab.h (enum search_domain): New element ALL_DOMAIN.
+
 2011-04-20  Pedro Alves  <pedro@codesourcery.com>
 
 	* regcache.c (get_thread_arch_regcache): If creating a regcache for
