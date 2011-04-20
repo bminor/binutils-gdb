@@ -1,3 +1,8 @@
+2011-04-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* elf-bfd.h (RELOC_AGAINST_DISCARDED_SECTION): Fix +1 overrun of
+	memmove elements.
+
 2011-04-20  Alan Modra  <amodra@gmail.com>
 
 	* libbfd.c (bfd_log2): Do return rounded up value.

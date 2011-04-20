@@ -2405,7 +2405,7 @@ extern asection _bfd_elf_large_com_section;
 	    rel_hdr = _bfd_elf_single_rel_hdr (input_section);		\
 	    rel_hdr->sh_size -= rel_hdr->sh_entsize;			\
 									\
-	    memmove (rel, rel + 1, (relend - rel) * sizeof (*rel));	\
+	    memmove (rel, rel + 1, (relend - rel - 1) * sizeof (*rel));	\
 									\
 	    input_section->reloc_count--;				\
 	    relend--;							\
