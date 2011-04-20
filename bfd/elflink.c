@@ -4237,10 +4237,7 @@ error_free_dyn:
 		 We need to get the alignment from the section.  */
 	      align = new_sec->alignment_power;
 	    }
-	  if (align > old_alignment
-	      /* Permit an alignment power of zero if an alignment of one
-		 is specified and no other alignments have been specified.  */
-	      || (isym->st_value == 1 && old_alignment == 0))
+	  if (align > old_alignment)
 	    h->root.u.c.p->alignment_power = align;
 	  else
 	    h->root.u.c.p->alignment_power = old_alignment;

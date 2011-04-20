@@ -1,5 +1,10 @@
 2011-04-20  Alan Modra  <amodra@gmail.com>
 
+	* archive.c (_bfd_get_elt_at_filepos): Don't release n_nfd.
+	* elflink.c (elf_link_add_object_symbols): Delete redundant code.
+
+2011-04-20  Alan Modra  <amodra@gmail.com>
+
 	PR ld/12365
 	* elfcode.h (elf_slurp_symbol_table): Put common plugin IR symbols
 	in their own common section.
