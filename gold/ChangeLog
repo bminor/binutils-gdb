@@ -1,3 +1,9 @@
+2011-04-20 Cary Coutant  <ccoutant@google.com>
+
+	PR gold/12689
+	* archive.h (Incremental_archive_entry::Archive_member):
+	Initialize arg_serial_ (second constructor).
+
 2011-04-17  Ian Lance Taylor  <iant@google.com>
 
 	* object.cc (Relocate_info::location): Simplify location string.

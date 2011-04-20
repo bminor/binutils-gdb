@@ -51,7 +51,7 @@ struct Archive_member
       : obj_(NULL), sd_(NULL), arg_serial_(0)
   { }
   Archive_member(Object* obj, Read_symbols_data* sd)
-      : obj_(obj), sd_(sd)
+      : obj_(obj), sd_(sd), arg_serial_(0)
   { }
   // The object file.
   Object* obj_;
