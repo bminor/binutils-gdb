@@ -97,10 +97,8 @@ static const char *error_plugin = NULL;
    cases when establishing symbol resolutions.  */
 static struct bfd_hash_table *non_ironly_hash = NULL;
 
-/* State of linker "notice" and "multiple_definition" interfaces
-   before we poked at them.  */
+/* State of linker "notice" interface before we poked at it.  */
 static bfd_boolean orig_notice_all;
-static bfd_boolean orig_allow_multiple_defs;
 
 /* Original linker callbacks, and the plugin version.  */
 static const struct bfd_link_callbacks *orig_callbacks;
@@ -138,9 +136,8 @@ static bfd_boolean plugin_notice (struct bfd_link_info *info,
 				  const char *name, bfd *abfd,
 				  asection *section, bfd_vma value);
 static bfd_boolean plugin_multiple_definition (struct bfd_link_info *info,
-					       const char *name,
-					       bfd *obfd, asection *osec,
-					       bfd_vma oval, bfd *nbfd,
+					       struct bfd_link_hash_entry *h,
+					       bfd *nbfd,
 					       asection *nsec,
 					       bfd_vma nval);
 
@@ -847,12 +844,6 @@ plugin_call_all_symbols_read (void)
   /* Disable any further file-claiming.  */
   no_more_claiming = TRUE;
 
-  /* If --allow-multiple-definition is in effect, we need to disable it,
-     as the plugin infrastructure relies on the multiple_definition
-     callback to swap out the dummy IR-only BFDs for new real ones
-     when it starts opening the files added during this callback.  */
-  orig_allow_multiple_defs = link_info.allow_multiple_definition;
-  link_info.allow_multiple_definition = FALSE;
   plugin_callbacks.multiple_definition = &plugin_multiple_definition;
 
   while (curplug)
@@ -949,28 +940,18 @@ plugin_notice (struct bfd_link_info *info,
    we've fixed it up, or anyway if --allow-multiple-definition was in
    effect (before we disabled it to ensure we got called back).  */
 static bfd_boolean
-plugin_multiple_definition (struct bfd_link_info *info, const char *name,
-			    bfd *obfd, asection *osec, bfd_vma oval,
+plugin_multiple_definition (struct bfd_link_info *info,
+			    struct bfd_link_hash_entry *h,
 			    bfd *nbfd, asection *nsec, bfd_vma nval)
 {
-  if (is_ir_dummy_bfd (obfd))
+  if (h->type == bfd_link_hash_defined
+      && is_ir_dummy_bfd (h->u.def.section->owner))
     {
-      struct bfd_link_hash_entry *blhe
-	= bfd_link_hash_lookup (info->hash, name, FALSE, FALSE, FALSE);
-      if (!blhe)
-	einfo (_("%P%X: %s: can't find IR symbol '%s'\n"), nbfd->filename,
-	       name);
-      else if (blhe->type != bfd_link_hash_defined)
-	einfo (_("%P%x: %s: bad IR symbol type %d\n"), name, blhe->type);
       /* Replace it with new details.  */
-      blhe->u.def.section = nsec;
-      blhe->u.def.value = nval;
+      h->u.def.section = nsec;
+      h->u.def.value = nval;
       return TRUE;
     }
 
-  if (orig_allow_multiple_defs)
-    return TRUE;
-
-  return (*orig_callbacks->multiple_definition) (info, name, obfd, osec, oval,
-						 nbfd, nsec, nval);
+  return (*orig_callbacks->multiple_definition) (info, h, nbfd, nsec, nval);
 }

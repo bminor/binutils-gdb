@@ -123,11 +123,11 @@ static char *get_emulation
 static bfd_boolean add_archive_element
   (struct bfd_link_info *, bfd *, const char *, bfd **);
 static bfd_boolean multiple_definition
-  (struct bfd_link_info *, const char *, bfd *, asection *, bfd_vma,
+  (struct bfd_link_info *, struct bfd_link_hash_entry *,
    bfd *, asection *, bfd_vma);
 static bfd_boolean multiple_common
-  (struct bfd_link_info *, const char *, bfd *, enum bfd_link_hash_type,
-   bfd_vma, bfd *, enum bfd_link_hash_type, bfd_vma);
+  (struct bfd_link_info *, struct bfd_link_hash_entry *,
+   bfd *, enum bfd_link_hash_type, bfd_vma);
 static bfd_boolean add_to_set
   (struct bfd_link_info *, struct bfd_link_hash_entry *,
    bfd_reloc_code_real_type, bfd *, asection *, bfd_vma);
@@ -937,15 +937,44 @@ add_archive_element (struct bfd_link_info *info,
    multiple times.  */
 
 static bfd_boolean
-multiple_definition (struct bfd_link_info *info ATTRIBUTE_UNUSED,
-		     const char *name,
-		     bfd *obfd,
-		     asection *osec,
-		     bfd_vma oval,
+multiple_definition (struct bfd_link_info *info,
+		     struct bfd_link_hash_entry *h,
 		     bfd *nbfd,
 		     asection *nsec,
 		     bfd_vma nval)
 {
+  const char *name;
+  bfd *obfd;
+  asection *osec;
+  bfd_vma oval;
+
+  if (info->allow_multiple_definition)
+    return TRUE;
+
+  switch (h->type)
+    {
+    case bfd_link_hash_defined:
+      osec = h->u.def.section;
+      oval = h->u.def.value;
+      obfd = h->u.def.section->owner;
+      break;
+    case bfd_link_hash_indirect:
+      osec = bfd_ind_section_ptr;
+      oval = 0;
+      obfd = NULL;
+      break;
+    default:
+      abort ();
+    }
+
+  /* Ignore a redefinition of an absolute symbol to the
+     same value; it's harmless.  */
+  if (h->type == bfd_link_hash_defined
+      && bfd_is_abs_section (osec)
+      && bfd_is_abs_section (nsec)
+      && nval == oval)
+    return TRUE;
+
   /* If either section has the output_section field set to
      bfd_abs_section_ptr, it means that the section is being
      discarded, and this is not really a multiple definition at all.
@@ -959,6 +988,14 @@ multiple_definition (struct bfd_link_info *info ATTRIBUTE_UNUSED,
 	  && bfd_is_abs_section (nsec->output_section)))
     return TRUE;
 
+  name = h->root.string;
+  if (nbfd == NULL)
+    {
+      nbfd = obfd;
+      nsec = osec;
+      nval = oval;
+      obfd = NULL;
+    }
   einfo (_("%X%C: multiple definition of `%T'\n"),
 	 nbfd, nsec, nval, name);
   if (obfd != NULL)
@@ -980,16 +1017,40 @@ multiple_definition (struct bfd_link_info *info ATTRIBUTE_UNUSED,
 
 static bfd_boolean
 multiple_common (struct bfd_link_info *info ATTRIBUTE_UNUSED,
-		 const char *name,
-		 bfd *obfd,
-		 enum bfd_link_hash_type otype,
-		 bfd_vma osize,
+		 struct bfd_link_hash_entry *h,
 		 bfd *nbfd,
 		 enum bfd_link_hash_type ntype,
 		 bfd_vma nsize)
 {
-  if (! config.warn_common)
+  const char *name;
+  bfd *obfd;
+  enum bfd_link_hash_type otype;
+  bfd_vma osize;
+
+  if (!config.warn_common)
     return TRUE;
+
+  name = h->root.string;
+  otype = h->type;
+  if (otype == bfd_link_hash_common)
+    {
+      obfd = h->u.c.p->section->owner;
+      osize = h->u.c.size;
+    }
+  else if (otype == bfd_link_hash_defined
+	   || otype == bfd_link_hash_defweak)
+    {
+      obfd = h->u.def.section->owner;
+      osize = 0;
+    }
+  else
+    {
+      /* FIXME: It would nice if we could report the BFD which defined
+	 an indirect symbol, but we don't have anywhere to store the
+	 information.  */
+      obfd = NULL;
+      osize = 0;
+    }
 
   if (ntype == bfd_link_hash_defined
       || ntype == bfd_link_hash_defweak

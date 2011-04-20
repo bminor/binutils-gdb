@@ -1,3 +1,13 @@
+2011-04-20  Alan Modra  <amodra@gmail.com>
+
+	PR ld/12365
+	* elflink.c (_bfd_elf_merge_symbol): Update multiple_common calls.
+	* linker.c (_bfd_generic_link_add_one_symbol): Likewise.  Call
+	multiple_definition regardless of allow_multiple_definition.
+	* simple.c (simple_dummy_multiple_definition): Update.
+	* xcofflink.c (xcoff_link_add_symbols): Update multiple_definition
+	calls.
+
 2011-04-18  Tristan Gingold  <gingold@adacore.com>
 
 	* coff-rs6000.c: Convert to ISO-C.  Remove PARAMS macro.

@@ -1,6 +1,6 @@
 /* POWER/PowerPC XCOFF linker support.
    Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
-   2005, 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+   2005, 2006, 2007, 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
    Written by Ian Lance Taylor <ian@cygnus.com>, Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -1996,11 +1996,7 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 		     handle them, and that would only be a warning,
 		     not an error.  */
 		  if (! ((*info->callbacks->multiple_definition)
-			 (info, (*sym_hash)->root.root.string,
-			  NULL, NULL, (bfd_vma) 0,
-			  (*sym_hash)->root.u.def.section->owner,
-			  (*sym_hash)->root.u.def.section,
-			  (*sym_hash)->root.u.def.value)))
+			 (info, &(*sym_hash)->root, NULL, NULL, (bfd_vma) 0)))
 		    goto error_return;
 		  /* Try not to give this error too many times.  */
 		  (*sym_hash)->flags &= ~XCOFF_MULTIPLY_DEFINED;
@@ -3119,9 +3115,7 @@ bfd_xcoff_import_symbol (bfd *output_bfd,
 	      || h->root.u.def.value != val))
 	{
 	  if (! ((*info->callbacks->multiple_definition)
-		 (info, h->root.root.string, h->root.u.def.section->owner,
-		  h->root.u.def.section, h->root.u.def.value,
-		  output_bfd, bfd_abs_section_ptr, val)))
+		 (info, &h->root, output_bfd, bfd_abs_section_ptr, val)))
 	    return FALSE;
 	}
 

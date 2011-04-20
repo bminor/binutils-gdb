@@ -1,3 +1,15 @@
+2011-04-20  Alan Modra  <amodra@gmail.com>
+
+	PR ld/12365
+	* ldmain.c (multiple_definition): Take a bfd_link_hash_entry
+	pointer arg rather than "name", "obfd", "osec", "oval".  Add code
+	removed from linker.c.  Hack around xcofflink.c oddity in
+	passing NULL nbfd.
+	(multiple_common): Similarly.
+	* plugin.c (orig_allow_multiple_defs): Delete.
+	(plugin_call_all_symbols_read): Don't twiddle allow_multiple_definition.
+	(plugin_multiple_definition): Update.
+
 2011-04-18  Kai Tietz  <ktietz@redhat.com>
 
 	* deffilep.y (def_aligncomm): Avoid duplets.

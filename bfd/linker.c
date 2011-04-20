@@ -1,6 +1,6 @@
 /* linker.c -- BFD linker routines
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
-   2003, 2004, 2005, 2006, 2007, 2008, 2009
+   2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011
    Free Software Foundation, Inc.
    Written by Steve Chamberlain and Ian Lance Taylor, Cygnus Support
 
@@ -1651,9 +1651,7 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
 	     previously common.  */
 	  BFD_ASSERT (h->type == bfd_link_hash_common);
 	  if (! ((*info->callbacks->multiple_common)
-		 (info, h->root.string,
-		  h->u.c.p->section->owner, bfd_link_hash_common, h->u.c.size,
-		  abfd, bfd_link_hash_defined, 0)))
+		 (info, h, abfd, bfd_link_hash_defined, 0)))
 	    return FALSE;
 	  /* Fall through.  */
 	case DEF:
@@ -1782,9 +1780,7 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
 	     two sizes, and use the section required by the larger symbol.  */
 	  BFD_ASSERT (h->type == bfd_link_hash_common);
 	  if (! ((*info->callbacks->multiple_common)
-		 (info, h->root.string,
-		  h->u.c.p->section->owner, bfd_link_hash_common, h->u.c.size,
-		  abfd, bfd_link_hash_common, value)))
+		 (info, h, abfd, bfd_link_hash_common, value)))
 	    return FALSE;
 	  if (value > h->u.c.size)
 	    {
@@ -1821,23 +1817,11 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
 	  break;
 
 	case CREF:
-	  {
-	    bfd *obfd;
-
-	    /* We have found a common definition for a symbol which
-	       was already defined.  FIXME: It would nice if we could
-	       report the BFD which defined an indirect symbol, but we
-	       don't have anywhere to store the information.  */
-	    if (h->type == bfd_link_hash_defined
-		|| h->type == bfd_link_hash_defweak)
-	      obfd = h->u.def.section->owner;
-	    else
-	      obfd = NULL;
-	    if (! ((*info->callbacks->multiple_common)
-		   (info, h->root.string, obfd, h->type, 0,
-		    abfd, bfd_link_hash_common, value)))
-	      return FALSE;
-	  }
+	  /* We have found a common definition for a symbol which
+	     was already defined.  */
+	  if (! ((*info->callbacks->multiple_common)
+		 (info, h, abfd, bfd_link_hash_common, value)))
+	    return FALSE;
 	  break;
 
 	case MIND:
@@ -1848,47 +1832,16 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
 	  /* Fall through.  */
 	case MDEF:
 	  /* Handle a multiple definition.  */
-	  if (!info->allow_multiple_definition)
-	    {
-	      asection *msec = NULL;
-	      bfd_vma mval = 0;
-
-	      switch (h->type)
-		{
-		case bfd_link_hash_defined:
-		  msec = h->u.def.section;
-		  mval = h->u.def.value;
-		  break;
-	        case bfd_link_hash_indirect:
-		  msec = bfd_ind_section_ptr;
-		  mval = 0;
-		  break;
-		default:
-		  abort ();
-		}
-
-	      /* Ignore a redefinition of an absolute symbol to the
-		 same value; it's harmless.  */
-	      if (h->type == bfd_link_hash_defined
-		  && bfd_is_abs_section (msec)
-		  && bfd_is_abs_section (section)
-		  && value == mval)
-		break;
-
-	      if (! ((*info->callbacks->multiple_definition)
-		     (info, h->root.string, msec->owner, msec, mval,
-		      abfd, section, value)))
-		return FALSE;
-	    }
+	  if (! ((*info->callbacks->multiple_definition)
+		 (info, h, abfd, section, value)))
+	    return FALSE;
 	  break;
 
 	case CIND:
 	  /* Create an indirect symbol from an existing common symbol.  */
 	  BFD_ASSERT (h->type == bfd_link_hash_common);
 	  if (! ((*info->callbacks->multiple_common)
-		 (info, h->root.string,
-		  h->u.c.p->section->owner, bfd_link_hash_common, h->u.c.size,
-		  abfd, bfd_link_hash_indirect, 0)))
+		 (info, h, abfd, bfd_link_hash_indirect, 0)))
 	    return FALSE;
 	  /* Fall through.  */
 	case IND:
