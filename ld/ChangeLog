@@ -1,6 +1,20 @@
 2011-04-20  Alan Modra  <amodra@gmail.com>
 
 	PR ld/12365
+	* ldfile.c (ldfile_try_open_bfd): Move code creating and switching
+	to plugin IR BFD..
+	* ldmain.c (add_archive_element): ..and similar code here..
+	* plugin.c (plugin_maybe_claim): ..to here.  New function.
+	(plugin_call_claim_file): Make static.
+	(asymbol_from_plugin_symbol): Set ELF st_shndx for common syms.
+	(plugin_multiple_common): New function.
+	(plugin_call_all_symbols_read): Hook in plugin_multiple_common.
+	* plugin.h (plugin_call_claim_file): Don't declare.
+	(plugin_maybe_claim): Declare.
+
+2011-04-20  Alan Modra  <amodra@gmail.com>
+
+	PR ld/12365
 	* ldmain.c (multiple_definition): Take a bfd_link_hash_entry
 	pointer arg rather than "name", "obfd", "osec", "oval".  Add code
 	removed from linker.c.  Hack around xcofflink.c oddity in

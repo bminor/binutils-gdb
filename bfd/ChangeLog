@@ -1,6 +1,16 @@
 2011-04-20  Alan Modra  <amodra@gmail.com>
 
 	PR ld/12365
+	* elfcode.h (elf_slurp_symbol_table): Put common plugin IR symbols
+	in their own common section.
+	* elflink.c (elf_link_add_object_symbols): Likewise.
+	* linker.c (generic_link_check_archive_element): Don't lose flags
+	if common section is pre-existing.
+	(_bfd_generic_link_add_one_symbol): Likewise.
+
+2011-04-20  Alan Modra  <amodra@gmail.com>
+
+	PR ld/12365
 	* elflink.c (_bfd_elf_merge_symbol): Update multiple_common calls.
 	* linker.c (_bfd_generic_link_add_one_symbol): Likewise.  Call
 	multiple_definition regardless of allow_multiple_definition.

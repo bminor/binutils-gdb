@@ -50,8 +50,8 @@ extern int plugin_load_plugins (void);
 extern const char *plugin_error_plugin (void);
 
 /* Call 'claim file' hook for all plugins.  */
-extern int plugin_call_claim_file (const struct ld_plugin_input_file *file,
-				   int *claimed);
+extern void plugin_maybe_claim (struct ld_plugin_input_file *,
+				lang_input_statement_type *);
 
 /* Call 'all symbols read' hook for all plugins.  */
 extern int plugin_call_all_symbols_read (void);

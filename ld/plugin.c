@@ -140,6 +140,11 @@ static bfd_boolean plugin_multiple_definition (struct bfd_link_info *info,
 					       bfd *nbfd,
 					       asection *nsec,
 					       bfd_vma nval);
+static bfd_boolean plugin_multiple_common (struct bfd_link_info *info,
+					   struct bfd_link_hash_entry *h,
+					   bfd *nbfd,
+					   enum bfd_link_hash_type ntype,
+					   bfd_vma nsize);
 
 #if !defined (HAVE_DLFCN_H) && defined (HAVE_WINDOWS_H)
 
@@ -312,7 +317,10 @@ asymbol_from_plugin_symbol (bfd *abfd, asymbol *asym,
       asym->value = ldsym->size;
       /* For ELF targets, set alignment of common symbol to 1.  */
       if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
-	((elf_symbol_type *) asym)->internal_elf_sym.st_value = 1;
+	{
+	  ((elf_symbol_type *) asym)->internal_elf_sym.st_shndx = SHN_COMMON;
+	  ((elf_symbol_type *) asym)->internal_elf_sym.st_value = 1;
+	}
       break;
 
     default:
@@ -812,7 +820,7 @@ plugin_load_plugins (void)
 }
 
 /* Call 'claim file' hook for all plugins.  */
-int
+static int
 plugin_call_claim_file (const struct ld_plugin_input_file *file, int *claimed)
 {
   plugin_t *curplug = plugins_list;
@@ -835,6 +843,42 @@ plugin_call_claim_file (const struct ld_plugin_input_file *file, int *claimed)
   return plugin_error_p () ? -1 : 0;
 }
 
+void
+plugin_maybe_claim (struct ld_plugin_input_file *file,
+		    lang_input_statement_type *entry)
+{
+  int claimed = 0;
+
+  /* We create a dummy BFD, initially empty, to house whatever symbols
+     the plugin may want to add.  */
+  file->handle = plugin_get_ir_dummy_bfd (entry->the_bfd->filename,
+					  entry->the_bfd);
+  if (plugin_call_claim_file (file, &claimed))
+    einfo (_("%P%F: %s: plugin reported error claiming file\n"),
+	   plugin_error_plugin ());
+  /* fd belongs to us, not the plugin; but we don't need it.  */
+  close (file->fd);
+  if (claimed)
+    {
+      /* Discard the real file's BFD and substitute the dummy one.  */
+
+      /* BFD archive handling caches elements so we can't call
+	 bfd_close for archives.  */
+      if (entry->the_bfd->my_archive == NULL)
+	bfd_close (entry->the_bfd);
+      entry->the_bfd = file->handle;
+      entry->claimed = TRUE;
+      bfd_make_readable (entry->the_bfd);
+    }
+  else
+    {
+      /* If plugin didn't claim the file, we don't need the dummy bfd.
+	 Can't avoid speculatively creating it, alas.  */
+      bfd_close_all_done (file->handle);
+      entry->claimed = FALSE;
+    }
+}
+
 /* Call 'all symbols read' hook for all plugins.  */
 int
 plugin_call_all_symbols_read (void)
@@ -845,6 +889,7 @@ plugin_call_all_symbols_read (void)
   no_more_claiming = TRUE;
 
   plugin_callbacks.multiple_definition = &plugin_multiple_definition;
+  plugin_callbacks.multiple_common = &plugin_multiple_common;
 
   while (curplug)
     {
@@ -954,4 +999,23 @@ plugin_multiple_definition (struct bfd_link_info *info,
     }
 
   return (*orig_callbacks->multiple_definition) (info, h, nbfd, nsec, nval);
+}
+
+static bfd_boolean
+plugin_multiple_common (struct bfd_link_info *info,
+			struct bfd_link_hash_entry *h,
+			bfd *nbfd, enum bfd_link_hash_type ntype, bfd_vma nsize)
+{
+  if (h->type == bfd_link_hash_common
+      && is_ir_dummy_bfd (h->u.c.p->section->owner)
+      && ntype == bfd_link_hash_common
+      && !is_ir_dummy_bfd (nbfd))
+    {
+      /* Arrange to have it replaced.  */
+      ASSERT (nsize != 0);
+      h->u.c.size = 0;
+      return TRUE;
+    }
+
+  return (*orig_callbacks->multiple_common) (info, h, nbfd, ntype, nsize);
 }

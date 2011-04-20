@@ -1296,7 +1296,7 @@ generic_link_check_archive_element (bfd *abfd,
 	  else
 	    h->u.c.p->section = bfd_make_section_old_way (symbfd,
 							  p->section->name);
-	  h->u.c.p->section->flags = SEC_ALLOC;
+	  h->u.c.p->section->flags |= SEC_ALLOC;
 	}
       else
 	{
@@ -1756,13 +1756,13 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
 	  if (section == bfd_com_section_ptr)
 	    {
 	      h->u.c.p->section = bfd_make_section_old_way (abfd, "COMMON");
-	      h->u.c.p->section->flags = SEC_ALLOC;
+	      h->u.c.p->section->flags |= SEC_ALLOC;
 	    }
 	  else if (section->owner != abfd)
 	    {
 	      h->u.c.p->section = bfd_make_section_old_way (abfd,
 							    section->name);
-	      h->u.c.p->section->flags = SEC_ALLOC;
+	      h->u.c.p->section->flags |= SEC_ALLOC;
 	    }
 	  else
 	    h->u.c.p->section = section;
@@ -1803,13 +1803,13 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
 		{
 		  h->u.c.p->section
 		    = bfd_make_section_old_way (abfd, "COMMON");
-		  h->u.c.p->section->flags = SEC_ALLOC;
+		  h->u.c.p->section->flags |= SEC_ALLOC;
 		}
 	      else if (section->owner != abfd)
 		{
 		  h->u.c.p->section
 		    = bfd_make_section_old_way (abfd, section->name);
-		  h->u.c.p->section->flags = SEC_ALLOC;
+		  h->u.c.p->section->flags |= SEC_ALLOC;
 		}
 	      else
 		h->u.c.p->section = section;

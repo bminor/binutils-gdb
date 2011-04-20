@@ -1,6 +1,6 @@
 /* ELF executable support for BFD.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010
+   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011
    Free Software Foundation, Inc.
 
    Written by Fred Fish @ Cygnus Support, from information published
@@ -1282,6 +1282,20 @@ elf_slurp_symbol_table (bfd *abfd, asymbol **symptrs, bfd_boolean dynamic)
 	  else if (isym->st_shndx == SHN_COMMON)
 	    {
 	      sym->symbol.section = bfd_com_section_ptr;
+	      if ((abfd->flags & BFD_PLUGIN) != 0)
+		{
+		  asection *xc = bfd_get_section_by_name (abfd, "COMMON");
+
+		  if (xc == NULL)
+		    {
+		      flagword flags = (SEC_ALLOC | SEC_IS_COMMON | SEC_KEEP
+					| SEC_EXCLUDE);
+		      xc = bfd_make_section_with_flags (abfd, "COMMON", flags);
+		      if (xc == NULL)
+			goto error_return;
+		    }
+		  sym->symbol.section = xc;
+		}
 	      /* Elf puts the alignment into the `value' field, and
 		 the size into the `size' field.  BFD wants to see the
 		 size in the value field, and doesn't care (at the

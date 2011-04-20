@@ -1,6 +1,7 @@
 /* Linker file opening and searching.
    Copyright 1991, 1992, 1993, 1994, 1995, 1998, 1999, 2000, 2001, 2002,
-   2003, 2004, 2005, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+   2003, 2004, 2005, 2007, 2008, 2009, 2010, 2011
+   Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils.
 
@@ -320,35 +321,12 @@ success:
       if (fd >= 0)
 	{
 	  struct ld_plugin_input_file file;
-	  int claimed = 0;
 
 	  file.name = attempt;
 	  file.offset = 0;
 	  file.filesize = lseek (fd, 0, SEEK_END);
 	  file.fd = fd;
-	  /* We create a dummy BFD, initially empty, to house
-	     whatever symbols the plugin may want to add.  */
-	  file.handle = plugin_get_ir_dummy_bfd (attempt, entry->the_bfd);
-	  if (plugin_call_claim_file (&file, &claimed))
-	    einfo (_("%P%F: %s: plugin reported error claiming file\n"),
-		   plugin_error_plugin ());
-	  /* fd belongs to us, not the plugin; but we don't need it.  */
-	  close (fd);
-	  if (claimed)
-	    {
-	      /* Discard the real file's BFD and substitute the dummy one.  */
-	      bfd_close (entry->the_bfd);
-	      entry->the_bfd = file.handle;
-	      entry->claimed = TRUE;
-	      bfd_make_readable (entry->the_bfd);
-	    }
-	  else
-	    {
-	      /* If plugin didn't claim the file, we don't need the dummy
-		 bfd.  Can't avoid speculatively creating it, alas.  */
-	      bfd_close_all_done (file.handle);
-	      entry->claimed = FALSE;
-	    }
+	  plugin_maybe_claim (&file, entry);
 	}
     }
 #endif /* ENABLE_PLUGINS */

@@ -3937,18 +3937,31 @@ error_free_dyn:
 	goto error_free_vers;
 
       if (isym->st_shndx == SHN_COMMON
-	  && ELF_ST_TYPE (isym->st_info) == STT_TLS
-	  && !info->relocatable)
+	  && (abfd->flags & BFD_PLUGIN) != 0)
+	{
+	  asection *xc = bfd_get_section_by_name (abfd, "COMMON");
+
+	  if (xc == NULL)
+	    {
+	      flagword sflags = (SEC_ALLOC | SEC_IS_COMMON | SEC_KEEP
+				 | SEC_EXCLUDE);
+	      xc = bfd_make_section_with_flags (abfd, "COMMON", sflags);
+	      if (xc == NULL)
+		goto error_free_vers;
+	    }
+	  sec = xc;
+	}
+      else if (isym->st_shndx == SHN_COMMON
+	       && ELF_ST_TYPE (isym->st_info) == STT_TLS
+	       && !info->relocatable)
 	{
 	  asection *tcomm = bfd_get_section_by_name (abfd, ".tcommon");
 
 	  if (tcomm == NULL)
 	    {
-	      tcomm = bfd_make_section_with_flags (abfd, ".tcommon",
-						   (SEC_ALLOC
-						    | SEC_IS_COMMON
-						    | SEC_LINKER_CREATED
-						    | SEC_THREAD_LOCAL));
+	      flagword sflags = (SEC_ALLOC | SEC_THREAD_LOCAL | SEC_IS_COMMON
+				 | SEC_LINKER_CREATED);
+	      tcomm = bfd_make_section_with_flags (abfd, ".tcommon", sflags);
 	      if (tcomm == NULL)
 		goto error_free_vers;
 	    }

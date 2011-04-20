@@ -813,7 +813,7 @@ add_archive_element (struct bfd_link_info *info,
       if (fd >= 0)
 	{
 	  struct ld_plugin_input_file file;
-	  int claimed = 0;
+
 	  /* Offset and filesize must refer to the individual archive
 	     member, not the whole file, and must exclude the header.
 	     Fortunately for us, that is how the data is stored in the
@@ -822,28 +822,11 @@ add_archive_element (struct bfd_link_info *info,
 	  file.offset = abfd->origin;
 	  file.filesize = arelt_size (abfd);
 	  file.fd = fd;
-	  /* We create a dummy BFD, initially empty, to house
-	     whatever symbols the plugin may want to add.  */
-	  file.handle = plugin_get_ir_dummy_bfd (abfd->filename, abfd);
-	  if (plugin_call_claim_file (&file, &claimed))
-	    einfo (_("%P%F: %s: plugin reported error claiming file\n"),
-		   plugin_error_plugin ());
-	  /* fd belongs to us, not the plugin; but we don't need it.  */
-	  close (fd);
-	  if (claimed)
+	  plugin_maybe_claim (&file, input);
+	  if (input->claimed)
 	    {
-	      /* Substitute the dummy BFD.  */
-	      input->the_bfd = file.handle;
-	      input->claimed = TRUE;
 	      input->claim_archive = TRUE;
-	      bfd_make_readable (input->the_bfd);
 	      *subsbfd = input->the_bfd;
-	    }
-	  else
-	    {
-	      /* Abandon the dummy BFD.  */
-	      bfd_close_all_done (file.handle);
-	      input->claimed = FALSE;
 	    }
 	}
     }
