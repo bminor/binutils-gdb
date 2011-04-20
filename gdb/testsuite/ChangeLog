@@ -1,3 +1,7 @@
+2011-04-20  Marek Polacek  <mpolacek@redhat.com>
+	* gdb.base/setshow.exp: Fix racy tests.
+	($old_gdb_prompt): New variable.
+
 2011-04-19  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.mi/mi-nsmoribund.exp:
