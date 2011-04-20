@@ -1,3 +1,7 @@
+2011-04-20  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.texinfo (Trace File Format): Move node later.
+
 2011-03-31  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 	    Sergio Durigan Junior  <sergiodj@linux.vnet.ibm.com>
 
