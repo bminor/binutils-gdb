@@ -4189,7 +4189,7 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
 	  || plt == NULL
 	  || gotplt == NULL
 	  || relplt == NULL)
-	abort ();
+	return FALSE;
 
       /* Get the index in the procedure linkage table which
 	 corresponds to this symbol.  This is the index of this symbol
