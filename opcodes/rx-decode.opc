@@ -274,6 +274,7 @@ rx_decode_opcode (unsigned long pc AU,
   if (ss == 3 && sz == 2 && rsrc == 0 && rdst == 0)
     {
       ID(nop2);
+      rx->syntax = "nop";
     }
   else
     {
@@ -536,6 +537,7 @@ rx_decode_opcode (unsigned long pc AU,
   if (ss == 3 && rsrc == 0 && rdst == 0)
     {
       ID(nop3);
+      rx->syntax = "nop";
     }
   else
     {
