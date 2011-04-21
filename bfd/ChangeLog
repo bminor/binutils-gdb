@@ -1,5 +1,12 @@
 2011-04-21  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/12694
+	* elf32-i386.c (elf_i386_readonly_dynrelocs): Skip local IFUNC
+	symbols.
+	* elf64-x86-64.c (elf_x86_64_readonly_dynrelocs): Likewise.
+
+2011-04-21  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf32-i386.c (elf_i386_finish_dynamic_symbol): Return false
 	on dynamic symbol error.
 	* elf64-x86-64.c (elf_x86_64_finish_dynamic_symbol): Likewise.

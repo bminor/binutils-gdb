@@ -2299,6 +2299,10 @@ elf_x86_64_readonly_dynrelocs (struct elf_link_hash_entry *h,
   if (h->root.type == bfd_link_hash_warning)
     h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
+  /* Skip local IFUNC symbols. */
+  if (h->forced_local && h->type == STT_GNU_IFUNC)
+    return TRUE;
+
   eh = (struct elf_x86_64_link_hash_entry *) h;
   for (p = eh->dyn_relocs; p != NULL; p = p->next)
     {
