@@ -922,6 +922,72 @@ default_auto_wide_charset (void)
   return GDB_DEFAULT_TARGET_WIDE_CHARSET;
 }
 
+
+#ifdef USE_INTERMEDIATE_ENCODING_FUNCTION
+/* Macro used for UTF or UCS endianness suffix.  */
+#if WORDS_BIGENDIAN
+#define ENDIAN_SUFFIX "BE"
+#else
+#define ENDIAN_SUFFIX "LE"
+#endif
+
+/* The code below serves to generate a compile time error if
+   gdb_wchar_t type is not of size 2 nor 4, despite the fact that
+   macro __STDC_ISO_10646__ is defined.
+   This is better than a gdb_assert call, because GDB cannot handle
+   strings correctly if this size is different.  */
+
+extern char your_gdb_wchar_t_is_bogus[(sizeof (gdb_wchar_t) == 2
+				       || sizeof (gdb_wchar_t) == 4)
+				      ? 1 : -1];
+
+/* intermediate_encoding returns the charset unsed internally by
+   GDB to convert between target and host encodings. As the test above
+   compiled, sizeof (gdb_wchar_t) is either 2 or 4 bytes.
+   UTF-16/32 is tested first, UCS-2/4 is tested as a second option,
+   otherwise an error is generated.  */
+
+const char *
+intermediate_encoding (void)
+{
+  iconv_t desc;
+  static const char *stored_result = NULL;
+  char *result;
+  int i;
+
+  if (stored_result)
+    return stored_result;
+  result = xstrprintf ("UTF-%d%s", (int) (sizeof (gdb_wchar_t) * 8),
+		       ENDIAN_SUFFIX);
+  /* Check that the name is supported by iconv_open.  */
+  desc = iconv_open (result, host_charset ());
+  if (desc != (iconv_t) -1)
+    {
+      iconv_close (desc);
+      stored_result = result;
+      return result;
+    }
+  /* Not valid, free the allocated memory.  */
+  xfree (result);
+  /* Second try, with UCS-2 type.  */
+  result = xstrprintf ("UCS-%d%s", (int) sizeof (gdb_wchar_t),
+		       ENDIAN_SUFFIX);
+  /* Check that the name is supported by iconv_open.  */
+  desc = iconv_open (result, host_charset ());
+  if (desc != (iconv_t) -1)
+    {
+      iconv_close (desc);
+      stored_result = result;
+      return result;
+    }
+  /* Not valid, free the allocated memory.  */
+  xfree (result);
+  /* No valid charset found, generate error here.  */
+  error (_("Unable to find a vaild charset for string conversions"));
+}
+
+#endif /* USE_INTERMEDIATE_ENCODING_FUNCTION */
+
 void
 _initialize_charset (void)
 {
