@@ -1,3 +1,14 @@
+2011-04-21  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* gdb_wchar.h (USE_INTERMEDIATE_ENCODING_FUNCTION): New macro.
+	(INTERMEDIATE_ENCODING): Change value to intermediate_encoding
+	function call if __STDC_ISO_10646__ macro is defined.
+	(intermediate_encoding): New prototype.
+	* charset.c (your_gdb_wchar_t_is_bogus): New extern test variable
+	to generate compile time error for unsupported gdb_wchar_t size.
+	(ENDIAN_SUFFIX): New macro.
+	(intermediate_encoding): New function.
+
 2011-04-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* ada-lang.c (struct add_partial_datum): Update the comment for
