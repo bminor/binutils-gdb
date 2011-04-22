@@ -2164,6 +2164,20 @@ arm_cortex_a8_local_reloc.o: arm_cortex_a8_local_reloc.s
 MOSTLYCLEANFILES += arm_cortex_a8_b_cond arm_cortex_a8_b arm_cortex_a8_bl \
 	arm_cortex_a8_blx arm_cortex_a8_local arm_cortex_a8_local_reloc
 
+check_SCRIPTS += arm_exidx_test.sh
+check_DATA += arm_exidx_test.stdout
+
+arm_exidx_test.stdout: arm_exidx_test.so
+	$(TEST_READELF) -S $< > $@
+
+arm_exidx_test.so: arm_exidx_test.o ../ld-new
+	../ld-new -shared -o $@ $<
+
+arm_exidx_test.o: arm_exidx_test.s
+	$(TEST_AS) -o $@ $<
+
+MOSTLYCLEANFILES += arm_exidx_test.so
+
 endif DEFAULT_TARGET_ARM
 
 endif NATIVE_OR_CROSS_LINKER

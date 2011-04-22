@@ -1,3 +1,12 @@
+2011-04-22  Doug Kwan  <dougkwan@google.com>
+
+	* arm.cc (Arm_output_section::Arm_output_section): Set SHF_LINK_ORDER
+	flag of a SHT_ARM_EXIDX section.
+        * testsuite/Makefile.am (arm_exidx_test): New test rules.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/arm_exidx_test.s: New file.
+	* testsuite/arm_exidx_test.sh: Same.
+
 2011-04-20 Cary Coutant  <ccoutant@google.com>
 
 	PR gold/12689

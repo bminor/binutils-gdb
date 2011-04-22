@@ -459,7 +459,8 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_branch_out_of_range.sh \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_fix_v4bx.sh \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_attr_merge.sh \
-@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_cortex_a8.sh
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_cortex_a8.sh \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_exidx_test.sh
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_44 = arm_abs_global.stdout \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_bl_in_range.stdout \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_bl_out_of_range.stdout \
@@ -483,7 +484,8 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_cortex_a8_bl.stdout \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_cortex_a8_blx.stdout \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_cortex_a8_local.stdout \
-@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_cortex_a8_local_reloc.stdout
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_cortex_a8_local_reloc.stdout \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_exidx_test.stdout
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_45 = arm_abs_global \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_bl_in_range \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_bl_out_of_range \
@@ -507,7 +509,8 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_cortex_a8_bl \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_cortex_a8_blx \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_cortex_a8_local \
-@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_cortex_a8_local_reloc
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_cortex_a8_local_reloc \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_exidx_test.so
 subdir = testsuite
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -3316,6 +3319,8 @@ arm_attr_merge.sh.log: arm_attr_merge.sh
 	@p='arm_attr_merge.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 arm_cortex_a8.sh.log: arm_cortex_a8.sh
 	@p='arm_cortex_a8.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+arm_exidx_test.sh.log: arm_exidx_test.sh
+	@p='arm_exidx_test.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 object_unittest.log: object_unittest$(EXEEXT)
 	@p='object_unittest$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 binary_unittest.log: binary_unittest$(EXEEXT)
@@ -4788,6 +4793,15 @@ uninstall-am:
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new -o $@ $<
 
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_cortex_a8_local_reloc.o: arm_cortex_a8_local_reloc.s
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -o $@ $<
+
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_exidx_test.stdout: arm_exidx_test.so
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_READELF) -S $< > $@
+
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_exidx_test.so: arm_exidx_test.o ../ld-new
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new -shared -o $@ $<
+
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_exidx_test.o: arm_exidx_test.s
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -o $@ $<
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

@@ -1342,9 +1342,13 @@ class Arm_output_section : public Output_section
  public:
   typedef std::vector<std::pair<Relobj*, unsigned int> > Text_section_list;
 
+  // We need to force SHF_LINK_ORDER in a SHT_ARM_EXIDX section.
   Arm_output_section(const char* name, elfcpp::Elf_Word type,
 		     elfcpp::Elf_Xword flags)
-    : Output_section(name, type, flags)
+    : Output_section(name, type,
+		     (type == elfcpp::SHT_ARM_EXIDX
+		      ? flags | elfcpp::SHF_LINK_ORDER
+		      : flags))
   {
     if (type == elfcpp::SHT_ARM_EXIDX)
       this->set_always_keeps_input_sections();
