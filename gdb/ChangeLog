@@ -1,3 +1,7 @@
+2011-04-21  Jie Zhang  <jzhang918@gmail.com>
+
+	* MAINTAINERS: Update my email address.
+
 2011-04-21  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* gdb_wchar.h (USE_INTERMEDIATE_ENCODING_FUNCTION): New macro.
