@@ -1,3 +1,30 @@
+2011-04-22 Cary Coutant  <ccoutant@google.com>
+
+	* incremental.cc (Sized_incremental_binary::setup_readers): Allocate
+	global symbol map.
+	(Sized_incremental_binary::do_apply_incremental_relocs): New function.
+	(Sized_incr_relobj::do_add_symbols): Add symbols to global symbol map.
+	(Sized_incr_relobj::do_relocate): Remap section indices in incremental
+	relocations.
+	(Sized_incr_dynobj::do_add_symbols): Add symbols to global symbol map.
+	(Sized_incr_dynobj::do_for_all_global_symbols): Remove FIXME.
+	(Sized_incr_dynobj::do_for_all_local_got_entries): Likewise.
+	* incremental.h
+	(Incremental_inputs_reader::global_symbol_reader_at_offset): New
+	function.
+	(Incremental_binary::apply_incremental_relocs): New function.
+	(Incremental_binary::do_apply_incremental_relocs): New function.
+	(Sized_incremental_binary::Sized_incremental_binary): Initialize new
+	data member.
+	(Sized_incremental_binary::add_global_symbol): New function.
+	(Sized_incremental_binary::global_symbol): New function.
+	(Sized_incremental_binary::do_apply_incremental_relocs): New function.
+	(Sized_incremental_binary::symbol_map_): New data member.
+	* layout.cc (Layout_task_runner::run): Apply incremental relocations.
+	* target.h (Sized_target::apply_relocation): New function.
+	* target-reloc.h (apply_relocation): New function.
+	* x86_64.cc (Target_x86_64::apply_relocation): New function.
+
 2011-04-22  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc (Arm_output_section::Arm_output_section): Set SHF_LINK_ORDER

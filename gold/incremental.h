@@ -898,6 +898,14 @@ class Incremental_inputs_reader
     return Incremental_input_entry_reader(this, offset);
   }
 
+  // Return a reader for the global symbol info at OFFSET.
+  Incremental_global_symbol_reader<big_endian>
+  global_symbol_reader_at_offset(unsigned int offset) const
+  {
+    const unsigned char* p = this->p_ + offset;
+    return Incremental_global_symbol_reader<big_endian>(p);
+  }
+
  private:
   // Lookup a string in the ELF string table.
   const char* get_string(unsigned int offset) const
@@ -1207,6 +1215,12 @@ class Incremental_binary
   reserve_layout(unsigned int input_file_index)
   { this->do_reserve_layout(input_file_index); }
 
+  // Apply incremental relocations for symbols whose values have changed.
+  void
+  apply_incremental_relocs(const Symbol_table* symtab, Layout* layout,
+			   Output_file* of)
+  { this->do_apply_incremental_relocs(symtab, layout, of); }
+
   // Functions and types for the elfcpp::Elf_file interface.  This
   // permit us to use Incremental_binary as the File template parameter for
   // elfcpp::Elf_file.
@@ -1279,6 +1293,10 @@ class Incremental_binary
   virtual void
   do_reserve_layout(unsigned int input_file_index) = 0;
 
+  // Apply incremental relocations for symbols whose values have changed.
+  virtual void
+  do_apply_incremental_relocs(const Symbol_table*, Layout*, Output_file*) = 0;
+
   virtual unsigned int
   do_input_file_count() const = 0;
 
@@ -1307,8 +1325,8 @@ class Sized_incremental_binary : public Incremental_binary
                            const elfcpp::Ehdr<size, big_endian>& ehdr,
                            Target* target)
     : Incremental_binary(output, target), elf_file_(this, ehdr),
-      section_map_(), has_incremental_info_(false), inputs_reader_(),
-      symtab_reader_(), relocs_reader_(), got_plt_reader_(),
+      section_map_(), symbol_map_(), has_incremental_info_(false),
+      inputs_reader_(), symtab_reader_(), relocs_reader_(), got_plt_reader_(),
       input_entry_readers_()
   { this->setup_readers(); }
 
@@ -1321,6 +1339,20 @@ class Sized_incremental_binary : public Incremental_binary
   Output_section*
   output_section(unsigned int shndx)
   { return this->section_map_[shndx]; }
+
+  // Map a symbol table entry from the input file to the output symbol table.
+  // SYMNDX is relative to the first forced-local or global symbol in the
+  // input file symbol table.
+  void
+  add_global_symbol(unsigned int symndx, Symbol* gsym)
+  { this->symbol_map_[symndx] = gsym; }
+
+  // Map a symbol table entry from the input file to the output symbol table.
+  // SYMNDX is relative to the first forced-local or global symbol in the
+  // input file symbol table.
+  Symbol*
+  global_symbol(unsigned int symndx) const
+  { return this->symbol_map_[symndx]; }
 
   // Readers for the incremental info sections.
 
@@ -1365,6 +1397,11 @@ class Sized_incremental_binary : public Incremental_binary
   // Mark regions of the input file that must be kept unchanged.
   virtual void
   do_reserve_layout(unsigned int input_file_index);
+
+  // Apply incremental relocations for symbols whose values have changed.
+  virtual void
+  do_apply_incremental_relocs(const Symbol_table* symtab, Layout* layout,
+			      Output_file* of);
 
   // Proxy class for a sized Incremental_input_entry_reader.
 
@@ -1434,6 +1471,9 @@ class Sized_incremental_binary : public Incremental_binary
 
   // Map section index to an Output_section in the updated layout.
   std::vector<Output_section*> section_map_;
+
+  // Map global symbols from the input file to the symbol table.
+  std::vector<Symbol*> symbol_map_;
 
   // Readers for the incremental info sections.
   bool has_incremental_info_;

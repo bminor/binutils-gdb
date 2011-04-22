@@ -298,10 +298,11 @@ Layout::Relaxation_debug_check::verify_sections(
 void
 Layout_task_runner::run(Workqueue* workqueue, const Task* task)
 {
-  off_t file_size = this->layout_->finalize(this->input_objects_,
-					    this->symtab_,
-                                            this->target_,
-					    task);
+  Layout* layout = this->layout_;
+  off_t file_size = layout->finalize(this->input_objects_,
+				     this->symtab_,
+                                     this->target_,
+				     task);
 
   // Now we know the final size of the output file and we know where
   // each piece of information goes.
@@ -309,11 +310,11 @@ Layout_task_runner::run(Workqueue* workqueue, const Task* task)
   if (this->mapfile_ != NULL)
     {
       this->mapfile_->print_discarded_sections(this->input_objects_);
-      this->layout_->print_to_mapfile(this->mapfile_);
+      layout->print_to_mapfile(this->mapfile_);
     }
 
   Output_file* of;
-  if (this->layout_->incremental_base() == NULL)
+  if (layout->incremental_base() == NULL)
     {
       of = new Output_file(parameters->options().output_file_name());
       if (this->options_.oformat_enum() != General_options::OBJECT_FORMAT_ELF)
@@ -322,13 +323,24 @@ Layout_task_runner::run(Workqueue* workqueue, const Task* task)
     }
   else
     {
-      of = this->layout_->incremental_base()->output_file();
+      of = layout->incremental_base()->output_file();
+
+      // Apply the incremental relocations for symbols whose values
+      // have changed.  We do this before we resize the file and start
+      // writing anything else to it, so that we can read the old
+      // incremental information from the file before (possibly)
+      // overwriting it.
+      if (parameters->incremental_update())
+        layout->incremental_base()->apply_incremental_relocs(this->symtab_,
+        						     this->layout_,
+							     of);
+
       of->resize(file_size);
     }
 
   // Queue up the final set of tasks.
   gold::queue_final_tasks(this->options_, this->input_objects_,
-			  this->symtab_, this->layout_, workqueue, of);
+			  this->symtab_, layout, workqueue, of);
 }
 
 // Layout methods.

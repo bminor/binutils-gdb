@@ -795,6 +795,19 @@ class Sized_target : public Target
   plt_entry_size() const
   { gold_unreachable(); }
 
+  // Apply an incremental relocation.
+
+  virtual void
+  apply_relocation(const Relocate_info<size, big_endian>* /* relinfo */,
+		   typename elfcpp::Elf_types<size>::Elf_Addr /* r_offset */,
+		   unsigned int /* r_type */,
+		   typename elfcpp::Elf_types<size>::Elf_Swxword /* r_addend */,
+		   const Symbol* /* gsym */,
+		   unsigned char* /* view */,
+		   typename elfcpp::Elf_types<size>::Elf_Addr /* address */,
+		   section_size_type /* view_size */)
+  { gold_unreachable(); }
+
  protected:
   Sized_target(const Target::Target_info* pti)
     : Target(pti)

@@ -345,6 +345,17 @@ class Target_x86_64 : public Target_freebsd<64, false>
   unsigned int
   plt_entry_size() const;
 
+  // Apply an incremental relocation.
+  void
+  apply_relocation(const Relocate_info<64, false>* relinfo,
+		   elfcpp::Elf_types<64>::Elf_Addr r_offset,
+		   unsigned int r_type,
+		   elfcpp::Elf_types<64>::Elf_Swxword r_addend,
+		   const Symbol* gsym,
+		   unsigned char* view,
+		   elfcpp::Elf_types<64>::Elf_Addr address,
+		   section_size_type view_size);
+
   // Add a new reloc argument, returning the index in the vector.
   size_t
   add_tlsdesc_info(Sized_relobj<64, false>* object, unsigned int r_sym)
@@ -3012,6 +3023,32 @@ Target_x86_64::relocate_section(
     address,
     view_size,
     reloc_symbol_changes);
+}
+
+// Apply an incremental relocation.  Incremental relocations always refer
+// to global symbols.
+
+void
+Target_x86_64::apply_relocation(
+    const Relocate_info<64, false>* relinfo,
+    elfcpp::Elf_types<64>::Elf_Addr r_offset,
+    unsigned int r_type,
+    elfcpp::Elf_types<64>::Elf_Swxword r_addend,
+    const Symbol* gsym,
+    unsigned char* view,
+    elfcpp::Elf_types<64>::Elf_Addr address,
+    section_size_type view_size)
+{
+  gold::apply_relocation<64, false, Target_x86_64, Target_x86_64::Relocate>(
+    relinfo,
+    this,
+    r_offset,
+    r_type,
+    r_addend,
+    gsym,
+    view,
+    address,
+    view_size);
 }
 
 // Return the size of a relocation while scanning during a relocatable

@@ -362,6 +362,46 @@ relocate_section(
     }
 }
 
+// Apply an incremental relocation.
+
+template<int size, bool big_endian, typename Target_type,
+	 typename Relocate>
+void
+apply_relocation(const Relocate_info<size, big_endian>* relinfo,
+		 Target_type* target,
+		 typename elfcpp::Elf_types<size>::Elf_Addr r_offset,
+		 unsigned int r_type,
+		 typename elfcpp::Elf_types<size>::Elf_Swxword r_addend,
+		 const Symbol* gsym,
+		 unsigned char* view,
+		 typename elfcpp::Elf_types<size>::Elf_Addr address,
+		 section_size_type view_size)
+{
+  // Construct the ELF relocation in a temporary buffer.
+  const int reloc_size = elfcpp::Elf_sizes<64>::rela_size;
+  unsigned char relbuf[reloc_size];
+  elfcpp::Rela<64, false> rel(relbuf);
+  elfcpp::Rela_write<64, false> orel(relbuf);
+  orel.put_r_offset(r_offset);
+  orel.put_r_info(elfcpp::elf_r_info<64>(0, r_type));
+  orel.put_r_addend(r_addend);
+
+  // Setup a Symbol_value for the global symbol.
+  const Sized_symbol<64>* sym = static_cast<const Sized_symbol<64>*>(gsym);
+  Symbol_value<64> symval;
+  gold_assert(sym->has_symtab_index() && sym->symtab_index() != -1U);
+  symval.set_output_symtab_index(sym->symtab_index());
+  symval.set_output_value(sym->value());
+  if (gsym->type() == elfcpp::STT_TLS)
+    symval.set_is_tls_symbol();
+  else if (gsym->type() == elfcpp::STT_GNU_IFUNC)
+    symval.set_is_ifunc_symbol();
+
+  Relocate relocate;
+  relocate.relocate(relinfo, target, NULL, -1U, rel, r_type, sym, &symval,
+		    view + r_offset, address + r_offset, view_size);
+}
+
 // This class may be used as a typical class for the
 // Scan_relocatable_reloc parameter to scan_relocatable_relocs.  The
 // template parameter Classify_reloc must be a class type which

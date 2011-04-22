@@ -310,6 +310,10 @@ Sized_incremental_binary<size, big_endian>::setup_readers()
 	}
     }
 
+  // Initialize the map of global symbols.
+  unsigned int nglobals = this->symtab_reader_.symbol_count();
+  this->symbol_map_.resize(nglobals);
+
   this->has_incremental_info_ = true;
 }
 
@@ -516,6 +520,102 @@ Sized_incremental_binary<size, big_endian>::do_reserve_layout(
       Output_section* os = this->section_map_[sect.output_shndx];
       gold_assert(os != NULL);
       os->reserve(sect.sh_offset, sect.sh_size);
+    }
+}
+
+// Apply incremental relocations for symbols whose values have changed.
+
+template<int size, bool big_endian>
+void
+Sized_incremental_binary<size, big_endian>::do_apply_incremental_relocs(
+    const Symbol_table* symtab,
+    Layout* layout,
+    Output_file* of)
+{
+  typedef typename elfcpp::Elf_types<size>::Elf_Addr Address;
+  typedef typename elfcpp::Elf_types<size>::Elf_Swxword Addend;
+  Incremental_symtab_reader<big_endian> isymtab(this->symtab_reader());
+  Incremental_relocs_reader<size, big_endian> irelocs(this->relocs_reader());
+  unsigned int nglobals = isymtab.symbol_count();
+  const unsigned int incr_reloc_size = irelocs.reloc_size;
+
+  Relocate_info<size, big_endian> relinfo;
+  relinfo.symtab = symtab;
+  relinfo.layout = layout;
+  relinfo.object = NULL;
+  relinfo.reloc_shndx = 0;
+  relinfo.reloc_shdr = NULL;
+  relinfo.data_shndx = 0;
+  relinfo.data_shdr = NULL;
+
+  Sized_target<size, big_endian>* target =
+      parameters->sized_target<size, big_endian>();
+
+  for (unsigned int i = 0; i < nglobals; i++)
+    {
+      const Symbol* gsym = this->global_symbol(i);
+
+      // If the symbol is not referenced from any unchanged input files,
+      // we do not need to reapply any of its relocations.
+      if (gsym == NULL)
+	continue;
+
+      // If the symbol is defined in an unchanged file, we do not need to
+      // reapply any of its relocations.
+      if (gsym->source() == Symbol::FROM_OBJECT
+	  && gsym->object()->is_incremental())
+	continue;
+
+      gold_debug(DEBUG_INCREMENTAL,
+		 "Applying incremental relocations for global symbol %s [%d]",
+		 gsym->name(), i);
+
+      // Follow the linked list of input symbol table entries for this symbol.
+      // We don't bother to figure out whether the symbol table entry belongs
+      // to a changed or unchanged file because it's easier just to apply all
+      // the relocations -- although we might scribble over an area that has
+      // been reallocated, we do this before copying any new data into the
+      // output file.
+      unsigned int offset = isymtab.get_list_head(i);
+      while (offset > 0)
+        {
+	  Incremental_global_symbol_reader<big_endian> sym_info =
+	      this->inputs_reader().global_symbol_reader_at_offset(offset);
+	  unsigned int r_base = sym_info.reloc_offset();
+	  unsigned int r_count = sym_info.reloc_count();
+
+	  // Apply each relocation for this symbol table entry.
+	  for (unsigned int j = 0; j < r_count;
+	       ++j, r_base += incr_reloc_size)
+	    {
+	      unsigned int r_type = irelocs.get_r_type(r_base);
+	      unsigned int r_shndx = irelocs.get_r_shndx(r_base);
+	      Address r_offset = irelocs.get_r_offset(r_base);
+	      Addend r_addend = irelocs.get_r_addend(r_base);
+	      Output_section* os = this->output_section(r_shndx);
+	      Address address = os->address();
+	      off_t section_offset = os->offset();
+	      size_t view_size = os->data_size();
+	      unsigned char* const view = of->get_output_view(section_offset,
+							      view_size);
+
+	      gold_debug(DEBUG_INCREMENTAL,
+	      		 "  %08lx: %s + %d: type %d addend %ld",
+	      		 (long)(section_offset + r_offset),
+	      		 os->name(),
+	      		 (int)r_offset,
+	      		 r_type,
+	      		 (long)r_addend);
+
+	      target->apply_relocation(&relinfo, r_offset, r_type, r_addend,
+				       gsym, view, address, view_size);
+
+	      // FIXME: Do something more efficient if write_output_view
+	      // ever becomes more than a no-op.
+	      of->write_output_view(section_offset, view_size, view);
+	    }
+	  offset = sym_info.next_offset();
+        }
     }
 }
 
@@ -1652,17 +1752,17 @@ Sized_incr_relobj<size, big_endian>::do_add_symbols(
   elfcpp::Elf_strtab strtab(NULL, 0);
   this->ibase_->get_symtab_view(&symtab_view, &symtab_count, &strtab);
 
-  // Incremental_symtab_reader<big_endian> isymtab(this->ibase_->symtab_reader());
-  // Incremental_relocs_reader<size, big_endian> irelocs(this->ibase_->relocs_reader());
-  // unsigned int isym_count = isymtab.symbol_count();
-  // unsigned int first_global = symtab_count - isym_count;
+  Incremental_symtab_reader<big_endian> isymtab(this->ibase_->symtab_reader());
+  unsigned int isym_count = isymtab.symbol_count();
+  unsigned int first_global = symtab_count - isym_count;
 
   unsigned const char* sym_p;
   for (unsigned int i = 0; i < nsyms; ++i)
     {
       Incremental_global_symbol_reader<big_endian> info =
 	  this->input_reader_.get_global_symbol_reader(i);
-      sym_p = symtab_view.data() + info.output_symndx() * sym_size;
+      unsigned int output_symndx = info.output_symndx();
+      sym_p = symtab_view.data() + output_symndx * sym_size;
       elfcpp::Sym<size, big_endian> gsym(sym_p);
       const char* name;
       if (!strtab.get_c_string(gsym.get_st_name(), &name))
@@ -1708,6 +1808,8 @@ Sized_incr_relobj<size, big_endian>::do_add_symbols(
 
       this->symbols_[i] =
 	symtab->add_from_incrobj(this, name, NULL, &sym);
+      this->ibase_->add_global_symbol(output_symndx - first_global,
+				      this->symbols_[i]);
     }
 }
 
@@ -1993,6 +2095,19 @@ Sized_incr_relobj<size, big_endian>::do_relocate(const Symbol_table*,
   off_t off = this->incr_reloc_output_index_ * incr_reloc_size;
   unsigned int len = this->incr_reloc_count_ * incr_reloc_size;
   memcpy(view + off, this->incr_relocs_, len);
+
+  // The output section table may have changed, so we need to map
+  // the old section index to the new section index for each relocation.
+  for (unsigned int i = 0; i < this->incr_reloc_count_; ++i)
+    {
+      unsigned char* pov = view + off + i * incr_reloc_size;
+      unsigned int shndx = elfcpp::Swap<32, big_endian>::readval(pov + 4);
+      Output_section* os = this->ibase_->output_section(shndx);
+      gold_assert(os != NULL);
+      shndx = os->out_shndx();
+      elfcpp::Swap<32, big_endian>::writeval(pov + 4, shndx);
+    }
+
   of->write_output_view(off, len, view);
 }
 
@@ -2068,10 +2183,9 @@ Sized_incr_dynobj<size, big_endian>::do_add_symbols(
   elfcpp::Elf_strtab strtab(NULL, 0);
   this->ibase_->get_symtab_view(&symtab_view, &symtab_count, &strtab);
 
-  // Incremental_symtab_reader<big_endian> isymtab(this->ibase_->symtab_reader());
-  // Incremental_relocs_reader<size, big_endian> irelocs(this->ibase_->relocs_reader());
-  // unsigned int isym_count = isymtab.symbol_count();
-  // unsigned int first_global = symtab_count - isym_count;
+  Incremental_symtab_reader<big_endian> isymtab(this->ibase_->symtab_reader());
+  unsigned int isym_count = isymtab.symbol_count();
+  unsigned int first_global = symtab_count - isym_count;
 
   unsigned const char* sym_p;
   for (unsigned int i = 0; i < nsyms; ++i)
@@ -2117,6 +2231,8 @@ Sized_incr_dynobj<size, big_endian>::do_add_symbols(
 
       this->symbols_[i] =
 	symtab->add_from_incrobj<size, big_endian>(this, name, NULL, &sym);
+      this->ibase_->add_global_symbol(output_symndx - first_global,
+				      this->symbols_[i]);
     }
 }
 
@@ -2152,7 +2268,6 @@ void
 Sized_incr_dynobj<size, big_endian>::do_for_all_local_got_entries(
     Got_offset_list::Visitor*) const
 {
-  // FIXME: Implement Sized_incr_dynobj::do_for_all_local_got_entries.
 }
 
 // Get the size of a section.
