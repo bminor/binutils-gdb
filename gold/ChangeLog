@@ -1,3 +1,9 @@
+2011-04-22  Vladimir Simonov  <sv@sw.ru>
+
+	* descriptors.cc (set_close_on_exec): New function.
+	(Descriptors::open): Use set_close_on_exec.
+	* output.cc (S_ISLNK): Define if not defined.
+
 2011-04-22 Cary Coutant  <ccoutant@google.com>
 
 	* incremental.cc (Sized_incremental_binary::setup_readers): Allocate

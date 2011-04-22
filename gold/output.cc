@@ -121,6 +121,11 @@ posix_fallocate(int o, off_t offset, off_t len)
 }
 #endif // !defined(HAVE_POSIX_FALLOCATE)
 
+// Mingw does not have S_ISLNK.
+#ifndef S_ISLNK
+# define S_ISLNK(mode) 0
+#endif
+
 namespace gold
 {
 
