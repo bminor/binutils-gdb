@@ -16135,6 +16135,7 @@ target system with the same privileges as the user running
 
 @subsection Running @code{gdbserver}
 @cindex arguments, to @code{gdbserver}
+@cindex @code{gdbserver}, command-line arguments
 
 Run @code{gdbserver} on the target system.  You need a copy of the
 program you want to debug, including any libraries it requires.
@@ -16181,6 +16182,8 @@ and exits.}  You must use the same port number with the host @value{GDBN}
 @code{target remote} command.
 
 @subsubsection Attaching to a Running Program
+@cindex attach to a program, @code{gdbserver}
+@cindex @option{--attach}, @code{gdbserver} option
 
 On some targets, @code{gdbserver} can also attach to running programs.
 This is accomplished via the @code{--attach} argument.  The syntax is:
@@ -16193,7 +16196,6 @@ target> gdbserver --attach @var{comm} @var{pid}
 to point @code{gdbserver} at a binary for the running process.
 
 @pindex pidof
-@cindex attach to a program by name
 You can debug processes by name instead of process ID if your target has the
 @code{pidof} utility:
 
@@ -16206,8 +16208,8 @@ has multiple threads, most versions of @code{pidof} support the
 @code{-s} option to only return the first process ID.
 
 @subsubsection Multi-Process Mode for @code{gdbserver}
-@cindex gdbserver, multiple processes
-@cindex multiple processes with gdbserver
+@cindex @code{gdbserver}, multiple processes
+@cindex multiple processes with @code{gdbserver}
 
 When you connect to @code{gdbserver} using @code{target remote},
 @code{gdbserver} debugs the specified program only once.  When the
@@ -16224,6 +16226,7 @@ remote exec-file}) to select the program to run.  Command line
 arguments are supported, except for wildcard expansion and I/O
 redirection (@pxref{Arguments}).
 
+@cindex @option{--multi}, @code{gdbserver} option
 To start @code{gdbserver} without supplying an initial command to run
 or process ID to attach, use the @option{--multi} command line option.
 Then you can connect using @kbd{target extended-remote} and start
@@ -16235,12 +16238,15 @@ You can terminate it by using @code{monitor exit}
 
 @subsubsection Other Command-Line Arguments for @code{gdbserver}
 
+@cindex @option{--debug}, @code{gdbserver} option
 The @option{--debug} option tells @code{gdbserver} to display extra
-status information about the debugging process.  The
-@option{--remote-debug} option tells @code{gdbserver} to display
+status information about the debugging process.
+@cindex @option{--remote-debug}, @code{gdbserver} option
+The @option{--remote-debug} option tells @code{gdbserver} to display
 remote protocol debug output.  These options are intended for
 @code{gdbserver} development and for bug reports to the developers.
 
+@cindex @option{--wrapper}, @code{gdbserver} option
 The @option{--wrapper} option specifies a wrapper to launch programs
 for debugging.  The option should be followed by the name of the
 wrapper, then any command-line arguments to pass to the wrapper, then

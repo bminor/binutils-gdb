@@ -1,3 +1,8 @@
+2011-04-23  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (Server): Improve indexing.  Index all optional
+	switches to gdbserver.
+
 2011-04-20  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (Index Section Format): New node.
