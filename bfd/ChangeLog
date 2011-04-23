@@ -1,3 +1,11 @@
+2011-04-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_readonly_dynrelocs): Warn relocation
+	in readonly section in a shared object.
+	(elf_i386_size_dynamic_sections): Likewise.
+	* elf64-x86-64.c (elf_x86_64_readonly_dynrelocs): Likewise.
+	(elf_x86_64_size_dynamic_sections): Likewise.
+
 2011-04-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/12694
