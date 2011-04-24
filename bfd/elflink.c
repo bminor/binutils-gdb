@@ -1427,7 +1427,10 @@ _bfd_elf_merge_symbol (bfd *abfd,
   /* Skip weak definitions of symbols that are already defined.  */
   if (newdef && olddef && newweak)
     {
-      *skip = TRUE;
+      /* Don't skip new non-IR weak syms.  */
+      if (!((oldbfd->flags & BFD_PLUGIN) != 0
+	    && (abfd->flags & BFD_PLUGIN) == 0))
+	*skip = TRUE;
 
       /* Merge st_other.  If the symbol already has a dynamic index,
 	 but visibility says it should not be visible, turn it into a

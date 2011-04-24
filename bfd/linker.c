@@ -465,10 +465,8 @@ _bfd_link_hash_newfunc (struct bfd_hash_entry *entry,
       struct bfd_link_hash_entry *h = (struct bfd_link_hash_entry *) entry;
 
       /* Initialize the local fields.  */
-      h->type = bfd_link_hash_new;
-      memset (&h->u.undef.next, 0,
-	      (sizeof (struct bfd_link_hash_entry)
-	       - offsetof (struct bfd_link_hash_entry, u.undef.next)));
+      memset ((char *) &h->root + sizeof (h->root), 0,
+	      sizeof (*h) - sizeof (h->root));
     }
 
   return entry;
@@ -1609,8 +1607,7 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
       || (info->notice_hash != NULL
 	  && bfd_hash_lookup (info->notice_hash, name, FALSE, FALSE) != NULL))
     {
-      if (! (*info->callbacks->notice) (info, h->root.string, abfd, section,
-					value))
+      if (! (*info->callbacks->notice) (info, h, abfd, section, value))
 	return FALSE;
     }
 

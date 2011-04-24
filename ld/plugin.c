@@ -90,13 +90,6 @@ static plugin_t *called_plugin = NULL;
 /* Last plugin to cause an error, if any.  */
 static const char *error_plugin = NULL;
 
-/* A hash table that records symbols referenced by non-IR files.  Used
-   at get_symbols time to determine whether any prevailing defs from
-   IR files are referenced only from other IR files, so tthat we can
-   we can distinguish the LDPR_PREVAILING_DEF and LDPR_PREVAILING_DEF_IRONLY
-   cases when establishing symbol resolutions.  */
-static struct bfd_hash_table *non_ironly_hash = NULL;
-
 /* State of linker "notice" interface before we poked at it.  */
 static bfd_boolean orig_notice_all;
 
@@ -133,18 +126,8 @@ static const size_t tv_header_size = ARRAY_SIZE (tv_header_tags);
 
 /* Forward references.  */
 static bfd_boolean plugin_notice (struct bfd_link_info *info,
-				  const char *name, bfd *abfd,
+				  struct bfd_link_hash_entry *h, bfd *abfd,
 				  asection *section, bfd_vma value);
-static bfd_boolean plugin_multiple_definition (struct bfd_link_info *info,
-					       struct bfd_link_hash_entry *h,
-					       bfd *nbfd,
-					       asection *nsec,
-					       bfd_vma nval);
-static bfd_boolean plugin_multiple_common (struct bfd_link_info *info,
-					   struct bfd_link_hash_entry *h,
-					   bfd *nbfd,
-					   enum bfd_link_hash_type ntype,
-					   bfd_vma nsize);
 
 #if !defined (HAVE_DLFCN_H) && defined (HAVE_WINDOWS_H)
 
@@ -438,6 +421,8 @@ static inline bfd_boolean
 is_visible_from_outside (struct ld_plugin_symbol *lsym, asection *section,
 			 struct bfd_link_hash_entry *blhe)
 {
+  struct bfd_sym_chain *sym;
+
   /* Section's owner may be NULL if it is the absolute
      section, fortunately is_ir_dummy_bfd handles that.  */
   if (!is_ir_dummy_bfd (section->owner))
@@ -466,6 +451,12 @@ is_visible_from_outside (struct ld_plugin_symbol *lsym, asection *section,
       return (lsym->visibility == LDPV_DEFAULT
 	      || lsym->visibility == LDPV_PROTECTED);
     }
+
+  for (sym = &entry_symbol; sym != NULL; sym = sym->next)
+    if (sym->name
+	&& strcmp (sym->name, blhe->root.string) == 0)
+      return TRUE;
+
   return FALSE;
 }
 
@@ -520,9 +511,8 @@ get_symbols (const void *handle, int nsyms, struct ld_plugin_symbol *syms)
 	 even potentially-referenced, perhaps in a future final link if
 	 this is a partial one, perhaps dynamically at load-time if the
 	 symbol is externally visible.  */
-      ironly = (!is_visible_from_outside (&syms[n], owner_sec, blhe)
-		&& !bfd_hash_lookup (non_ironly_hash, syms[n].name,
-				     FALSE, FALSE));
+      ironly = !(blhe->non_ir_ref
+		 || is_visible_from_outside (&syms[n], owner_sec, blhe));
 
       /* If it was originally undefined or common, then it has been
 	 resolved; determine how.  */
@@ -740,27 +730,6 @@ plugin_active_plugins_p (void)
   return plugins_list != NULL;
 }
 
-/* Init the non_ironly hash table.  */
-static void
-init_non_ironly_hash (void)
-{
-  struct bfd_sym_chain *sym;
-
-  non_ironly_hash
-    = (struct bfd_hash_table *) xmalloc (sizeof (struct bfd_hash_table));
-  if (!bfd_hash_table_init_n (non_ironly_hash,
-			      bfd_hash_newfunc,
-			      sizeof (struct bfd_hash_entry),
-			      61))
-    einfo (_("%P%F: bfd_hash_table_init failed: %E\n"));
-
-  for (sym = &entry_symbol; sym != NULL; sym = sym->next)
-    if (sym->name
-	&& !bfd_hash_lookup (non_ironly_hash, sym->name, TRUE, TRUE))
-      einfo (_("%P%X: hash table failure adding symbol %s\n"),
-	     sym->name);
-}
-
 /* Load up and initialise all plugins after argument parsing.  */
 int
 plugin_load_plugins (void)
@@ -814,7 +783,6 @@ plugin_load_plugins (void)
   plugin_callbacks.notice = &plugin_notice;
   link_info.notice_all = TRUE;
   link_info.callbacks = &plugin_callbacks;
-  init_non_ironly_hash ();
 
   return 0;
 }
@@ -888,9 +856,6 @@ plugin_call_all_symbols_read (void)
   /* Disable any further file-claiming.  */
   no_more_claiming = TRUE;
 
-  plugin_callbacks.multiple_definition = &plugin_multiple_definition;
-  plugin_callbacks.multiple_common = &plugin_multiple_common;
-
   while (curplug)
     {
       if (curplug->all_symbols_read_handler)
@@ -934,88 +899,47 @@ plugin_call_cleanup (void)
 
 /* To determine which symbols should be resolved LDPR_PREVAILING_DEF
    and which LDPR_PREVAILING_DEF_IRONLY, we notice all the symbols as
-   the linker adds them to the linker hash table.  If we see a symbol
-   being referenced from a non-IR file, we add it to the non_ironly hash
-   table.  If we can't find it there at get_symbols time, we know that
-   it was referenced only by IR files.  We have to notice_all symbols,
-   because we won't necessarily know until later which ones will be
-   contributed by IR files.  */
+   the linker adds them to the linker hash table.  Mark those
+   referenced from a non-IR file with non_ir_ref.  We have to
+   notice_all symbols, because we won't necessarily know until later
+   which ones will be contributed by IR files.  */
 static bfd_boolean
 plugin_notice (struct bfd_link_info *info,
-	       const char *name,
+	       struct bfd_link_hash_entry *h,
 	       bfd *abfd,
 	       asection *section,
 	       bfd_vma value)
 {
-  if (name != NULL)
+  if (h != NULL)
     {
       /* No further processing if this def/ref is from an IR dummy BFD.  */
       if (is_ir_dummy_bfd (abfd))
 	return TRUE;
 
-      /* We only care about refs, not defs, indicated by section
-	 pointing to the undefined section (according to the bfd
-	 linker notice callback interface definition).  */
+      /* If this is a ref, set non_ir_ref.  */
       if (bfd_is_und_section (section))
-	{
-	  /* This is a ref from a non-IR file, so note the ref'd
-	     symbol in the non-IR-only hash.  */
-	  if (!bfd_hash_lookup (non_ironly_hash, name, TRUE, TRUE))
-	    einfo (_("%P%X: %s: hash table failure adding symbol %s\n"),
-		   abfd->filename, name);
-	}
+	h->non_ir_ref = TRUE;
+
+      /* Otherwise, it must be a new def.  Ensure any symbol defined
+	 in an IR dummy BFD takes on a new value from a real BFD.
+	 Weak symbols are not normally overridden by a new weak
+	 definition, and strong symbols will normally cause multiple
+	 definition errors.  Avoid this by making the symbol appear
+	 to be undefined.  */
+      else if (((h->type == bfd_link_hash_defweak
+		 || h->type == bfd_link_hash_defined)
+		&& is_ir_dummy_bfd (h->u.def.section->owner))
+	       || (h->type == bfd_link_hash_common
+		   && is_ir_dummy_bfd (h->u.c.p->section->owner)))
+	h->type = bfd_link_hash_undefweak;
     }
 
   /* Continue with cref/nocrossref/trace-sym processing.  */
-  if (name == NULL
+  if (h == NULL
       || orig_notice_all
       || (info->notice_hash != NULL
-	  && bfd_hash_lookup (info->notice_hash, name, FALSE, FALSE) != NULL))
-    return (*orig_callbacks->notice) (info, name, abfd, section, value);
+	  && bfd_hash_lookup (info->notice_hash, h->root.string,
+			      FALSE, FALSE) != NULL))
+    return (*orig_callbacks->notice) (info, h, abfd, section, value);
   return TRUE;
-}
-
-/* When we add new object files to the link at all symbols read time,
-   these contain the real code and symbols generated from the IR files,
-   and so duplicate all the definitions already supplied by the dummy
-   IR-only BFDs that we created at claim files time.  We use the linker's
-   multiple-definitions callback hook to fix up the clash, discarding
-   the symbol from the IR-only BFD in favour of the symbol from the
-   real BFD.  We return true if this was not-really-a-clash because
-   we've fixed it up, or anyway if --allow-multiple-definition was in
-   effect (before we disabled it to ensure we got called back).  */
-static bfd_boolean
-plugin_multiple_definition (struct bfd_link_info *info,
-			    struct bfd_link_hash_entry *h,
-			    bfd *nbfd, asection *nsec, bfd_vma nval)
-{
-  if (h->type == bfd_link_hash_defined
-      && is_ir_dummy_bfd (h->u.def.section->owner))
-    {
-      /* Replace it with new details.  */
-      h->u.def.section = nsec;
-      h->u.def.value = nval;
-      return TRUE;
-    }
-
-  return (*orig_callbacks->multiple_definition) (info, h, nbfd, nsec, nval);
-}
-
-static bfd_boolean
-plugin_multiple_common (struct bfd_link_info *info,
-			struct bfd_link_hash_entry *h,
-			bfd *nbfd, enum bfd_link_hash_type ntype, bfd_vma nsize)
-{
-  if (h->type == bfd_link_hash_common
-      && is_ir_dummy_bfd (h->u.c.p->section->owner)
-      && ntype == bfd_link_hash_common
-      && !is_ir_dummy_bfd (nbfd))
-    {
-      /* Arrange to have it replaced.  */
-      ASSERT (nsize != 0);
-      h->u.c.size = 0;
-      return TRUE;
-    }
-
-  return (*orig_callbacks->multiple_common) (info, h, nbfd, ntype, nsize);
 }

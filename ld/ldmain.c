@@ -150,7 +150,8 @@ static bfd_boolean reloc_dangerous
 static bfd_boolean unattached_reloc
   (struct bfd_link_info *, const char *, bfd *, asection *, bfd_vma);
 static bfd_boolean notice
-  (struct bfd_link_info *, const char *, bfd *, asection *, bfd_vma);
+  (struct bfd_link_info *, struct bfd_link_hash_entry *,
+   bfd *, asection *, bfd_vma);
 
 static struct bfd_link_callbacks link_callbacks =
 {
@@ -1479,18 +1480,21 @@ unattached_reloc (struct bfd_link_info *info ATTRIBUTE_UNUSED,
 
 static bfd_boolean
 notice (struct bfd_link_info *info,
-	const char *name,
+	struct bfd_link_hash_entry *h,
 	bfd *abfd,
 	asection *section,
 	bfd_vma value)
 {
-  if (name == NULL)
+  const char *name;
+
+  if (h == NULL)
     {
       if (command_line.cref || nocrossref_list != NULL)
 	return handle_asneeded_cref (abfd, (enum notice_asneeded_action) value);
       return TRUE;
     }
 
+  name = h->root.string;
   if (info->notice_hash != NULL
       && bfd_hash_lookup (info->notice_hash, name, FALSE, FALSE) != NULL)
     {
