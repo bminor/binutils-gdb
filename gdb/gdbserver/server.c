@@ -40,6 +40,9 @@ static int extended_protocol;
 static int response_needed;
 static int exit_requested;
 
+/* --once: Exit after the first connection has closed.  */
+int run_once;
+
 int multi_process;
 int non_stop;
 
@@ -2312,7 +2315,9 @@ gdbserver_usage (FILE *stream)
 	   "  --debug               Enable general debugging output.\n"
 	   "  --remote-debug        Enable remote protocol debugging output.\n"
 	   "  --version             Display version information and exit.\n"
-	   "  --wrapper WRAPPER --  Run WRAPPER to start new programs.\n");
+	   "  --wrapper WRAPPER --  Run WRAPPER to start new programs.\n"
+	   "  --once                Exit after the first connection has "
+								  "closed.\n");
   if (REPORT_BUGS_TO[0] && stream == stdout)
     fprintf (stream, "Report bugs to \"%s\".\n", REPORT_BUGS_TO);
 }
@@ -2536,6 +2541,8 @@ main (int argc, char *argv[])
 		}
 	    }
 	}
+      else if (strcmp (*next_arg, "--once") == 0)
+	run_once = 1;
       else
 	{
 	  fprintf (stderr, "Unknown argument: %s\n", *next_arg);
@@ -2648,6 +2655,8 @@ main (int argc, char *argv[])
       exit (1);
     }
 
+  remote_prepare (port);
+
   while (1)
     {
       noack_mode = 0;
@@ -2676,7 +2685,7 @@ main (int argc, char *argv[])
 	 getpkt to fail; close the connection and reopen it at the
 	 top of the loop.  */
 
-      if (exit_requested)
+      if (exit_requested || run_once)
 	{
 	  detach_or_kill_for_exit ();
 	  exit (0);

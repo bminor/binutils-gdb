@@ -3,6 +3,10 @@
 
 *** Changes since GDB 7.3
 
+* The new option --once causes GDBserver to stop listening for connections once
+  the first connection is made.  The listening port used by GDBserver will
+  become available after that.
+
 *** Changes in GDB 7.3
 
 * GDB has a new command: "thread find [REGEXP]".

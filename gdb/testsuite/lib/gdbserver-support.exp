@@ -218,10 +218,21 @@ proc gdbserver_start { options arguments } {
 
 	# Fire off the debug agent.
 	set gdbserver_command "$gdbserver"
+
+	# If gdbserver_reconnect will be called $gdbserver_reconnect_p must be
+	# set to true already during gdbserver_start.
+	global gdbserver_reconnect_p
+	if {![info exists gdbserver_reconnect_p] || !$gdbserver_reconnect_p} {
+	    # GDB client could accidentally connect to a stale server.
+	    append gdbserver_command " --once"
+	}
+
 	if { $options != "" } {
 	    append gdbserver_command " $options"
 	}
+
 	append gdbserver_command " :$portnum"
+
 	if { $arguments != "" } {
 	    append gdbserver_command " $arguments"
 	}
@@ -314,6 +325,12 @@ proc gdbserver_run { child_args } {
 proc gdbserver_reconnect { } {
     global gdbserver_protocol
     global gdbserver_gdbport
+
+    global gdbserver_reconnect_p;
+    if {![info exists gdbserver_reconnect_p] || !$gdbserver_reconnect_p} {
+	error "gdbserver_reconnect_p is not set before gdbserver_reconnect"
+	return 0
+    }
 
     return [gdb_target_cmd $gdbserver_protocol $gdbserver_gdbport]
 }

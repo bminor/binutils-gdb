@@ -10435,6 +10435,7 @@ Enter actions for tracepoint #1, one per line.
 (@value{GDBP}) @b{tstop}
 @end smallexample
 
+@anchor{disconnected tracing}
 @cindex disconnected tracing
 You can choose to continue running the trace experiment even if
 @value{GDBN} disconnects from the target, voluntarily or
@@ -16232,9 +16233,42 @@ or process ID to attach, use the @option{--multi} command line option.
 Then you can connect using @kbd{target extended-remote} and start
 the program you want to debug.
 
-@code{gdbserver} does not automatically exit in multi-process mode.
-You can terminate it by using @code{monitor exit}
-(@pxref{Monitor Commands for gdbserver}).
+In multi-process mode @code{gdbserver} does not automatically exit unless you
+use the option @option{--once}.  You can terminate it by using
+@code{monitor exit} (@pxref{Monitor Commands for gdbserver}).  Note that the
+conditions under which @code{gdbserver} terminates depend on how @value{GDBN}
+connects to it (@kbd{target remote} or @kbd{target extended-remote}).  The
+@option{--multi} option to @code{gdbserver} has no influence on that.
+
+@subsubsection TCP port allocation lifecycle of @code{gdbserver}
+
+This section applies only when @code{gdbserver} is run to listen on a TCP port.
+
+@code{gdbserver} normally terminates after all of its debugged processes have
+terminated in @kbd{target remote} mode.  On the other hand, for @kbd{target
+extended-remote}, @code{gdbserver} stays running even with no processes left.
+@value{GDBN} normally terminates the spawned debugged process on its exit,
+which normally also terminates @code{gdbserver} in the @kbd{target remote}
+mode.  Therefore, when the connection drops unexpectedly, and @value{GDBN}
+cannot ask @code{gdbserver} to kill its debugged processes, @code{gdbserver}
+stays running even in the @kbd{target remote} mode.
+
+When @code{gdbserver} stays running, @value{GDBN} can connect to it again later.
+Such reconnecting is useful for features like @ref{disconnected tracing}.  For
+completeness, at most one @value{GDBN} can be connected at a time.
+
+@cindex @option{--once}, @code{gdbserver} option
+By default, @code{gdbserver} keeps the listening TCP port open, so that
+additional connections are possible.  However, if you start @code{gdbserver}
+with the @option{--once} option, it will stop listening for any further
+connection attempts after connecting to the first @value{GDBN} session.  This
+means no further connections to @code{gdbserver} will be possible after the
+first one.  It also means @code{gdbserver} will terminate after the first
+connection with remote @value{GDBN} has closed, even for unexpectedly closed
+connections and even in the @kbd{target extended-remote} mode.  The
+@option{--once} option allows reusing the same port number for connecting to
+multiple instances of @code{gdbserver} running on the same host, since each
+instance closes its port after the first connection.
 
 @subsubsection Other Command-Line Arguments for @code{gdbserver}
 

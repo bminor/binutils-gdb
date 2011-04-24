@@ -1,3 +1,11 @@
+2011-04-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/solib-disc.exp: Set gdbserver_reconnect_p.
+	* lib/gdb.exp (gdb_init): Clear gdbserver_reconnect_p.
+	* lib/gdbserver-support.exp (gdbserver_start): Add `--once' if
+	!gdbserver_reconnect_p..
+	(gdbserver_reconnect): Call error if !gdbserver_reconnect_p..
+
 2011-04-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.cp/cpcompletion.exp (complete class methods)

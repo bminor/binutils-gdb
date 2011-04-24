@@ -1,3 +1,12 @@
+2011-04-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (Starting and Stopping Trace Experiments): New anchor
+	for disconnected tracing.
+	(Multi-Process Mode for @code{gdbserver}): Mention --multi and
+	extended-remote relationship.  Mention --once.
+	(TCP port allocation lifecycle of @code{gdbserver}): New.
+
 2011-04-23  Eli Zaretskii  <eliz@gnu.org>
 
 	* gdb.texinfo (Server): Improve indexing.  Index all optional

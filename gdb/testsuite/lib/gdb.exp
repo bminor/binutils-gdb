@@ -2809,6 +2809,11 @@ proc gdb_init { args } {
     # especially having color output turned on can cause tests to fail.
     setenv GREP_OPTIONS ""
 
+    # Clear $gdbserver_reconnect_p.
+    global gdbserver_reconnect_p
+    set gdbserver_reconnect_p 1
+    unset gdbserver_reconnect_p
+
     return [eval default_gdb_init $args];
 }
 

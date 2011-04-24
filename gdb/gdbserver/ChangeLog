@@ -1,3 +1,16 @@
+2011-04-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* remote-utils.c (handle_accept_event): Close LISTEN_DESC only if
+	RUN_ONCE.  Comment for the LISTEN_DESC delete_file_handler call.
+	(remote_prepare): New function with most of the TCP code from ...
+	(remote_open): ... here.  Detect PORT here unconditionally.  Move also
+	setting transport_is_reliable.
+	* server.c (run_once): New variable.
+	(gdbserver_usage): Document it.
+	(main): Set run_once for `--once'.  Call remote_prepare.  Exit after
+	the first run if RUN_ONCE.
+	* server.h (run_once, remote_prepare): New declarations.
+
 2011-04-19  Tom Tromey  <tromey@redhat.com>
 
 	* win32-low.c (handle_load_dll): Remove duplicate "the".

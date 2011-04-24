@@ -1,3 +1,8 @@
+2011-04-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Eli Zaretskii  <eliz@gnu.org>
+
+	* NEWS: Document the new gdbserver --once option.
+
 2011-04-21  Jie Zhang  <jzhang918@gmail.com>
 
 	* MAINTAINERS: Update my email address.
