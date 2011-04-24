@@ -1,5 +1,10 @@
 2011-04-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* gdb.python/py-value.exp (test_objfiles): Name the first test
+	`py-value in file.filename'.
+
+2011-04-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdb.base/solib-disc.exp: Set gdbserver_reconnect_p.
 	* lib/gdb.exp (gdb_init): Clear gdbserver_reconnect_p.
 	* lib/gdbserver-support.exp (gdbserver_start): Add `--once' if

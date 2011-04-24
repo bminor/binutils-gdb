@@ -283,7 +283,8 @@ proc test_inferior_function_call {} {
 
 # A few objfile tests.
 proc test_objfiles {} {
-    gdb_test "python\nok=False\nfor file in gdb.objfiles():\n  if 'py-value' in file.filename:\n    ok=True\nprint ok\nend" "True"
+    gdb_test "python\nok=False\nfor file in gdb.objfiles():\n  if 'py-value' in file.filename:\n    ok=True\nprint ok\nend" "True" \
+	     "py-value in file.filename"
 
     gdb_test "python print gdb.objfiles()\[0\].pretty_printers" "\\\[\\\]"
 
