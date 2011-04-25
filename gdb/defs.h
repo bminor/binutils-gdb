@@ -271,15 +271,6 @@ struct cleanup
     void *arg;
   };
 
-/* Be conservative and use enum bitfields only with GCC.
-   This is copied from gcc 3.3.1, system.h.  */
-
-#if defined(__GNUC__) && (__GNUC__ >= 2)
-#define ENUM_BITFIELD(TYPE) enum TYPE
-#else
-#define ENUM_BITFIELD(TYPE) unsigned int
-#endif
-
 /* vec.h-style vectors of strings want a typedef for char * .  */
 
 typedef char * char_ptr;
