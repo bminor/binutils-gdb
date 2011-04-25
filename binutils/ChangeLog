@@ -1,3 +1,8 @@
+2011-04-21  Tom Tromey  <tromey@redhat.com>
+
+	* readelf.c (print_gnu_note): New function.
+	(process_note): Use it.
+
 2011-04-21  Jie Zhang  <jzhang918@gmail.com>
 
 	* MAINTAINERS: Update my email address.
