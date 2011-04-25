@@ -37,6 +37,9 @@ struct bfin_cec
   struct hw *me;
   struct hw_event *pending;
 
+  /* The port levels which latch into ilat.  */
+  bu32 plat;
+
   /* Order after here is important -- matches hardware MMR layout.  */
   bu32 evt_override, imask, ipend, ilat, iprio;
 };
@@ -135,7 +138,15 @@ bfin_cec_io_read_buffer (struct hw *me, void *dest,
 
   HW_TRACE_READ ();
 
-  dv_store_4 (dest, *valuep);
+  switch (mmr_off)
+    {
+    case mmr_offset(ilat):
+      dv_store_4 (dest, *valuep | cec->plat);
+      break;
+    default:
+      dv_store_4 (dest, *valuep);
+      break;
+    }
 
   return nr_bytes;
 }
@@ -165,7 +176,18 @@ bfin_cec_port_event (struct hw *me, int my_port, struct hw *source,
 		     int source_port, int level)
 {
   struct bfin_cec *cec = hw_data (me);
-  _cec_raise (cec->cpu, cec, my_port);
+  bu32 bit = 1 << my_port;
+
+  if (level)
+    {
+      if (!(cec->plat & bit))
+	{
+	  cec->plat |= bit;
+	  _cec_raise (cec->cpu, cec, my_port);
+	}
+    }
+  else
+    cec->plat &= ~bit;
 }
 
 static void
@@ -507,7 +529,7 @@ _cec_raise (SIM_CPU *cpu, struct bfin_cec *cec, int ivg)
       if (irpten)
 	goto done; /* All interrupts are masked anyways.  */
 
-      ivg = __cec_get_ivg (cec->ilat & cec->imask);
+      ivg = __cec_get_ivg ((cec->plat | cec->ilat) & cec->imask);
       if (ivg < 0)
 	goto done; /* Nothing latched.  */
 
