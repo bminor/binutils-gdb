@@ -4124,8 +4124,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 {"slbmte",	X(31,402),	XRA_MASK,    PPC64,	PPCNONE,	{RS, RB}},
 
-{"icswx",	XRC(31,406,0),	X_MASK,      PPCA2,	PPCNONE,	{RS, RA, RB}},
-{"icswx.",	XRC(31,406,1),	X_MASK,      PPCA2,	PPCNONE,	{RS, RA, RB}},
+{"icswx",	XRC(31,406,0),	X_MASK,   POWER7|PPCA2,	PPCNONE,	{RS, RA, RB}},
+{"icswx.",	XRC(31,406,1),	X_MASK,   POWER7|PPCA2,	PPCNONE,	{RS, RA, RB}},
 
 {"sthx",	X(31,407),	X_MASK,      COM,	PPCNONE,	{RS, RA0, RB}},
 
