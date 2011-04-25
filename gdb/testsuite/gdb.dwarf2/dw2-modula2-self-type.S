@@ -39,25 +39,25 @@ dieb:
 	.long	.LASF2	/* DW_AT_comp_dir: "" */
 
 die210:
-	.uleb128 0x5	# (DIE (0x210) DW_TAG_subroutine_type)
+	.uleb128 0x5	/* (DIE (0x210) DW_TAG_subroutine_type) */
 die215:
-	.uleb128 0x6	# (DIE (0x215) DW_TAG_formal_parameter)
-	.long	die21b-d	# DW_AT_type
-	.byte	0x0	# end of children of DIE 0x210
+	.uleb128 0x6	/* (DIE (0x215) DW_TAG_formal_parameter) */
+	.long	die21b-d	/* DW_AT_type */
+	.byte	0x0	/* end of children of DIE 0x210 */
 die21b:
-	.uleb128 0x7	# (DIE (0x21b) DW_TAG_pointer_type)
-	.byte	0x4	# DW_AT_byte_size
-	.long	die210-d	# DW_AT_type
+	.uleb128 0x7	/* (DIE (0x21b) DW_TAG_pointer_type) */
+	.byte	0x4	/* DW_AT_byte_size */
+	.long	die210-d	/* DW_AT_type */
 die221:
-	.uleb128 0x8	# (DIE (0x221) DW_TAG_variable)
-	.ascii "v\0"	# DW_AT_name
-	.long	die21b-d	# DW_AT_type
-	.byte	2f-1f	# DW_AT_location
-1:	.byte	0x3	# DW_OP_addr
+	.uleb128 0x8	/* (DIE (0x221) DW_TAG_variable) */
+	.ascii "v\0"	/* DW_AT_name */
+	.long	die21b-d	/* DW_AT_type */
+	.byte	2f-1f	/* DW_AT_location */
+1:	.byte	0x3	/* DW_OP_addr */
 	.long	v
 2:
 
-	.byte	0x0	# end of children of DIE 0xb
+	.byte	0x0	/* end of children of DIE 0xb */
 .Ldebug_info_end:
 	.section	.debug_abbrev
 .Ldebug_abbrev0:
@@ -76,39 +76,39 @@ die221:
 	.byte	0x0
 	.byte	0x0
 
-	.uleb128 0x5	# (abbrev code)
-	.uleb128 0x15	# (TAG: DW_TAG_subroutine_type)
-	.byte	0x1	# DW_children_yes
+	.uleb128 0x5	/* (abbrev code) */
+	.uleb128 0x15	/* (TAG: DW_TAG_subroutine_type) */
+	.byte	0x1	/* DW_children_yes */
 	.byte	0x0
 	.byte	0x0
 
-	.uleb128 0x6	# (abbrev code)
-	.uleb128 0x5	# (TAG: DW_TAG_formal_parameter)
-	.byte	0x0	# DW_children_no
-	.uleb128 0x49	# (DW_AT_type)
-	.uleb128 0x13	# (DW_FORM_ref4)
+	.uleb128 0x6	/* (abbrev code) */
+	.uleb128 0x5	/* (TAG: DW_TAG_formal_parameter) */
+	.byte	0x0	/* DW_children_no */
+	.uleb128 0x49	/* (DW_AT_type) */
+	.uleb128 0x13	/* (DW_FORM_ref4) */
 	.byte	0x0
 	.byte	0x0
 
-	.uleb128 0x7	# (abbrev code)
-	.uleb128 0xf	# (TAG: DW_TAG_pointer_type)
-	.byte	0x0	# DW_children_no
-	.uleb128 0xb	# (DW_AT_byte_size)
-	.uleb128 0xb	# (DW_FORM_data1)
-	.uleb128 0x49	# (DW_AT_type)
-	.uleb128 0x13	# (DW_FORM_ref4)
+	.uleb128 0x7	/* (abbrev code) */
+	.uleb128 0xf	/* (TAG: DW_TAG_pointer_type) */
+	.byte	0x0	/* DW_children_no */
+	.uleb128 0xb	/* (DW_AT_byte_size) */
+	.uleb128 0xb	/* (DW_FORM_data1) */
+	.uleb128 0x49	/* (DW_AT_type) */
+	.uleb128 0x13	/* (DW_FORM_ref4) */
 	.byte	0x0
 	.byte	0x0
 
-	.uleb128 0x8	# (abbrev code)
-	.uleb128 0x34	# (TAG: DW_TAG_variable)
-	.byte	0x0	# DW_children_no
-	.uleb128 0x3	# (DW_AT_name)
-	.uleb128 0x8	# (DW_FORM_string)
-	.uleb128 0x49	# (DW_AT_type)
-	.uleb128 0x13	# (DW_FORM_ref4)
-	.uleb128 0x2	# (DW_AT_location)
-	.uleb128 0xa	# (DW_FORM_block1)
+	.uleb128 0x8	/* (abbrev code) */
+	.uleb128 0x34	/* (TAG: DW_TAG_variable) */
+	.byte	0x0	/* DW_children_no */
+	.uleb128 0x3	/* (DW_AT_name) */
+	.uleb128 0x8	/* (DW_FORM_string) */
+	.uleb128 0x49	/* (DW_AT_type) */
+	.uleb128 0x13	/* (DW_FORM_ref4) */
+	.uleb128 0x2	/* (DW_AT_location) */
+	.uleb128 0xa	/* (DW_FORM_block1) */
 	.byte	0x0
 	.byte	0x0
 

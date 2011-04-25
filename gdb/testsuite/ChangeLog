@@ -1,3 +1,9 @@
+2011-04-25  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.dwarf2/dw2-double-set-die-type.S: Replace comment char `#'
+	with /*...*/.
+	* gdb.dwarf2/dw2-modula2-self-type.S: Likewise.
+
 2011-04-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.python/py-value.exp (test_objfiles): Name the first test
