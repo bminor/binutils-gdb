@@ -987,6 +987,16 @@ class Relobj : public Object
   local_symbol_count() const
   { return this->do_local_symbol_count(); }
 
+  // The number of local symbols in the output symbol table.
+  virtual unsigned int
+  output_local_symbol_count() const
+  { return this->do_output_local_symbol_count(); }
+
+  // The file offset for local symbols in the output symbol table.
+  virtual off_t
+  local_symbol_offset() const
+  { return this->do_local_symbol_offset(); }
+
   // Initial local symbol processing: count the number of local symbols
   // in the output symbol table and dynamic symbol table; add local symbol
   // names to *POOL and *DYNPOOL.
@@ -1114,6 +1124,14 @@ class Relobj : public Object
   // Return the number of local symbols--implemented by child class.
   virtual unsigned int
   do_local_symbol_count() const = 0;
+
+  // Return the number of output local symbols--implemented by child class.
+  virtual unsigned int
+  do_output_local_symbol_count() const = 0;
+
+  // Return the file offset for local symbols--implemented by child class.
+  virtual off_t
+  do_local_symbol_offset() const = 0;
 
   // Count local symbols--implemented by child class.
   virtual void
@@ -1910,6 +1928,16 @@ class Sized_relobj : public Sized_relobj_base<size, big_endian>
   unsigned int
   do_local_symbol_count() const
   { return this->local_symbol_count_; }
+
+  // Return the number of local symbols in the output symbol table.
+  unsigned int
+  do_output_local_symbol_count() const
+  { return this->output_local_symbol_count_; }
+
+  // Return the number of local symbols in the output symbol table.
+  off_t
+  do_local_symbol_offset() const
+  { return this->local_symbol_offset_; }
 
   // Lay out the input sections.
   void

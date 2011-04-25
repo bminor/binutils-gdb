@@ -1,3 +1,43 @@
+2011-04-25 Cary Coutant  <ccoutant@google.com>
+
+	* incremental-dump.cc (dump_incremental_inputs): Print local
+	symbol info for each input file.
+	* incremental.cc
+	(Output_section_incremental_inputs::set_final_data_size): Add local
+	symbol info to input file entries in incremental info.
+	(Output_section_incremental_inputs::write_info_blocks): Likewise.
+	(Sized_incr_relobj::Sized_incr_relobj): Initialize new data members.
+	(Sized_incr_relobj::do_add_symbols): Cosmetic change.
+	(Sized_incr_relobj::do_count_local_symbols): Replace stub with
+	implementation.
+	(Sized_incr_relobj::do_finalize_local_symbols): Likewise.
+	(Sized_incr_relobj::do_relocate): Write the local symbols.
+	(Sized_incr_dynobj::do_add_symbols): Cosmetic change.
+	* incremental.h (Incremental_inputs_reader::get_symbol_offset):
+	Adjust size of input file header.
+	(Incremental_inputs_reader::get_local_symbol_offset): New function.
+	(Incremental_inputs_reader::get_local_symbol_count): New function.
+	(Incremental_inputs_reader::get_input_section): Adjust size of input
+	file header.
+	(Incremental_inputs_reader::get_global_symbol_reader): Likewise.
+	(Sized_incr_relobj::This): New typedef.
+	(Sized_incr_relobj::sym_size): New const data member.
+	(Sized_incr_relobj::Local_symbol): New struct.
+	(Sized_incr_relobj::do_output_local_symbol_count): New function.
+	(Sized_incr_relobj::do_local_symbol_offset): New function.
+	(Sized_incr_relobj::local_symbol_count_): New data member.
+	(Sized_incr_relobj::output_local_dynsym_count_): New data member.
+	(Sized_incr_relobj::local_symbol_index_): New data member.
+	(Sized_incr_relobj::local_symbol_offset_): New data member.
+	(Sized_incr_relobj::local_dynsym_offset_): New data member.
+	(Sized_incr_relobj::local_symbols_): New data member.
+	* object.h (Relobj::output_local_symbol_count): New function.
+	(Relobj::local_symbol_offset): New function.
+	(Relobj::do_output_local_symbol_count): New function.
+	(Relobj::do_local_symbol_offset): New function.
+	(Sized_relobj::do_output_local_symbol_count): New function.
+	(Sized_relobj::do_local_symbol_offset): New function.
+
 2011-04-22  Vladimir Simonov  <sv@sw.ru>
 
 	* descriptors.cc (set_close_on_exec): New function.

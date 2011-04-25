@@ -1055,8 +1055,9 @@ Output_section_incremental_inputs<size, big_endian>::set_final_data_size()
 	    Incremental_object_entry* entry = (*p)->object_entry();
 	    gold_assert(entry != NULL);
 	    (*p)->set_info_offset(info_offset);
-	    // Input section count + global symbol count.
-	    info_offset += 8;
+	    // Input section count, global symbol count, local symbol offset,
+	    // local symbol count.
+	    info_offset += 16;
 	    // Each input section.
 	    info_offset += (entry->get_input_section_count()
 			    * (8 + 2 * sizeof_addr));
@@ -1295,13 +1296,18 @@ Output_section_incremental_inputs<size, big_endian>::write_info_blocks(
 	    Incremental_object_entry* entry = (*p)->object_entry();
 	    gold_assert(entry != NULL);
 	    const Object* obj = entry->object();
+	    const Relobj* relobj = static_cast<const Relobj*>(obj);
 	    const Object::Symbols* syms = obj->get_global_symbols();
 	    // Write the input section count and global symbol count.
 	    unsigned int nsections = entry->get_input_section_count();
 	    unsigned int nsyms = syms->size();
+	    off_t locals_offset = relobj->local_symbol_offset();
+	    unsigned int nlocals = relobj->output_local_symbol_count();
 	    Swap32::writeval(pov, nsections);
 	    Swap32::writeval(pov + 4, nsyms);
-	    pov += 8;
+	    Swap32::writeval(pov + 8, static_cast<unsigned int>(locals_offset));
+	    Swap32::writeval(pov + 12, nlocals);
+	    pov += 16;
 
 	    // Build a temporary array to map input section indexes
 	    // from the original object file index to the index in the
@@ -1671,8 +1677,11 @@ Sized_incr_relobj<size, big_endian>::Sized_incr_relobj(
   : Sized_relobj_base<size, big_endian>(name, NULL), ibase_(ibase),
     input_file_index_(input_file_index),
     input_reader_(ibase->inputs_reader().input_file(input_file_index)),
+    local_symbol_count_(0), output_local_dynsym_count_(0),
+    local_symbol_index_(0), local_symbol_offset_(0), local_dynsym_offset_(0),
     symbols_(), section_offsets_(), incr_reloc_offset_(-1U),
-    incr_reloc_count_(0), incr_reloc_output_index_(0), incr_relocs_(NULL)
+    incr_reloc_count_(0), incr_reloc_output_index_(0), incr_relocs_(NULL),
+    local_symbols_()
 {
   if (this->input_reader_.is_in_system_directory())
     this->set_is_in_system_directory();
@@ -1756,7 +1765,7 @@ Sized_incr_relobj<size, big_endian>::do_add_symbols(
   unsigned int isym_count = isymtab.symbol_count();
   unsigned int first_global = symtab_count - isym_count;
 
-  unsigned const char* sym_p;
+  const unsigned char* sym_p;
   for (unsigned int i = 0; i < nsyms; ++i)
     {
       Incremental_global_symbol_reader<big_endian> info =
@@ -2027,10 +2036,40 @@ Sized_incr_relobj<size, big_endian>::do_scan_relocs(Symbol_table*,
 template<int size, bool big_endian>
 void
 Sized_incr_relobj<size, big_endian>::do_count_local_symbols(
-    Stringpool_template<char>*,
+    Stringpool_template<char>* pool,
     Stringpool_template<char>*)
 {
-  // FIXME: Count local symbols.
+  const int sym_size = elfcpp::Elf_sizes<size>::sym_size;
+
+  // Set the count of local symbols based on the incremental info.
+  unsigned int nlocals = this->input_reader_.get_local_symbol_count();
+  this->local_symbol_count_ = nlocals;
+  this->local_symbols_.reserve(nlocals);
+
+  // Get views of the base file's symbol table and string table.
+  Incremental_binary::View symtab_view(NULL);
+  unsigned int symtab_count;
+  elfcpp::Elf_strtab strtab(NULL, 0);
+  this->ibase_->get_symtab_view(&symtab_view, &symtab_count, &strtab);
+
+  // Read the local symbols from the base file's symbol table.
+  off_t off = this->input_reader_.get_local_symbol_offset();
+  const unsigned char* symp = symtab_view.data() + off;
+  for (unsigned int i = 0; i < nlocals; ++i, symp += sym_size)
+    {
+      elfcpp::Sym<size, big_endian> sym(symp);
+      const char* name;
+      if (!strtab.get_c_string(sym.get_st_name(), &name))
+        name = "";
+      gold_debug(DEBUG_INCREMENTAL, "Local symbol %d: %s", i, name);
+      name = pool->add(name, true, NULL);
+      this->local_symbols_.push_back(Local_symbol(name,
+						  sym.get_st_value(),
+						  sym.get_st_size(),
+						  sym.get_st_shndx(),
+						  sym.get_st_type(),
+						  false));
+    }
 }
 
 // Finalize the local symbols.
@@ -2039,11 +2078,12 @@ template<int size, bool big_endian>
 unsigned int
 Sized_incr_relobj<size, big_endian>::do_finalize_local_symbols(
     unsigned int index,
-    off_t,
+    off_t off,
     Symbol_table*)
 {
-  // FIXME: Finalize local symbols.
-  return index;
+  this->local_symbol_index_ = index;
+  this->local_symbol_offset_ = off;
+  return index + this->local_symbol_count_;
 }
 
 // Set the offset where local dynamic symbol information will be stored.
@@ -2109,6 +2149,91 @@ Sized_incr_relobj<size, big_endian>::do_relocate(const Symbol_table*,
     }
 
   of->write_output_view(off, len, view);
+
+  // Get views into the output file for the portions of the symbol table
+  // and the dynamic symbol table that we will be writing.
+  off_t symtab_off = layout->symtab_section()->offset();
+  off_t output_size = this->local_symbol_count_ * This::sym_size;
+  unsigned char* oview = NULL;
+  if (output_size > 0)
+    oview = of->get_output_view(symtab_off + this->local_symbol_offset_,
+				output_size);
+
+  off_t dyn_output_size = this->output_local_dynsym_count_ * sym_size;
+  unsigned char* dyn_oview = NULL;
+  if (dyn_output_size > 0)
+    dyn_oview = of->get_output_view(this->local_dynsym_offset_,
+                                    dyn_output_size);
+
+  // Write the local symbols.
+  unsigned char* ov = oview;
+  unsigned char* dyn_ov = dyn_oview;
+  const Stringpool* sympool = layout->sympool();
+  const Stringpool* dynpool = layout->dynpool();
+  Output_symtab_xindex* symtab_xindex = layout->symtab_xindex();
+  Output_symtab_xindex* dynsym_xindex = layout->dynsym_xindex();
+  for (unsigned int i = 0; i < this->local_symbol_count_; ++i)
+    {
+      Local_symbol& lsym(this->local_symbols_[i]);
+
+      bool is_ordinary;
+      unsigned int st_shndx = this->adjust_sym_shndx(i, lsym.st_shndx,
+						     &is_ordinary);
+      if (is_ordinary)
+	{
+	  Output_section* os = this->ibase_->output_section(st_shndx);
+	  st_shndx = os->out_shndx();
+	  if (st_shndx >= elfcpp::SHN_LORESERVE)
+	    {
+	      symtab_xindex->add(this->local_symbol_index_ + i, st_shndx);
+	      if (lsym.needs_dynsym_entry)
+		dynsym_xindex->add(lsym.output_dynsym_index, st_shndx);
+	      st_shndx = elfcpp::SHN_XINDEX;
+	    }
+	}
+
+      // Write the symbol to the output symbol table.
+      {
+	elfcpp::Sym_write<size, big_endian> osym(ov);
+	osym.put_st_name(sympool->get_offset(lsym.name));
+	osym.put_st_value(lsym.st_value);
+	osym.put_st_size(lsym.st_size);
+	osym.put_st_info(elfcpp::STB_LOCAL,
+			 static_cast<elfcpp::STT>(lsym.st_type));
+	osym.put_st_other(0);
+	osym.put_st_shndx(st_shndx);
+	ov += sym_size;
+      }
+
+      // Write the symbol to the output dynamic symbol table.
+      if (lsym.needs_dynsym_entry)
+        {
+          gold_assert(dyn_ov < dyn_oview + dyn_output_size);
+          elfcpp::Sym_write<size, big_endian> osym(dyn_ov);
+          osym.put_st_name(dynpool->get_offset(lsym.name));
+          osym.put_st_value(lsym.st_value);
+          osym.put_st_size(lsym.st_size);
+	  osym.put_st_info(elfcpp::STB_LOCAL,
+			   static_cast<elfcpp::STT>(lsym.st_type));
+          osym.put_st_other(0);
+          osym.put_st_shndx(st_shndx);
+          dyn_ov += sym_size;
+        }
+    }
+
+  if (output_size > 0)
+    {
+      gold_assert(ov - oview == output_size);
+      of->write_output_view(symtab_off + this->local_symbol_offset_,
+			    output_size, oview);
+    }
+
+  if (dyn_output_size > 0)
+    {
+      gold_assert(dyn_ov - dyn_oview == dyn_output_size);
+      of->write_output_view(this->local_dynsym_offset_, dyn_output_size,
+                            dyn_oview);
+    }
 }
 
 // Set the offset of a section.
@@ -2187,7 +2312,7 @@ Sized_incr_dynobj<size, big_endian>::do_add_symbols(
   unsigned int isym_count = isymtab.symbol_count();
   unsigned int first_global = symtab_count - isym_count;
 
-  unsigned const char* sym_p;
+  const unsigned char* sym_p;
   for (unsigned int i = 0; i < nsyms; ++i)
     {
       bool is_def;

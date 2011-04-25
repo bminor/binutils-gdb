@@ -138,18 +138,17 @@ dump_incremental_inputs(const char* argv0, const char* filename,
       switch (input_type)
 	{
 	case INCREMENTAL_INPUT_OBJECT:
-	  printf("Object\n");
-	  printf("    Input section count: %d\n",
-		 input_file.get_input_section_count());
-	  printf("    Symbol count: %d\n",
-		 input_file.get_global_symbol_count());
-	  break;
 	case INCREMENTAL_INPUT_ARCHIVE_MEMBER:
-	  printf("Archive member\n");
+	  printf("%s\n", (input_type == INCREMENTAL_INPUT_OBJECT
+			  ? "Object" : "Archive member"));
 	  printf("    Input section count: %d\n",
 		 input_file.get_input_section_count());
-	  printf("    Symbol count: %d\n",
+	  printf("    Global symbol count: %d\n",
 		 input_file.get_global_symbol_count());
+	  printf("    Local symbol offset: %d\n",
+		 input_file.get_local_symbol_offset());
+	  printf("    Local symbol count: %d\n",
+		 input_file.get_local_symbol_count());
 	  break;
 	case INCREMENTAL_INPUT_ARCHIVE:
 	  printf("Archive\n");

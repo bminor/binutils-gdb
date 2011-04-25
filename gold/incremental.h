@@ -725,7 +725,7 @@ class Incremental_inputs_reader
 		  || this->type() == INCREMENTAL_INPUT_ARCHIVE_MEMBER);
 
       unsigned int section_count = this->get_input_section_count();
-      return (this->info_offset_ + 8
+      return (this->info_offset_ + 16
 	      + section_count * input_section_entry_size
 	      + symndx * 20);
     }
@@ -744,6 +744,26 @@ class Incremental_inputs_reader
 	default:
 	  gold_unreachable();
 	}
+    }
+
+    // Return the offset of the first local symbol -- for objects only.
+    unsigned int
+    get_local_symbol_offset() const
+    {
+      gold_assert(this->type() == INCREMENTAL_INPUT_OBJECT
+		  || this->type() == INCREMENTAL_INPUT_ARCHIVE_MEMBER);
+
+      return Swap32::readval(this->inputs_->p_ + this->info_offset_ + 8);
+    }
+
+    // Return the local symbol count -- for objects only.
+    unsigned int
+    get_local_symbol_count() const
+    {
+      gold_assert(this->type() == INCREMENTAL_INPUT_OBJECT
+		  || this->type() == INCREMENTAL_INPUT_ARCHIVE_MEMBER);
+
+      return Swap32::readval(this->inputs_->p_ + this->info_offset_ + 12);
     }
 
     // Return the object count -- for scripts only.
@@ -816,7 +836,7 @@ class Incremental_inputs_reader
     {
       Input_section_info info;
       const unsigned char* p = (this->inputs_->p_
-				+ this->info_offset_ + 8
+				+ this->info_offset_ + 16
 				+ n * input_section_entry_size);
       unsigned int name_offset = Swap32::readval(p);
       info.name = this->inputs_->get_string(name_offset);
@@ -834,7 +854,7 @@ class Incremental_inputs_reader
 		  || this->type() == INCREMENTAL_INPUT_ARCHIVE_MEMBER);
       unsigned int section_count = this->get_input_section_count();
       const unsigned char* p = (this->inputs_->p_
-				+ this->info_offset_ + 8
+				+ this->info_offset_ + 16
 				+ section_count * input_section_entry_size
 				+ n * 20);
       return Incremental_global_symbol_reader<big_endian>(p);
@@ -1522,11 +1542,41 @@ class Sized_incr_relobj : public Sized_relobj_base<size, big_endian>
   }
 
  private:
+  // For convenience.
+  typedef Sized_incr_relobj<size, big_endian> This;
+  static const int sym_size = elfcpp::Elf_sizes<size>::sym_size;
+
   typedef typename Sized_relobj_base<size, big_endian>::Output_sections
       Output_sections;
   typedef Incremental_inputs_reader<size, big_endian> Inputs_reader;
   typedef typename Inputs_reader::Incremental_input_entry_reader
       Input_entry_reader;
+
+  // A local symbol.
+  struct Local_symbol
+  {
+    Local_symbol(const char* name_, Address value_, unsigned int size_,
+		 unsigned int shndx_, unsigned int type_,
+		 bool needs_dynsym_entry_)
+      : st_value(value_), name(name_), st_size(size_), st_shndx(shndx_),
+	st_type(type_), output_dynsym_index(0),
+	needs_dynsym_entry(needs_dynsym_entry_)
+    { }
+    // The symbol value.
+    Address st_value;
+    // The symbol name.  This points to the stringpool entry.
+    const char* name;
+    // The symbol size.
+    unsigned int st_size;
+    // The output section index.
+    unsigned int st_shndx : 28;
+    // The symbol type.
+    unsigned int st_type : 4;
+    // The index of the symbol in the output dynamic symbol table.
+    unsigned int output_dynsym_index : 31;
+    // TRUE if the symbol needs to appear in the dynamic symbol table.
+    unsigned int needs_dynsym_entry : 1;
+  };
 
   // Return TRUE if this is an incremental (unchanged) input file.
   bool
@@ -1625,7 +1675,17 @@ class Sized_incr_relobj : public Sized_relobj_base<size, big_endian>
   // Return the number of local symbols.
   unsigned int
   do_local_symbol_count() const
-  { return 0; }
+  { return this->local_symbol_count_; }
+
+  // Return the number of local symbols in the output symbol table.
+  unsigned int
+  do_output_local_symbol_count() const
+  { return this->local_symbol_count_; }
+
+  // Return the file offset for local symbols in the output symbol table.
+  off_t
+  do_local_symbol_offset() const
+  { return this->local_symbol_offset_; }
 
   // Read the relocs.
   void
@@ -1671,6 +1731,17 @@ class Sized_incr_relobj : public Sized_relobj_base<size, big_endian>
   unsigned int input_file_index_;
   // The reader for the input file.
   Input_entry_reader input_reader_;
+  // The number of local symbols.
+  unsigned int local_symbol_count_;
+  // The number of local symbols which go into the output file's dynamic
+  // symbol table.
+  unsigned int output_local_dynsym_count_;
+  // This starting symbol index in the output symbol table.
+  unsigned int local_symbol_index_;
+  // The file offset for local symbols in the output symbol table.
+  unsigned int local_symbol_offset_;
+  // The file offset for local symbols in the output symbol table.
+  unsigned int local_dynsym_offset_;
   // The entries in the symbol table for the external symbols.
   Symbols symbols_;
   // For each input section, the offset of the input section in its
@@ -1686,6 +1757,8 @@ class Sized_incr_relobj : public Sized_relobj_base<size, big_endian>
   unsigned int incr_reloc_output_index_;
   // A copy of the incremental relocations from this object.
   unsigned char* incr_relocs_;
+  // The local symbols.
+  std::vector<Local_symbol> local_symbols_;
 };
 
 // An incremental Dynobj.  This class represents a shared object that has
