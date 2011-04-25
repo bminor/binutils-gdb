@@ -1,3 +1,9 @@
+2011-04-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/gdbindex-stabs-dwarf.c: New file.
+	* gdb.base/gdbindex-stabs.c: New file.
+	* gdb.base/gdbindex-stabs.exp: New file.
+
 2011-04-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.cp/cpcompletion.exp (complete class methods)

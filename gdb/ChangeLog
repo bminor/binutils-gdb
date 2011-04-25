@@ -1,3 +1,11 @@
+2011-04-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* elfread.c (elf_symfile_read): Protect dwarf2_initialize_objfile by
+	!objfile_has_partial_symbols.  New comment.
+	* objfiles.c (objfile_has_partial_symbols): Call HAS_SYMBOLS if
+	SYM_READ_PSYMBOLS is not present. Extend the comment.
+	* symfile.h (struct sym_fns): Extend the sym_read_psymbols comment.
+
 2011-04-21  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* gdb_wchar.h (USE_INTERMEDIATE_ENCODING_FUNCTION): New macro.

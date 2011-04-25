@@ -320,10 +320,10 @@ struct sym_fns
 
   void (*sym_read) (struct objfile *, int);
 
-  /* Read the partial symbols for an objfile.  This may be NULL, in
-     which case gdb assumes that sym_read already read the partial
-     symbols.  This may only be non-NULL if the objfile actually does
-     have debuginfo available.  */
+  /* Read the partial symbols for an objfile.  This may be NULL, in which case
+     gdb has to check other ways if this objfile has any symbols.  This may
+     only be non-NULL if the objfile actually does have debuginfo available.
+     */
 
   void (*sym_read_psymbols) (struct objfile *);
 
