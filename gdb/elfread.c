@@ -1396,7 +1396,12 @@ elf_symfile_read (struct objfile *objfile, int symfile_flags)
 
   if (dwarf2_has_info (objfile))
     {
-      if (dwarf2_initialize_objfile (objfile))
+      /* elf_sym_fns_gdb_index cannot handle simultaneous non-DWARF debug
+	 information present in OBJFILE.  If there is such debug info present
+	 never use .gdb_index.  */
+
+      if (!objfile_has_partial_symbols (objfile)
+	  && dwarf2_initialize_objfile (objfile))
 	objfile->sf = &elf_sym_fns_gdb_index;
       else
 	{

@@ -906,11 +906,15 @@ objfile_has_partial_symbols (struct objfile *objfile)
 {
   if (!objfile->sf)
     return 0;
-  /* If we have not read psymbols, but we have a function capable of
-     reading them, then that is an indication that they are in fact
-     available.  */
-  if ((objfile->flags & OBJF_PSYMTABS_READ) == 0)
-    return objfile->sf->sym_read_psymbols != NULL;
+
+  /* If we have not read psymbols, but we have a function capable of reading
+     them, then that is an indication that they are in fact available.  Without
+     this function the symbols may have been already read in but they also may
+     not be present in this objfile.  */
+  if ((objfile->flags & OBJF_PSYMTABS_READ) == 0
+      && objfile->sf->sym_read_psymbols != NULL)
+    return 1;
+
   return objfile->sf->qf->has_symbols (objfile);
 }
 
