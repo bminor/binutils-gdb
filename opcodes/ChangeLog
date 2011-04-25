@@ -1,3 +1,7 @@
+2011-04-26  Anton Blanchard  <anton@samba.org>
+
+	* ppc-opc.c: (powerpc_opcodes): Enable icswx for POWER7.
+
 2011-02-01  Alan Modra  <amodra@gmail.com>
 
 	Backport from mainline
