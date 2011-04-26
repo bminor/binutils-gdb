@@ -1,5 +1,10 @@
 2011-04-21  Tom Tromey  <tromey@redhat.com>
 
+	* readelf.c (get_stapsdt_note_type): New function.
+	(process_note): Recognize "stapsdt" notes.
+
+2011-04-21  Tom Tromey  <tromey@redhat.com>
+
 	* readelf.c (process_corefile_note_segment): Change header field
 	widths.
 	(process_note): Change field widths.

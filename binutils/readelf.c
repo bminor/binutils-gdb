@@ -12351,6 +12351,24 @@ get_netbsd_elfcore_note_type (unsigned e_type)
 }
 
 static const char *
+get_stapsdt_note_type (unsigned e_type)
+{
+  static char buff[64];
+
+  switch (e_type)
+    {
+    case NT_STAPSDT:
+      return _("NT_STAPSDT (SystemTap probe descriptors)");
+
+    default:
+      break;
+    }
+
+  snprintf (buff, sizeof (buff), _("Unknown note type: (0x%08x)"), e_type);
+  return buff;
+}
+
+static const char *
 get_ia64_vms_note_type (unsigned e_type)
 {
   static char buff[64];
@@ -12495,6 +12513,9 @@ process_note (Elf_Internal_Note * pnote)
   else if (const_strneq (pnote->namedata, "IPF/VMS"))
     /* VMS/ia64-specific file notes.  */
     nt = get_ia64_vms_note_type (pnote->type);
+
+  else if (const_strneq (pnote->namedata, "stapsdt"))
+    nt = get_stapsdt_note_type (pnote->type);
 
   else
     /* Don't recognize this note name; just use the default set of
