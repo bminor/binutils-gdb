@@ -104,15 +104,16 @@ static const char * const *mmr_names;
 static void
 bfin_sic_forward_interrupts (struct hw *me, bu32 *isr, bu32 *imask, bu32 *iar)
 {
+  int levels[IVG15 - IVG7 + 1];
   int my_port;
   bu32 ipend;
 
-  /* Process pending and unmasked interrupts.  */
-  ipend = *isr & *imask;
+  /* Gather all the signals based on their mappings/masks, and then send
+     out the updated levels to the CEC.  */
 
-  /* Usually none are pending unmasked, so avoid bit twiddling.  */
-  if (!ipend)
-    return;
+  memset (levels, 0, sizeof (levels));
+
+  ipend = *isr & *imask;
 
   for (my_port = 0; my_port < 32; ++my_port)
     {
@@ -128,8 +129,14 @@ bfin_sic_forward_interrupts (struct hw *me, bu32 *isr, bu32 *imask, bu32 *iar)
       iar_idx = my_port / 8;
       iar_off = (my_port % 8) * 4;
       iar_val = (iar[iar_idx] & (0xf << iar_off)) >> iar_off;
-      HW_TRACE ((me, "forwarding int %i to CEC", IVG7 + iar_val));
-      hw_port_event (me, IVG7 + iar_val, 1);
+      levels[iar_val] = 1;
+    }
+
+  for (my_port = 0; my_port < ARRAY_SIZE (levels); ++my_port)
+    {
+      HW_TRACE ((me, "setting level to CEC for int %2i to %i",
+		 IVG7 + my_port, levels[my_port]));
+      hw_port_event (me, IVG7 + my_port, levels[my_port]);
     }
 }
 
@@ -176,11 +183,11 @@ bfin_sic_52x_io_write_buffer (struct hw *me, const void *source, int space,
       break;
     case mmr_offset(bf52x.imask0):
     case mmr_offset(bf52x.imask1):
-      bfin_sic_52x_forward_interrupts (me, sic);
-      *value32p = value;
-      break;
     case mmr_offset(bf52x.iar0) ... mmr_offset(bf52x.iar3):
     case mmr_offset(bf52x.iar4) ... mmr_offset(bf52x.iar7):
+      *value32p = value;
+      bfin_sic_52x_forward_interrupts (me, sic);
+      break;
     case mmr_offset(bf52x.iwr0):
     case mmr_offset(bf52x.iwr1):
       *value32p = value;
@@ -287,13 +294,10 @@ bfin_sic_537_io_write_buffer (struct hw *me, const void *source, int space,
       /* XXX: what to do ...  */
       break;
     case mmr_offset(bf537.imask):
-      bfin_sic_537_forward_interrupts (me, sic);
+    case mmr_offset(bf537.iar0) ... mmr_offset(bf537.iar3):
       *value32p = value;
+      bfin_sic_537_forward_interrupts (me, sic);
       break;
-    case mmr_offset(bf537.iar0):
-    case mmr_offset(bf537.iar1):
-    case mmr_offset(bf537.iar2):
-    case mmr_offset(bf537.iar3):
     case mmr_offset(bf537.iwr):
       *value32p = value;
       break;
@@ -337,10 +341,7 @@ bfin_sic_537_io_read_buffer (struct hw *me, void *dest, int space,
       dv_store_2 (dest, *value16p);
       break;
     case mmr_offset(bf537.imask):
-    case mmr_offset(bf537.iar0):
-    case mmr_offset(bf537.iar1):
-    case mmr_offset(bf537.iar2):
-    case mmr_offset(bf537.iar3):
+    case mmr_offset(bf537.iar0) ... mmr_offset(bf537.iar3):
     case mmr_offset(bf537.isr):
     case mmr_offset(bf537.iwr):
       dv_store_4 (dest, *value32p);
@@ -399,10 +400,10 @@ bfin_sic_54x_io_write_buffer (struct hw *me, const void *source, int space,
       /* XXX: what to do ...  */
       break;
     case mmr_offset(bf54x.imask0) ... mmr_offset(bf54x.imask2):
-      bfin_sic_54x_forward_interrupts (me, sic);
-      *value32p = value;
-      break;
     case mmr_offset(bf54x.iar0) ... mmr_offset(bf54x.iar11):
+      *value32p = value;
+      bfin_sic_54x_forward_interrupts (me, sic);
+      break;
     case mmr_offset(bf54x.iwr0) ... mmr_offset(bf54x.iwr2):
       *value32p = value;
       break;
@@ -505,11 +506,11 @@ bfin_sic_561_io_write_buffer (struct hw *me, const void *source, int space,
       break;
     case mmr_offset(bf561.imask0):
     case mmr_offset(bf561.imask1):
-      bfin_sic_561_forward_interrupts (me, sic);
-      *value32p = value;
-      break;
     case mmr_offset(bf561.iar0) ... mmr_offset(bf561.iar3):
     case mmr_offset(bf561.iar4) ... mmr_offset(bf561.iar7):
+      *value32p = value;
+      bfin_sic_561_forward_interrupts (me, sic);
+      break;
     case mmr_offset(bf561.iwr0):
     case mmr_offset(bf561.iwr1):
       *value32p = value;
