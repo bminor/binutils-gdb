@@ -1,3 +1,8 @@
+2011-04-26  Michael Walle  <michael@walle.cc>
+
+	* remote.c (remote_start_remote): Ack packet after sending the
+	interrupt sequence.
+
 2011-04-26  Yao Qi  <yao@codesourcery.com>
 
         * linux-nat.c: Move common macros to ...
