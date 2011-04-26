@@ -1,3 +1,15 @@
+2011-04-26  Mike Frysinger  <vapier@gentoo.org>
+
+	* dv-bfin_gpio.c (bfin_gpio): Add "int_state" member.
+	(bfin_gpio_forward_int, bfin_gpio_forward_ints): New functions.
+	(bfin_gpio_io_write_buffer): Call bfin_gpio_forward_int when the
+	mask a or mask b MMRs are written.
+	(bfin_gpio_port_event): When handling edge gpios, set the bit in
+	int_state, call bfin_gpio_forward_ints, and then clear the bit.
+	When handling level gpios, clear/set the bit in int_state rather
+	than returning immediately.  Call bfin_gpio_forward_ints instead
+	of checking mask[ab] and calling HW_TRACE/hw_port_event directly.
+
 2011-04-16  Mike Frysinger  <vapier@gentoo.org>
 
 	* bfin-sim.c (decode_dsp32alu_0): Call STORE instead of SET_DREG for

@@ -28,6 +28,8 @@ struct bfin_gpio
 {
   bu32 base;
 
+  bu16 int_state;
+
   /* Order after here is important -- matches hardware MMR layout.  */
   bu16 BFIN_MMR_16(data);
   bu16 BFIN_MMR_16(clear);
@@ -59,6 +61,20 @@ static const char * const mmr_names[] =
   "PORTIO_BOTH", "PORTIO_INEN",
 };
 #define mmr_name(off) mmr_names[(off) / 4]
+
+static void
+bfin_gpio_forward_int (struct hw *me, struct bfin_gpio *port, bu32 mask,
+		       int dst_port)
+{
+  HW_TRACE ((me, "resending levels on port %c", 'a' + dst_port));
+  hw_port_event (me, dst_port, !!(port->int_state & mask));
+}
+static void
+bfin_gpio_forward_ints (struct hw *me, struct bfin_gpio *port)
+{
+  bfin_gpio_forward_int (me, port, port->maska, 0);
+  bfin_gpio_forward_int (me, port, port->maskb, 1);
+}
 
 static unsigned
 bfin_gpio_io_write_buffer (struct hw *me, const void *source, int space,
@@ -112,6 +128,17 @@ bfin_gpio_io_write_buffer (struct hw *me, const void *source, int space,
       break;
     default:
       dv_bfin_mmr_invalid (me, addr, nr_bytes, true);
+      break;
+    }
+
+  /* If updating masks, make sure we send updated port info.  */
+  switch (mmr_off)
+    {
+    case mmr_offset(maska) ... mmr_offset(maska_toggle):
+      bfin_gpio_forward_int (me, port, port->maska, 0);
+      break;
+    case mmr_offset(maskb) ... mmr_offset(maskb_toggle):
+      bfin_gpio_forward_int (me, port, port->maskb, 1);
       break;
     }
 
@@ -250,6 +277,11 @@ bfin_gpio_port_event (struct hw *me, int my_port, struct hw *source,
 	      return;
 	    }
 	}
+
+      /* Send the signal up, and then fall through to clear it.  */
+      port->int_state |= bit;
+      bfin_gpio_forward_ints (me, port);
+      port->int_state &= ~bit;
     }
   else
     {
@@ -258,21 +290,14 @@ bfin_gpio_port_event (struct hw *me, int my_port, struct hw *source,
 	{
 	  HW_TRACE ((me, "ignoring int due to EDGE=%i POLAR=%i lvl=%i",
 		     !!(port->edge & bit), !!(port->polar & bit), nlvl));
-	  return;
+	  /* We still need to signal SIC to clear the int, so don't return.  */
+	  port->int_state &= ~bit;
 	}
+      else
+	port->int_state |= bit;
     }
 
-  /* If the masks allow it, push the interrupt even higher.  */
-  if (port->maska & bit)
-    {
-      HW_TRACE ((me, "pin %i triggered an int via mask a", my_port));
-      hw_port_event (me, 0, 1);
-    }
-  if (port->maskb & bit)
-    {
-      HW_TRACE ((me, "pin %i triggered an int via mask b", my_port));
-      hw_port_event (me, 1, 1);
-    }
+  bfin_gpio_forward_ints (me, port);
 }
 
 static void
