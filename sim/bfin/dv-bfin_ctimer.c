@@ -77,7 +77,9 @@ bfin_ctimer_expire (struct hw *me, void *data)
       ctimer->handler = NULL;
     }
 
+  /* This is an edge interrupt.  */
   hw_port_event (me, IVG_IVTMR, 1);
+  hw_port_event (me, IVG_IVTMR, 0);
 }
 
 static void
