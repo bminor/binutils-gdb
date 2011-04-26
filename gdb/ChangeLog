@@ -1,3 +1,8 @@
+2011-04-26  Michael Walle  <michael@walle.cc>
+
+	* remote.c (remote_start_remote): Ack packet after sending the
+	interrupt sequence.
+
 2011-04-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* elfread.c (elf_symfile_read): Protect dwarf2_initialize_objfile by

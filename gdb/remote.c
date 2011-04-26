@@ -3139,11 +3139,11 @@ remote_start_remote (struct ui_out *uiout, void *opaque)
 
   immediate_quit++;		/* Allow user to interrupt it.  */
 
-  /* Ack any packet which the remote side has already sent.  */
-  serial_write (remote_desc, "+", 1);
-
   if (interrupt_on_connect)
     send_interrupt_sequence ();
+
+  /* Ack any packet which the remote side has already sent.  */
+  serial_write (remote_desc, "+", 1);
 
   /* The first packet we send to the target is the optional "supported
      packets" request.  If the target can answer this, it will tell us
