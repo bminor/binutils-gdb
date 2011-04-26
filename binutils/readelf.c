@@ -12501,7 +12501,7 @@ process_note (Elf_Internal_Note * pnote)
        note type strings.  */
     nt = get_note_type (pnote->type);
 
-  printf ("  %-10s\t0x%08lx\t%s\n", name, pnote->descsz, nt);
+  printf ("  %-20s 0x%08lx\t%s\n", name, pnote->descsz, nt);
 
   if (const_strneq (pnote->namedata, "IPF/VMS"))
     return print_ia64_vms_note (pnote);
@@ -12531,7 +12531,7 @@ process_corefile_note_segment (FILE * file, bfd_vma offset, bfd_vma length)
 
   printf (_("\nNotes at offset 0x%08lx with length 0x%08lx:\n"),
 	  (unsigned long) offset, (unsigned long) length);
-  printf (_("  Owner\t\tData size\tDescription\n"));
+  printf (_("  %-20s %10s\tDescription\n"), _("Owner"), _("Data size"));
 
   while (external < (Elf_External_Note *) ((char *) pnotes + length))
     {

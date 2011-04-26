@@ -1,5 +1,11 @@
 2011-04-21  Tom Tromey  <tromey@redhat.com>
 
+	* readelf.c (process_corefile_note_segment): Change header field
+	widths.
+	(process_note): Change field widths.
+
+2011-04-21  Tom Tromey  <tromey@redhat.com>
+
 	* readelf.c (print_gnu_note): New function.
 	(process_note): Use it.
 
