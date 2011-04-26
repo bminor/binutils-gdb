@@ -337,6 +337,8 @@ server_h = $(srcdir)/server.h $(regcache_h) config.h $(srcdir)/target.h \
 
 linux_low_h = $(srcdir)/linux-low.h
 
+linux_ptrace_h = $(srcdir)/../common/linux-ptrace.h
+
 lynx_low_h = $(srcdir)/lynx-low.h $(srcdir)/server.h
 
 nto_low_h = $(srcdir)/nto-low.h
@@ -408,7 +410,7 @@ i386-low.o: i386-low.c $(i386_low_h) $(server_h) $(target_h)
 
 i387-fp.o: i387-fp.c $(server_h)
 
-linux-low.o: linux-low.c $(linux_low_h) $(server_h)
+linux-low.o: linux-low.c $(linux_low_h) $(linux_ptrace_h) $(server_h)
 	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $< @USE_THREAD_DB@
 
 linux-arm-low.o: linux-arm-low.c $(linux_low_h) $(server_h) \

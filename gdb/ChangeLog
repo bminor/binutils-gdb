@@ -1,3 +1,9 @@
+2011-04-26  Yao Qi  <yao@codesourcery.com>
+
+        * linux-nat.c: Move common macros to ...
+        Include linux-ptrace.h.
+        * common/linux-ptrace.h: ... here.  New.
+
 2011-04-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* elfread.c (elf_symfile_read): Protect dwarf2_initialize_objfile by

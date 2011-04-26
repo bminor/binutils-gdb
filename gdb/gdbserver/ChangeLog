@@ -1,3 +1,10 @@
+2011-04-26  Yao Qi  <yao@codesourcery.com>
+
+        * linux-low.c: Move common macros to linux-ptrace.h.
+        Include linux-ptrace.h.
+	* Makefile.in (linux_ptrace_h): New.
+	(linux-low.o): Depends on linux-ptrace.h.
+
 2011-04-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* remote-utils.c (handle_accept_event): Close LISTEN_DESC only if

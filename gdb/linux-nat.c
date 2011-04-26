@@ -30,6 +30,7 @@
 #endif
 #include <sys/ptrace.h>
 #include "linux-nat.h"
+#include "linux-ptrace.h"
 #include "linux-fork.h"
 #include "gdbthread.h"
 #include "gdbcmd.h"
@@ -160,48 +161,10 @@ blocked.  */
 #define O_LARGEFILE 0
 #endif
 
-/* If the system headers did not provide the constants, hard-code the normal
-   values.  */
-#ifndef PTRACE_EVENT_FORK
-
-#define PTRACE_SETOPTIONS	0x4200
-#define PTRACE_GETEVENTMSG	0x4201
-
-/* Options set using PTRACE_SETOPTIONS.  */
-#define PTRACE_O_TRACESYSGOOD	0x00000001
-#define PTRACE_O_TRACEFORK	0x00000002
-#define PTRACE_O_TRACEVFORK	0x00000004
-#define PTRACE_O_TRACECLONE	0x00000008
-#define PTRACE_O_TRACEEXEC	0x00000010
-#define PTRACE_O_TRACEVFORKDONE	0x00000020
-#define PTRACE_O_TRACEEXIT	0x00000040
-
-/* Wait extended result codes for the above trace options.  */
-#define PTRACE_EVENT_FORK	1
-#define PTRACE_EVENT_VFORK	2
-#define PTRACE_EVENT_CLONE	3
-#define PTRACE_EVENT_EXEC	4
-#define PTRACE_EVENT_VFORK_DONE	5
-#define PTRACE_EVENT_EXIT	6
-
-#endif /* PTRACE_EVENT_FORK */
-
 /* Unlike other extended result codes, WSTOPSIG (status) on
    PTRACE_O_TRACESYSGOOD syscall events doesn't return SIGTRAP, but
    instead SIGTRAP with bit 7 set.  */
 #define SYSCALL_SIGTRAP (SIGTRAP | 0x80)
-
-/* We can't always assume that this flag is available, but all systems
-   with the ptrace event handlers also have __WALL, so it's safe to use
-   here.  */
-#ifndef __WALL
-#define __WALL          0x40000000 /* Wait for any child.  */
-#endif
-
-#ifndef PTRACE_GETSIGINFO
-# define PTRACE_GETSIGINFO    0x4202
-# define PTRACE_SETSIGINFO    0x4203
-#endif
 
 /* The single-threaded native GNU/Linux target_ops.  We save a pointer for
    the use of the multi-threaded target.  */
