@@ -12368,6 +12368,43 @@ get_stapsdt_note_type (unsigned e_type)
   return buff;
 }
 
+static int
+print_stapsdt_note (Elf_Internal_Note *pnote)
+{
+  int addr_size = is_32bit_elf ? 4 : 8;
+  char *data = pnote->descdata;
+  char *data_end = pnote->descdata + pnote->descsz;
+  bfd_vma pc, base_addr, semaphore;
+  char *provider, *probe, *arg_fmt;
+
+  pc = byte_get ((unsigned char *) data, addr_size);
+  data += addr_size;
+  base_addr = byte_get ((unsigned char *) data, addr_size);
+  data += addr_size;
+  semaphore = byte_get ((unsigned char *) data, addr_size);
+  data += addr_size;
+
+  provider = data;
+  data += strlen (data) + 1;
+  probe = data;
+  data += strlen (data) + 1;
+  arg_fmt = data;
+  data += strlen (data) + 1;
+
+  printf (_("    Provider: %s\n"), provider);
+  printf (_("    Name: %s\n"), probe);
+  printf (_("    Location: "));
+  print_vma (pc, FULL_HEX);
+  printf (_(", Base: "));
+  print_vma (base_addr, FULL_HEX);
+  printf (_(", Semaphore: "));
+  print_vma (semaphore, FULL_HEX);
+  printf (_("\n"));
+  printf (_("    Arguments: %s\n"), arg_fmt);
+
+  return data == data_end;
+}
+
 static const char *
 get_ia64_vms_note_type (unsigned e_type)
 {
@@ -12528,6 +12565,8 @@ process_note (Elf_Internal_Note * pnote)
     return print_ia64_vms_note (pnote);
   else if (const_strneq (pnote->namedata, "GNU"))
     return print_gnu_note (pnote);
+  else if (const_strneq (pnote->namedata, "stapsdt"))
+    return print_stapsdt_note (pnote);
   else
     return 1;
 }
