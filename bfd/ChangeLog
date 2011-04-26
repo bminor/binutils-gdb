@@ -1,3 +1,7 @@
+2011-04-26  Tristan Gingold  <gingold@adacore.com>
+
+	* coff64-rs6000.c: Convert to ISO-C.  Remove PARAMS and PTR macros.
+
 2011-04-24  Alan Modra  <amodra@gmail.com>
 
 	PR ld/12365
