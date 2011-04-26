@@ -1,5 +1,13 @@
 2011-04-26  Mike Frysinger  <vapier@gentoo.org>
 
+	* dv-bfin_gpio.c (bfin_gpio_forward_ouput): New function.
+	(bfin_gpio_io_write_buffer): Store the current port state into
+	"data", and call bfin_gpio_forward_ouput when the data or dir
+	MMRs are updated.
+	(bfin_gpio_ports): Change p0..p15 to bidirect_port.
+
+2011-04-26  Mike Frysinger  <vapier@gentoo.org>
+
 	* dv-bfin_gpio.c (bfin_gpio): Add "int_state" member.
 	(bfin_gpio_forward_int, bfin_gpio_forward_ints): New functions.
 	(bfin_gpio_io_write_buffer): Call bfin_gpio_forward_int when the
