@@ -1,3 +1,11 @@
+2011-04-26  Kai Tietz  <ktietz@redhat.com>
+
+	* ld-pe/pe.exp: Add cfi/cfi32 tests.
+	* ld-pe/cfi.d: New.
+	* ld-pe/cfi32.d: New.
+	* ld-pe/cfia.s: New.
+	* ld-pe/cfib.s: New.
+
 2011-04-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/12694

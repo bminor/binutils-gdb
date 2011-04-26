@@ -1,3 +1,33 @@
+2011-04-26  Kai Tietz  <ktietz@redhat.com>
+
+	* dw2gencfi.c (dwcfi_seg_list): New struct.
+	(dwcfi_hash): New static hash variable.
+	(get_debugseg_name): New.
+	(alloc_debugseg_item): New.
+	(make_debug_seg): New.
+	(dwcfi_hash_insert): New.
+	(dwcfi_hash_find): New.
+	(dwcfi_hash_find_or_make): New.
+	(cfi_insn_data): New member cur_seg.
+	(cie_entry): Likewise.
+	(fde_entry): New cseg and handled members.
+	(alloc_fde_entry): Initialize cseg member.
+	(alloc_cfi_insn_data): Initialize cur_seg member.
+	(dot_cfi_sections): Compare for beginning of
+	section names via strncmp.
+	(get_cfi_seg): New.
+	(cfi_finish): Treat link-once sections.
+	(is_now_linkonce_segment): New local helper.
+	(output_cie): Ignore cie entries not member of current
+	segment.
+	(output_fde): Likewise.
+	(select_cie_for_fde): Likewise.
+	(cfi_change_reg_numbers): Add new argument for current segment
+	and ignore insn elements, if not part of current segment.
+	* ehopt.c (get_cie_info): Use strncmp for
+	section name matching.
+	(heck_eh_frame): Likewise.
+
 2011-04-20  Catherine Moore  <clm@codesourcery.com>
             David Ung <davidu@mips.com>
 
@@ -11,7 +41,7 @@
 	(nops_for_24k): New.
 	(nops_for_insn): Call nops_for_24k.
 	(append_insn): Move O_constant expression handling.
-	
+
 2011-04-20  Alan Modra  <amodra@gmail.com>
 
 	* hash.c (set_gas_hash_table_size): Use bfd_hash_set_default_size.

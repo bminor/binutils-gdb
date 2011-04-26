@@ -115,7 +115,7 @@ SECTIONS
 
   .eh_frame ${RELOCATING+BLOCK(__section_alignment__)} :
   {
-    *(.eh_frame)
+    *(.eh_frame*)
   }
 
   .pdata ${RELOCATING+BLOCK(__section_alignment__)} :
@@ -250,7 +250,7 @@ SECTIONS
 
   .debug_frame ${RELOCATING+BLOCK(__section_alignment__)} ${RELOCATING+(NOLOAD)} :
   {
-    *(.debug_frame)
+    *(.debug_frame*)
   }
 
   .debug_str ${RELOCATING+BLOCK(__section_alignment__)} ${RELOCATING+(NOLOAD)} :

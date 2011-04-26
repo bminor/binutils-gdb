@@ -1,3 +1,8 @@
+2011-04-26  Kai Tietz  <ktietz@redhat.com>
+
+	* scripttempl/pe.sc: Handle .eh_frame($|.)* sections.
+	* scripttempl/pep.sc: Likewise.
+
 2011-04-24  Alan Modra  <amodra@gmail.com>
 
 	PR ld/12365

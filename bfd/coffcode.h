@@ -658,7 +658,10 @@ sec_to_styp_flags (const char *sec_name, flagword sec_flags)
 
   /* FIXME: There is no gas syntax to specify the debug section flag.  */
   if (is_dbg)
-      sec_flags = SEC_DEBUGGING | SEC_READONLY;
+    {
+      sec_flags &= (SEC_LINK_ONCE | SEC_LINK_DUPLICATES_DISCARD);
+      sec_flags |= SEC_DEBUGGING | SEC_READONLY;
+    }
 
   /* skip LOAD */
   /* READONLY later */
