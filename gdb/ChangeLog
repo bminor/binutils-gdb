@@ -1,3 +1,8 @@
+2011-04-26  Aleksandar Ristovski  <aristovski@qnx.com>
+
+	* nto-procfs.c (procfs_insert_hw_watchpoint): Fix prototype.
+	(procfs_remove_hw_watchpoint): Likewise.
+
 2011-04-26  Michael Walle  <michael@walle.cc>
 
 	* remote.c (remote_start_remote): Ack packet after sending the
