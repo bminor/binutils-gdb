@@ -1,5 +1,14 @@
 2011-04-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Replace re_comp/re_exec by regcomp/regexec.
+	* symtab.c (struct search_symbols_data): New fields preg, preg_p.
+	(search_symbols_name_matches): Use them, use regexec.
+	(search_symbols): New variable retval_chain, adjust the use of
+	old_chain against it.  Replace re_comp by regcomp.  Use the new struct
+	search_symbols_data fields, use regexec instead of re_exec.
+
+2011-04-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Format the code for the next patch.
 	* dwarf2read.c (struct mapped_index): Include delimiting newlines.
 	* utils.c (strcmp_iw_ordered): Reformat the code for the next patch.
