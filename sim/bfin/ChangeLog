@@ -1,3 +1,12 @@
+2011-04-27  Mike Frysinger  <vapier@gentoo.org>
+
+	* dv-bfin_dmac.c (bfin_dmac): Constify pmap array.
+	(bfin_dmac_50x_pmap, bfin_dmac_51x_pmap, bfin_dmac_52x_pmap,
+	bfin_dmac_533_pmap, bfin_dmac_537_pmap, bfin_dmac0_538_pmap,
+	bfin_dmac1_538_pmap, bfin_dmac0_54x_pmap, bfin_dmac1_54x_pmap,
+	bfin_dmac0_561_pmap, bfin_dmac1_561_pmap, bfin_dmac_59x_pmap):
+	Likewise.
+
 2011-04-26  Mike Frysinger  <vapier@gentoo.org>
 
 	* dv-bfin_gpio.c (bfin_gpio_forward_ouput): New function.
