@@ -1,3 +1,7 @@
+2011-04-27  Joel Brobecker  <brobecker@adacore.com>
+
+	* procfs.c (procfs_pass_signals): Fix advance declaration.
+
 2011-04-27  Ulrich Weigand  <ulrich.weigand@linaro.org>
 
 	* target.h (struct target_ops): Remove to_notice_signals;

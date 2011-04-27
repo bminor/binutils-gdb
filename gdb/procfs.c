@@ -120,7 +120,7 @@ static void procfs_fetch_registers (struct target_ops *,
 				    struct regcache *, int);
 static void procfs_store_registers (struct target_ops *,
 				    struct regcache *, int);
-static void procfs_pass_signals (ptid_t, int, unsigned char *);
+static void procfs_pass_signals (int, unsigned char *);
 static void procfs_kill_inferior (struct target_ops *ops);
 static void procfs_mourn_inferior (struct target_ops *ops);
 static void procfs_create_inferior (struct target_ops *, char *,
