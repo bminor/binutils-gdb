@@ -1,3 +1,14 @@
+2011-04-27  Vladimir Prus  <vladimir@codesourcery.com>
+
+	MI breakpoint notifications.
+
+	* testsuite/gdb.mi/mi-cli.exp: Adust.
+        * testsuite/gdb.mi/mi2-cli.exp: Adust.
+        * testsuite/gdb.mi/mi-watch.exp: Adust.
+        * testsuite/gdb.mi/mi2-watch.exp: Adust.
+        * testsuite/lib/mi-support.exp (mi_expect_stop): Accept breakpoint
+        notifications.
+
 2011-04-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/gdbindex-stabs-dwarf.c: New file.

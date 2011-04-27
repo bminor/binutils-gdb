@@ -29,6 +29,7 @@
 #include "gdb.h"
 #include "exceptions.h"
 #include "observer.h"
+#include "mi-main.h"
 
 enum
   {
@@ -46,10 +47,10 @@ static int mi_can_breakpoint_notify;
 /* Output a single breakpoint, when allowed. */
 
 static void
-breakpoint_notify (int b)
+breakpoint_notify (struct breakpoint *b)
 {
   if (mi_can_breakpoint_notify)
-    gdb_breakpoint_query (uiout, b, NULL);
+    gdb_breakpoint_query (uiout, b->number, NULL);
 }
 
 enum bp_type
@@ -146,8 +147,6 @@ mi_cmd_break_insert (char *command, char **argv, int argc)
   if (! mi_breakpoint_observers_installed)
     {
       observer_attach_breakpoint_created (breakpoint_notify);
-      observer_attach_breakpoint_modified (breakpoint_notify);
-      observer_attach_breakpoint_deleted (breakpoint_notify);
       mi_breakpoint_observers_installed = 1;
     }
 

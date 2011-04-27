@@ -25191,6 +25191,19 @@ thread group in whose context the library was unloaded.  If the field is
 absent, it means the library was unloaded in the context of all present
 thread groups.
 
+@item =breakpoint-created,bkpt=@{...@}
+@itemx =breakpoint-modified,bkpt=@{...@}
+@itemx =breakpoint-deleted,bkpt=@{...@}
+Reports that a breakpoint was created, modified, or deleted,
+respectively.  Only user-visible breakpoints are reported to the MI
+user.
+
+The @var{bkpt} argument is of the same form as returned by the various
+breakpoint commands; @xref{GDB/MI Breakpoint Commands}.
+
+Note that if a breakpoint is emitted in the result record of a
+command, then it will not also be emitted in an async record.
+
 @end table
 
 @node GDB/MI Frame Information

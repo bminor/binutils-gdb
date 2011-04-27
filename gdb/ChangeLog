@@ -1,3 +1,52 @@
+2011-04-27  Vladimir Prus  <vladimir@codesourcery.com>
+
+	MI breakpoint notifications.
+
+        * annotate.c (breakpoint_changed): Adjust parameter type.
+        * breakpoint.c (set_breakpoint_condition): Adjust to change
+        in breakpoint_modified type.
+        (breakpoint_set_commands): Likewise.
+        (do_map_commands_command): Likewise.
+        (bpstat_check_breakpoint_conditions): Notify that breakpoint has
+        changed after bumping hit count.
+        (bpstat_stop_status): Likewise.
+        (print_one_breakpoint_location): Don't wrap in tuple here.
+        (print_one_breakpoint): Always print individual locations.
+        For locations, use unnamed tuple.
+        (disable_breakpoints_in_unloaded_shlib): Notify that breakpoint
+        has changed.
+        (create_catchpoint, create_syscall_event_catchpoint): Call
+        breakpoint_created obsever.
+        (mention): Don't call breakpoint_created observer.
+        (create_breakpoint_sal): Call breakpoint_created observer.
+        (create_breakpoint, watch_command_1): Likewise.
+        (create_ada_exception_breakpoint): Likewise.
+        (delete_breakpoint): Call breakpoint_deleted breakpoint.
+        (locations_are_equal): New.
+        (update_breakpoint_locations): If locations were changed, notify.
+        (set_ignore_count, disable_breakpoint, do_enable_breakpoint):
+        Call breakpoint_modified observer.
+
+        * mi/mi-cmd-break.c (breakpoint_notify): Adjust.
+        (mi_cmd_break_insert): Don't set observers for modify and delete.
+        * mi/mi-interp.c (mi_suppress_breakpoint_notifications): New.
+        (mi_breakpoint_created, mi_breakpoint_deleted)
+        (mi_breakpoint_modified): New.
+        (mi_interpreter_init): Hook the above.
+        * mi/mi-main.c (mi_cmd_execute): Disable breakpoint notifications
+        while -break-* commands are executing.
+        * mi/mi-main.h (mi_suppress_breakpoint_notifications): New.
+        * mi/mi-out.c (struct ui_out_data): New field original_buffer.
+        (mi_redirect): New.
+        (mi_ui_out_impl): Hook in mi_redirect.
+        (mi_field_skip): True to the name, skip the field, don't output
+        a field with an empty value.
+
+        * python/py-breakpoint.c (gdbpy_breakpoint_created)
+        (gdbpy_breakpoint_deleted): Adjust.
+        * tui/tui-hooks.c (tui_event_create_breakpoint)
+        (tui_event_delete_breakpoint, tui_event_modify_breakpoint): Adjust.
+
 2011-04-26  Aleksandar Ristovski  <aristovski@qnx.com>
 
 	* nto-procfs.c (procfs_insert_hw_watchpoint): Fix prototype.

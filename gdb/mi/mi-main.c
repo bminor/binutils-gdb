@@ -2088,8 +2088,16 @@ mi_cmd_execute (struct mi_parse *parse)
 
   current_context = parse;
 
+  if (strncmp (parse->command, "break-", sizeof ("break-") - 1 ) == 0)
+    {
+      make_cleanup_restore_integer (&mi_suppress_breakpoint_notifications);
+      mi_suppress_breakpoint_notifications = 1;
+    }
+
   if (parse->cmd->argv_func != NULL)
-    parse->cmd->argv_func (parse->command, parse->argv, parse->argc);
+    {
+      parse->cmd->argv_func (parse->command, parse->argv, parse->argc);
+    }
   else if (parse->cmd->cli.cmd != 0)
     {
       /* FIXME: DELETE THIS. */

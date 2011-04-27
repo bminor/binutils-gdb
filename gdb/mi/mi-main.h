@@ -33,6 +33,7 @@ extern char *current_token;
 
 extern int running_result_record_printed;
 extern int mi_proceeded;
+extern int mi_suppress_breakpoint_notifications;
 
 #endif
 

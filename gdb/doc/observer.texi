@@ -159,19 +159,18 @@ thread was resume, and may be RESUME_ALL if all threads are resumed.
 The target is about to be proceeded.
 @end deftypefun
 
-@deftypefun void breakpoint_created (int @var{bpnum})
-A new breakpoint has been created.  The argument @var{bpnum} is the
-number of the newly-created breakpoint.
+@deftypefun void breakpoint_created (struct breakpoint *@var{b})
+A new breakpoint @var{b} has been created.
 @end deftypefun
 
-@deftypefun void breakpoint_deleted (int @var{bpnum})
-A breakpoint has been destroyed.  The argument @var{bpnum} is the
-number of the newly-destroyed breakpoint.
+@deftypefun void breakpoint_deleted (struct breakpoint *@var{b})
+A breakpoint has been destroyed.  The argument @var{b} is the
+pointer to the destroyed breakpoint.
 @end deftypefun
 
-@deftypefun void breakpoint_modified (int @var{bpnum})
-A breakpoint has been modified in some way.  The argument @var{bpnum}
-is the number of the modified breakpoint.
+@deftypefun void breakpoint_modified (struct breakpoint *@var{b})
+A breakpoint has been modified in some way.  The argument @var{b}
+is the modified breakpoint.
 @end deftypefun
 
 @deftypefun void tracepoint_created (int @var{tpnum})

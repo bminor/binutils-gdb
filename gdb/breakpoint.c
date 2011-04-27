@@ -626,7 +626,7 @@ set_breakpoint_condition (struct breakpoint *b, char *exp,
 	}
     }
   breakpoints_changed ();
-  observer_notify_breakpoint_modified (b->number);
+  observer_notify_breakpoint_modified (b);
 }
 
 /* condition N EXP -- set break condition of breakpoint N to EXP.  */
@@ -791,7 +791,7 @@ breakpoint_set_commands (struct breakpoint *b,
   decref_counted_command_line (&b->commands);
   b->commands = alloc_counted_command_line (commands);
   breakpoints_changed ();
-  observer_notify_breakpoint_modified (b->number);
+  observer_notify_breakpoint_modified (b);
 }
 
 /* Set the internal `silent' flag on the breakpoint.  Note that this
@@ -805,7 +805,7 @@ breakpoint_set_silent (struct breakpoint *b, int silent)
 
   b->silent = silent;
   if (old_silent != silent)
-    observer_notify_breakpoint_modified (b->number);
+    observer_notify_breakpoint_modified (b);
 }
 
 /* Set the thread for this breakpoint.  If THREAD is -1, make the
@@ -818,7 +818,7 @@ breakpoint_set_thread (struct breakpoint *b, int thread)
 
   b->thread = thread;
   if (old_thread != thread)
-    observer_notify_breakpoint_modified (b->number);
+    observer_notify_breakpoint_modified (b);
 }
 
 /* Set the task for this breakpoint.  If TASK is 0, make the
@@ -831,7 +831,7 @@ breakpoint_set_task (struct breakpoint *b, int task)
 
   b->task = task;
   if (old_task != task)
-    observer_notify_breakpoint_modified (b->number);
+    observer_notify_breakpoint_modified (b);
 }
 
 void
@@ -908,7 +908,7 @@ do_map_commands_command (struct breakpoint *b, void *data)
       decref_counted_command_line (&b->commands);
       b->commands = info->cmd;
       breakpoints_changed ();
-      observer_notify_breakpoint_modified (b->number);
+      observer_notify_breakpoint_modified (b);
     }
 }
 
@@ -1672,6 +1672,7 @@ insert_bp_location (struct bp_location *bl,
 	      /* See also: disable_breakpoints_in_shlibs.  */
 	      val = 0;
 	      bl->shlib_disabled = 1;
+	      observer_notify_breakpoint_modified (bl->owner);
 	      if (!*disabled_breaks)
 		{
 		  fprintf_unfiltered (tmp_error_stream, 
@@ -4173,6 +4174,7 @@ bpstat_check_breakpoint_conditions (bpstat bs, ptid_t ptid)
 	  bs->stop = 0;
 	  /* Increase the hit count even though we don't stop.  */
 	  ++(b->hit_count);
+	  observer_notify_breakpoint_modified (b);
 	}	
     }
 }
@@ -4301,6 +4303,7 @@ bpstat_stop_status (struct address_space *aspace,
 	  if (bs->stop)
 	    {
 	      ++(b->hit_count);
+	      observer_notify_breakpoint_modified (b);
 
 	      /* We will stop here.  */
 	      if (b->disposition == disp_disable)
@@ -4768,7 +4771,6 @@ print_one_breakpoint_location (struct breakpoint *b,
 {
   struct command_line *l;
   static char bpenables[] = "nynny";
-  struct cleanup *bkpt_chain;
 
   int header_of_multiple = 0;
   int part_of_multiple = (loc != NULL);
@@ -4787,7 +4789,6 @@ print_one_breakpoint_location (struct breakpoint *b,
     loc = b->loc;
 
   annotate_record ();
-  bkpt_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "bkpt");
 
   /* 1 */
   annotate_field (0);
@@ -5052,8 +5053,6 @@ print_one_breakpoint_location (struct breakpoint *b,
       else if (b->exp_string)
 	ui_out_field_string (uiout, "original-location", b->exp_string);
     }
-	
-  do_cleanups (bkpt_chain);
 }
 
 static void
@@ -5061,7 +5060,12 @@ print_one_breakpoint (struct breakpoint *b,
 		      struct bp_location **last_loc, 
 		      int allflag)
 {
+  struct cleanup *bkpt_chain;
+
+  bkpt_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "bkpt");
+
   print_one_breakpoint_location (b, NULL, 0, last_loc, allflag);
+  do_cleanups (bkpt_chain);
 
   /* If this breakpoint has custom print function,
      it's already printed.  Otherwise, print individual
@@ -5077,13 +5081,18 @@ print_one_breakpoint (struct breakpoint *b,
 	 internally, that's not a property exposed to user.  */
       if (b->loc 
 	  && !is_hardware_watchpoint (b)
-	  && (b->loc->next || !b->loc->enabled)
-	  && !ui_out_is_mi_like_p (uiout)) 
+	  && (b->loc->next || !b->loc->enabled))
 	{
 	  struct bp_location *loc;
 	  int n = 1;
+
 	  for (loc = b->loc; loc; loc = loc->next, ++n)
-	    print_one_breakpoint_location (b, loc, n, last_loc, allflag);
+	    {
+	      struct cleanup *inner2 =
+		make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
+	      print_one_breakpoint_location (b, loc, n, last_loc, allflag);
+	      do_cleanups (inner2);
+	    }
 	}
     }
 }
@@ -6191,6 +6200,10 @@ disable_breakpoints_in_unloaded_shlib (struct so_list *solib)
 	   succeeding so we must mark the breakpoint as not inserted
 	   to prevent future errors occurring in remove_breakpoints.  */
 	loc->inserted = 0;
+
+	/* This may cause duplicate notifications for the same breakpoint.  */
+	observer_notify_breakpoint_modified (b);
+
 	if (!disabled_shlib_breaks)
 	  {
 	    target_terminal_ours_for_output ();
@@ -6747,6 +6760,7 @@ create_catchpoint (struct gdbarch *gdbarch, int tempflag,
     create_catchpoint_without_mention (gdbarch, tempflag, cond_string, ops);
 
   mention (b);
+  observer_notify_breakpoint_created (b);
   update_global_location_list (1);
 
   return b;
@@ -6858,6 +6872,7 @@ create_syscall_event_catchpoint (int tempflag, VEC(int) *filter,
   /* Now, we have to mention the breakpoint and update the global
      location list.  */
   mention (b);
+  observer_notify_breakpoint_created (b);
   update_global_location_list (1);
 }
 
@@ -7093,12 +7108,6 @@ mention (struct breakpoint *b)
   struct value_print_options opts;
 
   get_user_print_options (&opts);
-
-  /* FIXME: This is misplaced; mention() is called by things (like
-     hitting a watchpoint) other than breakpoint creation.  It should
-     be possible to clean this up and at the same time replace the
-     random calls to breakpoint_changed with this hook.  */
-  observer_notify_breakpoint_created (b->number);
 
   if (b->ops != NULL && b->ops->print_mention != NULL)
     b->ops->print_mention (b);
@@ -7454,12 +7463,11 @@ create_breakpoint_sal (struct gdbarch *gdbarch,
       = xstrprintf ("*%s", paddress (b->loc->gdbarch, b->loc->address));
 
   b->ops = ops;
-  if (internal)
-    /* Do not mention breakpoints with a negative number, but do
-       notify observers.  */
-    observer_notify_breakpoint_created (b->number);
-  else
+  /* Do not mention breakpoints with a negative number, but do
+     notify observers.  */
+  if (!internal)
     mention (b);
+  observer_notify_breakpoint_created (b);
 }
 
 /* Remove element at INDEX_TO_REMOVE from SAL, shifting other
@@ -8122,12 +8130,11 @@ create_breakpoint (struct gdbarch *gdbarch,
 	      || b->type == bp_hardware_breakpoint))
 	b->enable_state = bp_startup_disabled;
 
-      if (internal)
+      if (!internal)
         /* Do not mention breakpoints with a negative number, 
 	   but do notify observers.  */
-        observer_notify_breakpoint_created (b->number);
-      else
-        mention (b);
+	mention (b);
+      observer_notify_breakpoint_created (b);
     }
   
   if (sals.nelts > 1)
@@ -8631,6 +8638,7 @@ break_range_command (char *arg, int from_tty)
   discard_cleanups (cleanup_bkpt);
 
   mention (b);
+  observer_notify_breakpoint_created (b);
   update_global_location_list (1);
 }
 
@@ -9065,12 +9073,13 @@ watch_command_1 (char *arg, int accessflag, int from_tty,
   /* Finally update the new watchpoint.  This creates the locations
      that should be inserted.  */
   update_watchpoint (b, 1);
-  if (internal)
-    /* Do not mention breakpoints with a negative number, but do
+
+  /* Do not mention breakpoints with a negative number, but do
        notify observers.  */
-    observer_notify_breakpoint_created (b->number);
-  else
+  if (!internal)
     mention (b);
+  observer_notify_breakpoint_created (b);
+
   update_global_location_list (1);
 }
 
@@ -9690,6 +9699,7 @@ create_ada_exception_breakpoint (struct gdbarch *gdbarch,
   b->ops = ops;
 
   mention (b);
+  observer_notify_breakpoint_created (b);
   update_global_location_list (1);
 }
 
@@ -10496,7 +10506,7 @@ delete_breakpoint (struct breakpoint *bpt)
       bpt->related_breakpoint = bpt;
     }
 
-  observer_notify_breakpoint_deleted (bpt->number);
+  observer_notify_breakpoint_deleted (bpt);
 
   if (breakpoint_chain == bpt)
     breakpoint_chain = bpt->next;
@@ -10807,6 +10817,33 @@ update_static_tracepoint (struct breakpoint *b, struct symtab_and_line sal)
   return sal;
 }
 
+/* Returns 1 iff locations A and B are sufficiently same that
+   we don't need to report breakpoint as changed.  */
+
+static int
+locations_are_equal (struct bp_location *a, struct bp_location *b)
+{
+  while (a && b)
+    {
+      if (a->address != b->address)
+	return 0;
+
+      if (a->shlib_disabled != b->shlib_disabled)
+	return 0;
+
+      if (a->enabled != b->enabled)
+	return 0;
+
+      a = a->next;
+      b = b->next;
+    }
+
+  if ((a == NULL) != (b == NULL))
+    return 0;
+
+  return 1;
+}
+
 /* Create new breakpoint locations for B (a hardware or software breakpoint)
    based on SALS and SALS_END.  If SALS_END.NELTS is not zero, then B is
    a ranged breakpoint.  */
@@ -10920,6 +10957,9 @@ update_breakpoint_locations (struct breakpoint *b,
 	  }
       }
   }
+
+  if (!locations_are_equal (existing_locations, b->loc))
+    observer_notify_breakpoint_modified (b);
 
   update_global_location_list (1);
 }
@@ -11264,7 +11304,7 @@ set_ignore_count (int bptnum, int count, int from_tty)
 			     count, bptnum);
 	}
       breakpoints_changed ();
-      observer_notify_breakpoint_modified (b->number);
+      observer_notify_breakpoint_modified (b);
       return;
     }
 
@@ -11419,7 +11459,7 @@ disable_breakpoint (struct breakpoint *bpt)
 
   update_global_location_list (0);
 
-  observer_notify_breakpoint_modified (bpt->number);
+  observer_notify_breakpoint_modified (bpt);
 }
 
 /* A callback for map_breakpoint_numbers that calls
@@ -11510,7 +11550,7 @@ do_enable_breakpoint (struct breakpoint *bpt, enum bpdisp disposition)
   update_global_location_list (1);
   breakpoints_changed ();
   
-  observer_notify_breakpoint_modified (bpt->number);
+  observer_notify_breakpoint_modified (bpt);
 }
 
 

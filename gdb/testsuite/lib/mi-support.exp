@@ -32,6 +32,7 @@ set MIFLAGS "-i=mi"
 
 set thread_selected_re "=thread-selected,id=\"\[0-9\]+\"\r\n"
 set library_loaded_re "=library-loaded\[^\n\]+\"\r\n"
+set breakpoint_re "=(breakpoint-created|breakpoint-deleted)\[^\n\]+\"\r\n"
 
 #
 # mi_gdb_exit -- exit the GDB, killing the target program if necessary
@@ -978,6 +979,7 @@ proc mi_expect_stop { reason func args file line extra test } {
     global fullname_syntax
     global async
     global thread_selected_re
+    global breakpoint_re
 
     set after_stopped ""
     set after_reason ""
@@ -1038,9 +1040,9 @@ proc mi_expect_stop { reason func args file line extra test } {
 
     set any "\[^\n\]*"
 
-    verbose -log "mi_expect_stop: expecting: \\*stopped,${r}${a}${bn}frame=\{addr=\"$hex\",func=\"$func\",args=$args,file=\"$any$file\",fullname=\"${fullname_syntax}$file\",line=\"$line\"\}$after_stopped,thread-id=\"$decimal\",stopped-threads=$any\r\n($thread_selected_re)?$prompt_re"
+    verbose -log "mi_expect_stop: expecting: \\*stopped,${r}${a}${bn}frame=\{addr=\"$hex\",func=\"$func\",args=$args,file=\"$any$file\",fullname=\"${fullname_syntax}$file\",line=\"$line\"\}$after_stopped,thread-id=\"$decimal\",stopped-threads=$any\r\n($thread_selected_re|$breakpoint_re)*$prompt_re"
     gdb_expect {
-	-re "\\*stopped,${r}${a}${bn}frame=\{addr=\"$hex\",func=\"$func\",args=$args,file=\"$any$file\",fullname=\"${fullname_syntax}$file\",line=\"($line)\"\}$after_stopped,thread-id=\"$decimal\",stopped-threads=$any\r\n($thread_selected_re)?$prompt_re" {
+	-re "\\*stopped,${r}${a}${bn}frame=\{addr=\"$hex\",func=\"$func\",args=$args,file=\"$any$file\",fullname=\"${fullname_syntax}$file\",line=\"($line)\"\}$after_stopped,thread-id=\"$decimal\",stopped-threads=$any\r\n($thread_selected_re|$breakpoint_re)*$prompt_re" {
 	    pass "$test"
             return $expect_out(2,string)
 	}

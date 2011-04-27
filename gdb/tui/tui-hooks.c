@@ -137,7 +137,7 @@ tui_register_changed_hook (int regno)
 /* Breakpoint creation hook.
    Update the screen to show the new breakpoint.  */
 static void
-tui_event_create_breakpoint (int number)
+tui_event_create_breakpoint (struct breakpoint *b)
 {
   tui_update_all_breakpoint_info ();
 }
@@ -145,13 +145,13 @@ tui_event_create_breakpoint (int number)
 /* Breakpoint deletion hook.
    Refresh the screen to update the breakpoint marks.  */
 static void
-tui_event_delete_breakpoint (int number)
+tui_event_delete_breakpoint (struct breakpoint *b)
 {
   tui_update_all_breakpoint_info ();
 }
 
 static void
-tui_event_modify_breakpoint (int number)
+tui_event_modify_breakpoint (struct breakpoint *b)
 {
   tui_update_all_breakpoint_info ();
 }

@@ -32,7 +32,7 @@ extern void _initialize_annotate (void);
 
 static void print_value_flags (struct type *);
 
-static void breakpoint_changed (int);
+static void breakpoint_changed (struct breakpoint *b);
 
 
 void (*deprecated_annotate_signalled_hook) (void);
@@ -561,7 +561,7 @@ annotate_array_section_end (void)
 }
 
 static void
-breakpoint_changed (int bpno)
+breakpoint_changed (struct breakpoint *b)
 {
   breakpoints_changed ();
 }

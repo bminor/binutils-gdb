@@ -782,15 +782,10 @@ gdbpy_breakpoint_has_py_cond (struct breakpoint_object *bp_obj)
 /* Callback that is used when a breakpoint is created.  This function
    will create a new Python breakpoint object.  */
 static void
-gdbpy_breakpoint_created (int num)
+gdbpy_breakpoint_created (struct breakpoint *bp)
 {
   breakpoint_object *newbp;
-  struct breakpoint *bp = NULL;
   PyGILState_STATE state;
-
-  bp = get_breakpoint (num);
-  if (! bp)
-    return;
 
   if (num < 0 && bppy_pending_object == NULL)
     return;
@@ -813,7 +808,7 @@ gdbpy_breakpoint_created (int num)
     newbp = PyObject_New (breakpoint_object, &breakpoint_object_type);
   if (newbp)
     {
-      newbp->number = num;
+      newbp->number = bp->number;
       newbp->bp = bp;
       newbp->bp->py_bp_object = newbp;
       Py_INCREF (newbp);
@@ -832,8 +827,9 @@ gdbpy_breakpoint_created (int num)
 /* Callback that is used when a breakpoint is deleted.  This will
    invalidate the corresponding Python object.  */
 static void
-gdbpy_breakpoint_deleted (int num)
+gdbpy_breakpoint_deleted (struct breakpoint *b)
 {
+  int num = b->number;
   PyGILState_STATE state;
   struct breakpoint *bp = NULL;
   breakpoint_object *bp_obj;
