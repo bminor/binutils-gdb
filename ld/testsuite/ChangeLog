@@ -1,3 +1,29 @@
+2011-04-27  Alan Modra  <amodra@gmail.com>
+
+	Backport from mainline.
+	2011-04-19  H.J. Lu  <hongjiu.lu@intel.com>
+	* ld-plugin/plugin-ignore.d: Removed.
+
+	2011-04-18  H.J. Lu  <hongjiu.lu@intel.com>
+	* ld-plugin/plugin-7.d: Update expected LTO linker errors for
+	GCC 4.6.
+	* ld-plugin/plugin-8.d: Likewise.
+
+	2011-04-18  Alan Modra  <amodra@gmail.com>
+	* ld-plugin/plugin-7.d: Adjust for plugin changes.
+	* ld-plugin/plugin-8.d: Likewise.
+	* ld-plugin/plugin.exp: Pass --verbose=2 for visibility test, and
+	compare ld output to..
+	* ld-plugin/plugin-12.d: New.
+
+	2011-04-11  Mark Wielaard  <mjw@redhat.com>
+	PR 10549
+	* ld-unique: New directory.
+	* ld-unique/unique.exp: New file: Run the UNIQUE tests.
+	* ld-unique/unique.s: New test file.
+	* ld-unique/unique_empty.s: Likewise.
+	* ld-unique/unique_shared.s: Likewise.
+
 2011-04-11  Alan Modra  <amodra@gmail.com>
 
 	* ld-elf/eh-frame-hdr.d: xfail avr.

@@ -1,3 +1,61 @@
+2011-04-27  Alan Modra  <amodra@gmail.com>
+
+	Backport from mainline
+	2011-04-24  Alan Modra  <amodra@gmail.com>
+	PR ld/12365
+	PR ld/12696
+	* coff-aux.c (coff_m68k_aux_link_add_one_symbol): Update "notice" call.
+	* linker.c (_bfd_link_hash_newfunc): Clear bitfields.
+	(_bfd_generic_link_add_one_symbol): Update "notice" call.
+	* elflink.c (_bfd_elf_merge_symbol): Don't skip weak redefs when
+	it is a redef of an IR symbol in a real BFD.
+
+	2011-04-20  Alan Modra  <amodra@gmail.com>
+	PR ld/12365
+	* elfcode.h (elf_slurp_symbol_table): Put common plugin IR symbols
+	in their own common section.
+	* elflink.c (elf_link_add_object_symbols): Likewise.
+	* linker.c (generic_link_check_archive_element): Don't lose flags
+	if common section is pre-existing.
+	(_bfd_generic_link_add_one_symbol): Likewise.
+
+	2011-04-20  Alan Modra  <amodra@gmail.com>
+	PR ld/12365
+	* elflink.c (_bfd_elf_merge_symbol): Update multiple_common calls.
+	* linker.c (_bfd_generic_link_add_one_symbol): Likewise.  Call
+	multiple_definition regardless of allow_multiple_definition.
+	* simple.c (simple_dummy_multiple_definition): Update.
+	* xcofflink.c (xcoff_link_add_symbols): Update multiple_definition
+	calls.
+
+	2011-04-18  Alan Modra  <amodra@gmail.com>
+	PR ld/12365
+	PR ld/12672
+	* bfd.c (BFD_PLUGIN): Define.
+	(BFD_FLAGS_SAVED, BFD_FLAGS_FOR_BFD_USE_MASK): Add BFD_PLUGIN.
+	* bfd-in2.h: Regenerate.
+	* elflink.c (elf_link_output_extsym): Strip undefined plugin syms.
+	* opncls.c (bfd_make_readable): Don't lose original bfd flags.
+
+	2011-04-11  Mark Wielaard  <mjw@redhat.com>
+	PR 10549
+	* elf-bfd.h (has_ifunc_symbols): Renamed to has_gnu_symbols.
+	(has_gnu_symbols): Renamed from has_ifunc_symbols.
+	* elf.c (_bfd_elf_set_osabi): Use new has_gnu_symbols name.
+	* elf32-i386.c (elf_i386_add_symbol_hook): Likewise.
+	* elf32-ppc.c (ppc_elf_add_symbol_hook): Likewise.
+	* elf32-sparc.c (elf32_sparc_add_symbol_hook): Likewise.
+	* elf64-ppc.c (ppc64_elf_add_symbol_hook): Likewise.
+	* elf64-sparc.c (elf64_sparc_add_symbol_hook): Likewise.
+	* elf64-x86-64.c (elf_x86_64_add_symbol_hook): Likewise.
+
+	2011-02-25  Rafael Ávila de Espíndola <respindola@mozilla.com>
+	* plugin.c (bfd_plugin_object_p): Correctly set the filesize
+	and handle claim_file seeking. Only try to load the plugin once.
+
+	2010-12-12  H.J. Lu  <hongjiu.lu@intel.com>
+	* elf.c (special_sections_g): Add ".gnu.lto_".
+
 2011-04-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* elf-bfd.h (RELOC_AGAINST_DISCARDED_SECTION): Fix +1 overrun of

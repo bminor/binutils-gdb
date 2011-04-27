@@ -1361,8 +1361,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
 	 symbols defined in dynamic objects.  */
 
       if (! ((*info->callbacks->multiple_common)
-	     (info, h->root.root.string, oldbfd, bfd_link_hash_common,
-	      h->size, abfd, bfd_link_hash_common, sym->st_size)))
+	     (info, &h->root, abfd, bfd_link_hash_common, sym->st_size)))
 	return FALSE;
 
       if (sym->st_size > h->size)
@@ -1428,7 +1427,10 @@ _bfd_elf_merge_symbol (bfd *abfd,
   /* Skip weak definitions of symbols that are already defined.  */
   if (newdef && olddef && newweak)
     {
-      *skip = TRUE;
+      /* Don't skip new non-IR weak syms.  */
+      if (!((oldbfd->flags & BFD_PLUGIN) != 0
+	    && (abfd->flags & BFD_PLUGIN) == 0))
+	*skip = TRUE;
 
       /* Merge st_other.  If the symbol already has a dynamic index,
 	 but visibility says it should not be visible, turn it into a
@@ -1513,8 +1515,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
 	 common symbol, but we don't know what to use for the section
 	 or the alignment.  */
       if (! ((*info->callbacks->multiple_common)
-	     (info, h->root.root.string, oldbfd, bfd_link_hash_common,
-	      h->size, abfd, bfd_link_hash_common, sym->st_size)))
+	     (info, &h->root, abfd, bfd_link_hash_common, sym->st_size)))
 	return FALSE;
 
       /* If the presumed common symbol in the dynamic object is
@@ -3939,18 +3940,31 @@ error_free_dyn:
 	goto error_free_vers;
 
       if (isym->st_shndx == SHN_COMMON
-	  && ELF_ST_TYPE (isym->st_info) == STT_TLS
-	  && !info->relocatable)
+	  && (abfd->flags & BFD_PLUGIN) != 0)
+	{
+	  asection *xc = bfd_get_section_by_name (abfd, "COMMON");
+
+	  if (xc == NULL)
+	    {
+	      flagword sflags = (SEC_ALLOC | SEC_IS_COMMON | SEC_KEEP
+				 | SEC_EXCLUDE);
+	      xc = bfd_make_section_with_flags (abfd, "COMMON", sflags);
+	      if (xc == NULL)
+		goto error_free_vers;
+	    }
+	  sec = xc;
+	}
+      else if (isym->st_shndx == SHN_COMMON
+	       && ELF_ST_TYPE (isym->st_info) == STT_TLS
+	       && !info->relocatable)
 	{
 	  asection *tcomm = bfd_get_section_by_name (abfd, ".tcommon");
 
 	  if (tcomm == NULL)
 	    {
-	      tcomm = bfd_make_section_with_flags (abfd, ".tcommon",
-						   (SEC_ALLOC
-						    | SEC_IS_COMMON
-						    | SEC_LINKER_CREATED
-						    | SEC_THREAD_LOCAL));
+	      flagword sflags = (SEC_ALLOC | SEC_THREAD_LOCAL | SEC_IS_COMMON
+				 | SEC_LINKER_CREATED);
+	      tcomm = bfd_make_section_with_flags (abfd, ".tcommon", sflags);
 	      if (tcomm == NULL)
 		goto error_free_vers;
 	    }
@@ -8698,6 +8712,11 @@ elf_link_output_extsym (struct elf_link_hash_entry *h, void *data)
 	   && (h->root.type == bfd_link_hash_defined
 	       || h->root.type == bfd_link_hash_defweak)
 	   && elf_discarded_section (h->root.u.def.section))
+    strip = TRUE;
+  else if ((h->root.type == bfd_link_hash_undefined
+	    || h->root.type == bfd_link_hash_undefweak)
+	   && h->root.u.undef.abfd != NULL
+	   && (h->root.u.undef.abfd->flags & BFD_PLUGIN) != 0)
     strip = TRUE;
   else
     strip = FALSE;

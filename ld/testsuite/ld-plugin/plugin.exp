@@ -87,7 +87,7 @@ set testobjfiles "tmpdir/main.o tmpdir/func.o tmpdir/text.o"
 set testobjfiles_notext "tmpdir/main.o tmpdir/func.o"
 # Rather than having libs we just define dummy values for anything
 # we may need to link a target exe; we aren't going to run it anyway.
-set libs "[ld_simple_link_defsyms] --defsym ${_}printf=0 --defsym ${_}puts=0"
+set libs "[ld_simple_link_defsyms] --defsym ${_}printf=${_}main --defsym ${_}puts=${_}main"
 
 set plugin_tests [list \
     [list "load plugin" "-plugin $plugin_path \
@@ -152,8 +152,8 @@ set plugin_extra_elf_tests [list \
 			-plugin-opt sym:${_}func2::0:2:0 \
 			-plugin-opt sym:${_}func3::0:3:0 \
 			-plugin-opt dumpresolutions \
-    $testobjfiles $libs" "" "" {{ld plugin-ignore.d} \
-				{readelf -s plugin-vis-1.d}} "main.x" ] \
+			-plugin-opt add:tmpdir/func.o \
+    $testobjfiles $libs --verbose=2" "" "" {{ld plugin-12.d}} "main.x" ] \
 ]
 
 if { !$can_compile || $failed_compile } {

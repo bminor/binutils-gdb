@@ -1631,9 +1631,9 @@ struct elf_obj_tdata
   bfd_byte *build_id;
 
   /* True if the bfd contains symbols that have the STT_GNU_IFUNC
-     symbol type.  Used to set the osabi field in the ELF header
-     structure.  */
-  bfd_boolean has_ifunc_symbols;
+     symbol type or STB_GNU_UNIQUE binding.  Used to set the osabi
+     field in the ELF header structure.  */
+  bfd_boolean has_gnu_symbols;
 
   /* An identifier used to distinguish different target
      specific extensions to this structure.  */

@@ -1,3 +1,11 @@
+2011-04-27  Alan Modra  <amodra@gmail.com>
+
+	Apply from mainline.
+	2010-12-12  H.J. Lu  <hongjiu.lu@intel.com>
+	* gas/elf/elf.exp: Run section9.
+	* gas/elf/section9.d: New.
+	* gas/elf/section9.s: Likewise.
+
 2011-02-10  Vincent Rivière  <vincent.riviere@freesbee.fr>
 
 	PR gas/6957

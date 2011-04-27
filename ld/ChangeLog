@@ -1,3 +1,140 @@
+2011-04-27  Alan Modra  <amodra@gmail.com>
+
+	Backport from mainline.
+	2011-04-24  Alan Modra  <amodra@gmail.com>
+	PR ld/12365
+	PR ld/12696
+	* ldmain.c (notice): Delete "name" param, add "h".
+	* plugin.c (plugin_notice): Likewise.  Set non_ir_ref.  Handle
+	redefinitions of IR symbols in real BFDs.
+	(plugin_multiple_definition, plugin_multiple_common): Delete.
+	(non_ironly_hash, init_non_ironly_hash): Delete.
+	(is_visible_from_outside): Traverse entry_symbol chain.
+	(get_symbols): Use non_ir_ref flag rather than hash lookup.
+
+	2011-04-20  Alan Modra  <amodra@gmail.com>
+	PR ld/12365
+	* ldfile.c (ldfile_try_open_bfd): Move code creating and switching
+	to plugin IR BFD..
+	* ldmain.c (add_archive_element): ..and similar code here..
+	* plugin.c (plugin_maybe_claim): ..to here.  New function.
+	(plugin_call_claim_file): Make static.
+	(asymbol_from_plugin_symbol): Set ELF st_shndx for common syms.
+	(plugin_multiple_common): New function.
+	(plugin_call_all_symbols_read): Hook in plugin_multiple_common.
+	* plugin.h (plugin_call_claim_file): Don't declare.
+	(plugin_maybe_claim): Declare.
+
+	2011-04-20  Alan Modra  <amodra@gmail.com>
+	PR ld/12365
+	* ldmain.c (multiple_definition): Take a bfd_link_hash_entry
+	pointer arg rather than "name", "obfd", "osec", "oval".  Add code
+	removed from linker.c.  Hack around xcofflink.c oddity in
+	passing NULL nbfd.
+	(multiple_common): Similarly.
+	* plugin.c (orig_allow_multiple_defs): Delete.
+	(plugin_call_all_symbols_read): Don't twiddle allow_multiple_definition.
+	(plugin_multiple_definition): Update.
+
+	2011-04-18  Alan Modra  <amodra@gmail.com>
+	PR ld/12365
+	PR ld/12672
+	* ldfile.c (ldfile_try_open_bfd): Don't attempt any plugin action
+	when no_more_claiming.
+	* ldmain.c (add_archive_element): Likewise.
+	(multiple_definition): Remove plugin_multiple_definition call.
+	(notice): Remove plugin_notice call.
+	* ldlang.c (lang_list_insert_after, void lang_list_remove_tail): Move.
+	Delete prototype.
+	(plugin_insert): New static var.
+	(open_input_bfds): Only rescan libs after plugin insert point.
+	(lang_gc_sections): Omit plugin claimed files.
+	(lang_process): Set plugin_insert.  Only rescan when plugin adds
+	objects.
+	* plugin.h (no_more_claiming): Declare.
+	(plugin_notice, plugin_multiple_definition): Don't declare.
+	* plugin.c: Formatting.
+	(orig_notice_all, orig_allow_multiple_defs, orig_callbacks,
+	plugin_callbacks): New static vars.
+	(no_more_claiming): Make global.
+	(plugin_cached_allow_multiple_defs): Delete.
+	(plugin_get_ir_dummy_bfd): Set SEC_EXCLUDE on dummy .text section,
+	use newer bfd_make_section variant.  Make COMMON section too.
+	Error handling.  Correct setting of gp size.
+	(asymbol_from_plugin_symbol): Properly cast last arg of concat.
+	(message): Likewise for ACONCAT.
+	(asymbol_from_plugin_symbol): Use our COMMON section.
+	(get_symbols): When report_plugin_symbols, show visibility too.
+	(init_non_ironly_hash): Move.  Don't test non_ironly_hash.
+	(plugin_load_plugins): Save state of linker callbacks, set up to
+	call plugin_notice instead.  Call init_non_ironly_hash here.
+	(plugin_call_all_symbols_read): Set plugin_multiple_definition in
+	plugin callbacks.
+	(plugin_notice): Rewrite.
+	(plugin_multiple_definition): Make static, call original callback.
+
+	2011-04-15  Alan Modra  <amodra@gmail.com>
+	PR ld/12672
+	* ldlang.c (enum open_bfd_mode): New.
+	(open_input_bfds): Replace "force" param with "mode".  Reload
+	archives for rescan.  Update all callers.
+	(lang_process): Make another open_input_bfds pass for plugins.
+
+	2011-03-23  Joseph Myers  <joseph@codesourcery.com>
+	* lexsup.c (parse_args): Only set report_plugin_symbols if plugins
+	are enabled.  Mark level as possibly unused.
+
+	2011-03-10  Dave Korn  <dave.korn.cygwin@gmail.com>
+	* plugin.c (get_symbols): Use wrapped lookup for undefined symbols.
+
+	2011-03-10  Dave Korn  <dave.korn.cygwin@gmail.com>
+	* ldlang.c (lang_check): Don't run checks on dummy IR BFDs.
+
+	2011-03-10  Dave Korn  <dave.korn.cygwin@gmail.com>
+	* ldlang.h (lang_input_statement_type): Add new 'claim_archive' flag,
+	wrapping both it and 'claim' flag in #ifdef ENABLE_PLUGINS.
+	* ldmain.c (add_archive_element): Set it if the member is claimed.
+	* ldlang.c (new_afile): Initialise claim_archive and claimed members.
+	(find_replacements_insert_point): New helper function.
+	(lang_process): After adding and opening replacement files passed
+	from plugin, splice them into correct place in statement list and
+	file chains to preserve critical link order.
+	(lang_list_insert_after): New helper function.
+	(lang_list_remove_tail): Likewise.
+
+	2011-03-10  Dave Korn  <dave.korn.cygwin@gmail.com>
+	* plugin.c (IRONLY_SUFFIX): Revise to nicely human-readable form.
+	(IRONLY_SUFFIX_LEN): Delete.
+	(plugin_get_ir_dummy_bfd): Don't append IRONLY_SUFFIX.
+	(is_ir_dummy_bfd): Don't look for suffix; check claimed flag of
+	enclosing lang input statement instead.
+
+	2011-03-04  H.J. Lu  <hongjiu.lu@intel.com>
+	* ld.texinfo: Document --verbose[=NUMBER].
+	* lexsup.c (ld_options): Update --verbose.
+	(parse_args): Set report_plugin_symbols.
+	* plugin.c (report_plugin_symbols): New.
+	(get_symbols): Report plugin symbols if report_plugin_symbols
+	is TRUE.
+	* plugin.h (report_plugin_symbols): New.
+
+	2011-02-24  H.J. Lu  <hongjiu.lu@intel.com>
+	PR ld/12507
+	* plugin.c (get_symbols): Don't check entry symbol here.
+	(init_non_ironly_hash): Add entry_symbol chain into
+	non_ironly_hash.
+
+	2011-02-24  H.J. Lu  <hongjiu.lu@intel.com>
+	PR ld/12507
+	* plugin.c (get_symbols): Don't mark entry symbol IR only.
+
+	2010-12-06  H.J. Lu  <hongjiu.lu@intel.com>
+	* lexsup.c (ld_options): Add -flto and -flto-partition= for
+	GCC LTO option compatibility.
+
+	2010-12-01  H.J. Lu  <hongjiu.lu@intel.com>
+	* plugin.h: Re-indent.
+
 2011-04-20  Tristan Gingold  <gingold@adacore.com>
 
 	* emultempl/aix.em (_add_options): Ignore -bbigtoc switch.
