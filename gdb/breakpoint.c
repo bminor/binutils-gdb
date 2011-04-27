@@ -5159,27 +5159,13 @@ gdb_breakpoint_query (struct ui_out *uiout, int bnum,
     return GDB_RC_OK;
 }
 
-/* Return non-zero if B is user settable (breakpoints, watchpoints,
-   catchpoints, et.al.).  */
-
-static int
-user_settable_breakpoint (const struct breakpoint *b)
-{
-  return (b->type == bp_breakpoint
-	  || b->type == bp_catchpoint
-	  || b->type == bp_hardware_breakpoint
-	  || is_tracepoint (b)
-	  || is_watchpoint (b)
-	  || b->type == bp_gnu_ifunc_resolver);
-}
-
 /* Return true if this breakpoint was set by the user, false if it is
    internal or momentary.  */
 
 int
 user_breakpoint_p (struct breakpoint *b)
 {
-  return user_settable_breakpoint (b) && b->number > 0;
+  return b->number > 0;
 }
 
 /* Print information on user settable breakpoint (watchpoint, etc)
@@ -10592,45 +10578,23 @@ delete_command (char *arg, int from_tty)
     {
       int breaks_to_delete = 0;
 
-      /* Delete all breakpoints if no argument.
-         Do not delete internal or call-dummy breakpoints, these have
-         to be deleted with an explicit breakpoint number argument.  */
+      /* Delete all breakpoints if no argument.  Do not delete
+         internal breakpoints, these have to be deleted with an
+         explicit breakpoint number argument.  */
       ALL_BREAKPOINTS (b)
-      {
-	if (b->type != bp_call_dummy
-	    && b->type != bp_std_terminate
-	    && b->type != bp_shlib_event
-	    && b->type != bp_jit_event
-	    && b->type != bp_thread_event
-	    && b->type != bp_overlay_event
-	    && b->type != bp_longjmp_master
-	    && b->type != bp_std_terminate_master
-	    && b->type != bp_exception_master
-	    && b->number >= 0)
+	if (user_breakpoint_p (b))
 	  {
 	    breaks_to_delete = 1;
 	    break;
 	  }
-      }
 
       /* Ask user only if there are some breakpoints to delete.  */
       if (!from_tty
 	  || (breaks_to_delete && query (_("Delete all breakpoints? "))))
 	{
 	  ALL_BREAKPOINTS_SAFE (b, b_tmp)
-	  {
-	    if (b->type != bp_call_dummy
-		&& b->type != bp_std_terminate
-		&& b->type != bp_shlib_event
-		&& b->type != bp_thread_event
-		&& b->type != bp_jit_event
-		&& b->type != bp_overlay_event
-		&& b->type != bp_longjmp_master
-		&& b->type != bp_std_terminate_master
-		&& b->type != bp_exception_master
-		&& b->number >= 0)
+	    if (user_breakpoint_p (b))
 	      delete_breakpoint (b);
-	  }
 	}
     }
   else
@@ -11474,31 +11438,14 @@ do_map_disable_breakpoint (struct breakpoint *b, void *ignore)
 static void
 disable_command (char *args, int from_tty)
 {
-  struct breakpoint *bpt;
-
   if (args == 0)
-    ALL_BREAKPOINTS (bpt)
-      switch (bpt->type)
-      {
-      case bp_none:
-	warning (_("attempted to disable apparently deleted breakpoint #%d?"),
-		 bpt->number);
-	break;
-      case bp_breakpoint:
-      case bp_tracepoint:
-      case bp_fast_tracepoint:
-      case bp_static_tracepoint:
-      case bp_catchpoint:
-      case bp_hardware_breakpoint:
-      case bp_watchpoint:
-      case bp_hardware_watchpoint:
-      case bp_read_watchpoint:
-      case bp_access_watchpoint:
-	disable_breakpoint (bpt);
-	break;
-      default:
-	break;
-      }
+    {
+      struct breakpoint *bpt;
+
+      ALL_BREAKPOINTS (bpt)
+	if (user_breakpoint_p (bpt))
+	  disable_breakpoint (bpt);
+    }
   else if (strchr (args, '.'))
     {
       struct bp_location *loc = find_location_by_number (args);
@@ -11576,31 +11523,14 @@ do_map_enable_breakpoint (struct breakpoint *b, void *ignore)
 static void
 enable_command (char *args, int from_tty)
 {
-  struct breakpoint *bpt;
-
   if (args == 0)
-    ALL_BREAKPOINTS (bpt)
-      switch (bpt->type)
-      {
-      case bp_none:
-	warning (_("attempted to enable apparently deleted breakpoint #%d?"),
-		 bpt->number);
-	break;
-      case bp_breakpoint:
-      case bp_tracepoint:
-      case bp_fast_tracepoint:
-      case bp_static_tracepoint:
-      case bp_catchpoint:
-      case bp_hardware_breakpoint:
-      case bp_watchpoint:
-      case bp_hardware_watchpoint:
-      case bp_read_watchpoint:
-      case bp_access_watchpoint:
-	enable_breakpoint (bpt);
-	break;
-      default:
-	break;
-      }
+    {
+      struct breakpoint *bpt;
+
+      ALL_BREAKPOINTS (bpt)
+	if (user_breakpoint_p (bpt))
+	  enable_breakpoint (bpt);
+    }
   else if (strchr (args, '.'))
     {
       struct bp_location *loc = find_location_by_number (args);
@@ -12143,24 +12073,19 @@ delete_trace_command (char *arg, int from_tty)
          have to be deleted with an explicit breakpoint number 
 	 argument.  */
       ALL_TRACEPOINTS (b)
-      {
-	if (b->number >= 0)
+	if (is_tracepoint (b) && user_breakpoint_p (b))
 	  {
 	    breaks_to_delete = 1;
 	    break;
 	  }
-      }
 
       /* Ask user only if there are some breakpoints to delete.  */
       if (!from_tty
 	  || (breaks_to_delete && query (_("Delete all tracepoints? "))))
 	{
 	  ALL_BREAKPOINTS_SAFE (b, b_tmp)
-	  {
-	    if (is_tracepoint (b)
-		&& b->number >= 0)
+	    if (is_tracepoint (b) && user_breakpoint_p (b))
 	      delete_breakpoint (b);
-	  }
 	}
     }
   else

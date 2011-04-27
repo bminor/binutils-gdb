@@ -1,3 +1,17 @@
+2011-04-27  Pedro Alves  <pedro@codesourcery.com>
+
+	* breakpoint.c (user_settable_breakpoint): Delete.
+	(user_breakpoint_p): Remove check on user_settable_breakpoint.
+	(delete_command): Check user_breakpoint_p instead of looking at
+	the breakpoint's type.
+	(disable_command): Ditto.
+	(enable_command): Ditto.
+	(delete_trace_command): Use user_breakpoint_p instead of looking
+	at the breakpoint number directly.  When checking if there are
+	user visible tracepoints, in order to know whether to ask the user
+	for confirmation, check whether the breakpoint is actually a
+	tracepoint.
+
 2011-04-27  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* python/py-breakpoint.c (gdbpy_breakpoint_created): Fix
