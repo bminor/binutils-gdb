@@ -19,7 +19,6 @@
 #define COMMON_LINUX_PTRACE_H
 
 #include <sys/ptrace.h>
-#include <sys/wait.h> /* __WAIT */
 
 #ifndef PTRACE_GETSIGINFO
 # define PTRACE_GETSIGINFO 0x4202
