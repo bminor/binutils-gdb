@@ -1,3 +1,7 @@
+2011-04-27  Nick Clifton  <nickc@redhat.com>
+
+	* po/da.po: Updated Danish translation.
+
 2011-04-26  Anton Blanchard  <anton@samba.org>
 
 	* ppc-opc.c: (powerpc_opcodes): Enable icswx for POWER7.

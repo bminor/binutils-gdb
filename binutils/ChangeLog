@@ -1,3 +1,7 @@
+2011-04-27  Nick Clifton  <nickc@redhat.com>
+
+	* po/da.po: Updated Danish translation.
+
 2011-04-21  Tom Tromey  <tromey@redhat.com>
 
 	* readelf.c (print_stapsdt_note): New function.

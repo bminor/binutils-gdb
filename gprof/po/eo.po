@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: gprof 2.20.90\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
 "POT-Creation-Date: 2010-11-05 11:34+0100\n"
-"PO-Revision-Date: 2011-03-13 10:38-0300\n"
+"PO-Revision-Date: 2011-04-17 14:27-0300\n"
 "Last-Translator: Felipe Castro <fefcas@gmail.com>\n"
 "Language-Team: Esperanto <translation-team-eo@lists.sourceforge.net>\n"
 "Language: eo\n"
@@ -178,10 +178,11 @@ msgstr "patroj"
 msgid "index"
 msgstr "indekso"
 
+# c-format ???
 #: cg_print.c:98
 #, c-format
 msgid "%time"
-msgstr ""
+msgstr "%time (tempo)"
 
 #: cg_print.c:98 cg_print.c:99
 msgid "self"
