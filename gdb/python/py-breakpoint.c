@@ -787,7 +787,7 @@ gdbpy_breakpoint_created (struct breakpoint *bp)
   breakpoint_object *newbp;
   PyGILState_STATE state;
 
-  if (num < 0 && bppy_pending_object == NULL)
+  if (bp->number < 0 && bppy_pending_object == NULL)
     return;
 
   if (bp->type != bp_breakpoint 

@@ -1,5 +1,10 @@
 2011-04-27  Vladimir Prus  <vladimir@codesourcery.com>
 
+	* python/py-breakpoint.c (gdbpy_breakpoint_created): Fix
+	compilation.
+
+2011-04-27  Vladimir Prus  <vladimir@codesourcery.com>
+
 	MI breakpoint notifications.
 
         * annotate.c (breakpoint_changed): Adjust parameter type.
