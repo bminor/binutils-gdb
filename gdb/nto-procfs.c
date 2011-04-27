@@ -64,8 +64,6 @@ static int procfs_xfer_memory (CORE_ADDR, gdb_byte *, int, int,
 			       struct mem_attrib *attrib,
 			       struct target_ops *);
 
-static void notice_signals (void);
-
 static void init_procfs_ops (void);
 
 static ptid_t do_attach (ptid_t ptid);
@@ -985,8 +983,6 @@ procfs_resume (struct target_ops *ops,
 
   run.flags |= _DEBUG_RUN_ARM;
 
-  sigemptyset (&run.trace);
-  notice_signals ();
   signal_to_pass = target_signal_to_host (signo);
 
   if (signal_to_pass)
@@ -1334,32 +1330,21 @@ procfs_store_registers (struct target_ops *ops,
     }
 }
 
+/* Set list of signals to be handled in the target.  */
+
 static void
-notice_signals (void)
+procfs_pass_signals (int numsigs, unsigned char *pass_signals)
 {
   int signo;
 
+  sigfillset (&run.trace);
+
   for (signo = 1; signo < NSIG; signo++)
     {
-      if (signal_stop_state (target_signal_from_host (signo)) == 0
-	  && signal_print_state (target_signal_from_host (signo)) == 0
-	  && signal_pass_state (target_signal_from_host (signo)) == 1)
-	sigdelset (&run.trace, signo);
-      else
-	sigaddset (&run.trace, signo);
+      int target_signo = target_signal_from_host (signo);
+      if (target_signo < numsigs && pass_signals[target_signo])
+        sigdelset (&run.trace, signo);
     }
-}
-
-/* When the user changes the state of gdb's signal handling via the
-   "handle" command, this function gets called to see if any change
-   in the /proc interface is required.  It is also called internally
-   by other /proc interface functions to initialize the state of
-   the traced signal set.  */
-static void
-procfs_notice_signals (ptid_t ptid)
-{
-  sigemptyset (&run.trace);
-  notice_signals ();
 }
 
 static struct tidinfo *
@@ -1426,7 +1411,7 @@ init_procfs_ops (void)
   procfs_ops.to_create_inferior = procfs_create_inferior;
   procfs_ops.to_mourn_inferior = procfs_mourn_inferior;
   procfs_ops.to_can_run = procfs_can_run;
-  procfs_ops.to_notice_signals = procfs_notice_signals;
+  procfs_ops.to_pass_signals = procfs_pass_signals;
   procfs_ops.to_thread_alive = procfs_thread_alive;
   procfs_ops.to_find_new_threads = procfs_find_new_threads;
   procfs_ops.to_pid_to_str = procfs_pid_to_str;
@@ -1458,8 +1443,8 @@ _initialize_procfs (void)
   sigaddset (&set, SIGUSR1);
   sigprocmask (SIG_BLOCK, &set, NULL);
 
-  /* Set up trace and fault sets, as gdb expects them.  */
-  sigemptyset (&run.trace);
+  /* Initially, make sure all signals are reported.  */
+  sigfillset (&run.trace);
 
   /* Stuff some information.  */
   nto_cpuinfo_flags = SYSPAGE_ENTRY (cpuinfo)->flags;

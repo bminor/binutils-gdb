@@ -1041,6 +1041,26 @@ restore_child_signals_mask (sigset_t *prev_mask)
 {
   sigprocmask (SIG_SETMASK, prev_mask, NULL);
 }
+
+/* Mask of signals to pass directly to the inferior.  */
+static sigset_t pass_mask;
+
+/* Update signals to pass to the inferior.  */
+static void
+linux_nat_pass_signals (int numsigs, unsigned char *pass_signals)
+{
+  int signo;
+
+  sigemptyset (&pass_mask);
+
+  for (signo = 1; signo < NSIG; signo++)
+    {
+      int target_signo = target_signal_from_host (signo);
+      if (target_signo < numsigs && pass_signals[target_signo])
+        sigaddset (&pass_mask, signo);
+    }
+}
+
 
 
 /* Prototypes for local functions.  */
@@ -1506,6 +1526,9 @@ linux_nat_create_inferior (struct target_ops *ops,
     }
 #endif /* HAVE_PERSONALITY */
 
+  /* Make sure we report all signals during startup.  */
+  linux_nat_pass_signals (0, NULL);
+
   linux_ops->to_create_inferior (ops, exec_file, allargs, env, from_tty);
 
 #ifdef HAVE_PERSONALITY
@@ -1526,6 +1549,9 @@ linux_nat_attach (struct target_ops *ops, char *args, int from_tty)
   struct lwp_info *lp;
   int status;
   ptid_t ptid;
+
+  /* Make sure we report all signals during attach.  */
+  linux_nat_pass_signals (0, NULL);
 
   linux_ops->to_attach (ops, args, from_tty);
 
@@ -1885,19 +1911,9 @@ linux_nat_resume (struct target_ops *ops,
 
   if (lp->status && WIFSTOPPED (lp->status))
     {
-      enum target_signal saved_signo;
-      struct inferior *inf;
-
-      inf = find_inferior_pid (ptid_get_pid (lp->ptid));
-      gdb_assert (inf);
-      saved_signo = target_signal_from_host (WSTOPSIG (lp->status));
-
-      /* Defer to common code if we're gaining control of the
-	 inferior.  */
-      if (inf->control.stop_soon == NO_STOP_QUIETLY
-	  && signal_stop_state (saved_signo) == 0
-	  && signal_print_state (saved_signo) == 0
-	  && signal_pass_state (saved_signo) == 1)
+      if (!lp->step
+	  && WSTOPSIG (lp->status)
+	  && sigismember (&pass_mask, WSTOPSIG (lp->status)))
 	{
 	  if (debug_linux_nat)
 	    fprintf_unfiltered (gdb_stdlog,
@@ -1907,7 +1923,7 @@ linux_nat_resume (struct target_ops *ops,
 	  /* FIXME: What should we do if we are supposed to continue
 	     this thread with a signal?  */
 	  gdb_assert (signo == TARGET_SIGNAL_0);
-	  signo = saved_signo;
+	  signo = target_signal_from_host (WSTOPSIG (lp->status));
 	  lp->status = 0;
 	}
     }
@@ -3553,20 +3569,11 @@ retry:
   if (WIFSTOPPED (status))
     {
       enum target_signal signo = target_signal_from_host (WSTOPSIG (status));
-      struct inferior *inf;
 
-      inf = find_inferior_pid (ptid_get_pid (lp->ptid));
-      gdb_assert (inf);
-
-      /* Defer to common code if we get a signal while
-	 single-stepping, since that may need special care, e.g. to
-	 skip the signal handler, or, if we're gaining control of the
-	 inferior.  */
+      /* When using hardware single-step, we need to report every signal.
+	 Otherwise, signals in pass_mask may be short-circuited.  */
       if (!lp->step
-	  && inf->control.stop_soon == NO_STOP_QUIETLY
-	  && signal_stop_state (signo) == 0
-	  && signal_print_state (signo) == 0
-	  && signal_pass_state (signo) == 1)
+	  && WSTOPSIG (status) && sigismember (&pass_mask, WSTOPSIG (status)))
 	{
 	  /* FIMXE: kettenis/2001-06-06: Should we resume all threads
 	     here?  It is not clear we should.  GDB may not expect
@@ -5675,6 +5682,7 @@ linux_nat_add_target (struct target_ops *t)
   t->to_detach = linux_nat_detach;
   t->to_resume = linux_nat_resume;
   t->to_wait = linux_nat_wait;
+  t->to_pass_signals = linux_nat_pass_signals;
   t->to_xfer_partial = linux_nat_xfer_partial;
   t->to_kill = linux_nat_kill;
   t->to_mourn_inferior = linux_nat_mourn_inferior;

@@ -494,7 +494,11 @@ struct target_ops
     int (*to_has_exited) (int, int, int *);
     void (*to_mourn_inferior) (struct target_ops *);
     int (*to_can_run) (void);
-    void (*to_notice_signals) (ptid_t ptid);
+
+    /* Documentation of this routine is provided with the corresponding
+       target_* macro.  */
+    void (*to_pass_signals) (int, unsigned char *);
+
     int (*to_thread_alive) (struct target_ops *, ptid_t ptid);
     void (*to_find_new_threads) (struct target_ops *);
     char *(*to_pid_to_str) (struct target_ops *, ptid_t);
@@ -1120,10 +1124,19 @@ void target_mourn_inferior (void);
 #define target_can_run(t) \
      ((t)->to_can_run) ()
 
-/* post process changes to signal handling in the inferior.  */
+/* Set list of signals to be handled in the target.
 
-#define target_notice_signals(ptid) \
-     (*current_target.to_notice_signals) (ptid)
+   PASS_SIGNALS is an array of size NSIG, indexed by target signal number
+   (enum target_signal).  For every signal whose entry in this array is
+   non-zero, the target is allowed -but not required- to skip reporting
+   arrival of the signal to the GDB core by returning from target_wait,
+   and to pass the signal directly to the inferior instead.
+
+   However, if the target is hardware single-stepping a thread that is
+   about to receive a signal, it needs to be reported in any case, even
+   if mentioned in a previous target_pass_signals call.   */
+
+extern void target_pass_signals (int nsig, unsigned char *pass_signals);
 
 /* Check to see if a thread is still alive.  */
 

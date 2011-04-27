@@ -276,6 +276,11 @@ static unsigned char *signal_stop;
 static unsigned char *signal_print;
 static unsigned char *signal_program;
 
+/* Table of signals that the target may silently handle.
+   This is automatically determined from the flags above,
+   and simply cached here.  */
+static unsigned char *signal_pass;
+
 #define SET_SIGS(nsigs,sigs,flags) \
   do { \
     int signum = (nsigs); \
@@ -1786,6 +1791,18 @@ a command like `return' or `jump' to continue execution."));
       /* Avoid confusing the next resume, if the next stop/resume
 	 happens to apply to another thread.  */
       tp->suspend.stop_signal = TARGET_SIGNAL_0;
+
+      /* Advise target which signals may be handled silently.  If we have
+	 removed breakpoints because we are stepping over one (which can
+	 happen only if we are not using displaced stepping), we need to
+	 receive all signals to avoid accidentally skipping a breakpoint
+	 during execution of a signal handler.  */
+      if ((step || singlestep_breakpoints_inserted_p)
+	  && tp->control.trap_expected
+	  && !use_displaced_stepping (gdbarch))
+	target_pass_signals (0, NULL);
+      else
+	target_pass_signals ((int) TARGET_SIGNAL_LAST, signal_pass);
 
       target_resume (resume_ptid, step, sig);
     }
@@ -3818,7 +3835,12 @@ handle_inferior_event (struct execution_control_state *ecs)
       int hw_step = 1;
 
       if (!target_have_steppable_watchpoint)
-	remove_breakpoints ();
+	{
+	  remove_breakpoints ();
+	  /* See comment in resume why we need to stop bypassing signals
+	     while breakpoints have been removed.  */
+	  target_pass_signals (0, NULL);
+	}
 	/* Single step */
       hw_step = maybe_software_singlestep (gdbarch, stop_pc);
       target_resume (ecs->ptid, hw_step, TARGET_SIGNAL_0);
@@ -4090,6 +4112,8 @@ process_event_stop_test:
 
 	  insert_step_resume_breakpoint_at_frame (frame);
 	  ecs->event_thread->step_after_step_resume_breakpoint = 1;
+	  /* Reset trap_expected to ensure breakpoints are re-inserted.  */
+	  ecs->event_thread->control.trap_expected = 0;
 	  keep_going (ecs);
 	  return;
 	}
@@ -4117,6 +4141,8 @@ process_event_stop_test:
                                 "single-step range\n");
 
 	  insert_step_resume_breakpoint_at_frame (frame);
+	  /* Reset trap_expected to ensure breakpoints are re-inserted.  */
+	  ecs->event_thread->control.trap_expected = 0;
 	  keep_going (ecs);
 	  return;
 	}
@@ -5853,12 +5879,29 @@ signal_pass_state (int signo)
   return signal_program[signo];
 }
 
+static void
+signal_cache_update (int signo)
+{
+  if (signo == -1)
+    {
+      for (signo = 0; signo < (int) TARGET_SIGNAL_LAST; signo++)
+	signal_cache_update (signo);
+
+      return;
+    }
+
+  signal_pass[signo] = (signal_stop[signo] == 0
+			&& signal_print[signo] == 0
+			&& signal_program[signo] == 1);
+}
+
 int
 signal_stop_update (int signo, int state)
 {
   int ret = signal_stop[signo];
 
   signal_stop[signo] = state;
+  signal_cache_update (signo);
   return ret;
 }
 
@@ -5868,6 +5911,7 @@ signal_print_update (int signo, int state)
   int ret = signal_print[signo];
 
   signal_print[signo] = state;
+  signal_cache_update (signo);
   return ret;
 }
 
@@ -5877,6 +5921,7 @@ signal_pass_update (int signo, int state)
   int ret = signal_program[signo];
 
   signal_program[signo] = state;
+  signal_cache_update (signo);
   return ret;
 }
 
@@ -6068,7 +6113,8 @@ Are you sure you want to change it? "),
   for (signum = 0; signum < nsigs; signum++)
     if (sigs[signum])
       {
-	target_notice_signals (inferior_ptid);
+	signal_cache_update (-1);
+	target_pass_signals ((int) TARGET_SIGNAL_LAST, signal_pass);
 
 	if (from_tty)
 	  {
@@ -6920,6 +6966,8 @@ leave it stopped or free to run as needed."),
     xmalloc (sizeof (signal_print[0]) * numsigs);
   signal_program = (unsigned char *)
     xmalloc (sizeof (signal_program[0]) * numsigs);
+  signal_pass = (unsigned char *)
+    xmalloc (sizeof (signal_program[0]) * numsigs);
   for (i = 0; i < numsigs; i++)
     {
       signal_stop[i] = 1;
@@ -6962,6 +7010,9 @@ leave it stopped or free to run as needed."),
   signal_print[TARGET_SIGNAL_WAITING] = 0;
   signal_stop[TARGET_SIGNAL_CANCEL] = 0;
   signal_print[TARGET_SIGNAL_CANCEL] = 0;
+
+  /* Update cached state.  */
+  signal_cache_update (-1);
 
   add_setshow_zinteger_cmd ("stop-on-solib-events", class_support,
 			    &stop_on_solib_events, _("\

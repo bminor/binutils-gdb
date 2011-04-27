@@ -1,3 +1,61 @@
+2011-04-27  Ulrich Weigand  <ulrich.weigand@linaro.org>
+
+	* target.h (struct target_ops): Remove to_notice_signals;
+	add to_pass_signals.
+	(target_notice_signals): Remove.
+	(target_pass_signals): Add prototype.
+	* target.c (update_current_target): Remove to_notice_signals;
+	mention to_pass_signals.
+	(target_pass_signals): New function.
+	(debug_to_notice_signals): Remove.
+	(setup_target_debug): Do not install debug_to_notice_signals.
+
+	* infrun.c (signal_pass): New global.
+	(resume): Call target_pass_signals.
+	(handle_inferior_event): Report all signals while stepping over
+	non-steppable watchpoint.  Reset trap_expected to ensure breakpoints
+	are re-inserted when stepping over a signal handler.
+	(signal_cache_update): New function.
+	(signal_stop_update): Call it.
+	(signal_print_update): Likewise.
+	(signal_pass_update): Likewise.
+	(handle_command): Call signal_cache_update and target_pass_signals
+	instead of target_notice_signals.
+	(_initialize_infrun): Initialize signal_pass.
+
+	* linux-nat.c (pass_mask): New global.
+	(linux_nat_pass_signals): New function.
+	(linux_nat_create_inferior): Report all signals initially.
+	(linux_nat_attach): Likewise.
+	(linux_nat_resume): Use pass_mask to decide whether to directly
+	handle an inferior signal.
+	(linux_nat_wait_1): Likewise.
+	(linux_nat_add_target): Install to_pass_signals callback.
+
+	* nto-procfs.c (notice_signals): Remove.
+	(procfs_resume): Do not call notice_signals.
+	(procfs_notice_signals): Remove.
+	(procfs_pass_signals): New function.
+	(init_procfs_ops): Install to_pass_signals callback instead of
+	to_notice_signals callback.
+	(_initialize_procfs): Report all signals initially.
+
+	* procfs.c (procfs_notice_signals): Remove.
+	(procfs_pass_signals): New function.
+	(procfs_target): Install to_pass_signals callback instead of
+	to_notice_signals callback.
+	(register_gdb_signals): Remove.
+	(procfs_debug_inferior): Report all signals initially.
+	(procfs_init_inferior): Remove redundant register_gdb_signals call.
+
+	* remote.c (remote_pass_signals): Add numsigs and pass_signals
+	parameters; use them instead of calling signal_..._state routines.
+	(remote_notice_signals): Remove.
+	(remote_start_remote): Report all signals initially.
+	(remote_resume): Do not call remote_pass_signals.
+	(_initialize_remote): Install to_pass_signals callback instead of
+	to_notice_signals callback.
+
 2011-04-27  Pedro Alves  <pedro@codesourcery.com>
 
 	* breakpoint.c (user_settable_breakpoint): Delete.

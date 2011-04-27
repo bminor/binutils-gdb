@@ -120,7 +120,7 @@ static void procfs_fetch_registers (struct target_ops *,
 				    struct regcache *, int);
 static void procfs_store_registers (struct target_ops *,
 				    struct regcache *, int);
-static void procfs_notice_signals (ptid_t);
+static void procfs_pass_signals (ptid_t, int, unsigned char *);
 static void procfs_kill_inferior (struct target_ops *ops);
 static void procfs_mourn_inferior (struct target_ops *ops);
 static void procfs_create_inferior (struct target_ops *, char *,
@@ -201,7 +201,7 @@ procfs_target (void)
   t->to_store_registers = procfs_store_registers;
   t->to_xfer_partial = procfs_xfer_partial;
   t->deprecated_xfer_memory = procfs_xfer_memory;
-  t->to_notice_signals = procfs_notice_signals;
+  t->to_pass_signals = procfs_pass_signals;
   t->to_files_info = procfs_files_info;
   t->to_stop = procfs_stop;
 
@@ -3147,7 +3147,6 @@ proc_iterate_over_threads (procinfo *pi,
 
 static ptid_t do_attach (ptid_t ptid);
 static void do_detach (int signo);
-static int register_gdb_signals (procinfo *, gdb_sigset_t *);
 static void proc_trace_syscalls_1 (procinfo *pi, int syscallnum,
 				   int entry_or_exit, int mode, int from_tty);
 
@@ -3186,9 +3185,9 @@ procfs_debug_inferior (procinfo *pi)
   if (!proc_set_traced_faults  (pi, &traced_faults))
     return __LINE__;
 
-  /* Register to trace selected signals in the child.  */
-  premptyset (&traced_signals);
-  if (!register_gdb_signals (pi, &traced_signals))
+  /* Initially, register to trace all signals in the child.  */
+  prfillset (&traced_signals);
+  if (!proc_set_traced_signals (pi, &traced_signals))
     return __LINE__;
 
 
@@ -4464,40 +4463,26 @@ procfs_resume (struct target_ops *ops,
     }
 }
 
-/* Traverse the list of signals that GDB knows about (see "handle"
-   command), and arrange for the target to be stopped or not,
-   according to these settings.  Returns non-zero for success, zero
-   for failure.  */
-
-static int
-register_gdb_signals (procinfo *pi, gdb_sigset_t *signals)
-{
-  int signo;
-
-  for (signo = 0; signo < NSIG; signo ++)
-    if (signal_stop_state  (target_signal_from_host (signo)) == 0 &&
-	signal_print_state (target_signal_from_host (signo)) == 0 &&
-	signal_pass_state  (target_signal_from_host (signo)) == 1)
-      gdb_prdelset (signals, signo);
-    else
-      gdb_praddset (signals, signo);
-
-  return proc_set_traced_signals (pi, signals);
-}
-
 /* Set up to trace signals in the child process.  */
 
 static void
-procfs_notice_signals (ptid_t ptid)
+procfs_pass_signals (int numsigs, unsigned char *pass_signals)
 {
   gdb_sigset_t signals;
-  procinfo *pi = find_procinfo_or_die (PIDGET (ptid), 0);
+  procinfo *pi = find_procinfo_or_die (PIDGET (inferior_ptid), 0);
+  int signo;
 
-  if (proc_get_traced_signals (pi, &signals) &&
-      register_gdb_signals    (pi, &signals))
-    return;
-  else
-    proc_error (pi, "notice_signals", __LINE__);
+  prfillset (&signals);
+
+  for (signo = 0; signo < NSIG; signo++)
+    {
+      int target_signo = target_signal_from_host (signo);
+      if (target_signo < numsigs && pass_signals[target_signo])
+	gdb_prdelset (&signals, signo);
+    }
+
+  if (!proc_set_traced_signals (pi, &signals))
+    proc_error (pi, "pass_signals", __LINE__);
 }
 
 /* Print status information about the child process.  */
@@ -4678,11 +4663,6 @@ procfs_init_inferior (struct target_ops *ops, int pid)
     proc_error (pi, "init_inferior, get_traced_sysentry", __LINE__);
   if (!proc_get_traced_sysexit  (pi, pi->saved_exitset))
     proc_error (pi, "init_inferior, get_traced_sysexit", __LINE__);
-
-  /* Register to trace selected signals in the child.  */
-  prfillset (&signals);
-  if (!register_gdb_signals (pi, &signals))
-    proc_error (pi, "init_inferior, register_signals", __LINE__);
 
   if ((fail = procfs_debug_inferior (pi)) != 0)
     proc_error (pi, "init_inferior (procfs_debug_inferior)", fail);

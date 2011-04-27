@@ -1596,20 +1596,17 @@ static char *last_pass_packet;
    it can simply pass through to the inferior without reporting.  */
 
 static void
-remote_pass_signals (void)
+remote_pass_signals (int numsigs, unsigned char *pass_signals)
 {
   if (remote_protocol_packets[PACKET_QPassSignals].support != PACKET_DISABLE)
     {
       char *pass_packet, *p;
-      int numsigs = (int) TARGET_SIGNAL_LAST;
       int count = 0, i;
 
       gdb_assert (numsigs < 256);
       for (i = 0; i < numsigs; i++)
 	{
-	  if (signal_stop_state (i) == 0
-	      && signal_print_state (i) == 0
-	      && signal_pass_state (i) == 1)
+	  if (pass_signals[i])
 	    count++;
 	}
       pass_packet = xmalloc (count * 3 + strlen ("QPassSignals:") + 1);
@@ -1617,9 +1614,7 @@ remote_pass_signals (void)
       p = pass_packet + strlen (pass_packet);
       for (i = 0; i < numsigs; i++)
 	{
-	  if (signal_stop_state (i) == 0
-	      && signal_print_state (i) == 0
-	      && signal_pass_state (i) == 1)
+	  if (pass_signals[i])
 	    {
 	      if (i >= 16)
 		*p++ = tohex (i >> 4);
@@ -1647,14 +1642,6 @@ remote_pass_signals (void)
       else
 	xfree (pass_packet);
     }
-}
-
-static void
-remote_notice_signals (ptid_t ptid)
-{
-  /* Update the remote on signals to silently pass, if they've
-     changed.  */
-  remote_pass_signals ();
 }
 
 /* If PTID is MAGIC_NULL_PTID, don't set any thread.  If PTID is
@@ -3378,10 +3365,8 @@ remote_start_remote (int from_tty, struct target_ops *target, int extended_p)
 	 the stop reply queue.  */
       gdb_assert (wait_status == NULL);
 
-      /* Update the remote on signals to silently pass, or more
-	 importantly, which to not ignore, in case a previous session
-	 had set some different set of signals to be ignored.  */
-      remote_pass_signals ();
+      /* Report all signals during attach/startup.  */
+      remote_pass_signals (0, NULL);
     }
 
   /* If we connected to a live target, do some additional setup.  */
@@ -4548,9 +4533,6 @@ remote_resume (struct target_ops *ops,
 
   last_sent_signal = siggnal;
   last_sent_step = step;
-
-  /* Update the inferior on signals to silently pass, if they've changed.  */
-  remote_pass_signals ();
 
   /* The vCont packet doesn't need to specify threads via Hc.  */
   /* No reverse support (yet) for vCont.  */
@@ -10293,7 +10275,7 @@ Specify the serial device it is connected to\n\
   remote_ops.to_kill = remote_kill;
   remote_ops.to_load = generic_load;
   remote_ops.to_mourn_inferior = remote_mourn;
-  remote_ops.to_notice_signals = remote_notice_signals;
+  remote_ops.to_pass_signals = remote_pass_signals;
   remote_ops.to_thread_alive = remote_thread_alive;
   remote_ops.to_find_new_threads = remote_threads_info;
   remote_ops.to_pid_to_str = remote_pid_to_str;

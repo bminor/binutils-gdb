@@ -149,8 +149,6 @@ static void debug_to_load (char *, int);
 
 static int debug_to_can_run (void);
 
-static void debug_to_notice_signals (ptid_t);
-
 static void debug_to_stop (ptid_t);
 
 /* Pointer to array of target architecture structures; the size of the
@@ -625,7 +623,7 @@ update_current_target (void)
       INHERIT (to_has_exited, t);
       /* Do not inherit to_mourn_inferior.  */
       INHERIT (to_can_run, t);
-      INHERIT (to_notice_signals, t);
+      /* Do not inherit to_pass_signals.  */
       /* Do not inherit to_thread_alive.  */
       /* Do not inherit to_find_new_threads.  */
       /* Do not inherit to_pid_to_str.  */
@@ -793,9 +791,6 @@ update_current_target (void)
 	    return_zero);
   de_fault (to_can_run,
 	    return_zero);
-  de_fault (to_notice_signals,
-	    (void (*) (ptid_t))
-	    target_ignore);
   de_fault (to_extra_thread_info,
 	    (char *(*) (struct thread_info *))
 	    return_zero);
@@ -2587,6 +2582,37 @@ target_resume (ptid_t ptid, int step, enum target_signal signal)
 
   noprocess ();
 }
+
+void
+target_pass_signals (int numsigs, unsigned char *pass_signals)
+{
+  struct target_ops *t;
+
+  for (t = current_target.beneath; t != NULL; t = t->beneath)
+    {
+      if (t->to_pass_signals != NULL)
+	{
+	  if (targetdebug)
+	    {
+	      int i;
+
+	      fprintf_unfiltered (gdb_stdlog, "target_pass_signals (%d, {",
+				  numsigs);
+
+	      for (i = 0; i < numsigs; i++)
+		if (pass_signals[i])
+		  fprintf_unfiltered (gdb_stdlog, " %s",
+				      target_signal_to_name (i));
+
+	      fprintf_unfiltered (gdb_stdlog, " })\n");
+	    }
+
+	  (*t->to_pass_signals) (numsigs, pass_signals);
+	  return;
+	}
+    }
+}
+
 /* Look through the list of possible targets for a target that can
    follow forks.  */
 
@@ -3914,15 +3940,6 @@ debug_to_can_run (void)
   return retval;
 }
 
-static void
-debug_to_notice_signals (ptid_t ptid)
-{
-  debug_target.to_notice_signals (ptid);
-
-  fprintf_unfiltered (gdb_stdlog, "target_notice_signals (%d)\n",
-                      PIDGET (ptid));
-}
-
 static struct gdbarch *
 debug_to_thread_architecture (struct target_ops *ops, ptid_t ptid)
 {
@@ -4010,7 +4027,6 @@ setup_target_debug (void)
   current_target.to_remove_exec_catchpoint = debug_to_remove_exec_catchpoint;
   current_target.to_has_exited = debug_to_has_exited;
   current_target.to_can_run = debug_to_can_run;
-  current_target.to_notice_signals = debug_to_notice_signals;
   current_target.to_stop = debug_to_stop;
   current_target.to_rcmd = debug_to_rcmd;
   current_target.to_pid_to_exec_file = debug_to_pid_to_exec_file;
