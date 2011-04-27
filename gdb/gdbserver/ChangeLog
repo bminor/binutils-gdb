@@ -1,3 +1,11 @@
+2011-04-27  Nathan Froyd  <froydnj@codesourcery.com>
+
+	* linux-x86-low.c (amd64_emit_const): Call memcpy instead of
+	casting pointers.
+	(amd64_emit_reg, amd64_emit_int_call_1, amd64_emit_void_call_2):
+	(i386_emit_const, i386_emit_reg, i386_emit_int_call_1):
+	(i386_emit_void_call_2): Likewise.
+
 2011-04-26  Yao Qi  <yao@codesourcery.com>
 
         * linux-low.c: Move common macros to linux-ptrace.h.
