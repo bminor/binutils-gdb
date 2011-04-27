@@ -1,3 +1,9 @@
+2011-04-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* lib/gdb.exp (gdb_test_multiple): Eror on newline in $message.
+	* gdb.base/ifelse.exp: Give names to the "" tests as `if true else
+	false #1', `if true else false #2' and `if true else false #3'.
+
 2011-04-27  Ulrich Weigand  <ulrich.weigand@linaro.org>
 
 	* gdb.base/annota1.exp: Accept breakpoints-invalid annotation
