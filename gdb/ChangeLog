@@ -1,3 +1,10 @@
+2011-04-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Format the code for the next patch.
+	* dwarf2read.c (struct mapped_index): Include delimiting newlines.
+	* utils.c (strcmp_iw_ordered): Reformat the code for the next patch.
+	New variables c1 and c2.
+
 2011-04-27  Ulrich Weigand  <ulrich.weigand@linaro.org>
 
 	* infrun.c (proceed): Do not single-step into signal delivery

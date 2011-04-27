@@ -151,14 +151,19 @@ struct mapped_index
 {
   /* The total length of the buffer.  */
   off_t total_size;
+
   /* A pointer to the address table data.  */
   const gdb_byte *address_table;
+
   /* Size of the address table data in bytes.  */
   offset_type address_table_size;
+
   /* The symbol table, implemented as a hash table.  */
   const offset_type *symbol_table;
+
   /* Size in slots, each slot is 2 offset_types.  */
   offset_type symbol_table_slots;
+
   /* A pointer to the constant pool.  */
   const char *constant_pool;
 };

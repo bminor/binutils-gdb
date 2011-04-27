@@ -3023,47 +3023,54 @@ strcmp_iw (const char *string1, const char *string2)
 int
 strcmp_iw_ordered (const char *string1, const char *string2)
 {
-  while ((*string1 != '\0') && (*string2 != '\0'))
+  /* Formatting stub.  */
+  if (1)
     {
-      while (isspace (*string1))
-	{
-	  string1++;
-	}
-      while (isspace (*string2))
-	{
-	  string2++;
-	}
-      if (*string1 != *string2)
-	{
-	  break;
-	}
-      if (*string1 != '\0')
-	{
-	  string1++;
-	  string2++;
-	}
-    }
+      /* C1 and C2 are valid only if *string1 != '\0' && *string2 != '\0'.
+	 Provide stub characters if we are already at the end of one of the
+	 strings.  */
+      char c1 = 'X', c2 = 'X';
 
-  switch (*string1)
-    {
-      /* Characters are non-equal unless they're both '\0'; we want to
-	 make sure we get the comparison right according to our
-	 comparison in the cases where one of them is '\0' or '('.  */
-    case '\0':
-      if (*string2 == '\0')
-	return 0;
-      else
-	return -1;
-    case '(':
-      if (*string2 == '\0')
-	return 1;
-      else
-	return -1;
-    default:
-      if (*string2 == '(')
-	return 1;
-      else
-	return *string1 - *string2;
+      while (*string1 != '\0' && *string2 != '\0')
+	{
+	  while (isspace (*string1))
+	    string1++;
+	  while (isspace (*string2))
+	    string2++;
+
+	      c1 = *string1;
+	      c2 = *string2;
+	  if (c1 != c2)
+	    break;
+
+	  if (*string1 != '\0')
+	    {
+	      string1++;
+	      string2++;
+	    }
+	}
+
+      switch (*string1)
+	{
+	  /* Characters are non-equal unless they're both '\0'; we want to
+	     make sure we get the comparison right according to our
+	     comparison in the cases where one of them is '\0' or '('.  */
+	case '\0':
+	  if (*string2 == '\0')
+	    return 0;
+	  else
+	    return -1;
+	case '(':
+	  if (*string2 == '\0')
+	    return 1;
+	  else
+	    return -1;
+	default:
+	  if (*string2 == '\0' || *string2 == '(')
+	    return 1;
+	  else
+	    return c1 - c2;
+	}
     }
 }
 
