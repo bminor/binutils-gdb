@@ -1,3 +1,12 @@
+2011-04-27  Ulrich Weigand  <ulrich.weigand@linaro.org>
+
+	* infrun.c (proceed): Do not single-step into signal delivery
+	when stepping off a breakpoint location.
+	(insert_step_resume_breakpoint_at_frame): Move prototype earlier.
+	(insert_step_resume_breakpoint_at_caller): Likewise.
+	(insert_step_resume_breakpoint_at_sal): Likewise.
+	(insert_longjmp_resume_breakpoint): Likewise.
+
 2011-04-27  Yao Qi  <yao@codesourcery.com>
 
 	* common/linux-ptrace.h: Remove include <sys/wait.h>.

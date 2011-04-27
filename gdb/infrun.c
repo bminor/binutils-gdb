@@ -99,6 +99,16 @@ void _initialize_infrun (void);
 
 void nullify_last_target_wait_ptid (void);
 
+static void insert_step_resume_breakpoint_at_frame (struct frame_info *);
+
+static void insert_step_resume_breakpoint_at_caller (struct frame_info *);
+
+static void insert_step_resume_breakpoint_at_sal (struct gdbarch *,
+						  struct symtab_and_line ,
+						  struct frame_id);
+
+static void insert_longjmp_resume_breakpoint (struct gdbarch *, CORE_ADDR);
+
 /* When set, stop the 'step' command if we enter a function which has
    no line number information.  The normal behavior is that we step
    over such function.  */
@@ -2054,24 +2064,6 @@ proceed (CORE_ADDR addr, enum target_signal siggnal, int step)
   /* prepare_to_proceed may change the current thread.  */
   tp = inferior_thread ();
 
-  if (oneproc)
-    {
-      tp->control.trap_expected = 1;
-      /* If displaced stepping is enabled, we can step over the
-	 breakpoint without hitting it, so leave all breakpoints
-	 inserted.  Otherwise we need to disable all breakpoints, step
-	 one instruction, and then re-add them when that step is
-	 finished.  */
-      if (!use_displaced_stepping (gdbarch))
-	remove_breakpoints ();
-    }
-
-  /* We can insert breakpoints if we're not trying to step over one,
-     or if we are stepping over one but we're using displaced stepping
-     to do so.  */
-  if (! tp->control.trap_expected || use_displaced_stepping (gdbarch))
-    insert_breakpoints ();
-
   if (!non_stop)
     {
       /* Pass the last stop signal to the thread we're resuming,
@@ -2140,6 +2132,42 @@ proceed (CORE_ADDR addr, enum target_signal siggnal, int step)
 
   /* Reset to normal state.  */
   init_infwait_state ();
+
+  /* Stepping over a breakpoint while at the same time delivering a signal
+     has a problem: we cannot use displaced stepping, but we also cannot
+     use software single-stepping, because we do not know where execution
+     will continue if a signal handler is installed.
+
+     On the other hand, if there is a signal handler we'd have to step
+     over it anyway.  So what we do instead is to install a step-resume
+     handler at the current address right away, deliver the signal without
+     stepping, and once we arrive back at the step-resume breakpoint, step
+     once more over the original breakpoint we wanted to step over.  */
+  if (oneproc && tp->suspend.stop_signal != TARGET_SIGNAL_0
+      && execution_direction != EXEC_REVERSE)
+    {
+      insert_step_resume_breakpoint_at_frame (get_current_frame ());
+      tp->step_after_step_resume_breakpoint = 1;
+      oneproc = 0;
+    }
+
+  if (oneproc)
+    {
+      tp->control.trap_expected = 1;
+      /* If displaced stepping is enabled, we can step over the
+	 breakpoint without hitting it, so leave all breakpoints
+	 inserted.  Otherwise we need to disable all breakpoints, step
+	 one instruction, and then re-add them when that step is
+	 finished.  */
+      if (!use_displaced_stepping (gdbarch))
+	remove_breakpoints ();
+    }
+
+  /* We can insert breakpoints if we're not trying to step over one,
+     or if we are stepping over one but we're using displaced stepping
+     to do so.  */
+  if (! tp->control.trap_expected || use_displaced_stepping (gdbarch))
+    insert_breakpoints ();
 
   /* Resume inferior.  */
   resume (oneproc || step || bpstat_should_step (), tp->suspend.stop_signal);
@@ -2257,12 +2285,6 @@ static void handle_step_into_function (struct gdbarch *gdbarch,
 				       struct execution_control_state *ecs);
 static void handle_step_into_function_backward (struct gdbarch *gdbarch,
 						struct execution_control_state *ecs);
-static void insert_step_resume_breakpoint_at_frame (struct frame_info *);
-static void insert_step_resume_breakpoint_at_caller (struct frame_info *);
-static void insert_step_resume_breakpoint_at_sal (struct gdbarch *,
-						  struct symtab_and_line ,
-						  struct frame_id);
-static void insert_longjmp_resume_breakpoint (struct gdbarch *, CORE_ADDR);
 static void check_exception_resume (struct execution_control_state *,
 				    struct frame_info *, struct symbol *);
 
