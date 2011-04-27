@@ -1056,19 +1056,6 @@ lookup_symbol_in_language (const char *name, const struct block *block,
 	}
     }
 
-  if (case_sensitivity == case_sensitive_off)
-    {
-      char *copy;
-      int len, i;
-
-      len = strlen (name);
-      copy = (char *) alloca (len + 1);
-      for (i= 0; i < len; i++)
-        copy[i] = tolower (name[i]);
-      copy[len] = 0;
-      modified_name = copy;
-    }
-
   returnval = lookup_symbol_aux (modified_name, block, domain, lang,
 				 is_a_field_of_this);
   do_cleanups (cleanup);
@@ -3069,7 +3056,9 @@ search_symbols (char *regexp, enum search_domain kind,
 	    }
 	}
 
-      errcode = regcomp (&datum.preg, regexp, REG_NOSUB);
+      errcode = regcomp (&datum.preg, regexp,
+			 REG_NOSUB | (case_sensitivity == case_sensitive_off
+				      ? REG_ICASE : 0));
       if (errcode != 0)
 	{
 	  char *err = get_regcomp_error (errcode, &datum.preg);
@@ -3519,10 +3508,13 @@ completion_list_add_name (char *symname, char *sym_text, int sym_text_len,
 			  char *text, char *word)
 {
   int newsize;
+  int (*ncmp) (const char *, const char *, size_t);
+
+  ncmp = (case_sensitivity == case_sensitive_on ? strncmp : strncasecmp);
 
   /* Clip symbols that cannot match.  */
 
-  if (strncmp (symname, sym_text, sym_text_len) != 0)
+  if (ncmp (symname, sym_text, sym_text_len) != 0)
     {
       return;
     }

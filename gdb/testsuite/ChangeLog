@@ -1,5 +1,13 @@
 2011-04-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* gdb.base/fortran-sym-case.c: New file.
+	* gdb.base/fortran-sym-case.exp: New file.
+	* gdb.dwarf2/dw2-case-insensitive-debug.S: New file.
+	* gdb.dwarf2/dw2-case-insensitive.c: New file.
+	* gdb.dwarf2/dw2-case-insensitive.exp: New file.
+
+2011-04-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* lib/gdb.exp (gdb_test_multiple): Eror on newline in $message.
 	* gdb.base/ifelse.exp: Give names to the "" tests as `if true else
 	false #1', `if true else false #2' and `if true else false #3'.

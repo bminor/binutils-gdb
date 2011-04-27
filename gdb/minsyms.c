@@ -239,11 +239,16 @@ lookup_minimal_symbol (const char *name, const char *sfile,
 
 		  if (pass == 1)
 		    {
-		      match = strcmp (SYMBOL_LINKAGE_NAME (msymbol),
-				      modified_name) == 0;
+		      int (*cmp) (const char *, const char *);
+
+		      cmp = (case_sensitivity == case_sensitive_on
+		             ? strcmp : strcasecmp);
+		      match = cmp (SYMBOL_LINKAGE_NAME (msymbol),
+				   modified_name) == 0;
 		    }
 		  else
 		    {
+		      /* The function respects CASE_SENSITIVITY.  */
 		      match = SYMBOL_MATCHES_SEARCH_NAME (msymbol,
 							  modified_name);
 		    }

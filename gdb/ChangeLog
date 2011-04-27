@@ -1,5 +1,35 @@
 2011-04-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Case insensitive lookups implementation.
+	* dwarf2read.c: Include ctype.h.
+	(struct mapped_index): New field version.
+	(mapped_index_string_hash): New parameter index_version.  New comment
+	for it.  Call tolower appropriately.
+	(find_slot_in_mapped_hash): New variable cmp, initialize it, use it.
+	Choose the right index version for mapped_index_string_hash.
+	(dwarf2_read_index): Support also the index version 5.  Initialize the
+	new struct mapped_index field version.
+	(hash_strtab_entry): Pass INT_MAX for the new parameter, explain why.
+	(find_slot): Explain the version needs.  Pass INT_MAX for the new
+	parameter.
+	(write_psymtabs_to_index): Produce version 5.
+	* minsyms.c (lookup_minimal_symbol): New variable cmp, initialize it,
+	use it.  New comment for SYMBOL_MATCHES_SEARCH_NAME.
+	* psymtab.c (lookup_partial_symbol): Find the
+	SYMBOL_MATCHES_SEARCH_NAME start of the found block of matching
+	entries.
+	* symtab.c (lookup_symbol_in_language): Remove the case_sensitive_off
+	NAME lowercasing.
+	(search_symbols): Pass REG_ICASE to regcomp for case_sensitive_off.
+	(completion_list_add_name): New variable ncmp, initialize it, use it.
+	* symtab.h (SYMBOL_HASH_NEXT): Always call tolower.
+	* utils.c (strcmp_iw): Support case_sensitive_off.
+	(strcmp_iw_ordered): Sort in a way compatible with case_sensitive_off.
+	New function comment part.  New variables saved_string1,
+	saved_string2 and case_pass.  Add a proper second pass.
+
+2011-04-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Replace re_comp/re_exec by regcomp/regexec.
 	* symtab.c (struct search_symbols_data): New fields preg, preg_p.
 	(search_symbols_name_matches): Use them, use regexec.

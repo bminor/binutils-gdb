@@ -149,6 +149,9 @@ DEF_VEC_I (offset_type);
    a comment by the code that writes the index.  */
 struct mapped_index
 {
+  /* Index data format version.  */
+  int version;
+
   /* The total length of the buffer.  */
   off_t total_size;
 
@@ -1972,17 +1975,23 @@ create_addrmap_from_index (struct objfile *objfile, struct mapped_index *index)
    SYMBOL_HASH_NEXT, but we keep a separate copy to maintain control over the
    implementation.  This is necessary because the hash function is tied to the
    format of the mapped index file.  The hash values do not have to match with
-   SYMBOL_HASH_NEXT.  */
+   SYMBOL_HASH_NEXT.
+   
+   Use INT_MAX for INDEX_VERSION if you generate the current index format.  */
 
 static hashval_t
-mapped_index_string_hash (const void *p)
+mapped_index_string_hash (int index_version, const void *p)
 {
   const unsigned char *str = (const unsigned char *) p;
   hashval_t r = 0;
   unsigned char c;
 
   while ((c = *str++) != 0)
-    r = r * 67 + c - 113;
+    {
+      if (index_version >= 5)
+	c = tolower (c);
+      r = r * 67 + c - 113;
+    }
 
   return r;
 }
@@ -1998,6 +2007,7 @@ find_slot_in_mapped_hash (struct mapped_index *index, const char *name,
   struct cleanup *back_to = make_cleanup (null_cleanup, 0);
   offset_type hash;
   offset_type slot, step;
+  int (*cmp) (const char *, const char *);
 
   if (current_language->la_language == language_cplus
       || current_language->la_language == language_java
@@ -2020,9 +2030,17 @@ find_slot_in_mapped_hash (struct mapped_index *index, const char *name,
 	}
     }
 
-  hash = mapped_index_string_hash (name);
+  /* Index version 4 did not support case insensitive searches.  But the
+     indexes for case insensitive languages are built in lowercase, therefore
+     simulate our NAME being searched is also lowercased.  */
+  hash = mapped_index_string_hash ((index->version == 4
+                                    && case_sensitivity == case_sensitive_off
+				    ? 5 : index->version),
+				   name);
+
   slot = hash & (index->symbol_table_slots - 1);
   step = ((hash * 17) & (index->symbol_table_slots - 1)) | 1;
+  cmp = (case_sensitivity == case_sensitive_on ? strcmp : strcasecmp);
 
   for (;;)
     {
@@ -2036,7 +2054,7 @@ find_slot_in_mapped_hash (struct mapped_index *index, const char *name,
 	}
 
       str = index->constant_pool + MAYBE_SWAP (index->symbol_table[i]);
-      if (!strcmp (name, str))
+      if (!cmp (name, str))
 	{
 	  *vec_out = (offset_type *) (index->constant_pool
 				      + MAYBE_SWAP (index->symbol_table[i + 1]));
@@ -2080,15 +2098,17 @@ dwarf2_read_index (struct objfile *objfile)
   /* Versions earlier than 3 emitted every copy of a psymbol.  This
      causes the index to behave very poorly for certain requests.  Version 3
      contained incomplete addrmap.  So, it seems better to just ignore such
-     indices.  */
+     indices.  Index version 4 uses a different hash function than index
+     version 5 and later.  */
   if (version < 4)
     return 0;
   /* Indexes with higher version than the one supported by GDB may be no
      longer backward compatible.  */
-  if (version > 4)
+  if (version > 5)
     return 0;
 
   map = OBSTACK_ZALLOC (&objfile->objfile_obstack, struct mapped_index);
+  map->version = version;
   map->total_size = dwarf2_per_objfile->gdb_index.size;
 
   metadata = (offset_type *) (addr + sizeof (offset_type));
@@ -15256,13 +15276,16 @@ struct strtab_entry
   const char *str;
 };
 
-/* Hash function for a strtab_entry.  */
+/* Hash function for a strtab_entry.
+
+   Function is used only during write_hash_table so no index format backward
+   compatibility is needed.  */
 
 static hashval_t
 hash_strtab_entry (const void *e)
 {
   const struct strtab_entry *entry = e;
-  return mapped_index_string_hash (entry->str);
+  return mapped_index_string_hash (INT_MAX, entry->str);
 }
 
 /* Equality function for a strtab_entry.  */
@@ -15400,12 +15423,15 @@ cleanup_mapped_symtab (void *p)
 }
 
 /* Find a slot in SYMTAB for the symbol NAME.  Returns a pointer to
-   the slot.  */
+   the slot.
+   
+   Function is used only during write_hash_table so no index format backward
+   compatibility is needed.  */
 
 static struct symtab_index_entry **
 find_slot (struct mapped_symtab *symtab, const char *name)
 {
-  offset_type index, step, hash = mapped_index_string_hash (name);
+  offset_type index, step, hash = mapped_index_string_hash (INT_MAX, name);
 
   index = hash & (symtab->size - 1);
   step = ((hash * 17) & (symtab->size - 1)) | 1;
@@ -15934,7 +15960,7 @@ write_psymtabs_to_index (struct objfile *objfile, const char *dir)
   total_len = size_of_contents;
 
   /* The version number.  */
-  val = MAYBE_SWAP (4);
+  val = MAYBE_SWAP (5);
   obstack_grow (&contents, &val, sizeof (val));
 
   /* The offset of the CU list from the start of the file.  */

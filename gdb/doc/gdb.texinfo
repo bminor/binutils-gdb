@@ -36993,7 +36993,8 @@ unless otherwise noted:
 
 @enumerate
 @item
-The version number, currently 4.  Versions 1, 2 and 3 are obsolete.
+The version number, currently 5.  Versions 1, 2 and 3 are obsolete.
+Version 4 differs by its hashing function.
 
 @item
 The offset, from the start of the file, of the CU list.
@@ -37061,9 +37062,18 @@ valid index for both a string and a CU vector.
 The hash value for a table entry is computed by applying an
 iterative hash function to the symbol's name.  Starting with an
 initial value of @code{r = 0}, each (unsigned) character @samp{c} in
-the string is incorporated into the hash using the formula
-@code{r = r * 67 + c - 113}.  The terminating @samp{\0} is not
-incorporated into the hash.
+the string is incorporated into the hash using the formula depending on the
+index version:
+
+@table @asis
+@item Version 4
+The formula is @code{r = r * 67 + c - 113}.
+
+@item Version 5
+The formula is @code{r = r * 67 + tolower (c) - 113}.
+@end table
+
+The terminating @samp{\0} is not incorporated into the hash.
 
 The step size used in the hash table is computed via
 @code{((hash * 17) & (size - 1)) | 1}, where @samp{hash} is the hash

@@ -2974,10 +2974,12 @@ strcmp_iw (const char *string1, const char *string2)
 	{
 	  string2++;
 	}
-      if (*string1 != *string2)
-	{
-	  break;
-	}
+      if (case_sensitivity == case_sensitive_on && *string1 != *string2)
+	break;
+      if (case_sensitivity == case_sensitive_off
+	  && (tolower ((unsigned char) *string1)
+	      != tolower ((unsigned char) *string2)))
+	break;
       if (*string1 != '\0')
 	{
 	  string1++;
@@ -2997,6 +2999,10 @@ strcmp_iw (const char *string1, const char *string2)
    find names in the list that match some fixed NAME according to
    strcmp_iw(LIST_ELT, NAME), then the place to start looking is right
    where this function would put NAME.
+
+   This function must be neutral to the CASE_SENSITIVITY setting as the user
+   may choose it during later lookup.  Therefore this function always sorts
+   primarily case-insensitively and secondarily case-sensitively.
 
    Here are some examples of why using strcmp to sort is a bad idea:
 
@@ -3023,8 +3029,10 @@ strcmp_iw (const char *string1, const char *string2)
 int
 strcmp_iw_ordered (const char *string1, const char *string2)
 {
-  /* Formatting stub.  */
-  if (1)
+  const char *saved_string1 = string1, *saved_string2 = string2;
+  enum case_sensitivity case_pass = case_sensitive_off;
+
+  for (;;)
     {
       /* C1 and C2 are valid only if *string1 != '\0' && *string2 != '\0'.
 	 Provide stub characters if we are already at the end of one of the
@@ -3038,8 +3046,17 @@ strcmp_iw_ordered (const char *string1, const char *string2)
 	  while (isspace (*string2))
 	    string2++;
 
+	  switch (case_pass)
+	  {
+	    case case_sensitive_off:
+	      c1 = tolower ((unsigned char) *string1);
+	      c2 = tolower ((unsigned char) *string2);
+	      break;
+	    case case_sensitive_on:
 	      c1 = *string1;
 	      c2 = *string2;
+	      break;
+	  }
 	  if (c1 != c2)
 	    break;
 
@@ -3057,7 +3074,7 @@ strcmp_iw_ordered (const char *string1, const char *string2)
 	     comparison in the cases where one of them is '\0' or '('.  */
 	case '\0':
 	  if (*string2 == '\0')
-	    return 0;
+	    break;
 	  else
 	    return -1;
 	case '(':
@@ -3068,9 +3085,22 @@ strcmp_iw_ordered (const char *string1, const char *string2)
 	default:
 	  if (*string2 == '\0' || *string2 == '(')
 	    return 1;
-	  else
-	    return c1 - c2;
+	  else if (c1 > c2)
+	    return 1;
+	  else if (c1 < c2)
+	    return -1;
+	  /* PASSTHRU */
 	}
+
+      if (case_pass == case_sensitive_on)
+	return 0;
+      
+      /* Otherwise the strings were equal in case insensitive way, make
+	 a more fine grained comparison in a case sensitive way.  */
+
+      case_pass = case_sensitive_on;
+      string1 = saved_string1;
+      string2 = saved_string2;
     }
 }
 

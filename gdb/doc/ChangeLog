@@ -1,3 +1,9 @@
+2011-04-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (Index Section Format): Change the version to 5.
+	Describe the different formula.
+
 2011-04-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Eli Zaretskii  <eliz@gnu.org>
 

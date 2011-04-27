@@ -691,8 +691,15 @@ lookup_partial_symbol (struct partial_symtab *pst, const char *name,
 	internal_error (__FILE__, __LINE__,
 			_("failed internal consistency check"));
 
-      while (top <= real_top
-	     && SYMBOL_MATCHES_SEARCH_NAME (*top, search_name))
+      /* For `case_sensitivity == case_sensitive_off' strcmp_iw_ordered will
+	 search more exactly than what matches SYMBOL_MATCHES_SEARCH_NAME.  */
+      while (top >= start && SYMBOL_MATCHES_SEARCH_NAME (*top, search_name))
+	top--;
+
+      /* Fixup to have a symbol which matches SYMBOL_MATCHES_SEARCH_NAME.  */
+      top++;
+
+      while (top <= real_top && SYMBOL_MATCHES_SEARCH_NAME (*top, search_name))
 	{
 	  if (symbol_matches_domain (SYMBOL_LANGUAGE (*top),
 				     SYMBOL_DOMAIN (*top), domain))
