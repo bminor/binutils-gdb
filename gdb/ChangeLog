@@ -100,6 +100,11 @@
 	is_private and is_protected by calling
 	dwarf2_default_access_attribute.
 
+2011-04-08  Kevin Buettner  <kevinb@redhat.com>
+
+	* rx-tdep.c (rx_frame_unwind): Add default_frame_unwind_stop_reason
+	to the initialization.
+
 2011-04-08  Steve Ellcey  <sje@cup.hp.com>
 
 	* Add default_frame_unwind_stop_reason value to libunwind_frame_unwind
