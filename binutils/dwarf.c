@@ -324,6 +324,53 @@ process_extended_line_op (unsigned char *data, int is_stmt)
     case DW_LNE_HP_define_proc:
       printf ("DW_LNE_HP_define_proc\n");
       break;
+    case DW_LNE_HP_source_file_correlation:
+      {
+        unsigned char *edata = data + len - bytes_read - 1;
+
+        printf ("DW_LNE_HP_source_file_correlation\n");
+
+        while (data < edata)
+          {
+            unsigned int opc;
+
+            opc = read_leb128 (data, & bytes_read, 0);
+            data += bytes_read;
+
+            switch (opc)
+              {
+              case DW_LNE_HP_SFC_formfeed:
+                printf ("    DW_LNE_HP_SFC_formfeed\n");
+                break;
+              case DW_LNE_HP_SFC_set_listing_line:
+                printf ("    DW_LNE_HP_SFC_set_listing_line (%s)\n",
+                        dwarf_vmatoa ("u",
+                                      read_leb128 (data, & bytes_read, 0)));
+                data += bytes_read;
+                break;
+              case DW_LNE_HP_SFC_associate:
+                printf ("    DW_LNE_HP_SFC_associate ");
+                printf (_("(%s"),
+                        dwarf_vmatoa ("u",
+                                      read_leb128 (data, & bytes_read, 0)));
+                data += bytes_read;
+                printf (_(",%s"),
+                        dwarf_vmatoa ("u",
+                                      read_leb128 (data, & bytes_read, 0)));
+                data += bytes_read;
+                printf (_(",%s)\n"),
+                        dwarf_vmatoa ("u",
+                                      read_leb128 (data, & bytes_read, 0)));
+                data += bytes_read;
+                break;
+              default:
+                printf ("    UNKNOW DW_LNE_HP_SFC opcode (%u)\n", opc);
+                data = edata;
+                break;
+              }
+          }
+      }
+      break;
 
     default:
       if (op_code >= DW_LNE_lo_user

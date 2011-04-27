@@ -1,3 +1,8 @@
+2011-04-27  Tristan Gingold  <gingold@adacore.com>
+
+	* dwarf.c (process_extended_line_op): Handle
+	DW_LNE_HP_source_file_correlation.
+
 2011-04-27  Nick Clifton  <nickc@redhat.com>
 
 	* po/da.po: Updated Danish translation.
