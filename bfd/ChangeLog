@@ -1,3 +1,7 @@
+2011-04-28  Tom Tromey  <tromey@redhat.com>
+
+	* bfdio.c (memory_bstat): Pass correct size to memset.
+
 2011-04-28  Mike Frysinger  <vapier@gentoo.org>
 
 	* dwarf2.c (dwarf_debug_sections): Mark const.
