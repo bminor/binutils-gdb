@@ -1,3 +1,65 @@
+2011-04-28  Yao Qi  <yao@codesourcery.com>
+
+	* arm-tdep.c (copy_unmodified): Rename to ...
+	(arm_copy_unmodified): .. this.  New.
+	(copy_preload): Move common part to ...
+	(install_preload): .. this.  New.
+	(arm_copy_preload): New.
+	(copy_preload_reg): Move common part to ...
+	(install_preload_reg): ... this.  New.
+	(arm_copy_preload_reg): New.
+	(copy_b_bl_blx): Move common part to ...
+	(install_b_bl_blx): .. this.  New.
+	(arm_copy_b_bl_blx): New.
+	(copy_bx_blx_reg): Move common part to ...
+	(install_bx_blx_reg): ... this. New.
+	(arm_copy_bx_blx_reg): New.
+	(copy_alu_reg): Move common part to ...
+	(install_alu_reg): ... this.  New.
+	(arm_copy_alu_reg): New.
+	(copy_alu_shifted_reg): Move common part to ...
+	(install_alu_shifted_reg): ... this.  New.
+	(copy_ldr_str_ldrb_strb): Move common part to ...
+	(install_ldr_str_ldrb_strb): ... this.  New.
+	(arm_copy_ldr_str_ldrb_strb): New.
+	(copy_copro_load_store): Move some common part to ...
+	(install_copy_copro_load_store): ... this.  New.
+	(arm_copy_copro_load_store): New.
+	(copy_svc): Delete.
+	(arm_copy_svc): Renamed from copy_svc.
+	(copy_undef): Delete.
+	(arm_copy_undef): Renamed from copy_undef.
+	(decode_ext_reg_ld_st): Delete.
+	(arm_decode_ext_reg_ld_st): Renamed from decode_ext_reg_ld_st.
+	(decode_svc_copro): Delete.
+	(arm_decode_svc_copro): Renamed from decode_svc_copro.
+	(copy_copro_load_store, copy_alu_imm): update callers.
+	(copy_extra_ld_st, copy_block_xfer): Likewise.
+	(decode_misc_memhint_neon, decode_unconditional): Likewise.
+	(decode_miscellaneous, decode_dp_misc): Likewise.
+	(decode_ld_st_word_ubyte, decode_media): Likewise.
+	(decode_b_bl_ldmstm, decode_ext_reg_ld_st): Likewise.
+	(decode_svc_copro, decode_misc_memhint_neon): Likewise.
+	(decode_unconditional, decode_miscellaneous): Likewise.
+	(decode_media, decode_b_bl_ldmstm): Likewise.
+	(arm_process_displaced_insn): Likewise..
+	(decode_misc_memhint_neon): Delete.
+	(arm_decode_misc_memhint_neon): Renamed from decode_misc_memhint_neon.
+	(decode_miscellaneous): Delete.
+	(arm_decode_miscellaneous): Renamed from decode_miscellaneous.
+	(decode_dp_misc): Delete.
+	(arm_decode_dp_misc): Renamed from decode_dp_misc.
+	(decode_ld_st_word_ubyte): Delete.
+	(arm_decode_ld_st_word_ubyte): Renamed from decode_ld_st_word_ubyte.
+	(decode_media): Delete.
+	(arm_decode_media): Renamed from decode_media.
+	(decode_b_bl_ldmstm): Delete.
+	(arm_decode_b_bl_ldmstm): Renamed from decode_b_bl_ldmstm.
+	(decode_ext_reg_ld_st): Delete.
+	(arm_decode_ext_reg_ld_st): Renamed from decode_ext_reg_ld_st.
+	(decode_unconditional): Delete.
+	(arm_decode_unconditional): Renamed from decode_unconditional.
+
 2011-04-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Case insensitive lookups implementation.
