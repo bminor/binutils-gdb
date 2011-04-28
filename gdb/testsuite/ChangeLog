@@ -1,3 +1,8 @@
+2011-04-28  Ulrich Weigand  <ulrich.weigand@linaro.org>
+
+	* gdb.base/signest.exp: New file.
+	* gdb.base/signest.c: Likewise.
+
 2011-04-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* lib/mi-support.exp (mi_expect_stop) <stopped at wrong place>: Accept

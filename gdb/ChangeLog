@@ -1,3 +1,10 @@
+2011-04-28  Ulrich Weigand  <ulrich.weigand@linaro.org>
+
+	* infrun.c (proceed): Revert previous change.
+	(resume): Instead, handle the case of signal delivery while stepping
+	off a breakpoint location here, and only if software single-stepping
+	is used.  Handle nested signals.
+
 2011-04-28  Yao Qi  <yao@codesourcery.com>
 
 	* arm-tdep.c (copy_unmodified): Rename to ...

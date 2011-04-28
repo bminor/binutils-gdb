@@ -1703,6 +1703,51 @@ a command like `return' or `jump' to continue execution."));
   else if (step)
     step = maybe_software_singlestep (gdbarch, pc);
 
+  /* Currently, our software single-step implementation leads to different
+     results than hardware single-stepping in one situation: when stepping
+     into delivering a signal which has an associated signal handler,
+     hardware single-step will stop at the first instruction of the handler,
+     while software single-step will simply skip execution of the handler.
+
+     For now, this difference in behavior is accepted since there is no
+     easy way to actually implement single-stepping into a signal handler
+     without kernel support.
+
+     However, there is one scenario where this difference leads to follow-on
+     problems: if we're stepping off a breakpoint by removing all breakpoints
+     and then single-stepping.  In this case, the software single-step
+     behavior means that even if there is a *breakpoint* in the signal
+     handler, GDB still would not stop.
+
+     Fortunately, we can at least fix this particular issue.  We detect
+     here the case where we are about to deliver a signal while software
+     single-stepping with breakpoints removed.  In this situation, we
+     revert the decisions to remove all breakpoints and insert single-
+     step breakpoints, and instead we install a step-resume breakpoint
+     at the current address, deliver the signal without stepping, and
+     once we arrive back at the step-resume breakpoint, actually step
+     over the breakpoint we originally wanted to step over.  */
+  if (singlestep_breakpoints_inserted_p
+      && tp->control.trap_expected && sig != TARGET_SIGNAL_0)
+    {
+      /* If we have nested signals or a pending signal is delivered
+	 immediately after a handler returns, might might already have
+	 a step-resume breakpoint set on the earlier handler.  We cannot
+	 set another step-resume breakpoint; just continue on until the
+	 original breakpoint is hit.  */
+      if (tp->control.step_resume_breakpoint == NULL)
+	{
+	  insert_step_resume_breakpoint_at_frame (get_current_frame ());
+	  tp->step_after_step_resume_breakpoint = 1;
+	}
+
+      remove_single_step_breakpoints ();
+      singlestep_breakpoints_inserted_p = 0;
+
+      insert_breakpoints ();
+      tp->control.trap_expected = 0;
+    }
+
   if (should_resume)
     {
       ptid_t resume_ptid;
@@ -2064,6 +2109,24 @@ proceed (CORE_ADDR addr, enum target_signal siggnal, int step)
   /* prepare_to_proceed may change the current thread.  */
   tp = inferior_thread ();
 
+  if (oneproc)
+    {
+      tp->control.trap_expected = 1;
+      /* If displaced stepping is enabled, we can step over the
+	 breakpoint without hitting it, so leave all breakpoints
+	 inserted.  Otherwise we need to disable all breakpoints, step
+	 one instruction, and then re-add them when that step is
+	 finished.  */
+      if (!use_displaced_stepping (gdbarch))
+	remove_breakpoints ();
+    }
+
+  /* We can insert breakpoints if we're not trying to step over one,
+     or if we are stepping over one but we're using displaced stepping
+     to do so.  */
+  if (! tp->control.trap_expected || use_displaced_stepping (gdbarch))
+    insert_breakpoints ();
+
   if (!non_stop)
     {
       /* Pass the last stop signal to the thread we're resuming,
@@ -2132,42 +2195,6 @@ proceed (CORE_ADDR addr, enum target_signal siggnal, int step)
 
   /* Reset to normal state.  */
   init_infwait_state ();
-
-  /* Stepping over a breakpoint while at the same time delivering a signal
-     has a problem: we cannot use displaced stepping, but we also cannot
-     use software single-stepping, because we do not know where execution
-     will continue if a signal handler is installed.
-
-     On the other hand, if there is a signal handler we'd have to step
-     over it anyway.  So what we do instead is to install a step-resume
-     handler at the current address right away, deliver the signal without
-     stepping, and once we arrive back at the step-resume breakpoint, step
-     once more over the original breakpoint we wanted to step over.  */
-  if (oneproc && tp->suspend.stop_signal != TARGET_SIGNAL_0
-      && execution_direction != EXEC_REVERSE)
-    {
-      insert_step_resume_breakpoint_at_frame (get_current_frame ());
-      tp->step_after_step_resume_breakpoint = 1;
-      oneproc = 0;
-    }
-
-  if (oneproc)
-    {
-      tp->control.trap_expected = 1;
-      /* If displaced stepping is enabled, we can step over the
-	 breakpoint without hitting it, so leave all breakpoints
-	 inserted.  Otherwise we need to disable all breakpoints, step
-	 one instruction, and then re-add them when that step is
-	 finished.  */
-      if (!use_displaced_stepping (gdbarch))
-	remove_breakpoints ();
-    }
-
-  /* We can insert breakpoints if we're not trying to step over one,
-     or if we are stepping over one but we're using displaced stepping
-     to do so.  */
-  if (! tp->control.trap_expected || use_displaced_stepping (gdbarch))
-    insert_breakpoints ();
 
   /* Resume inferior.  */
   resume (oneproc || step || bpstat_should_step (), tp->suspend.stop_signal);
