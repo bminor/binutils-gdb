@@ -3707,8 +3707,11 @@ static int
 expand_partial_symbol_name (const char *name, void *user_data)
 {
   struct add_name_data *datum = (struct add_name_data *) user_data;
+  int (*ncmp) (const char *, const char *, size_t);
 
-  return strncmp (name, datum->sym_text, datum->sym_text_len) == 0;
+  ncmp = (case_sensitivity == case_sensitive_on ? strncmp : strncasecmp);
+
+  return ncmp (name, datum->sym_text, datum->sym_text_len) == 0;
 }
 
 char **

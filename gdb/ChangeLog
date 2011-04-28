@@ -1,3 +1,8 @@
+2011-04-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* symtab.c (expand_partial_symbol_name): New variable NCMP.  Support
+	case insensitive comparison.
+
 2011-04-28  Ulrich Weigand  <ulrich.weigand@linaro.org>
 
 	* infrun.c (proceed): Revert previous change.
