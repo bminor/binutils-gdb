@@ -1,3 +1,9 @@
+2011-04-28  Daniel C. Klauer  <daniel.c.klauer@web.de>
+
+	PR ld/12614
+	* emultempl/pe.em (_after_open): Correctly check whether symbol is
+	in undef list.
+
 2011-04-26  Kai Tietz  <ktietz@redhat.com>
 
 	* scripttempl/pe.sc: Handle .eh_frame($|.)* sections.

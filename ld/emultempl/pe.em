@@ -1590,8 +1590,10 @@ gld_${EMULATION_NAME}_after_open (void)
 			/* If the symbol in the stub section has no other
 			   undefined references, exclude the stub section
 			   from the final link.  */
-			if (blhe && (blhe->type == bfd_link_hash_defined)
-			    && (blhe->u.undef.next == NULL))
+			if (blhe != NULL
+			    && blhe->type == bfd_link_hash_defined
+			    && blhe->u.undef.next == NULL
+			    && blhe != link_info.hash->undefs_tail)
 			  stub_sec->flags |= SEC_EXCLUDE;
 		      }
 		  }
