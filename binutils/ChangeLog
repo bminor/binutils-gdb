@@ -1,3 +1,7 @@
+2011-04-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf.c (display_gdb_index): Support version 5, warn on version 4.
+
 2011-04-27  Tristan Gingold  <gingold@adacore.com>
 
 	* dwarf.c (process_extended_line_op): Handle

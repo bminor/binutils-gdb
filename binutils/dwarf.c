@@ -5070,6 +5070,9 @@ display_gdb_index (struct dwarf_section *section,
       warn (_("The address table data in version 3 may be wrong.\n"));
       break;
     case 4:
+      warn (_("Version 4 does not support case insensitive lookups.\n"));
+      break;
+    case 5:
       break;
     default:
       warn (_("Unsupported version %lu.\n"), (unsigned long) version);
