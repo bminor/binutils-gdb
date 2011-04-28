@@ -1,3 +1,9 @@
+2011-04-28  Daniel C. Klauer  <daniel.c.klauer@web.de>
+
+	PR ld/12614
+	* emultempl/pe.em (_after_open): Correctly check whether symbol is
+	in undef list.
+
 2011-04-27  Alan Modra  <amodra@gmail.com>
 
 	Backport from mainline.
