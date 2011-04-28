@@ -1,3 +1,8 @@
+2011-04-28  Jonathan Nieder  <jrnieder@gmail.com>
+
+	* cg_print.c (print_header): Add no-c-format comment to prevent
+	confusion when translating "%time".
+
 2011-04-27  Nick Clifton  <nickc@redhat.com>
 
 	* po/eo.po: Updated Esperanto translation.

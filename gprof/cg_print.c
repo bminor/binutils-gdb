@@ -1,6 +1,6 @@
 /* cg_print.c -  Print routines for displaying call graphs.
 
-   Copyright 2000, 2001, 2002, 2004, 2007, 2009
+   Copyright 2000, 2001, 2002, 2004, 2007, 2009, 2011
    Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
@@ -96,8 +96,11 @@ print_header ()
       printf ("%6.6s %5.5s %7.7s %11.11s %7.7s/%-7.7s     %-8.8s\n",
 	      "", "", "", "", _("called"), _("total"), _("parents"));
       printf ("%-6.6s %5.5s %7.7s %11.11s %7.7s+%-7.7s %-8.8s\t%5.5s\n",
-	      _("index"), _("%time"), _("self"), _("descendants"),
-	      _("called"), _("self"), _("name"), _("index"));
+	      _("index"),
+	      /* xgettext:no-c-format */
+	      _("%time"),
+	      _("self"), _("descendants"), _("called"), _("self"),
+	      _("name"), _("index"));
       printf ("%6.6s %5.5s %7.7s %11.11s %7.7s/%-7.7s     %-8.8s\n",
 	      "", "", "", "", _("called"), _("total"), _("children"));
       printf ("\n");
