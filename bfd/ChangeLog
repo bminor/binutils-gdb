@@ -1,3 +1,10 @@
+2011-04-28  Mike Frysinger  <vapier@gentoo.org>
+
+	* dwarf2.c (dwarf_debug_sections): Mark const.
+	* elf.c (special_sections): Likewise.
+	* libbfd-in.h (dwarf_debug_sections): Likewise.
+	* libbfd.h: Regenerate.
+
 2011-04-26  Kai Tietz  <ktietz@redhat.com>
 
 	* coffcode.h (sec_to_styp_flags): Allow linkonce for

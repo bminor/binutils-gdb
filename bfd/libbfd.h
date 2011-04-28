@@ -822,7 +822,7 @@ struct dwarf_debug_section
 /* Map of uncompressed DWARF debug section name to compressed one.  It
    is terminated by NULL uncompressed_name.  */
 
-extern struct dwarf_debug_section dwarf_debug_sections[];
+extern const struct dwarf_debug_section dwarf_debug_sections[];
 /* Extracted from init.c.  */
 /* Extracted from libbfd.c.  */
 bfd_boolean bfd_write_bigendian_4byte_int (bfd *, unsigned int);

@@ -2164,7 +2164,7 @@ static const struct bfd_elf_special_section special_sections_z[] =
   { NULL,                     0,  0, 0,            0 }
 };
 
-static const struct bfd_elf_special_section *special_sections[] =
+static const struct bfd_elf_special_section * const special_sections[] =
 {
   special_sections_b,		/* 'b' */
   special_sections_c,		/* 'c' */

@@ -278,7 +278,7 @@ struct attr_abbrev
 /* Map of uncompressed DWARF debug section name to compressed one.  It
    is terminated by NULL uncompressed_name.  */
 
-struct dwarf_debug_section dwarf_debug_sections[] =
+const struct dwarf_debug_section dwarf_debug_sections[] =
 {
   { ".debug_abbrev",		".zdebug_abbrev" },
   { ".debug_aranges",		".zdebug_aranges" },
