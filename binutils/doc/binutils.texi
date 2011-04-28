@@ -1076,6 +1076,8 @@ objcopy [@option{-F} @var{bfdname}|@option{--target=}@var{bfdname}]
         [@option{--subsystem=}@var{which}:@var{major}.@var{minor}]
         [@option{--compress-debug-sections}]
         [@option{--decompress-debug-sections}]
+        [@option{--dwarf-depth=@var{n}}]
+        [@option{--dwarf-start=@var{n}}]
         [@option{-v}|@option{--verbose}]
         [@option{-V}|@option{--version}]
         [@option{--help}] [@option{--info}]
@@ -2128,6 +2130,28 @@ then only data found in those specific sections will be dumped.
 
 Note that there is no single letter option to display the content of
 trace sections or .gdb_index.
+
+Note: the output from the @option{=info} option can also be affected
+by the options @option{--dwarf-depth} and @option{--dwarf-start}.
+
+@item --dwarf-depth=@var{n}
+Limit the dump of the @code{.debug_info} section to @var{n} children.
+This is only useful with @option{--dwarf=info}.  The default is
+to print all DIEs; the special value 0 for @var{n} will also have this
+effect.
+
+With a non-zero value for @var{n}, DIEs at or deeper than @var{n}
+levels will not be printed.  The range for @var{n} is zero-based.
+
+@item --dwarf-start=@var{n}
+Print only DIEs beginning with the DIE numbered @var{n}.  This is only
+useful with @option{--dwarf=info}.
+
+If specified, this option will suppress printing of any header
+information and all DIEs before the DIE numbered @var{n}.  Only
+siblings and children of the specified DIE will be printed.
+
+This can be used in conjunction with @option{--dwarf-depth}.
 
 @item -G
 @itemx --stabs
@@ -3957,6 +3981,8 @@ readelf [@option{-a}|@option{--all}]
         [@option{-c}|@option{--archive-index}]
         [@option{-w[lLiaprmfFsoRt]}|
          @option{--debug-dump}[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=loc,=Ranges,=pubtypes,=trace_info,=trace_abbrev,=trace_aranges,=gdb_index]]
+        [@option{--dwarf-depth=@var{n}}]
+        [@option{--dwarf-start=@var{n}}]
         [@option{-I}|@option{--histogram}]
         [@option{-v}|@option{--version}]
         [@option{-W}|@option{--wide}]
@@ -4123,6 +4149,28 @@ dumps the contents in a raw format.
 Note: the @option{=frames-interp} option will display the interpreted
 contents of a .debug_frame section whereas the @option{=frames} option
 dumps the contents in a raw format.
+
+Note: the output from the @option{=info} option can also be affected
+by the options @option{--dwarf-depth} and @option{--dwarf-start}.
+
+@item --dwarf-depth=@var{n}
+Limit the dump of the @code{.debug_info} section to @var{n} children.
+This is only useful with @option{--debug-dump=info}.  The default is
+to print all DIEs; the special value 0 for @var{n} will also have this
+effect.
+
+With a non-zero value for @var{n}, DIEs at or deeper than @var{n}
+levels will not be printed.  The range for @var{n} is zero-based.
+
+@item --dwarf-start=@var{n}
+Print only DIEs beginning with the DIE numbered @var{n}.  This is only
+useful with @option{--debug-dump=info}.
+
+If specified, this option will suppress printing of any header
+information and all DIEs before the DIE numbered @var{n}.  Only
+siblings and children of the specified DIE will be printed.
+
+This can be used in conjunction with @option{--dwarf-depth}.
 
 @item -I
 @itemx --histogram

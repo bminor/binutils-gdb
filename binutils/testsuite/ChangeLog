@@ -1,3 +1,7 @@
+2011-04-28  Tom Tromey  <tromey@redhat.com>
+
+	* binutils-all/objdump.W: Correct output.
+
 011-04-11  Kai Tietz
 
 	* binutils-all/windres/windres.exp: Add '// cpparg <option>' command

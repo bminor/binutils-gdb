@@ -3,6 +3,9 @@
 * Add --preprocessor-arg option to windres to specify additional options
   passed to preprocessor.
 
+* Add --dwarf-start and --dwarf-end to readelf and objdump.  These are used by
+  the new Emacs mode, see dwarf-mode.el.
+
 Changes in 2.21:
 
 * Add --interleave-width option to objcopy to allowing copying a range of

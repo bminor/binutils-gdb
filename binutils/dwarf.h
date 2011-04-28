@@ -200,6 +200,9 @@ extern int do_trace_abbrevs;
 extern int do_trace_aranges;
 extern int do_wide;
 
+extern int dwarf_cutoff_level;
+extern unsigned long dwarf_start_die;
+
 extern void init_dwarf_regnames (unsigned int);
 extern void init_dwarf_regnames_i386 (void);
 extern void init_dwarf_regnames_x86_64 (void);

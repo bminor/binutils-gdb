@@ -9,7 +9,7 @@ Contents of the .debug_info section:
    Abbrev Offset: 0
    Pointer Size:  4
  <0><b>: Abbrev Number: 1 \(DW_TAG_compile_unit\)
-    < c>   DW_AT_stmt_list   : 0x0	
+    <c>   DW_AT_stmt_list   : 0x0	
     <10>   DW_AT_high_pc     : 0x.	
     <14>   DW_AT_low_pc      : 0x.	
     <18>   DW_AT_name        : file1.txt	

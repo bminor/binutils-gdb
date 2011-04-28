@@ -110,6 +110,7 @@ static bfd_vma start_address = (bfd_vma) -1; /* --start-address */
 static bfd_vma stop_address = (bfd_vma) -1;  /* --stop-address */
 static int dump_debugging;		/* --debugging */
 static int dump_debugging_tags;		/* --debugging-tags */
+static int suppress_bfd_header;
 static int dump_special_syms = 0;	/* --special-syms */
 static bfd_vma adjust_section_vma = 0;	/* --adjust-vma */
 static int file_start_context = 0;      /* --file-start-context */
@@ -246,8 +247,11 @@ usage (FILE *stream, int status)
       --adjust-vma=OFFSET        Add OFFSET to all displayed section addresses\n\
       --special-syms             Include special symbols in symbol dumps\n\
       --prefix=PREFIX            Add PREFIX to absolute paths for -S\n\
-      --prefix-strip=LEVEL       Strip initial directory names for -S\n\
-\n"));
+      --prefix-strip=LEVEL       Strip initial directory names for -S\n"));
+      fprintf (stream, _("\
+      --dwarf-depth=N        Do not display DIEs at depth N or greater\n\
+      --dwarf-start=N        Display DIEs starting with N, at the same depth\n\
+                             or deeper\n\n"));
       list_supported_targets (program_name, stream);
       list_supported_architectures (program_name, stream);
 
@@ -268,7 +272,9 @@ enum option_values
     OPTION_PREFIX,
     OPTION_PREFIX_STRIP,
     OPTION_INSN_WIDTH,
-    OPTION_ADJUST_VMA
+    OPTION_ADJUST_VMA,
+    OPTION_DWARF_DEPTH,
+    OPTION_DWARF_START
   };
 
 static struct option long_options[]=
@@ -316,6 +322,8 @@ static struct option long_options[]=
   {"prefix", required_argument, NULL, OPTION_PREFIX},
   {"prefix-strip", required_argument, NULL, OPTION_PREFIX_STRIP},
   {"insn-width", required_argument, NULL, OPTION_INSN_WIDTH},
+  {"dwarf-depth",      required_argument, 0, OPTION_DWARF_DEPTH},
+  {"dwarf-start",      required_argument, 0, OPTION_DWARF_START},
   {0, no_argument, 0, 0}
 };
 
@@ -3079,7 +3087,7 @@ dump_bfd (bfd *abfd)
       bfd_map_over_sections (abfd, adjust_addresses, &has_reloc);
     }
 
-  if (! dump_debugging_tags)
+  if (! dump_debugging_tags && ! suppress_bfd_header)
     printf (_("\n%s:     file format %s\n"), bfd_get_filename (abfd),
 	    abfd->xvec->name);
   if (dump_ar_hdrs)
@@ -3088,7 +3096,7 @@ dump_bfd (bfd *abfd)
     dump_bfd_header (abfd);
   if (dump_private_headers)
     dump_bfd_private_header (abfd);
-  if (! dump_debugging_tags)
+  if (! dump_debugging_tags && ! suppress_bfd_header)
     putchar ('\n');
   if (dump_section_headers)
     dump_headers (abfd);
@@ -3475,6 +3483,19 @@ main (int argc, char **argv)
 	    dwarf_select_sections_by_names (optarg);
 	  else
 	    dwarf_select_sections_all ();
+	  break;
+	case OPTION_DWARF_DEPTH:
+	  {
+	    char *cp;
+	    dwarf_cutoff_level = strtoul (optarg, & cp, 0);
+	  }
+	  break;
+	case OPTION_DWARF_START:
+	  {
+	    char *cp;
+	    dwarf_start_die = strtoul (optarg, & cp, 0);
+	    suppress_bfd_header = 1;
+	  }
 	  break;
 	case 'G':
 	  dump_stab_section_info = TRUE;

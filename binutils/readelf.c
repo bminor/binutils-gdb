@@ -3073,6 +3073,8 @@ get_section_type_name (unsigned int sh_type)
 
 #define OPTION_DEBUG_DUMP	512
 #define OPTION_DYN_SYMS		513
+#define OPTION_DWARF_DEPTH	514
+#define OPTION_DWARF_START	515
 
 static struct option options[] =
 {
@@ -3105,6 +3107,9 @@ static struct option options[] =
   {"instruction-dump", required_argument, 0, 'i'},
 #endif
   {"debug-dump",       optional_argument, 0, OPTION_DEBUG_DUMP},
+
+  {"dwarf-depth",      required_argument, 0, OPTION_DWARF_DEPTH},
+  {"dwarf-start",      required_argument, 0, OPTION_DWARF_START},
 
   {"version",	       no_argument, 0, 'v'},
   {"wide",	       no_argument, 0, 'W'},
@@ -3149,6 +3154,10 @@ usage (FILE * stream)
                =frames-interp,=str,=loc,=Ranges,=pubtypes,\n\
                =gdb_index,=trace_info,=trace_abbrev,=trace_aranges]\n\
                          Display the contents of DWARF2 debug sections\n"));
+  fprintf (stream, _("\
+  --dwarf-depth=N        Do not display DIEs at depth N or greater\n\
+  --dwarf-start=N        Display DIEs starting with N, at the same depth\n\
+                         or deeper\n"));
 #ifdef SUPPORT_DISASSEMBLY
   fprintf (stream, _("\
   -i --instruction-dump=<number|name>\n\
@@ -3354,6 +3363,20 @@ parse_args (int argc, char ** argv)
 	      do_debugging = 0;
 	      dwarf_select_sections_by_names (optarg);
 	    }
+	  break;
+	case OPTION_DWARF_DEPTH:
+	  {
+	    char *cp;
+
+	    dwarf_cutoff_level = strtoul (optarg, & cp, 0);
+	  }
+	  break;
+	case OPTION_DWARF_START:
+	  {
+	    char *cp;
+
+	    dwarf_start_die = strtoul (optarg, & cp, 0);
+	  }
 	  break;
 	case OPTION_DYN_SYMS:
 	  do_dyn_syms++;

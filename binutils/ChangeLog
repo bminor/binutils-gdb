@@ -1,3 +1,28 @@
+2011-04-28  Tom Tromey  <tromey@redhat.com>
+
+	* NEWS: Add note about --dwarf-depth, --dwarf-start, and
+	dwarf-mode.el.
+	* objdump.c (suppress_bfd_header): New global.
+	(usage): Update.
+	(OPTION_DWARF_DEPTH, OPTION_DWARF_START): New constants.
+	(options): Add dwarf-depth and dwarf-start entries.
+	(dump_bfd): Use suppress_bfd_header.
+	(main): Handle OPTION_DWARF_START, OPTION_DWARF_DEPTH.
+	* doc/binutils.texi (objcopy): Document --dwarf-depth and
+	--dwarf-start.
+	(readelf): Likewise.
+	* dwarf-mode.el: New file.
+	* dwarf.c (dwarf_cutoff_level, dwarf_start_die): New globals.
+	(read_and_display_attr_value): Also check debug_info_p.
+	(process_debug_info): Handle dwarf_start_die and
+	dwarf_cutoff_level.
+	* dwarf.h (dwarf_cutoff_level, dwarf_start_die): Declare.
+	* readelf.c (usage): Update.
+	(OPTION_DWARF_DEPTH): New macro.
+	(OPTION_DWARF_START): Likewise.
+	(options): Add dwarf-depth and dwarf-start entries.
+	(parse_args): Handle OPTION_DWARF_START and OPTION_DWARF_DEPTH.
+
 2011-04-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* dwarf.c (display_gdb_index): Support version 5, warn on version 4.

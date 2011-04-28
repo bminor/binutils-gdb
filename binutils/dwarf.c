@@ -63,6 +63,9 @@ int do_trace_abbrevs;
 int do_trace_aranges;
 int do_wide;
 
+int dwarf_cutoff_level = -1;
+unsigned long dwarf_start_die;
+
 /* Values for do_debug_lines.  */
 #define FLAG_DEBUG_LINES_RAW	 1
 #define FLAG_DEBUG_LINES_DECODED 2
@@ -1414,7 +1417,8 @@ read_and_display_attr_value (unsigned long attribute,
     }
 
   if ((do_loc || do_debug_loc || do_debug_ranges)
-      && num_debug_info_entries == 0)
+      && num_debug_info_entries == 0
+      && debug_info_p != NULL)
     {
       switch (attribute)
 	{
@@ -2028,7 +2032,8 @@ process_debug_info (struct dwarf_section *section,
 
   if (!do_loc)
     {
-      printf (_("Contents of the %s section:\n\n"), section->name);
+      if (dwarf_start_die == 0)
+	printf (_("Contents of the %s section:\n\n"), section->name);
 
       load_debug_section (str, file);
     }
@@ -2046,7 +2051,7 @@ process_debug_info (struct dwarf_section *section,
       DWARF2_Internal_CompUnit compunit;
       unsigned char *hdrptr;
       unsigned char *tags;
-      int level;
+      int level, last_level, saved_level;
       dwarf_vma cu_offset;
       int offset_size;
       int initial_length_size;
@@ -2115,7 +2120,7 @@ process_debug_info (struct dwarf_section *section,
 	  debug_information [unit].num_range_lists = 0;
 	}
 
-      if (!do_loc)
+      if (!do_loc && dwarf_start_die == 0)
 	{
 	  printf (_("  Compilation Unit @ offset 0x%s:\n"),
 		  dwarf_vmatoa ("x", cu_offset));
@@ -2176,6 +2181,8 @@ process_debug_info (struct dwarf_section *section,
 	   + debug_displays [abbrev_sec].section.size);
 
       level = 0;
+      last_level = level;
+      saved_level = -1;
       while (tags < start)
 	{
 	  unsigned int bytes_read;
@@ -2183,6 +2190,7 @@ process_debug_info (struct dwarf_section *section,
 	  unsigned long die_offset;
 	  abbrev_entry *entry;
 	  abbrev_attr *attr;
+	  int do_printing = 1;
 
 	  die_offset = tags - section_begin;
 
@@ -2219,12 +2227,30 @@ process_debug_info (struct dwarf_section *section,
 			warn (_("Further warnings about bogus end-of-sibling markers suppressed\n"));
 		    }
 		}
+	      if (dwarf_start_die != 0 && level < saved_level)
+		return 1;
 	      continue;
 	    }
 
 	  if (!do_loc)
-	    printf (_(" <%d><%lx>: Abbrev Number: %lu"),
-		    level, die_offset, abbrev_number);
+	    {
+	      if (dwarf_start_die != 0 && die_offset < dwarf_start_die)
+		do_printing = 0;
+	      else
+		{
+		  if (dwarf_start_die != 0 && die_offset == dwarf_start_die)
+		    saved_level = level;
+		  do_printing = (dwarf_cutoff_level == -1
+				 || level < dwarf_cutoff_level);
+		  if (do_printing)
+		    printf (_(" <%d><%lx>: Abbrev Number: %lu"),
+			    level, die_offset, abbrev_number);
+		  else if (dwarf_cutoff_level == -1
+			   || last_level < dwarf_cutoff_level)
+		    printf (_(" <%d><%lx>: ...\n"), level, die_offset);
+		  last_level = level;
+		}
+	    }
 
 	  /* Scan through the abbreviation list until we reach the
 	     correct entry.  */
@@ -2235,7 +2261,7 @@ process_debug_info (struct dwarf_section *section,
 
 	  if (entry == NULL)
 	    {
-	      if (!do_loc)
+	      if (!do_loc && do_printing)
 		{
 		  printf ("\n");
 		  fflush (stdout);
@@ -2245,7 +2271,7 @@ process_debug_info (struct dwarf_section *section,
 	      return 0;
 	    }
 
-	  if (!do_loc)
+	  if (!do_loc && do_printing)
 	    printf (" (%s)\n", get_TAG_name (entry->tag));
 
 	  switch (entry->tag)
@@ -2266,9 +2292,15 @@ process_debug_info (struct dwarf_section *section,
 
 	  for (attr = entry->first_attr; attr; attr = attr->next)
 	    {
-	      if (! do_loc)
+	      debug_info *arg;
+
+	      if (! do_loc && do_printing)
 		/* Show the offset from where the tag was extracted.  */
-		printf ("    <%2lx>", (unsigned long)(tags - section_begin));
+		printf ("    <%lx>", (unsigned long)(tags - section_begin));
+
+	      arg = debug_information;
+	      if (debug_information)
+		arg += unit;
 
 	      tags = read_and_display_attr (attr->attribute,
 					    attr->form,
@@ -2276,8 +2308,8 @@ process_debug_info (struct dwarf_section *section,
 					    compunit.cu_pointer_size,
 					    offset_size,
 					    compunit.cu_version,
-					    debug_information + unit,
-					    do_loc, section);
+					    arg,
+					    do_loc || ! do_printing, section);
 	    }
 
  	  if (entry->children)
