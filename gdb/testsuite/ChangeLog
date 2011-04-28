@@ -1,3 +1,8 @@
+2011-04-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* lib/mi-support.exp (mi_expect_stop) <stopped at wrong place>: Accept
+	thread and breakpoint notifications.
+
 2011-04-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/fortran-sym-case.c: New file.
