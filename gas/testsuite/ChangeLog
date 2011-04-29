@@ -1,3 +1,9 @@
+2011-04-29  Hans-Peter Nilsson  <hp@axis.com>
+
+	* gas/elf/dwarf2-1.d, gas/elf/dwarf2-2.d: Adjust for change in
+	output format.
+	* gas/i386/dw2-compress-1.d: Ditto.
+
 2011-04-20  Catherine Moore  <clm@codesourcery.com>
             David Ung <davidu@mips.com>
 
