@@ -436,7 +436,7 @@ frapy_read_var (PyObject *self, PyObject *args)
 	  FRAPY_REQUIRE_VALID ((frame_object *) self, frame);
 
 	  if (!block)
-	    block = block_for_pc (get_frame_address_in_block (frame));
+	    block = get_frame_block (frame, NULL);
 	  var = lookup_symbol (var_name, block, VAR_DOMAIN, NULL);
 	}
       GDB_PY_HANDLE_EXCEPTION (except);

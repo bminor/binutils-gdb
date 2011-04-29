@@ -1,3 +1,9 @@
+2011-04-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix Python access to inlined frames.
+	* python/py-frame.c (frapy_read_var): Find BLOCK using get_frame_block.
+	* python/py-symbol.c (gdbpy_lookup_symbol): Likewise.
+
 2011-04-26  Michael Walle  <michael@walle.cc>
 
 	* remote.c (remote_start_remote): Ack packet after sending the

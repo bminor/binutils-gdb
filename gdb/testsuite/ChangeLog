@@ -1,3 +1,9 @@
+2011-04-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix Python access to inlined frames.
+	* gdb.python/py-frame-inline.c: New file.
+	* gdb.python/py-frame-inline.exp: New file.
+
 2011-04-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/gdbindex-stabs-dwarf.c: New file.
