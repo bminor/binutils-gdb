@@ -944,15 +944,33 @@ linux_child_insert_fork_catchpoint (int pid)
 }
 
 static int
+linux_child_remove_fork_catchpoint (int pid)
+{
+  return 0;
+}
+
+static int
 linux_child_insert_vfork_catchpoint (int pid)
 {
   return !linux_supports_tracefork (pid);
 }
 
 static int
+linux_child_remove_vfork_catchpoint (int pid)
+{
+  return 0;
+}
+
+static int
 linux_child_insert_exec_catchpoint (int pid)
 {
   return !linux_supports_tracefork (pid);
+}
+
+static int
+linux_child_remove_exec_catchpoint (int pid)
+{
+  return 0;
 }
 
 static int
@@ -5214,8 +5232,11 @@ static void
 linux_target_install_ops (struct target_ops *t)
 {
   t->to_insert_fork_catchpoint = linux_child_insert_fork_catchpoint;
+  t->to_remove_fork_catchpoint = linux_child_remove_fork_catchpoint;
   t->to_insert_vfork_catchpoint = linux_child_insert_vfork_catchpoint;
+  t->to_remove_vfork_catchpoint = linux_child_remove_vfork_catchpoint;
   t->to_insert_exec_catchpoint = linux_child_insert_exec_catchpoint;
+  t->to_remove_exec_catchpoint = linux_child_remove_exec_catchpoint;
   t->to_set_syscall_catchpoint = linux_child_set_syscall_catchpoint;
   t->to_pid_to_exec_file = linux_child_pid_to_exec_file;
   t->to_post_startup_inferior = linux_child_post_startup_inferior;
