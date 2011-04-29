@@ -90,6 +90,16 @@ class Derived : public Vbase1, public Vbase2, public Vbase3
     }
 };
 
+class Fake
+{
+  int sname;
+  
+ public:
+  Fake (const int name = 0):
+  sname (name)
+  {
+  }
+};
 #endif
 
 struct substruct {
@@ -262,6 +272,7 @@ main ()
 
   Derived derived;
   
+  Fake fake (42);
 #endif
 
   add_item (&c, 23);		/* MI breakpoint here */

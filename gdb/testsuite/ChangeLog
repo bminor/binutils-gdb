@@ -1,3 +1,12 @@
+2011-04-29  Phil Muldoon  <pmuldoon@redhat.com>
+
+	PR mi/12531
+
+	* gdb.python/py-mi.exp: Add CPLUS_FAKE_CHILD tests and a C++
+	compile target.
+	* gdb.python/py-prettyprint.exp: Add C++ object for
+	CPLUS_FAKE_CHILD test.
+
 2011-04-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix Python access to inlined frames.

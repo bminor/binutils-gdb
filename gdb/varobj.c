@@ -1397,6 +1397,10 @@ install_visualizer (struct varobj *var, PyObject *constructor,
 static void
 install_default_visualizer (struct varobj *var)
 {
+  /* Do not install a visualizer on a CPLUS_FAKE_CHILD.  */
+  if (CPLUS_FAKE_CHILD (var))
+    return;
+
   if (pretty_printing)
     {
       PyObject *pretty_printer = NULL;
@@ -1428,6 +1432,10 @@ static void
 construct_visualizer (struct varobj *var, PyObject *constructor)
 {
   PyObject *pretty_printer;
+
+  /* Do not install a visualizer on a CPLUS_FAKE_CHILD.  */
+  if (CPLUS_FAKE_CHILD (var))
+    return;
 
   Py_INCREF (constructor);
   if (constructor == Py_None)
