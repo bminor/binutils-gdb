@@ -1,3 +1,8 @@
+2011-04-29  Hans-Peter Nilsson  <hp@axis.com>
+
+	* binutils-all/i386/compressed-1a.d: Adjust for change in output
+	format.
+
 2011-04-28  Tom Tromey  <tromey@redhat.com>
 
 	* binutils-all/objdump.W: Correct output.
