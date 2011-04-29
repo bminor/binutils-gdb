@@ -1,3 +1,11 @@
+2011-04-29  Phil Muldoon  <pmuldoon@redhat.com>
+
+	PR mi/12531
+
+	* varobj.c (install_default_visualizer): Do not install a
+	visualizer if the varobj is CPLUS_FAKE_CHILD.
+	(construct_visualizer): Likewise.
+
 2011-04-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* symtab.c (expand_partial_symbol_name): New variable NCMP.  Support
