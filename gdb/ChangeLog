@@ -1,3 +1,9 @@
+2011-04-29  Andrew Gontarek  <andrewg@cray.com>
+
+	* valprint.c (val_print_array_elements): Fixed poor performance
+	of printing very large arrays with repeat_count_threshold set
+	to unlimited.  New comment.
+
 2011-04-29  Pedro Alves  <pedro@codesourcery.com>
 
 	* linux-nat.c (linux_child_remove_fork_catchpoint)
