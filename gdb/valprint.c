@@ -1247,15 +1247,21 @@ val_print_array_elements (struct type *type,
 
       rep1 = i + 1;
       reps = 1;
-      while (rep1 < len
-	     && value_available_contents_eq (val,
-					     embedded_offset + i * eltlen,
-					     val,
-					     embedded_offset + rep1 * eltlen,
-					     eltlen))
+      /* Only check for reps if repeat_count_threshold is not set to
+	 UINT_MAX (unlimited).  */
+      if (options->repeat_count_threshold < UINT_MAX)
 	{
-	  ++reps;
-	  ++rep1;
+	  while (rep1 < len
+		 && value_available_contents_eq (val,
+						 embedded_offset + i * eltlen,
+						 val,
+						 (embedded_offset
+						  + rep1 * eltlen),
+						 eltlen))
+	    {
+	      ++reps;
+	      ++rep1;
+	    }
 	}
 
       if (reps > options->repeat_count_threshold)
