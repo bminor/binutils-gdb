@@ -1,3 +1,12 @@
+2011-04-29  Tom Tromey  <tromey@redhat.com>
+
+	* mi/mi-parse.c (mi_parse): Remove incorrect sizeof.
+	(mi_parse): Likewise.
+	* breakpoint.c (break_range_command): Use sizeof char*, not
+	char**.
+	(create_breakpoint): Likewise.
+	(parse_breakpoint_sals): Likewise.
+
 2011-04-29  Pedro Alves  <pedro@codesourcery.com>
 
 	* linux-nat.c (linux_child_remove_fork_catchpoint)

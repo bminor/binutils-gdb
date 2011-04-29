@@ -253,7 +253,7 @@ mi_parse (char *cmd, char **token)
   /* Find/skip any token and then extract it. */
   for (chp = cmd; *chp >= '0' && *chp <= '9'; chp++)
     ;
-  *token = xmalloc ((chp - cmd + 1) * sizeof (char *));
+  *token = xmalloc (chp - cmd + 1);
   memcpy (*token, cmd, (chp - cmd));
   (*token)[chp - cmd] = '\0';
 
@@ -276,7 +276,7 @@ mi_parse (char *cmd, char **token)
 
     for (; *chp && !isspace (*chp); chp++)
       ;
-    parse->command = xmalloc ((chp - tmp + 1) * sizeof (char *));
+    parse->command = xmalloc (chp - tmp + 1);
     memcpy (parse->command, tmp, chp - tmp);
     parse->command[chp - tmp] = '\0';
   }

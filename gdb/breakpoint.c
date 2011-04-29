@@ -7698,7 +7698,7 @@ parse_breakpoint_sals (char **address,
     }
   /* For any SAL that didn't have a canonical string, fill one in.  */
   if (sals->nelts > 0 && canonical->canonical == NULL)
-    canonical->canonical = xcalloc (sals->nelts, sizeof (char **));
+    canonical->canonical = xcalloc (sals->nelts, sizeof (char *));
   if (addr_start != (*address))
     {
       int i;
@@ -7917,7 +7917,7 @@ create_breakpoint (struct gdbarch *gdbarch,
       sals = decode_static_tracepoint_spec (&arg);
 
       copy_arg = savestring (addr_start, arg - addr_start);
-      canonical.canonical = xcalloc (sals.nelts, sizeof (char **));
+      canonical.canonical = xcalloc (sals.nelts, sizeof (char *));
       for (i = 0; i < sals.nelts; i++)
 	canonical.canonical[i] = xstrdup (copy_arg);
       goto done;
@@ -8573,7 +8573,7 @@ break_range_command (char *arg, int from_tty)
 
   /* canonical_end can be NULL if it was of the form "*0xdeadbeef".  */
   if (canonical_end.canonical == NULL)
-    canonical_end.canonical = xcalloc (1, sizeof (char **));
+    canonical_end.canonical = xcalloc (1, sizeof (char *));
   /* Add the string if not present.  */
   if (arg_start != arg && canonical_end.canonical[0] == NULL)
     canonical_end.canonical[0] = savestring (arg_start, arg - arg_start);
