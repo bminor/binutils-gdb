@@ -1,3 +1,10 @@
+2011-04-29  Pedro Alves  <pedro@codesourcery.com>
+
+	* linux-nat.c (linux_child_remove_fork_catchpoint)
+	(linux_child_remove_vfork_catchpoint)
+	(linux_child_remove_exec_catchpoint): New functions.
+	(linux_target_install_ops): Install them.
+
 2011-04-29  Phil Muldoon  <pmuldoon@redhat.com>
 
 	PR mi/12531
