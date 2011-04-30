@@ -4551,14 +4551,14 @@ elf_x86_64_merge_symbol (struct bfd_link_info *info ATTRIBUTE_UNUSED,
 			 bfd_boolean *override ATTRIBUTE_UNUSED,
 			 bfd_boolean *type_change_ok ATTRIBUTE_UNUSED,
 			 bfd_boolean *size_change_ok ATTRIBUTE_UNUSED,
-			 bfd_boolean *newdef ATTRIBUTE_UNUSED,
-			 bfd_boolean *newdyn,
+			 bfd_boolean *newdyn ATTRIBUTE_UNUSED,
+			 bfd_boolean *newdef,
 			 bfd_boolean *newdyncommon ATTRIBUTE_UNUSED,
 			 bfd_boolean *newweak ATTRIBUTE_UNUSED,
 			 bfd *abfd ATTRIBUTE_UNUSED,
 			 asection **sec,
-			 bfd_boolean *olddef ATTRIBUTE_UNUSED,
-			 bfd_boolean *olddyn,
+			 bfd_boolean *olddyn ATTRIBUTE_UNUSED,
+			 bfd_boolean *olddef,
 			 bfd_boolean *olddyncommon ATTRIBUTE_UNUSED,
 			 bfd_boolean *oldweak ATTRIBUTE_UNUSED,
 			 bfd *oldbfd,
@@ -4567,9 +4567,9 @@ elf_x86_64_merge_symbol (struct bfd_link_info *info ATTRIBUTE_UNUSED,
   /* A normal common symbol and a large common symbol result in a
      normal common symbol.  We turn the large common symbol into a
      normal one.  */
-  if (!*olddyn
+  if (!*olddef
       && h->root.type == bfd_link_hash_common
-      && !*newdyn
+      && !*newdef
       && bfd_is_com_section (*sec)
       && *oldsec != *sec)
     {
