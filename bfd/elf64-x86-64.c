@@ -1261,7 +1261,9 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    case R_X86_64_PLT32:
 	    case R_X86_64_GOTPCREL:
 	    case R_X86_64_GOTPCREL64:
-	      if (!_bfd_elf_create_ifunc_sections (abfd, info))
+	      if (htab->elf.dynobj == NULL)
+		htab->elf.dynobj = abfd;
+	      if (!_bfd_elf_create_ifunc_sections (htab->elf.dynobj, info))
 		return FALSE;
 	      break;
 	    }

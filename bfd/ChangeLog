@@ -1,3 +1,10 @@
+2011-05-01  Alan Modra  <amodra@gmail.com>
+
+	PR ld/12718
+	* elf32-i386.c (elf_i386_check_relocs): Ensure dynobj set before
+	creating ifunc sections.
+	* elf64-x86-64.c (elf_x86_64_check_relocs): Likewise.
+
 2011-04-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf64-x86-64.c (elf_x86_64_merge_symbol): Correct parameter

@@ -1376,7 +1376,9 @@ elf_i386_check_relocs (bfd *abfd,
 	    case R_386_PLT32:
 	    case R_386_GOT32:
 	    case R_386_GOTOFF:
-	      if (!_bfd_elf_create_ifunc_sections (abfd, info))
+	      if (htab->elf.dynobj == NULL)
+		htab->elf.dynobj = abfd;
+	      if (!_bfd_elf_create_ifunc_sections (htab->elf.dynobj, info))
 		return FALSE;
 	      break;
 	    }
