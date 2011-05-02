@@ -96,7 +96,6 @@ set timeout 30
 
 
 send_gdb "hfgfh\t"
-sleep 1
 gdb_expect  {
         -re "^hfgfh\\\x07$"\
             { send_gdb "\n"
@@ -114,7 +113,6 @@ gdb_expect  {
 #exp_internal 0
 
 send_gdb "show output\t"
-sleep 1
 gdb_expect  {
         -re "^show output-radix $"\
             { send_gdb "\n"
@@ -125,16 +123,6 @@ gdb_expect  {
                       timeout           {fail "(timeout) complete 'show output'"}
                      }
             }
-        -re "^show output$"\
-            { send_gdb "\n"
-               gdb_expect {
-                      -re "Default output radix for printing of values is 10\\..*$gdb_prompt $"\
-                                        { fail "complete 'show output'"}
-                      -re ".*$gdb_prompt $" { fail "complete 'show output'"}
-                      timeout           { fail "(timeout) complete 'show output'"}
-                     }
-
-             }
 
         -re ".*$gdb_prompt $"       { fail "complete 'show output'" }
         timeout         { fail "(timeout) complete 'show output'" }
@@ -142,7 +130,6 @@ gdb_expect  {
 
 
 send_gdb "show output-\t"
-sleep 1
 gdb_expect  {
         -re "^show output-radix $"\
             { send_gdb "\n"
@@ -153,27 +140,15 @@ gdb_expect  {
                       timeout           {fail "(timeout) complete 'show output-'"}
                      }
             }
-        -re "^show output-$"\
-            { send_gdb "\n"
-               gdb_expect {
-                      -re "Default output radix for printing of values is 10\\..*$gdb_prompt $"\
-                                        { fail "complete 'show output-'"}
-                      -re ".*$gdb_prompt $" { fail "complete 'show output-'"}
-                      timeout           { fail "(timeout) complete 'show output-'"}
-                     }
-
-             }
 
         -re ".*$gdb_prompt $"       { fail "complete 'show output-'" }
         timeout         { fail "(timeout) complete 'show output-'" }
         }
 
 send_gdb "p\t"
-sleep 1
 gdb_expect  {
         -re "^p\\\x07$"\
             { send_gdb "\n"
-	      sleep 1
               gdb_expect {
                       -re "The history is empty\\..*$gdb_prompt $"\
                                         { pass "complete 'p'"}
@@ -186,11 +161,9 @@ gdb_expect  {
         }
 
 send_gdb "p \t"
-sleep 3
 gdb_expect  {
         -re "^p \\\x07$"\
             { send_gdb "\n"
-	      sleep 1
               gdb_expect {
                       -re "The history is empty\\..*$gdb_prompt $"\
                                         { pass "complete 'p '"}
@@ -204,7 +177,6 @@ gdb_expect  {
 
 
 send_gdb "info t foo\t"
-sleep 1
 gdb_expect  {
         -re "^info t foo\\\x07$"\
             { send_gdb "\n"
@@ -220,7 +192,6 @@ gdb_expect  {
         }
 
 send_gdb "info t\t"
-sleep 1
 gdb_expect  {
         -re "^info t\\\x07$"\
             { send_gdb "\n"
@@ -238,7 +209,6 @@ gdb_expect  {
 
 
 send_gdb "info t \t"
-sleep 1
 gdb_expect  {
         -re "^info t \\\x07$"\
             { send_gdb "\n"
@@ -256,7 +226,6 @@ gdb_expect  {
 
 
 send_gdb "info asdfgh\t"
-sleep 1
 gdb_expect  {
         -re "^info asdfgh\\\x07$"\
             { send_gdb "\n"
@@ -274,7 +243,6 @@ gdb_expect  {
 
 
 send_gdb "info asdfgh \t"
-sleep 1
 gdb_expect  {
         -re "^info asdfgh \\\x07$"\
             { send_gdb "\n"
@@ -291,7 +259,6 @@ gdb_expect  {
         }
 
 send_gdb "info\t"
-sleep 1
 gdb_expect  {
         -re "^info $"\
             { send_gdb "\n"
@@ -307,7 +274,6 @@ gdb_expect  {
         }
 
 send_gdb "info \t"
-sleep 1
 gdb_expect  {
         -re "^info \\\x07$"\
             { send_gdb "\n"
@@ -322,14 +288,12 @@ gdb_expect  {
         timeout         { fail "(timeout) complete 'info '" }
         }
 
-
 send_gdb "info \t"
-sleep 1
 gdb_expect  {
         -re "^info \\\x07$"\
             { send_gdb "\t"
               gdb_expect {
-                      -re "address.*types.*$gdb_prompt info $"\
+                      -re "address.*types.*$gdb_prompt "\
                           { send_gdb "\n"
                             gdb_expect {
                                      -re "\"info\".*unambiguous\\..*$gdb_prompt $"\
@@ -365,7 +329,6 @@ gdb_expect  {
 
 
 send_gdb "p \"break1\t"
-sleep 1
 gdb_expect  {
         -re "^p \"break1\\\x07$"\
             { send_gdb "\n"
@@ -381,20 +344,12 @@ gdb_expect  {
 		    timeout           {fail "(timeout) complete 'p \"break1'"}
 		}
 	    }
-	-re "^p \"break1.*$"
-	    {	send_gdb "\n"
-		gdb_expect {
-		    -re ".*$gdb_prompt $" { fail "complete 'p \"break1'"}
-		    timeout           {fail "(timeout) complete 'p \"break1'"}
-		}
-	    }
         -re ".*$gdb_prompt $"       { fail "complete 'p \"break1'" }
         timeout         { fail "(timeout) complete 'p \"break1'" }
         }
 
 setup_xfail "*-*-*"
 send_gdb "p \"break1.\t"
-sleep 1
 gdb_expect  {
         -re "^p \"break1\\.\\\x07$"\
             { send_gdb "\n"
@@ -422,7 +377,6 @@ gdb_expect  {
         }
 
 send_gdb "p 'arg\t"
-sleep 1
 gdb_expect  {
         -re "^p 'arg\\\x07$"\
             { send_gdb "\n"
@@ -438,12 +392,11 @@ gdb_expect  {
         }
 
 send_gdb "p 'arg\t"
-sleep 1
 gdb_expect {
     -re "^p 'arg\\\x07$" {
 	send_gdb "\t"
 	gdb_expect {
-	    -re ".*argv.*$gdb_prompt p 'arg$" {
+	    -re ".*argv.*$gdb_prompt " {
 		send_gdb "\n"
 		gdb_expect {
 		    -re "(Invalid character constant\\.|Unmatched single quote\\.).*$gdb_prompt $" {
@@ -503,7 +456,6 @@ gdb_expect {
 # So, I'm hoping that there is no system with a static library variable named
 # `no_var_by_this_name'.
 send_gdb "p no_var_named_this-arg\t"
-sleep 1
 gdb_expect {
     -re "^p no_var_named_this-arg\\\x07$" {
         send_gdb "\n"
@@ -528,12 +480,11 @@ gdb_expect {
 }
 
 send_gdb "p no_var_named_this-arg\t"
-sleep 1
 gdb_expect {
     -re "^p no_var_named_this-arg\\\x07$" {
 	send_gdb "\t"
 	gdb_expect {
-	    -re ".*argv.*$gdb_prompt p no_var_named_this-arg$" {
+	    -re ".*argv.*$gdb_prompt " {
 		send_gdb "\n"
 		gdb_expect {
 		    -re "No symbol \"no_var_named_this\" in current context\\..*$gdb_prompt $" {
@@ -548,28 +499,26 @@ gdb_expect {
 		}
 	    }
 	    -re "(There are $decimal possibilities\\.  Do you really\r\nwish to see them all.|Display all $decimal possibilities.) \\(y or n\\)$" {
-		send_gdb "n"
+		send_gdb "n\n"
+
+		# Eat the prompt
 		gdb_expect {
-		    -re "\\(gdb\\) p no_var_named_this-arg$" {
-			send_gdb "\n"
-			gdb_expect {
-			    -re "No symbol \"no_var_named_this\" in current context\\..*$gdb_prompt $" {
-				pass "complete (2) 'p no_var_named_this-arg'"
-			    }
-			    -re ".*$gdb_prompt $" {
-				fail "complete (2) 'p no_var_named_this-arg'"
-			    }
-			    timeout {
-                                fail "(timeout) complete (2) 'p no_var_named_this-arg'"
-                            }
-			}
+		    -re "$gdb_prompt " {
+			pass "complete (2) 'p no_var_named_this-arg' (eat prompt)"
+		    }
+		    timeout { fail "(timeout) complete (2) 'p no_var_named_this-' (eat prompt)" }
+		}
+
+		gdb_expect {
+		    -re "No symbol \"no_var_named_this\" in current context\\..*$gdb_prompt $" {
+			pass "complete (2) 'p no_var_named_this-arg'"
 		    }
 		    -re ".*$gdb_prompt $" {
-                        fail "complete (2) 'p no_var_named_this-arg'"
-                    }
+			fail "complete (2) 'p no_var_named_this-arg'"
+		    }
 		    timeout {
-                        fail "(timeout) complete (2) 'p no_var_named_this-arg'"
-                    }
+			fail "(timeout) complete (2) 'p no_var_named_this-arg'"
+		    }
 		}
 	    }
 	    -re ".*$gdb_prompt $" {
@@ -583,37 +532,34 @@ gdb_expect {
 }
 
 send_gdb "p no_var_named_this-\t"
-sleep 1
 gdb_expect  {
     -re "^p no_var_named_this-\\\x07$" {
 	send_gdb "\t"
 	gdb_expect {
 	    -re "(There are $decimal possibilities\\.  Do you really\r\nwish to see them all.|Display all $decimal possibilities.) \\(y or n\\)$" {
-		send_gdb "n"
+		send_gdb "n\n"
+
+		# Eat the prompt
 		gdb_expect {
-		    -re "\\(gdb\\) p no_var_named_this-$" {
-			send_gdb "\n"
-			gdb_expect {
-			    -re "No symbol \"no_var_named_this\" in current context\\..*$gdb_prompt $" {
-				pass "complete (2) 'p no_var_named_this-'"
-			    }
-			    -re ".*$gdb_prompt $" {
-				fail "complete (2) 'p no_var_named_this-'"
-			    }
-			    timeout {
-                                fail "(timeout) complete (2) 'p no_var_named_this-'"
-                            }
-			}
+		    -re "$gdb_prompt " {
+			pass "complete (2) 'p no_var_named_this-' (eat prompt)"
+		    }
+		    timeout { fail "(timeout) complete (2) 'p no_var_named_this-' (eat prompt)" }
+		}
+
+		gdb_expect {
+		    -re "No symbol \"no_var_named_this\" in current context\\..*$gdb_prompt $" {
+			pass "complete (2) 'p no_var_named_this-'"
 		    }
 		    -re ".*$gdb_prompt $" {
-                        fail "complete (2) 'p no_var_named_this-'"
-                    }
+			fail "complete (2) 'p no_var_named_this-'"
+		    }
 		    timeout {
-                        fail "(timeout) complete (2) 'p no_var_named_this-'"
-                    }
+			fail "(timeout) complete (2) 'p no_var_named_this-'"
+		    }
 		}
 	    }
-	    -re ".*argv.*$gdb_prompt p no_var_named_this-$" {
+	    -re ".*argv.*$gdb_prompt $" {
 		send_gdb "\n"
 		gdb_expect {
 		    -re "No symbol \"no_var_named_this\" in current context\\..*$gdb_prompt $" {
@@ -638,11 +584,9 @@ gdb_expect  {
 }
 
 send_gdb "p values\[0\].a\t"
-sleep 3
 gdb_expect  {
         -re "^p values.0..a_field $"\
             { send_gdb "\n"
-	      sleep 1
               gdb_expect {
                       -re "^.* = 0.*$gdb_prompt $"\
                                         { pass "complete 'p values\[0\].a'"}
@@ -761,7 +705,6 @@ gdb_test " " "Source directories searched: .*" "Glob remaining of directory test
 
 
 send_gdb "complete file ./gdb.base/compl\n"
-sleep 1
 gdb_expect  {
     -re "file ./gdb.base/completion\\.exp.*$gdb_prompt $"
 	{ pass "complete-command 'file ./gdb.base/compl'"}
@@ -770,7 +713,6 @@ gdb_expect  {
 }
 
 send_gdb "file ./gdb.base/complet\t"
-sleep 1
 gdb_expect  {
         -re "^file ./gdb.base/completion\\.exp $"\
             { send_gdb "\n"
@@ -788,14 +730,12 @@ gdb_expect  {
         }
 
 send_gdb "info func marke\t"
-sleep 1
 gdb_expect  {
         -re "^info func marke.*r$"\
             {
 	      send_gdb "\t\t"
-              sleep 3
               gdb_expect {
-                      -re "marker1.*$gdb_prompt info func marker$"\
+                      -re "marker1.*$gdb_prompt "\
                       { send_gdb "\n"
                         gdb_expect {
                                 -re "All functions matching regular expression \"marker\":.*File.*break1.c:\r\nint marker1\\((void|)\\);\r\nint marker2\\(int\\).*marker3\\(char.*char.*\\).*marker4\\(long( int)?\\);.*$gdb_prompt $"\
@@ -814,9 +754,8 @@ gdb_expect  {
 
 
 send_gdb "set follow-fork-mode \t\t"
-sleep 1
 gdb_expect  {
-        -re "child.*parent.*$gdb_prompt set follow-fork-mode $"\
+        -re "child.*parent.*$gdb_prompt "\
             { send_gdb "\n"
               gdb_expect {
                       -re "Requires an argument.*child.*parent.*$gdb_prompt $"\

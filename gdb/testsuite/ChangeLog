@@ -1,3 +1,12 @@
+2011-05-02  Pedro Alves  <pedro@codesourcery.com>
+
+	PR testsuite/12649
+	Fix races.
+
+	* gdb.base/completion.exp: Remove all sleep calls.  Remove
+	unnecessary regexs.  Don't explicitly expect anything after the
+	prompt.  Eat the prompt if necessary.
+
 2011-05-02  Edjunior Machado  <emachado@linux.vnet.ibm.com>
 
 	* gdb.opt/inline-cmds.exp: Adjust checks with "finish" command to
