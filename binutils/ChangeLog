@@ -1,3 +1,11 @@
+2011-05-02  Alan Modra  <amodra@gmail.com>
+
+	PR binutils/12720
+	Revert the following change
+	Michael Snyder  <msnyder@vmware.com>
+	* ar.c (move_members): Plug memory leak.
+	(delete_members): Plug memory leak.
+
 2011-04-28  Tom Tromey  <tromey@redhat.com>
 
 	* NEWS: Add note about --dwarf-depth, --dwarf-start, and

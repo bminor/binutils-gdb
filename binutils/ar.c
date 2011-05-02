@@ -1119,7 +1119,6 @@ delete_members (bfd *arch, char **files_to_delete)
   bfd_boolean found;
   bfd_boolean something_changed = FALSE;
   int match_count;
-  const char * tmp = NULL;
 
   for (; *files_to_delete != NULL; ++files_to_delete)
     {
@@ -1141,10 +1140,8 @@ delete_members (bfd *arch, char **files_to_delete)
       current_ptr_ptr = &(arch->archive_next);
       while (*current_ptr_ptr)
 	{
-	  if (tmp != NULL)
-	    free ((char *) tmp);
-	  tmp = normalize (*files_to_delete, arch);
-	  if (FILENAME_CMP (tmp, (*current_ptr_ptr)->filename) == 0)
+	  if (FILENAME_CMP (normalize (*files_to_delete, arch),
+			    (*current_ptr_ptr)->filename) == 0)
 	    {
 	      ++match_count;
 	      if (counted_name_mode
@@ -1181,9 +1178,6 @@ delete_members (bfd *arch, char **files_to_delete)
     write_archive (arch);
   else
     output_filename = NULL;
-
-  if (tmp != NULL)
-    free ((char *) tmp);
 }
 
 
@@ -1192,9 +1186,8 @@ delete_members (bfd *arch, char **files_to_delete)
 static void
 move_members (bfd *arch, char **files_to_move)
 {
-  bfd **after_bfd;		/* New entries go after this one.  */
-  bfd **current_ptr_ptr;	/* cdr pointer into contents.  */
-  const char *tmp = NULL;
+  bfd **after_bfd;		/* New entries go after this one */
+  bfd **current_ptr_ptr;	/* cdr pointer into contents */
 
   for (; *files_to_move; ++files_to_move)
     {
@@ -1202,11 +1195,8 @@ move_members (bfd *arch, char **files_to_move)
       while (*current_ptr_ptr)
 	{
 	  bfd *current_ptr = *current_ptr_ptr;
-
-	  if (tmp != NULL)
-	    free ((char *) tmp);
-	  tmp = normalize (*files_to_move, arch);
-	  if (FILENAME_CMP (tmp, current_ptr->filename) == 0)
+	  if (FILENAME_CMP (normalize (*files_to_move, arch),
+			    current_ptr->filename) == 0)
 	    {
 	      /* Move this file to the end of the list - first cut from
 		 where it is.  */
@@ -1230,13 +1220,10 @@ move_members (bfd *arch, char **files_to_move)
       /* xgettext:c-format */
       fatal (_("no entry %s in archive %s!"), *files_to_move, arch->filename);
 
-    next_file:
-      ;
+    next_file:;
     }
 
   write_archive (arch);
-  if (tmp != NULL)
-    free ((char *) tmp);
 }
 
 /* Ought to default to replacing in place, but this is existing practice!  */
