@@ -1,3 +1,10 @@
+2011-05-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/12720
+	* binutils-all/ar.exp (delete_an_element): New.
+	(move_an_element): Likewise.
+	Run delete_an_element and move_an_element.
+
 2011-04-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* binutils-all/x86-64/compressed-1a.d: Adjust for change in output
