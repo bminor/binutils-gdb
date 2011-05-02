@@ -246,50 +246,50 @@
 
 	MI breakpoint notifications.
 
-        * annotate.c (breakpoint_changed): Adjust parameter type.
-        * breakpoint.c (set_breakpoint_condition): Adjust to change
-        in breakpoint_modified type.
-        (breakpoint_set_commands): Likewise.
-        (do_map_commands_command): Likewise.
-        (bpstat_check_breakpoint_conditions): Notify that breakpoint has
-        changed after bumping hit count.
-        (bpstat_stop_status): Likewise.
-        (print_one_breakpoint_location): Don't wrap in tuple here.
-        (print_one_breakpoint): Always print individual locations.
-        For locations, use unnamed tuple.
-        (disable_breakpoints_in_unloaded_shlib): Notify that breakpoint
-        has changed.
-        (create_catchpoint, create_syscall_event_catchpoint): Call
-        breakpoint_created obsever.
-        (mention): Don't call breakpoint_created observer.
-        (create_breakpoint_sal): Call breakpoint_created observer.
-        (create_breakpoint, watch_command_1): Likewise.
-        (create_ada_exception_breakpoint): Likewise.
-        (delete_breakpoint): Call breakpoint_deleted breakpoint.
-        (locations_are_equal): New.
-        (update_breakpoint_locations): If locations were changed, notify.
-        (set_ignore_count, disable_breakpoint, do_enable_breakpoint):
-        Call breakpoint_modified observer.
+	* annotate.c (breakpoint_changed): Adjust parameter type.
+	* breakpoint.c (set_breakpoint_condition): Adjust to change
+	in breakpoint_modified type.
+	(breakpoint_set_commands): Likewise.
+	(do_map_commands_command): Likewise.
+	(bpstat_check_breakpoint_conditions): Notify that breakpoint has
+	changed after bumping hit count.
+	(bpstat_stop_status): Likewise.
+	(print_one_breakpoint_location): Don't wrap in tuple here.
+	(print_one_breakpoint): Always print individual locations.
+	For locations, use unnamed tuple.
+	(disable_breakpoints_in_unloaded_shlib): Notify that breakpoint
+	has changed.
+	(create_catchpoint, create_syscall_event_catchpoint): Call
+	breakpoint_created obsever.
+	(mention): Don't call breakpoint_created observer.
+	(create_breakpoint_sal): Call breakpoint_created observer.
+	(create_breakpoint, watch_command_1): Likewise.
+	(create_ada_exception_breakpoint): Likewise.
+	(delete_breakpoint): Call breakpoint_deleted breakpoint.
+	(locations_are_equal): New.
+	(update_breakpoint_locations): If locations were changed, notify.
+	(set_ignore_count, disable_breakpoint, do_enable_breakpoint):
+	Call breakpoint_modified observer.
 
-        * mi/mi-cmd-break.c (breakpoint_notify): Adjust.
-        (mi_cmd_break_insert): Don't set observers for modify and delete.
-        * mi/mi-interp.c (mi_suppress_breakpoint_notifications): New.
-        (mi_breakpoint_created, mi_breakpoint_deleted)
-        (mi_breakpoint_modified): New.
-        (mi_interpreter_init): Hook the above.
-        * mi/mi-main.c (mi_cmd_execute): Disable breakpoint notifications
-        while -break-* commands are executing.
-        * mi/mi-main.h (mi_suppress_breakpoint_notifications): New.
-        * mi/mi-out.c (struct ui_out_data): New field original_buffer.
-        (mi_redirect): New.
-        (mi_ui_out_impl): Hook in mi_redirect.
-        (mi_field_skip): True to the name, skip the field, don't output
-        a field with an empty value.
+	* mi/mi-cmd-break.c (breakpoint_notify): Adjust.
+	(mi_cmd_break_insert): Don't set observers for modify and delete.
+	* mi/mi-interp.c (mi_suppress_breakpoint_notifications): New.
+	(mi_breakpoint_created, mi_breakpoint_deleted)
+	(mi_breakpoint_modified): New.
+	(mi_interpreter_init): Hook the above.
+	* mi/mi-main.c (mi_cmd_execute): Disable breakpoint notifications
+	while -break-* commands are executing.
+	* mi/mi-main.h (mi_suppress_breakpoint_notifications): New.
+	* mi/mi-out.c (struct ui_out_data): New field original_buffer.
+	(mi_redirect): New.
+	(mi_ui_out_impl): Hook in mi_redirect.
+	(mi_field_skip): True to the name, skip the field, don't output
+	a field with an empty value.
 
-        * python/py-breakpoint.c (gdbpy_breakpoint_created)
-        (gdbpy_breakpoint_deleted): Adjust.
-        * tui/tui-hooks.c (tui_event_create_breakpoint)
-        (tui_event_delete_breakpoint, tui_event_modify_breakpoint): Adjust.
+	* python/py-breakpoint.c (gdbpy_breakpoint_created)
+	(gdbpy_breakpoint_deleted): Adjust.
+	* tui/tui-hooks.c (tui_event_create_breakpoint)
+	(tui_event_delete_breakpoint, tui_event_modify_breakpoint): Adjust.
 
 2011-04-26  Aleksandar Ristovski  <aristovski@qnx.com>
 
@@ -303,9 +303,9 @@
 
 2011-04-26  Yao Qi  <yao@codesourcery.com>
 
-        * linux-nat.c: Move common macros to ...
-        Include linux-ptrace.h.
-        * common/linux-ptrace.h: ... here.  New.
+	* linux-nat.c: Move common macros to ...
+	Include linux-ptrace.h.
+	* common/linux-ptrace.h: ... here.  New.
 
 2011-04-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
@@ -1180,15 +1180,15 @@
 
 2011-03-24  Mark Wielaard  <mjw@redhat.com>
 
-        * dwarf2read.c (lookup_signatured_type): Use DW_FORM_ref_sig8 in
-        complaint.
-        (skip_one_die): Use DW_FORM_ref_sig8, not DW_FORM_sig8.
-        (find_partial_die_in_comp_unit): Likewise in comment.
-        (read_attribute_value): Likewise.
-        (lookup_die_type): Likewise.
-        (dwarf_form_name): Likewise.
-        (dump_die_shallow): Likewise.
-        (follow_die_ref_or_sig): Likewise.
+	* dwarf2read.c (lookup_signatured_type): Use DW_FORM_ref_sig8 in
+	complaint.
+	(skip_one_die): Use DW_FORM_ref_sig8, not DW_FORM_sig8.
+	(find_partial_die_in_comp_unit): Likewise in comment.
+	(read_attribute_value): Likewise.
+	(lookup_die_type): Likewise.
+	(dwarf_form_name): Likewise.
+	(dump_die_shallow): Likewise.
+	(follow_die_ref_or_sig): Likewise.
 
 2011-03-24  Tom Tromey  <tromey@redhat.com>
 
@@ -1319,7 +1319,7 @@
 
 2011-03-22  Phil Muldoon  <pmuldoon@redhat.com>
 
-        PR python/12183
+	PR python/12183
 
 	* python/py-function.c (fnpy_call): Treat GdbErrors differently to
 	other error classes.  Do not print stack trace.
@@ -1763,7 +1763,7 @@
 
 2011-03-18  Phil Muldoon  <pmuldoon@redhat.com>
 
-        PR python/12149
+	PR python/12149
 
 	* python/python.c (gdbpy_write): Accept a stream argument and
 	operate to the appropriate stream.
@@ -1778,9 +1778,9 @@
 2011-03-18  Kwok Cheung Yeung  <kcy@codesourcery.com>
 
 	* amd64-tdep.c (amd64_relocate_instruction): Fix ordering of arguments
-        to store_signed_integer.  Add debug message when relocating CALL
-        instructions.  Fix formatting of debug message.
-        * i386-tdep.c (i386_relocate_instruction): Ditto.
+	to store_signed_integer.  Add debug message when relocating CALL
+	instructions.  Fix formatting of debug message.
+	* i386-tdep.c (i386_relocate_instruction): Ditto.
 
 2011-03-17  Joel Brobecker  <brobecker@gnat.com>
 
