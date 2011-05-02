@@ -1,3 +1,8 @@
+2011-05-02  Edjunior Machado  <emachado@linux.vnet.ibm.com>
+
+	* gdb.opt/inline-cmds.exp: Adjust checks with "finish" command to
+	accept to show the caller line again as well as the line after.
+
 2011-04-29  Phil Muldoon  <pmuldoon@redhat.com>
 
 	PR mi/12531
