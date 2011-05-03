@@ -100,6 +100,9 @@ Boston, MA 02110-1301, USA@*
 ISBN 1-882114-77-9 @*
 
 @insertcopying
+@page
+@value{GDBN} version 7.3 is dedicated to the memory of long-standing
+contributor Michael Snyder.
 @end titlepage
 @page
 
