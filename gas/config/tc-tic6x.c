@@ -345,6 +345,44 @@ s_tic6x_arch (int ignored ATTRIBUTE_UNUSED)
   demand_empty_rest_of_line ();
 }
 
+/* Parse a .ehtype directive.  */
+
+static void
+s_tic6x_ehtype (int ignored ATTRIBUTE_UNUSED)
+{
+  expressionS exp;
+  char *p;
+
+#ifdef md_flush_pending_output
+  md_flush_pending_output ();
+#endif
+
+  if (is_it_end_of_statement ())
+    {
+      demand_empty_rest_of_line ();
+      return;
+    }
+
+#ifdef md_cons_align
+  md_cons_align (4);
+#endif
+
+
+  expression (&exp);
+
+  if (exp.X_op != O_symbol)
+    {
+      as_bad (_("expected symbol"));
+      return;
+    }
+
+  p = frag_more (4);
+  fix_new_exp (frag_now, p - frag_now->fr_literal, 4,
+	       &exp, 0, BFD_RELOC_C6000_EHTYPE);
+
+  demand_empty_rest_of_line ();
+}
+
 /* Parse a .nocmp directive.  */
 
 static void
@@ -535,6 +573,7 @@ const pseudo_typeS md_pseudo_table[] =
     { "nocmp", s_tic6x_nocmp, 0 },
     { "scomm",	s_tic6x_scomm, 0 },
     { "word", cons, 4 },
+    { "ehtype", s_tic6x_ehtype, 0 },
     { 0, 0, 0 }
   };
 
@@ -1801,6 +1840,7 @@ tic6x_fix_adjustable (fixS *fixP)
     case BFD_RELOC_C6000_SBR_GOT_U15_W:
     case BFD_RELOC_C6000_SBR_GOT_H16_W:
     case BFD_RELOC_C6000_SBR_GOT_L16_W:
+    case BFD_RELOC_C6000_EHTYPE:
       return 0;
 
     default:
@@ -3508,6 +3548,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
   switch (fixP->fx_r_type)
     {
     case BFD_RELOC_NONE:
+    case BFD_RELOC_C6000_EHTYPE:
       /* Force output to the object file.  */
       fixP->fx_done = 0;
       break;

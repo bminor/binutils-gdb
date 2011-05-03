@@ -1,3 +1,11 @@
+2011-05-03  Paul Brook  <paul@codesourcery.com>
+
+
+	* config/tc-tic6x.c (s_ehtype): New function.
+	(md_pseudo_table): Add "ehtype".
+	(tic6x_fix_adjustable, md_apply_fix): BFD_RELOC_C6000_EHTYPE.
+	* doc/c-tic6x.texi: Document .ehtype directive.
+
 2011-04-26  Kai Tietz  <ktietz@redhat.com>
 
 	* dw2gencfi.c (dwcfi_seg_list): New struct.

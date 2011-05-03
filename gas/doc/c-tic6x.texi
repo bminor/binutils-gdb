@@ -146,6 +146,10 @@ The @var{tag} is either an attribute number or one of
 @var{value} is either a @code{number}, @code{"string"}, or
 @code{number, "string"} depending on the tag.
 
+@cindex @code{.ehtype} directive, TIC6X
+@item .ehtype @var{symbol}
+Output an exception type table reference to @var{symbol}.
+
 @cindex @code{.nocmp} directive, TIC6X
 @item .nocmp
 Disallow use of C64x+ compact instructions in the current text

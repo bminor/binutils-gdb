@@ -1,3 +1,10 @@
+2011-05-03  Paul Brook  <paul@codesourcery.com>
+
+
+	* ld-tic6x/ehtype-reloc-1-rel.d: New test.
+	* ld-tic6x/ehtype-reloc-1.d: New test.
+	* ld-tic6x/ehtype-reloc-1.s: New test.
+
 2011-05-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/12718

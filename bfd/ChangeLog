@@ -1,3 +1,11 @@
+2011-05-03  Paul Brook  <paul@codesourcery.com>
+
+
+	* elf32-tic6x.c (elf32_tic6x_howto_table,
+	elf32_tic6x_howto_table_rel, (elf32_tic6x_gc_sweep_hook,
+	elf32_tic6x_relocate_section, elf32_tic6x_check_relocs):
+	Add R_C6000_EHTYPE.
+
 2011-05-01  Alan Modra  <amodra@gmail.com>
 
 	PR ld/12718

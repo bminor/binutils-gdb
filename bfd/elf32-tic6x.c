@@ -468,7 +468,19 @@ static reloc_howto_type elf32_tic6x_howto_table[] =
 	 0,			/* src_mask */
 	 0xffffffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
-  EMPTY_HOWTO (28),
+  HOWTO (R_C6000_EHTYPE,	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_C6000_EHTYPE",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
   EMPTY_HOWTO (29),
   EMPTY_HOWTO (30),
   EMPTY_HOWTO (31),
@@ -1040,7 +1052,19 @@ static reloc_howto_type elf32_tic6x_howto_table_rel[] =
 	 0,			/* src_mask */
 	 0xffffffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
-  EMPTY_HOWTO (28),
+  HOWTO (R_C6000_EHTYPE,	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_C6000_EHTYPE",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
   EMPTY_HOWTO (29),
   EMPTY_HOWTO (30),
   EMPTY_HOWTO (31),
@@ -1853,6 +1877,7 @@ elf32_tic6x_gc_sweep_hook (bfd *abfd,
 	case R_C6000_SBR_GOT_U15_W:
 	case R_C6000_SBR_GOT_L16_W:
 	case R_C6000_SBR_GOT_H16_W:
+	case R_C6000_EHTYPE:
 	  if (h != NULL)
 	    {
 	      if (h->got.refcount > 0)
@@ -2323,6 +2348,7 @@ elf32_tic6x_relocate_section (bfd *output_bfd,
 	case R_C6000_SBR_GOT_U15_W:
 	case R_C6000_SBR_GOT_L16_W:
 	case R_C6000_SBR_GOT_H16_W:
+	case R_C6000_EHTYPE:
 	  /* Relocation is to the entry for this symbol in the global
 	     offset table.  */
 	  if (htab->elf.sgot == NULL)
@@ -2646,6 +2672,7 @@ elf32_tic6x_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_C6000_SBR_GOT_U15_W:
 	case R_C6000_SBR_GOT_L16_W:
 	case R_C6000_SBR_GOT_H16_W:
+	case R_C6000_EHTYPE:
 	  /* This symbol requires a global offset table entry.  */
 	  if (h != NULL)
 	    {
