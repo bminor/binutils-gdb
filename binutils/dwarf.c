@@ -1084,17 +1084,6 @@ decode_location_expression (unsigned char * data,
 	  display_block (data, uvalue);
 	  data += uvalue;
 	  break;
-	case DW_OP_GNU_entry_value:
-	  uvalue = read_leb128 (data, &bytes_read, 0);
-	  data += bytes_read;
-	  printf ("DW_OP_GNU_entry_value: (");
-	  if (decode_location_expression (data, pointer_size, offset_size,
-					  dwarf_version, uvalue,
-					  cu_offset, section))
-	    need_frame_base = 1;
-	  putchar (')');
-	  data += uvalue;
-	  break;
 
 	  /* GNU extensions.  */
 	case DW_OP_GNU_push_tls_address:
@@ -1142,6 +1131,53 @@ decode_location_expression (unsigned char * data,
 				     &bytes_read)));
 	      data += offset_size + bytes_read;
 	    }
+	  break;
+	case DW_OP_GNU_entry_value:
+	  uvalue = read_leb128 (data, &bytes_read, 0);
+	  data += bytes_read;
+	  printf ("DW_OP_GNU_entry_value: (");
+	  if (decode_location_expression (data, pointer_size, offset_size,
+					  dwarf_version, uvalue,
+					  cu_offset, section))
+	    need_frame_base = 1;
+	  putchar (')');
+	  data += uvalue;
+	  break;
+	case DW_OP_GNU_const_type:
+	  uvalue = read_leb128 (data, &bytes_read, 0);
+	  data += bytes_read;
+	  printf ("DW_OP_GNU_const_type: <0x%s> ",
+		  dwarf_vmatoa ("x", cu_offset + uvalue));
+	  uvalue = byte_get (data++, 1);
+	  display_block (data, uvalue);
+	  data += uvalue;
+	  break;
+	case DW_OP_GNU_regval_type:
+	  uvalue = read_leb128 (data, &bytes_read, 0);
+	  data += bytes_read;
+	  printf ("DW_OP_GNU_regval_type: %s (%s)",
+		  dwarf_vmatoa ("u", uvalue), regname (uvalue, 1));
+	  uvalue = read_leb128 (data, &bytes_read, 0);
+	  data += bytes_read;
+	  printf (" <0x%s>", dwarf_vmatoa ("x", cu_offset + uvalue));
+	  break;
+	case DW_OP_GNU_deref_type:
+	  printf ("DW_OP_GNU_deref_type: %ld", (long) byte_get (data++, 1));
+	  uvalue = read_leb128 (data, &bytes_read, 0);
+	  data += bytes_read;
+	  printf (" <0x%s>", dwarf_vmatoa ("x", cu_offset + uvalue));
+	  break;
+	case DW_OP_GNU_convert:
+	  uvalue = read_leb128 (data, &bytes_read, 0);
+	  data += bytes_read;
+	  printf ("DW_OP_GNU_convert <0x%s>",
+		  dwarf_vmatoa ("x", cu_offset + uvalue));
+	  break;
+	case DW_OP_GNU_reinterpret:
+	  uvalue = read_leb128 (data, &bytes_read, 0);
+	  data += bytes_read;
+	  printf ("DW_OP_GNU_reinterpret <0x%s>",
+		  dwarf_vmatoa ("x", cu_offset + uvalue));
 	  break;
 
 	  /* HP extensions.  */

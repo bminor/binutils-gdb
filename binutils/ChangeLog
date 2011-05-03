@@ -1,5 +1,9 @@
 2011-05-03  Jakub Jelinek  <jakub@redhat.com>
 
+	* dwarf.c (decode_location_expression): Handle DW_OP_GNU_const_type,
+	DW_OP_GNU_regval_type, DW_OP_GNU_deref_type, DW_OP_GNU_convert
+	and DW_OP_GNU_reinterpret.
+
 	* MAINTAINERS: Add myself as DWARF2 maintainer.
 
 2011-05-02  Alan Modra  <amodra@gmail.com>
