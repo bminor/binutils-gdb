@@ -783,12 +783,15 @@ exp_fold_tree_1 (etree_type *tree)
     case etree_provided:
       if (tree->assign.dst[0] == '.' && tree->assign.dst[1] == 0)
 	{
-	  /* Assignment to dot can only be done during allocation.  */
 	  if (tree->type.node_class != etree_assign)
 	    einfo (_("%F%S can not PROVIDE assignment to location counter\n"));
+	  /* After allocation, assignment to dot should not be done inside
+	     an output section since allocation adds a padding statement
+	     that effectively duplicates the assignment.  */
 	  if (expld.phase == lang_mark_phase_enum
 	      || expld.phase == lang_allocating_phase_enum
-	      || (expld.phase == lang_final_phase_enum
+	      || ((expld.phase == lang_assigning_phase_enum
+		   || expld.phase == lang_final_phase_enum)
 		  && expld.section == bfd_abs_section_ptr))
 	    {
 	      /* Notify the folder that this is an assignment to dot.  */
