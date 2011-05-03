@@ -1,3 +1,9 @@
+2011-05-03  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* breakpoint.c (update_watchpoint): Move code to change
+	the enable state of breakpoint from here ...
+	(do_enable_breakpoint): ... to here.
+
 2011-04-26  Andrew Gontarek  <andrewg@cray.com>
 
 	* valprint.c (val_print_array_elements): Fixed poor performance

@@ -1416,7 +1416,6 @@ update_watchpoint (struct breakpoint *b, int reparse)
 	  if (reg_cnt)
 	    {
 	      int i, target_resources_ok, other_type_used;
-	      enum enable_state orig_enable_state;
 
 	      /* We need to determine how many resources are already
 		 used for all other hardware watchpoints plus this one
@@ -1427,16 +1426,8 @@ update_watchpoint (struct breakpoint *b, int reparse)
 		 watchpoint.  */
 	      b->type = bp_hardware_watchpoint;
 
-	      /* hw_watchpoint_used_count ignores disabled watchpoints,
-		 and b might be disabled if we're being called from
-		 do_enable_breakpoint.  */
-	      orig_enable_state = b->enable_state;
-	      b->enable_state = bp_enabled;
-
 	      i = hw_watchpoint_used_count (bp_hardware_watchpoint,
 					    &other_type_used);
-
-	      b->enable_state = orig_enable_state;
 
 	      target_resources_ok = target_can_use_hardware_watchpoint
 		    (bp_hardware_watchpoint, i, other_type_used);
@@ -11477,14 +11468,18 @@ do_enable_breakpoint (struct breakpoint *bpt, enum bpdisp disposition)
 
   if (is_watchpoint (bpt))
     {
+      enum enable_state orig_enable_state;
       struct gdb_exception e;
 
       TRY_CATCH (e, RETURN_MASK_ALL)
 	{
+	  orig_enable_state = bpt->enable_state;
+	  bpt->enable_state = bp_enabled;
 	  update_watchpoint (bpt, 1 /* reparse */);
 	}
       if (e.reason < 0)
 	{
+	  bpt->enable_state = orig_enable_state;
 	  exception_fprintf (gdb_stderr, e, _("Cannot enable watchpoint %d: "),
 			     bpt->number);
 	  return;
