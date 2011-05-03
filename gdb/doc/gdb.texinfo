@@ -31017,19 +31017,20 @@ things without first using the debugger to find the facts.
 @node In Memoriam
 @appendix In Memoriam
 
-The GDB project mourns the loss of the following long-time contributors:
+The @value{GDBN} project mourns the loss of the following long-time
+contributors:
 
 @table @code
 @item Fred Fish
-Fred was a long-standing contributor to GDB (1991-2006), and to Free
-Software in general.  Outside of GDB, he was known in the Amiga world
-for his series of Fish Disks, and the GeekGadget project.
+Fred was a long-standing contributor to @value{GDBN} (1991-2006), and
+to Free Software in general.  Outside of @value{GDBN}, he was known in
+the Amiga world for his series of Fish Disks, and the GeekGadget project.
 
 @item Michael Snyder
-Michael was one of the Global Maintainers of the GDB project, with
-contributions recorded as early as 1996, until 2011.  In addition to
-his day to day participation, he was a large driving force behind
-adding Reverse Debugging to GDB.
+Michael was one of the Global Maintainers of the @value{GDBN} project,
+with contributions recorded as early as 1996, until 2011.  In addition
+to his day to day participation, he was a large driving force behind
+adding Reverse Debugging to @value{GDBN}.
 @end table
 
 Beyond their technical contributions to the project, they were also

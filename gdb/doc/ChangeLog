@@ -1,5 +1,10 @@
 2011-05-03  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.texinfo (In Memoriam): Replace litteral uses of `GDB' with
+	`@value{GDBN}'.
+
+2011-05-03  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.texinfo (titlepage): Remove dedication.
 	(In Memoriam): New appendix.
 
