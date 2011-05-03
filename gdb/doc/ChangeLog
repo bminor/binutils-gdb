@@ -1,3 +1,8 @@
+2011-05-03  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (titlepage): Remove dedication.
+	(In Memoriam): New appendix.
+
 2011-04-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Eli Zaretskii  <eliz@gnu.org>
 

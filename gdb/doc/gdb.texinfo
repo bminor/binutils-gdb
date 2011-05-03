@@ -100,10 +100,6 @@ Boston, MA 02110-1301, USA@*
 ISBN 1-882114-77-9 @*
 
 @insertcopying
-@page
-This edition of the GDB manual is dedicated to the memory of Fred
-Fish.  Fred was a long-standing contributor to GDB and to Free
-software in general.  We will miss him.
 @end titlepage
 @page
 
@@ -171,6 +167,7 @@ software in general.  We will miss him.
 * Command Line Editing::        Command Line Editing
 * Using History Interactively:: Using History Interactively
 @end ifclear
+* In Memoriam::                 In Memoriam
 * Formatting Documentation::    How to format and print @value{GDBN} documentation
 * Installing GDB::              Installing GDB
 * Maintenance Commands::        Maintenance Commands
@@ -31017,6 +31014,26 @@ things without first using the debugger to find the facts.
 @include inc-hist.texinfo
 @end ifclear
 
+@node In Memoriam
+@appendix In Memoriam
+
+The GDB project mourns the loss of the following long-time contributors:
+
+@table @code
+@item Fred Fish
+Fred was a long-standing contributor to GDB (1991-2006), and to Free
+Software in general.  Outside of GDB, he was known in the Amiga world
+for his series of Fish Disks, and the GeekGadget project.
+
+@item Michael Snyder
+Michael was one of the Global Maintainers of the GDB project, with
+contributions recorded as early as 1996, until 2011.  In addition to
+his day to day participation, he was a large driving force behind
+adding Reverse Debugging to GDB.
+@end table
+
+Beyond their technical contributions to the project, they were also
+enjoyable members of the Free Software Community.  We will miss them.
 
 @node Formatting Documentation
 @appendix Formatting Documentation
