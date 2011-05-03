@@ -1,3 +1,9 @@
+2011-05-03  Marek Polacek  <mpolacek@redhat.com>
+
+	* gdb.base/pr10179.exp: Get rid of races using `delete_breakpoints'
+	in place of `gdb_test "delete breakpoints"'.  This eliminates two
+	testcases.
+
 2011-05-02  Pedro Alves  <pedro@codesourcery.com>
 
 	PR testsuite/12649
