@@ -1,3 +1,15 @@
+2011-05-04  Alan Modra  <amodra@gmail.com>
+
+	PR ld/12726
+	* ldexp.h (lang_phase_type): Add lang_assigning_phase_enum.
+	* ldexp.c (exp_fold_tree_1): Correct assign to dot comment.  Don't
+	assign to dot when lang_assigning_phase_enum.
+	* ldlang.h (lang_do_assignments): Update prototype.
+	* ldlang.c (lang_do_assignments): Add phase parameter.  Update all
+	callers.
+	* pe-dll.c (pe_dll_fill_sections, pe_exe_fill_sections): Update
+	lang_do_assignments calls.
+
 2011-04-28  Daniel C. Klauer  <daniel.c.klauer@web.de>
 
 	PR ld/12614

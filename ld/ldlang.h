@@ -543,7 +543,7 @@ extern void lang_for_each_file
 extern void lang_reset_memory_regions
   (void);
 extern void lang_do_assignments
-  (void);
+  (lang_phase_type);
 
 #define LANG_FOR_EACH_INPUT_STATEMENT(statement)			\
   lang_input_statement_type *statement;					\
