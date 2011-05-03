@@ -59,9 +59,9 @@ nto_target (void)
 #ifdef __CYGWIN__
   static char buf[PATH_MAX];
   if (p)
-    cygwin_conv_to_posix_path (p, buf);
+    cygwin_conv_path (CCP_WIN_A_TO_POSIX, p, buf, PATH_MAX);
   else
-    cygwin_conv_to_posix_path (default_nto_target, buf);
+    cygwin_conv_path (CCP_WIN_A_TO_POSIX, default_nto_target, buf, PATH_MAX);
   return buf;
 #else
   return p ? p : default_nto_target;
