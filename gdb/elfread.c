@@ -257,7 +257,6 @@ elf_symtab_read (struct objfile *objfile, int type,
   char *filesymname = "";
   struct dbx_symfile_info *dbx = objfile->deprecated_sym_stab_info;
   int stripped = (bfd_get_symcount (objfile->obfd) == 0);
-  struct cleanup *back_to = make_cleanup (null_cleanup, NULL);
 
   for (i = 0; i < number_of_symbols; i++)
     {
@@ -486,7 +485,6 @@ elf_symtab_read (struct objfile *objfile, int type,
 				  + (sizeof (CORE_ADDR) * max_index));
 			  sectinfo = (struct stab_section_info *)
 			    xmalloc (size);
-			  make_cleanup (xfree, sectinfo);
 			  memset (sectinfo, 0, size);
 			  sectinfo->num_sections = max_index;
 			  if (filesym == NULL)
@@ -595,7 +593,6 @@ elf_symtab_read (struct objfile *objfile, int type,
 	    }
 	}
     }
-  do_cleanups (back_to);
 }
 
 /* Build minimal symbols named `function@got.plt' (see SYMBOL_GOT_PLT_SUFFIX)
