@@ -1823,12 +1823,15 @@ sim_common=yes
 sim_igen=no
 sim_arch=
 case "${target}" in
-   arm*-*-* | thumb*-*-* | strongarm*-*-* | xscale-*-*)
+   arm*-*-*)
        sim_arch=arm
        sim_testsuite=yes
        ;;
    avr*-*-*)
        sim_arch=avr
+       ;;
+   bfin-*-*)
+       sim_arch=bfin
        ;;
    cr16*-*-*)
        sim_arch=cr16

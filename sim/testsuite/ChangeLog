@@ -1,3 +1,15 @@
+2011-05-04  Joseph Myers  <joseph@codesourcery.com>
+
+	* configure: Regenerate.
+	* sim/arm/allinsn.exp (xscale*-*-*): Don't handle target.
+	* sim/arm/misc.exp (thumb*-*-*, xscale*-*-*): Don't handle
+	targets.
+	* sim/arm/iwmmxt/iwmmxt.exp: Test for arm*-*-* instead of
+	xscale*-*-*.
+	* sim/arm/thumb/allthumb.exp (thumb*-*-*): Don't handle target.
+	* sim/arm/xscale/xscale.exp: Test for arm*-*-* instead of
+	xscale*-*-*.
+
 2010-10-07  Hans-Peter Nilsson  <hp@axis.com>
 
 	* sim/cris/c/seek3.c, sim/cris/c/seek4.c: New tests.

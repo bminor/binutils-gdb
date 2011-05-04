@@ -1,3 +1,8 @@
+2011-05-04  Joseph Myers  <joseph@codesourcery.com>
+
+	* README: Don't mention xscale*-*-linux*.
+	* configure.srv (xscale*-*-linux*): Don't handle target.
+
 2011-04-27  Nathan Froyd  <froydnj@codesourcery.com>
 
 	* linux-x86-low.c (amd64_emit_const): Call memcpy instead of

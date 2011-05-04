@@ -165,9 +165,7 @@ if { $sizeof_double == 8 || $sizeof_long_double == 8 } {
     # words swapped in big endian format.
     # EABI targets default to natural-endian VFP format.
 
-    if { ([istarget "arm*-*-*"] || \
-	  [istarget "xscale*-*-*"] || \
-	  [istarget "strongarm*-*-*"]) \
+    if { ([istarget "arm*-*-*"]) \
 	 && !([istarget "*-*-*eabi"] || \
 	      [istarget "*-*-mingw32ce*"] || \
 	      [istarget "*-*-openbsd*"] || \

@@ -94,7 +94,7 @@ arm*-*-symbianelf*)
 	# Target: SymbianOS/arm
 	gdb_target_obs="arm-tdep.o solib-target.o arm-symbian-tdep.o"
 	;;
-arm*-*-* | thumb*-*-* | strongarm*-*-* | xscale-*-*)
+arm*-*-*)
 	# Target: ARM embedded system
 	gdb_target_obs="arm-tdep.o"
 	gdb_sim=../sim/arm/libsim.a

@@ -1,3 +1,11 @@
+2011-05-04  Joseph Myers  <joseph@codesourcery.com>
+
+	* gdb.base/a2-run.exp (strongarm-*-coff): Don't handle target.
+	* gdb.base/float.exp (xscale*-*-*, strongarm*-*-*): Don't handle
+	targets.
+	* gdb.base/long_long.exp (xscale*-*-*, strongarm*-*-*): Don't
+	handle targets.
+
 2011-05-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/completion.exp (complete help info wat): Rename to ...

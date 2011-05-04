@@ -1,3 +1,9 @@
+2011-05-04  Joseph Myers  <joseph@codesourcery.com>
+
+	* configure.tgt (thumb*-*-* | strongarm*-*-* | xscale-*-*): Don't
+	handle targets.
+	* configure: Regenerate.
+
 2011-03-05  Mike Frysinger  <vapier@gentoo.org>
 
 	* MAINTAINERS: Add bfin entry.

@@ -257,11 +257,6 @@ case "${target}" in
 			srv_mingw=yes
 			;;
 
-  xscale*-*-linux*)	srv_regobj=reg-arm.o
-			srv_tgtobj="linux-low.o linux-arm-low.o"
-			srv_linux_usrregs=yes
-			srv_linux_thread_db=yes
-			;;
   xtensa*-*-linux*)	srv_regobj=reg-xtensa.o
 			srv_tgtobj="linux-low.o linux-xtensa-low.o"
 			srv_linux_regsets=yes

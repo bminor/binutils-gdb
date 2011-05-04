@@ -42,9 +42,7 @@ if ![runto_main] then {
 
 if { [istarget "alpha*-*-*"] } then {
     gdb_test "info float" "f0.*" "info float"
-} elseif { [istarget "arm*-*-*"] || \
-	[istarget "xscale*-*-*"] || \
-	[istarget "strongarm*-*-*"] } then {
+} elseif { [istarget "arm*-*-*"] } then {
     gdb_test_multiple "info float" "info float" {
 	-re "Software FPU type.*mask:.*flags:.*$gdb_prompt $" {
 	    pass "info float (FPA)"

@@ -16,7 +16,7 @@ sim_common=yes
 sim_igen=no
 sim_arch=
 case "${target}" in
-   arm*-*-* | thumb*-*-* | strongarm*-*-* | xscale-*-*)
+   arm*-*-*)
        SIM_ARCH(arm)
        sim_testsuite=yes
        ;;

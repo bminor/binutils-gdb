@@ -1,3 +1,9 @@
+2011-05-04  Joseph Myers  <joseph@codesourcery.com>
+
+	* configure.host (xscale*): Don't handle target.
+	* configure.tgt (thumb*-*-* | strongarm*-*-* | xscale-*-*): Don't
+	handle targets.
+
 2011-05-04  Yao Qi  <yao@codesourcery.com>
 
 	* gdb_wait.h: remove WAITTYPE and WCOREDUMP.
