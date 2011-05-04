@@ -78,12 +78,6 @@
 
 /* These are not defined in POSIX, but are used by our programs.  */
 
-#define WAITTYPE	int
-
-#ifndef	WCOREDUMP
-#define WCOREDUMP(w)	(((w)&0200) != 0)
-#endif
-
 #ifndef	WSETEXIT
 # ifdef	W_EXITCODE
 #define	WSETEXIT(w,status) ((w) = W_EXITCODE(status,0))
