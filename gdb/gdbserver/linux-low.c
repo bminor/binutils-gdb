@@ -878,11 +878,6 @@ static void
 linux_join (int pid)
 {
   int status, ret;
-  struct process_info *process;
-
-  process = find_process_pid (pid);
-  if (process == NULL)
-    return;
 
   do {
     ret = my_waitpid (pid, &status, 0);

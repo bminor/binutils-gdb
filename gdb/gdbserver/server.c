@@ -2442,17 +2442,6 @@ detach_or_kill_for_exit (void)
   for_each_inferior (&all_processes, detach_or_kill_inferior_callback);
 }
 
-static void
-join_inferiors_callback (struct inferior_list_entry *entry)
-{
-  struct process_info *process = (struct process_info *) entry;
-
-  /* If we are attached, then we can exit.  Otherwise, we need to hang
-     around doing nothing, until the child is gone.  */
-  if (!process->attached)
-    join_inferior (ptid_get_pid (process->head.id));
-}
-
 int
 main (int argc, char *argv[])
 {
@@ -2851,8 +2840,7 @@ process_serial_event (void)
 	      /* If we are attached, then we can exit.  Otherwise, we
 		 need to hang around doing nothing, until the child is
 		 gone.  */
-	      for_each_inferior (&all_processes,
-				 join_inferiors_callback);
+	      join_inferior (pid);
 	      exit (0);
 	    }
 	}
