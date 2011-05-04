@@ -1,3 +1,8 @@
+2011-05-04  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.base/completion.exp: Use gdb_test_multiple instead of
+	gdb_test and explicit $gdb_prompt/timeout matches.
+
 2011-05-04  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.arch/arm-disp-step.S: Fix usage of macros __thumb__
