@@ -18,7 +18,7 @@
 	.syntax unified
 	.text
 	.type main,%function
-#if defined (__thumb__) || defined (__thumb2__)
+#if defined (__thumb__)
 	.code   16
 	.thumb_func
 #endif
@@ -44,7 +44,7 @@ test_ret_end:
 	bl test_ldr_pc
 
 	/* Test ldm/stm only in ARM mode */
-#if !defined (__thumb__) && !defined (__thumb2__)
+#if !defined (__thumb__)
 	bl test_ldm_stm_pc
 #endif
 
@@ -60,7 +60,7 @@ test_ret_end:
 	.size main, .-main
 	
 	.global test_call_subr
-#if defined (__thumb__) || defined (__thumb2__)
+#if defined (__thumb__)
 	.code   16
 	.thumb_func
 #endif
@@ -77,7 +77,7 @@ test_ret:
 
 	
 	.global test_branch
-#if defined (__thumb__) || defined (__thumb2__)
+#if defined (__thumb__)
 	.code   16
 	.thumb_func
 #endif
@@ -90,7 +90,7 @@ L_branch:
 	.size test_branch, .-test_branch
 
 	.global test_ldr_pc
-#if defined (__thumb__) || defined (__thumb2__)
+#if defined (__thumb__)
 	.code   16
 	.thumb_func
 #endif
@@ -103,7 +103,7 @@ test_ldr_pc_ret:
 	bx lr
 	.size test_ldr_pc, .-test_ldr_pc
 
-#if !defined (__thumb__) && !defined (__thumb2__)
+#if !defined (__thumb__)
 	.global test_ldm_stm_pc
 	.type test_ldm_stm_pc, %function
 test_ldm_stm_pc:

@@ -1,3 +1,8 @@
+2011-05-04  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.arch/arm-disp-step.S: Fix usage of macros __thumb__
+	and __thumb2__.
+
 2011-05-03  Marek Polacek  <mpolacek@redhat.com>
 
 	* gdb.base/pr10179.exp: Get rid of races using `delete_breakpoints'
