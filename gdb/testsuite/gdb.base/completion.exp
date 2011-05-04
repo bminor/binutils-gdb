@@ -270,7 +270,7 @@ gdb_test_multiple "" "$test" {
     }
 }
 
-set test "complete help info wat"
+set test "complete 'help info wat'"
 send_gdb "help info wat\t"
 gdb_test_multiple "" "$test" {
     -re "^help info watchpoints $" {
@@ -296,7 +296,7 @@ gdb_test_multiple "" "$test" {
     -re "^p \"break1\\.c\"$" {
 	send_gdb "\n"
 	gdb_test_multiple "" "$test" {
-	    -re ".*$gdb_prompt $" {
+	    -re "$gdb_prompt $" {
 		pass "$test"
 	    }
 	}
@@ -314,7 +314,7 @@ gdb_test_multiple "" "$test" {
     -re "^p \"break1\\.c\"$" {
 	send_gdb "\n"
 	gdb_test_multiple "" "$test" {
-	    -re ".*$gdb_prompt $" {
+	    -re "$gdb_prompt $" {
 		pass "$test"
 	    }
 	}
@@ -325,7 +325,7 @@ gdb_test_multiple "" "$test" {
     }
 }
 
-set test "complete 'p \'arg'"
+set test "complete 'p 'arg'"
 send_gdb "p 'arg\t"
 gdb_test_multiple "" "$test" {
     -re "^p 'arg\\\x07$" {
@@ -338,13 +338,13 @@ gdb_test_multiple "" "$test" {
     }
 }
 
-set test "complete (2) 'p \'arg'"
+set test "complete (2) 'p 'arg'"
 send_gdb "p 'arg\t"
 gdb_test_multiple "" "$test" {
     -re "^p 'arg\\\x07$" {
 	send_gdb "\t"
 	gdb_test_multiple "" "$test" {
-	    -re ".*argv.*$gdb_prompt " {
+	    -re "argv.*$gdb_prompt " {
 		send_gdb "\n"
 		gdb_test_multiple "" "$test" {
 		    -re "(Invalid character constant\\.|Unmatched single quote\\.).*$gdb_prompt $" {
@@ -411,7 +411,7 @@ gdb_test_multiple "" "$test" {
     -re "^p no_var_named_this-arg\\\x07$" {
 	send_gdb "\t"
 	gdb_test_multiple "" "$test" {
-	    -re ".*argv.*$gdb_prompt " {
+	    -re "argv.*$gdb_prompt " {
 		send_gdb "\n"
 		gdb_test_multiple "" "$test" {
 		    -re "No symbol \"no_var_named_this\" in current context\\..*$gdb_prompt $" {
@@ -467,7 +467,7 @@ gdb_test_multiple "" "$test" {
 		    }
 		}
 	    }
-	    -re ".*argv.*$gdb_prompt $" {
+	    -re "argv.*$gdb_prompt $" {
 		send_gdb "\n"
 		gdb_test_multiple "" "$test" {
 		    -re "No symbol \"no_var_named_this\" in current context\\..*$gdb_prompt $" {
@@ -485,7 +485,7 @@ gdb_test_multiple "" "$test" {
     -re "^p values.0..a_field $" {
 	send_gdb "\n"
 	gdb_test_multiple "" "$test" {
-	    -re "^.* = 0.*$gdb_prompt $" {
+	    -re " = 0.*$gdb_prompt $" {
 		pass "$test"
 	    }
 	}
@@ -498,7 +498,7 @@ gdb_test_multiple "" "$test" {
     -re "^p values.0. . a_field $" {
 	send_gdb "\n"
 	gdb_test_multiple "" "$test" {
-	    -re "^.* = 0.*$gdb_prompt $" {
+	    -re " = 0.*$gdb_prompt $" {
 		pass "$test"
 	    }
 	}
@@ -511,7 +511,7 @@ gdb_test_multiple "" "$test" {
     -re "^p &values.0. -> a_field $" {
 	send_gdb "\n"
 	gdb_test_multiple "" "$test" {
-	    -re "^.* = .*0x\[0-9a-fA-F\]*.*$gdb_prompt $" {
+	    -re " = .*0x\[0-9a-fA-F\]*.*$gdb_prompt $" {
 		pass "$test"
 	    }
 	}
@@ -608,7 +608,7 @@ gdb_test_multiple "" "$test" {
 		send_gdb "n\n"
 		exp_continue
 	    }
-	    -re ".*$gdb_prompt $" {
+	    -re "$gdb_prompt $" {
 		pass "$test"
 	    }
 	}

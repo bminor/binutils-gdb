@@ -1,3 +1,10 @@
+2011-05-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/completion.exp (complete help info wat): Rename to ...
+	(complete 'help info wat'): ... here.
+	Remove all `-re ".*' and `-re "^.*' redundant regexes.
+	(complete 'p 'arg', complete (2) 'p 'arg'): Remove redundant backslash.
+
 2011-05-04  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.base/completion.exp: Use gdb_test_multiple instead of
