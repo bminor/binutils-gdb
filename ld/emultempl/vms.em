@@ -23,6 +23,8 @@
 # This file is sourced from generic.em.
 
 fragment <<EOF
+#include "getopt.h"
+
 static void
 gld${EMULATION_NAME}_before_parse (void)
 {
@@ -117,6 +119,51 @@ vms_place_orphan (asection *s,
   else
     return NULL;
 }
+
+/* VMS specific options.  */
+#define OPTION_IDENTIFICATION		(300  + 1)
+
+static void
+gld${EMULATION_NAME}_add_options
+  (int ns ATTRIBUTE_UNUSED,
+   char **shortopts ATTRIBUTE_UNUSED,
+   int nl,
+   struct option **longopts,
+   int nrl ATTRIBUTE_UNUSED,
+   struct option **really_longopts ATTRIBUTE_UNUSED)
+{
+  static const struct option xtra_long[] = {
+    {"identification", required_argument, NULL, OPTION_IDENTIFICATION},
+    {NULL, no_argument, NULL, 0}
+  };
+
+  *longopts
+    = xrealloc (*longopts, nl * sizeof (struct option) + sizeof (xtra_long));
+  memcpy (*longopts + nl, &xtra_long, sizeof (xtra_long));
+}
+
+static void
+gld${EMULATION_NAME}_list_options (FILE *file)
+{
+  fprintf (file, _("  --identification <string>          Set the identification of the output\n"));
+}
+
+static bfd_boolean
+gld${EMULATION_NAME}_handle_option (int optc)
+{
+  switch (optc)
+    {
+    default:
+      return FALSE;
+
+    case OPTION_IDENTIFICATION:
+      /* Currently ignored.  */
+      break;
+    }
+
+  return TRUE;
+}
+
 EOF
 
 LDEMUL_PLACE_ORPHAN=vms_place_orphan
@@ -124,3 +171,6 @@ LDEMUL_BEFORE_PARSE=gld"$EMULATION_NAME"_before_parse
 LDEMUL_CREATE_OUTPUT_SECTION_STATEMENTS=gld"$EMULATION_NAME"_create_output_section_statements
 LDEMUL_FIND_POTENTIAL_LIBRARIES=gld"$EMULATION_NAME"_find_potential_libraries
 LDEMUL_OPEN_DYNAMIC_ARCHIVE=gld"$EMULATION_NAME"_open_dynamic_archive
+LDEMUL_ADD_OPTIONS=gld"$EMULATION_NAME"_add_options
+LDEMUL_HANDLE_OPTION=gld"$EMULATION_NAME"_handle_option
+LDEMUL_LIST_OPTIONS=gld"$EMULATION_NAME"_list_options
