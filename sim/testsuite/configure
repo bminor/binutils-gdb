@@ -1830,6 +1830,9 @@ case "${target}" in
    avr*-*-*)
        sim_arch=avr
        ;;
+   bfin-*-*)
+       sim_arch=bfin
+       ;;
    cr16*-*-*)
        sim_arch=cr16
        sim_testsuite=yes
