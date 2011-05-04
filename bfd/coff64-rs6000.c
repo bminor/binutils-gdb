@@ -353,14 +353,15 @@ _bfd_xcoff64_swap_aux_in (bfd *abfd, void *ext1, int type, int in_class,
   switch (in_class)
     {
     case C_FILE:
-      if (ext->x_file.x_n.x_zeroes[0] == 0)
+      if (ext->x_file.x_n.x_n.x_zeroes[0] == 0)
 	{
 	  in->x_file.x_n.x_zeroes = 0;
-	  in->x_file.x_n.x_offset = H_GET_32 (abfd, ext->x_file.x_n.x_offset);
+	  in->x_file.x_n.x_offset =
+            H_GET_32 (abfd, ext->x_file.x_n.x_n.x_offset);
 	}
       else
 	{
-	  memcpy (in->x_file.x_fname, ext->x_file.x_fname, FILNMLEN);
+	  memcpy (in->x_file.x_fname, ext->x_file.x_n.x_fname, FILNMLEN);
 	}
       goto end;
 
@@ -444,12 +445,13 @@ _bfd_xcoff64_swap_aux_out (bfd *abfd, void *inp, int type, int in_class,
     case C_FILE:
       if (in->x_file.x_n.x_zeroes == 0)
 	{
-	  H_PUT_32 (abfd, 0, ext->x_file.x_n.x_zeroes);
-	  H_PUT_32 (abfd, in->x_file.x_n.x_offset, ext->x_file.x_n.x_offset);
+	  H_PUT_32 (abfd, 0, ext->x_file.x_n.x_n.x_zeroes);
+	  H_PUT_32 (abfd, in->x_file.x_n.x_offset,
+                    ext->x_file.x_n.x_n.x_offset);
 	}
       else
 	{
-	  memcpy (ext->x_file.x_fname, in->x_file.x_fname, FILNMLEN);
+	  memcpy (ext->x_file.x_n.x_fname, in->x_file.x_fname, FILNMLEN);
 	}
       H_PUT_8 (abfd, _AUX_FILE, ext->x_auxtype.x_auxtype);
       goto end;
