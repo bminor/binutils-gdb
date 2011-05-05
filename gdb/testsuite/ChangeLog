@@ -1,3 +1,10 @@
+20110-5-05  Janis Johnson  <janisjo@codesourcery.com>
+
+	* lib/gdb.exp (exec_target_file, exec_symbol_file,
+	gdb_rename_execfile, gdb_touch_execfile): New.
+	* gdb.base/reread.exp: Use new procs to handle multiple
+	exec files.
+
 2011-05-05  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.arch/arm-disp-step.S(test_ldr_literal): New.
