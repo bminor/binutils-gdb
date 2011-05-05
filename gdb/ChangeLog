@@ -1,3 +1,7 @@
+2011-05-05  Janis Johnson  <janisjo@codesourcery.com>
+
+	* MAINTAINERS: Add myself as a write-after-approval maintainer.
+
 2011-05-05  Jerome Guitton  <guitton@adacore.com>
 
 	* i386-tdep.c (i386_in_stack_tramp_p, i386_stack_tramp_frame_sniffer):
