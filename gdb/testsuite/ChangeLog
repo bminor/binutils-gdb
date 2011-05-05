@@ -1,3 +1,10 @@
+2011-05-05  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.arch/arm-disp-step.S(test_ldr_literal): New.
+	(test_adr_32bit, test_pop_pc): New.
+	* gdb.arch/arm-disp-step.exp (test_ldr_literal): New.
+	(test_adr_32bit, test_pop_pc): New.
+
 2011-05-04  Joseph Myers  <joseph@codesourcery.com>
 
 	* gdb.base/a2-run.exp (strongarm-*-coff): Don't handle target.

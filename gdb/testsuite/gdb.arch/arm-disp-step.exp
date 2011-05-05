@@ -68,6 +68,42 @@ proc test_ldm_stm_pc {} {
     gdb_continue_to_breakpoint "continue to test_ldm_stm_pc_ret" \
 	".*bx lr.*"
 }
+
+#########################################
+# Test ldrX literal
+proc test_ldr_literal {} {
+    global srcfile
+    global gdb_prompt
+
+    gdb_test_multiple "break *test_ldr_literal" "break test_ldr_literal" {
+       -re "Breakpoint.*at.* file .*$srcfile, line.*\r\n$gdb_prompt $" {
+           pass "break test_ldr_literal"
+       }
+       -re "No symbol.*\r\n$gdb_prompt $" {
+           return 0
+       }
+    }
+
+    gdb_test "break *test_ldrsb_literal" \
+       "Breakpoint.*at.* file .*$srcfile, line.*" \
+       "break test_ldrsb_literal"
+    gdb_test "break *test_ldrsh_literal" \
+       "Breakpoint.*at.* file .*$srcfile, line.*" \
+       "break test_ldrsh_literal"
+    gdb_test "break *test_ldr_literal_end" \
+       "Breakpoint.*at.* file .*$srcfile, line.*" \
+       "break test_test_ldr_literal_end"
+
+    gdb_continue_to_breakpoint "continue to test_ldr_literal" \
+       ".*ldrh.*r0\,.*\[pc\].*"
+    gdb_continue_to_breakpoint "continue to test_ldrsb_literal" \
+       ".*ldrsb.*r0\,.*\[pc\].*"
+    gdb_continue_to_breakpoint "continue to test_ldrsh_literal" \
+       ".*ldrsh.*r0\,.*\[pc\].*"
+    gdb_continue_to_breakpoint "continue to test_ldr_literal_ret" \
+       ".*bx lr.*"
+}
+
 ##########################################
 # Test call/ret.
 proc test_call_ret {} {
@@ -124,6 +160,52 @@ proc test_ldr_from_pc {} {
 	".*ldr.*r1\,.*\[pc, #0\].*"
     gdb_continue_to_breakpoint "continue to Lbranch" \
 	".*bx lr.*"
+}
+
+proc test_adr_32bit {} {
+    global srcfile
+    global gdb_prompt
+
+    gdb_test_multiple "break *test_adr_32bit" "break test_adr_32bit" {
+       -re "Breakpoint.*at.* file .*$srcfile, line.*\r\n$gdb_prompt $" {
+           pass "break test_adr"
+       }
+       -re "No symbol.*\r\n$gdb_prompt $" {
+           return 0
+       }
+    }
+
+    gdb_test "break *test_adr_32bit_after" \
+       "Breakpoint.*at.* file .*$srcfile, line.*" \
+       "break test_adr_32bit_after"
+
+    gdb_test "break *test_adr_32bit_end" \
+       "Breakpoint.*at.* file .*$srcfile, line.*" \
+       "break test_adr_32bit_end"
+
+    gdb_continue_to_breakpoint "test_adr_32bit" \
+       ".*adr.*r0\,.*\.L6.*"
+    gdb_continue_to_breakpoint "test_adr_32bit_after" \
+       ".*adr.*r0\,.*\.L6.*"
+    gdb_continue_to_breakpoint "test_adr_32bit_end" \
+       ".*bx lr.*"
+}
+
+#########################################
+# Test pop to PC
+proc test_pop_pc {} {
+    global srcfile
+    gdb_test "break *test_pop_pc_1" \
+       "Breakpoint.*at.* file .*$srcfile, line.*" \
+       "break test_pop_pc"
+    gdb_test "break *test_pop_pc_ret" \
+       "Breakpoint.*at.* file .*$srcfile, line.*" \
+       "break test_pop_pc_ret"
+
+    gdb_continue_to_breakpoint "continue to test_pop_pc" \
+       ".*b.*\{r1\, pc\}.*"
+    gdb_continue_to_breakpoint "continue to test_pop_pc_ret" \
+        ".*bx lr.*"
 }
 
 ###########################################
@@ -200,6 +282,12 @@ test_branch
 test_ldr_from_pc
 
 test_ldm_stm_pc
+
+test_ldr_literal
+
+test_adr_32bit
+
+test_pop_pc
 
 test_str_pc
 ##########################################
