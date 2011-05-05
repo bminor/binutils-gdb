@@ -1,3 +1,14 @@
+2011-05-05  Alan Modra  <amodra@gmail.com>
+
+	* dw2gencfi.c (SUPPORT_FRAME_LINKONCE): Define.  Use throughout
+	file to conditionally compile code added 2011-04-26.
+	(cfi_change_reg_numbers): Add ATTRIBUTE_UNUSED on params only used
+	when SUPPORT_FRAME_LINKONCE.
+	(get_cfi_seg): Likewise.  Reintroduce old code for when not
+	SUPPORT_FRAME_LINKONCE.
+	(cfi_finish): Move get_cfi_seg calls out of loop when not
+	SUPPORT_FRAME_LINKONCE.  Avoid unused var warning.
+
 2011-05-03  Paul Brook  <paul@codesourcery.com>
 
 
