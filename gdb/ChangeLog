@@ -1,3 +1,16 @@
+2011-05-05  Jerome Guitton  <guitton@adacore.com>
+
+	* i386-tdep.c (i386_in_stack_tramp_p, i386_stack_tramp_frame_sniffer):
+	New functions.
+	(i386_stack_tramp_frame_unwind): New static global.
+	(i386_match_pattern): New function, extracted from i386_match_insn.
+	(i386_match_insn): Use i386_match_pattern.
+	(i386_match_insn_block): New function.
+	(i386_tramp_chain_in_reg_insns)
+	(i386_tramp_chain_on_stack_insns): New static variables.
+	(i386_gdbarch_init): Add i386_stack_tramp_frame_unwind to list
+	of unwinders.
+
 2011-05-04  Joseph Myers  <joseph@codesourcery.com>
 
 	* configure.host (xscale*): Don't handle target.

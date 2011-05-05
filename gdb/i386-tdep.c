@@ -1126,45 +1126,91 @@ struct i386_insn
   gdb_byte mask[I386_MAX_MATCHED_INSN_LEN];
 };
 
-/* Search for the instruction at PC in the list SKIP_INSNS.  Return
+/* Return whether instruction at PC matches PATTERN.  */
+
+static int
+i386_match_pattern (CORE_ADDR pc, struct i386_insn pattern)
+{
+  gdb_byte op;
+
+  if (target_read_memory (pc, &op, 1))
+    return 0;
+
+  if ((op & pattern.mask[0]) == pattern.insn[0])
+    {
+      gdb_byte buf[I386_MAX_MATCHED_INSN_LEN - 1];
+      int insn_matched = 1;
+      size_t i;
+
+      gdb_assert (pattern.len > 1);
+      gdb_assert (pattern.len <= I386_MAX_MATCHED_INSN_LEN);
+
+      if (target_read_memory (pc + 1, buf, pattern.len - 1))
+	return 0;
+
+      for (i = 1; i < pattern.len; i++)
+	{
+	  if ((buf[i - 1] & pattern.mask[i]) != pattern.insn[i])
+	    insn_matched = 0;
+	}
+      return insn_matched;
+    }
+  return 0;
+}
+
+/* Search for the instruction at PC in the list INSN_PATTERNS.  Return
    the first instruction description that matches.  Otherwise, return
    NULL.  */
 
 static struct i386_insn *
-i386_match_insn (CORE_ADDR pc, struct i386_insn *skip_insns)
+i386_match_insn (CORE_ADDR pc, struct i386_insn *insn_patterns)
 {
-  struct i386_insn *insn;
-  gdb_byte op;
+  struct i386_insn *pattern;
 
-  if (target_read_memory (pc, &op, 1))
-    return NULL;
-
-  for (insn = skip_insns; insn->len > 0; insn++)
+  for (pattern = insn_patterns; pattern->len > 0; pattern++)
     {
-      if ((op & insn->mask[0]) == insn->insn[0])
-	{
-	  gdb_byte buf[I386_MAX_MATCHED_INSN_LEN - 1];
-	  int insn_matched = 1;
-	  size_t i;
-
-	  gdb_assert (insn->len > 1);
-	  gdb_assert (insn->len <= I386_MAX_MATCHED_INSN_LEN);
-
-	  if (target_read_memory (pc + 1, buf, insn->len - 1))
-	    return NULL;
-
-	  for (i = 1; i < insn->len; i++)
-	    {
-	      if ((buf[i - 1] & insn->mask[i]) != insn->insn[i])
-		insn_matched = 0;
-	    }
-
-	  if (insn_matched)
-	    return insn;
-	}
+      if (i386_match_pattern (pc, *pattern))
+	return pattern;
     }
 
   return NULL;
+}
+
+/* Return whether PC points inside a sequence of instructions that
+   matches INSN_PATTERNS.  */
+
+static int
+i386_match_insn_block (CORE_ADDR pc, struct i386_insn *insn_patterns)
+{
+  CORE_ADDR current_pc;
+  int ix, i;
+  gdb_byte op;
+  struct i386_insn *insn;
+
+  insn = i386_match_insn (pc, insn_patterns);
+  if (insn == NULL)
+    return 0;
+
+  current_pc = pc - insn->len;
+  ix = insn - insn_patterns;
+  for (i = ix - 1; i >= 0; i--)
+    {
+      if (!i386_match_pattern (current_pc, insn_patterns[i]))
+	return 0;
+
+      current_pc -= insn_patterns[i].len;
+    }
+
+  current_pc = pc + insn->len;
+  for (insn = insn_patterns + ix + 1; insn->len > 0; insn++)
+    {
+      if (!i386_match_pattern (current_pc, *insn))
+	return 0;
+
+      current_pc += insn->len;
+    }
+
+  return 1;
 }
 
 /* Some special instructions that might be migrated by GCC into the
@@ -1935,6 +1981,88 @@ static const struct frame_unwind i386_epilogue_frame_unwind =
   i386_frame_prev_register,
   NULL, 
   i386_epilogue_frame_sniffer
+};
+
+
+/* Stack-based trampolines.  */
+
+/* These trampolines are used on cross x86 targets, when taking the
+   address of a nested function.  When executing these trampolines,
+   no stack frame is set up, so we are in a similar situation as in
+   epilogues and i386_epilogue_frame_this_id can be re-used.  */
+
+/* Static chain passed in register.  */
+
+struct i386_insn i386_tramp_chain_in_reg_insns[] =
+{
+  /* `movl imm32, %eax' and `movl imm32, %ecx' */
+  { 5, { 0xb8 }, { 0xfe } },
+
+  /* `jmp imm32' */
+  { 5, { 0xe9 }, { 0xff } },
+
+  {0}
+};
+
+/* Static chain passed on stack (when regparm=3).  */
+
+struct i386_insn i386_tramp_chain_on_stack_insns[] =
+{
+  /* `push imm32' */
+  { 5, { 0x68 }, { 0xff } },
+
+  /* `jmp imm32' */
+  { 5, { 0xe9 }, { 0xff } },
+
+  {0}
+};
+
+/* Return whether PC points inside a stack trampoline.   */
+
+static int
+i386_in_stack_tramp_p (struct gdbarch *gdbarch, CORE_ADDR pc)
+{
+  gdb_byte insn;
+  char *name;
+
+  /* A stack trampoline is detected if no name is associated
+    to the current pc and if it points inside a trampoline
+    sequence.  */
+
+  find_pc_partial_function (pc, &name, NULL, NULL);
+  if (name)
+    return 0;
+
+  if (target_read_memory (pc, &insn, 1))
+    return 0;
+
+  if (!i386_match_insn_block (pc, i386_tramp_chain_in_reg_insns)
+      && !i386_match_insn_block (pc, i386_tramp_chain_on_stack_insns))
+    return 0;
+
+  return 1;
+}
+
+static int
+i386_stack_tramp_frame_sniffer (const struct frame_unwind *self,
+			     struct frame_info *this_frame,
+			     void **this_prologue_cache)
+{
+  if (frame_relative_level (this_frame) == 0)
+    return i386_in_stack_tramp_p (get_frame_arch (this_frame),
+				  get_frame_pc (this_frame));
+  else
+    return 0;
+}
+
+static const struct frame_unwind i386_stack_tramp_frame_unwind =
+{
+  NORMAL_FRAME,
+  i386_epilogue_frame_unwind_stop_reason,
+  i386_epilogue_frame_this_id,
+  i386_frame_prev_register,
+  NULL, 
+  i386_stack_tramp_frame_sniffer
 };
 
 
@@ -7295,6 +7423,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     tdep->mm0_regnum = -1;
 
   /* Hook in the legacy prologue-based unwinders last (fallback).  */
+  frame_unwind_append_unwinder (gdbarch, &i386_stack_tramp_frame_unwind);
   frame_unwind_append_unwinder (gdbarch, &i386_sigtramp_frame_unwind);
   frame_unwind_append_unwinder (gdbarch, &i386_frame_unwind);
 
