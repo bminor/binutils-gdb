@@ -1,4 +1,4 @@
-20110-5-05  Janis Johnson  <janisjo@codesourcery.com>
+2011-5-05  Janis Johnson  <janisjo@codesourcery.com>
 
 	* lib/gdb.exp (exec_target_file, exec_symbol_file,
 	gdb_rename_execfile, gdb_touch_execfile): New.
