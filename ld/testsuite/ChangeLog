@@ -1,3 +1,18 @@
+2011-05-05  Bernd Schmidt  <bernds@codesourcery.com>
+
+	* ld-tic6x/shared-nopic.d: New test.
+	* ld-tic6x/shared-nopid.d: New test.
+	* ld-tic6x/attr-pid-21.d: Don't expect a warning; check readelf
+	output instead.
+	* ld-tic6x/attr-pid-12.d: Likewise.
+	* ld-tic6x/attr-pic-01.d: Likewise.
+	* ld-tic6x/attr-pic-10.d: Likewise.
+	* ld-tic6x/attr-pid-01.d: Likewise.
+	* ld-tic6x/attr-pid-10.d: Likewise.
+	* ld-tic6x/attr-pid-02.d: Likewise.
+	* ld-tic6x/attr-pid-20.d: Likewise.
+	* ld-tic6x/got-reloc-inrange.d: Pass -mpic and -mpid options to gas.
+
 2011-05-03  Paul Brook  <paul@codesourcery.com>
 
 

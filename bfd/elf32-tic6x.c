@@ -1519,6 +1519,31 @@ elf32_tic6x_link_hash_table_create (bfd *abfd)
   return &ret->elf.root;
 }
 
+static bfd_boolean
+elf32_tic6x_final_link (bfd *abfd, struct bfd_link_info *info)
+{
+  if (info->shared)
+    {
+      obj_attribute *out_attr;
+      out_attr = elf_known_obj_attributes_proc (abfd);
+      if (out_attr[Tag_ABI_PIC].i == 0)
+	{
+	  _bfd_error_handler (_("warning: generating a shared library "
+				"containing non-PIC code"));
+	}
+      if (out_attr[Tag_ABI_PID].i == 0)
+	{
+	  _bfd_error_handler (_("warning: generating a shared library "
+				"containing non-PID code"));
+	}
+    }
+  /* Invoke the regular ELF backend linker to do all the work.  */
+  if (!bfd_elf_final_link (abfd, info))
+    return FALSE;
+
+  return TRUE;
+}
+
 /* Destroy a C6X ELF linker hash table.  */
 
 static void
@@ -3764,24 +3789,10 @@ elf32_tic6x_merge_attributes (bfd *ibfd, bfd *obfd)
 	    }
 	  break;
 
-	case Tag_ABI_PID:
-	  if (out_attr[i].i != in_attr[i].i)
-	    {
-	      _bfd_error_handler
-		(_("warning: %B and %B differ in position-dependence of "
-		   "data addressing"),
-		 obfd, ibfd);
-	    }
-	  break;
-
 	case Tag_ABI_PIC:
-	  if (out_attr[i].i != in_attr[i].i)
-	    {
-	      _bfd_error_handler
-		(_("warning: %B and %B differ in position-dependence of "
-		   "code addressing"),
-		 obfd, ibfd);
-	    }
+	case Tag_ABI_PID:
+	  if (out_attr[i].i > in_attr[i].i)
+	    out_attr[i].i = in_attr[i].i;
 	  break;
 
 	case Tag_ABI_array_object_alignment:
@@ -3944,6 +3955,8 @@ elf32_tic6x_copy_private_data (bfd * ibfd, bfd * obfd)
   elf32_tic6x_size_dynamic_sections
 #define elf_backend_finish_dynamic_sections \
   elf32_tic6x_finish_dynamic_sections
+#define bfd_elf32_bfd_final_link \
+	elf32_tic6x_final_link
 #define elf_info_to_howto		elf32_tic6x_info_to_howto
 #define elf_info_to_howto_rel		elf32_tic6x_info_to_howto_rel
 

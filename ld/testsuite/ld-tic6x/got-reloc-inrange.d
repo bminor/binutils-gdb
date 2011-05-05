@@ -1,5 +1,5 @@
 #name: C6X GOT relocations, no overflow
-#as: -mlittle-endian -mdsbt
+#as: -mlittle-endian -mdsbt -mpic -mpid=near
 #ld: -melf32_tic6x_le -Tdsbt-inrange.ld --dsbt-index 4 -shared
 #source: got-reloc-global.s
 #objdump: -dr

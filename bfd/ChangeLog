@@ -1,3 +1,10 @@
+2011-05-05  Bernd Schmidt  <bernds@codesourcery.com>
+
+	* elf32-tic6x.c (elf32_tic6x_final_link): New function.
+	(elf32_tic6x_merge_attributes): Do not warn for PID or PIC
+	mismatch.  Choose the lower of the two values.
+	(bfd_elf32_bfd_final_link): New macro.
+
 2011-04-28  Tristan Gingold  <gingold@adacore.com>
 
 	* coff-rs6000.c (_bfd_xcoff_swap_aux_in): Adjust for x_file.
