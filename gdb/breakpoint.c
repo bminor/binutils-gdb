@@ -101,7 +101,7 @@ static void clear_command (char *, int);
 
 static void catch_command (char *, int);
 
-static int can_use_hardware_watchpoint (struct value *, int);
+static int can_use_hardware_watchpoint (struct value *);
 
 static void break_command_1 (char *, int, int);
 
@@ -1404,18 +1404,21 @@ update_watchpoint (struct breakpoint *b, int reparse)
 	 an ordinary watchpoint depending on the hardware support
 	 and free hardware slots.  REPARSE is set when the inferior
 	 is started.  */
-      if ((b->type == bp_watchpoint || b->type == bp_hardware_watchpoint)
-	  && reparse)
+      if (reparse)
 	{
 	  int reg_cnt;
 	  enum bp_loc_type loc_type;
 	  struct bp_location *bl;
 
-	  reg_cnt = can_use_hardware_watchpoint (val_chain, b->exact);
+	  reg_cnt = can_use_hardware_watchpoint (val_chain);
 
 	  if (reg_cnt)
 	    {
 	      int i, target_resources_ok, other_type_used;
+
+	      /* Use an exact watchpoint when there's only one memory region to be
+		 watched, and only one debug register is needed to watch it.  */
+	      b->exact = target_exact_watchpoints && reg_cnt == 1;
 
 	      /* We need to determine how many resources are already
 		 used for all other hardware watchpoints plus this one
@@ -1424,16 +1427,29 @@ update_watchpoint (struct breakpoint *b, int reparse)
 		 hw_watchpoint_used_count call below counts this
 		 watchpoint, make sure that it is marked as a hardware
 		 watchpoint.  */
-	      b->type = bp_hardware_watchpoint;
+	      if (b->type == bp_watchpoint)
+		b->type = bp_hardware_watchpoint;
 
-	      i = hw_watchpoint_used_count (bp_hardware_watchpoint,
-					    &other_type_used);
-
+	      i = hw_watchpoint_used_count (b->type, &other_type_used);
 	      target_resources_ok = target_can_use_hardware_watchpoint
-		    (bp_hardware_watchpoint, i, other_type_used);
+		    (b->type, i, other_type_used);
 	      if (target_resources_ok <= 0)
-		b->type = bp_watchpoint;
+		{
+		  if (target_resources_ok == 0
+		      && b->type != bp_hardware_watchpoint)
+		    error (_("Target does not support this type of "
+			     "hardware watchpoint."));
+		  else if (target_resources_ok < 0
+		      && b->type != bp_hardware_watchpoint)
+		    error (_("Target can only support one kind "
+			     "of HW watchpoint at a time."));
+		  else
+		    b->type = bp_watchpoint;
+		}
 	    }
+	  else if (b->type != bp_hardware_watchpoint)
+	    error (_("Expression cannot be implemented with "
+		     "read/access watchpoint."));
 	  else
 	    b->type = bp_watchpoint;
 
@@ -8783,6 +8799,7 @@ static void
 watch_command_1 (char *arg, int accessflag, int from_tty,
 		 int just_location, int internal)
 {
+  volatile struct gdb_exception e;
   struct breakpoint *b, *scope_breakpoint = NULL;
   struct expression *exp;
   struct block *exp_valid_block = NULL, *cond_exp_valid_block = NULL;
@@ -8794,9 +8811,7 @@ watch_command_1 (char *arg, int accessflag, int from_tty,
   int toklen;
   char *cond_start = NULL;
   char *cond_end = NULL;
-  int i, other_type_used, target_resources_ok = 0;
   enum bptype bp_type;
-  int reg_cnt = 0;
   int thread = -1;
   int pc = 0;
 
@@ -8926,28 +8941,6 @@ watch_command_1 (char *arg, int accessflag, int from_tty,
   else
     bp_type = bp_hardware_watchpoint;
 
-  reg_cnt = can_use_hardware_watchpoint (val, target_exact_watchpoints);
-  if (reg_cnt == 0 && bp_type != bp_hardware_watchpoint)
-    error (_("Expression cannot be implemented with read/access watchpoint."));
-  if (reg_cnt != 0)
-    {
-      i = hw_watchpoint_used_count (bp_type, &other_type_used);
-      target_resources_ok = 
-	target_can_use_hardware_watchpoint (bp_type, i + reg_cnt,
-					    other_type_used);
-      if (target_resources_ok == 0 && bp_type != bp_hardware_watchpoint)
-	error (_("Target does not support this type of hardware watchpoint."));
-
-      if (target_resources_ok < 0 && bp_type != bp_hardware_watchpoint)
-	error (_("Target can only support one kind "
-		 "of HW watchpoint at a time."));
-    }
-
-  /* Change the type of breakpoint to an ordinary watchpoint if a
-     hardware watchpoint could not be set.  */
-  if (!reg_cnt || target_resources_ok <= 0)
-    bp_type = bp_watchpoint;
-
   frame = block_innermost_frame (exp_valid_block);
 
   /* If the expression is "local", then set up a "watchpoint scope"
@@ -8985,7 +8978,6 @@ watch_command_1 (char *arg, int accessflag, int from_tty,
 
   /* Now set up the breakpoint.  */
   b = set_raw_breakpoint_without_location (NULL, bp_type);
-  set_breakpoint_number (internal, b);
   b->thread = thread;
   b->disposition = disp_donttouch;
   b->exp = exp;
@@ -9016,10 +9008,6 @@ watch_command_1 (char *arg, int accessflag, int from_tty,
   b->val_valid = 1;
   b->ops = &watchpoint_breakpoint_ops;
 
-  /* Use an exact watchpoint when there's only one memory region to be
-     watched, and only one debug register is needed to watch it.  */
-  b->exact = target_exact_watchpoints && reg_cnt == 1;
-
   if (cond_start)
     b->cond_string = savestring (cond_start, cond_end - cond_start);
   else
@@ -9047,12 +9035,22 @@ watch_command_1 (char *arg, int accessflag, int from_tty,
   if (!just_location)
     value_free_to_mark (mark);
 
-  /* Finally update the new watchpoint.  This creates the locations
-     that should be inserted.  */
-  update_watchpoint (b, 1);
+  TRY_CATCH (e, RETURN_MASK_ALL)
+    {
+      /* Finally update the new watchpoint.  This creates the locations
+	 that should be inserted.  */
+      update_watchpoint (b, 1);
+    }
+  if (e.reason < 0)
+    {
+      delete_breakpoint (b);
+      throw_exception (e);
+    }
+
+  set_breakpoint_number (internal, b);
 
   /* Do not mention breakpoints with a negative number, but do
-       notify observers.  */
+     notify observers.  */
   if (!internal)
     mention (b);
   observer_notify_breakpoint_created (b);
@@ -9061,14 +9059,10 @@ watch_command_1 (char *arg, int accessflag, int from_tty,
 }
 
 /* Return count of debug registers needed to watch the given expression.
-   If EXACT_WATCHPOINTS is 1, then consider that only the address of
-   the start of the watched region will be monitored (i.e., all accesses
-   will be aligned).  This uses less debug registers on some targets.
-
    If the watchpoint cannot be handled in hardware return zero.  */
 
 static int
-can_use_hardware_watchpoint (struct value *v, int exact_watchpoints)
+can_use_hardware_watchpoint (struct value *v)
 {
   int found_memory_cnt = 0;
   struct value *head = v;
@@ -9124,7 +9118,7 @@ can_use_hardware_watchpoint (struct value *v, int exact_watchpoints)
 		  int len;
 		  int num_regs;
 
-		  len = (exact_watchpoints
+		  len = (target_exact_watchpoints
 			 && is_scalar_type_recursive (vtype))?
 		    1 : TYPE_LENGTH (value_type (v));
 
@@ -10483,7 +10477,12 @@ delete_breakpoint (struct breakpoint *bpt)
       bpt->related_breakpoint = bpt;
     }
 
-  observer_notify_breakpoint_deleted (bpt);
+  /* watch_command_1 creates a watchpoint but only sets its number if
+     update_watchpoint succeeds in creating its bp_locations.  If there's
+     a problem in that process, we'll be asked to delete the half-created
+     watchpoint.  In that case, don't announce the deletion.  */
+  if (bpt->number)
+    observer_notify_breakpoint_deleted (bpt);
 
   if (breakpoint_chain == bpt)
     breakpoint_chain = bpt->next;

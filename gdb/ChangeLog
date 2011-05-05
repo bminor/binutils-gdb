@@ -1,3 +1,20 @@
+2011-05-05  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	Demote to sw watchpoint only in update_watchpoint.
+	* breakpoint.c (update_watchpoint): Change between software and
+	hardware watchpoint for all kinds of watchpoints, not just
+	read/write ones.  Determine b->exact value here instead of
+	in watch_command_1.  Error out if there are not enough resources
+	for a read or access hardware watchpoint.
+	(watch_command_1): Remove logic of checking whether there are
+	enough resources available, since update_watchpoint will do that
+	work now.  Don't set b->exact here.  Catch exceptions thrown by
+	update_watchpoint and delete the watchpoint.
+	(can_use_hardware_watchpoint): Remove exact_watchpoints argument.
+	Use target_exact_watchpoints instead.
+	(delete_breakpoint): Notify observers only if deleted watchpoint
+	has a breakpoint number assigned to it.
+
 2011-05-05  Janis Johnson  <janisjo@codesourcery.com>
 
 	* MAINTAINERS: Add myself as a write-after-approval maintainer.
