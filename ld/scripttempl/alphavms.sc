@@ -21,7 +21,7 @@ SECTIONS
   }
   /* RO, executable code.  */
   \$CODE\$ ALIGN (${PAGESIZE}) : {
-    *(\$CODE\$)
+    *(\$CODE\$ *\$CODE*)
   }
   /* RO initialized data.  */
   \$LITERAL\$ ALIGN (${PAGESIZE}) : {

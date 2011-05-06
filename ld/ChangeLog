@@ -1,3 +1,7 @@
+2011-05-06  Tristan Gingold  <gingold@adacore.com>
+
+	* scripttempl/alphavms.sc (CODE): Add *$CODE*.
+
 2011-05-04  Tristan Gingold  <gingold@adacore.com>
 
 	* emultempl/generic.em (ld_${EMULATION_NAME}_emulation): Add
