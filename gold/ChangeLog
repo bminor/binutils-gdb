@@ -1,3 +1,8 @@
+2011-05-06  Ian Lance Taylor  <iant@google.com>
+
+	* layout.cc (Layout::layout): If the output section flags change,
+	update the ordering.
+
 2011-04-25 Cary Coutant  <ccoutant@google.com>
 
 	* incremental-dump.cc (dump_incremental_inputs): Print local
