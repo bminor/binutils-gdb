@@ -1,3 +1,8 @@
+2011-05-07  Alan Modra  <amodra@gmail.com>
+
+	* objcopy.c (copy_archive): Check bfd_openw result in unknown object
+	case.  Rewrite without goto.
+
 2011-05-03  Jakub Jelinek  <jakub@redhat.com>
 
 	* dwarf.c (decode_location_expression): Handle DW_OP_GNU_const_type,
