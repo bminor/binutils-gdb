@@ -410,6 +410,11 @@ struct breakpoint_ops
      the breakpoint or watchpoint needs one debug register.  */
   int (*resources_needed) (const struct bp_location *);
 
+  /* Tell whether we can downgrade from a hardware watchpoint to a software
+     one.  If not, the user will not be able to enable the watchpoint when
+     there are not enough hardware resources available.  */
+  int (*works_in_software_mode) (const struct breakpoint *);
+
   /* The normal print routine for this breakpoint, called when we
      hit it.  */
   enum print_stop_action (*print_it) (struct breakpoint *);
@@ -651,6 +656,9 @@ struct breakpoint
 
     /* Whether this watchpoint is exact (see target_exact_watchpoints).  */
     int exact;
+
+    /* The mask address for a masked hardware watchpoint.  */
+    CORE_ADDR hw_wp_mask;
   };
 
 typedef struct breakpoint *breakpoint_p;

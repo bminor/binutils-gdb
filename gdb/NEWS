@@ -3,9 +3,23 @@
 
 *** Changes since GDB 7.3
 
+* When natively debugging programs on PowerPC BookE processors running
+  a Linux kernel version 2.6.34 or later, GDB supports masked hardware
+  watchpoints, which specify a mask in addition to an address to watch.
+  The mask specifies that some bits of an address (the bits which are
+  reset in the mask) should be ignored when matching the address accessed
+  by the inferior against the watchpoint address.  See the "PowerPC Embedded"
+  section in the user manual for more details.
+
 * The new option --once causes GDBserver to stop listening for connections once
   the first connection is made.  The listening port used by GDBserver will
   become available after that.
+
+* Changed commands
+
+watch EXPRESSION mask MASK_VALUE
+  The watch command now supports the mask argument which allows creation
+  of masked watchpoints, if the current architecture supports this feature.
 
 *** Changes in GDB 7.3
 

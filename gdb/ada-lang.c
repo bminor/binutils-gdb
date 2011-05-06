@@ -10950,6 +10950,7 @@ static struct breakpoint_ops catch_exception_breakpoint_ops =
   NULL, /* remove */
   NULL, /* breakpoint_hit */
   NULL, /* resources_needed */
+  NULL, /* works_in_software_mode */
   print_it_catch_exception,
   print_one_catch_exception,
   NULL, /* print_one_detail */
@@ -10990,6 +10991,7 @@ static struct breakpoint_ops catch_exception_unhandled_breakpoint_ops = {
   NULL, /* remove */
   NULL, /* breakpoint_hit */
   NULL, /* resources_needed */
+  NULL, /* works_in_software_mode */
   print_it_catch_exception_unhandled,
   print_one_catch_exception_unhandled,
   NULL, /* print_one_detail */
@@ -11028,6 +11030,7 @@ static struct breakpoint_ops catch_assert_breakpoint_ops = {
   NULL, /* remove */
   NULL, /* breakpoint_hit */
   NULL, /* resources_needed */
+  NULL, /* works_in_software_mode */
   print_it_catch_assert,
   print_one_catch_assert,
   NULL, /* print_one_detail */

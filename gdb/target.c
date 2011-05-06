@@ -595,6 +595,8 @@ update_current_target (void)
       /* Do not inherit to_ranged_break_num_registers.  */
       INHERIT (to_insert_watchpoint, t);
       INHERIT (to_remove_watchpoint, t);
+      /* Do not inherit to_insert_mask_watchpoint.  */
+      /* Do not inherit to_remove_mask_watchpoint.  */
       INHERIT (to_stopped_data_address, t);
       INHERIT (to_have_steppable_watchpoint, t);
       INHERIT (to_have_continuable_watchpoint, t);
@@ -602,6 +604,7 @@ update_current_target (void)
       INHERIT (to_watchpoint_addr_within_range, t);
       INHERIT (to_region_ok_for_hw_watchpoint, t);
       INHERIT (to_can_accel_watchpoint_condition, t);
+      /* Do not inherit to_masked_watch_num_registers.  */
       INHERIT (to_terminal_init, t);
       INHERIT (to_terminal_inferior, t);
       INHERIT (to_terminal_ours_for_output, t);
@@ -3516,6 +3519,75 @@ target_verify_memory (const gdb_byte *data, CORE_ADDR memaddr, ULONGEST size)
     }
 
   tcomplain ();
+}
+
+/* The documentation for this function is in its prototype declaration in
+   target.h.  */
+
+int
+target_insert_mask_watchpoint (CORE_ADDR addr, CORE_ADDR mask, int rw)
+{
+  struct target_ops *t;
+
+  for (t = current_target.beneath; t != NULL; t = t->beneath)
+    if (t->to_insert_mask_watchpoint != NULL)
+      {
+	int ret;
+
+	ret = t->to_insert_mask_watchpoint (t, addr, mask, rw);
+
+	if (targetdebug)
+	  fprintf_unfiltered (gdb_stdlog, "\
+target_insert_mask_watchpoint (%s, %s, %d) = %d\n",
+			      core_addr_to_string (addr),
+			      core_addr_to_string (mask), rw, ret);
+
+	return ret;
+      }
+
+  return 1;
+}
+
+/* The documentation for this function is in its prototype declaration in
+   target.h.  */
+
+int
+target_remove_mask_watchpoint (CORE_ADDR addr, CORE_ADDR mask, int rw)
+{
+  struct target_ops *t;
+
+  for (t = current_target.beneath; t != NULL; t = t->beneath)
+    if (t->to_remove_mask_watchpoint != NULL)
+      {
+	int ret;
+
+	ret = t->to_remove_mask_watchpoint (t, addr, mask, rw);
+
+	if (targetdebug)
+	  fprintf_unfiltered (gdb_stdlog, "\
+target_remove_mask_watchpoint (%s, %s, %d) = %d\n",
+			      core_addr_to_string (addr),
+			      core_addr_to_string (mask), rw, ret);
+
+	return ret;
+      }
+
+  return 1;
+}
+
+/* The documentation for this function is in its prototype declaration
+   in target.h.  */
+
+int
+target_masked_watch_num_registers (CORE_ADDR addr, CORE_ADDR mask)
+{
+  struct target_ops *t;
+
+  for (t = current_target.beneath; t != NULL; t = t->beneath)
+    if (t->to_masked_watch_num_registers != NULL)
+      return t->to_masked_watch_num_registers (t, addr, mask);
+
+  return -1;
 }
 
 /* The documentation for this function is in its prototype declaration

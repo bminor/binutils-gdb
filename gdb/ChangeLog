@@ -1,3 +1,43 @@
+2011-05-06  Sergio Durigan Junior  <sergiodj@linux.vnet.ibm.com>
+	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	Implement support for PowerPC BookE masked watchpoints.
+	* NEWS: Mention masked watchpoint support.  Create "Changed commands"
+	section.
+	* breakpoint.h (struct breakpoint_ops) <works_in_software_mode>: New
+	method.  Initialize to NULL in all existing breakpoint_ops instances.
+	(struct breakpoint) <hw_wp_mask>: New field.
+	* breakpoint.c (is_masked_watchpoint): Add prototype.
+	(update_watchpoint): Don't set b->val for masked watchpoints.  Call
+	breakpoint's breakpoint_ops.works_in_software_mode if available.
+	(watchpoints_triggered): Handle the case of a hardware masked
+	watchpoint trigger.
+	(watchpoint_check): Likewise.
+	(works_in_software_mode_watchpoint): New function.
+	(insert_masked_watchpoint, remove_masked_watchpoint)
+	(resources_needed_masked_watchpoint)
+	(works_in_software_mode_masked_watchpoint, print_it_masked_watchpoint)
+	(print_one_detail_masked_watchpoint, print_mention_masked_watchpoint)
+	(print_recreate_masked_watchpoint, is_masked_watchpoint): New
+	functions.
+	(masked_watchpoint_breakpoint_ops): New structure.
+	(watch_command_1): Check for the existence of the `mask' parameter.
+	Set b->ops according to the type of hardware watchpoint being created.
+	* ppc-linux-nat.c (ppc_linux_insert_mask_watchpoint)
+	(ppc_linux_remove_mask_watchpoint)
+	(ppc_linux_masked_watch_num_registers): New functions.
+	(_initialize_ppc_linux_nat): Initialize to_insert_mask_watchpoint,
+	to_remove_mask_watchpoint and to_masked_watch_num_registers.
+	* target.c (update_current_target): Mention to_insert_mask_watchpoint,
+	to_remove_mask_watchpoint, and to_masked_watch_num_registers.
+	(target_insert_mask_watchpoint, target_remove_mask_watchpoint)
+	(target_masked_watch_num_registers): New functions.
+	* target.h (struct target_ops) <to_insert_mask_watchpoint>,
+	<to_remove_mask_watchpoint>, <to_masked_watch_num_registers>: New
+	methods.
+	(target_insert_mask_watchpoint, target_remove_mask_watchpoint)
+	(target_masked_watch_num_registers): Add prototypes.
+
 2011-05-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	PR 12573

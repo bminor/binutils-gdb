@@ -459,6 +459,10 @@ struct target_ops
     int (*to_remove_watchpoint) (CORE_ADDR, int, int, struct expression *);
     int (*to_insert_watchpoint) (CORE_ADDR, int, int, struct expression *);
 
+    int (*to_insert_mask_watchpoint) (struct target_ops *,
+				      CORE_ADDR, CORE_ADDR, int);
+    int (*to_remove_mask_watchpoint) (struct target_ops *,
+				      CORE_ADDR, CORE_ADDR, int);
     int (*to_stopped_by_watchpoint) (void);
     int to_have_steppable_watchpoint;
     int to_have_continuable_watchpoint;
@@ -472,6 +476,8 @@ struct target_ops
 
     int (*to_can_accel_watchpoint_condition) (CORE_ADDR, int, int,
 					      struct expression *);
+    int (*to_masked_watch_num_registers) (struct target_ops *,
+					  CORE_ADDR, CORE_ADDR);
     void (*to_terminal_init) (void);
     void (*to_terminal_inferior) (void);
     void (*to_terminal_ours_for_output) (void);
@@ -1362,6 +1368,20 @@ extern char *target_thread_name (struct thread_info *);
 #define	target_remove_watchpoint(addr, len, type, cond) \
      (*current_target.to_remove_watchpoint) (addr, len, type, cond)
 
+/* Insert a new masked watchpoint at ADDR using the mask MASK.
+   RW may be hw_read for a read watchpoint, hw_write for a write watchpoint
+   or hw_access for an access watchpoint.  Returns 0 for success, 1 if
+   masked watchpoints are not supported, -1 for failure.  */
+
+extern int target_insert_mask_watchpoint (CORE_ADDR, CORE_ADDR, int);
+
+/* Remove a masked watchpoint at ADDR with the mask MASK.
+   RW may be hw_read for a read watchpoint, hw_write for a write watchpoint
+   or hw_access for an access watchpoint.  Returns 0 for success, non-zero
+   for failure.  */
+
+extern int target_remove_mask_watchpoint (CORE_ADDR, CORE_ADDR, int);
+
 #define target_insert_hw_breakpoint(gdbarch, bp_tgt) \
      (*current_target.to_insert_hw_breakpoint) (gdbarch, bp_tgt)
 
@@ -1394,6 +1414,12 @@ extern int target_ranged_break_num_registers (void);
    the watchpoint triggers.  */
 #define target_can_accel_watchpoint_condition(addr, len, type, cond) \
   (*current_target.to_can_accel_watchpoint_condition) (addr, len, type, cond)
+
+/* Return number of debug registers needed for a masked watchpoint,
+   -1 if masked watchpoints are not supported or -2 if the given address
+   and mask combination cannot be used.  */
+
+extern int target_masked_watch_num_registers (CORE_ADDR addr, CORE_ADDR mask);
 
 /* Target can execute in reverse?  */
 #define target_can_execute_reverse \
