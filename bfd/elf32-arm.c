@@ -4556,6 +4556,7 @@ cortex_a8_erratum_scan (bfd *input_bfd,
                   bfd_vma target;
                   enum elf32_arm_stub_type stub_type = arm_stub_none;
                   struct a8_erratum_reloc key, *found;
+                  bfd_boolean use_plt = FALSE;
 
                   key.from = base_vma + i;
                   found = (struct a8_erratum_reloc *)
@@ -4567,7 +4568,6 @@ cortex_a8_erratum_scan (bfd *input_bfd,
 		    {
 		      char *error_message = NULL;
 		      struct elf_link_hash_entry *entry;
-		      bfd_boolean use_plt = FALSE;
 
 		      /* We don't care about the error returned from this
 		         function, only if there is glue or not.  */
@@ -4670,6 +4670,12 @@ cortex_a8_erratum_scan (bfd *input_bfd,
                       if (found)
                         offset =
 			  (bfd_signed_vma) (found->destination - pc_for_insn);
+
+                      /* If the stub will use a Thumb-mode branch to a
+                         PLT target, redirect it to the preceding Thumb
+                         entry point.  */
+                      if (stub_type != arm_stub_a8_veneer_blx && use_plt)
+                        offset -= PLT_THUMB_STUB_SIZE;
 
                       target = pc_for_insn + offset;
 
