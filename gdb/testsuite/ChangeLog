@@ -1,3 +1,12 @@
+2011-05-06  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdb.cell/bt.exp: Delete breakpoints before running to signal
+	to avoid race condition.
+	* gdb.cell/coremaker.c: Use small stack size.
+	* gdb.cell/ea-standalone.exp: Use file name without path as
+	argument to c_to.
+	* gdb.cell/fork.exp: Allow other output when continuing to end.
+
 2011-05-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.threads/corethreads.c: New file.

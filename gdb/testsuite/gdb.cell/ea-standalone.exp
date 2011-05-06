@@ -44,12 +44,12 @@ if ![runto_main] then {
   return 0
 }
 
-c_to "Marker SPUEA1" $srcfile
+c_to "Marker SPUEA1" $testfile.c
 gdb_test "p myarray\[0\]" \
 	 ".*= 0" \
 	 "p myarray\[0\]"
 
-c_to "Marker SPUEA2" $srcfile
+c_to "Marker SPUEA2" $testfile.c
 gdb_test "p myarray\[0\]" \
 	 ".*= 1" \
 	 "p myarray\[0\]"
