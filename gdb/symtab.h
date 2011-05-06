@@ -770,7 +770,13 @@ struct symtab
      should be designated the primary, so that the blockvector
      is relocated exactly once by objfile_relocate.  */
 
-  int primary;
+  unsigned int primary : 1;
+
+  /* Symtab has been compiled with both optimizations and debug info so that
+     GDB may stop skipping prologues as variables locations are valid already
+     at function entry points.  */
+
+  unsigned int locations_valid : 1;
 
   /* The macro table for this symtab.  Like the blockvector, this
      may be shared between different symtabs --- and normally is for

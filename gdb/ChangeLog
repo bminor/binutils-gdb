@@ -1,5 +1,19 @@
 2011-05-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	PR 12573
+	* dwarf2read.c (struct dwarf2_cu): New field has_loclist.
+	(producer_is_gcc_ge_4_0): New function.
+	(process_full_comp_unit): Set also symtab->locations_valid.  Move the
+	symtab->language code.
+	(var_decode_location): Set cu->has_loclist.
+	* symtab.c (skip_prologue_sal): New variables saved_pc, force_skip and
+	skip.  Intialize force_skip from locations_valid.  Move the prologue
+	skipping code into two passes.
+	* symtab.h (struct symtab): Make the primary field a bitfield.  New
+	field locations_valid.
+
+2011-05-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* c-exp.y (qualified_name): Call destructor_name_p with $1.type.
 	(classify_inner_name): Call cp_lookup_nested_type with
 	yylval.tsym.type.

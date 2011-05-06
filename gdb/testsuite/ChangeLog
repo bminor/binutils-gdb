@@ -1,5 +1,12 @@
 2011-05-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	PR 12573
+	* gdb.dwarf2/dw2-skip-prologue.S: New file.
+	* gdb.dwarf2/dw2-skip-prologue.c: New file.
+	* gdb.dwarf2/dw2-skip-prologue.exp: New file.
+
+2011-05-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdb.cp/psymtab-parameter.cc: New file.
 	* gdb.cp/psymtab-parameter.exp: New file.
 
