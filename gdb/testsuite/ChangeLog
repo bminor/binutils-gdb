@@ -1,3 +1,11 @@
+2011-04-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.threads/gcore-thread.exp (objfile, opts): New variables.
+	Try to compile the test using -Wl,-z,norelro first.
+	(load_core): New variable libthread_db_seen, initialize it.
+	(zeroed-threads cannot be listed): Protect it by XFAIL on
+	!$libthread_db_seen.
+
 2011-05-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	PR 12573

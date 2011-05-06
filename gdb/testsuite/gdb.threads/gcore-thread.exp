@@ -24,6 +24,7 @@ if $tracelevel then {
 # Single-threaded test case
 set testfile "gcore-thread"
 set srcfile  pthreads.c
+set objfile  ${objdir}/${subdir}/${testfile}.o
 set binfile  ${objdir}/${subdir}/${testfile}
 set corefile ${objdir}/${subdir}/${testfile}.test
 set core0file ${objdir}/${subdir}/${testfile}0.test
@@ -34,7 +35,15 @@ if [istarget "*-*-linux"] then {
     set target_cflags ""
 }
 
-if {[gdb_compile_pthreads "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable [list debug "incdir=${objdir}"]] != "" } {
+# Attempt to prevent -Wl,-z,relro which happens by default at least on
+# Kubuntu-10.10.  Due to PR corefiles/11804 will then GDB be unable to find
+# libpthread, therefore libthread_db will not fail as expected
+# on the test `zeroed-threads cannot be listed'.
+
+set opts [list debug "incdir=${objdir}"]
+if {[gdb_compile_pthreads "${srcdir}/${subdir}/${srcfile}" "${objfile}" object $opts] != ""
+    || ([gdb_compile_pthreads "${objfile}" "${binfile}" executable [concat $opts {additional_flags=-Wl,-z,norelro}] ] != ""
+        && [gdb_compile_pthreads "${objfile}" "${binfile}" executable $opts] != "") } {
     return -1
 }
 
@@ -139,9 +148,15 @@ clean_restart ${testfile}
 
 proc load_core { corefile } {
     global gdb_prompt
+    global libthread_db_seen
 
+    set libthread_db_seen 0
     gdb_test_multiple "core $corefile" \
 	"re-load generated corefile" {
+	    -re "\\\[Thread debugging using \[^ \r\n\]* enabled\\\]\r\n" {
+		set libthread_db_seen 1
+		exp_continue
+	    }
 	    -re " is not a core dump:.*\r\n$gdb_prompt $" {
 		fail "re-load generated corefile (bad file format)"
 		# No use proceeding from here.
@@ -189,6 +204,12 @@ gdb_test "info threads" ".*${nl}\\* ${horiz} thread2 .*" \
 # Test the uninitialized thread list.
 
 if {"$core0file" != "" && [load_core $core0file]} {
+    set test "zeroed-threads cannot be listed"
 
-    gdb_test "info threads" "Cannot find new threads: .*" "zeroed-threads cannot be listed"
+    if {!$libthread_db_seen} {
+	verbose -log "No libthread_db loaded - -Wl,-z,relro compilation?"
+	xfail $test
+    } else {
+	gdb_test "info threads" "Cannot find new threads: .*" $test
+    }
 }
