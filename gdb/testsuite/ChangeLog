@@ -1,3 +1,10 @@
+2011-05-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix a race.
+	* gdb.cp/static-print-quit.exp (print c): Split to ...
+	(print c - <return>, print c - q <return>, print c - to quit):
+	... these.  Make the testfile untested on gdb-7.1.
+
 2011-5-05  Janis Johnson  <janisjo@codesourcery.com>
 
 	* lib/gdb.exp (exec_target_file, exec_symbol_file,
