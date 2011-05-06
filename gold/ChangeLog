@@ -1,3 +1,8 @@
+2011-05-06  Ian Lance Taylor  <iant@google.com>
+
+	* layout.cc (Layout::layout): If the output section flags change,
+	update the ordering.
+
 2011-03-14  Ian Lance Taylor  <iant@google.com>
 
 	* script-sections.cc (Sort_output_sections::script_compare):
