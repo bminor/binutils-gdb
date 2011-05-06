@@ -1,4 +1,9 @@
-2011-04-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
+2011-05-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.threads/corethreads.c: New file.
+	* gdb.threads/corethreads.exp: New file.
+
+2011-05-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.threads/gcore-thread.exp (objfile, opts): New variables.
 	Try to compile the test using -Wl,-z,norelro first.
