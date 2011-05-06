@@ -1367,7 +1367,12 @@ ppu2spu_prev_register (struct frame_info *this_frame,
   gdb_byte *buf;
 
   buf = alloca (register_size (gdbarch, regnum));
-  regcache_cooked_read (cache->regcache, regnum, buf);
+
+  if (regnum < gdbarch_num_regs (gdbarch))
+    regcache_raw_read (cache->regcache, regnum, buf);
+  else
+    gdbarch_pseudo_register_read (gdbarch, cache->regcache, regnum, buf);
+
   return frame_unwind_got_bytes (this_frame, regnum, buf);
 }
 
@@ -1392,9 +1397,9 @@ ppu2spu_unwind_register (void *src, int regnum, gdb_byte *buf)
   else if (regnum == SPU_PC_REGNUM)
     store_unsigned_integer (buf, 4, byte_order, data->npc);
   else
-    return 0;
+    return REG_UNAVAILABLE;
 
-  return 1;
+  return REG_VALID;
 }
 
 static int

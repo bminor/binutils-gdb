@@ -72,6 +72,7 @@ if ![runto_main] then {
   return 0
 }
 
+delete_breakpoints
 gdb_test "continue" ".*Program received signal SIGABRT, Aborted.*"
 
 gdb_test "backtrace" ".*abort.*crash_handler.*base.*offset.*<cross-architecture call>.*main.*speid.*argp.*envp.*at.*$spu2_file.c.*<cross-architecture call>.*spe_context_run.*indirect_handler.*base.*offset.*<cross-architecture call>.*main.*speid.*argp.*envp.*at.*$spu_file.c.*<cross-architecture call>.*spe_context_run.*spe_thread.*at.*$ppu_file.c.*"

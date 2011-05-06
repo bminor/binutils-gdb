@@ -1,3 +1,9 @@
+2011-05-06  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* ppc-linux-tdep.c (ppu2spu_prev_register): Handle pseudo registers.
+	(ppu2spu_unwind_register): Mark pseudo registers unavailable.
+	* spu-tdep.c (op_selb): Use correct value.
+
 2011-05-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	PR 12573

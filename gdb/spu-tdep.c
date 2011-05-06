@@ -456,7 +456,7 @@ enum
     op_a     = 0x0c0,
     op_ai    = 0x1c,
 
-    op_selb  = 0x4,
+    op_selb  = 0x8,
 
     op_br    = 0x64,
     op_bra   = 0x60,
