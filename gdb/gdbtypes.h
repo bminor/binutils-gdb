@@ -1362,6 +1362,8 @@ extern struct type *allocate_stub_method (struct type *);
 
 extern char *type_name_no_tag (const struct type *);
 
+extern const char *type_name_no_tag_or_error (struct type *type);
+
 extern struct type *lookup_struct_elt_type (struct type *, char *, int);
 
 extern struct type *make_pointer_type (struct type *, struct type **);

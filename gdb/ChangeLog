@@ -1,5 +1,21 @@
 2011-05-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* c-exp.y (qualified_name): Call destructor_name_p with $1.type.
+	(classify_inner_name): Call cp_lookup_nested_type with
+	yylval.tsym.type.
+	* cp-namespace.c (cp_lookup_nested_type): New variable
+	saved_parent_type.  Call CHECK_TYPEDEF for parent_type.  Call
+	type_name_no_tag_or_error with saved_parent_type.
+	* dwarf2read.c (load_partial_dies): Read in any children of
+	DW_TAG_typedef with complaint in such case.
+	* gdbtypes.c (type_name_no_tag_or_error): New function.
+	* gdbtypes.h (type_name_no_tag_or_error): New prototype.
+	* valops.c (destructor_name_p): New comment for parameter type.  Remove
+	type const.  Make dname and cp const.  Call type_name_no_tag_or_error.
+	* value.h (destructor_name_p): Remove type const.
+
+2011-05-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* symtab.c (compare_symbol_name): New function.
 	(completion_list_add_name, expand_partial_symbol_name): Call it,
 	remove the variable ncmp.

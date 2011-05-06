@@ -3098,14 +3098,16 @@ classify_oload_match (struct badness_vector *oload_champ_bv,
 
 /* C++: return 1 is NAME is a legitimate name for the destructor of
    type TYPE.  If TYPE does not have a destructor, or if NAME is
-   inappropriate for TYPE, an error is signaled.  */
+   inappropriate for TYPE, an error is signaled.  Parameter TYPE should not yet
+   have CHECK_TYPEDEF applied, this function will apply it itself.  */
+
 int
-destructor_name_p (const char *name, const struct type *type)
+destructor_name_p (const char *name, struct type *type)
 {
   if (name[0] == '~')
     {
-      char *dname = type_name_no_tag (type);
-      char *cp = strchr (dname, '<');
+      const char *dname = type_name_no_tag_or_error (type);
+      const char *cp = strchr (dname, '<');
       unsigned int len;
 
       /* Do not compare the template part for template classes.  */

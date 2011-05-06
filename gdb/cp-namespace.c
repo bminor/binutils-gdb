@@ -630,6 +630,12 @@ cp_lookup_nested_type (struct type *parent_type,
 		       const char *nested_name,
 		       const struct block *block)
 {
+  /* type_name_no_tag_required provides better error reporting using the
+     original type.  */
+  struct type *saved_parent_type = parent_type;
+
+  CHECK_TYPEDEF (parent_type);
+
   switch (TYPE_CODE (parent_type))
     {
     case TYPE_CODE_STRUCT:
@@ -643,7 +649,7 @@ cp_lookup_nested_type (struct type *parent_type,
 	   just like members of namespaces; in particular,
 	   lookup_symbol_namespace works when looking them up.  */
 
-	const char *parent_name = TYPE_TAG_NAME (parent_type);
+	const char *parent_name = type_name_no_tag_or_error (saved_parent_type);
 	struct symbol *sym
 	  = cp_lookup_symbol_in_namespace (parent_name, nested_name,
 					   block, VAR_DOMAIN);

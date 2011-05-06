@@ -8946,7 +8946,7 @@ load_partial_dies (bfd *abfd, gdb_byte *buffer, gdb_byte *info_ptr,
       if (parent_die == NULL
 	  && part_die->has_specification == 0
 	  && part_die->is_declaration == 0
-	  && (part_die->tag == DW_TAG_typedef
+	  && ((part_die->tag == DW_TAG_typedef && !part_die->has_children)
 	      || part_die->tag == DW_TAG_base_type
 	      || part_die->tag == DW_TAG_subrange_type))
 	{
@@ -8958,6 +8958,20 @@ load_partial_dies (bfd *abfd, gdb_byte *buffer, gdb_byte *info_ptr,
 	  info_ptr = locate_pdi_sibling (part_die, buffer, info_ptr, abfd, cu);
 	  continue;
 	}
+
+      /* The exception for DW_TAG_typedef with has_children above is
+	 a workaround of GCC PR debug/47510.  In the case of this complaint
+	 type_name_no_tag_or_error will error on such types later.
+
+	 GDB skipped children of DW_TAG_typedef by the shortcut above and then
+	 it could not find the child DIEs referenced later, this is checked
+	 above.  In correct DWARF DW_TAG_typedef should have no children.  */
+
+      if (part_die->tag == DW_TAG_typedef && part_die->has_children)
+	complaint (&symfile_complaints,
+		   _("DW_TAG_typedef has childen - GCC PR debug/47510 bug "
+		     "- DIE at 0x%x [in module %s]"),
+		   part_die->offset, cu->objfile->name);
 
       /* If we're at the second level, and we're an enumerator, and
 	 our parent has no specification (meaning possibly lives in a

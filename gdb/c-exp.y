@@ -804,7 +804,7 @@ qualified_name:	TYPENAME COLONCOLON name
 			  tmp_token.ptr[tmp_token.length] = 0;
 
 			  /* Check for valid destructor name.  */
-			  destructor_name_p (tmp_token.ptr, type);
+			  destructor_name_p (tmp_token.ptr, $1.type);
 			  write_exp_elt_opcode (OP_SCOPE);
 			  write_exp_elt_type (type);
 			  write_exp_string (tmp_token);
@@ -2486,7 +2486,7 @@ classify_inner_name (struct block *block, int first_name)
     return NAME;
 
   copy = copy_name (yylval.tsym.stoken);
-  new_type = cp_lookup_nested_type (type, copy, block);
+  new_type = cp_lookup_nested_type (yylval.tsym.type, copy, block);
 
   if (new_type == NULL)
     /* We know the caller won't expect us to update yylval.  */

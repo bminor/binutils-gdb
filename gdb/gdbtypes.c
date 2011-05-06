@@ -1105,6 +1105,32 @@ type_name_no_tag (const struct type *type)
   return TYPE_NAME (type);
 }
 
+/* A wrapper of type_name_no_tag which calls error if the type is anonymous.
+   Since GCC PR debug/47510 DWARF provides associated information to detect the
+   anonymous class linkage name from its typedef.
+
+   Parameter TYPE should not yet have CHECK_TYPEDEF applied, this function will
+   apply it itself.  */
+
+const char *
+type_name_no_tag_or_error (struct type *type)
+{
+  struct type *saved_type = type;
+  const char *name;
+  struct objfile *objfile;
+
+  CHECK_TYPEDEF (type);
+
+  name = type_name_no_tag (type);
+  if (name != NULL)
+    return name;
+
+  name = type_name_no_tag (saved_type);
+  objfile = TYPE_OBJFILE (saved_type);
+  error (_("Invalid anonymous type %s [in module %s], GCC PR debug/47510 bug?"),
+	 name ? name : "<anonymous>", objfile ? objfile->name : "<arch>");
+}
+
 /* Lookup a typedef or primitive type named NAME, visible in lexical
    block BLOCK.  If NOERR is nonzero, return zero if NAME is not
    suitably defined.  */
