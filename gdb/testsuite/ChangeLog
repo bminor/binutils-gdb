@@ -1,5 +1,10 @@
 2011-05-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* gdb.cp/psymtab-parameter.cc: New file.
+	* gdb.cp/psymtab-parameter.exp: New file.
+
+2011-05-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Fix a race.
 	* gdb.cp/static-print-quit.exp (print c): Split to ...
 	(print c - <return>, print c - q <return>, print c - to quit):

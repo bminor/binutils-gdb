@@ -3489,6 +3489,40 @@ rbreak_command (char *regexp, int from_tty)
 }
 
 
+/* Evaluate if NAME matches SYM_TEXT and SYM_TEXT_LEN.
+
+   Either sym_text[sym_text_len] != '(' and then we search for any
+   symbol starting with SYM_TEXT text.
+
+   Otherwise sym_text[sym_text_len] == '(' and then we require symbol name to
+   be terminated at that point.  Partial symbol tables do not have parameters
+   information.  */
+
+static int
+compare_symbol_name (const char *name, const char *sym_text, int sym_text_len)
+{
+  int (*ncmp) (const char *, const char *, size_t);
+
+  ncmp = (case_sensitivity == case_sensitive_on ? strncmp : strncasecmp);
+
+  if (ncmp (name, sym_text, sym_text_len) != 0)
+    return 0;
+
+  if (sym_text[sym_text_len] == '(')
+    {
+      /* User searches for `name(someth...'.  Require NAME to be terminated.
+	 Normally psymtabs and gdbindex have no parameter types so '\0' will be
+	 present but accept even parameters presence.  In this case this
+	 function is in fact strcmp_iw but whitespace skipping is not supported
+	 for tab completion.  */
+
+      if (name[sym_text_len] != '\0' && name[sym_text_len] != '(')
+	return 0;
+    }
+
+  return 1;
+}
+
 /* Helper routine for make_symbol_completion_list.  */
 
 static int return_val_size;
@@ -3508,16 +3542,10 @@ completion_list_add_name (char *symname, char *sym_text, int sym_text_len,
 			  char *text, char *word)
 {
   int newsize;
-  int (*ncmp) (const char *, const char *, size_t);
-
-  ncmp = (case_sensitivity == case_sensitive_on ? strncmp : strncasecmp);
 
   /* Clip symbols that cannot match.  */
-
-  if (ncmp (symname, sym_text, sym_text_len) != 0)
-    {
-      return;
-    }
+  if (!compare_symbol_name (symname, sym_text, sym_text_len))
+    return;
 
   /* We have a match for a completion, so add SYMNAME to the current list
      of matches.  Note that the name is moved to freshly malloc'd space.  */
@@ -3707,11 +3735,8 @@ static int
 expand_partial_symbol_name (const char *name, void *user_data)
 {
   struct add_name_data *datum = (struct add_name_data *) user_data;
-  int (*ncmp) (const char *, const char *, size_t);
 
-  ncmp = (case_sensitivity == case_sensitive_on ? strncmp : strncasecmp);
-
-  return ncmp (name, datum->sym_text, datum->sym_text_len) == 0;
+  return compare_symbol_name (name, datum->sym_text, datum->sym_text_len);
 }
 
 char **
@@ -3789,6 +3814,22 @@ default_make_symbol_completion_list_break_on (char *text, char *word,
   }
 
   sym_text_len = strlen (sym_text);
+
+  /* Prepare SYM_TEXT_LEN for compare_symbol_name.  */
+
+  if (current_language->la_language == language_cplus
+      || current_language->la_language == language_java
+      || current_language->la_language == language_fortran)
+    {
+      /* These languages may have parameters entered by user but they are never
+	 present in the partial symbol tables.  */
+
+      const char *cs = memchr (sym_text, '(', sym_text_len);
+
+      if (cs)
+	sym_text_len = cs - sym_text;
+    }
+  gdb_assert (sym_text[sym_text_len] == '\0' || sym_text[sym_text_len] == '(');
 
   return_val_size = 100;
   return_val_index = 0;

@@ -1,3 +1,11 @@
+2011-05-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* symtab.c (compare_symbol_name): New function.
+	(completion_list_add_name, expand_partial_symbol_name): Call it,
+	remove the variable ncmp.
+	(default_make_symbol_completion_list_break_on): Reduce SYM_TEXT_LEN,
+	gdb_assert it.
+
 2011-05-05  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	Demote to sw watchpoint only in update_watchpoint.
