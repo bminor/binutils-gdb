@@ -1508,13 +1508,6 @@ s_comm_internal (int param,
       S_SET_VALUE (symbolP, (valueT) size);
       S_SET_EXTERNAL (symbolP);
       S_SET_SEGMENT (symbolP, bfd_com_section_ptr);
-#ifdef OBJ_VMS
-      {
-	extern int flag_one;
-	if (size == 0 || !flag_one)
-	  S_GET_OTHER (symbolP) = const_flag;
-      }
-#endif
     }
 
   demand_empty_rest_of_line ();
@@ -1653,9 +1646,6 @@ s_data (int ignore ATTRIBUTE_UNUSED)
 
   subseg_set (section, (subsegT) temp);
 
-#ifdef OBJ_VMS
-  const_flag = 0;
-#endif
   demand_empty_rest_of_line ();
 }
 
@@ -3463,9 +3453,6 @@ s_text (int ignore ATTRIBUTE_UNUSED)
   temp = get_absolute_expression ();
   subseg_set (text_section, (subsegT) temp);
   demand_empty_rest_of_line ();
-#ifdef OBJ_VMS
-  const_flag &= ~IN_DEFAULT_SECTION;
-#endif
 }
 
 /* .weakref x, y sets x as an alias to y that, as long as y is not

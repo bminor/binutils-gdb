@@ -1,3 +1,12 @@
+2011-05-06  Tristan Gingold  <gingold@adacore.com>
+
+	* read.c (s_comm_internal): Remove code for OBJ_VMS.
+	(s_data): Ditto.
+	(s_text): Ditto.
+	* write.c (write_object_file): Ditto.
+	* symbols.c (define_sym_at_dot): Ditto.
+	(colon): Ditto.
+
 2011-05-05  Alan Modra  <amodra@gmail.com>
 
 	* dw2gencfi.c (SUPPORT_FRAME_LINKONCE): Define.  Use throughout

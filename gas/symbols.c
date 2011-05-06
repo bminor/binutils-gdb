@@ -250,9 +250,6 @@ static void
 define_sym_at_dot (symbolS *symbolP)
 {
   symbolP->sy_frag = frag_now;
-#ifdef OBJ_VMS
-  S_SET_OTHER (symbolP, const_flag);
-#endif
   S_SET_VALUE (symbolP, (valueT) frag_now_fix ());
   S_SET_SEGMENT (symbolP, now_seg);
 }
@@ -447,9 +444,6 @@ colon (/* Just seen "x:" - rattle symbols & frags.  */
     {
       symbolP = symbol_new (sym_name, now_seg, (valueT) frag_now_fix (),
 			    frag_now);
-#ifdef OBJ_VMS
-      S_SET_OTHER (symbolP, const_flag);
-#endif /* OBJ_VMS */
 
       symbol_table_insert (symbolP);
     }

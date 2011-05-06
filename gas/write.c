@@ -1734,13 +1734,6 @@ write_object_file (void)
       }
   }
 
-#ifdef	OBJ_VMS
-  /* Under VMS we try to be compatible with VAX-11 "C".  Thus, we call
-     a routine to check for the definition of the procedure "_main",
-     and if so -- fix it up so that it can be program entry point.  */
-  vms_check_for_main ();
-#endif /* OBJ_VMS  */
-
   /* From now on, we don't care about sub-segments.  Build one frag chain
      for each segment. Linked thru fr_next.  */
 
