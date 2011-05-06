@@ -1,3 +1,17 @@
+2011-05-06  Tristan Gingold  <gingold@adacore.com>
+
+	* vms-alpha.c (evax_section_flags): Remove SEC_IN_MEMORY.
+	(_bfd_vms_slurp_egsd): Rename old_flags to vms_flags.  Handle
+	any code section.  Add comments.
+	(alpha_vms_object_p): Use void * instead of PTR.
+	(alpha_vms_create_eisd_for_section): Fix test for setting DZRO.
+	(build_module_list): Guard against no DST section.  Add comments.
+	(alpha_vms_link_output_symbol): Discard undefined symbols.
+	(alpha_vms_get_section_contents): Simply memcpy if the section was
+	already loaded.  Fix typo.
+	(vms_new_section_hook): Use void * instead of PTR.
+	(vms_alpha_vec): Ditto.
+
 2011-05-06  Richard Sandiford  <richard.sandiford@linaro.org>
 
 	* elf32-arm.c (cortex_a8_erratum_scan): If the stub is a Thumb
