@@ -375,7 +375,7 @@ spu_symbol_file_add_from_memory (int inferior_fd)
   nbfd = spu_bfd_open (addr);
   if (nbfd)
     symbol_file_add_from_bfd (nbfd, SYMFILE_VERBOSE | SYMFILE_MAINLINE,
-                              NULL, 0);
+                              NULL, 0, NULL);
 }
 
 
