@@ -1,3 +1,12 @@
+2011-05-06  Richard Sandiford  <richard.sandiford@linaro.org>
+
+	* ld-arm/cortex-a8-fix-b-plt.s, ld-arm/cortex-a8-fix-b-plt.d,
+	ld-arm/cortex-a8-fix-bcc-plt.s, ld-arm/cortex-a8-fix-bcc-plt.d,
+	ld-arm/cortex-a8-fix-bl-plt.s, ld-arm/cortex-a8-fix-bl-plt.d,
+	ld-arm/cortex-a8-fix-blx-plt.s, ld-arm/cortex-a8-fix-blx-plt.d,
+	ld-arm/cortex-a8-fix-plt.ld: New tests.
+	* ld-arm/arm-elf.exp: Run them.
+
 2011-04-27  Alan Modra  <amodra@gmail.com>
 
 	Backport from mainline.
