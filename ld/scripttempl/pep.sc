@@ -107,12 +107,15 @@ SECTIONS
   .rdata ${RELOCATING+BLOCK(__section_alignment__)} :
   {
     ${R_RDATA}
-    ${RELOCATING+___RUNTIME_PSEUDO_RELOC_LIST__ = .;}
-    ${RELOCATING+__RUNTIME_PSEUDO_RELOC_LIST__ = .;}
+    ${RELOCATING+__rt_psrelocs_start = .;}
     *(.rdata_runtime_pseudo_reloc)
-    ${RELOCATING+___RUNTIME_PSEUDO_RELOC_LIST_END__ = .;}
-    ${RELOCATING+__RUNTIME_PSEUDO_RELOC_LIST_END__ = .;}
+    ${RELOCATING+__rt_psrelocs_end = .;}
   }
+  ${RELOCATING+__rt_psrelocs_size = __rt_psrelocs_end - __rt_psrelocs_start;}
+  ${RELOCATING+___RUNTIME_PSEUDO_RELOC_LIST_END__ = .;}
+  ${RELOCATING+__RUNTIME_PSEUDO_RELOC_LIST_END__ = .;}
+  ${RELOCATING+___RUNTIME_PSEUDO_RELOC_LIST__ = . - __rt_psrelocs_size;}
+  ${RELOCATING+__RUNTIME_PSEUDO_RELOC_LIST__ = . - __rt_psrelocs_size;}
 
   .eh_frame ${RELOCATING+BLOCK(__section_alignment__)} :
   {

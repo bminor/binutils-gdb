@@ -1,3 +1,17 @@
+2011-05-07  Dave Korn  <dave.korn.cygwin@gmail.com>
+
+	PR ld/12365
+	* scripttempl/pe.sc (__rt_psrelocs_start): New symbol definition.
+	(__rt_psrelocs_end): Likewise.
+	(__rt_psrelocs_size): Likewise difference between the above.
+	(__RUNTIME_PSEUDO_RELOC_LIST_END__): Move outside .rdata section
+	immediately after end of pseudo-reloc data.
+	(___RUNTIME_PSEUDO_RELOC_LIST_END___): Likewise.
+	(__RUNTIME_PSEUDO_RELOC_LIST__): Move outside .rdata section and
+	calculate backward from list end.
+	(___RUNTIME_PSEUDO_RELOC_LIST___): Likewise.
+	* scripttempl/pep.sc: Likewise.
+
 2011-05-06  Tristan Gingold  <gingold@adacore.com>
 
 	* scripttempl/alphavms.sc (CODE): Add *$CODE*.

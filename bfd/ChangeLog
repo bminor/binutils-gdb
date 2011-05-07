@@ -1,6 +1,12 @@
 2011-05-07  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	PR ld/12365
+	* cofflink.c (bfd_coff_link_input_bfd): Check for and warn about
+	references to symbols defined in discarded sections.
+
+2011-05-07  Dave Korn  <dave.korn.cygwin@gmail.com>
+
+	PR ld/12365
 	* coffgen.c (coff_write_symbol): Assume input section is its own
 	output section if output_section member not set.
 	(coff_write_alien_symbol): Likewise.

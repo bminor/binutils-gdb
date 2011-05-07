@@ -1,3 +1,9 @@
+2011-05-07  Dave Korn  <dave.korn.cygwin@gmail.com>
+
+	PR ld/12365
+	* ld-plugin/plugin-7.d: Allow underscore in error message.
+	* ld-plugin/plugin-8.d: Likewise.
+
 2011-05-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/12730
