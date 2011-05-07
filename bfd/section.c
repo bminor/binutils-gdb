@@ -327,6 +327,11 @@ CODE_FRAGMENT
 .     sections.  *}
 .#define SEC_COFF_SHARED_LIBRARY 0x4000000
 .
+.  {* This input section should be copied to output in reverse order
+.     as an array of pointers.  This is for ELF linker internal use
+.     only.  *}
+.#define SEC_ELF_REVERSE_COPY 0x4000000
+.
 .  {* This section contains data which may be shared with other
 .     executables or shared objects. This is for COFF only.  *}
 .#define SEC_COFF_SHARED 0x8000000

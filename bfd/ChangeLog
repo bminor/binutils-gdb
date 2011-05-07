@@ -1,3 +1,14 @@
+2011-05-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/12730
+	* elf.c (_bfd_elf_section_offset): Check SEC_ELF_REVERSE_COPY.
+
+	* elflink.c (elf_link_input_bfd): Reverse copy .ctors/.dtors
+	sections if needed. 
+
+	* section.c (SEC_ELF_REVERSE_COPY): New.
+	* bfd-in2.h: Regenerated.
+
 2011-05-07  Anders Kaseorg  <andersk@ksplice.com>
 
 	PR 12739

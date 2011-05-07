@@ -1,3 +1,31 @@
+2011-05-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/12730
+	* ld-elf/elf.exp (array_tests): Add "pr12730".
+	(array_tests_pie): New.
+	(array_tests_static): Add -static for "static init array mixed".
+	Add "static pr12730".  Run array_tests_pie for Linux.
+
+	* ld-elf/init-mixed.c (ctor1007): Renamed to ...
+	(ctor1007a): This.
+	(ctor1007b): New.
+	(ctors1007): Remove ctor1007.  Add ctor1007b and ctor1007a.
+	(dtor1007): Renamed to ...
+	(dtor1007a): This.
+	(dtor1007b): New.
+	(dtors1007): Remove dtor1007.  Add dtor1007b and dtor1007a.
+	(ctor65535): Renamed to ...
+	(ctor65535a): This.
+	(ctor65535b): New.
+	(ctors65535): Remove ctor65535.  Add ctor65535b and ctor65535a.
+	(dtor65535): Renamed to ...
+	(dtor65535a): This.
+	(dtor65535b): New.
+	(dtors65535): Remove dtor65535.  Add dtor65535b and dtor65535a.
+
+	* ld-elf/pr12730.cc: New.
+	* ld-elf/pr12730.out: Likewise.
+
 2011-05-06  Richard Sandiford  <richard.sandiford@linaro.org>
 
 	* ld-arm/cortex-a8-fix-b-plt.s, ld-arm/cortex-a8-fix-b-plt.d,

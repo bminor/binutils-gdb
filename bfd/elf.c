@@ -9379,6 +9379,12 @@ _bfd_elf_section_offset (bfd *abfd,
     case ELF_INFO_TYPE_EH_FRAME:
       return _bfd_elf_eh_frame_section_offset (abfd, info, sec, offset);
     default:
+      if ((sec->flags & SEC_ELF_REVERSE_COPY) != 0)
+	{
+	  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
+	  bfd_size_type address_size = bed->s->arch_size / 8;
+	  offset = sec->size - offset - address_size;
+	}
       return offset;
     }
 }

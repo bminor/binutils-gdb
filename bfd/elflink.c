@@ -9120,6 +9120,9 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
   asection *o;
   const struct elf_backend_data *bed;
   struct elf_link_hash_entry **sym_hashes;
+  bfd_size_type address_size;
+  bfd_vma r_type_mask;
+  int r_sym_shift;
 
   output_bfd = finfo->output_bfd;
   bed = get_elf_backend_data (output_bfd);
@@ -9290,6 +9293,19 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 	*pindex = indx;
     }
 
+  if (bed->s->arch_size == 32)
+    {
+      r_type_mask = 0xff;
+      r_sym_shift = 8;
+      address_size = 4;
+    }
+  else
+    {
+      r_type_mask = 0xffffffff;
+      r_sym_shift = 32;
+      address_size = 8;
+    }
+
   /* Relocate the contents of each section.  */
   sym_hashes = elf_sym_hashes (input_bfd);
   for (o = input_bfd->sections; o != NULL; o = o->next)
@@ -9394,8 +9410,6 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 	{
 	  Elf_Internal_Rela *internal_relocs;
 	  Elf_Internal_Rela *rel, *relend;
-	  bfd_vma r_type_mask;
-	  int r_sym_shift;
 	  int action_discarded;
 	  int ret;
 
@@ -9407,15 +9421,27 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 	      && o->reloc_count > 0)
 	    return FALSE;
 
-	  if (bed->s->arch_size == 32)
+	  /* We need to reverse-copy input .ctors/.dtors sections if
+	     they are placed in .init_array/.finit_array for output.  */
+	  if (o->size > address_size
+	      && ((strncmp (o->name, ".ctors", 6) == 0
+		   && strcmp (o->output_section->name,
+			      ".init_array") == 0)
+		  || (strncmp (o->name, ".dtors", 6) == 0
+		      && strcmp (o->output_section->name,
+				 ".fini_array") == 0))
+	      && (o->name[6] == 0 || o->name[6] == '.'))
 	    {
-	      r_type_mask = 0xff;
-	      r_sym_shift = 8;
-	    }
-	  else
-	    {
-	      r_type_mask = 0xffffffff;
-	      r_sym_shift = 32;
+	      if (o->size != o->reloc_count * address_size)
+		{
+		  (*_bfd_error_handler)
+		    (_("error: %B: size of section %A is not "
+		       "multiple of address size"),
+		     input_bfd, o);
+		  bfd_set_error (bfd_error_on_input);
+		  return FALSE;
+		}
+	      o->flags |= SEC_ELF_REVERSE_COPY;
 	    }
 
 	  action_discarded = -1;
@@ -9876,12 +9902,34 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 	default:
 	  {
 	    /* FIXME: octets_per_byte.  */
-	    if (! (o->flags & SEC_EXCLUDE)
-		&& ! bfd_set_section_contents (output_bfd, o->output_section,
-					       contents,
-					       (file_ptr) o->output_offset,
-					       o->size))
-	      return FALSE;
+	    if (! (o->flags & SEC_EXCLUDE))
+	      {
+		file_ptr offset = (file_ptr) o->output_offset;
+		bfd_size_type todo = o->size;
+		if ((o->flags & SEC_ELF_REVERSE_COPY))
+		  {
+		    /* Reverse-copy input section to output.  */
+		    do
+		      {
+			todo -= address_size;
+			if (! bfd_set_section_contents (output_bfd,
+							o->output_section,
+							contents + todo,
+							offset,
+							address_size))
+			  return FALSE;
+			if (todo == 0)
+			  break;
+			offset += address_size;
+		      }
+		    while (1);
+		  }
+		else if (! bfd_set_section_contents (output_bfd,
+						     o->output_section,
+						     contents,
+						     offset, todo))
+		  return FALSE;
+	      }
 	  }
 	  break;
 	}

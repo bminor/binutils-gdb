@@ -81,17 +81,32 @@ set array_tests {
     {"init array" "" "" {init.c} "init" "init.out"}
     {"fini array" "" "" {fini.c} "fini" "fini.out"}
     {"init array mixed" "" "" {init-mixed.c} "init-mixed" "init-mixed.out" "-I."}
+    {"pr12730" "" "" {pr12730.cc} "pr12730" "pr12730.out" "" "c++"}
+}
+set array_tests_pie {
+    {"PIE preinit array" "-pie" "" {preinit.c} "preinit" "preinit.out" "-fPIE" }
+    {"PIE init array" "-pie" "" {init.c} "init" "init.out" "-fPIE"}
+    {"PIE fini array" "-pie" "" {fini.c} "fini" "fini.out" "-fPIE"}
+    {"PIE init array mixed" "-pie" "" {init-mixed.c} "init-mixed" "init-mixed.out" "-I. -fPIE"}
+    {"PIE pr12730" "-pie" "" {pr12730.cc} "pr12730" "pr12730.out" "-fPIE" "c++"}
 }
 set array_tests_static {
     {"static preinit array" "-static" "" {preinit.c} "preinit" "preinit.out"}
     {"static init array" "-static" "" {init.c} "init" "init.out"}
     {"static fini array" "-static" "" {fini.c} "fini" "fini.out"}
-    {"static init array mixed" "" "" {init-mixed.c} "init-mixed" "init-mixed.out" "-I."}
+    {"static init array mixed" "-static" "" {init-mixed.c} "init-mixed" "init-mixed.out" "-I."}
+    {"static pr12730" "-static" "" {pr12730.cc} "pr12730" "pr12730.out" "" "c++"}
 }
 
 # NetBSD ELF systems do not currently support the .*_array sections.
 set xfails [list "*-*-netbsdelf*"]
 run_ld_link_exec_tests $xfails $array_tests
+
+# Run PIE tests only on Linux.
+if { [istarget "*-*-linux*"] } {
+    run_ld_link_exec_tests $xfails $array_tests_pie
+}
+
 # Be cautious to not XFAIL for *-*-linux-gnu*, *-*-kfreebsd-gnu*, etc.
 switch -regexp $target_triplet {
     ^\[^-\]*-\[^-\]*-gnu.*$ {
