@@ -1,3 +1,9 @@
+2011-05-07  Anders Kaseorg  <andersk@ksplice.com>
+
+	PR 12739
+	* libbfd.c (bfd_get_8, bfd_get_signed_8): Use const cast.
+	* bfd-in2.h: Regenerate.
+
 2011-05-06  Tristan Gingold  <gingold@adacore.com>
 
 	* vms-alpha.c (evax_section_flags): Remove SEC_IN_MEMORY.
