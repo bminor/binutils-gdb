@@ -1,3 +1,10 @@
+2011-05-07  Dave Korn  <dave.korn.cygwin@gmail.com>
+
+	PR ld/12365
+	* coffgen.c (coff_write_symbol): Assume input section is its own
+	output section if output_section member not set.
+	(coff_write_alien_symbol): Likewise.
+
 2011-05-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/12730
