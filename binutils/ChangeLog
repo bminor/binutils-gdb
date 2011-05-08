@@ -1,5 +1,6 @@
 2011-05-07  Alan Modra  <amodra@gmail.com>
 
+	PR binutils/12632
 	* objcopy.c (copy_archive): Check bfd_openw result in unknown object
 	case.  Rewrite without goto.
 
