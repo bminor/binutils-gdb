@@ -1839,6 +1839,53 @@ elf32_tic6x_finish_dynamic_symbol (bfd * output_bfd,
   return TRUE;
 }
 
+/* Unwinding tables are not referenced directly.  This pass marks them as
+   required if the corresponding code section is marked.  */
+
+static bfd_boolean
+elf32_tic6x_gc_mark_extra_sections (struct bfd_link_info *info,
+				    elf_gc_mark_hook_fn gc_mark_hook)
+{
+  bfd *sub;
+  Elf_Internal_Shdr **elf_shdrp;
+  bfd_boolean again;
+
+  /* Marking EH data may cause additional code sections to be marked,
+     requiring multiple passes.  */
+  again = TRUE;
+  while (again)
+    {
+      again = FALSE;
+      for (sub = info->input_bfds; sub != NULL; sub = sub->link_next)
+	{
+	  asection *o;
+
+	  if (! is_tic6x_elf (sub))
+	    continue;
+
+	  elf_shdrp = elf_elfsections (sub);
+	  for (o = sub->sections; o != NULL; o = o->next)
+	    {
+	      Elf_Internal_Shdr *hdr;
+
+	      hdr = &elf_section_data (o)->this_hdr;
+	      if (hdr->sh_type == SHT_C6000_UNWIND
+		  && hdr->sh_link
+		  && hdr->sh_link < elf_numsections (sub)
+		  && !o->gc_mark
+		  && elf_shdrp[hdr->sh_link]->bfd_section->gc_mark)
+		{
+		  again = TRUE;
+		  if (!_bfd_elf_gc_mark (info, o, gc_mark_hook))
+		    return FALSE;
+		}
+	    }
+	}
+    }
+
+  return TRUE;
+}
+
 /* Update the got entry reference counts for the section being removed.  */
 
 static bfd_boolean
@@ -3933,6 +3980,7 @@ elf32_tic6x_copy_private_data (bfd * ibfd, bfd * obfd)
 #define elf_backend_rela_normal		1
 #define elf_backend_got_header_size     8
 #define elf_backend_gc_sweep_hook	elf32_tic6x_gc_sweep_hook
+#define elf_backend_gc_mark_extra_sections elf32_tic6x_gc_mark_extra_sections
 #define elf_backend_modify_program_headers \
   elf32_tic6x_modify_program_headers
 #define elf_backend_create_dynamic_sections \

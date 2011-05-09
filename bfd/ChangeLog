@@ -1,3 +1,8 @@
+2011-05-09  Paul Brook  <paul@codesourcery.com>
+
+	* elf32-tic6x.c (elf32_tic6x_gc_mark_extra_sections): New function.
+	(elf_backend_gc_mark_extra_sections): Define.
+
 2011-05-07  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	PR ld/12365
