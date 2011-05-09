@@ -1,5 +1,11 @@
 2011-05-09  Paul Brook  <paul@codesourcery.com>
 
+	* elf32-tic6x.c (is_tic6x_elf_unwind_section_name,
+	elf32_tic6x_fake_sections): New functions.
+	(elf_backend_fake_sections): Define.
+
+2011-05-09  Paul Brook  <paul@codesourcery.com>
+
 	* elf32-tic6x.c (elf32_tic6x_gc_mark_extra_sections): New function.
 	(elf_backend_gc_mark_extra_sections): Define.
 

@@ -68,18 +68,20 @@
 #define tc_cfi_frame_initial_instructions() ((void)0)
 #endif
 
+#ifndef tc_cfi_startproc
+# define tc_cfi_startproc() ((void)0)
+#endif
+
+#ifndef tc_cfi_endproc
+# define tc_cfi_endproc(fde) ((void)0)
+#endif
+
 #ifndef DWARF2_FORMAT
 #define DWARF2_FORMAT(SEC) dwarf2_format_32bit
 #endif
 
 #ifndef DWARF2_ADDR_SIZE
 #define DWARF2_ADDR_SIZE(bfd) (bfd_arch_bits_per_address (bfd) / 8)
-#endif
-
-#if defined (TE_PE) || defined (TE_PEP)
-#define SUPPORT_FRAME_LINKONCE 1
-#else
-#define SUPPORT_FRAME_LINKONCE 0
 #endif
 
 #if SUPPORT_FRAME_LINKONCE
@@ -266,67 +268,6 @@ struct cfi_escape_data
 {
   struct cfi_escape_data *next;
   expressionS exp;
-};
-
-struct cfi_insn_data
-{
-  struct cfi_insn_data *next;
-#if SUPPORT_FRAME_LINKONCE
-  segT cur_seg;
-#endif
-  int insn;
-  union
-  {
-    struct
-    {
-      unsigned reg;
-      offsetT offset;
-    } ri;
-
-    struct
-    {
-      unsigned reg1;
-      unsigned reg2;
-    } rr;
-
-    unsigned r;
-    offsetT i;
-
-    struct
-    {
-      symbolS *lab1;
-      symbolS *lab2;
-    } ll;
-
-    struct cfi_escape_data *esc;
-
-    struct
-    {
-      unsigned reg, encoding;
-      expressionS exp;
-    } ea;
-  } u;
-};
-
-struct fde_entry
-{
-  struct fde_entry *next;
-#if SUPPORT_FRAME_LINKONCE
-  segT cur_seg;
-#endif
-  symbolS *start_address;
-  symbolS *end_address;
-  struct cfi_insn_data *data;
-  struct cfi_insn_data **last;
-  unsigned char per_encoding;
-  unsigned char lsda_encoding;
-  expressionS personality;
-  expressionS lsda;
-  unsigned int return_column;
-  unsigned int signal_frame;
-#if SUPPORT_FRAME_LINKONCE
-  int handled;
-#endif
 };
 
 struct cie_entry
@@ -610,14 +551,6 @@ static void dot_cfi_endproc (int);
 static void dot_cfi_personality (int);
 static void dot_cfi_lsda (int);
 static void dot_cfi_val_encoded_addr (int);
-
-/* Fake CFI type; outside the byte range of any real CFI insn.  */
-#define CFI_adjust_cfa_offset	0x100
-#define CFI_return_column	0x101
-#define CFI_rel_offset		0x102
-#define CFI_escape		0x103
-#define CFI_signal_frame	0x104
-#define CFI_val_encoded_addr	0x105
 
 const pseudo_typeS cfi_pseudo_table[] =
   {
@@ -1087,6 +1020,7 @@ dot_cfi_val_encoded_addr (int ignored ATTRIBUTE_UNUSED)
 /* By default emit .eh_frame only, not .debug_frame.  */
 #define CFI_EMIT_eh_frame	(1 << 0)
 #define CFI_EMIT_debug_frame	(1 << 1)
+#define CFI_EMIT_target		(1 << 2)
 static int cfi_sections = CFI_EMIT_eh_frame;
 
 static void
@@ -1108,6 +1042,10 @@ dot_cfi_sections (int ignored ATTRIBUTE_UNUSED)
 	  sections |= CFI_EMIT_eh_frame;
 	else if (strncmp (name, ".debug_frame", sizeof ".debug_frame") == 0)
 	  sections |= CFI_EMIT_debug_frame;
+#ifdef tc_cfi_section_name
+	else if (strcmp (name, tc_cfi_section_name) == 0)
+	  sections |= CFI_EMIT_target;
+#endif
 	else
 	  {
 	    *input_line_pointer = c;
@@ -1170,11 +1108,16 @@ dot_cfi_startproc (int ignored ATTRIBUTE_UNUSED)
   frchain_now->frch_cfi_data->cur_cfa_offset = 0;
   if (!simple)
     tc_cfi_frame_initial_instructions ();
+
+  if ((cfi_sections & CFI_EMIT_target) != 0)
+    tc_cfi_startproc ();
 }
 
 static void
 dot_cfi_endproc (int ignored ATTRIBUTE_UNUSED)
 {
+  struct fde_entry *fde;
+
   if (frchain_now->frch_cfi_data == NULL)
     {
       as_bad (_(".cfi_endproc without corresponding .cfi_startproc"));
@@ -1182,9 +1125,14 @@ dot_cfi_endproc (int ignored ATTRIBUTE_UNUSED)
       return;
     }
 
+  fde = frchain_now->frch_cfi_data->cur_fde_data;
+
   cfi_end_fde (symbol_temp_new_now ());
 
   demand_empty_rest_of_line ();
+
+  if ((cfi_sections & CFI_EMIT_target) != 0)
+    tc_cfi_endproc (fde);
 }
 
 

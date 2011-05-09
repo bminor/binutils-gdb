@@ -131,6 +131,14 @@ subsequent directive overriding it.
 @item .arch @var{arch}
 This has the same effect as @option{-march=@var{arch}}.
 
+@cindex @code{.cantunwind} directive, TIC6X
+@item .cantunwind
+Prevents unwinding through the current function.  No personality routine
+or exception table data is required or permitted.
+
+If this is not specified then frame unwinding information will be
+constructed from CFI directives. @pxref{CFI directives}.
+
 @cindex @code{.c6xabi_attribute} directive, TIC6X
 @item .c6xabi_attribute @var{tag}, @var{value}
 Set the C6000 EABI build attribute @var{tag} to @var{value}.
@@ -150,10 +158,34 @@ The @var{tag} is either an attribute number or one of
 @item .ehtype @var{symbol}
 Output an exception type table reference to @var{symbol}.
 
+@cindex @code{.endp} directive, TIC6X
+@item .endp
+Marks the end of and exception table or function.  If preceeded by a
+@code{.handlerdata} directive then this also switched back to the previous
+text section.
+
+@cindex @code{.handlerdata} directive, TIC6X
+@item .handlerdata
+Marks the end of the current function, and the start of the exception table
+entry for that function.  Anything between this directive and the
+@code{.endp} directive will be added to the exception table entry.
+
+Must be preceded by a CFI block containing a @code{.cfi_lsda} directive.
+directive.
+
 @cindex @code{.nocmp} directive, TIC6X
 @item .nocmp
 Disallow use of C64x+ compact instructions in the current text
 section.
+
+@cindex @code{.personalityindex} directive, TIC6X
+@item .personalityindex @var{index}
+Sets the personality routine for the current function to the ABI specified 
+compact routine number @var{index}
+
+@cindex @code{.personality} directive, TIC6X
+@item .personality @var{name}
+Sets the personality routine for the current function to @var{name}.
 
 @cindex @code{.scomm} directive, TIC6X
 @item .scomm @var{symbol}, @var{size}, @var{align}

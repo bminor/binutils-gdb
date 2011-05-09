@@ -1886,6 +1886,36 @@ elf32_tic6x_gc_mark_extra_sections (struct bfd_link_info *info,
   return TRUE;
 }
 
+/* Return TRUE if this is an unwinding table index.  */
+
+static bfd_boolean
+is_tic6x_elf_unwind_section_name (const char *name)
+{
+  return (CONST_STRNEQ (name, ELF_STRING_C6000_unwind)
+	  || CONST_STRNEQ (name, ELF_STRING_C6000_unwind_once));
+}
+
+
+/* Set the type and flags for an unwinding index table.  We do this by
+   the section name, which is a hack, but ought to work.  */
+
+static bfd_boolean
+elf32_tic6x_fake_sections (bfd *abfd ATTRIBUTE_UNUSED,
+			   Elf_Internal_Shdr *hdr, asection *sec)
+{
+  const char * name;
+
+  name = bfd_get_section_name (abfd, sec);
+
+  if (is_tic6x_elf_unwind_section_name (name))
+    {
+      hdr->sh_type = SHT_C6000_UNWIND;
+      hdr->sh_flags |= SHF_LINK_ORDER;
+    }
+
+  return TRUE;
+}
+
 /* Update the got entry reference counts for the section being removed.  */
 
 static bfd_boolean
@@ -3979,6 +4009,7 @@ elf32_tic6x_copy_private_data (bfd * ibfd, bfd * obfd)
 #define elf_backend_plt_readonly	1
 #define elf_backend_rela_normal		1
 #define elf_backend_got_header_size     8
+#define elf_backend_fake_sections       elf32_tic6x_fake_sections
 #define elf_backend_gc_sweep_hook	elf32_tic6x_gc_sweep_hook
 #define elf_backend_gc_mark_extra_sections elf32_tic6x_gc_mark_extra_sections
 #define elf_backend_modify_program_headers \

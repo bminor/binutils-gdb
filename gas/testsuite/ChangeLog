@@ -1,3 +1,18 @@
+2011-05-09  Paul Brook  <paul@codesourcery.com>
+
+	* gas/tic6x/unwind-1.d: New test.
+	* gas/tic6x/unwind-1.s: New test.
+	* gas/tic6x/unwind-2.d: New test.
+	* gas/tic6x/unwind-2.s: New test.
+	* gas/tic6x/unwind-3.d: New test.
+	* gas/tic6x/unwind-3.s: New test.
+	* gas/tic6x/unwind-bad-1.d: New test.
+	* gas/tic6x/unwind-bad-1.s: New test.
+	* gas/tic6x/unwind-bad-1.l: New test.
+	* gas/tic6x/unwind-bad-2.d: New test.
+	* gas/tic6x/unwind-bad-2.s: New test.
+	* gas/tic6x/unwind-bad-2.l: New test.
+
 2011-04-29  Hans-Peter Nilsson  <hp@axis.com>
 
 	* gas/elf/dwarf2-1.d, gas/elf/dwarf2-2.d: Adjust for change in
