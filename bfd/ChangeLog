@@ -1,5 +1,20 @@
 2011-05-09  Paul Brook  <paul@codesourcery.com>
 
+	* bfd-in.h (elf32_tic6x_fix_exidx_coverage): Add prototype.
+	* bfd-in2.h: Regenerate.
+	* elf32-tic6x.c: Include limits.h.
+	(tic6x_unwind_edit_type, tic6x_unwind_table_edit,
+	_tic6x_elf_section_data): New.
+	(elf32_tic6x_section_data): Define.
+	(elf32_tic6x_new_section_hook): Allocate target specific data.
+	(elf32_tic6x_add_unwind_table_edit): New function.
+	(get_tic6x_elf_section_data, elf32_tic6x_adjust_exidx_size,
+	elf32_tic6x_insert_cantunwind_after, elf32_tic6x_add_low31,
+	elf32_tic6x_copy_exidx_entry): New functions.
+	(elf_backend_write_section): Define.
+
+2011-05-09  Paul Brook  <paul@codesourcery.com>
+
 	* elf32-tic6x.c (is_tic6x_elf_unwind_section_name,
 	elf32_tic6x_fake_sections): New functions.
 	(elf_backend_fake_sections): Define.

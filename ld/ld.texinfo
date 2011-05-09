@@ -2637,6 +2637,10 @@ to @var{index}.  The default is 0, which is appropriate for generating
 executables.  If a shared library is generated with a DSBT index of 0, the
 @code{R_C6000_DSBT_INDEX} relocs are copied into the output file.
 
+@kindex --no-merge-exidx-entries
+The @samp{--no-merge-exidx-entries} switch disables the merging of adjacent
+exidx entries in frame unwind info.
+
 @end table
 
 @c man end
