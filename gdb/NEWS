@@ -3,6 +3,12 @@
 
 *** Changes since GDB 7.3
 
+* New configure option --with-iconv-bin.
+  When using the internationalization support like the one in the GNU C
+  library, GDB will invoke the "iconv" program to get a list of supported
+  character sets.  If this program lives in a non-standard location, one can
+  use this option to specify where to find it.
+
 * When natively debugging programs on PowerPC BookE processors running
   a Linux kernel version 2.6.34 or later, GDB supports masked hardware
   watchpoints, which specify a mask in addition to an address to watch.

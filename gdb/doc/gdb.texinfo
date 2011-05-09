@@ -31214,7 +31214,12 @@ Sets}) require a functioning @code{iconv} implementation.  If you are
 on a GNU system, then this is provided by the GNU C Library.  Some
 other systems also provide a working @code{iconv}.
 
-On systems with @code{iconv}, you can install GNU Libiconv.  If you
+If @value{GDBN} is using the @code{iconv} program which is installed
+in a non-standard place, you will need to tell @value{GDBN} where to find it.
+This is done with @option{--with-iconv-bin} which specifies the
+directory that contains the @code{iconv} program.
+
+On systems without @code{iconv}, you can install GNU Libiconv.  If you
 have previously installed Libiconv, you can use the
 @option{--with-libiconv-prefix} option to configure.
 

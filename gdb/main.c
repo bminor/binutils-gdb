@@ -104,6 +104,7 @@ extern char *external_editor_command;
    file or directory.  FLAG is true if the value is relocatable, false
    otherwise.  Returns a newly allocated string; this may return NULL
    under the same conditions as make_relative_prefix.  */
+
 static char *
 relocate_path (const char *progname, const char *initial, int flag)
 {
@@ -117,12 +118,13 @@ relocate_path (const char *progname, const char *initial, int flag)
    the result is a directory, it is used; otherwise, INITIAL is used.
    The chosen directory is then canonicalized using lrealpath.  This
    function always returns a newly-allocated string.  */
-static char *
-relocate_directory (const char *progname, const char *initial, int flag)
+
+char *
+relocate_gdb_directory (const char *initial, int flag)
 {
   char *dir;
 
-  dir = relocate_path (progname, initial, flag);
+  dir = relocate_path (gdb_program_name, initial, flag);
   if (dir)
     {
       struct stat s;
@@ -342,22 +344,21 @@ captured_main (void *data)
   current_directory = gdb_dirbuf;
 
   /* Set the sysroot path.  */
-  gdb_sysroot = relocate_directory (argv[0], TARGET_SYSTEM_ROOT,
-				    TARGET_SYSTEM_ROOT_RELOCATABLE);
+  gdb_sysroot = relocate_gdb_directory (TARGET_SYSTEM_ROOT,
+					TARGET_SYSTEM_ROOT_RELOCATABLE);
 
-  debug_file_directory = relocate_directory (argv[0], DEBUGDIR,
-					     DEBUGDIR_RELOCATABLE);
+  debug_file_directory = relocate_gdb_directory (DEBUGDIR,
+						 DEBUGDIR_RELOCATABLE);
 
-  gdb_datadir = relocate_directory (argv[0], GDB_DATADIR,
-				    GDB_DATADIR_RELOCATABLE);
+  gdb_datadir = relocate_gdb_directory (GDB_DATADIR,
+					GDB_DATADIR_RELOCATABLE);
 
 #ifdef WITH_PYTHON_PATH
   {
     /* For later use in helping Python find itself.  */
     char *tmp = concat (WITH_PYTHON_PATH, SLASH_STRING, "lib", NULL);
 
-    python_libdir = relocate_directory (argv[0], tmp,
-					PYTHON_PATH_RELOCATABLE);
+    python_libdir = relocate_gdb_directory (tmp, PYTHON_PATH_RELOCATABLE);
     xfree (tmp);
   }
 #endif

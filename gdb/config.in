@@ -716,6 +716,12 @@
 /* Define to 1 if you have the `_mcleanup' function. */
 #undef HAVE__MCLEANUP
 
+/* Path of directory of iconv program. */
+#undef ICONV_BIN
+
+/* Define if the iconv directory should be relocated when GDB is moved. */
+#undef ICONV_BIN_RELOCATABLE
+
 /* Define as const if the declaration of iconv() needs const. */
 #undef ICONV_CONST
 

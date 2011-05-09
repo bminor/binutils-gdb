@@ -282,6 +282,12 @@ struct breakpoint;
 struct frame_info;
 struct gdbarch;
 
+/* From main.c.  */
+
+/* This really belong in utils.c (path-utils.c?), but it references some
+   globals that are currently only available to main.c.  */
+extern char *relocate_gdb_directory (const char *initial, int flag);
+
 /* From utils.c */
 
 extern void initialize_utils (void);

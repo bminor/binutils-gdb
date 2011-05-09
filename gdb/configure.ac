@@ -433,6 +433,29 @@ AC_SEARCH_LIBS(dlgetmodinfo, [dl xpdl])
 
 AM_ICONV
 
+# GDB may fork/exec the iconv program to get the list of supported character
+# sets.  Allow the user to specify where to find it.
+# There are several factors affecting the choice of option name:
+# - There is already --with-libiconv-prefix but we can't use it, it specifies
+#   the build-time location of libiconv files.
+# - The program we need to find is iconv, which comes with glibc.  The user
+#   doesn't necessarily have libiconv installed.  Therefore naming this
+#   --with-libiconv-foo feels wrong.
+# - We want the path to be relocatable, but GDB_AC_DEFINE_RELOCATABLE is
+#   defined to work on directories not files (though it really doesn't know
+#   the difference).
+# - Calling this --with-iconv-prefix is perceived to cause too much confusion
+#   with --with-libiconv-prefix.
+# Putting these together is why the option name is --with-iconv-bin.
+
+AC_ARG_WITH(iconv-bin,
+AS_HELP_STRING([--with-iconv-bin=PATH], [specify where to find the iconv program]),
+[iconv_bin="${withval}"
+ AC_DEFINE_UNQUOTED([ICONV_BIN], ["${iconv_bin}"],
+                    [Path of directory of iconv program.])
+ GDB_AC_DEFINE_RELOCATABLE(ICONV_BIN, iconv, ${iconv_bin})
+])
+
 # On alpha-osf, it appears that libtermcap and libcurses are not compatible.
 # There is a very specific comment in /usr/include/curses.h explaining that
 # termcap routines built into libcurses must not be used.

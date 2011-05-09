@@ -1,5 +1,14 @@
 2011-05-09  Doug Evans  <dje@google.com>
 
+	* NEWS: Mention --with-iconv-bin.
+	* configure.ac: New option --with-iconv-bin.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+	* defs.h (relocate_gdb_directory): Declare.
+	* main.c (relocate_gdb_directory): Renamed from relocate_directory,
+	removed progname parameter, and exported.  All callers updated.
+	* charset.c (find_charset_names): Use --with-iconv-bin if specified.
+
 	* linux-nat.c (lin_lwp_attach_lwp): For !WIPSTOPPED case,
 	adding missing call to restore_child_signals_mask.
 

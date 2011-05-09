@@ -961,6 +961,7 @@ with_pkgversion
 with_bugurl
 with_zlib
 with_libiconv_prefix
+with_iconv_bin
 with_system_readline
 with_expat
 with_gnu_ld
@@ -1660,6 +1661,7 @@ Optional Packages:
   --with-zlib             include zlib support (auto/yes/no) default=auto
   --with-libiconv-prefix=DIR
                           search for libiconv in DIR/include and DIR/lib
+  --with-iconv-bin=PATH   specify where to find the iconv program
   --with-system-readline  use installed readline library
   --with-expat            include expat support (auto/yes/no)
   --with-gnu-ld           assume the C compiler uses GNU ld default=no
@@ -9521,6 +9523,57 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
   fi
+
+
+# GDB may fork/exec the iconv program to get the list of supported character
+# sets.  Allow the user to specify where to find it.
+# There are several factors affecting the choice of option name:
+# - There is already --with-libiconv-prefix but we can't use it, it specifies
+#   the build-time location of libiconv files.
+# - The program we need to find is iconv, which comes with glibc.  The user
+#   doesn't necessarily have libiconv installed.  Therefore naming this
+#   --with-libiconv-foo feels wrong.
+# - We want the path to be relocatable, but GDB_AC_DEFINE_RELOCATABLE is
+#   defined to work on directories not files (though it really doesn't know
+#   the difference).
+# - Calling this --with-iconv-prefix is perceived to cause too much confusion
+#   with --with-libiconv-prefix.
+# Putting these together is why the option name is --with-iconv-bin.
+
+
+# Check whether --with-iconv-bin was given.
+if test "${with_iconv_bin+set}" = set; then :
+  withval=$with_iconv_bin; iconv_bin="${withval}"
+
+cat >>confdefs.h <<_ACEOF
+#define ICONV_BIN "${iconv_bin}"
+_ACEOF
+
+
+  if test "x$exec_prefix" = xNONE || test "x$exec_prefix" = 'x${prefix}'; then
+     if test "x$prefix" = xNONE; then
+     	test_prefix=/usr/local
+     else
+	test_prefix=$prefix
+     fi
+  else
+     test_prefix=$exec_prefix
+  fi
+  value=0
+  case ${iconv_bin} in
+     "${test_prefix}"|"${test_prefix}/"*|\
+	'${exec_prefix}'|'${exec_prefix}/'*)
+     value=1
+     ;;
+  esac
+
+cat >>confdefs.h <<_ACEOF
+#define ICONV_BIN_RELOCATABLE $value
+_ACEOF
+
+
+
+fi
 
 
 # On alpha-osf, it appears that libtermcap and libcurses are not compatible.
