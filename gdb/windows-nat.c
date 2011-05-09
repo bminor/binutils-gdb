@@ -1714,7 +1714,7 @@ do_initial_windows_stuff (struct target_ops *ops, DWORD pid, int attaching)
   while (1)
     {
       stop_after_trap = 1;
-      wait_for_inferior (0);
+      wait_for_inferior ();
       tp = inferior_thread ();
       if (tp->suspend.stop_signal != TARGET_SIGNAL_TRAP)
 	resume (0, tp->suspend.stop_signal);

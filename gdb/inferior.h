@@ -171,7 +171,7 @@ extern void address_to_signed_pointer (struct gdbarch *gdbarch,
 				       struct type *type, gdb_byte *buf,
 				       CORE_ADDR addr);
 
-extern void wait_for_inferior (int treat_exec_as_sigtrap);
+extern void wait_for_inferior (void);
 
 extern void prepare_for_detach (void);
 

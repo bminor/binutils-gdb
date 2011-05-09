@@ -2213,7 +2213,7 @@ svr4_solib_create_inferior_hook (int from_tty)
   do
     {
       target_resume (pid_to_ptid (-1), 0, tp->suspend.stop_signal);
-      wait_for_inferior (0);
+      wait_for_inferior ();
     }
   while (tp->suspend.stop_signal != TARGET_SIGNAL_TRAP);
   inf->control.stop_soon = NO_STOP_QUIETLY;

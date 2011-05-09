@@ -2526,7 +2526,7 @@ attach_command (char *args, int from_tty)
 	  return;
 	}
 
-      wait_for_inferior (0);
+      wait_for_inferior ();
     }
 
   attach_command_post_wait (args, from_tty, async_exec);
@@ -2590,7 +2590,7 @@ notice_new_inferior (ptid_t ptid, int leave_running, int from_tty)
 	  return;
 	}
       else
-	wait_for_inferior (0);
+	wait_for_inferior ();
     }
 
   async_exec = leave_running;

@@ -2205,7 +2205,7 @@ proceed (CORE_ADDR addr, enum target_signal siggnal, int step)
      does not support asynchronous execution.  */
   if (!target_can_async_p ())
     {
-      wait_for_inferior (0);
+      wait_for_inferior ();
       normal_stop ();
     }
 }
@@ -2236,7 +2236,7 @@ start_remote (int from_tty)
      target_open() return to the caller an indication that the target
      is currently running and GDB state should be set to the same as
      for an async run.  */
-  wait_for_inferior (0);
+  wait_for_inferior ();
 
   /* Now that the inferior has stopped, do any bookkeeping like
      loading shared libraries.  We want to do this before normal_stop,
@@ -2604,18 +2604,13 @@ prepare_for_detach (void)
 
 /* Wait for control to return from inferior to debugger.
 
-   If TREAT_EXEC_AS_SIGTRAP is non-zero, then handle EXEC signals
-   as if they were SIGTRAP signals.  This can be useful during
-   the startup sequence on some targets such as HP/UX, where
-   we receive an EXEC event instead of the expected SIGTRAP.
-
    If inferior gets a signal, we may decide to start it up again
    instead of returning.  That is why there is a loop in this function.
    When this function actually returns it means the inferior
    should be left stopped and GDB should read more commands.  */
 
 void
-wait_for_inferior (int treat_exec_as_sigtrap)
+wait_for_inferior (void)
 {
   struct cleanup *old_cleanups;
   struct execution_control_state ecss;
@@ -2623,8 +2618,7 @@ wait_for_inferior (int treat_exec_as_sigtrap)
 
   if (debug_infrun)
     fprintf_unfiltered
-      (gdb_stdlog, "infrun: wait_for_inferior (treat_exec_as_sigtrap=%d)\n",
-       treat_exec_as_sigtrap);
+      (gdb_stdlog, "infrun: wait_for_inferior ()\n");
 
   old_cleanups =
     make_cleanup (delete_step_thread_step_resume_breakpoint_cleanup, NULL);
@@ -2655,13 +2649,6 @@ wait_for_inferior (int treat_exec_as_sigtrap)
 
       if (debug_infrun)
 	print_target_wait_results (waiton_ptid, ecs->ptid, &ecs->ws);
-
-      if (treat_exec_as_sigtrap && ecs->ws.kind == TARGET_WAITKIND_EXECD)
-        {
-          xfree (ecs->ws.value.execd_pathname);
-          ecs->ws.kind = TARGET_WAITKIND_STOPPED;
-          ecs->ws.value.sig = TARGET_SIGNAL_TRAP;
-        }
 
       /* If an error happens while handling the event, propagate GDB's
 	 knowledge of the executing state to the frontend/user running

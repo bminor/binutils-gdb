@@ -1,3 +1,18 @@
+2011-05-09  Pedro Alves  <pedro@codesourcery.com>
+
+	* inferior.h (wait_for_inferior): Remove `thread_exec_as_sigtrap'
+	parameter.
+	* infrun.c (proceed, start_remote): Adjust.
+	(wait_for_inferior): Remove `thread_exec_as_sigtrap' parameter,
+	and adjust to not handle it.
+	* solib-irix.c (irix_solib_create_inferior_hook): Adjust.
+	* solib-osf.c (osf_solib_create_inferior_hook): Adjust.
+	* solib-sunos.c (sunos_solib_create_inferior_hook): Adjust.
+	* solib-svr4.c (svr4_solib_create_inferior_hook): Adjust.
+	* windows-nat.c (do_initial_windows_stuff): Adjust.
+	* infcmd.c (attach_command): Adjust.
+	(notice_new_inferior): Adjust.
+
 2011-05-06  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* ppc-linux-tdep.c (ppu2spu_prev_register): Handle pseudo registers.
