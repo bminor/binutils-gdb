@@ -1,3 +1,12 @@
+2011-05-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-elf/elf.exp (array_tests): Remove "pr12730".
+	(array_tests_pie): Remove "PIE pr12730".
+	(array_tests_static): Remove "static pr12730".
+
+	* ld-elf/pr12730.cc: Removed.
+	* ld-elf/pr12730.out: Likewise.
+
 2011-05-09  Paul Brook  <paul@codesourcery.com>
 
 	* ld-tic6x/discard-unwind.ld: New.
