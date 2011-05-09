@@ -1476,7 +1476,10 @@ lin_lwp_attach_lwp (ptid_t ptid)
 
       status = linux_nat_post_attach_wait (ptid, 0, &cloned, &signalled);
       if (!WIFSTOPPED (status))
-	return -1;
+	{
+	  restore_child_signals_mask (&prev_mask);
+	  return -1;
+	}
 
       lp = add_lwp (ptid);
       lp->stopped = 1;

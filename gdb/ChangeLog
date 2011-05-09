@@ -1,3 +1,8 @@
+2011-05-09  Doug Evans  <dje@google.com>
+
+	* linux-nat.c (lin_lwp_attach_lwp): For !WIPSTOPPED case,
+	adding missing call to restore_child_signals_mask.
+
 2011-05-09  Pedro Alves  <pedro@codesourcery.com>
 
 	* inferior.h (wait_for_inferior): Remove `thread_exec_as_sigtrap'
