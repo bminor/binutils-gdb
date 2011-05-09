@@ -151,6 +151,7 @@ bfin_uart_io_read_buffer (struct hw *me, void *dest,
       bfin_uart_reschedule (me);
       break;
     case mmr_offset(lsr):
+      uart->lsr &= ~(DR | THRE | TEMT);
       uart->lsr |= bfin_uart_get_status (me);
     case mmr_offset(thr):
     case mmr_offset(msr):
