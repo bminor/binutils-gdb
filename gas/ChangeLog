@@ -1,3 +1,7 @@
+2011-05-10  Alan Modra  <amodra@gmail.com>
+
+	* dw2gencfi.c (tc_cfi_endproc): Avoid "set but not used" error.
+
 2011-05-09  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-tic6x.c (streq): Define.

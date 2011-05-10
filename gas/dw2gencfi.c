@@ -73,7 +73,7 @@
 #endif
 
 #ifndef tc_cfi_endproc
-# define tc_cfi_endproc(fde) ((void)0)
+# define tc_cfi_endproc(fde) ((void) (fde))
 #endif
 
 #ifndef DWARF2_FORMAT
