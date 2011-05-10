@@ -97,7 +97,6 @@ show_libthread_db_debug (struct ui_file *file, int from_tty,
   fprintf_filtered (file, _("libthread-db debugging is %s.\n"), value);
 }
 
-
 /* If we're running on GNU/Linux, we must explicitly attach to any new
    threads.  */
 
@@ -650,7 +649,7 @@ dladdr_to_soname (const void *addr)
   return NULL;
 }
 
-/* Attempt to initialize dlopen()ed libthread_db, described by HANDLE.
+/* Attempt to initialize dlopen()ed libthread_db, described by INFO.
    Return 1 on success.
    Failure could happen if libthread_db does not have symbols we expect,
    or when it refuses to work with the current inferior (e.g. due to
@@ -812,7 +811,6 @@ try_thread_db_load (const char *library)
   delete_thread_db_info (GET_PID (inferior_ptid));
   return 0;
 }
-
 
 /* Search libthread_db_search_path for libthread_db which "agrees"
    to work on current inferior.  */

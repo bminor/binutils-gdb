@@ -1,5 +1,8 @@
 2011-05-10  Doug Evans  <dje@google.com>
 
+	* linux-thread-db.c: Whitespace cleanup.
+	(try_thread_db_load_1): Fix comment.
+
 	* linux-thread-db.c (set_libthread_db_search_path): New function.
 	(_initialize_thread_db): Add setter for libthread-db-search-path.
 
