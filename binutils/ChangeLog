@@ -1,3 +1,7 @@
+2011-05-10  Tristan Gingold  <gingold@adacore.com>
+
+	* dwarf.c (process_extended_line_op): Dump unknown records.
+
 2011-05-07  Alan Modra  <amodra@gmail.com>
 
 	PR binutils/12632

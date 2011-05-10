@@ -376,14 +376,22 @@ process_extended_line_op (unsigned char *data, int is_stmt)
       break;
 
     default:
-      if (op_code >= DW_LNE_lo_user
-	  /* The test against DW_LNW_hi_user is redundant due to
-	     the limited range of the unsigned char data type used
-	     for op_code.  */
-	  /*&& op_code <= DW_LNE_hi_user*/)
-	printf (_("user defined: length %d\n"), len - bytes_read);
-      else
-	printf (_("UNKNOWN: length %d\n"), len - bytes_read);
+      {
+        unsigned int rlen = len - bytes_read - 1;
+
+        if (op_code >= DW_LNE_lo_user
+            /* The test against DW_LNW_hi_user is redundant due to
+               the limited range of the unsigned char data type used
+               for op_code.  */
+            /*&& op_code <= DW_LNE_hi_user*/)
+          printf (_("user defined: "));
+        else
+          printf (_("UNKNOWN: "));
+        printf (_("length %d ["), rlen);
+        for (; rlen; rlen--)
+          printf (" %02x", *data++);
+        printf ("]\n");
+      }
       break;
     }
 
