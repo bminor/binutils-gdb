@@ -1,3 +1,8 @@
+2011-05-10  Doug Evans  <dje@google.com>
+
+	* linux-thread-db.c (set_libthread_db_search_path): New function.
+	(_initialize_thread_db): Add setter for libthread-db-search-path.
+
 2011-05-09  Doug Evans  <dje@google.com>
 
 	* NEWS: Mention --with-iconv-bin.

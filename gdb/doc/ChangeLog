@@ -1,3 +1,9 @@
+2011-05-10  Doug Evans  <dje@google.com>
+
+	* gdb.texinfo (Threads): If an empty path is provided for
+	libthread-db-search-path it is reset to its default value.
+	(Server): Ditto.
+
 2011-05-09  Doug Evans  <dje@google.com>
 
 	* gdb.texinfo (Requirements): Fix typo.  Mention --with-iconv-bin.

@@ -1,3 +1,7 @@
+2011-05-10  Doug Evans  <dje@google.com>
+
+	* thread-db.c (thread_db_handle_monitor_command): Handle elided path.
+
 2011-05-04  Doug Evans  <dje@google.com>
 
 	* linux-low.c (linux_join): Skip process lookup.

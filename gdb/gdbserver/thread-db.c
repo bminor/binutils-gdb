@@ -916,9 +916,14 @@ thread_db_mourn (struct process_info *proc)
 int
 thread_db_handle_monitor_command (char *mon)
 {
-  if (strncmp (mon, "set libthread-db-search-path ", 29) == 0)
+  const char *cmd = "set libthread-db-search-path";
+  size_t cmd_len = strlen (cmd);
+
+  if (strncmp (mon, cmd, cmd_len) == 0
+      && (mon[cmd_len] == '\0'
+	  || mon[cmd_len] == ' '))
     {
-      const char *cp = mon + 29;
+      const char *cp = mon + cmd_len;
 
       if (libthread_db_search_path != NULL)
 	free (libthread_db_search_path);
@@ -927,6 +932,8 @@ thread_db_handle_monitor_command (char *mon)
       while (isspace (*cp))
 	++cp;
 
+      if (*cp == '\0')
+	cp = LIBTHREAD_DB_SEARCH_PATH;
       libthread_db_search_path = xstrdup (cp);
 
       monitor_output ("libthread-db-search-path set to `");

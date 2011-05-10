@@ -2855,7 +2855,7 @@ watchpoints in programs with multiple threads.
 If this variable is set, @var{path} is a colon-separated list of
 directories @value{GDBN} will use to search for @code{libthread_db}.
 If you omit @var{path}, @samp{libthread-db-search-path} will be reset to
-an empty list.
+its default value.
 
 On @sc{gnu}/Linux and Solaris systems, @value{GDBN} uses a ``helper''
 @code{libthread_db} library to obtain information about threads in the
@@ -16369,7 +16369,7 @@ protocol (@pxref{Remote Protocol}).
 When this command is issued, @var{path} is a colon-separated list of
 directories to search for @code{libthread_db} (@pxref{Threads,,set
 libthread-db-search-path}).  If you omit @var{path},
-@samp{libthread-db-search-path} will be reset to an empty list.
+@samp{libthread-db-search-path} will be reset to its default value.
 
 @item monitor exit
 Tell gdbserver to exit immediately.  This command should be followed by

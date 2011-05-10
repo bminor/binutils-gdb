@@ -75,6 +75,17 @@
 
 static char *libthread_db_search_path;
 
+static void
+set_libthread_db_search_path (char *ignored, int from_tty,
+			      struct cmd_list_element *c)
+{
+  if (*libthread_db_search_path == '\0')
+    {
+      xfree (libthread_db_search_path);
+      libthread_db_search_path = xstrdup (LIBTHREAD_DB_SEARCH_PATH);
+    }
+}
+
 /* If non-zero, print details of libthread_db processing.  */
 
 static int libthread_db_debug;
@@ -1719,8 +1730,10 @@ _initialize_thread_db (void)
 Set search path for libthread_db."), _("\
 Show the current search path or libthread_db."), _("\
 This path is used to search for libthread_db to be loaded into \
-gdb itself."),
-			    NULL,
+gdb itself.\n\
+Its value is a colon (':') separate list of directories to search.\n\
+Setting the search path to an empty list resets it to its default value."),
+			    set_libthread_db_search_path,
 			    NULL,
 			    &setlist, &showlist);
 
