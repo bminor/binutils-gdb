@@ -1,3 +1,9 @@
+2010-05-10  Quentin Neill  <quentin.neill@amd.com>
+
+	* gas/i386/i386.exp: Add new bdver2 test cases.
+	* gas/i386/nops-1-bdver2.d: New.
+	* gas/i386/x86-64-nops-1-bdver2.d: New.
+
 2011-05-09  Paul Brook  <paul@codesourcery.com>
 
 	* gas/tic6x/unwind-1.d: New test.

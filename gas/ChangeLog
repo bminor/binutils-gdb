@@ -1,3 +1,11 @@
+2011-05-10  Quentin Neill  <quentin.neill@amd.com>
+
+	* config/tc-i386.c (cpu_arch): Add bdver2 and rename
+	PROCESSOR_BDVER1 to PROCESSOR_BDVER.
+	(i386_align_code): Rename PROCESSOR_BDVER1.
+	(processor_type): Ditto.
+	* doc/c-i386.texi: Add bdver2.
+
 2011-05-10  Alan Modra  <amodra@gmail.com>
 
 	* dw2gencfi.c (tc_cfi_endproc): Avoid "set but not used" error.
