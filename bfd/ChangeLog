@@ -1,3 +1,10 @@
+2011-05-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* elf.c (elfcore_grok_psinfo): Initialize CORE_PID for both native and
+	32bit psinfo.
+	* elf32-ppc.c (ppc_elf_grok_psinfo): Initialize core_pid.
+	* elf64-ppc.c (ppc64_elf_grok_psinfo): Likewise.
+
 2011-05-09  Paul Brook  <paul@codesourcery.com>
 
 	* bfd-in.h (elf32_tic6x_fix_exidx_coverage): Add prototype.

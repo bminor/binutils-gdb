@@ -1881,6 +1881,8 @@ ppc_elf_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
       return FALSE;
 
     case 128:		/* Linux/PPC elf_prpsinfo.  */
+      elf_tdata (abfd)->core_pid
+	= bfd_get_32 (abfd, note->descdata + 16);
       elf_tdata (abfd)->core_program
 	= _bfd_elfcore_strndup (abfd, note->descdata + 32, 16);
       elf_tdata (abfd)->core_command

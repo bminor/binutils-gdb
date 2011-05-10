@@ -8000,6 +8000,7 @@ elfcore_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
 
       memcpy (&psinfo, note->descdata, sizeof (psinfo));
 
+      elf_tdata (abfd)->core_pid = psinfo.pr_pid;
       elf_tdata (abfd)->core_program
 	= _bfd_elfcore_strndup (abfd, psinfo.pr_fname,
 				sizeof (psinfo.pr_fname));
@@ -8016,6 +8017,7 @@ elfcore_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
 
       memcpy (&psinfo, note->descdata, sizeof (psinfo));
 
+      elf_tdata (abfd)->core_pid = psinfo.pr_pid;
       elf_tdata (abfd)->core_program
 	= _bfd_elfcore_strndup (abfd, psinfo.pr_fname,
 				sizeof (psinfo.pr_fname));
