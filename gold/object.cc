@@ -1824,6 +1824,7 @@ Sized_relobj<size, big_endian>::do_count_local_symbols(Stringpool* pool,
   unsigned int dyncount = 0;
   // Skip the first, dummy, symbol.
   psyms += sym_size;
+  bool strip_all = parameters->options().strip_all();
   bool discard_all = parameters->options().discard_all();
   bool discard_locals = parameters->options().discard_locals();
   for (unsigned int i = 1; i < loccount; ++i, psyms += sym_size)
@@ -1882,7 +1883,8 @@ Sized_relobj<size, big_endian>::do_count_local_symbols(Stringpool* pool,
           ++dyncount;
         }
 
-      if (discard_all && lv.may_be_discarded_from_output_symtab())
+      if (strip_all
+	  || (discard_all && lv.may_be_discarded_from_output_symtab()))
 	{
 	  lv.set_no_output_symtab_entry();
 	  continue;

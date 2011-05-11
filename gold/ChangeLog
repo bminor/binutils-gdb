@@ -1,3 +1,8 @@
+2011-05-10 Cary Coutant  <ccoutant@google.com>
+
+	* object.cc (Sized_relobj::do_count_local_symbols): Check for
+	strip_all (-s).
+
 2011-05-06  Ian Lance Taylor  <iant@google.com>
 
 	* layout.cc (Layout::layout): If the output section flags change,
