@@ -1,3 +1,8 @@
+2011-05-10  Quentin Neill  <quentin.neill@amd.com>
+
+	* i386-gen.c (cpu_flag_init): Add new CPU_BDVER2_FLAGS.
+	* i386-init.h: Regenerated.
+
 2011-04-27  Nick Clifton  <nickc@redhat.com>
 
 	* po/da.po: Updated Danish translation.
