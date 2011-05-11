@@ -158,6 +158,9 @@ lookup_symtab (const char *name)
   struct objfile *objfile;
   char *real_path = NULL;
   char *full_path = NULL;
+  struct cleanup *cleanup;
+
+  cleanup = make_cleanup (null_cleanup, NULL);
 
   /* Here we are interested in canonicalizing an absolute path, not
      absolutizing a relative path.  */
@@ -177,6 +180,7 @@ got_symtab:
   {
     if (FILENAME_CMP (name, s->filename) == 0)
       {
+	do_cleanups (cleanup);
 	return s;
       }
 
@@ -189,6 +193,7 @@ got_symtab:
 
         if (fp != NULL && FILENAME_CMP (full_path, fp) == 0)
           {
+	    do_cleanups (cleanup);
             return s;
           }
       }
@@ -204,6 +209,7 @@ got_symtab:
             make_cleanup (xfree, rp);
             if (FILENAME_CMP (real_path, rp) == 0)
               {
+		do_cleanups (cleanup);
                 return s;
               }
           }
@@ -216,7 +222,10 @@ got_symtab:
     ALL_SYMTABS (objfile, s)
     {
       if (FILENAME_CMP (lbasename (s->filename), name) == 0)
-	return s;
+	{
+	  do_cleanups (cleanup);
+	  return s;
+	}
     }
 
   /* Same search rules as above apply here, but now we look thru the
@@ -235,9 +244,15 @@ got_symtab:
   }
 
   if (s != NULL)
-    return s;
+    {
+      do_cleanups (cleanup);
+      return s;
+    }
   if (!found)
-    return NULL;
+    {
+      do_cleanups (cleanup);
+      return NULL;
+    }
 
   /* At this point, we have located the psymtab for this file, but
      the conversion to a symtab has failed.  This usually happens

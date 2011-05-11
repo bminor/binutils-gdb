@@ -1,3 +1,7 @@
+2011-05-11  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* symtab.c (lookup_symtab): Run cleanup before returning.
+
 2011-05-11  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2read.c (handle_data_member_location): New function.
