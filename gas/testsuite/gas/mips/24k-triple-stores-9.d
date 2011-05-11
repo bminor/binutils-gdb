@@ -1,5 +1,5 @@
 #objdump: -dr
-#as: -mfix-24k
+#as: -mfix-24k -32
 #name: 24K: Triple store (Intervening data #1)
 
 .*: +file format .*mips.*

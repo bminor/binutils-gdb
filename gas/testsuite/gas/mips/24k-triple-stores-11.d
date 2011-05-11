@@ -1,5 +1,5 @@
 #objdump: -d
-#as: -mfix-24k
+#as: -mfix-24k -32
 #name: 24K: Triple Store (gprel relocs)
 
 .*: +file format .*mips.*
