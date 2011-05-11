@@ -1,11 +1,11 @@
 #objdump: -dr
-#as: -mfix-24k -32
+#as: -mfix-24k -32 -EB
 #name: 24K: Triple Store (Store Macro Check)
 
 .*: +file format .*mips.*
 
 Disassembly of section .text:
-00000000 <.text>:
+0+ <.*>:
    0:	abbf0050 	swl	ra,80\(sp\)
    4:	00000000 	nop
    8:	bbbf0053 	swr	ra,83\(sp\)

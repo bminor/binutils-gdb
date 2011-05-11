@@ -6,7 +6,7 @@
 
 Disassembly of section .text:
 
-00000000 <.text>:
+0+ <.*>:
    0:	a3a2000b 	sb	v0,11\(sp\)
    4:	00000000 	nop
    8:	a3a3000b 	sb	v1,11\(sp\)

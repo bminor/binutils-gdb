@@ -491,7 +491,10 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test_arches "24k-triple-stores-8" [mips_arch_list_matching mips1]
     run_dump_test_arches "24k-triple-stores-9" [mips_arch_list_matching mips1]
     run_dump_test_arches "24k-triple-stores-10" [mips_arch_list_matching mips1]
-    run_dump_test_arches "24k-triple-stores-11" [mips_arch_list_matching mips1]
+    if $elf {
+	run_dump_test_arches "24k-triple-stores-11" \
+	    [mips_arch_list_matching mips1]
+    }
 
     if $elf {
 	run_dump_test_arches "jal-svr4pic" \

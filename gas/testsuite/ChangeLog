@@ -1,5 +1,22 @@
 2011-05-11  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* gas/mips/24k-branch-delay-1.d: Allow 64-bit addresses.  Stub out
+	function names.
+	* gas/mips/24k-triple-stores-1.d: Likewise.
+	* gas/mips/24k-triple-stores-2.d: Likewise.
+	* gas/mips/24k-triple-stores-3.d: Likewise.
+	* gas/mips/24k-triple-stores-4.d: Likewise.
+	* gas/mips/24k-triple-stores-5.d: Likewise.
+	* gas/mips/24k-triple-stores-7.d: Likewise.
+	* gas/mips/24k-triple-stores-8.d: Likewise.
+	* gas/mips/24k-triple-stores-9.d: Likewise.
+	* gas/mips/24k-triple-stores-10.d: Likewise.
+	* gas/mips/24k-triple-stores-11.d: Likewise.
+	* gas/mips/24k-triple-stores-6.d: Likewise.  Add -EB.
+	* gas/mips/mips.exp: Only run 24k-triple-stores-11.d on ELF targets.
+
+2011-05-11  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* gas/mips/24k-branch-delay-1.d: Add -32 to assembler options.
 	* gas/mips/24k-triple-stores-1.d: Likewise.
 	* gas/mips/24k-triple-stores-2.d: Likewise.

@@ -5,7 +5,7 @@
 .*: +file format .*mips.*
 
 Disassembly of section .text:
-00000000 <.text>:
+0+ <.*>:
    0:	00842020 	add	a0,a0,a0
    4:	00842020 	add	a0,a0,a0
    8:	00842020 	add	a0,a0,a0

@@ -5,7 +5,7 @@
 .*: +file format .*mips.*
 
 Disassembly of section .text:
-00000000 <.text>:
+0+ <.*>:
    0:	a3a20000 	sb	v0,0\(sp\)
    4:	00000000 	nop
    8:	a3a3000a 	sb	v1,10\(sp\)
