@@ -1,3 +1,9 @@
+2011-05-11  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2read.c (handle_data_member_location): New function.
+	(dwarf2_add_field): Use it.
+	(read_common_block): Likewise.
+
 2011-05-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Make addrs->SECTINDEX always defined.
