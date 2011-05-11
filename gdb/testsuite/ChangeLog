@@ -1,5 +1,11 @@
 2011-05-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* lib/gdb.exp (gdb_rename_execfile): Remove catch wrappers.
+	(gdb_touch_execfile): Remove catch wrappers.  New variable time.
+	Replace `file copy' and `file rename' by `file mtime'.  Twice.
+
+2011-05-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdb.base/readline-ask.c: New file.
 	* gdb.base/readline-ask.exp: New file.
 	* gdb.base/readline-ask.inputrc: New file.

@@ -2672,32 +2672,21 @@ proc exec_symbol_file { binfile } {
 # Rename the executable file.  Normally this is just BINFILE1 being renamed
 # to BINFILE2, but some targets require multiple binary files.
 proc gdb_rename_execfile { binfile1 binfile2 } {
-    catch { file rename -force \
-	    [exec_target_file ${binfile1}] \
-	    [exec_target_file ${binfile2}] }
+    file rename -force [exec_target_file ${binfile1}] \
+		       [exec_target_file ${binfile2}]
     if { [exec_target_file ${binfile1}] != [exec_symbol_file ${binfile1}] } {
-	catch { file rename -force \
-		[exec_symbol_file ${binfile1}] \
-		[exec_symbol_file ${binfile2}] }
+	file rename -force [exec_symbol_file ${binfile1}] \
+			   [exec_symbol_file ${binfile2}]
     }
 }
 
 # "Touch" the executable file to update the date.  Normally this is just
 # BINFILE, but some targets require multiple files.
 proc gdb_touch_execfile { binfile } {
-    catch { file copy -force \
-	    [exec_target_file ${binfile}] \
-	    [exec_target_file ${binfile}.tmp] }
-    catch { file rename -force \
-	    [exec_target_file ${binfile}.tmp] \
-	    [exec_target_file ${binfile}] }
+    set time [clock seconds]
+    file mtime [exec_target_file ${binfile}] $time
     if { [exec_target_file ${binfile}] != [exec_symbol_file ${binfile}] } {
-	catch { file copy -force \
-		[exec_symbol_file ${binfile}] \
-		[exec_symbol_file ${binfile}.tmp] }
-	catch { file rename -force \
-		[exec_symbol_file ${binfile}.tmp] \
-		[exec_symbol_file ${binfile}] }
+	file mtime [exec_symbol_file ${binfile}] $time
     }
 }
 
