@@ -149,7 +149,7 @@ sim_engine_abort (SIM_DESC sd,
 {
   va_list ap;
   ASSERT (sd == NULL || STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
-  va_start(ap, fmt);
+  va_start (ap, fmt);
   sim_engine_vabort (sd, cpu, cia, fmt, ap);
   va_end (ap);
 }

@@ -43,17 +43,17 @@ sim_engine_abort (SIM_DESC sd,
   if (sd != NULL)
     {
       va_list ap;
-      va_start(ap, fmt);
+      va_start (ap, fmt);
       sim_io_evprintf (sd, fmt, ap);
-      va_end(ap);
+      va_end (ap);
       sim_io_error (sd, "\n");
     }
   else
     {
       va_list ap;
-      va_start(ap, fmt);
+      va_start (ap, fmt);
       vfprintf (stderr, fmt, ap);
-      va_end(ap);
+      va_end (ap);
       fprintf (stderr, "\n");
       abort ();
     }

@@ -419,7 +419,7 @@ standard_option_handler (SIM_DESC sd, sim_cpu *cpu, int opt,
 
     case OPTION_ARCHITECTURE_INFO:
       {
-	const char **list = bfd_arch_list();
+	const char **list = bfd_arch_list ();
 	const char **lp;
 	if (list == NULL)
 	  abort ();

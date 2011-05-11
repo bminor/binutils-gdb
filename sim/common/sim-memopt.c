@@ -196,7 +196,7 @@ do_memopt_add (SIM_DESC sd,
 	  if (free_buffer == 0 || free_buffer == (char*)-1) /* MAP_FAILED */
 	    {
 	      sim_io_error (sd, "Error, cannot mmap file (%s).\n",
-			    strerror(errno));
+			    strerror (errno));
 	    }
 	}
 #endif
@@ -500,7 +500,7 @@ memory_option_handler (SIM_DESC sd, sim_cpu *cpu, int opt,
 	if (mmap_next_fd < 0)
 	  {
 	    sim_io_eprintf (sd, "Cannot open file `%s': %s\n",
-			    arg, strerror(errno));
+			    arg, strerror (errno));
 	    return SIM_RC_FAIL;
 	  }
 

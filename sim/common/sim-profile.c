@@ -740,7 +740,7 @@ profile_print_pc (sim_cpu *cpu, int verbose)
 	  }
 	if (ok == 0)
 	  sim_io_eprintf (sd, "Failed to write to \"gmon.out\" profile file\n");
-	fclose(pf);
+	fclose (pf);
       }
   }
 

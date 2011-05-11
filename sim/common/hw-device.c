@@ -45,9 +45,9 @@ hw_ioctl (struct hw *me,
 {
   int status;
   va_list ap;
-  va_start(ap, request);
+  va_start (ap, request);
   status = me->to_ioctl (me, request, ap);
-  va_end(ap);
+  va_end (ap);
   return status;
 }
 

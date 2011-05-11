@@ -246,7 +246,7 @@ hw_port_decode (struct hw *me,
 {
   if (port_name == NULL || port_name[0] == '\0')
     return 0;
-  if (isdigit(port_name[0]))
+  if (isdigit (port_name[0]))
     {
       return strtoul (port_name, NULL, 0);
     }
@@ -268,7 +268,7 @@ hw_port_decode (struct hw *me,
 			{
 			  if (port_name[len] == '\0')
 			    return ports->number;
-			  else if(isdigit (port_name[len]))
+			  else if (isdigit (port_name[len]))
 			    {
 			      int port = (ports->number
 					  + strtoul (&port_name[len], NULL, 0));
@@ -313,7 +313,7 @@ hw_port_encode (struct hw *me,
 		    && port_number < ports->number + ports->nr_ports)
 		  {
 		    strcpy (buf, ports->name);
-		    sprintf (buf + strlen(buf), "%d", port_number - ports->number);
+		    sprintf (buf + strlen (buf), "%d", port_number - ports->number);
 		    if (strlen (buf) >= sizeof_buf)
 		      hw_abort (me, "hw_port_encode: buffer overflow");
 		    return strlen (buf);
@@ -323,10 +323,10 @@ hw_port_encode (struct hw *me,
 	      {
 		if (ports->number == port_number)
 		  {
-		    if (strlen(ports->name) >= sizeof_buf)
+		    if (strlen (ports->name) >= sizeof_buf)
 		      hw_abort (me, "hw_port_encode: buffer overflow");
-		    strcpy(buf, ports->name);
-		    return strlen(buf);
+		    strcpy (buf, ports->name);
+		    return strlen (buf);
 		  }
 	      }
 	  }
@@ -334,7 +334,7 @@ hw_port_encode (struct hw *me,
       }
   }
   sprintf (buf, "%d", port_number);
-  if (strlen(buf) >= sizeof_buf)
+  if (strlen (buf) >= sizeof_buf)
     hw_abort (me, "hw_port_encode: buffer overflow");
-  return strlen(buf);
+  return strlen (buf);
 }

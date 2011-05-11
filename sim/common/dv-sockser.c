@@ -175,12 +175,12 @@ dv_sockser_init (SIM_DESC sd)
     }
 
   sockaddr.sin_family = PF_INET;
-  sockaddr.sin_port = htons(port);
+  sockaddr.sin_port = htons (port);
   memcpy (&sockaddr.sin_addr.s_addr, hostent->h_addr,
 	  sizeof (struct in_addr));
 
   tmp = 1;
-  if (setsockopt (sockser_listen_fd, SOL_SOCKET, SO_REUSEADDR, (void*)& tmp, sizeof(tmp)) < 0)
+  if (setsockopt (sockser_listen_fd, SOL_SOCKET, SO_REUSEADDR, (void*)& tmp, sizeof (tmp)) < 0)
     {
       sim_io_eprintf (sd, "sockser init: unable to set SO_REUSEADDR: %s\n",
 		      strerror (errno));

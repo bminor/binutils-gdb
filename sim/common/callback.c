@@ -231,7 +231,7 @@ os_poll_quit (p)
 #endif
 #if defined (_MSC_VER)
   /* NB - this will not compile! */
-  int k = win32pollquit();
+  int k = win32pollquit ();
   if (k == 1)
     return 1;
   else if (k == 2)

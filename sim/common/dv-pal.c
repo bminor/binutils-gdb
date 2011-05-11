@@ -306,7 +306,7 @@ scan_hw_pal (struct hw *me)
   hw_pal_device *hw_pal = (hw_pal_device *)hw_data (me);
   char c;
   int count;
-  count = do_hw_poll_read (me, hw_pal->reader, 0/*STDIN*/, &c, sizeof(c));
+  count = do_hw_poll_read (me, hw_pal->reader, 0/*STDIN*/, &c, sizeof (c));
   switch (count)
     {
     case HW_IO_NOT_READY:
@@ -482,7 +482,7 @@ hw_pal_io_write_buffer (struct hw *me,
 
 #if NOT_YET
 static void
-hw_pal_instance_delete_callback(hw_instance *instance)
+hw_pal_instance_delete_callback (hw_instance *instance)
 {
   /* nothing to delete, the hw_pal is attached to the struct hw */
   return;

@@ -35,9 +35,9 @@ int
 sim_stop (SIM_DESC sd)
 {
   ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
-  sim_events_schedule_after_signal(sd,
-				   0 /*NOW*/,
-				   control_c_simulation,
-				   sd /*data*/);
+  sim_events_schedule_after_signal (sd,
+				    0 /*NOW*/,
+				    control_c_simulation,
+				    sd /*data*/);
   return 1;
 }

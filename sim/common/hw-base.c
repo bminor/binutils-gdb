@@ -114,13 +114,13 @@ generic_hw_unit_encode (struct hw *bus,
   /* don't output anything if empty */
   if (phys->nr_cells == 0)
     {
-      strcpy(pos, "");
+      strcpy (pos, "");
       len = 0;
     }
   else if (i == phys->nr_cells)
     {
       /* all zero */
-      strcpy(pos, "0");
+      strcpy (pos, "0");
       len = 1;
     }
   else
@@ -129,14 +129,14 @@ generic_hw_unit_encode (struct hw *bus,
 	{
 	  if (pos != buf)
 	    {
-	      strcat(pos, ",");
-	      pos = strchr(pos, '\0');
+	      strcat (pos, ",");
+	      pos = strchr (pos, '\0');
 	    }
 	  if (phys->cells[i] < 10)
 	    sprintf (pos, "%ld", (unsigned long)phys->cells[i]);
 	  else
 	    sprintf (pos, "0x%lx", (unsigned long)phys->cells[i]);
-	  pos = strchr(pos, '\0');
+	  pos = strchr (pos, '\0');
 	}
       len = pos - buf;
     }

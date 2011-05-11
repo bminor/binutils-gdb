@@ -83,7 +83,7 @@ sim_resume (SIM_DESC sd,
 #ifdef SIM_CPU_EXCEPTION_RESUME
       {
 	sim_cpu* cpu = STATE_CPU (sd, next_cpu_nr);
-	SIM_CPU_EXCEPTION_RESUME(sd, cpu, sig_to_deliver);
+	SIM_CPU_EXCEPTION_RESUME (sd, cpu, sig_to_deliver);
       }
 #endif
 

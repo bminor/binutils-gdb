@@ -194,9 +194,9 @@ frob_range (ADDR_RANGE *ar, address_word start, address_word end, int delete_p)
 
  out:
   if (new_asr)
-    free(new_asr);
+    free (new_asr);
   if (new_asr2)
-    free(new_asr2);
+    free (new_asr2);
 }
 
 /* Free T and all subtrees.  */

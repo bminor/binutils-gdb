@@ -1,3 +1,12 @@
+2011-05-11  Mike Frysinger  <vapier@gentoo.org>
+
+	* callback.c, dv-pal.c, dv-sockser.c, hw-base.c, hw-device.c,
+	hw-instances.c, hw-ports.c, hw-properties.c, hw-tree.c, sim-abort.c,
+	sim-arange.c, sim-config.c, sim-core.c, sim-engine.c, sim-events.c,
+	sim-hw.c, sim-io.c, sim-memopt.c, sim-options.c, sim-profile.c,
+	sim-resume.c, sim-stop.c, syscall.c: Add space before parenthesis
+	around function arguments.
+
 2011-04-14  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-options.c (complete_option_list, sim_complete_command):
