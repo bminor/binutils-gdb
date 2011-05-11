@@ -1,6 +1,7 @@
 # Intel(r) Wireless MMX(tm) technology testcase for WMAC
 # mach: xscale
 # as: -mcpu=xscale+iwmmxt
+# kfail: sim/12737 *-*-*
 
 	.include "testutils.inc"
 

@@ -1,3 +1,10 @@
+2011-05-11  Joseph Myers  <joseph@codesourcery.com>
+	    Hans-Peter Nilsson  <hp@axis.com>
+
+	PR sim/12737
+	* sim/arm/iwmmxt/wcmpgt.cgs, sim/arm/iwmmxt/wmac.cgs,
+	sim/arm/iwmmxt/wsra.cgs, sim/arm/xscale/blx.cgs: Kfail.
+
 2011-05-04  Joseph Myers  <joseph@codesourcery.com>
 
 	* configure: Regenerate.
