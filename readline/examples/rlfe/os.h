@@ -186,7 +186,7 @@ extern int errno;
  *    terminal handling
  */
 
-#ifdef POSIX
+#if defined (POSIX) || defined (__FreeBSD__)
 # include <termios.h>
 # ifdef hpux
 #  include <bsdtty.h>
@@ -527,4 +527,3 @@ typedef struct fd_set { int fds_bits[1]; } fd_set;
  * how many characters your pty's can buffer.
  */
 #define IOSIZE		4096
-

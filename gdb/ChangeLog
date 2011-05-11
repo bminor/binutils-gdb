@@ -1,3 +1,14 @@
+2011-05-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* configure.ac <--with-system-readline> (for readline_echoing_p):
+	Remove the test.
+	* tui/tui-io.c (tui_old_readline_echoing_p): Rename to ...
+	(tui_old_rl_echoing_p): ... here.
+	(tui_setup_io): Rename extern declaration readline_echoing_p to
+	_rl_echoing_p.  Adjust assignments for the both renames.
+
 2011-05-11  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* symtab.c (lookup_symtab): Run cleanup before returning.

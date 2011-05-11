@@ -1,3 +1,13 @@
+2011-05-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Workaround gdb.base/completion.exp regression on readline-6.2.
+	* complete.c (get_y_or_n): Disable the return on RL_STATE_CALLBACK.
+
+2011-05-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Imported readline 6.2, and upstream patch 001.
+	* configure: Regenerate.
+
 2011-03-04  Michael Snyder  <msnyder@vmware.com>
 
 	* bind.c (rl_function_dumper): Free allocated memory.

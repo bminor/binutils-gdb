@@ -1,3 +1,10 @@
+2011-05-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* Makefile.in (GDB_DOC_SOURCE_INCLUDES): Rename inc-hist.texinfo to
+	hsuser.texi.
+	* gdb.texinfo <!SYSTEM_READLINE>: Rename inc-hist.texinfo inclusion and
+	comment to hsuser.texi.  Change rluser.texi name in the comment.
+
 2011-05-10  Doug Evans  <dje@google.com>
 
 	* gdb.texinfo (Threads): If an empty path is provided for

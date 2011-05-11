@@ -31025,13 +31025,13 @@ things without first using the debugger to find the facts.
 
 @c The readline documentation is distributed with the readline code
 @c and consists of the two following files:
-@c     rluser.texinfo
-@c     inc-hist.texinfo
+@c     rluser.texi
+@c     hsuser.texi
 @c Use -I with makeinfo to point to the appropriate directory,
 @c environment var TEXINPUTS with TeX.
 @ifclear SYSTEM_READLINE
 @include rluser.texi
-@include inc-hist.texinfo
+@include hsuser.texi
 @end ifclear
 
 @node In Memoriam
