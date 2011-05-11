@@ -527,7 +527,7 @@ relative_addr_info_to_section_offsets (struct section_offsets *section_offsets,
       struct other_sections *osp;
 
       osp = &addrs->other[i];
-      if (osp->addr == 0)
+      if (osp->sectindex == -1)
   	continue;
 
       /* Record all sections in offsets.  */
@@ -568,10 +568,7 @@ addrs_section_compar (const void *ap, const void *bp)
   if (retval)
     return retval;
 
-  /* SECTINDEX is undefined iff ADDR is zero.  */
-  a_idx = a->addr == 0 ? 0 : a->sectindex;
-  b_idx = b->addr == 0 ? 0 : b->sectindex;
-  return a_idx - b_idx;
+  return a->sectindex - b->sectindex;
 }
 
 /* Provide sorted array of pointers to sections of ADDRS.  The array is
@@ -734,8 +731,7 @@ addr_info_make_relative (struct section_addr_info *addrs, bfd *abfd)
 		     bfd_get_filename (abfd));
 
 	  addrs->other[i].addr = 0;
-
-	  /* SECTINDEX is invalid if ADDR is zero.  */
+	  addrs->other[i].sectindex = -1;
 	}
     }
 

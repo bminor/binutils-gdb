@@ -1,3 +1,13 @@
+2011-05-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Make addrs->SECTINDEX always defined.
+	* symfile.c (relative_addr_info_to_section_offsets): Check for
+	SECTINDEX -1, not for zero ADDR.
+	(addrs_section_compar): Remove checking for invalid SECTINDEX.
+	(addr_info_make_relative): Set SECTINDEX to -1 for unmatched entries.
+	* symfile.h (struct section_addr_info) <sectindex>: Update the comment
+	on its validity.
+
 2011-05-10  Doug Evans  <dje@google.com>
 
 	* linux-thread-db.c: Whitespace cleanup.

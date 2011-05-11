@@ -86,7 +86,7 @@ struct section_addr_info
     CORE_ADDR addr;
     char *name;
 
-    /* SECTINDEX must be valid for associated BFD if ADDR is not zero.  */
+    /* SECTINDEX must be valid for associated BFD or set to -1.  */
     int sectindex;
   } other[1];
 };
