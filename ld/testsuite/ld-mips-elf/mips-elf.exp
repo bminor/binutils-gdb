@@ -160,8 +160,10 @@ if $has_newabi {
 
 if { $linux_gnu } {
     run_dump_test "rel32-o32"
-    run_dump_test "rel32-n32"
-    run_dump_test "rel64"
+    if { $has_newabi } {
+	run_dump_test "rel32-n32"
+	run_dump_test "rel64"
+    }
     # The first test checks that a mixed PIC/non-PIC relocatable link
     # will not introduce any stubs itself, but will flag PIC functions
     # for the final link.
@@ -333,7 +335,9 @@ if {$has_newabi} {
 }
 
 if { $linux_gnu } {
-    run_dump_test "textrel-1"
+    if { $has_newabi } {
+	run_dump_test "textrel-1"
+    }
     run_dump_test "got-page-1"
     if $has_newabi {
 	run_dump_test "got-page-2"
