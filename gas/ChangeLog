@@ -1,3 +1,8 @@
+2011-05-13  Frederic Marchal  <fmarchal@perso.be>
+
+	PR gas/12755
+	* config/tc-v850.c (parse_register_list): Correct error string.
+
 2011-05-12  Quentin Neill  <quentin.neill@amd.com>
 
 	* config/tc-i386.c (cpu_arch): Rename PROCESSOR_BDVER1 to PROCESSOR_BD.

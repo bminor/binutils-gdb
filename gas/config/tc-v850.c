@@ -1,6 +1,6 @@
 /* tc-v850.c -- Assembler code for the NEC V850
    Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
-   2006, 2007, 2009, 2010  Free Software Foundation, Inc.
+   2006, 2007, 2009, 2010, 2011  Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -1276,7 +1276,7 @@ parse_register_list (unsigned long *insn,
 
 	  if (exp.X_add_number > exp2.X_add_number)
 	    {
-	      return _("second register should greater tahn first register");
+	      return _("second register should be greater than first register");
 	    }
 
 	  /* Add the rest of the registers in the range.  */
