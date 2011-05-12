@@ -1,3 +1,8 @@
+2011-05-12  Quentin Neill  <quentin.neill@amd.com>
+
+	* config/tc-i386.c (cpu_arch): Rename PROCESSOR_BDVER1 to PROCESSOR_BD.
+	(i386_align_code): Ditto
+
 2011-05-12  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	PR gas/12715
