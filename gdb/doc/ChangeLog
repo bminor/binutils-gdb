@@ -1,3 +1,10 @@
+2011-05-12  Kwok Cheung Yeung  <kcy@codesourcery.com>
+
+	* gdb.texinfo: Document change in the behaviour of the enable and
+	disable GDB commands when applied to tracepoints.
+	Document the EnableDisableTracepoints remote stub feature.
+	Document QTEnable and QTDisable in the list of tracepoint packets.
+
 2011-05-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* Makefile.in (GDB_DOC_SOURCE_INCLUDES): Rename inc-hist.texinfo to

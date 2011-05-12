@@ -1583,11 +1583,17 @@ start_tracing (void)
 		 (t->type == bp_fast_tracepoint ? "fast " : ""), t->number);
     }
 
-  /* No point in tracing with only disabled tracepoints.  */
   if (!any_enabled)
     {
-      VEC_free (breakpoint_p, tp_vec);
-      error (_("No tracepoints enabled, not starting trace"));
+      if (target_supports_enable_disable_tracepoint ())
+	warning (_("No tracepoints enabled"));
+      else
+	{
+	  /* No point in tracing with only disabled tracepoints that
+	     cannot be re-enabled.  */
+	  VEC_free (breakpoint_p, tp_vec);
+	  error (_("No tracepoints enabled, not starting trace"));
+	}
     }
 
   if (num_to_download <= 0)

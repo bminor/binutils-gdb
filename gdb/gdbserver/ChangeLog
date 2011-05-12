@@ -1,3 +1,18 @@
+2011-05-12  Kwok Cheung Yeung  <kcy@codesourcery.com>
+
+	* server.c (handle_query): Add EnableDisableTracepoints to the list
+	of supported features.
+	* tracepoint.c (clear_installed_tracepoints): Uninstall	disabled
+	tracepoints.
+ 	(cmd_qtenable_disable): New.
+ 	(cmd_qtstart): Install tracepoints even if disabled.
+ 	(handle_tracepoint_general_set): Add call to cmd_qtenable_disable on
+ 	receiving a QTEnable or QTDisable packet.
+ 	(gdb_collect): Skip data collection if fast tracepoint is disabled.
+ 	(ust_marker_to_static_tracepoint): Do not ignore disabled static
+ 	tracepoints.
+ 	(gdb_probe): Skip data collection if static tracepoint is disabled.
+
 2011-05-10  Doug Evans  <dje@google.com>
 
 	* thread-db.c (thread_db_handle_monitor_command): Handle elided path.

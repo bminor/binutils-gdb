@@ -329,6 +329,10 @@ struct remote_state
      disconnected.  */
   int disconnected_tracing;
 
+  /* True if the stub reports support for enabling and disabling
+     tracepoints while a trace experiment is running.  */
+  int enable_disable_tracepoints;
+
   /* Nonzero if the user has pressed Ctrl-C, but the target hasn't
      responded to that.  */
   int ctrlc_pending_p;
@@ -3689,6 +3693,16 @@ remote_disconnected_tracing_feature (const struct protocol_feature *feature,
   rs->disconnected_tracing = (support == PACKET_ENABLE);
 }
 
+static void
+remote_enable_disable_tracepoint_feature (const struct protocol_feature *feature,
+					  enum packet_support support,
+					  const char *value)
+{
+  struct remote_state *rs = get_remote_state ();
+
+  rs->enable_disable_tracepoints = (support == PACKET_ENABLE);
+}
+
 static struct protocol_feature remote_protocol_features[] = {
   { "PacketSize", PACKET_DISABLE, remote_packet_size, -1 },
   { "qXfer:auxv:read", PACKET_DISABLE, remote_supported_packet,
@@ -3735,6 +3749,8 @@ static struct protocol_feature remote_protocol_features[] = {
     PACKET_TracepointSource },
   { "QAllow", PACKET_DISABLE, remote_supported_packet,
     PACKET_QAllow },
+  { "EnableDisableTracepoints", PACKET_DISABLE,
+    remote_enable_disable_tracepoint_feature, -1 },
 };
 
 static char *remote_support_xml;
@@ -9648,6 +9664,14 @@ remote_supports_static_tracepoints (void)
   return rs->static_tracepoints;
 }
 
+static int
+remote_supports_enable_disable_tracepoint (void)
+{
+  struct remote_state *rs = get_remote_state ();
+
+  return rs->enable_disable_tracepoints;
+}
+
 static void
 remote_trace_init (void)
 {
@@ -9916,6 +9940,38 @@ remote_download_trace_state_variable (struct trace_state_variable *tsv)
     error (_("Target does not support this command."));
   if (strcmp (target_buf, "OK") != 0)
     error (_("Error on target while downloading trace state variable."));
+}
+
+static void
+remote_enable_tracepoint (struct bp_location *location)
+{
+  struct remote_state *rs = get_remote_state ();
+  char addr_buf[40];
+
+  sprintf_vma (addr_buf, location->address);
+  sprintf (rs->buf, "QTEnable:%x:%s", location->owner->number, addr_buf);
+  putpkt (rs->buf);
+  remote_get_noisy_reply (&rs->buf, &rs->buf_size);
+  if (*rs->buf == '\0')
+    error (_("Target does not support enabling tracepoints while a trace run is ongoing."));
+  if (strcmp (rs->buf, "OK") != 0)
+    error (_("Error on target while enabling tracepoint."));
+}
+
+static void
+remote_disable_tracepoint (struct bp_location *location)
+{
+  struct remote_state *rs = get_remote_state ();
+  char addr_buf[40];
+
+  sprintf_vma (addr_buf, location->address);
+  sprintf (rs->buf, "QTDisable:%x:%s", location->owner->number, addr_buf);
+  putpkt (rs->buf);
+  remote_get_noisy_reply (&rs->buf, &rs->buf_size);
+  if (*rs->buf == '\0')
+    error (_("Target does not support disabling tracepoints while a trace run is ongoing."));
+  if (strcmp (rs->buf, "OK") != 0)
+    error (_("Error on target while disabling tracepoint."));
 }
 
 static void
@@ -10308,10 +10364,13 @@ Specify the serial device it is connected to\n\
   remote_ops.to_terminal_ours = remote_terminal_ours;
   remote_ops.to_supports_non_stop = remote_supports_non_stop;
   remote_ops.to_supports_multi_process = remote_supports_multi_process;
+  remote_ops.to_supports_enable_disable_tracepoint = remote_supports_enable_disable_tracepoint;
   remote_ops.to_trace_init = remote_trace_init;
   remote_ops.to_download_tracepoint = remote_download_tracepoint;
   remote_ops.to_download_trace_state_variable
     = remote_download_trace_state_variable;
+  remote_ops.to_enable_tracepoint = remote_enable_tracepoint;
+  remote_ops.to_disable_tracepoint = remote_disable_tracepoint;
   remote_ops.to_trace_set_readonly_regions = remote_trace_set_readonly_regions;
   remote_ops.to_trace_start = remote_trace_start;
   remote_ops.to_get_trace_status = remote_get_trace_status;

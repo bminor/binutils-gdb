@@ -10026,14 +10026,20 @@ These commands are deprecated; they are equivalent to plain @code{disable} and @
 @item disable tracepoint @r{[}@var{num}@r{]}
 Disable tracepoint @var{num}, or all tracepoints if no argument
 @var{num} is given.  A disabled tracepoint will have no effect during
-the next trace experiment, but it is not forgotten.  You can re-enable
+a trace experiment, but it is not forgotten.  You can re-enable
 a disabled tracepoint using the @code{enable tracepoint} command.
+If the command is issued during a trace experiment and the debug target
+has support for disabling tracepoints during a trace experiment, then the
+change will be effective immediately.  Otherwise, it will be applied to the
+next trace experiment.
 
 @kindex enable tracepoint
 @item enable tracepoint @r{[}@var{num}@r{]}
-Enable tracepoint @var{num}, or all tracepoints.  The enabled
-tracepoints will become effective the next time a trace experiment is
-run.
+Enable tracepoint @var{num}, or all tracepoints.  If this command is
+issued during a trace experiment and the debug target supports enabling
+tracepoints during a trace experiment, then the enabled tracepoints will
+become effective immediately.  Otherwise, they will become effective the
+next time a trace experiment is run.
 @end table
 
 @node Tracepoint Passcounts
@@ -33627,6 +33633,11 @@ These are the currently defined stub features and their properties:
 @tab @samp{-}
 @tab No
 
+@item @samp{EnableDisableTracepoints}
+@tab No
+@tab @samp{-}
+@tab No
+
 @end multitable
 
 These are the currently defined stub features, in more detail:
@@ -33739,6 +33750,11 @@ The remote stub understands the @samp{QAllow} packet.
 @cindex static tracepoints, in remote protocol
 The remote stub supports static tracepoints.
 
+@item EnableDisableTracepoints
+The remote stub supports the @samp{QTEnable} (@pxref{QTEnable}) and
+@samp{QTDisable} (@pxref{QTDisable}) packets that allow tracepoints
+to be enabled and disabled while a trace experiment is running.
+
 @end table
 
 @item qSymbol::
@@ -33819,6 +33835,8 @@ packets.)
 @item qTsV
 @itemx QTStart    
 @itemx QTStop     
+@itemx QTEnable
+@itemx QTDisable
 @itemx QTinit     
 @itemx QTro       
 @itemx qTStatus   
@@ -34307,6 +34325,18 @@ instruction reply packet}).
 
 @item QTStop
 End the tracepoint experiment.  Stop collecting trace frames.
+
+@item QTEnable:@var{n}:@var{addr}
+@anchor{QTEnable}
+Enable tracepoint @var{n} at address @var{addr} in a started tracepoint
+experiment.  If the tracepoint was previously disabled, then collection
+of data from it will resume.
+
+@item QTDisable:@var{n}:@var{addr}
+@anchor{QTDisable}
+Disable tracepoint @var{n} at address @var{addr} in a started tracepoint
+experiment.  No more data will be collected from the tracepoint unless
+@samp{QTEnable:@var{n}:@var{addr}} is subsequently issued.
 
 @item QTinit
 Clear the table of tracepoints, and empty the trace frame buffer.

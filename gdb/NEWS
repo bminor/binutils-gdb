@@ -27,6 +27,23 @@ watch EXPRESSION mask MASK_VALUE
   The watch command now supports the mask argument which allows creation
   of masked watchpoints, if the current architecture supports this feature.
 
+* Tracepoints can now be enabled and disabled at any time after a trace
+  experiment has been started using the standard "enable" and "disable"
+  commands.  It is now possible to start a trace experiment with no enabled
+  tracepoints; GDB will display a warning, but will allow the experiment to
+  begin, assuming that tracepoints will be enabled as needed while the trace
+  is running.
+
+* New remote packets
+
+QTEnable
+  
+  Dynamically enable a tracepoint in a started trace experiment.
+
+QTDisable
+
+  Dynamically disable a tracepoint in a started trace experiment.
+
 *** Changes in GDB 7.3
 
 * GDB has a new command: "thread find [REGEXP]".

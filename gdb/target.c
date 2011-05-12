@@ -659,9 +659,12 @@ update_current_target (void)
       INHERIT (to_get_ada_task_ptid, t);
       /* Do not inherit to_search_memory.  */
       INHERIT (to_supports_multi_process, t);
+      INHERIT (to_supports_enable_disable_tracepoint, t);
       INHERIT (to_trace_init, t);
       INHERIT (to_download_tracepoint, t);
       INHERIT (to_download_trace_state_variable, t);
+      INHERIT (to_enable_tracepoint, t);
+      INHERIT (to_disable_tracepoint, t);
       INHERIT (to_trace_set_readonly_regions, t);
       INHERIT (to_trace_start, t);
       INHERIT (to_get_trace_status, t);
@@ -825,6 +828,9 @@ update_current_target (void)
   de_fault (to_supports_multi_process,
 	    (int (*) (void))
 	    return_zero);
+  de_fault (to_supports_enable_disable_tracepoint,
+	    (int (*) (void))
+	    return_zero);
   de_fault (to_trace_init,
 	    (void (*) (void))
 	    tcomplain);
@@ -833,6 +839,12 @@ update_current_target (void)
 	    tcomplain);
   de_fault (to_download_trace_state_variable,
 	    (void (*) (struct trace_state_variable *))
+	    tcomplain);
+  de_fault (to_enable_tracepoint,
+	    (void (*) (struct bp_location *))
+	    tcomplain);
+  de_fault (to_disable_tracepoint,
+	    (void (*) (struct bp_location *))
 	    tcomplain);
   de_fault (to_trace_set_readonly_regions,
 	    (void (*) (void))

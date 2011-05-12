@@ -11685,6 +11685,15 @@ disable_breakpoint (struct breakpoint *bpt)
 
   bpt->enable_state = bp_disabled;
 
+  if (target_supports_enable_disable_tracepoint ()
+      && current_trace_status ()->running && is_tracepoint (bpt))
+    {
+      struct bp_location *location;
+     
+      for (location = bpt->loc; location; location = location->next)
+	target_disable_tracepoint (location);
+    }
+
   update_global_location_list (0);
 
   observer_notify_breakpoint_modified (bpt);
@@ -11714,7 +11723,13 @@ disable_command (char *args, int from_tty)
     {
       struct bp_location *loc = find_location_by_number (args);
       if (loc)
-	loc->enabled = 0;
+	{
+	  loc->enabled = 0;
+	  if (target_supports_enable_disable_tracepoint ()
+	      && current_trace_status ()->running && loc->owner
+	      && is_tracepoint (loc->owner))
+	    target_disable_tracepoint (loc);
+	}
       update_global_location_list (0);
     }
   else
@@ -11762,6 +11777,16 @@ do_enable_breakpoint (struct breakpoint *bpt, enum bpdisp disposition)
 
   if (bpt->enable_state != bp_permanent)
     bpt->enable_state = bp_enabled;
+
+  if (target_supports_enable_disable_tracepoint ()
+      && current_trace_status ()->running && is_tracepoint (bpt))
+    {
+      struct bp_location *location;
+
+      for (location = bpt->loc; location; location = location->next)
+	target_enable_tracepoint (location);
+    }
+
   bpt->disposition = disposition;
   update_global_location_list (1);
   breakpoints_changed ();
@@ -11804,7 +11829,13 @@ enable_command (char *args, int from_tty)
     {
       struct bp_location *loc = find_location_by_number (args);
       if (loc)
-	loc->enabled = 1;
+	{
+	  loc->enabled = 1;
+	  if (target_supports_enable_disable_tracepoint ()
+	      && current_trace_status ()->running && loc->owner
+	      && is_tracepoint (loc->owner))
+	    target_enable_tracepoint (loc);
+	}
       update_global_location_list (1);
     }
   else

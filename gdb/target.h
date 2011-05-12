@@ -28,6 +28,7 @@ struct objfile;
 struct ui_file;
 struct mem_attrib;
 struct target_ops;
+struct bp_location;
 struct bp_target_info;
 struct regcache;
 struct target_section_table;
@@ -644,6 +645,10 @@ struct target_ops
        simultaneously?  */
     int (*to_supports_multi_process) (void);
 
+    /* Does this target support enabling and disabling tracepoints while a trace
+       experiment is running?  */
+    int (*to_supports_enable_disable_tracepoint) (void);
+
     /* Determine current architecture of thread PTID.
 
        The target is supposed to determine the architecture of the code where
@@ -673,6 +678,12 @@ struct target_ops
 
     /* Send full details of a trace state variable to the target.  */
     void (*to_download_trace_state_variable) (struct trace_state_variable *tsv);
+
+    /* Enable a tracepoint on the target.  */
+    void (*to_enable_tracepoint) (struct bp_location *location);
+
+    /* Disable a tracepoint on the target.  */
+    void (*to_disable_tracepoint) (struct bp_location *location);
 
     /* Inform the target info of memory regions that are readonly
        (such as text sections), and so it should return data from
@@ -872,6 +883,12 @@ struct address_space *target_thread_address_space (ptid_t);
 
 #define	target_supports_multi_process()	\
      (*current_target.to_supports_multi_process) ()
+
+/* Returns true if this target can enable and disable tracepoints
+   while a trace experiment is running.  */
+
+#define target_supports_enable_disable_tracepoint() \
+  (*current_target.to_supports_enable_disable_tracepoint) ()
 
 /* Invalidate all target dcaches.  */
 extern void target_dcache_invalidate (void);
@@ -1456,6 +1473,12 @@ extern int target_search_memory (CORE_ADDR start_addr,
 
 #define target_download_trace_state_variable(tsv) \
   (*current_target.to_download_trace_state_variable) (tsv)
+
+#define target_enable_tracepoint(loc) \
+  (*current_target.to_enable_tracepoint) (loc)
+
+#define target_disable_tracepoint(loc) \
+  (*current_target.to_disable_tracepoint) (loc)
 
 #define target_trace_start() \
   (*current_target.to_trace_start) ()

@@ -2214,9 +2214,6 @@ clear_installed_tracepoints (void)
   /* Restore any bytes overwritten by tracepoints.  */
   for (tpoint = tracepoints; tpoint; tpoint = tpoint->next)
     {
-      if (!tpoint->enabled)
-	continue;
-
       /* Catch the case where we might try to remove a tracepoint that
 	 was never actually installed.  */
       if (tpoint->handle == NULL)
@@ -2452,6 +2449,73 @@ cmd_qtdv (char *own_buf)
   set_trace_state_variable_value (num, (LONGEST) val);
 
   write_ok (own_buf);
+}
+
+static void
+cmd_qtenable_disable (char *own_buf, int enable)
+{
+  char *packet = own_buf;
+  ULONGEST num, addr;
+  struct tracepoint *tp;
+
+  packet += strlen (enable ? "QTEnable:" : "QTDisable:");
+  packet = unpack_varlen_hex (packet, &num);
+  ++packet; /* skip a colon */
+  packet = unpack_varlen_hex (packet, &addr);
+
+  tp = find_tracepoint (num, addr);
+
+  if (tp)
+    {
+      if ((enable && tp->enabled) || (!enable && !tp->enabled))
+	{
+	  trace_debug ("Tracepoint %d at 0x%s is already %s",
+		       (int) num, paddress (addr),
+		       enable ? "enabled" : "disabled");
+	  write_ok (own_buf);
+	  return;
+	}
+
+      trace_debug ("%s tracepoint %d at 0x%s",
+		   enable ? "Enabling" : "Disabling",
+		   (int) num, paddress (addr));
+
+      tp->enabled = enable;
+
+      if (tp->type == fast_tracepoint || tp->type == static_tracepoint)
+	{
+	  int ret;
+	  int offset = offsetof (struct tracepoint, enabled);
+	  CORE_ADDR obj_addr = tp->obj_addr_on_target + offset;
+
+	  ret = prepare_to_access_memory ();
+	  if (ret)
+	    {
+	      trace_debug ("Failed to temporarily stop inferior threads");
+	      write_enn (own_buf);
+	      return;
+	    }
+	  
+	  ret = write_inferior_integer (obj_addr, enable);
+	  done_accessing_memory ();
+	  
+	  if (ret)
+	    {
+	      trace_debug ("Cannot write enabled flag into "
+			   "inferior process memory");
+	      write_enn (own_buf);
+	      return;
+	    }
+	}
+
+      write_ok (own_buf);
+    }
+  else
+    {
+      trace_debug ("Tracepoint %d at 0x%s not found",
+		   (int) num, paddress (addr));
+      write_enn (own_buf);
+    }
 }
 
 static void
@@ -2718,9 +2782,6 @@ cmd_qtstart (char *packet)
     {
       /* Ensure all the hit counts start at zero.  */
       tpoint->hit_count = 0;
-
-      if (!tpoint->enabled)
-	continue;
 
       if (tpoint->type == trap_tracepoint)
 	{
@@ -3459,6 +3520,16 @@ handle_tracepoint_general_set (char *packet)
   else if (strncmp ("QTDPsrc:", packet, strlen ("QTDPsrc:")) == 0)
     {
       cmd_qtdpsrc (packet);
+      return 1;
+    }
+  else if (strncmp ("QTEnable:", packet, strlen ("QTEnable:")) == 0)
+    {
+      cmd_qtenable_disable (packet, 1);
+      return 1;
+    }
+  else if (strncmp ("QTDisable:", packet, strlen ("QTDisable:")) == 0)
+    {
+      cmd_qtenable_disable (packet, 0);
       return 1;
     }
   else if (strncmp ("QTDV:", packet, strlen ("QTDV:")) == 0)
@@ -5340,6 +5411,9 @@ gdb_collect (struct tracepoint *tpoint, unsigned char *regs)
   if (!tracing)
     return;
 
+  if (!tpoint->enabled)
+    return;
+
   ctx.base.type = fast_tracepoint;
   ctx.regs = regs;
   ctx.regcache_initted = 0;
@@ -6598,7 +6672,7 @@ ust_marker_to_static_tracepoint (const struct marker *mdata)
 
   for (tpoint = tracepoints; tpoint; tpoint = tpoint->next)
     {
-      if (!tpoint->enabled || tpoint->type != static_tracepoint)
+      if (tpoint->type != static_tracepoint)
 	continue;
 
       if (tpoint->address == (uintptr_t) mdata->location)
@@ -6650,6 +6724,12 @@ gdb_probe (const struct marker *mdata, void *probe_private,
 		   "loc:0x%p, ch:\"%s\",n:\"%s\",f:\"%s\"",
 		   mdata->location, mdata->channel,
 		   mdata->name, mdata->format);
+      return;
+    }
+
+  if (!tpoint->enabled)
+    {
+      trace_debug ("gdb_probe: tracepoint disabled");
       return;
     }
 

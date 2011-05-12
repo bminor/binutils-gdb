@@ -1,3 +1,40 @@
+2011-05-12  Kwok Cheung Yeung  <kcy@codesourcery.com>
+
+	* breakpoint.c (disable_breakpoint): Disable all locations
+  	associated with a tracepoint on target if a trace experiment is
+	running.
+ 	(disable_command): Disable a specific tracepoint location on target if
+ 	a trace	experiment is running.
+ 	(do_enable_breakpoint): Enable all locations associated with a
+ 	tracepoint on target if a trace experiment is running.
+ 	(enable_command) Enable a specific tracepoint location on target if a
+ 	trace experiment is running.
+ 	* target.c (update_current_target): Add INHERIT and de_fault clauses for
+ 	to_supports_enable_disable_tracepoint, to_enable_tracepoint and
+	to_disable_tracepoint.
+ 	* target.h: Add declaration of struct bp_location.
+ 	(struct target_ops): Add new functions
+	to_supports_enable_disable_tracepoint, to_enable_tracepoint and
+ 	to_disable_tracepoint to target operations.
+	(target_supports_enable_disable_tracepoint): New macro.
+ 	(target_enable_tracepoint): New macro.
+ 	(target_disable_tracepoint): New macro.
+ 	* remote.c (struct remote_state): Add new field.
+	(remote_enable_disable_tracepoint_feature): New.
+	(remote_protocol_features): Add new entry.
+	(remote_supports_enable_disable_tracepoint): New.
+	(remote_enable_tracepoint): New.
+ 	(remote_disable_tracepoint): New.
+ 	(init_remote_ops): Add remote_enable_tracepoint,
+	remote_disable_tracepoint and remote_supports_enable_disable_tracepoint
+	to remote operations.
+ 	* tracepoint.c (start_tracing): Allow tracing to start without any
+ 	tracepoints enabled with just a warning if they can be re-enabled
+	later.
+ 	* NEWS: Add news item for the new behaviour of the enable and disable
+ 	GDB commands when applied to tracepoints.
+ 	Add news items for the new remote packets QTEnable and QTDisable.
+
 2011-05-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* config.in: Regenerate.
