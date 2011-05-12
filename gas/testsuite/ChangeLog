@@ -1,3 +1,9 @@
+2011-05-12  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
+	PR gas/12715
+	* gas/arm/neon-const.s: Add testcase for 64-bit Neon constants.
+	* gas/arm/neon-const.d: Likewise.
+
 2011-05-11  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* gas/mips/24k-branch-delay-1.d: Allow 64-bit addresses.  Stub out

@@ -4459,7 +4459,7 @@ parse_big_immediate (char **str, int i)
       /* If we're on a 64-bit host, then a 64-bit number can be returned using
 	 O_constant.  We have to be careful not to break compilation for
 	 32-bit X_add_number, though.  */
-      if ((exp.X_add_number & ~0xffffffffl) != 0)
+      if ((exp.X_add_number & ~(offsetT)(0xffffffffU)) != 0)
 	{
           /* X >> 32 is illegal if sizeof (exp.X_add_number) == 4.  */
 	  inst.operands[i].reg = ((exp.X_add_number >> 16) >> 16) & 0xffffffff;

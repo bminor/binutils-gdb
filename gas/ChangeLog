@@ -1,3 +1,9 @@
+2011-05-12  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
+	PR gas/12715
+	* config/tc-arm.c (parse_big_immediate):  Fix parsing of 64-bit
+	immediates on 32-bit hosts.
+
 2011-05-10  Quentin Neill  <quentin.neill@amd.com>
 
 	* config/tc-i386.c (cpu_arch): Add bdver2 and rename
