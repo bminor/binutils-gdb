@@ -1,3 +1,12 @@
+2011-05-12  Marek Polacek  <mpolacek@redhat.com>
+
+	* gdb.mi/mi-basics.exp: Fix races.  Honour the
+	`test_exec_and_symbol_mi_operatons' return value.
+	(test_mi_interpreter_selection): Use mi_gdb_test instead of
+	gdb_test_multiple.
+	(test_exec_and_symbol_mi_operatons): Likewise.
+	(test_path_specification): Likewise.
+
 2011-05-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* lib/gdb.exp (gdb_rename_execfile): Remove catch wrappers.
