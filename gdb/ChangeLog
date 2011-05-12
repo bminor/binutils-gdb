@@ -1,5 +1,10 @@
 2011-05-12  Tom Tromey  <tromey@redhat.com>
 
+	* dwarf2expr.c (execute_stack_op) <DW_OP_shr>: Unconditionally
+	cast left-hand-side to unsigned.
+
+2011-05-12  Tom Tromey  <tromey@redhat.com>
+
 	PR gdb/12617:
 	* value.h (value_from_contents): Declare.
 	* value.c (value_from_contents): New function.

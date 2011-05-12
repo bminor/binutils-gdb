@@ -979,7 +979,7 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	      case DW_OP_shr:
 		dwarf_require_integral (value_type (first));
 		dwarf_require_integral (value_type (second));
-		if (value_type (first) == address_type)
+		if (!TYPE_UNSIGNED (value_type (first)))
 		  {
 		    struct type *utype
 		      = get_unsigned_type (ctx->gdbarch, value_type (first));
