@@ -14379,6 +14379,43 @@ $as_echo "#define HAVE_PRPSINFO_T 1" >>confdefs.h
  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $bfd_cv_have_sys_procfs_type_prpsinfo_t" >&5
 $as_echo "$bfd_cv_have_sys_procfs_type_prpsinfo_t" >&6; }
 
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for prpsinfo_t.pr_pid in sys/procfs.h" >&5
+$as_echo_n "checking for prpsinfo_t.pr_pid in sys/procfs.h... " >&6; }
+ if test "${bfd_cv_have_sys_procfs_type_member_prpsinfo_t_pr_pid+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+#define _SYSCALL32
+/* Needed for new procfs interface on sparc-solaris.  */
+#define _STRUCTURED_PROC 1
+#include <sys/procfs.h>
+int
+main ()
+{
+prpsinfo_t avar; void* aref = (void*) &avar.pr_pid
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  bfd_cv_have_sys_procfs_type_member_prpsinfo_t_pr_pid=yes
+else
+  bfd_cv_have_sys_procfs_type_member_prpsinfo_t_pr_pid=no
+
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+
+ if test $bfd_cv_have_sys_procfs_type_member_prpsinfo_t_pr_pid = yes; then
+
+$as_echo "#define HAVE_PRPSINFO_T_PR_PID 1" >>confdefs.h
+
+ fi
+ { $as_echo "$as_me:${as_lineno-$LINENO}: result: $bfd_cv_have_sys_procfs_type_member_prpsinfo_t_pr_pid" >&5
+$as_echo "$bfd_cv_have_sys_procfs_type_member_prpsinfo_t_pr_pid" >&6; }
+
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for prpsinfo32_t in sys/procfs.h" >&5
 $as_echo_n "checking for prpsinfo32_t in sys/procfs.h... " >&6; }
  if test "${bfd_cv_have_sys_procfs_type_prpsinfo32_t+set}" = set; then :
@@ -14415,6 +14452,43 @@ $as_echo "#define HAVE_PRPSINFO32_T 1" >>confdefs.h
  fi
  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $bfd_cv_have_sys_procfs_type_prpsinfo32_t" >&5
 $as_echo "$bfd_cv_have_sys_procfs_type_prpsinfo32_t" >&6; }
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for prpsinfo32_t.pr_pid in sys/procfs.h" >&5
+$as_echo_n "checking for prpsinfo32_t.pr_pid in sys/procfs.h... " >&6; }
+ if test "${bfd_cv_have_sys_procfs_type_member_prpsinfo32_t_pr_pid+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+#define _SYSCALL32
+/* Needed for new procfs interface on sparc-solaris.  */
+#define _STRUCTURED_PROC 1
+#include <sys/procfs.h>
+int
+main ()
+{
+prpsinfo32_t avar; void* aref = (void*) &avar.pr_pid
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  bfd_cv_have_sys_procfs_type_member_prpsinfo32_t_pr_pid=yes
+else
+  bfd_cv_have_sys_procfs_type_member_prpsinfo32_t_pr_pid=no
+
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+
+ if test $bfd_cv_have_sys_procfs_type_member_prpsinfo32_t_pr_pid = yes; then
+
+$as_echo "#define HAVE_PRPSINFO32_T_PR_PID 1" >>confdefs.h
+
+ fi
+ { $as_echo "$as_me:${as_lineno-$LINENO}: result: $bfd_cv_have_sys_procfs_type_member_prpsinfo32_t_pr_pid" >&5
+$as_echo "$bfd_cv_have_sys_procfs_type_member_prpsinfo32_t_pr_pid" >&6; }
 
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for psinfo_t in sys/procfs.h" >&5
 $as_echo_n "checking for psinfo_t in sys/procfs.h... " >&6; }
@@ -14453,6 +14527,43 @@ $as_echo "#define HAVE_PSINFO_T 1" >>confdefs.h
  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $bfd_cv_have_sys_procfs_type_psinfo_t" >&5
 $as_echo "$bfd_cv_have_sys_procfs_type_psinfo_t" >&6; }
 
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for psinfo_t.pr_pid in sys/procfs.h" >&5
+$as_echo_n "checking for psinfo_t.pr_pid in sys/procfs.h... " >&6; }
+ if test "${bfd_cv_have_sys_procfs_type_member_psinfo_t_pr_pid+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+#define _SYSCALL32
+/* Needed for new procfs interface on sparc-solaris.  */
+#define _STRUCTURED_PROC 1
+#include <sys/procfs.h>
+int
+main ()
+{
+psinfo_t avar; void* aref = (void*) &avar.pr_pid
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  bfd_cv_have_sys_procfs_type_member_psinfo_t_pr_pid=yes
+else
+  bfd_cv_have_sys_procfs_type_member_psinfo_t_pr_pid=no
+
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+
+ if test $bfd_cv_have_sys_procfs_type_member_psinfo_t_pr_pid = yes; then
+
+$as_echo "#define HAVE_PSINFO_T_PR_PID 1" >>confdefs.h
+
+ fi
+ { $as_echo "$as_me:${as_lineno-$LINENO}: result: $bfd_cv_have_sys_procfs_type_member_psinfo_t_pr_pid" >&5
+$as_echo "$bfd_cv_have_sys_procfs_type_member_psinfo_t_pr_pid" >&6; }
+
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for psinfo32_t in sys/procfs.h" >&5
 $as_echo_n "checking for psinfo32_t in sys/procfs.h... " >&6; }
  if test "${bfd_cv_have_sys_procfs_type_psinfo32_t+set}" = set; then :
@@ -14489,6 +14600,43 @@ $as_echo "#define HAVE_PSINFO32_T 1" >>confdefs.h
  fi
  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $bfd_cv_have_sys_procfs_type_psinfo32_t" >&5
 $as_echo "$bfd_cv_have_sys_procfs_type_psinfo32_t" >&6; }
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for psinfo32_t.pr_pid in sys/procfs.h" >&5
+$as_echo_n "checking for psinfo32_t.pr_pid in sys/procfs.h... " >&6; }
+ if test "${bfd_cv_have_sys_procfs_type_member_psinfo32_t_pr_pid+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+#define _SYSCALL32
+/* Needed for new procfs interface on sparc-solaris.  */
+#define _STRUCTURED_PROC 1
+#include <sys/procfs.h>
+int
+main ()
+{
+psinfo32_t avar; void* aref = (void*) &avar.pr_pid
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  bfd_cv_have_sys_procfs_type_member_psinfo32_t_pr_pid=yes
+else
+  bfd_cv_have_sys_procfs_type_member_psinfo32_t_pr_pid=no
+
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+
+ if test $bfd_cv_have_sys_procfs_type_member_psinfo32_t_pr_pid = yes; then
+
+$as_echo "#define HAVE_PSINFO32_T_PR_PID 1" >>confdefs.h
+
+ fi
+ { $as_echo "$as_me:${as_lineno-$LINENO}: result: $bfd_cv_have_sys_procfs_type_member_psinfo32_t_pr_pid" >&5
+$as_echo "$bfd_cv_have_sys_procfs_type_member_psinfo32_t_pr_pid" >&6; }
 
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for lwpstatus_t in sys/procfs.h" >&5
 $as_echo_n "checking for lwpstatus_t in sys/procfs.h... " >&6; }

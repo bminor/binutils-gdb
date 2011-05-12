@@ -41,6 +41,8 @@ typedef unsigned int uint32_t;
 
 #undef HAVE_PRPSINFO32_T
 #define HAVE_PRPSINFO32_T
+#undef HAVE_PRPSINFO32_T_PR_PID
+#define HAVE_PRPSINFO32_T_PR_PID
 
 #undef HAVE_PRSTATUS32_T
 #define HAVE_PRSTATUS32_T

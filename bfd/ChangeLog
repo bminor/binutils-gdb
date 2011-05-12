@@ -1,3 +1,15 @@
+2011-05-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* config.in: Regenerated.
+	* configure: Regenerated.
+	* configure.in: New tests for HAVE_PRPSINFO_T_PR_PID,
+	HAVE_PRPSINFO32_T_PR_PID, HAVE_PSINFO_T_PR_PID and
+	HAVE_PSINFO32_T_PR_PID.
+	* elf.c (elfcore_grok_psinfo): Protect reading psinfo.pr_pid by
+	HAVE_PRPSINFO_T_PR_PID, HAVE_PRPSINFO32_T_PR_PID, HAVE_PSINFO_T_PR_PID
+	and HAVE_PSINFO32_T_PR_PID.
+	* hosts/x86-64linux.h (HAVE_PRPSINFO32_T_PR_PID): New redefinition.
+
 2011-05-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* elf.c (elfcore_grok_psinfo): Initialize CORE_PID for both native and
