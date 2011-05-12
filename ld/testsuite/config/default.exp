@@ -205,7 +205,15 @@ proc ld_compile { cc source object } {
 #	assemble a file
 #
 proc ld_assemble { as source object } {
-	default_ld_assemble $as $source $object 
+	default_ld_assemble $as "" $source $object 
+}
+
+#
+# ld_assemble_flags
+#	assemble a file with extra flags
+#
+proc ld_assemble_flags { as flags source object } {
+	default_ld_assemble $as $flags $source $object 
 }
 
 #
