@@ -7690,8 +7690,8 @@ read_common_block (struct die_info *die, struct dwarf2_cu *cu)
 	  LONGEST offset;
 
 	  sym = new_symbol (child_die, NULL, cu);
-	  if (sym != NULL &&
-	      handle_data_member_location (child_die, cu, &offset))
+	  if (sym != NULL
+	      && handle_data_member_location (child_die, cu, &offset))
 	    {
 	      SYMBOL_VALUE_ADDRESS (sym) = base + offset;
 	      add_symbol_to_list (sym, &global_symbols);

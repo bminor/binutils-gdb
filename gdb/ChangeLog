@@ -1,3 +1,7 @@
+2011-05-12  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2read.c (read_common_block): Fix formatting.
+
 2011-05-12  Kwok Cheung Yeung  <kcy@codesourcery.com>
 
 	* breakpoint.c (disable_breakpoint): Disable all locations
