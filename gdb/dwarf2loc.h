@@ -59,6 +59,9 @@ struct dwarf2_locexpr_baton dwarf2_fetch_die_location_block
    CORE_ADDR (*get_frame_pc) (void *baton),
    void *baton);
 
+struct type *dwarf2_get_die_type (unsigned int die_offset,
+				  struct dwarf2_per_cu_data *per_cu);
+
 /* Evaluate a location description, starting at DATA and with length
    SIZE, to find the current location of variable of TYPE in the context
    of FRAME.  */

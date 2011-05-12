@@ -479,6 +479,7 @@ extern struct value *value_at_lazy (struct type *type, CORE_ADDR addr);
 extern struct value *value_from_contents_and_address (struct type *,
 						      const gdb_byte *,
 						      CORE_ADDR);
+extern struct value *value_from_contents (struct type *, const gdb_byte *);
 
 extern struct value *default_value_from_register (struct type *type,
 						  int regnum,

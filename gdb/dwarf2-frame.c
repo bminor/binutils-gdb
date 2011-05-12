@@ -353,6 +353,14 @@ no_dwarf_call (struct dwarf_expr_context *ctx, size_t die_offset)
 		  _("Support for DW_OP_call* is invalid in CFI"));
 }
 
+/* Helper function for execute_stack_op.  */
+
+static struct type *
+no_base_type (struct dwarf_expr_context *ctx, size_t die)
+{
+  error (_("Support for typed DWARF is not supported in CFI"));
+}
+
 /* Execute the required actions for both the DW_CFA_restore and
 DW_CFA_restore_extended instructions.  */
 static void
@@ -406,14 +414,15 @@ execute_stack_op (const gdb_byte *exp, ULONGEST len, int addr_size,
   ctx->get_frame_pc = no_get_frame_pc;
   ctx->get_tls_address = no_get_tls_address;
   ctx->dwarf_call = no_dwarf_call;
+  ctx->get_base_type = no_base_type;
 
-  dwarf_expr_push (ctx, initial, initial_in_stack_memory);
+  dwarf_expr_push_address (ctx, initial, initial_in_stack_memory);
   dwarf_expr_eval (ctx, exp, len);
 
   if (ctx->location == DWARF_VALUE_MEMORY)
     result = dwarf_expr_fetch_address (ctx, 0);
   else if (ctx->location == DWARF_VALUE_REGISTER)
-    result = read_reg (this_frame, dwarf_expr_fetch (ctx, 0));
+    result = read_reg (this_frame, value_as_long (dwarf_expr_fetch (ctx, 0)));
   else
     {
       /* This is actually invalid DWARF, but if we ever do run across

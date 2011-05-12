@@ -1,5 +1,54 @@
 2011-05-12  Tom Tromey  <tromey@redhat.com>
 
+	PR gdb/12617:
+	* value.h (value_from_contents): Declare.
+	* value.c (value_from_contents): New function.
+	* dwarf2read.c (dwarf_stack_op_name): Add new values.
+	(dwarf2_get_die_type): New function.
+	* dwarf2loc.c (dwarf_expr_get_base_type): New function.
+	(allocate_piece_closure): Acquire reference to values.
+	(read_pieced_value): Update for value-based expressions.
+	(write_pieced_value): Likewise.
+	(free_pieced_value_closure): Call value_free as needed.
+	(dwarf2_evaluate_loc_desc_full): Set get_base_type field.
+	Update for value-based expressions.
+	* dwarf2loc.h (dwarf2_get_die_type): Declare.
+	* dwarf2expr.h (struct dwarf_stack_value) <value>: Change type.
+	<get_base_type>: New field.
+	(struct dwarf_expr_piece) <v.value>: Change type.
+	<v.regno>: New field.
+	(struct dwarf_expr_context) <mark>: New field.
+	(dwarf_expr_piece, dwarf_expr_fetch): Update.
+	(dwarf_expr_pop, dwarf_expr_push): Remove.
+	(dwarf_expr_push_address): Declare.
+	* dwarf2expr.c (dwarf_arch_cookie): New global.
+	(struct dwarf_gdbarch_types): New.
+	(dwarf_gdbarch_types_init, dwarf_expr_address_type): New
+	functions.
+	(dwarf_expr_push): Change type of 'value' argument.  Update.  Now
+	static.
+	(dwarf_expr_push_address): New function.
+	(dwarf_expr_pop): Now static.
+	(dwarf_expr_fetch): Change return type.
+	(dwarf_require_integral): New function.
+	(dwarf_expr_fetch): Simplify.
+	(add_piece): Update.
+	(base_types_equal_p, dwarf_get_base_type, get_unsigned_type): New
+	functions.
+	(execute_stack_op) <sign_ext>: Remove.
+	Use values for DWARF stack.
+	<DW_OP_GNU_const_type, DW_OP_GNU_deref_type,
+	DW_OP_GNU_regval_type, DW_OP_GNU_convert, DW_OP_GNU_reinterpret>:
+	New cases.
+	(_initialize_dwarf2expr): New function.
+	(add_piece): Update.
+	(new_dwarf_expr_context): Set new field.
+	(free_dwarf_expr_context): Call value_free_to_mark.
+	* dwarf2-frame.c (no_base_type): New function.
+	(execute_stack_op): Set get_base_type field.  Update.
+
+2011-05-12  Tom Tromey  <tromey@redhat.com>
+
 	* dwarf2read.c (read_common_block): Fix formatting.
 
 2011-05-12  Kwok Cheung Yeung  <kcy@codesourcery.com>

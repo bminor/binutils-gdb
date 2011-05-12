@@ -2965,6 +2965,19 @@ value_from_contents_and_address (struct type *type,
   return v;
 }
 
+/* Create a value of type TYPE holding the contents CONTENTS.
+   The new value is `not_lval'.  */
+
+struct value *
+value_from_contents (struct type *type, const gdb_byte *contents)
+{
+  struct value *result;
+
+  result = allocate_value (type);
+  memcpy (value_contents_raw (result), contents, TYPE_LENGTH (type));
+  return result;
+}
+
 struct value *
 value_from_double (struct type *type, DOUBLEST num)
 {

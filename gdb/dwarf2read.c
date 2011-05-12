@@ -13094,6 +13094,18 @@ dwarf_stack_op_name (unsigned op)
       return "DW_OP_GNU_uninit";
     case DW_OP_GNU_implicit_pointer:
       return "DW_OP_GNU_implicit_pointer";
+    case DW_OP_GNU_entry_value:
+      return "DW_OP_GNU_entry_value";
+    case DW_OP_GNU_const_type:
+      return "DW_OP_GNU_const_type";
+    case DW_OP_GNU_regval_type:
+      return "DW_OP_GNU_regval_type";
+    case DW_OP_GNU_deref_type:
+      return "DW_OP_GNU_deref_type";
+    case DW_OP_GNU_convert:
+      return "DW_OP_GNU_convert";
+    case DW_OP_GNU_reinterpret:
+      return "DW_OP_GNU_reinterpret";
     default:
       return NULL;
     }
@@ -13650,6 +13662,31 @@ dwarf2_fetch_die_location_block (unsigned int offset,
     }
   retval.per_cu = cu->per_cu;
   return retval;
+}
+
+/* Return the type of the DIE at DIE_OFFSET in the CU named by
+   PER_CU.  */
+
+struct type *
+dwarf2_get_die_type (unsigned int die_offset,
+		     struct dwarf2_per_cu_data *per_cu)
+{
+  struct dwarf2_cu *cu = per_cu->cu;
+  struct die_info *die;
+  struct type *result;
+
+  dw2_setup (per_cu->objfile);
+
+  die = follow_die_offset (die_offset, &cu);
+  if (!die)
+    error (_("Dwarf Error: Cannot find DIE at 0x%x referenced in module %s"),
+	   die_offset, per_cu->cu->objfile->name);
+
+  result = get_die_type (die, cu);
+  if (result == NULL)
+    result = read_type_die_1 (die, cu);
+
+  return result;
 }
 
 /* Follow the signature attribute ATTR in SRC_DIE.
