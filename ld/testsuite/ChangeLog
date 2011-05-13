@@ -1,3 +1,12 @@
+2011-05-13  Alan Modra  <amodra@gmail.com>
+
+	* ld-elf/flags1.d: Don't xfail tic6x.
+	* ld-scripts/weak.exp: Correct comments.  Don't xfail sh-pe.  Remove
+	redundant xfail.
+	* ld-selective/sel-dump.exp: Don't xfail alpha.
+	* ld-selective/selective.exp: Run for alpha.
+	* ld-undefined/weak-undef.exp: Don't xfail hppa64.
+
 2011-05-12  Bernd Schmidt  <bernds@codesourcery.com>
 
 	* config/default.exp (ld_assemble): Pass flags parameter to
