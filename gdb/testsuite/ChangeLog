@@ -6,7 +6,8 @@
 
 2011-05-13  Doug Evans  <dje@google.com>
 
-	* gdb.base/charset.exp: If UTF-16 is not available, skip char16_t, String16 tests.
+	* gdb.base/charset.exp: If UTF-16 is not available, skip char16_t,
+	String16 tests.
 
 2011-05-13  Tom Tromey  <tromey@redhat.com>
 
