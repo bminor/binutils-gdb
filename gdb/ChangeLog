@@ -24,7 +24,8 @@
 	(stdio_file_write_async_safe): New function.
 	(struct stdio_file): New member fd.
 	(stdio_file_new): Initialize to_write_async_safe, fd.
-	(stdio_file_read, stdio_file_isatty): New stdio->fd instead of calling fileno.
+	(stdio_file_read, stdio_file_isatty): New stdio->fd instead of calling
+	fileno.
 	* ui-file.h (ui_file_write_async_safe_ftype): New typedef.
 	(set_ui_file_write_async_safe): Declare.
 	(ui_file_write_async_safe): Declare.
