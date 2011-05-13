@@ -1,3 +1,10 @@
+2011-05-13  Alan Modra  <amodra@gmail.com>
+
+	* gas/all/gas.exp: Remove some xfails on redef2 and redef3 tests.
+	Update comments.
+	* gas/hppa/unsorted/unsorted.exp: Run globalbug test on appropriate
+	targets rather than xfailing.
+
 2011-05-12  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	PR gas/12715
@@ -568,7 +575,7 @@
 2011-01-06  Paul Koning  <ni1d@arrl.net>
 
 	* gas/pdp11/pdp11.exp: Add run of absreloc.
-	
+
 2011-01-06  Paul Koning  <ni1d@arrl.net>
 
 	* gas/pdp11/absreloc.s: New.
