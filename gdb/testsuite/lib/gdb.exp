@@ -1563,6 +1563,17 @@ proc is_lp64_target {} {
     return [set is_lp64_target_saved($board) 1]
 }
 
+# Return 1 if this target is an x86 or x86-64 with -m32.
+proc is_x86_like_target {} {
+    if {[istarget i?86-*]} {
+	return 1
+    }
+    if {![istarget "x86_64-*-*"]} {
+	return 0
+    }
+    return [is_ilp32_target]
+}
+
 # Run a test on the target to see if it supports vmx hardware.  Return 0 if so, 
 # 1 if it does not.  Based on 'check_vmx_hw_available' from the GCC testsuite.
 

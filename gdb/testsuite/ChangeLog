@@ -1,3 +1,16 @@
+2011-05-13  Tom Tromey  <tromey@redhat.com>
+
+	* lib/gdb.exp (is_x86_like_target): New proc.
+	* gdb.dwarf2/watch-notconst.exp: Use is_x86_like_target.
+	* gdb.dwarf2/valop.exp: Use is_x86_like_target.
+	* gdb.dwarf2/typeddwarf.exp: Use is_x86_like_target.  Pass
+	-nostdlib to compiler.
+	* gdb.dwarf2/typeddwarf.S (_start): Rename from 'main'.
+	* gdb.dwarf2/pieces.exp: Use is_x86_like_target.
+	* gdb.dwarf2/implptr.exp: Use is_x86_like_target.
+	* gdb.dwarf2/dw2-restore.exp: Check for LP64.
+	* gdb.dwarf2/callframecfa.exp: Use is_x86_like_target.
+
 2011-05-13  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* gdb.python/py-function.exp: Test setting a value from a function

@@ -16,7 +16,7 @@
 # Test handling of DW_CFA_restore_state.
 
 # This test can only be run on x86_64 targets.
-if {![istarget x86_64-*]} {
+if {![istarget x86_64-*] || ![is_lp64_target]} {
     return 0  
 }
 set testfile "dw2-restore"

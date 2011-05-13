@@ -23,11 +23,11 @@ if ![dwarf2_support] {
 }
 
 # This test can only be run on x86 targets.
-if { ![istarget i?86-*] } {
+if { ![is_x86_like_target] } {
     return 0
 }
 
-if { [prepare_for_testing "${test}.exp" "${test}" ${test}.S {nodebug}] } {
+if { [prepare_for_testing "${test}.exp" "${test}" ${test}.S {nodebug additional_flags=-nostdlib}] } {
     return -1
 }
 

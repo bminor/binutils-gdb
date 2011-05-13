@@ -212,9 +212,9 @@ f4:
 	.size	f4, .-f4
 	.section	.text.startup,"ax",@progbits
 	.p2align 4,,15
-	.globl	main
-	.type	main, @function
-main:
+	.globl	_start
+	.type	_start, @function
+_start:
 .LFB4:
 	# typeddwarf.c:87
 .LM37:
@@ -314,7 +314,7 @@ main:
 # SUCC: EXIT [100.0%] 
 	ret
 .LFE4:
-	.size	main, .-main
+	.size	_start, .-_start
 	.comm	vv,4,4
 	.section	.rodata.cst4,"aM",@progbits,4
 	.align 4
