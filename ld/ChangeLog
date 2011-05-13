@@ -1,3 +1,7 @@
+2011-05-13  Jan Beulich  <jbeulich@novell.com>
+
+	* configure.tgt: Add targets x86_64-*-pe and x86_64-*-pep.
+
 2011-05-09  Paul Brook  <paul@codesourcery.com>
 
 	* emultempl/tic6xdsbt.em (merge_exidx_entries): New.

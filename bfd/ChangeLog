@@ -1,3 +1,7 @@
+2011-05-13  Jan Beulich  <jbeulich@novell.com>
+
+	* config.bfd: Add targets x86_64-*-pe and x86_64-*-pep.
+
 2011-05-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* config.in: Regenerated.

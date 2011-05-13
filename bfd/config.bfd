@@ -601,7 +601,7 @@ case "${targ}" in
     targ_selvecs="bfd_elf32_i386_vec bfd_elf32_x86_64_vec i386linux_vec i386pei_vec x86_64pei_vec bfd_elf64_l1om_vec"
     want64=true
     ;;
-  x86_64-*-mingw*)
+  x86_64-*-mingw* | x86_64-*-pe | x86_64-*-pep)
     targ_defvec=x86_64pe_vec
     targ_selvecs="x86_64pe_vec x86_64pei_vec bfd_elf64_x86_64_vec bfd_elf64_l1om_vec i386pe_vec i386pei_vec bfd_elf32_i386_vec"
     want64=true
