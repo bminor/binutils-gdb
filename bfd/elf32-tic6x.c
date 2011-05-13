@@ -2764,7 +2764,7 @@ elf32_tic6x_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
   /* Create dynamic sections for relocatable executables so that we can
      copy relocations.  */
-  if (elf32_tic6x_using_dsbt (abfd)
+  if ((info->shared || elf32_tic6x_using_dsbt (abfd))
       && ! htab->elf.dynamic_sections_created)
     {
       if (! _bfd_elf_link_create_dynamic_sections (abfd, info))
@@ -4439,6 +4439,14 @@ elf32_tic6x_write_section (bfd *output_bfd,
   return TRUE;
 }
 
+static void
+elf32_tic6x_set_osabi (bfd *abfd, struct bfd_link_info *link_info)
+{
+  if (link_info == NULL || link_info->relocatable)
+    return;
+  _bfd_elf_set_osabi (abfd, link_info);
+}
+
 #define TARGET_LITTLE_SYM	bfd_elf32_tic6x_le_vec
 #define TARGET_LITTLE_NAME	"elf32-tic6x-le"
 #define TARGET_BIG_SYM		bfd_elf32_tic6x_be_vec
@@ -4488,6 +4496,7 @@ elf32_tic6x_write_section (bfd *output_bfd,
 #define elf_backend_section_from_bfd_section \
   elf32_tic6x_section_from_bfd_section
 #define elf_backend_relocate_section	elf32_tic6x_relocate_section
+#define elf_backend_relocs_compatible	_bfd_elf_relocs_compatible
 #define elf_backend_finish_dynamic_symbol \
   elf32_tic6x_finish_dynamic_symbol
 #define elf_backend_always_size_sections \
@@ -4506,5 +4515,42 @@ elf32_tic6x_write_section (bfd *output_bfd,
 #define elf_backend_omit_section_dynsym elf32_tic6x_link_omit_section_dynsym
 #define elf_backend_plt_sym_val		elf32_tic6x_plt_sym_val
 
+#include "elf32-target.h"
+
+#undef elf32_bed
+#define	elf32_bed		elf32_tic6x_linux_bed
+
+#undef TARGET_LITTLE_SYM
+#define	TARGET_LITTLE_SYM		bfd_elf32_tic6x_linux_le_vec
+#undef TARGET_LITTLE_NAME
+#define	TARGET_LITTLE_NAME		"elf32-tic6x-linux-le"
+#undef TARGET_BIG_SYM
+#define TARGET_BIG_SYM			bfd_elf32_tic6x_linux_be_vec
+#undef TARGET_BIG_NAME
+#define	TARGET_BIG_NAME			"elf32-tic6x-linux-be"
+#undef ELF_OSABI
+#define	ELF_OSABI			ELFOSABI_C6000_LINUX
+
+#undef elf_backend_post_process_headers
+#define elf_backend_post_process_headers	elf32_tic6x_set_osabi
+
+#include "elf32-target.h"
+
+#undef elf32_bed
+#define	elf32_bed		elf32_tic6x_elf_bed
+
+#undef TARGET_LITTLE_SYM
+#define	TARGET_LITTLE_SYM		bfd_elf32_tic6x_elf_le_vec
+#undef TARGET_LITTLE_NAME
+#define	TARGET_LITTLE_NAME		"elf32-tic6x-elf-le"
+#undef TARGET_BIG_SYM
+#define TARGET_BIG_SYM			bfd_elf32_tic6x_elf_be_vec
+#undef TARGET_BIG_NAME
+#define	TARGET_BIG_NAME			"elf32-tic6x-elf-be"
+#undef ELF_OSABI
+#define	ELF_OSABI			ELFOSABI_C6000_ELFABI
+
+#undef elf_backend_post_process_headers
+#define elf_backend_post_process_headers	elf32_tic6x_set_osabi
 
 #include "elf32-target.h"

@@ -1465,9 +1465,14 @@ case "${targ}" in
     ;;
 #endif
 
-  tic6x-*-*)
-    targ_defvec=bfd_elf32_tic6x_le_vec
-    targ_selvecs=bfd_elf32_tic6x_be_vec
+  tic6x-*-elf)
+    targ_defvec=bfd_elf32_tic6x_elf_le_vec
+    targ_selvecs="bfd_elf32_tic6x_elf_be_vec bfd_elf32_tic6x_le_vec bfd_elf32_tic6x_be_vec"
+    ;;
+
+  tic6x-*-uclinux)
+    targ_defvec=bfd_elf32_tic6x_linux_le_vec
+    targ_selvecs="bfd_elf32_tic6x_linux_be_vec bfd_elf32_tic6x_le_vec bfd_elf32_tic6x_be_vec"
     ;;
 
   tic80*-*-*)

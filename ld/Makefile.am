@@ -189,6 +189,10 @@ ALL_EMULATION_SOURCES = \
 	eelf32_spu.c \
 	eelf32_tic6x_be.c \
 	eelf32_tic6x_le.c \
+	eelf32_tic6x_linux_be.c \
+	eelf32_tic6x_linux_le.c \
+	eelf32_tic6x_elf_be.c \
+	eelf32_tic6x_elf_le.c \
 	eelf32b4300.c \
 	eelf32bfin.c \
 	eelf32bfinfd.c \
@@ -881,11 +885,29 @@ $(srcdir)/emultempl/spu_icache.@OBJEXT@_c: @MAINT@ $(srcdir)/emultempl/spu_icach
 	  ../binutils/bin2c <spu_icache.@OBJEXT@ >$@; \
 	fi
 eelf32_tic6x_be.c: $(srcdir)/emulparams/elf32_tic6x_be.sh \
-  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc $(srcdir)/emultempl/tic6xdsbt.em \
+  ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32_tic6x_be "$(tdir_elf32_tic6x_be)"
 eelf32_tic6x_le.c: $(srcdir)/emulparams/elf32_tic6x_le.sh \
-  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc $(srcdir)/emultempl/tic6xdsbt.em \
+  ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32_tic6x_le "$(tdir_elf32_tic6x_le)"
+eelf32_tic6x_linux_be.c: $(srcdir)/emulparams/elf32_tic6x_linux_be.sh \
+  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc  $(srcdir)/emultempl/tic6xdsbt.em \
+  ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32_tic6x_linux_be "$(tdir_elf32_tic6x_linux_be)"
+eelf32_tic6x_linux_le.c: $(srcdir)/emulparams/elf32_tic6x_linux_le.sh \
+  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc  $(srcdir)/emultempl/tic6xdsbt.em \
+  ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32_tic6x_linux_le "$(tdir_elf32_tic6x_linux_le)"
+eelf32_tic6x_elf_be.c: $(srcdir)/emulparams/elf32_tic6x_elf_be.sh \
+  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc  $(srcdir)/emultempl/tic6xdsbt.em \
+  ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32_tic6x_elf_be "$(tdir_elf32_tic6x_elf_be)"
+eelf32_tic6x_elf_le.c: $(srcdir)/emulparams/elf32_tic6x_elf_le.sh \
+  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc  $(srcdir)/emultempl/tic6xdsbt.em \
+  ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32_tic6x_elf_le "$(tdir_elf32_tic6x_elf_le)"
 eelf32b4300.c: $(srcdir)/emulparams/elf32b4300.sh \
   $(srcdir)/emulparams/elf32bmip.sh $(ELF_DEPS) \
   $(srcdir)/emultempl/mipself.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}

@@ -633,8 +633,13 @@ tic30-*-*aout*)		targ_emul=tic30aout ;;
 tic30-*-*coff*)		targ_emul=tic30coff ;;
 tic4x-*-* | c4x-*-*)    targ_emul=tic4xcoff ; targ_extra_emuls="tic3xcoff tic3xcoff_onchip" ;;
 tic54x-*-* | c54x*-*-*)	targ_emul=tic54xcoff ;;
-tic6x-*-*)		targ_emul=elf32_tic6x_le
-			targ_extra_emuls="elf32_tic6x_be"
+tic6x-*-elf)		targ_emul=elf32_tic6x_elf_le
+			targ_extra_emuls="elf32_tic6x_elf_be elf32_tic6x_le elf32_tic6x_be"
+			targ_extra_libpath=$targ_extra_emuls
+			;;
+tic6x-*-uclinux)	targ_emul=elf32_tic6x_linux_le
+			targ_extra_emuls="elf32_tic6x_linux_be elf32_tic6x_le elf32_tic6x_be"
+			targ_extra_libpath=$targ_extra_emuls
 			;;
 tic80-*-*)		targ_emul=tic80coff
 			;;

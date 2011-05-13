@@ -1,3 +1,5 @@
+OUTPUT_FORMAT("elf32-tic6x-le", "elf32-tic6x-le",
+	      "elf32-tic6x-le")
 EXTERN (__c6xabi_DSBT_BASE);
 SECTIONS
 {
