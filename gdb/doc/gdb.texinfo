@@ -2858,7 +2858,9 @@ watchpoints in programs with multiple threads.
 If this variable is set, @var{path} is a colon-separated list of
 directories @value{GDBN} will use to search for @code{libthread_db}.
 If you omit @var{path}, @samp{libthread-db-search-path} will be reset to
-its default value.
+its default value (an empty list on @sc{gnu}/Linux and Solaris systems).
+Internally, the default value comes from the @code{LIBTHREAD_DB_SEARCH_PATH}
+macro.
 
 On @sc{gnu}/Linux and Solaris systems, @value{GDBN} uses a ``helper''
 @code{libthread_db} library to obtain information about threads in the
