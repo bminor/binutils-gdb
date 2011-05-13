@@ -1,3 +1,9 @@
+2011-05-13  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.dwarf2/clztest.exp: New file.
+	* gdb.dwarf2/clztest.c: New file.
+	* gdb.dwarf2/clztest.S: New file.
+
 2011-05-06  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* gdb.cell/bt.exp: Delete breakpoints before running to signal
