@@ -1,3 +1,8 @@
+2011-05-13  Doug Evans  <dje@google.com>
+
+	* gdb.texinfo (Completion): Update example.
+	(Debugging Output): Delete `set/show debug lin-lwp-async'.
+
 2011-05-12  Kwok Cheung Yeung  <kcy@codesourcery.com>
 
 	* gdb.texinfo: Document change in the behaviour of the enable and

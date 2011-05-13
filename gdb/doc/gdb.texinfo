@@ -1592,8 +1592,10 @@ left-hand-side:
 
 @smallexample
 (@value{GDBP}) p gdb_stdout.@kbd{M-?}
-magic      to_delete  to_fputs   to_put     to_rewind  
-to_data    to_flush   to_isatty  to_read    to_write   
+magic                to_fputs             to_rewind
+to_data              to_isatty            to_write
+to_delete            to_put               to_write_async_safe
+to_flush             to_read
 @end smallexample
 
 @noindent
@@ -1607,6 +1609,7 @@ struct ui_file
    int *magic;
    ui_file_flush_ftype *to_flush;
    ui_file_write_ftype *to_write;
+   ui_file_write_async_safe_ftype *to_write_async_safe;
    ui_file_fputs_ftype *to_fputs;
    ui_file_read_ftype *to_read;
    ui_file_delete_ftype *to_delete;
@@ -20071,12 +20074,6 @@ Displays the current state of @value{GDBN} JIT debugging.
 Turns on or off debugging messages from the Linux LWP debug support.
 @item show debug lin-lwp
 Show the current state of Linux LWP debugging messages.
-@item set debug lin-lwp-async
-@cindex @sc{gnu}/Linux LWP async debug messages
-@cindex Linux lightweight processes
-Turns on or off debugging messages from the Linux LWP async debug support.
-@item show debug lin-lwp-async
-Show the current state of Linux LWP async debugging messages.
 @item set debug observer
 @cindex observer debugging info
 Turns on or off display of @value{GDBN} observer debugging.  This

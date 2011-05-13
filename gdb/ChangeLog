@@ -1,3 +1,24 @@
+2011-05-13  Doug Evans  <dje@google.com>
+
+	* linux-nat.c (debug_linux_nat_async): Delete.
+	Replace all references to use debug_linux_nat instead.
+	(show_debug_linux_nat_async): Delete.
+	(sigchld_handler): Call ui_file_write_async_safe instead of
+	fprintf_unfiltered.
+	(_initialize_linux_nat): Remove `set debug lin-lwp-async'.
+	* ui-file.c (struct ui_file): New member to_write_async_safe.
+	(null_file_write_async_safe): New function.
+	(ui_file_write_async_safe): New function.
+	(set_ui_file_write_async_safe): New function.
+	(ui_file_new): Initialize to_write_async_safe.
+	(stdio_file_write_async_safe): New function.
+	(struct stdio_file): New member fd.
+	(stdio_file_new): Initialize to_write_async_safe, fd.
+	(stdio_file_read, stdio_file_isatty): New stdio->fd instead of calling fileno.
+	* ui-file.h (ui_file_write_async_safe_ftype): New typedef.
+	(set_ui_file_write_async_safe): Declare.
+	(ui_file_write_async_safe): Declare.
+
 2011-05-13  Tom Tromey  <tromey@redhat.com>
 
 	* utils.c (do_value_free): New function.

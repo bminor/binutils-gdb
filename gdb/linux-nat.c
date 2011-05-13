@@ -198,16 +198,6 @@ show_debug_linux_nat (struct ui_file *file, int from_tty,
 		    value);
 }
 
-static int debug_linux_nat_async = 0;
-static void
-show_debug_linux_nat_async (struct ui_file *file, int from_tty,
-			    struct cmd_list_element *c, const char *value)
-{
-  fprintf_filtered (file,
-		    _("Debugging of GNU/Linux async lwp module is %s.\n"),
-		    value);
-}
-
 static int disable_randomization = 1;
 
 static void
@@ -3260,7 +3250,7 @@ linux_nat_wait_1 (struct target_ops *ops,
   int status = 0;
   pid_t pid;
 
-  if (debug_linux_nat_async)
+  if (debug_linux_nat)
     fprintf_unfiltered (gdb_stdlog, "LLW: enter\n");
 
   /* The first time we get here after starting a new inferior, we may
@@ -3303,7 +3293,7 @@ retry:
     {
       ourstatus->kind = TARGET_WAITKIND_IGNORE;
 
-      if (debug_linux_nat_async)
+      if (debug_linux_nat)
 	fprintf_unfiltered (gdb_stdlog, "LLW: exit (no resumed LWP)\n");
 
       restore_child_signals_mask (&prev_mask);
@@ -3546,7 +3536,7 @@ retry:
 		  /* No interesting event.  */
 		  ourstatus->kind = TARGET_WAITKIND_IGNORE;
 
-		  if (debug_linux_nat_async)
+		  if (debug_linux_nat)
 		    fprintf_unfiltered (gdb_stdlog, "LLW: exit (ignore)\n");
 
 		  restore_child_signals_mask (&prev_mask);
@@ -3561,7 +3551,7 @@ retry:
 	  /* No interesting event for PID yet.  */
 	  ourstatus->kind = TARGET_WAITKIND_IGNORE;
 
-	  if (debug_linux_nat_async)
+	  if (debug_linux_nat)
 	    fprintf_unfiltered (gdb_stdlog, "LLW: exit (ignore)\n");
 
 	  restore_child_signals_mask (&prev_mask);
@@ -3690,7 +3680,7 @@ retry:
   else
     store_waitstatus (ourstatus, status);
 
-  if (debug_linux_nat_async)
+  if (debug_linux_nat)
     fprintf_unfiltered (gdb_stdlog, "LLW: exit\n");
 
   restore_child_signals_mask (&prev_mask);
@@ -5416,8 +5406,9 @@ sigchld_handler (int signo)
 {
   int old_errno = errno;
 
-  if (debug_linux_nat_async)
-    fprintf_unfiltered (gdb_stdlog, "sigchld\n");
+  if (debug_linux_nat)
+    ui_file_write_async_safe (gdb_stdlog,
+			      "sigchld\n", sizeof ("sigchld\n") - 1);
 
   if (signo == SIGCHLD
       && linux_nat_event_pipe[0] != -1)
@@ -5799,15 +5790,6 @@ Show debugging of GNU/Linux lwp module."), _("\
 Enables printf debugging output."),
 			    NULL,
 			    show_debug_linux_nat,
-			    &setdebuglist, &showdebuglist);
-
-  add_setshow_zinteger_cmd ("lin-lwp-async", class_maintenance,
-			    &debug_linux_nat_async, _("\
-Set debugging of GNU/Linux async lwp module."), _("\
-Show debugging of GNU/Linux async lwp module."), _("\
-Enables printf debugging output."),
-			    NULL,
-			    show_debug_linux_nat_async,
 			    &setdebuglist, &showdebuglist);
 
   /* Save this mask as the default.  */
