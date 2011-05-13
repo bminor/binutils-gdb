@@ -2364,8 +2364,8 @@ disassemble_dwarf_expression (struct ui_file *stream,
 
       if (!name)
 	error (_("Unrecognized DWARF opcode 0x%02x at %ld"),
-	       op, (long) (data - start));
-      fprintf_filtered (stream, "  % 4ld: %s", (long) (data - start), name);
+	       op, (long) (data - 1 - start));
+      fprintf_filtered (stream, "  % 4ld: %s", (long) (data - 1 - start), name);
 
       switch (op)
 	{
