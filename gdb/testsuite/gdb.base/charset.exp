@@ -546,6 +546,12 @@ if {$wchar_ok} {
 }
 
 set ucs2_ok [expr {[get_sizeof char16_t 99] == 2}]
+
+if ![valid_host_charset "UTF-16"] {
+    verbose -log "Disabling UTF-16 tests."
+    set ucs2_ok 0
+}
+
 if {$ucs2_ok} {
     test_wide_or_unicode u UTF-16
 }
@@ -606,11 +612,13 @@ proc string_display { var_name set_prefix x_size x_type} {
   gdb_test "x /2${x_size}s ${var_name}" ".* ${x_type}\"Test String\"\[\r\n\]+.* ${x_type}\"with zeroes\"" "Display String ${var_name} with x/${x_size}s"
 }
 
-string_display String16 u h u
-if {$wchar_size == 2} {
-  string_display String16 L h u
+if {$ucs2_ok} {
+    string_display String16 u h u
+    if {$wchar_size == 2} {
+	string_display String16 L h u
+    }
 }
- 
+
 string_display String32 U w U
 if {$wchar_size == 4} {
   string_display String32 L w U
