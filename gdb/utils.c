@@ -431,6 +431,23 @@ make_cleanup_restore_ui_file (struct ui_file **variable)
   return make_cleanup_dtor (do_restore_ui_file, (void *) c, xfree);
 }
 
+/* Helper for make_cleanup_value_free_to_mark.  */
+
+static void
+do_value_free_to_mark (void *value)
+{
+  value_free_to_mark ((struct value *) value);
+}
+
+/* Free all values allocated since MARK was obtained by value_mark
+   (except for those released) when the cleanup is run.  */
+
+struct cleanup *
+make_cleanup_value_free_to_mark (struct value *mark)
+{
+  return make_my_cleanup (&cleanup_chain, do_value_free_to_mark, mark);
+}
+
 struct cleanup *
 make_my_cleanup2 (struct cleanup **pmy_chain, make_cleanup_ftype *function,
 		  void *arg,  void (*free_arg) (void *))

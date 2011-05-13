@@ -2025,9 +2025,7 @@ mi_cmd_execute (struct mi_parse *parse)
 {
   struct cleanup *cleanup;
 
-  prepare_execute_command ();
-
-  cleanup = make_cleanup (null_cleanup, NULL);
+  cleanup = prepare_execute_command ();
 
   if (parse->all && parse->thread_group != -1)
     error (_("Cannot specify --thread-group together with --all"));

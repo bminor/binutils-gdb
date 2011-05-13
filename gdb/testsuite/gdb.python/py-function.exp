@@ -95,3 +95,17 @@ gdb_py_test_multiple "Test Normal Error" \
 
 gdb_test "print \$normalerror()" "Traceback.*File.*line 5.*in invoke.*RuntimeError.*This is a Normal Error.*" \
     "Test a Runtime error.  There should be a stack trace."
+
+gdb_py_test_multiple "input command-calling function" \
+  "python" "" \
+  "class CallCommand(gdb.Function):" "" \
+  "    def __init__(self):" "" \
+  "        gdb.Function.__init__(self, 'call_command')" "" \
+  "    def invoke(self):" "" \
+  "        return gdb.execute('print 1', to_string=True)" "" \
+  "CallCommand ()" "" \
+  "end" ""
+
+gdb_test_no_output "set var \$foo = \$call_command()" "Setting a value from a function which executes a command."
+# There was a bug where GDB would segfault in the second call, so try calling again.
+gdb_test_no_output "set var \$foo = \$call_command()" "Setting a value from a function which executes a command, again."

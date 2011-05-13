@@ -1,3 +1,16 @@
+2011-05-13  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* mi/mi-main.c (mi_cmd_execute): Use cleanup from
+	prepare_execute_command.
+	* top.c (prepare_execute_command): Return cleanup.
+	(execute_command): Use cleanup from prepare_execute_command.
+	* top.h (prepare_execute_command): Change prototype to return
+	cleanup.
+	* defs.h (struct value): Add opaque declaration.
+	(make_cleanup_value_free_to_mark): Add prototype.
+	* utils.c (do_value_free_to_mark): New function.
+	(make_cleanup_value_free_to_mark): Likewise.
+
 2011-05-12  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2expr.c (execute_stack_op) <DW_OP_shr>: Unconditionally

@@ -339,10 +339,14 @@ do_chdir_cleanup (void *old_dir)
 }
 #endif
 
-void
+struct cleanup *
 prepare_execute_command (void)
 {
-  free_all_values ();
+  struct value *mark;
+  struct cleanup *cleanup;
+
+  mark = value_mark ();
+  cleanup = make_cleanup_value_free_to_mark (mark);
 
   /* With multiple threads running while the one we're examining is
      stopped, the dcache can get stale without us being able to detect
@@ -350,6 +354,8 @@ prepare_execute_command (void)
      help things like backtrace.  */
   if (non_stop)
     target_dcache_invalidate ();
+
+  return cleanup;
 }
 
 /* Execute the line P as a command, in the current user context.
@@ -358,12 +364,13 @@ prepare_execute_command (void)
 void
 execute_command (char *p, int from_tty)
 {
+  struct cleanup *cleanup;
   struct cmd_list_element *c;
   enum language flang;
   static int warned = 0;
   char *line;
 
-  prepare_execute_command ();
+  cleanup = prepare_execute_command ();
 
   /* Force cleanup of any alloca areas if using C alloca instead of
      a builtin alloca.  */
@@ -462,6 +469,8 @@ execute_command (char *p, int from_tty)
 	  warned = 1;
 	}
     }
+
+    do_cleanups (cleanup);
 }
 
 /* Run execute_command for P and FROM_TTY.  Capture its output into the

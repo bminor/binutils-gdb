@@ -1,3 +1,8 @@
+2011-05-13  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* gdb.python/py-function.exp: Test setting a value from a function
+	which executes a command.
+
 2011-05-12  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.dwarf2/typeddwarf.S: New file.

@@ -48,8 +48,9 @@ extern int quit_cover (void *);
 extern void execute_command (char *, int);
 
 /* Prepare for execution of a command.
-   Call this before every command, CLI or MI.  */
-extern void prepare_execute_command (void);
+   Call this before every command, CLI or MI.
+   Returns a cleanup to be run after the command is completed.  */
+extern struct cleanup *prepare_execute_command (void);
 
 /* This function returns a pointer to the string that is used
    by gdb for its command prompt.  */
