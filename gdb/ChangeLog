@@ -1,3 +1,24 @@
+2011-05-13  Doug Evans  <dje@google.com>
+
+	* NEWS: Mention "info auto-load-scripts".
+	* python/py-auto-load.c (struct auto_load_pspace_info): New member
+	script_not_found_warning_printed.
+	(init_loaded_scripts_info): Renamed from create_loaded_scripts_hash,
+	all callers updated.  Initialize script_not_found_warning_printed.
+	(get_auto_load_pspace_data_for_loading): New function.
+	(maybe_add_script): New function.
+	(source_section_scripts): Simplify.  Only print one warning regardless
+	of the number of auto-load scripts not found.
+	(clear_section_scripts): Clear script_not_found_warning_printed.
+	(auto_load_objfile_script): Record script in hash table.
+	(count_matching_scripts): New function.
+	(maybe_print_script): Renamed from maybe_print_section_script, all
+	callers updated.  Rewrite to use ui_out_*.
+	(info_auto_load_scripts): Renamed from
+	maintenance_print_section_scripts, all callers updated.
+	(gdbpy_initialize_auto_load): "maintenance print section-scripts"
+	renamed as "info auto-load-scripts".
+
 2011-05-13  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2expr.c (read_uleb128): Cast intermediate result.

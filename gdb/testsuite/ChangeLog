@@ -1,3 +1,11 @@
+2011-05-13  Doug Evans  <dje@google.com>
+
+	* gdb.python/py-objfile-script.exp: New file.
+	* gdb.python/py-objfile-script.c: New file.
+	* gdb.python/py-objfile-script-gdb.py: New file.
+	* testsuite/gdb.python/py-section-script.exp: Test
+	"info auto-load-scripts".
+
 2011-05-13  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.dwarf2/clztest.exp: New file.

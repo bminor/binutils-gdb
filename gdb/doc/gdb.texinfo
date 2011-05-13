@@ -23577,7 +23577,8 @@ command, or because the inferior has loaded a shared library),
 The auto-loading feature is useful for supplying application-specific
 debugging commands and scripts.
 
-Auto-loading can be enabled or disabled.
+Auto-loading can be enabled or disabled,
+and the list of auto-loaded scripts can be printed.
 
 @table @code
 @kindex set auto-load-scripts
@@ -23587,6 +23588,19 @@ Enable or disable the auto-loading of Python scripts.
 @kindex show auto-load-scripts
 @item show auto-load-scripts
 Show whether auto-loading of Python scripts is enabled or disabled.
+
+@kindex info auto-load-scripts
+@cindex print list of auto-loaded scripts
+@item info auto-load-scripts [@var{regexp}]
+Print the list of all scripts that gdb auto-loaded, or tried to auto-load.
+If @var{regexp} is supplied only scripts with matching names are printed.
+
+@smallexample
+(gdb) info auto-load-scripts
+Loaded Script                                                                 
+  Yes  py-section-script.py
+	full name: /tmp/py-section-script.py
+@end smallexample
 @end table
 
 When reading an auto-loaded file, @value{GDBN} sets the

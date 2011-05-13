@@ -27,6 +27,10 @@ watch EXPRESSION mask MASK_VALUE
   The watch command now supports the mask argument which allows creation
   of masked watchpoints, if the current architecture supports this feature.
 
+info auto-load-scripts [REGEXP]
+  This command was formerly named "maintenance print section-scripts".
+  It is now generally useful and is no longer a maintenance-only command.
+
 * Tracepoints can now be enabled and disabled at any time after a trace
   experiment has been started using the standard "enable" and "disable"
   commands.  It is now possible to start a trace experiment with no enabled
