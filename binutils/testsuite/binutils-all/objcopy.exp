@@ -87,8 +87,8 @@ proc objcopy_test {testname srcfile} {
 	setup_xfail "m68*-*-sysv*" "m68*-apple-aux*"
 	setup_xfail "m8*-*"
 	setup_xfail "or32-*-rtems*" "or32-*-coff"
-	setup_xfail "sh-*-coff*" "sh-*-rtems*" 
-	setup_xfail "tic4x-*-*" "tic80-*-*" "w65-*"
+	setup_xfail "sh-*-coff*"
+	setup_xfail "tic80-*-*" "w65-*"
 
 	clear_xfail "hppa*64*-*-hpux*" "hppa*-*-linux*" "hppa*-*-lites*"
 	clear_xfail "hppa*-*-*n*bsd*" "hppa*-*-rtems*" "*-*-*elf*"

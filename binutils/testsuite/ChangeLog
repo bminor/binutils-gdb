@@ -1,3 +1,8 @@
+2011-05-13  Alan Modra  <amodra@gmail.com>
+
+	* binutils-all/objcopy.exp objcopy_text): Remove xfails for sh-rtems
+	and tic4x.
+
 2011-05-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/12720
