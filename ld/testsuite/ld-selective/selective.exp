@@ -28,7 +28,7 @@ if ![is_elf_format] {
 }
 
 # These targets do not support selective linking
-if {[istarget "alpha*-*-*"] || [istarget "am33*-*-*"] ||
+if {[istarget "am33*-*-*"] ||
     [istarget "arc-*-*"] || [istarget "d30v-*-*"] ||
     [istarget "dlx-*-*"] || [istarget "hppa*64*-*-*"] ||
     [istarget "i370-*-*"] || [istarget "i860-*-*"] ||

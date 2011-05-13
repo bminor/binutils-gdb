@@ -98,7 +98,6 @@
 
 2011-05-03  Paul Brook  <paul@codesourcery.com>
 
-
 	* ld-tic6x/ehtype-reloc-1-rel.d: New test.
 	* ld-tic6x/ehtype-reloc-1.d: New test.
 	* ld-tic6x/ehtype-reloc-1.s: New test.
