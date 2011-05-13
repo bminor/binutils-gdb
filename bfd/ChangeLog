@@ -1,3 +1,9 @@
+2011-05-13  Alan Modra  <amodra@gmail.com>
+
+	Apply 2011-04-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	* elf64-ppc.c (ppc64_elf_get_synthetic_symtab): Do not check for
+	SEC_LOAD.
+
 2011-05-06  Richard Sandiford  <richard.sandiford@linaro.org>
 
 	* elf32-arm.c (cortex_a8_erratum_scan): If the stub is a Thumb
