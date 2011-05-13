@@ -1,5 +1,10 @@
 2011-05-13  Tom Tromey  <tromey@redhat.com>
 
+	* dwarf2expr.c (read_uleb128): Cast intermediate result.
+	(read_sleb128): Likewise.
+
+2011-05-13  Tom Tromey  <tromey@redhat.com>
+
 	* dwarf2loc.c (disassemble_dwarf_expression): Fix instruction
 	offset display.
 

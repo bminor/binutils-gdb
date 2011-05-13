@@ -364,7 +364,7 @@ read_uleb128 (const gdb_byte *buf, const gdb_byte *buf_end, ULONGEST * r)
 	error (_("read_uleb128: Corrupted DWARF expression."));
 
       byte = *buf++;
-      result |= (byte & 0x7f) << shift;
+      result |= ((ULONGEST) (byte & 0x7f)) << shift;
       if ((byte & 0x80) == 0)
 	break;
       shift += 7;
@@ -390,7 +390,7 @@ read_sleb128 (const gdb_byte *buf, const gdb_byte *buf_end, LONGEST * r)
 	error (_("read_sleb128: Corrupted DWARF expression."));
 
       byte = *buf++;
-      result |= (byte & 0x7f) << shift;
+      result |= ((ULONGEST) (byte & 0x7f)) << shift;
       shift += 7;
       if ((byte & 0x80) == 0)
 	break;
