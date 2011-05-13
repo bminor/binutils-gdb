@@ -1,3 +1,11 @@
+2011-05-13  Doug Evans  <dje@google.com>
+
+	* thread-db.c (try_thread_db_load_from_sdir): New function.
+	(try_thread_db_load_from_dir): New function.
+	(thread_db_load_search): Handle $sdir, ignore $pdir.
+	Remove trying of system directories if search of
+	libthread-db-search-path fails,	that is now done via $sdir.
+
 2011-05-12  Kwok Cheung Yeung  <kcy@codesourcery.com>
 
 	* server.c (handle_query): Add EnableDisableTracepoints to the list

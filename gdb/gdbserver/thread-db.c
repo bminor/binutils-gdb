@@ -698,10 +698,50 @@ try_thread_db_load (const char *library)
   return 0;
 }
 
+/* Handle $sdir in libthread-db-search-path.
+   Look for libthread_db in the system dirs, or wherever a plain
+   dlopen(file_without_path) will look.
+   The result is true for success.  */
+
+static int
+try_thread_db_load_from_sdir (void)
+{
+  return try_thread_db_load (LIBTHREAD_DB_SO);
+}
+
+/* Try to load libthread_db from directory DIR of length DIR_LEN.
+   The result is true for success.  */
+
+static int
+try_thread_db_load_from_dir (const char *dir, size_t dir_len)
+{
+  char path[PATH_MAX];
+
+  if (dir_len + 1 + strlen (LIBTHREAD_DB_SO) + 1 > sizeof (path))
+    {
+      char *cp = xmalloc (dir_len + 1);
+
+      memcpy (cp, dir, dir_len);
+      cp[dir_len] = '\0';
+      warning (_("libthread-db-search-path component too long,"
+		 " ignored: %s."), cp);
+      free (cp);
+      return 0;
+    }
+
+  memcpy (path, dir, dir_len);
+  path[dir_len] = '/';
+  strcpy (path + dir_len + 1, LIBTHREAD_DB_SO);
+  return try_thread_db_load (path);
+}
+
+/* Search libthread_db_search_path for libthread_db which "agrees"
+   to work on current inferior.
+   The result is true for success.  */
+
 static int
 thread_db_load_search (void)
 {
-  char path[PATH_MAX];
   const char *search_path;
   int rc = 0;
 
@@ -712,49 +752,45 @@ thread_db_load_search (void)
   while (*search_path)
     {
       const char *end = strchr (search_path, ':');
+      const char *this_dir = search_path;
+      size_t this_dir_len;
+
       if (end)
 	{
-	  size_t len = end - search_path;
-	  if (len + 1 + strlen (LIBTHREAD_DB_SO) + 1 > sizeof (path))
-	    {
-	      char *cp = xmalloc (len + 1);
-	      memcpy (cp, search_path, len);
-	      cp[len] = '\0';
-	      warning ("libthread_db_search_path component too long, "
-		       "ignored: %s.", cp);
-	      free (cp);
-	      search_path += len + 1;
-	      continue;
-	    }
-	  memcpy (path, search_path, len);
-	  path[len] = '\0';
-	  search_path += len + 1;
+	  this_dir_len = end - search_path;
+	  search_path += this_dir_len + 1;
 	}
       else
 	{
-	  size_t len = strlen (search_path);
+	  this_dir_len = strlen (this_dir);
+	  search_path += this_dir_len;
+	}
 
-	  if (len + 1 + strlen (LIBTHREAD_DB_SO) + 1 > sizeof (path))
+      if (this_dir_len == sizeof ("$pdir") - 1
+	  && strncmp (this_dir, "$pdir", this_dir_len) == 0)
+	{
+	  /* We don't maintain a list of loaded libraries so we don't know
+	     where libpthread lives.  We *could* fetch the info, but we don't
+	     do that yet.  Ignore it.  */
+	}
+      else if (this_dir_len == sizeof ("$sdir") - 1
+	       && strncmp (this_dir, "$sdir", this_dir_len) == 0)
+	{
+	  if (try_thread_db_load_from_sdir ())
 	    {
-	      warning ("libthread_db_search_path component too long,"
-		       " ignored: %s.", search_path);
+	      rc = 1;
 	      break;
 	    }
-	  memcpy (path, search_path, len + 1);
-	  search_path += len;
 	}
-      strcat (path, "/");
-      strcat (path, LIBTHREAD_DB_SO);
-      if (debug_threads)
-	fprintf (stderr, "thread_db_load_search trying %s\n", path);
-      if (try_thread_db_load (path))
+      else
 	{
-	  rc = 1;
-	  break;
+	  if (try_thread_db_load_from_dir (this_dir, this_dir_len))
+	    {
+	      rc = 1;
+	      break;
+	    }
 	}
     }
-  if (rc == 0)
-    rc = try_thread_db_load (LIBTHREAD_DB_SO);
 
   if (debug_threads)
     fprintf (stderr, "thread_db_load_search returning %d\n", rc);

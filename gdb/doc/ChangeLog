@@ -1,5 +1,8 @@
 2011-05-13  Doug Evans  <dje@google.com>
 
+	* gdb.texinfo (Threads): Document $sdir,$pdir.
+	(Server): Document $pdir exception.
+
 	* gdb.texinfo (Auto-loading): Document "info auto-load-scripts".
 
 	* gdb.texinfo (Threads): Clarify default value for

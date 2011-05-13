@@ -2858,16 +2858,22 @@ watchpoints in programs with multiple threads.
 If this variable is set, @var{path} is a colon-separated list of
 directories @value{GDBN} will use to search for @code{libthread_db}.
 If you omit @var{path}, @samp{libthread-db-search-path} will be reset to
-its default value (an empty list on @sc{gnu}/Linux and Solaris systems).
+its default value (@code{$sdir:$pdir} on @sc{gnu}/Linux and Solaris systems).
 Internally, the default value comes from the @code{LIBTHREAD_DB_SEARCH_PATH}
 macro.
 
 On @sc{gnu}/Linux and Solaris systems, @value{GDBN} uses a ``helper''
 @code{libthread_db} library to obtain information about threads in the
 inferior process.  @value{GDBN} will use @samp{libthread-db-search-path}
-to find @code{libthread_db}.  If that fails, @value{GDBN} will continue
-with default system shared library directories, and finally the directory
-from which @code{libpthread} was loaded in the inferior process.
+to find @code{libthread_db}.
+
+A special entry @samp{$sdir} for @samp{libthread-db-search-path}
+refers to the default system directories that are
+normally searched for loading shared libraries.
+
+A special entry @samp{$pdir} for @samp{libthread-db-search-path}
+refers to the directory from which @code{libpthread}
+was loaded in the inferior process.
 
 For any @code{libthread_db} library @value{GDBN} finds in above directories,
 @value{GDBN} attempts to initialize it with the current inferior process.
@@ -16381,6 +16387,9 @@ When this command is issued, @var{path} is a colon-separated list of
 directories to search for @code{libthread_db} (@pxref{Threads,,set
 libthread-db-search-path}).  If you omit @var{path},
 @samp{libthread-db-search-path} will be reset to its default value.
+
+The special entry @samp{$pdir} for @samp{libthread-db-search-path} is
+not supported in @code{gdbserver}.
 
 @item monitor exit
 Tell gdbserver to exit immediately.  This command should be followed by
