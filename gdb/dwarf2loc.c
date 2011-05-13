@@ -1086,7 +1086,7 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
   struct value *retval;
   struct dwarf_expr_baton baton;
   struct dwarf_expr_context *ctx;
-  struct cleanup *old_chain;
+  struct cleanup *old_chain, *value_chain;
   struct objfile *objfile = dwarf2_per_cu_objfile (per_cu);
   volatile struct gdb_exception ex;
 
@@ -1106,6 +1106,7 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 
   ctx = new_dwarf_expr_context ();
   old_chain = make_cleanup_free_dwarf_expr_context (ctx);
+  value_chain = make_cleanup_value_free_to_mark (value_mark ());
 
   ctx->gdbarch = get_objfile_arch (objfile);
   ctx->addr_size = dwarf2_per_cu_addr_size (per_cu);
@@ -1128,6 +1129,7 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
     {
       if (ex.error == NOT_AVAILABLE_ERROR)
 	{
+	  do_cleanups (old_chain);
 	  retval = allocate_value (type);
 	  mark_value_bytes_unavailable (retval, 0, TYPE_LENGTH (type));
 	  return retval;
@@ -1150,6 +1152,9 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 
       c = allocate_piece_closure (per_cu, ctx->num_pieces, ctx->pieces,
 				  ctx->addr_size);
+      /* We must clean up the value chain after creating the piece
+	 closure but before allocating the result.  */
+      do_cleanups (value_chain);
       retval = allocate_computed_value (type, &pieced_value_funcs, c);
       VALUE_FRAME_ID (retval) = frame_id;
       set_value_offset (retval, byte_offset);
@@ -1166,6 +1171,7 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 
 	    if (byte_offset != 0)
 	      error (_("cannot use offset on synthetic pointer to register"));
+	    do_cleanups (value_chain);
 	    if (gdb_regnum != -1)
 	      retval = value_from_register (type, gdb_regnum, frame);
 	    else
@@ -1179,6 +1185,7 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 	    CORE_ADDR address = dwarf_expr_fetch_address (ctx, 0);
 	    int in_stack_memory = dwarf_expr_fetch_in_stack_memory (ctx, 0);
 
+	    do_cleanups (value_chain);
 	    retval = allocate_value_lazy (type);
 	    VALUE_LVAL (retval) = lval_memory;
 	    if (in_stack_memory)
@@ -1201,6 +1208,13 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 	    val_bytes += byte_offset;
 	    n -= byte_offset;
 
+	    /* Preserve VALUE because we are going to free values back
+	       to the mark, but we still need the value contents
+	       below.  */
+	    value_incref (value);
+	    do_cleanups (value_chain);
+	    make_cleanup_value_free (value);
+
 	    retval = allocate_value (type);
 	    contents = value_contents_raw (retval);
 	    if (n > TYPE_LENGTH (type))
@@ -1218,6 +1232,7 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 	    if (byte_offset + TYPE_LENGTH (type) > n)
 	      invalid_synthetic_pointer ();
 
+	    do_cleanups (value_chain);
 	    retval = allocate_value (type);
 	    contents = value_contents_raw (retval);
 
@@ -1231,6 +1246,7 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 	  break;
 
 	case DWARF_VALUE_OPTIMIZED_OUT:
+	  do_cleanups (value_chain);
 	  retval = allocate_value (type);
 	  VALUE_LVAL (retval) = not_lval;
 	  set_value_optimized_out (retval, 1);
@@ -1353,6 +1369,7 @@ dwarf2_loc_desc_needs_frame (const gdb_byte *data, unsigned short size,
 
   ctx = new_dwarf_expr_context ();
   old_chain = make_cleanup_free_dwarf_expr_context (ctx);
+  make_cleanup_value_free_to_mark (value_mark ());
 
   ctx->gdbarch = get_objfile_arch (objfile);
   ctx->addr_size = dwarf2_per_cu_addr_size (per_cu);

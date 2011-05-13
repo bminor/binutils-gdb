@@ -104,7 +104,6 @@ new_dwarf_expr_context (void)
   retval->num_pieces = 0;
   retval->pieces = 0;
   retval->max_recursion_depth = 0x100;
-  retval->mark = value_mark ();
   return retval;
 }
 
@@ -113,7 +112,6 @@ new_dwarf_expr_context (void)
 void
 free_dwarf_expr_context (struct dwarf_expr_context *ctx)
 {
-  value_free_to_mark (ctx->mark);
   xfree (ctx->stack);
   xfree (ctx->pieces);
   xfree (ctx);

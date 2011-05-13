@@ -402,6 +402,7 @@ execute_stack_op (const gdb_byte *exp, ULONGEST len, int addr_size,
 
   ctx = new_dwarf_expr_context ();
   old_chain = make_cleanup_free_dwarf_expr_context (ctx);
+  make_cleanup_value_free_to_mark (value_mark ());
 
   ctx->gdbarch = get_frame_arch (this_frame);
   ctx->addr_size = addr_size;

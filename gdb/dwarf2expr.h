@@ -81,10 +81,6 @@ struct dwarf_expr_context
   /* Offset used to relocate DW_OP_addr argument.  */
   CORE_ADDR offset;
 
-  /* The evaluator is value-based, and frees values up to this point
-     when the expression context is destroyed.  */
-  struct value *mark;
-
   /* An opaque argument provided by the caller, which will be passed
      to all of the callback functions.  */
   void *baton;

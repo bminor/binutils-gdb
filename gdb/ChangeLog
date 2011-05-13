@@ -1,3 +1,19 @@
+2011-05-13  Tom Tromey  <tromey@redhat.com>
+
+	* utils.c (do_value_free): New function.
+	(make_cleanup_value_free): Likewise.
+	* dwarf2loc.c (dwarf2_evaluate_loc_desc_full): Handle value
+	freeing correctly.
+	(dwarf2_loc_desc_needs_frame): Call
+	make_cleanup_value_free_to_mark.
+	* dwarf2expr.h (struct dwarf_expr_context) <mark>: Remove field.
+	* dwarf2expr.c (free_dwarf_expr_context): Don't call
+	value_free_to_mark.
+	(new_dwarf_expr_context): Don't call value_mark.
+	* dwarf2-frame.c (execute_stack_op): Call
+	make_cleanup_value_free_to_mark.
+	* defs.h (make_cleanup_value_free): Declare.
+
 2011-05-13  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* mi/mi-main.c (mi_cmd_execute): Use cleanup from

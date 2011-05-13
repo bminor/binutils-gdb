@@ -448,6 +448,22 @@ make_cleanup_value_free_to_mark (struct value *mark)
   return make_my_cleanup (&cleanup_chain, do_value_free_to_mark, mark);
 }
 
+/* Helper for make_cleanup_value_free.  */
+
+static void
+do_value_free (void *value)
+{
+  value_free (value);
+}
+
+/* Free VALUE.  */
+
+struct cleanup *
+make_cleanup_value_free (struct value *value)
+{
+  return make_my_cleanup (&cleanup_chain, do_value_free, value);
+}
+
 struct cleanup *
 make_my_cleanup2 (struct cleanup **pmy_chain, make_cleanup_ftype *function,
 		  void *arg,  void (*free_arg) (void *))
