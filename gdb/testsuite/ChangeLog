@@ -1,3 +1,8 @@
+2011-05-14  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.trace/tfile.c(add_memory_block): Store address in unsigned
+	type.
+
 2011-05-13  Doug Evans  <dje@google.com>
 
 	* gdb.python/py-objfile-script.exp: New file.
