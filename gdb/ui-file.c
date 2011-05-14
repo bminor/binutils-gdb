@@ -580,7 +580,8 @@ stdio_file_write_async_safe (struct ui_file *file,
       return;
     }
 
-  write (stdio->fd, buf, length_buf);
+  if (write (stdio->fd, buf, length_buf))
+    ;
 }
 
 static void
