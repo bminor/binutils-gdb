@@ -1,3 +1,7 @@
+2011-05-13  Doug Evans  <dje@google.com>
+
+	* ui-file.c (stdio_file_write_async_safe): Add comment.
+
 2011-05-14  Hui Zhu  <teawater@gmail.com>
 
 	* ui-file.c (stdio_file_write_async_safe): Add empty check for build.

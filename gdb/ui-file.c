@@ -580,6 +580,9 @@ stdio_file_write_async_safe (struct ui_file *file,
       return;
     }
 
+  /* This is written the way it is to avoid a warning from gcc about not using the
+     result of write (since it can be declared with attribute warn_unused_result).
+     Alas casting to void doesn't work for this.  */
   if (write (stdio->fd, buf, length_buf))
     ;
 }
