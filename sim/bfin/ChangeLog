@@ -1,5 +1,10 @@
 2011-05-14  Mike Frysinger  <vapier@gentoo.org>
 
+	* bfin-sim.c (decode_PushPopReg_0): Delete (grp == 1 && reg == 6)
+	check for SP reg.
+
+2011-05-14  Mike Frysinger  <vapier@gentoo.org>
+
 	* dv-bfin_uart.c (bfin_uart_write_byte): Add a mcr arg.  Declare a
 	local uart.  When LOOP_ENA is set in mcr, write to the saved byte
 	and count fields of the uart.
