@@ -26,8 +26,8 @@
 #define BFIN_MMR_UART_SIZE	0x30
 
 struct bfin_uart;
-bu16 bfin_uart_get_next_byte (struct hw *, bu16, bool *fresh);
-bu16 bfin_uart_write_byte (struct hw *, bu16);
+bu16 bfin_uart_get_next_byte (struct hw *, bu16, bu16, bool *fresh);
+bu16 bfin_uart_write_byte (struct hw *, bu16, bu16);
 bu16 bfin_uart_get_status (struct hw *);
 unsigned bfin_uart_write_buffer (struct hw *, const unsigned char *, unsigned);
 unsigned bfin_uart_read_buffer (struct hw *, unsigned char *, unsigned);
@@ -50,5 +50,15 @@ void bfin_uart_reschedule (struct hw *);
 #define ERBFI	(1 << 0)
 #define ETBEI	(1 << 1)
 #define ELSI	(1 << 2)
+
+/* UART_MCR */
+#define XOFF		(1 << 0)
+#define MRTS		(1 << 1)
+#define RFIT		(1 << 2)
+#define RFRT		(1 << 3)
+#define LOOP_ENA	(1 << 4)
+#define FCPOL		(1 << 5)
+#define ARTS		(1 << 6)
+#define ACTS		(1 << 7)
 
 #endif

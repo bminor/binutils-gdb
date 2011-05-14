@@ -89,7 +89,7 @@ bfin_uart_io_write_buffer (struct hw *me, const void *source,
   switch (mmr_off)
     {
     case mmr_offset(thr):
-      uart->thr = bfin_uart_write_byte (me, value);
+      uart->thr = bfin_uart_write_byte (me, value, uart->mcr);
       if (uart->ier & ETBEI)
 	hw_port_event (me, DV_PORT_TX, 1);
       break;
@@ -142,7 +142,7 @@ bfin_uart_io_read_buffer (struct hw *me, void *dest,
   switch (mmr_off)
     {
     case mmr_offset(rbr):
-      uart->rbr = bfin_uart_get_next_byte (me, uart->rbr, NULL);
+      uart->rbr = bfin_uart_get_next_byte (me, uart->rbr, uart->mcr, NULL);
       dv_store_2 (dest, uart->rbr);
       break;
     case mmr_offset(ier_set):

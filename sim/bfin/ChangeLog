@@ -1,3 +1,18 @@
+2011-05-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* dv-bfin_uart.c (bfin_uart_write_byte): Add a mcr arg.  Declare a
+	local uart.  When LOOP_ENA is set in mcr, write to the saved byte
+	and count fields of the uart.
+	(bfin_uart_io_write_buffer): Pass uart->mcr to bfin_uart_write_byte
+	and bfin_uart_get_next_byte.
+	(bfin_uart_get_next_byte): Add a mcr arg.  Move uart->saved_count
+	check first, and skip the remaining code when LOOP_ENA is set in mcr.
+	* dv-bfin_uart.h (bfin_uart_write_byte): Add an mcr argument.
+	(bfin_uart_get_next_byte): Likewise.
+	(XOFF, MRTS, RFIT, RFRT, LOOP_ENA, FCPOL, ARTS, ACTS): Define.
+	* dv-bfin_uart2.c (bfin_uart_io_write_buffer): Padd uart->mcr when
+	calling bfin_uart_write_byte and bfin_uart_get_next_byte.
+
 2011-05-09  Mike Frysinger  <vapier@gentoo.org>
 
 	* dv-bfin_uart2.c (bfin_uart_io_read_buffer): Clear DR/THRE/TEMT bits
