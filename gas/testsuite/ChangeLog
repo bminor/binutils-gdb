@@ -1,3 +1,7 @@
+2011-05-14  Alan Modra  <amodra@gmail.com>
+
+	* gas/all/gas.exp: Fix typo last change.
+
 2011-05-13  Alan Modra  <amodra@gmail.com>
 
 	* gas/all/gas.exp: Remove some xfails on redef2 and redef3 tests.

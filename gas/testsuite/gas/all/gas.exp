@@ -145,7 +145,7 @@ case $target_triplet in {
 	# failures such as or32-elf.
 	setup_xfail "bfin-*-*" "i\[3-7\]86-*-*coff" \
 	    "i\[3-7\]86-*-*pe" "i\[3-7\]86-*-go32*" \
-	    "i\[3-7\]86-*-cygwin*" "i\[3-7\]86-*-mingw*" "86_64-*-mingw*"
+	    "i\[3-7\]86-*-cygwin*" "i\[3-7\]86-*-mingw*" "x86_64-*-mingw*"
 	run_dump_test redef3
 	gas_test_error "redef4.s" "" ".set for symbol already used as label"
 	gas_test_error "redef5.s" "" ".set for symbol already defined through .comm"
