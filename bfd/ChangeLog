@@ -1,5 +1,10 @@
 2011-05-15  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* elfxx-mips.c (_bfd_mips_elf_check_relocs): Record both local and
+	global GOT entries for GOT_PAGE relocations against global symbols.
+
+2011-05-15  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	PR ld/12637
 	* elfxx-mips.c (mips_elf_merge_got_with): Use arg->global_count
 	as the number of global entries when merging with the primary GOT.
