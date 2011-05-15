@@ -23601,14 +23601,25 @@ Show whether auto-loading of Python scripts is enabled or disabled.
 @kindex info auto-load-scripts
 @cindex print list of auto-loaded scripts
 @item info auto-load-scripts [@var{regexp}]
-Print the list of all scripts that gdb auto-loaded, or tried to auto-load.
+Print the list of all scripts that @value{GDBN} auto-loaded.
+
+Also printed is the list of scripts that were mentioned in
+the @code{.debug_gdb_scripts} section and were not found
+(@pxref{.debug_gdb_scripts section}).
+This is useful because their names are not printed when @value{GDBN}
+tries to load them and fails.  There may be many of them, and printing
+an error message for each one is problematic.
+
 If @var{regexp} is supplied only scripts with matching names are printed.
+
+Example:
 
 @smallexample
 (gdb) info auto-load-scripts
-Loaded Script                                                                 
-  Yes  py-section-script.py
-	full name: /tmp/py-section-script.py
+Loaded  Script
+Yes     py-section-script.py
+        full name: /tmp/py-section-script.py
+Missing my-foo-pretty-printers.py
 @end smallexample
 @end table
 

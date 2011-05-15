@@ -497,7 +497,7 @@ print_script (struct loaded_script *script)
 
   chain = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
 
-  ui_out_field_string (uiout, "loaded", script->full_path ? "Yes" : "No");
+  ui_out_field_string (uiout, "loaded", script->full_path ? "Yes" : "Missing");
   ui_out_field_string (uiout, "script", script->name);
   ui_out_text (uiout, "\n");
 
@@ -569,7 +569,7 @@ info_auto_load_scripts (char *pattern, int from_tty)
   make_cleanup_ui_out_table_begin_end (uiout, 2, nr_scripts,
 				       "AutoLoadedScriptsTable");
 
-  ui_out_table_header (uiout, 6, ui_center, "loaded", "Loaded");
+  ui_out_table_header (uiout, 7, ui_left, "loaded", "Loaded");
   ui_out_table_header (uiout, 70, ui_left, "script", "Script");
   ui_out_table_body (uiout);
 

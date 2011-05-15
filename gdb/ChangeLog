@@ -1,3 +1,9 @@
+2011-05-15  Doug Evans  <dje@google.com>
+
+	* python/py-autoload.c (print_script): Print "Missing" instead of
+	"No" for missing scripts.
+	(info_auto_load_scripts): Tweak "Loaded" column to fit "Missing".
+
 2011-05-13  Doug Evans  <dje@google.com>
 
 	* ui-file.c (stdio_file_write_async_safe): Add comment.

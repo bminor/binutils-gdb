@@ -1,3 +1,7 @@
+2011-05-15  Doug Evans  <dje@google.com>
+
+	* gdb.texinfo (Auto-loading): Document printing of missing scripts.
+
 2011-05-13  Doug Evans  <dje@google.com>
 
 	* gdb.texinfo (Threads): Document $sdir,$pdir.
