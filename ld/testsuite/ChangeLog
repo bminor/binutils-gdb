@@ -1,3 +1,10 @@
+2011-05-15  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* lib/ld-lib.exp (run_ld_link_tests): Simplify pass/fail logic.
+	Fail if the link command fails and if no test rules are defined.
+	* ld-mips-elf/reloc-6a.s, ld-mips-elf/reloc-6b.s: New tests.
+	* ld-mips-elf/mips-elf.exp: Run them.
+
 2011-05-13  Bernd Schmidt  <bernds@codesourcery.com>
 
 	* ld-tic6x/dsbt.ld (OUTPUT_FORMAT): Add.

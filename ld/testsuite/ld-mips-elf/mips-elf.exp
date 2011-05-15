@@ -298,6 +298,18 @@ if {$has_newabi} {
 }
 run_dump_test "reloc-4"
 run_dump_test "reloc-5"
+if { $has_newabi } {
+    run_ld_link_tests {
+	{"reloc test 6a" "-shared"
+	 "-n32" "reloc-6a.s"
+	 {}
+	 "reloc-6a.so"}
+	{"reloc test 6b" "tmpdir/reloc-6a.so"
+	 "-n32" "reloc-6b.s"
+	 {}
+	 "reloc-6b"}
+    }
+}
 
 if {$has_newabi && $linux_gnu} {
     run_dump_test "eh-frame1-n32"

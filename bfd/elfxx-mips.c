@@ -7743,7 +7743,6 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      if (!mips_elf_record_got_page_entry (info, abfd, r_symndx,
 						   addend))
 		return FALSE;
-	      break;
 	    }
 	  /* Fall through.  */
 

@@ -978,26 +978,21 @@ proc run_ld_link_tests { ldtests } {
 	}
 
 	# Catch assembler errors.
-	if { $is_unresolved != 0 } {
+	if { $is_unresolved } {
 	    unresolved $testname
 	    continue
 	}
 
 	if { [regexp ".*\\.a$" $binfile] } {
 	    if { ![ar_simple_create $ar $ld_options $binfile "$objfiles"] } {
-		fail $testname
 		set failed 1
-	    } else {
-		set failed 0
 	    }
 	} elseif { ![ld_simple_link $ld $binfile "-L$srcdir/$subdir $ld_options $objfiles"] } {
 	    set maybe_failed 1
 	    set ld_output "$exec_output"
-	} else {
-	    set failed 0
 	}
 
-	if { $failed == 0 } {
+	if { !$failed } {
 	    foreach actionlist $actions {
 		set action [lindex $actionlist 0]
 		set progopts [lindex $actionlist 1]
@@ -1034,10 +1029,7 @@ proc run_ld_link_tests { ldtests } {
 			break
 		    }
 		    set maybe_failed 0
-		} elseif { $maybe_failed != 0 } {
-		    set failed 1
-		    break
-		} elseif { $dump_prog != "" } {
+		} elseif { !$maybe_failed && $dump_prog != "" } {
 		    set dumpfile [lindex $actionlist 2]
 		    set binary $dump_prog
 
@@ -1079,18 +1071,14 @@ proc run_ld_link_tests { ldtests } {
 		    remote_file host delete "dump.out"
 		}
 	    }
-
-	    if { $failed != 0 } {
-		fail $testname
-	    } else { if { $is_unresolved == 0 } {
-		pass $testname
-	    } }
 	}
 
-	# Catch action errors.
-	if { $is_unresolved != 0 } {
+	if { $is_unresolved } {
 	    unresolved $testname
-	    continue
+	} elseif { $maybe_failed || $failed } {
+	    fail $testname
+	} else {
+	    pass $testname
 	}
     }
 }

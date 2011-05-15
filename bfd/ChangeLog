@@ -1,3 +1,8 @@
+2011-05-15  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* elfxx-mips.c (_bfd_mips_elf_check_relocs): Record both local and
+	global GOT entries for GOT_PAGE relocations against global symbols.
+
 2011-05-13  Bernd Schmidt  <bernds@codesourcery.com>
 
 	* config.bfd (tic6x-*-elf, tic6x-*-uclinux): New.
