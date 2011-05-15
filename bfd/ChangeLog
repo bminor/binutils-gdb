@@ -1,3 +1,9 @@
+2011-05-15  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	PR ld/12637
+	* elfxx-mips.c (mips_elf_merge_got_with): Use arg->global_count
+	as the number of global entries when merging with the primary GOT.
+
 2011-05-13  Alan Modra  <amodra@gmail.com>
 
 	Apply 2011-04-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
