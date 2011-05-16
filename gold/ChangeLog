@@ -1,5 +1,9 @@
 2011-05-16  Ian Lance Taylor  <iant@google.com>
 
+	* options.h (class General_options): Make -i a synonym for -r.
+
+2011-05-16  Ian Lance Taylor  <iant@google.com>
+
 	* testsuite/tls_test_main.cc: Use semaphores instead of mutexes.
 
 2011-05-10 Cary Coutant  <ccoutant@google.com>
