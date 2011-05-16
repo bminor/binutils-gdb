@@ -1,3 +1,8 @@
+2011-05-16  Adrian Cornish  <gnu@bluedreamer.com>
+
+	* linux-i386-ipa.c (supply_static_tracepoint_registers): Pass
+	__FILE__ and __LINE__ to internal_error.
+
 2011-05-13  Doug Evans  <dje@google.com>
 
 	* thread-db.c (try_thread_db_load_from_sdir): New function.
