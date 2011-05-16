@@ -1,3 +1,8 @@
+2011-05-16  Adrian Cornish  <gnu@bluedreamer.com>
+
+	* linux-i386-ipa.c (supply_static_tracepoint_registers): Pass
+	__FILE__ and __LINE__ to internal_error.
+
 2011-03-18  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* gdbserver/server.h (Macro _): Define it if not available.
