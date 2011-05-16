@@ -1,3 +1,10 @@
+2010-05-16  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* ldlang.c (print_assignment): Use the symbol's section if we
+	use its value.
+	* ldexp.c (exp_fold_tree_1): Skip self-assignment.  Expand
+	comment on copying symbol type.
+
 2011-05-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/12760
