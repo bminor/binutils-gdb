@@ -1,3 +1,10 @@
+2011-05-16  Hans-Peter Nilsson  <hp@axis.com>
+
+	* gas/cris/rd-brokw-pic-1.d, gas/cris/rd-brokw-pic-2.d,
+	gas/cris/rd-fragtest-pic.d: Gate on targets cris-*-*elf* and
+	cris-*-linux-gnu.
+	* gas/cris/pic-err-2.s, gas/cris/pic-err-3.s: New tests.
+
 2011-05-14  Alan Modra  <amodra@gmail.com>
 
 	* gas/all/gas.exp: Fix typo last change.
