@@ -56,7 +56,7 @@ if ![ld_simple_link $ld tmpdir/phdrs $ldopt] {
 	unresolved $testname
 	return
     }
-    set exec_output [run_host_cmd "$objdump" "--private tmpdir/phdrs"]
+    set exec_output [run_host_cmd "$objdump" "--private-headers tmpdir/phdrs"]
     set exec_output [prune_warnings $exec_output]
     verbose -log $exec_output
 

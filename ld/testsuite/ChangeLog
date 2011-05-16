@@ -1,3 +1,9 @@
+2011-05-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-scripts/phdrs.exp: Replace --private with
+	--private-headers for objdump.
+	* ld-scripts/phdrs2.exp: Likewise.
+
 2011-05-15  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* lib/ld-lib.exp (run_ld_link_tests): Simplify pass/fail logic.
