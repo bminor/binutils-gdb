@@ -1,3 +1,12 @@
+2011-05-16  Hans-Peter Nilsson  <hp@axis.com>
+
+	* config/tc-cris.c (md_parse_option) <OPTION_PIC>: Error if not
+	emitting ELF object.
+	(md_show_usage): Only mention --pic if the assembler can generate
+	ELF objects.
+	* doc/c-cris.texi (CRIS-Opt): Mention that generating ELF is a
+	prerequisite for --pic being a valid option.
+
 2011-05-13  Frederic Marchal  <fmarchal@perso.be>
 
 	PR gas/12755
