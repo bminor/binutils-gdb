@@ -6912,11 +6912,13 @@ lang_leave_output_section_statement (fill_type *fill, const char *memspec,
 		    current_section->load_base != NULL,
 		    current_section->addr_tree != NULL);
 
-  /* If this section has no load region or base, but has the same
+  /* If this section has no load region or base, but uses the same
      region as the previous section, then propagate the previous
      section's load region.  */
 
-  if (!current_section->lma_region && !current_section->load_base
+  if (current_section->lma_region == NULL
+      && current_section->load_base == NULL
+      && current_section->addr_tree == NULL
       && current_section->region == current_section->prev->region)
     current_section->lma_region = current_section->prev->lma_region;
 

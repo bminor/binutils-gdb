@@ -1,3 +1,8 @@
+2011-05-16  Alan Modra  <amodra@gmail.com>
+
+	* ldlang.c (lang_leave_output_section_statement): Don't copy
+	previous lma_region if given address.
+
 2011-05-13  Bernd Schmidt  <bernds@codesourcery.com>
 
 	(eelf32_tic6x_linux_be.c, eelf32_tic6x_linux_le.c,
