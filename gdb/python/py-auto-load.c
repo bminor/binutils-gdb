@@ -304,9 +304,10 @@ source_section_scripts (struct objfile *objfile, const char *source_name,
 	  /* We don't throw an error, the program is still debuggable.  */
 	  if (! pspace_info->script_not_found_warning_printed)
 	    {
-	      warning (_("Missing auto-load scripts referenced in %s.\n\
+	      warning (_("Missing auto-load scripts referenced in section %s\n\
+of file %s\n\
 Use `info auto-load-scripts [REGEXP]' to list them."),
-		       GDBPY_AUTO_SECTION_NAME);
+		       GDBPY_AUTO_SECTION_NAME, objfile->name);
 	      pspace_info->script_not_found_warning_printed = TRUE;
 	    }
 	  continue;
