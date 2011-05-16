@@ -1,5 +1,10 @@
 2011-05-15  Doug Evans  <dje@google.com>
 
+	* linux-thread-db.c (try_thread_db_load_from_pdir_1): New function.
+	(try_thread_db_load_from_pdir): Call it.  If unable to find
+	libthread_db in directory of libpthread, see if we're looking at
+	the separate-debug-info copy.
+
 	* python/py-autoload.c (print_script): Print "Missing" instead of
 	"No" for missing scripts.
 	(info_auto_load_scripts): Tweak "Loaded" column to fit "Missing".

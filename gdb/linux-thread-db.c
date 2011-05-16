@@ -812,6 +812,38 @@ try_thread_db_load (const char *library)
   return 0;
 }
 
+/* Subroutine of try_thread_db_load_from_pdir to simplify it.
+   Try loading libthread_db from the same directory as OBJ.
+   The result is true for success.  */
+
+static int
+try_thread_db_load_from_pdir_1 (struct objfile *obj)
+{
+  char path[PATH_MAX], *cp;
+
+  gdb_assert (strlen (obj->name) < sizeof (path));
+  strcpy (path, obj->name);
+  cp = strrchr (path, '/');
+
+  if (cp == NULL)
+    {
+      warning (_("Expected absolute pathname for libpthread in the"
+		 " inferior, but got %s."), path);
+      return 0;
+    }
+  else if (cp + 1 + strlen (LIBTHREAD_DB_SO) + 1 > path + sizeof (path))
+    {
+      warning (_("Unexpected: path to libpthread in the inferior is"
+		 " too long: %s"), path);
+      return 0;
+    }
+  else
+    {
+      strcpy (cp + 1, LIBTHREAD_DB_SO);
+      return try_thread_db_load (path);
+    }
+}
+
 /* Handle $pdir in libthread-db-search-path.
    Look for libthread_db in the directory of libpthread.
    The result is true for success.  */
@@ -824,28 +856,15 @@ try_thread_db_load_from_pdir (void)
   ALL_OBJFILES (obj)
     if (libpthread_name_p (obj->name))
       {
-	char path[PATH_MAX], *cp;
+	if (try_thread_db_load_from_pdir_1 (obj))
+	  return 1;
 
-	gdb_assert (strlen (obj->name) < sizeof (path));
-	strcpy (path, obj->name);
-	cp = strrchr (path, '/');
+	/* We may have found the separate-debug-info version of
+	   libpthread, and it may live in a directory without a matching
+	   libthread_db.  */
+	if (obj->separate_debug_objfile_backlink != NULL)
+	  return try_thread_db_load_from_pdir_1 (obj->separate_debug_objfile_backlink);
 
-	if (cp == NULL)
-	  {
-	    warning (_("Expected absolute pathname for libpthread in the"
-		       " inferior, but got %s."), path);
-	  }
-	else if (cp + 1 + strlen (LIBTHREAD_DB_SO) + 1 > path + sizeof (path))
-	  {
-	    warning (_("Unexpected: path to libpthread in the inferior is"
-		       " too long: %s"), path);
-	  }
-	else
-	  {
-	    strcpy (cp + 1, LIBTHREAD_DB_SO);
-	    if (try_thread_db_load (path))
-	      return 1;
-	  }
 	return 0;
       }
 
