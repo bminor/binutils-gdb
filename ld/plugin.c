@@ -912,6 +912,8 @@ plugin_notice (struct bfd_link_info *info,
 {
   if (h != NULL)
     {
+      bfd *sym_bfd;
+
       /* No further processing if this def/ref is from an IR dummy BFD.  */
       if (is_ir_dummy_bfd (abfd))
 	return TRUE;
@@ -928,10 +930,13 @@ plugin_notice (struct bfd_link_info *info,
 	 to be undefined.  */
       else if (((h->type == bfd_link_hash_defweak
 		 || h->type == bfd_link_hash_defined)
-		&& is_ir_dummy_bfd (h->u.def.section->owner))
+		&& is_ir_dummy_bfd (sym_bfd = h->u.def.section->owner))
 	       || (h->type == bfd_link_hash_common
-		   && is_ir_dummy_bfd (h->u.c.p->section->owner)))
-	h->type = bfd_link_hash_undefweak;
+		   && is_ir_dummy_bfd (sym_bfd = h->u.c.p->section->owner)))
+	{
+	  h->type = bfd_link_hash_undefweak;
+	  h->u.undef.abfd = sym_bfd;
+	}
     }
 
   /* Continue with cref/nocrossref/trace-sym processing.  */

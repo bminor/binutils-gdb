@@ -1,3 +1,9 @@
+2011-05-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/12760
+	* plugin.c (plugin_notice): Set u.undef.abfd for symbols made
+	undefweak.
+
 2011-05-16  Alan Modra  <amodra@gmail.com>
 
 	* ldlang.c (lang_leave_output_section_statement): Don't copy
