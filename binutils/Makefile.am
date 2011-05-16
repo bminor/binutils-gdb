@@ -85,7 +85,7 @@ AM_CPPFLAGS = -I. -I$(srcdir) -I../bfd -I$(BFDDIR) -I$(INCDIR) \
 HFILES = \
 	arsup.h binemul.h bucomm.h budbg.h \
 	coffgrok.h debug.h dlltool.h dwarf.h elfcomm.h nlmconv.h \
-	sysdep.h unwind-ia64.h windres.h winduni.h windint.h \
+	objdump.h sysdep.h unwind-ia64.h windres.h winduni.h windint.h \
 	windmc.h
 
 GENERATED_HFILES = arparse.h sysroff.h sysinfo.h defparse.h rcparse.h mcparse.h
@@ -99,6 +99,7 @@ CFILES = \
 	ieee.c is-ranlib.c is-strip.c maybe-ranlib.c maybe-strip.c \
 	nlmconv.c nm.c not-ranlib.c not-strip.c \
 	objcopy.c objdump.c prdbg.c \
+	od-xcoff.c \
 	rclex.c rdcoff.c rddbg.c readelf.c rename.c \
 	resbin.c rescoff.c resrc.c resres.c \
 	size.c srconv.c stabs.c strings.c sysdump.c \
@@ -112,6 +113,9 @@ GENERATED_CFILES = \
 
 DEBUG_SRCS = rddbg.c debug.c stabs.c ieee.c rdcoff.c
 WRITE_DEBUG_SRCS = $(DEBUG_SRCS) wrstabs.c
+
+# Extra object files for objdump
+OBJDUMP_PRIVATE_OFILES = @OBJDUMP_PRIVATE_OFILES@
 
 # Code shared by all the binutils.
 BULIBS = bucomm.c version.c filemode.c
@@ -167,7 +171,7 @@ installcheck-local:
 # which depends on libintl, since we don't know whether LIBINTL_DEP will be
 # non-empty until configure time.  Ugh!
 size_DEPENDENCIES =      $(LIBINTL_DEP) $(LIBIBERTY) $(BFDLIB)
-objdump_DEPENDENCIES =   $(LIBINTL_DEP) $(LIBIBERTY) $(BFDLIB) $(OPCODES)
+objdump_DEPENDENCIES =   $(LIBINTL_DEP) $(LIBIBERTY) $(BFDLIB) $(OPCODES) $(OBJDUMP_PRIVATE_OFILES)
 nm_new_DEPENDENCIES =    $(LIBINTL_DEP) $(LIBIBERTY) $(BFDLIB)
 ar_DEPENDENCIES =        $(LIBINTL_DEP) $(LIBIBERTY) $(BFDLIB)
 strings_DEPENDENCIES =   $(LIBINTL_DEP) $(LIBIBERTY) $(BFDLIB)
@@ -206,7 +210,8 @@ strip_new_SOURCES = objcopy.c is-strip.c rename.c $(WRITE_DEBUG_SRCS) $(BULIBS)
 nm_new_SOURCES = nm.c $(BULIBS)
 
 objdump_SOURCES = objdump.c dwarf.c prdbg.c $(DEBUG_SRCS) $(BULIBS) $(ELFLIBS)
-objdump_LDADD = $(OPCODES) $(BFDLIB) $(LIBIBERTY) $(LIBINTL)
+EXTRA_objdump_SOURCES = od-xcoff.c
+objdump_LDADD = $(OBJDUMP_PRIVATE_OFILES) $(OPCODES) $(BFDLIB) $(LIBIBERTY) $(LIBINTL)
 
 objdump.@OBJEXT@:objdump.c
 if am__fastdepCC

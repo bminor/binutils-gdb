@@ -604,6 +604,7 @@ LTLIBOBJS
 LIBOBJS
 EMULATION_VECTOR
 EMULATION
+OBJDUMP_PRIVATE_OFILES
 OBJDUMP_DEFS
 BUILD_INSTALL_MISC
 BUILD_MISC
@@ -11198,7 +11199,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11201 "configure"
+#line 11202 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11304,7 +11305,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11307 "configure"
+#line 11308 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -13779,6 +13780,9 @@ BUILD_DLLWRAP=
 BUILD_MISC=
 BUILD_INSTALL_MISC=
 OBJDUMP_DEFS=
+OBJDUMP_PRIVATE_VECTORS=
+OBJDUMP_PRIVATE_OFILES=
+od_vectors=
 
 for targ in $target $canon_targets
 do
@@ -13796,6 +13800,7 @@ do
 	fi
 	DLLTOOL_DEFS="$DLLTOOL_DEFS -DDLLTOOL_I386"
 	BUILD_DLLWRAP='$(DLLWRAP_PROG)$(EXEEXT)'
+        od_vectors="$od_vectors objdump_private_desc_xcoff"
     else
 	case $targ in
 	i[3-7]86*-*-netware*)
@@ -13815,9 +13820,11 @@ do
 	  NLMCONV_DEFS="$NLMCONV_DEFS -DNLMCONV_SPARC"
 	  ;;
 	esac
+
 	case $targ in
 	*-*-hms*) BUILD_SRCONV='$(SRCONV_PROG)' ;;
 	esac
+
 	case $targ in
 	arm-epoc-pe*)
   	  BUILD_DLLTOOL='$(DLLTOOL_PROG)$(EXEEXT)'
@@ -13931,7 +13938,44 @@ do
 	  OBJDUMP_DEFS="-DSKIP_ZEROES=256 -DSKIP_ZEROES_AT_END=0"
 	  ;;
 	esac
+
+	# Add objdump private vectors.
+	case $targ in
+	powerpc-*-aix*)
+	od_vectors="$od_vectors objdump_private_desc_xcoff"
+	  ;;
+	esac
     fi
+done
+
+# Uniq objdump private vector, build objdump target ofiles.
+od_files=
+f=""
+for i in $od_vectors ; do
+    case " $f " in
+    *" $i "*) ;;
+    *)
+	f="$f $i"
+	OBJDUMP_PRIVATE_VECTORS="$OBJDUMP_PRIVATE_VECTORS &$i,"
+	case $i in
+	objdump_private_desc_xcoff)
+	    od_files="$od_files od-xcoff" ;;
+	*) as_fn_error "*** unknown private vector $i" "$LINENO" 5 ;;
+	esac
+	;;
+    esac
+done
+
+# Uniq objdump target ofiles
+f=""
+for i in $od_files ; do
+    case " $f " in
+    *" $i "*) ;;
+    *)
+	f="$f $i"
+	OBJDUMP_PRIVATE_OFILES="$OBJDUMP_PRIVATE_OFILES $i.$objext"
+	;;
+    esac
 done
 
 DLLTOOL_DEFS="$DLLTOOL_DEFS $DLLTOOL_DEFAULT"
@@ -13943,6 +13987,9 @@ fi
 if test "${with_windmc+set}" = set; then
 	  BUILD_WINDMC='$(WINDMC_PROG)$(EXEEXT)'
 fi
+
+OBJDUMP_DEFS="${OBJDUMP_DEFS} -DOBJDUMP_PRIVATE_VECTORS=\"${OBJDUMP_PRIVATE_VECTORS}\""
+
 
 
 

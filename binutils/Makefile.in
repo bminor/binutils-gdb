@@ -200,9 +200,10 @@ SOURCES = $(addr2line_SOURCES) $(ar_SOURCES) $(EXTRA_ar_SOURCES) \
 	$(coffdump_SOURCES) $(cxxfilt_SOURCES) $(dlltool_SOURCES) \
 	$(dllwrap_SOURCES) $(elfedit_SOURCES) $(nlmconv_SOURCES) \
 	$(nm_new_SOURCES) $(objcopy_SOURCES) $(objdump_SOURCES) \
-	$(ranlib_SOURCES) $(readelf_SOURCES) $(size_SOURCES) \
-	$(srconv_SOURCES) $(strings_SOURCES) $(strip_new_SOURCES) \
-	$(sysdump_SOURCES) $(windmc_SOURCES) $(windres_SOURCES)
+	$(EXTRA_objdump_SOURCES) $(ranlib_SOURCES) $(readelf_SOURCES) \
+	$(size_SOURCES) $(srconv_SOURCES) $(strings_SOURCES) \
+	$(strip_new_SOURCES) $(sysdump_SOURCES) $(windmc_SOURCES) \
+	$(windres_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	html-recursive info-recursive install-data-recursive \
 	install-dvi-recursive install-exec-recursive \
@@ -298,6 +299,9 @@ NMEDIT = @NMEDIT@
 NO_WERROR = @NO_WERROR@
 OBJDUMP = @OBJDUMP@
 OBJDUMP_DEFS = @OBJDUMP_DEFS@
+
+# Extra object files for objdump
+OBJDUMP_PRIVATE_OFILES = @OBJDUMP_PRIVATE_OFILES@
 OBJEXT = @OBJEXT@
 OTOOL = @OTOOL@
 OTOOL64 = @OTOOL64@
@@ -429,7 +433,7 @@ AM_CPPFLAGS = -I. -I$(srcdir) -I../bfd -I$(BFDDIR) -I$(INCDIR) \
 HFILES = \
 	arsup.h binemul.h bucomm.h budbg.h \
 	coffgrok.h debug.h dlltool.h dwarf.h elfcomm.h nlmconv.h \
-	sysdep.h unwind-ia64.h windres.h winduni.h windint.h \
+	objdump.h sysdep.h unwind-ia64.h windres.h winduni.h windint.h \
 	windmc.h
 
 GENERATED_HFILES = arparse.h sysroff.h sysinfo.h defparse.h rcparse.h mcparse.h
@@ -442,6 +446,7 @@ CFILES = \
 	ieee.c is-ranlib.c is-strip.c maybe-ranlib.c maybe-strip.c \
 	nlmconv.c nm.c not-ranlib.c not-strip.c \
 	objcopy.c objdump.c prdbg.c \
+	od-xcoff.c \
 	rclex.c rdcoff.c rddbg.c readelf.c rename.c \
 	resbin.c rescoff.c resrc.c resres.c \
 	size.c srconv.c stabs.c strings.c sysdump.c \
@@ -487,7 +492,7 @@ CC_FOR_TARGET = ` \
 # which depends on libintl, since we don't know whether LIBINTL_DEP will be
 # non-empty until configure time.  Ugh!
 size_DEPENDENCIES = $(LIBINTL_DEP) $(LIBIBERTY) $(BFDLIB)
-objdump_DEPENDENCIES = $(LIBINTL_DEP) $(LIBIBERTY) $(BFDLIB) $(OPCODES)
+objdump_DEPENDENCIES = $(LIBINTL_DEP) $(LIBIBERTY) $(BFDLIB) $(OPCODES) $(OBJDUMP_PRIVATE_OFILES)
 nm_new_DEPENDENCIES = $(LIBINTL_DEP) $(LIBIBERTY) $(BFDLIB)
 ar_DEPENDENCIES = $(LIBINTL_DEP) $(LIBIBERTY) $(BFDLIB)
 strings_DEPENDENCIES = $(LIBINTL_DEP) $(LIBIBERTY) $(BFDLIB)
@@ -517,7 +522,8 @@ elfedit_LDADD = $(LIBINTL) $(LIBIBERTY)
 strip_new_SOURCES = objcopy.c is-strip.c rename.c $(WRITE_DEBUG_SRCS) $(BULIBS)
 nm_new_SOURCES = nm.c $(BULIBS)
 objdump_SOURCES = objdump.c dwarf.c prdbg.c $(DEBUG_SRCS) $(BULIBS) $(ELFLIBS)
-objdump_LDADD = $(OPCODES) $(BFDLIB) $(LIBIBERTY) $(LIBINTL)
+EXTRA_objdump_SOURCES = od-xcoff.c
+objdump_LDADD = $(OBJDUMP_PRIVATE_OFILES) $(OPCODES) $(BFDLIB) $(LIBIBERTY) $(LIBINTL)
 cxxfilt_SOURCES = cxxfilt.c $(BULIBS)
 ar_SOURCES = arparse.y arlex.l ar.c not-ranlib.c arsup.c rename.c binemul.c \
 	emul_$(EMULATION).c $(BULIBS)
@@ -796,6 +802,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/not-strip.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/objcopy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/objdump.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/od-xcoff.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/prdbg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rclex.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rcparse.Po@am__quote@

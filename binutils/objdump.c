@@ -65,6 +65,7 @@
 #include "filenames.h"
 #include "debug.h"
 #include "budbg.h"
+#include "objdump.h"
 
 #ifdef HAVE_MMAP
 #include <sys/mman.h>
@@ -93,6 +94,7 @@ static int dump_reloc_info;		/* -r */
 static int dump_dynamic_reloc_info;	/* -R */
 static int dump_ar_hdrs;		/* -a */
 static int dump_private_headers;	/* -p */
+static char *dump_private_options;	/* -P */
 static int prefix_addresses;		/* --prefix-addresses */
 static int with_line_numbers;		/* -l */
 static bfd_boolean with_source_code;	/* -S */
@@ -185,6 +187,13 @@ static char *strtab;
 static bfd_size_type stabstr_size;
 
 static bfd_boolean is_relocatable = FALSE;
+
+/* Handlers for -P/--private.  */
+static const struct objdump_private_desc * const objdump_private_vectors[] =
+  {
+    OBJDUMP_PRIVATE_VECTORS
+    NULL
+  };
 
 static void
 usage (FILE *stream, int status)
@@ -196,6 +205,7 @@ usage (FILE *stream, int status)
   -a, --archive-headers    Display archive header information\n\
   -f, --file-headers       Display the contents of the overall file header\n\
   -p, --private-headers    Display object format specific file header contents\n\
+  -P, --private=OPT,OPT... Display object format specific contents\n\
   -h, --[section-]headers  Display the contents of the section headers\n\
   -x, --all-headers        Display the contents of all headers\n\
   -d, --disassemble        Display assembler contents of executable sections\n\
@@ -221,6 +231,8 @@ usage (FILE *stream, int status)
 "));
   if (status != 2)
     {
+      const struct objdump_private_desc * const *desc;
+
       fprintf (stream, _("\n The following switches are optional:\n"));
       fprintf (stream, _("\
   -b, --target=BFDNAME           Specify the target object format as BFDNAME\n\
@@ -256,6 +268,14 @@ usage (FILE *stream, int status)
       list_supported_architectures (program_name, stream);
 
       disassembler_usage (stream);
+
+      if (objdump_private_vectors[0] != NULL)
+        {
+          fprintf (stream,
+                   _("\nOptions supported for -P/--private switch:\n"));
+          for (desc = objdump_private_vectors; *desc != NULL; desc++)
+            (*desc)->help (stream);
+        }
     }
   if (REPORT_BUGS_TO[0] && status == 0)
     fprintf (stream, _("Report bugs to %s.\n"), REPORT_BUGS_TO);
@@ -282,6 +302,7 @@ static struct option long_options[]=
   {"adjust-vma", required_argument, NULL, OPTION_ADJUST_VMA},
   {"all-headers", no_argument, NULL, 'x'},
   {"private-headers", no_argument, NULL, 'p'},
+  {"private", required_argument, NULL, 'P'},
   {"architecture", required_argument, NULL, 'm'},
   {"archive-headers", no_argument, NULL, 'a'},
   {"debugging", no_argument, NULL, 'g'},
@@ -2595,6 +2616,57 @@ dump_bfd_private_header (bfd *abfd)
   bfd_print_private_bfd_data (abfd, stdout);
 }
 
+static void
+dump_target_specific (bfd *abfd)
+{
+  const struct objdump_private_desc * const *desc;
+  struct objdump_private_option *opt;
+  char *e, *b;
+
+  /* Find the desc.  */
+  for (desc = objdump_private_vectors; *desc != NULL; desc++)
+    if ((*desc)->filter (abfd))
+      break;
+
+  if (desc == NULL)
+    {
+      non_fatal (_("option -P/--private not supported by this file"));
+      return;
+    }
+
+  /* Clear all options.  */
+  for (opt = (*desc)->options; opt->name; opt++)
+    opt->selected = FALSE;
+
+  /* Decode options.  */
+  b = dump_private_options;
+  do
+    {
+      e = strchr (b, ',');
+
+      if (e)
+        *e = 0;
+
+      for (opt = (*desc)->options; opt->name; opt++)
+        if (strcmp (opt->name, b) == 0)
+          {
+            opt->selected = TRUE;
+            break;
+          }
+      if (opt->name == NULL)
+        non_fatal (_("target specific dump '%s' not supported"), b);
+
+      if (e)
+        {
+          *e = ',';
+          b = e + 1;
+        }
+    }
+  while (e != NULL);
+
+  /* Dump.  */
+  (*desc)->dump (abfd);
+}
 
 /* Display a section in hexadecimal format with associated characters.
    Each line prefixed by the zero padded address.  */
@@ -3096,6 +3168,8 @@ dump_bfd (bfd *abfd)
     dump_bfd_header (abfd);
   if (dump_private_headers)
     dump_bfd_private_header (abfd);
+  if (dump_private_options != NULL)
+    dump_target_specific (abfd);
   if (! dump_debugging_tags && ! suppress_bfd_header)
     putchar ('\n');
   if (dump_section_headers)
@@ -3307,7 +3381,7 @@ main (int argc, char **argv)
   set_default_bfd_target ();
 
   while ((c = getopt_long (argc, argv,
-			   "pib:m:M:VvCdDlfFaHhrRtTxsSI:j:wE:zgeGW::",
+			   "pP:ib:m:M:VvCdDlfFaHhrRtTxsSI:j:wE:zgeGW::",
 			   long_options, (int *) 0))
 	 != EOF)
     {
@@ -3422,6 +3496,10 @@ main (int argc, char **argv)
 	  break;
 	case 'p':
 	  dump_private_headers = TRUE;
+	  seenflag = TRUE;
+	  break;
+	case 'P':
+	  dump_private_options = optarg;
 	  seenflag = TRUE;
 	  break;
 	case 'x':

@@ -1744,6 +1744,7 @@ objdump [@option{-a}|@option{--archive-headers}]
         [@option{-m} @var{machine}|@option{--architecture=}@var{machine}]
         [@option{-M} @var{options}|@option{--disassembler-options=}@var{options}]
         [@option{-p}|@option{--private-headers}]
+        [@option{-P} @var{options}|@option{--private=}@var{options}]
         [@option{-r}|@option{--reloc}]
         [@option{-R}|@option{--dynamic-reloc}]
         [@option{-s}|@option{--full-contents}]
@@ -1787,7 +1788,7 @@ object files.
 
 The long and short forms of options, shown here as alternatives, are
 equivalent.  At least one option from the list
-@option{-a,-d,-D,-e,-f,-g,-G,-h,-H,-p,-r,-R,-s,-S,-t,-T,-V,-x} must be given.
+@option{-a,-d,-D,-e,-f,-g,-G,-h,-H,-p,-P,-r,-R,-s,-S,-t,-T,-V,-x} must be given.
 
 @table @env
 @item -a
@@ -2065,6 +2066,17 @@ of the function being wrongly disassembled.
 Print information that is specific to the object file format.  The exact
 information printed depends upon the object file format.  For some
 object file formats, no additional information is printed.
+
+@item -P @var{options}
+@itemx --private=@var{options}
+Print information that is specific to the object file format.  The
+argument @var{options} is a comma separated list that depends on the
+format (the lists of options is displayed with the help).
+
+For XCOFF, the available options are: @option{header}, @option{aout},
+@option{sections}, @option{syms}, @option{relocs}, @option{lineno},
+@option{loader}, @option{except}, @option{typchk}, @option{traceback}
+and @option{toc}.
 
 @item -r
 @itemx --reloc
