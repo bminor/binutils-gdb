@@ -1,3 +1,11 @@
+2011-05-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* lib/sim-defs.exp: Support cc tag in test files.
+	(run_sim_test): Support global_cc_options in boards files.  Convert
+	assembler options into compiler options (c_as_options) with -Wa.
+	Convert linker options into compiler options (c_ld_options) with -Wl.
+	Compile .c and .S files into .x programs.
+
 2011-05-11  Joseph Myers  <joseph@codesourcery.com>
 	    Hans-Peter Nilsson  <hp@axis.com>
 
