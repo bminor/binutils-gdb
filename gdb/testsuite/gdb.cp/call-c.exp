@@ -30,7 +30,7 @@ set objfilecpp ${objdir}/${subdir}/${testfile}.o
 if {[gdb_compile "${srcfilec}" "${objfilec}" object {debug}] != ""
     || [gdb_compile "${srcfilecpp}" "${objfilecpp}" object {c++ debug}] != ""
     || [gdb_compile "${objfilecpp} ${objfilec}" "${binfile}" executable {c++ debug}] != ""} {
-    untested hang.exp
+    untested ${testfile}.exp
     return -1
 }
 

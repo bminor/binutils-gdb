@@ -2,8 +2,9 @@ VPATH = @srcdir@
 srcdir = @srcdir@
 
 EXECUTABLES   = break-reverse consecutive-reverse finish-reverse \
+	i386-precsave i386-reverse i386-sse-reverse \
 	machinestate solib-reverse step-reverse until-reverse \
-	watch-reverse i386-reverse
+	watch-reverse sigall-reverse sigall-precsave
 
 MISCELLANEOUS = 
 

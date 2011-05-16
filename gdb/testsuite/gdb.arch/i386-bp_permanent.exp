@@ -27,8 +27,8 @@ if {(![istarget "x86_64-*-*"] && ![istarget "i?86-*-*"]) || ![is_ilp32_target] }
     return
 }
 
-set testfile "i386-prologue"
-set srcfile ${testfile}.c
+set testfile "i386-bp_permanent"
+set srcfile i386-prologue.c
 set binfile ${objdir}/${subdir}/${testfile}
 
 # some targets have leading underscores on assembly symbols.
@@ -41,7 +41,7 @@ if [istarget "i?86-*-cygwin*"] then {
 # Don't use "debug", so that we don't have line information for the assembly
 # fragments.
 if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable [list $additional_flags]] != "" } {
-    untested i386-prologue.exp
+    untested ${testfile}.exp
     return -1
 }
 

@@ -37,7 +37,7 @@ if [istarget "i?86-*-cygwin*"] then {
 }
 
 if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable [list debug $additional_flags]] != "" } {
-    untested i387-float-reverse
+    untested ${testfile}.exp
     return -1
 }
 

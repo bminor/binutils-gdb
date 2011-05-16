@@ -14,7 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 if [target_info exists gdb,nosignals] {
-    verbose "Skipping sigall-reverse.exp because of nosignals."
+    verbose "Skipping sigall-precsave.exp because of nosignals."
     return
 }
 
@@ -31,11 +31,11 @@ gdb_exit
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 
-set testfile sigall-reverse
-set srcfile ${testfile}.c
+set testfile sigall-precsave
+set srcfile sigall-reverse.c
 set binfile ${objdir}/${subdir}/${testfile}
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-     untested sigall.exp
+     untested ${testfile}.exp
      return -1
 }
 

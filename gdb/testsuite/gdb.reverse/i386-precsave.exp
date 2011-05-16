@@ -34,8 +34,8 @@ if ![istarget "i?86-*linux*"] then {
     return
 }
 
-set testfile "i386-reverse"
-set srcfile ${testfile}.c
+set testfile "i386-precsave"
+set srcfile i386-reverse.c
 set binfile ${objdir}/${subdir}/${testfile}
 
 # some targets have leading underscores on assembly symbols.
@@ -46,7 +46,7 @@ if [istarget "i?86-*-cygwin*"] then {
 }
 
 if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable [list debug $additional_flags]] != "" } {
-    untested i386-reverse
+    untested ${testfile}.exp
     return -1
 }
 

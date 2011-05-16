@@ -28,7 +28,7 @@ set pattern  0123456789012345678901234567890123456789012345678901234567890123456
 set binfile  ${objdir}/${subdir}/${testfile}-${pattern}
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-     untested gcore.exp
+     untested ${testfile}.exp
      return -1
 }
 

@@ -1,3 +1,30 @@
+2011-05-16  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.ada/start.exp: Call untested with the correct test filename.
+	* gdb.arch/i386-bp_permanent.exp: Call untested with the correct
+	test filename.  Make the test's binary unique.
+	* gdb.arch/i386-signal.exp: Call untested with the correct test
+	filename.
+	* gdb.arch/i386-size-overlap.exp: Ditto.
+	* gdb.arch/Makefile.in (EXECUTABLES): Update.
+	* gdb.base/gcore-buffer-overflow.exp: Ditto.
+	* gdb.cp/call-c.exp: Ditto.
+	* gdb.mi/mi-reverse.exp: Call untested with the correct test
+	filename.  Make the test's binary unique.
+	* gdb.mi/Makefile.in (EXECUTABLES): Update.
+	* gdb.python/py-mi.exp: Ditto.
+	* gdb.python/Makefile.in (EXECUTABLES): Update.
+	* gdb.reverse/i386-precsave.exp: Ditto.
+	* gdb.reverse/i387-env-reverse.exp: Call untested with the correct
+	test filename.
+	* gdb.reverse/i387-stack-reverse.exp: Ditto.
+	* gdb.reverse/sigall-precsave.exp: Ditto.  Make the test's binary
+	unique.
+	* gdb.reverse/sigall-reverse.exp: Call untested with the correct
+	test filename.
+	* gdb.reverse/Makefile.in (EXECUTABLES): Update.
+	* gdb.trace/tfile.exp: Ditto.
+
 2011-05-14  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.trace/tfile.c(add_memory_block): Store address in unsigned

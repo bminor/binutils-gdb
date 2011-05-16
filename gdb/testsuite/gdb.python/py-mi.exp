@@ -24,11 +24,12 @@ if [mi_gdb_start] {
     continue
 }
 
-set testfile "py-prettyprint"
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/py-mi
+set testfile "py-mi"
+set srcfile py-prettyprint.c
+set binfile ${objdir}/${subdir}/${testfile}
+set pyfile py-prettyprint.py
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug additional_flags=-DMI}] != "" } {
-    untested mi2-var-child.exp
+    untested ${testfile}.exp
     return -1
 }
 
@@ -43,11 +44,11 @@ if {[lsearch -exact [mi_get_features] python] < 0} {
 
 mi_runto main
 
-set remote_python_file [remote_download host ${srcdir}/${subdir}/${testfile}.py]
+set remote_python_file [remote_download host ${srcdir}/${subdir}/${pyfile}]
 
 mi_gdb_test "python execfile ('${remote_python_file}')" ""
 
-mi_continue_to_line [gdb_get_line_number {MI breakpoint here} ${testfile}.c] \
+mi_continue_to_line [gdb_get_line_number {MI breakpoint here} ${srcfile}] \
   "step to breakpoint"
 
 mi_create_dynamic_varobj container c \
@@ -221,7 +222,7 @@ mi_varobj_update_dynamic container2 \
     } {} {}
 
 mi_continue_to_line \
-    [gdb_get_line_number {MI outer breakpoint here} ${testfile}.c] \
+    [gdb_get_line_number {MI outer breakpoint here} ${srcfile}] \
     "step to outer breakpoint"
 
 mi_create_dynamic_varobj outer outer \
@@ -244,14 +245,14 @@ mi_gdb_test "-var-update outer" \
   "update after updating element of outer"
 
 mi_continue_to_line \
-    [gdb_get_line_number {Another MI breakpoint} ${testfile}.c] \
+    [gdb_get_line_number {Another MI breakpoint} ${srcfile}] \
     "step to second breakpoint"
 
 mi_varobj_update_with_type_change container int 0 "update after type change"
 
 
 mi_continue_to_line \
-    [gdb_get_line_number {break to inspect struct and union} ${testfile}.c] \
+    [gdb_get_line_number {break to inspect struct and union} ${srcfile}] \
     "step to outer breakpoint"
 
 mi_create_dynamic_varobj nscont nstype \
@@ -305,7 +306,7 @@ if {[lsearch -exact [mi_get_features] python] < 0} {
 
 mi_runto main
 mi_continue_to_line \
-    [gdb_get_line_number {break to inspect struct and union} ${testfile}.c] \
+    [gdb_get_line_number {break to inspect struct and union} ${srcfile}] \
     "step to breakpoint"
 
 # Test python/12531.  Install visualizer on a cplus_fake_child.

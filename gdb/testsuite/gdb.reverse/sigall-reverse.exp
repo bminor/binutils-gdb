@@ -35,7 +35,7 @@ set testfile sigall-reverse
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-     untested sigall.exp
+     untested ${testfile}.exp
      return -1
 }
 
