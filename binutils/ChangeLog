@@ -1,3 +1,28 @@
+2011-05-15  Tristan Gingold  <gingold@adacore.com>
+
+	* od-xcoff.c: New file.
+	* objdump.h: New file.
+	* objdump.c: Include objdump.h
+	(dump_private_options, objdump_private_vectors): New variables.
+	(usage): Mention -P/--private.  Display handled options.
+	(long_options): Add -P/--private.
+	(dump_target_specific): New function.
+	(dump_bfd): Handle dump_private_options.
+	(main): Handle -P.
+	* doc/binutils.texi (objdump): Document -P/--private.
+	* configure.in (OBJDUMP_PRIVATE_VECTORS, OBJDUMP_PRIVATE_OFILES):
+	New variables, compute them.
+	(od_vectors): Add vectors for private dumpers. Make them uniq.
+	(OBJDUMP_DEFS): Add OBJDUMP_PRIVATE_VECTORS.
+	* Makefile.am (HFILES): Add objdump.h
+	(CFILES): Add od-xcoff.c
+	(OBJDUMP_PRIVATE_OFILES): New variable.
+	(objdump_DEPENDENCIES): Append OBJDUMP_PRIVATE_OFILES.
+	(objdump_LDADD): Ditto.
+	(EXTRA_objdump_SOURCES): Define.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+
 2011-05-10  Tristan Gingold  <gingold@adacore.com>
 
 	* dwarf.c (process_extended_line_op): Dump unknown records.
