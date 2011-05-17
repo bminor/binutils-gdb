@@ -24,7 +24,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 /* Initialize a port */
 
-struct hw_port_descriptor {
+struct hw_port_descriptor
+{
   const char *name;
   int number;
   int nr_ports;

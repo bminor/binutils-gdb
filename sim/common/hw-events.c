@@ -27,7 +27,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 /* The hw-events object is implemented using sim-events */
 
-struct hw_event {
+struct hw_event
+{
   void *data;
   struct hw *me;
   hw_event_callback *callback;
@@ -35,7 +36,8 @@ struct hw_event {
   struct hw_event_data *entry;
 };
 
-struct hw_event_data {
+struct hw_event_data
+{
   struct hw_event event;
   struct hw_event_data *next;
 };

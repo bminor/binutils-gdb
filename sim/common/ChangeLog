@@ -1,3 +1,24 @@
+2011-04-02  Mike Frysinger  <vapier@gentoo.org>
+
+	* hw-alloc.c (hw_alloc_data): Adjust brace.
+	* hw-base.c (hw_base_data): Likewise.
+	(generic_hw_unit_decode): Fix indentation.
+	* hw-device.h (_hw_unit, enum, hw): Adjust braces.
+	* hw-events.c (hw_event, hw_event_data): Likewise.
+	* hw-handles.c (hw_handle_mapping, hw_handle_data): Likewise.
+	* hw-instances.c (hw_instance_data): Likewise.
+	* hw-instances.h (hw_instance): Likewise.
+	* hw-main.h (hw_descriptor, enum): Likewise.
+	* hw-ports.c (hw_port_edge, hw_port_data, empty_hw_ports): Likewise.
+	* hw-ports.h (hw_port_descriptor): Likewise.
+	* hw-properties.c (hw_property_data): Likewise.
+	* hw-properties.h (enum, hw_property, _ihandle_runtime_property_spec,
+	_range_property_spec, _reg_property_spec): Likewise.
+	* hw-tree.c (_name_specifier, printer): Likewise.
+	(split_device_specifier, parse_string_property, hw_tree_traverse,
+	print_size, print_reg_property, print_string, print_properties):
+	Fix indentation.
+
 2011-03-29  Mike Frysinger  <vapier@gentoo.org>
 
 	* aclocal.m4 (SIM_AC_OPTION_HARDWARE): Add cfi to default list.

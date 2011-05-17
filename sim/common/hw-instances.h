@@ -134,7 +134,8 @@ int hw_instance_call_method
 /* Finally an instance of a hardware device - keep your grubby little
    mits off of these internals! :-) */
 
-struct hw_instance {
+struct hw_instance
+{
 
   void *data_of_instance;
   char *args_of_instance;
