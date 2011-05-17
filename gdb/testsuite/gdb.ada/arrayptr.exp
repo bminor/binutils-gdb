@@ -41,4 +41,13 @@ gdb_test "print string_p" \
          "= \\(foo\\.string_access\\) 0x\[0-9a-zA-Z\]+" \
          "print string_p"
 
+gdb_test "print string_p (3..4)" "= \"ll\""
+
 gdb_test "print null_string" "= \\(foo\\.string_access\\) 0x0"
+
+gdb_test "print arr_ptr" "= \\(access foo\\.little_array\\) 0x\[0-9a-zA-Z\]+"
+
+gdb_test "print arr_ptr (2)" "= 22"
+
+gdb_test "print arr_ptr (3..4)" "= \\(3 => 23, 24\\)"
+

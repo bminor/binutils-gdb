@@ -20,7 +20,14 @@ procedure Foo is
 
    String_P : String_Access := new String'("Hello");
    Null_String : String_Access := null;
+
+   --  Same situation, but constrained array.
+   type Little_Array is array (1 .. 10) of Integer;
+   type Little_Array_Ptr is access all Little_Array;
+   Arr_Ptr: Little_Array_Ptr :=
+     new Little_Array'(21, 22, 23, 24, 25, 26, 27, 28, 29, 30);
 begin
    Do_Nothing (String_P'Address);  -- STOP
    Do_Nothing (Null_String'Address);
+   Do_Nothing (Arr_Ptr'Address);
 end Foo;
