@@ -32195,9 +32195,12 @@ For any @var{command} not supported by the stub, an empty response
 protocol.  A newer @value{GDBN} can tell if a packet is supported based
 on that response.
 
-A stub is required to support the @samp{g}, @samp{G}, @samp{m}, @samp{M},
-@samp{c}, and @samp{s} @var{command}s.  All other @var{command}s are
-optional.
+At a minimum, a stub is required to support the @samp{g} and @samp{G}
+commands for register access, and the @samp{m} and @samp{M} commands
+for memory access.  Stubs that only control single-threaded targets
+can implement run control with the @samp{c} (continue), and @samp{s}
+(step) commands.  Stubs that support multi-threading targets should
+support the @samp{vCont} command.  All other commands are optional.
 
 @node Packets
 @section Packets
@@ -32334,6 +32337,9 @@ Reply:
 Continue.  @var{addr} is address to resume.  If @var{addr} is omitted,
 resume at current address.
 
+This packet is deprecated for multi-threading support.  @xref{vCont
+packet}.
+
 Reply:
 @xref{Stop Reply Packets}, for the reply specifications.
 
@@ -32341,6 +32347,9 @@ Reply:
 @cindex @samp{C} packet
 Continue with signal @var{sig} (hex signal number).  If
 @samp{;@var{addr}} is omitted, resume at same address.
+
+This packet is deprecated for multi-threading support.  @xref{vCont
+packet}.
 
 Reply:
 @xref{Stop Reply Packets}, for the reply specifications.
@@ -32424,13 +32433,15 @@ for success
 for an error
 @end table
 
-@item H @var{c} @var{thread-id}
+@item H @var{op} @var{thread-id}
 @cindex @samp{H} packet
 Set thread for subsequent operations (@samp{m}, @samp{M}, @samp{g},
-@samp{G}, et.al.).  @var{c} depends on the operation to be performed: it
-should be @samp{c} for step and continue operations, @samp{g} for other
-operations.  The thread designator @var{thread-id} has the format and
-interpretation described in @ref{thread-id syntax}.
+@samp{G}, et.al.).  @var{op} depends on the operation to be performed:
+it should be @samp{c} for step and continue operations (note that this
+is deprecated, supporting the @samp{vCont} command is a better
+option), @samp{g} for other operations.  The thread designator
+@var{thread-id} has the format and interpretation described in
+@ref{thread-id syntax}.
 
 Reply:
 @table @samp
@@ -32570,6 +32581,9 @@ The @samp{R} packet has no reply.
 Single step.  @var{addr} is the address at which to resume.  If
 @var{addr} is omitted, resume at same address.
 
+This packet is deprecated for multi-threading support.  @xref{vCont
+packet}.
+
 Reply:
 @xref{Stop Reply Packets}, for the reply specifications.
 
@@ -32578,6 +32592,9 @@ Reply:
 @cindex @samp{S} packet
 Step with signal.  This is analogous to the @samp{C} packet, but
 requests a single-step, rather than a normal resumption of execution.
+
+This packet is deprecated for multi-threading support.  @xref{vCont
+packet}.
 
 Reply:
 @xref{Stop Reply Packets}, for the reply specifications.
@@ -32635,6 +32652,7 @@ for success in non-stop mode (@pxref{Remote Non-Stop})
 
 @item vCont@r{[};@var{action}@r{[}:@var{thread-id}@r{]]}@dots{}
 @cindex @samp{vCont} packet
+@anchor{vCont packet}
 Resume the inferior, specifying different actions for each thread.
 If an action is specified with no @var{thread-id}, then it is applied to any
 threads that don't have a specific action specified; if no default action is
