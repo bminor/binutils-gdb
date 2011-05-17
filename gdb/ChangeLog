@@ -1,3 +1,8 @@
+2011-05-17  Tomas Martinec  <fyzmat@gmail.com>
+
+	* infrun.c (handle_inferior_event) <handling deferred step>: Clear
+	trap_expected.
+
 2011-05-16  Doug Evans  <dje@google.com>
 
 	* python/py-auto-load.c (source_section_scripts): Mention objfile

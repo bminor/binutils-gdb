@@ -3646,6 +3646,8 @@ handle_inferior_event (struct execution_control_state *ecs)
 	      singlestep_breakpoints_inserted_p = 0;
 	    }
 
+	  ecs->event_thread->control.trap_expected = 0;
+
 	  /* Note: We do not call context_switch at this point, as the
 	     context is already set up for stepping the original thread.  */
 	  switch_to_thread (deferred_step_ptid);
