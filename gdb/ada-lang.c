@@ -60,6 +60,7 @@
 
 #include "psymtab.h"
 #include "value.h"
+#include "mi/mi-common.h"
 
 /* Define whether or not the C operator '/' truncates towards zero for
    differently signed operands (truncation direction is undefined in C).
@@ -10744,40 +10745,63 @@ ada_exception_name_addr (enum exception_catchpoint_kind ex,
 static enum print_stop_action
 print_it_exception (enum exception_catchpoint_kind ex, struct breakpoint *b)
 {
-  const CORE_ADDR addr = ada_exception_name_addr (ex, b);
-  char exception_name[256];
+  annotate_catchpoint (b->number);
 
-  if (addr != 0)
+  if (ui_out_is_mi_like_p (uiout))
     {
-      read_memory (addr, exception_name, sizeof (exception_name) - 1);
-      exception_name [sizeof (exception_name) - 1] = '\0';
+      ui_out_field_string (uiout, "reason",
+			   async_reason_lookup (EXEC_ASYNC_BREAKPOINT_HIT));
+      ui_out_field_string (uiout, "disp", bpdisp_text (b->disposition));
     }
 
-  ada_find_printable_frame (get_current_frame ());
+  ui_out_text (uiout, "\nCatchpoint ");
+  ui_out_field_int (uiout, "bkptno", b->number);
+  ui_out_text (uiout, ", ");
 
-  annotate_catchpoint (b->number);
   switch (ex)
     {
       case ex_catch_exception:
-        if (addr != 0)
-          printf_filtered (_("\nCatchpoint %d, %s at "),
-                           b->number, exception_name);
-        else
-          printf_filtered (_("\nCatchpoint %d, exception at "), b->number);
-        break;
       case ex_catch_exception_unhandled:
-        if (addr != 0)
-          printf_filtered (_("\nCatchpoint %d, unhandled %s at "),
-                           b->number, exception_name);
-        else
-          printf_filtered (_("\nCatchpoint %d, unhandled exception at "),
-                           b->number);
-        break;
+	{
+	  const CORE_ADDR addr = ada_exception_name_addr (ex, b);
+	  char exception_name[256];
+
+	  if (addr != 0)
+	    {
+	      read_memory (addr, exception_name, sizeof (exception_name) - 1);
+	      exception_name [sizeof (exception_name) - 1] = '\0';
+	    }
+	  else
+	    {
+	      /* For some reason, we were unable to read the exception
+		 name.  This could happen if the Runtime was compiled
+		 without debugging info, for instance.  In that case,
+		 just replace the exception name by the generic string
+		 "exception" - it will read as "an exception" in the
+		 notification we are about to print.  */
+	      sprintf (exception_name, "exception");
+	    }
+	  /* In the case of unhandled exception breakpoints, we print
+	     the exception name as "unhandled EXCEPTION_NAME", to make
+	     it clearer to the user which kind of catchpoint just got
+	     hit.  We used ui_out_text to make sure that this extra
+	     info does not pollute the exception name in the MI case.  */
+	  if (ex == ex_catch_exception_unhandled)
+	    ui_out_text (uiout, "unhandled ");
+	  ui_out_field_string (uiout, "exception-name", exception_name);
+	}
+	break;
       case ex_catch_assert:
-        printf_filtered (_("\nCatchpoint %d, failed assertion at "),
-                         b->number);
-        break;
+	/* In this case, the name of the exception is not really
+	   important.  Just print "failed assertion" to make it clearer
+	   that his program just hit an assertion-failure catchpoint.
+	   We used ui_out_text because this info does not belong in
+	   the MI output.  */
+	ui_out_text (uiout, "failed assertion");
+	break;
     }
+  ui_out_text (uiout, " at ");
+  ada_find_printable_frame (get_current_frame ());
 
   return PRINT_SRC_AND_LOC;
 }

@@ -1,3 +1,8 @@
+2011-04-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (GDB/MI Ada Exception Information): Document
+	the "exception-name" field in the *stopped async record.
+
 2011-05-03  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.texinfo (titlepage): Dedicate GDB version 7.3 to

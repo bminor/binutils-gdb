@@ -1,3 +1,10 @@
+2011-04-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* breakpoint.h (bpdisp_text): Add declaration.
+	* breakpoint.c (bpdisp_text): Make non-static.
+	* ada-lang.c: #include "mi/mi-common.h".
+	(print_it_exception): Rewrite to improve GDB/MI output.
+
 2011-04-01  Pedro Alves  <pedro@codesourcery.com>
 
 	* arm-tdep.h (struct address_space): Add forward declaration.
