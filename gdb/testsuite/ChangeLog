@@ -1,3 +1,8 @@
+2011-04-01  Ulrich Weigand  <ulrich.weigand@linaro.org>
+
+	* gdb.arch/thumb-singlestep.S: New file.
+	* gdb.arch/thumb-singlestep.exp: Likewise.
+
 2011-05-13  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.dwarf2/clztest.exp: New file.
