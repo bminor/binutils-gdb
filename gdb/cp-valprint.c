@@ -340,9 +340,19 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 		}
 	      else if (field_is_static (&TYPE_FIELD (type, i)))
 		{
-		  struct value *v = value_static_field (type, i);
+		  volatile struct gdb_exception ex;
+		  struct value *v = NULL;
 
-		  if (v == NULL)
+		  TRY_CATCH (ex, RETURN_MASK_ERROR)
+		    {
+		      v = value_static_field (type, i);
+		    }
+
+		  if (ex.reason < 0)
+		    fprintf_filtered (stream,
+				      _("<error reading variable: %s>"),
+				      ex.message);
+		  else if (v == NULL)
 		    val_print_optimized_out (stream);
 		  else
 		    cp_print_static_field (TYPE_FIELD_TYPE (type, i),

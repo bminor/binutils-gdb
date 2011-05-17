@@ -1,5 +1,10 @@
 2011-05-17  Tom Tromey  <tromey@redhat.com>
 
+	* cp-valprint.c (cp_print_value_fields): Catch errors from
+	value_static_field.
+
+2011-05-17  Tom Tromey  <tromey@redhat.com>
+
 	* dwarf2read.c (dwarf2_get_die_type): Call
 	get_die_type_at_offset.
 	* dwarf2expr.c (dwarf_get_base_type): Handle NULL return from
