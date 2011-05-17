@@ -1,3 +1,10 @@
+2011-05-17  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-m32r.c (md_show_usage): Fix typos in descriptions.
+	* config/tc-mt.c (md_assemble): Fix typos in warning messages.
+	* cond.c (s_else): Fix typos in error messages.
+	* config/tc-pj.c (md_assemble): Fix typo in error message.
+
 2011-05-16  Hans-Peter Nilsson  <hp@axis.com>
 
 	* config/tc-cris.c (md_parse_option) <OPTION_PIC>: Error if not

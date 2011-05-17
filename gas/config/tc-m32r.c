@@ -406,11 +406,11 @@ md_show_usage (FILE *stream)
   fprintf (stream, _("\
   -ignore-parallel-conflicts            do not check parallel instructions\n"));
   fprintf (stream, _("\
-                                         fo contraint violations\n"));
+                                         for constraint violations\n"));
   fprintf (stream, _("\
   -no-ignore-parallel-conflicts         check parallel instructions for\n"));
   fprintf (stream, _("\
-                                         contraint violations\n"));
+                                         constraint violations\n"));
   fprintf (stream, _("\
   -Ip                     synonym for -ignore-parallel-conflicts\n"));
   fprintf (stream, _("\
