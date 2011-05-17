@@ -1,5 +1,8 @@
 2011-05-17  Nick Clifton  <nickc@redhat.com>
 
+	* po/fi.po: New Finnish translation.
+	* po/fr.po: Updated French translation.
+
 	* config/tc-m32r.c (md_show_usage): Fix typos in descriptions.
 	* config/tc-mt.c (md_assemble): Fix typos in warning messages.
 	* cond.c (s_else): Fix typos in error messages.
