@@ -1997,9 +1997,32 @@ static int
 find_slot_in_mapped_hash (struct mapped_index *index, const char *name,
 			  offset_type **vec_out)
 {
-  offset_type hash = mapped_index_string_hash (name);
+  struct cleanup *back_to = make_cleanup (null_cleanup, 0);
+  offset_type hash;
   offset_type slot, step;
 
+  if (current_language->la_language == language_cplus
+      || current_language->la_language == language_java
+      || current_language->la_language == language_fortran)
+    {
+      /* NAME is already canonical.  Drop any qualifiers as .gdb_index does
+	 not contain any.  */
+      const char *paren = strchr (name, '(');
+
+      if (paren)
+	{
+	  char *dup;
+
+	  dup = xmalloc (paren - name + 1);
+	  memcpy (dup, name, paren - name);
+	  dup[paren - name] = 0;
+
+	  make_cleanup (xfree, dup);
+	  name = dup;
+	}
+    }
+
+  hash = mapped_index_string_hash (name);
   slot = hash & (index->symbol_table_slots - 1);
   step = ((hash * 17) & (index->symbol_table_slots - 1)) | 1;
 
@@ -2009,13 +2032,17 @@ find_slot_in_mapped_hash (struct mapped_index *index, const char *name,
       offset_type i = 2 * slot;
       const char *str;
       if (index->symbol_table[i] == 0 && index->symbol_table[i + 1] == 0)
-	return 0;
+	{
+	  do_cleanups (back_to);
+	  return 0;
+	}
 
       str = index->constant_pool + MAYBE_SWAP (index->symbol_table[i]);
       if (!strcmp (name, str))
 	{
 	  *vec_out = (offset_type *) (index->constant_pool
 				      + MAYBE_SWAP (index->symbol_table[i + 1]));
+	  do_cleanups (back_to);
 	  return 1;
 	}
 

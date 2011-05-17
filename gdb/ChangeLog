@@ -1,3 +1,9 @@
+2011-04-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf2read.c (find_slot_in_mapped_hash): New variable back_to,
+	initialize it.  Delay HASH initialization.  Strip the part after open
+	parenthesis for languages with qualifiers.  Call do_cleanups.
+
 2011-04-01  Tom Tromey  <tromey@redhat.com>
 
 	* utils.c (report_command_stats): Don't print `-' for negative
