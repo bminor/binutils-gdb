@@ -1,18 +1,18 @@
-2011-04-01  Joel Brobecker  <brobecker@adacore.com>
+2011-05-17  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/arrayptr/foo.adb: Add access to constrained array.
 	* gdb.ada/arrayptr.exp: Add new tests.
 
-2011-04-01  Joel Brobecker  <brobecker@adacore.com>
+2011-05-17  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/mi_catch_ex: New testcase.
 
-2011-04-01  Pedro Alves  <pedro@codesourcery.com>
+2011-05-17  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.cp/cpexprs.exp (Overloaded methods): No longer try the
 	base::overload(void) method without specifying "const".
 
-2011-04-01  Ulrich Weigand  <ulrich.weigand@linaro.org>
+2011-05-17  Ulrich Weigand  <ulrich.weigand@linaro.org>
 
 	* gdb.arch/thumb-singlestep.S: New file.
 	* gdb.arch/thumb-singlestep.exp: Likewise.

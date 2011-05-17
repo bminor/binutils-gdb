@@ -1,4 +1,4 @@
-2011-04-01  Mike Frysinger  <vapier@gentoo.org>
+2011-05-17  Mike Frysinger  <vapier@gentoo.org>
 
 	* dv-bfin_otp.c (bfin_otp_ports): Declare.
 	(bfin_otp_finish): Call set_hw_ports with bfin_otp_ports.

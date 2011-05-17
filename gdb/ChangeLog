@@ -1,37 +1,37 @@
-2011-04-01  Ulrich Weigand  <ulrich.weigand@linaro.org>
+2011-05-17  Ulrich Weigand  <ulrich.weigand@linaro.org>
 
 	* arm-tdep.c (arm_gdbarch_init): Enfore correct register number
 	for "fpscr" in target description.
 
-2011-04-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
+2011-05-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* dwarf2read.c (find_slot_in_mapped_hash): New variable back_to,
 	initialize it.  Delay HASH initialization.  Strip the part after open
 	parenthesis for languages with qualifiers.  Call do_cleanups.
 
-2011-04-01  Tom Tromey  <tromey@redhat.com>
+2011-05-17  Tom Tromey  <tromey@redhat.com>
 
 	* utils.c (report_command_stats): Don't print `-' for negative
 	number.
 
-2011-04-01  Eric Botcazou  <ebotcazou@adacore.com>
+2011-05-17  Eric Botcazou  <ebotcazou@adacore.com>
 
 	* ada-lang.c (ada_is_simple_array_type, ada_value_slice_from_ptr)
 	(ada_value_slice, empty_array, to_fixed_array_type): Deal with
 	typedefs.
 
-2011-04-01  Joel Brobecker  <brobecker@adacore.com>
+2011-05-17  Joel Brobecker  <brobecker@adacore.com>
 
 	* breakpoint.h (bpdisp_text): Add declaration.
 	* breakpoint.c (bpdisp_text): Make non-static.
 	* ada-lang.c: #include "mi/mi-common.h".
 	(print_it_exception): Rewrite to improve GDB/MI output.
 
-2011-04-01  Pedro Alves  <pedro@codesourcery.com>
+2011-05-17  Pedro Alves  <pedro@codesourcery.com>
 
 	* arm-tdep.h (struct address_space): Add forward declaration.
 
-2011-04-01  Ulrich Weigand  <ulrich.weigand@linaro.org>
+2011-05-17  Ulrich Weigand  <ulrich.weigand@linaro.org>
 
 	* arm-tdep.h (arm_insert_single_step_breakpoint): Add prototype.
 	* arm-tdep.c (arm_override_mode): New global.
