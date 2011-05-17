@@ -1607,7 +1607,8 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
       || (info->notice_hash != NULL
 	  && bfd_hash_lookup (info->notice_hash, name, FALSE, FALSE) != NULL))
     {
-      if (! (*info->callbacks->notice) (info, h, abfd, section, value))
+      if (! (*info->callbacks->notice) (info, h,
+					abfd, section, value, flags, string))
 	return FALSE;
     }
 

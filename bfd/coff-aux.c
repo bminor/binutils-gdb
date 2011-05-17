@@ -105,7 +105,8 @@ coff_m68k_aux_link_add_one_symbol (info, abfd, name, flags, section, value,
 	  && (bfd_hash_lookup (info->notice_hash, name, FALSE, FALSE)
 	      != (struct bfd_hash_entry *) NULL))
 	{
-	  if (! (*info->callbacks->notice) (info, h, abfd, section, value))
+	  if (! (*info->callbacks->notice) (info, h, abfd, section, value,
+					    flags, string))
 	    return FALSE;
 	}
 

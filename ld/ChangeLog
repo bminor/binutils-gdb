@@ -1,3 +1,10 @@
+2011-05-17  Alan Modra  <amodra@gmail.com>
+
+	PR ld/12760
+	* ldmain.c (notice): Add "flags" and "string" param.
+	* plugin.c (plugin_notice): Likewise.  Handle indirect, warning
+	and constructor syms.
+
 2010-05-16  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* ldlang.c (print_assignment): Use the symbol's section if we

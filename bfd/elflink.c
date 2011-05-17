@@ -3814,7 +3814,7 @@ error_free_dyn:
       /* Make a special call to the linker "notice" function to
 	 tell it that we are about to handle an as-needed lib.  */
       if (!(*info->callbacks->notice) (info, NULL, abfd, NULL,
-				       notice_as_needed))
+				       notice_as_needed, 0, NULL))
 	goto error_free_vers;
 
       /* Clone the symbol table and sym hashes.  Remember some
@@ -4561,7 +4561,7 @@ error_free_dyn:
       /* Make a special call to the linker "notice" function to
 	 tell it that symbols added for crefs may need to be removed.  */
       if (!(*info->callbacks->notice) (info, NULL, abfd, NULL,
-				       notice_not_needed))
+				       notice_not_needed, 0, NULL))
 	goto error_free_vers;
 
       free (old_tab);
@@ -4575,7 +4575,7 @@ error_free_dyn:
   if (old_tab != NULL)
     {
       if (!(*info->callbacks->notice) (info, NULL, abfd, NULL,
-				       notice_needed))
+				       notice_needed, 0, NULL))
 	goto error_free_vers;
       free (old_tab);
       old_tab = NULL;

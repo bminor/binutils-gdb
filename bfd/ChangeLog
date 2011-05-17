@@ -1,3 +1,10 @@
+2011-05-17  Alan Modra  <amodra@gmail.com>
+
+	PR ld/12760
+	* coff-aux.c (coff_m68k_aux_link_add_one_symbol): Adjust "notice" call.
+	* elflink.c (elf_link_add_object_symbols): Likewise.
+	* linker.c (_bfd_generic_link_add_one_symbol): Likewise.
+
 2011-05-16  Alan Modra  <amodra@gmail.com>
 
 	* linker.c (_bfd_generic_link_add_one_symbol): Don't init u.undef.weak.
