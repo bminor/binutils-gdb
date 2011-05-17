@@ -1,3 +1,11 @@
+2011-05-17  Tomohiro Kashiwada  <kikairoya@gmail.com>
+
+	PR ld/12759
+	* elf32-rx.c (ignore_lma): New variable.
+	(bfd_elf32_rx_set_target_flags): Add ignore_lma parameter.
+	(rx_modify_program_headers): Only copy the LMA into the VMA if
+	ignore_lma is true.
+
 2011-05-17  Alan Modra  <amodra@gmail.com>
 
 	PR ld/12760

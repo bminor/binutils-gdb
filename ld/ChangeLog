@@ -1,3 +1,15 @@
+2011-05-17  Tomohiro Kashiwada  <kikairoya@gmail.com>
+
+	PR ld/12759
+	* emultempl/rxelf.em (ignore_lma): New variable.
+	(rx_elf_create_output_section_statements): Pass the setiing of
+	ignore_lma to bfd_elf32_rx_set_target_flags.
+	(OPTION_IGNORE_LMA): Define.
+	(OPTION_NO_IGNORE_LMA): Define.
+	(PARSE_AND_LIST_LONGOPTS): Add ignore lma.
+	(PARSE_AND_LIST_OPTIONS): Add ignore lma.
+	(PARSE_AND_LIST_ARGS_CASES): Add ignore lma.
+
 2011-05-17  Alan Modra  <amodra@gmail.com>
 
 	PR ld/12760

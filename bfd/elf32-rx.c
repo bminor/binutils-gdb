@@ -2855,13 +2855,16 @@ rx_elf_set_private_flags (bfd * abfd, flagword flags)
 }
 
 static bfd_boolean no_warn_mismatch = FALSE;
+static bfd_boolean ignore_lma = TRUE;
 
-void bfd_elf32_rx_set_target_flags (bfd_boolean);
+void bfd_elf32_rx_set_target_flags (bfd_boolean, bfd_boolean);
 
 void
-bfd_elf32_rx_set_target_flags (bfd_boolean user_no_warn_mismatch)
+bfd_elf32_rx_set_target_flags (bfd_boolean user_no_warn_mismatch,
+			       bfd_boolean user_ignore_lma)
 {
   no_warn_mismatch = user_no_warn_mismatch;
+  ignore_lma = user_ignore_lma;
 }
 
 /* Merge backend specific data from an object file to the output
@@ -3332,22 +3335,24 @@ elf32_rx_modify_program_headers (bfd * abfd ATTRIBUTE_UNUSED,
   phdr = tdata->phdr;
   count = tdata->program_header_size / bed->s->sizeof_phdr;
 
-  for (i = count; i-- != 0; )
-    if (phdr[i].p_type == PT_LOAD)
-      {
-	/* The Renesas tools expect p_paddr to be zero.  However,
-	   there is no other way to store the writable data in ROM for
-	   startup initialization.  So, we let the linker *think*
-	   we're using paddr and vaddr the "usual" way, but at the
-	   last minute we move the paddr into the vaddr (which is what
-	   the simulator uses) and zero out paddr.  Note that this
-	   does not affect the section headers, just the program
-	   headers.  We hope.  */
+  if (ignore_lma)
+    for (i = count; i-- != 0;)
+      if (phdr[i].p_type == PT_LOAD)
+	{
+	  /* The Renesas tools expect p_paddr to be zero.  However,
+	     there is no other way to store the writable data in ROM for
+	     startup initialization.  So, we let the linker *think*
+	     we're using paddr and vaddr the "usual" way, but at the
+	     last minute we move the paddr into the vaddr (which is what
+	     the simulator uses) and zero out paddr.  Note that this
+	     does not affect the section headers, just the program
+	     headers.  We hope.  */
 	  phdr[i].p_vaddr = phdr[i].p_paddr;
-	  /* If we zero out p_paddr, then the LMA in the section table
+#if 0	  /* If we zero out p_paddr, then the LMA in the section table
 	     becomes wrong.  */
-	  /*phdr[i].p_paddr = 0;*/
-      }
+	  phdr[i].p_paddr = 0;
+#endif
+	}
 
   return TRUE;
 }
