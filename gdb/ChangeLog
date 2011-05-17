@@ -1,3 +1,7 @@
+2011-04-01  Pedro Alves  <pedro@codesourcery.com>
+
+	* arm-tdep.h (struct address_space): Add forward declaration.
+
 2011-04-01  Ulrich Weigand  <ulrich.weigand@linaro.org>
 
 	* arm-tdep.h (arm_insert_single_step_breakpoint): Add prototype.
