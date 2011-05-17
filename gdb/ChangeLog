@@ -1,3 +1,10 @@
+2011-05-17  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2read.c (dwarf2_get_die_type): Call
+	get_die_type_at_offset.
+	* dwarf2expr.c (dwarf_get_base_type): Handle NULL return from
+	get_base_type function.
+
 2011-05-17  Tomas Martinec  <fyzmat@gmail.com>
 
 	* infrun.c (handle_inferior_event) <handling deferred step>: Clear

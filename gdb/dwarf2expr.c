@@ -447,6 +447,8 @@ dwarf_get_base_type (struct dwarf_expr_context *ctx, ULONGEST die, int size)
   if (ctx->get_base_type)
     {
       result = ctx->get_base_type (ctx, die);
+      if (result == NULL)
+	error (_("Could not find type for DW_OP_GNU_const_type"));
       if (size != 0 && TYPE_LENGTH (result) != size)
 	error (_("DW_OP_GNU_const_type has different sizes for type and data"));
     }

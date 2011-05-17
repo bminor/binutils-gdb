@@ -13671,22 +13671,8 @@ struct type *
 dwarf2_get_die_type (unsigned int die_offset,
 		     struct dwarf2_per_cu_data *per_cu)
 {
-  struct dwarf2_cu *cu = per_cu->cu;
-  struct die_info *die;
-  struct type *result;
-
   dw2_setup (per_cu->objfile);
-
-  die = follow_die_offset (die_offset, &cu);
-  if (!die)
-    error (_("Dwarf Error: Cannot find DIE at 0x%x referenced in module %s"),
-	   die_offset, per_cu->cu->objfile->name);
-
-  result = get_die_type (die, cu);
-  if (result == NULL)
-    result = read_type_die_1 (die, cu);
-
-  return result;
+  return get_die_type_at_offset (die_offset, per_cu);
 }
 
 /* Follow the signature attribute ATTR in SRC_DIE.
