@@ -8387,8 +8387,13 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	      if (!valid_p)
 		break;
 	    }
+	  if (!valid_p && i == 16)
+	    valid_p = 1;
 
-	  if (!valid_p && i != 16)
+	  /* Also require FPSCR.  */
+	  valid_p &= tdesc_numbered_register (feature, tdesc_data,
+					      ARM_FPSCR_REGNUM, "fpscr");
+	  if (!valid_p)
 	    {
 	      tdesc_data_cleanup (tdesc_data);
 	      return NULL;
