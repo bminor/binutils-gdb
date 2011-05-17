@@ -1,3 +1,8 @@
+2011-04-01  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.cp/cpexprs.exp (Overloaded methods): No longer try the
+	base::overload(void) method without specifying "const".
+
 2011-04-01  Ulrich Weigand  <ulrich.weigand@linaro.org>
 
 	* gdb.arch/thumb-singlestep.S: New file.
