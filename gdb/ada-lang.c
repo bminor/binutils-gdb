@@ -1733,7 +1733,8 @@ ada_is_simple_array_type (struct type *type)
   type = ada_check_typedef (type);
   return (TYPE_CODE (type) == TYPE_CODE_ARRAY
           || (TYPE_CODE (type) == TYPE_CODE_PTR
-              && TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_ARRAY));
+              && TYPE_CODE (ada_check_typedef (TYPE_TARGET_TYPE (type)))
+                 == TYPE_CODE_ARRAY));
 }
 
 /* Non-zero iff TYPE belongs to a GNAT array descriptor.  */
@@ -2578,14 +2579,15 @@ static struct value *
 ada_value_slice_from_ptr (struct value *array_ptr, struct type *type,
                           int low, int high)
 {
+  struct type *type0 = ada_check_typedef (type);
   CORE_ADDR base = value_as_address (array_ptr)
-    + ((low - ada_discrete_type_low_bound (TYPE_INDEX_TYPE (type)))
-       * TYPE_LENGTH (TYPE_TARGET_TYPE (type)));
+    + ((low - ada_discrete_type_low_bound (TYPE_INDEX_TYPE (type0)))
+       * TYPE_LENGTH (TYPE_TARGET_TYPE (type0)));
   struct type *index_type =
-    create_range_type (NULL, TYPE_TARGET_TYPE (TYPE_INDEX_TYPE (type)),
+    create_range_type (NULL, TYPE_TARGET_TYPE (TYPE_INDEX_TYPE (type0)),
                        low, high);
   struct type *slice_type =
-    create_array_type (NULL, TYPE_TARGET_TYPE (type), index_type);
+    create_array_type (NULL, TYPE_TARGET_TYPE (type0), index_type);
 
   return value_at_lazy (slice_type, base);
 }
@@ -2594,7 +2596,7 @@ ada_value_slice_from_ptr (struct value *array_ptr, struct type *type,
 static struct value *
 ada_value_slice (struct value *array, int low, int high)
 {
-  struct type *type = value_type (array);
+  struct type *type = ada_check_typedef (value_type (array));
   struct type *index_type =
     create_range_type (NULL, TYPE_INDEX_TYPE (type), low, high);
   struct type *slice_type =
@@ -2803,10 +2805,11 @@ ada_array_length (struct value *arr, int n)
 static struct value *
 empty_array (struct type *arr_type, int low)
 {
+  struct type *arr_type0 = ada_check_typedef (arr_type);
   struct type *index_type =
-    create_range_type (NULL, TYPE_TARGET_TYPE (TYPE_INDEX_TYPE (arr_type)),
+    create_range_type (NULL, TYPE_TARGET_TYPE (TYPE_INDEX_TYPE (arr_type0)),
                        low, low - 1);
-  struct type *elt_type = ada_array_element_type (arr_type, 1);
+  struct type *elt_type = ada_array_element_type (arr_type0, 1);
 
   return allocate_value (create_array_type (NULL, elt_type, index_type));
 }
@@ -7551,6 +7554,7 @@ to_fixed_array_type (struct type *type0, struct value *dval,
   struct type *result;
   int constrained_packed_array_p;
 
+  type0 = ada_check_typedef (type0);
   if (TYPE_FIXED_INSTANCE (type0))
     return type0;
 

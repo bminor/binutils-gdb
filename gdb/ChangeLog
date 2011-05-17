@@ -1,3 +1,9 @@
+2011-04-01  Eric Botcazou  <ebotcazou@adacore.com>
+
+	* ada-lang.c (ada_is_simple_array_type, ada_value_slice_from_ptr)
+	(ada_value_slice, empty_array, to_fixed_array_type): Deal with
+	typedefs.
+
 2011-04-01  Joel Brobecker  <brobecker@adacore.com>
 
 	* breakpoint.h (bpdisp_text): Add declaration.
