@@ -1,3 +1,7 @@
+2011-05-18  Nick Clifton  <nickc@redhat.com>
+
+	* gas/arm/req.l: Updated expected warning message.
+
 2011-05-18  Tristan Gingold  <gingold@adacore.com>
 
 	* gas/ppc/xcoff-dwsect-1-32.d: New test.
