@@ -6542,7 +6542,7 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
 	 (so through at least 3.2.1) incorrectly generate
 	 DW_TAG_variable tags.  */
 
-      char *physname;
+      const char *physname;
 
       /* Get name of field.  */
       fieldname = dwarf2_name (die, cu);
@@ -6563,7 +6563,7 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
 	}
 
       /* Get physical name.  */
-      physname = (char *) dwarf2_physname (fieldname, die, cu);
+      physname = dwarf2_physname (fieldname, die, cu);
 
       /* The name is already allocated along with this objfile, so we don't
 	 need to duplicate it for the type.  */

@@ -1549,7 +1549,7 @@ gen_static_field (struct gdbarch *gdbarch,
     }
   else
     {
-      char *phys_name = TYPE_FIELD_STATIC_PHYSNAME (type, fieldno);
+      const char *phys_name = TYPE_FIELD_STATIC_PHYSNAME (type, fieldno);
       struct symbol *sym = lookup_symbol (phys_name, 0, VAR_DOMAIN, 0);
 
       if (sym)

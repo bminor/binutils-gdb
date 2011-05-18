@@ -509,7 +509,7 @@ struct main_type
 	   Otherwise, physname is the mangled label of the static field.  */
 
 	CORE_ADDR physaddr;
-	char *physname;
+	const char *physname;
       }
       loc;
 

@@ -2388,7 +2388,7 @@ value_static_field (struct type *type, int fieldno)
       break;
     case FIELD_LOC_KIND_PHYSNAME:
     {
-      char *phys_name = TYPE_FIELD_STATIC_PHYSNAME (type, fieldno);
+      const char *phys_name = TYPE_FIELD_STATIC_PHYSNAME (type, fieldno);
       /* TYPE_FIELD_NAME (type, fieldno); */
       struct symbol *sym = lookup_symbol (phys_name, 0, VAR_DOMAIN, 0);
 
