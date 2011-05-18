@@ -3423,7 +3423,8 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
      .gnu.warning.SYMBOL are treated as warning symbols for the given
      symbol.  This differs from .gnu.warning sections, which generate
      warnings when they are included in an output file.  */
-  if (info->executable)
+  /* PR 12761: Also generate this warning when building shared libraries.  */
+  if (info->executable || info->shared)
     {
       asection *s;
 

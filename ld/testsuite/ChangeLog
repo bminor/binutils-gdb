@@ -1,3 +1,14 @@
+2011-05-18  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/12761
+	* lib/ld-lib.exp (run_cc_link_tests): Add an optional 8th
+	parameter - an expected warning message from the linker.
+	* ld-elf/shared.exp (build_tests): Expect a warning message when
+	building the libbarw.so library.
+
+	* ld-elf/shared.exp: Run library building tests even when not
+	building a native toolchain.
+
 2011-05-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-scripts/phdrs.exp: Replace --private with

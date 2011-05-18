@@ -1243,6 +1243,7 @@ proc run_ld_link_exec_tests { targets_to_xfail ldtests } {
 #  4:action and options.
 #  5:name of output file
 #  6:language (optional)
+#  7:linker warnings (optional)
 #
 # Actions:
 # objdump: Apply objdump options on result.  Compare with regex (last arg).
@@ -1261,6 +1262,7 @@ proc run_cc_link_tests { ldtests } {
     global CFLAGS
     global CXXFLAGS
     global ar
+    global exec_output
 
     foreach testitem $ldtests {
 	set testname [lindex $testitem 0]
@@ -1270,6 +1272,7 @@ proc run_cc_link_tests { ldtests } {
 	set actions [lindex $testitem 4]
 	set binfile tmpdir/[lindex $testitem 5]
 	set lang [lindex $testitem 6]
+	set warnings [lindex $testitem 7]
 	set objfiles {}
 	set is_unresolved 0
 	set failed 0
@@ -1306,8 +1309,18 @@ proc run_cc_link_tests { ldtests } {
 		set failed 0
 	    }
 	} elseif { ![ld_simple_link $cc_cmd $binfile "-L$srcdir/$subdir $ldflags $objfiles"] } {
-	    fail $testname
-	    set failed 1
+	    # Check if exec_output is expected.
+	    if { $warnings != "" } then {
+		verbose -log "returned with: <$exec_output>, expected: <$warnings>"
+		if { [regexp $warnings $exec_output] } then {
+		    set failed 0
+		} else {
+		    set failed 1
+		}
+	    } else {
+		fail $testname
+		set failed 1
+	    }
 	} else {
 	    set failed 0
 	}

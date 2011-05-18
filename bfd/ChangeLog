@@ -1,3 +1,9 @@
+2011-05-18  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/12761
+	* elflink.c (elf_link_add_object_symbols): Process .gnu.warning
+	sections when building shared libraries.
+
 2011-05-18  Rafał Krypa  <r.krypa@samsung.com>
 
 	PR ld/12778
