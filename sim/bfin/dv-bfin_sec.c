@@ -164,6 +164,69 @@ bfin_sec_io_read_buffer (struct hw *me, void *dest, int space,
   return nr_bytes;
 }
 
+/* Give each SEC its own base to make it easier to extract the pin at
+   runtime.  The pin is used as its bit position in the SEC MMRs.  */
+#define ENC(sec, pin) (((sec) << 8) + (pin))
+#define DEC_PIN(pin) ((pin) % 0x100)
+#define DEC_SEC(pin) ((pin) >> 8)
+
+/* It would be nice to declare just one set of input_ports, and then
+   have the device tree instantiate multiple SECs, but the MMR layout
+   on the BF54x/BF561 makes this pretty hard to pull off since their
+   regs are interwoven in the address space.  */
+
+#define BFIN_SEC_TO_CEC_PORTS \
+  { "ivg7",  IVG7,  0, output_port, }, \
+  { "ivg8",  IVG8,  0, output_port, }, \
+  { "ivg9",  IVG9,  0, output_port, }, \
+  { "ivg10", IVG10, 0, output_port, }, \
+  { "ivg11", IVG11, 0, output_port, }, \
+  { "ivg12", IVG12, 0, output_port, }, \
+  { "ivg13", IVG13, 0, output_port, }, \
+  { "ivg14", IVG14, 0, output_port, }, \
+  { "ivg15", IVG15, 0, output_port, },
+
+#define SEC_PORTS(n) \
+  { "int0@"#n,   ENC(n,  0), 0, input_port, }, \
+  { "int1@"#n,   ENC(n,  1), 0, input_port, }, \
+  { "int2@"#n,   ENC(n,  2), 0, input_port, }, \
+  { "int3@"#n,   ENC(n,  3), 0, input_port, }, \
+  { "int4@"#n,   ENC(n,  4), 0, input_port, }, \
+  { "int5@"#n,   ENC(n,  5), 0, input_port, }, \
+  { "int6@"#n,   ENC(n,  6), 0, input_port, }, \
+  { "int7@"#n,   ENC(n,  7), 0, input_port, }, \
+  { "int8@"#n,   ENC(n,  8), 0, input_port, }, \
+  { "int9@"#n,   ENC(n,  9), 0, input_port, }, \
+  { "int10@"#n,  ENC(n, 10), 0, input_port, }, \
+  { "int11@"#n,  ENC(n, 11), 0, input_port, }, \
+  { "int12@"#n,  ENC(n, 12), 0, input_port, }, \
+  { "int13@"#n,  ENC(n, 13), 0, input_port, }, \
+  { "int14@"#n,  ENC(n, 14), 0, input_port, }, \
+  { "int15@"#n,  ENC(n, 15), 0, input_port, }, \
+  { "int16@"#n,  ENC(n, 16), 0, input_port, }, \
+  { "int17@"#n,  ENC(n, 17), 0, input_port, }, \
+  { "int18@"#n,  ENC(n, 18), 0, input_port, }, \
+  { "int19@"#n,  ENC(n, 19), 0, input_port, }, \
+  { "int20@"#n,  ENC(n, 20), 0, input_port, }, \
+  { "int21@"#n,  ENC(n, 21), 0, input_port, }, \
+  { "int22@"#n,  ENC(n, 22), 0, input_port, }, \
+  { "int23@"#n,  ENC(n, 23), 0, input_port, }, \
+  { "int24@"#n,  ENC(n, 24), 0, input_port, }, \
+  { "int25@"#n,  ENC(n, 25), 0, input_port, }, \
+  { "int26@"#n,  ENC(n, 26), 0, input_port, }, \
+  { "int27@"#n,  ENC(n, 27), 0, input_port, }, \
+  { "int28@"#n,  ENC(n, 28), 0, input_port, }, \
+  { "int29@"#n,  ENC(n, 29), 0, input_port, }, \
+  { "int30@"#n,  ENC(n, 30), 0, input_port, }, \
+  { "int31@"#n,  ENC(n, 31), 0, input_port, },
+
+static const struct hw_port_descriptor bfin_sec_ports[] =
+{
+  BFIN_SEC_TO_CEC_PORTS
+  SEC_PORTS(0)
+  { NULL, 0, 0, 0, },
+};
+
 static void
 attach_bfin_sec_regs (struct hw *me, struct bfin_sec *sec)
 {
@@ -203,6 +266,8 @@ bfin_sec_finish (struct hw *me)
   set_hw_data (me, sec);
   set_hw_io_read_buffer (me, bfin_sec_io_read_buffer);
   set_hw_io_write_buffer (me, bfin_sec_io_write_buffer);
+  set_hw_ports (me, bfin_sec_ports);
+  //set_hw_port_event (me, bfin_sec_52x_port_event);
 
   attach_bfin_sec_regs (me, sec);
 

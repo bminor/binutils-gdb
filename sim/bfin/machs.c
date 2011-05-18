@@ -95,6 +95,7 @@ struct bfin_model_data {
     .src = _src, \
     .src_port = _src_port, \
   }
+#define SEC(_s, _ip, _d, _op) PORT("bfin_sec", "int"#_ip"@"#_s, _d, _op)
 #define SIC(_s, _ip, _d, _op) PORT("bfin_sic", "int"#_ip"@"#_s, _d, _op)
 
 /* [1] Common sim code can't model exec-only memory.
@@ -1437,6 +1438,90 @@ static const struct bfin_port_layout bf592_port[] =
   SIC (0, 31, "bfin_wdog",         "gpi"),
 };
 
+#define bf609_chipid 0xffff
+static const struct bfin_memory_layout bf609_mem[] =
+{
+  LAYOUT (0xFFC03000, 0x400, read_write),	/* PORT/GPIO stub */
+  LAYOUT (0xC8080000, 0x40000, read_write_exec),	/* L2 */
+  LAYOUT (0xFF800000, 0x8000, read_write),	/* Data A */
+  LAYOUT (0xFF900000, 0x8000, read_write),	/* Data B */
+  LAYOUT (0xFFA00000, 0x14000, read_write_exec),	/* Inst [1] */
+};
+static const struct bfin_dev_layout bf609_dev[] =
+{
+  DEVICE (0xFFC01E00, BFIN_MMR_TWI_SIZE,       "bfin_twi@0"),
+  DEVICE (0xFFC01F00, BFIN_MMR_TWI_SIZE,       "bfin_twi@0"),
+  DEVICE (0xFFC02000, BFIN_MMR_UART4_SIZE,     "bfin_uart4@0"),
+  DEVICE (0xFFC02400, BFIN_MMR_UART4_SIZE,     "bfin_uart4@1"),
+  DEVICE (0xFFC16000, BFIN_MMR_SMC_SIZE,       "bfin_smc"),
+  DEVICE (0xFFC17000, BFIN_MMR_WDOG_SIZE,      "bfin_wdog@0"),
+  DEVICE (0xFFC17800, BFIN_MMR_WDOG_SIZE,      "bfin_wdog@1"),
+/*
+  DEVICE (0xFFC18000, BFIN_MMR_EPPI_SIZE,      "bfin_ppi3@0"),
+  DEVICE (0xFFC18400, BFIN_MMR_EPPI_SIZE,      "bfin_ppi3@1"),
+  DEVICE (0xFFC18800, BFIN_MMR_EPPI_SIZE,      "bfin_ppi3@2"),
+  DEVICE (0xFFC40400, BFIN_MMR_SPI_SIZE,       "bfin_spi3@0"),
+  DEVICE (0xFFC40500, BFIN_MMR_SPI_SIZE,       "bfin_spi3@1"),
+*/
+  DEVICE (0xFFCA7000, BFIN_MMR_SPU_SIZE,       "bfin_spu"),
+  DEVICE (0xFFCA8000, BFIN_MMR_CGU_SIZE,       "bfin_cgu"),
+  DEVICE (0xFFCC0000, BFIN_MMR_EFS_SIZE,       "bfin_efs"),
+};
+#define bf609_dmac bf000_dmac
+static const struct bfin_dde_layout bf609_dde[] =
+{
+  DDE (0xFFC41000,  0, "bfin_sport@0", ""/*"hsA"*/),
+  DDE (0xFFC41080,  1, "bfin_sport@0", ""/*"hsB"*/),
+  DDE (0xFFC41100,  2, "bfin_sport@1", ""/*"hsA"*/),
+  DDE (0xFFC41180,  3, "bfin_sport@1", ""/*"hsB"*/),
+  DDE (0xFFC41200,  4, "bfin_sport@2", ""/*"hsA"*/),
+  DDE (0xFFC41280,  5, "bfin_sport@2", ""/*"hsB"*/),
+  DDE (0xFFC41300,  6, "bfin_spi3@0",  ""/*"tx"*/),
+  DDE (0xFFC41380,  7, "bfin_spi3@0",  ""/*"rx"*/),
+  DDE (0xFFC41400,  8, "bfin_spi3@1",  ""/*"tx"*/),
+  DDE (0xFFC41480,  9, "bfin_spi3@1",  ""/*"rx"*/),
+  DDE (0xFFC05000, 10, "bfin_rsi@0",   ""),
+  DDE (0xFFC05080, 11, "bfin_sdu",     ""),
+/*DDE (0xFFC05100, 12, reserved */
+  DDE (0xFFC07000, 13, "bfin_lp@0",    ""),
+  DDE (0xFFC07080, 14, "bfin_lp@1",    ""),
+  DDE (0xFFC07100, 15, "bfin_lp@2",    ""),
+  DDE (0xFFC07180, 16, "bfin_lp@3",    ""),
+  DDE (0xFFC07200, 17, "bfin_uart4@0", "tx"),
+  DDE (0xFFC07280, 18, "bfin_uart4@0", "rx"),
+  DDE (0xFFC07300, 19, "bfin_uart4@1", "tx"),
+  DDE (0xFFC07380, 20, "bfin_uart4@1", "rx"),
+  DDE (0xFFC09000, 21, "bfin_dde@22",  "di"),
+  DDE (0xFFC09080, 22, "bfin_dde@21",  "di"),
+  DDE (0xFFC09100, 23, "bfin_dde@24",  "di"),
+  DDE (0xFFC09180, 24, "bfin_dde@23",  "di"),
+  DDE (0xFFC09200, 25, "bfin_dde@26",  "di"),
+  DDE (0xFFC09280, 26, "bfin_dde@25",  "di"),
+  DDE (0xFFC09300, 27, "bfin_dde@28",  "di"),
+  DDE (0xFFC09380, 28, "bfin_dde@27",  "di"),
+  DDE (0xFFC0B000, 29, "bfin_ppi3@0", ""/*"f0"*/),
+  DDE (0xFFC0B080, 30, "bfin_ppi3@0", ""/*"f1"*/),
+  DDE (0xFFC0B100, 31, "bfin_ppi3@2", ""/*"f0"*/),
+  DDE (0xFFC0B180, 32, "bfin_ppi3@2", ""/*"f1"*/),
+  DDE (0xFFC0D000, 33, "bfin_ppi3@1", ""/*"f0"*/),
+  DDE (0xFFC0D080, 34, "bfin_ppi3@1", ""/*"f1"*/),
+  DDE (0xFFC10000, 35, "bfin_pixc",   ""),
+  DDE (0xFFC10080, 36, "bfin_pixc",   ""),
+  DDE (0xFFC10100, 37, "bfin_pixc",   ""),
+  DDE (0xFFC12000, 38, "bfin_cpdo@b", ""), /* Camera Pipe Data Output B */
+  DDE (0xFFC12080, 39, "bfin_cpdo@c", ""), /* Camera Pipe Data Output C */
+  DDE (0xFFC12100, 40, "bfin_cpco",   ""), /* Camera Pipe Control Output */
+  DDE (0xFFC12180, 41, "bfin_cpci",   ""), /* Camera Pipe Control Input */
+  DDE (0xFFC14000, 42, "bfin_mpdo",   ""), /* Memory Pipe/UDS Data Output */
+  DDE (0xFFC14080, 43, "bfin_mpdi",   ""), /* Memory Pipe/UDS Data Input */
+  DDE (0xFFC14100, 44, "bfin_mpco",   ""), /* Memory Pipe/UDS Control Output */
+  DDE (0xFFC14180, 45, "bfin_mpci",   ""), /* Memory Pipe/UDS Control Input */
+  DDE (0xFFC14200, 46, "bfin_cpdo@a", ""), /* Camera Pipe Data Output A */
+};
+static const struct bfin_port_layout bf609_port[] =
+{
+};
+
 static const struct bfin_model_data bfin_model_data[] =
 {
 #define P(n) \
@@ -1520,11 +1605,19 @@ bfin_model_hw_tree_init (SIM_DESC sd, SIM_CPU *cpu)
     goto done;
 
   /* Map the system devices.  */
-  dv_bfin_hw_parse (sd, sic, SIC);
-  for (i = 7; i < 16; ++i)
-    sim_hw_parse (sd, "/core/bfin_sic > ivg%i ivg%i /core/bfin_cec", i, i);
-
-  dv_bfin_hw_parse (sd, pll, PLL);
+  if (mdata->model_num < 600)
+    {
+      dv_bfin_hw_parse (sd, sic, SIC);
+      dv_bfin_hw_parse (sd, pll, PLL);
+      for (i = 7; i < 16; ++i)
+	sim_hw_parse (sd, "/core/bfin_sic > ivg%i ivg%i /core/bfin_cec", i, i);
+    }
+  else
+    {
+      dv_bfin_hw_parse (sd, sec, SEC);
+      for (i = 7; i < 16; ++i)
+	sim_hw_parse (sd, "/core/bfin_sec > ivg%i ivg%i /core/bfin_cec", i, i);
+    }
 
   dma_chan = 0;
   for (i = 0; i < mdata->dmac_count; ++i)
@@ -1592,9 +1685,9 @@ bfin_model_hw_tree_init (SIM_DESC sd, SIM_CPU *cpu)
 	  || !strncmp (dev->dev, "bfin_emac", 9)
 	  || !strncmp (dev->dev, "bfin_sport", 10))
 	{
-	  const char *sint = dev->dev + 5;
-	  sim_hw_parse (sd, "/core/%s > tx   %s_tx   /core/bfin_dmac@%u", dev->dev, sint, dev->dmac);
-	  sim_hw_parse (sd, "/core/%s > rx   %s_rx   /core/bfin_dmac@%u", dev->dev, sint, dev->dmac);
+//	  const char *sint = dev->dev + 5;
+//	  sim_hw_parse (sd, "/core/%s > tx   %s_tx   /core/bfin_dmac@%u", dev->dev, sint, dev->dmac);
+//	  sim_hw_parse (sd, "/core/%s > rx   %s_rx   /core/bfin_dmac@%u", dev->dev, sint, dev->dmac);
 	}
       else if (!strncmp (dev->dev, "bfin_wdog", 9))
 	{
@@ -1620,6 +1713,8 @@ bfin_model_hw_tree_init (SIM_DESC sd, SIM_CPU *cpu)
 
   /* Trigger all the new devices' finish func.  */
   hw_tree_finish (dv_get_device (cpu, "/"));
+
+sim_do_commandf (sd, "hw-list");
 }
 
 #include "bfroms/all.h"
