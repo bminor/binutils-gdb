@@ -1,3 +1,9 @@
+2011-05-18  Rafał Krypa  <r.krypa@samsung.com>
+
+	PR ld/12778
+	* elf32-arm.c (elf32_arm_gc_sweep_hook): Use the computed dynamic
+	reloc pointer.
+
 2011-05-18  Tristan Gingold  <gingold@adacore.com>
 
 	* xcofflink.c (xcoff_link_add_symbols): Handle C_DWARF symbols.

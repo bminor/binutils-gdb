@@ -12025,7 +12025,7 @@ elf32_arm_gc_sweep_hook (bfd *                     abfd,
 	  struct elf_dyn_relocs *p;
 
 	  if (h != NULL)
-	    pp = &((struct elf32_arm_link_hash_entry *) h)->dyn_relocs;
+	    pp = &(eh->dyn_relocs);
 	  else
 	    {
 	      Elf_Internal_Sym *isym;
@@ -12038,7 +12038,7 @@ elf32_arm_gc_sweep_hook (bfd *                     abfd,
 	      if (pp == NULL)
 		return FALSE;
 	    }
-	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
+	  for (; (p = *pp) != NULL; pp = &p->next)
 	    if (p->sec == sec)
 	      {
 		/* Everything must go for SEC.  */
