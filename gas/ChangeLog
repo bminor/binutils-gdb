@@ -1,3 +1,11 @@
+2011-05-18  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-arm.c (s_unreq): Reword warning message to make it
+	easier to translate.
+	* config/tc-ia64.c (md_show_usage): Add note for translators.
+	* configure.in (ALL_LINGUAS): Add "fi".
+	* configure: Regenerate.
+
 2011-05-18  Tristan Gingold  <gingold@adacore.com>
 
 	* config/tc-ppc.h (ppc_tc_sy): Reorder fields.

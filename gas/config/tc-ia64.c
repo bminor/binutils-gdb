@@ -1,6 +1,6 @@
 /* tc-ia64.c -- Assembler for the HP/Intel IA-64 architecture.
    Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007,
-   2008, 2009   Free Software Foundation, Inc.
+   2008, 2009, 2011   Free Software Foundation, Inc.
    Contributed by David Mosberger-Tang <davidm@hpl.hp.com>
 
    This file is part of GAS, the GNU Assembler.
@@ -7001,7 +7001,9 @@ IA-64 options:\n\
 			  unwind directive check (default -munwind-check=warning)\n\
   -mhint.b=[ok|warning|error]\n\
 			  hint.b check (default -mhint.b=error)\n\
-  -x | -xexplicit	  turn on dependency violation checking\n\
+  -x | -xexplicit	  turn on dependency violation checking\n"), stream);
+  /* Note for translators: "automagically" can be translated as "automatically" here.  */
+  fputs (_("\
   -xauto		  automagically remove dependency violations (default)\n\
   -xnone		  turn off dependency violation checking\n\
   -xdebug		  debug dependency violation checker\n\
