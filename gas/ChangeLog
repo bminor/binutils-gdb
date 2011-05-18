@@ -1,5 +1,11 @@
 2011-05-18  Nick Clifton  <nickc@redhat.com>
 
+	PR gas/12754
+	* config/tc-tic30.c (ordinal_names): Allow translation of the
+	ordinal names.
+
+2011-05-18  Nick Clifton  <nickc@redhat.com>
+
 	* config/tc-arm.c (s_unreq): Reword warning message to make it
 	easier to translate.
 	* config/tc-ia64.c (md_show_usage): Add note for translators.
