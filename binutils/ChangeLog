@@ -1,3 +1,10 @@
+2011-05-18  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/12753
+	* nm.c (filter_symbols): Treat unique symbols as global symbols.
+	* doc/binutils.texi (nm): Mention that some lowercase letters
+	actually indicate global symbols.
+
 2011-05-15  Tristan Gingold  <gingold@adacore.com>
 
 	* od-xcoff.c: New file.

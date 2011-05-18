@@ -354,6 +354,7 @@ proc run_dump_test { name {extra_options {}} } {
 	}
 	strings	{ set program strings }
 	elfedit { set program elfedit }
+	nm      { set program nm }
 	default	{
 	    perror "unrecognized program option $opts(PROG) in $file.d"
 	    unresolved $testname
