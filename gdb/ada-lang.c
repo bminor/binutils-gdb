@@ -10783,7 +10783,7 @@ print_it_exception (enum exception_catchpoint_kind ex, struct breakpoint *b)
 		 just replace the exception name by the generic string
 		 "exception" - it will read as "an exception" in the
 		 notification we are about to print.  */
-	      sprintf (exception_name, "exception");
+	      memcpy (exception_name, "exception", sizeof ("exception"));
 	    }
 	  /* In the case of unhandled exception breakpoints, we print
 	     the exception name as "unhandled EXCEPTION_NAME", to make

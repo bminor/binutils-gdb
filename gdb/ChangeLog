@@ -1,3 +1,7 @@
+2011-05-18  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (print_it_exception): Avoid use of sprintf.
+
 2011-05-18  Tom Tromey  <tromey@redhat.com>
 
 	* value.c (value_fn_field): Constify.
