@@ -52,6 +52,7 @@ noinst_PROGRAMS += %D%/run
 
 %C%_SIM_EXTRA_HW_DEVICES = \
 	bfin_cec \
+	bfin_cgu \
 	bfin_ctimer \
 	bfin_dma \
 	bfin_dmac \
