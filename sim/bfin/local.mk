@@ -74,6 +74,7 @@ noinst_PROGRAMS += %D%/run
 	bfin_pll \
 	bfin_ppi \
 	bfin_rtc \
+	bfin_sec \
 	bfin_sic \
 	bfin_spi \
 	bfin_trace \
