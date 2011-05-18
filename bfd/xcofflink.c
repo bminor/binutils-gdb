@@ -1365,11 +1365,12 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 	     If C_FILE or first time, handle special
 
 	     Advance esym, sym_hash, csect_hash ptrs.  */
-	  if (sym.n_sclass == C_FILE)
+	  if (sym.n_sclass == C_FILE || sym.n_sclass == C_DWARF)
 	    csect = NULL;
 	  if (csect != NULL)
 	    *csect_cache = csect;
-	  else if (first_csect == NULL || sym.n_sclass == C_FILE)
+	  else if (first_csect == NULL
+                   || sym.n_sclass == C_FILE || sym.n_sclass == C_DWARF)
 	    *csect_cache = coff_section_from_bfd_index (abfd, sym.n_scnum);
 	  else
 	    *csect_cache = NULL;
@@ -2073,6 +2074,10 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
   /* Make sure that we have seen all the relocs.  */
   for (o = abfd->sections; o != first_csect; o = o->next)
     {
+      /* Debugging sections have no csects.  */
+      if (bfd_get_section_flags (abfd, o) & SEC_DEBUGGING)
+        continue;
+
       /* Reset the section size and the line number count, since the
 	 data is now attached to the csects.  Don't reset the size of
 	 the .debug section, since we need to read it below in
@@ -3009,6 +3014,7 @@ xcoff_sweep (struct bfd_link_info *info)
 		  || o == xcoff_hash_table (info)->loader_section
 		  || o == xcoff_hash_table (info)->linkage_section
 		  || o == xcoff_hash_table (info)->descriptor_section
+                  || (bfd_get_section_flags (sub, o) & SEC_DEBUGGING)
 		  || strcmp (o->name, ".debug") == 0)
 		o->flags |= SEC_MARK;
 	      else
@@ -4930,21 +4936,25 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *flinfo,
 			     this case, but I don't think it's worth it.  */
 			  is = flinfo->internal_syms + r_symndx;
 
-			  name = (_bfd_coff_internal_syment_name
-				  (input_bfd, is, buf));
+                          if (is->n_sclass != C_DWARF)
+                            {
+                              name = (_bfd_coff_internal_syment_name
+                                      (input_bfd, is, buf));
 
-			  if (name == NULL)
-			    return FALSE;
+                              if (name == NULL)
+                                return FALSE;
 
-			  if (! ((*flinfo->info->callbacks->unattached_reloc)
-				 (flinfo->info, name, input_bfd, o,
-				  irel->r_vaddr)))
-			    return FALSE;
+                              if (!(*flinfo->info->callbacks->unattached_reloc)
+                                  (flinfo->info, name, input_bfd, o,
+                                   irel->r_vaddr))
+                                return FALSE;
+                            }
 			}
 		    }
 		}
 
-	      if (xcoff_need_ldrel_p (flinfo->info, irel, h))
+	      if ((o->flags & SEC_DEBUGGING) == 0
+                  && xcoff_need_ldrel_p (flinfo->info, irel, h))
 		{
 		  asection *sec;
 

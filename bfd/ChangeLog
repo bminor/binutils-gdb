@@ -1,5 +1,11 @@
 2011-05-18  Tristan Gingold  <gingold@adacore.com>
 
+	* xcofflink.c (xcoff_link_add_symbols): Handle C_DWARF symbols.
+	(xcoff_sweep): Always keep dwarf sections.
+	(xcoff_link_input_bfd): Handle dwarf symbols and sections.
+
+2011-05-18  Tristan Gingold  <gingold@adacore.com>
+
 	* libxcoff.h (struct xcoff_dwsect_name): New type.
 	(XCOFF_DWSECT_NBR_NAMES): New macro.
 	(xcoff_dwsect_names): Declare.
