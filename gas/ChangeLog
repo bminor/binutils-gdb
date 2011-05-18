@@ -1,3 +1,24 @@
+2011-05-18  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+
+	Backported from mainline
+	2011-03-18  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+
+	* config/tc-s390.c (md_parse_option): Add -march=all option which
+	switches to the highest available CPU.
+
+	2011-04-14  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+
+	* config/tc-s390.c (s390_machine): New prototype.
+	(md_pseudo_table): New pseudo-op .machine.
+	(s390_opcode_hash): Initialize to NULL.
+	(s390_parse_cpu): New function.
+	(md_parse_option): Use s390_parse_cpu.
+	(s390_setup_opcodes): New function.
+	(md_begin): Use s390_setup_opcodes.
+	(s390_machine): New hook handling the new .machine pseudo.
+
+	* doc/c-s390.texi: Document the new pseudo op .machine.
+
 2011-05-13  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	Apply from mainline.

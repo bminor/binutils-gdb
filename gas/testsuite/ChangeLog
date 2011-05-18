@@ -1,3 +1,12 @@
+2011-05-18  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+
+	Backported from mainline
+	2011-04-14  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+
+	* gas/s390/zarch-machine.s: New testcase.
+	* gas/s390/zarch-machine.d: New testcase output.
+	* gas/s390/s390.exp: Execute the new testcase.
+
 2011-05-13  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	Apply from mainline. 
