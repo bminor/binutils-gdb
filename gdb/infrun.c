@@ -1644,8 +1644,10 @@ resume (int step, enum target_signal sig)
   if (debug_infrun)
     fprintf_unfiltered (gdb_stdlog,
                         "infrun: resume (step=%d, signal=%d), "
-			"trap_expected=%d\n",
- 			step, sig, tp->control.trap_expected);
+			"trap_expected=%d, current thread [%s] at %s\n",
+ 			step, sig, tp->control.trap_expected,
+			target_pid_to_str (inferior_ptid),
+			paddress (gdbarch, pc));
 
   /* Normally, by the time we reach `resume', the breakpoints are either
      removed or inserted, as appropriate.  The exception is if we're sitting
@@ -2000,6 +2002,12 @@ prepare_to_proceed (int step)
 
 	  /* Switch back to WAIT_PID thread.  */
 	  switch_to_thread (wait_ptid);
+
+	  if (debug_infrun)
+	    fprintf_unfiltered (gdb_stdlog,
+				"infrun: prepare_to_proceed (step=%d), "
+				"switched to [%s]\n",
+				step, target_pid_to_str (inferior_ptid));
 
 	  /* We return 1 to indicate that there is a breakpoint here,
 	     so we need to step over it before continuing to avoid
