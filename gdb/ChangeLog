@@ -1,3 +1,9 @@
+2011-05-18  Tom Tromey  <tromey@redhat.com>
+
+	* linux-thread-db.c (try_thread_db_load_from_pdir_1): Fix absolute
+	path check.  Use xmalloc and cleanups.
+	(try_thread_db_load_from_dir): Use xmalloc and cleanups.
+
 2011-05-17  Tom Tromey  <tromey@redhat.com>
 
 	* cp-valprint.c (cp_print_value_fields): Catch errors from

@@ -819,29 +819,29 @@ try_thread_db_load (const char *library)
 static int
 try_thread_db_load_from_pdir_1 (struct objfile *obj)
 {
-  char path[PATH_MAX], *cp;
+  struct cleanup *cleanup;
+  char *path, *cp;
+  int result;
 
-  gdb_assert (strlen (obj->name) < sizeof (path));
-  strcpy (path, obj->name);
-  cp = strrchr (path, '/');
-
-  if (cp == NULL)
+  if (obj->name[0] != '/')
     {
       warning (_("Expected absolute pathname for libpthread in the"
-		 " inferior, but got %s."), path);
+		 " inferior, but got %s."), obj->name);
       return 0;
     }
-  else if (cp + 1 + strlen (LIBTHREAD_DB_SO) + 1 > path + sizeof (path))
-    {
-      warning (_("Unexpected: path to libpthread in the inferior is"
-		 " too long: %s"), path);
-      return 0;
-    }
-  else
-    {
-      strcpy (cp + 1, LIBTHREAD_DB_SO);
-      return try_thread_db_load (path);
-    }
+
+  path = xmalloc (strlen (obj->name) + 1 + strlen (LIBTHREAD_DB_SO) + 1);
+  cleanup = make_cleanup (xfree, path);
+
+  strcpy (path, obj->name);
+  cp = strrchr (path, '/');
+  /* This should at minimum hit the first character.  */
+  gdb_assert (cp != NULL);
+  strcpy (cp + 1, LIBTHREAD_DB_SO);
+  result = try_thread_db_load (path);
+
+  do_cleanups (cleanup);
+  return result;
 }
 
 /* Handle $pdir in libthread-db-search-path.
@@ -888,24 +888,20 @@ try_thread_db_load_from_sdir (void)
 static int
 try_thread_db_load_from_dir (const char *dir, size_t dir_len)
 {
-  char path[PATH_MAX];
+  struct cleanup *cleanup;
+  char *path;
+  int result;
 
-  if (dir_len + 1 + strlen (LIBTHREAD_DB_SO) + 1 > sizeof (path))
-    {
-      char *cp = xmalloc (dir_len + 1);
-
-      memcpy (cp, dir, dir_len);
-      cp[dir_len] = '\0';
-      warning (_("libthread-db-search-path component too long,"
-		 " ignored: %s."), cp);
-      xfree (cp);
-      return 0;
-    }
+  path = xmalloc (dir_len + 1 + strlen (LIBTHREAD_DB_SO) + 1);
+  cleanup = make_cleanup (xfree, path);
 
   memcpy (path, dir, dir_len);
   path[dir_len] = '/';
   strcpy (path + dir_len + 1, LIBTHREAD_DB_SO);
-  return try_thread_db_load (path);
+  result = try_thread_db_load (path);
+
+  do_cleanups (cleanup);
+  return result;
 }
 
 /* Search libthread_db_search_path for libthread_db which "agrees"
