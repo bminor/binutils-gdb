@@ -59,6 +59,7 @@ noinst_PROGRAMS += %D%/run
 	bfin_ebiu_amc \
 	bfin_ebiu_ddrc \
 	bfin_ebiu_sdc \
+	bfin_efs \
 	bfin_emac \
 	bfin_eppi \
 	bfin_evt \
