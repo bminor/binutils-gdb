@@ -83,7 +83,7 @@ bfin_uart_poll (struct hw *me, void *data)
 
   uart->handler = NULL;
 
-  lsr = bfin_uart_get_status (me);
+  lsr = bfin_uart_get_status (me, TEMT | THRE);
   if (lsr & DR)
     hw_port_event (me, DV_PORT_RX, 1);
 
@@ -234,7 +234,7 @@ bfin_uart_get_next_byte (struct hw *me, bu16 rbr, bu16 mcr, bool *fresh)
 }
 
 bu16
-bfin_uart_get_status (struct hw *me)
+bfin_uart_get_status (struct hw *me, bu16 txs)
 {
   SIM_DESC sd = hw_system (me);
   struct bfin_uart *uart = hw_data (me);
@@ -246,11 +246,11 @@ bfin_uart_get_status (struct hw *me)
       if (uart->saved_count <= 0)
 	uart->saved_count = sim_io_poll_read (sd, 0/*STDIN*/,
 					      &uart->saved_byte, 1);
-      lsr |= TEMT | THRE | (uart->saved_count > 0 ? DR : 0);
+      lsr |= txs | (uart->saved_count > 0 ? DR : 0);
     }
   else
-    lsr |= (status & DV_SOCKSER_INPUT_EMPTY ? 0 : DR) |
-	   (status & DV_SOCKSER_OUTPUT_EMPTY ? TEMT | THRE : 0);
+    lsr |= ((status & DV_SOCKSER_INPUT_EMPTY) ? 0 : DR) |
+	   ((status & DV_SOCKSER_OUTPUT_EMPTY) ? txs : 0);
 
   return lsr;
 }
@@ -291,7 +291,7 @@ bfin_uart_io_read_buffer (struct hw *me, void *dest,
       break;
     case mmr_offset(lsr):
       /* XXX: Reads are destructive on most parts, but not all ...  */
-      uart->lsr |= bfin_uart_get_status (me);
+      uart->lsr |= bfin_uart_get_status (me, TEMT | THRE);
       dv_store_2 (dest, *valuep);
       uart->lsr = 0;
       break;

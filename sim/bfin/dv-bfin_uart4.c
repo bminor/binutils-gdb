@@ -1,7 +1,7 @@
 /* Blackfin Universal Asynchronous Receiver/Transmitter (UART) model.
-   For "new style" UARTs on BF50x/BF54x parts.
+   For "newer style" UARTs on BF60x parts.
 
-   Copyright (C) 2010-2023 Free Software Foundation, Inc.
+   Copyright (C) 2010-2016 Free Software Foundation, Inc.
    Contributed by Analog Devices, Inc.
 
    This file is part of simulators.
@@ -19,12 +19,11 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-/* This must come before any other includes.  */
-#include "defs.h"
+#include "config.h"
 
 #include "sim-main.h"
 #include "devices.h"
-#include "dv-bfin_uart2.h"
+#include "dv-bfin_uart4.h"
 
 /* XXX: Should we bother emulating the TX/RX FIFOs ?  */
 
@@ -40,31 +39,43 @@ struct bfin_uart
   char saved_byte;
   int saved_count;
 
-  /* Accessed indirectly by ier_{set,clear}.  */
-  bu16 ier;
-
   /* Order after here is important -- matches hardware MMR layout.  */
-  bu16 BFIN_MMR_16(dll);
-  bu16 BFIN_MMR_16(dlh);
-  bu16 BFIN_MMR_16(gctl);
-  bu16 BFIN_MMR_16(lcr);
-  bu16 BFIN_MMR_16(mcr);
-  bu16 BFIN_MMR_16(lsr);
-  bu16 BFIN_MMR_16(msr);
-  bu16 BFIN_MMR_16(scr);
-  bu16 BFIN_MMR_16(ier_set);
-  bu16 BFIN_MMR_16(ier_clear);
-  bu16 BFIN_MMR_16(thr);
-  bu16 BFIN_MMR_16(rbr);
+  bu32 revid;
+  bu32 ctl;
+  bu32 stat;
+  bu32 scr;
+  bu32 clk;
+  bu32 imsk;
+  bu32 imsk_set;
+  bu32 imsk_clr;
+  bu32 rbr;
+  bu32 thr;
+  bu32 taip;
+  bu32 tsr;
+  bu32 rsr;
+  bu32 txcnt;
+  bu32 rxcnt;
 };
-#define mmr_base()      offsetof(struct bfin_uart, dll)
+#define mmr_base()      offsetof(struct bfin_uart, revid)
 #define mmr_offset(mmr) (offsetof(struct bfin_uart, mmr) - mmr_base())
 
 static const char * const mmr_names[] =
 {
-  "UART_DLL", "UART_DLH", "UART_GCTL", "UART_LCR", "UART_MCR", "UART_LSR",
-  "UART_MSR", "UART_SCR", "UART_IER_SET", "UART_IER_CLEAR", "UART_THR",
+  "UART_REVID",
+  "UART_CTL",
+  "UART_STAT",
+  "UART_SCR",
+  "UART_CLK",
+  "UART_IMSK",
+  "UART_IMSK_SET",
+  "UART_IMSK_CLR",
   "UART_RBR",
+  "UART_THR",
+  "UART_TAIP",
+  "UART_TSR",
+  "UART_RSR",
+  "UART_TXCNT",
+  "UART_RXCNT",
 };
 #define mmr_name(off) mmr_names[(off) / 4]
 
@@ -75,53 +86,35 @@ bfin_uart_io_write_buffer (struct hw *me, const void *source,
   struct bfin_uart *uart = hw_data (me);
   bu32 mmr_off;
   bu32 value;
-  bu16 *valuep;
+  bu32 *valuep;
 
-  /* Invalid access mode is higher priority than missing register.  */
-  if (!dv_bfin_mmr_require_16 (me, addr, nr_bytes, true))
-    return 0;
-
-  value = dv_load_2 (source);
+  value = dv_load_4 (source);
   mmr_off = addr - uart->base;
-  valuep = (void *)((uintptr_t)uart + mmr_base() + mmr_off);
+  valuep = (void *)((unsigned long)uart + mmr_base() + mmr_off);
 
   HW_TRACE_WRITE ();
 
-  /* XXX: All MMRs are "8bit" ... what happens to high 8bits ?  */
+  dv_bfin_mmr_require_32 (me, addr, nr_bytes, true);
 
   switch (mmr_off)
     {
     case mmr_offset(thr):
-      uart->thr = bfin_uart_write_byte (me, value, uart->mcr);
-      if (uart->ier & ETBEI)
+      uart->thr = bfin_uart_write_byte (me, value, 0);
+      if (uart->imsk & ETBEI)
 	hw_port_event (me, DV_PORT_TX, 1);
       break;
-    case mmr_offset(ier_set):
-      uart->ier |= value;
+    case mmr_offset(imsk_set):
+      uart->imsk |= value;
       break;
-    case mmr_offset(ier_clear):
-      dv_w1c_2 (&uart->ier, value, -1);
+    case mmr_offset(imsk_clr):
+      dv_w1c_4 (&uart->imsk, value, -1);
       break;
-    case mmr_offset(lsr):
-      dv_w1c_2 (valuep, value, TFI | BI | FE | PE | OE);
-      break;
-    case mmr_offset(rbr):
-      /* XXX: Writes are ignored ?  */
-      break;
-    case mmr_offset(msr):
-      dv_w1c_2 (valuep, value, SCTS);
-      break;
-    case mmr_offset(dll):
-    case mmr_offset(dlh):
-    case mmr_offset(gctl):
-    case mmr_offset(lcr):
-    case mmr_offset(mcr):
-    case mmr_offset(scr):
-      *valuep = value;
+    case mmr_offset(stat):
+      dv_w1c_4 (valuep, value, SCTS | ASTKY | TFI | BI | FE | PE | OE);
       break;
     default:
-      dv_bfin_mmr_invalid (me, addr, nr_bytes, true);
-      return 0;
+      *valuep = value;
+      break;
     }
 
   return nr_bytes;
@@ -133,45 +126,34 @@ bfin_uart_io_read_buffer (struct hw *me, void *dest,
 {
   struct bfin_uart *uart = hw_data (me);
   bu32 mmr_off;
-  bu16 *valuep;
-
-  /* Invalid access mode is higher priority than missing register.  */
-  if (!dv_bfin_mmr_require_16 (me, addr, nr_bytes, false))
-    return 0;
+  bu32 *valuep;
 
   mmr_off = addr - uart->base;
-  valuep = (void *)((uintptr_t)uart + mmr_base() + mmr_off);
+  valuep = (void *)((unsigned long)uart + mmr_base() + mmr_off);
 
   HW_TRACE_READ ();
+
+  dv_bfin_mmr_require_32 (me, addr, nr_bytes, false);
 
   switch (mmr_off)
     {
     case mmr_offset(rbr):
-      uart->rbr = bfin_uart_get_next_byte (me, uart->rbr, uart->mcr, NULL);
-      dv_store_2 (dest, uart->rbr);
+      uart->rbr = bfin_uart_get_next_byte (me, uart->rbr, 0, NULL);
+      dv_store_4 (dest, uart->rbr);
       break;
-    case mmr_offset(ier_set):
-    case mmr_offset(ier_clear):
-      dv_store_2 (dest, uart->ier);
-      bfin_uart_reschedule (me);
+    case mmr_offset(stat):
+      uart->stat &= ~(DR | THRE | TEMT | RO | CTS | RFCS);
+      uart->stat |= bfin_uart_get_status (me, TEMT | THRE);
+      dv_store_4 (dest, *valuep);
       break;
-    case mmr_offset(lsr):
-      uart->lsr &= ~(DR | THRE | TEMT);
-      uart->lsr |= bfin_uart_get_status (me, TEMT | THRE);
-      ATTRIBUTE_FALLTHROUGH;
-    case mmr_offset(thr):
-    case mmr_offset(msr):
-    case mmr_offset(dll):
-    case mmr_offset(dlh):
-    case mmr_offset(gctl):
-    case mmr_offset(lcr):
-    case mmr_offset(mcr):
-    case mmr_offset(scr):
-      dv_store_2 (dest, *valuep);
+    case mmr_offset(imsk):
+    case mmr_offset(imsk_set):
+    case mmr_offset(imsk_clr):
+      dv_store_4 (dest, uart->imsk);
       break;
     default:
-      dv_bfin_mmr_invalid (me, addr, nr_bytes, false);
-      return 0;
+      dv_store_4 (dest, *valuep);
+      break;
     }
 
   return nr_bytes;
@@ -198,8 +180,7 @@ bfin_uart_dma_write_buffer (struct hw *me, const void *source,
 
   ret = bfin_uart_write_buffer (me, source, nr_bytes);
 
-  if (ret == nr_bytes && (uart->ier & ETBEI))
-    hw_port_event (me, DV_PORT_TX, 1);
+  hw_port_event (me, DV_PORT_TX, 1);
 
   return ret;
 }
@@ -231,8 +212,8 @@ attach_bfin_uart_regs (struct hw *me, struct bfin_uart *uart)
 				     &attach_space, &attach_address, me);
   hw_unit_size_to_attach_size (hw_parent (me), &reg.size, &attach_size, me);
 
-  if (attach_size != BFIN_MMR_UART2_SIZE)
-    hw_abort (me, "\"reg\" size must be %#x", BFIN_MMR_UART2_SIZE);
+  if (attach_size != BFIN_MMR_UART4_SIZE)
+    hw_abort (me, "\"reg\" size must be %#x", BFIN_MMR_UART4_SIZE);
 
   hw_attach_address (hw_parent (me),
 		     0, attach_space, attach_address, attach_size, me);
@@ -257,12 +238,14 @@ bfin_uart_finish (struct hw *me)
   attach_bfin_uart_regs (me, uart);
 
   /* Initialize the UART.  */
-  uart->dll = 0x0001;
-  uart->lsr = 0x0060;
+  uart->revid = 0x00000004;
+  uart->stat  = 0x000000A0;
+  uart->clk   = 0x0000FFFF;
+  uart->tsr   = 0x000007FF;
 }
 
-const struct hw_descriptor dv_bfin_uart2_descriptor[] =
+const struct hw_descriptor dv_bfin_uart4_descriptor[] =
 {
-  {"bfin_uart2", bfin_uart_finish,},
+  {"bfin_uart4", bfin_uart_finish,},
   {NULL, NULL},
 };

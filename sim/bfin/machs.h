@@ -82,5 +82,6 @@ extern const SIM_MACH * const bfin_sim_machs[];
 #define BFIN_MMR_WDOG_SIZE		(4 * 3)
 #define BFIN_MMR_UART_SIZE		0x30
 #define BFIN_MMR_UART2_SIZE		0x30
+#define BFIN_MMR_UART4_SIZE		0x30
 
 #endif
