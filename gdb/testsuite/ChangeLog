@@ -1,3 +1,8 @@
+2011-05-18  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/kill-after-signal.c: New file.
+	* gdb.base/kill-after-signal.exp: New file.
+
 2011-05-16  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.ada/start.exp: Call untested with the correct test filename.

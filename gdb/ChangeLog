@@ -1,3 +1,7 @@
+2011-05-18  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* linux-nat.c (kill_callback): Use SIGKILL first.
+
 2011-05-18  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (print_it_exception): Avoid use of sprintf.

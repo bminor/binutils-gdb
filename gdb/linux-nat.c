@@ -3780,6 +3780,18 @@ linux_nat_wait (struct target_ops *ops,
 static int
 kill_callback (struct lwp_info *lp, void *data)
 {
+  /* PTRACE_KILL may resume the inferior.  Send SIGKILL first.  */
+
+  errno = 0;
+  kill (GET_LWP (lp->ptid), SIGKILL);
+  if (debug_linux_nat)
+    fprintf_unfiltered (gdb_stdlog,
+			"KC:  kill (SIGKILL) %s, 0, 0 (%s)\n",
+			target_pid_to_str (lp->ptid),
+			errno ? safe_strerror (errno) : "OK");
+
+  /* Some kernels ignore even SIGKILL for processes under ptrace.  */
+
   errno = 0;
   ptrace (PTRACE_KILL, GET_LWP (lp->ptid), 0, 0);
   if (debug_linux_nat)
