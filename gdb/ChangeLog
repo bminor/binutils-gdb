@@ -1,3 +1,22 @@
+2011-05-18  Tom Tromey  <tromey@redhat.com>
+
+	* value.c (value_fn_field): Constify.
+	* symtab.c (gdb_mangle_name): Constify.
+	* stabsread.c (update_method_name_from_physname): Make 'physname'
+	argument const.
+	* p-typeprint.c (pascal_type_print_method_args): Make arguments
+	const.  Use explicit fputc_filtered loop.
+	(pascal_type_print_base): Constify.
+	* p-lang.h (pascal_type_print_method_args): Update.
+	* linespec.c (add_matching_methods): Constify.
+	(add_constructors): Likewise.
+	* jv-typeprint.c (java_type_print_base): Constify.
+	* gdbtypes.h (struct cplus_struct_type)
+	<fn_fieldlist.fn_field.physname>: Now const.
+	* dwarf2read.c (compute_delayed_physnames): Constify.
+	(dwarf2_add_member_fn): Likewise.
+	* c-typeprint.c (c_type_print_base): Constify.  Use cleanups.
+
 2011-05-18  Pedro Alves  <pedro@codesourcery.com>
 
 	* infrun.c (resume): Mention which is the current thread, and its

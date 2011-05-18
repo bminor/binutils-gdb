@@ -153,7 +153,7 @@ pascal_type_print_derivation_info (struct ui_file *stream, struct type *type)
 /* Print the Pascal method arguments ARGS to the file STREAM.  */
 
 void
-pascal_type_print_method_args (char *physname, char *methodname,
+pascal_type_print_method_args (const char *physname, const char *methodname,
 			       struct ui_file *stream)
 {
   int is_constructor = (strncmp (physname, "__ct__", 6) == 0);
@@ -173,8 +173,7 @@ pascal_type_print_method_args (char *physname, char *methodname,
       while (isdigit (physname[0]))
 	{
 	  int len = 0;
-	  int i;
-	  char storec;
+	  int i, j;
 	  char *argname;
 
 	  while (isdigit (physname[len]))
@@ -183,10 +182,11 @@ pascal_type_print_method_args (char *physname, char *methodname,
 	    }
 	  i = strtol (physname, &argname, 0);
 	  physname += len;
-	  storec = physname[i];
-	  physname[i] = 0;
+
+	  for (j = 0; j < i; ++j)
+	    fputc_filtered (physname[i], stream);
 	  fputs_filtered (physname, stream);
-	  physname[i] = storec;
+
 	  physname += i;
 	  if (physname[0] != 0)
 	    {
@@ -638,7 +638,7 @@ pascal_type_print_base (struct type *type, struct ui_file *stream, int show,
 	         It might work for GNU pascal.  */
 	      for (j = 0; j < len2; j++)
 		{
-		  char *physname = TYPE_FN_FIELD_PHYSNAME (f, j);
+		  const char *physname = TYPE_FN_FIELD_PHYSNAME (f, j);
 
 		  int is_constructor = (strncmp (physname, "__ct__", 6) == 0);
 		  int is_destructor = (strncmp (physname, "__dt__", 6) == 0);

@@ -4609,10 +4609,10 @@ compute_delayed_physnames (struct dwarf2_cu *cu)
   struct delayed_method_info *mi;
   for (i = 0; VEC_iterate (delayed_method_info, cu->method_list, i, mi) ; ++i)
     {
-      char *physname;
+      const char *physname;
       struct fn_fieldlist *fn_flp
 	= &TYPE_FN_FIELDLIST (mi->type, mi->fnfield_index);
-      physname = (char *) dwarf2_physname ((char *) mi->name, mi->die, cu);
+      physname = dwarf2_physname ((char *) mi->name, mi->die, cu);
       fn_flp->fn_fields[mi->index].physname = physname ? physname : "";
     }
 }
@@ -6792,7 +6792,7 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
     }
   else
     {
-      char *physname = (char *) dwarf2_physname (fieldname, die, cu);
+      const char *physname = dwarf2_physname (fieldname, die, cu);
       fnp->physname = physname ? physname : "";
     }
 

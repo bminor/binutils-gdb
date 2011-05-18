@@ -2236,7 +2236,7 @@ rs6000_builtin_type (int typenum, struct objfile *objfile)
 /* Replace *OLD_NAME with the method name portion of PHYSNAME.  */
 
 static void
-update_method_name_from_physname (char **old_name, char *physname)
+update_method_name_from_physname (char **old_name, const char *physname)
 {
   char *method_name;
 

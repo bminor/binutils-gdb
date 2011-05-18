@@ -719,9 +719,6 @@ c_type_print_base (struct type *type, struct ui_file *stream,
   int i;
   int len, real_len;
   int lastval;
-  char *mangled_name;
-  char *demangled_name;
-  char *demangled_no_static;
   enum
     {
       s_none, s_public, s_private, s_protected
@@ -1001,7 +998,10 @@ c_type_print_base (struct type *type, struct ui_file *stream,
 
 	      for (j = 0; j < len2; j++)
 		{
-		  char *physname = TYPE_FN_FIELD_PHYSNAME (f, j);
+		  const char *mangled_name;
+		  char *demangled_name;
+		  struct cleanup *inner_cleanup;
+		  const char *physname = TYPE_FN_FIELD_PHYSNAME (f, j);
 		  int is_full_physname_constructor =
 		    is_constructor_name (physname) 
 		    || is_destructor_name (physname)
@@ -1010,6 +1010,8 @@ c_type_print_base (struct type *type, struct ui_file *stream,
 		  /* Do not print out artificial methods.  */
 		  if (TYPE_FN_FIELD_ARTIFICIAL (f, j))
 		    continue;
+
+		  inner_cleanup = make_cleanup (null_cleanup, NULL);
 
 		  QUIT;
 		  if (TYPE_FN_FIELD_PROTECTED (f, j))
@@ -1064,8 +1066,14 @@ c_type_print_base (struct type *type, struct ui_file *stream,
 		      fputs_filtered (" ", stream);
 		    }
 		  if (TYPE_FN_FIELD_STUB (f, j))
-		    /* Build something we can demangle.  */
-		    mangled_name = gdb_mangle_name (type, i, j);
+		    {
+		      char *tem;
+
+		      /* Build something we can demangle.  */
+		      tem = gdb_mangle_name (type, i, j);
+		      make_cleanup (xfree, tem);
+		      mangled_name = tem;
+		    }
 		  else
 		    mangled_name = TYPE_FN_FIELD_PHYSNAME (f, j);
 
@@ -1107,6 +1115,7 @@ c_type_print_base (struct type *type, struct ui_file *stream,
 		      if (p != NULL)
 			{
 			  int length = p - demangled_no_class;
+			  char *demangled_no_static;
 
 			  demangled_no_static
 			    = (char *) xmalloc (length + 1);
@@ -1121,8 +1130,7 @@ c_type_print_base (struct type *type, struct ui_file *stream,
 		      xfree (demangled_name);
 		    }
 
-		  if (TYPE_FN_FIELD_STUB (f, j))
-		    xfree (mangled_name);
+		  do_cleanups (inner_cleanup);
 
 		  fprintf_filtered (stream, ";\n");
 		}

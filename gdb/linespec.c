@@ -312,20 +312,21 @@ add_matching_methods (int method_counter, struct type *t,
        --field_counter)
     {
       struct fn_field *f;
-      char *phys_name;
+      const char *phys_name;
 
       f = TYPE_FN_FIELDLIST1 (t, method_counter);
 
       if (TYPE_FN_FIELD_STUB (f, field_counter))
 	{
-	  char *tmp_name;
+	  char *tmp_name, *tmp2;
 
 	  tmp_name = gdb_mangle_name (t,
 				      method_counter,
 				      field_counter);
-	  phys_name = alloca (strlen (tmp_name) + 1);
-	  strcpy (phys_name, tmp_name);
+	  tmp2 = alloca (strlen (tmp_name) + 1);
+	  strcpy (tmp2, tmp_name);
 	  xfree (tmp_name);
+	  phys_name = tmp2;
 	}
       else
 	phys_name = TYPE_FN_FIELD_PHYSNAME (f, field_counter);
@@ -373,7 +374,7 @@ add_constructors (int method_counter, struct type *t,
        --field_counter)
     {
       struct fn_field *f;
-      char *phys_name;
+      const char *phys_name;
 
       f = TYPE_FN_FIELDLIST1 (t, method_counter);
 

@@ -773,7 +773,7 @@ struct cplus_struct_type
 	       arguments.  See gdb_mangle_name for the conversion from this
 	       format to the one used if is_stub is clear.  */
 
-	    char *physname;
+	    const char *physname;
 
 	    /* The function type for the method.
 	       (This comment used to say "The return value of the method",

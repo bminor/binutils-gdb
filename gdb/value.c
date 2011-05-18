@@ -2559,7 +2559,7 @@ value_fn_field (struct value **arg1p, struct fn_field *f,
 {
   struct value *v;
   struct type *ftype = TYPE_FN_FIELD_TYPE (f, j);
-  char *physname = TYPE_FN_FIELD_PHYSNAME (f, j);
+  const char *physname = TYPE_FN_FIELD_PHYSNAME (f, j);
   struct symbol *sym;
   struct minimal_symbol *msym;
 
