@@ -1,3 +1,14 @@
+2011-05-18  Tristan Gingold  <gingold@adacore.com>
+
+	* libxcoff.h (struct xcoff_dwsect_name): New type.
+	(XCOFF_DWSECT_NBR_NAMES): New macro.
+	(xcoff_dwsect_names): Declare.
+	* coffcode.h (sec_to_styp_flags): Handle xcoff dwarf sections.
+	(styp_to_sec_flags): Ditto.
+	(coff_new_section_hook): Ditto.
+	(coff_slurp_symbol_table): Handle C_DWARF and C_INFO.
+	* coff-rs6000.c (xcoff_dwsect_name): New variable.
+
 2011-05-17  Tomohiro Kashiwada  <kikairoya@gmail.com>
 
 	PR ld/12759

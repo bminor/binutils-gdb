@@ -35,6 +35,11 @@
 #include "coff/pe.h"
 #endif
 
+#ifdef OBJ_XCOFF
+#include "coff/xcoff.h"
+#include "libxcoff.h"
+#endif
+
 /* This is the assembler for the PowerPC or POWER (RS/6000) chips.  */
 
 /* Tell the main code what the endianness is.  */
@@ -104,6 +109,7 @@ static void ppc_ec (int);
 static void ppc_ef (int);
 static void ppc_es (int);
 static void ppc_csect (int);
+static void ppc_dwsect (int);
 static void ppc_change_csect (symbolS *, offsetT);
 static void ppc_function (int);
 static void ppc_extern (int);
@@ -214,6 +220,7 @@ const pseudo_typeS md_pseudo_table[] =
   { "bi",	ppc_biei,	0 },
   { "bs",	ppc_bs,		0 },
   { "csect",	ppc_csect,	0 },
+  { "dwsect",	ppc_dwsect,	0 },
   { "data",	ppc_section,	'd' },
   { "eb",	ppc_eb,		0 },
   { "ec",	ppc_ec,		0 },
@@ -982,6 +989,28 @@ static symbolS *ppc_current_block;
    cause BFD to set the section number of a symbol to N_DEBUG.  */
 static asection *ppc_coff_debug_section;
 
+/* Structure to set the length field of the dwarf sections.  */
+struct dw_subsection {
+  /* Subsections are simply linked.  */
+  struct dw_subsection *link;
+
+  /* The subsection number.  */
+  subsegT subseg;
+
+  /* Expression to compute the length of the section.  */
+  expressionS end_exp;
+};
+
+static struct dw_section {
+  /* Corresponding section.  */
+  segT sect;
+
+  /* Simply linked list of subsections with a label.  */
+  struct dw_subsection *list_subseg;
+
+  /* The anonymous subsection.  */
+  struct dw_subsection *anon_subseg;
+} dw_sections[XCOFF_DWSECT_NBR_NAMES];
 #endif /* OBJ_XCOFF */
 
 #ifdef TE_PE
@@ -1186,7 +1215,7 @@ md_parse_option (int c, char *arg)
 	  as_bad (_("--nops needs a numeric argument"));
       }
       break;
-      
+
     default:
       return 0;
     }
@@ -3478,6 +3507,158 @@ ppc_change_csect (symbolS *sym, offsetT align)
   ppc_current_csect = sym;
 }
 
+static void
+ppc_change_debug_section (unsigned int idx, subsegT subseg)
+{
+  segT sec;
+  flagword oldflags;
+  const struct xcoff_dwsect_name *dw = &xcoff_dwsect_names[idx];
+
+  sec = subseg_new (dw->name, subseg);
+  oldflags = bfd_get_section_flags (stdoutput, sec);
+  if (oldflags == SEC_NO_FLAGS)
+    {
+      /* Just created section.  */
+      gas_assert (dw_sections[idx].sect == NULL);
+
+      bfd_set_section_flags (stdoutput, sec, SEC_DEBUGGING);
+      bfd_set_section_alignment (stdoutput, sec, 0);
+      dw_sections[idx].sect = sec;
+    }
+
+  /* Not anymore in a csect.  */
+  ppc_current_csect = NULL;
+}
+
+/* The .dwsect pseudo-op.  Defines a DWARF section.  Syntax is:
+     .dwsect flag [, opt-label ]
+*/
+
+static void
+ppc_dwsect (int ignore ATTRIBUTE_UNUSED)
+{
+  offsetT flag;
+  symbolS *opt_label;
+  const struct xcoff_dwsect_name *dw;
+  struct dw_subsection *subseg;
+  struct dw_section *dws;
+  int i;
+
+  /* Find section.  */
+  flag = get_absolute_expression ();
+  dw = NULL;
+  for (i = 0; i < XCOFF_DWSECT_NBR_NAMES; i++)
+    if (xcoff_dwsect_names[i].flag == flag)
+      {
+        dw = &xcoff_dwsect_names[i];
+        break;
+      }
+
+  /* Parse opt-label.  */
+  if (*input_line_pointer == ',')
+    {
+      const char *label;
+      char c;
+
+      ++input_line_pointer;
+
+      label = input_line_pointer;
+      c = get_symbol_end ();
+      opt_label = symbol_find_or_make (label);
+      *input_line_pointer = c;
+    }
+  else
+    opt_label = NULL;
+
+  demand_empty_rest_of_line ();
+
+  /* Return now in case of unknown subsection.  */
+  if (dw == NULL)
+    {
+      as_bad (_("No known dwarf XCOFF section for flag 0x%08x\n"),
+              (unsigned)flag);
+      return;
+    }
+
+  /* Find the subsection.  */
+  dws = &dw_sections[i];
+  subseg = NULL;
+  if (opt_label != NULL && S_IS_DEFINED (opt_label))
+    {
+      /* Sanity check (note that in theory S_GET_SEGMENT mustn't be null).  */
+      if (dws->sect == NULL || S_GET_SEGMENT (opt_label) != dws->sect)
+        {
+          as_bad (_("label %s was not defined in this dwarf section"),
+                  S_GET_NAME (opt_label));
+          subseg = dws->anon_subseg;
+          opt_label = NULL;
+        }
+      else
+        subseg = symbol_get_tc (opt_label)->u.dw;
+    }
+
+  if (subseg != NULL)
+    {
+      /* Switch to the subsection.  */
+      ppc_change_debug_section (i, subseg->subseg);
+    }
+  else
+    {
+      /* Create a new dw subsection.  */
+      subseg = (struct dw_subsection *)
+        xmalloc (sizeof (struct dw_subsection));
+
+      if (opt_label == NULL)
+        {
+          /* The anonymous one.  */
+          subseg->subseg = 0;
+          subseg->link = NULL;
+          dws->anon_subseg = subseg;
+        }
+      else
+        {
+          /* A named one.  */
+          if (dws->list_subseg != NULL)
+            subseg->subseg = dws->list_subseg->subseg + 1;
+          else
+            subseg->subseg = 1;
+
+          subseg->link = dws->list_subseg;
+          dws->list_subseg = subseg;
+          symbol_get_tc (opt_label)->u.dw = subseg;
+        }
+
+      ppc_change_debug_section (i, subseg->subseg);
+
+      if (dw->def_size)
+        {
+          /* Add the length field.  */
+          expressionS *exp = &subseg->end_exp;
+          int sz;
+
+          if (opt_label != NULL)
+            symbol_set_value_now (opt_label);
+
+          /* Add the length field.  Note that according to the AIX assembler
+             manual, the size of the length field is 4 for powerpc32 but
+             12 for powerpc64.  */
+          if (ppc_obj64)
+            {
+              /* Write the 64bit marker.  */
+              md_number_to_chars (frag_more (4), -1, 4);
+            }
+
+          exp->X_op = O_subtract;
+          exp->X_op_symbol = symbol_temp_new_now ();
+          exp->X_add_symbol = symbol_temp_make ();
+
+          sz = ppc_obj64 ? 8 : 4;
+          exp->X_add_number = -sz;
+          emit_expr (exp, sz);
+        }
+    }
+}
+
 /* This function handles the .text and .data pseudo-ops.  These
    pseudo-ops aren't really used by XCOFF; we implement them for the
    convenience of people who aren't used to XCOFF.  */
@@ -3865,11 +4046,9 @@ ppc_function (int ignore ATTRIBUTE_UNUSED)
 	    {
 	      /* The fifth argument is the function size.  */
 	      ++input_line_pointer;
-	      symbol_get_tc (ext_sym)->size = symbol_new ("L0\001",
-							  absolute_section,
-							  (valueT) 0,
-							  &zero_address_frag);
-	      pseudo_set (symbol_get_tc (ext_sym)->size);
+	      symbol_get_tc (ext_sym)->u.size = symbol_new
+                ("L0\001", absolute_section,(valueT) 0, &zero_address_frag);
+	      pseudo_set (symbol_get_tc (ext_sym)->u.size);
 	    }
 	}
     }
@@ -4229,6 +4408,33 @@ ppc_vbyte (int dummy ATTRIBUTE_UNUSED)
 
   ++input_line_pointer;
   cons (byte_count);
+}
+
+void
+ppc_xcoff_end (void)
+{
+  int i;
+
+  for (i = 0; i < XCOFF_DWSECT_NBR_NAMES; i++)
+    {
+      struct dw_section *dws = &dw_sections[i];
+      struct dw_subsection *dwss;
+
+      if (dws->anon_subseg)
+        {
+          dwss = dws->anon_subseg;
+          dwss->link = dws->list_subseg;
+        }
+      else
+        dwss = dws->list_subseg;
+
+      for (; dwss != NULL; dwss = dwss->link)
+        if (dwss->end_exp.X_add_symbol != NULL)
+          {
+            subseg_set (dws->sect, dwss->subseg);
+            symbol_set_value_now (dwss->end_exp.X_add_symbol);
+          }
+    }
 }
 
 #endif /* OBJ_XCOFF */
@@ -5057,7 +5263,8 @@ ppc_symbol_new_hook (symbolS *sym)
   tc->real_name = NULL;
   tc->subseg = 0;
   tc->align = 0;
-  tc->size = NULL;
+  tc->u.size = NULL;
+  tc->u.dw = NULL;
   tc->within = NULL;
 
   if (ppc_stab_symbol)
@@ -5215,11 +5422,11 @@ ppc_frob_symbol (symbolS *sym)
       if (ppc_last_function != (symbolS *) NULL)
 	as_bad (_("two .function pseudo-ops with no intervening .ef"));
       ppc_last_function = sym;
-      if (symbol_get_tc (sym)->size != (symbolS *) NULL)
+      if (symbol_get_tc (sym)->u.size != (symbolS *) NULL)
 	{
-	  resolve_symbol_value (symbol_get_tc (sym)->size);
+	  resolve_symbol_value (symbol_get_tc (sym)->u.size);
 	  SA_SET_SYM_FSIZE (sym,
-			    (long) S_GET_VALUE (symbol_get_tc (sym)->size));
+			    (long) S_GET_VALUE (symbol_get_tc (sym)->u.size));
 	}
     }
   else if (S_GET_STORAGE_CLASS (sym) == C_FCN
@@ -5486,6 +5693,10 @@ ppc_frob_section (asection *sec)
 {
   static bfd_vma vma = 0;
 
+  /* Dwarf sections start at 0.  */
+  if (bfd_get_section_flags (NULL, sec) & SEC_DEBUGGING)
+    return;
+
   vma = md_section_align (sec, vma);
   bfd_set_section_vma (stdoutput, sec, vma);
   vma += bfd_section_size (stdoutput, sec);
@@ -5580,6 +5791,10 @@ ppc_fix_adjustable (fixS *fix)
 
   if (symseg == absolute_section)
     return 0;
+
+  /* Always adjust symbols in debugging sections.  */
+  if (bfd_get_section_flags (stdoutput, symseg) & SEC_DEBUGGING)
+    return 1;
 
   if (ppc_toc_csect != (symbolS *) NULL
       && fix->fx_addsy != ppc_toc_csect

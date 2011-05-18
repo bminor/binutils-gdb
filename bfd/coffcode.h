@@ -581,6 +581,17 @@ sec_to_styp_flags (const char *sec_name, flagword sec_flags)
     {
       styp_flags = STYP_TYPCHK;
     }
+  else if (sec_flags & SEC_DEBUGGING)
+    {
+      int i;
+
+      for (i = 0; i < XCOFF_DWSECT_NBR_NAMES; i++)
+        if (!strcmp (sec_name, xcoff_dwsect_names[i].name))
+          {
+            styp_flags = STYP_DWARF | xcoff_dwsect_names[i].flag;
+            break;
+          }
+    }
 #endif
   /* Try and figure out what it should be */
   else if (sec_flags & SEC_CODE)
@@ -776,6 +787,10 @@ styp_to_sec_flags (bfd *abfd ATTRIBUTE_UNUSED,
     }
   else if (styp_flags & STYP_PAD)
     sec_flags = 0;
+#ifdef RS6000COFF_C
+  else if (styp_flags & STYP_DWARF)
+    sec_flags |= SEC_DEBUGGING;
+#endif
   else if (strcmp (name, _TEXT) == 0)
     {
       if (sec_flags & SEC_NEVER_LOAD)
@@ -1717,6 +1732,7 @@ coff_new_section_hook (bfd * abfd, asection * section)
 {
   combined_entry_type *native;
   bfd_size_type amt;
+  unsigned char sclass = C_STAT;
 
   section->alignment_power = COFF_DEFAULT_SECTION_ALIGNMENT_POWER;
 
@@ -1724,9 +1740,22 @@ coff_new_section_hook (bfd * abfd, asection * section)
   if (bfd_xcoff_text_align_power (abfd) != 0
       && strcmp (bfd_get_section_name (abfd, section), ".text") == 0)
     section->alignment_power = bfd_xcoff_text_align_power (abfd);
-  if (bfd_xcoff_data_align_power (abfd) != 0
+  else if (bfd_xcoff_data_align_power (abfd) != 0
       && strcmp (bfd_get_section_name (abfd, section), ".data") == 0)
     section->alignment_power = bfd_xcoff_data_align_power (abfd);
+  else
+    {
+      int i;
+
+      for (i = 0; i < XCOFF_DWSECT_NBR_NAMES; i++)
+        if (strcmp (bfd_get_section_name (abfd, section),
+                    xcoff_dwsect_names[i].name) == 0)
+          {
+            section->alignment_power = 0;
+            sclass = C_DWARF;
+            break;
+          }
+    }
 #endif
 
   /* Set up the section symbol.  */
@@ -1750,7 +1779,7 @@ coff_new_section_hook (bfd * abfd, asection * section)
      for n_numaux is already correct.  */
 
   native->u.syment.n_type = T_NULL;
-  native->u.syment.n_sclass = C_STAT;
+  native->u.syment.n_sclass = sclass;
 
   coffsymbol (section->symbol)->native = native;
 
@@ -4754,6 +4783,10 @@ coff_slurp_symbol_table (bfd * abfd)
 	    case C_THUMBSTAT:    /* Thumb static.  */
 	    case C_THUMBLABEL:   /* Thumb label.  */
 	    case C_THUMBSTATFUNC:/* Thumb static function.  */
+#endif
+#ifdef RS6000COFF_C
+            case C_DWARF:	 /* A label in a dwarf section.  */
+            case C_INFO:	 /* A label in a comment section.  */
 #endif
 	    case C_LABEL:	 /* Label.  */
 	      if (src->u.syment.n_scnum == N_DEBUG)

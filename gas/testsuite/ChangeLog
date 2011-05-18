@@ -1,3 +1,10 @@
+2011-05-18  Tristan Gingold  <gingold@adacore.com>
+
+	* gas/ppc/xcoff-dwsect-1-32.d: New test.
+	* gas/ppc/xcoff-dwsect-1-64.d: Ditto.
+	* gas/ppc/xcoff-dwsect-1.s: New file.
+	* gas/ppc/aix.exp (do_align_test): Add tests.
+
 2011-05-16  Hans-Peter Nilsson  <hp@axis.com>
 
 	* gas/cris/rd-brokw-pic-1.d, gas/cris/rd-brokw-pic-2.d,

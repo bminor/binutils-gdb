@@ -1,3 +1,25 @@
+2011-05-18  Tristan Gingold  <gingold@adacore.com>
+
+	* config/tc-ppc.h (ppc_tc_sy): Reorder fields.
+	Put size into an union with dw.
+	(OBJ_COPY_SYMBOL_ATTRIBUTES): Adjust.
+	(ppc_xcoff_end): Declare.
+	(md_end): Define.
+	* config/tc-ppc.c: Add includes for xcoff.
+	(ppc_dwsect): New function.
+	(md_pseudo_table): Add dwsect.
+	(struct dw_subsection): New.
+	(dw_sections): New.
+	(ppc_change_debug_section): New function.
+	(ppc_xcoff_end): Ditto.
+	(ppc_function): Adjust for ppc_tc_sy.
+	(ppc_symbol_new_hook): Ditto.
+	(ppc_frob_symbol): Ditto.
+	(ppc_frob_section): Do not set vma for debug sections.
+	(ppc_fix_adjustable): Return true for debug sections.
+	* config/obj-coff.c: Add includes for xcoff.
+	(coff_frob_section): Handle dwarf section.
+
 2011-05-17  Nick Clifton  <nickc@redhat.com>
 
 	* po/fi.po: New Finnish translation.

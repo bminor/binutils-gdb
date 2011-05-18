@@ -3862,6 +3862,18 @@ static unsigned long xcoff_glink_code[9] =
     0x00000000,	/* traceback table */
   };
 
+/* Table to convert DWARF flags to section names.  */
+
+const struct xcoff_dwsect_name xcoff_dwsect_names[] = {
+  { SSUBTYP_DWINFO,  ".dwinfo",   TRUE },
+  { SSUBTYP_DWLINE,  ".dwline",   TRUE },
+  { SSUBTYP_DWPBNMS, ".dwpbnms",  TRUE },
+  { SSUBTYP_DWPBTYP, ".dwpbtyp",  TRUE },
+  { SSUBTYP_DWARNGE, ".dwarnge",  TRUE },
+  { SSUBTYP_DWABREV, ".dwabrev",  FALSE },
+  { SSUBTYP_DWSTR,   ".dwstr",    TRUE },
+  { SSUBTYP_DWRNGES, ".dwrnges",  TRUE }
+};
 
 static const struct xcoff_backend_data_rec bfd_xcoff_backend_data =
   {
