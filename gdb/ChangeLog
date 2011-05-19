@@ -1,5 +1,9 @@
 2011-05-19  Hui Zhu  <teawater@gmail.com>
 
+	* tracepoint.c (tfile_trace_find): Return directly when num is -1.
+
+2011-05-19  Hui Zhu  <teawater@gmail.com>
+
 	* xcoffread.c (read_xcoff_symtab): Initialize fcn_aux_saved.
 
 2011-05-18  Tom Tromey  <tromey@redhat.com>

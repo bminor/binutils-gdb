@@ -3815,6 +3815,12 @@ tfile_trace_find (enum trace_find_type type, int num,
      first.  */
   if (type != tfind_number)
     set_tfile_traceframe ();
+  else if (num == -1)
+    {
+      if (tpp)
+        *tpp = -1;
+      return -1;
+    }
 
   lseek (trace_fd, trace_frames_offset, SEEK_SET);
   offset = trace_frames_offset;
