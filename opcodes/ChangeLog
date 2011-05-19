@@ -1,3 +1,8 @@
+2011-05-19  Nick Clifton  <nickc@redhat.com>
+
+	* v850-opc.c (cmpf.[sd]): Reverse the order of the reg1 and reg2
+	operands.
+
 2011-05-10  Quentin Neill  <quentin.neill@amd.com>
 
 	* i386-gen.c (cpu_flag_init): Add new CPU_BDVER2_FLAGS.
