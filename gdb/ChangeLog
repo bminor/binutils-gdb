@@ -1,3 +1,7 @@
+2011-05-19  Matt Rice  <ratmice@gmail.com>
+
+        * breakpoint.c (bpstat_do_actions_1): Call prevent_dont_repeat.
+
 2011-05-19  Hui Zhu  <teawater@gmail.com>
 
 	* tracepoint.c (tfile_trace_find): Return directly when num is -1.

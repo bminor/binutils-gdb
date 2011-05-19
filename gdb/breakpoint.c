@@ -3220,6 +3220,8 @@ bpstat_do_actions_1 (bpstat *bsp)
   executing_breakpoint_commands = 1;
   old_chain = make_cleanup (cleanup_executing_breakpoints, 0);
 
+  prevent_dont_repeat ();
+
   /* This pointer will iterate over the list of bpstat's.  */
   bs = *bsp;
 
