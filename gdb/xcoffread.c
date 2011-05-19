@@ -961,7 +961,7 @@ read_xcoff_symtab (struct partial_symtab *pst)
   struct coff_symbol fcn_stab_saved = { 0 };
 
   /* fcn_cs_saved is global because process_xcoff_symbol needs it.  */
-  union internal_auxent fcn_aux_saved;
+  union internal_auxent fcn_aux_saved = main_aux;
   struct context_stack *new;
 
   char *filestring = " _start_ ";	/* Name of the current file.  */
