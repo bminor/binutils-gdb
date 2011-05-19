@@ -100,7 +100,7 @@ python_on_resume (ptid_t ptid)
 {
   struct cleanup *cleanup;
 
-  cleanup = ensure_python_env (get_current_arch (), current_language);
+  cleanup = ensure_python_env (target_gdbarch, current_language);
 
   if (emit_continue_event (ptid) < 0)
     gdbpy_print_stack ();
@@ -116,7 +116,7 @@ python_inferior_exit (struct inferior *inf)
   ptid_t ptidp;
   struct target_waitstatus status;
 
-  cleanup = ensure_python_env (get_current_arch (), current_language);
+  cleanup = ensure_python_env (target_gdbarch, current_language);
 
   get_last_target_status (&ptidp, &status);
 
