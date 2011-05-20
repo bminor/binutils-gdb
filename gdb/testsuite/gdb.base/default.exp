@@ -601,8 +601,8 @@ gdb_test "show confirm" "Whether to confirm potentially dangerous operations is 
 # This is tricker as there are multiple internal convenience vars and we
 # can't assume any particular order.
 gdb_test_list_exact "show convenience" "show convenience" \
-    {[^\r\n]+[\r\n]+} \
-    {[^\r\n]+} \
+    "\[^\r\n\]+\[\r\n\]+" \
+    "\[^\r\n\]+" \
     { \
 	{$_sdata = void} \
 	{$_siginfo = void} \

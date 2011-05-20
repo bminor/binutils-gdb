@@ -1099,8 +1099,8 @@ proc gdb_test_exact { args } {
 # of text per element and then strip trailing \r\n's.
 # Example:
 # gdb_test_list_exact "foo" "bar" \
-#     {[^\r\n]+[\r\n]+} \
-#     {[^\r\n]+} \
+#    "\[^\r\n\]+\[\r\n\]+" \
+#    "\[^\r\n\]+" \
 #     { \
 #	{expected result 1} \
 #	{expected result 2} \

@@ -1,3 +1,10 @@
+2011-05-20  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* lib/gdb.exp (gdb_test_list_exact): Suggest use of double
+	quote pattern to avoid problems with Cygwin/mingw expect versions.
+	* gdb.base/default.exp (show convenience): Use double
+	quote pattern for regular expressions.
+
 2011-05-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix -readnow for -gdwarf-4 unused type units.
