@@ -1,5 +1,19 @@
 2011-05-20  Pedro Alves  <pedro@codesourcery.com>
 
+	* infcmd.c: Include "inf-loop.h".
+	(step_once): When stepping into an inline subroutine, pretend the
+	target has run.  If the target can async, switch the inferior
+	event loop to INF_EXEC_COMPLETE.
+	* inferior.h (user_visible_resume_ptid): Declare.
+	* infrun.c (user_visible_resume_ptid): New function, factored out
+	from `resume'.
+	(resume): Use it.
+	* mi/mi-main.c (mi_execute_async_cli_command): Remove assertion
+	that the current thread is running.  Merge async and sync
+	branches.
+
+2011-05-20  Pedro Alves  <pedro@codesourcery.com>
+
 	* infcmd.c (step_1): Simplify synchronous case.
 
 2011-05-20  Pedro Alves  <pedro@codesourcery.com>

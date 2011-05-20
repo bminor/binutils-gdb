@@ -1601,6 +1601,45 @@ maybe_software_singlestep (struct gdbarch *gdbarch, CORE_ADDR pc)
   return hw_step;
 }
 
+/* Return a ptid representing the set of threads that we will proceed,
+   in the perspective of the user/frontend.  We may actually resume
+   fewer threads at first, e.g., if a thread is stopped at a
+   breakpoint that needs stepping-off, but that should be visible to
+   the user/frontend, and neither should the frontend/user be allowed
+   to proceed any of the threads that happen to be stopped at for
+   internal run control handling, if a previous command wanted them
+   resumed.  */
+
+ptid_t
+user_visible_resume_ptid (int step)
+{
+  /* By default, resume all threads of all processes.  */
+  ptid_t resume_ptid = RESUME_ALL;
+
+  /* Maybe resume only all threads of the current process.  */
+  if (!sched_multi && target_supports_multi_process ())
+    {
+      resume_ptid = pid_to_ptid (ptid_get_pid (inferior_ptid));
+    }
+
+  /* Maybe resume a single thread after all.  */
+  if (non_stop)
+    {
+      /* With non-stop mode on, threads are always handled
+	 individually.  */
+      resume_ptid = inferior_ptid;
+    }
+  else if ((scheduler_mode == schedlock_on)
+	   || (scheduler_mode == schedlock_step
+	       && (step || singlestep_breakpoints_inserted_p)))
+    {
+      /* User-settable 'scheduler' mode requires solo thread resume.  */
+      resume_ptid = inferior_ptid;
+    }
+
+  return resume_ptid;
+}
+
 /* Resume the inferior, but allow a QUIT.  This is useful if the user
    wants to interrupt some lengthy single-stepping operation
    (for child processes, the SIGINT goes to the inferior, and so
@@ -1762,15 +1801,7 @@ a command like `return' or `jump' to continue execution."));
       /* Decide the set of threads to ask the target to resume.  Start
 	 by assuming everything will be resumed, than narrow the set
 	 by applying increasingly restricting conditions.  */
-
-      /* By default, resume all threads of all processes.  */
-      resume_ptid = RESUME_ALL;
-
-      /* Maybe resume only all threads of the current process.  */
-      if (!sched_multi && target_supports_multi_process ())
-	{
-	  resume_ptid = pid_to_ptid (ptid_get_pid (inferior_ptid));
-	}
+      resume_ptid = user_visible_resume_ptid (step);
 
       /* Maybe resume a single thread after all.  */
       if (singlestep_breakpoints_inserted_p
@@ -1802,19 +1833,6 @@ a command like `return' or `jump' to continue execution."));
 	     doing this, not just the one being stepped over, so if we
 	     let other threads run, we can actually miss any
 	     breakpoint, not just the one at PC.  */
-	  resume_ptid = inferior_ptid;
-	}
-      else if (non_stop)
-	{
-	  /* With non-stop mode on, threads are always handled
-	     individually.  */
-	  resume_ptid = inferior_ptid;
-	}
-      else if ((scheduler_mode == schedlock_on)
-	       || (scheduler_mode == schedlock_step
-		   && (step || singlestep_breakpoints_inserted_p)))
-	{
-	  /* User-settable 'scheduler' mode requires solo thread resume.  */
 	  resume_ptid = inferior_ptid;
 	}
 

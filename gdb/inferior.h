@@ -188,6 +188,8 @@ extern void reopen_exec_file (void);
 
 extern void resume (int, enum target_signal);
 
+extern ptid_t user_visible_resume_ptid (int step);
+
 /* From misc files */
 
 extern void default_print_registers_info (struct gdbarch *gdbarch,

@@ -55,6 +55,7 @@
 #include "valprint.h"
 #include "inline-frame.h"
 #include "tracepoint.h"
+#include "inf-loop.h"
 
 /* Functions exported for general use, in inferior.h: */
 
@@ -994,12 +995,23 @@ step_once (int skip_subroutines, int single_inst, int count, int thread)
 	  if (!skip_subroutines && !single_inst
 	      && inline_skipped_frames (inferior_ptid))
 	    {
+	      ptid_t resume_ptid;
+
+	      /* Pretend that we've ran.  */
+	      resume_ptid = user_visible_resume_ptid (1);
+	      set_running (resume_ptid, 1);
+
 	      step_into_inline_frame (inferior_ptid);
 	      if (count > 1)
 		step_once (skip_subroutines, single_inst, count - 1, thread);
 	      else
-		/* Pretend that we've stopped.  */
-		normal_stop ();
+		{
+		  /* Pretend that we've stopped.  */
+		  normal_stop ();
+
+		  if (target_can_async_p ())
+		    inferior_event_handler (INF_EXEC_COMPLETE, NULL);
+		}
 	      return;
 	    }
 
