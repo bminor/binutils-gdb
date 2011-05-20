@@ -142,6 +142,9 @@ typedef struct
      instruction, whereas a non-constant represents a DP-relative
      value counting in the appropriate units).  */
   bfd_boolean fix_adda;
+  /* The symbol to be subtracted in case of a PCR_H16 or PCR_L16
+     reloc.  */
+  symbolS *fix_subsy;
 } tic6x_fix_info;
 #define TC_FIX_TYPE tic6x_fix_info
 #define TC_INIT_FIX_DATA(fixP) tic6x_init_fix_data (fixP)

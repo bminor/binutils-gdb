@@ -528,8 +528,32 @@ static reloc_howto_type elf32_tic6x_howto_table[] =
 	 0,			/* src_mask */
 	 0xffffffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
-  EMPTY_HOWTO (29),
-  EMPTY_HOWTO (30),
+  HOWTO (R_C6000_PCR_H16,	/* type */
+	 16,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 TRUE,			/* pc_relative */
+	 7,			/* bitpos */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_C6000_PCR_H16",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0x007fff80,		/* dst_mask */
+	 TRUE),			/* pcrel_offset */
+  HOWTO (R_C6000_PCR_L16,	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 TRUE,			/* pc_relative */
+	 7,			/* bitpos */
+	 complain_overflow_dont,/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_C6000_PCR_L16",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0x007fff80,		/* dst_mask */
+	 TRUE),			/* pcrel_offset */
   EMPTY_HOWTO (31),
   EMPTY_HOWTO (32),
   EMPTY_HOWTO (33),
@@ -1112,8 +1136,8 @@ static reloc_howto_type elf32_tic6x_howto_table_rel[] =
 	 0,			/* src_mask */
 	 0xffffffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
-  EMPTY_HOWTO (29),
-  EMPTY_HOWTO (30),
+  EMPTY_HOWTO (R_C6000_PCR_H16),
+  EMPTY_HOWTO (R_C6000_PCR_L16),
   EMPTY_HOWTO (31),
   EMPTY_HOWTO (32),
   EMPTY_HOWTO (33),
@@ -2264,7 +2288,7 @@ elf32_tic6x_relocate_section (bfd *output_bfd,
       Elf_Internal_Sym *sym;
       asection *sec;
       struct elf_link_hash_entry *h;
-      bfd_vma off, relocation;
+      bfd_vma off, off2, relocation;
       bfd_boolean unresolved_reloc;
       bfd_reloc_status_type r;
       struct bfd_link_hash_entry *sbh;
@@ -2376,6 +2400,20 @@ elf32_tic6x_relocate_section (bfd *output_bfd,
 			 + input_section->output_offset
 			 + rel->r_offset) & 0x1f;
 	  unresolved_reloc = FALSE;
+	  break;
+
+	case R_C6000_PCR_H16:
+	case R_C6000_PCR_L16:
+	  off = (input_section->output_section->vma
+		 + input_section->output_offset
+		 + rel->r_offset);
+	  /* These must be calculated as R = S - FP(FP(PC) - A).
+	     PC, here, is the value we just computed in OFF.  RELOCATION
+	     has the address of S + A. */
+	  relocation -= rel->r_addend;
+	  off2 = ((off & ~(bfd_vma)0x1f) - rel->r_addend) & (bfd_vma)~0x1f;
+	  off2 = relocation - off2;
+	  relocation = off + off2;
 	  break;
 
 	case R_C6000_DSBT_INDEX:

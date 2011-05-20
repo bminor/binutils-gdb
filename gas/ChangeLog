@@ -1,3 +1,13 @@
+2011-05-20  Bernd Schmidt  <bernds@codesourcery.com>
+
+	* config/tc-tic6x.c (tic6x_operators): Add "pcr_offset".
+	(tic6x_parse_name): Handle it.
+	(tic6x_fix_new_exp): Handle O_pcr_offset.
+	(tic6x_fix_adjustable): Return 0 for the new relocs.
+	(md_apply_fix): Handle them.
+	(tc_gen_reloc): Likewise.
+	* config/tc-tic6x.h (tic6x_fix_info): Add a fix_subsy member.
+
 2011-05-18  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/12754

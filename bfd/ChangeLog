@@ -1,3 +1,9 @@
+2011-05-20  Bernd Schmidt  <bernds@codesourcery.com>
+
+	* elf32-tic6x.c (elf32_tic6x_howto_table): Add entries for
+	R_C6000_PCR_H16 and R_C6000_PCR_L16.
+	(elf32_tic6x_relocate_section): Handle them.
+
 2011-05-18  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/12761

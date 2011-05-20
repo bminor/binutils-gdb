@@ -1,3 +1,12 @@
+2011-05-20  Bernd Schmidt  <bernds@codesourcery.com>
+
+	* gas/tic6x/pcr-relocs.d: New test.
+	* gas/tic6x/pcr-relocs.s: New test.
+	* gas/tic6x/pcr-relocs-undef.d: New test.
+	* gas/tic6x/pcr-relocs-undef.s: New test.
+	* gas/tic6x/reloc-bad-2.s: Update for pcr_offset.
+	* gas/tic6x/reloc-bad-2.l: Update for pcr_offset.
+
 2011-05-18  Nick Clifton  <nickc@redhat.com>
 
 	* gas/arm/req.l: Updated expected warning message.

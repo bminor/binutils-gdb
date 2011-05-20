@@ -1738,6 +1738,8 @@ static const tic6x_operator_table tic6x_operators[] = {
   { "dpr_hword", O_dpr_hword },
 #define O_dpr_word O_md6
   { "dpr_word", O_dpr_word },
+#define O_pcr_offset O_md7
+  { "pcr_offset", O_pcr_offset }
 };
 
 /* Parse a name in some machine-specific way.  Used on C6X to handle
@@ -1752,7 +1754,7 @@ tic6x_parse_name (const char *name, expressionS *exprP,
   const char *inner_name;
   unsigned int i;
   operatorT op = O_illegal;
-  symbolS *sym;
+  symbolS *sym, *op_sym = NULL;
 
   if (*name != '$')
     return 0;
@@ -1791,6 +1793,37 @@ tic6x_parse_name (const char *name, expressionS *exprP,
   name_end = p;
   skip_whitespace (p);
 
+  if (op == O_pcr_offset)
+    {
+      char *op_name_start, *op_name_end;
+
+      if (*p != ',')
+	{
+	  *input_line_pointer = 0;
+	  return 0;
+	}
+      p++;
+      skip_whitespace (p);
+
+      if (!is_name_beginner (*p))
+	{
+	  *input_line_pointer = 0;
+	  return 0;
+	}
+
+      op_name_start = p;
+      p++;
+      while (is_part_of_name (*p))
+	p++;
+      op_name_end = p;
+      skip_whitespace (p);
+
+      c = *op_name_end;
+      *op_name_end = 0;
+      op_sym = symbol_find_or_make (op_name_start);
+      *op_name_end = c;
+    }
+
   if (*p != ')')
     {
       *input_line_pointer = 0;
@@ -1815,7 +1848,7 @@ tic6x_parse_name (const char *name, expressionS *exprP,
   exprP->X_op = op;
   exprP->X_add_symbol = sym;
   exprP->X_add_number = 0;
-  exprP->X_op_symbol = NULL;
+  exprP->X_op_symbol = op_sym;
   exprP->X_md = 0;
 
   return 1;
@@ -1833,6 +1866,7 @@ tic6x_fix_new_exp (fragS *frag, int where, int size, expressionS *exp,
 		   bfd_boolean fix_adda)
 {
   bfd_reloc_code_real_type new_reloc = BFD_RELOC_UNUSED;
+  symbolS *subsy = NULL;
   fixS *fix;
 
   switch (exp->X_op)
@@ -1935,6 +1969,25 @@ tic6x_fix_new_exp (fragS *frag, int where, int size, expressionS *exp,
 	}
       break;
 
+    case O_pcr_offset:
+      subsy = exp->X_op_symbol;
+      switch (r_type)
+	{
+	case BFD_RELOC_C6000_ABS_S16:
+	case BFD_RELOC_C6000_ABS_L16:
+	  new_reloc = BFD_RELOC_C6000_PCR_L16;
+	  break;
+
+	case BFD_RELOC_C6000_ABS_H16:
+	  new_reloc = BFD_RELOC_C6000_PCR_H16;
+	  break;
+
+	default:
+	  as_bad (_("$PCR_OFFSET not supported in this context"));
+	  return;
+	}
+      break;
+
     case O_symbol:
       break;
 
@@ -1952,6 +2005,7 @@ tic6x_fix_new_exp (fragS *frag, int where, int size, expressionS *exp,
   else
     fix = fix_new (frag, where, size, exp->X_add_symbol, exp->X_add_number,
 		   pcrel, new_reloc);
+  fix->tc_fix_data.fix_subsy = subsy;
   fix->tc_fix_data.fix_adda = fix_adda;
 }
 
@@ -1991,6 +2045,7 @@ void
 tic6x_init_fix_data (fixS *fixP)
 {
   fixP->tc_fix_data.fix_adda = FALSE;
+  fixP->tc_fix_data.fix_subsy = NULL;
 }
 
 /* Return true if the fix can be handled by GAS, false if it must
@@ -2011,6 +2066,10 @@ tic6x_fix_adjustable (fixS *fixP)
     case BFD_RELOC_C6000_PREL31:
       return 0;
 
+    case BFD_RELOC_C6000_PCR_H16:
+    case BFD_RELOC_C6000_PCR_L16:
+      return 0;
+      
     default:
       return 1;
     }
@@ -3823,6 +3882,19 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	abort ();
       break;
 
+    case BFD_RELOC_C6000_PCR_H16:
+    case BFD_RELOC_C6000_PCR_L16:
+      if (fixP->fx_done || !seg->use_rela_p)
+	{
+	  offsetT newval = md_chars_to_number (buf, 4);
+	  int shift = fixP->fx_r_type == BFD_RELOC_C6000_PCR_H16 ? 16 : 0;
+
+	  MODIFY_VALUE (newval, value, shift, 7, 16);
+
+	  md_number_to_chars (buf, newval, 4);
+	}
+      break;
+
     case BFD_RELOC_C6000_SBR_U15_B:
       if (fixP->fx_done || !seg->use_rela_p)
 	{
@@ -4437,7 +4509,24 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
       if (!bfd_is_com_section (symbol))
 	reloc->addend -= symbol->value;
     }
+  if (r_type == BFD_RELOC_C6000_PCR_H16
+      || r_type == BFD_RELOC_C6000_PCR_L16)
+    {
+      symbolS *t = fixp->tc_fix_data.fix_subsy;
+      segT sub_symbol_segment;
 
+      resolve_symbol_value (t);
+      sub_symbol_segment = S_GET_SEGMENT (t);
+      if (sub_symbol_segment == undefined_section)
+	as_bad_where (fixp->fx_file, fixp->fx_line,
+		      _("undefined symbol %s in PCR relocation"),
+		      S_GET_NAME (t));
+      else
+	{
+	  reloc->addend = reloc->address & ~0x1F;
+	  reloc->addend -= S_GET_VALUE (t);
+	}
+    }
   return reloc;
 }
 

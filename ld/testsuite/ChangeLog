@@ -1,3 +1,8 @@
+2011-05-20  Bernd Schmidt  <bernds@codesourcery.com>
+
+	* ld-tic6x/pcr-reloc.d: New test.
+	* ld-tic6x/pcr-reloc.s: New test.
+
 2011-05-18  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/12761
