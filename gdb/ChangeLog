@@ -1,5 +1,9 @@
 2011-05-20  Pedro Alves  <pedro@codesourcery.com>
 
+	* infcmd.c (step_1): Simplify synchronous case.
+
+2011-05-20  Pedro Alves  <pedro@codesourcery.com>
+
 	* tracepoint.c: Include exceptions.h.
 	(TFILE_PID): Move higher in file.
 	(tfile_open): Delay pushing the tfile target until we're assured

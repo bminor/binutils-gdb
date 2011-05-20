@@ -889,23 +889,21 @@ step_1 (int skip_subroutines, int single_inst, char *count_string)
     {
       for (; count > 0; count--)
 	{
-	  struct thread_info *tp;
-
 	  step_once (skip_subroutines, single_inst, count, thread);
 
-	  if (target_has_execution
-	      && !ptid_equal (inferior_ptid, null_ptid))
-	    tp = inferior_thread ();
+	  if (!target_has_execution)
+	    break;
 	  else
-	    tp = NULL;
-
-	  if (!tp || !tp->control.stop_step || !tp->step_multi)
 	    {
-	      /* If we stopped for some reason that is not stepping
-		 there are no further steps to make.  */
-	      if (tp)
-		tp->step_multi = 0;
-	      break;
+	      struct thread_info *tp = inferior_thread ();
+
+	      if (!tp->control.stop_step || !tp->step_multi)
+		{
+		  /* If we stopped for some reason that is not stepping
+		     there are no further steps to make.  */
+		  tp->step_multi = 0;
+		  break;
+		}
 	    }
 	}
 
