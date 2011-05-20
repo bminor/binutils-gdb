@@ -121,7 +121,8 @@ inferior_event_handler (enum inferior_event_type event_type,
       else
 	do_all_continuations ();
 
-      if (current_language != expected_language
+      if (info_verbose
+	  && current_language != expected_language
 	  && language_mode == language_mode_auto)
 	language_info (1);	/* Print what changed.  */
 
