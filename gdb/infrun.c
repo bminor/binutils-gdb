@@ -2071,6 +2071,9 @@ proceed (CORE_ADDR addr, enum target_signal siggnal, int step)
       return;
     }
 
+  /* We'll update this if & when we switch to a new thread.  */
+  previous_inferior_ptid = inferior_ptid;
+
   regcache = get_current_regcache ();
   gdbarch = get_regcache_arch (regcache);
   aspace = get_regcache_aspace (regcache);
@@ -2290,7 +2293,7 @@ init_wait_for_inferior (void)
 
   target_last_wait_ptid = minus_one_ptid;
 
-  previous_inferior_ptid = null_ptid;
+  previous_inferior_ptid = inferior_ptid;
   init_infwait_state ();
 
   /* Discard any skipped inlined frames.  */
@@ -2654,9 +2657,6 @@ wait_for_inferior (void)
   ecs = &ecss;
   memset (ecs, 0, sizeof (*ecs));
 
-  /* We'll update this if & when we switch to a new thread.  */
-  previous_inferior_ptid = inferior_ptid;
-
   while (1)
     {
       struct cleanup *old_chain;
@@ -2719,9 +2719,6 @@ fetch_inferior_event (void *client_data)
   int was_sync = sync_execution;
 
   memset (ecs, 0, sizeof (*ecs));
-
-  /* We'll update this if & when we switch to a new thread.  */
-  previous_inferior_ptid = inferior_ptid;
 
   /* We're handling a live event, so make sure we're doing live
      debugging.  If we're looking at traceframes while the target is

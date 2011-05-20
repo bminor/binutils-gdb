@@ -1,5 +1,13 @@
 2011-05-20  Pedro Alves  <pedro@codesourcery.com>
 
+	* infrun.c (proceed): Set previous_inferior_ptid here.
+	(init_wait_for_inferior): Initialize previous_inferior_ptid from
+	inferior_ptid, not null_ptid.
+	(wait_for_inferior): Don't initialize previous_inferior_ptid here.
+	(fetch_inferior_event): Nor here.
+
+2011-05-20  Pedro Alves  <pedro@codesourcery.com>
+
 	* inf-loop.c (inferior_event_handler): Only output a message if
 	verbose.
 
