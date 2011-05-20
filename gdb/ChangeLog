@@ -1,5 +1,20 @@
 2011-05-20  Pedro Alves  <pedro@codesourcery.com>
 
+	* tracepoint.c: Include exceptions.h.
+	(TFILE_PID): Move higher in file.
+	(tfile_open): Delay pushing the tfile target until we're assured
+	the tfile header is present in the file.  Wrap reading the initial
+	newline-terminated lines in TRY_CATCH.  Pop the target if the
+	initial setup failed.  Add the tfile's thread immediately
+	aftwards, before any non-essential setup.  Don't skip
+	post_create_inferior if there are no traceframes present in the
+	file.
+	(tfile_close): Remove redundant check for null before xfree call.
+	(tfile_thread_alive): New function.
+	(init_tfile_ops): Register it as to_thread_alive callback.
+
+2011-05-20  Pedro Alves  <pedro@codesourcery.com>
+
 	* tracepoint.c (tfile_open): Delete #if 0'd code.
 
 2011-05-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
