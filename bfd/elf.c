@@ -976,7 +976,9 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
       phdr = elf_tdata (abfd)->phdr;
       for (i = 0; i < elf_elfheader (abfd)->e_phnum; i++, phdr++)
 	{
-	  if (phdr->p_type == PT_LOAD
+	  if (((phdr->p_type == PT_LOAD
+		&& (hdr->sh_flags & SHF_TLS) == 0)
+	       || phdr->p_type == PT_TLS)
 	      && ELF_SECTION_IN_SEGMENT (hdr, phdr))
 	    {
 	      if ((flags & SEC_LOAD) == 0)
@@ -3987,8 +3989,12 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
 	  phdr_in_segment = FALSE;
 	}
 
-      /* Create a final PT_LOAD program segment.  */
-      if (last_hdr != NULL)
+      /* Create a final PT_LOAD program segment, but not if it's just
+	 for .tbss.  */
+      if (last_hdr != NULL
+	  && (i - phdr_index != 1
+	      || ((last_hdr->flags & (SEC_THREAD_LOCAL | SEC_LOAD))
+		  != SEC_THREAD_LOCAL)))
 	{
 	  m = make_mapping (abfd, sections, phdr_index, i, phdr_in_segment);
 	  if (m == NULL)
@@ -4748,7 +4754,8 @@ assign_file_positions_for_load_sections (bfd *abfd,
 
 	      sec = m->sections[i];
 	      this_hdr = &(elf_section_data(sec)->this_hdr);
-	      if (!ELF_SECTION_IN_SEGMENT_1 (this_hdr, p, check_vma, 0))
+	      if (!ELF_SECTION_IN_SEGMENT_1 (this_hdr, p, check_vma, 0)
+		  && !ELF_TBSS_SPECIAL (this_hdr, p))
 		{
 		  (*_bfd_error_handler)
 		    (_("%B: section `%A' can't be allocated in segment %d"),
@@ -4919,17 +4926,21 @@ assign_file_positions_for_non_load_sections (bfd *abfd,
 	      && (p->p_type != PT_NOTE
 		  || bfd_get_format (abfd) != bfd_core))
 	    {
-	      Elf_Internal_Shdr *hdr;
-	      asection *sect;
-
 	      BFD_ASSERT (!m->includes_filehdr && !m->includes_phdrs);
 
-	      sect = m->sections[m->count - 1];
-	      hdr = &elf_section_data (sect)->this_hdr;
-	      p->p_filesz = sect->filepos - m->sections[0]->filepos;
-	      if (hdr->sh_type != SHT_NOBITS)
-		p->p_filesz += hdr->sh_size;
+	      p->p_filesz = 0;
 	      p->p_offset = m->sections[0]->filepos;
+	      for (i = m->count; i-- != 0;)
+		{
+		  asection *sect = m->sections[i];
+		  Elf_Internal_Shdr *hdr = &elf_section_data (sect)->this_hdr;
+		  if (hdr->sh_type != SHT_NOBITS)
+		    {
+		      p->p_filesz = (sect->filepos - m->sections[0]->filepos
+				     + hdr->sh_size);
+		      break;
+		    }
+		}
 	    }
 	}
       else if (m->includes_filehdr)

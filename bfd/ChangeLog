@@ -1,3 +1,15 @@
+2011-05-21  Alan Modra  <amodra@gmail.com>
+
+	PR 12763
+	* elf.c (_bfd_elf_make_section_from_shdr): Set up TLS section LMAs
+	from PT_TLS header.
+	(_bfd_elf_map_sections_to_segments): Don't create a final PT_LOAD
+	segment if just for .tbss.
+	(assign_file_positions_for_load_sections): Don't report "can't
+	allocate in segment" errors for .tbss.
+	(assign_file_positions_for_non_load_sections): Don't set p_filesz
+	from SHT_NOBITS section filepos.
+
 2011-05-20  Bernd Schmidt  <bernds@codesourcery.com>
 
 	* elf32-tic6x.c (elf32_tic6x_howto_table): Add entries for
