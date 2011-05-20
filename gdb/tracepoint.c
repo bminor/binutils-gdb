@@ -3408,11 +3408,6 @@ tfile_open (char *filename, int from_tty)
   add_thread_silent (inferior_ptid);
 
   post_create_inferior (&tfile_ops, from_tty);
-
-#if 0
-  /* FIXME this will get defined in MI patch submission.  */
-  tfind_1 (tfind_number, 0, 0, 0, 0);
-#endif
 }
 
 /* Interpret the given line from the definitions part of the trace
