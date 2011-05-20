@@ -1,3 +1,15 @@
+2011-05-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix -readnow for -gdwarf-4 unused type units.
+	* dwarf2read.c (struct signatured_type): Remove the field offset.
+	(create_signatured_type_table_from_index): Remove its initialization.
+	(create_debug_types_hash_table): Likewise.  Initialize per_cu.offset
+	instead.  Add a complaint call.
+	(process_psymtab_comp_unit): Change assignment to gdb_assert.
+	(process_type_comp_unit, lookup_die_type, dump_die_shallow)
+	(lookup_signatured_type_at_offset, read_signatured_type)
+	(write_one_signatured_type): Update the field for per_cu.
+
 2011-05-19  Tom Tromey  <tromey@redhat.com>
 
 	* python/py-inferior.c (python_inferior_exit): Use

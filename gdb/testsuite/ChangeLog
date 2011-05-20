@@ -1,3 +1,9 @@
+2011-05-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix -readnow for -gdwarf-4 unused type units.
+	* gdb.dwarf2/dw4-sig-type-unused.S: New file.
+	* gdb.dwarf2/dw4-sig-type-unused.exp: New file.
+
 2011-05-18  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/kill-after-signal.c: New file.
