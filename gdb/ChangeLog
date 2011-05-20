@@ -1,5 +1,11 @@
 2011-05-20  Pedro Alves  <pedro@codesourcery.com>
 
+	* infrun.c (proceed): Switch the inferior event loop to
+	INF_EXEC_COMPLETE if the target refused to resume from a
+	vfork/fork.
+
+2011-05-20  Pedro Alves  <pedro@codesourcery.com>
+
 	* infcmd.c: Include "inf-loop.h".
 	(step_once): When stepping into an inline subroutine, pretend the
 	target has run.  If the target can async, switch the inferior

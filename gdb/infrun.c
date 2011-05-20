@@ -2066,6 +2066,8 @@ proceed (CORE_ADDR addr, enum target_signal siggnal, int step)
     {
       /* The target for some reason decided not to resume.  */
       normal_stop ();
+      if (target_can_async_p ())
+	inferior_event_handler (INF_EXEC_COMPLETE, NULL);
       return;
     }
 
