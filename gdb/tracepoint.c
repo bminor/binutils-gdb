@@ -51,6 +51,7 @@
 #include "ax.h"
 #include "ax-gdb.h"
 #include "memrange.h"
+#include "exceptions.h"
 
 /* readline include files */
 #include "readline/readline.h"
@@ -79,6 +80,8 @@ extern int bin2hex (const gdb_byte *bin, char *hex, int count);
    NOTE: expressions get mem2hex'ed otherwise this would be twice as
    large.  (400 - 31)/2 == 184 */
 #define MAX_AGENT_EXPR_LEN	184
+
+#define TFILE_PID (1)
 
 /* A hook used to notify the UI of tracepoint operations.  */
 
@@ -3287,6 +3290,7 @@ tfile_read (gdb_byte *readbuf, int size)
 static void
 tfile_open (char *filename, int from_tty)
 {
+  volatile struct gdb_exception ex;
   char *temp;
   struct cleanup *old_chain;
   int flags;
@@ -3324,8 +3328,6 @@ tfile_open (char *filename, int from_tty)
   discard_cleanups (old_chain);	/* Don't free filename any more.  */
   unpush_target (&tfile_ops);
 
-  push_target (&tfile_ops);
-
   trace_filename = xstrdup (filename);
   trace_fd = scratch_chan;
 
@@ -3337,6 +3339,8 @@ tfile_open (char *filename, int from_tty)
   if (!(header[0] == 0x7f
 	&& (strncmp (header + 1, "TRACE0\n", 7) == 0)))
     error (_("File is not a valid trace file."));
+
+  push_target (&tfile_ops);
 
   trace_regblock_size = 0;
   ts = current_trace_status ();
@@ -3352,28 +3356,52 @@ tfile_open (char *filename, int from_tty)
 
   cur_traceframe_number = -1;
 
-  /* Read through a section of newline-terminated lines that
-     define things like tracepoints.  */
-  i = 0;
-  while (1)
+  TRY_CATCH (ex, RETURN_MASK_ALL)
     {
-      tfile_read (&byte, 1);
-
-      ++bytes;
-      if (byte == '\n')
+      /* Read through a section of newline-terminated lines that
+	 define things like tracepoints.  */
+      i = 0;
+      while (1)
 	{
-	  /* Empty line marks end of the definition section.  */
-	  if (i == 0)
-	    break;
-	  linebuf[i] = '\0';
-	  i = 0;
-	  tfile_interp_line (linebuf, &uploaded_tps, &uploaded_tsvs);
+	  tfile_read (&byte, 1);
+
+	  ++bytes;
+	  if (byte == '\n')
+	    {
+	      /* Empty line marks end of the definition section.  */
+	      if (i == 0)
+		break;
+	      linebuf[i] = '\0';
+	      i = 0;
+	      tfile_interp_line (linebuf, &uploaded_tps, &uploaded_tsvs);
+	    }
+	  else
+	    linebuf[i++] = byte;
+	  if (i >= 1000)
+	    error (_("Excessively long lines in trace file"));
 	}
-      else
-	linebuf[i++] = byte;
-      if (i >= 1000)
-	error (_("Excessively long lines in trace file"));
+
+      /* Record the starting offset of the binary trace data.  */
+      trace_frames_offset = bytes;
+
+      /* If we don't have a blocksize, we can't interpret the
+	 traceframes.  */
+      if (trace_regblock_size == 0)
+	error (_("No register block size recorded in trace file"));
     }
+  if (ex.reason < 0)
+    {
+      /* Pop the partially set up target.  */
+      pop_target ();
+      throw_exception (ex);
+    }
+
+  inferior_appeared (current_inferior (), TFILE_PID);
+  inferior_ptid = pid_to_ptid (TFILE_PID);
+  add_thread_silent (inferior_ptid);
+
+  if (ts->traceframe_count <= 0)
+    warning (_("No traceframes present in this file."));
 
   /* Add the file's tracepoints and variables into the current mix.  */
 
@@ -3382,24 +3410,6 @@ tfile_open (char *filename, int from_tty)
   merge_uploaded_trace_state_variables (&uploaded_tsvs);
 
   merge_uploaded_tracepoints (&uploaded_tps);
-
-  /* Record the starting offset of the binary trace data.  */
-  trace_frames_offset = bytes;
-
-  /* If we don't have a blocksize, we can't interpret the
-     traceframes.  */
-  if (trace_regblock_size == 0)
-    error (_("No register block size recorded in trace file"));
-  if (ts->traceframe_count <= 0)
-    {
-      warning (_("No traceframes present in this file."));
-      return;
-    }
-
-#define TFILE_PID (1)
-  inferior_appeared (current_inferior (), TFILE_PID);
-  inferior_ptid = pid_to_ptid (TFILE_PID);
-  add_thread_silent (inferior_ptid);
 
   post_create_inferior (&tfile_ops, from_tty);
 }
@@ -3706,8 +3716,8 @@ tfile_close (int quitting)
 
   close (trace_fd);
   trace_fd = -1;
-  if (trace_filename)
-    xfree (trace_filename);
+  xfree (trace_filename);
+  trace_filename = NULL;
 }
 
 static void
@@ -4200,6 +4210,12 @@ tfile_has_registers (struct target_ops *ops)
   return traceframe_number != -1;
 }
 
+static int
+tfile_thread_alive (struct target_ops *ops, ptid_t ptid)
+{
+  return 1;
+}
+
 /* Callback for traceframe_walk_blocks.  Builds a traceframe_info
    object for the tfile target's current traceframe.  */
 
@@ -4272,6 +4288,7 @@ init_tfile_ops (void)
   tfile_ops.to_has_stack = tfile_has_stack;
   tfile_ops.to_has_registers = tfile_has_registers;
   tfile_ops.to_traceframe_info = tfile_traceframe_info;
+  tfile_ops.to_thread_alive = tfile_thread_alive;
   tfile_ops.to_magic = OPS_MAGIC;
 }
 
