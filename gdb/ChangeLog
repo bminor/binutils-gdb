@@ -1,3 +1,7 @@
+2011-05-20  Luis Machado  <lgustavo@codesourcery.com>
+
+	* MAINTAINERS: Update my e-mail address.
+
 2011-05-20  Pedro Alves  <pedro@codesourcery.com>
 
 	* infrun.c (proceed): Switch the inferior event loop to
