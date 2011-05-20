@@ -1,3 +1,10 @@
+2011-05-21  Alan Modra  <amodra@gmail.com>
+
+	PR 12763
+	* ld-elf/tdata3.s: New test.
+	* ld-elf/tbss3.s: New test.
+	* ld-elf/binutils.exp: Consolidate tbss and tdata tests.
+
 2011-05-20  Bernd Schmidt  <bernds@codesourcery.com>
 
 	* ld-tic6x/pcr-reloc.d: New test.
