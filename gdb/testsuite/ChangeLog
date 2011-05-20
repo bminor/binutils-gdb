@@ -1,5 +1,13 @@
 2011-05-20  Pedro Alves  <pedro@codesourcery.com>
 
+	Cope with async mode.
+
+	gdb/testsuite/
+	* gdb.mi/mi-break.exp (test_breakpoint_commands): Split gdb_test
+	into gdb_test + mi_expect_stop.
+
+2011-05-20  Pedro Alves  <pedro@codesourcery.com>
+
 	* gdb.mi/basics.c: Don't include stdio.h or unistd.h.
 	(callme): Remove printf call.
 
