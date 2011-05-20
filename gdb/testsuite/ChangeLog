@@ -1,3 +1,8 @@
+2011-05-20  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.mi/basics.c: Don't include stdio.h or unistd.h.
+	(callme): Remove printf call.
+
 2011-05-20  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* lib/gdb.exp (gdb_test_list_exact): Suggest use of double
