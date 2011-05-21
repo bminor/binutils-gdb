@@ -1,3 +1,10 @@
+2011-05-21  Mark Kettenis  <kettenis@gnu.org>
+
+	* sparc-nat.c (sparc_fetch_inferior_registers): Explicitly supply
+	zero as the value for %g0 in the register cache.
+	* sparc-tdep.c (sparc32_supply_gregset): Likewise.
+	* sparc64-tdep.c (sparc64_supply_gregset): Likewise.
+
 2011-05-20  Pedro Alves  <pedro@codesourcery.com>
 
 	* infrun.c (proceed): Set previous_inferior_ptid here.

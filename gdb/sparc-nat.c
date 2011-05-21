@@ -159,7 +159,9 @@ sparc_fetch_inferior_registers (struct target_ops *ops,
 
   if (regnum == SPARC_G0_REGNUM)
     {
-      regcache_raw_supply (regcache, SPARC_G0_REGNUM, NULL);
+      gdb_byte zero[8] = { 0 };
+
+      regcache_raw_supply (regcache, SPARC_G0_REGNUM, &zero);
       return;
     }
 

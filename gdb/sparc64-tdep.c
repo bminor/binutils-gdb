@@ -1206,6 +1206,7 @@ sparc64_supply_gregset (const struct sparc_gregset *gregset,
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int sparc32 = (gdbarch_ptr_bit (gdbarch) == 32);
   const gdb_byte *regs = gregs;
+  gdb_byte zero[8] = { 0 };
   int i;
 
   if (sparc32)
@@ -1268,7 +1269,7 @@ sparc64_supply_gregset (const struct sparc_gregset *gregset,
     }
 
   if (regnum == SPARC_G0_REGNUM || regnum == -1)
-    regcache_raw_supply (regcache, SPARC_G0_REGNUM, NULL);
+    regcache_raw_supply (regcache, SPARC_G0_REGNUM, &zero);
 
   if ((regnum >= SPARC_G1_REGNUM && regnum <= SPARC_O7_REGNUM) || regnum == -1)
     {
