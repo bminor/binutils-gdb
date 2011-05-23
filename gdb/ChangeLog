@@ -1,3 +1,8 @@
+2011-05-23  Jerome Guitton  <guitton@adacore.com>
+
+	* sparc-tdep.c (sparc_skip_stack_check): Recognize a new instruction
+	sequence for probing loops.
+
 2011-05-23  Pedro Alves  <pedro@codesourcery.com>
 
 	* infrun.c (user_visible_resume_ptid): Fix typos in describing
