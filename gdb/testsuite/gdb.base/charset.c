@@ -73,6 +73,11 @@ char32_t *String32;
 typedef wchar_t my_wchar_t;
 my_wchar_t myvar;
 
+/* Some arrays for simple assignment tests.  */
+short short_array[3];
+int int_array[3];
+long long_array[3];
+
 void
 init_string (char string[],
              char x,
