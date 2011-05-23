@@ -1,3 +1,11 @@
+2011-05-23  Alan Modra  <amodra@gmail.com>
+
+	PR 12763
+	* ldlang.c (lang_output_section_find_by_flags): Match orphan .sdata2
+	like sections to existing .sdata2, and similarly for orphan TLS
+	sections.
+	* emultempl/elf32.em (place_orphan): Exclude .tbss from orphan_bss.
+
 2011-05-17  Tomohiro Kashiwada  <kikairoya@gmail.com>
 
 	PR ld/12759

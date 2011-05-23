@@ -1579,8 +1579,14 @@ lang_output_section_find_by_flags (const asection *sec,
 	    }
 	  flags ^= sec->flags;
 	  if (!(flags & (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD
-			 | SEC_READONLY))
-	      && !(look->flags & (SEC_SMALL_DATA | SEC_THREAD_LOCAL)))
+			 | SEC_READONLY | SEC_SMALL_DATA))
+	      || (!(flags & (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD
+			     | SEC_READONLY))
+		  && !(look->flags & SEC_SMALL_DATA))
+	      || (!(flags & (SEC_THREAD_LOCAL | SEC_ALLOC))
+		  && (look->flags & SEC_THREAD_LOCAL)
+		  && (!(flags & SEC_LOAD)
+		      || (look->flags & SEC_LOAD))))
 	    found = look;
 	}
     }

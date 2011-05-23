@@ -4684,11 +4684,24 @@ assign_file_positions_for_load_sections (bfd *abfd,
 	    }
 	  else
 	    {
-	      if (p->p_type == PT_LOAD)
+	      if (p->p_type == PT_LOAD
+		  || (this_hdr->sh_type == SHT_NOBITS
+		      && (this_hdr->sh_flags & SHF_TLS) != 0
+		      && this_hdr->sh_offset == 0))
 		{
-		  this_hdr->sh_offset = sec->filepos = off;
-		  if (this_hdr->sh_type != SHT_NOBITS)
-		    off += this_hdr->sh_size;
+		  if (this_hdr->sh_type == SHT_NOBITS)
+		    {
+		      /* These sections don't really need sh_offset,
+			 but give them one anyway.  */
+		      bfd_vma adjust = vma_page_aligned_bias (this_hdr->sh_addr,
+							      off, align);
+		      this_hdr->sh_offset = sec->filepos = off + adjust;
+		    }
+		  else
+		    {
+		      this_hdr->sh_offset = sec->filepos = off;
+		      off += this_hdr->sh_size;
+		    }
 		}
 
 	      if (this_hdr->sh_type != SHT_NOBITS)

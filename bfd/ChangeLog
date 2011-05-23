@@ -1,3 +1,9 @@
+2011-05-23  Alan Modra  <amodra@gmail.com>
+
+	PR 12763
+	* elf.c (assign_file_positions_for_load_sections): Set sh_offset for
+	.tbss, and page align same for all SHT_NOBITS sections.
+
 2011-05-21  Alan Modra  <amodra@gmail.com>
 
 	PR 12763
