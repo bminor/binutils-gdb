@@ -79,7 +79,7 @@ class Incremental_input_entry
  public:
   Incremental_input_entry(Stringpool::Key filename_key, unsigned int arg_serial,
 			  Timespec mtime)
-    : filename_key_(filename_key), offset_(0), info_offset_(0),
+    : filename_key_(filename_key), file_index_(0), offset_(0), info_offset_(0),
       arg_serial_(arg_serial), mtime_(mtime), is_in_system_directory_(false)
   { }
 
@@ -92,15 +92,23 @@ class Incremental_input_entry
   type() const
   { return this->do_type(); }
 
-  // Set the section offset of this input file entry.
+  // Set the index and section offset of this input file entry.
   void
-  set_offset(unsigned int offset)
-  { this->offset_ = offset; }
+  set_offset(unsigned int file_index, unsigned int offset)
+  {
+    this->file_index_ = file_index;
+    this->offset_ = offset;
+  }
 
   // Set the section offset of the supplemental information for this entry.
   void
   set_info_offset(unsigned int info_offset)
   { this->info_offset_ = info_offset; }
+
+  // Get the index of this input file entry.
+  unsigned int
+  get_file_index() const
+  { return this->file_index_; }
 
   // Get the section offset of this input file entry.
   unsigned int
@@ -181,6 +189,9 @@ class Incremental_input_entry
  private:
   // Key of the filename string in the section stringtable.
   Stringpool::Key filename_key_;
+
+  // Index of the entry in the output section.
+  unsigned int file_index_;
 
   // Offset of the entry in the output section.
   unsigned int offset_;
@@ -1235,6 +1246,11 @@ class Incremental_binary
   reserve_layout(unsigned int input_file_index)
   { this->do_reserve_layout(input_file_index); }
 
+  // Process the GOT and PLT entries from the existing output file.
+  void
+  process_got_plt(Symbol_table* symtab, Layout* layout)
+  { this->do_process_got_plt(symtab, layout); }
+
   // Apply incremental relocations for symbols whose values have changed.
   void
   apply_incremental_relocs(const Symbol_table* symtab, Layout* layout,
@@ -1313,6 +1329,10 @@ class Incremental_binary
   virtual void
   do_reserve_layout(unsigned int input_file_index) = 0;
 
+  // Process the GOT and PLT entries from the existing output file.
+  virtual void
+  do_process_got_plt(Symbol_table* symtab, Layout* layout) = 0;
+
   // Apply incremental relocations for symbols whose values have changed.
   virtual void
   do_apply_incremental_relocs(const Symbol_table*, Layout*, Output_file*) = 0;
@@ -1345,29 +1365,53 @@ class Sized_incremental_binary : public Incremental_binary
                            const elfcpp::Ehdr<size, big_endian>& ehdr,
                            Target* target)
     : Incremental_binary(output, target), elf_file_(this, ehdr),
-      section_map_(), symbol_map_(), has_incremental_info_(false),
-      inputs_reader_(), symtab_reader_(), relocs_reader_(), got_plt_reader_(),
+      file_status_(NULL), section_map_(), symbol_map_(), main_symtab_loc_(),
+      main_strtab_loc_(), has_incremental_info_(false), inputs_reader_(),
+      symtab_reader_(), relocs_reader_(), got_plt_reader_(),
       input_entry_readers_()
   { this->setup_readers(); }
+
+  virtual
+  ~Sized_incremental_binary()
+  {
+    if (this->file_status_ != NULL)
+      delete[] this->file_status_;
+  }
 
   // Returns TRUE if the file contains incremental info.
   bool
   has_incremental_info() const
   { return this->has_incremental_info_; }
 
+  // Set the flag for input file N to indicate that the file is unchanged.
+  void
+  set_file_is_unchanged(unsigned int n)
+  {
+    gold_assert(this->file_status_ != NULL);
+    this->file_status_[n / 8] |= 1U << (n % 8);
+  }
+
+  // Returns TRUE if input file N is unchanged.
+  bool
+  file_is_unchanged(unsigned int n) const
+  {
+    gold_assert(this->file_status_ != NULL);
+    return (this->file_status_[n / 8] & (1U << (n % 8))) != 0;
+  }
+
   // Return the Output_section for section index SHNDX.
   Output_section*
   output_section(unsigned int shndx)
   { return this->section_map_[shndx]; }
 
-  // Map a symbol table entry from the input file to the output symbol table.
+  // Map a symbol table entry from the base file to the output symbol table.
   // SYMNDX is relative to the first forced-local or global symbol in the
   // input file symbol table.
   void
   add_global_symbol(unsigned int symndx, Symbol* gsym)
   { this->symbol_map_[symndx] = gsym; }
 
-  // Map a symbol table entry from the input file to the output symbol table.
+  // Map a symbol table entry from the base file to the output symbol table.
   // SYMNDX is relative to the first forced-local or global symbol in the
   // input file symbol table.
   Symbol*
@@ -1417,6 +1461,10 @@ class Sized_incremental_binary : public Incremental_binary
   // Mark regions of the input file that must be kept unchanged.
   virtual void
   do_reserve_layout(unsigned int input_file_index);
+
+  // Process the GOT and PLT entries from the existing output file.
+  virtual void
+  do_process_got_plt(Symbol_table* symtab, Layout* layout);
 
   // Apply incremental relocations for symbols whose values have changed.
   virtual void
@@ -1489,11 +1537,20 @@ class Sized_incremental_binary : public Incremental_binary
   // Output as an ELF file.
   elfcpp::Elf_file<size, big_endian, Incremental_binary> elf_file_;
 
+  // Status flags for each input file.  Each bit represents one input file;
+  // 0 indicates that the file was replaced; 1 indicates that the file was
+  // unchanged.
+  unsigned char* file_status_;
+
   // Map section index to an Output_section in the updated layout.
   std::vector<Output_section*> section_map_;
 
   // Map global symbols from the input file to the symbol table.
   std::vector<Symbol*> symbol_map_;
+
+  // Locations of the main symbol table and symbol string table.
+  Location main_symtab_loc_;
+  Location main_strtab_loc_;
 
   // Readers for the incremental info sections.
   bool has_incremental_info_;

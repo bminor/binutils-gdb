@@ -1358,6 +1358,13 @@ Output_data_got<size, big_endian>::Got_entry::write(unsigned char* pov) const
       val = this->u_.constant;
       break;
 
+    case RESERVED_CODE:
+      // If we're doing an incremental update, don't touch this GOT entry.
+      if (parameters->incremental_update())
+        return;
+      val = this->u_.constant;
+      break;
+
     default:
       {
 	const Sized_relobj<size, big_endian>* object = this->u_.object;
@@ -1393,9 +1400,8 @@ Output_data_got<size, big_endian>::add_global(
   if (gsym->has_got_offset(got_type))
     return false;
 
-  this->entries_.push_back(Got_entry(gsym, false));
-  this->set_got_size();
-  gsym->set_got_offset(got_type, this->last_got_offset());
+  unsigned int got_offset = this->add_got_entry(Got_entry(gsym, false));
+  gsym->set_got_offset(got_type, got_offset);
   return true;
 }
 
@@ -1409,9 +1415,8 @@ Output_data_got<size, big_endian>::add_global_plt(Symbol* gsym,
   if (gsym->has_got_offset(got_type))
     return false;
 
-  this->entries_.push_back(Got_entry(gsym, true));
-  this->set_got_size();
-  gsym->set_got_offset(got_type, this->last_got_offset());
+  unsigned int got_offset = this->add_got_entry(Got_entry(gsym, true));
+  gsym->set_got_offset(got_type, got_offset);
   return true;
 }
 
@@ -1429,9 +1434,7 @@ Output_data_got<size, big_endian>::add_global_with_rel(
   if (gsym->has_got_offset(got_type))
     return;
 
-  this->entries_.push_back(Got_entry());
-  this->set_got_size();
-  unsigned int got_offset = this->last_got_offset();
+  unsigned int got_offset = this->add_got_entry(Got_entry());
   gsym->set_got_offset(got_type, got_offset);
   rel_dyn->add_global(gsym, r_type, this, got_offset);
 }
@@ -1447,9 +1450,7 @@ Output_data_got<size, big_endian>::add_global_with_rela(
   if (gsym->has_got_offset(got_type))
     return;
 
-  this->entries_.push_back(Got_entry());
-  this->set_got_size();
-  unsigned int got_offset = this->last_got_offset();
+  unsigned int got_offset = this->add_got_entry(Got_entry());
   gsym->set_got_offset(got_type, got_offset);
   rela_dyn->add_global(gsym, r_type, this, got_offset, 0);
 }
@@ -1469,19 +1470,12 @@ Output_data_got<size, big_endian>::add_global_pair_with_rel(
   if (gsym->has_got_offset(got_type))
     return;
 
-  this->entries_.push_back(Got_entry());
-  unsigned int got_offset = this->last_got_offset();
+  unsigned int got_offset = this->add_got_entry_pair(Got_entry(), Got_entry());
   gsym->set_got_offset(got_type, got_offset);
   rel_dyn->add_global(gsym, r_type_1, this, got_offset);
 
-  this->entries_.push_back(Got_entry());
   if (r_type_2 != 0)
-    {
-      got_offset = this->last_got_offset();
-      rel_dyn->add_global(gsym, r_type_2, this, got_offset);
-    }
-
-  this->set_got_size();
+    rel_dyn->add_global(gsym, r_type_2, this, got_offset + size / 8);
 }
 
 template<int size, bool big_endian>
@@ -1496,19 +1490,12 @@ Output_data_got<size, big_endian>::add_global_pair_with_rela(
   if (gsym->has_got_offset(got_type))
     return;
 
-  this->entries_.push_back(Got_entry());
-  unsigned int got_offset = this->last_got_offset();
+  unsigned int got_offset = this->add_got_entry_pair(Got_entry(), Got_entry());
   gsym->set_got_offset(got_type, got_offset);
   rela_dyn->add_global(gsym, r_type_1, this, got_offset, 0);
 
-  this->entries_.push_back(Got_entry());
   if (r_type_2 != 0)
-    {
-      got_offset = this->last_got_offset();
-      rela_dyn->add_global(gsym, r_type_2, this, got_offset, 0);
-    }
-
-  this->set_got_size();
+    rela_dyn->add_global(gsym, r_type_2, this, got_offset + size / 8, 0);
 }
 
 // Add an entry for a local symbol to the GOT.  This returns true if
@@ -1525,9 +1512,9 @@ Output_data_got<size, big_endian>::add_local(
   if (object->local_has_got_offset(symndx, got_type))
     return false;
 
-  this->entries_.push_back(Got_entry(object, symndx, false));
-  this->set_got_size();
-  object->set_local_got_offset(symndx, got_type, this->last_got_offset());
+  unsigned int got_offset = this->add_got_entry(Got_entry(object, symndx,
+							  false));
+  object->set_local_got_offset(symndx, got_type, got_offset);
   return true;
 }
 
@@ -1543,9 +1530,9 @@ Output_data_got<size, big_endian>::add_local_plt(
   if (object->local_has_got_offset(symndx, got_type))
     return false;
 
-  this->entries_.push_back(Got_entry(object, symndx, true));
-  this->set_got_size();
-  object->set_local_got_offset(symndx, got_type, this->last_got_offset());
+  unsigned int got_offset = this->add_got_entry(Got_entry(object, symndx,
+							  true));
+  object->set_local_got_offset(symndx, got_type, got_offset);
   return true;
 }
 
@@ -1564,9 +1551,7 @@ Output_data_got<size, big_endian>::add_local_with_rel(
   if (object->local_has_got_offset(symndx, got_type))
     return;
 
-  this->entries_.push_back(Got_entry());
-  this->set_got_size();
-  unsigned int got_offset = this->last_got_offset();
+  unsigned int got_offset = this->add_got_entry(Got_entry());
   object->set_local_got_offset(symndx, got_type, got_offset);
   rel_dyn->add_local(object, symndx, r_type, this, got_offset);
 }
@@ -1583,9 +1568,7 @@ Output_data_got<size, big_endian>::add_local_with_rela(
   if (object->local_has_got_offset(symndx, got_type))
     return;
 
-  this->entries_.push_back(Got_entry());
-  this->set_got_size();
-  unsigned int got_offset = this->last_got_offset();
+  unsigned int got_offset = this->add_got_entry(Got_entry());
   object->set_local_got_offset(symndx, got_type, got_offset);
   rela_dyn->add_local(object, symndx, r_type, this, got_offset, 0);
 }
@@ -1607,20 +1590,15 @@ Output_data_got<size, big_endian>::add_local_pair_with_rel(
   if (object->local_has_got_offset(symndx, got_type))
     return;
 
-  this->entries_.push_back(Got_entry());
-  unsigned int got_offset = this->last_got_offset();
+  unsigned int got_offset =
+      this->add_got_entry_pair(Got_entry(),
+			       Got_entry(object, symndx, false));
   object->set_local_got_offset(symndx, got_type, got_offset);
   Output_section* os = object->output_section(shndx);
   rel_dyn->add_output_section(os, r_type_1, this, got_offset);
 
-  this->entries_.push_back(Got_entry(object, symndx, false));
   if (r_type_2 != 0)
-    {
-      got_offset = this->last_got_offset();
-      rel_dyn->add_output_section(os, r_type_2, this, got_offset);
-    }
-
-  this->set_got_size();
+    rel_dyn->add_output_section(os, r_type_2, this, got_offset + size / 8);
 }
 
 template<int size, bool big_endian>
@@ -1637,20 +1615,37 @@ Output_data_got<size, big_endian>::add_local_pair_with_rela(
   if (object->local_has_got_offset(symndx, got_type))
     return;
 
-  this->entries_.push_back(Got_entry());
-  unsigned int got_offset = this->last_got_offset();
+  unsigned int got_offset =
+      this->add_got_entry_pair(Got_entry(),
+			       Got_entry(object, symndx, false));
   object->set_local_got_offset(symndx, got_type, got_offset);
   Output_section* os = object->output_section(shndx);
   rela_dyn->add_output_section(os, r_type_1, this, got_offset, 0);
 
-  this->entries_.push_back(Got_entry(object, symndx, false));
   if (r_type_2 != 0)
-    {
-      got_offset = this->last_got_offset();
-      rela_dyn->add_output_section(os, r_type_2, this, got_offset, 0);
-    }
+    rela_dyn->add_output_section(os, r_type_2, this, got_offset + size / 8, 0);
+}
 
-  this->set_got_size();
+// Reserve a slot in the GOT for a local symbol or the second slot of a pair.
+
+template<int size, bool big_endian>
+void
+Output_data_got<size, big_endian>::reserve_slot(unsigned int i)
+{
+  this->free_list_.remove(i * size / 8, (i + 1) * size / 8);
+}
+
+// Reserve a slot in the GOT for a global symbol.
+
+template<int size, bool big_endian>
+void
+Output_data_got<size, big_endian>::reserve_slot_for_global(
+    unsigned int i,
+    Symbol* gsym,
+    unsigned int got_type)
+{
+  this->free_list_.remove(i * size / 8, (i + 1) * size / 8);
+  gsym->set_got_offset(got_type, this->got_offset(i));
 }
 
 // Write out the GOT.
@@ -1680,6 +1675,63 @@ Output_data_got<size, big_endian>::do_write(Output_file* of)
 
   // We no longer need the GOT entries.
   this->entries_.clear();
+}
+
+// Create a new GOT entry and return its offset.
+
+template<int size, bool big_endian>
+unsigned int
+Output_data_got<size, big_endian>::add_got_entry(Got_entry got_entry)
+{
+  if (!this->is_data_size_valid())
+    {
+      this->entries_.push_back(got_entry);
+      this->set_got_size();
+      return this->last_got_offset();
+    }
+  else
+    {
+      // For an incremental update, find an available slot.
+      off_t got_offset = this->free_list_.allocate(size / 8, size / 8, 0);
+      if (got_offset == -1)
+	gold_fatal(_("out of patch space (GOT);"
+		     " relink with --incremental-full"));
+      unsigned int got_index = got_offset / (size / 8);
+      gold_assert(got_index < this->entries_.size());
+      this->entries_[got_index] = got_entry;
+      return static_cast<unsigned int>(got_offset);
+    }
+}
+
+// Create a pair of new GOT entries and return the offset of the first.
+
+template<int size, bool big_endian>
+unsigned int
+Output_data_got<size, big_endian>::add_got_entry_pair(Got_entry got_entry_1,
+						      Got_entry got_entry_2)
+{
+  if (!this->is_data_size_valid())
+    {
+      unsigned int got_offset;
+      this->entries_.push_back(got_entry_1);
+      got_offset = this->last_got_offset();
+      this->entries_.push_back(got_entry_2);
+      this->set_got_size();
+      return got_offset;
+    }
+  else
+    {
+      // For an incremental update, find an available pair of slots.
+      off_t got_offset = this->free_list_.allocate(2 * size / 8, size / 8, 0);
+      if (got_offset == -1)
+	gold_fatal(_("out of patch space (GOT);"
+		     " relink with --incremental-full"));
+      unsigned int got_index = got_offset / (size / 8);
+      gold_assert(got_index < this->entries_.size());
+      this->entries_[got_index] = got_entry_1;
+      this->entries_[got_index + 1] = got_entry_2;
+      return static_cast<unsigned int>(got_offset);
+    }
 }
 
 // Output_data_dynamic::Dynamic_entry methods.
@@ -2335,7 +2387,8 @@ Output_section::add_output_section_data(Output_section_data* posd)
       uint64_t addr = this->address();
       posd->set_address(addr);
       posd->set_file_offset(0);
-      // FIXME: Mark *POSD as part of a fixed-layout section.
+      // FIXME: This should eventually be unreachable.
+      // gold_unreachable();
     }
 }
 

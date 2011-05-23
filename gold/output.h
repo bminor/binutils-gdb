@@ -764,6 +764,10 @@ class Output_section_data_build : public Output_section_data
     : Output_section_data(addralign)
   { }
 
+  Output_section_data_build(off_t data_size, uint64_t addralign)
+    : Output_section_data(data_size, addralign, false)
+  { }
+
   // Set the current data size.
   void
   set_current_data_size(off_t data_size)
@@ -887,6 +891,12 @@ class Output_data_space : public Output_section_data_build
  public:
   explicit Output_data_space(uint64_t addralign, const char* map_name)
     : Output_section_data_build(addralign),
+      map_name_(map_name)
+  { }
+
+  explicit Output_data_space(off_t data_size, uint64_t addralign,
+			     const char* map_name)
+    : Output_section_data_build(data_size, addralign),
       map_name_(map_name)
   { }
 
@@ -1942,8 +1952,19 @@ class Output_data_got : public Output_section_data_build
 
   Output_data_got()
     : Output_section_data_build(Output_data::default_alignment_for_size(size)),
-      entries_()
+      entries_(), free_list_()
   { }
+
+  Output_data_got(off_t data_size)
+    : Output_section_data_build(data_size,
+				Output_data::default_alignment_for_size(size)),
+      entries_(), free_list_()
+  {
+    // For an incremental update, we have an existing GOT section.
+    // Initialize the list of entries and the free list.
+    this->entries_.resize(data_size / (size / 8));
+    this->free_list_.init(data_size, false);
+  }
 
   // Add an entry for a global symbol to the GOT.  Return true if this
   // is a new GOT entry, false if the symbol was already in the GOT.
@@ -2021,10 +2042,17 @@ class Output_data_got : public Output_section_data_build
   unsigned int
   add_constant(Valtype constant)
   {
-    this->entries_.push_back(Got_entry(constant));
-    this->set_got_size();
-    return this->last_got_offset();
+    unsigned int got_offset = this->add_got_entry(Got_entry(constant));
+    return got_offset;
   }
+
+  // Reserve a slot in the GOT for a local symbol or the second slot of a pair.
+  void
+  reserve_slot(unsigned int i);
+
+  // Reserve a slot in the GOT for a global symbol.
+  void
+  reserve_slot_for_global(unsigned int i, Symbol* gsym, unsigned int got_type);
 
  protected:
   // Write out the GOT table.
@@ -2043,7 +2071,7 @@ class Output_data_got : public Output_section_data_build
    public:
     // Create a zero entry.
     Got_entry()
-      : local_sym_index_(CONSTANT_CODE), use_plt_offset_(false)
+      : local_sym_index_(RESERVED_CODE), use_plt_offset_(false)
     { this->u_.constant = 0; }
 
     // Create a global symbol entry.
@@ -2058,6 +2086,7 @@ class Output_data_got : public Output_section_data_build
     {
       gold_assert(local_sym_index != GSYM_CODE
 		  && local_sym_index != CONSTANT_CODE
+		  && local_sym_index != RESERVED_CODE
 		  && local_sym_index == this->local_sym_index_);
       this->u_.object = object;
     }
@@ -2076,7 +2105,8 @@ class Output_data_got : public Output_section_data_build
     enum
     {
       GSYM_CODE = 0x7fffffff,
-      CONSTANT_CODE = 0x7ffffffe
+      CONSTANT_CODE = 0x7ffffffe,
+      RESERVED_CODE = 0x7ffffffd
     };
 
     union
@@ -2097,6 +2127,14 @@ class Output_data_got : public Output_section_data_build
 
   typedef std::vector<Got_entry> Got_entries;
 
+  // Create a new GOT entry and return its offset.
+  unsigned int
+  add_got_entry(Got_entry got_entry);
+
+  // Create a pair of new GOT entries and return the offset of the first.
+  unsigned int
+  add_got_entry_pair(Got_entry got_entry_1, Got_entry got_entry_2);
+
   // Return the offset into the GOT of GOT entry I.
   unsigned int
   got_offset(unsigned int i) const
@@ -2114,6 +2152,10 @@ class Output_data_got : public Output_section_data_build
 
   // The list of GOT entries.
   Got_entries entries_;
+
+  // List of available regions within the section, for incremental
+  // update links.
+  Free_list free_list_;
 };
 
 // Output_data_dynamic is used to hold the data in SHT_DYNAMIC

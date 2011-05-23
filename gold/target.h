@@ -54,6 +54,8 @@ template<int size>
 class Sized_symbol;
 class Symbol_table;
 class Output_data;
+template<int size, bool big_endian>
+class Output_data_got;
 class Output_section;
 class Input_objects;
 class Task;
@@ -793,6 +795,24 @@ class Sized_target : public Target
 
   virtual unsigned int
   plt_entry_size() const
+  { gold_unreachable(); }
+
+  // Create the GOT and PLT sections for an incremental update.
+  // A target needs to implement this to support incremental linking.
+
+  virtual Output_data_got<size, big_endian>*
+  init_got_plt_for_update(Symbol_table*,
+			  Layout*,
+			  unsigned int /* got_count */,
+			  unsigned int /* plt_count */)
+  { gold_unreachable(); }
+
+  // Register an existing PLT entry for a global symbol.
+  // A target needs to implement this to support incremental linking.
+
+  virtual void
+  register_global_plt_entry(unsigned int /* plt_index */,
+			    Symbol*)
   { gold_unreachable(); }
 
   // Apply an incremental relocation.

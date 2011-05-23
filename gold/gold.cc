@@ -630,6 +630,13 @@ queue_middle_tasks(const General_options& options,
 	}
     }
 
+  // For incremental updates, record the existing GOT and PLT entries.
+  if (parameters->incremental_update())
+    {
+      Incremental_binary* ibase = layout->incremental_base();
+      ibase->process_got_plt(symtab, layout);
+    }
+
   if (is_debugging_enabled(DEBUG_SCRIPT))
     layout->script_options()->print(stderr);
 

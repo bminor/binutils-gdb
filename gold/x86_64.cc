@@ -53,8 +53,31 @@ class Output_data_plt_x86_64 : public Output_section_data
  public:
   typedef Output_data_reloc<elfcpp::SHT_RELA, true, 64, false> Reloc_section;
 
-  Output_data_plt_x86_64(Symbol_table*, Layout*, Output_data_got<64, false>*,
-                         Output_data_space*);
+  Output_data_plt_x86_64(Symbol_table* symtab, Layout* layout,
+			 Output_data_got<64, false>* got,
+			 Output_data_space* got_plt)
+    : Output_section_data(8), tlsdesc_rel_(NULL), got_(got), got_plt_(got_plt),
+      count_(0), tlsdesc_got_offset_(-1U), free_list_()
+  { this->init(symtab, layout); }
+
+  Output_data_plt_x86_64(Symbol_table* symtab, Layout* layout,
+			 Output_data_got<64, false>* got,
+			 Output_data_space* got_plt,
+			 unsigned int plt_count)
+    : Output_section_data((plt_count + 1) * plt_entry_size, 8, false),
+      tlsdesc_rel_(NULL), got_(got), got_plt_(got_plt),
+      count_(plt_count), tlsdesc_got_offset_(-1U), free_list_()
+  {
+    this->init(symtab, layout);
+
+    // Initialize the free list and reserve the first entry.
+    this->free_list_.init((plt_count + 1) * plt_entry_size, false);
+    this->free_list_.remove(0, plt_entry_size);
+  }
+
+  // Initialize the PLT section.
+  void
+  init(Symbol_table* symtab, Layout* layout);
 
   // Add an entry to the PLT.
   void
@@ -64,6 +87,10 @@ class Output_data_plt_x86_64 : public Output_section_data
   unsigned int
   add_local_ifunc_entry(Sized_relobj<64, false>* relobj,
 			unsigned int local_sym_index);
+
+  // Add the relocation for a PLT entry.
+  void
+  add_relocation(Symbol* gsym, unsigned int got_offset);
 
   // Add the reserved TLSDESC_PLT entry to the PLT.
   void
@@ -108,6 +135,14 @@ class Output_data_plt_x86_64 : public Output_section_data
   static unsigned int
   get_plt_entry_size()
   { return plt_entry_size; }
+
+  // Reserve a slot in the PLT for an existing symbol in an incremental update.
+  void
+  reserve_slot(unsigned int plt_index)
+  {
+    this->free_list_.remove((plt_index + 1) * plt_entry_size,
+			    (plt_index + 2) * plt_entry_size);
+  }
 
  protected:
   void
@@ -154,6 +189,9 @@ class Output_data_plt_x86_64 : public Output_section_data
   unsigned int count_;
   // Offset of the reserved TLSDESC_GOT entry when needed.
   unsigned int tlsdesc_got_offset_;
+  // List of available regions within the section, for incremental
+  // update links.
+  Free_list free_list_;
 };
 
 // The x86_64 target class.
@@ -344,6 +382,18 @@ class Target_x86_64 : public Target_freebsd<64, false>
   // Return the size of each PLT entry.
   unsigned int
   plt_entry_size() const;
+
+  // Create the GOT section for an incremental update.
+  Output_data_got<64, false>*
+  init_got_plt_for_update(Symbol_table* symtab,
+			  Layout* layout,
+			  unsigned int got_count,
+			  unsigned int plt_count);
+
+  // Register an existing PLT entry for a global symbol.
+  // A target needs to implement this to support incremental linking.
+  void
+  register_global_plt_entry(unsigned int plt_index, Symbol* gsym);
 
   // Apply an incremental relocation.
   void
@@ -779,16 +829,10 @@ Target_x86_64::rela_dyn_section(Layout* layout)
   return this->rela_dyn_;
 }
 
-// Create the PLT section.  The ordinary .got section is an argument,
-// since we need to refer to the start.  We also create our own .got
-// section just for PLT entries.
+// Initialize the PLT section.
 
-Output_data_plt_x86_64::Output_data_plt_x86_64(Symbol_table* symtab,
-					       Layout* layout,
-                                               Output_data_got<64, false>* got,
-                                               Output_data_space* got_plt)
-  : Output_section_data(8), tlsdesc_rel_(NULL), got_(got), got_plt_(got_plt),
-    count_(0), tlsdesc_got_offset_(-1U)
+void
+Output_data_plt_x86_64::init(Symbol_table* symtab, Layout* layout)
 {
   this->rel_ = new Reloc_section(false);
   layout->add_output_section_data(".rela.plt", elfcpp::SHT_RELA,
@@ -827,30 +871,46 @@ Output_data_plt_x86_64::add_entry(Symbol* gsym)
 {
   gold_assert(!gsym->has_plt_offset());
 
-  // Note that when setting the PLT offset we skip the initial
-  // reserved PLT entry.
-  gsym->set_plt_offset((this->count_ + 1) * plt_entry_size);
+  unsigned int plt_index;
+  off_t plt_offset;
+  section_offset_type got_offset;
 
-  ++this->count_;
+  if (!this->is_data_size_valid())
+    {
+      // Note that when setting the PLT offset we skip the initial
+      // reserved PLT entry.
+      plt_index = this->count_ + 1;
+      plt_offset = plt_index * plt_entry_size;
 
-  section_offset_type got_offset = this->got_plt_->current_data_size();
+      ++this->count_;
 
-  // Every PLT entry needs a GOT entry which points back to the PLT
-  // entry (this will be changed by the dynamic linker, normally
-  // lazily when the function is called).
-  this->got_plt_->set_current_data_size(got_offset + 8);
+      got_offset = (plt_index - 1 + 3) * 8;
+      gold_assert(got_offset == this->got_plt_->current_data_size());
 
-  // Every PLT entry needs a reloc.
-  if (gsym->type() == elfcpp::STT_GNU_IFUNC
-      && gsym->can_use_relative_reloc(false))
-    this->rel_->add_symbolless_global_addend(gsym, elfcpp::R_X86_64_IRELATIVE,
-					     this->got_plt_, got_offset, 0);
+      // Every PLT entry needs a GOT entry which points back to the PLT
+      // entry (this will be changed by the dynamic linker, normally
+      // lazily when the function is called).
+      this->got_plt_->set_current_data_size(got_offset + 8);
+    }
   else
     {
-      gsym->set_needs_dynsym_entry();
-      this->rel_->add_global(gsym, elfcpp::R_X86_64_JUMP_SLOT, this->got_plt_,
-			     got_offset, 0);
+      // For incremental updates, find an available slot.
+      plt_offset = this->free_list_.allocate(plt_entry_size, plt_entry_size, 0);
+      if (plt_offset == -1)
+	gold_fatal(_("out of patch space (PLT);"
+		     " relink with --incremental-full"));
+
+      // The GOT and PLT entries have a 1-1 correspondance, so the GOT offset
+      // can be calculated from the PLT index, adjusting for the three
+      // reserved entries at the beginning of the GOT.
+      plt_index = plt_offset / plt_entry_size - 1;
+      got_offset = (plt_index - 1 + 3) * 8;
     }
+
+  gsym->set_plt_offset(plt_offset);
+
+  // Every PLT entry needs a reloc.
+  this->add_relocation(gsym, got_offset);
 
   // Note that we don't need to save the symbol.  The contents of the
   // PLT are independent of which symbols are used.  The symbols only
@@ -879,6 +939,23 @@ Output_data_plt_x86_64::add_local_ifunc_entry(Sized_relobj<64, false>* relobj,
 					  this->got_plt_, got_offset, 0);
 
   return plt_offset;
+}
+
+// Add the relocation for a PLT entry.
+
+void
+Output_data_plt_x86_64::add_relocation(Symbol* gsym, unsigned int got_offset)
+{
+  if (gsym->type() == elfcpp::STT_GNU_IFUNC
+      && gsym->can_use_relative_reloc(false))
+    this->rel_->add_symbolless_global_addend(gsym, elfcpp::R_X86_64_IRELATIVE,
+					     this->got_plt_, got_offset, 0);
+  else
+    {
+      gsym->set_needs_dynsym_entry();
+      this->rel_->add_global(gsym, elfcpp::R_X86_64_JUMP_SLOT, this->got_plt_,
+			     got_offset, 0);
+    }
 }
 
 // Return where the TLSDESC relocations should go, creating it if
@@ -1127,6 +1204,81 @@ unsigned int
 Target_x86_64::plt_entry_size() const
 {
   return Output_data_plt_x86_64::get_plt_entry_size();
+}
+
+// Create the GOT and PLT sections for an incremental update.
+
+Output_data_got<64, false>*
+Target_x86_64::init_got_plt_for_update(Symbol_table* symtab,
+				       Layout* layout,
+				       unsigned int got_count,
+				       unsigned int plt_count)
+{
+  gold_assert(this->got_ == NULL);
+
+  this->got_ = new Output_data_got<64, false>(got_count * 8);
+  layout->add_output_section_data(".got", elfcpp::SHT_PROGBITS,
+				  (elfcpp::SHF_ALLOC
+				   | elfcpp::SHF_WRITE),
+				  this->got_, ORDER_RELRO_LAST,
+				  true);
+
+  // Add the three reserved entries.
+  this->got_plt_ = new Output_data_space((plt_count + 3) * 8, 8, "** GOT PLT");
+  layout->add_output_section_data(".got.plt", elfcpp::SHT_PROGBITS,
+				  (elfcpp::SHF_ALLOC
+				   | elfcpp::SHF_WRITE),
+				  this->got_plt_, ORDER_NON_RELRO_FIRST,
+				  false);
+
+  // Define _GLOBAL_OFFSET_TABLE_ at the start of the PLT.
+  this->global_offset_table_ =
+    symtab->define_in_output_data("_GLOBAL_OFFSET_TABLE_", NULL,
+				  Symbol_table::PREDEFINED,
+				  this->got_plt_,
+				  0, 0, elfcpp::STT_OBJECT,
+				  elfcpp::STB_LOCAL,
+				  elfcpp::STV_HIDDEN, 0,
+				  false, false);
+
+  // If there are any TLSDESC relocations, they get GOT entries in
+  // .got.plt after the jump slot entries.
+  // FIXME: Get the count for TLSDESC entries.
+  this->got_tlsdesc_ = new Output_data_got<64, false>(0);
+  layout->add_output_section_data(".got.plt", elfcpp::SHT_PROGBITS,
+				  elfcpp::SHF_ALLOC | elfcpp::SHF_WRITE,
+				  this->got_tlsdesc_,
+				  ORDER_NON_RELRO_FIRST, false);
+
+  // Create the PLT section.
+  this->plt_ = new Output_data_plt_x86_64(symtab, layout, this->got_,
+					  this->got_plt_, plt_count);
+  layout->add_output_section_data(".plt", elfcpp::SHT_PROGBITS,
+				  elfcpp::SHF_ALLOC | elfcpp::SHF_EXECINSTR,
+				  this->plt_, ORDER_PLT, false);
+
+  // Make the sh_info field of .rela.plt point to .plt.
+  Output_section* rela_plt_os = this->plt_->rela_plt()->output_section();
+  rela_plt_os->set_info_section(this->plt_->output_section());
+
+  return this->got_;
+}
+
+// Register an existing PLT entry for a global symbol.
+
+void
+Target_x86_64::register_global_plt_entry(unsigned int plt_index,
+					 Symbol* gsym)
+{
+  gold_assert(this->plt_ != NULL);
+  gold_assert(!gsym->has_plt_offset());
+
+  this->plt_->reserve_slot(plt_index);
+
+  gsym->set_plt_offset((plt_index + 1) * this->plt_entry_size());
+
+  unsigned int got_offset = (plt_index + 3) * 8;
+  this->plt_->add_relocation(gsym, got_offset);
 }
 
 // Define the _TLS_MODULE_BASE_ symbol in the TLS segment.

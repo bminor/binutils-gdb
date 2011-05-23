@@ -1,3 +1,83 @@
+2011-05-23 Cary Coutant  <ccoutant@google.com>
+
+	* gold.cc (queue_middle_tasks): Process existing GOT/PLT entries.
+	* incremental-dump.cc (dump_incremental_inputs): Mask high-order
+	bit when checking got_type.
+	* incremental.cc (Sized_incremental_binary::setup_readers):
+	Store symbol table and string table locations; initialize bit vector
+	of file status flags.
+	(Sized_incremental_binary::do_reserve_layout): Set bit flag for
+	unchanged files.
+	(Sized_incremental_binary::do_process_got_plt): New function.
+	(Sized_incremental_binary::get_symtab_view): Use stored locations.
+	(Output_section_incremental_inputs::set_final_data_size): Record
+	file index for each input file.
+	(Output_section_incremental_inputs::write_got_plt): Store file index
+	instead of input entry offset for each GOT entry.
+	* incremental.h
+	(Incremental_input_entry::Incremental_input_entry): Initialize new
+	data member.
+	(Incremental_input_entry::set_offset): Store file index.
+	(Incremental_input_entry::get_file_index): New function.
+	(Incremental_input_entry::file_index_): New data member.
+	(Incremental_binary::process_got_plt): New function.
+	(Incremental_binary::do_process_got_plt): New function.
+	(Sized_incremental_binary::Sized_incremental_binary): Initialize new
+	data members.
+	(Sized_incremental_binary::~Sized_incremental_binary): New destructor.
+	(Sized_incremental_binary::set_file_is_unchanged): New function.
+	(Sized_incremental_binary::file_is_unchanged): New function.
+	(Sized_incremental_binary::do_process_got_plt): New function.
+	(Sized_incremental_binary::file_status_): New data member.
+	(Sized_incremental_binary::main_symtab_loc_): New data member.
+	(Sized_incremental_binary::main_strtab_loc_): New data member.
+	* output.cc (Output_data_got::Got_entry::write): Add case
+	RESERVED_CODE.
+	(Output_data_got::add_global): Call add_got_entry.
+	(Output_data_got::add_global_plt): Likewise.
+	(Output_data_got::add_global_with_rel): Likewise.
+	(Output_data_got::add_global_with_rela): Likewise.
+	(Output_data_got::add_global_pair_with_rel): Call add_got_entry_pair.
+	(Output_data_got::add_global_pair_with_rela): Likewise.
+	(Output_data_got::add_local): Call add_got_entry.
+	(Output_data_got::add_local_plt): Likewise.
+	(Output_data_got::add_local_with_rel): Likewise.
+	(Output_data_got::add_local_with_rela): Likewise.
+	(Output_data_got::add_local_pair_with_rel): Call add_got_entry_pair.
+	(Output_data_got::add_local_pair_with_rela): Likewise.
+	(Output_data_got::reserve_slot): New function.
+	(Output_data_got::reserve_slot_for_global): New function.
+	(Output_data_got::add_got_entry): New function.
+	(Output_data_got::add_got_entry_pair): New function.
+	(Output_section::add_output_section_data): Edit FIXME.
+	* output.h
+	(Output_section_data_build::Output_section_data_build): New
+	constructor with size parameter.
+	(Output_data_space::Output_data_space): Likewise.
+	(Output_data_got::Output_data_got): Initialize new data member; new
+	constructor with size parameter.
+	(Output_data_got::add_constant): Call add_got_entry.
+	(Output_data_got::reserve_slot): New function.
+	(Output_data_got::reserve_slot_for_global): New function.
+	(class Output_data_got::Got_entry): Add RESERVED_CODE.
+	(Output_data_got::add_got_entry): New function.
+	(Output_data_got::add_got_entry_pair): New function.
+	(Output_data_got::free_list_): New data member.
+	* target.h (Sized_target::init_got_plt_for_update): New function.
+	(Sized_target::register_global_plt_entry): New function.
+	* x86_64.cc (Output_data_plt_x86_64::Output_data_plt_x86_64):
+	Initialize new data member; call init; add constructor with PLT count.
+	(Output_data_plt_x86_64::init): New function.
+	(Output_data_plt_x86_64::add_relocation): New function.
+	(Output_data_plt_x86_64::reserve_slot): New function.
+	(Output_data_plt_x86_64::free_list_): New data member.
+	(Target_x86_64::init_got_plt_for_update): New function.
+	(Target_x86_64::register_global_plt_entry): New function.
+	(Output_data_plt_x86_64::add_entry): Allocate from free list for
+	incremental updates.
+	(Output_data_plt_x86_64::add_relocation): New function.
+	* testsuite/object_unittest.cc (Object_test): Set default options.
+
 2011-05-16  Ian Lance Taylor  <iant@google.com>
 
 	* options.h (class General_options): Make -i a synonym for -r.

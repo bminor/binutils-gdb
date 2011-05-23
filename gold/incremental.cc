@@ -258,6 +258,19 @@ Sized_incremental_binary<size, big_endian>::setup_readers()
   this->got_plt_reader_ =
       Incremental_got_plt_reader<big_endian>(got_plt_view.data());
 
+  // Find the main symbol table.
+  unsigned int main_symtab_shndx =
+      this->elf_file_.find_section_by_type(elfcpp::SHT_SYMTAB);
+  gold_assert(main_symtab_shndx != elfcpp::SHN_UNDEF);
+  this->main_symtab_loc_ = this->elf_file_.section_contents(main_symtab_shndx);
+
+  // Find the main symbol string table.
+  unsigned int main_strtab_shndx =
+      this->elf_file_.section_link(main_symtab_shndx);
+  gold_assert(main_strtab_shndx != elfcpp::SHN_UNDEF
+              && main_strtab_shndx < this->elf_file_.shnum());
+  this->main_strtab_loc_ = this->elf_file_.section_contents(main_strtab_shndx);
+
   // Walk the list of input files (a) to setup an Input_reader for each
   // input file, and (b) to record maps of files added from archive
   // libraries and scripts.
@@ -313,6 +326,10 @@ Sized_incremental_binary<size, big_endian>::setup_readers()
   // Initialize the map of global symbols.
   unsigned int nglobals = this->symtab_reader_.symbol_count();
   this->symbol_map_.resize(nglobals);
+
+  // Initialize the status of each input file.
+  this->file_status_ = new unsigned char[(count + 7) / 8];
+  memset(this->file_status_, 0, (count + 7) / 8);
 
   this->has_incremental_info_ = true;
 }
@@ -507,6 +524,8 @@ Sized_incremental_binary<size, big_endian>::do_reserve_layout(
   Input_entry_reader input_file =
       this->inputs_reader_.input_file(input_file_index);
 
+  this->set_file_is_unchanged(input_file_index);
+
   if (input_file.type() == INCREMENTAL_INPUT_SHARED_LIBRARY)
     return;
 
@@ -520,6 +539,83 @@ Sized_incremental_binary<size, big_endian>::do_reserve_layout(
       Output_section* os = this->section_map_[sect.output_shndx];
       gold_assert(os != NULL);
       os->reserve(sect.sh_offset, sect.sh_size);
+    }
+}
+
+// Process the GOT and PLT entries from the existing output file.
+
+template<int size, bool big_endian>
+void
+Sized_incremental_binary<size, big_endian>::do_process_got_plt(
+    Symbol_table* symtab,
+    Layout* layout)
+{
+  Incremental_got_plt_reader<big_endian> got_plt_reader(this->got_plt_reader());
+  Sized_target<size, big_endian>* target =
+      parameters->sized_target<size, big_endian>();
+
+  // Get the number of symbols in the main symbol table and in the
+  // incremental symbol table.  The difference between the two counts
+  // is the index of the first forced-local or global symbol in the
+  // main symbol table.
+  unsigned int symtab_count =
+      this->main_symtab_loc_.data_size / elfcpp::Elf_sizes<size>::sym_size;
+  unsigned int isym_count = this->symtab_reader_.symbol_count();
+  unsigned int first_global = symtab_count - isym_count;
+
+  // Tell the target how big the GOT and PLT sections are.
+  unsigned int got_count = got_plt_reader.get_got_entry_count();
+  unsigned int plt_count = got_plt_reader.get_plt_entry_count();
+  Output_data_got<size, big_endian>* got =
+      target->init_got_plt_for_update(symtab, layout, got_count, plt_count);
+
+  // Read the GOT entries from the base file and build the outgoing GOT.
+  for (unsigned int i = 0; i < got_count; ++i)
+    {
+      unsigned int got_type = got_plt_reader.get_got_type(i);
+      if ((got_type & 0x7f) == 0x7f)
+	{
+	  // This is the second entry of a pair.
+	  got->reserve_slot(i);
+	  continue;
+	}
+      unsigned int got_desc = got_plt_reader.get_got_desc(i);
+      if (got_type & 0x80)
+	{
+	  // This is an entry for a local symbol.  GOT_DESC is the index
+	  // of the object file entry in the list of input files.  Ignore
+	  // this entry if the object file was replaced.
+	  gold_debug(DEBUG_INCREMENTAL,
+		     "GOT entry %d, type %02x: (local symbol)",
+		     i, got_type & 0x7f);
+	  if (this->file_is_unchanged(got_desc))
+	    got->reserve_slot(i);
+	}
+      else
+	{
+	  // This is an entry for a global symbol.  GOT_DESC is the symbol
+	  // table index.
+	  // FIXME: This should really be a fatal error (corrupt input).
+	  gold_assert(got_desc >= first_global && got_desc < symtab_count);
+	  Symbol* sym = this->global_symbol(got_desc - first_global);
+	  gold_debug(DEBUG_INCREMENTAL,
+		     "GOT entry %d, type %02x: %s",
+		     i, got_type, sym->name());
+	  got->reserve_slot_for_global(i, sym, got_type);
+	}
+    }
+
+  // Read the PLT entries from the base file and pass each to the target.
+  for (unsigned int i = 0; i < plt_count; ++i)
+    {
+      unsigned int plt_desc = got_plt_reader.get_plt_desc(i);
+      // FIXME: This should really be a fatal error (corrupt input).
+      gold_assert(plt_desc >= first_global && plt_desc < symtab_count);
+      Symbol* sym = this->global_symbol(plt_desc - first_global);
+      gold_debug(DEBUG_INCREMENTAL,
+		 "PLT entry %d: %s",
+		 i, sym->name());
+      target->register_global_plt_entry(i, sym);
     }
 }
 
@@ -628,20 +724,12 @@ Sized_incremental_binary<size, big_endian>::get_symtab_view(
     unsigned int* nsyms,
     elfcpp::Elf_strtab* strtab)
 {
-  unsigned int symtab_shndx =
-      this->elf_file_.find_section_by_type(elfcpp::SHT_SYMTAB);
-  gold_assert(symtab_shndx != elfcpp::SHN_UNDEF);
-  Location symtab_location(this->elf_file_.section_contents(symtab_shndx));
-  *symtab_view = this->view(symtab_location);
-  *nsyms = symtab_location.data_size / elfcpp::Elf_sizes<size>::sym_size;
+  *symtab_view = this->view(this->main_symtab_loc_);
+  *nsyms = this->main_symtab_loc_.data_size / elfcpp::Elf_sizes<size>::sym_size;
 
-  unsigned int strtab_shndx = this->elf_file_.section_link(symtab_shndx);
-  gold_assert(strtab_shndx != elfcpp::SHN_UNDEF
-              && strtab_shndx < this->elf_file_.shnum());
-
-  Location strtab_location(this->elf_file_.section_contents(strtab_shndx));
-  View strtab_view(this->view(strtab_location));
-  *strtab = elfcpp::Elf_strtab(strtab_view.data(), strtab_location.data_size);
+  View strtab_view(this->view(this->main_strtab_loc_));
+  *strtab = elfcpp::Elf_strtab(strtab_view.data(),
+			       this->main_strtab_loc_.data_size);
 }
 
 namespace
@@ -1022,6 +1110,7 @@ Output_section_incremental_inputs<size, big_endian>::set_final_data_size()
   unsigned int input_offset = this->header_size;
 
   // Offset of each supplemental info block.
+  unsigned int file_index = 0;
   unsigned int info_offset = this->header_size;
   info_offset += this->input_entry_size * inputs->input_file_count();
 
@@ -1031,8 +1120,9 @@ Output_section_incremental_inputs<size, big_endian>::set_final_data_size()
        p != inputs->input_files().end();
        ++p)
     {
-      // Set the offset of the input file entry.
-      (*p)->set_offset(input_offset);
+      // Set the index and offset of the input file entry.
+      (*p)->set_offset(file_index, input_offset);
+      ++file_index;
       input_offset += this->input_entry_size;
 
       // Set the offset of the supplemental info block.
@@ -1655,7 +1745,7 @@ Output_section_incremental_inputs<size, big_endian>::write_got_plt(
       gold_assert(entry != NULL);
       const Object* obj = entry->object();
       gold_assert(obj != NULL);
-      view_info.got_descriptor = (*p)->get_offset();
+      view_info.got_descriptor = (*p)->get_file_index();
       Got_visitor v(view_info);
       obj->for_all_local_got_entries(&v);
     }

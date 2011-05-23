@@ -370,7 +370,7 @@ dump_incremental_inputs(const char* argv0, const char* filename,
       unsigned int got_type = igot_plt.get_got_type(i);
       unsigned int got_desc = igot_plt.get_got_desc(i);
       printf("[%d] type %02x, ", i, got_type & 0x7f);
-      if (got_type == 0x7f)
+      if ((got_type & 0x7f) == 0x7f)
 	printf("reserved");
       else if (got_type & 0x80)
 	{
