@@ -1,3 +1,11 @@
+2011-05-23  Mike Frysinger  <vapier@gentoo.org>
+
+	* dv-glue.c (hw_glue_finish): Set type to glue_or when name is
+	glue-or, and set type to glue_xor when name is glue-xor.
+	(hw_glue_port_event): Return immediately when type is glue_io
+	or unmatched.  Handle glue_or and glue_xor types.  Move HW_TRACE
+	and hw_port_event calls from glue_and to end of function.
+
 2011-05-11  Mike Frysinger  <vapier@gentoo.org>
 
 	* callback.c, dv-pal.c, dv-sockser.c, hw-base.c, hw-device.c,

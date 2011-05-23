@@ -274,6 +274,10 @@ hw_glue_finish (struct hw *me)
       glue->type = glue_io;
     else if (strcmp (name, "glue-and") == 0)
       glue->type = glue_and;
+    else if (strcmp (name, "glue-or") == 0)
+      glue->type = glue_or;
+    else if (strcmp (name, "glue-xor") == 0)
+      glue->type = glue_xor;
     else
       hw_abort (me, "unimplemented glue type");
   }
@@ -358,26 +362,41 @@ hw_glue_port_event (struct hw *me,
 		   my_port,
 		   (unsigned long) glue->address + port * sizeof (unsigned_word),
 		   level));
-	break;
+	return;
       }
     case glue_and:
       {
 	glue->output[0] = glue->input[0];
 	for (i = 1; i < glue->nr_inputs; i++)
 	  glue->output[0] &= glue->input[i];
-
-	HW_TRACE ((me, "and - port %d, level %d arrived - output %d",
-		   my_port, level, glue->output[0]));
-
-	hw_port_event (me, 0, glue->output[0]);
+	break;
+      }
+    case glue_or:
+      {
+	glue->output[0] = glue->input[0];
+	for (i = 1; i < glue->nr_inputs; i++)
+	  glue->output[0] |= glue->input[i];
+	break;
+      }
+    case glue_xor:
+      {
+	glue->output[0] = glue->input[0];
+	for (i = 1; i < glue->nr_inputs; i++)
+	  glue->output[0] ^= glue->input[i];
 	break;
       }
     default:
       {
 	hw_abort (me, "operator not implemented");
-	break;
+	return;
       }
     }
+
+  /* If we fell through, we want to generate a port event.  */
+  HW_TRACE ((me, "port %d, level %d arrived - output %d",
+	     my_port, level, glue->output[0]));
+
+  hw_port_event (me, 0, glue->output[0]);
 }
 
 
