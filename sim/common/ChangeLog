@@ -1,5 +1,12 @@
 2011-05-23  Mike Frysinger  <vapier@gentoo.org>
 
+	* dv-glue.c (hw_glue_finish): Move "name" to function scope and
+	remove now-unnecessary sub-scope for glue->type setting.
+	Check to see if the "reg" property exists before we use it, and
+	if it doesn't exist, error out for "glue" devices.
+
+2011-05-23  Mike Frysinger  <vapier@gentoo.org>
+
 	* dv-glue.c (hw_glue_finish): Set type to glue_or when name is
 	glue-or, and set type to glue_xor when name is glue-xor.
 	(hw_glue_port_event): Return immediately when type is glue_io

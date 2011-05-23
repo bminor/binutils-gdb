@@ -195,6 +195,7 @@ static void
 hw_glue_finish (struct hw *me)
 {
   struct hw_glue *glue = HW_ZALLOC (me, struct hw_glue);
+  const char *name = hw_name (me);
 
   /* establish our own methods */
   set_hw_data (me, glue);
@@ -207,39 +208,49 @@ hw_glue_finish (struct hw *me)
   do_hw_attach_regs (me);
 
   /* establish the output registers */
-  {
-    reg_property_spec unit;
-    int reg_nr;
+  if (hw_find_property (me, "reg"))
+    {
+      reg_property_spec unit;
+      int reg_nr;
 
-    /* find a relevant reg entry */
-    reg_nr = 0;
-    while (hw_find_reg_array_property (me, "reg", reg_nr, &unit)
-	   && !hw_unit_size_to_attach_size (hw_parent (me),
-					    &unit.size,
-					    &glue->sizeof_output,
-					    me))
-      reg_nr++;
+      /* Find a relevant reg entry.  */
+      reg_nr = 0;
+      while (hw_find_reg_array_property (me, "reg", reg_nr, &unit)
+	     && !hw_unit_size_to_attach_size (hw_parent (me),
+					      &unit.size,
+					      &glue->sizeof_output,
+					      me))
+	reg_nr++;
 
-    /* check out the size */
-    if (glue->sizeof_output == 0)
-      hw_abort (me, "at least one reg property size must be nonzero");
-    if (glue->sizeof_output % sizeof (unsigned_word) != 0)
-      hw_abort (me, "reg property size must be %ld aligned",
-		(long) sizeof (unsigned_word));
+      /* Check out the size ...  */
+      if (glue->sizeof_output == 0)
+	hw_abort (me, "at least one reg property size must be nonzero");
+      if (glue->sizeof_output % sizeof (unsigned_word) != 0)
+	hw_abort (me, "reg property size must be %ld aligned",
+		  (long) sizeof (unsigned_word));
 
-    /* and the address */
-    hw_unit_address_to_attach_address (hw_parent (me),
-				       &unit.address,
-				       &glue->space,
-				       &glue->address,
-				       me);
-    if (glue->address % (sizeof (unsigned_word) * max_nr_ports) != 0)
-      hw_abort (me, "reg property address must be %ld aligned",
-		(long) (sizeof (unsigned_word) * max_nr_ports));
+      /* ... and the address.  */
+      hw_unit_address_to_attach_address (hw_parent (me),
+					 &unit.address,
+					 &glue->space,
+					 &glue->address,
+					 me);
+      if (glue->address % (sizeof (unsigned_word) * max_nr_ports) != 0)
+	hw_abort (me, "reg property address must be %ld aligned",
+		  (long) (sizeof (unsigned_word) * max_nr_ports));
 
-    glue->nr_outputs = glue->sizeof_output / sizeof (unsigned_word);
-    glue->output = hw_zalloc (me, glue->sizeof_output);
-  }
+      glue->nr_outputs = glue->sizeof_output / sizeof (unsigned_word);
+    }
+  else
+    {
+      /* Allow bitwise glue devices to declare only ports.  */
+      if (!strcmp (name, "glue"))
+	hw_abort (me, "Missing \"reg\" property");
+
+      glue->nr_outputs = 1;
+      glue->sizeof_output = sizeof (unsigned_word);
+    }
+  glue->output = hw_zalloc (me, glue->sizeof_output);
 
   /* establish the input ports */
   {
@@ -267,20 +278,16 @@ hw_glue_finish (struct hw *me)
   }
 
   /* determine our type */
-  {
-    const char *name = hw_name(me);
-
-    if (strcmp (name, "glue") == 0)
-      glue->type = glue_io;
-    else if (strcmp (name, "glue-and") == 0)
-      glue->type = glue_and;
-    else if (strcmp (name, "glue-or") == 0)
-      glue->type = glue_or;
-    else if (strcmp (name, "glue-xor") == 0)
-      glue->type = glue_xor;
-    else
-      hw_abort (me, "unimplemented glue type");
-  }
+  if (strcmp (name, "glue") == 0)
+    glue->type = glue_io;
+  else if (strcmp (name, "glue-and") == 0)
+    glue->type = glue_and;
+  else if (strcmp (name, "glue-or") == 0)
+    glue->type = glue_or;
+  else if (strcmp (name, "glue-xor") == 0)
+    glue->type = glue_xor;
+  else
+    hw_abort (me, "unimplemented glue type");
 
   HW_TRACE ((me, "int-number %d, nr_inputs %d, nr_outputs %d",
 	     glue->int_number, glue->nr_inputs, glue->nr_outputs));
