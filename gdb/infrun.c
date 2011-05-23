@@ -1604,9 +1604,9 @@ maybe_software_singlestep (struct gdbarch *gdbarch, CORE_ADDR pc)
 /* Return a ptid representing the set of threads that we will proceed,
    in the perspective of the user/frontend.  We may actually resume
    fewer threads at first, e.g., if a thread is stopped at a
-   breakpoint that needs stepping-off, but that should be visible to
-   the user/frontend, and neither should the frontend/user be allowed
-   to proceed any of the threads that happen to be stopped at for
+   breakpoint that needs stepping-off, but that should not be visible
+   to the user/frontend, and neither should the frontend/user be
+   allowed to proceed any of the threads that happen to be stopped for
    internal run control handling, if a previous command wanted them
    resumed.  */
 

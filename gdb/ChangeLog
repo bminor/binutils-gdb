@@ -1,3 +1,8 @@
+2011-05-23  Pedro Alves  <pedro@codesourcery.com>
+
+	* infrun.c (user_visible_resume_ptid): Fix typos in describing
+	comment.
+
 2011-05-21  Mark Kettenis  <kettenis@gnu.org>
 
 	* sparc-nat.c (sparc_fetch_inferior_registers): Explicitly supply
