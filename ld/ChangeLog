@@ -1,5 +1,11 @@
 2011-05-23  Alan Modra  <amodra@gmail.com>
 
+	* ldmisc.c (vfinfo): Add %H.
+	* ldmain.c (reloc_overflow): Use %H rather than %C.
+	(reloc_dangerous, unattached_reloc): Likewise.
+
+2011-05-23  Alan Modra  <amodra@gmail.com>
+
 	PR 12763
 	* ldlang.c (lang_output_section_find_by_flags): Match orphan .sdata2
 	like sections to existing .sdata2, and similarly for orphan TLS

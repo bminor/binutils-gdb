@@ -47,6 +47,7 @@
  %E current bfd error or errno
  %F error is fatal
  %G like %D, but only function name
+ %H like %C but in addition emit section+offset
  %I filename from a lang_input_statement_type
  %P print program name
  %R info about a relent
@@ -262,6 +263,7 @@ vfinfo (FILE *fp, const char *fmt, va_list arg, bfd_boolean is_warning)
 	    case 'C':
 	    case 'D':
 	    case 'G':
+	    case 'H':
 	      /* Clever filename:linenumber with function name if possible.
 		 The arguments are a BFD, a section, and an offset.  */
 	      {
@@ -276,6 +278,7 @@ vfinfo (FILE *fp, const char *fmt, va_list arg, bfd_boolean is_warning)
 		const char *functionname;
 		unsigned int linenumber;
 		bfd_boolean discard_last;
+		bfd_boolean done;
 
 		abfd = va_arg (arg, bfd *);
 		section = va_arg (arg, asection *);
@@ -296,14 +299,15 @@ vfinfo (FILE *fp, const char *fmt, va_list arg, bfd_boolean is_warning)
 
 		   We do not always have a line number available so if
 		   we cannot find them we print out the section name and
-		   offset instread.  */
+		   offset instead.  */
 		discard_last = TRUE;
 		if (abfd != NULL
 		    && bfd_find_nearest_line (abfd, section, asymbols, offset,
 					      &filename, &functionname,
 					      &linenumber))
 		  {
-		    if (functionname != NULL && fmt[-1] == 'C')
+		    if (functionname != NULL
+			&& (fmt[-1] == 'C' || fmt[-1] == 'H'))
 		      {
 			/* Detect the case where we are printing out a
 			   message for the same function as the last
@@ -343,15 +347,21 @@ vfinfo (FILE *fp, const char *fmt, va_list arg, bfd_boolean is_warning)
 		    if (filename != NULL)
 		      fprintf (fp, "%s:", filename);
 
+		    done = fmt[-1] != 'H';
 		    if (functionname != NULL && fmt[-1] == 'G')
 		      lfinfo (fp, "%T", functionname);
 		    else if (filename != NULL && linenumber != 0)
-		      fprintf (fp, "%u", linenumber);
+		      fprintf (fp, "%u%s", linenumber, ":" + done);
 		    else
-		      lfinfo (fp, "(%A+0x%v)", section, offset);
+		      done = FALSE;
 		  }
 		else
-		  lfinfo (fp, "%B:(%A+0x%v)", abfd, section, offset);
+		  {
+		    lfinfo (fp, "%B:", abfd);
+		    done = FALSE;
+		  }
+		if (!done)
+		  lfinfo (fp, "(%A+0x%v)", section, offset);
 
 		if (discard_last)
 		  {
