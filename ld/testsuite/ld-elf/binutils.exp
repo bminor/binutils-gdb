@@ -121,10 +121,10 @@ if { ([istarget "i?86-*-elf*"]
 
 binutils_test strip "-T ${srcdir}/${subdir}/lma.lnk" lma
 
-set tls_tests { "tdata1" "tdata2" "tdata3" }
+set tls_tests { "tdata1" "tdata2" }
 # hppa64 has its own .tbss section, with different flags.
 if { ![istarget "hppa64-*-*"] } {
-    lappend tls_tests "tbss1" "tbss2" "tbss3"
+    lappend tls_tests "tdata3" "tbss1" "tbss2" "tbss3"
 }
 set tls_opts {
     ""
