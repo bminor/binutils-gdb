@@ -1,3 +1,8 @@
+2011-05-23  Nick Clifton  <nickc@redhat.com>
+
+	* ld-elf/shared.exp: Revert previous delta.  Do not build
+	libraries in a non-native environment.
+
 2011-05-23  Alan Modra  <amodra@gmail.com>
 
 	PR 12763
