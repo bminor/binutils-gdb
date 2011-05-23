@@ -2954,8 +2954,58 @@ elf32_rx_machine (bfd * abfd)
 static bfd_boolean
 rx_elf_object_p (bfd * abfd)
 {
+  int i;
+  unsigned int u;
+  Elf_Internal_Phdr *phdr = elf_tdata (abfd)->phdr;
+  int nphdrs = elf_elfheader (abfd)->e_phnum;
+  sec_ptr bsec;
+
   bfd_default_set_arch_mach (abfd, bfd_arch_rx,
 			     elf32_rx_machine (abfd));
+
+  /* For each PHDR in the object, we must find some section that
+     corresponds (based on matching file offsets) and use its VMA
+     information to reconstruct the p_vaddr field we clobbered when we
+     wrote it out.  */
+  for (i=0; i<nphdrs; i++)
+    {
+      for (u=0; u<elf_tdata(abfd)->num_elf_sections; u++)
+	{
+	  Elf_Internal_Shdr *sec = elf_tdata(abfd)->elf_sect_ptr[u];
+
+	  if (phdr[i].p_offset <= (bfd_vma) sec->sh_offset
+	      && (bfd_vma)sec->sh_offset <= phdr[i].p_offset + (phdr[i].p_filesz - 1))
+	    {
+	      /* Found one!  The difference between the two addresses,
+		 plus the difference between the two file offsets, is
+		 enough information to reconstruct the lma.  */
+
+	      /* Example where they aren't:
+		 PHDR[1] = lma fffc0100 offset 00002010 size 00000100
+		 SEC[6]  = vma 00000050 offset 00002050 size 00000040
+
+		 The correct LMA for the section is fffc0140 + (2050-2010).
+	      */
+
+	      phdr[i].p_vaddr = sec->sh_addr + (sec->sh_offset - phdr[i].p_offset);
+	      break;
+	    }
+	}
+
+      /* We must update the bfd sections as well, so we don't stop
+	 with one match.  */
+      bsec = abfd->sections;
+      while (bsec)
+	{
+	  if (phdr[i].p_vaddr <= bsec->lma
+	      && bsec->vma <= phdr[i].p_vaddr + (phdr[i].p_filesz - 1))
+	    {
+	      bsec->lma = phdr[i].p_paddr + (bsec->vma - phdr[i].p_vaddr);
+	    }
+	  bsec = bsec->next;
+	}
+    }
+
   return TRUE;
 }
  

@@ -1,3 +1,8 @@
+2011-05-23  DJ Delorie  <dj@redhat.com>
+
+	* elf32-rx.c (rx_elf_object_p): When reading an RX object in, undo
+	the vma/lma swapping done in elf32_rx_modify_program_headers.
+
 2011-05-23  Nick Clifton  <nickc@redhat.com>
 
 	* elf-m10300.c (mn10300_elf_mkobject): New function.
