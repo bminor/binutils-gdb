@@ -978,6 +978,7 @@ evaluate_subexp_c (struct type *expect_type, struct expression *exp,
 	struct value *result;
 	enum c_string_type dest_type;
 	const char *dest_charset;
+	int satisfy_expected = 0;
 
 	obstack_init (&output);
 	cleanup = make_cleanup_obstack_free (&output);
@@ -1014,6 +1015,22 @@ evaluate_subexp_c (struct type *expect_type, struct expression *exp,
 	/* Ensure TYPE_LENGTH is valid for TYPE.  */
 	check_typedef (type);
 
+	/* If the caller expects an array of some integral type,
+	   satisfy them.  If something odder is expected, rely on the
+	   caller to cast.  */
+	if (expect_type && TYPE_CODE (expect_type) == TYPE_CODE_ARRAY)
+	  {
+	    struct type *element_type
+	      = check_typedef (TYPE_TARGET_TYPE (expect_type));
+
+	    if (TYPE_CODE (element_type) == TYPE_CODE_INT
+		|| TYPE_CODE (element_type) == TYPE_CODE_CHAR)
+	      {
+		type = element_type;
+		satisfy_expected = 1;
+	      }
+	  }
+
 	dest_charset = charset_for_string_type (dest_type, exp->gdbarch);
 
 	++*pos;
@@ -1036,7 +1053,9 @@ evaluate_subexp_c (struct type *expect_type, struct expression *exp,
 	if (noside == EVAL_SKIP)
 	  {
 	    /* Return a dummy value of the appropriate type.  */
-	    if ((dest_type & C_CHAR) != 0)
+	    if (expect_type != NULL)
+	      result = allocate_value (expect_type);
+	    else if ((dest_type & C_CHAR) != 0)
 	      result = allocate_value (type);
 	    else
 	      result = value_cstring ("", 0, type);
@@ -1061,9 +1080,30 @@ evaluate_subexp_c (struct type *expect_type, struct expression *exp,
 	    /* Write the terminating character.  */
 	    for (i = 0; i < TYPE_LENGTH (type); ++i)
 	      obstack_1grow (&output, 0);
-	    result = value_cstring (obstack_base (&output),
-				    obstack_object_size (&output),
-				    type);
+
+	    if (satisfy_expected)
+	      {
+		LONGEST low_bound, high_bound;
+		int element_size = TYPE_LENGTH (type);
+
+		if (get_discrete_bounds (TYPE_INDEX_TYPE (expect_type),
+					 &low_bound, &high_bound) < 0)
+		  {
+		    low_bound = 0;
+		    high_bound = (TYPE_LENGTH (expect_type) / element_size) - 1;
+		  }
+		if (obstack_object_size (&output) / element_size
+		    > (high_bound - low_bound + 1))
+		  error (_("Too many array elements"));
+
+		result = allocate_value (expect_type);
+		memcpy (value_contents_raw (result), obstack_base (&output),
+			obstack_object_size (&output));
+	      }
+	    else
+	      result = value_cstring (obstack_base (&output),
+				      obstack_object_size (&output),
+				      type);
 	  }
 	do_cleanups (cleanup);
 	return result;

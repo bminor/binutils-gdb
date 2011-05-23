@@ -625,4 +625,13 @@ if {$wchar_size == 4} {
 }
 
 
+foreach name {short int long} {
+    # We're really just checking to make sure this doesn't give an
+    # error.
+    gdb_test "print ${name}_array = \"hi\"" \
+	" = {.*}" \
+	"assign string to $name array"
+}
+
+
 gdb_exit 

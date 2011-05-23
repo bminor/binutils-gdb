@@ -1,3 +1,9 @@
+2011-05-23  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.base/charset.exp (string_display): Add tests to assign to
+	arrays.
+	* gdb.base/charset.c (short_array, int_array, long_array): New.
+
 2011-05-20  Pedro Alves  <pedro@codesourcery.com>
 
 	Cope with async mode.

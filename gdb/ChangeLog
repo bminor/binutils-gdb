@@ -1,3 +1,8 @@
+2011-05-23  Tom Tromey  <tromey@redhat.com>
+
+	* c-lang.c (evaluate_subexp_c): Use expect_type if it is not
+	NULL.
+
 2011-05-23  Doug Evans  <dje@google.com>
 
 	* python/lib/gdb/printing.py (register_pretty_printer): Add missing
