@@ -3487,26 +3487,6 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
    calls may use the function descriptor symbol, ie. "bl foo".  This
    behaves exactly as "bl .foo".  */
 
-/* The linker needs to keep track of the number of relocs that it
-   decides to copy as dynamic relocs in check_relocs for each symbol.
-   This is so that it can later discard them if they are found to be
-   unnecessary.  We store the information in a field extending the
-   regular ELF linker hash table.  */
-
-struct ppc_dyn_relocs
-{
-  struct ppc_dyn_relocs *next;
-
-  /* The input section of the reloc.  */
-  asection *sec;
-
-  /* Total number of relocs copied for the input section.  */
-  bfd_size_type count;
-
-  /* Number of pc-relative relocs copied for the input section.  */
-  bfd_size_type pc_count;
-};
-
 /* Of those relocs that might be copied as dynamic relocs, this function
    selects those that must be copied when linking a shared library,
    even when the symbol is local.  */
@@ -3673,7 +3653,7 @@ struct ppc_link_hash_entry
   } u;
 
   /* Track dynamic relocs copied for this symbol.  */
-  struct ppc_dyn_relocs *dyn_relocs;
+  struct elf_dyn_relocs *dyn_relocs;
 
   /* Link between function code and descriptor symbols.  */
   struct ppc_link_hash_entry *oh;
@@ -4403,14 +4383,14 @@ ppc64_elf_copy_indirect_symbol (struct bfd_link_info *info,
     {
       if (edir->dyn_relocs != NULL)
 	{
-	  struct ppc_dyn_relocs **pp;
-	  struct ppc_dyn_relocs *p;
+	  struct elf_dyn_relocs **pp;
+	  struct elf_dyn_relocs *p;
 
 	  /* Add reloc counts against the indirect sym to the direct sym
 	     list.  Merge any entries against the same section.  */
 	  for (pp = &eind->dyn_relocs; (p = *pp) != NULL; )
 	    {
-	      struct ppc_dyn_relocs *q;
+	      struct elf_dyn_relocs *q;
 
 	      for (q = edir->dyn_relocs; q != NULL; q = q->next)
 		if (q->sec == p->sec)
@@ -5406,8 +5386,8 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      || (!info->shared
 		  && ifunc != NULL))
 	    {
-	      struct ppc_dyn_relocs *p;
-	      struct ppc_dyn_relocs **head;
+	      struct elf_dyn_relocs *p;
+	      struct elf_dyn_relocs **head;
 
 	      /* We must copy these reloc types into the output file.
 		 Create a reloc section in dynobj and make room for
@@ -5446,7 +5426,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		    s = sec;
 
 		  vpp = &elf_section_data (s)->local_dynrel;
-		  head = (struct ppc_dyn_relocs **) vpp;
+		  head = (struct elf_dyn_relocs **) vpp;
 		}
 
 	      p = *head;
@@ -5855,8 +5835,8 @@ ppc64_elf_gc_sweep_hook (bfd *abfd, struct bfd_link_info *info,
       if (r_symndx >= symtab_hdr->sh_info)
 	{
 	  struct ppc_link_hash_entry *eh;
-	  struct ppc_dyn_relocs **pp;
-	  struct ppc_dyn_relocs *p;
+	  struct elf_dyn_relocs **pp;
+	  struct elf_dyn_relocs *p;
 
 	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
 	  h = elf_follow_link (h);
@@ -6474,7 +6454,7 @@ ppc64_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
   if (ELIMINATE_COPY_RELOCS)
     {
       struct ppc_link_hash_entry * eh;
-      struct ppc_dyn_relocs *p;
+      struct elf_dyn_relocs *p;
 
       eh = (struct ppc_link_hash_entry *) h;
       for (p = eh->dyn_relocs; p != NULL; p = p->next)
@@ -6814,8 +6794,8 @@ dec_dynrel_count (bfd_vma r_info,
 		  asection *sym_sec)
 {
   enum elf_ppc64_reloc_type r_type;
-  struct ppc_dyn_relocs *p;
-  struct ppc_dyn_relocs **pp;
+  struct elf_dyn_relocs *p;
+  struct elf_dyn_relocs **pp;
 
   /* Can this reloc be dynamic?  This switch, and later tests here
      should be kept in sync with the code in check_relocs.  */
@@ -6900,12 +6880,12 @@ dec_dynrel_count (bfd_vma r_info,
       if (sym_sec != NULL)
 	{
 	  void *vpp = &elf_section_data (sym_sec)->local_dynrel;
-	  pp = (struct ppc_dyn_relocs **) vpp;
+	  pp = (struct elf_dyn_relocs **) vpp;
 	}
       else
 	{
 	  void *vpp = &elf_section_data (sec)->local_dynrel;
-	  pp = (struct ppc_dyn_relocs **) vpp;
+	  pp = (struct elf_dyn_relocs **) vpp;
 	}
 
       /* elf_gc_sweep may have already removed all dyn relocs associated
@@ -8617,7 +8597,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
   struct ppc_link_hash_table *htab;
   asection *s;
   struct ppc_link_hash_entry *eh;
-  struct ppc_dyn_relocs *p;
+  struct elf_dyn_relocs *p;
   struct got_entry **pgent, *gent;
 
   if (h->root.type == bfd_link_hash_indirect)
@@ -8781,7 +8761,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	 then they should avoid writing weird assembly.  */
       if (SYMBOL_CALLS_LOCAL (info, h))
 	{
-	  struct ppc_dyn_relocs **pp;
+	  struct elf_dyn_relocs **pp;
 
 	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; )
 	    {
@@ -8864,7 +8844,7 @@ static bfd_boolean
 readonly_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 {
   struct ppc_link_hash_entry *eh;
-  struct ppc_dyn_relocs *p;
+  struct elf_dyn_relocs *p;
 
   if (h->root.type == bfd_link_hash_warning)
     h = (struct elf_link_hash_entry *) h->root.u.i.link;
@@ -8939,7 +8919,7 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 
       for (s = ibfd->sections; s != NULL; s = s->next)
 	{
-	  struct ppc_dyn_relocs *p;
+	  struct elf_dyn_relocs *p;
 
 	  for (p = elf_section_data (s)->local_dynrel; p != NULL; p = p->next)
 	    {

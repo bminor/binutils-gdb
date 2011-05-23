@@ -1,5 +1,12 @@
 2011-05-23  Alan Modra  <amodra@gmail.com>
 
+	* elf-bfd.h: Comment typo fix.
+	* elf32-ppc.c (struct ppc_elf_dyn_relocs): Delete.  Replace with
+	struct elf_dyn_relocs throughout.
+	* elf64-ppc.c (struct ppc_dyn_relocs): Likewise.
+
+2011-05-23  Alan Modra  <amodra@gmail.com>
+
 	* elf32-frv.c: Use info->callbacks->einfo throughout file in linker
 	functions rather than warning callback or _bfd_error_handler.
 	* elf32-ppc.c: Likewise.
