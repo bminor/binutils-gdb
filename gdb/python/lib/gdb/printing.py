@@ -86,6 +86,7 @@ def register_pretty_printer(obj, printer):
     Raises:
         TypeError: A problem with the type of the printer.
         ValueError: The printer's name contains a semicolon ";".
+        RuntimeError: A printer with the same name is already registered.
 
     If the caller wants the printer to be listable and disableable, it must
     follow the PrettyPrinter API.  This applies to the old way (functions) too.
