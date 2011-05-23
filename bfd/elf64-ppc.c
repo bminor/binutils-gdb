@@ -4138,8 +4138,9 @@ ppc_get_stub_entry (const asection *input_section,
 static struct ppc_stub_hash_entry *
 ppc_add_stub (const char *stub_name,
 	      asection *section,
-	      struct ppc_link_hash_table *htab)
+	      struct bfd_link_info *info)
 {
+  struct ppc_link_hash_table *htab = ppc_hash_table (info);
   asection *link_sec;
   asection *stub_sec;
   struct ppc_stub_hash_entry *stub_entry;
@@ -4176,8 +4177,8 @@ ppc_add_stub (const char *stub_name,
 				     TRUE, FALSE);
   if (stub_entry == NULL)
     {
-      (*_bfd_error_handler) (_("%B: cannot create stub entry %s"),
-			     section->owner, stub_name);
+      info->callbacks->einfo (_("%B: cannot create stub entry %s\n"),
+			      section->owner, stub_name);
       return NULL;
     }
 
@@ -6499,9 +6500,9 @@ ppc64_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 	 function pointers, vtable refs and suchlike in read-only
 	 sections.  Allow them to proceed, but warn that this might
 	 break at runtime.  */
-      (*_bfd_error_handler)
+      info->callbacks->einfo
 	(_("copy reloc against `%s' requires lazy plt linking; "
-	   "avoid setting LD_BIND_NOW=1 or upgrade gcc"),
+	   "avoid setting LD_BIND_NOW=1 or upgrade gcc\n"),
 	 h->root.root.string);
     }
 
@@ -6510,8 +6511,8 @@ ppc64_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 
   if (h->size == 0)
     {
-      (*_bfd_error_handler) (_("dynamic variable `%s' is zero size"),
-			     h->root.root.string);
+      info->callbacks->einfo (_("dynamic variable `%s' is zero size\n"),
+			      h->root.root.string);
       return TRUE;
     }
 
@@ -6928,8 +6929,8 @@ dec_dynrel_count (bfd_vma r_info,
       pp = &p->next;
     }
 
-  (*_bfd_error_handler) (_("dynreloc miscount for %B, section %A"),
-			   sec->owner, sec);
+  info->callbacks->einfo (_("dynreloc miscount for %B, section %A\n"),
+			  sec->owner, sec);
   bfd_set_error (bfd_error_bad_value);
   return FALSE;
 }
@@ -7600,7 +7601,7 @@ ppc64_elf_tls_optimize (struct bfd_link_info *info)
 		      && !found_tls_get_addr_arg
 		      && is_branch_reloc (r_type))
 		    {
-		      info->callbacks->minfo (_("%C __tls_get_addr lost arg, "
+		      info->callbacks->minfo (_("%H __tls_get_addr lost arg, "
 						"TLS optimization disabled\n"),
 					      ibfd, sec, rel->r_offset);
 		      ret = TRUE;
@@ -7794,7 +7795,7 @@ ppc64_elf_tls_optimize (struct bfd_link_info *info)
 			 could just mark this symbol to exclude it
 			 from tls optimization but it's safer to skip
 			 the entire optimization.  */
-		      info->callbacks->minfo (_("%C arg lost __tls_get_addr, "
+		      info->callbacks->minfo (_("%H arg lost __tls_get_addr, "
 						"TLS optimization disabled\n"),
 					      ibfd, sec, rel->r_offset);
 		      ret = TRUE;
@@ -9473,9 +9474,10 @@ get_relocs (asection *sec, int count)
 }
 
 static bfd_vma
-get_r2off (struct ppc_link_hash_table *htab,
+get_r2off (struct bfd_link_info *info,
 	   struct ppc_stub_hash_entry *stub_entry)
 {
+  struct ppc_link_hash_table *htab = ppc_hash_table (info);
   bfd_vma r2off = htab->stub_group[stub_entry->target_section->id].toc_off;
 
   if (r2off == 0)
@@ -9489,15 +9491,15 @@ get_r2off (struct ppc_link_hash_table *htab,
       if (strcmp (opd->name, ".opd") != 0
 	  || opd->reloc_count != 0)
 	{
-	  (*_bfd_error_handler) (_("cannot find opd entry toc for %s"),
-				 stub_entry->h->elf.root.root.string);
+	  info->callbacks->einfo (_("cannot find opd entry toc for %s\n"),
+				  stub_entry->h->elf.root.root.string);
 	  bfd_set_error (bfd_error_bad_value);
 	  return 0;
 	}
       if (!bfd_get_section_contents (opd->owner, opd, buf, opd_off + 8, 8))
 	return 0;
       r2off = bfd_get_64 (opd->owner, buf);
-      r2off -= elf_gp (stub_entry->id_sec->output_section->owner);
+      r2off -= elf_gp (info->output_bfd);
     }
   r2off -= htab->stub_group[stub_entry->id_sec->id].toc_off;
   return r2off;
@@ -9547,7 +9549,7 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
       size = 4;
       if (stub_entry->stub_type == ppc_stub_long_branch_r2off)
 	{
-	  bfd_vma r2off = get_r2off (htab, stub_entry);
+	  bfd_vma r2off = get_r2off (info, stub_entry);
 
 	  if (r2off == 0)
 	    {
@@ -9571,8 +9573,8 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 
       if (off + (1 << 25) >= (bfd_vma) (1 << 26))
 	{
-	  (*_bfd_error_handler) (_("long branch stub `%s' offset overflow"),
-				 stub_entry->root.string);
+	  info->callbacks->einfo (_("long branch stub `%s' offset overflow\n"),
+				  stub_entry->root.string);
 	  htab->stub_error = TRUE;
 	  return FALSE;
 	}
@@ -9630,8 +9632,8 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 					 FALSE, FALSE);
       if (br_entry == NULL)
 	{
-	  (*_bfd_error_handler) (_("can't find branch stub `%s'"),
-				 stub_entry->root.string);
+	  info->callbacks->einfo (_("can't find branch stub `%s'\n"),
+				  stub_entry->root.string);
 	  htab->stub_error = TRUE;
 	  return FALSE;
 	}
@@ -9691,8 +9693,8 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 
       if (off + 0x80008000 > 0xffffffff || (off & 7) != 0)
 	{
-	  (*_bfd_error_handler)
-	    (_("linkage table error against `%s'"),
+	  info->callbacks->einfo
+	    (_("linkage table error against `%s'\n"),
 	     stub_entry->root.string);
 	  bfd_set_error (bfd_error_bad_value);
 	  htab->stub_error = TRUE;
@@ -9737,7 +9739,7 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	}
       else
 	{
-	  bfd_vma r2off = get_r2off (htab, stub_entry);
+	  bfd_vma r2off = get_r2off (info, stub_entry);
 
 	  if (r2off == 0)
 	    {
@@ -9833,8 +9835,8 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 
       if (off + 0x80008000 > 0xffffffff || (off & 7) != 0)
 	{
-	  (*_bfd_error_handler)
-	    (_("linkage table error against `%s'"),
+	  info->callbacks->einfo
+	    (_("linkage table error against `%s'\n"),
 	     stub_entry->h != NULL
 	     ? stub_entry->h->elf.root.root.string
 	     : "<local sym>");
@@ -9986,7 +9988,7 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
       size = 4;
       if (stub_entry->stub_type == ppc_stub_long_branch_r2off)
 	{
-	  r2off = get_r2off (htab, stub_entry);
+	  r2off = get_r2off (info, stub_entry);
 	  if (r2off == 0)
 	    {
 	      htab->stub_error = TRUE;
@@ -10008,8 +10010,8 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 					     TRUE, FALSE);
 	  if (br_entry == NULL)
 	    {
-	      (*_bfd_error_handler) (_("can't build branch stub `%s'"),
-				     stub_entry->root.string);
+	      info->callbacks->einfo (_("can't build branch stub `%s'\n"),
+				      stub_entry->root.string);
 	      htab->stub_error = TRUE;
 	      return FALSE;
 	    }
@@ -11151,7 +11153,7 @@ ppc64_elf_size_stubs (struct bfd_link_info *info, bfd_signed_vma group_size)
 		      continue;
 		    }
 
-		  stub_entry = ppc_add_stub (stub_name, section, htab);
+		  stub_entry = ppc_add_stub (stub_name, section, info);
 		  if (stub_entry == NULL)
 		    {
 		      free (stub_name);
@@ -11472,7 +11474,7 @@ ppc64_elf_build_stubs (bfd_boolean emit_stub_syms,
       || htab->glink->rawsize != htab->glink->size)
     {
       htab->stub_error = TRUE;
-      (*_bfd_error_handler) (_("stubs don't match calculated size"));
+      info->callbacks->einfo (_("stubs don't match calculated size\n"));
     }
 
   if (htab->stub_error)
@@ -11832,13 +11834,11 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	    /* R_PPC64_TLS is OK against a symbol in the TOC.  */
 	    ;
 	  else
-	    (*_bfd_error_handler)
+	    info->callbacks->einfo
 	      (!IS_PPC64_TLS_RELOC (r_type)
-	       ? _("%B(%A+0x%lx): %s used with TLS symbol %s")
-	       : _("%B(%A+0x%lx): %s used with non-TLS symbol %s"),
-	       input_bfd,
-	       input_section,
-	       (long) rel->r_offset,
+	       ? _("%H: %s used with TLS symbol %s\n")
+	       : _("%H: %s used with non-TLS symbol %s\n"),
+	       input_bfd, input_section, rel->r_offset,
 	       ppc64_elf_howto_table[r_type]->name,
 	       sym_name);
 	}
@@ -12334,23 +12334,19 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 				  ".init") == 0
 			  || strcmp (input_section->output_section->name,
 				     ".fini") == 0)
-			(*_bfd_error_handler)
-			  (_("%B(%A+0x%lx): automatic multiple TOCs "
+			info->callbacks->einfo
+			  (_("%H: automatic multiple TOCs "
 			     "not supported using your crt files; "
-			     "recompile with -mminimal-toc or upgrade gcc"),
-			   input_bfd,
-			   input_section,
-			   (long) rel->r_offset);
+			     "recompile with -mminimal-toc or upgrade gcc\n"),
+			   input_bfd, input_section, rel->r_offset);
 		      else
-			(*_bfd_error_handler)
-			  (_("%B(%A+0x%lx): sibling call optimization to `%s' "
+			info->callbacks->einfo
+			  (_("%H: sibling call optimization to `%s' "
 			     "does not allow automatic multiple TOCs; "
 			     "recompile with -mminimal-toc or "
 			     "-fno-optimize-sibling-calls, "
-			     "or make `%s' extern"),
-			   input_bfd,
-			   input_section,
-			   (long) rel->r_offset,
+			     "or make `%s' extern\n"),
+			   input_bfd, input_section, rel->r_offset,
 			   sym_name,
 			   sym_name);
 		      bfd_set_error (bfd_error_bad_value);
@@ -12451,8 +12447,8 @@ ppc64_elf_relocate_section (bfd *output_bfd,
       switch (r_type)
 	{
 	default:
-	  (*_bfd_error_handler)
-	    (_("%B: unknown relocation type %d for symbol %s"),
+	  info->callbacks->einfo
+	    (_("%B: unknown relocation type %d for symbol %s\n"),
 	     input_bfd, (int) r_type, sym_name);
 
 	  bfd_set_error (bfd_error_bad_value);
@@ -12956,12 +12952,10 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 			  ? h->elf.type == STT_GNU_IFUNC
 			  : ELF_ST_TYPE (sym->st_info) == STT_GNU_IFUNC)
 			{
-			  (*_bfd_error_handler)
-			    (_("%B(%A+0x%lx): relocation %s for indirect "
-			       "function %s unsupported"),
-			     input_bfd,
-			     input_section,
-			     (long) rel->r_offset,
+			  info->callbacks->einfo
+			    (_("%H: relocation %s for indirect "
+			       "function %s unsupported\n"),
+			     input_bfd, input_section, rel->r_offset,
 			     ppc64_elf_howto_table[r_type]->name,
 			     sym_name);
 			  ret = FALSE;
@@ -13063,8 +13057,8 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	case R_PPC64_PLTREL64:
 	  /* These ones haven't been implemented yet.  */
 
-	  (*_bfd_error_handler)
-	    (_("%B: relocation %s is not supported for symbol %s."),
+	  info->callbacks->einfo
+	    (_("%B: relocation %s is not supported for symbol %s\n"),
 	     input_bfd,
 	     ppc64_elf_howto_table[r_type]->name, sym_name);
 
@@ -13240,9 +13234,9 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	    mask = 15;
 	  if (((relocation + addend) & mask) != 0)
 	    {
-	      (*_bfd_error_handler)
-		(_("%B(%A+0x%lx): error: %s not a multiple of %u"),
-		 input_bfd, input_section, (long) rel->r_offset,
+	      info->callbacks->einfo
+		(_("%H: error: %s not a multiple of %u\n"),
+		 input_bfd, input_section, rel->r_offset,
 		 ppc64_elf_howto_table[r_type]->name,
 		 mask + 1);
 	      bfd_set_error (bfd_error_bad_value);
@@ -13259,11 +13253,9 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	  && !((input_section->flags & SEC_DEBUGGING) != 0
 	       && h->elf.def_dynamic))
 	{
-	  (*_bfd_error_handler)
-	    (_("%B(%A+0x%lx): unresolvable %s relocation against symbol `%s'"),
-	     input_bfd,
-	     input_section,
-	     (long) rel->r_offset,
+	  info->callbacks->einfo
+	    (_("%H: unresolvable %s relocation against symbol `%s'\n"),
+	     input_bfd, input_section, rel->r_offset,
 	     ppc64_elf_howto_table[(int) r_type]->name,
 	     h->elf.root.root.string);
 	  ret = FALSE;
@@ -13306,11 +13298,9 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	    }
 	  else
 	    {
-	      (*_bfd_error_handler)
-		(_("%B(%A+0x%lx): %s reloc against `%s': error %d"),
-		 input_bfd,
-		 input_section,
-		 (long) rel->r_offset,
+	      info->callbacks->einfo
+		(_("%H: %s reloc against `%s': error %d\n"),
+		 input_bfd, input_section, rel->r_offset,
 		 ppc64_elf_howto_table[r_type]->name,
 		 sym_name,
 		 (int) r);

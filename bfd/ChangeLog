@@ -1,5 +1,15 @@
 2011-05-23  Alan Modra  <amodra@gmail.com>
 
+	* elf32-frv.c: Use info->callbacks->einfo throughout file in linker
+	functions rather than warning callback or _bfd_error_handler.
+	* elf32-ppc.c: Likewise.
+	* elf64-ppc.c: Likewise.
+	* elf32-ppc.c (ppc_elf_tls_optimize): Use %H in __tls_get_addr lost
+	arg error.
+	* elf64-ppc.c (ppc64_elf_tls_optimize): Likewise.
+
+2011-05-23  Alan Modra  <amodra@gmail.com>
+
 	PR 12763
 	* elf.c (assign_file_positions_for_load_sections): Set sh_offset for
 	.tbss, and page align same for all SHT_NOBITS sections.
