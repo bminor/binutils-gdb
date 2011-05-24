@@ -1151,10 +1151,6 @@ extern int ep_is_catchpoint (struct breakpoint *);
    deletes all breakpoints.  */
 extern void delete_command (char *arg, int from_tty);
 
-/* Pull all H/W watchpoints from the target.  Return non-zero if the
-   remove fails.  */
-extern int remove_hw_watchpoints (void);
-
 /* Manage a software single step breakpoint (or two).  Insert may be
    called twice before remove is called.  */
 extern void insert_single_step_breakpoint (struct gdbarch *,

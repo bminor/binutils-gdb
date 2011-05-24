@@ -1,3 +1,8 @@
+2011-05-24  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* breakpont.c (remove_hw_watchpoints): Remove unused function.
+	* breakpoint.h remove_hw_watchpoints(): Remove prototype.
+
 2011-05-23  Tom Tromey  <tromey@redhat.com>
 
 	* c-lang.c (evaluate_subexp_c): Use expect_type if it is not

@@ -2016,20 +2016,6 @@ remove_breakpoints_pid (int pid)
 }
 
 int
-remove_hw_watchpoints (void)
-{
-  struct bp_location *bl, **blp_tmp;
-  int val = 0;
-
-  ALL_BP_LOCATIONS (bl, blp_tmp)
-  {
-    if (bl->inserted && bl->loc_type == bp_loc_hardware_watchpoint)
-      val |= remove_breakpoint (bl, mark_uninserted);
-  }
-  return val;
-}
-
-int
 reattach_breakpoints (int pid)
 {
   struct cleanup *old_chain;
