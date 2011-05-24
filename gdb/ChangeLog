@@ -1,3 +1,7 @@
+2011-05-24  Tom Tromey  <tromey@redhat.com>
+
+	* MAINTAINERS: Move Jim Blandy to past maintainers.
+
 2011-05-24  Tristan Gingold  <gingold@adacore.com>
 
 	* symfile.h (enum dwarf2_section_enum): New type.

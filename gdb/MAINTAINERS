@@ -115,7 +115,6 @@ alphabetical order.  Their affiliations are provided for reference only -
 their membership on the Steering Committee is individual and not through
 their affiliation, and they act on behalf of the GNU project.
 
-	Jim Blandy (Mozilla)
 	Andrew Cagney (Red Hat)
 	Robert Dewar (AdaCore, NYU)
 	Klee Dienes (Apple)
@@ -159,7 +158,6 @@ future, if there are, a reference to the list will be included here.
 The current global maintainers are (in alphabetical order):
 
 Pedro Alves                     pedro@codesourcery.com
-Jim Blandy			jimb@red-bean.com
 Joel Brobecker			brobecker@adacore.com
 Kevin Buettner			kevinb@redhat.com
 Andrew Cagney			cagney@gnu.org
@@ -665,6 +663,7 @@ Scott Bambrough (ARM)				scottb at netwinder dot org
 Philippe De Muyter (coff)			phdm at macqel dot be
 Michael Chastain (testsuite)			mec.gnu at mindspring dot com
 Fred Fish (global)
+Jim Blandy (global)				jimb@red-bean.com
 
 
 
