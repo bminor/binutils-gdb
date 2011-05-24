@@ -40,6 +40,7 @@ class Input_argument;
 class Incremental_inputs_checker;
 class Incremental_script_entry;
 class Incremental_object_entry;
+class Incremental_dynobj_entry;
 class Incremental_archive_entry;
 class Incremental_inputs;
 class Incremental_binary;
@@ -63,7 +64,8 @@ enum Incremental_input_type
 
 enum Incremental_input_flags
 {
-  INCREMENTAL_INPUT_IN_SYSTEM_DIR = 0x0800
+  INCREMENTAL_INPUT_IN_SYSTEM_DIR = 0x8000,
+  INCREMENTAL_INPUT_AS_NEEDED = 0x4000
 };
 
 // Create an Incremental_binary object for FILE. Returns NULL is this is not
@@ -80,7 +82,8 @@ class Incremental_input_entry
   Incremental_input_entry(Stringpool::Key filename_key, unsigned int arg_serial,
 			  Timespec mtime)
     : filename_key_(filename_key), file_index_(0), offset_(0), info_offset_(0),
-      arg_serial_(arg_serial), mtime_(mtime), is_in_system_directory_(false)
+      arg_serial_(arg_serial), mtime_(mtime), is_in_system_directory_(false),
+      as_needed_(false)
   { }
 
   virtual
@@ -145,6 +148,16 @@ class Incremental_input_entry
   is_in_system_directory() const
   { return this->is_in_system_directory_; }
 
+  // Record that the file was linked with --as-needed.
+  void
+  set_as_needed()
+  { this->as_needed_ = true; }
+
+  // Return TRUE if the file was linked with --as-needed.
+  bool
+  as_needed() const
+  { return this->as_needed_; }
+
   // Return a pointer to the derived Incremental_script_entry object.
   // Return NULL for input entries that are not script files.
   Incremental_script_entry*
@@ -156,6 +169,12 @@ class Incremental_input_entry
   Incremental_object_entry*
   object_entry()
   { return this->do_object_entry(); }
+
+  // Return a pointer to the derived Incremental_dynobj_entry object.
+  // Return NULL for input entries that are not shared object files.
+  Incremental_dynobj_entry*
+  dynobj_entry()
+  { return this->do_dynobj_entry(); }
 
   // Return a pointer to the derived Incremental_archive_entry object.
   // Return NULL for input entries that are not archive files.
@@ -178,6 +197,12 @@ class Incremental_input_entry
   // Return NULL for input entries that are not object files.
   virtual Incremental_object_entry*
   do_object_entry()
+  { return NULL; }
+
+  // Return a pointer to the derived Incremental_dynobj_entry object.
+  // Return NULL for input entries that are not shared object files.
+  virtual Incremental_dynobj_entry*
+  do_dynobj_entry()
   { return NULL; }
 
   // Return a pointer to the derived Incremental_archive_entry object.
@@ -207,6 +232,9 @@ class Incremental_input_entry
 
   // TRUE if the file was found in a system directory.
   bool is_in_system_directory_;
+
+  // TRUE if the file was linked with --as-needed.
+  bool as_needed_;
 };
 
 // Information about a script input that will persist during the whole linker
@@ -298,10 +326,7 @@ class Incremental_object_entry : public Incremental_input_entry
 			   unsigned int arg_serial, Timespec mtime)
     : Incremental_input_entry(filename_key, arg_serial, mtime), obj_(obj),
       is_member_(false), sections_()
-  {
-    if (!obj_->is_dynamic())
-      this->sections_.reserve(obj->shnum());
-  }
+  { this->sections_.reserve(obj->shnum()); }
 
   // Get the object.
   Object*
@@ -349,9 +374,7 @@ class Incremental_object_entry : public Incremental_input_entry
   {
     return (this->is_member_
 	    ? INCREMENTAL_INPUT_ARCHIVE_MEMBER
-	    : (this->obj_->is_dynamic()
-	       ? INCREMENTAL_INPUT_SHARED_LIBRARY
-	       : INCREMENTAL_INPUT_OBJECT));
+	    : INCREMENTAL_INPUT_OBJECT);
   }
 
   // Return a pointer to the derived Incremental_object_entry object.
@@ -377,6 +400,46 @@ class Incremental_object_entry : public Incremental_input_entry
     off_t sh_size_;
   };
   std::vector<Input_section> sections_;
+};
+
+// Class for recording shared library input files.
+
+class Incremental_dynobj_entry : public Incremental_input_entry
+{
+ public:
+  Incremental_dynobj_entry(Stringpool::Key filename_key,
+  			   Stringpool::Key soname_key, Object* obj,
+			   unsigned int arg_serial, Timespec mtime)
+    : Incremental_input_entry(filename_key, arg_serial, mtime),
+      soname_key_(soname_key), obj_(obj)
+  { }
+
+  // Get the object.
+  Object*
+  object() const
+  { return this->obj_; }
+
+  // Get the stringpool key for the soname.
+  Stringpool::Key
+  get_soname_key() const
+  { return this->soname_key_; }
+
+ protected:
+  virtual Incremental_input_type
+  do_type() const
+  { return INCREMENTAL_INPUT_SHARED_LIBRARY; }
+
+  // Return a pointer to the derived Incremental_dynobj_entry object.
+  virtual Incremental_dynobj_entry*
+  do_dynobj_entry()
+  { return this; }
+
+ private:
+  // Key of the soname string in the section stringtable.
+  Stringpool::Key soname_key_;
+
+  // The object file itself.
+  Object* obj_;
 };
 
 // Class for recording archive library input files.
@@ -718,6 +781,11 @@ class Incremental_inputs_reader
     is_in_system_directory() const
     { return (this->flags_ & INCREMENTAL_INPUT_IN_SYSTEM_DIR) != 0; }
 
+    // Return TRUE if the file was linked with --as-needed.
+    bool
+    as_needed() const
+    { return (this->flags_ & INCREMENTAL_INPUT_AS_NEEDED) != 0; }
+
     // Return the input section count -- for objects only.
     unsigned int
     get_input_section_count() const
@@ -725,6 +793,16 @@ class Incremental_inputs_reader
       gold_assert(this->type() == INCREMENTAL_INPUT_OBJECT
 		  || this->type() == INCREMENTAL_INPUT_ARCHIVE_MEMBER);
       return Swap32::readval(this->inputs_->p_ + this->info_offset_);
+    }
+
+    // Return the soname -- for shared libraries only.
+    const char*
+    get_soname() const
+    {
+      gold_assert(this->type() == INCREMENTAL_INPUT_SHARED_LIBRARY);
+      unsigned int offset = Swap32::readval(this->inputs_->p_
+					    + this->info_offset_);
+      return this->inputs_->get_string(offset);
     }
 
     // Return the offset of the supplemental info for symbol SYMNDX --
@@ -745,16 +823,10 @@ class Incremental_inputs_reader
     unsigned int
     get_global_symbol_count() const
     {
-      switch (this->type())
-	{
-	case INCREMENTAL_INPUT_OBJECT:
-	case INCREMENTAL_INPUT_ARCHIVE_MEMBER:
-	  return Swap32::readval(this->inputs_->p_ + this->info_offset_ + 4);
-	case INCREMENTAL_INPUT_SHARED_LIBRARY:
-	  return Swap32::readval(this->inputs_->p_ + this->info_offset_);
-	default:
-	  gold_unreachable();
-	}
+      gold_assert(this->type() == INCREMENTAL_INPUT_OBJECT
+		  || this->type() == INCREMENTAL_INPUT_ARCHIVE_MEMBER
+		  || this->type() == INCREMENTAL_INPUT_SHARED_LIBRARY);
+      return Swap32::readval(this->inputs_->p_ + this->info_offset_ + 4);
     }
 
     // Return the offset of the first local symbol -- for objects only.
@@ -899,7 +971,7 @@ class Incremental_inputs_reader
     {
       gold_assert(this->type() == INCREMENTAL_INPUT_SHARED_LIBRARY);
       const unsigned char* p = (this->inputs_->p_
-				+ this->info_offset_ + 4
+				+ this->info_offset_ + 8
 				+ n * 4);
       unsigned int output_symndx = Swap32::readval(p);
       *is_def = (output_symndx & (1U << 31)) != 0;

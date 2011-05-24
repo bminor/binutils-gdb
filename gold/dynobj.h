@@ -96,6 +96,11 @@ class Dynobj : public Object
 			unsigned char** pphash, unsigned int* phashlen);
 
  protected:
+  // Return a pointer to this object.
+  virtual Dynobj*
+  do_dynobj()
+  { return this; }
+
   // Set the DT_SONAME string.
   void
   set_soname_string(const char* s)

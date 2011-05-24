@@ -3986,9 +3986,7 @@ Layout::finish_dynamic_section(const Input_objects* input_objects,
        p != input_objects->dynobj_end();
        ++p)
     {
-      if (!(*p)->is_needed()
-	  && !(*p)->is_incremental()
-	  && (*p)->input_file()->options().as_needed())
+      if (!(*p)->is_needed() && (*p)->as_needed())
 	{
 	  // This dynamic object was linked with --as-needed, but it
 	  // is not needed.

@@ -332,12 +332,13 @@ class Object
     : name_(name), input_file_(input_file), offset_(offset), shnum_(-1U),
       is_dynamic_(is_dynamic), is_needed_(false), uses_split_stack_(false),
       has_no_split_stack_(false), no_export_(false),
-      is_in_system_directory_(false), xindex_(NULL)
+      is_in_system_directory_(false), as_needed_(false), xindex_(NULL)
   {
     if (input_file != NULL)
       {
 	input_file->file().add_object();
 	this->is_in_system_directory_ = input_file->is_in_system_directory();
+	this->as_needed_ = input_file->options().as_needed();
       }
   }
 
@@ -385,6 +386,12 @@ class Object
   bool
   has_no_split_stack() const
   { return this->has_no_split_stack_; }
+
+  // Returns NULL for Objects that are not dynamic objects.  This method
+  // is overridden in the Dynobj class.
+  Dynobj*
+  dynobj()
+  { return this->do_dynobj(); }
 
   // Returns NULL for Objects that are not plugin objects.  This method
   // is overridden in the Pluginobj class.
@@ -688,6 +695,16 @@ class Object
   is_in_system_directory() const
   { return this->is_in_system_directory_; }
 
+  // Set flag that this object was linked with --as-needed.
+  void
+  set_as_needed()
+  { this->as_needed_ = true; }
+
+  // Return whether this object was linked with --as-needed.
+  bool
+  as_needed() const
+  { return this->as_needed_; }
+
   // Return whether we found this object by searching a directory.
   bool
   searched_for() const
@@ -719,6 +736,12 @@ class Object
   { return this->do_get_incremental_reloc_count(symndx); }
 
  protected:
+  // Returns NULL for Objects that are not dynamic objects.  This method
+  // is overridden in the Dynobj class.
+  virtual Dynobj*
+  do_dynobj()
+  { return NULL; }
+
   // Returns NULL for Objects that are not plugin objects.  This method
   // is overridden in the Pluginobj class.
   virtual Pluginobj*
@@ -911,6 +934,8 @@ class Object
   bool no_export_ : 1;
   // True if the object was found in a system directory.
   bool is_in_system_directory_ : 1;
+  // True if the object was linked with --as-needed.
+  bool as_needed_ : 1;
   // Many sections for objects with more than SHN_LORESERVE sections.
   Xindex* xindex_;
 };

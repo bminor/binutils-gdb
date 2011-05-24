@@ -975,28 +975,48 @@ Incremental_inputs::report_object(Object* obj, unsigned int arg_serial,
     arg_serial = 0;
 
   this->strtab_->add(obj->name().c_str(), false, &filename_key);
-  Incremental_object_entry* obj_entry =
-      new Incremental_object_entry(filename_key, obj, arg_serial, mtime);
-  if (obj->is_in_system_directory())
-    obj_entry->set_is_in_system_directory();
-  this->inputs_.push_back(obj_entry);
 
-  if (arch != NULL)
+  Incremental_input_entry* input_entry;
+
+  this->current_object_ = obj;
+
+  if (!obj->is_dynamic())
     {
-      Incremental_archive_entry* arch_entry = arch->incremental_info();
-      gold_assert(arch_entry != NULL);
-      arch_entry->add_object(obj_entry);
+      this->current_object_entry_ =
+          new Incremental_object_entry(filename_key, obj, arg_serial, mtime);
+      input_entry = this->current_object_entry_;
+      if (arch != NULL)
+	{
+	  Incremental_archive_entry* arch_entry = arch->incremental_info();
+	  gold_assert(arch_entry != NULL);
+	  arch_entry->add_object(this->current_object_entry_);
+	}
     }
+  else
+    {
+      this->current_object_entry_ = NULL;
+      Stringpool::Key soname_key;
+      Dynobj* dynobj = obj->dynobj();
+      gold_assert(dynobj != NULL);
+      this->strtab_->add(dynobj->soname(), false, &soname_key);
+      input_entry = new Incremental_dynobj_entry(filename_key, soname_key, obj,
+						 arg_serial, mtime);
+    }
+
+  if (obj->is_in_system_directory())
+    input_entry->set_is_in_system_directory();
+
+  if (obj->as_needed())
+    input_entry->set_as_needed();
+
+  this->inputs_.push_back(input_entry);
 
   if (script_info != NULL)
     {
       Incremental_script_entry* script_entry = script_info->incremental_info();
       gold_assert(script_entry != NULL);
-      script_entry->add_object(obj_entry);
+      script_entry->add_object(input_entry);
     }
-
-  this->current_object_ = obj;
-  this->current_object_entry_ = obj_entry;
 }
 
 // Record the input object file OBJ.  If ARCH is not NULL, attach
@@ -1013,6 +1033,7 @@ Incremental_inputs::report_input_section(Object* obj, unsigned int shndx,
       this->strtab_->add(name, true, &key);
 
   gold_assert(obj == this->current_object_);
+  gold_assert(this->current_object_entry_ != NULL);
   this->current_object_entry_->add_input_section(shndx, key, sh_size);
 }
 
@@ -1155,11 +1176,11 @@ Output_section_incremental_inputs<size, big_endian>::set_final_data_size()
 	  break;
 	case INCREMENTAL_INPUT_SHARED_LIBRARY:
 	  {
-	    Incremental_object_entry* entry = (*p)->object_entry();
+	    Incremental_dynobj_entry* entry = (*p)->dynobj_entry();
 	    gold_assert(entry != NULL);
 	    (*p)->set_info_offset(info_offset);
-	    // Global symbol count.
-	    info_offset += 4;
+	    // Global symbol count, soname index.
+	    info_offset += 8;
 	    // Each global symbol.
 	    const Object::Symbols* syms = entry->object()->get_global_symbols();
 	    gold_assert(syms != NULL);
@@ -1321,6 +1342,8 @@ Output_section_incremental_inputs<size, big_endian>::write_input_files(
       unsigned int flags = (*p)->type();
       if ((*p)->is_in_system_directory())
         flags |= INCREMENTAL_INPUT_IN_SYSTEM_DIR;
+      if ((*p)->as_needed())
+        flags |= INCREMENTAL_INPUT_AS_NEEDED;
       Swap32::writeval(pov, filename_offset);
       Swap32::writeval(pov + 4, (*p)->get_info_offset());
       Swap64::writeval(pov + 8, mtime.seconds);
@@ -1483,10 +1506,16 @@ Output_section_incremental_inputs<size, big_endian>::write_info_blocks(
 	  {
 	    gold_assert(static_cast<unsigned int>(pov - oview)
 			== (*p)->get_info_offset());
-	    Incremental_object_entry* entry = (*p)->object_entry();
+	    Incremental_dynobj_entry* entry = (*p)->dynobj_entry();
 	    gold_assert(entry != NULL);
 	    const Object* obj = entry->object();
 	    const Object::Symbols* syms = obj->get_global_symbols();
+
+	    // Write the soname string table index.
+	    section_offset_type soname_offset =
+		strtab->get_offset_from_key(entry->get_soname_key());
+	    Swap32::writeval(pov, soname_offset);
+	    pov += 4;
 
 	    // Skip the global symbol count for now.
 	    unsigned char* orig_pov = pov;
@@ -2347,6 +2376,9 @@ Sized_incr_dynobj<size, big_endian>::Sized_incr_dynobj(
 {
   if (this->input_reader_.is_in_system_directory())
     this->set_is_in_system_directory();
+  if (this->input_reader_.as_needed())
+    this->set_as_needed();
+  this->set_soname_string(this->input_reader_.get_soname());
   this->set_shnum(0);
 }
 

@@ -162,6 +162,10 @@ dump_incremental_inputs(const char* argv0, const char* filename,
 	  break;
 	case INCREMENTAL_INPUT_SHARED_LIBRARY:
 	  printf("Shared library\n");
+	  printf("    As needed: %s\n",
+		 input_file.as_needed() ? "true" : "false");
+	  printf("    soname: %s\n",
+		 input_file.get_soname());
 	  printf("    Symbol count: %d\n",
 		 input_file.get_global_symbol_count());
 	  break;

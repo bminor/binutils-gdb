@@ -1,5 +1,49 @@
 2011-05-24 Cary Coutant  <ccoutant@google.com>
 
+	* dynobj.h (Dynobj::do_dynobj): New function.
+	* incremental-dump.cc (dump_incremental_inputs): Print as_needed
+	flag and soname for shared objects.
+	* incremental.cc (Incremental_inputs::report_object): Make
+	either Incremental_object_entry or Incremental_dynobj_entry; add
+	soname to string table.
+	(Incremental_inputs::report_input_section): Add assertion.
+	(Output_section_incremental_inputs::set_final_data_size): Adjust
+	type of input file entry for shared libraries; adjust size of
+	shared library info entry.
+	(Output_section_incremental_inputs::write_input_files): Write
+	as_needed flag for shared libraries.
+	(Output_section_incremental_inputs::write_info_blocks): Adjust type
+	of input file entry for shared libraries; write soname.
+	(Sized_incr_dynobj::Sized_incr_dynobj): Read as_needed flag and
+	soname from incremental info.
+	* incremental.h (enum Incremental_input_flags): Add
+	INCREMENTAL_INPUT_AS_NEEDED.
+	(Incremental_input_entry::Incremental_input_entry): Initialize new
+	data member.
+	(Incremental_input_entry::set_as_needed): New function.
+	(Incremental_input_entry::as_needed): New function.
+	(Incremental_input_entry::do_dynobj_entry): New function.
+	(Incremental_input_entry::as_needed_): New data member.
+	(Incremental_object_entry::Incremental_object_entry): Don't check
+	for shared library.
+	(Incremental_object_entry::do_type): Likewise.
+	(class Incremental_dynobj_entry): New class.
+	(Incremental_input_entry_reader::as_needed): New function.
+	(Incremental_input_entry_reader::get_soname): New function.
+	(Incremental_input_entry_reader::get_global_symbol_count): Rewrite.
+	(Incremental_input_entry_reader::get_output_symbol_index): Adjust
+	size of shared library info entry.
+	* layout.cc (Layout::finish_dynamic_section): Don't test for 
+	incremental link when adding DT_NEEDED entries.
+	* object.h (Object::Object): Initialize new data member.
+	(Object::dynobj): New function.
+	(Object::set_as_needed): New function.
+	(Object::as_needed): New function.
+	(Object::do_dynobj): New function.
+	(Object::as_needed_): New data member.
+
+2011-05-24 Cary Coutant  <ccoutant@google.com>
+
 	* incremental-dump.cc (dump_incremental_inputs): Print dynamic reloc
 	info; adjust display of GOT entries.
 	* incremental.cc (Sized_incremental_binary::setup_readers): Allocate
