@@ -1,3 +1,11 @@
+2011-05-24  Keith Seitz  <keiths@redhat.com>
+
+	PR breakpoint/12803
+	* gdb.cp/cmpd-minsyms.cc (a): New method.
+	(b): New method.
+	(c): New method.
+	* gdb.cp/cmpd-minsyms.exp: Add tests for new methods.
+
 2011-05-24  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.base/commands.exp (watchpoint_command_test): Check that the

@@ -25,11 +25,17 @@ class GDB
    static X even_harder (T a) { return static_cast<X> (a); }
    int operator == (GDB const& other)
    { return 1; }
+  void a (void) const { }
+  void b (void) volatile { }
+  void c (void) const volatile { }
 };
 
 int main(int argc, char **argv)
 {
    GDB<int> a, b;
+   a.a ();
+   a.b ();
+   a.c ();
    if (a == b)
      return GDB<char>::harder('a') + GDB<int>::harder(3)
 	+ GDB<char>::even_harder<int> ('a');

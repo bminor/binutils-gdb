@@ -19,12 +19,25 @@
 
 if {[skip_cplus_tests]} { continue }
 
-# Test for c++/12273
+# Tests for c++/12273, breakpoint/12803
 set testfile "cmpd-minsyms"
 # Do NOT compile with debug flag.
 if {[prepare_for_testing $testfile $testfile $testfile.cc {c++}]} {
     return -1
 }
+
+# Before setting the language, try to set a few simple breakpoints
+set min_syms [list \
+		  "GDB<int>::a() const" \
+		  "GDB<int>::b() volatile" \
+		  "GDB<int>::c() const volatile"]
+foreach sym $min_syms {
+    set tst "setting breakpoint at '$sym'"
+    if {[gdb_breakpoint "'$sym'"]} {
+	pass $tst
+    }    
+}
+
 
 gdb_test_no_output "set language c++"
 
