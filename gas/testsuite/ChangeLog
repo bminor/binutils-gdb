@@ -1,3 +1,18 @@
+2011-05-24  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+
+	* gas/s390/esa-g5.d: Fix register pair operands.
+	* gas/s390/esa-g5.s: Likewise.
+	* gas/s390/esa-z9-109.d: Likewise.
+	* gas/s390/esa-z9-109.s: Likewise.
+	* gas/s390/zarch-z196.d: Likewise.
+	* gas/s390/zarch-z196.s: Likewise.
+	* gas/s390/zarch-z9-109.d: Likewise.
+	* gas/s390/zarch-z9-109.s: Likewise.
+	* gas/s390/zarch-z900.d: Likewise.
+	* gas/s390/zarch-z900.s: Likewise.
+	* gas/s390/zarch-z990.d: Likewise.
+	* gas/s390/zarch-z990.s: Likewise.
+
 2011-05-20  Bernd Schmidt  <bernds@codesourcery.com>
 
 	* gas/tic6x/pcr-relocs.d: New test.

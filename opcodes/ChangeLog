@@ -1,3 +1,10 @@
+2011-05-24  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+
+	* s390-opc.c: Add new instruction types marking register pair
+	operands.
+	* s390-opc.txt: Match instructions having register pair operands
+	to the new instruction types.
+
 2011-05-19  Nick Clifton  <nickc@redhat.com>
 
 	* v850-opc.c (cmpf.[sd]): Reverse the order of the reg1 and reg2

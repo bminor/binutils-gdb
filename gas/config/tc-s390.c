@@ -1267,6 +1267,9 @@ md_gather_operands (char *str,
 		  && ex.X_add_number == 0
 		  && warn_areg_zero)
 		as_warn (_("base register specified but zero"));
+	      if ((operand->flags & S390_OPERAND_REG_EVEN)
+		  && (ex.X_add_number & 1))
+		as_fatal (_("odd numbered register specified as register pair"));
 	      s390_insert_operand (insn, operand, ex.X_add_number, NULL, 0);
 	    }
 	}
