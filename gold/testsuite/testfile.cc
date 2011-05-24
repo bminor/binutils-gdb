@@ -44,13 +44,14 @@ class Target_test : public Sized_target<size, big_endian>
   { }
 
   void
-  gc_process_relocs(Symbol_table*, Layout*, Sized_relobj<size, big_endian>*,
+  gc_process_relocs(Symbol_table*, Layout*,
+		    Sized_relobj_file<size, big_endian>*,
 		    unsigned int, unsigned int, const unsigned char*, size_t,
 		    Output_section*, bool, size_t, const unsigned char*)
   { ERROR("call to Target_test::gc_process_relocs"); }
 
   void
-  scan_relocs(Symbol_table*, Layout*, Sized_relobj<size, big_endian>*,
+  scan_relocs(Symbol_table*, Layout*, Sized_relobj_file<size, big_endian>*,
 	      unsigned int, unsigned int, const unsigned char*, size_t,
 	      Output_section*, bool, size_t, const unsigned char*)
   { ERROR("call to Target_test::scan_relocs"); }
@@ -64,7 +65,7 @@ class Target_test : public Sized_target<size, big_endian>
 
   void
   scan_relocatable_relocs(Symbol_table*, Layout*,
-			  Sized_relobj<size, big_endian>*, unsigned int,
+			  Sized_relobj_file<size, big_endian>*, unsigned int,
 			  unsigned int, const unsigned char*,
 			  size_t, Output_section*, bool, size_t,
 			  const unsigned char*, Relocatable_relocs*)

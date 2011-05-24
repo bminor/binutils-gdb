@@ -189,7 +189,7 @@ Object::section_contents(unsigned int shndx, section_size_type* plen,
   return this->get_view(loc.file_offset, *plen, true, cache);
 }
 
-// Read the section data into SD.  This is code common to Sized_relobj
+// Read the section data into SD.  This is code common to Sized_relobj_file
 // and Sized_dynobj, so we put it into Object.
 
 template<int size, bool big_endian>
@@ -374,13 +374,35 @@ Relobj::finalize_incremental_relocs(Layout* layout, bool clear_counts)
 
 // Class Sized_relobj.
 
+// Iterate over local symbols, calling a visitor class V for each GOT offset
+// associated with a local symbol.
+
 template<int size, bool big_endian>
-Sized_relobj<size, big_endian>::Sized_relobj(
+void
+Sized_relobj<size, big_endian>::do_for_all_local_got_entries(
+    Got_offset_list::Visitor* v) const
+{
+  unsigned int nsyms = this->local_symbol_count();
+  for (unsigned int i = 0; i < nsyms; i++)
+    {
+      Local_got_offsets::const_iterator p = this->local_got_offsets_.find(i);
+      if (p != this->local_got_offsets_.end())
+	{
+	  const Got_offset_list* got_offsets = p->second;
+	  got_offsets->for_all_got_offsets(v);
+	}
+    }
+}
+
+// Class Sized_relobj_file.
+
+template<int size, bool big_endian>
+Sized_relobj_file<size, big_endian>::Sized_relobj_file(
     const std::string& name,
     Input_file* input_file,
     off_t offset,
     const elfcpp::Ehdr<size, big_endian>& ehdr)
-  : Sized_relobj_base<size, big_endian>(name, input_file, offset),
+  : Sized_relobj<size, big_endian>(name, input_file, offset),
     elf_file_(this, ehdr),
     symtab_shndx_(-1U),
     local_symbol_count_(0),
@@ -391,7 +413,6 @@ Sized_relobj<size, big_endian>::Sized_relobj(
     local_symbol_offset_(0),
     local_dynsym_offset_(0),
     local_values_(),
-    local_got_offsets_(),
     local_plt_offsets_(),
     kept_comdat_sections_(),
     has_eh_frame_(false),
@@ -403,7 +424,7 @@ Sized_relobj<size, big_endian>::Sized_relobj(
 }
 
 template<int size, bool big_endian>
-Sized_relobj<size, big_endian>::~Sized_relobj()
+Sized_relobj_file<size, big_endian>::~Sized_relobj_file()
 {
 }
 
@@ -412,7 +433,7 @@ Sized_relobj<size, big_endian>::~Sized_relobj()
 
 template<int size, bool big_endian>
 void
-Sized_relobj<size, big_endian>::do_setup()
+Sized_relobj_file<size, big_endian>::do_setup()
 {
   const unsigned int shnum = this->elf_file_.shnum();
   this->set_shnum(shnum);
@@ -425,7 +446,7 @@ Sized_relobj<size, big_endian>::do_setup()
 
 template<int size, bool big_endian>
 void
-Sized_relobj<size, big_endian>::find_symtab(const unsigned char* pshdrs)
+Sized_relobj_file<size, big_endian>::find_symtab(const unsigned char* pshdrs)
 {
   const unsigned int shnum = this->shnum();
   this->symtab_shndx_ = 0;
@@ -474,7 +495,7 @@ Sized_relobj<size, big_endian>::find_symtab(const unsigned char* pshdrs)
 
 template<int size, bool big_endian>
 Xindex*
-Sized_relobj<size, big_endian>::do_initialize_xindex()
+Sized_relobj_file<size, big_endian>::do_initialize_xindex()
 {
   gold_assert(this->symtab_shndx_ != -1U);
   Xindex* xindex = new Xindex(this->elf_file_.large_shndx_offset());
@@ -487,7 +508,7 @@ Sized_relobj<size, big_endian>::do_initialize_xindex()
 
 template<int size, bool big_endian>
 bool
-Sized_relobj<size, big_endian>::check_eh_frame_flags(
+Sized_relobj_file<size, big_endian>::check_eh_frame_flags(
     const elfcpp::Shdr<size, big_endian>* shdr) const
 {
   return (shdr->get_sh_type() == elfcpp::SHT_PROGBITS
@@ -499,7 +520,7 @@ Sized_relobj<size, big_endian>::check_eh_frame_flags(
 
 template<int size, bool big_endian>
 bool
-Sized_relobj<size, big_endian>::find_eh_frame(
+Sized_relobj_file<size, big_endian>::find_eh_frame(
     const unsigned char* pshdrs,
     const char* names,
     section_size_type names_size) const
@@ -536,7 +557,7 @@ build_compressed_section_map(
     unsigned int shnum,
     const char* names,
     section_size_type names_size,
-    Sized_relobj<size, big_endian>* obj)
+    Sized_relobj_file<size, big_endian>* obj)
 {
   Compressed_section_map* uncompressed_sizes = new Compressed_section_map();
   const unsigned int shdr_size = elfcpp::Elf_sizes<size>::shdr_size;
@@ -574,7 +595,7 @@ build_compressed_section_map(
 
 template<int size, bool big_endian>
 void
-Sized_relobj<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
+Sized_relobj_file<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
 {
   this->read_section_data(&this->elf_file_, sd);
 
@@ -677,9 +698,9 @@ Sized_relobj<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
 
 template<int size, bool big_endian>
 unsigned int
-Sized_relobj<size, big_endian>::symbol_section_and_value(unsigned int sym,
-							 Address* value,
-							 bool* is_ordinary)
+Sized_relobj_file<size, big_endian>::symbol_section_and_value(unsigned int sym,
+							      Address* value,
+							      bool* is_ordinary)
 {
   section_size_type symbols_size;
   const unsigned char* symbols = this->section_contents(this->symtab_shndx_,
@@ -703,7 +724,7 @@ Sized_relobj<size, big_endian>::symbol_section_and_value(unsigned int sym,
 
 template<int size, bool big_endian>
 bool
-Sized_relobj<size, big_endian>::include_section_group(
+Sized_relobj_file<size, big_endian>::include_section_group(
     Symbol_table* symtab,
     Layout* layout,
     unsigned int index,
@@ -916,7 +937,7 @@ Sized_relobj<size, big_endian>::include_section_group(
 
 template<int size, bool big_endian>
 bool
-Sized_relobj<size, big_endian>::include_linkonce_section(
+Sized_relobj_file<size, big_endian>::include_linkonce_section(
     Layout* layout,
     unsigned int index,
     const char* name,
@@ -988,12 +1009,12 @@ Sized_relobj<size, big_endian>::include_linkonce_section(
 
 template<int size, bool big_endian>
 inline void
-Sized_relobj<size, big_endian>::layout_section(Layout* layout,
-                                               unsigned int shndx,
-                                               const char* name,
-                                               typename This::Shdr& shdr,
-                                               unsigned int reloc_shndx,
-                                               unsigned int reloc_type)
+Sized_relobj_file<size, big_endian>::layout_section(Layout* layout,
+						    unsigned int shndx,
+						    const char* name,
+						    typename This::Shdr& shdr,
+						    unsigned int reloc_shndx,
+						    unsigned int reloc_type)
 {
   off_t offset;
   Output_section* os = layout->layout(this, shndx, name, shdr,
@@ -1001,9 +1022,9 @@ Sized_relobj<size, big_endian>::layout_section(Layout* layout,
 
   this->output_sections()[shndx] = os;
   if (offset == -1)
-    this->section_offsets_[shndx] = invalid_address;
+    this->section_offsets()[shndx] = invalid_address;
   else
-    this->section_offsets_[shndx] = convert_types<Address, off_t>(offset);
+    this->section_offsets()[shndx] = convert_types<Address, off_t>(offset);
 
   // If this section requires special handling, and if there are
   // relocs that apply to it, then we must do the special handling
@@ -1028,9 +1049,9 @@ Sized_relobj<size, big_endian>::layout_section(Layout* layout,
 
 template<int size, bool big_endian>
 void
-Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
-					  Layout* layout,
-					  Read_symbols_data* sd)
+Sized_relobj_file<size, big_endian>::do_layout(Symbol_table* symtab,
+					       Layout* layout,
+					       Read_symbols_data* sd)
 {
   const unsigned int shnum = this->shnum();
   bool is_gc_pass_one = ((parameters->options().gc_sections() 
@@ -1151,7 +1172,7 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
     }
 
   Output_sections& out_sections(this->output_sections());
-  std::vector<Address>& out_section_offsets(this->section_offsets_);
+  std::vector<Address>& out_section_offsets(this->section_offsets());
 
   if (!is_gc_pass_two)
     {
@@ -1552,7 +1573,7 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
 
 template<int size, bool big_endian>
 void
-Sized_relobj<size, big_endian>::do_layout_deferred_sections(Layout* layout)
+Sized_relobj_file<size, big_endian>::do_layout_deferred_sections(Layout* layout)
 {
   typename std::vector<Deferred_layout>::iterator deferred;
 
@@ -1575,7 +1596,7 @@ Sized_relobj<size, big_endian>::do_layout_deferred_sections(Layout* layout)
   // Now handle the deferred relocation sections.
 
   Output_sections& out_sections(this->output_sections());
-  std::vector<Address>& out_section_offsets(this->section_offsets_);
+  std::vector<Address>& out_section_offsets(this->section_offsets());
 
   for (deferred = this->deferred_layout_relocs_.begin();
        deferred != this->deferred_layout_relocs_.end();
@@ -1607,9 +1628,9 @@ Sized_relobj<size, big_endian>::do_layout_deferred_sections(Layout* layout)
 
 template<int size, bool big_endian>
 void
-Sized_relobj<size, big_endian>::do_add_symbols(Symbol_table* symtab,
-					       Read_symbols_data* sd,
-					       Layout*)
+Sized_relobj_file<size, big_endian>::do_add_symbols(Symbol_table* symtab,
+						    Read_symbols_data* sd,
+						    Layout*)
 {
   if (sd->symbols == NULL)
     {
@@ -1650,10 +1671,11 @@ Sized_relobj<size, big_endian>::do_add_symbols(Symbol_table* symtab,
 
 template<int size, bool big_endian>
 Archive::Should_include
-Sized_relobj<size, big_endian>::do_should_include_member(Symbol_table* symtab,
-							 Layout* layout,
-                                                         Read_symbols_data* sd,
-                                                         std::string* why)
+Sized_relobj_file<size, big_endian>::do_should_include_member(
+    Symbol_table* symtab,
+    Layout* layout,
+    Read_symbols_data* sd,
+    std::string* why)
 {
   char* tmpbuf = NULL;
   size_t tmpbuflen = 0;
@@ -1699,7 +1721,7 @@ Sized_relobj<size, big_endian>::do_should_include_member(Symbol_table* symtab,
 
 template<int size, bool big_endian>
 void
-Sized_relobj<size, big_endian>::do_for_all_global_symbols(
+Sized_relobj_file<size, big_endian>::do_for_all_global_symbols(
     Read_symbols_data* sd,
     Library_base::Symbol_visitor_base* v)
 {
@@ -1720,31 +1742,12 @@ Sized_relobj<size, big_endian>::do_for_all_global_symbols(
     }
 }
 
-// Iterate over local symbols, calling a visitor class V for each GOT offset
-// associated with a local symbol.
-
-template<int size, bool big_endian>
-void
-Sized_relobj<size, big_endian>::do_for_all_local_got_entries(
-    Got_offset_list::Visitor* v) const
-{
-  unsigned int nsyms = this->local_symbol_count();
-  for (unsigned int i = 0; i < nsyms; i++)
-    {
-      Local_got_offsets::const_iterator p = this->local_got_offsets_.find(i);
-      if (p != this->local_got_offsets_.end())
-	{
-	  const Got_offset_list* got_offsets = p->second;
-	  got_offsets->for_all_got_offsets(v);
-	}
-    }
-}
-
 // Return whether the local symbol SYMNDX has a PLT offset.
 
 template<int size, bool big_endian>
 bool
-Sized_relobj<size, big_endian>::local_has_plt_offset(unsigned int symndx) const
+Sized_relobj_file<size, big_endian>::local_has_plt_offset(
+    unsigned int symndx) const
 {
   typename Local_plt_offsets::const_iterator p =
     this->local_plt_offsets_.find(symndx);
@@ -1755,7 +1758,7 @@ Sized_relobj<size, big_endian>::local_has_plt_offset(unsigned int symndx) const
 
 template<int size, bool big_endian>
 unsigned int
-Sized_relobj<size, big_endian>::local_plt_offset(unsigned int symndx) const
+Sized_relobj_file<size, big_endian>::local_plt_offset(unsigned int symndx) const
 {
   typename Local_plt_offsets::const_iterator p =
     this->local_plt_offsets_.find(symndx);
@@ -1767,8 +1770,8 @@ Sized_relobj<size, big_endian>::local_plt_offset(unsigned int symndx) const
 
 template<int size, bool big_endian>
 void
-Sized_relobj<size, big_endian>::set_local_plt_offset(unsigned int symndx,
-						     unsigned int plt_offset)
+Sized_relobj_file<size, big_endian>::set_local_plt_offset(
+    unsigned int symndx, unsigned int plt_offset)
 {
   std::pair<typename Local_plt_offsets::iterator, bool> ins =
     this->local_plt_offsets_.insert(std::make_pair(symndx, plt_offset));
@@ -1783,8 +1786,8 @@ Sized_relobj<size, big_endian>::set_local_plt_offset(unsigned int symndx,
 
 template<int size, bool big_endian>
 void
-Sized_relobj<size, big_endian>::do_count_local_symbols(Stringpool* pool,
-						       Stringpool* dynpool)
+Sized_relobj_file<size, big_endian>::do_count_local_symbols(Stringpool* pool,
+							    Stringpool* dynpool)
 {
   gold_assert(this->symtab_shndx_ != -1U);
   if (this->symtab_shndx_ == 0)
@@ -1932,8 +1935,8 @@ Sized_relobj<size, big_endian>::do_count_local_symbols(Stringpool* pool,
 // Compute the final value of a local symbol.
 
 template<int size, bool big_endian>
-typename Sized_relobj<size, big_endian>::Compute_final_local_value_status
-Sized_relobj<size, big_endian>::compute_final_local_value_internal(
+typename Sized_relobj_file<size, big_endian>::Compute_final_local_value_status
+Sized_relobj_file<size, big_endian>::compute_final_local_value_internal(
     unsigned int r_sym,
     const Symbol_value<size>* lv_in,
     Symbol_value<size>* lv_out,
@@ -1982,8 +1985,8 @@ Sized_relobj<size, big_endian>::compute_final_local_value_internal(
 	  Section_id folded = symtab->icf()->get_folded_section(this,
 								shndx);
 	  gold_assert(folded.first != NULL);
-	  Sized_relobj<size, big_endian>* folded_obj = reinterpret_cast
-	    <Sized_relobj<size, big_endian>*>(folded.first);
+	  Sized_relobj_file<size, big_endian>* folded_obj = reinterpret_cast
+	    <Sized_relobj_file<size, big_endian>*>(folded.first);
 	  os = folded_obj->output_section(folded.second);
 	  gold_assert(os != NULL);
 	  secoffset = folded_obj->get_output_section_offset(folded.second);
@@ -2085,8 +2088,8 @@ Sized_relobj<size, big_endian>::compute_final_local_value_internal(
 // everything is finalized.  The caller should also free up any allocated
 // memory in the return value in *LV.
 template<int size, bool big_endian>
-typename Sized_relobj<size, big_endian>::Compute_final_local_value_status
-Sized_relobj<size, big_endian>::compute_final_local_value(
+typename Sized_relobj_file<size, big_endian>::Compute_final_local_value_status
+Sized_relobj_file<size, big_endian>::compute_final_local_value(
     unsigned int r_sym,
     const Symbol_value<size>* lv_in,
     Symbol_value<size>* lv_out,
@@ -2095,7 +2098,7 @@ Sized_relobj<size, big_endian>::compute_final_local_value(
   // This is just a wrapper of compute_final_local_value_internal.
   const bool relocatable = parameters->options().relocatable();
   const Output_sections& out_sections(this->output_sections());
-  const std::vector<Address>& out_offsets(this->section_offsets_);
+  const std::vector<Address>& out_offsets(this->section_offsets());
   return this->compute_final_local_value_internal(r_sym, lv_in, lv_out,
 						  relocatable, out_sections,
 						  out_offsets, symtab);
@@ -2108,9 +2111,10 @@ Sized_relobj<size, big_endian>::compute_final_local_value(
 
 template<int size, bool big_endian>
 unsigned int
-Sized_relobj<size, big_endian>::do_finalize_local_symbols(unsigned int index,
-							  off_t off,
-                                                          Symbol_table* symtab)
+Sized_relobj_file<size, big_endian>::do_finalize_local_symbols(
+    unsigned int index,
+    off_t off,
+    Symbol_table* symtab)
 {
   gold_assert(off == static_cast<off_t>(align_address(off, size >> 3)));
 
@@ -2119,7 +2123,7 @@ Sized_relobj<size, big_endian>::do_finalize_local_symbols(unsigned int index,
 
   const bool relocatable = parameters->options().relocatable();
   const Output_sections& out_sections(this->output_sections());
-  const std::vector<Address>& out_offsets(this->section_offsets_);
+  const std::vector<Address>& out_offsets(this->section_offsets());
 
   for (unsigned int i = 1; i < loccount; ++i)
     {
@@ -2153,7 +2157,8 @@ Sized_relobj<size, big_endian>::do_finalize_local_symbols(unsigned int index,
 
 template<int size, bool big_endian>
 unsigned int
-Sized_relobj<size, big_endian>::do_set_local_dynsym_indexes(unsigned int index)
+Sized_relobj_file<size, big_endian>::do_set_local_dynsym_indexes(
+    unsigned int index)
 {
   const unsigned int loccount = this->local_symbol_count_;
   for (unsigned int i = 1; i < loccount; ++i)
@@ -2174,7 +2179,7 @@ Sized_relobj<size, big_endian>::do_set_local_dynsym_indexes(unsigned int index)
 
 template<int size, bool big_endian>
 unsigned int
-Sized_relobj<size, big_endian>::do_set_local_dynsym_offset(off_t off)
+Sized_relobj_file<size, big_endian>::do_set_local_dynsym_offset(off_t off)
 {
   gold_assert(off == static_cast<off_t>(align_address(off, size >> 3)));
   this->local_dynsym_offset_ = off;
@@ -2186,7 +2191,7 @@ Sized_relobj<size, big_endian>::do_set_local_dynsym_offset(off_t off)
 
 template<int size, bool big_endian>
 uint64_t
-Sized_relobj<size, big_endian>::do_section_flags(unsigned int shndx)
+Sized_relobj_file<size, big_endian>::do_section_flags(unsigned int shndx)
 {
   Symbols_data* sd = this->get_symbols_data();
   if (sd != NULL)
@@ -2205,7 +2210,7 @@ Sized_relobj<size, big_endian>::do_section_flags(unsigned int shndx)
 
 template<int size, bool big_endian>
 uint64_t
-Sized_relobj<size, big_endian>::do_section_entsize(unsigned int shndx)
+Sized_relobj_file<size, big_endian>::do_section_entsize(unsigned int shndx)
 {
   Symbols_data* sd = this->get_symbols_data();
   gold_assert(sd != NULL);
@@ -2220,7 +2225,7 @@ Sized_relobj<size, big_endian>::do_section_entsize(unsigned int shndx)
 
 template<int size, bool big_endian>
 void
-Sized_relobj<size, big_endian>::write_local_symbols(
+Sized_relobj_file<size, big_endian>::write_local_symbols(
     Output_file* of,
     const Stringpool* sympool,
     const Stringpool* dynpool,
@@ -2370,7 +2375,7 @@ Sized_relobj<size, big_endian>::write_local_symbols(
 
 template<int size, bool big_endian>
 bool
-Sized_relobj<size, big_endian>::get_symbol_location_info(
+Sized_relobj_file<size, big_endian>::get_symbol_location_info(
     unsigned int shndx,
     off_t offset,
     Symbol_location_info* info)
@@ -2445,8 +2450,8 @@ Sized_relobj<size, big_endian>::get_symbol_location_info(
 // debugging sections.  If we can't find the kept section, return 0.
 
 template<int size, bool big_endian>
-typename Sized_relobj<size, big_endian>::Address
-Sized_relobj<size, big_endian>::map_to_kept_section(
+typename Sized_relobj_file<size, big_endian>::Address
+Sized_relobj_file<size, big_endian>::map_to_kept_section(
     unsigned int shndx,
     bool* found) const
 {
@@ -2454,8 +2459,8 @@ Sized_relobj<size, big_endian>::map_to_kept_section(
   unsigned int kept_shndx;
   if (this->get_kept_comdat_section(shndx, &kept_object, &kept_shndx))
     {
-      Sized_relobj<size, big_endian>* kept_relobj =
-	static_cast<Sized_relobj<size, big_endian>*>(kept_object);
+      Sized_relobj_file<size, big_endian>* kept_relobj =
+	static_cast<Sized_relobj_file<size, big_endian>*>(kept_object);
       Output_section* os = kept_relobj->output_section(kept_shndx);
       Address offset = kept_relobj->get_output_section_offset(kept_shndx);
       if (os != NULL && offset != invalid_address)
@@ -2472,7 +2477,7 @@ Sized_relobj<size, big_endian>::map_to_kept_section(
 
 template<int size, bool big_endian>
 void
-Sized_relobj<size, big_endian>::do_get_global_symbol_counts(
+Sized_relobj_file<size, big_endian>::do_get_global_symbol_counts(
     const Symbol_table*,
     size_t* defined,
     size_t* used) const
@@ -2851,22 +2856,22 @@ Object::read_section_data<64, true>(elfcpp::Elf_file<64, true, Object>*,
 
 #ifdef HAVE_TARGET_32_LITTLE
 template
-class Sized_relobj<32, false>;
+class Sized_relobj_file<32, false>;
 #endif
 
 #ifdef HAVE_TARGET_32_BIG
 template
-class Sized_relobj<32, true>;
+class Sized_relobj_file<32, true>;
 #endif
 
 #ifdef HAVE_TARGET_64_LITTLE
 template
-class Sized_relobj<64, false>;
+class Sized_relobj_file<64, false>;
 #endif
 
 #ifdef HAVE_TARGET_64_BIG
 template
-class Sized_relobj<64, true>;
+class Sized_relobj_file<64, true>;
 #endif
 
 #ifdef HAVE_TARGET_32_LITTLE

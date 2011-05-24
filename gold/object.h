@@ -834,7 +834,7 @@ class Object
   set_shnum(int shnum)
   { this->shnum_ = shnum; }
 
-  // Functions used by both Sized_relobj and Sized_dynobj.
+  // Functions used by both Sized_relobj_file and Sized_dynobj.
 
   // Read the section data into a Read_symbols_data object.
   template<int size, bool big_endian>
@@ -916,7 +916,7 @@ class Object
 };
 
 // A regular object (ET_REL).  This is an abstract base class itself.
-// The implementation is the template class Sized_relobj.
+// The implementation is the template class Sized_relobj_file.
 
 class Relobj : public Object
 {
@@ -929,7 +929,9 @@ class Relobj : public Object
       relocs_must_follow_section_writes_(false),
       sd_(NULL),
       reloc_counts_(NULL),
-      reloc_bases_(NULL)
+      reloc_bases_(NULL),
+      first_dyn_reloc_(0),
+      dyn_reloc_count_(0)
   { }
 
   // During garbage collection, the Read_symbols_data pass for 
@@ -1021,6 +1023,25 @@ class Relobj : public Object
   unsigned int
   set_local_dynsym_offset(off_t off)
   { return this->do_set_local_dynsym_offset(off); }
+
+  // Record a dynamic relocation against an input section from this object.
+  void
+  add_dyn_reloc(unsigned int index)
+  {
+    if (this->dyn_reloc_count_ == 0)
+      this->first_dyn_reloc_ = index;
+    ++this->dyn_reloc_count_;
+  }
+
+  // Return the index of the first dynamic relocation.
+  unsigned int
+  first_dyn_reloc() const
+  { return this->first_dyn_reloc_; }
+
+  // Return the count of dynamic relocations.
+  unsigned int
+  dyn_reloc_count() const
+  { return this->dyn_reloc_count_; }
 
   // Relocate the input sections and write out the local symbols.
   void
@@ -1262,6 +1283,10 @@ class Relobj : public Object
   unsigned int* reloc_counts_;
   // Per-symbol base indexes of relocations, for incremental links.
   unsigned int* reloc_bases_;
+  // Index of the first dynamic relocation for this object.
+  unsigned int first_dyn_reloc_;
+  // Count of dynamic relocations for this object.
+  unsigned int dyn_reloc_count_;
 };
 
 // This class is used to handle relocations against a section symbol
@@ -1379,7 +1404,7 @@ class Symbol_value
   // symbol is defined, and ADDEND is an addend to add to the value.
   template<bool big_endian>
   Value
-  value(const Sized_relobj<size, big_endian>* object, Value addend) const
+  value(const Sized_relobj_file<size, big_endian>* object, Value addend) const
   {
     if (this->has_output_value_)
       return this->u_.value + addend;
@@ -1678,37 +1703,155 @@ typedef std::map<unsigned int, section_size_type> Compressed_section_map;
 // or an incremental (unchanged) object.  This is size and endian specific.
 
 template<int size, bool big_endian>
-class Sized_relobj_base : public Relobj
+class Sized_relobj : public Relobj
 {
  public:
+  typedef typename elfcpp::Elf_types<size>::Elf_Addr Address;
   typedef Relobj::Symbols Symbols;
 
-  Sized_relobj_base(const std::string& name, Input_file* input_file)
-    : Relobj(name, input_file)
+  static const Address invalid_address = static_cast<Address>(0) - 1;
+
+  Sized_relobj(const std::string& name, Input_file* input_file)
+    : Relobj(name, input_file), local_got_offsets_(), section_offsets_()
   { }
 
-  Sized_relobj_base(const std::string& name, Input_file* input_file,
+  Sized_relobj(const std::string& name, Input_file* input_file,
 		    off_t offset)
-    : Relobj(name, input_file, offset)
+    : Relobj(name, input_file, offset), local_got_offsets_(), section_offsets_()
   { }
 
-  ~Sized_relobj_base()
+  ~Sized_relobj()
   { }
+
+  // If this is a regular object, return a pointer to the Sized_relobj_file
+  // object.  Otherwise, return NULL.
+  virtual Sized_relobj_file<size, big_endian>*
+  sized_relobj()
+  { return NULL; }
+
+  const virtual Sized_relobj_file<size, big_endian>*
+  sized_relobj() const
+  { return NULL; }
+
+  // Checks if the offset of input section SHNDX within its output
+  // section is invalid.
+  bool
+  is_output_section_offset_invalid(unsigned int shndx) const
+  { return this->get_output_section_offset(shndx) == invalid_address; }
+
+  // Get the offset of input section SHNDX within its output section.
+  // This is -1 if the input section requires a special mapping, such
+  // as a merge section.  The output section can be found in the
+  // output_sections_ field of the parent class Relobj.
+  Address
+  get_output_section_offset(unsigned int shndx) const
+  {
+    gold_assert(shndx < this->section_offsets_.size());
+    return this->section_offsets_[shndx];
+  }
+
+  // Return whether the local symbol SYMNDX has a GOT offset.
+  // For TLS symbols, the GOT entry will hold its tp-relative offset.
+  bool
+  local_has_got_offset(unsigned int symndx, unsigned int got_type) const
+  {
+    Local_got_offsets::const_iterator p =
+        this->local_got_offsets_.find(symndx);
+    return (p != this->local_got_offsets_.end()
+            && p->second->get_offset(got_type) != -1U);
+  }
+
+  // Return the GOT offset of the local symbol SYMNDX.
+  unsigned int
+  local_got_offset(unsigned int symndx, unsigned int got_type) const
+  {
+    Local_got_offsets::const_iterator p =
+        this->local_got_offsets_.find(symndx);
+    gold_assert(p != this->local_got_offsets_.end());
+    unsigned int off = p->second->get_offset(got_type);
+    gold_assert(off != -1U);
+    return off;
+  }
+
+  // Set the GOT offset of the local symbol SYMNDX to GOT_OFFSET.
+  void
+  set_local_got_offset(unsigned int symndx, unsigned int got_type,
+                       unsigned int got_offset)
+  {
+    Local_got_offsets::const_iterator p =
+        this->local_got_offsets_.find(symndx);
+    if (p != this->local_got_offsets_.end())
+      p->second->set_offset(got_type, got_offset);
+    else
+      {
+        Got_offset_list* g = new Got_offset_list(got_type, got_offset);
+        std::pair<Local_got_offsets::iterator, bool> ins =
+            this->local_got_offsets_.insert(std::make_pair(symndx, g));
+        gold_assert(ins.second);
+      }
+  }
+
+  // Iterate over local symbols, calling a visitor class V for each GOT offset
+  // associated with a local symbol.
+  void
+  do_for_all_local_got_entries(Got_offset_list::Visitor* v) const;
 
  protected:
   typedef Relobj::Output_sections Output_sections;
 
+  // Clear the local symbol information.
+  void
+  clear_got_offsets()
+  { this->local_got_offsets_.clear(); }
+
+  // Return the vector of section offsets.
+  std::vector<Address>&
+  section_offsets()
+  { return this->section_offsets_; }
+
+  // Get the offset of a section.
+  uint64_t
+  do_output_section_offset(unsigned int shndx) const
+  {
+    Address off = this->get_output_section_offset(shndx);
+    if (off == invalid_address)
+      return -1ULL;
+    return off;
+  }
+
+  // Set the offset of a section.
+  void
+  do_set_section_offset(unsigned int shndx, uint64_t off)
+  {
+    gold_assert(shndx < this->section_offsets_.size());
+    this->section_offsets_[shndx] =
+      (off == static_cast<uint64_t>(-1)
+       ? invalid_address
+       : convert_types<Address, uint64_t>(off));
+  }
+
  private:
+  // The GOT offsets of local symbols. This map also stores GOT offsets
+  // for tp-relative offsets for TLS symbols.
+  typedef Unordered_map<unsigned int, Got_offset_list*> Local_got_offsets;
+
+  // GOT offsets for local non-TLS symbols, and tp-relative offsets
+  // for TLS symbols, indexed by symbol number.
+  Local_got_offsets local_got_offsets_;
+  // For each input section, the offset of the input section in its
+  // output section.  This is INVALID_ADDRESS if the input section requires a
+  // special mapping.
+  std::vector<Address> section_offsets_;
 };
 
 // A regular object file.  This is size and endian specific.
 
 template<int size, bool big_endian>
-class Sized_relobj : public Sized_relobj_base<size, big_endian>
+class Sized_relobj_file : public Sized_relobj<size, big_endian>
 {
  public:
   typedef typename elfcpp::Elf_types<size>::Elf_Addr Address;
-  typedef typename Sized_relobj_base<size, big_endian>::Symbols Symbols;
+  typedef typename Sized_relobj<size, big_endian>::Symbols Symbols;
   typedef std::vector<Symbol_value<size> > Local_values;
 
   static const Address invalid_address = static_cast<Address>(0) - 1;
@@ -1723,21 +1866,26 @@ class Sized_relobj : public Sized_relobj_base<size, big_endian>
     CFLV_DISCARDED
   };
 
-  Sized_relobj(const std::string& name, Input_file* input_file, off_t offset,
-	       const typename elfcpp::Ehdr<size, big_endian>&);
+  Sized_relobj_file(const std::string& name,
+		    Input_file* input_file,
+		    off_t offset,
+		    const typename elfcpp::Ehdr<size, big_endian>&);
 
-  ~Sized_relobj();
-
-  // Checks if the offset of input section SHNDX within its output
-  // section is invalid. 
-  bool
-  is_output_section_offset_invalid(unsigned int shndx) const
-  { return this->get_output_section_offset(shndx) == invalid_address; }
+  ~Sized_relobj_file();
 
   // Set up the object file based on TARGET.
   void
   setup()
   { this->do_setup(); }
+
+  // Return a pointer to the Sized_relobj_file object.
+  Sized_relobj_file<size, big_endian>*
+  sized_relobj()
+  { return this; }
+
+  const Sized_relobj_file<size, big_endian>*
+  sized_relobj() const
+  { return this; }
 
   // Return the number of symbols.  This is only valid after
   // Object::add_symbols has been called.
@@ -1818,47 +1966,6 @@ class Sized_relobj : public Sized_relobj_base<size, big_endian>
     this->local_values_[sym].set_needs_output_dynsym_entry();
   }
 
-  // Return whether the local symbol SYMNDX has a GOT offset.
-  // For TLS symbols, the GOT entry will hold its tp-relative offset.
-  bool
-  local_has_got_offset(unsigned int symndx, unsigned int got_type) const
-  {
-    Local_got_offsets::const_iterator p =
-        this->local_got_offsets_.find(symndx);
-    return (p != this->local_got_offsets_.end()
-            && p->second->get_offset(got_type) != -1U);
-  }
-
-  // Return the GOT offset of the local symbol SYMNDX.
-  unsigned int
-  local_got_offset(unsigned int symndx, unsigned int got_type) const
-  {
-    Local_got_offsets::const_iterator p =
-        this->local_got_offsets_.find(symndx);
-    gold_assert(p != this->local_got_offsets_.end());
-    unsigned int off = p->second->get_offset(got_type);
-    gold_assert(off != -1U);
-    return off;
-  }
-
-  // Set the GOT offset of the local symbol SYMNDX to GOT_OFFSET.
-  void
-  set_local_got_offset(unsigned int symndx, unsigned int got_type,
-                       unsigned int got_offset)
-  {
-    Local_got_offsets::const_iterator p =
-        this->local_got_offsets_.find(symndx);
-    if (p != this->local_got_offsets_.end())
-      p->second->set_offset(got_type, got_offset);
-    else
-      {
-        Got_offset_list* g = new Got_offset_list(got_type, got_offset);
-        std::pair<Local_got_offsets::iterator, bool> ins =
-            this->local_got_offsets_.insert(std::make_pair(symndx, g));
-        gold_assert(ins.second);
-      }
-  }
-
   // Return whether the local symbol SYMNDX has a PLT offset.
   bool
   local_has_plt_offset(unsigned int symndx) const;
@@ -1871,17 +1978,6 @@ class Sized_relobj : public Sized_relobj_base<size, big_endian>
   // Set the PLT offset of the local symbol SYMNDX.
   void
   set_local_plt_offset(unsigned int symndx, unsigned int plt_offset);
-
-  // Get the offset of input section SHNDX within its output section.
-  // This is -1 if the input section requires a special mapping, such
-  // as a merge section.  The output section can be found in the
-  // output_sections_ field of the parent class Relobj.
-  Address
-  get_output_section_offset(unsigned int shndx) const
-  {
-    gold_assert(shndx < this->section_offsets_.size());
-    return this->section_offsets_[shndx];
-  }
 
   // Return the name of the symbol that spans the given offset in the
   // specified section in this object.  This is used only for error
@@ -1913,7 +2009,7 @@ class Sized_relobj : public Sized_relobj_base<size, big_endian>
 			    const Symbol_table* symtab);
 
  protected:
-  typedef typename Sized_relobj_base<size, big_endian>::Output_sections
+  typedef typename Sized_relobj<size, big_endian>::Output_sections
       Output_sections;
 
   // Set up.
@@ -1960,11 +2056,6 @@ class Sized_relobj : public Sized_relobj_base<size, big_endian>
   void
   do_for_all_global_symbols(Read_symbols_data* sd,
 			    Library_base::Symbol_visitor_base* v);
-
-  // Iterate over local symbols, calling a visitor class V for each GOT offset
-  // associated with a local symbol.
-  void
-  do_for_all_local_got_entries(Got_offset_list::Visitor* v) const;
 
   // Read the relocs.
   void
@@ -2061,27 +2152,6 @@ class Sized_relobj : public Sized_relobj_base<size, big_endian>
   do_get_global_symbols() const
   { return &this->symbols_; }
 
-  // Get the offset of a section.
-  uint64_t
-  do_output_section_offset(unsigned int shndx) const
-  {
-    Address off = this->get_output_section_offset(shndx);
-    if (off == invalid_address)
-      return -1ULL;
-    return off;
-  }
-
-  // Set the offset of a section.
-  void
-  do_set_section_offset(unsigned int shndx, uint64_t off)
-  {
-    gold_assert(shndx < this->section_offsets_.size());
-    this->section_offsets_[shndx] =
-      (off == static_cast<uint64_t>(-1)
-       ? invalid_address
-       : convert_types<Address, uint64_t>(off));
-  }
-
   // Adjust a section index if necessary.
   unsigned int
   adjust_shndx(unsigned int shndx)
@@ -2161,7 +2231,7 @@ class Sized_relobj : public Sized_relobj_base<size, big_endian>
 
  private:
   // For convenience.
-  typedef Sized_relobj<size, big_endian> This;
+  typedef Sized_relobj_file<size, big_endian> This;
   static const int ehdr_size = elfcpp::Elf_sizes<size>::ehdr_size;
   static const int shdr_size = elfcpp::Elf_sizes<size>::shdr_size;
   static const int sym_size = elfcpp::Elf_sizes<size>::sym_size;
@@ -2369,10 +2439,6 @@ class Sized_relobj : public Sized_relobj_base<size, big_endian>
 				     const std::vector<Address>& out_offsets,
 				     const Symbol_table* symtab);
 
-  // The GOT offsets of local symbols. This map also stores GOT offsets
-  // for tp-relative offsets for TLS symbols.
-  typedef Unordered_map<unsigned int, Got_offset_list*> Local_got_offsets;
-
   // The PLT offsets of local symbols.
   typedef Unordered_map<unsigned int, unsigned int> Local_plt_offsets;
 
@@ -2416,15 +2482,8 @@ class Sized_relobj : public Sized_relobj_base<size, big_endian>
   off_t local_dynsym_offset_;
   // Values of local symbols.
   Local_values local_values_;
-  // GOT offsets for local non-TLS symbols, and tp-relative offsets
-  // for TLS symbols, indexed by symbol number.
-  Local_got_offsets local_got_offsets_;
   // PLT offsets for local symbols.
   Local_plt_offsets local_plt_offsets_;
-  // For each input section, the offset of the input section in its
-  // output section.  This is INVALID_ADDRESS if the input section requires a
-  // special mapping.
-  std::vector<Address> section_offsets_;
   // Table mapping discarded comdat sections to corresponding kept sections.
   Kept_comdat_section_table kept_comdat_sections_;
   // Whether this object has a GNU style .eh_frame section.
@@ -2548,7 +2607,7 @@ struct Relocate_info
   // Layout.
   const Layout* layout;
   // Object being relocated.
-  Sized_relobj<size, big_endian>* object;
+  Sized_relobj_file<size, big_endian>* object;
   // Section index of relocation section.
   unsigned int reloc_shndx;
   // Section header of relocation section.

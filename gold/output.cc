@@ -941,10 +941,13 @@ set_needs_dynsym_index()
     default:
       {
         const unsigned int lsi = this->local_sym_index_;
+	Sized_relobj_file<size, big_endian>* relobj =
+	    this->u1_.relobj->sized_relobj();
+	gold_assert(relobj != NULL);
         if (!this->is_section_symbol_)
-          this->u1_.relobj->set_needs_output_dynsym_entry(lsi);
+          relobj->set_needs_output_dynsym_entry(lsi);
         else
-          this->u1_.relobj->output_section(lsi)->set_needs_dynsym_index();
+          relobj->output_section(lsi)->set_needs_dynsym_index();
       }
       break;
     }
@@ -994,16 +997,19 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::get_symbol_index()
     default:
       {
         const unsigned int lsi = this->local_sym_index_;
+	Sized_relobj_file<size, big_endian>* relobj =
+	    this->u1_.relobj->sized_relobj();
+	gold_assert(relobj != NULL);
         if (!this->is_section_symbol_)
           {
             if (dynamic)
-              index = this->u1_.relobj->dynsym_index(lsi);
+              index = relobj->dynsym_index(lsi);
             else
-              index = this->u1_.relobj->symtab_index(lsi);
+              index = relobj->symtab_index(lsi);
           }
         else
           {
-            Output_section* os = this->u1_.relobj->output_section(lsi);
+            Output_section* os = relobj->output_section(lsi);
             gold_assert(os != NULL);
             if (dynamic)
               index = os->dynsym_index();
@@ -1038,7 +1044,10 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::
   if (offset != invalid_address)
     return offset + addend;
   // This is a merge section.
-  offset = os->output_address(this->u1_.relobj, lsi, addend);
+  Sized_relobj_file<size, big_endian>* relobj =
+      this->u1_.relobj->sized_relobj();
+  gold_assert(relobj != NULL);
+  offset = os->output_address(relobj, lsi, addend);
   gold_assert(offset != invalid_address);
   return offset;
 }
@@ -1059,8 +1068,10 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::get_address() const
 	address += os->address() + off;
       else
 	{
-	  address = os->output_address(this->u2_.relobj, this->shndx_,
-				       address);
+	  Sized_relobj_file<size, big_endian>* relobj =
+	      this->u2_.relobj->sized_relobj();
+	  gold_assert(relobj != NULL);
+	  address = os->output_address(relobj, this->shndx_, address);
 	  gold_assert(address != invalid_address);
 	}
     }
@@ -1113,8 +1124,11 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::symbol_value(
 	      && this->local_sym_index_ != 0
               && !this->is_section_symbol_);
   const unsigned int lsi = this->local_sym_index_;
-  const Symbol_value<size>* symval = this->u1_.relobj->local_symbol(lsi);
-  return symval->value(this->u1_.relobj, addend);
+  Sized_relobj_file<size, big_endian>* relobj =
+      this->u1_.relobj->sized_relobj();
+  gold_assert(relobj != NULL);
+  const Symbol_value<size>* symval = relobj->local_symbol(lsi);
+  return symval->value(relobj, addend);
 }
 
 // Reloc comparison.  This function sorts the dynamic relocs for the
@@ -1265,7 +1279,7 @@ Output_relocatable_relocs<sh_type, size, big_endian>::set_final_data_size()
 
 template<int size, bool big_endian>
 Output_data_group<size, big_endian>::Output_data_group(
-    Sized_relobj<size, big_endian>* relobj,
+    Sized_relobj_file<size, big_endian>* relobj,
     section_size_type entry_count,
     elfcpp::Elf_Word flags,
     std::vector<unsigned int>* input_shndxes)
@@ -1367,7 +1381,7 @@ Output_data_got<size, big_endian>::Got_entry::write(unsigned char* pov) const
 
     default:
       {
-	const Sized_relobj<size, big_endian>* object = this->u_.object;
+	const Sized_relobj_file<size, big_endian>* object = this->u_.object;
         const unsigned int lsi = this->local_sym_index_;
         const Symbol_value<size>* symval = object->local_symbol(lsi);
 	if (!this->use_plt_offset_)
@@ -1505,7 +1519,7 @@ Output_data_got<size, big_endian>::add_global_pair_with_rela(
 template<int size, bool big_endian>
 bool
 Output_data_got<size, big_endian>::add_local(
-    Sized_relobj<size, big_endian>* object,
+    Sized_relobj_file<size, big_endian>* object,
     unsigned int symndx,
     unsigned int got_type)
 {
@@ -1523,7 +1537,7 @@ Output_data_got<size, big_endian>::add_local(
 template<int size, bool big_endian>
 bool
 Output_data_got<size, big_endian>::add_local_plt(
-    Sized_relobj<size, big_endian>* object,
+    Sized_relobj_file<size, big_endian>* object,
     unsigned int symndx,
     unsigned int got_type)
 {
@@ -1542,7 +1556,7 @@ Output_data_got<size, big_endian>::add_local_plt(
 template<int size, bool big_endian>
 void
 Output_data_got<size, big_endian>::add_local_with_rel(
-    Sized_relobj<size, big_endian>* object,
+    Sized_relobj_file<size, big_endian>* object,
     unsigned int symndx,
     unsigned int got_type,
     Rel_dyn* rel_dyn,
@@ -1559,7 +1573,7 @@ Output_data_got<size, big_endian>::add_local_with_rel(
 template<int size, bool big_endian>
 void
 Output_data_got<size, big_endian>::add_local_with_rela(
-    Sized_relobj<size, big_endian>* object,
+    Sized_relobj_file<size, big_endian>* object,
     unsigned int symndx,
     unsigned int got_type,
     Rela_dyn* rela_dyn,
@@ -1579,7 +1593,7 @@ Output_data_got<size, big_endian>::add_local_with_rela(
 template<int size, bool big_endian>
 void
 Output_data_got<size, big_endian>::add_local_pair_with_rel(
-    Sized_relobj<size, big_endian>* object,
+    Sized_relobj_file<size, big_endian>* object,
     unsigned int symndx,
     unsigned int shndx,
     unsigned int got_type,
@@ -1604,7 +1618,7 @@ Output_data_got<size, big_endian>::add_local_pair_with_rel(
 template<int size, bool big_endian>
 void
 Output_data_got<size, big_endian>::add_local_pair_with_rela(
-    Sized_relobj<size, big_endian>* object,
+    Sized_relobj_file<size, big_endian>* object,
     unsigned int symndx,
     unsigned int shndx,
     unsigned int got_type,
@@ -1630,21 +1644,26 @@ Output_data_got<size, big_endian>::add_local_pair_with_rela(
 
 template<int size, bool big_endian>
 void
-Output_data_got<size, big_endian>::reserve_slot(unsigned int i)
+Output_data_got<size, big_endian>::reserve_local(
+    unsigned int i,
+    Sized_relobj<size, big_endian>* object,
+    unsigned int sym_index,
+    unsigned int got_type)
 {
-  this->free_list_.remove(i * size / 8, (i + 1) * size / 8);
+  this->reserve_slot(i);
+  object->set_local_got_offset(sym_index, got_type, this->got_offset(i));
 }
 
 // Reserve a slot in the GOT for a global symbol.
 
 template<int size, bool big_endian>
 void
-Output_data_got<size, big_endian>::reserve_slot_for_global(
+Output_data_got<size, big_endian>::reserve_global(
     unsigned int i,
     Symbol* gsym,
     unsigned int got_type)
 {
-  this->free_list_.remove(i * size / 8, (i + 1) * size / 8);
+  this->reserve_slot(i);
   gsym->set_got_offset(got_type, this->got_offset(i));
 }
 
@@ -2189,7 +2208,7 @@ Output_section::set_entsize(uint64_t v)
 template<int size, bool big_endian>
 off_t
 Output_section::add_input_section(Layout* layout,
-				  Sized_relobj<size, big_endian>* object,
+				  Sized_relobj_file<size, big_endian>* object,
 				  unsigned int shndx,
 				  const char* secname,
 				  const elfcpp::Shdr<size, big_endian>& shdr,
@@ -4821,7 +4840,7 @@ template
 off_t
 Output_section::add_input_section<32, false>(
     Layout* layout,
-    Sized_relobj<32, false>* object,
+    Sized_relobj_file<32, false>* object,
     unsigned int shndx,
     const char* secname,
     const elfcpp::Shdr<32, false>& shdr,
@@ -4834,7 +4853,7 @@ template
 off_t
 Output_section::add_input_section<32, true>(
     Layout* layout,
-    Sized_relobj<32, true>* object,
+    Sized_relobj_file<32, true>* object,
     unsigned int shndx,
     const char* secname,
     const elfcpp::Shdr<32, true>& shdr,
@@ -4847,7 +4866,7 @@ template
 off_t
 Output_section::add_input_section<64, false>(
     Layout* layout,
-    Sized_relobj<64, false>* object,
+    Sized_relobj_file<64, false>* object,
     unsigned int shndx,
     const char* secname,
     const elfcpp::Shdr<64, false>& shdr,
@@ -4860,7 +4879,7 @@ template
 off_t
 Output_section::add_input_section<64, true>(
     Layout* layout,
-    Sized_relobj<64, true>* object,
+    Sized_relobj_file<64, true>* object,
     unsigned int shndx,
     const char* secname,
     const elfcpp::Shdr<64, true>& shdr,

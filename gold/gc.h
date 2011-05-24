@@ -37,7 +37,7 @@ namespace gold
 class Object;
 
 template<int size, bool big_endian>
-class Sized_relobj;
+class Sized_relobj_file;
 
 template<int sh_type, int size, bool big_endian>
 class Reloc_types;
@@ -178,7 +178,7 @@ gc_process_relocs(
     Symbol_table* symtab,
     Layout*,
     Target_type* target,
-    Sized_relobj<size, big_endian>* src_obj,
+    Sized_relobj_file<size, big_endian>* src_obj,
     unsigned int src_indx,
     const unsigned char* prelocs,
     size_t reloc_count,

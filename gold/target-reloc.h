@@ -46,7 +46,7 @@ scan_relocs(
     Symbol_table* symtab,
     Layout* layout,
     Target_type* target,
-    Sized_relobj<size, big_endian>* object,
+    Sized_relobj_file<size, big_endian>* object,
     unsigned int data_shndx,
     const unsigned char* prelocs,
     size_t reloc_count,
@@ -213,7 +213,7 @@ relocate_section(
   const int reloc_size = Reloc_types<sh_type, size, big_endian>::reloc_size;
   Relocate relocate;
 
-  Sized_relobj<size, big_endian>* object = relinfo->object;
+  Sized_relobj_file<size, big_endian>* object = relinfo->object;
   unsigned int local_count = object->local_symbol_count();
 
   Comdat_behavior comdat_behavior = CB_UNDETERMINED;
@@ -475,7 +475,7 @@ void
 scan_relocatable_relocs(
     Symbol_table*,
     Layout*,
-    Sized_relobj<size, big_endian>* object,
+    Sized_relobj_file<size, big_endian>* object,
     unsigned int data_shndx,
     const unsigned char* prelocs,
     size_t reloc_count,
@@ -570,7 +570,7 @@ relocate_for_relocatable(
   const int reloc_size = Reloc_types<sh_type, size, big_endian>::reloc_size;
   const Address invalid_address = static_cast<Address>(0) - 1;
 
-  Sized_relobj<size, big_endian>* const object = relinfo->object;
+  Sized_relobj_file<size, big_endian>* const object = relinfo->object;
   const unsigned int local_count = object->local_symbol_count();
 
   unsigned char* pwrite = reloc_view;

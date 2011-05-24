@@ -488,7 +488,7 @@ class Layout
   // within the output section.
   template<int size, bool big_endian>
   Output_section*
-  layout(Sized_relobj<size, big_endian> *object, unsigned int shndx,
+  layout(Sized_relobj_file<size, big_endian> *object, unsigned int shndx,
 	 const char* name, const elfcpp::Shdr<size, big_endian>& shdr,
 	 unsigned int reloc_shndx, unsigned int reloc_type, off_t* offset);
 
@@ -510,7 +510,7 @@ class Layout
   // relocatable information.
   template<int size, bool big_endian>
   Output_section*
-  layout_reloc(Sized_relobj<size, big_endian>* object,
+  layout_reloc(Sized_relobj_file<size, big_endian>* object,
 	       unsigned int reloc_shndx,
 	       const elfcpp::Shdr<size, big_endian>& shdr,
 	       Output_section* data_section,
@@ -520,7 +520,7 @@ class Layout
   template<int size, bool big_endian>
   void
   layout_group(Symbol_table* symtab,
-	       Sized_relobj<size, big_endian>* object,
+	       Sized_relobj_file<size, big_endian>* object,
 	       unsigned int group_shndx,
 	       const char* group_section_name,
 	       const char* signature,
@@ -539,7 +539,7 @@ class Layout
   // returns the output section, and sets *OFFSET to the offset.
   template<int size, bool big_endian>
   Output_section*
-  layout_eh_frame(Sized_relobj<size, big_endian>* object,
+  layout_eh_frame(Sized_relobj_file<size, big_endian>* object,
 		  const unsigned char* symbols,
 		  off_t symbols_size,
 		  const unsigned char* symbol_names,
@@ -958,7 +958,7 @@ class Layout
   // Return whether to include this section in the link.
   template<int size, bool big_endian>
   bool
-  include_section(Sized_relobj<size, big_endian>* object, const char* name,
+  include_section(Sized_relobj_file<size, big_endian>* object, const char* name,
 		  const elfcpp::Shdr<size, big_endian>&);
 
   // Return the output section name to use given an input section

@@ -149,6 +149,10 @@ dump_incremental_inputs(const char* argv0, const char* filename,
 		 input_file.get_local_symbol_offset());
 	  printf("    Local symbol count: %d\n",
 		 input_file.get_local_symbol_count());
+	  printf("    First dynamic reloc: %d\n",
+		 input_file.get_first_dyn_reloc());
+	  printf("    Dynamic reloc count: %d\n",
+		 input_file.get_dyn_reloc_count());
 	  break;
 	case INCREMENTAL_INPUT_ARCHIVE:
 	  printf("Archive\n");
@@ -368,24 +372,26 @@ dump_incremental_inputs(const char* argv0, const char* filename,
   for (unsigned int i = 0; i < ngot; ++i)
     {
       unsigned int got_type = igot_plt.get_got_type(i);
-      unsigned int got_desc = igot_plt.get_got_desc(i);
+      unsigned int got_symndx = igot_plt.get_got_symndx(i);
+      unsigned int got_input_index = igot_plt.get_got_input_index(i);
       printf("[%d] type %02x, ", i, got_type & 0x7f);
       if ((got_type & 0x7f) == 0x7f)
 	printf("reserved");
       else if (got_type & 0x80)
 	{
-	  Entry_reader input_file = incremental_inputs.input_file(got_desc);
+	  Entry_reader input_file =
+	      incremental_inputs.input_file(got_input_index);
 	  const char* objname = input_file.filename();
-	  printf("local: %s (%d)", objname, got_desc);
+	  printf("local: %s (%d)", objname, got_symndx);
 	}
       else
 	{
-	  sym_p = symtab_view.data() + got_desc * sym_size;
+	  sym_p = symtab_view.data() + got_symndx * sym_size;
 	  elfcpp::Sym<size, big_endian> sym(sym_p);
 	  const char* symname;
 	  if (!strtab.get_c_string(sym.get_st_name(), &symname))
 	    symname = "<unknown>";
-	  printf("global %s (%d)", symname, got_desc);
+	  printf("global %s (%d)", symname, got_symndx);
 	}
       printf("\n");
     }

@@ -46,6 +46,8 @@ template<int size, bool big_endian>
 class Sized_target;
 template<int size, bool big_endian>
 class Sized_relobj;
+template<int size, bool big_endian>
+class Sized_relobj_file;
 
 // An abtract class for data which has to go into the output file.
 
@@ -1119,6 +1121,16 @@ class Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>
   Address
   symbol_value(Addend addend) const;
 
+  // If this relocation is against an input section, return the
+  // relocatable object containing the input section.
+  Sized_relobj<size, big_endian>*
+  get_relobj() const
+  {
+    if (this->shndx_ == INVALID_CODE)
+      return NULL;
+    return this->u2_.relobj;
+  }
+
   // Write the reloc entry to an output view.
   void
   write(unsigned char* pov) const;
@@ -1325,6 +1337,12 @@ class Output_reloc<elfcpp::SHT_RELA, dynamic, size, big_endian>
   is_symbolless() const
   { return this->rel_.is_symbolless(); }
 
+  // If this relocation is against an input section, return the
+  // relocatable object containing the input section.
+  Sized_relobj<size, big_endian>*
+  get_relobj() const
+  { return this->rel_.get_relobj(); }
+
   // Write the reloc entry to an output view.
   void
   write(unsigned char* pov) const;
@@ -1437,6 +1455,9 @@ class Output_data_reloc_base : public Output_data_reloc_generic
     od->add_dynamic_reloc();
     if (reloc.is_relative())
       this->bump_relative_reloc_count();
+    Sized_relobj<size, big_endian>* relobj = reloc.get_relobj();
+    if (relobj != NULL)
+      relobj->add_dyn_reloc(this->relocs_.size() - 1);
   }
 
  private:
@@ -1819,9 +1840,9 @@ class Output_data_reloc<elfcpp::SHT_RELA, dynamic, size, big_endian>
 
   void
   add_local_section(Sized_relobj<size, big_endian>* relobj,
-	             unsigned int input_shndx, unsigned int type,
-	             Output_data* od, unsigned int shndx, Address address,
-	             Addend addend)
+		    unsigned int input_shndx, unsigned int type,
+		    Output_data* od, unsigned int shndx, Address address,
+		    Addend addend)
   {
     this->add(od, Output_reloc_type(relobj, input_shndx, type, shndx,
                                     address, addend, false, false, true));
@@ -1910,7 +1931,7 @@ class Output_data_group : public Output_section_data
 {
  public:
   // The constructor clears *INPUT_SHNDXES.
-  Output_data_group(Sized_relobj<size, big_endian>* relobj,
+  Output_data_group(Sized_relobj_file<size, big_endian>* relobj,
 		    section_size_type entry_count,
 		    elfcpp::Elf_Word flags,
 		    std::vector<unsigned int>* input_shndxes);
@@ -1930,7 +1951,7 @@ class Output_data_group : public Output_section_data
 
  private:
   // The input object.
-  Sized_relobj<size, big_endian>* relobj_;
+  Sized_relobj_file<size, big_endian>* relobj_;
   // The group flag word.
   elfcpp::Elf_Word flags_;
   // The section indexes of the input sections in this group.
@@ -2002,37 +2023,38 @@ class Output_data_got : public Output_section_data_build
   // this is a new GOT entry, false if the symbol already has a GOT
   // entry.
   bool
-  add_local(Sized_relobj<size, big_endian>* object, unsigned int sym_index,
+  add_local(Sized_relobj_file<size, big_endian>* object, unsigned int sym_index,
             unsigned int got_type);
 
   // Like add_local, but use the PLT offset of the local symbol if it
   // has one.
   bool
-  add_local_plt(Sized_relobj<size, big_endian>* object, unsigned int sym_index,
+  add_local_plt(Sized_relobj_file<size, big_endian>* object,
+		unsigned int sym_index,
 		unsigned int got_type);
 
   // Add an entry for a local symbol to the GOT, and add a dynamic
   // relocation of type R_TYPE for the GOT entry.
   void
-  add_local_with_rel(Sized_relobj<size, big_endian>* object,
+  add_local_with_rel(Sized_relobj_file<size, big_endian>* object,
                      unsigned int sym_index, unsigned int got_type,
                      Rel_dyn* rel_dyn, unsigned int r_type);
 
   void
-  add_local_with_rela(Sized_relobj<size, big_endian>* object,
+  add_local_with_rela(Sized_relobj_file<size, big_endian>* object,
                       unsigned int sym_index, unsigned int got_type,
                       Rela_dyn* rela_dyn, unsigned int r_type);
 
   // Add a pair of entries for a local symbol to the GOT, and add
   // dynamic relocations of type R_TYPE_1 and R_TYPE_2, respectively.
   void
-  add_local_pair_with_rel(Sized_relobj<size, big_endian>* object,
+  add_local_pair_with_rel(Sized_relobj_file<size, big_endian>* object,
                           unsigned int sym_index, unsigned int shndx,
                           unsigned int got_type, Rel_dyn* rel_dyn,
                           unsigned int r_type_1, unsigned int r_type_2);
 
   void
-  add_local_pair_with_rela(Sized_relobj<size, big_endian>* object,
+  add_local_pair_with_rela(Sized_relobj_file<size, big_endian>* object,
                           unsigned int sym_index, unsigned int shndx,
                           unsigned int got_type, Rela_dyn* rela_dyn,
                           unsigned int r_type_1, unsigned int r_type_2);
@@ -2046,13 +2068,19 @@ class Output_data_got : public Output_section_data_build
     return got_offset;
   }
 
-  // Reserve a slot in the GOT for a local symbol or the second slot of a pair.
+  // Reserve a slot in the GOT.
   void
-  reserve_slot(unsigned int i);
+  reserve_slot(unsigned int i)
+  { this->free_list_.remove(i * size / 8, (i + 1) * size / 8); }
+
+  // Reserve a slot in the GOT for a local symbol.
+  void
+  reserve_local(unsigned int i, Sized_relobj<size, big_endian>* object,
+		unsigned int sym_index, unsigned int got_type);
 
   // Reserve a slot in the GOT for a global symbol.
   void
-  reserve_slot_for_global(unsigned int i, Symbol* gsym, unsigned int got_type);
+  reserve_global(unsigned int i, Symbol* gsym, unsigned int got_type);
 
  protected:
   // Write out the GOT table.
@@ -2080,7 +2108,7 @@ class Output_data_got : public Output_section_data_build
     { this->u_.gsym = gsym; }
 
     // Create a local symbol entry.
-    Got_entry(Sized_relobj<size, big_endian>* object,
+    Got_entry(Sized_relobj_file<size, big_endian>* object,
               unsigned int local_sym_index, bool use_plt_offset)
       : local_sym_index_(local_sym_index), use_plt_offset_(use_plt_offset)
     {
@@ -2112,7 +2140,7 @@ class Output_data_got : public Output_section_data_build
     union
     {
       // For a local symbol, the object.
-      Sized_relobj<size, big_endian>* object;
+      Sized_relobj_file<size, big_endian>* object;
       // For a global symbol, the symbol.
       Symbol* gsym;
       // For a constant, the constant.
@@ -2608,7 +2636,7 @@ class Output_section : public Output_data
   // within the output section.
   template<int size, bool big_endian>
   off_t
-  add_input_section(Layout* layout, Sized_relobj<size, big_endian>* object,
+  add_input_section(Layout* layout, Sized_relobj_file<size, big_endian>* object,
                     unsigned int shndx, const char* name,
 		    const elfcpp::Shdr<size, big_endian>& shdr,
 		    unsigned int reloc_shndx, bool have_sections_script);

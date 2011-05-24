@@ -316,7 +316,7 @@ class Eh_frame : public Output_section_data
   // data.
   template<int size, bool big_endian>
   bool
-  add_ehframe_input_section(Sized_relobj<size, big_endian>* object,
+  add_ehframe_input_section(Sized_relobj_file<size, big_endian>* object,
 			    const unsigned char* symbols,
 			    section_size_type symbols_size,
 			    const unsigned char* symbol_names,
@@ -382,7 +382,7 @@ class Eh_frame : public Output_section_data
   // The implementation of add_ehframe_input_section.
   template<int size, bool big_endian>
   bool
-  do_add_ehframe_input_section(Sized_relobj<size, big_endian>* object,
+  do_add_ehframe_input_section(Sized_relobj_file<size, big_endian>* object,
 			       const unsigned char* symbols,
 			       section_size_type symbols_size,
 			       const unsigned char* symbol_names,
@@ -397,7 +397,7 @@ class Eh_frame : public Output_section_data
   // Read a CIE.
   template<int size, bool big_endian>
   bool
-  read_cie(Sized_relobj<size, big_endian>* object,
+  read_cie(Sized_relobj_file<size, big_endian>* object,
 	   unsigned int shndx,
 	   const unsigned char* symbols,
 	   section_size_type symbols_size,
@@ -413,7 +413,7 @@ class Eh_frame : public Output_section_data
   // Read an FDE.
   template<int size, bool big_endian>
   bool
-  read_fde(Sized_relobj<size, big_endian>* object,
+  read_fde(Sized_relobj_file<size, big_endian>* object,
 	   unsigned int shndx,
 	   const unsigned char* symbols,
 	   section_size_type symbols_size,

@@ -69,7 +69,7 @@ class Target_sparc : public Sized_target<size, big_endian>
   void
   gc_process_relocs(Symbol_table* symtab,
 	            Layout* layout,
-	            Sized_relobj<size, big_endian>* object,
+	            Sized_relobj_file<size, big_endian>* object,
 	            unsigned int data_shndx,
 	            unsigned int sh_type,
 	            const unsigned char* prelocs,
@@ -83,7 +83,7 @@ class Target_sparc : public Sized_target<size, big_endian>
   void
   scan_relocs(Symbol_table* symtab,
 	      Layout* layout,
-	      Sized_relobj<size, big_endian>* object,
+	      Sized_relobj_file<size, big_endian>* object,
 	      unsigned int data_shndx,
 	      unsigned int sh_type,
 	      const unsigned char* prelocs,
@@ -118,7 +118,7 @@ class Target_sparc : public Sized_target<size, big_endian>
   void
   scan_relocatable_relocs(Symbol_table* symtab,
 			  Layout* layout,
-			  Sized_relobj<size, big_endian>* object,
+			  Sized_relobj_file<size, big_endian>* object,
 			  unsigned int data_shndx,
 			  unsigned int sh_type,
 			  const unsigned char* prelocs,
@@ -203,7 +203,7 @@ class Target_sparc : public Sized_target<size, big_endian>
 
     inline void
     local(Symbol_table* symtab, Layout* layout, Target_sparc* target,
-	  Sized_relobj<size, big_endian>* object,
+	  Sized_relobj_file<size, big_endian>* object,
 	  unsigned int data_shndx,
 	  Output_section* output_section,
 	  const elfcpp::Rela<size, big_endian>& reloc, unsigned int r_type,
@@ -211,7 +211,7 @@ class Target_sparc : public Sized_target<size, big_endian>
 
     inline void
     global(Symbol_table* symtab, Layout* layout, Target_sparc* target,
-	   Sized_relobj<size, big_endian>* object,
+	   Sized_relobj_file<size, big_endian>* object,
 	   unsigned int data_shndx,
 	   Output_section* output_section,
 	   const elfcpp::Rela<size, big_endian>& reloc, unsigned int r_type,
@@ -220,7 +220,7 @@ class Target_sparc : public Sized_target<size, big_endian>
     inline bool
     local_reloc_may_be_function_pointer(Symbol_table* , Layout* ,
  					Target_sparc* ,
-	          			Sized_relobj<size, big_endian>* ,
+	          			Sized_relobj_file<size, big_endian>* ,
        	          			unsigned int ,
 	          			Output_section* ,
 	          			const elfcpp::Rela<size, big_endian>& ,
@@ -231,7 +231,7 @@ class Target_sparc : public Sized_target<size, big_endian>
     inline bool
     global_reloc_may_be_function_pointer(Symbol_table* , Layout* ,
 			 		 Target_sparc* ,
-		   			 Sized_relobj<size, big_endian>* ,
+		   			 Sized_relobj_file<size, big_endian>* ,
 		   			 unsigned int ,
 		   			 Output_section* ,
 		   			 const elfcpp::Rela<size,
@@ -242,11 +242,11 @@ class Target_sparc : public Sized_target<size, big_endian>
 
   private:
     static void
-    unsupported_reloc_local(Sized_relobj<size, big_endian>*,
+    unsupported_reloc_local(Sized_relobj_file<size, big_endian>*,
 			    unsigned int r_type);
 
     static void
-    unsupported_reloc_global(Sized_relobj<size, big_endian>*,
+    unsupported_reloc_global(Sized_relobj_file<size, big_endian>*,
 			     unsigned int r_type, Symbol*);
 
     static void
@@ -324,7 +324,7 @@ class Target_sparc : public Sized_target<size, big_endian>
   // Create a GOT entry for the TLS module index.
   unsigned int
   got_mod_index_entry(Symbol_table* symtab, Layout* layout,
-		      Sized_relobj<size, big_endian>* object);
+		      Sized_relobj_file<size, big_endian>* object);
 
   // Return the gsym for "__tls_get_addr".  Cache if not already
   // cached.
@@ -352,7 +352,7 @@ class Target_sparc : public Sized_target<size, big_endian>
   // Copy a relocation against a global symbol.
   void
   copy_reloc(Symbol_table* symtab, Layout* layout,
-             Sized_relobj<size, big_endian>* object,
+             Sized_relobj_file<size, big_endian>* object,
 	     unsigned int shndx, Output_section* output_section,
 	     Symbol* sym, const elfcpp::Rela<size, big_endian>& reloc)
   {
@@ -472,7 +472,7 @@ private:
   rela(unsigned char* view,
        unsigned int right_shift,
        typename elfcpp::Elf_types<valsize>::Elf_Addr dst_mask,
-       const Sized_relobj<size, big_endian>* object,
+       const Sized_relobj_file<size, big_endian>* object,
        const Symbol_value<size>* psymval,
        typename elfcpp::Swap<valsize, big_endian>::Valtype addend)
   {
@@ -493,7 +493,7 @@ private:
   static inline void
   rela_ua(unsigned char* view,
 	  unsigned int right_shift, elfcpp::Elf_Xword dst_mask,
-	  const Sized_relobj<size, big_endian>* object,
+	  const Sized_relobj_file<size, big_endian>* object,
 	  const Symbol_value<size>* psymval,
 	  typename elfcpp::Swap<size, big_endian>::Valtype addend)
   {
@@ -516,7 +516,7 @@ private:
   pcrela(unsigned char* view,
 	 unsigned int right_shift,
 	 typename elfcpp::Elf_types<valsize>::Elf_Addr dst_mask,
-	 const Sized_relobj<size, big_endian>* object,
+	 const Sized_relobj_file<size, big_endian>* object,
 	 const Symbol_value<size>* psymval,
 	 typename elfcpp::Swap<size, big_endian>::Valtype addend,
 	 typename elfcpp::Elf_types<size>::Elf_Addr address)
@@ -536,7 +536,7 @@ private:
   template<int valsize>
   static inline void
   pcrela_unaligned(unsigned char* view,
-		   const Sized_relobj<size, big_endian>* object,
+		   const Sized_relobj_file<size, big_endian>* object,
 		   const Symbol_value<size>* psymval,
 		   typename elfcpp::Swap<size, big_endian>::Valtype addend,
 		   typename elfcpp::Elf_types<size>::Elf_Addr address)
@@ -556,7 +556,7 @@ public:
   // R_SPARC_WDISP30: (Symbol + Addend - Address) >> 2
   static inline void
   wdisp30(unsigned char* view,
-	   const Sized_relobj<size, big_endian>* object,
+	   const Sized_relobj_file<size, big_endian>* object,
 	   const Symbol_value<size>* psymval,
 	   typename elfcpp::Elf_types<size>::Elf_Addr addend,
 	   typename elfcpp::Elf_types<size>::Elf_Addr address)
@@ -568,7 +568,7 @@ public:
   // R_SPARC_WDISP22: (Symbol + Addend - Address) >> 2
   static inline void
   wdisp22(unsigned char* view,
-	   const Sized_relobj<size, big_endian>* object,
+	   const Sized_relobj_file<size, big_endian>* object,
 	   const Symbol_value<size>* psymval,
 	   typename elfcpp::Elf_types<size>::Elf_Addr addend,
 	   typename elfcpp::Elf_types<size>::Elf_Addr address)
@@ -580,7 +580,7 @@ public:
   // R_SPARC_WDISP19: (Symbol + Addend - Address) >> 2
   static inline void
   wdisp19(unsigned char* view,
-	  const Sized_relobj<size, big_endian>* object,
+	  const Sized_relobj_file<size, big_endian>* object,
 	  const Symbol_value<size>* psymval,
 	  typename elfcpp::Elf_types<size>::Elf_Addr addend,
 	  typename elfcpp::Elf_types<size>::Elf_Addr address)
@@ -592,7 +592,7 @@ public:
   // R_SPARC_WDISP16: (Symbol + Addend - Address) >> 2
   static inline void
   wdisp16(unsigned char* view,
-	  const Sized_relobj<size, big_endian>* object,
+	  const Sized_relobj_file<size, big_endian>* object,
 	  const Symbol_value<size>* psymval,
 	  typename elfcpp::Elf_types<size>::Elf_Addr addend,
 	  typename elfcpp::Elf_types<size>::Elf_Addr address)
@@ -615,7 +615,7 @@ public:
   // R_SPARC_PC22: (Symbol + Addend - Address) >> 10
   static inline void
   pc22(unsigned char* view,
-       const Sized_relobj<size, big_endian>* object,
+       const Sized_relobj_file<size, big_endian>* object,
        const Symbol_value<size>* psymval,
        typename elfcpp::Elf_types<size>::Elf_Addr addend,
        typename elfcpp::Elf_types<size>::Elf_Addr address)
@@ -627,7 +627,7 @@ public:
   // R_SPARC_PC10: (Symbol + Addend - Address) & 0x3ff
   static inline void
   pc10(unsigned char* view,
-       const Sized_relobj<size, big_endian>* object,
+       const Sized_relobj_file<size, big_endian>* object,
        const Symbol_value<size>* psymval,
        typename elfcpp::Elf_types<size>::Elf_Addr addend,
        typename elfcpp::Elf_types<size>::Elf_Addr address)
@@ -648,7 +648,7 @@ public:
   // R_SPARC_HI22: (Symbol + Addend) >> 10
   static inline void
   hi22(unsigned char* view,
-       const Sized_relobj<size, big_endian>* object,
+       const Sized_relobj_file<size, big_endian>* object,
        const Symbol_value<size>* psymval,
        typename elfcpp::Elf_types<size>::Elf_Addr addend)
   {
@@ -658,7 +658,7 @@ public:
   // R_SPARC_PCPLT22: (Symbol + Addend - Address) >> 10
   static inline void
   pcplt22(unsigned char* view,
-	  const Sized_relobj<size, big_endian>* object,
+	  const Sized_relobj_file<size, big_endian>* object,
 	  const Symbol_value<size>* psymval,
 	  typename elfcpp::Elf_types<size>::Elf_Addr addend,
 	  typename elfcpp::Elf_types<size>::Elf_Addr address)
@@ -679,7 +679,7 @@ public:
   // R_SPARC_LO10: (Symbol + Addend) & 0x3ff
   static inline void
   lo10(unsigned char* view,
-       const Sized_relobj<size, big_endian>* object,
+       const Sized_relobj_file<size, big_endian>* object,
        const Symbol_value<size>* psymval,
        typename elfcpp::Elf_types<size>::Elf_Addr addend)
   {
@@ -689,7 +689,7 @@ public:
   // R_SPARC_LO10: (Symbol + Addend) & 0x3ff
   static inline void
   lo10(unsigned char* view,
-       const Sized_relobj<size, big_endian>* object,
+       const Sized_relobj_file<size, big_endian>* object,
        const Symbol_value<size>* psymval,
        typename elfcpp::Elf_types<size>::Elf_Addr addend,
        typename elfcpp::Elf_types<size>::Elf_Addr address)
@@ -701,7 +701,7 @@ public:
   // R_SPARC_OLO10: ((Symbol + Addend) & 0x3ff) + Addend2
   static inline void
   olo10(unsigned char* view,
-	const Sized_relobj<size, big_endian>* object,
+	const Sized_relobj_file<size, big_endian>* object,
 	const Symbol_value<size>* psymval,
 	typename elfcpp::Elf_types<size>::Elf_Addr addend,
 	typename elfcpp::Elf_types<size>::Elf_Addr addend2)
@@ -722,7 +722,7 @@ public:
   // R_SPARC_22: (Symbol + Addend)
   static inline void
   rela32_22(unsigned char* view,
-	    const Sized_relobj<size, big_endian>* object,
+	    const Sized_relobj_file<size, big_endian>* object,
 	    const Symbol_value<size>* psymval,
 	    typename elfcpp::Elf_types<size>::Elf_Addr addend)
   {
@@ -741,7 +741,7 @@ public:
   // R_SPARC_13: (Symbol + Addend)
   static inline void
   rela32_13(unsigned char* view,
-	    const Sized_relobj<size, big_endian>* object,
+	    const Sized_relobj_file<size, big_endian>* object,
 	    const Symbol_value<size>* psymval,
 	    typename elfcpp::Elf_types<size>::Elf_Addr addend)
   {
@@ -751,7 +751,7 @@ public:
   // R_SPARC_UA16: (Symbol + Addend)
   static inline void
   ua16(unsigned char* view,
-       const Sized_relobj<size, big_endian>* object,
+       const Sized_relobj_file<size, big_endian>* object,
        const Symbol_value<size>* psymval,
        typename elfcpp::Elf_types<size>::Elf_Addr addend)
   {
@@ -761,7 +761,7 @@ public:
   // R_SPARC_UA32: (Symbol + Addend)
   static inline void
   ua32(unsigned char* view,
-       const Sized_relobj<size, big_endian>* object,
+       const Sized_relobj_file<size, big_endian>* object,
        const Symbol_value<size>* psymval,
        typename elfcpp::Elf_types<size>::Elf_Addr addend)
   {
@@ -771,7 +771,7 @@ public:
   // R_SPARC_UA64: (Symbol + Addend)
   static inline void
   ua64(unsigned char* view,
-       const Sized_relobj<size, big_endian>* object,
+       const Sized_relobj_file<size, big_endian>* object,
        const Symbol_value<size>* psymval,
        typename elfcpp::Elf_types<size>::Elf_Addr addend)
   {
@@ -782,7 +782,7 @@ public:
   // R_SPARC_DISP8: (Symbol + Addend - Address)
   static inline void
   disp8(unsigned char* view,
-	const Sized_relobj<size, big_endian>* object,
+	const Sized_relobj_file<size, big_endian>* object,
 	const Symbol_value<size>* psymval,
 	typename elfcpp::Elf_types<size>::Elf_Addr addend,
 	typename elfcpp::Elf_types<size>::Elf_Addr address)
@@ -794,7 +794,7 @@ public:
   // R_SPARC_DISP16: (Symbol + Addend - Address)
   static inline void
   disp16(unsigned char* view,
-	 const Sized_relobj<size, big_endian>* object,
+	 const Sized_relobj_file<size, big_endian>* object,
 	 const Symbol_value<size>* psymval,
 	 typename elfcpp::Elf_types<size>::Elf_Addr addend,
 	 typename elfcpp::Elf_types<size>::Elf_Addr address)
@@ -806,7 +806,7 @@ public:
   // R_SPARC_DISP32: (Symbol + Addend - Address)
   static inline void
   disp32(unsigned char* view,
-	 const Sized_relobj<size, big_endian>* object,
+	 const Sized_relobj_file<size, big_endian>* object,
 	 const Symbol_value<size>* psymval,
 	 typename elfcpp::Elf_types<size>::Elf_Addr addend,
 	 typename elfcpp::Elf_types<size>::Elf_Addr address)
@@ -818,7 +818,7 @@ public:
   // R_SPARC_DISP64: (Symbol + Addend - Address)
   static inline void
   disp64(unsigned char* view,
-	 const Sized_relobj<size, big_endian>* object,
+	 const Sized_relobj_file<size, big_endian>* object,
 	 const Symbol_value<size>* psymval,
 	 elfcpp::Elf_Xword addend,
 	 typename elfcpp::Elf_types<size>::Elf_Addr address)
@@ -830,7 +830,7 @@ public:
   // R_SPARC_H44: (Symbol + Addend) >> 22
   static inline void
   h44(unsigned char* view,
-      const Sized_relobj<size, big_endian>* object,
+      const Sized_relobj_file<size, big_endian>* object,
       const Symbol_value<size>* psymval,
       typename elfcpp::Elf_types<size>::Elf_Addr  addend)
   {
@@ -840,7 +840,7 @@ public:
   // R_SPARC_M44: ((Symbol + Addend) >> 12) & 0x3ff
   static inline void
   m44(unsigned char* view,
-      const Sized_relobj<size, big_endian>* object,
+      const Sized_relobj_file<size, big_endian>* object,
       const Symbol_value<size>* psymval,
       typename elfcpp::Elf_types<size>::Elf_Addr  addend)
   {
@@ -850,7 +850,7 @@ public:
   // R_SPARC_L44: (Symbol + Addend) & 0xfff
   static inline void
   l44(unsigned char* view,
-      const Sized_relobj<size, big_endian>* object,
+      const Sized_relobj_file<size, big_endian>* object,
       const Symbol_value<size>* psymval,
       typename elfcpp::Elf_types<size>::Elf_Addr  addend)
   {
@@ -860,7 +860,7 @@ public:
   // R_SPARC_HH22: (Symbol + Addend) >> 42
   static inline void
   hh22(unsigned char* view,
-       const Sized_relobj<size, big_endian>* object,
+       const Sized_relobj_file<size, big_endian>* object,
        const Symbol_value<size>* psymval,
        typename elfcpp::Elf_types<size>::Elf_Addr addend)
   {
@@ -870,7 +870,7 @@ public:
   // R_SPARC_PC_HH22: (Symbol + Addend - Address) >> 42
   static inline void
   pc_hh22(unsigned char* view,
-	  const Sized_relobj<size, big_endian>* object,
+	  const Sized_relobj_file<size, big_endian>* object,
 	  const Symbol_value<size>* psymval,
 	  typename elfcpp::Elf_types<size>::Elf_Addr addend,
 	  typename elfcpp::Elf_types<size>::Elf_Addr address)
@@ -882,7 +882,7 @@ public:
   // R_SPARC_HM10: ((Symbol + Addend) >> 32) & 0x3ff
   static inline void
   hm10(unsigned char* view,
-       const Sized_relobj<size, big_endian>* object,
+       const Sized_relobj_file<size, big_endian>* object,
        const Symbol_value<size>* psymval,
        typename elfcpp::Elf_types<size>::Elf_Addr addend)
   {
@@ -892,7 +892,7 @@ public:
   // R_SPARC_PC_HM10: ((Symbol + Addend - Address) >> 32) & 0x3ff
   static inline void
   pc_hm10(unsigned char* view,
-	  const Sized_relobj<size, big_endian>* object,
+	  const Sized_relobj_file<size, big_endian>* object,
 	  const Symbol_value<size>* psymval,
 	  typename elfcpp::Elf_types<size>::Elf_Addr addend,
 	  typename elfcpp::Elf_types<size>::Elf_Addr address)
@@ -904,7 +904,7 @@ public:
   // R_SPARC_11: (Symbol + Addend)
   static inline void
   rela32_11(unsigned char* view,
-	    const Sized_relobj<size, big_endian>* object,
+	    const Sized_relobj_file<size, big_endian>* object,
 	    const Symbol_value<size>* psymval,
 	    typename elfcpp::Elf_types<size>::Elf_Addr addend)
   {
@@ -914,7 +914,7 @@ public:
   // R_SPARC_10: (Symbol + Addend)
   static inline void
   rela32_10(unsigned char* view,
-	    const Sized_relobj<size, big_endian>* object,
+	    const Sized_relobj_file<size, big_endian>* object,
 	    const Symbol_value<size>* psymval,
 	    typename elfcpp::Elf_types<size>::Elf_Addr addend)
   {
@@ -924,7 +924,7 @@ public:
   // R_SPARC_7: (Symbol + Addend)
   static inline void
   rela32_7(unsigned char* view,
-	   const Sized_relobj<size, big_endian>* object,
+	   const Sized_relobj_file<size, big_endian>* object,
 	   const Symbol_value<size>* psymval,
 	   typename elfcpp::Elf_types<size>::Elf_Addr addend)
   {
@@ -934,7 +934,7 @@ public:
   // R_SPARC_6: (Symbol + Addend)
   static inline void
   rela32_6(unsigned char* view,
-	   const Sized_relobj<size, big_endian>* object,
+	   const Sized_relobj_file<size, big_endian>* object,
 	   const Symbol_value<size>* psymval,
 	   typename elfcpp::Elf_types<size>::Elf_Addr addend)
   {
@@ -944,7 +944,7 @@ public:
   // R_SPARC_5: (Symbol + Addend)
   static inline void
   rela32_5(unsigned char* view,
-	   const Sized_relobj<size, big_endian>* object,
+	   const Sized_relobj_file<size, big_endian>* object,
 	   const Symbol_value<size>* psymval,
 	   typename elfcpp::Elf_types<size>::Elf_Addr addend)
   {
@@ -1001,7 +1001,7 @@ public:
   // R_SPARC_HIX22: ((Symbol + Addend) ^ 0xffffffffffffffff) >> 10
   static inline void
   hix22(unsigned char* view,
-	const Sized_relobj<size, big_endian>* object,
+	const Sized_relobj_file<size, big_endian>* object,
 	const Symbol_value<size>* psymval,
 	typename elfcpp::Elf_types<size>::Elf_Addr addend)
   {
@@ -1042,7 +1042,7 @@ public:
   // R_SPARC_LOX10: ((Symbol + Addend) & 0x3ff) | 0x1c00
   static inline void
   lox10(unsigned char* view,
-	const Sized_relobj<size, big_endian>* object,
+	const Sized_relobj_file<size, big_endian>* object,
 	const Symbol_value<size>* psymval,
 	typename elfcpp::Elf_types<size>::Elf_Addr addend)
   {
@@ -1490,9 +1490,10 @@ Target_sparc<size, big_endian>::plt_entry_size() const
 
 template<int size, bool big_endian>
 unsigned int
-Target_sparc<size, big_endian>::got_mod_index_entry(Symbol_table* symtab,
-						    Layout* layout,
-						    Sized_relobj<size, big_endian>* object)
+Target_sparc<size, big_endian>::got_mod_index_entry(
+     Symbol_table* symtab,
+     Layout* layout,
+     Sized_relobj_file<size, big_endian>* object)
 {
   if (this->got_mod_index_offset_ == -1U)
     {
@@ -1709,7 +1710,7 @@ Target_sparc<size, big_endian>::Scan::generate_tls_call(Symbol_table* symtab,
 template<int size, bool big_endian>
 void
 Target_sparc<size, big_endian>::Scan::unsupported_reloc_local(
-			Sized_relobj<size, big_endian>* object,
+			Sized_relobj_file<size, big_endian>* object,
 			unsigned int r_type)
 {
   gold_error(_("%s: unsupported reloc %u against local symbol"),
@@ -1816,7 +1817,7 @@ Target_sparc<size, big_endian>::Scan::local(
 			Symbol_table* symtab,
 			Layout* layout,
 			Target_sparc<size, big_endian>* target,
-			Sized_relobj<size, big_endian>* object,
+			Sized_relobj_file<size, big_endian>* object,
 			unsigned int data_shndx,
 			Output_section* output_section,
 			const elfcpp::Rela<size, big_endian>& reloc,
@@ -2104,7 +2105,7 @@ Target_sparc<size, big_endian>::Scan::local(
 template<int size, bool big_endian>
 void
 Target_sparc<size, big_endian>::Scan::unsupported_reloc_global(
-			Sized_relobj<size, big_endian>* object,
+			Sized_relobj_file<size, big_endian>* object,
 			unsigned int r_type,
 			Symbol* gsym)
 {
@@ -2120,7 +2121,7 @@ Target_sparc<size, big_endian>::Scan::global(
 				Symbol_table* symtab,
 				Layout* layout,
 				Target_sparc<size, big_endian>* target,
-				Sized_relobj<size, big_endian>* object,
+				Sized_relobj_file<size, big_endian>* object,
 				unsigned int data_shndx,
 				Output_section* output_section,
 				const elfcpp::Rela<size, big_endian>& reloc,
@@ -2498,7 +2499,7 @@ void
 Target_sparc<size, big_endian>::gc_process_relocs(
 			Symbol_table* symtab,
 			Layout* layout,
-			Sized_relobj<size, big_endian>* object,
+			Sized_relobj_file<size, big_endian>* object,
 			unsigned int data_shndx,
 			unsigned int,
 			const unsigned char* prelocs,
@@ -2533,7 +2534,7 @@ void
 Target_sparc<size, big_endian>::scan_relocs(
 			Symbol_table* symtab,
 			Layout* layout,
-			Sized_relobj<size, big_endian>* object,
+			Sized_relobj_file<size, big_endian>* object,
 			unsigned int data_shndx,
 			unsigned int sh_type,
 			const unsigned char* prelocs,
@@ -2636,7 +2637,7 @@ Target_sparc<size, big_endian>::Relocate::relocate(
       psymval = &symval;
     }
 
-  const Sized_relobj<size, big_endian>* object = relinfo->object;
+  const Sized_relobj_file<size, big_endian>* object = relinfo->object;
   const elfcpp::Elf_Xword addend = rela.get_r_addend();
 
   // Get the GOT offset if needed.  Unlike i386 and x86_64, our GOT
@@ -2979,7 +2980,7 @@ Target_sparc<size, big_endian>::Relocate::relocate_tls(
 {
   Output_segment* tls_segment = relinfo->layout->tls_segment();
   typedef Sparc_relocate_functions<size, big_endian> Reloc;
-  const Sized_relobj<size, big_endian>* object = relinfo->object;
+  const Sized_relobj_file<size, big_endian>* object = relinfo->object;
   typedef typename elfcpp::Swap<32, true>::Valtype Insntype;
 
   const elfcpp::Elf_Xword addend = rela.get_r_addend();
@@ -3392,7 +3393,7 @@ void
 Target_sparc<size, big_endian>::scan_relocatable_relocs(
 			Symbol_table* symtab,
 			Layout* layout,
-			Sized_relobj<size, big_endian>* object,
+			Sized_relobj_file<size, big_endian>* object,
 			unsigned int data_shndx,
 			unsigned int sh_type,
 			const unsigned char* prelocs,

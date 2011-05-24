@@ -74,8 +74,8 @@ Target::do_make_elf_object_implementation(
   int et = ehdr.get_e_type();
   if (et == elfcpp::ET_REL)
     {
-      Sized_relobj<size, big_endian>* obj =
-	new Sized_relobj<size, big_endian>(name, input_file, offset, ehdr);
+      Sized_relobj_file<size, big_endian>* obj =
+	new Sized_relobj_file<size, big_endian>(name, input_file, offset, ehdr);
       obj->setup();
       return obj;
     }

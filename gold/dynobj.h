@@ -156,7 +156,7 @@ template<int size, bool big_endian>
 class Sized_dynobj : public Dynobj
 {
  public:
-  typedef typename Sized_relobj<size, big_endian>::Symbols Symbols;
+  typedef typename Sized_relobj_file<size, big_endian>::Symbols Symbols;
 
   Sized_dynobj(const std::string& name, Input_file* input_file, off_t offset,
 	       const typename elfcpp::Ehdr<size, big_endian>&);

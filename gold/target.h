@@ -45,6 +45,8 @@ class Object;
 class Relobj;
 template<int size, bool big_endian>
 class Sized_relobj;
+template<int size, bool big_endian>
+class Sized_relobj_file;
 class Relocatable_relocs;
 template<int size, bool big_endian>
 class Relocate_info;
@@ -642,7 +644,7 @@ class Sized_target : public Target
   virtual void
   gc_process_relocs(Symbol_table* symtab,
 		    Layout* layout,
-		    Sized_relobj<size, big_endian>* object,
+		    Sized_relobj_file<size, big_endian>* object,
 		    unsigned int data_shndx,
 		    unsigned int sh_type,
 		    const unsigned char* prelocs,
@@ -667,7 +669,7 @@ class Sized_target : public Target
   virtual void
   scan_relocs(Symbol_table* symtab,
 	      Layout* layout,
-	      Sized_relobj<size, big_endian>* object,
+	      Sized_relobj_file<size, big_endian>* object,
 	      unsigned int data_shndx,
 	      unsigned int sh_type,
 	      const unsigned char* prelocs,
@@ -706,7 +708,7 @@ class Sized_target : public Target
   virtual void
   scan_relocatable_relocs(Symbol_table* symtab,
 			  Layout* layout,
-			  Sized_relobj<size, big_endian>* object,
+			  Sized_relobj_file<size, big_endian>* object,
 			  unsigned int data_shndx,
 			  unsigned int sh_type,
 			  const unsigned char* prelocs,
@@ -805,6 +807,22 @@ class Sized_target : public Target
 			  Layout*,
 			  unsigned int /* got_count */,
 			  unsigned int /* plt_count */)
+  { gold_unreachable(); }
+
+  // Reserve a GOT entry for a local symbol, and regenerate any
+  // necessary dynamic relocations.
+  virtual void
+  reserve_local_got_entry(unsigned int /* got_index */,
+			  Sized_relobj<size, big_endian>* /* obj */,
+			  unsigned int /* r_sym */,
+			  unsigned int /* got_type */)
+  { gold_unreachable(); }
+
+  // Reserve a GOT entry for a global symbol, and regenerate any
+  // necessary dynamic relocations.
+  virtual void
+  reserve_global_got_entry(unsigned int /* got_index */, Symbol* /* gsym */,
+			   unsigned int /* got_type */)
   { gold_unreachable(); }
 
   // Register an existing PLT entry for a global symbol.

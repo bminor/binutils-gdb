@@ -736,7 +736,7 @@ class Incremental_inputs_reader
 		  || this->type() == INCREMENTAL_INPUT_ARCHIVE_MEMBER);
 
       unsigned int section_count = this->get_input_section_count();
-      return (this->info_offset_ + 16
+      return (this->info_offset_ + 24
 	      + section_count * input_section_entry_size
 	      + symndx * 20);
     }
@@ -775,6 +775,26 @@ class Incremental_inputs_reader
 		  || this->type() == INCREMENTAL_INPUT_ARCHIVE_MEMBER);
 
       return Swap32::readval(this->inputs_->p_ + this->info_offset_ + 12);
+    }
+
+    // Return the index of the first dynamic relocation -- for objects only.
+    unsigned int
+    get_first_dyn_reloc() const
+    {
+      gold_assert(this->type() == INCREMENTAL_INPUT_OBJECT
+		  || this->type() == INCREMENTAL_INPUT_ARCHIVE_MEMBER);
+
+      return Swap32::readval(this->inputs_->p_ + this->info_offset_ + 16);
+    }
+
+    // Return the dynamic relocation count -- for objects only.
+    unsigned int
+    get_dyn_reloc_count() const
+    {
+      gold_assert(this->type() == INCREMENTAL_INPUT_OBJECT
+		  || this->type() == INCREMENTAL_INPUT_ARCHIVE_MEMBER);
+
+      return Swap32::readval(this->inputs_->p_ + this->info_offset_ + 20);
     }
 
     // Return the object count -- for scripts only.
@@ -847,7 +867,7 @@ class Incremental_inputs_reader
     {
       Input_section_info info;
       const unsigned char* p = (this->inputs_->p_
-				+ this->info_offset_ + 16
+				+ this->info_offset_ + 24
 				+ n * input_section_entry_size);
       unsigned int name_offset = Swap32::readval(p);
       info.name = this->inputs_->get_string(name_offset);
@@ -865,7 +885,7 @@ class Incremental_inputs_reader
 		  || this->type() == INCREMENTAL_INPUT_ARCHIVE_MEMBER);
       unsigned int section_count = this->get_input_section_count();
       const unsigned char* p = (this->inputs_->p_
-				+ this->info_offset_ + 16
+				+ this->info_offset_ + 24
 				+ section_count * input_section_entry_size
 				+ n * 20);
       return Incremental_global_symbol_reader<big_endian>(p);
@@ -1064,7 +1084,7 @@ class Incremental_got_plt_reader
   {
     this->got_count_ = elfcpp::Swap<32, big_endian>::readval(p);
     this->got_desc_p_ = p + 8 + ((this->got_count_ + 3) & ~3);
-    this->plt_desc_p_ = this->got_desc_p_ + this->got_count_ * 4;
+    this->plt_desc_p_ = this->got_desc_p_ + this->got_count_ * 8;
   }
 
   // Return the GOT entry count.
@@ -1088,11 +1108,18 @@ class Incremental_got_plt_reader
     return this->p_[8 + n];
   }
 
-  // Return the GOT descriptor for GOT entry N.
+  // Return the symbol index for GOT entry N.
   unsigned int
-  get_got_desc(unsigned int n)
+  get_got_symndx(unsigned int n)
   {
-    return elfcpp::Swap<32, big_endian>::readval(this->got_desc_p_ + n * 4);
+    return elfcpp::Swap<32, big_endian>::readval(this->got_desc_p_ + n * 8);
+  }
+
+  // Return the input file index for GOT entry N.
+  unsigned int
+  get_got_input_index(unsigned int n)
+  {
+    return elfcpp::Swap<32, big_endian>::readval(this->got_desc_p_ + n * 8 + 4);
   }
 
   // Return the PLT descriptor for PLT entry N.
@@ -1358,6 +1385,9 @@ class Incremental_binary
 };
 
 template<int size, bool big_endian>
+class Sized_relobj_incr;
+
+template<int size, bool big_endian>
 class Sized_incremental_binary : public Incremental_binary
 {
  public:
@@ -1365,38 +1395,29 @@ class Sized_incremental_binary : public Incremental_binary
                            const elfcpp::Ehdr<size, big_endian>& ehdr,
                            Target* target)
     : Incremental_binary(output, target), elf_file_(this, ehdr),
-      file_status_(NULL), section_map_(), symbol_map_(), main_symtab_loc_(),
+      input_objects_(), section_map_(), symbol_map_(), main_symtab_loc_(),
       main_strtab_loc_(), has_incremental_info_(false), inputs_reader_(),
       symtab_reader_(), relocs_reader_(), got_plt_reader_(),
       input_entry_readers_()
   { this->setup_readers(); }
-
-  virtual
-  ~Sized_incremental_binary()
-  {
-    if (this->file_status_ != NULL)
-      delete[] this->file_status_;
-  }
 
   // Returns TRUE if the file contains incremental info.
   bool
   has_incremental_info() const
   { return this->has_incremental_info_; }
 
-  // Set the flag for input file N to indicate that the file is unchanged.
+  // Record a pointer to the object for input file N.
   void
-  set_file_is_unchanged(unsigned int n)
-  {
-    gold_assert(this->file_status_ != NULL);
-    this->file_status_[n / 8] |= 1U << (n % 8);
-  }
+  set_input_object(unsigned int n,
+		   Sized_relobj_incr<size, big_endian>* obj)
+  { this->input_objects_[n] = obj; }
 
-  // Returns TRUE if input file N is unchanged.
-  bool
-  file_is_unchanged(unsigned int n) const
+  // Return a pointer to the object for input file N.
+  Sized_relobj_incr<size, big_endian>*
+  input_object(unsigned int n) const
   {
-    gold_assert(this->file_status_ != NULL);
-    return (this->file_status_[n / 8] & (1U << (n % 8))) != 0;
+    gold_assert(n < this->input_objects_.size());
+    return this->input_objects_[n];
   }
 
   // Return the Output_section for section index SHNDX.
@@ -1537,10 +1558,9 @@ class Sized_incremental_binary : public Incremental_binary
   // Output as an ELF file.
   elfcpp::Elf_file<size, big_endian, Incremental_binary> elf_file_;
 
-  // Status flags for each input file.  Each bit represents one input file;
-  // 0 indicates that the file was replaced; 1 indicates that the file was
-  // unchanged.
-  unsigned char* file_status_;
+  // Vector of pointers to the input objects for the unchanged files.
+  // For replaced files, the corresponding pointer is NULL.
+  std::vector<Sized_relobj_incr<size, big_endian>*> input_objects_;
 
   // Map section index to an Output_section in the updated layout.
   std::vector<Output_section*> section_map_;
@@ -1566,44 +1586,22 @@ class Sized_incremental_binary : public Incremental_binary
 // can be used directly from the base file.
 
 template<int size, bool big_endian>
-class Sized_incr_relobj : public Sized_relobj_base<size, big_endian>
+class Sized_relobj_incr : public Sized_relobj<size, big_endian>
 {
  public:
   typedef typename elfcpp::Elf_types<size>::Elf_Addr Address;
-  typedef typename Sized_relobj_base<size, big_endian>::Symbols Symbols;
+  typedef typename Sized_relobj<size, big_endian>::Symbols Symbols;
 
-  static const Address invalid_address = static_cast<Address>(0) - 1;
-
-  Sized_incr_relobj(const std::string& name,
+  Sized_relobj_incr(const std::string& name,
 		    Sized_incremental_binary<size, big_endian>* ibase,
 		    unsigned int input_file_index);
 
-  // Checks if the offset of input section SHNDX within its output
-  // section is invalid.
-  bool
-  is_output_section_offset_invalid(unsigned int shndx) const
-  { return this->section_offsets_[shndx] == invalid_address; }
-
-  // Get the offset of input section SHNDX within its output section.
-  // This is -1 if the input section requires a special mapping, such
-  // as a merge section.  The output section can be found in the
-  // output_sections_ field of the parent class Incrobj.
-  uint64_t
-  do_output_section_offset(unsigned int shndx) const
-  {
-    gold_assert(shndx < this->section_offsets_.size());
-    Address off = this->section_offsets_[shndx];
-    if (off == invalid_address)
-      return -1ULL;
-    return off;
-  }
-
  private:
   // For convenience.
-  typedef Sized_incr_relobj<size, big_endian> This;
+  typedef Sized_relobj_incr<size, big_endian> This;
   static const int sym_size = elfcpp::Elf_sizes<size>::sym_size;
 
-  typedef typename Sized_relobj_base<size, big_endian>::Output_sections
+  typedef typename Sized_relobj<size, big_endian>::Output_sections
       Output_sections;
   typedef Incremental_inputs_reader<size, big_endian> Inputs_reader;
   typedef typename Inputs_reader::Incremental_input_entry_reader
@@ -1670,11 +1668,6 @@ class Sized_incr_relobj : public Sized_relobj_base<size, big_endian>
   void
   do_for_all_global_symbols(Read_symbols_data* sd,
 			    Library_base::Symbol_visitor_base* v);
-
-  // Iterate over local symbols, calling a visitor class V for each GOT offset
-  // associated with a local symbol.
-  void
-  do_for_all_local_got_entries(Got_offset_list::Visitor* v) const;
 
   // Get the size of a section.
   uint64_t
@@ -1801,10 +1794,6 @@ class Sized_incr_relobj : public Sized_relobj_base<size, big_endian>
   unsigned int local_dynsym_offset_;
   // The entries in the symbol table for the external symbols.
   Symbols symbols_;
-  // For each input section, the offset of the input section in its
-  // output section.  This is INVALID_ADDRESS if the input section requires a
-  // special mapping.
-  std::vector<Address> section_offsets_;
   // The offset of the first incremental relocation for this object.
   unsigned int incr_reloc_offset_;
   // The number of incremental relocations for this object.

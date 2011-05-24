@@ -42,7 +42,7 @@ class Mapfile;
 class Object;
 class Relobj;
 template<int size, bool big_endian>
-class Sized_relobj;
+class Sized_relobj_file;
 template<int size, bool big_endian>
 class Sized_pluginobj;
 class Dynobj;
@@ -1309,11 +1309,11 @@ class Symbol_table
   // *DEFINED to the number of defined symbols.
   template<int size, bool big_endian>
   void
-  add_from_relobj(Sized_relobj<size, big_endian>* relobj,
+  add_from_relobj(Sized_relobj_file<size, big_endian>* relobj,
 		  const unsigned char* syms, size_t count,
 		  size_t symndx_offset, const char* sym_names,
 		  size_t sym_name_size,
-		  typename Sized_relobj<size, big_endian>::Symbols*,
+		  typename Sized_relobj_file<size, big_endian>::Symbols*,
 		  size_t* defined);
 
   // Add one external symbol from the plugin object OBJ to the symbol table.
@@ -1335,7 +1335,7 @@ class Symbol_table
 		  const char* sym_names, size_t sym_name_size,
 		  const unsigned char* versym, size_t versym_size,
 		  const std::vector<const char*>*,
-		  typename Sized_relobj<size, big_endian>::Symbols*,
+		  typename Sized_relobj_file<size, big_endian>::Symbols*,
 		  size_t* defined);
 
   // Add one external symbol from the incremental object OBJ to the symbol

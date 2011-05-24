@@ -1048,13 +1048,13 @@ Symbol_table::add_from_object(Object* object,
 template<int size, bool big_endian>
 void
 Symbol_table::add_from_relobj(
-    Sized_relobj<size, big_endian>* relobj,
+    Sized_relobj_file<size, big_endian>* relobj,
     const unsigned char* syms,
     size_t count,
     size_t symndx_offset,
     const char* sym_names,
     size_t sym_name_size,
-    typename Sized_relobj<size, big_endian>::Symbols* sympointers,
+    typename Sized_relobj_file<size, big_endian>::Symbols* sympointers,
     size_t* defined)
 {
   *defined = 0;
@@ -1304,7 +1304,7 @@ Symbol_table::add_from_dynobj(
     const unsigned char* versym,
     size_t versym_size,
     const std::vector<const char*>* version_map,
-    typename Sized_relobj<size, big_endian>::Symbols* sympointers,
+    typename Sized_relobj_file<size, big_endian>::Symbols* sympointers,
     size_t* defined)
 {
   *defined = 0;
@@ -3295,13 +3295,13 @@ Sized_symbol<64>::allocate_common(Output_data*, Value_type);
 template
 void
 Symbol_table::add_from_relobj<32, false>(
-    Sized_relobj<32, false>* relobj,
+    Sized_relobj_file<32, false>* relobj,
     const unsigned char* syms,
     size_t count,
     size_t symndx_offset,
     const char* sym_names,
     size_t sym_name_size,
-    Sized_relobj<32, false>::Symbols* sympointers,
+    Sized_relobj_file<32, false>::Symbols* sympointers,
     size_t* defined);
 #endif
 
@@ -3309,13 +3309,13 @@ Symbol_table::add_from_relobj<32, false>(
 template
 void
 Symbol_table::add_from_relobj<32, true>(
-    Sized_relobj<32, true>* relobj,
+    Sized_relobj_file<32, true>* relobj,
     const unsigned char* syms,
     size_t count,
     size_t symndx_offset,
     const char* sym_names,
     size_t sym_name_size,
-    Sized_relobj<32, true>::Symbols* sympointers,
+    Sized_relobj_file<32, true>::Symbols* sympointers,
     size_t* defined);
 #endif
 
@@ -3323,13 +3323,13 @@ Symbol_table::add_from_relobj<32, true>(
 template
 void
 Symbol_table::add_from_relobj<64, false>(
-    Sized_relobj<64, false>* relobj,
+    Sized_relobj_file<64, false>* relobj,
     const unsigned char* syms,
     size_t count,
     size_t symndx_offset,
     const char* sym_names,
     size_t sym_name_size,
-    Sized_relobj<64, false>::Symbols* sympointers,
+    Sized_relobj_file<64, false>::Symbols* sympointers,
     size_t* defined);
 #endif
 
@@ -3337,13 +3337,13 @@ Symbol_table::add_from_relobj<64, false>(
 template
 void
 Symbol_table::add_from_relobj<64, true>(
-    Sized_relobj<64, true>* relobj,
+    Sized_relobj_file<64, true>* relobj,
     const unsigned char* syms,
     size_t count,
     size_t symndx_offset,
     const char* sym_names,
     size_t sym_name_size,
-    Sized_relobj<64, true>::Symbols* sympointers,
+    Sized_relobj_file<64, true>::Symbols* sympointers,
     size_t* defined);
 #endif
 
@@ -3399,7 +3399,7 @@ Symbol_table::add_from_dynobj<32, false>(
     const unsigned char* versym,
     size_t versym_size,
     const std::vector<const char*>* version_map,
-    Sized_relobj<32, false>::Symbols* sympointers,
+    Sized_relobj_file<32, false>::Symbols* sympointers,
     size_t* defined);
 #endif
 
@@ -3415,7 +3415,7 @@ Symbol_table::add_from_dynobj<32, true>(
     const unsigned char* versym,
     size_t versym_size,
     const std::vector<const char*>* version_map,
-    Sized_relobj<32, true>::Symbols* sympointers,
+    Sized_relobj_file<32, true>::Symbols* sympointers,
     size_t* defined);
 #endif
 
@@ -3431,7 +3431,7 @@ Symbol_table::add_from_dynobj<64, false>(
     const unsigned char* versym,
     size_t versym_size,
     const std::vector<const char*>* version_map,
-    Sized_relobj<64, false>::Symbols* sympointers,
+    Sized_relobj_file<64, false>::Symbols* sympointers,
     size_t* defined);
 #endif
 
@@ -3447,7 +3447,7 @@ Symbol_table::add_from_dynobj<64, true>(
     const unsigned char* versym,
     size_t versym_size,
     const std::vector<const char*>* version_map,
-    Sized_relobj<64, true>::Symbols* sympointers,
+    Sized_relobj_file<64, true>::Symbols* sympointers,
     size_t* defined);
 #endif
 

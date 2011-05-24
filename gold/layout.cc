@@ -510,7 +510,7 @@ is_compressed_debug_section(const char* secname)
 
 template<int size, bool big_endian>
 bool
-Layout::include_section(Sized_relobj<size, big_endian>*, const char* name,
+Layout::include_section(Sized_relobj_file<size, big_endian>*, const char* name,
 			const elfcpp::Shdr<size, big_endian>& shdr)
 {
   if (shdr.get_sh_flags() & elfcpp::SHF_EXCLUDE)
@@ -880,7 +880,7 @@ Layout::init_fixed_output_section(const char* name,
 
 template<int size, bool big_endian>
 Output_section*
-Layout::layout(Sized_relobj<size, big_endian>* object, unsigned int shndx,
+Layout::layout(Sized_relobj_file<size, big_endian>* object, unsigned int shndx,
 	       const char* name, const elfcpp::Shdr<size, big_endian>& shdr,
 	       unsigned int reloc_shndx, unsigned int, off_t* off)
 {
@@ -968,7 +968,7 @@ Layout::layout(Sized_relobj<size, big_endian>* object, unsigned int shndx,
 
 template<int size, bool big_endian>
 Output_section*
-Layout::layout_reloc(Sized_relobj<size, big_endian>* object,
+Layout::layout_reloc(Sized_relobj_file<size, big_endian>* object,
 		     unsigned int,
 		     const elfcpp::Shdr<size, big_endian>& shdr,
 		     Output_section* data_section,
@@ -1035,7 +1035,7 @@ Layout::layout_reloc(Sized_relobj<size, big_endian>* object,
 template<int size, bool big_endian>
 void
 Layout::layout_group(Symbol_table* symtab,
-		     Sized_relobj<size, big_endian>* object,
+		     Sized_relobj_file<size, big_endian>* object,
 		     unsigned int,
 		     const char* group_section_name,
 		     const char* signature,
@@ -1085,7 +1085,7 @@ Layout::layout_group(Symbol_table* symtab,
 
 template<int size, bool big_endian>
 Output_section*
-Layout::layout_eh_frame(Sized_relobj<size, big_endian>* object,
+Layout::layout_eh_frame(Sized_relobj_file<size, big_endian>* object,
 			const unsigned char* symbols,
 			off_t symbols_size,
 			const unsigned char* symbol_names,
@@ -4787,7 +4787,8 @@ Layout::init_fixed_output_section<64, true>(
 #ifdef HAVE_TARGET_32_LITTLE
 template
 Output_section*
-Layout::layout<32, false>(Sized_relobj<32, false>* object, unsigned int shndx,
+Layout::layout<32, false>(Sized_relobj_file<32, false>* object,
+			  unsigned int shndx,
 			  const char* name,
 			  const elfcpp::Shdr<32, false>& shdr,
 			  unsigned int, unsigned int, off_t*);
@@ -4796,7 +4797,8 @@ Layout::layout<32, false>(Sized_relobj<32, false>* object, unsigned int shndx,
 #ifdef HAVE_TARGET_32_BIG
 template
 Output_section*
-Layout::layout<32, true>(Sized_relobj<32, true>* object, unsigned int shndx,
+Layout::layout<32, true>(Sized_relobj_file<32, true>* object,
+			 unsigned int shndx,
 			 const char* name,
 			 const elfcpp::Shdr<32, true>& shdr,
 			 unsigned int, unsigned int, off_t*);
@@ -4805,7 +4807,8 @@ Layout::layout<32, true>(Sized_relobj<32, true>* object, unsigned int shndx,
 #ifdef HAVE_TARGET_64_LITTLE
 template
 Output_section*
-Layout::layout<64, false>(Sized_relobj<64, false>* object, unsigned int shndx,
+Layout::layout<64, false>(Sized_relobj_file<64, false>* object,
+			  unsigned int shndx,
 			  const char* name,
 			  const elfcpp::Shdr<64, false>& shdr,
 			  unsigned int, unsigned int, off_t*);
@@ -4814,7 +4817,8 @@ Layout::layout<64, false>(Sized_relobj<64, false>* object, unsigned int shndx,
 #ifdef HAVE_TARGET_64_BIG
 template
 Output_section*
-Layout::layout<64, true>(Sized_relobj<64, true>* object, unsigned int shndx,
+Layout::layout<64, true>(Sized_relobj_file<64, true>* object,
+			 unsigned int shndx,
 			 const char* name,
 			 const elfcpp::Shdr<64, true>& shdr,
 			 unsigned int, unsigned int, off_t*);
@@ -4823,7 +4827,7 @@ Layout::layout<64, true>(Sized_relobj<64, true>* object, unsigned int shndx,
 #ifdef HAVE_TARGET_32_LITTLE
 template
 Output_section*
-Layout::layout_reloc<32, false>(Sized_relobj<32, false>* object,
+Layout::layout_reloc<32, false>(Sized_relobj_file<32, false>* object,
 				unsigned int reloc_shndx,
 				const elfcpp::Shdr<32, false>& shdr,
 				Output_section* data_section,
@@ -4833,7 +4837,7 @@ Layout::layout_reloc<32, false>(Sized_relobj<32, false>* object,
 #ifdef HAVE_TARGET_32_BIG
 template
 Output_section*
-Layout::layout_reloc<32, true>(Sized_relobj<32, true>* object,
+Layout::layout_reloc<32, true>(Sized_relobj_file<32, true>* object,
 			       unsigned int reloc_shndx,
 			       const elfcpp::Shdr<32, true>& shdr,
 			       Output_section* data_section,
@@ -4843,7 +4847,7 @@ Layout::layout_reloc<32, true>(Sized_relobj<32, true>* object,
 #ifdef HAVE_TARGET_64_LITTLE
 template
 Output_section*
-Layout::layout_reloc<64, false>(Sized_relobj<64, false>* object,
+Layout::layout_reloc<64, false>(Sized_relobj_file<64, false>* object,
 				unsigned int reloc_shndx,
 				const elfcpp::Shdr<64, false>& shdr,
 				Output_section* data_section,
@@ -4853,7 +4857,7 @@ Layout::layout_reloc<64, false>(Sized_relobj<64, false>* object,
 #ifdef HAVE_TARGET_64_BIG
 template
 Output_section*
-Layout::layout_reloc<64, true>(Sized_relobj<64, true>* object,
+Layout::layout_reloc<64, true>(Sized_relobj_file<64, true>* object,
 			       unsigned int reloc_shndx,
 			       const elfcpp::Shdr<64, true>& shdr,
 			       Output_section* data_section,
@@ -4864,7 +4868,7 @@ Layout::layout_reloc<64, true>(Sized_relobj<64, true>* object,
 template
 void
 Layout::layout_group<32, false>(Symbol_table* symtab,
-				Sized_relobj<32, false>* object,
+				Sized_relobj_file<32, false>* object,
 				unsigned int,
 				const char* group_section_name,
 				const char* signature,
@@ -4877,7 +4881,7 @@ Layout::layout_group<32, false>(Symbol_table* symtab,
 template
 void
 Layout::layout_group<32, true>(Symbol_table* symtab,
-			       Sized_relobj<32, true>* object,
+			       Sized_relobj_file<32, true>* object,
 			       unsigned int,
 			       const char* group_section_name,
 			       const char* signature,
@@ -4890,7 +4894,7 @@ Layout::layout_group<32, true>(Symbol_table* symtab,
 template
 void
 Layout::layout_group<64, false>(Symbol_table* symtab,
-				Sized_relobj<64, false>* object,
+				Sized_relobj_file<64, false>* object,
 				unsigned int,
 				const char* group_section_name,
 				const char* signature,
@@ -4903,7 +4907,7 @@ Layout::layout_group<64, false>(Symbol_table* symtab,
 template
 void
 Layout::layout_group<64, true>(Symbol_table* symtab,
-			       Sized_relobj<64, true>* object,
+			       Sized_relobj_file<64, true>* object,
 			       unsigned int,
 			       const char* group_section_name,
 			       const char* signature,
@@ -4915,7 +4919,7 @@ Layout::layout_group<64, true>(Symbol_table* symtab,
 #ifdef HAVE_TARGET_32_LITTLE
 template
 Output_section*
-Layout::layout_eh_frame<32, false>(Sized_relobj<32, false>* object,
+Layout::layout_eh_frame<32, false>(Sized_relobj_file<32, false>* object,
 				   const unsigned char* symbols,
 				   off_t symbols_size,
 				   const unsigned char* symbol_names,
@@ -4930,9 +4934,9 @@ Layout::layout_eh_frame<32, false>(Sized_relobj<32, false>* object,
 #ifdef HAVE_TARGET_32_BIG
 template
 Output_section*
-Layout::layout_eh_frame<32, true>(Sized_relobj<32, true>* object,
-				   const unsigned char* symbols,
-				   off_t symbols_size,
+Layout::layout_eh_frame<32, true>(Sized_relobj_file<32, true>* object,
+				  const unsigned char* symbols,
+				  off_t symbols_size,
 				  const unsigned char* symbol_names,
 				  off_t symbol_names_size,
 				  unsigned int shndx,
@@ -4945,7 +4949,7 @@ Layout::layout_eh_frame<32, true>(Sized_relobj<32, true>* object,
 #ifdef HAVE_TARGET_64_LITTLE
 template
 Output_section*
-Layout::layout_eh_frame<64, false>(Sized_relobj<64, false>* object,
+Layout::layout_eh_frame<64, false>(Sized_relobj_file<64, false>* object,
 				   const unsigned char* symbols,
 				   off_t symbols_size,
 				   const unsigned char* symbol_names,
@@ -4960,9 +4964,9 @@ Layout::layout_eh_frame<64, false>(Sized_relobj<64, false>* object,
 #ifdef HAVE_TARGET_64_BIG
 template
 Output_section*
-Layout::layout_eh_frame<64, true>(Sized_relobj<64, true>* object,
-				   const unsigned char* symbols,
-				   off_t symbols_size,
+Layout::layout_eh_frame<64, true>(Sized_relobj_file<64, true>* object,
+				  const unsigned char* symbols,
+				  off_t symbols_size,
 				  const unsigned char* symbol_names,
 				  off_t symbol_names_size,
 				  unsigned int shndx,

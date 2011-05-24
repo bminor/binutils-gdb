@@ -47,7 +47,7 @@ template<int size>
 class Sized_symbol;
 
 template<int size, bool big_endian>
-class Sized_relobj;
+class Sized_relobj_file;
 
 template<int size>
 class Symbol_value;
@@ -337,7 +337,7 @@ private:
   template<int valsize>
   static inline void
   rel(unsigned char* view,
-      const Sized_relobj<size, big_endian>* object,
+      const Sized_relobj_file<size, big_endian>* object,
       const Symbol_value<size>* psymval)
   {
     typedef typename elfcpp::Swap<valsize, big_endian>::Valtype Valtype;
@@ -365,7 +365,7 @@ private:
   template<int valsize>
   static inline void
   rela(unsigned char* view,
-       const Sized_relobj<size, big_endian>* object,
+       const Sized_relobj_file<size, big_endian>* object,
        const Symbol_value<size>* psymval,
        typename elfcpp::Swap<valsize, big_endian>::Valtype addend)
   {
@@ -395,7 +395,7 @@ private:
   template<int valsize>
   static inline void
   pcrel(unsigned char* view,
-	const Sized_relobj<size, big_endian>* object,
+	const Sized_relobj_file<size, big_endian>* object,
 	const Symbol_value<size>* psymval,
 	typename elfcpp::Elf_types<size>::Elf_Addr address)
   {
@@ -425,7 +425,7 @@ private:
   template<int valsize>
   static inline void
   pcrela(unsigned char* view,
-	 const Sized_relobj<size, big_endian>* object,
+	 const Sized_relobj_file<size, big_endian>* object,
 	 const Symbol_value<size>* psymval,
 	 typename elfcpp::Swap<valsize, big_endian>::Valtype addend,
 	 typename elfcpp::Elf_types<size>::Elf_Addr address)
@@ -447,7 +447,7 @@ public:
 
   static inline void
   rel8(unsigned char* view,
-       const Sized_relobj<size, big_endian>* object,
+       const Sized_relobj_file<size, big_endian>* object,
        const Symbol_value<size>* psymval)
   { This::template rel<8>(view, object, psymval); }
 
@@ -458,7 +458,7 @@ public:
 
   static inline void
   rela8(unsigned char* view,
-	const Sized_relobj<size, big_endian>* object,
+	const Sized_relobj_file<size, big_endian>* object,
 	const Symbol_value<size>* psymval,
 	unsigned char addend)
   { This::template rela<8>(view, object, psymval, addend); }
@@ -472,7 +472,7 @@ public:
 
   static inline void
   pcrel8(unsigned char* view,
-	 const Sized_relobj<size, big_endian>* object,
+	 const Sized_relobj_file<size, big_endian>* object,
 	 const Symbol_value<size>* psymval,
 	 typename elfcpp::Elf_types<size>::Elf_Addr address)
   { This::template pcrel<8>(view, object, psymval, address); }
@@ -486,7 +486,7 @@ public:
 
   static inline void
   pcrela8(unsigned char* view,
-	  const Sized_relobj<size, big_endian>* object,
+	  const Sized_relobj_file<size, big_endian>* object,
 	  const Symbol_value<size>* psymval,
 	  unsigned char addend,
 	  typename elfcpp::Elf_types<size>::Elf_Addr address)
@@ -500,7 +500,7 @@ public:
 
   static inline void
   rel16(unsigned char* view,
-	const Sized_relobj<size, big_endian>* object,
+	const Sized_relobj_file<size, big_endian>* object,
 	const Symbol_value<size>* psymval)
   { This::template rel<16>(view, object, psymval); }
 
@@ -511,7 +511,7 @@ public:
 
   static inline void
   rela16(unsigned char* view,
-	 const Sized_relobj<size, big_endian>* object,
+	 const Sized_relobj_file<size, big_endian>* object,
 	 const Symbol_value<size>* psymval,
 	 elfcpp::Elf_Half addend)
   { This::template rela<16>(view, object, psymval, addend); }
@@ -525,7 +525,7 @@ public:
 
   static inline void
   pcrel16(unsigned char* view,
-	  const Sized_relobj<size, big_endian>* object,
+	  const Sized_relobj_file<size, big_endian>* object,
 	  const Symbol_value<size>* psymval,
 	  typename elfcpp::Elf_types<size>::Elf_Addr address)
   { This::template pcrel<16>(view, object, psymval, address); }
@@ -540,7 +540,7 @@ public:
 
   static inline void
   pcrela16(unsigned char* view,
-	   const Sized_relobj<size, big_endian>* object,
+	   const Sized_relobj_file<size, big_endian>* object,
 	   const Symbol_value<size>* psymval,
 	   elfcpp::Elf_Half addend,
 	   typename elfcpp::Elf_types<size>::Elf_Addr address)
@@ -554,7 +554,7 @@ public:
 
   static inline void
   rel32(unsigned char* view,
-	const Sized_relobj<size, big_endian>* object,
+	const Sized_relobj_file<size, big_endian>* object,
 	const Symbol_value<size>* psymval)
   { This::template rel<32>(view, object, psymval); }
 
@@ -565,7 +565,7 @@ public:
 
   static inline void
   rela32(unsigned char* view,
-	 const Sized_relobj<size, big_endian>* object,
+	 const Sized_relobj_file<size, big_endian>* object,
 	 const Symbol_value<size>* psymval,
 	 elfcpp::Elf_Word addend)
   { This::template rela<32>(view, object, psymval, addend); }
@@ -579,7 +579,7 @@ public:
 
   static inline void
   pcrel32(unsigned char* view,
-	  const Sized_relobj<size, big_endian>* object,
+	  const Sized_relobj_file<size, big_endian>* object,
 	  const Symbol_value<size>* psymval,
 	  typename elfcpp::Elf_types<size>::Elf_Addr address)
   { This::template pcrel<32>(view, object, psymval, address); }
@@ -594,7 +594,7 @@ public:
 
   static inline void
   pcrela32(unsigned char* view,
-	   const Sized_relobj<size, big_endian>* object,
+	   const Sized_relobj_file<size, big_endian>* object,
 	   const Symbol_value<size>* psymval,
 	   elfcpp::Elf_Word addend,
 	   typename elfcpp::Elf_types<size>::Elf_Addr address)
@@ -608,7 +608,7 @@ public:
 
   static inline void
   rel64(unsigned char* view,
-	const Sized_relobj<size, big_endian>* object,
+	const Sized_relobj_file<size, big_endian>* object,
 	const Symbol_value<size>* psymval)
   { This::template rel<64>(view, object, psymval); }
 
@@ -620,7 +620,7 @@ public:
 
   static inline void
   rela64(unsigned char* view,
-	 const Sized_relobj<size, big_endian>* object,
+	 const Sized_relobj_file<size, big_endian>* object,
 	 const Symbol_value<size>* psymval,
 	 elfcpp::Elf_Xword addend)
   { This::template rela<64>(view, object, psymval, addend); }
@@ -634,7 +634,7 @@ public:
 
   static inline void
   pcrel64(unsigned char* view,
-	  const Sized_relobj<size, big_endian>* object,
+	  const Sized_relobj_file<size, big_endian>* object,
 	  const Symbol_value<size>* psymval,
 	  typename elfcpp::Elf_types<size>::Elf_Addr address)
   { This::template pcrel<64>(view, object, psymval, address); }
@@ -649,7 +649,7 @@ public:
 
   static inline void
   pcrela64(unsigned char* view,
-	   const Sized_relobj<size, big_endian>* object,
+	   const Sized_relobj_file<size, big_endian>* object,
 	   const Symbol_value<size>* psymval,
 	   elfcpp::Elf_Xword addend,
 	   typename elfcpp::Elf_types<size>::Elf_Addr address)
