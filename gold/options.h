@@ -787,6 +787,11 @@ class General_options
   DEFINE_special(incremental_update, options::TWO_DASHES, '\0',
 		 N_("Do an incremental link; exit if not possible"), NULL);
 
+  DEFINE_string(incremental_base, options::TWO_DASHES, '\0', NULL,
+                N_("Set base file for incremental linking"
+                   " (default is output file)"),
+                N_("FILE"));
+
   DEFINE_special(incremental_changed, options::TWO_DASHES, '\0',
                  N_("Assume files changed"), NULL);
 

@@ -204,11 +204,7 @@ queue_initial_tasks(const General_options& options,
       if (parameters->incremental_update())
 	{
 	  Output_file* of = new Output_file(options.output_file_name());
-	  if (!of->open_for_modification())
-	    gold_info(_("incremental update not possible: "
-			"cannot open %s"),
-		      options.output_file_name());
-	  else
+	  if (of->open_base_file(options.incremental_base(), true))
 	    {
 	      ibase = open_incremental_binary(of);
 	      if (ibase != NULL

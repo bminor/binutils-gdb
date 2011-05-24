@@ -861,8 +861,17 @@ Incremental_inputs::report_command_line(int argc, const char* const* argv)
 	  || strcmp(argv[i], "--incremental-changed") == 0
 	  || strcmp(argv[i], "--incremental-unchanged") == 0
 	  || strcmp(argv[i], "--incremental-unknown") == 0
+	  || is_prefix_of("--incremental-base=", argv[i])
 	  || is_prefix_of("--debug=", argv[i]))
         continue;
+      if (strcmp(argv[i], "--incremental-base") == 0
+	  || strcmp(argv[i], "--debug") == 0)
+	{
+	  // When these options are used without the '=', skip the
+	  // following parameter as well.
+	  ++i;
+	  continue;
+	}
 
       args.append(" '");
       // Now append argv[i], but with all single-quotes escaped

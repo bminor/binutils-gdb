@@ -1840,13 +1840,15 @@ incremental_test_3: two_file_test_1.o two_file_test_1b_v1.o two_file_test_1b.o \
 	$(CXXLINK) -Wl,--incremental-update -Bgcctestdir/ two_file_test_1.o two_file_test_tmp.o two_file_test_2.o two_file_test_main.o
 
 check_PROGRAMS += incremental_test_4
+MOSTLYCLEANFILES += incremental_test_4.base
 incremental_test_4: two_file_test_1.o two_file_test_1b.o two_file_test_2_v1.o \
 		    two_file_test_2.o two_file_test_main.o gcctestdir/ld
 	cp -f two_file_test_2_v1.o two_file_test_tmp.o
 	$(CXXLINK) -Wl,--incremental-full -Bgcctestdir/ two_file_test_1.o two_file_test_1b.o two_file_test_tmp.o two_file_test_main.o
+	mv -f incremental_test_4 incremental_test_4.base
 	@sleep 1
 	cp -f two_file_test_2.o two_file_test_tmp.o
-	$(CXXLINK) -Wl,--incremental-update -Bgcctestdir/ two_file_test_1.o two_file_test_1b.o two_file_test_tmp.o two_file_test_main.o
+	$(CXXLINK) -Wl,--incremental-update,--incremental-base=incremental_test_4.base -Bgcctestdir/ two_file_test_1.o two_file_test_1b.o two_file_test_tmp.o two_file_test_main.o
 
 endif DEFAULT_TARGET_X86_64
 

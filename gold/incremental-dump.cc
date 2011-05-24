@@ -449,10 +449,10 @@ main(int argc, char** argv)
 
   Output_file* file = new Output_file(filename);
 
-  bool t = file->open_for_modification();
+  bool t = file->open_base_file(NULL, false);
   if (!t)
     {
-      fprintf(stderr, "%s: open_for_modification(%s): %s\n", argv[0], filename,
+      fprintf(stderr, "%s: open_base_file(%s): %s\n", argv[0], filename,
               strerror(errno));
       return 1;
     }

@@ -1,5 +1,30 @@
 2011-05-24 Cary Coutant  <ccoutant@google.com>
 
+	* gold.cc (queue_initial_tasks): Pass incremental base filename
+	to Output_file::open_base_file; don't print error message.
+	* incremental-dump.cc (main): Adjust call to
+	Output_file::open_for_modification.
+	* incremental-dump.cc (main): Likewise.
+	* incremental.cc (Incremental_inputs::report_command_line):
+	Ignore --incremental-base option when comparing command lines.
+	Ignore parameter when given as separate argument.
+	* options.h (class General_options): Add --incremental-base.
+	* output.cc (Output_file::Output_file):
+	(Output_file::open_base_file): Add base_name and writable parameters;
+	read base file into new file; print error message here.
+	(Output_file::map_no_anonymous): Add writable parameter; adjust all
+	callers.
+	* output.h (Output_file::open_for_modification): Rename to...
+	(Output_file::open_base_file): ...this; add base_name and
+	writable parameters; adjust all callers.
+	(Output_file::map_no_anonymous): Add writable parameter; adjust all
+	callers.
+	* testsuite/Makefile.am (incremental_test_4): Test
+	--incremental-base.
+	* testsuite/Makefile.in: Regenerate.
+
+2011-05-24 Cary Coutant  <ccoutant@google.com>
+
 	* testsuite/Makefile.am: Add incremental_test_2, incremental_test_3,
 	incremental_test_4.
 	* testsuite/Makefile.in: Regenerate.

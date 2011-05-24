@@ -4188,9 +4188,10 @@ class Output_file
 
   // Try to open an existing file. Returns false if the file doesn't
   // exist, has a size of 0 or can't be mmaped.  This method is
-  // thread-unsafe.
+  // thread-unsafe.  If BASE_NAME is not NULL, use the contents of
+  // that file as the base for incremental linking.
   bool
-  open_for_modification();
+  open_base_file(const char* base_name, bool writable);
 
   // Open the output file.  FILE_SIZE is the final size of the file.
   // If the file already exists, it is deleted/truncated.  This method
@@ -4275,7 +4276,7 @@ class Output_file
 
   // Map the file into memory.
   bool
-  map_no_anonymous();
+  map_no_anonymous(bool);
 
   // Unmap the file from memory (and flush to disk buffers).
   void

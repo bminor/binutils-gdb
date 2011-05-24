@@ -4562,31 +4562,77 @@ Output_file::Output_file(const char* name)
 }
 
 // Try to open an existing file.  Returns false if the file doesn't
-// exist, has a size of 0 or can't be mmapped.
+// exist, has a size of 0 or can't be mmapped.  If BASE_NAME is not
+// NULL, open that file as the base for incremental linking, and
+// copy its contents to the new output file.  This routine can
+// be called for incremental updates, in which case WRITABLE should
+// be true, or by the incremental-dump utility, in which case
+// WRITABLE should be false.
 
 bool
-Output_file::open_for_modification()
+Output_file::open_base_file(const char* base_name, bool writable)
 {
   // The name "-" means "stdout".
   if (strcmp(this->name_, "-") == 0)
     return false;
 
+  bool use_base_file = base_name != NULL;
+  if (!use_base_file)
+    base_name = this->name_;
+  else if (strcmp(base_name, this->name_) == 0)
+    gold_fatal(_("%s: incremental base and output file name are the same"),
+	       base_name);
+
   // Don't bother opening files with a size of zero.
   struct stat s;
-  if (::stat(this->name_, &s) != 0 || s.st_size == 0)
-    return false;
+  if (::stat(base_name, &s) != 0)
+    {
+      gold_info(_("%s: stat: %s"), base_name, strerror(errno));
+      return false;
+    }
+  if (s.st_size == 0)
+    {
+      gold_info(_("%s: incremental base file is empty"), base_name);
+      return false;
+    }
 
-  int o = open_descriptor(-1, this->name_, O_RDWR, 0);
+  // If we're using a base file, we want to open it read-only.
+  if (use_base_file)
+    writable = false;
+
+  int oflags = writable ? O_RDWR : O_RDONLY;
+  int o = open_descriptor(-1, base_name, oflags, 0);
   if (o < 0)
-    gold_fatal(_("%s: open: %s"), this->name_, strerror(errno));
+    {
+      gold_info(_("%s: open: %s"), base_name, strerror(errno));
+      return false;
+    }
+
+  // If the base file and the output file are different, open a
+  // new output file and read the contents from the base file into
+  // the newly-mapped region.
+  if (use_base_file)
+    {
+      this->open(s.st_size);
+      ssize_t len = ::read(o, this->base_, s.st_size);
+      if (len < 0)
+        {
+	  gold_info(_("%s: read failed: %s"), base_name, strerror(errno));
+	  return false;
+        }
+      if (len < s.st_size)
+        {
+	  gold_info(_("%s: file too short"), base_name);
+	  return false;
+        }
+      ::close(o);
+      return true;
+    }
+
   this->o_ = o;
   this->file_size_ = s.st_size;
 
-  // If the file can't be mmapped, copying the content to an anonymous
-  // map will probably negate the performance benefits of incremental
-  // linking.  This could be helped by using views and loading only
-  // the necessary parts, but this is not supported as of now.
-  if (!this->map_no_anonymous())
+  if (!this->map_no_anonymous(writable))
     {
       release_descriptor(o, true);
       this->o_ = -1;
@@ -4688,7 +4734,7 @@ Output_file::resize(off_t file_size)
     {
       this->unmap();
       this->file_size_ = file_size;
-      if (!this->map_no_anonymous())
+      if (!this->map_no_anonymous(true))
 	gold_fatal(_("%s: mmap: %s"), this->name_, strerror(errno));
     }
 }
@@ -4715,9 +4761,10 @@ Output_file::map_anonymous()
 }
 
 // Map the file into memory.  Return whether the mapping succeeded.
+// If WRITABLE is true, map with write access.
 
 bool
-Output_file::map_no_anonymous()
+Output_file::map_no_anonymous(bool writable)
 {
   const int o = this->o_;
 
@@ -4739,12 +4786,14 @@ Output_file::map_no_anonymous()
   // output file will wind up incomplete, but we will have already
   // exited.  The alternative to fallocate would be to use fdatasync,
   // but that would be a more significant performance hit.
-  if (::posix_fallocate(o, 0, this->file_size_) < 0)
+  if (writable && ::posix_fallocate(o, 0, this->file_size_) < 0)
     gold_fatal(_("%s: %s"), this->name_, strerror(errno));
 
   // Map the file into memory.
-  base = ::mmap(NULL, this->file_size_, PROT_READ | PROT_WRITE,
-		MAP_SHARED, o, 0);
+  int prot = PROT_READ;
+  if (writable)
+    prot |= PROT_WRITE;
+  base = ::mmap(NULL, this->file_size_, prot, MAP_SHARED, o, 0);
 
   // The mmap call might fail because of file system issues: the file
   // system might not support mmap at all, or it might not support
@@ -4762,7 +4811,7 @@ Output_file::map_no_anonymous()
 void
 Output_file::map()
 {
-  if (this->map_no_anonymous())
+  if (this->map_no_anonymous(true))
     return;
 
   // The mmap call might fail because of file system issues: the file
