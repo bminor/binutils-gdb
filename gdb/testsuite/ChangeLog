@@ -1,3 +1,8 @@
+2011-05-24  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.trace/tfile.exp: Add test that opening the basic.tf trace
+	file doesn't error, using MI.
+
 2011-05-23  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.base/charset.exp (string_display): Add tests to assign to

@@ -1,3 +1,8 @@
+2011-05-24  Pedro Alves  <pedro@codesourcery.com>
+
+	* solib-svr4.c (svr4_solib_create_inferior_hook): Skip setting
+	shared library event breakpoint if there's no execution.
+
 2011-05-23  Tom Tromey  <tromey@redhat.com>
 
 	* c-lang.c (evaluate_subexp_c): Use expect_type if it is not
