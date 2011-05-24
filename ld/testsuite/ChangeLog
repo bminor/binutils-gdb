@@ -1,3 +1,8 @@
+2011-05-24  Hans-Peter Nilsson  <hp@axis.com>
+
+	* ld-cris/tls-e-tpoffcomm1.d: Adjust for second PR12763 change,
+	setting TLS file offset.
+
 2011-05-23  Nick Clifton  <nickc@redhat.com>
 
 	* ld-elf/shared.exp: Revert previous delta.  Do not build

@@ -12,7 +12,7 @@
 Program Header:
     LOAD off    0x0+ vaddr 0x0+80000 paddr 0x0+80000 align 2\*\*13
          filesz 0x0+84 memsz 0x0+84 flags r-x
-     TLS off    0x0+ vaddr 0x0+82084 paddr 0x0+82084 align 2\*\*2
+     TLS off    0x0+84 vaddr 0x0+82084 paddr 0x0+82084 align 2\*\*2
          filesz 0x0+ memsz 0x0+8 flags r--
 private flags = 0:
 
@@ -20,7 +20,7 @@ Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
   0 .text         0+10  0+80074  0+80074  0+74  2\*\*1
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  1 .tbss         0+8  0+82084  0+82084  0+  2\*\*2
+  1 .tbss         0+8  0+82084  0+82084  0+84  2\*\*2
                   ALLOC, THREAD_LOCAL
 SYMBOL TABLE:
 0+80074 l    d  .text	0+ .text
