@@ -1,3 +1,9 @@
+2011-05-24  Keith Seitz  <keiths@redhat.com>
+
+	PR breakpoint/12803
+	* linespec.c (keep_name_info): Add handling for "volatile" keyword.
+	(decode_compound): Unconditionally call	keep_name_info.
+
 2011-05-24  Pedro Alves  <pedro@codesourcery.com>
 
 	* breakpoint.c (watchpoint_check): If the watchpoint went out of

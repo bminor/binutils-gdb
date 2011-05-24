@@ -715,8 +715,7 @@ keep_name_info (char *ptr)
   if (name_end (ptr))
     return remove_trailing_whitespace (start, ptr);
 
-  while (isspace (*p))
-    ++p;
+  p = skip_spaces (p);
   if (*p == '<')
     ptr = p = find_template_name_end (ptr);
 
@@ -731,12 +730,21 @@ keep_name_info (char *ptr)
     return remove_trailing_whitespace (start, ptr);
 
   /* Keep important keywords.  */  
-  while (isspace (*p))
-    ++p;
-  if (strncmp (p, "const", 5) == 0
-      && (isspace (p[5]) || p[5] == '\0'
-	  || strchr (get_gdb_completer_quote_characters (), p[5]) != NULL))
-    ptr = p = p + 5;
+  while (1)
+    {
+      char *quotes = get_gdb_completer_quote_characters ();
+      p = skip_spaces (p);
+      if (strncmp (p, "const", 5) == 0
+	  && (isspace (p[5]) || p[5] == '\0'
+	      || strchr (quotes, p[5]) != NULL))
+	ptr = p = p + 5;
+      else if (strncmp (p, "volatile", 8) == 0
+	       && (isspace (p[8]) || p[8] == '\0'
+		   || strchr (quotes, p[8]) != NULL))
+	ptr = p = p + 8;
+      else
+	break;
+    }
 
   return remove_trailing_whitespace (start, ptr);
 }
@@ -1574,9 +1582,7 @@ decode_compound (char **argptr, int funfirstline,
   /* We couldn't find a class, so we're in case 2 above.  We check the
      entire name as a symbol instead.  */
 
-  if (current_language->la_language == language_cplus
-      || current_language->la_language == language_java)
-    p = keep_name_info (p);
+  p = keep_name_info (p);
 
   copy = (char *) alloca (p - saved_arg2 + 1);
   memcpy (copy, saved_arg2, p - saved_arg2);
