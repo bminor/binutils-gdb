@@ -1,3 +1,12 @@
+2011-05-24  Tristan Gingold  <gingold@adacore.com>
+
+	* symfile.h (enum dwarf2_section_enum): New type.
+	(dwarf2_get_section_info): New prototype.
+	* dwarf2read.c (dwarf2_get_section_info): Replace parameter
+	section_name by sect.  Use a switch to select the info.
+	* dwarf2-frame.c (warf2_get_section_info): Remove prototype.
+	(dwarf2_build_frame_info): Adjust calls to dwarf2_get_section_info.
+
 2011-05-24  Pedro Alves  <pedro@codesourcery.com>
 
 	* solib-svr4.c (svr4_solib_create_inferior_hook): Skip setting

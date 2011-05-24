@@ -1633,7 +1633,8 @@ dwarf2_section_size (struct objfile *objfile,
    SECTION_NAME.  */
 
 void
-dwarf2_get_section_info (struct objfile *objfile, const char *section_name,
+dwarf2_get_section_info (struct objfile *objfile,
+                         enum dwarf2_section_enum sect,
                          asection **sectp, gdb_byte **bufp,
                          bfd_size_type *sizep)
 {
@@ -1650,12 +1651,17 @@ dwarf2_get_section_info (struct objfile *objfile, const char *section_name,
       *sizep = 0;
       return;
     }
-  if (section_is_p (section_name, EH_FRAME_SECTION))
-    info = &data->eh_frame;
-  else if (section_is_p (section_name, FRAME_SECTION))
-    info = &data->frame;
-  else
-    gdb_assert_not_reached ("unexpected section");
+  switch (sect)
+    {
+    case DWARF2_DEBUG_FRAME:
+      info = &data->frame;
+      break;
+    case DWARF2_EH_FRAME:
+      info = &data->eh_frame;
+      break;
+    default:
+      gdb_assert_not_reached ("unexpected section");
+    }
 
   dwarf2_read_section (objfile, info);
 

@@ -2183,12 +2183,6 @@ Corrupt data in %s:%s; align 8 workaround apparently succeeded"),
   return ret;
 }
 
-
-/* Imported from dwarf2read.c.  */
-extern void dwarf2_get_section_info (struct objfile *, const char *,
-				     asection **, gdb_byte **,
-				     bfd_size_type *);
-
 static int
 qsort_fde_cmp (const void *a, const void *b)
 {
@@ -2233,7 +2227,7 @@ dwarf2_build_frame_info (struct objfile *objfile)
   unit->dbase = 0;
   unit->tbase = 0;
 
-  dwarf2_get_section_info (objfile, ".eh_frame",
+  dwarf2_get_section_info (objfile, DWARF2_EH_FRAME,
                            &unit->dwarf_frame_section,
                            &unit->dwarf_frame_buffer,
                            &unit->dwarf_frame_size);
@@ -2269,7 +2263,7 @@ dwarf2_build_frame_info (struct objfile *objfile)
         }
     }
 
-  dwarf2_get_section_info (objfile, ".debug_frame",
+  dwarf2_get_section_info (objfile, DWARF2_DEBUG_FRAME,
                            &unit->dwarf_frame_section,
                            &unit->dwarf_frame_buffer,
                            &unit->dwarf_frame_size);
