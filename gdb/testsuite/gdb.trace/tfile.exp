@@ -116,3 +116,8 @@ Collected 0 trace frame.*
 Trace buffer has 256 bytes of 4096 bytes free \\(93% full\\).*
 Not looking at any trace frame.*" \
     "tstatus on error trace file"
+
+# Make sure we can reopen without error.
+gdb_test \
+    "interpreter-exec mi \"-target-select tfile basic.tf\"" \
+    "\\^connected.*"
