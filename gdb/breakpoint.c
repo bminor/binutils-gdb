@@ -3866,6 +3866,8 @@ watchpoint_check (void *p)
 		   " deleted because the program has left the block in\n\
 which its expression is valid.\n");     
 
+      /* Make sure the watchpoint's commands aren't executed.  */
+      decref_counted_command_line (&b->commands);
       watchpoint_del_at_next_stop (b);
 
       return WP_DELETED;
@@ -11585,25 +11587,8 @@ map_breakpoint_numbers (char *args, void (*function) (struct breakpoint *,
 	  ALL_BREAKPOINTS_SAFE (b, tmp)
 	    if (b->number == num)
 	      {
-		struct breakpoint *related_breakpoint;
-
 		match = 1;
-		related_breakpoint = b;
-		do
-		  {
-		    struct breakpoint *next_related_b;
-
-		    /* FUNCTION can be also delete_breakpoint.  */
-		    next_related_b = related_breakpoint->related_breakpoint;
-		    function (related_breakpoint, data);
-
-		    /* For delete_breakpoint of the last entry of the ring we
-		       were traversing we would never get back to B.  */
-		    if (next_related_b == related_breakpoint)
-		      break;
-		    related_breakpoint = next_related_b;
-		  }
-		while (related_breakpoint != b);
+		function (b, data);
 		break;
 	      }
 	  if (match == 0)

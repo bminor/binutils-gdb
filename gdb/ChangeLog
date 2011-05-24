@@ -1,3 +1,10 @@
+2011-05-24  Pedro Alves  <pedro@codesourcery.com>
+
+	* breakpoint.c (watchpoint_check): If the watchpoint went out of
+	scope, clear its command list.
+	(map_breakpoint_numbers): Don't walk the related breakpoints list
+	of each breakpoint.
+
 2011-05-24  Tom Tromey  <tromey@redhat.com>
 
 	* MAINTAINERS: Move Jim Blandy to past maintainers.

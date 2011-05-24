@@ -1,3 +1,9 @@
+2011-05-24  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.base/commands.exp (watchpoint_command_test): Check that the
+	watchpoint's command list didn't execute when the watchpoint went
+	out of scope.
+
 2011-05-24  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	Centralize -DSYMBOL_PREFIX=\"_\" additional flags in gdb.exp.
@@ -30,7 +36,6 @@
 
 	Cope with async mode.
 
-	gdb/testsuite/
 	* gdb.mi/mi-break.exp (test_breakpoint_commands): Split gdb_test
 	into gdb_test + mi_expect_stop.
 

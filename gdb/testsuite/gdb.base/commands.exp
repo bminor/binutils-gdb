@@ -294,6 +294,9 @@ proc watchpoint_command_test {} {
 	    pass "begin commands on watch"
 	}
     }
+    # See the 'No symbol "value...' fail below.  This command will
+    # fail if it's executed in the wrong frame.  If adjusting the
+    # test, make sure this property holds.
     gdb_test_multiple "print value" "add print command to watch" {
 	-re ">$" {
 	    pass "add print command to watch"
@@ -308,9 +311,18 @@ proc watchpoint_command_test {} {
 	"" \
 	"end commands on watch"
 
-    gdb_test "continue" \
-	"Continuing.*\[Ww\]atchpoint $wp_id deleted because the program has left the block in.*which its expression is valid.*run.c:(57|82).*" \
-	"continue with watch"
+    set test "continue with watch"
+    gdb_test_multiple "continue" "$test" {
+	-re "No symbol \"value\" in current context.\r\n$gdb_prompt $" {
+	    # Happens if GDB actually runs the watchpoints commands,
+	    # even though the watchpoint was deleted for not being in
+	    # scope.
+	    fail $test
+	}
+ 	-re "Continuing.*\[Ww\]atchpoint $wp_id deleted because the program has left the block in.*which its expression is valid.*run.c:(57|82).*$gdb_prompt $" {
+	    pass $test
+	}
+   }
 }
 
 proc test_command_prompt_position {} {
