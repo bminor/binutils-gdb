@@ -1815,6 +1815,41 @@ memory_test: memory_test.o gcctestdir/ld $(srcdir)/memory_test.t
 memory_test.stdout: memory_test
 	$(TEST_READELF) -lWS  $< > $@
 
+# End-to-end incremental linking tests.
+# Incremental linking is currently supported only on the x86_64 target.
+
+if DEFAULT_TARGET_X86_64
+
+check_PROGRAMS += incremental_test_2
+MOSTLYCLEANFILES += two_file_test_tmp.o
+incremental_test_2: two_file_test_1_v1.o two_file_test_1.o two_file_test_1b.o \
+		    two_file_test_2.o two_file_test_main.o gcctestdir/ld
+	cp -f two_file_test_1_v1.o two_file_test_tmp.o
+	$(CXXLINK) -Wl,--incremental-full -Bgcctestdir/ two_file_test_tmp.o two_file_test_1b.o two_file_test_2.o two_file_test_main.o
+	@sleep 1
+	cp -f two_file_test_1.o two_file_test_tmp.o
+	$(CXXLINK) -Wl,--incremental-update -Bgcctestdir/ two_file_test_tmp.o two_file_test_1b.o two_file_test_2.o two_file_test_main.o
+
+check_PROGRAMS += incremental_test_3
+incremental_test_3: two_file_test_1.o two_file_test_1b_v1.o two_file_test_1b.o \
+		    two_file_test_2.o two_file_test_main.o gcctestdir/ld
+	cp -f two_file_test_1b_v1.o two_file_test_tmp.o
+	$(CXXLINK) -Wl,--incremental-full -Bgcctestdir/ two_file_test_1.o two_file_test_tmp.o two_file_test_2.o two_file_test_main.o
+	@sleep 1
+	cp -f two_file_test_1b.o two_file_test_tmp.o
+	$(CXXLINK) -Wl,--incremental-update -Bgcctestdir/ two_file_test_1.o two_file_test_tmp.o two_file_test_2.o two_file_test_main.o
+
+check_PROGRAMS += incremental_test_4
+incremental_test_4: two_file_test_1.o two_file_test_1b.o two_file_test_2_v1.o \
+		    two_file_test_2.o two_file_test_main.o gcctestdir/ld
+	cp -f two_file_test_2_v1.o two_file_test_tmp.o
+	$(CXXLINK) -Wl,--incremental-full -Bgcctestdir/ two_file_test_1.o two_file_test_1b.o two_file_test_tmp.o two_file_test_main.o
+	@sleep 1
+	cp -f two_file_test_2.o two_file_test_tmp.o
+	$(CXXLINK) -Wl,--incremental-update -Bgcctestdir/ two_file_test_1.o two_file_test_1b.o two_file_test_tmp.o two_file_test_main.o
+
+endif DEFAULT_TARGET_X86_64
+
 endif GCC
 endif NATIVE_LINKER
 

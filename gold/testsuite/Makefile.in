@@ -47,7 +47,7 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 	$(am__EXEEXT_13) $(am__EXEEXT_14) $(am__EXEEXT_15) \
 	$(am__EXEEXT_16) $(am__EXEEXT_17) $(am__EXEEXT_18) \
 	$(am__EXEEXT_19) $(am__EXEEXT_20) $(am__EXEEXT_21) \
-	$(am__EXEEXT_22)
+	$(am__EXEEXT_22) $(am__EXEEXT_23)
 @NATIVE_OR_CROSS_LINKER_TRUE@am__append_1 = object_unittest \
 @NATIVE_OR_CROSS_LINKER_TRUE@	binary_unittest
 
@@ -431,37 +431,44 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 # Test that --start-lib and --end-lib function correctly.
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_34 = start_lib_test
 
+# End-to-end incremental linking tests.
+# Incremental linking is currently supported only on the x86_64 target.
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_35 = incremental_test_2 \
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	incremental_test_3 \
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	incremental_test_4
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_36 = two_file_test_tmp.o
+
 # These tests work with native and cross linkers.
 
 # Test script section order.
-@NATIVE_OR_CROSS_LINKER_TRUE@am__append_35 = script_test_10.sh
-@NATIVE_OR_CROSS_LINKER_TRUE@am__append_36 = script_test_10.stdout
+@NATIVE_OR_CROSS_LINKER_TRUE@am__append_37 = script_test_10.sh
+@NATIVE_OR_CROSS_LINKER_TRUE@am__append_38 = script_test_10.stdout
 
 # These tests work with cross linkers only.
-@DEFAULT_TARGET_I386_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_37 = split_i386.sh
-@DEFAULT_TARGET_I386_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_38 = split_i386_1.stdout split_i386_2.stdout \
+@DEFAULT_TARGET_I386_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_39 = split_i386.sh
+@DEFAULT_TARGET_I386_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_40 = split_i386_1.stdout split_i386_2.stdout \
 @DEFAULT_TARGET_I386_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	split_i386_3.stdout split_i386_4.stdout split_i386_r.stdout
 
-@DEFAULT_TARGET_I386_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_39 = split_i386_1 split_i386_2 split_i386_3 \
+@DEFAULT_TARGET_I386_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_41 = split_i386_1 split_i386_2 split_i386_3 \
 @DEFAULT_TARGET_I386_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	split_i386_4 split_i386_r
 
-@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_40 = split_x86_64.sh
-@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_41 = split_x86_64_1.stdout split_x86_64_2.stdout \
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_42 = split_x86_64.sh
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_43 = split_x86_64_1.stdout split_x86_64_2.stdout \
 @DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	split_x86_64_3.stdout split_x86_64_4.stdout split_x86_64_r.stdout
 
-@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_42 = split_x86_64_1 split_x86_64_2 split_x86_64_3 \
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_44 = split_x86_64_1 split_x86_64_2 split_x86_64_3 \
 @DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	split_x86_64_4 split_x86_64_r
 
 
 # Cortex-A8 workaround test.
-@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_43 = arm_abs_global.sh \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_45 = arm_abs_global.sh \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_branch_in_range.sh \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_branch_out_of_range.sh \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_fix_v4bx.sh \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_attr_merge.sh \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_cortex_a8.sh \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_exidx_test.sh
-@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_44 = arm_abs_global.stdout \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_46 = arm_abs_global.stdout \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_bl_in_range.stdout \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_bl_out_of_range.stdout \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	thumb_bl_in_range.stdout \
@@ -486,7 +493,7 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_cortex_a8_local.stdout \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_cortex_a8_local_reloc.stdout \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_exidx_test.stdout
-@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_45 = arm_abs_global \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_47 = arm_abs_global \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_bl_in_range \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_bl_out_of_range \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	thumb_bl_in_range \
@@ -670,6 +677,9 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain7pic$(EXEEXT) \
 @GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncmain7pie$(EXEEXT)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_22 = start_lib_test$(EXEEXT)
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_23 = incremental_test_2$(EXEEXT) \
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	incremental_test_3$(EXEEXT) \
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	incremental_test_4$(EXEEXT)
 basic_pic_test_SOURCES = basic_pic_test.c
 basic_pic_test_OBJECTS = basic_pic_test.$(OBJEXT)
 basic_pic_test_LDADD = $(LDADD)
@@ -994,6 +1004,24 @@ ifuncmain7pie_DEPENDENCIES = libgoldtest.a ../libgold.a \
 ifuncmain7static_OBJECTS = $(am_ifuncmain7static_OBJECTS)
 ifuncmain7static_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(ifuncmain7static_LDFLAGS) $(LDFLAGS) -o $@
+incremental_test_2_SOURCES = incremental_test_2.c
+incremental_test_2_OBJECTS = incremental_test_2.$(OBJEXT)
+incremental_test_2_LDADD = $(LDADD)
+incremental_test_2_DEPENDENCIES = libgoldtest.a ../libgold.a \
+	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+incremental_test_3_SOURCES = incremental_test_3.c
+incremental_test_3_OBJECTS = incremental_test_3.$(OBJEXT)
+incremental_test_3_LDADD = $(LDADD)
+incremental_test_3_DEPENDENCIES = libgoldtest.a ../libgold.a \
+	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+incremental_test_4_SOURCES = incremental_test_4.c
+incremental_test_4_OBJECTS = incremental_test_4.$(OBJEXT)
+incremental_test_4_LDADD = $(LDADD)
+incremental_test_4_DEPENDENCIES = libgoldtest.a ../libgold.a \
+	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 @CONSTRUCTOR_PRIORITY_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am_initpri1_OBJECTS = initpri1.$(OBJEXT)
 initpri1_OBJECTS = $(am_initpri1_OBJECTS)
 initpri1_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(initpri1_LDFLAGS) \
@@ -1472,7 +1500,8 @@ SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c basic_pie_test.c \
 	$(ifuncmain5static_SOURCES) ifuncmain5staticpic.c \
 	ifuncmain6pie.c $(ifuncmain7_SOURCES) ifuncmain7pic.c \
 	ifuncmain7picstatic.c ifuncmain7pie.c \
-	$(ifuncmain7static_SOURCES) $(initpri1_SOURCES) \
+	$(ifuncmain7static_SOURCES) incremental_test_2.c \
+	incremental_test_3.c incremental_test_4.c $(initpri1_SOURCES) \
 	$(justsyms_SOURCES) $(large_SOURCES) local_labels_test.c \
 	many_sections_r_test.c $(many_sections_test_SOURCES) \
 	$(object_unittest_SOURCES) permission_test.c plugin_test_1.c \
@@ -1753,18 +1782,18 @@ TEST_AS = $(top_builddir)/../gas/as-new
 # the right choice for files 'make' builds that people rebuild.
 MOSTLYCLEANFILES = *.so *.syms *.stdout $(am__append_4) \
 	$(am__append_9) $(am__append_18) $(am__append_26) \
-	$(am__append_30) $(am__append_39) $(am__append_42) \
-	$(am__append_45)
+	$(am__append_30) $(am__append_36) $(am__append_41) \
+	$(am__append_44) $(am__append_47)
 
 # We will add to these later, for each individual test.  Note
 # that we add each test under check_SCRIPTS or check_PROGRAMS;
 # the TESTS variable is automatically populated from these.
 check_SCRIPTS = $(am__append_2) $(am__append_24) $(am__append_28) \
-	$(am__append_35) $(am__append_37) $(am__append_40) \
-	$(am__append_43)
+	$(am__append_37) $(am__append_39) $(am__append_42) \
+	$(am__append_45)
 check_DATA = $(am__append_3) $(am__append_25) $(am__append_29) \
-	$(am__append_36) $(am__append_38) $(am__append_41) \
-	$(am__append_44)
+	$(am__append_38) $(am__append_40) $(am__append_43) \
+	$(am__append_46)
 BUILT_SOURCES = $(am__append_17)
 TESTS = $(check_SCRIPTS) $(check_PROGRAMS)
 
@@ -2544,6 +2573,33 @@ ifuncmain7$(EXEEXT): $(ifuncmain7_OBJECTS) $(ifuncmain7_DEPENDENCIES)
 ifuncmain7static$(EXEEXT): $(ifuncmain7static_OBJECTS) $(ifuncmain7static_DEPENDENCIES) 
 	@rm -f ifuncmain7static$(EXEEXT)
 	$(ifuncmain7static_LINK) $(ifuncmain7static_OBJECTS) $(ifuncmain7static_LDADD) $(LIBS)
+@DEFAULT_TARGET_X86_64_FALSE@incremental_test_2$(EXEEXT): $(incremental_test_2_OBJECTS) $(incremental_test_2_DEPENDENCIES) 
+@DEFAULT_TARGET_X86_64_FALSE@	@rm -f incremental_test_2$(EXEEXT)
+@DEFAULT_TARGET_X86_64_FALSE@	$(LINK) $(incremental_test_2_OBJECTS) $(incremental_test_2_LDADD) $(LIBS)
+@GCC_FALSE@incremental_test_2$(EXEEXT): $(incremental_test_2_OBJECTS) $(incremental_test_2_DEPENDENCIES) 
+@GCC_FALSE@	@rm -f incremental_test_2$(EXEEXT)
+@GCC_FALSE@	$(LINK) $(incremental_test_2_OBJECTS) $(incremental_test_2_LDADD) $(LIBS)
+@NATIVE_LINKER_FALSE@incremental_test_2$(EXEEXT): $(incremental_test_2_OBJECTS) $(incremental_test_2_DEPENDENCIES) 
+@NATIVE_LINKER_FALSE@	@rm -f incremental_test_2$(EXEEXT)
+@NATIVE_LINKER_FALSE@	$(LINK) $(incremental_test_2_OBJECTS) $(incremental_test_2_LDADD) $(LIBS)
+@DEFAULT_TARGET_X86_64_FALSE@incremental_test_3$(EXEEXT): $(incremental_test_3_OBJECTS) $(incremental_test_3_DEPENDENCIES) 
+@DEFAULT_TARGET_X86_64_FALSE@	@rm -f incremental_test_3$(EXEEXT)
+@DEFAULT_TARGET_X86_64_FALSE@	$(LINK) $(incremental_test_3_OBJECTS) $(incremental_test_3_LDADD) $(LIBS)
+@GCC_FALSE@incremental_test_3$(EXEEXT): $(incremental_test_3_OBJECTS) $(incremental_test_3_DEPENDENCIES) 
+@GCC_FALSE@	@rm -f incremental_test_3$(EXEEXT)
+@GCC_FALSE@	$(LINK) $(incremental_test_3_OBJECTS) $(incremental_test_3_LDADD) $(LIBS)
+@NATIVE_LINKER_FALSE@incremental_test_3$(EXEEXT): $(incremental_test_3_OBJECTS) $(incremental_test_3_DEPENDENCIES) 
+@NATIVE_LINKER_FALSE@	@rm -f incremental_test_3$(EXEEXT)
+@NATIVE_LINKER_FALSE@	$(LINK) $(incremental_test_3_OBJECTS) $(incremental_test_3_LDADD) $(LIBS)
+@DEFAULT_TARGET_X86_64_FALSE@incremental_test_4$(EXEEXT): $(incremental_test_4_OBJECTS) $(incremental_test_4_DEPENDENCIES) 
+@DEFAULT_TARGET_X86_64_FALSE@	@rm -f incremental_test_4$(EXEEXT)
+@DEFAULT_TARGET_X86_64_FALSE@	$(LINK) $(incremental_test_4_OBJECTS) $(incremental_test_4_LDADD) $(LIBS)
+@GCC_FALSE@incremental_test_4$(EXEEXT): $(incremental_test_4_OBJECTS) $(incremental_test_4_DEPENDENCIES) 
+@GCC_FALSE@	@rm -f incremental_test_4$(EXEEXT)
+@GCC_FALSE@	$(LINK) $(incremental_test_4_OBJECTS) $(incremental_test_4_LDADD) $(LIBS)
+@NATIVE_LINKER_FALSE@incremental_test_4$(EXEEXT): $(incremental_test_4_OBJECTS) $(incremental_test_4_DEPENDENCIES) 
+@NATIVE_LINKER_FALSE@	@rm -f incremental_test_4$(EXEEXT)
+@NATIVE_LINKER_FALSE@	$(LINK) $(incremental_test_4_OBJECTS) $(incremental_test_4_LDADD) $(LIBS)
 initpri1$(EXEEXT): $(initpri1_OBJECTS) $(initpri1_DEPENDENCIES) 
 	@rm -f initpri1$(EXEEXT)
 	$(initpri1_LINK) $(initpri1_OBJECTS) $(initpri1_LDADD) $(LIBS)
@@ -2911,6 +2967,9 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifuncmain7pic.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifuncmain7picstatic.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifuncmain7pie.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/incremental_test_2.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/incremental_test_3.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/incremental_test_4.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/initpri1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/justsyms_1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/large-large.Po@am__quote@
@@ -3581,6 +3640,12 @@ ifuncmain7pie.log: ifuncmain7pie$(EXEEXT)
 	@p='ifuncmain7pie$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 start_lib_test.log: start_lib_test$(EXEEXT)
 	@p='start_lib_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+incremental_test_2.log: incremental_test_2$(EXEEXT)
+	@p='incremental_test_2$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+incremental_test_3.log: incremental_test_3$(EXEEXT)
+	@p='incremental_test_3$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+incremental_test_4.log: incremental_test_4$(EXEEXT)
+	@p='incremental_test_4$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 .test.log:
 	@p='$<'; $(am__check_pre) $(TEST_LOG_COMPILE) "$$tst" $(am__check_post)
 @am__EXEEXT_TRUE@.test$(EXEEXT).log:
@@ -4522,6 +4587,27 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ -nostartfiles -nostdlib -T $(srcdir)/memory_test.t -o $@ memory_test.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@memory_test.stdout: memory_test
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) -lWS  $< > $@
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@incremental_test_2: two_file_test_1_v1.o two_file_test_1.o two_file_test_1b.o \
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@		    two_file_test_2.o two_file_test_main.o gcctestdir/ld
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	cp -f two_file_test_1_v1.o two_file_test_tmp.o
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Wl,--incremental-full -Bgcctestdir/ two_file_test_tmp.o two_file_test_1b.o two_file_test_2.o two_file_test_main.o
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	@sleep 1
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	cp -f two_file_test_1.o two_file_test_tmp.o
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Wl,--incremental-update -Bgcctestdir/ two_file_test_tmp.o two_file_test_1b.o two_file_test_2.o two_file_test_main.o
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@incremental_test_3: two_file_test_1.o two_file_test_1b_v1.o two_file_test_1b.o \
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@		    two_file_test_2.o two_file_test_main.o gcctestdir/ld
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	cp -f two_file_test_1b_v1.o two_file_test_tmp.o
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Wl,--incremental-full -Bgcctestdir/ two_file_test_1.o two_file_test_tmp.o two_file_test_2.o two_file_test_main.o
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	@sleep 1
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	cp -f two_file_test_1b.o two_file_test_tmp.o
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Wl,--incremental-update -Bgcctestdir/ two_file_test_1.o two_file_test_tmp.o two_file_test_2.o two_file_test_main.o
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@incremental_test_4: two_file_test_1.o two_file_test_1b.o two_file_test_2_v1.o \
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@		    two_file_test_2.o two_file_test_main.o gcctestdir/ld
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	cp -f two_file_test_2_v1.o two_file_test_tmp.o
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Wl,--incremental-full -Bgcctestdir/ two_file_test_1.o two_file_test_1b.o two_file_test_tmp.o two_file_test_main.o
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	@sleep 1
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	cp -f two_file_test_2.o two_file_test_tmp.o
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Wl,--incremental-update -Bgcctestdir/ two_file_test_1.o two_file_test_1b.o two_file_test_tmp.o two_file_test_main.o
 @NATIVE_OR_CROSS_LINKER_TRUE@script_test_10.o: script_test_10.s
 @NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -o $@ $<
 @NATIVE_OR_CROSS_LINKER_TRUE@script_test_10: $(srcdir)/script_test_10.t script_test_10.o gcctestdir/ld

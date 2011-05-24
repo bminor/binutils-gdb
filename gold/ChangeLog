@@ -1,5 +1,14 @@
 2011-05-24 Cary Coutant  <ccoutant@google.com>
 
+	* testsuite/Makefile.am: Add incremental_test_2, incremental_test_3,
+	incremental_test_4.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/two_file_test_1_v1.cc: New test source file.
+	* testsuite/two_file_test_1b_v1.cc: New test source file.
+	* testsuite/two_file_test_2_v1.cc: New test source file.
+
+2011-05-24 Cary Coutant  <ccoutant@google.com>
+
 	* dynobj.h (Dynobj::do_dynobj): New function.
 	* incremental-dump.cc (dump_incremental_inputs): Print as_needed
 	flag and soname for shared objects.
