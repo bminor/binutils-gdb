@@ -67,19 +67,19 @@ const struct s390_operand s390_operands[] =
 /* General purpose register pair operands.  */
 
 #define RE_8    10                  /* GPR starting at position 8 */
-  { 4, 8, S390_OPERAND_GPR | S390_OPERAND_REG_EVEN },
+  { 4, 8, S390_OPERAND_GPR | S390_OPERAND_REG_PAIR },
 #define RE_12   11                  /* GPR starting at position 12 */
-  { 4, 12, S390_OPERAND_GPR | S390_OPERAND_REG_EVEN },
+  { 4, 12, S390_OPERAND_GPR | S390_OPERAND_REG_PAIR },
 #define RE_16   12                  /* GPR starting at position 16 */
-  { 4, 16, S390_OPERAND_GPR | S390_OPERAND_REG_EVEN },
+  { 4, 16, S390_OPERAND_GPR | S390_OPERAND_REG_PAIR },
 #define RE_20   13                  /* GPR starting at position 20 */
-  { 4, 20, S390_OPERAND_GPR | S390_OPERAND_REG_EVEN },
+  { 4, 20, S390_OPERAND_GPR | S390_OPERAND_REG_PAIR },
 #define RE_24   14                  /* GPR starting at position 24 */
-  { 4, 24, S390_OPERAND_GPR | S390_OPERAND_REG_EVEN },
+  { 4, 24, S390_OPERAND_GPR | S390_OPERAND_REG_PAIR },
 #define RE_28   15                  /* GPR starting at position 28 */
-  { 4, 28, S390_OPERAND_GPR | S390_OPERAND_REG_EVEN },
+  { 4, 28, S390_OPERAND_GPR | S390_OPERAND_REG_PAIR },
 #define RE_32   16                  /* GPR starting at position 32 */
-  { 4, 32, S390_OPERAND_GPR | S390_OPERAND_REG_EVEN },
+  { 4, 32, S390_OPERAND_GPR | S390_OPERAND_REG_PAIR },
 
 
 /* Floating point register operands.  */
@@ -102,19 +102,19 @@ const struct s390_operand s390_operands[] =
 /* Floating point register pair operands.  */
 
 #define FE_8    24                 /* FPR starting at position 8 */
-  { 4, 8, S390_OPERAND_FPR | S390_OPERAND_REG_EVEN },
+  { 4, 8, S390_OPERAND_FPR | S390_OPERAND_REG_PAIR },
 #define FE_12   25                 /* FPR starting at position 12 */
-  { 4, 12, S390_OPERAND_FPR | S390_OPERAND_REG_EVEN },
+  { 4, 12, S390_OPERAND_FPR | S390_OPERAND_REG_PAIR },
 #define FE_16   26                 /* FPR starting at position 16 */
-  { 4, 16, S390_OPERAND_FPR | S390_OPERAND_REG_EVEN },
+  { 4, 16, S390_OPERAND_FPR | S390_OPERAND_REG_PAIR },
 #define FE_20   27                 /* FPR starting at position 16 */
-  { 4, 16, S390_OPERAND_FPR | S390_OPERAND_REG_EVEN },
+  { 4, 16, S390_OPERAND_FPR | S390_OPERAND_REG_PAIR },
 #define FE_24   28                 /* FPR starting at position 24 */
-  { 4, 24, S390_OPERAND_FPR | S390_OPERAND_REG_EVEN },
+  { 4, 24, S390_OPERAND_FPR | S390_OPERAND_REG_PAIR },
 #define FE_28   29                 /* FPR starting at position 28 */
-  { 4, 28, S390_OPERAND_FPR | S390_OPERAND_REG_EVEN },
+  { 4, 28, S390_OPERAND_FPR | S390_OPERAND_REG_PAIR },
 #define FE_32   30                 /* FPR starting at position 32 */
-  { 4, 32, S390_OPERAND_FPR | S390_OPERAND_REG_EVEN },
+  { 4, 32, S390_OPERAND_FPR | S390_OPERAND_REG_PAIR },
 
 
 /* Access register operands.  */
@@ -336,7 +336,7 @@ const struct s390_operand s390_operands[] =
 #define INSTR_RRF_UUFFE  4, { F_24,U4_16,FE_28,U4_20,0,0 }     /* e.g. ldxtr */
 #define INSTR_RRF_UUFEFE 4, { FE_24,U4_16,FE_28,U4_20,0,0 }    /* e.g. fixtr */
 #define INSTR_RRF_0UFF   4, { F_24,F_28,U4_20,0,0,0 }          /* e.g. ldetr */
-#define INSTR_RRF_0UFEF  4, { F_24,FE_28,U4_20,0,0,0 }         /* e.g. lxdtr */
+#define INSTR_RRF_0UFEF  4, { FE_24,F_28,U4_20,0,0,0 }         /* e.g. lxdtr */
 #define INSTR_RRF_FFRU   4, { F_24,F_16,R_28,U4_20,0,0 }       /* e.g. rrdtr */
 #define INSTR_RRF_FEFERU 4, { FE_24,FE_16,R_28,U4_20,0,0 }     /* e.g. rrxtr */
 #define INSTR_RRF_M0RR   4, { R_24,R_28,M_16OPT,0,0,0 }        /* e.g. sske  */

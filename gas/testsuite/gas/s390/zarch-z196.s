@@ -202,16 +202,16 @@ foo:
 
 	cefbra %f5,3,%r9,7
 	cdfbra %f5,3,%r9,7
-	cxfbra %f6,3,%r9,7
+	cxfbra %f5,3,%r9,7
 	cegbra %f5,3,%r9,7
 	cdgbra %f5,3,%r9,7
-	cxgbra %f6,3,%r9,7
+	cxgbra %f5,3,%r9,7
 	celfbr %f5,3,%r9,7
 	cdlfbr %f5,3,%r9,7
-	cxlfbr %f6,3,%r9,7
+	cxlfbr %f5,3,%r9,7
 	celgbr %f5,3,%r9,7
 	cdlgbr %f5,3,%r9,7
-	cxlgbr %f6,3,%r9,7
+	cxlgbr %f5,3,%r9,7
 	cfebra %r5,3,%f9,7
 	cfdbra %r5,3,%f9,7
 	cfxbra %r5,3,%f8,7
@@ -226,18 +226,18 @@ foo:
 	clgxbr %r5,3,%f8,7
 	fiebra %f5,3,%f9,7
 	fidbra %f5,3,%f9,7
-	fixbra %f6,3,%f8,7
+	fixbra %f5,3,%f8,7
 	ledbra %f5,3,%f9,7
-	ldxbra %f6,3,%f8,7
-	lexbra %f6,3,%f8,7
+	ldxbra %f5,3,%f8,7
+	lexbra %f5,3,%f8,7
 	adtra %f3,%f5,%f9,7
-	axtra %f2,%f4,%f6,7
+	axtra %f1,%f4,%f5,7
 	cdgtra %f5,3,%r9,7
 	cdftr %f5,3,%r9,7
-	cxftr %f6,3,%r9,7
-	cxgtra %f6,3,%r9,7
+	cxftr %f5,3,%r9,7
+	cxgtra %f5,3,%r9,7
 	cdlgtr %f5,3,%r9,7
-	cxlgtr %f6,3,%r9,7
+	cxlgtr %f5,3,%r9,7
 	cdlftr %f5,3,%r9,7
 	cxlftr %f5,3,%r9,7
 	cgdtra %r5,3,%f9,7
@@ -249,9 +249,9 @@ foo:
 	clfdtr %r5,3,%f9,7
 	clfxtr %r5,3,%f8,7
 	ddtra %f3,%f5,%f9,7
-	dxtra %f2,%f4,%f6,7
+	dxtra %f1,%f4,%f5,7
 	mdtra %f3,%f5,%f9,7
-	mxtra %f2,%f4,%f6,7
+	mxtra %f1,%f4,%f5,7
 	sdtra %f3,%f5,%f9,7
-	sxtra %f2,%f4,%f6,7
+	sxtra %f1,%f4,%f5,7
 	srnmb 4000(%r7)

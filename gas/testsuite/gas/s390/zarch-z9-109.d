@@ -54,7 +54,7 @@ Disassembly of section .text:
 .*:	b3 3b 60 95 [	 ]*myr	%f6,%f9,%f5
 .*:	b3 3d 60 95 [	 ]*myhr	%f6,%f9,%f5
 .*:	b3 39 60 95 [	 ]*mylr	%f6,%f9,%f5
-.*:	ed 95 af ff 60 3b [	 ]*my	%f6,%f9,4095\(%r5,%r10\)
+.*:	ed 95 af ff 50 3b [	 ]*my	%f5,%f9,4095\(%r5,%r10\)
 .*:	ed 95 af ff 60 3d [	 ]*myh	%f6,%f9,4095\(%r5,%r10\)
 .*:	ed 95 af ff 60 39 [	 ]*myl	%f6,%f9,4095\(%r5,%r10\)
 .*:	b3 3a 60 95 [	 ]*mayr	%f6,%f9,%f5

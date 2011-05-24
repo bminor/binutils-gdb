@@ -1,5 +1,11 @@
 2011-05-24  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
 
+	* s390-opc.c: Replace S390_OPERAND_REG_EVEN with
+	S390_OPERAND_REG_PAIR.  Fix INSTR_RRF_0UFEF instruction type.
+	* s390-opc.txt: Fix cxr instruction type.
+
+2011-05-24  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+
 	* s390-opc.c: Add new instruction types marking register pair
 	operands.
 	* s390-opc.txt: Match instructions having register pair operands

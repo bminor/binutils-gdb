@@ -19,8 +19,8 @@ foo:
 	aur	%f6,%f9
 	aw	%f6,4095(%r5,%r10)
 	awr	%f6,%f9
-	axbr	%f6,%f8
-	axr	%f6,%f8
+	axbr	%f4,%f8
+	axr	%f4,%f8
 	b	4095(%r5,%r10)
 	bakr	%r6,%r9
 	bal	%r6,4095(%r5,%r10)
@@ -103,7 +103,7 @@ foo:
 	cfxbr	%r5,5,%f8
 	cfdr	%r6,9,%f5
 	cfer	%r6,9,%f5
-	cfxr	%r5,9,%f6
+	cfxr	%r5,9,%f4
 	ch	%r6,4095(%r5,%r10)
 	chi	%r6,-32767
 	cksm	%r6,%r9
@@ -127,10 +127,10 @@ foo:
 	cuutf	%r6,%r8
 	cvb	%r6,4095(%r5,%r10)
 	cvd	%r6,4095(%r5,%r10)
-	cxbr	%f6,%f8
-	cxfbr	%f6,%r9
-	cxfr	%f6,%r9
-	cxr	%f6,%f9
+	cxbr	%f5,%f8
+	cxfbr	%f5,%r9
+	cxfr	%f5,%r9
+	cxr	%f5,%f9
 	d	%r6,4095(%r5,%r10)
 	dd	%f6,4095(%r5,%r10)
 	ddb	%f6,4095(%r5,%r10)
@@ -145,8 +145,8 @@ foo:
 	diebr	%f6,%r9,%r5,10
 	dp	4095(6,%r5),4095(9,%r10)
 	dr	%r6,%r9
-	dxbr	%f6,%f8
-	dxr	%f6,%f8
+	dxbr	%f5,%f8
+	dxr	%f5,%f8
 	ear	%r6,%a9
 	ed	4095(256,%r5),4095(%r10)
 	edmk	4095(256,%r5),4095(%r10)
@@ -160,8 +160,8 @@ foo:
 	fidr	%f6,%f9
 	fiebr	%f6,5,%f9
 	fier	%f6,%f9
-	fixbr	%f6,5,%f8
-	fixr	%f6,%f8
+	fixbr	%f5,5,%f8
+	fixr	%f5,%f8
 	hdr	%f6,%f9
 	her	%f6,%f9
 	hsch	
@@ -210,21 +210,21 @@ foo:
 	lcer	%f6,%f9
 	lcr	%r6,%r9
 	lctl	%c6,%c9,4095(%r5)
-	lcxbr	%f6,%f8
-	lcxr	%f6,%f8
+	lcxbr	%f5,%f8
+	lcxr	%f5,%f8
 	ld	%f6,4095(%r5,%r10)
 	lde	%f6,4095(%r5,%r10)
 	ldeb	%f6,4095(%r5,%r10)
 	ldebr	%f6,%f9
 	lder	%f6,%f9
 	ldr	%f6,%f9
-	ldxbr	%f6,%f8
+	ldxbr	%f5,%f8
 	ldxr	%f6,%f8
 	le	%f6,4095(%r5,%r10)
 	ledbr	%f6,%f9
 	ledr	%f6,%f9
 	ler	%f6,%f9
-	lexbr	%f6,%f8
+	lexbr	%f5,%f8
 	lexr	%f6,%f8
 	lfpc	4095(%r5)
 	lh	%r6,4095(%r5,%r10)
@@ -235,16 +235,16 @@ foo:
 	lnebr	%f6,%f9
 	lner	%f6,%f9
 	lnr	%r6,%r9
-	lnxbr	%f6,%f8
-	lnxr	%f6,%f8
+	lnxbr	%f5,%f8
+	lnxr	%f5,%f8
 	lpdbr	%f6,%f9
 	lpdr	%f6,%f9
 	lpebr	%f6,%f9
 	lper	%f6,%f9
 	lpr	%r6,%r9
 	lpsw	4095(%r5)
-	lpxbr	%f6,%f8
-	lpxr	%f6,%f8
+	lpxbr	%f5,%f8
+	lpxr	%f5,%f8
 	lr	%r6,%r9
 	lra	%r6,4095(%r5,%r10)
 	lrdr	%f7,%f8
@@ -254,21 +254,21 @@ foo:
 	ltebr	%f6,%f9
 	lter	%f6,%f9
 	ltr	%r6,%r9
-	ltxbr	%f6,%f8
-	ltxr	%f6,%f8
+	ltxbr	%f5,%f8
+	ltxr	%f5,%f8
 	lura	%r6,%r9
-	lxd	%f6,4095(%r5,%r10)
-	lxdb	%f6,4095(%r5,%r10)
-	lxdbr	%f6,%f9
-	lxdr	%f6,%f9
-	lxe	%f6,4095(%r5,%r10)
-	lxeb	%f6,4095(%r5,%r10)
-	lxebr	%f6,%f9
-	lxer	%f6,%f9
-	lxr	%f6,%f8
+	lxd	%f5,4095(%r5,%r10)
+	lxdb	%f5,4095(%r5,%r10)
+	lxdbr	%f5,%f9
+	lxdr	%f5,%f9
+	lxe	%f5,4095(%r5,%r10)
+	lxeb	%f5,4095(%r5,%r10)
+	lxebr	%f5,%f9
+	lxer	%f5,%f9
+	lxr	%f5,%f8
 	lzdr	%f6
 	lzer	%f6
-	lzxr	%f6
+	lzxr	%f5
 	m	%r6,4095(%r5,%r10)
 	madb	%f6,%f9,4095(%r5,%r10)
 	madbr	%f6,%f9,%f5
@@ -317,12 +317,12 @@ foo:
 	mvpg	%r6,%r9
 	mvst	%r6,%r9
 	mvz	4095(256,%r5),4095(%r10)
-	mxbr	%f6,%f8
-	mxd	%f6,4095(%r5,%r10)
-	mxdb	%f6,4095(%r5,%r10)
-	mxdbr	%f6,%f9
-	mxdr	%f6,%f9
-	mxr	%f6,%f8
+	mxbr	%f5,%f8
+	mxd	%f5,4095(%r5,%r10)
+	mxdb	%f5,4095(%r5,%r10)
+	mxdbr	%f5,%f9
+	mxdr	%f5,%f9
+	mxr	%f5,%f8
 	n	%r6,4095(%r5,%r10)
 	nc	4095(256,%r5),4095(%r10)
 	ni	4095(%r5),255
@@ -389,8 +389,8 @@ foo:
 	sqeb	%f6,4095(%r5,%r10)
 	sqebr	%f6,%f9
 	sqer	%f6,%f9
-	sqxbr	%f6,%f8
-	sqxr	%f6,%f8
+	sqxbr	%f5,%f8
+	sqxr	%f5,%f8
 	sr	%r6,%r9
 	sra	%r6,4095(%r5)
 	srda	%r6,4095(%r5)
@@ -432,15 +432,15 @@ foo:
 	svc	255
 	sw	%f6,4095(%r5,%r10)
 	swr	%f6,%f9
-	sxbr	%f6,%f8
-	sxr	%f6,%f8
+	sxbr	%f5,%f8
+	sxr	%f5,%f8
 	tar	%a6,%r9
 	tb	%r6
 	tbdr	%r6,5,%r9
 	tbedr	%r6,5,%r9
 	tcdb	%f6,4095(%r5,%r10)
 	tceb	%f6,4095(%r5,%r10)
-	tcxb	%f6,4095(%r5,%r10)
+	tcxb	%f5,4095(%r5,%r10)
 	thder	%f6,%f9
 	thdr	%f6,%f9
 	tm	4095(%r5),255

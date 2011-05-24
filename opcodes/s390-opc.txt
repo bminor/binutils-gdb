@@ -551,7 +551,7 @@ e30000000090 llgc RXE_RRRD "load logical character" z900 zarch
 e30000000091 llgh RXE_RRRD "load logical halfword" z900 zarch
 eb000000001c rllg RSE_RRRD "rotate left single logical 64" z900 zarch
 eb000000001d rll RSE_RRRD "rotate left single logical 32" z900 esa,zarch
-b369 cxr RRE_FF "compare extended hfp" g5 esa,zarch
+b369 cxr RRE_FEFE "compare extended hfp" g5 esa,zarch
 b3b6 cxfr RRE_FER "convert from fixed 32 to extended hfp" g5 esa,zarch
 b3b5 cdfr RRE_FR "convert from fixed 32 to long hfp" g5 esa,zarch
 b3b4 cefr RRE_FR "convert from fixed 32 to short hfp" g5 esa,zarch

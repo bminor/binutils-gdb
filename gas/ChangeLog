@@ -1,5 +1,10 @@
 2011-05-24  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
 
+	* config/tc-s390.c (md_gather_operands): Fix check for floating
+	register pair operands.
+
+2011-05-24  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+
 	* config/tc-s390.c (md_gather_operands): Emit an error for odd
 	numbered registers used as register pair operand.
 

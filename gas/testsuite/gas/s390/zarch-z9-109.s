@@ -48,7 +48,7 @@ foo:
 	myr	%f6,%f9,%f5
 	myhr	%f6,%f9,%f5
 	mylr	%f6,%f9,%f5
-	my	%f6,%f9,4095(%r5,%r10)
+	my	%f5,%f9,4095(%r5,%r10)
 	myh	%f6,%f9,4095(%r5,%r10)
 	myl	%f6,%f9,4095(%r5,%r10)
 	mayr	%f6,%f9,%f5
