@@ -36,11 +36,7 @@ set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
 
 # some targets have leading underscores on assembly symbols.
-# TODO: detect this automatically
-set additional_flags ""
-if { [istarget "*-*-cygwin*"] || [istarget "*-*-mingw*"] } then {
-  set additional_flags "additional_flags=-DSYMBOL_PREFIX=\"_\""
-}
+set additional_flags [gdb_target_symbol_prefix_flags]
 
 if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable [list debug $additional_flags]] != "" } {
     untested i386-unwind.exp

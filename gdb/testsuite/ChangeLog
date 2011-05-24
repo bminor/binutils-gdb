@@ -1,3 +1,20 @@
+2011-05-24  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	Centralize -DSYMBOL_PREFIX=\"_\" additional flags in gdb.exp.
+	* lib/gdb.exp (gdb_target_symbol_prefix_flags): New procedure.
+	* gdb.arch/i386-bp_permanent.exp: Use gdb_target_symbol_prefix_flags.
+	* gdb.arch/i386-gnu-cfi.exp: Likewise.
+	* gdb.arch/i386-permbkpt.exp: Likewise.
+	* gdb.arch/i386-prologue.exp: Likewise.
+	* gdb.arch/i386-size-overlap.exp: Likewise.
+	* gdb.arch/i386-size.exp: Likewise.
+	* gdb.arch/i386-unwind.exp: Likewise.
+	* gdb.reverse/i386-precsave.exp: Likewise.
+	* gdb.reverse/i386-reverse.exp: Likewise.
+	* gdb.reverse/i386-sse-reverse.exp: Likewise.
+	* gdb.reverse/i387-env-reverse.exp: Likewise.
+	* gdb.reverse/i387-stack-reverse.exp: Likewise.
+
 2011-05-24  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.trace/tfile.exp: Add test that opening the basic.tf trace
