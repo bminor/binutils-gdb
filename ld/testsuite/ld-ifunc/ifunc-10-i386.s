@@ -6,6 +6,8 @@ foo:
         movl ifunc@GOTOFF(%ecx), %eax
 	call ifunc@PLT
 	call ifunc
+        movl xxx@GOT(%ecx), %eax
+        movl xxx, %eax
         ret
 
         .section .text.bar,"ax",@progbits
@@ -18,3 +20,7 @@ bar:
         .type ifunc, @gnu_indirect_function
 ifunc:
         ret
+
+        .section .data.foo,"aw",@progbits
+xxx:
+	.long ifunc 

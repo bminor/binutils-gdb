@@ -6,6 +6,7 @@ foo:
         movl ifunc(%rip), %eax
 	call ifunc@PLT
 	call ifunc
+        movl xxx(%rip), %eax
         ret
 
         .section .text.bar,"ax",@progbits
@@ -18,3 +19,7 @@ bar:
         .type ifunc, @gnu_indirect_function
 ifunc:
         ret
+
+        .section .data.foo,"aw",@progbits
+xxx:
+	.quad ifunc 
