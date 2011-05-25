@@ -113,6 +113,11 @@ Library_base::should_include_member(Symbol_table* symtab, Layout* layout,
 	  *why = buf;
 	  delete[] buf;
 	}
+      else if (strcmp(sym_name, parameters->entry()) == 0)
+	{
+	  *why = "entry symbol ";
+	  *why += sym_name;
+	}
       else
 	return Library_base::SHOULD_INCLUDE_UNKNOWN;
     }

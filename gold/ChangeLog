@@ -1,3 +1,16 @@
+2011-05-24  Ian Lance Taylor  <iant@google.com>
+
+	* archive.cc (Library_base::should_include_member): Pull in object
+	from archive if it defines the entry symbol.
+	* parameters.cc (Parameters::entry): New function.
+	* parameters.h (class Parameters): Declare entry.
+	* output.h (class Output_file_header): Remove entry_ field.
+	* output.cc (Output_file_header::Output_file_header): Remove entry
+	parameter.  Change all callers.
+	(Output_file_header::entry): Use parameters->entry.
+	* gold.cc (queue_middle_tasks): Likewise.
+	* plugin.cc (Plugin_hook::run): Likewise.
+
 2011-05-24 Cary Coutant  <ccoutant@google.com>
 
 	* gold.cc (queue_initial_tasks): Pass incremental base filename

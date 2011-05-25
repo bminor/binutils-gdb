@@ -1218,11 +1218,7 @@ void
 Plugin_hook::run(Workqueue* workqueue)
 {
   gold_assert(this->options_.has_plugins());
-  Symbol* start_sym;
-  if (parameters->options().entry())
-    start_sym = this->symtab_->lookup(parameters->options().entry());
-  else
-    start_sym = this->symtab_->lookup("_start");
+  Symbol* start_sym = this->symtab_->lookup(parameters->entry());
   if (start_sym != NULL)
     start_sym->set_in_real_elf();
 

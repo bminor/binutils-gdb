@@ -134,6 +134,10 @@ class Parameters
     return debug_;
   }
 
+  // Return the name of the entry symbol.
+  const char*
+  entry() const;
+
   // A convenience routine for combining size and endianness.  It also
   // checks the HAVE_TARGET_FOO configure options and dies if the
   // current target's size/endianness is not supported according to

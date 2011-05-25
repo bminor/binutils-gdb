@@ -211,6 +211,20 @@ Parameters::check_target_endianness()
     }
 }
 
+// Return the name of the entry symbol.
+
+const char*
+Parameters::entry() const
+{
+  const char* ret = this->options().entry();
+  if (ret == NULL)
+    {
+      // FIXME: Need to support target specific entry symbol.
+      ret = "_start";
+    }
+  return ret;
+}
+
 // Set the incremental linking mode to INCREMENTAL_FULL.  Used when
 // the linker determines that an incremental update is not possible.
 // Returns false if the incremental mode was INCREMENTAL_UPDATE,

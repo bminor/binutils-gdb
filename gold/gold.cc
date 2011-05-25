@@ -501,11 +501,7 @@ queue_middle_tasks(const General_options& options,
   if (parameters->options().gc_sections())
     {
       // Find the start symbol if any.
-      Symbol* start_sym;
-      if (parameters->options().entry())
-        start_sym = symtab->lookup(parameters->options().entry());
-      else
-        start_sym = symtab->lookup("_start");
+      Symbol* start_sym = symtab->lookup(parameters->entry());
       if (start_sym != NULL)
         {
           bool is_ordinary;

@@ -425,14 +425,12 @@ Output_segment_headers::do_size() const
 
 Output_file_header::Output_file_header(const Target* target,
 				       const Symbol_table* symtab,
-				       const Output_segment_headers* osh,
-				       const char* entry)
+				       const Output_segment_headers* osh)
   : target_(target),
     symtab_(symtab),
     segment_header_(osh),
     section_header_(NULL),
-    shstrtab_(NULL),
-    entry_(entry)
+    shstrtab_(NULL)
 {
   this->set_data_size(this->do_size());
 }
@@ -572,22 +570,16 @@ Output_file_header::do_sized_write(Output_file* of)
   of->write_output_view(0, ehdr_size, view);
 }
 
-// Return the value to use for the entry address.  THIS->ENTRY_ is the
-// symbol specified on the command line, if any.
+// Return the value to use for the entry address.
 
 template<int size>
 typename elfcpp::Elf_types<size>::Elf_Addr
 Output_file_header::entry()
 {
-  const bool should_issue_warning = (this->entry_ != NULL
+  const bool should_issue_warning = (parameters->options().entry() != NULL
 				     && !parameters->options().relocatable()
                                      && !parameters->options().shared());
-
-  // FIXME: Need to support target specific entry symbol.
-  const char* entry = this->entry_;
-  if (entry == NULL)
-    entry = "_start";
-
+  const char* entry = parameters->entry();
   Symbol* sym = this->symtab_->lookup(entry);
 
   typename Sized_symbol<size>::Value_type v;
