@@ -1,3 +1,10 @@
+2011-05-24  David Meyer  <pdox@google.com>
+
+	* dirsearch.cc (Dirsearch::find): Replace n1 and n2 parameters
+	with name parameter.  Add found_name parameter.
+	* fileread.cc (Input_file::find_file): Adjust code accordingly.
+	* dirsearch.h (class Dirsearch): Update declaration.
+
 2011-05-24  Ian Lance Taylor  <iant@google.com>
 
 	* archive.cc (Library_base::should_include_member): Pull in object

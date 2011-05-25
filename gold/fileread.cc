@@ -986,45 +986,40 @@ Input_file::find_file(const Dirsearch& dirpath, int* pindex,
   else if (input_argument->is_lib()
 	   || input_argument->is_searched_file())
     {
-      std::string n1, n2;
+      std::vector<std::string> names;
+      names.reserve(2);
       if (input_argument->is_lib())
 	{
-	  n1 = "lib";
-	  n1 += input_argument->name();
+	  std::string prefix = "lib";
+	  prefix += input_argument->name();
 	  if (parameters->options().is_static()
 	      || !input_argument->options().Bdynamic())
-	    n1 += ".a";
+	    names.push_back(prefix + ".a");
 	  else
 	    {
-	      n2 = n1 + ".a";
-	      n1 += ".so";
+	      names.push_back(prefix + ".so");
+	      names.push_back(prefix + ".a");
 	    }
 	}
       else
-	n1 = input_argument->name();
+	names.push_back(input_argument->name());
 
-      if (Input_file::try_extra_search_path(pindex, input_argument, n1,
-					    found_name, namep))
-        return true;
-
-      if (!n2.empty() && Input_file::try_extra_search_path(pindex,
-							   input_argument, n2,
-							   found_name, namep))
-        return true;
+      for (std::vector<std::string>::const_iterator n = names.begin();
+	   n != names.end();
+	   ++n)
+	if (Input_file::try_extra_search_path(pindex, input_argument, *n,
+					      found_name, namep))
+	  return true;
 
       // It is not in the extra_search_path.
-      name = dirpath.find(n1, n2, is_in_sysroot, pindex);
+      name = dirpath.find(names, is_in_sysroot, pindex, found_name);
       if (name.empty())
 	{
 	  gold_error(_("cannot find %s%s"),
-	             input_argument->is_lib() ? "-l" : "",
+		     input_argument->is_lib() ? "-l" : "",
 		     input_argument->name());
 	  return false;
 	}
-      if (n2.empty() || name[name.length() - 1] == 'o')
-	*found_name = n1;
-      else
-	*found_name = n2;
       *namep = name;
       return true;
     }
@@ -1034,22 +1029,21 @@ Input_file::find_file(const Dirsearch& dirpath, int* pindex,
       gold_assert(input_argument->extra_search_path() != NULL);
 
       if (try_extra_search_path(pindex, input_argument, input_argument->name(),
-                                found_name, namep))
-        return true;
+				found_name, namep))
+	return true;
 
       // extra_search_path failed, so check the normal search-path.
       int index = *pindex;
       if (index > 0)
-        --index;
-      name = dirpath.find(input_argument->name(), "",
-                          is_in_sysroot, &index);
+	--index;
+      name = dirpath.find(std::vector<std::string>(1, input_argument->name()),
+			  is_in_sysroot, &index, found_name);
       if (name.empty())
-        {
-          gold_error(_("cannot find %s"),
-                     input_argument->name());
-          return false;
-        }
-      *found_name = input_argument->name();
+	{
+	  gold_error(_("cannot find %s"),
+		     input_argument->name());
+	  return false;
+	}
       *namep = name;
       *pindex = index + 1;
       return true;
