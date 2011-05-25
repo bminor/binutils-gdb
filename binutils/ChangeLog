@@ -1,3 +1,10 @@
+2011-05-25  Jakub Jelinek  <jakub@redhat.com>
+
+	* dwarf.c (loc_offsets): New variable.
+	(loc_offsets_compar): New routine.
+	(display_debug_loc): Handle loc_offsets not being in ascending order
+	and also a single .debug_loc entry being used multiple times.
+
 2011-05-18  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/12753

@@ -3488,6 +3488,19 @@ display_debug_abbrev (struct dwarf_section *section,
   return 1;
 }
 
+/* Sort array of indexes in ascending order of loc_offsets[idx].  */
+
+static dwarf_vma *loc_offsets;
+
+static int
+loc_offsets_compar (const void *ap, const void *bp)
+{
+  dwarf_vma a = loc_offsets[*(const unsigned int *) ap];
+  dwarf_vma b = loc_offsets[*(const unsigned int *) bp];
+
+  return (a > b) - (b > a);
+}
+
 static int
 display_debug_loc (struct dwarf_section *section, void *file)
 {
@@ -3500,9 +3513,11 @@ display_debug_loc (struct dwarf_section *section, void *file)
   unsigned int first = 0;
   unsigned int i;
   unsigned int j;
+  unsigned int k;
   int seen_first_offset = 0;
-  int use_debug_info = 1;
+  int locs_sorted = 1;
   unsigned char *next;
+  unsigned int *array = NULL;
 
   bytes = section->size;
   section_end = start + bytes;
@@ -3528,10 +3543,11 @@ display_debug_loc (struct dwarf_section *section, void *file)
       unsigned int num;
 
       num = debug_information [i].num_loc_offsets;
-      num_loc_list += num;
+      if (num > num_loc_list)
+	num_loc_list = num;
 
       /* Check if we can use `debug_information' directly.  */
-      if (use_debug_info && num != 0)
+      if (locs_sorted && num != 0)
 	{
 	  if (!seen_first_offset)
 	    {
@@ -3549,17 +3565,13 @@ display_debug_loc (struct dwarf_section *section, void *file)
 	      if (last_offset >
 		  debug_information [i].loc_offsets [j])
 		{
-		  use_debug_info = 0;
+		  locs_sorted = 0;
 		  break;
 		}
 	      last_offset = debug_information [i].loc_offsets [j];
 	    }
 	}
     }
-
-  if (!use_debug_info)
-    /* FIXME: Should we handle this case?  */
-    error (_("Location lists in .debug_info section aren't in ascending order!\n"));
 
   if (!seen_first_offset)
     error (_("No location lists in .debug_info section!\n"));
@@ -3571,6 +3583,8 @@ display_debug_loc (struct dwarf_section *section, void *file)
 	  section->name,
 	  dwarf_vmatoa ("x", debug_information [first].loc_offsets [0]));
 
+  if (!locs_sorted)
+    array = (unsigned int *) xcmalloc (num_loc_list, sizeof (unsigned int));
   printf (_("Contents of the %s section:\n\n"), section->name);
   printf (_("    Offset   Begin    End      Expression\n"));
 
@@ -3593,9 +3607,23 @@ display_debug_loc (struct dwarf_section *section, void *file)
       cu_offset = debug_information [i].cu_offset;
       offset_size = debug_information [i].offset_size;
       dwarf_version = debug_information [i].dwarf_version;
-
-      for (j = 0; j < debug_information [i].num_loc_offsets; j++)
+      if (!locs_sorted)
 	{
+	  for (k = 0; k < debug_information [i].num_loc_offsets; k++)
+	    array[k] = k;
+	  loc_offsets = debug_information [i].loc_offsets;
+	  qsort (array, debug_information [i].num_loc_offsets,
+		 sizeof (*array), loc_offsets_compar);
+	}
+
+      for (k = 0; k < debug_information [i].num_loc_offsets; k++)
+	{
+	  j = locs_sorted ? k : array[k];
+	  if (k
+	      && debug_information [i].loc_offsets [locs_sorted
+						    ? k - 1 : array [k - 1]]
+		 == debug_information [i].loc_offsets [j])
+	    continue;
 	  has_frame_base = debug_information [i].have_frame_base [j];
 	  /* DWARF sections under Mach-O have non-zero addresses.  */
 	  offset = debug_information [i].loc_offsets [j] - section->address;
@@ -3709,6 +3737,7 @@ display_debug_loc (struct dwarf_section *section, void *file)
     warn (_("There are %ld unused bytes at the end of section %s\n"),
 	  (long) (section_end - start), section->name);
   putchar ('\n');
+  free (array);
   return 1;
 }
 
