@@ -1,3 +1,8 @@
+2011-05-25  Andreas Schwab  <schwab@redhat.com>
+
+	PR gdb/8677
+	* event-loop.c (handle_file_event): Don't handle POLLHUP as error.
+
 2011-05-24  Keith Seitz  <keiths@redhat.com>
 
 	PR breakpoint/12803

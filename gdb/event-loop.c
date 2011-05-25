@@ -759,7 +759,6 @@ handle_file_event (event_data data)
   int mask;
 #ifdef HAVE_POLL
   int error_mask;
-  int error_mask_returned;
 #endif
   int event_file_desc = data.integer;
 
@@ -783,22 +782,19 @@ handle_file_event (event_data data)
 	  if (use_poll)
 	    {
 #ifdef HAVE_POLL
+	      /* POLLHUP means EOF, but can be combined with POLLIN to
+		 signal more data to read.  */
 	      error_mask = POLLHUP | POLLERR | POLLNVAL;
-	      mask = (file_ptr->ready_mask & file_ptr->mask) |
-		(file_ptr->ready_mask & error_mask);
-	      error_mask_returned = mask & error_mask;
+	      mask = file_ptr->ready_mask & (file_ptr->mask | error_mask);
 
-	      if (error_mask_returned != 0)
+	      if ((mask & (POLLERR | POLLNVAL)) != 0)
 		{
 		  /* Work in progress.  We may need to tell somebody
 		     what kind of error we had.  */
-		  if (error_mask_returned & POLLHUP)
-		    printf_unfiltered (_("Hangup detected on fd %d\n"),
-				       file_ptr->fd);
-		  if (error_mask_returned & POLLERR)
+		  if (mask & POLLERR)
 		    printf_unfiltered (_("Error detected on fd %d\n"),
 				       file_ptr->fd);
-		  if (error_mask_returned & POLLNVAL)
+		  if (mask & POLLNVAL)
 		    printf_unfiltered (_("Invalid or non-`poll'able fd %d\n"),
 				       file_ptr->fd);
 		  file_ptr->error = 1;
