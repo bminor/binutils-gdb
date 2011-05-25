@@ -1,3 +1,12 @@
+2011-05-25  Mike Frysinger  <vapier@gentoo.org>
+
+	* machs.c (bf526_roms): Add a region with rev of 2.
+	(bf54x_roms): Add regions with rev of 4.
+	* bfroms/all.h: Include new bf526-0.2.h, bf54x-0.4.h, and
+	bf54x_l1-0.4.h headers.
+	* bfroms/bf526-0.2.h, bfroms/bf54x-0.4.h, bfroms/bf54x_l1-0.4.h:
+	New header files.
+
 2011-05-14  Mike Frysinger  <vapier@gentoo.org>
 
 	* bfin-sim.c (decode_PushPopReg_0): Delete (grp == 1 && reg == 6)
