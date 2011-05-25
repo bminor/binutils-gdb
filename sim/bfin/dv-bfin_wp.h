@@ -21,7 +21,4 @@
 #ifndef DV_BFIN_WP_H
 #define DV_BFIN_WP_H
 
-#define BFIN_COREMMR_WP_BASE	0xFFE07000
-#define BFIN_COREMMR_WP_SIZE	0x204
-
 #endif

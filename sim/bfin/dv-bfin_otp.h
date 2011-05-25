@@ -21,12 +21,6 @@
 #ifndef DV_BFIN_OTP_H
 #define DV_BFIN_OTP_H
 
-/* XXX: This should be pushed into the model data.  */
-/* XXX: Not exactly true; it's two sets of 4 regs near each other:
-          0xFFC03600 0x10 - Control
-          0xFFC03680 0x10 - Data  */
-#define BFIN_MMR_OTP_SIZE	0xa0
-
 /* OTP Defined Pages.  */
 #define FPS00		0x004
 #define FPS01		0x005

@@ -21,9 +21,6 @@
 #ifndef DV_BFIN_EMAC_H
 #define DV_BFIN_EMAC_H
 
-#define BFIN_MMR_EMAC_BASE	0xFFC03000
-#define BFIN_MMR_EMAC_SIZE	0x200
-
 /* EMAC_OPMODE Masks */
 #define RE		(1 << 0)
 #define ASTP		(1 << 1)

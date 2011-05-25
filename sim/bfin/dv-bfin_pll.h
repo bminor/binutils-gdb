@@ -21,7 +21,4 @@
 #ifndef DV_BFIN_PLL_H
 #define DV_BFIN_PLL_H
 
-#define BFIN_MMR_PLL_BASE	0xFFC00000
-#define BFIN_MMR_PLL_SIZE	(4 * 6)
-
 #endif

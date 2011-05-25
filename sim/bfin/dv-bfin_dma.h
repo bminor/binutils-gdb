@@ -21,8 +21,6 @@
 #ifndef DV_BFIN_DMA_H
 #define DV_BFIN_DMA_H
 
-#define BFIN_MMR_DMA_SIZE	(4 * 16)
-
 /* DMA_CONFIG Masks */
 #define DMAEN		0x0001	/* DMA Channel Enable */
 #define WNR		0x0002	/* Channel Direction (W/R*) */

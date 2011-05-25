@@ -21,7 +21,4 @@
 #ifndef DV_BFIN_JTAG_H
 #define DV_BFIN_JTAG_H
 
-#define BFIN_COREMMR_JTAG_BASE	0xFFE05000
-#define BFIN_COREMMR_JTAG_SIZE	(4 * 3)
-
 #endif

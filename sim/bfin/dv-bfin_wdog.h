@@ -21,8 +21,6 @@
 #ifndef DV_BFIN_WDOG_H
 #define DV_BFIN_WDOG_H
 
-#define BFIN_MMR_WDOG_SIZE	(4 * 3)
-
 /* WDOG_CTL */
 #define WDEV            0x0006  /* event generated on roll over */
 #define WDEV_RESET      0x0000  /* generate reset event on roll over */

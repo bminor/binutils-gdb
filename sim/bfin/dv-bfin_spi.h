@@ -21,9 +21,6 @@
 #ifndef DV_BFIN_SPI_H
 #define DV_BFIN_SPI_H
 
-/* XXX: This should be pushed into the model data.  */
-#define BFIN_MMR_SPI_SIZE	(4 * 7)
-
 /* SPI_CTL Masks.  */
 #define TIMOD		(3 << 0)
 #define RDBR_CORE	(0 << 0)

@@ -21,9 +21,6 @@
 #ifndef DV_BFIN_TWI_H
 #define DV_BFIN_TWI_H
 
-/* XXX: This should be pushed into the model data.  */
-#define BFIN_MMR_TWI_SIZE	0x90
-
 /* TWI_MASTER_STAT Masks */
 #define MPROG		(1 << 0)
 #define LOSTARB		(1 << 1)

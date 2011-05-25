@@ -21,9 +21,6 @@
 #ifndef DV_BFIN_TRACE_H
 #define DV_BFIN_TRACE_H
 
-#define BFIN_COREMMR_TRACE_BASE	0xFFE06000
-#define BFIN_COREMMR_TRACE_SIZE	(4 * 65)
-
 /* TBUFCTL Masks */
 #define TBUFPWR			0x0001
 #define TBUFEN			0x0002

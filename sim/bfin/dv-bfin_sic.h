@@ -21,7 +21,4 @@
 #ifndef DV_BFIN_SIC_H
 #define DV_BFIN_SIC_H
 
-#define BFIN_MMR_SIC_BASE	0xFFC00100
-#define BFIN_MMR_SIC_SIZE	0x100
-
 #endif

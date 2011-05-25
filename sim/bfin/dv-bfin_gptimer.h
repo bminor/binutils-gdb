@@ -21,7 +21,4 @@
 #ifndef DV_BFIN_GPTIMER_H
 #define DV_BFIN_GPTIMER_H
 
-/* XXX: This should be pushed into the model data.  */
-#define BFIN_MMR_GPTIMER_SIZE	(4 * 4)
-
 #endif

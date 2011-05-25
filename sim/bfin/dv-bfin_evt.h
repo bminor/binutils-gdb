@@ -21,9 +21,6 @@
 #ifndef DV_BFIN_EVT_H
 #define DV_BFIN_EVT_H
 
-#define BFIN_COREMMR_EVT_BASE	0xFFE02000
-#define BFIN_COREMMR_EVT_SIZE	(4 * 16)
-
 extern void cec_set_evt (SIM_CPU *, int ivg, bu32 handler_addr);
 extern bu32 cec_get_evt (SIM_CPU *, int ivg);
 extern bu32 cec_get_reset_evt (SIM_CPU *);

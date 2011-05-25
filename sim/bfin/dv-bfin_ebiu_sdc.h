@@ -21,8 +21,6 @@
 #ifndef DV_BFIN_EBIU_SDC_H
 #define DV_BFIN_EBIU_SDC_H
 
-#define BFIN_MMR_EBIU_SDC_SIZE	(4 * 4)
-
 /* EBIU_SDBCTL Masks */
 #define EBE		0x0001	/* Enable SDRAM External Bank */
 #define EBSZ_16		0x0000	/* Size = 16MB */

@@ -22,9 +22,6 @@
 #ifndef DV_BFIN_UART_H
 #define DV_BFIN_UART_H
 
-/* XXX: This should be pushed into the model data.  */
-#define BFIN_MMR_UART_SIZE	0x30
-
 struct bfin_uart;
 bu16 bfin_uart_get_next_byte (struct hw *, bu16, bu16, bool *fresh);
 bu16 bfin_uart_write_byte (struct hw *, bu16, bu16);

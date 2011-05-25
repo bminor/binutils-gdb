@@ -24,7 +24,4 @@
 
 #include "dv-bfin_ppi.h"
 
-/* XXX: This should be pushed into the model data.  */
-#define BFIN_MMR_EPPI_SIZE	0x40
-
 #endif

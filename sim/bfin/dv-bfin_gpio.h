@@ -21,7 +21,4 @@
 #ifndef DV_BFIN_GPIO_H
 #define DV_BFIN_GPIO_H
 
-/* XXX: This should be pushed into the model data.  */
-#define BFIN_MMR_GPIO_SIZE	(17 * 4)
-
 #endif

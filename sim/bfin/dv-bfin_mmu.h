@@ -21,9 +21,6 @@
 #ifndef DV_BFIN_MMU_H
 #define DV_BFIN_MMU_H
 
-#define BFIN_COREMMR_MMU_BASE	0xFFE00000
-#define BFIN_COREMMR_MMU_SIZE	0x2000
-
 void mmu_check_addr (SIM_CPU *, bu32 addr, bool write, bool inst, int size);
 void mmu_check_cache_addr (SIM_CPU *, bu32 addr, bool write, bool inst);
 void mmu_process_fault (SIM_CPU *, bu32 addr, bool write, bool inst, bool unaligned, bool miss);

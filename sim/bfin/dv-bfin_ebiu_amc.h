@@ -22,10 +22,6 @@
 #ifndef DV_BFIN_EBIU_AMC_H
 #define DV_BFIN_EBIU_AMC_H
 
-#define BFIN_MMR_EBIU_AMC_SIZE	(4 * 3)
-#define BF50X_MMR_EBIU_AMC_SIZE	0x28
-#define BF54X_MMR_EBIU_AMC_SIZE	(4 * 7)
-
 #define BFIN_EBIU_AMC_BASE	0x20000000
 
 #endif
