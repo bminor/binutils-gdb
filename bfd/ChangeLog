@@ -1,3 +1,40 @@
+2011-05-25  Tristan Gingold  <gingold@adacore.com>
+
+	* configure.in (bfd_elf32_ia64_big_vec, bfd_elf32_ia64_hpux_big_vec)
+	(bfd_elf64_ia64_big_vec, bfd_elf64_ia64_hpux_big_vec)
+	(bfd_elf64_ia64_little_vec, bfd_elf64_ia64_vms_vec): Add elfxx-ia64.lo
+	* Makefile.am (BFD64_BACKENDS): Add elfxx-ia64.lo
+	(BFD64_BACKENDS_CFILES): Add elfxx-ia64.c
+	(elf32-ia64.c): Created from elfnn-ia64.c
+	(elf64-ia64.c): Likewise.
+	* elfxx-ia64.h: New file.
+	* elfxx-ia64.c: Split with elfnn-ia64.c.  Keep only the following
+	functions.Includes elfxx-ia64.h.
+	(elfNN_ia64_reloc): Renames to ia64_elf_reloc.  Adjust error message.
+	(IA64_HOWTO): Adjust.
+	(lookup_howto): Renames to ia64_elf_lookup_howto.  Make it public.
+	(elfNN_ia64_reloc_type_lookup): Renames to
+	ia64_elf_reloc_type_lookup. Make it public. Adjust calls.
+	(elfNN_ia64_reloc_name_lookup): Renames to
+	ia64_elf_reloc_name_lookup. Make it public.
+	(elfNN_ia64_relax_br): Renames to ia64_elf_relax_br.  Make it public.
+	(elfNN_ia64_relax_brl): Renames to ia64_elf_relax_brl. Make it
+	public.
+	(elfNN_ia64_relax_ldxmov): Renames to ia64_elf_relax_ldxmov.
+	Move it and make it public.  Move prototype to elfxx-ia64.h
+	(elfNN_ia64_install_value): Renames to ia64_elf_install_value.
+	Move prototype to elfxx-ia64.h
+	* elfnn-ia64.c: New file, split from elfxx-ia64.c.
+	(elfNN_ia64_info_to_howto): Adjust calls.
+	(elfNN_ia64_relax_section): Adjust calls.
+	(count_dyn_reloc): Fix typo.
+	(elfNN_ia64_relocate_section): Adjust calls.
+	(elfNN_ia64_finish_dynamic_symbol): Likewise.
+	(bfd_elfNN_bfd_reloc_type_lookup)
+	(bfd_elfNN_bfd_reloc_name_lookup): Adjust macros.
+	* configure: Regenerate.
+	* Makefile.in: Regenerate.
+
 2011-05-23  DJ Delorie  <dj@redhat.com>
 
 	* elf32-rx.c (rx_elf_object_p): When reading an RX object in, undo
