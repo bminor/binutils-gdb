@@ -1,5 +1,14 @@
 2011-05-25  Mike Frysinger  <vapier@gentoo.org>
 
+	* Makefile.in (dv-bfin_pfmon.o): New target.
+	* configure.ac (SIM_AC_OPTION_HARDWARE): Add bfin_pfmon.
+	* configure: Regenerated.
+	* dv-bfin_pfmon.c, dv-bfin_pfmon.h: New files.
+	* machs.c: Add include new bfin_pfmon.h.
+	(bfin_core_dev): Add pfmon.
+
+2011-05-25  Mike Frysinger  <vapier@gentoo.org>
+
 	* machs.c (bf526_roms): Add a region with rev of 2.
 	(bf54x_roms): Add regions with rev of 4.
 	* bfroms/all.h: Include new bf526-0.2.h, bf54x-0.4.h, and

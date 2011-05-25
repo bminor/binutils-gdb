@@ -42,6 +42,7 @@
 #include "dv-bfin_mmu.h"
 #include "dv-bfin_nfc.h"
 #include "dv-bfin_otp.h"
+#include "dv-bfin_pfmon.h"
 #include "dv-bfin_pll.h"
 #include "dv-bfin_ppi.h"
 #include "dv-bfin_rtc.h"
@@ -746,6 +747,7 @@ static const struct bfin_dev_layout bfin_core_dev[] =
   CORE_DEVICE (evt, EVT),
   CORE_DEVICE (jtag, JTAG),
   CORE_DEVICE (mmu, MMU),
+  CORE_DEVICE (pfmon, PFMON),
   CORE_DEVICE (trace, TRACE),
   CORE_DEVICE (wp, WP),
 };
