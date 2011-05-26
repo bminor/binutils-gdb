@@ -1,3 +1,7 @@
+2011-05-26  Mike Frysinger  <vapier@gentoo.org>
+
+	* nltvals.def: Regenerate to include Blackfin syscalls again.
+
 2011-05-25  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-trace.c (OPTION_TRACE_SYSCALL): New enum.
