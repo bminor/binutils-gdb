@@ -111,8 +111,7 @@ alpha_register_name (struct gdbarch *gdbarch, int regno)
 static int
 alpha_cannot_fetch_register (struct gdbarch *gdbarch, int regno)
 {
-  return (regno == ALPHA_ZERO_REGNUM
-          || strlen (alpha_register_name (gdbarch, regno)) == 0);
+  return (strlen (alpha_register_name (gdbarch, regno)) == 0);
 }
 
 static int
@@ -1424,7 +1423,11 @@ alpha_supply_int_regs (struct regcache *regcache, int regno,
       regcache_raw_supply (regcache, i, regs + i * 8);
 
   if (regno == ALPHA_ZERO_REGNUM || regno == -1)
-    regcache_raw_supply (regcache, ALPHA_ZERO_REGNUM, NULL);
+    {
+      const gdb_byte zero[8] = { 0 };
+
+      regcache_raw_supply (regcache, ALPHA_ZERO_REGNUM, zero);
+    }
 
   if (regno == ALPHA_PC_REGNUM || regno == -1)
     regcache_raw_supply (regcache, ALPHA_PC_REGNUM, pc);
