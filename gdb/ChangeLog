@@ -1,5 +1,34 @@
 2011-05-26  Pedro Alves  <pedro@codesourcery.com>
 
+	* breakpoint.h (enum bptype) <bp_hp_step_resume>: New.
+	(enum bpstat_what_main_action): Move BPSTAT_WHAT_STEP_RESUME
+	before BPSTAT_WHAT_STOP_SILENT.  Add BPSTAT_WHAT_HP_STEP_RESUME
+	at the end.
+	* breakpoint.c (update_breakpoints_after_exec): Also delete hp
+	step-resume breakpoints.
+	(print_it_typical): Handle bp_hp_step_resume.
+	(bpstat_what): Ditto.
+	(bptype_string): Ditto.
+	(print_one_breakpoint_location): Ditto.
+	(allocate_bp_location): Ditto.
+	(mention): Ditto.
+	(breakpoint_re_set_one): Ditto.
+	* infrun.c (handle_inferior_event): Adjust.  Split
+	BPSTAT_WHAT_STEP_RESUME handling in BPSTAT_WHAT_STEP_RESUME and
+	BPSTAT_WHAT_HP_STEP_RESUME.
+	(insert_step_resume_breakpoint_at_sal): Rename to ...
+	(insert_step_resume_breakpoint_at_sal_1): ... this.  Add bptype
+	parameter.  Handle it.
+	(insert_step_resume_breakpoint_at_sal): Reimplement on top of
+	insert_step_resume_breakpoint_at_sal_1.
+	(insert_step_resume_breakpoint_at_frame): Rename to ...
+	(insert_hp_step_resume_breakpoint_at_frame): ... this.  Adjust to
+	set a high-priority step-resume breakpoint.
+	(insert_step_resume_breakpoint_at_frame): Adjust comment.
+	(insert_step_resume_breakpoint_at_caller): Ditto.
+
+2011-05-26  Pedro Alves  <pedro@codesourcery.com>
+
 	* breakpoint.c (iterate_over_related_breakpoints): New.
 	(do_map_delete_breakpoint): New.
 	(delete_command): Pass do_map_delete_breakpoint to

@@ -2415,7 +2415,7 @@ update_breakpoints_after_exec (void)
       }
 
     /* Step-resume breakpoints are meaningless after an exec().  */
-    if (b->type == bp_step_resume)
+    if (b->type == bp_step_resume || b->type == bp_hp_step_resume)
       {
 	delete_breakpoint (b);
 	continue;
@@ -3503,6 +3503,7 @@ print_it_typical (bpstat bs)
     case bp_exception:
     case bp_exception_resume:
     case bp_step_resume:
+    case bp_hp_step_resume:
     case bp_watchpoint_scope:
     case bp_call_dummy:
     case bp_std_terminate:
@@ -4489,6 +4490,15 @@ bpstat_what (bpstat bs_head)
 	      this_action = BPSTAT_WHAT_SINGLE;
 	    }
 	  break;
+	case bp_hp_step_resume:
+	  if (bs->stop)
+	    this_action = BPSTAT_WHAT_HP_STEP_RESUME;
+	  else
+	    {
+	      /* It is for the wrong frame.  */
+	      this_action = BPSTAT_WHAT_SINGLE;
+	    }
+	  break;
 	case bp_watchpoint_scope:
 	case bp_thread_event:
 	case bp_overlay_event:
@@ -4757,6 +4767,7 @@ bptype_string (enum bptype type)
     {bp_exception, "exception"},
     {bp_exception_resume, "exception resume"},
     {bp_step_resume, "step resume"},
+    {bp_hp_step_resume, "high-priority step resume"},
     {bp_watchpoint_scope, "watchpoint scope"},
     {bp_call_dummy, "call dummy"},
     {bp_std_terminate, "std::terminate"},
@@ -4892,6 +4903,7 @@ print_one_breakpoint_location (struct breakpoint *b,
       case bp_exception:
       case bp_exception_resume:
       case bp_step_resume:
+      case bp_hp_step_resume:
       case bp_watchpoint_scope:
       case bp_call_dummy:
       case bp_std_terminate:
@@ -5701,6 +5713,7 @@ allocate_bp_location (struct breakpoint *bpt)
     case bp_exception:
     case bp_exception_resume:
     case bp_step_resume:
+    case bp_hp_step_resume:
     case bp_watchpoint_scope:
     case bp_call_dummy:
     case bp_std_terminate:
@@ -7227,6 +7240,7 @@ mention (struct breakpoint *b)
       case bp_exception:
       case bp_exception_resume:
       case bp_step_resume:
+      case bp_hp_step_resume:
       case bp_call_dummy:
       case bp_std_terminate:
       case bp_watchpoint_scope:
@@ -11459,6 +11473,7 @@ breakpoint_re_set_one (void *bint)
     case bp_call_dummy:
     case bp_std_terminate:
     case bp_step_resume:
+    case bp_hp_step_resume:
     case bp_longjmp:
     case bp_longjmp_resume:
     case bp_exception:

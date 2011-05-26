@@ -99,7 +99,7 @@ void _initialize_infrun (void);
 
 void nullify_last_target_wait_ptid (void);
 
-static void insert_step_resume_breakpoint_at_frame (struct frame_info *);
+static void insert_hp_step_resume_breakpoint_at_frame (struct frame_info *);
 
 static void insert_step_resume_breakpoint_at_caller (struct frame_info *);
 
@@ -1778,7 +1778,7 @@ a command like `return' or `jump' to continue execution."));
 	 original breakpoint is hit.  */
       if (tp->control.step_resume_breakpoint == NULL)
 	{
-	  insert_step_resume_breakpoint_at_frame (get_current_frame ());
+	  insert_hp_step_resume_breakpoint_at_frame (get_current_frame ());
 	  tp->step_after_step_resume_breakpoint = 1;
 	}
 
@@ -4173,7 +4173,7 @@ process_event_stop_test:
                                 "infrun: signal arrived while stepping over "
                                 "breakpoint\n");
 
-	  insert_step_resume_breakpoint_at_frame (frame);
+	  insert_hp_step_resume_breakpoint_at_frame (frame);
 	  ecs->event_thread->step_after_step_resume_breakpoint = 1;
 	  /* Reset trap_expected to ensure breakpoints are re-inserted.  */
 	  ecs->event_thread->control.trap_expected = 0;
@@ -4203,7 +4203,7 @@ process_event_stop_test:
                                 "infrun: signal may take us out of "
                                 "single-step range\n");
 
-	  insert_step_resume_breakpoint_at_frame (frame);
+	  insert_hp_step_resume_breakpoint_at_frame (frame);
 	  /* Reset trap_expected to ensure breakpoints are re-inserted.  */
 	  ecs->event_thread->control.trap_expected = 0;
 	  keep_going (ecs);
@@ -4349,6 +4349,24 @@ process_event_stop_test:
 	   where we are stepping and step out of the right range.  */
 	break;
 
+      case BPSTAT_WHAT_STEP_RESUME:
+        if (debug_infrun)
+	  fprintf_unfiltered (gdb_stdlog, "infrun: BPSTAT_WHAT_STEP_RESUME\n");
+
+	delete_step_resume_breakpoint (ecs->event_thread);
+	if (stop_pc == ecs->stop_func_start
+	    && execution_direction == EXEC_REVERSE)
+	  {
+	    /* We are stepping over a function call in reverse, and
+	       just hit the step-resume breakpoint at the start
+	       address of the function.  Go back to single-stepping,
+	       which should take us back to the function call.  */
+	    ecs->event_thread->stepping_over_breakpoint = 1;
+	    keep_going (ecs);
+	    return;
+	  }
+	break;
+
       case BPSTAT_WHAT_STOP_NOISY:
         if (debug_infrun)
 	  fprintf_unfiltered (gdb_stdlog, "infrun: BPSTAT_WHAT_STOP_NOISY\n");
@@ -4371,9 +4389,9 @@ process_event_stop_test:
 	stop_stepping (ecs);
 	return;
 
-      case BPSTAT_WHAT_STEP_RESUME:
+      case BPSTAT_WHAT_HP_STEP_RESUME:
         if (debug_infrun)
-	  fprintf_unfiltered (gdb_stdlog, "infrun: BPSTAT_WHAT_STEP_RESUME\n");
+	  fprintf_unfiltered (gdb_stdlog, "infrun: BPSTAT_WHAT_HP_STEP_RESUME\n");
 
 	delete_step_resume_breakpoint (ecs->event_thread);
 	if (ecs->event_thread->step_after_step_resume_breakpoint)
@@ -4382,17 +4400,6 @@ process_event_stop_test:
 	       were trying to single-step off a breakpoint.  Go back
 	       to doing that.  */
 	    ecs->event_thread->step_after_step_resume_breakpoint = 0;
-	    ecs->event_thread->stepping_over_breakpoint = 1;
-	    keep_going (ecs);
-	    return;
-	  }
-	if (stop_pc == ecs->stop_func_start
-	    && execution_direction == EXEC_REVERSE)
-	  {
-	    /* We are stepping over a function call in reverse, and
-	       just hit the step-resume breakpoint at the start
-	       address of the function.  Go back to single-stepping,
-	       which should take us back to the function call.  */
 	    ecs->event_thread->stepping_over_breakpoint = 1;
 	    keep_going (ecs);
 	    return;
@@ -5208,14 +5215,16 @@ handle_step_into_function_backward (struct gdbarch *gdbarch,
    This is used to both functions and to skip over code.  */
 
 static void
-insert_step_resume_breakpoint_at_sal (struct gdbarch *gdbarch,
-				      struct symtab_and_line sr_sal,
-				      struct frame_id sr_id)
+insert_step_resume_breakpoint_at_sal_1 (struct gdbarch *gdbarch,
+					struct symtab_and_line sr_sal,
+					struct frame_id sr_id,
+					enum bptype sr_type)
 {
   /* There should never be more than one step-resume or longjmp-resume
      breakpoint per thread, so we should never be setting a new
      step_resume_breakpoint when one is already active.  */
   gdb_assert (inferior_thread ()->control.step_resume_breakpoint == NULL);
+  gdb_assert (sr_type == bp_step_resume || sr_type == bp_hp_step_resume);
 
   if (debug_infrun)
     fprintf_unfiltered (gdb_stdlog,
@@ -5223,18 +5232,28 @@ insert_step_resume_breakpoint_at_sal (struct gdbarch *gdbarch,
 			paddress (gdbarch, sr_sal.pc));
 
   inferior_thread ()->control.step_resume_breakpoint
-    = set_momentary_breakpoint (gdbarch, sr_sal, sr_id, bp_step_resume);
+    = set_momentary_breakpoint (gdbarch, sr_sal, sr_id, sr_type);
 }
 
-/* Insert a "step-resume breakpoint" at RETURN_FRAME.pc.  This is used
-   to skip a potential signal handler.
+static void
+insert_step_resume_breakpoint_at_sal (struct gdbarch *gdbarch,
+				      struct symtab_and_line sr_sal,
+				      struct frame_id sr_id)
+{
+  insert_step_resume_breakpoint_at_sal_1 (gdbarch,
+					  sr_sal, sr_id,
+					  bp_step_resume);
+}
+
+/* Insert a "high-priority step-resume breakpoint" at RETURN_FRAME.pc.
+   This is used to skip a potential signal handler.
 
    This is called with the interrupted function's frame.  The signal
    handler, when it returns, will resume the interrupted function at
    RETURN_FRAME.pc.  */
 
 static void
-insert_step_resume_breakpoint_at_frame (struct frame_info *return_frame)
+insert_hp_step_resume_breakpoint_at_frame (struct frame_info *return_frame)
 {
   struct symtab_and_line sr_sal;
   struct gdbarch *gdbarch;
@@ -5247,14 +5266,14 @@ insert_step_resume_breakpoint_at_frame (struct frame_info *return_frame)
   sr_sal.section = find_pc_overlay (sr_sal.pc);
   sr_sal.pspace = get_frame_program_space (return_frame);
 
-  insert_step_resume_breakpoint_at_sal (gdbarch, sr_sal,
-					get_stack_frame_id (return_frame));
+  insert_step_resume_breakpoint_at_sal_1 (gdbarch, sr_sal,
+					  get_stack_frame_id (return_frame),
+					  bp_hp_step_resume);
 }
 
-/* Similar to insert_step_resume_breakpoint_at_frame, except
-   but a breakpoint at the previous frame's PC.  This is used to
-   skip a function after stepping into it (for "next" or if the called
-   function has no debugging information).
+/* Insert a "step-resume breakpoint" at the previous frame's PC.  This
+   is used to skip a function after stepping into it (for "next" or if
+   the called function has no debugging information).
 
    The current function has almost always been reached by single
    stepping a call or return instruction.  NEXT_FRAME belongs to the
@@ -5262,7 +5281,7 @@ insert_step_resume_breakpoint_at_frame (struct frame_info *return_frame)
    resume address.
 
    This is a separate function rather than reusing
-   insert_step_resume_breakpoint_at_frame in order to avoid
+   insert_hp_step_resume_breakpoint_at_frame in order to avoid
    get_prev_frame, which may stop prematurely (see the implementation
    of frame_unwind_caller_id for an example).  */
 

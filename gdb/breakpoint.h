@@ -68,9 +68,12 @@ enum bptype
     bp_exception_resume,
 
     /* Used by wait_for_inferior for stepping over subroutine calls,
-       for stepping over signal handlers, and for skipping
-       prologues.  */
+       and for skipping prologues.  */
     bp_step_resume,
+
+    /* Used by wait_for_inferior for stepping over signal
+       handlers.  */
+    bp_hp_step_resume,
 
     /* Used to detect when a watchpoint expression has gone out of
        scope.  These breakpoints are usually not visible to the user.
@@ -721,6 +724,9 @@ enum bpstat_what_main_action
        BPSTAT_WHAT_KEEP_CHECKING.  */
     BPSTAT_WHAT_CLEAR_LONGJMP_RESUME,
 
+    /* Clear step resume breakpoint, and keep checking.  */
+    BPSTAT_WHAT_STEP_RESUME,
+
     /* Rather than distinguish between noisy and silent stops here, it
        might be cleaner to have bpstat_print make that decision (also
        taking into account stop_print_frame and source_only).  But the
@@ -733,8 +739,14 @@ enum bpstat_what_main_action
     /* Stop and print.  */
     BPSTAT_WHAT_STOP_NOISY,
 
-    /* Clear step resume breakpoint, and keep checking.  */
-    BPSTAT_WHAT_STEP_RESUME,
+    /* Clear step resume breakpoint, and keep checking.  High-priority
+       step-resume breakpoints are used when even if there's a user
+       breakpoint at the current PC when we set the step-resume
+       breakpoint, we don't want to re-handle any breakpoint other
+       than the step-resume when it's hit; instead we want to move
+       past the breakpoint.  This is used in the case of skipping
+       signal handlers.  */
+    BPSTAT_WHAT_HP_STEP_RESUME,
   };
 
 /* An enum indicating the kind of "stack dummy" stop.  This is a bit
