@@ -1,3 +1,9 @@
+2011-05-26  Alan Modra  <amodra@gmail.com>
+
+	* elf-bfd.h (SYMBOL_REFERENCES_LOCAL): Remove most of comment.
+	* elflink.c (_bfd_elf_symbol_refs_local_p): Expand
+	local_protected comment.
+
 2011-05-25  Tristan Gingold  <gingold@adacore.com>
 
 	* configure.in (bfd_elf32_ia64_big_vec, bfd_elf32_ia64_hpux_big_vec)

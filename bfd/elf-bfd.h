@@ -232,11 +232,7 @@ struct elf_link_hash_entry
 };
 
 /* Will references to this symbol always reference the symbol
-   in this object?  STV_PROTECTED is excluded from the visibility test
-   here so that function pointer comparisons work properly.  Since
-   function symbols not defined in an app are set to their .plt entry,
-   it's necessary for shared libs to also reference the .plt even
-   though the symbol is really local to the shared lib.  */
+   in this object?  */
 #define SYMBOL_REFERENCES_LOCAL(INFO, H) \
   _bfd_elf_symbol_refs_local_p (H, INFO, 0)
 

@@ -2881,8 +2881,10 @@ _bfd_elf_symbol_refs_local_p (struct elf_link_hash_entry *h,
     return TRUE;
 
   /* Function pointer equality tests may require that STV_PROTECTED
-     symbols be treated as dynamic symbols, even when we know that the
-     dynamic linker will resolve them locally.  */
+     symbols be treated as dynamic symbols.  If the address of a
+     function not defined in an executable is set to that function's
+     plt entry in the executable, then the address of the function in
+     a shared library must also be the plt entry in the executable.  */
   return local_protected;
 }
 
