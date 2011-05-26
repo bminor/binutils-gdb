@@ -1,5 +1,25 @@
 2011-05-26  Pedro Alves  <pedro@codesourcery.com>
 
+	* breakpoint.c (iterate_over_related_breakpoints): New.
+	(do_map_delete_breakpoint): New.
+	(delete_command): Pass do_map_delete_breakpoint to
+	map_breakpoint_numbers.
+	(do_disable_breakpoint): New.
+	(do_map_disable_breakpoint): Iterate over the breakpoint's related
+	breakpoints.
+	(do_enable_breakpoint): Rename to ...
+	(enable_breakpoint_disp): ... this.
+	(enable_breakpoint): Adjust.
+	(do_enable_breakpoint): New.
+	(enable_once_breakpoint): Delete.
+	(do_map_enable_breakpoint): New.
+	(do_map_enable_once_breakpoint): New.
+	(enable_once_command, enable_delete_command)
+	(delete_trace_command): Iterate over the breakpoint's related
+	breakpoints.
+
+2011-05-26  Pedro Alves  <pedro@codesourcery.com>
+
 	* alpha-tdep.c (alpha_cannot_fetch_register): Don't return true
 	for ALPHA_ZERO_REGNUM.
 	(alpha_supply_int_regs): Explicitly supply zero as the value for

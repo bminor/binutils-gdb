@@ -176,7 +176,7 @@ static void hbreak_command (char *, int);
 
 static void thbreak_command (char *, int);
 
-static void do_enable_breakpoint (struct breakpoint *, enum bpdisp);
+static void enable_breakpoint_disp (struct breakpoint *, enum bpdisp);
 
 static void stop_command (char *arg, int from_tty);
 
@@ -10812,13 +10812,56 @@ make_cleanup_delete_breakpoint (struct breakpoint *b)
   return make_cleanup (do_delete_breakpoint_cleanup, b);
 }
 
-/* A callback for map_breakpoint_numbers that calls
-   delete_breakpoint.  */
+/* Iterator function to call a user-provided callback function once
+   for each of B and its related breakpoints.  */
+
+static void
+iterate_over_related_breakpoints (struct breakpoint *b,
+				  void (*function) (struct breakpoint *,
+						    void *),
+				  void *data)
+{
+  struct breakpoint *related;
+
+  related = b;
+  do
+    {
+      struct breakpoint *next;
+
+      /* FUNCTION may delete RELATED.  */
+      next = related->related_breakpoint;
+
+      if (next == related)
+	{
+	  /* RELATED is the last ring entry.  */
+	  function (related, data);
+
+	  /* FUNCTION may have deleted it, so we'd never reach back to
+	     B.  There's nothing left to do anyway, so just break
+	     out.  */
+	  break;
+	}
+      else
+	function (related, data);
+
+      related = next;
+    }
+  while (related != b);
+}
 
 static void
 do_delete_breakpoint (struct breakpoint *b, void *ignore)
 {
   delete_breakpoint (b);
+}
+
+/* A callback for map_breakpoint_numbers that calls
+   delete_breakpoint.  */
+
+static void
+do_map_delete_breakpoint (struct breakpoint *b, void *ignore)
+{
+  iterate_over_related_breakpoints (b, do_delete_breakpoint, NULL);
 }
 
 void
@@ -10852,7 +10895,7 @@ delete_command (char *arg, int from_tty)
 	}
     }
   else
-    map_breakpoint_numbers (arg, do_delete_breakpoint, NULL);
+    map_breakpoint_numbers (arg, do_map_delete_breakpoint, NULL);
 }
 
 static int
@@ -11672,13 +11715,21 @@ disable_breakpoint (struct breakpoint *bpt)
   observer_notify_breakpoint_modified (bpt);
 }
 
+/* A callback for iterate_over_related_breakpoints.  */
+
+static void
+do_disable_breakpoint (struct breakpoint *b, void *ignore)
+{
+  disable_breakpoint (b);
+}
+
 /* A callback for map_breakpoint_numbers that calls
    disable_breakpoint.  */
 
 static void
 do_map_disable_breakpoint (struct breakpoint *b, void *ignore)
 {
-  disable_breakpoint (b);
+  iterate_over_related_breakpoints (b, do_disable_breakpoint, NULL);
 }
 
 static void
@@ -11710,7 +11761,7 @@ disable_command (char *args, int from_tty)
 }
 
 static void
-do_enable_breakpoint (struct breakpoint *bpt, enum bpdisp disposition)
+enable_breakpoint_disp (struct breakpoint *bpt, enum bpdisp disposition)
 {
   int target_resources_ok;
 
@@ -11771,7 +11822,13 @@ do_enable_breakpoint (struct breakpoint *bpt, enum bpdisp disposition)
 void
 enable_breakpoint (struct breakpoint *bpt)
 {
-  do_enable_breakpoint (bpt, bpt->disposition);
+  enable_breakpoint_disp (bpt, bpt->disposition);
+}
+
+static void
+do_enable_breakpoint (struct breakpoint *bpt, void *arg)
+{
+  enable_breakpoint (bpt);
 }
 
 /* A callback for map_breakpoint_numbers that calls
@@ -11780,7 +11837,7 @@ enable_breakpoint (struct breakpoint *bpt)
 static void
 do_map_enable_breakpoint (struct breakpoint *b, void *ignore)
 {
-  enable_breakpoint (b);
+  iterate_over_related_breakpoints (b, do_enable_breakpoint, NULL);
 }
 
 /* The enable command enables the specified breakpoints (or all defined
@@ -11816,27 +11873,39 @@ enable_command (char *args, int from_tty)
 }
 
 static void
-enable_once_breakpoint (struct breakpoint *bpt, void *ignore)
+do_enable_breakpoint_disp (struct breakpoint *bpt, void *arg)
 {
-  do_enable_breakpoint (bpt, disp_disable);
+  enum bpdisp disp = *(enum bpdisp *) arg;
+
+  enable_breakpoint_disp (bpt, disp);
+}
+
+static void
+do_map_enable_once_breakpoint (struct breakpoint *bpt, void *ignore)
+{
+  enum bpdisp disp = disp_disable;
+
+  iterate_over_related_breakpoints (bpt, do_enable_breakpoint_disp, &disp);
 }
 
 static void
 enable_once_command (char *args, int from_tty)
 {
-  map_breakpoint_numbers (args, enable_once_breakpoint, NULL);
+  map_breakpoint_numbers (args, do_map_enable_once_breakpoint, NULL);
 }
 
 static void
-enable_delete_breakpoint (struct breakpoint *bpt, void *ignore)
+do_map_enable_delete_breakpoint (struct breakpoint *bpt, void *ignore)
 {
-  do_enable_breakpoint (bpt, disp_del);
+  enum bpdisp disp = disp_del;
+
+  iterate_over_related_breakpoints (bpt, do_enable_breakpoint_disp, &disp);
 }
 
 static void
 enable_delete_command (char *args, int from_tty)
 {
-  map_breakpoint_numbers (args, enable_delete_breakpoint, NULL);
+  map_breakpoint_numbers (args, do_map_enable_delete_breakpoint, NULL);
 }
 
 static void
@@ -12362,7 +12431,7 @@ delete_trace_command (char *arg, int from_tty)
 	}
     }
   else
-    map_breakpoint_numbers (arg, do_delete_breakpoint, NULL);
+    map_breakpoint_numbers (arg, do_map_delete_breakpoint, NULL);
 }
 
 /* Helper function for trace_pass_command.  */
