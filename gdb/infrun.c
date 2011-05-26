@@ -2742,6 +2742,9 @@ fetch_inferior_event (void *client_data)
   overlay_cache_invalid = 1;
   registers_changed ();
 
+  make_cleanup_restore_integer (&execution_direction);
+  execution_direction = target_execution_direction ();
+
   if (deprecated_target_wait_hook)
     ecs->ptid =
       deprecated_target_wait_hook (waiton_ptid, &ecs->ws, TARGET_WNOHANG);
@@ -6878,7 +6881,7 @@ save_inferior_ptid (void)
    Set exec-direction / show exec-direction commands
    (returns error unless target implements to_set_exec_direction method).  */
 
-enum exec_direction_kind execution_direction = EXEC_FORWARD;
+int execution_direction = EXEC_FORWARD;
 static const char exec_forward[] = "forward";
 static const char exec_reverse[] = "reverse";
 static const char *exec_direction = exec_forward;

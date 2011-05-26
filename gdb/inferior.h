@@ -356,7 +356,10 @@ enum exec_direction_kind
     EXEC_ERROR
   };
 
-extern enum exec_direction_kind execution_direction;
+/* The current execution direction.  This should only be set to enum
+   exec_direction_kind values.  It is only an int to make it
+   compatible with make_cleanup_restore_integer.  */
+extern int execution_direction;
 
 /* Save register contents here when executing a "finish" command or are
    about to pop a stack dummy frame, if-and-only-if proceed_to_finish is set.

@@ -1,5 +1,39 @@
 2011-05-26  Pedro Alves  <pedro@codesourcery.com>
 
+	* record.c: Include event-loop.h, inf-loop.h.
+	(record_beneath_to_async): New global.
+	(tmp_to_async): New global.
+	(record_async_inferior_event_token): New global.
+	(record_open_1): Don't error out if async is enabled.
+	(record_open): Handle to_async.  Create an async event source in
+	the event loop.
+	(record_close): Delete the async event source.
+	(record_resumed): New global.
+	(record_execution_dir): New global.
+	(record_resume, record_core_resume): Set them.  Register the
+	target on the event loop.
+	(record_wait): Rename to ...
+	(record_wait_1): ... this.  Add more debug output.  Handle
+	TARGET_WNOHANG, and the target beneath returning
+	TARGET_WAITKIND_IGNORE.
+	(record_wait): Reimplement on top of record_wait_1.
+	(record_async_mask_value): New global.
+	(record_async, record_async_mask, record_can_async_p)
+	(record_is_async_p, record_execution_direction): New functions.
+	(init_record_ops, init_record_core_ops): Install new methods.
+	* infrun.c (fetch_inferior_event): Temporarily switch the global
+	execution direction to the direction the target was going.
+	(execution_direction): Change type to int.
+	* target.c (default_execution_direction): New function.
+	(update_current_target): Inherit and de_fault
+	to_execution_direction.
+	* target.h (struct target_ops) <to_execution_direction>: New
+	field.
+	(target_execution_direction): New macro.
+	* inferior.h (execution_direction): Change type to int.
+
+2011-05-26  Pedro Alves  <pedro@codesourcery.com>
+
 	* infcall.c (call_function_by_hand): Don't allow calling functions
 	in reverse execution mode.
 
