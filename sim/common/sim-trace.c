@@ -77,7 +77,8 @@ enum {
   OPTION_TRACE_FUNCTION,
   OPTION_TRACE_DEBUG,
   OPTION_TRACE_FILE,
-  OPTION_TRACE_VPU
+  OPTION_TRACE_VPU,
+  OPTION_TRACE_SYSCALL
 };
 
 static const OPTION trace_options[] =
@@ -124,6 +125,9 @@ static const OPTION trace_options[] =
       trace_option_handler, NULL },
   { {"trace-events", optional_argument, NULL, OPTION_TRACE_EVENTS},
       '\0', "on|off", "Trace events",
+      trace_option_handler, NULL },
+  { {"trace-syscall", optional_argument, NULL, OPTION_TRACE_SYSCALL},
+      '\0', "on|off", "Trace system calls",
       trace_option_handler, NULL },
 #ifdef SIM_HAVE_ADDR_RANGE
   { {"trace-range", required_argument, NULL, OPTION_TRACE_RANGE},
@@ -329,6 +333,13 @@ trace_option_handler (SIM_DESC sd, sim_cpu *cpu, int opt,
 	return set_trace_option (sd, "-branch", TRACE_BRANCH_IDX, arg);
       else
 	sim_io_eprintf (sd, "Branch tracing not compiled in, `--trace-branch' ignored\n");
+      break;
+
+    case OPTION_TRACE_SYSCALL :
+      if (WITH_TRACE_SYSCALL_P)
+	return set_trace_option (sd, "-syscall", TRACE_SYSCALL_IDX, arg);
+      else
+	sim_io_eprintf (sd, "System call tracing not compiled in, `--trace-syscall' ignored\n");
       break;
 
     case OPTION_TRACE_SEMANTICS :
@@ -621,6 +632,7 @@ trace_idx_to_str (int trace_idx)
     case TRACE_EVENTS_IDX:  return "events:  ";
     case TRACE_FPU_IDX:     return "fpu:     ";
     case TRACE_BRANCH_IDX:  return "branch:  ";
+    case TRACE_SYSCALL_IDX: return "syscall: ";
     case TRACE_VPU_IDX:     return "vpu:     ";
     default:
       sprintf (num, "?%d?", trace_idx);

@@ -1,3 +1,14 @@
+2011-05-25  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-trace.c (OPTION_TRACE_SYSCALL): New enum.
+	(trace_options): Handle "trace-syscall" with OPTION_TRACE_SYSCALL.
+	(trace_option_handler): Handle OPTION_TRACE_SYSCALL.
+	(trace_idx_to_str): Likewise.
+	* sim-trace.h (TRACE_SYSCALL_IDX): New enum.
+	(TRACE_syscall): Define.
+	(WITH_TRACE_SYSCALL_P): Likewise.
+	(TRACE_SYSCALL_P): Likewise.
+
 2011-05-23  Mike Frysinger  <vapier@gentoo.org>
 
 	* dv-glue.c (hw_glue_finish): Move "name" to function scope and

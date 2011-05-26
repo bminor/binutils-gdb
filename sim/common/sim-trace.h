@@ -69,6 +69,9 @@ enum {
   /* Trace branching.  */
   TRACE_BRANCH_IDX,
 
+  /* Trace syscalls.  */
+  TRACE_SYSCALL_IDX,
+
   /* Add information useful for debugging the simulator to trace output.  */
   TRACE_DEBUG_IDX,
 
@@ -105,6 +108,7 @@ enum {
 #define TRACE_fpu      (1 << TRACE_FPU_IDX)
 #define TRACE_vpu      (1 << TRACE_VPU_IDX)
 #define TRACE_branch   (1 << TRACE_BRANCH_IDX)
+#define TRACE_syscall  (1 << TRACE_SYSCALL_IDX)
 #define TRACE_debug    (1 << TRACE_DEBUG_IDX)
 
 /* Preprocessor macros to simplify tests of WITH_TRACE.  */
@@ -120,6 +124,7 @@ enum {
 #define WITH_TRACE_FPU_P	(WITH_TRACE & TRACE_fpu)
 #define WITH_TRACE_VPU_P	(WITH_TRACE & TRACE_vpu)
 #define WITH_TRACE_BRANCH_P	(WITH_TRACE & TRACE_branch)
+#define WITH_TRACE_SYSCALL_P	(WITH_TRACE & TRACE_syscall)
 #define WITH_TRACE_DEBUG_P	(WITH_TRACE & TRACE_debug)
 
 /* Tracing install handler.  */
@@ -217,6 +222,7 @@ typedef struct _trace_data {
 #define TRACE_FPU_P(cpu)	TRACE_P (cpu, TRACE_FPU_IDX)
 #define TRACE_VPU_P(cpu)	TRACE_P (cpu, TRACE_VPU_IDX)
 #define TRACE_BRANCH_P(cpu)	TRACE_P (cpu, TRACE_BRANCH_IDX)
+#define TRACE_SYSCALL_P(cpu)	TRACE_P (cpu, TRACE_SYSCALL_IDX)
 #define TRACE_DEBUG_P(cpu)	TRACE_P (cpu, TRACE_DEBUG_IDX)
 
 /* Tracing functions.  */
