@@ -1,5 +1,10 @@
 2011-05-26  Pedro Alves  <pedro@codesourcery.com>
 
+	* infcall.c (call_function_by_hand): Don't allow calling functions
+	in reverse execution mode.
+
+2011-05-26  Pedro Alves  <pedro@codesourcery.com>
+
 	* infcmd.c (finish_command): Allow async finish in reverse.
 
 2011-05-26  Yao Qi  <yao@codesourcery.com>
