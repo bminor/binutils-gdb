@@ -103,10 +103,6 @@ static void insert_hp_step_resume_breakpoint_at_frame (struct frame_info *);
 
 static void insert_step_resume_breakpoint_at_caller (struct frame_info *);
 
-static void insert_step_resume_breakpoint_at_sal (struct gdbarch *,
-						  struct symtab_and_line ,
-						  struct frame_id);
-
 static void insert_longjmp_resume_breakpoint (struct gdbarch *, CORE_ADDR);
 
 /* When set, stop the 'step' command if we enter a function which has
@@ -4354,6 +4350,20 @@ process_event_stop_test:
 	  fprintf_unfiltered (gdb_stdlog, "infrun: BPSTAT_WHAT_STEP_RESUME\n");
 
 	delete_step_resume_breakpoint (ecs->event_thread);
+	if (ecs->event_thread->control.proceed_to_finish
+	    && execution_direction == EXEC_REVERSE)
+	  {
+	    struct thread_info *tp = ecs->event_thread;
+
+	    /* We are finishing a function in reverse, and just hit
+	       the step-resume breakpoint at the start address of the
+	       function, and we're almost there -- just need to back
+	       up by one more single-step, which should take us back
+	       to the function call.  */
+	    tp->control.step_range_start = tp->control.step_range_end = 1;
+	    keep_going (ecs);
+	    return;
+	  }
 	if (stop_pc == ecs->stop_func_start
 	    && execution_direction == EXEC_REVERSE)
 	  {
@@ -5235,7 +5245,7 @@ insert_step_resume_breakpoint_at_sal_1 (struct gdbarch *gdbarch,
     = set_momentary_breakpoint (gdbarch, sr_sal, sr_id, sr_type);
 }
 
-static void
+void
 insert_step_resume_breakpoint_at_sal (struct gdbarch *gdbarch,
 				      struct symtab_and_line sr_sal,
 				      struct frame_id sr_id)
@@ -5859,7 +5869,8 @@ normal_stop (void)
 
   /* Save the function value return registers, if we care.
      We might be about to restore their previous contents.  */
-  if (inferior_thread ()->control.proceed_to_finish)
+  if (inferior_thread ()->control.proceed_to_finish
+      && execution_direction != EXEC_REVERSE)
     {
       /* This should not be necessary.  */
       if (stop_registers)

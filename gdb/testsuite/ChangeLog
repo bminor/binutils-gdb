@@ -1,5 +1,9 @@
 2011-05-26  Pedro Alves  <pedro@codesourcery.com>
 
+	* gdb.reverse/finish-reverse-bkpt.exp: New test.
+
+2011-05-26  Pedro Alves  <pedro@codesourcery.com>
+
 	* gdb.reverse/next-reverse-bkpt-over-sr.exp: New test.
 
 2011-05-24  Keith Seitz  <keiths@redhat.com>

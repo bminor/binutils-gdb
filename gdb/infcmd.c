@@ -1528,11 +1528,8 @@ finish_backward (struct symbol *function)
 {
   struct symtab_and_line sal;
   struct thread_info *tp = inferior_thread ();
-  struct breakpoint *breakpoint;
-  struct cleanup *old_chain;
   CORE_ADDR pc;
   CORE_ADDR func_addr;
-  int back_up;
 
   pc = get_frame_pc (get_current_frame ());
 
@@ -1542,8 +1539,7 @@ finish_backward (struct symbol *function)
 
   sal = find_pc_line (func_addr, 0);
 
-  /* We don't need a return value.  */
-  tp->control.proceed_to_finish = 0;
+  tp->control.proceed_to_finish = 1;
   /* Special case: if we're sitting at the function entry point,
      then all we need to do is take a reverse singlestep.  We
      don't need to set a breakpoint, and indeed it would do us
@@ -1557,33 +1553,25 @@ finish_backward (struct symbol *function)
     {
       struct frame_info *frame = get_selected_frame (NULL);
       struct gdbarch *gdbarch = get_frame_arch (frame);
+      struct symtab_and_line sr_sal;
 
-      /* Set breakpoint and continue.  */
-      breakpoint =
-	set_momentary_breakpoint (gdbarch, sal,
-				  get_stack_frame_id (frame),
-				  bp_breakpoint);
-      /* Tell the breakpoint to keep quiet.  We won't be done
-         until we've done another reverse single-step.  */
-      breakpoint_set_silent (breakpoint, 1);
-      old_chain = make_cleanup_delete_breakpoint (breakpoint);
+      /* Set a step-resume at the function's entry point.  Once that's
+	 hit, we'll do one more step backwards.  */
+      init_sal (&sr_sal);
+      sr_sal.pc = sal.pc;
+      sr_sal.pspace = get_frame_program_space (frame);
+      insert_step_resume_breakpoint_at_sal (gdbarch,
+					    sr_sal, null_frame_id);
+
       proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 0);
-      /* We will be stopped when proceed returns.  */
-      back_up = (bpstat_find_breakpoint (tp->control.stop_bpstat, breakpoint)
-		 != NULL);
-      do_cleanups (old_chain);
     }
   else
-    back_up = 1;
-  if (back_up)
     {
-      /* If in fact we hit the step-resume breakpoint (and not
-	 some other breakpoint), then we're almost there --
-	 we just need to back up by one more single-step.  */
+      /* We're almost there -- we just need to back up by one more
+	 single-step.  */
       tp->control.step_range_start = tp->control.step_range_end = 1;
       proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 1);
     }
-  return;
 }
 
 /* finish_forward -- helper function for finish_command.  */

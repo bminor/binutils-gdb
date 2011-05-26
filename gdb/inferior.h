@@ -190,6 +190,10 @@ extern void resume (int, enum target_signal);
 
 extern ptid_t user_visible_resume_ptid (int step);
 
+extern void insert_step_resume_breakpoint_at_sal (struct gdbarch *,
+						  struct symtab_and_line ,
+						  struct frame_id);
+
 /* From misc files */
 
 extern void default_print_registers_info (struct gdbarch *gdbarch,
