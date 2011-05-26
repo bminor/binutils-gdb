@@ -339,6 +339,8 @@ linux_low_h = $(srcdir)/linux-low.h
 
 linux_ptrace_h = $(srcdir)/../common/linux-ptrace.h
 
+gdb_thread_db_h = $(srcdir)/../common/gdb_thread_db.h
+
 lynx_low_h = $(srcdir)/lynx-low.h $(srcdir)/server.h
 
 nto_low_h = $(srcdir)/nto-low.h
@@ -379,7 +381,8 @@ regcache.o: regcache.c $(server_h) $(regdef_h)
 remote-utils.o: remote-utils.c terminal.h $(server_h)
 server.o: server.c $(server_h)
 target.o: target.c $(server_h)
-thread-db.o: thread-db.c $(server_h) $(linux_low_h) $(gdb_proc_service_h)
+thread-db.o: thread-db.c $(server_h) $(linux_low_h) $(gdb_proc_service_h) \
+	$(gdb_thread_db_h)
 tracepoint.o: tracepoint.c $(server_h) $(srcdir)/../common/ax.def
 utils.o: utils.c $(server_h)
 gdbreplay.o: gdbreplay.c config.h

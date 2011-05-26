@@ -1,3 +1,9 @@
+2011-05-26  Yao Qi  <yao@codesourcery.com>
+
+	* Makefile.in (thread-db.o): Track dependence to
+	common/gdb_thread_db.h.
+	* thread-db.c: include gdb_thread_db.h from right place.
+
 2011-05-16  Adrian Cornish  <gnu@bluedreamer.com>
 
 	* linux-i386-ipa.c (supply_static_tracepoint_registers): Pass

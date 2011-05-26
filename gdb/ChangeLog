@@ -1,3 +1,8 @@
+2011-05-26  Yao Qi  <yao@codesourcery.com>
+
+	* gdb_thread_db.h: Delete.  Move to ...
+	* common/gdb_thread_db.h: ... here.
+
 2011-05-26  Pedro Alves  <pedro@codesourcery.com>
 
 	* infcmd.c (finish_backward): Set a step-resume breakpoint at the
