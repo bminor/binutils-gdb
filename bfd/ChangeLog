@@ -1,3 +1,9 @@
+2011-05-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/12809
+	* elf64-x86-64.c (elf_x86_64_relocate_section): Handle
+	R_X86_64_TPOFF64 in executable.
+
 2011-05-26  Alan Modra  <amodra@gmail.com>
 
 	* elf-bfd.h (SYMBOL_REFERENCES_LOCAL): Remove most of comment.

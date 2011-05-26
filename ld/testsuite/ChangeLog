@@ -1,3 +1,17 @@
+2011-05-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/12809
+	* ld-x86-64/tlsbin.s: Add a test for LE with large model.
+
+	* ld-x86-64/tlsbin.dd: Updated.
+	* ld-x86-64/tlsbin.rd: Likewise.
+	* ld-x86-64/tlsbin.sd: Likewise.
+	* ld-x86-64/tlsbin.td: Likewise.
+	* ld-x86-64/tlsbindesc.dd: Likewise.
+	* ld-x86-64/tlsbindesc.rd: Likewise.
+	* ld-x86-64/tlsbindesc.sd: Likewise.
+	* ld-x86-64/tlsbindesc.td: Likewise.
+
 2011-05-24  Hans-Peter Nilsson  <hp@axis.com>
 
 	* ld-cris/tls-e-tpoffcomm1.d: Adjust for second PR12763 change,

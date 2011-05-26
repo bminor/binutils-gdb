@@ -17,12 +17,12 @@ Section Headers:
  +\[[ 0-9]+\] .rela.dyn +.*
  +\[[ 0-9]+\] .rela.plt +.*
  +\[[ 0-9]+\] .plt +.*
- +\[[ 0-9]+\] .text +PROGBITS +0+401000 0+1000 0+22a 00 +AX +0 +0 +4096
- +\[[ 0-9]+\] .tdata +PROGBITS +0+60122a 0+122a 0+60 00 WAT +0 +0 +1
- +\[[ 0-9]+\] .tbss +NOBITS +0+60128a 0+128a 0+40 00 WAT +0 +0 +1
- +\[[ 0-9]+\] .dynamic +DYNAMIC +0+601290 0+1290 0+140 10 +WA +4 +0 +8
- +\[[ 0-9]+\] .got +PROGBITS +0+6013d0 0+13d0 0+20 08 +WA +0 +0 +8
- +\[[ 0-9]+\] .got.plt +PROGBITS +0+6013f0 0+13f0 0+20 08 +WA +0 +0 +8
+ +\[[ 0-9]+\] .text +PROGBITS +0+401000 0+1000 0+234 00 +AX +0 +0 +4096
+ +\[[ 0-9]+\] .tdata +PROGBITS +0+601234 0+1234 0+60 00 WAT +0 +0 +1
+ +\[[ 0-9]+\] .tbss +NOBITS +0+601294 0+1294 0+40 00 WAT +0 +0 +1
+ +\[[ 0-9]+\] .dynamic +DYNAMIC +0+601298 0+1298 0+140 10 +WA +4 +0 +8
+ +\[[ 0-9]+\] .got +PROGBITS +0+6013d8 0+13d8 0+20 08 +WA +0 +0 +8
+ +\[[ 0-9]+\] .got.plt +PROGBITS +0+6013f8 0+13f8 0+20 08 +WA +0 +0 +8
  +\[[ 0-9]+\] .shstrtab +.*
  +\[[ 0-9]+\] .symtab +.*
  +\[[ 0-9]+\] .strtab +.*
@@ -40,10 +40,10 @@ Program Headers:
  +PHDR.*
  +INTERP.*
 .*Requesting program interpreter.*
- +LOAD +0x0+ 0x0+400000 0x0+400000 0x0+122a 0x0+122a R E 0x200000
- +LOAD +0x0+122a 0x0+60122a 0x0+60122a 0x0+1e6 0x0+1e6 RW +0x200000
- +DYNAMIC +0x0+1290 0x0+601290 0x0+601290 0x0+140 0x0+140 RW +0x8
- +TLS +0x0+122a 0x0+60122a 0x0+60122a 0x0+60 0x0+a0 R +0x1
+ +LOAD +0x0+ 0x0+400000 0x0+400000 0x0+1234 0x0+1234 R E 0x200000
+ +LOAD +0x0+1234 0x0+601234 0x0+601234 0x0+1e4 0x0+1e4 RW +0x200000
+ +DYNAMIC +0x0+1298 0x0+601298 0x0+601298 0x0+140 0x0+140 RW +0x8
+ +TLS +0x0+1234 0x0+601234 0x0+601234 0x0+60 0x0+a0 R +0x1
 
  Section to Segment mapping:
  +Segment Sections...

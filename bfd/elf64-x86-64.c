@@ -3863,6 +3863,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 	  break;
 
 	case R_X86_64_TPOFF32:
+	case R_X86_64_TPOFF64:
 	  BFD_ASSERT (info->executable);
 	  relocation = elf_x86_64_tpoff (info, relocation);
 	  break;

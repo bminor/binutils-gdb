@@ -22,7 +22,7 @@ Disassembly of section .text:
   [0-9a-f]+:	55[ 	]+push   %rbp
   [0-9a-f]+:	48 89 e5[ 	]+mov    %rsp,%rbp
 #  GD -> IE because variable is not defined in executable
-  [0-9a-f]+:	48 8b 05 65 03 20 00[ 	]+mov    0x200365\(%rip\),%rax +# 601370 <.*>
+  [0-9a-f]+:	48 8b 05 6d 03 20 00[ 	]+mov    0x20036d\(%rip\),%rax +# 601378 <.*>
 #				-> R_X86_64_TPOFF64	sG1
   [0-9a-f]+:	66 90[ 	]+xchg   %ax,%ax
   [0-9a-f]+:	90[ 	]+nop *
@@ -31,7 +31,7 @@ Disassembly of section .text:
   [0-9a-f]+:	90[ 	]+nop *
 #  GD -> IE because variable is not defined in executable where
 #  the variable is referenced through IE too
-  [0-9a-f]+:	48 8b 05 48 03 20 00[ 	]+mov    0x200348\(%rip\),%rax +# 601360 <.*>
+  [0-9a-f]+:	48 8b 05 50 03 20 00[ 	]+mov    0x200350\(%rip\),%rax +# 601368 <.*>
 #				-> R_X86_64_TPOFF64	sG2
   [0-9a-f]+:	66 90[ 	]+xchg   %ax,%ax
   [0-9a-f]+:	90[ 	]+nop *
@@ -93,7 +93,7 @@ Disassembly of section .text:
   [0-9a-f]+:	00 00 *
   [0-9a-f]+:	90[ 	]+nop *
   [0-9a-f]+:	90[ 	]+nop *
-  [0-9a-f]+:	4c 03 0d d6 02 20 00[ 	]+add    0x2002d6\(%rip\),%r9 +# 601360 <.*>
+  [0-9a-f]+:	4c 03 0d de 02 20 00[ 	]+add    0x2002de\(%rip\),%r9 +# 601368 <.*>
 #				-> R_X86_64_TPOFF64	sG2
   [0-9a-f]+:	90[ 	]+nop *
   [0-9a-f]+:	90[ 	]+nop *
@@ -134,7 +134,7 @@ Disassembly of section .text:
   [0-9a-f]+:	90[ 	]+nop *
 #  Direct access through %fs
 #  IE against global var
-  [0-9a-f]+:	48 8b 0d 81 02 20 00[ 	]+mov    0x200281\(%rip\),%rcx +# 601358 <.*>
+  [0-9a-f]+:	48 8b 0d 89 02 20 00[ 	]+mov    0x200289\(%rip\),%rcx +# 601360 <.*>
 #				-> R_X86_64_TPOFF64	sG5
   [0-9a-f]+:	90[ 	]+nop *
   [0-9a-f]+:	90[ 	]+nop *
@@ -177,7 +177,7 @@ Disassembly of section .text:
   [0-9a-f]+:	00 00 *
   [0-9a-f]+:	90[ 	]+nop *
   [0-9a-f]+:	90[ 	]+nop *
-  [0-9a-f]+:	4c 03 1d 4a 02 20 00[ 	]+add    0x20024a\(%rip\),%r11 +# 601368 <.*>
+  [0-9a-f]+:	4c 03 1d 52 02 20 00[ 	]+add    0x200252\(%rip\),%r11 +# 601370 <.*>
 #				-> R_X86_64_TPOFF64	sG6
   [0-9a-f]+:	90[ 	]+nop *
   [0-9a-f]+:	90[ 	]+nop *
@@ -297,5 +297,8 @@ Disassembly of section .text:
   [0-9a-f]+:	90[ 	]+nop *
   [0-9a-f]+:	90[ 	]+nop *
   [0-9a-f]+:	90[ 	]+nop *
+#  LE, large model
+  [0-9a-f]+:	48 ba a5 ff ff ff ff[ 	]+movabs \$0xffffffffffffffa5,%rdx
+  [0-9a-f]+:	ff ff ff *
   [0-9a-f]+:	c9[ 	]+leaveq *
   [0-9a-f]+:	c3[ 	]+retq *
