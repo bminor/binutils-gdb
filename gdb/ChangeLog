@@ -1,3 +1,7 @@
+2011-05-26  Pedro Alves  <pedro@codesourcery.com>
+
+	* infcmd.c (finish_command): Allow async finish in reverse.
+
 2011-05-26  Yao Qi  <yao@codesourcery.com>
 
 	* gdb_thread_db.h: Delete.  Move to ...
