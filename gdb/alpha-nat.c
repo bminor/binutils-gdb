@@ -101,6 +101,15 @@ fetch_osf_core_registers (struct regcache *regcache,
 	  regcache_raw_supply (regcache, regno, NULL);
 	  continue;
 	}
+
+      if (regno == ALPHA_ZERO_REGNUM)
+	{
+	  const gdb_byte zero[8] = { 0 };
+
+	  regcache_raw_supply (regcache, regno, zero);
+	  continue;
+	}
+
       addr = 8 * core_reg_mapping[regno];
       if (addr < 0 || addr >= core_reg_size)
 	{

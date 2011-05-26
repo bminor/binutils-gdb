@@ -1,3 +1,11 @@
+2011-05-26  Pedro Alves  <pedro@codesourcery.com>
+
+	* alpha-tdep.c (alpha_cannot_fetch_register): Don't return true
+	for ALPHA_ZERO_REGNUM.
+	(alpha_supply_int_regs): Explicitly supply zero as the value for
+	ALPHA_ZERO_REGNUM in the register cache.
+	* alpha-nat.c (fetch_osf_core_registers): Ditto.
+
 2011-05-26  Yao Qi  <yao@codesourcery.com>
 
 	* gdb/gdb_thread_db.h: Remove HAVE_UINTPTR_T.
