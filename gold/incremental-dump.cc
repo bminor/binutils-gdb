@@ -153,6 +153,8 @@ dump_incremental_inputs(const char* argv0, const char* filename,
 		 input_file.get_first_dyn_reloc());
 	  printf("    Dynamic reloc count: %d\n",
 		 input_file.get_dyn_reloc_count());
+	  printf("    COMDAT group count: %d\n",
+		 input_file.get_comdat_group_count());
 	  break;
 	case INCREMENTAL_INPUT_ARCHIVE:
 	  printf("Archive\n");
@@ -212,6 +214,11 @@ dump_incremental_inputs(const char* argv0, const char* filename,
 		 static_cast<long long>(info.sh_size),
 		 info.name);
 	}
+
+      unsigned int ncomdat = input_file.get_comdat_group_count();
+      for (unsigned int i = 0; i < ncomdat; ++i)
+	printf("    Comdat group: %s\n",
+	       input_file.get_comdat_group_signature(i));
     }
 
   // Get a view of the .symtab section.

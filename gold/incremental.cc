@@ -1028,9 +1028,7 @@ Incremental_inputs::report_object(Object* obj, unsigned int arg_serial,
     }
 }
 
-// Record the input object file OBJ.  If ARCH is not NULL, attach
-// the object file to the archive.  This is called by the
-// Add_symbols task after finding out the type of the file.
+// Record an input section SHNDX from object file OBJ.
 
 void
 Incremental_inputs::report_input_section(Object* obj, unsigned int shndx,
@@ -1039,11 +1037,25 @@ Incremental_inputs::report_input_section(Object* obj, unsigned int shndx,
   Stringpool::Key key = 0;
 
   if (name != NULL)
-      this->strtab_->add(name, true, &key);
+    this->strtab_->add(name, true, &key);
 
   gold_assert(obj == this->current_object_);
   gold_assert(this->current_object_entry_ != NULL);
   this->current_object_entry_->add_input_section(shndx, key, sh_size);
+}
+
+// Record a kept COMDAT group belonging to object file OBJ.
+
+void
+Incremental_inputs::report_comdat_group(Object* obj, const char* name)
+{
+  Stringpool::Key key = 0;
+
+  if (name != NULL)
+    this->strtab_->add(name, true, &key);
+  gold_assert(obj == this->current_object_);
+  gold_assert(this->current_object_entry_ != NULL);
+  this->current_object_entry_->add_comdat_group(key);
 }
 
 // Record that the input argument INPUT is a script SCRIPT.  This is
@@ -1173,14 +1185,17 @@ Output_section_incremental_inputs<size, big_endian>::set_final_data_size()
 	    gold_assert(entry != NULL);
 	    (*p)->set_info_offset(info_offset);
 	    // Input section count, global symbol count, local symbol offset,
-	    // local symbol count, first dynamic reloc, dynamic reloc count.
-	    info_offset += 24;
+	    // local symbol count, first dynamic reloc, dynamic reloc count,
+	    // comdat group count.
+	    info_offset += 28;
 	    // Each input section.
 	    info_offset += (entry->get_input_section_count()
 			    * (8 + 2 * sizeof_addr));
 	    // Each global symbol.
 	    const Object::Symbols* syms = entry->object()->get_global_symbols();
 	    info_offset += syms->size() * 20;
+	    // Each comdat group.
+	    info_offset += entry->get_comdat_group_count() * 4;
 	  }
 	  break;
 	case INCREMENTAL_INPUT_SHARED_LIBRARY:
@@ -1424,13 +1439,15 @@ Output_section_incremental_inputs<size, big_endian>::write_info_blocks(
 	    unsigned int nlocals = relobj->output_local_symbol_count();
 	    unsigned int first_dynrel = relobj->first_dyn_reloc();
 	    unsigned int ndynrel = relobj->dyn_reloc_count();
+	    unsigned int ncomdat = entry->get_comdat_group_count();
 	    Swap32::writeval(pov, nsections);
 	    Swap32::writeval(pov + 4, nsyms);
 	    Swap32::writeval(pov + 8, static_cast<unsigned int>(locals_offset));
 	    Swap32::writeval(pov + 12, nlocals);
 	    Swap32::writeval(pov + 16, first_dynrel);
 	    Swap32::writeval(pov + 20, ndynrel);
-	    pov += 24;
+	    Swap32::writeval(pov + 24, ncomdat);
+	    pov += 28;
 
 	    // Build a temporary array to map input section indexes
 	    // from the original object file index to the index in the
@@ -1505,6 +1522,17 @@ Output_section_incremental_inputs<size, big_endian>::write_info_blocks(
 		Swap32::writeval(pov + 12, nrelocs);
 		Swap32::writeval(pov + 16, first_reloc * 3 * sizeof_addr);
 		pov += 20;
+	      }
+
+	    // For each kept COMDAT group, write the group signature.
+	    for (unsigned int i = 0; i < ncomdat; i++)
+	      {
+		Stringpool::Key key = entry->get_comdat_signature_key(i);
+		off_t name_offset = 0;
+		if (key != 0)
+		  name_offset = strtab->get_offset_from_key(key);
+		Swap32::writeval(pov, name_offset);
+		pov += 4;
 	      }
 
 	    delete[] index_map;
@@ -1861,6 +1889,20 @@ Sized_relobj_incr<size, big_endian>::do_layout(
       gold_assert(os != NULL);
       out_sections[i] = os;
       this->section_offsets()[i] = static_cast<Address>(sect.sh_offset);
+    }
+
+  // Process the COMDAT groups.
+  unsigned int ncomdat = this->input_reader_.get_comdat_group_count();
+  for (unsigned int i = 0; i < ncomdat; i++)
+    {
+      const char* signature = this->input_reader_.get_comdat_group_signature(i);
+      if (signature == NULL || signature[0] == '\0')
+        this->error(_("COMDAT group has no signature"));
+      bool keep = layout->find_or_add_kept_section(signature, this, i, true,
+						   true, NULL);
+      if (!keep)
+        this->error(_("COMDAT group %s included twice in incremental link"),
+		    signature);
     }
 }
 

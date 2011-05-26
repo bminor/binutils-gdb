@@ -1,3 +1,33 @@
+2011-05-26 Cary Coutant  <ccoutant@google.com>
+
+	* incremental-dump.cc (dump_incremental_inputs): Print COMDAT groups.
+	* incremental.cc (Incremental_inputs::report_input_section): Fix
+	comment, indentation.
+	(Incremental_inputs::report_comdat_group): New function.
+	(Output_section_incremental_inputs::set_final_data_size): Adjust size
+	of data for incremental input file entry.
+	(Output_section_incremental_inputs::write_info_blocks): Write COMDAT
+	group count, COMDAT group signatures.
+	(Sized_incr_relobj::do_layout): Record kept COMDAT group info from
+	an unchanged input file.
+	* incremental.h (Incremental_object_entry::Incremental_object_entry):
+	Initialize new data member.
+	(Incremental_object_entry::add_comdat_group): New function.
+	(Incremental_object_entry::get_comdat_group_count): New function.
+	(Incremental_object_entry::get_comdat_signature_key): New function.
+	(Incremental_object_entry::groups_): New data member.
+	(Incremental_inputs::report_comdat_group): New function.
+	(Incremental_input_entry_reader::get_symbol_offset): Adjust size of
+	data for incremental input file entry.
+	(Incremental_input_entry_reader::get_comdat_group_count): New function.
+	(Incremental_input_entry_reader::get_input_section): Adjust size of
+	data for incremental input file entry.
+	(Incremental_input_entry_reader::get_global_symbol_reader): Likewise.
+	(Incremental_input_entry_reader::get_comdat_group_signature): New
+	function.
+	* object.cc (Sized_relobj::include_section_group): Report kept
+	COMDAT groups for incremental links.
+
 2011-05-24  David Meyer  <pdox@google.com>
 
 	* dirsearch.cc (Dirsearch::find): Replace n1 and n2 parameters

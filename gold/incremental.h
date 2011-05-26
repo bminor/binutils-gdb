@@ -325,7 +325,7 @@ class Incremental_object_entry : public Incremental_input_entry
   Incremental_object_entry(Stringpool::Key filename_key, Object* obj,
 			   unsigned int arg_serial, Timespec mtime)
     : Incremental_input_entry(filename_key, arg_serial, mtime), obj_(obj),
-      is_member_(false), sections_()
+      is_member_(false), sections_(), groups_()
   { this->sections_.reserve(obj->shnum()); }
 
   // Get the object.
@@ -368,6 +368,21 @@ class Incremental_object_entry : public Incremental_input_entry
   get_input_section_size(unsigned int n) const
   { return this->sections_[n].sh_size_; }
 
+  // Add a kept COMDAT group.
+  void
+  add_comdat_group(Stringpool::Key signature_key)
+  { this->groups_.push_back(signature_key); }
+
+  // Return the number of COMDAT groups.
+  unsigned int
+  get_comdat_group_count() const
+  { return this->groups_.size(); }
+
+  // Return the stringpool key for the signature of the Nth comdat group.
+  Stringpool::Key
+  get_comdat_signature_key(unsigned int n) const
+  { return this->groups_[n]; }
+
  protected:
   virtual Incremental_input_type
   do_type() const
@@ -400,6 +415,9 @@ class Incremental_object_entry : public Incremental_input_entry
     off_t sh_size_;
   };
   std::vector<Input_section> sections_;
+
+  // COMDAT groups.
+  std::vector<Stringpool::Key> groups_;
 };
 
 // Class for recording shared library input files.
@@ -545,6 +563,10 @@ class Incremental_inputs
   void
   report_input_section(Object* obj, unsigned int shndx, const char* name,
 		       off_t sh_size);
+
+  // Record a kept COMDAT group belonging to object file OBJ.
+  void
+  report_comdat_group(Object* obj, const char* name);
 
   // Record the info for input script SCRIPT.
   void
@@ -814,7 +836,7 @@ class Incremental_inputs_reader
 		  || this->type() == INCREMENTAL_INPUT_ARCHIVE_MEMBER);
 
       unsigned int section_count = this->get_input_section_count();
-      return (this->info_offset_ + 24
+      return (this->info_offset_ + 28
 	      + section_count * input_section_entry_size
 	      + symndx * 20);
     }
@@ -867,6 +889,16 @@ class Incremental_inputs_reader
 		  || this->type() == INCREMENTAL_INPUT_ARCHIVE_MEMBER);
 
       return Swap32::readval(this->inputs_->p_ + this->info_offset_ + 20);
+    }
+
+    // Return the COMDAT group count -- for objects only.
+    unsigned int
+    get_comdat_group_count() const
+    {
+      gold_assert(this->type() == INCREMENTAL_INPUT_OBJECT
+		  || this->type() == INCREMENTAL_INPUT_ARCHIVE_MEMBER);
+
+      return Swap32::readval(this->inputs_->p_ + this->info_offset_ + 24);
     }
 
     // Return the object count -- for scripts only.
@@ -939,7 +971,7 @@ class Incremental_inputs_reader
     {
       Input_section_info info;
       const unsigned char* p = (this->inputs_->p_
-				+ this->info_offset_ + 24
+				+ this->info_offset_ + 28
 				+ n * input_section_entry_size);
       unsigned int name_offset = Swap32::readval(p);
       info.name = this->inputs_->get_string(name_offset);
@@ -957,10 +989,25 @@ class Incremental_inputs_reader
 		  || this->type() == INCREMENTAL_INPUT_ARCHIVE_MEMBER);
       unsigned int section_count = this->get_input_section_count();
       const unsigned char* p = (this->inputs_->p_
-				+ this->info_offset_ + 24
+				+ this->info_offset_ + 28
 				+ section_count * input_section_entry_size
 				+ n * 20);
       return Incremental_global_symbol_reader<big_endian>(p);
+    }
+
+    // Return the signature of the Nth comdat group -- for objects only.
+    const char*
+    get_comdat_group_signature(unsigned int n) const
+    {
+      unsigned int section_count = this->get_input_section_count();
+      unsigned int symbol_count = this->get_global_symbol_count();
+      const unsigned char* p = (this->inputs_->p_
+				+ this->info_offset_ + 28
+				+ section_count * input_section_entry_size
+				+ symbol_count * 20
+				+ n * 4);
+      unsigned int name_offset = Swap32::readval(p);
+      return this->inputs_->get_string(name_offset);
     }
 
     // Return the output symbol index for the Nth global symbol -- for shared

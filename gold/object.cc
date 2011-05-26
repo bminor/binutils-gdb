@@ -825,6 +825,13 @@ Sized_relobj_file<size, big_endian>::include_section_group(
       is_comdat = true;
     }
 
+  if (is_comdat && include_group)
+    {
+      Incremental_inputs* incremental_inputs = layout->incremental_inputs();
+      if (incremental_inputs != NULL)
+	incremental_inputs->report_comdat_group(this, signature.c_str());
+    }
+
   size_t count = shdr.get_sh_size() / sizeof(elfcpp::Elf_Word);
 
   std::vector<unsigned int> shndxes;
