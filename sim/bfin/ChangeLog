@@ -1,5 +1,9 @@
 2011-05-25  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-main.h (TRACE_SYSCALL): Change EVENTS to SYSCALL.
+
+2011-05-25  Mike Frysinger  <vapier@gentoo.org>
+
 	* dv-bfin_cec.h (BFIN_COREMMR_CEC_{BASE,SIZE}): Move to ...
 	* dv-bfin_ctimer.h (BFIN_COREMMR_CTIMER_{BASE,SIZE}): Move to ...
 	* dv-bfin_dma.h (BFIN_MMR_DMA_SIZE): Move to ...
