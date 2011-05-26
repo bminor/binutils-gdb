@@ -1391,7 +1391,7 @@ elf_symfile_read (struct objfile *objfile, int symfile_flags)
 				bfd_section_size (abfd, str_sect));
     }
 
-  if (dwarf2_has_info (objfile))
+  if (dwarf2_has_info (objfile, NULL))
     {
       /* elf_sym_fns_gdb_index cannot handle simultaneous non-DWARF debug
 	 information present in OBJFILE.  If there is such debug info present
@@ -1437,7 +1437,7 @@ elf_symfile_read (struct objfile *objfile, int symfile_flags)
 static void
 read_psyms (struct objfile *objfile)
 {
-  if (dwarf2_has_info (objfile))
+  if (dwarf2_has_info (objfile, NULL))
     dwarf2_build_psymtabs (objfile);
 }
 

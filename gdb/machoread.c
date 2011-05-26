@@ -660,7 +660,7 @@ macho_symfile_read (struct objfile *objfile, int symfile_flags)
       /* Try to read .eh_frame / .debug_frame.  */
       /* First, locate these sections.  We ignore the result status
 	 as it only checks for debug info.  */
-      dwarf2_has_info (objfile);
+      dwarf2_has_info (objfile, NULL);
       dwarf2_build_frame_info (objfile);
       
       /* Check for DSYM file.  */
@@ -702,7 +702,7 @@ macho_symfile_read (struct objfile *objfile, int symfile_flags)
 	}
     }
 
-  if (dwarf2_has_info (objfile))
+  if (dwarf2_has_info (objfile, NULL))
     {
       /* DWARF 2 sections */
       dwarf2_build_psymtabs (objfile);

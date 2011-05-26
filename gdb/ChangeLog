@@ -1,3 +1,20 @@
+2011-05-26  Tristan Gingold  <gingold@adacore.com>
+
+	* symfile.h (struct dwarf2_section_names): New type.
+	(struct dwarf2_debug_sections): New type.
+	(dwarf2_has_info): Add parameter.
+	* dwarf2read.c (dwarf2_elf_names): New variable.
+	(INFO_SECTION, ABBREV_SECTION, LINE_SECTION, LOC_SECTION)
+	(MACINFO_SECTION, STR_SECTION, RANGES_SECTION, TYPES_SECTION)
+	(FRAME_SECTION, EH_FRAME_SECTION, GDB_INDEX_SECTION): Remove.
+	(dwarf2_has_info): Add names parameter.  Pass names
+	to dwarf2_locate_sections.
+	(section_is_p): Rewrite using the names parameter.
+	(dwarf2_locate_sections): Use section names from the names parameter.
+	* coffread.c (coff_symfile_read): Adjust call to dwarf2_has_info.
+	* elfread.c (read_psyms): Ditto.
+	* machoread.c (macho_symfile_read): Ditto.
+
 2011-05-25  Andreas Schwab  <schwab@redhat.com>
 
 	PR gdb/8677

@@ -553,7 +553,42 @@ extern struct cleanup *increment_reading_symtab (void);
 
 /* From dwarf2read.c */
 
-extern int dwarf2_has_info (struct objfile *);
+/* Names for a dwarf2 debugging section.  The field NORMAL is the normal
+   section name (usually from the DWARF standard), while the field COMPRESSED
+   is the name of compressed sections.  If your object file format doesn't
+   support compressed sections, the field COMPRESSED can be NULL.  Likewise,
+   the debugging section is not supported, the field NORMAL can be NULL too.
+   It doesn't make sense to have a NULL NORMAL field but a non-NULL COMPRESSED
+   field.  */
+
+struct dwarf2_section_names {
+  const char *normal;
+  const char *compressed;
+};
+
+/* List of names for dward2 debugging sections.  Also most object file formats
+   use the standardized (ie ELF) names, some (eg XCOFF) have customized names
+   due to restrictions.
+   The table for the standard names is defined in dwarf2read.c.  Please
+   update all instances of dwarf2_debug_sections if you add a field to this
+   structure.  It is always safe to use { NULL, NULL } in this case.  */
+
+struct dwarf2_debug_sections {
+  struct dwarf2_section_names info;
+  struct dwarf2_section_names abbrev;
+  struct dwarf2_section_names line;
+  struct dwarf2_section_names loc;
+  struct dwarf2_section_names macinfo;
+  struct dwarf2_section_names str;
+  struct dwarf2_section_names ranges;
+  struct dwarf2_section_names types;
+  struct dwarf2_section_names frame;
+  struct dwarf2_section_names eh_frame;
+  struct dwarf2_section_names gdb_index;
+};
+
+extern int dwarf2_has_info (struct objfile *,
+                            const struct dwarf2_debug_sections *);
 
 /* Dwarf2 sections that can be accessed by dwarf2_get_section_info.  */
 enum dwarf2_section_enum {

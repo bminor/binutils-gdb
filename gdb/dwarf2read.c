@@ -243,22 +243,24 @@ struct dwarf2_per_objfile
 
 static struct dwarf2_per_objfile *dwarf2_per_objfile;
 
-/* names of the debugging sections */
+/* Default names of the debugging sections.  */
 
 /* Note that if the debugging section has been compressed, it might
    have a name like .zdebug_info.  */
 
-#define INFO_SECTION     "debug_info"
-#define ABBREV_SECTION   "debug_abbrev"
-#define LINE_SECTION     "debug_line"
-#define LOC_SECTION      "debug_loc"
-#define MACINFO_SECTION  "debug_macinfo"
-#define STR_SECTION      "debug_str"
-#define RANGES_SECTION   "debug_ranges"
-#define TYPES_SECTION    "debug_types"
-#define FRAME_SECTION    "debug_frame"
-#define EH_FRAME_SECTION "eh_frame"
-#define GDB_INDEX_SECTION "gdb_index"
+static const struct dwarf2_debug_sections dwarf2_elf_names = {
+  { ".debug_info", ".zdebug_info" },
+  { ".debug_abbrev", ".zdebug_abbrev" },
+  { ".debug_line", ".zdebug_line" },
+  { ".debug_loc", ".zdebug_loc" },
+  { ".debug_macinfo", ".zdebug_macinfo" },
+  { ".debug_str", ".zdebug_str" },
+  { ".debug_ranges", ".zdebug_ranges" },
+  { ".debug_types", ".zdebug_types" },
+  { ".debug_frame", ".zdebug_frame" },
+  { ".eh_frame", NULL },
+  { ".gdb_index", ".zgdb_index" }
+};
 
 /* local data types */
 
@@ -1335,10 +1337,13 @@ static const char *dwarf2_physname (char *name, struct die_info *die,
 				    struct dwarf2_cu *cu);
 
 /* Try to locate the sections we need for DWARF 2 debugging
-   information and return true if we have enough to do something.  */
+   information and return true if we have enough to do something.
+   NAMES points to the dwarf2 section names, or is NULL if the standard
+   ELF names are used.  */
 
 int
-dwarf2_has_info (struct objfile *objfile)
+dwarf2_has_info (struct objfile *objfile,
+                 const struct dwarf2_debug_sections *names)
 {
   dwarf2_per_objfile = objfile_data (objfile, dwarf2_objfile_data_key);
   if (!dwarf2_per_objfile)
@@ -1351,23 +1356,28 @@ dwarf2_has_info (struct objfile *objfile)
       set_objfile_data (objfile, dwarf2_objfile_data_key, data);
       dwarf2_per_objfile = data;
 
-      bfd_map_over_sections (objfile->obfd, dwarf2_locate_sections, NULL);
+      bfd_map_over_sections (objfile->obfd, dwarf2_locate_sections,
+                             (void *) names);
       dwarf2_per_objfile->objfile = objfile;
     }
   return (dwarf2_per_objfile->info.asection != NULL
 	  && dwarf2_per_objfile->abbrev.asection != NULL);
 }
 
-/* When loading sections, we can either look for ".<name>", or for
- * ".z<name>", which indicates a compressed section.  */
+/* When loading sections, we look either for uncompressed section or for
+   compressed section names.  */
 
 static int
-section_is_p (const char *section_name, const char *name)
+section_is_p (const char *section_name,
+              const struct dwarf2_section_names *names)
 {
-  return (section_name[0] == '.'
-	  && (strcmp (section_name + 1, name) == 0
-	      || (section_name[1] == 'z'
-		  && strcmp (section_name + 2, name) == 0)));
+  if (names->normal != NULL
+      && strcmp (section_name, names->normal) == 0)
+    return 1;
+  if (names->compressed != NULL
+      && strcmp (section_name, names->compressed) == 0)
+    return 1;
+  return 0;
 }
 
 /* This function is mapped across the sections and remembers the
@@ -1375,44 +1385,51 @@ section_is_p (const char *section_name, const char *name)
    in.  */
 
 static void
-dwarf2_locate_sections (bfd *abfd, asection *sectp, void *ignore_ptr)
+dwarf2_locate_sections (bfd *abfd, asection *sectp, void *vnames)
 {
-  if (section_is_p (sectp->name, INFO_SECTION))
+  const struct dwarf2_debug_sections *names;
+
+  if (vnames == NULL)
+    names = &dwarf2_elf_names;
+  else
+    names = (const struct dwarf2_debug_sections *) vnames;
+
+  if (section_is_p (sectp->name, &names->info))
     {
       dwarf2_per_objfile->info.asection = sectp;
       dwarf2_per_objfile->info.size = bfd_get_section_size (sectp);
     }
-  else if (section_is_p (sectp->name, ABBREV_SECTION))
+  else if (section_is_p (sectp->name, &names->abbrev))
     {
       dwarf2_per_objfile->abbrev.asection = sectp;
       dwarf2_per_objfile->abbrev.size = bfd_get_section_size (sectp);
     }
-  else if (section_is_p (sectp->name, LINE_SECTION))
+  else if (section_is_p (sectp->name, &names->line))
     {
       dwarf2_per_objfile->line.asection = sectp;
       dwarf2_per_objfile->line.size = bfd_get_section_size (sectp);
     }
-  else if (section_is_p (sectp->name, LOC_SECTION))
+  else if (section_is_p (sectp->name, &names->loc))
     {
       dwarf2_per_objfile->loc.asection = sectp;
       dwarf2_per_objfile->loc.size = bfd_get_section_size (sectp);
     }
-  else if (section_is_p (sectp->name, MACINFO_SECTION))
+  else if (section_is_p (sectp->name, &names->macinfo))
     {
       dwarf2_per_objfile->macinfo.asection = sectp;
       dwarf2_per_objfile->macinfo.size = bfd_get_section_size (sectp);
     }
-  else if (section_is_p (sectp->name, STR_SECTION))
+  else if (section_is_p (sectp->name, &names->str))
     {
       dwarf2_per_objfile->str.asection = sectp;
       dwarf2_per_objfile->str.size = bfd_get_section_size (sectp);
     }
-  else if (section_is_p (sectp->name, FRAME_SECTION))
+  else if (section_is_p (sectp->name, &names->frame))
     {
       dwarf2_per_objfile->frame.asection = sectp;
       dwarf2_per_objfile->frame.size = bfd_get_section_size (sectp);
     }
-  else if (section_is_p (sectp->name, EH_FRAME_SECTION))
+  else if (section_is_p (sectp->name, &names->eh_frame))
     {
       flagword aflag = bfd_get_section_flags (ignore_abfd, sectp);
 
@@ -1422,17 +1439,17 @@ dwarf2_locate_sections (bfd *abfd, asection *sectp, void *ignore_ptr)
           dwarf2_per_objfile->eh_frame.size = bfd_get_section_size (sectp);
         }
     }
-  else if (section_is_p (sectp->name, RANGES_SECTION))
+  else if (section_is_p (sectp->name, &names->ranges))
     {
       dwarf2_per_objfile->ranges.asection = sectp;
       dwarf2_per_objfile->ranges.size = bfd_get_section_size (sectp);
     }
-  else if (section_is_p (sectp->name, TYPES_SECTION))
+  else if (section_is_p (sectp->name, &names->types))
     {
       dwarf2_per_objfile->types.asection = sectp;
       dwarf2_per_objfile->types.size = bfd_get_section_size (sectp);
     }
-  else if (section_is_p (sectp->name, GDB_INDEX_SECTION))
+  else if (section_is_p (sectp->name, &names->gdb_index))
     {
       dwarf2_per_objfile->gdb_index.asection = sectp;
       dwarf2_per_objfile->gdb_index.size = bfd_get_section_size (sectp);
