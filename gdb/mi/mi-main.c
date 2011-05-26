@@ -285,9 +285,6 @@ exec_reverse_continue (char **argv, int argc)
   enum exec_direction_kind dir = execution_direction;
   struct cleanup *old_chain;
 
-  if (dir == EXEC_ERROR)
-    error (_("Target %s does not support this command."), target_shortname);
-
   if (dir == EXEC_REVERSE)
     error (_("Already in reverse mode."));
 

@@ -352,8 +352,7 @@ enum stop_kind
 enum exec_direction_kind
   {
     EXEC_FORWARD,
-    EXEC_REVERSE,
-    EXEC_ERROR
+    EXEC_REVERSE
   };
 
 /* The current execution direction.  This should only be set to enum

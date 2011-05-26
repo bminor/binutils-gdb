@@ -6920,12 +6920,10 @@ show_exec_direction_func (struct ui_file *out, int from_tty,
   case EXEC_REVERSE:
     fprintf_filtered (out, _("Reverse.\n"));
     break;
-  case EXEC_ERROR:
   default:
-    fprintf_filtered (out, _("Forward (target `%s' does not "
-			     "support exec-direction).\n"),
-		      target_shortname);
-    break;
+    internal_error (__FILE__, __LINE__,
+		    _("bogus execution_direction value: %d"),
+		    (int) execution_direction);
   }
 }
 

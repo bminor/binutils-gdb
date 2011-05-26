@@ -1,5 +1,13 @@
 2011-05-26  Pedro Alves  <pedro@codesourcery.com>
 
+	* inferior.h (enum exec_direction_kind): Delete EXEC_ERROR.
+	* infrun.c (show_exec_direction_func): Don't handle EXEC_ERROR.
+	Internal error on invalid values.
+	* reverse.c: Don't handle EXEC_ERROR.
+	* mi/mi-main.c: Don't handle EXEC_ERROR.
+
+2011-05-26  Pedro Alves  <pedro@codesourcery.com>
+
 	* record.c: Include event-loop.h, inf-loop.h.
 	(record_beneath_to_async): New global.
 	(tmp_to_async): New global.
