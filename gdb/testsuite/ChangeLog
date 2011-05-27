@@ -1,3 +1,13 @@
+2011-05-27  Marek Polacek  <mpolacek@redhat.com>
+
+	* gdb.mi/mi-nonstop-exit.exp: Remove the `-gdb-show non-stop' testcase,
+	remove the `supported' variable.
+	* gdb.mi/mi-nonstop.exp: Likewise.
+	* gdb.mi/mi-ns-stale-regcache.exp: Likewise.
+	* gdb.mi/mi-nsintrall.exp: Likewise.
+	* gdb.mi/mi-nsmoribund.exp: Likewise.
+	* gdb.mi/mi-nsthrexec.exp: Likewise.
+
 2011-05-26  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.reverse/finish-reverse-bkpt.exp: New test.

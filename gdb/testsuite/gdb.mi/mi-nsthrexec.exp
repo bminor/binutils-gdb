@@ -46,17 +46,6 @@ if {[gdb_compile_pthreads "$srcdir/$subdir/$srcfile" $binfile executable $option
 mi_gdb_reinitialize_dir $srcdir/$subdir
 mi_gdb_load $binfile
 
-set supported 0
-gdb_test_multiple "-gdb-show non-stop" "" {
-    -re ".*\\^done,value=\"off\",supported=\"(\[^\"\]+)\"\r\n$mi_gdb_prompt$" {
-	if { $expect_out(1,string) == "1" } {
-	    set supported 1
-	}
-    }
-    -re ".*$mi_gdb_prompt$" {
-    }
-}
-
 mi_gdb_test "-gdb-set non-stop 1" ".*"
 mi_gdb_test "-gdb-set target-async 1" ".*"
 detect_async
