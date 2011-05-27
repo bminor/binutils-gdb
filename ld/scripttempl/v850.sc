@@ -180,6 +180,7 @@ SECTIONS
 
   ${RELOCATING+_end = . ;}
   ${RELOCATING+PROVIDE (end = .);}
+  ${RELOCATING+PROVIDE (_heap_start = .);}
 
   /* Stabs debugging sections.  */
   .stab 0		: { *(.stab) }
