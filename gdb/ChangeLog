@@ -1,3 +1,20 @@
+2011-05-27  Pedro Alves  <pedro@codesourcery.com>
+
+	* defs.h (struct continuation, continuation_ftype)
+	(continuation_free_arg_ftype, add_continuation)
+	(do_all_continuations, do_all_continuations_thread)
+	(discard_all_continuations, discard_all_continuations_thread)
+	(add_intermediate_continuation, do_all_intermediate_continuations)
+	(do_all_intermediate_continuations_thread)
+	(discard_all_intermediate_continuations)
+	(discard_all_intermediate_continuations_thread)
+	(add_inferior_continuation, do_all_inferior_continuations)
+	(discard_all_inferior_continuations): Move to ...
+	* continuations.h: ... this new file.
+	* breakpoint.c, continuations.c, event-top.c, inf-loop.c,
+	infcmd.c, inferior.c, infrun.c, interps.c: Include
+	continuations.h.
+
 2011-05-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Doug Evans  <dje@google.com>
 

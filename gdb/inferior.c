@@ -31,6 +31,7 @@
 #include "symfile.h"
 #include "environ.h"
 #include "cli/cli-utils.h"
+#include "continuations.h"
 
 void _initialize_inferiors (void);
 

@@ -33,7 +33,7 @@
 #include "cli/cli-script.h"     /* for reset_command_nest_depth */
 #include "main.h"
 #include "gdbthread.h"
-
+#include "continuations.h"
 #include "gdbcmd.h"		/* for dont_repeat() */
 
 /* readline include files.  */

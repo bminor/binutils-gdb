@@ -22,6 +22,7 @@
 #include "defs.h"
 #include "gdbthread.h"
 #include "inferior.h"
+#include "continuations.h"
 
 struct continuation
 {

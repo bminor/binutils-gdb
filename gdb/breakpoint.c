@@ -64,6 +64,7 @@
 #include "xml-syscall.h"
 #include "parser-defs.h"
 #include "cli/cli-utils.h"
+#include "continuations.h"
 
 /* readline include files */
 #include "readline/readline.h"

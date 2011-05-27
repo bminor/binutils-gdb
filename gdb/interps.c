@@ -41,6 +41,7 @@
 #include "gdb_assert.h"
 #include "top.h"		/* For command_loop.  */
 #include "exceptions.h"
+#include "continuations.h"
 
 struct interp
 {

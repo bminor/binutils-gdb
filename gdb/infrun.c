@@ -54,6 +54,7 @@
 #include "inline-frame.h"
 #include "jit.h"
 #include "tracepoint.h"
+#include "continuations.h"
 
 /* Prototypes for local functions */
 

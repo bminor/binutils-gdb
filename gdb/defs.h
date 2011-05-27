@@ -730,51 +730,8 @@ extern struct command_line *read_command_lines_1 (char * (*) (void), int,
 
 extern void free_command_lines (struct command_line **);
 
-/* To continue the execution commands when running gdb asynchronously.
-   A continuation structure contains a pointer to a function to be called 
-   to finish the command, once the target has stopped.  Such mechanism is
-   used by the finish and until commands, and in the remote protocol
-   when opening an extended-remote connection.  */
-
-struct continuation;
 struct thread_info;
 struct inferior;
-
-/* From continuations.c */
-
-/* Prototype of the continuation callback functions.  */
-typedef void (continuation_ftype) (void *);
-
-/* Prototype of the function responsible for releasing the argument
-   passed to the continuation callback functions, either when the
-   continuation is called, or discarded.  */
-typedef void (continuation_free_arg_ftype) (void *);
-
-/* Thread specific continuations.  */
-
-extern void add_continuation (struct thread_info *,
-			      continuation_ftype *, void *,
-			      continuation_free_arg_ftype *);
-extern void do_all_continuations (void);
-extern void do_all_continuations_thread (struct thread_info *);
-extern void discard_all_continuations (void);
-extern void discard_all_continuations_thread (struct thread_info *);
-
-extern void add_intermediate_continuation (struct thread_info *,
-					   continuation_ftype *, void *,
-					   continuation_free_arg_ftype *);
-extern void do_all_intermediate_continuations (void);
-extern void do_all_intermediate_continuations_thread (struct thread_info *);
-extern void discard_all_intermediate_continuations (void);
-extern void discard_all_intermediate_continuations_thread (struct thread_info *);
-
-/* Inferior specific (any thread) continuations.  */
-
-extern void add_inferior_continuation (continuation_ftype *,
-				       void *,
-				       continuation_free_arg_ftype *);
-extern void do_all_inferior_continuations (void);
-extern void discard_all_inferior_continuations (struct inferior *inf);
 
 /* String containing the current directory (what getwd would return).  */
 

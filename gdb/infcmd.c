@@ -56,6 +56,7 @@
 #include "inline-frame.h"
 #include "tracepoint.h"
 #include "inf-loop.h"
+#include "continuations.h"
 
 /* Functions exported for general use, in inferior.h: */
 

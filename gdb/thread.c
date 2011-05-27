@@ -45,6 +45,7 @@
 #include "cli/cli-decode.h"
 #include "gdb_regex.h"
 #include "cli/cli-utils.h"
+#include "continuations.h"
 
 /* Definition of struct thread_info exported to gdbthread.h.  */
 

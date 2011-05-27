@@ -28,6 +28,7 @@
 #include "exceptions.h"
 #include "language.h"
 #include "gdbthread.h"
+#include "continuations.h"
 
 static int fetch_inferior_event_wrapper (gdb_client_data client_data);
 
