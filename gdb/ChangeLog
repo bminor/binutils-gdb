@@ -1,3 +1,11 @@
+2011-05-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Doug Evans  <dje@google.com>
+
+	Fix PR 10970, PR 12702.
+	* linux-nat.c (linux_lwp_is_zombie): New function.
+	(wait_lwp): Initialize status.  New variable prev_mask.  Block signals.
+	Check for linux_lwp_is_zombie.  Use WNOHANG and sigsuspend.
+
 2011-05-27  Pedro Alves  <pedro@codesourcery.com>
 
 	* defs.h (continuation_ftype, continuation_free_arg_ftype): New
