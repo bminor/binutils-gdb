@@ -1,5 +1,27 @@
 2011-05-27  Pedro Alves  <pedro@codesourcery.com>
 
+	* continuations.c (make_continuation): Make it return void.
+	(do_my_continuations): Rename to ...
+	(do_my_continuations_1): ... this.  Remove old_chain parameter and
+	adjust.
+	(do_my_continuations): New.
+	(discard_my_continuations): Rename to ...
+	(discard_my_continuations_1): ... this.  Remove old_chain
+	parameter and adjust.
+	(discard_my_continuations): New.
+	(add_inferior_continuation): Simplify.
+	(do_all_inferior_continuations): Reimplement on top
+	do_my_continuations.
+	(discard_all_inferior_continuations): Simplify.
+	(add_continuation): Simplify.
+	(do_all_continuations_ptid): Simplify.
+	(discard_all_continuations_thread_callback): Simplify.
+	(add_intermediate_continuation): Simplify.
+	(discard_all_intermediate_continuations_thread_callback):
+	Simplify.
+
+2011-05-27  Pedro Alves  <pedro@codesourcery.com>
+
 	* utils.c (struct continuation, add_continuation)
 	(add_inferior_continuation)
 	(do_all_inferior_continuations, discard_all_inferior_continuations)

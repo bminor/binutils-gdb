@@ -33,35 +33,30 @@ struct continuation
 
 typedef void (make_continuation_ftype) (void *);
 
-/* Add a new continuation to the continuation chain, and return the
-   previous chain pointer to be passed later to do_continuations or
-   discard_continuations.  Args are FUNCTION to run the continuation
-   up with, and ARG to pass to it.  */
+/* Add a new continuation to the continuation chain.  Args are
+   FUNCTION to run the continuation up with, and ARG to pass to
+   it.  */
 
-static struct continuation *
+static void
 make_continuation (struct continuation **pmy_chain,
 		   make_continuation_ftype *function,
 		   void *arg,  void (*free_arg) (void *))
 {
   struct continuation *new = XNEW (struct continuation);
-  struct continuation *old_chain = *pmy_chain;
 
   new->next = *pmy_chain;
   new->function = function;
   new->free_arg = free_arg;
   new->arg = arg;
   *pmy_chain = new;
-
-  return old_chain;
 }
 
 static void
-do_my_continuations (struct continuation **pmy_chain,
-		     struct continuation *old_chain)
+do_my_continuations_1 (struct continuation **pmy_chain)
 {
   struct continuation *ptr;
 
-  while ((ptr = *pmy_chain) != old_chain)
+  while ((ptr = *pmy_chain) != NULL)
     {
       *pmy_chain = ptr->next;	/* Do this first in case of recursion.  */
       (*ptr->function) (ptr->arg);
@@ -71,13 +66,32 @@ do_my_continuations (struct continuation **pmy_chain,
     }
 }
 
-void
-discard_my_continuations (struct continuation **pmy_chain,
-			  struct continuation *old_chain)
+static void
+do_my_continuations (struct continuation **list)
+{
+  struct continuation *continuations;
+
+  if (*list == NULL)
+    return;
+
+  /* Copy the list header into another pointer, and set the global
+     list header to null, so that the global list can change as a side
+     effect of invoking the continuations and the processing of the
+     preexisting continuations will not be affected.  */
+
+  continuations = *list;
+  *list = NULL;
+
+  /* Work now on the list we have set aside.  */
+  do_my_continuations_1 (&continuations);
+}
+
+static void
+discard_my_continuations_1 (struct continuation **pmy_chain)
 {
   struct continuation *ptr;
 
-  while ((ptr = *pmy_chain) != old_chain)
+  while ((ptr = *pmy_chain) != NULL)
     {
       *pmy_chain = ptr->next;
       if (ptr->free_arg)
@@ -86,23 +100,13 @@ discard_my_continuations (struct continuation **pmy_chain,
     }
 }
 
-/* Add a continuation to the continuation list of THREAD.  The new
-   continuation will be added at the front.  */
-
-void
-add_continuation (struct thread_info *thread,
-		  void (*continuation_hook) (void *), void *args,
-		  void (*continuation_free_args) (void *))
+static void
+discard_my_continuations (struct continuation **list)
 {
-  struct continuation *continuations = thread->continuations;
-  make_cleanup_ftype *continuation_hook_fn = continuation_hook;
+  struct continuation *continuation_ptr = *list;
 
-  make_continuation (&continuations,
-		     continuation_hook_fn,
-		     args,
-		     continuation_free_args);
-
-  thread->continuations = continuations;
+  discard_my_continuations_1 (list);
+  *list = NULL;
 }
 
 /* Add a continuation to the continuation list of INFERIOR.  The new
@@ -113,15 +117,9 @@ add_inferior_continuation (void (*continuation_hook) (void *), void *args,
 			   void (*continuation_free_args) (void *))
 {
   struct inferior *inf = current_inferior ();
-  struct continuation *continuations = inf->continuations;
-  make_cleanup_ftype *continuation_hook_fn = continuation_hook;
 
-  make_continuation (&continuations,
-		     continuation_hook_fn,
-		     args,
-		     continuation_free_args);
-
-  inf->continuations = continuations;
+  make_continuation (&inf->continuations, continuation_hook,
+		     args, continuation_free_args);
 }
 
 /* Do all continuations of the current inferior.  */
@@ -129,22 +127,8 @@ add_inferior_continuation (void (*continuation_hook) (void *), void *args,
 void
 do_all_inferior_continuations (void)
 {
-  struct continuation *continuations;
   struct inferior *inf = current_inferior ();
-
-  if (inf->continuations == NULL)
-    return;
-
-  /* Copy the list header into another pointer, and set the global
-     list header to null, so that the global list can change as a side
-     effect of invoking the continuations and the processing of the
-     preexisting continuations will not be affected.  */
-
-  continuations = inf->continuations;
-  inf->continuations = NULL;
-
-  /* Work now on the list we have set aside.  */
-  do_my_continuations (&continuations, NULL);
+  do_my_continuations (&inf->continuations);
 }
 
 /* Get rid of all the inferior-wide continuations of INF.  */
@@ -152,10 +136,19 @@ do_all_inferior_continuations (void)
 void
 discard_all_inferior_continuations (struct inferior *inf)
 {
-  struct continuation *continuation_ptr = inf->continuations;
+  discard_my_continuations (&inf->continuations);
+}
 
-  discard_my_continuations (&continuation_ptr, NULL);
-  inf->continuations = NULL;
+/* Add a continuation to the continuation list of THREAD.  The new
+   continuation will be added at the front.  */
+
+void
+add_continuation (struct thread_info *thread,
+		  void (*continuation_hook) (void *), void *args,
+		  void (*continuation_free_args) (void *))
+{
+  make_continuation (&thread->continuations, continuation_hook,
+		     args, continuation_free_args);
 }
 
 static void
@@ -180,7 +173,6 @@ do_all_continuations_ptid (ptid_t ptid,
 			   struct continuation **continuations_p)
 {
   struct cleanup *old_chain;
-  struct continuation *continuations;
   ptid_t current_thread;
 
   if (*continuations_p == NULL)
@@ -202,16 +194,7 @@ do_all_continuations_ptid (ptid_t ptid,
   /* Let the continuation see this thread as selected.  */
   switch_to_thread (ptid);
 
-  /* Copy the list header into another pointer, and set the global
-     list header to null, so that the global list can change as a side
-     effect of invoking the continuations and the processing of the
-     preexisting continuations will not be affected.  */
-
-  continuations = *continuations_p;
-  *continuations_p = NULL;
-
-  /* Work now on the list we have set aside.  */
-  do_my_continuations (&continuations, NULL);
+  do_my_continuations (continuations_p);
 
   do_cleanups (old_chain);
 }
@@ -247,10 +230,7 @@ static int
 discard_all_continuations_thread_callback (struct thread_info *thread,
 					   void *data)
 {
-  struct continuation *continuation_ptr = thread->continuations;
-
-  discard_my_continuations (&continuation_ptr, NULL);
-  thread->continuations = NULL;
+  discard_my_continuations (&thread->continuations);
   return 0;
 }
 
@@ -280,15 +260,8 @@ add_intermediate_continuation (struct thread_info *thread,
 			       (void *), void *args,
 			       void (*continuation_free_args) (void *))
 {
-  struct continuation *continuations = thread->intermediate_continuations;
-  make_cleanup_ftype *continuation_hook_fn = continuation_hook;
-
-  make_continuation (&continuations,
-		     continuation_hook_fn,
-		     args,
-		     continuation_free_args);
-
-  thread->intermediate_continuations = continuations;
+  make_continuation (&thread->intermediate_continuations, continuation_hook,
+		     args, continuation_free_args);
 }
 
 /* Walk down the cmd_continuation list, and execute all the
@@ -332,10 +305,7 @@ static int
 discard_all_intermediate_continuations_thread_callback (struct thread_info *thread,
 							void *data)
 {
-  struct continuation *continuation_ptr = thread->intermediate_continuations;
-
-  discard_my_continuations (&continuation_ptr, NULL);
-  thread->intermediate_continuations = NULL;
+  discard_my_continuations (&thread->intermediate_continuations);
   return 0;
 }
 
