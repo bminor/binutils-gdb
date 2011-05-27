@@ -1,5 +1,9 @@
 2011-05-27  Marek Polacek  <mpolacek@redhat.com>
 
+        * gdb.mi/mi-nonstop.exp: Replace gdb_test_multiple with mi_gdb_test.
+
+2011-05-27  Marek Polacek  <mpolacek@redhat.com>
+
 	* gdb.mi/mi-nonstop-exit.exp: Remove the `-gdb-show non-stop' testcase,
 	remove the `supported' variable.
 	* gdb.mi/mi-nonstop.exp: Likewise.
