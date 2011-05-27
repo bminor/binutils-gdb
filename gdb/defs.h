@@ -740,21 +740,29 @@ struct continuation;
 struct thread_info;
 struct inferior;
 
-/* From utils.c */
+/* From continuations.c */
+
+/* Prototype of the continuation callback functions.  */
+typedef void (continuation_ftype) (void *);
+
+/* Prototype of the function responsible for releasing the argument
+   passed to the continuation callback functions, either when the
+   continuation is called, or discarded.  */
+typedef void (continuation_free_arg_ftype) (void *);
 
 /* Thread specific continuations.  */
 
 extern void add_continuation (struct thread_info *,
-			      void (*)(void *), void *,
-			      void (*)(void *));
+			      continuation_ftype *, void *,
+			      continuation_free_arg_ftype *);
 extern void do_all_continuations (void);
 extern void do_all_continuations_thread (struct thread_info *);
 extern void discard_all_continuations (void);
 extern void discard_all_continuations_thread (struct thread_info *);
 
 extern void add_intermediate_continuation (struct thread_info *,
-					   void (*)(void *), void *,
-					   void (*)(void *));
+					   continuation_ftype *, void *,
+					   continuation_free_arg_ftype *);
 extern void do_all_intermediate_continuations (void);
 extern void do_all_intermediate_continuations_thread (struct thread_info *);
 extern void discard_all_intermediate_continuations (void);
@@ -762,9 +770,9 @@ extern void discard_all_intermediate_continuations_thread (struct thread_info *)
 
 /* Inferior specific (any thread) continuations.  */
 
-extern void add_inferior_continuation (void (*) (void *),
+extern void add_inferior_continuation (continuation_ftype *,
 				       void *,
-				       void (*) (void *));
+				       continuation_free_arg_ftype *);
 extern void do_all_inferior_continuations (void);
 extern void discard_all_inferior_continuations (struct inferior *inf);
 

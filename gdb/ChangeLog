@@ -1,5 +1,17 @@
 2011-05-27  Pedro Alves  <pedro@codesourcery.com>
 
+	* defs.h (continuation_ftype, continuation_free_arg_ftype): New
+	typedefs.
+	(add_continuation, add_intermediate_continuation)
+	(add_inferior_continuation): Use them.
+	* continuations.c (struct continuation): Use them.
+	(make_continuation_ftype): Delete.
+	(make_continuation, add_inferior_continuation, add_continuation)
+	(add_intermediate_continuation): Use continuation_ftype and
+	continuation_free_arg_ftype.  Rename parameters to shorter names.
+
+2011-05-27  Pedro Alves  <pedro@codesourcery.com>
+
 	* continuations.c (make_continuation): Make it return void.
 	(do_my_continuations): Rename to ...
 	(do_my_continuations_1): ... this.  Remove old_chain parameter and

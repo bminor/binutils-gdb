@@ -26,12 +26,10 @@
 struct continuation
 {
   struct continuation *next;
-  void (*function) (void *);
-  void (*free_arg) (void *);
+  continuation_ftype *function;
+  continuation_free_arg_ftype *free_arg;
   void *arg;
 };
-
-typedef void (make_continuation_ftype) (void *);
 
 /* Add a new continuation to the continuation chain.  Args are
    FUNCTION to run the continuation up with, and ARG to pass to
@@ -39,7 +37,7 @@ typedef void (make_continuation_ftype) (void *);
 
 static void
 make_continuation (struct continuation **pmy_chain,
-		   make_continuation_ftype *function,
+		   continuation_ftype *function,
 		   void *arg,  void (*free_arg) (void *))
 {
   struct continuation *new = XNEW (struct continuation);
@@ -113,13 +111,12 @@ discard_my_continuations (struct continuation **list)
    continuation will be added at the front.  */
 
 void
-add_inferior_continuation (void (*continuation_hook) (void *), void *args,
-			   void (*continuation_free_args) (void *))
+add_inferior_continuation (continuation_ftype *hook, void *args,
+			   continuation_free_arg_ftype *free_arg)
 {
   struct inferior *inf = current_inferior ();
 
-  make_continuation (&inf->continuations, continuation_hook,
-		     args, continuation_free_args);
+  make_continuation (&inf->continuations, hook, args, free_arg);
 }
 
 /* Do all continuations of the current inferior.  */
@@ -144,11 +141,10 @@ discard_all_inferior_continuations (struct inferior *inf)
 
 void
 add_continuation (struct thread_info *thread,
-		  void (*continuation_hook) (void *), void *args,
-		  void (*continuation_free_args) (void *))
+		  continuation_ftype *hook, void *args,
+		  continuation_free_arg_ftype *free_arg)
 {
-  make_continuation (&thread->continuations, continuation_hook,
-		     args, continuation_free_args);
+  make_continuation (&thread->continuations, hook, args, free_arg);
 }
 
 static void
@@ -256,12 +252,12 @@ discard_all_continuations (void)
 
 void
 add_intermediate_continuation (struct thread_info *thread,
-			       void (*continuation_hook)
-			       (void *), void *args,
-			       void (*continuation_free_args) (void *))
+			       continuation_ftype *hook,
+			       void *args,
+			       continuation_free_arg_ftype *free_arg)
 {
-  make_continuation (&thread->intermediate_continuations, continuation_hook,
-		     args, continuation_free_args);
+  make_continuation (&thread->intermediate_continuations, hook,
+		     args, free_arg);
 }
 
 /* Walk down the cmd_continuation list, and execute all the
