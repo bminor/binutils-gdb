@@ -1,3 +1,25 @@
+2011-05-27  Pedro Alves  <pedro@codesourcery.com>
+
+	* utils.c (struct continuation, add_continuation)
+	(add_inferior_continuation)
+	(do_all_inferior_continuations, discard_all_inferior_continuations)
+	(restore_thread_cleanup, do_all_continuations_ptid)
+	(do_all_continuations_thread_callback)
+	(do_all_continuations_thread, do_all_continuations)
+	(discard_all_continuations_thread_callback)
+	(discard_all_continuations_thread, discard_all_continuations)
+	(add_intermediate_continuation)
+	(do_all_intermediate_continuations_thread_callback)
+	(do_all_intermediate_continuations_thread)
+	(do_all_intermediate_continuations)
+	(discard_all_intermediate_continuations_thread_callback)
+	(discard_all_intermediate_continuations_thread)
+	(discard_all_intermediate_continuations): Move to ...
+	* continuations.c: ... this new file, and adjust to no longer
+	implement continuations on top of cleanups.
+	* Makefile.in (SFILES): Add continuations.c.
+	(COMMON_OBS): Add continuations.o.
+
 2011-05-26  Pedro Alves  <pedro@codesourcery.com>
 
 	* inferior.h (enum exec_direction_kind): Delete EXEC_ERROR.
