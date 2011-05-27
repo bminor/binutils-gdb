@@ -954,7 +954,7 @@ ver_test_LDADD = ver_test_1.so ver_test_2.so ver_test_4.so
 ver_test_1.so: ver_test_1.o ver_test_2.so ver_test_3.o ver_test_4.so gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -shared ver_test_1.o ver_test_2.so ver_test_3.o ver_test_4.so
 ver_test_2.so: ver_test_2.o $(srcdir)/ver_test_2.script ver_test_4.so gcctestdir/ld
-	$(CXXLINK) -Bgcctestdir/ -shared -Wl,--version-script,$(srcdir)/ver_test_2.script ver_test_2.o ver_test_4.so
+	$(CXXLINK) -Bgcctestdir/ -shared -Wl,--version-script,$(srcdir)/ver_test_2.script -Wl,-R,. ver_test_2.o ver_test_4.so
 ver_test_4.so: ver_test_4.o $(srcdir)/ver_test_4.script gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -shared -Wl,--version-script,$(srcdir)/ver_test_4.script ver_test_4.o
 ver_test_1.o: ver_test_1.cc
@@ -1027,7 +1027,7 @@ ver_test_9_DEPENDENCIES = gcctestdir/ld ver_test_9.so
 ver_test_9_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
 ver_test_9_LDADD = ver_test_9.so
 ver_test_9.so: ver_test_9.o ver_test_4.so ver_test_5.so gcctestdir/ld
-	$(CXXLINK) -Bgcctestdir/ -shared ver_test_9.o ver_test_5.so ver_test_4.so
+	$(CXXLINK) -Bgcctestdir/ -shared -Wl,-R,. ver_test_9.o ver_test_5.so ver_test_4.so
 ver_test_9.o: ver_test_9.cc
 	$(CXXCOMPILE) -c -fpic -o $@ $<
 

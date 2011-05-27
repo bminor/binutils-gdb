@@ -1,3 +1,9 @@
+2011-05-27  Ian Lance Taylor  <iant@google.com>
+
+	* testsuite/Makefile.am (ver_test_2.so): Use -Wl,-R,.
+	(ver_test_9.so): Likewise.
+	* testsuite/Makefile.in: Rebuild.
+
 2011-05-26 Cary Coutant  <ccoutant@google.com>
 
 	* incremental-dump.cc (dump_incremental_inputs): Print COMDAT groups.

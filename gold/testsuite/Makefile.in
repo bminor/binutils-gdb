@@ -4155,7 +4155,7 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_1.so: ver_test_1.o ver_test_2.so ver_test_3.o ver_test_4.so gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared ver_test_1.o ver_test_2.so ver_test_3.o ver_test_4.so
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_2.so: ver_test_2.o $(srcdir)/ver_test_2.script ver_test_4.so gcctestdir/ld
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared -Wl,--version-script,$(srcdir)/ver_test_2.script ver_test_2.o ver_test_4.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared -Wl,--version-script,$(srcdir)/ver_test_2.script -Wl,-R,. ver_test_2.o ver_test_4.so
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_4.so: ver_test_4.o $(srcdir)/ver_test_4.script gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared -Wl,--version-script,$(srcdir)/ver_test_4.script ver_test_4.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_1.o: ver_test_1.cc
@@ -4191,7 +4191,7 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_8_2.so: two_file_test_2_pic.o $(srcdir)/ver_test_8.script gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared -Wl,--version-script,$(srcdir)/ver_test_8.script two_file_test_2_pic.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_9.so: ver_test_9.o ver_test_4.so ver_test_5.so gcctestdir/ld
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared ver_test_9.o ver_test_5.so ver_test_4.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared -Wl,-R,. ver_test_9.o ver_test_5.so ver_test_4.so
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_9.o: ver_test_9.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -fpic -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_10.syms: ver_test_10.so
