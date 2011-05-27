@@ -29,6 +29,7 @@ struct value;
 struct block;
 struct breakpoint_object;
 struct get_number_or_range_state;
+struct thread_info;
 
 /* This is the maximum number of bytes a breakpoint instruction can
    take.  Feel free to increase it.  It's just used in a few places to

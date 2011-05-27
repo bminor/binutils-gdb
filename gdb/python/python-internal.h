@@ -106,6 +106,7 @@ struct value;
 struct language_defn;
 struct program_space;
 struct bpstats;
+struct inferior;
 
 extern PyObject *gdb_module;
 extern PyTypeObject value_object_type;

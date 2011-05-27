@@ -1,5 +1,14 @@
 2011-05-27  Pedro Alves  <pedro@codesourcery.com>
 
+	* defs.h (struct thread_info, struct inferior): Delete forward
+	declarations.
+	* breakpoint.h (struct thread_info): New forward declaration.
+	* observer.sh (struct inferior): New forward declaration.
+	* python/python-internal.h (struct inferior): New forward
+	declaration.
+
+2011-05-27  Pedro Alves  <pedro@codesourcery.com>
+
 	* defs.h (struct continuation, continuation_ftype)
 	(continuation_free_arg_ftype, add_continuation)
 	(do_all_continuations, do_all_continuations_thread)

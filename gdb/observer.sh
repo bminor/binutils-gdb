@@ -64,6 +64,7 @@ struct bpstats;
 struct so_list;
 struct objfile;
 struct thread_info;
+struct inferior;
 EOF
         ;;
 esac

@@ -730,9 +730,6 @@ extern struct command_line *read_command_lines_1 (char * (*) (void), int,
 
 extern void free_command_lines (struct command_line **);
 
-struct thread_info;
-struct inferior;
-
 /* String containing the current directory (what getwd would return).  */
 
 extern char *current_directory;
