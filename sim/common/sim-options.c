@@ -458,10 +458,14 @@ standard_option_handler (SIM_DESC sd, sim_cpu *cpu, int opt,
 
     case OPTION_SYSROOT:
       /* Don't leak memory in the odd event that there's lots of
-	 --sysroot=... options.  */
-      if (simulator_sysroot[0] != '\0' && arg[0] != '\0')
+	 --sysroot=... options.  We treat "" specially since this
+	 is the statically initialized value and cannot free it.  */
+      if (simulator_sysroot[0] != '\0')
 	free (simulator_sysroot);
-      simulator_sysroot = xstrdup (arg);
+      if (arg[0] != '\0')
+	simulator_sysroot = xstrdup (arg);
+      else
+	simulator_sysroot = "";
       break;
     }
 

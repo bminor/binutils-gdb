@@ -1,3 +1,9 @@
+2011-05-27  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-options.c (standard_option_handler): Remove arg[0] check
+	when freeing simulator_sysroot.  Only strdup arg when arg[0] is
+	not an empty string, otherwise assign "" back to it.
+
 2011-05-26  Mike Frysinger  <vapier@gentoo.org>
 
 	* nltvals.def: Regenerate to include Blackfin syscalls again.
