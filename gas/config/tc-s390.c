@@ -527,7 +527,6 @@ md_begin (void)
 {
   register const struct s390_opcode *op;
   const struct s390_opcode *op_end;
-  bfd_boolean dup_insn = FALSE;
   const char *retval;
 
   /* Give a warning if the combination -m64-bit and -Aesa is used.  */
@@ -548,11 +547,8 @@ md_begin (void)
     {
       retval = hash_insert (s390_opformat_hash, op->name, (void *) op);
       if (retval != (const char *) NULL)
-	{
-	  as_bad (_("Internal assembler error for instruction format %s"),
-		  op->name);
-	  dup_insn = TRUE;
-	}
+	as_bad (_("Internal assembler error for instruction format %s"),
+		op->name);
     }
 
   s390_setup_opcodes ();
