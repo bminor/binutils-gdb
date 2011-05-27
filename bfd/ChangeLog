@@ -1,3 +1,12 @@
+2011-05-27  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/12710
+	* archive.c (_bfd_get_elt_at_filepos): Set correct error value if
+	unable to read a file pointed to by an entry in a thin archive.
+	(adjust_relative_path): Use lrealpath to canonicalize paths.
+	Handle the case where the reference path is above the current
+	path in the directory tree.
+
 2011-05-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/12809

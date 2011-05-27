@@ -629,6 +629,8 @@ _bfd_get_elt_at_filepos (bfd *archive, file_ptr filepos)
       /* It's not an element of a nested archive;
          open the external file as a bfd.  */
       n_nfd = bfd_openr (filename, NULL);
+      if (n_nfd == NULL)
+	bfd_set_error (bfd_error_malformed_archive);
     }
   else
     {
@@ -717,6 +719,7 @@ bfd_generic_openr_next_archived_file (bfd *archive, bfd *last_file)
   else
     {
       unsigned int size = arelt_size (last_file);
+
       filestart = last_file->proxy_origin;
       if (! bfd_is_thin_archive (archive))
         filestart += size;
@@ -750,7 +753,7 @@ bfd_generic_archive_p (bfd *abfd)
   if (strncmp (armag, ARMAG, SARMAG) != 0
       && strncmp (armag, ARMAGB, SARMAG) != 0
       && ! bfd_is_thin_archive (abfd))
-    return 0;
+    return NULL;
 
   tdata_hold = bfd_ardata (abfd);
 
@@ -1333,19 +1336,47 @@ normalize (bfd *abfd ATTRIBUTE_UNUSED, const char *file)
 }
 #endif
 
-/* Adjust a relative path name based on the reference path.  */
+/* Adjust a relative path name based on the reference path.
+   For example:
+
+     Relative path  Reference path  Result
+     -------------  --------------  ------
+     bar.o          lib.a           bar.o
+     foo/bar.o      lib.a           foo/bar.o
+     bar.o          foo/lib.a       ../bar.o
+     foo/bar.o      baz/lib.a       ../foo/bar.o
+     bar.o          ../lib.a        <parent of current dir>/bar.o
+     ../bar.o       ../lib.a        bar.o
+     ../bar.o       lib.a           ../bar.o
+     foo/bar.o      ../lib.a        <parent of current dir>/foo/bar.o
+     bar.o          ../../lib.a     <grandparent>/<parent>/bar.o
+     bar.o          foo/baz/lib.a   ../../bar.o
+
+     Note - the returned string is in a static buffer.  */
 
 static const char *
 adjust_relative_path (const char * path, const char * ref_path)
 {
   static char *pathbuf = NULL;
-  static int pathbuf_len = 0;
-  const char *pathp = path;
-  const char *refp = ref_path;
-  int element_count = 0;
-  int len;
+  static unsigned int pathbuf_len = 0;
+  const char *pathp;
+  const char *refp;
+  char * lpath;
+  char * rpath;
+  unsigned int len;
+  unsigned int dir_up = 0;
+  unsigned int dir_down = 0;
   char *newp;
+  char * pwd = getpwd ();
+  const char * down;
 
+  /* Remove symlinks, '.' and '..' from the paths, if possible.  */
+  lpath = lrealpath (path);
+  pathp = lpath == NULL ? path : lpath;
+
+  rpath = lrealpath (ref_path);
+  refp = rpath == NULL ? ref_path : rpath;
+ 
   /* Remove common leading path elements.  */
   for (;;)
     {
@@ -1363,12 +1394,42 @@ adjust_relative_path (const char * path, const char * ref_path)
       refp = e2 + 1;
     }
 
+  len = strlen (pathp) + 1;
   /* For each leading path element in the reference path,
      insert "../" into the path.  */
   for (; *refp; ++refp)
     if (IS_DIR_SEPARATOR (*refp))
-      ++element_count;
-  len = 3 * element_count + strlen (path) + 1;
+      {
+	/* PR 12710:  If the path element is "../" then instead of
+	   inserting "../" we need to insert the name of the directory
+	   at the current level.  */	
+	if (refp > ref_path + 1
+	    && refp[-1] == '.'
+	    && refp[-2] == '.')
+	  dir_down ++;
+	else
+	  dir_up ++;
+      }
+
+  /* If the lrealpath calls above succeeded then we should never
+     see dir_up and dir_down both being non-zero.  */
+  
+  len += 3 * dir_up;
+
+  if (dir_down)
+    {
+      down = pwd + strlen (pwd) - 1;
+
+      while (dir_down && down > pwd)
+	{
+	  if (IS_DIR_SEPARATOR (*down))
+	    --dir_down;
+	}
+      BFD_ASSERT (dir_down == 0);
+      len += strlen (down) + 1;
+    }
+  else
+    down = NULL;
 
   if (len > pathbuf_len)
     {
@@ -1377,19 +1438,26 @@ adjust_relative_path (const char * path, const char * ref_path)
       pathbuf_len = 0;
       pathbuf = (char *) bfd_malloc (len);
       if (pathbuf == NULL)
-	return path;
+	goto out;
       pathbuf_len = len;
     }
 
   newp = pathbuf;
-  while (element_count-- > 0)
+  while (dir_up-- > 0)
     {
       /* FIXME: Support Windows style path separators as well.  */
       strcpy (newp, "../");
       newp += 3;
     }
-  strcpy (newp, pathp);
 
+  if (down)
+    sprintf (newp, "%s/%s", down, pathp);
+  else
+    strcpy (newp, pathp);
+
+ out:
+  free (lpath);
+  free (rpath);
   return pathbuf;
 }
 
