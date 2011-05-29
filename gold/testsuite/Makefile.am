@@ -1821,34 +1821,35 @@ memory_test.stdout: memory_test
 if DEFAULT_TARGET_X86_64
 
 check_PROGRAMS += incremental_test_2
-MOSTLYCLEANFILES += two_file_test_tmp.o
+MOSTLYCLEANFILES += two_file_test_tmp_2.o
 incremental_test_2: two_file_test_1_v1.o two_file_test_1.o two_file_test_1b.o \
 		    two_file_test_2.o two_file_test_main.o gcctestdir/ld
-	cp -f two_file_test_1_v1.o two_file_test_tmp.o
-	$(CXXLINK) -Wl,--incremental-full -Bgcctestdir/ two_file_test_tmp.o two_file_test_1b.o two_file_test_2.o two_file_test_main.o
+	cp -f two_file_test_1_v1.o two_file_test_tmp_2.o
+	$(CXXLINK) -Wl,--incremental-full -Bgcctestdir/ two_file_test_tmp_2.o two_file_test_1b.o two_file_test_2.o two_file_test_main.o
 	@sleep 1
-	cp -f two_file_test_1.o two_file_test_tmp.o
-	$(CXXLINK) -Wl,--incremental-update -Bgcctestdir/ two_file_test_tmp.o two_file_test_1b.o two_file_test_2.o two_file_test_main.o
+	cp -f two_file_test_1.o two_file_test_tmp_2.o
+	$(CXXLINK) -Wl,--incremental-update -Bgcctestdir/ two_file_test_tmp_2.o two_file_test_1b.o two_file_test_2.o two_file_test_main.o
 
 check_PROGRAMS += incremental_test_3
+MOSTLYCLEANFILES += two_file_test_tmp_3.o
 incremental_test_3: two_file_test_1.o two_file_test_1b_v1.o two_file_test_1b.o \
 		    two_file_test_2.o two_file_test_main.o gcctestdir/ld
-	cp -f two_file_test_1b_v1.o two_file_test_tmp.o
-	$(CXXLINK) -Wl,--incremental-full -Bgcctestdir/ two_file_test_1.o two_file_test_tmp.o two_file_test_2.o two_file_test_main.o
+	cp -f two_file_test_1b_v1.o two_file_test_tmp_3.o
+	$(CXXLINK) -Wl,--incremental-full -Bgcctestdir/ two_file_test_1.o two_file_test_tmp_3.o two_file_test_2.o two_file_test_main.o
 	@sleep 1
-	cp -f two_file_test_1b.o two_file_test_tmp.o
-	$(CXXLINK) -Wl,--incremental-update -Bgcctestdir/ two_file_test_1.o two_file_test_tmp.o two_file_test_2.o two_file_test_main.o
+	cp -f two_file_test_1b.o two_file_test_tmp_3.o
+	$(CXXLINK) -Wl,--incremental-update -Bgcctestdir/ two_file_test_1.o two_file_test_tmp_3.o two_file_test_2.o two_file_test_main.o
 
 check_PROGRAMS += incremental_test_4
-MOSTLYCLEANFILES += incremental_test_4.base
+MOSTLYCLEANFILES += incremental_test_4.base two_file_test_tmp_4.o
 incremental_test_4: two_file_test_1.o two_file_test_1b.o two_file_test_2_v1.o \
 		    two_file_test_2.o two_file_test_main.o gcctestdir/ld
-	cp -f two_file_test_2_v1.o two_file_test_tmp.o
-	$(CXXLINK) -Wl,--incremental-full -Bgcctestdir/ two_file_test_1.o two_file_test_1b.o two_file_test_tmp.o two_file_test_main.o
+	cp -f two_file_test_2_v1.o two_file_test_tmp_4.o
+	$(CXXLINK) -Wl,--incremental-full -Bgcctestdir/ two_file_test_1.o two_file_test_1b.o two_file_test_tmp_4.o two_file_test_main.o
 	mv -f incremental_test_4 incremental_test_4.base
 	@sleep 1
-	cp -f two_file_test_2.o two_file_test_tmp.o
-	$(CXXLINK) -Wl,--incremental-update,--incremental-base=incremental_test_4.base -Bgcctestdir/ two_file_test_1.o two_file_test_1b.o two_file_test_tmp.o two_file_test_main.o
+	cp -f two_file_test_2.o two_file_test_tmp_4.o
+	$(CXXLINK) -Wl,--incremental-update,--incremental-base=incremental_test_4.base -Bgcctestdir/ two_file_test_1.o two_file_test_1b.o two_file_test_tmp_4.o two_file_test_main.o
 
 endif DEFAULT_TARGET_X86_64
 

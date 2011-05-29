@@ -1,5 +1,12 @@
 2011-05-29  Ian Lance Taylor  <iant@google.com>
 
+	PR gold/12804
+	* testsuite/Makefile.am: Use different file name for two_file_test
+	temporary file for each incremental test.
+	* testsuite/Makefile.in: Rebuild.
+
+2011-05-29  Ian Lance Taylor  <iant@google.com>
+
 	* binary.cc (Binary_to_elf::sized_convert): Don't crash if the
 	binary input file is empty.
 
