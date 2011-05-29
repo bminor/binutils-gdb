@@ -1,15 +1,15 @@
-2011-05-24  Hans-Peter Nilsson  <hp@axis.com>
+2011-05-29  Alan Modra  <amodra@gmail.com>
 
+	Apply from mainline
+	2011-05-24  Hans-Peter Nilsson  <hp@axis.com>
 	* ld-cris/tls-e-tpoffcomm1.d: Adjust for second PR12763 change,
 	setting TLS file offset.
 
-2011-05-21  Hans-Peter Nilsson  <hp@axis.com>
-
+	2011-05-21  Hans-Peter Nilsson  <hp@axis.com>
 	* ld-cris/tls-e-tpoffcomm1.d: Adjust for PR12763 change removing
 	empty program header.
 
-2011-05-07  Dave Korn  <dave.korn.cygwin@gmail.com>
-
+	2011-05-07  Dave Korn  <dave.korn.cygwin@gmail.com>
 	PR ld/12365
 	* ld-plugin/plugin-7.d: Allow underscore in error message.
 	* ld-plugin/plugin-8.d: Likewise.
