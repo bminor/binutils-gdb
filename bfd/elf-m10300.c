@@ -4882,6 +4882,22 @@ _bfd_mn10300_elf_reloc_type_class (const Elf_Internal_Rela *rela)
     }
 }
 
+/* Allocate space for an MN10300 extension to the bfd elf data structure.  */
+
+static bfd_boolean
+mn10300_elf_mkobject (bfd *abfd)
+{
+  /* We do not actually need any extra room in the bfd elf data structure.
+     But we do need the object_id of the structure to be set to
+     MN10300_ELF_DATA so that elflink.c:elf_link_add_object_symols() will call
+     our mn10300_elf_check_relocs function which will then allocate space in
+     the .got section for any GOT based relocs.  */
+  return bfd_elf_allocate_object (abfd, sizeof (struct elf_obj_tdata),
+				  MN10300_ELF_DATA);
+}
+
+#define bfd_elf32_mkobject	mn10300_elf_mkobject
+
 #ifndef ELF_ARCH
 #define TARGET_LITTLE_SYM	bfd_elf32_mn10300_vec
 #define TARGET_LITTLE_NAME	"elf32-mn10300"

@@ -1526,8 +1526,14 @@ lang_output_section_find_by_flags (const asection *sec,
 	    }
 	  flags ^= sec->flags;
 	  if (!(flags & (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD
-			 | SEC_READONLY))
-	      && !(look->flags & (SEC_SMALL_DATA | SEC_THREAD_LOCAL)))
+			 | SEC_READONLY | SEC_SMALL_DATA))
+	      || (!(flags & (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD
+			     | SEC_READONLY))
+		  && !(look->flags & SEC_SMALL_DATA))
+	      || (!(flags & (SEC_THREAD_LOCAL | SEC_ALLOC))
+		  && (look->flags & SEC_THREAD_LOCAL)
+		  && (!(flags & SEC_LOAD)
+		      || (look->flags & SEC_LOAD))))
 	    found = look;
 	}
     }
@@ -3995,9 +4001,8 @@ print_assignment (lang_assignment_statement_type *assignment,
 	  if (h)
 	    {
 	      value = h->u.def.value;
-
-	      if (expld.result.section != NULL)
-		value += expld.result.section->vma;
+	      value += h->u.def.section->output_section->vma;
+	      value += h->u.def.section->output_offset;
 
 	      minfo ("[0x%V]", value);
 	    }
@@ -7387,19 +7392,29 @@ lang_vers_match (struct bfd_elf_version_expr_head *head,
 		 struct bfd_elf_version_expr *prev,
 		 const char *sym)
 {
+  const char *c_sym;
   const char *cxx_sym = sym;
   const char *java_sym = sym;
   struct bfd_elf_version_expr *expr = NULL;
+  enum demangling_styles curr_style;
+
+  curr_style = CURRENT_DEMANGLING_STYLE;
+  cplus_demangle_set_style (no_demangling);
+  c_sym = bfd_demangle (link_info.output_bfd, sym, DMGL_NO_OPTS);
+  if (!c_sym)
+    c_sym = sym;
+  cplus_demangle_set_style (curr_style);
 
   if (head->mask & BFD_ELF_VERSION_CXX_TYPE)
     {
-      cxx_sym = cplus_demangle (sym, DMGL_PARAMS | DMGL_ANSI);
+      cxx_sym = bfd_demangle (link_info.output_bfd, sym,
+			      DMGL_PARAMS | DMGL_ANSI);
       if (!cxx_sym)
 	cxx_sym = sym;
     }
   if (head->mask & BFD_ELF_VERSION_JAVA_TYPE)
     {
-      java_sym = cplus_demangle (sym, DMGL_JAVA);
+      java_sym = bfd_demangle (link_info.output_bfd, sym, DMGL_JAVA);
       if (!java_sym)
 	java_sym = sym;
     }
@@ -7413,10 +7428,10 @@ lang_vers_match (struct bfd_elf_version_expr_head *head,
 	case 0:
 	  if (head->mask & BFD_ELF_VERSION_C_TYPE)
 	    {
-	      e.pattern = sym;
+	      e.pattern = c_sym;
 	      expr = (struct bfd_elf_version_expr *)
                   htab_find ((htab_t) head->htab, &e);
-	      while (expr && strcmp (expr->pattern, sym) == 0)
+	      while (expr && strcmp (expr->pattern, c_sym) == 0)
 		if (expr->mask == BFD_ELF_VERSION_C_TYPE)
 		  goto out_ret;
 		else
@@ -7474,12 +7489,14 @@ lang_vers_match (struct bfd_elf_version_expr_head *head,
       else if (expr->mask == BFD_ELF_VERSION_CXX_TYPE)
 	s = cxx_sym;
       else
-	s = sym;
+	s = c_sym;
       if (fnmatch (expr->pattern, s, 0) == 0)
 	break;
     }
 
  out_ret:
+  if (c_sym != sym)
+    free ((char *) c_sym);
   if (cxx_sym != sym)
     free ((char *) cxx_sym);
   if (java_sym != sym)

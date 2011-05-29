@@ -1,3 +1,28 @@
+2011-05-29  Alan Modra  <amodra@gmail.com>
+
+	Apply from mainline
+	2011-03-18  Alan Modra  <amodra@gmail.com>
+	* input-scrub.c (line_numberT): Delete.
+	(input_scrub_close): Reset line counters.
+	* messages.c (as_show_where): Don't print invalid line number.
+	(as_warn_internal, as_bad_internal): Likewise.
+
+	2011-03-18  Alan Modra  <amodra@gmail.com>
+	* read.c (read_a_source_file): Remove md_after_pass_hook.
+	Move "quit" label before set of dot_symbol.
+	* config/tc-d10v.h (md_after_pass_hook): Don't define.
+	* config/tc-d30v.h (md_after_pass_hook): Likewise.
+	* config/tc-m32r.h (md_after_pass_hook): Likewise.
+	(md_cleanup): Define to call m32r_fill_insn.
+
+	2011-03-10  Alan Modra  <amodra@gmail.com>
+	* gas/config/obj-elf.h (ELF_TARGET_SYMBOL_FIELDS,
+	TARGET_SYMBOL_FIELDS): Don't define.
+	* gas/config/tc-arc.c (arc_common): Use correct symbol "local" field.
+
+	2011-03-09  Michael Snyder  <msnyder@vmware.com>
+	* dwarf2dbg.c (emit_fixed_inc_line_addr): Correct assert.
+
 2011-05-18  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
 
 	Backported from mainline

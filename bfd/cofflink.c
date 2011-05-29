@@ -2365,6 +2365,35 @@ _bfd_coff_link_input_bfd (struct coff_final_link_info *finfo, bfd *input_bfd)
 	  if (internal_relocs == NULL)
 	    return FALSE;
 
+	  /* Run through the relocs looking for relocs against symbols
+	     coming from discarded sections and complain about them.  */
+	  irel = internal_relocs;
+	  for (; irel < &internal_relocs[o->reloc_count]; irel++)
+	    {
+	      struct coff_link_hash_entry *h;
+	      asection *ps = NULL;
+	      long symndx = irel->r_symndx;
+	      if (symndx < 0)
+		continue;
+	      h = obj_coff_sym_hashes (input_bfd)[symndx];
+	      if (h == NULL)
+		continue;
+	      while (h->root.type == bfd_link_hash_indirect
+		     || h->root.type == bfd_link_hash_warning)
+		h = (struct coff_link_hash_entry *) h->root.u.i.link;
+	      if (h->root.type == bfd_link_hash_defined
+		  || h->root.type == bfd_link_hash_defweak)
+		ps = h->root.u.def.section;
+	      if (ps == NULL)
+		continue;
+	      /* Complain if definition comes from an excluded section.  */
+	      if (ps->flags & SEC_EXCLUDE)
+		(*finfo->info->callbacks->einfo)
+		  (_("%X`%s' referenced in section `%A' of %B: "
+		     "defined in discarded section `%A' of %B\n"),
+		   h->root.root.string, o, input_bfd, ps, ps->owner);
+	    }
+
 	  /* Call processor specific code to relocate the section
              contents.  */
 	  if (! bfd_coff_relocate_section (output_bfd, finfo->info,

@@ -1,3 +1,54 @@
+2011-05-29  Alan Modra  <amodra@gmail.com>
+
+	Apply from mainline
+	2011-05-23  Alan Modra  <amodra@gmail.com>
+	PR 12763
+	* ldlang.c (lang_output_section_find_by_flags): Match orphan .sdata2
+	like sections to existing .sdata2, and similarly for orphan TLS
+	sections.
+	* emultempl/elf32.em (place_orphan): Exclude .tbss from orphan_bss.
+
+	2011-05-17  Alan Modra  <amodra@gmail.com>
+	PR ld/12760
+	* ldmain.c (notice): Add "flags" and "string" param.
+	* plugin.c (plugin_notice): Likewise.  Handle indirect, warning
+	and constructor syms.
+
+	2010-05-16  Daniel Jacobowitz  <dan@codesourcery.com>
+	* ldlang.c (print_assignment): Use the symbol's section if we
+	use its value.
+	* ldexp.c (exp_fold_tree_1): Skip self-assignment.  Expand
+	comment on copying symbol type.
+
+	2011-05-07  Dave Korn  <dave.korn.cygwin@gmail.com>
+	PR ld/12365
+	* scripttempl/pe.sc (__rt_psrelocs_start): New symbol definition.
+	(__rt_psrelocs_end): Likewise.
+	(__rt_psrelocs_size): Likewise difference between the above.
+	(__RUNTIME_PSEUDO_RELOC_LIST_END__): Move outside .rdata section
+	immediately after end of pseudo-reloc data.
+	(___RUNTIME_PSEUDO_RELOC_LIST_END___): Likewise.
+	(__RUNTIME_PSEUDO_RELOC_LIST__): Move outside .rdata section and
+	calculate backward from list end.
+	(___RUNTIME_PSEUDO_RELOC_LIST___): Likewise.
+	* scripttempl/pep.sc: Likewise.
+
+	2011-03-29  Alan Modra  <amodra@gmail.com>
+	PR ld/12613
+	* ldlex.l (lex_warn_invalid): Don't assume char is unsigned.
+
+	2011-03-10  Dave Korn  <dave.korn.cygwin@gmail.com>
+	* emultempl/pe.em (gld_${EMULATION_NAME}_place_orphan): Preserve
+	alignment of input sections when creating orphan output sections
+	during relocatable link.
+	* emultempl/pep.em (gld_${EMULATION_NAME}_place_orphan): Likewise.
+
+	2011-02-14  Mike Frysinger  <vapier@gentoo.org>
+	* ldlang.c (lang_vers_match): Declare a new c_sym, assign it to
+	the bfd_demangle of sym, change users of sym to c_sym when not
+	already demangling, and free when done.  Change callers of
+	cplus_demangle to bfd_demangle.
+
 2011-05-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/12760

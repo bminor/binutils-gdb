@@ -1,3 +1,21 @@
+2011-05-29  Alan Modra  <amodra@gmail.com>
+
+	Apply from mainline
+	2011-05-18  Nick Clifton  <nickc@redhat.com>
+	PR binutils/12753
+	* nm.c (filter_symbols): Treat unique symbols as global symbols.
+	* doc/binutils.texi (nm): Mention that some lowercase letters
+	actually indicate global symbols.
+
+	2011-05-07  Alan Modra  <amodra@gmail.com>
+	* objcopy.c (copy_archive): Check bfd_openw result in unknown object
+	case.  Rewrite without goto.
+
+	2011-04-03  H.J. Lu  <hongjiu.lu@intel.com>
+	PR binutils/12632
+	* objcopy.c (copy_unknown_object): Make the archive element
+	readable.
+
 2011-03-01  Akos Pasztory  <akos.pasztory@gmail.com>
 
 	PR binutils/12523

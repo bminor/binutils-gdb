@@ -832,6 +832,8 @@ exp_fold_tree_1 (etree_type *tree)
 	}
       else
 	{
+	  etree_type *name;
+
 	  struct bfd_link_hash_entry *h = NULL;
 
 	  if (tree->type.node_class == etree_provide)
@@ -848,6 +850,23 @@ exp_fold_tree_1 (etree_type *tree)
 		  break;
 		}
 	    }
+
+	  name = tree->assign.src;
+	  if (name->type.node_class == etree_trinary)
+	    {
+	      exp_fold_tree_1 (name->trinary.cond);
+	      if (expld.result.valid_p)
+		name = (expld.result.value
+			? name->trinary.lhs : name->trinary.rhs);
+	    }
+
+	  if (name->type.node_class == etree_name
+	      && name->type.node_code == NAME
+	      && strcmp (tree->assign.dst, name->name.name) == 0)
+	    /* Leave it alone.  Do not replace a symbol with its own
+	       output address, in case there is another section sizing
+	       pass.  Folding does not preserve input sections.  */
+	    break;
 
 	  exp_fold_tree_1 (tree->assign.src);
 	  if (expld.result.valid_p
@@ -876,7 +895,8 @@ exp_fold_tree_1 (etree_type *tree)
 		tree->type.node_class = etree_provided;
 
 	      /* Copy the symbol type if this is a simple assignment of
-	         one symbol to annother.  */
+	         one symbol to another.  This could be more general
+		 (e.g. a ?: operator with NAMEs in each branch).  */
 	      if (tree->assign.src->type.node_class == etree_name)
 		{
 		  struct bfd_link_hash_entry *hsrc;

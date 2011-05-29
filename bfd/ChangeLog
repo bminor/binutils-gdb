@@ -1,3 +1,112 @@
+2011-05-29  Alan Modra  <amodra@gmail.com>
+
+	Apply from mainline
+	2011-05-26  Alan Modra  <amodra@gmail.com>
+	* elf-bfd.h (SYMBOL_REFERENCES_LOCAL): Remove most of comment.
+	* elflink.c (_bfd_elf_symbol_refs_local_p): Expand
+	local_protected comment.
+
+	2011-05-23  Alan Modra  <amodra@gmail.com>
+	PR 12763
+	* elf.c (assign_file_positions_for_load_sections): Set sh_offset for
+	.tbss, and page align same for all SHT_NOBITS sections.
+
+	2011-05-23  Nick Clifton  <nickc@redhat.com>
+	* elf-m10300.c (mn10300_elf_mkobject): New function.
+	(bfd_elf32_mkobject): Define.
+
+	2011-05-21  Alan Modra  <amodra@gmail.com>
+	PR 12763
+	* elf.c (_bfd_elf_make_section_from_shdr): Set up TLS section LMAs
+	from PT_TLS header.
+	(_bfd_elf_map_sections_to_segments): Don't create a final PT_LOAD
+	segment if just for .tbss.
+	(assign_file_positions_for_load_sections): Don't report "can't
+	allocate in segment" errors for .tbss.
+	(assign_file_positions_for_non_load_sections): Don't set p_filesz
+	from SHT_NOBITS section filepos.
+
+	2011-05-17  Alan Modra  <amodra@gmail.com>
+	PR ld/12760
+	* coff-aux.c (coff_m68k_aux_link_add_one_symbol): Adjust "notice" call.
+	* elflink.c (elf_link_add_object_symbols): Likewise.
+	* linker.c (_bfd_generic_link_add_one_symbol): Likewise.
+
+	2011-05-16  Alan Modra  <amodra@gmail.com>
+	* linker.c (_bfd_generic_link_add_one_symbol): Don't init u.undef.weak.
+
+	2011-05-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	* config.in: Regenerated.
+	* configure: Regenerated.
+	* configure.in: New tests for HAVE_PRPSINFO_T_PR_PID,
+	HAVE_PRPSINFO32_T_PR_PID, HAVE_PSINFO_T_PR_PID and
+	HAVE_PSINFO32_T_PR_PID.
+	* elf.c (elfcore_grok_psinfo): Protect reading psinfo.pr_pid by
+	HAVE_PRPSINFO_T_PR_PID, HAVE_PRPSINFO32_T_PR_PID, HAVE_PSINFO_T_PR_PID
+	and HAVE_PSINFO32_T_PR_PID.
+	* hosts/x86-64linux.h (HAVE_PRPSINFO32_T_PR_PID): New redefinition.
+
+	2011-05-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	* elf.c (elfcore_grok_psinfo): Initialize CORE_PID for both native and
+	32bit psinfo.
+	* elf32-ppc.c (ppc_elf_grok_psinfo): Initialize core_pid.
+	* elf64-ppc.c (ppc64_elf_grok_psinfo): Likewise.
+
+	2011-05-07  Dave Korn  <dave.korn.cygwin@gmail.com>
+	PR ld/12365
+	* cofflink.c (bfd_coff_link_input_bfd): Check for and warn about
+	references to symbols defined in discarded sections.
+
+	2011-05-07  Dave Korn  <dave.korn.cygwin@gmail.com>
+	PR ld/12365
+	* coffgen.c (coff_write_symbol): Assume input section is its own
+	output section if output_section member not set.
+	(coff_write_alien_symbol): Likewise.
+
+	2011-05-07  Anders Kaseorg  <andersk@ksplice.com>
+	PR 12739
+	* libbfd.c (bfd_get_8, bfd_get_signed_8): Use const cast.
+	* bfd-in2.h: Regenerate.
+
+	2011-04-28  Tom Tromey  <tromey@redhat.com>
+	* bfdio.c (memory_bstat): Pass correct size to memset.
+
+	2011-04-20  Alan Modra  <amodra@gmail.com>
+	* libbfd.c (bfd_log2): Do return rounded up value.
+	* elflink.c (bfd_elf_size_dynsym_hash_dynstr): Replace bfd_log2
+	call with expanded old round down version of the function.
+	* archive.c (_bfd_get_elt_at_filepos): Don't release n_nfd.
+	* elflink.c (elf_link_add_object_symbols): Delete redundant code.
+
+	2011-04-09  Kai Tietz  <ktietz@redhat.com>
+	* peXXigen.c (_bfd_XXi_final_link_postscripte): Sort pdata in temporary
+	buffer and use rawsize for sorting.
+	* coffcode.h (coff_compute_section_file_positions): Set rawsize
+	before doing alignment.
+
+	2011-04-07  Cary Coutant  <ccoutant@google.com>
+	* dwarf2.c (scan_unit_for_symbols): Check for DW_AT_specification.
+
+	2011-03-03  Michael Snyder  <msnyder@vmware.com>
+	* aoutx.h (aout_final_link): Use sizeof int not sizeof int*.
+	(aout_link_write_other_symbol): Missing break statement.
+
+	2011-02-14  Mike Frysinger  <vapier@gentoo.org>
+	* elflink.c (bfd_elf_size_dynamic_sections): Add
+	bfd_get_symbol_leading_char to the start of newname.
+
+	2011-01-18  Pierre Muller  <muller@ics.u-strasbg.fr>
+	Fix compilation for mingw64.
+	* coffcode.h (coff_slurp_symbol_table): Add intptr_t intermediate
+	typecast to avoid warning.
+	* elf32-rx.c: Add "bfd_stdint.h" include required for int32_t type
+	usage.
+	* elfxx-ia64.c (elfNN_ia64_relax_br): Use intptr_t typeacast instead
+	of long for pointer to avoid warning.
+	(elfNN_ia64_relax_brl): Idem.
+	(elfNN_ia64_install_value): Idem.
+	* vms-alpha.c (_bfd_vms_slurp_etir): Idem.
+
 2012-05-25  H.J. Lu  <hongjiu.lu@intel.com>
 
 	Backport from mainline

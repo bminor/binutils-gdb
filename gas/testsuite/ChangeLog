@@ -1,3 +1,10 @@
+2011-05-29  Alan Modra  <amodra@gmail.com>
+
+	Apply from mainline
+	2011-03-18  Alan Modra  <amodra@gmail.com>
+	* gas/i386/inval-equ-2.l: Adjust expected error.
+	* gas/symver/symver2.l: Likewise.
+
 2011-05-18  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
 
 	Backported from mainline
@@ -9,7 +16,7 @@
 
 2011-05-13  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
-	Apply from mainline. 
+	Apply from mainline.
 	2011-05-12  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 	PR gas/12715
 	* gas/arm/neon-const.s: Add testcase for 64-bit Neon constants.

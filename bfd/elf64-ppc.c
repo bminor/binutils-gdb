@@ -2670,6 +2670,8 @@ ppc64_elf_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
   if (note->descsz != 136)
     return FALSE;
 
+  elf_tdata (abfd)->core_pid
+    = bfd_get_32 (abfd, note->descdata + 24);
   elf_tdata (abfd)->core_program
     = _bfd_elfcore_strndup (abfd, note->descdata + 40, 16);
   elf_tdata (abfd)->core_command

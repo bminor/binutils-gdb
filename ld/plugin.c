@@ -125,9 +125,9 @@ static const enum ld_plugin_tag tv_header_tags[] =
 static const size_t tv_header_size = ARRAY_SIZE (tv_header_tags);
 
 /* Forward references.  */
-static bfd_boolean plugin_notice (struct bfd_link_info *info,
-				  struct bfd_link_hash_entry *h, bfd *abfd,
-				  asection *section, bfd_vma value);
+static bfd_boolean plugin_notice (struct bfd_link_info *,
+				  struct bfd_link_hash_entry *, bfd *,
+				  asection *, bfd_vma, flagword, const char *);
 
 #if !defined (HAVE_DLFCN_H) && defined (HAVE_WINDOWS_H)
 
@@ -908,7 +908,9 @@ plugin_notice (struct bfd_link_info *info,
 	       struct bfd_link_hash_entry *h,
 	       bfd *abfd,
 	       asection *section,
-	       bfd_vma value)
+	       bfd_vma value,
+	       flagword flags,
+	       const char *string)
 {
   if (h != NULL)
     {
@@ -918,8 +920,33 @@ plugin_notice (struct bfd_link_info *info,
       if (is_ir_dummy_bfd (abfd))
 	return TRUE;
 
+      /* Making an indirect symbol counts as a reference unless this
+	 is a brand new symbol.  */
+      if (bfd_is_ind_section (section)
+	  || (flags & BSF_INDIRECT) != 0)
+	{
+	  if (h->type != bfd_link_hash_new)
+	    {
+	      struct bfd_link_hash_entry *inh;
+
+	      h->non_ir_ref = TRUE;
+	      inh = bfd_wrapped_link_hash_lookup (abfd, info, string, FALSE,
+						  FALSE, FALSE);
+	      if (inh != NULL)
+		inh->non_ir_ref = TRUE;
+	    }
+	}
+
+      /* Nothing to do here for warning symbols.  */
+      else if ((flags & BSF_WARNING) != 0)
+	;
+
+      /* Nothing to do here for constructor symbols.  */
+      else if ((flags & BSF_CONSTRUCTOR) != 0)
+	;
+
       /* If this is a ref, set non_ir_ref.  */
-      if (bfd_is_und_section (section))
+      else if (bfd_is_und_section (section))
 	h->non_ir_ref = TRUE;
 
       /* Otherwise, it must be a new def.  Ensure any symbol defined
@@ -945,6 +972,7 @@ plugin_notice (struct bfd_link_info *info,
       || (info->notice_hash != NULL
 	  && bfd_hash_lookup (info->notice_hash, h->root.string,
 			      FALSE, FALSE) != NULL))
-    return (*orig_callbacks->notice) (info, h, abfd, section, value);
+    return (*orig_callbacks->notice) (info, h,
+				      abfd, section, value, flags, string);
   return TRUE;
 }

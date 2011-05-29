@@ -3295,6 +3295,8 @@ coff_compute_section_file_positions (bfd * abfd)
       if (!(current->flags & SEC_HAS_CONTENTS))
 	continue;
 
+      current->rawsize = current->size;
+
 #ifdef COFF_IMAGE_WITH_PE
       /* Make sure we skip empty sections in a PE image.  */
       if (current->size == 0)
@@ -3361,7 +3363,7 @@ coff_compute_section_file_positions (bfd * abfd)
 
 #ifdef COFF_IMAGE_WITH_PE
       /* Set the padded size.  */
-      current->size = (current->size + page_size -1) & -page_size;
+      current->size = (current->size + page_size - 1) & -page_size;
 #endif
 
       sofar += current->size;
@@ -4852,7 +4854,7 @@ coff_slurp_symbol_table (bfd * abfd)
 		 to the symbol instead of the index.  FIXME: This
 		 should use a union.  */
 	      src->u.syment.n_value =
-		(long) (native_symbols + src->u.syment.n_value);
+		(long) (intptr_t) (native_symbols + src->u.syment.n_value);
 	      dst->symbol.value = src->u.syment.n_value;
 	      src->fix_value = 1;
 	      break;

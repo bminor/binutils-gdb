@@ -2881,8 +2881,10 @@ _bfd_elf_symbol_refs_local_p (struct elf_link_hash_entry *h,
     return TRUE;
 
   /* Function pointer equality tests may require that STV_PROTECTED
-     symbols be treated as dynamic symbols, even when we know that the
-     dynamic linker will resolve them locally.  */
+     symbols be treated as dynamic symbols.  If the address of a
+     function not defined in an executable is set to that function's
+     plt entry in the executable, then the address of the function in
+     a shared library must also be the plt entry in the executable.  */
   return local_protected;
 }
 
@@ -3814,7 +3816,7 @@ error_free_dyn:
       /* Make a special call to the linker "notice" function to
 	 tell it that we are about to handle an as-needed lib.  */
       if (!(*info->callbacks->notice) (info, NULL, abfd, NULL,
-				       notice_as_needed))
+				       notice_as_needed, 0, NULL))
 	goto error_free_vers;
 
       /* Clone the symbol table and sym hashes.  Remember some
@@ -4240,10 +4242,7 @@ error_free_dyn:
 		 We need to get the alignment from the section.  */
 	      align = new_sec->alignment_power;
 	    }
-	  if (align > old_alignment
-	      /* Permit an alignment power of zero if an alignment of one
-		 is specified and no other alignments have been specified.  */
-	      || (isym->st_value == 1 && old_alignment == 0))
+	  if (align > old_alignment)
 	    h->root.u.c.p->alignment_power = align;
 	  else
 	    h->root.u.c.p->alignment_power = old_alignment;
@@ -4561,7 +4560,7 @@ error_free_dyn:
       /* Make a special call to the linker "notice" function to
 	 tell it that symbols added for crefs may need to be removed.  */
       if (!(*info->callbacks->notice) (info, NULL, abfd, NULL,
-				       notice_not_needed))
+				       notice_not_needed, 0, NULL))
 	goto error_free_vers;
 
       free (old_tab);
@@ -4575,7 +4574,7 @@ error_free_dyn:
   if (old_tab != NULL)
     {
       if (!(*info->callbacks->notice) (info, NULL, abfd, NULL,
-				       notice_needed))
+				       notice_needed, 0, NULL))
 	goto error_free_vers;
       free (old_tab);
       old_tab = NULL;
@@ -5724,11 +5723,12 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 	    {
 	      const char *verstr, *name;
 	      size_t namelen, verlen, newlen;
-	      char *newname, *p;
+	      char *newname, *p, leading_char;
 	      struct elf_link_hash_entry *newh;
 
+	      leading_char = bfd_get_symbol_leading_char (output_bfd);
 	      name = d->pattern;
-	      namelen = strlen (name);
+	      namelen = strlen (name) + (leading_char != '\0');
 	      verstr = t->name;
 	      verlen = strlen (verstr);
 	      newlen = namelen + verlen + 3;
@@ -5736,7 +5736,8 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 	      newname = (char *) bfd_malloc (newlen);
 	      if (newname == NULL)
 		return FALSE;
-	      memcpy (newname, name, namelen);
+	      newname[0] = leading_char;
+	      memcpy (newname + (leading_char != '\0'), name, namelen);
 
 	      /* Check the hidden versioned definition.  */
 	      p = newname + namelen;
@@ -6538,10 +6539,13 @@ bfd_elf_size_dynsym_hash_dynstr (bfd *output_bfd, struct bfd_link_info *info)
 	    }
 	  else
 	    {
-	      unsigned long int maskwords, maskbitslog2;
+	      unsigned long int maskwords, maskbitslog2, x;
 	      BFD_ASSERT (cinfo.min_dynindx != -1);
 
-	      maskbitslog2 = bfd_log2 (cinfo.nsyms) + 1;
+	      x = cinfo.nsyms;
+	      maskbitslog2 = 1;
+	      while ((x >>= 1) != 0)
+		++maskbitslog2;
 	      if (maskbitslog2 < 3)
 		maskbitslog2 = 5;
 	      else if ((1 << (maskbitslog2 - 2)) & cinfo.nsyms)
