@@ -44,6 +44,9 @@ if [get_compiler_info ${binfile}] {
 }
 
 set additional_flags {debug}
+if [support_complex_tests] {
+    lappend additional_flags "additional_flags=-DTEST_COMPLEX"
+}
 
 if {$hp_cc_compiler} {
     lappend additional_flags "additional_flags=-Ae"
@@ -112,3 +115,26 @@ if {![target_info exists gdb,skip_float_tests]} {
 	"print find_max_double(5,1.0,17.0,2.0,3.0,4.0)"
 }
 
+
+# Test _Complex type here if supported.
+if [support_complex_tests] {
+    global gdb_prompt
+
+    set test "print find_max_float_real(4, fc1, fc2, fc3, fc4)"
+    setup_kfail_for_target gdb/12790 "x86_64-*-*"
+    setup_kfail_for_target gdb/12791 "arm*-*-*"
+    gdb_test $test ".*= 4 \\+ 4 \\* I" $test
+
+    set test "print find_max_double_real(4, dc1, dc2, dc3, dc4)"
+    setup_kfail_for_target gdb/12776 "i?86-*-*"
+    setup_kfail_for_target gdb/12790 "x86_64-*-*"
+    setup_kfail_for_target gdb/12791 "arm*-*-*"
+    gdb_test $test ".*= 4 \\+ 4 \\* I" $test
+
+    set test "print find_max_long_double_real(4, ldc1, ldc2, ldc3, ldc4)"
+    setup_kfail_for_target gdb/12776 "i?86-*-*"
+    setup_kfail_for_target gdb/12790 "x86_64-*-*"
+    setup_kfail_for_target gdb/12791 "arm*-*-*"
+    gdb_test $test ".*= 4 \\+ 4 \\* I" $test
+
+}

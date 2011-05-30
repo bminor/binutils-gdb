@@ -1,5 +1,12 @@
 2011-05-30  Yao Qi  <yao@codesourcery.com>
 
+        * gdb.base/varargs.c (find_max_float_real): New.
+        (find_max_double_real, find_max_long_double_real): New.
+        * gdb.base/varargs.exp: Call these new added functions.
+	* lib/gdb.exp (setup_kfail_for_target): New.
+
+2011-05-30  Yao Qi  <yao@codesourcery.com>
+
 	* gdb.base/funcargs.c (callca, callcb, callcc): New.
 	(callcd, callce, callcf, callc1a, callc1b): New.
 	(callc2a, callc2b): New.
