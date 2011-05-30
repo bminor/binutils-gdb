@@ -1,3 +1,13 @@
+2011-05-30  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.base/funcargs.c (callca, callcb, callcc): New.
+	(callcd, callce, callcf, callc1a, callc1b): New.
+	(callc2a, callc2b): New.
+	* gdb.base/funcargs.exp (complex_args): New.
+	(complex_integral_args, complex_float_integral_args): New.
+	* lib/gdb.exp (support_complex_tests): New.  Determine
+	whether to run test cases on _Complex types.
+
 2011-05-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.threads/leader-exit.c: New file.

@@ -24,7 +24,13 @@ if $tracelevel {
 set testfile "funcargs"
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
+
+set compile_flags {debug nowarnings quiet}
+if [support_complex_tests] {
+    lappend compile_flags "additional_flags=-DTEST_COMPLEX"
+}
+
+if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable $compile_flags] != "" } {
      untested funcargs.exp
      return -1
 }
@@ -237,6 +243,77 @@ proc float_and_integral_args {} {
 	gdb_suppress_tests;
     }
     gdb_stop_suppressing_tests;
+}
+
+
+#
+# Locate actual args; _Complex types.
+#
+
+proc complex_args {} {
+    global gdb_prompt
+
+    delete_breakpoints
+
+    gdb_breakpoint callca
+    gdb_breakpoint callcb
+    gdb_breakpoint callcc
+    gdb_breakpoint callcd
+    gdb_breakpoint callce
+    gdb_breakpoint callcf
+
+    # Run; should stop at call1a and print actual arguments.
+    gdb_run_cmd
+    gdb_expect {
+	-re ".* callca \\(f1=1 \\+ 2 \\* I, f2=1 \\+ 2 \\* I, f3=1 \\+ 2 \\* I\\) .*$gdb_prompt $" { pass "run to call2a" }
+	timeout { fail "(timeout) run to callca" ; gdb_suppress_tests; }
+    }
+    gdb_test "cont" ".* callcb \\(d1=3 \\+ 4 \\* I, d2=3 \\+ 4 \\* I, d3=3 \\+ 4 \\* I\\) .*" "continue to callcb"
+    gdb_test "cont" ".* callcc \\(ld1=5 \\+ 6 \\* I, ld2=5 \\+ 6 \\* I, ld3=5 \\+ 6 \\* I\\) .*" "continue to callcb"
+    gdb_test "cont" ".* callcd \\(fc1=1 \\+ 2 \\* I, dc1=3 \\+ 4 \\* I, ldc1=5 \\+ 6 \\* I\\) .*" "continue to callcd"
+    gdb_test "cont" ".* callce \\(dc1=3 \\+ 4 \\* I, ldc1=5 \\+ 6 \\* I, fc1=1 \\+ 2 \\* I\\) .*" "continue to callce"
+    gdb_test "cont" ".* callcf \\(ldc1=5 \\+ 6 \\* I, fc1=1 \\+ 2 \\* I, dc1=3 \\+ 4 \\* I\\) .*" "continue to callcf"
+}
+
+
+#
+# Locate actual args; _Complex types and integral.
+#
+proc complex_integral_args {} {
+    global gdb_prompt
+
+    delete_breakpoints
+
+    gdb_breakpoint callc1a
+    gdb_breakpoint callc1b
+
+    # Run; should stop at call1a and print actual arguments.
+    gdb_run_cmd
+    gdb_expect {
+	-re ".* callc1a \\(c=97 'a', s=1, i=2, ui=7, l=3, fc1=1 \\+ 2 \\* I, dc1=3 \\+ 4 \\* I, ldc1=5 \\+ 6 \\* I\\) .*$gdb_prompt $" { pass "run to callc1a" }
+	timeout { fail "(timeout) run to callc1a" ; gdb_suppress_tests; }
+    }
+    gdb_test "cont" ".* callc1b \\(ldc1=5 \\+ 6 \\* I\\, c=97 'a', s=1, i=2, fc1=1 \\+ 2 \\* I, ui=7, l=3, dc1=3 \\+ 4 \\* I\\) .*" "continue to callc1b"
+}
+
+#
+# Locate actual args; _Complex types and integral/float.
+#
+proc complex_float_integral_args {} {
+    global gdb_prompt
+
+    delete_breakpoints
+
+    gdb_breakpoint callc2a
+    gdb_breakpoint callc2b
+
+    # Run; should stop at call1a and print actual arguments.
+    gdb_run_cmd
+    gdb_expect {
+	-re ".* callc2a \\(c=97 'a', s=1, i=2, ui=7, l=3, f=4, d=5, fc1=1 \\+ 2 \\* I, dc1=3 \\+ 4 \\* I, ldc1=5 \\+ 6 \\* I\\) .*$gdb_prompt $" { pass "run to callc2a" }
+	timeout { fail "(timeout) run to callc1a" ; gdb_suppress_tests; }
+    }
+    gdb_test "cont" ".* callc2b \\(fc1=1 \\+ 2 \\* I, c=97 'a', s=1, i=2, ui=7, ldc1=5 \\+ 6 \\* I\\, l=3, f=4, d=5, dc1=3 \\+ 4 \\* I\\) .*" "continue to callc2b"
 }
 
 #
@@ -1167,6 +1244,21 @@ funcargs_reload
 if {![target_info exists gdb,skip_float_tests]} {
   float_and_integral_args
 }
+
+# Test _Complex type here if supported.
+if [support_complex_tests] {
+    funcargs_reload
+    complex_args
+
+    funcargs_reload
+    complex_integral_args
+
+    if {![target_info exists gdb,skip_float_tests]} {
+	funcargs_reload
+	complex_float_integral_args
+    }
+}
+
 funcargs_reload
 pointer_args
 funcargs_reload

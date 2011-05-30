@@ -1486,6 +1486,47 @@ proc skip_shlib_tests {} {
     return 1
 }
 
+# Return 1 if _Complex types are supported, otherwise, return 0.
+
+proc support_complex_tests {} {
+    global support_complex_tests_saved
+
+    # Use the cached value, if it exists.
+    if [info exists support_complex_tests_saved] {
+        verbose "returning saved $support_complex_tests_saved" 2
+        return $support_complex_tests_saved
+    }
+
+    # Set up, compile, and execute a test program containing _Complex types.
+    # Include the current process ID in the file names to prevent conflicts
+    # with invocations for multiple testsuites.
+    set src complex[pid].c
+    set exe complex[pid].x
+
+    set f [open $src "w"]
+    puts $f "int main() {"
+    puts $f "_Complex float cf;"
+    puts $f "_Complex double cd;"
+    puts $f "_Complex long double cld;"
+    puts $f "  return 0; }"
+    close $f
+
+    verbose "compiling testfile $src" 2
+    set compile_flags {debug nowarnings quiet}
+    set lines [gdb_compile $src $exe executable $compile_flags]
+    file delete $src
+    file delete $exe
+
+    if ![string match "" $lines] then {
+        verbose "testfile compilation failed, returning 0" 2
+        set support_complex_tests_saved 0
+    } else {
+	set support_complex_tests_saved 1
+    }
+
+    return $support_complex_tests_saved
+}
+
 # Return 1 if target is ILP32.
 # This cannot be decided simply from looking at the target string,
 # as it might depend on externally passed compiler options like -m64.
