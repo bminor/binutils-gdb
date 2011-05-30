@@ -1,3 +1,7 @@
+2011-05-30  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* linux-nat.c (linux_lwp_is_zombie): Use xsnprintf.
+
 2011-05-30  Pedro Alves  <pedro@codesourcery.com>
 
 	* continuations.h (continuation_ftype): Add `err' parameter.

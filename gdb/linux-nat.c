@@ -2365,7 +2365,7 @@ linux_lwp_is_zombie (long lwp)
   FILE *procfile;
   int retval = 0;
 
-  sprintf (buffer, "/proc/%ld/status", lwp);
+  xsnprintf (buffer, sizeof (buffer), "/proc/%ld/status", lwp);
   procfile = fopen (buffer, "r");
   if (procfile == NULL)
     {
