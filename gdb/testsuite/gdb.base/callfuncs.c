@@ -73,6 +73,30 @@ double double_val13 = 10.25;
 double double_val14 = 11.25;
 double double_val15 = 12.25;
 
+#ifdef TEST_COMPLEX
+extern float crealf (float _Complex);
+extern float cimagf (float _Complex);
+extern double creal (double _Complex);
+extern double cimag (double _Complex);
+extern long double creall (long double _Complex);
+extern long double cimagl (long double _Complex);
+
+float _Complex fc1 = 1.0F + 1.0iF;
+float _Complex fc2 = 2.0F + 2.0iF;
+float _Complex fc3 = 3.0F + 3.0iF;
+float _Complex fc4 = 4.0F + 4.0iF;
+
+double _Complex dc1 = 1.0 + 1.0i;
+double _Complex dc2 = 2.0 + 2.0i;
+double _Complex dc3 = 3.0 + 3.0i;
+double _Complex dc4 = 4.0 + 4.0i;
+
+long double _Complex ldc1 = 1.0L + 1.0Li;
+long double _Complex ldc2 = 2.0L + 2.0Li;
+long double _Complex ldc3 = 3.0L + 3.0Li;
+long double _Complex ldc4 = 4.0L + 4.0Li;
+#endif /* TEST_COMPLEX */
+
 #define DELTA (0.001)
 
 char *string_val1 = (char *)"string 1";
@@ -89,8 +113,15 @@ struct struct1 {
   float f;
   double d;
   char a[4];
+#ifdef TEST_COMPLEX
+  float _Complex fc;
+  double _Complex dc;
+  long double _Complex ldc;
+} struct_val1 ={ 'x', 87, 76, 51, 2.1234, 9.876, "foo", 3.0F + 3.0Fi,
+		 4.0L + 4.0Li, 5.0L + 5.0Li};
+#else
 } struct_val1 = { 'x', 87, 76, 51, 2.1234, 9.876, "foo" };
-
+#endif /* TEST_COMPLEX */
 /* Some functions that can be passed as arguments to other test
    functions, or called directly. */
 #ifdef PROTOTYPES
@@ -183,6 +214,11 @@ char  *t_structs_a (struct struct1 tstruct)
   strcpy (buf, tstruct.a);
   return buf;
 }
+#ifdef TEST_COMPLEX
+float _Complex t_structs_fc (struct struct1 tstruct) { return tstruct.fc;}
+double _Complex t_structs_dc (struct struct1 tstruct) { return tstruct.dc;}
+long double _Complex t_structs_fc (struct struct1 tstruct) { return tstruct.ldc;}
+#endif
 #else
 char   t_structs_c (tstruct) struct struct1 tstruct; { return (tstruct.c); }
 short  t_structs_s (tstruct) struct struct1 tstruct; { return (tstruct.s); }
@@ -196,6 +232,11 @@ char  *t_structs_a (tstruct) struct struct1 tstruct;
   strcpy (buf, tstruct.a);
   return buf;
 }
+#ifdef TEST_COMPLEX
+float _Complex t_structs_fc (tstruct) struct struct1 tstruct; { return tstruct.fc;}
+double _Complex t_structs_dc (tstruct) struct struct1 tstruct; { return tstruct.dc;}
+long double _Complex t_structs_ldc (tstruct) struct struct1 tstruct; { return tstruct.ldc;}
+#endif
 #endif
 
 /* Test that calling functions works if there are a lot of arguments.  */
@@ -399,6 +440,110 @@ t_double_many_args (double f1, double f2, double f3, double f4, double f5,
   return ((sum_args - sum_values) < DELTA
 	  && (sum_args - sum_values) > -DELTA);
 }
+
+/* Various functions for _Complex types.  */
+
+#ifdef TEST_COMPLEX
+
+#define COMPARE_WITHIN_RANGE(ARG1, ARG2, DEL, FUNC) \
+  ((FUNC(ARG1) - FUNC(ARG2)) < DEL) && ((FUNC(ARG1) - FUNC(ARG2) > -DEL))
+
+#define DEF_FUNC_MANY_ARGS_1(TYPE, NAME)			\
+t_##NAME##_complex_many_args (f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, \
+			      f12, f13, f14, f15, f16)			\
+     TYPE _Complex f1, TYPE _Complex f2, TYPE _Complex f3, \
+     TYPE _Complex f4, TYPE _Complex f5, TYPE _Complex f6, \
+     TYPE _Complex f7, TYPE _Complex f8, TYPE _Complex f9, \
+     TYPE _Complex f10, TYPE _Complex f11, TYPE _Complex f12, \
+     TYPE _Complex f13, TYPE _Complex f14, TYPE _Complex f15, \
+     TYPE _Complex f16;
+
+#define DEF_FUNC_MANY_ARGS_2(TYPE, NAME)		  \
+t_##NAME##_complex_many_args (TYPE _Complex f1, TYPE _Complex f2, \
+			      TYPE _Complex f3, TYPE _Complex f4, \
+			      TYPE _Complex f5, TYPE _Complex f6, \
+			      TYPE _Complex f7, TYPE _Complex f8, \
+			      TYPE _Complex f9, TYPE _Complex f10,	\
+			      TYPE _Complex f11, TYPE _Complex f12,	\
+			      TYPE _Complex f13, TYPE _Complex f14,	\
+			      TYPE _Complex f15, TYPE _Complex f16)
+
+#define DEF_FUNC_MANY_ARGS_3(TYPE, CREAL, CIMAG) \
+{ \
+   TYPE _Complex expected = fc1 + fc2 + fc3 + fc4 + fc1 + fc2 + fc3 + fc4 \
+    + fc1 + fc2 + fc3 + fc4 + fc1 + fc2 + fc3 + fc4; \
+  TYPE _Complex actual = f1 + f2 + f3 + f4 + f5 + f6 + f7 + f8 + f9 + f10 \
+    + f11 + f12 + f13 + f14 + f15 + f16; \
+  return (COMPARE_WITHIN_RANGE(expected, actual, DELTA, creal) \
+	  && COMPARE_WITHIN_RANGE(expected, actual, DELTA, creal) \
+	  && COMPARE_WITHIN_RANGE(expected, actual, DELTA, cimag)   \
+	  && COMPARE_WITHIN_RANGE(expected, actual, DELTA, cimag)); \
+}
+
+int
+#ifdef NO_PROTOTYPES
+DEF_FUNC_MANY_ARGS_1(float, float)
+#else
+DEF_FUNC_MANY_ARGS_2(float, float)
+#endif
+DEF_FUNC_MANY_ARGS_3(float, crealf, cimagf)
+
+int
+#ifdef NO_PROTOTYPES
+DEF_FUNC_MANY_ARGS_1(double, double)
+#else
+DEF_FUNC_MANY_ARGS_2(double, double)
+#endif
+DEF_FUNC_MANY_ARGS_3(double, creal, cimag)
+
+int
+#ifdef NO_PROTOTYPES
+DEF_FUNC_MANY_ARGS_1(long double, long_double)
+#else
+DEF_FUNC_MANY_ARGS_2(long double, long_double)
+#endif
+DEF_FUNC_MANY_ARGS_3(long double, creall, cimagl)
+
+#define DEF_FUNC_VALUES_1(TYPE, NAME)			\
+  t_##NAME##_complex_values (f1, f2) TYPE _Complex f1, TYPE _Complex f2;
+
+#define DEF_FUNC_VALUES_2(TYPE, NAME) \
+  t_##NAME##_complex_values (TYPE _Complex f1, TYPE _Complex f2)
+
+#define DEF_FUNC_VALUES_3(FORMAL_PARM, TYPE, CREAL, CIMAG)	\
+{ \
+  return (COMPARE_WITHIN_RANGE(f1, FORMAL_PARM##1, DELTA, CREAL)    \
+	  && COMPARE_WITHIN_RANGE(f2, FORMAL_PARM##2, DELTA, CREAL)    \
+	  && COMPARE_WITHIN_RANGE(f1,  FORMAL_PARM##1, DELTA, CIMAG)   \
+	  && COMPARE_WITHIN_RANGE(f2,  FORMAL_PARM##2, DELTA, CIMAG)); \
+}
+
+int
+#ifdef NO_PROTOTYPES
+DEF_FUNC_VALUES_1(float, float)
+#else
+DEF_FUNC_VALUES_2(float, float)
+#endif
+DEF_FUNC_VALUES_3(fc, float, crealf, cimagf)
+
+int
+#ifdef NO_PROTOTYPES
+DEF_FUNC_VALUES_1(double, double)
+#else
+DEF_FUNC_VALUES_2(double, double)
+#endif
+DEF_FUNC_VALUES_3(fc, double, creal, cimag)
+
+int
+#ifdef NO_PROTOTYPES
+DEF_FUNC_VALUES_1(long double, long_double)
+#else
+DEF_FUNC_VALUES_2(long double, long_double)
+#endif
+DEF_FUNC_VALUES_3(fc, long double, creall, cimagl)
+
+#endif /* TEST_COMPLEX */
+
 
 #ifdef PROTOTYPES
 int t_string_values (char *string_arg1, char *string_arg2)

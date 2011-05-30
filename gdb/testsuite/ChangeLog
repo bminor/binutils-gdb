@@ -1,5 +1,15 @@
 2011-05-30  Yao Qi  <yao@codesourcery.com>
 
+	* gdb.base/callfuncs.c (t_structs_fc): New.
+	(t_structs_dc, t_structs_ldc): New.
+	(t_double_many_args):
+	(DEF_FUNC_MANY_ARGS_1, DEF_FUNC_MANY_ARGS_2): Define.
+	(DEF_FUNC_MANY_ARGS_3, DEF_FUNC_VALUES_1): Define.
+	(DEF_FUNC_VALUES_2, DEF_FUNC_VALUES_3): Define.
+	* gdb.base/callfuncs.exp: Call new functions.
+
+2011-05-30  Yao Qi  <yao@codesourcery.com>
+
 	* gdb.base/callfuncs.exp (rerun_and_prepare): New.
 	Call rerun_and_prepare for each test to isolate effects.
 
