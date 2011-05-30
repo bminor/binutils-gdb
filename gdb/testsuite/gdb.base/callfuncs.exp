@@ -273,6 +273,39 @@ proc fetch_all_registers {test} {
     return $all_registers_lines
 }
 
+proc rerun_and_prepare {} {
+    global hp_aCC_compiler
+
+    if { $hp_aCC_compiler } {
+	# Do not set language explicitly to 'C'.  This will cause aCC
+	# tests to fail because promotion rules are different.  Just let
+	# the language be set to the default.
+
+	if { ![runto_main] } {
+	    gdb_suppress_tests;
+	}
+
+	# However, turn off overload-resolution for aCC.  Having it on causes
+	# a lot of failures.
+
+	gdb_test_no_output "set overload-resolution 0"
+    } else {
+	gdb_test_no_output "set language c"
+	if { ![runto_main] } {
+	    gdb_suppress_tests;
+	}
+    }
+
+    get_debug_format
+
+    # Make sure that malloc gets called and that the floating point unit
+    # is initialized via a call to t_double_values.
+    gdb_test "next" "t_double_values\\(double_val1, double_val2\\);.*" \
+	"next to t_double_values"
+    gdb_test "next" "t_structs_c\\(struct_val1\\);.*" \
+	"next to t_structs_c"
+}
+
 
 # Start with a fresh gdb.
 
@@ -285,34 +318,7 @@ gdb_test_no_output "set print sevenbit-strings"
 gdb_test_no_output "set print address off"
 gdb_test_no_output "set width 0"
 
-if { $hp_aCC_compiler } {
-    # Do not set language explicitly to 'C'.  This will cause aCC
-    # tests to fail because promotion rules are different.  Just let
-    # the language be set to the default.
-
-    if { ![runto_main] } {
-	gdb_suppress_tests;
-    }
-
-    # However, turn off overload-resolution for aCC.  Having it on causes
-    # a lot of failures.
-
-    gdb_test_no_output "set overload-resolution 0"
-} else {
-    gdb_test_no_output "set language c"
-    if { ![runto_main] } {
-	gdb_suppress_tests;
-    }
-}
-
-get_debug_format
-
-# Make sure that malloc gets called and that the floating point unit
-# is initialized via a call to t_double_values.
-gdb_test "next" "t_double_values\\(double_val1, double_val2\\);.*" \
-  "next to t_double_values"
-gdb_test "next" "t_structs_c\\(struct_val1\\);.*" \
-  "next to t_structs_c"
+rerun_and_prepare
 
 # Save all register contents.
 set old_reg_content [fetch_all_registers "retrieve original register contents"]
@@ -329,6 +335,10 @@ if {$old_reg_content == $new_reg_content} then {
     set old_reg_content $new_reg_content
     fail "gdb function calls preserve register contents"
 }
+
+rerun_and_prepare
+# Save all register contents.
+set old_reg_content [fetch_all_registers "retrieve original register contents"]
 
 # Set breakpoint at a function we will call from gdb.
 gdb_breakpoint add
@@ -351,6 +361,12 @@ if ![gdb_test "bt 2" \
     }
 }
 
+rerun_and_prepare
+# Set breakpoint at a function we will call from gdb.
+gdb_breakpoint add
+# Save all register contents.
+set old_reg_content [fetch_all_registers "retrieve original register contents"]
+
 # Call function (causing a breakpoint hit in the call dummy) and do a finish,
 # make sure we are back at main and still have the same register contents.
 gdb_test "print add(4,5)" "The program being debugged stopped while.*" \
@@ -370,6 +386,12 @@ if ![gdb_test "bt 2" \
     }
 }
 
+rerun_and_prepare
+# Set breakpoint at a function we will call from gdb.
+gdb_breakpoint add
+# Save all register contents.
+set old_reg_content [fetch_all_registers "retrieve original register contents"]
+
 # Call function (causing a breakpoint hit in the call dummy) and do a return
 # with a value, make sure we are back at main with the same register contents.
 gdb_test "print add(4,5)" "The program being debugged stopped while.*" \
@@ -387,6 +409,11 @@ if ![gdb_test "return 7" \
 	fail "return after stop in call dummy preserves register contents"
     }
 }
+
+rerun_and_prepare
+# Set breakpoint at a function we will call from gdb.
+gdb_breakpoint add
+set old_reg_content [fetch_all_registers "retrieve original register contents"]
 
 # Call function (causing a breakpoint hit in the call dummy), and
 # call another function from the call dummy frame (thereby setting up
