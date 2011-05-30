@@ -1,3 +1,14 @@
+2011-05-30  Alan Modra  <amodra@gmail.com>
+
+	PR binutils/12820
+	* Makefile.am (bin_PROGRAMS): Move BUILD_INSTALL_MISC to..
+	(bin_SCRIPTS): ..here.
+	(EXTRA_SCRIPTS): Define.
+	(EXTRA_DIST): Add embedspu.sh.
+	(DISTCLEANFILES): Add embedspu.
+	(embedspu): Depend on Makefile.  Replace sed "s" command with "c".
+	* Makefile.in: Regenerate.
+
 2011-05-25  Jakub Jelinek  <jakub@redhat.com>
 
 	* dwarf.c (loc_offsets): New variable.

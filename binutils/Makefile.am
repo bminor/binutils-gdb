@@ -60,7 +60,10 @@ DLLWRAP_PROG=dllwrap
 
 SRCONV_PROG=srconv$(EXEEXT) sysdump$(EXEEXT) coffdump$(EXEEXT)
 
-bin_PROGRAMS = $(SIZE_PROG) $(OBJDUMP_PROG) $(AR_PROG) $(STRINGS_PROG) $(RANLIB_PROG) $(OBJCOPY_PROG) @BUILD_NLMCONV@ @BUILD_SRCONV@ @BUILD_DLLTOOL@ @BUILD_WINDRES@ @BUILD_WINDMC@ $(ADDR2LINE_PROG) $(READELF_PROG) $(ELFEDIT_PROG) @BUILD_DLLWRAP@ @BUILD_INSTALL_MISC@
+bin_PROGRAMS = $(SIZE_PROG) $(OBJDUMP_PROG) $(AR_PROG) $(STRINGS_PROG) $(RANLIB_PROG) $(OBJCOPY_PROG) @BUILD_NLMCONV@ @BUILD_SRCONV@ @BUILD_DLLTOOL@ @BUILD_WINDRES@ @BUILD_WINDMC@ $(ADDR2LINE_PROG) $(READELF_PROG) $(ELFEDIT_PROG) @BUILD_DLLWRAP@
+
+bin_SCRIPTS = @BUILD_INSTALL_MISC@
+EXTRA_SCRIPTS = embedspu
 
 ## We need a special rule to install the programs which are built with
 ## -new, and to rename cxxfilt to c++filt.
@@ -284,8 +287,8 @@ sysinfo.@OBJEXT@: sysinfo.c
 bin2c$(EXEEXT_FOR_BUILD): bin2c.c
 	$(CC_FOR_BUILD) -o $@ $(AM_CPPFLAGS) $(AM_CFLAGS) $(CFLAGS_FOR_BUILD) $(LDFLAGS_FOR_BUILD) $(srcdir)/bin2c.c
 
-embedspu: embedspu.sh
-	sed "s@^program_transform_name=@program_transform_name=$(program_transform_name)@" < $< > $@
+embedspu: embedspu.sh Makefile
+	sed "/^program_transform_name=/cprogram_transform_name=$(program_transform_name)" < $< > $@
 	chmod a+x $@
 
 # We need these for parallel make.
@@ -481,7 +484,7 @@ dllwrap_LDADD = $(LIBIBERTY) $(LIBINTL)
 
 EXTRA_DIST = arparse.c arparse.h arlex.c nlmheader.c sysinfo.c sysinfo.h \
 	syslex.c deflex.c defparse.h defparse.c rcparse.h rcparse.c \
-	mcparse.h mcparse.c
+	mcparse.h mcparse.c embedspu.sh
 
 diststuff: $(EXTRA_DIST) info
 all: info
@@ -490,7 +493,7 @@ all: info
 # when BFD's version changes.
 CONFIG_STATUS_DEPENDENCIES = $(BFDDIR)/configure.in
 
-DISTCLEANFILES = sysroff.c sysroff.h site.exp site.bak
+DISTCLEANFILES = sysroff.c sysroff.h site.exp site.bak embedspu
 
 MOSTLYCLEANFILES = sysinfo$(EXEEXT_FOR_BUILD) bin2c$(EXEEXT_FOR_BUILD) \
   binutils.log binutils.sum abcdefgh*
