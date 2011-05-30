@@ -63,13 +63,12 @@ inferior_event_handler (enum inferior_event_type event_type,
       /* Use catch errors for now, until the inner layers of
 	 fetch_inferior_event (i.e. readchar) can return meaningful
 	 error status.  If an error occurs while getting an event from
-	 the target, just get rid of the target.  */
+	 the target, just cancel the current command.  */
       if (!catch_errors (fetch_inferior_event_wrapper, 
 			 client_data, "", RETURN_MASK_ALL))
 	{
-	  pop_all_targets_above (file_stratum, 0);
-	  discard_all_intermediate_continuations ();
-	  discard_all_continuations ();
+	  do_all_intermediate_continuations (1);
+	  do_all_continuations (1);
 	  async_enable_stdin ();
 	  display_gdb_prompt (0);
 	}
@@ -95,7 +94,7 @@ inferior_event_handler (enum inferior_event_type event_type,
       /* Do all continuations associated with the whole inferior (not
 	 a particular thread).  */
       if (!ptid_equal (inferior_ptid, null_ptid))
-	do_all_inferior_continuations ();
+	do_all_inferior_continuations (0);
 
       /* If we were doing a multi-step (eg: step n, next n), but it
 	 got interrupted by a breakpoint, still do the pending
@@ -107,9 +106,9 @@ inferior_event_handler (enum inferior_event_type event_type,
       if (non_stop
 	  && target_has_execution
 	  && !ptid_equal (inferior_ptid, null_ptid))
-	do_all_intermediate_continuations_thread (inferior_thread ());
+	do_all_intermediate_continuations_thread (inferior_thread (), 0);
       else
-	do_all_intermediate_continuations ();
+	do_all_intermediate_continuations (0);
 
       /* Always finish the previous command before running any
 	 breakpoint commands.  Any stop cancels the previous command.
@@ -118,9 +117,9 @@ inferior_event_handler (enum inferior_event_type event_type,
       if (non_stop
 	  && target_has_execution
 	  && !ptid_equal (inferior_ptid, null_ptid))
-	do_all_continuations_thread (inferior_thread ());
+	do_all_continuations_thread (inferior_thread (), 0);
       else
-	do_all_continuations ();
+	do_all_continuations (0);
 
       if (info_verbose
 	  && current_language != expected_language
@@ -147,9 +146,9 @@ inferior_event_handler (enum inferior_event_type event_type,
          complete?  */
 
       if (non_stop)
-	do_all_intermediate_continuations_thread (inferior_thread ());
+	do_all_intermediate_continuations_thread (inferior_thread (), 0);
       else
-	do_all_intermediate_continuations ();
+	do_all_intermediate_continuations (0);
       break;
 
     case INF_QUIT_REQ: 

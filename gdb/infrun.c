@@ -2393,12 +2393,10 @@ infrun_thread_stop_requested_callback (struct thread_info *info, void *arg)
 
 	  normal_stop ();
 
-	  /* Finish off the continuations.  The continations
-	     themselves are responsible for realising the thread
-	     didn't finish what it was supposed to do.  */
+	  /* Finish off the continuations.  */
 	  tp = inferior_thread ();
-	  do_all_intermediate_continuations_thread (tp);
-	  do_all_continuations_thread (tp);
+	  do_all_intermediate_continuations_thread (tp, 1);
+	  do_all_continuations_thread (tp, 1);
 	}
 
       do_cleanups (old_chain);

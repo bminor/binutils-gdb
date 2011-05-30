@@ -51,14 +51,14 @@ make_continuation (struct continuation **pmy_chain,
 }
 
 static void
-do_my_continuations_1 (struct continuation **pmy_chain)
+do_my_continuations_1 (struct continuation **pmy_chain, int err)
 {
   struct continuation *ptr;
 
   while ((ptr = *pmy_chain) != NULL)
     {
       *pmy_chain = ptr->next;	/* Do this first in case of recursion.  */
-      (*ptr->function) (ptr->arg);
+      (*ptr->function) (ptr->arg, err);
       if (ptr->free_arg)
 	(*ptr->free_arg) (ptr->arg);
       xfree (ptr);
@@ -66,7 +66,7 @@ do_my_continuations_1 (struct continuation **pmy_chain)
 }
 
 static void
-do_my_continuations (struct continuation **list)
+do_my_continuations (struct continuation **list, int err)
 {
   struct continuation *continuations;
 
@@ -82,7 +82,7 @@ do_my_continuations (struct continuation **list)
   *list = NULL;
 
   /* Work now on the list we have set aside.  */
-  do_my_continuations_1 (&continuations);
+  do_my_continuations_1 (&continuations, err);
 }
 
 static void
@@ -123,10 +123,10 @@ add_inferior_continuation (continuation_ftype *hook, void *args,
 /* Do all continuations of the current inferior.  */
 
 void
-do_all_inferior_continuations (void)
+do_all_inferior_continuations (int err)
 {
   struct inferior *inf = current_inferior ();
-  do_my_continuations (&inf->continuations);
+  do_my_continuations (&inf->continuations, err);
 }
 
 /* Get rid of all the inferior-wide continuations of INF.  */
@@ -167,7 +167,8 @@ restore_thread_cleanup (void *arg)
 
 static void
 do_all_continuations_ptid (ptid_t ptid,
-			   struct continuation **continuations_p)
+			   struct continuation **continuations_p,
+			   int err)
 {
   struct cleanup *old_chain;
   ptid_t current_thread;
@@ -191,7 +192,7 @@ do_all_continuations_ptid (ptid_t ptid,
   /* Let the continuation see this thread as selected.  */
   switch_to_thread (ptid);
 
-  do_my_continuations (continuations_p);
+  do_my_continuations (continuations_p, err);
 
   do_cleanups (old_chain);
 }
@@ -201,24 +202,25 @@ do_all_continuations_ptid (ptid_t ptid,
 static int
 do_all_continuations_thread_callback (struct thread_info *thread, void *data)
 {
-  do_all_continuations_ptid (thread->ptid, &thread->continuations);
+  int err = * (int *) data;
+  do_all_continuations_ptid (thread->ptid, &thread->continuations, err);
   return 0;
 }
 
 /* Do all continuations of thread THREAD.  */
 
 void
-do_all_continuations_thread (struct thread_info *thread)
+do_all_continuations_thread (struct thread_info *thread, int err)
 {
-  do_all_continuations_thread_callback (thread, NULL);
+  do_all_continuations_thread_callback (thread, &err);
 }
 
 /* Do all continuations of all threads.  */
 
 void
-do_all_continuations (void)
+do_all_continuations (int err)
 {
-  iterate_over_threads (do_all_continuations_thread_callback, NULL);
+  iterate_over_threads (do_all_continuations_thread_callback, &err);
 }
 
 /* Callback for iterate over threads.  */
@@ -274,26 +276,28 @@ static int
 do_all_intermediate_continuations_thread_callback (struct thread_info *thread,
 						   void *data)
 {
+  int err = * (int *) data;
+
   do_all_continuations_ptid (thread->ptid,
-			     &thread->intermediate_continuations);
+			     &thread->intermediate_continuations, err);
   return 0;
 }
 
 /* Do all intermediate continuations of thread THREAD.  */
 
 void
-do_all_intermediate_continuations_thread (struct thread_info *thread)
+do_all_intermediate_continuations_thread (struct thread_info *thread, int err)
 {
-  do_all_intermediate_continuations_thread_callback (thread, NULL);
+  do_all_intermediate_continuations_thread_callback (thread, &err);
 }
 
 /* Do all intermediate continuations of all threads.  */
 
 void
-do_all_intermediate_continuations (void)
+do_all_intermediate_continuations (int err)
 {
   iterate_over_threads (do_all_intermediate_continuations_thread_callback,
-			NULL);
+			&err);
 }
 
 /* Callback for iterate over threads.  */

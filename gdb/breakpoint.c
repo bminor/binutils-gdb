@@ -9508,7 +9508,7 @@ struct until_break_command_continuation_args
    care of cleaning up the temporary breakpoints set up by the until
    command.  */
 static void
-until_break_command_continuation (void *arg)
+until_break_command_continuation (void *arg, int err)
 {
   struct until_break_command_continuation_args *a = arg;
 

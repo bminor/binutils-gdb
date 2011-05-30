@@ -1,3 +1,44 @@
+2011-05-30  Pedro Alves  <pedro@codesourcery.com>
+
+	* continuations.h (continuation_ftype): Add `err' parameter.
+	Document parameters.
+	(do_all_continuations, do_all_continuations_thread)
+	(do_all_intermediate_continuations)
+	(do_all_intermediate_continuations_thread)
+	(do_all_inferior_continuations): Add `err' parameter.
+	* continuations.c (do_my_continuations_1, do_my_continuations)
+	(do_all_inferior_continuations, do_all_continuations_ptid)
+	(do_all_continuations_thread_callback)
+	(do_all_continuations_thread, do_all_continuations)
+	(do_all_intermediate_continuations_thread_callback)
+	(do_all_intermediate_continuations_thread)
+	(do_all_intermediate_continuations): Add `err' parameter, and pass
+	it down all the way to the continuations proper.
+	* inf-loop.c (inferior_event_handler): If fetching an inferior
+	event throws an error, don't pop the target, and still call the
+	continuations, but with `err' set.  Adjust all other continuation
+	calls.
+	* breakpoint.c (until_break_command_continuation): Add `err'
+	parameter.
+	* infcmd.c (step_1_continuation): Add `err' parameter.  Don't
+	issue another step if `err' is set.
+	(struct until_next_continuation_args): New.
+	(until_next_continuation): Add `err' parameter.  Adjust.
+	(until_next_command): Adjust.
+	(struct finish_command_continuation_args): Add `thread' field.
+	(finish_command_continuation): Add `err' parameter.  Handle it.
+	(finish_forward): Adjust.
+	(attach_command_continuation): Add `err' parameter.  Handle it.
+	* infrun.c (infrun_thread_stop_requested_callback): Adjust to
+	cancel the continuations.
+	* interps.c (interp_set): Adjust to cancel the continuations.
+	* thread.c (clear_thread_inferior_resources): Adjust to cancel the
+	continuations rather than discarding.
+	(free_thread): Don't clear thread inferior resources here.
+	(delete_thread_1): Do it here instead.  And do it before removing
+	the thread from the threads list.  Tag the thread as exited before
+	clearing thread inferior resources.
+
 2011-05-30  Joel Brobecker  <brobecker@adacore.com>
 
 	* infcall.c (call_function_by_hand): Rephrase error message.
