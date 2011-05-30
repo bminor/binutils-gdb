@@ -150,7 +150,6 @@ interp_set (struct interp *interp, int top_level)
 
   if (current_interpreter != NULL)
     {
-      do_all_continuations (1);
       ui_out_flush (uiout);
       if (current_interpreter->procs->suspend_proc
 	  && !current_interpreter->procs->suspend_proc (current_interpreter->
