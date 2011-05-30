@@ -51,14 +51,6 @@ inferior_event_handler (enum inferior_event_type event_type,
 
   switch (event_type)
     {
-    case INF_ERROR:
-      printf_unfiltered (_("error detected from target.\n"));
-      pop_all_targets_above (file_stratum, 0);
-      discard_all_intermediate_continuations ();
-      discard_all_continuations ();
-      async_enable_stdin ();
-      break;
-
     case INF_REG_EVENT:
       /* Use catch errors for now, until the inner layers of
 	 fetch_inferior_event (i.e. readchar) can return meaningful

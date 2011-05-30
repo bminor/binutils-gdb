@@ -1,5 +1,10 @@
 2011-05-30  Pedro Alves  <pedro@codesourcery.com>
 
+	* target.h (enum inferior_event_type): Delete INF_ERROR.
+	* inf-loop.c (inferior_event_handler): Don't handle INF_ERROR.
+
+2011-05-30  Pedro Alves  <pedro@codesourcery.com>
+
 	* interps.c (interp_set): Don't cancel continuations.
 
 2011-05-30  Jan Kratochvil  <jan.kratochvil@redhat.com>
