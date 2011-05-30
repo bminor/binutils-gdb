@@ -32,12 +32,6 @@
 
 static int fetch_inferior_event_wrapper (gdb_client_data client_data);
 
-void
-inferior_event_handler_wrapper (gdb_client_data client_data)
-{
-  inferior_event_handler (INF_QUIT_REQ, client_data);
-}
-
 /* General function to handle events in the inferior.  So far it just
    takes care of detecting errors reported by select() or poll(),
    otherwise it assumes that all is OK, and goes on reading data from
@@ -141,13 +135,6 @@ inferior_event_handler (enum inferior_event_type event_type,
 	do_all_intermediate_continuations_thread (inferior_thread (), 0);
       else
 	do_all_intermediate_continuations (0);
-      break;
-
-    case INF_QUIT_REQ: 
-      /* FIXME: ezannoni 1999-10-04.  This call should really be a
-	 target vector entry, so that it can be used for any kind of
-	 targets.  */
-      async_remote_interrupt_twice (NULL);
       break;
 
     case INF_TIMER:

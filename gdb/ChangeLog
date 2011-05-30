@@ -1,5 +1,15 @@
 2011-05-30  Pedro Alves  <pedro@codesourcery.com>
 
+	* target.h (enum inferior_event_type): Delete INF_QUIT_REQ.
+	* inf-loop.h (inferior_event_handler_wrapper): Delete.
+	* inf-loop.c (inferior_event_handler_wrapper): Delete.
+	(inferior_event_handler): Don't handle INF_QUIT_REQ.
+	* remote.c (_initialize_remote): Register
+	async_remote_interrupt_twice directly as
+	sigint_remote_twice_token event.
+
+2011-05-30  Pedro Alves  <pedro@codesourcery.com>
+
 	* target.h (enum inferior_event_type): Delete INF_ERROR.
 	* inf-loop.c (inferior_event_handler): Don't handle INF_ERROR.
 
