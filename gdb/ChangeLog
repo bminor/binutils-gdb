@@ -1,3 +1,7 @@
+2011-05-30  Joel Brobecker  <brobecker@adacore.com>
+
+	* infcall.c (call_function_by_hand): Rephrase error message.
+
 2011-05-27  Pedro Alves  <pedro@codesourcery.com>
 
 	* defs.h (struct thread_info, struct inferior): Delete forward

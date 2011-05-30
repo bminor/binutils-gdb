@@ -496,7 +496,7 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
     error (_("May not call functions while looking at trace frames."));
 
   if (execution_direction == EXEC_REVERSE)
-    error (_("May not call functions in reverse."));
+    error (_("Cannot call functions in reverse mode."));
 
   frame = get_current_frame ();
   gdbarch = get_frame_arch (frame);
