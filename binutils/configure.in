@@ -304,7 +304,10 @@ changequote([,])dnl
 	  BUILD_WINDMC='$(WINDMC_PROG)$(EXEEXT)'
 	  ;;
 	powerpc*-*-linux* | powerpc*-*-elf* | powerpc*-*-eabi*)
-	  BUILD_INSTALL_MISC="${BUILD_INSTALL_MISC} embedspu"
+	  case "$BUILD_INSTALL_MISC" in
+	    *embedspu*) ;;
+	    *) BUILD_INSTALL_MISC="${BUILD_INSTALL_MISC} embedspu"
+	  esac
 	  ;;
 	sh*-*-pe)
   	  BUILD_DLLTOOL='$(DLLTOOL_PROG)$(EXEEXT)'

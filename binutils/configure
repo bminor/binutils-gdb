@@ -13800,7 +13800,7 @@ do
 	fi
 	DLLTOOL_DEFS="$DLLTOOL_DEFS -DDLLTOOL_I386"
 	BUILD_DLLWRAP='$(DLLWRAP_PROG)$(EXEEXT)'
-        od_vectors="$od_vectors objdump_private_desc_xcoff"
+	od_vectors="$od_vectors objdump_private_desc_xcoff"
     else
 	case $targ in
 	i[3-7]86*-*-netware*)
@@ -13895,7 +13895,10 @@ do
 	  BUILD_WINDMC='$(WINDMC_PROG)$(EXEEXT)'
 	  ;;
 	powerpc*-*-linux* | powerpc*-*-elf* | powerpc*-*-eabi*)
-	  BUILD_INSTALL_MISC="${BUILD_INSTALL_MISC} embedspu"
+	  case "$BUILD_INSTALL_MISC" in
+	    *embedspu*) ;;
+	    *) BUILD_INSTALL_MISC="${BUILD_INSTALL_MISC} embedspu"
+	  esac
 	  ;;
 	sh*-*-pe)
   	  BUILD_DLLTOOL='$(DLLTOOL_PROG)$(EXEEXT)'
