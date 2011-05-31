@@ -1,3 +1,8 @@
+2011-05-31  Nick Clifton  <nickc@redhat.com>
+
+	* archive.c (adjust_relative_path): Fix comment to prevent it
+	corrupting the auto-generated bfd.h.
+
 2011-05-31  Paul Brook  <paul@codesourcery.com>
 
 	* elf32-arm.c (elf32_arm_final_link_relocate): Only do bl conversion
