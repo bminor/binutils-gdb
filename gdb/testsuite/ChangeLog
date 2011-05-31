@@ -1,5 +1,11 @@
 2010-05-31  Keith Seitz  <keiths@redhat.com>
 
+	PR c++/12750
+	* gdb.cp/static-method.cc: New file.
+	* gdb.cp/static-method.exp: New file.
+
+2010-05-31  Keith Seitz  <keiths@redhat.com>
+
 	PR symtab/12704
 	* gdb.cp/anon-ns.cc: New file.
 	* gdb.cp/anon-ns.exp: New file.
