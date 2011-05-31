@@ -1430,8 +1430,15 @@ decode_compound (char **argptr, int funfirstline,
 	    {
 	      /* PASS2: We'll keep getting here, until P points to one of the
 		 break characters, at which point we exit this loop.  */
-	      if (*p && strchr (break_characters, *p) == NULL)
-		p++;
+	      if (*p)
+		{
+		  if (p[1] == '('
+		      && strncmp (&p[1], CP_ANONYMOUS_NAMESPACE_STR,
+				  CP_ANONYMOUS_NAMESPACE_LEN) == 0)
+		    p += CP_ANONYMOUS_NAMESPACE_LEN;
+		  else if (strchr (break_characters, *p) == NULL)
+		    ++p;
+		}
 	    }
 	}
 

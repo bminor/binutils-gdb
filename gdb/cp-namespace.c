@@ -52,10 +52,6 @@ static struct type *cp_lookup_transparent_type_loop (const char *name,
 /* Check to see if SYMBOL refers to an object contained within an
    anonymous namespace; if so, add an appropriate using directive.  */
 
-/* Optimize away strlen ("(anonymous namespace)").  */
-
-#define ANONYMOUS_NAMESPACE_LEN 21
-
 void
 cp_scan_for_anonymous_namespaces (const struct symbol *symbol)
 {
@@ -76,10 +72,11 @@ cp_scan_for_anonymous_namespaces (const struct symbol *symbol)
 
       while (name[next_component] == ':')
 	{
-	  if ((next_component - previous_component) == ANONYMOUS_NAMESPACE_LEN
+	  if (((next_component - previous_component)
+	       == CP_ANONYMOUS_NAMESPACE_LEN)
 	      && strncmp (name + previous_component,
-			  "(anonymous namespace)",
-			  ANONYMOUS_NAMESPACE_LEN) == 0)
+			  CP_ANONYMOUS_NAMESPACE_STR,
+			  CP_ANONYMOUS_NAMESPACE_LEN) == 0)
 	    {
 	      int dest_len = (previous_component == 0
 			      ? 0 : previous_component - 2);
@@ -207,7 +204,7 @@ cp_set_block_scope (const struct symbol *symbol,
 int
 cp_is_anonymous (const char *namespace)
 {
-  return (strstr (namespace, "(anonymous namespace)")
+  return (strstr (namespace, CP_ANONYMOUS_NAMESPACE_STR)
 	  != NULL);
 }
 

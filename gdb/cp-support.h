@@ -36,6 +36,14 @@ struct objfile;
 struct type;
 struct demangle_component;
 
+/* A string representing the name of the anonymous namespace used in GDB.  */
+
+#define CP_ANONYMOUS_NAMESPACE_STR "(anonymous namespace)"
+
+/* The length of the string representing the anonymous namespace.  */
+
+#define CP_ANONYMOUS_NAMESPACE_LEN 21
+
 /* This struct is designed to store data from using directives.  It
    says that names from namespace IMPORT_SRC should be visible within
    namespace IMPORT_DEST.  These form a linked list; NEXT is the next

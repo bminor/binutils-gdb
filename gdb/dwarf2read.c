@@ -7877,7 +7877,7 @@ namespace_name (struct die_info *die, int *is_anonymous, struct dwarf2_cu *cu)
 
   *is_anonymous = (name == NULL);
   if (*is_anonymous)
-    name = "(anonymous namespace)";
+    name = CP_ANONYMOUS_NAMESPACE_STR;
 
   return name;
 }
@@ -9547,7 +9547,7 @@ fixup_partial_die (struct partial_die_info *part_die,
   /* Set default names for some unnamed DIEs.  */
 
   if (part_die->name == NULL && part_die->tag == DW_TAG_namespace)
-    part_die->name = "(anonymous namespace)";
+    part_die->name = CP_ANONYMOUS_NAMESPACE_STR;
 
   /* If there is no parent die to provide a namespace, and there are
      children, see if we can determine the namespace from their linkage

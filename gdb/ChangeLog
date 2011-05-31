@@ -1,3 +1,17 @@
+2010-05-31  Keith Seitz  <keiths@redhat.com>
+
+	PR symtab/12704
+	* cp-namespace.c (ANONYMOUS_NAMESPACE_LEN): Remove.
+	(cp_scan_for_anonymous_namespaces): Use CP_ANONYMOUS_NAMESPACE_STR
+	and CP_ANONYMOUS_NAMESPACE_LEN.
+	(cp_is_anonymous): Likewise.
+	* cp-support.h (CP_ANONYMOUS_NAMESPACE_STR): Define.
+	(CP_ANONYMOUS_NAMESPACE_LEN): Define.
+	* dwarf2read.c (namespace_name): Likewise.
+	(fixup_partial_die): Likewise.
+	* linespec.c (decode_compound): If CP_ANONYMOUS_NAMESPACE_STR is
+	seen in the input, keep it.
+
 2011-05-30  Pedro Alves  <pedro@codesourcery.com>
 
 	* target.h (enum inferior_event_type): Delete INF_QUIT_REQ.
