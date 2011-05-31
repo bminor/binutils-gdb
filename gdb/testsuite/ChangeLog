@@ -1,3 +1,9 @@
+2010-05-31  Keith Seitz  <keiths@redhat.com>
+
+	PR symtab/12704
+	* gdb.cp/anon-ns.cc: New file.
+	* gdb.cp/anon-ns.exp: New file.
+
 2011-05-31  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.arch/i386-dr3-watch.c: New file.
