@@ -1,3 +1,8 @@
+2011-05-30  Ian Lance Taylor  <iant@google.com>
+
+	* reloc.cc (Sized_relobj_file::do_read_relocs): Ignore empty reloc
+	sections.
+
 2011-05-29  Ian Lance Taylor  <iant@google.com>
 
 	PR gold/12804

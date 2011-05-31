@@ -322,6 +322,9 @@ Sized_relobj_file<size, big_endian>::do_read_relocs(Read_relocs_data* rd)
 
       off_t sh_size = shdr.get_sh_size();
 
+      if (sh_size == 0)
+	continue;
+
       unsigned int reloc_size;
       if (sh_type == elfcpp::SHT_REL)
 	reloc_size = elfcpp::Elf_sizes<size>::rel_size;
