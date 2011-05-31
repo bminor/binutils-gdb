@@ -66,17 +66,20 @@ static struct symtabs_and_lines decode_objc (char **argptr,
 static struct symtabs_and_lines decode_compound (char **argptr,
 						 int funfirstline,
 						 struct linespec_result *canonical,
+						 struct symtab *file_symtab,
 						 char *saved_arg,
 						 char *p);
 
-static struct symbol *lookup_prefix_sym (char **argptr, char *p);
+static struct symbol *lookup_prefix_sym (char **argptr, char *p,
+					 struct symtab *);
 
 static struct symtabs_and_lines find_method (int funfirstline,
 					     struct linespec_result *canonical,
 					     char *saved_arg,
 					     char *copy,
 					     struct type *t,
-					     struct symbol *sym_class);
+					     struct symbol *sym_class,
+					     struct symtab *);
 
 static void cplusplus_error (const char *name, const char *fmt, ...)
      ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (2, 3);
@@ -84,7 +87,7 @@ static void cplusplus_error (const char *name, const char *fmt, ...)
 static int total_number_of_methods (struct type *type);
 
 static int find_methods (struct type *, char *,
-			 enum language, struct symbol **);
+			 enum language, struct symbol **, struct symtab *);
 
 static int add_matching_methods (int method_counter, struct type *t,
 				 enum language language,
@@ -203,6 +206,30 @@ total_number_of_methods (struct type *type)
   return count;
 }
 
+/* Returns the block to be used for symbol searches for the given SYMTAB,
+   which may be NULL.  */
+
+static struct block *
+get_search_block (struct symtab *symtab)
+{
+  struct block *block;
+
+  if (symtab != NULL)
+    block = BLOCKVECTOR_BLOCK (BLOCKVECTOR (symtab), STATIC_BLOCK);
+  else
+    {
+      enum language save_language;
+
+      /* get_selected_block can change the current language when there is
+	 no selected frame yet.  */
+      save_language = current_language->la_language;
+      block = get_selected_block (0);
+      set_language (save_language);
+    }
+
+  return block;
+}
+
 /* Recursive helper function for decode_line_1.
    Look for methods named NAME in type T.
    Return number of matches.
@@ -212,7 +239,7 @@ total_number_of_methods (struct type *type)
 
 static int
 find_methods (struct type *t, char *name, enum language language,
-	      struct symbol **sym_arr)
+	      struct symbol **sym_arr, struct symtab *file_symtab)
 {
   int i1 = 0;
   int ibase;
@@ -235,7 +262,7 @@ find_methods (struct type *t, char *name, enum language language,
      unless we figure out how to get the physname without the name of
      the class, then the loop can't do any good.  */
   if (class_name
-      && (lookup_symbol_in_language (class_name, (struct block *) NULL,
+      && (lookup_symbol_in_language (class_name, get_search_block (file_symtab),
 			 STRUCT_DOMAIN, language, (int *) NULL)))
     {
       int method_counter;
@@ -290,7 +317,7 @@ find_methods (struct type *t, char *name, enum language language,
   if (i1 == 0)
     for (ibase = 0; ibase < TYPE_N_BASECLASSES (t); ibase++)
       i1 += find_methods (TYPE_BASECLASS (t, ibase), name,
-			  language, sym_arr + i1);
+			  language, sym_arr + i1, file_symtab);
 
   do_cleanups (cleanup);
   return i1;
@@ -814,6 +841,8 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
   char *saved_arg = *argptr;
   /* If IS_QUOTED, the end of the quoted bit.  */
   char *end_quote = NULL;
+  /* Is *ARGPTR enclosed in single quotes?  */
+  int is_squote_enclosed = 0;
   /* The "first half" of the linespec.  */
   char *first_half;
 
@@ -837,7 +866,11 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
 		       **argptr) != NULL);
 
   if (is_quoted)
-    end_quote = skip_quoted (*argptr);
+    {
+      end_quote = skip_quoted (*argptr);
+      if (*end_quote == '\0')
+	is_squote_enclosed = 1;
+    }
 
   /* Check to see if it's a multipart linespec (with colons or
      periods).  */
@@ -850,6 +883,26 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
 
   first_half = p = locate_first_half (argptr, &is_quote_enclosed);
 
+  /* First things first: if ARGPTR starts with a filename, get its
+     symtab and strip the filename from ARGPTR.  */
+  TRY_CATCH (file_exception, RETURN_MASK_ERROR)
+    {
+      file_symtab = symtab_from_filename (argptr, p, is_quote_enclosed);
+    }
+
+  if (file_exception.reason >= 0)
+    {
+      /* Check for single quotes on the non-filename part.  */
+      is_quoted = (**argptr
+		   && strchr (get_gdb_completer_quote_characters (),
+			      **argptr) != NULL);
+      if (is_quoted)
+	end_quote = skip_quoted (*argptr);
+
+      /* Locate the next "half" of the linespec.  */
+      first_half = p = locate_first_half (argptr, &is_quote_enclosed);
+    }
+
   /* Check if this is an Objective-C method (anything that starts with
      a '+' or '-' and a '[').  */
   if (is_objc_method_format (p))
@@ -860,7 +913,7 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
   {
     struct symtabs_and_lines values;
 
-    values = decode_objc (argptr, funfirstline, NULL,
+    values = decode_objc (argptr, funfirstline, file_symtab,
 			  canonical, saved_arg);
     if (values.sals != NULL)
       return values;
@@ -884,20 +937,14 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
 	  if (is_quote_enclosed)
 	    ++saved_arg;
 	  values = decode_compound (argptr, funfirstline, canonical,
-				    saved_arg, p);
-	  if (is_quoted && **argptr == '\'')
+				    file_symtab, saved_arg, p);
+	  if ((is_quoted || is_squote_enclosed) && **argptr == '\'')
 	    *argptr = *argptr + 1;
 	  return values;
 	}
 
-      /* No, the first part is a filename; set file_symtab to be that file's
-	 symtab.  Also, move argptr past the filename.  */
-
-      TRY_CATCH (file_exception, RETURN_MASK_ERROR)
-	{
-	  file_symtab = symtab_from_filename (argptr, p, is_quote_enclosed);
-	}
-      /* If that failed, maybe we have `function:label'.  */
+      /* If there was an exception looking up a specified filename earlier,
+	 then check whether we were really given `function:label'.   */
       if (file_exception.reason < 0)
 	{
 	  function_symbol = find_function_symbol (argptr, p, is_quote_enclosed);
@@ -954,7 +1001,7 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
   if (**argptr == '$')		/* May be a convenience variable.  */
     /* One or two $ chars possible.  */
     p = skip_quoted (*argptr + (((*argptr)[1] == '$') ? 2 : 1));
-  else if (is_quoted)
+  else if (is_quoted || is_squote_enclosed)
     {
       p = end_quote;
       if (p[-1] != '\'')
@@ -984,7 +1031,7 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
       copy[p - *argptr - 1] = '\0';
       copy++;
     }
-  else if (is_quoted)
+  else if (is_quoted || is_squote_enclosed)
     copy[p - *argptr - 1] = '\0';
   while (*p == ' ' || *p == '\t')
     p++;
@@ -1160,13 +1207,11 @@ locate_first_half (char **argptr, int *is_quote_enclosed)
 	  break;
 	}
       /* Check for the end of the first half of the linespec.  End of
-         line, a tab, a double colon or the last single colon, or a
-         space.  But if enclosed in double quotes we do not break on
-         enclosed spaces.  */
+         line, a tab, a colon or a space.  But if enclosed in double
+	 quotes we do not break on enclosed spaces.  */
       if (!*p
 	  || p[0] == '\t'
-	  || ((p[0] == ':')
-	      && ((p[1] == ':') || (strchr (p + 1, ':') == NULL)))
+	  || (p[0] == ':')
 	  || ((p[0] == ' ') && !*is_quote_enclosed))
 	break;
       if (p[0] == '.' && strchr (p, ':') == NULL)
@@ -1225,20 +1270,8 @@ decode_objc (char **argptr, int funfirstline, struct symtab *file_symtab,
   values.sals = NULL;
   values.nelts = 0;
 
-  if (file_symtab != NULL)
-    block = BLOCKVECTOR_BLOCK (BLOCKVECTOR (file_symtab), STATIC_BLOCK);
-  else
-    {
-      enum language save_language;
-
-      /* get_selected_block can change the current language when there is
-	 no selected frame yet.  */
-      save_language = current_language->la_language;
-      block = get_selected_block (0);
-      set_language (save_language);
-    }
-
-  find_imps (file_symtab, block, *argptr, NULL, &i1, &i2); 
+  find_imps (file_symtab, get_search_block (file_symtab), *argptr,
+	     NULL, &i1, &i2); 
     
   if (i1 > 0)
     {
@@ -1320,7 +1353,7 @@ decode_objc (char **argptr, int funfirstline, struct symtab *file_symtab,
 
 static struct symtabs_and_lines
 decode_compound (char **argptr, int funfirstline,
-		 struct linespec_result *canonical,
+		 struct linespec_result *canonical, struct symtab *file_symtab,
 		 char *the_real_saved_arg, char *p)
 {
   struct symtabs_and_lines values;
@@ -1468,7 +1501,7 @@ decode_compound (char **argptr, int funfirstline,
   /* Before the call, argptr->"AAA::inA::fun",
      p->"", p2->"::fun".  After the call: argptr->"fun", p, p2
      unchanged.  */
-  sym_class = lookup_prefix_sym (argptr, p2);
+  sym_class = lookup_prefix_sym (argptr, p2, file_symtab);
 
   /* If sym_class has been found, and if "AAA::inA" is a class, then
      we're in case 1 above.  So we look up "fun" as a method of that
@@ -1563,7 +1596,7 @@ decode_compound (char **argptr, int funfirstline,
 	 we'll lookup the whole string in the symbol tables.  */
 
       values = find_method (funfirstline, canonical, saved_arg,
-			    copy, t, sym_class);
+			    copy, t, sym_class, file_symtab);
       if (saved_java_argptr != NULL && values.nelts == 1)
 	{
 	  /* The user specified a specific return type for a java method.
@@ -1631,7 +1664,7 @@ decode_compound (char **argptr, int funfirstline,
    example, say ARGPTR is "AAA::inA::fun" and P is "::inA::fun".  */
 
 static struct symbol *
-lookup_prefix_sym (char **argptr, char *p)
+lookup_prefix_sym (char **argptr, char *p, struct symtab *file_symtab)
 {
   char *p1;
   char *copy;
@@ -1654,7 +1687,7 @@ lookup_prefix_sym (char **argptr, char *p)
   /* At this point p1->"::inA::fun", p->"inA::fun" copy->"AAA",
      argptr->"inA::fun".  */
 
-  sym = lookup_symbol (copy, get_selected_block (0), STRUCT_DOMAIN, 0);
+  sym = lookup_symbol (copy, get_search_block (file_symtab), STRUCT_DOMAIN, 0);
   if (sym == NULL)
     {
       /* Typedefs are in VAR_DOMAIN so the above symbol lookup will
@@ -1684,7 +1717,8 @@ lookup_prefix_sym (char **argptr, char *p)
 static struct symtabs_and_lines
 find_method (int funfirstline, struct linespec_result *canonical,
 	     char *saved_arg,
-	     char *copy, struct type *t, struct symbol *sym_class)
+	     char *copy, struct type *t, struct symbol *sym_class,
+	     struct symtab *file_symtab)
 {
   struct symtabs_and_lines values;
   struct symbol *sym = NULL;
@@ -1695,7 +1729,8 @@ find_method (int funfirstline, struct linespec_result *canonical,
   /* Find all methods with a matching name, and put them in
      sym_arr.  */
 
-  i1 = find_methods (t, copy, SYMBOL_LANGUAGE (sym_class), sym_arr);
+  i1 = find_methods (t, copy, SYMBOL_LANGUAGE (sym_class), sym_arr,
+		     file_symtab);
 
   if (i1 == 1)
     {
@@ -2086,11 +2121,7 @@ decode_variable (char *copy, int funfirstline,
   struct symbol *sym;
   struct minimal_symbol *msymbol;
 
-  sym = lookup_symbol (copy,
-		       (file_symtab
-			? BLOCKVECTOR_BLOCK (BLOCKVECTOR (file_symtab),
-					     STATIC_BLOCK)
-			: get_selected_block (0)),
+  sym = lookup_symbol (copy, get_search_block (file_symtab),
 		       VAR_DOMAIN, 0);
 
   if (sym != NULL)

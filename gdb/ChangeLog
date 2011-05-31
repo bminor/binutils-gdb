@@ -1,5 +1,27 @@
 2010-05-31  Keith Seitz  <keiths@redhat.com>
 
+	PR c++/12750
+	* linespec.c (get_search_block): New function.
+	(find_methods): Add FILE_SYMTATB parameter and use it and
+	get_search_block to pass an appropriate block to
+	lookup_symbol_in_namespace.
+	(decode_line_1): Record if *ARGPTR is single-quote enclosed.
+	Check if *ARGPTR starts with a filename first.
+	If it does, call locate_first_half again to locate the next
+	"first half" of the linespec.
+	Pass FILE_SYMTATB to decode_objc and decode_compound.
+	Swallow the trailing single-quote if IS_SQUOTE_ENCLOSED.
+	(locate_first_half): Stop on the first colon seen.
+	(decode_compound): Add FILE_SYMTAB parameter.
+	Pass FILE_SYMTAB to lookup_prefix_sym and find_method.
+	(lookup_prefix_sym): Add FILE_SYMTAB parameter and use
+	get_search_block with lookup_symbol.
+	(find_method): Add FILE_SYMTAB parameter and pass it to
+	find_methods.
+	(decode_objc): Use get_search_block.
+
+2010-05-31  Keith Seitz  <keiths@redhat.com>
+
 	PR symtab/12704
 	* cp-namespace.c (ANONYMOUS_NAMESPACE_LEN): Remove.
 	(cp_scan_for_anonymous_namespaces): Use CP_ANONYMOUS_NAMESPACE_STR
