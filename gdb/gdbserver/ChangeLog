@@ -1,3 +1,9 @@
+2011-05-31  Pedro Alves  <pedro@codesourcery.com>
+
+	* linux-x86-low.c (i386_dr_low_get_addr): Fix off by one in
+	assertion.
+	* win32-i386-low.c (i386_dr_low_get_addr): Ditto.
+
 2011-05-26  Yao Qi  <yao@codesourcery.com>
 
 	* Makefile.in (thread-db.o): Track dependence to

@@ -1,3 +1,8 @@
+2011-05-31  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.arch/i386-dr3-watch.c: New file.
+	* gdb.arch/i386-dr3-watch.exp: New file.
+
 2011-05-30  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.base/callfuncs.c (t_structs_fc): New.
