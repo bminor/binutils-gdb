@@ -8304,7 +8304,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 		     case, mode switching is performed by the stub.  */
 		  if (branch_type == ST_BRANCH_TO_THUMB && !stub_entry)
 		    value |= (1 << 28);
-		  else
+		  else if (stub_entry || branch_type != ST_BRANCH_UNKNOWN)
 		    {
 		      value &= ~(bfd_vma)(1 << 28);
 		      value |= (1 << 24);
@@ -15131,12 +15131,16 @@ elf32_arm_swap_symbol_in (bfd * abfd,
 
   /* New EABI objects mark thumb function symbols by setting the low bit of
      the address.  */
-  if ((ELF_ST_TYPE (dst->st_info) == STT_FUNC
-       || ELF_ST_TYPE (dst->st_info) == STT_GNU_IFUNC)
-      && (dst->st_value & 1))
+  if (ELF_ST_TYPE (dst->st_info) == STT_FUNC
+      || ELF_ST_TYPE (dst->st_info) == STT_GNU_IFUNC)
     {
-      dst->st_value &= ~(bfd_vma) 1;
-      dst->st_target_internal = ST_BRANCH_TO_THUMB;
+      if (dst->st_value & 1)
+	{
+	  dst->st_value &= ~(bfd_vma) 1;
+	  dst->st_target_internal = ST_BRANCH_TO_THUMB;
+	}
+      else
+	dst->st_target_internal = ST_BRANCH_TO_ARM;
     }
   else if (ELF_ST_TYPE (dst->st_info) == STT_ARM_TFUNC)
     {
@@ -15146,7 +15150,7 @@ elf32_arm_swap_symbol_in (bfd * abfd,
   else if (ELF_ST_TYPE (dst->st_info) == STT_SECTION)
     dst->st_target_internal = ST_BRANCH_LONG;
   else
-    dst->st_target_internal = ST_BRANCH_TO_ARM;
+    dst->st_target_internal = ST_BRANCH_UNKNOWN;
 
   return TRUE;
 }

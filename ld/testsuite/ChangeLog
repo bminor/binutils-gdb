@@ -1,4 +1,15 @@
 2011-05-31  Paul Brook  <paul@codesourcery.com>
+
+	* ld-arm/cortex-a8-far.d: Adjust expected output.
+	* ld-arm/arm-call1.s: Give function symbol correct type.
+	* ld-arm/arm-call2.s: Ditto.
+	* ld-arm/farcall-group4.s: Ditto.
+	* ld-arm/arm-elf.exp (cortex-a8-far): Define far symbols with correct
+	type via assembly file.
+	* ld-arm/cortex-a8-far-3.s: New file.
+	* ld-arm/abs-call-1.s: Add Thumb tests
+
+2011-05-31  Paul Brook  <paul@codesourcery.com>
 	Nathan Sidwell  <nathan@codesourcery.com>
 
 	* ld-arm/abs-call-1.d: New.
