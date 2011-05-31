@@ -9845,7 +9845,9 @@ do_t_branch (void)
 
   if (unified_syntax
       && (inst.size_req == 4
-	  || (inst.size_req != 2 && inst.operands[0].hasreloc)))
+	  || (inst.size_req != 2
+	      && (inst.operands[0].hasreloc
+		  || inst.reloc.exp.X_op == O_constant))))
     {
       inst.instruction = THUMB_OP32(opcode);
       if (cond == COND_ALWAYS)

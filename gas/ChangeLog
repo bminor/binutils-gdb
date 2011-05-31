@@ -1,4 +1,9 @@
 2011-05-31  Paul Brook  <paul@codesourcery.com>
+
+	* config/tc-arm.c (do_t_branch): Avoid relaxing branches to constant
+	addresses.
+
+2011-05-31  Paul Brook  <paul@codesourcery.com>
 	Nathan Sidwell  <nathan@codesourcery.com>
 
 	* config/tc-arm.c (fix_new_arm): Create an absolute symbol for

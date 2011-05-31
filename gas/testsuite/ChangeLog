@@ -1,3 +1,8 @@
+2011-05-31  Paul Brook  <paul@codesourcery.com>
+
+	* arm/t2-branch-global.d: New test.
+	* arm/t2-branch-global.s: New test.
+
 2011-05-24  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
 
 	* gas/s390/esa-g5.d: Fix fp register pair operands.
