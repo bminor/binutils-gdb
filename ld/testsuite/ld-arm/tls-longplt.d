@@ -47,7 +47,7 @@ Disassembly of section .foo:
  4001018:	e1a00000 	nop			; .*
  400101c:	fc00f2a0 	.word	0xfc00f2a0
  4001020:	4801      	ldr	r0, \[pc, #4\]	; .*
- 4001022:	f000 e80a 	blx	4001038 .*
+ 4001022:	f000 f809 	bl	4001038 .*
  4001026:	46c0      	nop			; .*
  4001028:	fc00f291 	.word	0xfc00f291
  400102c:	00000000 	.word	0x00000000

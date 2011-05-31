@@ -1,3 +1,10 @@
+2011-05-31  Paul Brook  <paul@codesourcery.com>
+
+	* elf32-arm.c (arm_stub_is_thumb): Add
+	arm_stub_long_branch_v4t_thumb_tls_pic.
+	(elf32_arm_final_link_relocate): TLS stubs are always ARM.
+	Handle Thumb stubs.
+
 2011-05-27  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/12710

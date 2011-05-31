@@ -3427,6 +3427,7 @@ arm_stub_is_thumb (enum elf32_arm_stub_type stub_type)
     case arm_stub_long_branch_v4t_thumb_arm:
     case arm_stub_short_branch_v4t_thumb_arm:
     case arm_stub_long_branch_v4t_thumb_arm_pic:
+    case arm_stub_long_branch_v4t_thumb_tls_pic:
     case arm_stub_long_branch_thumb_only_pic:
       return TRUE;
     case arm_stub_none:
@@ -9304,6 +9305,9 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	    || ELF32_R_TYPE(rel->r_info) == R_ARM_THM_TLS_CALL)
 	  {
 	    bfd_signed_vma offset;
+	    /* TLS stubs are arm mode.  The original symbol is a
+	       data object, so branch_type is bogus.  */
+	    branch_type = ST_BRANCH_TO_ARM;
 	    enum elf32_arm_stub_type stub_type
 	      = arm_type_of_stub (info, input_section, rel,
 				  st_type, &branch_type,
@@ -9348,16 +9352,25 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 			   input_section->output_offset
 			   + rel->r_offset + 4);
 	    
-		/* Round up the offset to a word boundary */
-		offset = (offset + 2) & ~2;
+		if (stub_type != arm_stub_none
+		    && arm_stub_is_thumb (stub_type))
+		  {
+		    lower_insn = 0xd000;
+		  }
+		else
+		  {
+		    lower_insn = 0xc000;
+		    /* Round up the offset to a word boundary */
+		    offset = (offset + 2) & ~2;
+		  }
+
 		neg = offset < 0;
 		upper_insn = (0xf000
 			      | ((offset >> 12) & 0x3ff)
 			      | (neg << 10));
-		lower_insn = (0xc000
-			      | (((!((offset >> 23) & 1)) ^ neg) << 13)
+		lower_insn |= (((!((offset >> 23) & 1)) ^ neg) << 13)
 			      | (((!((offset >> 22) & 1)) ^ neg) << 11)
-			      | ((offset >> 1) & 0x7ff));
+			      | ((offset >> 1) & 0x7ff);
 		bfd_put_16 (input_bfd, upper_insn, hit_data);
 		bfd_put_16 (input_bfd, lower_insn, hit_data + 2);
 		return bfd_reloc_ok;
