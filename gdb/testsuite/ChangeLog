@@ -1,3 +1,8 @@
+2011-05-31  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.arch/i386-dr3-watch.c: New file.
+	* gdb.arch/i386-dr3-watch.exp: New file.
+
 2011-05-24  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.trace/tfile.exp: Add test that opening the basic.tf trace

@@ -508,7 +508,7 @@ i386_dr_low_get_addr (int regnum)
   ptid_t ptid = ptid_of (lwp);
 
   /* DR6 and DR7 are retrieved with some other way.  */
-  gdb_assert (DR_FIRSTADDR <= regnum && regnum < DR_LASTADDR);
+  gdb_assert (DR_FIRSTADDR <= regnum && regnum <= DR_LASTADDR);
 
   return x86_linux_dr_get (ptid, regnum);
 }
