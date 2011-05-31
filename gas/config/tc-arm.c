@@ -21895,14 +21895,25 @@ arm_force_relocation (struct fix * fixp)
     }
 #endif
 
-  /* Resolve these relocations even if the symbol is extern or weak.  */
+  /* Resolve these relocations even if the symbol is extern or weak.
+     Technically this is probably wrong due to symbol preemption.
+     In practice these relocations do not have enough range to be useful
+     at dynamic link time, and some code (e.g. in the Linux kernel)
+     expects these references to be resolved.  */
   if (fixp->fx_r_type == BFD_RELOC_ARM_IMMEDIATE
       || fixp->fx_r_type == BFD_RELOC_ARM_OFFSET_IMM
+      || fixp->fx_r_type == BFD_RELOC_ARM_OFFSET_IMM8
       || fixp->fx_r_type == BFD_RELOC_ARM_ADRL_IMMEDIATE
+      || fixp->fx_r_type == BFD_RELOC_ARM_CP_OFF_IMM
+      || fixp->fx_r_type == BFD_RELOC_ARM_CP_OFF_IMM_S2
+      || fixp->fx_r_type == BFD_RELOC_ARM_THUMB_OFFSET
       || fixp->fx_r_type == BFD_RELOC_ARM_T32_ADD_IMM
       || fixp->fx_r_type == BFD_RELOC_ARM_T32_IMMEDIATE
       || fixp->fx_r_type == BFD_RELOC_ARM_T32_IMM12
-      || fixp->fx_r_type == BFD_RELOC_ARM_T32_ADD_PC12)
+      || fixp->fx_r_type == BFD_RELOC_ARM_T32_OFFSET_IMM
+      || fixp->fx_r_type == BFD_RELOC_ARM_T32_ADD_PC12
+      || fixp->fx_r_type == BFD_RELOC_ARM_T32_CP_OFF_IMM
+      || fixp->fx_r_type == BFD_RELOC_ARM_T32_CP_OFF_IMM_S2)
     return 0;
 
   /* Always leave these relocations for the linker.  */

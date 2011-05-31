@@ -1,5 +1,10 @@
 2011-05-31  Paul Brook  <paul@codesourcery.com>
 
+	* config/tc-arm.c (arm_force_relocation): Resolve all pc-relative
+	loads.
+
+2011-05-31  Paul Brook  <paul@codesourcery.com>
+
 	* config/tc-arm.c (do_t_branch): Avoid relaxing branches to constant
 	addresses.
 
