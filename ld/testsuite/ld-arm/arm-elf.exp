@@ -413,6 +413,9 @@ set armelftests {
       {objdump {-s -j.data -j.got} ifunc-16.gd}
       {readelf -r ifunc-16.rd}}
      "ifunc-16"}
+    {"abs call" "-T arm.ld" "" {abs-call-1.s}
+     {{objdump -d abs-call-1.d}}
+     "abs-call-1"}
 }
 
 run_ld_link_tests $armelftests

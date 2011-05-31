@@ -15434,6 +15434,29 @@ fix_new_arm (fragS *	   frag,
   switch (exp->X_op)
     {
     case O_constant:
+      if (pc_rel)
+	{
+	  /* Create an absolute valued symbol, so we have something to
+             refer to in the object file.  Unfortunately for us, gas's
+             generic expression parsing will already have folded out
+             any use of .set foo/.type foo %function that may have
+             been used to set type information of the target location,
+             that's being specified symbolically.  We have to presume
+             the user knows what they are doing.  */
+	  char name[16 + 8];
+	  symbolS *symbol;
+
+	  sprintf (name, "*ABS*0x%lx", (unsigned long)exp->X_add_number);
+
+	  symbol = symbol_find_or_make (name);
+	  S_SET_SEGMENT (symbol, absolute_section);
+	  symbol_set_frag (symbol, &zero_address_frag);
+	  S_SET_VALUE (symbol, exp->X_add_number);
+	  exp->X_op = O_symbol;
+	  exp->X_add_symbol = symbol;
+	  exp->X_add_number = 0;
+	}
+      /* FALLTHROUGH */
     case O_symbol:
     case O_add:
     case O_subtract:

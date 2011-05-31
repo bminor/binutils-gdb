@@ -1,4 +1,11 @@
 2011-05-31  Paul Brook  <paul@codesourcery.com>
+	Nathan Sidwell  <nathan@codesourcery.com>
+
+	* ld-arm/abs-call-1.d: New.
+	* ld-arm/abs-call-1.s: New.
+	* ld-arm/arm-elf.exp: Add it.
+
+2011-05-31  Paul Brook  <paul@codesourcery.com>
 
 	* ld-arm/tls-longplt.d: Update expected output.
 	* ld-arm/tls-thumb1.d: Ditto.

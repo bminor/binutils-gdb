@@ -192,6 +192,12 @@ void arm_copy_symbol_attributes (symbolS *, symbolS *);
   (THUMB_IS_FUNC ((FIX)->fx_addsy)		\
    || !SEG_NORMAL (SEG))
 
+#define TC_FORCE_RELOCATION_ABS(FIX)			\
+  (((FIX)->fx_pcrel					\
+    && (FIX)->fx_r_type != BFD_RELOC_32			\
+    && (FIX)->fx_r_type != BFD_RELOC_ARM_GOT32)		\
+   || TC_FORCE_RELOCATION(FIX))
+
 #define TC_CONS_FIX_NEW cons_fix_new_arm
 
 #define MAX_MEM_ALIGNMENT_BYTES    6
