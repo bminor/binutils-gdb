@@ -22805,6 +22805,8 @@ static const struct arm_cpu_option_table arm_cpus[] =
   {"cortex-r4",		ARM_ARCH_V7R,	 FPU_NONE,	  "Cortex-R4"},
   {"cortex-r4f",	ARM_ARCH_V7R,	 FPU_ARCH_VFP_V3D16,
   							  "Cortex-R4F"},
+  {"cortex-r5",		ARM_ARCH_V7R_IDIV,
+					 FPU_NONE,	  "Cortex-R5"},
   {"cortex-m4",		ARM_ARCH_V7EM,	 FPU_NONE,	  "Cortex-M4"},
   {"cortex-m3",		ARM_ARCH_V7M,	 FPU_NONE,	  "Cortex-M3"},
   {"cortex-m1",		ARM_ARCH_V6SM,	 FPU_NONE,	  "Cortex-M1"},
@@ -22888,7 +22890,7 @@ struct arm_option_extension_value_table
 static const struct arm_option_extension_value_table arm_extensions[] =
 {
   {"idiv",	ARM_FEATURE (ARM_EXT_ADIV | ARM_EXT_DIV, 0),
-				   ARM_FEATURE (ARM_EXT_V7A, 0)},
+				   ARM_FEATURE (ARM_EXT_V7A | ARM_EXT_V7R, 0)},
   {"iwmmxt",	ARM_FEATURE (0, ARM_CEXT_IWMMXT),	ARM_ANY},
   {"iwmmxt2",	ARM_FEATURE (0, ARM_CEXT_IWMMXT2),	ARM_ANY},
   {"maverick",	ARM_FEATURE (0, ARM_CEXT_MAVERICK),	ARM_ANY},

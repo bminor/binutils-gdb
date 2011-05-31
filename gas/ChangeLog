@@ -1,5 +1,11 @@
 2011-05-31  Paul Brook  <paul@codesourcery.com>
 
+	* config/tc-arm.c (arm_cpus): Add Cortex-R5.
+	(arm_extensions): Allow idiv on ARMv7-R.
+	* doc/c-arm.text: Update idiv extension restrictions.
+
+2011-05-31  Paul Brook  <paul@codesourcery.com>
+
 	* config/tc-arm.c (arm_force_relocation): Resolve all pc-relative
 	loads.
 

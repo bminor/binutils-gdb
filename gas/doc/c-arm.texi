@@ -152,7 +152,7 @@ been added, again in ascending alphabetical order.  For example,
 
 
 The following extensions are currently supported:
-@code{idiv}, (Integer Divide Extensions for v7-A architecture),
+@code{idiv}, (Integer Divide Extensions for v7-A and v7-R architectures),
 @code{iwmmxt},
 @code{iwmmxt2},
 @code{maverick},

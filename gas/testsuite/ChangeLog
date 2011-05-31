@@ -1,5 +1,13 @@
 2011-05-31  Paul Brook  <paul@codesourcery.com>
 
+	* gas/arm/arm-idiv-bad.d: New test.
+	* gas/arm/arm-idiv-bad.s: New test.
+	* gas/arm/arm-idiv-bad.l: New test.
+	* gas/arm/arm-idiv.d: New test.
+	* gas/arm/arm-idiv.s: New test.
+
+2011-05-31  Paul Brook  <paul@codesourcery.com>
+
 	* gas/arm/ldr-global.d: New test.
 	* gas/arm/ldr-global.s: New test.
 
