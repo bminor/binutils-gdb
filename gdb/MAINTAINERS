@@ -119,10 +119,10 @@ their affiliation, and they act on behalf of the GNU project.
 	Robert Dewar (AdaCore, NYU)
 	Klee Dienes (Apple)
 	Paul Hilfinger (UC Berkeley)
-	Dan Jacobowitz (CodeSourcery)
+	Dan Jacobowitz (Google)
 	Stan Shebs (CodeSourcery)
 	Richard Stallman (FSF)
-	Ian Lance Taylor (C2)
+	Ian Lance Taylor (Google)
 	Todd Whitesel
 
 
@@ -162,7 +162,7 @@ Joel Brobecker			brobecker@adacore.com
 Kevin Buettner			kevinb@redhat.com
 Andrew Cagney			cagney@gnu.org
 Doug Evans			dje@google.com
-Daniel Jacobowitz		dan@codesourcery.com
+Daniel Jacobowitz		drow@false.org
 Mark Kettenis           	kettenis@gnu.org
 Jan Kratochvil			jan.kratochvil@redhat.com
 Stan Shebs			stan@codesourcery.com
@@ -364,7 +364,7 @@ MS Windows (NT, '00, 9x, Me, XP) host & native
 GNU/Linux/x86 native & host
 			Mark Kettenis		kettenis@gnu.org
 GNU/Linux MIPS native & host
-			Daniel Jacobowitz	dan@codesourcery.com
+			Daniel Jacobowitz	drow@false.org
 GNU/Linux m68k		Andreas Schwab		schwab@linux-m68k.org
 FreeBSD native & host	Mark Kettenis		kettenis@gnu.org
 
@@ -378,7 +378,7 @@ threads			Michael Snyder		msnyder@vmware.com
 language support
   Ada			Joel Brobecker		brobecker@adacore.com
 			Paul Hilfinger		hilfinger@gnat.com
-  C++			Daniel Jacobowitz	dan@codesourcery.com
+  C++			Daniel Jacobowitz	drow@false.org
   Objective C support   Adam Fedor		fedor@gnu.org
 shared libs		Kevin Buettner		kevinb@redhat.com
 MI interface		Vladimir Prus		vladimir@codesourcery.com
@@ -400,7 +400,7 @@ libgui (w/foundry, sn)	Keith Seitz		keiths@redhat.com
 
 Misc:
 
-gdb/gdbserver		Daniel Jacobowitz	dan@codesourcery.com
+gdb/gdbserver		Daniel Jacobowitz	drow@false.org
 
 Makefile.in, configure*	ALL
 
@@ -488,7 +488,7 @@ Randolph Chung					tausq@debian.org
 Nick Clifton					nickc@redhat.com
 J.T. Conklin					jtc@acorntoolworks.com
 Brendan Conoboy					blc@redhat.com
-Ludovic Courtès					ludo@gnu.org
+Ludovic CourtÃ¨s					ludo@gnu.org
 DJ Delorie					dj@redhat.com
 Chris Demetriou					cgd@google.com
 Philippe De Muyter				phdm@macqel.be
@@ -529,7 +529,7 @@ Martin Hunt					hunt@redhat.com
 Jim Ingham					jingham@apple.com
 Baurzhan Ismagulov				ibr@radix50.net
 Manoj Iyer					manjo@austin.ibm.com
-Daniel Jacobowitz				dan@codesourcery.com
+Daniel Jacobowitz				drow@false.org
 Andreas Jaeger					aj@suse.de
 Janis Johnson					janisjo@codesourcery.com
 Jeff Johnston					jjohnstn@redhat.com
