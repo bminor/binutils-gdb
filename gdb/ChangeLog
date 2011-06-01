@@ -1,4 +1,4 @@
-2011-06-01  Daniel Jacobowitz  <dan@codesourcery.com>
+2011-06-01  Daniel Jacobowitz  <drow@false.org>
 
 	* MAINTAINERS: Update my email address and affiliation.  Also
 	update Ian Lance Taylor's affiliation.  Use UTF-8 for ludo@gnu.org.
