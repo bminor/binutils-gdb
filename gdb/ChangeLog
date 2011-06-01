@@ -1,3 +1,9 @@
+2011-06-01  Yao Qi  <yao@codesourcery.com>
+
+	* objfiles.h (obj_section_addr): Update reference to objfile from
+	`abfd' to `obfd'.
+	(obj_section_endaddr): Likewise.
+
 2011-06-01  Daniel Jacobowitz  <drow@false.org>
 
 	* MAINTAINERS: Update my email address and affiliation.  Also

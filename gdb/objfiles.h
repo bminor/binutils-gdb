@@ -128,13 +128,13 @@ struct obj_section
 
 /* The memory address of section S (vma + offset).  */
 #define obj_section_addr(s)				      		\
-  (bfd_get_section_vma ((s)->objfile->abfd, s->the_bfd_section)		\
+  (bfd_get_section_vma ((s)->objfile->obfd, s->the_bfd_section)		\
    + obj_section_offset (s))
 
 /* The one-passed-the-end memory address of section S
    (vma + size + offset).  */
 #define obj_section_endaddr(s)						\
-  (bfd_get_section_vma ((s)->objfile->abfd, s->the_bfd_section)		\
+  (bfd_get_section_vma ((s)->objfile->obfd, s->the_bfd_section)		\
    + bfd_get_section_size ((s)->the_bfd_section)			\
    + obj_section_offset (s))
 
