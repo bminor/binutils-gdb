@@ -1,3 +1,7 @@
+2011-06-01  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.base/ending-run.exp: Match __uClibc_main for uClibc.
+
 2010-05-31  Keith Seitz  <keiths@redhat.com>
 
 	PR c++/12750

@@ -195,6 +195,10 @@ gdb_test_multiple "next" "step out of main" {
     -re ".*Program received signal SIGTRAP.*$gdb_prompt $" {
         pass "step out of main"
     }
+    -re ".*in.*__uClibc_main.*$gdb_prompt $" {
+	# This is what happens on system using uClibc.
+	pass "step out of main"
+    }
 }
 
 # When we're talking to a program running on a real stand-alone board,
