@@ -1,3 +1,7 @@
+2011-06-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* interf.c (sim_complete_command): New stub function.
+
 2011-01-11  Andrew Burgess  <aburgess@broadcom.com>
 
 	* interf.c (sim_store_register): Update return value to

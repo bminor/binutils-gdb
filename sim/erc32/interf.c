@@ -481,6 +481,12 @@ sim_do_command(sd, cmd)
     exec_cmd(&sregs, cmd);
 }
 
+char **
+sim_complete_command (SIM_DESC sd, char *text, char *word)
+{
+  return NULL;
+}
+
 #if 0 /* FIXME: These shouldn't exist.  */
 
 int
