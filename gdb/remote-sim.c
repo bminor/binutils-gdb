@@ -684,6 +684,7 @@ gdbsim_open (char *args, int from_tty)
   len = (7 + 1			/* gdbsim */
 	 + strlen (" -E little")
 	 + strlen (" --architecture=xxxxxxxxxx")
+	 + strlen (" --sysroot=") + strlen (gdb_sysroot) +
 	 + (args ? strlen (args) : 0)
 	 + 50) /* slack */ ;
   arg_buf = (char *) alloca (len);
@@ -708,6 +709,9 @@ gdbsim_open (char *args, int from_tty)
       strcat (arg_buf, " --architecture=");
       strcat (arg_buf, selected_architecture_name ());
     }
+  /* Pass along gdb's concept of the sysroot.  */
+  strcat (arg_buf, " --sysroot=");
+  strcat (arg_buf, gdb_sysroot);
   /* finally, any explicit args */
   if (args)
     {

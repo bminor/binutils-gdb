@@ -1,3 +1,8 @@
+2011-06-01  Mike Frysinger  <vapier@gentoo.org>
+
+	* remote-sim.c (gdbsim_open): Add the strlen of " --sysroot=" and
+	gdb_sysroot to the "len" variable.  Append both to "arg_buf".
+
 2011-06-01  Yao Qi  <yao@codesourcery.com>
 
 	* objfiles.h (obj_section_addr): Update reference to objfile from
