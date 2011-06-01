@@ -2214,7 +2214,20 @@ arm_exidx_test.so: arm_exidx_test.o ../ld-new
 arm_exidx_test.o: arm_exidx_test.s
 	$(TEST_AS) -o $@ $<
 
-MOSTLYCLEANFILES += arm_exidx_test.so
+check_SCRIPTS += pr12826.sh
+check_DATA += pr12826.stdout
+
+pr12826.stdout: pr12826.so
+	$(TEST_READELF) -A $< > $@
+
+pr12826.so: pr12826_1.o pr12826_2.o ../ld-new
+	../ld-new -shared -o $@ $<
+
+pr12826_1.o: pr12826_1.s
+	$(TEST_AS) -o $@ $<
+
+pr12826_2.o: pr12826_2.s
+	$(TEST_AS) -o $@ $<
 
 endif DEFAULT_TARGET_ARM
 

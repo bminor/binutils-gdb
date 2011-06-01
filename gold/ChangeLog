@@ -1,3 +1,19 @@
+2011-05-31  Doug Kwan  <dougkwan@google.com>
+            Asier Llano
+
+	PR gold/12826
+	* arm.cc (Target_arm::tag_cpu_arch_combine): Fix handling of 
+	arch value that equals to elfcpp::MAX_TAG_CPU_ARCH.
+	* testsuite/Makefile.am: (MOSTLYCLEANFILES): Clean up.  Remove
+	redundant arm_exidx_test.so.
+	* testsuite/Makefile.in: Regenerate.
+	(check_SCRIPTS): Add pr12826.sh
+	(check_DATA): Add pr12826.stdout
+	(pr12826.stdout, pr12826.so, pr12826_1.o, pr12826_2.o): New rules.
+	* testsuite/pr12826.sh: New file.
+	* testsuite/pr12826_1.s: Ditto.
+	* testsuite/pr12826_1.s: Ditto.
+
 2011-05-30  Ian Lance Taylor  <iant@google.com>
 
 	* reloc.cc (Sized_relobj_file::do_read_relocs): Ignore empty reloc

@@ -10202,7 +10202,7 @@ Target_arm<big_endian>::tag_cpu_arch_combine(
 
   // Check we've not got a higher architecture than we know about.
 
-  if (oldtag >= elfcpp::MAX_TAG_CPU_ARCH || newtag >= elfcpp::MAX_TAG_CPU_ARCH)
+  if (oldtag > elfcpp::MAX_TAG_CPU_ARCH || newtag > elfcpp::MAX_TAG_CPU_ARCH)
     {
       gold_error(_("%s: unknown CPU architecture"), name);
       return -1;
