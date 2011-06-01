@@ -1,3 +1,9 @@
+2011-06-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_size_dynamic_sections): Properly warn
+	relocation in readonly section in a shared object.
+	* elf64-x86-64.c (elf_x86_64_size_dynamic_sections): Likewise.
+
 2011-05-31  Nick Clifton  <nickc@redhat.com>
 
 	* archive.c (adjust_relative_path): Fix comment to prevent it
