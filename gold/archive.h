@@ -405,6 +405,8 @@ class Archive : public Library_base
   unsigned int num_members_;
   // True if we exclude this library archive from automatic export.
   bool no_export_;
+  // True if this library has been included as a --whole-archive.
+  bool included_all_members_;
 };
 
 // This class is used to read an archive and pick out the desired

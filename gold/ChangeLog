@@ -1,3 +1,11 @@
+2011-06-02  Cary Coutant  <ccoutant@google.com>
+
+	PR gold/12163
+	* gold/archive.cc (Archive::Archive): Initialize new data member.
+	(Archive::include_all_members): Return if archive has already been
+	included.
+	* gold/archive.h (Archive::include_all_members_): New data member.
+
 2011-06-02  Nick Clifton  <nickc@redhat.com>
 
 	* dynobj.h: Fix spelling mistake in comment.
