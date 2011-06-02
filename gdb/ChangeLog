@@ -1,3 +1,7 @@
+2011-06-02  Pedro Alves  <pedro@codesourcery.com>
+
+	* top.h (simplified_command_loop): Delete declaration.
+
 2011-06-01  Mike Frysinger  <vapier@gentoo.org>
 
 	* remote-sim.c (gdbsim_open): Add the strlen of " --sysroot=" and
