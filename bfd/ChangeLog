@@ -1,3 +1,13 @@
+2011-06-01  DJ Delorie  <dj@redhat.com>
+
+	* config.bfd: Add bfd_elf32_rx_be_ns_vec.
+	* target.c: Likewise.
+	* configure.in: Likewise.
+	* configure.in: Regenerate.
+	* elf32-rx.c: Add elf32-rx-be-ns target.
+	(rx_elf_object_p): Never allow the be-ns target by default,
+	only allow it if the user requests it.
+
 2011-06-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_size_dynamic_sections): Properly warn

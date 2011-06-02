@@ -1189,7 +1189,7 @@ case "${targ}" in
 
   rx-*-elf)
     targ_defvec=bfd_elf32_rx_le_vec
-    targ_selvecs="bfd_elf32_rx_be_vec bfd_elf32_rx_le_vec"
+    targ_selvecs="bfd_elf32_rx_be_vec bfd_elf32_rx_le_vec bfd_elf32_rx_be_ns_vec"
     ;;
 
   s390-*-linux*)

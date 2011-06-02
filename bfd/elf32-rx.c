@@ -28,6 +28,11 @@
 
 #define RX_OPCODE_BIG_ENDIAN 0
 
+/* This is a meta-target that's used only with objcopy, to avoid the
+   endian-swap we would otherwise get.  We check for this in
+   rx_elf_object_p().  */
+const bfd_target bfd_elf32_rx_be_ns_vec;
+
 #ifdef DEBUG
 char * rx_get_reloc (long);
 void rx_dump_symtab (bfd *, void *, void *);
@@ -2960,6 +2965,13 @@ rx_elf_object_p (bfd * abfd)
   int nphdrs = elf_elfheader (abfd)->e_phnum;
   sec_ptr bsec;
 
+  /* We never want to automatically choose the non-swapping big-endian
+     target.  The user can only get that explicitly, such as with -I
+     and objcopy.  */
+  if (abfd->xvec == &bfd_elf32_rx_be_ns_vec
+      && abfd->target_defaulted)
+    return FALSE;
+
   bfd_default_set_arch_mach (abfd, bfd_arch_rx,
 			     elf32_rx_machine (abfd));
 
@@ -3434,5 +3446,23 @@ elf32_rx_modify_program_headers (bfd * abfd ATTRIBUTE_UNUSED,
 #define bfd_elf32_set_section_contents		rx_set_section_contents
 #define bfd_elf32_bfd_final_link		rx_final_link
 #define bfd_elf32_bfd_relax_section		elf32_rx_relax_section_wrapper
+
+#include "elf32-target.h"
+
+/* We define a second big-endian target that doesn't have the custom
+   section get/set hooks, for times when we want to preserve the
+   pre-swapped .text sections (like objcopy).  */
+
+#undef  TARGET_BIG_SYM
+#define TARGET_BIG_SYM		bfd_elf32_rx_be_ns_vec
+#undef  TARGET_BIG_NAME
+#define TARGET_BIG_NAME		"elf32-rx-be-ns"
+#undef  TARGET_LITTLE_SYM
+
+#undef bfd_elf32_get_section_contents
+#undef bfd_elf32_set_section_contents
+
+#undef	elf32_bed
+#define elf32_bed				elf32_rx_be_ns_bed
 
 #include "elf32-target.h"
