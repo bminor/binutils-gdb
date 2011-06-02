@@ -1,6 +1,6 @@
 /* Motorola 68HC11/HC12-specific support for 32-bit ELF
    Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008,
-   2009, 2010  Free Software Foundation, Inc.
+   2009, 2010, 2011  Free Software Foundation, Inc.
    Contributed by Stephane Carrez (stcarrez@nerim.fr)
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -1188,7 +1188,7 @@ _bfd_m68hc11_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
   flagword new_flags;
   bfd_boolean ok = TRUE;
 
-  /* Check if we have the same endianess */
+  /* Check if we have the same endianness */
   if (!_bfd_generic_verify_endian_match (ibfd, obfd))
     return FALSE;
 

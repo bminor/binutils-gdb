@@ -1,3 +1,8 @@
+2011-06-02  Nick Clifton  <nickc@redhat.com>
+
+	* arm-dis.c: Fix spelling mistakes.
+	* op/opcodes.pot: Regenerate.
+
 2011-05-24  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
 
 	* s390-opc.c: Replace S390_OPERAND_REG_EVEN with

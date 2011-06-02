@@ -1,3 +1,10 @@
+2011-06-02  Nick Clifton  <nickc@redhat.com>
+
+	* as.c: Fix spelling typo.
+	* read.c: Likewise.
+	* config/tc-ppc.c: Likewise.
+	* po/gas.pit: Regenerate.
+
 2011-05-31  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (arm_cpus): Add Cortex-R5.
@@ -20,7 +27,7 @@
 	* config/tc-arm.c (fix_new_arm): Create an absolute symbol for
 	pc-relative fixes to constants.
 	* config/tc-arm.h (TC_FORCE_RELOCATATION_ABS): Define.
-	
+
 2011-05-27  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-s390.c (md_begin): Remove unused variable dup_insn.

@@ -20,6 +20,8 @@ dlltool.h
 dllwrap.c
 dwarf.c
 dwarf.h
+elfcomm.c
+elfcomm.h
 elfedit.c
 emul_aix.c
 emul_vanilla.c
@@ -38,6 +40,8 @@ not-ranlib.c
 not-strip.c
 objcopy.c
 objdump.c
+objdump.h
+od-xcoff.c
 prdbg.c
 rclex.c
 rdcoff.c

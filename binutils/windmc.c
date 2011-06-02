@@ -1,5 +1,5 @@
 /* windmc.c -- a program to compile Windows message files.
-   Copyright 2007, 2008, 2009, 2010
+   Copyright 2007, 2008, 2009, 2010, 2011
    Free Software Foundation, Inc.
    Written by Kai Tietz, Onevision.
 
@@ -205,7 +205,7 @@ usage (FILE *stream, int status)
   -C --codepage_in=<val>       Set codepage when reading mc text file\n\
   -d --decimal_values          Print values to text files decimal\n\
   -e --extension=<extension>   Set header extension used on export header file\n\
-  -F --target <target>         Specify output target for endianess.\n\
+  -F --target <target>         Specify output target for endianness.\n\
   -h --headerdir=<directory>   Set the export directory for headers\n\
   -u --unicode_in              Read input file as UTF16 file\n\
   -U --unicode_out             Write binary messages as UFT16\n\
@@ -231,7 +231,7 @@ usage (FILE *stream, int status)
 }
 
 static void
-set_endianess (bfd *abfd, const char *target)
+set_endianness (bfd *abfd, const char *target)
 {
   const bfd_target *target_vec;
 
@@ -239,7 +239,7 @@ set_endianess (bfd *abfd, const char *target)
   target_vec = bfd_get_target_info (target, abfd, &target_is_bigendian, NULL,
 				   &def_target_arch);
   if (! target_vec)
-    fatal ("Can't detect target endianess and architecture.");
+    fatal ("Can't detect target endianness and architecture.");
   if (! def_target_arch)
     fatal ("Can't detect architecture.");
 }
@@ -1054,7 +1054,7 @@ main (int argc, char **argv)
       ++optind;
     }
 
-  set_endianess (NULL, target);
+  set_endianness (NULL, target);
 
   if (input_filename == NULL)
     {

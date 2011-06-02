@@ -1,6 +1,6 @@
 /* Parse options for the GNU linker.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009
+   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2011
    Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils.
@@ -454,7 +454,7 @@ static const struct ld_option ld_options[] =
     '\0', NULL, N_("Do not allow unresolved references in object files"),
     TWO_DASHES },
   { {"allow-shlib-undefined", no_argument, NULL, OPTION_ALLOW_SHLIB_UNDEFINED},
-    '\0', NULL, N_("Allow unresolved references in shared libaries"),
+    '\0', NULL, N_("Allow unresolved references in shared libraries"),
     TWO_DASHES },
   { {"no-allow-shlib-undefined", no_argument, NULL,
      OPTION_NO_ALLOW_SHLIB_UNDEFINED},

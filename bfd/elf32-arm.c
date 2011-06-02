@@ -10233,7 +10233,7 @@ elf32_arm_relocate_section (bfd *                  output_bfd,
 		    - relocation;
 		  addend += msec->output_section->vma + msec->output_offset;
 
-		  /* Cases here must match those in the preceeding
+		  /* Cases here must match those in the preceding
 		     switch statement.  */
 		  switch (r_type)
 		    {
@@ -15448,7 +15448,7 @@ elf32_arm_merge_private_bfd_data (bfd * ibfd, bfd * obfd)
   bfd_boolean flags_compatible = TRUE;
   asection *sec;
 
-  /* Check if we have the same endianess.  */
+  /* Check if we have the same endianness.  */
   if (! _bfd_generic_verify_endian_match (ibfd, obfd))
     return FALSE;
 

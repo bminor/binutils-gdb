@@ -1,6 +1,6 @@
 /* vms.c -- BFD back-end for EVAX (openVMS/Alpha) files.
    Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
-   2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+   2006, 2007, 2008, 2009, 2010, 2011  Free Software Foundation, Inc.
 
    Initial version written by Klaus Kaempf (kkaempf@rmi.de)
    Major rewrite by Adacore.
@@ -440,7 +440,7 @@ struct alpha_vms_link_hash_table
 {
   struct bfd_link_hash_table root;
 
-  /* Vector of shared libaries.  */
+  /* Vector of shared libraries.  */
   struct vector_type shrlibs;
 
   /* Fixup section.  */

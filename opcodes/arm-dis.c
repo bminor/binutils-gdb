@@ -4702,7 +4702,7 @@ print_insn (bfd_vma pc, struct disassemble_info *info, bfd_boolean little)
 	  if (!found)
 	    {
 	      /* No mapping symbol found at this address.  Look backwards
-		 for a preceeding one.  */
+		 for a preceding one.  */
 	      for (n = start - 1; n >= 0; n--)
 		{
 		  if (get_map_sym_type (info, n, &type))
@@ -4762,7 +4762,7 @@ print_insn (bfd_vma pc, struct disassemble_info *info, bfd_boolean little)
 	  if (!found)
 	    {
 	      /* No mapping symbol found at this address.  Look backwards
-		 for a preceeding one.  */
+		 for a preceding one.  */
 	      for (n = start - 1; n >= 0; n--)
 		{
 		  if (get_sym_code_type (info, n, &type))
@@ -4984,5 +4984,5 @@ the -M switch:\n"));
 	     regnames[i].description);
 
   fprintf (stream, "  force-thumb              Assume all insns are Thumb insns\n");
-  fprintf (stream, "  no-force-thumb           Examine preceeding label to determine an insn's type\n\n");
+  fprintf (stream, "  no-force-thumb           Examine preceding label to determine an insn's type\n\n");
 }

@@ -1,6 +1,6 @@
 // dynobj.h -- dynamic object support for gold   -*- C++ -*-
 
-// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010, 2011  Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -652,7 +652,7 @@ class Versions
   // Contents of --version-script, if passed, or NULL.
   const Version_script_info& version_script_;
   // Whether we need to insert a base version.  This is only used for
-  // shared libaries and is cleared when the base version is defined.
+  // shared libraries and is cleared when the base version is defined.
   bool needs_base_version_;
 };
 

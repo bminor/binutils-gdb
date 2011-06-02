@@ -1,5 +1,5 @@
 /* BFD back-end for Motorola MCore COFF/PE
-   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2010
+   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2010, 2011
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -377,7 +377,7 @@ coff_mcore_relocate_section (output_bfd, info, input_bfd, input_section,
   if (info->relocatable)
     return TRUE;
 
-  /* Check if we have the same endianess */
+  /* Check if we have the same endianness */
   if (   input_bfd->xvec->byteorder != output_bfd->xvec->byteorder
       && output_bfd->xvec->byteorder != BFD_ENDIAN_UNKNOWN)
     {

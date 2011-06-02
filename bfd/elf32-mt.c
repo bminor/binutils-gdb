@@ -1,5 +1,5 @@
 /* Morpho Technologies MT specific support for 32-bit ELF
-   Copyright 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008
+   Copyright 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2011
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -521,7 +521,7 @@ mt_elf_merge_private_bfd_data (bfd * ibfd, bfd * obfd)
   flagword     old_flags, new_flags;
   bfd_boolean  ok = TRUE;
 
-  /* Check if we have the same endianess.  */
+  /* Check if we have the same endianness.  */
   if (_bfd_generic_verify_endian_match (ibfd, obfd) == FALSE)
     return FALSE;
 

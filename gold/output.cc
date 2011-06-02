@@ -479,7 +479,7 @@ Output_file_header::do_write(Output_file* of)
     }
 }
 
-// Write out the file header with appropriate size and endianess.
+// Write out the file header with appropriate size and endianness.
 
 template<int size, bool big_endian>
 void

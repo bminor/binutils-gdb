@@ -1,5 +1,5 @@
 /* windint.h -- internal header file for windres program.
-   Copyright 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2005, 2007
+   Copyright 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2005, 2007, 2011
    Free Software Foundation, Inc.
    Written by Kai Tietz, Onevision.
 
@@ -1083,6 +1083,6 @@ extern rc_uint_type windres_get_16 (windres_bfd *, const void *, rc_uint_type);
 extern rc_uint_type windres_get_32 (windres_bfd *, const void *, rc_uint_type);
 
 extern void set_windres_bfd (windres_bfd *, bfd *, asection *, rc_uint_type);
-extern void set_windres_bfd_endianess (windres_bfd *, int);
+extern void set_windres_bfd_endianness (windres_bfd *, int);
 
 #endif

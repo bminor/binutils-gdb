@@ -1,8 +1,13 @@
+2011-06-02  Nick Clifton  <nickc@redhat.com>
+
+	* dynobj.h: Fix spelling mistake in comment.
+	* output.cc: Likewise.
+
 2011-05-31  Doug Kwan  <dougkwan@google.com>
             Asier Llano
 
 	PR gold/12826
-	* arm.cc (Target_arm::tag_cpu_arch_combine): Fix handling of 
+	* arm.cc (Target_arm::tag_cpu_arch_combine): Fix handling of
 	arch value that equals to elfcpp::MAX_TAG_CPU_ARCH.
 	* testsuite/Makefile.am: (MOSTLYCLEANFILES): Clean up.  Remove
 	redundant arm_exidx_test.so.

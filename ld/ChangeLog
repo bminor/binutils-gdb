@@ -1,3 +1,13 @@
+2011-06-02  Nick Clifton  <nickc@redhat.com>
+
+	* lexsup.c: Fix spelling mistake in comment.
+	* scripttempl/epocpe.sc: Likewise.
+	* scripttempl/i386beos.sc: Likewise.
+	* scripttempl/mcorepe.sc: Likewise.
+	* scripttempl/pe.sc: Likewise.
+	* scripttempl/pep.sc: Likewise.
+	* po/ld.pot: Regenerate.
+
 2011-05-27  Nick Clifton  <nickc@redhat.com>
 
 	* scripttempl/v850.sc (_heap_start): Provide.

@@ -1,6 +1,6 @@
 /* BFD back-end for Intel 386 COFF files (DJGPP variant with a stub).
-   Copyright 1997, 1998, 1999, 2000, 2001, 2002, 2005, 2006, 2007, 2009
-   Free Software Foundation, Inc.
+   Copyright 1997, 1998, 1999, 2000, 2001, 2002, 2005, 2006, 2007, 2009,
+   2011  Free Software Foundation, Inc.
    Written by Robert Hoehne.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -102,9 +102,9 @@ static bfd_boolean
 
 #include "coff-i386.c"
 
-/* This macro is used, because I cannot assume the endianess of the
+/* This macro is used, because I cannot assume the endianness of the
    host system.  */
-#define _H(index) (H_GET_16 (abfd, (header+index*2)))
+#define _H(index) (H_GET_16 (abfd, (header + index * 2)))
 
 /* These bytes are a 2048-byte DOS executable, which loads the COFF
    image into memory and then runs it. It is called 'stub'.  */

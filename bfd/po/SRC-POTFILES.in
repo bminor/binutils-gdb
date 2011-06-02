@@ -223,6 +223,7 @@ elfcode.h
 elfcore.h
 elflink.c
 elfn32-mips.c
+elfxx-ia64.c
 elfxx-mips.c
 elfxx-sparc.c
 epoc-pe-arm.c
@@ -319,6 +320,7 @@ ppcboot.c
 reloc.c
 reloc16.c
 riscix.c
+rs6000-core.c
 sco5-core.c
 section.c
 simple.c
@@ -345,7 +347,6 @@ vms-alpha.c
 vms-lib.c
 vms-misc.c
 vms.h
-xcoff-target.h
 xcofflink.c
 xsym.c
 xsym.h

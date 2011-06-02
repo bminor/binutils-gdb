@@ -2935,7 +2935,7 @@ s_purgem (int ignore ATTRIBUTE_UNUSED)
 static void
 s_bad_end (int endr)
 {
-  as_warn (_(".end%c encountered without preceeding %s"),
+  as_warn (_(".end%c encountered without preceding %s"),
 	   endr ? 'r' : 'm',
 	   endr ? ".rept, .irp, or .irpc" : ".macro");
   demand_empty_rest_of_line ();

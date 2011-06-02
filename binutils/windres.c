@@ -54,7 +54,7 @@ int verbose = 0;
 int target_is_bigendian = 0;
 const char *def_target_arch;
 
-static void set_endianess (bfd *, const char *);
+static void set_endianness (bfd *, const char *);
 
 /* An enumeration of format types.  */
 
@@ -1049,7 +1049,7 @@ main (int argc, char **argv)
 	output_format = format_from_filename (output_filename, 0);
     }
 
-  set_endianess (NULL, target);
+  set_endianness (NULL, target);
 
   /* Read the input file.  */
   switch (input_format)
@@ -1098,7 +1098,7 @@ main (int argc, char **argv)
 }
 
 static void
-set_endianess (bfd *abfd, const char *target)
+set_endianness (bfd *abfd, const char *target)
 {
   const bfd_target *target_vec;
 
@@ -1106,7 +1106,7 @@ set_endianess (bfd *abfd, const char *target)
   target_vec = bfd_get_target_info (target, abfd, &target_is_bigendian, NULL,
                                    &def_target_arch);
   if (! target_vec)
-    fatal ("Can't detect target endianess and architecture.");
+    fatal ("Can't detect target endianness and architecture.");
   if (! def_target_arch)
     fatal ("Can't detect architecture.");
 }
@@ -1127,7 +1127,7 @@ windres_open_as_binary (const char *filename, int rdmode)
 }
 
 void
-set_windres_bfd_endianess (windres_bfd *wrbfd, int is_bigendian)
+set_windres_bfd_endianness (windres_bfd *wrbfd, int is_bigendian)
 {
   assert (!! wrbfd);
   switch (WR_KIND(wrbfd))
