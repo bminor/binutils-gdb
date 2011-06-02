@@ -1,3 +1,7 @@
+2011-06-02  Keith Seitz  <keiths@redhat.com>
+
+	* objc-lang.c (find_methods): Increment objfile_csym earlier.
+
 2011-06-02  Pedro Alves  <pedro@codesourcery.com>
 
 	* top.h (simplified_command_loop): Delete declaration.

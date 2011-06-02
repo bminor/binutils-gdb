@@ -1221,6 +1221,8 @@ find_methods (struct symtab *symtab, char type,
 	  pc = gdbarch_convert_from_func_ptr_addr (gdbarch, pc,
 						   &current_target);
 
+	  objfile_csym++;
+
 	  if (symtab)
 	    if (pc < BLOCK_START (block) || pc >= BLOCK_END (block))
 	      /* Not in the specified symtab.  */
@@ -1237,8 +1239,6 @@ find_methods (struct symtab *symtab, char type,
 	  if (parse_method (tmp, &ntype, &nclass,
 			    &ncategory, &nselector) == NULL)
 	    continue;
-      
-	  objfile_csym++;
 
 	  if ((type != '\0') && (ntype != type))
 	    continue;
