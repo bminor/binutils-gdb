@@ -1,3 +1,12 @@
+2011-06-02  Jie Zhang <jie@codesourcery.com>
+	    Nathan Sidwell <nathan@codesourcery.com>
+	    Maciej Rozycki <macro@codesourcery.com>
+
+	* arm-dis.c (print_insn_coprocessor): Explicitly print #-0
+	as address offset.
+	(print_arm_address): Likewise. Elide positive #0 appropriately.
+	(print_insn_arm): Likewise.
+
 2011-06-02  Nick Clifton  <nickc@redhat.com>
 
 	* arm-dis.c: Fix spelling mistakes.

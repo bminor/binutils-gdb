@@ -53,7 +53,7 @@ Disassembly of section .foo:
  400102c:	00000000 	.word	0x00000000
 
 04001030 <__unnamed_veneer>:
- 4001030:	e59f1000 	ldr	r1, \[pc, #0\]	; .*
+ 4001030:	e59f1000 	ldr	r1, \[pc\]	; .*
  4001034:	e08ff001 	add	pc, pc, r1
  4001038:	fc007170 	.word	0xfc007170
  400103c:	00000000 	.word	0x00000000

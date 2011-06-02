@@ -1,3 +1,12 @@
+2011-06-02  Jie Zhang jie@codesourcery.com
+	    Nathan Sidwell nathan@codesourcery.com
+
+	* config/tc-arm.c (parse_address_main): Handle -0 offsets.
+	(encode_arm_addr_mode_2): Set default sign of zero here ...
+	(encode_arm_addr_mode_3): ... and here.
+	(encode_arm_cp_address): ... and here.
+	(md_apply_fix): Use default sign of zero here.
+
 2011-06-02  Nick Clifton  <nickc@redhat.com>
 
 	* as.c: Fix spelling typo.

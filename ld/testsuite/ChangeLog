@@ -1,3 +1,29 @@
+2011-06-02  Nathan Sidwell  <nathan@codesourcery.com>
+
+	Adjust tests for zero offset formatting.
+	* ld-arm/cortex-a8-fix-bcc-plt.d: Adjust.
+	* ld-arm/farcall-arm-arm-pic-veneer.d: Adjust.
+	* ld-arm/farcall-arm-thumb.d: Adjust.
+	* ld-arm/farcall-group-size2.d: Adjust.
+	* ld-arm/farcall-group.d: Adjust.
+	* ld-arm/farcall-mix.d: Adjust.
+	* ld-arm/farcall-mix2.d: Adjust.
+	* ld-arm/farcall-mixed-lib-v4t.d: Adjust.
+	* ld-arm/farcall-mixed-lib.d: Adjust.
+	* ld-arm/farcall-thumb-arm-blx-pic-veneer.d: Adjust.
+	* ld-arm/farcall-thumb-arm-pic-veneer.d: Adjust.
+	* ld-arm/farcall-thumb-thumb.d: Adjust.
+	* ld-arm/ifunc-10.dd: Adjust.
+	* ld-arm/ifunc-3.dd: Adjust.
+	* ld-arm/ifunc-4.dd: Adjust.
+	* ld-arm/ifunc-5.dd: Adjust.
+	* ld-arm/ifunc-6.dd: Adjust.
+	* ld-arm/ifunc-7.dd: Adjust.
+	* ld-arm/ifunc-8.dd: Adjust.
+	* ld-arm/jump-reloc-veneers-long.d: Adjust.
+	* ld-arm/tls-longplt-lib.d: Adjust.
+	* ld-arm/tls-thumb1.d: Adjust.
+
 2011-05-31  Paul Brook  <paul@codesourcery.com>
 
 	* ld-arm/cortex-a8-far.d: Adjust expected output.

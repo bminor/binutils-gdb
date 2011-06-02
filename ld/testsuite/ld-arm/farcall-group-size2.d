@@ -8,7 +8,7 @@ Disassembly of section .text:
     1004:	eb000002 	bl	1014 <__bar2_veneer>
 
 00001008 <__bar_from_arm>:
-    1008:	e59fc000 	ldr	ip, \[pc, #0\]	; 1010 <__bar_from_arm\+0x8>
+    1008:	e59fc000 	ldr	ip, \[pc\]	; 1010 <__bar_from_arm\+0x8>
     100c:	e12fff1c 	bx	ip
     1010:	02003021 	.word	0x02003021
 
@@ -24,12 +24,12 @@ Disassembly of section .text:
     102c:	00000000 	andeq	r0, r0, r0
 
 00001030 <__bar5_from_arm>:
-    1030:	e59fc000 	ldr	ip, \[pc, #0\]	; 1038 <__bar5_from_arm\+0x8>
+    1030:	e59fc000 	ldr	ip, \[pc\]	; 1038 <__bar5_from_arm\+0x8>
     1034:	e12fff1c 	bx	ip
     1038:	0200302f 	.word	0x0200302f
 
 0000103c <__bar4_from_arm>:
-    103c:	e59fc000 	ldr	ip, \[pc, #0\]	; 1044 <__bar4_from_arm\+0x8>
+    103c:	e59fc000 	ldr	ip, \[pc\]	; 1044 <__bar4_from_arm\+0x8>
     1040:	e12fff1c 	bx	ip
     1044:	0200302d 	.word	0x0200302d
 

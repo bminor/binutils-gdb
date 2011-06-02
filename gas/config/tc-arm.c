@@ -5200,8 +5200,24 @@ parse_address_main (char **str, int i, int group_relocations,
 		}
             }
           else
-	    if (my_get_expression (&inst.reloc.exp, &p, GE_IMM_PREFIX))
-	      return PARSE_OPERAND_FAIL;
+	    {
+	      char *q = p;
+	      if (my_get_expression (&inst.reloc.exp, &p, GE_IMM_PREFIX))
+		return PARSE_OPERAND_FAIL;
+	      /* If the offset is 0, find out if it's a +0 or -0.  */
+	      if (inst.reloc.exp.X_op == O_constant
+		  && inst.reloc.exp.X_add_number == 0)
+		{
+		  skip_whitespace (q);
+		  if (*q == '#')
+		    {
+		      q++;
+		      skip_whitespace (q);
+		    }
+		  if (*q == '-')
+		    inst.operands[i].negative = 1;
+		}
+	    }
 	}
     }
   else if (skip_past_char (&p, ':') == SUCCESS)
@@ -5275,6 +5291,7 @@ parse_address_main (char **str, int i, int group_relocations,
 	    }
 	  else
 	    {
+	      char *q = p;
 	      if (inst.operands[i].negative)
 		{
 		  inst.operands[i].negative = 0;
@@ -5282,6 +5299,19 @@ parse_address_main (char **str, int i, int group_relocations,
 		}
 	      if (my_get_expression (&inst.reloc.exp, &p, GE_IMM_PREFIX))
 		return PARSE_OPERAND_FAIL;
+	      /* If the offset is 0, find out if it's a +0 or -0.  */
+	      if (inst.reloc.exp.X_op == O_constant
+		  && inst.reloc.exp.X_add_number == 0)
+		{
+		  skip_whitespace (q);
+		  if (*q == '#')
+		    {
+		      q++;
+		      skip_whitespace (q);
+		    }
+		  if (*q == '-')
+		    inst.operands[i].negative = 1;
+		}
 	    }
 	}
     }
@@ -7038,7 +7068,12 @@ encode_arm_addr_mode_2 (int i, bfd_boolean is_t)
 	}
 
       if (inst.reloc.type == BFD_RELOC_UNUSED)
-	inst.reloc.type = BFD_RELOC_ARM_OFFSET_IMM;
+	{
+	  /* Prefer + for zero encoded value.  */
+	  if (!inst.operands[i].negative)
+	    inst.instruction |= INDEX_UP;
+	  inst.reloc.type = BFD_RELOC_ARM_OFFSET_IMM;
+	}
     }
 }
 
@@ -7074,7 +7109,13 @@ encode_arm_addr_mode_3 (int i, bfd_boolean is_t)
 		  BAD_PC_WRITEBACK);
       inst.instruction |= HWOFFSET_IMM;
       if (inst.reloc.type == BFD_RELOC_UNUSED)
-	inst.reloc.type = BFD_RELOC_ARM_OFFSET_IMM8;
+	{
+	  /* Prefer + for zero encoded value.  */
+	  if (!inst.operands[i].negative)
+	    inst.instruction |= INDEX_UP;
+
+	  inst.reloc.type = BFD_RELOC_ARM_OFFSET_IMM8;
+	}
     }
 }
 
@@ -7135,6 +7176,10 @@ encode_arm_cp_address (int i, int wb_ok, int unind_ok, int reloc_override)
       else
         inst.reloc.type = BFD_RELOC_ARM_CP_OFF_IMM;
     }
+
+  /* Prefer + for zero encoded value.  */
+  if (!inst.operands[i].negative)
+    inst.instruction |= INDEX_UP;
 
   return SUCCESS;
 }
@@ -20447,7 +20492,7 @@ md_apply_fix (fixS *	fixP,
 	value = 0;
 
     case BFD_RELOC_ARM_LITERAL:
-      sign = value >= 0;
+      sign = value > 0;
 
       if (value < 0)
 	value = - value;
@@ -20465,14 +20510,19 @@ md_apply_fix (fixS *	fixP,
 	}
 
       newval = md_chars_to_number (buf, INSN_SIZE);
-      newval &= 0xff7ff000;
-      newval |= value | (sign ? INDEX_UP : 0);
+      if (value == 0)
+	newval &= 0xfffff000;
+      else
+	{
+	  newval &= 0xff7ff000;
+	  newval |= value | (sign ? INDEX_UP : 0);
+	}
       md_number_to_chars (buf, newval, INSN_SIZE);
       break;
 
     case BFD_RELOC_ARM_OFFSET_IMM8:
     case BFD_RELOC_ARM_HWLITERAL:
-      sign = value >= 0;
+      sign = value > 0;
 
       if (value < 0)
 	value = - value;
@@ -20489,8 +20539,13 @@ md_apply_fix (fixS *	fixP,
 	}
 
       newval = md_chars_to_number (buf, INSN_SIZE);
-      newval &= 0xff7ff0f0;
-      newval |= ((value >> 4) << 8) | (value & 0xf) | (sign ? INDEX_UP : 0);
+      if (value == 0)
+	newval &= 0xfffff0f0;
+      else
+	{
+	  newval &= 0xff7ff0f0;
+	  newval |= ((value >> 4) << 8) | (value & 0xf) | (sign ? INDEX_UP : 0);
+	}
       md_number_to_chars (buf, newval, INSN_SIZE);
       break;
 
@@ -21117,7 +21172,7 @@ md_apply_fix (fixS *	fixP,
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("co-processor offset out of range"));
     cp_off_common:
-      sign = value >= 0;
+      sign = value > 0;
       if (value < 0)
 	value = -value;
       if (fixP->fx_r_type == BFD_RELOC_ARM_CP_OFF_IMM
@@ -21125,8 +21180,13 @@ md_apply_fix (fixS *	fixP,
 	newval = md_chars_to_number (buf, INSN_SIZE);
       else
 	newval = get_thumb32_insn (buf);
-      newval &= 0xff7fff00;
-      newval |= (value >> 2) | (sign ? INDEX_UP : 0);
+      if (value == 0)
+	newval &= 0xffffff00;
+      else
+	{
+	  newval &= 0xff7fff00;
+	  newval |= (value >> 2) | (sign ? INDEX_UP : 0);
+	}
       if (fixP->fx_r_type == BFD_RELOC_ARM_CP_OFF_IMM
 	  || fixP->fx_r_type == BFD_RELOC_ARM_CP_OFF_IMM_S2)
 	md_number_to_chars (buf, newval, INSN_SIZE);
