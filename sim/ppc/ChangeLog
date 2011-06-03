@@ -3001,7 +3001,7 @@ Wed Jun 19 21:45:28 1996  Andrew Cagney  <cagney@kremvax.highland.com.au>
 	* configure.in: Adjust filter flag so that default includes 32bit
 	and floating point.
 	* ppc-instructions: Clean up filter fields so that only in use
-        entries are specifed (ie delete `be').
+        entries are specified (ie delete `be').
 
 	* misc.c (name2i, i2name): New function.  Map between a string and
         an integer value.
