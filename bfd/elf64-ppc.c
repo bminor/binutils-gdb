@@ -2733,7 +2733,7 @@ ppc64_elf_write_core_note (bfd *abfd, char *buf, int *bufsiz, int note_type,
 static bfd_boolean
 ppc64_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 {
-  /* Check if we have the same endianess.  */
+  /* Check if we have the same endianness.  */
   if (ibfd->xvec->byteorder != obfd->xvec->byteorder
       && ibfd->xvec->byteorder != BFD_ENDIAN_UNKNOWN
       && obfd->xvec->byteorder != BFD_ENDIAN_UNKNOWN)
