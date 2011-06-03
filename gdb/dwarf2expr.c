@@ -229,6 +229,28 @@ get_unsigned_type (struct gdbarch *gdbarch, struct type *type)
     }
 }
 
+/* Return the signed form of TYPE.  TYPE is necessarily an integral
+   type.  */
+
+static struct type *
+get_signed_type (struct gdbarch *gdbarch, struct type *type)
+{
+  switch (TYPE_LENGTH (type))
+    {
+    case 1:
+      return builtin_type (gdbarch)->builtin_int8;
+    case 2:
+      return builtin_type (gdbarch)->builtin_int16;
+    case 4:
+      return builtin_type (gdbarch)->builtin_int32;
+    case 8:
+      return builtin_type (gdbarch)->builtin_int64;
+    default:
+      error (_("no signed variant found for type, while evaluating "
+	       "DWARF expression"));
+    }
+}
+
 /* Retrieve the N'th item on CTX's stack, converted to an address.  */
 
 CORE_ADDR
@@ -996,7 +1018,19 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	      case DW_OP_shra:
 		dwarf_require_integral (value_type (first));
 		dwarf_require_integral (value_type (second));
+		if (TYPE_UNSIGNED (value_type (first)))
+		  {
+		    struct type *stype
+		      = get_signed_type (ctx->gdbarch, value_type (first));
+
+		    first = value_cast (stype, first);
+		  }
+
 		result_val = value_binop (first, second, BINOP_RSH);
+		/* Make sure we wind up with the same type we started
+		   with.  */
+		if (value_type (result_val) != value_type (second))
+		  result_val = value_cast (value_type (second), result_val);
 		break;
 	      case DW_OP_xor:
 		dwarf_require_integral (value_type (first));
