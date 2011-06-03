@@ -1,3 +1,9 @@
+2011-06-03  Bertram Felgenhauer  <bertram.felgenhauer@gmail.com>
+
+	PR ld/12682
+	* hash.c (higher_primer_number): Add more, small, prime numbers.
+	(bfd_hash_set_default_size): Likewise.
+
 2011-06-02  Nick Clifton  <nickc@redhat.com>
 
 	* coff-mcore.c: Fix spelling typo.
