@@ -679,7 +679,7 @@ _initialize_cli_dump (void)
   add_dump_command ("memory", dump_memory_command, "\
 Write contents of memory to a raw binary file.\n\
 Arguments are FILE START STOP.  Writes the contents of memory within the\n\
-range [START .. STOP) to the specifed FILE in raw target ordered bytes.");
+range [START .. STOP) to the specified FILE in raw target ordered bytes.");
 
   add_dump_command ("value", dump_value_command, "\
 Write the value of an expression to a raw binary file.\n\
@@ -719,7 +719,7 @@ the specified FILE in raw target ordered bytes.");
   add_cmd ("memory", all_commands, dump_srec_memory, _("\
 Write contents of memory to an srec file.\n\
 Arguments are FILE START STOP.  Writes the contents of memory\n\
-within the range [START .. STOP) to the specifed FILE in srec format."),
+within the range [START .. STOP) to the specified FILE in srec format."),
 	   &srec_cmdlist);
 
   add_cmd ("value", all_commands, dump_srec_value, _("\
@@ -731,7 +731,7 @@ to the specified FILE in srec format."),
   add_cmd ("memory", all_commands, dump_ihex_memory, _("\
 Write contents of memory to an ihex file.\n\
 Arguments are FILE START STOP.  Writes the contents of memory within\n\
-the range [START .. STOP) to the specifed FILE in intel hex format."),
+the range [START .. STOP) to the specified FILE in intel hex format."),
 	   &ihex_cmdlist);
 
   add_cmd ("value", all_commands, dump_ihex_value, _("\
@@ -743,7 +743,7 @@ to the specified FILE in intel hex format."),
   add_cmd ("memory", all_commands, dump_tekhex_memory, _("\
 Write contents of memory to a tekhex file.\n\
 Arguments are FILE START STOP.  Writes the contents of memory\n\
-within the range [START .. STOP) to the specifed FILE in tekhex format."),
+within the range [START .. STOP) to the specified FILE in tekhex format."),
 	   &tekhex_cmdlist);
 
   add_cmd ("value", all_commands, dump_tekhex_value, _("\
@@ -755,7 +755,7 @@ to the specified FILE in tekhex format."),
   add_cmd ("memory", all_commands, dump_binary_memory, _("\
 Write contents of memory to a raw binary file.\n\
 Arguments are FILE START STOP.  Writes the contents of memory\n\
-within the range [START .. STOP) to the specifed FILE in binary format."),
+within the range [START .. STOP) to the specified FILE in binary format."),
 	   &binary_dump_cmdlist);
 
   add_cmd ("value", all_commands, dump_binary_value, _("\
@@ -767,7 +767,7 @@ to the specified FILE in raw target ordered bytes."),
   add_cmd ("memory", all_commands, append_binary_memory, _("\
 Append contents of memory to a raw binary file.\n\
 Arguments are FILE START STOP.  Writes the contents of memory within the\n\
-range [START .. STOP) to the specifed FILE in raw target ordered bytes."),
+range [START .. STOP) to the specified FILE in raw target ordered bytes."),
 	   &binary_append_cmdlist);
 
   add_cmd ("value", all_commands, append_binary_value, _("\

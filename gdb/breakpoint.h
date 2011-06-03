@@ -1065,7 +1065,7 @@ extern void delete_std_terminate_breakpoint (void);
 
 /* These functions respectively disable or reenable all currently
    enabled watchpoints.  When disabled, the watchpoints are marked
-   call_disabled.  When reenabled, they are marked enabled.
+   call_disabled.  When re-enabled, they are marked enabled.
 
    The intended client of these functions is call_function_by_hand.
 
@@ -1079,7 +1079,7 @@ extern void delete_std_terminate_breakpoint (void);
    and that can cause execution control to become very confused.
 
    Note that if a user sets breakpoints in an interactively called
-   function, the call_disabled watchpoints will have been reenabled
+   function, the call_disabled watchpoints will have been re-enabled
    when the first such breakpoint is reached.  However, on targets
    that are unable to unwind through the call dummy frame, watches
    of stack-based storage may then be deleted, because gdb will

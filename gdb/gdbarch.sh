@@ -1949,7 +1949,7 @@ gdbarch_register (enum bfd_architecture bfd_architecture,
     {
       if (bfd_architecture == (*curr)->bfd_architecture)
 	internal_error (__FILE__, __LINE__,
-                        _("gdbarch: Duplicate registraration "
+                        _("gdbarch: Duplicate registration "
 			  "of architecture (%s)"),
 	                bfd_arch_info->printable_name);
     }

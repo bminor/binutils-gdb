@@ -1,3 +1,9 @@
+2011-06-03  Joel Brobecker  <brobecker@adacore.com>  (obvious fix)
+
+	From Stephen Kitt  <steve@sk2.org>
+	* gdb.base/help.exp: Adjust following some spelling corrections
+	in GDB.
+
 2011-06-01  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.base/ending-run.exp: Match __uClibc_main for uClibc.

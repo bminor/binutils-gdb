@@ -1,3 +1,9 @@
+2011-06-03  Joel Brobecker  <brobecker@adacore.com>  (obvious fix)
+
+	From Stephen Kitt  <steve@sk2.org>
+	* breakpoint.c, breakpoint.h, cli/cli-dump.c, dwarf2expr.c,
+	gdbarch.c, gdbarch.sh, remote.c: Various spelling fixes.
+
 2011-06-03  Joel Brobecker  <brobecker@adacore.com>
 
 	* dwarf2expr.c (execute_stack_op) [DW_OP_deref]: Handle

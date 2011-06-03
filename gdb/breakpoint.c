@@ -12997,7 +12997,7 @@ If a breakpoint is hit while enabled in this fashion, it becomes disabled."),
 Disable some breakpoints.\n\
 Arguments are breakpoint numbers with spaces in between.\n\
 To disable all breakpoints, give no argument.\n\
-A disabled breakpoint is not forgotten, but has no effect until reenabled."),
+A disabled breakpoint is not forgotten, but has no effect until re-enabled."),
 		  &disablelist, "disable ", 1, &cmdlist);
   add_com_alias ("dis", "disable", class_breakpoint, 1);
   add_com_alias ("disa", "disable", class_breakpoint, 1);
@@ -13006,13 +13006,13 @@ A disabled breakpoint is not forgotten, but has no effect until reenabled."),
 Disable some breakpoints.\n\
 Arguments are breakpoint numbers with spaces in between.\n\
 To disable all breakpoints, give no argument.\n\
-A disabled breakpoint is not forgotten, but has no effect until reenabled."));
+A disabled breakpoint is not forgotten, but has no effect until re-enabled."));
 
   add_cmd ("breakpoints", class_alias, disable_command, _("\
 Disable some breakpoints.\n\
 Arguments are breakpoint numbers with spaces in between.\n\
 To disable all breakpoints, give no argument.\n\
-A disabled breakpoint is not forgotten, but has no effect until reenabled.\n\
+A disabled breakpoint is not forgotten, but has no effect until re-enabled.\n\
 This command may be abbreviated \"disable\"."),
 	   &disablelist);
 
