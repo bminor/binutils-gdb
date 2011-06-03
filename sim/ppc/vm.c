@@ -913,7 +913,7 @@ om_unpack_srs(vm *virtual,
 #endif
 
 
-/* Rebuild all the data structures for the new context as specifed by
+/* Rebuild all the data structures for the new context as specified by
    the passed registers */
 INLINE_VM\
 (void)

@@ -1,3 +1,9 @@
+2011-06-03  Joel Brobecker  <brobecker@adacore.com>  (obvious fix)
+
+	From Stephen Kitt  <steve@sk2.org>
+	* vm.c (vm_synchronize_context): Spelling fix in function
+	documentation.
+
 2011-04-16  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim_calls.c (sim_complete_command): New stub function.
