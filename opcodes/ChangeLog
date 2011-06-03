@@ -1,3 +1,8 @@
+2011-06-03  Quentin Neill  <quentin.neill@amd.com>
+
+	* i386-gen.c (cpu_flag_init): Add CpuF16C to CPU_BDVER2_FLAGS.
+	* i386-init.h: Regenerated.
+
 2011-06-03  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/12752
