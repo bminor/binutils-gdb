@@ -877,6 +877,19 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	      type = address_type;
 
 	    (ctx->read_mem) (ctx->baton, buf, addr, addr_size);
+
+	    /* If the size of the object read from memory is different
+	       from the type length, we need to zero-extend it.  */
+	    if (TYPE_LENGTH (type) != addr_size)
+	      {
+		ULONGEST result =
+		  extract_unsigned_integer (buf, addr_size, byte_order);
+
+		buf = alloca (TYPE_LENGTH (type));
+		store_unsigned_integer (buf, TYPE_LENGTH (type),
+					byte_order, result);
+	      }
+
 	    result_val = value_from_contents_and_address (type, buf, addr);
 	    break;
 	  }
