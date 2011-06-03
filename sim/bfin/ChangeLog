@@ -1,3 +1,7 @@
+2011-06-03  Mike Frysinger  <vapier@gentoo.org>
+
+	* dv-bfin_dma.c (bfin_dma_io_write_buffer): Fix indentation.
+
 2011-05-25  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-main.h (TRACE_SYSCALL): Change EVENTS to SYSCALL.

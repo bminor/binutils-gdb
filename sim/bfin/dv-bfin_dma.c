@@ -345,7 +345,7 @@ bfin_dma_io_write_buffer (struct hw *me, const void *source, int space,
 	  if (nr_bytes == 4)
 	    *value32p = value;
 	  else
-	   *value16p = value;
+	    *value16p = value;
 	}
       else
 	HW_TRACE ((me, "discarding write while dma running"));
