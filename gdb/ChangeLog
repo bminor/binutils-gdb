@@ -1,5 +1,20 @@
 2011-06-03  Tom Tromey  <tromey@redhat.com>
 
+	* python/py-inferior.c (python_inferior_exit): Use inferior's exit
+	code fields.
+	* python/py-exitedevent.c (create_exited_event_object): Change
+	type of 'exit_code'.  Optionally add exit_code attribute.
+	(emit_exited_event): Change type of 'exit_code'.
+	* python/py-event.h (emit_exited_event): Update.
+	* mi/mi-interp.c (mi_inferior_exit): Print exit code.
+	* infrun.c (handle_inferior_event): Set exit code fields on
+	inferior.
+	* inferior.h (struct inferior) <has_exit_code, exit_code>: New
+	fields.
+	* inferior.c (exit_inferior_1): Initialize new fields.
+
+2011-06-03  Tom Tromey  <tromey@redhat.com>
+
 	* dwarf2expr.c (get_signed_type): New function.
 	(execute_stack_op) <DW_OP_shra>: Always perform a signed shift.
 

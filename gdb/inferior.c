@@ -281,6 +281,9 @@ exit_inferior_1 (struct inferior *inftoex, int silent)
       inf->vfork_parent->vfork_child = NULL;
       inf->vfork_parent = NULL;
     }
+
+  inf->has_exit_code = 0;
+  inf->exit_code = 0;
 }
 
 void

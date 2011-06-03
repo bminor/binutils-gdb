@@ -3308,6 +3308,11 @@ handle_inferior_event (struct execution_control_state *ecs)
          that the user can inspect this again later.  */
       set_internalvar_integer (lookup_internalvar ("_exitcode"),
 			       (LONGEST) ecs->ws.value.integer);
+
+      /* Also record this in the inferior itself.  */
+      current_inferior ()->has_exit_code = 1;
+      current_inferior ()->exit_code = (LONGEST) ecs->ws.value.integer;
+
       gdb_flush (gdb_stdout);
       target_mourn_inferior ();
       singlestep_breakpoints_inserted_p = 0;

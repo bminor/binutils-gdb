@@ -517,6 +517,11 @@ struct inferior
   /* Private data used by the target vector implementation.  */
   struct private_inferior *private;
 
+  /* HAS_EXIT_CODE is true if the inferior exited with an exit code.
+     In this case, the EXIT_CODE field is also valid.  */
+  int has_exit_code;
+  LONGEST exit_code;
+
   /* We keep a count of the number of times the user has requested a
      particular syscall to be tracked, and pass this information to the
      target.  This lets capable targets implement filtering directly.  */

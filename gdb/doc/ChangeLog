@@ -1,3 +1,8 @@
+2011-06-03  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.texinfo (GDB/MI Async Records): Document 'exit-code' field.
+	(Events In Python): Note that exit_code is optional.
+
 2011-05-17  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.texinfo (Remote Protocol) <Overview>: Mention vCont is

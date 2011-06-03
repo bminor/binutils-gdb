@@ -22127,7 +22127,9 @@ inherited attribute refer to @code{gdb.ThreadEvent} above.
 
 @item events.exited
 Emits @code{events.ExitedEvent} which indicates that the inferior has exited.
-@code{events.ExitedEvent} has one attribute:
+@code{events.ExitedEvent} has one optional attribute.  This attribute
+will exist only in the case that the inferior exited with some
+status.
 @table @code
 @defivar ExitedEvent exit_code
 An integer representing the exit code which the inferior has returned.
@@ -25199,11 +25201,12 @@ was attached to a program.  The @var{id} field contains the
 @value{GDBN} identifier of the thread group.  The @var{pid} field
 contains process identifier, specific to the operating system.
 
-@itemx =thread-group-exited,id="@var{id}"
+@item =thread-group-exited,id="@var{id}"[,exit-code="@var{code}"]
 A thread group is no longer associated with a running program,
 either because the program has exited, or because it was detached
 from.  The @var{id} field contains the @value{GDBN} identifier of the
-thread group.
+thread group.  @var{code} is the exit code of the inferior; it exists
+only when the inferior exited with some code.
 
 @item =thread-created,id="@var{id}",group-id="@var{gid}"
 @itemx =thread-exited,id="@var{id}",group-id="@var{gid}"

@@ -366,8 +366,14 @@ mi_inferior_exit (struct inferior *inf)
   struct mi_interp *mi = top_level_interpreter_data ();
 
   target_terminal_ours ();
-  fprintf_unfiltered (mi->event_channel, "thread-group-exited,id=\"i%d\"",
-		      inf->num);
+  if (inf->has_exit_code)
+    fprintf_unfiltered (mi->event_channel,
+			"thread-group-exited,id=\"i%d\",exit-code=\"%s\"",
+			inf->num, int_string (inf->exit_code, 8, 0, 0, 1));
+  else
+    fprintf_unfiltered (mi->event_channel,
+			"thread-group-exited,id=\"i%d\"", inf->num);
+
   gdb_flush (mi->event_channel);  
 }
 
