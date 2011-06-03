@@ -1,3 +1,9 @@
+2011-06-03  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/12698
+	* config/tc-arm.c (parse_psr): Set m_profile to false when
+	assembling for any architecture.
+
 2011-06-02  Jie Zhang jie@codesourcery.com
 	    Nathan Sidwell nathan@codesourcery.com
 

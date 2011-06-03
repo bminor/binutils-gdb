@@ -5395,6 +5395,12 @@ parse_psr (char **str, bfd_boolean lhs)
   bfd_boolean is_apsr = FALSE;
   bfd_boolean m_profile = ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_m);
 
+  /* PR gas/12698:  If the user has specified -march=all then m_profile will
+     be TRUE, but we want to ignore it in this case as we are building for any
+     CPU type, including non-m variants.  */
+  if (selected_cpu.core == arm_arch_any.core)
+    m_profile = FALSE;
+
   /* CPSR's and SPSR's can now be lowercase.  This is just a convenience
      feature for ease of use and backwards compatibility.  */
   p = *str;
