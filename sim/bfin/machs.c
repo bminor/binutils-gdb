@@ -50,6 +50,11 @@ struct bfin_dmac_layout {
   address_word base;
   unsigned int dma_count;
 };
+struct bfin_dde_layout {
+  address_word base;
+  const char *dev, *peer, *port;
+  unsigned int mwidth, pwidth;
+};
 struct bfin_port_layout {
   /* Which device this routes to (name/port).  */
   const char *dst, *dst_port;
@@ -65,6 +70,8 @@ struct bfin_model_data {
   size_t dev_count;
   const struct bfin_dmac_layout *dmac;
   size_t dmac_count;
+  const struct bfin_dde_layout *dde;
+  size_t dde_count;
   const struct bfin_port_layout *port;
   size_t port_count;
 };
@@ -72,6 +79,15 @@ struct bfin_model_data {
 #define LAYOUT(_addr, _len, _mask) { .addr = _addr, .len = _len, .mask = access_##_mask, }
 #define _DEVICE(_base, _len, _dev, _dmac) { .base = _base, .len = _len, .dev = _dev, .dmac = _dmac, }
 #define DEVICE(_base, _len, _dev) _DEVICE(_base, _len, _dev, 0)
+#define DDE(_base, _dev, _peer, _port) \
+  { \
+    .base   = _base, \
+    .dev    = "bfin_dde@"#_dev, \
+    .peer   = _peer, \
+    .port   = _port, \
+    .mwidth = 3, \
+    .pwidth = 3, \
+  }
 #define PORT(_dst, _dst_port, _src, _src_port) \
   { \
     .dst = _dst, \
@@ -88,6 +104,7 @@ struct bfin_model_data {
 static const struct bfin_memory_layout bf000_mem[] = {};
 static const struct bfin_dev_layout bf000_dev[] = {};
 static const struct bfin_dmac_layout bf000_dmac[] = {};
+static const struct bfin_dde_layout bf000_dde[] = {};
 static const struct bfin_port_layout bf000_port[] = {};
 
 #define bf50x_chipid 0x2800
@@ -137,6 +154,8 @@ static const struct bfin_dmac_layout bf50x_dmac[] =
 };
 #define bf504_dmac bf50x_dmac
 #define bf506_dmac bf50x_dmac
+#define bf504_dde bf000_dde
+#define bf506_dde bf000_dde
 static const struct bfin_port_layout bf50x_port[] =
 {
   SIC (0,  0, "bfin_pll",          "pll"),
@@ -283,6 +302,10 @@ static const struct bfin_dev_layout bf516_dev[] =
 #define bf514_dmac bf50x_dmac
 #define bf516_dmac bf50x_dmac
 #define bf518_dmac bf50x_dmac
+#define bf512_dde bf000_dde
+#define bf514_dde bf000_dde
+#define bf516_dde bf000_dde
+#define bf518_dde bf000_dde
 static const struct bfin_port_layout bf51x_port[] =
 {
   SIC (0,  0, "bfin_pll",          "pll"),
@@ -438,6 +461,12 @@ static const struct bfin_dev_layout bf526_dev[] =
 #define bf525_dmac bf50x_dmac
 #define bf526_dmac bf50x_dmac
 #define bf527_dmac bf50x_dmac
+#define bf522_dde bf000_dde
+#define bf523_dde bf000_dde
+#define bf524_dde bf000_dde
+#define bf525_dde bf000_dde
+#define bf526_dde bf000_dde
+#define bf527_dde bf000_dde
 static const struct bfin_port_layout bf52x_port[] =
 {
   SIC (0,  0, "bfin_pll",          "pll"),
@@ -563,6 +592,9 @@ static const struct bfin_dmac_layout bf533_dmac[] =
 };
 #define bf531_dmac bf533_dmac
 #define bf532_dmac bf533_dmac
+#define bf531_dde bf000_dde
+#define bf532_dde bf000_dde
+#define bf533_dde bf000_dde
 static const struct bfin_port_layout bf533_port[] =
 {
   SIC (0,  0, "bfin_pll",          "pll"),
@@ -714,6 +746,9 @@ static const struct bfin_dev_layout bf537_dev[] =
 #define bf534_dmac bf50x_dmac
 #define bf536_dmac bf50x_dmac
 #define bf537_dmac bf50x_dmac
+#define bf534_dde bf000_dde
+#define bf536_dde bf000_dde
+#define bf537_dde bf000_dde
 static const struct bfin_port_layout bf537_port[] =
 {
   SIC (0,  0, "bfin_pll",          "pll"),
@@ -821,6 +856,8 @@ static const struct bfin_dmac_layout bf538_dmac[] =
   { BFIN_MMR_DMAC1_BASE, 12, },
 };
 #define bf539_dmac bf538_dmac
+#define bf538_dde bf000_dde
+#define bf539_dde bf000_dde
 static const struct bfin_port_layout bf538_port[] =
 {
   SIC (0,  0, "bfin_pll",          "pll"),
@@ -1052,6 +1089,11 @@ static const struct bfin_dmac_layout bf54x_dmac[] =
 #define bf547_dmac bf54x_dmac
 #define bf548_dmac bf54x_dmac
 #define bf549_dmac bf54x_dmac
+#define bf542_dde bf000_dde
+#define bf544_dde bf000_dde
+#define bf547_dde bf000_dde
+#define bf548_dde bf000_dde
+#define bf549_dde bf000_dde
 #define PINT_PIQS(p, b, g) \
   PORT (p, "piq0@"#b,  g, "p0"), \
   PORT (p, "piq1@"#b,  g, "p1"), \
@@ -1247,6 +1289,7 @@ static const struct bfin_dmac_layout bf561_dmac[] =
   { BFIN_MMR_DMAC1_BASE, 12, },
   /* XXX: IMDMA: { 0xFFC01800, 4, }, */
 };
+#define bf561_dde bf000_dde
 static const struct bfin_port_layout bf561_port[] =
 {
   /* SIC0 */
@@ -1350,6 +1393,7 @@ static const struct bfin_dmac_layout bf592_dmac[] =
           start right after the dma channels ... */
   { BFIN_MMR_DMAC0_BASE, 12, },
 };
+#define bf592_dde bf000_dde
 static const struct bfin_port_layout bf592_port[] =
 {
   SIC (0,  0, "bfin_pll",          "pll"),
@@ -1401,6 +1445,7 @@ static const struct bfin_model_data bfin_model_data[] =
     bf##n##_mem , ARRAY_SIZE (bf##n##_mem ), \
     bf##n##_dev , ARRAY_SIZE (bf##n##_dev ), \
     bf##n##_dmac, ARRAY_SIZE (bf##n##_dmac), \
+    bf##n##_dde , ARRAY_SIZE (bf##n##_dde ), \
     bf##n##_port, ARRAY_SIZE (bf##n##_port), \
   },
 #include "proc_list.def"
@@ -1514,6 +1559,17 @@ bfin_model_hw_tree_init (SIM_DESC sd, SIM_CPU *cpu)
 	}
     }
 
+  for (i = 0; i < mdata->dde_count; ++i)
+    {
+      const struct bfin_dde_layout *dde = &mdata->dde[i];
+
+      sim_hw_parse (sd, "/core/%s/reg %#x %i", dde->dev,
+		    dde->base, BFIN_MMR_DDE_SIZE);
+      sim_hw_parse (sd, "/core/%s/mwidth %i", dde->dev, dde->mwidth);
+      sim_hw_parse (sd, "/core/%s/pwidth %i", dde->dev, dde->pwidth);
+      sim_hw_parse (sd, "/core/%s/peer %s", dde->dev, dde->peer);
+    }
+
   for (i = 0; i < mdata->dev_count; ++i)
     {
       const struct bfin_dev_layout *dev = &mdata->dev[i];
@@ -1545,6 +1601,16 @@ bfin_model_hw_tree_init (SIM_DESC sd, SIM_CPU *cpu)
 	  sim_hw_parse (sd, "/core/%s > reset rst  /core/bfin_cec", dev->dev);
 	  sim_hw_parse (sd, "/core/%s > nmi   nmi  /core/bfin_cec", dev->dev);
 	}
+    }
+
+  for (i = 0; i < mdata->dde_count; ++i)
+    {
+      const struct bfin_dde_layout *dde = &mdata->dde[i];
+
+      /* Must run after we've declared all of our devices to avoid loops.  */
+      if (dde->port[0])
+	sim_hw_parse (sd, "/core/%s > %s pi /core/%s", dde->peer,
+		      dde->port, dde->dev);
     }
 
  done:

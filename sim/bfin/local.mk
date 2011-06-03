@@ -54,6 +54,7 @@ noinst_PROGRAMS += %D%/run
 	bfin_cec \
 	bfin_cgu \
 	bfin_ctimer \
+	bfin_dde \
 	bfin_dma \
 	bfin_dmac \
 	bfin_ebiu_amc \
