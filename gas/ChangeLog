@@ -1,4 +1,4 @@
-2011-06-03  Nick Clifton  <nickc@redhat.com>
+2011-06-03  Arnaud Patard  <arnaud.patard@rtp-net.org>
 
 	PR gas/12698
 	* config/tc-arm.c (parse_psr): Set m_profile to false when
