@@ -112,18 +112,14 @@ static void
 python_inferior_exit (struct inferior *inf)
 {
   struct cleanup *cleanup;
-  LONGEST exit_code = -1;
-  ptid_t ptidp;
-  struct target_waitstatus status;
+  const LONGEST *exit_code = NULL;
 
   cleanup = ensure_python_env (target_gdbarch, current_language);
 
-  get_last_target_status (&ptidp, &status);
+  if (inf->has_exit_code)
+    exit_code = &inf->exit_code;
 
-  exit_code = status.value.integer;
-
-  if (exit_code >= 0
-      && emit_exited_event (exit_code) < 0)
+  if (emit_exited_event (exit_code) < 0)
     gdbpy_print_stack ();
 
   do_cleanups (cleanup);

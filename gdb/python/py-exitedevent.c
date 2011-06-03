@@ -21,8 +21,8 @@
 
 static PyTypeObject exited_event_object_type;
 
-PyObject *
-create_exited_event_object (LONGEST exit_code)
+static PyObject *
+create_exited_event_object (const LONGEST *exit_code)
 {
   PyObject *exited_event;
 
@@ -31,9 +31,10 @@ create_exited_event_object (LONGEST exit_code)
   if (!exited_event)
     goto fail;
 
-  if (evpy_add_attribute (exited_event,
-                          "exit_code",
-                          PyLong_FromLongLong (exit_code)) < 0)
+  if (exit_code
+      && evpy_add_attribute (exited_event,
+			     "exit_code",
+			     PyLong_FromLongLong (*exit_code)) < 0)
     goto fail;
 
   return exited_event;
@@ -47,7 +48,7 @@ create_exited_event_object (LONGEST exit_code)
    will create a new Python exited event object.  */
 
 int
-emit_exited_event (LONGEST exit_code)
+emit_exited_event (const LONGEST *exit_code)
 {
   PyObject *event;
 
