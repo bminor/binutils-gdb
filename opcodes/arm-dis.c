@@ -1873,7 +1873,7 @@ print_insn_coprocessor (bfd_vma pc,
 		case 'A':
 		  {
 		    int rn = (given >> 16) & 0xf;
-  		    int offset = given & 0xff;
+  		    bfd_vma offset = given & 0xff;
 
 		    func (stream, "[%s", arm_regnames [(given >> 16) & 0xf]);
 
@@ -2335,7 +2335,7 @@ print_arm_address (bfd_vma pc, struct disassemble_info *info, long given)
 {
   void *stream = info->stream;
   fprintf_ftype func = info->fprintf_func;
-  int offset = 0;
+  bfd_vma offset = 0;
 
   if (((given & 0x000f0000) == 0x000f0000)
       && ((given & 0x02000000) == 0))
@@ -2995,7 +2995,7 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
                       if ((given & 0x004f0000) == 0x004f0000)
 			{
                           /* PC relative with immediate offset.  */
-			  int offset = ((given & 0xf00) >> 4) | (given & 0xf);
+			  bfd_vma offset = ((given & 0xf00) >> 4) | (given & 0xf);
 
 			  if (PRE_BIT_SET)
 			    {
@@ -3102,7 +3102,7 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
 
 		    case 'b':
 		      {
-			int disp = (((given & 0xffffff) ^ 0x800000) - 0x800000);
+			bfd_vma disp = (((given & 0xffffff) ^ 0x800000) - 0x800000);
 			info->print_address_func (disp * 4 + pc + 8, info);
 		      }
 		      break;
@@ -3619,7 +3619,7 @@ print_insn_thumb16 (bfd_vma pc, struct disassemble_info *info, long given)
 		    {
 		    case '-':
 		      {
-			long reg;
+			bfd_vma reg;
 
 			c++;
 			while (*c >= '0' && *c <= '9')
@@ -3908,7 +3908,7 @@ print_insn_thumb32 (bfd_vma pc, struct disassemble_info *info, long given)
 		  unsigned int i12 = (given & 0x00000fff);
 		  unsigned int i8  = (given & 0x000000ff);
 		  bfd_boolean writeback = FALSE, postind = FALSE;
-		  int offset = 0;
+		  bfd_vma offset = 0;
 
 		  func (stream, "[%s", arm_regnames[Rn]);
 		  if (U) /* 12-bit positive immediate offset.  */
@@ -4085,7 +4085,7 @@ print_insn_thumb32 (bfd_vma pc, struct disassemble_info *info, long given)
 		  unsigned int S = (given & 0x04000000u) >> 26;
 		  unsigned int J1 = (given & 0x00002000u) >> 13;
 		  unsigned int J2 = (given & 0x00000800u) >> 11;
-		  int offset = 0;
+		  bfd_vma offset = 0;
 
 		  offset |= !S << 20;
 		  offset |= J2 << 19;
@@ -4103,7 +4103,7 @@ print_insn_thumb32 (bfd_vma pc, struct disassemble_info *info, long given)
 		  unsigned int S = (given & 0x04000000u) >> 26;
 		  unsigned int I1 = (given & 0x00002000u) >> 13;
 		  unsigned int I2 = (given & 0x00000800u) >> 11;
-		  int offset = 0;
+		  bfd_vma offset = 0;
 
 		  offset |= !S << 24;
 		  offset |= !(I1 ^ S) << 23;

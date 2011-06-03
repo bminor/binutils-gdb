@@ -1,3 +1,13 @@
+2011-06-03  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/12752
+	* arm-dis.c (print_insn_coprocessor): Use bfd_vma type for
+	computing address offsets.
+	(print_arm_address): Likewise.
+	(print_insn_arm): Likewise.
+	(print_insn_thumb16): Likewise.
+	(print_insn_thumb32): Likewise.
+
 2011-06-02  Jie Zhang <jie@codesourcery.com>
 	    Nathan Sidwell <nathan@codesourcery.com>
 	    Maciej Rozycki <macro@codesourcery.com>
@@ -6,6 +16,12 @@
 	as address offset.
 	(print_arm_address): Likewise. Elide positive #0 appropriately.
 	(print_insn_arm): Likewise.
+
+2011-06-02  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/12752
+	* arm-dis.c (print_insn_thumb32): Do not sign extend  addresses
+	passed to print_address_func.
 
 2011-06-02  Nick Clifton  <nickc@redhat.com>
 
