@@ -654,6 +654,18 @@ static const struct bfin_dev_layout bf534_dev[] =
   DEVICE (0xFFC01500, BFIN_MMR_GPIO_SIZE,      "bfin_gpio@6"),
   DEVICE (0xFFC01700, BFIN_MMR_GPIO_SIZE,      "bfin_gpio@7"),
   DEVICE (0xFFC02000, BFIN_MMR_UART_SIZE,      "bfin_uart@1"),
+  DEVICE (0, 0, "glue-or@1"),
+  DEVICE (0, 0, "glue-or@1/interrupt-ranges 0 5"),
+  DEVICE (0, 0, "glue-or@2"),
+  DEVICE (0, 0, "glue-or@2/interrupt-ranges 0 8"),
+  DEVICE (0, 0, "glue-or@17"),
+  DEVICE (0, 0, "glue-or@17/interrupt-ranges 0 2"),
+  DEVICE (0, 0, "glue-or@18"),
+  DEVICE (0, 0, "glue-or@18/interrupt-ranges 0 2"),
+  DEVICE (0, 0, "glue-or@27"),
+  DEVICE (0, 0, "glue-or@27/interrupt-ranges 0 2"),
+  DEVICE (0, 0, "glue-or@31"),
+  DEVICE (0, 0, "glue-or@31/interrupt-ranges 0 2"),
 };
 static const struct bfin_dev_layout bf537_dev[] =
 {
@@ -679,6 +691,18 @@ static const struct bfin_dev_layout bf537_dev[] =
   DEVICE (0xFFC02000, BFIN_MMR_UART_SIZE,      "bfin_uart@1"),
   DEVICE (0xFFC03000, BFIN_MMR_EMAC_SIZE,      "bfin_emac"),
   DEVICE (0, 0x20, "bfin_emac/eth_phy"),
+  DEVICE (0, 0, "glue-or@1"),
+  DEVICE (0, 0, "glue-or@1/interrupt-ranges 0 5"),
+  DEVICE (0, 0, "glue-or@2"),
+  DEVICE (0, 0, "glue-or@2/interrupt-ranges 0 8"),
+  DEVICE (0, 0, "glue-or@17"),
+  DEVICE (0, 0, "glue-or@17/interrupt-ranges 0 2"),
+  DEVICE (0, 0, "glue-or@18"),
+  DEVICE (0, 0, "glue-or@18/interrupt-ranges 0 2"),
+  DEVICE (0, 0, "glue-or@27"),
+  DEVICE (0, 0, "glue-or@27/interrupt-ranges 0 2"),
+  DEVICE (0, 0, "glue-or@31"),
+  DEVICE (0, 0, "glue-or@31/interrupt-ranges 0 2"),
 };
 #define bf536_dev bf537_dev
 #define bf534_dmac bf50x_dmac
@@ -687,19 +711,21 @@ static const struct bfin_dev_layout bf537_dev[] =
 static const struct bfin_port_layout bf537_port[] =
 {
   SIC (0,  0, "bfin_pll",          "pll"),
-/*SIC (0,  1, "bfin_dmac@0",       "stat"),*/
-  SIC (0,  1, "bfin_dmar@0",       "block"),
-  SIC (0,  1, "bfin_dmar@1",       "block"),
-  SIC (0,  1, "bfin_dmar@0",       "overflow"),
-  SIC (0,  1, "bfin_dmar@1",       "overflow"),
-  SIC (0,  2, "bfin_can@0",        "stat"),
-  SIC (0,  2, "bfin_emac",         "stat"),
-  SIC (0,  2, "bfin_sport@0",      "stat"),
-  SIC (0,  2, "bfin_sport@1",      "stat"),
-  SIC (0,  2, "bfin_ppi@0",        "stat"),
-  SIC (0,  2, "bfin_spi@0",        "stat"),
-  SIC (0,  2, "bfin_uart@0",       "stat"),
-  SIC (0,  2, "bfin_uart@1",       "stat"),
+  SIC (0,  1, "glue-or@1",         "int"),
+/*PORT ("glue-or@1", "int", "bfin_dmac@0",   "stat"),*/
+  PORT ("glue-or@1", "int", "bfin_dmar@0",   "block"),
+  PORT ("glue-or@1", "int", "bfin_dmar@1",   "block"),
+  PORT ("glue-or@1", "int", "bfin_dmar@0",   "overflow"),
+  PORT ("glue-or@1", "int", "bfin_dmar@1",   "overflow"),
+  SIC (0,  2, "glue-or@2",         "int"),
+  PORT ("glue-or@2", "int", "bfin_can@0",    "stat"),
+  PORT ("glue-or@2", "int", "bfin_emac",     "stat"),
+  PORT ("glue-or@2", "int", "bfin_sport@0",  "stat"),
+  PORT ("glue-or@2", "int", "bfin_sport@1",  "stat"),
+  PORT ("glue-or@2", "int", "bfin_ppi@0",    "stat"),
+  PORT ("glue-or@2", "int", "bfin_spi@0",    "stat"),
+  PORT ("glue-or@2", "int", "bfin_uart@0",   "stat"),
+  PORT ("glue-or@2", "int", "bfin_uart@1",   "stat"),
   SIC (0,  3, "bfin_rtc",          "rtc"),
   SIC (0,  4, "bfin_dma@0",        "di"),
   SIC (0,  5, "bfin_dma@3",        "di"),
@@ -714,10 +740,12 @@ static const struct bfin_port_layout bf537_port[] =
   SIC (0, 14, "bfin_dma@11",       "di"),
   SIC (0, 15, "bfin_can@0",        "rx"),
   SIC (0, 16, "bfin_can@0",        "tx"),
-  SIC (0, 17, "bfin_dma@1",        "di"),
-  SIC (0, 17, "bfin_gpio@7",       "mask_a"),
-  SIC (0, 18, "bfin_dma@2",        "di"),
-  SIC (0, 18, "bfin_gpio@7",       "mask_b"),
+  SIC (0, 17, "glue-or@17",        "int"),
+  PORT ("glue-or@17", "int", "bfin_dma@1",   "di"),
+  PORT ("glue-or@17", "int", "bfin_gpio@7",  "mask_a"),
+  SIC (0, 18, "glue-or@18",        "int"),
+  PORT ("glue-or@18", "int", "bfin_dma@2",   "di"),
+  PORT ("glue-or@18", "int", "bfin_gpio@7",  "mask_b"),
   SIC (0, 19, "bfin_gptimer@0",    "stat"),
   SIC (0, 20, "bfin_gptimer@1",    "stat"),
   SIC (0, 21, "bfin_gptimer@2",    "stat"),
@@ -726,15 +754,17 @@ static const struct bfin_port_layout bf537_port[] =
   SIC (0, 24, "bfin_gptimer@5",    "stat"),
   SIC (0, 25, "bfin_gptimer@6",    "stat"),
   SIC (0, 26, "bfin_gptimer@7",    "stat"),
-  SIC (0, 27, "bfin_gpio@5",       "mask_a"),
-  SIC (0, 27, "bfin_gpio@6",       "mask_a"),
+  SIC (0, 27, "glue-or@27",        "int"),
+  PORT ("glue-or@27", "int", "bfin_gpio@5",   "mask_a"),
+  PORT ("glue-or@27", "int", "bfin_gpio@6",   "mask_a"),
   SIC (0, 28, "bfin_gpio@6",       "mask_b"),
   SIC (0, 29, "bfin_dma@256",      "di"),	/* mdma0 */
   SIC (0, 29, "bfin_dma@257",      "di"),	/* mdma0 */
   SIC (0, 30, "bfin_dma@258",      "di"),	/* mdma1 */
   SIC (0, 30, "bfin_dma@259",      "di"),	/* mdma1 */
-  SIC (0, 31, "bfin_wdog@0",       "gpi"),
-  SIC (0, 31, "bfin_gpio@5",       "mask_b"),
+  SIC (0, 31, "glue-or@31",        "int"),
+  PORT ("glue-or@31", "int", "bfin_wdog@0",   "gpi"),
+  PORT ("glue-or@31", "int", "bfin_gpio@5",   "mask_b"),
 };
 #define bf534_port bf537_port
 #define bf536_port bf537_port
@@ -1362,7 +1392,6 @@ bfin_model_hw_tree_init (SIM_DESC sd, SIM_CPU *cpu)
 
   /* Map the system devices.  */
   dv_bfin_hw_parse (sd, sic, SIC);
-  sim_hw_parse (sd, "/core/bfin_sic/type %i", mdata->model_num);
   for (i = 7; i < 16; ++i)
     sim_hw_parse (sd, "/core/bfin_sic > ivg%i ivg%i /core/bfin_cec", i, i);
 
@@ -1405,11 +1434,19 @@ bfin_model_hw_tree_init (SIM_DESC sd, SIM_CPU *cpu)
     {
       const struct bfin_dev_layout *dev = &mdata->dev[i];
 
-      sim_hw_parse (sd, "/core/%s/reg %#x %i", dev->dev, dev->base, dev->len);
-      sim_hw_parse (sd, "/core/%s/type %i", dev->dev, mdata->model_num);
+      if (dev->len)
+	{
+	  sim_hw_parse (sd, "/core/%s/reg %#x %i", dev->dev, dev->base, dev->len);
+	  sim_hw_parse (sd, "/core/%s/type %i", dev->dev, mdata->model_num);
+	}
+      else
+	{
+	  sim_hw_parse (sd, "/core/%s", dev->dev);
+	}
+
+      dv_bfin_hw_port_parse (sd, mdata, dev->dev);
       if (strchr (dev->dev, '/'))
 	continue;
-      dv_bfin_hw_port_parse (sd, mdata, dev->dev);
 
       if (!strncmp (dev->dev, "bfin_uart", 9)
 	  || !strncmp (dev->dev, "bfin_emac", 9)

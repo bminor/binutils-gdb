@@ -1,5 +1,14 @@
 2011-06-04  Mike Frysinger  <vapier@gentoo.org>
 
+	* machs.c (bf534_dev, bf537_dev): Add glue-or devices.
+	(bf537_port): Define applicable devices with PORT to the glue-or
+	devices instead of SIC.
+	(bfin_model_hw_tree_init): Drop old sim_hw_parse call for bfin_sic.
+	Only parse reg/type when the device has an address.  Move the call
+	to dv_bfin_hw_port_parse up before slash check.
+
+2011-06-04  Mike Frysinger  <vapier@gentoo.org>
+
 	* dv-bfin_sic.c (ENC, DEC_PIN, DEC_SIC): Move above the
 	BFIN_SIC_TO_CEC_PORTS definition.
 	(SIC_PORTS): New define.
