@@ -595,26 +595,27 @@ elf_object_p (bfd *abfd)
 
       /* This is the generic ELF target.  Let it match any ELF target
 	 for which we do not have a specific backend.  */
-      for (target_ptr = bfd_target_vector; *target_ptr != NULL; target_ptr++)
-	{
-	  const struct elf_backend_data *back;
+      if (abfd->target_defaulted)
+	for (target_ptr = bfd_target_vector; *target_ptr != NULL; target_ptr++)
+	  {
+	    const struct elf_backend_data *back;
 
-	  if ((*target_ptr)->flavour != bfd_target_elf_flavour)
-	    continue;
-	  back = xvec_get_elf_backend_data (*target_ptr);
-	  if (back->s->arch_size != ARCH_SIZE)
-	    continue;
-	  if (back->elf_machine_code == i_ehdrp->e_machine
-	      || (back->elf_machine_alt1 != 0
-		  && back->elf_machine_alt1 == i_ehdrp->e_machine)
-	      || (back->elf_machine_alt2 != 0
-		  && back->elf_machine_alt2 == i_ehdrp->e_machine))
-	    {
-	      /* target_ptr is an ELF backend which matches this
-		 object file, so reject the generic ELF target.  */
-	      goto got_wrong_format_error;
-	    }
-	}
+	    if ((*target_ptr)->flavour != bfd_target_elf_flavour)
+	      continue;
+	    back = xvec_get_elf_backend_data (*target_ptr);
+	    if (back->s->arch_size != ARCH_SIZE)
+	      continue;
+	    if (back->elf_machine_code == i_ehdrp->e_machine
+		|| (back->elf_machine_alt1 != 0
+		    && back->elf_machine_alt1 == i_ehdrp->e_machine)
+		|| (back->elf_machine_alt2 != 0
+		    && back->elf_machine_alt2 == i_ehdrp->e_machine))
+	      {
+		/* target_ptr is an ELF backend which matches this
+		   object file, so reject the generic ELF target.  */
+		goto got_wrong_format_error;
+	      }
+	  }
     }
 
   if (i_ehdrp->e_type == ET_EXEC)
