@@ -1,3 +1,36 @@
+2011-06-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* dv-bfin_sic.c (ENC, DEC_PIN, DEC_SIC): Move above the
+	BFIN_SIC_TO_CEC_PORTS definition.
+	(SIC_PORTS): New define.
+	(bfin_sic_50x_ports, bfin_sic_51x_ports, bfin_sic_52x_ports,
+	bfin_sic_533_ports, bfin_sic_537_ports, bfin_sic_538_ports,
+	bfin_sic_54x_ports, bfin_sic_561_ports, bfin_sic_59x_ports):
+	Delete old layouts.
+	(bfin_sic1_ports, bfin_sic2_ports, bfin_sic3_ports,
+	bfin_sic_561_ports): Define new layouts with SIC_PORTS().
+	(bfin_sic_finish): Change reference to bfin_sic_50x_ports,
+	bfin_sic_51x_ports, bfin_sic_52x_ports, and bfin_sic_538_ports
+	to bfin_sic2_ports.  Change reference to bfin_sic_533_ports,
+	bfin_sic_537_ports, and bfin_sic_59x_ports to bfin_sic1_ports.
+	Change reference to bfin_sic_54x_ports to bfin_sic3_ports.
+	* machs.c (bfin_port_layout): New structure.
+	(bfin_model_data): Add new "port" and "port_count" members.
+	(PORT, SIC): New defines.
+	(bf000_port, bf50x_port, bf51x_port, bf52x_port, bf533_port,
+	bf537_port, bf538_port, bf54x_port, bf561_port, bf592_port):
+	Move and redefine port layout from dv-bfin_sic.c to here.
+	(bf504_port, bf506_port, bf512_port, bf514_port, bf516_port,
+	bf518_port, bf522_port, bf523_port, bf524_port, bf525_port,
+	bf526_port, bf527_port, bf531_port, bf532_port, bf534_port,
+	bf536_port, bf539_port, bf542_port, bf544_port, bf547_port,
+	bf548_port, bf549_port): New defines.
+	(bfin_model_data): Link in new bfin_port_layout.port member.
+	(dv_bfin_hw_port_parse): New function.
+	(dv_bfin_hw_parse): Call new dv_bfin_hw_port_parse function.
+	(bfin_model_hw_tree_init): Replace calls to sim_hw_parse for
+	bfin_sic links with new dv_bfin_hw_port_parse function.
+
 2011-06-03  Mike Frysinger  <vapier@gentoo.org>
 
 	* dv-bfin_dma.c (bfin_dma_io_write_buffer): Fix indentation.
