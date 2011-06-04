@@ -1,3 +1,8 @@
+2011-06-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.tgt (bfin-*-*): Add sim_testsuite=yes.
+	* configure: Regenerate.
+
 2011-05-04  Joseph Myers  <joseph@codesourcery.com>
 
 	* configure.tgt (thumb*-*-* | strongarm*-*-* | xscale-*-*): Don't

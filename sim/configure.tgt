@@ -25,6 +25,7 @@ case "${target}" in
        ;;
    bfin-*-*)
        SIM_ARCH(bfin)
+       sim_testsuite=yes
        ;;
    cr16*-*-*)
        SIM_ARCH(cr16)

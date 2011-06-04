@@ -3646,6 +3646,7 @@ subdirs="$subdirs arm"
   subdirs="$subdirs bfin"
 
 
+       sim_testsuite=yes
        ;;
    cr16*-*-*)
 
