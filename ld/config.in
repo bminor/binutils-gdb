@@ -132,7 +132,7 @@
 /* Define to 1 if you have the `waitpid' function. */
 #undef HAVE_WAITPID
 
-/* Define to 1 if you have the <Windows.h> header file. */
+/* Define to 1 if you have the <windows.h> header file. */
 #undef HAVE_WINDOWS_H
 
 /* Define to 1 if you have the <zlib.h> header file. */
