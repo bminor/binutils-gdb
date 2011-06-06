@@ -1,3 +1,7 @@
+2011-06-06  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.threads/pending-step.exp: Add more context to SIGTRAP match.
+
 2011-06-03  Joel Brobecker  <brobecker@adacore.com>  (obvious fix)
 
 	From Stephen Kitt  <steve@sk2.org>
