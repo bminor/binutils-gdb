@@ -1,3 +1,34 @@
+2011-06-06  Pedro Alves  <pedro@codesourcery.com>
+
+	* infcall.c (run_inferior_call): Don't mask async.  Instead force
+	a synchronous wait, if the target can async.
+
+	* target.h (struct target_ops): Delete to_async_mask.
+	(target_async_mask): Delete.
+	* target.c (update_current_target): Delete references to to_async_mask.
+	* linux-nat.c (linux_nat_async_mask_value): Delete.
+	(linux_nat_is_async_p, linux_nat_can_async_p): Remove references
+	to linux_nat_async_mask_value.
+	(linux_nat_async_mask): Delete.
+	(linux_nat_async, linux_nat_close): Remove references to
+	linux_nat_async_mask_value.
+	* record.c (record_async_mask_value): Delete.
+	(record_async): Remove references to record_async_mask_value.
+	(record_async_mask): Delete.
+	(record_can_async_p, record_is_async_p): Remove references to
+	record_async_mask_value.
+	(init_record_ops, init_record_core_ops): Remove references to
+	record_async_mask.
+	* remote.c (remote_async_mask_value): Delete.
+	(init_remote_ops): Remove reference to remote_async_mask.
+	(remote_can_async_p, remote_is_async_p): Remove references to
+	remote_async_mask_value.
+	(remote_async): Remove references to remote_async_mask_value.
+	(remote_async_mask): Delete.
+
+	* infrun.c (fetch_inferior_event): Don't claim registers changed
+	if the current thread is already not executing.
+
 2011-06-03  Joel Brobecker  <brobecker@adacore.com>  (obvious fix)
 
 	From Stephen Kitt  <steve@sk2.org>

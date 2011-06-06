@@ -1817,16 +1817,10 @@ record_goto_bookmark (gdb_byte *bookmark, int from_tty)
   return;
 }
 
-static int record_async_mask_value = 1;
-
 static void
 record_async (void (*callback) (enum inferior_event_type event_type,
 				void *context), void *context)
 {
-  if (record_async_mask_value == 0)
-    internal_error (__FILE__, __LINE__,
-		    _("Calling record_async when async is masked"));
-
   /* If we're on top of a line target (e.g., linux-nat, remote), then
      set it to async mode as well.  Will be NULL if we're sitting on
      top of the core target, for "record restore".  */
@@ -1835,32 +1829,17 @@ record_async (void (*callback) (enum inferior_event_type event_type,
 }
 
 static int
-record_async_mask (int new_mask)
-{
-  int curr_mask = record_async_mask_value;
-
-  record_async_mask_value = new_mask;
-  return curr_mask;
-}
-
-static int
 record_can_async_p (void)
 {
   /* We only enable async when the user specifically asks for it.  */
-  if (!target_async_permitted)
-    return 0;
-
-  return record_async_mask_value;
+  return target_async_permitted;
 }
 
 static int
 record_is_async_p (void)
 {
   /* We only enable async when the user specifically asks for it.  */
-  if (!target_async_permitted)
-    return 0;
-
-  return record_async_mask_value;
+  return target_async_permitted;
 }
 
 static enum exec_direction_kind
@@ -1899,7 +1878,6 @@ init_record_ops (void)
   record_ops.to_async = record_async;
   record_ops.to_can_async_p = record_can_async_p;
   record_ops.to_is_async_p = record_is_async_p;
-  record_ops.to_async_mask = record_async_mask;
   record_ops.to_execution_direction = record_execution_direction;
   record_ops.to_magic = OPS_MAGIC;
 }
@@ -2125,7 +2103,6 @@ init_record_core_ops (void)
   record_core_ops.to_async = record_async;
   record_core_ops.to_can_async_p = record_can_async_p;
   record_core_ops.to_is_async_p = record_is_async_p;
-  record_core_ops.to_async_mask = record_async_mask;
   record_core_ops.to_execution_direction = record_execution_direction;
   record_core_ops.to_magic = OPS_MAGIC;
 }

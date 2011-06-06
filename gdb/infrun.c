@@ -2739,7 +2739,16 @@ fetch_inferior_event (void *client_data)
      status mechanism.  */
 
   overlay_cache_invalid = 1;
-  registers_changed ();
+
+  /* But don't do it if the current thread is already stopped (hence
+     this is either a delayed event that will result in
+     TARGET_WAITKIND_IGNORE, or it's an event for another thread (and
+     we always clear the register and frame caches when the user
+     switches threads anyway).  If we didn't do this, a spurious
+     delayed event in all-stop mode would make the user lose the
+     selected frame.  */
+  if (non_stop || is_executing (inferior_ptid))
+    registers_changed ();
 
   make_cleanup_restore_integer (&execution_direction);
   execution_direction = target_execution_direction ();
