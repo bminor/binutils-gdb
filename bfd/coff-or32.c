@@ -1,5 +1,5 @@
 /* BFD back-end for OpenRISC 1000 COFF binaries.
-   Copyright 2002, 2003, 2004, 2005, 2006, 2007, 2008
+   Copyright 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2011
    Free Software Foundation, Inc.
    Contributed by Ivan Guzvinec  <ivang@opencores.org>
 
@@ -594,6 +594,7 @@ const bfd_target or32coff_big_vec =
   '_',        /* Leading underscore.  */
   '/',        /* ar_pad_char.  */
   15,         /* ar_max_namelen.  */
+  0,          /* match priority.  */
 
   /* Data.  */
   bfd_getb64, bfd_getb_signed_64, bfd_putb64,

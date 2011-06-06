@@ -1,6 +1,6 @@
 /* BFD back-end for os9000 i386 binaries.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1998, 1999, 2001, 2002,
-   2004, 2005, 2006, 2007, 2009 Free Software Foundation, Inc.
+   2004, 2005, 2006, 2007, 2009, 2011 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -193,6 +193,7 @@ const bfd_target i386os9k_vec =
     0,				/* symbol leading char */
     ' ',				/* ar_pad_char */
     16,				/* ar_max_namelen */
+    0,				/* match priority.  */
 
     bfd_getl64, bfd_getl_signed_64, bfd_putl64,
     bfd_getl32, bfd_getl_signed_32, bfd_putl32,

@@ -208,7 +208,11 @@ DESCRIPTION
 .  char ar_pad_char;
 .
 .  {* The maximum number of characters in an archive header.  *}
-.  unsigned short ar_max_namelen;
+.  unsigned char ar_max_namelen;
+.
+.  {* How well this target matches, used to select between various
+.     possible targets when more than one target matches.  *}
+.  unsigned char match_priority;
 .
 .  {* Entries for byte swapping for data. These are different from the
 .     other entry points, since they don't take a BFD as the first argument.

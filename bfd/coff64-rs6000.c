@@ -1,6 +1,6 @@
 /* BFD back-end for IBM RS/6000 "XCOFF64" files.
    Copyright 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009,
-   2010
+   2010, 2011
    Free Software Foundation, Inc.
    Written Clinton Popetz.
    Contributed by Cygnus Support.
@@ -2622,6 +2622,7 @@ const bfd_target rs6000coff64_vec =
     0,				/* leading char */
     '/',			/* ar_pad_char */
     15,				/* ar_max_namelen */
+    0,				/* match priority.  */
 
     /* data */
     bfd_getb64,
@@ -2877,6 +2878,7 @@ const bfd_target aix5coff64_vec =
     0,				/* leading char */
     '/',			/* ar_pad_char */
     15,				/* ar_max_namelen */
+    0,				/* match priority.  */
 
     /* data */
     bfd_getb64,

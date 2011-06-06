@@ -6768,6 +6768,7 @@ const bfd_target som_vec =
   0,
   '/',				/* AR_pad_char.  */
   14,				/* AR_max_namelen.  */
+  0,				/* match priority.  */
   bfd_getb64, bfd_getb_signed_64, bfd_putb64,
   bfd_getb32, bfd_getb_signed_32, bfd_putb32,
   bfd_getb16, bfd_getb_signed_16, bfd_putb16,	/* Data.  */

@@ -1,6 +1,6 @@
 /* BFD back end for traditional Unix core files (U-area and raw sections)
    Copyright 1988, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
+   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2011
    Free Software Foundation, Inc.
    Written by John Gilmore of Cygnus Support.
 
@@ -284,9 +284,10 @@ const bfd_target trad_core_vec =
      HAS_LINENO | HAS_DEBUG |
      HAS_SYMS | HAS_LOCALS | WP_TEXT | D_PAGED),
     (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
-    0,			                                   /* symbol prefix */
-    ' ',						   /* ar_pad_char */
-    16,							   /* ar_max_namelen */
+    0,				/* symbol prefix */
+    ' ',			/* ar_pad_char */
+    16,				/* ar_max_namelen */
+    0,				/* match priority.  */
     NO_GET64, NO_GETS64, NO_PUT64,	/* 64 bit data */
     NO_GET, NO_GETS, NO_PUT,		/* 32 bit data */
     NO_GET, NO_GETS, NO_PUT,		/* 16 bit data */

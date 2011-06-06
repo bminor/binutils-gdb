@@ -1,5 +1,5 @@
 /* BFD back-end for PDP-11 a.out binaries.
-   Copyright 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2009, 2010
+   Copyright 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2009, 2010, 2011
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -4511,6 +4511,7 @@ const bfd_target MY (vec) =
   MY_symbol_leading_char,
   AR_PAD_CHAR,			/* AR_pad_char.  */
   15,				/* AR_max_namelen.  */
+  0,				/* match priority.  */
   bfd_getl64, bfd_getl_signed_64, bfd_putl64,
      bfd_getp32, bfd_getp_signed_32, bfd_putp32,
      bfd_getl16, bfd_getl_signed_16, bfd_putl16, /* Data.  */

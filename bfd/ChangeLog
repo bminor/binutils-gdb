@@ -1,3 +1,27 @@
+2011-06-06  Alan Modra  <amodra@gmail.com>
+
+	* targets.c (bfd_target): Make ar_max_namelen an unsigned char.
+	Add match_priority.
+	* configure.in: Bump bfd version.
+	* elfcode.h (elf_object_p): Delete hacks preventing match of
+	EM_NONE and ELFOSABI_NONE targets when a better match exists.
+	* elfxx-target.h (elf_match_priority): Define and use.
+	* format.c (bfd_check_format_matches): Use target match_priority
+	to choose best of multiple matching targets.  In cases with multiple
+	matches rerun _bfd_check_format if we don't choose the last match.
+	* aout-adobe.c, * aout-arm.c, * aout-target.h, * aout-tic30.c,
+	* binary.c, * bout.c, * coff-alpha.c, * coff-i386.c, * coff-i860.c,
+	* coff-i960.c, * coff-ia64.c, * coff-mips.c, * coff-or32.c,
+	* coff-ppc.c, * coff-rs6000.c, * coff-sh.c, * coff-tic30.c,
+	* coff-tic54x.c, * coff-x86_64.c, * coff64-rs6000.c, * coffcode.h,
+	* i386msdos.c, * i386os9k.c, * ieee.c, * ihex.c, * mach-o-target.c,
+	* mipsbsd.c, * mmo.c, * nlm-target.h, * oasys.c, * pdp11.c,
+	* pe-mips.c, * pef.c, * plugin.c, * ppcboot.c, * som.c, * srec.c,
+	* tekhex.c, * trad-core.c, * verilog.c, * versados.c, * vms-alpha.c,
+	* vms-lib.c, * xsym.c: Init match_priority field.
+	* configure: Regenerate.
+	* bfd-in2.h: Regenerate.
+
 2011-06-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/12842

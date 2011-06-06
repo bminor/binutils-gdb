@@ -1,6 +1,7 @@
 /* Target definitions for NN-bit ELF
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
-   2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+   2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011
+   Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -643,6 +644,11 @@
 #define elf_backend_is_function_type _bfd_elf_is_function_type
 #endif
 
+#ifndef elf_match_priority
+#define elf_match_priority \
+  (ELF_ARCH == bfd_arch_unknown ? 2 : ELF_OSABI == ELFOSABI_NONE ? 1 : 0)
+#endif
+
 extern const struct elf_size_info _bfd_elfNN_size_info;
 
 static struct elf_backend_data elfNN_bed =
@@ -811,6 +817,8 @@ const bfd_target TARGET_BIG_SYM =
      Chapter 7 (Formats & Protocols), Archive section sets this as 15.  */
   15,
 
+  elf_match_priority,
+
   /* Routines to byte-swap various sized integers from the data sections */
   bfd_getb64, bfd_getb_signed_64, bfd_putb64,
     bfd_getb32, bfd_getb_signed_32, bfd_putb32,
@@ -906,6 +914,8 @@ const bfd_target TARGET_LITTLE_SYM =
      of the archiver and should be independently tunable.  The System V ABI,
      Chapter 7 (Formats & Protocols), Archive section sets this as 15.  */
   15,
+
+  elf_match_priority,
 
   /* Routines to byte-swap various sized integers from the data sections */
   bfd_getl64, bfd_getl_signed_64, bfd_putl64,

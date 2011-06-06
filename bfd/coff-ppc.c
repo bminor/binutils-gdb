@@ -2582,6 +2582,7 @@ const bfd_target TARGET_LITTLE_SYM =
   0,				/* leading char */
   '/',				/* ar_pad_char */
   15,				/* ar_max_namelen??? FIXMEmgo */
+  0,				/* match priority.  */
 
   bfd_getl64, bfd_getl_signed_64, bfd_putl64,
   bfd_getl32, bfd_getl_signed_32, bfd_putl32,
@@ -2641,6 +2642,7 @@ const bfd_target TARGET_BIG_SYM =
   0,				/* leading char */
   '/',				/* ar_pad_char */
   15,				/* ar_max_namelen??? FIXMEmgo */
+  0,				/* match priority.  */
 
   bfd_getb64, bfd_getb_signed_64, bfd_putb64,
   bfd_getb32, bfd_getb_signed_32, bfd_putb32,

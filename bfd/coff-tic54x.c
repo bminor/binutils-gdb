@@ -1,5 +1,5 @@
 /* BFD back-end for TMS320C54X coff binaries.
-   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008
+   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008, 2011
    Free Software Foundation, Inc.
    Contributed by Timothy Wall (twall@cygnus.com)
 
@@ -446,6 +446,7 @@ const bfd_target tic54x_coff0_vec =
     '_',				/* leading symbol underscore */
     '/',				/* ar_pad_char */
     15,				/* ar_max_namelen */
+    0,				/* match priority.  */
     bfd_getl64, bfd_getl_signed_64, bfd_putl64,
     tic54x_getl32, tic54x_getl_signed_32, tic54x_putl32,
     bfd_getl16, bfd_getl_signed_16, bfd_putl16,	/* data */
@@ -490,6 +491,7 @@ const bfd_target tic54x_coff0_beh_vec =
     '_',				/* leading symbol underscore */
     '/',				/* ar_pad_char */
     15,				/* ar_max_namelen */
+    0,				/* match priority.  */
     bfd_getl64, bfd_getl_signed_64, bfd_putl64,
     tic54x_getl32, tic54x_getl_signed_32, tic54x_putl32,
     bfd_getl16, bfd_getl_signed_16, bfd_putl16,	/* data */
@@ -535,6 +537,7 @@ const bfd_target tic54x_coff1_vec =
     '_',				/* leading symbol underscore */
     '/',				/* ar_pad_char */
     15,				/* ar_max_namelen */
+    0,				/* match priority.  */
     bfd_getl64, bfd_getl_signed_64, bfd_putl64,
     tic54x_getl32, tic54x_getl_signed_32, tic54x_putl32,
     bfd_getl16, bfd_getl_signed_16, bfd_putl16,	/* data */
@@ -580,6 +583,7 @@ const bfd_target tic54x_coff1_beh_vec =
     '_',				/* leading symbol underscore */
     '/',				/* ar_pad_char */
     15,				/* ar_max_namelen */
+    0,				/* match priority.  */
     bfd_getl64, bfd_getl_signed_64, bfd_putl64,
     tic54x_getl32, tic54x_getl_signed_32, tic54x_putl32,
     bfd_getl16, bfd_getl_signed_16, bfd_putl16,	/* data */
@@ -625,6 +629,7 @@ const bfd_target tic54x_coff2_vec =
     '_',				/* leading symbol underscore */
     '/',				/* ar_pad_char */
     15,				/* ar_max_namelen */
+    0,				/* match priority.  */
     bfd_getl64, bfd_getl_signed_64, bfd_putl64,
     tic54x_getl32, tic54x_getl_signed_32, tic54x_putl32,
     bfd_getl16, bfd_getl_signed_16, bfd_putl16,	/* data */
@@ -670,6 +675,7 @@ const bfd_target tic54x_coff2_beh_vec =
     '_',				/* leading symbol underscore */
     '/',				/* ar_pad_char */
     15,				/* ar_max_namelen */
+    0,				/* match priority.  */
     bfd_getl64, bfd_getl_signed_64, bfd_putl64,
     tic54x_getl32, tic54x_getl_signed_32, tic54x_putl32,
     bfd_getl16, bfd_getl_signed_16, bfd_putl16,	/* data */
