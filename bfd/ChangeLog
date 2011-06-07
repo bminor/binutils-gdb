@@ -1,3 +1,7 @@
+2011-06-07  Joel Brobecker  <brobecker@adacore.com>
+
+	* irix-core.c (irix_core_vec): Add match_priority field.
+
 2011-06-06  Alan Modra  <amodra@gmail.com>
 
 	* targets.c (bfd_target): Make ar_max_namelen an unsigned char.
