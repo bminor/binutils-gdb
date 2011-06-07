@@ -1,3 +1,9 @@
+2011-06-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Pedro Alves  <pedro@codesourcery.com>
+
+	* cli/cli-cmds.c (shell_escape): Use waitpid.
+	* rs6000-nat.c (exec_one_dummy_insn): Likewise.
+
 2011-06-07  Tristan Gingold  <gingold@adacore.com>
 
 	* xcoffread.c (dwarf2_xcoff_names): New variable.

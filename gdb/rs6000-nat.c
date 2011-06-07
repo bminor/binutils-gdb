@@ -614,7 +614,7 @@ exec_one_dummy_insn (struct regcache *regcache)
 
   do
     {
-      pid = wait (&status);
+      pid = waitpid (PIDGET (inferior_ptid), &status, 0);
     }
   while (pid != PIDGET (inferior_ptid));
 

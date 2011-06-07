@@ -726,7 +726,7 @@ shell_escape (char *arg, int from_tty)
   chdir (current_directory);
 #endif
 #else /* Can fork.  */
-  int rc, status, pid;
+  int status, pid;
 
   if ((pid = vfork ()) == 0)
     {
@@ -750,8 +750,7 @@ shell_escape (char *arg, int from_tty)
     }
 
   if (pid != -1)
-    while ((rc = wait (&status)) != pid && rc != -1)
-      ;
+    waitpid (pid, &status, 0);
   else
     error (_("Fork failed"));
 #endif /* Can fork.  */
