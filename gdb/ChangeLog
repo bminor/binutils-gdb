@@ -1,3 +1,10 @@
+2011-06-07  Tristan Gingold  <gingold@adacore.com>
+
+	* xcoffread.c (dwarf2_xcoff_names): New variable.
+	(aix_process_linenos): Add a guard.
+	(xcoff_symfile_finish): Free dwarf2.
+	(xcoff_initial_scan): Add dwarf2 support.
+
 2011-06-06  Pedro Alves  <pedro@codesourcery.com>
 
 	* infcall.c (run_inferior_call): Don't mask async.  Instead force

@@ -152,6 +152,22 @@ struct coff_symfile_info
     CORE_ADDR toc_offset;
   };
 
+/* XCOFF names for dwarf sections.  There is no compressed sections.  */
+
+static const struct dwarf2_debug_sections dwarf2_xcoff_names = {
+  { ".dwinfo", NULL },
+  { ".dwabrev", NULL },
+  { ".dwline", NULL },
+  { ".dwloc", NULL },
+  { NULL, NULL }, /* debug_macinfo */
+  { ".dwstr", NULL },
+  { ".dwrnges", NULL },
+  { NULL, NULL }, /* debug_types */
+  { ".dwframe", NULL },
+  { NULL, NULL }, /* eh_frame */
+  { NULL, NULL } /* gdb_index */
+};
+
 static void
 bf_notfound_complaint (void)
 {
@@ -757,6 +773,10 @@ return_after_cleanup:
 static void
 aix_process_linenos (void)
 {
+  /* There is no linenos to read if there are only dwarf info.  */
+  if (this_symtab_psymtab == NULL)
+    return;
+
   /* Process line numbers and enter them into line vector.  */
   process_linenos (last_source_start_addr, cur_src_end_addr);
 }
@@ -1910,6 +1930,8 @@ xcoff_symfile_finish (struct objfile *objfile)
       inclTable = NULL;
     }
   inclIndx = inclLength = inclDepth = 0;
+
+  dwarf2_free_objfile (objfile);
 }
 
 
@@ -3021,6 +3043,13 @@ xcoff_initial_scan (struct objfile *objfile, int symfile_flags)
      minimal symbols for this objfile.  */
 
   install_minimal_symbols (objfile);
+
+  /* DWARF2 sections.  */
+
+  if (dwarf2_has_info (objfile, &dwarf2_xcoff_names))
+    dwarf2_build_psymtabs (objfile);
+
+  dwarf2_build_frame_info (objfile);
 
   do_cleanups (back_to);
 }
