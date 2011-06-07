@@ -387,19 +387,27 @@ core_sym_class (asymbol *sym)
       if (*name == '$')
         return 0;
 
-      if (*name == '.')
+      while (*name == '.')
 	{
-	  /* Allow GCC cloned functions.  */
-	  if (strlen (name) > 7 && strncmp (name, ".clone.", 7) == 0)
-	    name += 6;
+	  /* Allow both nested subprograms (which end with ".NNN", where N is
+	     a digit) and GCC cloned functions (which contain ".clone").
+	     Allow for multiple iterations of both - apparently GCC can clone
+	     clones and subprograms.  */
+	  int digit_seen = 0;
+#define CLONE_NAME      ".clone."
+#define CLONE_NAME_LEN  strlen (CLONE_NAME)
+	      
+	  if (strlen (name) > CLONE_NAME_LEN
+	      && strncmp (name, CLONE_NAME, CLONE_NAME_LEN) == 0)
+	    name += CLONE_NAME_LEN - 1;
 
-	  /* Do not discard nested subprograms (those
-	     which end with .NNN, where N are digits).  */
 	  for (name++; *name; name++)
-	    if (! ISDIGIT (*name))
+	    if (digit_seen && *name == '.')
+	      break;
+	    else if (ISDIGIT (*name))
+	      digit_seen = 1;
+	    else
 	      return 0;
-
-	  break;
 	}
     }
 
