@@ -5266,8 +5266,8 @@ display_gdb_index (struct dwarf_section *section,
 	    {
 	      cu = byte_get_little_endian (constant_pool + cu_vector_offset + 4 + j * 4, 4);
 	      /* Convert to TU number if it's for a type unit.  */
-	      if (cu >= cu_list_elements)
-		printf (" T%lu", (unsigned long) (cu - cu_list_elements));
+	      if (cu >= cu_list_elements / 2)
+		printf (" T%lu", (unsigned long) (cu - cu_list_elements / 2));
 	      else
 		printf (" %lu", (unsigned long) cu);
 	    }
