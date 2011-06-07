@@ -5885,6 +5885,9 @@ lang_one_common (struct bfd_link_hash_entry *h, void *info)
   bfd_vma size;
   asection *section;
 
+  if (h->type == bfd_link_hash_warning)
+    h = h->u.i.link;
+
   if (h->type != bfd_link_hash_common)
     return TRUE;
 
