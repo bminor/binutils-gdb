@@ -1,3 +1,7 @@
+2011-06-07  Doug Evans  <dje@google.com>
+
+	* cc-with-index.sh: Fix typos in comment.
+
 2011-06-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Pedro Alves  <pedro@codesourcery.com>
 
