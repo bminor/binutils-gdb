@@ -1,3 +1,28 @@
+2011-06-08  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/12855
+	* readelf.c (process_version_sections): Handle binaries containing
+	corrupt version information.
+	(process_symbol_table): Stop processing a symbol's version
+	information if it could not be read in.
+
+	(get_data): Add comment describing the function.
+	(process_section_headers): Set dynamic_strings_length to 0 if the
+	dynamic strings could not be read in.
+	(process_dynamic_section): Likewise.
+	(process_section_groups): Stop processing the group information if
+	the data could not be read in.
+	(hppa_processs_unwind): Assert that there is only one string table
+	in the file.
+	(arm_process_unwind): Likewise.
+	(ia64_process_unwind): Likewise.
+	Set the size of the unwind auxillary information to 0 if the data
+	could not be read.
+	(load_specific_debug_section): Handle a failure to read in the
+	section.
+	(process_mips_specific): Stop display of the PLT GOT section if it
+	could not be read in.
+
 2011-06-08  Tristan Gingold  <gingold@adacore.com>
 
 	* makefile.vms (DEFS): Define OBJDUMP_PRIVATE_VECTORS.

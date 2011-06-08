@@ -286,6 +286,12 @@ print_mode;
     }						\
   while (0)
 
+/* Retrieve NMEMB structures, each SIZE bytes long from FILE starting at OFFSET.
+   Put the retrieved data into VAR, if it is not NULL.  Otherwise allocate a buffer
+   using malloc and fill that.  In either case return the pointer to the start of
+   the retrieved data or NULL if something went wrong.  If something does go wrong
+   emit an error message using REASON as part of the context.  */
+
 static void *
 get_data (void * var, FILE * file, long offset, size_t size, size_t nmemb,
 	  const char * reason)
@@ -4548,7 +4554,7 @@ process_section_headers (FILE * file)
 	  dynamic_strings = (char *) get_data (NULL, file, section->sh_offset,
                                                1, section->sh_size,
                                                _("dynamic strings"));
-	  dynamic_strings_length = section->sh_size;
+	  dynamic_strings_length = dynamic_strings == NULL ? 0 : section->sh_size;
 	}
       else if (section->sh_type == SHT_SYMTAB_SHNDX)
 	{
@@ -5029,6 +5035,8 @@ process_section_groups (FILE * file)
 	  start = (unsigned char *) get_data (NULL, file, section->sh_offset,
                                               1, section->sh_size,
                                               _("section data"));
+	  if (start == NULL)
+	    continue;
 
 	  indices = start;
 	  size = (section->sh_size / section->sh_entsize) - 1;
@@ -5734,6 +5742,7 @@ ia64_process_unwind (FILE * file)
 	  aux.symtab = GET_ELF_SYMBOLS (file, sec);
 
 	  strsec = section_headers + sec->sh_link;
+	  assert (aux.strtab == NULL);
 	  aux.strtab = (char *) get_data (NULL, file, strsec->sh_offset,
                                           1, strsec->sh_size,
                                           _("string table"));
@@ -5816,11 +5825,11 @@ ia64_process_unwind (FILE * file)
 	}
       else
 	{
-	  aux.info_size = sec->sh_size;
 	  aux.info_addr = sec->sh_addr;
 	  aux.info = (unsigned char *) get_data (NULL, file, sec->sh_offset, 1,
-                                                 aux.info_size,
+                                                 sec->sh_size,
                                                  _("unwind info"));
+	  aux.info_size = aux.info == NULL ? 0 : sec->sh_size;
 
 	  printf (_("\nUnwind section "));
 
@@ -6147,6 +6156,7 @@ hppa_process_unwind (FILE * file)
 	  aux.symtab = GET_ELF_SYMBOLS (file, sec);
 
 	  strsec = section_headers + sec->sh_link;
+	  assert (aux.strtab == NULL);
 	  aux.strtab = (char *) get_data (NULL, file, strsec->sh_offset,
                                           1, strsec->sh_size,
                                           _("string table"));
@@ -6273,7 +6283,6 @@ arm_section_get_word (struct arm_unw_aux_info *aux,
       arm_sec->sec = sec;
       arm_sec->data = get_data (NULL, aux->file, sec->sh_offset, 1,
 				sec->sh_size, _("unwind data"));
-
       arm_sec->rela = NULL;
       arm_sec->nrelas = 0;
 
@@ -7032,6 +7041,7 @@ arm_process_unwind (FILE *file)
 	  aux.symtab = GET_ELF_SYMBOLS (file, sec);
 
 	  strsec = section_headers + sec->sh_link;
+	  assert (aux.strtab == NULL);
 	  aux.strtab = get_data (NULL, file, strsec->sh_offset,
 				 1, strsec->sh_size, _("string table"));
 	  aux.strtab_size = aux.strtab != NULL ? strsec->sh_size : 0;
@@ -7541,7 +7551,7 @@ process_dynamic_section (FILE * file)
 	  dynamic_strings = (char *) get_data (NULL, file, offset, 1,
                                                str_tab_len,
                                                _("dynamic string table"));
-	  dynamic_strings_length = str_tab_len;
+	  dynamic_strings_length = dynamic_strings == NULL ? 0 : str_tab_len;
 	  break;
 	}
     }
@@ -8079,9 +8089,9 @@ process_version_sections (FILE * file)
 	    edefs = (Elf_External_Verdef *)
                 get_data (NULL, file, section->sh_offset, 1,section->sh_size,
                           _("version definition section"));
-	    endbuf = (char *) edefs + section->sh_size;
 	    if (!edefs)
 	      break;
+	    endbuf = (char *) edefs + section->sh_size;
 
 	    for (idx = cnt = 0; cnt < section->sh_info; ++cnt)
 	      {
@@ -8198,9 +8208,9 @@ process_version_sections (FILE * file)
                                                        section->sh_offset, 1,
                                                        section->sh_size,
                                                        _("version need section"));
-	    endbuf = (char *) eneed + section->sh_size;
 	    if (!eneed)
 	      break;
+	    endbuf = (char *) eneed + section->sh_size;
 
 	    for (idx = cnt = 0; cnt < section->sh_info; ++cnt)
 	      {
@@ -8416,9 +8426,10 @@ process_version_sections (FILE * file)
 			      Elf_External_Vernaux evna;
 			      unsigned long a_off;
 
-			      get_data (&evn, file, offset, sizeof (evn), 1,
-					_("version need"));
-
+			      if (get_data (&evn, file, offset, sizeof (evn), 1,
+					    _("version need")) == NULL)
+				break;
+			      
 			      ivn.vn_aux  = BYTE_GET (evn.vn_aux);
 			      ivn.vn_next = BYTE_GET (evn.vn_next);
 
@@ -8426,11 +8437,17 @@ process_version_sections (FILE * file)
 
 			      do
 				{
-				  get_data (&evna, file, a_off, sizeof (evna),
-					    1, _("version need aux (2)"));
-
-				  ivna.vna_next  = BYTE_GET (evna.vna_next);
-				  ivna.vna_other = BYTE_GET (evna.vna_other);
+				  if (get_data (&evna, file, a_off, sizeof (evna),
+						1, _("version need aux (2)")) == NULL)
+				    {
+				      ivna.vna_next  = 0;
+				      ivna.vna_other = 0;
+				    }
+				  else
+				    {
+				      ivna.vna_next  = BYTE_GET (evna.vna_next);
+				      ivna.vna_other = BYTE_GET (evna.vna_other);
+				    }
 
 				  a_off += ivna.vna_next;
 				}
@@ -8471,11 +8488,17 @@ process_version_sections (FILE * file)
 
 			  do
 			    {
-			      get_data (&evd, file, offset, sizeof (evd), 1,
-					_("version def"));
-
-			      ivd.vd_next = BYTE_GET (evd.vd_next);
-			      ivd.vd_ndx  = BYTE_GET (evd.vd_ndx);
+			      if (get_data (&evd, file, offset, sizeof (evd), 1,
+					    _("version def")) == NULL)
+				{
+				  ivd.vd_next = 0;
+				  ivd.vd_ndx  = 0;
+				}
+			      else
+				{
+				  ivd.vd_next = BYTE_GET (evd.vd_next);
+				  ivd.vd_ndx  = BYTE_GET (evd.vd_ndx);
+				}
 
 			      offset += ivd.vd_next;
 			    }
@@ -8489,10 +8512,11 @@ process_version_sections (FILE * file)
 
 			      ivd.vd_aux = BYTE_GET (evd.vd_aux);
 
-			      get_data (&evda, file,
-					offset - ivd.vd_next + ivd.vd_aux,
-					sizeof (evda), 1,
-					_("version def aux"));
+			      if (get_data (&evda, file,
+					    offset - ivd.vd_next + ivd.vd_aux,
+					    sizeof (evda), 1,
+					    _("version def aux")) == NULL)
+				break;
 
 			      ivda.vda_name = BYTE_GET (evda.vda_name);
 
@@ -9153,8 +9177,8 @@ process_symbol_table (FILE * file)
 	      print_symbol (25, psym->st_name < strtab_size
 			    ? strtab + psym->st_name : _("<corrupt>"));
 
-	      if (section->sh_type == SHT_DYNSYM &&
-		  version_info[DT_VERSIONTAGIDX (DT_VERSYM)] != 0)
+	      if (section->sh_type == SHT_DYNSYM
+		  && version_info[DT_VERSIONTAGIDX (DT_VERSYM)] != 0)
 		{
 		  unsigned char data[2];
 		  unsigned short vers_data;
@@ -9166,8 +9190,9 @@ process_symbol_table (FILE * file)
 		    (file, version_info[DT_VERSIONTAGIDX (DT_VERSYM)],
 		     sizeof data + si * sizeof (vers_data));
 
-		  get_data (&data, file, offset + si * sizeof (vers_data),
-			    sizeof (data), 1, _("version data"));
+		  if (get_data (&data, file, offset + si * sizeof (vers_data),
+				sizeof (data), 1, _("version data")) == NULL)
+		    break;
 
 		  vers_data = byte_get (data, 2);
 
@@ -9195,8 +9220,14 @@ process_symbol_table (FILE * file)
 			    {
 			      unsigned long vna_off;
 
-			      get_data (&evn, file, offset, sizeof (evn), 1,
-					_("version need"));
+			      if (get_data (&evn, file, offset, sizeof (evn), 1,
+					    _("version need")) == NULL)
+				{
+				  ivna.vna_next = 0;
+				  ivna.vna_other = 0;
+				  ivna.vna_name = 0;
+				  break;
+				}
 
 			      ivn.vn_aux  = BYTE_GET (evn.vn_aux);
 			      ivn.vn_next = BYTE_GET (evn.vn_next);
@@ -9207,13 +9238,20 @@ process_symbol_table (FILE * file)
 				{
 				  Elf_External_Vernaux evna;
 
-				  get_data (&evna, file, vna_off,
-					    sizeof (evna), 1,
-					    _("version need aux (3)"));
-
-				  ivna.vna_other = BYTE_GET (evna.vna_other);
-				  ivna.vna_next  = BYTE_GET (evna.vna_next);
-				  ivna.vna_name  = BYTE_GET (evna.vna_name);
+				  if (get_data (&evna, file, vna_off,
+						sizeof (evna), 1,
+						_("version need aux (3)")) == NULL)
+				    {
+				      ivna.vna_next = 0;
+				      ivna.vna_other = 0;
+				      ivna.vna_name = 0;
+				    }
+				  else
+				    {
+				      ivna.vna_other = BYTE_GET (evna.vna_other);
+				      ivna.vna_next  = BYTE_GET (evna.vna_next);
+				      ivna.vna_name  = BYTE_GET (evna.vna_name);
+				    }
 
 				  vna_off += ivna.vna_next;
 				}
@@ -9260,12 +9298,19 @@ process_symbol_table (FILE * file)
 				{
 				  Elf_External_Verdef evd;
 
-				  get_data (&evd, file, off, sizeof (evd),
-					    1, _("version def"));
-
-				  ivd.vd_ndx = BYTE_GET (evd.vd_ndx);
-				  ivd.vd_aux = BYTE_GET (evd.vd_aux);
-				  ivd.vd_next = BYTE_GET (evd.vd_next);
+				  if (get_data (&evd, file, off, sizeof (evd),
+						1, _("version def")) == NULL)
+				    {
+				      ivd.vd_ndx = 0;
+				      ivd.vd_aux = 0;
+				      ivd.vd_next = 0;
+				    }
+				  else
+				    {
+				      ivd.vd_ndx = BYTE_GET (evd.vd_ndx);
+				      ivd.vd_aux = BYTE_GET (evd.vd_aux);
+				      ivd.vd_next = BYTE_GET (evd.vd_next);
+				    }
 
 				  off += ivd.vd_next;
 				}
@@ -9275,8 +9320,9 @@ process_symbol_table (FILE * file)
 			      off -= ivd.vd_next;
 			      off += ivd.vd_aux;
 
-			      get_data (&evda, file, off, sizeof (evda),
-					1, _("version def aux"));
+			      if (get_data (&evda, file, off, sizeof (evda),
+					    1, _("version def aux")) == NULL)
+				break;
 
 			      ivda.vda_name = BYTE_GET (evda.vda_name);
 
@@ -10361,12 +10407,17 @@ load_specific_debug_section (enum dwarf_section_display_enum debug,
 
   snprintf (buf, sizeof (buf), _("%s section data"), section->name);
   section->address = sec->sh_addr;
-  section->size = sec->sh_size;
   section->start = (unsigned char *) get_data (NULL, (FILE *) file,
                                                sec->sh_offset, 1,
                                                sec->sh_size, buf);
-  if (uncompress_section_contents (&section->start, &section->size))
-    sec->sh_size = section->size;
+  if (section->start == NULL)
+    section->size = 0;
+  else
+    {
+      section->size = sec->sh_size;
+      if (uncompress_section_contents (&section->start, &section->size))
+	sec->sh_size = section->size;
+    }
 
   if (section->start == NULL)
     return 0;
@@ -11934,6 +11985,9 @@ process_mips_specific (FILE * file)
       offset = offset_from_vma (file, pltgot, global_end - pltgot);
       data = (unsigned char *) get_data (NULL, file, offset,
                                          global_end - pltgot, 1, _("GOT"));
+      if (data == NULL)
+	return 0;
+
       printf (_("\nPrimary GOT:\n"));
       printf (_(" Canonical gp value: "));
       print_vma (pltgot + 0x7ff0, LONG_HEX);
@@ -12030,6 +12084,9 @@ process_mips_specific (FILE * file)
       offset = offset_from_vma (file, mips_pltgot, end - mips_pltgot);
       data = (unsigned char *) get_data (NULL, file, offset, end - mips_pltgot,
                                          1, _("PLT GOT"));
+      if (data == NULL)
+	return 0;
+
       printf (_("\nPLT GOT:\n\n"));
       printf (_(" Reserved entries:\n"));
       printf (_("  %*s %*s Purpose\n"),
@@ -12108,8 +12165,6 @@ process_gnu_liblist (FILE * file)
 	  strtab = (char *) get_data (NULL, file, string_sec->sh_offset, 1,
                                       string_sec->sh_size,
                                       _("liblist string table"));
-	  strtab_size = string_sec->sh_size;
-
 	  if (strtab == NULL
 	      || section->sh_entsize != sizeof (Elf32_External_Lib))
 	    {
@@ -12117,6 +12172,7 @@ process_gnu_liblist (FILE * file)
 	      free (strtab);
 	      break;
 	    }
+	  strtab_size = string_sec->sh_size;
 
 	  printf (_("\nLibrary list section '%s' contains %lu entries:\n"),
 		  SECTION_NAME (section),
