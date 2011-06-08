@@ -75,7 +75,7 @@ gdb_py_test_silent_cmd "python str = gdb.inferiors()\[0\].read_memory (addr, 5)"
 gdb_py_test_silent_cmd "python str\[1\] = 'a'" "change str" 0
 gdb_py_test_silent_cmd "python gdb.inferiors()\[0\].write_memory (addr, str)" \
   "write str" 1
-gdb_test "print str" " = 0x\[\[:xdigit:\]\]+ \"hallo, testsuite\"" \
+gdb_test "print str" " = \"hallo, testsuite\"" \
   "ensure str was changed in the inferior"
 
 # Test memory search.

@@ -17,7 +17,11 @@ static int search_buf_size;
 
 int f2 (int a)
 {
-  char *str = "hello, testsuite";
+  /* We use a `char[]' type below rather than the typical `char *'
+     to make sure that `str' gets allocated on the stack.  Otherwise,
+     the compiler may place the "hello, testsuite" string inside
+     a read-only section, preventing us from over-writing it from GDB.  */
+  char str[] = "hello, testsuite";
 
   puts (str);	/* Break here.  */
 
