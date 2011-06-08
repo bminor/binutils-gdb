@@ -1,3 +1,8 @@
+2011-06-08  Tristan Gingold  <gingold@adacore.com>
+
+	* makefile.vms (OBJS): Add elfxx-ia64.obj
+	Remove vax case.
+
 2011-06-08  Alan Modra  <amodra@gmail.com>
 
 	* aix386-core.c, * cisco-core.c, * hpux-core.c, * osf-core.c,
