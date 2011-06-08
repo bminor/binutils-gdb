@@ -1705,8 +1705,8 @@ Output_data_got<size, big_endian>::add_got_entry(Got_entry got_entry)
       // For an incremental update, find an available slot.
       off_t got_offset = this->free_list_.allocate(size / 8, size / 8, 0);
       if (got_offset == -1)
-	gold_fatal(_("out of patch space (GOT);"
-		     " relink with --incremental-full"));
+	gold_fallback(_("out of patch space (GOT);"
+			" relink with --incremental-full"));
       unsigned int got_index = got_offset / (size / 8);
       gold_assert(got_index < this->entries_.size());
       this->entries_[got_index] = got_entry;
@@ -1735,8 +1735,8 @@ Output_data_got<size, big_endian>::add_got_entry_pair(Got_entry got_entry_1,
       // For an incremental update, find an available pair of slots.
       off_t got_offset = this->free_list_.allocate(2 * size / 8, size / 8, 0);
       if (got_offset == -1)
-	gold_fatal(_("out of patch space (GOT);"
-		     " relink with --incremental-full"));
+	gold_fallback(_("out of patch space (GOT);"
+			" relink with --incremental-full"));
       unsigned int got_index = got_offset / (size / 8);
       gold_assert(got_index < this->entries_.size());
       this->entries_[got_index] = got_entry_1;
@@ -2270,7 +2270,7 @@ Output_section::add_input_section(Layout* layout,
       offset_in_section = this->free_list_.allocate(input_section_size,
 						    addralign, 0);
       if (offset_in_section == -1)
-        gold_fatal(_("out of patch space; relink with --incremental-full"));
+        gold_fallback(_("out of patch space; relink with --incremental-full"));
       aligned_offset_in_section = offset_in_section;
     }
   else
@@ -2374,7 +2374,8 @@ Output_section::add_output_section_data(Output_section_data* posd)
 	  offset_in_section = this->free_list_.allocate(posd->data_size(),
 							posd->addralign(), 0);
 	  if (offset_in_section == -1)
-	    gold_fatal(_("out of patch space; relink with --incremental-full"));
+	    gold_fallback(_("out of patch space; "
+			    "relink with --incremental-full"));
 	  // Finalize the address and offset now.
 	  uint64_t addr = this->address();
 	  off_t offset = this->offset();
@@ -4170,17 +4171,17 @@ Output_segment::set_section_list_addresses(Layout* layout, bool reset,
 	      if (off == -1)
 	        {
 		  gold_assert((*p)->output_section() != NULL);
-		  gold_fatal(_("out of patch space for section %s; "
-			       "relink with --incremental-full"),
-			     (*p)->output_section()->name());
+		  gold_fallback(_("out of patch space for section %s; "
+				  "relink with --incremental-full"),
+				(*p)->output_section()->name());
 	        }
 	      (*p)->set_address_and_file_offset(addr + (off - startoff), off);
 	      if ((*p)->data_size() > current_size)
 		{
 		  gold_assert((*p)->output_section() != NULL);
-		  gold_fatal(_("%s: section changed size; "
-			       "relink with --incremental-full"),
-			     (*p)->output_section()->name());
+		  gold_fallback(_("%s: section changed size; "
+				  "relink with --incremental-full"),
+				(*p)->output_section()->name());
 		}
 	    }
 	}

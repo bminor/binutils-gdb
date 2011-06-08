@@ -81,7 +81,18 @@ Errors::fatal(const char* format, va_list args)
   fprintf(stderr, _("%s: fatal error: "), this->program_name_);
   vfprintf(stderr, format, args);
   fputc('\n', stderr);
-  gold_exit(false);
+  gold_exit(GOLD_ERR);
+}
+
+// Report a fallback error.
+
+void
+Errors::fallback(const char* format, va_list args)
+{
+  fprintf(stderr, _("%s: fatal error: "), this->program_name_);
+  vfprintf(stderr, format, args);
+  fputc('\n', stderr);
+  gold_exit(GOLD_FALLBACK);
 }
 
 // Report an error.
@@ -209,6 +220,17 @@ gold_fatal(const char* format, ...)
   va_list args;
   va_start(args, format);
   parameters->errors()->fatal(format, args);
+  va_end(args);
+}
+
+// Report a fallback error.
+
+void
+gold_fallback(const char* format, ...)
+{
+  va_list args;
+  va_start(args, format);
+  parameters->errors()->fallback(format, args);
   va_end(args);
 }
 

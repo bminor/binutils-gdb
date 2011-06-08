@@ -351,9 +351,9 @@ Symbol_table::do_allocate_commons_list(
 	  // For an incremental update, allocate from the free list.
 	  off = os->allocate(ssym->symsize(), ssym->value());
 	  if (off == -1)
-	    gold_fatal(_("out of patch space in section %s; "
-			 "relink with --incremental-full"),
-			 os->name());
+	    gold_fallback(_("out of patch space in section %s; "
+			    "relink with --incremental-full"),
+			  os->name());
 	  ssym->allocate_common(os, off);
 	}
     }

@@ -27,6 +27,7 @@
 #include "ansidecl.h"
 
 #include <cstddef>
+#include <cstdlib>
 #include <cstring>
 #include <stdint.h>
 #include <sys/types.h>
@@ -166,6 +167,15 @@ class Output_file;
 template<int size, bool big_endian>
 struct Relocate_info;
 
+// Exit status codes.
+
+enum Exit_status
+{
+  GOLD_OK = EXIT_SUCCESS,
+  GOLD_ERR = EXIT_FAILURE,
+  GOLD_FALLBACK = EXIT_FAILURE + 1
+};
+
 // Some basic types.  For these we use lower case initial letters.
 
 // For an offset in an input or output file, use off_t.  Note that
@@ -183,7 +193,7 @@ extern const char* program_name;
 // This function is called to exit the program.  Status is true to
 // exit success (0) and false to exit failure (1).
 extern void
-gold_exit(bool status) ATTRIBUTE_NORETURN;
+gold_exit(Exit_status status) ATTRIBUTE_NORETURN;
 
 // This function is called to emit an error message and then
 // immediately exit with failure.
@@ -202,6 +212,13 @@ gold_warning(const char* msg, ...) ATTRIBUTE_PRINTF_1;
 // This function is called to print an informational message.
 extern void
 gold_info(const char* msg, ...) ATTRIBUTE_PRINTF_1;
+
+// This function is called to emit an error message and then
+// immediately exit with fallback status (e.g., when
+// --incremental-update fails and the link needs to be restarted
+// with --incremental-full).
+extern void
+gold_fallback(const char* format, ...) ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF_1;
 
 // Work around a bug in gcc 4.3.0.  http://gcc.gnu.org/PR35546 .  This
 // can probably be removed after the bug has been fixed for a while.

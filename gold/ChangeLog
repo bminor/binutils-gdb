@@ -1,5 +1,31 @@
 2011-06-07  Cary Coutant  <ccoutant@google.com>
 
+	* common.cc (Symbol_table::do_allocate_commons_list): Call
+	gold_fallback.
+	* errors.cc (Errors::fatal): Adjust call to gold_exit.
+	(Errors::fallback): New function.
+	(gold_fallback): New function.
+	* errors.h (Errors::fallback): New function.
+	* gold.cc (gold_exit): Change status parameter to enum; adjust
+	all callers.
+	(queue_initial_tasks): Call gold_fallback.
+	* gold.h: Include cstdlib.
+	(Exit_status): New enum type.
+	(gold_exit): Change status parameter to enum.
+	(gold_fallback): New function.
+	* layout.cc (Layout::set_section_offsets): Call gold_fallback.
+	(Layout::create_symtab_sections): Likewise.
+	(Layout::create_shdrs): Likewise.
+	* main.cc (main): Adjust call to gold_exit.
+	* output.cc (Output_data_got::add_got_entry): Call gold_fallback.
+	(Output_data_got::add_got_entry_pair): Likewise.
+	(Output_section::add_input_section): Likewise.
+	(Output_section::add_output_section_data): Likewise.
+	(Output_segment::set_section_list_addresses): Likewise.
+	* x86_64.cc (Output_data_plt_x86_64::add_entry): Likewise.
+
+2011-06-07  Cary Coutant  <ccoutant@google.com>
+
 	* layout.cc (Layout::set_segment_offsets): Don't adjust layout
 	for incremental links.
 	* output.cc (Output_segment::set_section_list_addresses): Remove

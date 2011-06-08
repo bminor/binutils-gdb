@@ -3125,18 +3125,18 @@ Layout::set_section_offsets(off_t off, Layout::Section_offset_pass pass)
 	      if (is_debugging_enabled(DEBUG_INCREMENTAL))
 	        this->free_list_.dump();
 	      gold_assert((*p)->output_section() != NULL);
-	      gold_fatal(_("out of patch space for section %s; "
-			   "relink with --incremental-full"),
-			 (*p)->output_section()->name());
+	      gold_fallback(_("out of patch space for section %s; "
+			      "relink with --incremental-full"),
+			    (*p)->output_section()->name());
 	    }
 	  (*p)->set_file_offset(off);
 	  (*p)->finalize_data_size();
 	  if ((*p)->data_size() > current_size)
 	    {
 	      gold_assert((*p)->output_section() != NULL);
-	      gold_fatal(_("%s: section changed size; "
-			   "relink with --incremental-full"),
-			 (*p)->output_section()->name());
+	      gold_fallback(_("%s: section changed size; "
+			      "relink with --incremental-full"),
+			    (*p)->output_section()->name());
 	    }
 	  gold_debug(DEBUG_INCREMENTAL,
 		     "set_section_offsets: %08lx %08lx %s",
@@ -3391,8 +3391,8 @@ Layout::create_symtab_sections(const Input_objects* input_objects,
 	{
 	  symtab_off = this->allocate(off, align, *poff);
           if (off == -1)
-	    gold_fatal(_("out of patch space for symbol table; "
-		         "relink with --incremental-full"));
+	    gold_fallback(_("out of patch space for symbol table; "
+			    "relink with --incremental-full"));
 	  gold_debug(DEBUG_INCREMENTAL,
 		     "create_symtab_sections: %08lx %08lx .symtab",
 		     static_cast<long>(symtab_off),
@@ -3462,8 +3462,8 @@ Layout::create_shdrs(const Output_section* shstrtab_section, off_t* poff)
       oshdrs->pre_finalize_data_size();
       off = this->allocate(oshdrs->data_size(), oshdrs->addralign(), *poff);
       if (off == -1)
-	  gold_fatal(_("out of patch space for section header table; "
-		       "relink with --incremental-full"));
+	  gold_fallback(_("out of patch space for section header table; "
+			  "relink with --incremental-full"));
       gold_debug(DEBUG_INCREMENTAL,
 		 "create_shdrs: %08lx %08lx (section header table)",
 		 static_cast<long>(off),

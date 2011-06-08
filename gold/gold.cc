@@ -58,15 +58,15 @@ process_incremental_input(Incremental_binary*, unsigned int, Input_objects*,
 			  Task_token*, Task_token*);
 
 void
-gold_exit(bool status)
+gold_exit(Exit_status status)
 {
   if (parameters != NULL
       && parameters->options_valid()
       && parameters->options().has_plugins())
     parameters->options().plugins()->cleanup();
-  if (!status && parameters != NULL && parameters->options_valid())
+  if (status != GOLD_OK && parameters != NULL && parameters->options_valid())
     unlink_if_ordinary(parameters->options().output_file_name());
-  exit(status ? EXIT_SUCCESS : EXIT_FAILURE);
+  exit(status);
 }
 
 void
@@ -87,7 +87,7 @@ gold_nomem()
       const char* const s = ": out of memory\n";
       len = write(2, s, strlen(s));
     }
-  gold_exit(false);
+  gold_exit(GOLD_ERR);
 }
 
 // Handle an unreachable case.
@@ -97,7 +97,7 @@ do_gold_unreachable(const char* filename, int lineno, const char* function)
 {
   fprintf(stderr, _("%s: internal error in %s, at %s:%d\n"),
 	  program_name, function, filename, lineno);
-  gold_exit(false);
+  gold_exit(GOLD_ERR);
 }
 
 // This class arranges to run the functions done in the middle of the
@@ -176,7 +176,7 @@ queue_initial_tasks(const General_options& options,
   if (cmdline.begin() == cmdline.end())
     {
       if (options.printed_version())
-	gold_exit(true);
+	gold_exit(GOLD_OK);
       gold_fatal(_("no input files"));
     }
 
@@ -222,7 +222,7 @@ queue_initial_tasks(const General_options& options,
 	      if (set_parameters_incremental_full())
 		gold_info(_("linking with --incremental-full"));
 	      else
-		gold_fatal(_("restart link with --incremental-full"));
+		gold_fallback(_("restart link with --incremental-full"));
 	    }
 	}
     }
@@ -748,7 +748,7 @@ queue_middle_tasks(const General_options& options,
 	  // THIS_BLOCKER to be NULL here.  There's no real point in
 	  // continuing if that happens.
 	  gold_assert(parameters->errors()->error_count() > 0);
-	  gold_exit(false);
+	  gold_exit(GOLD_ERR);
 	}
     }
 

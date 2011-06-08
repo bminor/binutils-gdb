@@ -915,8 +915,8 @@ Output_data_plt_x86_64::add_entry(Symbol* gsym)
       // For incremental updates, find an available slot.
       plt_offset = this->free_list_.allocate(plt_entry_size, plt_entry_size, 0);
       if (plt_offset == -1)
-	gold_fatal(_("out of patch space (PLT);"
-		     " relink with --incremental-full"));
+	gold_fallback(_("out of patch space (PLT);"
+			" relink with --incremental-full"));
 
       // The GOT and PLT entries have a 1-1 correspondance, so the GOT offset
       // can be calculated from the PLT index, adjusting for the three
