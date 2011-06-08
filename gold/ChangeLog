@@ -1,5 +1,14 @@
 2011-06-07  Cary Coutant  <ccoutant@google.com>
 
+	* testsuite/Makefile.am: Add incremental_copy_test,
+	incremental_common_test_1.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/common_test_1_v1.c: New source file.
+	* testsuite/common_test_1_v2.c: New source file.
+	* testsuite/copy_test_v1.cc: New source file.
+
+2011-06-07  Cary Coutant  <ccoutant@google.com>
+
 	* common.cc (Symbol_table::do_allocate_commons_list): For incremental
 	update, allocate common from bss section's free list.
 	* incremental-dump.cc (dump_incremental_inputs): Print flag for
