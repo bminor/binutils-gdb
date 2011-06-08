@@ -1,3 +1,7 @@
+2011-06-08  Tristan Gingold  <gingold@adacore.com>
+
+	* makefile.vms (DEFS): Define OBJDUMP_PRIVATE_VECTORS.
+
 2011-06-07  Cary Coutant  <ccoutant@google.com>
 
 	* dwarf.c: Fix conversion to TU number.

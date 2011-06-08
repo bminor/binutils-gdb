@@ -1,24 +1,18 @@
 #
-# Makefile for binutils under openVMS (Alpha and Vax)
+# Makefile for binutils under openVMS (Alpha and Itanium)
 #
 # For use with gnu-make for vms
 #
-# Created by Klaus K"ampf, kkaempf@rmi.de
+# Created by Klaus Kaempf, kkaempf@rmi.de
 #
 #
 
-ifeq ($(CC),gcc)
-DEFS=
-CFLAGS=/include=([],[-.include],[-.bfd])$(DEFS)
-LIBS=,gnu_cc_library:libgcc/lib,sys$$library:vaxcrtl.olb/lib,gnu_cc_library:crt0.obj
-else
-DEFS=
+DEFS=/define=("OBJDUMP_PRIVATE_VECTORS=")
 OPT=/noopt/debug
 CFLAGS=$(OPT)/include=([],"../include",[-.bfd])$(DEFS)\
  /name=(as_is,shortened)\
  /prefix=(all,except=("getopt","optarg","optopt","optind","opterr"))\
  /warns=(info=(ptrmismatch,shiftcount))
-endif
 
 LIBBFD = [-.bfd]libbfd.olb/lib
 LIBBFD_DEP = [-.bfd]libbfd.olb
