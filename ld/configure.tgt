@@ -643,9 +643,7 @@ tic6x-*-uclinux)	targ_emul=elf32_tic6x_linux_le
 			;;
 tic80-*-*)		targ_emul=tic80coff
 			;;
-v850-*-*)		targ_emul=v850 ;;
-v850e-*-*)		targ_emul=v850 ;;
-v850ea-*-*)		targ_emul=v850
+v850*-*-*)		targ_emul=v850
 			;;
 vax-dec-ultrix* | vax-dec-bsd*) targ_emul=vax ;;
 vax-*-netbsdelf*)	targ_emul=elf32vax

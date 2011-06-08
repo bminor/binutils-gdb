@@ -2,6 +2,10 @@
 
 	* ldlang.c (lang_one_common): Handle warning symbols.
 
+2011-06-07  Nick Clifton  <nickc@redhat.com>
+
+	* configure.tgt: Accept any V850 architecture.
+
 2011-06-03  Nick Clifton  <nickc@redhat.com>
 
 	* Makefile.am (ALL_EMULATION_SOURCES): Add eelf32am33lin.c
