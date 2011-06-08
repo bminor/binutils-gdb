@@ -40,6 +40,15 @@ if { [is_remote host] } then {
     remote_download host merge.ld
 }
 
+run_ld_link_tests {
+    {"Build symbol3.a"
+     "" ""
+     {symbol3.s} {} "symbol3.a"}
+    {"Build symbol3w.a"
+     "" ""
+     {symbol3w.s} {} "symbol3w.a"}
+}
+
 set test_list [lsort [glob -nocomplain $srcdir/$subdir/*.d]]
 foreach t $test_list {
     # We need to strip the ".d", but can leave the dirname.
