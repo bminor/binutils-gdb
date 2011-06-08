@@ -803,6 +803,11 @@ class Symbol
 	    && !this->is_func());
   }
 
+  // Return true if this symbol was predefined by the linker.
+  bool
+  is_predefined() const
+  { return this->is_predefined_; }
+
  protected:
   // Instances of this class should always be created at a specific
   // size.
@@ -828,7 +833,8 @@ class Symbol
   void
   init_base_output_data(const char* name, const char* version, Output_data*,
 			elfcpp::STT, elfcpp::STB, elfcpp::STV,
-			unsigned char nonvis, bool offset_is_from_end);
+			unsigned char nonvis, bool offset_is_from_end,
+			bool is_predefined);
 
   // Initialize fields for an Output_segment.
   void
@@ -836,13 +842,14 @@ class Symbol
 			   Output_segment* os, elfcpp::STT type,
 			   elfcpp::STB binding, elfcpp::STV visibility,
 			   unsigned char nonvis,
-			   Segment_offset_base offset_base);
+			   Segment_offset_base offset_base,
+			   bool is_predefined);
 
   // Initialize fields for a constant.
   void
   init_base_constant(const char* name, const char* version, elfcpp::STT type,
 		     elfcpp::STB binding, elfcpp::STV visibility,
-		     unsigned char nonvis);
+		     unsigned char nonvis, bool is_predefined);
 
   // Initialize fields for an undefined symbol.
   void
@@ -991,6 +998,8 @@ class Symbol
   // True if this symbol was a weak undef resolved by a dynamic def
   // (bit 33).
   bool undef_binding_weak_ : 1;
+  // True if this symbol is a predefined linker symbol (bit 34).
+  bool is_predefined_ : 1;
 };
 
 // The parts of a symbol which are size specific.  Using a template
@@ -1020,20 +1029,20 @@ class Sized_symbol : public Symbol
   init_output_data(const char* name, const char* version, Output_data*,
 		   Value_type value, Size_type symsize, elfcpp::STT,
 		   elfcpp::STB, elfcpp::STV, unsigned char nonvis,
-		   bool offset_is_from_end);
+		   bool offset_is_from_end, bool is_predefined);
 
   // Initialize fields for an Output_segment.
   void
   init_output_segment(const char* name, const char* version, Output_segment*,
 		      Value_type value, Size_type symsize, elfcpp::STT,
 		      elfcpp::STB, elfcpp::STV, unsigned char nonvis,
-		      Segment_offset_base offset_base);
+		      Segment_offset_base offset_base, bool is_predefined);
 
   // Initialize fields for a constant.
   void
   init_constant(const char* name, const char* version, Value_type value,
 		Size_type symsize, elfcpp::STT, elfcpp::STB, elfcpp::STV,
-		unsigned char nonvis);
+		unsigned char nonvis, bool is_predefined);
 
   // Initialize fields for an undefined symbol.
   void
@@ -1250,6 +1259,9 @@ class Symbol_table
     SCRIPT,
     // Predefined by the linker.
     PREDEFINED,
+    // Defined by the linker during an incremental base link, but not
+    // a predefined symbol (e.g., common, defined in script).
+    INCREMENTAL_BASE,
   };
 
   // The order in which we sort common symbols.

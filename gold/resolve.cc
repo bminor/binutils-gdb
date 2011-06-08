@@ -830,6 +830,7 @@ Symbol_table::report_resolve_problem(bool is_error, const char* msg,
       objname = _("linker script");
       break;
     case PREDEFINED:
+    case INCREMENTAL_BASE:
       objname = _("linker defined");
       break;
     default:
@@ -907,6 +908,8 @@ Symbol::override_base_with_special(const Symbol* from)
     this->needs_dynsym_entry_ = true;
   if (from->needs_dynsym_value_)
     this->needs_dynsym_value_ = true;
+
+  this->is_predefined_ = from->is_predefined_;
 
   // We shouldn't see these flags.  If we do, we need to handle them
   // somehow.

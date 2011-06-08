@@ -3726,10 +3726,20 @@ Output_section::set_fixed_layout(uint64_t sh_addr, off_t sh_offset,
 
 // Reserve space within the fixed layout for the section.  Used for
 // incremental update links.
+
 void
 Output_section::reserve(uint64_t sh_offset, uint64_t sh_size)
 {
   this->free_list_.remove(sh_offset, sh_offset + sh_size);
+}
+
+// Allocate space from the free list for the section.  Used for
+// incremental update links.
+
+off_t
+Output_section::allocate(off_t len, uint64_t addralign)
+{
+  return this->free_list_.allocate(len, addralign, 0);
 }
 
 // Output segment methods.

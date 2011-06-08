@@ -3432,6 +3432,11 @@ class Output_section : public Output_data
   void
   reserve(uint64_t sh_offset, uint64_t sh_size);
 
+  // Allocate space from the free list for the section.  Used for
+  // incremental update links.
+  off_t
+  allocate(off_t len, uint64_t addralign);
+
  protected:
   // Return the output section--i.e., the object itself.
   Output_section*

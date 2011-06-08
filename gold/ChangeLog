@@ -1,5 +1,41 @@
 2011-06-07  Cary Coutant  <ccoutant@google.com>
 
+	* common.cc (Symbol_table::do_allocate_commons_list): For incremental
+	update, allocate common from bss section's free list.
+	* incremental-dump.cc (dump_incremental_inputs): Print flag for
+	linker-defined symbols.
+	* incremental.cc (Sized_incremental_binary::do_process_got_plt):
+	Skip GOT and PLT entries that are no longer referenced.
+	(Output_section_incremental_inputs::write_info_blocks): Mark
+	linker-defined symbols.
+	(Sized_incr_relobj::do_add_symbols): Process linker-defined symbols.
+	* output.cc (Output_section::allocate): New function.
+	* output.h (Output_section::allocate): New function.
+	* resolve.cc (Symbol_table::report_resolve_problem): Add case for
+	linker-defined symbols.
+	(Symbol::override_base_with_special): Copy is_predefined_ flag.
+	* symtab.cc (Symbol::init_fields): Initialize is_predefined_ flag.
+	(Symbol::init_base_output_data): Likewise.
+	(Symbol::init_base_output_segment): Likewise.
+	(Symbol::init_base_constant): Likewise.
+	(Sized_symbol::init_output_data): Likewise.
+	(Sized_symbol::init_output_segment): Likewise.
+	(Sized_symbol::init_constant): Likewise.
+	(Symbol_table::do_define_in_output_data): Likewise.
+	(Symbol_table::do_define_in_output_segment): Likewise.
+	(Symbol_table::do_define_as_constant): Likewise.
+	* symtab.h (Symbol::is_predefined): New function.
+	(Symbol::init_base_output_data): Add is_predefined parameter.
+	(Symbol::init_base_output_segment): Likewise.
+	(Symbol::init_base_constant): Likewise.
+	(Symbol::is_predefined_): New data member.
+	(Sized_symbol::init_output_data): Add is_predefined parameter.
+	(Sized_symbol::init_output_segment): Likewise.
+	(Sized_symbol::init_constant): Likewise.
+	(enum Symbol_table::Defined): Add INCREMENTAL_BASE.
+
+2011-06-07  Cary Coutant  <ccoutant@google.com>
+
 	* copy-relocs.cc (Copy_relocs::copy_reloc): Call make_copy_reloc
 	instead of emit_copy_reloc.
 	(Copy_relocs::emit_copy_reloc): Refactor.

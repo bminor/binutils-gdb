@@ -79,6 +79,7 @@ Symbol::init_fields(const char* name, const char* version,
   this->is_defined_in_discarded_section_ = false;
   this->undef_binding_set_ = false;
   this->undef_binding_weak_ = false;
+  this->is_predefined_ = false;
 }
 
 // Return the demangled version of the symbol's name, but only
@@ -133,7 +134,8 @@ void
 Symbol::init_base_output_data(const char* name, const char* version,
 			      Output_data* od, elfcpp::STT type,
 			      elfcpp::STB binding, elfcpp::STV visibility,
-			      unsigned char nonvis, bool offset_is_from_end)
+			      unsigned char nonvis, bool offset_is_from_end,
+			      bool is_predefined)
 {
   this->init_fields(name, version, type, binding, visibility, nonvis);
   this->u_.in_output_data.output_data = od;
@@ -141,6 +143,7 @@ Symbol::init_base_output_data(const char* name, const char* version,
   this->source_ = IN_OUTPUT_DATA;
   this->in_reg_ = true;
   this->in_real_elf_ = true;
+  this->is_predefined_ = is_predefined;
 }
 
 // Initialize the fields in the base class Symbol for a symbol defined
@@ -151,7 +154,8 @@ Symbol::init_base_output_segment(const char* name, const char* version,
 				 Output_segment* os, elfcpp::STT type,
 				 elfcpp::STB binding, elfcpp::STV visibility,
 				 unsigned char nonvis,
-				 Segment_offset_base offset_base)
+				 Segment_offset_base offset_base,
+				 bool is_predefined)
 {
   this->init_fields(name, version, type, binding, visibility, nonvis);
   this->u_.in_output_segment.output_segment = os;
@@ -159,6 +163,7 @@ Symbol::init_base_output_segment(const char* name, const char* version,
   this->source_ = IN_OUTPUT_SEGMENT;
   this->in_reg_ = true;
   this->in_real_elf_ = true;
+  this->is_predefined_ = is_predefined;
 }
 
 // Initialize the fields in the base class Symbol for a symbol defined
@@ -167,12 +172,14 @@ Symbol::init_base_output_segment(const char* name, const char* version,
 void
 Symbol::init_base_constant(const char* name, const char* version,
 			   elfcpp::STT type, elfcpp::STB binding,
-			   elfcpp::STV visibility, unsigned char nonvis)
+			   elfcpp::STV visibility, unsigned char nonvis,
+			   bool is_predefined)
 {
   this->init_fields(name, version, type, binding, visibility, nonvis);
   this->source_ = IS_CONSTANT;
   this->in_reg_ = true;
   this->in_real_elf_ = true;
+  this->is_predefined_ = is_predefined;
 }
 
 // Initialize the fields in the base class Symbol for an undefined
@@ -227,10 +234,11 @@ Sized_symbol<size>::init_output_data(const char* name, const char* version,
 				     elfcpp::STB binding,
 				     elfcpp::STV visibility,
 				     unsigned char nonvis,
-				     bool offset_is_from_end)
+				     bool offset_is_from_end,
+				     bool is_predefined)
 {
   this->init_base_output_data(name, version, od, type, binding, visibility,
-			      nonvis, offset_is_from_end);
+			      nonvis, offset_is_from_end, is_predefined);
   this->value_ = value;
   this->symsize_ = symsize;
 }
@@ -246,10 +254,11 @@ Sized_symbol<size>::init_output_segment(const char* name, const char* version,
 					elfcpp::STB binding,
 					elfcpp::STV visibility,
 					unsigned char nonvis,
-					Segment_offset_base offset_base)
+					Segment_offset_base offset_base,
+					bool is_predefined)
 {
   this->init_base_output_segment(name, version, os, type, binding, visibility,
-				 nonvis, offset_base);
+				 nonvis, offset_base, is_predefined);
   this->value_ = value;
   this->symsize_ = symsize;
 }
@@ -262,9 +271,11 @@ void
 Sized_symbol<size>::init_constant(const char* name, const char* version,
 				  Value_type value, Size_type symsize,
 				  elfcpp::STT type, elfcpp::STB binding,
-				  elfcpp::STV visibility, unsigned char nonvis)
+				  elfcpp::STV visibility, unsigned char nonvis,
+				  bool is_predefined)
 {
-  this->init_base_constant(name, version, type, binding, visibility, nonvis);
+  this->init_base_constant(name, version, type, binding, visibility, nonvis,
+			   is_predefined);
   this->value_ = value;
   this->symsize_ = symsize;
 }
@@ -1843,7 +1854,8 @@ Symbol_table::do_define_in_output_data(
     return NULL;
 
   sym->init_output_data(name, version, od, value, symsize, type, binding,
-			visibility, nonvis, offset_is_from_end);
+			visibility, nonvis, offset_is_from_end,
+			defined == PREDEFINED);
 
   if (oldsym == NULL)
     {
@@ -1956,7 +1968,8 @@ Symbol_table::do_define_in_output_segment(
     return NULL;
 
   sym->init_output_segment(name, version, os, value, symsize, type, binding,
-			   visibility, nonvis, offset_base);
+			   visibility, nonvis, offset_base,
+			   defined == PREDEFINED);
 
   if (oldsym == NULL)
     {
@@ -2068,7 +2081,7 @@ Symbol_table::do_define_as_constant(
     return NULL;
 
   sym->init_constant(name, version, value, symsize, type, binding, visibility,
-		     nonvis);
+		     nonvis, defined == PREDEFINED);
 
   if (oldsym == NULL)
     {

@@ -322,12 +322,14 @@ dump_incremental_inputs(const char* argv0, const char* filename,
 		symname = "<unknown>";
 	      printf("    %6d  %6d  %8d  %8d  %8d  %8d  %-5s  %s\n",
 		     output_symndx,
-		     info.shndx(),
+		     info.shndx() == -1U ? -1 : info.shndx(),
 		     input_file.get_symbol_offset(symndx),
 		     info.next_offset(),
 		     info.reloc_count(),
 		     info.reloc_offset(),
-		     info.shndx() != elfcpp::SHN_UNDEF ? "DEF" : "UNDEF",
+		     (info.shndx() == -1U
+		      ? "BASE"
+		      : info.shndx() == 0 ? "UNDEF" : "DEF"),
 		     symname);
 	    }
 	}

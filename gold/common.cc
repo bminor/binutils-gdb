@@ -286,12 +286,23 @@ Symbol_table::do_allocate_commons_list(
       gold_unreachable();
     }
 
-  Output_data_space* poc = new Output_data_space(addralign, ds_name);
-  Output_section* os = layout->add_output_section_data(name,
-						       elfcpp::SHT_NOBITS,
-						       flags, poc,
-						       ORDER_INVALID,
-						       false);
+  Output_data_space* poc;
+  Output_section* os;
+
+  if (!parameters->incremental_update())
+    {
+      poc = new Output_data_space(addralign, ds_name);
+      os = layout->add_output_section_data(name, elfcpp::SHT_NOBITS, flags,
+					   poc, ORDER_INVALID, false);
+    }
+  else
+    {
+      // When doing an incremental update, we need to allocate each common
+      // directly from the output section's free list.
+      poc = NULL;
+      os = layout->find_output_section(name);
+    }
+
   if (os != NULL)
     {
       if (commons_section_type == COMMONS_SMALL)
@@ -329,12 +340,26 @@ Symbol_table::do_allocate_commons_list(
       if (mapfile != NULL)
 	mapfile->report_allocate_common(sym, ssym->symsize());
 
-      off = align_address(off, ssym->value());
-      ssym->allocate_common(poc, off);
-      off += ssym->symsize();
+      if (poc != NULL)
+	{
+	  off = align_address(off, ssym->value());
+	  ssym->allocate_common(poc, off);
+	  off += ssym->symsize();
+	}
+      else
+	{
+	  // For an incremental update, allocate from the free list.
+	  off = os->allocate(ssym->symsize(), ssym->value());
+	  if (off == -1)
+	    gold_fatal(_("out of patch space in section %s; "
+			 "relink with --incremental-full"),
+			 os->name());
+	  ssym->allocate_common(os, off);
+	}
     }
 
-  poc->set_current_data_size(off);
+  if (poc != NULL)
+    poc->set_current_data_size(off);
 
   commons->clear();
 }
