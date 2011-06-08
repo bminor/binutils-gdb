@@ -1,5 +1,10 @@
 2011-06-08  Alan Modra  <amodra@gmail.com>
 
+	* aix386-core.c, * cisco-core.c, * hpux-core.c, * osf-core.c,
+	* sco5-core.c: Init match_priority field.
+
+2011-06-08  Alan Modra  <amodra@gmail.com>
+
 	* elflink.c (_bfd_elf_archive_symbol_lookup): Follow warning and
 	indirect links here.
 

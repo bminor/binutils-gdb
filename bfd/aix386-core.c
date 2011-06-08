@@ -2,7 +2,7 @@
    This was based on trad-core.c, which was written by John Gilmore of
         Cygnus Support.
    Copyright 1988, 1989, 1991, 1992, 1993, 1994, 1996, 1998, 1999, 2000,
-   2001, 2002, 2004, 2005, 2006, 2007
+   2001, 2002, 2004, 2005, 2006, 2007, 2010, 2011
    Free Software Foundation, Inc.
    Written by Minh Tran-Le <TRANLE@INTELLICORP.COM>.
    Converted to back end form by Ian Lance Taylor <ian@cygnus.com>.
@@ -242,6 +242,7 @@ const bfd_target aix386_core_vec = {
   0,				/* leading underscore */
   ' ',				/* ar_pad_char */
   16,				/* ar_max_namelen */
+  0,				/* match priority.  */
   NO_GET64, NO_GETS64, NO_PUT64,
   NO_GET, NO_GETS, NO_PUT,
   NO_GET, NO_GETS, NO_PUT,	/* data */

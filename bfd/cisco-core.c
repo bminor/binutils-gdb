@@ -1,5 +1,6 @@
 /* BFD back-end for CISCO crash dumps.
-   Copyright 1994, 1997, 1999, 2000, 2001, 2002, 2004, 2005, 2006, 2007, 2010
+   Copyright 1994, 1997, 1999, 2000, 2001, 2002, 2004, 2005, 2006, 2007,
+   2010, 2011
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -332,9 +333,10 @@ const bfd_target cisco_core_big_vec =
      HAS_LINENO | HAS_DEBUG |
      HAS_SYMS | HAS_LOCALS | WP_TEXT | D_PAGED),
     (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
-    0,			                                   /* symbol prefix */
-    ' ',						   /* ar_pad_char */
-    16,							   /* ar_max_namelen */
+    0,				/* symbol prefix */
+    ' ',			/* ar_pad_char */
+    16,				/* ar_max_namelen */
+    0,				/* match priority.  */
     bfd_getb64, bfd_getb_signed_64, bfd_putb64,
     bfd_getb32, bfd_getb_signed_32, bfd_putb32,
     bfd_getb16, bfd_getb_signed_16, bfd_putb16, /* data */
