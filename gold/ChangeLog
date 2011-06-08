@@ -1,5 +1,12 @@
 2011-06-07  Cary Coutant  <ccoutant@google.com>
 
+	* layout.cc (Layout::set_segment_offsets): Don't adjust layout
+	for incremental links.
+	* output.cc (Output_segment::set_section_list_addresses): Remove
+	FIXME and test for TLS or BSS.
+
+2011-06-07  Cary Coutant  <ccoutant@google.com>
+
 	* testsuite/Makefile.am: Add incremental_copy_test,
 	incremental_common_test_1.
 	* testsuite/Makefile.in: Regenerate.

@@ -2957,7 +2957,7 @@ Layout::set_segment_offsets(const Target* target, Output_segment* load_seg,
 	  if (!are_addresses_set
 	      && !has_relro
 	      && aligned_addr != addr
-	      && !parameters->incremental_update())
+	      && !parameters->incremental())
 	    {
 	      uint64_t first_off = (common_pagesize
 				    - (aligned_addr

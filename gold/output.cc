@@ -4156,10 +4156,7 @@ Output_segment::set_section_list_addresses(Layout* layout, bool reset,
                 }
             }
 
-	  // FIXME: Need to handle TLS and .bss with incremental update.
-	  if (!parameters->incremental_update()
-	      || (*p)->is_section_flag_set(elfcpp::SHF_TLS)
-	      || (*p)->is_section_type(elfcpp::SHT_NOBITS))
+	  if (!parameters->incremental_update())
 	    {
 	      off = align_address(off, align);
 	      (*p)->set_address_and_file_offset(addr + (off - startoff), off);
