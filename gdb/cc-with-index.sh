@@ -40,6 +40,9 @@ then
     elif [ -f ../gdb ]
     then
 	GDB="../gdb"
+    elif [ -f ../../gdb ]
+    then
+	GDB="../../gdb"
     else
 	echo "$myname: unable to find usable gdb" >&2
 	exit 1
