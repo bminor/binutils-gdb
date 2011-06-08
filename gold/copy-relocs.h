@@ -81,6 +81,12 @@ class Copy_relocs
   void
   emit(Output_data_reloc<sh_type, true, size, big_endian>*);
 
+  // Emit a COPY reloc.
+  void
+  emit_copy_reloc(Symbol_table*, Sized_symbol<size>*,
+		  Output_data*, off_t,
+		  Output_data_reloc<sh_type, true, size, big_endian>*);
+
  private:
   typedef typename elfcpp::Elf_types<size>::Elf_Addr Address;
   typedef typename elfcpp::Elf_types<size>::Elf_Addr Addend;
@@ -126,15 +132,10 @@ class Copy_relocs
                   Sized_relobj_file<size, big_endian>* object,
 		  unsigned int shndx) const;
 
-  // Emit a COPY reloc.
+  // Make a new COPY reloc and emit it.
   void
-  emit_copy_reloc(Symbol_table*, Layout*, Sized_symbol<size>*,
+  make_copy_reloc(Symbol_table*, Layout*, Sized_symbol<size>*,
 		  Output_data_reloc<sh_type, true, size, big_endian>*);
-
-  // Add a COPY reloc to the dynamic reloc section.
-  void
-  add_copy_reloc(Symbol*, section_size_type,
-		 Output_data_reloc<sh_type, true, size, big_endian>*);
 
   // Save a reloc against SYM for possible emission later.
   void

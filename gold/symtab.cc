@@ -1489,7 +1489,7 @@ Symbol_table::add_from_dynobj(
 // Add a symbol from a incremental object file.
 
 template<int size, bool big_endian>
-Symbol*
+Sized_symbol<size>*
 Symbol_table::add_from_incrobj(
     Object* obj,
     const char* name,
@@ -3453,7 +3453,7 @@ Symbol_table::add_from_dynobj<64, true>(
 
 #ifdef HAVE_TARGET_32_LITTLE
 template
-Symbol*
+Sized_symbol<32>*
 Symbol_table::add_from_incrobj(
     Object* obj,
     const char* name,
@@ -3463,7 +3463,7 @@ Symbol_table::add_from_incrobj(
 
 #ifdef HAVE_TARGET_32_BIG
 template
-Symbol*
+Sized_symbol<32>*
 Symbol_table::add_from_incrobj(
     Object* obj,
     const char* name,
@@ -3473,7 +3473,7 @@ Symbol_table::add_from_incrobj(
 
 #ifdef HAVE_TARGET_64_LITTLE
 template
-Symbol*
+Sized_symbol<64>*
 Symbol_table::add_from_incrobj(
     Object* obj,
     const char* name,
@@ -3483,7 +3483,7 @@ Symbol_table::add_from_incrobj(
 
 #ifdef HAVE_TARGET_64_BIG
 template
-Symbol*
+Sized_symbol<64>*
 Symbol_table::add_from_incrobj(
     Object* obj,
     const char* name,

@@ -293,8 +293,9 @@ dump_incremental_inputs(const char* argv0, const char* filename,
 	  for (unsigned int symndx = 0; symndx < nsyms; ++symndx)
 	    {
 	      bool is_def;
+	      bool is_copy;
 	      unsigned int output_symndx =
-		  input_file.get_output_symbol_index(symndx, &is_def);
+		  input_file.get_output_symbol_index(symndx, &is_def, &is_copy);
 	      sym_p = symtab_view.data() + output_symndx * sym_size;
 	      elfcpp::Sym<size, big_endian> sym(sym_p);
 	      const char* symname;
@@ -303,7 +304,7 @@ dump_incremental_inputs(const char* argv0, const char* filename,
 	      printf("    %6d  %6s  %8s  %8s  %8s  %8s  %-5s  %s\n",
 		     output_symndx,
 		     "", "", "", "", "",
-		     is_def ? "DEF" : "UNDEF",
+		     is_copy ? "COPY" : (is_def ? "DEF" : "UNDEF"),
 		     symname);
 	    }
 	}

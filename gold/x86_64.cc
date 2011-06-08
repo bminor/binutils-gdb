@@ -405,9 +405,12 @@ class Target_x86_64 : public Target_freebsd<64, false>
 			   unsigned int got_type);
 
   // Register an existing PLT entry for a global symbol.
-  // A target needs to implement this to support incremental linking.
   void
   register_global_plt_entry(unsigned int plt_index, Symbol* gsym);
+
+  // Force a COPY relocation for a given symbol.
+  void
+  emit_copy_reloc(Symbol_table*, Symbol*, Output_section*, off_t);
 
   // Apply an incremental relocation.
   void
@@ -1387,6 +1390,19 @@ Target_x86_64::register_global_plt_entry(unsigned int plt_index,
 
   unsigned int got_offset = (plt_index + 3) * 8;
   this->plt_->add_relocation(gsym, got_offset);
+}
+
+// Force a COPY relocation for a given symbol.
+
+void
+Target_x86_64::emit_copy_reloc(
+    Symbol_table* symtab, Symbol* sym, Output_section* os, off_t offset)
+{
+  this->copy_relocs_.emit_copy_reloc(symtab,
+				     symtab->get_sized_symbol<64>(sym),
+				     os,
+				     offset,
+				     this->rela_dyn_section(NULL));
 }
 
 // Define the _TLS_MODULE_BASE_ symbol in the TLS segment.

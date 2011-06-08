@@ -22,6 +22,7 @@
 
 #include "gold.h"
 
+#include <set>
 #include <cstdarg>
 #include "libiberty.h"
 
@@ -518,11 +519,45 @@ void
 Sized_incremental_binary<size, big_endian>::do_reserve_layout(
     unsigned int input_file_index)
 {
+  const int sym_size = elfcpp::Elf_sizes<size>::sym_size;
+
   Input_entry_reader input_file =
       this->inputs_reader_.input_file(input_file_index);
 
   if (input_file.type() == INCREMENTAL_INPUT_SHARED_LIBRARY)
-    return;
+    {
+      // Reserve the BSS space used for COPY relocations.
+      unsigned int nsyms = input_file.get_global_symbol_count();
+      Incremental_binary::View symtab_view(NULL);
+      unsigned int symtab_count;
+      elfcpp::Elf_strtab strtab(NULL, 0);
+      this->get_symtab_view(&symtab_view, &symtab_count, &strtab);
+      for (unsigned int i = 0; i < nsyms; ++i)
+	{
+	  bool is_def;
+	  bool is_copy;
+          unsigned int output_symndx =
+	      input_file.get_output_symbol_index(i, &is_def, &is_copy);
+	  if (is_copy)
+	    {
+	      const unsigned char* sym_p = (symtab_view.data()
+					    + output_symndx * sym_size);
+	      elfcpp::Sym<size, big_endian> gsym(sym_p);
+	      unsigned int shndx = gsym.get_st_shndx();
+	      if (shndx < 1 || shndx >= this->section_map_.size())
+	        continue;
+	      Output_section* os = this->section_map_[shndx];
+	      off_t offset = gsym.get_st_value() - os->address();
+	      os->reserve(offset, gsym.get_st_size());
+	      gold_debug(DEBUG_INCREMENTAL,
+			 "Reserve for COPY reloc: %s, off %d, size %d",
+			 os->name(),
+			 static_cast<int>(offset),
+			 static_cast<int>(gsym.get_st_size()));
+	    }
+	}
+      return;
+    }
 
   unsigned int shnum = input_file.get_input_section_count();
   for (unsigned int i = 0; i < shnum; i++)
@@ -613,6 +648,26 @@ Sized_incremental_binary<size, big_endian>::do_process_got_plt(
 		 "PLT entry %d: %s",
 		 i, sym->name());
       target->register_global_plt_entry(i, sym);
+    }
+}
+
+// Emit COPY relocations from the existing output file.
+
+template<int size, bool big_endian>
+void
+Sized_incremental_binary<size, big_endian>::do_emit_copy_relocs(
+    Symbol_table* symtab)
+{
+  Sized_target<size, big_endian>* target =
+      parameters->sized_target<size, big_endian>();
+
+  for (typename Copy_relocs::iterator p = this->copy_relocs_.begin();
+       p != this->copy_relocs_.end();
+       ++p)
+    {
+      if (!(*p).symbol->is_copied_from_dynobj())
+	target->emit_copy_reloc(symtab, (*p).symbol, (*p).output_section,
+				(*p).offset);
     }
 }
 
@@ -1545,7 +1600,9 @@ Output_section_incremental_inputs<size, big_endian>::write_info_blocks(
 			== (*p)->get_info_offset());
 	    Incremental_dynobj_entry* entry = (*p)->dynobj_entry();
 	    gold_assert(entry != NULL);
-	    const Object* obj = entry->object();
+	    Object* obj = entry->object();
+	    Dynobj* dynobj = obj->dynobj();
+	    gold_assert(dynobj != NULL);
 	    const Object::Symbols* syms = obj->get_global_symbols();
 
 	    // Write the soname string table index.
@@ -1570,12 +1627,16 @@ Output_section_incremental_inputs<size, big_endian>::write_info_blocks(
 		  sym = this->symtab_->resolve_forwards(sym);
 	        if (sym->symtab_index() == -1U)
 	          continue;
-		unsigned int def_flag = 0;
+		unsigned int flags = 0;
 		if (sym->source() == Symbol::FROM_OBJECT
 		    && sym->object() == obj
 		    && sym->is_defined())
-		  def_flag = 1U << 31;
-		Swap32::writeval(pov, sym->symtab_index() | def_flag);
+		  flags = INCREMENTAL_SHLIB_SYM_DEF;
+		else if (sym->is_copied_from_dynobj()
+			 && this->symtab_->get_copy_source(sym) == dynobj)
+		  flags = INCREMENTAL_SHLIB_SYM_COPY;
+		flags <<= INCREMENTAL_SHLIB_SYM_FLAGS_SHIFT;
+		Swap32::writeval(pov, sym->symtab_index() | flags);
 		pov += 4;
 		++nsyms_out;
 	      }
@@ -2481,19 +2542,26 @@ Sized_incr_dynobj<size, big_endian>::do_add_symbols(
   unsigned int isym_count = isymtab.symbol_count();
   unsigned int first_global = symtab_count - isym_count;
 
+  // We keep a set of symbols that we have generated COPY relocations
+  // for, indexed by the symbol value. We do not need more than one
+  // COPY relocation per address.
+  typedef typename std::set<Address> Copied_symbols;
+  Copied_symbols copied_symbols;
+
   const unsigned char* sym_p;
   for (unsigned int i = 0; i < nsyms; ++i)
     {
       bool is_def;
+      bool is_copy;
       unsigned int output_symndx =
-	  this->input_reader_.get_output_symbol_index(i, &is_def);
+	  this->input_reader_.get_output_symbol_index(i, &is_def, &is_copy);
       sym_p = symtab_view.data() + output_symndx * sym_size;
       elfcpp::Sym<size, big_endian> gsym(sym_p);
       const char* name;
       if (!strtab.get_c_string(gsym.get_st_name(), &name))
 	name = "";
 
-      typename elfcpp::Elf_types<size>::Elf_Addr v;
+      Address v;
       unsigned int shndx;
       elfcpp::STB st_bind = gsym.get_st_bind();
       elfcpp::STT st_type = gsym.get_st_type();
@@ -2523,10 +2591,24 @@ Sized_incr_dynobj<size, big_endian>::do_add_symbols(
       osym.put_st_other(gsym.get_st_other());
       osym.put_st_shndx(shndx);
 
-      this->symbols_[i] =
-	symtab->add_from_incrobj<size, big_endian>(this, name, NULL, &sym);
+      Sized_symbol<size>* res =
+	  symtab->add_from_incrobj<size, big_endian>(this, name, NULL, &sym);
+      this->symbols_[i] = res;
       this->ibase_->add_global_symbol(output_symndx - first_global,
 				      this->symbols_[i]);
+
+      if (is_copy)
+	{
+	  std::pair<typename Copied_symbols::iterator, bool> ins =
+	      copied_symbols.insert(v);
+	  if (ins.second)
+	    {
+	      unsigned int shndx = gsym.get_st_shndx();
+	      Output_section* os = this->ibase_->output_section(shndx);
+	      off_t offset = v - os->address();
+	      this->ibase_->add_copy_reloc(this->symbols_[i], os, offset);
+	    }
+	}
     }
 }
 

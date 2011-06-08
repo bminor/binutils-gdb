@@ -1341,7 +1341,7 @@ class Symbol_table
   // Add one external symbol from the incremental object OBJ to the symbol
   // table.  Returns a pointer to the resolved symbol in the symbol table.
   template<int size, bool big_endian>
-  Symbol*
+  Sized_symbol<size>*
   add_from_incrobj(Object* obj, const char* name,
 		   const char* ver, elfcpp::Sym<size, big_endian>* sym);
 

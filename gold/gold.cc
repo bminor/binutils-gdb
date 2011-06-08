@@ -622,11 +622,13 @@ queue_middle_tasks(const General_options& options,
 	}
     }
 
-  // For incremental updates, record the existing GOT and PLT entries.
+  // For incremental updates, record the existing GOT and PLT entries,
+  // and the COPY relocations.
   if (parameters->incremental_update())
     {
       Incremental_binary* ibase = layout->incremental_base();
       ibase->process_got_plt(symtab, layout);
+      ibase->emit_copy_relocs(symtab);
     }
 
   if (is_debugging_enabled(DEBUG_SCRIPT))

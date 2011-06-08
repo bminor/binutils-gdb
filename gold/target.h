@@ -833,6 +833,13 @@ class Sized_target : public Target
 			    Symbol*)
   { gold_unreachable(); }
 
+  // Force a COPY relocation for a given symbol.
+  // A target needs to implement this to support incremental linking.
+
+  virtual void
+  emit_copy_reloc(Symbol_table*, Symbol*, Output_section*, off_t)
+  { gold_unreachable(); }
+
   // Apply an incremental relocation.
 
   virtual void

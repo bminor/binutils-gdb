@@ -1,3 +1,41 @@
+2011-06-07  Cary Coutant  <ccoutant@google.com>
+
+	* copy-relocs.cc (Copy_relocs::copy_reloc): Call make_copy_reloc
+	instead of emit_copy_reloc.
+	(Copy_relocs::emit_copy_reloc): Refactor.
+	(Copy_relocs::make_copy_reloc): New function.
+	(Copy_relocs::add_copy_reloc): Remove.
+	* copy-relocs.h (Copy_relocs::emit_copy_reloc): Move to public
+	section.
+	(Copy_relocs::make_copy_reloc): New function.
+	(Copy_relocs::add_copy_reloc): Remove.
+	* gold.cc (queue_middle_tasks): Emit old COPY relocations from
+	unchanged input files.
+	* incremental-dump.cc (dump_incremental_inputs): Print "COPY" flag.
+	* incremental.cc (Sized_incremental_binary::do_reserve_layout):
+	Reserve BSS space for COPY relocations.
+	(Sized_incremental_binary::do_emit_copy_relocs): New function.
+	(Output_section_incremental_inputs::write_info_blocks): Record
+	whether a symbol is copied from a shared object.
+	(Sized_incr_dynobj::do_add_symbols): Record COPY relocations.
+	* incremental.h (enum Incremental_shlib_symbol_flags): New type.
+	(INCREMENTAL_SHLIB_SYM_FLAGS_SHIFT): New constant.
+	(Incremental_input_entry_reader::get_output_symbol_index): Add
+	is_copy parameter.
+	(Incremental_binary::emit_copy_relocs): New function.
+	(Incremental_binary::do_emit_copy_relocs): New function.
+	(Sized_incremental_binary::Sized_incremental_binary): Initialize
+	new data member.
+	(Sized_incremental_binary::add_copy_reloc): New function.
+	(Sized_incremental_binary::do_emit_copy_relocs): New function.
+	(Sized_incremental_binary::Copy_reloc): New struct.
+	(Sized_incremental_binary::Copy_relocs): New typedef.
+	(Sized_incremental_binary::copy_relocs_): New data member.
+	* symtab.cc (Symbol_table::add_from_incrobj): Change return type.
+	* symtab.h (Symbol_table::add_from_incrobj): Change return type.
+	* target.h (Sized_target::emit_copy_reloc): New function.
+	* x86_64.cc (Target_x86_64::emit_copy_reloc): New function.
+
 2011-06-02  Cary Coutant  <ccoutant@google.com>
 
 	PR gold/12163

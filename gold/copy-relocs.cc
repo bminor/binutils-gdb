@@ -65,7 +65,7 @@ Copy_relocs<sh_type, size, big_endian>::copy_reloc(
     Output_data_reloc<sh_type, true, size, big_endian>* reloc_section)
 {
   if (this->need_copy_reloc(sym, object, shndx))
-    this->emit_copy_reloc(symtab, layout, sym, reloc_section);
+    this->make_copy_reloc(symtab, layout, sym, reloc_section);
   else
     {
       // We may not need a COPY relocation.  Save this relocation to
@@ -105,6 +105,24 @@ Copy_relocs<sh_type, size, big_endian>::need_copy_reloc(
 template<int sh_type, int size, bool big_endian>
 void
 Copy_relocs<sh_type, size, big_endian>::emit_copy_reloc(
+    Symbol_table* symtab,
+    Sized_symbol<size>* sym,
+    Output_data* posd,
+    off_t offset,
+    Output_data_reloc<sh_type, true, size, big_endian>* reloc_section)
+{
+  // Define the symbol as being copied.
+  symtab->define_with_copy_reloc(sym, posd, offset);
+
+  // Add the COPY relocation to the dynamic reloc section.
+  reloc_section->add_global(sym, this->copy_reloc_type_, posd, offset, 0);
+}
+
+// Make a COPY relocation for SYM and emit it.
+
+template<int sh_type, int size, bool big_endian>
+void
+Copy_relocs<sh_type, size, big_endian>::make_copy_reloc(
     Symbol_table* symtab,
     Layout* layout,
     Sized_symbol<size>* sym,
@@ -164,24 +182,7 @@ Copy_relocs<sh_type, size, big_endian>::emit_copy_reloc(
   section_size_type offset = dynbss_size;
   dynbss->set_current_data_size(dynbss_size + symsize);
 
-  // Define the symbol as being copied.
-  symtab->define_with_copy_reloc(sym, dynbss, offset);
-
-  // Add the COPY relocation to the dynamic reloc section.
-  this->add_copy_reloc(sym, offset, reloc_section);
-}
-
-// Add a COPY relocation for SYM to RELOC_SECTION.
-
-template<int sh_type, int size, bool big_endian>
-void
-Copy_relocs<sh_type, size, big_endian>::add_copy_reloc(
-    Symbol* sym,
-    section_size_type offset,
-    Output_data_reloc<sh_type, true, size, big_endian>* reloc_section)
-{
-  reloc_section->add_global(sym, this->copy_reloc_type_, this->dynbss_,
-			    offset, 0);
+  this->emit_copy_reloc(symtab, sym, dynbss, offset, reloc_section);
 }
 
 // Save a relocation to possibly be emitted later.
