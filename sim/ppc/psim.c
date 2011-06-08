@@ -261,6 +261,7 @@ psim_options(device *root,
     while (*p != '\0') {
       switch (*p) {
       default:
+	printf_filtered ("Invalid Option: %s\n", argv[argp]);
 	psim_usage(0, 0);
 	error ("");
 	break;
@@ -368,7 +369,11 @@ psim_options(device *root,
 	    exit (0);
 	  }
 	else
-	  error("Unrecognized option");
+	  {
+	    printf_filtered ("Invalid option: %s\n", argv[argp]);
+	    psim_usage (0, 0);
+	    error ("");
+	  }
 	break;
       }
       p += 1;
