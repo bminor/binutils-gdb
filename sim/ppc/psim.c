@@ -357,6 +357,10 @@ psim_options(device *root,
         }
 	else if (strcmp (argv[argp], "--help") == 0)
 	  psim_usage (0, 1);
+	else if (strncmp (argv[argp], "--sysroot=",
+			  sizeof ("--sysroot=")) == 0)
+	  /* Ignore this option.  */
+	  p = argv[argp] + strlen(argv[argp]) - 1;
 	else if (strcmp (argv[argp], "--version") == 0)
 	  {
 	    extern const char version[];

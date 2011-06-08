@@ -1,3 +1,7 @@
+2011-06-08  Joel Brobecker  <brobecker@adacore.com>
+
+	* psim.c (psim_options): Accept and ignore `--sysroot=...'.
+
 2011-06-03  Joel Brobecker  <brobecker@adacore.com>  (obvious fix)
 
 	From Stephen Kitt  <steve@sk2.org>
