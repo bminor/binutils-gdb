@@ -1,3 +1,8 @@
+2011-06-09  Tristan Gingold  <gingold@adacore.com>
+
+	* od-xcoff.c (xcoff32_read_symbols): Allow missing string table
+	length.
+
 2011-06-08  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/12855

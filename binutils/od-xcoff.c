@@ -639,17 +639,14 @@ xcoff32_read_symbols (bfd *abfd, struct xcoff_dump *data)
     + data->nsyms * (unsigned)sizeof (struct external_syment);
 
   /* Read string table.  */
-  if (bfd_seek (abfd, stptr, SEEK_SET) != 0)
+  if (bfd_seek (abfd, stptr, SEEK_SET) != 0
+      || bfd_bread (&stsz_arr, sizeof (stsz_arr), abfd) != sizeof (stsz_arr))
     {
+      non_fatal (_("cannot read strings table length"));
       data->strings_size = 0;
     }
   else
     {
-      if (bfd_bread (&stsz_arr, sizeof (stsz_arr), abfd) != sizeof (stsz_arr))
-        {
-          non_fatal (_("cannot read strings table len"));
-          return;
-        }
       data->strings_size = bfd_h_get_32 (abfd, stsz_arr);
       if (data->strings_size > sizeof (stsz_arr))
         {
