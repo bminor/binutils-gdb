@@ -1299,8 +1299,13 @@ Sized_relobj_file<size, big_endian>::do_layout(Symbol_table* symtab,
 	      && (shdr.get_sh_type() == elfcpp::SHT_PROGBITS
 	          || shdr.get_sh_type() == elfcpp::SHT_NOBITS
 	          || shdr.get_sh_type() == elfcpp::SHT_NOTE))
-	    incremental_inputs->report_input_section(this, i, name,
-						     shdr.get_sh_size());
+	    {
+	      off_t sh_size = shdr.get_sh_size();
+	      section_size_type uncompressed_size;
+	      if (this->section_is_compressed(i, &uncompressed_size))
+		sh_size = uncompressed_size;
+	      incremental_inputs->report_input_section(this, i, name, sh_size);
+	    }
 
           if (discard)
             {

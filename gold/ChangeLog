@@ -1,3 +1,11 @@
+2011-06-09  Cary Coutant  <ccoutant@google.com>
+
+	PR gold/12804
+	* gold/gold.cc (queue_initial_tasks): Warn if --incremental is
+	used with --compress-debug-sections.
+	* gold/object.cc (Sized_relobj_file::do_layout): Report
+	uncompressed size of compressed input sections.
+
 2011-06-08  Cary Coutant  <ccoutant@google.com>
 
 	PR gold/12804

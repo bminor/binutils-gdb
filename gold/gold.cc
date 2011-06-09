@@ -200,6 +200,9 @@ queue_initial_tasks(const General_options& options,
 	gold_error(_("incremental linking is incompatible with --icf"));
       if (options.has_plugins())
 	gold_error(_("incremental linking is incompatible with --plugin"));
+      if (strcmp(options.compress_debug_sections(), "none") != 0)
+	gold_error(_("incremental linking is incompatible with "
+		     "--compress-debug-sections"));
 
       if (parameters->incremental_update())
 	{
