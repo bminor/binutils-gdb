@@ -1217,6 +1217,13 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    break;
 
 	  case R_X86_64_64:
+	    /* Allow R_X86_64_64 relocations in SEC_DEBUGGING sections
+	       when building shared libraries.  */
+	    if (info->shared
+		&& !info->executable
+		&& (sec->flags & SEC_DEBUGGING) != 0)
+	      break;
+
 	  case R_X86_64_DTPOFF64:
 	  case R_X86_64_TPOFF64:
 	  case R_X86_64_PC64:

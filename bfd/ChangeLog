@@ -1,5 +1,11 @@
 2011-06-08  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf64-x86-64.c (elf_x86_64_check_relocs): Allow R_X86_64_64
+	relocations in SEC_DEBUGGING sections when building shared
+	libraries.
+
+2011-06-08  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/12851
 	* elflink.c (elf_gc_sweep): Don't check SHT_NOTE sections here.
 	(bfd_elf_gc_sections): Also check SHT_NOTE sections.

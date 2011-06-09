@@ -1,5 +1,13 @@
 2011-06-08  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* ld-x86-64/simple.c: New.
+	* ld-x86-64/x86-64-x32.rd: Likewise.
+
+	* ld-x86-64/x86-64.exp: Check building x32 DSO from x86-64
+	object file.
+
+2011-06-08  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/12851
 	* ld-elf/pr12851.d: New.
 	* ld-elf/pr12851.s: Likewise.

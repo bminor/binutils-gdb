@@ -203,3 +203,26 @@ run_dump_test "ia32-3"
 run_dump_test "lp64-1"
 run_dump_test "lp64-2"
 run_dump_test "lp64-3"
+
+# Need the C compiler
+if { [which $CC] != 0 } {
+    run_cc_link_tests {
+	{"Helper X32 DSO from x86-64 object" "" "-m64 -fPIC -g"
+	 {simple.c} {} "libsimple.a"}
+    }
+
+    set convertx32 "$objcopy -O elf32-x86-64 tmpdir/simple.o tmpdir/simple-x32.o"
+    send_log "$convertx32\n"
+    set got [remote_exec host "$convertx32"]
+    if { [lindex $got 0] != 0 || ![string match "" [lindex $got 1]] } then {
+	send_log "$got\n"
+	fail "Convert x86-64 object to x32"
+	return
+    }
+
+    run_ld_link_tests {
+	{"X32 DSO from x86-64 object"
+	 "-shared -melf32_x86_64 tmpdir/simple-x32.o" "--x32"
+	{dummy.s} {{readelf {-s --wide} x86-64-x32.rd}} "x86-64-x32"}
+    }
+}
