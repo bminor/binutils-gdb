@@ -1,3 +1,8 @@
+2011-06-09  Joel Brobecker  <brobecker@adacore.com>
+
+	* psim.c (psim_options): Fix length of comparison when checking
+	for --sysroot= option.
+
 2011-06-08  Joel Brobecker  <brobecker@adacore.com>
 
 	* psim.c (psim_options): Add option that cause the error
