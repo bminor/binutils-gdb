@@ -1,3 +1,9 @@
+2011-06-09  Ian Lance Taylor  <iant@google.com>
+
+	* script-sections.cc
+	(Orphan_output_section::set_section_addresses): For a relocatable
+	link set address to 0.
+
 2011-06-09  Cary Coutant  <ccoutant@google.com>
 
 	PR gold/12804
