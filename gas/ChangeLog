@@ -1,3 +1,12 @@
+2011-06-09  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/12861
+	* config/tc-cr16.c (tc_gen_reloc): Remove unused local variable
+	code.
+	(check_cinv_options): Remove unused local variables.  Make
+	function void.
+	(md_assemble): Remove unused local variable.
+
 2011-06-09  James Greenhalgh  <james.greenhalgh@arm.com>
 
 	* config/tc-arm.c (do_ldrd): Warn in unpredictable cases.
