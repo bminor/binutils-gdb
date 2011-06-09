@@ -1,3 +1,7 @@
+2011-06-09  Mike Frysinger  <vapier@gentoo.org>
+
+	* interf.c (sim_open): Accept and ignore `--sysroot=...'.
+
 2011-06-01  Joel Brobecker  <brobecker@adacore.com>
 
 	* interf.c (sim_complete_command): New stub function.
