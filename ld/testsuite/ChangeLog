@@ -1,3 +1,9 @@
+2011-06-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/12851
+	* ld-elf/pr12851.d: New.
+	* ld-elf/pr12851.s: Likewise.
+
 2011-06-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-elf/elf.exp: Build symbol3.a and symbol3w.a.

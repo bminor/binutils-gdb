@@ -11728,10 +11728,9 @@ elf_gc_sweep (bfd *abfd, struct bfd_link_info *info)
 	      o->gc_mark = first->gc_mark;
 	    }
 	  else if ((o->flags & (SEC_DEBUGGING | SEC_LINKER_CREATED)) != 0
-		   || (o->flags & (SEC_ALLOC | SEC_LOAD | SEC_RELOC)) == 0
-		   || elf_section_data (o)->this_hdr.sh_type == SHT_NOTE)
+		   || (o->flags & (SEC_ALLOC | SEC_LOAD | SEC_RELOC)) == 0)
 	    {
-	      /* Keep debug, special and SHT_NOTE sections.  */
+	      /* Keep debug and special sections.  */
 	      o->gc_mark = 1;
 	    }
 
@@ -12013,8 +12012,12 @@ bfd_elf_gc_sections (bfd *abfd, struct bfd_link_info *info)
       if (bfd_get_flavour (sub) != bfd_target_elf_flavour)
 	continue;
 
+      /* Also keep SHT_NOTE sections.  */
       for (o = sub->sections; o != NULL; o = o->next)
-	if ((o->flags & (SEC_EXCLUDE | SEC_KEEP)) == SEC_KEEP && !o->gc_mark)
+	if ((o->flags & SEC_EXCLUDE) == 0
+	    && ((o->flags & SEC_KEEP) != 0
+		|| elf_section_data (o)->this_hdr.sh_type == SHT_NOTE)
+	    && !o->gc_mark)
 	  if (!_bfd_elf_gc_mark (info, o, gc_mark_hook))
 	    return FALSE;
     }
