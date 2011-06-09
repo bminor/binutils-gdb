@@ -1,10 +1,10 @@
-2011-06-08  joel brobecker  <brobecker@adacore.com>
+2011-06-08  Joel Brobecker  <brobecker@adacore.com>
 
 	* psim.c (psim_options): Add option that cause the error
 	in invalid-option error messages. Print the usage when
 	detecting an invalid long-name option.
 
-2011-06-08  joel brobecker  <brobecker@adacore.com>
+2011-06-08  Joel Brobecker  <brobecker@adacore.com>
 
 	* psim.c (psim_options): Accept and ignore `--sysroot=...'.
 
