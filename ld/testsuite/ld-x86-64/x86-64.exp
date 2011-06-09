@@ -204,8 +204,8 @@ run_dump_test "lp64-1"
 run_dump_test "lp64-2"
 run_dump_test "lp64-3"
 
-# Need the C compiler
-if { [which $CC] != 0 } {
+# Must be native with the C compiler
+if { [isnative] && [which $CC] != 0 } {
     run_cc_link_tests {
 	{"Helper X32 DSO from x86-64 object" "" "-m64 -fPIC -g"
 	 {simple.c} {} "libsimple.a"}

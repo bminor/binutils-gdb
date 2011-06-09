@@ -1,5 +1,10 @@
 2011-06-08  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* ld-x86-64/x86-64.exp: Build x32 DSO from x86-64 object file
+	only for native.
+
+2011-06-08  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* ld-x86-64/simple.c: New.
 	* ld-x86-64/x86-64-x32.rd: Likewise.
 
