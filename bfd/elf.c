@@ -6272,6 +6272,8 @@ _bfd_elf_init_private_section_data (bfd *ibfd,
       || obfd->xvec->flavour != bfd_target_elf_flavour)
     return TRUE;
 
+  BFD_ASSERT (elf_section_data (osec) != NULL);
+
   /* For objcopy and relocatable link, don't copy the output ELF
      section type from input if the output BFD section flags have been
      set to something different.  For a final link allow some flags

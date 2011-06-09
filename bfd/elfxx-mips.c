@@ -1727,6 +1727,11 @@ mips_elf_check_symbols (struct mips_elf_link_hash_entry *h, void *data)
 
   if (mips_elf_local_pic_function_p (h))
     {
+      /* PR 12845: If H is in a section that has been garbage
+	 collected it will have its output section set to *ABS*.  */
+      if (bfd_is_abs_section (h->root.root.u.def.section->output_section))
+	return TRUE;
+
       /* H is a function that might need $25 to be valid on entry.
 	 If we're creating a non-PIC relocatable object, mark H as
 	 being PIC.  If we're creating a non-relocatable object with

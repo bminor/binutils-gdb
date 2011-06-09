@@ -1,3 +1,12 @@
+2011-06-09  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/12845
+	* elf.c (_bfd_elf_init_private_section_data): Add an assertion
+	that the output section has an allocated bfd_elf_section_data
+	structure.
+	* elfxx-mips.c (mips_elf_check_symbols): Do not create a stub for
+	symbols in sections that have been removed by garbage collection.
+
 2011-06-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf64-x86-64.c (elf_x86_64_check_relocs): Allow R_X86_64_64
