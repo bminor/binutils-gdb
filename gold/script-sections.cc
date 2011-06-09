@@ -2846,6 +2846,17 @@ Orphan_output_section::set_section_addresses(Symbol_table*, Layout*,
   uint64_t address = *dot_value;
   address = align_address(address, this->os_->addralign());
 
+  // For a relocatable link, all orphan sections are put at
+  // address 0.  In general we expect all sections to be at
+  // address 0 for a relocatable link, but we permit the linker
+  // script to override that for specific output sections.
+  if (parameters->options().relocatable())
+    {
+      address = 0;
+      *load_address = 0;
+      have_load_address = false;
+    }
+
   if ((this->os_->flags() & elfcpp::SHF_ALLOC) != 0)
     {
       this->os_->set_address(address);
