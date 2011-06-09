@@ -1,5 +1,11 @@
 2011-06-09  Tristan Gingold  <gingold@adacore.com>
 
+	* elfnn-ia64.c (elfNN_ia64_relax_section, elfNN_ia64_choose_gp)
+	(elfNN_ia64_relocate_section, elfNN_vms_object_p): Remove trailing
+	spaces.
+
+2011-06-09  Tristan Gingold  <gingold@adacore.com>
+
 	* bfd.c (bfd_get_sign_extend_vma): Handle aixcoff.
 
 2011-06-09  Nick Clifton  <nickc@redhat.com>

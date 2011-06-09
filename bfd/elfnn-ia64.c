@@ -586,7 +586,7 @@ elfNN_ia64_relax_section (bfd *abfd, asection *sec,
 	    offset = -0x1000000;
 
 	  /* If the branch is in range, no need to do anything.  */
-	  if ((bfd_signed_vma) (symaddr - reladdr) >= offset 
+	  if ((bfd_signed_vma) (symaddr - reladdr) >= offset
 	      && (bfd_signed_vma) (symaddr - reladdr) <= 0x0FFFFF0)
 	    {
 	      /* If the 60-bit branch is in 21-bit range, optimize it. */
@@ -3609,7 +3609,7 @@ elfNN_ia64_choose_gp (bfd *abfd, struct bfd_link_info *info, bfd_boolean final)
 
   if (ia64_info->min_short_sec)
     {
-      if (min_short_vma 
+      if (min_short_vma
 	  > (ia64_info->min_short_sec->vma
 	     + ia64_info->min_short_offset))
 	min_short_vma = (ia64_info->min_short_sec->vma
@@ -3868,7 +3868,7 @@ elfNN_ia64_relocate_section (bfd *output_bfd,
 	      && (sym_sec->flags & SEC_MERGE) != 0
 	      && ELF_ST_TYPE (sym->st_info) == STT_SECTION
 	      && sym_sec->sec_info_type == ELF_INFO_TYPE_MERGE)
- 	    {
+	    {
 	      struct elfNN_ia64_local_hash_entry *loc_h;
 
 	      loc_h = get_local_sym_hash (ia64_info, input_bfd, rel, FALSE);
@@ -5094,7 +5094,7 @@ elfNN_vms_object_p (bfd *abfd)
 	  nsec->vma = base_vma;
 	  nsec->size = next_vma - base_vma;
 	  nsec->filepos = i_phdr->p_offset + (base_vma - i_phdr->p_vaddr);
-	  
+
 	  base_vma = next_vma;
 	}
     }
