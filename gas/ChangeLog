@@ -1,3 +1,7 @@
+2011-06-09  James Greenhalgh  <james.greenhalgh@arm.com>
+
+	* config/tc-arm.c (do_ldrd): Warn in unpredictable cases.
+
 2011-06-03  Arnaud Patard  <arnaud.patard@rtp-net.org>
 
 	PR gas/12698

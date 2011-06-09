@@ -7798,35 +7798,34 @@ static void
 do_ldrd (void)
 {
   constraint (inst.operands[0].reg % 2 != 0,
-	      _("first destination register must be even"));
+	      _("first transfer register must be even"));
   constraint (inst.operands[1].present
 	      && inst.operands[1].reg != inst.operands[0].reg + 1,
-	      _("can only load two consecutive registers"));
+	      _("can only transfer two consecutive registers"));
   constraint (inst.operands[0].reg == REG_LR, _("r14 not allowed here"));
   constraint (!inst.operands[2].isreg, _("'[' expected"));
 
   if (!inst.operands[1].present)
     inst.operands[1].reg = inst.operands[0].reg + 1;
 
-  if (inst.instruction & LOAD_BIT)
+  /* encode_arm_addr_mode_3 will diagnose overlap between the base
+     register and the first register written; we have to diagnose
+     overlap between the base and the second register written here.  */
+
+  if (inst.operands[2].reg == inst.operands[1].reg
+      && (inst.operands[2].writeback || inst.operands[2].postind))
+    as_warn (_("base register written back, and overlaps "
+	       "second transfer register"));
+
+  if (!(inst.instruction & V4_STR_BIT))
     {
-      /* encode_arm_addr_mode_3 will diagnose overlap between the base
-	 register and the first register written; we have to diagnose
-	 overlap between the base and the second register written here.	 */
-
-      if (inst.operands[2].reg == inst.operands[1].reg
-	  && (inst.operands[2].writeback || inst.operands[2].postind))
-	as_warn (_("base register written back, and overlaps "
-		   "second destination register"));
-
       /* For an index-register load, the index register must not overlap the
-	 destination (even if not write-back).	*/
-      else if (inst.operands[2].immisreg
-	       && ((unsigned) inst.operands[2].imm == inst.operands[0].reg
-		   || (unsigned) inst.operands[2].imm == inst.operands[1].reg))
-	as_warn (_("index register overlaps destination register"));
+	destination (even if not write-back).  */
+      if (inst.operands[2].immisreg
+	      && ((unsigned) inst.operands[2].imm == inst.operands[0].reg
+	      || (unsigned) inst.operands[2].imm == inst.operands[1].reg))
+	as_warn (_("index register overlaps transfer register"));
     }
-
   inst.instruction |= inst.operands[0].reg << 12;
   encode_arm_addr_mode_3 (2, /*is_t=*/FALSE);
 }
