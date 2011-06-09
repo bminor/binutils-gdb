@@ -46,7 +46,7 @@ t1a()
 
 // 2  Code in file 1 refers to global data in file 2.
 
-int v2 = 0;
+int v2 = 1;
 
 // 3 Code in file 1 referes to common symbol in file 2.  This is
 // initialized at runtime to 789.

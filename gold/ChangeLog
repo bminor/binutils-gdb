@@ -1,3 +1,9 @@
+2011-06-08  Cary Coutant  <ccoutant@google.com>
+
+	PR gold/12804
+	* testsuite/two_file_test_2_v1.cc: Change initialization of
+	v2 to keep it in .data.
+
 2011-06-07  Cary Coutant  <ccoutant@google.com>
 
 	* common.cc (Symbol_table::do_allocate_commons_list): Call
