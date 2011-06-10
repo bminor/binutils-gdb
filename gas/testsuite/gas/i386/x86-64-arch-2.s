@@ -54,7 +54,7 @@ pswapd %mm4,%mm3
 insertq %xmm2,%xmm1
 # SVME
 vmload
-# ABM
+# ABM/LZCNT
 lzcnt %ecx,%ebx
 # PadLock
 xstorerng

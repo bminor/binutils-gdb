@@ -218,7 +218,9 @@ enum i386_error
     old_gcc_only,
     unsupported_with_intel_mnemonic,
     unsupported_syntax,
-    unsupported
+    unsupported,
+    invalid_vsib_address,
+    unsupported_vector_index_register
   };
 
 struct _i386_insn
@@ -679,6 +681,8 @@ static const arch_entry cpu_arch[] =
     CPU_ANY_SSE_FLAGS, 0, 1 },
   { STRING_COMMA_LEN (".avx"), PROCESSOR_UNKNOWN,
     CPU_AVX_FLAGS, 0, 0 },
+  { STRING_COMMA_LEN (".avx2"), PROCESSOR_UNKNOWN,
+    CPU_AVX2_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".noavx"), PROCESSOR_UNKNOWN,
     CPU_ANY_AVX_FLAGS, 0, 1 },
   { STRING_COMMA_LEN (".vmx"), PROCESSOR_UNKNOWN,
@@ -701,6 +705,8 @@ static const arch_entry cpu_arch[] =
     CPU_RDRND_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".f16c"), PROCESSOR_UNKNOWN,
     CPU_F16C_FLAGS, 0, 0 },
+  { STRING_COMMA_LEN (".bmi2"), PROCESSOR_UNKNOWN,
+    CPU_BMI2_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".fma"), PROCESSOR_UNKNOWN,
     CPU_FMA_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".fma4"), PROCESSOR_UNKNOWN,
@@ -713,6 +719,10 @@ static const arch_entry cpu_arch[] =
     CPU_MOVBE_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".ept"), PROCESSOR_UNKNOWN,
     CPU_EPT_FLAGS, 0, 0 },
+  { STRING_COMMA_LEN (".lzcnt"), PROCESSOR_UNKNOWN,
+    CPU_LZCNT_FLAGS, 0, 0 },
+  { STRING_COMMA_LEN (".invpcid"), PROCESSOR_UNKNOWN,
+    CPU_INVPCID_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".clflush"), PROCESSOR_UNKNOWN,
     CPU_CLFLUSH_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".nop"), PROCESSOR_UNKNOWN,
@@ -3834,6 +3844,38 @@ optimize_disp (void)
       }
 }
 
+/* Check if operands are valid for the instruction.  */
+
+static int
+check_VecOperands (const insn_template *t)
+{
+  /* Without VSIB byte, we can't have a vector register for index.  */
+  if (!t->opcode_modifier.vecsib
+      && i.index_reg
+      && (i.index_reg->reg_type.bitfield.regxmm
+	  || i.index_reg->reg_type.bitfield.regymm))
+    {
+      i.error = unsupported_vector_index_register;
+      return 1;
+    }
+
+  /* For VSIB byte, we need a vector register for index and no PC
+     relative addressing is allowed.  */
+  if (t->opcode_modifier.vecsib
+      && (!i.index_reg
+	  || !((t->opcode_modifier.vecsib == VecSIB128
+		&& i.index_reg->reg_type.bitfield.regxmm)
+	       || (t->opcode_modifier.vecsib == VecSIB256
+		   && i.index_reg->reg_type.bitfield.regymm))
+	  || (i.base_reg && i.base_reg->reg_num == RegRip)))
+    {
+      i.error = invalid_vsib_address;
+      return 1;
+    }
+
+  return 0;
+}
+
 /* Check if operands are valid for the instruction.  Update VEX
    operand types.  */
 
@@ -4170,6 +4212,10 @@ check_reverse:
 	  continue;
 	}
 
+      /* Check if vector operands are valid.  */
+      if (check_VecOperands (t))
+	continue;
+
       /* Check if VEX operands are valid.  */
       if (VEX_check_operands (t))
 	continue;
@@ -4215,6 +4261,12 @@ check_reverse:
 	  break;
 	case unsupported:
 	  err_msg = _("unsupported");
+	  break;
+	case invalid_vsib_address:
+	  err_msg = _("invalid VSIB address");
+	  break;
+	case unsupported_vector_index_register:
+	  err_msg = _("unsupported vector index register");
 	  break;
 	}
       as_bad (_("%s for `%s'"), err_msg,
@@ -5412,15 +5464,53 @@ build_modrm_byte (void)
 	      break;
 	  gas_assert (op < i.operands);
 
+	  if (i.tm.opcode_modifier.vecsib)
+	    {
+	      if (i.index_reg->reg_num == RegEiz
+		  || i.index_reg->reg_num == RegRiz)
+		abort ();
+
+	      i.rm.regmem = ESCAPE_TO_TWO_BYTE_ADDRESSING;
+	      if (!i.base_reg)
+		{
+		  i.sib.base = NO_BASE_REGISTER;
+		  i.sib.scale = i.log2_scale_factor;
+		  i.types[op].bitfield.disp8 = 0;
+		  i.types[op].bitfield.disp16 = 0;
+		  i.types[op].bitfield.disp64 = 0;
+		  if (flag_code != CODE_64BIT)
+		    {
+		      /* Must be 32 bit */
+		      i.types[op].bitfield.disp32 = 1;
+		      i.types[op].bitfield.disp32s = 0;
+		    }
+		  else
+		    {
+		      i.types[op].bitfield.disp32 = 0;
+		      i.types[op].bitfield.disp32s = 1;
+		    }
+		}
+	      i.sib.index = i.index_reg->reg_num;
+	      if ((i.index_reg->reg_flags & RegRex) != 0)
+		i.rex |= REX_X;
+	    }
+
 	  default_seg = &ds;
 
 	  if (i.base_reg == 0)
 	    {
 	      i.rm.mode = 0;
 	      if (!i.disp_operands)
-		fake_zero_displacement = 1;
+		{
+		  fake_zero_displacement = 1;
+		  /* Instructions with VSIB byte need 32bit displacement
+		     if there is no base register.  */
+		  if (i.tm.opcode_modifier.vecsib)
+		    i.types[op].bitfield.disp32 = 1;
+		}
 	      if (i.index_reg == 0)
 		{
+		  gas_assert (!i.tm.opcode_modifier.vecsib);
 		  /* Operand is just <disp>  */
 		  if (flag_code == CODE_64BIT)
 		    {
@@ -5446,8 +5536,9 @@ build_modrm_byte (void)
 		      i.types[op] = disp32;
 		    }
 		}
-	      else /* !i.base_reg && i.index_reg  */
+	      else if (!i.tm.opcode_modifier.vecsib)
 		{
+		  /* !i.base_reg && i.index_reg  */
 		  if (i.index_reg->reg_num == RegEiz
 		      || i.index_reg->reg_num == RegRiz)
 		    i.sib.index = NO_INDEX_REGISTER;
@@ -5478,6 +5569,7 @@ build_modrm_byte (void)
 	  else if (i.base_reg->reg_num == RegRip ||
 		   i.base_reg->reg_num == RegEip)
 	    {
+	      gas_assert (!i.tm.opcode_modifier.vecsib);
 	      i.rm.regmem = NO_BASE_REGISTER;
 	      i.types[op].bitfield.disp8 = 0;
 	      i.types[op].bitfield.disp16 = 0;
@@ -5490,6 +5582,7 @@ build_modrm_byte (void)
 	    }
 	  else if (i.base_reg->reg_type.bitfield.reg16)
 	    {
+	      gas_assert (!i.tm.opcode_modifier.vecsib);
 	      switch (i.base_reg->reg_num)
 		{
 		case 3: /* (%bx)  */
@@ -5533,7 +5626,8 @@ build_modrm_byte (void)
 		    i.types[op].bitfield.disp32 = 1;
 		}
 
-	      i.rm.regmem = i.base_reg->reg_num;
+	      if (!i.tm.opcode_modifier.vecsib)
+		i.rm.regmem = i.base_reg->reg_num;
 	      if ((i.base_reg->reg_flags & RegRex) != 0)
 		i.rex |= REX_B;
 	      i.sib.base = i.base_reg->reg_num;
@@ -5555,6 +5649,7 @@ build_modrm_byte (void)
 	      i.sib.scale = i.log2_scale_factor;
 	      if (i.index_reg == 0)
 		{
+		  gas_assert (!i.tm.opcode_modifier.vecsib);
 		  /* <disp>(%esp) becomes two byte modrm with no index
 		     register.  We've already stored the code for esp
 		     in i.rm.regmem ie. ESCAPE_TO_TWO_BYTE_ADDRESSING.
@@ -5562,7 +5657,7 @@ build_modrm_byte (void)
 		     extra modrm byte.  */
 		  i.sib.index = NO_INDEX_REGISTER;
 		}
-	      else
+	      else if (!i.tm.opcode_modifier.vecsib)
 		{
 		  if (i.index_reg->reg_num == RegEiz
 		      || i.index_reg->reg_num == RegRiz)
@@ -7124,6 +7219,8 @@ i386_index_check (const char *operand_string)
 	       || i.base_reg->reg_num !=
 		  (i.prefix[ADDR_PREFIX] == 0 ? RegRip : RegEip)))
 	  || (i.index_reg
+	      && !(i.index_reg->reg_type.bitfield.regxmm
+		   || i.index_reg->reg_type.bitfield.regymm)
 	      && (!i.index_reg->reg_type.bitfield.baseindex
 		  || (i.prefix[ADDR_PREFIX] == 0
 		      && i.index_reg->reg_num != RegRiz
@@ -7157,6 +7254,8 @@ i386_index_check (const char *operand_string)
 	  if ((i.base_reg
 	       && !i.base_reg->reg_type.bitfield.reg32)
 	      || (i.index_reg
+		  && !i.index_reg->reg_type.bitfield.regxmm
+		  && !i.index_reg->reg_type.bitfield.regymm
 		  && ((!i.index_reg->reg_type.bitfield.reg32
 		       && i.index_reg->reg_num != RegEiz)
 		      || !i.index_reg->reg_type.bitfield.baseindex)))

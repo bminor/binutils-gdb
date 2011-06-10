@@ -1,3 +1,19 @@
+2011-06-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	AVX Programming Reference (June, 2011)
+	* config/tc-i386.c (i386_error): Add invalid_vsib_address and
+	unsupported_vector_index_register.
+	(cpu_arch): Add .avx2, .bmi2, .lzcnt and .invpcid.
+	(check_VecOperands): New.
+	(match_template): Call check_VecOperands.  Handle 
+	invalid_vsib_address and unsupported_vector_index_register.
+	(build_modrm_byte): Support VecSIB.  Check register-only source
+	operand when two source operands are swapped.
+	(i386_index_check): Allow Xmm/Ymm index registers.
+
+	* doc/c-i386.texi: Document avx2/.avx2, bmi2/.bmi2, lzcnt/.lzcnt
+	and invpcid./invpcid.
+
 2011-06-09  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/12861

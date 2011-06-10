@@ -1,3 +1,51 @@
+2011-06-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	AVX Programming Reference (June, 2011)
+	* gas/i386/arch-10-1.l: Updated.
+	* gas/i386/arch-10-2.l: Likewise.
+	* gas/i386/arch-10-3.l: Likewise.
+	* gas/i386/arch-10-4.l: Likewise.
+
+	* gas/i386/arch-10.s: Add LZCNT to comments.
+	* gas/i386/x86-64-arch-2.s: Likewise.
+
+	* gas/i386/arch-10-lzcnt.d: New.
+	* gas/i386/avx-gather-intel.d: Likewise.
+	* gas/i386/avx-gather.d: Likewise.
+	* gas/i386/avx-gather.s: Likewise.
+	* gas/i386/avx2-intel.d: Likewise.
+	* gas/i386/avx2.d: Likewise.
+	* gas/i386/avx2.s: Likewise
+	* gas/i386/avx256int-intel.d: Likewise.
+	* gas/i386/avx256int.d: Likewise.
+	* gas/i386/avx256int.s: Likewise.
+	* gas/i386/bmi2-intel.d: Likewise.
+	* gas/i386/bmi2.d: Likewise.
+	* gas/i386/bmi2.s: Likewise.
+	* gas/i386/inval-invpcid.l:Likewise.
+	* gas/i386/inval-invpcid.s: Likewise.
+	* gas/i386/invpcid-intel.d: Likewise.
+	* gas/i386/invpcid.d: Likewise.
+	* gas/i386/invpcid.s: Likewise.
+	* gas/i386/x86-64-arch-2-lzcnt.d: Likewise.
+	* gas/i386/x86-64-avx-gather-intel.d: Likewise.
+	* gas/i386/x86-64-avx-gather.d: Likewise.
+	* gas/i386/x86-64-avx-gather.s: Likewise.
+	* gas/i386/x86-64-avx2-intel.d: Likewise.
+	* gas/i386/x86-64-avx2.d: Likewise.
+	* gas/i386/x86-64-avx2.s: Likewise.
+	* gas/i386/x86-64-avx256int-intel.d: Likewise.
+	* gas/i386/x86-64-avx256int.d: Likewise.
+	* gas/i386/x86-64-avx256int.s: Likewise.
+	* gas/i386/x86-64-bmi2-intel.d: Likewise.
+	* gas/i386/x86-64-bmi2.d: Likewise.
+	* gas/i386/x86-64-bmi2.s: Likewise.
+	* gas/i386/x86-64-inval-invpcid.l: Likewise.
+	* gas/i386/x86-64-inval-invpcid.s: Likewise.
+	* gas/i386/x86-64-invpcid-intel.d: Likewise.
+	* gas/i386/x86-64-invpcid.d: Likewise.
+	* gas/i386/x86-64-invpcid.s: Likewise.
+
 2011-06-09  James Greenhalgh  <james.greenhalgh@arm.com>
 
 	* gas/arm/ldrd-unpredicatble.d: New testcase.

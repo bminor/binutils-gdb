@@ -93,7 +93,7 @@ GAS LISTING .*
 GAS LISTING .*
 
 
-[ 	]*57[ 	]+\# ABM
+[ 	]*57[ 	]+\# ABM/LZCNT
 [ 	]*58[ 	]+lzcnt %ecx,%ebx
 [ 	]*59[ 	]+\# PadLock
 [ 	]*60[ 	]+xstorerng

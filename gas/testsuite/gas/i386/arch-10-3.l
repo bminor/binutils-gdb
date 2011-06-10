@@ -89,7 +89,7 @@ GAS LISTING .*
 [ 	]*54[ 	]+insertq %xmm2,%xmm1
 [ 	]*55[ 	]+\# SVME
 [ 	]*56[ 	]+vmload
-[ 	]*57[ 	]+\# ABM
+[ 	]*57[ 	]+\# ABM/LZCNT
 [ 	]*58[ 	]+lzcnt %ecx,%ebx
 [ 	]*59[ 	]+\# PadLock
 [ 	]*60[ 	]+xstorerng

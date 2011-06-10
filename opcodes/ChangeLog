@@ -1,3 +1,134 @@
+2011-06-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	AVX Programming Reference (June, 2011)
+	* i386-dis.c (XMGatherQ): New.
+	* i386-dis.c (EXxmm_mb): New.
+	(EXxmm_mb): Likewise.
+	(EXxmm_mw): Likewise.
+	(EXxmm_md): Likewise.
+	(EXxmm_mq): Likewise.
+	(EXxmmdw): Likewise.
+	(EXxmmqd): Likewise.
+	(VexGatherQ): Likewise.
+	(MVexVSIBDWpX): Likewise.
+	(MVexVSIBQWpX): Likewise.
+	(xmm_mb_mode): Likewise.
+	(xmm_mw_mode): Likewise.
+	(xmm_md_mode): Likewise.
+	(xmm_mq_mode): Likewise.
+	(xmmdw_mode): Likewise.
+	(xmmqd_mode): Likewise.
+	(ymmxmm_mode): Likewise.
+	(vex_vsib_d_w_dq_mode): Likewise.
+	(vex_vsib_q_w_dq_mode): Likewise.
+	(MOD_VEX_0F385A_PREFIX_2): Likewise.
+	(MOD_VEX_0F388C_PREFIX_2): Likewise.
+	(MOD_VEX_0F388E_PREFIX_2): Likewise.
+	(PREFIX_0F3882): Likewise.
+	(PREFIX_VEX_0F3816): Likewise.
+	(PREFIX_VEX_0F3836): Likewise.
+	(PREFIX_VEX_0F3845): Likewise.
+	(PREFIX_VEX_0F3846): Likewise.
+	(PREFIX_VEX_0F3847): Likewise.
+	(PREFIX_VEX_0F3858): Likewise.
+	(PREFIX_VEX_0F3859): Likewise.
+	(PREFIX_VEX_0F385A): Likewise.
+	(PREFIX_VEX_0F3878): Likewise.
+	(PREFIX_VEX_0F3879): Likewise.
+	(PREFIX_VEX_0F388C): Likewise.
+	(PREFIX_VEX_0F388E): Likewise.
+	(PREFIX_VEX_0F3890..PREFIX_VEX_0F3893): Likewise.
+	(PREFIX_VEX_0F38F5): Likewise.
+	(PREFIX_VEX_0F38F6): Likewise.
+	(PREFIX_VEX_0F3A00): Likewise.
+	(PREFIX_VEX_0F3A01): Likewise.
+	(PREFIX_VEX_0F3A02): Likewise.
+	(PREFIX_VEX_0F3A38): Likewise.
+	(PREFIX_VEX_0F3A39): Likewise.
+	(PREFIX_VEX_0F3A46): Likewise.
+	(PREFIX_VEX_0F3AF0): Likewise.
+	(VEX_LEN_0F3816_P_2): Likewise.
+	(VEX_LEN_0F3819_P_2): Likewise.
+	(VEX_LEN_0F3836_P_2): Likewise.
+	(VEX_LEN_0F385A_P_2_M_0): Likewise.
+	(VEX_LEN_0F38F5_P_0): Likewise.
+	(VEX_LEN_0F38F5_P_1): Likewise.
+	(VEX_LEN_0F38F5_P_3): Likewise.
+	(VEX_LEN_0F38F6_P_3): Likewise.
+	(VEX_LEN_0F38F7_P_1): Likewise.
+	(VEX_LEN_0F38F7_P_2): Likewise.
+	(VEX_LEN_0F38F7_P_3): Likewise.
+	(VEX_LEN_0F3A00_P_2): Likewise.
+	(VEX_LEN_0F3A01_P_2): Likewise.
+	(VEX_LEN_0F3A38_P_2): Likewise.
+	(VEX_LEN_0F3A39_P_2): Likewise.
+	(VEX_LEN_0F3A46_P_2): Likewise.
+	(VEX_LEN_0F3AF0_P_3): Likewise.
+	(VEX_W_0F3816_P_2): Likewise.
+	(VEX_W_0F3818_P_2): Likewise.
+	(VEX_W_0F3819_P_2): Likewise.
+	(VEX_W_0F3836_P_2): Likewise.
+	(VEX_W_0F3846_P_2): Likewise.
+	(VEX_W_0F3858_P_2): Likewise.
+	(VEX_W_0F3859_P_2): Likewise.
+	(VEX_W_0F385A_P_2_M_0): Likewise.
+	(VEX_W_0F3878_P_2): Likewise.
+	(VEX_W_0F3879_P_2): Likewise.
+	(VEX_W_0F3A00_P_2): Likewise.
+	(VEX_W_0F3A01_P_2): Likewise.
+	(VEX_W_0F3A02_P_2): Likewise.
+	(VEX_W_0F3A38_P_2): Likewise.
+	(VEX_W_0F3A39_P_2): Likewise.
+	(VEX_W_0F3A46_P_2): Likewise.
+	(MOD_VEX_0F3818_PREFIX_2): Removed.
+	(MOD_VEX_0F3819_PREFIX_2): Likewise.
+	(VEX_LEN_0F60_P_2..VEX_LEN_0F6D_P_2): Likewise.
+	(VEX_LEN_0F70_P_1..VEX_LEN_0F76_P_2): Likewise.
+	(VEX_LEN_0FD1_P_2..VEX_LEN_0FD5_P_2): Likewise.
+	(VEX_LEN_0FD7_P_2_M_1..VEX_LEN_0F3819_P_2_M_0): Likewise.
+	(VEX_LEN_0F381C_P_2..VEX_LEN_0F3840_P_2): Likewise.
+	(VEX_LEN_0F3A0E_P_2): Likewise.
+	(VEX_LEN_0F3A0F_P_2): Likewise.
+	(VEX_LEN_0F3A42_P_2): Likewise.
+	(VEX_LEN_0F3A4C_P_2): Likewise.
+	(VEX_W_0F3818_P_2_M_0): Likewise.
+	(VEX_W_0F3819_P_2_M_0): Likewise.
+	(prefix_table): Updated.
+	(three_byte_table): Likewise.
+	(vex_table): Likewise.
+	(vex_len_table): Likewise.
+	(vex_w_table): Likewise.
+	(mod_table): Likewise.
+	(putop): Handle "LW".
+	(intel_operand_size): Handle xmm_mb_mode, xmm_mw_mode,
+	xmm_md_mode, xmm_mq_mode, xmmdw_mode, xmmqd_mode, ymmxmm_mode,
+	vex_vsib_d_w_dq_mode, vex_vsib_q_w_dq_mode.
+	(OP_EX): Likewise.
+	(OP_E_memory): Handle vex_vsib_d_w_dq_mode and
+	vex_vsib_q_w_dq_mode.
+	(OP_XMM): Handle vex_vsib_q_w_dq_mode.
+	(OP_VEX): Likewise.
+
+	* i386-gen.c (cpu_flag_init): Add CpuAVX2 to CPU_ANY_SSE_FLAGS
+	and CPU_ANY_AVX_FLAGS.  Add CPU_BMI2_FLAGS, CPU_LZCNT_FLAGS,
+	CPU_INVPCID_FLAGS and CPU_AVX2_FLAGS.
+	(cpu_flags): Add CpuAVX2, CpuBMI2, CpuLZCNT and CpuINVPCID.
+	(opcode_modifiers): Add VecSIB.
+
+	* i386-opc.h (CpuAVX2): New.
+	(CpuBMI2): Likewise.
+	(CpuLZCNT): Likewise.
+	(CpuINVPCID): Likewise.
+	(VecSIB128): Likewise.
+	(VecSIB256): Likewise.
+	(VecSIB): Likewise.
+	(i386_cpu_flags): Add cpuavx2, cpubmi2, cpulzcnt and cpuinvpcid.
+	(i386_opcode_modifier): Add vecsib.
+
+	* i386-opc.tbl: Add invpcid, AVX2 and BMI2 instructions.
+	* i386-init.h: Regenerated.
+	* i386-tbl.h: Likewise.
+
 2011-06-03  Quentin Neill  <quentin.neill@amd.com>
 
 	* i386-gen.c (cpu_flag_init): Add CpuF16C to CPU_BDVER2_FLAGS.
