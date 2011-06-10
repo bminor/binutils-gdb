@@ -1,3 +1,11 @@
+2011-06-10  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.cp/temargs.exp: Let tests pass if compiler bug is fixed.
+	Add tests for pointer-to-member-function.
+	* gdb.cp/temargs.cc (S::somefunc): New function.
+	(K2): New class.
+	(main): Instantiate K2; call method.
+
 2011-06-08  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.python/py-inferior.c (f2): Make str an array rather

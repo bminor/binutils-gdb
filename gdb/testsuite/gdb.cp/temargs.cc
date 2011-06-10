@@ -23,6 +23,7 @@ int a_global;
 struct S
 {
   int f;
+  void somefunc() { }
 };
 
 template<typename T, int I, int *P, int S::*MP>
@@ -55,17 +56,28 @@ void func ()
   // Breakpoint 3.
 }
 
+template<void (S::*F) ()>
+struct K2
+{
+  void k2_m ()
+  {
+    // Breakpoint 5.
+  }
+};
+
 int main ()
 {
   Base<double, 23, &a_global, &S::f> base;
   // Note that instantiating with P==0 does not work with g++.
   // That would be worth testing, once g++ is fixed.
   Base<long, 47, &a_global, &S::f>::Inner<float> inner;
+  K2<&S::somefunc> k2;
 
   base.base_m ();
   inner.inner_m ();
   func<unsigned char, 91, &a_global, &S::f> ();
   base.templ_m<short> ();
+  k2.k2_m ();
 
   return 0;
 }
