@@ -1,5 +1,10 @@
 2011-06-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* symtab.c (output_partial_symbol_filename): Exchange the filename and
+	fullname parameters order.
+
+2011-06-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Code cleanup.
 	* dwarf2read.c (dw2_map_symbol_filenames): Use symbol_filename_ftype
 	for fun.

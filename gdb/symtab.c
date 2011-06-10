@@ -2837,7 +2837,7 @@ output_source_filename (const char *name, int *first)
 
 /* A callback for map_partial_symbol_filenames.  */
 static void
-output_partial_symbol_filename (const char *fullname, const char *filename,
+output_partial_symbol_filename (const char *filename, const char *fullname,
 				void *data)
 {
   output_source_filename (fullname ? fullname : filename, data);
