@@ -116,6 +116,11 @@ struct symfile_segment_data
   int *segment_info;
 };
 
+/* Callback for quick_symbol_functions->map_symbol_filenames.  */
+
+typedef void (symbol_filename_ftype) (const char *filename,
+				      const char *fullname, void *data);
+
 /* The "quick" symbol functions exist so that symbol readers can
    avoiding an initial read of all the symbols.  For example, symbol
    readers might choose to use the "partial symbol table" utilities,
@@ -283,12 +288,10 @@ struct quick_symbol_functions
 					 int warn_if_readin);
 
   /* Call a callback for every file defined in OBJFILE whose symtab is
-     not already read in.  FUN is the callback.  It is passed the file's name,
-     the file's full name, and the DATA passed to this function.  */
+     not already read in.  FUN is the callback.  It is passed the file's
+     FILENAME, the file's FULLNAME, and the DATA passed to this function.  */
   void (*map_symbol_filenames) (struct objfile *objfile,
-				void (*fun) (const char *, const char *,
-					     void *),
-				void *data);
+				symbol_filename_ftype *fun, void *data);
 };
 
 /* Structure to keep track of symbol reading functions for various

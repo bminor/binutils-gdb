@@ -1082,9 +1082,7 @@ read_psymtabs_with_filename (struct objfile *objfile, const char *filename)
 
 static void
 map_symbol_filenames_psymtab (struct objfile *objfile,
-			      void (*fun) (const char *, const char *,
-					   void *),
-			      void *data)
+			      symbol_filename_ftype *fun, void *data)
 {
   struct partial_symtab *ps;
 
@@ -1917,9 +1915,7 @@ expand_partial_symbol_names (int (*fun) (const char *, void *), void *data)
 }
 
 void
-map_partial_symbol_filenames (void (*fun) (const char *, const char *,
-					   void *),
-			      void *data)
+map_partial_symbol_filenames (symbol_filename_ftype *fun, void *data)
 {
   struct objfile *objfile;
 

@@ -2720,8 +2720,7 @@ dw2_find_pc_sect_symtab (struct objfile *objfile,
 }
 
 static void
-dw2_map_symbol_filenames (struct objfile *objfile,
-			  void (*fun) (const char *, const char *, void *),
+dw2_map_symbol_filenames (struct objfile *objfile, symbol_filename_ftype *fun,
 			  void *data)
 {
   int i;

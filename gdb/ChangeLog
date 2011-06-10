@@ -1,3 +1,16 @@
+2011-06-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Code cleanup.
+	* dwarf2read.c (dw2_map_symbol_filenames): Use symbol_filename_ftype
+	for fun.
+	* psymtab.c (map_symbol_filenames_psymtab)
+	(map_partial_symbol_filenames): Likewise.
+	* psymtab.h: Include symfile.h.
+	(map_partial_symbol_filenames): Use symbol_filename_ftype for fun.
+	* symfile.h (symbol_filename_ftype): New.
+	(struct quick_symbol_functions): Use symbol_filename_ftype for fun of
+	map_symbol_filenames, clarify more the naming in comment.
+
 2011-06-07  Doug Evans  <dje@google.com>
 
 	* cc-with-index.sh: Fix typos in comment.
