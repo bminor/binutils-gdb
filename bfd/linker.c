@@ -1566,6 +1566,8 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
   struct bfd_link_hash_entry *h;
   bfd_boolean cycle;
 
+  BFD_ASSERT (section != NULL);
+
   if (bfd_is_ind_section (section)
       || (flags & BSF_INDIRECT) != 0)
     row = INDR_ROW;

@@ -903,18 +903,24 @@ proc ar_simple_create { ar aropts target objects } {
 
 # List contains test-items with 3 items followed by 2 lists, one item and
 # one optional item:
-# 0:name 1:ld/ar options 2:assembler options
-# 3:filenames of assembler files 4: action and options. 5: name of output file
-# 6:compiler flags (optional)
+#  0:name
+#  1:ld/ar options
+#  2:assembler options
+#  3:filenames of assembler files
+#  4:list of actions, options and expected outputs.
+#  5:name of output file
+#  6:compiler flags (optional)
 #
-# Actions:
-# objdump: Apply objdump options on result.  Compare with regex (last arg).
-# nm: Apply nm options on result.  Compare with regex (last arg).
-# readelf: Apply readelf options on result.  Compare with regex (last arg).
-# ld: Don't apply anything on result.  Compare output during linking with 
-#     regex (second arg).  Note that this *must* be the first action if it
-#     is to be used at all; in all other cases, any output from the linker
-#     during linking is treated as a sign of an error and FAILs the test.
+# Actions: { command command-line-options file-containg-expected-output-regexps }
+# Commands:
+#   objdump: Apply objdump options on result.
+#   nm: Apply nm options on result.
+#   readelf: Apply readelf options on result.
+#   ld: Don't apply anything on result.  Compare output during linking with 
+#     the file containing regexps (which is the second arg, not the third).
+#     Note that this *must* be the first action if it is to be used at all;
+#     in all other cases, any output from the linker during linking is
+#     treated as a sign of an error and FAILs the test.
 #
 proc run_ld_link_tests { ldtests } {
     global ld
@@ -1019,11 +1025,11 @@ proc run_ld_link_tests { ldtests } {
 		    }
 
 		if { $action == "ld" } {
-		    set dumpfile [lindex $actionlist 1]
-		    verbose "dumpfile is $dumpfile"
+		    set regexpfile $progopts
+		    verbose "regexpfile is $srcdir/$subdir/$regexpfile"
 		    set_file_contents "tmpdir/ld.messages" "$ld_output"
 		    verbose "ld.messages has '[file_contents tmpdir/ld.messages]'"
-		    if { [regexp_diff "tmpdir/ld.messages" "$srcdir/$subdir/$dumpfile"] } then {
+		    if { [regexp_diff "tmpdir/ld.messages" "$srcdir/$subdir/$regexpfile"] } then {
 			verbose "output is $ld_output" 2
 			set failed 1
 			break

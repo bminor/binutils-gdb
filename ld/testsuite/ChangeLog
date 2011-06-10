@@ -1,3 +1,12 @@
+2011-06-10  Nick Clifton  <nickc@redhat.com>
+
+	* ld-elf/elf.exp: Add test for linking a shared library with a
+	broken linker script that marks dynamic sections as being notes.
+	* ld-elf/note-3.s: New test source file.
+	* ld-elf/note-3.t: New test linker script.
+	* ld-elf/note-3.l: Expected output from the linker.
+	* lib/ld-lib.exp (run_ld_link_tests): Improve description.
+
 2011-06-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-x86-64/x86-64.exp: Build x32 DSO from x86-64 object file

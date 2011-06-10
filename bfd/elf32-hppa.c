@@ -4498,12 +4498,19 @@ elf32_hppa_finish_dynamic_sections (bfd *output_bfd,
   bfd *dynobj;
   struct elf32_hppa_link_hash_table *htab;
   asection *sdyn;
+  asection * sgot;
 
   htab = hppa_link_hash_table (info);
   if (htab == NULL)
     return FALSE;
 
   dynobj = htab->etab.dynobj;
+
+  sgot = htab->sgot;
+  /* A broken linker script might have discarded the dynamic sections.
+     Catch this here so that we do not seg-fault later on.  */
+  if (sgot != NULL && bfd_is_abs_section (sgot->output_section))
+    return FALSE;
 
   sdyn = bfd_get_section_by_name (dynobj, ".dynamic");
 
@@ -4569,19 +4576,19 @@ elf32_hppa_finish_dynamic_sections (bfd *output_bfd,
 	}
     }
 
-  if (htab->sgot != NULL && htab->sgot->size != 0)
+  if (sgot != NULL && sgot->size != 0)
     {
       /* Fill in the first entry in the global offset table.
 	 We use it to point to our dynamic section, if we have one.  */
       bfd_put_32 (output_bfd,
 		  sdyn ? sdyn->output_section->vma + sdyn->output_offset : 0,
-		  htab->sgot->contents);
+		  sgot->contents);
 
       /* The second entry is reserved for use by the dynamic linker.  */
-      memset (htab->sgot->contents + GOT_ENTRY_SIZE, 0, GOT_ENTRY_SIZE);
+      memset (sgot->contents + GOT_ENTRY_SIZE, 0, GOT_ENTRY_SIZE);
 
       /* Set .got entry size.  */
-      elf_section_data (htab->sgot->output_section)
+      elf_section_data (sgot->output_section)
 	->this_hdr.sh_entsize = GOT_ENTRY_SIZE;
     }
 
@@ -4601,8 +4608,8 @@ elf32_hppa_finish_dynamic_sections (bfd *output_bfd,
 	  if ((htab->splt->output_offset
 	       + htab->splt->output_section->vma
 	       + htab->splt->size)
-	      != (htab->sgot->output_offset
-		  + htab->sgot->output_section->vma))
+	      != (sgot->output_offset
+		  + sgot->output_section->vma))
 	    {
 	      (*_bfd_error_handler)
 		(_(".got section not immediately after .plt section"));

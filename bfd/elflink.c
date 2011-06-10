@@ -286,7 +286,8 @@ _bfd_elf_link_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
   /* Let the backend create the rest of the sections.  This lets the
      backend set the right flags.  The backend will normally create
      the .got and .plt sections.  */
-  if (! (*bed->elf_backend_create_dynamic_sections) (abfd, info))
+  if (bed->elf_backend_create_dynamic_sections == NULL
+      || ! (*bed->elf_backend_create_dynamic_sections) (abfd, info))
     return FALSE;
 
   elf_hash_table (info)->dynamic_sections_created = TRUE;
@@ -11148,6 +11149,13 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 		    (_("%B: could not find output section %s"), abfd, name);
 		  goto error_return;
 		}
+	      if (elf_section_data (o->output_section)->this_hdr.sh_type == SHT_NOTE)
+		{
+		  (*_bfd_error_handler)
+		    (_("warning: section '%s' is being made into a note"), name);
+		  bfd_set_error (bfd_error_nonrepresentable_section);
+		  goto error_return;
+		}
 	      dyn.d_un.d_ptr = o->vma;
 	      break;
 
@@ -11235,7 +11243,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	    continue;
 	  if ((elf_section_data (o->output_section)->this_hdr.sh_type
 	       != SHT_STRTAB)
-	      || strcmp (bfd_get_section_name (abfd, o), ".dynstr") != 0)
+	      && (strcmp (bfd_get_section_name (abfd, o), ".dynstr") != 0))
 	    {
 	      /* FIXME: octets_per_byte.  */
 	      if (! bfd_set_section_contents (abfd, o->output_section,

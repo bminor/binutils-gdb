@@ -49,6 +49,45 @@ run_ld_link_tests {
      {symbol3w.s} {} "symbol3w.a"}
 }
 
+# Run a test to check linking a shared library with a broken linker
+# script that accidentally marks dynamic sections as notes.  The
+# resulting executable is not expected to work, but the linker
+# should not seg-fault whilst creating the binary.
+#
+# Only run the test on targets thats support creating shared libraries.
+if {    ! [istarget arc-*-*]
+     && ! [istarget avr-*-*]
+     && ! [istarget cr16-*-*]
+     && ! [istarget cris*-*-*]
+     && ! [istarget crx-*-*]
+     && ! [istarget d10v-*-*]
+     && ! [istarget d30v-*-*]
+     && ! [istarget dlx-*-*]
+     && ! [istarget fr30-*-*]
+     && ! [istarget frv-*-*]
+     && ! [istarget h8300-*-*]
+     && ! [istarget ip2k-*-*]
+     && ! [istarget m32r-*-*]
+     && ! [istarget mcore*-*-*]
+     && ! [istarget mn10200-*-*]
+     && ! [istarget msp430-*-*]
+     && ! [istarget openrisc-*-*]
+     && ! [istarget or32-*-*]
+     && ! [istarget pj-*-*]
+     && ! [istarget rx-*-*]
+     && ! [istarget v850-*-*]
+     && ! [istarget *-*-irix*]
+     && ! [istarget *-*-rtems] } {
+  run_ld_link_tests {
+      {"Build shared library for next test"
+       "-shared" "" "note-3.s" {} "note-3.so" }
+      {"Link using broken linker script"
+        "--script note-3.t tmpdir/note-3.so" "" ""
+	  { { ld "note-3.l" } }
+	  "a.out" }
+  }
+}
+
 set test_list [lsort [glob -nocomplain $srcdir/$subdir/*.d]]
 foreach t $test_list {
     # We need to strip the ".d", but can leave the dirname.

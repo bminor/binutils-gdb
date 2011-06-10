@@ -1,3 +1,16 @@
+2011-06-10  Nick Clifton  <nickc@redhat.com>
+
+	* elflink.c (_bfd_elf_link_create_dynamic_sections): If the
+	backend does not provide a function for creating dynamic sections
+	then fail.
+	(bfd_elf_final_link): Issue a warning message if a dynamic section
+	has the SHT_NOTE type.
+	(bfd_elf_final_link): Do not look for dynamic strings in a section
+	that does not have the SHT_STRTAB type or the name .dynstr.
+	* elf32-arm.c (elf32_arm_finish_dynamic_sections): Fail if the got
+	section is not in the output binary.
+	* elf32-hppa.c (elf32_hppa_finish_dynamic_sections): Likewise.
+
 2011-06-09  Tristan Gingold  <gingold@adacore.com>
 
 	* elfnn-ia64.c (elfNN_ia64_relax_section, elfNN_ia64_choose_gp)
