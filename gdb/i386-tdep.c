@@ -1191,14 +1191,14 @@ i386_match_insn_block (CORE_ADDR pc, struct i386_insn *insn_patterns)
   if (insn == NULL)
     return 0;
 
-  current_pc = pc - insn->len;
+  current_pc = pc;
   ix = insn - insn_patterns;
   for (i = ix - 1; i >= 0; i--)
     {
+      current_pc -= insn_patterns[i].len;
+
       if (!i386_match_pattern (current_pc, insn_patterns[i]))
 	return 0;
-
-      current_pc -= insn_patterns[i].len;
     }
 
   current_pc = pc + insn->len;

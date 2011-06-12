@@ -1,3 +1,8 @@
+2011-06-12  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-tdep.c (i386_match_insn_block): Use length of the proper
+	instruction when walking back through the instruction stream.
+
 2011-06-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* symtab.c (output_partial_symbol_filename): Exchange the filename and
