@@ -1,5 +1,18 @@
 2011-06-12  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386-tdep.c (i386_epilogue_frame_cache): Simplify code.  Call
+	get_frame_func instead of get_frame_pc to determine the code
+	address used to construct the frame ID.
+	(i386_epilogue_frame_unwind_stop_reason): Fix coding style.
+	(i386_epilogue_frame_this_id): Likewise.
+	(i386_epilogue_frame_prev_register): New function.
+	(i386_epilogue_frame_unwind): Use i386_epilogue_frame_prev_register.
+	(i386_stack_tramp_frame_sniffer): Fix coding style.
+	(i386_stack_tramp_frame_unwind): Use i386_epilogue_frame_prev_register.
+	(i386_gdbarch_init): Fix comments.
+
+2011-06-12  Mark Kettenis  <kettenis@gnu.org>
+
 	* i386-tdep.c (i386_match_insn_block): Use length of the proper
 	instruction when walking back through the instruction stream.
 
