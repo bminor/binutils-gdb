@@ -3354,9 +3354,6 @@ xcoff_post_gc_symbol (struct xcoff_link_hash_entry *h, void * p)
 {
   struct xcoff_loader_info *ldinfo = (struct xcoff_loader_info *) p;
 
-  if (h->root.type == bfd_link_hash_warning)
-    h = (struct xcoff_link_hash_entry *) h->root.u.i.link;
-
   /* __rtinit, this symbol has special handling. */
   if (h->flags & XCOFF_RTINIT)
     return TRUE;
@@ -5152,8 +5149,9 @@ xcoff_find_tc0 (bfd *output_bfd, struct xcoff_final_link_info *flinfo)
 /* Write out a non-XCOFF global symbol.  */
 
 static bfd_boolean
-xcoff_write_global_symbol (struct xcoff_link_hash_entry *h, void * inf)
+xcoff_write_global_symbol (struct bfd_hash_entry *bh, void * inf)
 {
+  struct xcoff_link_hash_entry *h = (struct xcoff_link_hash_entry *) bh;
   struct xcoff_final_link_info *flinfo = (struct xcoff_final_link_info *) inf;
   bfd *output_bfd;
   bfd_byte *outsym;
@@ -6237,9 +6235,7 @@ _bfd_xcoff_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
 
   /* Write out all the global symbols which do not come from XCOFF
      input files.  */
-  xcoff_link_hash_traverse (xcoff_hash_table (info),
-			    xcoff_write_global_symbol,
-			    (void *) &flinfo);
+  bfd_hash_traverse (&info->hash->table, xcoff_write_global_symbol, &flinfo);
 
   if (flinfo.outsyms != NULL)
     {

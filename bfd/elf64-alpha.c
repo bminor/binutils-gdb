@@ -1553,9 +1553,6 @@ elf64_alpha_output_extsym (struct alpha_elf_link_hash_entry *h, PTR data)
   bfd_boolean strip;
   asection *sec, *output_section;
 
-  if (h->root.root.type == bfd_link_hash_warning)
-    h = (struct alpha_elf_link_hash_entry *) h->root.root.u.i.link;
-
   if (h->root.indx == -2)
     strip = FALSE;
   else if ((h->root.def_dynamic
@@ -2390,9 +2387,6 @@ elf64_alpha_calc_got_offsets_for_symbol (struct alpha_elf_link_hash_entry *h,
 {
   struct alpha_elf_got_entry *gotent;
 
-  if (h->root.root.type == bfd_link_hash_warning)
-    h = (struct alpha_elf_link_hash_entry *) h->root.root.u.i.link;
-
   for (gotent = h->got_entries; gotent; gotent = gotent->next)
     if (gotent->use_count > 0)
       {
@@ -2695,9 +2689,6 @@ elf64_alpha_calc_dynrel_sizes (struct alpha_elf_link_hash_entry *h,
   struct alpha_elf_reloc_entry *relent;
   unsigned long entries;
 
-  if (h->root.root.type == bfd_link_hash_warning)
-    h = (struct alpha_elf_link_hash_entry *) h->root.root.u.i.link;
-
   /* If the symbol was defined as a common symbol in a regular object
      file, and there was no definition in any dynamic object, then the
      linker will have allocated space for the symbol in a common
@@ -2750,9 +2741,6 @@ elf64_alpha_size_rela_got_1 (struct alpha_elf_link_hash_entry *h,
   bfd_boolean dynamic;
   struct alpha_elf_got_entry *gotent;
   unsigned long entries;
-
-  if (h->root.root.type == bfd_link_hash_warning)
-    h = (struct alpha_elf_link_hash_entry *) h->root.root.u.i.link;
 
   /* If we're using a plt for this symbol, then all of its relocations
      for its got entries go into .rela.plt.  */

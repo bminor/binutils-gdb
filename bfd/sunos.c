@@ -1,6 +1,6 @@
 /* BFD backend for SunOS binaries.
    Copyright 1990, 1991, 1992, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008
+   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2011
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -1748,9 +1748,6 @@ static bfd_boolean
 sunos_scan_dynamic_symbol (struct sunos_link_hash_entry *h, void * data)
 {
   struct bfd_link_info *info = (struct bfd_link_info *) data;
-
-  if (h->root.root.type == bfd_link_hash_warning)
-    h = (struct sunos_link_hash_entry *) h->root.root.u.i.link;
 
   /* Set the written flag for symbols we do not want to write out as
      part of the regular symbol table.  This is all symbols which are

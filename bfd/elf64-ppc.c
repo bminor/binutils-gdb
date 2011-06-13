@@ -5669,9 +5669,6 @@ ppc64_elf_gc_mark_dynamic_ref (struct elf_link_hash_entry *h, void *inf)
   struct ppc_link_hash_entry *eh = (struct ppc_link_hash_entry *) h;
   struct ppc_link_hash_entry *fdh;
 
-  if (eh->elf.root.type == bfd_link_hash_warning)
-    eh = (struct ppc_link_hash_entry *) eh->elf.root.u.i.link;
-
   /* Dynamic linking info is on the func descriptor sym.  */
   fdh = defined_func_desc (eh);
   if (fdh != NULL)
@@ -6214,9 +6211,6 @@ func_desc_adjust (struct elf_link_hash_entry *h, void *inf)
   if (fh->elf.root.type == bfd_link_hash_indirect)
     return TRUE;
 
-  if (fh->elf.root.type == bfd_link_hash_warning)
-    fh = (struct ppc_link_hash_entry *) fh->elf.root.u.i.link;
-
   info = inf;
   htab = ppc_hash_table (info);
   if (htab == NULL)
@@ -6741,9 +6735,6 @@ adjust_opd_syms (struct elf_link_hash_entry *h, void *inf ATTRIBUTE_UNUSED)
 
   if (h->root.type == bfd_link_hash_indirect)
     return TRUE;
-
-  if (h->root.type == bfd_link_hash_warning)
-    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
   if (h->root.type != bfd_link_hash_defined
       && h->root.type != bfd_link_hash_defweak)
@@ -7905,9 +7896,6 @@ adjust_toc_syms (struct elf_link_hash_entry *h, void *inf)
   if (h->root.type == bfd_link_hash_indirect)
     return TRUE;
 
-  if (h->root.type == bfd_link_hash_warning)
-    h = (struct elf_link_hash_entry *) h->root.u.i.link;
-
   if (h->root.type != bfd_link_hash_defined
       && h->root.type != bfd_link_hash_defweak)
     return TRUE;
@@ -8603,9 +8591,6 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
   if (h->root.type == bfd_link_hash_indirect)
     return TRUE;
 
-  if (h->root.type == bfd_link_hash_warning)
-    h = (struct elf_link_hash_entry *) h->root.u.i.link;
-
   info = (struct bfd_link_info *) inf;
   htab = ppc_hash_table (info);
   if (htab == NULL)
@@ -8845,9 +8830,6 @@ readonly_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 {
   struct ppc_link_hash_entry *eh;
   struct elf_dyn_relocs *p;
-
-  if (h->root.type == bfd_link_hash_warning)
-    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
   eh = (struct ppc_link_hash_entry *) h;
   for (p = eh->dyn_relocs; p != NULL; p = p->next)
@@ -10217,9 +10199,6 @@ merge_global_got (struct elf_link_hash_entry *h, void *inf ATTRIBUTE_UNUSED)
   if (h->root.type == bfd_link_hash_indirect)
     return TRUE;
 
-  if (h->root.type == bfd_link_hash_warning)
-    h = (struct elf_link_hash_entry *) h->root.u.i.link;
-
   merge_got_entries (&h->got.glist);
 
   return TRUE;
@@ -10235,9 +10214,6 @@ reallocate_got (struct elf_link_hash_entry *h, void *inf)
 
   if (h->root.type == bfd_link_hash_indirect)
     return TRUE;
-
-  if (h->root.type == bfd_link_hash_warning)
-    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
   for (gent = h->got.glist; gent != NULL; gent = gent->next)
     if (!gent->is_indirect)
@@ -11492,9 +11468,6 @@ undo_symbol_twiddle (struct elf_link_hash_entry *h, void *inf ATTRIBUTE_UNUSED)
 
   if (h->root.type == bfd_link_hash_indirect)
     return TRUE;
-
-  if (h->root.type == bfd_link_hash_warning)
-    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
   eh = (struct ppc_link_hash_entry *) h;
   if (eh->elf.root.type != bfd_link_hash_undefweak || !eh->was_undefined)

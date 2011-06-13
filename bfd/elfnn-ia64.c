@@ -1421,9 +1421,6 @@ elfNN_ia64_global_dyn_info_free (void **xentry,
   struct elfNN_ia64_link_hash_entry *entry
     = (struct elfNN_ia64_link_hash_entry *) xentry;
 
-  if (entry->root.root.type == bfd_link_hash_warning)
-    entry = (struct elfNN_ia64_link_hash_entry *) entry->root.root.u.i.link;
-
   if (entry->info)
     {
       free (entry->info);
@@ -1495,9 +1492,6 @@ elfNN_ia64_global_dyn_sym_thunk (struct bfd_hash_entry *xentry,
     = (struct elfNN_ia64_dyn_sym_traverse_data *) xdata;
   struct elfNN_ia64_dyn_sym_info *dyn_i;
   unsigned int count;
-
-  if (entry->root.root.type == bfd_link_hash_warning)
-    entry = (struct elfNN_ia64_link_hash_entry *) entry->root.root.u.i.link;
 
   for (count = entry->count, dyn_i = entry->info;
        count != 0;

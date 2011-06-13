@@ -8600,21 +8600,31 @@ alpha_vms_build_fixups (struct bfd_link_info *info)
   return TRUE;
 }
 
-/* Called by bfd_link_hash_traverse to fill the symbol table.
+/* Called by bfd_hash_traverse to fill the symbol table.
    Return FALSE in case of failure.  */
 
 static bfd_boolean
-alpha_vms_link_output_symbol (struct bfd_link_hash_entry *hc, void *infov)
+alpha_vms_link_output_symbol (struct bfd_hash_entry *bh, void *infov)
 {
+  struct bfd_link_hash_entry *hc = (struct bfd_link_hash_entry *) bh;
   struct bfd_link_info *info = (struct bfd_link_info *)infov;
-  struct alpha_vms_link_hash_entry *h = (struct alpha_vms_link_hash_entry *)hc;
+  struct alpha_vms_link_hash_entry *h;
   struct vms_symbol_entry *sym;
+
+  if (hc->type == bfd_link_hash_warning)
+    {
+      hc = hc->u.i.link;
+      if (hc->type == bfd_link_hash_new)
+	return TRUE;
+    }
+  h = (struct alpha_vms_link_hash_entry *) hc;
 
   switch (h->root.type)
     {
     case bfd_link_hash_undefined:
       return TRUE;
     case bfd_link_hash_new:
+    case bfd_link_hash_warning:
       abort ();
     case bfd_link_hash_undefweak:
       return TRUE;
@@ -8634,7 +8644,6 @@ alpha_vms_link_output_symbol (struct bfd_link_hash_entry *hc, void *infov)
     case bfd_link_hash_common:
       break;
     case bfd_link_hash_indirect:
-    case bfd_link_hash_warning:
       return TRUE;
     }
 
@@ -8740,7 +8749,7 @@ alpha_vms_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
   /* Generate the symbol table.  */
   BFD_ASSERT (PRIV (syms) == NULL);
   if (info->strip != strip_all)
-    bfd_link_hash_traverse (info->hash, alpha_vms_link_output_symbol, info);
+    bfd_hash_traverse (&info->hash->table, alpha_vms_link_output_symbol, info);
 
   /* Find the entry point.  */
   if (bfd_get_start_address (abfd) == 0)

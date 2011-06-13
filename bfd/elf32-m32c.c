@@ -1,5 +1,5 @@
 /* M16C/M32C specific support for 32-bit ELF.
-   Copyright (C) 2005, 2006, 2007, 2008, 2009, 2010
+   Copyright (C) 2005, 2006, 2007, 2008, 2009, 2010, 2011
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -989,9 +989,6 @@ m32c_relax_plt_check (struct elf_link_hash_entry *h,
 {
   struct relax_plt_data *data = (struct relax_plt_data *) xdata;
 
-  if (h->root.type == bfd_link_hash_warning)
-    h = (struct elf_link_hash_entry *) h->root.u.i.link;
-
   if (h->plt.offset != (bfd_vma) -1)
     {
       bfd_vma address;
@@ -1023,9 +1020,6 @@ m32c_relax_plt_realloc (struct elf_link_hash_entry *h,
                         PTR xdata)
 {
   bfd_vma *entry = (bfd_vma *) xdata;
-
-  if (h->root.type == bfd_link_hash_warning)
-    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
   if (h->plt.offset != (bfd_vma) -1)
     {

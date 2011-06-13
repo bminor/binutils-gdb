@@ -5451,9 +5451,6 @@ bfin_discard_copies (struct elf_link_hash_entry *h, PTR inf)
   struct bfd_link_info *info = (struct bfd_link_info *) inf;
   struct bfin_pcrel_relocs_copied *s;
 
-  if (h->root.type == bfd_link_hash_warning)
-    h = (struct elf_link_hash_entry *) h->root.u.i.link;
-
   if (!h->def_regular || (!info->symbolic && !h->forced_local))
     {
       if ((info->flags & DF_TEXTREL) == 0)

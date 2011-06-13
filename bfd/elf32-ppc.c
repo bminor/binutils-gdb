@@ -5149,12 +5149,6 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
   if (h->root.type == bfd_link_hash_indirect)
     return TRUE;
 
-  if (h->root.type == bfd_link_hash_warning)
-    /* When warning symbols are created, they **replace** the "real"
-       entry in the hash table, thus we never get to see the real
-       symbol in a hash traversal.  So look at it now.  */
-    h = (struct elf_link_hash_entry *) h->root.u.i.link;
-
   htab = ppc_elf_hash_table (info);
   if (htab->elf.dynamic_sections_created
       || h->type == STT_GNU_IFUNC)
@@ -5503,9 +5497,6 @@ maybe_set_textrel (struct elf_link_hash_entry *h, void *info)
 {
   if (h->root.type == bfd_link_hash_indirect)
     return TRUE;
-
-  if (h->root.type == bfd_link_hash_warning)
-    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
   if (readonly_dynrelocs (h))
     {

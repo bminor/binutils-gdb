@@ -1,6 +1,7 @@
 /* VAX series support for 32-bit ELF
    Copyright 1993, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-   2004, 2005, 2006, 2007, 2008, 2009, 2010  Free Software Foundation, Inc.
+   2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011
+   Free Software Foundation, Inc.
    Contributed by Matt Thomas <matt@3am-software.com>.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -1271,9 +1272,6 @@ elf_vax_discard_copies (struct elf_vax_link_hash_entry *h,
 			PTR ignore ATTRIBUTE_UNUSED)
 {
   struct elf_vax_pcrel_relocs_copied *s;
-
-  if (h->root.root.type == bfd_link_hash_warning)
-    h = (struct elf_vax_link_hash_entry *) h->root.root.u.i.link;
 
   /* We only discard relocs for symbols defined in a regular object.  */
   if (!h->root.def_regular)

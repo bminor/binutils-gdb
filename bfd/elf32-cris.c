@@ -1,6 +1,6 @@
 /* CRIS-specific support for 32-bit ELF.
    Copyright 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009,
-   2010  Free Software Foundation, Inc.
+   2010, 2011 Free Software Foundation, Inc.
    Contributed by Axis Communications AB.
    Written by Hans-Peter Nilsson, based on elf32-fr30.c
    PIC and shlib bits based primarily on elf32-m68k.c and elf32-i386.c.
@@ -2733,9 +2733,6 @@ elf_cris_adjust_gotplt_to_got (h, p)
 {
   struct bfd_link_info *info = (struct bfd_link_info *) p;
 
-  if (h->root.root.type == bfd_link_hash_warning)
-    h = (struct elf_cris_link_hash_entry *) h->root.root.u.i.link;
-
   /* If nobody wanted a GOTPLT with this symbol, we're done.  */
   if (h->gotplt_refcount <= 0)
     return TRUE;
@@ -3956,9 +3953,6 @@ elf_cris_discard_excess_dso_dynamics (h, inf)
   struct elf_cris_pcrel_relocs_copied *s;
   struct bfd_link_info *info = (struct bfd_link_info *) inf;
 
-  if (h->root.root.type == bfd_link_hash_warning)
-    h = (struct elf_cris_link_hash_entry *) h->root.root.u.i.link;
-
   /* If a symbol has been forced local or we have found a regular
      definition for the symbolic link case, then we won't be needing
      any relocs.  */
@@ -4013,9 +4007,6 @@ elf_cris_discard_excess_program_dynamics (h, inf)
      PTR inf;
 {
   struct bfd_link_info *info = (struct bfd_link_info *) inf;
-
-  if (h->root.root.type == bfd_link_hash_warning)
-    h = (struct elf_cris_link_hash_entry *) h->root.root.u.i.link;
 
   /* If we're not creating a shared library and have a symbol which is
      referred to by .got references, but the symbol is defined locally,

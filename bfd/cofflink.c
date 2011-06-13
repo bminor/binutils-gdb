@@ -1,6 +1,6 @@
 /* COFF specific linker code.
    Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-   2004, 2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+   2004, 2005, 2006, 2007, 2008, 2009, 2011 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -1019,8 +1019,7 @@ _bfd_coff_final_link (bfd *abfd,
 
   /* Write out the global symbols.  */
   finfo.failed = FALSE;
-  coff_link_hash_traverse (coff_hash_table (info),
-			   _bfd_coff_write_global_sym, &finfo);
+  bfd_hash_traverse (&info->hash->table, _bfd_coff_write_global_sym, &finfo);
   if (finfo.failed)
     goto error_return;
 
@@ -2516,11 +2515,12 @@ _bfd_coff_link_input_bfd (struct coff_final_link_info *finfo, bfd *input_bfd)
   return TRUE;
 }
 
-/* Write out a global symbol.  Called via coff_link_hash_traverse.  */
+/* Write out a global symbol.  Called via bfd_hash_traverse.  */
 
 bfd_boolean
-_bfd_coff_write_global_sym (struct coff_link_hash_entry *h, void *data)
+_bfd_coff_write_global_sym (struct bfd_hash_entry *bh, void *data)
 {
+  struct coff_link_hash_entry *h = (struct coff_link_hash_entry *) bh;
   struct coff_final_link_info *finfo = (struct coff_final_link_info *) data;
   bfd *output_bfd;
   struct internal_syment isym;
@@ -2745,7 +2745,7 @@ _bfd_coff_write_task_globals (struct coff_link_hash_entry *h, void *data)
 	case bfd_link_hash_defweak:
 	  save_global_to_static = finfo->global_to_static;
 	  finfo->global_to_static = TRUE;
-	  rtnval = _bfd_coff_write_global_sym (h, data);
+	  rtnval = _bfd_coff_write_global_sym (&h->root.root, data);
 	  finfo->global_to_static = save_global_to_static;
 	  break;
 	default:

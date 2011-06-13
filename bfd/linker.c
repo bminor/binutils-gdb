@@ -604,21 +604,32 @@ bfd_wrapped_link_hash_lookup (bfd *abfd,
   return bfd_link_hash_lookup (info->hash, string, create, copy, follow);
 }
 
-/* Traverse a generic link hash table.  The only reason this is not a
-   macro is to do better type checking.  This code presumes that an
-   argument passed as a struct bfd_hash_entry * may be caught as a
-   struct bfd_link_hash_entry * with no explicit cast required on the
-   call.  */
+/* Traverse a generic link hash table.  Differs from bfd_hash_traverse
+   in the treatment of warning symbols.  When warning symbols are
+   created they replace the real symbol, so you don't get to see the
+   real symbol in a bfd_hash_travere.  This traversal calls func with
+   the real symbol.  */
 
 void
 bfd_link_hash_traverse
-  (struct bfd_link_hash_table *table,
+  (struct bfd_link_hash_table *htab,
    bfd_boolean (*func) (struct bfd_link_hash_entry *, void *),
    void *info)
 {
-  bfd_hash_traverse (&table->table,
-		     (bfd_boolean (*) (struct bfd_hash_entry *, void *)) func,
-		     info);
+  unsigned int i;
+
+  htab->table.frozen = 1;
+  for (i = 0; i < htab->table.size; i++)
+    {
+      struct bfd_link_hash_entry *p;
+
+      p = (struct bfd_link_hash_entry *) htab->table.table[i];
+      for (; p != NULL; p = (struct bfd_link_hash_entry *) p->root.next)
+	if (!(*func) (p->type == bfd_link_hash_warning ? p->u.i.link : p, info))
+	  goto out;
+    }
+ out:
+  htab->table.frozen = 0;
 }
 
 /* Add a symbol to the linker hash table undefs list.  */
@@ -2442,9 +2453,6 @@ _bfd_generic_link_write_global_symbol (struct generic_link_hash_entry *h,
       (struct generic_write_global_symbol_info *) data;
   asymbol *sym;
 
-  if (h->root.type == bfd_link_hash_warning)
-    h = (struct generic_link_hash_entry *) h->root.u.i.link;
-
   if (h->written)
     return TRUE;
 
@@ -3094,9 +3102,6 @@ static bfd_boolean
 fix_syms (struct bfd_link_hash_entry *h, void *data)
 {
   bfd *obfd = (bfd *) data;
-
-  if (h->type == bfd_link_hash_warning)
-    h = h->u.i.link;
 
   if (h->type == bfd_link_hash_defined
       || h->type == bfd_link_hash_defweak)

@@ -1719,9 +1719,6 @@ mips_elf_check_symbols (struct mips_elf_link_hash_entry *h, void *data)
   struct mips_htab_traverse_info *hti;
 
   hti = (struct mips_htab_traverse_info *) data;
-  if (h->root.root.type == bfd_link_hash_warning)
-    h = (struct mips_elf_link_hash_entry *) h->root.root.u.i.link;
-
   if (!hti->info->relocatable)
     mips_elf_check_mips16_stubs (hti->info, h);
 
@@ -2408,9 +2405,6 @@ mips_elf_output_extsym (struct mips_elf_link_hash_entry *h, void *data)
   struct extsym_info *einfo = data;
   bfd_boolean strip;
   asection *sec, *output_section;
-
-  if (h->root.root.type == bfd_link_hash_warning)
-    h = (struct mips_elf_link_hash_entry *) h->root.root.u.i.link;
 
   if (h->root.indx == -2)
     strip = FALSE;
@@ -3436,9 +3430,6 @@ static bfd_boolean
 mips_elf_sort_hash_table_f (struct mips_elf_link_hash_entry *h, void *data)
 {
   struct mips_elf_hash_sort_data *hsd = data;
-
-  if (h->root.root.type == bfd_link_hash_warning)
-    h = (struct mips_elf_link_hash_entry *) h->root.root.u.i.link;
 
   /* Symbols without dynamic symbol table entries aren't interesting
      at all.  */
@@ -8147,10 +8138,9 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
   if (htab->is_vxworks && !info->shared)
     return TRUE;
 
-  /* Ignore indirect and warning symbols.  All relocations against
-     such symbols will be redirected to the target symbol.  */
-  if (h->root.type == bfd_link_hash_indirect
-      || h->root.type == bfd_link_hash_warning)
+  /* Ignore indirect symbols.  All relocations against such symbols
+     will be redirected to the target symbol.  */
+  if (h->root.type == bfd_link_hash_indirect)
     return TRUE;
 
   /* If this symbol is defined in a dynamic object, or we are creating

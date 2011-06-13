@@ -4,7 +4,7 @@
 
 /* BFD COFF object file private structure.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009
+   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -563,7 +563,7 @@ extern bfd_boolean _bfd_coff_generic_relocate_section
 extern struct bfd_hash_entry *_bfd_coff_debug_merge_hash_newfunc
   (struct bfd_hash_entry *, struct bfd_hash_table *, const char *);
 extern bfd_boolean _bfd_coff_write_global_sym
-  (struct coff_link_hash_entry *, void *);
+  (struct bfd_hash_entry *, void *);
 extern bfd_boolean _bfd_coff_write_task_globals
   (struct coff_link_hash_entry *, void *);
 extern bfd_boolean _bfd_coff_link_input_bfd

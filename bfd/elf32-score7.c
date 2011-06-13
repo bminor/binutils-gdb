@@ -1,5 +1,5 @@
 /* 32-bit ELF support for S+core.
-   Copyright 2009, 2010 Free Software Foundation, Inc.
+   Copyright 2009, 2010, 2011 Free Software Foundation, Inc.
    Contributed by
    Brain.lin (brain.lin@sunplusct.com)
    Mei Ligang (ligang@sunnorth.com.cn)
@@ -919,9 +919,6 @@ static bfd_boolean
 score_elf_sort_hash_table_f (struct score_elf_link_hash_entry *h, void *data)
 {
   struct score_elf_hash_sort_data *hsd = data;
-
-  if (h->root.root.type == bfd_link_hash_warning)
-    h = (struct score_elf_link_hash_entry *) h->root.root.u.i.link;
 
   /* Symbols without dynamic symbol table entries aren't interesting at all.  */
   if (h->root.dynindx == -1)

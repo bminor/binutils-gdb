@@ -2039,8 +2039,6 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
   if (h->root.type == bfd_link_hash_indirect)
     return TRUE;
 
-  if (h->root.type == bfd_link_hash_warning)
-    h = (struct elf_link_hash_entry *) h->root.u.i.link;
   eh = (struct elf_x86_64_link_hash_entry *) h;
 
   info = (struct bfd_link_info *) inf;
@@ -2304,9 +2302,6 @@ elf_x86_64_readonly_dynrelocs (struct elf_link_hash_entry *h,
 {
   struct elf_x86_64_link_hash_entry *eh;
   struct elf_dyn_relocs *p;
-
-  if (h->root.type == bfd_link_hash_warning)
-    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
   /* Skip local IFUNC symbols. */
   if (h->forced_local && h->type == STT_GNU_IFUNC)

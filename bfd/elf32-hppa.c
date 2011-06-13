@@ -1,6 +1,6 @@
 /* BFD back-end for HP PA-RISC ELF files.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1999, 2000, 2001,
-   2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010
+   2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011
    Free Software Foundation, Inc.
 
    Original code by
@@ -1938,9 +1938,6 @@ allocate_plt_static (struct elf_link_hash_entry *eh, void *inf)
   if (eh->root.type == bfd_link_hash_indirect)
     return TRUE;
 
-  if (eh->root.type == bfd_link_hash_warning)
-    eh = (struct elf_link_hash_entry *) eh->root.u.i.link;
-
   info = (struct bfd_link_info *) inf;
   hh = hppa_elf_hash_entry (eh);
   htab = hppa_link_hash_table (info);
@@ -2007,9 +2004,6 @@ allocate_dynrelocs (struct elf_link_hash_entry *eh, void *inf)
 
   if (eh->root.type == bfd_link_hash_indirect)
     return TRUE;
-
-  if (eh->root.type == bfd_link_hash_warning)
-    eh = (struct elf_link_hash_entry *) eh->root.u.i.link;
 
   info = inf;
   htab = hppa_link_hash_table (info);
@@ -2170,9 +2164,6 @@ static bfd_boolean
 clobber_millicode_symbols (struct elf_link_hash_entry *eh,
 			   struct bfd_link_info *info)
 {
-  if (eh->root.type == bfd_link_hash_warning)
-    eh = (struct elf_link_hash_entry *) eh->root.u.i.link;
-
   if (eh->type == STT_PARISC_MILLI
       && !eh->forced_local)
     {
@@ -2188,9 +2179,6 @@ readonly_dynrelocs (struct elf_link_hash_entry *eh, void *inf)
 {
   struct elf32_hppa_link_hash_entry *hh;
   struct elf32_hppa_dyn_reloc_entry *hdh_p;
-
-  if (eh->root.type == bfd_link_hash_warning)
-    eh = (struct elf_link_hash_entry *) eh->root.u.i.link;
 
   hh = hppa_elf_hash_entry (eh);
   for (hdh_p = hh->dyn_relocs; hdh_p != NULL; hdh_p = hdh_p->hdh_next)

@@ -1,6 +1,6 @@
 /* BFD back-end for linux flavored i386 a.out binaries.
    Copyright 1992, 1993, 1994, 1995, 1996, 1997, 1999, 2001, 2002, 2003,
-   2004, 2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+   2004, 2005, 2006, 2007, 2008, 2009, 2011 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -434,9 +434,6 @@ linux_tally_symbols (h, data)
   int is_plt;
   struct linux_link_hash_entry *h1, *h2;
   bfd_boolean exists;
-
-  if (h->root.root.type == bfd_link_hash_warning)
-    h = (struct linux_link_hash_entry *) h->root.root.u.i.link;
 
   if (h->root.root.type == bfd_link_hash_undefined
       && CONST_STRNEQ (h->root.root.root.string, NEEDS_SHRLIB))

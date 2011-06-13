@@ -2401,8 +2401,7 @@ ppc_bfd_coff_final_link (abfd, info)
 
   /* Write out the global symbols.  */
   finfo.failed = FALSE;
-  coff_link_hash_traverse (coff_hash_table (info), _bfd_coff_write_global_sym,
-			   (PTR) &finfo);
+  bfd_hash_traverse (&info->hash->table, _bfd_coff_write_global_sym, &finfo);
   if (finfo.failed)
     goto error_return;
 

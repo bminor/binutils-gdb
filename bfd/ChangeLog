@@ -1,3 +1,87 @@
+2011-06-13  Alan Modra  <amodra@gmail.com>
+
+	* linker.c (bfd_link_hash_traverse): Follow warning symbol link.
+	(_bfd_generic_link_write_global_symbol, fix_syms): Don't handle
+	warning symbols here.
+	* elf-m10300.c (elf32_mn10300_finish_hash_table_entry): Likewise.
+	* elf32-arm.c (allocate_dynrelocs_for_symbol,
+	elf32_arm_readonly_dynrelocs): Likewise.
+	* elf32-bfin.c (bfin_discard_copies): Likewise.
+	* elf32-cris.c (elf_cris_adjust_gotplt_to_got,
+	elf_cris_discard_excess_dso_dynamics,
+	elf_cris_discard_excess_program_dynamics): Likewise.
+	* elf32-hppa.c (allocate_plt_static, allocate_dynrelocs,
+	clobber_millicode_symbols, readonly_dynrelocs): Likewise.
+	* elf32-i370.c (i370_elf_adjust_dynindx): Likewise.
+	* elf32-i386.c (elf_i386_allocate_dynrelocs,
+	elf_i386_readonly_dynrelocs): Likewise.
+	* elf32-lm32.c (allocate_dynrelocs, readonly_dynrelocs): Likewise.
+	* elf32-m32c.c (m32c_relax_plt_check, m32c_relax_plt_realloc): Likewise.
+	* elf32-m32r.c (allocate_dynrelocs, readonly_dynrelocs): Likewise.
+	* elf32-m68k.c (elf_m68k_discard_copies): Likewise.
+	* elf32-microblaze.c (allocate_dynrelocs): Likewise.
+	* elf32-ppc.c (allocate_dynrelocs, maybe_set_textrel): Likewise.
+	* elf32-s390.c (allocate_dynrelocs, readonly_dynrelocs): Likewise.
+	* elf32-score.c (score_elf_sort_hash_table_f): Likewise.
+	* elf32-score7.c (score_elf_sort_hash_table_f): Likewise.
+	* elf32-sh.c (allocate_dynrelocs, readonly_dynrelocs): Likewise.
+	* elf32-tic6x.c (elf32_tic6x_allocate_dynrelocs,
+	elf32_tic6x_readonly_dynrelocs): Likewise.
+	* elf32-vax.c (elf_vax_discard_copies): Likewise.
+	* elf32-xstormy16.c (xstormy16_relax_plt_check,
+	xstormy16_relax_plt_realloc): Likewise.
+	* elf32-xtensa.c (elf_xtensa_allocate_dynrelocs): Likewise.
+	* elf64-alpha.c (elf64_alpha_output_extsym,
+	elf64_alpha_calc_got_offsets_for_symbol,
+	elf64_alpha_calc_dynrel_sizes, elf64_alpha_size_rela_got_1): Likewise.
+	* elf64-hppa.c (elf64_hppa_mark_exported_functions,
+	allocate_global_data_opd, elf64_hppa_mark_milli_and_exported_functions,
+	elf_hppa_unmark_useless_dynamic_symbols,
+	elf_hppa_remark_useless_dynamic_symbols): Likewise.
+	* elf64-ppc.c (ppc64_elf_gc_mark_dynamic_ref, func_desc_adjust,
+	adjust_opd_syms, adjust_toc_syms, allocate_dynrelocs,
+	readonly_dynrelocs, merge_global_got, reallocate_got,
+	undo_symbol_twiddle): Likewise.
+	* elf64-s390.c (allocate_dynrelocs, readonly_dynrelocs): Likewise.
+	* elf64-sh64.c (sh64_elf64_discard_copies): Likewise.
+	* elf64-x86-64.c (elf_x86_64_allocate_dynrelocs,
+	elf_x86_64_readonly_dynrelocs): Likewise.
+	* elflink.c (elf_link_renumber_hash_table_dynsyms,
+	elf_link_renumber_local_hash_table_dynsyms, _bfd_elf_export_symbol,
+	_bfd_elf_link_find_version_dependencies,
+	_bfd_elf_link_assign_sym_version, _bfd_elf_adjust_dynamic_symbol,
+	_bfd_elf_link_sec_merge_syms, elf_adjust_dynstr_offsets,
+	elf_collect_hash_codes, elf_collect_gnu_hash_codes,
+	elf_renumber_gnu_hash_syms, elf_gc_sweep_symbol,
+	elf_gc_propagate_vtable_entries_used,
+	elf_gc_smash_unused_vtentry_relocs, bfd_elf_gc_mark_dynamic_ref_symbol,
+	elf_gc_allocate_got_offsets): Likewise.
+	* elfnn-ia64.c (elfNN_ia64_global_dyn_info_free,
+	elfNN_ia64_global_dyn_sym_thunk): Likewise.
+	* elfxx-mips.c (mips_elf_check_symbols, mips_elf_output_extsym,
+	mips_elf_sort_hash_table_f, allocate_dynrelocs): Likewise.
+	* elfxx-sparc.c (allocate_dynrelocs, readonly_dynrelocs): Likewise.
+	* i386linux.c (linux_tally_symbols): Likewise.
+	* m68klinux.c (linux_tally_symbols): Likewise.
+	* sparclinux.c (linux_tally_symbols): Likewise.
+	* sunos.c (sunos_scan_dynamic_symbol): Likewise.
+	* xcofflink.c (xcoff_post_gc_symbol): Likewise.
+
+	* elflink.c (elf_link_output_extsym): Make it a bfd_hash_traverse
+	function.  Update all callers.
+	* aoutx.h (aout_link_write_other_symbol): Likewise.
+	* pdp11.c (aout_link_write_other_symbol): Likewise.
+	* cofflink.c (_bfd_coff_write_global_sym): Likewise.
+	* ecoff.c (ecoff_link_write_external): Likewise.
+	* xcofflink.c (xcoff_write_global_symbol): Likewise.
+	* vms-alpha.c (alpha_vms_link_output_symbol): Likewise.  Handle
+	warning symbols.
+	* ecoff.c (ecoff_link_hash_traverse): Delete.
+	* coff-ppc.c (ppc_bfd_coff_final_link): Use bfd_hash_traverse for
+	_bfd_coff_write_global_sym.
+	* libcoff-in.h (_bfd_coff_write_global_sym): Update prototype.
+	* libcoff.h: Regenerate.
+
 2011-06-10  Nick Clifton  <nickc@redhat.com>
 
 	* elflink.c (_bfd_elf_link_create_dynamic_sections): If the

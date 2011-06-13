@@ -1,6 +1,6 @@
 /* Matsushita 10300 specific support for 32-bit ELF
    Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
-   2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+   2006, 2007, 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -1601,9 +1601,6 @@ elf32_mn10300_finish_hash_table_entry (struct bfd_hash_entry *gen_entry,
   unsigned int byte_count = 0;
 
   entry = (struct elf32_mn10300_link_hash_entry *) gen_entry;
-
-  if (entry->root.root.type == bfd_link_hash_warning)
-    entry = (struct elf32_mn10300_link_hash_entry *) entry->root.root.u.i.link;
 
   /* If we already know we want to convert "call" to "calls" for calls
      to this symbol, then return now.  */

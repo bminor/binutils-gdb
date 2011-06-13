@@ -1,5 +1,5 @@
 /* Lattice Mico32-specific support for 32-bit ELF
-   Copyright 2008, 2009, 2010  Free Software Foundation, Inc.
+   Copyright 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
    Contributed by Jon Beniston <jon@beniston.com>
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -1918,12 +1918,6 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
   if (h->root.type == bfd_link_hash_indirect)
     return TRUE;
 
-  if (h->root.type == bfd_link_hash_warning)
-    /* When warning symbols are created, they **replace** the "real"
-       entry in the hash table, thus we never get to see the real
-       symbol in a hash traversal.  So look at it now.  */
-    h = (struct elf_link_hash_entry *) h->root.u.i.link;
-
   info = (struct bfd_link_info *) inf;
   htab = lm32_elf_hash_table (info);
   if (htab == NULL)
@@ -2109,9 +2103,6 @@ readonly_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 {
   struct elf_lm32_link_hash_entry *eh;
   struct elf_lm32_dyn_relocs *p;
-
-  if (h->root.type == bfd_link_hash_warning)
-    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
   eh = (struct elf_lm32_link_hash_entry *) h;
   for (p = eh->dyn_relocs; p != NULL; p = p->next)
