@@ -1,5 +1,12 @@
 2011-06-13  Nick Clifton  <nickc@redhat.com>
 
+	PR gas/12854
+	* config/tc-arm.c (do_shift): Do not allow shift operations at the
+	end of a register based shift insn.
+	(do_t_shift): Likewise.
+
+2011-06-13  Nick Clifton  <nickc@redhat.com>
+
 	* config/tc-score.c (s3_my_get_expression): Delete unused local
 	variable 'seg'.
 	(s3_do_ldst_insn): Delete unused local variable 'strbak'.

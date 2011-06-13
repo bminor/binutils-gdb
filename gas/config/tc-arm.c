@@ -8343,6 +8343,9 @@ do_shift (void)
     {
       inst.instruction |= inst.operands[2].reg << 8;
       inst.instruction |= SHIFT_BY_REG;
+      /* PR 12854: Error on extraneous shifts.  */
+      constraint (inst.operands[2].shifted,
+		  _("extraneous shift as part of operand to shift insn"));
     }
   else
     inst.reloc.type = BFD_RELOC_ARM_SHIFT_IMM;
@@ -11535,6 +11538,10 @@ do_t_shift (void)
 	      inst.instruction |= inst.operands[0].reg << 8;
 	      inst.instruction |= inst.operands[1].reg << 16;
 	      inst.instruction |= inst.operands[2].reg;
+
+	      /* PR 12854: Error on extraneous shifts.  */
+	      constraint (inst.operands[2].shifted,
+			  _("extraneous shift as part of operand to shift insn"));
 	    }
 	  else
 	    {
