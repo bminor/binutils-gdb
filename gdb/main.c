@@ -319,8 +319,8 @@ captured_main (void *data)
   ndir = 0;
 
   quit_flag = 0;
-  line = (char *) xmalloc (linesize);
-  line[0] = '\0';		/* Terminate saved (now empty) cmd line.  */
+  saved_command_line = (char *) xmalloc (saved_command_line_size);
+  saved_command_line[0] = '\0';
   instream = stdin;
 
   gdb_stdout = stdio_fileopen (stdout);

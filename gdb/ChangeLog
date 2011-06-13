@@ -1,3 +1,17 @@
+2011-06-13  Pedro Alves  <pedro@codesourcery.com>
+
+	* top.h (line): Rename to ...
+	(saved_command_line): ... this.
+	(linesize): Rename to ...
+	(saved_command_line_size): ... this.
+	* top.c (line): Rename to ...
+	(saved_command_line): ... this.
+	(linesize): Rename to ...
+	(saved_command_line_size): ... this.
+	(dont_repeat, command_line_input, dont_repeat_command): Adjust.
+	* event-top.c (command_line_handler): Adjust.
+	* main.c (captured_main): Adjust.
+
 2011-06-12  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-tdep.c (i386_epilogue_frame_cache): Simplify code.  Call
