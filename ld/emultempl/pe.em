@@ -1197,8 +1197,7 @@ This should work unless it involves constant data structures referencing symbols
 static bfd_boolean
 pr_sym (struct bfd_hash_entry *h, void *inf ATTRIBUTE_UNUSED)
 {
-  if (pe_dll_extra_pe_debug)
-    printf ("+%s\n", h->string);
+  printf ("+%s\n", h->string);
 
   return TRUE;
 }

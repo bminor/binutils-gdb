@@ -1,3 +1,10 @@
+2011-06-13  Alan Modra  <amodra@gmail.com>
+
+	* ldlang.c (sort_def_symbol, lang_one_common): Don't handle
+	warning symbols here.
+	* emultempl/pe.em (pr_sym): Remove redundant test.
+	* emultempl/pep.em (pr_sym): Likewise.
+
 2011-06-09  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/12845

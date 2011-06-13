@@ -1130,8 +1130,7 @@ pep_find_data_imports (void)
 static bfd_boolean
 pr_sym (struct bfd_hash_entry *h, void *inf ATTRIBUTE_UNUSED)
 {
-  if (pep_dll_extra_pe_debug)
-    printf ("+%s\n", h->string);
+  printf ("+%s\n", h->string);
 
   return TRUE;
 }
