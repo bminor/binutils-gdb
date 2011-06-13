@@ -1,3 +1,22 @@
+2011-06-13  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-score.c (s3_my_get_expression): Delete unused local
+	variable 'seg'.
+	(s3_do_ldst_insn): Delete unused local variable 'strbak'.
+	(s3_do16_ldst_insn): Delete unused local variable 'temp'.
+	(s3_do_macro_bcmp): Zero inst_expand array.
+	(s3_do_macro_bcmpz): Likewise.
+	(s3_s_score_end): Delete unused local variable 'dot'.
+	(s3_gen_reloc): Delete unused local variables 'f', 's', and 'e'.
+	* config/tc-score7.c (s7_my_get_expression): Delete unused local
+	variable 'seg'.
+	(s7_do_ldst_insn): Delete unused local variable 'strbak'.
+	(s7_b32_relax_to_b16): Delete unused local variables 'r_old' and
+	'r_new'.
+	(s7_s_score_end): Delete unused local variable 'dot'.
+	(s7_relax_frag): Delete unused local variable 'relax_size'.
+	(s7_gen_reloc): Delete unused local variables 'f', 's', and 'e'.
+
 2011-06-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	AVX Programming Reference (June, 2011)
@@ -5,7 +24,7 @@
 	unsupported_vector_index_register.
 	(cpu_arch): Add .avx2, .bmi2, .lzcnt and .invpcid.
 	(check_VecOperands): New.
-	(match_template): Call check_VecOperands.  Handle 
+	(match_template): Call check_VecOperands.  Handle
 	invalid_vsib_address and unsupported_vector_index_register.
 	(build_modrm_byte): Support VecSIB.  Check register-only source
 	operand when two source operands are swapped.
