@@ -11570,6 +11570,10 @@ do_t_shift (void)
 
 	      inst.instruction |= inst.operands[0].reg;
 	      inst.instruction |= inst.operands[2].reg << 3;
+
+	      /* PR 12854: Error on extraneous shifts.  */
+	      constraint (inst.operands[2].shifted,
+			  _("extraneous shift as part of operand to shift insn"));
 	    }
 	  else
 	    {
@@ -11609,6 +11613,10 @@ do_t_shift (void)
 
 	  inst.instruction |= inst.operands[0].reg;
 	  inst.instruction |= inst.operands[2].reg << 3;
+
+	  /* PR 12854: Error on extraneous shifts.  */
+	  constraint (inst.operands[2].shifted,
+		      _("extraneous shift as part of operand to shift insn"));
 	}
       else
 	{
