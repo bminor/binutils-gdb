@@ -1,3 +1,10 @@
+2011-06-13  Nick Clifton  <nickc@redhat.com>
+
+	* elf32-tilepro.c (tilepro_elf_check_relocs): Delete unused local
+	variable 'local_got_offsets'.
+	* elfxx-tilegx.c (tilegx_elf_check_relocs): Likewise.
+	(tilegx_finish_dyn): Delete unused local variable 'abi_64_p'.
+
 2011-06-13  Walter Lee  <walt@tilera.com>
 
 	* Makefile.am (ALL_MACHINES): Add cpu-tilegx.lo and cpu-tilepro.lo.

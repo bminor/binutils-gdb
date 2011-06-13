@@ -1549,7 +1549,6 @@ tilegx_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
   struct tilegx_elf_link_hash_table *htab;
   Elf_Internal_Shdr *symtab_hdr;
   struct elf_link_hash_entry **sym_hashes;
-  bfd_vma *local_got_offsets;
   const Elf_Internal_Rela *rel;
   const Elf_Internal_Rela *rel_end;
   asection *sreloc;
@@ -1561,7 +1560,6 @@ tilegx_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
   htab = tilegx_elf_hash_table (info);
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (abfd);
-  local_got_offsets = elf_local_got_offsets (abfd);
 
   sreloc = NULL;
 
@@ -3767,14 +3765,12 @@ tilegx_finish_dyn (bfd *output_bfd, struct bfd_link_info *info,
   const struct elf_backend_data *bed;
   bfd_byte *dyncon, *dynconend;
   size_t dynsize;
-  bfd_boolean abi_64_p;
 
   htab = tilegx_elf_hash_table (info);
   BFD_ASSERT (htab != NULL);
   bed = get_elf_backend_data (output_bfd);
   dynsize = bed->s->sizeof_dyn;
   dynconend = sdyn->contents + sdyn->size;
-  abi_64_p = ABI_64_P (output_bfd);
 
   for (dyncon = sdyn->contents; dyncon < dynconend; dyncon += dynsize)
     {
