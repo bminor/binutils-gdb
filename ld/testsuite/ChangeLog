@@ -1,3 +1,16 @@
+2011-06-13  Walter Lee  <walt@tilera.com>
+
+	* ld-elf/eh5.d: Don't run on tile*.
+	* ld-srec/srec.exp: xfail on tile*.
+	* ld-tilegx/external.s: New file.
+	* ld-tilegx/reloc.d: New file.
+	* ld-tilegx/reloc.s: New file.
+	* ld-tilegx/tilegx.exp: New file.
+	* ld-tilepro/external.s: New file.
+	* ld-tilepro/reloc.d: New file.
+	* ld-tilepro/reloc.s: New file.
+	* ld-tilepro/tilepro.exp: New file.
+
 2011-06-10  Nick Clifton  <nickc@redhat.com>
 
 	* ld-elf/elf.exp: Add test for linking a shared library with a

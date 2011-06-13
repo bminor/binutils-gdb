@@ -1,3 +1,14 @@
+2011-06-13  Walter Lee  <walt@tilera.com>
+
+	* gas/tilepro/t_constants.s: New file.
+	* gas/tilepro/t_constants.d: Likewise.
+	* gas/tilepro/t_insns.s: Likewise.
+	* gas/tilepro/tilepro.exp: Likewise.
+	* gas/tilepro/t_insns.d: Likewise.
+	* gas/tilegx/tilegx.exp: Likewise.
+	* gas/tilegx/t_insns.d: Likewise.
+	* gas/tilegx/t_insns.s: Likewise.
+
 2011-06-13  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/12854

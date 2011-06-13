@@ -1,3 +1,14 @@
+2011-06-13  Walter Lee  <walt@tilera.com>
+
+	* readelf.c: Include tilepro.h and tilegx.h.
+	(guess_is_rela): Handle EM_TILEGX and EM_TILEPRO.
+	(dump_relocations): Likewise.
+	(get_machine_name): Likewise.
+	(is_32bit_abs_reloc): Likewise.
+	(is_32bit_pcerel_reloc): Likewise.
+	(is_64bit_abs_reloc): Likewise.
+	(is_64bit_pcrel_reloc): Likewise.
+
 2011-06-09  Tristan Gingold  <gingold@adacore.com>
 
 	* od-xcoff.c (xcoff32_read_symbols): Allow missing string table

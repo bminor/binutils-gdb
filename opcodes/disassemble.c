@@ -1,6 +1,6 @@
 /* Select disassembly routine for specified architecture.
    Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-   2004, 2005, 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+   2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
 
    This file is part of the GNU opcodes library.
 
@@ -81,6 +81,8 @@
 #define ARCH_tic54x
 #define ARCH_tic6x
 #define ARCH_tic80
+#define ARCH_tilegx
+#define ARCH_tilepro
 #define ARCH_v850
 #define ARCH_vax
 #define ARCH_w65
@@ -465,6 +467,16 @@ disassembler (abfd)
 #ifdef ARCH_m32c
     case bfd_arch_m32c:
       disassemble = print_insn_m32c;
+      break;
+#endif
+#ifdef ARCH_tilegx
+    case bfd_arch_tilegx:
+      disassemble = print_insn_tilegx;
+      break;
+#endif
+#ifdef ARCH_tilepro
+    case bfd_arch_tilepro:
+      disassemble = print_insn_tilepro;
       break;
 #endif
     default:

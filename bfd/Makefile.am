@@ -132,6 +132,8 @@ ALL_MACHINES = \
 	cpu-tic54x.lo \
 	cpu-tic6x.lo \
 	cpu-tic80.lo \
+	cpu-tilegx.lo \
+	cpu-tilepro.lo \
 	cpu-v850.lo \
 	cpu-vax.lo \
 	cpu-w65.lo \
@@ -204,6 +206,8 @@ ALL_MACHINES_CFILES = \
 	cpu-tic54x.c \
 	cpu-tic6x.c \
 	cpu-tic80.c \
+	cpu-tilegx.c \
+	cpu-tilepro.c \
 	cpu-v850.c \
 	cpu-vax.c \
 	cpu-w65.c \
@@ -319,6 +323,8 @@ BFD32_BACKENDS = \
 	elf32-sparc.lo \
 	elf32-spu.lo \
 	elf32-tic6x.lo \
+	elf32-tilegx.lo \
+	elf32-tilepro.lo \
 	elf32-v850.lo \
 	elf32-vax.lo \
 	elf32-xc16x.lo \
@@ -328,6 +334,7 @@ BFD32_BACKENDS = \
 	elflink.lo \
 	elfxx-mips.lo \
 	elfxx-sparc.lo \
+	elfxx-tilegx.lo \
 	epoc-pe-arm.lo \
 	epoc-pei-arm.lo \
 	hp300bsd.lo \
@@ -500,6 +507,8 @@ BFD32_BACKENDS_CFILES = \
 	elf32-sparc.c \
 	elf32-spu.c \
 	elf32-tic6x.c \
+	elf32-tilegx.c \
+	elf32-tilepro.c \
 	elf32-v850.c \
 	elf32-vax.c \
 	elf32-xc16x.c \
@@ -509,6 +518,7 @@ BFD32_BACKENDS_CFILES = \
 	elflink.c \
 	elfxx-mips.c \
 	elfxx-sparc.c \
+	elfxx-tilegx.c \
 	epoc-pe-arm.c \
 	epoc-pei-arm.c \
 	hp300bsd.c \
@@ -602,6 +612,7 @@ BFD64_BACKENDS = \
 	elf64-s390.lo \
 	elf64-sh64.lo \
 	elf64-sparc.lo \
+ 	elf64-tilegx.lo \
 	elf64-x86-64.lo \
 	elf64.lo \
 	elfn32-mips.lo \
@@ -635,6 +646,7 @@ BFD64_BACKENDS_CFILES = \
 	elf64-s390.c \
 	elf64-sh64.c \
 	elf64-sparc.c \
+	elf64-tilegx.c \
 	elf64-x86-64.c \
 	elf64.c \
 	elfn32-mips.c \

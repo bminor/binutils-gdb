@@ -1,3 +1,26 @@
+2011-06-13  Walter Lee  <walt@tilera.com>
+
+	* Makefile.am (TARGET_CPU_CFILES): Add config/tc-tilegx.c and
+	config/tc-tilepro.c.
+	(TARGET_CPU_HFILES): Add config/tc-tilegx.h and
+	config/tc-tilepro.h.
+	* Makefile.in: Regenerate.
+	* configure.tgt (tilepro-*-*): New.
+	(tilegx-*-*): Likewise.
+	* config/tc-tilegx.c: New file.
+	* config/tc-tilegx.h: Likewise.
+	* config/tc-tilepro.h: Likewise.
+	* config/tc-tilepro.c: Likewise.
+	* doc/Makefile.am (CPU_DOCS): Add c-tilegx.texi and
+	c-tilepro.texi.
+	* doc/Makefile.in: Regenerate.
+	* doc/all.texi (TILEGX): Define.
+	(TILEPRO): Define.
+	* doc/as.texinfo: Add Tile-Gx and TILEPro documentation.  Include
+	c-tilegx.texi and c-tilepro.texi.
+	* doc/c-tilegx.texi: New.
+	* doc/c-tilepro.texi: New.
+
 2011-06-13  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/12854

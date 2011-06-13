@@ -437,6 +437,10 @@ DESCRIPTION
 .  bfd_arch_lm32,      {* Lattice Mico32 *}
 .#define bfd_mach_lm32      1
 .  bfd_arch_microblaze,{* Xilinx MicroBlaze. *}
+.  bfd_arch_tilepro,   {* Tilera TILEPro *}
+.  bfd_arch_tilegx, {* Tilera TILE-Gx *}
+.#define bfd_mach_tilepro   1
+.#define bfd_mach_tilegx    1
 .  bfd_arch_last
 .  };
 */
@@ -537,6 +541,8 @@ extern const bfd_arch_info_type bfd_tic4x_arch;
 extern const bfd_arch_info_type bfd_tic54x_arch;
 extern const bfd_arch_info_type bfd_tic6x_arch;
 extern const bfd_arch_info_type bfd_tic80_arch;
+extern const bfd_arch_info_type bfd_tilegx_arch;
+extern const bfd_arch_info_type bfd_tilepro_arch;
 extern const bfd_arch_info_type bfd_v850_arch;
 extern const bfd_arch_info_type bfd_vax_arch;
 extern const bfd_arch_info_type bfd_w65_arch;
@@ -611,6 +617,8 @@ static const bfd_arch_info_type * const bfd_archures_list[] =
     &bfd_tic54x_arch,
     &bfd_tic6x_arch,
     &bfd_tic80_arch,
+    &bfd_tilegx_arch,
+    &bfd_tilepro_arch,
     &bfd_v850_arch,
     &bfd_vax_arch,
     &bfd_w65_arch,

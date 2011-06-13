@@ -206,6 +206,10 @@ TARGET_LIBOPCODES_CFILES = \
 	tic6x-dis.c \
 	tic80-dis.c \
 	tic80-opc.c \
+	tilegx-dis.c \
+	tilegx-opc.c \
+	tilepro-dis.c \
+	tilepro-opc.c \
 	v850-dis.c \
 	v850-opc.c \
 	vax-dis.c \

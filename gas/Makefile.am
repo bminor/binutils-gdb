@@ -161,6 +161,8 @@ TARGET_CPU_CFILES = \
 	config/tc-tic4x.c \
 	config/tc-tic54x.c \
 	config/tc-tic6x.c \
+	config/tc-tilegx.c \
+	config/tc-tilepro.c \
 	config/tc-vax.c \
 	config/tc-v850.c \
 	config/tc-xstormy16.c \
@@ -224,6 +226,8 @@ TARGET_CPU_HFILES = \
 	config/tc-tic4x.h \
 	config/tc-tic54x.h \
 	config/tc-tic6x.h \
+	config/tc-tilegx.h \
+	config/tc-tilepro.h \
 	config/tc-vax.h \
 	config/tc-v850.h \
 	config/tc-xstormy16.h \

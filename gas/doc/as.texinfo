@@ -487,6 +487,14 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
    [@b{-mdsbt}|@b{-mno-dsbt}] [@b{-mpid=no}|@b{-mpid=near}|@b{-mpid=far}]
    [@b{-mpic}|@b{-mno-pic}]
 @end ifset
+@ifset TILEGX
+
+@emph{Target TILE-Gx options:}
+   [@b{-m32}|@b{-m64}]
+@end ifset
+@ifset TILEPRO
+@c TILEPro has no machine-dependent assembler options
+@end ifset
 
 @ifset XTENSA
 
@@ -1359,6 +1367,25 @@ TMS320C6000 processor.
 @c man end
 @c man begin INCLUDE
 @include c-tic6x.texi
+@c ended inside the included file
+@end ifset
+
+@end ifset
+
+@ifset TILEGX
+
+@ifclear man
+@xref{TILE-Gx Options}, for the options available when @value{AS} is configured
+for a TILE-Gx processor.
+@end ifclear
+
+@ifset man
+@c man begin OPTIONS
+The following options are available when @value{AS} is configured for a TILE-Gx
+processor.
+@c man end
+@c man begin INCLUDE
+@include c-tilegx.texi
 @c ended inside the included file
 @end ifset
 
@@ -6881,6 +6908,12 @@ subject, see the hardware manufacturer's manual.
 @ifset TIC6X
 * TIC6X-Dependent ::            TI TMS320C6x Dependent Features
 @end ifset
+@ifset TILEGX
+* TILE-Gx-Dependent ::          Tilera TILE-Gx Dependent Features
+@end ifset
+@ifset TILEPRO
+* TILEPro-Dependent ::          Tilera TILEPro Dependent Features
+@end ifset
 @ifset V850
 * V850-Dependent::              V850 Dependent Features
 @end ifset
@@ -7074,6 +7107,14 @@ family.
 
 @ifset TIC6X
 @include c-tic6x.texi
+@end ifset
+
+@ifset TILEGX
+@include c-tilegx.texi
+@end ifset
+
+@ifset TILEPRO
+@include c-tilepro.texi
 @end ifset
 
 @ifset Z80

@@ -140,6 +140,8 @@
 #include "elf/sparc.h"
 #include "elf/spu.h"
 #include "elf/tic6x.h"
+#include "elf/tilegx.h"
+#include "elf/tilepro.h"
 #include "elf/v850.h"
 #include "elf/vax.h"
 #include "elf/x86-64.h"
@@ -598,6 +600,8 @@ guess_is_rela (unsigned int e_machine)
     case EM_SPARCV9:
     case EM_SPU:
     case EM_TI_C6000:
+    case EM_TILEGX:
+    case EM_TILEPRO:
     case EM_V850:
     case EM_CYGNUS_V850:
     case EM_VAX:
@@ -1218,6 +1222,14 @@ dump_relocations (FILE * file,
 
 	case EM_TI_C6000:
 	  rtype = elf_tic6x_reloc_type (type);
+	  break;
+
+	case EM_TILEGX:
+	  rtype = elf_tilegx_reloc_type (type);
+	  break;
+
+	case EM_TILEPRO:
+	  rtype = elf_tilepro_reloc_type (type);
 	  break;
 	}
 
@@ -1965,6 +1977,7 @@ get_machine_name (unsigned e_machine)
     case EM_STM8:		return "STMicroeletronics STM8 8-bit microcontroller";
     case EM_TILE64:		return "Tilera TILE64 multicore architecture family";
     case EM_TILEPRO:		return "Tilera TILEPro multicore architecture family";
+    case EM_TILEGX:		return "Tilera TILE-Gx multicore architecture family";
     case EM_CUDA:		return "NVIDIA CUDA architecture";
     default:
       snprintf (buff, sizeof (buff), _("<unknown>: 0x%x"), e_machine);
@@ -9731,6 +9744,10 @@ is_32bit_abs_reloc (unsigned int reloc_type)
       return reloc_type == 6; /* R_SPU_ADDR32 */
     case EM_TI_C6000:
       return reloc_type == 1; /* R_C6000_ABS32.  */
+    case EM_TILEGX:
+      return reloc_type == 2; /* R_TILEGX_32.  */
+    case EM_TILEPRO:
+      return reloc_type == 1; /* R_TILEPRO_32.  */
     case EM_CYGNUS_V850:
     case EM_V850:
       return reloc_type == 6; /* R_V850_ABS32.  */
@@ -9790,6 +9807,10 @@ is_32bit_pcrel_reloc (unsigned int reloc_type)
       return reloc_type == 6;  /* R_SPARC_DISP32.  */
     case EM_SPU:
       return reloc_type == 13; /* R_SPU_REL32.  */
+    case EM_TILEGX:
+      return reloc_type == 6; /* R_TILEGX_32_PCREL.  */
+    case EM_TILEPRO:
+      return reloc_type == 4; /* R_TILEPRO_32_PCREL.  */
     case EM_X86_64:
     case EM_L1OM:
       return reloc_type == 2;  /* R_X86_64_PC32.  */
@@ -9831,9 +9852,11 @@ is_64bit_abs_reloc (unsigned int reloc_type)
       return reloc_type == 1; /* R_X86_64_64.  */
     case EM_S390_OLD:
     case EM_S390:
-      return reloc_type == 22;	/* R_S390_64 */
+      return reloc_type == 22;	/* R_S390_64.  */
+    case EM_TILEGX:
+      return reloc_type == 1; /* R_TILEGX_64.  */
     case EM_MIPS:
-      return reloc_type == 18;	/* R_MIPS_64 */
+      return reloc_type == 18;	/* R_MIPS_64.  */
     default:
       return FALSE;
     }
@@ -9848,23 +9871,25 @@ is_64bit_pcrel_reloc (unsigned int reloc_type)
   switch (elf_header.e_machine)
     {
     case EM_ALPHA:
-      return reloc_type == 11; /* R_ALPHA_SREL64 */
+      return reloc_type == 11; /* R_ALPHA_SREL64.  */
     case EM_IA_64:
-      return reloc_type == 0x4f; /* R_IA64_PCREL64LSB */
+      return reloc_type == 0x4f; /* R_IA64_PCREL64LSB.  */
     case EM_PARISC:
-      return reloc_type == 72; /* R_PARISC_PCREL64 */
+      return reloc_type == 72; /* R_PARISC_PCREL64.  */
     case EM_PPC64:
-      return reloc_type == 44; /* R_PPC64_REL64 */
+      return reloc_type == 44; /* R_PPC64_REL64.  */
     case EM_SPARC32PLUS:
     case EM_SPARCV9:
     case EM_SPARC:
-      return reloc_type == 46; /* R_SPARC_DISP64 */
+      return reloc_type == 46; /* R_SPARC_DISP64.  */
     case EM_X86_64:
     case EM_L1OM:
-      return reloc_type == 24; /* R_X86_64_PC64 */
+      return reloc_type == 24; /* R_X86_64_PC64.  */
     case EM_S390_OLD:
     case EM_S390:
-      return reloc_type == 23;	/* R_S390_PC64 */
+      return reloc_type == 23;	/* R_S390_PC64.  */
+    case EM_TILEGX:
+      return reloc_type == 5;  /* R_TILEGX_64_PCREL.  */
     default:
       return FALSE;
     }
@@ -9956,6 +9981,8 @@ is_none_reloc (unsigned int reloc_type)
     case EM_MOXIE:   /* R_MOXIE_NONE.  */
     case EM_M32R:    /* R_M32R_NONE.  */
     case EM_TI_C6000:/* R_C6000_NONE.  */
+    case EM_TILEGX:  /* R_TILEGX_NONE.  */
+    case EM_TILEPRO: /* R_TILEPRO_NONE.  */
     case EM_XC16X:
     case EM_C166:    /* R_XC16X_NONE.  */
       return reloc_type == 0;

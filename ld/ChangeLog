@@ -1,3 +1,17 @@
+2011-06-13  Walter Lee  <walt@tilera.com>
+
+	* Makefile.am (ALL_EMULATION_SOURCES): Add eelf32tilegx.c and
+	eelf32tilepro.c.
+	(ALL_64_EMULATION_SOURCES): Add eelf64tilegx.c.
+	(eelf32tilegx.c): New target.
+	(eelf32tilepro.c): Likewise.
+	(eelf64tilegx.c): Likewise.
+	* Makefile.in: Regenerate.
+	* configure.tgt: Handle tilegx-*-* and tilepro-*-*.
+	* emulparams/elf32tilegx.sh: New file.
+	* emulparams/elf64tilegx.sh: New file.
+	* emulparams/elf32tilepro.sh: New file.
+
 2011-06-13  Alan Modra  <amodra@gmail.com>
 
 	* ldlang.c (sort_def_symbol, lang_one_common): Don't handle
