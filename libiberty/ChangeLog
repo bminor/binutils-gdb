@@ -1,8 +1,3 @@
-2011-05-17  Corinna Vinschen  <vinschen@redhat.com>
-
-	* strsignal.c (psignal): Change second parameter to const char *.
-	Fix comment accordingly.
-
 2011-04-20  Jim Meyering  <meyering@redhat.com>
 
 	* cp-demint.c (cplus_demangle_v3_components): Remove useless
