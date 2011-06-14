@@ -1,5 +1,5 @@
 /* .eh_frame section optimization.
-   Copyright 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010
+   Copyright 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011
    Free Software Foundation, Inc.
    Written by Jakub Jelinek <jakub@redhat.com>.
 
@@ -490,7 +490,8 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
   if (hdr_info->parsed_eh_frames)
     return;
 
-  if (sec->size == 0)
+  if (sec->size == 0
+      || sec->sec_info_type != ELF_INFO_TYPE_NONE)
     {
       /* This file does not contain .eh_frame information.  */
       return;
@@ -1132,6 +1133,9 @@ _bfd_elf_discard_section_eh_frame
   struct eh_frame_sec_info *sec_info;
   struct eh_frame_hdr_info *hdr_info;
   unsigned int ptr_size, offset;
+
+  if (sec->sec_info_type != ELF_INFO_TYPE_EH_FRAME)
+    return FALSE;
 
   sec_info = (struct eh_frame_sec_info *) elf_section_data (sec)->sec_info;
   if (sec_info == NULL)
