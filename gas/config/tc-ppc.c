@@ -5352,6 +5352,7 @@ ppc_frob_label (symbolS *sym)
       symbol_append (sym, symbol_get_tc (ppc_current_csect)->within,
 		     &symbol_rootP, &symbol_lastP);
       symbol_get_tc (ppc_current_csect)->within = sym;
+      symbol_get_tc (sym)->within = ppc_current_csect;
     }
 
 #ifdef OBJ_ELF
@@ -5841,55 +5842,17 @@ ppc_fix_adjustable (fixS *fix)
 	  || (ppc_after_toc_frag != NULL
 	      && val >= ppc_after_toc_frag->fr_address)))
     {
-      symbolS *csect;
-      symbolS *next_csect;
+      symbolS *csect = tc->within;
 
-      if (symseg == text_section)
-	csect = ppc_text_csects;
-      else if (symseg == data_section)
-	csect = ppc_data_csects;
-      else
-	abort ();
+      /* If the symbol was not declared by a label (eg: a section symbol),
+         use the section instead of the csect.  This doesn't happen in
+         normal AIX assembly code.  */
+      if (csect == NULL)
+        csect = seg_info (symseg)->sym;
 
-      /* Skip the initial dummy symbol.  */
-      csect = symbol_get_tc (csect)->next;
+      fix->fx_offset += val - symbol_get_frag (csect)->fr_address;
+      fix->fx_addsy = csect;
 
-      if (csect != (symbolS *) NULL)
-	{
-	  while ((next_csect = symbol_get_tc (csect)->next) != (symbolS *) NULL
-		 && (symbol_get_frag (next_csect)->fr_address <= val))
-	    {
-	      /* If the csect address equals the symbol value, then we
-		 have to look through the full symbol table to see
-		 whether this is the csect we want.  Note that we will
-		 only get here if the csect has zero length.  */
-	      if (symbol_get_frag (csect)->fr_address == val
-		  && S_GET_VALUE (csect) == val)
-		{
-		  symbolS *scan;
-
-		  for (scan = symbol_next (csect);
-		       scan != NULL;
-		       scan = symbol_next (scan))
-		    {
-		      if (symbol_get_tc (scan)->subseg != 0)
-			break;
-		      if (scan == fix->fx_addsy)
-			break;
-		    }
-
-		  /* If we found the symbol before the next csect
-		     symbol, then this is the csect we want.  */
-		  if (scan == fix->fx_addsy)
-		    break;
-		}
-
-	      csect = next_csect;
-	    }
-
-	  fix->fx_offset += val - symbol_get_frag (csect)->fr_address;
-	  fix->fx_addsy = csect;
-	}
       return 0;
     }
 
@@ -5929,6 +5892,13 @@ ppc_force_relocation (fixS *fix)
     return 1;
 
   return generic_force_reloc (fix);
+}
+
+void
+ppc_new_dot_label (symbolS *sym)
+{
+  /* Anchor this label to the current csect for relocations.  */
+  symbol_get_tc (sym)->within = ppc_current_csect;
 }
 
 #endif /* OBJ_XCOFF */

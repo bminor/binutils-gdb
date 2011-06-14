@@ -1,3 +1,7 @@
+2011-06-14  Tristan Gingold  <gingold@adacore.com>
+
+	* gas/ppc/test1xcoff32.d: Adjust for csect anchor.
+
 2011-06-13  Walter Lee  <walt@tilera.com>
 
 	* gas/tilepro/t_constants.s: New file.

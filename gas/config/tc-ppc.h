@@ -143,8 +143,9 @@ struct ppc_tc_sy
      for symbols that are not csects.  */
   subsegT subseg;
   /* For a csect symbol, the last symbol which has been defined in
-     this csect, or NULL if none have been defined so far.  For a .bs
-     symbol, the referenced csect symbol.  */
+     this csect, or NULL if none have been defined so far.
+     For a .bs symbol, the referenced csect symbol.
+     For a label, the enclosing csect.  */
   symbolS *within;
   union
   {
@@ -206,6 +207,9 @@ do {								\
 
 extern void ppc_xcoff_end (void);
 #define md_end ppc_xcoff_end
+
+#define tc_new_dot_label(sym) ppc_new_dot_label (sym)
+extern void ppc_new_dot_label (symbolS *);
 
 #endif /* OBJ_XCOFF */
 

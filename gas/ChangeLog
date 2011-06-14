@@ -1,3 +1,12 @@
+2011-06-14  Tristan Gingold  <gingold@adacore.com>
+
+	* config/tc-ppc.h (struct ppc_tc_sy): Complete comment on within.
+	(tc_new_dot_label): Define.
+	(ppc_new_dot_label): Declare.
+	* config/tc-ppc.c (ppc_frob_label): Set within target field.
+	(ppc_fix_adjustable): Use this field to adjust the reloc.
+	(ppc_new_dot_label): New function.
+
 2011-06-14  Alan Modra  <amodra@gmail.com>
 
 	* po/POTFILES.in: Regenerate.
