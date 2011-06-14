@@ -1,3 +1,7 @@
+2011-06-14  Alan Modra  <amodra@gmail.com>
+
+	* ld-elf/pr12851.d: Correct target selection and comment.
+
 2011-06-13  Walter Lee  <walt@tilera.com>
 
 	* ld-elf/eh5.d: Don't run on tile*.
