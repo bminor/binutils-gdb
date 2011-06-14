@@ -1,3 +1,7 @@
+2011-06-14  Alan Modra  <amodra@gmail.com>
+
+	* po/POTFILES.in: Regenerate.
+
 2011-06-13  Walter Lee  <walt@tilera.com>
 
 	* Makefile.am (TARGET_CPU_CFILES): Add config/tc-tilegx.c and

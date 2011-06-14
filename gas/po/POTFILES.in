@@ -144,6 +144,10 @@ config/tc-tic54x.c
 config/tc-tic54x.h
 config/tc-tic6x.c
 config/tc-tic6x.h
+config/tc-tilegx.c
+config/tc-tilegx.h
+config/tc-tilepro.c
+config/tc-tilepro.h
 config/tc-v850.c
 config/tc-v850.h
 config/tc-vax.c

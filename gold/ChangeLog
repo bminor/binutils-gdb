@@ -1,3 +1,7 @@
+2011-06-14  Alan Modra  <amodra@gmail.com>
+
+	* po/POTFILES.in: Regenerate.
+
 2011-06-09  Ian Lance Taylor  <iant@google.com>
 
 	* script-sections.cc
