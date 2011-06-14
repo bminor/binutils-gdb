@@ -1,3 +1,7 @@
+2011-06-14  Alan Modra  <amodra@gmail.com>
+
+	* Makefile.in: Regenerate.
+
 2011-06-13  Walter Lee  <walt@tilera.com>
 
 	* Makefile.am (TARGET_LIBOPCODES_CFILES): Add tilegx-dis.c,
