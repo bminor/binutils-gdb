@@ -11633,6 +11633,49 @@ _bfd_elf_gc_mark (struct bfd_link_info *info,
   return ret;
 }
 
+/* Keep debug and special sections.  */
+
+bfd_boolean
+_bfd_elf_gc_mark_extra_sections (struct bfd_link_info *info,
+				 elf_gc_mark_hook_fn mark_hook ATTRIBUTE_UNUSED)
+{
+  bfd *ibfd;
+
+  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
+    {
+      asection *isec;
+      bfd_boolean some_kept;
+
+      if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour)
+	continue;
+
+      /* Ensure all linker created sections are kept, and see whether
+	 any other section is already marked.  */
+      some_kept = FALSE;
+      for (isec = ibfd->sections; isec != NULL; isec = isec->next)
+	{
+	  if ((isec->flags & SEC_LINKER_CREATED) != 0)
+	    isec->gc_mark = 1;
+	  else if (isec->gc_mark)
+	    some_kept = TRUE;
+	}
+
+      /* If no section in this file will be kept, then we can
+	 toss out debug sections.  */
+      if (!some_kept)
+	continue;
+
+      /* Keep debug and special sections like .comment when they are
+	 not part of a group.  */
+      for (isec = ibfd->sections; isec != NULL; isec = isec->next)
+	if (elf_next_in_group (isec) == NULL
+	    && ((isec->flags & SEC_DEBUGGING) != 0
+		|| (isec->flags & (SEC_ALLOC | SEC_LOAD | SEC_RELOC)) == 0))
+	  isec->gc_mark = 1;
+    }
+  return TRUE;
+}
+
 /* Sweep symbols in swept sections.  Called via elf_link_hash_traverse.  */
 
 struct elf_gc_sweep_symbol_info
@@ -11689,12 +11732,6 @@ elf_gc_sweep (bfd *abfd, struct bfd_link_info *info)
 	    {
 	      asection *first = elf_next_in_group (o);
 	      o->gc_mark = first->gc_mark;
-	    }
-	  else if ((o->flags & (SEC_DEBUGGING | SEC_LINKER_CREATED)) != 0
-		   || (o->flags & (SEC_ALLOC | SEC_LOAD | SEC_RELOC)) == 0)
-	    {
-	      /* Keep debug and special sections.  */
-	      o->gc_mark = 1;
 	    }
 
 	  if (o->gc_mark)
@@ -11966,19 +12003,23 @@ bfd_elf_gc_sections (bfd *abfd, struct bfd_link_info *info)
       if (bfd_get_flavour (sub) != bfd_target_elf_flavour)
 	continue;
 
-      /* Also keep SHT_NOTE sections.  */
+      /* Start at sections marked with SEC_KEEP (ref _bfd_elf_gc_keep).
+	 Also treat note sections as a root, if the section is not part
+	 of a group.  */
       for (o = sub->sections; o != NULL; o = o->next)
-	if ((o->flags & SEC_EXCLUDE) == 0
+	if (!o->gc_mark
+	    && (o->flags & SEC_EXCLUDE) == 0
 	    && ((o->flags & SEC_KEEP) != 0
-		|| elf_section_data (o)->this_hdr.sh_type == SHT_NOTE)
-	    && !o->gc_mark)
-	  if (!_bfd_elf_gc_mark (info, o, gc_mark_hook))
-	    return FALSE;
+		|| (elf_section_data (o)->this_hdr.sh_type == SHT_NOTE
+		    && elf_next_in_group (o) == NULL )))
+	  {
+	    if (!_bfd_elf_gc_mark (info, o, gc_mark_hook))
+	      return FALSE;
+	  }
     }
 
   /* Allow the backend to mark additional target specific sections.  */
-  if (bed->gc_mark_extra_sections)
-    bed->gc_mark_extra_sections (info, gc_mark_hook);
+  bed->gc_mark_extra_sections (info, gc_mark_hook);
 
   /* ... and mark SEC_EXCLUDE for those that go.  */
   return elf_gc_sweep (abfd, info);

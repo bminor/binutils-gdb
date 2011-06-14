@@ -1921,6 +1921,8 @@ elf32_tic6x_gc_mark_extra_sections (struct bfd_link_info *info,
   Elf_Internal_Shdr **elf_shdrp;
   bfd_boolean again;
 
+  _bfd_elf_gc_mark_extra_sections (info, gc_mark_hook);
+
   /* Marking EH data may cause additional code sections to be marked,
      requiring multiple passes.  */
   again = TRUE;

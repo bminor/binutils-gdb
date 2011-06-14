@@ -229,8 +229,8 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_ARM_THM_CALL",	/* name */
 	 FALSE,			/* partial_inplace */
-	 0x07ff07ff,		/* src_mask */
-	 0x07ff07ff,		/* dst_mask */
+	 0x07ff2fff,		/* src_mask */
+	 0x07ff2fff,		/* dst_mask */
 	 TRUE),			/* pcrel_offset */
 
   HOWTO (R_ARM_THM_PC8,	        /* type */
@@ -293,7 +293,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
   HOWTO (R_ARM_XPC25,		/* type */
 	 2,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 25,			/* bitsize */
+	 24,			/* bitsize */
 	 TRUE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed,/* complain_on_overflow */
@@ -308,15 +308,15 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
   HOWTO (R_ARM_THM_XPC22,	/* type */
 	 2,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 22,			/* bitsize */
+	 24,			/* bitsize */
 	 TRUE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed,/* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_ARM_THM_XPC22",	/* name */
 	 FALSE,			/* partial_inplace */
-	 0x07ff07ff,		/* src_mask */
-	 0x07ff07ff,		/* dst_mask */
+	 0x07ff2fff,		/* src_mask */
+	 0x07ff2fff,		/* dst_mask */
 	 TRUE),			/* pcrel_offset */
 
   /* Dynamic TLS relocations.  */
@@ -12466,6 +12466,8 @@ elf32_arm_gc_mark_extra_sections (struct bfd_link_info *info,
   bfd *sub;
   Elf_Internal_Shdr **elf_shdrp;
   bfd_boolean again;
+
+  _bfd_elf_gc_mark_extra_sections (info, gc_mark_hook);
 
   /* Marking EH data may cause additional code sections to be marked,
      requiring multiple passes.  */

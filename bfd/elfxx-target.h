@@ -143,7 +143,7 @@
 #define elf_backend_gc_mark_hook	_bfd_elf_gc_mark_hook
 #endif
 #ifndef elf_backend_gc_mark_extra_sections
-#define elf_backend_gc_mark_extra_sections	NULL
+#define elf_backend_gc_mark_extra_sections _bfd_elf_gc_mark_extra_sections
 #endif
 #ifndef elf_backend_gc_sweep_hook
 #define elf_backend_gc_sweep_hook	NULL

@@ -1,3 +1,18 @@
+2011-06-14  Alan Modra  <amodra@gmail.com>
+
+	PR ld/12851
+	* elflink.c (_bfd_elf_gc_mark_extra_sections): New function.
+	(elf_gc_sweep): Don't treat debug and sections like .comment
+	specially here.
+	(bfd_elf_gc_sections): Treat note sections as gc roots only when
+	not part of a group.  Always call gc_mark_extra_sections.
+	* elf-bfd.h (_bfd_elf_gc_mark_extra_sections): Declare.
+	* elfxx-target.h (elf_backend_gc_mark_extra_sections): Default to
+	_bfd_elf_gc_mark_extra_sections.
+	* elf32-arm.c (elf32_arm_gc_mark_extra_sections): Call
+	_bfd_elf_gc_mark_extra_sections.
+	* elf32-tic6x.c (elf32_tic6x_gc_mark_extra_sections): Likewise.
+
 2011-06-13  Nick Clifton  <nickc@redhat.com>
 
 	* elf32-tilepro.c (tilepro_elf_check_relocs): Delete unused local
