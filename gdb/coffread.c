@@ -51,7 +51,7 @@ extern void _initialize_coffread (void);
 
 /* The objfile we are currently reading.  */
 
-static struct objfile *current_objfile;
+static struct objfile *coffread_objfile;
 
 struct coff_symfile_info
   {
@@ -359,7 +359,7 @@ coff_alloc_type (int index)
      We will fill it in later if we find out how.  */
   if (type == NULL)
     {
-      type = alloc_type (current_objfile);
+      type = alloc_type (coffread_objfile);
       *type_addr = type;
     }
   return type;
@@ -749,7 +749,7 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
   if (val < 0)
     perror_with_name (objfile->name);
 
-  current_objfile = objfile;
+  coffread_objfile = objfile;
   nlist_bfd_global = objfile->obfd;
   nlist_nsyms_global = nsyms;
   last_source_file = NULL;
@@ -1136,7 +1136,7 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
   ALL_OBJFILE_SYMTABS (objfile, s)
     patch_opaque_types (s);
 
-  current_objfile = NULL;
+  coffread_objfile = NULL;
 }
 
 /* Routines for reading headers and symbols from executable.  */
@@ -1157,14 +1157,14 @@ read_one_sym (struct coff_symbol *cs,
   cs->c_symnum = symnum;
   bytes = bfd_bread (temp_sym, local_symesz, nlist_bfd_global);
   if (bytes != local_symesz)
-    error (_("%s: error reading symbols"), current_objfile->name);
+    error (_("%s: error reading symbols"), coffread_objfile->name);
   bfd_coff_swap_sym_in (symfile_bfd, temp_sym, (char *) sym);
   cs->c_naux = sym->n_numaux & 0xff;
   if (cs->c_naux >= 1)
     {
       bytes  = bfd_bread (temp_aux, local_auxesz, nlist_bfd_global);
       if (bytes != local_auxesz)
-	error (_("%s: error reading symbols"), current_objfile->name);
+	error (_("%s: error reading symbols"), coffread_objfile->name);
       bfd_coff_swap_aux_in (symfile_bfd, temp_aux,
 			    sym->n_type, sym->n_sclass,
 			    0, cs->c_naux, (char *) aux);
@@ -1174,7 +1174,7 @@ read_one_sym (struct coff_symbol *cs,
 	{
 	  bytes = bfd_bread (temp_aux, local_auxesz, nlist_bfd_global);
 	  if (bytes != local_auxesz)
-	    error (_("%s: error reading symbols"), current_objfile->name);
+	    error (_("%s: error reading symbols"), coffread_objfile->name);
 	}
     }
   cs->c_name = getsymname (sym);

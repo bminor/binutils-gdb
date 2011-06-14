@@ -107,7 +107,7 @@ struct symloc
 
 /* The objfile we are currently reading.  */
 
-static struct objfile *current_objfile;
+static struct objfile *dbxread_objfile;
 
 /* Remember what we deduced to be the source language of this psymtab.  */
 
@@ -347,10 +347,10 @@ add_this_object_header_file (int i)
 static void
 add_old_header_file (char *name, int instance)
 {
-  struct header_file *p = HEADER_FILES (current_objfile);
+  struct header_file *p = HEADER_FILES (dbxread_objfile);
   int i;
 
-  for (i = 0; i < N_HEADER_FILES (current_objfile); i++)
+  for (i = 0; i < N_HEADER_FILES (dbxread_objfile); i++)
     if (filename_cmp (p[i].name, name) == 0 && instance == p[i].instance)
       {
 	add_this_object_header_file (i);
@@ -378,30 +378,30 @@ add_new_header_file (char *name, int instance)
 
   /* Make sure there is room for one more header file.  */
 
-  i = N_ALLOCATED_HEADER_FILES (current_objfile);
+  i = N_ALLOCATED_HEADER_FILES (dbxread_objfile);
 
-  if (N_HEADER_FILES (current_objfile) == i)
+  if (N_HEADER_FILES (dbxread_objfile) == i)
     {
       if (i == 0)
 	{
-	  N_ALLOCATED_HEADER_FILES (current_objfile) = 10;
-	  HEADER_FILES (current_objfile) = (struct header_file *)
+	  N_ALLOCATED_HEADER_FILES (dbxread_objfile) = 10;
+	  HEADER_FILES (dbxread_objfile) = (struct header_file *)
 	    xmalloc (10 * sizeof (struct header_file));
 	}
       else
 	{
 	  i *= 2;
-	  N_ALLOCATED_HEADER_FILES (current_objfile) = i;
-	  HEADER_FILES (current_objfile) = (struct header_file *)
-	    xrealloc ((char *) HEADER_FILES (current_objfile),
+	  N_ALLOCATED_HEADER_FILES (dbxread_objfile) = i;
+	  HEADER_FILES (dbxread_objfile) = (struct header_file *)
+	    xrealloc ((char *) HEADER_FILES (dbxread_objfile),
 		      (i * sizeof (struct header_file)));
 	}
     }
 
   /* Create an entry for this header file.  */
 
-  i = N_HEADER_FILES (current_objfile)++;
-  hfile = HEADER_FILES (current_objfile) + i;
+  i = N_HEADER_FILES (dbxread_objfile)++;
+  hfile = HEADER_FILES (dbxread_objfile) + i;
   hfile->name = xstrdup (name);
   hfile->instance = instance;
   hfile->length = 10;
@@ -416,7 +416,7 @@ add_new_header_file (char *name, int instance)
 static struct type **
 explicit_lookup_type (int real_filenum, int index)
 {
-  struct header_file *f = &HEADER_FILES (current_objfile)[real_filenum];
+  struct header_file *f = &HEADER_FILES (dbxread_objfile)[real_filenum];
 
   if (index >= f->length)
     {
@@ -2537,7 +2537,7 @@ read_ofile_symtab (struct partial_symtab *pst)
      objfile->section_offsets.  */ 
   section_offsets = pst->section_offsets;
 
-  current_objfile = objfile;
+  dbxread_objfile = objfile;
   subfile_stack = NULL;
 
   stringtab_global = DBX_STRINGTAB (objfile);
@@ -2702,7 +2702,7 @@ read_ofile_symtab (struct partial_symtab *pst)
 
   end_stabs ();
 
-  current_objfile = NULL;
+  dbxread_objfile = NULL;
 }
 
 
