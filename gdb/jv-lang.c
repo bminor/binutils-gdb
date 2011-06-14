@@ -57,17 +57,11 @@ static void java_emit_char (int c, struct type *type,
 static char *java_class_name_from_physname (const char *physname);
 
 static const struct objfile_data *jv_dynamics_objfile_data_key;
-static const struct objfile_data *jv_type_objfile_data_key;
 
-/* This objfile contains symtabs that have been dynamically created
-   to record dynamically loaded Java classes and dynamically
-   compiled java methods.  */
+/* The dynamic objfile is kept per-program-space.  This key lets us
+   associate the objfile with the program space.  */
 
-static struct objfile *dynamics_objfile = NULL;
-
-/* symtab contains classes read from the inferior.  */
-
-static struct symtab *class_symtab = NULL;
+static const struct program_space_data *jv_dynamics_progspace_key;
 
 static struct type *java_link_class_type (struct gdbarch *,
 					  struct type *, struct value *);
@@ -87,15 +81,19 @@ static void
 jv_per_objfile_free (struct objfile *objfile, void *data)
 {
   struct jv_per_objfile_data *jv_data = data;
+  struct objfile *dynamics_objfile;
 
+  dynamics_objfile = program_space_data (current_program_space,
+					 jv_dynamics_progspace_key);
   gdb_assert (objfile == dynamics_objfile);
-  /* Clean up all our cached state.  */
-  dynamics_objfile = NULL;
-  class_symtab = NULL;
 
   if (jv_data->dict)
     dict_free (jv_data->dict);
   xfree (jv_data);
+
+  set_program_space_data (current_program_space,
+			  jv_dynamics_progspace_key,
+			  NULL);
 }
 
 /* FIXME: carlton/2003-02-04: This is the main or only caller of
@@ -107,6 +105,11 @@ jv_per_objfile_free (struct objfile *objfile, void *data)
 static struct objfile *
 get_dynamics_objfile (struct gdbarch *gdbarch)
 {
+  struct objfile *dynamics_objfile;
+
+  dynamics_objfile = program_space_data (current_program_space,
+					 jv_dynamics_progspace_key);
+
   if (dynamics_objfile == NULL)
     {
       struct jv_per_objfile_data *data;
@@ -118,6 +121,10 @@ get_dynamics_objfile (struct gdbarch *gdbarch)
 
       data = XCNEW (struct jv_per_objfile_data);
       set_objfile_data (dynamics_objfile, jv_dynamics_objfile_data_key, data);
+
+      set_program_space_data (current_program_space,
+			      jv_dynamics_progspace_key,
+			      dynamics_objfile);
     }
   return dynamics_objfile;
 }
@@ -125,9 +132,11 @@ get_dynamics_objfile (struct gdbarch *gdbarch)
 static struct symtab *
 get_java_class_symtab (struct gdbarch *gdbarch)
 {
+  struct objfile *objfile = get_dynamics_objfile (gdbarch);
+  struct symtab *class_symtab = objfile->symtabs;
+
   if (class_symtab == NULL)
     {
-      struct objfile *objfile = get_dynamics_objfile (gdbarch);
       struct blockvector *bv;
       struct block *bl;
       struct jv_per_objfile_data *jv_data;
@@ -172,9 +181,10 @@ static struct symbol *
 add_class_symbol (struct type *type, CORE_ADDR addr)
 {
   struct symbol *sym;
+  struct objfile *objfile = get_dynamics_objfile (get_type_arch (type));
 
   sym = (struct symbol *)
-    obstack_alloc (&dynamics_objfile->objfile_obstack, sizeof (struct symbol));
+    obstack_alloc (&objfile->objfile_obstack, sizeof (struct symbol));
   memset (sym, 0, sizeof (struct symbol));
   SYMBOL_SET_LANGUAGE (sym, language_java);
   SYMBOL_SET_LINKAGE_NAME (sym, TYPE_TAG_NAME (type));
@@ -492,7 +502,7 @@ java_link_class_type (struct gdbarch *gdbarch,
   TYPE_NFN_FIELDS_TOTAL (type) = nmethods;
   j = nmethods * sizeof (struct fn_field);
   fn_fields = (struct fn_field *)
-    obstack_alloc (&dynamics_objfile->objfile_obstack, j);
+    obstack_alloc (&objfile->objfile_obstack, j);
   memset (fn_fields, 0, j);
   fn_fieldlists = (struct fn_fieldlist *)
     alloca (nmethods * sizeof (struct fn_fieldlist));
@@ -571,49 +581,21 @@ java_link_class_type (struct gdbarch *gdbarch,
 
   j = TYPE_NFN_FIELDS (type) * sizeof (struct fn_fieldlist);
   TYPE_FN_FIELDLISTS (type) = (struct fn_fieldlist *)
-    obstack_alloc (&dynamics_objfile->objfile_obstack, j);
+    obstack_alloc (&objfile->objfile_obstack, j);
   memcpy (TYPE_FN_FIELDLISTS (type), fn_fieldlists, j);
 
   return type;
 }
 
-static struct type *java_object_type;
-
-/* A free function that is attached to the objfile defining
-   java_object_type.  This is used to clear the cached type whenever
-   its owning objfile is destroyed.  */
-static void
-jv_clear_object_type (struct objfile *objfile, void *ignore)
-{
-  java_object_type = NULL;
-}
-
-static void
-set_java_object_type (struct type *type)
-{
-  struct objfile *owner;
-
-  gdb_assert (java_object_type == NULL);
-
-  owner = TYPE_OBJFILE (type);
-  if (owner)
-    set_objfile_data (owner, jv_type_objfile_data_key, &java_object_type);
-  java_object_type = type;
-}
-
 struct type *
 get_java_object_type (void)
 {
-  if (java_object_type == NULL)
-    {
-      struct symbol *sym;
+  struct symbol *sym;
 
-      sym = lookup_symbol ("java.lang.Object", NULL, STRUCT_DOMAIN, NULL);
-      if (sym == NULL)
-	error (_("cannot find java.lang.Object"));
-      set_java_object_type (SYMBOL_TYPE (sym));
-    }
-  return java_object_type;
+  sym = lookup_symbol ("java.lang.Object", NULL, STRUCT_DOMAIN, NULL);
+  if (sym == NULL)
+    error (_("cannot find java.lang.Object"));
+  return SYMBOL_TYPE (sym);
 }
 
 int
@@ -645,11 +627,7 @@ is_object_type (struct type *type)
       name
 	= TYPE_NFIELDS (ttype) > 0 ? TYPE_FIELD_NAME (ttype, 0) : (char *) 0;
       if (name != NULL && strcmp (name, "vtable") == 0)
-	{
-	  if (java_object_type == NULL)
-	    set_java_object_type (type);
-	  return 1;
-	}
+	return 1;
     }
   return 0;
 }
@@ -1237,8 +1215,7 @@ _initialize_java_language (void)
 {
   jv_dynamics_objfile_data_key
     = register_objfile_data_with_cleanup (NULL, jv_per_objfile_free);
-  jv_type_objfile_data_key
-    = register_objfile_data_with_cleanup (NULL, jv_clear_object_type);
+  jv_dynamics_progspace_key = register_program_space_data ();
 
   java_type_data = gdbarch_data_register_post_init (build_java_types);
 

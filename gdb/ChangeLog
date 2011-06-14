@@ -1,5 +1,23 @@
 2011-06-14  Tom Tromey  <tromey@redhat.com>
 
+	* jv-lang.c (jv_type_objfile_data_key, dynamics_objfile)
+	(class_symtab): Remove.
+	(jv_dynamics_progspace_key): New global.
+	(jv_per_objfile_free): Reset program space data.  Update assert.
+	Don't clear globals.
+	(get_dynamics_objfile): Use and set program space data.
+	(get_java_class_symtab): Use get_dynamics_objfile.
+	(add_class_symbol): Likewise.
+	(java_link_class_type): Likewise.
+	(java_object_type, jv_clear_object_type, set_java_object_type):
+	Remove.
+	(get_java_object_type): Update.  Don't cache result.
+	(is_object_type): Don't call set_java_object_type.
+	(_initialize_java_language): Don't set jv_type_objfile_data_key;
+	initialize jv_dynamics_progspace_key.
+
+2011-06-14  Tom Tromey  <tromey@redhat.com>
+
 	* symtab.h (current_objfile): Don't declare.
 	* objfiles.h (current_objfile): Don't declare.
 	* objfiles.c (current_objfile): Remove.
