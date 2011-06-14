@@ -1,3 +1,12 @@
+2011-06-14  Tom Tromey  <tromey@redhat.com>
+
+	* symtab.h (current_objfile): Don't declare.
+	* objfiles.h (current_objfile): Don't declare.
+	* objfiles.c (current_objfile): Remove.
+	* mdebugread.c (current_objfile): New file-scope global.
+	* dbxread.c (current_objfile): New file-scope global.
+	* coffread.c (current_objfile): New file-scope global.
+
 2011-06-13  Pedro Alves  <pedro@codesourcery.com>
 
 	* top.h (line): Rename to ...

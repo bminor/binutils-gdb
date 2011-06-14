@@ -64,7 +64,6 @@ static void objfile_free_data (struct objfile *objfile);
 /* Externally visible variables that are owned by this module.
    See declarations in objfile.h for more info.  */
 
-struct objfile *current_objfile;	/* For symbol file being read in */
 struct objfile *rt_common_objfile;	/* For runtime common symbols */
 
 struct objfile_pspace_info

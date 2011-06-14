@@ -78,6 +78,11 @@ extern void _initialize_mdebugread (void);
    case the symbol's ELF section could not be represented in ECOFF.  */
 #define ECOFF_IN_ELF(bfd) (bfd_get_flavour (bfd) == bfd_target_elf_flavour \
 			   && bfd_get_section_by_name (bfd, ".mdebug") != NULL)
+
+/* The objfile we are currently reading.  */
+
+static struct objfile *current_objfile;
+
 
 
 /* We put a pointer to this structure in the read_symtab_private field

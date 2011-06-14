@@ -439,21 +439,6 @@ struct objfile
 
 extern struct objfile *rt_common_objfile;
 
-/* When we need to allocate a new type, we need to know which objfile_obstack
-   to allocate the type on, since there is one for each objfile.  The places
-   where types are allocated are deeply buried in function call hierarchies
-   which know nothing about objfiles, so rather than trying to pass a
-   particular objfile down to them, we just do an end run around them and
-   set current_objfile to be whatever objfile we expect to be using at the
-   time types are being allocated.  For instance, when we start reading
-   symbols for a particular objfile, we set current_objfile to point to that
-   objfile, and when we are done, we set it back to NULL, to ensure that we
-   never put a type someplace other than where we are expecting to put it.
-   FIXME:  Maybe we should review the entire type handling system and
-   see if there is a better way to avoid this problem.  */
-
-extern struct objfile *current_objfile;
-
 /* Declarations for functions defined in objfiles.c */
 
 extern struct objfile *allocate_objfile (bfd *, int);

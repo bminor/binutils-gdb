@@ -49,6 +49,10 @@
 
 extern void _initialize_coffread (void);
 
+/* The objfile we are currently reading.  */
+
+static struct objfile *current_objfile;
+
 struct coff_symfile_info
   {
     file_ptr min_lineno_offset;	/* Where in file lowest line#s are.  */

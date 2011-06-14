@@ -847,10 +847,6 @@ struct symtab
 
 /* External variables and functions for the objects described above.  */
 
-/* See the comment in symfile.c about how current_objfile is used.  */
-
-extern struct objfile *current_objfile;
-
 /* True if we are nested inside psymtab_to_symtab.  */
 
 extern int currently_reading_symtab;
