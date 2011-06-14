@@ -1,3 +1,8 @@
+2011-06-14  Yao Qi  <yao@codesourcery.com>
+
+	gdb/testsuite/
+	* gdb.threads/ia64-sigill.exp: Remove "set debug lin-lwp 1".
+
 2011-06-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.dwarf2/dw2-filename.exp (info sources): New testcase.

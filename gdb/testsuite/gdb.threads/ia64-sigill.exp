@@ -58,7 +58,6 @@ gdb_breakpoint [gdb_get_line_number "break-at-exit"]
 gdb_test_no_output "set debug infrun 1"
 
 # The ia64 SIGILL signal is visible only in the lin-lwp debug.
-gdb_test_no_output "set debug lin-lwp 1"
 
 gdb_test "continue" "Breakpoint \[0-9\]+,( .* in)? thread_func .*"
 
