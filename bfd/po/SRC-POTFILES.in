@@ -122,6 +122,8 @@ cpu-tic4x.c
 cpu-tic54x.c
 cpu-tic6x.c
 cpu-tic80.c
+cpu-tilegx.c
+cpu-tilepro.c
 cpu-v850.c
 cpu-vax.c
 cpu-w65.c
@@ -201,6 +203,8 @@ elf32-sh64.c
 elf32-sparc.c
 elf32-spu.c
 elf32-tic6x.c
+elf32-tilegx.c
+elf32-tilepro.c
 elf32-v850.c
 elf32-vax.c
 elf32-xc16x.c
@@ -217,6 +221,7 @@ elf64-ppc.c
 elf64-s390.c
 elf64-sh64.c
 elf64-sparc.c
+elf64-tilegx.c
 elf64-x86-64.c
 elf64.c
 elfcode.h
@@ -226,6 +231,7 @@ elfn32-mips.c
 elfxx-ia64.c
 elfxx-mips.c
 elfxx-sparc.c
+elfxx-tilegx.c
 epoc-pe-arm.c
 epoc-pei-arm.c
 format.c

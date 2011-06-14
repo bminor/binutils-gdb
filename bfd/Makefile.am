@@ -612,7 +612,7 @@ BFD64_BACKENDS = \
 	elf64-s390.lo \
 	elf64-sh64.lo \
 	elf64-sparc.lo \
- 	elf64-tilegx.lo \
+	elf64-tilegx.lo \
 	elf64-x86-64.lo \
 	elf64.lo \
 	elfn32-mips.lo \
