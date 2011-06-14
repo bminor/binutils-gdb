@@ -1,5 +1,6 @@
 # Expect script for various ELF tests.
-#   Copyright 2002, 2003, 2005, 2007, 2009, 2010 Free Software Foundation, Inc.
+#   Copyright 2002, 2003, 2005, 2007, 2009, 2010, 2011
+#   Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -40,13 +41,15 @@ if { [is_remote host] } then {
     remote_download host merge.ld
 }
 
-run_ld_link_tests {
-    {"Build symbol3.a"
-     "" ""
-     {symbol3.s} {} "symbol3.a"}
-    {"Build symbol3w.a"
-     "" ""
-     {symbol3w.s} {} "symbol3w.a"}
+if { ![istarget hppa64*-hpux*] } {
+    run_ld_link_tests {
+	{"Build symbol3.a"
+	    "" ""
+	    {symbol3.s} {} "symbol3.a"}
+	{"Build symbol3w.a"
+	    "" ""
+	    {symbol3w.s} {} "symbol3w.a"}
+    }
 }
 
 # Run a test to check linking a shared library with a broken linker

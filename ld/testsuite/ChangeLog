@@ -1,5 +1,8 @@
 2011-06-14  Alan Modra  <amodra@gmail.com>
 
+	* ld-elf/elf.exp: Don't attempt to build symbol3.a for hppa64-hpux.
+	* ld-elf/warn3.d: Correct target selection and comment.
+
 	* ld-elf/pr12851.d: Correct target selection and comment.
 
 2011-06-13  Walter Lee  <walt@tilera.com>
