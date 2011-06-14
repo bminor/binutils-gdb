@@ -1,5 +1,13 @@
 2011-06-14  Alan Modra  <amodra@gmail.com>
 
+	* elf32-tilepro.c (tilepro_elf_size_dynamic_sections): Don't use PTR.
+	(allocate_dynrelocs, readonly_dynrelocs): Replace PTR with void *.
+	Don't handle warning symbols here.
+	* elfxx-tilegx.c (tilegx_elf_size_dynamic_sections): As above.
+	(allocate_dynrelocs, readonly_dynrelocs): As above.
+
+2011-06-14  Alan Modra  <amodra@gmail.com>
+
 	PR ld/12851
 	* elflink.c (_bfd_elf_gc_mark_extra_sections): New function.
 	(elf_gc_sweep): Don't treat debug and sections like .comment

@@ -1969,7 +1969,7 @@ tilepro_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
    dynamic relocs.  */
 
 static bfd_boolean
-allocate_dynrelocs (struct elf_link_hash_entry *h, PTR inf)
+allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 {
   struct bfd_link_info *info;
   struct tilepro_elf_link_hash_table *htab;
@@ -1978,12 +1978,6 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, PTR inf)
 
   if (h->root.type == bfd_link_hash_indirect)
     return TRUE;
-
-  if (h->root.type == bfd_link_hash_warning)
-    /* When warning symbols are created, they **replace** the "real"
-       entry in the hash table, thus we never get to see the real
-       symbol in a hash traversal.  So look at it now.  */
-    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
   info = (struct bfd_link_info *) inf;
   htab = tilepro_elf_hash_table (info);
@@ -2170,13 +2164,10 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, PTR inf)
 /* Find any dynamic relocs that apply to read-only sections.  */
 
 static bfd_boolean
-readonly_dynrelocs (struct elf_link_hash_entry *h, PTR inf)
+readonly_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 {
   struct tilepro_elf_link_hash_entry *eh;
   struct tilepro_elf_dyn_relocs *p;
-
-  if (h->root.type == bfd_link_hash_warning)
-    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
   eh = (struct tilepro_elf_link_hash_entry *) h;
   for (p = eh->dyn_relocs; p != NULL; p = p->next)
@@ -2313,7 +2304,7 @@ tilepro_elf_size_dynamic_sections (bfd *output_bfd,
 
   /* Allocate global sym .plt and .got entries, and space for global
      sym dynamic relocs.  */
-  elf_link_hash_traverse (&htab->elf, allocate_dynrelocs, (PTR) info);
+  elf_link_hash_traverse (&htab->elf, allocate_dynrelocs, info);
 
   if (elf_hash_table (info)->dynamic_sections_created)
     {
@@ -2436,8 +2427,7 @@ tilepro_elf_size_dynamic_sections (bfd *output_bfd,
       /* If any dynamic relocs apply to a read-only section,
 	 then we need a DT_TEXTREL entry.  */
       if ((info->flags & DF_TEXTREL) == 0)
-	elf_link_hash_traverse (&htab->elf, readonly_dynrelocs,
-				(PTR) info);
+	elf_link_hash_traverse (&htab->elf, readonly_dynrelocs, info);
 
       if (info->flags & DF_TEXTREL)
 	{
