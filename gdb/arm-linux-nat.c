@@ -44,11 +44,6 @@
 /* Defines ps_err_e, struct ps_prochandle.  */
 #include "gdb_proc_service.h"
 
-#include "features/arm-with-iwmmxt.c"
-#include "features/arm-with-vfpv2.c"
-#include "features/arm-with-vfpv3.c"
-#include "features/arm-with-neon.c"
-
 #ifndef PTRACE_GET_THREAD_AREA
 #define PTRACE_GET_THREAD_AREA 22
 #endif
@@ -67,13 +62,6 @@
 #define PTRACE_GETHBPREGS 29
 #define PTRACE_SETHBPREGS 30
 #endif
-
-/* These are in <asm/elf.h> in current kernels.  */
-#define HWCAP_VFP       64
-#define HWCAP_IWMMXT    512
-#define HWCAP_NEON      4096
-#define HWCAP_VFPv3     8192
-#define HWCAP_VFPv3D16  16384
 
 /* A flag for whether the WMMX registers are available.  */
 static int arm_linux_has_wmmx_registers;
@@ -696,8 +684,6 @@ arm_linux_read_description (struct target_ops *ops)
   if (arm_hwcap & HWCAP_IWMMXT)
     {
       arm_linux_has_wmmx_registers = 1;
-      if (tdesc_arm_with_iwmmxt == NULL)
-	initialize_tdesc_arm_with_iwmmxt ();
       return tdesc_arm_with_iwmmxt;
     }
 
@@ -712,22 +698,16 @@ arm_linux_read_description (struct target_ops *ops)
       if (arm_hwcap & HWCAP_NEON)
 	{
 	  arm_linux_vfp_register_count = 32;
-	  if (tdesc_arm_with_neon == NULL)
-	    initialize_tdesc_arm_with_neon ();
 	  result = tdesc_arm_with_neon;
 	}
       else if ((arm_hwcap & (HWCAP_VFPv3 | HWCAP_VFPv3D16)) == HWCAP_VFPv3)
 	{
 	  arm_linux_vfp_register_count = 32;
-	  if (tdesc_arm_with_vfpv3 == NULL)
-	    initialize_tdesc_arm_with_vfpv3 ();
 	  result = tdesc_arm_with_vfpv3;
 	}
       else
 	{
 	  arm_linux_vfp_register_count = 16;
-	  if (tdesc_arm_with_vfpv2 == NULL)
-	    initialize_tdesc_arm_with_vfpv2 ();
 	  result = tdesc_arm_with_vfpv2;
 	}
 

@@ -33,6 +33,7 @@
 #include "trad-frame.h"
 #include "tramp-frame.h"
 #include "breakpoint.h"
+#include "auxv.h"
 
 #include "arm-tdep.h"
 #include "arm-linux-tdep.h"
@@ -44,6 +45,9 @@
 #include "symfile.h"
 
 #include "gdb_string.h"
+
+/* This is defined in <elf.h> on ARM GNU/Linux systems.  */
+#define AT_HWCAP        16
 
 extern int arm_apcs_32;
 
@@ -638,6 +642,44 @@ arm_linux_collect_nwfpe (const struct regset *regset,
 			  regs + INT_REGISTER_SIZE * ARM_FPS_REGNUM);
 }
 
+/* Support VFP register format.  */
+
+#define ARM_LINUX_SIZEOF_VFP (32 * 8 + 4)
+
+static void
+arm_linux_supply_vfp (const struct regset *regset,
+		      struct regcache *regcache,
+		      int regnum, const void *regs_buf, size_t len)
+{
+  const gdb_byte *regs = regs_buf;
+  int regno;
+
+  if (regnum == ARM_FPSCR_REGNUM || regnum == -1)
+    regcache_raw_supply (regcache, ARM_FPSCR_REGNUM, regs + 32 * 8);
+
+  for (regno = ARM_D0_REGNUM; regno <= ARM_D31_REGNUM; regno++)
+    if (regnum == -1 || regnum == regno)
+      regcache_raw_supply (regcache, regno,
+			   regs + (regno - ARM_D0_REGNUM) * 8);
+}
+
+static void
+arm_linux_collect_vfp (const struct regset *regset,
+			 const struct regcache *regcache,
+			 int regnum, void *regs_buf, size_t len)
+{
+  gdb_byte *regs = regs_buf;
+  int regno;
+
+  if (regnum == ARM_FPSCR_REGNUM || regnum == -1)
+    regcache_raw_collect (regcache, ARM_FPSCR_REGNUM, regs + 32 * 8);
+
+  for (regno = ARM_D0_REGNUM; regno <= ARM_D31_REGNUM; regno++)
+    if (regnum == -1 || regnum == regno)
+      regcache_raw_collect (regcache, regno,
+			    regs + (regno - ARM_D0_REGNUM) * 8);
+}
+
 /* Return the appropriate register set for the core section identified
    by SECT_NAME and SECT_SIZE.  */
 
@@ -665,8 +707,61 @@ arm_linux_regset_from_core_section (struct gdbarch *gdbarch,
       return tdep->fpregset;
     }
 
+  if (strcmp (sect_name, ".reg-arm-vfp") == 0
+      && sect_size == ARM_LINUX_SIZEOF_VFP)
+    {
+      if (tdep->vfpregset == NULL)
+        tdep->vfpregset = regset_alloc (gdbarch, arm_linux_supply_vfp,
+					arm_linux_collect_vfp);
+      return tdep->vfpregset;
+    }
+
   return NULL;
 }
+
+/* Core file register set sections.  */
+
+static struct core_regset_section arm_linux_fpa_regset_sections[] =
+{
+  { ".reg", ARM_LINUX_SIZEOF_GREGSET, "general-purpose" },
+  { ".reg2", ARM_LINUX_SIZEOF_NWFPE, "FPA floating-point" },
+  { NULL, 0}
+};
+
+static struct core_regset_section arm_linux_vfp_regset_sections[] =
+{
+  { ".reg", ARM_LINUX_SIZEOF_GREGSET, "general-purpose" },
+  { ".reg-arm-vfp", ARM_LINUX_SIZEOF_VFP, "VFP floating-point" },
+  { NULL, 0}
+};
+
+/* Determine target description from core file.  */
+
+static const struct target_desc *
+arm_linux_core_read_description (struct gdbarch *gdbarch,
+                                 struct target_ops *target,
+                                 bfd *abfd)
+{
+  CORE_ADDR arm_hwcap = 0;
+
+  if (target_auxv_search (target, AT_HWCAP, &arm_hwcap) != 1)
+    return NULL;
+
+  if (arm_hwcap & HWCAP_VFP)
+    {
+      /* NEON implies VFPv3-D32 or no-VFP unit.  Say that we only support
+         Neon with VFPv3-D32.  */
+      if (arm_hwcap & HWCAP_NEON)
+	return tdesc_arm_with_neon;
+      else if ((arm_hwcap & (HWCAP_VFPv3 | HWCAP_VFPv3D16)) == HWCAP_VFPv3)
+	return tdesc_arm_with_vfpv3;
+      else
+	return tdesc_arm_with_vfpv2;
+    }
+
+  return NULL;
+}
+
 
 /* Copy the value of next pc of sigreturn and rt_sigrturn into PC,
    return 1.  In addition, set IS_THUMB depending on whether we
@@ -1036,6 +1131,12 @@ arm_linux_init_abi (struct gdbarch_info info,
   /* Core file support.  */
   set_gdbarch_regset_from_core_section (gdbarch,
 					arm_linux_regset_from_core_section);
+  set_gdbarch_core_read_description (gdbarch, arm_linux_core_read_description);
+
+  if (tdep->have_vfp_registers)
+    set_gdbarch_core_regset_sections (gdbarch, arm_linux_vfp_regset_sections);
+  else if (tdep->have_fpa_registers)
+    set_gdbarch_core_regset_sections (gdbarch, arm_linux_fpa_regset_sections);
 
   set_gdbarch_get_siginfo_type (gdbarch, linux_get_siginfo_type);
 

@@ -56,6 +56,10 @@
 #include "vec.h"
 
 #include "features/arm-with-m.c"
+#include "features/arm-with-iwmmxt.c"
+#include "features/arm-with-vfpv2.c"
+#include "features/arm-with-vfpv3.c"
+#include "features/arm-with-neon.c"
 
 static int arm_debug;
 
@@ -8800,6 +8804,10 @@ _initialize_arm_tdep (void)
 
   /* Initialize the standard target descriptions.  */
   initialize_tdesc_arm_with_m ();
+  initialize_tdesc_arm_with_iwmmxt ();
+  initialize_tdesc_arm_with_vfpv2 ();
+  initialize_tdesc_arm_with_vfpv3 ();
+  initialize_tdesc_arm_with_neon ();
 
   /* Get the number of possible sets of register names defined in opcodes.  */
   num_disassembly_options = get_arm_regname_num_options ();

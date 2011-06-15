@@ -1,3 +1,32 @@
+2011-06-15  Ulrich Weigand  <ulrich.weigand@linaro.org>
+
+	* arm-linux-tdep.c: Include "auxv.h".
+	(AT_HWCAP): Define.
+	(ARM_LINUX_SIZEOF_VFP): Define.
+	(arm_linux_supply_vfp): New function.
+	(arm_linux_collect_vfp): Likewise.
+	(arm_linux_regset_from_core_section): Handle .reg-arm-vfp sections.
+	(arm_linux_fpa_regset_sections): New variable.
+	(arm_linux_vfp_regset_sections): Likewise.
+	(arm_linux_core_read_description): New function.
+	(arm_linux_init_abi): Install arm_linux_core_read_description and
+	arm_linux_fpa_regset_sections or arm_linux_vfp_regset_sections as
+	appropriate for the architecture.
+	* arm-tdep.h (struct gdbarch_tdep): Add member "vfpregset".
+	(tdesc_arm_with_m): Declare.
+	(tdesc_arm_with_iwmmxt): Likewise.
+	(tdesc_arm_with_vfpv2): Likewise.
+	(tdesc_arm_with_vfpv3): Likewise.
+	(tdesc_arm_with_neon): Likewise.
+	* arm-linux-nat.c: Move features/*.c includes ...
+	* arm-tdep.c: ... here.
+	* arm-linux-nat.c (arm_linux_read_description): Move initializing
+	target description data structures ...
+	* arm-tdep.c (_initialize_arm_tdep): ... here.
+	* arm-linux-nat.c (HWCAP_VFP, HWCAP_IWMMXT, HWCAP_NEON, HWCAP_VFPv3,
+	HWCAP_VFPv3D16): Move definitions ...
+	* arm-linux-tdep.h: ... here.
+
 2011-06-15  Hui Zhu  <teawater@gmail.com>
 
 	* remote.c (remote_trace_set_readonly_regions): Add a check for

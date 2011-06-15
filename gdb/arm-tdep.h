@@ -191,7 +191,7 @@ struct gdbarch_tdep
   enum struct_return struct_return;
 
   /* Cached core file helpers.  */
-  struct regset *gregset, *fpregset;
+  struct regset *gregset, *fpregset, *vfpregset;
 
   /* ISA-specific data types.  */
   struct type *arm_ext_type;
@@ -338,5 +338,12 @@ extern int arm_pc_is_thumb (struct gdbarch *, CORE_ADDR);
 extern const struct regset *
   armbsd_regset_from_core_section (struct gdbarch *gdbarch,
 				   const char *sect_name, size_t sect_size);
+
+/* Target descriptions.  */
+extern struct target_desc *tdesc_arm_with_m;
+extern struct target_desc *tdesc_arm_with_iwmmxt;
+extern struct target_desc *tdesc_arm_with_vfpv2;
+extern struct target_desc *tdesc_arm_with_vfpv3;
+extern struct target_desc *tdesc_arm_with_neon;
 
 #endif /* arm-tdep.h */
