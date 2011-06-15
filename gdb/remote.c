@@ -9977,6 +9977,7 @@ remote_trace_set_readonly_regions (void)
   bfd_size_type size;
   bfd_vma vma;
   int anysecs = 0;
+  int offset = 0;
 
   if (!exec_bfd)
     return;			/* No information to give.  */
@@ -9985,6 +9986,7 @@ remote_trace_set_readonly_regions (void)
   for (s = exec_bfd->sections; s; s = s->next)
     {
       char tmp1[40], tmp2[40];
+      int sec_length;
 
       if ((s->flags & SEC_LOAD) == 0 ||
       /*  (s->flags & SEC_CODE) == 0 || */
@@ -9996,8 +9998,15 @@ remote_trace_set_readonly_regions (void)
       size = bfd_get_section_size (s);
       sprintf_vma (tmp1, vma);
       sprintf_vma (tmp2, vma + size);
-      sprintf (target_buf + strlen (target_buf), 
-	       ":%s,%s", tmp1, tmp2);
+      sec_length = 1 + strlen (tmp1) + 1 + strlen (tmp2);
+      if (offset + sec_length + 1 > target_buf_size)
+	{
+	  warning (_("\
+Too many sections for read-only sections definition packet."));
+	  break;
+	}
+      sprintf (target_buf + offset, ":%s,%s", tmp1, tmp2);
+      offset += sec_length;
     }
   if (anysecs)
     {
