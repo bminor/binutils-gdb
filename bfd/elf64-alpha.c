@@ -2148,22 +2148,28 @@ elf64_alpha_merge_symbol_attribute (struct elf_link_hash_entry *h,
    indirect to the new ones.  Consolidate the got and reloc information
    in these situations.  */
 
-static bfd_boolean
-elf64_alpha_merge_ind_symbols (struct alpha_elf_link_hash_entry *hi,
-			       PTR dummy ATTRIBUTE_UNUSED)
+static void
+elf64_alpha_copy_indirect_symbol (struct bfd_link_info *info,
+				  struct elf_link_hash_entry *dir,
+				  struct elf_link_hash_entry *ind)
 {
-  struct alpha_elf_link_hash_entry *hs;
+  struct alpha_elf_link_hash_entry *hi
+    = (struct alpha_elf_link_hash_entry *) ind;
+  struct alpha_elf_link_hash_entry *hs
+    = (struct alpha_elf_link_hash_entry *) dir;
 
-  if (hi->root.root.type != bfd_link_hash_indirect)
-    return TRUE;
-  hs = hi;
-  do {
-    hs = (struct alpha_elf_link_hash_entry *)hs->root.root.u.i.link;
-  } while (hs->root.root.type == bfd_link_hash_indirect);
+  /* Do the merging in the superclass.  */
+  _bfd_elf_link_hash_copy_indirect(info, dir, ind);
 
   /* Merge the flags.  Whee.  */
-
   hs->flags |= hi->flags;
+
+  /* ??? It's unclear to me what's really supposed to happen when
+     "merging" defweak and defined symbols, given that we don't
+     actually throw away the defweak.  This more-or-less copies
+     the logic related to got and plt entries in the superclass.  */
+  if (ind->root.type != bfd_link_hash_indirect)
+    return;
 
   /* Merge the .got entries.  Cannibalize the old symbol's list in
      doing so, since we don't need it anymore.  */
@@ -2217,8 +2223,6 @@ elf64_alpha_merge_ind_symbols (struct alpha_elf_link_hash_entry *hi,
 	}
     }
   hi->reloc_entries = NULL;
-
-  return TRUE;
 }
 
 /* Is it possible to merge two object file's .got tables?  */
@@ -2624,10 +2628,6 @@ elf64_alpha_always_size_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
   htab = alpha_elf_hash_table (info);
   if (htab == NULL)
     return FALSE;
-
-  /* First, take care of the indirect symbols created by versioning.  */
-  alpha_elf_link_hash_traverse (htab, elf64_alpha_merge_ind_symbols,
-				NULL);
 
   if (!elf64_alpha_size_got_sections (info))
     return FALSE;
@@ -5443,6 +5443,8 @@ static const struct elf_size_info alpha_elf_size_info =
   elf64_alpha_adjust_dynamic_symbol
 #define elf_backend_merge_symbol_attribute \
   elf64_alpha_merge_symbol_attribute
+#define elf_backend_copy_indirect_symbol \
+  elf64_alpha_copy_indirect_symbol
 #define elf_backend_always_size_sections \
   elf64_alpha_always_size_sections
 #define elf_backend_size_dynamic_sections \

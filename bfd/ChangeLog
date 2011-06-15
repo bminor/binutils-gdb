@@ -1,3 +1,11 @@
+2011-06-14  Richard Henderson  <rth@redhat.com>
+
+	* elf64-alpha.c (elf64_alpha_copy_indirect_symbol): Rename from
+	elf64_alpha_merge_ind_symbols; adjust for the generic interface.
+	(elf64_alpha_always_size_sections): Don't call
+	elf64_alpha_merge_ind_symbols.
+	(elf_backend_copy_indirect_symbol): New.
+
 2011-06-14  Alan Modra  <amodra@gmail.com>
 
 	PR ld/12887
