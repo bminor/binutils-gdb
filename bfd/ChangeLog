@@ -1,3 +1,11 @@
+2011-06-15  Ulrich Weigand  <ulrich.weigand@linaro.org>
+
+	* elf-bfd.h (elfcore_write_arm_vfp): Add prototype.
+	* elf.c (elfcore_grok_arm_vfp): New function.
+	(elfcore_grok_note): Call it to handle NT_ARM_VFP notes.
+	(elfcore_write_arm_vfp): New function.
+	(elfcore_write_register_note): Call it to handle .reg-arm-vfp.
+
 2011-06-14  Richard Henderson  <rth@redhat.com>
 
 	* elf64-alpha.c (elf64_alpha_copy_indirect_symbol): Rename from

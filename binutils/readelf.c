@@ -12284,6 +12284,8 @@ get_note_type (unsigned e_type)
 	return _("NT_S390_CTRS (s390 control registers)");
       case NT_S390_PREFIX:
 	return _("NT_S390_PREFIX (s390 prefix register)");
+      case NT_ARM_VFP:
+	return _("NT_ARM_VFP (arm VFP registers)");
       case NT_PSTATUS:
 	return _("NT_PSTATUS (pstatus structure)");
       case NT_FPREGS:
