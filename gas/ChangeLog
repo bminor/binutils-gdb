@@ -1,3 +1,7 @@
+2011-06-15  Nick Clifton  <nickc@redhat.com>
+
+	* NEWS: Mention addition of TILEPRO and TIKE-Gx support.
+
 2011-06-14  Tristan Gingold  <gingold@adacore.com>
 
 	* config/tc-ppc.h (struct ppc_tc_sy): Complete comment on within.

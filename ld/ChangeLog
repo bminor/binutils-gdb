@@ -1,3 +1,7 @@
+2011-06-15  Nick Clifton  <nickc@redhat.com>
+
+	* NEWS: Mention addition of TILEPRO and TIKE-Gx support.
+
 2011-06-13  Walter Lee  <walt@tilera.com>
 
 	* Makefile.am (ALL_EMULATION_SOURCES): Add eelf32tilegx.c and

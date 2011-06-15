@@ -1,11 +1,12 @@
 -*- text -*-
 
+* Add support for the Tilera TILEPRO and TILE-Gx architectures.
+
 * Added SORT_BY_INIT_PRIORITY to the linker script language to permit
 sorting sections by numerical value of the GCC init_priority attribute
 encoded in the section name.
 
 Changes in 2.21:
-
 
 * Linker script expression evaluation is somewhat more sane.  This may
   break scripts that depend on quirks of the old expression evaluation.
