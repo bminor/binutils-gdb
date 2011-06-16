@@ -1,3 +1,9 @@
+2011-06-16  Hui Zhu  <teawater@gmail.com>
+
+	* remote.c (remote_trace_set_readonly_regions): Add check for
+	remote_protocol_packets[PACKET_qXfer_traceframe_info].support before
+	output warning.
+
 2011-06-15  Ulrich Weigand  <ulrich.weigand@linaro.org>
 
 	* arm-linux-tdep.c: Include "auxv.h".

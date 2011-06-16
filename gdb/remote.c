@@ -10001,7 +10001,9 @@ remote_trace_set_readonly_regions (void)
       sec_length = 1 + strlen (tmp1) + 1 + strlen (tmp2);
       if (offset + sec_length + 1 > target_buf_size)
 	{
-	  warning (_("\
+	  if (remote_protocol_packets[PACKET_qXfer_traceframe_info].support
+	      != PACKET_ENABLE)
+	    warning (_("\
 Too many sections for read-only sections definition packet."));
 	  break;
 	}
