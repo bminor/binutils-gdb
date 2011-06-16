@@ -1,3 +1,8 @@
+2011-06-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf64-x86-64.c (elf_x86_64_grok_prstatus): Support x32.
+	(elf_x86_64_grok_psinfo): Likewise.
+
 2011-06-16  Nick Clifton  <nickc@redhat.com>
 
 	* elf.c (elf_find_function): Fail if not provided with a symbol
