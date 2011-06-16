@@ -3282,6 +3282,12 @@ Warnings::issue_warning(const Symbol* sym,
 			size_t relnum, off_t reloffset) const
 {
   gold_assert(sym->has_warning());
+
+  // We don't want to issue a warning for a relocation against the
+  // symbol in the same object file in which the symbol is defined.
+  if (sym->object() == relinfo->object)
+    return;
+
   Warning_table::const_iterator p = this->warnings_.find(sym->name());
   gold_assert(p != this->warnings_.end());
   gold_warning_at_location(relinfo, relnum, reloffset,

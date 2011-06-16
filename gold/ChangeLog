@@ -1,3 +1,8 @@
+2011-06-16  Ian Lance Taylor  <iant@google.com>
+
+	* symtab.cc (Warnings::issue_warning): Don't warn if relocation
+	occurs in same object.
+
 2011-06-14  Alan Modra  <amodra@gmail.com>
 
 	* po/POTFILES.in: Regenerate.
