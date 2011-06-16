@@ -47,7 +47,7 @@
     (save-excursion
       (apply #'call-process dwarf-objdump-program nil (current-buffer) nil
 	     "-Wi" (concat "--dwarf-start=0x" die)
-	     dwarf-file
+	     (expand-file-name dwarf-file)
 	     (if new-depth (list (concat "--dwarf-depth="
 					 (int-to-string new-depth))))))
     (set-buffer-modified-p nil)))
@@ -136,7 +136,7 @@ A prefix argument means expand all children."
       (call-process dwarf-objdump-program
 		    nil (current-buffer) nil
 		    "-Wi" "--dwarf-depth=1"
-		    dwarf-file))
+		    (expand-file-name dwarf-file)))
     (set-buffer-modified-p nil)))
 
 ;;;###autoload

@@ -1,3 +1,9 @@
+2011-06-16  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf-mode.el (dwarf-do-insert-substructure): Call
+	expand-file-name.
+	(dwarf-do-refresh): Likewise.
+
 2011-06-15  Ulrich Weigand  <ulrich.weigand@linaro.org>
 
 	* readelf.c (get_note_type): Handle NT_ARM_VFP.
