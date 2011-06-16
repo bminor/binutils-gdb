@@ -1,5 +1,27 @@
 2011-06-16  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf64-x86-64.c: Include <stdarg.h> and CORE_HEADER if
+	CORE_HEADER is defined.
+	(elf_x86_64_write_core_note): New.
+	(elf_backend_write_core_note): Likewise.
+
+	* hosts/x86-64linux.h (uint64_t): New.
+	(user_regsx32_struct): Likewise.
+	(elf_gregx32_t): Likewise.
+	(ELF_NGREGX32): Likewise.
+	(elf_gregsetx32_t): Likewise.
+	(elf_prstatusx32): Likewise.
+	(prstatusx32_t): Likewise.
+	(user_fpregs32_struct): Removed.
+	(user_fpxregs32_struct): Likewise.
+	(user32): Likewise.
+	(elf_fpregset32_t): Likewise.
+	(elf_fpxregset32_t): Likewise.
+	(prgregset32_t): Likewise.
+	(prfpregset32_t): Likewise.
+
+2011-06-16  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf64-x86-64.c (elf_x86_64_grok_prstatus): Support x32.
 	(elf_x86_64_grok_psinfo): Likewise.
 
