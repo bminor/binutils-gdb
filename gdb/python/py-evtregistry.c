@@ -21,6 +21,8 @@
 #include "command.h"
 #include "py-events.h"
 
+events_object gdb_py_events;
+
 static PyTypeObject eventregistry_object_type;
 
 /* Implementation of EventRegistry.connect () -> NULL.

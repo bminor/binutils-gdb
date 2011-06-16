@@ -51,7 +51,7 @@ typedef struct
 } events_object;
 
 /* Python events singleton.  */
-events_object gdb_py_events;
+extern events_object gdb_py_events;
 
 extern eventregistry_object *create_eventregistry_object (void);
 extern int evregpy_no_listeners_p (eventregistry_object *registry);

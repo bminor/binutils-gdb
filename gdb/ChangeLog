@@ -1,3 +1,8 @@
+2011-06-16  Tristan Gingold  <gingold@adacore.com>
+
+	* python/py-events.h (gdb_py_events): Make it extern.
+	* python/py-evtregistry.c (gdb_py_events): Declare.
+
 2011-06-16  Hui Zhu  <teawater@gmail.com>
 
 	* remote.c (remote_trace_set_readonly_regions): Add check for
