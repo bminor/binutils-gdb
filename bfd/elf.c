@@ -7391,6 +7391,9 @@ elf_find_function (bfd *abfd,
   enum { nothing_seen, symbol_seen, file_after_symbol_seen } state;
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
 
+  if (symbols == NULL)
+    return FALSE;
+
   filename = NULL;
   func = NULL;
   file = NULL;
