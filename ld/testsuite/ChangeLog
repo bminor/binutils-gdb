@@ -1,3 +1,13 @@
+2011-06-16  Alan Modra  <amodra@gmail.com>
+
+	* ld-elfvers/vers2.ver: Don't assume any particular index for
+	version reference.
+	* ld-elfvers/vers3.ver: Likewise.
+	* ld-elfvers/vers19.ver: Likewise.
+	* ld-elfvers/vers22.ver: Likewise.
+	* ld-elfvers/vers27d4.ver: Likewise.
+	* ld-elfvers/vers28c.ver: Likewise.
+
 2011-06-14  Alan Modra  <amodra@gmail.com>
 
 	* ld-elf/elf.exp: Don't attempt to build symbol3.a for hppa64-hpux.
