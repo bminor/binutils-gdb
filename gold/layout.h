@@ -1,6 +1,6 @@
 // layout.h -- lay out output file sections for gold  -*- C++ -*-
 
-// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -1168,6 +1168,8 @@ class Layout
   Output_segment* tls_segment_;
   // A pointer to the PT_GNU_RELRO segment if there is one.
   Output_segment* relro_segment_;
+  // A pointer to the PT_INTERP segment if there is one.
+  Output_segment* interp_segment_;
   // A backend may increase the size of the PT_GNU_RELRO segment if
   // there is one.  This is the amount to increase it by.
   unsigned int increase_relro_;

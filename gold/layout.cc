@@ -360,6 +360,7 @@ Layout::Layout(int number_of_input_files, Script_options* script_options)
     section_headers_(NULL),
     tls_segment_(NULL),
     relro_segment_(NULL),
+    interp_segment_(NULL),
     increase_relro_(0),
     symtab_section_(NULL),
     symtab_xindex_(NULL),
@@ -618,11 +619,8 @@ Layout::find_output_segment(elfcpp::PT type, elfcpp::Elf_Word set,
 
 // Return the output section to use for section NAME with type TYPE
 // and section flags FLAGS.  NAME must be canonicalized in the string
-// pool, and NAME_KEY is the key.  IS_INTERP is true if this is the
-// .interp section.  IS_DYNAMIC_LINKER_SECTION is true if this section
-// is used by the dynamic linker.  IS_RELRO is true for a relro
-// section.  IS_LAST_RELRO is true for the last relro section.
-// IS_FIRST_NON_RELRO is true for the first non-relro section.
+// pool, and NAME_KEY is the key.  ORDER is where this should appear
+// in the output sections.  IS_RELRO is true for a relro section.
 
 Output_section*
 Layout::get_output_section(const char* name, Stringpool::Key name_key,
@@ -687,12 +685,9 @@ Layout::get_output_section(const char* name, Stringpool::Key name_key,
 // RELOBJ, with type TYPE and flags FLAGS.  RELOBJ may be NULL for a
 // linker created section.  IS_INPUT_SECTION is true if we are
 // choosing an output section for an input section found in a input
-// file.  IS_INTERP is true if this is the .interp section.
-// IS_DYNAMIC_LINKER_SECTION is true if this section is used by the
-// dynamic linker.  IS_RELRO is true for a relro section.
-// IS_LAST_RELRO is true for the last relro section.
-// IS_FIRST_NON_RELRO is true for the first non-relro section.  This
-// will return NULL if the input section should be discarded.
+// file.  ORDER is where this section should appear in the output
+// sections.  IS_RELRO is true for a relro section.  This will return
+// NULL if the input section should be discarded.
 
 Output_section*
 Layout::choose_output_section(const Relobj* relobj, const char* name,
@@ -1541,6 +1536,21 @@ Layout::attach_allocated_section_to_segment(Output_section* os)
 	this->make_output_segment(elfcpp::PT_GNU_RELRO, seg_flags);
       this->relro_segment_->add_output_section_to_nonload(os, seg_flags);
     }
+
+  // If we are making a shared library, and we see a section named
+  // .interp, and the -dynamic-linker option was not used, then put
+  // the .interp section into a PT_INTERP segment.  This is for GNU ld
+  // compatibility.  If making an executable, or if the
+  // -dynamic-linker option was used, we will create the section and
+  // segment in Layout::create_interp.
+  if (strcmp(os->name(), ".interp") == 0
+      && parameters->options().shared()
+      && parameters->options().dynamic_linker() == NULL)
+    {
+      if (this->interp_segment_ == NULL)
+	this->make_output_segment(elfcpp::PT_INTERP, seg_flags);
+      this->interp_segment_->add_output_section_to_nonload(os, seg_flags);
+    }
 }
 
 // Make an output section for a script.
@@ -2164,7 +2174,8 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab,
 
       // Create the .interp section to hold the name of the
       // interpreter, and put it in a PT_INTERP segment.
-      if (!parameters->options().shared())
+      if (!parameters->options().shared()
+	  || parameters->options().dynamic_linker() != NULL)
         this->create_interp(target);
 
       // Finish the .dynamic section to hold the dynamic data, and put
@@ -3845,6 +3856,8 @@ Layout::sized_create_version_sections(
 void
 Layout::create_interp(const Target* target)
 {
+  gold_assert(this->interp_segment_ == NULL);
+
   const char* interp = parameters->options().dynamic_linker();
   if (interp == NULL)
     {
@@ -3856,11 +3869,23 @@ Layout::create_interp(const Target* target)
 
   Output_section_data* odata = new Output_data_const(interp, len, 1);
 
-  Output_section* osec = this->choose_output_section(NULL, ".interp",
-						     elfcpp::SHT_PROGBITS,
-						     elfcpp::SHF_ALLOC,
-						     false, ORDER_INTERP,
-						     false);
+  Output_section* osec;
+
+  // If we are using a SECTIONS clause, let it decide where the
+  // .interp section should go.  Otherwise always create a new section
+  // so that this .interp section does not get confused with any
+  // section of the same name in the program.
+  if (this->script_options_->saw_sections_clause())
+    osec = this->choose_output_section(NULL, ".interp", elfcpp::SHT_PROGBITS,
+				       elfcpp::SHF_ALLOC, false, ORDER_INTERP,
+				       false);
+  else
+    {
+      const char* n = this->namepool_.add("interp", false, NULL);
+      osec = this->make_output_section(n, elfcpp::SHT_PROGBITS,
+				       elfcpp::SHF_ALLOC, ORDER_INTERP, false);
+    }
+
   osec->add_output_section_data(odata);
 
   if (!this->script_options_->saw_phdrs_clause())
@@ -4389,6 +4414,8 @@ Layout::make_output_segment(elfcpp::Elf_Word type, elfcpp::Elf_Word flags)
     this->tls_segment_ = oseg;
   else if (type == elfcpp::PT_GNU_RELRO)
     this->relro_segment_ = oseg;
+  else if (type == elfcpp::PT_INTERP)
+    this->interp_segment_ = oseg;
 
   return oseg;
 }

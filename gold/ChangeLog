@@ -1,5 +1,21 @@
 2011-06-17  Ian Lance Taylor  <iant@google.com>
 
+	PR gold/12880
+	* layout.h (class Layout): Add interp_segment_ field.
+	* layout.cc (Layout::Layout): Initialize interp_segment_ field.
+	(Layout::attach_allocated_section_to_segment): If making shared
+	library, put .interp section in PT_INTERP segment.
+	(Layout::finalize): Also call create_interp if -dynamic-linker
+	option was used.
+	(Layout::create_interp): Assert that there is no PT_INTERP
+	segment.  If not using a SECTIONS clause, use make_output_section.
+	(Layout::make_output_segment): Set interp_segment_ if PT_INTERP.
+	* script-sections.cc
+	(Script_sections::create_note_and_tls_segments): If making shared
+	library, put .interp section in PT_INTERP segment.
+
+2011-06-17  Ian Lance Taylor  <iant@google.com>
+
 	* object.cc (Sized_relobj_file::do_layout): Keep warning sections
 	when making a shared library.
 
