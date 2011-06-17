@@ -3608,6 +3608,13 @@ value_of_local (const char *name, int complain)
   struct value * ret;
   struct frame_info *frame;
 
+  if (!name)
+    {
+      if (complain)
+	error (_("no `this' in current language"));
+      return 0;
+    }
+
   if (complain)
     frame = get_selected_frame (_("no frame selected"));
   else

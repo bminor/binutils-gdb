@@ -277,11 +277,6 @@ OP (STRUCTOP_PTR)
    It just comes in a tight (OP_THIS, OP_THIS) pair.  */
 OP (OP_THIS)
 
-/* Objective-C: OP_OBJC_SELF is just a placeholder for the class
-   instance variable.  It just comes in a tight (OP_OBJC_SELF,
-   OP_OBJC_SELF) pair.  */
-OP (OP_OBJC_SELF)
-
 /* Objective C: "@selector" pseudo-operator.  */
 OP (OP_OBJC_SELECTOR)
 

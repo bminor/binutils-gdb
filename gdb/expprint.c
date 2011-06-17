@@ -499,14 +499,11 @@ print_subexp_standard (struct expression *exp, int *pos,
 
     case OP_THIS:
       ++(*pos);
-      fputs_filtered ("this", stream);
-      return;
-
-      /* Objective-C ops */
-
-    case OP_OBJC_SELF:
-      ++(*pos);
-      fputs_filtered ("self", stream);	/* The ObjC equivalent of "this".  */
+      if (exp->language_defn->la_name_of_this)
+	fputs_filtered (exp->language_defn->la_name_of_this, stream);
+      else
+	fprintf_filtered (stream, _("<language %s has no 'this'>"),
+			  exp->language_defn->la_name);
       return;
 
       /* Modula-2 ops */

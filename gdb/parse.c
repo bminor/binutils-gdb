@@ -963,7 +963,6 @@ operator_length_standard (const struct expression *expr, int endpos,
 
       /* C++ */
     case OP_THIS:
-    case OP_OBJC_SELF:
       oplen = 2;
       break;
 

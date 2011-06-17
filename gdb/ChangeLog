@@ -1,3 +1,14 @@
+2011-06-17  Tom Tromey  <tromey@redhat.com>
+
+	* valops.c (value_of_local): Complain if NAME is NULL.
+	* std-operator.def (OP_OBJC_SELF): Remove.
+	* parse.c (operator_length_standard) <OP_OBJC_SELF>: Remove.
+	* objc-exp.y (name_not_typename): Use OP_THIS.
+	* expprint.c (print_subexp_standard) <OP_THIS>: Print language's
+	name for "this".
+	<OP_OBJC_SELF>: Remove.
+	* eval.c (evaluate_subexp_standard) <OP_OBJC_SELF>: Remove.
+
 2011-06-16  Tristan Gingold  <gingold@adacore.com>
 
 	* python/py-events.h (gdb_py_events): Make it extern.
