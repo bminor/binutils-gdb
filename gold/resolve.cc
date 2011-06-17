@@ -1,6 +1,6 @@
 // resolve.cc -- symbol resolution for gold
 
-// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -245,6 +245,21 @@ Symbol_table::resolve(Sized_symbol<size>* to,
 		      unsigned int orig_st_shndx,
 		      Object* object, const char* version)
 {
+  // It's possible for a symbol to be defined in an object file
+  // using .symver to give it a version, and for there to also be
+  // a linker script giving that symbol the same version.  We
+  // don't want to give a multiple-definition error for this
+  // harmless redefinition.
+  bool to_is_ordinary;
+  if (to->source() == Symbol::FROM_OBJECT
+      && to->object() == object
+      && is_ordinary
+      && to->is_defined()
+      && to->shndx(&to_is_ordinary) == st_shndx
+      && to_is_ordinary
+      && to->value() == sym.get_st_value())
+    return;
+
   if (parameters->target().has_resolve())
     {
       Sized_target<size, big_endian>* sized_target;
@@ -306,7 +321,6 @@ Symbol_table::resolve(Sized_symbol<size>* to,
   // inline and the other is not.  (Note: not all ODR violations can
   // be found this way, and not everything this finds is an ODR
   // violation.  But it's helpful to warn about.)
-  bool to_is_ordinary;
   if (parameters->options().detect_odr_violations()
       && (sym.get_st_bind() == elfcpp::STB_WEAK
 	  || to->binding() == elfcpp::STB_WEAK)

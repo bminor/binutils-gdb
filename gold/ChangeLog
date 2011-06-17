@@ -1,5 +1,11 @@
 2011-06-17  Ian Lance Taylor  <iant@google.com>
 
+	PR gold/12893
+	* resolve.cc (Symbol_table::resolve): Don't give an error if a
+	symbol is redefined with the exact same object and value.
+
+2011-06-17  Ian Lance Taylor  <iant@google.com>
+
 	PR gold/12880
 	* layout.h (class Layout): Add interp_segment_ field.
 	* layout.cc (Layout::Layout): Initialize interp_segment_ field.
