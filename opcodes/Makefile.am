@@ -458,11 +458,11 @@ stamp-xstormy16: $(CGENDEPS) $(CPUDIR)/xstormy16.cpu $(CPUDIR)/xstormy16.opc
 		archfile=$(CPUDIR)/xstormy16.cpu opcfile=$(CPUDIR)/xstormy16.opc extrafiles=
 
 MOSTLYCLEANFILES = i386-gen$(EXEEXT_FOR_BUILD) ia64-gen$(EXEEXT_FOR_BUILD) \
-	s390-mkopc$(EXEEXT_FOR_BUILD) z8kgen$(EXEEXT_FOR_BUILD) \
+	s390-mkopc$(EXEEXT_FOR_BUILD) s390-opc.tab z8kgen$(EXEEXT_FOR_BUILD) \
 	opc2c$(EXEEXT_FOR_BUILD)
 
 MAINTAINERCLEANFILES = $(srcdir)/i386-tbl.h $(srcdir)/i386-init.h \
-	$(srcdir)/ia64-asmtab.c s390-opc.tab $(srcdir)/z8k-opc.h \
+	$(srcdir)/ia64-asmtab.c $(srcdir)/z8k-opc.h \
 	$(srcdir)/rx-decode.c
 
 i386-gen$(EXEEXT_FOR_BUILD): i386-gen.o $(BUILD_LIB_DEPS)

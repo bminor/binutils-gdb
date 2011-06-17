@@ -1,3 +1,9 @@
+2011-06-17  Andreas Schwab  <schwab@redhat.com>
+
+	* Makefile.am (MAINTAINERCLEANFILES): Move s390-opc.tab ...
+	(MOSTLYCLEANFILES): ... here.
+	* Makefile.in: Regenerate.
+
 2011-06-14  Alan Modra  <amodra@gmail.com>
 
 	* Makefile.in: Regenerate.
@@ -348,7 +354,7 @@
 
 2011-02-09  Michael Snyder  <msnyder@vmware.com>
 
-	* i386-dis.c (OP_J): Parenthesize expression to prevent 
+	* i386-dis.c (OP_J): Parenthesize expression to prevent
 	truncated addresses.
 	(print_insn): Fix indentation off-by-one.
 
