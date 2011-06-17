@@ -1,8 +1,13 @@
 2011-06-17  Ian Lance Taylor  <iant@google.com>
 
-	* x86_64.cc (check_non_pic): Add gsym parameter.  Change all
-	callers.  Don't issue warning about PC32 against locally defined
-	symbol.
+	* object.cc (Sized_relobj_file::do_layout): Keep warning sections
+	when making a shared library.
+
+2011-06-17  Ian Lance Taylor  <iant@google.com>
+
+	* x86_64.cc (Target_x86_64::Scan::check_non_pic): Add gsym
+	parameter.  Change all callers.  Don't issue warning about PC32
+	against locally defined symbol.
 
 2011-06-16  Ian Lance Taylor  <iant@google.com>
 
