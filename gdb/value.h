@@ -715,7 +715,8 @@ extern int value_logical_not (struct value *arg1);
 
 /* C++ */
 
-extern struct value *value_of_this (int complain);
+extern struct value *value_of_this (const struct language_defn *lang,
+				    int complain);
 
 extern struct value *value_x_binop (struct value *arg1, struct value *arg2,
 				    enum exp_opcode op,
@@ -834,8 +835,6 @@ extern struct value *find_function_in_inferior (const char *,
 						struct objfile **);
 
 extern struct value *value_allocate_space_in_inferior (int);
-
-extern struct value *value_of_local (const char *name, int complain);
 
 extern struct value *value_subscripted_rvalue (struct value *array,
 					       LONGEST index, int lowerbound);

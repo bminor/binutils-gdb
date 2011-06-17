@@ -1,5 +1,15 @@
 2011-06-17  Tom Tromey  <tromey@redhat.com>
 
+	* value.h (value_of_this): Update.
+	(value_of_local): Remove.
+	* valops.c (value_of_this): Rename from value_of_local.  Change
+	parameters.
+	* p-exp.y (exp): Update.
+	(variable): Likewise.
+	* eval.c (evaluate_subexp_standard) <OP_THIS>: Use value_of_this.
+
+2011-06-17  Tom Tromey  <tromey@redhat.com>
+
 	* valops.c (value_of_local): Complain if NAME is NULL.
 	* std-operator.def (OP_OBJC_SELF): Remove.
 	* parse.c (operator_length_standard) <OP_OBJC_SELF>: Remove.

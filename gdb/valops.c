@@ -3601,12 +3601,13 @@ value_full_object (struct value *argp,
    inappropriate context.  */
 
 struct value *
-value_of_local (const char *name, int complain)
+value_of_this (const struct language_defn *lang, int complain)
 {
   struct symbol *func, *sym;
   struct block *b;
   struct value * ret;
   struct frame_info *frame;
+  const char *name = lang->la_name_of_this;
 
   if (!name)
     {
@@ -3658,18 +3659,6 @@ value_of_local (const char *name, int complain)
   if (ret == 0 && complain)
     error (_("`%s' argument unreadable"), name);
   return ret;
-}
-
-/* C++/Objective-C: return the value of the class instance variable,
-   if one exists.  Flag COMPLAIN signals an error if the request is
-   made in an inappropriate context.  */
-
-struct value *
-value_of_this (int complain)
-{
-  if (!current_language->la_name_of_this)
-    return 0;
-  return value_of_local (current_language->la_name_of_this, complain);
 }
 
 /* Create a slice (sub-string, sub-array) of ARRAY, that is LENGTH
