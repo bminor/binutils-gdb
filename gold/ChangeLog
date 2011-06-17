@@ -1,3 +1,8 @@
+2011-06-17  Ian Lance Taylor  <iant@google.com>
+
+	* object.cc (Sized_relobj::do_layout): Keep warning sections when
+	making a shared library.
+
 2011-06-09  Ian Lance Taylor  <iant@google.com>
 
 	* script-sections.cc
