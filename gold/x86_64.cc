@@ -488,7 +488,7 @@ class Target_x86_64 : public Target_freebsd<64, false>
 			     Symbol*);
 
     void
-    check_non_pic(Relobj*, unsigned int r_type);
+    check_non_pic(Relobj*, unsigned int r_type, Symbol*);
 
     inline bool
     possible_function_pointer_reloc(unsigned int r_type);
@@ -1610,10 +1610,13 @@ Target_x86_64::Scan::unsupported_reloc_local(
 // Here we know the section is allocated, but we don't know that it is
 // read-only.  But we check for all the relocation types which the
 // glibc dynamic linker supports, so it seems appropriate to issue an
-// error even if the section is not read-only.
+// error even if the section is not read-only.  If GSYM is not NULL,
+// it is the symbol the relocation is against; if it is NULL, the
+// relocation is against a local symbol.
 
 void
-Target_x86_64::Scan::check_non_pic(Relobj* object, unsigned int r_type)
+Target_x86_64::Scan::check_non_pic(Relobj* object, unsigned int r_type,
+				   Symbol* gsym)
 {
   switch (r_type)
     {
@@ -1631,13 +1634,29 @@ Target_x86_64::Scan::check_non_pic(Relobj* object, unsigned int r_type)
       return;
 
       // glibc supports these reloc types, but they can overflow.
-    case elfcpp::R_X86_64_32:
     case elfcpp::R_X86_64_PC32:
+      // A PC relative reference is OK against a local symbol or if
+      // the symbol is defined locally.
+      if (gsym == NULL
+	  || (!gsym->is_from_dynobj()
+	      && !gsym->is_undefined()
+	      && !gsym->is_preemptible()))
+	return;
+      /* Fall through.  */
+    case elfcpp::R_X86_64_32:
       if (this->issued_non_pic_error_)
 	return;
       gold_assert(parameters->options().output_is_position_independent());
-      object->error(_("requires dynamic reloc which may overflow at runtime; "
-		      "recompile with -fPIC"));
+      if (gsym == NULL)
+	object->error(_("requires dynamic R_X86_64_32 reloc which may "
+			"overflow at runtime; recompile with -fPIC"));
+      else
+	object->error(_("requires dynamic %s reloc against '%s' which may "
+			"overflow at runtime; recompile with -fPIC"),
+		      (r_type == elfcpp::R_X86_64_32
+		       ? "R_X86_64_32"
+		       : "R_X86_64_PC32"),
+		      gsym->name());
       this->issued_non_pic_error_ = true;
       return;
 
@@ -1648,8 +1667,9 @@ Target_x86_64::Scan::check_non_pic(Relobj* object, unsigned int r_type)
       if (this->issued_non_pic_error_)
         return;
       gold_assert(parameters->options().output_is_position_independent());
-      object->error(_("requires unsupported dynamic reloc; "
-                      "recompile with -fPIC"));
+      object->error(_("requires unsupported dynamic reloc %u; "
+                      "recompile with -fPIC"),
+		    r_type);
       this->issued_non_pic_error_ = true;
       return;
 
@@ -1730,7 +1750,7 @@ Target_x86_64::Scan::local(Symbol_table* symtab,
       // because that is always a 64-bit relocation.
       if (parameters->options().output_is_position_independent())
         {
-          this->check_non_pic(object, r_type);
+          this->check_non_pic(object, r_type, NULL);
 
           Reloc_section* rela_dyn = target->rela_dyn_section(layout);
 	  unsigned int r_sym = elfcpp::elf_r_sym<64>(reloc.get_r_info());
@@ -1814,7 +1834,7 @@ Target_x86_64::Scan::local(Symbol_table* symtab,
 		  }
                 else
                   {
-                    this->check_non_pic(object, r_type);
+                    this->check_non_pic(object, r_type, NULL);
 
                     gold_assert(lsym.get_st_type() != elfcpp::STT_SECTION);
                     rela_dyn->add_local(
@@ -2135,7 +2155,7 @@ Target_x86_64::Scan::global(Symbol_table* symtab,
               }
             else
               {
-                this->check_non_pic(object, r_type);
+                this->check_non_pic(object, r_type, gsym);
                 Reloc_section* rela_dyn = target->rela_dyn_section(layout);
                 rela_dyn->add_global(gsym, r_type, output_section, object,
                                      data_shndx, reloc.get_r_offset(),
@@ -2163,7 +2183,7 @@ Target_x86_64::Scan::global(Symbol_table* symtab,
               }
             else
               {
-                this->check_non_pic(object, r_type);
+                this->check_non_pic(object, r_type, gsym);
                 Reloc_section* rela_dyn = target->rela_dyn_section(layout);
                 rela_dyn->add_global(gsym, r_type, output_section, object,
                                      data_shndx, reloc.get_r_offset(),
