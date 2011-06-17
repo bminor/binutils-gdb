@@ -3603,13 +3603,12 @@ value_full_object (struct value *argp,
 struct value *
 value_of_this (const struct language_defn *lang, int complain)
 {
-  struct symbol *func, *sym;
+  struct symbol *sym;
   struct block *b;
   struct value * ret;
   struct frame_info *frame;
-  const char *name = lang->la_name_of_this;
 
-  if (!name)
+  if (!lang->la_name_of_this)
     {
       if (complain)
 	error (_("no `this' in current language"));
@@ -3625,39 +3624,21 @@ value_of_this (const struct language_defn *lang, int complain)
 	return 0;
     }
 
-  func = get_frame_function (frame);
-  if (!func)
-    {
-      if (complain)
-	error (_("no `%s' in nameless context"), name);
-      else
-	return 0;
-    }
+  b = get_frame_block (frame, NULL);
 
-  b = SYMBOL_BLOCK_VALUE (func);
-  if (dict_empty (BLOCK_DICT (b)))
-    {
-      if (complain)
-	error (_("no args, no `%s'"), name);
-      else
-	return 0;
-    }
-
-  /* Calling lookup_block_symbol is necessary to get the LOC_REGISTER
-     symbol instead of the LOC_ARG one (if both exist).  */
-  sym = lookup_block_symbol (b, name, VAR_DOMAIN);
+  sym = lookup_language_this (lang, b);
   if (sym == NULL)
     {
       if (complain)
 	error (_("current stack frame does not contain a variable named `%s'"),
-	       name);
+	       lang->la_name_of_this);
       else
 	return NULL;
     }
 
   ret = read_var_value (sym, frame);
   if (ret == 0 && complain)
-    error (_("`%s' argument unreadable"), name);
+    error (_("`%s' argument unreadable"), lang->la_name_of_this);
   return ret;
 }
 

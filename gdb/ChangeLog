@@ -1,5 +1,13 @@
 2011-06-17  Tom Tromey  <tromey@redhat.com>
 
+	* valops.c (value_of_this): Use lookup_language_this.
+	* symtab.h (lookup_language_this): Declare.
+	* symtab.c (lookup_language_this): New function.
+	(lookup_symbol_aux): Use lookup_language_this.
+	* ax-gdb.c (gen_expr) <OP_THIS>: Use lookup_language_this.
+
+2011-06-17  Tom Tromey  <tromey@redhat.com>
+
 	* value.h (value_of_this): Update.
 	(value_of_local): Remove.
 	* valops.c (value_of_this): Rename from value_of_local.  Change

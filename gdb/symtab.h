@@ -33,6 +33,7 @@ struct blockvector;
 struct axs_value;
 struct agent_expr;
 struct program_space;
+struct language_defn;
 
 /* Some of the structures in this file are space critical.
    The space-critical structures are:
@@ -916,6 +917,9 @@ extern struct symbol *lookup_symbol_global (const char *name,
 extern struct symbol *lookup_symbol_aux_block (const char *name,
 					       const struct block *block,
 					       const domain_enum domain);
+
+extern struct symbol *lookup_language_this (const struct language_defn *lang,
+					    const struct block *block);
 
 /* Lookup a symbol only in the file static scope of all the objfiles.  */
 

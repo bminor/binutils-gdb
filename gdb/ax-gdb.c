@@ -2138,18 +2138,17 @@ gen_expr (struct expression *exp, union exp_element **pc,
     case OP_THIS:
       {
 	char *this_name;
-	struct symbol *func, *sym;
+	struct symbol *sym, *func;
 	struct block *b;
+	const struct language_defn *lang;
 
-	func = block_linkage_function (block_for_pc (ax->scope));
-	this_name = language_def (SYMBOL_LANGUAGE (func))->la_name_of_this;
-	b = SYMBOL_BLOCK_VALUE (func);
+	b = block_for_pc (ax->scope);
+	func = block_linkage_function (b);
+	lang = language_def (SYMBOL_LANGUAGE (func));
 
-	/* Calling lookup_block_symbol is necessary to get the LOC_REGISTER
-	   symbol instead of the LOC_ARG one (if both exist).  */
-	sym = lookup_block_symbol (b, this_name, VAR_DOMAIN);
+	sym = lookup_language_this (lang, b);
 	if (!sym)
-	  error (_("no `%s' found"), this_name);
+	  error (_("no `%s' found"), lang->la_name_of_this);
 
 	gen_var_ref (exp->gdbarch, ax, value, sym);
 

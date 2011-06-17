@@ -1090,6 +1090,29 @@ lookup_symbol (const char *name, const struct block *block,
 				    is_a_field_of_this);
 }
 
+/* Look up the `this' symbol for LANG in BLOCK.  Return the symbol if
+   found, or NULL if not found.  */
+
+struct symbol *
+lookup_language_this (const struct language_defn *lang,
+		      const struct block *block)
+{
+  if (lang->la_name_of_this == NULL || block == NULL)
+    return NULL;
+
+  while (1)
+    {
+      struct symbol *sym;
+
+      sym = lookup_block_symbol (block, lang->la_name_of_this, VAR_DOMAIN);
+      if (sym != NULL)
+	return sym;
+      if (BLOCK_FUNCTION (block))
+	return NULL;
+      block = BLOCK_SUPERBLOCK (block);
+    }
+}
+
 /* Behave like lookup_symbol except that NAME is the natural name
    of the symbol that we're looking for and, if LINKAGE_NAME is
    non-NULL, ensure that the symbol's linkage name matches as
@@ -1123,20 +1146,10 @@ lookup_symbol_aux (const char *name, const struct block *block,
 
   langdef = language_def (language);
 
-  if (langdef->la_name_of_this != NULL && is_a_field_of_this != NULL
-      && block != NULL)
+  if (is_a_field_of_this != NULL)
     {
-      struct symbol *sym = NULL;
-      const struct block *function_block = block;
+      struct symbol *sym = lookup_language_this (langdef, block);
 
-      /* 'this' is only defined in the function's block, so find the
-	 enclosing function block.  */
-      for (; function_block && !BLOCK_FUNCTION (function_block);
-	   function_block = BLOCK_SUPERBLOCK (function_block));
-
-      if (function_block && !dict_empty (BLOCK_DICT (function_block)))
-	sym = lookup_block_symbol (function_block, langdef->la_name_of_this,
-				   VAR_DOMAIN);
       if (sym)
 	{
 	  struct type *t = sym->type;
