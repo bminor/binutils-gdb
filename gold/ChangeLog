@@ -1,5 +1,10 @@
 2011-06-18  Ian Lance Taylor  <iant@google.com>
 
+	* layout.cc (Layout::finish_dynamic_section): Don't set DT_TEXTREL
+	merely because a non-PT_LOAD segment has a dynamic reloc.
+
+2011-06-18  Ian Lance Taylor  <iant@google.com>
+
 	* layout.cc (Layout::finish_dynamic_section): Don't create
 	DT_FLAGS entry if not needed.
 

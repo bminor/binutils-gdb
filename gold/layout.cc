@@ -4107,7 +4107,8 @@ Layout::finish_dynamic_section(const Input_objects* input_objects,
            p != this->segment_list_.end();
            ++p)
         {
-          if (((*p)->flags() & elfcpp::PF_W) == 0
+          if ((*p)->type() == elfcpp::PT_LOAD
+	      && ((*p)->flags() & elfcpp::PF_W) == 0
               && (*p)->has_dynamic_reloc())
             {
               have_textrel = true;
@@ -4127,7 +4128,7 @@ Layout::finish_dynamic_section(const Input_objects* input_objects,
         {
           if (((*p)->flags() & elfcpp::SHF_ALLOC) != 0
               && ((*p)->flags() & elfcpp::SHF_WRITE) == 0
-              && ((*p)->has_dynamic_reloc()))
+              && (*p)->has_dynamic_reloc())
             {
               have_textrel = true;
               break;
