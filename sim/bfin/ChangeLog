@@ -1,5 +1,11 @@
 2011-06-18  Robin Getz  <robin.getz@analog.com>
 
+	* bfin-sim.c (decode_dsp32shift_0): Clear ASTAT[AV] if val is 0,
+	else set it.  Set ASTAT[AVS] if val is 0.  Do this for LSHIFT and
+	ASHIFT accumulator insns.
+
+2011-06-18  Robin Getz  <robin.getz@analog.com>
+
 	* bfin-sim.c (ashiftrt): If size is 40, do not call SET_ASTATREG.
 	(lshiftrt): Likewise.
 

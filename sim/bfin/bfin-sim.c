@@ -5223,6 +5223,9 @@ decode_dsp32shift_0 (SIM_CPU *cpu, bu16 iw0, bu16 iw1)
 
       STORE (AXREG (HLs), (val >> 32) & 0xff);
       STORE (AWREG (HLs), (val & 0xffffffff));
+      STORE (ASTATREG (av[HLs]), val == 0);
+      if (val == 0)
+	STORE (ASTATREG (avs[HLs]), 1);
     }
   else if (sop == 1 && sopcde == 3 && (HLs == 0 || HLs == 1))
     {
@@ -5240,6 +5243,9 @@ decode_dsp32shift_0 (SIM_CPU *cpu, bu16 iw0, bu16 iw1)
 
       STORE (AXREG (HLs), (val >> 32) & 0xff);
       STORE (AWREG (HLs), (val & 0xffffffff));
+      STORE (ASTATREG (av[HLs]), val == 0);
+      if (val == 0)
+	STORE (ASTATREG (avs[HLs]), 1);
     }
   else if ((sop == 0 || sop == 1) && sopcde == 1)
     {
