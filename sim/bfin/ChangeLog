@@ -1,5 +1,15 @@
 2011-06-18  Robin Getz  <robin.getz@analog.com>
 
+	* bfin-sim.c (decode_macfunc): Add nosat_acc to track acc value
+	before saturation, set sat when more cases saturate, and set the
+	overflow bit based on these results.  For M_TFU, M_IU, M_FU, and
+	M_W32, change the max values compared against.
+	(decode_dsp32mac_0): Delete v_i and add v_0 and v_1.  Pass v_1
+	when processing MAC1 and pass v_0 when processing MAC0.  Combine
+	the results into the V/VS ASTAT bits.
+
+2011-06-18  Robin Getz  <robin.getz@analog.com>
+
 	* bfin-sim.c (extract_mult): Call saturate_s32 when MM is set
 	and mmod is M_IU.  Call saturate_s16 when MM is set and mmod
 	is M_TFU.
