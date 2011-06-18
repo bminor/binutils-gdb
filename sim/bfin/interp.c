@@ -1222,7 +1222,7 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
      'target sim' with `bfin-...-gdb`), we need to handle it.  */
   if (STATE_OPEN_KIND (sd) == SIM_OPEN_DEBUG)
     {
-      free (STATE_PROG_ARGV (sd));
+      freeargv (STATE_PROG_ARGV (sd));
       STATE_PROG_ARGV (sd) = dupargv (argv);
     }
 
