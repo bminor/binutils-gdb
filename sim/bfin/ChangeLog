@@ -1,6 +1,6 @@
 2011-06-18  Robin Getz  <robin.getz@analog.com>
 
-	* bfin-sim.c (saturate_s40_astat): Change ">" to ">=".
+	* bfin-sim.c (saturate_s40_astat): Change ">=" to ">".
 	(decode_macfunc): Likewise when mmod is M_IH.
 
 2011-06-18  Mike Frysinger  <vapier@gentoo.org>
