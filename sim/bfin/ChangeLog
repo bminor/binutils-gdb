@@ -1,5 +1,12 @@
 2011-06-18  Robin Getz  <robin.getz@analog.com>
 
+	* bfin-sim.c (decode_dsp32shiftimm_0): With left shift vector insns,
+	call lshift only when count is positive.  Otherwise, call ashiftrt.
+	With arithmetic right shift insns, call ashiftrt when the value is
+	small enough, otherwise call lshift.
+
+2011-06-18  Robin Getz  <robin.getz@analog.com>
+
 	* bfin-sim.c (extract_mult): Call saturate_s16 directly when
 	mmod is M_IH rather than computing the result by hand.
 

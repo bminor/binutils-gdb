@@ -5678,7 +5678,10 @@ decode_dsp32shiftimm_0 (SIM_CPU *cpu, bu16 iw0, bu16 iw1)
 	  TRACE_INSN (cpu, "R%i.%c = R%i.%c >>> %i;",
 		      dst0, (HLs & 2) ? 'H' : 'L',
 		      src1, (HLs & 1) ? 'H' : 'L', newimmag);
-	  result = ashiftrt (cpu, in, newimmag, 16);
+	  if (newimmag > 16)
+	    result = lshift (cpu, in, 16 - (newimmag & 0xF), 16, 0);
+	  else
+	    result = ashiftrt (cpu, in, newimmag, 16);
 	}
       else if (sop == 1 && bit8 == 0)
 	{
@@ -5786,9 +5789,18 @@ decode_dsp32shiftimm_0 (SIM_CPU *cpu, bu16 iw0, bu16 iw1)
       bu32 astat;
 
       TRACE_INSN (cpu, "R%i = R%i << %i (V,S);", dst0, src1, count);
-      val0 = lshift (cpu, val0, count, 16, 1);
-      astat = ASTAT;
-      val1 = lshift (cpu, val1, count, 16, 1);
+      if (count >= 0)
+	{
+	  val0 = lshift (cpu, val0, count, 16, 1);
+	  astat = ASTAT;
+	  val1 = lshift (cpu, val1, count, 16, 1);
+	}
+      else
+	{
+	  val0 = ashiftrt (cpu, val0, -count, 16);
+	  astat = ASTAT;
+	  val1 = ashiftrt (cpu, val1, -count, 16);
+	}
       SET_ASTAT (ASTAT | astat);
 
       STORE (DREG (dst0), (val0 << 16) | val1);
@@ -5833,9 +5845,19 @@ decode_dsp32shiftimm_0 (SIM_CPU *cpu, bu16 iw0, bu16 iw1)
       TRACE_INSN (cpu, "R%i = R%i >>> %i %s;", dst0, src1, count,
 		  sop == 0 ? "(V)" : "(V,S)");
 
-      val0 = ashiftrt (cpu, val0, count, 16);
-      astat = ASTAT;
-      val1 = ashiftrt (cpu, val1, count, 16);
+      if (count & 0x10)
+	{
+	  val0 = lshift (cpu, val0, 16 - (count & 0xF), 16, 0);
+	  astat = ASTAT;
+	  val1 = lshift (cpu, val1, 16 - (count & 0xF), 16, 0);
+	}
+      else
+	{
+	  val0 = ashiftrt (cpu, val0, count, 16);
+	  astat = ASTAT;
+	  val1 = ashiftrt (cpu, val1, count, 16);
+	}
+
       SET_ASTAT (ASTAT | astat);
 
       STORE (DREG (dst0), REG_H_L (val1 << 16, val0));
