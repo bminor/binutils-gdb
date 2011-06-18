@@ -1,5 +1,10 @@
 2011-06-18  Robin Getz  <robin.getz@analog.com>
 
+	* bfin-sim.c (extract_mult): Call saturate_s16 directly when
+	mmod is M_IH rather than computing the result by hand.
+
+2011-06-18  Robin Getz  <robin.getz@analog.com>
+
 	* bfin-sim.c (decode_macfunc): Add nosat_acc to track acc value
 	before saturation, set sat when more cases saturate, and set the
 	overflow bit based on these results.  For M_TFU, M_IU, M_FU, and
@@ -20,11 +25,6 @@
 	allow MM to sign extend all the time.
 	(decode_macfunc): Likewise.  Drop sign extension of unsigned
 	values.
-
-2011-06-18  Robin Getz  <robin.getz@analog.com>
-
-	* bfin-sim.c (extract_mult): When mmod is M_IH, change the order
-	from round/saturate to saturate/round/saturate.
 
 2011-06-18  Robin Getz  <robin.getz@analog.com>
 
