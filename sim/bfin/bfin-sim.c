@@ -713,8 +713,8 @@ ashiftrt (SIM_CPU *cpu, bu40 val, int cnt, int size)
   val |= sgn;
   SET_ASTATREG (an, val >> (size - 1));
   SET_ASTATREG (az, val == 0);
-  /* XXX: Need to check ASTAT[v] behavior here.  */
-  SET_ASTATREG (v, 0);
+  if (size != 40)
+    SET_ASTATREG (v, 0);
   return val;
 }
 
@@ -742,7 +742,8 @@ lshiftrt (SIM_CPU *cpu, bu64 val, int cnt, int size)
     }
   SET_ASTATREG (an, val >> (size - 1));
   SET_ASTATREG (az, val == 0);
-  SET_ASTATREG (v, 0);
+  if (size != 40)
+    SET_ASTATREG (v, 0);
   return val;
 }
 

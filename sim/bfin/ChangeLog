@@ -1,5 +1,10 @@
 2011-06-18  Robin Getz  <robin.getz@analog.com>
 
+	* bfin-sim.c (ashiftrt): If size is 40, do not call SET_ASTATREG.
+	(lshiftrt): Likewise.
+
+2011-06-18  Robin Getz  <robin.getz@analog.com>
+
 	* bfin-sim.c (decode_dsp32shift_0): Use get_unextended_acc
 	rather than get_extended_acc in LSHIFT insns.
 
