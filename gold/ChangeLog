@@ -1,5 +1,10 @@
 2011-06-18  Ian Lance Taylor  <iant@google.com>
 
+	* layout.cc (Layout::finish_dynamic_section): Don't create
+	DT_FLAGS entry if not needed.
+
+2011-06-18  Ian Lance Taylor  <iant@google.com>
+
 	PR gold/12745
 	* layout.cc (Layout::layout_eh_frame): Correct handling of
 	writable .eh_frame section.

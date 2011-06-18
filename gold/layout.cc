@@ -4162,7 +4162,8 @@ Layout::finish_dynamic_section(const Input_objects* input_objects,
     }
   if (parameters->options().now())
     flags |= elfcpp::DF_BIND_NOW;
-  odyn->add_constant(elfcpp::DT_FLAGS, flags);
+  if (flags != 0)
+    odyn->add_constant(elfcpp::DT_FLAGS, flags);
 
   flags = 0;
   if (parameters->options().initfirst())
@@ -4187,7 +4188,7 @@ Layout::finish_dynamic_section(const Input_objects* input_objects,
     flags |= elfcpp::DF_1_ORIGIN;
   if (parameters->options().now())
     flags |= elfcpp::DF_1_NOW;
-  if (flags)
+  if (flags != 0)
     odyn->add_constant(elfcpp::DT_FLAGS_1, flags);
 }
 
