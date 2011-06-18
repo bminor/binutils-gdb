@@ -1380,8 +1380,8 @@ decode_multfunc (SIM_CPU *cpu, int h0, int h1, int src0, int src1, int mmod,
     }
   val1 = val;
 
-  if (mmod == 0 || mmod == M_IS || mmod == M_T || mmod == M_S2RND
-      || mmod == M_ISS2 || mmod == M_IH || (MM && mmod == M_FU))
+  /* In signed modes, sign extend.  */
+  if (is_macmod_signed (mmod) || MM)
     val1 |= -(val1 & 0x80000000);
 
   if (*psat)
@@ -1579,15 +1579,10 @@ decode_macfunc (SIM_CPU *cpu, int which, int op, int h0, int h1, int src0,
   bu32 sat = 0, tsat, ret;
 
   /* Sign extend accumulator if necessary, otherwise unsigned.  */
-  if (mmod == 0 || mmod == M_T || mmod == M_IS || mmod == M_ISS2
-      || mmod == M_S2RND || mmod == M_IH || mmod == M_W32)
+  if (is_macmod_signed (mmod) || MM)
     acc = get_extended_acc (cpu, which);
   else
     acc = get_unextended_acc (cpu, which);
-
-  if (MM && (mmod == M_T || mmod == M_IS || mmod == M_ISS2
-      || mmod == M_S2RND || mmod == M_IH || mmod == M_W32))
-    acc |= -(acc & 0x80000000);
 
   if (op != 3)
     {
