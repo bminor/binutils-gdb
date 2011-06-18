@@ -1,5 +1,10 @@
 2011-06-18  Robin Getz  <robin.getz@analog.com>
 
+	* bfin-sim.c (decode_dsp32shift_0): Use get_unextended_acc
+	rather than get_extended_acc in LSHIFT insns.
+
+2011-06-18  Robin Getz  <robin.getz@analog.com>
+
 	* bfin-sim.c (decode_macfunc): Handle MM when mmod is M_TFU.
 	Check MM once when mmod is M_FU to match M_TFU better.
 

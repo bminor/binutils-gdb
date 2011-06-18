@@ -5230,7 +5230,7 @@ decode_dsp32shift_0 (SIM_CPU *cpu, bu16 iw0, bu16 iw1)
 
       HLs = !!HLs;
       TRACE_INSN (cpu, "A%i = LSHIFT A%i BY R%i.L;", HLs, HLs, src0);
-      val = get_extended_acc (cpu, HLs);
+      val = get_unextended_acc (cpu, HLs);
 
       if (shft <= 0)
 	val = lshiftrt (cpu, val, -shft, 40);
