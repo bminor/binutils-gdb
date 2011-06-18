@@ -1,5 +1,11 @@
 2011-06-18  Robin Getz  <robin.getz@analog.com>
 
+	* bfin-sim.c (decode_dsp32shiftimm_0): When shift is greater than
+	32, perform a left shift.  Update the corresponding AV bit.  Set
+	AZ when the low 32bits are also zero.
+
+2011-06-18  Robin Getz  <robin.getz@analog.com>
+
 	* bfin-sim.c (decode_dsp32shiftimm_0): With left shift vector insns,
 	call lshift only when count is positive.  Otherwise, call ashiftrt.
 	With arithmetic right shift insns, call ashiftrt when the value is
