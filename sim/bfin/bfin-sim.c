@@ -1617,10 +1617,20 @@ decode_macfunc (SIM_CPU *cpu, int which, int op, int h0, int h1, int src0,
 	    acc = 0x7fffffffffull, sat = 1;
 	  break;
 	case M_TFU:
-	  if (!MM && (bs64)acc < 0)
-	    acc = 0, sat = 1;
-	  if (!MM && (bs64)acc > 0xFFFFFFFFFFull)
-	    acc = 0xFFFFFFFFFFull, sat = 1;
+	  if (MM)
+	    {
+	      if ((bs64)acc < -((bs64)1 << 39))
+		acc = -((bu64)1 << 39), sat = 1;
+	      if ((bs64)acc > 0x7FFFFFFFFFll)
+		acc = 0x7FFFFFFFFFull, sat = 1;
+	    }
+	  else
+	    {
+	      if ((bs64)acc < 0)
+		acc = 0, sat = 1;
+	      if ((bs64)acc > 0xFFFFFFFFFFull)
+		acc = 0xFFFFFFFFFFull, sat = 1;
+	    }
 	  break;
 	case M_IU:
 	  if (!MM && acc & 0x8000000000000000ull)
@@ -1633,16 +1643,22 @@ decode_macfunc (SIM_CPU *cpu, int which, int op, int h0, int h1, int src0,
 	    acc |= 0xffffff0000000000ull;
 	  break;
 	case M_FU:
-	  if (!MM && (bs64)acc < 0)
-	    acc = 0x0, sat = 1;
-	  if (MM && (bs64)acc < -((bs64)1 << 39))
-	    acc = -((bu64)1 << 39), sat = 1;
-	  if (!MM && (bs64)acc > (bs64)0xFFFFFFFFFFll)
-	    acc = 0xFFFFFFFFFFull, sat = 1;
-	  if (MM && acc > 0xFFFFFFFFFFull)
-	    acc &= 0xFFFFFFFFFFull;
-	  if (MM && acc & 0x8000000000ull)
-	    acc |= 0xffffff0000000000ull;
+	  if (MM)
+	    {
+	      if ((bs64)acc < -((bs64)1 << 39))
+		acc = -((bu64)1 << 39), sat = 1;
+	      if ((bs64)acc > 0x7FFFFFFFFFll)
+		acc = 0x7FFFFFFFFFull, sat = 1;
+	      else if (acc & 0x8000000000ull)
+		acc |= 0xffffff0000000000ull;
+	    }
+	  else
+	    {
+	      if ((bs64)acc < 0)
+		acc = 0x0, sat = 1;
+	      else if ((bs64)acc > (bs64)0xFFFFFFFFFFll)
+		acc = 0xFFFFFFFFFFull, sat = 1;
+	    }
 	  break;
 	case M_IH:
 	  if ((bs64)acc < -0x80000000ll)
