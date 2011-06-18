@@ -1398,7 +1398,7 @@ saturate_s40_astat (bu64 val, bu32 *v)
       *v = 1;
       return -((bs64)1 << 39);
     }
-  else if ((bs64)val >= ((bs64)1 << 39) - 1)
+  else if ((bs64)val > ((bs64)1 << 39) - 1)
     {
       *v = 1;
       return ((bu64)1 << 39) - 1;
@@ -1645,7 +1645,7 @@ decode_macfunc (SIM_CPU *cpu, int which, int op, int h0, int h1, int src0,
 	case M_IH:
 	  if ((bs64)acc < -0x80000000ll)
 	    acc = -0x80000000ull, sat = 1;
-	  else if ((bs64)acc >= 0x7fffffffll)
+	  else if ((bs64)acc > 0x7fffffffll)
 	    acc = 0x7fffffffull, sat = 1;
 	  break;
 	case M_W32:
