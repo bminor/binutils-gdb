@@ -1,3 +1,9 @@
+2011-06-18  Ian Lance Taylor  <iant@google.com>
+
+	PR gold/12745
+	* layout.cc (Layout::layout_eh_frame): Correct handling of
+	writable .eh_frame section.
+
 2011-06-17  Ian Lance Taylor  <iant@google.com>
 
 	PR gold/12893

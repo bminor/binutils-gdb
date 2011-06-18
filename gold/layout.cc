@@ -1140,6 +1140,8 @@ Layout::layout_eh_frame(Sized_relobj_file<size, big_endian>* object,
 
   gold_assert(this->eh_frame_section_ == os);
 
+  elfcpp::Elf_Xword orig_flags = os->flags();
+
   if (!parameters->incremental()
       && this->eh_frame_data_->add_ehframe_input_section(object,
 							 symbols,
@@ -1153,8 +1155,12 @@ Layout::layout_eh_frame(Sized_relobj_file<size, big_endian>* object,
       os->update_flags_for_input_section(shdr.get_sh_flags());
 
       // A writable .eh_frame section is a RELRO section.
-      if ((shdr.get_sh_flags() & elfcpp::SHF_WRITE) != 0)
-	os->set_is_relro();
+      if ((orig_flags & (elfcpp::SHF_WRITE | elfcpp::SHF_EXECINSTR))
+	  != (os->flags() & (elfcpp::SHF_WRITE | elfcpp::SHF_EXECINSTR)))
+	{
+	  os->set_is_relro();
+	  os->set_order(ORDER_RELRO);
+	}
 
       // We found a .eh_frame section we are going to optimize, so now
       // we can add the set of optimized sections to the output
@@ -1176,6 +1182,10 @@ Layout::layout_eh_frame(Sized_relobj_file<size, big_endian>* object,
       *off = os->add_input_section(this, object, shndx, name, shdr, reloc_shndx,
 				   saw_sections_clause);
       this->have_added_input_section_ = true;
+
+      if ((orig_flags & (elfcpp::SHF_WRITE | elfcpp::SHF_EXECINSTR))
+	  != (os->flags() & (elfcpp::SHF_WRITE | elfcpp::SHF_EXECINSTR)))
+	os->set_order(this->default_section_order(os, false));
     }
 
   return os;
