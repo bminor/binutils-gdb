@@ -1,3 +1,10 @@
+2011-06-18  Robin Getz  <robin.getz@analog.com>
+
+	* random_0019.S, random_0020.S, random_0021.S, random_0022.S,
+	random_0023.S, random_0024.S, random_0026.S, random_0027.S,
+	random_0028.S, random_0029.S, random_0030.S, random_0032.S,
+	random_0035.S: New tests for dsp insns.
+
 2011-06-04  Mike Frysinger  <vapier@gentoo.org>
 
 	* .gitignore, 10272_small.s, 10436.s, 10622.s, 10742.s, 10799.s,
