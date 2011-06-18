@@ -1,5 +1,10 @@
 2011-06-18  Robin Getz  <robin.getz@analog.com>
 
+	* bfin-sim.c (extract_mult): When mmod is M_IH, change the order
+	from round/saturate to saturate/round/saturate.
+
+2011-06-18  Robin Getz  <robin.getz@analog.com>
+
 	* bfin-sim.c (saturate_s40_astat): Change ">=" to ">".
 	(decode_macfunc): Likewise when mmod is M_IH.
 
