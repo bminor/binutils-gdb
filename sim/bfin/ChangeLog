@@ -1,5 +1,11 @@
 2011-06-18  Robin Getz  <robin.getz@analog.com>
 
+	* bfin-sim.c (extract_mult): Call saturate_s32 when MM is set
+	and mmod is M_IU.  Call saturate_s16 when MM is set and mmod
+	is M_TFU.
+
+2011-06-18  Robin Getz  <robin.getz@analog.com>
+
 	* bfin-sim.c (decode_multfunc): Call new is_macmod_signed, and
 	allow MM to sign extend all the time.
 	(decode_macfunc): Likewise.  Drop sign extension of unsigned
