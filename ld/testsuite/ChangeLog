@@ -1,3 +1,20 @@
+2011-06-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-elf/eh1.d: Skip x32.
+	* ld-elf/eh2.d: Likewise.
+	* ld-elf/eh3.d: Likewise.
+	* ld-elf/eh4.d: Likewise.
+
+	* ld-elfvsb/elfvsb.exp: Only xfail 64bit x86_64-*-linux*.
+	* ld-shared/shared.exp: Likewise. 
+
+	* ld-ifunc/ifunc-1-local-x86.d: Support x32.
+	* ld-ifunc/ifunc-1-x86.d: Likewise.
+	* ld-ifunc/ifunc-3a-x86.d: Likewise.
+	* ld-x86-64/pcrel16.d: Likewise.
+
+	* ld-x86-64/x86-64.exp (x86_64tests): Add missing -melf_x86_64.
+
 2011-06-16  Alan Modra  <amodra@gmail.com>
 
 	* ld-elfvers/vers2.ver: Don't assume any particular index for

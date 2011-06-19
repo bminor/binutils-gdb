@@ -302,7 +302,9 @@ proc visibility_run {visibility} {
 		    setup_xfail "sparc*-*-linux*"
 		}
 	    }
-	    setup_xfail "x86_64-*-linux*"
+	    if { [is_elf64 $tmpdir/mainnp.o] } {
+		setup_xfail "x86_64-*-linux*"
+	    }
 	    if { ![istarget hppa*64*-*-linux*] } {
 		setup_xfail "hppa*-*-linux*"
 	    }
@@ -343,7 +345,9 @@ proc visibility_run {visibility} {
 		setup_xfail "alpha*-*-linux*"
 		setup_xfail "mips*-*-linux*"
 	    }
-	    setup_xfail "x86_64-*-linux*"
+	    if { [is_elf64 $tmpdir/mainnp.o] } {
+		setup_xfail "x86_64-*-linux*"
+	    }
 	    if { ![istarget hppa*64*-*-linux*] } {
 		setup_xfail "hppa*-*-linux*"
 	    }
@@ -415,7 +419,9 @@ proc visibility_run {visibility} {
 			setup_xfail "sparc*-*-linux*"
 		    }
 		}
-		setup_xfail "x86_64-*-linux*"
+		if { [is_elf64 $tmpdir/mainp.o] } {
+		    setup_xfail "x86_64-*-linux*"
+		}
 		if { ![istarget hppa*64*-*-linux*] } {
 		    setup_xfail "hppa*-*-linux*"
 		}

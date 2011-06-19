@@ -4995,4 +4995,7 @@ elf32_x86_64_elf_object_p (bfd *abfd)
 #define elf_backend_size_info \
   _bfd_elf32_size_info
 
+#undef  elf_backend_post_process_headers
+#define elf_backend_post_process_headers  _bfd_elf_set_osabi
+
 #include "elf32-target.h"

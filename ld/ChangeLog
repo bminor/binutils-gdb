@@ -1,3 +1,7 @@
+2011-06-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure.tgt: Support x32.
+
 2011-06-15  Nick Clifton  <nickc@redhat.com>
 
 	* NEWS: Mention addition of TILEPRO and TIKE-Gx support.

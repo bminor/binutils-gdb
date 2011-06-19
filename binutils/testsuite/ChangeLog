@@ -1,3 +1,7 @@
+2011-06-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* binutils-all/elfedit-1.d: Updated for x32.
+
 2011-05-18  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/12753

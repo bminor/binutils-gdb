@@ -2,6 +2,7 @@
 #source: eh4a.s
 #ld: -shared
 #readelf: -wf
+#notarget: x86_64-x32-*
 #target: x86_64-*-*
 
 Contents of the .eh_frame section:

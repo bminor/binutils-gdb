@@ -1,3 +1,8 @@
+2011-06-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf64-x86-64.c (elf_backend_post_process_headers): Defined
+	for x32.
+
 2011-06-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf64-x86-64.c: Include <stdarg.h> and CORE_HEADER if
