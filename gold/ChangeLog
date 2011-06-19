@@ -1,3 +1,19 @@
+2011-06-19  Ian Lance Taylor  <iant@google.com>
+
+	PR gold/12880
+	* layout.cc (Layout::attach_allocated_section_to_segment): Add a
+	.interp section to a PT_INTERP segment even if we have seen a
+	--dynamic-linker option.  Don't do it if we have seen a PHDRS
+	clause in a linker script.
+	(Layout::finalize): Don't create a .interp section if we've
+	already create a PT_INTERP segment.
+	(Layout::create_interp): Always call choose_output_section (revert
+	patch of 2011-06-17).  Don't create PT_INTERP segment.
+	* script-sections.cc
+	(Script_sections::create_note_and_tls_segments): Add a .interp
+	section to a PT_INTERP segment even if we have seen a
+	--dynamic-linker option.
+
 2011-06-18  Ian Lance Taylor  <iant@google.com>
 
 	* layout.cc (Layout::finish_dynamic_section): Don't set DT_TEXTREL

@@ -1547,18 +1547,17 @@ Layout::attach_allocated_section_to_segment(Output_section* os)
       this->relro_segment_->add_output_section_to_nonload(os, seg_flags);
     }
 
-  // If we are making a shared library, and we see a section named
-  // .interp, and the -dynamic-linker option was not used, then put
-  // the .interp section into a PT_INTERP segment.  This is for GNU ld
-  // compatibility.  If making an executable, or if the
-  // -dynamic-linker option was used, we will create the section and
-  // segment in Layout::create_interp.
+  // If we see a section named .interp, put it into a PT_INTERP
+  // segment.  This seems broken to me, but this is what GNU ld does,
+  // and glibc expects it.
   if (strcmp(os->name(), ".interp") == 0
-      && parameters->options().shared()
-      && parameters->options().dynamic_linker() == NULL)
+      && !this->script_options_->saw_phdrs_clause())
     {
       if (this->interp_segment_ == NULL)
 	this->make_output_segment(elfcpp::PT_INTERP, seg_flags);
+      else
+	gold_warning(_("multiple '.interp' sections in input files "
+		       "may cause confusing PT_INTERP segment"));
       this->interp_segment_->add_output_section_to_nonload(os, seg_flags);
     }
 }
@@ -2183,9 +2182,11 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab,
 				  &versions);
 
       // Create the .interp section to hold the name of the
-      // interpreter, and put it in a PT_INTERP segment.
-      if (!parameters->options().shared()
-	  || parameters->options().dynamic_linker() != NULL)
+      // interpreter, and put it in a PT_INTERP segment.  Don't do it
+      // if we saw a .interp section in an input file.
+      if ((!parameters->options().shared()
+	   || parameters->options().dynamic_linker() != NULL)
+	  && this->interp_segment_ == NULL)
         this->create_interp(target);
 
       // Finish the .dynamic section to hold the dynamic data, and put
@@ -3879,31 +3880,12 @@ Layout::create_interp(const Target* target)
 
   Output_section_data* odata = new Output_data_const(interp, len, 1);
 
-  Output_section* osec;
-
-  // If we are using a SECTIONS clause, let it decide where the
-  // .interp section should go.  Otherwise always create a new section
-  // so that this .interp section does not get confused with any
-  // section of the same name in the program.
-  if (this->script_options_->saw_sections_clause())
-    osec = this->choose_output_section(NULL, ".interp", elfcpp::SHT_PROGBITS,
-				       elfcpp::SHF_ALLOC, false, ORDER_INTERP,
-				       false);
-  else
-    {
-      const char* n = this->namepool_.add("interp", false, NULL);
-      osec = this->make_output_section(n, elfcpp::SHT_PROGBITS,
-				       elfcpp::SHF_ALLOC, ORDER_INTERP, false);
-    }
-
+  Output_section* osec = this->choose_output_section(NULL, ".interp",
+						     elfcpp::SHT_PROGBITS,
+						     elfcpp::SHF_ALLOC,
+						     false, ORDER_INTERP,
+						     false);
   osec->add_output_section_data(odata);
-
-  if (!this->script_options_->saw_phdrs_clause())
-    {
-      Output_segment* oseg = this->make_output_segment(elfcpp::PT_INTERP,
-						       elfcpp::PF_R);
-      oseg->add_output_section_to_nonload(osec, elfcpp::PF_R);
-    }
 }
 
 // Add dynamic tags for the PLT and the dynamic relocs.  This is
