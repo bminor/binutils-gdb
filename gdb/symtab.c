@@ -1100,7 +1100,7 @@ lookup_language_this (const struct language_defn *lang,
   if (lang->la_name_of_this == NULL || block == NULL)
     return NULL;
 
-  while (1)
+  while (block)
     {
       struct symbol *sym;
 
@@ -1108,9 +1108,11 @@ lookup_language_this (const struct language_defn *lang,
       if (sym != NULL)
 	return sym;
       if (BLOCK_FUNCTION (block))
-	return NULL;
+	break;
       block = BLOCK_SUPERBLOCK (block);
     }
+
+  return NULL;
 }
 
 /* Behave like lookup_symbol except that NAME is the natural name
