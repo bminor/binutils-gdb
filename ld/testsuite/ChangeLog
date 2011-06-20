@@ -1,5 +1,11 @@
 2011-06-20  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* ld-ifunc/ifunc-1-local-x86.d: Adjusted.
+	* ld-ifunc/ifunc-1-x86.d: Likewise.
+	* ld-ifunc/ifunc-3a-x86.d: Likewise.
+
+2011-06-20  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* ld-elf/eh1.d: Revert x32 change.
 	* ld-elf/eh2.d: Likewise.
 	* ld-elf/eh3.d: Likewise.
