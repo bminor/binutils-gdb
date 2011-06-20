@@ -2,7 +2,6 @@
 #source: eh2a.s
 #ld:
 #readelf: -wf
-#notarget: x86_64-x32-*
 #target: x86_64-*-*
 
 Contents of the .eh_frame section:
