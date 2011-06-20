@@ -1,3 +1,10 @@
+2011-06-20  Nick Clifton  <nickc@redhat.com>
+
+	* doc/Makefile.am: (CPU_DOCS): Add c-xstormy16.texi.
+	* doc/Makefile.in: Regenerate.
+	* doc/all.texi: Set XSTORMY16.
+	* doc/c-xstormy16.texi: New file.
+
 2011-06-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* configure.tgt: Support x32.
