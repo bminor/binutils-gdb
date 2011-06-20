@@ -2069,6 +2069,12 @@ call before the linker has a chance to wrap it to @code{malloc}.
 Request creation of @code{.eh_frame_hdr} section and ELF
 @code{PT_GNU_EH_FRAME} segment header.
 
+@kindex --ld-generated-unwind-info
+@item --no-ld-generated-unwind-info
+Request creation of @code{.eh_frame} unwind info for linker
+generated code sections like PLT.  This option is on by default
+if linker generated unwind info is supported.
+
 @kindex --enable-new-dtags
 @kindex --disable-new-dtags
 @item --enable-new-dtags

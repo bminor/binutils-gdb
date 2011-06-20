@@ -38,12 +38,14 @@ if { !([istarget "x86_64-*-elf*"]
 # readelf: Apply readelf options on result.  Compare with regex (last arg).
 
 set x86_64tests {
-    {"TLS -fpic -shared transitions" "-shared -melf_x86_64"
+    {"TLS -fpic -shared transitions"
+     "-shared -melf_x86_64 --no-ld-generated-unwind-info"
      "--64" {tlspic1.s tlspic2.s}
      {{readelf -WSsrl tlspic.rd} {objdump -drj.text tlspic.dd}
       {objdump -sj.got tlspic.sd} {objdump -sj.tdata tlspic.td}}
       "libtlspic.so"}
-    {"TLS descriptor -fpic -shared transitions" "-shared -melf_x86_64"
+    {"TLS descriptor -fpic -shared transitions"
+     "-shared -melf_x86_64 --no-ld-generated-unwind-info"
      "--64" {tlsdesc.s tlspic2.s}
      {{readelf -WSsrld tlsdesc.rd} {objdump -drj.text tlsdesc.dd}
       {objdump "-s -j.got -j.got.plt" tlsdesc.sd} {objdump -sj.tdata tlsdesc.td}
@@ -51,17 +53,20 @@ set x86_64tests {
     {"Helper shared library" "-shared -melf_x86_64"
      "--64" {tlslib.s} {} "libtlslib.so"}
     {"TLS -fpic and -fno-pic exec transitions"
-     "-melf_x86_64 tmpdir/libtlslib.so" "--64" {tlsbinpic.s tlsbin.s}
+     "-melf_x86_64 tmpdir/libtlslib.so --no-ld-generated-unwind-info"
+     "--64" {tlsbinpic.s tlsbin.s}
      {{readelf -WSsrl tlsbin.rd} {objdump -drj.text tlsbin.dd}
       {objdump -sj.got tlsbin.sd} {objdump -sj.tdata tlsbin.td}}
       "tlsbin"}
     {"TLS descriptor -fpic and -fno-pic exec transitions"
-     "-melf_x86_64 tmpdir/libtlslib.so" "--64" {tlsbindesc.s tlsbin.s}
+     "-melf_x86_64 tmpdir/libtlslib.so --no-ld-generated-unwind-info"
+     "--64" {tlsbindesc.s tlsbin.s}
      {{readelf -WSsrl tlsbindesc.rd} {objdump -drj.text tlsbindesc.dd}
       {objdump -sj.got tlsbindesc.sd} {objdump -sj.tdata tlsbindesc.td}}
       "tlsbindesc"}
     {"TLS with global dynamic and descriptors"
-	"-shared -melf_x86_64" "--64" {tlsgdesc.s}
+     "-shared -melf_x86_64 --no-ld-generated-unwind-info"
+     "--64" {tlsgdesc.s}
      {{readelf -WSsrl tlsgdesc.rd} {objdump -drj.text tlsgdesc.dd}}
       "libtlsgdesc.so"}
     {"TLS in debug sections" "-melf_x86_64"

@@ -2124,6 +2124,8 @@ fragment <<EOF
 #define OPTION_HASH_STYLE		(OPTION_EXCLUDE_LIBS + 1)
 #define OPTION_BUILD_ID			(OPTION_HASH_STYLE + 1)
 #define OPTION_AUDIT			(OPTION_BUILD_ID + 1)
+#define OPTION_LD_GENERATED_UNWIND_INFO	(OPTION_AUDIT + 1)
+#define OPTION_NO_LD_GENERATED_UNWIND_INFO (OPTION_LD_GENERATED_UNWIND_INFO + 1)
 
 static void
 gld${EMULATION_NAME}_add_options
@@ -2144,6 +2146,10 @@ fragment <<EOF
     {"eh-frame-hdr", no_argument, NULL, OPTION_EH_FRAME_HDR},
     {"exclude-libs", required_argument, NULL, OPTION_EXCLUDE_LIBS},
     {"hash-style", required_argument, NULL, OPTION_HASH_STYLE},
+    {"ld-generated-unwind-info", no_argument, NULL,
+      OPTION_LD_GENERATED_UNWIND_INFO},
+    {"no-ld-generated-unwind-info", no_argument, NULL,
+      OPTION_NO_LD_GENERATED_UNWIND_INFO},
     {"Bgroup", no_argument, NULL, OPTION_GROUP},
 EOF
 fi
@@ -2207,6 +2213,14 @@ fragment <<EOF
 
     case OPTION_EH_FRAME_HDR:
       link_info.eh_frame_hdr = TRUE;
+      break;
+
+    case OPTION_LD_GENERATED_UNWIND_INFO:
+      link_info.no_ld_generated_unwind_info = FALSE;
+      break;
+
+    case OPTION_NO_LD_GENERATED_UNWIND_INFO:
+      link_info.no_ld_generated_unwind_info = TRUE;
       break;
 
     case OPTION_GROUP:

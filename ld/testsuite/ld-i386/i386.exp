@@ -118,12 +118,14 @@ if { !([istarget "i?86-*-elf*"]
 # readelf: Apply readelf options on result.  Compare with regex (last arg).
 
 set i386tests {
-    {"TLS -fpic -shared transitions" "-shared -melf_i386"
+    {"TLS -fpic -shared transitions"
+     "-shared -melf_i386 --no-ld-generated-unwind-info"
      "--32" {tlspic1.s tlspic2.s}
      {{readelf -Ssrl tlspic.rd} {objdump -drj.text tlspic.dd}
       {objdump -sj.got tlspic.sd} {objdump -sj.tdata tlspic.td}}
       "libtlspic.so"}
-    {"TLS descriptor -fpic -shared transitions" "-shared -melf_i386"
+    {"TLS descriptor -fpic -shared transitions"
+     "-shared -melf_i386 --no-ld-generated-unwind-info"
      "--32" {tlsdesc.s tlspic2.s}
      {{readelf -Ssrl tlsdesc.rd} {objdump -drj.text tlsdesc.dd}
       {objdump "-s -j.got -j.got.plt" tlsdesc.sd} {objdump -sj.tdata tlsdesc.td}}
@@ -131,21 +133,24 @@ set i386tests {
     {"Helper shared library" "-shared -melf_i386"
      "--32" {tlslib.s} {} "libtlslib.so"}
     {"TLS -fpic and -fno-pic exec transitions"
-     "-melf_i386 tmpdir/libtlslib.so" "--32" {tlsbinpic.s tlsbin.s}
+     "-melf_i386 tmpdir/libtlslib.so --no-ld-generated-unwind-info"
+     "--32" {tlsbinpic.s tlsbin.s}
      {{readelf -Ssrl tlsbin.rd} {objdump -drj.text tlsbin.dd}
       {objdump -sj.got tlsbin.sd} {objdump -sj.tdata tlsbin.td}}
       "tlsbin"}
     {"TLS descriptor -fpic and -fno-pic exec transitions"
-     "-melf_i386 tmpdir/libtlslib.so" "--32" {tlsbindesc.s tlsbin.s}
+     "-melf_i386 tmpdir/libtlslib.so --no-ld-generated-unwind-info"
+     "--32" {tlsbindesc.s tlsbin.s}
      {{readelf -Ssrl tlsbindesc.rd} {objdump -drj.text tlsbindesc.dd}
       {objdump -sj.got tlsbindesc.sd} {objdump -sj.tdata tlsbindesc.td}}
       "tlsbindesc"}
-    {"TLS -fno-pic -shared" "-shared -melf_i386"
+    {"TLS -fno-pic -shared" "-shared -melf_i386 --no-ld-generated-unwind-info"
      "--32" {tlsnopic1.s tlsnopic2.s}
      {{readelf -Ssrl tlsnopic.rd} {objdump -drj.text tlsnopic.dd}
       {objdump -sj.got tlsnopic.sd}} "libtlsnopic.so"}
     {"TLS with global dynamic and descriptors"
-	"-shared -melf_i386" "--32" {tlsgdesc.s}
+     "-shared -melf_i386 --no-ld-generated-unwind-info"
+     "--32" {tlsgdesc.s}
      {{readelf -Ssrl tlsgdesc.rd} {objdump -drj.text tlsgdesc.dd}}
       "libtlsgdesc.so"}
     {"TLS in debug sections" "-melf_i386"

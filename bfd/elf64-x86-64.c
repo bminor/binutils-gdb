@@ -29,6 +29,7 @@
 #include "bfd_stdint.h"
 #include "objalloc.h"
 #include "hashtab.h"
+#include "dwarf2.h"
 
 #include "elf/x86-64.h"
 
@@ -528,6 +529,45 @@ static const bfd_byte elf_x86_64_plt_entry[PLT_ENTRY_SIZE] =
   0, 0, 0, 0	/* replaced with offset to start of .plt0.  */
 };
 
+/* .eh_frame covering the .plt section.  */
+
+static const bfd_byte elf_x86_64_eh_frame_plt[] =
+{
+#define PLT_CIE_LENGTH		20
+#define PLT_FDE_LENGTH		36
+#define PLT_FDE_START_OFFSET	4 + PLT_CIE_LENGTH + 8
+#define PLT_FDE_LEN_OFFSET	4 + PLT_CIE_LENGTH + 12
+  PLT_CIE_LENGTH, 0, 0, 0,	/* CIE length */
+  0, 0, 0, 0,			/* CIE ID */
+  1,				/* CIE version */
+  'z', 'R', 0,			/* Augmentation string */
+  1,				/* Code alignment factor */
+  0x78,				/* Data alignment factor */
+  16,				/* Return address column */
+  1,				/* Augmentation size */
+  DW_EH_PE_pcrel | DW_EH_PE_sdata4, /* FDE encoding */
+  DW_CFA_def_cfa, 7, 8,		/* DW_CFA_def_cfa: r7 (rsp) ofs 8 */
+  DW_CFA_offset + 16, 1,	/* DW_CFA_offset: r16 (rip) at cfa-8 */
+  DW_CFA_nop, DW_CFA_nop,
+
+  PLT_FDE_LENGTH, 0, 0, 0,	/* FDE length */
+  PLT_CIE_LENGTH + 8, 0, 0, 0,	/* CIE pointer */
+  0, 0, 0, 0,			/* R_X86_64_PC32 .plt goes here */
+  0, 0, 0, 0,			/* .plt size goes here */
+  0,				/* Augmentation size */
+  DW_CFA_def_cfa_offset, 16,	/* DW_CFA_def_cfa_offset: 16 */
+  DW_CFA_advance_loc + 6,	/* DW_CFA_advance_loc: 6 to __PLT__+6 */
+  DW_CFA_def_cfa_offset, 24,	/* DW_CFA_def_cfa_offset: 24 */
+  DW_CFA_advance_loc + 10,	/* DW_CFA_advance_loc: 10 to __PLT__+16 */
+  DW_CFA_def_cfa_expression,	/* DW_CFA_def_cfa_expression */
+  11,				/* Block length */
+  DW_OP_breg7, 8,		/* DW_OP_breg7 (rsp): 8 */
+  DW_OP_breg16, 0,		/* DW_OP_breg16 (rip): 0 */
+  DW_OP_lit15, DW_OP_and, DW_OP_lit11, DW_OP_ge,
+  DW_OP_lit3, DW_OP_shl, DW_OP_plus,
+  DW_CFA_nop, DW_CFA_nop, DW_CFA_nop, DW_CFA_nop
+};
+
 /* x86-64 ELF linker hash entry.  */
 
 struct elf_x86_64_link_hash_entry
@@ -601,6 +641,7 @@ struct elf_x86_64_link_hash_table
   /* Short-cuts to get to dynamic linker sections.  */
   asection *sdynbss;
   asection *srelbss;
+  asection *plt_eh_frame;
 
   union
   {
@@ -847,6 +888,24 @@ elf_x86_64_create_dynamic_sections (bfd *dynobj,
       || (!info->shared && !htab->srelbss))
     abort ();
 
+  if (!info->no_ld_generated_unwind_info
+      && bfd_get_section_by_name (dynobj, ".eh_frame") == NULL
+      && htab->elf.splt != NULL)
+    {
+      flagword flags = get_elf_backend_data (dynobj)->dynamic_sec_flags;
+      htab->plt_eh_frame
+	= bfd_make_section_with_flags (dynobj, ".eh_frame",
+				       flags | SEC_READONLY);
+      if (htab->plt_eh_frame == NULL
+	  || !bfd_set_section_alignment (dynobj, htab->plt_eh_frame, 3))
+	return FALSE;
+
+      htab->plt_eh_frame->size = sizeof (elf_x86_64_eh_frame_plt);
+      htab->plt_eh_frame->contents
+	= bfd_alloc (dynobj, htab->plt_eh_frame->size);
+      memcpy (htab->plt_eh_frame->contents, elf_x86_64_eh_frame_plt,
+	      sizeof (elf_x86_64_eh_frame_plt));
+    }
   return TRUE;
 }
 
@@ -2721,6 +2780,13 @@ elf_x86_64_size_dynamic_sections (bfd *output_bfd,
 	return FALSE;
     }
 
+  if (htab->plt_eh_frame != NULL
+      && htab->elf.splt != NULL
+      && htab->elf.splt->size != 0
+      && (htab->elf.splt->flags & SEC_EXCLUDE) == 0)
+    bfd_put_32 (dynobj, htab->elf.splt->size,
+		htab->plt_eh_frame->contents + PLT_FDE_LEN_OFFSET);
+
   if (htab->elf.dynamic_sections_created)
     {
       /* Add some entries to the .dynamic section.  We fill in the
@@ -4521,6 +4587,33 @@ elf_x86_64_finish_dynamic_sections (bfd *output_bfd,
 	GOT_ENTRY_SIZE;
     }
 
+  /* Adjust .eh_frame for .plt section.  */
+  if (htab->plt_eh_frame != NULL)
+    {
+      if (htab->elf.splt != NULL
+	  && htab->elf.splt->size != 0
+	  && (htab->elf.splt->flags & SEC_EXCLUDE) == 0
+	  && htab->elf.splt->output_section != NULL
+	  && htab->plt_eh_frame->output_section != NULL)
+	{
+	  bfd_vma plt_start = htab->elf.splt->output_section->vma;
+	  bfd_vma eh_frame_start = htab->plt_eh_frame->output_section->vma
+				   + htab->plt_eh_frame->output_offset
+				   + PLT_FDE_START_OFFSET;
+	  bfd_put_signed_32 (dynobj, plt_start - eh_frame_start,
+			     htab->plt_eh_frame->contents
+			     + PLT_FDE_START_OFFSET);
+	}
+      if (htab->plt_eh_frame->sec_info_type
+	  == ELF_INFO_TYPE_EH_FRAME)
+	{
+	  if (! _bfd_elf_write_section_eh_frame (output_bfd, info,
+						 htab->plt_eh_frame,
+						 htab->plt_eh_frame->contents))
+	    return FALSE;
+	}
+    }
+
   if (htab->elf.sgot && htab->elf.sgot->size > 0)
     elf_section_data (htab->elf.sgot->output_section)->this_hdr.sh_entsize
       = GOT_ENTRY_SIZE;
@@ -4787,6 +4880,7 @@ static const struct bfd_elf_special_section
 #define elf_backend_want_plt_sym	    0
 #define elf_backend_got_header_size	    (GOT_ENTRY_SIZE*3)
 #define elf_backend_rela_normal		    1
+#define elf_backend_plt_alignment           4
 
 #define elf_info_to_howto		    elf_x86_64_info_to_howto
 

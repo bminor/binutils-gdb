@@ -778,8 +778,6 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
 	}
       else
 	{
-	  asection *rsec;
-
 	  /* Find the corresponding CIE.  */
 	  unsigned int cie_offset = this_inf->offset + 4 - hdr_id;
 	  for (cie = local_cies; cie < local_cies + cie_count; cie++)
@@ -795,17 +793,22 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
 	    = cie->cie_inf->add_augmentation_size;
 
 	  ENSURE_NO_RELOCS (buf);
-	  REQUIRE (GET_RELOC (buf));
-
-	  /* Chain together the FDEs for each section.  */
-	  rsec = _bfd_elf_gc_mark_rsec (info, sec, gc_mark_hook, cookie);
-	  /* RSEC will be NULL if FDE was cleared out as it was belonging to
-	     a discarded SHT_GROUP.  */
-	  if (rsec)
+	  if ((sec->flags & SEC_LINKER_CREATED) == 0 || cookie->rels != NULL)
 	    {
-	      REQUIRE (rsec->owner == abfd);
-	      this_inf->u.fde.next_for_section = elf_fde_list (rsec);
-	      elf_fde_list (rsec) = this_inf;
+	      asection *rsec;
+
+	      REQUIRE (GET_RELOC (buf));
+
+	      /* Chain together the FDEs for each section.  */
+	      rsec = _bfd_elf_gc_mark_rsec (info, sec, gc_mark_hook, cookie);
+	      /* RSEC will be NULL if FDE was cleared out as it was belonging to
+		 a discarded SHT_GROUP.  */
+	      if (rsec)
+		{
+		  REQUIRE (rsec->owner == abfd);
+		  this_inf->u.fde.next_for_section = elf_fde_list (rsec);
+		  elf_fde_list (rsec) = this_inf;
+		}
 	    }
 
 	  /* Skip the initial location and address range.  */
@@ -1141,6 +1144,9 @@ _bfd_elf_discard_section_eh_frame
   if (sec_info == NULL)
     return FALSE;
 
+  ptr_size = (get_elf_backend_data (sec->owner)
+	      ->elf_backend_eh_frame_address_size (sec->owner, sec));
+
   hdr_info = &elf_hash_table (info)->eh_info;
   for (ent = sec_info->entry; ent < sec_info->entry + sec_info->count; ++ent)
     if (ent->size == 4)
@@ -1149,11 +1155,25 @@ _bfd_elf_discard_section_eh_frame
       ent->removed = sec->map_head.s != NULL;
     else if (!ent->cie)
       {
-	cookie->rel = cookie->rels + ent->reloc_index;
-	/* FIXME: octets_per_byte.  */
-	BFD_ASSERT (cookie->rel < cookie->relend
-		    && cookie->rel->r_offset == ent->offset + 8);
-	if (!(*reloc_symbol_deleted_p) (ent->offset + 8, cookie))
+	bfd_boolean keep;
+	if ((sec->flags & SEC_LINKER_CREATED) != 0 && cookie->rels == NULL)
+	  {
+	    unsigned int width
+	      = get_DW_EH_PE_width (ent->fde_encoding, ptr_size);
+	    bfd_vma value
+	      = read_value (abfd, sec->contents + ent->offset + 8 + width,
+			    width, get_DW_EH_PE_signed (ent->fde_encoding));
+	    keep = value != 0;
+	  }
+	else
+	  {
+	    cookie->rel = cookie->rels + ent->reloc_index;
+	    /* FIXME: octets_per_byte.  */
+	    BFD_ASSERT (cookie->rel < cookie->relend
+			&& cookie->rel->r_offset == ent->offset + 8);
+	    keep = !(*reloc_symbol_deleted_p) (ent->offset + 8, cookie);
+	  }
+	if (keep)
 	  {
 	    if (info->shared
 		&& (((ent->fde_encoding & 0x70) == DW_EH_PE_absptr
@@ -1182,8 +1202,6 @@ _bfd_elf_discard_section_eh_frame
       sec_info->cies = NULL;
     }
 
-  ptr_size = (get_elf_backend_data (sec->owner)
-	      ->elf_backend_eh_frame_address_size (sec->owner, sec));
   offset = 0;
   for (ent = sec_info->entry; ent < sec_info->entry + sec_info->count; ++ent)
     if (!ent->removed)

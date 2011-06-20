@@ -1,7 +1,7 @@
 #source: tlsbinpic.s
 #source: tlsbin.s
 #as: --64
-#ld: -shared -melf_x86_64
+#ld: -shared -melf_x86_64 --no-ld-generated-unwind-info
 #readelf: -WSsrl
 #target: x86_64-*-*
 

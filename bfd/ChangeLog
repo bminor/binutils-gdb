@@ -1,3 +1,37 @@
+2011-06-20  Jakub Jelinek  <jakub@redhat.com>
+
+	PR ld/12570
+	* elf-eh-frame.c (_bfd_elf_parse_eh_frame): Allow no relocations
+	at all for linker created .eh_frame sections.
+	(_bfd_elf_discard_section_eh_frame): Handle linker created
+	.eh_frame sections with no relocations.
+	* elf64-x86-64.c: Include dwarf2.h.
+	(elf_x86_64_eh_frame_plt): New variable.
+	(PLT_CIE_LENGTH, PLT_FDE_LENGTH, PLT_FDE_START_OFFSET,
+	PLT_FDE_LEN_OFFSET): Define.
+	(struct elf_x86_64_link_hash_table): Add plt_eh_frame field.
+	(elf_x86_64_create_dynamic_sections): Create and fill in
+	.eh_frame section for .plt section.
+	(elf_x86_64_size_dynamic_sections): Write .plt section size
+	into .eh_frame FDE covering .plt section.
+	(elf_x86_64_finish_dynamic_sections): Write .plt section
+	start into .eh_frame FDE covering .plt section.  Call
+	_bfd_elf_write_section_eh_frame on htab->plt_eh_frame section.
+	(elf_backend_plt_alignment): Define to 4.
+	* elf32-i386.c: Include dwarf2.h.
+	(elf_i386_eh_frame_plt): New variable.
+	(PLT_CIE_LENGTH, PLT_FDE_LENGTH, PLT_FDE_START_OFFSET,
+	PLT_FDE_LEN_OFFSET): Define.
+	(struct elf_i386_link_hash_table): Add plt_eh_frame field.
+	(elf_i386_create_dynamic_sections): Create and fill in
+	.eh_frame section for .plt section.
+	(elf_i386_size_dynamic_sections): Write .plt section size
+	into .eh_frame FDE covering .plt section.
+	(elf_i386_finish_dynamic_sections): Write .plt section
+	start into .eh_frame FDE covering .plt section.  Call
+	_bfd_elf_write_section_eh_frame on htab->plt_eh_frame section.
+	(elf_backend_plt_alignment): Define to 4.
+
 2011-06-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf64-x86-64.c (elf_backend_post_process_headers): Defined

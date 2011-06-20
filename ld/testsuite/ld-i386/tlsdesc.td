@@ -1,7 +1,7 @@
 #source: tlsdesc.s
 #source: tlspic2.s
 #as: --32
-#ld: -shared -melf_i386
+#ld: -shared -melf_i386 --no-ld-generated-unwind-info
 #objdump: -sj.tdata
 #target: i?86-*-*
 

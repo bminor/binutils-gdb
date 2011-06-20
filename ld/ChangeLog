@@ -1,3 +1,13 @@
+2011-06-20  Jakub Jelinek  <jakub@redhat.com>
+
+	PR ld/12570
+	* emultempl/elf32.em (OPTION_LD_GENERATED_UNWIND_INFO,
+	OPTION_NO_LD_GENERATED_UNWIND_INFO): Define.
+	(gld${EMULATION_NAME}_handle_option): Handle
+	--ld-generated-unwind-info and --no-ld-generated-unwind-info.
+	* ld.texinfo (--ld-generated-unwind-info,
+	--no-ld-generated-unwind-info): Document.
+
 2011-06-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* configure.tgt: Support x32.

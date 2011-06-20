@@ -1,6 +1,6 @@
 #source: tlsgdesc.s
 #as: --32
-#ld: -shared -melf_i386
+#ld: -shared -melf_i386 --no-ld-generated-unwind-info
 #objdump: -drj.text
 #target: i?86-*-*
 

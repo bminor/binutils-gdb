@@ -1,6 +1,6 @@
 #source: start.s
 #as: --x32
-#ld: -m elf32_x86_64 -shared
+#ld: -m elf32_x86_64 -shared --no-ld-generated-unwind-info
 #readelf: -d -S --wide
 
 There are 10 section headers, starting at offset 0x22c:

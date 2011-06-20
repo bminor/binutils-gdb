@@ -1,7 +1,7 @@
 #source: tlsbinpic.s
 #source: tlsbin.s
 #as: --32
-#ld: -melf_i386 tmpdir/libtlslib.so
+#ld: -melf_i386 tmpdir/libtlslib.so --no-ld-generated-unwind-info
 #objdump: -drj.text
 #target: i?86-*-*
 

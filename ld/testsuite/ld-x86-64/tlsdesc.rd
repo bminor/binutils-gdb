@@ -1,7 +1,7 @@
 #source: tlsdesc.s
 #source: tlspic2.s
 #as: --64
-#ld: -shared -melf_x86_64
+#ld: -shared -melf_x86_64 --no-ld-generated-unwind-info
 #readelf: -WSsrld
 #target: x86_64-*-*
 
@@ -15,7 +15,7 @@ Section Headers:
  +\[[ 0-9]+\] .dynstr +.*
  +\[[ 0-9]+\] .rela.dyn +.*
  +\[[ 0-9]+\] .rela.plt +.*
- +\[[ 0-9]+\] .plt +PROGBITS +0+450 0+450 0+20 10 +AX +0 +0 +4
+ +\[[ 0-9]+\] .plt +PROGBITS +0+450 0+450 0+20 10 +AX +0 +0 +(4|16)
  +\[[ 0-9]+\] .text +PROGBITS +0+1000 0+1000 0+154 00 +AX +0 +0 4096
  +\[[ 0-9]+\] .tdata +PROGBITS +0+201154 0+1154 0+60 00 WAT +0 +0 +1
  +\[[ 0-9]+\] .tbss +NOBITS +0+2011b4 0+11b4 0+20 00 WAT +0 +0 +1
