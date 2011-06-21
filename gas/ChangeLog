@@ -1,3 +1,10 @@
+2011-06-21  Sameera Deshpande  <sameera.deshpande@arm.com>
+
+	* config/tc-arm.c (vfp_conv): Add check on range of immediate operand
+	in vcvt instruction between floating-point and fixed-point.
+	(operand_parse_code): Add "OP_oI32z".
+	(parse_operands): OP_oI32z case added.
+
 2011-06-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* configure.tgt: Revert x32 change.

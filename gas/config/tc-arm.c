@@ -6118,6 +6118,7 @@ enum operand_parse_code
   OP_oI7b,	 /* immediate, prefix optional, 0 .. 7 */
   OP_oI31b,	 /*				0 .. 31 */
   OP_oI32b,      /*                             1 .. 32 */
+  OP_oI32z,      /*                             0 .. 32 */
   OP_oIffffb,	 /*				0 .. 65535 */
   OP_oI255c,	 /*	  curly-brace enclosed, 0 .. 255 */
 
@@ -6447,6 +6448,7 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 	case OP_oI31b:
 	case OP_I31b:	 po_imm_or_fail (  0,	  31, TRUE);	break;
         case OP_oI32b:   po_imm_or_fail (  1,     32, TRUE);    break;
+        case OP_oI32z:   po_imm_or_fail (  0,     32, TRUE);    break;
 	case OP_oIffffb: po_imm_or_fail (  0, 0xffff, TRUE);	break;
 
 	  /* Immediate variants */
@@ -8736,7 +8738,23 @@ do_vfp_dp_const (void)
 static void
 vfp_conv (int srcsize)
 {
-  unsigned immbits = srcsize - inst.operands[1].imm;
+  int immbits = srcsize - inst.operands[1].imm;
+
+  if (srcsize == 16 && !(immbits >= 0 && immbits <= srcsize)) 
+    {  
+      /* If srcsize is 16, inst.operands[1].imm must be in the range 0-16.
+         i.e. immbits must be in range 0 - 16.  */
+      inst.error = _("immediate value out of range, expected range [0, 16]");
+      return;
+    }
+  else if (srcsize == 32 && !(immbits >= 0 && immbits < srcsize)) 
+    {
+      /* If srcsize is 32, inst.operands[1].imm must be in the range 1-32.
+         i.e. immbits must be in range 0 - 31.  */
+      inst.error = _("immediate value out of range, expected range [1, 32]");
+      return;
+    }
+
   inst.instruction |= (immbits & 1) << 5;
   inst.instruction |= (immbits >> 1);
 }
@@ -18177,7 +18195,7 @@ static const struct asm_opcode insns[] =
  NCE(vldr,      d100b00, 2, (RVSD, ADDRGLDC), neon_ldr_str),
  NCE(vstr,      d000b00, 2, (RVSD, ADDRGLDC), neon_ldr_str),
 
- nCEF(vcvt,     _vcvt,   3, (RNSDQ, RNSDQ, oI32b), neon_cvt),
+ nCEF(vcvt,     _vcvt,   3, (RNSDQ, RNSDQ, oI32z), neon_cvt),
  nCEF(vcvtr,    _vcvt,   2, (RNSDQ, RNSDQ), neon_cvtr),
  nCEF(vcvtb,	_vcvt,	 2, (RVS, RVS), neon_cvtb),
  nCEF(vcvtt,	_vcvt,	 2, (RVS, RVS), neon_cvtt),
