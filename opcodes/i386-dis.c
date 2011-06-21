@@ -4828,14 +4828,14 @@ static const struct dis386 prefix_table[][4] = {
   {
     { Bad_Opcode },
     { Bad_Opcode },
-     { MOD_TABLE (MOD_VEX_0F388C_PREFIX_2) },
+    { MOD_TABLE (MOD_VEX_0F388C_PREFIX_2) },
   },
 
   /* PREFIX_VEX_0F388E */
   {
     { Bad_Opcode },
     { Bad_Opcode },
-     { MOD_TABLE (MOD_VEX_0F388E_PREFIX_2) },
+    { MOD_TABLE (MOD_VEX_0F388E_PREFIX_2) },
   },
 
   /* PREFIX_VEX_0F3890 */

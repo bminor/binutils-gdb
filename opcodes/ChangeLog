@@ -1,3 +1,8 @@
+2011-06-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (prefix_table): Re-indent PREFIX_VEX_0F388C and
+	PREFIX_VEX_0F388E.
+
 2011-06-17  Andreas Schwab  <schwab@redhat.com>
 
 	* Makefile.am (MAINTAINERCLEANFILES): Move s390-opc.tab ...
