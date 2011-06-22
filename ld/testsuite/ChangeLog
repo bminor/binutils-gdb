@@ -1,3 +1,7 @@
+2011-06-22  Thomas Schwinge  <thomas@schwinge.name>
+
+	* ld-elf/elf.exp: Execute array_tests_pie tests on *-*-gnu*, too.
+
 2011-06-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-ifunc/ifunc-1-local-x86.d: Adjusted.

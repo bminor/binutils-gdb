@@ -150,8 +150,8 @@ set array_tests_static {
 set xfails [list "*-*-netbsdelf*"]
 run_ld_link_exec_tests $xfails $array_tests
 
-# Run PIE tests only on Linux.
-if { [istarget "*-*-linux*"] } {
+if { [istarget *-*-linux*]
+     || [istarget *-*-gnu*] } {
     run_ld_link_exec_tests $xfails $array_tests_pie
 }
 
