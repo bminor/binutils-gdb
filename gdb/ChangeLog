@@ -1,5 +1,21 @@
 2011-06-22  Pedro Alves  <pedro@codesourcery.com>
 
+	* breakpoint.c (init_raw_breakpoint_without_location): Don't add
+	the breakpoint to the breakpoint chain here.
+	(set_raw_breakpoint_without_location): Add the breakpoint to the
+	breakpoint chain here.
+	(init_raw_breakpoint): Adjust comments.
+	(set_raw_breakpoint): Add the breakpoint to the breakpoint chain
+	here.
+	(init_catchpoint): Don't set the catchpoint's breakpoint number
+	here.
+	(install_catchpoint): New function.
+	(create_fork_vfork_event_catchpoint)
+	(create_syscall_event_catchpoint, catch_exec_command_1): Adjust to
+	use install_catchpoint.
+
+2011-06-22  Pedro Alves  <pedro@codesourcery.com>
+
 	* breakpoint.c (create_catchpoint_without_mention)
 	(create_catchpoint): Delete.
 

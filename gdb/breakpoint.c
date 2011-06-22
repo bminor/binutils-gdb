@@ -5830,8 +5830,6 @@ init_raw_breakpoint_without_location (struct breakpoint *b,
   b->condition_not_parsed = 0;
   b->py_bp_object = NULL;
   b->related_breakpoint = b;
-
-  add_to_breakpoint_chain (b);
 }
 
 /* Helper to set_raw_breakpoint below.  Creates a breakpoint
@@ -5846,7 +5844,7 @@ set_raw_breakpoint_without_location (struct gdbarch *gdbarch,
   struct breakpoint *b = XNEW (struct breakpoint);
 
   init_raw_breakpoint_without_location (b, gdbarch, bptype);
-
+  add_to_breakpoint_chain (b);
   return b;
 }
 
@@ -5909,17 +5907,11 @@ get_sal_arch (struct symtab_and_line sal)
 
 /* Low level routine for partially initializing a breakpoint of type
    BPTYPE.  The newly created breakpoint's address, section, source
-   file name, and line number are provided by SAL.  The newly created
-   and partially initialized breakpoint is added to the breakpoint
-   chain.
+   file name, and line number are provided by SAL.
 
    It is expected that the caller will complete the initialization of
    the newly created breakpoint struct as well as output any status
-   information regarding the creation of a new breakpoint.  In
-   particular, init_raw_breakpoint does NOT set the breakpoint number!
-   Care should be taken to not allow an error to occur prior to
-   completing the initialization of the breakpoint.  If this should
-   happen, a bogus breakpoint will be left on the chain.  */
+   information regarding the creation of a new breakpoint.  */
 
 static void
 init_raw_breakpoint (struct breakpoint *b, struct gdbarch *gdbarch,
@@ -5991,6 +5983,7 @@ set_raw_breakpoint (struct gdbarch *gdbarch,
   struct breakpoint *b = XNEW (struct breakpoint);
 
   init_raw_breakpoint (b, gdbarch, sal, bptype);
+  add_to_breakpoint_chain (b);
   return b;
 }
 
@@ -6862,8 +6855,6 @@ init_catchpoint (struct breakpoint *b,
   sal.pspace = current_program_space;
 
   init_raw_breakpoint (b, gdbarch, sal, bp_catchpoint);
-  set_breakpoint_count (breakpoint_count + 1);
-  b->number = breakpoint_count;
 
   b->cond_string = (cond_string == NULL) ? NULL : xstrdup (cond_string);
   b->thread = -1;
@@ -6871,6 +6862,20 @@ init_catchpoint (struct breakpoint *b,
   b->enable_state = bp_enabled;
   b->disposition = tempflag ? disp_del : disp_donttouch;
   b->ops = ops;
+}
+
+/* Add breakpoint B on the breakpoint list, and notify the user, the
+   target and breakpoint_created observers of its existence.  */
+
+static void
+install_catchpoint (struct breakpoint *b)
+{
+  add_to_breakpoint_chain (b);
+  set_breakpoint_count (breakpoint_count + 1);
+  b->number = breakpoint_count;
+  mention (b);
+  observer_notify_breakpoint_created (b);
+  update_global_location_list (1);
 }
 
 static void
@@ -6884,9 +6889,7 @@ create_fork_vfork_event_catchpoint (struct gdbarch *gdbarch,
 
   c->forked_inferior_pid = null_ptid;
 
-  mention (&c->base);
-  observer_notify_breakpoint_created (&c->base);
-  update_global_location_list (1);
+  install_catchpoint (&c->base);
 }
 
 /* Exec catchpoints.  */
@@ -7015,11 +7018,7 @@ create_syscall_event_catchpoint (int tempflag, VEC(int) *filter,
   init_catchpoint (&c->base, gdbarch, tempflag, NULL, ops);
   c->syscalls_to_be_caught = filter;
 
-  /* Now, we have to mention the breakpoint and update the global
-     location list.  */
-  mention (&c->base);
-  observer_notify_breakpoint_created (&c->base);
-  update_global_location_list (1);
+  install_catchpoint (&c->base);
 }
 
 static int
@@ -9850,11 +9849,7 @@ catch_exec_command_1 (char *arg, int from_tty,
 		   &catch_exec_breakpoint_ops);
   c->exec_pathname = NULL;
 
-  /* Now, we have to mention the breakpoint and update the global
-     location list.  */
-  mention (&c->base);
-  observer_notify_breakpoint_created (&c->base);
-  update_global_location_list (1);
+  install_catchpoint (&c->base);
 }
 
 static enum print_stop_action
