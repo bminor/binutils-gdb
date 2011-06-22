@@ -594,8 +594,8 @@ bfin_syscall (SIM_CPU *cpu)
     {
       tbuf += sprintf (tbuf, "%lu (error = %i)", sc.result, sc.errcode);
       SET_DREG (0, sc.result);
-      /* Blackfin libgloss only expects R0 to be updated, not R1.  */
-      /*SET_DREG (1, sc.errcode);*/
+      SET_DREG (1, sc.result2);
+      SET_DREG (2, sc.errcode);
     }
 
   TRACE_SYSCALL (cpu, "%s", _tbuf);

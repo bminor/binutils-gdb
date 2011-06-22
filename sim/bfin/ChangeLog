@@ -1,3 +1,8 @@
+2011-06-22  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (bfin_syscall): Delete old comment.  Set dreg 1 to
+	sc.result2 and dreg 2 to sc.errcode.
+
 2011-06-18  Robin Getz  <robin.getz@analog.com>
 
 	* bfin-sim.c (decode_dsp32shift_0): Clear ASTAT[AV] if val is 0,
