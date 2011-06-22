@@ -76,10 +76,6 @@
 #include "mi/mi-common.h"
 #include "python/python.h"
 
-/* Arguments to pass as context to some catch command handlers.  */
-#define CATCH_PERMANENT ((void *) (uintptr_t) 0)
-#define CATCH_TEMPORARY ((void *) (uintptr_t) 1)
-
 /* Prototypes for local functions.  */
 
 static void enable_delete_command (char *, int);
@@ -10024,9 +10020,7 @@ catch_throw_command (char *arg, int from_tty, struct cmd_list_element *command)
   catch_exception_command_1 (EX_EVENT_THROW, arg, tempflag, from_tty);
 }
 
-/* Create a breakpoint struct for Ada exception catchpoints.  */
-
-static void
+void
 create_ada_exception_breakpoint (struct gdbarch *gdbarch,
 				 struct symtab_and_line sal,
                                  char *addr_string,
@@ -10075,32 +10069,6 @@ create_ada_exception_breakpoint (struct gdbarch *gdbarch,
   mention (b);
   observer_notify_breakpoint_created (b);
   update_global_location_list (1);
-}
-
-/* Implement the "catch exception" command.  */
-
-static void
-catch_ada_exception_command (char *arg, int from_tty,
-			     struct cmd_list_element *command)
-{
-  struct gdbarch *gdbarch = get_current_arch ();
-  int tempflag;
-  struct symtab_and_line sal;
-  char *addr_string = NULL;
-  char *exp_string = NULL;
-  char *cond_string = NULL;
-  struct expression *cond = NULL;
-  struct breakpoint_ops *ops = NULL;
-
-  tempflag = get_cmd_context (command) == CATCH_TEMPORARY;
-
-  if (!arg)
-    arg = "";
-  sal = ada_decode_exception_location (arg, &addr_string, &exp_string,
-                                       &cond_string, &cond, &ops);
-  create_ada_exception_breakpoint (gdbarch, sal, addr_string, exp_string,
-                                   cond_string, cond, ops, tempflag,
-                                   from_tty);
 }
 
 /* Cleanup function for a syscall filter list.  */
@@ -10199,27 +10167,6 @@ this architecture yet."));
 
   create_syscall_event_catchpoint (tempflag, filter,
 				   &catch_syscall_breakpoint_ops);
-}
-
-/* Implement the "catch assert" command.  */
-
-static void
-catch_assert_command (char *arg, int from_tty,
-		      struct cmd_list_element *command)
-{
-  struct gdbarch *gdbarch = get_current_arch ();
-  int tempflag;
-  struct symtab_and_line sal;
-  char *addr_string = NULL;
-  struct breakpoint_ops *ops = NULL;
-
-  tempflag = get_cmd_context (command) == CATCH_TEMPORARY;
-
-  if (!arg)
-    arg = "";
-  sal = ada_decode_assert_location (arg, &addr_string, &ops);
-  create_ada_exception_breakpoint (gdbarch, sal, addr_string, NULL, NULL, NULL,
-				   ops, tempflag, from_tty);
 }
 
 static void
@@ -12956,9 +12903,7 @@ static struct cmd_list_element *catch_cmdlist;
 /* List of subcommands for "tcatch".  */
 static struct cmd_list_element *tcatch_cmdlist;
 
-/* Like add_cmd, but add the command to both the "catch" and "tcatch"
-   lists, and pass some additional user data to the command function.  */
-static void
+void
 add_catch_command (char *name, char *docstring,
 		   void (*sfunc) (char *args, int from_tty,
 				  struct cmd_list_element *command),
@@ -13322,20 +13267,6 @@ Arguments, if given, should be one or more system call names\n\
 (if your system supports that), or system call numbers."),
 		     catch_syscall_command_1,
 		     catch_syscall_completer,
-		     CATCH_PERMANENT,
-		     CATCH_TEMPORARY);
-  add_catch_command ("exception", _("\
-Catch Ada exceptions, when raised.\n\
-With an argument, catch only exceptions with the given name."),
-		     catch_ada_exception_command,
-                     NULL,
-		     CATCH_PERMANENT,
-		     CATCH_TEMPORARY);
-  add_catch_command ("assert", _("\
-Catch failed Ada assertions, when raised.\n\
-With an argument, catch only exceptions with the given name."),
-		     catch_assert_command,
-                     NULL,
 		     CATCH_PERMANENT,
 		     CATCH_TEMPORARY);
 

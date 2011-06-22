@@ -61,6 +61,7 @@
 #include "psymtab.h"
 #include "value.h"
 #include "mi/mi-common.h"
+#include "arch-utils.h"
 
 /* Define whether or not the C operator '/' truncates towards zero for
    differently signed operands (truncation direction is undefined in C).
@@ -11339,7 +11340,7 @@ ada_exception_sal (enum exception_catchpoint_kind ex, char *exp_string,
    See ada_exception_sal for a description of all the remaining
    function arguments of this function.  */
 
-struct symtab_and_line
+static struct symtab_and_line
 ada_decode_exception_location (char *args, char **addr_string,
                                char **exp_string, char **cond_string,
                                struct expression **cond,
@@ -11352,7 +11353,33 @@ ada_decode_exception_location (char *args, char **addr_string,
                             cond, ops);
 }
 
-struct symtab_and_line
+/* Implement the "catch exception" command.  */
+
+static void
+catch_ada_exception_command (char *arg, int from_tty,
+			     struct cmd_list_element *command)
+{
+  struct gdbarch *gdbarch = get_current_arch ();
+  int tempflag;
+  struct symtab_and_line sal;
+  char *addr_string = NULL;
+  char *exp_string = NULL;
+  char *cond_string = NULL;
+  struct expression *cond = NULL;
+  struct breakpoint_ops *ops = NULL;
+
+  tempflag = get_cmd_context (command) == CATCH_TEMPORARY;
+
+  if (!arg)
+    arg = "";
+  sal = ada_decode_exception_location (arg, &addr_string, &exp_string,
+                                       &cond_string, &cond, &ops);
+  create_ada_exception_breakpoint (gdbarch, sal, addr_string, exp_string,
+                                   cond_string, cond, ops, tempflag,
+                                   from_tty);
+}
+
+static struct symtab_and_line
 ada_decode_assert_location (char *args, char **addr_string,
                             struct breakpoint_ops **ops)
 {
@@ -11370,6 +11397,26 @@ ada_decode_assert_location (char *args, char **addr_string,
                             ops);
 }
 
+/* Implement the "catch assert" command.  */
+
+static void
+catch_assert_command (char *arg, int from_tty,
+		      struct cmd_list_element *command)
+{
+  struct gdbarch *gdbarch = get_current_arch ();
+  int tempflag;
+  struct symtab_and_line sal;
+  char *addr_string = NULL;
+  struct breakpoint_ops *ops = NULL;
+
+  tempflag = get_cmd_context (command) == CATCH_TEMPORARY;
+
+  if (!arg)
+    arg = "";
+  sal = ada_decode_assert_location (arg, &addr_string, &ops);
+  create_ada_exception_breakpoint (gdbarch, sal, addr_string, NULL, NULL, NULL,
+				   ops, tempflag, from_tty);
+}
                                 /* Operators */
 /* Information about operators given special treatment in functions
    below.  */
@@ -11941,6 +11988,21 @@ work around this bug.  It is always safe to turn this option \"off\", but\n\
 this incurs a slight performance penalty, so it is recommended to NOT change\n\
 this option to \"off\" unless necessary."),
                             NULL, NULL, &set_ada_list, &show_ada_list);
+
+  add_catch_command ("exception", _("\
+Catch Ada exceptions, when raised.\n\
+With an argument, catch only exceptions with the given name."),
+		     catch_ada_exception_command,
+                     NULL,
+		     CATCH_PERMANENT,
+		     CATCH_TEMPORARY);
+  add_catch_command ("assert", _("\
+Catch failed Ada assertions, when raised.\n\
+With an argument, catch only exceptions with the given name."),
+		     catch_assert_command,
+                     NULL,
+		     CATCH_PERMANENT,
+		     CATCH_TEMPORARY);
 
   varsize_limit = 65536;
 

@@ -984,6 +984,36 @@ extern void awatch_command_wrapper (char *, int, int);
 extern void rwatch_command_wrapper (char *, int, int);
 extern void tbreak_command (char *, int);
 
+/* Arguments to pass as context to some catch command handlers.  */
+#define CATCH_PERMANENT ((void *) (uintptr_t) 0)
+#define CATCH_TEMPORARY ((void *) (uintptr_t) 1)
+
+/* Like add_cmd, but add the command to both the "catch" and "tcatch"
+   lists, and pass some additional user data to the command
+   function.  */
+
+extern void
+  add_catch_command (char *name, char *docstring,
+		     void (*sfunc) (char *args, int from_tty,
+				    struct cmd_list_element *command),
+		     char **(*completer) (struct cmd_list_element *cmd,
+					  char *text, char *word),
+		     void *user_data_catch,
+		     void *user_data_tcatch);
+
+/* Create a breakpoint struct for Ada exception catchpoints.  */
+
+extern void
+  create_ada_exception_breakpoint (struct gdbarch *gdbarch,
+				   struct symtab_and_line sal,
+				   char *addr_string,
+				   char *exp_string,
+				   char *cond_string,
+				   struct expression *cond,
+				   struct breakpoint_ops *ops,
+				   int tempflag,
+				   int from_tty);
+
 extern int create_breakpoint (struct gdbarch *gdbarch, char *arg,
 			      char *cond_string, int thread,
 			      int parse_condition_and_thread,

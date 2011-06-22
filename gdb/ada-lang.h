@@ -387,15 +387,4 @@ extern int ada_build_task_list (int warn_if_null);
 
 extern int ada_exception_catchpoint_p (struct breakpoint *b);
   
-extern struct symtab_and_line
-  ada_decode_exception_location (char *args, char **addr_string,
-                                 char **exp_string, char **cond_string,
-                                 struct expression **cond,
-                                 struct breakpoint_ops **ops);
-
-extern struct symtab_and_line
-  ada_decode_assert_location (char *args, char **addr_string,
-                              struct breakpoint_ops **ops);
-
-
 #endif

@@ -1,5 +1,28 @@
 2011-06-22  Pedro Alves  <pedro@codesourcery.com>
 
+	* ada-lang.c: Include arch-utils.h.
+	(ada_decode_exception_location): Make static.
+	(catch_ada_exception_command): Moved here from breakpoint.c.
+	(ada_decode_assert_location): Make static.
+	(catch_assert_command): Moved here from breakpoint.c.
+	(_initialize_ada_lang): Install the exception and assert
+	catchpoint commands here.
+	* ada-lang.h (ada_decode_exception_location)
+	(ada_decode_assert_location): Delete declarations.
+	* breakpoint.c (CATCH_PERMANENT, CATCH_TEMPORARY): Moved to
+	breakpoint.h.
+	(create_ada_exception_breakpoint): Make extern.
+	(catch_ada_exception_command, catch_assert_command): Moved to
+	ada-lang.c.
+	(add_catch_command): Make extern.
+	(_initilize_breakpoint): Don't install the exception and assert
+	catchpoint commands here.
+	* breakpoint.h (CATCH_PERMANENT, CATCH_TEMPORARY): Moved from
+	breakpoint.c
+	(add_catch_command, create_ada_exception_breakpoint): Declare.
+
+2011-06-22  Pedro Alves  <pedro@codesourcery.com>
+
 	* breakpoint.c (init_raw_breakpoint_without_location): Don't add
 	the breakpoint to the breakpoint chain here.
 	(set_raw_breakpoint_without_location): Add the breakpoint to the
