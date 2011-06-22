@@ -6873,48 +6873,6 @@ init_catchpoint (struct breakpoint *b,
   b->ops = ops;
 }
 
-/* Create a new breakpoint of the bp_catchpoint kind and return it,
-   but does NOT mention it nor update the global location list.
-   This is useful if you need to fill more fields in the
-   struct breakpoint before calling mention.
-
-   If TEMPFLAG is non-zero, then make the breakpoint temporary.
-   If COND_STRING is not NULL, then store it in the breakpoint.
-   OPS, if not NULL, is the breakpoint_ops structure associated
-   to the catchpoint.  */
-
-static struct breakpoint *
-create_catchpoint_without_mention (struct gdbarch *gdbarch, int tempflag,
-				   char *cond_string,
-				   struct breakpoint_ops *ops)
-{
-  struct breakpoint *b = XNEW (struct breakpoint);
-
-  init_catchpoint (b, gdbarch, tempflag, cond_string, ops);
-  return b;
-}
-
-/* Create a new breakpoint of the bp_catchpoint kind and return it.
- 
-   If TEMPFLAG is non-zero, then make the breakpoint temporary.
-   If COND_STRING is not NULL, then store it in the breakpoint.
-   OPS, if not NULL, is the breakpoint_ops structure associated
-   to the catchpoint.  */
-
-static struct breakpoint *
-create_catchpoint (struct gdbarch *gdbarch, int tempflag,
-		   char *cond_string, struct breakpoint_ops *ops)
-{
-  struct breakpoint *b =
-    create_catchpoint_without_mention (gdbarch, tempflag, cond_string, ops);
-
-  mention (b);
-  observer_notify_breakpoint_created (b);
-  update_global_location_list (1);
-
-  return b;
-}
-
 static void
 create_fork_vfork_event_catchpoint (struct gdbarch *gdbarch,
 				    int tempflag, char *cond_string,

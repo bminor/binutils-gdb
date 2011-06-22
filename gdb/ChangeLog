@@ -1,5 +1,10 @@
 2011-06-22  Pedro Alves  <pedro@codesourcery.com>
 
+	* breakpoint.c (create_catchpoint_without_mention)
+	(create_catchpoint): Delete.
+
+2011-06-22  Pedro Alves  <pedro@codesourcery.com>
+
 	* breakpoint.h (struct breakpoint): Delete field `exec_pathname'.
 	* breakpoint.c (init_raw_breakpoint_without_location): Remove
 	reference to exec_pathname.
