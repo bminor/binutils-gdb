@@ -5516,7 +5516,7 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 
 	    check_segment[0] = check_segment[1] = -1;
 
-	    if (! info->shared)
+	    if (! info->shared || info->pie)
 	      {
 		relocation = tpoff (info, relocation);
 		addend = rel->r_addend;
@@ -6614,7 +6614,7 @@ sh_elf_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
 	  break;
 
 	case R_SH_TLS_LE_32:
-	  if (info->shared)
+	  if (info->shared && !info->pie)
 	    {
 	      (*_bfd_error_handler)
 		(_("%B: TLS local exec code cannot be linked into shared objects"),
