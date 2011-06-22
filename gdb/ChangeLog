@@ -1,5 +1,17 @@
 2011-06-22  Pedro Alves  <pedro@codesourcery.com>
 
+	* breakpoint.h (struct breakpoint): Delete field `exec_pathname'.
+	* breakpoint.c (init_raw_breakpoint_without_location): Remove
+	reference to exec_pathname.
+	(struct exec_catchpoint): New type.
+	(dtor_catch_exec): New function.
+	(insert_catch_exec, print_it_catch_exec, print_one_catch_exec): Adjust.
+	(catch_exec_breakpoint_ops): Install dtor_catch_syscall.
+	(catch_exec_command_1): Adjust to use init_catchpoint.
+	(delete_breakpoint): Remove reference to exec_pathname.
+
+2011-06-22  Pedro Alves  <pedro@codesourcery.com>
+
 	* breakpoint.h (struct breakpoint_ops): New field `dtor'.
 	(struct breakpoint): Delete field `syscalls_to_be_caught'.
 	* breakpoint.c (init_raw_breakpoint_without_location): Remove

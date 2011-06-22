@@ -608,11 +608,6 @@ struct breakpoint
        aborting, so you can back up to just before the abort.  */
     int hit_count;
 
-    /* Filename of a program whose exec triggered this catchpoint.
-       This field is only valid immediately after this catchpoint has
-       triggered.  */
-    char *exec_pathname;
-
     /* Methods associated with this breakpoint.  */
     struct breakpoint_ops *ops;
 

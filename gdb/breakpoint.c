@@ -5826,7 +5826,6 @@ init_raw_breakpoint_without_location (struct breakpoint *b,
   b->ignore_count = 0;
   b->commands = NULL;
   b->frame_id = null_frame_id;
-  b->exec_pathname = NULL;
   b->ops = NULL;
   b->condition_not_parsed = 0;
   b->py_bp_object = NULL;
@@ -6934,6 +6933,34 @@ create_fork_vfork_event_catchpoint (struct gdbarch *gdbarch,
 
 /* Exec catchpoints.  */
 
+/* An instance of this type is used to represent an exec catchpoint.
+   It includes a "struct breakpoint" as a kind of base class; users
+   downcast to "struct breakpoint *" when needed.  A breakpoint is
+   really of this type iff its ops pointer points to
+   CATCH_EXEC_BREAKPOINT_OPS.  */
+
+struct exec_catchpoint
+{
+  /* The base class.  */
+  struct breakpoint base;
+
+  /* Filename of a program whose exec triggered this catchpoint.
+     This field is only valid immediately after this catchpoint has
+     triggered.  */
+  char *exec_pathname;
+};
+
+/* Implement the "dtor" breakpoint_ops method for exec
+   catchpoints.  */
+
+static void
+dtor_catch_exec (struct breakpoint *b)
+{
+  struct exec_catchpoint *c = (struct exec_catchpoint *) b;
+
+  xfree (c->exec_pathname);
+}
+
 static int
 insert_catch_exec (struct bp_location *bl)
 {
@@ -6950,21 +6977,26 @@ static int
 breakpoint_hit_catch_exec (const struct bp_location *bl,
 			   struct address_space *aspace, CORE_ADDR bp_addr)
 {
-  return inferior_has_execd (inferior_ptid, &bl->owner->exec_pathname);
+  struct exec_catchpoint *c = (struct exec_catchpoint *) bl->owner;
+
+  return inferior_has_execd (inferior_ptid, &c->exec_pathname);
 }
 
 static enum print_stop_action
 print_it_catch_exec (struct breakpoint *b)
 {
+  struct exec_catchpoint *c = (struct exec_catchpoint *) b;
+
   annotate_catchpoint (b->number);
   printf_filtered (_("\nCatchpoint %d (exec'd %s), "), b->number,
-		   b->exec_pathname);
+		   c->exec_pathname);
   return PRINT_SRC_AND_LOC;
 }
 
 static void
 print_one_catch_exec (struct breakpoint *b, struct bp_location **last_loc)
 {
+  struct exec_catchpoint *c = (struct exec_catchpoint *) b;
   struct value_print_options opts;
 
   get_user_print_options (&opts);
@@ -6976,10 +7008,10 @@ print_one_catch_exec (struct breakpoint *b, struct bp_location **last_loc)
     ui_out_field_skip (uiout, "addr");
   annotate_field (5);
   ui_out_text (uiout, "exec");
-  if (b->exec_pathname != NULL)
+  if (c->exec_pathname != NULL)
     {
       ui_out_text (uiout, ", program \"");
-      ui_out_field_string (uiout, "what", b->exec_pathname);
+      ui_out_field_string (uiout, "what", c->exec_pathname);
       ui_out_text (uiout, "\" ");
     }
 }
@@ -7001,7 +7033,7 @@ print_recreate_catch_exec (struct breakpoint *b, struct ui_file *fp)
 
 static struct breakpoint_ops catch_exec_breakpoint_ops =
 {
-  NULL, /* dtor */
+  dtor_catch_exec,
   insert_catch_exec,
   remove_catch_exec,
   breakpoint_hit_catch_exec,
@@ -9834,6 +9866,7 @@ static void
 catch_exec_command_1 (char *arg, int from_tty, 
 		      struct cmd_list_element *command)
 {
+  struct exec_catchpoint *c;
   struct gdbarch *gdbarch = get_current_arch ();
   int tempflag;
   char *cond_string = NULL;
@@ -9854,10 +9887,16 @@ catch_exec_command_1 (char *arg, int from_tty,
   if ((*arg != '\0') && !isspace (*arg))
     error (_("Junk at end of arguments."));
 
-  /* If this target supports it, create an exec catchpoint
-     and enable reporting of such events.  */
-  create_catchpoint (gdbarch, tempflag, cond_string,
-		     &catch_exec_breakpoint_ops);
+  c = XNEW (struct exec_catchpoint);
+  init_catchpoint (&c->base, gdbarch, tempflag, cond_string,
+		   &catch_exec_breakpoint_ops);
+  c->exec_pathname = NULL;
+
+  /* Now, we have to mention the breakpoint and update the global
+     location list.  */
+  mention (&c->base);
+  observer_notify_breakpoint_created (&c->base);
+  update_global_location_list (1);
 }
 
 static enum print_stop_action
@@ -10918,7 +10957,6 @@ delete_breakpoint (struct breakpoint *bpt)
   xfree (bpt->exp_string_reparse);
   value_free (bpt->val);
   xfree (bpt->source_file);
-  xfree (bpt->exec_pathname);
 
 
   /* Be sure no bpstat's are pointing at the breakpoint after it's
