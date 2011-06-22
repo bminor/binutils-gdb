@@ -5785,18 +5785,34 @@ decref_bp_location (struct bp_location **blp)
   *blp = NULL;
 }
 
-/* Helper to set_raw_breakpoint below.  Creates a breakpoint that has
-   type BPTYPE and has no locations as yet.  */
-/* This function is used in gdbtk sources and thus can not be made
-   static.  */
+/* Add breakpoint B at the end of the global breakpoint chain.  */
 
-static struct breakpoint *
-set_raw_breakpoint_without_location (struct gdbarch *gdbarch,
-				     enum bptype bptype)
+static void
+add_to_breakpoint_chain (struct breakpoint *b)
 {
-  struct breakpoint *b, *b1;
+  struct breakpoint *b1;
 
-  b = (struct breakpoint *) xmalloc (sizeof (struct breakpoint));
+  /* Add this breakpoint to the end of the chain so that a list of
+     breakpoints will come out in order of increasing numbers.  */
+
+  b1 = breakpoint_chain;
+  if (b1 == 0)
+    breakpoint_chain = b;
+  else
+    {
+      while (b1->next)
+	b1 = b1->next;
+      b1->next = b;
+    }
+}
+
+/* Initializes breakpoint B with type BPTYPE and no locations yet.  */
+
+static void
+init_raw_breakpoint_without_location (struct breakpoint *b,
+				      struct gdbarch *gdbarch,
+				      enum bptype bptype)
+{
   memset (b, 0, sizeof (*b));
 
   b->type = bptype;
@@ -5818,18 +5834,22 @@ set_raw_breakpoint_without_location (struct gdbarch *gdbarch,
   b->py_bp_object = NULL;
   b->related_breakpoint = b;
 
-  /* Add this breakpoint to the end of the chain so that a list of
-     breakpoints will come out in order of increasing numbers.  */
+  add_to_breakpoint_chain (b);
+}
 
-  b1 = breakpoint_chain;
-  if (b1 == 0)
-    breakpoint_chain = b;
-  else
-    {
-      while (b1->next)
-	b1 = b1->next;
-      b1->next = b;
-    }
+/* Helper to set_raw_breakpoint below.  Creates a breakpoint
+   that has type BPTYPE and has no locations as yet.  */
+/* This function is used in gdbtk sources and thus can not be made
+   static.  */
+
+static struct breakpoint *
+set_raw_breakpoint_without_location (struct gdbarch *gdbarch,
+				     enum bptype bptype)
+{
+  struct breakpoint *b = XNEW (struct breakpoint);
+
+  init_raw_breakpoint_without_location (b, gdbarch, bptype);
+
   return b;
 }
 
@@ -5890,29 +5910,28 @@ get_sal_arch (struct symtab_and_line sal)
   return NULL;
 }
 
-/* set_raw_breakpoint is a low level routine for allocating and
-   partially initializing a breakpoint of type BPTYPE.  The newly
-   created breakpoint's address, section, source file name, and line
-   number are provided by SAL.  The newly created and partially
-   initialized breakpoint is added to the breakpoint chain and
-   is also returned as the value of this function.
+/* Low level routine for partially initializing a breakpoint of type
+   BPTYPE.  The newly created breakpoint's address, section, source
+   file name, and line number are provided by SAL.  The newly created
+   and partially initialized breakpoint is added to the breakpoint
+   chain.
 
    It is expected that the caller will complete the initialization of
    the newly created breakpoint struct as well as output any status
    information regarding the creation of a new breakpoint.  In
-   particular, set_raw_breakpoint does NOT set the breakpoint
-   number!  Care should be taken to not allow an error to occur
-   prior to completing the initialization of the breakpoint.  If this
-   should happen, a bogus breakpoint will be left on the chain.  */
+   particular, init_raw_breakpoint does NOT set the breakpoint number!
+   Care should be taken to not allow an error to occur prior to
+   completing the initialization of the breakpoint.  If this should
+   happen, a bogus breakpoint will be left on the chain.  */
 
-struct breakpoint *
-set_raw_breakpoint (struct gdbarch *gdbarch,
-		    struct symtab_and_line sal, enum bptype bptype)
+static void
+init_raw_breakpoint (struct breakpoint *b, struct gdbarch *gdbarch,
+		     struct symtab_and_line sal, enum bptype bptype)
 {
-  struct breakpoint *b = set_raw_breakpoint_without_location (gdbarch, 
-							      bptype);
   CORE_ADDR adjusted_address;
   struct gdbarch *loc_gdbarch;
+
+  init_raw_breakpoint_without_location (b, gdbarch, bptype);
 
   loc_gdbarch = get_sal_arch (sal);
   if (!loc_gdbarch)
@@ -5951,7 +5970,30 @@ set_raw_breakpoint (struct gdbarch *gdbarch,
 				    sal.explicit_pc || sal.explicit_line);
 
   breakpoints_changed ();
+}
 
+/* set_raw_breakpoint is a low level routine for allocating and
+   partially initializing a breakpoint of type BPTYPE.  The newly
+   created breakpoint's address, section, source file name, and line
+   number are provided by SAL.  The newly created and partially
+   initialized breakpoint is added to the breakpoint chain and
+   is also returned as the value of this function.
+
+   It is expected that the caller will complete the initialization of
+   the newly created breakpoint struct as well as output any status
+   information regarding the creation of a new breakpoint.  In
+   particular, set_raw_breakpoint does NOT set the breakpoint
+   number!  Care should be taken to not allow an error to occur
+   prior to completing the initialization of the breakpoint.  If this
+   should happen, a bogus breakpoint will be left on the chain.  */
+
+struct breakpoint *
+set_raw_breakpoint (struct gdbarch *gdbarch,
+		    struct symtab_and_line sal, enum bptype bptype)
+{
+  struct breakpoint *b = XNEW (struct breakpoint);
+
+  init_raw_breakpoint (b, gdbarch, sal, bptype);
   return b;
 }
 
@@ -6737,11 +6779,41 @@ syscall_catchpoint_p (struct breakpoint *b)
   return (b->ops == &catch_syscall_breakpoint_ops);
 }
 
+/* Initialize a new breakpoint of the bp_catchpoint kind.  If TEMPFLAG
+   is non-zero, then make the breakpoint temporary.  If COND_STRING is
+   not NULL, then store it in the breakpoint.  OPS, if not NULL, is
+   the breakpoint_ops structure associated to the catchpoint.  */
+
+static void
+init_catchpoint (struct breakpoint *b,
+		 struct gdbarch *gdbarch, int tempflag,
+		 char *cond_string,
+		 struct breakpoint_ops *ops)
+{
+  struct symtab_and_line sal;
+
+  memset (b, 0, sizeof (*b));
+
+  init_sal (&sal);
+  sal.pspace = current_program_space;
+
+  init_raw_breakpoint (b, gdbarch, sal, bp_catchpoint);
+  set_breakpoint_count (breakpoint_count + 1);
+  b->number = breakpoint_count;
+
+  b->cond_string = (cond_string == NULL) ? NULL : xstrdup (cond_string);
+  b->thread = -1;
+  b->addr_string = NULL;
+  b->enable_state = bp_enabled;
+  b->disposition = tempflag ? disp_del : disp_donttouch;
+  b->ops = ops;
+}
+
 /* Create a new breakpoint of the bp_catchpoint kind and return it,
    but does NOT mention it nor update the global location list.
    This is useful if you need to fill more fields in the
    struct breakpoint before calling mention.
- 
+
    If TEMPFLAG is non-zero, then make the breakpoint temporary.
    If COND_STRING is not NULL, then store it in the breakpoint.
    OPS, if not NULL, is the breakpoint_ops structure associated
@@ -6752,23 +6824,9 @@ create_catchpoint_without_mention (struct gdbarch *gdbarch, int tempflag,
 				   char *cond_string,
 				   struct breakpoint_ops *ops)
 {
-  struct symtab_and_line sal;
-  struct breakpoint *b;
+  struct breakpoint *b = XNEW (struct breakpoint);
 
-  init_sal (&sal);
-  sal.pspace = current_program_space;
-
-  b = set_raw_breakpoint (gdbarch, sal, bp_catchpoint);
-  set_breakpoint_count (breakpoint_count + 1);
-  b->number = breakpoint_count;
-
-  b->cond_string = (cond_string == NULL) ? NULL : xstrdup (cond_string);
-  b->thread = -1;
-  b->addr_string = NULL;
-  b->enable_state = bp_enabled;
-  b->disposition = tempflag ? disp_del : disp_donttouch;
-  b->ops = ops;
-
+  init_catchpoint (b, gdbarch, tempflag, cond_string, ops);
   return b;
 }
 

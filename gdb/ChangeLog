@@ -1,3 +1,18 @@
+2011-06-22  Pedro Alves  <pedro@codesourcery.com>
+
+	* breakpoint.c (add_to_breakpoint_chain)
+	(init_raw_breakpoint_without_location): New functions, factored
+	out from ...
+	(set_raw_breakpoint_without_location): ... this one.
+	(init_raw_breakpoint): New function, factored out from
+	set_raw_breakpoint and adjusted to use
+	init_raw_breakpoint_without_location.
+	(set_raw_breakpoint): Adjust.
+	(init_catchpoint): New function, factored out from
+	create_catchpoint_without_mention and adjusted to use
+	init_raw_breakpoint.
+	(create_catchpoint_without_mention): Adjust.
+
 2011-06-22  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2expr.c (execute_stack_op) <DW_OP_GNU_convert>: Treat type
