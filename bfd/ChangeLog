@@ -1,3 +1,8 @@
+2011-06-22  Ramana Radhakrishnan  <ramana.radhakrishnan@linaro.org>
+
+       * elf32-arm.c (elf32_arm_final_link_relocate): Allow R_ARM_TLS_LE32
+       for PIE.
+
 2011-06-22  Alan Modra  <amodra@gmail.com>
 
 	* elflink.c (_bfd_elf_merge_symbol): Allow type changes for

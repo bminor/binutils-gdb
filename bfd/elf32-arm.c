@@ -9454,7 +9454,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
       }
 
     case R_ARM_TLS_LE32:
-      if (info->shared)
+      if (info->shared && !info->pie)
 	{
 	  (*_bfd_error_handler)
 	    (_("%B(%A+0x%lx): R_ARM_TLS_LE32 relocation not permitted in shared object"),
