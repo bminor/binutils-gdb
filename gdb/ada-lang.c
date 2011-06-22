@@ -10946,6 +10946,7 @@ print_recreate_catch_exception (struct breakpoint *b, struct ui_file *fp)
 
 static struct breakpoint_ops catch_exception_breakpoint_ops =
 {
+  NULL, /* dtor */
   NULL, /* insert */
   NULL, /* remove */
   NULL, /* breakpoint_hit */
@@ -10987,6 +10988,7 @@ print_recreate_catch_exception_unhandled (struct breakpoint *b,
 }
 
 static struct breakpoint_ops catch_exception_unhandled_breakpoint_ops = {
+  NULL, /* dtor */
   NULL, /* insert */
   NULL, /* remove */
   NULL, /* breakpoint_hit */
@@ -11026,6 +11028,7 @@ print_recreate_catch_assert (struct breakpoint *b, struct ui_file *fp)
 }
 
 static struct breakpoint_ops catch_assert_breakpoint_ops = {
+  NULL, /* dtor */
   NULL, /* insert */
   NULL, /* remove */
   NULL, /* breakpoint_hit */

@@ -5827,7 +5827,6 @@ init_raw_breakpoint_without_location (struct breakpoint *b,
   b->commands = NULL;
   b->frame_id = null_frame_id;
   b->exec_pathname = NULL;
-  b->syscalls_to_be_caught = NULL;
   b->ops = NULL;
   b->condition_not_parsed = 0;
   b->py_bp_object = NULL;
@@ -6393,6 +6392,7 @@ print_recreate_catch_fork (struct breakpoint *b, struct ui_file *fp)
 
 static struct breakpoint_ops catch_fork_breakpoint_ops =
 {
+  NULL, /* dtor */
   insert_catch_fork,
   remove_catch_fork,
   breakpoint_hit_catch_fork,
@@ -6497,6 +6497,7 @@ print_recreate_catch_vfork (struct breakpoint *b, struct ui_file *fp)
 
 static struct breakpoint_ops catch_vfork_breakpoint_ops =
 {
+  NULL, /* dtor */
   insert_catch_vfork,
   remove_catch_vfork,
   breakpoint_hit_catch_vfork,
@@ -6509,23 +6510,53 @@ static struct breakpoint_ops catch_vfork_breakpoint_ops =
   print_recreate_catch_vfork
 };
 
+/* An instance of this type is used to represent a syscall catchpoint.
+   It includes a "struct breakpoint" as a kind of base class; users
+   downcast to "struct breakpoint *" when needed.  A breakpoint is
+   really of this type iff its ops pointer points to
+   CATCH_SYSCALL_BREAKPOINT_OPS.  */
+
+struct syscall_catchpoint
+{
+  /* The base class.  */
+  struct breakpoint base;
+
+  /* Syscall numbers used for the 'catch syscall' feature.  If no
+     syscall has been specified for filtering, its value is NULL.
+     Otherwise, it holds a list of all syscalls to be caught.  The
+     list elements are allocated with xmalloc.  */
+  VEC(int) *syscalls_to_be_caught;
+};
+
+/* Implement the "dtor" breakpoint_ops method for syscall
+   catchpoints.  */
+
+static void
+dtor_catch_syscall (struct breakpoint *b)
+{
+  struct syscall_catchpoint *c = (struct syscall_catchpoint *) b;
+
+  VEC_free (int, c->syscalls_to_be_caught);
+}
+
 /* Implement the "insert" breakpoint_ops method for syscall
    catchpoints.  */
 
 static int
 insert_catch_syscall (struct bp_location *bl)
 {
+  struct syscall_catchpoint *c = (struct syscall_catchpoint *) bl->owner;
   struct inferior *inf = current_inferior ();
 
   ++inf->total_syscalls_count;
-  if (!bl->owner->syscalls_to_be_caught)
+  if (!c->syscalls_to_be_caught)
     ++inf->any_syscall_count;
   else
     {
       int i, iter;
 
       for (i = 0;
-           VEC_iterate (int, bl->owner->syscalls_to_be_caught, i, iter);
+           VEC_iterate (int, c->syscalls_to_be_caught, i, iter);
            i++)
 	{
           int elem;
@@ -6560,17 +6591,18 @@ insert_catch_syscall (struct bp_location *bl)
 static int
 remove_catch_syscall (struct bp_location *bl)
 {
+  struct syscall_catchpoint *c = (struct syscall_catchpoint *) bl->owner;
   struct inferior *inf = current_inferior ();
 
   --inf->total_syscalls_count;
-  if (!bl->owner->syscalls_to_be_caught)
+  if (!c->syscalls_to_be_caught)
     --inf->any_syscall_count;
   else
     {
       int i, iter;
 
       for (i = 0;
-           VEC_iterate (int, bl->owner->syscalls_to_be_caught, i, iter);
+           VEC_iterate (int, c->syscalls_to_be_caught, i, iter);
            i++)
 	{
           int elem;
@@ -6601,18 +6633,19 @@ breakpoint_hit_catch_syscall (const struct bp_location *bl,
      breakpoint.  If we are, then we must guarantee that the called
      syscall is the same syscall we are catching.  */
   int syscall_number = 0;
-  const struct breakpoint *b = bl->owner;
+  const struct syscall_catchpoint *c
+    = (const struct syscall_catchpoint *) bl->owner;
 
   if (!inferior_has_called_syscall (inferior_ptid, &syscall_number))
     return 0;
 
   /* Now, checking if the syscall is the same.  */
-  if (b->syscalls_to_be_caught)
+  if (c->syscalls_to_be_caught)
     {
       int i, iter;
 
       for (i = 0;
-           VEC_iterate (int, b->syscalls_to_be_caught, i, iter);
+           VEC_iterate (int, c->syscalls_to_be_caught, i, iter);
            i++)
 	if (syscall_number == iter)
 	  break;
@@ -6672,6 +6705,7 @@ static void
 print_one_catch_syscall (struct breakpoint *b,
 			 struct bp_location **last_loc)
 {
+  struct syscall_catchpoint *c = (struct syscall_catchpoint *) b;
   struct value_print_options opts;
 
   get_user_print_options (&opts);
@@ -6682,19 +6716,19 @@ print_one_catch_syscall (struct breakpoint *b,
     ui_out_field_skip (uiout, "addr");
   annotate_field (5);
 
-  if (b->syscalls_to_be_caught
-      && VEC_length (int, b->syscalls_to_be_caught) > 1)
+  if (c->syscalls_to_be_caught
+      && VEC_length (int, c->syscalls_to_be_caught) > 1)
     ui_out_text (uiout, "syscalls \"");
   else
     ui_out_text (uiout, "syscall \"");
 
-  if (b->syscalls_to_be_caught)
+  if (c->syscalls_to_be_caught)
     {
       int i, iter;
       char *text = xstrprintf ("%s", "");
 
       for (i = 0;
-           VEC_iterate (int, b->syscalls_to_be_caught, i, iter);
+           VEC_iterate (int, c->syscalls_to_be_caught, i, iter);
            i++)
         {
           char *x = text;
@@ -6726,17 +6760,19 @@ print_one_catch_syscall (struct breakpoint *b,
 static void
 print_mention_catch_syscall (struct breakpoint *b)
 {
-  if (b->syscalls_to_be_caught)
+  struct syscall_catchpoint *c = (struct syscall_catchpoint *) b;
+
+  if (c->syscalls_to_be_caught)
     {
       int i, iter;
 
-      if (VEC_length (int, b->syscalls_to_be_caught) > 1)
+      if (VEC_length (int, c->syscalls_to_be_caught) > 1)
         printf_filtered (_("Catchpoint %d (syscalls"), b->number);
       else
         printf_filtered (_("Catchpoint %d (syscall"), b->number);
 
       for (i = 0;
-           VEC_iterate (int, b->syscalls_to_be_caught, i, iter);
+           VEC_iterate (int, c->syscalls_to_be_caught, i, iter);
            i++)
         {
           struct syscall s;
@@ -6760,14 +6796,16 @@ print_mention_catch_syscall (struct breakpoint *b)
 static void
 print_recreate_catch_syscall (struct breakpoint *b, struct ui_file *fp)
 {
+  struct syscall_catchpoint *c = (struct syscall_catchpoint *) b;
+
   fprintf_unfiltered (fp, "catch syscall");
 
-  if (b->syscalls_to_be_caught)
+  if (c->syscalls_to_be_caught)
     {
       int i, iter;
 
       for (i = 0;
-           VEC_iterate (int, b->syscalls_to_be_caught, i, iter);
+           VEC_iterate (int, c->syscalls_to_be_caught, i, iter);
            i++)
         {
           struct syscall s;
@@ -6785,6 +6823,7 @@ print_recreate_catch_syscall (struct breakpoint *b, struct ui_file *fp)
 
 static struct breakpoint_ops catch_syscall_breakpoint_ops =
 {
+  dtor_catch_syscall,
   insert_catch_syscall,
   remove_catch_syscall,
   breakpoint_hit_catch_syscall,
@@ -6962,6 +7001,7 @@ print_recreate_catch_exec (struct breakpoint *b, struct ui_file *fp)
 
 static struct breakpoint_ops catch_exec_breakpoint_ops =
 {
+  NULL, /* dtor */
   insert_catch_exec,
   remove_catch_exec,
   breakpoint_hit_catch_exec,
@@ -6978,16 +7018,17 @@ static void
 create_syscall_event_catchpoint (int tempflag, VEC(int) *filter,
                                  struct breakpoint_ops *ops)
 {
+  struct syscall_catchpoint *c;
   struct gdbarch *gdbarch = get_current_arch ();
-  struct breakpoint *b =
-    create_catchpoint_without_mention (gdbarch, tempflag, NULL, ops);
 
-  b->syscalls_to_be_caught = filter;
+  c = XNEW (struct syscall_catchpoint);
+  init_catchpoint (&c->base, gdbarch, tempflag, NULL, ops);
+  c->syscalls_to_be_caught = filter;
 
   /* Now, we have to mention the breakpoint and update the global
      location list.  */
-  mention (b);
-  observer_notify_breakpoint_created (b);
+  mention (&c->base);
+  observer_notify_breakpoint_created (&c->base);
   update_global_location_list (1);
 }
 
@@ -8589,6 +8630,7 @@ print_recreate_ranged_breakpoint (struct breakpoint *b, struct ui_file *fp)
 
 static struct breakpoint_ops ranged_breakpoint_ops =
 {
+  NULL, /* dtor */
   NULL, /* insert */
   NULL, /* remove */
   breakpoint_hit_ranged_breakpoint,
@@ -8914,6 +8956,7 @@ works_in_software_mode_watchpoint (const struct breakpoint *b)
 
 static struct breakpoint_ops watchpoint_breakpoint_ops =
 {
+  NULL, /* dtor */
   insert_watchpoint,
   remove_watchpoint,
   NULL, /* breakpoint_hit */
@@ -9092,6 +9135,7 @@ print_recreate_masked_watchpoint (struct breakpoint *b, struct ui_file *fp)
 
 static struct breakpoint_ops masked_watchpoint_breakpoint_ops =
 {
+  NULL, /* dtor */
   insert_masked_watchpoint,
   remove_masked_watchpoint,
   NULL, /* breakpoint_hit */
@@ -9904,6 +9948,7 @@ print_recreate_exception_catchpoint (struct breakpoint *b,
 }
 
 static struct breakpoint_ops gnu_v3_exception_catchpoint_ops = {
+  NULL, /* dtor */
   NULL, /* insert */
   NULL, /* remove */
   NULL, /* breakpoint_hit */
@@ -10860,6 +10905,9 @@ delete_breakpoint (struct breakpoint *bpt)
       break;
     }
 
+  if (bpt->ops != NULL && bpt->ops->dtor != NULL)
+    bpt->ops->dtor (bpt);
+
   decref_counted_command_line (&bpt->commands);
   xfree (bpt->cond_string);
   xfree (bpt->cond_exp);
@@ -10871,7 +10919,6 @@ delete_breakpoint (struct breakpoint *bpt)
   value_free (bpt->val);
   xfree (bpt->source_file);
   xfree (bpt->exec_pathname);
-  clean_up_filters (&bpt->syscalls_to_be_caught);
 
 
   /* Be sure no bpstat's are pointing at the breakpoint after it's
@@ -12271,11 +12318,13 @@ catching_syscall_number (int syscall_number)
   ALL_BREAKPOINTS (bp)
     if (is_syscall_catchpoint_enabled (bp))
       {
-	if (bp->syscalls_to_be_caught)
+	struct syscall_catchpoint *c = (struct syscall_catchpoint *) bp;
+
+	if (c->syscalls_to_be_caught)
 	  {
             int i, iter;
             for (i = 0;
-                 VEC_iterate (int, bp->syscalls_to_be_caught, i, iter);
+                 VEC_iterate (int, c->syscalls_to_be_caught, i, iter);
                  i++)
 	      if (syscall_number == iter)
 		return 1;

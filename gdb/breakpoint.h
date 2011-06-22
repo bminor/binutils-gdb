@@ -393,6 +393,10 @@ struct bp_location
 
 struct breakpoint_ops
 {
+  /* Destructor.  Releases everything from SELF (but not SELF
+     itself).  */
+  void (*dtor) (struct breakpoint *self);
+
   /* Insert the breakpoint or watchpoint or activate the catchpoint.
      Return 0 for success, 1 if the breakpoint, watchpoint or catchpoint
      type is not supported, -1 for failure.  */
@@ -608,12 +612,6 @@ struct breakpoint
        This field is only valid immediately after this catchpoint has
        triggered.  */
     char *exec_pathname;
-
-    /* Syscall numbers used for the 'catch syscall' feature.  If no
-       syscall has been specified for filtering, its value is NULL.
-       Otherwise, it holds a list of all syscalls to be caught.  The
-       list elements are allocated with xmalloc.  */
-    VEC(int) *syscalls_to_be_caught;
 
     /* Methods associated with this breakpoint.  */
     struct breakpoint_ops *ops;

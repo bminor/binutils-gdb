@@ -1,5 +1,31 @@
 2011-06-22  Pedro Alves  <pedro@codesourcery.com>
 
+	* breakpoint.h (struct breakpoint_ops): New field `dtor'.
+	(struct breakpoint): Delete field `syscalls_to_be_caught'.
+	* breakpoint.c (init_raw_breakpoint_without_location): Remove
+	reference to syscalls_to_be_caught.
+	(catch_fork_breakpoint_ops, catch_vfork_breakpoint_ops): Install a
+	NULL `dtor'.
+	(struct syscall_catchpoint): New type.
+	(dtor_catch_syscall): New function.
+	(insert_catch_syscall, remove_catch_syscall)
+	(breakpoint_hit_catch_syscall, print_one_catch_syscall)
+	(print_recreate_catch_syscall): Adjust.
+	(catch_syscall_breakpoint_ops): Install dtor_catch_syscall.
+	(catch_exec_breakpoint_ops): Install a NULL `dtor'.
+	(create_syscall_event_catchpoint): Adjust to use init_catchpoint.
+	(ranged_breakpoint_ops, watchpoint_breakpoint_ops)
+	(masked_watchpoint_breakpoint_ops)
+	(gnu_v3_exception_catchpoint_ops): Install a NULL `dtor'.
+	(delete_breakpoint): Call the `dtor' breakpoint_ops method, if
+	there is one.  Remove references to syscalls_to_be_caught.
+	(catching_syscall_number): Adjust.
+	* ada-lang.c (catch_exception_breakpoint_ops)
+	(catch_exception_unhandled_breakpoint_ops)
+	(catch_assert_breakpoint_ops): Install a NULL `dtor'.
+
+2011-06-22  Pedro Alves  <pedro@codesourcery.com>
+
 	* breakpoint.h (struct breakpoint): Delete forked_inferior_pid
 	field.
 	* breakpoint.c (init_raw_breakpoint_without_location): Remove
