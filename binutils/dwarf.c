@@ -1179,13 +1179,18 @@ decode_location_expression (unsigned char * data,
 	  uvalue = read_leb128 (data, &bytes_read, 0);
 	  data += bytes_read;
 	  printf ("DW_OP_GNU_convert <0x%s>",
-		  dwarf_vmatoa ("x", cu_offset + uvalue));
+		  dwarf_vmatoa ("x", uvalue ? cu_offset + uvalue : 0));
 	  break;
 	case DW_OP_GNU_reinterpret:
 	  uvalue = read_leb128 (data, &bytes_read, 0);
 	  data += bytes_read;
 	  printf ("DW_OP_GNU_reinterpret <0x%s>",
-		  dwarf_vmatoa ("x", cu_offset + uvalue));
+		  dwarf_vmatoa ("x", uvalue ? cu_offset + uvalue : 0));
+	  break;
+	case DW_OP_GNU_parameter_ref:
+	  printf ("DW_OP_GNU_parameter_ref: <0x%s>",
+		  dwarf_vmatoa ("x", cu_offset + byte_get (data, 4)));
+	  data += 4;
 	  break;
 
 	  /* HP extensions.  */

@@ -1,3 +1,9 @@
+2011-06-22  Jakub Jelinek  <jakub@redhat.com>
+
+	* dwarf.c (decode_location_expression): For DW_OP_GNU_convert and
+	DW_OP_GNU_reinterpret, if uvalue is 0, don't add cu_offset.
+	Handle DW_OP_GNU_parameter_ref.
+
 2011-06-16  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf-mode.el (dwarf-do-insert-substructure): Call
