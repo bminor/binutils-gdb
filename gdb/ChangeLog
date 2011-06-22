@@ -1,3 +1,8 @@
+2011-06-22  Yao Qi  <yao@codesourcery.com>
+
+	* infrun.c (handle_inferior_event): Remove write-only local variable
+	`sw_single_step_trap_p'.
+
 2011-06-20  Tom Tromey  <tromey@redhat.com>
 
 	* symtab.c (lookup_language_this): End loop if block is NULL.

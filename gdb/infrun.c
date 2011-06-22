@@ -3090,7 +3090,6 @@ handle_inferior_event (struct execution_control_state *ecs)
 {
   struct frame_info *frame;
   struct gdbarch *gdbarch;
-  int sw_single_step_trap_p = 0;
   int stopped_by_watchpoint;
   int stepped_after_stopped_by_watchpoint = 0;
   struct symtab_and_line stop_pc_sal;
@@ -3845,7 +3844,6 @@ handle_inferior_event (struct execution_control_state *ecs)
 	}
       else if (singlestep_breakpoints_inserted_p)
 	{
-	  sw_single_step_trap_p = 1;
 	  ecs->random_signal = 0;
 	}
     }
