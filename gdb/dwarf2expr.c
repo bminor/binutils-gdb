@@ -1229,7 +1229,10 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 
 	    op_ptr = read_uleb128 (op_ptr, op_end, &type_die);
 
-	    type = dwarf_get_base_type (ctx, type_die, 0);
+	    if (type_die == 0)
+	      type = address_type;
+	    else
+	      type = dwarf_get_base_type (ctx, type_die, 0);
 
 	    result_val = dwarf_expr_fetch (ctx, 0);
 	    dwarf_expr_pop (ctx);

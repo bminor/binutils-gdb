@@ -1,3 +1,8 @@
+2011-06-22  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2expr.c (execute_stack_op) <DW_OP_GNU_convert>: Treat type
+	argument of 0 specially.
+
 2011-06-22  Yao Qi  <yao@codesourcery.com>
 
 	* infrun.c (handle_inferior_event): Remove write-only local variable
