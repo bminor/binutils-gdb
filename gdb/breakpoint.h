@@ -30,6 +30,8 @@ struct block;
 struct breakpoint_object;
 struct get_number_or_range_state;
 struct thread_info;
+struct bpstats;
+struct bp_location;
 
 /* This is the maximum number of bytes a breakpoint instruction can
    take.  Feel free to increase it.  It's just used in a few places to
@@ -278,11 +280,25 @@ enum bp_loc_type
   bp_loc_other			/* Miscellaneous...  */
 };
 
+/* This structure is a collection of function pointers that, if
+   available, will be called instead of performing the default action
+   for this bp_loc_type.  */
+
+struct bp_location_ops
+{
+  /* Destructor.  Releases everything from SELF (but not SELF
+     itself).  */
+  void (*dtor) (struct bp_location *self);
+};
+
 struct bp_location
 {
   /* Chain pointer to the next breakpoint location for
      the same parent breakpoint.  */
   struct bp_location *next;
+
+  /* Methods associated with this location.  */
+  const struct bp_location_ops *ops;
 
   /* The reference count.  */
   int refc;
@@ -397,6 +413,14 @@ struct breakpoint_ops
      itself).  */
   void (*dtor) (struct breakpoint *self);
 
+  /* Allocate a location for this breakpoint.  */
+  struct bp_location * (*allocate_location) (struct breakpoint *);
+
+  /* Reevaluate a breakpoint.  This is necessary after symbols change
+     (e.g., an executable or DSO was loaded, or the inferior just
+     started).  */
+  void (*re_set) (struct breakpoint *self);
+
   /* Insert the breakpoint or watchpoint or activate the catchpoint.
      Return 0 for success, 1 if the breakpoint, watchpoint or catchpoint
      type is not supported, -1 for failure.  */
@@ -408,10 +432,15 @@ struct breakpoint_ops
      -1 for failure.  */
   int (*remove_location) (struct bp_location *);
 
-  /* Return non-zero if the debugger should tell the user that this
-     breakpoint was hit.  */
-  int (*breakpoint_hit) (const struct bp_location *, struct address_space *,
+  /* Return true if it the target has stopped due to hitting
+     breakpoint location BL.  This function does not check if we
+     should stop, only if BL explains the stop.  */
+  int (*breakpoint_hit) (const struct bp_location *bl, struct address_space *,
 			 CORE_ADDR);
+
+  /* Check internal conditions of the breakpoint referred to by BS.
+     If we should not stop for this breakpoint, set BS->stop to 0.  */
+  void (*check_status) (struct bpstats *bs);
 
   /* Tell how many hardware resources (debug registers) are needed
      for this breakpoint.  If this function is not provided, then
@@ -937,6 +966,12 @@ extern int breakpoint_thread_match (struct address_space *,
 
 extern void until_break_command (char *, int, int);
 
+/* Initialize a struct bp_location.  */
+
+extern void init_bp_location (struct bp_location *loc,
+			      const struct bp_location_ops *ops,
+			      struct breakpoint *owner);
+
 extern void update_breakpoint_locations (struct breakpoint *b,
 					 struct symtabs_and_lines sals,
 					 struct symtabs_and_lines sals_end);
@@ -944,6 +979,12 @@ extern void update_breakpoint_locations (struct breakpoint *b,
 extern void breakpoint_re_set (void);
 
 extern void breakpoint_re_set_thread (struct breakpoint *);
+
+/* The default re_set method, for typical hardware or software
+   breakpoints.  Reevaluate the breakpoint and recreate its
+   locations.  */
+
+extern void breakpoint_re_set_default (struct breakpoint *);
 
 extern struct breakpoint *set_momentary_breakpoint
   (struct gdbarch *, struct symtab_and_line, struct frame_id, enum bptype);
@@ -1001,18 +1042,21 @@ extern void
 		     void *user_data_catch,
 		     void *user_data_tcatch);
 
-/* Create a breakpoint struct for Ada exception catchpoints.  */
+/* Initialize a breakpoint struct for Ada exception catchpoints.  */
 
 extern void
-  create_ada_exception_breakpoint (struct gdbarch *gdbarch,
-				   struct symtab_and_line sal,
-				   char *addr_string,
-				   char *exp_string,
-				   char *cond_string,
-				   struct expression *cond,
-				   struct breakpoint_ops *ops,
-				   int tempflag,
-				   int from_tty);
+  init_ada_exception_breakpoint (struct breakpoint *b,
+				 struct gdbarch *gdbarch,
+				 struct symtab_and_line sal,
+				 char *addr_string,
+				 struct breakpoint_ops *ops,
+				 int tempflag,
+				 int from_tty);
+
+/* Add breakpoint B on the breakpoint list, and notify the user, the
+   target and breakpoint_created observers of its existence.  */
+
+extern void install_breakpoint (struct breakpoint *b);
 
 extern int create_breakpoint (struct gdbarch *gdbarch, char *arg,
 			      char *cond_string, int thread,

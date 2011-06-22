@@ -1,5 +1,102 @@
 2011-06-22  Pedro Alves  <pedro@codesourcery.com>
 
+	* breakpoint.c (bpstat_stop_status): Call the check_status
+	breakpoint_ops method.
+	(print_one_breakpoint_location): Also print the condition for Ada
+	exception catchpoints.
+	(allocate_bp_location): New, factored out from
+	allocate_bp_location.
+	(allocate_bp_location): Adjust.  Call the owner breakpoint's
+	allocate_location method, if there is one.
+	(free_bp_location): Call the locations's dtor method, if there is
+	one.
+	(init_raw_breakpoint_without_location): New breakpoint_ops
+	parameter.  Use it.
+	(set_raw_breakpoint_without_location): Adjust.
+	(init_raw_breakpoint): New breakpoint_ops parameter.  Pass it down.
+	(set_raw_breakpoint): Adjust.
+	(catch_fork_breakpoint_ops, catch_vfork_breakpoint_ops)
+	(catch_syscall_breakpoint_ops): Install NULL allocate_location,
+	re_set and check_status methods.
+	(init_catchpoint): Don't memset, initialize thread, addr_string
+	and enable_state.  Pass the ops down to init_raw_breakpoint.
+	(install_catchpoint): Rename to ...
+	(install_breakpoint): ... this, and make extern.
+	(create_fork_vfork_event_catchpoint): Adjust.
+	(catch_exec_breakpoint_ops): Install NULL allocate_location,
+	re_set and check_status methods.
+	(create_syscall_event_catchpoint): Adjust.
+	(ranged_breakpoint_ops, watchpoint_breakpoint_ops)
+	(masked_watchpoint_breakpoint_ops): Install NULL
+	allocate_location, re_set and check_status methods.
+	(catch_exec_command_1): Adjust.
+	(gnu_v3_exception_catchpoint_ops): Install NULL allocate_location,
+	re_set and check_status methods.
+	(create_ada_exception_breakpoint): Rename to ...
+	(init_ada_exception_breakpoint): ... this.  Add a struct
+	breakpoint parameter, and delete the exp_string, cond_string and
+	cond parameters.  Use init_raw_breakpoint, and don't install or
+	mention the breakpoint yet.  Don't clear breakpoint fields that
+	init_raw_breakpoint already clears.
+	(re_set_breakpoint): Delete, split into ...
+	(breakpoint_re_set_default, prepare_re_set_context): ... these new
+	functions.
+	(breakpoint_re_set_one): Call the breakpoint's
+	breakpoint_ops->re_set implementation, if there's one.  Adjust.
+	* breakpoint.h: Forward declare struct bpstats and struct bp_location.
+	(struct bp_location_ops): New type.
+	(struct bp_location): New field `ops'.
+	(struct breakpoint_ops): New `allocate_location', `re_set' and
+	`check_status' fields.  Make `breakpoint_hit''s description match
+	reality.
+	(init_bp_location): Declare.
+	(breakpoint_re_set_default): Declare.
+	(create_ada_exception_breakpoint): Rename to ...
+	(init_ada_exception_breakpoint): ... this.  Add a struct
+	breakpoint parameter, and delete the exp_string, cond_string and
+	cond parameters.
+	(install_breakpoint): Declare.
+	* ada-lang.c: Include exceptions.h.
+	<Ada exceptions description>: Update.
+	(struct ada_catchpoint_location): New type.
+	(ada_catchpoint_location_dtor): New function.
+	(ada_catchpoint_location_ops): New global.
+	(ada_catchpoint): New type.
+	(create_excep_cond_exprs): New function.
+	(dtor_exception, allocate_location_exception, re_set_exception)
+	(should_stop_exception, check_status_exception): New functions.
+	(print_one_exception, print_mention_exception)
+	(print_recreate_exception): Adjust.
+	(dtor_catch_exception, allocate_location_catch_exception)
+	(re_set_catch_exception, check_status_catch_exception): New
+	functions.
+	(catch_exception_breakpoint_ops): Install them.
+	(dtor_catch_exception_unhandled)
+	(allocate_location_catch_exception_unhandled)
+	(re_set_catch_exception_unhandled)
+	(check_status_catch_exception_unhandled): New functions.
+	(catch_exception_unhandled_breakpoint_ops): Install them.
+	(dtor_catch_assert, allocate_location_catch_assert)
+	(re_set_catch_assert, check_status_catch_assert): New functions.
+	(catch_assert_breakpoint_ops): Install them.
+	(ada_exception_catchpoint_p): Delete.
+	(catch_ada_exception_command_split)
+	(ada_exception_catchpoint_cond_string): Rename exp_string
+	parameter to excep_string.  Adjust.
+	(ada_parse_catchpoint_condition): Delete.
+	(ada_exception_sal): Rename the exp_string parameter to
+	excep_string.  Delete the cond_string and cond parameters.
+	Adjust.
+	(ada_decode_exception_location): Rename the exp_string parameter
+	to excep_string.  Delete the cond_string and cond parameters.
+	Adjust.
+	(create_ada_exception_catchpoint): New function.
+	(catch_ada_exception_command, ada_decode_assert_location)
+	(catch_assert_command): Adjust.
+	* ada-lang.h (ada_exception_catchpoint_p): Delete declaration.
+
+2011-06-22  Pedro Alves  <pedro@codesourcery.com>
+
 	* ada-lang.c: Include arch-utils.h.
 	(ada_decode_exception_location): Make static.
 	(catch_ada_exception_command): Moved here from breakpoint.c.

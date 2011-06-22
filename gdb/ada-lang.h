@@ -385,6 +385,4 @@ extern void iterate_over_live_ada_tasks
 
 extern int ada_build_task_list (int warn_if_null);
 
-extern int ada_exception_catchpoint_p (struct breakpoint *b);
-  
 #endif
