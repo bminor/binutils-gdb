@@ -82,15 +82,14 @@ mi_create_breakpoint "-p 5 $srcfile:$bkpt_line" 3 keep thread_function .* .* .* 
 # Resume all threads.  Only thread 5 should report a stop.
 
 set running_re ""
-for {set i $nthreads} {$i > 0} {incr i -1} {
+for {set i $nthreads} {$i > 1} {incr i -1} {
     set running_re "$running_re\\*running,thread-id=\"$decimal\"\r\n"
 }
+# Don't append \r\n after last line.
+set running_re "$running_re\\*running,thread-id=\"$decimal\""
 
-gdb_test_multiple "-exec-continue --all" "resume all, thread specific breakpoint" {
-    -re ".*$running_re$mi_gdb_prompt" {
-	pass "resume all, thread specific breakpoint"
-    }
-}
+mi_gdb_test "-exec-continue --all" "\[^\n\]*\r\n$running_re" \
+    "resume all, thread specific breakpoint"
 
 mi_expect_stop "breakpoint-hit" "thread_function" "\[^\n\]*" "$srcfile" \
     "\[0-9\]*" {"" "disp=\"keep\""} "hit thread specific breakpoint"

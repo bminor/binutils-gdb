@@ -1,5 +1,10 @@
 2011-06-20  Marek Polacek  <mpolacek@redhat.com>
 
+        * gdb.mi/mi-nsmoribund.exp: Replace gdb_test_multiple with
+	mi_gdb_test.
+
+2011-06-20  Marek Polacek  <mpolacek@redhat.com>
+
         * gdb.mi/mi-return.exp: Replace gdb_test_multiple with mi_gdb_test.
 
 2011-06-14  Yao Qi  <yao@codesourcery.com>
