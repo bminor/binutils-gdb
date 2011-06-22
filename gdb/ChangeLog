@@ -1,5 +1,18 @@
 2011-06-22  Pedro Alves  <pedro@codesourcery.com>
 
+	* breakpoint.h (struct breakpoint): Delete forked_inferior_pid
+	field.
+	* breakpoint.c (init_raw_breakpoint_without_location): Remove
+	reference to forked_inferior_pid.
+	(struct fork_catchpoint): New type.
+	(breakpoint_hit_catch_fork, print_it_catch_fork)
+	(print_one_catch_fork, breakpoint_hit_catch_vfork)
+	(print_it_catch_vfork, print_one_catch_vfork): Adjust.
+	(create_fork_vfork_event_catchpoint): Adjust to use
+	init_catchpoint.
+
+2011-06-22  Pedro Alves  <pedro@codesourcery.com>
+
 	* breakpoint.c (add_to_breakpoint_chain)
 	(init_raw_breakpoint_without_location): New functions, factored
 	out from ...

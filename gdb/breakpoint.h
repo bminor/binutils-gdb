@@ -604,11 +604,6 @@ struct breakpoint
        aborting, so you can back up to just before the abort.  */
     int hit_count;
 
-    /* Process id of a child process whose forking triggered this
-       catchpoint.  This field is only valid immediately after this
-       catchpoint has triggered.  */
-    ptid_t forked_inferior_pid;
-
     /* Filename of a program whose exec triggered this catchpoint.
        This field is only valid immediately after this catchpoint has
        triggered.  */
