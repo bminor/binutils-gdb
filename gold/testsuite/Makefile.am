@@ -828,16 +828,17 @@ many_sections_r_test.o: many_sections_test.o gcctestdir/ld
 many_sections_r_test: many_sections_r_test.o gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ many_sections_r_test.o $(LIBS)
 
-if CONSTRUCTOR_PRIORITY
-
 check_PROGRAMS += initpri1
 initpri1_SOURCES = initpri1.c
 initpri1_DEPENDENCIES = gcctestdir/ld
 initpri1_LDFLAGS = -Bgcctestdir/
 initpri1_LDADD =
 
-endif
-
+check_PROGRAMS += initpri2
+initpri2_SOURCES = initpri2.c
+initpri2_DEPENDENCIES = gcctestdir/ld
+initpri2_LDFLAGS = -Bgcctestdir/
+initpri2_LDADD =
 
 # Test --detect-odr-violations
 check_SCRIPTS += debug_msg.sh

@@ -627,6 +627,18 @@ Layout::get_output_section(const char* name, Stringpool::Key name_key,
 			   elfcpp::Elf_Word type, elfcpp::Elf_Xword flags,
 			   Output_section_order order, bool is_relro)
 {
+  elfcpp::Elf_Word lookup_type = type;
+
+  // For lookup purposes, treat INIT_ARRAY, FINI_ARRAY, and
+  // PREINIT_ARRAY like PROGBITS.  This ensures that we combine
+  // .init_array, .fini_array, and .preinit_array sections by name
+  // whatever their type in the input file.  We do this because the
+  // types are not always right in the input files.
+  if (lookup_type == elfcpp::SHT_INIT_ARRAY
+      || lookup_type == elfcpp::SHT_FINI_ARRAY
+      || lookup_type == elfcpp::SHT_PREINIT_ARRAY)
+    lookup_type = elfcpp::SHT_PROGBITS;
+
   elfcpp::Elf_Xword lookup_flags = flags;
 
   // Ignoring SHF_WRITE and SHF_EXECINSTR here means that we combine
@@ -635,7 +647,7 @@ Layout::get_output_section(const char* name, Stringpool::Key name_key,
   // controlling this.
   lookup_flags &= ~(elfcpp::SHF_WRITE | elfcpp::SHF_EXECINSTR);
 
-  const Key key(name_key, std::make_pair(type, lookup_flags));
+  const Key key(name_key, std::make_pair(lookup_type, lookup_flags));
   const std::pair<Key, Output_section*> v(key, NULL);
   std::pair<Section_name_map::iterator, bool> ins(
     this->section_name_map_.insert(v));
@@ -652,20 +664,24 @@ Layout::get_output_section(const char* name, Stringpool::Key name_key,
       // there should be an option to control this.
       Output_section* os = NULL;
 
-      if (type == elfcpp::SHT_PROGBITS)
+      if (lookup_type == elfcpp::SHT_PROGBITS)
 	{
           if (flags == 0)
             {
               Output_section* same_name = this->find_output_section(name);
               if (same_name != NULL
-                  && same_name->type() == elfcpp::SHT_PROGBITS
+                  && (same_name->type() == elfcpp::SHT_PROGBITS
+		      || same_name->type() == elfcpp::SHT_INIT_ARRAY
+		      || same_name->type() == elfcpp::SHT_FINI_ARRAY
+		      || same_name->type() == elfcpp::SHT_PREINIT_ARRAY)
                   && (same_name->flags() & elfcpp::SHF_TLS) == 0)
                 os = same_name;
             }
           else if ((flags & elfcpp::SHF_TLS) == 0)
             {
               elfcpp::Elf_Xword zero_flags = 0;
-              const Key zero_key(name_key, std::make_pair(type, zero_flags));
+              const Key zero_key(name_key, std::make_pair(lookup_type,
+							  zero_flags));
               Section_name_map::iterator p =
                   this->section_name_map_.find(zero_key);
               if (p != this->section_name_map_.end())
@@ -815,7 +831,7 @@ Layout::choose_output_section(const Relobj* relobj, const char* name,
   if (is_input_section
       && !this->script_options_->saw_sections_clause()
       && !parameters->options().relocatable())
-    name = Layout::output_section_name(name, &len);
+    name = Layout::output_section_name(relobj, name, &len);
 
   Stringpool::Key name_key;
   name = this->namepool_.add_with_length(name, len, true, &name_key);
@@ -884,32 +900,11 @@ Layout::layout(Sized_relobj_file<size, big_endian>* object, unsigned int shndx,
   if (!this->include_section(object, name, shdr))
     return NULL;
 
-  Output_section* os;
-
-  // Sometimes .init_array*, .preinit_array* and .fini_array* do not have
-  // correct section types.  Force them here.
   elfcpp::Elf_Word sh_type = shdr.get_sh_type();
-  if (sh_type == elfcpp::SHT_PROGBITS)
-    {
-      static const char init_array_prefix[] = ".init_array";
-      static const char preinit_array_prefix[] = ".preinit_array";
-      static const char fini_array_prefix[] = ".fini_array";
-      static size_t init_array_prefix_size = sizeof(init_array_prefix) - 1;
-      static size_t preinit_array_prefix_size =
-	sizeof(preinit_array_prefix) - 1;
-      static size_t fini_array_prefix_size = sizeof(fini_array_prefix) - 1;
-
-      if (strncmp(name, init_array_prefix, init_array_prefix_size) == 0)
-	sh_type = elfcpp::SHT_INIT_ARRAY;
-      else if (strncmp(name, preinit_array_prefix, preinit_array_prefix_size)
-	       == 0)
-	sh_type = elfcpp::SHT_PREINIT_ARRAY;
-      else if (strncmp(name, fini_array_prefix, fini_array_prefix_size) == 0)
-	sh_type = elfcpp::SHT_FINI_ARRAY;
-    }
 
   // In a relocatable link a grouped section must not be combined with
   // any other sections.
+  Output_section* os;
   if (parameters->options().relocatable()
       && (shdr.get_sh_flags() & elfcpp::SHF_GROUP) != 0)
     {
@@ -929,12 +924,18 @@ Layout::layout(Sized_relobj_file<size, big_endian>* object, unsigned int shndx,
   // By default the GNU linker sorts input sections whose names match
   // .ctor.*, .dtor.*, .init_array.*, or .fini_array.*.  The sections
   // are sorted by name.  This is used to implement constructor
-  // priority ordering.  We are compatible.
+  // priority ordering.  We are compatible.  When we put .ctor
+  // sections in .init_array and .dtor sections in .fini_array, we
+  // must also sort plain .ctor and .dtor sections.
   if (!this->script_options_->saw_sections_clause()
+      && !parameters->options().relocatable()
       && (is_prefix_of(".ctors.", name)
 	  || is_prefix_of(".dtors.", name)
 	  || is_prefix_of(".init_array.", name)
-	  || is_prefix_of(".fini_array.", name)))
+	  || is_prefix_of(".fini_array.", name)
+	  || (parameters->options().ctors_in_init_array()
+	      && (strcmp(name, ".ctors") == 0
+		  || strcmp(name, ".dtors") == 0))))
     os->set_must_sort_attached_input_sections();
 
   // FIXME: Handle SHF_LINK_ORDER somewhere.
@@ -1256,6 +1257,18 @@ Layout::make_output_section(const char* name, elfcpp::Elf_Word type,
     }
   else
     {
+      // Sometimes .init_array*, .preinit_array* and .fini_array* do
+      // not have correct section types.  Force them here.
+      if (type == elfcpp::SHT_PROGBITS)
+	{
+	  if (is_prefix_of(".init_array", name))
+	    type = elfcpp::SHT_INIT_ARRAY;
+	  else if (is_prefix_of(".preinit_array", name))
+	    type = elfcpp::SHT_PREINIT_ARRAY;
+	  else if (is_prefix_of(".fini_array", name))
+	    type = elfcpp::SHT_FINI_ARRAY;
+	}
+
       // FIXME: const_cast is ugly.
       Target* target = const_cast<Target*>(&parameters->target());
       os = target->make_output_section(name, type, flags);
@@ -1303,10 +1316,12 @@ Layout::make_output_section(const char* name, elfcpp::Elf_Word type,
   // do the same.  We need to know that this might happen before we
   // attach any input sections.
   if (!this->script_options_->saw_sections_clause()
-      && (strcmp(name, ".ctors") == 0
-	  || strcmp(name, ".dtors") == 0
-	  || strcmp(name, ".init_array") == 0
-	  || strcmp(name, ".fini_array") == 0))
+      && !parameters->options().relocatable()
+      && (strcmp(name, ".init_array") == 0
+	  || strcmp(name, ".fini_array") == 0
+	  || (!parameters->options().ctors_in_init_array()
+	      && (strcmp(name, ".ctors") == 0
+		  || strcmp(name, ".dtors") == 0))))
     os->set_may_sort_attached_input_sections();
 
   // Check for .stab*str sections, as .stab* sections need to link to
@@ -4202,8 +4217,6 @@ Layout::set_dynamic_symbol_size(const Symbol_table* symtab)
 const Layout::Section_name_mapping Layout::section_name_mapping[] =
 {
   MAPPING_INIT(".text.", ".text"),
-  MAPPING_INIT(".ctors.", ".ctors"),
-  MAPPING_INIT(".dtors.", ".dtors"),
   MAPPING_INIT(".rodata.", ".rodata"),
   MAPPING_INIT(".data.rel.ro.local", ".data.rel.ro.local"),
   MAPPING_INIT(".data.rel.ro", ".data.rel.ro"),
@@ -4255,7 +4268,8 @@ const int Layout::section_name_mapping_count =
 // length of NAME.
 
 const char*
-Layout::output_section_name(const char* name, size_t* plen)
+Layout::output_section_name(const Relobj* relobj, const char* name,
+			    size_t* plen)
 {
   // gcc 4.3 generates the following sorts of section names when it
   // needs a section name specific to a function:
@@ -4302,7 +4316,60 @@ Layout::output_section_name(const char* name, size_t* plen)
 	}
     }
 
+  // As an additional complication, .ctors sections are output in
+  // either .ctors or .init_array sections, and .dtors sections are
+  // output in either .dtors or .fini_array sections.
+  if (is_prefix_of(".ctors.", name) || is_prefix_of(".dtors.", name))
+    {
+      if (parameters->options().ctors_in_init_array())
+	{
+	  *plen = 11;
+	  return name[1] == 'c' ? ".init_array" : ".fini_array";
+	}
+      else
+	{
+	  *plen = 6;
+	  return name[1] == 'c' ? ".ctors" : ".dtors";
+	}
+    }
+  if (parameters->options().ctors_in_init_array()
+      && (strcmp(name, ".ctors") == 0 || strcmp(name, ".dtors") == 0))
+    {
+      // To make .init_array/.fini_array work with gcc we must exclude
+      // .ctors and .dtors sections from the crtbegin and crtend
+      // files.
+      if (relobj == NULL
+	  || (!Layout::match_file_name(relobj, "crtbegin")
+	      && !Layout::match_file_name(relobj, "crtend")))
+	{
+	  *plen = 11;
+	  return name[1] == 'c' ? ".init_array" : ".fini_array";
+	}
+    }
+
   return name;
+}
+
+// Return true if RELOBJ is an input file whose base name matches
+// FILE_NAME.  The base name must have an extension of ".o", and must
+// be exactly FILE_NAME.o or FILE_NAME, one character, ".o".  This is
+// to match crtbegin.o as well as crtbeginS.o without getting confused
+// by other possibilities.  Overall matching the file name this way is
+// a dreadful hack, but the GNU linker does it in order to better
+// support gcc, and we need to be compatible.
+
+bool
+Layout::match_file_name(const Relobj* relobj, const char* match)
+{
+  const std::string& file_name(relobj->name());
+  const char* base_name = lbasename(file_name.c_str());
+  size_t match_len = strlen(match);
+  if (strncmp(base_name, match, match_len) != 0)
+    return false;
+  size_t base_len = strlen(base_name);
+  if (base_len != match_len + 2 && base_len != match_len + 3)
+    return false;
+  return memcmp(base_name + base_len - 2, ".o", 2) == 0;
 }
 
 // Check if a comdat group or .gnu.linkonce section with the given

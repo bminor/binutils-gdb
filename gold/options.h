@@ -1,6 +1,6 @@
 // options.h -- handle command line options for gold  -*- C++ -*-
 
-// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -662,6 +662,10 @@ class General_options
   DEFINE_bool(cref, options::TWO_DASHES, '\0', false,
 	      N_("Output cross reference table"),
 	      N_("Do not output cross reference table"));
+
+  DEFINE_bool(ctors_in_init_array, options::TWO_DASHES, '\0', true,
+	      N_("Use DT_INIT_ARRAY for all constructors (default)"),
+	      N_("Handle constructors as directed by compiler"));
 
   DEFINE_bool(define_common, options::TWO_DASHES, 'd', false,
               N_("Define common symbols"),

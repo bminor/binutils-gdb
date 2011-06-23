@@ -645,6 +645,12 @@ class Layout
             || strncmp(name, ".stab", sizeof(".stab") - 1) == 0);
   }
 
+  // Return true if RELOBJ is an input file whose base name matches
+  // FILE_NAME.  The base name must have an extension of ".o", and
+  // must be exactly FILE_NAME.o or FILE_NAME, one character, ".o".
+  static bool
+  match_file_name(const Relobj* relobj, const char* file_name);
+
   // Check if a comdat group or .gnu.linkonce section with the given
   // NAME is selected for the link.  If there is already a section,
   // *KEPT_SECTION is set to point to the signature and the function
@@ -965,7 +971,7 @@ class Layout
   // name.  Set *PLEN to the length of the name.  *PLEN must be
   // initialized to the length of NAME.
   static const char*
-  output_section_name(const char* name, size_t* plen);
+  output_section_name(const Relobj*, const char* name, size_t* plen);
 
   // Return the number of allocated output sections.
   size_t

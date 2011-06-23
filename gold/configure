@@ -605,8 +605,6 @@ WARN_CFLAGS
 IFUNC_FALSE
 IFUNC_TRUE
 RANDOM_SEED_CFLAGS
-CONSTRUCTOR_PRIORITY_FALSE
-CONSTRUCTOR_PRIORITY_TRUE
 TLS_DESCRIPTORS_FALSE
 TLS_DESCRIPTORS_TRUE
 TLS_GNU2_DIALECT_FALSE
@@ -6314,34 +6312,6 @@ else
 fi
 
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for constructor priorities" >&5
-$as_echo_n "checking for constructor priorities... " >&6; }
-if test "${gold_cv_c_conprio+set}" = set; then :
-  $as_echo_n "(cached) " >&6
-else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-void f() __attribute__ ((constructor (1)));
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  gold_cv_c_conprio=yes
-else
-  gold_cv_c_conprio=no
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gold_cv_c_conprio" >&5
-$as_echo "$gold_cv_c_conprio" >&6; }
-
- if test "$gold_cv_c_conprio" = "yes"; then
-  CONSTRUCTOR_PRIORITY_TRUE=
-  CONSTRUCTOR_PRIORITY_FALSE='#'
-else
-  CONSTRUCTOR_PRIORITY_TRUE='#'
-  CONSTRUCTOR_PRIORITY_FALSE=
-fi
-
-
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for -frandom-seed support" >&5
 $as_echo_n "checking for -frandom-seed support... " >&6; }
 if test "${gold_cv_c_random_seed+set}" = set; then :
@@ -7332,10 +7302,6 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${TLS_DESCRIPTORS_TRUE}" && test -z "${TLS_DESCRIPTORS_FALSE}"; then
   as_fn_error "conditional \"TLS_DESCRIPTORS\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
-if test -z "${CONSTRUCTOR_PRIORITY_TRUE}" && test -z "${CONSTRUCTOR_PRIORITY_FALSE}"; then
-  as_fn_error "conditional \"CONSTRUCTOR_PRIORITY\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${IFUNC_TRUE}" && test -z "${IFUNC_FALSE}"; then

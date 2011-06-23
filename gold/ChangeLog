@@ -1,3 +1,36 @@
+2011-06-22  Ian Lance Taylor  <iant@google.com>
+
+	PR gold/12910
+	* options.h (class General_options): Add --ctors-in-init-array.
+	* layout.cc (Layout::get_output_section): Treat SHT_INIT_ARRAY and
+	friends as SHT_PROGBITS for merging sections.
+	(Layout::layout): Remove special handling of .init_array and
+	friends.  Don't sort if doing relocatable link.  Sort for .ctors
+	and .dtors if ctors_in_init_array.
+	(Layout::make_output_section): Force correct section types for
+	.init_array and friends.  Don't sort if doing relocatable link,
+	Don't sort .ctors and .dtors if ctors_in_init_array.
+	(Layout::section_name_mapping): Remove .ctors. and .dtorso.
+	(Layout::output_section_name): Add relobj parameter.  Change all
+	callers.  Handle .ctors. and .dtors. in code rather than table.
+	Handle .ctors and .dtors if ctors_in_init_array.
+	(Layout::match_file_name): New function, moved from output.cc.
+	* layout.h (class Layout): Update declarations.
+	* output.cc: Include "layout.h".
+	(Input_section_sort_entry::get_priority): New function.
+	(Input_section_sort_entry::match_file_name): Just call
+	Layout::match_file_name.
+	(Output_section::Input_section_sort_init_fini_compare::operator()):
+	Handle .ctors and .dtors.  Sort by explicit priority rather than
+	by name.
+	* configure.ac: Remove CONSTRUCTOR_PRIORITY test and conditional.
+	* testsuite/initpri2.c: New test.
+	* testsuite/Makefile.am: Don't test CONSTRUCTOR_PRIORITY.
+	(check_PROGRAMS): Add initpri2.
+	(initpri2_SOURCES, initpri2_DEPENDENCIES): New variables.
+	(initpri2_LDFLAGS, initpri2_LDADD): New variables.
+	* configure, testsuite/Makefile.in: Rebuild.
+
 2011-06-19  Ian Lance Taylor  <iant@google.com>
 
 	PR gold/12880

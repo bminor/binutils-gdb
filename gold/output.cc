@@ -42,6 +42,7 @@
 #include "reloc.h"
 #include "merge.h"
 #include "descriptors.h"
+#include "layout.h"
 #include "output.h"
 
 // For systems without mmap support.
@@ -3017,7 +3018,7 @@ Output_section::do_set_tls_offset(uint64_t tls_base)
 // priority ordering implemented by the GNU linker, in which the
 // priority becomes part of the section name and the sections are
 // sorted by name.  We only do this for an output section if we see an
-// attached input section matching ".ctor.*", ".dtor.*",
+// attached input section matching ".ctors.*", ".dtors.*",
 // ".init_array.*" or ".fini_array.*".
 
 class Output_section::Input_section_sort_entry
@@ -3092,6 +3093,34 @@ class Output_section::Input_section_sort_entry
     return this->section_name_.find('.', 1) != std::string::npos;
   }
 
+  // Return the priority.  Believe it or not, gcc encodes the priority
+  // differently for .ctors/.dtors and .init_array/.fini_array
+  // sections.
+  unsigned int
+  get_priority() const
+  {
+    gold_assert(this->section_has_name_);
+    bool is_ctors;
+    if (is_prefix_of(".ctors.", this->section_name_.c_str())
+	|| is_prefix_of(".dtors.", this->section_name_.c_str()))
+      is_ctors = true;
+    else if (is_prefix_of(".init_array.", this->section_name_.c_str())
+	     || is_prefix_of(".fini_array.", this->section_name_.c_str()))
+      is_ctors = false;
+    else
+      return 0;
+    char* end;
+    unsigned long prio = strtoul((this->section_name_.c_str()
+				  + (is_ctors ? 7 : 12)),
+				 &end, 10);
+    if (*end != '\0')
+      return 0;
+    else if (is_ctors)
+      return 65535 - prio;
+    else
+      return prio;
+  }
+
   // Return true if this an input file whose base name matches
   // FILE_NAME.  The base name must have an extension of ".o", and
   // must be exactly FILE_NAME.o or FILE_NAME, one character, ".o".
@@ -3100,18 +3129,8 @@ class Output_section::Input_section_sort_entry
   // file name this way is a dreadful hack, but the GNU linker does it
   // in order to better support gcc, and we need to be compatible.
   bool
-  match_file_name(const char* match_file_name) const
-  {
-    const std::string& file_name(this->input_section_.relobj()->name());
-    const char* base_name = lbasename(file_name.c_str());
-    size_t match_len = strlen(match_file_name);
-    if (strncmp(base_name, match_file_name, match_len) != 0)
-      return false;
-    size_t base_len = strlen(base_name);
-    if (base_len != match_len + 2 && base_len != match_len + 3)
-      return false;
-    return memcmp(base_name + base_len - 2, ".o", 2) == 0;
-  }
+  match_file_name(const char* file_name) const
+  { return Layout::match_file_name(this->input_section_.relobj(), file_name); }
 
   // Returns 1 if THIS should appear before S in section order, -1 if S
   // appears before THIS and 0 if they are not comparable.
@@ -3232,6 +3251,28 @@ Output_section::Input_section_sort_init_fini_compare::operator()(
     return true;
   if (!s1_has_priority && s2_has_priority)
     return false;
+
+  // .ctors and .dtors sections without priority come after
+  // .init_array and .fini_array sections without priority.
+  if (!s1_has_priority
+      && (s1.section_name() == ".ctors" || s1.section_name() == ".dtors")
+      && s1.section_name() != s2.section_name())
+    return false;
+  if (!s2_has_priority
+      && (s2.section_name() == ".ctors" || s2.section_name() == ".dtors")
+      && s2.section_name() != s1.section_name())
+    return true;
+
+  // Sort by priority if we can.
+  if (s1_has_priority)
+    {
+      unsigned int s1_prio = s1.get_priority();
+      unsigned int s2_prio = s2.get_priority();
+      if (s1_prio < s2_prio)
+	return true;
+      else if (s1_prio > s2_prio)
+	return false;
+    }
 
   // Check if a section order exists for these sections through a section
   // ordering file.  If sequence_num is 0, an order does not exist.

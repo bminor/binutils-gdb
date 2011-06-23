@@ -346,14 +346,6 @@ error
 
 AM_CONDITIONAL(TLS_DESCRIPTORS, test "$gold_cv_lib_glibc29" = "yes")
 
-dnl Check whether the compiler supports constructor priorities in
-dnl attributes, which were added in gcc 4.3.
-AC_CACHE_CHECK([for constructor priorities], [gold_cv_c_conprio],
-[AC_COMPILE_IFELSE([void f() __attribute__ ((constructor (1)));],
-[gold_cv_c_conprio=yes], [gold_cv_c_conprio=no])])
-
-AM_CONDITIONAL(CONSTRUCTOR_PRIORITY, test "$gold_cv_c_conprio" = "yes")
-
 dnl Test for the -frandom-seed option.
 AC_CACHE_CHECK([for -frandom-seed support], [gold_cv_c_random_seed],
 [save_CFLAGS="$CFLAGS"
