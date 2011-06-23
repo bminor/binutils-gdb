@@ -48,11 +48,8 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
 mi_run_to_main
 
 # Next over the hello() call which will produce lots of output
-gdb_test_multiple "220-exec-next" "Started step over hello" {
-    -re "220\\^running\r\n(\\*running,thread-id=\"all\"\r\n)?$mi_gdb_prompt" {
-	pass "Started step over hello"
-    }
-}
+mi_gdb_test "220-exec-next" "220\\^running(\r\n)?(\\*running,thread-id=\"all\")?" \
+	"Started step over hello"
 
 if { ![target_info exists gdb,noinferiorio] } {
     gdb_expect {
