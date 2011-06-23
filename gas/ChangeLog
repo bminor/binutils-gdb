@@ -1,3 +1,9 @@
+2011-06-23  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	PR gas/12915
+	* config/tc-mips.c (append_insn): Only consider hazards between the
+	pre-noreorder block and ip.
+
 2011-06-21  Sameera Deshpande  <sameera.deshpande@arm.com>
 
 	* config/tc-arm.c (vfp_conv): Add check on range of immediate operand

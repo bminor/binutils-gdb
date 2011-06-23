@@ -3154,8 +3154,18 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
     }
   else if (mips_relax.sequence != 2 && prev_nop_frag != NULL)
     {
-      /* Work out how many nops in prev_nop_frag are needed by IP.  */
-      int nops = nops_for_insn_or_target (history, ip);
+      struct mips_cl_insn stubbed_history[ARRAY_SIZE (history)];
+      int nops, i;
+
+      /* Work out how many nops in prev_nop_frag are needed by IP.
+	 Base this on a history in which all insns since prev_nop_frag
+	 are stubbed out with nops.  */
+      for (i = 0; i < (int) ARRAY_SIZE (history); i++)
+	if (i < prev_nop_frag_since)
+	  stubbed_history[i] = *NOP_INSN;
+	else
+	  stubbed_history[i] = history[i];
+      nops = nops_for_insn_or_target (stubbed_history, ip);
       gas_assert (nops <= prev_nop_frag_holds);
 
       /* Enforce NOPS as a minimum.  */

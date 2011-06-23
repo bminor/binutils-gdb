@@ -1,3 +1,8 @@
+2011-06-23  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* gas/mips/pr12915.s, gas/mips/pr12915.d: New test.
+	* gas/mips/mips.exp: Run it.
+
 2011-06-21  Sameera Deshpande  <sameera.deshpande@arm.com>
 
 	* gas/arm/vcvt-bad.d: New test.
