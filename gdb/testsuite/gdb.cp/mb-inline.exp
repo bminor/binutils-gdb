@@ -101,7 +101,19 @@ gdb_expect {
     }
 }
 
-gdb_continue_to_end "disabled breakpoint 1.2"
+gdb_test_multiple "info break" "disabled breakpoint 1.2" {
+    -re "1\.2.* n .* at .*$hdrfile:$bp_location.*$gdb_prompt $" {
+	pass "disabled breakpoint 1.2"
+    }
+    -re "1\.2.* y .* at .*$hdrfile:$bp_location.*$gdb_prompt $" {
+	# When inferior is restarted, breakpoint locations will be updated.
+	# On uclinux, it is not guaranteed that new inferior is located the
+	# same address as previous one, so status/state of breakpoint location
+	# will loose.  The heuristic of GDB should be improved.
+	setup_kfail gdb/12924 "*-*-uclinux*"
+	fail "disabled breakpoint 1.2"
+    }    
+}
 
 # Make sure we can set a breakpoint on a source statement that spans
 # multiple lines.
