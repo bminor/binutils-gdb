@@ -1,5 +1,10 @@
 2011-06-23  Marek Polacek  <mpolacek@redhat.com>
 
+	* gdb.mi/mi2-var-display.exp: Replace gdb_test_multiple with
+	mi_gdb_test.
+
+2011-06-23  Marek Polacek  <mpolacek@redhat.com>
+
 	* gdb.mi/mi2-return.exp: Replace gdb_test_multiple with mi_gdb_test.
 
 2011-06-23  Marek Polacek  <mpolacek@redhat.com>
@@ -141,7 +146,7 @@
 
 2011-05-27  Marek Polacek  <mpolacek@redhat.com>
 
-        * gdb.mi/mi-nonstop.exp: Replace gdb_test_multiple with mi_gdb_test.
+	* gdb.mi/mi-nonstop.exp: Replace gdb_test_multiple with mi_gdb_test.
 
 2011-05-27  Marek Polacek  <mpolacek@redhat.com>
 
