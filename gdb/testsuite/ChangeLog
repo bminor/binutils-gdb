@@ -1,15 +1,19 @@
 2011-06-23  Marek Polacek  <mpolacek@redhat.com>
 
-        * gdb.mi/mi2-console.exp: Replace gdb_test_multiple with mi_gdb_test.
+	* gdb.mi/mi2-return.exp: Replace gdb_test_multiple with mi_gdb_test.
 
 2011-06-23  Marek Polacek  <mpolacek@redhat.com>
 
-        * gdb.mi/mi2-basics.exp: Fix races.  Honour the
-        `test_exec_and_symbol_mi_operatons' return value.
-        (test_mi_interpreter_selection): Use mi_gdb_test instead of
-        gdb_test_multiple.
-        (test_exec_and_symbol_mi_operatons): Likewise.
-        (test_path_specification): Likewise.
+	* gdb.mi/mi2-console.exp: Replace gdb_test_multiple with mi_gdb_test.
+
+2011-06-23  Marek Polacek  <mpolacek@redhat.com>
+
+	* gdb.mi/mi2-basics.exp: Fix races.  Honour the
+	`test_exec_and_symbol_mi_operatons' return value.
+	(test_mi_interpreter_selection): Use mi_gdb_test instead of
+	gdb_test_multiple.
+	(test_exec_and_symbol_mi_operatons): Likewise.
+	(test_path_specification): Likewise.
 
 2011-06-23  Yao Qi  <yao@codesourcery.com>
 
@@ -23,21 +27,21 @@
 
 2011-06-21  Marek Polacek  <mpolacek@redhat.com>
 
-        * gdb.mi/mi-var-display.exp: Replace gdb_test_multiple with
+	* gdb.mi/mi-var-display.exp: Replace gdb_test_multiple with
 	mi_gdb_test.
 
 2011-06-20  Marek Polacek  <mpolacek@redhat.com>
 
-        * gdb.mi/mi-nsintrall.exp: Replace gdb_test_multiple with mi_gdb_test.
+	* gdb.mi/mi-nsintrall.exp: Replace gdb_test_multiple with mi_gdb_test.
 
 2011-06-20  Marek Polacek  <mpolacek@redhat.com>
 
-        * gdb.mi/mi-nsmoribund.exp: Replace gdb_test_multiple with
+	* gdb.mi/mi-nsmoribund.exp: Replace gdb_test_multiple with
 	mi_gdb_test.
 
 2011-06-20  Marek Polacek  <mpolacek@redhat.com>
 
-        * gdb.mi/mi-return.exp: Replace gdb_test_multiple with mi_gdb_test.
+	* gdb.mi/mi-return.exp: Replace gdb_test_multiple with mi_gdb_test.
 
 2011-06-14  Yao Qi  <yao@codesourcery.com>
 
