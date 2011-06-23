@@ -1,3 +1,7 @@
+2011-06-23  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.threads/execl.exp: Skip on remote target.
+
 2011-06-21  Marek Polacek  <mpolacek@redhat.com>
 
         * gdb.mi/mi-var-display.exp: Replace gdb_test_multiple with
