@@ -1,3 +1,8 @@
+2011-06-23  Andrew Burgess  <aburgess@broadcom.com>
+
+	* gdbtypes.c (append_composite_type_field_aligned): Fix
+	calculation of bit position based on alignment.
+
 2011-06-22  Pedro Alves  <pedro@codesourcery.com>
 
 	* breakpoint.c (bpstat_stop_status): Call the check_status
