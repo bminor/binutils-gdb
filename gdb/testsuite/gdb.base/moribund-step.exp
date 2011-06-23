@@ -14,6 +14,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 set testfile moribund-step
+
+if { ![support_displaced_stepping] } {
+    unsupported "displaced stepping"
+    return -1
+}
+
 if { [prepare_for_testing ${testfile}.exp ${testfile} start.c] } {
     return -1
 }

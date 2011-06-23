@@ -1615,6 +1615,18 @@ proc is_x86_like_target {} {
     return [is_ilp32_target]
 }
 
+# Return 1 if displaced stepping is supported on target, otherwise, return 0.
+proc support_displaced_stepping {} {
+
+    if { [istarget "x86_64-*-linux*"] || [istarget "i\[34567\]86-*-linux*"]
+	 || [istarget "arm*-*-linux*"] || [istarget "powerpc-*-linux*"]
+	 || [istarget "powerpc64-*-linux*"] || [istarget "s390*-*-*"] } {
+	return 1
+    }
+
+    return 0
+}
+
 # Run a test on the target to see if it supports vmx hardware.  Return 0 if so, 
 # 1 if it does not.  Based on 'check_vmx_hw_available' from the GCC testsuite.
 

@@ -1,5 +1,11 @@
 2011-06-23  Yao Qi  <yao@codesourcery.com>
 
+	* gdb.base/moribund-step.exp: Skip test if displaced stepping is not
+	supported.
+	* lib/gdb.exp (support_displaced_stepping): New.
+
+2011-06-23  Yao Qi  <yao@codesourcery.com>
+
 	* gdb.threads/execl.exp: Skip on remote target.
 
 2011-06-21  Marek Polacek  <mpolacek@redhat.com>
