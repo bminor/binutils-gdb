@@ -2246,7 +2246,6 @@ start_remote (int from_tty)
 {
   struct inferior *inferior;
 
-  init_wait_for_inferior ();
   inferior = current_inferior ();
   inferior->control.stop_soon = STOP_QUIETLY_REMOTE;
 

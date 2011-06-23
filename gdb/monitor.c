@@ -844,6 +844,8 @@ monitor_open (char *args, struct monitor_ops *mon_ops, int from_tty)
 
   monitor_printf (current_monitor->line_term);
 
+  init_wait_for_inferior ();
+
   start_remote (from_tty);
 }
 

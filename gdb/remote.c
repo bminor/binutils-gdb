@@ -3280,6 +3280,17 @@ remote_start_remote (int from_tty, struct target_ops *target, int extended_p)
       /* Always add the main thread.  */
       add_thread_silent (inferior_ptid);
 
+      /* init_wait_for_inferior should be called before get_offsets in order
+	 to manage `inserted' flag in bp loc in a correct state.
+	 breakpoint_init_inferior, called from init_wait_for_inferior, set
+	 `inserted' flag to 0, while before breakpoint_re_set, called from
+	 start_remote, set `inserted' flag to 1.  In the initialization of
+	 inferior, breakpoint_init_inferior should be called first, and then
+	 breakpoint_re_set can be called.  If this order is broken, state of
+	 `inserted' flag is wrong, and cause some problems on breakpoint
+	 manipulation.  */
+      init_wait_for_inferior ();
+
       get_offsets ();		/* Get text, data & bss offsets.  */
 
       /* If we could not find a description using qXfer, and we know

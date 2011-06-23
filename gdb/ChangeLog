@@ -1,3 +1,9 @@
+2011-06-23  Yao Qi  <yao@codesourcery.com>
+
+	* infrun.c (start_remote): Move call init_wait_for_inferior to ...
+	* remote.c (remote_start_remote): ... here.
+	* monitor.c (monitor_open): ... here.
+
 2011-06-23  Andrew Burgess  <aburgess@broadcom.com>
 
 	* gdbtypes.c (append_composite_type_field_aligned): Fix
