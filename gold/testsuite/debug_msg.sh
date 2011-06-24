@@ -90,6 +90,33 @@ check debug_msg.err ": symbol 'SometimesInlineFunction(int)' defined in multiple
 check debug_msg.err "debug_msg.cc:68"
 check debug_msg.err "odr_violation2.cc:27"
 
+# Check for the same error messages when using --compressed-debug-sections.
+if test -r debug_msg_cdebug.err
+then
+  check debug_msg_cdebug.err "debug_msg_cdebug.o:debug_msg.cc:function fn_array: error: undefined reference to 'undef_fn1()'"
+  check debug_msg_cdebug.err "debug_msg_cdebug.o:debug_msg.cc:function fn_array: error: undefined reference to 'undef_fn2()'"
+  check debug_msg_cdebug.err "debug_msg_cdebug.o:debug_msg.cc:function badref1: error: undefined reference to 'undef_int'"
+  check debug_msg_cdebug.err ".*/debug_msg.cc:50: error: undefined reference to 'undef_fn1()'"
+  check debug_msg_cdebug.err ".*/debug_msg.cc:55: error: undefined reference to 'undef_fn2()'"
+  check debug_msg_cdebug.err ".*/debug_msg.cc:43: error: undefined reference to 'undef_fn1()'"
+  check debug_msg_cdebug.err ".*/debug_msg.cc:44: error: undefined reference to 'undef_fn2()'"
+  check debug_msg_cdebug.err ".*/debug_msg.cc:.*: error: undefined reference to 'undef_int'"
+  check debug_msg_cdebug.err ".*/debug_msg.cc:43: error: undefined reference to 'undef_fn1()'"
+  check debug_msg_cdebug.err ".*/debug_msg.cc:44: error: undefined reference to 'undef_fn2()'"
+  check debug_msg_cdebug.err ".*/debug_msg.cc:.*: error: undefined reference to 'undef_int'"
+  check debug_msg_cdebug.err ": symbol 'Ordering::operator()(int, int)' defined in multiple places (possible ODR violation):"
+  check debug_msg_cdebug.err "odr_violation1.cc:6"
+  check debug_msg_cdebug.err "odr_violation2.cc:12"
+  check_missing debug_msg_cdebug.err "OdrDerived::~OdrDerived()"
+  check_missing debug_msg_cdebug.err "__adjust_heap"
+  check_missing debug_msg_cdebug.err ": symbol 'OverriddenCFunction' defined in multiple places (possible ODR violation):"
+  check_missing debug_msg_cdebug.err "odr_violation1.cc:16"
+  check_missing debug_msg_cdebug.err "odr_violation2.cc:23"
+  check debug_msg_cdebug.err ": symbol 'SometimesInlineFunction(int)' defined in multiple places (possible ODR violation):"
+  check debug_msg_cdebug.err "debug_msg.cc:68"
+  check debug_msg_cdebug.err "odr_violation2.cc:27"
+fi
+
 # When linking together .so's, we don't catch the line numbers, but we
 # still find all the undefined variables, and the ODR violation.
 check debug_msg_so.err "debug_msg.so: error: undefined reference to 'undef_fn1()'"
@@ -98,14 +125,14 @@ check debug_msg_so.err "debug_msg.so: error: undefined reference to 'undef_int'"
 check debug_msg_so.err ": symbol 'Ordering::operator()(int, int)' defined in multiple places (possible ODR violation):"
 check debug_msg_so.err "odr_violation1.cc:6"
 check debug_msg_so.err "odr_violation2.cc:12"
-check_missing debug_msg.err "OdrDerived::~OdrDerived()"
-check_missing debug_msg.err "__adjust_heap"
-check_missing debug_msg.err ": symbol 'OverriddenCFunction' defined in multiple places (possible ODR violation):"
-check_missing debug_msg.err "odr_violation1.cc:16"
-check_missing debug_msg.err "odr_violation2.cc:23"
-check debug_msg.err ": symbol 'SometimesInlineFunction(int)' defined in multiple places (possible ODR violation):"
-check debug_msg.err "debug_msg.cc:68"
-check debug_msg.err "odr_violation2.cc:27"
+check_missing debug_msg_so.err "OdrDerived::~OdrDerived()"
+check_missing debug_msg_so.err "__adjust_heap"
+check_missing debug_msg_so.err ": symbol 'OverriddenCFunction' defined in multiple places (possible ODR violation):"
+check_missing debug_msg_so.err "odr_violation1.cc:16"
+check_missing debug_msg_so.err "odr_violation2.cc:23"
+check debug_msg_so.err ": symbol 'SometimesInlineFunction(int)' defined in multiple places (possible ODR violation):"
+check debug_msg_so.err "debug_msg.cc:68"
+check debug_msg_so.err "odr_violation2.cc:27"
 
 # These messages shouldn't need any debug info to detect:
 check debug_msg_ndebug.err "debug_msg_ndebug.so: error: undefined reference to 'undef_fn1()'"

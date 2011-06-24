@@ -80,6 +80,12 @@ gcctestdir/ld: ../ld-new
 	rm -f gcctestdir/ld
 	(cd gcctestdir && $(LN_S) ../../ld-new ld)
 
+# Some tests require the latest features of an in-tree assembler.
+gcctestdir/as: $(TEST_AS)
+	test -d gcctestdir || mkdir -p gcctestdir
+	rm -f gcctestdir/as
+	(cd gcctestdir && $(LN_S) $(abs_top_builddir)/../gas/as-new as)
+
 endif GCC
 
 check_PROGRAMS += object_unittest
@@ -862,6 +868,29 @@ debug_msg.err: debug_msg.o odr_violation1.o odr_violation2.o gcctestdir/ld
 	  rm -f $@; \
 	  exit 1; \
 	fi
+
+
+if HAVE_ZLIB
+
+# Check that --detect-odr-violations works with compressed debug sections.
+check_DATA += debug_msg_cdebug.err
+MOSTLYCLEANFILES += debug_msg_cdebug.err
+debug_msg_cdebug.o: debug_msg.cc gcctestdir/as
+	$(CXXCOMPILE) -Bgcctestdir/ -O0 -g -Wa,--compress-debug-sections -c -w -o $@ $(srcdir)/debug_msg.cc
+odr_violation1_cdebug.o: odr_violation1.cc gcctestdir/as
+	$(CXXCOMPILE) -Bgcctestdir/ -O0 -g -Wa,--compress-debug-sections -c -w -o $@ $(srcdir)/odr_violation1.cc
+odr_violation2_cdebug.o: odr_violation2.cc gcctestdir/as
+	$(CXXCOMPILE) -Bgcctestdir/ -O2 -g -Wa,--compress-debug-sections -c -w -o $@ $(srcdir)/odr_violation2.cc
+debug_msg_cdebug.err: debug_msg_cdebug.o odr_violation1_cdebug.o odr_violation2_cdebug.o gcctestdir/ld
+	@echo $(CXXLINK) -Bgcctestdir/ -Wl,--detect-odr-violations -o debug_msg_cdebug debug_msg_cdebug.o odr_violation1_cdebug.o odr_violation2_cdebug.o "2>$@"
+	@if $(CXXLINK) -Bgcctestdir/ -Wl,--detect-odr-violations -o debug_msg_cdebug debug_msg_cdebug.o odr_violation1_cdebug.o odr_violation2_cdebug.o 2>$@; \
+	then \
+	  echo 1>&2 "Link of debug_msg_cdebug should have failed"; \
+	  rm -f $@; \
+	  exit 1; \
+	fi
+
+endif HAVE_ZLIB
 
 # See if we can also detect problems when we're linking .so's, not .o's.
 check_DATA += debug_msg_so.err

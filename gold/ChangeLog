@@ -1,3 +1,12 @@
+2011-06-24  Cary Coutant  <ccoutant@google.com>
+
+	* testsuite/Makefile.am: Add in-tree assembler to gcctestdir.
+	(debug_msg_cdebug.o, odr_violation1_cdebug.o, odr_violation2_cdebug.o)
+	(debug_msg_cdebug.err): New targets.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/debug_msg.sh: Check output of link with compressed debug.
+	Fix checks for link with shared library.
+
 2011-06-24  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc (Arm_output_section::append_text_sections_to_list): Do not
