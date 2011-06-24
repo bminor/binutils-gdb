@@ -428,7 +428,8 @@ infpy_read_memory (PyObject *self, PyObject *args, PyObject *kw)
 static PyObject *
 infpy_write_memory (PyObject *self, PyObject *args, PyObject *kw)
 {
-  int buf_len, error = 0;
+  Py_ssize_t buf_len;
+  int error = 0;
   const char *buffer;
   CORE_ADDR addr, length;
   PyObject *addr_obj, *length_obj = NULL;

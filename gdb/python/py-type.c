@@ -497,7 +497,7 @@ typy_get_sizeof (PyObject *self, void *closure)
 }
 
 static struct type *
-typy_lookup_typename (char *type_name, struct block *block)
+typy_lookup_typename (const char *type_name, struct block *block)
 {
   struct type *type = NULL;
   volatile struct gdb_exception except;
@@ -1020,7 +1020,7 @@ PyObject *
 gdbpy_lookup_type (PyObject *self, PyObject *args, PyObject *kw)
 {
   static char *keywords[] = { "name", "block", NULL };
-  char *type_name = NULL;
+  const char *type_name = NULL;
   struct type *type = NULL;
   PyObject *block_obj = NULL;
   struct block *block = NULL;

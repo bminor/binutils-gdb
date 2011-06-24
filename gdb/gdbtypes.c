@@ -1137,7 +1137,7 @@ type_name_no_tag_or_error (struct type *type)
 
 struct type *
 lookup_typename (const struct language_defn *language,
-		 struct gdbarch *gdbarch, char *name,
+		 struct gdbarch *gdbarch, const char *name,
 		 const struct block *block, int noerr)
 {
   struct symbol *sym;
@@ -1194,7 +1194,7 @@ lookup_signed_typename (const struct language_defn *language,
    visible in lexical block BLOCK.  */
 
 struct type *
-lookup_struct (char *name, struct block *block)
+lookup_struct (const char *name, struct block *block)
 {
   struct symbol *sym;
 
@@ -1216,7 +1216,7 @@ lookup_struct (char *name, struct block *block)
    visible in lexical block BLOCK.  */
 
 struct type *
-lookup_union (char *name, struct block *block)
+lookup_union (const char *name, struct block *block)
 {
   struct symbol *sym;
   struct type *t;
@@ -1241,7 +1241,7 @@ lookup_union (char *name, struct block *block)
    visible in lexical block BLOCK.  */
 
 struct type *
-lookup_enum (char *name, struct block *block)
+lookup_enum (const char *name, struct block *block)
 {
   struct symbol *sym;
 

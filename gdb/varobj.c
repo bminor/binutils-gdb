@@ -1085,7 +1085,7 @@ update_dynamic_varobj_children (struct varobj *var,
       if (to < 0 || i < to)
 	{
 	  PyObject *py_v;
-	  char *name;
+	  const char *name;
 	  struct value *v;
 	  struct cleanup *inner;
 	  int can_mention = from < 0 || i >= from;

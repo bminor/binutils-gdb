@@ -1,5 +1,32 @@
 2011-06-24  Tom Tromey  <tromey@redhat.com>
 
+	* varobj.c (update_dynamic_varobj_children): Make 'name' const.
+	* symtab.h (lookup_struct, lookup_union, lookup_enum): Update.
+	* python/python.c (gdbpy_parameter): Make 'arg' const.
+	(execute_gdb_command): Likewise.
+	(gdbpy_decode_line): Likewise.  Copy it.
+	(gdbpy_parse_and_eval): Make 'expr_string' const.  Copy it.
+	(gdbpy_write): Make 'arg' const.
+	* python/py-type.c (typy_lookup_typename): Make 'type_name'
+	const.
+	(gdbpy_lookup_type): Likewise.
+	* python/py-prettyprint.c (print_children): Make 'name' const.
+	* python/py-param.c (parmpy_init): Make 'name' const.  Copy it.
+	* python/py-inferior.c (infpy_write_memory): Make 'buf_len' a
+	Py_ssize_t.
+	* python/py-function.c (fnpy_init): Make 'name' const.
+	* python/py-cmd.c (cmdpy_init): Make 'name' const.  Copy it.
+	(gdbpy_string_to_argv): Make 'input' const.
+	* python/py-breakpoint.c (bppy_init): Make 'spec' const.  Copy
+	it.
+	* gdbtypes.h (lookup_typename): Update.
+	* gdbtypes.c (lookup_typename): Make 'name' const.
+	(lookup_struct): Likewise.
+	(lookup_union): Likewise.
+	(lookup_enum): Likewise.
+
+2011-06-24  Tom Tromey  <tromey@redhat.com>
+
 	* Makefile.in (HFILES_NO_SRCDIR): Add "common/" to
 	gdb_thread_db.h.  Move all common/ entries to be together.
 	(TAGS): Don't depend on DEPFILES.

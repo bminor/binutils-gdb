@@ -934,11 +934,11 @@ extern struct symbol *lookup_block_symbol (const struct block *, const char *,
 
 /* lookup a [struct, union, enum] by name, within a specified block.  */
 
-extern struct type *lookup_struct (char *, struct block *);
+extern struct type *lookup_struct (const char *, struct block *);
 
-extern struct type *lookup_union (char *, struct block *);
+extern struct type *lookup_union (const char *, struct block *);
 
-extern struct type *lookup_enum (char *, struct block *);
+extern struct type *lookup_enum (const char *, struct block *);
 
 /* from blockframe.c: */
 

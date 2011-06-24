@@ -1405,7 +1405,7 @@ extern void check_stub_method_group (struct type *, int);
 extern char *gdb_mangle_name (struct type *, int, int);
 
 extern struct type *lookup_typename (const struct language_defn *,
-				     struct gdbarch *, char *,
+				     struct gdbarch *, const char *,
 				     const struct block *, int);
 
 extern struct type *lookup_template_type (char *, struct type *,

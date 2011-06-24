@@ -526,7 +526,7 @@ print_children (PyObject *printer, const char *hint,
   for (i = 0; i < options->print_max; ++i)
     {
       PyObject *py_v, *item = PyIter_Next (iter);
-      char *name;
+      const char *name;
       struct cleanup *inner_cleanup;
 
       if (! item)

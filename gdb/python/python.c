@@ -290,7 +290,8 @@ PyObject *
 gdbpy_parameter (PyObject *self, PyObject *args)
 {
   struct cmd_list_element *alias, *prefix, *cmd;
-  char *arg, *newarg;
+  const char *arg;
+  char *newarg;
   int found = -1;
   volatile struct gdb_exception except;
 
@@ -340,7 +341,7 @@ gdbpy_target_wide_charset (PyObject *self, PyObject *args)
 static PyObject *
 execute_gdb_command (PyObject *self, PyObject *args, PyObject *kw)
 {
-  char *arg;
+  const char *arg;
   PyObject *from_tty_obj = NULL, *to_string_obj = NULL;
   int from_tty, to_string;
   volatile struct gdb_exception except;
@@ -434,7 +435,7 @@ gdbpy_decode_line (PyObject *self, PyObject *args)
   struct symtabs_and_lines sals = { NULL, 0 }; /* Initialize to
 						  appease gcc.  */
   struct symtab_and_line sal;
-  char *arg = NULL;
+  const char *arg = NULL;
   char *copy = NULL;
   struct cleanup *cleanups;
   PyObject *result = NULL;
@@ -451,9 +452,8 @@ gdbpy_decode_line (PyObject *self, PyObject *args)
     {
       if (arg)
 	{
-	  arg = xstrdup (arg);
-	  make_cleanup (xfree, arg);
-	  copy = arg;
+	  copy = xstrdup (arg);
+	  make_cleanup (xfree, copy);
 	  sals = decode_line_1 (&copy, 0, 0, 0, 0);
 	  make_cleanup (xfree, sals.sals);
 	}
@@ -531,7 +531,7 @@ gdbpy_decode_line (PyObject *self, PyObject *args)
 static PyObject *
 gdbpy_parse_and_eval (PyObject *self, PyObject *args)
 {
-  char *expr_str;
+  const char *expr_str;
   struct value *result = NULL;
   volatile struct gdb_exception except;
 
@@ -540,7 +540,11 @@ gdbpy_parse_and_eval (PyObject *self, PyObject *args)
 
   TRY_CATCH (except, RETURN_MASK_ALL)
     {
-      result = parse_and_eval (expr_str);
+      char *copy = xstrdup (expr_str);
+      struct cleanup *cleanup = make_cleanup (xfree, copy);
+
+      result = parse_and_eval (copy);
+      do_cleanups (cleanup);
     }
   GDB_PY_HANDLE_EXCEPTION (except);
 
@@ -687,7 +691,7 @@ gdbpy_initialize_events (void)
 static PyObject *
 gdbpy_write (PyObject *self, PyObject *args, PyObject *kw)
 {
-  char *arg;
+  const char *arg;
   static char *keywords[] = {"text", "stream", NULL };
   int stream_type = 0;
   

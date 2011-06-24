@@ -405,7 +405,8 @@ static int
 cmdpy_init (PyObject *self, PyObject *args, PyObject *kw)
 {
   cmdpy_object *obj = (cmdpy_object *) self;
-  char *name;
+  const char *name;
+  char *copy;
   int cmdtype;
   int completetype = -1;
   char *docstring = NULL;
@@ -449,7 +450,9 @@ cmdpy_init (PyObject *self, PyObject *args, PyObject *kw)
       return -1;
     }
 
-  cmd_name = gdbpy_parse_command_name (name, &cmd_list, &cmdlist);
+  copy = xstrdup (name);
+  cmd_name = gdbpy_parse_command_name (copy, &cmd_list, &cmdlist);
+  xfree (copy);
   if (! cmd_name)
     return -1;
 
@@ -659,7 +662,7 @@ PyObject *
 gdbpy_string_to_argv (PyObject *self, PyObject *args)
 {
   PyObject *py_argv;
-  char *input;
+  const char *input;
 
   if (!PyArg_ParseTuple (args, "s", &input))
     return NULL;

@@ -645,7 +645,8 @@ static int
 parmpy_init (PyObject *self, PyObject *args, PyObject *kwds)
 {
   parmpy_object *obj = (parmpy_object *) self;
-  char *name;
+  const char *name;
+  char *copy;
   char *set_doc, *show_doc, *doc;
   char *cmd_name;
   int parmclass, cmdtype;
@@ -696,16 +697,21 @@ parmpy_init (PyObject *self, PyObject *args, PyObject *kwds)
   obj->type = (enum var_types) parmclass;
   memset (&obj->value, 0, sizeof (obj->value));
 
-  cmd_name = gdbpy_parse_command_name (name, &set_list,
+  copy = xstrdup (name);
+  cmd_name = gdbpy_parse_command_name (copy, &set_list,
 				       &setlist);
 
   if (! cmd_name)
-    return -1;
+    {
+      xfree (copy);
+      return -1;
+    }
   xfree (cmd_name);
-  cmd_name = gdbpy_parse_command_name (name, &show_list,
+  cmd_name = gdbpy_parse_command_name (copy, &show_list,
 				       &showlist);
   if (! cmd_name)
     return -1;
+  xfree (copy);
 
   set_doc = get_doc_string (self, set_doc_cst);
   show_doc = get_doc_string (self, show_doc_cst);
