@@ -1,3 +1,8 @@
+2011-06-24  Tristan Gingold  <gingold@adacore.com>
+
+	* config/tc-alpha.c (add_to_link_pool): Remove useless offset
+	variable.  Fix style.
+
 2011-06-23  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	PR gas/12915

@@ -3372,7 +3372,7 @@ assemble_tokens (const char *opname,
 
 #ifdef OBJ_EVAX
 
-/* Add symbol+addend to link pool.
+/* Add sym+addend to link pool.
    Return offset from basesym to entry in link pool.
 
    Add new fixup only if offset isn't 16bit.  */
@@ -3384,15 +3384,12 @@ add_to_link_pool (symbolS *basesym,
 {
   segT current_section = now_seg;
   int current_subsec = now_subseg;
-  valueT offset;
   char *p;
   segment_info_type *seginfo = seg_info (alpha_link_section);
   fixS *fixp;
   symbolS *linksym, *expsym;
   expressionS e;
   
-  offset = 0; /* ??? DBR */
-
   /* @@ This assumes all entries in a given section will be of the same
      size...  Probably correct, but unwise to rely on.  */
   /* This must always be called with the same subsegment.  */
@@ -3402,11 +3399,6 @@ add_to_link_pool (symbolS *basesym,
 	 fixp != (fixS *) NULL;
 	 fixp = fixp->fx_next)
       {
-	if (fixp->tc_fix_data.info
-	    && fixp->tc_fix_data.info->sym
-	    && fixp->tc_fix_data.info->sym->sy_value.X_op_symbol == basesym)
-	  offset += 8;
-	
 	if (fixp->fx_addsy == sym
 	    && fixp->fx_offset == (valueT)addend
 	    && fixp->tc_fix_data.info
@@ -3430,7 +3422,7 @@ add_to_link_pool (symbolS *basesym,
   expsym = make_expr_symbol (&e);
 
   fixp = fix_new
-    (frag_now, p-frag_now->fr_literal, 8, sym, addend, 0, BFD_RELOC_64);
+    (frag_now, p - frag_now->fr_literal, 8, sym, addend, 0, BFD_RELOC_64);
   fixp->tc_fix_data.info = get_alpha_reloc_tag (next_sequence_num--);
   fixp->tc_fix_data.info->sym = expsym;
 
