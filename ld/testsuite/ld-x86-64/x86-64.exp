@@ -161,6 +161,7 @@ run_dump_test "nogot1"
 run_dump_test "nogot2"
 run_dump_test "discarded1"
 run_dump_test "pr12718"
+run_dump_test "pr12921"
 
 if { ![istarget "x86_64-*-linux*"] } {
     return

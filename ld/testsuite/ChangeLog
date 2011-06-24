@@ -1,3 +1,14 @@
+2011-06-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/12921
+	* ld-i386/i386.exp: Run pr12921.
+	* ld-x86-64/x86-64.exp: Likewise.
+
+	* ld-i386/pr12921.d: New.
+	* ld-i386/pr12921.s: Likewise.
+	* ld-x86-64/pr12921.d: Likewise.
+	* ld-x86-64/pr12921.s: Likewise.
+
 2011-06-22  Thomas Schwinge  <thomas@schwinge.name>
 
 	* ld-elf/elf.exp: Execute array_tests_pie tests on *-*-gnu*, too.
