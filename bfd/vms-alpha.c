@@ -5106,7 +5106,14 @@ alpha_vms_slurp_relocs (bfd *abfd)
                 (*_bfd_error_handler) (_("Invalid section index in ETIR"));
                 return FALSE;
               }
+
             sec = PRIV (sections)[cur_psect];
+            if (sec == bfd_abs_section_ptr)
+              {
+                (*_bfd_error_handler) (_("Relocation for non-REL psect"));
+                return FALSE;
+              }
+
             vms_sec = vms_section_data (sec);
 
             /* Allocate a reloc entry.  */
@@ -5117,7 +5124,7 @@ alpha_vms_slurp_relocs (bfd *abfd)
                     vms_sec->reloc_max = 64;
                     sec->relocation = bfd_zmalloc
                       (vms_sec->reloc_max * sizeof (arelent));
-                }
+                  }
                 else
                   {
                     vms_sec->reloc_max *= 2;

@@ -1,3 +1,8 @@
+2011-06-24  Tristan Gingold  <gingold@adacore.com>
+
+	* vms-alpha.c (alpha_vms_slurp_relocs): Add a guard for relocs in the
+	absolute section.
+
 2011-06-24  Alan Modra  <amodra@gmail.com>
 
 	PR ld/12921
