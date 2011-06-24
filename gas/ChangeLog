@@ -1,5 +1,10 @@
 2011-06-24  Tristan Gingold  <gingold@adacore.com>
 
+	PR gas/11625
+	* config/obj-evax.c (evax_frob_symbol): Use as_bad instead of abort.
+
+2011-06-24  Tristan Gingold  <gingold@adacore.com>
+
 	* config/tc-alpha.c (add_to_link_pool): Remove useless offset
 	variable.  Fix style.
 

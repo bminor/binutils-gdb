@@ -125,7 +125,10 @@ evax_frob_symbol (symbolS *sym, int *punt)
 	     O_symbol and we hope the equated symbol is still there.  */
 	  sym = symbol_get_value_expression (sym)->X_add_symbol;
 	  if (sym == NULL)
-	    abort ();
+            {
+              as_bad (_("no entry symbol for global function '%s'"), symname);
+              return;
+            }
 	  symbol = symbol_get_bfdsym (sym);
 	  udata->enbsym
 	    = ((struct evax_private_udata_struct *)symbol->udata.p)->enbsym;
@@ -150,7 +153,7 @@ evax_frob_file_before_adjust (void)
     {
       if (S_GET_SEGMENT (l->fixp->fx_addsy) == alpha_link_section)
 	{
-	  symbolS * entry_sym;
+	  symbolS *entry_sym;
 	  fixS *fixpentry, *fixppdesc, *fixtail;
 
 	  fixtail = seginfo->fix_tail;
