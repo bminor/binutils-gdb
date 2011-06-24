@@ -5803,8 +5803,7 @@ Arm_output_section<big_endian>::append_text_sections_to_list(
     {
       // We only care about plain or relaxed input sections.  We also
       // ignore any merged sections.
-      if ((p->is_input_section() || p->is_relaxed_input_section())
-	  && p->data_size() != 0)
+      if (p->is_input_section() || p->is_relaxed_input_section())
 	list->push_back(Text_section_list::value_type(p->relobj(),
 						      p->shndx()));
     }

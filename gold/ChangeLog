@@ -1,3 +1,9 @@
+2011-06-24  Doug Kwan  <dougkwan@google.com>
+
+	* arm.cc (Arm_output_section::append_text_sections_to_list): Do not
+	skip empty text sections.
+	* testsuite/arm_exidx_test.s: Test handling of an empty text section.
+
 2011-06-22  Ian Lance Taylor  <iant@google.com>
 
 	PR gold/12910
