@@ -4684,24 +4684,26 @@ assign_file_positions_for_load_sections (bfd *abfd,
 	    }
 	  else
 	    {
-	      if (p->p_type == PT_LOAD
-		  || (this_hdr->sh_type == SHT_NOBITS
-		      && (this_hdr->sh_flags & SHF_TLS) != 0
-		      && this_hdr->sh_offset == 0))
+	      if (p->p_type == PT_LOAD)
 		{
-		  if (this_hdr->sh_type == SHT_NOBITS)
-		    {
-		      /* These sections don't really need sh_offset,
-			 but give them one anyway.  */
-		      bfd_vma adjust = vma_page_aligned_bias (this_hdr->sh_addr,
-							      off, align);
-		      this_hdr->sh_offset = sec->filepos = off + adjust;
-		    }
-		  else
-		    {
-		      this_hdr->sh_offset = sec->filepos = off;
-		      off += this_hdr->sh_size;
-		    }
+		  this_hdr->sh_offset = sec->filepos = off;
+		  if (this_hdr->sh_type != SHT_NOBITS)
+		    off += this_hdr->sh_size;
+		}
+	      else if (this_hdr->sh_type == SHT_NOBITS
+		       && (this_hdr->sh_flags & SHF_TLS) != 0
+		       && this_hdr->sh_offset == 0)
+		{
+		  /* This is a .tbss section that didn't get a PT_LOAD.
+		     (See _bfd_elf_map_sections_to_segments "Create a
+		     final PT_LOAD".)  Set sh_offset to the value it
+		     would have if we had created a zero p_filesz and
+		     p_memsz PT_LOAD header for the section.  This
+		     also makes the PT_TLS header have the same
+		     p_offset value.  */
+		  bfd_vma adjust = vma_page_aligned_bias (this_hdr->sh_addr,
+							  off, align);
+		  this_hdr->sh_offset = sec->filepos = off + adjust;
 		}
 
 	      if (this_hdr->sh_type != SHT_NOBITS)
