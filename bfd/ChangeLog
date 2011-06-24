@@ -1,3 +1,10 @@
+2011-06-24  Alan Modra  <amodra@gmail.com>
+
+	PR ld/12921
+	* elf.c (assign_file_positions_for_load_sections): Don't align
+	sh_offset for all SHT_NOBITS sections here, just .tbss sections
+	that don't get a PT_LOAD.
+
 2011-06-22  Alan Modra  <amodra@gmail.com>
 
 	* elflink.c (_bfd_elf_merge_symbol): Allow type changes for
