@@ -1,3 +1,9 @@
+2011-06-24  Richard Henderson  <rth@redhat.com>
+
+	PR ld/12928
+	* elf64-alpha.c (elf64_alpha_relax_tls_get_addr): Recover the
+	tlsgd insn before swapping adjacent insns.
+
 2011-06-24  Tristan Gingold  <gingold@adacore.com>
 
 	* vms-alpha.c (alpha_vms_slurp_relocs): Add a guard for relocs in the

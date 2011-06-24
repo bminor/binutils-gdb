@@ -3508,6 +3508,13 @@ elf64_alpha_relax_tls_get_addr (struct alpha_relax_info *info, bfd_vma symval,
   pos[3] = info->contents + gpdisp->r_offset;
   pos[4] = pos[3] + gpdisp->r_addend;
 
+  /* Beware of the compiler hoisting part of the sequence out a loop
+     and adjusting the destination register for the TLSGD insn.  If this
+     happens, there will be a move into $16 before the JSR insn, so only
+     transformations of the first insn pair should use this register.  */
+  tlsgd_reg = bfd_get_32 (info->abfd, pos[0]);
+  tlsgd_reg = (tlsgd_reg >> 21) & 31;
+
   /* Generally, the positions are not allowed to be out of order, lest the
      modified insn sequence have different register lifetimes.  We can make
      an exception when pos 1 is adjacent to pos 0.  */
@@ -3574,13 +3581,6 @@ elf64_alpha_relax_tls_get_addr (struct alpha_relax_info *info, bfd_vma symval,
 
   use_gottprel = FALSE;
   new_symndx = is_gd ? ELF64_R_SYM (irel->r_info) : STN_UNDEF;
-
-  /* Beware of the compiler hoisting part of the sequence out a loop
-     and adjusting the destination register for the TLSGD insn.  If this
-     happens, there will be a move into $16 before the JSR insn, so only
-     transformations of the first insn pair should use this register.  */
-  tlsgd_reg = bfd_get_32 (info->abfd, pos[0]);
-  tlsgd_reg = (tlsgd_reg >> 21) & 31;
 
   switch (!dynamic && !info->link_info->shared)
     {
