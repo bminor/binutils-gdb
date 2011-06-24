@@ -1,3 +1,9 @@
+2011-06-24  Tom Tromey  <tromey@redhat.com>
+
+	* Makefile.in (HFILES_NO_SRCDIR): Add "common/" to
+	gdb_thread_db.h.  Move all common/ entries to be together.
+	(TAGS): Don't depend on DEPFILES.
+
 2011-06-23  Yao Qi  <yao@codesourcery.com>
 
 	* infrun.c (start_remote): Move call init_wait_for_inferior to ...

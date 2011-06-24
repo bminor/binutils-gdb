@@ -756,7 +756,10 @@ osf-share/cma_util.h osf-share/RIOS/cma_thread_io.h \
 osf-share/cma_errors.h osf-share/cma_tcb_defs.h osf-share/cma_attr.h \
 osf-share/cma_stack_int.h osf-share/cma_init.h \
 osf-share/cma_deb_core.h osf-share/AT386/cma_thread_io.h \
-osf-share/cma_sched.h proc-utils.h arm-tdep.h ax-gdb.h ppcnbsd-tdep.h \
+osf-share/cma_sched.h \
+common/gdb_signals.h common/gdb_thread_db.h common/i386-xstate.h \
+common/linux-ptrace.h \
+proc-utils.h arm-tdep.h ax-gdb.h ppcnbsd-tdep.h	\
 cli-out.h gdb_expat.h breakpoint.h infcall.h obsd-tdep.h \
 exec.h m32r-tdep.h osabi.h gdbcore.h solib-som.h \
 i386bsd-nat.h xml-support.h xml-tdesc.h alphabsd-tdep.h gdb_obstack.h \
@@ -768,7 +771,7 @@ gnulib/string.in.h gnulib/str-two-way.h \
 gnulib/stdint.in.h remote.h gdb.h sparc-nat.h \
 gdbthread.h dwarf2-frame.h nbsd-nat.h dcache.h \
 amd64-nat.h s390-tdep.h arm-linux-tdep.h exceptions.h macroscope.h \
-gdbarch.h bsd-uthread.h gdb_thread_db.h gdb_stat.h memory-map.h	memrange.h \
+gdbarch.h bsd-uthread.h gdb_stat.h memory-map.h	memrange.h \
 mdebugread.h m88k-tdep.h stabsread.h hppa-linux-offsets.h linux-fork.h \
 ser-unix.h inf-ptrace.h terminal.h ui-out.h frame-base.h \
 f-lang.h dwarf2loc.h value.h sparc-tdep.h defs.h target-descriptions.h \
@@ -806,7 +809,7 @@ remote-fileio.h i386-linux-tdep.h vax-tdep.h objc-lang.h \
 sentinel-frame.h bcache.h symfile.h windows-tdep.h linux-tdep.h \
 gdb_usleep.h jit.h xml-syscall.h microblaze-tdep.h \
 psymtab.h psympriv.h progspace.h bfin-tdep.h ia64-hpux-tdep.h \
-amd64-darwin-tdep.h charset-list.h common/gdb_signals.h common/i386-xstate.h \
+amd64-darwin-tdep.h charset-list.h \
 config/djgpp/langinfo.h config/djgpp/nl_types.h darwin-nat.h \
 dicos-tdep.h filesystem.h gcore.h gdb_wchar.h hppabsd-tdep.h \
 i386-darwin-tdep.h i386-nat.h linux-record.h moxie-tdep.h \
@@ -1209,7 +1212,7 @@ gdb1$(EXEEXT): gdb$(EXEEXT)
 # with `make TAGS' and not have to say `rm TAGS' first.
 
 GDB_NM_FILE = @GDB_NM_FILE@
-TAGS: $(DEPFILES) $(TAGFILES_NO_SRCDIR) $(TAGFILES_WITH_SRCDIR)
+TAGS: $(TAGFILES_NO_SRCDIR) $(TAGFILES_WITH_SRCDIR)
 	@echo Making TAGS
 	@etags $(srcdir)/$(GDB_NM_FILE) \
 	`(for i in $(DEPFILES) $(TAGFILES_NO_SRCDIR); do \
