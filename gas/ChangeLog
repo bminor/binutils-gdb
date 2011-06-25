@@ -1,3 +1,12 @@
+2011-06-25  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	PR gas/12915
+	* config/tc-mips.c (nops_for_vr4130, nops_for_24k, nops_for_insn)
+	(nops_for_sequence, nops_for_insn_or_target): Add ignore parameters.
+	(mips_emit_delays, start_noreorder): Update accordingly.
+	(append_insn): Likewise.  Revert original fix for this PR
+	and use the ignore parameter instead.
+
 2011-06-24  Tristan Gingold  <gingold@adacore.com>
 
 	PR gas/11625

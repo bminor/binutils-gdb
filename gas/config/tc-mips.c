@@ -2644,10 +2644,11 @@ insns_between (const struct mips_cl_insn *insn1,
 
 /* Return the number of nops that would be needed to work around the
    VR4130 mflo/mfhi errata if instruction INSN immediately followed
-   the MAX_VR4130_NOPS instructions described by HIST.  */
+   the MAX_VR4130_NOPS instructions described by HIST.  Ignore hazards
+   that are contained within the first IGNORE instructions of HIST.  */
 
 static int
-nops_for_vr4130 (const struct mips_cl_insn *hist,
+nops_for_vr4130 (int ignore, const struct mips_cl_insn *hist,
 		 const struct mips_cl_insn *insn)
 {
   int i, j, reg;
@@ -2679,7 +2680,8 @@ nops_for_vr4130 (const struct mips_cl_insn *hist,
 	  if (insn_uses_reg (&hist[j], reg, MIPS_GR_REG))
 	    return 0;
 
-	return MAX_VR4130_NOPS - i;
+	if (i >= ignore)
+	  return MAX_VR4130_NOPS - i;
       }
   return 0;
 }
@@ -2749,51 +2751,58 @@ fix_24k_record_store_info (struct fix_24k_store_info *stinfo,
   return TRUE;
 }
 
-/* 24K Errata: Lost Data on Stores During Refill. 
-  
-  Problem: The FSB (fetch store buffer) acts as an intermediate buffer
-  for the data cache refills and store data. The following describes
-  the scenario where the store data could be lost.
-  
-  * A data cache miss, due to either a load or a store, causing fill
-    data to be supplied by the memory subsystem
-  * The first three doublewords of fill data are returned and written
-    into the cache
-  * A sequence of four stores occurs in consecutive cycles around the
-    final doubleword of the fill:
-  * Store A
-  * Store B
-  * Store C
-  * Zero, One or more instructions
-  * Store D
-  
-  The four stores A-D must be to different doublewords of the line that
-  is being filled. The fourth instruction in the sequence above permits
-  the fill of the final doubleword to be transferred from the FSB into
-  the cache. In the sequence above, the stores may be either integer
-  (sb, sh, sw, swr, swl, sc) or coprocessor (swc1/swc2, sdc1/sdc2,
-  swxc1, sdxc1, suxc1) stores, as long as the four stores are to
-  different doublewords on the line. If the floating point unit is
-  running in 1:2 mode, it is not possible to create the sequence above
-  using only floating point store instructions.
+/* Return the number of nops that would be needed to work around the 24k
+   "lost data on stores during refill" errata if instruction INSN
+   immediately followed the 2 instructions described by HIST.
+   Ignore hazards that are contained within the first IGNORE
+   instructions of HIST.
+
+   Problem: The FSB (fetch store buffer) acts as an intermediate buffer
+   for the data cache refills and store data. The following describes
+   the scenario where the store data could be lost.
+
+   * A data cache miss, due to either a load or a store, causing fill
+     data to be supplied by the memory subsystem
+   * The first three doublewords of fill data are returned and written
+     into the cache
+   * A sequence of four stores occurs in consecutive cycles around the
+     final doubleword of the fill:
+   * Store A
+   * Store B
+   * Store C
+   * Zero, One or more instructions
+   * Store D
+
+   The four stores A-D must be to different doublewords of the line that
+   is being filled. The fourth instruction in the sequence above permits
+   the fill of the final doubleword to be transferred from the FSB into
+   the cache. In the sequence above, the stores may be either integer
+   (sb, sh, sw, swr, swl, sc) or coprocessor (swc1/swc2, sdc1/sdc2,
+   swxc1, sdxc1, suxc1) stores, as long as the four stores are to
+   different doublewords on the line. If the floating point unit is
+   running in 1:2 mode, it is not possible to create the sequence above
+   using only floating point store instructions.
 
    In this case, the cache line being filled is incorrectly marked
    invalid, thereby losing the data from any store to the line that
    occurs between the original miss and the completion of the five
    cycle sequence shown above.
 
-  The workarounds are:
+   The workarounds are:
 
-  * Run the data cache in write-through mode.
-  * Insert a non-store instruction between
-    Store A and Store B or Store B and Store C.  */
+   * Run the data cache in write-through mode.
+   * Insert a non-store instruction between
+     Store A and Store B or Store B and Store C.  */
   
 static int
-nops_for_24k (const struct mips_cl_insn *hist,
+nops_for_24k (int ignore, const struct mips_cl_insn *hist,
 	      const struct mips_cl_insn *insn)
 {
   struct fix_24k_store_info pos[3];
   int align, i, base_offset;
+
+  if (ignore >= 2)
+    return 0;
 
   /* If INSN is definitely not a store, there's nothing to worry about.  */
   if (insn && (insn->insn_mo->pinfo & INSN_STORE_MEMORY) == 0)
@@ -2869,17 +2878,20 @@ nops_for_24k (const struct mips_cl_insn *hist,
 
 /* Return the number of nops that would be needed if instruction INSN
    immediately followed the MAX_NOPS instructions given by HIST,
-   where HIST[0] is the most recent instruction.  If INSN is null,
-   return the worse-case number of nops for any instruction.  */
+   where HIST[0] is the most recent instruction.  Ignore hazards
+   between INSN and the first IGNORE instructions in HIST.
+
+   If INSN is null, return the worse-case number of nops for any
+   instruction.  */
 
 static int
-nops_for_insn (const struct mips_cl_insn *hist,
+nops_for_insn (int ignore, const struct mips_cl_insn *hist,
 	       const struct mips_cl_insn *insn)
 {
   int i, nops, tmp_nops;
 
   nops = 0;
-  for (i = 0; i < MAX_DELAY_NOPS; i++)
+  for (i = ignore; i < MAX_DELAY_NOPS; i++)
     {
       tmp_nops = insns_between (hist + i, insn) - i;
       if (tmp_nops > nops)
@@ -2888,14 +2900,14 @@ nops_for_insn (const struct mips_cl_insn *hist,
 
   if (mips_fix_vr4130)
     {
-      tmp_nops = nops_for_vr4130 (hist, insn);
+      tmp_nops = nops_for_vr4130 (ignore, hist, insn);
       if (tmp_nops > nops)
 	nops = tmp_nops;
     }
 
   if (mips_fix_24k)
     {
-      tmp_nops = nops_for_24k (hist, insn);
+      tmp_nops = nops_for_24k (ignore, hist, insn);
       if (tmp_nops > nops)
 	nops = tmp_nops;
     }
@@ -2905,10 +2917,12 @@ nops_for_insn (const struct mips_cl_insn *hist,
 
 /* The variable arguments provide NUM_INSNS extra instructions that
    might be added to HIST.  Return the largest number of nops that
-   would be needed after the extended sequence.  */
+   would be needed after the extended sequence, ignoring hazards
+   in the first IGNORE instructions.  */
 
 static int
-nops_for_sequence (int num_insns, const struct mips_cl_insn *hist, ...)
+nops_for_sequence (int num_insns, int ignore,
+		   const struct mips_cl_insn *hist, ...)
 {
   va_list args;
   struct mips_cl_insn buffer[MAX_NOPS];
@@ -2921,7 +2935,7 @@ nops_for_sequence (int num_insns, const struct mips_cl_insn *hist, ...)
   while (cursor > buffer)
     *--cursor = *va_arg (args, const struct mips_cl_insn *);
 
-  nops = nops_for_insn (buffer, NULL);
+  nops = nops_for_insn (ignore, buffer, NULL);
   va_end (args);
   return nops;
 }
@@ -2930,17 +2944,18 @@ nops_for_sequence (int num_insns, const struct mips_cl_insn *hist, ...)
    worst-case delay for the branch target.  */
 
 static int
-nops_for_insn_or_target (const struct mips_cl_insn *hist,
+nops_for_insn_or_target (int ignore, const struct mips_cl_insn *hist,
 			 const struct mips_cl_insn *insn)
 {
   int nops, tmp_nops;
 
-  nops = nops_for_insn (hist, insn);
+  nops = nops_for_insn (ignore, hist, insn);
   if (insn->insn_mo->pinfo & (INSN_UNCOND_BRANCH_DELAY
 			      | INSN_COND_BRANCH_DELAY
 			      | INSN_COND_BRANCH_LIKELY))
     {
-      tmp_nops = nops_for_sequence (2, hist, insn, NOP_INSN);
+      tmp_nops = nops_for_sequence (2, ignore ? ignore + 2 : 0,
+				    hist, insn, NOP_INSN);
       if (tmp_nops > nops)
 	nops = tmp_nops;
     }
@@ -2948,7 +2963,7 @@ nops_for_insn_or_target (const struct mips_cl_insn *hist,
 	   && (insn->insn_mo->pinfo & (MIPS16_INSN_UNCOND_BRANCH
 				       | MIPS16_INSN_COND_BRANCH)))
     {
-      tmp_nops = nops_for_sequence (1, hist, insn);
+      tmp_nops = nops_for_sequence (1, ignore ? ignore + 1 : 0, hist, insn);
       if (tmp_nops > nops)
 	nops = tmp_nops;
     }
@@ -3116,8 +3131,8 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	 benefit hand written assembly code, and does not seem worth
 	 it.  */
       int nops = (mips_optimize == 0
-		  ? nops_for_insn (history, NULL)
-		  : nops_for_insn_or_target (history, ip));
+		  ? nops_for_insn (0, history, NULL)
+		  : nops_for_insn_or_target (0, history, ip));
       if (nops > 0)
 	{
 	  fragS *old_frag;
@@ -3154,18 +3169,12 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
     }
   else if (mips_relax.sequence != 2 && prev_nop_frag != NULL)
     {
-      struct mips_cl_insn stubbed_history[ARRAY_SIZE (history)];
-      int nops, i;
+      int nops;
 
-      /* Work out how many nops in prev_nop_frag are needed by IP.
-	 Base this on a history in which all insns since prev_nop_frag
-	 are stubbed out with nops.  */
-      for (i = 0; i < (int) ARRAY_SIZE (history); i++)
-	if (i < prev_nop_frag_since)
-	  stubbed_history[i] = *NOP_INSN;
-	else
-	  stubbed_history[i] = history[i];
-      nops = nops_for_insn_or_target (stubbed_history, ip);
+      /* Work out how many nops in prev_nop_frag are needed by IP,
+	 ignoring hazards generated by the first prev_nop_frag_since
+	 instructions.  */
+      nops = nops_for_insn_or_target (prev_nop_frag_since, history, ip);
       gas_assert (nops <= prev_nop_frag_holds);
 
       /* Enforce NOPS as a minimum.  */
@@ -3486,10 +3495,10 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 		  && prev_insn_frag_type == rs_machine_dependent)
 	      /* Check for conflicts between the branch and the instructions
 		 before the candidate delay slot.  */
-	      || nops_for_insn (history + 1, ip) > 0
+	      || nops_for_insn (0, history + 1, ip) > 0
 	      /* Check for conflicts between the swapped sequence and the
 		 target of the branch.  */
-	      || nops_for_sequence (2, history + 1, ip, history) > 0
+	      || nops_for_sequence (2, 0, history + 1, ip, history) > 0
 	      /* We do not swap with a trap instruction, since it
 		 complicates trap handlers to have the trap
 		 instruction be in a delay slot.  */
@@ -3688,7 +3697,7 @@ mips_emit_delays (void)
 {
   if (! mips_opts.noreorder)
     {
-      int nops = nops_for_insn (history, NULL);
+      int nops = nops_for_insn (0, history, NULL);
       if (nops > 0)
 	{
 	  while (nops-- > 0)
@@ -3716,7 +3725,7 @@ start_noreorder (void)
       /* Insert any nops that might be needed between the .set noreorder
 	 block and the previous instructions.  We will later remove any
 	 nops that turn out not to be needed.  */
-      nops = nops_for_insn (history, NULL);
+      nops = nops_for_insn (0, history, NULL);
       if (nops > 0)
 	{
 	  if (mips_optimize != 0)
