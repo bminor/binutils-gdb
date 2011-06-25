@@ -861,6 +861,7 @@ elf_i386_link_hash_table_create (bfd *abfd)
 
   ret->sdynbss = NULL;
   ret->srelbss = NULL;
+  ret->plt_eh_frame = NULL;
   ret->tls_ldm_got.refcount = 0;
   ret->next_tls_desc_index = 0;
   ret->sgotplt_jump_table_size = 0;

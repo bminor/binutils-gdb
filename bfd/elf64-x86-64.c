@@ -810,6 +810,7 @@ elf_x86_64_link_hash_table_create (bfd *abfd)
 
   ret->sdynbss = NULL;
   ret->srelbss = NULL;
+  ret->plt_eh_frame = NULL;
   ret->sym_cache.abfd = NULL;
   ret->tlsdesc_plt = 0;
   ret->tlsdesc_got = 0;
