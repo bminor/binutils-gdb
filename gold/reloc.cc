@@ -659,7 +659,7 @@ Sized_relobj_file<size, big_endian>::do_relocate(const Symbol_table* symtab,
   // section data to the output file.  The second one applies
   // relocations.
 
-  this->write_sections(pshdrs, of, &views);
+  this->write_sections(layout, pshdrs, of, &views);
 
   // To speed up relocations, we set up hash tables for fast lookup of
   // input offsets to output addresses.
@@ -678,6 +678,8 @@ Sized_relobj_file<size, big_endian>::do_relocate(const Symbol_table* symtab,
     {
       if (views[i].view != NULL)
 	{
+	  if (views[i].is_ctors_reverse_view)
+	    this->reverse_words(views[i].view, views[i].view_size);
 	  if (!views[i].is_postprocessing_view)
 	    {
 	      if (views[i].is_input_output_view)
@@ -712,7 +714,8 @@ struct Read_multiple_compare
 
 template<int size, bool big_endian>
 void
-Sized_relobj_file<size, big_endian>::write_sections(const unsigned char* pshdrs,
+Sized_relobj_file<size, big_endian>::write_sections(const Layout* layout,
+						    const unsigned char* pshdrs,
 						    Output_file* of,
 						    Views* pviews)
 {
@@ -761,6 +764,7 @@ Sized_relobj_file<size, big_endian>::write_sections(const unsigned char* pshdrs,
 	  pvs->address = posd->address();
 	  pvs->is_input_output_view = false;
 	  pvs->is_postprocessing_view = false;
+	  pvs->is_ctors_reverse_view = false;
 
 	  continue;
 	}
@@ -875,6 +879,12 @@ Sized_relobj_file<size, big_endian>::write_sections(const unsigned char* pshdrs,
       pvs->view_size = view_size;
       pvs->is_input_output_view = output_offset == invalid_address;
       pvs->is_postprocessing_view = os->requires_postprocessing();
+      pvs->is_ctors_reverse_view =
+	(!parameters->options().relocatable()
+	 && view_size > size / 8
+	 && (strcmp(os->name(), ".init_array") == 0
+	     || strcmp(os->name(), ".fini_array") == 0)
+	 && layout->is_ctors_in_init_array(this, i));
     }
 
   // Actually read the data.
@@ -1480,6 +1490,26 @@ Sized_relobj_file<size, big_endian>::find_functions(
 	convert_to_section_size_type(isym.get_st_size());
 
       (*function_offsets)[value] = fnsize;
+    }
+}
+
+// Reverse the words in a section.  Used for .ctors sections mapped to
+// .init_array sections.  See ctors_sections_in_init_array in
+// layout.cc.
+
+template<int size, bool big_endian>
+void
+Sized_relobj_file<size, big_endian>::reverse_words(unsigned char* view,
+						   section_size_type view_size)
+{
+  typedef typename elfcpp::Swap<size, big_endian>::Valtype Valtype;
+  Valtype* vview = reinterpret_cast<Valtype*>(view);
+  section_size_type vview_size = view_size / (size / 8);
+  for (section_size_type i = 0; i < vview_size / 2; ++i)
+    {
+      Valtype tmp = vview[i];
+      vview[i] = vview[vview_size - 1 - i];
+      vview[vview_size - 1 - i] = tmp;
     }
 }
 

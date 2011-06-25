@@ -1,3 +1,28 @@
+2011-06-24  Ian Lance Taylor  <iant@google.com>
+
+	* layout.cc: Include "object.h".
+	(ctors_sections_in_init_array): New static variable.
+	(Layout::is_ctors_in_init_array): New function.
+	(Layout::layout): Add entry to ctors_sections_in_init_array if
+	appropriate.
+	* layout.h (class Layout): Declare is_ctors_in_init_array.
+	* reloc.cc (Sized_relobj_file::do_relocate): Call reverse_words if
+	is_ctors_reverse_view is set.
+	(Sized_relobj_file::write_sections): Add layout parameter.  Change
+	all callers.  Set is_ctors_reverse_view field of View_size.
+	(Sized_relobj_file::reverse_words): New function.
+	* object.h (Sized_relobj_file::View_size): Add
+	is_ctors_reverse_view field.
+	(class Sized_relobj_file): Update declarations.
+	* testsuite/initpri3.c: New test.
+	* testsuite/Makefile.am: (check_PROGRAMS): Add initpri3a and
+	initpri3b.
+	(initpri3a_SOURCES, initpri3a_DEPENDENCIES): New variables.
+	(initpri3a_LDFLAGS, initpri3a_LDADD): New variables.
+	(initpri3b_SOURCES, initpri3b_DEPENDENCIES): New variables.
+	(initpri3b_LDFLAGS, initpri3b_LDADD): New variables.
+	* testsuite/Makefile.in: Rebuild.
+
 2011-06-24  Cary Coutant  <ccoutant@google.com>
 
 	* testsuite/Makefile.am: Add in-tree assembler to gcctestdir.

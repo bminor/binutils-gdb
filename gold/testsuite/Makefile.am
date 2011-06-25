@@ -846,6 +846,18 @@ initpri2_DEPENDENCIES = gcctestdir/ld
 initpri2_LDFLAGS = -Bgcctestdir/
 initpri2_LDADD =
 
+check_PROGRAMS += initpri3a
+initpri3a_SOURCES = initpri3.c
+initpri3a_DEPENDENCIES = gcctestdir/ld
+initpri3a_LDFLAGS = -Bgcctestdir/
+initpri3a_LDADD =
+
+check_PROGRAMS += initpri3b
+initpri3b_SOURCES = initpri3.c
+initpri3b_DEPENDENCIES = gcctestdir/ld
+initpri3b_LDFLAGS = -Bgcctestdir/ -Wl,--no-ctors-in-init-array
+initpri3b_LDADD =
+
 # Test --detect-odr-violations
 check_SCRIPTS += debug_msg.sh
 

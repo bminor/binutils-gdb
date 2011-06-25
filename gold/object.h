@@ -2220,6 +2220,7 @@ class Sized_relobj_file : public Sized_relobj<size, big_endian>
     section_size_type view_size;
     bool is_input_output_view;
     bool is_postprocessing_view;
+    bool is_ctors_reverse_view;
   };
 
   typedef std::vector<View_size> Views;
@@ -2311,7 +2312,8 @@ class Sized_relobj_file : public Sized_relobj<size, big_endian>
   // Write section data to the output file.  Record the views and
   // sizes in VIEWS for use when relocating.
   void
-  write_sections(const unsigned char* pshdrs, Output_file*, Views*);
+  write_sections(const Layout*, const unsigned char* pshdrs, Output_file*,
+		 Views*);
 
   // Relocate the sections in the output file.
   void
@@ -2319,6 +2321,11 @@ class Sized_relobj_file : public Sized_relobj<size, big_endian>
 		    const unsigned char* pshdrs, Output_file* of,
 		    Views* pviews)
   { this->do_relocate_sections(symtab, layout, pshdrs, of, pviews); }
+
+  // Reverse the words in a section.  Used for .ctors sections mapped
+  // to .init_array sections.
+  void
+  reverse_words(unsigned char*, section_size_type);
 
   // Scan the input relocations for --emit-relocs.
   void

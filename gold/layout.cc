@@ -46,6 +46,7 @@
 #include "ehframe.h"
 #include "compressed_output.h"
 #include "reduced_debug_output.h"
+#include "object.h"
 #include "reloc.h"
 #include "descriptors.h"
 #include "plugin.h"
@@ -617,6 +618,30 @@ Layout::find_output_segment(elfcpp::PT type, elfcpp::Elf_Word set,
   return NULL;
 }
 
+// When we put a .ctors or .dtors section with more than one word into
+// a .init_array or .fini_array section, we need to reverse the words
+// in the .ctors/.dtors section.  This is because .init_array executes
+// constructors front to back, where .ctors executes them back to
+// front, and vice-versa for .fini_array/.dtors.  Although we do want
+// to remap .ctors/.dtors into .init_array/.fini_array because it can
+// be more efficient, we don't want to change the order in which
+// constructors/destructors are run.  This set just keeps track of
+// these sections which need to be reversed.  It is only changed by
+// Layout::layout.  It should be a private member of Layout, but that
+// would require layout.h to #include object.h to get the definition
+// of Section_id.
+static Unordered_set<Section_id, Section_id_hash> ctors_sections_in_init_array;
+
+// Return whether OBJECT/SHNDX is a .ctors/.dtors section mapped to a
+// .init_array/.fini_array section.
+
+bool
+Layout::is_ctors_in_init_array(Relobj* relobj, unsigned int shndx) const
+{
+  return (ctors_sections_in_init_array.find(Section_id(relobj, shndx))
+	  != ctors_sections_in_init_array.end());
+}
+
 // Return the output section to use for section NAME with type TYPE
 // and section flags FLAGS.  NAME must be canonicalized in the string
 // pool, and NAME_KEY is the key.  ORDER is where this should appear
@@ -922,11 +947,11 @@ Layout::layout(Sized_relobj_file<size, big_endian>* object, unsigned int shndx,
     }
 
   // By default the GNU linker sorts input sections whose names match
-  // .ctor.*, .dtor.*, .init_array.*, or .fini_array.*.  The sections
-  // are sorted by name.  This is used to implement constructor
-  // priority ordering.  We are compatible.  When we put .ctor
-  // sections in .init_array and .dtor sections in .fini_array, we
-  // must also sort plain .ctor and .dtor sections.
+  // .ctors.*, .dtors.*, .init_array.*, or .fini_array.*.  The
+  // sections are sorted by name.  This is used to implement
+  // constructor priority ordering.  We are compatible.  When we put
+  // .ctor sections in .init_array and .dtor sections in .fini_array,
+  // we must also sort plain .ctor and .dtor sections.
   if (!this->script_options_->saw_sections_clause()
       && !parameters->options().relocatable()
       && (is_prefix_of(".ctors.", name)
@@ -937,6 +962,22 @@ Layout::layout(Sized_relobj_file<size, big_endian>* object, unsigned int shndx,
 	      && (strcmp(name, ".ctors") == 0
 		  || strcmp(name, ".dtors") == 0))))
     os->set_must_sort_attached_input_sections();
+
+  // If this is a .ctors or .ctors.* section being mapped to a
+  // .init_array section, or a .dtors or .dtors.* section being mapped
+  // to a .fini_array section, we will need to reverse the words if
+  // there is more than one.  Record this section for later.  See
+  // ctors_sections_in_init_array above.
+  if (!this->script_options_->saw_sections_clause()
+      && !parameters->options().relocatable()
+      && shdr.get_sh_size() > size / 8
+      && (((strcmp(name, ".ctors") == 0
+	    || is_prefix_of(".ctors.", name))
+	   && strcmp(os->name(), ".init_array") == 0)
+	  || ((strcmp(name, ".dtors") == 0
+	       || is_prefix_of(".dtors.", name))
+	      && strcmp(os->name(), ".fini_array") == 0)))
+    ctors_sections_in_init_array.insert(Section_id(object, shndx));
 
   // FIXME: Handle SHF_LINK_ORDER somewhere.
 

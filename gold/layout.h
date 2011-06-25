@@ -651,6 +651,12 @@ class Layout
   static bool
   match_file_name(const Relobj* relobj, const char* file_name);
 
+  // Return whether section SHNDX in RELOBJ is a .ctors/.dtors section
+  // with more than one word being mapped to a .init_array/.fini_array
+  // section.
+  bool
+  is_ctors_in_init_array(Relobj* relobj, unsigned int shndx) const;
+
   // Check if a comdat group or .gnu.linkonce section with the given
   // NAME is selected for the link.  If there is already a section,
   // *KEPT_SECTION is set to point to the signature and the function
