@@ -4958,6 +4958,8 @@ static const struct bfd_elf_special_section
 #undef  elf64_bed
 #define elf64_bed elf64_x86_64_fbsd_bed
 
+#undef  elf_backend_post_process_headers
+
 #include "elf64-target.h"
 
 /* Solaris 2 support.  */
@@ -5017,6 +5019,8 @@ elf64_l1om_elf_object_p (bfd *abfd)
 #define elf_backend_object_p		    elf64_l1om_elf_object_p
 
 #undef  elf_backend_post_process_headers
+#define elf_backend_post_process_headers    _bfd_elf_set_osabi
+
 #undef  elf_backend_static_tls_alignment
 
 #undef elf_backend_want_plt_sym
@@ -5038,7 +5042,6 @@ elf64_l1om_elf_object_p (bfd *abfd)
 #define elf64_bed elf64_l1om_fbsd_bed
 
 #undef  elf_backend_post_process_headers
-#define elf_backend_post_process_headers  _bfd_elf_set_osabi
 
 #include "elf64-target.h"
 
@@ -5077,6 +5080,7 @@ elf32_x86_64_elf_object_p (bfd *abfd)
 #undef	ELF_OSABI
 
 #undef elf_backend_post_process_headers
+#define elf_backend_post_process_headers    _bfd_elf_set_osabi
 
 #undef elf_backend_object_p
 #define elf_backend_object_p \
@@ -5089,8 +5093,5 @@ elf32_x86_64_elf_object_p (bfd *abfd)
 #undef elf_backend_size_info
 #define elf_backend_size_info \
   _bfd_elf32_size_info
-
-#undef  elf_backend_post_process_headers
-#define elf_backend_post_process_headers  _bfd_elf_set_osabi
 
 #include "elf32-target.h"
