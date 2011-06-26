@@ -1,12 +1,5 @@
 2011-06-26  Richard Sandiford  <rdsandiford@googlemail.com>
 
-	* gas/mips/mips16-e.d, gas/mips/mips16-f.d,
-	gas/mips/mipsel16-e.d, gas/mips/mipsel16-f.d,
-	gas/mips/tmips16-e.d, gas/mips/tmips16-f.d,
-	gas/mips/tmipsel16-e.d, gas/mips/tmipsel16-f.d: Fix GPR mask.
-
-2011-06-26  Richard Sandiford  <rdsandiford@googlemail.com>
-
 	* gas/mips/24k-branch-delay-1.d: Do not allow stores to be put
 	into delay slots.
 	* gas/mips/24k-triple-stores-1.d: Put the first nop after the

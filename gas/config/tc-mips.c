@@ -2242,6 +2242,88 @@ fixup_has_matching_lo_p (fixS *fixp)
 	  && fixp->fx_offset == fixp->fx_next->fx_offset);
 }
 
+/* See whether instruction IP reads register REG.  CLASS is the type
+   of register.  */
+
+static int
+insn_uses_reg (const struct mips_cl_insn *ip, unsigned int reg,
+	       enum mips_regclass regclass)
+{
+  if (regclass == MIPS16_REG)
+    {
+      gas_assert (mips_opts.mips16);
+      reg = mips16_to_32_reg_map[reg];
+      regclass = MIPS_GR_REG;
+    }
+
+  /* Don't report on general register ZERO, since it never changes.  */
+  if (regclass == MIPS_GR_REG && reg == ZERO)
+    return 0;
+
+  if (regclass == MIPS_FP_REG)
+    {
+      gas_assert (! mips_opts.mips16);
+      /* If we are called with either $f0 or $f1, we must check $f0.
+	 This is not optimal, because it will introduce an unnecessary
+	 NOP between "lwc1 $f0" and "swc1 $f1".  To fix this we would
+	 need to distinguish reading both $f0 and $f1 or just one of
+	 them.  Note that we don't have to check the other way,
+	 because there is no instruction that sets both $f0 and $f1
+	 and requires a delay.  */
+      if ((ip->insn_mo->pinfo & INSN_READ_FPR_S)
+	  && ((EXTRACT_OPERAND (FS, *ip) & ~(unsigned) 1)
+	      == (reg &~ (unsigned) 1)))
+	return 1;
+      if ((ip->insn_mo->pinfo & INSN_READ_FPR_T)
+	  && ((EXTRACT_OPERAND (FT, *ip) & ~(unsigned) 1)
+	      == (reg &~ (unsigned) 1)))
+	return 1;
+      if ((ip->insn_mo->pinfo2 & INSN2_READ_FPR_Z)
+	  && ((EXTRACT_OPERAND (FZ, *ip) & ~(unsigned) 1)
+	      == (reg &~ (unsigned) 1)))
+	return 1;
+    }
+  else if (! mips_opts.mips16)
+    {
+      if ((ip->insn_mo->pinfo & INSN_READ_GPR_S)
+	  && EXTRACT_OPERAND (RS, *ip) == reg)
+	return 1;
+      if ((ip->insn_mo->pinfo & INSN_READ_GPR_T)
+	  && EXTRACT_OPERAND (RT, *ip) == reg)
+	return 1;
+      if ((ip->insn_mo->pinfo2 & INSN2_READ_GPR_D)
+	  && EXTRACT_OPERAND (RD, *ip) == reg)
+	return 1;
+      if ((ip->insn_mo->pinfo2 & INSN2_READ_GPR_Z)
+	  && EXTRACT_OPERAND (RZ, *ip) == reg)
+	return 1;
+    }
+  else
+    {
+      if ((ip->insn_mo->pinfo & MIPS16_INSN_READ_X)
+	  && mips16_to_32_reg_map[MIPS16_EXTRACT_OPERAND (RX, *ip)] == reg)
+	return 1;
+      if ((ip->insn_mo->pinfo & MIPS16_INSN_READ_Y)
+	  && mips16_to_32_reg_map[MIPS16_EXTRACT_OPERAND (RY, *ip)] == reg)
+	return 1;
+      if ((ip->insn_mo->pinfo & MIPS16_INSN_READ_Z)
+	  && (mips16_to_32_reg_map[MIPS16_EXTRACT_OPERAND (MOVE32Z, *ip)]
+	      == reg))
+	return 1;
+      if ((ip->insn_mo->pinfo & MIPS16_INSN_READ_T) && reg == TREG)
+	return 1;
+      if ((ip->insn_mo->pinfo & MIPS16_INSN_READ_SP) && reg == SP)
+	return 1;
+      if ((ip->insn_mo->pinfo & MIPS16_INSN_READ_31) && reg == RA)
+	return 1;
+      if ((ip->insn_mo->pinfo & MIPS16_INSN_READ_GPR_X)
+	  && MIPS16_EXTRACT_OPERAND (REGR32, *ip) == reg)
+	return 1;
+    }
+
+  return 0;
+}
+
 /* This function returns true if modifying a register requires a
    delay.  */
 
@@ -2394,141 +2476,6 @@ relax_end (void)
   mips_relax.sequence = 0;
 }
 
-/* Return the mask of core registers that IP reads.  */
-
-static unsigned int
-gpr_read_mask (const struct mips_cl_insn *ip)
-{
-  unsigned long pinfo, pinfo2;
-  unsigned int mask;
-
-  mask = 0;
-  pinfo = ip->insn_mo->pinfo;
-  pinfo2 = ip->insn_mo->pinfo2;
-  if (mips_opts.mips16)
-    {
-      if (pinfo & MIPS16_INSN_READ_X)
-	mask |= 1 << mips16_to_32_reg_map[MIPS16_EXTRACT_OPERAND (RX, *ip)];
-      if (pinfo & MIPS16_INSN_READ_Y)
-	mask |= 1 << mips16_to_32_reg_map[MIPS16_EXTRACT_OPERAND (RY, *ip)];
-      if (pinfo & MIPS16_INSN_READ_T)
-	mask |= 1 << TREG;
-      if (pinfo & MIPS16_INSN_READ_SP)
-	mask |= 1 << SP;
-      if (pinfo & MIPS16_INSN_READ_31)
-	mask |= 1 << RA;
-      if (pinfo & MIPS16_INSN_READ_Z)
-	mask |= 1 << (mips16_to_32_reg_map
-		      [MIPS16_EXTRACT_OPERAND (MOVE32Z, *ip)]);
-      if (pinfo & MIPS16_INSN_READ_GPR_X)
-	mask |= 1 << MIPS16_EXTRACT_OPERAND (REGR32, *ip);
-    }
-  else
-    {
-      if (pinfo2 & INSN2_READ_GPR_D)
-	mask |= 1 << EXTRACT_OPERAND (RD, *ip);
-      if (pinfo & INSN_READ_GPR_T)
-	mask |= 1 << EXTRACT_OPERAND (RT, *ip);
-      if (pinfo & INSN_READ_GPR_S)
-	mask |= 1 << EXTRACT_OPERAND (RS, *ip);
-      if (pinfo2 & INSN2_READ_GPR_Z)
-	mask |= 1 << EXTRACT_OPERAND (RZ, *ip);
-    }
-  return mask & ~0;
-}
-
-/* Return the mask of core registers that IP writes.  */
-
-static unsigned int
-gpr_write_mask (const struct mips_cl_insn *ip)
-{
-  unsigned long pinfo, pinfo2;
-  unsigned int mask;
-
-  mask = 0;
-  pinfo = ip->insn_mo->pinfo;
-  pinfo2 = ip->insn_mo->pinfo2;
-  if (mips_opts.mips16)
-    {
-      if (pinfo & MIPS16_INSN_WRITE_X)
-	mask |= 1 << mips16_to_32_reg_map[MIPS16_EXTRACT_OPERAND (RX, *ip)];
-      if (pinfo & MIPS16_INSN_WRITE_Y)
-	mask |= 1 << mips16_to_32_reg_map[MIPS16_EXTRACT_OPERAND (RY, *ip)];
-      if (pinfo & MIPS16_INSN_WRITE_Z)
-	mask |= 1 << mips16_to_32_reg_map[MIPS16_EXTRACT_OPERAND (RZ, *ip)];
-      if (pinfo & MIPS16_INSN_WRITE_T)
-	mask |= 1 << TREG;
-      if (pinfo & MIPS16_INSN_WRITE_SP)
-	mask |= 1 << SP;
-      if (pinfo & MIPS16_INSN_WRITE_31)
-	mask |= 1 << RA;
-      if (pinfo & MIPS16_INSN_WRITE_GPR_Y)
-	mask |= 1 << MIPS16OP_EXTRACT_REG32R (ip->insn_opcode);
-    }
-  else
-    {
-      if (pinfo & INSN_WRITE_GPR_D)
-	mask |= 1 << EXTRACT_OPERAND (RD, *ip);
-      if (pinfo & INSN_WRITE_GPR_T)
-	mask |= 1 << EXTRACT_OPERAND (RT, *ip);
-      if (pinfo & INSN_WRITE_GPR_31)
-	mask |= 1 << RA;
-      if (pinfo2 & INSN2_WRITE_GPR_Z)
-	mask |= 1 << EXTRACT_OPERAND (RZ, *ip);
-    }
-  return mask & ~0;
-}
-
-/* Return the mask of floating-point registers that IP reads.  */
-
-static unsigned int
-fpr_read_mask (const struct mips_cl_insn *ip)
-{
-  unsigned long pinfo, pinfo2;
-  unsigned int mask;
-
-  mask = 0;
-  pinfo = ip->insn_mo->pinfo;
-  pinfo2 = ip->insn_mo->pinfo2;
-  if (!mips_opts.mips16)
-    {
-      if (pinfo & INSN_READ_FPR_S)
-	mask |= 1 << EXTRACT_OPERAND (FS, *ip);
-      if (pinfo & INSN_READ_FPR_T)
-	mask |= 1 << EXTRACT_OPERAND (FT, *ip);
-      if (pinfo & INSN_READ_FPR_R)
-	mask |= 1 << EXTRACT_OPERAND (FR, *ip);
-      if (pinfo2 & INSN2_READ_FPR_Z)
-	mask |= 1 << EXTRACT_OPERAND (FZ, *ip);
-    }
-  return mask;
-}
-
-/* Return the mask of floating-point registers that IP writes.  */
-
-static unsigned int
-fpr_write_mask (const struct mips_cl_insn *ip)
-{
-  unsigned long pinfo, pinfo2;
-  unsigned int mask;
-
-  mask = 0;
-  pinfo = ip->insn_mo->pinfo;
-  pinfo2 = ip->insn_mo->pinfo2;
-  if (!mips_opts.mips16)
-    {
-      if (pinfo & INSN_WRITE_FPR_D)
-	mask |= 1 << EXTRACT_OPERAND (FD, *ip);
-      if (pinfo & INSN_WRITE_FPR_S)
-	mask |= 1 << EXTRACT_OPERAND (FS, *ip);
-      if (pinfo & INSN_WRITE_FPR_T)
-	mask |= 1 << EXTRACT_OPERAND (FT, *ip);
-      if (pinfo2 & INSN2_WRITE_FPR_Z)
-	mask |= 1 << EXTRACT_OPERAND (FZ, *ip);
-    }
-  return mask;
-}
-
 /* Classify an instruction according to the FIX_VR4120_* enumeration.
    Return NUM_FIX_VR4120_CLASSES if the instruction isn't affected
    by VR4120 errata.  */
@@ -2563,17 +2510,16 @@ insns_between (const struct mips_cl_insn *insn1,
 	       const struct mips_cl_insn *insn2)
 {
   unsigned long pinfo1, pinfo2;
-  unsigned int mask;
 
   /* This function needs to know which pinfo flags are set for INSN2
      and which registers INSN2 uses.  The former is stored in PINFO2 and
-     the latter is tested via INSN2_USES_GPR.  If INSN2 is null, PINFO2
-     will have every flag set and INSN2_USES_GPR will always return true.  */
+     the latter is tested via INSN2_USES_REG.  If INSN2 is null, PINFO2
+     will have every flag set and INSN2_USES_REG will always return true.  */
   pinfo1 = insn1->insn_mo->pinfo;
   pinfo2 = insn2 ? insn2->insn_mo->pinfo : ~0U;
 
-#define INSN2_USES_GPR(REG) \
-  (insn2 == NULL || (gpr_read_mask (insn2) & (1U << (REG))) != 0)
+#define INSN2_USES_REG(REG, CLASS) \
+   (insn2 == NULL || insn_uses_reg (insn2, REG, CLASS))
 
   /* For most targets, write-after-read dependencies on the HI and LO
      registers must be separated by at least two instructions.  */
@@ -2589,7 +2535,7 @@ insns_between (const struct mips_cl_insn *insn1,
      between an mfhi or mflo and any instruction that uses the result.  */
   if (mips_7000_hilo_fix
       && MF_HILO_INSN (pinfo1)
-      && INSN2_USES_GPR (EXTRACT_OPERAND (RD, *insn1)))
+      && INSN2_USES_REG (EXTRACT_OPERAND (RD, *insn1), MIPS_GR_REG))
     return 2;
 
   /* If we're working around 24K errata, one instruction is required
@@ -2636,7 +2582,7 @@ insns_between (const struct mips_cl_insn *insn1,
 	  || (!cop_interlocks && (pinfo1 & INSN_LOAD_COPROC_DELAY)))
 	{
 	  know (pinfo1 & INSN_WRITE_GPR_T);
-	  if (INSN2_USES_GPR (EXTRACT_OPERAND (RT, *insn1)))
+	  if (INSN2_USES_REG (EXTRACT_OPERAND (RT, *insn1), MIPS_GR_REG))
 	    return 1;
 	}
 
@@ -2654,10 +2600,14 @@ insns_between (const struct mips_cl_insn *insn1,
 	  /* Handle cases where INSN1 writes to a known general coprocessor
 	     register.  There must be a one instruction delay before INSN2
 	     if INSN2 reads that register, otherwise no delay is needed.  */
-	  mask = fpr_write_mask (insn1);
-	  if (mask != 0)
+	  if (pinfo1 & INSN_WRITE_FPR_T)
 	    {
-	      if (!insn2 || (mask & fpr_read_mask (insn2)) != 0)
+	      if (INSN2_USES_REG (EXTRACT_OPERAND (FT, *insn1), MIPS_FP_REG))
+		return 1;
+	    }
+	  else if (pinfo1 & INSN_WRITE_FPR_S)
+	    {
+	      if (INSN2_USES_REG (EXTRACT_OPERAND (FS, *insn1), MIPS_FP_REG))
 		return 1;
 	    }
 	  else
@@ -2687,7 +2637,7 @@ insns_between (const struct mips_cl_insn *insn1,
 	return 1;
     }
 
-#undef INSN2_USES_GPR
+#undef INSN2_USES_REG
 
   return 0;
 }
@@ -2701,8 +2651,7 @@ static int
 nops_for_vr4130 (int ignore, const struct mips_cl_insn *hist,
 		 const struct mips_cl_insn *insn)
 {
-  int i, j;
-  unsigned int mask;
+  int i, j, reg;
 
   /* Check if the instruction writes to HI or LO.  MTHI and MTLO
      are not affected by the errata.  */
@@ -2717,15 +2666,18 @@ nops_for_vr4130 (int ignore, const struct mips_cl_insn *hist,
     if (MF_HILO_INSN (hist[i].insn_mo->pinfo))
       {
 	/* Extract the destination register.  */
-	mask = gpr_write_mask (&hist[i]);
+	if (mips_opts.mips16)
+	  reg = mips16_to_32_reg_map[MIPS16_EXTRACT_OPERAND (RX, hist[i])];
+	else
+	  reg = EXTRACT_OPERAND (RD, hist[i]);
 
 	/* No nops are needed if INSN reads that register.  */
-	if (insn != NULL && (gpr_read_mask (insn) & mask) != 0)
+	if (insn != NULL && insn_uses_reg (insn, reg, MIPS_GR_REG))
 	  return 0;
 
 	/* ...or if any of the intervening instructions do.  */
 	for (j = 0; j < i; j++)
-	  if (gpr_read_mask (&hist[j]) & mask)
+	  if (insn_uses_reg (&hist[j], reg, MIPS_GR_REG))
 	    return 0;
 
 	if (i >= ignore)
@@ -3443,8 +3395,59 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
   install_insn (ip);
 
   /* Update the register mask information.  */
-  mips_gprmask |= gpr_read_mask (ip) | gpr_write_mask (ip);
-  mips_cprmask[1] |= fpr_read_mask (ip) | fpr_write_mask (ip);
+  if (! mips_opts.mips16)
+    {
+      if ((pinfo & INSN_WRITE_GPR_D) || (pinfo2 & INSN2_READ_GPR_D))
+	mips_gprmask |= 1 << EXTRACT_OPERAND (RD, *ip);
+      if ((pinfo & (INSN_WRITE_GPR_T | INSN_READ_GPR_T)) != 0)
+	mips_gprmask |= 1 << EXTRACT_OPERAND (RT, *ip);
+      if (pinfo & INSN_READ_GPR_S)
+	mips_gprmask |= 1 << EXTRACT_OPERAND (RS, *ip);
+      if (pinfo & INSN_WRITE_GPR_31)
+	mips_gprmask |= 1 << RA;
+      if (pinfo2 & (INSN2_WRITE_GPR_Z | INSN2_READ_GPR_Z))
+	mips_gprmask |= 1 << EXTRACT_OPERAND (RZ, *ip);
+      if (pinfo & INSN_WRITE_FPR_D)
+	mips_cprmask[1] |= 1 << EXTRACT_OPERAND (FD, *ip);
+      if ((pinfo & (INSN_WRITE_FPR_S | INSN_READ_FPR_S)) != 0)
+	mips_cprmask[1] |= 1 << EXTRACT_OPERAND (FS, *ip);
+      if ((pinfo & (INSN_WRITE_FPR_T | INSN_READ_FPR_T)) != 0)
+	mips_cprmask[1] |= 1 << EXTRACT_OPERAND (FT, *ip);
+      if ((pinfo & INSN_READ_FPR_R) != 0)
+	mips_cprmask[1] |= 1 << EXTRACT_OPERAND (FR, *ip);
+      if (pinfo2 & (INSN2_WRITE_FPR_Z | INSN2_READ_FPR_Z))
+	mips_cprmask[1] |= 1 << EXTRACT_OPERAND (FZ, *ip);
+      if (pinfo & INSN_COP)
+	{
+	  /* We don't keep enough information to sort these cases out.
+	     The itbl support does keep this information however, although
+	     we currently don't support itbl fprmats as part of the cop
+	     instruction.  May want to add this support in the future.  */
+	}
+      /* Never set the bit for $0, which is always zero.  */
+      mips_gprmask &= ~1 << 0;
+    }
+  else
+    {
+      if (pinfo & (MIPS16_INSN_WRITE_X | MIPS16_INSN_READ_X))
+	mips_gprmask |= 1 << MIPS16_EXTRACT_OPERAND (RX, *ip);
+      if (pinfo & (MIPS16_INSN_WRITE_Y | MIPS16_INSN_READ_Y))
+	mips_gprmask |= 1 << MIPS16_EXTRACT_OPERAND (RY, *ip);
+      if (pinfo & MIPS16_INSN_WRITE_Z)
+	mips_gprmask |= 1 << MIPS16_EXTRACT_OPERAND (RZ, *ip);
+      if (pinfo & (MIPS16_INSN_WRITE_T | MIPS16_INSN_READ_T))
+	mips_gprmask |= 1 << TREG;
+      if (pinfo & (MIPS16_INSN_WRITE_SP | MIPS16_INSN_READ_SP))
+	mips_gprmask |= 1 << SP;
+      if (pinfo & (MIPS16_INSN_WRITE_31 | MIPS16_INSN_READ_31))
+	mips_gprmask |= 1 << RA;
+      if (pinfo & MIPS16_INSN_WRITE_GPR_Y)
+	mips_gprmask |= 1 << MIPS16OP_EXTRACT_REG32R (ip->insn_opcode);
+      if (pinfo & MIPS16_INSN_READ_Z)
+	mips_gprmask |= 1 << MIPS16_EXTRACT_OPERAND (MOVE32Z, *ip);
+      if (pinfo & MIPS16_INSN_READ_GPR_X)
+	mips_gprmask |= 1 << MIPS16_EXTRACT_OPERAND (REGR32, *ip);
+    }
 
   if (mips_relax.sequence != 2 && !mips_opts.noreorder)
     {
@@ -3500,13 +3503,77 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	      || (prev_pinfo & INSN_TRAP)
 	      /* If the branch reads a register that the previous
 		 instruction sets, we can not swap.  */
-	      || (gpr_read_mask (ip) & gpr_write_mask (&history[0])) != 0
+	      || (! mips_opts.mips16
+		  && (prev_pinfo & INSN_WRITE_GPR_T)
+		  && insn_uses_reg (ip, EXTRACT_OPERAND (RT, history[0]),
+				    MIPS_GR_REG))
+	      || (! mips_opts.mips16
+		  && (prev_pinfo & INSN_WRITE_GPR_D)
+		  && insn_uses_reg (ip, EXTRACT_OPERAND (RD, history[0]),
+				    MIPS_GR_REG))
+	      || (! mips_opts.mips16
+		  && (prev_pinfo2 & INSN2_WRITE_GPR_Z)
+		  && insn_uses_reg (ip, EXTRACT_OPERAND (RZ, history[0]),
+				    MIPS_GR_REG))
+	      || (mips_opts.mips16
+		  && (((prev_pinfo & MIPS16_INSN_WRITE_X)
+		       && (insn_uses_reg
+			   (ip, MIPS16_EXTRACT_OPERAND (RX, history[0]),
+			    MIPS16_REG)))
+		      || ((prev_pinfo & MIPS16_INSN_WRITE_Y)
+			  && (insn_uses_reg
+			      (ip, MIPS16_EXTRACT_OPERAND (RY, history[0]),
+			       MIPS16_REG)))
+		      || ((prev_pinfo & MIPS16_INSN_WRITE_Z)
+			  && (insn_uses_reg
+			      (ip, MIPS16_EXTRACT_OPERAND (RZ, history[0]),
+			       MIPS16_REG)))
+		      || ((prev_pinfo & MIPS16_INSN_WRITE_T)
+			  && insn_uses_reg (ip, TREG, MIPS_GR_REG))
+		      || ((prev_pinfo & MIPS16_INSN_WRITE_31)
+			  && insn_uses_reg (ip, RA, MIPS_GR_REG))
+		      || ((prev_pinfo & MIPS16_INSN_WRITE_GPR_Y)
+			  && insn_uses_reg (ip,
+					    MIPS16OP_EXTRACT_REG32R
+					      (history[0].insn_opcode),
+					    MIPS_GR_REG))))
 	      /* If the branch writes a register that the previous
-		 instruction sets, we can not swap.  */
-	      || (gpr_write_mask (ip) & gpr_write_mask (&history[0])) != 0
+		 instruction sets, we can not swap (we know that
+		 branches write only to RD or to $31).  */
+	      || (! mips_opts.mips16
+		  && (prev_pinfo & INSN_WRITE_GPR_T)
+		  && (((pinfo & INSN_WRITE_GPR_D)
+		       && (EXTRACT_OPERAND (RT, history[0])
+			   == EXTRACT_OPERAND (RD, *ip)))
+		      || ((pinfo & INSN_WRITE_GPR_31)
+			  && EXTRACT_OPERAND (RT, history[0]) == RA)))
+	      || (! mips_opts.mips16
+		  && (prev_pinfo & INSN_WRITE_GPR_D)
+		  && (((pinfo & INSN_WRITE_GPR_D)
+		       && (EXTRACT_OPERAND (RD, history[0])
+			   == EXTRACT_OPERAND (RD, *ip)))
+		      || ((pinfo & INSN_WRITE_GPR_31)
+			  && EXTRACT_OPERAND (RD, history[0]) == RA)))
+	      || (mips_opts.mips16
+		  && (pinfo & MIPS16_INSN_WRITE_31)
+		  && ((prev_pinfo & MIPS16_INSN_WRITE_31)
+		      || ((prev_pinfo & MIPS16_INSN_WRITE_GPR_Y)
+			  && (MIPS16OP_EXTRACT_REG32R (history[0].insn_opcode)
+			      == RA))))
 	      /* If the branch writes a register that the previous
-		 instruction reads, we can not swap.  */
-	      || (gpr_write_mask (ip) & gpr_read_mask (&history[0])) != 0
+		 instruction reads, we can not swap (we know that
+		 branches only write to RD or to $31).  */
+	      || (! mips_opts.mips16
+		  && (pinfo & INSN_WRITE_GPR_D)
+		  && insn_uses_reg (&history[0],
+				    EXTRACT_OPERAND (RD, *ip),
+				    MIPS_GR_REG))
+	      || (! mips_opts.mips16
+		  && (pinfo & INSN_WRITE_GPR_31)
+		  && insn_uses_reg (&history[0], RA, MIPS_GR_REG))
+	      || (mips_opts.mips16
+		  && (pinfo & MIPS16_INSN_WRITE_31)
+		  && insn_uses_reg (&history[0], RA, MIPS_GR_REG))
 	      /* If one instruction sets a condition code and the
                  other one uses a condition code, we can not swap.  */
 	      || ((pinfo & INSN_READ_COND_CODE)
