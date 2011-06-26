@@ -2740,7 +2740,7 @@ fix_24k_sort (const void *a, const void *b)
 
 static bfd_boolean
 fix_24k_record_store_info (struct fix_24k_store_info *stinfo,
-                      const struct mips_cl_insn *insn)
+			   const struct mips_cl_insn *insn)
 {
   /* The instruction must have a known offset.  */
   if (!insn->complete_p || !strstr (insn->insn_mo->args, "o("))
@@ -2804,26 +2804,24 @@ nops_for_24k (int ignore, const struct mips_cl_insn *hist,
   if (ignore >= 2)
     return 0;
 
-  /* If INSN is definitely not a store, there's nothing to worry about.  */
-  if (insn && (insn->insn_mo->pinfo & INSN_STORE_MEMORY) == 0)
-    return 0;
-
-  /* Likewise, the previous instruction wasn't a store.  */
+  /* If the previous instruction wasn't a store, there's nothing to
+     worry about.  */
   if ((hist[0].insn_mo->pinfo & INSN_STORE_MEMORY) == 0)
     return 0;
 
-  /* If we don't know what came before, assume the worst.  */
-  if (hist[1].frag == NULL)
+  /* If the instructions after the previous one are unknown, we have
+     to assume the worst.  */
+  if (!insn)
     return 1;
 
-  /* If the instruction was not a store, there's nothing to worry about.  */
-  if ((hist[1].insn_mo->pinfo & INSN_STORE_MEMORY) == 0)
+  /* Check whether we are dealing with three consecutive stores.  */
+  if ((insn->insn_mo->pinfo & INSN_STORE_MEMORY) == 0
+      || (hist[1].insn_mo->pinfo & INSN_STORE_MEMORY) == 0)
     return 0;
 
   /* If we don't know the relationship between the store addresses,
      assume the worst.  */
-  if (insn == NULL
-      || !BASE_REG_EQ (insn->insn_opcode, hist[0].insn_opcode)
+  if (!BASE_REG_EQ (insn->insn_opcode, hist[0].insn_opcode)
       || !BASE_REG_EQ (insn->insn_opcode, hist[1].insn_opcode))
     return 1;
 

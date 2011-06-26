@@ -1,3 +1,21 @@
+2011-06-26  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* gas/mips/24k-branch-delay-1.d: Do not allow stores to be put
+	into delay slots.
+	* gas/mips/24k-triple-stores-1.d: Put the first nop after the
+	second store, rather than the first.
+	* gas/mips/24k-triple-stores-2.d: Likewise.
+	* gas/mips/24k-triple-stores-4.d: Likewise.
+	* gas/mips/24k-triple-stores-8.d: Likewise.
+	* gas/mips/24k-triple-stores-3.d: Remove first nop.
+	* gas/mips/24k-triple-stores-5.d: Likewise.
+	* gas/mips/24k-triple-stores-6.d: Likewise.
+	* gas/mips/24k-triple-stores-7.d: Likewise.
+	* gas/mips/24k-triple-stores-9.d: Add a nop after the second store.
+	Expect a nop at the end.
+	* gas/mips/24k-triple-stores-10.d: Put the first nop after the
+	second store, rather than the first.  Expect a nop at the end.
+
 2011-06-25  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* gas/mips/vr4130.s: Add some more ".set noreorder" tests.

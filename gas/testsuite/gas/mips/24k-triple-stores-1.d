@@ -7,11 +7,11 @@
 Disassembly of section .text:
 0+ <.*>:
    0:	a3a20000 	sb	v0,0\(sp\)
-   4:	00000000 	nop
-   8:	a3a30008 	sb	v1,8\(sp\)
+   4:	a3a30008 	sb	v1,8\(sp\)
+   8:	00000000 	nop
    c:	a3a40010 	sb	a0,16\(sp\)
-  10:	00000000 	nop
-  14:	a3a50018 	sb	a1,24\(sp\)
+  10:	a3a50018 	sb	a1,24\(sp\)
+  14:	00000000 	nop
   18:	a3a60020 	sb	a2,32\(sp\)
   1c:	a7a20000 	sh	v0,0\(sp\)
   20:	a7a30008 	sh	v1,8\(sp\)

@@ -7,8 +7,8 @@
 Disassembly of section .text:
 0+ <.*>:
    0:	a1130000 	sb	s3,0\(t0\)
-   4:	00000000 	nop
-   8:	a1130001 	sb	s3,1\(t0\)
+   4:	a1130001 	sb	s3,1\(t0\)
+   8:	00000000 	nop
    c:	a1130018 	sb	s3,24\(t0\)
   10:	0000000d 	break
   14:	a1130000 	sb	s3,0\(t0\)
