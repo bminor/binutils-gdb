@@ -1,3 +1,7 @@
+2011-06-27  Alan Modra  <amodra@gmail.com>
+
+	* ld-elf/elf.exp: Exclude more targets from note-3 test.
+
 2011-06-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/12921
@@ -88,7 +92,7 @@
 	* ld-elf/eh4.d: Likewise.
 
 	* ld-elfvsb/elfvsb.exp: Only xfail 64bit x86_64-*-linux*.
-	* ld-shared/shared.exp: Likewise. 
+	* ld-shared/shared.exp: Likewise.
 
 	* ld-ifunc/ifunc-1-local-x86.d: Support x32.
 	* ld-ifunc/ifunc-1-x86.d: Likewise.
