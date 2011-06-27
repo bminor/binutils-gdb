@@ -771,10 +771,9 @@ gdbpy_breakpoint_has_py_cond (struct breakpoint_object *bp_obj)
     get_current_arch ();
   struct cleanup *cleanup = ensure_python_env (garch, current_language);
   
-  if (py_bp == NULL)
-    return 0;
+  if (py_bp != NULL)
+    has_func = PyObject_HasAttrString (py_bp, stop_func);
 
-  has_func = PyObject_HasAttrString (py_bp, stop_func);
   do_cleanups (cleanup);
 
   return has_func;

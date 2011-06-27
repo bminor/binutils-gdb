@@ -2670,6 +2670,7 @@ find_overload_match (struct type **arg_types, int nargs,
       if (func_name == NULL)
         {
 	  *symp = fsym;
+	  do_cleanups (all_cleanups);
           return 0;
         }
 

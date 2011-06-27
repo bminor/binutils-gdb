@@ -1425,7 +1425,7 @@ backtrace_command_stub (void *data)
 static void
 backtrace_command (char *arg, int from_tty)
 {
-  struct cleanup *old_chain = NULL;
+  struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
   int fulltrace_arg = -1, arglen = 0, argc = 0;
   struct backtrace_command_args btargs;
 
@@ -1435,7 +1435,7 @@ backtrace_command (char *arg, int from_tty)
       int i;
 
       argv = gdb_buildargv (arg);
-      old_chain = make_cleanup_freeargv (argv);
+      make_cleanup_freeargv (argv);
       argc = 0;
       for (i = 0; argv[i]; i++)
 	{
@@ -1481,8 +1481,7 @@ backtrace_command (char *arg, int from_tty)
   if (fulltrace_arg >= 0 && arglen > 0)
     xfree (arg);
 
-  if (old_chain)
-    do_cleanups (old_chain);
+  do_cleanups (old_chain);
 }
 
 static void

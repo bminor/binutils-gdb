@@ -553,8 +553,6 @@ static PyObject *
 valpy_str (PyObject *self)
 {
   char *s = NULL;
-  struct ui_file *stb;
-  struct cleanup *old_chain;
   PyObject *result;
   struct value_print_options opts;
   volatile struct gdb_exception except;
@@ -562,18 +560,18 @@ valpy_str (PyObject *self)
   get_user_print_options (&opts);
   opts.deref_ref = 0;
 
-  stb = mem_fileopen ();
-  old_chain = make_cleanup_ui_file_delete (stb);
-
   TRY_CATCH (except, RETURN_MASK_ALL)
     {
+      struct ui_file *stb = mem_fileopen ();
+      struct cleanup *old_chain = make_cleanup_ui_file_delete (stb);
+
       common_val_print (((value_object *) self)->value, stb, 0,
 			&opts, python_language);
       s = ui_file_xstrdup (stb, NULL);
+
+      do_cleanups (old_chain);
     }
   GDB_PY_HANDLE_EXCEPTION (except);
-
-  do_cleanups (old_chain);
 
   result = PyUnicode_Decode (s, strlen (s), host_charset (), NULL);
   xfree (s);

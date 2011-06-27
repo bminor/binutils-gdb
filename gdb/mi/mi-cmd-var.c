@@ -196,7 +196,7 @@ mi_cmd_var_delete (char *command, char **argv, int argc)
       children_only_p = 1;
       do_cleanups (old_cleanups);
       name = xstrdup (argv[1]);
-      make_cleanup (free_current_contents, &name);
+      old_cleanups = make_cleanup (free_current_contents, &name);
     }
 
   /* If we didn't error out, now NAME contains the name of the

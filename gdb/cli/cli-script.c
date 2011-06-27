@@ -317,12 +317,12 @@ execute_user_command (struct cmd_list_element *c, char *args)
   static int user_call_depth = 0;
   extern int max_user_call_depth;
 
-  old_chain = setup_user_args (args);
-
   cmdlines = c->user_commands;
   if (cmdlines == 0)
     /* Null command */
     return;
+
+  old_chain = setup_user_args (args);
 
   if (++user_call_depth > max_user_call_depth)
     error (_("Max user call depth exceeded -- command aborted."));

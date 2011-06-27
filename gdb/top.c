@@ -378,7 +378,10 @@ execute_command (char *p, int from_tty)
 
   /* This can happen when command_line_input hits end of file.  */
   if (p == NULL)
-    return;
+    {
+      do_cleanups (cleanup);
+      return;
+    }
 
   target_log_command (p);
 
@@ -542,7 +545,10 @@ command_loop (void)
 				    get_prompt () : (char *) NULL,
 				    instream == stdin, "prompt");
       if (command == 0)
-	return;
+	{
+	  do_cleanups (old_chain);
+	  return;
+	}
 
       make_command_stats_cleanup (1);
 

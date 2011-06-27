@@ -132,6 +132,7 @@ parse_find_args (char *args, ULONGEST *max_countp,
       len = value_as_long (v);
       if (len == 0)
 	{
+	  do_cleanups (old_cleanups);
 	  printf_filtered (_("Empty search range.\n"));
 	  return;
 	}

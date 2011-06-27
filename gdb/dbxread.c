@@ -3433,7 +3433,7 @@ elfstab_build_psymtabs (struct objfile *objfile, asection *stabsect,
   bfd *sym_bfd = objfile->obfd;
   char *name = bfd_get_filename (sym_bfd);
   struct dbx_symfile_info *info;
-  struct cleanup *back_to = NULL;
+  struct cleanup *back_to = make_cleanup (null_cleanup, NULL);
 
   /* There is already a dbx_symfile_info allocated by our caller.
      It might even contain some info from the ELF symtab to help us.  */
@@ -3477,7 +3477,7 @@ elfstab_build_psymtabs (struct objfile *objfile, asection *stabsect,
   symbuf_left = bfd_section_size (objfile->obfd, stabsect);
   stabs_data = symfile_relocate_debug_section (objfile, stabsect, NULL);
   if (stabs_data)
-    back_to = make_cleanup (free_current_contents, (void *) &stabs_data);
+    make_cleanup (free_current_contents, (void *) &stabs_data);
 
   /* In an elf file, we've already installed the minimal symbols that came
      from the elf (non-stab) symbol table, so always act like an
@@ -3487,8 +3487,7 @@ elfstab_build_psymtabs (struct objfile *objfile, asection *stabsect,
      case it does, it will install them itself.  */
   dbx_symfile_read (objfile, 0);
 
-  if (back_to)
-    do_cleanups (back_to);
+  do_cleanups (back_to);
 }
 
 /* Scan and build partial symbols for a file with special sections for stabs

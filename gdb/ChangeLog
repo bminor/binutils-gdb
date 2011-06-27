@@ -1,3 +1,23 @@
+2011-06-27  Tom Tromey  <tromey@redhat.com>
+
+	* valops.c (find_overload_match): Call do_cleanups before early
+	return.
+	* top.c (execute_command): Call do_cleanups before early return.
+	(command_loop): Likewise.
+	* stack.c (backtrace_command): Make a null cleanup early.  Don't
+	conditionally call do_cleanups.
+	* python/py-value.c (TRY_CATCH): Move cleanup handling into
+	TRY_CATCH.
+	* python/py-breakpoint.c (gdbpy_breakpoint_has_py_cond): Rearrange
+	so cleanups are always run.
+	* mi/mi-cmd-var.c (mi_cmd_var_delete): Reset old_cleanups.
+	* findcmd.c (parse_find_args): Call do_cleanups on early return
+	path.
+	* dbxread.c (elfstab_build_psymtabs): Make a null cleanup early.
+	Don't conditionally call do_cleanups.
+	* cli/cli-script.c (execute_user_command): Initialize 'old_chain'
+	later.
+
 2011-06-27  Eric Botcazou  <ebotcazou@adacore.com>
 
 	* MAINTAINERS (Write After Approval): Use default email address.
