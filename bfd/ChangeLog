@@ -1,5 +1,17 @@
 2011-06-27  Tristan Gingold  <gingold@adacore.com>
 
+	* cache.c: Include bfd_stdint.h.
+	(cache_bmmap): Change profile.  Return region start and size.
+	* bfdio.c (struct bfd_iovec): Change bmmap profile.
+	(bfd_mmap): Change profile and adjust.   Update comment.
+	(memory_bmmap): Change profile.
+	* opncls.c (opncls_bmmap): Change profile.
+	* vms-lib.c (vms_lib_bmmap): Likewise.
+	* libbfd.h: Regenerate.
+	* bfd-in2.h: Regenerate.
+
+2011-06-27  Tristan Gingold  <gingold@adacore.com>
+
 	* vms-misc.c (vms_time_to_time_t): Adjust overflow detection.
 	Add comment.
 

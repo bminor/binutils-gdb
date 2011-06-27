@@ -525,7 +525,9 @@ opncls_bmmap (struct bfd *abfd ATTRIBUTE_UNUSED,
 	      bfd_size_type len ATTRIBUTE_UNUSED,
 	      int prot ATTRIBUTE_UNUSED,
 	      int flags ATTRIBUTE_UNUSED,
-	      file_ptr offset ATTRIBUTE_UNUSED)
+	      file_ptr offset ATTRIBUTE_UNUSED,
+              void **map_addr ATTRIBUTE_UNUSED,
+              bfd_size_type *map_len ATTRIBUTE_UNUSED)
 {
   return (void *) -1;
 }
