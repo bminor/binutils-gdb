@@ -1,3 +1,8 @@
+2011-06-27  Tristan Gingold  <gingold@adacore.com>
+
+	* vms-misc.c (vms_time_to_time_t): Adjust overflow detection.
+	Add comment.
+
 2011-06-25  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf64-x86-64.c (elf_backend_post_process_headers): Don't
