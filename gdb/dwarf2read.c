@@ -134,7 +134,10 @@ struct dwarf2_section_info
   asection *asection;
   gdb_byte *buffer;
   bfd_size_type size;
-  int was_mmapped;
+  /* Not NULL if the section was actually mmapped.  */
+  void *map_addr;
+  /* Page aligned size of mmapped area.  */
+  bfd_size_type map_len;
   /* True if we have tried to read this section.  */
   int readin;
 };
@@ -1562,7 +1565,7 @@ dwarf2_read_section (struct objfile *objfile, struct dwarf2_section_info *info)
   if (info->readin)
     return;
   info->buffer = NULL;
-  info->was_mmapped = 0;
+  info->map_addr = NULL;
   info->readin = 1;
 
   if (dwarf2_section_empty_p (info))
@@ -1592,17 +1595,14 @@ dwarf2_read_section (struct objfile *objfile, struct dwarf2_section_info *info)
 
   if (info->size > 4 * pagesize && (sectp->flags & SEC_RELOC) == 0)
     {
-      off_t pg_offset = sectp->filepos & ~(pagesize - 1);
-      size_t map_length = info->size + sectp->filepos - pg_offset;
-      caddr_t retbuf = bfd_mmap (abfd, 0, map_length, PROT_READ,
-				 MAP_PRIVATE, pg_offset);
+      info->buffer = bfd_mmap (abfd, 0, info->size, PROT_READ,
+                         MAP_PRIVATE, sectp->filepos,
+                         &info->map_addr, &info->map_len);
 
-      if (retbuf != MAP_FAILED)
+      if ((caddr_t)info->buffer != MAP_FAILED)
 	{
-	  info->was_mmapped = 1;
-	  info->buffer = retbuf + (sectp->filepos & (pagesize - 1)) ;
 #if HAVE_POSIX_MADVISE
-	  posix_madvise (retbuf, map_length, POSIX_MADV_WILLNEED);
+	  posix_madvise (info->map_addr, info->map_len, POSIX_MADV_WILLNEED);
 #endif
 	  return;
 	}
@@ -15357,14 +15357,13 @@ show_dwarf2_cmd (char *args, int from_tty)
 static void
 munmap_section_buffer (struct dwarf2_section_info *info)
 {
-  if (info->was_mmapped)
+  if (info->map_addr != NULL)
     {
 #ifdef HAVE_MMAP
-      intptr_t begin = (intptr_t) info->buffer;
-      intptr_t map_begin = begin & ~(pagesize - 1);
-      size_t map_length = info->size + begin - map_begin;
+      int res;
 
-      gdb_assert (munmap ((void *) map_begin, map_length) == 0);
+      res = munmap (info->map_addr, info->map_len);
+      gdb_assert (res == 0);
 #else
       /* Without HAVE_MMAP, we should never be here to begin with.  */
       gdb_assert_not_reached ("no mmap support");

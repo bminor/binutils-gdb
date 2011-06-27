@@ -1,3 +1,10 @@
+2011-06-27  Tristan Gingold  <gingold@adacore.com>
+
+	* dwarf2read.c (struct dwarf2_section_info): Replace was_mmapped
+	field by map_addr and map_len.
+	(dwarf2_read_section): Adjust for the new bfd_mmap api.
+	(munmap_section_buffer): Likewise.
+
 2011-06-24  Tom Tromey  <tromey@redhat.com>
 
 	* varobj.c (update_dynamic_varobj_children): Make 'name' const.
