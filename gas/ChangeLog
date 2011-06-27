@@ -1,5 +1,14 @@
 2011-06-27  Tristan Gingold  <gingold@adacore.com>
 
+	* config/tc-alpha.c (add_to_link_pool): Remove basesym parameter.
+	Locally declare basesym.  Add comments.  Do not set literal_pool_size.
+	(load_expression): Adjust call to add_to_link_pool.
+	(s_alpha_pdesc): Define pdesc symbol using dot.
+	Do not set literal_pool_size.
+	(s_alpha_end): Use NULL instead of 0.
+
+2011-06-27  Tristan Gingold  <gingold@adacore.com>
+
 	* config/obj-evax.c (evax_frob_file_before_adjust): Add comments.
 	Fix style.
 	* config/obj-evax.h (struct alpha_linkage_fixups): Remove seg
