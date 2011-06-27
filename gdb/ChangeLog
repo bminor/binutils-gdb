@@ -1,3 +1,7 @@
+2011-06-27  Joel Brobecker  <brobecker@adacore.com>
+
+	* MAINTAINERS (Write After Approval): Add Eric Botcazou.
+
 2011-06-27  Eric Botcazou  <ebotcazou@adacore.com>
 
 	* sparc-tdep.h (struct sparc_frame_cache): Add frame_offset,
