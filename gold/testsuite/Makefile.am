@@ -2027,7 +2027,8 @@ check_DATA += arm_bl_in_range.stdout arm_bl_out_of_range.stdout \
 	thumb2_bl_in_range.stdout thumb2_bl_out_of_range.stdout \
 	thumb_blx_in_range.stdout thumb_blx_out_of_range.stdout \
 	thumb2_blx_in_range.stdout thumb2_blx_out_of_range.stdout \
-	thumb_bl_out_of_range_local.stdout
+	thumb_bl_out_of_range_local.stdout arm_thm_jump11.stdout \
+	arm_thm_jump8.stdout
 
 arm_bl_in_range.stdout: arm_bl_in_range
 	$(TEST_OBJDUMP) -D $< > $@
@@ -2128,10 +2129,29 @@ thumb_bl_out_of_range_local: thumb_bl_out_of_range_local.o ../ld-new
 thumb_bl_out_of_range_local.o: thumb_bl_out_of_range_local.s
 	$(TEST_AS) -o $@ -march=armv5te $<
 
+arm_thm_jump11.stdout: arm_thm_jump11
+	$(TEST_OBJDUMP) -D $< > $@
+
+arm_thm_jump11: arm_thm_jump11.o ../ld-new
+	../ld-new -T $(srcdir)/arm_thm_jump11.t -o $@ $<
+
+arm_thm_jump11.o: arm_thm_jump11.s
+	$(TEST_AS) -o $@ $<
+
+arm_thm_jump8.stdout: arm_thm_jump8
+	$(TEST_OBJDUMP) -D $< > $@
+
+arm_thm_jump8: arm_thm_jump8.o ../ld-new
+	../ld-new -T $(srcdir)/arm_thm_jump8.t -o $@ $<
+
+arm_thm_jump8.o: arm_thm_jump8.s
+	$(TEST_AS) -o $@ $<
+
 MOSTLYCLEANFILES += arm_bl_in_range arm_bl_out_of_range thumb_bl_in_range \
 	thumb_bl_out_of_range thumb2_bl_in_range thumb2_bl_out_of_range \
 	thumb_blx_in_range thumb_blx_out_of_range thumb2_blx_in_range \
-	thumb2_blx_out_of_range thumb_bl_out_of_range_local
+	thumb2_blx_out_of_range thumb_bl_out_of_range_local arm_thm_jump11 \
+	arm_thm_jump8
 
 check_SCRIPTS += arm_fix_v4bx.sh
 check_DATA += arm_fix_v4bx.stdout arm_fix_v4bx_interworking.stdout \

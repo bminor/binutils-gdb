@@ -1,3 +1,18 @@
+2011-06-27  Doug Kwan  <dougkwan@google.com>
+
+	* arm.cc (Arm_relocate_functions::thm_jump8,
+	Arm_relocate_functions::thm_jump11): Use a wider signed
+	type to compute offset.
+	* testsuite/Makefile.am: Add new tests arm_thm_jump11 and
+	arm_thm_jump8.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/arm_branch_in_range.sh: Check test results of
+	arm_thm_jump11 and arm_thm_jump8.
+	* testsuite/arm_thm_jump11.s: New test source file.
+	* testsuite/arm_thm_jump11.t: New linker script.
+	* testsuite/arm_thm_jump8.s: New test source file.
+	* testsuite/arm_thm_jump8.t: New linker script.
+
 2011-06-24  Ian Lance Taylor  <iant@google.com>
 
 	* layout.cc: Include "object.h".

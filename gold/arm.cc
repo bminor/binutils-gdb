@@ -3356,13 +3356,14 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
 	    Arm_address address)
   {
     typedef typename elfcpp::Swap<16, big_endian>::Valtype Valtype;
-    typedef typename elfcpp::Swap<16, big_endian>::Valtype Reltype;
     Valtype* wv = reinterpret_cast<Valtype*>(view);
     Valtype val = elfcpp::Swap<16, big_endian>::readval(wv);
-    Reltype addend = utils::sign_extend<8>((val & 0x00ff) << 1);
-    Reltype x = (psymval->value(object, addend) - address);
-    elfcpp::Swap<16, big_endian>::writeval(wv, (val & 0xff00) | ((x & 0x01fe) >> 1));
-    return (utils::has_overflow<8>(x)
+    int32_t addend = utils::sign_extend<8>((val & 0x00ff) << 1);
+    int32_t x = (psymval->value(object, addend) - address);
+    elfcpp::Swap<16, big_endian>::writeval(wv, ((val & 0xff00)
+                                                | ((x & 0x01fe) >> 1)));
+    // We do a 9-bit overflow check because x is right-shifted by 1 bit.
+    return (utils::has_overflow<9>(x)
 	    ? This::STATUS_OVERFLOW
 	    : This::STATUS_OKAY);
   }
@@ -3375,13 +3376,14 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
 	    Arm_address address)
   {
     typedef typename elfcpp::Swap<16, big_endian>::Valtype Valtype;
-    typedef typename elfcpp::Swap<16, big_endian>::Valtype Reltype;
     Valtype* wv = reinterpret_cast<Valtype*>(view);
     Valtype val = elfcpp::Swap<16, big_endian>::readval(wv);
-    Reltype addend = utils::sign_extend<11>((val & 0x07ff) << 1);
-    Reltype x = (psymval->value(object, addend) - address);
-    elfcpp::Swap<16, big_endian>::writeval(wv, (val & 0xf800) | ((x & 0x0ffe) >> 1));
-    return (utils::has_overflow<11>(x)
+    int32_t addend = utils::sign_extend<11>((val & 0x07ff) << 1);
+    int32_t x = (psymval->value(object, addend) - address);
+    elfcpp::Swap<16, big_endian>::writeval(wv, ((val & 0xf800)
+                                                | ((x & 0x0ffe) >> 1)));
+    // We do a 12-bit overflow check because x is right-shifted by 1 bit.
+    return (utils::has_overflow<12>(x)
 	    ? This::STATUS_OVERFLOW
 	    : This::STATUS_OKAY);
   }
