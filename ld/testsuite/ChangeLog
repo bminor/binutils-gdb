@@ -1,3 +1,7 @@
+2011-06-27  Nick Clifton  <nickc@redhat.com>
+
+	* ld-elf/elf.exp: Exlcude all v850 targets from note-3 test.
+
 2011-06-27  Alan Modra  <amodra@gmail.com>
 
 	* ld-elf/elf.exp: Exclude more targets from note-3 test.

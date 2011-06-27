@@ -88,7 +88,7 @@ if {    ! [istarget arc-*-*]
      && ! [istarget pj-*-*]
      && ! [istarget rx-*-*]
      && ! [istarget spu-*-*]
-     && ! [istarget v850-*-*]
+     && ! [istarget v850*-*-*]
      && ! [istarget xstormy16-*-*]
      && ! [istarget *-*-irix*]
      && ! [istarget *-*-rtems] } {
