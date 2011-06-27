@@ -3974,13 +3974,11 @@ _bfd_vms_write_etir (bfd * abfd, int objtype ATTRIBUTE_UNUSED)
 		  _bfd_vms_output_begin_subrec (recwr, ETIR__C_STC_NOP_GBL);
 		  _bfd_vms_output_long (recwr, (unsigned long) udata->lkindex);
 		  _bfd_vms_output_long
-		    (recwr,
-                     (unsigned long) udata->enbsym->section->target_index);
+		    (recwr, (unsigned long) section->target_index);
 		  _bfd_vms_output_quad (recwr, rptr->address);
 		  _bfd_vms_output_long (recwr, (unsigned long) 0x47ff041f);
 		  _bfd_vms_output_long
-		    (recwr,
-                     (unsigned long) udata->enbsym->section->target_index);
+		    (recwr, (unsigned long) section->target_index);
 		  _bfd_vms_output_quad (recwr, rptr->addend);
 		  _bfd_vms_output_counted
 		    (recwr, _bfd_vms_length_hash_symbol
@@ -4001,8 +3999,7 @@ _bfd_vms_write_etir (bfd * abfd, int objtype ATTRIBUTE_UNUSED)
 		  _bfd_vms_output_long
 		    (recwr, (unsigned long) udata->lkindex + 1);
 		  _bfd_vms_output_long
-		    (recwr,
-                     (unsigned long) udata->enbsym->section->target_index);
+		    (recwr, (unsigned long) section->target_index);
 		  _bfd_vms_output_quad (recwr, rptr->address);
 		  _bfd_vms_output_long (recwr, (unsigned long) 0x237B0000);
 		  _bfd_vms_output_long
@@ -4022,13 +4019,11 @@ _bfd_vms_write_etir (bfd * abfd, int objtype ATTRIBUTE_UNUSED)
 		  _bfd_vms_output_begin_subrec (recwr, ETIR__C_STC_BOH_GBL);
 		  _bfd_vms_output_long (recwr, (unsigned long) udata->lkindex);
 		  _bfd_vms_output_long
-		    (recwr,
-                     (unsigned long) udata->enbsym->section->target_index);
+		    (recwr, (unsigned long) section->target_index);
 		  _bfd_vms_output_quad (recwr, rptr->address);
 		  _bfd_vms_output_long (recwr, (unsigned long) 0xD3400000);
 		  _bfd_vms_output_long
-		    (recwr,
-                     (unsigned long) udata->enbsym->section->target_index);
+		    (recwr, (unsigned long) section->target_index);
 		  _bfd_vms_output_quad (recwr, rptr->addend);
 		  _bfd_vms_output_counted
 		    (recwr, _bfd_vms_length_hash_symbol

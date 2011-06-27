@@ -1,3 +1,8 @@
+2011-06-27  Tristan Gingold  <gingold@adacore.com>
+
+	* vms-alpha.c (_bfd_vms_write_etir): Use 'section' to get current
+	section target index.
+
 2011-06-27  Nick Clifton  <nickc@redhat.com>
 
 	* cisco-core.c (cisco_core_little_vec): Add initialization of
