@@ -1,3 +1,8 @@
+2011-06-27  Nick Clifton  <nickc@redhat.com>
+
+	* cisco-core.c (cisco_core_little_vec): Add initialization of
+	match_priority field.
+
 2011-06-27  Tristan Gingold  <gingold@adacore.com>
 
 	* cache.c: Include bfd_stdint.h.
