@@ -1,3 +1,26 @@
+2011-06-27  Eric Botcazou  <ebotcazou@adacore.com>
+
+	* sparc-tdep.h (struct sparc_frame_cache): Add frame_offset,
+	saved_regs_mask and copied_regs_mask fields.
+	(sparc_record_save_insn): New prototype.
+	* sparc-tdep.c (sparc_alloc_frame_cache): Initialize the new fields.
+	(sparc_record_save_insn): New function.
+	(sparc_analyze_prologue): Add head comment.  Recognize store insns
+	of call-saved registers.  Use OFFSET consistently.  Recognize flat
+	frames and cache their settings.
+	(sparc32_skip_prologue): Handle flat frames.
+	(sparc_frame_cache): Add frame_offset to the base address.
+	(sparc32_frame_cache): Adjust to new frame description.
+	(sparc32_frame_prev_register): Likewise.
+	* sparc64-tdep.c (sparc64_frame_prev_register): Likewise.
+	* sparc-sol2-tdep.c (sparc32_sol2_sigtramp_frame_cache): Likewise.
+	* sparc64-sol2-tdep.c (sparc64_sol2_sigtramp_frame_cache): Likewise.
+	* sparcnbsd-tdep.c (sparc32nbsd_sigcontext_frame_cache): Force the
+	frame by calling sparc_record_save_insn.
+	* sparc64nbsd-tdep.c (sparc64nbsd_sigcontext_frame_cache): Likewise.
+	* sparcobsd-tdep.c (sparc32obsd_sigtramp_frame_cache): Likewise.
+	* sparc64obsd-tdep.c (sparc64obsd_frame_cache): Likewise.
+
 2011-06-27  Tristan Gingold  <gingold@adacore.com>
 
 	* dwarf2read.c (struct dwarf2_section_info): Replace was_mmapped

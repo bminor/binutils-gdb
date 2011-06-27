@@ -146,6 +146,15 @@ struct sparc_frame_cache
   /* Do we have a frame?  */
   int frameless_p;
 
+  /* The offset from the base register to the CFA.  */
+  int frame_offset;
+
+  /* Mask of `local' and `in' registers saved in the register save area.  */
+  unsigned short int saved_regs_mask;
+
+  /* Mask of `out' registers copied or renamed to their `in' sibling.  */
+  unsigned char copied_regs_mask;
+
   /* Do we have a Structure, Union or Quad-Precision return value?  */
   int struct_return_p;
 
@@ -159,6 +168,10 @@ extern unsigned long sparc_fetch_instruction (CORE_ADDR pc);
 /* Fetch StackGhost Per-Process XOR cookie.  */
 extern ULONGEST sparc_fetch_wcookie (struct gdbarch *gdbarch);
 
+/* Record the effect of a SAVE instruction on CACHE.  */
+extern void sparc_record_save_insn (struct sparc_frame_cache *cache);
+
+/* Do a full analysis of the prologue at PC and update CACHE accordingly.  */
 extern CORE_ADDR sparc_analyze_prologue (struct gdbarch *gdbarch,
 					 CORE_ADDR pc, CORE_ADDR current_pc,
 					 struct sparc_frame_cache *cache);

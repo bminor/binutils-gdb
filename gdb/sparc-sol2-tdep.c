@@ -93,7 +93,8 @@ sparc32_sol2_sigtramp_frame_cache (struct frame_info *this_frame,
   /* The third argument is a pointer to an instance of `ucontext_t',
      which has a member `uc_mcontext' that contains the saved
      registers.  */
-  regnum = (cache->frameless_p ? SPARC_O2_REGNUM : SPARC_I2_REGNUM);
+  regnum =
+    (cache->copied_regs_mask & 0x04) ? SPARC_I2_REGNUM : SPARC_O2_REGNUM;
   mcontext_addr = get_frame_register_unsigned (this_frame, regnum) + 40;
 
   cache->saved_regs[SPARC32_PSR_REGNUM].addr = mcontext_addr + 0 * 4;
