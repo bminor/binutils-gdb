@@ -153,6 +153,8 @@ evax_frob_file_before_adjust (void)
     {
       if (S_GET_SEGMENT (l->fixp->fx_addsy) == alpha_link_section)
 	{
+          /* The symbol is defined in the file.  The linkage entry decays to
+             two relocs.  */
 	  symbolS *entry_sym;
 	  fixS *fixpentry, *fixppdesc, *fixtail;
 
@@ -166,7 +168,7 @@ evax_frob_file_before_adjust (void)
 	  fixpentry = fix_new (l->fixp->fx_frag, l->fixp->fx_where, 8,
 			       entry_sym, l->fixp->fx_offset, 0,
 			       BFD_RELOC_64);
-	  fixppdesc = fix_new (l->fixp->fx_frag, l->fixp->fx_where+8, 8,
+	  fixppdesc = fix_new (l->fixp->fx_frag, l->fixp->fx_where + 8, 8,
 			       l->fixp->fx_addsy, l->fixp->fx_offset, 0,
 			       BFD_RELOC_64);
 	  l->fixp->fx_size = 0;
@@ -184,6 +186,7 @@ evax_frob_file_before_adjust (void)
 	}
       else
 	{
+          /* Assign a linkage index.  */
 	  ((struct evax_private_udata_struct *)
 	   symbol_get_bfdsym (l->label)->udata.p)->lkindex = linkage_index;
 

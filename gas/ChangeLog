@@ -1,3 +1,11 @@
+2011-06-27  Tristan Gingold  <gingold@adacore.com>
+
+	* config/obj-evax.c (evax_frob_file_before_adjust): Add comments.
+	Fix style.
+	* config/obj-evax.h (struct alpha_linkage_fixups): Remove seg
+	field.  Add comments.
+	(obj_symbol_type, object_headers, OBJ_SYMFIELD_TYPE): Remove
+
 2011-06-26  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* config/tc-mips.c (fix_24k_record_store_info): If the previous
