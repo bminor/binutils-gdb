@@ -1089,6 +1089,14 @@ ver_test_11_LDADD = ver_test_11.a
 ver_test_11.a: ver_test_1.o ver_test_2.o ver_test_4.o
 	$(TEST_AR) rc $@ $^
 
+check_PROGRAMS += ver_test_12
+ver_test_12_SOURCES = ver_test_main_2.cc
+ver_test_12_DEPENDENCIES = gcctestdir/ld ver_test_12.o
+ver_test_12_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+ver_test_12_LDADD = ver_test_12.o
+ver_test_12.o: gcctestdir/ld ver_test_1.o ver_test_2.o ver_test_4.o
+	gcctestdir/ld -r -o $@ ver_test_1.o ver_test_2.o ver_test_4.o
+
 check_PROGRAMS += protected_1
 protected_1_SOURCES = \
 	protected_main_1.cc protected_main_2.cc protected_main_3.cc

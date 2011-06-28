@@ -1,6 +1,6 @@
 // symtab.h -- the gold symbol table   -*- C++ -*-
 
-// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -135,6 +135,10 @@ class Symbol
   void
   set_is_default()
   { this->is_def_ = true; }
+
+  // Return the symbol's name as name@version (or name@@version).
+  std::string
+  versioned_name() const;
 
   // Return the symbol source.
   Source

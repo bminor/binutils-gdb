@@ -1,3 +1,18 @@
+2011-06-27  Ian Lance Taylor  <iant@google.com>
+
+	* symtab.cc (Symbol::versioned_name): New function.
+	(Symbol_table::add_to_final_symtab): Use versioned_name when
+	appropriate.
+	(Symbol_table::sized_write_symbol): Likewise.
+	* symtab.h (class Symbol): Declare versioned_name.
+	* stringpool.h (class Stringpool_template): Add variant of add
+	which takes a std::basic_string.
+	* testsuite/Makefile.am (check_PROGRAMS): Add ver_test_12.
+	(ver_test_12_SOURCES, ver_test_12_DEPENDENCIES): New variables.
+	(ver_test_12_LDFLAGS, ver_test_12_LDADD): New variables.
+	(ver_test_12.o): New target.
+	* testsuite/Makefile.in: Rebuild.
+
 2011-06-27  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc (Arm_relocate_functions::thm_jump8,

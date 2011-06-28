@@ -293,6 +293,21 @@ Sized_symbol<size>::init_undefined(const char* name, const char* version,
   this->symsize_ = 0;
 }
 
+// Return an allocated string holding the symbol's name as
+// name@version.  This is used for relocatable links.
+
+std::string
+Symbol::versioned_name() const
+{
+  gold_assert(this->version_ != NULL);
+  std::string ret = this->name_;
+  ret.push_back('@');
+  if (this->is_def_)
+    ret.push_back('@');
+  ret += this->version_;
+  return ret;
+}
+
 // Return true if SHNDX represents a common symbol.
 
 bool
@@ -2416,7 +2431,10 @@ Symbol_table::add_to_final_symtab(Symbol* sym, Stringpool* pool,
 				  unsigned int* pindex, off_t* poff)
 {
   sym->set_symtab_index(*pindex);
-  pool->add(sym->name(), false, NULL);
+  if (sym->version() == NULL || !parameters->options().relocatable())
+    pool->add(sym->name(), false, NULL);
+  else
+    pool->add(sym->versioned_name(), true, NULL);
   ++*pindex;
   *poff += elfcpp::Elf_sizes<size>::sym_size;
 }
@@ -2925,7 +2943,10 @@ Symbol_table::sized_write_symbol(
     unsigned char* p) const
 {
   elfcpp::Sym_write<size, big_endian> osym(p);
-  osym.put_st_name(pool->get_offset(sym->name()));
+  if (sym->version() == NULL || !parameters->options().relocatable())
+    osym.put_st_name(pool->get_offset(sym->name()));
+  else
+    osym.put_st_name(pool->get_offset(sym->versioned_name()));
   osym.put_st_value(value);
   // Use a symbol size of zero for undefined symbols from shared libraries.
   if (shndx == elfcpp::SHN_UNDEF && sym->is_from_dynobj())
