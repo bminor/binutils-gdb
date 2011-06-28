@@ -38,8 +38,9 @@ class Target_selector_freebsd : public Target_selector
  public:
   Target_selector_freebsd(int machine, int size, bool is_big_endian,
 			  const char* bfd_name,
-			  const char* freebsd_bfd_name)
-    : Target_selector(machine, size, is_big_endian, NULL),
+			  const char* freebsd_bfd_name,
+			  const char* emulation)
+    : Target_selector(machine, size, is_big_endian, NULL, emulation),
       bfd_name_(bfd_name), freebsd_bfd_name_(freebsd_bfd_name)
   { }
 
@@ -57,7 +58,7 @@ class Target_selector_freebsd : public Target_selector
   
   // Recognize two names.
   virtual Target*
-  do_recognize_by_name(const char* name)
+  do_recognize_by_bfd_name(const char* name)
   {
     if (strcmp(name, this->bfd_name_) == 0)
       return this->instantiate_target();
@@ -73,7 +74,7 @@ class Target_selector_freebsd : public Target_selector
 
   // Print both names in --help output.
   virtual void
-  do_supported_names(std::vector<const char*>* names)
+  do_supported_bfd_names(std::vector<const char*>* names)
   {
     names->push_back(this->bfd_name_);
     names->push_back(this->freebsd_bfd_name_);

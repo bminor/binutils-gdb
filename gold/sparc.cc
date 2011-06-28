@@ -3481,7 +3481,8 @@ class Target_selector_sparc : public Target_selector
 public:
   Target_selector_sparc()
     : Target_selector(elfcpp::EM_NONE, size, big_endian,
-		      (size == 64 ? "elf64-sparc" : "elf32-sparc"))
+		      (size == 64 ? "elf64-sparc" : "elf32-sparc"),
+		      (size == 64 ? "elf64_sparc" : "elf32_sparc"))
   { }
 
   Target* do_recognize(int machine, int, int)

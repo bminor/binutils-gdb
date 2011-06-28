@@ -11904,7 +11904,8 @@ class Target_selector_arm : public Target_selector
  public:
   Target_selector_arm()
     : Target_selector(elfcpp::EM_ARM, 32, big_endian,
-		      (big_endian ? "elf32-bigarm" : "elf32-littlearm"))
+		      (big_endian ? "elf32-bigarm" : "elf32-littlearm"),
+		      (big_endian ? "armelfb" : "armelf"))
   { }
 
   Target*

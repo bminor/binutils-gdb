@@ -1,6 +1,6 @@
 // script.cc -- handle linker scripts for gold.
 
-// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -2804,7 +2804,7 @@ script_check_output_format(void* closurev,
 {
   Parser_closure* closure = static_cast<Parser_closure*>(closurev);
   std::string name(default_name, default_length);
-  Target* target = select_target_by_name(name.c_str());
+  Target* target = select_target_by_bfd_name(name.c_str());
   if (target == NULL || !parameters->is_compatible_target(target))
     {
       if (closure->skip_on_incompatible_target())

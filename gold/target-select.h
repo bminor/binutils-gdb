@@ -1,6 +1,6 @@
 // target-select.h -- select a target for an object file  -*- C++ -*-
 
-// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -65,9 +65,10 @@ class Target_selector
   // or 64), and endianness.  The machine number can be EM_NONE to
   // test for any machine number.  BFD_NAME is the name of the target
   // used by the GNU linker, for backward compatibility; it may be
-  // NULL.
+  // NULL.  EMULATION is the name of the emulation used by the GNU
+  // linker; it is similar to BFD_NAME.
   Target_selector(int machine, int size, bool is_big_endian,
-		  const char* bfd_name);
+		  const char* bfd_name, const char* emulation);
 
   virtual ~Target_selector()
   { }
@@ -81,14 +82,26 @@ class Target_selector
   // If NAME matches the target, return a pointer to a target
   // structure.
   Target*
-  recognize_by_name(const char* name)
-  { return this->do_recognize_by_name(name); }
+  recognize_by_bfd_name(const char* name)
+  { return this->do_recognize_by_bfd_name(name); }
 
-  // Push all supported names onto the vector.  This is only used for
-  // help output.
+  // Push all supported BFD names onto the vector.  This is only used
+  // for help output.
   void
-  supported_names(std::vector<const char*>* names)
-  { this->do_supported_names(names); }
+  supported_bfd_names(std::vector<const char*>* names)
+  { this->do_supported_bfd_names(names); }
+
+  // If NAME matches the target emulation, return a pointer to a
+  // target structure.
+  Target*
+  recognize_by_emulation(const char* name)
+  { return this->do_recognize_by_emulation(name); }
+
+  // Push all supported emulations onto the vector.  This is only used
+  // for help output.
+  void
+  supported_emulations(std::vector<const char*>* names)
+  { this->do_supported_emulations(names); }
 
   // Return the next Target_selector in the linked list.
   Target_selector*
@@ -114,11 +127,18 @@ class Target_selector
   { return this->is_big_endian_; }
 
   // Return the BFD name.  This may return NULL, in which case the
-  // do_recognize_by_name hook will be responsible for matching the
-  // BFD name.
+  // do_recognize_by_bfd_name hook will be responsible for matching
+  // the BFD name.
   const char*
   bfd_name() const
   { return this->bfd_name_; }
+
+  // Return the emulation.  This may return NULL, in which case the
+  // do_recognize_by_emulation hook will be responsible for matching
+  // the emulation.
+  const char*
+  emulation() const
+  { return this->emulation_; }
 
  protected:
   // Return an instance of the real target.  This must be implemented
@@ -141,17 +161,35 @@ class Target_selector
   // child class may implement a different version of this to
   // recognize more than one name.
   virtual Target*
-  do_recognize_by_name(const char*)
+  do_recognize_by_bfd_name(const char*)
   { return this->instantiate_target(); }
 
   // Return a list of supported BFD names.  The child class may
   // implement a different version of this to handle more than one
   // name.
   virtual void
-  do_supported_names(std::vector<const char*>* names)
+  do_supported_bfd_names(std::vector<const char*>* names)
   {
     gold_assert(this->bfd_name_ != NULL);
     names->push_back(this->bfd_name_);
+  }
+
+  // Recognize a target by emulation.  When this is called we already
+  // know that the name matches (or that the emulation_ field is
+  // NULL).  The child class may implement a different version of this
+  // to recognize more than one emulation.
+  virtual Target*
+  do_recognize_by_emulation(const char*)
+  { return this->instantiate_target(); }
+
+  // Return a list of supported emulations.  The child class may
+  // implement a different version of this to handle more than one
+  // emulation.
+  virtual void
+  do_supported_emulations(std::vector<const char*>* emulations)
+  {
+    gold_assert(this->emulation_ != NULL);
+    emulations->push_back(this->emulation_);
   }
 
   // Instantiate the target and return it.
@@ -173,6 +211,8 @@ class Target_selector
   const bool is_big_endian_;
   // BFD name of target, for compatibility.
   const char* const bfd_name_;
+  // GNU linker emulation for this target, for compatibility.
+  const char* const emulation_;
   // Next entry in list built at global constructor time.
   Target_selector* next_;
   // The singleton Target structure--this points to an instance of the
@@ -191,13 +231,23 @@ select_target(int machine, int size, bool big_endian, int osabi,
 // Select a target using a BFD name.
 
 extern Target*
-select_target_by_name(const char* name);
+select_target_by_bfd_name(const char* name);
+
+// Select a target using a GNU linker emulation.
+
+extern Target*
+select_target_by_emulation(const char* name);
 
 // Fill in a vector with the list of supported targets.  This returns
 // a list of BFD names.
 
 extern void
 supported_target_names(std::vector<const char*>*);
+
+// Fill in a vector with the list of supported emulations.
+
+extern void
+supported_emulation_names(std::vector<const char*>*);
 
 } // End namespace gold.
 

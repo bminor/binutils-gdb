@@ -1,6 +1,6 @@
 // options.c -- handle command line options for gold
 
-// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -170,6 +170,15 @@ help()
     printf(" %s", *p);
   printf("\n");
 
+  printf(_("%s: supported emulations:"), gold::program_name);
+  supported_names.clear();
+  gold::supported_emulation_names(&supported_names);
+  for (std::vector<const char*>::const_iterator p = supported_names.begin();
+       p != supported_names.end();
+       ++p)
+    printf(" %s", *p);
+  printf("\n");
+
   // REPORT_BUGS_TO is defined in bfd/bfdver.h.
   const char* report = REPORT_BUGS_TO;
   if (*report != '\0')
@@ -300,9 +309,18 @@ General_options::parse_V(const char*, const char*, Command_line*)
 {
   gold::print_version(true);
   this->printed_version_ = true;
+
   printf(_("  Supported targets:\n"));
   std::vector<const char*> supported_names;
   gold::supported_target_names(&supported_names);
+  for (std::vector<const char*>::const_iterator p = supported_names.begin();
+       p != supported_names.end();
+       ++p)
+    printf("   %s\n", *p);
+
+  printf(_("  Supported emulations:\n"));
+  supported_names.clear();
+  gold::supported_emulation_names(&supported_names);
   for (std::vector<const char*>::const_iterator p = supported_names.begin();
        p != supported_names.end();
        ++p)

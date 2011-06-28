@@ -1,6 +1,6 @@
 // parameters.cc -- general parameters for a link using gold
 
-// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -299,15 +299,28 @@ parameters_force_valid_target()
   gold_assert(parameters->options_valid());
   if (parameters->options().user_set_oformat())
     {
-      Target* target = select_target_by_name(parameters->options().oformat());
+      const char* bfd_name = parameters->options().oformat();
+      Target* target = select_target_by_bfd_name(bfd_name);
       if (target != NULL)
 	{
 	  set_parameters_target(target);
 	  return;
 	}
 
-      gold_error(_("unrecognized output format %s"),
-                 parameters->options().oformat());
+      gold_error(_("unrecognized output format %s"), bfd_name);
+    }
+
+  if (parameters->options().user_set_m())
+    {
+      const char* emulation = parameters->options().m();
+      Target* target = select_target_by_emulation(emulation);
+      if (target != NULL)
+	{
+	  set_parameters_target(target);
+	  return;
+	}
+
+      gold_error(_("unrecognized emulation %s"), emulation);
     }
 
   // The GOLD_DEFAULT_xx macros are defined by the configure script.

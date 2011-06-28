@@ -3648,7 +3648,7 @@ class Target_selector_x86_64 : public Target_selector_freebsd
 public:
   Target_selector_x86_64()
     : Target_selector_freebsd(elfcpp::EM_X86_64, 64, false, "elf64-x86-64",
-			      "elf64-x86-64-freebsd")
+			      "elf64-x86-64-freebsd", "elf_x86_64")
   { }
 
   Target*

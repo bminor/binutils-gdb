@@ -2124,9 +2124,12 @@ class Target_selector_powerpc : public Target_selector
 public:
   Target_selector_powerpc()
     : Target_selector(elfcpp::EM_NONE, size, big_endian,
-		      (size == 64 ?
-		       (big_endian ? "elf64-powerpc" : "elf64-powerpcle") :
-		       (big_endian ? "elf32-powerpc" : "elf32-powerpcle")))
+		      (size == 64
+		       ? (big_endian ? "elf64-powerpc" : "elf64-powerpcle")
+		       : (big_endian ? "elf32-powerpc" : "elf32-powerpcle")),
+		      (size == 64
+		       ? (big_endian ? "elf64ppc" : "elf64lppc")
+		       : (big_endian ? "elf32ppc" : "elf32lppc")))
   { }
 
   Target* do_recognize(int machine, int, int)

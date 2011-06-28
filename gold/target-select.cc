@@ -1,6 +1,6 @@
 // target-select.cc -- select a target for an object file
 
-// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -52,9 +52,10 @@ Set_target_once::do_run_once(void*)
 // fast.
 
 Target_selector::Target_selector(int machine, int size, bool is_big_endian,
-				 const char* bfd_name)
+				 const char* bfd_name, const char* emulation)
   : machine_(machine), size_(size), is_big_endian_(is_big_endian),
-    bfd_name_(bfd_name), instantiated_target_(NULL), set_target_once_(this)
+    bfd_name_(bfd_name), emulation_(emulation), instantiated_target_(NULL),
+    set_target_once_(this)
 {
   this->next_ = target_selectors;
   target_selectors = this;
@@ -104,14 +105,33 @@ select_target(int machine, int size, bool is_big_endian, int osabi,
 // --oformat option.
 
 Target*
-select_target_by_name(const char* name)
+select_target_by_bfd_name(const char* name)
 {
   for (Target_selector* p = target_selectors; p != NULL; p = p->next())
     {
       const char* pname = p->bfd_name();
       if (pname == NULL || strcmp(pname, name) == 0)
 	{
-	  Target* ret = p->recognize_by_name(name);
+	  Target* ret = p->recognize_by_bfd_name(name);
+	  if (ret != NULL)
+	    return ret;
+	}
+    }
+  return NULL;
+}
+
+// Find a target using a GNU linker emulation.  This is used to
+// support the -m option.
+
+Target*
+select_target_by_emulation(const char* name)
+{
+  for (Target_selector* p = target_selectors; p != NULL; p = p->next())
+    {
+      const char* pname = p->emulation();
+      if (pname == NULL || strcmp(pname, name) == 0)
+	{
+	  Target* ret = p->recognize_by_emulation(name);
 	  if (ret != NULL)
 	    return ret;
 	}
@@ -125,7 +145,16 @@ void
 supported_target_names(std::vector<const char*>* names)
 {
   for (Target_selector* p = target_selectors; p != NULL; p = p->next())
-    p->supported_names(names);
+    p->supported_bfd_names(names);
+}
+
+// Push all the supported emulations onto a vector.
+
+void
+supported_emulation_names(std::vector<const char*>* names)
+{
+  for (Target_selector* p = target_selectors; p != NULL; p = p->next())
+    p->supported_emulations(names);
 }
 
 } // End namespace gold.

@@ -3284,7 +3284,8 @@ class Target_selector_i386 : public Target_selector_freebsd
 public:
   Target_selector_i386()
     : Target_selector_freebsd(elfcpp::EM_386, 32, false,
-			      "elf32-i386", "elf32-i386-freebsd")
+			      "elf32-i386", "elf32-i386-freebsd",
+			      "elf_i386")
   { }
 
   Target*

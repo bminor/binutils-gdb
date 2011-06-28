@@ -835,7 +835,7 @@ class General_options
               NULL);
 
   DEFINE_string(m, options::EXACTLY_ONE_DASH, 'm', "",
-                N_("Ignored for compatibility"), N_("EMULATION"));
+                N_("Set GNU linker emulation; obsolete"), N_("EMULATION"));
 
   DEFINE_bool(print_map, options::TWO_DASHES, 'M', false,
 	      N_("Write map file on standard output"), NULL);

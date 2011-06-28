@@ -151,7 +151,7 @@ class Target_selector_test : public Target_selector
 {
  public:
   Target_selector_test()
-    : Target_selector(0xffff, size, big_endian, NULL)
+    : Target_selector(0xffff, size, big_endian, NULL, NULL)
   { }
 
   Target*
