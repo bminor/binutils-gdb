@@ -41,6 +41,9 @@
    around technique as above.  */
 #undef _FILE_OFFSET_BITS
 
+/* Request clean size types from Python.  */
+#define PY_SSIZE_T_CLEAN
+
 /* Include the Python header files using angle brackets rather than
    double quotes.  On case-insensitive filesystems, this prevents us
    from including our python/python.h header file.  */

@@ -1,3 +1,7 @@
+2011-06-28  Tom Tromey  <tromey@redhat.com>
+
+	* python/python-internal.h (PY_SSIZE_T_CLEAN): Define.
+
 2011-06-27  Tom Tromey  <tromey@redhat.com>
 
 	* valops.c (find_overload_match): Call do_cleanups before early
