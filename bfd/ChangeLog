@@ -1,3 +1,8 @@
+2011-06-28  Fawzi Mohamed <fawzi.mohamed@nokia.com>
+
+	* mach-o.c (bfd_mach_o_read_command): Also ignore
+	BFD_MACH_O_LC_ROUTINES_64.
+
 2011-06-27  Tristan Gingold  <gingold@adacore.com>
 
 	* vms-alpha.c (_bfd_vms_write_etir): Use 'section' to get current

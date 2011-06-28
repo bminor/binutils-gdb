@@ -2523,6 +2523,7 @@ bfd_mach_o_read_command (bfd *abfd, bfd_mach_o_load_command *command)
     case BFD_MACH_O_LC_FVMFILE:
     case BFD_MACH_O_LC_PREPAGE:
     case BFD_MACH_O_LC_ROUTINES:
+    case BFD_MACH_O_LC_ROUTINES_64:
       break;
     case BFD_MACH_O_LC_SUB_FRAMEWORK:
     case BFD_MACH_O_LC_SUB_UMBRELLA:
