@@ -1,3 +1,12 @@
+2011-06-28  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.cp/exception.cc: Don't include iostream.
+	(bar): Remove print statement.
+	(catcher): New.
+	(main): Remove print statements.  Call function catcher.
+	* gdb.cp/exception.exp : Don't match inferior's output in regexp.
+	Set breakpoint on catcher, and check the value of parameter.
+
 2011-06-23  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.cp/mb-inline.exp: Parse the output of `info break' to check breakpoint

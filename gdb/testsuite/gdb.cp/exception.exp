@@ -127,6 +127,8 @@ gdb_test_multiple "info breakpoints" $name {
       }
 }
 
+gdb_test "break catcher" "Breakpoint \[0-9\]+ at.*"
+
 # Get the first exception thrown
        
 set name "continue to first throw"
@@ -173,14 +175,17 @@ gdb_test_multiple "backtrace" $name {
     }
 }
 
+# Continue to breakpoint on catcher.
+gdb_test "continue" ".*catcher \\(x=13\\).*" "continue to catcher for the first time"
+
 # Continue to second throw.
 
 set name "continue to second throw"
 gdb_test_multiple "continue" $name {
-    -re "Continuing.${ws}Got an except 13${ws}Catchpoint \[0-9\]+ \\(exception thrown\\), throw location.*${srcfile}:30, catch location .*${srcfile}:58\r\n$gdb_prompt $" {
+    -re "Continuing.${ws}Catchpoint \[0-9\]+ \\(exception thrown\\), throw location.*${srcfile}:30, catch location .*${srcfile}:58\r\n$gdb_prompt $" {
 	pass $name
     }
-    -re "Continuing.${ws}Got an except 13${ws}Catchpoint \[0-9\]+ \\(exception thrown\\).*\r\n$gdb_prompt $" {
+    -re "Continuing.${ws}Catchpoint \[0-9\]+ \\(exception thrown\\).*\r\n$gdb_prompt $" {
 	pass $name
     }
 }
@@ -216,6 +221,9 @@ gdb_test_multiple "backtrace" $name {
 	pass $name
     }
 }
+
+# Continue to breakpoint on catcher.
+gdb_test "continue" ".*catcher \\(x=13\\).*" "continue to catcher for the second time"
 
 # That is all for now.
 # 

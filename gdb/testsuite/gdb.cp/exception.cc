@@ -21,7 +21,6 @@
 
 // Test file for exception handling support.
 
-#include <iostream>
 using namespace std;
 
 int foo (int i)
@@ -36,8 +35,12 @@ extern "C" int bar (int k, unsigned long eharg, int flag);
     
 int bar (int k, unsigned long eharg, int flag)
 {
-  cout << "k is " << k << " eharg is " << eharg << " flag is " << flag << endl;
   return 1;
+}
+
+int catcher (int x)
+{
+  return x;
 }
 
 int main()
@@ -48,7 +51,7 @@ int main()
     j = foo (20);
   }
   catch (int x) {
-    cout << "Got an except " << x << endl;
+    catcher (x);
   }
   
   try {
@@ -56,12 +59,12 @@ int main()
       j = foo (20);
     }
     catch (int x) {
-      cout << "Got an except " << x << endl;
+      catcher (x);
       throw;
     }
   }
   catch (int y) {
-    cout << "Got an except (rethrown) " << y << endl;
+    catcher (y);
   }
 
   // Not caught 
