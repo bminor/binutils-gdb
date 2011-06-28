@@ -1,3 +1,13 @@
+2011-06-28  Tristan Gingold  <gingold@adacore.com>
+
+	* config/tc-alpha.c (alpha_evax_proc_hash): Remove.
+	(alpha_evax_proc_data): New variable.
+	(s_alpha_ent): Prevent nested function.  Remove has_insert call.
+	(s_alpha_pdesc): Do not call demand_empty_rest_of_line in case of
+	error.  Do not search in the hash table.  Check if match with .ent.
+	(s_alpha_name): Remove unused variable.
+	(md_begin): Remove initialization of alpha_evax_proc_hash.
+
 2011-06-27  Tristan Gingold  <gingold@adacore.com>
 
 	* config/tc-alpha.c (add_to_link_pool): Remove basesym parameter.

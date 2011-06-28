@@ -293,8 +293,6 @@ size_t md_longopts_size = sizeof (md_longopts);
 #undef AXP_REG_GP
 #define AXP_REG_GP AXP_REG_PV
 
-static struct hash_control *alpha_evax_proc_hash;
-
 #endif /* OBJ_EVAX  */
 
 /* The cpu for which we are generating code.  */
@@ -429,6 +427,7 @@ static struct alpha_linkage_fixups *alpha_linkage_fixup_tail;
 
 /* Current procedure descriptor.  */
 static struct alpha_evax_procs *alpha_evax_proc;
+static struct alpha_evax_procs alpha_evax_proc_data;
 
 static int alpha_flag_hash_long_names = 0;		/* -+ */
 static int alpha_flag_show_after_trunc = 0;		/* -H */
@@ -4356,8 +4355,10 @@ s_alpha_ent (int ignore ATTRIBUTE_UNUSED)
   symbolS *symbol;
   expressionS symexpr;
 
-  alpha_evax_proc
-    = (struct alpha_evax_procs *) xmalloc (sizeof (struct alpha_evax_procs));
+  if (alpha_evax_proc != NULL)
+    as_bad (_("previous .ent not closed by a .end"));
+
+  alpha_evax_proc = &alpha_evax_proc_data;
 
   alpha_evax_proc->pdsckind = 0;
   alpha_evax_proc->framereg = -1;
@@ -4384,10 +4385,6 @@ s_alpha_ent (int ignore ATTRIBUTE_UNUSED)
   symbol = make_expr_symbol (&symexpr);
   symbol_get_bfdsym (symbol)->flags |= BSF_FUNCTION;
   alpha_evax_proc->symbol = symbol;
-
-  (void) hash_insert
-    (alpha_evax_proc_hash,
-     symbol_get_bfdsym (alpha_evax_proc->symbol)->name, (PTR)alpha_evax_proc);
 
   demand_empty_rest_of_line ();
 }
@@ -4476,48 +4473,48 @@ s_alpha_pdesc (int ignore ATTRIBUTE_UNUSED)
   register char *p;
   expressionS exp;
   symbolS *entry_sym;
-  fixS *fixp;
-  segment_info_type *seginfo = seg_info (alpha_link_section);
   const char *entry_sym_name;
-  char *sym_name;
-  int len;
+  const char *pdesc_sym_name;
+  fixS *fixp;
+  size_t len;
 
   if (now_seg != alpha_link_section)
     {
       as_bad (_(".pdesc directive not in link (.link) section"));
-      demand_empty_rest_of_line ();
       return;
     }
 
   expression (&exp);
   if (exp.X_op != O_symbol)
     {
-      as_warn (_(".pdesc directive has no entry symbol"));
-      demand_empty_rest_of_line ();
+      as_bad (_(".pdesc directive has no entry symbol"));
       return;
     }
   
   entry_sym = make_expr_symbol (&exp);
-  entry_sym_name = symbol_get_bfdsym (entry_sym)->name;
+  entry_sym_name = S_GET_NAME (entry_sym);
  
   /* Strip "..en".  */
   len = strlen (entry_sym_name);
-  sym_name = (char *) xmalloc (len - 4 + 1);
-  strncpy (sym_name, entry_sym_name, len - 4);
-  sym_name [len - 4] = 0;
-  
-  alpha_evax_proc = (struct alpha_evax_procs *)
-    hash_find (alpha_evax_proc_hash, sym_name);
- 
-  if (!alpha_evax_proc || !S_IS_DEFINED (alpha_evax_proc->symbol))
+  if (len < 4 || strcmp (entry_sym_name + len - 4, "..en") != 0)
     {
-      as_fatal (_(".pdesc has no matching .ent"));
-      demand_empty_rest_of_line ();
+      as_bad (_(".pdesc has a bad entry symbol"));
+      return;
+    }
+  len -= 4;
+  pdesc_sym_name = S_GET_NAME (alpha_evax_proc->symbol);
+
+  if (!alpha_evax_proc
+      || !S_IS_DEFINED (alpha_evax_proc->symbol)
+      || strlen (pdesc_sym_name) != len
+      || memcmp (entry_sym_name, pdesc_sym_name, len) != 0)
+    {
+      as_fatal (_(".pdesc doesn't match with last .ent"));
       return;
     }
 
   /* Define pdesc symbol.  */
-  define_sym_at_dot (alpha_evax_proc->symbol);
+  symbol_set_value_now (alpha_evax_proc->symbol);
  
   /* Save bfd symbol of proc entry in function symbol.  */
   ((struct evax_private_udata_struct *)
@@ -4651,7 +4648,6 @@ s_alpha_name (int ignore ATTRIBUTE_UNUSED)
 {
   char *p;
   expressionS exp;
-  segment_info_type *seginfo = seg_info (alpha_link_section);
 
   if (now_seg != alpha_link_section)
     {
@@ -5518,7 +5514,6 @@ md_begin (void)
 
 #ifdef OBJ_EVAX
   create_literal_section (".link", &alpha_link_section, &alpha_link_symbol);
-  alpha_evax_proc_hash = hash_new ();
 #endif
 
 #ifdef OBJ_ELF
