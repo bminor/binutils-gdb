@@ -1,6 +1,6 @@
 // icf.cc -- Identical Code Folding.
 //
-// Copyright 2009, 2010 Free Software Foundation, Inc.
+// Copyright 2009, 2010, 2011 Free Software Foundation, Inc.
 // Written by Sriraman Tallam <tmsriram@google.com>.
 
 // This file is part of gold.
@@ -373,7 +373,7 @@ get_section_contents(bool first_iteration,
               // This reloc points to a merge section.  Hash the
               // contents of this section.
               if ((secn_flags & elfcpp::SHF_MERGE) != 0
-		  && parameters->target().can_icf_inline_merge_sections ())
+		  && parameters->target().can_icf_inline_merge_sections())
                 {
                   uint64_t entsize =
                     (it_v->first)->section_entsize(it_v->second);

@@ -1,6 +1,6 @@
 // x86_64.cc -- x86_64 target support for gold.
 
-// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -217,20 +217,6 @@ class Target_x86_64 : public Target_freebsd<64, false>
       tls_base_symbol_defined_(false)
   { }
 
-  // This function should be defined in targets that can use relocation
-  // types to determine (implemented in local_reloc_may_be_function_pointer
-  // and global_reloc_may_be_function_pointer)
-  // if a function's pointer is taken.  ICF uses this in safe mode to only
-  // fold those functions whose pointer is defintely not taken.  For x86_64
-  // pie binaries, safe ICF cannot be done by looking at relocation types.
-  inline bool
-  can_check_for_function_pointers() const
-  { return !parameters->options().pie(); }
-
-  virtual bool
-  can_icf_inline_merge_sections () const
-  { return true; }
-
   // Hook for a new output section.
   void
   do_new_output_section(Output_section*) const;
@@ -346,6 +332,16 @@ class Target_x86_64 : public Target_freebsd<64, false>
   Output_data*
   do_plt_section_for_local(const Relobj*, unsigned int) const
   { return this->plt_section(); }
+
+  // This function should be defined in targets that can use relocation
+  // types to determine (implemented in local_reloc_may_be_function_pointer
+  // and global_reloc_may_be_function_pointer)
+  // if a function's pointer is taken.  ICF uses this in safe mode to only
+  // fold those functions whose pointer is defintely not taken.  For x86_64
+  // pie binaries, safe ICF cannot be done by looking at relocation types.
+  bool
+  do_can_check_for_function_pointers() const
+  { return !parameters->options().pie(); }
 
   // Adjust -fsplit-stack code which calls non-split-stack code.
   void
@@ -755,6 +751,7 @@ const Target::Target_info Target_x86_64::x86_64_info =
   false,		// has_resolve
   true,			// has_code_fill
   true,			// is_default_stack_executable
+  true,			// can_icf_inline_merge_sections
   '\0',			// wrap_char
   "/lib/ld64.so.1",     // program interpreter
   0x400000,		// default_text_segment_address

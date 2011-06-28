@@ -1,6 +1,6 @@
 // testfile.cc -- Dummy ELF objects for testing purposes.
 
-// Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2011 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -94,6 +94,7 @@ const Target::Target_info Target_test<size, big_endian>::test_target_info =
   false,				// has_resolve
   false,				// has_code_fill
   false,				// is_default_stack_executable
+  false,				// can_icf_inline_merge_sections
   '\0',					// wrap_char
   "/dummy",				// dynamic_linker
   0x08000000,				// default_text_segment_address

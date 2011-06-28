@@ -1,3 +1,35 @@
+2011-06-28  Ian Lance Taylor  <iant@google.com>
+
+	* target.h (Target::can_check_for_function_pointers): Rewrite.
+	Make non-virtual.
+	(Target::can_icf_inline_merge_sections): Likewise.
+	(Target::section_may_have_icf_unsafe_poineters): Likewise.
+	(Target::Target_info): Add can_icf_inline_merge_sections field.
+	(Target::do_can_check_for_function_pointers): New virtual
+	function.
+	(Target::do_section_may_have_icf_unsafe_pointers): Likewise.
+	* arm.cc (Target_arm::do_can_check_for_function_pointers): Rename
+	from can_check_for_function_pointers, move in file.
+	(Target_arm::do_section_may_have_icf_unsafe_pointers): Rename from
+	section_may_have_icf_unsafe_poineters, move in file.
+	(Target_arm::arm_info): Initialize can_icf_inline_merge_sections.
+	* i386.cc (Target_i386::do_can_check_for_function_pointers):
+	Rename from can_check_for_function_pointers, move in file.
+	(Target_i386::can_icf_inline_merge_sections): Remove.
+	(Target_i386::i386_info): Initialize
+	can_icf_inline_merge_sections.
+	* powerpc.cc (Target_powerpc::powerpc_info) [all versions]:
+	Initialize can_icf_inline_merge_sections.
+	* sparc.cc (Target_sparc::sparc_info) [both version]: Likewise.
+	* x86_64.cc (Target_x86_64::do_can_check_for_function_pointers):
+	Rename from can_check_for_function_pointers, move in file.
+	(Target_x86_64::can_icf_inline_merge_sections): Remove.
+	(Target_x86_64::x86_64_info): Initialize
+	can_icf_inline_merge_sections.
+	* testsuite/testfile.cc (Target_test::test_target_info):
+	Likewise.
+	* icf.cc (get_section_contents): Correct formatting.
+
 2011-06-27  Ian Lance Taylor  <iant@google.com>
 
 	* symtab.cc (Symbol::versioned_name): New function.

@@ -1,6 +1,6 @@
 // i386.cc -- i386 target support for gold.
 
-// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -171,14 +171,6 @@ class Target_i386 : public Target_freebsd<32, false>
       got_mod_index_offset_(-1U), tls_base_symbol_defined_(false)
   { }
 
-  inline bool
-  can_check_for_function_pointers() const
-  { return true; }
-
-  virtual bool
-  can_icf_inline_merge_sections () const
-  { return true; }
-
   // Process the relocations to determine unreferenced sections for 
   // garbage collection.
   void
@@ -290,6 +282,11 @@ class Target_i386 : public Target_freebsd<32, false>
   Output_data*
   do_plt_section_for_local(const Relobj*, unsigned int) const
   { return this->plt_section(); }
+
+  // We can tell whether we take the address of a function.
+  inline bool
+  do_can_check_for_function_pointers() const
+  { return true; }
 
   // Return whether SYM is call to a non-split function.
   bool
@@ -642,6 +639,7 @@ const Target::Target_info Target_i386::i386_info =
   false,		// has_resolve
   true,			// has_code_fill
   true,			// is_default_stack_executable
+  true,			// can_icf_inline_merge_sections
   '\0',			// wrap_char
   "/usr/lib/libc.so.1",	// dynamic_linker
   0x08048000,		// default_text_segment_address

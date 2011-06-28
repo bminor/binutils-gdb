@@ -1,6 +1,6 @@
 // target.h -- target support for gold   -*- C++ -*-
 
-// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -69,34 +69,6 @@ class Target
  public:
   virtual ~Target()
   { }
-
-  // Virtual function which is set to return true by a target if
-  // it can use relocation types to determine if a function's
-  // pointer is taken.
-  virtual bool
-  can_check_for_function_pointers() const
-  { return false; }
-
-  // This function is used in ICF (icf.cc).  This is set to true by
-  // the target if a relocation to a merged section can be processed
-  // to retrieve the contents of the merged section.
-  virtual bool
-  can_icf_inline_merge_sections () const
-  { return false; }
-
-  // Whether a section called SECTION_NAME may have function pointers to
-  // sections not eligible for safe ICF folding.
-  virtual bool
-  section_may_have_icf_unsafe_pointers(const char* section_name) const
-  {
-    // We recognize sections for normal vtables, construction vtables and
-    // EH frames.
-    return (!is_prefix_of(".rodata._ZTV", section_name)
-	    && !is_prefix_of(".data.rel.ro._ZTV", section_name)
-	    && !is_prefix_of(".rodata._ZTC", section_name)
-	    && !is_prefix_of(".data.rel.ro._ZTC", section_name)
-	    && !is_prefix_of(".eh_frame", section_name));
-  }
 
   // Return the bit size that this target implements.  This should
   // return 32 or 64.
@@ -286,6 +258,24 @@ class Target
   plt_section_for_local(const Relobj* object, unsigned int symndx) const
   { return this->do_plt_section_for_local(object, symndx); }
 
+  // Return whether this target can use relocation types to determine
+  // if a function's address is taken.
+  bool
+  can_check_for_function_pointers() const
+  { return this->do_can_check_for_function_pointers(); }
+
+  // Return whether a relocation to a merged section can be processed
+  // to retrieve the contents.
+  bool
+  can_icf_inline_merge_sections () const
+  { return this->pti_->can_icf_inline_merge_sections; }
+
+  // Whether a section called SECTION_NAME may have function pointers to
+  // sections not eligible for safe ICF folding.
+  virtual bool
+  section_may_have_icf_unsafe_pointers(const char* section_name) const
+  { return this->do_section_may_have_icf_unsafe_pointers(section_name); }
+
   // Return true if a reference to SYM from a reloc of type R_TYPE
   // means that the current function may call an object compiled
   // without -fsplit-stack.  SYM is known to be defined in an object
@@ -406,6 +396,9 @@ class Target
     // Whether an object file with no .note.GNU-stack sections implies
     // that the stack should be executable.
     bool is_default_stack_executable;
+    // Whether a relocation to a merged section can be processed to
+    // retrieve the contents.
+    bool can_icf_inline_merge_sections;
     // Prefix character to strip when checking for wrapping.
     char wrap_char;
     // The default dynamic linker name.
@@ -496,6 +489,26 @@ class Target
   virtual Output_data*
   do_plt_section_for_local(const Relobj*, unsigned int) const
   { gold_unreachable(); }
+
+  // Virtual function which may be overriden by the child class.
+  virtual bool
+  do_can_check_for_function_pointers() const
+  { return false; }
+
+  // Virtual function which may be overridden by the child class.  We
+  // recognize some default sections for which we don't care whether
+  // they have function pointers.
+  virtual bool
+  do_section_may_have_icf_unsafe_pointers(const char* section_name) const
+  {
+    // We recognize sections for normal vtables, construction vtables and
+    // EH frames.
+    return (!is_prefix_of(".rodata._ZTV", section_name)
+	    && !is_prefix_of(".data.rel.ro._ZTV", section_name)
+	    && !is_prefix_of(".rodata._ZTC", section_name)
+	    && !is_prefix_of(".data.rel.ro._ZTC", section_name)
+	    && !is_prefix_of(".eh_frame", section_name));
+  }
 
   // Virtual function which may be overridden by the child class.  The
   // default implementation is that any function not defined by the
