@@ -1,6 +1,6 @@
 // freebsd.h -- FreeBSD support for gold    -*- C++ -*-
 
-// Copyright 2009 Free Software Foundation, Inc.
+// Copyright 2009, 2011 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -30,59 +30,8 @@ namespace gold
 {
 
 // FreeBSD 4.1 and later wants the EI_OSABI field in the ELF header to
-// be set to ELFOSABI_FREEBSD.  This is a subclass of Sized_target
-// which supports that.  The real target would be a subclass of this
-// one.  We permit combining FreeBSD and non-FreeBSD object files.
-// The effect of this target is to set the code in the output file.
-
-template<int size, bool big_endian>
-class Target_freebsd : public Sized_target<size, big_endian>
-{
- public:
-  // Set the value to use for the EI_OSABI field in the ELF header.
-  void
-  set_osabi(elfcpp::ELFOSABI osabi)
-  { this->osabi_ = osabi; }
-
- protected:
-  Target_freebsd(const Target::Target_info* pti)
-    : Sized_target<size, big_endian>(pti),
-      osabi_(elfcpp::ELFOSABI_NONE)
-  { }
-
-  virtual void
-  do_adjust_elf_header(unsigned char* view, int len) const;
-
- private:
-  // Value to store in the EI_OSABI field of the ELF file header.
-  elfcpp::ELFOSABI osabi_;
-};
-
-// Adjust the ELF file header by storing the requested value in the
-// OSABI field.  This is for FreeBSD support.
-
-template<int size, bool big_endian>
-inline void
-Target_freebsd<size, big_endian>::do_adjust_elf_header(unsigned char* view,
-						       int len) const
-{
-  if (this->osabi_ != elfcpp::ELFOSABI_NONE)
-    {
-      gold_assert(len == elfcpp::Elf_sizes<size>::ehdr_size);
-
-      elfcpp::Ehdr<size, false> ehdr(view);
-      unsigned char e_ident[elfcpp::EI_NIDENT];
-      memcpy(e_ident, ehdr.get_e_ident(), elfcpp::EI_NIDENT);
-
-      e_ident[elfcpp::EI_OSABI] = this->osabi_;
-
-      elfcpp::Ehdr_write<size, false> oehdr(view);
-      oehdr.put_e_ident(e_ident);
-    }
-}
-
-// A target selector for targets which permit combining both FreeBSD
-// and non-FreeBSD object files.
+// be set to ELFOSABI_FREEBSD.  This is a target selector for targets
+// which permit combining both FreeBSD and non-FreeBSD object files.
 
 class Target_selector_freebsd : public Target_selector
 {
@@ -102,7 +51,7 @@ class Target_selector_freebsd : public Target_selector
   {
     Target* ret = this->instantiate_target();
     if (osabi == elfcpp::ELFOSABI_FREEBSD)
-      this->set_osabi(ret);
+      ret->set_osabi(static_cast<elfcpp::ELFOSABI>(osabi));
     return ret;
   }
   
@@ -115,7 +64,7 @@ class Target_selector_freebsd : public Target_selector
     else if (strcmp(name, this->freebsd_bfd_name_) == 0)
       {
 	Target* ret = this->instantiate_target();
-	this->set_osabi(ret);
+	ret->set_osabi(elfcpp::ELFOSABI_FREEBSD);
 	return ret;
       }
     else
@@ -131,32 +80,6 @@ class Target_selector_freebsd : public Target_selector
   }
 
  private:
-  // Set the OSABI field.  This is quite ugly.
-  void
-  set_osabi(Target* target)
-  {
-    if (this->get_size() == 32)
-      {
-	if (this->is_big_endian())
-	  static_cast<Target_freebsd<32, true>*>(target)->
-	    set_osabi(elfcpp::ELFOSABI_FREEBSD);
-	else
-	  static_cast<Target_freebsd<32, false>*>(target)->
-	    set_osabi(elfcpp::ELFOSABI_FREEBSD);
-      }
-    else if (this->get_size() == 64)
-      {
-	if (this->is_big_endian())
-	  static_cast<Target_freebsd<64, true>*>(target)->
-	    set_osabi(elfcpp::ELFOSABI_FREEBSD);
-	else
-	  static_cast<Target_freebsd<64, false>*>(target)->
-	    set_osabi(elfcpp::ELFOSABI_FREEBSD);
-      }
-    else
-      gold_unreachable();
-  }
-
   // The BFD name for the non-Freebsd target.
   const char* bfd_name_;
   // The BFD name for the Freebsd target.

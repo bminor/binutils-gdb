@@ -375,6 +375,17 @@ class Target
   select_as_default_target()
   { this->do_select_as_default_target(); } 
 
+  // Return the value to store in the EI_OSABI field in the ELF
+  // header.
+  elfcpp::ELFOSABI
+  osabi() const
+  { return this->osabi_; }
+
+  // Set the value to store in the EI_OSABI field in the ELF header.
+  void
+  set_osabi(elfcpp::ELFOSABI osabi)
+  { this->osabi_ = osabi; }
+
  protected:
   // This struct holds the constant information for a child class.  We
   // use a struct to avoid the overhead of virtual function calls for
@@ -427,7 +438,7 @@ class Target
 
   Target(const Target_info* pti)
     : pti_(pti), processor_specific_flags_(0),
-      are_processor_specific_flags_set_(false)
+      are_processor_specific_flags_set_(false), osabi_(elfcpp::ELFOSABI_NONE)
   { }
 
   // Virtual function which may be implemented by the child class.
@@ -459,10 +470,10 @@ class Target
   // Adjust the output file header before it is written out.  VIEW
   // points to the header in external form.  LEN is the length, and
   // will be one of the values of elfcpp::Elf_sizes<size>::ehdr_size.
-  // By default, we do nothing.
+  // By default, we set the EI_OSABI field if requested (in
+  // Sized_target).
   virtual void
-  do_adjust_elf_header(unsigned char*, int) const
-  { }
+  do_adjust_elf_header(unsigned char*, int) const = 0;
 
   // Virtual function which may be overridden by the child class.
   virtual bool
@@ -622,6 +633,10 @@ class Target
   elfcpp::Elf_Word processor_specific_flags_;
   // Whether the processor-specific flags are set at least once.
   bool are_processor_specific_flags_set_;
+  // If not ELFOSABI_NONE, the value to put in the EI_OSABI field of
+  // the ELF header.  This is handled at this level because it is
+  // OS-specific rather than processor-specific.
+  elfcpp::ELFOSABI osabi_;
 };
 
 // The abstract class for a specific size and endianness of target.
@@ -873,6 +888,10 @@ class Sized_target : public Target
     gold_assert(pti->size == size);
     gold_assert(pti->is_big_endian ? big_endian : !big_endian);
   }
+
+  // Set the EI_OSABI field if requested.
+  virtual void
+  do_adjust_elf_header(unsigned char*, int) const;
 };
 
 } // End namespace gold.

@@ -201,7 +201,7 @@ class Output_data_plt_x86_64 : public Output_section_data
 //   http://people.redhat.com/drepper/tls.pdf
 //   http://www.lsd.ic.unicamp.br/~oliva/writeups/TLS/RFC-TLSDESC-x86.txt
 
-class Target_x86_64 : public Target_freebsd<64, false>
+class Target_x86_64 : public Sized_target<64, false>
 {
  public:
   // In the x86_64 ABI (p 68), it says "The AMD64 ABI architectures
@@ -209,7 +209,7 @@ class Target_x86_64 : public Target_freebsd<64, false>
   typedef Output_data_reloc<elfcpp::SHT_RELA, true, 64, false> Reloc_section;
 
   Target_x86_64()
-    : Target_freebsd<64, false>(&x86_64_info),
+    : Sized_target<64, false>(&x86_64_info),
       got_(NULL), plt_(NULL), got_plt_(NULL), got_tlsdesc_(NULL),
       global_offset_table_(NULL), rela_dyn_(NULL),
       copy_relocs_(elfcpp::R_X86_64_COPY), dynbss_(NULL),

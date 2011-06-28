@@ -1,6 +1,6 @@
-// target.cc
+// target.cc -- target support for gold.
 
-// Copyright 2009, 2010 Free Software Foundation, Inc.
+// Copyright 2009, 2010, 2011 Free Software Foundation, Inc.
 // Written by Doug Kwan <dougkwan@google.com>.
 
 // This file is part of gold.
@@ -199,5 +199,50 @@ Target::set_view_to_nop(unsigned char* view, section_size_type view_size,
       memcpy(view + offset, fill.data(), len);
     }
 }
+
+// Class Sized_target.
+
+// Set the EI_OSABI field of the ELF header if requested.
+
+template<int size, bool big_endian>
+void
+Sized_target<size, big_endian>::do_adjust_elf_header(unsigned char* view,
+						     int len) const
+{
+  elfcpp::ELFOSABI osabi = this->osabi();
+  if (osabi != elfcpp::ELFOSABI_NONE)
+    {
+      gold_assert(len == elfcpp::Elf_sizes<size>::ehdr_size);
+
+      elfcpp::Ehdr<size, false> ehdr(view);
+      unsigned char e_ident[elfcpp::EI_NIDENT];
+      memcpy(e_ident, ehdr.get_e_ident(), elfcpp::EI_NIDENT);
+
+      e_ident[elfcpp::EI_OSABI] = osabi;
+
+      elfcpp::Ehdr_write<size, false> oehdr(view);
+      oehdr.put_e_ident(e_ident);
+    }
+}
+
+#ifdef HAVE_TARGET_32_LITTLE
+template
+class Sized_target<32, false>;
+#endif
+
+#ifdef HAVE_TARGET_32_BIG
+template
+class Sized_target<32, true>;
+#endif
+
+#ifdef HAVE_TARGET_64_LITTLE
+template
+class Sized_target<64, false>;
+#endif
+
+#ifdef HAVE_TARGET_64_BIG
+template
+class Sized_target<64, true>;
+#endif
 
 } // End namespace gold.

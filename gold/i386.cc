@@ -158,13 +158,13 @@ class Output_data_plt_i386 : public Output_section_data
 //   http://people.redhat.com/drepper/tls.pdf
 //   http://www.lsd.ic.unicamp.br/~oliva/writeups/TLS/RFC-TLSDESC-x86.txt
 
-class Target_i386 : public Target_freebsd<32, false>
+class Target_i386 : public Sized_target<32, false>
 {
  public:
   typedef Output_data_reloc<elfcpp::SHT_REL, true, 32, false> Reloc_section;
 
   Target_i386()
-    : Target_freebsd<32, false>(&i386_info),
+    : Sized_target<32, false>(&i386_info),
       got_(NULL), plt_(NULL), got_plt_(NULL), got_tlsdesc_(NULL),
       global_offset_table_(NULL), rel_dyn_(NULL),
       copy_relocs_(elfcpp::R_386_COPY), dynbss_(NULL),

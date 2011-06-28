@@ -1,5 +1,24 @@
 2011-06-28  Ian Lance Taylor  <iant@google.com>
 
+	* target.h (class Target): Add osabi_ field.
+	(Target::osabi): New function.
+	(Target::set_osabi): New function.
+	(Target::Target): Initialize osabi_.
+	(Target::do_adjust_elf_header): Make pure virtual.
+	(Sized_target::do_adjust_elf_header): Declare.
+	* target.cc (Sized_target::do_adjust_elf_header): New function.
+	(class Sized_target): Instantiate all versions.
+	* freebsd.h (class Target_freebsd): Remove.
+	(Target_selector_freebsd::do_recognize): Call set_osabi on
+	Target.
+	(Target_selector_freebsd::do_recognize_by_name): Likewise.
+	(Target_selector_freebsd::set_osabi): Remove.
+	* i386.cc (class Target_i386): Inherit from Sized_target rather
+	than Target_freebsd.
+	* x86_64.cc (class Target_x86_64): Likewise.
+
+2011-06-28  Ian Lance Taylor  <iant@google.com>
+
 	* target.h (Target::can_check_for_function_pointers): Rewrite.
 	Make non-virtual.
 	(Target::can_icf_inline_merge_sections): Likewise.
