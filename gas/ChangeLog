@@ -1,5 +1,11 @@
 2011-06-28  Tristan Gingold  <gingold@adacore.com>
 
+	* config/tc-alpha.c (load_expression): Use alloca instead of xmalloc.
+	(emit_jsrjmp): Ditto.
+	(tc_gen_reloc): Ditto.
+
+2011-06-28  Tristan Gingold  <gingold@adacore.com>
+
 	* config/tc-alpha.c (alpha_evax_proc_hash): Remove.
 	(alpha_evax_proc_data): New variable.
 	(s_alpha_ent): Prevent nested function.  Remove has_insert call.

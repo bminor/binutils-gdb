@@ -1387,7 +1387,7 @@ load_expression (int targreg,
 		    ptr1 = strstr (symname, "..") + 2;
 		    if (ptr1 > ptr2)
 		      ptr1 = symname;
-		    ensymname = (char *) xmalloc (ptr2 - ptr1 + 5);
+		    ensymname = (char *) alloca (ptr2 - ptr1 + 5);
 		    memcpy (ensymname, ptr1, ptr2 - ptr1);
 		    memcpy (ensymname + (ptr2 - ptr1), "..en", 5);
 
@@ -1419,7 +1419,7 @@ load_expression (int targreg,
 		    ptr1 = strstr (symname, "..") + 2;
 		    if (ptr1 > ptr2)
 		      ptr1 = symname;
-		    psymname = (char *) xmalloc (ptr2 - ptr1 + 1);
+		    psymname = (char *) alloca (ptr2 - ptr1 + 1);
 		    memcpy (psymname, ptr1, ptr2 - ptr1);
 		    psymname [ptr2 - ptr1] = 0;
 
@@ -2884,7 +2884,7 @@ emit_jsrjmp (const expressionS *tok,
       char *ensymname;
 
       /* Build the entry name as 'NAME..en'.  */
-      ensymname = (char *) xmalloc (symlen + 5);
+      ensymname = (char *) alloca (symlen + 5);
       memcpy (ensymname, symname, symlen);
       memcpy (ensymname + symlen, "..en", 5);
 
@@ -6282,11 +6282,14 @@ tc_gen_reloc (asection *sec ATTRIBUTE_UNUSED,
       if (pname_len > 4 && strcmp (pname + pname_len - 4, "..en") == 0)
 	{
 	  symbolS *sym;
-	  char *my_pname = xstrdup (pname);
+	  char *my_pname = (char *) alloca (pname_len - 4 + 1);
+
+	  memcpy (my_pname, pname, pname_len - 4);
 	  my_pname [pname_len - 4] = 0;
 	  sym = symbol_find (my_pname);
 	  if (sym == NULL)
 	    abort ();
+
 	  while (symbol_equated_reloc_p (sym))
 	    {
 	      symbolS *n = symbol_get_value_expression (sym)->X_add_symbol;
