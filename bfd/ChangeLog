@@ -1,3 +1,9 @@
+2011-06-28  Tristan Gingold  <gingold@adacore.com>
+
+	* vms-alpha.c (vms_private_data_struct): Make vms_linkage_index
+	unsigned int.
+	(_bfd_vms_write_etir): Write linkage index from reloc.
+
 2011-06-28  Fawzi Mohamed <fawzi.mohamed@nokia.com>
 
 	* mach-o.c (bfd_mach_o_read_command): Also ignore

@@ -330,7 +330,7 @@ struct vms_private_data_struct
   struct vms_internal_eisd_map *gbl_eisd_tail;
 
   /* linkage index counter used by conditional store commands */
-  int vms_linkage_index;
+  unsigned int vms_linkage_index;
 
   /* see tc-alpha.c of gas for a description.  */
   int flag_hash_long_names;	/* -+, hash instead of truncate */
@@ -3947,8 +3947,9 @@ _bfd_vms_write_etir (bfd * abfd, int objtype ATTRIBUTE_UNUSED)
 		  etir_output_check (abfd, section, curr_addr, 64);
 		  _bfd_vms_output_begin_subrec (recwr, ETIR__C_STC_LP_PSB);
 		  _bfd_vms_output_long
-		    (recwr, (unsigned long) PRIV (vms_linkage_index));
-		  PRIV (vms_linkage_index) += 2;
+		    (recwr, (unsigned long) rptr->addend);
+                  if (rptr->addend > PRIV (vms_linkage_index))
+                    PRIV (vms_linkage_index) = rptr->addend;
 		  hash = _bfd_vms_length_hash_symbol
                     (abfd, sym->name, EOBJ__C_SYMSIZ);
 		  _bfd_vms_output_counted (recwr, hash);
