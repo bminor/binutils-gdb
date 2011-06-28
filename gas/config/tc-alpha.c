@@ -4590,19 +4590,15 @@ s_alpha_pdesc (int ignore ATTRIBUTE_UNUSED)
   /* Signature offset.  */
   md_number_to_chars (p + 6, (valueT) 0, 2);
 
-  fix_new_exp (frag_now, p - frag_now->fr_literal+8, 8, &exp, 0, BFD_RELOC_64);
+  fix_new_exp (frag_now, p - frag_now->fr_literal + 8,
+               8, &exp, 0, BFD_RELOC_64);
 
   if (alpha_evax_proc->pdsckind == PDSC_S_K_KIND_NULL)
     return;
 
-  /* Add dummy fix to make add_to_link_pool work.  */
-  p = frag_more (6);
-  fixp = fix_new (frag_now, p - frag_now->fr_literal, 6, 0, 0, 0, 0);
-  fixp->fx_done = 1;
-  
   /* pdesc+16: Size.  */
+  p = frag_more (6);
   md_number_to_chars (p, (valueT) alpha_evax_proc->framesize, 4);
-
   md_number_to_chars (p + 4, (valueT) 0, 2);
 
   /* Entry length.  */
@@ -4614,13 +4610,8 @@ s_alpha_pdesc (int ignore ATTRIBUTE_UNUSED)
   if (alpha_evax_proc->pdsckind == PDSC_S_K_KIND_FP_REGISTER)
     return;
 
-  /* Add dummy fix to make add_to_link_pool work.  */
-  p = frag_more (8);
-  fixp = fix_new (frag_now, p - frag_now->fr_literal, 8, 0, 0, 0, 0);
-  fixp->fx_done = 1;
-
   /* pdesc+24: register masks.  */
-
+  p = frag_more (8);
   md_number_to_chars (p, alpha_evax_proc->imask, 4);
   md_number_to_chars (p + 4, alpha_evax_proc->fmask, 4);
 
@@ -4633,10 +4624,7 @@ s_alpha_pdesc (int ignore ATTRIBUTE_UNUSED)
 
   if (alpha_evax_proc->handler_data)
     {
-      /* Add dummy fix to make add_to_link_pool work.  */
       p = frag_more (8);
-      fixp = fix_new (frag_now, p - frag_now->fr_literal, 8, 0, 0, 0, 0);
-      fixp->fx_done = 1;
       md_number_to_chars (p, alpha_evax_proc->handler_data, 8);
     }
 }

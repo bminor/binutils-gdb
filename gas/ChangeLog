@@ -1,5 +1,10 @@
 2011-06-28  Tristan Gingold  <gingold@adacore.com>
 
+	* config/tc-alpha.c (s_alpha_pdesc): Fix indentation. Do not
+	generate dummy fix.
+
+2011-06-28  Tristan Gingold  <gingold@adacore.com>
+
 	* config/tc-alpha.c (load_expression): Use alloca instead of xmalloc.
 	(emit_jsrjmp): Ditto.
 	(tc_gen_reloc): Ditto.
