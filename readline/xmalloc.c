@@ -33,12 +33,16 @@
 #endif /* HAVE_STDLIB_H */
 
 #include "xmalloc.h"
+#include "readline.h"
 
 /* **************************************************************** */
 /*								    */
 /*		   Memory Allocation and Deallocation.		    */
 /*								    */
 /* **************************************************************** */
+
+/* xmalloc and xrealloc are provided by GDB.  */
+#if 0
 
 static void
 memory_error_and_abort (fname)
@@ -77,12 +81,20 @@ xrealloc (pointer, bytes)
   return (temp);
 }
 
+/* xmalloc and xrealloc are provided by GDB.  */
+#endif /* 0 */
+
 /* Use this as the function to call when adding unwind protects so we
    don't need to know what free() returns. */
 void
 xfree (string)
      PTR_T string;
 {
+  /* Leak a bit.  */
+  if (RL_ISSTATE(RL_STATE_SIGHANDLER))
+    return;
+
+#undef free
   if (string)
     free (string);
 }
