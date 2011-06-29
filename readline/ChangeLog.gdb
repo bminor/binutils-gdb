@@ -1,3 +1,11 @@
+2011-06-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Avoid free from a signal handler.
+	* Makefile.in (xfree.o): Add readline.h.
+	* xfree.c: Include stdio.h and readline.h.
+	(xfree): Return on RL_STATE_SIGHANDLER.
+	* xmalloc.h (xfree): New definition.
+
 2011-05-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Workaround gdb.base/completion.exp regression on readline-6.2.

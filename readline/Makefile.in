@@ -422,7 +422,7 @@ vi_mode.o: rldefs.h ${BUILD_DIR}/config.h rlconf.h
 vi_mode.o: readline.h keymaps.h rltypedefs.h chardefs.h tilde.h
 vi_mode.o: history.h ansi_stdlib.h rlstdc.h
 xfree.o: ${BUILD_DIR}/config.h
-xfree.o: ansi_stdlib.h
+xfree.o: ansi_stdlib.h readline.h
 xmalloc.o: ${BUILD_DIR}/config.h
 xmalloc.o: ansi_stdlib.h
 
