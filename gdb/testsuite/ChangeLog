@@ -1,5 +1,17 @@
 2011-06-29  Tom Tromey  <tromey@redhat.com>
 
+	PR testsuite/12040:
+	* gdb.fortran/array-element.exp: Use f90, not f77.
+	* gdb.fortran/complex.exp: Use f90, not f77.
+	* gdb.fortran/derived-type.exp: Use f90, not f77.
+	* gdb.fortran/library-module.exp: Use f90, not f77.
+	* gdb.fortran/logical.exp: Use f90, not f77.
+	* gdb.fortran/module.exp: Use f90, not f77.
+	* gdb.fortran/multi-dim.exp: Use f90, not f77.
+	* gdb.fortran/subarray.exp: Use f90, not f77.
+
+2011-06-29  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.fortran/charset.exp: New file.
 	* gdb.fortran/charset.f90: New file.
 

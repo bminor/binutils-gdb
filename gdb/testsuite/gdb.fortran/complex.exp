@@ -18,7 +18,7 @@ set srcfile ${testfile}.f
 set binfile ${objdir}/${subdir}/${testfile}
 
 if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" \
-	  executable {debug f77 quiet}] != "" } {
+	  executable {debug f90 quiet}] != "" } {
     untested "Couldn't compile ${srcfile}"
     return -1
 }

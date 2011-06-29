@@ -29,7 +29,7 @@ set srcfile ${testfile}.f
 set binfile ${objdir}/${subdir}/${testfile}
 
 if {[gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" \
-	executable {debug f77}] != ""} {
+	executable {debug f90}] != ""} {
     return -1
 }
 
