@@ -4435,8 +4435,6 @@ bpstat_what (bpstat bs_head)
 	     breakpoint which has since been deleted.  */
 	  bptype = bp_none;
 	}
-      else if (bs->breakpoint_at == NULL)
-	bptype = bp_none;
       else
 	bptype = bs->breakpoint_at->type;
 
