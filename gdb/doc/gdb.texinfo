@@ -36368,10 +36368,6 @@ The formal DTD for the traceframe info format is given below:
 @appendix Target Descriptions
 @cindex target descriptions
 
-@strong{Warning:} target descriptions are still under active development,
-and the contents and format may change between @value{GDBN} releases.
-The format is expected to stabilize in the future.
-
 One of the challenges of using @value{GDBN} to debug embedded systems
 is that there are so many minor variants of each processor
 architecture in use.  It is common practice for vendors to start with
