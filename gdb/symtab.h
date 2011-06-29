@@ -779,6 +779,11 @@ struct symtab
 
   unsigned int locations_valid : 1;
 
+  /* DWARF unwinder for this CU is valid even for epilogues (PC at the return
+     instruction).  This is supported by GCC since 4.5.0.  */
+
+  unsigned int epilogue_unwind_valid : 1;
+
   /* The macro table for this symtab.  Like the blockvector, this
      may be shared between different symtabs --- and normally is for
      all the symtabs in a given compilation unit.  */

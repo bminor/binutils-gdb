@@ -2219,6 +2219,11 @@ static int
 amd64_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   gdb_byte insn;
+  struct symtab *symtab;
+
+  symtab = find_pc_symtab (pc);
+  if (symtab && symtab->epilogue_unwind_valid)
+    return 0;
 
   if (target_read_memory (pc, &insn, 1))
     return 0;   /* Can't read memory at pc.  */

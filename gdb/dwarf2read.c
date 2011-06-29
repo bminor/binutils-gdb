@@ -4751,6 +4751,9 @@ process_full_comp_unit (struct dwarf2_per_cu_data *per_cu)
 	 */ 
       if (cu->has_loclist && gcc_4_minor >= 0)
 	symtab->locations_valid = 1;
+
+      if (gcc_4_minor >= 5)
+	symtab->epilogue_unwind_valid = 1;
     }
 
   if (dwarf2_per_objfile->using_index)
