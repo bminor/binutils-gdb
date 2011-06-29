@@ -511,7 +511,9 @@ bool
 Sized_relobj_file<size, big_endian>::check_eh_frame_flags(
     const elfcpp::Shdr<size, big_endian>* shdr) const
 {
-  return (shdr->get_sh_type() == elfcpp::SHT_PROGBITS
+  elfcpp::Elf_Word sh_type = shdr->get_sh_type();
+  return ((sh_type == elfcpp::SHT_PROGBITS
+	   || sh_type == elfcpp::SHT_X86_64_UNWIND)
 	  && (shdr->get_sh_flags() & elfcpp::SHF_ALLOC) != 0);
 }
 

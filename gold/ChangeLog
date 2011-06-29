@@ -1,5 +1,12 @@
 2011-06-29  Ian Lance Taylor  <iant@google.com>
 
+	PR gold/12675
+	* object.cc (Sized_relobj_file::check_eh_frame_flags): Check for
+	SHT_X86_64_UNWIND.
+	* layout.cc (Layout::layout_eh_frame): Likewise.
+
+2011-06-29  Ian Lance Taylor  <iant@google.com>
+
 	PR gold/12695
 	* layout.cc (Layout::symtab_section_shndx): New function.
 	* layout.h (class Layout): Declare symtab_section_shndx.

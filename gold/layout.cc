@@ -1132,7 +1132,8 @@ Layout::layout_eh_frame(Sized_relobj_file<size, big_endian>* object,
 			unsigned int reloc_shndx, unsigned int reloc_type,
 			off_t* off)
 {
-  gold_assert(shdr.get_sh_type() == elfcpp::SHT_PROGBITS);
+  gold_assert(shdr.get_sh_type() == elfcpp::SHT_PROGBITS
+	      || shdr.get_sh_type() == elfcpp::SHT_X86_64_UNWIND);
   gold_assert((shdr.get_sh_flags() & elfcpp::SHF_ALLOC) != 0);
 
   const char* const name = ".eh_frame";
