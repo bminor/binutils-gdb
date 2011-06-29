@@ -1,5 +1,13 @@
 2011-06-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Code cleanup - reformatting.
+	* dwarf2read.c (producer_is_gcc_ge_4_0): Rename to ...
+	(producer_is_gcc_ge_4): ... here, change the return value.
+	(process_full_comp_unit): New variable gcc_4_minor, adjust the value
+	interpretation.
+
+2011-06-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Fix non-only rename list for Fortran modules import.
 	* cp-namespace.c (cp_scan_for_anonymous_namespaces): Adjust the
 	cp_add_using_directive caller.
