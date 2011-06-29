@@ -701,6 +701,10 @@ class Layout
   off_t
   symtab_section_offset() const;
 
+  // Return the section index of the normal symbol tabl.e
+  unsigned int
+  symtab_section_shndx() const;
+
   // Return the dynamic symbol table.
   Output_section*
   dynsym_section() const

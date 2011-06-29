@@ -4536,6 +4536,17 @@ Layout::symtab_section_offset() const
   return 0;
 }
 
+// Return the section index of the normal symbol table.  It may have
+// been stripped by the -s/--strip-all option.
+
+unsigned int
+Layout::symtab_section_shndx() const
+{
+  if (this->symtab_section_ != NULL)
+    return this->symtab_section_->out_shndx();
+  return 0;
+}
+
 // Write out the Output_sections.  Most won't have anything to write,
 // since most of the data will come from input sections which are
 // handled elsewhere.  But some Output_sections do have Output_data.

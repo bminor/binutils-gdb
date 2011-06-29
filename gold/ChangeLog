@@ -1,5 +1,12 @@
 2011-06-29  Ian Lance Taylor  <iant@google.com>
 
+	PR gold/12695
+	* layout.cc (Layout::symtab_section_shndx): New function.
+	* layout.h (class Layout): Declare symtab_section_shndx.
+	* output.cc (Output_section::write_header): Call it.
+
+2011-06-29  Ian Lance Taylor  <iant@google.com>
+
 	PR gold/12818
 	* symtab.cc (Symbol::should_add_dynsym_entry): Don't add undefined
 	symbols which are not used in a relocation.

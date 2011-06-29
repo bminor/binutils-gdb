@@ -3390,7 +3390,7 @@ Output_section::write_header(const Layout* layout,
   if (this->link_section_ != NULL)
     oshdr->put_sh_link(this->link_section_->out_shndx());
   else if (this->should_link_to_symtab_)
-    oshdr->put_sh_link(layout->symtab_section()->out_shndx());
+    oshdr->put_sh_link(layout->symtab_section_shndx());
   else if (this->should_link_to_dynsym_)
     oshdr->put_sh_link(layout->dynsym_section()->out_shndx());
   else
