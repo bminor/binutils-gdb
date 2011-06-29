@@ -414,6 +414,7 @@ Symbol::should_add_dynsym_entry(Symbol_table* symtab) const
   // externally visible, we need to add it.
   if ((parameters->options().export_dynamic() || parameters->options().shared())
       && !this->is_from_dynobj()
+      && !this->is_undefined()
       && this->is_externally_visible())
     return true;
 
