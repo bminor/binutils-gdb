@@ -51,6 +51,9 @@ gdb_test "print var_b" " = 11"
 gdb_test "print var_c" "No symbol \"var_c\" in current context\\."
 gdb_test "print var_d" " = 12"
 gdb_test "print var_i" " = 14" "print var_i value 14"
+gdb_test "print var_x" " = 30" "print var_x value 30"
+gdb_test "print var_y" "No symbol \"var_y\" in current context\\."
+gdb_test "print var_z" " = 31" "print var_x value 31"
 
 gdb_test "ptype modmany" {No symbol "modmany" in current context.}
 

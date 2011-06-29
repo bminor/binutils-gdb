@@ -95,7 +95,7 @@ cp_scan_for_anonymous_namespaces (const struct symbol *symbol)
 		 anonymous namespace.  So add symbols in it to the
 		 namespace given by the previous component if there is
 		 one, or to the global namespace if there isn't.  */
-	      cp_add_using_directive (dest, src, NULL, NULL,
+	      cp_add_using_directive (dest, src, NULL, NULL, NULL,
 	                              &SYMBOL_SYMTAB (symbol)->objfile->objfile_obstack);
 	    }
 	  /* The "+ 2" is for the "::".  */
@@ -116,14 +116,17 @@ cp_scan_for_anonymous_namespaces (const struct symbol *symbol)
    in the current scope.  If ALIAS is NULL then the namespace is known
    by its original name.  DECLARATION is the name if the imported
    varable if this is a declaration import (Eg. using A::x), otherwise
-   it is NULL.  The arguments are copied into newly allocated memory
-   so they can be temporaries.  */
+   it is NULL.  EXCLUDES is a list of names not to import from an imported
+   module or NULL.  The arguments are copied into newly allocated memory so
+   they can be temporaries.  For EXCLUDES the VEC pointers are copied but the
+   pointed to characters are not copied.  */
 
 void
 cp_add_using_directive (const char *dest,
 			const char *src,
 			const char *alias,
 			const char *declaration,
+			VEC (const_char_ptr) *excludes,
                         struct obstack *obstack)
 {
   struct using_direct *current;
@@ -133,6 +136,9 @@ cp_add_using_directive (const char *dest,
 
   for (current = using_directives; current != NULL; current = current->next)
     {
+      int ix;
+      const char *param;
+
       if (strcmp (current->import_src, src) != 0)
 	continue;
       if (strcmp (current->import_dest, dest) != 0)
@@ -148,11 +154,23 @@ cp_add_using_directive (const char *dest,
 	      && strcmp (declaration, current->declaration) != 0))
 	continue;
 
+      /* Compare the contents of EXCLUDES.  */
+      for (ix = 0; VEC_iterate (const_char_ptr, excludes, ix, param); ix++)
+	if (current->excludes[ix] == NULL
+	    || strcmp (param, current->excludes[ix]) != 0)
+	  break;
+      if (ix < VEC_length (const_char_ptr, excludes)
+	  || current->excludes[ix] != NULL)
+	continue;
+
       /* Parameters exactly match CURRENT.  */
       return;
     }
 
-  new = OBSTACK_ZALLOC (obstack, struct using_direct);
+  new = obstack_alloc (obstack, (sizeof (*new)
+				 + (VEC_length (const_char_ptr, excludes)
+				    * sizeof (*new->excludes))));
+  memset (new, 0, sizeof (*new));
 
   new->import_src = obsavestring (src, strlen (src), obstack);
   new->import_dest = obsavestring (dest, strlen (dest), obstack);
@@ -163,6 +181,10 @@ cp_add_using_directive (const char *dest,
   if (declaration != NULL)
     new->declaration = obsavestring (declaration, strlen (declaration),
                                      obstack);
+
+  memcpy (new->excludes, VEC_address (const_char_ptr, excludes),
+	  VEC_length (const_char_ptr, excludes) * sizeof (*new->excludes));
+  new->excludes[VEC_length (const_char_ptr, excludes)] = NULL;
 
   new->next = using_directives;
   using_directives = new;
@@ -332,6 +354,8 @@ cp_lookup_symbol_imports (const char *scope,
        current != NULL;
        current = current->next)
     {
+      const char **excludep;
+
       len = strlen (current->import_dest);
       directive_match = (search_parents
                          ? (strncmp (scope, current->import_dest,
@@ -376,6 +400,16 @@ cp_lookup_symbol_imports (const char *scope,
 
             continue;
           }
+
+	/* Do not follow CURRENT if NAME matches its EXCLUDES.  */
+	for (excludep = current->excludes; *excludep; excludep++)
+	  if (strcmp (name, *excludep) == 0)
+	    break;
+	if (*excludep)
+	  {
+	    discard_cleanups (searched_cleanup);
+	    continue;
+	  }
 
 	if (current->alias != NULL
 	    && strcmp (name, current->alias) == 0)

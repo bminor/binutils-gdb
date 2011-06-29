@@ -271,9 +271,10 @@ struct cleanup
     void *arg;
   };
 
-/* vec.h-style vectors of strings want a typedef for char * .  */
+/* vec.h-style vectors of strings want a typedef for char * or const char *.  */
 
 typedef char * char_ptr;
+typedef const char * const_char_ptr;
 
 /* Needed for various prototypes */
 

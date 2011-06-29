@@ -1,3 +1,11 @@
+2011-06-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix non-only rename list for Fortran modules import.
+	* gdb.fortran/module.exp (print var_x, print var_y, print var_z): New
+	tests.
+	* gdb.fortran/module.f90 (module moduse): New.
+	(program module): use moduse, test var_x, var_y and var_z.
+
 2011-06-29  Tom Tromey  <tromey@redhat.com>
 
 	PR testsuite/12040:

@@ -1,5 +1,24 @@
 2011-06-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Fix non-only rename list for Fortran modules import.
+	* cp-namespace.c (cp_scan_for_anonymous_namespaces): Adjust the
+	cp_add_using_directive caller.
+	(cp_add_using_directive): New parameter excludes, describe it.  New
+	variables ix and param.  Compare if also excludes match.  Allocate NEW
+	with variable size, initialize EXCLUDES there.
+	(cp_lookup_symbol_imports): New variable excludep, test
+	current->EXCLUDES with it.
+	* cp-support.h: Include vec.h.
+	(struct using_direct): New field excludes, describe it.
+	(DEF_VEC_P (const_char_ptr)): New.
+	(cp_add_using_directive): New parameter excludes.
+	* defs.h (const_char_ptr): New typedef.
+	* dwarf2read.c (read_import_statement): New variables child_die,
+	excludes and cleanups, read in excludes.
+	(read_namespace): Adjust the cp_add_using_directive caller.
+
+2011-06-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Code cleanup.
 	* cp-namespace.c (cp_add_using_directive): Turn positive comparison to
 	negative comparisons.

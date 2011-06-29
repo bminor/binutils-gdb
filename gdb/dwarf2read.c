@@ -5178,7 +5178,7 @@ static void
 read_import_statement (struct die_info *die, struct dwarf2_cu *cu)
 {
   struct attribute *import_attr;
-  struct die_info *imported_die;
+  struct die_info *imported_die, *child_die;
   struct dwarf2_cu *imported_cu;
   const char *imported_name;
   const char *imported_name_prefix;
@@ -5186,6 +5186,8 @@ read_import_statement (struct die_info *die, struct dwarf2_cu *cu)
   const char *import_alias;
   const char *imported_declaration = NULL;
   const char *import_prefix;
+  VEC (const_char_ptr) *excludes = NULL;
+  struct cleanup *cleanups;
 
   char *temp;
 
@@ -5265,11 +5267,60 @@ read_import_statement (struct die_info *die, struct dwarf2_cu *cu)
   else
     canonical_name = imported_name;
 
+  cleanups = make_cleanup (VEC_cleanup (const_char_ptr), &excludes);
+
+  if (die->tag == DW_TAG_imported_module && cu->language == language_fortran)
+    for (child_die = die->child; child_die && child_die->tag;
+	 child_die = sibling_die (child_die))
+      {
+	/* DWARF-4: A Fortran use statement with a “rename list” may be
+	   represented by an imported module entry with an import attribute
+	   referring to the module and owned entries corresponding to those
+	   entities that are renamed as part of being imported.  */
+
+	if (child_die->tag != DW_TAG_imported_declaration)
+	  {
+	    complaint (&symfile_complaints,
+		       _("child DW_TAG_imported_declaration expected "
+			 "- DIE at 0x%x [in module %s]"),
+		       child_die->offset, cu->objfile->name);
+	    continue;
+	  }
+
+	import_attr = dwarf2_attr (child_die, DW_AT_import, cu);
+	if (import_attr == NULL)
+	  {
+	    complaint (&symfile_complaints, _("Tag '%s' has no DW_AT_import"),
+		       dwarf_tag_name (child_die->tag));
+	    continue;
+	  }
+
+	imported_cu = cu;
+	imported_die = follow_die_ref_or_sig (child_die, import_attr,
+					      &imported_cu);
+	imported_name = dwarf2_name (imported_die, imported_cu);
+	if (imported_name == NULL)
+	  {
+	    complaint (&symfile_complaints,
+		       _("child DW_TAG_imported_declaration has unknown "
+			 "imported name - DIE at 0x%x [in module %s]"),
+		       child_die->offset, cu->objfile->name);
+	    continue;
+	  }
+
+	VEC_safe_push (const_char_ptr, excludes, imported_name);
+
+	process_die (child_die, cu);
+      }
+
   cp_add_using_directive (import_prefix,
                           canonical_name,
                           import_alias,
                           imported_declaration,
+			  excludes,
                           &cu->objfile->objfile_obstack);
+
+  do_cleanups (cleanups);
 }
 
 static void
@@ -7797,7 +7848,7 @@ read_namespace (struct die_info *die, struct dwarf2_cu *cu)
 	  const char *previous_prefix = determine_prefix (die, cu);
 
 	  cp_add_using_directive (previous_prefix, TYPE_NAME (type), NULL,
-	                          NULL, &objfile->objfile_obstack);
+				  NULL, NULL, &objfile->objfile_obstack);
 	}
     }
 
