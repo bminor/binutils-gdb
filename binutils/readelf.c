@@ -3084,7 +3084,9 @@ get_section_type_name (unsigned int sh_type)
       else if ((sh_type >= SHT_LOUSER) && (sh_type <= SHT_HIUSER))
 	sprintf (buff, "LOUSER+%x", sh_type - SHT_LOUSER);
       else
-	snprintf (buff, sizeof (buff), _("<unknown>: %x"), sh_type);
+	/* This message is probably going to be displayed in a 15
+	   character wide field, so put the hex value first.  */
+	snprintf (buff, sizeof (buff), _("%08x: <unknown>"), sh_type);
 
       return buff;
     }

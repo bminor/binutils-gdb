@@ -1,3 +1,10 @@
+2011-06-29  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (get_section_type_name): When displaying an unknown
+	section type display the hex value first on the assumption that
+	the full message will probably be truncated into a 15 character
+	field.
+
 2011-06-22  Jakub Jelinek  <jakub@redhat.com>
 
 	* dwarf.c (decode_location_expression): For DW_OP_GNU_convert and
