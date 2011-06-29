@@ -3610,13 +3610,6 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	      delay.fixed_p = 1;
 	      insert_into_history (0, 1, &delay);
 	    }
-
-	  /* If that was an unconditional branch, forget the previous
-	     insn information.  */
-	  if (pinfo & INSN_UNCOND_BRANCH_DELAY)
-	    {
-	      mips_no_prev_insn ();
-	    }
 	}
       else if (pinfo & INSN_COND_BRANCH_LIKELY)
 	{
@@ -3632,6 +3625,12 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
     }
   else
     insert_into_history (0, 1, ip);
+
+  /* If we have just completed an unconditional branch, clear the history.  */
+  if ((history[1].insn_mo->pinfo & INSN_UNCOND_BRANCH_DELAY)
+      || (mips_opts.mips16
+	  && (history[0].insn_mo->pinfo & MIPS16_INSN_UNCOND_BRANCH)))
+    mips_no_prev_insn ();
 
   /* We just output an insn, so the next one doesn't have a label.  */
   mips_clear_insn_labels ();
