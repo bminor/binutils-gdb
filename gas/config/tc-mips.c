@@ -121,6 +121,21 @@ extern int target_big_endian;
 			    ? ".rodata" \
 			    : (abort (), ""))
 
+/* Ways in which an instruction can be "appended" to the output.  */
+enum append_method {
+  /* Just add it normally.  */
+  APPEND_ADD,
+
+  /* Add it normally and then add a nop.  */
+  APPEND_ADD_WITH_NOP,
+
+  /* Turn an instruction with a delay slot into a "compact" version.  */
+  APPEND_ADD_COMPACT,
+
+  /* Insert the instruction before the last one.  */
+  APPEND_SWAP
+};
+
 /* Information about an instruction, including its format, operands
    and fixups.  */
 struct mips_cl_insn
@@ -3073,6 +3088,168 @@ fix_loongson2f (struct mips_cl_insn * ip)
     fix_loongson2f_jump (ip);
 }
 
+/* IP is a branch that has a delay slot, and we need to fill it
+   automatically.   Return true if we can do that by swapping IP
+   with the previous instruction.  */
+
+static bfd_boolean
+can_swap_branch_p (struct mips_cl_insn *ip)
+{
+  unsigned long pinfo, prev_pinfo;
+  unsigned int gpr_read, gpr_write, prev_gpr_read, prev_gpr_write;
+
+  /* -O2 and above is required for this optimization.  */
+  if (mips_optimize < 2)
+    return FALSE;
+
+  /* If we have seen .set volatile or .set nomove, don't optimize.  */
+  if (mips_opts.nomove)
+    return FALSE;
+
+  /* We can't swap if the previous instruction's position is fixed.  */
+  if (history[0].fixed_p)
+    return FALSE;
+
+  /* If the previous previous insn was in a .set noreorder, we can't
+     swap.  Actually, the MIPS assembler will swap in this situation.
+     However, gcc configured -with-gnu-as will generate code like
+
+	.set	noreorder
+	lw	$4,XXX
+	.set	reorder
+	INSN
+	bne	$4,$0,foo
+
+     in which we can not swap the bne and INSN.  If gcc is not configured
+     -with-gnu-as, it does not output the .set pseudo-ops.  */
+  if (history[1].noreorder_p)
+    return FALSE;
+
+  /* If the previous instruction had a fixup in mips16 mode, we can not
+     swap.  This normally means that the previous instruction was a 4
+     byte branch anyhow.  */
+  if (mips_opts.mips16 && history[0].fixp[0])
+    return FALSE;
+
+  /* If the branch is itself the target of a branch, we can not swap.
+     We cheat on this; all we check for is whether there is a label on
+     this instruction.  If there are any branches to anything other than
+     a label, users must use .set noreorder.  */
+  if (seg_info (now_seg)->label_list)
+    return FALSE;
+
+  /* If the previous instruction is in a variant frag other than this
+     branch's one, we cannot do the swap.  This does not apply to the
+     mips16, which uses variant frags for different purposes.  */
+  if (!mips_opts.mips16
+      && history[0].frag
+      && history[0].frag->fr_type == rs_machine_dependent)
+    return FALSE;
+
+  /* We do not swap with a trap instruction, since it complicates trap
+     handlers to have the trap instruction be in a delay slot.  */
+  prev_pinfo = history[0].insn_mo->pinfo;
+  if (prev_pinfo & INSN_TRAP)
+    return FALSE;
+
+  /* If the previous instruction is a sync, sync.l, or sync.p, we can
+     not swap.  */
+  if (prev_pinfo & INSN_SYNC)
+    return FALSE;
+
+  /* If the previous instruction is an ERET or DERET, avoid the swap.  */
+  if (history[0].insn_opcode == INSN_ERET)
+    return FALSE;
+  if (history[0].insn_opcode == INSN_DERET)
+    return FALSE;
+
+  /* Check for conflicts between the branch and the instructions
+     before the candidate delay slot.  */
+  if (nops_for_insn (0, history + 1, ip) > 0)
+    return FALSE;
+
+  /* Check for conflicts between the swapped sequence and the
+     target of the branch.  */
+  if (nops_for_sequence (2, 0, history + 1, ip, history) > 0)
+    return FALSE;
+
+  /* If the branch reads a register that the previous
+     instruction sets, we can not swap.  */
+  gpr_read = gpr_read_mask (ip);
+  prev_gpr_write = gpr_write_mask (&history[0]);
+  if (gpr_read & prev_gpr_write)
+    return FALSE;
+
+  /* If the branch writes a register that the previous
+     instruction sets, we can not swap.  */
+  gpr_write = gpr_write_mask (ip);
+  if (gpr_write & prev_gpr_write)
+    return FALSE;
+
+  /* If the branch writes a register that the previous
+     instruction reads, we can not swap.  */
+  prev_gpr_read = gpr_read_mask (&history[0]);
+  if (gpr_write & prev_gpr_read)
+    return FALSE;
+
+  /* If one instruction sets a condition code and the
+     other one uses a condition code, we can not swap.  */
+  pinfo = ip->insn_mo->pinfo;
+  if ((pinfo & INSN_READ_COND_CODE)
+      && (prev_pinfo & INSN_WRITE_COND_CODE))
+    return FALSE;
+  if ((pinfo & INSN_WRITE_COND_CODE)
+      && (prev_pinfo & INSN_READ_COND_CODE))
+    return FALSE;
+
+  /* If the previous instruction uses the PC, we can not swap.  */
+  if (mips_opts.mips16 && (prev_pinfo & MIPS16_INSN_READ_PC))
+    return FALSE;
+
+  return TRUE;
+}
+
+/* Decide how we should add IP to the instruction stream.  */
+
+static enum append_method
+get_append_method (struct mips_cl_insn *ip)
+{
+  unsigned long pinfo;
+
+  /* The relaxed version of a macro sequence must be inherently
+     hazard-free.  */
+  if (mips_relax.sequence == 2)
+    return APPEND_ADD;
+
+  /* We must not dabble with instructions in a ".set norerorder" block.  */
+  if (mips_opts.noreorder)
+    return APPEND_ADD;
+
+  /* Otherwise, it's our responsibility to fill branch delay slots.  */
+  pinfo = ip->insn_mo->pinfo;
+  if ((pinfo & INSN_UNCOND_BRANCH_DELAY)
+      || (pinfo & INSN_COND_BRANCH_DELAY))
+    {
+      if (can_swap_branch_p (ip))
+	return APPEND_SWAP;
+
+      if (mips_opts.mips16
+	  && ISA_SUPPORTS_MIPS16E
+	  && (pinfo & INSN_UNCOND_BRANCH_DELAY)
+	  && (pinfo & (MIPS16_INSN_READ_X | MIPS16_INSN_READ_31)))
+	return APPEND_ADD_COMPACT;
+
+      return APPEND_ADD_WITH_NOP;
+    }
+
+  /* We don't bother trying to track the target of branches, so there's
+     nothing we can use to fill a branch-likely slot.  */
+  if (pinfo & INSN_COND_BRANCH_LIKELY)
+    return APPEND_ADD_WITH_NOP;
+
+  return APPEND_ADD;
+}
+
 /* IP is a MIPS16 instruction whose opcode we have just changed.
    Point IP->insn_mo to the new opcode's definition.  */
 
@@ -3101,9 +3278,8 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 {
   unsigned long prev_pinfo, pinfo;
   unsigned long prev_pinfo2, pinfo2;
-  relax_stateT prev_insn_frag_type = 0;
   bfd_boolean relaxed_branch = FALSE;
-  segment_info_type *si = seg_info (now_seg);
+  enum append_method method;
 
   if (mips_fix_loongson2f)
     fix_loongson2f (ip);
@@ -3273,6 +3449,8 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	}
     }
 
+  method = get_append_method (ip);
+
 #ifdef OBJ_ELF
   /* The value passed to dwarf2_emit_insn is the distance between
      the beginning of the current instruction and the address that
@@ -3281,10 +3459,6 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
      address higher by one than the current.  */
   dwarf2_emit_insn (mips_opts.mips16 ? -1 : 0);
 #endif
-
-  /* Record the frag type before frag_var.  */
-  if (history[0].frag)
-    prev_insn_frag_type = history[0].frag->fr_type;
 
   if (address_expr
       && *reloc_type == BFD_RELOC_16_PCREL_S2
@@ -3469,158 +3643,59 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
   mips_gprmask |= gpr_read_mask (ip) | gpr_write_mask (ip);
   mips_cprmask[1] |= fpr_read_mask (ip) | fpr_write_mask (ip);
 
-  if (mips_relax.sequence != 2 && !mips_opts.noreorder)
+  switch (method)
     {
-      /* Filling the branch delay slot is more complex.  We try to
-	 switch the branch with the previous instruction, which we can
-	 do if the previous instruction does not set up a condition
-	 that the branch tests and if the branch is not itself the
-	 target of any branch.  */
-      if ((pinfo & INSN_UNCOND_BRANCH_DELAY)
-	  || (pinfo & INSN_COND_BRANCH_DELAY))
-	{
-	  if (mips_optimize < 2
-	      /* If we have seen .set volatile or .set nomove, don't
-		 optimize.  */
-	      || mips_opts.nomove != 0
-	      /* We can't swap if the previous instruction's position
-		 is fixed.  */
-	      || history[0].fixed_p
-	      /* If the previous previous insn was in a .set
-		 noreorder, we can't swap.  Actually, the MIPS
-		 assembler will swap in this situation.  However, gcc
-		 configured -with-gnu-as will generate code like
-		   .set noreorder
-		   lw	$4,XXX
-		   .set	reorder
-		   INSN
-		   bne	$4,$0,foo
-		 in which we can not swap the bne and INSN.  If gcc is
-		 not configured -with-gnu-as, it does not output the
-		 .set pseudo-ops.  */
-	      || history[1].noreorder_p
-	      /* If the branch is itself the target of a branch, we
-		 can not swap.  We cheat on this; all we check for is
-		 whether there is a label on this instruction.  If
-		 there are any branches to anything other than a
-		 label, users must use .set noreorder.  */
-	      || si->label_list != NULL
-	      /* If the previous instruction is in a variant frag
-		 other than this branch's one, we cannot do the swap.
-		 This does not apply to the mips16, which uses variant
-		 frags for different purposes.  */
-	      || (! mips_opts.mips16
-		  && prev_insn_frag_type == rs_machine_dependent)
-	      /* Check for conflicts between the branch and the instructions
-		 before the candidate delay slot.  */
-	      || nops_for_insn (0, history + 1, ip) > 0
-	      /* Check for conflicts between the swapped sequence and the
-		 target of the branch.  */
-	      || nops_for_sequence (2, 0, history + 1, ip, history) > 0
-	      /* We do not swap with a trap instruction, since it
-		 complicates trap handlers to have the trap
-		 instruction be in a delay slot.  */
-	      || (prev_pinfo & INSN_TRAP)
-	      /* If the branch reads a register that the previous
-		 instruction sets, we can not swap.  */
-	      || (gpr_read_mask (ip) & gpr_write_mask (&history[0])) != 0
-	      /* If the branch writes a register that the previous
-		 instruction sets, we can not swap.  */
-	      || (gpr_write_mask (ip) & gpr_write_mask (&history[0])) != 0
-	      /* If the branch writes a register that the previous
-		 instruction reads, we can not swap.  */
-	      || (gpr_write_mask (ip) & gpr_read_mask (&history[0])) != 0
-	      /* If one instruction sets a condition code and the
-                 other one uses a condition code, we can not swap.  */
-	      || ((pinfo & INSN_READ_COND_CODE)
-		  && (prev_pinfo & INSN_WRITE_COND_CODE))
-	      || ((pinfo & INSN_WRITE_COND_CODE)
-		  && (prev_pinfo & INSN_READ_COND_CODE))
-	      /* If the previous instruction uses the PC, we can not
-                 swap.  */
-	      || (mips_opts.mips16
-		  && (prev_pinfo & MIPS16_INSN_READ_PC))
-	      /* If the previous instruction had a fixup in mips16
-                 mode, we can not swap.  This normally means that the
-                 previous instruction was a 4 byte branch anyhow.  */
-	      || (mips_opts.mips16 && history[0].fixp[0])
-	      /* If the previous instruction is a sync, sync.l, or
-		 sync.p, we can not swap.  */
-	      || (prev_pinfo & INSN_SYNC)
-	      /* If the previous instruction is an ERET or
-		 DERET, avoid the swap.  */
-              || (history[0].insn_opcode == INSN_ERET)
-              || (history[0].insn_opcode == INSN_DERET))
-	    {
-	      if (mips_opts.mips16
-		  && (pinfo & INSN_UNCOND_BRANCH_DELAY)
-		  && (pinfo & (MIPS16_INSN_READ_X | MIPS16_INSN_READ_31))
-		  && ISA_SUPPORTS_MIPS16E)
-		{
-		  /* Convert MIPS16 jr/jalr into a "compact" jump.  */
-		  ip->insn_opcode |= 0x0080;
-		  find_altered_mips16_opcode (ip);
-		  install_insn (ip);
-		  insert_into_history (0, 1, ip);
-		} 
-	      else
-		{
-		  /* We could do even better for unconditional branches to
-		     portions of this object file; we could pick up the
-		     instruction at the destination, put it in the delay
-		     slot, and bump the destination address.  */
-		  insert_into_history (0, 1, ip);
-		  emit_nop ();
-		}
-		
-	      if (mips_relax.sequence)
-		mips_relax.sizes[mips_relax.sequence - 1] += 4;
-	    }
-	  else
-	    {
-	      /* It looks like we can actually do the swap.  */
-	      struct mips_cl_insn delay = history[0];
-	      if (mips_opts.mips16)
-		{
-		  know (delay.frag == ip->frag);
-                  move_insn (ip, delay.frag, delay.where);
-		  move_insn (&delay, ip->frag, ip->where + insn_length (ip));
-		}
-	      else if (relaxed_branch)
-		{
-		  /* Add the delay slot instruction to the end of the
-		     current frag and shrink the fixed part of the
-		     original frag.  If the branch occupies the tail of
-		     the latter, move it backwards to cover the gap.  */
-		  delay.frag->fr_fix -= 4;
-		  if (delay.frag == ip->frag)
-		    move_insn (ip, ip->frag, ip->where - 4);
-		  add_fixed_insn (&delay);
-		}
-	      else
-		{
-		  move_insn (&delay, ip->frag, ip->where);
-		  move_insn (ip, history[0].frag, history[0].where);
-		}
-	      history[0] = *ip;
-	      delay.fixed_p = 1;
-	      insert_into_history (0, 1, &delay);
-	    }
-	}
-      else if (pinfo & INSN_COND_BRANCH_LIKELY)
-	{
-	  /* We don't yet optimize a branch likely.  What we should do
-	     is look at the target, copy the instruction found there
-	     into the delay slot, and increment the branch to jump to
-	     the next instruction.  */
-	  insert_into_history (0, 1, ip);
-	  emit_nop ();
-	}
-      else
-	insert_into_history (0, 1, ip);
+    case APPEND_ADD:
+      insert_into_history (0, 1, ip);
+      break;
+
+    case APPEND_ADD_WITH_NOP:
+      insert_into_history (0, 1, ip);
+      emit_nop ();
+      if (mips_relax.sequence)
+	mips_relax.sizes[mips_relax.sequence - 1] += 4;
+      break;
+
+    case APPEND_ADD_COMPACT:
+      /* Convert MIPS16 jr/jalr into a "compact" jump.  */
+      gas_assert (mips_opts.mips16);
+      ip->insn_opcode |= 0x0080;
+      find_altered_mips16_opcode (ip);
+      install_insn (ip);
+      insert_into_history (0, 1, ip);
+      break;
+
+    case APPEND_SWAP:
+      {
+	struct mips_cl_insn delay = history[0];
+	if (mips_opts.mips16)
+	  {
+	    know (delay.frag == ip->frag);
+	    move_insn (ip, delay.frag, delay.where);
+	    move_insn (&delay, ip->frag, ip->where + insn_length (ip));
+	  }
+	else if (relaxed_branch)
+	  {
+	    /* Add the delay slot instruction to the end of the
+	       current frag and shrink the fixed part of the
+	       original frag.  If the branch occupies the tail of
+	       the latter, move it backwards to cover the gap.  */
+	    delay.frag->fr_fix -= 4;
+	    if (delay.frag == ip->frag)
+	      move_insn (ip, ip->frag, ip->where - 4);
+	    add_fixed_insn (&delay);
+	  }
+	else
+	  {
+	    move_insn (&delay, ip->frag, ip->where);
+	    move_insn (ip, history[0].frag, history[0].where);
+	  }
+	history[0] = *ip;
+	delay.fixed_p = 1;
+	insert_into_history (0, 1, &delay);
+      }
+      break;
     }
-  else
-    insert_into_history (0, 1, ip);
 
   /* If we have just completed an unconditional branch, clear the history.  */
   if ((history[1].insn_mo->pinfo & INSN_UNCOND_BRANCH_DELAY)

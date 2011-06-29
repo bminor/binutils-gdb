@@ -1,5 +1,12 @@
 2011-06-29  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* config/tc-mips.c (append_method): New enum.
+	(can_swap_branch_p, get_append_method): New functions.
+	(append_insn): Use get_append_method to decide how the instruction
+	should be added.
+
+2011-06-29  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* config/tc-mips.c (append_insn): Remove bogus goto.
 
 2011-06-29  Richard Sandiford  <rdsandiford@googlemail.com>
