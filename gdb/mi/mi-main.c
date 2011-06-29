@@ -1708,6 +1708,7 @@ mi_cmd_list_features (char *command, char **argv, int argc)
       ui_out_field_string (uiout, NULL, "pending-breakpoints");
       ui_out_field_string (uiout, NULL, "thread-info");
       ui_out_field_string (uiout, NULL, "data-read-memory-bytes");
+      ui_out_field_string (uiout, NULL, "breakpoint-notifications");
       
 #if HAVE_PYTHON
       ui_out_field_string (uiout, NULL, "python");

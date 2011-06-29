@@ -1,3 +1,8 @@
+2011-06-29  André Pönitz  <andre.poenitz@nokia.com>
+
+	* mi/mi-main.c (mi_cmd_list_features): Emit
+	breakpoint-notifications.
+
 2011-06-29  Tom Tromey  <tromey@redhat.com>
 
 	PR fortran/10036:

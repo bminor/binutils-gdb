@@ -30066,6 +30066,9 @@ Indicates presence of the @code{-thread-info} command.
 @item data-read-memory-bytes
 Indicates presense of the @code{-data-read-memory-bytes} and the
 @code{-data-write-memory-bytes} commands.
+@item breakpoint-notifications
+Indicates that changes to breakpoints and breakpoints created via the
+CLI will be announced via async records.
 
 @end table
 

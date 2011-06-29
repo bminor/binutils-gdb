@@ -1,3 +1,8 @@
+2011-06-29  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.texinfo (GDB/MI Miscellaneous Commands): Document
+	breakpoint-notifications feature.
+
 2011-06-29  Ulrich Weigand  <ulrich.weigand@linaro.org>
 
 	* gdb.texinfo (Target Description): Remove warning about
