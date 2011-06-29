@@ -3735,3 +3735,5 @@ proc gdb_target_symbol_prefix_flags {} {
     }
 }
 
+# Always load compatibility stuff.
+load_lib future.exp

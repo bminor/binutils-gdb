@@ -1,3 +1,15 @@
+2011-06-29  Tom Tromey  <tromey@redhat.com>
+
+	PR testsuite/12040:
+	* lib/future.exp: New file, mostly extracted from ada.exp.
+	Rewrote compatibility code to use rename.
+	(gdb_find_gfortran): New proc.
+	(gdb_default_target_compile): Refresh from dejagnu; plus a pending
+	gfortran patch.
+	* lib/ada.exp (gdb_find_gnatmake, gdb_default_target_compile):
+	Move to future.exp.
+	* lib/gdb.exp: Always load future.exp.
+
 2011-06-28  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.cp/exception.cc: Don't include iostream.
