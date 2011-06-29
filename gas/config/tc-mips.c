@@ -3073,6 +3073,24 @@ fix_loongson2f (struct mips_cl_insn * ip)
     fix_loongson2f_jump (ip);
 }
 
+/* IP is a MIPS16 instruction whose opcode we have just changed.
+   Point IP->insn_mo to the new opcode's definition.  */
+
+static void
+find_altered_mips16_opcode (struct mips_cl_insn *ip)
+{
+  const struct mips_opcode *mo, *end;
+
+  end = &mips16_opcodes[bfd_mips16_num_opcodes];
+  for (mo = ip->insn_mo; mo < end; mo++)
+    if ((ip->insn_opcode & mo->mask) == mo->match)
+      {
+	ip->insn_mo = mo;
+	return;
+      }
+  abort ();
+}
+
 /* Output an instruction.  IP is the instruction information.
    ADDRESS_EXPR is an operand of the instruction to be used with
    RELOC_TYPE.  */
@@ -3545,6 +3563,7 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 		{
 		  /* Convert MIPS16 jr/jalr into a "compact" jump.  */
 		  ip->insn_opcode |= 0x0080;
+		  find_altered_mips16_opcode (ip);
 		  install_insn (ip);
 		  insert_into_history (0, 1, ip);
 		} 
