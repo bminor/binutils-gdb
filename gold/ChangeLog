@@ -1,5 +1,6 @@
 2011-06-29  Ian Lance Taylor  <iant@google.com>
 
+	PR gold/12652
 	* script.cc (Token::integer_value): Accept trailing M/m/K/k
 	modifier.
 	(Lex::gather_token): Accept trailing M/m/K/k for integers.
