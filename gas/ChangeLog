@@ -1,5 +1,9 @@
 2011-06-29  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* config/tc-mips.c (append_insn): Remove bogus goto.
+
+2011-06-29  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* config/tc-mips.c (append_insn): Always clear the history after an
 	unconditional branch.
 

@@ -3180,12 +3180,13 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	  if ((address_expr->X_add_number & 3) != 0)
 	    as_bad (_("branch to misaligned address (0x%lx)"),
 	            (unsigned long) address_expr->X_add_number);
-	  if (mips_relax_branch)
-	    goto need_reloc;
-	  if ((address_expr->X_add_number + 0x20000) & ~0x3ffff)
-	    as_bad (_("branch address range overflow (0x%lx)"),
-	            (unsigned long) address_expr->X_add_number);
-	  ip->insn_opcode |= (address_expr->X_add_number >> 2) & 0xffff;
+	  if (!mips_relax_branch)
+	    {
+	      if ((address_expr->X_add_number + 0x20000) & ~0x3ffff)
+		as_bad (_("branch address range overflow (0x%lx)"),
+			(unsigned long) address_expr->X_add_number);
+	      ip->insn_opcode |= (address_expr->X_add_number >> 2) & 0xffff;
+	    }
 	  ip->complete_p = 0;
 	  break;
 
@@ -3367,105 +3368,100 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
       add_fixed_insn (ip);
     }
 
-  if (address_expr != NULL && *reloc_type <= BFD_RELOC_UNUSED)
+  if (!ip->complete_p && *reloc_type < BFD_RELOC_UNUSED)
     {
-      if (!ip->complete_p
-          && *reloc_type < BFD_RELOC_UNUSED)
-	need_reloc:
+      reloc_howto_type *howto;
+      int i;
+
+      /* In a compound relocation, it is the final (outermost)
+	 operator that determines the relocated field.  */
+      for (i = 1; i < 3; i++)
+	if (reloc_type[i] == BFD_RELOC_UNUSED)
+	  break;
+
+      howto = bfd_reloc_type_lookup (stdoutput, reloc_type[i - 1]);
+      if (howto == NULL)
 	{
-	  reloc_howto_type *howto;
-	  int i;
-
-	  /* In a compound relocation, it is the final (outermost)
-	     operator that determines the relocated field.  */
-	  for (i = 1; i < 3; i++)
-	    if (reloc_type[i] == BFD_RELOC_UNUSED)
-	      break;
-
-	  howto = bfd_reloc_type_lookup (stdoutput, reloc_type[i - 1]);
-	  if (howto == NULL)
-	    {
-	      /* To reproduce this failure try assembling gas/testsuites/
-		 gas/mips/mips16-intermix.s with a mips-ecoff targeted
-		 assembler.  */
-	      as_bad (_("Unsupported MIPS relocation number %d"), reloc_type[i - 1]);
-	      howto = bfd_reloc_type_lookup (stdoutput, BFD_RELOC_16);
-	    }
-	  
-	  ip->fixp[0] = fix_new_exp (ip->frag, ip->where,
-				     bfd_get_reloc_size (howto),
-				     address_expr,
-				     reloc_type[0] == BFD_RELOC_16_PCREL_S2,
-				     reloc_type[0]);
-
-	  /* Tag symbols that have a R_MIPS16_26 relocation against them.  */
-	  if (reloc_type[0] == BFD_RELOC_MIPS16_JMP
-	      && ip->fixp[0]->fx_addsy)
-	    *symbol_get_tc (ip->fixp[0]->fx_addsy) = 1;
-
-	  /* These relocations can have an addend that won't fit in
-	     4 octets for 64bit assembly.  */
-	  if (HAVE_64BIT_GPRS
-	      && ! howto->partial_inplace
-	      && (reloc_type[0] == BFD_RELOC_16
-		  || reloc_type[0] == BFD_RELOC_32
-		  || reloc_type[0] == BFD_RELOC_MIPS_JMP
-		  || reloc_type[0] == BFD_RELOC_GPREL16
-		  || reloc_type[0] == BFD_RELOC_MIPS_LITERAL
-		  || reloc_type[0] == BFD_RELOC_GPREL32
-		  || reloc_type[0] == BFD_RELOC_64
-		  || reloc_type[0] == BFD_RELOC_CTOR
-		  || reloc_type[0] == BFD_RELOC_MIPS_SUB
-		  || reloc_type[0] == BFD_RELOC_MIPS_HIGHEST
-		  || reloc_type[0] == BFD_RELOC_MIPS_HIGHER
-		  || reloc_type[0] == BFD_RELOC_MIPS_SCN_DISP
-		  || reloc_type[0] == BFD_RELOC_MIPS_REL16
-		  || reloc_type[0] == BFD_RELOC_MIPS_RELGOT
-		  || reloc_type[0] == BFD_RELOC_MIPS16_GPREL
-		  || hi16_reloc_p (reloc_type[0])
-		  || lo16_reloc_p (reloc_type[0])))
-	    ip->fixp[0]->fx_no_overflow = 1;
-
-	  if (mips_relax.sequence)
-	    {
-	      if (mips_relax.first_fixup == 0)
-		mips_relax.first_fixup = ip->fixp[0];
-	    }
-	  else if (reloc_needs_lo_p (*reloc_type))
-	    {
-	      struct mips_hi_fixup *hi_fixup;
-
-	      /* Reuse the last entry if it already has a matching %lo.  */
-	      hi_fixup = mips_hi_fixup_list;
-	      if (hi_fixup == 0
-		  || !fixup_has_matching_lo_p (hi_fixup->fixp))
-		{
-		  hi_fixup = ((struct mips_hi_fixup *)
-			      xmalloc (sizeof (struct mips_hi_fixup)));
-		  hi_fixup->next = mips_hi_fixup_list;
-		  mips_hi_fixup_list = hi_fixup;
-		}
-	      hi_fixup->fixp = ip->fixp[0];
-	      hi_fixup->seg = now_seg;
-	    }
-
-	  /* Add fixups for the second and third relocations, if given.
-	     Note that the ABI allows the second relocation to be
-	     against RSS_UNDEF, RSS_GP, RSS_GP0 or RSS_LOC.  At the
-	     moment we only use RSS_UNDEF, but we could add support
-	     for the others if it ever becomes necessary.  */
-	  for (i = 1; i < 3; i++)
-	    if (reloc_type[i] != BFD_RELOC_UNUSED)
-	      {
-		ip->fixp[i] = fix_new (ip->frag, ip->where,
-				       ip->fixp[0]->fx_size, NULL, 0,
-				       FALSE, reloc_type[i]);
-
-		/* Use fx_tcbit to mark compound relocs.  */
-		ip->fixp[0]->fx_tcbit = 1;
-		ip->fixp[i]->fx_tcbit = 1;
-	      }
+	  /* To reproduce this failure try assembling gas/testsuites/
+	     gas/mips/mips16-intermix.s with a mips-ecoff targeted
+	     assembler.  */
+	  as_bad (_("Unsupported MIPS relocation number %d"), reloc_type[i - 1]);
+	  howto = bfd_reloc_type_lookup (stdoutput, BFD_RELOC_16);
 	}
+	  
+      ip->fixp[0] = fix_new_exp (ip->frag, ip->where,
+				 bfd_get_reloc_size (howto),
+				 address_expr,
+				 reloc_type[0] == BFD_RELOC_16_PCREL_S2,
+				 reloc_type[0]);
+
+      /* Tag symbols that have a R_MIPS16_26 relocation against them.  */
+      if (reloc_type[0] == BFD_RELOC_MIPS16_JMP
+	  && ip->fixp[0]->fx_addsy)
+	*symbol_get_tc (ip->fixp[0]->fx_addsy) = 1;
+
+      /* These relocations can have an addend that won't fit in
+	 4 octets for 64bit assembly.  */
+      if (HAVE_64BIT_GPRS
+	  && ! howto->partial_inplace
+	  && (reloc_type[0] == BFD_RELOC_16
+	      || reloc_type[0] == BFD_RELOC_32
+	      || reloc_type[0] == BFD_RELOC_MIPS_JMP
+	      || reloc_type[0] == BFD_RELOC_GPREL16
+	      || reloc_type[0] == BFD_RELOC_MIPS_LITERAL
+	      || reloc_type[0] == BFD_RELOC_GPREL32
+	      || reloc_type[0] == BFD_RELOC_64
+	      || reloc_type[0] == BFD_RELOC_CTOR
+	      || reloc_type[0] == BFD_RELOC_MIPS_SUB
+	      || reloc_type[0] == BFD_RELOC_MIPS_HIGHEST
+	      || reloc_type[0] == BFD_RELOC_MIPS_HIGHER
+	      || reloc_type[0] == BFD_RELOC_MIPS_SCN_DISP
+	      || reloc_type[0] == BFD_RELOC_MIPS_REL16
+	      || reloc_type[0] == BFD_RELOC_MIPS_RELGOT
+	      || reloc_type[0] == BFD_RELOC_MIPS16_GPREL
+	      || hi16_reloc_p (reloc_type[0])
+	      || lo16_reloc_p (reloc_type[0])))
+	ip->fixp[0]->fx_no_overflow = 1;
+
+      if (mips_relax.sequence)
+	{
+	  if (mips_relax.first_fixup == 0)
+	    mips_relax.first_fixup = ip->fixp[0];
+	}
+      else if (reloc_needs_lo_p (*reloc_type))
+	{
+	  struct mips_hi_fixup *hi_fixup;
+
+	  /* Reuse the last entry if it already has a matching %lo.  */
+	  hi_fixup = mips_hi_fixup_list;
+	  if (hi_fixup == 0
+	      || !fixup_has_matching_lo_p (hi_fixup->fixp))
+	    {
+	      hi_fixup = ((struct mips_hi_fixup *)
+			  xmalloc (sizeof (struct mips_hi_fixup)));
+	      hi_fixup->next = mips_hi_fixup_list;
+	      mips_hi_fixup_list = hi_fixup;
+	    }
+	  hi_fixup->fixp = ip->fixp[0];
+	  hi_fixup->seg = now_seg;
+	}
+
+      /* Add fixups for the second and third relocations, if given.
+	 Note that the ABI allows the second relocation to be
+	 against RSS_UNDEF, RSS_GP, RSS_GP0 or RSS_LOC.  At the
+	 moment we only use RSS_UNDEF, but we could add support
+	 for the others if it ever becomes necessary.  */
+      for (i = 1; i < 3; i++)
+	if (reloc_type[i] != BFD_RELOC_UNUSED)
+	  {
+	    ip->fixp[i] = fix_new (ip->frag, ip->where,
+				   ip->fixp[0]->fx_size, NULL, 0,
+				   FALSE, reloc_type[i]);
+
+	    /* Use fx_tcbit to mark compound relocs.  */
+	    ip->fixp[0]->fx_tcbit = 1;
+	    ip->fixp[i]->fx_tcbit = 1;
+	  }
     }
   install_insn (ip);
 
