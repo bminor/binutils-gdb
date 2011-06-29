@@ -1,4 +1,4 @@
-#objdump: -d
+#objdump: -dz
 #as: -mfix-24k -32
 #name: 24K: Triple Store (gprel relocs)
 
@@ -14,4 +14,5 @@ Disassembly of section .text:
   14:	af830000 	sw	v1,0\(gp\)
   18:	00000000 	nop
   1c:	af840000 	sw	a0,0\(gp\)
-
+  20:	00000000 	nop
+#pass

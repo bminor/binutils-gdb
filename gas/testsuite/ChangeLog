@@ -1,3 +1,13 @@
+2011-06-29  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* gas/mips/24k-triple-stores-9.d: Add -z to dump options and
+	explicitly match one nop.
+	* gas/mips/24k-triple-stores-10.d: Likewise.
+	* gas/mips/24k-triple-stores-11.d: Likewise.
+	* gas/mips/lifloat.d: Likewise.
+	* gas/mips/trunc.d: Likewise 1 extra nop.
+	* gas/mips/vr4111.d: Likewise 2 nops.
+
 2011-06-26  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* gas/mips/24k-branch-delay-1.d: Do not allow stores to be put

@@ -2111,6 +2111,7 @@ md_begin (void)
 void
 md_mips_end (void)
 {
+  mips_emit_delays ();
   if (! ECOFF_DEBUGGING)
     md_obj_end ();
 }
