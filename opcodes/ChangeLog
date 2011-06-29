@@ -1,3 +1,8 @@
+2011-06-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* tilegx-opc.c (find_opcode): Replace "index" with "i".
+	* tilepro-opc.c (find_opcode): Likewise.
+
 2011-06-29  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* mips16-opc.c (jalrc, jrc): Move earlier in file.

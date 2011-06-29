@@ -10103,19 +10103,19 @@ const struct tilepro_opcode *
 find_opcode (tilepro_bundle_bits bits, tilepro_pipeline pipe)
 {
   const unsigned short *table = tilepro_bundle_decoder_fsms[pipe];
-  int index = 0;
+  int i = 0;
 
   while (1)
     {
-      unsigned short bitspec = table[index];
+      unsigned short bitspec = table[i];
       unsigned int bitfield =
 	((unsigned int) (bits >> (bitspec & 63))) & (bitspec >> 6);
-      unsigned short next = table[index + 1 + bitfield];
+      unsigned short next = table[i + 1 + bitfield];
 
       if (next <= TILEPRO_OPC_NONE)
 	return &tilepro_opcodes[next];
 
-      index = next - TILEPRO_OPC_NONE;
+      i = next - TILEPRO_OPC_NONE;
     }
 }
 

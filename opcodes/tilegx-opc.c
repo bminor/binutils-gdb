@@ -7976,19 +7976,19 @@ const char * const tilegx_register_names[] =
 static const struct tilegx_opcode *
 find_opcode (tilegx_bundle_bits bits, const unsigned short *table)
 {
-  int index = 0;
+  int i = 0;
 
   while (1)
     {
-      unsigned short bitspec = table[index];
+      unsigned short bitspec = table[i];
       unsigned int bitfield =
 	((unsigned int)(bits >> (bitspec & 63))) & (bitspec >> 6);
 
-      unsigned short next = table[index + 1 + bitfield];
+      unsigned short next = table[i + 1 + bitfield];
       if (next <= TILEGX_OPC_NONE)
 	return & tilegx_opcodes[next];
 
-      index = next - TILEGX_OPC_NONE;
+      i = next - TILEGX_OPC_NONE;
     }
 }
 
