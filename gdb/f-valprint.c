@@ -271,10 +271,23 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
       break;
 
     case TYPE_CODE_ARRAY:
-      fprintf_filtered (stream, "(");
-      f77_print_array (type, valaddr, embedded_offset,
-		       address, stream, recurse, original_value, options);
-      fprintf_filtered (stream, ")");
+      if (TYPE_CODE (TYPE_TARGET_TYPE (type)) != TYPE_CODE_CHAR)
+	{
+	  fprintf_filtered (stream, "(");
+	  f77_print_array (type, valaddr, embedded_offset,
+			   address, stream, recurse, original_value, options);
+	  fprintf_filtered (stream, ")");
+	}
+      else
+	{
+	  struct type *ch_type = TYPE_TARGET_TYPE (type);
+
+	  f77_get_dynamic_length_of_aggregate (type);
+	  LA_PRINT_STRING (stream, ch_type,
+			   valaddr + embedded_offset,
+			   TYPE_LENGTH (type) / TYPE_LENGTH (ch_type),
+			   NULL, 0, options);
+	}
       break;
 
     case TYPE_CODE_PTR:
@@ -363,6 +376,7 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
       break;
 
     case TYPE_CODE_INT:
+    case TYPE_CODE_CHAR:
       if (options->format || options->output_format)
 	{
 	  struct value_print_options opts = *options;
@@ -379,7 +393,7 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	     Since we don't know whether the value is really intended to
 	     be used as an integer or a character, print the character
 	     equivalent as well.  */
-	  if (TYPE_LENGTH (type) == 1)
+	  if (TYPE_LENGTH (type) == 1 || TYPE_CODE (type) == TYPE_CODE_CHAR)
 	    {
 	      LONGEST c;
 

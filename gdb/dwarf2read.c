@@ -8335,15 +8335,21 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
 	break;
       case DW_ATE_unsigned:
 	type_flags |= TYPE_FLAG_UNSIGNED;
+	if (cu->language == language_fortran
+	    && name
+	    && strncmp (name, "character(", sizeof ("character(") - 1) == 0)
+	  code = TYPE_CODE_CHAR;
 	break;
       case DW_ATE_signed_char:
 	if (cu->language == language_ada || cu->language == language_m2
-	    || cu->language == language_pascal)
+	    || cu->language == language_pascal
+	    || cu->language == language_fortran)
 	  code = TYPE_CODE_CHAR;
 	break;
       case DW_ATE_unsigned_char:
 	if (cu->language == language_ada || cu->language == language_m2
-	    || cu->language == language_pascal)
+	    || cu->language == language_pascal
+	    || cu->language == language_fortran)
 	  code = TYPE_CODE_CHAR;
 	type_flags |= TYPE_FLAG_UNSIGNED;
 	break;

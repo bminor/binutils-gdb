@@ -321,10 +321,6 @@ f_type_print_base (struct type *type, struct ui_file *stream, int show,
       break;
 
     case TYPE_CODE_CHAR:
-      /* Override name "char" and make it "character".  */
-      fprintfi_filtered (level, stream, "character");
-      break;
-
     case TYPE_CODE_INT:
       /* There may be some character types that attempt to come
          through as TYPE_CODE_INT since dbxstclass.h is so

@@ -1,3 +1,30 @@
+2011-06-29  Tom Tromey  <tromey@redhat.com>
+
+	PR fortran/10036:
+	* valprint.h (generic_emit_char, generic_printstr): Declare.
+	* valprint.c (wchar_printable, append_string_as_wide)
+	(print_wchar): Move from c-lang.c.
+	(generic_emit_char): New function; mostly taken from c_emit_char.
+	(generic_printstr): New function; mostly taken from c_printstr.
+	* f-valprint.c (f_val_print) <TYPE_CODE_ARRAY>: Handle strings
+	represented as arrays.
+	<TYPE_CODE_CHAR>: Treat as TYPE_CODE_INT; recognize as character
+	type.
+	* f-typeprint.c (f_type_print_base) <TYPE_CODE_CHAR>: Treat
+	identically to TYPE_CODE_INT.
+	* f-lang.c (f_get_encoding): New function.
+	(f_emit_char): Use generic_emit_char.
+	(f_printchar): Replace comment.
+	(f_printstr): Use generic_printstr.
+	* dwarf2read.c (read_base_type) <DW_ATE_unsigned>: Handle Fortran
+	"character" types specially.
+	<DW_ATE_signed_char, DW_ATE_unsigned_char>: Make TYPE_CODE_CHAR
+	for Fortran.
+	* c-lang.c (wchar_printable, append_string_as_wide, print_wchar):
+	Move to valprint.c
+	(c_emit_char): Call generic_emit_char.
+	(c_printstr): Call generic_printstr.
+
 2011-06-29  Gary Benson  <gbenson@redhat.com>
 
 	* breakpoint.c (bpstat_what): Removed duplicated case.
