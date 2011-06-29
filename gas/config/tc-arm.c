@@ -2589,7 +2589,24 @@ mapping_state (enum mstate state)
     /* The mapping symbol has already been emitted.
        There is nothing else to do.  */
     return;
-  else if (TRANSITION (MAP_UNDEFINED, MAP_DATA))
+
+  if (state == MAP_ARM || state == MAP_THUMB)
+    /*  PR gas/12931
+	All ARM instructions require 4-byte alignment.
+	(Almost) all Thumb instructions require 2-byte alignment.
+
+	When emitting instructions into any section, mark the section
+	appropriately.
+
+	Some Thumb instructions are alignment-sensitive modulo 4 bytes,
+	but themselves require 2-byte alignment; this applies to some
+	PC- relative forms.  However, these cases will invovle implicit
+	literal pool generation or an explicit .align >=2, both of
+	which will cause the section to me marked with sufficient
+	alignment.  Thus, we don't handle those cases here.  */
+    record_alignment (now_seg, state == MAP_ARM ? 2 : 1);
+
+  if (TRANSITION (MAP_UNDEFINED, MAP_DATA))
     /* This case will be evaluated later in the next else.  */
     return;
   else if (TRANSITION (MAP_UNDEFINED, MAP_ARM)

@@ -1,3 +1,9 @@
+2011-06-29  Dave Martin  <dave.martin@linaro.org>
+
+	PR gas/12931
+	* config/tc-arm.c (mapping_state): When changing to ARM or THUMB
+	state set the minimum required alignment of the section.
+
 2011-06-29  Tristan Gingold  <gingold@adacore.com>
 
 	* config/tc-i386.c (i386_mach): Convert to ISO-C.
