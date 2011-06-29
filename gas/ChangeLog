@@ -1,5 +1,12 @@
 2011-06-29  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* config/tc-mips.c (insn_uses_reg): Delete.
+	(gpr_read_mask, gpr_write_mask): New functions.
+	(fpr_read_mask, fpr_write_mask): Likewise.
+	(insns_between, nops_for_vr4130, append_insn): Use them.
+
+2011-06-29  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* config/tc-mips.c (md_mips_end): Call mips_emit_delays.
 
 2011-06-29  Dave Martin  <dave.martin@linaro.org>

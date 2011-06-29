@@ -1,5 +1,15 @@
 2011-06-29  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* gas/mips/mips16-e.d, gas/mips/mips16-f.d,
+	gas/mips/mipsel16-e.d, gas/mips/mipsel16-f.d,
+	gas/mips/tmips16-e.d, gas/mips/tmips16-f.d,
+	gas/mips/tmipsel16-e.d, gas/mips/tmipsel16-f.d: Fix GPR mask.
+	* gas/mips/reginfo-1.s, gas/mips/reginfo-1a.d,
+	gas/mips/reginfo-1b.d: New tests.
+	* gas/mips/mips.exp: Run them.
+
+2011-06-29  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* gas/mips/24k-triple-stores-9.d: Add -z to dump options and
 	explicitly match one nop.
 	* gas/mips/24k-triple-stores-10.d: Likewise.
