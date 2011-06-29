@@ -1,3 +1,10 @@
+2011-06-29  Tristan Gingold  <gingold@adacore.com>
+
+	* config/tc-i386.c (i386_mach): Convert to ISO-C.
+	(md_begin, pe_directive_secrel, md_estimate_size_before_relax): Ditto.
+	(md_convert_frag, md_apply_fix, md_undefined_symbol): Ditto.
+	(md_section_align, tc_gen_reloc): Ditto.
+
 2011-06-28  Tristan Gingold  <gingold@adacore.com>
 
 	* config/tc-alpha.c (s_alpha_pdesc): Fix indentation. Do not

@@ -2241,7 +2241,7 @@ i386_arch (void)
 }
 
 unsigned long
-i386_mach ()
+i386_mach (void)
 {
   if (!strncmp (default_arch, "x86_64", 6))
     {
@@ -2264,7 +2264,7 @@ i386_mach ()
 }
 
 void
-md_begin ()
+md_begin (void)
 {
   const char *hash_err;
 
@@ -6720,8 +6720,7 @@ signed_cons (int size)
 
 #ifdef TE_PE
 static void
-pe_directive_secrel (dummy)
-     int dummy ATTRIBUTE_UNUSED;
+pe_directive_secrel (int dummy ATTRIBUTE_UNUSED)
 {
   expressionS exp;
 
@@ -7613,9 +7612,7 @@ i386_att_operand (char *operand_string)
    returned value.  */
 
 int
-md_estimate_size_before_relax (fragP, segment)
-     fragS *fragP;
-     segT segment;
+md_estimate_size_before_relax (fragS *fragP, segT segment)
 {
   /* We've already got fragP->fr_subtype right;  all we have to do is
      check for un-relaxable symbols.  On an ELF system, we can't relax
@@ -7738,10 +7735,8 @@ md_estimate_size_before_relax (fragP, segment)
 	Caller will turn frag into a ".space 0".  */
 
 void
-md_convert_frag (abfd, sec, fragP)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     segT sec ATTRIBUTE_UNUSED;
-     fragS *fragP;
+md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT sec ATTRIBUTE_UNUSED,
+                 fragS *fragP)
 {
   unsigned char *opcode;
   unsigned char *where_to_put_displacement = NULL;
@@ -7838,21 +7833,17 @@ md_convert_frag (abfd, sec, fragP)
   fragP->fr_fix += extension;
 }
 
-/* Apply a fixup (fixS) to segment data, once it has been determined
+/* Apply a fixup (fixP) to segment data, once it has been determined
    by our caller that we have all the info we need to fix it up.
+
+   Parameter valP is the pointer to the value of the bits.
 
    On the 386, immediates, displacements, and data pointers are all in
    the same (little-endian) format, so we don't need to care about which
    we are handling.  */
 
 void
-md_apply_fix (fixP, valP, seg)
-     /* The fix we're to put in.  */
-     fixS *fixP;
-     /* Pointer to the value of the bits.  */
-     valueT *valP;
-     /* Segment fix is from.  */
-     segT seg ATTRIBUTE_UNUSED;
+md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 {
   char *p = fixP->fx_where + fixP->fx_frag->fr_literal;
   valueT value = *valP;
@@ -8808,8 +8799,7 @@ i386_elf_emit_arch_note (void)
 #endif
 
 symbolS *
-md_undefined_symbol (name)
-     char *name;
+md_undefined_symbol (char *name)
 {
   if (name[0] == GLOBAL_OFFSET_TABLE_NAME[0]
       && name[1] == GLOBAL_OFFSET_TABLE_NAME[1]
@@ -8831,9 +8821,7 @@ md_undefined_symbol (name)
 /* Round up a section size to the appropriate boundary.  */
 
 valueT
-md_section_align (segment, size)
-     segT segment ATTRIBUTE_UNUSED;
-     valueT size;
+md_section_align (segT segment ATTRIBUTE_UNUSED, valueT size)
 {
 #if (defined (OBJ_AOUT) || defined (OBJ_MAYBE_AOUT))
   if (OUTPUT_FLAVOR == bfd_target_aout_flavour)
@@ -8904,9 +8892,7 @@ i386_validate_fix (fixS *fixp)
 }
 
 arelent *
-tc_gen_reloc (section, fixp)
-     asection *section ATTRIBUTE_UNUSED;
-     fixS *fixp;
+tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
 {
   arelent *rel;
   bfd_reloc_code_real_type code;
