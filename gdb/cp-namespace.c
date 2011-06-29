@@ -133,15 +133,23 @@ cp_add_using_directive (const char *dest,
 
   for (current = using_directives; current != NULL; current = current->next)
     {
-      if (strcmp (current->import_src, src) == 0
-          && strcmp (current->import_dest, dest) == 0
-          && ((alias == NULL && current->alias == NULL)
-              || (alias != NULL && current->alias != NULL
-        	  && strcmp (alias, current->alias) == 0))
-	  && ((declaration == NULL && current->declaration == NULL)
-	      || (declaration != NULL && current->declaration != NULL
-		  && strcmp (declaration, current->declaration) == 0)))
-	return;
+      if (strcmp (current->import_src, src) != 0)
+	continue;
+      if (strcmp (current->import_dest, dest) != 0)
+	continue;
+      if ((alias == NULL && current->alias != NULL)
+	  || (alias != NULL && current->alias == NULL)
+	  || (alias != NULL && current->alias != NULL
+	      && strcmp (alias, current->alias) != 0))
+	continue;
+      if ((declaration == NULL && current->declaration != NULL)
+	  || (declaration != NULL && current->declaration == NULL)
+	  || (declaration != NULL && current->declaration != NULL
+	      && strcmp (declaration, current->declaration) != 0))
+	continue;
+
+      /* Parameters exactly match CURRENT.  */
+      return;
     }
 
   new = OBSTACK_ZALLOC (obstack, struct using_direct);
