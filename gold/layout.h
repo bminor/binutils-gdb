@@ -1052,7 +1052,7 @@ class Layout
   place_orphan_sections_in_script();
 
   // Return whether SEG1 comes before SEG2 in the output file.
-  static bool
+  bool
   segment_precedes(const Output_segment* seg1, const Output_segment* seg2);
 
   // Use to save and restore segments during relaxation. 
@@ -1102,11 +1102,19 @@ class Layout
 
   // A comparison class for segments.
 
-  struct Compare_segments
+  class Compare_segments
   {
+   public:
+    Compare_segments(Layout* layout)
+      : layout_(layout)
+    { }
+
     bool
     operator()(const Output_segment* seg1, const Output_segment* seg2)
-    { return Layout::segment_precedes(seg1, seg2); }
+    { return this->layout_->segment_precedes(seg1, seg2); }
+
+   private:
+    Layout* layout_;
   };
 
   typedef std::vector<Output_section_data*> Output_section_data_list;

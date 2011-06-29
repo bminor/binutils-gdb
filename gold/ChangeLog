@@ -1,5 +1,21 @@
 2011-06-28  Ian Lance Taylor  <iant@google.com>
 
+	PR gold/12898
+	* layout.cc (Layout::segment_precedes): Don't crash if a linker
+	script create indistinguishable segments.
+	(Layout::set_segment_offsets): Use stable_sort when sorting
+	segments.  Pass this to Compare_segments constructor.
+	* layout.h (class Layout): Make segment_precedes non-static.
+	(class Compare_segments): Change from struct to class.  Add
+	layout_ field.  Add constructor.
+	* script-sections.cc
+	(Script_sections::attach_sections_using_phdrs_clause): Rename
+	local orphan to is_orphan.  Don't report failure to put empty
+	section in segment.  On attachment failure, report name of
+	section, and attach to first PT_LOAD segment.
+
+2011-06-28  Ian Lance Taylor  <iant@google.com>
+
 	PR gold/12934
 	* target-select.cc (Target_selector::Target_selector): Add
 	emulation parameter.  Change all callers.

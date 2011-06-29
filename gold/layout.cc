@@ -2751,7 +2751,7 @@ Layout::create_incremental_info_sections(Symbol_table* symtab)
 
 // Return whether SEG1 should be before SEG2 in the output file.  This
 // is based entirely on the segment type and flags.  When this is
-// called the segment addresses has normally not yet been set.
+// called the segment addresses have normally not yet been set.
 
 bool
 Layout::segment_precedes(const Output_segment* seg1,
@@ -2877,8 +2877,10 @@ Layout::segment_precedes(const Output_segment* seg1,
     return (flags1 & elfcpp::PF_R) == 0;
 
   // We shouldn't get here--we shouldn't create segments which we
-  // can't distinguish.
-  gold_unreachable();
+  // can't distinguish.  Unless of course we are using a weird linker
+  // script.
+  gold_assert(this->script_options_->saw_phdrs_clause());
+  return false;
 }
 
 // Increase OFF so that it is congruent to ADDR modulo ABI_PAGESIZE.
@@ -2902,9 +2904,11 @@ off_t
 Layout::set_segment_offsets(const Target* target, Output_segment* load_seg,
 			    unsigned int* pshndx)
 {
-  // Sort them into the final order.
-  std::sort(this->segment_list_.begin(), this->segment_list_.end(),
-	    Layout::Compare_segments());
+  // Sort them into the final order.  We use a stable sort so that we
+  // don't randomize the order of indistinguishable segments created
+  // by linker scripts.
+  std::stable_sort(this->segment_list_.begin(), this->segment_list_.end(),
+		   Layout::Compare_segments(this));
 
   // Find the PT_LOAD segments, and set their addresses and offsets
   // and their section's addresses and offsets.

@@ -4050,15 +4050,37 @@ Script_sections::attach_sections_using_phdrs_clause(Layout* layout)
        p != this->sections_elements_->end();
        ++p)
     {
-      bool orphan;
+      bool is_orphan;
       String_list* old_phdr_names = phdr_names;
-      Output_section* os = (*p)->allocate_to_segment(&phdr_names, &orphan);
+      Output_section* os = (*p)->allocate_to_segment(&phdr_names, &is_orphan);
       if (os == NULL)
 	continue;
 
+      elfcpp::Elf_Word seg_flags =
+	Layout::section_flags_to_segment(os->flags());
+
       if (phdr_names == NULL)
 	{
-	  gold_error(_("allocated section not in any segment"));
+	  // Don't worry about empty orphan sections.
+	  if (is_orphan && os->current_data_size() > 0)
+	    gold_error(_("allocated section %s not in any segment"),
+		       os->name());
+
+	  // To avoid later crashes drop this section into the first
+	  // PT_LOAD segment.
+	  for (Phdrs_elements::const_iterator ppe =
+		 this->phdrs_elements_->begin();
+	       ppe != this->phdrs_elements_->end();
+	       ++ppe)
+	    {
+	      Output_segment* oseg = (*ppe)->segment();
+	      if (oseg->type() == elfcpp::PT_LOAD)
+		{
+		  oseg->add_output_section_to_load(layout, os, seg_flags);
+		  break;
+		}
+	    }
+
 	  continue;
 	}
 
@@ -4073,7 +4095,7 @@ Script_sections::attach_sections_using_phdrs_clause(Layout* layout)
       // PT_INTERP segment will pick up following orphan sections,
       // which does not make sense.  If this is not an orphan section,
       // we trust the linker script.
-      if (orphan)
+      if (is_orphan)
 	{
 	  // Enable PT_LOAD segments only filtering until we see another
 	  // list of segment names.
@@ -4093,9 +4115,6 @@ Script_sections::attach_sections_using_phdrs_clause(Layout* layout)
 	      if (load_segments_only
 		  && r->second->type() != elfcpp::PT_LOAD)
 		continue;
-
-	      elfcpp::Elf_Word seg_flags =
-		Layout::section_flags_to_segment(os->flags());
 
 	      if (r->second->type() != elfcpp::PT_LOAD)
 		r->second->add_output_section_to_nonload(os, seg_flags);
