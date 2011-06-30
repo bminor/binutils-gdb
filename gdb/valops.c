@@ -2585,6 +2585,7 @@ find_overload_match (struct type **arg_types, int nargs,
 	  if (*valp)
 	    {
 	      *staticp = 1;
+	      do_cleanups (all_cleanups);
 	      return 0;
 	    }
 	}

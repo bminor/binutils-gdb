@@ -254,6 +254,7 @@ solib_find (char *in_pathname, int *fd)
   if (remote_filename_p (temp_pathname))
     {
       *fd = -1;
+      do_cleanups (old_chain);
       return temp_pathname;
     }
 

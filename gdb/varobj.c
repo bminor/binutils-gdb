@@ -580,6 +580,7 @@ varobj_create (char *objname,
          return a sensible error.  */
       if (!gdb_parse_exp_1 (&p, block, 0, &var->root->exp))
 	{
+	  do_cleanups (old_chain);
 	  return NULL;
 	}
 

@@ -1,5 +1,12 @@
 2011-06-30  Tom Tromey  <tromey@redhat.com>
 
+	* varobj.c (varobj_create): Call do_cleanups on early exit path.
+	* valops.c (find_overload_match): Call do_cleanups on early exit
+	path.
+	* solib.c (solib_find): Call do_cleanups on early exit path.
+
+2011-06-30  Tom Tromey  <tromey@redhat.com>
+
 	* symfile-mem.c (symbol_file_add_from_memory): Call do_cleanups.
 	* solib-svr4.c (open_symbol_file_object): Call do_cleanups on all
 	return paths.  Defer final do_cleanups until last return.
