@@ -1,3 +1,8 @@
+2011-06-30  Bernd Schmidt  <bernds@codesourcery.com>
+
+	* bfd/elf32-tic6x.c (elf32_tic6x_set_osabi): Also set it if
+	link_info is NULL.
+
 2011-06-28  Tristan Gingold  <gingold@adacore.com>
 
 	* vms-alpha.c (vms_private_data_struct): Make vms_linkage_index

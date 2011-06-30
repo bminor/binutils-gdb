@@ -4473,7 +4473,7 @@ elf32_tic6x_write_section (bfd *output_bfd,
 static void
 elf32_tic6x_set_osabi (bfd *abfd, struct bfd_link_info *link_info)
 {
-  if (link_info == NULL || link_info->relocatable)
+  if (link_info != NULL && link_info->relocatable)
     return;
   _bfd_elf_set_osabi (abfd, link_info);
 }
