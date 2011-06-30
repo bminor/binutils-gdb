@@ -8961,7 +8961,7 @@ static const struct dis386 vex_len_table[][2] = {
 
   /* VEX_LEN_0F3AF0_P_3 */
   {
-    { "rorxS",		{ Gdq, VexGdq, Edq, Ib } },
+    { "rorxS",		{ Gv, Ev, Ib } },
   },
 
   /* VEX_LEN_0FXOP_09_80 */

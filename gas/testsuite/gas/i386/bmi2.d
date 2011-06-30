@@ -8,8 +8,8 @@
 Disassembly of section .text:
 
 0+ <_start>:
-[ 	]*[a-f0-9]+:	c4 e3 63 f0 f0 07    	rorx   \$0x7,%eax,%ebx,%esi
-[ 	]*[a-f0-9]+:	c4 e3 63 f0 31 07    	rorx   \$0x7,\(%ecx\),%ebx,%esi
+[ 	]*[a-f0-9]+:	c4 e3 7b f0 d8 07    	rorx   \$0x7,%eax,%ebx
+[ 	]*[a-f0-9]+:	c4 e3 7b f0 19 07    	rorx   \$0x7,\(%ecx\),%ebx
 [ 	]*[a-f0-9]+:	c4 e2 63 f6 f0       	mulx   %eax,%ebx,%esi
 [ 	]*[a-f0-9]+:	c4 e2 63 f6 31       	mulx   \(%ecx\),%ebx,%esi
 [ 	]*[a-f0-9]+:	c4 e2 63 f5 f0       	pdep   %eax,%ebx,%esi
@@ -24,9 +24,9 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	c4 e2 61 f7 31       	shlx   %ebx,\(%ecx\),%esi
 [ 	]*[a-f0-9]+:	c4 e2 7b f7 f3       	shrx   %eax,%ebx,%esi
 [ 	]*[a-f0-9]+:	c4 e2 63 f7 31       	shrx   %ebx,\(%ecx\),%esi
-[ 	]*[a-f0-9]+:	c4 e3 63 f0 f0 07    	rorx   \$0x7,%eax,%ebx,%esi
-[ 	]*[a-f0-9]+:	c4 e3 63 f0 31 07    	rorx   \$0x7,\(%ecx\),%ebx,%esi
-[ 	]*[a-f0-9]+:	c4 e3 63 f0 31 07    	rorx   \$0x7,\(%ecx\),%ebx,%esi
+[ 	]*[a-f0-9]+:	c4 e3 7b f0 d8 07    	rorx   \$0x7,%eax,%ebx
+[ 	]*[a-f0-9]+:	c4 e3 7b f0 19 07    	rorx   \$0x7,\(%ecx\),%ebx
+[ 	]*[a-f0-9]+:	c4 e3 7b f0 19 07    	rorx   \$0x7,\(%ecx\),%ebx
 [ 	]*[a-f0-9]+:	c4 e2 63 f6 f0       	mulx   %eax,%ebx,%esi
 [ 	]*[a-f0-9]+:	c4 e2 63 f6 31       	mulx   \(%ecx\),%ebx,%esi
 [ 	]*[a-f0-9]+:	c4 e2 63 f6 31       	mulx   \(%ecx\),%ebx,%esi

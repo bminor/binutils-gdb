@@ -1,3 +1,11 @@
+2011-06-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	AVX Programming Reference (June, 2011)
+	* i386-dis.c (vex_len_table): Correct rorxS.
+
+	* i386-opc.tbl: Correct rorx.
+	* i386-tbl.h: Regenerated.
+
 2011-06-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* tilegx-opc.c (find_opcode): Replace "index" with "i".

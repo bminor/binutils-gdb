@@ -8,10 +8,10 @@
 Disassembly of section .text:
 
 0+ <_start>:
-[ 	]*[a-f0-9]+:	c4 e3 63 f0 f0 07    	rorx   \$0x7,%eax,%ebx,%esi
-[ 	]*[a-f0-9]+:	c4 e3 63 f0 31 07    	rorx   \$0x7,\(%rcx\),%ebx,%esi
-[ 	]*[a-f0-9]+:	c4 43 03 f0 d1 07    	rorx   \$0x7,%r9d,%r15d,%r10d
-[ 	]*[a-f0-9]+:	c4 63 03 f0 11 07    	rorx   \$0x7,\(%rcx\),%r15d,%r10d
+[ 	]*[a-f0-9]+:	c4 e3 7b f0 d8 07    	rorx   \$0x7,%eax,%ebx
+[ 	]*[a-f0-9]+:	c4 e3 7b f0 19 07    	rorx   \$0x7,\(%rcx\),%ebx
+[ 	]*[a-f0-9]+:	c4 43 7b f0 f9 07    	rorx   \$0x7,%r9d,%r15d
+[ 	]*[a-f0-9]+:	c4 63 7b f0 39 07    	rorx   \$0x7,\(%rcx\),%r15d
 [ 	]*[a-f0-9]+:	c4 e2 63 f6 f0       	mulx   %eax,%ebx,%esi
 [ 	]*[a-f0-9]+:	c4 e2 63 f6 31       	mulx   \(%rcx\),%ebx,%esi
 [ 	]*[a-f0-9]+:	c4 42 03 f6 d1       	mulx   %r9d,%r15d,%r10d
@@ -40,10 +40,10 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	c4 e2 63 f7 31       	shrx   %ebx,\(%rcx\),%esi
 [ 	]*[a-f0-9]+:	c4 42 33 f7 d7       	shrx   %r9d,%r15d,%r10d
 [ 	]*[a-f0-9]+:	c4 62 33 f7 11       	shrx   %r9d,\(%rcx\),%r10d
-[ 	]*[a-f0-9]+:	c4 e3 e3 f0 f0 07    	rorx   \$0x7,%rax,%rbx,%rsi
-[ 	]*[a-f0-9]+:	c4 e3 e3 f0 31 07    	rorx   \$0x7,\(%rcx\),%rbx,%rsi
-[ 	]*[a-f0-9]+:	c4 43 83 f0 d1 07    	rorx   \$0x7,%r9,%r15,%r10
-[ 	]*[a-f0-9]+:	c4 63 83 f0 11 07    	rorx   \$0x7,\(%rcx\),%r15,%r10
+[ 	]*[a-f0-9]+:	c4 e3 fb f0 d8 07    	rorx   \$0x7,%rax,%rbx
+[ 	]*[a-f0-9]+:	c4 e3 fb f0 19 07    	rorx   \$0x7,\(%rcx\),%rbx
+[ 	]*[a-f0-9]+:	c4 43 fb f0 f9 07    	rorx   \$0x7,%r9,%r15
+[ 	]*[a-f0-9]+:	c4 63 fb f0 39 07    	rorx   \$0x7,\(%rcx\),%r15
 [ 	]*[a-f0-9]+:	c4 e2 e3 f6 f0       	mulx   %rax,%rbx,%rsi
 [ 	]*[a-f0-9]+:	c4 e2 e3 f6 31       	mulx   \(%rcx\),%rbx,%rsi
 [ 	]*[a-f0-9]+:	c4 42 83 f6 d1       	mulx   %r9,%r15,%r10
@@ -72,11 +72,11 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	c4 e2 fb f7 31       	shrx   %rax,\(%rcx\),%rsi
 [ 	]*[a-f0-9]+:	c4 42 b3 f7 d7       	shrx   %r9,%r15,%r10
 [ 	]*[a-f0-9]+:	c4 62 b3 f7 11       	shrx   %r9,\(%rcx\),%r10
-[ 	]*[a-f0-9]+:	c4 e3 63 f0 f0 07    	rorx   \$0x7,%eax,%ebx,%esi
-[ 	]*[a-f0-9]+:	c4 e3 63 f0 31 07    	rorx   \$0x7,\(%rcx\),%ebx,%esi
-[ 	]*[a-f0-9]+:	c4 43 2b f0 f9 07    	rorx   \$0x7,%r9d,%r10d,%r15d
-[ 	]*[a-f0-9]+:	c4 63 2b f0 39 07    	rorx   \$0x7,\(%rcx\),%r10d,%r15d
-[ 	]*[a-f0-9]+:	c4 e3 63 f0 31 07    	rorx   \$0x7,\(%rcx\),%ebx,%esi
+[ 	]*[a-f0-9]+:	c4 e3 7b f0 d8 07    	rorx   \$0x7,%eax,%ebx
+[ 	]*[a-f0-9]+:	c4 e3 7b f0 19 07    	rorx   \$0x7,\(%rcx\),%ebx
+[ 	]*[a-f0-9]+:	c4 43 7b f0 d1 07    	rorx   \$0x7,%r9d,%r10d
+[ 	]*[a-f0-9]+:	c4 63 7b f0 11 07    	rorx   \$0x7,\(%rcx\),%r10d
+[ 	]*[a-f0-9]+:	c4 e3 7b f0 19 07    	rorx   \$0x7,\(%rcx\),%ebx
 [ 	]*[a-f0-9]+:	c4 e2 63 f6 f0       	mulx   %eax,%ebx,%esi
 [ 	]*[a-f0-9]+:	c4 e2 63 f6 31       	mulx   \(%rcx\),%ebx,%esi
 [ 	]*[a-f0-9]+:	c4 42 2b f6 f9       	mulx   %r9d,%r10d,%r15d
@@ -112,11 +112,11 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	c4 42 33 f7 fa       	shrx   %r9d,%r10d,%r15d
 [ 	]*[a-f0-9]+:	c4 62 33 f7 39       	shrx   %r9d,\(%rcx\),%r15d
 [ 	]*[a-f0-9]+:	c4 e2 63 f7 31       	shrx   %ebx,\(%rcx\),%esi
-[ 	]*[a-f0-9]+:	c4 e3 e3 f0 f0 07    	rorx   \$0x7,%rax,%rbx,%rsi
-[ 	]*[a-f0-9]+:	c4 e3 e3 f0 31 07    	rorx   \$0x7,\(%rcx\),%rbx,%rsi
-[ 	]*[a-f0-9]+:	c4 43 83 f0 d1 07    	rorx   \$0x7,%r9,%r15,%r10
-[ 	]*[a-f0-9]+:	c4 63 83 f0 11 07    	rorx   \$0x7,\(%rcx\),%r15,%r10
-[ 	]*[a-f0-9]+:	c4 e3 e3 f0 31 07    	rorx   \$0x7,\(%rcx\),%rbx,%rsi
+[ 	]*[a-f0-9]+:	c4 e3 fb f0 d8 07    	rorx   \$0x7,%rax,%rbx
+[ 	]*[a-f0-9]+:	c4 e3 fb f0 19 07    	rorx   \$0x7,\(%rcx\),%rbx
+[ 	]*[a-f0-9]+:	c4 43 fb f0 f9 07    	rorx   \$0x7,%r9,%r15
+[ 	]*[a-f0-9]+:	c4 63 fb f0 39 07    	rorx   \$0x7,\(%rcx\),%r15
+[ 	]*[a-f0-9]+:	c4 e3 fb f0 19 07    	rorx   \$0x7,\(%rcx\),%rbx
 [ 	]*[a-f0-9]+:	c4 e2 e3 f6 f0       	mulx   %rax,%rbx,%rsi
 [ 	]*[a-f0-9]+:	c4 e2 e3 f6 31       	mulx   \(%rcx\),%rbx,%rsi
 [ 	]*[a-f0-9]+:	c4 42 83 f6 d1       	mulx   %r9,%r15,%r10

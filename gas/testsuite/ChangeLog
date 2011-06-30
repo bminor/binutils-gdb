@@ -1,3 +1,14 @@
+2011-06-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	AVX Programming Reference (June, 2011)
+	* gas/i386/bmi2.s: Correct rorx tests.
+	* gas/i386/x86-64-bmi2.s: Likewise.
+
+	* gas/i386/bmi2-intel.d: Updated.
+	* gas/i386/bmi2.d: Likewise.
+	* gas/i386/x86-64-bmi2-intel.d: Likewise.
+	* gas/i386/x86-64-bmi2.d: Likewise.
+
 2011-06-30  Paul Carroll  <pcarroll@codesourcery.com>
 
 	* gas/arm/addthumb2err.s: New test file.

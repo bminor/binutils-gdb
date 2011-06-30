@@ -4,11 +4,11 @@
 	.text
 _start:
 
-# Test for op r32, r32, r/m32, imm8
-	rorx $7,%eax,%ebx,%esi
-	rorx $7,(%rcx),%ebx,%esi
-	rorx $7,%r9d,%r15d,%r10d
-	rorx $7,(%rcx),%r15d,%r10d
+# Test for op r32, r/m32, imm8
+	rorx $7,%eax,%ebx
+	rorx $7,(%rcx),%ebx
+	rorx $7,%r9d,%r15d
+	rorx $7,(%rcx),%r15d
 
 # Test for op r32, r32, r/m32
 	mulx %eax,%ebx,%esi
@@ -42,11 +42,11 @@ _start:
 	shrx %r9d,%r15d,%r10d
 	shrx %r9d,(%rcx),%r10d
 
-# Test for op r64, r64, r/m64, imm8
-	rorx $7,%rax,%rbx,%rsi
-	rorx $7,(%rcx),%rbx,%rsi
-	rorx $7,%r9,%r15,%r10
-	rorx $7,(%rcx),%r15,%r10
+# Test for op r64, r/m64, imm8
+	rorx $7,%rax,%rbx
+	rorx $7,(%rcx),%rbx
+	rorx $7,%r9,%r15
+	rorx $7,(%rcx),%r15
 
 # Test for op r64, r64, r/m64
 	mulx %rax,%rbx,%rsi
@@ -82,12 +82,12 @@ _start:
 
 	.intel_syntax noprefix
 
-# Test for op r32, r32, r/m32, imm8
-	rorx esi,ebx,eax,7
-	rorx esi,ebx,DWORD PTR [rcx],7
-	rorx r15d,r10d,r9d,7
-	rorx r15d,r10d,DWORD PTR [rcx],7
-	rorx esi,ebx,[rcx],7
+# Test for op r32, r/m32, imm8
+	rorx ebx,eax,7
+	rorx ebx,DWORD PTR [rcx],7
+	rorx r10d,r9d,7
+	rorx r10d,DWORD PTR [rcx],7
+	rorx ebx,[rcx],7
 
 # Test for op r32, r32, r/m32
 	mulx esi,ebx,eax
@@ -128,12 +128,12 @@ _start:
 	shrx r15d,DWORD PTR [rcx],r9d
 	shrx esi,[rcx],ebx
 
-# Test for op r64, r64, r/m64, imm8
-	rorx rsi,rbx,rax,7
-	rorx rsi,rbx,QWORD PTR [rcx],7
-	rorx r10,r15,r9,7
-	rorx r10,r15,QWORD PTR [rcx],7
-	rorx rsi,rbx,[rcx],7
+# Test for op r64, r/m64, imm8
+	rorx rbx,rax,7
+	rorx rbx,QWORD PTR [rcx],7
+	rorx r15,r9,7
+	rorx r15,QWORD PTR [rcx],7
+	rorx rbx,[rcx],7
 
 # Test for op r64, r64, r/m64
 	mulx rsi,rbx,rax

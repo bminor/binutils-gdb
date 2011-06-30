@@ -9,8 +9,8 @@
 Disassembly of section .text:
 
 0+ <_start>:
-[ 	]*[a-f0-9]+:	c4 e3 63 f0 f0 07    	rorx   esi,ebx,eax,0x7
-[ 	]*[a-f0-9]+:	c4 e3 63 f0 31 07    	rorx   esi,ebx,DWORD PTR \[ecx\],0x7
+[ 	]*[a-f0-9]+:	c4 e3 7b f0 d8 07    	rorx   ebx,eax,0x7
+[ 	]*[a-f0-9]+:	c4 e3 7b f0 19 07    	rorx   ebx,DWORD PTR \[ecx\],0x7
 [ 	]*[a-f0-9]+:	c4 e2 63 f6 f0       	mulx   esi,ebx,eax
 [ 	]*[a-f0-9]+:	c4 e2 63 f6 31       	mulx   esi,ebx,DWORD PTR \[ecx\]
 [ 	]*[a-f0-9]+:	c4 e2 63 f5 f0       	pdep   esi,ebx,eax
@@ -25,9 +25,9 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	c4 e2 61 f7 31       	shlx   esi,DWORD PTR \[ecx\],ebx
 [ 	]*[a-f0-9]+:	c4 e2 7b f7 f3       	shrx   esi,ebx,eax
 [ 	]*[a-f0-9]+:	c4 e2 63 f7 31       	shrx   esi,DWORD PTR \[ecx\],ebx
-[ 	]*[a-f0-9]+:	c4 e3 63 f0 f0 07    	rorx   esi,ebx,eax,0x7
-[ 	]*[a-f0-9]+:	c4 e3 63 f0 31 07    	rorx   esi,ebx,DWORD PTR \[ecx\],0x7
-[ 	]*[a-f0-9]+:	c4 e3 63 f0 31 07    	rorx   esi,ebx,DWORD PTR \[ecx\],0x7
+[ 	]*[a-f0-9]+:	c4 e3 7b f0 d8 07    	rorx   ebx,eax,0x7
+[ 	]*[a-f0-9]+:	c4 e3 7b f0 19 07    	rorx   ebx,DWORD PTR \[ecx\],0x7
+[ 	]*[a-f0-9]+:	c4 e3 7b f0 19 07    	rorx   ebx,DWORD PTR \[ecx\],0x7
 [ 	]*[a-f0-9]+:	c4 e2 63 f6 f0       	mulx   esi,ebx,eax
 [ 	]*[a-f0-9]+:	c4 e2 63 f6 31       	mulx   esi,ebx,DWORD PTR \[ecx\]
 [ 	]*[a-f0-9]+:	c4 e2 63 f6 31       	mulx   esi,ebx,DWORD PTR \[ecx\]

@@ -4,9 +4,9 @@
 	.text
 _start:
 
-# Test for op r32, r32, r/m32, imm8
-	rorx $7,%eax,%ebx,%esi
-	rorx $7,(%ecx),%ebx,%esi
+# Test for op r32, r/m32, imm8
+	rorx $7,%eax,%ebx
+	rorx $7,(%ecx),%ebx
 
 # Test for op r32, r32, r/m32
 	mulx %eax,%ebx,%esi
@@ -28,10 +28,10 @@ _start:
 
 	.intel_syntax noprefix
 
-# Test for op r32, r32, r/m32, imm8
-	rorx esi,ebx,eax,7
-	rorx esi,ebx,DWORD PTR [ecx],7
-	rorx esi,ebx,[ecx],7
+# Test for op r32, r/m32, imm8
+	rorx ebx,eax,7
+	rorx ebx,DWORD PTR [ecx],7
+	rorx ebx,[ecx],7
 
 # Test for op r32, r32, r/m32
 	mulx esi,ebx,eax
