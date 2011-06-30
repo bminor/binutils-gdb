@@ -9474,6 +9474,9 @@ do_t_add_sub (void)
 	}
       else
 	{
+	  unsigned int value = inst.reloc.exp.X_add_number;
+	  unsigned int shift = inst.operands[2].shift_kind;
+
 	  Rn = inst.operands[2].reg;
 	  /* See if we can do this with a 16-bit instruction.  */
 	  if (!inst.operands[2].shifted && inst.size_req != 4)
@@ -9524,6 +9527,10 @@ do_t_add_sub (void)
 	  inst.instruction = THUMB_OP32 (inst.instruction);
 	  inst.instruction |= Rd << 8;
 	  inst.instruction |= Rs << 16;
+	  constraint (Rd == REG_SP && Rs == REG_SP && value > 3,
+		      _("shift value over 3 not allowed in thumb mode"));
+	  constraint (Rd == REG_SP && Rs == REG_SP && shift != SHIFT_LSL,
+		      _("only LSL shift allowed in thumb mode"));
 	  encode_thumb32_shifted_operand (2);
 	}
     }

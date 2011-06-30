@@ -1,3 +1,8 @@
+2011-06-30  Paul Carroll  <pcarroll@codesourcery.com>
+
+	* config/tc-arm.c (do_t_add_sub): Only allow LSL shifts of less
+	than 4 in Thumb mode.
+
 2011-06-30  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/12848
