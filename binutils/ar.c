@@ -745,11 +745,17 @@ main (int argc, char **argv)
 	  break;
 
 	case move:
-	  if (files != NULL)
-	    move_members (arch, files);
-	  else
-	    output_filename = NULL;
-	  break;
+	  /* PR 12558: Creating and moving at the same time does
+	     not make sense.  Just create the archive instead.  */
+	  if (! silent_create)
+	    {
+	      if (files != NULL)
+		move_members (arch, files);
+	      else
+		output_filename = NULL;
+	      break;
+	    }
+	  /* Fall through.  */
 
 	case replace:
 	case quick_append:

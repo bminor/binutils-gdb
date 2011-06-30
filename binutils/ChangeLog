@@ -1,3 +1,9 @@
+2011-06-30  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/12558
+	* ar.c (main): When asked to move members in an archive that is
+	being created, ignore the move request.
+
 2011-06-29  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (get_section_type_name): When displaying an unknown
