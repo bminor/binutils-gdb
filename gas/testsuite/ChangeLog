@@ -1,6 +1,13 @@
 2011-06-30  Nick Clifton  <nickc@redhat.com>
 
-	PR 12848
+	PR gas/12931
+	* gas/arm/blx-bad.d: Add exrta nop at end of disassembly.
+	* gas/arm/inst-po-be.d: Add exrta nop at end of disassembly.
+	* gas/arm/inst-po.d: Add exrta nop at end of disassembly.
+
+2011-06-30  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/12848
 	* gas/arm/thumb-b-bad.s: New test.
 	* gas/arm/thumb-b-bad.d: Test control file.
 	* gas/arm/thumb-b-bad.l: Expected error output.

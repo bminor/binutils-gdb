@@ -21,3 +21,4 @@ Disassembly of section .text:
   18:	46c0      	nop			; \(mov r8, r8\)
   1a:	f7ff eff1 			; <UNDEFINED> instruction: 0xf7ffeff1
   1e:	f7ff eff0 	blx	0 <ARM>
+  22:	46c0      	nop			; \(mov r8, r8\)
