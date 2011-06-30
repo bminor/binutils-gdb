@@ -2211,7 +2211,7 @@ arm_obj_section_from_vma (struct objfile *objfile, bfd_vma vma)
 static void
 arm_exidx_new_objfile (struct objfile *objfile)
 {
-  struct cleanup *cleanups = make_cleanup (null_cleanup, NULL);
+  struct cleanup *cleanups;
   struct arm_exidx_data *data;
   asection *exidx, *extab;
   bfd_vma exidx_vma = 0, extab_vma = 0;
@@ -2222,6 +2222,7 @@ arm_exidx_new_objfile (struct objfile *objfile)
   /* If we've already touched this file, do nothing.  */
   if (!objfile || objfile_data (objfile, arm_exidx_data_key) != NULL)
     return;
+  cleanups = make_cleanup (null_cleanup, NULL);
 
   /* Read contents of exception table and index.  */
   exidx = bfd_get_section_by_name (objfile->obfd, ".ARM.exidx");

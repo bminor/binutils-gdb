@@ -1021,17 +1021,26 @@ open_symbol_file_object (void *from_ttyp)
 
   if (symfile_objfile)
     if (!query (_("Attempt to reload symbols from process? ")))
-      return 0;
+      {
+	do_cleanups (cleanups);
+	return 0;
+      }
 
   /* Always locate the debug struct, in case it has moved.  */
   info->debug_base = 0;
   if (locate_base (info) == 0)
-    return 0;	/* failed somehow...  */
+    {
+      do_cleanups (cleanups);
+      return 0;	/* failed somehow...  */
+    }
 
   /* First link map member should be the executable.  */
   lm = solib_svr4_r_map (info);
   if (lm == 0)
-    return 0;	/* failed somehow...  */
+    {
+      do_cleanups (cleanups);
+      return 0;	/* failed somehow...  */
+    }
 
   /* Read address of name from target memory to GDB.  */
   read_memory (lm + lmo->l_name_offset, l_name_buf, l_name_size);
@@ -1039,11 +1048,11 @@ open_symbol_file_object (void *from_ttyp)
   /* Convert the address to host format.  */
   l_name = extract_typed_address (l_name_buf, ptr_type);
 
-  /* Free l_name_buf.  */
-  do_cleanups (cleanups);
-
   if (l_name == 0)
-    return 0;		/* No filename.  */
+    {
+      do_cleanups (cleanups);
+      return 0;		/* No filename.  */
+    }
 
   /* Now fetch the filename from target memory.  */
   target_read_string (l_name, &filename, SO_NAME_MAX_PATH_SIZE - 1, &errcode);
@@ -1053,12 +1062,14 @@ open_symbol_file_object (void *from_ttyp)
     {
       warning (_("failed to read exec filename from attached file: %s"),
 	       safe_strerror (errcode));
+      do_cleanups (cleanups);
       return 0;
     }
 
   /* Have a pathname: read the symbol file.  */
   symbol_file_add_main (filename, from_tty);
 
+  do_cleanups (cleanups);
   return 1;
 }
 
