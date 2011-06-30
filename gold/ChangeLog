@@ -1,5 +1,18 @@
 2011-06-29  Ian Lance Taylor  <iant@google.com>
 
+	PR gold/12629
+	* object.cc (Sized_relobj_file::layout_section): Change shdr
+	parameter to be const.
+	(Sized_relobj_file::layout_eh_frame_section): New function, broken
+	out of do_layout.
+	(Sized_relobj_file::do_layout): Defer .eh_frame sections if
+	appropriate.  Call layout_eh_frame_section.
+	(Sized_relobj_file::do_layout_deferred_sections): Handle .eh_frame
+	sections.
+	* object.h (class Sized_relobj_file): Update declarations.
+
+2011-06-29  Ian Lance Taylor  <iant@google.com>
+
 	PR gold/12652
 	* script.cc (Token::integer_value): Accept trailing M/m/K/k
 	modifier.

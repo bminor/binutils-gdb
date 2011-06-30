@@ -2306,8 +2306,17 @@ class Sized_relobj_file : public Sized_relobj<size, big_endian>
   // Layout an input section.
   void
   layout_section(Layout* layout, unsigned int shndx, const char* name,
-                 typename This::Shdr& shdr, unsigned int reloc_shndx,
+                 const typename This::Shdr& shdr, unsigned int reloc_shndx,
                  unsigned int reloc_type);
+
+  // Layout an input .eh_frame section.
+  void
+  layout_eh_frame_section(Layout* layout, const unsigned char* symbols_data,
+			  section_size_type symbols_size,
+			  const unsigned char* symbol_names_data,
+			  section_size_type symbol_names_size,
+			  unsigned int shndx, const typename This::Shdr&,
+			  unsigned int reloc_shndx, unsigned int reloc_type);
 
   // Write section data to the output file.  Record the views and
   // sizes in VIEWS for use when relocating.
