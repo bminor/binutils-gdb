@@ -215,8 +215,7 @@ SUBDIR_MI_SRCS = \
 	mi/mi-main.c mi/mi-parse.c mi/mi-getopt.c
 SUBDIR_MI_DEPS =
 SUBDIR_MI_LDFLAGS=
-SUBDIR_MI_CFLAGS= \
-	-DMI_OUT=1
+SUBDIR_MI_CFLAGS=
 
 #
 # TUI sub directory definitions
