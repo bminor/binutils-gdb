@@ -1,3 +1,10 @@
+2011-06-30  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/12848
+	* config/tc-arm.c (BAD_RANGE): New error message define.
+	(md_apply_fix): Use it.
+	Fix range check for thumb branch instructions.
+
 2011-06-29  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* config/tc-mips.c (append_method): New enum.

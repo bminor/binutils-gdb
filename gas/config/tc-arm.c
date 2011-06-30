@@ -724,6 +724,7 @@ struct asm_opcode
 	_("cannot use register index with PC-relative addressing")
 #define BAD_PC_WRITEBACK \
 	_("cannot use writeback with PC-relative addressing")
+#define BAD_RANGE     _("branch out of range")
 
 static struct hash_control * arm_ops_hsh;
 static struct hash_control * arm_cond_hsh;
@@ -20944,8 +20945,7 @@ md_apply_fix (fixS *	fixP,
 		      _("misaligned branch destination"));
       if ((value & (offsetT)0xfe000000) != (offsetT)0
 	  && (value & (offsetT)0xfe000000) != (offsetT)0xfe000000)
-	as_bad_where (fixP->fx_file, fixP->fx_line,
-		      _("branch out of range"));
+	as_bad_where (fixP->fx_file, fixP->fx_line, BAD_RANGE);
 
       if (fixP->fx_done || !seg->use_rela_p)
 	{
@@ -20981,8 +20981,7 @@ md_apply_fix (fixS *	fixP,
       else
 	{
 	  if (value & ~0x7e)
-	    as_bad_where (fixP->fx_file, fixP->fx_line,
-		          _("branch out of range"));
+	    as_bad_where (fixP->fx_file, fixP->fx_line, BAD_RANGE);
 
           if (fixP->fx_done || !seg->use_rela_p)
 	    {
@@ -20995,8 +20994,7 @@ md_apply_fix (fixS *	fixP,
 
     case BFD_RELOC_THUMB_PCREL_BRANCH9: /* Conditional branch.	*/
       if ((value & ~0xff) && ((value & ~0xff) != ~0xff))
-	as_bad_where (fixP->fx_file, fixP->fx_line,
-		      _("branch out of range"));
+	as_bad_where (fixP->fx_file, fixP->fx_line, BAD_RANGE);
 
       if (fixP->fx_done || !seg->use_rela_p)
 	{
@@ -21008,8 +21006,7 @@ md_apply_fix (fixS *	fixP,
 
     case BFD_RELOC_THUMB_PCREL_BRANCH12: /* Unconditional branch.  */
       if ((value & ~0x7ff) && ((value & ~0x7ff) != ~0x7ff))
-	as_bad_where (fixP->fx_file, fixP->fx_line,
-		      _("branch out of range"));
+	as_bad_where (fixP->fx_file, fixP->fx_line, BAD_RANGE);
 
       if (fixP->fx_done || !seg->use_rela_p)
 	{
@@ -21029,7 +21026,7 @@ md_apply_fix (fixS *	fixP,
 	  /* Force a relocation for a branch 20 bits wide.  */
 	  fixP->fx_done = 0;
 	}
-      if ((value & ~0x1fffff) && ((value & ~0x1fffff) != ~0x1fffff))
+      if ((value & ~0x1fffff) && ((value & ~0x0fffff) != ~0x0fffff))
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("conditional branch out of range"));
 
@@ -21054,7 +21051,6 @@ md_apply_fix (fixS *	fixP,
       break;
 
     case BFD_RELOC_THUMB_PCREL_BLX:
-
       /* If there is a blx from a thumb state function to
 	 another thumb function flip this to a bl and warn
 	 about it.  */
@@ -21079,7 +21075,6 @@ md_apply_fix (fixS *	fixP,
       goto thumb_bl_common;
 
     case BFD_RELOC_THUMB_PCREL_BRANCH23:
-
       /* A bl from Thumb state ISA to an internal ARM state function
 	 is converted to a blx.  */
       if (fixP->fx_addsy
@@ -21110,21 +21105,15 @@ md_apply_fix (fixS *	fixP,
 	   1 of the base address.  */
 	value = (value + 1) & ~ 1;
 
-
        if ((value & ~0x3fffff) && ((value & ~0x3fffff) != ~0x3fffff))
-	{
-	  if (!(ARM_CPU_HAS_FEATURE (cpu_variant, arm_arch_t2)))
-	    {
-	      as_bad_where (fixP->fx_file, fixP->fx_line,
-			    _("branch out of range"));
-	    }
-	  else if ((value & ~0x1ffffff)
-		   && ((value & ~0x1ffffff) != ~0x1ffffff))
-	      {
-		as_bad_where (fixP->fx_file, fixP->fx_line,
-			    _("Thumb2 branch out of range"));
-	      }
-	}
+	 {
+	   if (!(ARM_CPU_HAS_FEATURE (cpu_variant, arm_arch_t2)))
+	     as_bad_where (fixP->fx_file, fixP->fx_line, BAD_RANGE);
+	   else if ((value & ~0x1ffffff)
+		    && ((value & ~0x1ffffff) != ~0x1ffffff))
+	     as_bad_where (fixP->fx_file, fixP->fx_line,
+			   _("Thumb2 branch out of range"));
+	 }
 
       if (fixP->fx_done || !seg->use_rela_p)
 	encode_thumb2_b_bl_offset (buf, value);
@@ -21132,9 +21121,8 @@ md_apply_fix (fixS *	fixP,
       break;
 
     case BFD_RELOC_THUMB_PCREL_BRANCH25:
-      if ((value & ~0x1ffffff) && ((value & ~0x1ffffff) != ~0x1ffffff))
-	as_bad_where (fixP->fx_file, fixP->fx_line,
-		      _("branch out of range"));
+      if ((value & ~0x0ffffff) && ((value & ~0x0ffffff) != ~0x0ffffff))
+	as_bad_where (fixP->fx_file, fixP->fx_line, BAD_RANGE);
 
       if (fixP->fx_done || !seg->use_rela_p)
 	  encode_thumb2_b_bl_offset (buf, value);
