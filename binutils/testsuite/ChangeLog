@@ -1,3 +1,9 @@
+2011-06-30  Bernd Schmidt  <bernds@codesourcery.com>
+
+	* binutils-all/objcopy.exp (strip_test, strip_executable):
+	On ELF targets, test that OS/ABI is preserved.
+	(copy_setup): Do test on tic6x-*-uclinux.
+
 2011-06-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* binutils-all/elfedit-1.d: Updated for x32.

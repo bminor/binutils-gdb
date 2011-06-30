@@ -406,12 +406,26 @@ proc strip_test { } {
     global NMFLAGS
     global srcdir
     global subdir
+    global READELF
 
     set test "strip"
 
     if { [target_compile $srcdir/$subdir/testprog.c tmpdir/testprog.o object debug] != "" } {
 	untested $test
 	return
+    }
+
+    set osabi_fail "false"
+    if [is_elf_format] {
+	verbose -log "$READELF -a tmpdir/testprog.o > tmpdir/osabi.in"
+	set exec_output [remote_exec host "$READELF -h tmpdir/testprog.o" "" "/dev/null" "tmpdir/osabi.in"]
+	if { [lindex $exec_output 0] != 0 } then {
+	    unresolved "$test preserving OS/ABI"	
+	    set osabi_fail "true"
+	} else {
+	    verbose -log "grep OS/ABI tmpdir/osabi.in"
+	    catch "exec grep OS/ABI tmpdir/osabi.in" osabi_in
+	}
     }
 
     if [is_remote host] {
@@ -428,19 +442,38 @@ proc strip_test { } {
     set exec_output [binutils_run $AR "rc $archive ${objfile}"]
     if ![string match "" $exec_output] {
 	fail $test
+	unresolved "$test preserving OS/ABI"	
 	return
     }
 
     set exec_output [binutils_run $STRIP "-g $archive"]
     if ![string match "" $exec_output] {
 	fail $test
+	unresolved "$test preserving OS/ABI"	
 	return
     }
 
     set exec_output [binutils_run $STRIP "$STRIPFLAGS $archive"]
     if ![string match "" $exec_output] {
 	fail $test
+	unresolved "$test preserving OS/ABI"	
 	return
+    }
+
+    if { $osabi_fail != "true" && [is_elf_format] } {
+	verbose -log "$READELF -a tmpdir/testprog.o > tmpdir/osabi.out"
+	set exec_output [remote_exec host "$READELF -h tmpdir/testprog.o" "" "/dev/null" "tmpdir/osabi.out"]
+	if { [lindex $exec_output 0] != 0 } then {
+	    unresolved "$test preserving OS/ABI"	
+	} else {
+	    verbose -log "grep OS/ABI tmpdir/osabi.out"
+	    catch "exec grep OS/ABI tmpdir/osabi.out" osabi_out
+	    if { "$osabi_in" == "$osabi_out" } {
+		pass "$test preserving OS/ABI"
+	    } else {
+		fail "$test preserving OS/ABI"
+	    }
+	}
     }
 
     if { [target_compile $srcdir/$subdir/testprog.c tmpdir/testprog.o object debug] != "" } {
@@ -531,7 +564,7 @@ proc copy_setup { } {
     set res [build_wrapper testglue.o]
     set flags { debug }
     
-    if { [istarget *-*-uclinux*] } {
+    if { [istarget *-*-uclinux*] && ![istarget tic6x-*-*] } {
 	return 1
     }
     
@@ -649,6 +682,7 @@ proc copy_executable { prog flags test1 test2 } {
 proc strip_executable { prog flags test } {
     global NM
     global NMFLAGS
+    global READELF
     global host_triplet
 
     remote_file build delete tmpdir/striprog
@@ -658,6 +692,19 @@ proc strip_executable { prog flags test } {
     } else {
 	set copyfile tmpdir/striprog
     }
+
+    set osabi_fail "false"
+    if [is_elf_format] {
+	verbose -log "$READELF -a ${copyfile} > tmpdir/osabi.in"
+	set exec_output [remote_exec host "$READELF -h ${copyfile}" "" "/dev/null" "tmpdir/osabi.in"]
+	if { [lindex $exec_output 0] != 0 } then {
+	    unresolved "$test preserving OS/ABI"	
+	    set osabi_fail "true"
+	} else {
+	    verbose -log "grep OS/ABI tmpdir/osabi.in"
+	    catch "exec grep OS/ABI tmpdir/osabi.in" osabi_in
+	}
+     }
 
     set exec_output [binutils_run $prog "$flags ${copyfile}"]
     if ![string match "" $exec_output] {
@@ -677,6 +724,22 @@ proc strip_executable { prog flags test } {
     if { $status != "pass" } {
 	fail $test
         return
+    }
+
+    if { $osabi_fail != "true" && [is_elf_format] } {
+	verbose -log "$READELF -a ${copyfile} > tmpdir/osabi.out"
+	set exec_output [remote_exec host "$READELF -h ${copyfile}" "" "/dev/null" "tmpdir/osabi.out"]
+	if { [lindex $exec_output 0] != 0 } then {
+	    unresolved "$test preserving OS/ABI"	
+	} else {
+	    verbose -log "grep OS/ABI tmpdir/osabi.out"
+	    catch "exec grep OS/ABI tmpdir/osabi.out" osabi_out
+	    if { "$osabi_in" == "$osabi_out" } {
+		pass "$test preserving OS/ABI"
+	    } else {
+		fail "$test preserving OS/ABI"
+	    }
+	}
     }
 
     set exec_output [binutils_run $NM "$NMFLAGS ${copyfile}"]
