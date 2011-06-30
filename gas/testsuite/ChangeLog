@@ -1,3 +1,10 @@
+2011-06-30  Nick Clifton  <nickc@redhat.com>
+
+	PR 12848
+	* gas/arm/thumb-b-bad.s: New test.
+	* gas/arm/thumb-b-bad.d: Test control file.
+	* gas/arm/thumb-b-bad.l: Expected error output.
+
 2011-06-29  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* gas/mips/mips16-e.d, gas/mips/mips16-f.d,
