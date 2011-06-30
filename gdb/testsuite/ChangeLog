@@ -1,3 +1,8 @@
+2011-06-30  Andrew Burgess  <aburgess@broadcom.com>
+
+	* gdb.python/py-template.exp: Don't run this test if the target
+	does not support c++ tests.
+
 2011-06-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix non-only rename list for Fortran modules import.
