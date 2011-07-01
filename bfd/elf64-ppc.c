@@ -80,7 +80,7 @@ static bfd_vma opd_entry_value
 #define bfd_elf64_mkobject		      ppc64_elf_mkobject
 #define bfd_elf64_bfd_reloc_type_lookup	      ppc64_elf_reloc_type_lookup
 #define bfd_elf64_bfd_reloc_name_lookup	      ppc64_elf_reloc_name_lookup
-#define bfd_elf64_bfd_merge_private_bfd_data  ppc64_elf_merge_private_bfd_data
+#define bfd_elf64_bfd_merge_private_bfd_data  _bfd_generic_verify_endian_match
 #define bfd_elf64_new_section_hook	      ppc64_elf_new_section_hook
 #define bfd_elf64_bfd_link_hash_table_create  ppc64_elf_link_hash_table_create
 #define bfd_elf64_bfd_link_hash_table_free    ppc64_elf_link_hash_table_free
@@ -2727,35 +2727,6 @@ ppc64_elf_write_core_note (bfd *abfd, char *buf, int *bufsiz, int note_type,
     }
 }
 
-/* Merge backend specific data from an object file to the output
-   object file when linking.  */
-
-static bfd_boolean
-ppc64_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
-{
-  /* Check if we have the same endianness.  */
-  if (ibfd->xvec->byteorder != obfd->xvec->byteorder
-      && ibfd->xvec->byteorder != BFD_ENDIAN_UNKNOWN
-      && obfd->xvec->byteorder != BFD_ENDIAN_UNKNOWN)
-    {
-      const char *msg;
-
-      if (bfd_big_endian (ibfd))
-	msg = _("%B: compiled for a big endian system "
-		"and target is little endian");
-      else
-	msg = _("%B: compiled for a little endian system "
-		"and target is big endian");
-
-      (*_bfd_error_handler) (msg, ibfd);
-
-      bfd_set_error (bfd_error_wrong_format);
-      return FALSE;
-    }
-
-  return TRUE;
-}
-
 /* Add extra PPC sections.  */
 
 static const struct bfd_elf_special_section ppc64_elf_special_sections[]=
@@ -4378,6 +4349,29 @@ ppc64_elf_copy_indirect_symbol (struct bfd_link_info *info,
   edir = (struct ppc_link_hash_entry *) dir;
   eind = (struct ppc_link_hash_entry *) ind;
 
+  edir->is_func |= eind->is_func;
+  edir->is_func_descriptor |= eind->is_func_descriptor;
+  edir->tls_mask |= eind->tls_mask;
+  if (eind->oh != NULL)
+    edir->oh = ppc_follow_link (eind->oh);
+
+  /* If called to transfer flags for a weakdef during processing
+     of elf_adjust_dynamic_symbol, don't copy NON_GOT_REF.
+     We clear it ourselves for ELIMINATE_COPY_RELOCS.  */
+  if (!(ELIMINATE_COPY_RELOCS
+	&& eind->elf.root.type != bfd_link_hash_indirect
+	&& edir->elf.dynamic_adjusted))
+    edir->elf.non_got_ref |= eind->elf.non_got_ref;
+
+  edir->elf.ref_dynamic |= eind->elf.ref_dynamic;
+  edir->elf.ref_regular |= eind->elf.ref_regular;
+  edir->elf.ref_regular_nonweak |= eind->elf.ref_regular_nonweak;
+  edir->elf.needs_plt |= eind->elf.needs_plt;
+
+  /* If we were called to copy over info for a weak sym, that's all.  */
+  if (eind->elf.root.type != bfd_link_hash_indirect)
+    return;
+
   /* Copy over any dynamic relocs we may have on the indirect sym.  */
   if (eind->dyn_relocs != NULL)
     {
@@ -4409,29 +4403,6 @@ ppc64_elf_copy_indirect_symbol (struct bfd_link_info *info,
       edir->dyn_relocs = eind->dyn_relocs;
       eind->dyn_relocs = NULL;
     }
-
-  edir->is_func |= eind->is_func;
-  edir->is_func_descriptor |= eind->is_func_descriptor;
-  edir->tls_mask |= eind->tls_mask;
-  if (eind->oh != NULL)
-    edir->oh = ppc_follow_link (eind->oh);
-
-  /* If called to transfer flags for a weakdef during processing
-     of elf_adjust_dynamic_symbol, don't copy NON_GOT_REF.
-     We clear it ourselves for ELIMINATE_COPY_RELOCS.  */
-  if (!(ELIMINATE_COPY_RELOCS
-	&& eind->elf.root.type != bfd_link_hash_indirect
-	&& edir->elf.dynamic_adjusted))
-    edir->elf.non_got_ref |= eind->elf.non_got_ref;
-
-  edir->elf.ref_dynamic |= eind->elf.ref_dynamic;
-  edir->elf.ref_regular |= eind->elf.ref_regular;
-  edir->elf.ref_regular_nonweak |= eind->elf.ref_regular_nonweak;
-  edir->elf.needs_plt |= eind->elf.needs_plt;
-
-  /* If we were called to copy over info for a weak sym, that's all.  */
-  if (eind->elf.root.type != bfd_link_hash_indirect)
-    return;
 
   /* Copy over got entries that we may have already seen to the
      symbol which just became indirect.  */

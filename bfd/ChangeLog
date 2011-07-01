@@ -1,3 +1,12 @@
+2011-07-01  Alan Modra  <amodra@gmail.com>
+
+	* elf32-ppc.c (ppc_elf_copy_indirect_symbol): Don't look at
+	dyn relocs when called to copy flags for a weak sym.
+	* elf64-ppc.c (ppc64_elf_copy_indirect_symbol): Likewise.
+	(ppc64_elf_merge_private_bfd_data): Delete.
+	(bfd_elf64_bfd_merge_private_bfd_data): Define as
+	_bfd_generic_verify_endian_match.
+
 2011-06-30  Bernd Schmidt  <bernds@codesourcery.com>
 
 	* bfd/elf32-tic6x.c (elf32_tic6x_set_osabi): Also set it if
@@ -85,8 +94,8 @@
 
 2011-06-22  Ramana Radhakrishnan  <ramana.radhakrishnan@linaro.org>
 
-       * elf32-arm.c (elf32_arm_final_link_relocate): Allow R_ARM_TLS_LE32
-       for PIE.
+	* elf32-arm.c (elf32_arm_final_link_relocate): Allow R_ARM_TLS_LE32
+	for PIE.
 
 2011-06-22  Alan Modra  <amodra@gmail.com>
 
