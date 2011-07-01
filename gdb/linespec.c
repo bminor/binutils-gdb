@@ -679,6 +679,14 @@ decode_line_2 (struct symbol *sym_arr[], int nelts, int funfirstline,
   return return_values;
 }
 
+/* Valid delimiters for linespec keywords "if", "thread" or "task".  */
+
+static int
+is_linespec_boundary (char c)
+{
+  return c == ' ' || c == '\t' || c == '\0' || c == ',';
+}
+
 /* A helper function for decode_line_1 and friends which skips P
    past any method overload information at the beginning of P, e.g.,
    "(const struct foo *)".
@@ -710,70 +718,55 @@ find_method_overload_end (char *p)
   return p;
 }
 
-/* Does P point to a sequence of characters which implies the end
-   of a name?  Terminals include "if" and "thread" clauses. */
-
-static int
-name_end (char *p)
-{
-  while (isspace (*p))
-    ++p;
-  if (*p == 'i' && p[1] == 'f'
-      && (isspace (p[2]) || p[2] == '\0' || p[2] == '('))
-    return 1;
-
-  if (strncmp (p, "thread", 6) == 0
-      && (isspace (p[6]) || p[6] == '\0'))
-    return 1;
-
-  return 0;
-}
-
 /* Keep important information used when looking up a name.  This includes
-   template parameters, overload information, and important keywords.  */
+   template parameters, overload information, and important keywords, including
+   the possible Java trailing type.  */
 
 static char *
-keep_name_info (char *ptr)
+keep_name_info (char *p, int on_boundary)
 {
-  char *p = ptr;
-  char *start = ptr;
+  const char *quotes = get_gdb_completer_quote_characters ();
+  char *saved_p = p;
+  int nest = 0;
 
-  /* Keep any template parameters.  */
-  if (name_end (ptr))
-    return remove_trailing_whitespace (start, ptr);
-
-  p = skip_spaces (p);
-  if (*p == '<')
-    ptr = p = find_template_name_end (ptr);
-
-  if (name_end (ptr))
-    return remove_trailing_whitespace (start, ptr);
-
-  /* Keep method overload information.  */
-  if (*p == '(')
-    ptr = p = find_method_overload_end (p);
-
-  if (name_end (ptr))
-    return remove_trailing_whitespace (start, ptr);
-
-  /* Keep important keywords.  */  
-  while (1)
+  while (*p)
     {
-      char *quotes = get_gdb_completer_quote_characters ();
-      p = skip_spaces (p);
-      if (strncmp (p, "const", 5) == 0
-	  && (isspace (p[5]) || p[5] == '\0'
-	      || strchr (quotes, p[5]) != NULL))
-	ptr = p = p + 5;
-      else if (strncmp (p, "volatile", 8) == 0
-	       && (isspace (p[8]) || p[8] == '\0'
-		   || strchr (quotes, p[8]) != NULL))
-	ptr = p = p + 8;
-      else
+      if (strchr (quotes, *p))
 	break;
+
+      if (*p == ',' && !nest)
+	break;
+
+      if (on_boundary && !nest)
+	{
+	  const char *const words[] = { "if", "thread", "task" };
+	  int wordi;
+
+	  for (wordi = 0; wordi < ARRAY_SIZE (words); wordi++)
+	    if (strncmp (p, words[wordi], strlen (words[wordi])) == 0
+		&& is_linespec_boundary (p[strlen (words[wordi])]))
+	      break;
+	  if (wordi < ARRAY_SIZE (words))
+	    break;
+	}
+
+      if (*p == '(' || *p == '<' || *p == '[')
+	nest++;
+      else if ((*p == ')' || *p == '>' || *p == ']') && nest > 0)
+	nest--;
+
+      p++;
+
+      /* The ',' check could fail on "operator ,".  */
+      p += cp_validate_operator (p);
+
+      on_boundary = is_linespec_boundary (p[-1]);
     }
 
-  return remove_trailing_whitespace (start, ptr);
+  while (p > saved_p && is_linespec_boundary (p[-1]))
+    p--;
+
+  return p;
 }
 
 
@@ -1034,7 +1027,7 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
     }
 
   /* Keep any important naming information.  */
-  p = keep_name_info (p);
+  p = keep_name_info (p, p == saved_arg || is_linespec_boundary (p[-1]));
 
   copy = (char *) alloca (p - *argptr + 1);
   memcpy (copy, *argptr, p - *argptr);
@@ -1380,7 +1373,6 @@ decode_compound (char **argptr, int funfirstline,
   char *copy;
   struct symbol *sym_class;
   struct type *t;
-  char *saved_java_argptr = NULL;
   char *saved_arg;
 
   /* If the user specified any completer quote characters in the input,
@@ -1558,31 +1550,7 @@ decode_compound (char **argptr, int funfirstline,
 	    }
 
 	  /* Keep any important naming information.  */
-	  p = keep_name_info (p);
-
-	  /* Java may append typenames,  so assume that if there is
-	     anything else left in *argptr, it must be a typename.  */
-	  if (*p && current_language->la_language == language_java)
-	    {
-	      struct type *type;
-
-	      p2 = p;
-	      while (*p2)
-		++p2;
-	      copy = (char *) alloca (p2 - p + 1);
-	      memcpy (copy, p, p2 - p);
-	      copy[p2 - p] = '\0';
-	      type = lookup_typename (current_language, get_current_arch (),
-				      copy, NULL, 1);
-	      if (type != NULL)
-		{
-		  /* Save the location of this just in case this
-		     method/type combination isn't actually defined.
-		     It will be checked later.  */
-		  saved_java_argptr = p;
-		  p = p2;
-		}
-	    }
+	  p = keep_name_info (p, 1);
 	}
 
       /* Allocate our own copy of the substring between argptr and
@@ -1611,34 +1579,15 @@ decode_compound (char **argptr, int funfirstline,
 	 here, we return.  If not, and we are at the and of the string,
 	 we'll lookup the whole string in the symbol tables.  */
 
-      values = find_method (funfirstline, canonical, saved_arg,
-			    copy, t, sym_class, file_symtab);
-      if (saved_java_argptr != NULL && values.nelts == 1)
-	{
-	  /* The user specified a specific return type for a java method.
-	     Double-check that it really is the one the user specified.
-	     [This is a necessary evil because strcmp_iw_ordered stops
-	     comparisons too prematurely.]  */
-	  sym = find_pc_sect_function (values.sals[0].pc,
-				       values.sals[0].section);
-	  /* We just found a SAL, we had better be able to go backwards!  */
-	  gdb_assert (sym != NULL);
-	  if (strcmp_iw (SYMBOL_LINKAGE_NAME (sym), saved_arg) != 0)
-	    {
-	      xfree (values.sals);
-	      error (_("the class `%s' does not have "
-		       "any method instance named %s"),
-		     SYMBOL_PRINT_NAME (sym_class), copy);
-	    }
-	}
-      return values;
+      return find_method (funfirstline, canonical, saved_arg, copy, t,
+			  sym_class, file_symtab);
     } /* End if symbol found.  */
 
 
   /* We couldn't find a class, so we're in case 2 above.  We check the
      entire name as a symbol instead.  */
 
-  p = keep_name_info (p);
+  p = keep_name_info (p, 1);
 
   copy = (char *) alloca (p - saved_arg2 + 1);
   memcpy (copy, saved_arg2, p - saved_arg2);

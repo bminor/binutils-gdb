@@ -1,5 +1,17 @@
 2011-07-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Stop on first linespec terminator instead of eating what we can.
+	* gdb.cp/minsym-fallback-main.cc (main): Call also C::operator ().
+	* gdb.cp/minsym-fallback.cc (C::operator ()): Define.
+	* gdb.cp/minsym-fallback.exp (break 'C::f()'): Change to ...
+	(break C::f()): ... this one.
+	(break C::operator()()): New test.
+	* gdb.cp/minsym-fallback.h (C::operator ()): Declare.
+	* gdb.java/jmisc.exp (break jmisc.main(java.lang.String[])int): New
+	test.
+
+2011-07-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Fall back linespec to minimal symbols.
 	* gdb.base/psymtab.exp (Don't search past end of psymtab.): Update the
 	error message.

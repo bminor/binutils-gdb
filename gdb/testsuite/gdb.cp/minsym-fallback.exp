@@ -35,4 +35,6 @@ clean_restart ${executable}
 
 gdb_test_no_output "set breakpoint pending off"
 
-gdb_test "break 'C::f()'" {Breakpoint [0-9]+ at 0x[0-9a-f]+}
+gdb_test "break C::f()" {Breakpoint [0-9]+ at 0x[0-9a-f]+}
+
+gdb_test "break C::operator()()" {Breakpoint [0-9]+ at 0x[0-9a-f]+}
