@@ -1,4 +1,8 @@
 2011-07-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* symtab.c (symbol_find_demangled_name): Likewise.
+
+2011-07-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2read.c (check_physname): New variable.

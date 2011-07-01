@@ -1,4 +1,9 @@
-2011-05-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+2011-07-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.cp/no-dmgl-verbose.cc: New file.
+	* gdb.cp/no-dmgl-verbose.exp: New file.
+
+2011-07-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/break-interp.exp (reach_1, test_ld): Allow also the prefix
 	__GI_.
