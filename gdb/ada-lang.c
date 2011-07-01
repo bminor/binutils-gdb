@@ -11085,7 +11085,9 @@ print_it_exception (enum exception_catchpoint_kind ex, struct breakpoint *b)
       ui_out_field_string (uiout, "disp", bpdisp_text (b->disposition));
     }
 
-  ui_out_text (uiout, "\nCatchpoint ");
+  ui_out_text (uiout,
+               b->disposition == disp_del ? "\nTemporary catchpoint "
+	                                  : "\nCatchpoint ");
   ui_out_field_int (uiout, "bkptno", b->number);
   ui_out_text (uiout, ", ");
 
@@ -11194,24 +11196,32 @@ print_mention_exception (enum exception_catchpoint_kind ex,
 {
   struct ada_catchpoint *c = (struct ada_catchpoint *) b;
 
+  ui_out_text (uiout, b->disposition == disp_del ? _("Temporary catchpoint ")
+                                                 : _("Catchpoint "));
+  ui_out_field_int (uiout, "bkptno", b->number);
+  ui_out_text (uiout, ": ");
+
   switch (ex)
     {
       case ex_catch_exception:
         if (c->excep_string != NULL)
-          printf_filtered (_("Catchpoint %d: `%s' Ada exception"),
-                           b->number, c->excep_string);
+	  {
+	    char *info = xstrprintf (_("`%s' Ada exception"), c->excep_string);
+	    struct cleanup *old_chain = make_cleanup (xfree, info);
+
+	    ui_out_text (uiout, info);
+	    do_cleanups (old_chain);
+	  }
         else
-          printf_filtered (_("Catchpoint %d: all Ada exceptions"), b->number);
-        
+          ui_out_text (uiout, _("all Ada exceptions"));
         break;
 
       case ex_catch_exception_unhandled:
-        printf_filtered (_("Catchpoint %d: unhandled Ada exceptions"),
-                         b->number);
+        ui_out_text (uiout, _("unhandled Ada exceptions"));
         break;
       
       case ex_catch_assert:
-        printf_filtered (_("Catchpoint %d: failed Ada assertions"), b->number);
+        ui_out_text (uiout, _("failed Ada assertions"));
         break;
 
       default:

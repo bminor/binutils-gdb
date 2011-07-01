@@ -145,4 +145,34 @@ gdb_test "continue" \
          "Continuing\..*$inferior_exited_re.*" \
          "continuing to program completion"
 
+#################################
+# 3. Try temporary catchpoints. #
+#################################
+
+# Scenario:
+#   - Insert a temporary catchpoint on all exceptions.
+#   - Run to that catchpoint
+#   - Continue; we should reach the program's exit, not stopping
+#     at any of the other exceptions that are being raised inside
+#     the program.
+
+if ![runto_main] then {
+   fail "Cannot run to main, testcase aborted"
+   return 0
+}
+
+gdb_test "tcatch exception" \
+         "Temporary catchpoint $any_nb: all Ada exceptions"
+
+set temp_catchpoint_msg \
+  "Temporary catchpoint $any_nb, CONSTRAINT_ERROR at $any_addr in foo \\\(\\\).*at .*foo.adb:$any_nb"
+gdb_test "continue" \
+         "Continuing\.$eol$temp_catchpoint_msg$eol.*SPOT1" \
+         "continuing to temporary catchpoint"
+
+gdb_test "continue" \
+         "Continuing\..*$inferior_exited_re.*" \
+         "continuing to program completion"
+
+
 
