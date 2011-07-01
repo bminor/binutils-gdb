@@ -125,7 +125,8 @@ avr_operand (unsigned int insn, unsigned int insn2, unsigned int pc, int constra
         {
           if (*s == '+')
             {
-	*buf++ = '+';
+	      if (insn & (1 << (15 - (s - opcode_str))))
+		*buf++ = '+';
               break;
             }
         }

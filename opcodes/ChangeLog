@@ -1,3 +1,9 @@
+2011-07-01  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/12329
+	* avr-dis.c (avr_operand): Fix disassembly of ELPM, LPM and SPM
+	insns using post-increment addressing.
+
 2011-06-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (vex_len_table): Update rorxS.
