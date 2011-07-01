@@ -1,5 +1,16 @@
 2011-07-01  Joel Brobecker  <brobecker@adacore.com>
 
+	* machoread.c (struct macho_oso_data): Delete.
+	(current_oso): Delete.
+	(macho_relocate_common_syms): New function, mostly extracted
+	out of
+	(macho_add_oso_symfile): Call macho_relocate_common_syms.
+	Remove code that sets and unset current_oso.
+	(macho_symfile_relocate): Delete handling of common symbols,
+	now moved to macho_relocate_common_syms.
+
+2011-07-01  Joel Brobecker  <brobecker@adacore.com>
+
 	* darwin-nat.c (darwin_ptrace): Add documentation.
 	Set errno to zero before calling ptrace.  If ptrace returns
 	-1 and errno is zero, then change then return zero.

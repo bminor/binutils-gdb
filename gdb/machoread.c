@@ -71,23 +71,6 @@ oso_el;
 DEF_VEC_O (oso_el);
 static VEC (oso_el) *oso_vector;
 
-struct macho_oso_data
-{
-  /* Per objfile symbol table.  This is used to apply relocation to sections
-     It is loaded only once, then relocated, and free after sections are
-     relocated.  */
-  asymbol **symbol_table;
-
-  /* The offsets for this objfile.  Used to relocate the symbol_table.  */
-  struct oso_el *oso;
-
-  struct objfile *main_objfile;
-};
-
-/* Data for OSO being processed.  */
-
-static struct macho_oso_data current_oso;
-
 static void
 macho_new_init (struct objfile *objfile)
 {
@@ -308,6 +291,65 @@ oso_el_compare_name (const void *vl, const void *vr)
   return strcmp (l->name, r->name);
 }
 
+/* Relocate all of ABFD's common symbols immediately.
+
+   This modifies the section and address of all common symbols to become
+   absolute symbols with their address set to match the address given by
+   the main objfile's symbol table.
+
+   The reason why the common symbols have to be handled separately
+   is because relocation is performed relative to section start.
+   But there is no section in this case.  So the "relocation" of
+   these common symbols is performed by finding their address in
+   the main objfile's symbol table, where we know it's been relocated.
+
+   ABFD is an OSO's bfd.
+   MAIN_OBJFILE is the object file from which the OSO is a part.  */
+
+static void
+macho_relocate_common_syms(bfd *abfd, struct objfile *main_objfile)
+{
+  int storage;
+  int i;
+  char leading_char;
+  asymbol **symbol_table;
+
+  storage = bfd_get_symtab_upper_bound (abfd);
+  symbol_table = (asymbol **) xmalloc (storage);
+  bfd_canonicalize_symtab (abfd, symbol_table);
+
+  leading_char = bfd_get_symbol_leading_char (abfd);
+
+  for (i = 0; symbol_table[i]; i++)
+    {
+      asymbol *sym = symbol_table[i];
+
+      if (bfd_is_com_section (sym->section))
+	{
+	  /* This one must be solved.  */
+	  struct minimal_symbol *msym;
+	  const char *name = sym->name;
+
+	  if (name[0] == leading_char)
+	    name++;
+
+	  msym = lookup_minimal_symbol (name, NULL, main_objfile);
+	  if (msym == NULL)
+	    {
+	      warning (_("can't find symbol '%s' in minsymtab"), name);
+	      continue;
+	    }
+	  else
+	    {
+	      sym->section = &bfd_abs_section;
+	      sym->value = SYMBOL_VALUE_ADDRESS (msym);
+	    }
+	}
+    }
+
+  xfree (symbol_table);
+}
+
 /* Add an oso file as a symbol file.  */
 
 static void
@@ -384,13 +426,15 @@ macho_add_oso_symfile (oso_el *oso, bfd *abfd,
                            core_addr_to_string (vma), sectname);
     }
 
+  /* Deal with the common symbols now, as they need special handing.
+     Doing it now sets them up so that we don't accidently try to
+     relocate them during the normal relocation phase.  */
+  macho_relocate_common_syms (abfd, main_objfile);
+
   /* Make sure that the filename was malloc'ed.  The current filename comes
      either from an OSO symbol name or from an archive name.  Memory for both
      is not managed by gdb.  */
   abfd->filename = xstrdup (abfd->filename);
-
-  gdb_assert (current_oso.symbol_table == NULL);
-  current_oso.main_objfile = main_objfile;
 
   /* We need to clear SYMFILE_MAINLINE to avoid interractive question
      from symfile.c:symbol_file_add_with_addrs_or_offsets.  */
@@ -399,13 +443,6 @@ macho_add_oso_symfile (oso_el *oso, bfd *abfd,
      main_objfile->flags & (OBJF_REORDERED | OBJF_SHARED
 			    | OBJF_READNOW | OBJF_USERLOADED),
      main_objfile);
-
-  current_oso.main_objfile = NULL;
-  if (current_oso.symbol_table)
-    {
-      xfree (current_oso.symbol_table);
-      current_oso.symbol_table = NULL;
-    }
 }
 
 /* Read symbols from the vector of oso files.  */
@@ -730,47 +767,6 @@ macho_symfile_relocate (struct objfile *objfile, asection *sectp,
   if (mach_o_debug_level > 0)
     printf_unfiltered (_("Relocate section '%s' of %s\n"),
                        sectp->name, objfile->name);
-
-  if (current_oso.symbol_table == NULL)
-    {
-      int storage;
-      int i;
-      char leading_char;
-
-      storage = bfd_get_symtab_upper_bound (abfd);
-      current_oso.symbol_table = (asymbol **) xmalloc (storage);
-      bfd_canonicalize_symtab (abfd, current_oso.symbol_table);
-
-      leading_char = bfd_get_symbol_leading_char (abfd);
-
-      for (i = 0; current_oso.symbol_table[i]; i++)
-        {
-          asymbol *sym = current_oso.symbol_table[i];
-
-          if (bfd_is_com_section (sym->section))
-            {
-              /* This one must be solved.  */
-              struct minimal_symbol *msym;
-              const char *name = sym->name;
-
-              if (name[0] == leading_char)
-                name++;
-
-              msym = lookup_minimal_symbol
-                (name, NULL, current_oso.main_objfile);
-              if (msym == NULL)
-                {
-                  warning (_("can't find symbol '%s' in minsymtab"), name);
-                  continue;
-                }
-              else
-                {
-                  sym->section = &bfd_abs_section;
-                  sym->value = SYMBOL_VALUE_ADDRESS (msym);
-                }
-            }
-        }
-    }
 
   return bfd_simple_get_relocated_section_contents (abfd, sectp, buf, NULL);
 }
