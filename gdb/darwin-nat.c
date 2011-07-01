@@ -1601,7 +1601,11 @@ darwin_detach (struct target_ops *ops, char *args, int from_tty)
 
   darwin_reply_to_all_pending_messages (inf);
 
-  darwin_resume_inferior (inf);
+  /* When using ptrace, we have just performed a PT_DETACH, which
+     resumes the inferior.  On the other hand, when we are not using
+     ptrace, we need to resume its execution ourselves.  */
+  if (inf->private->no_ptrace)
+    darwin_resume_inferior (inf);
 
   darwin_mourn_inferior (ops);
 }

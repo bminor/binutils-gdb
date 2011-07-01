@@ -1,5 +1,10 @@
 2011-07-01  Joel Brobecker  <brobecker@adacore.com>
 
+	* darwin-nat.c (darwin_detach): Call darwin_resume_inferior
+	only when inf->private->no_ptrace.
+
+2011-07-01  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c (print_it_exception): Print temporary catchpoints
 	as "Temporary catchpoint".
 	(print_mention_exception): Likewise.
