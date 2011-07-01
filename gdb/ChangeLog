@@ -1,3 +1,8 @@
+2011-07-01  Jean-Charles Delay  <delay@adacore.com>
+
+	* ada-typeprint.c (print_array_type): removed if condition on show
+	being negative for bounds printing.
+
 2011-07-01  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (ada_identical_enum_types_p): New function.

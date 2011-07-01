@@ -340,56 +340,51 @@ print_array_type (struct type *type, struct ui_file *stream, int show,
     }
 
   n_indices = -1;
-  if (show < 0)
-    fprintf_filtered (stream, "...");
-  else
+  if (ada_is_simple_array_type (type))
     {
-      if (ada_is_simple_array_type (type))
+      struct type *range_desc_type;
+      struct type *arr_type;
+
+      range_desc_type = ada_find_parallel_type (type, "___XA");
+      ada_fixup_array_indexes_type (range_desc_type);
+
+      bitsize = 0;
+      if (range_desc_type == NULL)
 	{
-	  struct type *range_desc_type;
-	  struct type *arr_type;
-
-	  range_desc_type = ada_find_parallel_type (type, "___XA");
-	  ada_fixup_array_indexes_type (range_desc_type);
-
-	  bitsize = 0;
-	  if (range_desc_type == NULL)
+	  for (arr_type = type; TYPE_CODE (arr_type) == TYPE_CODE_ARRAY;
+	       arr_type = TYPE_TARGET_TYPE (arr_type))
 	    {
-	      for (arr_type = type; TYPE_CODE (arr_type) == TYPE_CODE_ARRAY;
-		   arr_type = TYPE_TARGET_TYPE (arr_type))
-		{
-		  if (arr_type != type)
-		    fprintf_filtered (stream, ", ");
-		  print_range (TYPE_INDEX_TYPE (arr_type), stream);
-		  if (TYPE_FIELD_BITSIZE (arr_type, 0) > 0)
-		    bitsize = TYPE_FIELD_BITSIZE (arr_type, 0);
-		}
-	    }
-	  else
-	    {
-	      int k;
-
-	      n_indices = TYPE_NFIELDS (range_desc_type);
-	      for (k = 0, arr_type = type;
-		   k < n_indices;
-		   k += 1, arr_type = TYPE_TARGET_TYPE (arr_type))
-		{
-		  if (k > 0)
-		    fprintf_filtered (stream, ", ");
-		  print_range_type (TYPE_FIELD_TYPE (range_desc_type, k),
-				    stream);
-		  if (TYPE_FIELD_BITSIZE (arr_type, 0) > 0)
-		    bitsize = TYPE_FIELD_BITSIZE (arr_type, 0);
-		}
+	      if (arr_type != type)
+		fprintf_filtered (stream, ", ");
+	      print_range (TYPE_INDEX_TYPE (arr_type), stream);
+	      if (TYPE_FIELD_BITSIZE (arr_type, 0) > 0)
+		bitsize = TYPE_FIELD_BITSIZE (arr_type, 0);
 	    }
 	}
       else
 	{
-	  int i, i0;
+	  int k;
 
-	  for (i = i0 = ada_array_arity (type); i > 0; i -= 1)
-	    fprintf_filtered (stream, "%s<>", i == i0 ? "" : ", ");
+	  n_indices = TYPE_NFIELDS (range_desc_type);
+	  for (k = 0, arr_type = type;
+	       k < n_indices;
+	       k += 1, arr_type = TYPE_TARGET_TYPE (arr_type))
+	    {
+	      if (k > 0)
+		fprintf_filtered (stream, ", ");
+	      print_range_type (TYPE_FIELD_TYPE (range_desc_type, k),
+				stream);
+	      if (TYPE_FIELD_BITSIZE (arr_type, 0) > 0)
+		bitsize = TYPE_FIELD_BITSIZE (arr_type, 0);
+	    }
 	}
+    }
+  else
+    {
+      int i, i0;
+
+      for (i = i0 = ada_array_arity (type); i > 0; i -= 1)
+	fprintf_filtered (stream, "%s<>", i == i0 ? "" : ", ");
     }
 
   fprintf_filtered (stream, ") of ");
