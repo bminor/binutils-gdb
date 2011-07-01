@@ -621,8 +621,17 @@ print_record_type (struct type *type0, struct ui_file *stream, int show,
 
   parent_type = ada_parent_type (type);
   if (ada_type_name (parent_type) != NULL)
-    fprintf_filtered (stream, "new %s with record",
-		      decoded_type_name (parent_type));
+    {
+      const char *parent_name = decoded_type_name (parent_type);
+
+      /* If we fail to decode the parent type name, then use the parent
+	 type name as is.  Not pretty, but should never happen except
+	 when the debugging info is incomplete or incorrect.  This
+	 prevents a crash trying to print a NULL pointer.  */
+      if (parent_name == NULL)
+	parent_name = ada_type_name (parent_type);
+      fprintf_filtered (stream, "new %s with record", parent_name);
+    }
   else if (parent_type == NULL && ada_is_tagged_type (type, 0))
     fprintf_filtered (stream, "tagged record");
   else

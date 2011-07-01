@@ -1,3 +1,8 @@
+2011-07-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-typeprint.c (print_record_type): If unable to decode
+	the name of the parent type, use the encoded name.
+
 2011-07-01  Jean-Charles Delay  <delay@adacore.com>
 
 	* ada-typeprint.c (ada_print_type): Fix both PAD type and
