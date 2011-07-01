@@ -1,5 +1,12 @@
 2011-07-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Fall back linespec to minimal symbols.
+	* linespec.c (decode_line_1): New variable ex, saved_argptr.  Protect
+	decode_compound by TRY_CATCH, fall back on minsyms if it failed.
+	(find_method, symbol_found): Change error to cplusplus_error.
+
+2011-07-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* symtab.c (symbol_find_demangled_name): Remove DMGL_VERBOSE.
 
 2011-07-01  Jan Kratochvil  <jan.kratochvil@redhat.com>

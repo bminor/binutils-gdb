@@ -933,35 +933,51 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
       if (p[0] == '.' || p[1] == ':')
 	{
 	  struct symtabs_and_lines values;
+	  volatile struct gdb_exception ex;
+	  char *saved_argptr = *argptr;
 
 	  if (is_quote_enclosed)
 	    ++saved_arg;
-	  values = decode_compound (argptr, funfirstline, canonical,
-				    file_symtab, saved_arg, p);
+
+	  TRY_CATCH (ex, RETURN_MASK_ERROR)
+	    {
+	      values = decode_compound (argptr, funfirstline, canonical,
+					file_symtab, saved_arg, p);
+	    }
 	  if ((is_quoted || is_squote_enclosed) && **argptr == '\'')
 	    *argptr = *argptr + 1;
-	  return values;
-	}
 
-      /* If there was an exception looking up a specified filename earlier,
-	 then check whether we were really given `function:label'.   */
-      if (file_exception.reason < 0)
-	{
-	  function_symbol = find_function_symbol (argptr, p, is_quote_enclosed);
-	  /* If we did not find a function, re-throw the original
-	     exception.  */
-	  if (!function_symbol)
-	    throw_exception (file_exception);
-	}
+	  if (ex.reason >= 0)
+	    return values;
 
-      /* Check for single quotes on the non-filename part.  */
-      if (!is_quoted)
+	  if (ex.error != NOT_FOUND_ERROR)
+	    throw_exception (ex);
+
+	  *argptr = saved_argptr;
+	}
+      else
 	{
-	  is_quoted = (**argptr
-		       && strchr (get_gdb_completer_quote_characters (),
-				  **argptr) != NULL);
-	  if (is_quoted)
-	    end_quote = skip_quoted (*argptr);
+	  /* If there was an exception looking up a specified filename earlier,
+	     then check whether we were really given `function:label'.   */
+	  if (file_exception.reason < 0)
+	    {
+	      function_symbol = find_function_symbol (argptr, p,
+						      is_quote_enclosed);
+	      /* If we did not find a function, re-throw the original
+		 exception.  */
+	      if (!function_symbol)
+		throw_exception (file_exception);
+	    }
+
+	  /* Check for single quotes on the non-filename part.  */
+	  if (!is_quoted)
+	    {
+	      is_quoted = (**argptr
+			   && strchr (get_gdb_completer_quote_characters (),
+				      **argptr) != NULL);
+	      if (is_quoted)
+		end_quote = skip_quoted (*argptr);
+	    }
 	}
     }
 
@@ -1798,9 +1814,9 @@ find_method (int funfirstline, struct linespec_result *canonical,
 		}
 	    }
 
-	  error (_("the class `%s' does not have "
-		   "any method instance named %s"),
-		 SYMBOL_PRINT_NAME (sym_class), copy);
+	  cplusplus_error (saved_arg, _("the class `%s' does not have "
+					"any method instance named %s"),
+				      SYMBOL_PRINT_NAME (sym_class), copy);
 	}
 
       return decode_line_2 (sym_arr, i1, funfirstline, canonical);
@@ -2208,7 +2224,12 @@ symbol_found (int funfirstline, struct linespec_result *canonical, char *copy,
 	  return values;
 	}
       else if (funfirstline)
-	error (_("\"%s\" is not a function"), copy);
+	{
+	  /* NOT_FOUND_ERROR is not correct but it ensures COPY will be
+	     searched also as a minimal symbol.  */
+
+	  throw_error (NOT_FOUND_ERROR, _("\"%s\" is not a function"), copy);
+	}
       else if (SYMBOL_LINE (sym) != 0)
 	{
 	  /* We know its line number.  */

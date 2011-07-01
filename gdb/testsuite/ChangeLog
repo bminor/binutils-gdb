@@ -1,5 +1,16 @@
 2011-07-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Fall back linespec to minimal symbols.
+	* gdb.base/psymtab.exp (Don't search past end of psymtab.): Update the
+	error message.
+	* gdb.cp/cplusfuncs.exp (list foo::operator int*): Likewise.
+	* gdb.cp/minsym-fallback-main.cc: New file.
+	* gdb.cp/minsym-fallback.cc: New file.
+	* gdb.cp/minsym-fallback.exp: New file.
+	* gdb.cp/minsym-fallback.h: New file.
+
+2011-07-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdb.cp/no-dmgl-verbose.cc: New file.
 	* gdb.cp/no-dmgl-verbose.exp: New file.
 
