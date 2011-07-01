@@ -952,7 +952,7 @@ Output_data_plt_i386::plt_eh_frame_fde[plt_eh_frame_fde_size] =
   elfcpp::DW_OP_ge,			// >= ((%eip & 0xf) >= 0xb)
   elfcpp::DW_OP_lit2,			// Push 2.
   elfcpp::DW_OP_shl,			// << (((%eip & 0xf) >= 0xb) << 2)
-  elfcpp::DW_OP_plus,			// + ((((%eip&0xf)>=0xb)<<2)+%esp+8
+  elfcpp::DW_OP_plus,			// + ((((%eip&0xf)>=0xb)<<2)+%esp+4
   elfcpp::DW_CFA_nop,			// Align to 32 bytes.
   elfcpp::DW_CFA_nop,
   elfcpp::DW_CFA_nop,
