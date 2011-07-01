@@ -1,3 +1,7 @@
+2011-07-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_evaluate_subexp): Add missing word in comment.
+
 2011-07-01  Eric Botcazou  <ebotcazou@adacore.com>
 
 	* ada-lang.c (thin_descriptor_type): Deal with typedefs.

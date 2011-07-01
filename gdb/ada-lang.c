@@ -9386,8 +9386,8 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
       type = ada_check_typedef (value_type (argvec[0]));
 
       /* Ada allows us to implicitly dereference arrays when subscripting
-         them.  So, if this is an typedef (encoding use for array access
-	 types encoded as fat pointers), strip it now.  */
+	 them.  So, if this is an array typedef (encoding use for array
+	 access types encoded as fat pointers), strip it now.  */
       if (TYPE_CODE (type) == TYPE_CODE_TYPEDEF)
 	type = ada_typedef_target_type (type);
 
