@@ -1,3 +1,11 @@
+2011-07-01  Nick Clifton  <nickc@redhat.com>
+
+	PR sim/12737
+	* sim/arm/iwmmxt/wcmpgt.cgs: Remove expectation of failure.
+	* sim/arm/iwmmxt/wmac.cgs: Remove expectation of failure.
+	* sim/arm/iwmmxt/wsra.cgs: Remove expectation of failure.
+	* sim/arm/xscale/blx.cgs: Remove expectation of failure.
+
 2011-05-16  Mike Frysinger  <vapier@gentoo.org>
 
 	* lib/sim-defs.exp: Support cc tag in test files.

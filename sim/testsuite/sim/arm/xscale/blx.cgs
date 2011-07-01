@@ -1,6 +1,5 @@
 # arm testcase for bl$cond $offset24
 # mach: all
-# kfail: sim/12737 *-*-*
 
 	.include "testutils.inc"
 
