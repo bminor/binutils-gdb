@@ -1,3 +1,42 @@
+2011-07-01  Ian Lance Taylor  <iant@google.com>
+
+	PR gold/12571
+	* options.h (class General_options): Add
+	--ld-generated-unwind-info.
+	* ehframe.cc (Fde::write): Add address parameter.  Change all
+	callers.  If associated with PLT, fill in address and size.
+	(Cie::set_output_offset): Only add merge mapping if there is an
+	object.
+	(Cie::write): Add address parameter.  Change all callers.
+	(Eh_frame::add_ehframe_for_plt): New function.
+	* ehframe.h (class Fde): Update declarations.  Move shndx_ and
+	input_offset_ fields into union u_, with new plt field.
+	(Fde::Fde): Adjust for new union field.
+	(Fde::Fde) [Output_data version]: New constructor.
+	(Fde::add_mapping): Only add merge mapping if there is an object.
+	(class Cie): Update declarations.
+	(class Eh_frame): Declare add_ehframe_for_plt.
+	* layout.cc (Layout::layout_eh_frame): Break out code into
+	make_eh_frame_section, and call it.
+	(Layout::make_eh_frame_section): New function.
+	(Layout::add_eh_frame_for_plt): New function.
+	* layout.h (class Layout): Update declarations.
+	* merge.cc (Merge_map::add_mapping): Add assertion.
+	* i386.cc: Include "dwarf.h".
+	(class Output_data_plt_i386): Make first_plt_entry,
+	dyn_first_plt_entry, exec_plt_entry, and dyn_plt_entry const.  Add
+	plt_eh_frame_cie_size, plt_eh_frame_fde_size, plt_eh_frame_cie,
+	and plt_eh_frame_fde.
+	(Output_data_plt_i386::Output_data_plt_i386): Align to 16-byte
+	boundary.  Call add_eh_frame_for_plt if appropriate.
+	* x86_64.cc: Include "dwarf.h".
+	(class Output_data_plt_x86_64): Align to 16-byte boundary.  Make
+	first_plt_entry, plt_entry and tlsdesc_plt_entry const.  Add
+	plt_eh_frame_cie_size, plt_eh_frame_fde_size, plt_eh_frame_cie,
+	and plt_eh_frame_fde.
+	(Output_data_plt_x86_64::init): Call add_eh_frame_for_plt if
+	appropriate.
+
 2011-06-29  Ian Lance Taylor  <iant@google.com>
 
 	PR gold/12629

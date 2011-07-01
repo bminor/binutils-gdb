@@ -1,6 +1,6 @@
 // merge.cc -- handle section merging for gold
 
-// Copyright 2006, 2007, 2008, 2010 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -242,6 +242,7 @@ Merge_map::add_mapping(Relobj* object, unsigned int shndx,
 		       section_offset_type offset, section_size_type length,
 		       section_offset_type output_offset)
 {
+  gold_assert(object != NULL);
   Object_merge_map* object_merge_map = object->merge_map();
   if (object_merge_map == NULL)
     {

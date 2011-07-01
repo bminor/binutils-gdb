@@ -1136,8 +1136,73 @@ Layout::layout_eh_frame(Sized_relobj_file<size, big_endian>* object,
 	      || shdr.get_sh_type() == elfcpp::SHT_X86_64_UNWIND);
   gold_assert((shdr.get_sh_flags() & elfcpp::SHF_ALLOC) != 0);
 
-  const char* const name = ".eh_frame";
-  Output_section* os = this->choose_output_section(object, name,
+  Output_section* os = this->make_eh_frame_section(object);
+  if (os == NULL)
+    return NULL;
+
+  gold_assert(this->eh_frame_section_ == os);
+
+  elfcpp::Elf_Xword orig_flags = os->flags();
+
+  if (!parameters->incremental()
+      && this->eh_frame_data_->add_ehframe_input_section(object,
+							 symbols,
+							 symbols_size,
+							 symbol_names,
+							 symbol_names_size,
+							 shndx,
+							 reloc_shndx,
+							 reloc_type))
+    {
+      os->update_flags_for_input_section(shdr.get_sh_flags());
+
+      // A writable .eh_frame section is a RELRO section.
+      if ((orig_flags & (elfcpp::SHF_WRITE | elfcpp::SHF_EXECINSTR))
+	  != (os->flags() & (elfcpp::SHF_WRITE | elfcpp::SHF_EXECINSTR)))
+	{
+	  os->set_is_relro();
+	  os->set_order(ORDER_RELRO);
+	}
+
+      // We found a .eh_frame section we are going to optimize, so now
+      // we can add the set of optimized sections to the output
+      // section.  We need to postpone adding this until we've found a
+      // section we can optimize so that the .eh_frame section in
+      // crtbegin.o winds up at the start of the output section.
+      if (!this->added_eh_frame_data_)
+	{
+	  os->add_output_section_data(this->eh_frame_data_);
+	  this->added_eh_frame_data_ = true;
+	}
+      *off = -1;
+    }
+  else
+    {
+      // We couldn't handle this .eh_frame section for some reason.
+      // Add it as a normal section.
+      bool saw_sections_clause = this->script_options_->saw_sections_clause();
+      *off = os->add_input_section(this, object, shndx, ".eh_frame", shdr,
+				   reloc_shndx, saw_sections_clause);
+      this->have_added_input_section_ = true;
+
+      if ((orig_flags & (elfcpp::SHF_WRITE | elfcpp::SHF_EXECINSTR))
+	  != (os->flags() & (elfcpp::SHF_WRITE | elfcpp::SHF_EXECINSTR)))
+	os->set_order(this->default_section_order(os, false));
+    }
+
+  return os;
+}
+
+// Create and return the magic .eh_frame section.  Create
+// .eh_frame_hdr also if appropriate.  OBJECT is the object with the
+// input .eh_frame section; it may be NULL.
+
+Output_section*
+Layout::make_eh_frame_section(const Relobj* object)
+{
+  // FIXME: On x86_64, this could use SHT_X86_64_UNWIND rather than
+  // SHT_PROGBITS.
+  Output_section* os = this->choose_output_section(object, ".eh_frame",
 						   elfcpp::SHT_PROGBITS,
 						   elfcpp::SHF_ALLOC, false,
 						   ORDER_EHFRAME, false);
@@ -1181,57 +1246,31 @@ Layout::layout_eh_frame(Sized_relobj_file<size, big_endian>* object,
 	}
     }
 
-  gold_assert(this->eh_frame_section_ == os);
-
-  elfcpp::Elf_Xword orig_flags = os->flags();
-
-  if (!parameters->incremental()
-      && this->eh_frame_data_->add_ehframe_input_section(object,
-							 symbols,
-							 symbols_size,
-							 symbol_names,
-							 symbol_names_size,
-							 shndx,
-							 reloc_shndx,
-							 reloc_type))
-    {
-      os->update_flags_for_input_section(shdr.get_sh_flags());
-
-      // A writable .eh_frame section is a RELRO section.
-      if ((orig_flags & (elfcpp::SHF_WRITE | elfcpp::SHF_EXECINSTR))
-	  != (os->flags() & (elfcpp::SHF_WRITE | elfcpp::SHF_EXECINSTR)))
-	{
-	  os->set_is_relro();
-	  os->set_order(ORDER_RELRO);
-	}
-
-      // We found a .eh_frame section we are going to optimize, so now
-      // we can add the set of optimized sections to the output
-      // section.  We need to postpone adding this until we've found a
-      // section we can optimize so that the .eh_frame section in
-      // crtbegin.o winds up at the start of the output section.
-      if (!this->added_eh_frame_data_)
-	{
-	  os->add_output_section_data(this->eh_frame_data_);
-	  this->added_eh_frame_data_ = true;
-	}
-      *off = -1;
-    }
-  else
-    {
-      // We couldn't handle this .eh_frame section for some reason.
-      // Add it as a normal section.
-      bool saw_sections_clause = this->script_options_->saw_sections_clause();
-      *off = os->add_input_section(this, object, shndx, name, shdr, reloc_shndx,
-				   saw_sections_clause);
-      this->have_added_input_section_ = true;
-
-      if ((orig_flags & (elfcpp::SHF_WRITE | elfcpp::SHF_EXECINSTR))
-	  != (os->flags() & (elfcpp::SHF_WRITE | elfcpp::SHF_EXECINSTR)))
-	os->set_order(this->default_section_order(os, false));
-    }
-
   return os;
+}
+
+// Add an exception frame for a PLT.  This is called from target code.
+
+void
+Layout::add_eh_frame_for_plt(Output_data* plt, const unsigned char* cie_data,
+			     size_t cie_length, const unsigned char* fde_data,
+			     size_t fde_length)
+{
+  if (parameters->incremental())
+    {
+      // FIXME: Maybe this could work some day....
+      return;
+    }
+  Output_section* os = this->make_eh_frame_section(NULL);
+  if (os == NULL)
+    return;
+  this->eh_frame_data_->add_ehframe_for_plt(plt, cie_data, cie_length,
+					    fde_data, fde_length);
+  if (!this->added_eh_frame_data_)
+    {
+      os->add_output_section_data(this->eh_frame_data_);
+      this->added_eh_frame_data_ = true;
+    }
 }
 
 // Add POSD to an output section using NAME, TYPE, and FLAGS.  Return

@@ -25,6 +25,7 @@
 #include <cstring>
 
 #include "elfcpp.h"
+#include "dwarf.h"
 #include "parameters.h"
 #include "reloc.h"
 #include "i386.h"
@@ -101,16 +102,22 @@ class Output_data_plt_i386 : public Output_section_data
   static const int plt_entry_size = 16;
 
   // The first entry in the PLT for an executable.
-  static unsigned char exec_first_plt_entry[plt_entry_size];
+  static const unsigned char exec_first_plt_entry[plt_entry_size];
 
   // The first entry in the PLT for a shared object.
-  static unsigned char dyn_first_plt_entry[plt_entry_size];
+  static const unsigned char dyn_first_plt_entry[plt_entry_size];
 
   // Other entries in the PLT for an executable.
-  static unsigned char exec_plt_entry[plt_entry_size];
+  static const unsigned char exec_plt_entry[plt_entry_size];
 
   // Other entries in the PLT for a shared object.
-  static unsigned char dyn_plt_entry[plt_entry_size];
+  static const unsigned char dyn_plt_entry[plt_entry_size];
+
+  // The .eh_frame unwind information for the PLT.
+  static const int plt_eh_frame_cie_size = 16;
+  static const int plt_eh_frame_fde_size = 32;
+  static const unsigned char plt_eh_frame_cie[plt_eh_frame_cie_size];
+  static const unsigned char plt_eh_frame_fde[plt_eh_frame_fde_size];
 
   // Set the final size.
   void
@@ -728,7 +735,7 @@ Target_i386::rel_dyn_section(Layout* layout)
 Output_data_plt_i386::Output_data_plt_i386(Symbol_table* symtab,
 					   Layout* layout,
 					   Output_data_space* got_plt)
-  : Output_section_data(4), tls_desc_rel_(NULL), got_plt_(got_plt), count_(0),
+  : Output_section_data(16), tls_desc_rel_(NULL), got_plt_(got_plt), count_(0),
     global_ifuncs_(), local_ifuncs_()
 {
   this->rel_ = new Reloc_section(false);
@@ -753,6 +760,11 @@ Output_data_plt_i386::Output_data_plt_i386(Symbol_table* symtab,
 				    elfcpp::STB_GLOBAL, elfcpp::STV_HIDDEN,
 				    0, true, true);
     }
+
+  // Add unwind information if requested.
+  if (parameters->options().ld_generated_unwind_info())
+    layout->add_eh_frame_for_plt(this, plt_eh_frame_cie, plt_eh_frame_cie_size,
+				 plt_eh_frame_fde, plt_eh_frame_fde_size);
 }
 
 void
@@ -857,7 +869,7 @@ Output_data_plt_i386::rel_tls_desc(Layout* layout)
 
 // The first entry in the PLT for an executable.
 
-unsigned char Output_data_plt_i386::exec_first_plt_entry[plt_entry_size] =
+const unsigned char Output_data_plt_i386::exec_first_plt_entry[plt_entry_size] =
 {
   0xff, 0x35,	// pushl contents of memory address
   0, 0, 0, 0,	// replaced with address of .got + 4
@@ -868,7 +880,7 @@ unsigned char Output_data_plt_i386::exec_first_plt_entry[plt_entry_size] =
 
 // The first entry in the PLT for a shared object.
 
-unsigned char Output_data_plt_i386::dyn_first_plt_entry[plt_entry_size] =
+const unsigned char Output_data_plt_i386::dyn_first_plt_entry[plt_entry_size] =
 {
   0xff, 0xb3, 4, 0, 0, 0,	// pushl 4(%ebx)
   0xff, 0xa3, 8, 0, 0, 0,	// jmp *8(%ebx)
@@ -877,7 +889,7 @@ unsigned char Output_data_plt_i386::dyn_first_plt_entry[plt_entry_size] =
 
 // Subsequent entries in the PLT for an executable.
 
-unsigned char Output_data_plt_i386::exec_plt_entry[plt_entry_size] =
+const unsigned char Output_data_plt_i386::exec_plt_entry[plt_entry_size] =
 {
   0xff, 0x25,	// jmp indirect
   0, 0, 0, 0,	// replaced with address of symbol in .got
@@ -889,7 +901,7 @@ unsigned char Output_data_plt_i386::exec_plt_entry[plt_entry_size] =
 
 // Subsequent entries in the PLT for a shared object.
 
-unsigned char Output_data_plt_i386::dyn_plt_entry[plt_entry_size] =
+const unsigned char Output_data_plt_i386::dyn_plt_entry[plt_entry_size] =
 {
   0xff, 0xa3,	// jmp *offset(%ebx)
   0, 0, 0, 0,	// replaced with offset of symbol in .got
@@ -897,6 +909,54 @@ unsigned char Output_data_plt_i386::dyn_plt_entry[plt_entry_size] =
   0, 0, 0, 0,	// replaced with offset into relocation table
   0xe9,		// jmp relative
   0, 0, 0, 0	// replaced with offset to start of .plt
+};
+
+// The .eh_frame unwind information for the PLT.
+
+const unsigned char
+Output_data_plt_i386::plt_eh_frame_cie[plt_eh_frame_cie_size] =
+{
+  1,				// CIE version.
+  'z',				// Augmentation: augmentation size included.
+  'R',				// Augmentation: FDE encoding included.
+  '\0',				// End of augmentation string.
+  1,				// Code alignment factor.
+  0x7c,				// Data alignment factor.
+  8,				// Return address column.
+  1,				// Augmentation size.
+  (elfcpp::DW_EH_PE_pcrel	// FDE encoding.
+   | elfcpp::DW_EH_PE_sdata4),
+  elfcpp::DW_CFA_def_cfa, 4, 4,	// DW_CFA_def_cfa: r4 (esp) ofs 4.
+  elfcpp::DW_CFA_offset + 8, 1,	// DW_CFA_offset: r8 (eip) at cfa-4.
+  elfcpp::DW_CFA_nop,		// Align to 16 bytes.
+  elfcpp::DW_CFA_nop
+};
+
+const unsigned char
+Output_data_plt_i386::plt_eh_frame_fde[plt_eh_frame_fde_size] =
+{
+  0, 0, 0, 0,				// Replaced with offset to .plt.
+  0, 0, 0, 0,				// Replaced with size of .plt.
+  0,					// Augmentation size.
+  elfcpp::DW_CFA_def_cfa_offset, 8,	// DW_CFA_def_cfa_offset: 8.
+  elfcpp::DW_CFA_advance_loc + 6,	// Advance 6 to __PLT__ + 6.
+  elfcpp::DW_CFA_def_cfa_offset, 12,	// DW_CFA_def_cfa_offset: 12.
+  elfcpp::DW_CFA_advance_loc + 10,	// Advance 10 to __PLT__ + 16.
+  elfcpp::DW_CFA_def_cfa_expression,	// DW_CFA_def_cfa_expression.
+  11,					// Block length.
+  elfcpp::DW_OP_breg4, 4,		// Push %esp + 4.
+  elfcpp::DW_OP_breg8, 0,		// Push %eip.
+  elfcpp::DW_OP_lit15,			// Push 0xf.
+  elfcpp::DW_OP_and,			// & (%eip & 0xf).
+  elfcpp::DW_OP_lit11,			// Push 0xb.
+  elfcpp::DW_OP_ge,			// >= ((%eip & 0xf) >= 0xb)
+  elfcpp::DW_OP_lit2,			// Push 2.
+  elfcpp::DW_OP_shl,			// << (((%eip & 0xf) >= 0xb) << 2)
+  elfcpp::DW_OP_plus,			// + ((((%eip&0xf)>=0xb)<<2)+%esp+8
+  elfcpp::DW_CFA_nop,			// Align to 32 bytes.
+  elfcpp::DW_CFA_nop,
+  elfcpp::DW_CFA_nop,
+  elfcpp::DW_CFA_nop
 };
 
 // Write out the PLT.  This uses the hand-coded instructions above,

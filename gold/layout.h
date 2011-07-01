@@ -549,6 +549,14 @@ class Layout
 		  unsigned int reloc_shndx, unsigned int reloc_type,
 		  off_t* offset);
 
+  // Add .eh_frame information for a PLT.  The FDE must start with a
+  // 4-byte PC-relative reference to the start of the PLT, followed by
+  // a 4-byte size of PLT.
+  void
+  add_eh_frame_for_plt(Output_data* plt, const unsigned char* cie_data,
+		       size_t cie_length, const unsigned char* fde_data,
+		       size_t fde_length);
+
   // Handle a GNU stack note.  This is called once per input object
   // file.  SEEN_GNU_STACK is true if the object file has a
   // .note.GNU-stack section.  GNU_STACK_FLAGS is the section flags
@@ -1017,6 +1025,10 @@ class Layout
   // Attach an allocated section to a segment.
   void
   attach_allocated_section_to_segment(Output_section*);
+
+  // Make the .eh_frame section.
+  Output_section*
+  make_eh_frame_section(const Relobj*);
 
   // Set the final file offsets of all the segments.
   off_t

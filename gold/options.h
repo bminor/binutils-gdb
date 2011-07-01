@@ -820,6 +820,10 @@ class General_options
               N_("Keep files mapped across passes (default)"),
               N_("Release mapped files after each pass"));
 
+  DEFINE_bool(ld_generated_unwind_info, options::TWO_DASHES, '\0', true,
+	      N_("Generate unwind information for PLT (default)"),
+	      N_("Do not generate unwind information for PLT"));
+
   DEFINE_special(library, options::TWO_DASHES, 'l',
                  N_("Search for library LIBNAME"), N_("LIBNAME"));
 
