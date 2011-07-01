@@ -1,5 +1,12 @@
 2011-07-01  Jean-Charles Delay  <delay@adacore.com>
 
+	* ada-typeprint.c (ada_print_type): Fix both PAD type and
+	pointer to constrained packed array type output.
+	* ada-valprint.c (ada_val_print_1): Fix pointer to constrained
+	packed array output.
+
+2011-07-01  Jean-Charles Delay  <delay@adacore.com>
+
 	* ada-typeprint.c (print_array_type): removed if condition on show
 	being negative for bounds printing.
 

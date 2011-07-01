@@ -761,7 +761,7 @@ ada_print_type (struct type *type0, const char *varstring,
     fprintf_filtered (stream, "%.*s: ",
 		      ada_name_prefix_len (varstring), varstring);
 
-  if (type_name != NULL && show <= 0)
+  if (type_name != NULL && show <= 0 && !ada_is_aligner_type (type))
     {
       fprintf_filtered (stream, "%.*s",
 			ada_name_prefix_len (type_name), type_name);
@@ -770,18 +770,9 @@ ada_print_type (struct type *type0, const char *varstring,
 
   if (ada_is_aligner_type (type))
     ada_print_type (ada_aligned_type (type), "", stream, show, level);
-  else if (ada_is_constrained_packed_array_type (type))
-    {
-      if (TYPE_CODE (type) == TYPE_CODE_PTR)
-        {
-          fprintf_filtered (stream, "access ");
-          print_array_type (TYPE_TARGET_TYPE (type), stream, show, level);
-        }
-      else
-        {
-          print_array_type (type, stream, show, level);
-        }
-    }
+  else if (ada_is_constrained_packed_array_type (type)
+	   && TYPE_CODE (type) != TYPE_CODE_PTR)
+    print_array_type (type, stream, show, level);
   else
     switch (TYPE_CODE (type))
       {

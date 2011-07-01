@@ -682,7 +682,8 @@ ada_val_print_1 (struct type *type, const gdb_byte *valaddr,
   type = ada_check_typedef (type);
 
   if (ada_is_array_descriptor_type (type)
-      || ada_is_constrained_packed_array_type (type))
+      || (ada_is_constrained_packed_array_type (type)
+	  && TYPE_CODE (type) != TYPE_CODE_PTR))
     {
       int retn;
       struct value *mark = value_mark ();

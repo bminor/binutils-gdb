@@ -48,7 +48,7 @@ gdb_test "ptype &var" \
          "ptype &var"
 
 gdb_test "print &var" \
-         "= \\(access array \\(4 \\.\\. 8\\) of boolean <packed: 1-bit elements>\\) \\(4 => true, false, true, false, true\\)" \
+         "= \\(access pa.packed_array\\) 0x.*" \
          "print &var"
 
 # Print the value of U_Var, an unconstrainted packed array.

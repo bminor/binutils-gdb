@@ -1,5 +1,9 @@
 2011-07-01  Jean-Charles Delay  <delay@adacore.com>
 
+	* gdb.ada/packed_array.exp: Fix expected outout.
+
+2011-07-01  Jean-Charles Delay  <delay@adacore.com>
+
 	* gdb.ada/packed_array.exp: fixed expected output.
 
 2011-07-01  Joel Brobecker  <brobecker@adacore.com>
