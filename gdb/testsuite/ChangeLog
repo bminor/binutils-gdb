@@ -1,5 +1,9 @@
 2011-07-01  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.ada/ptr_typedef: New testcase.
+
+2011-07-01  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.ada/arrayptr.exp: Add ptype test.
 
 2011-07-01  Joel Brobecker  <brobecker@adacore.com>
