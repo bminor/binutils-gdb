@@ -176,7 +176,7 @@ in the section entitled ``GNU Free Documentation License''.
 @c man title ar create, modify, and extract from archives
 
 @smallexample
-ar [@option{--plugin} @var{name}] [-]@var{p}[@var{mod} [@var{relpos}] [@var{count}]] @var{archive} [@var{member}@dots{}]
+ar [@option{--plugin} @var{name}] [-]@var{p}[@var{mod} [@var{relpos}] [@var{count}]] [@option{--target} @var{bfdname}] @var{archive} [@var{member}@dots{}] 
 ar -M [ <mri-script ]
 @end smallexample
 
@@ -251,7 +251,7 @@ program.
 
 @smallexample
 @c man begin SYNOPSIS ar
-ar [@option{--plugin} @var{name}] [@option{-X32_64}] [@option{-}]@var{p}[@var{mod} [@var{relpos}] [@var{count}]] @var{archive} [@var{member}@dots{}]
+ar [@option{--plugin} @var{name}] [@option{-X32_64}] [@option{-}]@var{p}[@var{mod} [@var{relpos}] [@var{count}]] [@option{--target} @var{bfdname}] @var{archive} [@var{member}@dots{}]
 @c man end
 @end smallexample
 
@@ -383,6 +383,13 @@ are extracted.
 
 Files cannot be extracted from a thin archive.
 
+@item --help
+Displays the list of command line options supported by @command{ar}
+and then exits.
+
+@item --version
+Displays the version information of @command{ar} and then exits.
+
 @end table
 
 A number of modifiers (@var{mod}) may immediately follow the @var{p}
@@ -505,6 +512,11 @@ The optional command line switch @option{--plugin} @var{name} causes
 @command{ar} to load the plugin called @var{name} which adds support
 for more file formats.  This option is only available if the toolchain
 has been built with plugin support enabled.
+
+The optional command line switch @option{--target} @var{bfdname}
+specifies that the archive members are in an object code format
+different from your system's default format.  See
+@xref{Target Selection}, for more information.
 
 @c man end
 
