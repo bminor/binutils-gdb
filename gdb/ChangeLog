@@ -1,5 +1,9 @@
 2011-07-01  Joel Brobecker  <brobecker@adacore.com>
 
+	* machoread.c (macho_symfile_read): Delete OBE comment.
+
+2011-07-01  Joel Brobecker  <brobecker@adacore.com>
+
 	* machoread.c (struct macho_oso_data): Delete.
 	(current_oso): Delete.
 	(macho_relocate_common_syms): New function, mostly extracted

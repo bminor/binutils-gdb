@@ -745,9 +745,6 @@ macho_symfile_read (struct objfile *objfile, int symfile_flags)
       dwarf2_build_psymtabs (objfile);
     }
 
-  /* Do not try to read .eh_frame/.debug_frame as they are not relocated
-     and dwarf2_build_frame_info cannot deal with unrelocated sections.  */
-
   /* Then the oso.  */
   if (oso_vector != NULL)
     macho_symfile_read_all_oso (objfile, symfile_flags);
