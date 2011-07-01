@@ -38,6 +38,8 @@
 #include "dictionary.h"
 #include <ctype.h>
 #include "gdb_assert.h"
+#include "charset.h"
+#include "valprint.h"
 
 /* Local functions */
 
@@ -837,6 +839,28 @@ java_value_string (char *ptr, int len)
   error (_("not implemented - java_value_string"));	/* FIXME */
 }
 
+/* Return the encoding that should be used for the character type
+   TYPE.  */
+
+static const char *
+java_get_encoding (struct type *type)
+{
+  struct gdbarch *arch = get_type_arch (type);
+  const char *encoding;
+
+  if (type == builtin_java_type (arch)->builtin_char)
+    {
+      if (gdbarch_byte_order (arch) == BFD_ENDIAN_BIG)
+	encoding = "UTF-16BE";
+      else
+	encoding = "UTF-16LE";
+    }
+  else
+    encoding = target_charset (arch);
+
+  return encoding;
+}
+
 /* Print the character C on STREAM as part of the contents of a literal
    string whose delimiter is QUOTER.  Note that that format for printing
    characters and strings is language specific.  */
@@ -844,34 +868,36 @@ java_value_string (char *ptr, int len)
 static void
 java_emit_char (int c, struct type *type, struct ui_file *stream, int quoter)
 {
-  switch (c)
-    {
-    case '\\':
-    case '\'':
-      fprintf_filtered (stream, "\\%c", c);
-      break;
-    case '\b':
-      fputs_filtered ("\\b", stream);
-      break;
-    case '\t':
-      fputs_filtered ("\\t", stream);
-      break;
-    case '\n':
-      fputs_filtered ("\\n", stream);
-      break;
-    case '\f':
-      fputs_filtered ("\\f", stream);
-      break;
-    case '\r':
-      fputs_filtered ("\\r", stream);
-      break;
-    default:
-      if (isprint (c))
-	fputc_filtered (c, stream);
-      else
-	fprintf_filtered (stream, "\\u%.4x", (unsigned int) c);
-      break;
-    }
+  const char *encoding = java_get_encoding (type);
+
+  generic_emit_char (c, type, stream, quoter, encoding);
+}
+
+/* Implementation of la_printchar method.  */
+
+static void
+java_printchar (int c, struct type *type, struct ui_file *stream)
+{
+  fputs_filtered ("'", stream);
+  LA_EMIT_CHAR (c, type, stream, '\'');
+  fputs_filtered ("'", stream);
+}
+
+/* Implementation of la_printstr method.  */
+
+static void
+java_printstr (struct ui_file *stream, struct type *type,
+	       const gdb_byte *string,
+	       unsigned int length, const char *encoding, int force_ellipses,
+	       const struct value_print_options *options)
+{
+  const char *type_encoding = java_get_encoding (type);
+
+  if (!encoding || !*encoding)
+    encoding = type_encoding;
+
+  generic_printstr (stream, type, string, length, encoding,
+		    force_ellipses, '"', 0, options);
 }
 
 static struct value *
@@ -1149,8 +1175,8 @@ const struct language_defn java_language_defn =
   java_parse,
   java_error,
   null_post_parser,
-  c_printchar,			/* Print a character constant */
-  c_printstr,			/* Function to print string constant */
+  java_printchar,		/* Print a character constant */
+  java_printstr,		/* Function to print string constant */
   java_emit_char,		/* Function to print a single character */
   java_print_type,		/* Print a type using appropriate syntax */
   default_print_typedef,	/* Print a typedef using appropriate syntax */

@@ -1,3 +1,12 @@
+2011-07-01  Tom Tromey  <tromey@redhat.com>
+
+	* jv-lang.c (java_language_defn): Use java_printchar,
+	java_printstr.
+	(java_get_encoding): New function.
+	(java_emit_char): Use generic_emit_char.
+	(java_printchar): New function.
+	(java_printstr): Likewise.
+
 2011-07-01  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-typeprint.c (print_record_type): If unable to decode
