@@ -226,6 +226,12 @@ proc gdb_load { arg } {
 		set loadtimeout 1600
 	    }
 
+	    if [is_remote target] {
+		set oldremotetimeout [get_remotetimeout]
+		set_remotetimeout $loadtimeout
+	    }
+
+	    set load_ok 0
 	    send_gdb $command;
 	    gdb_expect $loadtimeout {
 		-re "\[Ff\]ailed.*$gdb_prompt $" {
@@ -235,13 +241,21 @@ proc gdb_load { arg } {
 		}
 		-re "$gdb_prompt $" {
 		    verbose "Loaded $farg into $GDB\n"
-		    return 0;
+		    set load_ok 1
 		}
 		timeout {
 		    if { $verbose > 1 } {
 			perror "Timed out trying to load $farg."
 		    }
 		}
+	    }
+
+	    if [is_remote target] {
+		set_remotetimeout $oldremotetimeout
+	    }
+
+	    if { $load_ok == 1 } {
+		return 0;
 	    }
 	}
 

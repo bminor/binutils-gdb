@@ -3606,6 +3606,33 @@ proc get_sizeof { type default } {
     return [get_integer_valueof "sizeof (${type})" $default]
 }
 
+# Get the current value for remotetimeout and return it.
+proc get_remotetimeout { } {
+    global gdb_prompt
+    global decimal
+
+    gdb_test_multiple "show remotetimeout" "" {
+	-re "Timeout limit to wait for target to respond is ($decimal).*$gdb_prompt $" {
+	    return $expect_out(1,string);
+	}
+    }
+
+    # Pick the default that gdb uses
+    warning "Unable to read remotetimeout"
+    return 300
+}
+
+# Set the remotetimeout to the specified timeout.  Nothing is returned.
+proc set_remotetimeout { timeout } {
+    global gdb_prompt
+
+    gdb_test_multiple "set remotetimeout $timeout" "" {
+	-re "$gdb_prompt $" {
+	    verbose "Set remotetimeout to $timeout\n"
+	}
+    }
+}
+
 # Log gdb command line and script if requested.
 if {[info exists TRANSCRIPT]} {
   rename send_gdb real_send_gdb

@@ -1,3 +1,15 @@
+2011-06-30  Jie Zhang <jie.zhang@analog.com>
+	    Mike Frysinger  <vapier@gentoo.org>
+
+	* config/monitor.exp (get_remotetimeout, set_remotetimeout): New
+	helper functions for getting/setting remotetimeout variable.
+	* lib/gdb.exp (gdb_load): If the target is remote, set
+	$oldremotetimeout to get_remotetimeout, then call set_remotetimeout
+	with $loadtimeout.  Set $load_ok to 0 before doing the load.
+	Instead of returning, immediately, set $load_ok to 0.  Call
+	set_remotetimeout with $oldremotetimeout, and then return if
+	$load_ok is 1.
+
 2011-06-30  Andrew Burgess  <aburgess@broadcom.com>
 
 	* gdb.python/py-template.exp: Don't run this test if the target
