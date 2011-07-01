@@ -1,5 +1,12 @@
 2011-07-01  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (ada_identical_enum_types_p): New function.
+	(symbols_are_identical_enums): New function.
+	(remove_extra_symbols): Do nothing if NSYMS < 2.
+	Use symbols_are_identical_enums.
+
+2011-07-01  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-valprint.c (ada_value_print): Handle typedefs.
 
 2011-07-01  Joel Brobecker  <brobecker@adacore.com>

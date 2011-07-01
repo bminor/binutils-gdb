@@ -4365,6 +4365,108 @@ is_nondebugging_type (struct type *type)
   return (name != NULL && strcmp (name, "<variable, no debug info>") == 0);
 }
 
+/* Return nonzero if TYPE1 and TYPE2 are two enumeration types
+   that are deemed "identical" for practical purposes.
+
+   This function assumes that TYPE1 and TYPE2 are both TYPE_CODE_ENUM
+   types and that their number of enumerals is identical (in other
+   words, TYPE_NFIELDS (type1) == TYPE_NFIELDS (type2)).  */
+
+static int
+ada_identical_enum_types_p (struct type *type1, struct type *type2)
+{
+  int i;
+
+  /* The heuristic we use here is fairly conservative.  We consider
+     that 2 enumerate types are identical if they have the same
+     number of enumerals and that all enumerals have the same
+     underlying value and name.  */
+
+  /* All enums in the type should have an identical underlying value.  */
+  for (i = 0; i < TYPE_NFIELDS (type1); i++)
+    if (TYPE_FIELD_BITPOS (type1, i) != TYPE_FIELD_BITPOS (type2, i))
+      return 0;
+
+  /* All enumerals should also have the same name (modulo any numerical
+     suffix).  */
+  for (i = 0; i < TYPE_NFIELDS (type1); i++)
+    {
+      char *name_1 = TYPE_FIELD_NAME (type1, i);
+      char *name_2 = TYPE_FIELD_NAME (type2, i);
+      int len_1 = strlen (name_1);
+      int len_2 = strlen (name_2);
+
+      ada_remove_trailing_digits (TYPE_FIELD_NAME (type1, i), &len_1);
+      ada_remove_trailing_digits (TYPE_FIELD_NAME (type2, i), &len_2);
+      if (len_1 != len_2
+          || strncmp (TYPE_FIELD_NAME (type1, i),
+		      TYPE_FIELD_NAME (type2, i),
+		      len_1) != 0)
+	return 0;
+    }
+
+  return 1;
+}
+
+/* Return nonzero if all the symbols in SYMS are all enumeral symbols
+   that are deemed "identical" for practical purposes.  Sometimes,
+   enumerals are not strictly identical, but their types are so similar
+   that they can be considered identical.
+
+   For instance, consider the following code:
+
+      type Color is (Black, Red, Green, Blue, White);
+      type RGB_Color is new Color range Red .. Blue;
+
+   Type RGB_Color is a subrange of an implicit type which is a copy
+   of type Color. If we call that implicit type RGB_ColorB ("B" is
+   for "Base Type"), then type RGB_ColorB is a copy of type Color.
+   As a result, when an expression references any of the enumeral
+   by name (Eg. "print green"), the expression is technically
+   ambiguous and the user should be asked to disambiguate. But
+   doing so would only hinder the user, since it wouldn't matter
+   what choice he makes, the outcome would always be the same.
+   So, for practical purposes, we consider them as the same.  */
+
+static int
+symbols_are_identical_enums (struct ada_symbol_info *syms, int nsyms)
+{
+  int i;
+
+  /* Before performing a thorough comparison check of each type,
+     we perform a series of inexpensive checks.  We expect that these
+     checks will quickly fail in the vast majority of cases, and thus
+     help prevent the unnecessary use of a more expensive comparison.
+     Said comparison also expects us to make some of these checks
+     (see ada_identical_enum_types_p).  */
+
+  /* Quick check: All symbols should have an enum type.  */
+  for (i = 0; i < nsyms; i++)
+    if (TYPE_CODE (SYMBOL_TYPE (syms[i].sym)) != TYPE_CODE_ENUM)
+      return 0;
+
+  /* Quick check: They should all have the same value.  */
+  for (i = 1; i < nsyms; i++)
+    if (SYMBOL_VALUE (syms[i].sym) != SYMBOL_VALUE (syms[0].sym))
+      return 0;
+
+  /* Quick check: They should all have the same number of enumerals.  */
+  for (i = 1; i < nsyms; i++)
+    if (TYPE_NFIELDS (SYMBOL_TYPE (syms[i].sym))
+        != TYPE_NFIELDS (SYMBOL_TYPE (syms[0].sym)))
+      return 0;
+
+  /* All the sanity checks passed, so we might have a set of
+     identical enumeration types.  Perform a more complete
+     comparison of the type of each symbol.  */
+  for (i = 1; i < nsyms; i++)
+    if (!ada_identical_enum_types_p (SYMBOL_TYPE (syms[i].sym),
+                                     SYMBOL_TYPE (syms[0].sym)))
+      return 0;
+
+  return 1;
+}
+
 /* Remove any non-debugging symbols in SYMS[0 .. NSYMS-1] that definitely
    duplicate other symbols in the list (The only case I know of where
    this happens is when object files containing stabs-in-ecoff are
@@ -4376,6 +4478,12 @@ static int
 remove_extra_symbols (struct ada_symbol_info *syms, int nsyms)
 {
   int i, j;
+
+  /* We should never be called with less than 2 symbols, as there
+     cannot be any extra symbol in that case.  But it's easy to
+     handle, since we have nothing to do in that case.  */
+  if (nsyms < 2)
+    return nsyms;
 
   i = 0;
   while (i < nsyms)
@@ -4428,6 +4536,22 @@ remove_extra_symbols (struct ada_symbol_info *syms, int nsyms)
 
       i += 1;
     }
+
+  /* If all the remaining symbols are identical enumerals, then
+     just keep the first one and discard the rest.
+
+     Unlike what we did previously, we do not discard any entry
+     unless they are ALL identical.  This is because the symbol
+     comparison is not a strict comparison, but rather a practical
+     comparison.  If all symbols are considered identical, then
+     we can just go ahead and use the first one and discard the rest.
+     But if we cannot reduce the list to a single element, we have
+     to ask the user to disambiguate anyways.  And if we have to
+     present a multiple-choice menu, it's less confusing if the list
+     isn't missing some choices that were identical and yet distinct.  */
+  if (symbols_are_identical_enums (syms, nsyms))
+    nsyms = 1;
+
   return nsyms;
 }
 
