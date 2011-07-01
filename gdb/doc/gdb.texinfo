@@ -20027,6 +20027,16 @@ Display debugging messages about inner workings of the AIX thread
 module.
 @item show debug aix-thread
 Show the current state of AIX thread debugging info display.
+@item set debug check-physname
+@cindex physname
+Check the results of the ``physname'' computation.  When reading DWARF
+debugging information for C@t{++}, @value{GDBN} attempts to compute
+each entity's name.  @value{GDBN} can do this computation in two
+different ways, depending on exactly what information is present.
+When enabled, this setting causes @value{GDBN} to compute the names
+both ways and display any discrepancies.
+@item show debug check-physname
+Show the current state of ``physname'' checking.
 @item set debug dwarf2-die
 @cindex DWARF2 DIEs
 Dump DWARF2 DIEs after they are read in.

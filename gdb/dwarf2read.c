@@ -119,6 +119,9 @@ _STATEMENT_PROLOGUE;
 /* When non-zero, dump DIEs after they are read in.  */
 static int dwarf2_die_debug = 0;
 
+/* When non-zero, cross-check physname against demangler.  */
+static int check_physname = 0;
+
 static int pagesize;
 
 /* When set, the file that we're processing is known to have debugging
@@ -5180,7 +5183,91 @@ dwarf2_full_name (char *name, struct die_info *die, struct dwarf2_cu *cu)
 static const char *
 dwarf2_physname (char *name, struct die_info *die, struct dwarf2_cu *cu)
 {
-  return dwarf2_compute_name (name, die, cu, 1);
+  struct attribute *attr;
+  const char *retval, *mangled = NULL, *canon = NULL;
+  struct cleanup *back_to;
+  int need_copy = 1;
+
+  /* In this case dwarf2_compute_name is just a shortcut not building anything
+     on its own.  */
+  if (!die_needs_namespace (die, cu))
+    return dwarf2_compute_name (name, die, cu, 1);
+
+  back_to = make_cleanup (null_cleanup, NULL);
+
+  attr = dwarf2_attr (die, DW_AT_linkage_name, cu);
+  if (!attr)
+    attr = dwarf2_attr (die, DW_AT_MIPS_linkage_name, cu);
+
+  /* DW_AT_linkage_name is missing in some cases - depend on what GDB
+     has computed.  */
+  if (attr && DW_STRING (attr))
+    {
+      char *demangled;
+
+      mangled = DW_STRING (attr);
+
+      /* Use DMGL_RET_DROP for C++ template functions to suppress their return
+	 type.  It is easier for GDB users to search for such functions as
+	 `name(params)' than `long name(params)'.  In such case the minimal
+	 symbol names do not match the full symbol names but for template
+	 functions there is never a need to look up their definition from their
+	 declaration so the only disadvantage remains the minimal symbol
+	 variant `long name(params)' does not have the proper inferior type.
+	 */
+
+      demangled = cplus_demangle (mangled, (DMGL_PARAMS | DMGL_ANSI
+					    | (cu->language == language_java
+					       ? DMGL_JAVA | DMGL_RET_POSTFIX
+					       : DMGL_RET_DROP)));
+      if (demangled)
+	{
+	  make_cleanup (xfree, demangled);
+	  canon = demangled;
+	}
+      else
+	{
+	  canon = mangled;
+	  need_copy = 0;
+	}
+    }
+
+  if (canon == NULL || check_physname)
+    {
+      const char *physname = dwarf2_compute_name (name, die, cu, 1);
+
+      if (canon != NULL && strcmp (physname, canon) != 0)
+	{
+	  /* It may not mean a bug in GDB.  The compiler could also
+	     compute DW_AT_linkage_name incorrectly.  But in such case
+	     GDB would need to be bug-to-bug compatible.  */
+
+	  complaint (&symfile_complaints,
+		     _("Computed physname <%s> does not match demangled <%s> "
+		       "(from linkage <%s>) - DIE at 0x%x [in module %s]"),
+		     physname, canon, mangled, die->offset, cu->objfile->name);
+
+	  /* Prefer DW_AT_linkage_name (in the CANON form) - when it
+	     is available here - over computed PHYSNAME.  It is safer
+	     against both buggy GDB and buggy compilers.  */
+
+	  retval = canon;
+	}
+      else
+	{
+	  retval = physname;
+	  need_copy = 0;
+	}
+    }
+  else
+    retval = canon;
+
+  if (need_copy)
+    retval = obsavestring (retval, strlen (retval),
+			   &cu->objfile->objfile_obstack);
+
+  do_cleanups (back_to);
+  return retval;
 }
 
 /* Read the import statement specified by the given die and record it.  */
@@ -16254,6 +16341,15 @@ show_dwarf2_always_disassemble (struct ui_file *file, int from_tty,
 		    value);
 }
 
+static void
+show_check_physname (struct ui_file *file, int from_tty,
+		     struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file,
+		    _("Whether to check \"physname\" is %s.\n"),
+		    value);
+}
+
 void _initialize_dwarf2_read (void);
 
 void
@@ -16308,6 +16404,14 @@ The value is the maximum depth to print."),
 			    NULL,
 			    NULL,
 			    &setdebuglist, &showdebuglist);
+
+  add_setshow_boolean_cmd ("check-physname", no_class, &check_physname, _("\
+Set cross-checking of \"physname\" code against demangler."), _("\
+Show cross-checking of \"physname\" code against demangler."), _("\
+When enabled, GDB's internal \"physname\" code is checked against\n\
+the demangler."),
+			   NULL, show_check_physname,
+			   &setdebuglist, &showdebuglist);
 
   c = add_cmd ("gdb-index", class_files, save_gdb_index_command,
 	       _("\

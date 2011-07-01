@@ -1,3 +1,17 @@
+2011-05-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/break-interp.exp (reach_1, test_ld): Allow also the prefix
+	__GI_.
+	* gdb.cp/psymtab-parameter.cc (func): Make it a template function.
+	(f): New function.
+	* gdb.cp/psymtab-parameter.exp (complete break 'func(): Rename to ...
+	(complete p 'func<short>(): ... here.
+	* gdb.dwarf2/dw2-linkage-name-trust-main.cc: New file.
+	* gdb.dwarf2/dw2-linkage-name-trust.S: New file.
+	* gdb.dwarf2/dw2-linkage-name-trust.exp: New file.
+	* gdb.cp/temargs.exp (test type of F in k3_m, test value of F in k3_m):
+	Make them KFAIL gcc/49546.
+
 2011-07-01  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/catch_ex.exp: Add temporary catchpoint tests.

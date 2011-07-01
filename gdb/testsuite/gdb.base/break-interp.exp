@@ -140,14 +140,14 @@ proc reach_1 {func command displacement} {
 	    }
 	    exp_continue
 	}
-	-re "Breakpoint \[0-9\]+, \\.?$func \\(.*\\) at .*:\[0-9\]+\r\n.*$gdb_prompt $" {
+	-re "Breakpoint \[0-9\]+, \\.?(__GI_)?$func \\(.*\\) at .*:\[0-9\]+\r\n.*$gdb_prompt $" {
 	    if {$func == "_dl_debug_state"} {
 		fail $test
 	    } else {
 		pass $test
 	    }
 	}
-	-re "Breakpoint \[0-9\]+, \[0-9xa-f\]+ in \\.?$func \\(\\).*\r\n$gdb_prompt $" {
+	-re "Breakpoint \[0-9\]+, \[0-9xa-f\]+ in \\.?(__GI_)?$func \\(\\).*\r\n$gdb_prompt $" {
 	    if {$func == "_dl_debug_state"} {
 		fail $test
 	    } else {
@@ -403,7 +403,7 @@ proc test_ld {file ifmain trynosym displacement} {
 
     reach "_dl_debug_state" "run" $displacement
 
-    gdb_test "bt" "#0 +\[^\r\n\]*\\m_dl_debug_state\\M.*" "dl bt"
+    gdb_test "bt" "#0 +\[^\r\n\]*\\m(__GI_)?_dl_debug_state\\M.*" "dl bt"
 
     if $ifmain {
 	reach "main" continue "NONE"

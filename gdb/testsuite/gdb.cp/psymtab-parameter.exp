@@ -35,5 +35,6 @@ gdb_test_no_output "set language c++"
 # XFAIL than FAIL here.  For example -readnow breaks it.
 gdb_test_no_output "maintenance info symtabs"
 
-# GDB has shown only the `func(int)' entry before.
-gdb_test "complete break 'func(" "break 'func\\(int\\)\r\nbreak 'func\\(typedefed\\)"
+# GDB has shown only the `long func<short>()' ELF symbol before, not the DWARF
+# symbol
+gdb_test "complete p 'func<short>(" "p 'func<short>\\(\\)"

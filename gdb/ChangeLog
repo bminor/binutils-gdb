@@ -1,3 +1,11 @@
+2011-07-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2read.c (check_physname): New variable.
+	(dwarf2_physname): Prefer DW_AT_linkage_name over dwarf2_compute_name.
+	(show_check_physname): New function.
+	(_initialize_dwarf2_read): Add `check-physname' for check_physname.
+
 2011-07-01  Joel Brobecker  <brobecker@adacore.com>
 
 	* machoread.c (macho_symfile_read): Delete OBE comment.
