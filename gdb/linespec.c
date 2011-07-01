@@ -1697,7 +1697,10 @@ find_method (int funfirstline, struct linespec_result *canonical,
   i1 = find_methods (t, copy, SYMBOL_LANGUAGE (sym_class), sym_arr,
 		     file_symtab);
 
-  if (i1 == 1)
+  /* If we were given a specific overload instance in COPY, defer the field
+     acceptance till the strcmp_iw verification below, even if we found just
+     a single field with that name.  */
+  if (i1 == 1 && strchr (copy, '(') == NULL)
     {
       /* There is exactly one field with that name.  */
       sym = sym_arr[0];

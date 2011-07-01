@@ -1,5 +1,10 @@
 2011-07-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* linespec.c (find_method): Accept the function type automatically only
+	if it was specified with parameter types.
+
+2011-07-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Stop on first linespec terminator instead of eating what we can.
 	* linespec.c (is_linespec_boundary): New function.
 	(name_end): Remove function.

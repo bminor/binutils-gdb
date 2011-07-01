@@ -1,5 +1,10 @@
 2011-07-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* gdb.cp/paren-type.cc: New files.
+	* gdb.cp/paren-type.exp: New files.
+
+2011-07-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Stop on first linespec terminator instead of eating what we can.
 	* gdb.cp/minsym-fallback-main.cc (main): Call also C::operator ().
 	* gdb.cp/minsym-fallback.cc (C::operator ()): Define.
