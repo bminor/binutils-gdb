@@ -233,13 +233,25 @@ unparse_exception_type (unsigned int i)
     }
 }
 
+/* Set errno to zero, and then call ptrace with the given arguments.
+   If inferior debugging traces are on, then also print a debug
+   trace.
+
+   The returned value is the same as the value returned by ptrace,
+   except in the case where that value is -1 but errno is zero.
+   This case is documented to be a non-error situation, so we
+   return zero in that case. */
+
 static int
 darwin_ptrace (const char *name,
 	       int request, int pid, PTRACE_TYPE_ARG3 arg3, int arg4)
 {
   int ret;
 
+  errno = 0;
   ret = ptrace (request, pid, (caddr_t) arg3, arg4);
+  if (ret == -1 && errno == 0)
+    ret = 0;
 
   inferior_debug (4, _("ptrace (%s, %d, 0x%x, %d): %d (%s)\n"),
                   name, pid, arg3, arg4, ret,
@@ -1301,7 +1313,10 @@ darwin_kill_inferior (struct target_ops *ops)
       darwin_stop_inferior (inf);
 
       res = PTRACE (PT_KILL, inf->pid, 0, 0);
-      gdb_assert (res == 0);
+      if (res != 0)
+        warning (_("Failed to kill inferior: ptrace returned %d "
+	           "[%s] (pid=%d)"),
+		 res, safe_strerror (errno), inf->pid);
 
       darwin_reply_to_all_pending_messages (inf);
 

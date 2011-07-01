@@ -1,5 +1,14 @@
 2011-07-01  Joel Brobecker  <brobecker@adacore.com>
 
+	* darwin-nat.c (darwin_ptrace): Add documentation.
+	Set errno to zero before calling ptrace.  If ptrace returns
+	-1 and errno is zero, then change then return zero.
+	(darwin_kill_inferior): Issue a warning instead of triggering
+	a failed assertion when the PT_KILL ptrace operations returned
+	nonzero.
+
+2011-07-01  Joel Brobecker  <brobecker@adacore.com>
+
 	* darwin-nat.c (darwin_detach): Call darwin_resume_inferior
 	only when inf->private->no_ptrace.
 
