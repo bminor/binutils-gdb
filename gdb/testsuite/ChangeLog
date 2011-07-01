@@ -1,3 +1,11 @@
+2011-07-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Test GCC PR debug/49546.
+	* gdb.cp/temargs.exp (set sixth breakpoint for temargs)
+	(test type of F in k3_m, test value of F in k3_m): New.
+	* gdb.cp/temargs.cc (struct S3, struct K3): New.
+	(main): New variable k3.  Call k3.k3_m.
+
 2011-07-01  Jean-Charles Delay  <delay@adacore.com>
 
 	* gdb.ada/packed_array.exp: Fix expected outout.

@@ -65,6 +65,21 @@ struct K2
   }
 };
 
+// GCC PR debug/49546
+struct S3
+{
+  static void m (int x) {}
+};
+template <void (*F) (int)>
+// or: template <void (F) (int)>
+struct K3
+{
+  void k3_m ()
+  {
+    F (0);	// Breakpoint 6.
+  }
+};
+
 int main ()
 {
   Base<double, 23, &a_global, &S::f> base;
@@ -72,12 +87,15 @@ int main ()
   // That would be worth testing, once g++ is fixed.
   Base<long, 47, &a_global, &S::f>::Inner<float> inner;
   K2<&S::somefunc> k2;
+  K3<&S3::m> k3;
+// or: K3<S3::m> k3;
 
   base.base_m ();
   inner.inner_m ();
   func<unsigned char, 91, &a_global, &S::f> ();
   base.templ_m<short> ();
   k2.k2_m ();
+  k3.k3_m ();
 
   return 0;
 }

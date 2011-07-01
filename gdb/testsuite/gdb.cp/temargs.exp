@@ -75,6 +75,10 @@ set line [gdb_get_line_number "Breakpoint 5" $srcfile]
 gdb_test "break $srcfile:$line" "Breakpoint 6.*" \
     "set fifth breakpoint for temargs"
 
+set line [gdb_get_line_number "Breakpoint 6" $srcfile]
+gdb_test "break $srcfile:$line" "Breakpoint 7.*" \
+    "set sixth breakpoint for temargs"
+
 #
 # Tests in Base::base_m.
 #
@@ -166,3 +170,19 @@ gdb_test "ptype F" "type = void \\\(S::\\\*\\\)\\\(S \\\* const\\\)" \
 
 setup_kfail gcc/49366 "*-*-*"
 gdb_test "print F" "&S::somefunc" "test value of F in k2_m"
+
+#
+# Tests in K3::k3_m, GCC PR debug/49546.
+# The problem reproduces with DW_AT_MIPS_linkage_name.  It does not happen with
+# GDB physname - GDB's own computation of the linkage name based on
+# (incorrectly output by GCC) DW_AT_name.
+#
+
+gdb_continue_to_breakpoint "continue to sixth breakpoint for temargs"
+
+if $have_older_template_gcc { setup_xfail "*-*-*" }
+gdb_test "ptype F" {type = void \(\*\)\(int\)} "test type of F in k3_m"
+
+if $have_older_template_gcc { setup_xfail "*-*-*" }
+gdb_test "print F" { = \(void \(\*\)\(int\)\) 0x[0-9a-f]+ <S3::m\(int\)>} \
+	 "test value of F in k3_m"
