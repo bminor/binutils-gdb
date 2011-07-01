@@ -1443,7 +1443,7 @@ thin_descriptor_type (struct type *type)
 static struct value *
 thin_data_pntr (struct value *val)
 {
-  struct type *type = value_type (val);
+  struct type *type = ada_check_typedef (value_type (val));
   struct type *data_type = desc_data_target_type (thin_descriptor_type (type));
 
   data_type = lookup_pointer_type (data_type);
@@ -2093,7 +2093,7 @@ decode_constrained_packed_array (struct value *arr)
      of the routine assumes that the array hasn't been decoded yet,
      so we use the basic "value_ind" routine to perform the dereferencing,
      as opposed to using "ada_value_ind".  */
-  if (TYPE_CODE (value_type (arr)) == TYPE_CODE_PTR)
+  if (TYPE_CODE (ada_check_typedef (value_type (arr))) == TYPE_CODE_PTR)
     arr = value_ind (arr);
 
   type = decode_constrained_packed_array_type (value_type (arr));
@@ -9522,16 +9522,17 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
         if (!ada_is_simple_array_type (value_type (array)))
           error (_("cannot take slice of non-array"));
 
-        if (TYPE_CODE (value_type (array)) == TYPE_CODE_PTR)
+        if (TYPE_CODE (ada_check_typedef (value_type (array)))
+            == TYPE_CODE_PTR)
           {
+            struct type *type0 = ada_check_typedef (value_type (array));
+
             if (high_bound < low_bound || noside == EVAL_AVOID_SIDE_EFFECTS)
-              return empty_array (TYPE_TARGET_TYPE (value_type (array)),
-                                  low_bound);
+              return empty_array (TYPE_TARGET_TYPE (type0), low_bound);
             else
               {
                 struct type *arr_type0 =
-                  to_fixed_array_type (TYPE_TARGET_TYPE (value_type (array)),
-                                       NULL, 1);
+                  to_fixed_array_type (TYPE_TARGET_TYPE (type0), NULL, 1);
 
                 return ada_value_slice_from_ptr (array, arr_type0,
                                                  longest_to_int (low_bound),

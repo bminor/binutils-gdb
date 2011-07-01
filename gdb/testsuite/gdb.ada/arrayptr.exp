@@ -51,3 +51,5 @@ gdb_test "print arr_ptr (2)" "= 22"
 
 gdb_test "print arr_ptr (3..4)" "= \\(3 => 23, 24\\)"
 
+gdb_test "ptype string_access" "= access array \\(<>\\) of character"
+
