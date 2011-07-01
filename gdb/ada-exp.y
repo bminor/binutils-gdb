@@ -1449,8 +1449,12 @@ convert_char_literal (struct type *type, LONGEST val)
   char name[7];
   int f;
 
-  if (type == NULL || TYPE_CODE (type) != TYPE_CODE_ENUM)
+  if (type == NULL)
     return val;
+  type = check_typedef (type);
+  if (TYPE_CODE (type) != TYPE_CODE_ENUM)
+    return val;
+
   xsnprintf (name, sizeof (name), "QU%02x", (int) val);
   for (f = 0; f < TYPE_NFIELDS (type); f += 1)
     {
