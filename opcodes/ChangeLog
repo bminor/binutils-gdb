@@ -1,5 +1,9 @@
 2011-06-30  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* i386-dis.c (vex_len_table): Update rorxS.
+
+2011-06-30  H.J. Lu  <hongjiu.lu@intel.com>
+
 	AVX Programming Reference (June, 2011)
 	* i386-dis.c (vex_len_table): Correct rorxS.
 
