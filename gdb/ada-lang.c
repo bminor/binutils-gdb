@@ -900,11 +900,14 @@ is_lower_alphanum (const char c)
   return (isdigit (c) || (isalpha (c) && islower (c)));
 }
 
-/* Remove either of these suffixes:
+/* ENCODED is the linkage name of a symbol and LEN contains its length.
+   This function saves in LEN the length of that same symbol name but
+   without either of these suffixes:
      . .{DIGIT}+
      . ${DIGIT}+
      . ___{DIGIT}+
      . __{DIGIT}+.
+
    These are suffixes introduced by the compiler for entities such as
    nested subprogram for instance, in order to avoid name clashes.
    They do not serve any purpose for the debugger.  */

@@ -1,3 +1,7 @@
+2011-07-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_remove_trailing_digits): Expand documentation.
+
 2011-06-30  Tom Tromey  <tromey@redhat.com>
 
 	* varobj.c (varobj_create): Call do_cleanups on early exit path.
