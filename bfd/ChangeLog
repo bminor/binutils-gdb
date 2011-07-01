@@ -1,3 +1,8 @@
+2011-07-01  Ian Lance Taylor  <iant@google.com>
+
+	* elf32-i386.c (elf_i386_eh_frame_plt): Correct expression: change
+	DW_OP_lit3 to DW_OP_lit2.
+
 2011-07-01  Alan Modra  <amodra@gmail.com>
 
 	* elf32-ppc.c (ppc_elf_copy_indirect_symbol): Don't look at

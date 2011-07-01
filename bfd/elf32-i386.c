@@ -610,7 +610,7 @@ static const bfd_byte elf_i386_eh_frame_plt[] =
   DW_OP_breg4, 4,		/* DW_OP_breg4 (esp): 4 */
   DW_OP_breg8, 0,		/* DW_OP_breg8 (eip): 0 */
   DW_OP_lit15, DW_OP_and, DW_OP_lit11, DW_OP_ge,
-  DW_OP_lit3, DW_OP_shl, DW_OP_plus,
+  DW_OP_lit2, DW_OP_shl, DW_OP_plus,
   DW_CFA_nop, DW_CFA_nop, DW_CFA_nop, DW_CFA_nop
 };
 
