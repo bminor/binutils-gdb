@@ -1,3 +1,14 @@
+2011-07-01  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (cb_linux_stat_map_32, cb_linux_stat_map_64): Rename from
+	stat_map_32 and stat_map_64.
+	(cb_libgloss_stat_map_32): New stat map.
+	(stat_map_32, stat_map_64): New stat map pointers.
+	(bfin_user_init): Assign stat_map_32 to cb_linux_stat_map_32 and
+	stat_map_64 to cb_linux_stat_map_64.
+	(bfin_virtual_init): New function.
+	(sim_create_inferior): Call bfin_virtual_init for all other envs.
+
 2011-06-22  Mike Frysinger  <vapier@gentoo.org>
 
 	* interp.c (bfin_syscall): Delete old comment.  Set dreg 1 to

@@ -89,7 +89,7 @@
 # define setgid(gid) -1
 #endif
 
-static const char stat_map_32[] =
+static const char cb_linux_stat_map_32[] =
 /* Linux kernel 32bit layout:  */
 "st_dev,2:space,2:st_ino,4:st_mode,2:st_nlink,2:st_uid,2:st_gid,2:st_rdev,2:"
 "space,2:st_size,4:st_blksize,4:st_blocks,4:st_atime,4:st_atimensec,4:"
@@ -99,10 +99,15 @@ static const char stat_map_32[] =
 "st_rdev,8:space,2:space,2:st_size,4:st_blksiez,4:st_blocks,4:st_atime,4:"
 "st_atimensec,4:st_mtime,4:st_mtimensec,4:st_ctime,4:st_ctimensec,4:space,4:"
 "space,4";  */
-static const char stat_map_64[] =
+static const char cb_linux_stat_map_64[] =
 "st_dev,8:space,4:space,4:st_mode,4:st_nlink,4:st_uid,4:st_gid,4:st_rdev,8:"
 "space,4:st_size,8:st_blksize,4:st_blocks,8:st_atime,4:st_atimensec,4:"
 "st_mtime,4:st_mtimensec,4:st_ctime,4:st_ctimensec,4:st_ino,8";
+static const char cb_libgloss_stat_map_32[] =
+"st_dev,2:st_ino,2:st_mode,4:st_nlink,2:st_uid,2:st_gid,2:st_rdev,2:"
+"st_size,4:st_atime,4:space,4:st_mtime,4:space,4:st_ctime,4:"
+"space,4:st_blksize,4:st_blocks,4:space,8";
+static const char *stat_map_32, *stat_map_64;
 
 /* Count the number of arguments in an argv.  */
 static int
@@ -1173,7 +1178,8 @@ bfin_user_init (SIM_DESC sd, SIM_CPU *cpu, struct bfd *abfd,
   cb->errno_map = cb_linux_errno_map;
   cb->open_map = cb_linux_open_map;
   cb->signal_map = cb_linux_signal_map;
-  cb->stat_map = stat_map_32;
+  cb->stat_map = stat_map_32 = cb_linux_stat_map_32;
+  stat_map_64 = cb_linux_stat_map_64;
 }
 
 static void
@@ -1201,6 +1207,15 @@ bfin_os_init (SIM_DESC sd, SIM_CPU *cpu, const char * const *argv)
     }
   byte = 0;
   sim_write (sd, cmdline, &byte, 1);
+}
+
+static void
+bfin_virtual_init (SIM_DESC sd, SIM_CPU *cpu)
+{
+  host_callback *cb = STATE_CALLBACK (sd);
+
+  cb->stat_map = stat_map_32 = cb_libgloss_stat_map_32;
+  stat_map_64 = NULL;
 }
 
 SIM_RC
@@ -1235,7 +1250,7 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
       bfin_os_init (sd, cpu, (void *)argv);
       break;
     default:
-      /* Nothing to do for virtual/all envs.  */
+      bfin_virtual_init (sd, cpu);
       break;
     }
 
