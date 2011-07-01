@@ -1,3 +1,10 @@
+2011-07-02  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.base/dump.exp (capture_pointer_with_type): New.
+	Get value from address instead of name.
+	Start GDB once, and do `dump' and `restore'
+	tests together.
+
 2011-06-30  Jie Zhang <jie.zhang@analog.com>
 	    Mike Frysinger  <vapier@gentoo.org>
 
