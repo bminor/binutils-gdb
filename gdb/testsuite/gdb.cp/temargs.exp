@@ -80,6 +80,10 @@ gdb_test "print P == &a_global" " = true" "test value of P in base_m"
 setup_kfail "gcc/41736" *-*-*
 gdb_test "print MP" "&S::f" "test value of MP in base_m"
 
+set line [gdb_get_line_number "Breakpoint 6" $srcfile]
+gdb_test "break $srcfile:$line" "Breakpoint 6.*" \
+    "set sixth breakpoint for temargs"
+
 #
 # Tests in Inner::inner_m.
 #
@@ -139,3 +143,19 @@ gdb_test "print MP" "&S::f" "test value of MP in templ_m"
 
 if $have_older_template_gcc { setup_xfail "*-*-*" }
 gdb_test "whatis Q" "short" "test type of Q in templ_m"
+
+#
+# Tests in K3::k3_m, GCC PR debug/49546.
+# The problem reproduces with DW_AT_MIPS_linkage_name.  It does not happen with
+# GDB physname - GDB's own computation of the linkage name based on
+# (incorrectly output by GCC) DW_AT_name.
+#
+
+gdb_continue_to_breakpoint "continue to sixth breakpoint for temargs"
+
+if $have_older_template_gcc { setup_xfail "*-*-*" }
+gdb_test "ptype F" {type = void \(\*\)\(int\)} "test type of F in k3_m"
+
+if $have_older_template_gcc { setup_xfail "*-*-*" }
+gdb_test "print F" { = \(void \(\*\)\(int\)\) 0x[0-9a-f]+ <S3::m\(int\)>} \
+	 "test value of F in k3_m"
