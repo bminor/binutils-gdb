@@ -32,5 +32,12 @@ if ![runto_main] then {
 gdb_breakpoint [gdb_get_line_number "marker"]
 gdb_continue_to_breakpoint "marker"
 
+if {[test_compiler_info {gcc-[0-3]-*}]
+    || [test_compiler_info {gcc-4-[0-4]-*}]} {
+    # There was an extra CU-level DW_TAG_variable for DEFAULT_INSTANCE
+    # as DW_AT_declaration with DW_AT_name = nowhere
+    # and DW_AT_MIPS_linkage_name = _ZN9gnu_obj_47nowhereE .
+    setup_xfail *-*-*
+}
 gdb_test "p b" "{<A<int, B>> = {<ATB<int>> = {data = 0}, static DEFAULT_INSTANCE = <optimized out>}, <No data fields>}"
 

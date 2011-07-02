@@ -51,8 +51,6 @@ if {[test_compiler_info {gcc-[0-3]-*}]
 } elseif {[test_compiler_info {gcc-4-5-*}]} {
     set have_pr_41736_fixed 0
     set have_pr_45024_fixed 0
-} elseif {[test_compiler_info {gcc-4-6-*}]} {
-    set have_pr_45024_fixed 0
 }
 
 set line [gdb_get_line_number "Breakpoint 1" $srcfile]
@@ -110,13 +108,23 @@ gdb_test "ptype T" "long" "test type of T in inner_m"
 if {!$have_pr_45024_fixed} { setup_xfail *-*-* }
 gdb_test "print I" " = 47" "test value of I in inner_m"
 
-if $have_older_template_gcc { setup_xfail "*-*-*" }
+if $have_older_template_gcc { setup_xfail "*-*-*"
+} elseif {[test_compiler_info {gcc-[0-3]-*}]
+	 || [test_compiler_info {gcc-4-[0-5]-*}]} {
+  # gcc-4.5.x still does not emit inner DW_TAG_structure_type.
+  setup_xfail "*-*-*"
+}
 gdb_test "print P == &a_global" " = true" "test value of P in inner_m"
 
 if {!$have_pr_41736_fixed} { setup_xfail *-*-* }
 gdb_test "print MP" "&S::f" "test value of MP in inner_m"
 
-if $have_older_template_gcc { setup_xfail "*-*-*" }
+if $have_older_template_gcc { setup_xfail "*-*-*"
+} elseif {[test_compiler_info {gcc-[0-3]-*}]
+	 || [test_compiler_info {gcc-4-[0-5]-*}]} {
+  # gcc-4.5.x still does not emit outer DW_TAG_structure_type.
+  setup_xfail "*-*-*"
+}
 gdb_test "whatis Z" "float" "test type of Z in inner_m"
 
 #
