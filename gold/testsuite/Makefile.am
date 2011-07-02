@@ -428,15 +428,15 @@ check_PROGRAMS += two_file_separate_shared_21_nonpic_test
 check_PROGRAMS += two_file_mixed_shared_test
 check_PROGRAMS += two_file_mixed_2_shared_test
 two_file_shared_1_nonpic.so: two_file_test_1.o gcctestdir/ld
-	$(CXXLINK) -Bgcctestdir/ -shared two_file_test_1.o two_file_test_1b.o
+	$(CXXLINK) -Bgcctestdir/ -shared two_file_test_1.o two_file_test_1b.o -Wl,-z,notext
 two_file_shared_2_nonpic.so: two_file_test_2.o gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -shared two_file_test_2.o
 two_file_shared_nonpic.so: two_file_test_1.o two_file_test_1b.o two_file_test_2.o gcctestdir/ld
-	$(CXXLINK) -Bgcctestdir/ -shared two_file_test_1.o two_file_test_1b.o two_file_test_2.o
+	$(CXXLINK) -Bgcctestdir/ -shared two_file_test_1.o two_file_test_1b.o two_file_test_2.o -Wl,-z,notext
 two_file_shared_mixed.so: two_file_test_1_pic.o two_file_test_1b_pic.o two_file_test_2.o gcctestdir/ld
-	$(CXXLINK) -Bgcctestdir/ -shared two_file_test_1_pic.o two_file_test_1b_pic.o two_file_test_2.o
+	$(CXXLINK) -Bgcctestdir/ -shared two_file_test_1_pic.o two_file_test_1b_pic.o two_file_test_2.o -Wl,-z,notext
 two_file_shared_mixed_1.so: two_file_test_1.o two_file_test_1b_pic.o two_file_shared_2.so gcctestdir/ld
-	$(CXXLINK) -Bgcctestdir/ -shared two_file_test_1.o two_file_test_1b_pic.o two_file_shared_2.so
+	$(CXXLINK) -Bgcctestdir/ -shared two_file_test_1.o two_file_test_1b_pic.o two_file_shared_2.so -Wl,-z,notext
 
 two_file_shared_1_nonpic_test_SOURCES = \
 	two_file_test_2.cc two_file_test_main.cc
@@ -620,10 +620,10 @@ weak_undef_file1_nonpic.o: weak_undef_file1.cc
 weak_undef_file2_nonpic.o: weak_undef_file2.cc
 	$(CXXCOMPILE) -c -o $@ $<
 weak_undef_lib_nonpic.so: weak_undef_file1_nonpic.o
-	$(CXXLINK) -Bgcctestdir/ -shared weak_undef_file1_nonpic.o
+	$(CXXLINK) -Bgcctestdir/ -shared weak_undef_file1_nonpic.o -Wl,-z,notext
 alt/weak_undef_lib_nonpic.so: weak_undef_file2_nonpic.o
 	test -d alt || mkdir -p alt
-	$(CXXLINK) -Bgcctestdir/ -shared weak_undef_file2_nonpic.o
+	$(CXXLINK) -Bgcctestdir/ -shared weak_undef_file2_nonpic.o -Wl,-z,notext
 endif FN_PTRS_IN_SO_WITHOUT_PIC
 
 
@@ -809,7 +809,7 @@ endif
 if FN_PTRS_IN_SO_WITHOUT_PIC
 check_PROGRAMS += tls_shared_nonpic_test
 tls_test_shared_nonpic.so: tls_test.o tls_test_file2.o tls_test_c.o gcctestdir/ld
-	$(CXXLINK) -Bgcctestdir/ -shared tls_test.o tls_test_file2.o tls_test_c.o
+	$(CXXLINK) -Bgcctestdir/ -shared tls_test.o tls_test_file2.o tls_test_c.o -Wl,-z,notext
 
 tls_shared_nonpic_test_SOURCES = tls_test_main.cc
 tls_shared_nonpic_test_DEPENDENCIES = gcctestdir/ld tls_test_shared_nonpic.so

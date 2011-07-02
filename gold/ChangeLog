@@ -1,6 +1,20 @@
 2011-07-01  Ian Lance Taylor  <iant@google.com>
 
 	PR gold/12525
+	* options.h (class General_options): Support -z notext.
+	* testsuite/Makefile.am (two_file_shared_1_nonpic.so): Use
+	-Wl,-z,notext.
+	(two_file_shared_nonpic.so): Likewise.
+	(two_file_shared_mixed.so): Likewise.
+	(two_file_shared_mixed_1.so): Likewise.
+	(weak_undef_lib_nonpic.so): Likewise.
+	(alt/weak_undef_lib_nonpic.so): Likewise.
+	(tls_test_shared_nonpic.so): Likewise.
+	* testsuite/Makefile.in: Rebuild.
+
+2011-07-01  Ian Lance Taylor  <iant@google.com>
+
+	PR gold/12525
 	* configure.ac: Test whether static linking works, setting
 	the automake conditional HAVE_STATIC.
 	* testsuite/Makefile.am: Disable tests using -static if

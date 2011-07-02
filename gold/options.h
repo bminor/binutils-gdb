@@ -1170,7 +1170,7 @@ class General_options
 	      N_("Don't mark variables read-only after relocation"));
   DEFINE_bool(text, options::DASH_Z, '\0', false,
 	      N_("Do not permit relocations in read-only segments"),
-	      NULL);
+	      N_("Permit relocations in read-only segments (default)"));
   DEFINE_bool_alias(textoff, text, options::DASH_Z, '\0',
 		    N_("Permit relocations in read-only segments (default)"),
 		    NULL, true);
