@@ -62,6 +62,10 @@ set line [gdb_get_line_number "Breakpoint 4" $srcfile]
 gdb_test "break $srcfile:$line" "Breakpoint 5.*" \
     "set fourth breakpoint for temargs"
 
+set line [gdb_get_line_number "Breakpoint 6" $srcfile]
+gdb_test "break $srcfile:$line" "Breakpoint 6.*" \
+    "set sixth breakpoint for temargs"
+
 #
 # Tests in Base::base_m.
 #
@@ -79,10 +83,6 @@ gdb_test "print P == &a_global" " = true" "test value of P in base_m"
 
 setup_kfail "gcc/41736" *-*-*
 gdb_test "print MP" "&S::f" "test value of MP in base_m"
-
-set line [gdb_get_line_number "Breakpoint 6" $srcfile]
-gdb_test "break $srcfile:$line" "Breakpoint 6.*" \
-    "set sixth breakpoint for temargs"
 
 #
 # Tests in Inner::inner_m.

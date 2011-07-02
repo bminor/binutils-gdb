@@ -1,5 +1,10 @@
 2011-07-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* gdb.cp/temargs.exp (set sixth breakpoint for temargs): Move the test
+	to match the HEAD order.
+
+2011-07-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdb.cp/m-static.exp: Call get_compiler_info.
 	(static const int initialized nowhere): Call setup_xfail for gcc <= 4.4.
 	* gdb.cp/pr9167.exp (p b): Likewise.
