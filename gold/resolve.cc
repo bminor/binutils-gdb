@@ -887,7 +887,8 @@ Symbol_table::should_override_with_special(const Symbol* to, Defined defined)
 void
 Symbol::override_base_with_special(const Symbol* from)
 {
-  gold_assert(this->name_ == from->name_ || this->has_alias());
+  bool same_name = this->name_ == from->name_;
+  gold_assert(same_name || this->has_alias());
 
   this->source_ = from->source_;
   switch (from->source_)
@@ -909,7 +910,8 @@ Symbol::override_base_with_special(const Symbol* from)
       break;
     }
 
-  this->override_version(from->version_);
+  if (same_name)
+    this->override_version(from->version_);
   this->type_ = from->type_;
   this->binding_ = from->binding_;
   this->override_visibility(from->visibility_);

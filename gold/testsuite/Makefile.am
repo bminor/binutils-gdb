@@ -631,11 +631,11 @@ check_PROGRAMS += weak_alias_test
 weak_alias_test_SOURCES = weak_alias_test_main.cc
 weak_alias_test_DEPENDENCIES = \
 	gcctestdir/ld weak_alias_test_1.so weak_alias_test_2.so \
-	weak_alias_test_3.o weak_alias_test_4.so
+	weak_alias_test_3.o weak_alias_test_4.so weak_alias_test_5.so
 weak_alias_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
 weak_alias_test_LDADD = \
 	weak_alias_test_1.so weak_alias_test_2.so weak_alias_test_3.o \
-	weak_alias_test_4.so
+	weak_alias_test_4.so weak_alias_test_5.so
 weak_alias_test_1_pic.o: weak_alias_test_1.cc
 	$(CXXCOMPILE) -c -fpic -o $@ $<
 weak_alias_test_1.so: weak_alias_test_1_pic.o gcctestdir/ld
@@ -650,6 +650,11 @@ weak_alias_test_4_pic.o: weak_alias_test_4.cc
 	$(CXXCOMPILE) -c -fpic -o $@ $<
 weak_alias_test_4.so: weak_alias_test_4_pic.o gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -shared weak_alias_test_4_pic.o
+weak_alias_test_5_pic.o: weak_alias_test_5.cc
+	$(CXXCOMPILE) -c -fpic -o $@ $<
+weak_alias_test_5.so: weak_alias_test_5_pic.o $(srcdir)/weak_alias_test.script gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -shared weak_alias_test_5_pic.o \
+		-Wl,--version-script,$(srcdir)/weak_alias_test.script
 
 check_SCRIPTS += weak_plt.sh
 check_PROGRAMS += weak_plt

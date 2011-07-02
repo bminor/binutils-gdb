@@ -1,6 +1,6 @@
 // dynobj.cc -- dynamic object support for gold
 
-// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -1483,7 +1483,7 @@ Versions::record_version(const Symbol_table* symtab,
   if (!sym->is_from_dynobj() && !sym->is_copied_from_dynobj())
     {
       if (parameters->options().shared())
-        this->add_def(sym, version, version_key);
+        this->add_def(dynpool, sym, version, version_key);
     }
   else
     {
@@ -1496,7 +1496,7 @@ Versions::record_version(const Symbol_table* symtab,
 // We've found a symbol SYM defined in version VERSION.
 
 void
-Versions::add_def(const Symbol* sym, const char* version,
+Versions::add_def(Stringpool* dynpool, const Symbol* sym, const char* version,
 		  Stringpool::Key version_key)
 {
   Key k(version_key, 0);
@@ -1520,8 +1520,12 @@ Versions::add_def(const Symbol* sym, const char* version,
       // find a definition of a symbol with a version which is not
       // in the version script.
       if (parameters->options().shared())
-	gold_error(_("symbol %s has undefined version %s"),
-		   sym->demangled_name().c_str(), version);
+	{
+	  gold_error(_("symbol %s has undefined version %s"),
+		     sym->demangled_name().c_str(), version);
+	  if (this->needs_base_version_)
+	    this->define_base_version(dynpool);
+	}
       else
 	// We only insert a base version for shared library.
 	gold_assert(!this->needs_base_version_);

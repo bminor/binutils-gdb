@@ -2077,12 +2077,12 @@ LDADD = libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@weak_alias_test_SOURCES = weak_alias_test_main.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@weak_alias_test_DEPENDENCIES = \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	gcctestdir/ld weak_alias_test_1.so weak_alias_test_2.so \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_alias_test_3.o weak_alias_test_4.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_alias_test_3.o weak_alias_test_4.so weak_alias_test_5.so
 
 @GCC_TRUE@@NATIVE_LINKER_TRUE@weak_alias_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
 @GCC_TRUE@@NATIVE_LINKER_TRUE@weak_alias_test_LDADD = \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_alias_test_1.so weak_alias_test_2.so weak_alias_test_3.o \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_alias_test_4.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_alias_test_4.so weak_alias_test_5.so
 
 @GCC_TRUE@@NATIVE_LINKER_TRUE@copy_test_SOURCES = copy_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@copy_test_DEPENDENCIES = gcctestdir/ld copy_test_1.so copy_test_2.so
@@ -4169,6 +4169,11 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -fpic -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@weak_alias_test_4.so: weak_alias_test_4_pic.o gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared weak_alias_test_4_pic.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@weak_alias_test_5_pic.o: weak_alias_test_5.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -fpic -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@weak_alias_test_5.so: weak_alias_test_5_pic.o $(srcdir)/weak_alias_test.script gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared weak_alias_test_5_pic.o \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@		-Wl,--version-script,$(srcdir)/weak_alias_test.script
 @GCC_TRUE@@NATIVE_LINKER_TRUE@weak_plt_main_pic.o: weak_plt_main.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -fpic -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@weak_plt: weak_plt_main_pic.o gcctestdir/ld

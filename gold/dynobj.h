@@ -599,7 +599,8 @@ class Versions
 
   // Handle a symbol SYM defined with version VERSION.
   void
-  add_def(const Symbol* sym, const char* version, Stringpool::Key);
+  add_def(Stringpool*, const Symbol* sym, const char* version,
+	  Stringpool::Key);
 
   // Add a reference to version NAME in file FILENAME.
   void

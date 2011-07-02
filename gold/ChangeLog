@@ -1,6 +1,26 @@
 2011-07-01  Ian Lance Taylor  <iant@google.com>
 
 	PR gold/12525
+	PR gold/12952
+	* resolve.cc (Symbol::override_base_with_special): Don't override
+	the version if the overriding symbol has a different name.
+	* dynobj.cc (Versions::add_def): Add dynpool parameter.  Change
+	all callers.  If we give an error about an undefined version,
+	define the base version if necessary.
+	* dynobj.h (class Versions): Update declaration.
+	* testsuite/weak_alias_test_5.cc: New file.
+	* testsuite/weak_alias_test.script: New file.
+	* testsuite/weak_alias_test_main.cc: Check that versioned_symbol
+	and versioned_alias have the right value, and call t2.
+	* testsuite/Makefile.am (weak_alias_test_DEPENDENCIES): Add
+	weak_alias_test_5.so.
+	(weak_alias_test_LDADD): Likewise.
+	(weak_alias_test_5_pic.o, weak_alias_test_5.so): New targets.
+	* testsuite/Makefile.in: Rebuild.
+
+2011-07-01  Ian Lance Taylor  <iant@google.com>
+
+	PR gold/12525
 	* options.h (class General_options): Support -z notext.
 	* testsuite/Makefile.am (two_file_shared_1_nonpic.so): Use
 	-Wl,-z,notext.
