@@ -261,6 +261,17 @@ AM_CONDITIONAL(GCC, test "$GCC" = yes)
 AM_CONDITIONAL(NATIVE_OR_CROSS_LINKER,
   test "x$target_alias" = "x" -o "x$host_alias" = "x$target_alias" -o "x$host_alias" = "x$build_alias")
 
+dnl Test for whether static linking is supported.  Some systems do not
+dnl install static libraries.  This only affects the set of tests that
+dnl we run.
+AC_CACHE_CHECK([whether static linking works], [gold_cv_lib_static],
+LDFLAGS_hold=$LDFLAGS
+LDFLAGS="$LDFLAGS -static"
+[AC_LINK_IFELSE([
+AC_LANG_PROGRAM([[void f() { }]])],
+[gold_cv_lib_static=yes], [gold_cv_lib_static=no])])
+AM_CONDITIONAL(HAVE_STATIC, test "$gold_cv_lib_static" = "yes")
+
 dnl Some architectures do not support taking pointers of functions
 dnl defined in shared libraries except in -fPIC mode.  We need to
 dnl tell the unittest framework if we're compiling for one of those

@@ -1,6 +1,15 @@
 2011-07-01  Ian Lance Taylor  <iant@google.com>
 
 	PR gold/12525
+	* configure.ac: Test whether static linking works, setting
+	the automake conditional HAVE_STATIC.
+	* testsuite/Makefile.am: Disable tests using -static if
+	HAVE_STATIC is not true.
+	* configure, testsuite/Makefile.in: Rebuild.
+
+2011-07-01  Ian Lance Taylor  <iant@google.com>
+
+	PR gold/12525
 	* ehframe.cc (Eh_frame_hdr::get_fde_pc): Handle DW_EH_PE_datarel.
 	Assert if we see DW_EH_PE_indirect.
 	* target.h (Target::ehframe_datarel_base): New function.

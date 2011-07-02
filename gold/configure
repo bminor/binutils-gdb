@@ -619,6 +619,8 @@ MCMODEL_MEDIUM_FALSE
 MCMODEL_MEDIUM_TRUE
 FN_PTRS_IN_SO_WITHOUT_PIC_FALSE
 FN_PTRS_IN_SO_WITHOUT_PIC_TRUE
+HAVE_STATIC_FALSE
+HAVE_STATIC_TRUE
 NATIVE_OR_CROSS_LINKER_FALSE
 NATIVE_OR_CROSS_LINKER_TRUE
 GCC_FALSE
@@ -6104,6 +6106,44 @@ else
 fi
 
 
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether static linking works" >&5
+$as_echo_n "checking whether static linking works... " >&6; }
+if test "${gold_cv_lib_static+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  LDFLAGS_hold=$LDFLAGS
+LDFLAGS="$LDFLAGS -static"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+void f() { }
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  gold_cv_lib_static=yes
+else
+  gold_cv_lib_static=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gold_cv_lib_static" >&5
+$as_echo "$gold_cv_lib_static" >&6; }
+ if test "$gold_cv_lib_static" = "yes"; then
+  HAVE_STATIC_TRUE=
+  HAVE_STATIC_FALSE='#'
+else
+  HAVE_STATIC_TRUE='#'
+  HAVE_STATIC_FALSE=
+fi
+
+
  if
   case $target_cpu in
     i?86) true;;
@@ -7274,6 +7314,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${NATIVE_OR_CROSS_LINKER_TRUE}" && test -z "${NATIVE_OR_CROSS_LINKER_FALSE}"; then
   as_fn_error "conditional \"NATIVE_OR_CROSS_LINKER\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${HAVE_STATIC_TRUE}" && test -z "${HAVE_STATIC_FALSE}"; then
+  as_fn_error "conditional \"HAVE_STATIC\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${FN_PTRS_IN_SO_WITHOUT_PIC_TRUE}" && test -z "${FN_PTRS_IN_SO_WITHOUT_PIC_FALSE}"; then
