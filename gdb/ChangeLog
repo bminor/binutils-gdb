@@ -1,5 +1,9 @@
 2011-07-02  Keith Seitz  <keiths@redhat.com>
 
+	* objc-lang.c (find_methods): Increment objfile_csym earlier.
+
+2011-07-02  Keith Seitz  <keiths@redhat.com>
+
 	PR c++/12750
 	* linespec.c (get_search_block): New function.
 	(find_methods): Add FILE_SYMTATB parameter and use it and
