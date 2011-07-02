@@ -266,7 +266,7 @@ Eh_frame_hdr::get_fde_pc(
       gold_unreachable();
     }
 
-  switch (fde_encoding & 0xf0)
+  switch (fde_encoding & 0x70)
     {
     case 0:
       break;
@@ -275,11 +275,17 @@ Eh_frame_hdr::get_fde_pc(
       pc += eh_frame_address + fde_offset + 8;
       break;
 
+    case elfcpp::DW_EH_PE_datarel:
+      pc += parameters->target().ehframe_datarel_base();
+      break;
+
     default:
       // If other cases arise, then we have to handle them, or we have
       // to reject them by returning false in Eh_frame::read_cie.
       gold_unreachable();
     }
+
+  gold_assert((fde_encoding & elfcpp::DW_EH_PE_indirect) == 0);
 
   return pc;
 }

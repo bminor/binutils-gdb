@@ -1,5 +1,16 @@
 2011-07-01  Ian Lance Taylor  <iant@google.com>
 
+	PR gold/12525
+	* ehframe.cc (Eh_frame_hdr::get_fde_pc): Handle DW_EH_PE_datarel.
+	Assert if we see DW_EH_PE_indirect.
+	* target.h (Target::ehframe_datarel_base): New function.
+	(Target::do_ehframe_datarel_base): New target function.
+	* i386.cc (Target_i386::do_ehframe_datarel_base): New function.
+	* x86_64.cc (Target_x86_64::do_ehframe_datarel_base): New
+	function.
+
+2011-07-01  Ian Lance Taylor  <iant@google.com>
+
 	PR gold/12571
 	* options.h (class General_options): Add
 	--ld-generated-unwind-info.

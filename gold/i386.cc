@@ -295,6 +295,10 @@ class Target_i386 : public Sized_target<32, false>
   do_can_check_for_function_pointers() const
   { return true; }
 
+  // Return the base for a DW_EH_PE_datarel encoding.
+  uint64_t
+  do_ehframe_datarel_base() const;
+
   // Return whether SYM is call to a non-split function.
   bool
   do_is_call_to_non_split(const Symbol* sym, unsigned int) const;
@@ -3265,6 +3269,21 @@ Target_i386::do_code_fill(section_size_type length) const
   };
 
   return std::string(nops[length], length);
+}
+
+// Return the value to use for the base of a DW_EH_PE_datarel offset
+// in an FDE.  Solaris and SVR4 use DW_EH_PE_datarel because their
+// assembler can not write out the difference between two labels in
+// different sections, so instead of using a pc-relative value they
+// use an offset from the GOT.
+
+uint64_t
+Target_i386::do_ehframe_datarel_base() const
+{
+  gold_assert(this->global_offset_table_ != NULL);
+  Symbol* sym = this->global_offset_table_;
+  Sized_symbol<32>* ssym = static_cast<Sized_symbol<32>*>(sym);
+  return ssym->value();
 }
 
 // Return whether SYM should be treated as a call to a non-split

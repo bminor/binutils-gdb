@@ -350,6 +350,10 @@ class Target_x86_64 : public Sized_target<64, false>
   do_can_check_for_function_pointers() const
   { return !parameters->options().pie(); }
 
+  // Return the base for a DW_EH_PE_datarel encoding.
+  uint64_t
+  do_ehframe_datarel_base() const;
+
   // Adjust -fsplit-stack code which calls non-split-stack code.
   void
   do_calls_non_split(Relobj* object, unsigned int shndx,
@@ -3638,6 +3642,21 @@ Target_x86_64::do_reloc_addend(void* arg, unsigned int r_type,
   gold_assert(psymval->is_tls_symbol());
   // The value of a TLS symbol is the offset in the TLS segment.
   return psymval->value(ti.object, 0);
+}
+
+// Return the value to use for the base of a DW_EH_PE_datarel offset
+// in an FDE.  Solaris and SVR4 use DW_EH_PE_datarel because their
+// assembler can not write out the difference between two labels in
+// different sections, so instead of using a pc-relative value they
+// use an offset from the GOT.
+
+uint64_t
+Target_x86_64::do_ehframe_datarel_base() const
+{
+  gold_assert(this->global_offset_table_ != NULL);
+  Symbol* sym = this->global_offset_table_;
+  Sized_symbol<64>* ssym = static_cast<Sized_symbol<64>*>(sym);
+  return ssym->value();
 }
 
 // FNOFFSET in section SHNDX in OBJECT is the start of a function

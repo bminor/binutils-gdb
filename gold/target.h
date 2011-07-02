@@ -276,6 +276,15 @@ class Target
   section_may_have_icf_unsafe_pointers(const char* section_name) const
   { return this->do_section_may_have_icf_unsafe_pointers(section_name); }
 
+  // Return the base to use for the PC value in an FDE when it is
+  // encoded using DW_EH_PE_datarel.  This does not appear to be
+  // documented anywhere, but it is target specific.  Any use of
+  // DW_EH_PE_datarel in gcc requires defining a special macro
+  // (ASM_MAYBE_OUTPUT_ENCODED_ADDR_RTX) to output the value.
+  uint64_t
+  ehframe_datarel_base() const
+  { return this->do_ehframe_datarel_base(); }
+
   // Return true if a reference to SYM from a reloc of type R_TYPE
   // means that the current function may call an object compiled
   // without -fsplit-stack.  SYM is known to be defined in an object
@@ -520,6 +529,10 @@ class Target
 	    && !is_prefix_of(".data.rel.ro._ZTC", section_name)
 	    && !is_prefix_of(".eh_frame", section_name));
   }
+
+  virtual uint64_t
+  do_ehframe_datarel_base() const
+  { gold_unreachable(); }
 
   // Virtual function which may be overridden by the child class.  The
   // default implementation is that any function not defined by the
