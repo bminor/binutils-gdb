@@ -21,3 +21,8 @@ void
 C::f ()
 {
 }
+
+void
+C::operator () ()
+{
+}

@@ -104,4 +104,8 @@ if [set_lang_java] then {
 	    }
 	}
     }
+
+    # Test a non-mathing return type really fails the look up.
+    gdb_test_no_output "set breakpoint pending off"
+    gdb_test {break jmisc.main(java.lang.String[])int} {Function "jmisc\.main\(java\.lang\.String\[\]\)int" not defined\.}
 }
