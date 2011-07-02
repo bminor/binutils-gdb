@@ -1,3 +1,9 @@
+2011-07-02  Keith Seitz  <keiths@redhat.com>
+
+	PR breakpoint/12803
+	* linespec.c (keep_name_info): Add handling for "volatile" keyword.
+	(decode_compound): Unconditionally call	keep_name_info.
+
 2011-07-02  Tom Tromey  <tromey@redhat.com>
 
 	* tracepoint.c (scope_info): Update.
