@@ -265,11 +265,12 @@ dnl Test for whether static linking is supported.  Some systems do not
 dnl install static libraries.  This only affects the set of tests that
 dnl we run.
 AC_CACHE_CHECK([whether static linking works], [gold_cv_lib_static],
-LDFLAGS_hold=$LDFLAGS
+[LDFLAGS_hold=$LDFLAGS
 LDFLAGS="$LDFLAGS -static"
-[AC_LINK_IFELSE([
+AC_LINK_IFELSE([
 AC_LANG_PROGRAM([[void f() { }]])],
-[gold_cv_lib_static=yes], [gold_cv_lib_static=no])])
+[gold_cv_lib_static=yes], [gold_cv_lib_static=no])
+LDFLAGS=$LDFLAGS_hold])
 AM_CONDITIONAL(HAVE_STATIC, test "$gold_cv_lib_static" = "yes")
 
 dnl Some architectures do not support taking pointers of functions

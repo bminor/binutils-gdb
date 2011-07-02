@@ -6132,6 +6132,7 @@ else
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
+LDFLAGS=$LDFLAGS_hold
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $gold_cv_lib_static" >&5
 $as_echo "$gold_cv_lib_static" >&6; }
