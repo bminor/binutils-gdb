@@ -1,5 +1,10 @@
 2011-07-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* gdb.cp/no-dmgl-verbose.cc: New file.
+	* gdb.cp/no-dmgl-verbose.exp: New file.
+
+2011-07-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdb.base/break-interp.exp (reach_1, test_ld): Allow also the prefix
 	__GI_.
 	* gdb.cp/psymtab-parameter.cc (func): Make it a template function.
