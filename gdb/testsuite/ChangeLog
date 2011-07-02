@@ -1,5 +1,14 @@
 2011-07-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* gdb.cp/m-static.exp: Call get_compiler_info.
+	(static const int initialized nowhere): Call setup_xfail for gcc <= 4.4.
+	* gdb.cp/pr9167.exp (p b): Likewise.
+	* gdb.cp/temargs.exp: Do not set have_pr_45024_fixed for gcc 4.6.
+	(test value of P in inner_m, test type of Z in inner_m): Call
+	setup_xfail for gcc <= 4.5.
+
+2011-07-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdb.cp/paren-type.cc: New files.
 	* gdb.cp/paren-type.exp: New files.
 

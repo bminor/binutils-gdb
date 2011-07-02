@@ -52,6 +52,10 @@ if { [gdb_compile "$objdir/$subdir/$objfile $objdir/$subdir/$objfile1" "${binfil
      return -1
 }
 
+if [get_compiler_info $binfile] {
+    return -1
+}
+
 gdb_exit
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
@@ -126,6 +130,13 @@ gdb_test "print test3.data.value_derived" "\\$\[0-9\].* = etruscan" "template ob
 gdb_test "print test4.elsewhere" "\\$\[0-9\].* = 221" "static const int initialized elsewhere"
 
 # static const int that nobody initializes.  From PR gdb/635.
+if {[test_compiler_info {gcc-[0-3]-*}]
+    || [test_compiler_info {gcc-4-[0-4]-*}]} {
+    # There was an extra CU-level DW_TAG_variable as DW_AT_declaration
+    # with DW_AT_name = nowhere
+    # and DW_AT_MIPS_linkage_name = _ZN9gnu_obj_47nowhereE .
+    setup_xfail *-*-*
+}
 gdb_test "print test4.nowhere" "field nowhere is nonexistent or has been optimized out" "static const int initialized nowhere"
 
 # static const initialized in the class definition, PR gdb/11702.
