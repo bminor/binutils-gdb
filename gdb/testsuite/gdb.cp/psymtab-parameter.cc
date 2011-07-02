@@ -16,7 +16,14 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
    */
 
-typedef int typedefed;
-void func (typedefed param)
+template <typename T>
+long
+func ()
 {
+}
+
+void
+f ()
+{
+  func<short> ();
 }
