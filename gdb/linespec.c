@@ -67,8 +67,7 @@ static struct symtabs_and_lines decode_compound (char **argptr,
 						 int funfirstline,
 						 struct linespec_result *canonical,
 						 char *saved_arg,
-						 char *p,
-						 int *not_found_ptr);
+						 char *p);
 
 static struct symbol *lookup_prefix_sym (char **argptr, char *p);
 
@@ -77,8 +76,7 @@ static struct symtabs_and_lines find_method (int funfirstline,
 					     char *saved_arg,
 					     char *copy,
 					     struct type *t,
-					     struct symbol *sym_class,
-					     int *not_found_ptr);
+					     struct symbol *sym_class);
 
 static void cplusplus_error (const char *name, const char *fmt, ...)
      ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (2, 3);
@@ -108,8 +106,7 @@ static struct symtabs_and_lines decode_line_2 (struct symbol *[],
 					       struct linespec_result *);
 
 static struct symtab *symtab_from_filename (char **argptr,
-					    char *p, int is_quote_enclosed,
-					    int *not_found_ptr);
+					    char *p, int is_quote_enclosed);
 
 static struct symbol *find_function_symbol (char **argptr, char *p,
 					    int is_quote_enclosed);
@@ -135,8 +132,7 @@ static int decode_label (struct symbol *function_symbol,
 static struct symtabs_and_lines decode_variable (char *copy,
 						 int funfirstline,
 						 struct linespec_result *canonical,
-						 struct symtab *file_symtab,
-						 int *not_found_ptr);
+						 struct symtab *file_symtab);
 
 static struct
 symtabs_and_lines symbol_found (int funfirstline,
@@ -783,12 +779,7 @@ keep_name_info (char *ptr)
 
    Note that it is possible to return zero for the symtab
    if no file is validly specified.  Callers must check that.
-   Also, the line number returned may be invalid.  
- 
-   If NOT_FOUND_PTR is not null, store a boolean true/false value at
-   the location, based on whether or not failure occurs due to an
-   unknown function or file.  In the case where failure does occur due
-   to an unknown function or file, do not issue an error message.  */
+   Also, the line number returned may be invalid.  */
 
 /* We allow single quotes in various places.  This is a hideous
    kludge, which exists because the completer can't yet deal with the
@@ -797,8 +788,7 @@ keep_name_info (char *ptr)
 
 struct symtabs_and_lines
 decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
-	       int default_line, struct linespec_result *canonical,
-	       int *not_found_ptr)
+	       int default_line, struct linespec_result *canonical)
 {
   char *p;
   char *q;
@@ -824,9 +814,6 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
   /* If FUNCTION_SYMBOL is not NULL, then this is the exception that
      was thrown when trying to parse a filename.  */
   volatile struct gdb_exception file_exception;
-
-  if (not_found_ptr)
-    *not_found_ptr = 0;
 
   /* Defaults have defaults.  */
 
@@ -888,7 +875,7 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
 	  if (is_quote_enclosed)
 	    ++saved_arg;
 	  values = decode_compound (argptr, funfirstline, canonical,
-				    saved_arg, p, not_found_ptr);
+				    saved_arg, p);
 	  if (is_quoted && **argptr == '\'')
 	    *argptr = *argptr + 1;
 	  return values;
@@ -899,8 +886,7 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
 
       TRY_CATCH (file_exception, RETURN_MASK_ERROR)
 	{
-	  file_symtab = symtab_from_filename (argptr, p, is_quote_enclosed,
-					      not_found_ptr);
+	  file_symtab = symtab_from_filename (argptr, p, is_quote_enclosed);
 	}
       /* If that failed, maybe we have `function:label'.  */
       if (file_exception.reason < 0)
@@ -910,8 +896,6 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
 	     exception.  */
 	  if (!function_symbol)
 	    throw_exception (file_exception);
-	  if (not_found_ptr)
-	    *not_found_ptr = 0;
 	}
 
       /* Check for single quotes on the non-filename part.  */
@@ -1016,17 +1000,12 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
     }
 
   if (function_symbol)
-    {
-      if (not_found_ptr)
-	*not_found_ptr = 1;
-      throw_exception (file_exception);
-    }
+    throw_exception (file_exception);
 
   /* Look up that token as a variable.
      If file specified, use that file's per-file block to start with.  */
 
-  return decode_variable (copy, funfirstline, canonical,
-			  file_symtab, not_found_ptr);
+  return decode_variable (copy, funfirstline, canonical, file_symtab);
 }
 
 
@@ -1333,7 +1312,7 @@ decode_objc (char **argptr, int funfirstline, struct symtab *file_symtab,
 static struct symtabs_and_lines
 decode_compound (char **argptr, int funfirstline,
 		 struct linespec_result *canonical,
-		 char *the_real_saved_arg, char *p, int *not_found_ptr)
+		 char *the_real_saved_arg, char *p)
 {
   struct symtabs_and_lines values;
   char *p2;
@@ -1568,7 +1547,7 @@ decode_compound (char **argptr, int funfirstline,
 	 we'll lookup the whole string in the symbol tables.  */
 
       values = find_method (funfirstline, canonical, saved_arg,
-			    copy, t, sym_class, not_found_ptr);
+			    copy, t, sym_class);
       if (saved_java_argptr != NULL && values.nelts == 1)
 	{
 	  /* The user specified a specific return type for a java method.
@@ -1622,8 +1601,6 @@ decode_compound (char **argptr, int funfirstline,
     }    
 
   /* Couldn't find a minimal symbol, either, so give up.  */
-  if (not_found_ptr)
-    *not_found_ptr = 1;
   cplusplus_error (the_real_saved_arg,
 		   "Can't find member of namespace, "
 		   "class, struct, or union named \"%s\"\n",
@@ -1693,8 +1670,7 @@ lookup_prefix_sym (char **argptr, char *p)
 static struct symtabs_and_lines
 find_method (int funfirstline, struct linespec_result *canonical,
 	     char *saved_arg,
-	     char *copy, struct type *t, struct symbol *sym_class,
-	     int *not_found_ptr)
+	     char *copy, struct type *t, struct symbol *sym_class)
 {
   struct symtabs_and_lines values;
   struct symbol *sym = NULL;
@@ -1782,8 +1758,6 @@ find_method (int funfirstline, struct linespec_result *canonical,
     }
   else
     {
-      if (not_found_ptr)
-        *not_found_ptr = 1;
       if (copy[0] == '~')
 	cplusplus_error (saved_arg,
 			 "the class `%s' does not have destructor defined\n",
@@ -1798,14 +1772,10 @@ find_method (int funfirstline, struct linespec_result *canonical,
 
 
 /* Return the symtab associated to the filename given by the substring
-   of *ARGPTR ending at P, and advance ARGPTR past that filename.  If
-   NOT_FOUND_PTR is not null and the source file is not found, store
-   boolean true at the location pointed to and do not issue an
-   error message.  */
+   of *ARGPTR ending at P, and advance ARGPTR past that filename.  */
 
 static struct symtab *
-symtab_from_filename (char **argptr, char *p, int is_quote_enclosed, 
-		      int *not_found_ptr)
+symtab_from_filename (char **argptr, char *p, int is_quote_enclosed)
 {
   char *p1;
   char *copy;
@@ -1829,8 +1799,6 @@ symtab_from_filename (char **argptr, char *p, int is_quote_enclosed,
   file_symtab = lookup_symtab (copy);
   if (file_symtab == 0)
     {
-      if (not_found_ptr)
-	*not_found_ptr = 1;
       if (!have_full_symbols () && !have_partial_symbols ())
 	throw_error (NOT_FOUND_ERROR,
 		     _("No symbol table is loaded.  "
@@ -2094,14 +2062,12 @@ decode_label (struct symbol *function_symbol, char *copy,
 }
 
 /* Decode a linespec that's a variable.  If FILE_SYMTAB is non-NULL,
-   look in that symtab's static variables first.  If NOT_FOUND_PTR is
-   not NULL and the function cannot be found, store boolean true in
-   the location pointed to and do not issue an error message.  */ 
+   look in that symtab's static variables first.  */ 
 
 static struct symtabs_and_lines
 decode_variable (char *copy, int funfirstline,
 		 struct linespec_result *canonical,
-		 struct symtab *file_symtab, int *not_found_ptr)
+		 struct symtab *file_symtab)
 {
   struct symbol *sym;
   struct minimal_symbol *msymbol;
@@ -2120,9 +2086,6 @@ decode_variable (char *copy, int funfirstline,
 
   if (msymbol != NULL)
     return minsym_found (funfirstline, msymbol);
-
-  if (not_found_ptr)
-    *not_found_ptr = 1;
 
   if (!have_full_symbols ()
       && !have_partial_symbols ()

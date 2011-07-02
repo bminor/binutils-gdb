@@ -2336,7 +2336,7 @@ scope_info (char *args, int from_tty)
     error (_("requires an argument (function, "
 	     "line or *addr) to define a scope"));
 
-  sals = decode_line_1 (&args, 1, NULL, 0, NULL, NULL);
+  sals = decode_line_1 (&args, 1, NULL, 0, NULL);
   if (sals.nelts == 0)
     return;		/* Presumably decode_line_1 has already warned.  */
 

@@ -1,3 +1,21 @@
+2011-07-02  Tom Tromey  <tromey@redhat.com>
+
+	* tracepoint.c (scope_info): Update.
+	* symtab.c (decode_line_spec): Update.
+	* python/python.c (gdbpy_decode_line): Update.
+	* linespec.h (decode_line_1): Update.
+	* linespec.c (decode_line_1): Remove 'not_found_ptr' argument.
+	(decode_compound, find_method, symtab_from_filename)
+	(decode_variable): Likewise.
+	* cli/cli-cmds.c (edit_command): Update.
+	(list_command): Update.
+	* breakpoint.c (parse_breakpoint_sals): Remove 'not_found_ptr'
+	argument.
+	(create_breakpoint): Update.
+	(until_break_command): Update.
+	(addr_string_to_sals): Update.
+	(decode_line_spec_1): Update.
+
 2011-06-16  Hui Zhu  <teawater@gmail.com>
 
 	* remote.c (remote_trace_set_readonly_regions): Add check for
