@@ -616,7 +616,7 @@ proc do_tests {} {
 
     # A regression test on errors involving operators
     gdb_test "list foo::operator $dm_type_int_star" \
-	".*the class foo does not have any method named operator $dm_type_int_star.*"
+	"Function \"foo::operator [string_to_regexp $dm_type_int_star]\" not defined\\."
 }
 
 do_tests

@@ -71,4 +71,4 @@ gdb_test_no_output "set breakpoint pending off" "psymtab pending setup"
 # zzz::dummy currently causes a search for 'zzz' in STRUCT_NAMESPACE
 # without a preceding search for 'zzz' in VAR_NAMESPACE.
 
-gdb_test "break zzz::dummy" "Can't find member of namespace, class, struct, or union named \"zzz::dummy\"\r\n.*" "Don't search past end of psymtab."
+gdb_test "break zzz::dummy" {Function "zzz::dummy" not defined\.} "Don't search past end of psymtab."

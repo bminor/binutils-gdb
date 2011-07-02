@@ -19,5 +19,4 @@ class C
 {
 public:
   static void f ();
-  void operator () ();
 };
