@@ -1,3 +1,8 @@
+2011-07-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.cp/m-static.exp: Call get_compiler_info.
+	(static const int initialized nowhere): Call setup_xfail for gcc<=4.4.
+
 2011-07-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.cp/paren-type.cc: New files.
