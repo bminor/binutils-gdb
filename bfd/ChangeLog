@@ -1,6 +1,7 @@
 2011-07-03  Samuel Thibault  <samuel.thibault@gnu.org>
 	    Thomas Schwinge  <thomas@schwinge.name>
 
+	PR binutils/12913
 	* elf.c (_bfd_elf_set_osabi): Use ELFOSABI_GNU name instead of
 	ELFOSABI_LINUX alias.
 	* elf32-hppa.c: Likewise.

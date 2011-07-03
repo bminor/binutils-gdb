@@ -1,6 +1,7 @@
 2011-07-03  Samuel Thibault  <samuel.thibault@gnu.org>
 	    Thomas Schwinge  <thomas@schwinge.name>
 
+	PR binutils/12913
 	* ld-ifunc/ifunc.exp: Update for changed output.
 	* ld-unique/unique.exp: Likewise.
 
