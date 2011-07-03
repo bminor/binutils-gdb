@@ -129,10 +129,9 @@ enum ELFOSABI
   ELFOSABI_NONE = 0,
   ELFOSABI_HPUX = 1,
   ELFOSABI_NETBSD = 2,
-  // ELFOSABI_LINUX is not listed in the ELF standard.
+  ELFOSABI_GNU = 3,
+  // ELFOSABI_LINUX is an alias for ELFOSABI_GNU.
   ELFOSABI_LINUX = 3,
-  // ELFOSABI_HURD is not listed in the ELF standard.
-  ELFOSABI_HURD = 4,
   ELFOSABI_SOLARIS = 6,
   ELFOSABI_AIX = 7,
   ELFOSABI_IRIX = 8,

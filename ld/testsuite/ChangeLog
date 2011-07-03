@@ -1,3 +1,9 @@
+2011-07-03  Samuel Thibault  <samuel.thibault@gnu.org>
+	    Thomas Schwinge  <thomas@schwinge.name>
+
+	* ld-ifunc/ifunc.exp: Update for changed output.
+	* ld-unique/unique.exp: Likewise.
+
 2011-06-27  Nick Clifton  <nickc@redhat.com>
 
 	* ld-elf/elf.exp: Exlcude all v850 targets from note-3 test.

@@ -1368,7 +1368,7 @@ i370_elf_relocate_section (bfd *output_bfd,
 #define ELF_MACHINE_ALT1	EM_I370_OLD
 #endif
 #define ELF_MAXPAGESIZE		0x1000
-#define ELF_OSABI		ELFOSABI_LINUX
+#define ELF_OSABI		ELFOSABI_GNU
 
 #define elf_info_to_howto	i370_elf_info_to_howto
 

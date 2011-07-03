@@ -149,8 +149,8 @@ if { $fails != 0 } {
 }
 
 # Check the object file.
-if {! [check_osabi tmpdir/unique.o {UNIX - Linux}]} {
-    fail "Object containing unique does not have an OS/ABI field of LINUX"
+if {! [check_osabi tmpdir/unique.o {UNIX - GNU}]} {
+    fail "Object containing unique does not have an OS/ABI field of GNU"
     set fails [expr $fails + 1]
 }
 
@@ -164,8 +164,8 @@ if { $fails == 0 } {
 }
 
 # Check the executable.
-if {! [check_osabi tmpdir/unique_prog {UNIX - Linux}]} {
-    fail "Executable containing unique does not have an OS/ABI field of LINUX"
+if {! [check_osabi tmpdir/unique_prog {UNIX - GNU}]} {
+    fail "Executable containing unique does not have an OS/ABI field of GNU"
     set fails [expr $fails + 1]
 }
 
@@ -194,8 +194,8 @@ if { $fails == 0 } {
 }
 
 # Check the unique PIC file.
-if {! [check_osabi tmpdir/unique_shared.o {UNIX - Linux}]} {
-    fail "PIC Object containing unique does not have an OS/ABI field of LINUX"
+if {! [check_osabi tmpdir/unique_shared.o {UNIX - GNU}]} {
+    fail "PIC Object containing unique does not have an OS/ABI field of GNU"
     set fails [expr $fails + 1]
 }
 
@@ -209,8 +209,8 @@ if { $fails == 0 } {
 }
 
 # Check the unique shared library.
-if {! [check_osabi tmpdir/libunique_shared.so {UNIX - Linux}]} {
-    fail "Shared library containing unique does not have an OS/ABI field of LINUX"
+if {! [check_osabi tmpdir/libunique_shared.so {UNIX - GNU}]} {
+    fail "Shared library containing unique does not have an OS/ABI field of GNU"
     set fails [expr $fails + 1]
 }
 

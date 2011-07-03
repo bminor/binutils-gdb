@@ -6438,7 +6438,7 @@ Mark the symbol as being a function name.
 @item STT_GNU_IFUNC
 @itemx gnu_indirect_function
 Mark the symbol as an indirect function when evaluated during reloc
-processing.  (This is only supported on Linux targeted assemblers).
+processing.  (This is only supported on assemblers targeting GNU systems).
 
 @item STT_OBJECT
 @itemx object
@@ -6459,7 +6459,8 @@ Does not mark the symbol in any way.  It is supported just for completeness.
 @item gnu_unique_object
 Marks the symbol as being a globally unique data object.  The dynamic linker
 will make sure that in the entire process there is just one symbol with this
-name and type in use.  (This is only supported on Linux targeted assemblers).
+name and type in use.  (This is only supported on assemblers targeting GNU
+systems).
 
 @end table
 

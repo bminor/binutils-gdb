@@ -2612,8 +2612,7 @@ get_osabi_name (unsigned int osabi)
     case ELFOSABI_NONE:		return "UNIX - System V";
     case ELFOSABI_HPUX:		return "UNIX - HP-UX";
     case ELFOSABI_NETBSD:	return "UNIX - NetBSD";
-    case ELFOSABI_LINUX:	return "UNIX - Linux";
-    case ELFOSABI_HURD:		return "GNU/Hurd";
+    case ELFOSABI_GNU:		return "UNIX - GNU";
     case ELFOSABI_SOLARIS:	return "UNIX - Solaris";
     case ELFOSABI_AIX:		return "UNIX - AIX";
     case ELFOSABI_IRIX:		return "UNIX - IRIX";
@@ -8587,8 +8586,8 @@ get_symbol_binding (unsigned int binding)
       else if (binding >= STB_LOOS && binding <= STB_HIOS)
 	{
 	  if (binding == STB_GNU_UNIQUE
-	      && (elf_header.e_ident[EI_OSABI] == ELFOSABI_LINUX
-		  /* GNU/Linux is still using the default value 0.  */
+	      && (elf_header.e_ident[EI_OSABI] == ELFOSABI_GNU
+		  /* GNU is still using the default value 0.  */
 		  || elf_header.e_ident[EI_OSABI] == ELFOSABI_NONE))
 	    return "UNIQUE";
 	  snprintf (buff, sizeof (buff), _("<OS specific>: %d"), binding);
@@ -8640,8 +8639,8 @@ get_symbol_type (unsigned int type)
 	    }
 
 	  if (type == STT_GNU_IFUNC
-	      && (elf_header.e_ident[EI_OSABI] == ELFOSABI_LINUX
-		  /* GNU/Linux is still using the default value 0.  */
+	      && (elf_header.e_ident[EI_OSABI] == ELFOSABI_GNU
+		  /* GNU is still using the default value 0.  */
 		  || elf_header.e_ident[EI_OSABI] == ELFOSABI_NONE))
 	    return "IFUNC";
 

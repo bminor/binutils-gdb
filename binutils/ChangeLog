@@ -1,3 +1,12 @@
+2011-07-03  Samuel Thibault  <samuel.thibault@gnu.org>
+	    Thomas Schwinge  <thomas@schwinge.name>
+
+	* elfedit.c (osabis): Use ELFOSABI_GNU name instead of ELFOSABI_LINUX
+	alias and ELFOSABI_HURD.  Add GNU alias.
+	* readelf.c (get_osabi_name, get_symbol_binding, get_symbol_type):
+	Likewise.
+	* doc/binutils.texi <elfedit>: Update accordingly.
+
 2011-07-01  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/12325

@@ -1,3 +1,12 @@
+2011-07-03  Samuel Thibault  <samuel.thibault@gnu.org>
+	    Thomas Schwinge  <thomas@schwinge.name>
+
+	* elf.c (_bfd_elf_set_osabi): Use ELFOSABI_GNU name instead of
+	ELFOSABI_LINUX alias.
+	* elf32-hppa.c: Likewise.
+	* elf32-i370.c: Likewise.
+	* elf64-hppa.c: Likewise.
+
 2011-07-01  Ian Lance Taylor  <iant@google.com>
 
 	* elf32-i386.c (elf_i386_eh_frame_plt): Correct expression: change

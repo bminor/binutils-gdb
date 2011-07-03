@@ -329,9 +329,9 @@ elf64_hppa_object_p (bfd *abfd)
   i_ehdrp = elf_elfheader (abfd);
   if (strcmp (bfd_get_target (abfd), "elf64-hppa-linux") == 0)
     {
-      /* GCC on hppa-linux produces binaries with OSABI=Linux,
+      /* GCC on hppa-linux produces binaries with OSABI=GNU,
 	 but the kernel produces corefiles with OSABI=SysV.  */
-      if (i_ehdrp->e_ident[EI_OSABI] != ELFOSABI_LINUX
+      if (i_ehdrp->e_ident[EI_OSABI] != ELFOSABI_GNU
 	  && i_ehdrp->e_ident[EI_OSABI] != ELFOSABI_NONE) /* aka SYSV */
 	return FALSE;
     }
@@ -4097,7 +4097,7 @@ const struct elf_size_info hppa64_elf_size_info =
 #undef TARGET_BIG_NAME
 #define TARGET_BIG_NAME			"elf64-hppa-linux"
 #undef ELF_OSABI
-#define ELF_OSABI			ELFOSABI_LINUX
+#define ELF_OSABI			ELFOSABI_GNU
 #undef elf_backend_post_process_headers
 #define elf_backend_post_process_headers _bfd_elf_set_osabi
 #undef elf64_bed

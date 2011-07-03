@@ -9610,11 +9610,11 @@ _bfd_elf_set_osabi (bfd * abfd,
   i_ehdrp->e_ident[EI_OSABI] = get_elf_backend_data (abfd)->elf_osabi;
 
   /* To make things simpler for the loader on Linux systems we set the
-     osabi field to ELFOSABI_LINUX if the binary contains symbols of
+     osabi field to ELFOSABI_GNU if the binary contains symbols of
      the STT_GNU_IFUNC type or STB_GNU_UNIQUE binding.  */
   if (i_ehdrp->e_ident[EI_OSABI] == ELFOSABI_NONE
       && elf_tdata (abfd)->has_gnu_symbols)
-    i_ehdrp->e_ident[EI_OSABI] = ELFOSABI_LINUX;
+    i_ehdrp->e_ident[EI_OSABI] = ELFOSABI_GNU;
 }
 
 

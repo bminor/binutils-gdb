@@ -1,3 +1,10 @@
+2011-07-03  Samuel Thibault  <samuel.thibault@gnu.org>
+	    Thomas Schwinge  <thomas@schwinge.name>
+
+	* config/obj-elf.c (obj_elf_type): Use ELFOSABI_GNU name instead of
+	ELFOSABI_LINUX alias.
+	* config/tc-ia64.c: Likewise.
+
 2011-06-30  Paul Carroll  <pcarroll@codesourcery.com>
 
 	* config/tc-arm.c (do_t_add_sub): Only allow LSL shifts of less

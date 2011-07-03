@@ -1,3 +1,9 @@
+2011-07-03  Samuel Thibault  <samuel.thibault@gnu.org>
+	    Thomas Schwinge  <thomas@schwinge.name>
+
+	* elfcpp.h (ELFOSABI): Add ELFOSABI_GNU with value of ELFOSABI_LINUX,
+	keep ELFOSABI_LINUX as an alias.  Remove ELFOSABI_HURD.
+
 2011-07-01  Ian Lance Taylor  <iant@google.com>
 
 	* dwarf.h (enum DW_CFA): Define.
