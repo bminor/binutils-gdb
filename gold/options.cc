@@ -1166,6 +1166,14 @@ General_options::finalize()
   if (this->pie() && this->relocatable())
     gold_fatal(_("-pie and -r are incompatible"));
 
+  if (!this->shared())
+    {
+      if (this->filter() != NULL)
+	gold_fatal(_("-F/--filter may not used without -shared"));
+      if (this->any_auxiliary())
+	gold_fatal(_("-f/--auxiliary may not be used without -shared"));
+    }
+
   // TODO: implement support for -retain-symbols-file with -r, if needed.
   if (this->relocatable() && this->retain_symbols_file())
     gold_fatal(_("-retain-symbols-file does not yet work with -r"));

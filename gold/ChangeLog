@@ -1,5 +1,13 @@
 2011-07-02  Ian Lance Taylor  <iant@google.com>
 
+	PR gold/12957
+	* options.h (class General_options): Add -f and -F.
+	* options.cc (General_options::finalize): Fatal error if -f/-F
+	are used without -shared.
+	* layout.cc (Layout::finish_dynamic_section): Implement -f/-F.
+
+2011-07-02  Ian Lance Taylor  <iant@google.com>
+
 	* dirsearch.cc (Dir_cache::read_files): Ignore ENOTDIR errors.
 
 2011-07-01  Ian Lance Taylor  <iant@google.com>

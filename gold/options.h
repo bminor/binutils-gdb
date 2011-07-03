@@ -735,6 +735,14 @@ class General_options
 	      N_("(ARM only) Do not warn about objects with incompatible "
 		 "enum sizes"));
 
+  DEFINE_set(auxiliary, options::TWO_DASHES, 'f',
+	     N_("Auxiliary filter for shared object symbol table"),
+	     N_("SHLIB"));
+
+  DEFINE_string(filter, options::TWO_DASHES, 'F', NULL,
+		N_("Filter for shared object symbol table"),
+		N_("SHLIB"));
+
   DEFINE_bool(fatal_warnings, options::TWO_DASHES, '\0', false,
 	      N_("Treat warnings as errors"),
 	      N_("Do not treat warnings as errors"));

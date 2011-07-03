@@ -4218,8 +4218,18 @@ Layout::finish_dynamic_section(const Input_objects* input_objects,
         }
     }
 
-  // Add a DT_FLAGS entry. We add it even if no flags are set so that
-  // post-link tools can easily modify these flags if desired.
+  if (parameters->options().filter() != NULL)
+    odyn->add_string(elfcpp::DT_FILTER, parameters->options().filter());
+  if (parameters->options().any_auxiliary())
+    {
+      for (options::String_set::const_iterator p =
+	     parameters->options().auxiliary_begin();
+	   p != parameters->options().auxiliary_end();
+	   ++p)
+	odyn->add_string(elfcpp::DT_AUXILIARY, *p);
+    }
+
+  // Add a DT_FLAGS entry if necessary.
   unsigned int flags = 0;
   if (have_textrel)
     {
