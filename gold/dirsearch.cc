@@ -66,8 +66,9 @@ Dir_cache::read_files()
   DIR* d = opendir(this->dirname_);
   if (d == NULL)
     {
-      // We ignore directories which do not exist.
-      if (errno != ENOENT)
+      // We ignore directories which do not exist or are actually file
+      // names.
+      if (errno != ENOENT && errno != ENOTDIR)
 	gold::gold_error(_("%s: can not read directory: %s"),
 			 this->dirname_, strerror(errno));
       return;
