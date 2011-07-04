@@ -4379,8 +4379,8 @@ in_prologue (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR func_start)
    The functions end point and an increasing SAL line are used as
    indicators of the prologue's endpoint.
 
-   This code is based on the function refine_prologue_limit (versions
-   found in both ia64 and ppc).  */
+   This code is based on the function refine_prologue_limit
+   (found in ia64).  */
 
 CORE_ADDR
 skip_prologue_using_sal (struct gdbarch *gdbarch, CORE_ADDR func_addr)

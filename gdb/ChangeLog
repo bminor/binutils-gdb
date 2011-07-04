@@ -1,5 +1,9 @@
 2011-07-04  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
+	* symtab.c (in_prologue): Remove mention of ppc's refine_prologue_limit.
+
+2011-07-04  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
 	* ui-out.c (ui_out_field_core_addr): Mention that the function
 	description is in the header file.
 	* ui-out.h (ui_out_field_core_addr): Document function.
