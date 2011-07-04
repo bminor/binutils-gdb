@@ -3454,10 +3454,20 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 #ifdef OBJ_ELF
   /* The value passed to dwarf2_emit_insn is the distance between
      the beginning of the current instruction and the address that
-     should be recorded in the debug tables.  For MIPS16 debug info
-     we want to use ISA-encoded addresses, so we pass -1 for an
-     address higher by one than the current.  */
-  dwarf2_emit_insn (mips_opts.mips16 ? -1 : 0);
+     should be recorded in the debug tables.  This is normally the
+     current address.
+
+     For MIPS16 debug info we want to use ISA-encoded addresses,
+     so we use -1 for an address higher by one than the current one.
+
+     If the instruction produced is a branch that we will swap with
+     the preceding instruction, then we add the displacement by which
+     the branch will be moved backwards.  This is more appropriate
+     and for MIPS16 code also prevents a debugger from placing a
+     breakpoint in the middle of the branch (and corrupting code if
+     software breakpoints are used).  */
+  dwarf2_emit_insn ((mips_opts.mips16 ? -1 : 0)
+		    + (method == APPEND_SWAP ? insn_length (history) : 0));
 #endif
 
   if (address_expr

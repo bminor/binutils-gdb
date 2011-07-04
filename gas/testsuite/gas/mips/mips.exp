@@ -854,6 +854,10 @@ if { [istarget mips*-*-vxworks*] } {
 					[mips_arch_list_matching mips1]
 	run_dump_test_arches "branch-misc-4-64" \
 					[mips_arch_list_matching mips3]
+
+	run_dump_test_arches "loc-swap"	[mips_arch_list_all]
+	run_dump_test_arches "loc-swap-dis" \
+					[mips_arch_list_all]
     }
 
     if $has_newabi {

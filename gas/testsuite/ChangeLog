@@ -1,3 +1,13 @@
+2011-07-04  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* gas/mips/loc-swap.d: New test case for DWARF-2 location with
+	branch swapping.
+	* gas/mips/loc-swap-dis.d: Likewise.
+	* gas/mips/mips16@loc-swap.d: Likewise, MIPS16 version.
+	* gas/mips/mips16@loc-swap-dis.d: Likewise.
+	* gas/mips/loc-swap.s: Source for the new tests.
+	* gas/mips/mips.exp: Run the new tests.
+
 2011-06-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	AVX Programming Reference (June, 2011)

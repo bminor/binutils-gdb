@@ -1,3 +1,8 @@
+2011-07-04  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* config/tc-mips.c (append_insn): Make sure DWARF-2 location
+	information is properly adjusted for branches that get swapped.
+
 2011-07-03  Samuel Thibault  <samuel.thibault@gnu.org>
 	    Thomas Schwinge  <thomas@schwinge.name>
 
