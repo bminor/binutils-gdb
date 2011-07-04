@@ -1,3 +1,8 @@
+2011-07-04  Joel Brobecker  <brobecker@adacore.com>
+
+	* dwarf2-frame.c (dwarf2_build_frame_info): Do not load .eh_frame
+	section in separate object files.
+
 2011-07-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix false GCC warning.

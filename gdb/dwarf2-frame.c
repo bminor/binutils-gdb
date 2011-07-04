@@ -2227,39 +2227,44 @@ dwarf2_build_frame_info (struct objfile *objfile)
   unit->dbase = 0;
   unit->tbase = 0;
 
-  dwarf2_get_section_info (objfile, DWARF2_EH_FRAME,
-                           &unit->dwarf_frame_section,
-                           &unit->dwarf_frame_buffer,
-                           &unit->dwarf_frame_size);
-  if (unit->dwarf_frame_size)
+  if (objfile->separate_debug_objfile_backlink == NULL)
     {
-      asection *got, *txt;
-
-      /* FIXME: kettenis/20030602: This is the DW_EH_PE_datarel base
-	 that is used for the i386/amd64 target, which currently is
-	 the only target in GCC that supports/uses the
-	 DW_EH_PE_datarel encoding.  */
-      got = bfd_get_section_by_name (unit->abfd, ".got");
-      if (got)
-	unit->dbase = got->vma;
-
-      /* GCC emits the DW_EH_PE_textrel encoding type on sh and ia64
-         so far.  */
-      txt = bfd_get_section_by_name (unit->abfd, ".text");
-      if (txt)
-	unit->tbase = txt->vma;
-
-      frame_ptr = unit->dwarf_frame_buffer;
-      while (frame_ptr < unit->dwarf_frame_buffer + unit->dwarf_frame_size)
-	frame_ptr = decode_frame_entry (unit, frame_ptr, 1,
-                                        &cie_table, &fde_table);
-
-      if (cie_table.num_entries != 0)
+      /* Do not read .eh_frame from separate file as they must be also
+         present in the main file.  */
+      dwarf2_get_section_info (objfile, DWARF2_EH_FRAME,
+                               &unit->dwarf_frame_section,
+                               &unit->dwarf_frame_buffer,
+                               &unit->dwarf_frame_size);
+      if (unit->dwarf_frame_size)
         {
-          /* Reinit cie_table: debug_frame has different CIEs.  */
-          xfree (cie_table.entries);
-          cie_table.num_entries = 0;
-          cie_table.entries = NULL;
+          asection *got, *txt;
+
+          /* FIXME: kettenis/20030602: This is the DW_EH_PE_datarel base
+             that is used for the i386/amd64 target, which currently is
+             the only target in GCC that supports/uses the
+             DW_EH_PE_datarel encoding.  */
+          got = bfd_get_section_by_name (unit->abfd, ".got");
+          if (got)
+            unit->dbase = got->vma;
+
+          /* GCC emits the DW_EH_PE_textrel encoding type on sh and ia64
+             so far.  */
+          txt = bfd_get_section_by_name (unit->abfd, ".text");
+          if (txt)
+            unit->tbase = txt->vma;
+
+          frame_ptr = unit->dwarf_frame_buffer;
+          while (frame_ptr < unit->dwarf_frame_buffer + unit->dwarf_frame_size)
+            frame_ptr = decode_frame_entry (unit, frame_ptr, 1,
+                                            &cie_table, &fde_table);
+
+          if (cie_table.num_entries != 0)
+            {
+              /* Reinit cie_table: debug_frame has different CIEs.  */
+              xfree (cie_table.entries);
+              cie_table.num_entries = 0;
+              cie_table.entries = NULL;
+            }
         }
     }
 
