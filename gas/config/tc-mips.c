@@ -2450,7 +2450,8 @@ gpr_read_mask (const struct mips_cl_insn *ip)
       if (pinfo2 & INSN2_READ_GPR_Z)
 	mask |= 1 << EXTRACT_OPERAND (RZ, *ip);
     }
-  return mask & ~0;
+  /* Don't include register 0.  */
+  return mask & ~1;
 }
 
 /* Return the mask of core registers that IP writes.  */
@@ -2492,7 +2493,8 @@ gpr_write_mask (const struct mips_cl_insn *ip)
       if (pinfo2 & INSN2_WRITE_GPR_Z)
 	mask |= 1 << EXTRACT_OPERAND (RZ, *ip);
     }
-  return mask & ~0;
+  /* Don't include register 0.  */
+  return mask & ~1;
 }
 
 /* Return the mask of floating-point registers that IP reads.  */

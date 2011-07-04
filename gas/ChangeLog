@@ -1,3 +1,8 @@
+2011-07-04  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* config/tc-mips.c (gpr_read_mask, gpr_write_mask): Fix handling
+	of register 0.
+
 2011-07-04  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* config/tc-mips.c (append_insn): Make sure DWARF-2 location
