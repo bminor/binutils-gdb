@@ -146,8 +146,6 @@ extern void ui_out_wrap_hint (struct ui_out *uiout, char *identstring);
 
 extern void ui_out_flush (struct ui_out *uiout);
 
-extern void ui_out_get_field_separator (struct ui_out *uiout);
-
 extern int ui_out_set_flags (struct ui_out *uiout, int mask);
 
 extern int ui_out_clear_flags (struct ui_out *uiout, int mask);

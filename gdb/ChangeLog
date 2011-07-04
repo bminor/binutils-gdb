@@ -1,5 +1,10 @@
 2011-07-04  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
+	* ui-out.c (ui_out_get_field_separator): Remove unused function.
+	* ui-out.h (ui_out_get_field_separator): Remove prototype.
+
+2011-07-04  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
 	* symtab.c (expand_line_sal): Remove empty line.
 
 2011-07-04  Thomas Schwinge  <thomas@schwinge.name>
