@@ -1,5 +1,19 @@
 2011-07-04  Tristan Gingold  <gingold@adacore.com>
 
+	* ada-tasks.c (KNOWN_TASKS_LIST): New macro.
+	(tcb_fieldno): Add activation_link field.
+	(get_known_tasks_addr): Moved and rewritten.
+	(get_tcb_types_info): Set activation_link field.
+	(read_known_tasks_array): Add parameter.  Rewritten.
+	(read_known_tasks_list): New function.
+	(read_known_tasks): New function.
+	(ada_build_task_list): Call read_known_tasks instead of
+	read_known_tasks_array.
+	* ravenscar-thread.c: Add first_task_name constant.
+	(has_ravenscar_runtime): Check for task list too.
+
+2011-07-04  Tristan Gingold  <gingold@adacore.com>
+
 	* ada-tasks.c: Renames fieldno to actb_fieldno.
 	(ada_get_task_number): Indentation.
 	(get_tcb_types_info): Remove all parameters.  Write directly

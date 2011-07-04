@@ -32,6 +32,11 @@
 /* The maximum number of tasks known to the Ada runtime.  */
 static const int MAX_NUMBER_OF_KNOWN_TASKS = 1000;
 
+/* The name of the variable in the GNAT runtime where the head of a task
+   chain is saved.  This is an alternate mechanism to find the list of known
+   tasks.  */
+#define KNOWN_TASKS_LIST "system__tasking__debug__first_task"
+
 enum task_states
 {
   Unactivated,
@@ -114,6 +119,7 @@ struct tcb_fieldnos
   int priority;
   int image;
   int image_len;     /* This field may be missing.  */
+  int activation_link;
   int call;
   int ll;
 
@@ -299,54 +305,6 @@ read_fat_string_value (char *dest, struct value *val, int max_len)
   dest[len] = '\0';
 }
 
-/* Return the address of the Known_Tasks array maintained in
-   the Ada Runtime.  Return zero if the array could not be found,
-   meaning that the inferior program probably does not use tasking.
-
-   In order to provide a fast response time, this function caches
-   the Known_Tasks array address after the lookup during the first
-   call.  Subsequent calls will simply return this cached address.  */
-
-static CORE_ADDR
-get_known_tasks_addr (void)
-{
-  static CORE_ADDR known_tasks_addr = 0;
-
-  if (ada_tasks_check_symbol_table)
-    {
-      struct minimal_symbol *msym;
-
-      msym = lookup_minimal_symbol (KNOWN_TASKS_NAME, NULL, NULL);
-      if (msym == NULL)
-        return 0;
-      known_tasks_addr = SYMBOL_VALUE_ADDRESS (msym);
-
-      /* FIXME: brobecker 2003-03-05: Here would be a much better place
-         to attach the ada-tasks observers, instead of doing this
-         unconditionaly in _initialize_tasks.  This would avoid an
-         unecessary notification when the inferior does not use tasking
-         or as long as the user does not use the ada-tasks commands.
-         Unfortunately, this is not possible for the moment: the current
-         code resets ada__tasks_check_symbol_table back to 1 whenever
-         symbols for a new program are being loaded.  If we place the
-         observers intialization here, we will end up adding new observers
-         everytime we do the check for Ada tasking-related symbols
-         above.  This would currently have benign effects, but is still
-         undesirable.  The cleanest approach is probably to create a new
-         observer to notify us when the user is debugging a new program.
-         We would then reset ada__tasks_check_symbol_table back to 1
-         during the notification, but also detach all observers.
-         BTW: observers are probably not reentrant, so detaching during
-         a notification may not be the safest thing to do...  Sigh...
-         But creating the new observer would be a good idea in any case,
-         since this allow us to make ada__tasks_check_symbol_table
-         static, which is a good bonus.  */
-      ada_tasks_check_symbol_table = 0;
-    }
-
-  return known_tasks_addr;
-}
-
 /* Get from the debugging information the type description of all types
    related to the Ada Task Control Block that will be needed in order to
    read the list of known tasks in the Ada runtime.  Also return the
@@ -435,6 +393,8 @@ get_tcb_types_info (void)
   fieldnos.priority = ada_get_field_index (common_type, "base_priority", 0);
   fieldnos.image = ada_get_field_index (common_type, "task_image", 1);
   fieldnos.image_len = ada_get_field_index (common_type, "task_image_len", 1);
+  fieldnos.activation_link = ada_get_field_index (common_type,
+                                                  "activation_link", 1);
   fieldnos.call = ada_get_field_index (common_type, "call", 1);
   fieldnos.ll = ada_get_field_index (common_type, "ll", 0);
   fieldnos.ll_thread = ada_get_field_index (ll_type, "thread", 0);
@@ -639,28 +599,16 @@ add_ada_task (CORE_ADDR task_id)
    it in TASK_LIST.  Return non-zero upon success.  */
 
 static int
-read_known_tasks_array (void)
+read_known_tasks_array (CORE_ADDR known_tasks_addr)
 {
   const int target_ptr_byte =
     gdbarch_ptr_bit (target_gdbarch) / TARGET_CHAR_BIT;
-  const CORE_ADDR known_tasks_addr = get_known_tasks_addr ();
   const int known_tasks_size = target_ptr_byte * MAX_NUMBER_OF_KNOWN_TASKS;
   gdb_byte *known_tasks = alloca (known_tasks_size);
   int i;
 
-  /* Step 1: Clear the current list, if necessary.  */
-  VEC_truncate (ada_task_info_s, task_list, 0);
-
-  /* If the application does not use task, then no more needs to be done.
-     It is important to have the task list cleared (see above) before we
-     return, as we don't want a stale task list to be used...  This can
-     happen for instance when debugging a non-multitasking program after
-     having debugged a multitasking one.  */
-  if (known_tasks_addr == 0)
-    return 0;
-
-  /* Step 2: Build a new list by reading the ATCBs from the Known_Tasks
-     array in the Ada runtime.  */
+  /* Build a new list by reading the ATCBs from the Known_Tasks array
+     in the Ada runtime.  */
   read_memory (known_tasks_addr, known_tasks, known_tasks_size);
   for (i = 0; i < MAX_NUMBER_OF_KNOWN_TASKS; i++)
     {
@@ -673,6 +621,118 @@ read_known_tasks_array (void)
       if (task_id != 0)
         add_ada_task (task_id);
     }
+
+  return 1;
+}
+
+/* Read the known tasks from the inferior memory, and store it in
+   TASK_LIST.  Return non-zero upon success.  */
+
+static int
+read_known_tasks_list (CORE_ADDR known_tasks_addr)
+{
+  const int target_ptr_byte =
+    gdbarch_ptr_bit (target_gdbarch) / TARGET_CHAR_BIT;
+  gdb_byte *known_tasks = alloca (target_ptr_byte);
+  struct type *data_ptr_type =
+    builtin_type (target_gdbarch)->builtin_data_ptr;
+  CORE_ADDR task_id;
+
+  /* Sanity check.  */
+  if (atcb_fieldno.activation_link < 0)
+    return 0;
+
+  /* Build a new list by reading the ATCBs.  Read head of the list.  */
+  read_memory (known_tasks_addr, known_tasks, target_ptr_byte);
+  task_id = extract_typed_address (known_tasks, data_ptr_type);
+  while (task_id != 0)
+    {
+      struct value *tcb_value;
+      struct value *common_value;
+
+      add_ada_task (task_id);
+
+      /* Read the chain.  */
+      tcb_value = value_from_contents_and_address (atcb_type, NULL, task_id);
+      common_value = value_field (tcb_value, atcb_fieldno.common);
+      task_id = value_as_address (value_field (common_value,
+                                               atcb_fieldno.activation_link));
+    }
+
+  return 1;
+}
+
+/* Return the address of the variable NAME that contains all the known
+   tasks maintained in the Ada Runtime.  Return NULL if the variable
+   could not be found, meaning that the inferior program probably does
+   not use tasking.  */
+
+static CORE_ADDR
+get_known_tasks_addr (const char *name)
+{
+  struct minimal_symbol *msym;
+
+  msym = lookup_minimal_symbol (name, NULL, NULL);
+  if (msym == NULL)
+    return 0;
+
+  return SYMBOL_VALUE_ADDRESS (msym);
+}
+
+/* Read the known tasks from the inferior memory, and store it in
+   TASK_LIST.  Return non-zero upon success.  */
+
+static int
+read_known_tasks (void)
+{
+  /* In order to provide a fast response time, this function caches the
+     known tasks addresses after the lookup during the first call. */
+  static CORE_ADDR known_tasks_array_addr;
+  static CORE_ADDR known_tasks_list_addr;
+
+  /* Step 1: Clear the current list, if necessary.  */
+  VEC_truncate (ada_task_info_s, task_list, 0);
+
+  /* Step 2: do the real work.
+     If the application does not use task, then no more needs to be done.
+     It is important to have the task list cleared (see above) before we
+     return, as we don't want a stale task list to be used...  This can
+     happen for instance when debugging a non-multitasking program after
+     having debugged a multitasking one.  */
+  if (ada_tasks_check_symbol_table)
+    {
+      known_tasks_array_addr = get_known_tasks_addr (KNOWN_TASKS_NAME);
+      known_tasks_list_addr = get_known_tasks_addr (KNOWN_TASKS_LIST);
+
+      /* FIXME: brobecker 2003-03-05: Here would be a much better place
+         to attach the ada-tasks observers, instead of doing this
+         unconditionaly in _initialize_tasks. This would avoid an
+         unecessary notification when the inferior does not use tasking
+         or as long as the user does not use the ada-tasks commands.
+         Unfortunately, this is not possible for the moment: the current
+         code resets ada__tasks_check_symbol_table back to 1 whenever
+         symbols for a new program are being loaded. If we place the
+         observers intialization here, we will end up adding new observers
+         everytime we do the check for Ada tasking-related symbols
+         above. This would currently have benign effects, but is still
+         undesirable. The cleanest approach is probably to create a new
+         observer to notify us when the user is debugging a new program.
+         We would then reset ada__tasks_check_symbol_table back to 1
+         during the notification, but also detach all observers.
+         BTW: observers are probably not reentrant, so detaching during
+         a notification may not be the safest thing to do... Sigh...
+         But creating the new observer would be a good idea in any case,
+         since this allow us to make ada__tasks_check_symbol_table
+         static, which is a good bonus.  */
+      ada_tasks_check_symbol_table = 0;
+    }
+
+  /* Try both mechanisms.  */
+  if ((known_tasks_array_addr == 0
+       || read_known_tasks_array (known_tasks_array_addr) == 0)
+      && (known_tasks_list_addr == 0
+          || read_known_tasks_list (known_tasks_list_addr) == 0))
+    return 0;
 
   /* Step 3: Unset stale_task_list_p, to avoid re-reading the Known_Tasks
      array unless needed.  Then report a success.  */
@@ -692,7 +752,7 @@ ada_build_task_list (int warn_if_null)
     error (_("Cannot inspect Ada tasks when program is not running"));
 
   if (stale_task_list_p)
-    read_known_tasks_array ();
+    read_known_tasks ();
 
   if (task_list == NULL)
     {
