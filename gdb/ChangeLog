@@ -1,3 +1,12 @@
+2011-07-04  Tristan Gingold  <gingold@adacore.com>
+
+	* ada-tasks.c: Renames fieldno to actb_fieldno.
+	(ada_get_task_number): Indentation.
+	(get_tcb_types_info): Remove all parameters.  Write directly
+	the globals.
+	(ptid_from_atcb_common): Adjust.
+	(read_atcb): Adjust.
+
 2011-07-04  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* symtab.c (in_prologue): Remove mention of ppc's refine_prologue_limit.

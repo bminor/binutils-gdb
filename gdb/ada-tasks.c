@@ -136,7 +136,7 @@ static struct type *atcb_type = NULL;
 static struct type *atcb_common_type = NULL;
 static struct type *atcb_ll_type = NULL;
 static struct type *atcb_call_type = NULL;
-static struct tcb_fieldnos fieldno;
+static struct tcb_fieldnos atcb_fieldno;
 
 /* Set to 1 when the cached address of System.Tasking.Debug.Known_Tasks
    might be stale and so needs to be recomputed.  */
@@ -165,7 +165,7 @@ ada_get_task_number (ptid_t ptid)
 {
   int i;
 
-  for (i=0; i < VEC_length (ada_task_info_s, task_list); i++)
+  for (i = 0; i < VEC_length (ada_task_info_s, task_list); i++)
     if (ptid_equal (VEC_index (ada_task_info_s, task_list, i)->ptid, ptid))
       return i + 1;
 
@@ -358,11 +358,7 @@ get_known_tasks_addr (void)
    return values will be set.  */
 
 static void
-get_tcb_types_info (struct type **atcb_type,
-                    struct type **atcb_common_type,
-                    struct type **atcb_ll_type,
-                    struct type **atcb_call_type,
-                    struct tcb_fieldnos *atcb_fieldnos)
+get_tcb_types_info (void)
 {
   struct type *type;
   struct type *common_type;
@@ -456,11 +452,11 @@ get_tcb_types_info (struct type **atcb_type,
 
   /* Set all the out parameters all at once, now that we are certain
      that there are no potential error() anymore.  */
-  *atcb_type = type;
-  *atcb_common_type = common_type;
-  *atcb_ll_type = ll_type;
-  *atcb_call_type = call_type;
-  *atcb_fieldnos = fieldnos;
+  atcb_type = type;
+  atcb_common_type = common_type;
+  atcb_ll_type = ll_type;
+  atcb_call_type = call_type;
+  atcb_fieldno = fieldnos;
 }
 
 /* Build the PTID of the task from its COMMON_VALUE, which is the "Common"
@@ -475,11 +471,11 @@ ptid_from_atcb_common (struct value *common_value)
   struct value *ll_value;
   ptid_t ptid;
 
-  ll_value = value_field (common_value, fieldno.ll);
+  ll_value = value_field (common_value, atcb_fieldno.ll);
 
-  if (fieldno.ll_lwp >= 0)
-    lwp = value_as_address (value_field (ll_value, fieldno.ll_lwp));
-  thread = value_as_long (value_field (ll_value, fieldno.ll_thread));
+  if (atcb_fieldno.ll_lwp >= 0)
+    lwp = value_as_address (value_field (ll_value, atcb_fieldno.ll_lwp));
+  thread = value_as_long (value_field (ll_value, atcb_fieldno.ll_thread));
 
   ptid = target_get_ada_task_ptid (lwp, thread);
 
@@ -502,11 +498,10 @@ read_atcb (CORE_ADDR task_id, struct ada_task_info *task_info)
   const char ravenscar_task_name[] = "Ravenscar task";
 
   if (atcb_type == NULL)
-    get_tcb_types_info (&atcb_type, &atcb_common_type, &atcb_ll_type,
-                        &atcb_call_type, &fieldno);
+    get_tcb_types_info ();
 
   tcb_value = value_from_contents_and_address (atcb_type, NULL, task_id);
-  common_value = value_field (tcb_value, fieldno.common);
+  common_value = value_field (tcb_value, atcb_fieldno.common);
 
   /* Fill in the task_id.  */
 
@@ -527,35 +522,37 @@ read_atcb (CORE_ADDR task_id, struct ada_task_info *task_info)
      we may want to get it from the first user frame of the stack.  For now,
      we just give a dummy name.  */
 
-  if (fieldno.image_len == -1)
+  if (atcb_fieldno.image_len == -1)
     {
-      if (fieldno.image >= 0)
+      if (atcb_fieldno.image >= 0)
         read_fat_string_value (task_info->name,
-                               value_field (common_value, fieldno.image),
+                               value_field (common_value, atcb_fieldno.image),
                                sizeof (task_info->name) - 1);
       else
         strcpy (task_info->name, ravenscar_task_name);
     }
   else
     {
-      int len = value_as_long (value_field (common_value, fieldno.image_len));
+      int len = value_as_long (value_field (common_value,
+                                            atcb_fieldno.image_len));
 
       value_as_string (task_info->name,
-                       value_field (common_value, fieldno.image), len);
+                       value_field (common_value, atcb_fieldno.image), len);
     }
 
   /* Compute the task state and priority.  */
 
-  task_info->state = value_as_long (value_field (common_value, fieldno.state));
+  task_info->state =
+    value_as_long (value_field (common_value, atcb_fieldno.state));
   task_info->priority =
-    value_as_long (value_field (common_value, fieldno.priority));
+    value_as_long (value_field (common_value, atcb_fieldno.priority));
 
   /* If the ATCB contains some information about the parent task,
      then compute it as well.  Otherwise, zero.  */
 
-  if (fieldno.parent >= 0)
+  if (atcb_fieldno.parent >= 0)
     task_info->parent =
-      value_as_address (value_field (common_value, fieldno.parent));
+      value_as_address (value_field (common_value, atcb_fieldno.parent));
   else
     task_info->parent = 0;
   
@@ -563,16 +560,16 @@ read_atcb (CORE_ADDR task_id, struct ada_task_info *task_info)
   /* If the ATCB contains some information about entry calls, then
      compute the "called_task" as well.  Otherwise, zero.  */
 
-  if (fieldno.atc_nesting_level > 0 && fieldno.entry_calls > 0) 
+  if (atcb_fieldno.atc_nesting_level > 0 && atcb_fieldno.entry_calls > 0)
     {
       /* Let My_ATCB be the Ada task control block of a task calling the
          entry of another task; then the Task_Id of the called task is
          in My_ATCB.Entry_Calls (My_ATCB.ATC_Nesting_Level).Called_Task.  */
       atc_nesting_level_value = value_field (tcb_value,
-                                             fieldno.atc_nesting_level);
+                                             atcb_fieldno.atc_nesting_level);
       entry_calls_value =
         ada_coerce_to_simple_array_ptr (value_field (tcb_value,
-                                                     fieldno.entry_calls));
+                                                     atcb_fieldno.entry_calls));
       entry_calls_value_element =
         value_subscript (entry_calls_value,
 			 value_as_long (atc_nesting_level_value));
@@ -592,12 +589,12 @@ read_atcb (CORE_ADDR task_id, struct ada_task_info *task_info)
      then compute the "caller_task".  Otherwise, zero.  */
 
   task_info->caller_task = 0;
-  if (fieldno.call >= 0)
+  if (atcb_fieldno.call >= 0)
     {
       /* Get the ID of the caller task from Common_ATCB.Call.all.Self.
          If Common_ATCB.Call is null, then there is no caller.  */
       const CORE_ADDR call =
-        value_as_address (value_field (common_value, fieldno.call));
+        value_as_address (value_field (common_value, atcb_fieldno.call));
       struct value *call_val;
 
       if (call != 0)
@@ -605,7 +602,7 @@ read_atcb (CORE_ADDR task_id, struct ada_task_info *task_info)
           call_val =
             value_from_contents_and_address (atcb_call_type, NULL, call);
           task_info->caller_task =
-            value_as_address (value_field (call_val, fieldno.call_self));
+            value_as_address (value_field (call_val, atcb_fieldno.call_self));
         }
     }
 
