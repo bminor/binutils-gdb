@@ -932,6 +932,9 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
 	  if (is_quote_enclosed)
 	    ++saved_arg;
 
+	  /* Initialize it just to avoid a GCC false warning.  */
+	  memset (&values, 0, sizeof (values));
+
 	  TRY_CATCH (ex, RETURN_MASK_ERROR)
 	    {
 	      values = decode_compound (argptr, funfirstline, canonical,
