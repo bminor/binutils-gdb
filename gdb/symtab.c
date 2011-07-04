@@ -4754,7 +4754,6 @@ expand_line_sal (struct symtab_and_line sal)
 
       filter[i] = 1;
       blocks[i] = block_for_pc_sect (ret.sals[i].pc, ret.sals[i].section);
-
     }
   do_cleanups (old_chain);
 
