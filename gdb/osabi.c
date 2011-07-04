@@ -519,9 +519,10 @@ generic_elf_osabi_sniffer (bfd *abfd)
          (0), then the ELF structures in the file are conforming to
          the base specification for that machine (there are no
          OS-specific extensions).  In order to determine the real OS
-         in use we must look for OS-specific notes.  The same applies
-         for ELFOSABI_GNU: this can mean GNU/Hurd, GNU/Linux, and
-         possibly more.  */
+         in use, we must look for OS-specific notes.
+
+         The same applies for ELFOSABI_GNU: this can mean GNU/Hurd,
+         GNU/Linux, and possibly more.  */
       bfd_map_over_sections (abfd,
 			     generic_elf_osabi_sniff_abi_tag_sections,
 			     &osabi);

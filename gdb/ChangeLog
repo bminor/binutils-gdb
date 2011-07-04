@@ -1,3 +1,7 @@
+2011-07-04  Joel Brobecker  <brobecker@adacore.com>
+
+        * osabi.c (generic_elf_osabi_sniffer): Minor comment reformatting.
+
 2011-07-04  Tristan Gingold  <gingold@adacore.com>
 
 	* ada-tasks.c (KNOWN_TASKS_LIST): New macro.
