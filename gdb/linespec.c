@@ -828,7 +828,7 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
   /* This says whether or not something in *ARGPTR is quoted with
      completer_quotes (i.e. with single quotes).  */
   int is_quoted;
-  /* Is *ARGPTR is enclosed in double quotes?  */
+  /* Is *ARGPTR enclosed in double quotes?  */
   int is_quote_enclosed;
   int is_objc_method = 0;
   char *saved_arg = *argptr;

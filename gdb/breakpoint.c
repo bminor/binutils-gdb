@@ -358,7 +358,7 @@ static int overlay_events_enabled;
 int target_exact_watchpoints = 0;
 
 /* Walk the following statement or block through all breakpoints.
-   ALL_BREAKPOINTS_SAFE does so even if the statment deletes the
+   ALL_BREAKPOINTS_SAFE does so even if the statement deletes the
    current breakpoint.  */
 
 #define ALL_BREAKPOINTS(B)  for (B = breakpoint_chain; B; B = B->next)
@@ -704,7 +704,7 @@ is_tracepoint (const struct breakpoint *b)
 	  || b->type == bp_static_tracepoint);
 }
   
-/* A helper function that validsates that COMMANDS are valid for a
+/* A helper function that validates that COMMANDS are valid for a
    breakpoint.  This function will throw an exception if a problem is
    found.  */
 
@@ -986,7 +986,7 @@ bp_location_has_shadow (struct bp_location *bl)
   if (!bl->inserted)
     return 0;
   if (bl->target_info.shadow_len == 0)
-    /* bp isn't valid, or doesn't shadow memory.  */
+    /* BL isn't valid, or doesn't shadow memory.  */
     return 0;
   return 1;
 }
@@ -1074,7 +1074,7 @@ breakpoint_restore_shadows (gdb_byte *buf, ULONGEST memaddr, LONGEST len)
       warning (_("reading through apparently deleted breakpoint #%d?"),
 	       bl->owner->number);
 
-    /* Performance optimization: any futher element can no longer affect BUF
+    /* Performance optimization: any further element can no longer affect BUF
        content.  */
 
     if (bl->address >= bp_location_placed_address_before_address_max
@@ -2060,7 +2060,7 @@ static int internal_breakpoint_number = -1;
 /* Set the breakpoint number of B, depending on the value of INTERNAL.
    If INTERNAL is non-zero, the breakpoint number will be populated
    from internal_breakpoint_number and that variable decremented.
-   Otherwis the breakpoint number will be populated from
+   Otherwise the breakpoint number will be populated from
    breakpoint_count and that value incremented.  Internal breakpoints
    do not set the internal var bpnum.  */
 static void
@@ -2451,7 +2451,7 @@ update_breakpoints_after_exec (void)
        gets 'round to deleting the "use to be a bp_finish" breakpoint.
        We really must allow finish_command to delete a bp_finish.
 
-       In the absense of a general solution for the "how do we know
+       In the absence of a general solution for the "how do we know
        it's safe to delete something others may have handles to?"
        problem, what we'll do here is just uninsert the bp_finish, and
        let finish_command delete it.
@@ -2787,7 +2787,7 @@ breakpoint_init_inferior (enum inf_context context)
    permanent breakpoint.
    - When continuing from a location with an ordinary breakpoint, we
      actually single step once before calling insert_breakpoints.
-   - When continuing from a localion with a permanent breakpoint, we
+   - When continuing from a location with a permanent breakpoint, we
      need to use the `SKIP_PERMANENT_BREAKPOINT' macro, provided by
      the target, to advance the PC past the breakpoint.  */
 
@@ -4357,7 +4357,7 @@ bpstat_stop_status (struct address_space *aspace,
 		}
 	    }
 
-	  /* Print nothing for this entry if we dont stop or dont print.  */
+	  /* Print nothing for this entry if we don't stop or don't print.  */
 	  if (bs->stop == 0 || bs->print == 0)
 	    bs->print_it = print_it_noop;
     }
@@ -5007,7 +5007,7 @@ print_one_breakpoint_location (struct breakpoint *b,
     {
       annotate_field (6);
       ui_out_text (uiout, "\tstop only in stack frame at ");
-      /* FIXME: cagney/2002-12-01: Shouldn't be poeking around inside
+      /* FIXME: cagney/2002-12-01: Shouldn't be poking around inside
          the frame ID.  */
       ui_out_field_core_addr (uiout, "frame",
 			      b->gdbarch, b->frame_id.stack_addr);
@@ -6015,7 +6015,7 @@ make_breakpoint_permanent (struct breakpoint *b)
      code.  Mark all locations as inserted.  For now,
      make_breakpoint_permanent is called in just one place, so it's
      hard to say if it's reasonable to have permanent breakpoint with
-     multiple locations or not, but it's easy to implmement.  */
+     multiple locations or not, but it's easy to implement.  */
   for (bl = b->loc; bl; bl = bl->next)
     bl->inserted = 1;
 }
@@ -6753,7 +6753,7 @@ print_one_catch_syscall (struct breakpoint *b,
             text = xstrprintf ("%s%d, ", text, iter);
 
           /* We have to xfree the last 'text' (now stored at 'x')
-             because xstrprintf dinamically allocates new space for it
+             because xstrprintf dynamically allocates new space for it
              on every call.  */
 	  xfree (x);
         }
@@ -7738,7 +7738,7 @@ expand_line_sal_maybe (struct symtab_and_line sal)
 
   if (expanded.nelts <= 1)
     {
-      /* This is un ugly workaround.  If we get zero expanded sals
+      /* This is an ugly workaround.  If we get zero expanded sals
          then something is really wrong.  Fix that by returning the
          original sal.  */
 
@@ -10075,7 +10075,7 @@ init_ada_exception_breakpoint (struct breakpoint *b,
          used for different exception names will use the same address.
          In this case, a "breakpoint ... also set at..." warning is
          unproductive.  Besides, the warning phrasing is also a bit
-         inapropriate, we should use the word catchpoint, and tell
+         inappropriate, we should use the word catchpoint, and tell
          the user what type of catchpoint it is.  The above is good
          enough for now, though.  */
     }
@@ -10366,7 +10366,7 @@ breakpoint_auto_delete (bpstat bs)
    does breakpoint_address_is_meaningful say for its OWNER),
    secondarily by ordering first bp_permanent OWNERed elements and
    terciarily just ensuring the array is sorted stable way despite
-   qsort being an instable algorithm.  */
+   qsort being an unstable algorithm.  */
 
 static int
 bp_location_compare (const void *ap, const void *bp)
@@ -10505,7 +10505,7 @@ update_global_location_list (int should_insert)
       struct bp_location *old_loc = *old_locp;
       struct bp_location **loc2p;
 
-      /* Tells if 'old_loc' is found amoung the new locations.  If
+      /* Tells if 'old_loc' is found among the new locations.  If
 	 not, we have to free it.  */
       int found_object = 0;
       /* Tells if the location should remain inserted in the target.  */
@@ -10879,7 +10879,7 @@ delete_breakpoint (struct breakpoint *bpt)
   /* Be sure no bpstat's are pointing at the breakpoint after it's
      been freed.  */
   /* FIXME, how can we find all bpstat's?  We just check stop_bpstat
-     in all threeds for now.  Note that we cannot just remove bpstats
+     in all threads for now.  Note that we cannot just remove bpstats
      pointing at bpt from the stop_bpstat list entirely, as breakpoint
      commands are associated with the bpstat; if we remove it here,
      then the later call to bpstat_do_actions (&stop_bpstat); in

@@ -1,3 +1,9 @@
+2011-07-04  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* breakpoint.c: Fix typos in comments.
+	* linespec.c: Likewise.
+	* symtab.c: Likewise.
+
 2011-07-04  Joel Brobecker  <brobecker@adacore.com>
 
 	* dwarf2-frame.c (dwarf2_build_frame_info): Do not load .eh_frame

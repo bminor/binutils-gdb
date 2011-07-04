@@ -4397,7 +4397,7 @@ skip_prologue_using_sal (struct gdbarch *gdbarch, CORE_ADDR func_addr)
   prologue_sal = find_pc_line (start_pc, 0);
   if (prologue_sal.line != 0)
     {
-      /* For langauges other than assembly, treat two consecutive line
+      /* For languages other than assembly, treat two consecutive line
 	 entries at the same address as a zero-instruction prologue.
 	 The GNU assembler emits separate line notes for each instruction
 	 in a multi-instruction macro, but compilers generally will not
