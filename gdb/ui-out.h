@@ -113,7 +113,7 @@ extern void ui_out_field_fmt_int (struct ui_out *uiout, int width,
 				  enum ui_align align, const char *fldname, 
 		 		  int value);
 
-/* Output a field containing an addresses.  */
+/* Output a field containing an address.  */
 
 extern void ui_out_field_core_addr (struct ui_out *uiout, const char *fldname,
 				    struct gdbarch *gdbarch, CORE_ADDR address);
