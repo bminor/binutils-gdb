@@ -329,22 +329,3 @@ sim_store_register (sd, rn, memory, length)
   State.regs[rn] = T2H_4 (*(unsigned32*)memory);
   return length;
 }
-
-void
-sim_do_command (sd, cmd)
-     SIM_DESC sd;
-     char *cmd;
-{
-  char *mm_cmd = "memory-map";
-  char *int_cmd = "interrupt";
-
-  if (sim_args_command (sd, cmd) != SIM_RC_OK)
-    {
-      if (strncmp (cmd, mm_cmd, strlen (mm_cmd) == 0))
-	sim_io_eprintf (sd, "`memory-map' command replaced by `sim memory'\n");
-      else if (strncmp (cmd, int_cmd, strlen (int_cmd)) == 0)
-	sim_io_eprintf (sd, "`interrupt' command replaced by `sim watch'\n");
-      else
-	sim_io_eprintf (sd, "Unknown command `%s'\n", cmd);
-    }
-}

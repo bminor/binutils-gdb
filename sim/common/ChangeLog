@@ -1,3 +1,9 @@
+2011-07-05  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-command.c: New file.
+	* Make-common.in (SIM_NEW_COMMON_OBJS): Add sim-command.o.
+	(sim-command.o): New rule.
+
 2011-05-27  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-options.c (standard_option_handler): Remove arg[0] check

@@ -162,6 +162,7 @@ SIM_COMMON_HW_OBJS = \
 SIM_NEW_COMMON_OBJS = \
 	sim-arange.o \
 	sim-bits.o \
+	sim-command.o \
 	sim-config.o \
 	sim-core.o \
 	sim-endian.o \
@@ -424,6 +425,9 @@ sim-arange.o: $(srccom)/sim-arange.c $(sim-arange_h) $(SIM_EXTRA_DEPS)
 sim-bits.o: $(srccom)/sim-bits.c $(sim-bits_h) $(sim-n-bits_h) \
 	  $(SIM_EXTRA_DEPS)
 	$(CC) -c $(srccom)/sim-bits.c $(ALL_CFLAGS)
+
+sim-command.o: $(srccom)/sim-command.c $(sim_main_headers)
+	$(CC) -c $(srccom)/sim-command.c $(ALL_CFLAGS)
 
 sim-config.o: $(srccom)/sim-config.c $(sim-config_h) sim-main.h \
 	  $(SIM_EXTRA_DEPS)

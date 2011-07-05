@@ -1,3 +1,7 @@
+2011-07-05  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (sim_do_command): Delete.
+
 2011-07-01  Mike Frysinger  <vapier@gentoo.org>
 
 	* interp.c (cb_linux_stat_map_32, cb_linux_stat_map_64): Rename from

@@ -1142,16 +1142,6 @@ sim_create_inferior (sd, abfd, argv,env)
   return SIM_RC_OK;
 }
 
-void
-sim_do_command (sd,cmd)
-     SIM_DESC sd;
-     char *cmd;
-{
-  if (sim_args_command (sd, cmd) != SIM_RC_OK)
-    sim_io_printf (sd, "Error: \"%s\" is not a valid MIPS simulator command.\n",
-		   cmd);
-}
-
 /*---------------------------------------------------------------------------*/
 /*-- Private simulator support interface ------------------------------------*/
 /*---------------------------------------------------------------------------*/

@@ -711,33 +711,6 @@ sim_size (int s)
   ;
 }
 
-void
-sim_do_command (SIM_DESC sd, char *cmd)
-{
-  char *mm_cmd = "memory-map";
-  char *int_cmd = "interrupt";
-  sim_cpu *cpu;
-
-  cpu = STATE_CPU (sd, 0);
-  /* Commands available from GDB:   */
-  if (sim_args_command (sd, cmd) != SIM_RC_OK)
-    {
-      if (strncmp (cmd, "info", sizeof ("info") - 1) == 0)
-	sim_get_info (sd, &cmd[4]);
-      else if (strncmp (cmd, mm_cmd, strlen (mm_cmd) == 0))
-	sim_io_eprintf (sd,
-			"`memory-map' command replaced by `sim memory'\n");
-      else if (strncmp (cmd, int_cmd, strlen (int_cmd)) == 0)
-	sim_io_eprintf (sd, "`interrupt' command replaced by `sim watch'\n");
-      else
-	sim_io_eprintf (sd, "Unknown command `%s'\n", cmd);
-    }
-
-  /* If the architecture changed, re-configure.  */
-  if (STATE_ARCHITECTURE (sd) != cpu->cpu_configured_arch)
-    sim_hw_configure (sd);
-}
-
 /* Halt the simulator after just one instruction */
 
 static void

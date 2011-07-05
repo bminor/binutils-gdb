@@ -189,15 +189,3 @@ sim_create_inferior (sd, abfd, argv, envp)
 
   return SIM_RC_OK;
 }
-
-void
-sim_do_command (sd, cmd)
-     SIM_DESC sd;
-     char *cmd;
-{ 
-  if (sim_args_command (sd, cmd) != SIM_RC_OK)
-    sim_io_eprintf (sd, "Unknown command `%s'\n", cmd);
-}
-
-
-

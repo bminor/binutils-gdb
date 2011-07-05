@@ -1,3 +1,7 @@
+2011-07-05  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-if.c (sim_do_command): Delete.
+
 2010-10-09  Alan Modra  <amodra@gmail.com>
 
 	* cris-desc.h: Regenerate.

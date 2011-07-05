@@ -5108,13 +5108,6 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd, char **argv, char **env)
 }
 
 void
-sim_do_command (SIM_DESC sd, char *cmd)
-{
-  (*sim_callback->printf_filtered) (sim_callback,
-				    "This simulator does not accept any commands.\n");
-}
-
-void
 sim_set_callbacks (struct host_callback_struct *ptr)
 {
   sim_callback = ptr;

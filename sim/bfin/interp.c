@@ -1256,10 +1256,3 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
 
   return SIM_RC_OK;
 }
-
-void
-sim_do_command (SIM_DESC sd, char *cmd)
-{
-  if (sim_args_command (sd, cmd) != SIM_RC_OK)
-    sim_io_eprintf (sd, "Unknown command `%s'\n", cmd);
-}

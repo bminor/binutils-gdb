@@ -1,3 +1,7 @@
+2011-07-05  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (sim_do_command): Delete.
+
 2011-06-20  Nick Clifton  <nickc@redhat.com>
 
 	* am33.igen (sub Rm,Rn,Rd): Fix computation of carry flag.
