@@ -287,6 +287,10 @@ gnuv3_rtti_type (struct value *value,
   if (TYPE_CODE (values_type) != TYPE_CODE_CLASS)
     return NULL;
 
+  /* Java doesn't have RTTI following the C++ ABI.  */
+  if (TYPE_CPLUS_REALLY_JAVA (values_type))
+    return NULL;
+
   /* Determine architecture.  */
   gdbarch = get_type_arch (values_type);
 

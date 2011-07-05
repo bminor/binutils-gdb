@@ -70,4 +70,6 @@ if [set_lang_java] then {
     # so GDB will report these as "optimized out". See gcc/43260.
     setup_xfail *-*-* gcc/43260
     gdb_test "print *jprint.props" " = .*" "print a java.util.Properties"
+
+    gdb_test "print jprint.hi" "= java.lang.String \"hi maude\"" "print a java.lang.String"
 }

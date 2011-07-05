@@ -7492,6 +7492,9 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
 	}
 
       do_cleanups (back_to);
+
+      if (HAVE_CPLUS_STRUCT (type))
+	TYPE_CPLUS_REALLY_JAVA (type) = cu->language == language_java;
     }
 
   quirk_gcc_member_function_pointer (type, cu->objfile);

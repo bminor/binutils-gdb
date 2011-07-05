@@ -1,3 +1,8 @@
+2011-07-05  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.java/jprint.java (jprint.hi): New field.
+	* gdb.java/jprint.exp: Print string.
+
 2011-07-05  Thiago Jung Bauermann  <bauerman.ibm.com>
 
 	* gdb.base/call-sc.c: Fix typos.

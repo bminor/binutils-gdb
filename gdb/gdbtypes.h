@@ -705,6 +705,9 @@ struct cplus_struct_type
        dynamic.  Zero if not yet computed.  */
     int is_dynamic : 2;
 
+    /* Non-zero if this type came from a Java CU.  */
+    unsigned int is_java : 1;
+
     /* For derived classes, the number of base classes is given by
        n_baseclasses and virtual_field_bits is a bit vector containing
        one bit per base class.  If the base class is virtual, the
@@ -991,6 +994,7 @@ extern void allocate_gnat_aux_type (struct type *);
 #define BASETYPE_VIA_PUBLIC(thistype, index) \
   ((!TYPE_FIELD_PRIVATE(thistype, index)) && (!TYPE_FIELD_PROTECTED(thistype, index)))
 #define TYPE_CPLUS_DYNAMIC(thistype) TYPE_CPLUS_SPECIFIC (thistype)->is_dynamic
+#define TYPE_CPLUS_REALLY_JAVA(thistype) TYPE_CPLUS_SPECIFIC (thistype)->is_java
 
 #define BASETYPE_VIA_VIRTUAL(thistype, index) \
   (TYPE_CPLUS_SPECIFIC(thistype)->virtual_field_bits == NULL ? 0 \

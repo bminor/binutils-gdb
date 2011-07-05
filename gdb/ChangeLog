@@ -1,3 +1,11 @@
+2011-07-05  Tom Tromey  <tromey@redhat.com>
+
+	* gnu-v3-abi.c (gnuv3_rtti_type): Check TYPE_CPLUS_REALLY_JAVA.
+	* gdbtypes.h (struct cplus_struct_type) <is_java>: New field.
+	(TYPE_CPLUS_REALLY_JAVA): New macro.
+	* dwarf2read.c (process_structure_scope): Set
+	TYPE_CPLUS_REALLY_JAVA.
+
 2011-07-05  Thiago Jung Bauermann  <bauerman.ibm.com>
 
 	* ada-lang.c: Fix typos.
