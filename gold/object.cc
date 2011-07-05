@@ -748,10 +748,11 @@ Sized_relobj_file<size, big_endian>::include_section_group(
   // just like ordinary sections.
   elfcpp::Elf_Word flags = elfcpp::Swap<32, big_endian>::readval(pword);
 
-  // Look up the group signature, which is the name of a symbol.  This
-  // is a lot of effort to go to to read a string.  Why didn't they
-  // just have the group signature point into the string table, rather
-  // than indirect through a symbol?
+  // Look up the group signature, which is the name of a symbol.  ELF
+  // uses a symbol name because some group signatures are long, and
+  // the name is generally already in the symbol table, so it makes
+  // sense to put the long string just once in .strtab rather than in
+  // both .strtab and .shstrtab.
 
   // Get the appropriate symbol table header (this will normally be
   // the single SHT_SYMTAB section, but in principle it need not be).
