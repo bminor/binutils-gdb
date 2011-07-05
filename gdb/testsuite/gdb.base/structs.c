@@ -433,7 +433,7 @@ int main()
   /* An infinite loop that first clears all the variables and then
      calls each function.  This "hack" is to make testing random
      functions easier - "advance funN" is guaranteed to have always
-     been preceeded by a global variable clearing zed call.  */
+     been preceded by a global variable clearing zed call.  */
 
   while (1)
     {

@@ -151,7 +151,7 @@ parse_find_args (char *args, ULONGEST *max_countp,
       v = parse_to_comma_and_eval (&s);
       end_addr = value_as_address (v);
       if (start_addr > end_addr)
-	error (_("Invalid search space, end preceeds start."));
+	error (_("Invalid search space, end precedes start."));
       search_space_len = end_addr - start_addr + 1;
       /* We don't support searching all of memory
 	 (i.e. start=0, end = 0xff..ff).

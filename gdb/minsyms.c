@@ -583,7 +583,7 @@ lookup_minimal_symbol_by_pc_section_1 (CORE_ADDR pc,
 
 		  /* If we are looking for a trampoline and this is a
 		     text symbol, or the other way around, check the
-		     preceeding symbol too.  If they are otherwise
+		     preceding symbol too.  If they are otherwise
 		     identical prefer that one.  */
 		  if (hi > 0
 		      && MSYMBOL_TYPE (&msymbol[hi]) == other_type

@@ -8775,7 +8775,7 @@ break_range_command (char *arg, int from_tty)
 
   end = find_breakpoint_range_end (sal_end);
   if (sal_start.pc > end)
-    error (_("Invalid address range, end preceeds start."));
+    error (_("Invalid address range, end precedes start."));
 
   length = end - sal_start.pc + 1;
   if (length < 0)

@@ -53,7 +53,7 @@ gdb_test_multiple "if 0\nend" $message {
 # This fails in GDB <=6.5
 
 # Unfortunately it was an uninitialised memory problem so
-# sometimes it just works. Preceed it with an if else end with
+# sometimes it just works. Precede it with an if else end with
 # bodies and hopefully the memory with be dirty and the problem
 # will show itself (this works at time of writing).
 

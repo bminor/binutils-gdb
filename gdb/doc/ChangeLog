@@ -1,3 +1,7 @@
+2011-07-05  Thiago Jung Bauermann  <bauerman.ibm.com>
+
+	* gdb.texinfo: Fix typos.
+
 2011-07-01  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (Debugging Output): Document set debug

@@ -36715,7 +36715,7 @@ The register's size, in bits.
 @item regnum
 The register's number.  If omitted, a register's number is one greater
 than that of the previous register (either in the current feature or in
-a preceeding feature); the first register in the target description
+a preceding feature); the first register in the target description
 defaults to zero.  This register number is used to read or write
 the register; e.g.@: it is used in the remote @code{p} and @code{P}
 packets, and registers appear in the @code{g} and @code{G} packets

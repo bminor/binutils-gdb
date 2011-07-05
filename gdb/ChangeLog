@@ -1,3 +1,19 @@
+2011-07-05  Thiago Jung Bauermann  <bauerman.ibm.com>
+
+	* ada-lang.c: Fix typos.
+	* amd64-tdep.c: Likewise.
+	* breakpoint.c: Likewise.
+	* cli/cli-decode.c: Likewise.
+	* findcmd.c: Likewise.
+	* inline-frame.c: Likewise.
+	* mi/mi-main.c: Likewise.
+	* minsyms.c: Likewise.
+	* monitor.c: Likewise.
+	* monitor.h: Likewise.
+	* prologue-value.c: Likewise.
+	* reverse.c: Likewise.
+	* s390-tdep.c: Likewise.
+
 2011-07-04  Joel Brobecker  <brobecker@adacore.com>
 
         * osabi.c (generic_elf_osabi_sniffer): Minor comment reformatting.

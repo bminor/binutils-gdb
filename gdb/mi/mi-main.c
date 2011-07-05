@@ -1550,7 +1550,7 @@ mi_cmd_data_read_memory_bytes (char *command, char **argv, int argc)
 
 /* DATA-MEMORY-WRITE:
 
-   COLUMN_OFFSET: optional argument. Must be preceeded by '-o'. The
+   COLUMN_OFFSET: optional argument. Must be preceded by '-o'. The
    offset from the beginning of the memory grid row where the cell to
    be written is.
    ADDR: start address of the row in the memory grid where the memory

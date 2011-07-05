@@ -226,7 +226,7 @@ struct monitor_ops
 
 #define MO_PRINT_PROGRAM_OUTPUT 0x200000
 
-/* Some dump bytes commands align the first data with the preceeding
+/* Some dump bytes commands align the first data with the preceding
    16 byte boundary.  Some print blanks and start at the exactly the
    requested boundary.  */
 

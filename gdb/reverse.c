@@ -184,7 +184,7 @@ delete_one_bookmark (int num)
   if (b == bookmark_chain)
     bookmark_chain = b->next;
 
-  /* Find bookmark preceeding "marked" one, so we can unlink.  */
+  /* Find bookmark preceding "marked" one, so we can unlink.  */
   if (b)
     {
       ALL_BOOKMARKS (b1)

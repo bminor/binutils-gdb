@@ -288,7 +288,7 @@ block_starting_point_at (CORE_ADDR pc, struct block *block)
   if (new_block == block || contained_in (new_block, block))
     return 0;
 
-  /* The immediately preceeding address belongs to a different block,
+  /* The immediately preceding address belongs to a different block,
      which is not a child of this one.  Treat this as an entrance into
      BLOCK.  */
   return 1;

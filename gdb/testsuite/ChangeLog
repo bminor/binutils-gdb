@@ -1,3 +1,9 @@
+2011-07-05  Thiago Jung Bauermann  <bauerman.ibm.com>
+
+	* gdb.base/call-sc.c: Fix typos.
+	* gdb.base/ifelse.exp: Likewise.
+	* gdb.base/structs.c: Likewise.
+
 2011-07-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.cp/m-static.exp: Call get_compiler_info.

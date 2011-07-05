@@ -1307,7 +1307,7 @@ s390_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
      exactly one case: when pc points to that branch instruction.
 
      Thus we try to disassemble the one instructions immediately
-     preceeding pc and check whether it is an LM-type instruction
+     preceding pc and check whether it is an LM-type instruction
      modifying the stack pointer.
 
      Note that disassembling backwards is not reliable, so there

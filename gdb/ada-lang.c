@@ -8321,7 +8321,7 @@ ada_enum_name (const char *name)
 
   /* First, unqualify the enumeration name:
      1. Search for the last '.' character.  If we find one, then skip
-     all the preceeding characters, the unqualified name starts
+     all the preceding characters, the unqualified name starts
      right after that dot.
      2. Otherwise, we may be debugging on a target where the compiler
      translates dots into "__".  Search forward for double underscores,

@@ -68,7 +68,7 @@ int main()
 
   /* An infinite loop that first clears all the variables and then
      calls the function.  This "hack" is to make re-testing easier -
-     "advance fun" is guaranteed to have always been preceeded by a
+     "advance fun" is guaranteed to have always been preceded by a
      global variable clearing zed call.  */
 
   zed ();
