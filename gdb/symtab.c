@@ -83,10 +83,6 @@ static void output_source_filename (const char *, int *);
 
 static int find_line_common (struct linetable *, int, int *);
 
-/* This one is used by linespec.c */
-
-char *operator_chars (char *p, char **end);
-
 static struct symbol *lookup_symbol_aux (const char *name,
 					 const struct block *block,
 					 const domain_enum domain,
@@ -2637,7 +2633,7 @@ skip_prologue_sal (struct symtab_and_line *sal)
    some legitimate operator text, return a pointer to the
    beginning of the substring of the operator text.
    Otherwise, return "".  */
-char *
+static char *
 operator_chars (char *p, char **end)
 {
   *end = "";

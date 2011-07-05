@@ -1,3 +1,8 @@
+2011-07-05  Tom Tromey  <tromey@redhat.com>
+
+	* symtab.c (operator_chars): Now static.
+	* linespec.c (operator_chars): Don't declare.
+
 2011-07-05  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* ui-out.h (ui_out_field_core_addr): Fix typo in comment.

@@ -44,10 +44,6 @@
 #include <ctype.h>
 #include "cli/cli-utils.h"
 
-/* We share this one with symtab.c, but it is not exported widely.  */
-
-extern char *operator_chars (char *, char **);
-
 /* Prototypes for local functions.  */
 
 static void initialize_defaults (struct symtab **default_symtab,
