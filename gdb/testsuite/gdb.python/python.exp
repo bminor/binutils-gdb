@@ -153,14 +153,14 @@ gdb_py_test_silent_cmd "python symtab = gdb.decode_line()" "test decode_line cur
 gdb_test "python print len(symtab)" "2" "Test decode_line current location"
 gdb_test "python print symtab\[0\]" "None" "Test decode_line expression parse"
 gdb_test "python print len(symtab\[1\])" "1" "Test decode_line current location"
-gdb_test "python print symtab\[1\]\[0\].symtab" "gdb/testsuite/gdb.python/python.c.*" "Test decode_line current locationn filename"
+gdb_test "python print symtab\[1\]\[0\].symtab" ".*gdb.python/python.c.*" "Test decode_line current locationn filename"
 gdb_test "python print symtab\[1\]\[0\].line" "22" "Test decode_line current location line number"
 
 gdb_py_test_silent_cmd "python symtab = gdb.decode_line(\"python.c:26 if foo\")" "test decode_line python.c:26" 1
 gdb_test "python print len(symtab)" "2" "Test decode_line python.c:26 length"
 gdb_test "python print symtab\[0\]" "if foo" "Test decode_line expression parse"
 gdb_test "python print len(symtab\[1\])" "1" "Test decode_line python.c:26 length"
-gdb_test "python print symtab\[1\]\[0\].symtab" "gdb/testsuite/gdb.python/python.c.*" "Test decode_line python.c:26 filename"
+gdb_test "python print symtab\[1\]\[0\].symtab" ".*gdb.python/python.c.*" "Test decode_line python.c:26 filename"
 gdb_test "python print symtab\[1\]\[0\].line" "26" "Test decode_line python.c:26 line number"
 
 gdb_test "python gdb.decode_line(\"randomfunc\")" \
@@ -168,7 +168,7 @@ gdb_test "python gdb.decode_line(\"randomfunc\")" \
 gdb_py_test_silent_cmd "python symtab = gdb.decode_line(\"func1\")" "test decode_line func1()" 1
 gdb_test "python print len(symtab)" "2" "Test decode_line func1 length"
 gdb_test "python print len(symtab\[1\])" "1" "Test decode_line func1 length"
-gdb_test "python print symtab\[1\]\[0\].symtab" "gdb/testsuite/gdb.python/python-1.c.*" "Test decode_line func1 filename"
+gdb_test "python print symtab\[1\]\[0\].symtab" ".*gdb.python/python-1.c.*" "Test decode_line func1 filename"
 gdb_test "python print symtab\[1\]\[0\].line" "19" "Test decode_line func1 line number"
 
 # gdb.write
