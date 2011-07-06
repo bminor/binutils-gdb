@@ -46,7 +46,6 @@ class Incremental_inputs;
 class Incremental_binary;
 class Incremental_library;
 class Object;
-class Script_info;
 
 // Incremental input type as stored in .gnu_incremental_inputs.
 
@@ -259,7 +258,13 @@ class Script_info
 {
  public:
   Script_info(const std::string& filename)
-    : filename_(filename), incremental_script_entry_(NULL)
+    : filename_(filename), input_file_index_(0),
+      incremental_script_entry_(NULL)
+  { }
+
+  Script_info(const std::string& filename, unsigned int input_file_index)
+    : filename_(filename), input_file_index_(input_file_index),
+      incremental_script_entry_(NULL)
   { }
 
   // Store a pointer to the incremental information for this script.
@@ -272,6 +277,11 @@ class Script_info
   filename() const
   { return this->filename_; }
 
+  // Return the input file index.
+  unsigned int
+  input_file_index() const
+  { return this->input_file_index_; }
+
   // Return the pointer to the incremental information for this script.
   Incremental_script_entry*
   incremental_info() const
@@ -279,6 +289,7 @@ class Script_info
 
  private:
   const std::string filename_;
+  unsigned int input_file_index_;
   Incremental_script_entry* incremental_script_entry_;
 };
 
@@ -1403,12 +1414,12 @@ class Incremental_binary
 
   // Return an Incremental_library for the given input file.
   Incremental_library*
-  get_library(unsigned int n)
+  get_library(unsigned int n) const
   { return this->library_map_[n]; }
 
   // Return a Script_info for the given input file.
   Script_info*
-  get_script_info(unsigned int n)
+  get_script_info(unsigned int n) const
   { return this->script_map_[n]; }
 
   // Initialize the layout of the output file based on the existing

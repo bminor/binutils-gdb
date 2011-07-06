@@ -309,7 +309,7 @@ Sized_incremental_binary<size, big_endian>::setup_readers()
 	  break;
 	case INCREMENTAL_INPUT_SCRIPT:
 	  {
-	    Script_info* script = new Script_info(input_file.filename());
+	    Script_info* script = new Script_info(input_file.filename(), i);
 	    this->script_map_[i] = script;
 	    unsigned int object_count = input_file.get_object_count();
 	    for (unsigned int j = 0; j < object_count; j++)
@@ -448,6 +448,14 @@ Sized_incremental_binary<size, big_endian>::do_file_has_changed(
 {
   Input_entry_reader input_file = this->inputs_reader_.input_file(n);
   Incremental_disposition disp = INCREMENTAL_CHECK;
+
+  // For files named in scripts, find the file that was actually named
+  // on the command line, so that we can get the incremental disposition
+  // flag.
+  Script_info* script = this->get_script_info(n);
+  if (script != NULL)
+    n = script->input_file_index();
+
   const Input_argument* input_argument = this->get_input_argument(n);
   if (input_argument != NULL)
     disp = input_argument->file().options().incremental_disposition();

@@ -637,6 +637,8 @@ Read_member::~Read_member()
 Task_token*
 Read_member::is_runnable()
 {
+  if (this->this_blocker_ != NULL && this->this_blocker_->is_blocked())
+    return this->this_blocker_;
   return NULL;
 }
 

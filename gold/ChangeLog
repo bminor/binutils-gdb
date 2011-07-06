@@ -1,5 +1,22 @@
 2011-07-06  Cary Coutant  <ccoutant@google.com>
 
+	* incremental.cc (Sized_incremental_binary::setup_readers): Pass
+	input file index to Script_info ctor.
+	(Sized_incremental_binary::do_file_has_changed): Find the
+	command-line argument for files named in scripts.
+	* incremental.h (Script_info::Script_info): New ctor
+	with input file index.
+	(Script_info::input_file_index): New function.
+	(Script_info::input_file_index_): New data member.
+	(Incremental_binary::get_library): Add const.
+	(Incremental_binary::get_script_info): Add const.
+	* readsyms.cc (Read_member::is_runnable): Check for this_blocker_.
+	* testsuite/Makefile.am (incremental_test_5): New test case.
+	(incremental_test_6): New test case.
+	* testsuite/Makefile.in: Regenerate.
+
+2011-07-06  Cary Coutant  <ccoutant@google.com>
+
 	* incremental.cc (Sized_incremental_binary::do_check_inputs): Add
 	debug output when command lines differ.
 

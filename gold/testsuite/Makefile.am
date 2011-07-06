@@ -1929,6 +1929,32 @@ incremental_test_4: two_file_test_1.o two_file_test_1b.o two_file_test_2_v1.o \
 	cp -f two_file_test_2.o two_file_test_tmp_4.o
 	$(CXXLINK) -Wl,--incremental-update,--incremental-base=incremental_test_4.base -Bgcctestdir/ two_file_test_1.o two_file_test_1b.o two_file_test_tmp_4.o two_file_test_main.o
 
+check_PROGRAMS += incremental_test_5
+MOSTLYCLEANFILES += two_file_test_5.a
+incremental_test_5: two_file_test_1.o two_file_test_1b_v1.o two_file_test_1b.o \
+		    two_file_test_2.o two_file_test_main.o gcctestdir/ld
+	cp -f two_file_test_1b_v1.o two_file_test_tmp_5.o
+	$(TEST_AR) rc two_file_test_5.a two_file_test_1.o two_file_test_tmp_5.o two_file_test_2.o
+	$(CXXLINK) -Wl,--incremental-full -Bgcctestdir/ two_file_test_main.o two_file_test_5.a
+	@sleep 1
+	cp -f two_file_test_1b.o two_file_test_tmp_5.o
+	$(TEST_AR) rc two_file_test_5.a two_file_test_1.o two_file_test_tmp_5.o two_file_test_2.o
+	$(CXXLINK) -Wl,--incremental-update -Bgcctestdir/ two_file_test_main.o two_file_test_5.a
+
+# Test the --incremental-unchanged flag with an archive library.
+# The second link should not update the library.
+check_PROGRAMS += incremental_test_6
+MOSTLYCLEANFILES += two_file_test_6.a
+incremental_test_6: two_file_test_1.o two_file_test_1b_v1.o two_file_test_1b.o \
+		    two_file_test_2.o two_file_test_main.o gcctestdir/ld
+	cp -f two_file_test_1b.o two_file_test_tmp_6.o
+	$(TEST_AR) rc two_file_test_6.a two_file_test_1.o two_file_test_tmp_6.o two_file_test_2.o
+	$(CXXLINK) -Wl,--incremental-full -Bgcctestdir/ two_file_test_main.o two_file_test_6.a
+	@sleep 1
+	cp -f two_file_test_1b_v1.o two_file_test_tmp_6.o
+	$(TEST_AR) rc two_file_test_6.a two_file_test_1.o two_file_test_tmp_6.o two_file_test_2.o
+	$(CXXLINK) -Wl,--incremental-update -Bgcctestdir/ two_file_test_main.o -Wl,--incremental-unchanged two_file_test_6.a -Wl,--incremental-unknown
+
 check_PROGRAMS += incremental_copy_test
 incremental_copy_test: copy_test_v1.o copy_test.o copy_test_1.so copy_test_2.so
 	cp -f copy_test_v1.o copy_test_tmp.o
