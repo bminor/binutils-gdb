@@ -1,5 +1,12 @@
 2011-07-05  Ian Lance Taylor  <iant@google.com>
 
+	PR gold/12392
+	* i386.cc (Target_i386::do_finalize_sections): Define __rel_iplt
+	symbols if necessary.
+	* x86_64.cc (Target_x86_64::do_finalize_sections): Likewise.
+
+2011-07-05  Ian Lance Taylor  <iant@google.com>
+
 	PR gold/12952
 	* resolve.cc (Symbol::override_base_with_special): Simply override
 	version with special symbol version, ignoring previous version.

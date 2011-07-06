@@ -2599,6 +2599,46 @@ Target_x86_64::do_finalize_sections(
       uint64_t data_size = this->got_plt_->current_data_size();
       symtab->get_sized_symbol<64>(sym)->set_symsize(data_size);
     }
+
+  if (parameters->doing_static_link() && this->plt_ == NULL)
+    {
+      // If linking statically, make sure that the __rela_iplt symbols
+      // were defined if necessary, even if we didn't create a PLT.
+      static const Define_symbol_in_segment syms[] =
+	{
+	  {
+	    "__rela_iplt_start",	// name
+	    elfcpp::PT_LOAD,		// segment_type
+	    elfcpp::PF_W,		// segment_flags_set
+	    elfcpp::PF(0),		// segment_flags_clear
+	    0,				// value
+	    0,				// size
+	    elfcpp::STT_NOTYPE,		// type
+	    elfcpp::STB_GLOBAL,		// binding
+	    elfcpp::STV_HIDDEN,		// visibility
+	    0,				// nonvis
+	    Symbol::SEGMENT_START,	// offset_from_base
+	    true			// only_if_ref
+	  },
+	  {
+	    "__rela_iplt_end",		// name
+	    elfcpp::PT_LOAD,		// segment_type
+	    elfcpp::PF_W,		// segment_flags_set
+	    elfcpp::PF(0),		// segment_flags_clear
+	    0,				// value
+	    0,				// size
+	    elfcpp::STT_NOTYPE,		// type
+	    elfcpp::STB_GLOBAL,		// binding
+	    elfcpp::STV_HIDDEN,		// visibility
+	    0,				// nonvis
+	    Symbol::SEGMENT_START,	// offset_from_base
+	    true			// only_if_ref
+	  }
+	};
+
+      symtab->define_symbols(layout, 2, syms,
+			     layout->script_options()->saw_sections_clause());
+    }
 }
 
 // Perform a relocation.
