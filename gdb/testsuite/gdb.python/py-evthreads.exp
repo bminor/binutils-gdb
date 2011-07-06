@@ -86,7 +86,7 @@ gdb_expect {
 send_gdb "continue&\n"
 gdb_expect {
     -re ".*event type: continue.*
-.*thread num: 1.*\r\n$gdb_prompt " {
+.*thread num: 1.*\r\n$gdb_prompt $" {
         pass "continue thread 1"
     }
     timeout {

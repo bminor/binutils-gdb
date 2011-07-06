@@ -1,3 +1,7 @@
+2011-07-06  Marek Polacek  <mpolacek@redhat.com>
+
+	* gdb.python/py-evthreads.exp: Add missing `$'.
+
 2011-07-06  Jie Zhang  <jie.zhang@analog.com>
 
 	* config/bfin.exp: New file.
