@@ -1,5 +1,11 @@
 2011-07-05  Ian Lance Taylor  <iant@google.com>
 
+	PR gold/12952
+	* resolve.cc (Symbol::override_base_with_special): Simply override
+	version with special symbol version, ignoring previous version.
+
+2011-07-05  Ian Lance Taylor  <iant@google.com>
+
 	* object.cc (Sized_relobj_file::include_section_group): Add
 	information to comment about signature location.
 

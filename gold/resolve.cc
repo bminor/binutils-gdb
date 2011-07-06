@@ -911,7 +911,15 @@ Symbol::override_base_with_special(const Symbol* from)
     }
 
   if (same_name)
-    this->override_version(from->version_);
+    {
+      // When overriding a versioned symbol with a special symbol, we
+      // may be changing the version.  This will happen if we see a
+      // special symbol such as "_end" defined in a shared object with
+      // one version (from a version script), but we want to define it
+      // here with a different version (from a different version
+      // script).
+      this->version_ = from->version_;
+    }
   this->type_ = from->type_;
   this->binding_ = from->binding_;
   this->override_visibility(from->visibility_);
