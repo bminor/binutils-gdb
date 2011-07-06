@@ -1,3 +1,8 @@
+2011-07-06  Tristan Gingold  <gingold@adacore.com>
+
+	* mach-o.h: Move loader related definitions to
+	include/mach-o/loader.h.  Include it.
+
 2011-07-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf64-x86-64.c (elf_backend_post_process_headers): Always
