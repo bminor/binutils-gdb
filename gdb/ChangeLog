@@ -1,3 +1,7 @@
+2011-07-06  Joel Brobecker  <brobecker@adacore.com>
+
+	* version.in: Update GDB version number to 7.2.91.
+
 2011-07-06  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* jit.c (jit_inferior_init): Forward declare.
