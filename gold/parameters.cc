@@ -248,6 +248,14 @@ Parameters::incremental() const
   return this->incremental_mode_ != General_options::INCREMENTAL_OFF;
 }
 
+// Return true if we are doing a full incremental link.
+
+bool
+Parameters::incremental_full() const
+{
+  return this->incremental_mode_ == General_options::INCREMENTAL_FULL;
+}
+
 // Return true if we are doing an incremental update.
 
 bool

@@ -1903,7 +1903,7 @@ MOSTLYCLEANFILES += two_file_test_tmp_2.o
 incremental_test_2: two_file_test_1_v1.o two_file_test_1.o two_file_test_1b.o \
 		    two_file_test_2.o two_file_test_main.o gcctestdir/ld
 	cp -f two_file_test_1_v1.o two_file_test_tmp_2.o
-	$(CXXLINK) -Wl,--incremental-full -Bgcctestdir/ two_file_test_tmp_2.o two_file_test_1b.o two_file_test_2.o two_file_test_main.o
+	$(CXXLINK) -Wl,--incremental-full,--incremental-patch=100 -Bgcctestdir/ two_file_test_tmp_2.o two_file_test_1b.o two_file_test_2.o two_file_test_main.o
 	@sleep 1
 	cp -f two_file_test_1.o two_file_test_tmp_2.o
 	$(CXXLINK) -Wl,--incremental-update -Bgcctestdir/ two_file_test_tmp_2.o two_file_test_1b.o two_file_test_2.o two_file_test_main.o

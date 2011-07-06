@@ -98,6 +98,9 @@ extern void
 parse_double(const char* option_name, const char* arg, double* retval);
 
 extern void
+parse_percent(const char* option_name, const char* arg, double* retval);
+
+extern void
 parse_string(const char* option_name, const char* arg, const char** retval);
 
 extern void
@@ -371,6 +374,12 @@ struct Struct_special : public Struct_var
   DEFINE_var(varname__, dashes__, shortname__, default_value__,		 \
 	     #default_value__, helpstring__, helparg__, false,		 \
 	     double, double, options::parse_double)
+
+#define DEFINE_percent(varname__, dashes__, shortname__, default_value__, \
+		       helpstring__, helparg__)				  \
+  DEFINE_var(varname__, dashes__, shortname__, default_value__ / 100.0,	  \
+	     #default_value__, helpstring__, helparg__, false,		  \
+	     double, double, options::parse_percent)
 
 #define DEFINE_string(varname__, dashes__, shortname__, default_value__, \
                       helpstring__, helparg__)                           \
@@ -812,6 +821,10 @@ class General_options
 
   DEFINE_special(incremental_unknown, options::TWO_DASHES, '\0',
                  N_("Use timestamps to check files (default)"), NULL);
+
+  DEFINE_percent(incremental_patch, options::TWO_DASHES, '\0', 10,
+		 N_("Amount of extra space to allocate for patches"),
+		 N_("PERCENT"));
 
   DEFINE_string(init, options::ONE_DASH, '\0', "_init",
                 N_("Call SYMBOL at load-time"), N_("SYMBOL"));

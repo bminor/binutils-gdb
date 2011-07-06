@@ -1,3 +1,37 @@
+2011-07-06  Cary Coutant  <ccoutant@google.com>
+
+	* incremental.cc (Incremental_inputs::report_command_line): Ignore
+	--incremental-patch option.
+	* layout.cc (Free_list::allocate): Extend allocation beyond original
+	end if enabled.
+	(Layout::make_output_section): Mark sections that should get
+	patch space.
+	* options.cc (parse_percent): New function.
+	* options.h (parse_percent): New function.
+	(DEFINE_percent): New macro.
+	(General_options): Add --incremental-patch option.
+	* output.cc (Output_section::Output_section): Initialize new data
+	members.
+	(Output_section::add_input_section): Print section name when out
+	of patch space.
+	(Output_section::add_output_section_data): Likewise.
+	(Output_section::set_final_data_size): Add patch space when
+	doing --incremental-full.
+	(Output_section::do_reset_address_and_file_offset): Remove patch
+	space.
+	(Output_segment::set_section_list_addresses): Print debug output
+	only if --incremental-update.
+	* output.h (Output_section::set_is_patch_space_allowed): New function.
+	(Output_section::is_patch_space_allowed_): New data member.
+	(Output_section::patch_space_): New data member.
+	* parameters.cc (Parameters::incremental_full): New function.
+	* parameters.h (Parameters::incremental_full): New function
+	* testsuite/Makefile.am (incremental_test_2): Add test for
+	--incremental-patch option.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/two_file_test_1_v1.cc (t1, t2, t3): Add comments.
+	(t18): Remove function body.
+
 2011-07-05  Doug Kwan  <dougkwan@google.com>
 
 	PR gold/12771

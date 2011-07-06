@@ -235,6 +235,17 @@ parse_double(const char* option_name, const char* arg, double* retval)
 }
 
 void
+parse_percent(const char* option_name, const char* arg, double* retval)
+{
+  char* endptr;
+  *retval = strtod(arg, &endptr) / 100.0;
+  if (*endptr != '\0')
+    gold_fatal(_("%s: invalid option value "
+		 "(expected a floating point number): %s"),
+	       option_name, arg);
+}
+
+void
 parse_string(const char* option_name, const char* arg, const char** retval)
 {
   if (*arg == '\0')

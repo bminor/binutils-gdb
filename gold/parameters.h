@@ -159,6 +159,10 @@ class Parameters
   bool
   incremental() const;
 
+  // Return true if we are doing a full incremental link.
+  bool
+  incremental_full() const;
+
   // Return true if we are doing an incremental update.
   bool
   incremental_update() const;

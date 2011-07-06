@@ -62,7 +62,7 @@
 bool
 t1()
 {
-  return t1_2() == 0;
+  return t1_2() == 0;  // Intentionally wrong.
 }
 
 // 2  Code in file 1 refers to global data in file 2.
@@ -70,7 +70,7 @@ t1()
 bool
 t2()
 {
-  return v2 == 0;
+  return v2 == 0;  // Intentionally wrong.
 }
 
 // 3  Code in file 1 referes to common symbol in file 2.
@@ -78,7 +78,7 @@ t2()
 bool
 t3()
 {
-  return v3 == 0;
+  return v3 == 0;  // Intentionally wrong.
 }
 
 // 4  Code in file 1 refers to offset within global data in file 2.
@@ -231,13 +231,6 @@ t17()
 bool
 t18()
 {
-  char c = 'a';
-  for (int i = 0; i < T17_COUNT; ++i)
-    {
-      const char* s = f18(i);
-      if (s[0] != c || s[1] != '\0')
-        return false;
-      ++c;
-    }
+  // Stubbed out; full implementation in two_file_test_1.cc.
   return true;
 }

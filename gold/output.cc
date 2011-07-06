@@ -2153,10 +2153,12 @@ Output_section::Output_section(const char* name, elfcpp::Elf_Word type,
     is_noload_(false),
     always_keeps_input_sections_(false),
     has_fixed_layout_(false),
+    is_patch_space_allowed_(false),
     tls_offset_(0),
     checkpoint_(NULL),
     lookup_maps_(new Output_section_lookup_maps),
-    free_list_()
+    free_list_(),
+    patch_space_(0)
 {
   // An unallocated section has no address.  Forcing this means that
   // we don't need special treatment for symbols defined in debug
@@ -2271,7 +2273,9 @@ Output_section::add_input_section(Layout* layout,
       offset_in_section = this->free_list_.allocate(input_section_size,
 						    addralign, 0);
       if (offset_in_section == -1)
-        gold_fallback(_("out of patch space; relink with --incremental-full"));
+        gold_fallback(_("out of patch space in section %s; "
+			"relink with --incremental-full"),
+		      this->name());
       aligned_offset_in_section = offset_in_section;
     }
   else
@@ -2375,8 +2379,9 @@ Output_section::add_output_section_data(Output_section_data* posd)
 	  offset_in_section = this->free_list_.allocate(posd->data_size(),
 							posd->addralign(), 0);
 	  if (offset_in_section == -1)
-	    gold_fallback(_("out of patch space; "
-			    "relink with --incremental-full"));
+	    gold_fallback(_("out of patch space in section %s; "
+			    "relink with --incremental-full"),
+			  this->name());
 	  // Finalize the address and offset now.
 	  uint64_t addr = this->address();
 	  off_t offset = this->offset();
@@ -2946,30 +2951,48 @@ Output_section::update_data_size()
 void
 Output_section::set_final_data_size()
 {
+  off_t data_size;
+
   if (this->input_sections_.empty())
+    data_size = this->current_data_size_for_child();
+  else
     {
-      this->set_data_size(this->current_data_size_for_child());
-      return;
+      if (this->must_sort_attached_input_sections()
+	  || this->input_section_order_specified())
+	this->sort_attached_input_sections();
+
+      uint64_t address = this->address();
+      off_t startoff = this->offset();
+      off_t off = startoff + this->first_input_offset_;
+      for (Input_section_list::iterator p = this->input_sections_.begin();
+	   p != this->input_sections_.end();
+	   ++p)
+	{
+	  off = align_address(off, p->addralign());
+	  p->set_address_and_file_offset(address + (off - startoff), off,
+					 startoff);
+	  off += p->data_size();
+	}
+      data_size = off - startoff;
     }
 
-  if (this->must_sort_attached_input_sections()
-      || this->input_section_order_specified())
-    this->sort_attached_input_sections();
-
-  uint64_t address = this->address();
-  off_t startoff = this->offset();
-  off_t off = startoff + this->first_input_offset_;
-  for (Input_section_list::iterator p = this->input_sections_.begin();
-       p != this->input_sections_.end();
-       ++p)
+  // For full incremental links, we want to allocate some patch space
+  // in most sections for subsequent incremental updates.
+  if (this->is_patch_space_allowed_ && parameters->incremental_full())
     {
-      off = align_address(off, p->addralign());
-      p->set_address_and_file_offset(address + (off - startoff), off,
-				     startoff);
-      off += p->data_size();
+      double pct = parameters->options().incremental_patch();
+      off_t extra = static_cast<off_t>(data_size * pct);
+      off_t new_size = align_address(data_size + extra, this->addralign());
+      this->patch_space_ = new_size - data_size;
+      gold_debug(DEBUG_INCREMENTAL,
+		 "set_final_data_size: %08lx + %08lx: section %s",
+		 static_cast<long>(data_size),
+		 static_cast<long>(this->patch_space_),
+		 this->name());
+      data_size = new_size;
     }
 
-  this->set_data_size(off - startoff);
+  this->set_data_size(data_size);
 }
 
 // Reset the address and file offset.
@@ -2988,8 +3011,16 @@ Output_section::do_reset_address_and_file_offset()
        p != this->input_sections_.end();
        ++p)
     p->reset_address_and_file_offset();
+
+  // Remove any patch space that was added in set_final_data_size.
+  if (this->patch_space_ > 0)
+    {
+      this->set_current_data_size_for_child(this->current_data_size_for_child()
+					    - this->patch_space_);
+      this->patch_space_ = 0;
+    }
 }
-  
+
 // Return true if address and file offset have the values after reset.
 
 bool
@@ -4265,14 +4296,15 @@ Output_segment::set_section_list_addresses(Layout* layout, bool reset,
 	  (*p)->finalize_data_size();
 	}
 
-      gold_debug(DEBUG_INCREMENTAL,
-		 "set_section_list_addresses: %08lx %08lx %s",
-		 static_cast<long>(off),
-		 static_cast<long>((*p)->data_size()),
-		 ((*p)->output_section() != NULL
-		  ? (*p)->output_section()->name() : "(special)"));
+      if (parameters->incremental_update())
+	gold_debug(DEBUG_INCREMENTAL,
+		   "set_section_list_addresses: %08lx %08lx %s",
+		   static_cast<long>(off),
+		   static_cast<long>((*p)->data_size()),
+		   ((*p)->output_section() != NULL
+		    ? (*p)->output_section()->name() : "(special)"));
 
-      // We want to ignore the size of a SHF_TLS or SHT_NOBITS
+      // We want to ignore the size of a SHF_TLS SHT_NOBITS
       // section.  Such a section does not affect the size of a
       // PT_LOAD segment.
       if (!(*p)->is_section_flag_set(elfcpp::SHF_TLS)

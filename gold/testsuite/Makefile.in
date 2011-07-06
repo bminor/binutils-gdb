@@ -4783,7 +4783,7 @@ uninstall-am:
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@incremental_test_2: two_file_test_1_v1.o two_file_test_1.o two_file_test_1b.o \
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@		    two_file_test_2.o two_file_test_main.o gcctestdir/ld
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	cp -f two_file_test_1_v1.o two_file_test_tmp_2.o
-@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Wl,--incremental-full -Bgcctestdir/ two_file_test_tmp_2.o two_file_test_1b.o two_file_test_2.o two_file_test_main.o
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Wl,--incremental-full,--incremental-patch=100 -Bgcctestdir/ two_file_test_tmp_2.o two_file_test_1b.o two_file_test_2.o two_file_test_main.o
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	@sleep 1
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	cp -f two_file_test_1.o two_file_test_tmp_2.o
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Wl,--incremental-update -Bgcctestdir/ two_file_test_tmp_2.o two_file_test_1b.o two_file_test_2.o two_file_test_main.o

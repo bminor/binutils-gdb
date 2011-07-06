@@ -168,6 +168,11 @@ Free_list::allocate(off_t len, uint64_t align, off_t minoff)
       off_t start = p->start_ > minoff ? p->start_ : minoff;
       start = align_address(start, align);
       off_t end = start + len;
+      if (end > p->end_ && p->end_ == this->length_ && this->extend_)
+	{
+	  this->length_ = end;
+	  p->end_ = end;
+	}
       if (end <= p->end_)
 	{
 	  if (p->start_ + 3 >= start && p->end_ <= end + 3)
@@ -185,6 +190,12 @@ Free_list::allocate(off_t len, uint64_t align, off_t minoff)
 	    }
 	  return start;
 	}
+    }
+  if (this->extend_)
+    {
+      off_t start = align_address(this->length_, align);
+      this->length_ = start + len;
+      return start;
     }
   return -1;
 }
@@ -1412,6 +1423,21 @@ Layout::make_output_section(const char* name, elfcpp::Elf_Word type,
       && strncmp(name, ".stab", 5) == 0
       && strcmp(name + strlen(name) - 3, "str") == 0)
     this->have_stabstr_section_ = true;
+
+  // During a full incremental link, we add patch space to most
+  // PROGBITS and NOBITS sections.  Flag those that may be
+  // arbitrarily padded.
+  if ((type == elfcpp::SHT_PROGBITS || type == elfcpp::SHT_NOBITS)
+      && order != ORDER_INTERP
+      && order != ORDER_INIT
+      && order != ORDER_PLT
+      && order != ORDER_FINI
+      && order != ORDER_RELRO_LAST
+      && order != ORDER_NON_RELRO_FIRST
+      && strcmp(name, ".ctors") != 0
+      && strcmp(name, ".dtors") != 0
+      && strcmp(name, ".jcr") != 0)
+    os->set_is_patch_space_allowed();
 
   // If we have already attached the sections to segments, then we
   // need to attach this one now.  This happens for sections created
