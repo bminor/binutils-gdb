@@ -117,8 +117,12 @@ update_locations (const void *const addr, int idx)
     }
 }
 
+#ifndef MAIN
+#define MAIN main
+#endif
+
 int
-main (int argc, char *argv[])
+MAIN (int argc, char *argv[])
 {
   /* These variables are here so they can easily be set from jit.exp.  */
   const char *libname = NULL;

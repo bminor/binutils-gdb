@@ -1,3 +1,8 @@
+2011-07-06  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* jit.c (jit_inferior_init): Forward declare.
+	(jit_breakpoint_re_set_internal): Call jit_inferior_init.
+
 2011-07-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix false GCC warning.
