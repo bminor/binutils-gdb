@@ -63,6 +63,11 @@ class Script_info;
 
 enum Incremental_disposition
 {
+  // Startup files that appear before the first disposition option.
+  // These will default to INCREMENTAL_CHECK unless the
+  // --incremental-startup-unchanged option is given.
+  // (For files added implicitly by gcc before any user options.)
+  INCREMENTAL_STARTUP,
   // Determine the status from the timestamp (default).
   INCREMENTAL_CHECK,
   // Assume the file changed from the previous build.
@@ -822,6 +827,10 @@ class General_options
   DEFINE_special(incremental_unknown, options::TWO_DASHES, '\0',
                  N_("Use timestamps to check files (default)"), NULL);
 
+  DEFINE_special(incremental_startup_unchanged, options::TWO_DASHES, '\0',
+                 N_("Assume startup files unchanged "
+		    "(files preceding this option)"), NULL);
+
   DEFINE_percent(incremental_patch, options::TWO_DASHES, '\0', 10,
 		 N_("Amount of extra space to allocate for patches"),
 		 N_("PERCENT"));
@@ -1342,6 +1351,12 @@ class General_options
   incremental_disposition() const
   { return this->incremental_disposition_; }
 
+  // The disposition to use for startup files (those that precede the
+  // first --incremental-changed, etc. option).
+  Incremental_disposition
+  incremental_startup_disposition() const
+  { return this->incremental_startup_disposition_; }
+
   // Return true if S is the name of a library excluded from automatic
   // symbol export.
   bool
@@ -1459,9 +1474,12 @@ class General_options
   // --incremental-unchanged or --incremental-unknown option.  The
   // value may change as we proceed parsing the command line flags.
   Incremental_disposition incremental_disposition_;
+  // The disposition to use for startup files (those marked
+  // INCREMENTAL_STARTUP).
+  Incremental_disposition incremental_startup_disposition_;
   // Whether we have seen one of the options that require incremental
-  // build (--incremental-changed, --incremental-unchanged or
-  // --incremental-unknown)
+  // build (--incremental-changed, --incremental-unchanged,
+  // --incremental-unknown, or --incremental-startup-unchanged).
   bool implicit_incremental_;
   // Libraries excluded from automatic export, via --exclude-libs.
   Unordered_set<std::string> excluded_libs_;

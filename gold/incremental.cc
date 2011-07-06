@@ -460,6 +460,12 @@ Sized_incremental_binary<size, big_endian>::do_file_has_changed(
   if (input_argument != NULL)
     disp = input_argument->file().options().incremental_disposition();
 
+  // For files at the beginning of the command line (i.e., those added
+  // implicitly by gcc), check whether the --incremental-startup-unchanged
+  // option was used.
+  if (disp == INCREMENTAL_STARTUP)
+    disp = parameters->options().incremental_startup_disposition();
+
   if (disp != INCREMENTAL_CHECK)
     return disp == INCREMENTAL_CHANGED;
 
@@ -938,6 +944,7 @@ Incremental_inputs::report_command_line(int argc, const char* const* argv)
 	  || strcmp(argv[i], "--incremental-changed") == 0
 	  || strcmp(argv[i], "--incremental-unchanged") == 0
 	  || strcmp(argv[i], "--incremental-unknown") == 0
+	  || strcmp(argv[i], "--incremental-startup-unchanged") == 0
 	  || is_prefix_of("--incremental-base=", argv[i])
 	  || is_prefix_of("--incremental-patch=", argv[i])
 	  || is_prefix_of("--debug=", argv[i]))

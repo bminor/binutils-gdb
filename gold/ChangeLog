@@ -1,5 +1,19 @@
 2011-07-06  Cary Coutant  <ccoutant@google.com>
 
+	* incremental.cc (Sized_incremental_binary::do_file_has_changed):
+	Check disposition for startup file.
+	(Incremental_inputs::report_command_line): Ignore
+	--incremental-startup-unchanged option.
+	* options.cc (General_options::parse_incremental_startup_unchanged):
+	New function.
+	(General_options::General_options): Initialize new data member.
+	* options.h (Incremental_disposition): Add INCREMENTAL_STARTUP.
+	(General_options): Add --incremental-startup-unchanged option.
+	(General_options::incremental_startup_disposition): New function.
+	(General_options::incremental_startup_disposition_): New data member.
+
+2011-07-06  Cary Coutant  <ccoutant@google.com>
+
 	* incremental.cc (Sized_incremental_binary::setup_readers): Pass
 	input file index to Script_info ctor.
 	(Sized_incremental_binary::do_file_has_changed): Find the

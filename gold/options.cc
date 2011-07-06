@@ -398,6 +398,14 @@ General_options::parse_incremental_unknown(const char*, const char*,
 }
 
 void
+General_options::parse_incremental_startup_unchanged(const char*, const char*,
+						     Command_line*)
+{
+  this->implicit_incremental_ = true;
+  this->incremental_startup_disposition_ = INCREMENTAL_UNCHANGED;
+}
+
+void
 General_options::parse_library(const char*, const char* arg,
                                Command_line* cmdline)
 {
@@ -910,7 +918,8 @@ General_options::General_options()
     plugins_(NULL),
     dynamic_list_(),
     incremental_mode_(INCREMENTAL_OFF),
-    incremental_disposition_(INCREMENTAL_CHECK),
+    incremental_disposition_(INCREMENTAL_STARTUP),
+    incremental_startup_disposition_(INCREMENTAL_CHECK),
     implicit_incremental_(false),
     excluded_libs_(),
     symbols_to_retain_(),
