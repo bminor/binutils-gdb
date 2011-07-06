@@ -1,3 +1,9 @@
+2011-07-06  Hui Zhu  <teawater@gmail.com>
+
+	* remote.c (remote_start_remote): Add TRY_CATCH for
+	remote_get_trace_status.
+	* tracepoint.c (disconnect_tracing): Ditto.
+
 2011-07-05  Tom Tromey  <tromey@redhat.com>
 
 	* symtab.c (operator_chars): Now static.
