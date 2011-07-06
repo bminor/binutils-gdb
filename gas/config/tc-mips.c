@@ -3279,7 +3279,6 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	     bfd_reloc_code_real_type *reloc_type)
 {
   unsigned long prev_pinfo, pinfo;
-  unsigned long prev_pinfo2, pinfo2;
   bfd_boolean relaxed_branch = FALSE;
   enum append_method method;
 
@@ -3292,9 +3291,7 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
   file_ase_mips16 |= mips_opts.mips16;
 
   prev_pinfo = history[0].insn_mo->pinfo;
-  prev_pinfo2 = history[0].insn_mo->pinfo2;
   pinfo = ip->insn_mo->pinfo;
-  pinfo2 = ip->insn_mo->pinfo2;
 
   if (address_expr == NULL)
     ip->complete_p = 1;
