@@ -2343,6 +2343,20 @@ pr12826_1.o: pr12826_1.s
 pr12826_2.o: pr12826_2.s
 	$(TEST_AS) -o $@ $<
 
+check_SCRIPTS += arm_unaligned_reloc.sh
+check_DATA += arm_unaligned_reloc.stdout
+
+arm_unaligned_reloc.stdout: arm_unaligned_reloc
+	$(TEST_OBJDUMP) -D $< > $@
+
+arm_unaligned_reloc: arm_unaligned_reloc.o ../ld-new
+	../ld-new -o $@ $<
+
+arm_unaligned_reloc.o: arm_unaligned_reloc.s
+	$(TEST_AS) -o $@ $<
+
+MOSTLYCLEANFILES += arm_unaligned_reloc
+
 endif DEFAULT_TARGET_ARM
 
 endif NATIVE_OR_CROSS_LINKER

@@ -3215,11 +3215,10 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
        const Symbol_value<32>* psymval)
   {
     typedef typename elfcpp::Swap<8, big_endian>::Valtype Valtype;
-    typedef typename elfcpp::Swap<32, big_endian>::Valtype Reltype;
     Valtype* wv = reinterpret_cast<Valtype*>(view);
     Valtype val = elfcpp::Swap<8, big_endian>::readval(wv);
-    Reltype addend = utils::sign_extend<8>(val);
-    Reltype x = psymval->value(object, addend);
+    int32_t addend = utils::sign_extend<8>(val);
+    Arm_address x = psymval->value(object, addend);
     val = utils::bit_select(val, x, 0xffU);
     elfcpp::Swap<8, big_endian>::writeval(wv, val);
 
@@ -3277,15 +3276,17 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
 	const Sized_relobj_file<32, big_endian>* object,
 	const Symbol_value<32>* psymval)
   {
-    typedef typename elfcpp::Swap<16, big_endian>::Valtype Valtype;
+    typedef typename elfcpp::Swap_unaligned<16, big_endian>::Valtype Valtype;
     typedef typename elfcpp::Swap<32, big_endian>::Valtype Reltype;
-    Valtype* wv = reinterpret_cast<Valtype*>(view);
-    Valtype val = elfcpp::Swap<16, big_endian>::readval(wv);
-    Reltype addend = utils::sign_extend<16>(val);
-    Reltype x = psymval->value(object, addend);
+    Valtype val = elfcpp::Swap_unaligned<16, big_endian>::readval(view);
+    int32_t addend = utils::sign_extend<16>(val);
+    Arm_address x = psymval->value(object, addend);
     val = utils::bit_select(val, x, 0xffffU);
-    elfcpp::Swap<16, big_endian>::writeval(wv, val);
-    return (utils::has_signed_unsigned_overflow<16>(x)
+    elfcpp::Swap_unaligned<16, big_endian>::writeval(view, val);
+
+    // R_ARM_ABS16 permits signed or unsigned results.
+    int signed_x = static_cast<int32_t>(x);
+    return ((signed_x < -32768 || signed_x > 65536)
 	    ? This::STATUS_OVERFLOW
 	    : This::STATUS_OKAY);
   }
@@ -3297,11 +3298,10 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
 	const Symbol_value<32>* psymval,
 	Arm_address thumb_bit)
   {
-    typedef typename elfcpp::Swap<32, big_endian>::Valtype Valtype;
-    Valtype* wv = reinterpret_cast<Valtype*>(view);
-    Valtype addend = elfcpp::Swap<32, big_endian>::readval(wv);
+    typedef typename elfcpp::Swap_unaligned<32, big_endian>::Valtype Valtype;
+    Valtype addend = elfcpp::Swap_unaligned<32, big_endian>::readval(view);
     Valtype x = psymval->value(object, addend) | thumb_bit;
-    elfcpp::Swap<32, big_endian>::writeval(wv, x);
+    elfcpp::Swap_unaligned<32, big_endian>::writeval(view, x);
     return This::STATUS_OKAY;
   }
 
@@ -3313,11 +3313,10 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
 	Arm_address address,
 	Arm_address thumb_bit)
   {
-    typedef typename elfcpp::Swap<32, big_endian>::Valtype Valtype;
-    Valtype* wv = reinterpret_cast<Valtype*>(view);
-    Valtype addend = elfcpp::Swap<32, big_endian>::readval(wv);
+    typedef typename elfcpp::Swap_unaligned<32, big_endian>::Valtype Valtype;
+    Valtype addend = elfcpp::Swap_unaligned<32, big_endian>::readval(view);
     Valtype x = (psymval->value(object, addend) | thumb_bit) - address;
-    elfcpp::Swap<32, big_endian>::writeval(wv, x);
+    elfcpp::Swap_unaligned<32, big_endian>::writeval(view, x);
     return This::STATUS_OKAY;
   }
 
@@ -3435,13 +3434,12 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
 	 Arm_address address,
 	 Arm_address thumb_bit)
   {
-    typedef typename elfcpp::Swap<32, big_endian>::Valtype Valtype;
-    Valtype* wv = reinterpret_cast<Valtype*>(view);
-    Valtype val = elfcpp::Swap<32, big_endian>::readval(wv);
+    typedef typename elfcpp::Swap_unaligned<32, big_endian>::Valtype Valtype;
+    Valtype val = elfcpp::Swap_unaligned<32, big_endian>::readval(view);
     Valtype addend = utils::sign_extend<31>(val);
     Valtype x = (psymval->value(object, addend) | thumb_bit) - address;
     val = utils::bit_select(val, x, 0x7fffffffU);
-    elfcpp::Swap<32, big_endian>::writeval(wv, val);
+    elfcpp::Swap_unaligned<32, big_endian>::writeval(view, val);
     return (utils::has_overflow<31>(x) ?
 	    This::STATUS_OVERFLOW : This::STATUS_OKAY);
   }
@@ -5221,8 +5219,7 @@ Arm_exidx_cantunwind::do_fixed_endian_write(Output_file* of)
   const section_size_type oview_size = 8;
   unsigned char* const oview = of->get_output_view(offset, oview_size);
   
-  typedef typename elfcpp::Swap<32, big_endian>::Valtype Valtype;
-  Valtype* wv = reinterpret_cast<Valtype*>(oview);
+  typedef typename elfcpp::Swap_unaligned<32, big_endian>::Valtype Valtype;
 
   Output_section* os = this->relobj_->output_section(this->shndx_);
   gold_assert(os != NULL);
@@ -5263,8 +5260,10 @@ Arm_exidx_cantunwind::do_fixed_endian_write(Output_file* of)
   uint32_t prel31_offset = output_address - this->address();
   if (utils::has_overflow<31>(offset))
     gold_error(_("PREL31 overflow in EXIDX_CANTUNWIND entry"));
-  elfcpp::Swap<32, big_endian>::writeval(wv, prel31_offset & 0x7fffffffU);
-  elfcpp::Swap<32, big_endian>::writeval(wv + 1, elfcpp::EXIDX_CANTUNWIND);
+  elfcpp::Swap_unaligned<32, big_endian>::writeval(oview,
+						   prel31_offset & 0x7fffffffU);
+  elfcpp::Swap_unaligned<32, big_endian>::writeval(oview + 4,
+						   elfcpp::EXIDX_CANTUNWIND);
 
   of->write_output_view(this->offset(), oview_size, oview);
 }

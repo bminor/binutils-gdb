@@ -1,3 +1,19 @@
+2011-07-05  Doug Kwan  <dougkwan@google.com>
+
+	PR gold/12771
+	* arm.cc (Arm_relocate_functions::abs8): Use int32_t for addend and
+	Arm_Address type for relocation result.
+	(Arm_relocate_functions::abs16): Use unaligned access.  Also fix
+	overflow check.
+	(Arm_relocate_functions::abs32): Use unaligned access.
+	(Arm_relocate_functions::rel32): Ditto.
+	(Arm_relocate_functions::prel31): Ditto.
+	(Arm_exidix_cantunwind::do_fixed_endian_write): Ditto.
+	* testsuite/Makefile.am: Add new test arm_unaligned_reloc for unaligned
+	static data relocations.
+	* testsuite/Makefile.in: Regnerate.
+	* testsuite/arm_unaligned_reloc.{s,sh}: New files.
+
 2011-07-05  Ian Lance Taylor  <iant@google.com>
 
 	PR gold/12392
