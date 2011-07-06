@@ -1,3 +1,9 @@
+2011-07-06  Jie Zhang  <jie.zhang@analog.com>
+
+	* config/bfin.exp: New file.
+	* gdb.asm/asm-source.exp (bfin-*-*): Handle Blackfin targets.
+	* gdb.asm/bfin.inc: New file.
+
 2011-07-06  Marek Polacek  <mpolacek@redhat.com>
 
 	* gdb.python/py-evthreads.exp: Fix race by adding an anchor to match 

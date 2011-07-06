@@ -43,6 +43,9 @@ switch -glob -- [istarget] {
     "arm*-*-*" {
         set asm-arch arm
     }
+    "bfin-*-*" {
+        set asm-arch bfin
+    }
     "frv-*-*" {
 	set asm-arch frv
     }
