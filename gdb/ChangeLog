@@ -21,7 +21,7 @@
 	* dwarf2read.c (process_structure_scope): Set
 	TYPE_CPLUS_REALLY_JAVA.
 
-2011-07-05  Thiago Jung Bauermann  <bauerman.ibm.com>
+2011-07-05  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* ada-lang.c: Fix typos.
 	* amd64-tdep.c: Likewise.
