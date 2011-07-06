@@ -37,6 +37,11 @@
 	* reverse.c: Likewise.
 	* s390-tdep.c: Likewise.
 
+2011-07-06  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* jit.c (jit_inferior_init): Forward declare.
+	(jit_breakpoint_re_set_internal): Call jit_inferior_init.
+
 2011-07-04  Joel Brobecker  <brobecker@adacore.com>
 
         * osabi.c (generic_elf_osabi_sniffer): Minor comment reformatting.

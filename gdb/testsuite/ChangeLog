@@ -24,6 +24,12 @@
 	* gdb.base/ifelse.exp: Likewise.
 	* gdb.base/structs.c: Likewise.
 
+2011-07-06  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* gdb.base/jit-so.exp: New test.
+	* gdb.base/jit-dlmain.c: New file.
+	* gdb.base/jit-main.c: Allow "main" to be elsewhere.
+
 2011-07-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.cp/m-static.exp: Call get_compiler_info.
