@@ -1,5 +1,11 @@
 2011-07-06  Cary Coutant  <ccoutant@google.com>
 
+	* gold/incremental.cc
+	(Output_section_incremental_inputs::write_info_blocks): Check for
+	hidden and internal symbols.
+
+2011-07-06  Cary Coutant  <ccoutant@google.com>
+
 	* incremental.cc (Sized_incremental_binary::do_file_has_changed):
 	Check disposition for startup file.
 	(Incremental_inputs::report_command_line): Ignore

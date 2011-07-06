@@ -1669,9 +1669,15 @@ Output_section_incremental_inputs<size, big_endian>::write_info_blocks(
 	        if (sym->symtab_index() == -1U)
 	          continue;
 		unsigned int flags = 0;
-		if (sym->source() == Symbol::FROM_OBJECT
-		    && sym->object() == obj
-		    && sym->is_defined())
+		// If the symbol has hidden or internal visibility, we
+		// mark it as defined in the shared object so we don't
+		// try to resolve it during an incremental update.
+		if (sym->visibility() == elfcpp::STV_HIDDEN
+		    || sym->visibility() == elfcpp::STV_INTERNAL)
+		  flags = INCREMENTAL_SHLIB_SYM_DEF;
+		else if (sym->source() == Symbol::FROM_OBJECT
+			 && sym->object() == obj
+			 && sym->is_defined())
 		  flags = INCREMENTAL_SHLIB_SYM_DEF;
 		else if (sym->is_copied_from_dynobj()
 			 && this->symtab_->get_copy_source(sym) == dynobj)
