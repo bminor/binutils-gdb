@@ -393,6 +393,12 @@ Sized_incremental_binary<size, big_endian>::do_check_inputs(
 
   if (incremental_inputs->command_line() != inputs.command_line())
     {
+      gold_debug(DEBUG_INCREMENTAL,
+      		 "old command line: %s",
+      		 inputs.command_line());
+      gold_debug(DEBUG_INCREMENTAL,
+      		 "new command line: %s",
+      		 incremental_inputs->command_line().c_str());
       explain_no_incremental(_("command line changed"));
       return false;
     }

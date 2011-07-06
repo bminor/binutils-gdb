@@ -1,5 +1,10 @@
 2011-07-06  Cary Coutant  <ccoutant@google.com>
 
+	* incremental.cc (Sized_incremental_binary::do_check_inputs): Add
+	debug output when command lines differ.
+
+2011-07-06  Cary Coutant  <ccoutant@google.com>
+
 	* incremental.cc (Incremental_inputs::report_command_line): Ignore
 	--incremental-patch option.
 	* layout.cc (Free_list::allocate): Extend allocation beyond original
