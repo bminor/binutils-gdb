@@ -40,8 +40,7 @@ static const char *const jit_descriptor_name = "__jit_debug_descriptor";
 
 static const struct inferior_data *jit_inferior_data = NULL;
 
-static void
-jit_inferior_init (struct gdbarch *gdbarch);
+static void jit_inferior_init (struct gdbarch *gdbarch);
 
 /* Non-zero if we want to see trace of jit level stuff.  */
 
