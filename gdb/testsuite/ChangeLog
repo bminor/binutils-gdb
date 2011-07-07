@@ -1,3 +1,8 @@
+2011-07-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.java/jprint.exp (print a java.lang.String): xfail without system
+	debug info.
+
 2011-07-06  Matt Rice  <ratmice@gmail.com>
 
 	* gdb.python/python.exp: Update filename paths.

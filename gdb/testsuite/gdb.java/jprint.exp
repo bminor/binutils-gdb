@@ -71,5 +71,14 @@ if [set_lang_java] then {
     setup_xfail *-*-* gcc/43260
     gdb_test "print *jprint.props" " = .*" "print a java.util.Properties"
 
-    gdb_test "print jprint.hi" "= java.lang.String \"hi maude\"" "print a java.lang.String"
+    set test "print a java.lang.String"
+    gdb_test_multiple "print jprint.hi" $test {
+	-re " = java.lang.String \"hi maude\"\r\n$gdb_prompt $" {
+	    pass $test
+	}
+	-re "There is no member named data\\.\r\n$gdb_prompt $" {
+	    # GCJ system debug info for java.lang.String is not installed.
+	    xfail $test
+	}
+    }
 }
