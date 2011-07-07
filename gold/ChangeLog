@@ -1,3 +1,12 @@
+2011-07-07  Cary Coutant  <ccoutant@google.com>
+
+	* testsuite/Makefile.am (two_file_test_1_v1_ndebug.o): New target.
+	(two_file_test_1_ndebug.o): Likewise.
+	(two_file_test_1b_ndebug.o): Likewise.
+	(two_file_test_2_ndebug.o): Likewise.
+	(two_file_test_main_ndebug.o): Likewise.
+	(incremental_test_2): Link with no-debug versions.
+
 2011-07-06  Cary Coutant  <ccoutant@google.com>
 
 	* gold/incremental.cc
