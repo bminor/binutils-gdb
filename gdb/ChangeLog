@@ -1,3 +1,8 @@
+2011-07-07  Andrew Burgess  <aburgess@broadcom.com>
+
+	* cli/cli-setshow.c (do_setshow_command): Display var_zinteger
+	variables as signed, not unsigned.
+
 2011-07-06  Joel Brobecker  <brobecker@adacore.com>
 
 	* jit.c (jit_inferior_init): Reformat forward declaration.

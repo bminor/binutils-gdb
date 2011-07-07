@@ -358,21 +358,18 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
 	    }
 	  break;
 	case var_uinteger:
-	  if (*(unsigned int *) c->var == UINT_MAX)
-	    {
-	      fputs_filtered ("unlimited", stb->stream);
-	      break;
-	    }
-	  /* else fall through */
 	case var_zuinteger:
-	case var_zinteger:
-	  fprintf_filtered (stb->stream, "%u", *(unsigned int *) c->var);
+	  if (c->var_type == var_uinteger
+	      && *(unsigned int *) c->var == UINT_MAX)
+	    fputs_filtered ("unlimited", stb->stream);
+	  else
+	    fprintf_filtered (stb->stream, "%u", *(unsigned int *) c->var);
 	  break;
 	case var_integer:
-	  if (*(int *) c->var == INT_MAX)
-	    {
-	      fputs_filtered ("unlimited", stb->stream);
-	    }
+	case var_zinteger:
+	  if (c->var_type == var_integer
+	      && *(int *) c->var == INT_MAX)
+	    fputs_filtered ("unlimited", stb->stream);
 	  else
 	    fprintf_filtered (stb->stream, "%d", *(int *) c->var);
 	  break;
