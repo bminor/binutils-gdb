@@ -1,3 +1,11 @@
+2011-07-07  Hui Zhu  <teawater@gmail.com>
+
+	Revert:
+	2011-07-06  Hui Zhu  <teawater@gmail.com>
+	* remote.c (remote_start_remote): Add TRY_CATCH for
+	remote_get_trace_status.
+	* tracepoint.c (disconnect_tracing): Ditto.
+
 2011-07-07  Andrew Burgess  <aburgess@broadcom.com>
 
 	* cli/cli-setshow.c (do_setshow_command): Display var_zinteger

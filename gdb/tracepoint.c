@@ -1900,23 +1900,11 @@ trace_status_mi (int on_stop)
 void
 disconnect_tracing (int from_tty)
 {
-  int ret = 0;
-  volatile struct gdb_exception ex;
-
   /* It can happen that the target that was tracing went away on its
      own, and we didn't notice.  Get a status update, and if the
      current target doesn't even do tracing, then assume it's not
      running anymore.  */
-  TRY_CATCH (ex, RETURN_MASK_ERROR)
-    {
-      ret = target_get_trace_status (current_trace_status ());
-    }
-  if (ex.reason < 0)
-    {
-      warning (_("%s"), ex.message);
-      ret = -1;
-    }
-  if (ret < 0)
+  if (target_get_trace_status (current_trace_status ()) < 0)
     current_trace_status ()->running = 0;
 
   /* If running interactively, give the user the option to cancel and

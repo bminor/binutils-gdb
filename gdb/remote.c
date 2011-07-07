@@ -3146,8 +3146,6 @@ remote_start_remote (int from_tty, struct target_ops *target, int extended_p)
   struct remote_state *rs = get_remote_state ();
   struct packet_config *noack_config;
   char *wait_status = NULL;
-  int ret = 0;
-  volatile struct gdb_exception ex;
 
   immediate_quit++;		/* Allow user to interrupt it.  */
 
@@ -3391,16 +3389,7 @@ remote_start_remote (int from_tty, struct target_ops *target, int extended_p)
 
   /* Possibly the target has been engaged in a trace run started
      previously; find out where things are at.  */
-  TRY_CATCH (ex, RETURN_MASK_ERROR)
-    {
-      ret = remote_get_trace_status (current_trace_status ());
-    }
-  if (ex.reason < 0)
-    {
-      warning (_("%s"), ex.message);
-      ret = -1;
-    }
-  if (ret != -1)
+  if (remote_get_trace_status (current_trace_status ()) != -1)
     {
       struct uploaded_tp *uploaded_tps = NULL;
       struct uploaded_tsv *uploaded_tsvs = NULL;
