@@ -1,5 +1,7 @@
 2011-07-08  Hans-Peter Nilsson  <hp@axis.com>
 
+	* ld-insn.c (print_insn_words): For fields, print conditionals.
+
 	Correct handling of constant named fields.
 	* gen.c (insn_field_cmp): Tweak comment about neither field
 	being an insn_field_string with a cond_eq-to-value condition.
