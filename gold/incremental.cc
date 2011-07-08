@@ -1,6 +1,6 @@
 // inremental.cc -- incremental linking support for gold
 
-// Copyright 2009, 2010 Free Software Foundation, Inc.
+// Copyright 2009, 2010, 2011 Free Software Foundation, Inc.
 // Written by Mikolaj Zalewski <mikolajz@google.com>.
 
 // This file is part of gold.
@@ -674,7 +674,7 @@ Sized_incremental_binary<size, big_endian>::do_process_got_plt(
 	  gold_debug(DEBUG_INCREMENTAL,
 		     "PLT entry %d: %s",
 		     i, sym->name());
-	  target->register_global_plt_entry(i, sym);
+	  target->register_global_plt_entry(symtab, layout, i, sym);
 	}
     }
 }

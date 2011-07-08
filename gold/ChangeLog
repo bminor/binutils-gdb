@@ -1,3 +1,111 @@
+2011-07-08  Ian Lance Taylor  <iant@google.com>
+
+	PR gold/12372
+	* target.h (Target::plt_address_for_global): New function.
+	(Target::plt_address_for_local): New function.
+	(Target::plt_section_for_global): Remove.
+	(Target::plt_section_for_local): Remove.
+	(Target::do_plt_address_for_global): New virtual function.
+	(Target::do_plt_address_for_local): New virtual function.
+	(Target::do_plt_section_for_global): Remove.
+	(Target::do_plt_section_for_local): Remove.
+	(Target::register_global_plt_entry): Add Symbol_table and Layout
+	parameters.
+	* output.cc (Output_data_got::Got_entry::write): Use
+	plt_address_for_global and plt_address_for_local.
+	* layout.cc (Layout::add_target_dynamic_tags): Use size and
+	address of output section.
+	* i386.cc (class Output_data_plt_i386): Add irelative_rel_,
+	got_irelative_, and irelative_count_ fields.  Update
+	declarations.
+	(Output_data_plt_i386::has_irelative_section): New function.
+	(Output_data_plt_i386::entry_count): Add irelative_count_.
+	(Output_data_plt_i386::set_final_data_size): Likewise.
+	(class Target_i386): Add got_irelative_ and rel_irelative_
+	fields.  Update declarations.
+	(Target_i386::Target_i386): Initialize new fields.
+	(Target_i386::do_plt_address_for_global): New function replacing
+	do_plt_section_for_global.
+	(Target_i386::do_plt_address_for_local): New function replacing
+	do_plt_section_for_local.
+	(Target_i386::got_section): Create got_irelative_.
+	(Target_i386::rel_irelative_section): New function.
+	(Output_data_plt_i386::Output_data_plt_i386): Initialize new
+	fields.  Don't define __rel_iplt_{start,end}.
+	(Output_data_plt_i386::add_entry): Add symtab and layout
+	parameters.  Change all callers.  Use different PLT and GOT for
+	IFUNC symbols.
+	(Output_data_plt_i386::add_local_ifunc_entry): Add symtab and
+	layout parameters.  Change all callers.  Use different PLT and
+	GOT.
+	(Output_data_plt_i386::rel_tls_desc): Fix formatting.
+	(Output_data_plt_i386::rel_irelative): New function.
+	(Output_data_plt_i386::address_for_global): New function.
+	(Output_data_plt_i386::address_for_local): New function.
+	(Output_data_plt_i386::do_write): Write out IRELATIVE area.  Use
+	IRELATIVE GOT when changing IFUNC GOT entries.
+	(Target_i386::Scan::global): Use IRELATIVE GOT for IRELATIVE
+	reloc.
+	(Target_i386::do_finalize_sections): Create the __rel_iplt symbols
+	if we didn't create an IRELATIVE GOT.
+	(Target_i386::Relocate::relocate): Use plt_address_for_global and
+	plt_address_for_local.
+	(Target_i386::do_dynsym_value): Use plt_address_for_global.
+	* x86_64.cc (class Output_data_plt_x86_64): Add irelative_rel_,
+	got_irelative_, and irelative_count_ fields.  Update
+	declarations.
+	(Output_data_plt_x86_64::Output_data_plt_x86_64) [both versions]:
+	Initialize new fields.  Remove symtab parameter.  Change all
+	callers.
+	(Output_data_plt_x86_64::get_tlsdesc_plt_offset): Add
+	irelative_count_.
+	(Output_data_plt_x86_64::has_irelative_section): New function.
+	(Output_data_plt_x86_64::entry_count): Add irelative_count_.
+	(class Target_x86_64): Add got_irelative_ and rel_irelative_
+	fields.  Update declarations.
+	(Target_x86_64::Target_x86_64): Initialize new fields.
+	(Target_x86_64::do_plt_address_for_global): New function replacing
+	do_plt_section_for_global.
+	(Target_x86_64::do_plt_address_for_local): New function replacing
+	do_plt_section_for_local.
+	(Target_x86_64::got_section): Create got_irelative_.
+	(Target_x86_64::rela_irelative_section): New function.
+	(Output_data_plt_x86_64::init): Remove symtab parameter.  Change
+	all callers.  Don't create __rel_iplt_{start,end}.
+	(Output_data_plt_x86_64::add_entry): Add symtab and layout
+	parameters.  Change all callers.  Use different PLT and GOT for
+	IFUNC symbols.
+	(Output_data_plt_x86_64::add_local_ifunc_entry): Add symtab and
+	layout parameters.  Change all callers.  Use different PLT and
+	GOT.
+	(Output_data_plt_x86_64::add_relocation): Add symtab and layout
+	parameters.  Change all callers.  Use different PLT and GOT for
+	IFUNC symbols.
+	(Output_data_plt_x86_64::rela_tlsdesc): Fix formatting.
+	(Output_data_plt_x86_64::rela_irelative): New function.
+	(Output_data_plt_x86_64::address_for_global): New function.
+	(Output_data_plt_x86_64::address_for_local): New function.
+	(Output_data_plt_x86_64::set_final_data_size): Likewise.
+	(Output_data_plt_x86_64::do_write): Write out IRELATIVE area.
+	(Target_x86_64::init_got_plt_for_update): Create got_irelative_.
+	(Target_x86_64::register_global_plt_entry): Add symtab and layout
+	parameters.
+	(Target_x86_64::Scan::global): Use IRELATIVE GOT for IRELATIVE
+	reloc.
+	(Target_x86_64::do_finalize_sections): Create the __rela_iplt
+	symbols if we didn't create an IRELATIVE GOT.
+	(Target_x86_64::Relocate::relocate): Use plt_address_for_global and
+	plt_address_for_local.
+	(Target_x86_64::do_dynsym_value): Use plt_address_for_global.
+	* testsuite/ifuncvar1.c: New test file.
+	* testsuite/ifuncvar2.c: New test file.
+	* testsuite/ifuncvar3.c: New test file.
+	* testsuite/Makefile.am (check_PROGRAMS): Add ifuncvar.
+	(ifuncvar1_pic.o, ifuncvar2_pic.o, ifuncvar.so): New targets.
+	(ifuncvar_SOURCES, ifuncvar_DEPENDENCIES): New variables.
+	(ifuncvar_LDFLAGS, ifuncvar_LDADD): New variables.
+	* testsuite/Makefile.in: Rebuild.
+
 2011-07-07  Cary Coutant  <ccoutant@google.com>
 
 	* testsuite/Makefile.am (two_file_test_1_v1_ndebug.o): New target.

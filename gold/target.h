@@ -246,17 +246,19 @@ class Target
   reloc_addend(void* arg, unsigned int type, uint64_t addend) const
   { return this->do_reloc_addend(arg, type, addend); }
 
-  // Return the PLT section to use for a global symbol.  This is used
-  // for STT_GNU_IFUNC symbols.
-  Output_data*
-  plt_section_for_global(const Symbol* sym) const
-  { return this->do_plt_section_for_global(sym); }
+  // Return the PLT address to use for a global symbol.  This is used
+  // for STT_GNU_IFUNC symbols.  The symbol's plt_offset is relative
+  // to this PLT address.
+  uint64_t
+  plt_address_for_global(const Symbol* sym) const
+  { return this->do_plt_address_for_global(sym); }
 
-  // Return the PLT section to use for a local symbol.  This is used
-  // for STT_GNU_IFUNC symbols.
-  Output_data*
-  plt_section_for_local(const Relobj* object, unsigned int symndx) const
-  { return this->do_plt_section_for_local(object, symndx); }
+  // Return the PLT address to use for a local symbol.  This is used
+  // for STT_GNU_IFUNC symbols.  The symbol's plt_offset is relative
+  // to this PLT address.
+  uint64_t
+  plt_address_for_local(const Relobj* object, unsigned int symndx) const
+  { return this->do_plt_address_for_local(object, symndx); }
 
   // Return whether this target can use relocation types to determine
   // if a function's address is taken.
@@ -502,12 +504,12 @@ class Target
 
   // Virtual functions that must be overridden by a target that uses
   // STT_GNU_IFUNC symbols.
-  virtual Output_data*
-  do_plt_section_for_global(const Symbol*) const
+  virtual uint64_t
+  do_plt_address_for_global(const Symbol*) const
   { gold_unreachable(); }
 
-  virtual Output_data*
-  do_plt_section_for_local(const Relobj*, unsigned int) const
+  virtual uint64_t
+  do_plt_address_for_local(const Relobj*, unsigned int) const
   { gold_unreachable(); }
 
   // Virtual function which may be overriden by the child class.
@@ -870,7 +872,8 @@ class Sized_target : public Target
   // A target needs to implement this to support incremental linking.
 
   virtual void
-  register_global_plt_entry(unsigned int /* plt_index */,
+  register_global_plt_entry(Symbol_table*, Layout*,
+			    unsigned int /* plt_index */,
 			    Symbol*)
   { gold_unreachable(); }
 

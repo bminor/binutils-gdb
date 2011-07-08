@@ -4027,7 +4027,8 @@ Layout::create_interp(const Target* target)
 // some targets have multiple reloc sections in PLT_REL.
 
 // If DYN_REL is not NULL, it is used for DT_REL/DT_RELA,
-// DT_RELSZ/DT_RELASZ, DT_RELENT/DT_RELAENT.
+// DT_RELSZ/DT_RELASZ, DT_RELENT/DT_RELAENT.  Again we use the output
+// section.
 
 // If ADD_DEBUG is true, we add a DT_DEBUG entry when generating an
 // executable.
@@ -4056,13 +4057,16 @@ Layout::add_target_dynamic_tags(bool use_rel, const Output_data* plt_got,
   if (dyn_rel != NULL && dyn_rel->output_section() != NULL)
     {
       odyn->add_section_address(use_rel ? elfcpp::DT_REL : elfcpp::DT_RELA,
-				dyn_rel);
-      if (plt_rel != NULL && dynrel_includes_plt)
+				dyn_rel->output_section());
+      if (plt_rel != NULL
+	  && plt_rel->output_section() != NULL
+	  && dynrel_includes_plt)
 	odyn->add_section_size(use_rel ? elfcpp::DT_RELSZ : elfcpp::DT_RELASZ,
-			       dyn_rel, plt_rel);
+			       dyn_rel->output_section(),
+			       plt_rel->output_section());
       else
 	odyn->add_section_size(use_rel ? elfcpp::DT_RELSZ : elfcpp::DT_RELASZ,
-			       dyn_rel);
+			       dyn_rel->output_section());
       const int size = parameters->target().get_size();
       elfcpp::DT rel_tag;
       int rel_size;

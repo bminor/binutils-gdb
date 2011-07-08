@@ -1833,6 +1833,18 @@ check_PROGRAMS += ifuncmain7pie
 ifuncmain7pie: ifuncmain7pie.o gcctestdir/ld
 	$(LINK) -Bgcctestdir/ -pie ifuncmain7pie.o
 
+check_PROGRAMS += ifuncvar
+ifuncvar1_pic.o: ifuncvar1.c
+	$(COMPILE) -c -fpic -o $@ $<
+ifuncvar2_pic.o: ifuncvar2.c	
+	$(COMPILE) -c -fpic -o $@ $<
+ifuncvar.so: ifuncvar1_pic.o ifuncvar2_pic.o gcctestdir/ld
+	$(LINK) -Bgcctestdir/ -shared ifuncvar1_pic.o ifuncvar2_pic.o
+ifuncvar_SOURCES = ifuncvar3.c
+ifuncvar_DEPENDENCIES = gcctestdir/ld ifuncvar.so
+ifuncvar_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+ifuncvar_LDADD = ifuncvar.so
+
 endif IFUNC
 
 # Test that strong reference to a weak symbol in a DSO remains strong.

@@ -1347,7 +1347,7 @@ Output_data_got<size, big_endian>::Got_entry::write(unsigned char* pov) const
 	// RELATIVE relocation.
 	Symbol* gsym = this->u_.gsym;
 	if (this->use_plt_offset_ && gsym->has_plt_offset())
-	  val = (parameters->target().plt_section_for_global(gsym)->address()
+	  val = (parameters->target().plt_address_for_global(gsym)
 		 + gsym->plt_offset());
 	else
 	  {
@@ -1381,9 +1381,9 @@ Output_data_got<size, big_endian>::Got_entry::write(unsigned char* pov) const
 	  val = symval->value(this->u_.object, 0);
 	else
 	  {
-	    const Output_data* plt =
-	      parameters->target().plt_section_for_local(object, lsi);
-	    val = plt->address() + object->local_plt_offset(lsi);
+	    uint64_t plt_address =
+	      parameters->target().plt_address_for_local(object, lsi);
+	    val = plt_address + object->local_plt_offset(lsi);
 	  }
       }
       break;

@@ -53,15 +53,16 @@ class Output_data_plt_i386 : public Output_section_data
  public:
   typedef Output_data_reloc<elfcpp::SHT_REL, true, 32, false> Reloc_section;
 
-  Output_data_plt_i386(Symbol_table*, Layout*, Output_data_space*);
+  Output_data_plt_i386(Layout*, Output_data_space*, Output_data_space*);
 
   // Add an entry to the PLT.
   void
-  add_entry(Symbol* gsym);
+  add_entry(Symbol_table*, Layout*, Symbol* gsym);
 
   // Add an entry to the PLT for a local STT_GNU_IFUNC symbol.
   unsigned int
-  add_local_ifunc_entry(Sized_relobj_file<32, false>* relobj,
+  add_local_ifunc_entry(Symbol_table*, Layout*,
+			Sized_relobj_file<32, false>* relobj,
 			unsigned int local_sym_index);
 
   // Return the .rel.plt section data.
@@ -73,10 +74,19 @@ class Output_data_plt_i386 : public Output_section_data
   Reloc_section*
   rel_tls_desc(Layout*);
 
+  // Return where the IRELATIVE relocations should go.
+  Reloc_section*
+  rel_irelative(Symbol_table*, Layout*);
+
+  // Return whether we created a section for IRELATIVE relocations.
+  bool
+  has_irelative_section() const
+  { return this->irelative_rel_ != NULL; }
+
   // Return the number of PLT entries.
   unsigned int
   entry_count() const
-  { return this->count_; }
+  { return this->count_ + this->irelative_count_; }
 
   // Return the offset of the first non-reserved PLT entry.
   static unsigned int
@@ -87,6 +97,14 @@ class Output_data_plt_i386 : public Output_section_data
   static unsigned int
   get_plt_entry_size()
   { return plt_entry_size; }
+
+  // Return the PLT address to use for a global symbol.
+  uint64_t
+  address_for_global(const Symbol*);
+
+  // Return the PLT address to use for a local symbol.
+  uint64_t
+  address_for_local(const Relobj*, unsigned int symndx);
 
  protected:
   void
@@ -122,7 +140,10 @@ class Output_data_plt_i386 : public Output_section_data
   // Set the final size.
   void
   set_final_data_size()
-  { this->set_data_size((this->count_ + 1) * plt_entry_size); }
+  {
+    this->set_data_size((this->count_ + this->irelative_count_ + 1)
+			* plt_entry_size);
+  }
 
   // Write out the PLT data.
   void
@@ -150,10 +171,18 @@ class Output_data_plt_i386 : public Output_section_data
   // The TLS_DESC relocations, if necessary.  These must follow the
   // regular PLT relocs.
   Reloc_section* tls_desc_rel_;
+  // The IRELATIVE relocations, if necessary.  These must follow the
+  // regular relocatoins and the TLS_DESC relocations.
+  Reloc_section* irelative_rel_;
   // The .got.plt section.
   Output_data_space* got_plt_;
+  // The part of the .got.plt section used for IRELATIVE relocs.
+  Output_data_space* got_irelative_;
   // The number of PLT entries.
   unsigned int count_;
+  // Number of PLT entries with R_386_IRELATIVE relocs.  These follow
+  // the regular PLT entries.
+  unsigned int irelative_count_;
   // Global STT_GNU_IFUNC symbols.
   std::vector<Global_ifunc> global_ifuncs_;
   // Local STT_GNU_IFUNC symbols.
@@ -172,9 +201,9 @@ class Target_i386 : public Sized_target<32, false>
 
   Target_i386()
     : Sized_target<32, false>(&i386_info),
-      got_(NULL), plt_(NULL), got_plt_(NULL), got_tlsdesc_(NULL),
-      global_offset_table_(NULL), rel_dyn_(NULL),
-      copy_relocs_(elfcpp::R_386_COPY), dynbss_(NULL),
+      got_(NULL), plt_(NULL), got_plt_(NULL), got_irelative_(NULL),
+      got_tlsdesc_(NULL), global_offset_table_(NULL), rel_dyn_(NULL),
+      rel_irelative_(NULL), copy_relocs_(elfcpp::R_386_COPY), dynbss_(NULL),
       got_mod_index_offset_(-1U), tls_base_symbol_defined_(false)
   { }
 
@@ -281,14 +310,14 @@ class Target_i386 : public Sized_target<32, false>
     return Target::do_is_local_label_name(name);
   }
 
-  // Return the PLT section.
-  Output_data*
-  do_plt_section_for_global(const Symbol*) const
-  { return this->plt_section(); }
+  // Return the PLT address to use for a global symbol.
+  uint64_t
+  do_plt_address_for_global(const Symbol* gsym) const
+  { return this->plt_section()->address_for_global(gsym); }
 
-  Output_data*
-  do_plt_section_for_local(const Relobj*, unsigned int) const
-  { return this->plt_section(); }
+  uint64_t
+  do_plt_address_for_local(const Relobj* relobj, unsigned int symndx) const
+  { return this->plt_section()->address_for_local(relobj, symndx); }
 
   // We can tell whether we take the address of a function.
   inline bool
@@ -589,6 +618,10 @@ class Target_i386 : public Sized_target<32, false>
   Reloc_section*
   rel_tls_desc_section(Layout*) const;
 
+  // Get the section to use for IRELATIVE relocations.
+  Reloc_section*
+  rel_irelative_section(Layout*);
+
   // Add a potential copy relocation.
   void
   copy_reloc(Symbol_table* symtab, Layout* layout,
@@ -625,12 +658,16 @@ class Target_i386 : public Sized_target<32, false>
   Output_data_plt_i386* plt_;
   // The GOT PLT section.
   Output_data_space* got_plt_;
+  // The GOT section for IRELATIVE relocations.
+  Output_data_space* got_irelative_;
   // The GOT section for TLSDESC relocations.
   Output_data_got<32, false>* got_tlsdesc_;
   // The _GLOBAL_OFFSET_TABLE_ symbol.
   Symbol* global_offset_table_;
   // The dynamic reloc section.
   Reloc_section* rel_dyn_;
+  // The section to use for IRELATIVE relocs.
+  Reloc_section* rel_irelative_;
   // Relocs saved to avoid a COPY reloc.
   Copy_relocs<elfcpp::SHT_REL, 32, false> copy_relocs_;
   // Space for variables copied with a COPY reloc.
@@ -703,6 +740,15 @@ Target_i386::got_section(Symbol_table* symtab, Layout* layout)
 				      elfcpp::STV_HIDDEN, 0,
 				      false, false);
 
+      // If there are any IRELATIVE relocations, they get GOT entries
+      // in .got.plt after the jump slot relocations.
+      this->got_irelative_ = new Output_data_space(4, "** GOT IRELATIVE PLT");
+      layout->add_output_section_data(".got.plt", elfcpp::SHT_PROGBITS,
+				      (elfcpp::SHF_ALLOC
+				       | elfcpp::SHF_WRITE),
+				      this->got_irelative_,
+				      ORDER_NON_RELRO_FIRST, false);
+
       // If there are any TLSDESC relocations, they get GOT entries in
       // .got.plt after the jump slot entries.
       this->got_tlsdesc_ = new Output_data_got<32, false>();
@@ -732,38 +778,44 @@ Target_i386::rel_dyn_section(Layout* layout)
   return this->rel_dyn_;
 }
 
+// Get the section to use for IRELATIVE relocs, creating it if
+// necessary.  These go in .rel.dyn, but only after all other dynamic
+// relocations.  They need to follow the other dynamic relocations so
+// that they can refer to global variables initialized by those
+// relocs.
+
+Target_i386::Reloc_section*
+Target_i386::rel_irelative_section(Layout* layout)
+{
+  if (this->rel_irelative_ == NULL)
+    {
+      // Make sure we have already create the dynamic reloc section.
+      this->rel_dyn_section(layout);
+      this->rel_irelative_ = new Reloc_section(false);
+      layout->add_output_section_data(".rel.dyn", elfcpp::SHT_REL,
+				      elfcpp::SHF_ALLOC, this->rel_irelative_,
+				      ORDER_DYNAMIC_RELOCS, false);
+      gold_assert(this->rel_dyn_->output_section()
+		  == this->rel_irelative_->output_section());
+    }
+  return this->rel_irelative_;
+}
+
 // Create the PLT section.  The ordinary .got section is an argument,
 // since we need to refer to the start.  We also create our own .got
 // section just for PLT entries.
 
-Output_data_plt_i386::Output_data_plt_i386(Symbol_table* symtab,
-					   Layout* layout,
-					   Output_data_space* got_plt)
-  : Output_section_data(16), tls_desc_rel_(NULL), got_plt_(got_plt), count_(0),
-    global_ifuncs_(), local_ifuncs_()
+Output_data_plt_i386::Output_data_plt_i386(Layout* layout,
+					   Output_data_space* got_plt,
+					   Output_data_space* got_irelative)
+  : Output_section_data(16), tls_desc_rel_(NULL), irelative_rel_(NULL),
+    got_plt_(got_plt), got_irelative_(got_irelative), count_(0),
+    irelative_count_(0), global_ifuncs_(), local_ifuncs_()
 {
   this->rel_ = new Reloc_section(false);
   layout->add_output_section_data(".rel.plt", elfcpp::SHT_REL,
 				  elfcpp::SHF_ALLOC, this->rel_,
 				  ORDER_DYNAMIC_PLT_RELOCS, false);
-
-  if (parameters->doing_static_link())
-    {
-      // A statically linked executable will only have a .rel.plt
-      // section to hold R_386_IRELATIVE relocs for STT_GNU_IFUNC
-      // symbols.  The library will use these symbols to locate the
-      // IRELATIVE relocs at program startup time.
-      symtab->define_in_output_data("__rel_iplt_start", NULL,
-				    Symbol_table::PREDEFINED,
-				    this->rel_, 0, 0, elfcpp::STT_NOTYPE,
-				    elfcpp::STB_GLOBAL, elfcpp::STV_HIDDEN,
-				    0, false, true);
-      symtab->define_in_output_data("__rel_iplt_end", NULL,
-				    Symbol_table::PREDEFINED,
-				    this->rel_, 0, 0, elfcpp::STT_NOTYPE,
-				    elfcpp::STB_GLOBAL, elfcpp::STV_HIDDEN,
-				    0, true, true);
-    }
 
   // Add unwind information if requested.
   if (parameters->options().ld_generated_unwind_info())
@@ -782,29 +834,23 @@ Output_data_plt_i386::do_adjust_output_section(Output_section* os)
 // Add an entry to the PLT.
 
 void
-Output_data_plt_i386::add_entry(Symbol* gsym)
+Output_data_plt_i386::add_entry(Symbol_table* symtab, Layout* layout,
+				Symbol* gsym)
 {
   gold_assert(!gsym->has_plt_offset());
-
-  // Note that when setting the PLT offset we skip the initial
-  // reserved PLT entry.
-  gsym->set_plt_offset((this->count_ + 1) * plt_entry_size);
-
-  ++this->count_;
-
-  section_offset_type got_offset = this->got_plt_->current_data_size();
-
-  // Every PLT entry needs a GOT entry which points back to the PLT
-  // entry (this will be changed by the dynamic linker, normally
-  // lazily when the function is called).
-  this->got_plt_->set_current_data_size(got_offset + 4);
 
   // Every PLT entry needs a reloc.
   if (gsym->type() == elfcpp::STT_GNU_IFUNC
       && gsym->can_use_relative_reloc(false))
     {
-      this->rel_->add_symbolless_global_addend(gsym, elfcpp::R_386_IRELATIVE,
-					       this->got_plt_, got_offset);
+      gsym->set_plt_offset(this->irelative_count_ * plt_entry_size);
+      ++this->irelative_count_;
+      section_offset_type got_offset =
+	this->got_irelative_->current_data_size();
+      this->got_irelative_->set_current_data_size(got_offset + 4);
+      Reloc_section* rel = this->rel_irelative(symtab, layout);
+      rel->add_symbolless_global_addend(gsym, elfcpp::R_386_IRELATIVE,
+					this->got_irelative_, got_offset);
       struct Global_ifunc gi;
       gi.sym = gsym;
       gi.got_offset = got_offset;
@@ -812,6 +858,19 @@ Output_data_plt_i386::add_entry(Symbol* gsym)
     }
   else
     {
+      // When setting the PLT offset we skip the initial reserved PLT
+      // entry.
+      gsym->set_plt_offset((this->count_ + 1) * plt_entry_size);
+
+      ++this->count_;
+
+      section_offset_type got_offset = this->got_plt_->current_data_size();
+
+      // Every PLT entry needs a GOT entry which points back to the
+      // PLT entry (this will be changed by the dynamic linker,
+      // normally lazily when the function is called).
+      this->got_plt_->set_current_data_size(got_offset + 4);
+
       gsym->set_needs_dynsym_entry();
       this->rel_->add_global(gsym, elfcpp::R_386_JUMP_SLOT, this->got_plt_,
 			     got_offset);
@@ -827,22 +886,25 @@ Output_data_plt_i386::add_entry(Symbol* gsym)
 
 unsigned int
 Output_data_plt_i386::add_local_ifunc_entry(
+    Symbol_table* symtab,
+    Layout* layout,
     Sized_relobj_file<32, false>* relobj,
     unsigned int local_sym_index)
 {
-  unsigned int plt_offset = (this->count_ + 1) * plt_entry_size;
-  ++this->count_;
+  unsigned int plt_offset = this->irelative_count_ * plt_entry_size;
+  ++this->irelative_count_;
 
-  section_offset_type got_offset = this->got_plt_->current_data_size();
+  section_offset_type got_offset = this->got_irelative_->current_data_size();
 
   // Every PLT entry needs a GOT entry which points back to the PLT
   // entry.
-  this->got_plt_->set_current_data_size(got_offset + 4);
+  this->got_irelative_->set_current_data_size(got_offset + 4);
 
   // Every PLT entry needs a reloc.
-  this->rel_->add_symbolless_local_addend(relobj, local_sym_index,
-					  elfcpp::R_386_IRELATIVE,
-					  this->got_plt_, got_offset);
+  Reloc_section* rel = this->rel_irelative(symtab, layout);
+  rel->add_symbolless_local_addend(relobj, local_sym_index,
+				   elfcpp::R_386_IRELATIVE,
+				   this->got_irelative_, got_offset);
 
   struct Local_ifunc li;
   li.object = relobj;
@@ -865,10 +927,70 @@ Output_data_plt_i386::rel_tls_desc(Layout* layout)
       layout->add_output_section_data(".rel.plt", elfcpp::SHT_REL,
 				      elfcpp::SHF_ALLOC, this->tls_desc_rel_,
 				      ORDER_DYNAMIC_PLT_RELOCS, false);
-      gold_assert(this->tls_desc_rel_->output_section() ==
-		  this->rel_->output_section());
+      gold_assert(this->tls_desc_rel_->output_section()
+		  == this->rel_->output_section());
     }
   return this->tls_desc_rel_;
+}
+
+// Return where the IRELATIVE relocations should go in the PLT.  These
+// follow the JUMP_SLOT and TLS_DESC relocations.
+
+Output_data_plt_i386::Reloc_section*
+Output_data_plt_i386::rel_irelative(Symbol_table* symtab, Layout* layout)
+{
+  if (this->irelative_rel_ == NULL)
+    {
+      // Make sure we have a place for the TLS_DESC relocations, in
+      // case we see any later on.
+      this->rel_tls_desc(layout);
+      this->irelative_rel_ = new Reloc_section(false);
+      layout->add_output_section_data(".rel.plt", elfcpp::SHT_REL,
+				      elfcpp::SHF_ALLOC, this->irelative_rel_,
+				      ORDER_DYNAMIC_PLT_RELOCS, false);
+      gold_assert(this->irelative_rel_->output_section()
+		  == this->rel_->output_section());
+
+      if (parameters->doing_static_link())
+	{
+	  // A statically linked executable will only have a .rel.plt
+	  // section to hold R_386_IRELATIVE relocs for STT_GNU_IFUNC
+	  // symbols.  The library will use these symbols to locate
+	  // the IRELATIVE relocs at program startup time.
+	  symtab->define_in_output_data("__rel_iplt_start", NULL,
+					Symbol_table::PREDEFINED,
+					this->irelative_rel_, 0, 0,
+					elfcpp::STT_NOTYPE, elfcpp::STB_GLOBAL,
+					elfcpp::STV_HIDDEN, 0, false, true);
+	  symtab->define_in_output_data("__rel_iplt_end", NULL,
+					Symbol_table::PREDEFINED,
+					this->irelative_rel_, 0, 0,
+					elfcpp::STT_NOTYPE, elfcpp::STB_GLOBAL,
+					elfcpp::STV_HIDDEN, 0, true, true);
+	}
+    }
+  return this->irelative_rel_;
+}
+
+// Return the PLT address to use for a global symbol.
+
+uint64_t
+Output_data_plt_i386::address_for_global(const Symbol* gsym)
+{
+  uint64_t offset = 0;
+  if (gsym->type() == elfcpp::STT_GNU_IFUNC
+      && gsym->can_use_relative_reloc(false))
+    offset = (this->count_ + 1) * plt_entry_size;
+  return this->address() + offset;
+}
+
+// Return the PLT address to use for a local symbol.  These are always
+// IRELATIVE relocs.
+
+uint64_t
+Output_data_plt_i386::address_for_local(const Relobj*, unsigned int)
+{
+  return this->address() + (this->count_ + 1) * plt_entry_size;
 }
 
 // The first entry in the PLT for an executable.
@@ -976,8 +1098,12 @@ Output_data_plt_i386::do_write(Output_file* of)
   unsigned char* const oview = of->get_output_view(offset, oview_size);
 
   const off_t got_file_offset = this->got_plt_->offset();
+  gold_assert(parameters->incremental_update()
+	      || (got_file_offset + this->got_plt_->data_size()
+		  == this->got_irelative_->offset()));
   const section_size_type got_size =
-    convert_to_section_size_type(this->got_plt_->data_size());
+    convert_to_section_size_type(this->got_plt_->data_size()
+				 + this->got_irelative_->data_size());
   unsigned char* const got_view = of->get_output_view(got_file_offset,
 						      got_size);
 
@@ -1006,7 +1132,7 @@ Output_data_plt_i386::do_write(Output_file* of)
   unsigned int plt_offset = plt_entry_size;
   unsigned int plt_rel_offset = 0;
   unsigned int got_offset = 12;
-  const unsigned int count = this->count_;
+  const unsigned int count = this->count_ + this->irelative_count_;
   for (unsigned int i = 0;
        i < count;
        ++i,
@@ -1043,6 +1169,7 @@ Output_data_plt_i386::do_write(Output_file* of)
   // the GOT to point to the actual symbol value, rather than point to
   // the PLT entry.  That will let the dynamic linker call the right
   // function when resolving IRELATIVE relocations.
+  unsigned char* got_irelative_view = got_view + this->got_plt_->data_size();
   for (std::vector<Global_ifunc>::const_iterator p =
 	 this->global_ifuncs_.begin();
        p != this->global_ifuncs_.end();
@@ -1050,7 +1177,7 @@ Output_data_plt_i386::do_write(Output_file* of)
     {
       const Sized_symbol<32>* ssym =
 	static_cast<const Sized_symbol<32>*>(p->sym);
-      elfcpp::Swap<32, false>::writeval(got_view + p->got_offset,
+      elfcpp::Swap<32, false>::writeval(got_irelative_view + p->got_offset,
 					ssym->value());
     }
 
@@ -1061,7 +1188,7 @@ Output_data_plt_i386::do_write(Output_file* of)
     {
       const Symbol_value<32>* psymval =
 	p->object->local_symbol(p->local_sym_index);
-      elfcpp::Swap<32, false>::writeval(got_view + p->got_offset,
+      elfcpp::Swap<32, false>::writeval(got_irelative_view + p->got_offset,
 					psymval->value(p->object, 0));
     }
 
@@ -1082,7 +1209,8 @@ Target_i386::make_plt_section(Symbol_table* symtab, Layout* layout)
       // Create the GOT sections first.
       this->got_section(symtab, layout);
 
-      this->plt_ = new Output_data_plt_i386(symtab, layout, this->got_plt_);
+      this->plt_ = new Output_data_plt_i386(layout, this->got_plt_,
+					    this->got_irelative_);
       layout->add_output_section_data(".plt", elfcpp::SHT_PROGBITS,
 				      (elfcpp::SHF_ALLOC
 				       | elfcpp::SHF_EXECINSTR),
@@ -1103,7 +1231,7 @@ Target_i386::make_plt_entry(Symbol_table* symtab, Layout* layout, Symbol* gsym)
     return;
   if (this->plt_ == NULL)
     this->make_plt_section(symtab, layout);
-  this->plt_->add_entry(gsym);
+  this->plt_->add_entry(symtab, layout, gsym);
 }
 
 // Make a PLT entry for a local STT_GNU_IFUNC symbol.
@@ -1117,7 +1245,8 @@ Target_i386::make_local_ifunc_plt_entry(Symbol_table* symtab, Layout* layout,
     return;
   if (this->plt_ == NULL)
     this->make_plt_section(symtab, layout);
-  unsigned int plt_offset = this->plt_->add_local_ifunc_entry(relobj,
+  unsigned int plt_offset = this->plt_->add_local_ifunc_entry(symtab, layout,
+							      relobj,
 							      local_sym_index);
   relobj->set_local_plt_offset(local_sym_index, plt_offset);
 }
@@ -1779,7 +1908,7 @@ Target_i386::Scan::global(Symbol_table* symtab,
 		// STT_GNU_IFUNC symbol.  This makes a function
 		// address in a PIE executable match the address in a
 		// shared library that it links against.
-		Reloc_section* rel_dyn = target->rel_dyn_section(layout);
+		Reloc_section* rel_dyn = target->rel_irelative_section(layout);
 		rel_dyn->add_symbolless_global_addend(gsym,
 						      elfcpp::R_386_IRELATIVE,
 						      output_section,
@@ -2182,7 +2311,8 @@ Target_i386::do_finalize_sections(
       symtab->get_sized_symbol<32>(sym)->set_symsize(data_size);
     }
 
-  if (parameters->doing_static_link() && this->plt_ == NULL)
+  if (parameters->doing_static_link()
+      && (this->plt_ == NULL || !this->plt_->has_irelative_section()))
     {
       // If linking statically, make sure that the __rel_iplt symbols
       // were defined if necessary, even if we didn't create a PLT.
@@ -2312,7 +2442,7 @@ Target_i386::Relocate::relocate(const Relocate_info<32, false>* relinfo,
   else if (gsym != NULL
 	   && gsym->use_plt_offset(Scan::get_reference_flags(r_type)))
     {
-      symval.set_output_value(target->plt_section()->address()
+      symval.set_output_value(target->plt_address_for_global(gsym)
 			      + gsym->plt_offset());
       psymval = &symval;
     }
@@ -2321,7 +2451,7 @@ Target_i386::Relocate::relocate(const Relocate_info<32, false>* relinfo,
       unsigned int r_sym = elfcpp::elf_r_sym<32>(rel.get_r_info());
       if (object->local_has_plt_offset(r_sym))
 	{
-	  symval.set_output_value(target->plt_section()->address()
+	  symval.set_output_value(target->plt_address_for_local(object, r_sym)
 				  + object->local_plt_offset(r_sym));
 	  psymval = &symval;
 	}
@@ -3245,7 +3375,7 @@ uint64_t
 Target_i386::do_dynsym_value(const Symbol* gsym) const
 {
   gold_assert(gsym->is_from_dynobj() && gsym->has_plt_offset());
-  return this->plt_section()->address() + gsym->plt_offset();
+  return this->plt_address_for_global(gsym) + gsym->plt_offset();
 }
 
 // Return a string used to fill a code section with nops to take up
