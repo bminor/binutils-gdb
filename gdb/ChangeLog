@@ -1,5 +1,18 @@
 2011-07-08  Tom Tromey  <tromey@redhat.com>
 
+	* dwarf2loc.c (locexpr_regname): New function.
+	(locexpr_describe_location_piece): Use it.
+	(disassemble_dwarf_expression): Add per_cu argument.  Use
+	locexpr_regname.
+	<DW_OP_GNU_deref_type, DW_OP_GNU_const_type,
+	DW_OP_GNU_regval_type, DW_OP_GNU_convert, DW_OP_GNU_reinterpret>:
+	New cases.
+	(locexpr_describe_location_1): Add per_cu argument.
+	(locexpr_describe_location): Update.
+	(loclist_describe_location): Update.
+
+2011-07-08  Tom Tromey  <tromey@redhat.com>
+
 	* dwarf2expr.c (execute_stack_op): Add QUIT.
 
 2011-07-07  Hui Zhu  <teawater@gmail.com>
