@@ -19,7 +19,6 @@ m32c		DJ Delorie <dj@redhat.com>
 m32r		Doug Evans <dje@sebabeach.org>
 m68hc11		Stephane Carrez <stcarrez@nerim.fr>
 microblaze	Michael Eager <eager@eagercon.com>
-mips		Thiemo Seufer <ths@networkno.de>
 moxie		Anthony Green <green@moxielogic.com>
 rx		DJ Delorie <dj@redhat.com>
 sh		(global maintainers)
