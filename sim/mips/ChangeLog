@@ -1,3 +1,7 @@
+2011-07-08  Hans-Peter Nilsson  <hp@axis.com>
+
+	* Makefile.in (tmp-mach-multi): Exit early when igen fails.
+
 2011-07-05  Mike Frysinger  <vapier@gentoo.org>
 
 	* interp.c (sim_do_command): Delete.
