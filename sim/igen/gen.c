@@ -555,48 +555,6 @@ make_gen_tables (insn_table *isa, decode_table *rules)
 
 /****************************************************************/
 
-#if 0
-typedef enum
-{
-  field_is_not_constant = 0,
-  field_constant_int = 1,
-  field_constant_reserved = 2,
-  field_constant_string = 3
-}
-constant_field_types;
-
-static constant_field_types
-insn_field_is_constant (insn_field * field, decode_table *rule)
-{
-  switch (field->type)
-    {
-    case insn_field_int:
-      /* field is an integer */
-      return field_constant_int;
-    case insn_field_reserved:
-      /* field is `/' and treating that as a constant */
-      if (rule->with_zero_reserved)
-	return field_constant_reserved;
-      else
-	return field_is_not_constant;
-    case insn_field_wild:
-      return field_is_not_constant;	/* never constant */
-    case insn_field_string:
-      /* field, though variable, is on the list of forced constants */
-      if (filter_is_member (rule->constant_field_names, field->val_string))
-	return field_constant_string;
-      else
-	return field_is_not_constant;
-    }
-  ERROR ("Internal error");
-  return field_is_not_constant;
-}
-#endif
-
-
-/****************************************************************/
-
-
 /* Is the bit, according to the decode rule, identical across all the
    instructions? */
 static int
@@ -765,75 +723,6 @@ gen_entry_find_opcode_field (insn_list *insns,
       else
 	break;
     }
-
-
-#if 0
-  for (entry = insns; entry != NULL; entry = entry->next)
-    {
-      insn_word_entry *fields = entry->insn->word[rule->word_nr];
-      opcode_field new_opcode;
-
-      ASSERT (fields != NULL);
-
-      /* find a start point for the opcode field */
-      new_opcode.first = rule->first;
-      while (new_opcode.first <= rule->last
-	     && (!string_only
-		 ||
-		 (insn_field_is_constant (fields->bit[new_opcode.first], rule)
-		  != field_constant_string)) && (string_only
-						 ||
-						 (insn_field_is_constant
-						  (fields->
-						   bit[new_opcode.first],
-						   rule) ==
-						  field_is_not_constant)))
-	{
-	  int new_first = fields->bit[new_opcode.first]->last + 1;
-	  ASSERT (new_first > new_opcode.first);
-	  new_opcode.first = new_first;
-	}
-      ASSERT (new_opcode.first > rule->last
-	      || (string_only
-		  && insn_field_is_constant (fields->bit[new_opcode.first],
-					     rule) == field_constant_string)
-	      || (!string_only
-		  && insn_field_is_constant (fields->bit[new_opcode.first],
-					     rule)));
-
-      /* find the end point for the opcode field */
-      new_opcode.last = rule->last;
-      while (new_opcode.last >= rule->first
-	     && (!string_only
-		 || insn_field_is_constant (fields->bit[new_opcode.last],
-					    rule) != field_constant_string)
-	     && (string_only
-		 || !insn_field_is_constant (fields->bit[new_opcode.last],
-					     rule)))
-	{
-	  int new_last = fields->bit[new_opcode.last]->first - 1;
-	  ASSERT (new_last < new_opcode.last);
-	  new_opcode.last = new_last;
-	}
-      ASSERT (new_opcode.last < rule->first
-	      || (string_only
-		  && insn_field_is_constant (fields->bit[new_opcode.last],
-					     rule) == field_constant_string)
-	      || (!string_only
-		  && insn_field_is_constant (fields->bit[new_opcode.last],
-					     rule)));
-
-      /* now see if our current opcode needs expanding to include the
-         interesting fields within this instruction */
-      if (new_opcode.first <= rule->last
-	  && curr_opcode.first > new_opcode.first)
-	curr_opcode.first = new_opcode.first;
-      if (new_opcode.last >= rule->first
-	  && curr_opcode.last < new_opcode.last)
-	curr_opcode.last = new_opcode.last;
-
-    }
-#endif
 
   /* did the final opcode field end up being empty? */
   if (curr_opcode.first > curr_opcode.last)

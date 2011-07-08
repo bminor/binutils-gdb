@@ -1,3 +1,25 @@
+2011-07-08  Hans-Peter Nilsson  <hp@axis.com>
+
+	Remove all #if 0'd code.
+	* filter.c: Remove #if 0'd function it_is.
+	(main): Remove #if 0'd code.
+	* gen-engine.c: Remove #if 0'd functions print_jump,
+	print_jump_insn, print_jump_definition,
+	print_jump_internal_function, print_jump_body.
+	(gen_engine_c): Remove #if 0'd code.
+	* gen-idecode.c: Remove #if 0'd functions print_jump print_jump,
+	print_jump_insn, print_jump_definition,
+	print_jump_internal_function, print_jump_until_stop_body.
+	* gen-model.c: Remove #if 0'd functions model_c_or_h_data,
+	model_c_or_h_function, gen_model_h, model_c_insn,
+	model_c_function, gen_model_c and types model_c_passed_data
+	and struct _model_c_passed_data.
+	* gen.c: Remove #if 0'd type constant_field_types and function
+	insn_field_is_constant.
+	(gen_entry_find_opcode_field): Remove #if 0'd code.
+	* ld-insn.c (parse_insn_model_record): Remove #if 0'd code.
+	* misc.h (STRDUP, STRNDUP): Remove #if 0'd macros.
+
 2011-02-14  Mike Frysinger  <vapier@gentoo.org>
 
 	* table.c (table_push): Change zfree to free.

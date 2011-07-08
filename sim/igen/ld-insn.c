@@ -874,13 +874,6 @@ parse_insn_model_record (table *file,
 	  filter_parse (&insn->processors, name);
 	}
     }
-#if 0
-  /* for some reason record the max length of any
-     function unit field */
-  int len = strlen (insn_model_ptr->field[insn_model_fields]);
-  if (model->max_model_fields_len < len)
-    model->max_model_fields_len = len;
-#endif
   /* link it in */
   last_insn_model = &insn->models;
   while ((*last_insn_model) != NULL)

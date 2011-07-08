@@ -110,10 +110,6 @@ do { \
 
 #define ZALLOC(TYPE) ((TYPE*) zalloc (sizeof(TYPE)))
 #define NZALLOC(TYPE,N) ((TYPE*) zalloc (sizeof(TYPE) * (N)))
-#if 0
-#define STRDUP(STRING) (strcpy (zalloc (strlen (STRING) + 1), (STRING)))
-#define STRNDUP(STRING,LEN) (strncpy (zalloc ((LEN) + 1), (STRING), (LEN)))
-#endif
 
 extern void *zalloc (long size);
 
