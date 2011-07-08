@@ -521,6 +521,10 @@ execute_stack_op (struct dwarf_expr_context *ctx,
       LONGEST offset;
       struct value *result_val = NULL;
 
+      /* The DWARF expression might have a bug causing an infinite
+	 loop.  In that case, quitting is the only way out.  */
+      QUIT;
+
       switch (op)
 	{
 	case DW_OP_lit0:

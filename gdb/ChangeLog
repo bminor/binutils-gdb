@@ -1,3 +1,7 @@
+2011-07-08  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2expr.c (execute_stack_op): Add QUIT.
+
 2011-07-07  Hui Zhu  <teawater@gmail.com>
 
 	Revert:
