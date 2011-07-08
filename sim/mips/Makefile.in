@@ -198,6 +198,8 @@ m32_support.o: sim-main.h m32_support.c $(SIM_EXTRA_DEPS)
 m32_idecode.o: sim-main.h m32_idecode.c $(SIM_EXTRA_DEPS)
 m32_icache.o: sim-main.h m32_icache.c $(SIM_EXTRA_DEPS)
 
+$(SIM_MULTI_OBJ): sim-main.h $(SIM_EXTRA_DEPS)
+
 BUILT_SRC_FROM_M16 = \
 	m16_icache.h \
 	m16_icache.c \

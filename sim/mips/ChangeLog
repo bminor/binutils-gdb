@@ -1,6 +1,8 @@
 2011-07-08  Hans-Peter Nilsson  <hp@axis.com>
 
-	* Makefile.in (tmp-mach-multi): Exit early when igen fails.
+	* Makefile.in ($(SIM_MULTI_OBJ)): Depend on sim-main.h
+	$(SIM_EXTRA_DEPS).
+	(tmp-mach-multi): Exit early when igen fails.
 
 2011-07-05  Mike Frysinger  <vapier@gentoo.org>
 
