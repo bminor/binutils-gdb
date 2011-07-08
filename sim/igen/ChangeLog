@@ -1,6 +1,6 @@
 2011-07-08  Hans-Peter Nilsson  <hp@axis.com>
 
-	Correct handling of constant fields.
+	Correct handling of constant named fields.
 	* gen.c (insn_field_cmp): Tweak comment about neither field
 	being an insn_field_string with a cond_eq-to-value condition.
 	(insns_bit_useless) <case insn_field_string, case
