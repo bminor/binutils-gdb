@@ -1661,7 +1661,8 @@ class Symbol_table
   // Whether we should override a symbol, based on flags in
   // resolve.cc.
   static bool
-  should_override(const Symbol*, unsigned int, Defined, Object*, bool*, bool*);
+  should_override(const Symbol*, unsigned int, elfcpp::STT, Defined,
+		  Object*, bool*, bool*);
 
   // Report a problem in symbol resolution.
   static void
@@ -1679,7 +1680,7 @@ class Symbol_table
   // Whether we should override a symbol with a special symbol which
   // is automatically defined by the linker.
   static bool
-  should_override_with_special(const Symbol*, Defined);
+  should_override_with_special(const Symbol*, elfcpp::STT, Defined);
 
   // Override a symbol with a special symbol.
   template<int size>

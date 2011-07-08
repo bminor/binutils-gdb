@@ -1883,7 +1883,7 @@ Symbol_table::do_define_in_output_data(
       return sym;
     }
 
-  if (Symbol_table::should_override_with_special(oldsym, defined))
+  if (Symbol_table::should_override_with_special(oldsym, type, defined))
     this->override_with_special(oldsym, sym);
 
   if (resolve_oldsym)
@@ -1997,7 +1997,7 @@ Symbol_table::do_define_in_output_segment(
       return sym;
     }
 
-  if (Symbol_table::should_override_with_special(oldsym, defined))
+  if (Symbol_table::should_override_with_special(oldsym, type, defined))
     this->override_with_special(oldsym, sym);
 
   if (resolve_oldsym)
@@ -2116,7 +2116,7 @@ Symbol_table::do_define_as_constant(
     }
 
   if (force_override
-      || Symbol_table::should_override_with_special(oldsym, defined))
+      || Symbol_table::should_override_with_special(oldsym, type, defined))
     this->override_with_special(oldsym, sym);
 
   if (resolve_oldsym)

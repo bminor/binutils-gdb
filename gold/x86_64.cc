@@ -3110,7 +3110,11 @@ Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>* relinfo,
 	}
       if (optimized_type == tls::TLSOPT_TO_LE)
 	{
-	  gold_assert(tls_segment != NULL);
+	  if (tls_segment == NULL)
+	    {
+	      gold_assert(parameters->errors()->error_count() > 0);
+	      return;
+	    }
 	  this->tls_gd_to_le(relinfo, relnum, tls_segment,
 			     rela, r_type, value, view,
 			     view_size);
@@ -3136,7 +3140,11 @@ Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>* relinfo,
             }
           if (optimized_type == tls::TLSOPT_TO_IE)
             {
-              gold_assert(tls_segment != NULL);
+	      if (tls_segment == NULL)
+		{
+		  gold_assert(parameters->errors()->error_count() > 0);
+		  return;
+		}
               value = target->got_plt_section()->address() + got_offset;
               this->tls_gd_to_ie(relinfo, relnum, tls_segment, rela, r_type,
                                  value, view, address, view_size);
@@ -3165,7 +3173,11 @@ Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>* relinfo,
 	}
       if (optimized_type == tls::TLSOPT_TO_LE)
 	{
-	  gold_assert(tls_segment != NULL);
+	  if (tls_segment == NULL)
+	    {
+	      gold_assert(parameters->errors()->error_count() > 0);
+	      return;
+	    }
 	  this->tls_desc_gd_to_le(relinfo, relnum, tls_segment,
 			          rela, r_type, value, view,
 			          view_size);
@@ -3200,7 +3212,11 @@ Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>* relinfo,
             }
           if (optimized_type == tls::TLSOPT_TO_IE)
             {
-              gold_assert(tls_segment != NULL);
+	      if (tls_segment == NULL)
+		{
+		  gold_assert(parameters->errors()->error_count() > 0);
+		  return;
+		}
               value = target->got_plt_section()->address() + got_offset;
               this->tls_desc_gd_to_ie(relinfo, relnum, tls_segment,
                                       rela, r_type, value, view, address,
@@ -3232,7 +3248,11 @@ Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>* relinfo,
 	}
       if (optimized_type == tls::TLSOPT_TO_LE)
         {
-          gold_assert(tls_segment != NULL);
+	  if (tls_segment == NULL)
+	    {
+	      gold_assert(parameters->errors()->error_count() > 0);
+	      return;
+	    }
 	  this->tls_ld_to_le(relinfo, relnum, tls_segment, rela, r_type,
 			     value, view, view_size);
 	  break;
@@ -3262,7 +3282,11 @@ Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>* relinfo,
       // R_X86_64_TLSLD.
       if (optimized_type == tls::TLSOPT_TO_LE && is_executable)
 	{
-	  gold_assert(tls_segment != NULL);
+	  if (tls_segment == NULL)
+	    {
+	      gold_assert(parameters->errors()->error_count() > 0);
+	      return;
+	    }
 	  value -= tls_segment->memsz();
 	}
       Relocate_functions<64, false>::rela32(view, value, addend);
@@ -3272,7 +3296,11 @@ Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>* relinfo,
       // See R_X86_64_DTPOFF32, just above, for why we check for is_executable.
       if (optimized_type == tls::TLSOPT_TO_LE && is_executable)
 	{
-	  gold_assert(tls_segment != NULL);
+	  if (tls_segment == NULL)
+	    {
+	      gold_assert(parameters->errors()->error_count() > 0);
+	      return;
+	    }
 	  value -= tls_segment->memsz();
 	}
       Relocate_functions<64, false>::rela64(view, value, addend);
@@ -3281,7 +3309,11 @@ Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>* relinfo,
     case elfcpp::R_X86_64_GOTTPOFF:         // Initial-exec
       if (optimized_type == tls::TLSOPT_TO_LE)
 	{
-          gold_assert(tls_segment != NULL);
+	  if (tls_segment == NULL)
+	    {
+	      gold_assert(parameters->errors()->error_count() > 0);
+	      return;
+	    }
 	  Target_x86_64::Relocate::tls_ie_to_le(relinfo, relnum, tls_segment,
                                                 rela, r_type, value, view,
                                                 view_size);
@@ -3316,6 +3348,11 @@ Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>* relinfo,
       break;
 
     case elfcpp::R_X86_64_TPOFF32:          // Local-exec
+      if (tls_segment == NULL)
+	{
+	  gold_assert(parameters->errors()->error_count() > 0);
+	  return;
+	}
       value -= tls_segment->memsz();
       Relocate_functions<64, false>::rela32(view, value, addend);
       break;

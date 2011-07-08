@@ -351,8 +351,8 @@ Symbol_table::resolve(Sized_symbol<size>* to,
   bool adjust_common_sizes;
   bool adjust_dyndef;
   typename Sized_symbol<size>::Size_type tosize = to->symsize();
-  if (Symbol_table::should_override(to, frombits, OBJECT, object,
-				    &adjust_common_sizes,
+  if (Symbol_table::should_override(to, frombits, sym.get_st_type(), OBJECT,
+				    object, &adjust_common_sizes,
 				    &adjust_dyndef))
     {
       elfcpp::STB tobinding = to->binding();
@@ -409,8 +409,8 @@ Symbol_table::resolve(Sized_symbol<size>* to,
 
 bool
 Symbol_table::should_override(const Symbol* to, unsigned int frombits,
-                              Defined defined, Object* object,
-			      bool* adjust_common_sizes,
+			      elfcpp::STT fromtype, Defined defined,
+			      Object* object, bool* adjust_common_sizes,
 			      bool* adjust_dyndef)
 {
   *adjust_common_sizes = false;
@@ -434,7 +434,13 @@ Symbol_table::should_override(const Symbol* to, unsigned int frombits,
 			      to->type());
     }
 
-  // FIXME: Warn if either but not both of TO and SYM are STT_TLS.
+  if (to->type() == elfcpp::STT_TLS
+      ? fromtype != elfcpp::STT_TLS
+      : fromtype == elfcpp::STT_TLS)
+    Symbol_table::report_resolve_problem(true,
+					 _("symbol '%s' used as both __thread "
+					   "and non-__thread"),
+					 to, defined, object);
 
   // We use a giant switch table for symbol resolution.  This code is
   // unwieldy, but: 1) it is efficient; 2) we definitely handle all
@@ -870,13 +876,15 @@ Symbol_table::report_resolve_problem(bool is_error, const char* msg,
 // defining special symbols.
 
 bool
-Symbol_table::should_override_with_special(const Symbol* to, Defined defined)
+Symbol_table::should_override_with_special(const Symbol* to,
+					   elfcpp::STT fromtype,
+					   Defined defined)
 {
   bool adjust_common_sizes;
   bool adjust_dyn_def;
   unsigned int frombits = global_flag | regular_flag | def_flag;
-  bool ret = Symbol_table::should_override(to, frombits, defined, NULL,
-					   &adjust_common_sizes,
+  bool ret = Symbol_table::should_override(to, frombits, fromtype, defined,
+					   NULL, &adjust_common_sizes,
 					   &adjust_dyn_def);
   gold_assert(!adjust_common_sizes && !adjust_dyn_def);
   return ret;

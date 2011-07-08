@@ -2638,7 +2638,11 @@ Target_i386::Relocate::relocate_tls(const Relocate_info<32, false>* relinfo,
     case elfcpp::R_386_TLS_GD:           // Global-dynamic
       if (optimized_type == tls::TLSOPT_TO_LE)
 	{
-	  gold_assert(tls_segment != NULL);
+	  if (tls_segment == NULL)
+	    {
+	      gold_assert(parameters->errors()->error_count() > 0);
+	      return;
+	    }
 	  this->tls_gd_to_le(relinfo, relnum, tls_segment,
 			     rel, r_type, value, view,
 			     view_size);
@@ -2664,7 +2668,11 @@ Target_i386::Relocate::relocate_tls(const Relocate_info<32, false>* relinfo,
             }
           if (optimized_type == tls::TLSOPT_TO_IE)
 	    {
-              gold_assert(tls_segment != NULL);
+	      if (tls_segment == NULL)
+		{
+		  gold_assert(parameters->errors()->error_count() > 0);
+		  return;
+		}
 	      this->tls_gd_to_ie(relinfo, relnum, tls_segment, rel, r_type,
                                  got_offset, view, view_size);
               break;
@@ -2687,7 +2695,11 @@ Target_i386::Relocate::relocate_tls(const Relocate_info<32, false>* relinfo,
       this->local_dynamic_type_ = LOCAL_DYNAMIC_GNU;
       if (optimized_type == tls::TLSOPT_TO_LE)
         {
-	  gold_assert(tls_segment != NULL);
+	  if (tls_segment == NULL)
+	    {
+	      gold_assert(parameters->errors()->error_count() > 0);
+	      return;
+	    }
 	  this->tls_desc_gd_to_le(relinfo, relnum, tls_segment,
 			          rel, r_type, value, view,
 			          view_size);
@@ -2722,7 +2734,11 @@ Target_i386::Relocate::relocate_tls(const Relocate_info<32, false>* relinfo,
             }
           if (optimized_type == tls::TLSOPT_TO_IE)
 	    {
-              gold_assert(tls_segment != NULL);
+	      if (tls_segment == NULL)
+		{
+		  gold_assert(parameters->errors()->error_count() > 0);
+		  return;
+		}
 	      this->tls_desc_gd_to_ie(relinfo, relnum, tls_segment, rel, r_type,
                                       got_offset, view, view_size);
               break;
@@ -2754,7 +2770,11 @@ Target_i386::Relocate::relocate_tls(const Relocate_info<32, false>* relinfo,
       this->local_dynamic_type_ = LOCAL_DYNAMIC_GNU;
       if (optimized_type == tls::TLSOPT_TO_LE)
 	{
-          gold_assert(tls_segment != NULL);
+	  if (tls_segment == NULL)
+	    {
+	      gold_assert(parameters->errors()->error_count() > 0);
+	      return;
+	    }
 	  this->tls_ld_to_le(relinfo, relnum, tls_segment, rel, r_type,
 			     value, view, view_size);
 	  break;
@@ -2785,7 +2805,11 @@ Target_i386::Relocate::relocate_tls(const Relocate_info<32, false>* relinfo,
 	  elfcpp::Shdr<32, false> shdr(relinfo->data_shdr);
 	  if ((shdr.get_sh_flags() & elfcpp::SHF_EXECINSTR) != 0)
 	    {
-	      gold_assert(tls_segment != NULL);
+	      if (tls_segment == NULL)
+		{
+		  gold_assert(parameters->errors()->error_count() > 0);
+		  return;
+		}
 	      value -= tls_segment->memsz();
 	    }
 	}
@@ -2797,7 +2821,11 @@ Target_i386::Relocate::relocate_tls(const Relocate_info<32, false>* relinfo,
     case elfcpp::R_386_TLS_IE_32:
       if (optimized_type == tls::TLSOPT_TO_LE)
 	{
-          gold_assert(tls_segment != NULL);
+	  if (tls_segment == NULL)
+	    {
+	      gold_assert(parameters->errors()->error_count() > 0);
+	      return;
+	    }
 	  Target_i386::Relocate::tls_ie_to_le(relinfo, relnum, tls_segment,
 					      rel, r_type, value, view,
 					      view_size);
@@ -2841,7 +2869,11 @@ Target_i386::Relocate::relocate_tls(const Relocate_info<32, false>* relinfo,
       // have been created for this location, so do not apply it now.
       if (!parameters->options().shared())
         {
-          gold_assert(tls_segment != NULL);
+	  if (tls_segment == NULL)
+	    {
+	      gold_assert(parameters->errors()->error_count() > 0);
+	      return;
+	    }
           value -= tls_segment->memsz();
           Relocate_functions<32, false>::rel32(view, value);
         }
@@ -2852,7 +2884,11 @@ Target_i386::Relocate::relocate_tls(const Relocate_info<32, false>* relinfo,
       // have been created for this location, so do not apply it now.
       if (!parameters->options().shared())
         {
-          gold_assert(tls_segment != NULL);
+	  if (tls_segment == NULL)
+	    {
+	      gold_assert(parameters->errors()->error_count() > 0);
+	      return;
+	    }
           value = tls_segment->memsz() - value;
           Relocate_functions<32, false>::rel32(view, value);
         }

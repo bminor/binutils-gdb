@@ -1,5 +1,17 @@
 2011-07-08  Ian Lance Taylor  <iant@google.com>
 
+	PR gold/12279
+	* resolve.cc (Symbol_table::should_override): Add fromtype
+	parameter.  Change all callers.  Give error when linking together
+	TLS and non-TLS symbol.
+	(Symbol_table::should_override_with_special): Add fromtype
+	parameter.  Change all callers.
+	* i386.cc (Target_i386::Relocate::relocate_tls): Don't crash if
+	there is no TLS segment if we have reported some errors.
+	* x86_64.cc (Target_x86_64::relocate_tls): Likewise.
+
+2011-07-08  Ian Lance Taylor  <iant@google.com>
+
 	PR gold/12372
 	* target.h (Target::plt_address_for_global): New function.
 	(Target::plt_address_for_local): New function.
