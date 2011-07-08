@@ -750,7 +750,13 @@ print_idecode_validate (lf *file,
 	    /* Only need to validate constant (and reserved)
 	       bits. Skip any others */
 	    if (field->type != insn_field_int
-		&& field->type != insn_field_reserved)
+		&& field->type != insn_field_reserved
+		/* Consider a named field equal to a value to be just as
+		   constant as an integer field.  */
+		&& (field->type != insn_field_string
+		    || field->conditions == NULL
+		    || field->conditions->test != insn_field_cond_eq
+		    || field->conditions->type != insn_field_cond_value))
 	      continue;
 
 	    /* Look through the list of opcode paths that lead to this

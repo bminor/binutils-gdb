@@ -1,5 +1,16 @@
 2011-07-08  Hans-Peter Nilsson  <hp@axis.com>
 
+	Correct handling of constant fields.
+	* gen.c (insn_field_cmp): Tweak comment about neither field
+	being an insn_field_string with a cond_eq-to-value condition.
+	(insns_bit_useless) <case insn_field_string, case
+	decode_find_mixed>: Handle cond_eq-to-value fields as
+	insn_field_int.
+	* gen-idecode.c (print_idecode_validate): Handle
+	insn_field_string cond-equal-to-value fields as insn_field_int.
+	* gen-icache.c (print_icache_body): Add comment why constant
+	string fields are handled.
+
 	Remove all #if 0'd code.
 	* filter.c: Remove #if 0'd function it_is.
 	(main): Remove #if 0'd code.

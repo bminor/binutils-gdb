@@ -151,7 +151,9 @@ insn_field_cmp (insn_word_entry *l, insn_word_entry *r)
 		return -1;
 	      /* The case of both fields having constant values should have
 	         already have been handled because such fields are converted
-	         into normal constant fields. */
+	         into normal constant fields, but we must not make this
+		 an assert, as we wouldn't gracefully handle an (invalid)
+		 duplicate insn description.  */
 	      continue;
 	    }
 	  if (l->bit[bit_nr]->field->conditions->test == insn_field_cond_eq)
@@ -611,6 +613,18 @@ insns_bit_useless (insn_list *insns, decode_table *rule, int bit_nr)
 				    bit->field->val_string))
 		/* a string field forced to constant? */
 		is_useless = 0;
+	      else if (bit->field->conditions != NULL
+		       && bit->field->conditions->test == insn_field_cond_eq
+		       && bit->field->conditions->type == insn_field_cond_value)
+		{
+		  int shift = bit->field->last - bit_nr;
+		  int bitvalue = (bit->field->conditions->value >> shift) & 1;
+
+		  if (value < 0)
+		    value = bitvalue;
+		  else if (value != bitvalue)
+		    is_useless = 0;
+		}
 	      else if (rule->search == decode_find_constants)
 		/* the string field isn't constant */
 		return 1;

@@ -424,6 +424,8 @@ print_icache_body (lf *file,
 	     cur_field->first < options.insn_bit_size;
 	     cur_field = cur_field->next)
 	  {
+	    /* Always expand named fields (even if constant), so
+	       references are valid.  */
 	    if (cur_field->type == insn_field_string)
 	      {
 		cache_entry *cache_rule;
