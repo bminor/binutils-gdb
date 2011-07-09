@@ -1,5 +1,10 @@
 2011-07-08  Ian Lance Taylor  <iant@google.com>
 
+	* testsuite/odr_violation2.cc (Ordering::operator()): Make
+	expression more complex.
+
+2011-07-08  Ian Lance Taylor  <iant@google.com>
+
 	PR gold/11317
 	* target-reloc.h (issue_undefined_symbol_error): New inline
 	function, broken out of relocate_section.

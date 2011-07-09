@@ -12,7 +12,7 @@ class Ordering {
 bool Ordering::operator()(int a, int b) {
   // Optimization makes this operator() a different size than the one
   // in odr_violation1.cc.
-  return a + 1 > b + 1;
+  return a + 12345 > b / 67;
 }
 
 void SortDescending(int array[], int size) {
