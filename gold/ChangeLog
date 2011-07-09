@@ -1,5 +1,17 @@
 2011-07-08  Ian Lance Taylor  <iant@google.com>
 
+	PR gold/11985
+	* layout.cc (Layout::create_initial_dynamic_sections): Don't crash
+	if linker script discards key sections.
+	(Layout::create_dynamic_symtab): Likewise.
+	(Layout::assign_local_dynsym_offsets): Likewise.
+	(Layout::sized_create_version_sections): Likewise.
+	(Layout::create_interp): Likewise.
+	(Layout::finish_dynamic_section): Likewise.
+	(Layout::set_dynamic_symbol_size): Likewise.
+
+2011-07-08  Ian Lance Taylor  <iant@google.com>
+
 	PR gold/12386
 	* options.h (class General_options): Add --unresolved-symbols.
 	* target-reloc.h (issue_undefined_symbol_error): Check

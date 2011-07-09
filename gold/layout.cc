@@ -1786,15 +1786,20 @@ Layout::create_initial_dynamic_sections(Symbol_table* symtab)
 						       false, ORDER_RELRO,
 						       true);
 
-  this->dynamic_symbol_ =
-    symtab->define_in_output_data("_DYNAMIC", NULL, Symbol_table::PREDEFINED,
-				  this->dynamic_section_, 0, 0,
-				  elfcpp::STT_OBJECT, elfcpp::STB_LOCAL,
-				  elfcpp::STV_HIDDEN, 0, false, false);
+  // A linker script may discard .dynamic, so check for NULL.
+  if (this->dynamic_section_ != NULL)
+    {
+      this->dynamic_symbol_ =
+	symtab->define_in_output_data("_DYNAMIC", NULL,
+				      Symbol_table::PREDEFINED,
+				      this->dynamic_section_, 0, 0,
+				      elfcpp::STT_OBJECT, elfcpp::STB_LOCAL,
+				      elfcpp::STV_HIDDEN, 0, false, false);
 
-  this->dynamic_data_ =  new Output_data_dynamic(&this->dynpool_);
+      this->dynamic_data_ =  new Output_data_dynamic(&this->dynpool_);
 
-  this->dynamic_section_->add_output_section_data(this->dynamic_data_);
+      this->dynamic_section_->add_output_section_data(this->dynamic_data_);
+    }
 }
 
 // For each output section whose name can be represented as C symbol,
@@ -3708,20 +3713,27 @@ Layout::create_dynamic_symtab(const Input_objects* input_objects,
 						       ORDER_DYNAMIC_LINKER,
 						       false);
 
-  Output_section_data* odata = new Output_data_fixed_space(index * symsize,
-							   align,
-							   "** dynsym");
-  dynsym->add_output_section_data(odata);
+  // Check for NULL as a linker script may discard .dynsym.
+  if (dynsym != NULL)
+    {
+      Output_section_data* odata = new Output_data_fixed_space(index * symsize,
+							       align,
+							       "** dynsym");
+      dynsym->add_output_section_data(odata);
 
-  dynsym->set_info(local_symcount);
-  dynsym->set_entsize(symsize);
-  dynsym->set_addralign(align);
+      dynsym->set_info(local_symcount);
+      dynsym->set_entsize(symsize);
+      dynsym->set_addralign(align);
 
-  this->dynsym_section_ = dynsym;
+      this->dynsym_section_ = dynsym;
+    }
 
   Output_data_dynamic* const odyn = this->dynamic_data_;
-  odyn->add_section_address(elfcpp::DT_SYMTAB, dynsym);
-  odyn->add_constant(elfcpp::DT_SYMENT, symsize);
+  if (odyn != NULL)
+    {
+      odyn->add_section_address(elfcpp::DT_SYMTAB, dynsym);
+      odyn->add_constant(elfcpp::DT_SYMENT, symsize);
+    }
 
   // If there are more than SHN_LORESERVE allocated sections, we
   // create a .dynsym_shndx section.  It is possible that we don't
@@ -3738,20 +3750,23 @@ Layout::create_dynamic_symtab(const Input_objects* input_objects,
 				    elfcpp::SHF_ALLOC,
 				    false, ORDER_DYNAMIC_LINKER, false);
 
-      this->dynsym_xindex_ = new Output_symtab_xindex(index);
+      if (dynsym_xindex != NULL)
+	{
+	  this->dynsym_xindex_ = new Output_symtab_xindex(index);
 
-      dynsym_xindex->add_output_section_data(this->dynsym_xindex_);
+	  dynsym_xindex->add_output_section_data(this->dynsym_xindex_);
 
-      dynsym_xindex->set_link_section(dynsym);
-      dynsym_xindex->set_addralign(4);
-      dynsym_xindex->set_entsize(4);
+	  dynsym_xindex->set_link_section(dynsym);
+	  dynsym_xindex->set_addralign(4);
+	  dynsym_xindex->set_entsize(4);
 
-      dynsym_xindex->set_after_input_sections();
+	  dynsym_xindex->set_after_input_sections();
 
-      // This tells the driver code to wait until the symbol table has
-      // written out before writing out the postprocessing sections,
-      // including the .dynsym_shndx section.
-      this->any_postprocessing_sections_ = true;
+	  // This tells the driver code to wait until the symbol table
+	  // has written out before writing out the postprocessing
+	  // sections, including the .dynsym_shndx section.
+	  this->any_postprocessing_sections_ = true;
+	}
     }
 
   // Create the dynamic string table section.
@@ -3763,16 +3778,24 @@ Layout::create_dynamic_symtab(const Input_objects* input_objects,
 						       ORDER_DYNAMIC_LINKER,
 						       false);
 
-  Output_section_data* strdata = new Output_data_strtab(&this->dynpool_);
-  dynstr->add_output_section_data(strdata);
+  if (dynstr != NULL)
+    {
+      Output_section_data* strdata = new Output_data_strtab(&this->dynpool_);
+      dynstr->add_output_section_data(strdata);
 
-  dynsym->set_link_section(dynstr);
-  this->dynamic_section_->set_link_section(dynstr);
+      if (dynsym != NULL)
+	dynsym->set_link_section(dynstr);
+      if (this->dynamic_section_ != NULL)
+	this->dynamic_section_->set_link_section(dynstr);
 
-  odyn->add_section_address(elfcpp::DT_STRTAB, dynstr);
-  odyn->add_section_size(elfcpp::DT_STRSZ, dynstr);
+      if (odyn != NULL)
+	{
+	  odyn->add_section_address(elfcpp::DT_STRTAB, dynstr);
+	  odyn->add_section_size(elfcpp::DT_STRSZ, dynstr);
+	}
 
-  *pdynstr = dynstr;
+      *pdynstr = dynstr;
+    }
 
   // Create the hash tables.
 
@@ -3793,12 +3816,18 @@ Layout::create_dynamic_symtab(const Input_objects* input_objects,
 								   hashlen,
 								   align,
 								   "** hash");
-      hashsec->add_output_section_data(hashdata);
+      if (hashsec != NULL && hashdata != NULL)
+	hashsec->add_output_section_data(hashdata);
 
-      hashsec->set_link_section(dynsym);
-      hashsec->set_entsize(4);
+      if (hashsec != NULL)
+	{
+	  if (dynsym != NULL)
+	    hashsec->set_link_section(dynsym);
+	  hashsec->set_entsize(4);
+	}
 
-      odyn->add_section_address(elfcpp::DT_HASH, hashsec);
+      if (odyn != NULL)
+	odyn->add_section_address(elfcpp::DT_HASH, hashsec);
     }
 
   if (strcmp(parameters->options().hash_style(), "gnu") == 0
@@ -3818,17 +3847,23 @@ Layout::create_dynamic_symtab(const Input_objects* input_objects,
 								   hashlen,
 								   align,
 								   "** hash");
-      hashsec->add_output_section_data(hashdata);
+      if (hashsec != NULL && hashdata != NULL)
+	hashsec->add_output_section_data(hashdata);
 
-      hashsec->set_link_section(dynsym);
+      if (hashsec != NULL)
+	{
+	  if (dynsym != NULL)
+	    hashsec->set_link_section(dynsym);
 
-      // For a 64-bit target, the entries in .gnu.hash do not have a
-      // uniform size, so we only set the entry size for a 32-bit
-      // target.
-      if (parameters->target().get_size() == 32)
-	hashsec->set_entsize(4);
+	  // For a 64-bit target, the entries in .gnu.hash do not have
+	  // a uniform size, so we only set the entry size for a
+	  // 32-bit target.
+	  if (parameters->target().get_size() == 32)
+	    hashsec->set_entsize(4);
 
-      odyn->add_section_address(elfcpp::DT_GNU_HASH, hashsec);
+	  if (odyn != NULL)
+	    odyn->add_section_address(elfcpp::DT_GNU_HASH, hashsec);
+	}
     }
 }
 
@@ -3838,7 +3873,8 @@ void
 Layout::assign_local_dynsym_offsets(const Input_objects* input_objects)
 {
   Output_section* dynsym = this->dynsym_section_;
-  gold_assert(dynsym != NULL);
+  if (dynsym == NULL)
+    return;
 
   off_t off = dynsym->offset();
 
@@ -3919,46 +3955,59 @@ Layout::sized_create_version_sections(
 						     ORDER_DYNAMIC_LINKER,
 						     false);
 
-  unsigned char* vbuf;
-  unsigned int vsize;
-  versions->symbol_section_contents<size, big_endian>(symtab, &this->dynpool_,
-						      local_symcount,
-						      dynamic_symbols,
-						      &vbuf, &vsize);
+  // Check for NULL since a linker script may discard this section.
+  if (vsec != NULL)
+    {
+      unsigned char* vbuf;
+      unsigned int vsize;
+      versions->symbol_section_contents<size, big_endian>(symtab,
+							  &this->dynpool_,
+							  local_symcount,
+							  dynamic_symbols,
+							  &vbuf, &vsize);
 
-  Output_section_data* vdata = new Output_data_const_buffer(vbuf, vsize, 2,
-							    "** versions");
+      Output_section_data* vdata = new Output_data_const_buffer(vbuf, vsize, 2,
+								"** versions");
 
-  vsec->add_output_section_data(vdata);
-  vsec->set_entsize(2);
-  vsec->set_link_section(this->dynsym_section_);
+      vsec->add_output_section_data(vdata);
+      vsec->set_entsize(2);
+      vsec->set_link_section(this->dynsym_section_);
+    }
 
   Output_data_dynamic* const odyn = this->dynamic_data_;
-  odyn->add_section_address(elfcpp::DT_VERSYM, vsec);
+  if (odyn != NULL && vsec != NULL)
+    odyn->add_section_address(elfcpp::DT_VERSYM, vsec);
 
   if (versions->any_defs())
     {
       Output_section* vdsec;
-      vdsec= this->choose_output_section(NULL, ".gnu.version_d",
-					 elfcpp::SHT_GNU_verdef,
-					 elfcpp::SHF_ALLOC,
-					 false, ORDER_DYNAMIC_LINKER, false);
+      vdsec = this->choose_output_section(NULL, ".gnu.version_d",
+					  elfcpp::SHT_GNU_verdef,
+					  elfcpp::SHF_ALLOC,
+					  false, ORDER_DYNAMIC_LINKER, false);
 
-      unsigned char* vdbuf;
-      unsigned int vdsize;
-      unsigned int vdentries;
-      versions->def_section_contents<size, big_endian>(&this->dynpool_, &vdbuf,
-						       &vdsize, &vdentries);
+      if (vdsec != NULL)
+	{
+	  unsigned char* vdbuf;
+	  unsigned int vdsize;
+	  unsigned int vdentries;
+	  versions->def_section_contents<size, big_endian>(&this->dynpool_,
+							   &vdbuf, &vdsize,
+							   &vdentries);
 
-      Output_section_data* vddata =
-	new Output_data_const_buffer(vdbuf, vdsize, 4, "** version defs");
+	  Output_section_data* vddata =
+	    new Output_data_const_buffer(vdbuf, vdsize, 4, "** version defs");
 
-      vdsec->add_output_section_data(vddata);
-      vdsec->set_link_section(dynstr);
-      vdsec->set_info(vdentries);
+	  vdsec->add_output_section_data(vddata);
+	  vdsec->set_link_section(dynstr);
+	  vdsec->set_info(vdentries);
 
-      odyn->add_section_address(elfcpp::DT_VERDEF, vdsec);
-      odyn->add_constant(elfcpp::DT_VERDEFNUM, vdentries);
+	  if (odyn != NULL)
+	    {
+	      odyn->add_section_address(elfcpp::DT_VERDEF, vdsec);
+	      odyn->add_constant(elfcpp::DT_VERDEFNUM, vdentries);
+	    }
+	}
     }
 
   if (versions->any_needs())
@@ -3969,22 +4018,28 @@ Layout::sized_create_version_sections(
 					  elfcpp::SHF_ALLOC,
 					  false, ORDER_DYNAMIC_LINKER, false);
 
-      unsigned char* vnbuf;
-      unsigned int vnsize;
-      unsigned int vnentries;
-      versions->need_section_contents<size, big_endian>(&this->dynpool_,
-							&vnbuf, &vnsize,
-							&vnentries);
+      if (vnsec != NULL)
+	{
+	  unsigned char* vnbuf;
+	  unsigned int vnsize;
+	  unsigned int vnentries;
+	  versions->need_section_contents<size, big_endian>(&this->dynpool_,
+							    &vnbuf, &vnsize,
+							    &vnentries);
 
-      Output_section_data* vndata =
-	new Output_data_const_buffer(vnbuf, vnsize, 4, "** version refs");
+	  Output_section_data* vndata =
+	    new Output_data_const_buffer(vnbuf, vnsize, 4, "** version refs");
 
-      vnsec->add_output_section_data(vndata);
-      vnsec->set_link_section(dynstr);
-      vnsec->set_info(vnentries);
+	  vnsec->add_output_section_data(vndata);
+	  vnsec->set_link_section(dynstr);
+	  vnsec->set_info(vnentries);
 
-      odyn->add_section_address(elfcpp::DT_VERNEED, vnsec);
-      odyn->add_constant(elfcpp::DT_VERNEEDNUM, vnentries);
+	  if (odyn != NULL)
+	    {
+	      odyn->add_section_address(elfcpp::DT_VERNEED, vnsec);
+	      odyn->add_constant(elfcpp::DT_VERNEEDNUM, vnentries);
+	    }
+	}
     }
 }
 
@@ -4011,7 +4066,8 @@ Layout::create_interp(const Target* target)
 						     elfcpp::SHF_ALLOC,
 						     false, ORDER_INTERP,
 						     false);
-  osec->add_output_section_data(odata);
+  if (osec != NULL)
+    osec->add_output_section_data(odata);
 }
 
 // Add dynamic tags for the PLT and the dynamic relocs.  This is
@@ -4117,7 +4173,8 @@ void
 Layout::finish_dynamic_section(const Input_objects* input_objects,
 			       const Symbol_table* symtab)
 {
-  if (!this->script_options_->saw_phdrs_clause())
+  if (!this->script_options_->saw_phdrs_clause()
+      && this->dynamic_section_ != NULL)
     {
       Output_segment* oseg = this->make_output_segment(elfcpp::PT_DYNAMIC,
 						       (elfcpp::PF_R
@@ -4127,6 +4184,8 @@ Layout::finish_dynamic_section(const Input_objects* input_objects,
     }
 
   Output_data_dynamic* const odyn = this->dynamic_data_;
+  if (odyn == NULL)
+    return;
 
   for (Input_objects::Dynobj_iterator p = input_objects->dynobj_begin();
        p != input_objects->dynobj_end();
@@ -4322,7 +4381,11 @@ void
 Layout::set_dynamic_symbol_size(const Symbol_table* symtab)
 {
   Output_data_dynamic* const odyn = this->dynamic_data_;
+  if (odyn == NULL)
+    return;
   odyn->finalize_data_size();
+  if (this->dynamic_symbol_ == NULL)
+    return;
   off_t data_size = odyn->data_size();
   const int size = parameters->target().get_size();
   if (size == 32)
