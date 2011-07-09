@@ -1069,6 +1069,13 @@ class General_options
   DEFINE_set(undefined, options::TWO_DASHES, 'u',
 	     N_("Create undefined reference to SYMBOL"), N_("SYMBOL"));
 
+  DEFINE_enum(unresolved_symbols, options::TWO_DASHES, '\0', NULL,
+	      N_("How to handle unresolved symbols"),
+	      ("ignore-all,report-all,ignore-in-object-files,"
+	       "ignore-in-shared-libs"),
+	      {"ignore-all", "report-all", "ignore-in-object-files",
+		  "ignore-in-shared-libs"});
+
   DEFINE_bool(verbose, options::TWO_DASHES, '\0', false,
               N_("Synonym for --debug=files"), NULL);
 

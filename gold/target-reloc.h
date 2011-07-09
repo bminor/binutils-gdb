@@ -176,13 +176,46 @@ visibility_error(const Symbol* sym)
 inline bool
 issue_undefined_symbol_error(const Symbol* sym)
 {
-  return (sym != NULL
-	  && (sym->is_undefined() || sym->is_placeholder())
-	  && sym->binding() != elfcpp::STB_WEAK
-	  && !sym->is_defined_in_discarded_section()
-	  && !parameters->target().is_defined_by_abi(sym)
-	  && (!parameters->options().shared()
-	      || parameters->options().defs()));
+  // We only report global symbols.
+  if (sym == NULL)
+    return false;
+
+  // We only report undefined symbols.
+  if (!sym->is_undefined() && !sym->is_placeholder())
+    return false;
+
+  // We don't report weak symbols.
+  if (sym->binding() == elfcpp::STB_WEAK)
+    return false;
+
+  // We don't report symbols defined in discarded sections.
+  if (sym->is_defined_in_discarded_section())
+    return false;
+
+  // If the target defines this symbol, don't report it here.
+  if (parameters->target().is_defined_by_abi(sym))
+    return false;
+
+  // See if we've been told to ignore whether this symbol is
+  // undefined.
+  const char* const u = parameters->options().unresolved_symbols();
+  if (u != NULL)
+    {
+      if (strcmp(u, "ignore-all") == 0)
+	return false;
+      if (strcmp(u, "ignore-in-object-files") == 0 && !sym->in_dyn())
+	return false;
+      if (strcmp(u, "ignore-in-shared-libs") == 0 && !sym->in_reg())
+	return false;
+    }
+
+  // When creating a shared library, only report unresolved symbols if
+  // -z defs was used.
+  if (parameters->options().shared() && !parameters->options().defs())
+    return false;
+
+  // Otherwise issue a warning.
+  return true;
 }
 
 // This function implements the generic part of relocation processing.

@@ -1,5 +1,12 @@
 2011-07-08  Ian Lance Taylor  <iant@google.com>
 
+	PR gold/12386
+	* options.h (class General_options): Add --unresolved-symbols.
+	* target-reloc.h (issue_undefined_symbol_error): Check
+	--unresolved-symbols.  Add comments.
+
+2011-07-08  Ian Lance Taylor  <iant@google.com>
+
 	* testsuite/odr_violation2.cc (Ordering::operator()): Make
 	expression more complex.
 
