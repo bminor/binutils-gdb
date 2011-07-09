@@ -1,5 +1,16 @@
 2011-07-08  Ian Lance Taylor  <iant@google.com>
 
+	PR gold/11317
+	* target-reloc.h (issue_undefined_symbol_error): New inline
+	function, broken out of relocate_section.
+	(relocate_section): Call issue_undefined_symbol_error.
+	* i386.cc (Target_i386::Relocate::relocate_tls): Don't crash if
+	there is no TLS segment if we are about to issue an undefined
+	symbol error.
+	* x86_64.cc (Target_x86_64::relocate_tls): Likewise.
+
+2011-07-08  Ian Lance Taylor  <iant@google.com>
+
 	PR gold/12279
 	* resolve.cc (Symbol_table::should_override): Add fromtype
 	parameter.  Change all callers.  Give error when linking together

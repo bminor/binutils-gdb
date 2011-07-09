@@ -2640,7 +2640,8 @@ Target_i386::Relocate::relocate_tls(const Relocate_info<32, false>* relinfo,
 	{
 	  if (tls_segment == NULL)
 	    {
-	      gold_assert(parameters->errors()->error_count() > 0);
+	      gold_assert(parameters->errors()->error_count() > 0
+			  || issue_undefined_symbol_error(gsym));
 	      return;
 	    }
 	  this->tls_gd_to_le(relinfo, relnum, tls_segment,
@@ -2670,7 +2671,8 @@ Target_i386::Relocate::relocate_tls(const Relocate_info<32, false>* relinfo,
 	    {
 	      if (tls_segment == NULL)
 		{
-		  gold_assert(parameters->errors()->error_count() > 0);
+		  gold_assert(parameters->errors()->error_count() > 0
+			      || issue_undefined_symbol_error(gsym));
 		  return;
 		}
 	      this->tls_gd_to_ie(relinfo, relnum, tls_segment, rel, r_type,
@@ -2697,7 +2699,8 @@ Target_i386::Relocate::relocate_tls(const Relocate_info<32, false>* relinfo,
         {
 	  if (tls_segment == NULL)
 	    {
-	      gold_assert(parameters->errors()->error_count() > 0);
+	      gold_assert(parameters->errors()->error_count() > 0
+			  || issue_undefined_symbol_error(gsym));
 	      return;
 	    }
 	  this->tls_desc_gd_to_le(relinfo, relnum, tls_segment,
@@ -2736,7 +2739,8 @@ Target_i386::Relocate::relocate_tls(const Relocate_info<32, false>* relinfo,
 	    {
 	      if (tls_segment == NULL)
 		{
-		  gold_assert(parameters->errors()->error_count() > 0);
+		  gold_assert(parameters->errors()->error_count() > 0
+			      || issue_undefined_symbol_error(gsym));
 		  return;
 		}
 	      this->tls_desc_gd_to_ie(relinfo, relnum, tls_segment, rel, r_type,
@@ -2772,7 +2776,8 @@ Target_i386::Relocate::relocate_tls(const Relocate_info<32, false>* relinfo,
 	{
 	  if (tls_segment == NULL)
 	    {
-	      gold_assert(parameters->errors()->error_count() > 0);
+	      gold_assert(parameters->errors()->error_count() > 0
+			  || issue_undefined_symbol_error(gsym));
 	      return;
 	    }
 	  this->tls_ld_to_le(relinfo, relnum, tls_segment, rel, r_type,
@@ -2807,7 +2812,8 @@ Target_i386::Relocate::relocate_tls(const Relocate_info<32, false>* relinfo,
 	    {
 	      if (tls_segment == NULL)
 		{
-		  gold_assert(parameters->errors()->error_count() > 0);
+		  gold_assert(parameters->errors()->error_count() > 0
+			      || issue_undefined_symbol_error(gsym));
 		  return;
 		}
 	      value -= tls_segment->memsz();
@@ -2823,7 +2829,8 @@ Target_i386::Relocate::relocate_tls(const Relocate_info<32, false>* relinfo,
 	{
 	  if (tls_segment == NULL)
 	    {
-	      gold_assert(parameters->errors()->error_count() > 0);
+	      gold_assert(parameters->errors()->error_count() > 0
+			  || issue_undefined_symbol_error(gsym));
 	      return;
 	    }
 	  Target_i386::Relocate::tls_ie_to_le(relinfo, relnum, tls_segment,
@@ -2871,7 +2878,8 @@ Target_i386::Relocate::relocate_tls(const Relocate_info<32, false>* relinfo,
         {
 	  if (tls_segment == NULL)
 	    {
-	      gold_assert(parameters->errors()->error_count() > 0);
+	      gold_assert(parameters->errors()->error_count() > 0
+			  || issue_undefined_symbol_error(gsym));
 	      return;
 	    }
           value -= tls_segment->memsz();
@@ -2886,7 +2894,8 @@ Target_i386::Relocate::relocate_tls(const Relocate_info<32, false>* relinfo,
         {
 	  if (tls_segment == NULL)
 	    {
-	      gold_assert(parameters->errors()->error_count() > 0);
+	      gold_assert(parameters->errors()->error_count() > 0
+			  || issue_undefined_symbol_error(gsym));
 	      return;
 	    }
           value = tls_segment->memsz() - value;

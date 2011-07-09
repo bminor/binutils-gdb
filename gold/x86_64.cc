@@ -3112,7 +3112,8 @@ Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>* relinfo,
 	{
 	  if (tls_segment == NULL)
 	    {
-	      gold_assert(parameters->errors()->error_count() > 0);
+	      gold_assert(parameters->errors()->error_count() > 0
+			  || issue_undefined_symbol_error(gsym));
 	      return;
 	    }
 	  this->tls_gd_to_le(relinfo, relnum, tls_segment,
@@ -3142,7 +3143,8 @@ Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>* relinfo,
             {
 	      if (tls_segment == NULL)
 		{
-		  gold_assert(parameters->errors()->error_count() > 0);
+		  gold_assert(parameters->errors()->error_count() > 0
+			      || issue_undefined_symbol_error(gsym));
 		  return;
 		}
               value = target->got_plt_section()->address() + got_offset;
@@ -3175,7 +3177,8 @@ Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>* relinfo,
 	{
 	  if (tls_segment == NULL)
 	    {
-	      gold_assert(parameters->errors()->error_count() > 0);
+	      gold_assert(parameters->errors()->error_count() > 0
+			  || issue_undefined_symbol_error(gsym));
 	      return;
 	    }
 	  this->tls_desc_gd_to_le(relinfo, relnum, tls_segment,
@@ -3214,7 +3217,8 @@ Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>* relinfo,
             {
 	      if (tls_segment == NULL)
 		{
-		  gold_assert(parameters->errors()->error_count() > 0);
+		  gold_assert(parameters->errors()->error_count() > 0
+			      || issue_undefined_symbol_error(gsym));
 		  return;
 		}
               value = target->got_plt_section()->address() + got_offset;
@@ -3250,7 +3254,8 @@ Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>* relinfo,
         {
 	  if (tls_segment == NULL)
 	    {
-	      gold_assert(parameters->errors()->error_count() > 0);
+	      gold_assert(parameters->errors()->error_count() > 0
+			  || issue_undefined_symbol_error(gsym));
 	      return;
 	    }
 	  this->tls_ld_to_le(relinfo, relnum, tls_segment, rela, r_type,
@@ -3284,7 +3289,8 @@ Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>* relinfo,
 	{
 	  if (tls_segment == NULL)
 	    {
-	      gold_assert(parameters->errors()->error_count() > 0);
+	      gold_assert(parameters->errors()->error_count() > 0
+			  || issue_undefined_symbol_error(gsym));
 	      return;
 	    }
 	  value -= tls_segment->memsz();
@@ -3298,7 +3304,8 @@ Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>* relinfo,
 	{
 	  if (tls_segment == NULL)
 	    {
-	      gold_assert(parameters->errors()->error_count() > 0);
+	      gold_assert(parameters->errors()->error_count() > 0
+			  || issue_undefined_symbol_error(gsym));
 	      return;
 	    }
 	  value -= tls_segment->memsz();
@@ -3311,7 +3318,8 @@ Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>* relinfo,
 	{
 	  if (tls_segment == NULL)
 	    {
-	      gold_assert(parameters->errors()->error_count() > 0);
+	      gold_assert(parameters->errors()->error_count() > 0
+			  || issue_undefined_symbol_error(gsym));
 	      return;
 	    }
 	  Target_x86_64::Relocate::tls_ie_to_le(relinfo, relnum, tls_segment,
@@ -3350,7 +3358,8 @@ Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>* relinfo,
     case elfcpp::R_X86_64_TPOFF32:          // Local-exec
       if (tls_segment == NULL)
 	{
-	  gold_assert(parameters->errors()->error_count() > 0);
+	  gold_assert(parameters->errors()->error_count() > 0
+		      || issue_undefined_symbol_error(gsym));
 	  return;
 	}
       value -= tls_segment->memsz();

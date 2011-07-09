@@ -1,6 +1,6 @@
 // target-reloc.h -- target specific relocation support  -*- C++ -*-
 
-// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -167,6 +167,22 @@ visibility_error(const Symbol* sym)
     }
   gold_error(_("%s symbol '%s' is not defined locally"),
 	     v, sym->name());
+}
+
+// Return true if we are should issue an error saying that SYM is an
+// undefined symbol.  This is called if there is a relocation against
+// SYM.
+
+inline bool
+issue_undefined_symbol_error(const Symbol* sym)
+{
+  return (sym != NULL
+	  && (sym->is_undefined() || sym->is_placeholder())
+	  && sym->binding() != elfcpp::STB_WEAK
+	  && !sym->is_defined_in_discarded_section()
+	  && !parameters->target().is_defined_by_abi(sym)
+	  && (!parameters->options().shared()
+	      || parameters->options().defs()));
 }
 
 // This function implements the generic part of relocation processing.
@@ -344,13 +360,7 @@ relocate_section(
 	  continue;
 	}
 
-      if (sym != NULL
-	  && (sym->is_undefined() || sym->is_placeholder())
-	  && sym->binding() != elfcpp::STB_WEAK
-	  && !is_defined_in_discarded_section
-          && !target->is_defined_by_abi(sym)
-	  && (!parameters->options().shared()       // -shared
-              || parameters->options().defs()))     // -z defs
+      if (issue_undefined_symbol_error(sym))
 	gold_undefined_symbol_at_location(sym, relinfo, i, offset);
       else if (sym != NULL
 	       && sym->visibility() != elfcpp::STV_DEFAULT
