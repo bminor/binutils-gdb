@@ -1793,7 +1793,7 @@ extern bfd_boolean _bfd_elf_match_sections_by_type
 extern bfd_boolean bfd_elf_is_group_section
   (bfd *, const struct bfd_section *);
 extern void _bfd_elf_section_already_linked
-  (bfd *, struct bfd_section *, struct bfd_link_info *);
+  (bfd *, struct already_linked *, struct bfd_link_info *);
 extern void bfd_elf_set_group_contents
   (bfd *, asection *, void *);
 extern asection *_bfd_elf_check_kept_section

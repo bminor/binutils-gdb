@@ -3900,7 +3900,7 @@ error_free_dyn:
 	  sec = bfd_section_from_elf_index (abfd, isym->st_shndx);
 	  if (sec == NULL)
 	    sec = bfd_abs_section_ptr;
-	  else if (sec->kept_section)
+	  else if (elf_discarded_section (sec))
 	    {
 	      /* Symbols from discarded section are undefined.  We keep
 		 its visibility.  */
@@ -12438,63 +12438,100 @@ section_signature (asection *sec)
 }
 
 void
-_bfd_elf_section_already_linked (bfd *abfd, asection *sec,
+_bfd_elf_section_already_linked (bfd *abfd,
+				 struct already_linked *linked,
 				 struct bfd_link_info *info)
 {
   flagword flags;
   const char *name, *p;
   struct bfd_section_already_linked *l;
   struct bfd_section_already_linked_hash_entry *already_linked_list;
+  asection *sec, *l_sec;
 
-  if (sec->output_section == bfd_abs_section_ptr)
-    return;
-
-  flags = sec->flags;
-
-  /* Return if it isn't a linkonce section.  A comdat group section
-     also has SEC_LINK_ONCE set.  */
-  if ((flags & SEC_LINK_ONCE) == 0)
-    return;
-
-  /* Don't put group member sections on our list of already linked
-     sections.  They are handled as a group via their group section.  */
-  if (elf_sec_group (sec) != NULL)
-    return;
-
-  /* FIXME: When doing a relocatable link, we may have trouble
-     copying relocations in other sections that refer to local symbols
-     in the section being discarded.  Those relocations will have to
-     be converted somehow; as of this writing I'm not sure that any of
-     the backends handle that correctly.
-
-     It is tempting to instead not discard link once sections when
-     doing a relocatable link (technically, they should be discarded
-     whenever we are building constructors).  However, that fails,
-     because the linker winds up combining all the link once sections
-     into a single large link once section, which defeats the purpose
-     of having link once sections in the first place.
-
-     Also, not merging link once sections in a relocatable link
-     causes trouble for MIPS ELF, which relies on link once semantics
-     to handle the .reginfo section correctly.  */
-
-  name = section_signature (sec);
-
-  if (CONST_STRNEQ (name, ".gnu.linkonce.")
-      && (p = strchr (name + sizeof (".gnu.linkonce.") - 1, '.')) != NULL)
-    p++;
+  p = name = linked->comdat_key;
+  if (name)
+    {
+      sec = NULL;
+      flags = SEC_GROUP | SEC_LINK_ONCE | SEC_LINK_DUPLICATES_DISCARD;
+    }
   else
-    p = name;
+    {
+      sec = linked->u.sec;
+      if (sec->output_section == bfd_abs_section_ptr)
+	return;
+
+      flags = sec->flags;
+
+      /* Return if it isn't a linkonce section.  A comdat group section
+	 also has SEC_LINK_ONCE set.  */
+      if ((flags & SEC_LINK_ONCE) == 0)
+	return;
+
+      /* Don't put group member sections on our list of already linked
+	 sections.  They are handled as a group via their group section.
+	 */
+      if (elf_sec_group (sec) != NULL)
+	return;
+
+      /* FIXME: When doing a relocatable link, we may have trouble
+	 copying relocations in other sections that refer to local symbols
+	 in the section being discarded.  Those relocations will have to
+	 be converted somehow; as of this writing I'm not sure that any of
+	 the backends handle that correctly.
+
+	 It is tempting to instead not discard link once sections when
+	 doing a relocatable link (technically, they should be discarded
+	 whenever we are building constructors).  However, that fails,
+	 because the linker winds up combining all the link once sections
+	 into a single large link once section, which defeats the purpose
+	 of having link once sections in the first place.
+
+	 Also, not merging link once sections in a relocatable link
+	 causes trouble for MIPS ELF, which relies on link once semantics
+	 to handle the .reginfo section correctly.  */
+
+      name = section_signature (sec);
+
+      if (CONST_STRNEQ (name, ".gnu.linkonce.")
+	  && ((p = strchr (name + sizeof (".gnu.linkonce.") - 1, '.'))
+	      != NULL))
+	p++;
+      else
+	p = name;
+    }
 
   already_linked_list = bfd_section_already_linked_table_lookup (p);
 
   for (l = already_linked_list->entry; l != NULL; l = l->next)
     {
+      bfd_boolean l_coff_comdat_sec;
+      flagword l_flags;
+      bfd *l_owner;
+      const char *l_name = l->linked.comdat_key;
+      if (l_name)
+	{
+	  l_sec = NULL;
+	  l_owner = l->linked.u.abfd;
+	  l_flags = (SEC_GROUP
+		     | SEC_LINK_ONCE
+		     | SEC_LINK_DUPLICATES_DISCARD);
+	  l_coff_comdat_sec = FALSE;
+	}
+      else
+	{
+	  l_sec = l->linked.u.sec;
+	  l_owner = l_sec->owner;
+	  l_flags = l_sec->flags;
+	  l_coff_comdat_sec
+	    = !!bfd_coff_get_comdat_section (l_sec->owner, l_sec);
+	  l_name = section_signature (l_sec);
+	}
+
       /* We may have 2 different types of sections on the list: group
 	 sections and linkonce sections.  Match like sections.  */
-      if ((flags & SEC_GROUP) == (l->sec->flags & SEC_GROUP)
-	  && strcmp (name, section_signature (l->sec)) == 0
-	  && bfd_coff_get_comdat_section (l->sec->owner, l->sec) == NULL)
+      if ((flags & SEC_GROUP) == (l_flags & SEC_GROUP)
+	  && strcmp (name, l_name) == 0
+	  && !l_coff_comdat_sec)
 	{
 	  /* The section has already been linked.  See if we should
 	     issue a warning.  */
@@ -12504,6 +12541,18 @@ _bfd_elf_section_already_linked (bfd *abfd, asection *sec,
 	      abort ();
 
 	    case SEC_LINK_DUPLICATES_DISCARD:
+	      /* If we found an LTO IR match for this comdat group on
+		 the first pass, replace it with the LTO output on the
+		 second pass.  We can't simply choose real object
+		 files over IR because the first pass may contain a
+		 mix of LTO and normal objects and we must keep the
+		 first match, be it IR or real.  */
+	      if (info->loading_lto_outputs
+		  && (l_owner->flags & BFD_PLUGIN) != 0)
+		{
+		  l->linked = *linked;
+		  return;
+		}
 	      break;
 
 	    case SEC_LINK_DUPLICATES_ONE_ONLY:
@@ -12513,14 +12562,20 @@ _bfd_elf_section_already_linked (bfd *abfd, asection *sec,
 	      break;
 
 	    case SEC_LINK_DUPLICATES_SAME_SIZE:
-	      if (sec->size != l->sec->size)
+	      if (!sec || !l_sec)
+		abort ();
+
+	      if (sec->size != l_sec->size)
 		(*_bfd_error_handler)
 		  (_("%B: duplicate section `%A' has different size"),
 		   abfd, sec);
 	      break;
 
 	    case SEC_LINK_DUPLICATES_SAME_CONTENTS:
-	      if (sec->size != l->sec->size)
+	      if (!sec || !l_sec)
+		abort ();
+
+	      if (sec->size != l_sec->size)
 		(*_bfd_error_handler)
 		  (_("%B: duplicate section `%A' has different size"),
 		   abfd, sec);
@@ -12532,11 +12587,11 @@ _bfd_elf_section_already_linked (bfd *abfd, asection *sec,
 		    (*_bfd_error_handler)
 		      (_("%B: warning: could not read contents of section `%A'"),
 		       abfd, sec);
-		  else if (!bfd_malloc_and_get_section (l->sec->owner, l->sec,
+		  else if (!bfd_malloc_and_get_section (l_sec->owner, l_sec,
 							&l_sec_contents))
 		    (*_bfd_error_handler)
 		      (_("%B: warning: could not read contents of section `%A'"),
-		       l->sec->owner, l->sec);
+		       l_sec->owner, l_sec);
 		  else if (memcmp (sec_contents, l_sec_contents, sec->size) != 0)
 		    (*_bfd_error_handler)
 		      (_("%B: warning: duplicate section `%A' has different contents"),
@@ -12550,28 +12605,31 @@ _bfd_elf_section_already_linked (bfd *abfd, asection *sec,
 	      break;
 	    }
 
-	  /* Set the output_section field so that lang_add_section
-	     does not create a lang_input_section structure for this
-	     section.  Since there might be a symbol in the section
-	     being discarded, we must retain a pointer to the section
-	     which we are really going to use.  */
-	  sec->output_section = bfd_abs_section_ptr;
-	  sec->kept_section = l->sec;
-
-	  if (flags & SEC_GROUP)
+	  if (sec)
 	    {
-	      asection *first = elf_next_in_group (sec);
-	      asection *s = first;
+	      /* Set the output_section field so that lang_add_section
+		 does not create a lang_input_section structure for this
+		 section.  Since there might be a symbol in the section
+		 being discarded, we must retain a pointer to the section
+		 which we are really going to use.  */
+	      sec->output_section = bfd_abs_section_ptr;
+	      sec->kept_section = l_sec;
 
-	      while (s != NULL)
+	      if (flags & SEC_GROUP)
 		{
-		  s->output_section = bfd_abs_section_ptr;
-		  /* Record which group discards it.  */
-		  s->kept_section = l->sec;
-		  s = elf_next_in_group (s);
-		  /* These lists are circular.  */
-		  if (s == first)
-		    break;
+		  asection *first = elf_next_in_group (sec);
+		  asection *s = first;
+
+		  while (s != NULL)
+		    {
+		      s->output_section = bfd_abs_section_ptr;
+		      /* Record which group discards it.  */
+		      s->kept_section = l_sec;
+		      s = elf_next_in_group (s);
+		      /* These lists are circular.  */
+		      if (s == first)
+			break;
+		    }
 		}
 	    }
 
@@ -12579,67 +12637,100 @@ _bfd_elf_section_already_linked (bfd *abfd, asection *sec,
 	}
     }
 
-  /* A single member comdat group section may be discarded by a
-     linkonce section and vice versa.  */
-
-  if ((flags & SEC_GROUP) != 0)
+  if (sec)
     {
-      asection *first = elf_next_in_group (sec);
+      /* A single member comdat group section may be discarded by a
+	 linkonce section and vice versa.  */
 
-      if (first != NULL && elf_next_in_group (first) == first)
-	/* Check this single member group against linkonce sections.  */
+      if ((flags & SEC_GROUP) != 0)
+	{
+	  asection *first = elf_next_in_group (sec);
+
+	  if (first != NULL && elf_next_in_group (first) == first)
+	    /* Check this single member group against linkonce sections.  */
+	    for (l = already_linked_list->entry; l != NULL; l = l->next)
+	      {
+		if (l->linked.comdat_key == NULL)
+		  {
+		    l_sec = l->linked.u.sec;
+
+		    if ((l_sec->flags & SEC_GROUP) == 0
+			&& bfd_coff_get_comdat_section (l_sec->owner,
+							l_sec) == NULL
+			&& bfd_elf_match_symbols_in_sections (l_sec,
+							      first,
+							      info))
+		      {
+			first->output_section = bfd_abs_section_ptr;
+			first->kept_section = l_sec;
+			sec->output_section = bfd_abs_section_ptr;
+			break;
+		      }
+		  }
+	      }
+	}
+      else
+	/* Check this linkonce section against single member groups.  */
 	for (l = already_linked_list->entry; l != NULL; l = l->next)
-	  if ((l->sec->flags & SEC_GROUP) == 0
-	      && bfd_coff_get_comdat_section (l->sec->owner, l->sec) == NULL
-	      && bfd_elf_match_symbols_in_sections (l->sec, first, info))
-	    {
-	      first->output_section = bfd_abs_section_ptr;
-	      first->kept_section = l->sec;
-	      sec->output_section = bfd_abs_section_ptr;
-	      break;
-	    }
+	  {
+	    if (l->linked.comdat_key == NULL)
+	      {
+		l_sec = l->linked.u.sec;
+
+		if (l_sec->flags & SEC_GROUP)
+		  {
+		    asection *first = elf_next_in_group (l_sec);
+
+		    if (first != NULL
+			&& elf_next_in_group (first) == first
+			&& bfd_elf_match_symbols_in_sections (first,
+							      sec,
+							      info))
+		      {
+			sec->output_section = bfd_abs_section_ptr;
+			sec->kept_section = first;
+			break;
+		      }
+		  }
+	      }
+	  }
+
+      /* Do not complain on unresolved relocations in `.gnu.linkonce.r.F'
+	 referencing its discarded `.gnu.linkonce.t.F' counterpart -
+	 g++-3.4 specific as g++-4.x is using COMDAT groups (without the
+	 `.gnu.linkonce' prefix) instead.  `.gnu.linkonce.r.*' were the
+	 `.rodata' part of its matching `.gnu.linkonce.t.*'.  If
+	 `.gnu.linkonce.r.F' is not discarded but its `.gnu.linkonce.t.F'
+	 is discarded means we chose one-only `.gnu.linkonce.t.F' section
+	 from a different bfd not requiring any `.gnu.linkonce.r.F'.
+	 Thus `.gnu.linkonce.r.F' should be discarded.  The reverse order
+	 cannot happen as there is never a bfd with only the
+	 `.gnu.linkonce.r.F' section.  The order of sections in a bfd
+	 does not matter as here were are looking only for cross-bfd
+	 sections.  */
+
+      if ((flags & SEC_GROUP) == 0
+	  && CONST_STRNEQ (name, ".gnu.linkonce.r."))
+	for (l = already_linked_list->entry; l != NULL; l = l->next)
+	  {
+	    if (l->linked.comdat_key == NULL)
+	      {
+		l_sec = l->linked.u.sec;
+
+		if ((l_sec->flags & SEC_GROUP) == 0
+		    && CONST_STRNEQ (l_sec->name, ".gnu.linkonce.t."))
+		  {
+		    if (abfd != l_sec->owner)
+		      sec->output_section = bfd_abs_section_ptr;
+		    break;
+		  }
+	      }
+	  }
     }
-  else
-    /* Check this linkonce section against single member groups.  */
-    for (l = already_linked_list->entry; l != NULL; l = l->next)
-      if (l->sec->flags & SEC_GROUP)
-	{
-	  asection *first = elf_next_in_group (l->sec);
-
-	  if (first != NULL
-	      && elf_next_in_group (first) == first
-	      && bfd_elf_match_symbols_in_sections (first, sec, info))
-	    {
-	      sec->output_section = bfd_abs_section_ptr;
-	      sec->kept_section = first;
-	      break;
-	    }
-	}
-
-  /* Do not complain on unresolved relocations in `.gnu.linkonce.r.F'
-     referencing its discarded `.gnu.linkonce.t.F' counterpart - g++-3.4
-     specific as g++-4.x is using COMDAT groups (without the `.gnu.linkonce'
-     prefix) instead.  `.gnu.linkonce.r.*' were the `.rodata' part of its
-     matching `.gnu.linkonce.t.*'.  If `.gnu.linkonce.r.F' is not discarded
-     but its `.gnu.linkonce.t.F' is discarded means we chose one-only
-     `.gnu.linkonce.t.F' section from a different bfd not requiring any
-     `.gnu.linkonce.r.F'.  Thus `.gnu.linkonce.r.F' should be discarded.
-     The reverse order cannot happen as there is never a bfd with only the
-     `.gnu.linkonce.r.F' section.  The order of sections in a bfd does not
-     matter as here were are looking only for cross-bfd sections.  */
-
-  if ((flags & SEC_GROUP) == 0 && CONST_STRNEQ (name, ".gnu.linkonce.r."))
-    for (l = already_linked_list->entry; l != NULL; l = l->next)
-      if ((l->sec->flags & SEC_GROUP) == 0
-	  && CONST_STRNEQ (l->sec->name, ".gnu.linkonce.t."))
-	{
-	  if (abfd != l->sec->owner)
-	    sec->output_section = bfd_abs_section_ptr;
-	  break;
-	}
 
   /* This is the first section with this name.  Record it.  */
-  if (! bfd_section_already_linked_table_insert (already_linked_list, sec))
+  if (! bfd_section_already_linked_table_insert (already_linked_list,
+						 linked))
     info->callbacks->einfo (_("%F%P: already_linked_table: %E\n"));
 }
 

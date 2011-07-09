@@ -1,3 +1,32 @@
+2011-07-09  Alan Modra  <amodra@gmail.com>
+
+	PR ld/12942
+	* elflink.c (elf_link_add_object_symbols): Use elf_discarded_section
+	rather than kept_section to determine whether a symbol is from
+	a discarded section.
+	* cofflink.c (coff_link_add_symbols): Make symbols from discarded
+	sections appear undefined.
+
+2011-07-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/12942
+	* elf-bfd.h (_bfd_elf_section_already_linked): Replace
+	"asection *" with "struct already_linked *".
+	* libbfd-in.h (_bfd_nolink_section_already_linked): Likewise.
+	(_bfd_generic_section_already_linked): Likewise.
+	(bfd_section_already_linked_table_insert): Likewise.
+	(struct already_linked): New.
+	(struct bfd_section_already_linked): Use it.
+	* elflink.c (_bfd_elf_section_already_linked): Replace.
+	"asection *" with "struct already_linked *".  Replace the plugin
+	dummy with the LTO output.
+	* linker.c (_bfd_generic_section_already_linked): Likewise.
+	* targets.c (struct already_linked): Add forward declaration.
+	(bfd_target): Replace "struct bfd_section *" with
+	"struct already_linked *" in _section_already_linked.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
 2011-07-06  Tristan Gingold  <gingold@adacore.com>
 
 	* mach-o.h: Move loader related definitions to

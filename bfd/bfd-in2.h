@@ -5726,6 +5726,7 @@ enum bfd_endian { BFD_ENDIAN_BIG, BFD_ENDIAN_LITTLE, BFD_ENDIAN_UNKNOWN };
 
 /* Forward declaration.  */
 typedef struct bfd_link_info _bfd_link_info;
+struct already_linked;
 
 typedef struct bfd_target
 {
@@ -6051,7 +6052,7 @@ typedef struct bfd_target
 
   /* Check if SEC has been already linked during a reloceatable or
      final link.  */
-  void (*_section_already_linked) (bfd *, struct bfd_section *,
+  void (*_section_already_linked) (bfd *, struct already_linked *,
                                    struct bfd_link_info *);
 
   /* Define a common symbol.  */
@@ -6121,11 +6122,12 @@ bfd_boolean bfd_link_split_section (bfd *abfd, asection *sec);
 #define bfd_link_split_section(abfd, sec) \
        BFD_SEND (abfd, _bfd_link_split_section, (abfd, sec))
 
-void bfd_section_already_linked (bfd *abfd, asection *sec,
+void bfd_section_already_linked (bfd *abfd,
+    struct already_linked *data,
     struct bfd_link_info *info);
 
-#define bfd_section_already_linked(abfd, sec, info) \
-       BFD_SEND (abfd, _section_already_linked, (abfd, sec, info))
+#define bfd_section_already_linked(abfd, data, info) \
+       BFD_SEND (abfd, _section_already_linked, (abfd, data, info))
 
 bfd_boolean bfd_generic_define_common_symbol
    (bfd *output_bfd, struct bfd_link_info *info,

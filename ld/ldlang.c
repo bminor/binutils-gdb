@@ -2237,7 +2237,12 @@ section_already_linked (bfd *abfd, asection *sec, void *data)
     }
 
   if (!(abfd->flags & DYNAMIC))
-    bfd_section_already_linked (abfd, sec, &link_info);
+    {
+      struct already_linked linked;
+      linked.comdat_key = NULL;
+      linked.u.sec = sec;
+      bfd_section_already_linked (abfd, &linked, &link_info);
+    }
 }
 
 /* The wild routines.
@@ -6544,6 +6549,7 @@ lang_process (void)
 	einfo (_("%P%F: %s: plugin reported error after all symbols read\n"),
 	       plugin_error_plugin ());
       /* Open any newly added files, updating the file chains.  */
+      link_info.loading_lto_outputs = TRUE;
       open_input_bfds (added.head, OPEN_BFD_NORMAL);
       /* Restore the global list pointer now they have all been added.  */
       lang_list_remove_tail (stat_ptr, &added);

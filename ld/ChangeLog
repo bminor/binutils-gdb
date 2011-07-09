@@ -1,3 +1,13 @@
+2011-07-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/12942
+	* ldlang.c (section_already_linked): Pass "struct already_linked *"
+	to bfd_section_already_linked.
+	(lang_process): Set link_info.loading_lto_outputs before
+	loading LTO outputs.
+	* plugin.c: Include "libbfd.h".
+	(add_symbols): Call bfd_section_already_linked with comdat_key.
+
 2011-06-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* configure.tgt: Revert x32 change.

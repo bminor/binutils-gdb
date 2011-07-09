@@ -478,7 +478,8 @@ extern bfd_boolean _bfd_generic_set_section_contents
 #define _bfd_nolink_bfd_link_split_section \
   ((bfd_boolean (*) (bfd *, struct bfd_section *)) bfd_false)
 #define _bfd_nolink_section_already_linked \
-  ((void (*) (bfd *, struct bfd_section *, struct bfd_link_info *)) bfd_void)
+  ((void (*) (bfd *, struct already_linked*, \
+	      struct bfd_link_info *)) bfd_void)
 #define _bfd_nolink_bfd_define_common_symbol \
   ((bfd_boolean (*) (bfd *, struct bfd_link_info *, \
 		     struct bfd_link_hash_entry *)) bfd_false)
@@ -599,7 +600,7 @@ extern bfd_boolean _bfd_generic_link_split_section
   (bfd *, struct bfd_section *);
 
 extern void _bfd_generic_section_already_linked
-  (bfd *, struct bfd_section *, struct bfd_link_info *);
+  (bfd *, struct already_linked *, struct bfd_link_info *);
 
 /* Generic reloc_link_order processing routine.  */
 extern bfd_boolean _bfd_generic_reloc_link_order
@@ -791,16 +792,26 @@ struct bfd_section_already_linked_hash_entry
   struct bfd_section_already_linked *entry;
 };
 
+struct already_linked
+{
+  const char *comdat_key;
+  union
+    {
+      asection *sec;
+      bfd *abfd;
+    } u;
+};
+
 struct bfd_section_already_linked
 {
   struct bfd_section_already_linked *next;
-  asection *sec;
+  struct already_linked linked;
 };
 
 extern struct bfd_section_already_linked_hash_entry *
   bfd_section_already_linked_table_lookup (const char *);
 extern bfd_boolean bfd_section_already_linked_table_insert
-  (struct bfd_section_already_linked_hash_entry *, asection *);
+  (struct bfd_section_already_linked_hash_entry *, struct already_linked *);
 extern void bfd_section_already_linked_table_traverse
   (bfd_boolean (*) (struct bfd_section_already_linked_hash_entry *,
 		    void *), void *);
