@@ -1410,6 +1410,9 @@ static const struct ecoff_backend_data mips_ecoff_backend_data =
 /* GC of sections is not done.  */
 #define _bfd_ecoff_bfd_gc_sections bfd_generic_gc_sections
 
+/* Input section flags is not implemented.  */
+#define _bfd_ecoff_bfd_lookup_section_flags bfd_generic_lookup_section_flags
+
 /* Merging of sections is not done.  */
 #define _bfd_ecoff_bfd_merge_sections bfd_generic_merge_sections
 

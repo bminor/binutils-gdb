@@ -459,6 +459,7 @@ aout_adobe_sizeof_headers (bfd *ignore_abfd ATTRIBUTE_UNUSED,
 #define aout_32_get_section_contents_in_window      _bfd_generic_get_section_contents_in_window
 #define aout_32_bfd_relax_section                   bfd_generic_relax_section
 #define aout_32_bfd_gc_sections                     bfd_generic_gc_sections
+#define aout_32_bfd_lookup_section_flags	    bfd_generic_lookup_section_flags
 #define aout_32_bfd_merge_sections	            bfd_generic_merge_sections
 #define aout_32_bfd_is_group_section	            bfd_generic_is_group_section
 #define aout_32_bfd_discard_group	            bfd_generic_discard_group

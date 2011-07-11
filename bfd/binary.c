@@ -299,6 +299,7 @@ binary_sizeof_headers (bfd *abfd ATTRIBUTE_UNUSED,
 #define binary_bfd_get_relocated_section_contents  bfd_generic_get_relocated_section_contents
 #define binary_bfd_relax_section                   bfd_generic_relax_section
 #define binary_bfd_gc_sections                     bfd_generic_gc_sections
+#define binary_bfd_lookup_section_flags            bfd_generic_lookup_section_flags
 #define binary_bfd_merge_sections                  bfd_generic_merge_sections
 #define binary_bfd_is_group_section                bfd_generic_is_group_section
 #define binary_bfd_discard_group                   bfd_generic_discard_group

@@ -143,6 +143,7 @@ msdos_set_section_contents (bfd *abfd,
   bfd_generic_get_relocated_section_contents
 #define msdos_bfd_relax_section bfd_generic_relax_section
 #define msdos_bfd_gc_sections bfd_generic_gc_sections
+#define msdos_bfd_lookup_section_flags bfd_generic_lookup_section_flags
 #define msdos_bfd_merge_sections bfd_generic_merge_sections
 #define msdos_bfd_is_group_section bfd_generic_is_group_section
 #define msdos_bfd_discard_group bfd_generic_discard_group

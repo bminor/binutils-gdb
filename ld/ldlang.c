@@ -237,6 +237,9 @@ walk_wild_consider_section (lang_wild_statement_type *ptr,
 {
   struct name_list *list_tmp;
 
+  /* Propagate the section_flag_info from the wild statement to the section.  */
+  s->section_flag_info = ptr->section_flag_list;
+
   /* Don't process sections from files which were excluded.  */
   for (list_tmp = sec->spec.exclude_name_list;
        list_tmp;
@@ -2261,8 +2264,11 @@ lang_add_section (lang_statement_list_type *ptr,
 		  lang_output_section_statement_type *output)
 {
   flagword flags = section->flags;
+  struct flag_info *sflag_info = section->section_flag_info;
+
   bfd_boolean discard;
   lang_input_section_type *new_section;
+  bfd *abfd = link_info.output_bfd;
 
   /* Discard sections marked with SEC_EXCLUDE.  */
   discard = (flags & SEC_EXCLUDE) != 0;
@@ -2286,6 +2292,28 @@ lang_add_section (lang_statement_list_type *ptr,
 	  section->output_section = bfd_abs_section_ptr;
 	}
       return;
+    }
+
+  if (sflag_info)
+    {
+      if (sflag_info->flags_initialized == FALSE)
+	bfd_lookup_section_flags (&link_info, sflag_info);
+
+      if (sflag_info->only_with_flags != 0
+	  && sflag_info->not_with_flags != 0
+          && ((sflag_info->not_with_flags & flags) != 0
+	       || (sflag_info->only_with_flags & flags)
+                   != sflag_info->only_with_flags))
+	return;
+
+      if (sflag_info->only_with_flags != 0
+	  && (sflag_info->only_with_flags & flags)
+              != sflag_info->only_with_flags)
+	return;
+
+      if (sflag_info->not_with_flags != 0
+          && (sflag_info->not_with_flags & flags) != 0)
+	return;
     }
 
   if (section->output_section != NULL)
@@ -6719,10 +6747,12 @@ lang_add_wild (struct wildcard_spec *filespec,
   new_stmt = new_stat (lang_wild_statement, stat_ptr);
   new_stmt->filename = NULL;
   new_stmt->filenames_sorted = FALSE;
+  new_stmt->section_flag_list = NULL;
   if (filespec != NULL)
     {
       new_stmt->filename = filespec->name;
       new_stmt->filenames_sorted = filespec->sorted == by_name;
+      new_stmt->section_flag_list = filespec->section_flag_list;
     }
   new_stmt->section_list = section_list;
   new_stmt->keep_sections = keep_sections;

@@ -6044,6 +6044,30 @@ bfd_generic_gc_sections (bfd *abfd ATTRIBUTE_UNUSED,
 
 /*
 INTERNAL_FUNCTION
+	bfd_generic_lookup_section_flags
+
+SYNOPSIS
+	void bfd_generic_lookup_section_flags
+	  (struct bfd_link_info *, struct flag_info *);
+
+DESCRIPTION
+	Provides default handling for section flags lookup
+	-- i.e., does nothing.
+*/
+
+void
+bfd_generic_lookup_section_flags (struct bfd_link_info *info ATTRIBUTE_UNUSED,
+				  struct flag_info *finfo) 
+{
+  if (finfo != NULL)
+    {
+      (*_bfd_error_handler) (_("INPUT_SECTION_FLAGS are not supported.\n"));
+      return;
+    }
+}
+
+/*
+INTERNAL_FUNCTION
 	bfd_generic_merge_sections
 
 SYNOPSIS

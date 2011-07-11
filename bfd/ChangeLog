@@ -1,3 +1,53 @@
+2011-07-11  Catherine Moore  <clm@codesourcery.com>
+
+	* aout-adobe.c (aout_32_bfd_lookup_section_flags): New definition.
+	* aout-target.h (MY_bfd_lookup_section_flags): New definition.
+	* aout-tic30.c (MY_bfd_lookup_section_flags): New definition.
+        * bfd-in2.h: Regenerated.
+	* bfd.c (bfd_lookup_section_flags): New definition.
+	* binary.c (binary_bfd_lookup_section_flags): New definition.
+	* bout.c (b_out_bfd_lookup_section_flags): New definition.
+	* coff-alpha.c (_bfd_ecoff_bfd_lookup_section_flags): New definition.
+	* coff-mips.c (_bfd_ecoff_bfd_lookup_section_flags): New definition.
+	* coff-rs6000.c (rs6000coff_vec): Include
+	bfd_generic_lookup_section_flags.
+	(pmac_xcoff_vec): Likewise.
+	* coffcode.h (coff_bfd_lookup_section_flags): New definition.
+	* coff64-rs6000.c (rs6000coff64_vec): Include
+	bfd_generic_lookup_section_flags.
+	(aix5coff64_vec): Likewise.
+	* ecoff.c (bfd_debug_section): Initialize flag_info field.
+	* elf-bfd.h (elf_backend_lookup_section_flags_hook): Declare.
+	(bfd_elf_lookup_section_flags): Declare.
+	* elflink.c (bfd_elf_lookup_section_flags): New function.
+	* elfxx-target.h (bfd_elfNN_bfd_lookup_section_flags): Define.
+	(elf_backend_lookup_section_flags_hook): Define.
+	(elf_backend_data): Add elf_backend_lookup_section_flags_hook.
+	* i386msdos.c (msdos_bfd_lookup_section_flags): New define.
+	* i386os9k.c (os9k_bfd_lookup_section_flags): New define.
+	* ieee.c (ieee_bfd_lookup_section_flags): New define.
+	* ihex.c (ihex_bfd_lookup_section_flags): New define.
+	* libbfd-in.h (_bfd_nolink_bfd_lookup_section_flags): Declare.
+	(bfd_generic_lookup_section_flags): Declare.
+	* libbfd.h: Regenerated.
+	* mach-o-target.c (bfd_mach_o_bfd_lookup_section_flags): New.
+	* mmo.c (mmo_bfd_lookup_section_flags): New definition.
+	* nlm-target.h (nlm_bfd_lookup_section_flags): New definition.
+	* oasys.c (oasys_bfd_lookup_section_flags): New definition.
+	* pef.c (bfd_pef_bfd_lookup_section_flags): New definition.
+	* plugin.c (bfd_plugin_bfd_lookup_section_flags): New definition.
+	* ppcboot.c (ppcboot_bfd_lookup_section_flags): New definition.
+	* reloc.c (bfd_generic_lookup_section_flags): New function.
+	* som.c (som_bfd_lookup_section_flags): New definition.
+	* srec.c (srec_bfd_lookup_section_flags): New definition.
+	* targets.c (flag_info): Declare.
+	(NAME##_bfd_lookup_section_flags): Add to LINK jump table.
+	(_bfd_lookup_section_flags): New.
+	* tekhex.c (tekhex_bfd_lookup_section_flags): New definition.
+	* versados.c (versados_bfd_lookup_section_flags): New definition.
+	* vms-alpha.c (alpha_vms_bfd_lookup_section_flag): New definition.
+	* xsym.c (bfd_sym_bfd_lookup_section_flags): New definition.
+
 2011-07-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/12978

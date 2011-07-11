@@ -174,6 +174,10 @@
 #define bfd_elfNN_bfd_define_common_symbol bfd_generic_define_common_symbol
 #endif
 
+#ifndef bfd_elfNN_bfd_lookup_section_flags
+#define bfd_elfNN_bfd_lookup_section_flags bfd_elf_lookup_section_flags
+#endif
+
 #ifndef bfd_elfNN_bfd_make_debug_symbol
 #define bfd_elfNN_bfd_make_debug_symbol \
   ((asymbol * (*) (bfd *, void *, unsigned long)) bfd_nullvoidptr)
@@ -529,6 +533,9 @@
 #ifndef elf_backend_write_core_note
 #define elf_backend_write_core_note		NULL
 #endif
+#ifndef elf_backend_lookup_section_flags_hook
+#define elf_backend_lookup_section_flags_hook	NULL
+#endif
 #ifndef elf_backend_reloc_type_class
 #define elf_backend_reloc_type_class		_bfd_elf_reloc_type_class
 #endif
@@ -717,6 +724,7 @@ static struct elf_backend_data elfNN_bed =
   elf_backend_grok_prstatus,
   elf_backend_grok_psinfo,
   elf_backend_write_core_note,
+  elf_backend_lookup_section_flags_hook,
   elf_backend_reloc_type_class,
   elf_backend_discard_info,
   elf_backend_ignore_discarded_relocs,

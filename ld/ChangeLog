@@ -1,3 +1,25 @@
+2011-07-11  Catherine Moore  <clm@codesourcery.com>
+
+	* ld.h (section_flag_list): Add field to struct wildcard_spec.
+	* ld.texinfo (INPUT_SECTION_FLAGS): Document.
+	* ldgram.y (flag_info_list, flag_info): Add to union.
+	(INPUT_SECTION_FLAGS): New token.
+	(wildcard_spec): Initialize section_flag_list to NULL for
+	each alternative.
+	(sect_flag_list, sect_flags): New rules.
+	(input_section_spec_no_keep): Add alternatives to recognize
+	sect_flags.
+	* ldlang.c (walk_wild_consider_section): Initialize
+	section_flag_info field of the section struct.
+	(lang_add_section): Check input section flags.
+	(lang_add_wild): Initialize section_flag_list field of 
+	the statement struct.
+	* ldlang.h (lang_input_statement_struct): Add section_flag_list field.
+	(lang_wild_statement_struct): Likewise.
+	* ldlex.l (INPUT_SECTION_FLAGS): New token.
+	* mri.c (mri_draw_tree): Initialize section_flag_list to NULL.
+	* NEWS: Announce INPUT_SECTION_FLAGS enhancement.
+
 2011-07-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/12942

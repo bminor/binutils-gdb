@@ -944,6 +944,9 @@ tic30_aout_set_arch_mach (bfd *abfd,
 #ifndef MY_bfd_gc_sections
 #define MY_bfd_gc_sections bfd_generic_gc_sections
 #endif
+#ifndef MY_bfd_lookup_section_flags
+#define MY_bfd_lookup_section_flags bfd_generic_lookup_section_flags
+#endif
 #ifndef MY_bfd_merge_sections
 #define MY_bfd_merge_sections bfd_generic_merge_sections
 #endif

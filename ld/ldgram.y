@@ -72,6 +72,8 @@ static int error_index;
   struct wildcard_spec wildcard;
   struct wildcard_list *wildcard_list;
   struct name_list *name_list;
+  struct flag_info_list *flag_info_list;
+  struct flag_info *flag_info;
   int token;
   union etree_union *etree;
   struct phdr_info
@@ -93,6 +95,8 @@ static int error_index;
 %type <fill> fill_opt fill_exp
 %type <name_list> exclude_name_list
 %type <wildcard_list> file_NAME_list
+%type <flag_info_list> sect_flag_list
+%type <flag_info> sect_flags
 %type <name> memspec_opt casesymlist
 %type <name> memspec_at_opt
 %type <cname> wildcard_name
@@ -150,7 +154,7 @@ static int error_index;
 %token INPUT_SCRIPT INPUT_MRI_SCRIPT INPUT_DEFSYM CASE EXTERN START
 %token <name> VERS_TAG VERS_IDENTIFIER
 %token GLOBAL LOCAL VERSIONK INPUT_VERSION_SCRIPT
-%token KEEP ONLY_IF_RO ONLY_IF_RW SPECIAL
+%token KEEP ONLY_IF_RO ONLY_IF_RW SPECIAL INPUT_SECTION_FLAGS
 %token EXCLUDE_FILE
 %token CONSTANT
 %type <versyms> vers_defns
@@ -437,60 +441,121 @@ wildcard_spec:
 			  $$.name = $1;
 			  $$.sorted = none;
 			  $$.exclude_name_list = NULL;
+			  $$.section_flag_list = NULL;
 			}
 	| 	EXCLUDE_FILE '(' exclude_name_list ')' wildcard_name
 			{
 			  $$.name = $5;
 			  $$.sorted = none;
 			  $$.exclude_name_list = $3;
+			  $$.section_flag_list = NULL;
 			}
 	|	SORT_BY_NAME '(' wildcard_name ')'
 			{
 			  $$.name = $3;
 			  $$.sorted = by_name;
 			  $$.exclude_name_list = NULL;
+			  $$.section_flag_list = NULL;
 			}
 	|	SORT_BY_ALIGNMENT '(' wildcard_name ')'
 			{
 			  $$.name = $3;
 			  $$.sorted = by_alignment;
 			  $$.exclude_name_list = NULL;
+			  $$.section_flag_list = NULL;
 			}
 	|	SORT_BY_NAME '(' SORT_BY_ALIGNMENT '(' wildcard_name ')' ')'
 			{
 			  $$.name = $5;
 			  $$.sorted = by_name_alignment;
 			  $$.exclude_name_list = NULL;
+			  $$.section_flag_list = NULL;
 			}
 	|	SORT_BY_NAME '(' SORT_BY_NAME '(' wildcard_name ')' ')'
 			{
 			  $$.name = $5;
 			  $$.sorted = by_name;
 			  $$.exclude_name_list = NULL;
+			  $$.section_flag_list = NULL;
 			}
 	|	SORT_BY_ALIGNMENT '(' SORT_BY_NAME '(' wildcard_name ')' ')'
 			{
 			  $$.name = $5;
 			  $$.sorted = by_alignment_name;
 			  $$.exclude_name_list = NULL;
+			  $$.section_flag_list = NULL;
 			}
 	|	SORT_BY_ALIGNMENT '(' SORT_BY_ALIGNMENT '(' wildcard_name ')' ')'
 			{
 			  $$.name = $5;
 			  $$.sorted = by_alignment;
 			  $$.exclude_name_list = NULL;
+			  $$.section_flag_list = NULL;
 			}
 	|	SORT_BY_NAME '(' EXCLUDE_FILE '(' exclude_name_list ')' wildcard_name ')'
 			{
 			  $$.name = $7;
 			  $$.sorted = by_name;
 			  $$.exclude_name_list = $5;
+			  $$.section_flag_list = NULL;
 			}
 	|	SORT_BY_INIT_PRIORITY '(' wildcard_name ')'
 			{
 			  $$.name = $3;
 			  $$.sorted = by_init_priority;
 			  $$.exclude_name_list = NULL;
+			  $$.section_flag_list = NULL;
+			}
+	;
+
+sect_flag_list:	NAME
+			{
+			  struct flag_info_list *n;
+			  n = ((struct flag_info_list *) xmalloc (sizeof *n));
+			  if ($1[0] == '!')
+			    {
+			      n->with = without_flags;
+			      n->name = &$1[1];
+			    }
+			  else
+			    {
+			      n->with = with_flags;
+			      n->name = $1;
+			    }
+			  n->valid = FALSE;
+			  n->next = NULL;
+			  $$ = n;
+			}
+	|	sect_flag_list '&' NAME
+			{
+			  struct flag_info_list *n;
+			  n = ((struct flag_info_list *) xmalloc (sizeof *n));
+			  if ($3[0] == '!')
+			    {
+			      n->with = without_flags;
+			      n->name = &$3[1];
+			    }
+			  else
+			    {
+			      n->with = with_flags;
+			      n->name = $3;
+			    }
+			  n->valid = FALSE;
+			  n->next = $1;
+			  $$ = n;
+			}
+	;
+
+sect_flags:
+		INPUT_SECTION_FLAGS '(' sect_flag_list ')'
+			{
+			  struct flag_info *n;
+			  n = ((struct flag_info *) xmalloc (sizeof *n));
+			  n->flag_list = $3;
+			  n->flags_initialized = FALSE;
+			  n->not_with_flags = 0;
+			  n->only_with_flags = 0;
+			  $$ = n;
 			}
 	;
 
@@ -541,15 +606,39 @@ input_section_spec_no_keep:
 			  tmp.name = $1;
 			  tmp.exclude_name_list = NULL;
 			  tmp.sorted = none;
+			  tmp.section_flag_list = NULL;
+			  lang_add_wild (&tmp, NULL, ldgram_had_keep);
+			}
+	|	sect_flags NAME
+			{
+			  struct wildcard_spec tmp;
+			  tmp.name = $2;
+			  tmp.exclude_name_list = NULL;
+			  tmp.sorted = none;
+			  tmp.section_flag_list = $1;
 			  lang_add_wild (&tmp, NULL, ldgram_had_keep);
 			}
         |	'[' file_NAME_list ']'
 			{
 			  lang_add_wild (NULL, $2, ldgram_had_keep);
 			}
+        |	sect_flags '[' file_NAME_list ']'
+			{
+			  struct wildcard_spec tmp;
+			  tmp.name = NULL;
+			  tmp.exclude_name_list = NULL;
+			  tmp.sorted = none;
+			  tmp.section_flag_list = $1;
+			  lang_add_wild (NULL, $3, ldgram_had_keep);
+			}
 	|	wildcard_spec '(' file_NAME_list ')'
 			{
 			  lang_add_wild (&$1, $3, ldgram_had_keep);
+			}
+	|	sect_flags wildcard_spec '(' file_NAME_list ')'
+			{
+			  $2.section_flag_list = $1;
+			  lang_add_wild (&$2, $4, ldgram_had_keep);
 			}
 	;
 

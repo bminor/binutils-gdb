@@ -51,6 +51,7 @@
 #define bfd_mach_o_bfd_set_private_flags              _bfd_generic_bfd_set_private_flags
 #define bfd_mach_o_get_section_contents               _bfd_generic_get_section_contents
 #define bfd_mach_o_bfd_gc_sections                    bfd_generic_gc_sections
+#define bfd_mach_o_bfd_lookup_section_flags           bfd_generic_lookup_section_flags
 #define bfd_mach_o_bfd_merge_sections                 bfd_generic_merge_sections
 #define bfd_mach_o_bfd_is_group_section               bfd_generic_is_group_section
 #define bfd_mach_o_bfd_discard_group                  bfd_generic_discard_group

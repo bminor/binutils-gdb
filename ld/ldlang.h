@@ -240,6 +240,8 @@ typedef struct lang_input_statement_struct
 
   bfd *the_bfd;
 
+  struct flag_info *section_flag_list;
+
   /* Point to the next file - whatever it is, wanders up and down
      archives */
   union lang_statement_union *next;
@@ -337,6 +339,7 @@ struct lang_wild_statement_struct
   walk_wild_section_handler_t walk_wild_section_handler;
   struct wildcard_list *handler_data[4];
   lang_section_bst_type *tree;
+  struct flag_info *section_flag_list;
 };
 
 typedef struct lang_address_statement_struct

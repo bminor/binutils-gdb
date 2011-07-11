@@ -1,3 +1,11 @@
+2011-07-11 Catherine Moore  <clm@cm00re.com>
+
+	* ld-scripts/section-flags-1.s: New.
+	* ld-scripts/section-flags-1.t: New.
+	* ld-scripts/section-flags-2.s: New.
+	* ld-scripts/section-flags-2.t: New.
+	* ld-scripts/section-flags.exp: New.
+
 2011-07-11  Alan Modra  <amodra@gmail.com>
 
 	* ld-powerpc/tocopt2.s, * ld-powerpc/tocopt2.out,

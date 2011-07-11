@@ -1,5 +1,8 @@
 -*- text -*-
 
+* INPUT_SECTION_FLAGS has been added to the linker script language
+to allow selection of input sections by section header section flags.
+
 * Add support for the Tilera TILEPRO and TILE-Gx architectures.
 
 * Added SORT_BY_INIT_PRIORITY to the linker script language to permit

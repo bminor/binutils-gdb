@@ -1514,6 +1514,9 @@ typedef struct bfd_section
   /* The BFD which owns the section.  */
   bfd *owner;
 
+  /* INPUT_SECTION_FLAGS if specified in the linker script.  */
+  struct flag_info *section_flag_info;
+
   /* A symbol which points at this section only.  */
   struct bfd_symbol *symbol;
   struct bfd_symbol **symbol_ptr_ptr;
@@ -1691,6 +1694,9 @@ extern asection bfd_ind_section;
                                                                        \
   /* target_index, used_by_bfd, constructor_chain, owner,          */  \
      0,            NULL,        NULL,              NULL,               \
+                                                                       \
+  /* flag_info,                                                    */  \
+     NULL,                                                             \
                                                                        \
   /* symbol,                    symbol_ptr_ptr,                    */  \
      (struct bfd_symbol *) SYM, &SEC.symbol,                           \
@@ -5571,6 +5577,9 @@ bfd_boolean bfd_set_private_flags (bfd *abfd, flagword flags);
 #define bfd_gc_sections(abfd, link_info) \
        BFD_SEND (abfd, _bfd_gc_sections, (abfd, link_info))
 
+#define bfd_lookup_section_flags(link_info, flag_info) \
+       BFD_SEND (abfd, _bfd_lookup_section_flags, (link_info, flag_info))
+
 #define bfd_merge_sections(abfd, link_info) \
        BFD_SEND (abfd, _bfd_merge_sections, (abfd, link_info))
 
@@ -5727,6 +5736,9 @@ enum bfd_endian { BFD_ENDIAN_BIG, BFD_ENDIAN_LITTLE, BFD_ENDIAN_UNKNOWN };
 /* Forward declaration.  */
 typedef struct bfd_link_info _bfd_link_info;
 struct already_linked;
+
+/* Forward declaration.  */
+typedef struct flag_info flag_info;
 
 typedef struct bfd_target
 {
@@ -5997,6 +6009,7 @@ typedef struct bfd_target
   NAME##_bfd_final_link, \
   NAME##_bfd_link_split_section, \
   NAME##_bfd_gc_sections, \
+  NAME##_bfd_lookup_section_flags, \
   NAME##_bfd_merge_sections, \
   NAME##_bfd_is_group_section, \
   NAME##_bfd_discard_group, \
@@ -6040,6 +6053,10 @@ typedef struct bfd_target
 
   /* Remove sections that are not referenced from the output.  */
   bfd_boolean (*_bfd_gc_sections) (bfd *, struct bfd_link_info *);
+
+  /* Sets the bitmask of allowed and disallowed section flags.  */
+  void (*_bfd_lookup_section_flags) (struct bfd_link_info *,
+                                     struct flag_info *);
 
   /* Attempt to merge SEC_MERGE sections.  */
   bfd_boolean (*_bfd_merge_sections) (bfd *, struct bfd_link_info *);

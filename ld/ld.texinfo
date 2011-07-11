@@ -3859,6 +3859,26 @@ needs to be at a particular location in memory.  For example:
 data.o(.data)
 @end smallexample
 
+To refine the sections that are included based on the section flags
+of an input section, INPUT_SECTION_FLAGS may be used.
+
+Here is a simple example for using Section header flags for ELF sections:
+
+@smallexample
+@group
+SECTIONS @{
+  .text : @{ INPUT_SECTION_FLAGS (SHF_MERGE & SHF_STRINGS) *(.text) @}
+  .text2 :  @{ INPUT_SECTION_FLAGS (!SHF_WRITE) *(.text) @}
+@}
+@end group
+@end smallexample
+
+In this example, the output section @samp{.text} will be comprised of any
+input section matching the name *(.text) whose section header flags
+@code{SHF_MERGE} and @code{SHF_STRINGS} are set.  The output section
+@samp{.text2} will be comprised of any input section matching the name *(.text)
+whose section header flag @code{SHF_WRITE} is clear.
+
 You can also specify files within archives by writing a pattern
 matching the archive, a colon, then the pattern matching the file,
 with no whitespace around the colon.

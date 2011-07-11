@@ -1112,6 +1112,11 @@ struct elf_backend_data
   char *(*elf_backend_write_core_note)
     (bfd *abfd, char *buf, int *bufsiz, int note_type, ...);
 
+  /* This function, if defined, is called to convert target-specific
+     section flag names into hex values.  */
+  flagword (*elf_backend_lookup_section_flags_hook)
+    (char *);
+
   /* This function returns class of a reloc type.  */
   enum elf_reloc_type_class (*elf_backend_reloc_type_class)
     (const Elf_Internal_Rela *);
@@ -2192,6 +2197,9 @@ extern bfd_boolean _bfd_elf_map_sections_to_segments
 extern bfd_boolean _bfd_elf_is_function_type (unsigned int);
 
 extern int bfd_elf_get_default_section_type (flagword);
+
+extern void bfd_elf_lookup_section_flags
+  (struct bfd_link_info *, struct flag_info *);
 
 extern Elf_Internal_Phdr * _bfd_elf_find_segment_containing_section
   (bfd * abfd, asection * section);
