@@ -2129,7 +2129,7 @@ count_dyn_reloc (bfd *abfd, struct elfNN_ia64_dyn_sym_info *dyn_i,
       rent->count = 0;
       dyn_i->reloc_entries = rent;
     }
-  rent->reltext |= reltext;
+  rent->reltext = reltext;
   rent->count++;
 
   return TRUE;

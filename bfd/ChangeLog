@@ -1,3 +1,8 @@
+2011-07-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/12978
+	* elfnn-ia64.c (count_dyn_reloc): Fix a typo.
+
 2011-07-09  Alan Modra  <amodra@gmail.com>
 
 	PR ld/12942
