@@ -49,7 +49,6 @@ create_thread_object (struct thread_info *tp)
 
   thread_obj->thread = tp;
   thread_obj->inf_obj = find_inferior_object (PIDGET (tp->ptid));
-  Py_INCREF (thread_obj->inf_obj);
 
   return thread_obj;
 }

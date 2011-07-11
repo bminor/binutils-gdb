@@ -125,9 +125,10 @@ python_inferior_exit (struct inferior *inf)
   do_cleanups (cleanup);
 }
 
-/* Return a borrowed reference to the Python object of type Inferior
+/* Return a reference to the Python object of type Inferior
    representing INFERIOR.  If the object has already been created,
-   return it,  otherwise, create it.  Return NULL on failure.  */
+   return it and increment the reference count,  otherwise, create it.
+   Return NULL on failure.  */
 PyObject *
 inferior_to_inferior_object (struct inferior *inferior)
 {
@@ -154,13 +155,14 @@ inferior_to_inferior_object (struct inferior *inferior)
 
       do_cleanups (cleanup);
     }
+  else
+    Py_INCREF ((PyObject *)inf_obj);
 
   return (PyObject *) inf_obj;
 }
 
 /* Finds the Python Inferior object for the given PID.  Returns a
-   borrowed reference, or NULL if PID does not match any inferior
-   object.  */
+   reference, or NULL if PID does not match any inferior object. */
 
 PyObject *
 find_inferior_object (int pid)
@@ -180,6 +182,7 @@ find_thread_object (ptid_t ptid)
   int pid;
   struct threadlist_entry *thread;
   PyObject *inf_obj;
+  thread_object *found = NULL;
 
   pid = PIDGET (ptid);
   if (pid == 0)
@@ -187,11 +190,21 @@ find_thread_object (ptid_t ptid)
 
   inf_obj = find_inferior_object (pid);
 
-  if (inf_obj)
-    for (thread = ((inferior_object *)inf_obj)->threads; thread;
-	 thread = thread->next)
-      if (ptid_equal (thread->thread_obj->thread->ptid, ptid))
-	return thread->thread_obj;
+  if (! inf_obj)
+    return NULL;
+
+  for (thread = ((inferior_object *)inf_obj)->threads; thread;
+       thread = thread->next)
+    if (ptid_equal (thread->thread_obj->thread->ptid, ptid))
+      {
+	found = thread->thread_obj;
+	break;
+      }
+
+  Py_DECREF (inf_obj);
+
+  if (found)
+    return found;
 
   return NULL;
 }
@@ -245,7 +258,10 @@ delete_thread_object (struct thread_info *tp, int ignore)
       break;
 
   if (!*entry)
-    return;
+    {
+      Py_DECREF (inf_obj);
+      return;
+    }
 
   cleanup = ensure_python_env (python_gdbarch, python_language);
 
@@ -256,6 +272,7 @@ delete_thread_object (struct thread_info *tp, int ignore)
   inf_obj->nthreads--;
 
   Py_DECREF (tmp->thread_obj);
+  Py_DECREF (inf_obj);
   xfree (tmp);
 
   do_cleanups (cleanup);
@@ -321,8 +338,15 @@ build_inferior_list (struct inferior *inf, void *arg)
 {
   PyObject *list = arg;
   PyObject *inferior = inferior_to_inferior_object (inf);
+  int success = 0;
 
-  if (PyList_Append (list, inferior))
+  if (! inferior)
+    return 0;
+
+  success = PyList_Append (list, inferior);
+  Py_DECREF (inferior);
+
+  if (success)
     return 1;
 
   return 0;
@@ -617,6 +641,17 @@ infpy_is_valid (PyObject *self, PyObject *args)
   Py_RETURN_TRUE;
 }
 
+static void
+infpy_dealloc (PyObject *obj)
+{
+  inferior_object *inf_obj = (inferior_object *) obj;
+  struct inferior *inf = inf_obj->inferior;
+
+  if (! inf)
+    return;
+
+  set_inferior_data (inf, infpy_inf_data_key, NULL);
+}
 
 /* Clear the INFERIOR pointer in an Inferior object and clear the
    thread list.  */
@@ -714,7 +749,7 @@ static PyTypeObject inferior_object_type =
   "gdb.Inferior",		  /* tp_name */
   sizeof (inferior_object),	  /* tp_basicsize */
   0,				  /* tp_itemsize */
-  0,				  /* tp_dealloc */
+  infpy_dealloc,		  /* tp_dealloc */
   0,				  /* tp_print */
   0,				  /* tp_getattr */
   0,				  /* tp_setattr */

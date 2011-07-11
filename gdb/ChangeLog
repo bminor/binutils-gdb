@@ -1,3 +1,13 @@
+2011-07-11  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* python/py-inferior.c (infpy_dealloc): New function.
+        (inferior_to_inferior_object): Return a new object, or a
+	new reference to the existing object.
+        (find_thread_object): Cleanup references to inferior.
+        (delete_thread_object): Ditto.
+        * python/py-infthread.c (create_thread_object): Do not increment
+	inferior reference count.
+
 2011-07-08  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2loc.c (locexpr_regname): New function.
