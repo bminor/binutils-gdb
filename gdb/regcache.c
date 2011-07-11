@@ -67,7 +67,7 @@ struct regcache_descr
   long sizeof_cooked_registers;
   long sizeof_cooked_register_status;
 
-  /* Offset and size (in 8 bit bytes), of reach register in the
+  /* Offset and size (in 8 bit bytes), of each register in the
      register cache.  All registers (including those in the range
      [NR_RAW_REGISTERS .. NR_COOKED_REGISTERS) are given an
      offset.  */

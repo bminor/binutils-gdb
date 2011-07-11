@@ -1,5 +1,10 @@
 2011-07-11  Tom Tromey  <tromey@redhat.com>
 
+	* regcache.c (struct regcache_descr): Fix typo.
+	* i387-tdep.c (i387_supply_xsave): Fix typo.
+
+2011-07-11  Tom Tromey  <tromey@redhat.com>
+
 	* dwarf2read.c (handle_DW_AT_stmt_list): New function.
 	(read_file_scope, read_type_unit_scope): Use it.
 

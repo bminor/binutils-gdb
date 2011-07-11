@@ -795,7 +795,7 @@ i387_supply_xsave (struct regcache *regcache, int regnum,
       return;
 
     case all:
-      /* Hanle the upper YMM registers.  */
+      /* Handle the upper YMM registers.  */
       if ((tdep->xcr0 & I386_XSTATE_AVX))
 	{
 	  if ((clear_bv & I386_XSTATE_AVX))
