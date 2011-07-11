@@ -1,3 +1,9 @@
+2011-07-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/12982
+	* elflink.c (bfd_elf_size_dynamic_sections): Also skip BFD_PLUGIN
+	when setting stack_flags.
+
 2011-07-11  Catherine Moore  <clm@codesourcery.com>
 
 	* aout-adobe.c (aout_32_bfd_lookup_section_flags): New definition.
