@@ -20801,10 +20801,15 @@ End with a line saying just "end".
 
 @kindex maint set python print-stack
 @item maint set python print-stack
-By default, @value{GDBN} will print a stack trace when an error occurs
-in a Python script.  This can be controlled using @code{maint set
-python print-stack}: if @code{on}, the default, then Python stack
-printing is enabled; if @code{off}, then Python stack printing is
+This command is now deprecated.  Instead use @code{set python
+print-stack} 
+
+@kindex set python print-stack
+@item set python print-stack
+By default, @value{GDBN} will not print a stack trace when an error
+occurs in a Python script.  This can be controlled using @code{set
+python print-stack}: if @code{on}, then Python stack printing is
+enabled; if @code{off}, the default, then Python stack printing is
 disabled.
 @end table
 

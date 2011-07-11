@@ -36,7 +36,7 @@
 
 /* True if we should print the stack when catching a Python error,
    false otherwise.  */
-static int gdbpy_should_print_stack = 1;
+static int gdbpy_should_print_stack = 0;
 
 #ifdef HAVE_PYTHON
 
@@ -936,23 +936,46 @@ gdbpy_breakpoint_has_py_cond (struct breakpoint_object *bp_obj)
 
 /* Lists for 'maint set python' commands.  */
 
-struct cmd_list_element *set_python_list;
-struct cmd_list_element *show_python_list;
+static struct cmd_list_element *maint_set_python_list;
+static struct cmd_list_element *maint_show_python_list;
+
+/* Lists for 'set python' commands.  */
+
+static struct cmd_list_element *user_set_python_list;
+static struct cmd_list_element *user_show_python_list;
 
 /* Function for use by 'maint set python' prefix command.  */
 
 static void
-set_python (char *args, int from_tty)
+maint_set_python (char *args, int from_tty)
 {
-  help_list (set_python_list, "maintenance set python ", -1, gdb_stdout);
+  help_list (maint_set_python_list, "maintenance set python ",
+	     class_deprecated, gdb_stdout);
 }
 
 /* Function for use by 'maint show python' prefix command.  */
 
 static void
-show_python (char *args, int from_tty)
+maint_show_python (char *args, int from_tty)
 {
-  cmd_show_list (show_python_list, from_tty, "");
+  cmd_show_list (maint_show_python_list, from_tty, "");
+}
+
+/* Function for use by 'set python' prefix command.  */
+
+static void
+user_set_python (char *args, int from_tty)
+{
+  help_list (user_set_python_list, "set python ", all_commands,
+	     gdb_stdout);
+}
+
+/* Function for use by 'show python' prefix command.  */
+
+static void
+user_show_python (char *args, int from_tty)
+{
+  cmd_show_list (user_show_python_list, from_tty, "");
 }
 
 /* Initialize the Python code.  */
@@ -963,6 +986,9 @@ extern initialize_file_ftype _initialize_python;
 void
 _initialize_python (void)
 {
+  char *cmd_name;
+  struct cmd_list_element *cmd;
+
   add_com ("python", class_obscure, python_command,
 #ifdef HAVE_PYTHON
 	   _("\
@@ -984,13 +1010,13 @@ This command is only a placeholder.")
 #endif /* HAVE_PYTHON */
 	   );
 
-  add_prefix_cmd ("python", no_class, show_python,
+  add_prefix_cmd ("python", no_class, maint_show_python,
 		  _("Prefix command for python maintenance settings."),
-		  &show_python_list, "maintenance show python ", 0,
+		  &maint_show_python_list, "maintenance show python ", 0,
 		  &maintenance_show_cmdlist);
-  add_prefix_cmd ("python", no_class, set_python,
+  add_prefix_cmd ("python", no_class, maint_set_python,
 		  _("Prefix command for python maintenance settings."),
-		  &set_python_list, "maintenance set python ", 0,
+		  &maint_set_python_list, "maintenance set python ", 0,
 		  &maintenance_set_cmdlist);
 
   add_setshow_boolean_cmd ("print-stack", class_maintenance,
@@ -999,8 +1025,37 @@ Enable or disable printing of Python stack dump on error."), _("\
 Show whether Python stack will be printed on error."), _("\
 Enables or disables printing of Python stack traces."),
 			   NULL, NULL,
-			   &set_python_list,
-			   &show_python_list);
+			   &maint_set_python_list,
+			   &maint_show_python_list);
+
+  /* Deprecate maint set/show python print-stack in favour of
+     non-maintenance alternatives.  */
+  cmd_name = "print-stack";
+  cmd = lookup_cmd (&cmd_name, maint_set_python_list, "", -1, 0);
+  deprecate_cmd (cmd, "set python print-stack");
+  cmd_name = "print-stack"; /* Reset name.  */
+  cmd = lookup_cmd (&cmd_name, maint_show_python_list, "", -1, 0);
+  deprecate_cmd (cmd, "show python print-stack");
+
+  /* Add set/show python print-stack.  */
+  add_prefix_cmd ("python", no_class, user_show_python,
+		  _("Prefix command for python preference settings."),
+		  &user_show_python_list, "show python ", 0,
+		  &showlist);
+
+  add_prefix_cmd ("python", no_class, user_set_python,
+		  _("Prefix command for python preference settings."),
+		  &user_set_python_list, "set python ", 0,
+		  &setlist);
+
+  add_setshow_boolean_cmd ("print-stack", no_class,
+			   &gdbpy_should_print_stack, _("\
+Enable or disable printing of Python stack dump on error."), _("\
+Show whether Python stack will be printed on error."), _("\
+Enables or disables printing of Python stack traces."),
+			   NULL, NULL,
+			   &user_set_python_list,
+			   &user_show_python_list);
 
 #ifdef HAVE_PYTHON
 #ifdef WITH_PYTHON_PATH

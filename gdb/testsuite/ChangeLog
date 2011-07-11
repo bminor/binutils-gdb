@@ -1,3 +1,9 @@
+2011-07-11  Phil Muldoon  <pmuldoon@redhat.com>
+
+        PR python/12438
+	* gdb.python/python.exp: Add maint set/show python print-stack
+          deprecated tests.  Add set/show python print-backtrace tests.
+
 2011-07-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.java/jprint.exp (print a java.lang.String): xfail without system

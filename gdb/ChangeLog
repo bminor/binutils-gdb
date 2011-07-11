@@ -1,5 +1,15 @@
 2011-07-11  Phil Muldoon  <pmuldoon@redhat.com>
 
+        PR python/12438
+	* python/python.c: Set gdbpy_should_print_stack default to off.
+	(set_python): Deprecate maint set python print-stack to
+	class_deprecate.
+	(_initialize_python): Deprecate maint set/show python print-stack.
+	Add new prefix command, python.  Add new setting, print-backtrace.
+	* NEWS: Document set python print-stack.  Document default change.
+
+2011-07-11  Phil Muldoon  <pmuldoon@redhat.com>
+
 	* python/py-inferior.c (infpy_dealloc): New function.
         (inferior_to_inferior_object): Return a new object, or a
 	new reference to the existing object.

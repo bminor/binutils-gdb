@@ -178,3 +178,18 @@ gdb_test "python gdb.write(\"Foo\\n\")" "Foo" "Test default write"
 gdb_test "python gdb.write(\"Error stream\\n\", stream=gdb.STDERR)" "Error stream" "Test stderr write"
 gdb_test "python gdb.write(\"Normal stream\\n\", stream=gdb.STDOUT)" "Normal stream" "Test stdout write"
 gdb_test "python gdb.write(\"Log stream\\n\", stream=gdb.STDLOG)" "Log stream" "Test stdlog write"
+
+# Deprecate maint set/show python print-stack
+gdb_test "maint show python print-stack" \
+    "Warning: command 'maintenance show python print-stack' is deprecated.*Use 'show python print-stack'.*" \
+    "Test deprecation maint show warning."
+gdb_test "maint set python print-stack off" \
+    "Warning: command 'maintenance set python print-stack' is deprecated.*Use 'set python print-stack'.*" \
+    "Test deprecation maint set warning."
+gdb_test "show python print-stack" \
+    "Whether Python stack will be printed on error is off.*" \
+    "Test print-backtrace show setting. Default off."
+gdb_py_test_silent_cmd "set python print-stack on" \
+    "Test print-backtrace set setting" 1
+gdb_test "show python print-stack" \
+    "Whether Python stack will be printed on error is on.*" \

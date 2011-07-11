@@ -3,6 +3,11 @@
 
 *** Changes since GDB 7.3
 
+* The "maint set python print-stack on|off" command has been
+  deprecated, and a new command: "set python print-stack on|off" has
+  replaced it.  Additionally, the default for "print-stack" is now
+  "off".
+
 * libthread-db-search-path now supports two special values: $sdir and $pdir.
   $sdir specifies the default system locations of shared libraries.
   $pdir specifies the directory where the libpthread used by the application
