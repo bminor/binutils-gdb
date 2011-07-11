@@ -1,3 +1,10 @@
+2011-07-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.dwarf2/dw2-const.S (Pointer size): Change from 4 to 8.
+	(DW_AT_high_pc, DW_AT_low_pc): Remove them.
+	(val8, .Ltype_const8, .Ltype_int8, DW_TAG_variable): New.
+	* gdb.dwarf2/dw2-const.exp (print/x val8): New test.
+
 2011-07-11  Phil Muldoon  <pmuldoon@redhat.com>
 
         PR python/12438

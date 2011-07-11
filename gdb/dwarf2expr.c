@@ -418,7 +418,7 @@ read_sleb128 (const gdb_byte *buf, const gdb_byte *buf_end, LONGEST * r)
 	break;
     }
   if (shift < (sizeof (*r) * 8) && (byte & 0x40) != 0)
-    result |= -(1 << shift);
+    result |= -(((LONGEST) 1) << shift);
 
   *r = result;
   return buf;

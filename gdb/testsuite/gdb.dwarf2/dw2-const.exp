@@ -39,3 +39,4 @@ clean_restart ${testfile}.x
 
 gdb_test "print twelve" "= 12"
 
+gdb_test "print/x val8" " = 0xffffffff00000000"

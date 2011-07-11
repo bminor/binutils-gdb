@@ -1,3 +1,8 @@
+2011-07-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf2expr.c (read_sleb128): Fix signed extension overflowing host
+	`int'.
+
 2011-07-11  Phil Muldoon  <pmuldoon@redhat.com>
 
         PR python/12438
