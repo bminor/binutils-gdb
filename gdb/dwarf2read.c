@@ -5478,6 +5478,35 @@ find_file_and_directory (struct die_info *die, struct dwarf2_cu *cu,
     *name = "<unknown>";
 }
 
+/* Handle DW_AT_stmt_list for a compilation unit.  */
+
+static void
+handle_DW_AT_stmt_list (struct die_info *die, struct dwarf2_cu *cu,
+			const char *comp_dir)
+{
+  struct attribute *attr;
+  struct objfile *objfile = cu->objfile;
+  bfd *abfd = objfile->obfd;
+
+  /* Decode line number information if present.  We do this before
+     processing child DIEs, so that the line header table is available
+     for DW_AT_decl_file.  */
+  attr = dwarf2_attr (die, DW_AT_stmt_list, cu);
+  if (attr)
+    {
+      unsigned int line_offset = DW_UNSND (attr);
+      struct line_header *line_header
+	= dwarf_decode_line_header (line_offset, abfd, cu);
+
+      if (line_header)
+        {
+          cu->line_header = line_header;
+          make_cleanup (free_cu_line_header, cu);
+          dwarf_decode_lines (line_header, comp_dir, abfd, cu, NULL);
+        }
+    }
+}
+
 /* Process DW_TAG_compile_unit.  */
 
 static void
@@ -5492,7 +5521,6 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
   char *comp_dir = NULL;
   struct die_info *child_die;
   bfd *abfd = objfile->obfd;
-  struct line_header *line_header = 0;
   CORE_ADDR baseaddr;
 
   baseaddr = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
@@ -5535,21 +5563,7 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
 
   initialize_cu_func_list (cu);
 
-  /* Decode line number information if present.  We do this before
-     processing child DIEs, so that the line header table is available
-     for DW_AT_decl_file.  */
-  attr = dwarf2_attr (die, DW_AT_stmt_list, cu);
-  if (attr)
-    {
-      unsigned int line_offset = DW_UNSND (attr);
-      line_header = dwarf_decode_line_header (line_offset, abfd, cu);
-      if (line_header)
-        {
-          cu->line_header = line_header;
-          make_cleanup (free_cu_line_header, cu);
-          dwarf_decode_lines (line_header, comp_dir, abfd, cu, NULL);
-        }
-    }
+  handle_DW_AT_stmt_list (die, cu, comp_dir);
 
   /* Process all dies in compilation unit.  */
   if (die->child != NULL)
@@ -5567,11 +5581,11 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
      header, so we can only read it if we've read the header
      successfully.  */
   attr = dwarf2_attr (die, DW_AT_macro_info, cu);
-  if (attr && line_header)
+  if (attr && cu->line_header)
     {
       unsigned int macro_offset = DW_UNSND (attr);
 
-      dwarf_decode_macros (line_header, macro_offset,
+      dwarf_decode_macros (cu->line_header, macro_offset,
                            comp_dir, abfd, cu);
     }
   do_cleanups (back_to);
@@ -5635,6 +5649,8 @@ read_type_unit_scope (struct die_info *die, struct dwarf2_cu *cu)
   start_symtab (name, comp_dir, lowpc);
   record_debugformat ("DWARF 2");
   record_producer (cu->producer);
+
+  handle_DW_AT_stmt_list (die, cu, comp_dir);
 
   /* Process the dies in the type unit.  */
   if (die->child == NULL)

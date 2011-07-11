@@ -1,3 +1,8 @@
+2011-07-11  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2read.c (handle_DW_AT_stmt_list): New function.
+	(read_file_scope, read_type_unit_scope): Use it.
+
 2011-07-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* dwarf2expr.c (read_sleb128): Fix signed extension overflowing host
