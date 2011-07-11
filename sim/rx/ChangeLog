@@ -1,5 +1,9 @@
 2011-07-11  Mike Frysinger  <vapier@gentoo.org>
 
+	* configure.ac: Rename from configure.in.
+
+2011-07-11  Mike Frysinger  <vapier@gentoo.org>
+
 	* configure.in: Add "dnl" before copyright notice.
 
 2011-04-16  Mike Frysinger  <vapier@gentoo.org>
