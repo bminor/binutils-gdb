@@ -203,6 +203,8 @@ issue_undefined_symbol_error(const Symbol* sym)
     {
       if (strcmp(u, "ignore-all") == 0)
 	return false;
+      if (strcmp(u, "report-all") == 0)
+	return true;
       if (strcmp(u, "ignore-in-object-files") == 0 && !sym->in_dyn())
 	return false;
       if (strcmp(u, "ignore-in-shared-libs") == 0 && !sym->in_reg())

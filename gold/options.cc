@@ -1168,6 +1168,14 @@ General_options::finalize()
         }
     }
 
+  // -Bgroup implies --unresolved-symbols=report-all.
+  if (this->Bgroup() && !this->user_set_unresolved_symbols())
+    this->set_unresolved_symbols("report-all");
+
+  // -shared implies --allow-shlib-undefined.  Currently
+  // ---allow-shlib-undefined controls warnings issued based on the
+  // -symbol table.  --unresolved-symbols controls warnings issued
+  // -based on relocations.
   if (this->shared() && !this->user_set_allow_shlib_undefined())
     this->set_allow_shlib_undefined(true);
 

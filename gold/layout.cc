@@ -4370,6 +4370,8 @@ Layout::finish_dynamic_section(const Input_objects* input_objects,
     flags |= elfcpp::DF_1_ORIGIN;
   if (parameters->options().now())
     flags |= elfcpp::DF_1_NOW;
+  if (parameters->options().Bgroup())
+    flags |= elfcpp::DF_1_GROUP;
   if (flags != 0)
     odyn->add_constant(elfcpp::DT_FLAGS_1, flags);
 }

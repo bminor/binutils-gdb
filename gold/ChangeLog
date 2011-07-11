@@ -1,3 +1,13 @@
+2011-07-11  Ian Lance Taylor  <iant@google.com>
+
+	PR gold/12979
+	* options.h (class General_options): Add -Bgroup.
+	* options.cc (General_options::finalize): If -Bgroup is set,
+	default to --unresolved-symbols=report-all.
+	* layout.cc (Layout::finish_dynamic_section): Implement -Bgroup.
+	* target-reloc.h (issue_undefined_symbol_error): Handle
+	--unresolved-symbols=report-all.
+
 2011-07-08  Ian Lance Taylor  <iant@google.com>
 
 	PR gold/11985

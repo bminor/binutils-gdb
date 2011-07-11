@@ -643,6 +643,9 @@ class General_options
   DEFINE_bool_alias(dn, Bdynamic, options::ONE_DASH, '\0',
 		    N_("alias for -Bstatic"), NULL, true);
 
+  DEFINE_bool(Bgroup, options::ONE_DASH, '\0', false,
+	      N_("Use group name lookup rules for shared library"), NULL);
+
   DEFINE_bool(Bsymbolic, options::ONE_DASH, '\0', false,
               N_("Bind defined symbols locally"), NULL);
 
