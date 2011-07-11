@@ -1,3 +1,10 @@
+2011-07-11  Alan Modra  <amodra@gmail.com>
+
+	* ld-powerpc/tocopt2.s, * ld-powerpc/tocopt2.out,
+	* ld-powerpc/tocopt2.d: New test.
+	* ld-powerpc/tocopt3.s, * ld-powerpc/tocopt3.d: New test.
+	* ld-powerpc/powerpc.exp (ppc64elftests) Run them.
+
 2011-07-03  Samuel Thibault  <samuel.thibault@gnu.org>
 	    Thomas Schwinge  <thomas@schwinge.name>
 
