@@ -1202,6 +1202,10 @@ display_file (char *filename)
       return FALSE;
     }
 
+  /* If printing line numbers, decompress the debug sections.  */
+  if (line_numbers)
+    file->flags |= BFD_DECOMPRESS;
+
   if (bfd_check_format (file, bfd_archive))
     {
       display_archive (file);

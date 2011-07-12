@@ -1,3 +1,9 @@
+2011-07-11  Cary Coutant  <ccoutant@google.com>
+
+	PR 12983
+	* binutils/nm.c (display_file): Decompress debug sections when
+	printing line numbers.
+
 2011-07-03  Samuel Thibault  <samuel.thibault@gnu.org>
 	    Thomas Schwinge  <thomas@schwinge.name>
 
