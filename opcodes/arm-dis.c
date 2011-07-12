@@ -2997,9 +2997,6 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
                           /* PC relative with immediate offset.  */
 			  bfd_vma offset = ((given & 0xf00) >> 4) | (given & 0xf);
 
-			  if (NEGATIVE_BIT_SET)
-			    offset = - offset;
-
 			  if (PRE_BIT_SET)
 			    {
 			      /* Elide positive zero offset.  */

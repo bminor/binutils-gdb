@@ -1,3 +1,8 @@
+2011-07-12  Nick Clifton  <nickc@redhat.com>
+
+	* arm-dis.c (print_insn_arm): Revert previous, undocumented,
+	accidental change.
+
 2011-07-01  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/12329
