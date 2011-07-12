@@ -207,6 +207,8 @@ extern struct value *allocate_computed_value (struct type *type,
                                               struct lval_funcs *funcs,
                                               void *closure);
 
+extern struct value *allocate_optimized_out_value (struct type *type);
+
 /* If VALUE is lval_computed, return its lval_funcs structure.  */
 
 extern struct lval_funcs *value_computed_funcs (struct value *value);

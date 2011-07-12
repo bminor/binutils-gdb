@@ -728,6 +728,18 @@ allocate_computed_value (struct type *type,
   return v;
 }
 
+/* Allocate NOT_LVAL value for type TYPE being OPTIMIZED_OUT.  */
+
+struct value *
+allocate_optimized_out_value (struct type *type)
+{
+  struct value *retval = allocate_value_lazy (type);
+
+  set_value_optimized_out (retval, 1);
+
+  return retval;
+}
+
 /* Accessor methods.  */
 
 struct value *

@@ -1094,12 +1094,7 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
     invalid_synthetic_pointer ();
 
   if (size == 0)
-    {
-      retval = allocate_value (type);
-      VALUE_LVAL (retval) = not_lval;
-      set_value_optimized_out (retval, 1);
-      return retval;
-    }
+    return allocate_optimized_out_value (type);
 
   baton.frame = frame;
   baton.per_cu = per_cu;
@@ -1247,9 +1242,7 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 
 	case DWARF_VALUE_OPTIMIZED_OUT:
 	  do_cleanups (value_chain);
-	  retval = allocate_value (type);
-	  VALUE_LVAL (retval) = not_lval;
-	  set_value_optimized_out (retval, 1);
+	  retval = allocate_optimized_out_value (type);
 	  break;
 
 	  /* DWARF_VALUE_IMPLICIT_POINTER was converted to a pieced
@@ -2829,11 +2822,7 @@ loclist_read_variable (struct symbol *symbol, struct frame_info *frame)
 
   data = dwarf2_find_location_expression (dlbaton, &size, pc);
   if (data == NULL)
-    {
-      val = allocate_value (SYMBOL_TYPE (symbol));
-      VALUE_LVAL (val) = not_lval;
-      set_value_optimized_out (val, 1);
-    }
+    val = allocate_optimized_out_value (SYMBOL_TYPE (symbol));
   else
     val = dwarf2_evaluate_loc_desc (SYMBOL_TYPE (symbol), frame, data, size,
 				    dlbaton->per_cu);

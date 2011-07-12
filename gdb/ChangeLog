@@ -1,5 +1,15 @@
 2011-07-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Code cleanup making also optimized out values lazy.
+	* dwarf2loc.c (dwarf2_evaluate_loc_desc_full): Use
+	allocate_optimized_out_value.  Twice.
+	(loclist_read_variable)  Use allocate_optimized_out_value.  Once.
+	* findvar.c (read_var_value): Likewise.
+	* value.c (allocate_optimized_out_value): New function.
+	* value.h (allocate_optimized_out_value): New declaration.
+
+2011-07-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Fix occasional crash of CTRL-C during DWARF read in.
 	* dwarf2read.c (dwarf2_mark_helper): Return on NULL CU.
 

@@ -577,10 +577,7 @@ read_var_value (struct symbol *var, struct frame_info *frame)
       break;
 
     case LOC_OPTIMIZED_OUT:
-      v = allocate_value_lazy (type);
-      VALUE_LVAL (v) = not_lval;
-      set_value_optimized_out (v, 1);
-      return v;
+      return allocate_optimized_out_value (type);
 
     default:
       error (_("Cannot look up value of a botched symbol."));
