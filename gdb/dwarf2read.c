@@ -15455,6 +15455,13 @@ dwarf2_mark_helper (void **slot, void *data)
   struct dwarf2_per_cu_data *per_cu;
 
   per_cu = (struct dwarf2_per_cu_data *) *slot;
+
+  /* cu->dependencies references may not yet have been ever read if QUIT aborts
+     reading of the chain.  As such dependencies remain valid it is not much
+     useful to track and undo them during QUIT cleanups.  */
+  if (per_cu->cu == NULL)
+    return 1;
+
   if (per_cu->cu->mark)
     return 1;
   per_cu->cu->mark = 1;
