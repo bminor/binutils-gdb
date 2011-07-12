@@ -1,3 +1,14 @@
+2011-07-12  Ian Lance Taylor  <iant@google.com>
+
+	PR gold/12980
+	* i386.cc (Target_i386::Scan::global): For a GOT reloc, use a
+	GLOB_DAT relocation rather than a RELATIVE relocation for a
+	protected symbol when creating a shared library.
+	* x86_64.cc (Target_x86_64::Scan::global): Likewise.
+	* testsuite/protected_1.cc (f2, get_f2_addr): New functions.
+	* testsuite/protected_main_1.cc (main): Test that protected
+	function has same address.
+
 2011-07-11  Ian Lance Taylor  <iant@google.com>
 
 	PR gold/12979

@@ -2436,9 +2436,24 @@ Target_x86_64::Scan::global(Symbol_table* symtab,
             // If this symbol is not fully resolved, we need to add a
             // dynamic relocation for it.
             Reloc_section* rela_dyn = target->rela_dyn_section(layout);
+
+	    // Use a GLOB_DAT rather than a RELATIVE reloc if:
+	    //
+	    // 1) The symbol may be defined in some other module.
+	    //
+	    // 2) We are building a shared library and this is a
+	    // protected symbol; using GLOB_DAT means that the dynamic
+	    // linker can use the address of the PLT in the main
+	    // executable when appropriate so that function address
+	    // comparisons work.
+	    //
+	    // 3) This is a STT_GNU_IFUNC symbol in position dependent
+	    // code, again so that function address comparisons work.
 	    if (gsym->is_from_dynobj()
 		|| gsym->is_undefined()
 		|| gsym->is_preemptible()
+		|| (gsym->visibility() == elfcpp::STV_PROTECTED
+		    && parameters->options().shared())
 		|| (gsym->type() == elfcpp::STT_GNU_IFUNC
 		    && parameters->options().output_is_position_independent()))
               got->add_global_with_rela(gsym, GOT_TYPE_STANDARD, rela_dyn,
