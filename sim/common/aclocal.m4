@@ -24,11 +24,11 @@ sinclude([../../config/zlib.m4])
 
 AC_DEFUN([SIM_AC_COMMON],
 [
+AC_REQUIRE([AC_PROG_CC])
 # autoconf.info says this should be called right after AC_INIT.
 AC_CONFIG_HEADER(ifelse([$1],,config.h,[$1]):config.in)
 AC_CANONICAL_SYSTEM
 AC_ARG_PROGRAM
-AC_PROG_CC
 AC_PROG_INSTALL
 
 # Put a plausible default for CC_FOR_BUILD in Makefile.
