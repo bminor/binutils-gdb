@@ -8,9 +8,9 @@
 # The simulator's configure.in should look like:
 #
 # dnl Process this file with autoconf to produce a configure script.
-# sinclude(../common/aclocal.m4)
 # AC_PREREQ(2.5)dnl
 # AC_INIT(Makefile.in)
+# sinclude(../common/aclocal.m4)
 #
 # SIM_AC_COMMON
 #

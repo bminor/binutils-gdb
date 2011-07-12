@@ -1,5 +1,9 @@
 2011-07-12  Mike Frysinger  <vapier@gentoo.org>
 
+	* aclocal.m4: Move sinclude comment after AC_INIT comment.
+
+2011-07-12  Mike Frysinger  <vapier@gentoo.org>
+
 	* aclocal.m4 (SIM_AC_COMMON): Call AC_REQUIRE on AC_PROG_CC.
 	Delete direct call to AC_PROG_CC.
 
