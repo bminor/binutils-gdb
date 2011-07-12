@@ -1,3 +1,8 @@
+2011-07-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix occasional crash of CTRL-C during DWARF read in.
+	* dwarf2read.c (dwarf2_mark_helper): Return on NULL CU.
+
 2011-07-06  Joel Brobecker  <brobecker@adacore.com>
 
 	* version.in: Set version to 7.2.91.20110706-cvs.
