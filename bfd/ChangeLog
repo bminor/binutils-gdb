@@ -1,3 +1,8 @@
+2011-07-12  Nick Clifton  <nickc@redhat.com>
+
+	* elf32-arm.c (elf32_arm_section_flags): Delete.
+	(elf_backend_section_flags): Remove.
+
 2011-07-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/12982

@@ -14101,17 +14101,6 @@ elf32_arm_reloc_type_class (const Elf_Internal_Rela *rela)
     }
 }
 
-/* Set the right machine number for an Arm ELF file.  */
-
-static bfd_boolean
-elf32_arm_section_flags (flagword *flags, const Elf_Internal_Shdr *hdr)
-{
-  if (hdr->sh_type == SHT_NOTE)
-    *flags |= SEC_LINK_ONCE | SEC_LINK_DUPLICATES_SAME_CONTENTS;
-
-  return TRUE;
-}
-
 static void
 elf32_arm_final_write_processing (bfd *abfd, bfd_boolean linker ATTRIBUTE_UNUSED)
 {
@@ -15337,7 +15326,6 @@ const struct elf_size_info elf32_arm_size_info =
 #define elf_backend_post_process_headers	elf32_arm_post_process_headers
 #define elf_backend_reloc_type_class		elf32_arm_reloc_type_class
 #define elf_backend_object_p			elf32_arm_object_p
-#define elf_backend_section_flags		elf32_arm_section_flags
 #define elf_backend_fake_sections  		elf32_arm_fake_sections
 #define elf_backend_section_from_shdr  		elf32_arm_section_from_shdr
 #define elf_backend_final_write_processing      elf32_arm_final_write_processing
