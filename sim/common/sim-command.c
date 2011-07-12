@@ -19,6 +19,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "sim-main.h"
+#include "sim-options.h"
 #include "sim-utils.h"
 
 /* Generic implementation of sim_do_command that works with simulators

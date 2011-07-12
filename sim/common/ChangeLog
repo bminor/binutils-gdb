@@ -1,5 +1,9 @@
 2011-07-12  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-command.c: Include sim-options.h.
+
+2011-07-12  Mike Frysinger  <vapier@gentoo.org>
+
 	* aclocal.m4: Move sinclude comment after AC_INIT comment.
 
 2011-07-12  Mike Frysinger  <vapier@gentoo.org>
