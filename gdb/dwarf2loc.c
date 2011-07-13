@@ -44,15 +44,15 @@
 
 extern int dwarf2_always_disassemble;
 
-static void
-dwarf_expr_frame_base_1 (struct symbol *framefunc, CORE_ADDR pc,
-			 const gdb_byte **start, size_t *length);
+static void dwarf_expr_frame_base_1 (struct symbol *framefunc, CORE_ADDR pc,
+				     const gdb_byte **start, size_t *length);
 
-static struct value *
-dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
-			       const gdb_byte *data, unsigned short size,
-			       struct dwarf2_per_cu_data *per_cu,
-			       LONGEST byte_offset);
+static struct value *dwarf2_evaluate_loc_desc_full (struct type *type,
+						    struct frame_info *frame,
+						    const gdb_byte *data,
+						    unsigned short size,
+					      struct dwarf2_per_cu_data *per_cu,
+						    LONGEST byte_offset);
 
 /* A function for dealing with location lists.  Given a
    symbol baton (BATON) and a pc value (PC), find the appropriate

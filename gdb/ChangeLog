@@ -1,3 +1,9 @@
+2011-07-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Code cleanup.
+	* dwarf2loc.c (dwarf_expr_frame_base_1, dwarf2_evaluate_loc_desc_full):
+	Indent prototypes so they do not get into tags.
+
 2011-07-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Code cleanup making also optimized out values lazy.
