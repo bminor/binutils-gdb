@@ -49,7 +49,7 @@ array3:	.2byte	3
 	.4byte		.L2byte_type-.Lcu1_begin	/* DW_AT_type */
 	.byte		2f - 1f			/* DW_AT_location */
 1:	.byte		3			/*   DW_OP_addr */
-	.4byte		array			/*     <addr> */
+	.4byte		array1			/*     <addr> */
 2:
 
 	.uleb128	3			/* Abbrev: DW_TAG_variable */

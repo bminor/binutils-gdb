@@ -1,3 +1,8 @@
+2011-07-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.dwarf2/dw2-op-call.S (array1): Use the real label; do not
+	reference undefined label.
+
 2011-07-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.dwarf2/dw2-const.S (Pointer size): Change from 4 to 8.
