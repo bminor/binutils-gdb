@@ -712,23 +712,37 @@ Target_i386::got_section(Symbol_table* symtab, Layout* layout)
 
       this->got_ = new Output_data_got<32, false>();
 
+      // When using -z now, we can treat .got.plt as a relro section.
+      // Without -z now, it is modified after program startup by lazy
+      // PLT relocations.
+      bool is_got_plt_relro = parameters->options().now();
+      Output_section_order got_order = (is_got_plt_relro
+					? ORDER_RELRO
+					: ORDER_RELRO_LAST);
+      Output_section_order got_plt_order = (is_got_plt_relro
+					    ? ORDER_RELRO
+					    : ORDER_NON_RELRO_FIRST);
+
       layout->add_output_section_data(".got", elfcpp::SHT_PROGBITS,
 				      (elfcpp::SHF_ALLOC
 				       | elfcpp::SHF_WRITE),
-				      this->got_, ORDER_RELRO_LAST, true);
+				      this->got_, got_order, true);
 
       this->got_plt_ = new Output_data_space(4, "** GOT PLT");
       layout->add_output_section_data(".got.plt", elfcpp::SHT_PROGBITS,
 				      (elfcpp::SHF_ALLOC
 				       | elfcpp::SHF_WRITE),
-				      this->got_plt_, ORDER_NON_RELRO_FIRST,
-				      false);
+				      this->got_plt_, got_plt_order,
+				      is_got_plt_relro);
 
       // The first three entries are reserved.
       this->got_plt_->set_current_data_size(3 * 4);
 
-      // Those bytes can go into the relro segment.
-      layout->increase_relro(3 * 4);
+      if (!is_got_plt_relro)
+	{
+	  // Those bytes can go into the relro segment.
+	  layout->increase_relro(3 * 4);
+	}
 
       // Define _GLOBAL_OFFSET_TABLE_ at the start of the PLT.
       this->global_offset_table_ =
@@ -747,7 +761,7 @@ Target_i386::got_section(Symbol_table* symtab, Layout* layout)
 				      (elfcpp::SHF_ALLOC
 				       | elfcpp::SHF_WRITE),
 				      this->got_irelative_,
-				      ORDER_NON_RELRO_FIRST, false);
+				      got_plt_order, is_got_plt_relro);
 
       // If there are any TLSDESC relocations, they get GOT entries in
       // .got.plt after the jump slot entries.
@@ -756,7 +770,7 @@ Target_i386::got_section(Symbol_table* symtab, Layout* layout)
 				      (elfcpp::SHF_ALLOC
 				       | elfcpp::SHF_WRITE),
 				      this->got_tlsdesc_,
-				      ORDER_NON_RELRO_FIRST, false);
+				      got_plt_order, is_got_plt_relro);
     }
 
   return this->got_;

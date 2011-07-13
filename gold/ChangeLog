@@ -1,3 +1,16 @@
+2011-07-13  Ian Lance Taylor  <iant@google.com>
+
+	* i386.cc (Target_i386::got_section): If -z now, make .got.plt a
+	relro section.
+	* x86_64.cc (Target_x86_64::got_section): Likewise.
+	* testsuite/Makefile.am (check_PROGRAMS): Add relro_now_test.
+	(relro_now_test_SOURCES): New variable.
+	(relro_now_test_DEPENDENCIES): New variable.
+	(relro_now_test_LDFLAGS): New variable.
+	(relro_now_test_LDADD): New variable.
+	(relro_now_test.so): New target.
+	* testsuite/Makefile.in: Rebuild.
+
 2011-07-12  Ian Lance Taylor  <iant@google.com>
 
 	PR gold/12980

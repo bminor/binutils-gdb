@@ -1163,6 +1163,14 @@ relro_test_pic.o: relro_test.cc
 relro_test.stdout: relro_test.so
 	$(TEST_READELF) -SlW relro_test.so > relro_test.stdout
 
+check_PROGRAMS += relro_now_test
+relro_now_test_SOURCES = relro_test_main.cc
+relro_now_test_DEPENDENCIES = gcctestdir/ld relro_now_test.so
+relro_now_test_LDFLAGS = -Bgcctestdir -Wl,-R,. -Wl,-z,relro -Wl,-z,now
+relro_now_test_LDADD = relro_now_test.so
+relro_now_test.so: gcctestdir/ld relro_test_pic.o
+	$(CXXLINK) -Bgcctestdir/ -shared -Wl,-z,relro -Wl,-z,now relro_test_pic.o
+
 check_PROGRAMS += relro_strip_test
 relro_strip_test_SOURCES = relro_test_main.cc
 relro_strip_test_DEPENDENCIES = gcctestdir/ld relro_strip_test.so
