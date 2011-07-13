@@ -1221,7 +1221,9 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 
 	    type = dwarf_get_base_type (ctx, type_die, 0);
 	    result = (ctx->read_reg) (ctx->baton, reg);
-	    result_val = value_from_ulongest (type, result);
+	    result_val = value_from_ulongest (address_type, result);
+	    result_val = value_from_contents (type,
+					      value_contents_all (result_val));
 	  }
 	  break;
 

@@ -1,3 +1,8 @@
+2011-07-13  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2expr.c (execute_stack_op) <DW_OP_GNU_regval_type>: Use
+	value_from_contents for final conversion.
+
 2011-07-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Code cleanup.
