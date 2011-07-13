@@ -1,3 +1,9 @@
+2011-07-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Work around kgdb.
+	* remote.c (remote_get_trace_status): New variable ex.  Put
+	remote_get_noisy_reply into TRY_CATCH.  Call exception_fprintf for it.
+
 2011-07-13  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2expr.c (execute_stack_op) <DW_OP_GNU_regval_type>: Use

@@ -10045,11 +10045,21 @@ remote_get_trace_status (struct trace_status *ts)
   char *p;
   /* FIXME we need to get register block size some other way.  */
   extern int trace_regblock_size;
+  volatile struct gdb_exception ex;
 
   trace_regblock_size = get_remote_arch_state ()->sizeof_g_packet;
 
   putpkt ("qTStatus");
-  p = remote_get_noisy_reply (&target_buf, &target_buf_size);
+
+  TRY_CATCH (ex, RETURN_MASK_ERROR)
+    {
+      p = remote_get_noisy_reply (&target_buf, &target_buf_size);
+    }
+  if (ex.reason < 0)
+    {
+      exception_fprintf (gdb_stderr, ex, "qTStatus: ");
+      return -1;
+    }
 
   /* If the remote target doesn't do tracing, flag it.  */
   if (*p == '\0')
