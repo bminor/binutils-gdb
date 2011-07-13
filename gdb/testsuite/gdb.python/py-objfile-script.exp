@@ -38,7 +38,7 @@ if { [skip_python_tests] } { continue }
 # Make the -gdb.py script available to gdb, it is automagically loaded by gdb.
 # Care is taken to put it in the same directory as the binary so that
 # gdb will find it.
-set remote_python_file [remote_download host ${srcdir}/${subdir}/${testfile}-gdb.py ${subdir}/${testfile}-gdb.py]
+set remote_python_file [remote_download host ${srcdir}/${subdir}/${testfile}-gdb.py.in ${subdir}/${testfile}-gdb.py]
 
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}

@@ -1,3 +1,12 @@
+2011-07-13  Matt Rice <ratmice@gmail.com>
+
+	* gdb.python/py-objfile-script-gdb.py: Renamed to
+	py-objfile-script-gdb.py.in.
+	* gdb.python/py-objfile-script-gdb.py.in: Renamed from
+	py-objfile-script-gdb.py.
+	* gdb.python/py-objfile-script.exp: Update reference to
+	py-objfile-script-gdb.py.
+
 2011-07-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.dwarf2/dw2-op-call.S (array1): Use the real label; do not
