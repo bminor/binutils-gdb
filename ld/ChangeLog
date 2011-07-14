@@ -1,5 +1,11 @@
 2011-07-14  Alan Modra  <amodra@gmail.com>
 
+	* emultempl/elf32.em (gld${EMULATION_NAME}_handle_option,
+	gld${EMULATION_NAME}_list_options): Don't condition -z relro
+	and -z norelro on COMMONPAGESIZE being defined.
+
+2011-07-14  Alan Modra  <amodra@gmail.com>
+
 	* emultempl/ppc64elf.em (plt_static_chain): New var.
 	(gld${EMULATION_NAME}_after_allocation): Pass to ppc64_elf_size_stubs.
 	(PARSE_AND_LIST_PROLOGUE, PARSE_AND_LIST_LONGOPTS,

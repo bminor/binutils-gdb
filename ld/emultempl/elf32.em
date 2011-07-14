@@ -2323,16 +2323,11 @@ fragment <<EOF
 	link_info.combreloc = FALSE;
       else if (strcmp (optarg, "nocopyreloc") == 0)
 	link_info.nocopyreloc = TRUE;
-EOF
-
-  if test -n "$COMMONPAGESIZE"; then
-fragment <<EOF
       else if (strcmp (optarg, "relro") == 0)
 	link_info.relro = TRUE;
       else if (strcmp (optarg, "norelro") == 0)
 	link_info.relro = FALSE;
 EOF
-  fi
 fi
 
 fragment <<EOF
@@ -2444,27 +2439,17 @@ fragment <<EOF
   -z noexecstack              Mark executable as not requiring executable stack\n"));
 EOF
 if test x"$GENERATE_SHLIB_SCRIPT" = xyes; then
-  if test -n "$COMMONPAGESIZE"; then
 fragment <<EOF
   fprintf (file, _("\
   -z norelro                  Don't create RELRO program header\n"));
-EOF
-  fi
-
-fragment <<EOF
   fprintf (file, _("\
   -z now                      Mark object non-lazy runtime binding\n"));
   fprintf (file, _("\
   -z origin                   Mark object requiring immediate \$ORIGIN\n\
                                 processing at runtime\n"));
-EOF
-
-  if test -n "$COMMONPAGESIZE"; then
-fragment <<EOF
   fprintf (file, _("\
   -z relro                    Create RELRO program header\n"));
 EOF
-  fi
 fi
 
 if test -n "$PARSE_AND_LIST_OPTIONS" ; then
