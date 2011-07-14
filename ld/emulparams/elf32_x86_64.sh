@@ -1,3 +1,4 @@
+. ${srcdir}/emulparams/plt_unwind.sh
 SCRIPT_NAME=elf
 ELFSIZE=32
 OUTPUT_FORMAT="elf32-x86-64"

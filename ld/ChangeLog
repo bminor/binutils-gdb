@@ -1,3 +1,22 @@
+2011-07-14  Alan Modra  <amodra@gmail.com>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_add_options,
+	gld${EMULATION_NAME}_handle_option, gld${EMULATION_NAME}_list_options):
+	Provide --build-id, -z defs, -z muldefs, -z max-page-size,
+	-z common-page-size, -z execstack, -z noexecstack for all targets.
+	Add help for --exclude-libs.
+	(OPTION_LD_GENERATED_UNWIND_INFO,
+	OPTION_NO_LD_GENERATED_UNWIND_INFO): Move this..
+	(gld${EMULATION_NAME}_handle_option): ..and code handling
+	--ld-generated-unwind-info and --no-ld-generated-unwind-info..
+	* emulparams/plt_unwind.sh: ..to here.  New file.  Add help.
+	* emulparams/elf32_x86_64.sh: Include plt_unwind.sh.
+	* emulparams/elf_i386.sh: Likewise.
+	* emulparams/elf_i386_chaos.sh: Likewise.
+	* emulparams/elf_i386_ldso.sh: Likewise.
+	* emulparams/elf_l1om.sh: Likewise.
+	* emulparams/elf_x86_64.sh: Likewise.
+
 2011-07-11  Catherine Moore  <clm@codesourcery.com>
 
 	* ld.h (section_flag_list): Add field to struct wildcard_spec.
@@ -12,7 +31,7 @@
 	* ldlang.c (walk_wild_consider_section): Initialize
 	section_flag_info field of the section struct.
 	(lang_add_section): Check input section flags.
-	(lang_add_wild): Initialize section_flag_list field of 
+	(lang_add_wild): Initialize section_flag_list field of
 	the statement struct.
 	* ldlang.h (lang_input_statement_struct): Add section_flag_list field.
 	(lang_wild_statement_struct): Likewise.
@@ -404,7 +423,7 @@
 2011-03-31  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* configure.tgt: Add elf_l1om to targ_extra_libpath for
-	 x86_64-*-linux-*.
+	x86_64-*-linux-*.
 
 	* emulparams/elf_l1om.sh: Remove duplicates.
 

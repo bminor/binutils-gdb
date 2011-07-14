@@ -2106,8 +2106,6 @@ EOF
 fi
 fi
 
-if test -n "$PARSE_AND_LIST_ARGS_CASES" -o x"$GENERATE_SHLIB_SCRIPT" = xyes; then
-
 if test -n "$PARSE_AND_LIST_PROLOGUE" ; then
 fragment <<EOF
  $PARSE_AND_LIST_PROLOGUE
@@ -2124,42 +2122,49 @@ fragment <<EOF
 #define OPTION_HASH_STYLE		(OPTION_EXCLUDE_LIBS + 1)
 #define OPTION_BUILD_ID			(OPTION_HASH_STYLE + 1)
 #define OPTION_AUDIT			(OPTION_BUILD_ID + 1)
-#define OPTION_LD_GENERATED_UNWIND_INFO	(OPTION_AUDIT + 1)
-#define OPTION_NO_LD_GENERATED_UNWIND_INFO (OPTION_LD_GENERATED_UNWIND_INFO + 1)
 
 static void
 gld${EMULATION_NAME}_add_options
   (int ns, char **shortopts, int nl, struct option **longopts,
    int nrl ATTRIBUTE_UNUSED, struct option **really_longopts ATTRIBUTE_UNUSED)
 {
-  static const char xtra_short[] = "${PARSE_AND_LIST_SHORTOPTS}z:P:";
-  static const struct option xtra_long[] = {
-    {"build-id", optional_argument, NULL, OPTION_BUILD_ID},
-    {"audit", required_argument, NULL, OPTION_AUDIT},
-    {"depaudit", required_argument, NULL, 'P'},
 EOF
-
 if test x"$GENERATE_SHLIB_SCRIPT" = xyes; then
 fragment <<EOF
+  static const char xtra_short[] = "${PARSE_AND_LIST_SHORTOPTS}z:P:";
+EOF
+else
+fragment <<EOF
+  static const char xtra_short[] = "${PARSE_AND_LIST_SHORTOPTS}z:";
+EOF
+fi
+fragment <<EOF
+  static const struct option xtra_long[] = {
+EOF
+if test x"$GENERATE_SHLIB_SCRIPT" = xyes; then
+fragment <<EOF
+    {"audit", required_argument, NULL, OPTION_AUDIT},
+    {"Bgroup", no_argument, NULL, OPTION_GROUP},
+EOF
+fi
+fragment <<EOF
+    {"build-id", optional_argument, NULL, OPTION_BUILD_ID},
+EOF
+if test x"$GENERATE_SHLIB_SCRIPT" = xyes; then
+fragment <<EOF
+    {"depaudit", required_argument, NULL, 'P'},
     {"disable-new-dtags", no_argument, NULL, OPTION_DISABLE_NEW_DTAGS},
     {"enable-new-dtags", no_argument, NULL, OPTION_ENABLE_NEW_DTAGS},
     {"eh-frame-hdr", no_argument, NULL, OPTION_EH_FRAME_HDR},
     {"exclude-libs", required_argument, NULL, OPTION_EXCLUDE_LIBS},
     {"hash-style", required_argument, NULL, OPTION_HASH_STYLE},
-    {"ld-generated-unwind-info", no_argument, NULL,
-      OPTION_LD_GENERATED_UNWIND_INFO},
-    {"no-ld-generated-unwind-info", no_argument, NULL,
-      OPTION_NO_LD_GENERATED_UNWIND_INFO},
-    {"Bgroup", no_argument, NULL, OPTION_GROUP},
 EOF
 fi
-
 if test -n "$PARSE_AND_LIST_LONGOPTS" ; then
 fragment <<EOF
     $PARSE_AND_LIST_LONGOPTS
 EOF
 fi
-
 fragment <<EOF
     {NULL, no_argument, NULL, 0}
   };
@@ -2192,17 +2197,19 @@ gld${EMULATION_NAME}_handle_option (int optc)
       if (strcmp (optarg, "none"))
 	link_info.emit_note_gnu_build_id = xstrdup (optarg);
       break;
-    case OPTION_AUDIT:
-  	gld${EMULATION_NAME}_append_to_separated_string (&audit, optarg); 
-	break;
-    case 'P':
-	gld${EMULATION_NAME}_append_to_separated_string (&depaudit, optarg);
-	break;
 
 EOF
 
 if test x"$GENERATE_SHLIB_SCRIPT" = xyes; then
 fragment <<EOF
+    case OPTION_AUDIT:
+  	gld${EMULATION_NAME}_append_to_separated_string (&audit, optarg); 
+	break;
+
+    case 'P':
+	gld${EMULATION_NAME}_append_to_separated_string (&depaudit, optarg);
+	break;
+
     case OPTION_DISABLE_NEW_DTAGS:
       link_info.new_dtags = FALSE;
       break;
@@ -2213,14 +2220,6 @@ fragment <<EOF
 
     case OPTION_EH_FRAME_HDR:
       link_info.eh_frame_hdr = TRUE;
-      break;
-
-    case OPTION_LD_GENERATED_UNWIND_INFO:
-      link_info.no_ld_generated_unwind_info = FALSE;
-      break;
-
-    case OPTION_NO_LD_GENERATED_UNWIND_INFO:
-      link_info.no_ld_generated_unwind_info = TRUE;
       break;
 
     case OPTION_GROUP:
@@ -2250,8 +2249,46 @@ fragment <<EOF
 	einfo (_("%P%F: invalid hash style \`%s'\n"), optarg);
       break;
 
+EOF
+fi
+fragment <<EOF
     case 'z':
-      if (strcmp (optarg, "initfirst") == 0)
+      if (strcmp (optarg, "defs") == 0)
+	link_info.unresolved_syms_in_objects = RM_GENERATE_ERROR;
+      else if (strcmp (optarg, "muldefs") == 0)
+	link_info.allow_multiple_definition = TRUE;
+      else if (CONST_STRNEQ (optarg, "max-page-size="))
+	{
+	  char *end;
+
+	  config.maxpagesize = strtoul (optarg + 14, &end, 0);
+	  if (*end || (config.maxpagesize & (config.maxpagesize - 1)) != 0)
+	    einfo (_("%P%F: invalid maxium page size \`%s'\n"),
+		   optarg + 14);
+	}
+      else if (CONST_STRNEQ (optarg, "common-page-size="))
+	{
+	  char *end;
+	  config.commonpagesize = strtoul (optarg + 17, &end, 0);
+	  if (*end
+	      || (config.commonpagesize & (config.commonpagesize - 1)) != 0)
+	    einfo (_("%P%F: invalid common page size \`%s'\n"),
+		   optarg + 17);
+	}
+      else if (strcmp (optarg, "execstack") == 0)
+	{
+	  link_info.execstack = TRUE;
+	  link_info.noexecstack = FALSE;
+	}
+      else if (strcmp (optarg, "noexecstack") == 0)
+	{
+	  link_info.noexecstack = TRUE;
+	  link_info.execstack = FALSE;
+	}
+EOF
+if test x"$GENERATE_SHLIB_SCRIPT" = xyes; then
+fragment <<EOF
+      else if (strcmp (optarg, "initfirst") == 0)
 	link_info.flags_1 |= (bfd_vma) DF_1_INITFIRST;
       else if (strcmp (optarg, "interpose") == 0)
 	link_info.flags_1 |= (bfd_vma) DF_1_INTERPOSE;
@@ -2280,26 +2317,12 @@ fragment <<EOF
 	  link_info.flags |= (bfd_vma) DF_ORIGIN;
 	  link_info.flags_1 |= (bfd_vma) DF_1_ORIGIN;
 	}
-      else if (strcmp (optarg, "defs") == 0)
-	link_info.unresolved_syms_in_objects = RM_GENERATE_ERROR;
-      else if (strcmp (optarg, "muldefs") == 0)
-	link_info.allow_multiple_definition = TRUE;
       else if (strcmp (optarg, "combreloc") == 0)
 	link_info.combreloc = TRUE;
       else if (strcmp (optarg, "nocombreloc") == 0)
 	link_info.combreloc = FALSE;
       else if (strcmp (optarg, "nocopyreloc") == 0)
 	link_info.nocopyreloc = TRUE;
-      else if (strcmp (optarg, "execstack") == 0)
-	{
-	  link_info.execstack = TRUE;
-	  link_info.noexecstack = FALSE;
-	}
-      else if (strcmp (optarg, "noexecstack") == 0)
-	{
-	  link_info.noexecstack = TRUE;
-	  link_info.execstack = FALSE;
-	}
 EOF
 
   if test -n "$COMMONPAGESIZE"; then
@@ -2310,30 +2333,13 @@ fragment <<EOF
 	link_info.relro = FALSE;
 EOF
   fi
+fi
 
 fragment <<EOF
-      else if (CONST_STRNEQ (optarg, "max-page-size="))
-	{
-	  char *end;
-
-	  config.maxpagesize = strtoul (optarg + 14, &end, 0);
-	  if (*end || (config.maxpagesize & (config.maxpagesize - 1)) != 0)
-	    einfo (_("%P%F: invalid maxium page size \`%s'\n"),
-		   optarg + 14);
-	}
-      else if (CONST_STRNEQ (optarg, "common-page-size="))
-	{
-	  char *end;
-	  config.commonpagesize = strtoul (optarg + 17, &end, 0);
-	  if (*end
-	      || (config.commonpagesize & (config.commonpagesize - 1)) != 0)
-	    einfo (_("%P%F: invalid common page size \`%s'\n"),
-		   optarg + 17);
-	}
-      /* What about the other Solaris -z options? FIXME.  */
+      else
+	einfo (_("%P: warning: -z %s ignored.\n"), optarg);
       break;
 EOF
-fi
 
 if test -n "$PARSE_AND_LIST_ARGS_CASES" ; then
 fragment <<EOF
@@ -2355,19 +2361,24 @@ fragment <<EOF
 static void
 gld${EMULATION_NAME}_list_options (FILE * file)
 {
-  fprintf (file, _("\
-  --build-id[=STYLE]          Generate build ID note\n"));
-  fprintf (file, _("\
-  --audit=AUDITLIB            Specify a library to use for auditing\n"));
-  fprintf (file, _("\
-  -P AUDITLIB, --depaudit=AUDITLIB\n" "\
-                              Specify a library to use for auditing dependencies\n"));
 EOF
-
 if test x"$GENERATE_SHLIB_SCRIPT" = xyes; then
 fragment <<EOF
   fprintf (file, _("\
+  --audit=AUDITLIB            Specify a library to use for auditing\n"));
+  fprintf (file, _("\
   -Bgroup                     Selects group name lookup rules for DSO\n"));
+EOF
+fi
+fragment <<EOF
+  fprintf (file, _("\
+  --build-id[=STYLE]          Generate build ID note\n"));
+EOF
+if test x"$GENERATE_SHLIB_SCRIPT" = xyes; then
+fragment <<EOF
+  fprintf (file, _("\
+  -P AUDITLIB, --depaudit=AUDITLIB\n" "\
+                              Specify a library to use for auditing dependencies\n"));
   fprintf (file, _("\
   --disable-new-dtags         Disable new dynamic tags\n"));
   fprintf (file, _("\
@@ -2375,13 +2386,25 @@ fragment <<EOF
   fprintf (file, _("\
   --eh-frame-hdr              Create .eh_frame_hdr section\n"));
   fprintf (file, _("\
+  --exclude-libs=LIBS         Make all symbols in LIBS hidden\n"));
+  fprintf (file, _("\
   --hash-style=STYLE          Set hash style to sysv, gnu or both\n"));
   fprintf (file, _("\
   -z combreloc                Merge dynamic relocs into one section and sort\n"));
+EOF
+fi
+
+fragment <<EOF
+  fprintf (file, _("\
+  -z common-page-size=SIZE    Set common page size to SIZE\n"));
   fprintf (file, _("\
   -z defs                     Report unresolved symbols in object files.\n"));
   fprintf (file, _("\
   -z execstack                Mark executable as requiring executable stack\n"));
+EOF
+
+if test x"$GENERATE_SHLIB_SCRIPT" = xyes; then
+fragment <<EOF
   fprintf (file, _("\
   -z initfirst                Mark DSO to be initialized first at runtime\n"));
   fprintf (file, _("\
@@ -2390,8 +2413,18 @@ fragment <<EOF
   -z lazy                     Mark object lazy runtime binding (default)\n"));
   fprintf (file, _("\
   -z loadfltr                 Mark object requiring immediate process\n"));
+EOF
+fi
+
+fragment <<EOF
+  fprintf (file, _("\
+  -z max-page-size=SIZE       Set maximum page size to SIZE\n"));
   fprintf (file, _("\
   -z muldefs                  Allow multiple definitions\n"));
+EOF
+
+if test x"$GENERATE_SHLIB_SCRIPT" = xyes; then
+fragment <<EOF
   fprintf (file, _("\
   -z nocombreloc              Don't merge dynamic relocs into one section\n"));
   fprintf (file, _("\
@@ -2404,10 +2437,13 @@ fragment <<EOF
   -z nodlopen                 Mark DSO not available to dlopen\n"));
   fprintf (file, _("\
   -z nodump                   Mark DSO not available to dldump\n"));
+EOF
+fi
+fragment <<EOF
   fprintf (file, _("\
   -z noexecstack              Mark executable as not requiring executable stack\n"));
 EOF
-
+if test x"$GENERATE_SHLIB_SCRIPT" = xyes; then
   if test -n "$COMMONPAGESIZE"; then
 fragment <<EOF
   fprintf (file, _("\
@@ -2429,15 +2465,6 @@ fragment <<EOF
   -z relro                    Create RELRO program header\n"));
 EOF
   fi
-
-fragment <<EOF
-  fprintf (file, _("\
-  -z max-page-size=SIZE       Set maximum page size to SIZE\n"));
-  fprintf (file, _("\
-  -z common-page-size=SIZE    Set common page size to SIZE\n"));
-  fprintf (file, _("\
-  -z KEYWORD                  Ignored for Solaris compatibility\n"));
-EOF
 fi
 
 if test -n "$PARSE_AND_LIST_OPTIONS" ; then
@@ -2453,17 +2480,6 @@ EOF
 if test -n "$PARSE_AND_LIST_EPILOGUE" ; then
 fragment <<EOF
  $PARSE_AND_LIST_EPILOGUE
-EOF
-fi
-fi
-else
-fragment <<EOF
-#define gld${EMULATION_NAME}_add_options NULL
-#define gld${EMULATION_NAME}_handle_option NULL
-EOF
-if test x"$LDEMUL_LIST_OPTIONS" != xgld"$EMULATION_NAME"_list_options; then
-fragment <<EOF
-#define gld${EMULATION_NAME}_list_options NULL
 EOF
 fi
 fi
