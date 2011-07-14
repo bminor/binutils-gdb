@@ -2665,6 +2665,11 @@ class Output_section : public Output_data
   flags() const
   { return this->flags_; }
 
+  typedef std::map<Section_id, unsigned int> Section_layout_order;
+
+  void
+  update_section_layout(const Section_layout_order& order_map);
+
   // Update the output section flags based on input section flags.
   void
   update_flags_for_input_section(elfcpp::Elf_Xword flags);

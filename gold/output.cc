@@ -2296,7 +2296,7 @@ Output_section::add_input_section(Layout* layout,
       && (sh_flags & elfcpp::SHF_EXECINSTR) != 0
       && parameters->target().has_code_fill()
       && (parameters->target().may_relax()
-          || parameters->options().section_ordering_file()))
+          || layout->is_section_ordering_specified()))
     {
       gold_assert(this->fills_.empty());
       this->generate_code_fills_at_write_ = true;
@@ -2335,10 +2335,10 @@ Output_section::add_input_section(Layout* layout,
       || this->must_sort_attached_input_sections()
       || parameters->options().user_set_Map()
       || parameters->target().may_relax()
-      || parameters->options().section_ordering_file())
+      || layout->is_section_ordering_specified())
     {
       Input_section isecn(object, shndx, input_section_size, addralign);
-      if (parameters->options().section_ordering_file())
+      if (layout->is_section_ordering_specified())
         {
           unsigned int section_order_index =
             layout->find_section_order_index(std::string(secname));
@@ -2421,7 +2421,7 @@ Output_section::add_relaxed_input_section(Layout* layout,
 
   // If the --section-ordering-file option is used to specify the order of
   // sections, we need to keep track of sections.
-  if (parameters->options().section_ordering_file())
+  if (layout->is_section_ordering_specified())
     {
       unsigned int section_order_index =
         layout->find_section_order_index(name);
@@ -3339,6 +3339,38 @@ Output_section::Input_section_sort_section_order_index_compare::operator()(
   return s1_secn_index < s2_secn_index;
 }
 
+// This updates the section order index of input sections according to the
+// the order specified in the mapping from Section id to order index.
+
+void
+Output_section::update_section_layout(
+  const Section_layout_order& order_map)
+{
+  for (Input_section_list::iterator p = this->input_sections_.begin();
+       p != this->input_sections_.end();
+       ++p)
+    {
+      if (p->is_input_section()
+	  || p->is_relaxed_input_section())
+        {
+	  Object* obj = (p->is_input_section()
+			 ? p->relobj()
+		         : p->relaxed_input_section()->relobj());
+	  unsigned int shndx = p->shndx();
+	  Section_layout_order::const_iterator it
+	    = order_map.find(Section_id(obj, shndx));
+	  if (it == order_map.end())
+	    continue;
+	  unsigned int section_order_index = it->second;
+	  if (section_order_index != 0)
+            {
+              p->set_section_order_index(section_order_index);
+              this->set_input_section_order_specified();
+	    }
+        }
+    }
+}
+
 // Sort the input sections attached to an output section.
 
 void
@@ -3381,7 +3413,7 @@ Output_section::sort_attached_input_sections()
     }
   else
     {
-      gold_assert(parameters->options().section_ordering_file());
+      gold_assert(this->input_section_order_specified());
       std::sort(sort_list.begin(), sort_list.end(),
 	        Input_section_sort_section_order_index_compare());
     }

@@ -320,12 +320,33 @@ Read_symbols::do_read_symbols(Workqueue* workqueue)
 	}
     }
 
+  Object* elf_obj = NULL;
+  bool unconfigured;
+  bool* punconfigured = NULL;
+  if (is_elf)
+    {
+      // This is an ELF object.
+
+      unconfigured = false;
+      punconfigured = (input_file->will_search_for()
+		       ? &unconfigured
+		       : NULL);
+      elf_obj = make_elf_object(input_file->filename(),
+				input_file, 0, ehdr, read_size,
+				punconfigured);
+    }
+
   if (parameters->options().has_plugins())
     {
       Pluginobj* obj = parameters->options().plugins()->claim_file(input_file,
-                                                                   0, filesize);
+                                                                   0, filesize,
+								   elf_obj);
       if (obj != NULL)
         {
+	  // Delete the elf_obj, this file has been claimed.
+	  if (elf_obj != NULL)
+	    delete elf_obj;
+
           // The input file was claimed by a plugin, and its symbols
           // have been provided by the plugin.
 
@@ -359,14 +380,7 @@ Read_symbols::do_read_symbols(Workqueue* workqueue)
     {
       // This is an ELF object.
 
-      bool unconfigured = false;
-      bool* punconfigured = (input_file->will_search_for()
-			     ? &unconfigured
-			     : NULL);
-      Object* obj = make_elf_object(input_file->filename(),
-				    input_file, 0, ehdr, read_size,
-				    punconfigured);
-      if (obj == NULL)
+      if (elf_obj == NULL)
 	{
 	  if (unconfigured)
 	    {
@@ -382,7 +396,7 @@ Read_symbols::do_read_symbols(Workqueue* workqueue)
 	}
 
       Read_symbols_data* sd = new Read_symbols_data;
-      obj->read_symbols(sd);
+      elf_obj->read_symbols(sd);
 
       // Opening the file locked it, so now we need to unlock it.  We
       // need to unlock it before queuing the Add_symbols task,
@@ -397,7 +411,7 @@ Read_symbols::do_read_symbols(Workqueue* workqueue)
       if (this->member_ != NULL)
         {
           this->member_->sd_ = sd;
-          this->member_->obj_ = obj;
+          this->member_->obj_ = elf_obj;
           this->member_->arg_serial_ =
               this->input_argument_->file().arg_serial();
           return true;
@@ -412,7 +426,7 @@ Read_symbols::do_read_symbols(Workqueue* workqueue)
 					    this->dirindex_,
 					    this->mapfile_,
 					    this->input_argument_,
-					    obj,
+					    elf_obj,
 					    NULL,
 					    sd,
 					    this->this_blocker_,

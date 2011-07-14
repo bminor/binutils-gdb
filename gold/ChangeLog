@@ -1,3 +1,56 @@
+2011-07-13  Sriraman Tallam  <tmsriram@google.com>
+
+	* archive.cc (Archive::get_elf_object_for_member): Add extra parameter
+	to claim_file call.
+	* layout.cc (Layout::Layout): Initialize section_ordering_specified_,
+	input_section_position_, and input_section_glob_.
+	(read_layout_from_file): Call function section_ordering_specified.
+	* layout.h (is_section_ordering_specified): New function.
+	(section_ordering_specified): New function.
+	(section_ordering_specified_): New boolean member.
+	* main.cc(main): Call load_plugins after layout object is defined.
+	* output.cc (Output_section::add_input_section): Use
+	function section_ordering_specified to check if section ordering is
+	needed.
+	* output.cc (Output_section::add_relaxed_input_section): Use
+	function section_ordering_specified to check if section ordering is
+	needed.
+	(Output_section::update_section_layout): New function.
+	(Output_section::sort_attached_input_sections): Check if input section
+	must be reordered.
+	* output.h (Output_section::update_section_layout): New function.
+	* plugin.cc (get_section_count): New function.
+	(get_section_type): New function.
+	(get_section_name): New function.
+	(get_section_contents): New function.
+	(update_section_order): New function.
+	(allow_section_ordering): New function.	
+	(Plugin::load): Add the new interfaces to the transfer vector.
+	(Plugin_manager::load_plugins): New parameter.
+	(Plugin_manager::all_symbols_read): New parameter.
+	(Plugin_manager::claim_file): New parameter. Save the elf object for
+	unclaimed objects.
+	(Plugin_manager::get_elf_object): New function.
+	(Plugin_manager::get_view): Change to directly use the bool to check
+	if get_view is called from claim_file_hook.
+	* plugin.h (input_objects): New function
+	(Plugin__manager::load_plugins): New parameter.
+	(Plugin_manager::claim_file): New parameter.
+	(Plugin_manager::get_elf_object): New function.
+	(Plugin_manager::in_claim_file_handler): New function.
+	(Plugin_manager::in_claim_file_handler_): New member.
+	(layout): New function.
+	* readsyms.cc (Read_symbols::do_read_symbols): Call the claim_file
+	handler with an extra parameter. Make the elf object before calling
+	claim_file handler.
+	* testsuite/plugin_test.c (get_section_count): New function pointer.
+	(get_section_type): New function pointer.
+	(get_section_name): New function pointer.
+	(get_section_contents): New function pointer.
+	(update_section_order): New function pointer.
+	(allow_section_ordering): New function pointer.
+	(onload): Check if the new interfaces exist.
+
 2011-07-13  Ian Lance Taylor  <iant@google.com>
 
 	* i386.cc (Target_i386::got_section): If -z now, make .got.plt a

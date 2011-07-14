@@ -492,6 +492,14 @@ class Layout
 	 const char* name, const elfcpp::Shdr<size, big_endian>& shdr,
 	 unsigned int reloc_shndx, unsigned int reloc_type, off_t* offset);
 
+  bool
+  is_section_ordering_specified()
+  { return this->section_ordering_specified_; }
+
+  void
+  set_section_ordering_specified()
+  { this->section_ordering_specified_ = true; }
+
   // For incremental updates, allocate a block of memory from the
   // free list.  Find a block starting at or after MINOFF.
   off_t
@@ -501,6 +509,8 @@ class Layout
   unsigned int
   find_section_order_index(const std::string&);
 
+  // Read the sequence of input sections from the file specified with
+  // linker option --section-ordering-file.
   void
   read_layout_from_file();
 
@@ -1262,6 +1272,9 @@ class Layout
   bool resized_signatures_;
   // Whether we have created a .stab*str output section.
   bool have_stabstr_section_;
+  // True if the input sections in the output sections should be sorted
+  // as specified in a section ordering file.
+  bool section_ordering_specified_;
   // In incremental build, holds information check the inputs and build the
   // .gnu_incremental_inputs section.
   Incremental_inputs* incremental_inputs_;

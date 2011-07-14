@@ -60,6 +60,12 @@ static ld_plugin_add_input_file add_input_file = NULL;
 static ld_plugin_message message = NULL;
 static ld_plugin_get_input_file get_input_file = NULL;
 static ld_plugin_release_input_file release_input_file = NULL;
+static ld_plugin_get_input_section_count get_input_section_count = NULL;
+static ld_plugin_get_input_section_type get_input_section_type = NULL;
+static ld_plugin_get_input_section_name get_input_section_name = NULL;
+static ld_plugin_get_input_section_contents get_input_section_contents = NULL;
+static ld_plugin_update_section_order update_section_order = NULL;
+static ld_plugin_allow_section_ordering allow_section_ordering = NULL;
 
 #define MAXOPTS 10
 
@@ -126,6 +132,24 @@ onload(struct ld_plugin_tv *tv)
         case LDPT_RELEASE_INPUT_FILE:
           release_input_file = entry->tv_u.tv_release_input_file;
           break;
+        case LDPT_GET_INPUT_SECTION_COUNT:
+          get_input_section_count = *entry->tv_u.tv_get_input_section_count;
+          break;
+        case LDPT_GET_INPUT_SECTION_TYPE:
+          get_input_section_type = *entry->tv_u.tv_get_input_section_type;
+          break;
+        case LDPT_GET_INPUT_SECTION_NAME:
+          get_input_section_name = *entry->tv_u.tv_get_input_section_name;
+          break;
+        case LDPT_GET_INPUT_SECTION_CONTENTS:
+          get_input_section_contents = *entry->tv_u.tv_get_input_section_contents;
+          break;
+	case LDPT_UPDATE_SECTION_ORDER:
+	  update_section_order = *entry->tv_u.tv_update_section_order;
+	  break;
+	case LDPT_ALLOW_SECTION_ORDERING:
+	  allow_section_ordering = *entry->tv_u.tv_allow_section_ordering;
+	  break;
         default:
           break;
         }
@@ -176,6 +200,42 @@ onload(struct ld_plugin_tv *tv)
   if ((*register_cleanup_hook)(cleanup_hook) != LDPS_OK)
     {
       (*message)(LDPL_ERROR, "error registering cleanup hook");
+      return LDPS_ERR;
+    }
+
+  if (get_input_section_count == NULL)
+    {
+      fprintf(stderr, "tv_get_input_section_count interface missing\n");
+      return LDPS_ERR;
+    }
+
+  if (get_input_section_type == NULL)
+    {
+      fprintf(stderr, "tv_get_input_section_type interface missing\n");
+      return LDPS_ERR;
+    }
+
+  if (get_input_section_name == NULL)
+    {
+      fprintf(stderr, "tv_get_input_section_name interface missing\n");
+      return LDPS_ERR;
+    }
+
+  if (get_input_section_contents == NULL)
+    {
+      fprintf(stderr, "tv_get_input_section_contents interface missing\n");
+      return LDPS_ERR;
+    }
+
+  if (update_section_order == NULL)
+    {
+      fprintf(stderr, "tv_update_section_order interface missing\n");
+      return LDPS_ERR;
+    }
+
+  if (allow_section_ordering == NULL)
+    {
+      fprintf(stderr, "tv_allow_section_ordering interface missing\n");
       return LDPS_ERR;
     }
 

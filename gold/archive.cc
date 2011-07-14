@@ -653,7 +653,8 @@ Archive::get_elf_object_for_member(off_t off, bool* punconfigured)
     {
       Object* obj = parameters->options().plugins()->claim_file(input_file,
                                                                 memoff,
-                                                                memsize);
+                                                                memsize,
+								NULL);
       if (obj != NULL)
         {
           // The input file was claimed by a plugin, and its symbols

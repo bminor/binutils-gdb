@@ -131,6 +131,7 @@ class Plugin_manager
     : plugins_(), objects_(), deferred_layout_objects_(), input_file_(NULL),
       plugin_input_file_(), rescannable_(), undefined_symbols_(),
       any_claimed_(false), in_replacement_phase_(false), any_added_(false),
+      in_claim_file_handler_(false),
       options_(options), workqueue_(NULL), task_(NULL), input_objects_(NULL),
       symtab_(NULL), layout_(NULL), dirpath_(NULL), mapfile_(NULL),
       this_blocker_(NULL), extra_search_path_()
@@ -153,11 +154,22 @@ class Plugin_manager
 
   // Load all plugin libraries.
   void
-  load_plugins();
+  load_plugins(Layout* layout);
 
   // Call the plugin claim-file handlers in turn to see if any claim the file.
   Pluginobj*
-  claim_file(Input_file* input_file, off_t offset, off_t filesize);
+  claim_file(Input_file* input_file, off_t offset, off_t filesize,
+             Object* elf_object);
+
+  // Get the object associated with the handle and check if it is an elf object.
+  // If it is not a Pluginobj, it is an elf object.
+  Object*
+  get_elf_object(const void* handle);
+
+  // True if the claim_file handler of the plugins is being called.
+  bool
+  in_claim_file_handler()
+  { return in_claim_file_handler_; }
 
   // Let the plugin manager save an archive for later rescanning.
   // This takes ownership of the Archive pointer.
@@ -173,7 +185,7 @@ class Plugin_manager
   void
   all_symbols_read(Workqueue* workqueue, Task* task,
                    Input_objects* input_objects, Symbol_table* symtab,
-                   Layout* layout, Dirsearch* dirpath, Mapfile* mapfile,
+                   Dirsearch* dirpath, Mapfile* mapfile,
                    Task_token** last_blocker);
 
   // Tell the plugin manager that we've a new undefined symbol which
@@ -218,8 +230,8 @@ class Plugin_manager
   Pluginobj*
   make_plugin_object(unsigned int handle);
 
-  // Return the Pluginobj associated with the given HANDLE.
-  Pluginobj*
+  // Return the object associated with the given HANDLE.
+  Object*
   object(unsigned int handle) const
   {
     if (handle >= this->objects_.size())
@@ -265,6 +277,14 @@ class Plugin_manager
   in_replacement_phase() const
   { return this->in_replacement_phase_; }
 
+  Input_objects*
+  input_objects() const
+  { return this->input_objects_; }
+
+  Layout*
+  layout()
+  { return this->layout_; }
+
  private:
   Plugin_manager(const Plugin_manager&);
   Plugin_manager& operator=(const Plugin_manager&);
@@ -293,7 +313,7 @@ class Plugin_manager
   };
 
   typedef std::list<Plugin*> Plugin_list;
-  typedef std::vector<Pluginobj*> Object_list;
+  typedef std::vector<Object*> Object_list;
   typedef std::vector<Relobj*> Deferred_layout_list;
   typedef std::vector<Rescannable> Rescannable_list;
   typedef std::vector<Symbol*> Undefined_symbol_list;
@@ -339,6 +359,9 @@ class Plugin_manager
 
   // Whether any input files or libraries were added by a plugin.
   bool any_added_;
+
+  // Set to true when the claim_file handler of a plugin is called.
+  bool in_claim_file_handler_;
 
   const General_options& options_;
   Workqueue* workqueue_;

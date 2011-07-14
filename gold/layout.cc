@@ -399,11 +399,14 @@ Layout::Layout(int number_of_input_files, Script_options* script_options)
     any_postprocessing_sections_(false),
     resized_signatures_(false),
     have_stabstr_section_(false),
+    section_ordering_specified_(false),
     incremental_inputs_(NULL),
     record_output_section_data_from_script_(false),
     script_output_section_data_list_(),
     segment_states_(NULL),
     relaxation_debug_check_(NULL),
+    input_section_position_(),
+    input_section_glob_(),
     incremental_base_(NULL),
     free_list_()
 {
@@ -2209,7 +2212,7 @@ Layout::find_section_order_index(const std::string& section_name)
 }
 
 // Read the sequence of input sections from the file specified with
-// --section-ordering-file.
+// option --section-ordering-file.
 
 void
 Layout::read_layout_from_file()
@@ -2225,6 +2228,7 @@ Layout::read_layout_from_file()
 
   std::getline(in, line);   // this chops off the trailing \n, if any
   unsigned int position = 1;
+  this->set_section_ordering_specified();
 
   while (in)
     {
