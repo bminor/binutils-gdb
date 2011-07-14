@@ -1,3 +1,13 @@
+2011-07-14  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (struct ppc_link_hash_table): Add plt_static_chain.
+	(build_plt_stub): Add plt_static_chain param, don't load r11 if false.
+	(build_tls_get_addr_stub): Likewise.
+	(ppc_build_one_stub): Update calls to above.
+	(ppc_size_one_stub): Adjust stub size.
+	(ppc64_elf_size_stubs): Add plt_static_chain param, save to htab.
+	* elf64-ppc.h (ppc64_elf_size_stubs): Update prototype.
+
 2011-07-12  Nick Clifton  <nickc@redhat.com>
 
 	* elf32-arm.c (elf32_arm_section_flags): Delete.

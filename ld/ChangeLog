@@ -1,5 +1,13 @@
 2011-07-14  Alan Modra  <amodra@gmail.com>
 
+	* emultempl/ppc64elf.em (plt_static_chain): New var.
+	(gld${EMULATION_NAME}_after_allocation): Pass to ppc64_elf_size_stubs.
+	(PARSE_AND_LIST_PROLOGUE, PARSE_AND_LIST_LONGOPTS,
+	PARSE_AND_LIST_OPTIONS, PARSE_AND_LIST_ARGS_CASES): Handle
+	--plt-static-chain and --no-plt-static-chain.
+
+2011-07-14  Alan Modra  <amodra@gmail.com>
+
 	* emultempl/elf32.em (gld${EMULATION_NAME}_add_options,
 	gld${EMULATION_NAME}_handle_option, gld${EMULATION_NAME}_list_options):
 	Provide --build-id, -z defs, -z muldefs, -z max-page-size,

@@ -21,7 +21,6 @@ Disassembly of section \.text:
 .*	f8 41 00 28 	std     r2,40\(r1\)
 .*	e9 62 80 48 	ld      r11,-32696\(r2\)
 .*	7d 69 03 a6 	mtctr   r11
-.*	e9 62 80 58 	ld      r11,-32680\(r2\)
 .*	e8 42 80 50 	ld      r2,-32688\(r2\)
 .*	4e 80 04 21 	bctrl
 .*	e9 61 00 20 	ld      r11,32\(r1\)
@@ -34,7 +33,7 @@ Disassembly of section \.text:
 .*	60 00 00 00 	nop
 .*	7c 63 6a 14 	add     r3,r3,r13
 .*	38 62 80 18 	addi    r3,r2,-32744
-.*	4b ff ff a5 	bl      .*
+.*	4b ff ff a9 	bl      .*
 .*	60 00 00 00 	nop
 .*	3c 6d 00 00 	addis   r3,r13,0
 .*	60 00 00 00 	nop
@@ -68,7 +67,6 @@ Disassembly of section \.text:
 .*	e9 4d 90 2a 	lwa     r10,-28632\(r13\)
 .*	3d 2d 00 00 	addis   r9,r13,0
 .*	a9 49 90 30 	lha     r10,-28624\(r9\)
-.*	60 00 00 00 	nop
 .*	00 00 00 00 .*
 .*	00 01 02 00 .*
 .* <__glink_PLTresolve>:

@@ -3734,6 +3734,9 @@ struct ppc_link_hash_table
   /* Number of stubs against global syms.  */
   unsigned long stub_globals;
 
+  /* Set if PLT call stubs should load r11.  */
+  unsigned int plt_static_chain:1;
+
   /* Set if we should emit symbols for stubs.  */
   unsigned int emit_stub_syms:1;
 
@@ -9253,7 +9256,8 @@ ppc_type_of_stub (asection *input_sec,
 /* Build a .plt call stub.  */
 
 static inline bfd_byte *
-build_plt_stub (bfd *obfd, bfd_byte *p, int offset, Elf_Internal_Rela *r)
+build_plt_stub (bfd *obfd, bfd_byte *p, int offset, Elf_Internal_Rela *r,
+		bfd_boolean plt_static_chain)
 {
 #define PPC_LO(v) ((v) & 0xffff)
 #define PPC_HI(v) (((v) >> 16) & 0xffff)
@@ -9286,14 +9290,15 @@ build_plt_stub (bfd *obfd, bfd_byte *p, int offset, Elf_Internal_Rela *r)
       bfd_put_32 (obfd, ADDIS_R12_R2 | PPC_HA (offset), p),	p += 4;
       bfd_put_32 (obfd, STD_R2_40R1, p),			p += 4;
       bfd_put_32 (obfd, LD_R11_0R12 | PPC_LO (offset), p),	p += 4;
-      if (PPC_HA (offset + 16) != PPC_HA (offset))
+      if (PPC_HA (offset + 8 + 8 * plt_static_chain) != PPC_HA (offset))
 	{
 	  bfd_put_32 (obfd, ADDI_R12_R12 | PPC_LO (offset), p),	p += 4;
 	  offset = 0;
 	}
       bfd_put_32 (obfd, MTCTR_R11, p),				p += 4;
       bfd_put_32 (obfd, LD_R2_0R12 | PPC_LO (offset + 8), p),	p += 4;
-      bfd_put_32 (obfd, LD_R11_0R12 | PPC_LO (offset + 16), p),	p += 4;
+      if (plt_static_chain)
+	bfd_put_32 (obfd, LD_R11_0R12 | PPC_LO (offset + 16), p), p += 4;
       bfd_put_32 (obfd, BCTR, p),				p += 4;
     }
   else
@@ -9320,13 +9325,14 @@ build_plt_stub (bfd *obfd, bfd_byte *p, int offset, Elf_Internal_Rela *r)
 	}
       bfd_put_32 (obfd, STD_R2_40R1, p),			p += 4;
       bfd_put_32 (obfd, LD_R11_0R2 | PPC_LO (offset), p),	p += 4;
-      if (PPC_HA (offset + 16) != PPC_HA (offset))
+      if (PPC_HA (offset + 8 + 8 * plt_static_chain) != PPC_HA (offset))
 	{
 	  bfd_put_32 (obfd, ADDI_R2_R2 | PPC_LO (offset), p),	p += 4;
 	  offset = 0;
 	}
       bfd_put_32 (obfd, MTCTR_R11, p),				p += 4;
-      bfd_put_32 (obfd, LD_R11_0R2 | PPC_LO (offset + 16), p),	p += 4;
+      if (plt_static_chain)
+	bfd_put_32 (obfd, LD_R11_0R2 | PPC_LO (offset + 16), p), p += 4;
       bfd_put_32 (obfd, LD_R2_0R2 | PPC_LO (offset + 8), p),	p += 4;
       bfd_put_32 (obfd, BCTR, p),				p += 4;
     }
@@ -9351,7 +9357,7 @@ build_plt_stub (bfd *obfd, bfd_byte *p, int offset, Elf_Internal_Rela *r)
 
 static inline bfd_byte *
 build_tls_get_addr_stub (bfd *obfd, bfd_byte *p, int offset,
-			 Elf_Internal_Rela *r)
+			 Elf_Internal_Rela *r, bfd_boolean plt_static_chain)
 {
   bfd_put_32 (obfd, LD_R11_0R3 + 0, p),		p += 4;
   bfd_put_32 (obfd, LD_R12_0R3 + 8, p),		p += 4;
@@ -9365,7 +9371,7 @@ build_tls_get_addr_stub (bfd *obfd, bfd_byte *p, int offset,
 
   if (r != NULL)
     r[0].r_offset += 9 * 4;
-  p = build_plt_stub (obfd, p, offset, r);
+  p = build_plt_stub (obfd, p, offset, r, plt_static_chain);
   bfd_put_32 (obfd, BCTRL, p - 4);
 
   bfd_put_32 (obfd, LD_R11_0R1 + 32, p),	p += 4;
@@ -9795,9 +9801,11 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	  && (stub_entry->h == htab->tls_get_addr_fd
 	      || stub_entry->h == htab->tls_get_addr)
 	  && !htab->no_tls_get_addr_opt)
-	p = build_tls_get_addr_stub (htab->stub_bfd, loc, off, r);
+	p = build_tls_get_addr_stub (htab->stub_bfd, loc, off, r,
+				     htab->plt_static_chain);
       else
-	p = build_plt_stub (htab->stub_bfd, loc, off, r);
+	p = build_plt_stub (htab->stub_bfd, loc, off, r,
+			    htab->plt_static_chain);
       size = p - loc;
       break;
 
@@ -9884,6 +9892,8 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	      - htab->stub_group[stub_entry->id_sec->id].toc_off);
 
       size = PLT_CALL_STUB_SIZE;
+      if (!htab->plt_static_chain)
+	size -= 4;
       if (PPC_HA (off) == 0)
 	size -= 4;
       if (PPC_HA (off + 16) != PPC_HA (off))
@@ -10823,7 +10833,8 @@ group_sections (struct ppc_link_hash_table *htab,
    instruction.  */
 
 bfd_boolean
-ppc64_elf_size_stubs (struct bfd_link_info *info, bfd_signed_vma group_size)
+ppc64_elf_size_stubs (struct bfd_link_info *info, bfd_signed_vma group_size,
+		      bfd_boolean plt_static_chain)
 {
   bfd_size_type stub_group_size;
   bfd_boolean stubs_always_before_branch;
@@ -10832,6 +10843,7 @@ ppc64_elf_size_stubs (struct bfd_link_info *info, bfd_signed_vma group_size)
   if (htab == NULL)
     return FALSE;
 
+  htab->plt_static_chain = plt_static_chain;
   stubs_always_before_branch = group_size < 0;
   if (group_size < 0)
     stub_group_size = -group_size;

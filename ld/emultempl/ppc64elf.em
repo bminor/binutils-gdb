@@ -61,6 +61,9 @@ static int no_multi_toc = 0;
 /* Whether to sort input toc and got sections.  */
 static int no_toc_sort = 0;
 
+/* Set if PLT call stubs should load r11.  */
+static int plt_static_chain = 0;
+
 /* Whether to emit symbols for stubs.  */
 static int emit_stub_syms = -1;
 
@@ -500,7 +503,7 @@ gld${EMULATION_NAME}_after_allocation (void)
 	    einfo ("%P: .init/.fini fragments use differing TOC pointers\n");
 
 	  /* Call into the BFD backend to do the real work.  */
-	  if (!ppc64_elf_size_stubs (&link_info, group_size))
+	  if (!ppc64_elf_size_stubs (&link_info, group_size, plt_static_chain))
 	    einfo ("%X%P: can not size stub section: %E\n");
 	}
     }
@@ -651,7 +654,9 @@ fi
 #
 PARSE_AND_LIST_PROLOGUE='
 #define OPTION_STUBGROUP_SIZE		301
-#define OPTION_STUBSYMS			(OPTION_STUBGROUP_SIZE + 1)
+#define OPTION_PLT_STATIC_CHAIN		(OPTION_STUBGROUP_SIZE + 1)
+#define OPTION_NO_PLT_STATIC_CHAIN	(OPTION_PLT_STATIC_CHAIN + 1)
+#define OPTION_STUBSYMS			(OPTION_NO_PLT_STATIC_CHAIN + 1)
 #define OPTION_NO_STUBSYMS		(OPTION_STUBSYMS + 1)
 #define OPTION_DOTSYMS			(OPTION_NO_STUBSYMS + 1)
 #define OPTION_NO_DOTSYMS		(OPTION_DOTSYMS + 1)
@@ -666,6 +671,8 @@ PARSE_AND_LIST_PROLOGUE='
 
 PARSE_AND_LIST_LONGOPTS='
   { "stub-group-size", required_argument, NULL, OPTION_STUBGROUP_SIZE },
+  { "plt-static-chain", no_argument, NULL, OPTION_PLT_STATIC_CHAIN },
+  { "no-plt-static-chain", no_argument, NULL, OPTION_NO_PLT_STATIC_CHAIN },
   { "emit-stub-syms", no_argument, NULL, OPTION_STUBSYMS },
   { "no-emit-stub-syms", no_argument, NULL, OPTION_NO_STUBSYMS },
   { "dotsyms", no_argument, NULL, OPTION_DOTSYMS },
@@ -689,6 +696,12 @@ PARSE_AND_LIST_OPTIONS='
                                 before, and one after each stub section.\n\
                                 Values of +/-1 indicate the linker should\n\
                                 choose suitable defaults.\n"
+		   ));
+  fprintf (file, _("\
+  --plt-static-chain          PLT call stubs should load r11.\n"
+		   ));
+  fprintf (file, _("\
+  --no-plt-static-chain       PLT call stubs should not load r11. (default)\n"
 		   ));
   fprintf (file, _("\
   --emit-stub-syms            Label linker stubs with a symbol.\n"
@@ -737,6 +750,14 @@ PARSE_AND_LIST_ARGS_CASES='
         if (*end)
 	  einfo (_("%P%F: invalid number `%s'\''\n"), optarg);
       }
+      break;
+
+    case OPTION_PLT_STATIC_CHAIN:
+      plt_static_chain = 1;
+      break;
+
+    case OPTION_NO_PLT_STATIC_CHAIN:
+      plt_static_chain = 0;
       break;
 
     case OPTION_STUBSYMS:

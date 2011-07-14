@@ -12,22 +12,21 @@ Disassembly of section \.text:
 .*	f8 41 00 28 	std     r2,40\(r1\)
 .*	e9 62 80 70 	ld      r11,-32656\(r2\)
 .*	7d 69 03 a6 	mtctr   r11
-.*	e9 62 80 80 	ld      r11,-32640\(r2\)
 .*	e8 42 80 78 	ld      r2,-32648\(r2\)
 .*	4e 80 04 20 	bctr
 
 .* <_start>:
 .*	38 62 80 08 	addi    r3,r2,-32760
-.*	4b ff ff e5 	bl      .*
+.*	4b ff ff e9 	bl      .*
 .*	e8 41 00 28 	ld      r2,40\(r1\)
 .*	38 62 80 18 	addi    r3,r2,-32744
-.*	4b ff ff d9 	bl      .*
+.*	4b ff ff dd 	bl      .*
 .*	e8 41 00 28 	ld      r2,40\(r1\)
 .*	38 62 80 28 	addi    r3,r2,-32728
-.*	4b ff ff cd 	bl      .*
+.*	4b ff ff d1 	bl      .*
 .*	e8 41 00 28 	ld      r2,40\(r1\)
 .*	38 62 80 38 	addi    r3,r2,-32712
-.*	4b ff ff c1 	bl      .*
+.*	4b ff ff c5 	bl      .*
 .*	e8 41 00 28 	ld      r2,40\(r1\)
 .*	39 23 80 40 	addi    r9,r3,-32704
 .*	3d 23 00 00 	addis   r9,r3,0
@@ -39,6 +38,7 @@ Disassembly of section \.text:
 .*	89 4d 00 00 	lbz     r10,0\(r13\)
 .*	3d 2d 00 00 	addis   r9,r13,0
 .*	99 49 00 00 	stb     r10,0\(r9\)
+.*	60 00 00 00 	nop
 .*	00 00 00 00 .*
 .*	00 01 02 18 .*
 .* <__glink_PLTresolve>:
