@@ -3057,6 +3057,7 @@ _bfd_generic_section_already_linked (bfd *abfd,
 	{
 	  l_sec = l->linked.u.sec;
 	  l_owner = l_sec->owner;
+	  l_flags = l_sec->flags;
 	  l_comdat = bfd_coff_get_comdat_section (l_sec->owner, l_sec);
 	}
 
