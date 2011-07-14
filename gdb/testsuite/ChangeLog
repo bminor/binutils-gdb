@@ -1,3 +1,7 @@
+2011-07-14  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* gdb.cp/minsym-fallback.exp: Link in C++ mode.
+
 2011-07-13  Matt Rice <ratmice@gmail.com>
 
 	* gdb.python/py-objfile-script-gdb.py: Renamed to

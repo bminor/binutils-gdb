@@ -26,7 +26,7 @@ set objmainfile $objdir/$subdir/${testfile}-main.o
 set binfile $objdir/$subdir/$executable
 if {[gdb_compile $srcdir/$subdir/$srcfile $objfile object {}] != ""
     || [gdb_compile $srcdir/$subdir/$srcmainfile $objmainfile object {debug}] != ""
-    || [gdb_compile "$objfile $objmainfile" $binfile executable {}] != ""} {
+    || [gdb_compile "$objfile $objmainfile" $binfile executable {c++}] != ""} {
     untested ${testfile}.exp
     return -1
 }
