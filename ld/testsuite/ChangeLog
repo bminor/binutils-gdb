@@ -1,5 +1,10 @@
 2011-07-14  Alan Modra  <amodra@gmail.com>
 
+	* ld-scripts/section-flags.exp: Pass --local-store 0:0 for
+	spu.  Rewrite using foreach.
+
+2011-07-14  Alan Modra  <amodra@gmail.com>
+
 	* ld-powerpc/tlsexe.d, * ld-powerpc/tlsexe.g. *ld-powerpc/tlsexe.r,
 	* ld-powerpc/tlsexetoc.d, * ld-powerpc/tlsexetoc.g,
 	* ld-powerpc/tlsexetoc.r, * ld-powerpc/tlsso.d,

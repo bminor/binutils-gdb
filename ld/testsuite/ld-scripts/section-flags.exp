@@ -17,36 +17,25 @@
 # Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
 # MA 02110-1301, USA.
 
-set testname "SECTION_FLAGS-1"
-
-
-# This test only works for ELF targets
+# These tests only work for ELF targets
 if {! [is_elf_format]} {
-    unsupported $testname
     return
 }
 
-if ![ld_assemble $as $srcdir/$subdir/section-flags-1.s tmpdir/section-flags-1.o] {
-    unresolved $testname
-    return
+set ldcmd $ld
+if { [istarget spu*-*-*] } {
+    set ldcmd "$ldcmd --local-store 0:0"
 }
 
-if ![ld_simple_link $ld tmpdir/section-flags-1 "-T $srcdir/$subdir/section-flags-1.t tmpdir/section-flags-1.o"] {
-    fail $testname
-    return
+foreach test {"section-flags-1" "section-flags-2"} {
+    if ![ld_assemble $as $srcdir/$subdir/$test.s tmpdir/$test.o] {
+	unresolved $test
+    } else {
+	if ![ld_simple_link $ldcmd tmpdir/$test \
+		"-T $srcdir/$subdir/$test.t tmpdir/$test.o"] {
+	    fail $test
+	} else {
+	    pass $test
+	}
+    }
 }
-
-pass $testname
-
-set testname "SECTION_FLAGS-2"
-if ![ld_assemble $as $srcdir/$subdir/section-flags-2.s tmpdir/section-flags-2.o] {
-    unresolved $testname
-    return
-}
-
-if ![ld_simple_link $ld tmpdir/section-flags-2 "-T $srcdir/$subdir/section-flags-2.t tmpdir/section-flags-1.o tmpdir/section-flags-2.o"] {
-    fail $testname
-    return
-}
-
-pass $testname
