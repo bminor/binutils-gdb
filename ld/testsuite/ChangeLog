@@ -1,7 +1,3 @@
-2011-07-14  H.J. Lu  <hongjiu.lu@intel.com>
-
-	* ld-elf/binutils.exp: Skip relro tests on ia64.
-
 2011-07-14  Alan Modra  <amodra@gmail.com>
 
 	* ld-scripts/section-flags.exp: Pass --local-store 0:0 for
