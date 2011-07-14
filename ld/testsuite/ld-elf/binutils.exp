@@ -104,11 +104,19 @@ binutils_test strip "-shared" maxpage1
 binutils_test objcopy "" maxpage1
 binutils_test objcopy "-shared" maxpage1
 
-binutils_test strip "-z relro" relro1
-binutils_test strip "-z relro -shared" relro1
-binutils_test objcopy "-z relro" relro1
-binutils_test objcopy "-z relro -shared" relro1
-if { ([istarget "i?86-*-elf*"]		
+if { [istarget "ia64-*-*"] } {
+  set relotest no
+} else {
+  set relotest yes
+}
+
+if { $relotest == "yes" } {
+    binutils_test strip "-z relro" relro1
+    binutils_test strip "-z relro -shared" relro1
+    binutils_test objcopy "-z relro" relro1
+    binutils_test objcopy "-z relro -shared" relro1
+}
+if { ([istarget "i?86-*-elf*"]
       || (([istarget "i?86-*-linux*"]
 	   || [istarget "i?86-*-gnu*"])
 	  && ![istarget "*-*-*aout*"]
@@ -137,6 +145,8 @@ set tls_opts {
 
 foreach testitem $tls_tests {
     foreach testopt $tls_opts {
-	binutils_test objcopy $testopt $testitem
+	if { ($relotest == "yes" || ![regexp "\-z relro" "$testopt"]) } {
+	    binutils_test objcopy $testopt $testitem
+	}
     }
 }
