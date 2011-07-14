@@ -1,3 +1,7 @@
+2011-07-14  Hui Zhu  <teawater@gmail.com>
+
+	* remote.c (remote_get_trace_status): Initialize p.
+
 2011-07-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Work around kgdb.
