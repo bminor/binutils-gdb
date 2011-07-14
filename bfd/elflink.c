@@ -2517,7 +2517,7 @@ _bfd_elf_fix_symbol_flags (struct elf_link_hash_entry *h,
       struct elf_link_hash_entry *weakdef;
 
       weakdef = h->u.weakdef;
-      if (h->root.type == bfd_link_hash_indirect)
+      while (h->root.type == bfd_link_hash_indirect)
 	h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
       BFD_ASSERT (h->root.type == bfd_link_hash_defined
@@ -2621,12 +2621,12 @@ _bfd_elf_adjust_dynamic_symbol (struct elf_link_hash_entry *h, void *data)
 
   if (h->u.weakdef != NULL)
     {
-      /* If we get to this point, we know there is an implicit
-	 reference by a regular object file via the weak symbol H.
-	 FIXME: Is this really true?  What if the traversal finds
-	 H->U.WEAKDEF before it finds H?  */
+      /* If we get to this point, there is an implicit reference to
+	 H->U.WEAKDEF by a regular object file via the weak symbol H.  */
       h->u.weakdef->ref_regular = 1;
 
+      /* Ensure that the backend adjust_dynamic_symbol function sees
+	 H->U.WEAKDEF before H by recursively calling ourselves.  */
       if (! _bfd_elf_adjust_dynamic_symbol (h->u.weakdef, eif))
 	return FALSE;
     }

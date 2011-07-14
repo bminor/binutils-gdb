@@ -1,5 +1,10 @@
 2011-07-14  Alan Modra  <amodra@gmail.com>
 
+	* elflink.c (_bfd_elf_fix_symbol_flags): Loop on indirect syms.
+	(_bfd_elf_adjust_dynamic_symbol): Remove FIXME.
+
+2011-07-14  Alan Modra  <amodra@gmail.com>
+
 	* elf64-ppc.c (struct ppc_link_hash_table): Add plt_static_chain.
 	(build_plt_stub): Add plt_static_chain param, don't load r11 if false.
 	(build_tls_get_addr_stub): Likewise.
