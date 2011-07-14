@@ -6394,7 +6394,7 @@ siginfo_value_write (struct value *v, struct value *fromval)
     error (_("Unable to write siginfo"));
 }
 
-static struct lval_funcs siginfo_value_funcs =
+static const struct lval_funcs siginfo_value_funcs =
   {
     siginfo_value_read,
     siginfo_value_write

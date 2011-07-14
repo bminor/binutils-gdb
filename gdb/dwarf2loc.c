@@ -1051,7 +1051,7 @@ free_pieced_value_closure (struct value *v)
 }
 
 /* Functions for accessing a variable described by DW_OP_piece.  */
-static struct lval_funcs pieced_value_funcs = {
+static const struct lval_funcs pieced_value_funcs = {
   read_pieced_value,
   write_pieced_value,
   check_pieced_value_validity,

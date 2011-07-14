@@ -256,7 +256,7 @@ tlb_value_write (struct value *v, struct value *fromval)
   error (_("Impossible to change the Thread Local Base"));
 }
 
-static struct lval_funcs tlb_value_funcs =
+static const struct lval_funcs tlb_value_funcs =
   {
     tlb_value_read,
     tlb_value_write

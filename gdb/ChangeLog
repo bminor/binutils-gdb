@@ -1,3 +1,21 @@
+2011-07-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Code cleanup - constify struct lval_funcs.
+	* dwarf2loc.c (pieced_value_funcs): Make it const.
+	* infrun.c (siginfo_value_funcs): Likewise.
+	* opencl-lang.c (opencl_value_funcs): Likewise.
+	* valops.c (value_assign, value_ind): Make the funcs variable const.
+	* value.c (struct value): Make location.computed.funcs target const.
+	Rearrange the comments.
+	(allocate_computed_value): Make the funcs parameter target const.
+	(value_computed_funcs): Return the funcs target const.
+	(value_free, value_copy, set_value_component_location): Make the funcs
+	variable const.
+	* value.h (allocate_computed_value): Make the funcs parameter target
+	const.
+	(value_computed_funcs): Return the funcs target const.
+	* windows-tdep.c (tlb_value_funcs): Make it const.
+
 2011-07-14  Hui Zhu  <teawater@gmail.com>
 
 	* remote.c (remote_get_trace_status): Initialize p.

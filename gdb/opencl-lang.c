@@ -354,7 +354,7 @@ lval_func_free_closure (struct value *v)
     }
 }
 
-static struct lval_funcs opencl_value_funcs =
+static const struct lval_funcs opencl_value_funcs =
   {
     lval_func_read,
     lval_func_write,

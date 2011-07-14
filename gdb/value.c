@@ -194,8 +194,11 @@ struct value
        for them to use.  */
     struct
     {
-      struct lval_funcs *funcs; /* Functions to call.  */
-      void *closure;            /* Closure for those functions to use.  */
+      /* Functions to call.  */
+      const struct lval_funcs *funcs;
+
+      /* Closure for those functions to use.  */
+      void *closure;
     } computed;
   } location;
 
@@ -716,7 +719,7 @@ allocate_repeat_value (struct type *type, int count)
 
 struct value *
 allocate_computed_value (struct type *type,
-                         struct lval_funcs *funcs,
+                         const struct lval_funcs *funcs,
                          void *closure)
 {
   struct value *v = allocate_value_lazy (type);
@@ -1059,7 +1062,7 @@ set_value_pointed_to_offset (struct value *value, int val)
   value->pointed_to_offset = val;
 }
 
-struct lval_funcs *
+const struct lval_funcs *
 value_computed_funcs (struct value *v)
 {
   gdb_assert (VALUE_LVAL (v) == lval_computed);
@@ -1175,7 +1178,7 @@ value_free (struct value *val)
 
       if (VALUE_LVAL (val) == lval_computed)
 	{
-	  struct lval_funcs *funcs = val->location.computed.funcs;
+	  const struct lval_funcs *funcs = val->location.computed.funcs;
 
 	  if (funcs->free_closure)
 	    funcs->free_closure (val);
@@ -1319,7 +1322,7 @@ value_copy (struct value *arg)
     value_incref (val->parent);
   if (VALUE_LVAL (val) == lval_computed)
     {
-      struct lval_funcs *funcs = val->location.computed.funcs;
+      const struct lval_funcs *funcs = val->location.computed.funcs;
 
       if (funcs->copy_closure)
         val->location.computed.closure = funcs->copy_closure (val);
@@ -1359,7 +1362,7 @@ set_value_component_location (struct value *component,
   component->location = whole->location;
   if (whole->lval == lval_computed)
     {
-      struct lval_funcs *funcs = whole->location.computed.funcs;
+      const struct lval_funcs *funcs = whole->location.computed.funcs;
 
       if (funcs->copy_closure)
         component->location.computed.closure = funcs->copy_closure (whole);
