@@ -346,7 +346,13 @@ parameters_force_valid_target()
 				 is_big_endian,
 				 elfcpp::GOLD_DEFAULT_OSABI,
 				 0);
-  gold_assert(target != NULL);
+
+  if (target == NULL)
+    {
+      gold_assert(is_big_endian != GOLD_DEFAULT_BIG_ENDIAN);
+      gold_fatal(_("no supported target for -EB/-EL option"));
+    }
+
   set_parameters_target(target);
 }
 

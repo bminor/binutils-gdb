@@ -742,11 +742,11 @@ class General_options
   DEFINE_special(EB, options::ONE_DASH, '\0',
 		 N_("Link big-endian objects."), NULL);
 
-  DEFINE_bool(eh_frame_hdr, options::TWO_DASHES, '\0', false,
-              N_("Create exception frame header"), NULL);
-
   DEFINE_special(EL, options::ONE_DASH, '\0',
 		 N_("Link little-endian objects."), NULL);
+
+  DEFINE_bool(eh_frame_hdr, options::TWO_DASHES, '\0', false,
+              N_("Create exception frame header"), NULL);
 
   DEFINE_bool(enum_size_warning, options::TWO_DASHES, '\0', true, NULL,
 	      N_("(ARM only) Do not warn about objects with incompatible "
@@ -926,6 +926,9 @@ class General_options
 
   DEFINE_bool(preread_archive_symbols, options::TWO_DASHES, '\0', false,
               N_("Preread archive symbols when multi-threaded"), NULL);
+
+  DEFINE_bool(print_output_format, options::TWO_DASHES, '\0', false,
+	      N_("Print default output format"), NULL);
 
   DEFINE_string(print_symbol_counts, options::TWO_DASHES, '\0', NULL,
 		N_("Print symbols defined and used for each input"),

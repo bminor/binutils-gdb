@@ -80,6 +80,17 @@ class Target_selector_freebsd : public Target_selector
     names->push_back(this->freebsd_bfd_name_);
   }
 
+  // Return appropriate BFD name.
+  virtual const char*
+  do_target_bfd_name(const Target* target)
+  {
+    if (!this->is_our_target(target))
+      return NULL;
+    return (target->osabi() == elfcpp::ELFOSABI_FREEBSD
+	    ? this->freebsd_bfd_name_
+	    : this->bfd_name_);
+  }
+
  private:
   // The BFD name for the non-Freebsd target.
   const char* bfd_name_;

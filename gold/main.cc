@@ -1,6 +1,6 @@
 // main.cc -- gold main function.
 
-// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -33,6 +33,7 @@
 
 #include "script.h"
 #include "options.h"
+#include "target-select.h"
 #include "parameters.h"
 #include "errors.h"
 #include "mapfile.h"
@@ -245,6 +246,9 @@ main(int argc, char** argv)
 
   // Run the main task processing loop.
   workqueue.process(0);
+
+  if (command_line.options().print_output_format())
+    print_output_format();
 
   if (command_line.options().stats())
     {

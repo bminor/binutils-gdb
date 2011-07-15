@@ -1,6 +1,6 @@
 // gold.cc -- main linker functions
 
-// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -30,6 +30,7 @@
 #include "libiberty.h"
 
 #include "options.h"
+#include "target-select.h"
 #include "debug.h"
 #include "workqueue.h"
 #include "dirsearch.h"
@@ -175,7 +176,15 @@ queue_initial_tasks(const General_options& options,
 {
   if (cmdline.begin() == cmdline.end())
     {
+      bool is_ok = false;
       if (options.printed_version())
+	is_ok = true;
+      if (options.print_output_format())
+	{
+	  print_output_format();
+	  is_ok = true;
+	}
+      if (is_ok)
 	gold_exit(GOLD_OK);
       gold_fatal(_("no input files"));
     }

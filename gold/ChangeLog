@@ -1,5 +1,26 @@
 2011-07-15  Ian Lance Taylor  <iant@google.com>
 
+	* options.h (class General_options): Add --print-output-format.
+	Move -EL next to -EB, for  better --help output.
+	* target-select.cc: Include <cstdio>, "options.h", and
+	"parameters.h".
+	(Target_selector::do_target_bfd_name): New function.
+	(print_output_format): New function.
+	* target-select.h (class Target_selector): Update declarations.
+	(Target_selector::target_bfd_name): New function.
+	(print_output_format): Declare.
+	* main.cc: Include "target-select.h".
+	(main): Handle --print-output-format.
+	* gold.cc: Include "target-select.h".
+	(queue_initial_tasks): Handle --print-output-format when there are
+	no input files.
+	* parameters.cc (parameters_force_valid_target): Give a better
+	error message if -EB/-EL does not match target.
+	* freebsd.h (Target_selector_freebsd::do_target_bfd_name): New
+	function.
+
+2011-07-15  Ian Lance Taylor  <iant@google.com>
+
 	* i386.cc (class Output_data_plt_i386): Add layout_ field.
 	(Output_data_plt_i386::Output_data_plt_i386): Initialize layout_.
 	(Output_data_plt_i386::do_write): Write address of .dynamic

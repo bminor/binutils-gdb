@@ -22,9 +22,12 @@
 
 #include "gold.h"
 
+#include <cstdio>
 #include <cstring>
 
 #include "elfcpp.h"
+#include "options.h"
+#include "parameters.h"
 #include "target-select.h"
 
 namespace
@@ -78,6 +81,18 @@ Target_selector::set_target()
 {
   gold_assert(this->instantiated_target_ == NULL);
   this->instantiated_target_ = this->do_instantiate_target();
+}
+
+// If we instantiated TARGET, return the corresponding BFD name.
+
+const char*
+Target_selector::do_target_bfd_name(const Target* target)
+{
+  if (!this->is_our_target(target))
+    return NULL;
+  const char* my_bfd_name = this->bfd_name();
+  gold_assert(my_bfd_name != NULL);
+  return my_bfd_name;
 }
 
 // Find the target for an ELF file.
@@ -155,6 +170,48 @@ supported_emulation_names(std::vector<const char*>* names)
 {
   for (Target_selector* p = target_selectors; p != NULL; p = p->next())
     p->supported_emulations(names);
+}
+
+// Implement the --print-output-format option.
+
+void
+print_output_format()
+{
+  if (!parameters->target_valid())
+    {
+      // This case arises when --print-output-format is used with no
+      // input files.  We need to come up with the right string to
+      // print based on the other options.  If the user specified the
+      // format using a --oformat option, use that.  That saves each
+      // target from having to remember the name that was used to
+      // select it.  In other cases, we will just have to ask the
+      // target.
+      if (parameters->options().user_set_oformat())
+	{
+	  const char* bfd_name = parameters->options().oformat();
+	  Target* target = select_target_by_bfd_name(bfd_name);
+	  if (target != NULL)
+	    printf("%s\n", bfd_name);
+	  else
+	    gold_error(_("unrecognized output format %s"), bfd_name);
+	  return;
+	}
+
+      parameters_force_valid_target();
+    }
+
+  const Target* target = &parameters->target();
+  for (Target_selector* p = target_selectors; p != NULL; p = p->next())
+    {
+      const char* bfd_name = p->target_bfd_name(target);
+      if (bfd_name != NULL)
+	{
+	  printf("%s\n", bfd_name);
+	  return;
+	}
+    }
+
+  gold_unreachable();
 }
 
 } // End namespace gold.

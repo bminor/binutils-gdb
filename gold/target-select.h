@@ -140,6 +140,13 @@ class Target_selector
   emulation() const
   { return this->emulation_; }
 
+  // The reverse mapping, for --print-output-format: if we
+  // instantiated TARGET, return our BFD_NAME.  If we did not
+  // instantiate it, return NULL.
+  const char*
+  target_bfd_name(const Target* target)
+  { return this->do_target_bfd_name(target); }
+
  protected:
   // Return an instance of the real target.  This must be implemented
   // by the child class.
@@ -192,9 +199,18 @@ class Target_selector
     emulations->push_back(this->emulation_);
   }
 
+  // Map from target to BFD name.
+  virtual const char*
+  do_target_bfd_name(const Target*);
+
   // Instantiate the target and return it.
   Target*
   instantiate_target();
+
+  // Return whether TARGET is the target we instantiated.
+  bool
+  is_our_target(const Target* target)
+  { return target == this->instantiated_target_; }
 
  private:
   // Set the target.
@@ -248,6 +264,11 @@ supported_target_names(std::vector<const char*>*);
 
 extern void
 supported_emulation_names(std::vector<const char*>*);
+
+// Print the output format, for the --print-output-format option.
+
+extern void
+print_output_format();
 
 } // End namespace gold.
 
