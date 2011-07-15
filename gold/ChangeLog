@@ -1,3 +1,16 @@
+2011-07-15  Ian Lance Taylor  <iant@google.com>
+
+	* i386.cc (class Output_data_plt_i386): Add layout_ field.
+	(Output_data_plt_i386::Output_data_plt_i386): Initialize layout_.
+	(Output_data_plt_i386::do_write): Write address of .dynamic
+	section to first entry in .got.plt section.
+	* x86_64.cc (class Output_data_plt_x86_64): Add layout_ field.
+	(Output_data_plt_x86_64::Output_data_plt_x86_64) [both versions]:
+	Initialize layout_.
+	(Output_data_plt_x86_64::do_write): Write address of .dynamic
+	section to first entry in .got.plt section.
+	* layout.h (Layout::dynamic_section): New function.
+
 2011-07-13  Sriraman Tallam  <tmsriram@google.com>
 
 	* archive.cc (Archive::get_elf_object_for_member): Add extra parameter

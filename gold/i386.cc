@@ -166,6 +166,9 @@ class Output_data_plt_i386 : public Output_section_data
     unsigned int got_offset;
   };
 
+  // A pointer to the Layout class, so that we can find the .dynamic
+  // section when we write out the GOT PLT section.
+  Layout* layout_;
   // The reloc section.
   Reloc_section* rel_;
   // The TLS_DESC relocations, if necessary.  These must follow the
@@ -822,9 +825,9 @@ Target_i386::rel_irelative_section(Layout* layout)
 Output_data_plt_i386::Output_data_plt_i386(Layout* layout,
 					   Output_data_space* got_plt,
 					   Output_data_space* got_irelative)
-  : Output_section_data(16), tls_desc_rel_(NULL), irelative_rel_(NULL),
-    got_plt_(got_plt), got_irelative_(got_irelative), count_(0),
-    irelative_count_(0), global_ifuncs_(), local_ifuncs_()
+  : Output_section_data(16), layout_(layout), tls_desc_rel_(NULL),
+    irelative_rel_(NULL), got_plt_(got_plt), got_irelative_(got_irelative),
+    count_(0), irelative_count_(0), global_ifuncs_(), local_ifuncs_()
 {
   this->rel_ = new Reloc_section(false);
   layout->add_output_section_data(".rel.plt", elfcpp::SHT_REL,
@@ -1138,8 +1141,16 @@ Output_data_plt_i386::do_write(Output_file* of)
 
   unsigned char* got_pov = got_view;
 
-  memset(got_pov, 0, 12);
-  got_pov += 12;
+  // The first entry in the GOT is the address of the .dynamic section
+  // aka the PT_DYNAMIC segment.  The next two entries are reserved.
+  // We saved space for them when we created the section in
+  // Target_i386::got_section.
+  Output_section* dynamic = this->layout_->dynamic_section();
+  uint32_t dynamic_addr = dynamic == NULL ? 0 : dynamic->address();
+  elfcpp::Swap<32, false>::writeval(got_pov, dynamic_addr);
+  got_pov += 4;
+  memset(got_pov, 0, 8);
+  got_pov += 8;
 
   const int rel_size = elfcpp::Elf_sizes<32>::rel_size;
 

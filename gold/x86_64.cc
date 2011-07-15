@@ -57,9 +57,10 @@ class Output_data_plt_x86_64 : public Output_section_data
   Output_data_plt_x86_64(Layout* layout, Output_data_got<64, false>* got,
 			 Output_data_space* got_plt,
 			 Output_data_space* got_irelative)
-    : Output_section_data(16), tlsdesc_rel_(NULL), irelative_rel_(NULL),
-      got_(got), got_plt_(got_plt), got_irelative_(got_irelative), count_(0),
-      irelative_count_(0), tlsdesc_got_offset_(-1U), free_list_()
+    : Output_section_data(16), layout_(layout), tlsdesc_rel_(NULL),
+      irelative_rel_(NULL), got_(got), got_plt_(got_plt),
+      got_irelative_(got_irelative), count_(0), irelative_count_(0),
+      tlsdesc_got_offset_(-1U), free_list_()
   { this->init(layout); }
 
   Output_data_plt_x86_64(Layout* layout, Output_data_got<64, false>* got,
@@ -67,9 +68,9 @@ class Output_data_plt_x86_64 : public Output_section_data
 			 Output_data_space* got_irelative,
 			 unsigned int plt_count)
     : Output_section_data((plt_count + 1) * plt_entry_size, 16, false),
-      tlsdesc_rel_(NULL), irelative_rel_(NULL), got_(got), got_plt_(got_plt),
-      got_irelative_(got_irelative), count_(plt_count), irelative_count_(0),
-      tlsdesc_got_offset_(-1U), free_list_()
+      layout_(layout), tlsdesc_rel_(NULL), irelative_rel_(NULL), got_(got),
+      got_plt_(got_plt), got_irelative_(got_irelative), count_(plt_count),
+      irelative_count_(0), tlsdesc_got_offset_(-1U), free_list_()
   {
     this->init(layout);
 
@@ -205,6 +206,9 @@ class Output_data_plt_x86_64 : public Output_section_data
   void
   do_write(Output_file*);
 
+  // A pointer to the Layout class, so that we can find the .dynamic
+  // section when we write out the GOT PLT section.
+  Layout* layout_;
   // The reloc section.
   Reloc_section* rel_;
   // The TLSDESC relocs, if necessary.  These must follow the regular
@@ -1306,8 +1310,16 @@ Output_data_plt_x86_64::do_write(Output_file* of)
 
   unsigned char* got_pov = got_view;
 
-  memset(got_pov, 0, 24);
-  got_pov += 24;
+  // The first entry in the GOT is the address of the .dynamic section
+  // aka the PT_DYNAMIC segment.  The next two entries are reserved.
+  // We saved space for them when we created the section in
+  // Target_x86_64::got_section.
+  Output_section* dynamic = this->layout_->dynamic_section();
+  uint32_t dynamic_addr = dynamic == NULL ? 0 : dynamic->address();
+  elfcpp::Swap<64, false>::writeval(got_pov, dynamic_addr);
+  got_pov += 8;
+  memset(got_pov, 0, 16);
+  got_pov += 16;
 
   unsigned int plt_offset = plt_entry_size;
   unsigned int got_offset = 24;

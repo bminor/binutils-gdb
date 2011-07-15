@@ -627,6 +627,12 @@ class Layout
   dynpool() const
   { return &this->dynpool_; }
 
+  // Return the .dynamic output section.  This is only valid after the
+  // layout has been finalized.
+  Output_section*
+  dynamic_section() const
+  { return this->dynamic_section_; }
+
   // Return the symtab_xindex section used to hold large section
   // indexes for the normal symbol table.
   Output_symtab_xindex*
