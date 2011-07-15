@@ -9976,7 +9976,8 @@ remote_trace_start (void)
 static int
 remote_get_trace_status (struct trace_status *ts)
 {
-  char *p;
+  /* Initialize it just to avoid a GCC false warning.  */
+  char *p = NULL;
   /* FIXME we need to get register block size some other way.  */
   extern int trace_regblock_size;
   volatile struct gdb_exception ex;
