@@ -1,3 +1,9 @@
+2011-07-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Code cleanup.
+	* gdb.cp/namespace.exp (xfail_class_types): New variable.  Initialize
+	it.  Substitute it instead of test_compiler_info everywhere.
+
 2011-07-15  Ulrich Weigand  <ulrich.weigand@linaro.org>
 
 	* gdb.base/type-opaque.exp: Use gdb_load_shlibs.  Run test on
