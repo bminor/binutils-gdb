@@ -1,5 +1,10 @@
 2011-07-15  Ulrich Weigand  <ulrich.weigand@linaro.org>
 
+	* gdb.base/type-opaque.exp: Use gdb_load_shlibs.  Run test on
+	remote targets as well.
+
+2011-07-15  Ulrich Weigand  <ulrich.weigand@linaro.org>
+
 	* lib/gdb.exp (gdb_compile_shlib_pthreads): New helper.
 	* gdb.threads/tls-shared.exp: Use it.  Call gdb_load_shlibs.
 
