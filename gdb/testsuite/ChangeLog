@@ -1,3 +1,9 @@
+2011-07-15  Ulrich Weigand  <ulrich.weigand@linaro.org>
+
+	* lib/gdb.exp (gdb_compile): Specify rpath if the *target* is
+	a remote machine, not the host.
+	(gdb_compile_shlib): Set soname if target is remote.
+
 2011-07-14  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* gdb.cp/minsym-fallback.exp: Link in C++ mode.

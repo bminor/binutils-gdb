@@ -2168,7 +2168,7 @@ proc gdb_compile {source dest type options} {
     # dynamically load one by basename, we must specify rpath.  If we
     # are using a remote host, DejaGNU will link to the shared library
     # using a relative path, so again we must specify an rpath.
-    if { $shlib_load || ($shlib_found && [is_remote host]) } {
+    if { $shlib_load || ($shlib_found && [is_remote target]) } {
 	if { ([istarget "*-*-mingw*"]
 	      || [istarget *-*-cygwin*]
 	      || [istarget *-*-pe*]
@@ -2383,7 +2383,17 @@ proc gdb_compile_shlib {sources dest options} {
 		 || [istarget *-*-cygwin*]
 		 || [istarget *-*-pe*])} {
 	       lappend link_options "additional_flags=-Wl,--out-implib,${dest}.a"
-	   }
+	   } elseif [is_remote target] {
+	     # By default, we do not set the soname.  This causes the linker
+	     # on ELF systems to create a DT_NEEDED entry in the executable
+	     # refering to the full path name of the library.  This is a
+	     # problem in remote testing if the library is in a different
+	     # directory there.  To fix this, we set a soname of just the
+	     # base filename for the library, and add an appropriate -rpath
+	     # to the main executable (in gdb_compile).
+             set destbase [file tail $dest]
+             lappend link_options "additional_flags=-Wl,-soname,$destbase"
+           }
        }
        if {[gdb_compile "${objects}" "${dest}" executable $link_options] != ""} {
            return -1
