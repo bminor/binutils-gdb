@@ -1,3 +1,8 @@
+2011-07-15  Fawzi Mohamed  <fawzi.mohamed@nokia.com>
+
+	* dwarf2-frame.c (decode_frame_entry, decode_frame_entry_1): Ensure
+	that CIE pointer of an FDE really points to a CIE .
+
 2011-07-15  Hui Zhu  <teawater@gmail.com>
 
 	* remote.c (remote_get_trace_status): Add comments.
