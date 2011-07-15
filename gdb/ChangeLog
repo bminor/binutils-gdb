@@ -1,5 +1,9 @@
 2011-07-15  Fawzi Mohamed  <fawzi.mohamed@nokia.com>
 
+	* MAINTAINERS (Write After Approval): Add myself to the list.
+
+2011-07-15  Fawzi Mohamed  <fawzi.mohamed@nokia.com>
+
 	* dwarf2-frame.c (decode_frame_entry, decode_frame_entry_1): Ensure
 	that CIE pointer of an FDE really points to a CIE .
 
