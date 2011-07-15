@@ -1,3 +1,8 @@
+2011-07-15  Alan Modra  <amodra@gmail.com>
+
+	* configure.in: Bump version.
+	* configure: Regenerate.
+
 2011-07-14  Alan Modra  <amodra@gmail.com>
 
 	* linker.c (_bfd_generic_section_already_linked): Set l_flags.
