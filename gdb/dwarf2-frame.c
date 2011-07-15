@@ -391,6 +391,20 @@ register %s (#%d) at %s"),
 		       paddress (gdbarch, fs->pc));
 }
 
+/* Virtual method table for execute_stack_op below.  */
+
+static const struct dwarf_expr_context_funcs dwarf2_frame_ctx_funcs =
+{
+  read_reg,
+  read_mem,
+  no_get_frame_base,
+  no_get_frame_cfa,
+  no_get_frame_pc,
+  no_get_tls_address,
+  no_dwarf_call,
+  no_base_type
+};
+
 static CORE_ADDR
 execute_stack_op (const gdb_byte *exp, ULONGEST len, int addr_size,
 		  CORE_ADDR offset, struct frame_info *this_frame,
@@ -408,14 +422,7 @@ execute_stack_op (const gdb_byte *exp, ULONGEST len, int addr_size,
   ctx->addr_size = addr_size;
   ctx->offset = offset;
   ctx->baton = this_frame;
-  ctx->read_reg = read_reg;
-  ctx->read_mem = read_mem;
-  ctx->get_frame_base = no_get_frame_base;
-  ctx->get_frame_cfa = no_get_frame_cfa;
-  ctx->get_frame_pc = no_get_frame_pc;
-  ctx->get_tls_address = no_get_tls_address;
-  ctx->dwarf_call = no_dwarf_call;
-  ctx->get_base_type = no_base_type;
+  ctx->funcs = &dwarf2_frame_ctx_funcs;
 
   dwarf_expr_push_address (ctx, initial, initial_in_stack_memory);
   dwarf_expr_eval (ctx, exp, len);
