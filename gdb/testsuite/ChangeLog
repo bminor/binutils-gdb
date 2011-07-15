@@ -1,5 +1,10 @@
 2011-07-15  Ulrich Weigand  <ulrich.weigand@linaro.org>
 
+	* lib/gdb.exp (gdb_compile_shlib_pthreads): New helper.
+	* gdb.threads/tls-shared.exp: Use it.  Call gdb_load_shlibs.
+
+2011-07-15  Ulrich Weigand  <ulrich.weigand@linaro.org>
+
 	* lib/gdb.exp (gdb_compile): Specify rpath if the *target* is
 	a remote machine, not the host.
 	(gdb_compile_shlib): Set soname if target is remote.

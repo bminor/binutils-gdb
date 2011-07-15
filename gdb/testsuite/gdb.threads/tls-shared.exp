@@ -24,6 +24,8 @@ set testfile tls-main
 set libfile tls-shared
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
+set srcfile_lib ${libfile}.c
+set binfile_lib ${objdir}/${subdir}/${libfile}.so
 
 remote_exec build "rm -f ${binfile}"
 
@@ -32,48 +34,9 @@ if [get_compiler_info ${binfile}] {
     return -1
 }
 
-if  { [gdb_compile_pthreads "${srcdir}/${subdir}/${srcfile}" "${binfile}.o" object {debug}] != "" } {
-    return -1
-}
 
-# Build the shared libraries this test case needs.
-#
-
-if {$gcc_compiled == 0} {
-    if [istarget "hppa*-hp-hpux*"] then {
-        set additional_flags "additional_flags=+z"
-    } elseif { [istarget "mips-sgi-irix*"] } {
-        # Disable SGI compiler's implicit -Dsgi
-        set additional_flags "additional_flags=-Usgi"
-    } else {
-        # don't know what the compiler is...
-        set additional_flags ""
-    }
-} else {
-    if { ([istarget "powerpc*-*-aix*"]
-    || [istarget "rs6000*-*-aix*"]) } {
-        set additional_flags ""
-    } else {
-        set additional_flags "additional_flags=-fpic"
-    }
-}
-
-set additional_flags "$additional_flags -shared"
-if {[gdb_compile_pthreads "${srcdir}/${subdir}/${libfile}.c" "${objdir}/${subdir}/${libfile}.so" executable [list debug $additional_flags "incdir=${objdir}"]] != ""} {
-    return -1
-}
-
-if { ($gcc_compiled 
-&&  ([istarget "powerpc*-*-aix*"]
-|| [istarget "rs6000*-*-aix*"] )) } {
-    set additional_flags "additional_flags=-L${objdir}/${subdir}"
-} elseif { [istarget "mips-sgi-irix*"] } {
-    set additional_flags "additional_flags=-rpath ${objdir}/${subdir}"
-} else {
-    set additional_flags ""
-}
-
-if {[gdb_compile_pthreads "${objdir}/${subdir}/${testfile}.o ${objdir}/${subdir}/${libfile}.so" "${binfile}" executable [list debug $additional_flags]] != ""} {
+if { [gdb_compile_shlib_pthreads ${srcdir}/${subdir}/${srcfile_lib} ${binfile_lib} {debug}] != ""
+     || [gdb_compile_pthreads ${srcdir}/${subdir}/${srcfile} ${binfile} executable [list debug shlib=${binfile_lib}]] != ""} {
     return -1
 }
 
@@ -82,6 +45,7 @@ gdb_exit
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
+gdb_load_shlibs ${binfile_lib}
 
 if ![runto_main] then {
     fail "Can't run to main"
