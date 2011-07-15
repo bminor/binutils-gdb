@@ -1,3 +1,7 @@
+2011-07-15  Hui Zhu  <teawater@gmail.com>
+
+	* remote.c (remote_get_trace_status): Add comments.
+
 2011-07-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Code cleanup - constify struct lval_funcs.
