@@ -1401,6 +1401,13 @@ default behaviour (of not listing the sections that are removed) can
 be restored by specifying @samp{--no-print-gc-sections} on the command
 line.
 
+@kindex --print-output-format
+@cindex output format
+@item --print-output-format
+Print the name of the default output format (perhaps influenced by
+other command-line options).  This is the string that would appear
+in an @code{OUTPUT_FORMAT} linker script command (@pxref{File Commands}).
+
 @cindex help
 @cindex usage
 @kindex --help

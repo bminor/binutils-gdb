@@ -427,11 +427,14 @@ main (int argc, char **argv)
       info_msg ("\n==================================================\n");
     }
 
+  if (command_line.print_output_format)
+    info_msg ("%s\n", lang_get_output_target ());
+
   lang_final ();
 
   if (!lang_has_input_file)
     {
-      if (version_printed)
+      if (version_printed || command_line.print_output_format)
 	xexit (0);
       einfo (_("%P%F: no input files\n"));
     }

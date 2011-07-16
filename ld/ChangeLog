@@ -1,3 +1,14 @@
+2011-07-16  Roland McGrath  <roland@hack.frob.com>
+
+	* ld.h (args_type): New field print_output_format.
+	* lexsup.c (enum option_values, ld_options, parse_args):
+	Handle --print-output-format.
+	* ldmain.c (main): Implement --print-output-format.
+	* ld.texinfo (Options): Document it.
+
+	* ldlang.c (lang_get_output_target): Don't return current_target
+	when it's NULL.
+
 2011-07-15  Alan Modra  <amodra@gmail.com>
 
 	* Makefile.am (e*.c): Sort.

@@ -175,6 +175,7 @@ enum option_values
   OPTION_PLUGIN_OPT,
 #endif /* ENABLE_PLUGINS */
   OPTION_DEFAULT_SCRIPT,
+  OPTION_PRINT_OUTPUT_FORMAT,
 };
 
 /* The long options.  This structure is used for both the option
@@ -491,6 +492,8 @@ static const struct ld_option ld_options[] =
   { {"oformat", required_argument, NULL, OPTION_OFORMAT},
     '\0', N_("TARGET"), N_("Specify target of output file"),
     EXACTLY_TWO_DASHES },
+  { {"print-output-format", no_argument, NULL, OPTION_PRINT_OUTPUT_FORMAT},
+    '\0', NULL, N_("Print default output format"), TWO_DASHES },
   { {"qmagic", no_argument, NULL, OPTION_IGNORE},
     '\0', NULL, N_("Ignored for Linux compatibility"), ONE_DASH },
   { {"reduce-memory-overheads", no_argument, NULL,
@@ -1058,6 +1061,9 @@ parse_args (unsigned argc, char **argv)
 	  break;
 	case OPTION_OFORMAT:
 	  lang_add_output_format (optarg, NULL, NULL, 0);
+	  break;
+	case OPTION_PRINT_OUTPUT_FORMAT:
+	  command_line.print_output_format = TRUE;
 	  break;
 #ifdef ENABLE_PLUGINS
 	case OPTION_PLUGIN:

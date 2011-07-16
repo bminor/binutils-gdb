@@ -3052,7 +3052,7 @@ lang_get_output_target (void)
 
   /* No - has the current target been set to something other than
      the default?  */
-  if (current_target != default_target)
+  if (current_target != default_target && current_target != NULL)
     return current_target;
 
   /* No - can we determine the format of the first input file?  */

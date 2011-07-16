@@ -200,6 +200,9 @@ typedef struct {
      input files.  */
   bfd_boolean accept_unknown_input_arch;
 
+  /* If TRUE we'll just print the default output on stdout.  */
+  bfd_boolean print_output_format;
+
   /* Big or little endian as set on command line.  */
   enum endian_enum endian;
 
