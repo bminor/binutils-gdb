@@ -3343,7 +3343,13 @@ static void
 pmon_download (char *buffer, int length)
 {
   if (tftp_in_use)
-    fwrite (buffer, 1, length, tftp_file);
+    {
+      size_t written;
+
+      written = fwrite (buffer, 1, length, tftp_file);
+      if (written < length)
+	perror_with_name (tftp_localname);
+    }
   else
     serial_write (udp_in_use ? udp_desc : mips_desc, buffer, length);
 }

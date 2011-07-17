@@ -1,3 +1,7 @@
+2011-07-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* remote-mips.c (pmon_download): Fix ignored return value GCC warning.
+
 2011-07-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Code cleanup.
