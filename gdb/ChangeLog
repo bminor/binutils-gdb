@@ -1,3 +1,8 @@
+2011-07-18  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2read.c (read_subrange_type): Use attr_form_is_block when
+	checking for variable-sized array.
+
 2011-07-18  Jean-Charles Delay  <delay@adacore.com>
 
 	* varobj.h (varobj_languages): Add vlang_ada definition to the list

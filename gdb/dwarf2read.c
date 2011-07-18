@@ -8580,7 +8580,7 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
   attr = dwarf2_attr (die, DW_AT_upper_bound, cu);
   if (attr)
     {
-      if (attr->form == DW_FORM_block1 || is_ref_attr (attr))
+      if (attr_form_is_block (attr) || is_ref_attr (attr))
         {
           /* GCC encodes arrays with unspecified or dynamic length
              with a DW_FORM_block1 attribute or a reference attribute.
@@ -8663,7 +8663,7 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
   /* Mark arrays with dynamic length at least as an array of unspecified
      length.  GDB could check the boundary but before it gets implemented at
      least allow accessing the array elements.  */
-  if (attr && attr->form == DW_FORM_block1)
+  if (attr && attr_form_is_block (attr))
     TYPE_HIGH_BOUND_UNDEFINED (range_type) = 1;
 
   /* Ada expects an empty array on no boundary attributes.  */
