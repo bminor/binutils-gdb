@@ -210,7 +210,7 @@ for any SSE intruction.
 @cindex @samp{-mavxscalar=} option, x86-64
 @item -mavxscalar=@var{128}
 @itemx -mavxscalar=@var{256}
-This options control how the assembler should encode scalar AVX
+These options control how the assembler should encode scalar AVX
 instructions.  @option{-mavxscalar=@var{128}} will encode scalar
 AVX instructions with 128bit vector length, which is the default.
 @option{-mavxscalar=@var{256}} will encode scalar AVX instructions

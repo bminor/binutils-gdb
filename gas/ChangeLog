@@ -1,3 +1,7 @@
+2011-07-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* doc/c-i386.texi: Fix a typo.
+
 2011-07-06  Aurelien Jarno  <aurelien@aurel32.net>
 
 	* config/tc-mips.c (append_insn): delete prev_pinfo2 and pinfo2.
