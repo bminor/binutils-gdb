@@ -23,6 +23,11 @@ if { [is_remote target] } then {
     continue
 }
 
+if { ![support_displaced_stepping] } { 
+    unsupported "displaced stepping"
+    return -1
+}
+
 load_lib mi-support.exp
 set MIFLAGS "-i=mi"
 

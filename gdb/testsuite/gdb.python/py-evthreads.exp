@@ -22,6 +22,11 @@ if $tracelevel then {
     strace $tracelevel
 }
 
+if { ![support_displaced_stepping] } { 
+    unsupported "displaced stepping"
+    return -1
+}
+
 load_lib gdb-python.exp
 
 set testfile "py-evthreads"

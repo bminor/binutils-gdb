@@ -1,3 +1,15 @@
+2011-07-18  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.base/async-shell.exp: Skip test if displaced stepping is not
+	supported.
+	* gdb.mi/mi-nonstop-exit.exp: Likewise.
+	* gdb.mi/mi-nonstop.exp: Likewise.
+	* gdb.mi/mi-ns-stale-regcache.exp: Likewise.
+	* gdb.mi/mi-nsintrall.exp: Likewise.
+	* gdb.mi/mi-nsmoribund.exp: Likewise.
+	* gdb.mi/mi-nsthrexec.exp: Likewise.
+	* gdb.python/py-evthreads.exp: Likewise.
+
 2011-07-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Code cleanup.
