@@ -1,3 +1,14 @@
+2011-07-18  Jean-Charles Delay  <delay@adacore.com>
+
+	* varobj.h (varobj_languages): Add vlang_ada definition to the list
+	of supported languages.
+	* varobj.c: Add top definitions and basic implementation of the
+	following callbacks: ada_number_of_children, ada_name_of_variable,
+	ada_name_of_child, ada_path_expr_of_child, ada_value_of_root,
+	ada_value_of_child, ada_type_of_child, ada_value_of_variable.
+	(languages): Register Ada-specific callbacks.
+	(variable_language): Add the Ada case in the language setter switch.
+
 2011-07-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* remote-mips.c (pmon_download): Fix ignored return value GCC warning.
