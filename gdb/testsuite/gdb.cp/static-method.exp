@@ -70,7 +70,7 @@ foreach test $methods {
     # with the filename pre-pended.
     gdb_test "list ${srcfile}:$test" $result
     gdb_test "list '${srcfile}:$test'" $result
-    gdb_test "list '${srcfile}':$test'" $result
+    gdb_test "list '${srcfile}':'$test'" $result
     gdb_test "list ${srcfile}:'$test'" $result
 
     # Test setting and hitting a breakoint at the function/method.

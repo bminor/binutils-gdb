@@ -1,3 +1,7 @@
+2011-07-18  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.cp/static-method.exp: Add missing single quote.
+
 2011-07-18  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.base/async-shell.exp: Skip test if displaced stepping is not
