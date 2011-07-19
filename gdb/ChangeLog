@@ -1,3 +1,8 @@
+2011-07-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf2loc.c (indirect_pieced_value): Use check_typedef for VALUE's
+	type.
+
 2011-07-19  Gary Benson  <gbenson@redhat.com>
 
 	* infrun.c (struct execution_control_state): New member

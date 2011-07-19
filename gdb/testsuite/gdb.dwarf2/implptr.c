@@ -52,12 +52,16 @@ foo (int i)
   return i + j;			/* foo breakpoint */
 }
 
+typedef int *intp;
+typedef intp *intpp;
+typedef intpp *intppp;
+
 int __attribute__ ((noinline, used, noclone)) 
 bar (int i) 
 {
-  int *j = &i;
-  int **k = &j;
-  int ***l = &k;
+  intp j = &i;
+  intpp k = &j;
+  intppp l = &k;
   i++;				/* bar breakpoint */
   return i;
 }

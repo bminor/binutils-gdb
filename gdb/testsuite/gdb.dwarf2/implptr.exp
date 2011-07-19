@@ -20,17 +20,23 @@ load_lib dwarf.exp
 if {![dwarf2_support]} {
     return 0  
 }
-# This test can only be run on x86 targets.
-if {![is_x86_like_target]} {
-    return 0  
-}
 
 set testfile "implptr"
 set srcfile ${testfile}.S
 set csrcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}.x
+set opts {}
 
-if {[prepare_for_testing ${testfile}.exp ${testfile}.x $srcfile]} {
+if [info exists COMPILE] {
+    # make check RUNTESTFLAGS='gdb.dwarf2/implptr.exp COMPILE=1 CC_FOR_TARGET=gcc\ -m32'
+    set srcfile ${csrcfile}
+    lappend opts debug optimize=-O2
+} elseif {![is_x86_like_target]} {
+    # This test can only be run on x86 targets.
+    return 0  
+}
+
+if {[prepare_for_testing ${testfile}.exp ${testfile}.x $srcfile $opts]} {
     return -1
 }
 
@@ -45,7 +51,7 @@ proc implptr_test_bar {} {
     gdb_test "break implptr.c:$line" "Breakpoint 2.*" \
        "set bar breakpoint for implptr"
     gdb_continue_to_breakpoint "continue to bar breakpoint for implptr"
-    gdb_test "print j" " = .int .. <synthetic pointer>" "print j in implptr:bar"
+    gdb_test "print j" " = \\(intp\\) <synthetic pointer>" "print j in implptr:bar"
     gdb_test "print *j" " = 5" "print *j in implptr:bar"
     gdb_test "print **k" " = 5" "print **k in implptr:bar"
     gdb_test "print ***l" " = 5" "print ***l in implptr:bar"
@@ -58,7 +64,7 @@ proc implptr_test_foo {} {
     gdb_test "break implptr.c:$line" "Breakpoint 3.*" \
 	"set foo breakpoint for implptr"
     gdb_continue_to_breakpoint "continue to foo breakpoint for implptr"
-    gdb_test "print p\[0].x" " = .int .. <synthetic pointer>" \
+    gdb_test "print p\[0].x" " = \\(int \\*\\) <synthetic pointer>" \
 	"print p\[0].x in implptr:foo"
     gdb_test "print *p\[0].x" " = 69" \
 	"print *p\[0].x in implptr:foo"

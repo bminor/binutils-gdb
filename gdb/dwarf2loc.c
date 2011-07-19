@@ -967,7 +967,7 @@ indirect_pieced_value (struct value *value)
   struct value *result;
   LONGEST byte_offset;
 
-  type = value_type (value);
+  type = check_typedef (value_type (value));
   if (TYPE_CODE (type) != TYPE_CODE_PTR)
     return NULL;
 
