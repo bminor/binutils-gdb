@@ -40,6 +40,9 @@ if {[prepare_for_testing ${testfile}.exp ${testfile}.x $srcfile $opts]} {
     return -1
 }
 
+# Additional test to verify the referenced CU is not aged out.
+gdb_test_no_output "maintenance set dwarf2 max-cache-age 0"
+
 if ![runto_main] {
     return -1
 }

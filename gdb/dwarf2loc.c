@@ -265,14 +265,19 @@ per_cu_dwarf_call (struct dwarf_expr_context *ctx, size_t die_offset,
 		   void *baton)
 {
   struct dwarf2_locexpr_baton block;
+  struct cleanup *back_to;
 
   block = dwarf2_fetch_die_location_block (die_offset, per_cu,
 					   get_frame_pc, baton);
+
+  back_to = make_cleanup (xfree, (void *) block.data);
 
   /* DW_OP_call_ref is currently not supported.  */
   gdb_assert (block.per_cu == per_cu);
 
   dwarf_expr_eval (ctx, block.data, block.size);
+
+  do_cleanups (back_to);
 }
 
 /* Helper interface of per_cu_dwarf_call for dwarf2_evaluate_loc_desc.  */
@@ -966,6 +971,7 @@ indirect_pieced_value (struct value *value)
   struct dwarf_expr_piece *piece = NULL;
   struct value *result;
   LONGEST byte_offset;
+  struct cleanup *back_to;
 
   type = check_typedef (value_type (value));
   if (TYPE_CODE (type) != TYPE_CODE_PTR)
@@ -1013,9 +1019,13 @@ indirect_pieced_value (struct value *value)
 					   get_frame_address_in_block_wrapper,
 					   frame);
 
+  back_to = make_cleanup (xfree, (void *) baton.data);
+
   result = dwarf2_evaluate_loc_desc_full (TYPE_TARGET_TYPE (type), frame,
 					  baton.data, baton.size, baton.per_cu,
 					  byte_offset);
+
+  do_cleanups (back_to);
 
   return result;
 }
@@ -2123,12 +2133,14 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
 	  {
 	    struct dwarf2_locexpr_baton block;
 	    int size = (op == DW_OP_call2 ? 2 : 4);
+	    struct cleanup *back_to;
 
 	    uoffset = extract_unsigned_integer (op_ptr, size, byte_order);
 	    op_ptr += size;
 
 	    block = dwarf2_fetch_die_location_block (uoffset, per_cu,
 						     get_ax_pc, expr);
+	    back_to = make_cleanup (xfree, (void *) block.data);
 
 	    /* DW_OP_call_ref is currently not supported.  */
 	    gdb_assert (block.per_cu == per_cu);
@@ -2136,6 +2148,8 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
 	    dwarf2_compile_expr_to_ax (expr, loc, arch, addr_size,
 				       block.data, block.data + block.size,
 				       per_cu);
+
+	    do_cleanups (back_to);
 	  }
 	  break;
 

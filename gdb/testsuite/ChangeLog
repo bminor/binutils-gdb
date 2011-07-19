@@ -1,5 +1,12 @@
 2011-07-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Fix crash if referenced CU is aged out.
+	* gdb.dwarf2/dw2-op-call.exp (maintenance set dwarf2 max-cache-age 0):
+	New.
+	* gdb.dwarf2/implptr.exp: Likewise.
+
+2011-07-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdb.dwarf2/implptr.S: Rebuilt.
 	* gdb.dwarf2/implptr.c (intp, intpp, intppp): New typedefs.
 	(bar): Use them for j, k, l.

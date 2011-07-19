@@ -884,6 +884,9 @@ static void dwarf2_locate_sections (bfd *, asection *, void *);
 static void dwarf2_create_include_psymtab (char *, struct partial_symtab *,
                                            struct objfile *);
 
+static void dwarf2_find_base_address (struct die_info *die,
+				      struct dwarf2_cu *cu);
+
 static void dwarf2_build_psymtabs_hard (struct objfile *);
 
 static void scan_partial_symbols (struct partial_die_info *,
@@ -1788,6 +1791,23 @@ create_quick_file_names_table (unsigned int nr_initial_entries)
 			    delete_file_name_entry, xcalloc, xfree);
 }
 
+/* Read in PER_CU->CU.  This function is unrelated to symtabs, symtab would
+   have to be created afterwards.  You should call age_cached_comp_units after
+   processing PER_CU->CU.  dw2_setup must have been already called.  */
+
+static void
+load_cu (struct dwarf2_per_cu_data *per_cu)
+{
+  if (per_cu->from_debug_types)
+    read_signatured_type_at_offset (per_cu->objfile, per_cu->offset);
+  else
+    load_full_comp_unit (per_cu, per_cu->objfile);
+
+  dwarf2_find_base_address (per_cu->cu->dies, per_cu->cu);
+
+  gdb_assert (per_cu->cu != NULL);
+}
+
 /* Read in the symbols for PER_CU.  OBJFILE is the objfile from which
    this CU came.  */
 
@@ -1801,10 +1821,7 @@ dw2_do_instantiate_symtab (struct objfile *objfile,
 
   queue_comp_unit (per_cu, objfile);
 
-  if (per_cu->from_debug_types)
-    read_signatured_type_at_offset (objfile, per_cu->offset);
-  else
-    load_full_comp_unit (per_cu, objfile);
+  load_cu (per_cu);
 
   process_queue (objfile);
 
@@ -4713,8 +4730,6 @@ process_full_comp_unit (struct dwarf2_per_cu_data *per_cu)
   delayed_list_cleanup = make_cleanup (free_delayed_list, cu);
 
   cu->list_in_scope = &file_symbols;
-
-  dwarf2_find_base_address (cu->dies, cu);
 
   /* Do line number decoding in read_file_scope () */
   process_die (cu->dies, cu);
@@ -13813,7 +13828,8 @@ follow_die_ref (struct die_info *src_die, struct attribute *attr,
 }
 
 /* Return DWARF block and its CU referenced by OFFSET at PER_CU.  Returned
-   value is intended for DW_OP_call*.  */
+   value is intended for DW_OP_call*.  You must call xfree on returned
+   dwarf2_locexpr_baton->data.  */
 
 struct dwarf2_locexpr_baton
 dwarf2_fetch_die_location_block (unsigned int offset,
@@ -13821,12 +13837,16 @@ dwarf2_fetch_die_location_block (unsigned int offset,
 				 CORE_ADDR (*get_frame_pc) (void *baton),
 				 void *baton)
 {
-  struct dwarf2_cu *cu = per_cu->cu;
+  struct dwarf2_cu *cu;
   struct die_info *die;
   struct attribute *attr;
   struct dwarf2_locexpr_baton retval;
 
   dw2_setup (per_cu->objfile);
+
+  if (per_cu->cu == NULL)
+    load_cu (per_cu);
+  cu = per_cu->cu;
 
   die = follow_die_offset (offset, &cu);
   if (!die)
@@ -13864,6 +13884,12 @@ dwarf2_fetch_die_location_block (unsigned int offset,
       retval.size = DW_BLOCK (attr)->size;
     }
   retval.per_cu = cu->per_cu;
+
+  if (retval.data)
+    retval.data = xmemdup (retval.data, retval.size, retval.size);
+
+  age_cached_comp_units ();
+
   return retval;
 }
 

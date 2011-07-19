@@ -1,5 +1,21 @@
 2011-07-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Fix crash if referenced CU is aged out.
+	* dwarf2loc.c (per_cu_dwarf_call): New variable back_to, use to for
+	xfree of block.data.
+	(indirect_pieced_value): New variable back_to, use to for xfree of
+	baton.data.
+	(dwarf2_compile_expr_to_ax): New variable back_to, use to for xfree of
+	block.data.
+	* dwarf2read.c (dwarf2_find_base_address): New prototype.
+	(load_cu): New function from ...
+	(dw2_do_instantiate_symtab): ... the code here ...
+	(process_full_comp_unit): ... and here.
+	(dwarf2_fetch_die_location_block): Call load_cu first.  Call xmemdup on
+	retval.data.
+
+2011-07-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* dwarf2loc.c (indirect_pieced_value): Use check_typedef for VALUE's
 	type.
 
