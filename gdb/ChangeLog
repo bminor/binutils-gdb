@@ -1,3 +1,13 @@
+2011-07-19  Gary Benson  <gbenson@redhat.com>
+
+	* infrun.c (struct execution_control_state): New member
+	stop_func_filled_in.
+	(clear_stop_func, fill_in_stop_func): New functions.
+	(handle_inferior_event): Call clear_stop_func rather than
+	manipulating the execution control state directly.
+	Call fill_in_stop_func lazily as required rather than
+	directly calling find_pc_partial_function in all cases.
+
 2011-07-18  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2read.c (read_subrange_type): Use attr_form_is_block when
