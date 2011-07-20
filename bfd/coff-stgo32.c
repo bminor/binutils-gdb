@@ -95,6 +95,10 @@ create_go32_stub PARAMS ((bfd *));
 #define COFF_ADJUST_AUX_OUT_PRE adjust_aux_out_pre
 #define COFF_ADJUST_AUX_OUT_POST adjust_aux_out_post
 
+static const bfd_target *go32_check_format (bfd *abfd);
+
+#define COFF_CHECK_FORMAT go32_check_format
+
 static bfd_boolean
   go32_stubbed_coff_bfd_copy_private_bfd_data PARAMS ((bfd *, bfd *));
 
@@ -413,4 +417,24 @@ go32_stubbed_coff_bfd_copy_private_bfd_data  (ibfd, obfd)
 	    GO32_STUBSIZE);
 
   return TRUE;
+}
+
+/* coff_object_p only checks 2 bytes F_MAGIC at GO32_STUBSIZE inside the file
+   which is too fragile.  */
+
+static const bfd_target *
+go32_check_format (bfd *abfd)
+{
+  char mz[2];
+
+  if (bfd_bread (mz, 2, abfd) != 2 || mz[0] != 'M' || mz[1] != 'Z')
+    {
+      bfd_set_error (bfd_error_wrong_format);
+      return NULL;
+    }
+
+  if (bfd_seek (abfd, 0, SEEK_SET) != 0)
+    return NULL;
+
+  return coff_object_p (abfd);
 }

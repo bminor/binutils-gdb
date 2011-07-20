@@ -671,8 +671,13 @@ const bfd_target
      bfd_getl16, bfd_getl_signed_16, bfd_putl16, /* hdrs */
 
 /* Note that we allow an object file to be treated as a core file as well.  */
-    {_bfd_dummy_target, coff_object_p, /* bfd_check_format */
-       bfd_generic_archive_p, coff_object_p},
+    /* bfd_check_format */
+#ifdef COFF_CHECK_FORMAT
+    {_bfd_dummy_target, COFF_CHECK_FORMAT,
+       bfd_generic_archive_p, COFF_CHECK_FORMAT},
+#else
+    {_bfd_dummy_target, coff_object_p, bfd_generic_archive_p, coff_object_p},
+#endif
     {bfd_false, coff_mkobject, _bfd_generic_mkarchive, /* bfd_set_format */
        bfd_false},
     {bfd_false, coff_write_object_contents, /* bfd_write_contents */

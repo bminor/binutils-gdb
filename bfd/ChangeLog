@@ -1,3 +1,12 @@
+2011-07-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix false coff-go32-exe matches.
+	* coff-i386.c (TARGET_SYM) <_bfd_check_format>: Conditionally use
+	COFF_CHECK_FORMAT.
+	* coff-stgo32.c (go32_check_format): New forward declaration.
+	(COFF_CHECK_FORMAT): New defintion.
+	(go32_check_format): New function.
+
 2011-07-15  Alan Modra  <amodra@gmail.com>
 
 	* configure.in: Bump version.
