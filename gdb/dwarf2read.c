@@ -1207,6 +1207,11 @@ static struct die_info *follow_die_sig (struct die_info *,
 					struct attribute *,
 					struct dwarf2_cu **);
 
+static struct signatured_type *lookup_signatured_type_at_offset
+    (struct objfile *objfile,
+     struct dwarf2_section_info *section,
+     unsigned int offset);
+
 static void read_signatured_type_at_offset (struct objfile *objfile,
 					    struct dwarf2_section_info *sect,
 					    unsigned int offset);
@@ -7728,6 +7733,27 @@ process_enumeration_scope (struct die_info *die, struct dwarf2_cu *cu)
 	}
       if (unsigned_enum)
 	TYPE_UNSIGNED (this_type) = 1;
+    }
+
+  /* If we are reading an enum from a .debug_types unit, and the enum
+     is a declaration, and the enum is not the signatured type in the
+     unit, then we do not want to add a symbol for it.  Adding a
+     symbol would in some cases obscure the true definition of the
+     enum, giving users an incomplete type when the definition is
+     actually available.  Note that we do not want to do this for all
+     enums which are just declarations, because C++0x allows forward
+     enum declarations.  */
+  if (cu->per_cu->debug_type_section
+      && die_is_declaration (die, cu))
+    {
+      struct signatured_type *type_sig;
+
+      type_sig
+	= lookup_signatured_type_at_offset (dwarf2_per_objfile->objfile,
+					    cu->per_cu->debug_type_section,
+					    cu->per_cu->offset);
+      if (type_sig->type_offset != die->offset)
+	return;
     }
 
   new_symbol (die, this_type, cu);

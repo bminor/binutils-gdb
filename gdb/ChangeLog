@@ -1,5 +1,10 @@
 2011-07-20  Tom Tromey  <tromey@redhat.com>
 
+	* dwarf2read.c (process_enumeration_scope): Do not call new_symbol
+	in some declaration-only cases.
+
+2011-07-18  Tom Tromey  <tromey@redhat.com>
+
 	PR symtab/12984:
 	* dwarf2read.c (dwarf2_section_info_def): New typedef.
 	(struct dwarf2_per_objfile) <types>: Change to a VEC.
