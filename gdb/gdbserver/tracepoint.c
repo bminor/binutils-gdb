@@ -320,13 +320,11 @@ maybe_write_ipa_ust_not_loaded (char *buffer)
 void
 tracepoint_look_up_symbols (void)
 {
-  int all_ok;
   int i;
 
   if (all_tracepoint_symbols_looked_up)
     return;
 
-  all_ok = 1;
   for (i = 0; i < sizeof (symbol_list) / sizeof (symbol_list[0]); i++)
     {
       CORE_ADDR *addrp =
@@ -336,11 +334,11 @@ tracepoint_look_up_symbols (void)
 	{
 	  if (debug_threads)
 	    fprintf (stderr, "symbol `%s' not found\n", symbol_list[i].name);
-	  all_ok = 0;
+	  return;
 	}
     }
 
-  all_tracepoint_symbols_looked_up = all_ok;
+  all_tracepoint_symbols_looked_up = 1;
 }
 
 #endif
