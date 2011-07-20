@@ -623,7 +623,7 @@ bfin_extract_return_value (struct type *type,
   while (len > 0)
     {
       regcache_cooked_read_unsigned (regs, regno++, &tmp);
-      store_unsigned_integer (valbuf, (len > 4 ? 4 : len), tmp, byte_order);
+      store_unsigned_integer (valbuf, (len > 4 ? 4 : len), byte_order, tmp);
       len -= 4;
       valbuf += 4;
     }
