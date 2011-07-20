@@ -1,3 +1,32 @@
+2011-07-20  Tom Tromey  <tromey@redhat.com>
+
+	PR symtab/12984:
+	* dwarf2read.c (dwarf2_section_info_def): New typedef.
+	(struct dwarf2_per_objfile) <types>: Change to a VEC.
+	(struct dwarf2_per_cu_data) <from_debug_types>: Remove.
+	<debug_type_section>: New field.
+	(dwarf2_locate_sections): Push .debug_types sections onto VEC.
+	(load_cu): Use appropriate section.
+	(create_signatured_type_table_from_index): Add 'section'
+	argument.
+	(dwarf2_read_index): Only allow a single .debug_types section.
+	(dw2_get_file_names): Use appropriate section.
+	(read_type_comp_unit_head): Add 'section' argument.
+	(create_debug_types_hash_table): Loop over all .debug_types
+	sections.
+	(init_cu_die_reader): Use appropriate section.
+	(process_psymtab_comp_unit, load_partial_comp_unit)
+	(load_full_comp_unit, read_die_and_children, find_partial_die)
+	(lookup_die_type, determine_prefix, follow_die_offset): Update.
+	(lookup_signatured_type_at_offset): Add 'section' argument.
+	(read_signatured_type_at_offset): Add 'sect' argument.
+	(read_signatured_type): Use appropriate section.
+	(set_die_type, get_die_type_at_offset): Update.
+	(dwarf2_per_objfile_free): Free all .debug_types sections, and
+	VEC.
+	(write_psymtabs_to_index): Don't allow index with more than one
+	.debug_types section.
+
 2011-07-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix crash if referenced CU is aged out.
