@@ -193,3 +193,85 @@ gdb_py_test_silent_cmd "set python print-stack on" \
     "Test print-backtrace set setting" 1
 gdb_test "show python print-stack" \
     "Whether Python stack will be printed on error is on.*" \
+
+# Test prompt substituion
+
+gdb_py_test_multiple "prompt substitution" \
+  "python" "" \
+  "someCounter = 0" "" \
+  "def prompt(current):" "" \
+  "   global someCounter" "" \
+  "   if (current == \"testfake \"):" "" \
+  "      return None" "" \
+  "   someCounter = someCounter + 1" "" \
+  "   return \"py prompt \" + str (someCounter) + \" \"" "" \
+  "end" ""
+
+gdb_py_test_multiple "prompt substitution readline" \
+  "python" "" \
+  "pCounter = 0" "" \
+  "def program_prompt(current):" "" \
+  "   global pCounter" "" \
+  "   if (current == \">\"):" "" \
+  "      pCounter = pCounter + 1" "" \
+  "      return \"python line \" + str (pCounter) + \": \"" "" \
+  "   return None" "" \
+  "end" ""
+
+set newprompt "py prompt 1"
+set newprompt2 "py prompt 2"
+set testfake "testfake"
+
+gdb_test_multiple "python gdb.prompt_hook = prompt" "set the hook" {
+    -re "\[\r\n\]$newprompt $" {
+	pass "set hook"
+    }
+}
+
+gdb_test_multiple "set prompt testfake " "set testfake prompt in GDB" {
+    -re "\[\r\n\]$testfake $" {
+	pass "set prompt testfake"
+    }
+}
+
+gdb_test_multiple "show prompt" "show testfake prompt" {
+    -re "Gdb's prompt is \"$testfake \"..* $" {
+	pass "show prompt shows guarded prompt"
+    }
+}
+
+gdb_test_multiple "set prompt blah " "set blah in GDB" {
+    -re "\[\r\n\]$newprompt2 $" {
+	pass "set prompt blah overriden"
+    }
+}
+
+gdb_test_multiple "python gdb.prompt_hook = None" "Delete hook" {
+    -re "\[\r\n\]$newprompt2 $" {
+	pass "Delete old hook"
+    }
+}
+
+gdb_test_multiple "set prompt $gdb_prompt " "set default prompt" {
+    -re "\[\r\n\]$gdb_prompt $" {
+	pass "set default prompt"
+    }
+}
+
+gdb_test_multiple "python gdb.prompt_hook = program_prompt" "set the hook" {
+    -re "\[\r\n\]$gdb_prompt $" {
+	pass "set programming hook"
+    }
+}
+
+gdb_test_multiple "python" "test we ignore substituion for seconday prompts" {
+    -re "\r\n>$" {
+	pass "readline secondary are not substituted"
+    }
+}
+
+gdb_test_multiple "end" "end programming" {
+    -re "\[\r\n\]$gdb_prompt $" {
+	pass "end programming"
+    }
+}

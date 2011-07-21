@@ -21080,6 +21080,22 @@ provided, it is decoded the way that @value{GDBN}'s inbuilt
 @code{break} or @code{edit} commands do (@pxref{Specify Location}).
 @end defun
 
+@defop Operation {@value{GDBN}} prompt_hook current_prompt
+If @var{prompt_hook} is callable, @value{GDBN} will call the method
+assigned to this operation before a prompt is displayed by
+@value{GDBN}.
+
+The parameter @code{current_prompt} contains the current @value{GDBN} 
+prompt.  This method must return a Python string, or @code{None}.  If
+a string is returned, the @value{GDBN} prompt will be set to that
+string.  If @code{None} is returned, @value{GDBN} will continue to use
+the current prompt.
+
+Some prompts cannot be substituted in @value{GDBN}.  Secondary prompts
+such as those used by readline for command input, and annotation
+related prompts are prohibited from being changed.
+@end defop
+
 @node Exception Handling
 @subsubsection Exception Handling
 @cindex python exceptions

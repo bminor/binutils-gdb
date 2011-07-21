@@ -1133,14 +1133,17 @@ get_prompt (void)
 }
 
 void
-set_prompt (char *s)
+set_prompt (const char *s)
 {
-/* ??rehrauer: I don't know why this fails, since it looks as though
-   assignments to prompt are wrapped in calls to xstrdup...
-   if (prompt != NULL)
-     xfree (prompt);
- */
-  PROMPT (0) = xstrdup (s);
+  char *p = xstrdup (s);
+
+  xfree (PROMPT (0));
+  PROMPT (0) = p;
+
+  /* Also, free and set new_async_prompt so prompt changes sync up
+     with set/show prompt.  */
+  xfree (new_async_prompt);
+  new_async_prompt = xstrdup (PROMPT (0));
 }
 
 

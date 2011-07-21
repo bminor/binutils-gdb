@@ -55,7 +55,7 @@ extern char *get_prompt (void);
 
 /* This function copies the specified string into the string that
    is used by gdb for its command prompt.  */
-extern void set_prompt (char *);
+extern void set_prompt (const char *);
 
 /* From random places.  */
 extern int readnow_symbol_files;

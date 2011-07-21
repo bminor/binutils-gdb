@@ -51,6 +51,7 @@ static int gdbpy_should_print_stack = 0;
 #include "version.h"
 #include "target.h"
 #include "gdbthread.h"
+#include "observer.h"
 
 static PyMethodDef GdbMethods[];
 
@@ -682,6 +683,81 @@ gdbpy_initialize_events (void)
     }
 }
 
+
+
+static void
+before_prompt_hook (const char *current_gdb_prompt)
+{
+  struct cleanup *cleanup;
+  char *prompt = NULL;
+
+  cleanup = ensure_python_env (get_current_arch (), current_language);
+
+  if (PyObject_HasAttrString (gdb_module, "prompt_hook"))
+    {
+      PyObject *hook;
+
+      hook = PyObject_GetAttrString (gdb_module, "prompt_hook");
+      if (hook == NULL)
+	goto fail;
+
+      if (PyCallable_Check (hook))
+	{
+	  PyObject *result;
+	  PyObject *current_prompt;
+
+	  current_prompt = PyString_FromString (current_gdb_prompt);
+	  if (current_prompt == NULL)
+	    goto fail;
+
+	  result = PyObject_CallFunctionObjArgs (hook, current_prompt, NULL);
+
+	  Py_DECREF (current_prompt);
+
+	  if (result == NULL)
+	    goto fail;
+
+	  make_cleanup_py_decref (result);
+
+	  /* Return type should be None, or a String.  If it is None,
+	     fall through, we will not set a prompt.  If it is a
+	     string, set  PROMPT.  Anything else, set an exception.  */
+	  if (result != Py_None && ! PyString_Check (result))
+	    {
+	      PyErr_Format (PyExc_RuntimeError,
+			    _("Return from prompt_hook must " \
+			      "be either a Python string, or None"));
+	      goto fail;
+	    }
+
+	  if (result != Py_None)
+	    {
+	      prompt = python_string_to_host_string (result);
+
+	      if (prompt == NULL)
+		goto fail;
+	      else
+		make_cleanup (xfree, prompt);
+	    }
+	}
+    }
+
+  /* If a prompt has been set, PROMPT will not be NULL.  If it is
+     NULL, do not set the prompt.  */
+  if (prompt != NULL)
+    set_prompt (prompt);
+
+  do_cleanups (cleanup);
+  return;
+
+ fail:
+  gdbpy_print_stack ();
+  do_cleanups (cleanup);
+  return;
+}
+
+
+
 /* Printing.  */
 
 /* A python function to write a single string using gdb's filtered
@@ -1134,6 +1210,8 @@ Enables or disables printing of Python stack traces."),
   gdbpy_initialize_exited_event ();
   gdbpy_initialize_thread_event ();
 
+  observer_attach_before_prompt (before_prompt_hook);
+
   PyRun_SimpleString ("import gdb");
   PyRun_SimpleString ("gdb.pretty_printers = []");
 
@@ -1236,6 +1314,8 @@ def GdbSetPythonDirectory (dir):\n\
 \n\
 # Install the default gdb.PYTHONDIR.\n\
 GdbSetPythonDirectory (gdb.PYTHONDIR)\n\
+# Default prompt hook does nothing.\n\
+prompt_hook = None\n\
 ");
 
   do_cleanups (cleanup);

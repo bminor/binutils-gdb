@@ -1,3 +1,7 @@
+2011-07-21  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* gdb.python/python.exp: Add prompt substitution tests.
+
 2011-07-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix crash if referenced CU is aged out.

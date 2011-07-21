@@ -33,6 +33,7 @@
 #include "cli/cli-script.h"     /* for reset_command_nest_depth */
 #include "main.h"
 #include "gdbthread.h"
+#include "observer.h"
 #include "continuations.h"
 #include "gdbcmd.h"		/* for dont_repeat() */
 
@@ -258,7 +259,7 @@ void
 display_gdb_prompt (char *new_prompt)
 {
   int prompt_length = 0;
-  char *gdb_prompt = get_prompt ();
+  char *actual_gdb_prompt = NULL;
 
   /* Reset the nesting depth used when trace-commands is set.  */
   reset_command_nest_depth ();
@@ -267,6 +268,25 @@ display_gdb_prompt (char *new_prompt)
      prompt.  */
   if (!current_interp_display_prompt_p ())
     return;
+
+  /* Get the prompt before the observers are called as observer hook
+     functions may change the prompt.  Do not call observers on an
+     explicit prompt change as passed to this function, as this forms
+     a temporary prompt, IE, displayed but not set.  */
+  if (! new_prompt)
+    {
+      char *post_gdb_prompt = NULL;
+      char *pre_gdb_prompt = xstrdup (get_prompt ());
+
+      observer_notify_before_prompt (pre_gdb_prompt);
+      post_gdb_prompt = get_prompt ();
+
+      /* If the observer changed the prompt, use that prompt.  */
+      if (strcmp (pre_gdb_prompt, post_gdb_prompt) != 0)
+	actual_gdb_prompt = post_gdb_prompt;
+
+      xfree (pre_gdb_prompt);
+    }
 
   if (sync_execution && is_running (inferior_ptid))
     {
@@ -289,27 +309,35 @@ display_gdb_prompt (char *new_prompt)
       return;
     }
 
-  if (!new_prompt)
+  /* If the observer changed the prompt, ACTUAL_GDB_PROMPT will not be
+     NULL.  Otherwise, either copy the existing prompt, or set it to
+     NEW_PROMPT.  */
+  if (! actual_gdb_prompt)
     {
-      /* Just use the top of the prompt stack.  */
-      prompt_length = strlen (PREFIX (0)) +
-	strlen (SUFFIX (0)) +
-	strlen (gdb_prompt) + 1;
+      if (! new_prompt)
+	{
+	  /* Just use the top of the prompt stack.  */
+	  prompt_length = strlen (PREFIX (0)) +
+	    strlen (SUFFIX (0)) +
+	    strlen (get_prompt()) + 1;
 
-      new_prompt = (char *) alloca (prompt_length);
+	  actual_gdb_prompt = (char *) alloca (prompt_length);
 
-      /* Prefix needs to have new line at end.  */
-      strcpy (new_prompt, PREFIX (0));
-      strcat (new_prompt, gdb_prompt);
-      /* Suffix needs to have a new line at end and \032 \032 at
-         beginning.  */
-      strcat (new_prompt, SUFFIX (0));
+	  /* Prefix needs to have new line at end.  */
+	  strcpy (actual_gdb_prompt, PREFIX (0));
+	  strcat (actual_gdb_prompt, get_prompt());
+	  /* Suffix needs to have a new line at end and \032 \032 at
+	     beginning.  */
+	  strcat (actual_gdb_prompt, SUFFIX (0));
+	}
+      else
+	actual_gdb_prompt = new_prompt;;
     }
 
   if (async_command_editing_p)
     {
       rl_callback_handler_remove ();
-      rl_callback_handler_install (new_prompt, input_handler);
+      rl_callback_handler_install (actual_gdb_prompt, input_handler);
     }
   /* new_prompt at this point can be the top of the stack or the one
      passed in.  It can't be NULL.  */
@@ -318,7 +346,7 @@ display_gdb_prompt (char *new_prompt)
       /* Don't use a _filtered function here.  It causes the assumed
          character position to be off, since the newline we read from
          the user is not accounted for.  */
-      fputs_unfiltered (new_prompt, gdb_stdout);
+      fputs_unfiltered (actual_gdb_prompt, gdb_stdout);
       gdb_flush (gdb_stdout);
     }
 }
