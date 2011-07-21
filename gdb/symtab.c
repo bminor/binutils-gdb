@@ -3771,6 +3771,7 @@ struct add_name_data
    This adds a macro's name to the current completion list.  */
 static void
 add_macro_name (const char *name, const struct macro_definition *ignore,
+		struct macro_source_file *ignore2, int ignore3,
 		void *user_data)
 {
   struct add_name_data *datum = (struct add_name_data *) user_data;

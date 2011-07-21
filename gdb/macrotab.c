@@ -913,7 +913,8 @@ foreach_macro (splay_tree_node node, void *arg)
   struct macro_key *key = (struct macro_key *) node->key;
   struct macro_definition *def = (struct macro_definition *) node->value;
 
-  (*datum->fn) (key->name, def, datum->user_data);
+  (*datum->fn) (key->name, def, key->start_file, key->start_line,
+		datum->user_data);
   return 0;
 }
 
@@ -945,7 +946,8 @@ foreach_macro_in_scope (splay_tree_node node, void *info)
       && (!key->end_file
 	  || compare_locations (key->end_file, key->end_line,
 				datum->file, datum->line) >= 0))
-    (*datum->fn) (key->name, def, datum->user_data);
+    (*datum->fn) (key->name, def, key->start_file, key->start_line,
+		  datum->user_data);
   return 0;
 }
 

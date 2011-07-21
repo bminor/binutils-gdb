@@ -9588,10 +9588,23 @@ can be any string of tokens.
 
 @kindex info macro
 @cindex macro definition, showing
-@cindex definition, showing a macro's
+@cindex definition of a macro, showing
+@cindex macros, from debug info
 @item info macro @var{macro}
-Show the definition of the macro named @var{macro}, and describe the
+Show the current definition of the named @var{macro}, and describe the
 source location or compiler command-line where that definition was established.
+
+@kindex info macros
+@item info macros @var{linespec}
+Show all macro definitions that are in effect at the location specified
+by @var{linespec},  and describe the source location or compiler
+command-line where those definitions were established.
+
+@kindex info definitions
+@item info definitions @var{macro}
+Show all definitions of the named @var{macro} that are defined in the current
+compilation unit, and describe the source location or compiler command-line
+where those definitions were established.
 
 @kindex macro define
 @cindex user-defined macros

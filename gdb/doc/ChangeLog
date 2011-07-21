@@ -1,3 +1,9 @@
+2011-07-21  Matt Rice  <ratmice@gmail.com>
+
+	PR macros/12999
+	* gdb.texinfo (Macros): Add info definitions and info macros commands.
+	Update text and cindex entries for info macro command.
+
 2011-07-21  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* observer.texi (GDB Observers): Add before_prompt observer.

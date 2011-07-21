@@ -306,11 +306,14 @@ struct macro_source_file *(macro_definition_location
                             int *definition_line));
 
 /* Callback function when walking a macro table.  NAME is the name of
-   the macro, and DEFINITION is the definition.  USER_DATA is an
-   arbitrary pointer which is passed by the caller to macro_for_each
-   or macro_for_each_in_scope.  */
+   the macro, and DEFINITION is the definition.  SOURCE is the file at the
+   start of the include path, and LINE is the line number of the SOURCE file
+   where the macro was defined.  USER_DATA is an arbitrary pointer which is
+   passed by the caller to macro_for_each or macro_for_each_in_scope.  */
 typedef void (*macro_callback_fn) (const char *name,
 				   const struct macro_definition *definition,
+				   struct macro_source_file *source,
+				   int line,
 				   void *user_data);
 
 /* Call the function FN for each macro in the macro table TABLE.

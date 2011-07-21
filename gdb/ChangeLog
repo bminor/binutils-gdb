@@ -1,3 +1,18 @@
+2011-07-18  Matt Rice  <ratmice@gmail.com>
+
+	PR macros/12999
+	* macrotab.h (macro_callback_fn): Add new arguments to callback.
+	* macrotab.c (foreach_macro): Ditto.
+	(foreach_macro_in_scope): Ditto.
+	* macrocmd.c (print_macro_callback): New function.
+	(info_macro_command): Move some code to print_macro_definition.
+	(print_macro_definition): New function.
+	(print_one_macro): Add new arguments to callback.
+	(info_definitions_command): New function.
+	(info_macros_command): Ditto.
+	(_initialize_macrocmd): Add info macros and info definitions commands.
+	* symtab.c (add_macro_name): Add new arguments to callback.
+
 2011-07-21  Phil Muldoon  <pmuldoon@redhat.com>
             Tom Tromey  <tromey@redhat.com>
 

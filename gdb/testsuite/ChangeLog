@@ -1,3 +1,9 @@
+2011-07-21  Matt Rice  <ratmice@gmail.com>
+
+	PR macros/12999
+	* gdb.base/info-macros.c: New test sources.
+	* gdb.base/info-macros.exp: New tests.
+
 2011-07-21  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* gdb.python/python.exp: Add prompt substitution tests.
