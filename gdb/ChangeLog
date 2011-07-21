@@ -1,3 +1,7 @@
+2011-07-21  Matt Rice  <ratmice@gmail.com>
+
+	* NEWS: Add info macros and info definitions commands.
+
 2011-07-21  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* NEWS: Document Python prompt substitution hook.
