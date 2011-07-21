@@ -30,81 +30,6 @@ int dlls_changed;
 
 struct thread_info *current_inferior;
 
-
-/* Oft used ptids */
-ptid_t null_ptid;
-ptid_t minus_one_ptid;
-
-/* Create a ptid given the necessary PID, LWP, and TID components.  */
-
-ptid_t
-ptid_build (int pid, long lwp, long tid)
-{
-  ptid_t ptid;
-
-  ptid.pid = pid;
-  ptid.lwp = lwp;
-  ptid.tid = tid;
-  return ptid;
-}
-
-/* Create a ptid from just a pid.  */
-
-ptid_t
-pid_to_ptid (int pid)
-{
-  return ptid_build (pid, 0, 0);
-}
-
-/* Fetch the pid (process id) component from a ptid.  */
-
-int
-ptid_get_pid (ptid_t ptid)
-{
-  return ptid.pid;
-}
-
-/* Fetch the lwp (lightweight process) component from a ptid.  */
-
-long
-ptid_get_lwp (ptid_t ptid)
-{
-  return ptid.lwp;
-}
-
-/* Fetch the tid (thread id) component from a ptid.  */
-
-long
-ptid_get_tid (ptid_t ptid)
-{
-  return ptid.tid;
-}
-
-/* ptid_equal() is used to test equality of two ptids.  */
-
-int
-ptid_equal (ptid_t ptid1, ptid_t ptid2)
-{
-  return (ptid1.pid == ptid2.pid
-	  && ptid1.lwp == ptid2.lwp
-	  && ptid1.tid == ptid2.tid);
-}
-
-/* Return true if this ptid represents a process.  */
-
-int
-ptid_is_pid (ptid_t ptid)
-{
-  if (ptid_equal (minus_one_ptid, ptid))
-    return 0;
-  if (ptid_equal (null_ptid, ptid))
-    return 0;
-
-  return (ptid_get_pid (ptid) != 0
-	  && ptid_get_lwp (ptid) == 0
-	  && ptid_get_tid (ptid) == 0);
-}
-
 #define get_thread(inf) ((struct thread_info *)(inf))
 #define get_dll(inf) ((struct dll_info *)(inf))
 
@@ -517,11 +442,4 @@ current_process (void)
     fatal ("Current inferior requested, but current_inferior is NULL\n");
 
   return get_thread_process (current_inferior);
-}
-
-void
-initialize_inferiors (void)
-{
-  null_ptid = ptid_build (0, 0, 0);
-  minus_one_ptid = ptid_build (-1, 0, 0);
 }

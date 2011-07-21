@@ -32,6 +32,8 @@ struct regcache;
 struct ui_out;
 struct terminal_info;
 
+#include "ptid.h"
+
 /* For bpstat.  */
 #include "breakpoint.h"
 
@@ -62,36 +64,6 @@ extern void discard_infcall_control_state (struct infcall_control_state *);
 
 extern struct regcache *
   get_infcall_suspend_state_regcache (struct infcall_suspend_state *);
-
-/* The -1 ptid, often used to indicate either an error condition
-   or a "don't care" condition, i.e, "run all threads."  */
-extern ptid_t minus_one_ptid;
-
-/* The null or zero ptid, often used to indicate no process.  */
-extern ptid_t null_ptid;
-
-/* Attempt to find and return an existing ptid with the given PID, LWP,
-   and TID components.  If none exists, create a new one and return
-   that.  */
-ptid_t ptid_build (int pid, long lwp, long tid);
-
-/* Find/Create a ptid from just a pid.  */
-ptid_t pid_to_ptid (int pid);
-
-/* Fetch the pid (process id) component from a ptid.  */
-int ptid_get_pid (ptid_t ptid);
-
-/* Fetch the lwp (lightweight process) component from a ptid.  */
-long ptid_get_lwp (ptid_t ptid);
-
-/* Fetch the tid (thread id) component from a ptid.  */
-long ptid_get_tid (ptid_t ptid);
-
-/* Compare two ptids to see if they are equal.  */
-extern int ptid_equal (ptid_t p1, ptid_t p2);
-
-/* Return true if PTID represents a process id.  */
-extern int ptid_is_pid (ptid_t ptid);
 
 /* Returns true if PTID matches filter FILTER.  FILTER can be the wild
    card MINUS_ONE_PTID (all ptid match it); can be a ptid representing

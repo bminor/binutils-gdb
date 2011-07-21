@@ -1210,7 +1210,7 @@ quit (void)
    memory requested in SIZE.  */
 
 void
-nomem (long size)
+malloc_failure (long size)
 {
   if (size > 0)
     {
@@ -1222,146 +1222,6 @@ nomem (long size)
     {
       internal_error (__FILE__, __LINE__, _("virtual memory exhausted."));
     }
-}
-
-/* The xmalloc() (libiberty.h) family of memory management routines.
-
-   These are like the ISO-C malloc() family except that they implement
-   consistent semantics and guard against typical memory management
-   problems.  */
-
-/* NOTE: These are declared using PTR to ensure consistency with
-   "libiberty.h".  xfree() is GDB local.  */
-
-PTR				/* ARI: PTR */
-xmalloc (size_t size)
-{
-  void *val;
-
-  /* See libiberty/xmalloc.c.  This function need's to match that's
-     semantics.  It never returns NULL.  */
-  if (size == 0)
-    size = 1;
-
-  val = malloc (size);		/* ARI: malloc */
-  if (val == NULL)
-    nomem (size);
-
-  return (val);
-}
-
-void *
-xzalloc (size_t size)
-{
-  return xcalloc (1, size);
-}
-
-PTR				/* ARI: PTR */
-xrealloc (PTR ptr, size_t size)	/* ARI: PTR */
-{
-  void *val;
-
-  /* See libiberty/xmalloc.c.  This function need's to match that's
-     semantics.  It never returns NULL.  */
-  if (size == 0)
-    size = 1;
-
-  if (ptr != NULL)
-    val = realloc (ptr, size);	/* ARI: realloc */
-  else
-    val = malloc (size);		/* ARI: malloc */
-  if (val == NULL)
-    nomem (size);
-
-  return (val);
-}
-
-PTR				/* ARI: PTR */
-xcalloc (size_t number, size_t size)
-{
-  void *mem;
-
-  /* See libiberty/xmalloc.c.  This function need's to match that's
-     semantics.  It never returns NULL.  */
-  if (number == 0 || size == 0)
-    {
-      number = 1;
-      size = 1;
-    }
-
-  mem = calloc (number, size);		/* ARI: xcalloc */
-  if (mem == NULL)
-    nomem (number * size);
-
-  return mem;
-}
-
-void
-xfree (void *ptr)
-{
-  if (ptr != NULL)
-    free (ptr);		/* ARI: free */
-}
-
-
-/* Like asprintf/vasprintf but get an internal_error if the call
-   fails.  */
-
-char *
-xstrprintf (const char *format, ...)
-{
-  char *ret;
-  va_list args;
-
-  va_start (args, format);
-  ret = xstrvprintf (format, args);
-  va_end (args);
-  return ret;
-}
-
-void
-xasprintf (char **ret, const char *format, ...)
-{
-  va_list args;
-
-  va_start (args, format);
-  (*ret) = xstrvprintf (format, args);
-  va_end (args);
-}
-
-void
-xvasprintf (char **ret, const char *format, va_list ap)
-{
-  (*ret) = xstrvprintf (format, ap);
-}
-
-char *
-xstrvprintf (const char *format, va_list ap)
-{
-  char *ret = NULL;
-  int status = vasprintf (&ret, format, ap);
-
-  /* NULL is returned when there was a memory allocation problem, or
-     any other error (for instance, a bad format string).  A negative
-     status (the printed length) with a non-NULL buffer should never
-     happen, but just to be sure.  */
-  if (ret == NULL || status < 0)
-    internal_error (__FILE__, __LINE__, _("vasprintf call failed"));
-  return ret;
-}
-
-int
-xsnprintf (char *str, size_t size, const char *format, ...)
-{
-  va_list args;
-  int ret;
-
-  va_start (args, format);
-  ret = vsnprintf (str, size, format, args);
-  gdb_assert (ret < size);
-  va_end (args);
-
-  return ret;
 }
 
 /* My replacement for the read system call.
@@ -1385,7 +1245,7 @@ myread (int desc, char *addr, int len)
     }
   return orglen;
 }
-
+
 /* Make a copy of the string at PTR with SIZE characters
    (and add a null character at the end in the copy).
    Uses malloc to get the space.  Returns the address of the copy.  */
@@ -3741,7 +3601,7 @@ gdb_buildargv (const char *s)
   char **argv = buildargv (s);
 
   if (s != NULL && argv == NULL)
-    nomem (0);
+    malloc_failure (0);
   return argv;
 }
 

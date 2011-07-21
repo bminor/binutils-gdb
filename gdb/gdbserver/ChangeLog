@@ -1,3 +1,42 @@
+2011-07-22  Kwok Cheung Yeung  <kcy@codesourcery.com>
+
+	* linux-low.c (compare_ints, unique, list_threads, show_process,
+	linux_core_of_thread): Delete.
+	(linux_target_ops): Change linux_core_of_thread to
+	linux_common_core_of_thread.
+	(linux_qxfer_osdata): Defer to linux_common_xfer_osdata.
+	* utils.c (malloc_failure): Change type of argument.
+	(xmalloc, xrealloc, xcalloc, xsnprintf): Delete.
+	* Makefile.in (SFILES): Add common/common-utils.c, common/xml-utils.c,
+	common/linux-osdata.c, common/ptid.c and common/buffer.c.
+	(OBS): Add xml-utils.o, common-utils.o, ptid.o and buffer.o.
+	(IPA_OBJS): Add common-utils-ipa.o.
+	(ptid_h, linux_osdata_h): New macros.
+	(server_h): Add common/common-utils.h, common/xml-utils.h,
+	common/buffer.h, common/gdb_assert.h, common/gdb_locale.h and
+	common/ptid.h.
+	(common-utils-ipa.o, common-utils.o, xml-utils.o, linux-osdata.o,
+	ptid.o, buffer.o): New rules.
+	(linux-low.o): Add common/linux-osdata.h as a dependency.
+	* configure.srv (srv_tgtobj): Add linux-osdata.o to Linux targets.
+	* configure.ac: Add AC_HEADER_DIRENT check.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* remote-utils.c (xml_escape_text): Delete.
+	(buffer_grow, buffer_free, buffer_init, buffer_finish,
+	buffer_xml_printf): Move to common/buffer.c.
+	* server.c (main): Remove call to initialize_inferiors.
+	* server.h (struct ptid, ptid_t, minus_one_ptid, null_ptid,
+	ptid_build, pid_to_ptid, ptid_get_pid, ptid_get_lwp, ptid_get_tid,
+	ptid_equal, ptid_is_pid, initialize_inferiors, xml_escape_text,
+	internal_error, gdb_assert, gdb_assert_fail): Delete.
+	(struct buffer, buffer_grow, buffer_free, buffer_init, buffer_finish,
+	buffer_xml_printf, buffer_grow_str, buffer_grow_str0): Move to
+	common/buffer.h.
+	* inferiors.c (null_ptid, minus_one_ptid, ptid_build, pid_to_ptid,
+	ptid_get_pid, ptid_get_lwp, ptid_get_tid, ptid_equal, ptid_is_pid,
+	initialize_inferiors): Delete.
+
 2011-07-20  Pedro Alves  <pedro@codesourcery.com>
 
 	* tracepoint.c (tracepoint_look_up_symbols): Return upon the first

@@ -35,6 +35,7 @@ AC_PROG_INSTALL
 AC_ARG_PROGRAM
 
 AC_HEADER_STDC
+AC_HEADER_DIRENT
 
 AC_FUNC_ALLOCA
 AC_CHECK_HEADERS(sgtty.h termio.h termios.h sys/reg.h string.h dnl

@@ -6803,77 +6803,6 @@ inferior_has_called_syscall (ptid_t pid, int *syscall_number)
   return 1;
 }
 
-/* Oft used ptids */
-ptid_t null_ptid;
-ptid_t minus_one_ptid;
-
-/* Create a ptid given the necessary PID, LWP, and TID components.  */
-
-ptid_t
-ptid_build (int pid, long lwp, long tid)
-{
-  ptid_t ptid;
-
-  ptid.pid = pid;
-  ptid.lwp = lwp;
-  ptid.tid = tid;
-  return ptid;
-}
-
-/* Create a ptid from just a pid.  */
-
-ptid_t
-pid_to_ptid (int pid)
-{
-  return ptid_build (pid, 0, 0);
-}
-
-/* Fetch the pid (process id) component from a ptid.  */
-
-int
-ptid_get_pid (ptid_t ptid)
-{
-  return ptid.pid;
-}
-
-/* Fetch the lwp (lightweight process) component from a ptid.  */
-
-long
-ptid_get_lwp (ptid_t ptid)
-{
-  return ptid.lwp;
-}
-
-/* Fetch the tid (thread id) component from a ptid.  */
-
-long
-ptid_get_tid (ptid_t ptid)
-{
-  return ptid.tid;
-}
-
-/* ptid_equal() is used to test equality of two ptids.  */
-
-int
-ptid_equal (ptid_t ptid1, ptid_t ptid2)
-{
-  return (ptid1.pid == ptid2.pid && ptid1.lwp == ptid2.lwp
-	  && ptid1.tid == ptid2.tid);
-}
-
-/* Returns true if PTID represents a process.  */
-
-int
-ptid_is_pid (ptid_t ptid)
-{
-  if (ptid_equal (minus_one_ptid, ptid))
-    return 0;
-  if (ptid_equal (null_ptid, ptid))
-    return 0;
-
-  return (ptid_get_lwp (ptid) == 0 && ptid_get_tid (ptid) == 0);
-}
-
 int
 ptid_match (ptid_t ptid, ptid_t filter)
 {
@@ -7263,8 +7192,6 @@ Tells gdb whether to detach the child of a fork."),
 			   NULL, NULL, &setlist, &showlist);
 
   /* ptid initializations */
-  null_ptid = ptid_build (0, 0, 0);
-  minus_one_ptid = ptid_build (-1, 0, 0);
   inferior_ptid = null_ptid;
   target_last_wait_ptid = minus_one_ptid;
 

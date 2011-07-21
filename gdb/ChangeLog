@@ -1,3 +1,67 @@
+2011-07-22  Kwok Cheung Yeung  <kcy@codesourcery.com>
+
+	* defs.h: Add guard against inclusion in gdbserver.
+	(struct ptid, ptid_t): Move to common/ptid.h.
+	(xfree, xzalloc, xasprintf, xvasprintf, xstrprintf, xstrvprintf,
+	xsnprintf, internal_error): Move to common/common-utils.h.
+	(nomem): Delete.
+	* gdb_assert.h: Move into common/ sub-directory.
+	* gdb_locale.h: Ditto.
+	* gdb_dirent.h: Ditto.
+	* inferior.h (minus_one_ptid, null_ptid, ptid_build, pid_to_ptid,
+	ptid_get_pid, ptid_get_lwp, ptid_get_tid, ptid_equal, ptid_is_pid):
+	Move into common/ptid.h.
+	* xml-support.c (xml_escape_text): Move into common/xml-utils.c.
+	(gdb_xml_create_parser_and_cleanup_1, xml_fetch_context_from_file):
+	Change nomem to malloc_failure.
+	* xml-support.h (xml_escape_text): Move into common/xml-utils.h.
+	* utils.c (nomem): Rename to malloc_failure.
+	(xmalloc, xzalloc, xrealloc, xcalloc, xfree, xstrprintf, xasprintf,
+	xvasprintf, xstrvprintf, xsnprintf): Move to common/common-utils.c.
+	(gdb_buildargv): Change nomem to malloc_failure.
+	* infrun.c (null_ptid, minus_one_ptid, ptid_build, pid_to_ptid,
+	ptid_get_pid, ptid_get_lwp, ptid_get_tid, ptid_equal,
+	ptid_is_pid): Move into common/ptid.c.
+	(initialize_infrun): Delete initialization of null_ptid and
+	minus_one_ptid.
+	* linux-nat.c (linux_nat_xfer_osdata): Defer to
+	linux_common_xfer_osdata.
+	* Makefile.in (SFILES): Add common/common-utils.c, common/xml-utils.c,
+	common/ptid.c and common/buffer.c.
+	(HFILES_NO_SRCDIR): Add common/common-utils.h, common/xml-utils.h,
+	common/ptid.h, common/buffer.h and common/linux-osdata.h.
+	(COMMON_OBS): Add xml-utils.o, common-utils.o, buffer.o and ptid.o.
+	(common-utils.o, xml-utils.o, ptid.o, buffer.o, linux-osdata.o): New
+	rules.
+	* common/gdb_assert.h: New.
+	* common/gdb_dirent.h: New.
+	* common/gdb_locale.h: New.
+	* common/buffer.c: New.
+	* common/buffer.h: New.
+	* common/ptid.c: New.
+	* common/ptid.h: New.
+	* common/xml-utils.c: New.
+	* common/xml-utils.h: New.
+	* common/common-utils.c: New.
+	* common/common-utils.h: New.
+	* common/linux-osdata.c: New.
+	* common/linux-osdata.h: New.
+	* config/alpha/alpha-linux.mh (NATDEPFILES): Add linux-osdata.o.
+	* config/arm/linux.mh (NATDEPFILES): Ditto.
+	* config/i386/linux.mh (NATDEPFILES): Ditto.
+	* config/i386/linux64.mh (NATDEPFILES): Ditto.
+	* config/ia64/linux.mh (NATDEPFILES): Ditto.
+	* config/m32r/linux.mh (NATDEPFILES): Ditto.
+	* config/m68k/linux.mh (NATDEPFILES): Ditto.
+	* config/mips/linux.mh (NATDEPFILES): Ditto.
+	* config/pa/linux.mh (NATDEPFILES): Ditto.
+	* config/powerpc/linux.mh (NATDEPFILES): Ditto.
+	* config/powerpc/ppc64-linux.mh (NATDEPFILES): Ditto.
+	* config/s390/s390.mh (NATDEPFILES): Ditto.
+	* config/sparc/linux.mh (NATDEPFILES): Ditto.
+	* config/sparc/linux64.mh (NATDEPFILES): Ditto.
+	* config/xtensa/linux.mh (NATDEPFILES): Ditto.
+
 2011-07-21  Matt Rice  <ratmice@gmail.com>
 
 	* NEWS: Add info macros and info definitions commands.

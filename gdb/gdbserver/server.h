@@ -105,74 +105,17 @@ int vsnprintf(char *str, size_t size, const char *format, va_list ap);
 /* A type used for binary buffers.  */
 typedef unsigned char gdb_byte;
 
+#include "ptid.h"
+#include "buffer.h"
+#include "xml-utils.h"
+#include "gdb_locale.h"
+
 /* FIXME: This should probably be autoconf'd for.  It's an integer type at
    least the size of a (void *).  */
 typedef long long CORE_ADDR;
 
 typedef long long LONGEST;
 typedef unsigned long long ULONGEST;
-
-/* The ptid struct is a collection of the various "ids" necessary
-   for identifying the inferior.  This consists of the process id
-   (pid), thread id (tid), and other fields necessary for uniquely
-   identifying the inferior process/thread being debugged.  When
-   manipulating ptids, the constructors, accessors, and predicate
-   declared in server.h should be used.  These are as follows:
-
-      ptid_build	- Make a new ptid from a pid, lwp, and tid.
-      pid_to_ptid	- Make a new ptid from just a pid.
-      ptid_get_pid	- Fetch the pid component of a ptid.
-      ptid_get_lwp	- Fetch the lwp component of a ptid.
-      ptid_get_tid	- Fetch the tid component of a ptid.
-      ptid_equal	- Test to see if two ptids are equal.
-
-   Please do NOT access the struct ptid members directly (except, of
-   course, in the implementation of the above ptid manipulation
-   functions).  */
-
-struct ptid
-  {
-    /* Process id */
-    int pid;
-
-    /* Lightweight process id */
-    long lwp;
-
-    /* Thread id */
-    long tid;
-  };
-
-typedef struct ptid ptid_t;
-
-/* The -1 ptid, often used to indicate either an error condition or a
-   "don't care" condition, i.e, "run all threads".  */
-extern ptid_t minus_one_ptid;
-
-/* The null or zero ptid, often used to indicate no process.  */
-extern ptid_t null_ptid;
-
-/* Attempt to find and return an existing ptid with the given PID,
-   LWP, and TID components.  If none exists, create a new one and
-   return that.  */
-ptid_t ptid_build (int pid, long lwp, long tid);
-
-/* Create a ptid from just a pid.  */
-ptid_t pid_to_ptid (int pid);
-
-/* Fetch the pid (process id) component from a ptid.  */
-int ptid_get_pid (ptid_t ptid);
-
-/* Fetch the lwp (lightweight process) component from a ptid.  */
-long ptid_get_lwp (ptid_t ptid);
-
-/* Fetch the tid (thread id) component from a ptid.  */
-long ptid_get_tid (ptid_t ptid);
-
-/* Compare two ptids to see if they are equal.  */
-extern int ptid_equal (ptid_t p1, ptid_t p2);
-
-/* Return true if this ptid represents a process id.  */
-extern int ptid_is_pid (ptid_t ptid);
 
 /* Generic information for tracking a list of ``inferiors'' - threads,
    processes, etc.  */
@@ -293,8 +236,6 @@ extern struct inferior_list all_processes;
 extern struct inferior_list all_threads;
 extern struct inferior_list all_dlls;
 extern int dlls_changed;
-
-void initialize_inferiors (void);
 
 void add_inferior_to_list (struct inferior_list *list,
 			   struct inferior_list_entry *new_inferior);
@@ -454,43 +395,8 @@ int relocate_instruction (CORE_ADDR *to, CORE_ADDR oldloc);
 
 void monitor_output (const char *msg);
 
-char *xml_escape_text (const char *text);
-
-/* Simple growing buffer.  */
-
-struct buffer
-{
-  char *buffer;
-  size_t buffer_size; /* allocated size */
-  size_t used_size; /* actually used size */
-};
-
-/* Append DATA of size SIZE to the end of BUFFER.  Grows the buffer to
-   accommodate the new data.  */
-void buffer_grow (struct buffer *buffer, const char *data, size_t size);
-
-/* Release any memory held by BUFFER.  */
-void buffer_free (struct buffer *buffer);
-
-/* Initialize BUFFER.  BUFFER holds no memory afterwards.  */
-void buffer_init (struct buffer *buffer);
-
-/* Return a pointer into BUFFER data, effectivelly transfering
-   ownership of the buffer memory to the caller.  Calling buffer_free
-   afterwards has no effect on the returned data.  */
-char* buffer_finish (struct buffer *buffer);
-
-/* Simple printf to BUFFER function.  Current implemented formatters:
-   %s - grow an xml escaped text in OBSTACK.  */
-void buffer_xml_printf (struct buffer *buffer, const char *format, ...)
-  ATTR_FORMAT (printf, 2, 3);
-
-#define buffer_grow_str(BUFFER,STRING)         \
-  buffer_grow (BUFFER, STRING, strlen (STRING))
-#define buffer_grow_str0(BUFFER,STRING)                        \
-  buffer_grow (BUFFER, STRING, strlen (STRING) + 1)
-
 /* Functions from utils.c */
+#include "common-utils.h"
 
 void *xmalloc (size_t) ATTR_MALLOC;
 void *xrealloc (void *, size_t);
@@ -502,8 +408,6 @@ void freeargv (char **argv);
 void perror_with_name (const char *string);
 void error (const char *string,...) ATTR_NORETURN ATTR_FORMAT (printf, 1, 2);
 void fatal (const char *string,...) ATTR_NORETURN ATTR_FORMAT (printf, 1, 2);
-void internal_error (const char *file, int line, const char *, ...)
-     ATTR_NORETURN ATTR_FORMAT (printf, 3, 4);
 void warning (const char *string,...) ATTR_FORMAT (printf, 1, 2);
 char *paddress (CORE_ADDR addr);
 char *pulongest (ULONGEST u);
@@ -511,33 +415,7 @@ char *plongest (LONGEST l);
 char *phex_nz (ULONGEST l, int sizeof_l);
 char *pfildes (gdb_fildes_t fd);
 
-#define gdb_assert(expr)                                                      \
-  ((void) ((expr) ? 0 :                                                       \
-	   (gdb_assert_fail (#expr, __FILE__, __LINE__, ASSERT_FUNCTION), 0)))
-
-/* Version 2.4 and later of GCC define a magical variable `__PRETTY_FUNCTION__'
-   which contains the name of the function currently being defined.
-   This is broken in G++ before version 2.6.
-   C9x has a similar variable called __func__, but prefer the GCC one since
-   it demangles C++ function names.  */
-#if (GCC_VERSION >= 2004)
-#define ASSERT_FUNCTION		__PRETTY_FUNCTION__
-#else
-#if defined __STDC_VERSION__ && __STDC_VERSION__ >= 199901L
-#define ASSERT_FUNCTION		__func__
-#endif
-#endif
-
-/* This prints an "Assertion failed" message, and exits.  */
-#if defined (ASSERT_FUNCTION)
-#define gdb_assert_fail(assertion, file, line, function)		\
-  internal_error (file, line, "%s: Assertion `%s' failed.",		\
-		  function, assertion)
-#else
-#define gdb_assert_fail(assertion, file, line, function)		\
-  internal_error (file, line, "Assertion `%s' failed.",			\
-		  assertion)
-#endif
+#include "gdb_assert.h"
 
 /* Maximum number of bytes to read/write at once.  The value here
    is chosen to fill up a packet (the headers account for the 32).  */

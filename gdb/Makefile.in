@@ -737,7 +737,9 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	jit.c \
 	xml-syscall.c \
 	annotate.c common/signals.c copying.c dfp.c gdb.c inf-child.c \
-	regset.c sol-thread.c windows-termcap.c
+	regset.c sol-thread.c windows-termcap.c \
+	common/common-utils.c common/xml-utils.c \
+	common/ptid.c common/buffer.c
 
 LINTFILES = $(SFILES) $(YYFILES) $(CONFIG_SRCS) init.c
 
@@ -816,7 +818,9 @@ osdata.h procfs.h python/py-event.h python/py-events.h python/py-stopevent.h \
 python/python-internal.h python/python.h ravenscar-thread.h record.h \
 solib-darwin.h solib-ia64-hpux.h solib-spu.h windows-nat.h xcoffread.h \
 gnulib/extra/arg-nonnull.h gnulib/extra/c++defs.h gnulib/extra/warn-on-use.h \
-gnulib/stddef.in.h inline-frame.h
+gnulib/stddef.in.h inline-frame.h \
+common/common-utils.h common/xml-utils.h common/buffer.h common/ptid.h \
+common/linux-osdata.h
 
 # Header files that already have srcdir in them, or which are in objdir.
 
@@ -898,10 +902,12 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	trad-frame.o \
 	tramp-frame.o \
 	solib.o solib-target.o \
-	prologue-value.o memory-map.o memrange.o xml-support.o xml-syscall.o \
+	prologue-value.o memory-map.o memrange.o \
+	xml-support.o xml-syscall.o xml-utils.o \
 	target-descriptions.o target-memory.o xml-tdesc.o xml-builtin.o \
 	inferior.o osdata.o gdb_usleep.o record.o gcore.o \
-	jit.o progspace.o
+	jit.o progspace.o \
+	common-utils.o buffer.o ptid.o
 
 TSOBS = inflow.o
 
@@ -1931,6 +1937,26 @@ mi-common.o: $(srcdir)/mi/mi-common.c
 
 signals.o: $(srcdir)/common/signals.c
 	$(COMPILE) $(srcdir)/common/signals.c
+	$(POSTCOMPILE)
+
+common-utils.o: ${srcdir}/common/common-utils.c
+	$(COMPILE) $(srcdir)/common/common-utils.c
+	$(POSTCOMPILE)
+
+xml-utils.o: ${srcdir}/common/xml-utils.c
+	$(COMPILE) $(srcdir)/common/xml-utils.c
+	$(POSTCOMPILE)
+
+ptid.o: ${srcdir}/common/ptid.c
+	$(COMPILE) $(srcdir)/common/ptid.c
+	$(POSTCOMPILE)
+
+buffer.o: ${srcdir}/common/buffer.c
+	$(COMPILE) $(srcdir)/common/buffer.c
+	$(POSTCOMPILE)
+
+linux-osdata.o: ${srcdir}/common/linux-osdata.c
+	$(COMPILE) $(srcdir)/common/linux-osdata.c
 	$(POSTCOMPILE)
 
 #

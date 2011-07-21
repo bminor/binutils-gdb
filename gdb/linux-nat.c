@@ -57,6 +57,7 @@
 #include "terminal.h"
 #include <sys/vfs.h>
 #include "solib.h"
+#include "linux-osdata.h"
 
 #ifndef SPUFS_MAGIC
 #define SPUFS_MAGIC 0x23c9b64e
@@ -5114,148 +5115,9 @@ linux_nat_xfer_osdata (struct target_ops *ops, enum target_object object,
 		       const char *annex, gdb_byte *readbuf,
 		       const gdb_byte *writebuf, ULONGEST offset, LONGEST len)
 {
-  /* We make the process list snapshot when the object starts to be
-     read.  */
-  static const char *buf;
-  static LONGEST len_avail = -1;
-  static struct obstack obstack;
-
-  DIR *dirp;
-
   gdb_assert (object == TARGET_OBJECT_OSDATA);
 
-  if (!annex)
-    {
-      if (offset == 0)
-	{
-	  if (len_avail != -1 && len_avail != 0)
-	    obstack_free (&obstack, NULL);
-	  len_avail = 0;
-	  buf = NULL;
-	  obstack_init (&obstack);
-	  obstack_grow_str (&obstack, "<osdata type=\"types\">\n");
-
-	  obstack_xml_printf (&obstack,
-			      "<item>"
-			      "<column name=\"Type\">processes</column>"
-			      "<column name=\"Description\">"
-			      "Listing of all processes</column>"
-			      "</item>");
-
-	  obstack_grow_str0 (&obstack, "</osdata>\n");
-	  buf = obstack_finish (&obstack);
-	  len_avail = strlen (buf);
-	}
-
-      if (offset >= len_avail)
-	{
-	  /* Done.  Get rid of the obstack.  */
-	  obstack_free (&obstack, NULL);
-	  buf = NULL;
-	  len_avail = 0;
-	  return 0;
-	}
-
-      if (len > len_avail - offset)
-	len = len_avail - offset;
-      memcpy (readbuf, buf + offset, len);
-
-      return len;
-    }
-
-  if (strcmp (annex, "processes") != 0)
-    return 0;
-
-  gdb_assert (readbuf && !writebuf);
-
-  if (offset == 0)
-    {
-      if (len_avail != -1 && len_avail != 0)
-	obstack_free (&obstack, NULL);
-      len_avail = 0;
-      buf = NULL;
-      obstack_init (&obstack);
-      obstack_grow_str (&obstack, "<osdata type=\"processes\">\n");
-
-      dirp = opendir ("/proc");
-      if (dirp)
-	{
-	  struct dirent *dp;
-
-	  while ((dp = readdir (dirp)) != NULL)
-	    {
-	      struct stat statbuf;
-	      char procentry[sizeof ("/proc/4294967295")];
-
-	      if (!isdigit (dp->d_name[0])
-		  || NAMELEN (dp) > sizeof ("4294967295") - 1)
-		continue;
-
-	      sprintf (procentry, "/proc/%s", dp->d_name);
-	      if (stat (procentry, &statbuf) == 0
-		  && S_ISDIR (statbuf.st_mode))
-		{
-		  char *pathname;
-		  FILE *f;
-		  char cmd[MAXPATHLEN + 1];
-		  struct passwd *entry;
-
-		  pathname = xstrprintf ("/proc/%s/cmdline", dp->d_name);
-		  entry = getpwuid (statbuf.st_uid);
-
-		  if ((f = fopen (pathname, "r")) != NULL)
-		    {
-		      size_t length = fread (cmd, 1, sizeof (cmd) - 1, f);
-
-		      if (length > 0)
-			{
-			  int i;
-
-			  for (i = 0; i < length; i++)
-			    if (cmd[i] == '\0')
-			      cmd[i] = ' ';
-			  cmd[length] = '\0';
-
-			  obstack_xml_printf (
-			    &obstack,
-			    "<item>"
-			    "<column name=\"pid\">%s</column>"
-			    "<column name=\"user\">%s</column>"
-			    "<column name=\"command\">%s</column>"
-			    "</item>",
-			    dp->d_name,
-			    entry ? entry->pw_name : "?",
-			    cmd);
-			}
-		      fclose (f);
-		    }
-
-		  xfree (pathname);
-		}
-	    }
-
-	  closedir (dirp);
-	}
-
-      obstack_grow_str0 (&obstack, "</osdata>\n");
-      buf = obstack_finish (&obstack);
-      len_avail = strlen (buf);
-    }
-
-  if (offset >= len_avail)
-    {
-      /* Done.  Get rid of the obstack.  */
-      obstack_free (&obstack, NULL);
-      buf = NULL;
-      len_avail = 0;
-      return 0;
-    }
-
-  if (len > len_avail - offset)
-    len = len_avail - offset;
-  memcpy (readbuf, buf + offset, len);
-
-  return len;
+  return linux_common_xfer_osdata (annex, readbuf, offset, len);
 }
 
 static LONGEST

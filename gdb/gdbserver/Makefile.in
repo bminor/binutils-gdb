@@ -124,7 +124,10 @@ SFILES=	$(srcdir)/gdbreplay.c $(srcdir)/inferiors.c \
 	$(srcdir)/linux-xtensa-low.c \
 	$(srcdir)/win32-arm-low.c $(srcdir)/win32-i386-low.c \
 	$(srcdir)/win32-low.c $(srcdir)/wincecompat.c \
-	$(srcdir)/hostio.c $(srcdir)/hostio-errno.c
+	$(srcdir)/hostio.c $(srcdir)/hostio-errno.c \
+	$(srcdir)/common/common-utils.c $(srcdir)/common/xml-utils.c \
+	$(srcdir)/common/linux-osdata.c $(srcdir)/common/ptid.c \
+	$(srcdir)/common/buffer.c
 
 DEPFILES = @GDBSERVER_DEPFILES@
 
@@ -136,6 +139,7 @@ TAGFILES = $(SOURCES) ${HFILES} ${ALLPARAM} ${POSSLIBS}
 OBS = inferiors.o regcache.o remote-utils.o server.o signals.o target.o \
 	utils.o version.o \
 	mem-break.o hostio.o event-loop.o tracepoint.o \
+	xml-utils.o common-utils.o ptid.o buffer.o \
 	$(XML_BUILTIN) \
 	$(DEPFILES) $(LIBOBJS)
 GDBREPLAY_OBS = gdbreplay.o version.o
@@ -234,7 +238,7 @@ gdbreplay$(EXEEXT): $(GDBREPLAY_OBS)
 	${CC-LD} $(INTERNAL_CFLAGS) $(INTERNAL_LDFLAGS) -o gdbreplay$(EXEEXT) $(GDBREPLAY_OBS) \
 	  $(XM_CLIBS)
 
-IPA_OBJS=tracepoint-ipa.o utils-ipa.o regcache-ipa.o remote-utils-ipa.o ${IPA_DEPFILES}
+IPA_OBJS=tracepoint-ipa.o utils-ipa.o regcache-ipa.o remote-utils-ipa.o common-utils-ipa.o ${IPA_DEPFILES}
 
 IPA_LIB=libinproctrace.so
 
@@ -331,8 +335,16 @@ regdef_h = $(srcdir)/../regformats/regdef.h
 regcache_h = $(srcdir)/regcache.h
 signals_def = $(srcdir)/../../include/gdb/signals.def
 signals_h = $(srcdir)/../../include/gdb/signals.h $(signals_def)
+ptid_h = $(srcdir)/../common/ptid.h
+linux_osdata_h = $(srcdir)/../common/linux-osdata.h
 server_h = $(srcdir)/server.h $(regcache_h) config.h $(srcdir)/target.h \
 		$(srcdir)/mem-break.h $(srcdir)/../common/gdb_signals.h \
+		$(srcdir)/../common/common-utils.h \
+		$(srcdir)/../common/xml-utils.h \
+		$(srcdir)/../common/buffer.h \
+		$(srcdir)/../common/gdb_assert.h \
+		$(srcdir)/../common/gdb_locale.h \
+		$(ptid_h) \
 		$(signals_h)
 
 linux_low_h = $(srcdir)/linux-low.h
@@ -358,6 +370,8 @@ tracepoint-ipa.o: tracepoint.c $(server_h) $(srcdir)/../common/ax.def
 	$(CC) -c $(IPAGENT_CFLAGS) $< -o tracepoint-ipa.o
 utils-ipa.o: utils.c $(server_h)
 	$(CC) -c $(IPAGENT_CFLAGS) $< -o utils-ipa.o
+common-utils-ipa.o: ../common/common-utils.c $(server_h)
+	$(CC) -c $(IPAGENT_CFLAGS) $< -o common-utils-ipa.o
 remote-utils-ipa.o: remote-utils.c $(server_h)
 	$(CC) -c $(IPAGENT_CFLAGS) $< -o remote-utils-ipa.o
 regcache-ipa.o: regcache.c $(server_h)
@@ -390,6 +404,21 @@ gdbreplay.o: gdbreplay.c config.h
 signals.o: ../common/signals.c $(server_h) $(signals_def)
 	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $< -DGDBSERVER
 
+common-utils.o: ../common/common-utils.c $(server_h)
+	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $< -DGDBSERVER
+
+xml-utils.o: ../common/xml-utils.c $(server_h)
+	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $< -DGDBSERVER
+
+linux-osdata.o: ../common/linux-osdata.c $(server_h) $(linux_osdata_h) ../common/gdb_dirent.h
+	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $< -DGDBSERVER
+
+ptid.o: ../common/ptid.c $(ptid_h)
+	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $< -DGDBSERVER
+
+buffer.o: ../common/buffer.c $(server_h)
+	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $< -DGDBSERVER
+
 # We build memmem.c without -Werror because this file is not under
 # our control.  On LynxOS, the compiler generates some warnings
 # because str-two-way.h uses a constant (MAX_SIZE) whose definition
@@ -413,7 +442,7 @@ i386-low.o: i386-low.c $(i386_low_h) $(server_h) $(target_h)
 
 i387-fp.o: i387-fp.c $(server_h)
 
-linux-low.o: linux-low.c $(linux_low_h) $(linux_ptrace_h) $(server_h)
+linux-low.o: linux-low.c $(linux_low_h) $(linux_ptrace_h) $(server_h) $(linux_osdata_h)
 	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $< @USE_THREAD_DB@
 
 linux-arm-low.o: linux-arm-low.c $(linux_low_h) $(server_h) \
