@@ -51,11 +51,27 @@ extern struct cleanup *prepare_execute_command (void);
 
 /* This function returns a pointer to the string that is used
    by gdb for its command prompt.  */
-extern char *get_prompt (void);
+extern char *get_prompt (int);
 
 /* This function copies the specified string into the string that
    is used by gdb for its command prompt.  */
-extern void set_prompt (const char *);
+extern void set_prompt (const char *, int level);
+
+/* This function returns a pointer to the string that is used
+   by gdb for its command prompt prefix.  */
+extern char *get_prefix (int);
+
+/* This function copies the specified string into the string that
+   is used by gdb for its command prompt prefix.  */
+extern void set_prefix (const char *, int);
+
+/* This function returns a pointer to the string that is used
+   by gdb for its command prompt suffix.  */
+extern char *get_suffix (int);
+
+/* This function copies the specified string into the string that
+   is used by gdb for its command prompt suffix.  */
+extern void set_suffix (const char *, int);
 
 /* From random places.  */
 extern int readnow_symbol_files;

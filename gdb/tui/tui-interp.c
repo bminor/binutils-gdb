@@ -145,17 +145,17 @@ tui_command_loop (void *data)
     {
       int length;
       char *a_prompt;
-      char *gdb_prompt = get_prompt ();
+      char *gdb_prompt = get_prompt (0);
 
       /* Tell readline what the prompt to display is and what function
          it will need to call after a whole line is read. This also
          displays the first prompt.  */
-      length = strlen (PREFIX (0)) 
-	+ strlen (gdb_prompt) + strlen (SUFFIX (0)) + 1;
+      length = strlen (get_prefix (0))
+	+ strlen (gdb_prompt) + strlen (get_suffix (0)) + 1;
       a_prompt = (char *) alloca (length);
-      strcpy (a_prompt, PREFIX (0));
+      strcpy (a_prompt, get_prefix (0));
       strcat (a_prompt, gdb_prompt);
-      strcat (a_prompt, SUFFIX (0));
+      strcat (a_prompt, get_suffix (0));
       rl_callback_handler_install (a_prompt, input_handler);
     }
   else

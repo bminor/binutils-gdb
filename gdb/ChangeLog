@@ -1,3 +1,30 @@
+2011-07-22  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* event-top.c (cli_command_loop): Use get_prompt, get_suffix,
+	get_prefix.
+	(display_gdb_prompt): Likewise.
+	(change_annotation_level): Likewise.
+	(push_prompt): Likewise.
+	(pop_prompt): Likewise.
+	(handle_stop_sig): Use get_prompt with a level.
+	* top.c (command_loop): Use get_prompt with a level.
+	(set_async_annotation_level): Use set_prompt with a level.
+	(get_prefix): New function.
+	(set_prefix): Ditto.
+	(set_suffix): Ditto.
+	(get_suffix): Ditto.
+	(get_prompt): Accept a level argument.
+	(set_prompt): Accept a level argument.  Free old prompts.  Set
+	new_async_prompt if level is 0.
+	(init_main): Use set_prompt with a level.  Do not set
+	new_async_prompt.
+	* event-top.h (PROMPT, SUFFIX, PREFIX): Move to top.c
+	* top.h: Declare set_suffix, get_suffix, set_prefix, get_prefix.
+	Modify set_prompt, get_prompt to account for levels.
+	* tui/tui-interp.c (tui_command_loop): Use get_prompt with a
+	level.
+	* python/python.c (before_prompt_hook): Use set_prompt.
+	
 2011-07-22  Kwok Cheung Yeung  <kcy@codesourcery.com>
 
 	* defs.h: Add guard against inclusion in gdbserver.

@@ -69,9 +69,6 @@ struct prompts
     int top;
   };
 
-#define PROMPT(X) the_prompts.prompt_stack[the_prompts.top + X].prompt
-#define PREFIX(X) the_prompts.prompt_stack[the_prompts.top + X].prefix
-#define SUFFIX(X) the_prompts.prompt_stack[the_prompts.top + X].suffix
 
 /* Exported functions from event-top.c.
    FIXME: these should really go into top.h.  */
