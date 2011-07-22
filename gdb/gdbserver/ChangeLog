@@ -1,3 +1,15 @@
+2011-07-22  Pedro Alves  <pedro@codesourcery.com>
+
+	* i386-low.c (i386_insert_aligned_watchpoint): Don't pass the info
+	to the inferior here.
+	(i386_remove_aligned_watchpoint): Ditto.
+	(i386_handle_nonaligned_watchpoint): Return immediate on fail to
+	fit part of the watchpoint in the debug registers.
+	(i386_update_inferior_debug_regs): New.
+	(i386_low_insert_watchpoint): Work on a local mirror of the debug
+	registers, and only update the inferior on success.
+	(i386_low_remove_watchpoint): Ditto.
+
 2011-07-22  Kwok Cheung Yeung  <kcy@codesourcery.com>
 
 	* linux-low.c (compare_ints, unique, list_threads, show_process,

@@ -1,3 +1,28 @@
+2011-07-22  Pedro Alves  <pedro@codesourcery.com>
+
+	* i386-nat.c (I386_DR_VACANT, I386_DR_LOCAL_ENABLE)
+	(I386_DR_GLOBAL_ENABLE, I386_DR_DISABLE, I386_DR_SET_RW_LEN)
+	(I386_DR_GET_RW_LEN, I386_DR_WATCH_HIT): Add state parameter and
+	adjust.
+	(dr_mirror, dr_status_mirror, dr_control_mirror): Delete.
+	(struct i386_debug_reg_state): New.
+	(i386_init_dregs): New.
+	(dr_mirror): New.
+	(i386_cleanup_dregs): Use i386_init_dregs.
+	(i386_show_dr): Add state parameter and adjust.
+	(i386_insert_aligned_watchpoint): Ditto.  Don't pass the info to
+	the inferior here.
+	(i386_remove_aligned_watchpoint): Likewise.
+	(i386_handle_nonaligned_watchpoint): Add state parameter and adjust.
+	(i386_update_inferior_debug_regs): New.
+	(i386_insert_watchpoint): Work on a local mirror of the debug
+	registers, and only update the inferior on success.
+	(i386_remove_watchpoint): Ditto.
+	(i386_region_ok_for_watchpoint): Adjust.
+	(i386_stopped_data_address): Adjust.
+	(i386_insert_hw_breakpoint): Adjust.
+	(i386_remove_hw_breakpoint): Adjust.
+
 2011-07-22  Tom Tromey  <tromey@redhat.com>
 
 	* amd64-tdep.c (amd64_pseudo_register_read_value): Rename

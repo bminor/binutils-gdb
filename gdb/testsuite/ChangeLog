@@ -1,3 +1,8 @@
+2011-07-22  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.arch/i386-dr3-watch.exp: Test that the i386 watchpoints
+	backend doesn't leave used debug registers behind.
+
 2011-07-22  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.dwarf2/typeddwarf.c: XFAIL 'z' on x86-64.
