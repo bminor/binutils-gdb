@@ -1238,14 +1238,14 @@ Symbol_table::add_from_relobj(
 				  is_default_version, *psym, st_shndx,
 				  is_ordinary, orig_st_shndx);
       
+      if (is_forced_local)
+	this->force_local(res);
+
       // If building a shared library using garbage collection, do not 
       // treat externally visible symbols as garbage.
       if (parameters->options().gc_sections() 
           && parameters->options().shared())
         this->gc_mark_symbol_for_shlib(res);
-
-      if (is_forced_local)
-	this->force_local(res);
 
       if (is_defined_in_discarded_section)
 	res->set_is_defined_in_discarded_section();

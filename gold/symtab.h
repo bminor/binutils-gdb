@@ -538,8 +538,9 @@ class Symbol
   bool
   is_externally_visible() const
   {
-    return (this->visibility_ == elfcpp::STV_DEFAULT
-            || this->visibility_ == elfcpp::STV_PROTECTED);
+    return ((this->visibility_ == elfcpp::STV_DEFAULT
+             || this->visibility_ == elfcpp::STV_PROTECTED)
+	    && !this->is_forced_local_);
   }
 
   // Return true if this symbol can be preempted by a definition in
