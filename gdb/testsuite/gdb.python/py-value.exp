@@ -326,7 +326,7 @@ proc test_value_after_death {} {
 proc test_subscript_regression {lang} {
 
  global srcdir subdir srcfile binfile testfile hex
- if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable "debug $lang"] != "" } {
+ if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}-${lang}" executable "debug $lang"] != "" } {
      untested "Couldn't compile ${srcfile} in $lang mode"
      return -1
  }
@@ -335,7 +335,7 @@ proc test_subscript_regression {lang} {
  gdb_exit
  gdb_start
  gdb_reinitialize_dir $srcdir/$subdir
- gdb_load ${binfile}
+ gdb_load ${binfile}-${lang}
 
  if ![runto_main ] then {
      perror "couldn't run to breakpoint"

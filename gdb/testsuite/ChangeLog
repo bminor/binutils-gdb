@@ -1,5 +1,15 @@
 2011-07-22  Ulrich Weigand  <ulrich.weigand@linaro.org>
 
+	* gdb.python/py-mi.exp: Use different file names for different
+	versions of the executable under test.
+	* gdb.python/py-prettyprint.exp: Likewise.
+	* gdb.python/py-symbol.exp: Likewise.
+	* gdb.python/py-template.exp: Likewise.
+	* gdb.python/py-type.exp: Likewise.
+	* gdb.python/py-value.exp: Likewise.
+
+2011-07-22  Ulrich Weigand  <ulrich.weigand@linaro.org>
+
 	* gdb.python/py-breakpoint.exp: Re-set can-use-hw-watchpoints
 	flag after restarting GDB if necessary.
 

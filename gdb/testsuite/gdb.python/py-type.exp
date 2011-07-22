@@ -34,20 +34,20 @@ if [get_compiler_info not-used c++] {
 proc build_inferior {lang} {
   global srcdir subdir srcfile binfile testfile hex
 
-  if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable "debug $lang"] != "" } {
+  if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}-${lang}" executable "debug $lang"] != "" } {
       untested "Couldn't compile ${srcfile} in $lang mode"
       return -1
   }
 }
 
 # Restart GDB.
-proc restart_gdb {} { 
+proc restart_gdb {lang} { 
   global srcdir subdir srcfile binfile testfile hex
 
   gdb_exit
   gdb_start
   gdb_reinitialize_dir $srcdir/$subdir
-  gdb_load ${binfile}
+  gdb_load ${binfile}-${lang}
 
   if ![runto_main ] then {
       perror "couldn't run to breakpoint"
@@ -162,7 +162,7 @@ proc test_template {} {
 
 # Perform C Tests.
 build_inferior "c"
-restart_gdb 
+restart_gdb "c"
 
 # Skip all tests if Python scripting is not enabled.
 if { [skip_python_tests] } { continue }
@@ -172,7 +172,7 @@ test_fields "c"
 
 # Perform C++ Tests.
 build_inferior "c++"
-restart_gdb 
+restart_gdb "c++"
 runto_bp "break to inspect struct and array."
 test_fields "c++"
 test_base_class
