@@ -1,5 +1,10 @@
 2011-07-22  Ulrich Weigand  <ulrich.weigand@linaro.org>
 
+	* gdb.python/py-breakpoint.exp: Re-set can-use-hw-watchpoints
+	flag after restarting GDB if necessary.
+
+2011-07-22  Ulrich Weigand  <ulrich.weigand@linaro.org>
+
 	* gdb.python/py-shared.exp: Call gdb_load_shlibs.
 
 2011-07-22  Pedro Alves  <pedro@codesourcery.com>
