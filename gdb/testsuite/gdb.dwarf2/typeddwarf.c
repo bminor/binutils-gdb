@@ -25,7 +25,7 @@ f1 (double a, double b, double c, float d, float e, int f, unsigned int g, long 
   double w = d / 4.0;		/* { dg-final { gdb-test 29 "w" "1" } } */
   double x = a + b + 1.0;	/* { dg-final { gdb-test 29 "x" "4" } } */
   double y = b + c + 2.0;	/* { dg-final { gdb-test 29 "y" "7" } } */
-  float z = d + e + 3.0f;	/* { dg-final { gdb-test 29 "z" "12" } } */
+  float z = d + e + 3.0f;	/* { dg-final { xfail-gdb-test 29 "z" "12" "x86_64-*-*"} } */
   vv++;
 }
 

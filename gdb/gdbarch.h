@@ -216,6 +216,17 @@ typedef enum register_status (gdbarch_pseudo_register_read_ftype) (struct gdbarc
 extern enum register_status gdbarch_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache, int cookednum, gdb_byte *buf);
 extern void set_gdbarch_pseudo_register_read (struct gdbarch *gdbarch, gdbarch_pseudo_register_read_ftype *pseudo_register_read);
 
+/* Read a register into a new struct value.  If the register is wholly
+   or partly unavailable, this should call mark_value_bytes_unavailable
+   as appropriate.  If this is defined, then pseudo_register_read will
+   never be called. */
+
+extern int gdbarch_pseudo_register_read_value_p (struct gdbarch *gdbarch);
+
+typedef struct value * (gdbarch_pseudo_register_read_value_ftype) (struct gdbarch *gdbarch, struct regcache *regcache, int cookednum);
+extern struct value * gdbarch_pseudo_register_read_value (struct gdbarch *gdbarch, struct regcache *regcache, int cookednum);
+extern void set_gdbarch_pseudo_register_read_value (struct gdbarch *gdbarch, gdbarch_pseudo_register_read_value_ftype *pseudo_register_read_value);
+
 extern int gdbarch_pseudo_register_write_p (struct gdbarch *gdbarch);
 
 typedef void (gdbarch_pseudo_register_write_ftype) (struct gdbarch *gdbarch, struct regcache *regcache, int cookednum, const gdb_byte *buf);

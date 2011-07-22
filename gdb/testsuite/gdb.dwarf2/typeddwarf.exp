@@ -22,12 +22,16 @@ if ![dwarf2_support] {
     return 0  
 }
 
-# This test can only be run on x86 targets.
-if { ![is_x86_like_target] } {
+# This test can only be run on x86 and amd64 targets.
+if { [is_x86_like_target] } {
+    set sfile ${test}.S
+} elseif {[istarget "x86_64-*-*"]} {
+    set sfile ${test}-amd64.S
+} else {
     return 0
 }
 
-if { [prepare_for_testing "${test}.exp" "${test}" ${test}.S {nodebug additional_flags=-nostdlib}] } {
+if { [prepare_for_testing "${test}.exp" "${test}" ${sfile} {nodebug additional_flags=-nostdlib}] } {
     return -1
 }
 
@@ -45,10 +49,19 @@ proc gdb-test {line var value} {
     lappend tests($line) [list $var $value 0]
 }
 
-proc xfail-gdb-test {line var value} {
+# Add an XFAIL'd test.  If ARCH_PATTERN is given, and does not match
+# the target, then the test is simply added and not XFAIL'd.
+proc xfail-gdb-test {line var value {arch_pattern ""}} {
     global tests
 
-    lappend tests($line) [list $var $value 1]
+    set flag 1
+    if {$arch_pattern != ""} {
+	if {! [istarget $arch_pattern]} {
+	    set flag 0
+	}
+    }
+
+    lappend tests($line) [list $var $value $flag]
 }
 
 proc scan_gdb_tests {} {

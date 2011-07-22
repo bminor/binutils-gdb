@@ -709,9 +709,64 @@ regcache_cooked_read (struct regcache *regcache, int regnum, gdb_byte *buf)
 
       return regcache->register_status[regnum];
     }
+  else if (gdbarch_pseudo_register_read_value_p (regcache->descr->gdbarch))
+    {
+      struct value *mark, *computed;
+      enum register_status result = REG_VALID;
+
+      mark = value_mark ();
+
+      computed = gdbarch_pseudo_register_read_value (regcache->descr->gdbarch,
+						     regcache, regnum);
+      if (value_entirely_available (computed))
+	memcpy (buf, value_contents_raw (computed),
+		regcache->descr->sizeof_register[regnum]);
+      else
+	{
+	  memset (buf, 0, regcache->descr->sizeof_register[regnum]);
+	  result = REG_UNAVAILABLE;
+	}
+
+      value_free_to_mark (mark);
+
+      return result;
+    }
   else
     return gdbarch_pseudo_register_read (regcache->descr->gdbarch, regcache,
 					 regnum, buf);
+}
+
+struct value *
+regcache_cooked_read_value (struct regcache *regcache, int regnum)
+{
+  gdb_assert (regnum >= 0);
+  gdb_assert (regnum < regcache->descr->nr_cooked_registers);
+
+  if (regnum < regcache->descr->nr_raw_registers
+      || (regcache->readonly_p
+	  && regcache->register_status[regnum] != REG_UNKNOWN)
+      || !gdbarch_pseudo_register_read_value_p (regcache->descr->gdbarch))
+    {
+      struct value *result;
+
+      result = allocate_value (register_type (regcache->descr->gdbarch,
+					      regnum));
+      VALUE_LVAL (result) = lval_register;
+      VALUE_REGNUM (result) = regnum;
+
+      /* It is more efficient in general to do this delegation in this
+	 direction than in the other one, even though the value-based
+	 API is preferred.  */
+      if (regcache_cooked_read (regcache, regnum,
+				value_contents_raw (result)) == REG_UNAVAILABLE)
+	mark_value_bytes_unavailable (result, 0,
+				      TYPE_LENGTH (value_type (result)));
+
+      return result;
+    }
+  else
+    return gdbarch_pseudo_register_read_value (regcache->descr->gdbarch,
+					       regcache, regnum);
 }
 
 enum register_status

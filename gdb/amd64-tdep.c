@@ -275,14 +275,21 @@ amd64_pseudo_register_name (struct gdbarch *gdbarch, int regnum)
     return i386_pseudo_register_name (gdbarch, regnum);
 }
 
-static enum register_status
-amd64_pseudo_register_read (struct gdbarch *gdbarch,
-			    struct regcache *regcache,
-			    int regnum, gdb_byte *buf)
+static struct value *
+amd64_pseudo_register_read_value (struct gdbarch *gdbarch,
+				  struct regcache *regcache,
+				  int regnum)
 {
   gdb_byte raw_buf[MAX_REGISTER_SIZE];
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   enum register_status status;
+  struct value *result_value;
+  gdb_byte *buf;
+
+  result_value = allocate_value (register_type (gdbarch, regnum));
+  VALUE_LVAL (result_value) = lval_register;
+  VALUE_REGNUM (result_value) = regnum;
+  buf = value_contents_raw (result_value);
 
   if (i386_byte_regnum_p (gdbarch, regnum))
     {
@@ -297,15 +304,19 @@ amd64_pseudo_register_read (struct gdbarch *gdbarch,
 				      raw_buf);
 	  if (status == REG_VALID)
 	    memcpy (buf, raw_buf + 1, 1);
+	  else
+	    mark_value_bytes_unavailable (result_value, 0,
+					  TYPE_LENGTH (value_type (result_value)));
 	}
       else
 	{
 	  status = regcache_raw_read (regcache, gpnum, raw_buf);
 	  if (status == REG_VALID)
 	    memcpy (buf, raw_buf, 1);
+	  else
+	    mark_value_bytes_unavailable (result_value, 0,
+					  TYPE_LENGTH (value_type (result_value)));
 	}
-
-      return status;
     }
   else if (i386_dword_regnum_p (gdbarch, regnum))
     {
@@ -314,11 +325,15 @@ amd64_pseudo_register_read (struct gdbarch *gdbarch,
       status = regcache_raw_read (regcache, gpnum, raw_buf);
       if (status == REG_VALID)
 	memcpy (buf, raw_buf, 4);
-
-      return status;
+      else
+	mark_value_bytes_unavailable (result_value, 0,
+				      TYPE_LENGTH (value_type (result_value)));
     }
   else
-    return i386_pseudo_register_read (gdbarch, regcache, regnum, buf);
+    i386_pseudo_register_read_into_value (gdbarch, regcache, regnum,
+					  result_value);
+
+  return result_value;
 }
 
 static void
@@ -2494,8 +2509,8 @@ amd64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* Avoid wiring in the MMX registers for now.  */
   tdep->num_mmx_regs = 0;
 
-  set_gdbarch_pseudo_register_read (gdbarch,
-				    amd64_pseudo_register_read);
+  set_gdbarch_pseudo_register_read_value (gdbarch,
+					  amd64_pseudo_register_read_value);
   set_gdbarch_pseudo_register_write (gdbarch,
 				     amd64_pseudo_register_write);
 

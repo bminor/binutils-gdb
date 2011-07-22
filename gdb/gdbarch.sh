@@ -418,6 +418,11 @@ F:void:write_pc:struct regcache *regcache, CORE_ADDR val:regcache, val
 m:void:virtual_frame_pointer:CORE_ADDR pc, int *frame_regnum, LONGEST *frame_offset:pc, frame_regnum, frame_offset:0:legacy_virtual_frame_pointer::0
 #
 M:enum register_status:pseudo_register_read:struct regcache *regcache, int cookednum, gdb_byte *buf:regcache, cookednum, buf
+# Read a register into a new struct value.  If the register is wholly
+# or partly unavailable, this should call mark_value_bytes_unavailable
+# as appropriate.  If this is defined, then pseudo_register_read will
+# never be called.
+M:struct value *:pseudo_register_read_value:struct regcache *regcache, int cookednum:regcache, cookednum
 M:void:pseudo_register_write:struct regcache *regcache, int cookednum, const gdb_byte *buf:regcache, cookednum, buf
 #
 v:int:num_regs:::0:-1

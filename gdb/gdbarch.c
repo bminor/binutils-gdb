@@ -161,6 +161,7 @@ struct gdbarch
   gdbarch_write_pc_ftype *write_pc;
   gdbarch_virtual_frame_pointer_ftype *virtual_frame_pointer;
   gdbarch_pseudo_register_read_ftype *pseudo_register_read;
+  gdbarch_pseudo_register_read_value_ftype *pseudo_register_read_value;
   gdbarch_pseudo_register_write_ftype *pseudo_register_write;
   int num_regs;
   int num_pseudo_regs;
@@ -313,6 +314,7 @@ struct gdbarch startup_gdbarch =
   0,  /* write_pc */
   legacy_virtual_frame_pointer,  /* virtual_frame_pointer */
   0,  /* pseudo_register_read */
+  0,  /* pseudo_register_read_value */
   0,  /* pseudo_register_write */
   0,  /* num_regs */
   0,  /* num_pseudo_regs */
@@ -594,6 +596,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of write_pc, has predicate.  */
   /* Skip verify of virtual_frame_pointer, invalid_p == 0 */
   /* Skip verify of pseudo_register_read, has predicate.  */
+  /* Skip verify of pseudo_register_read_value, has predicate.  */
   /* Skip verify of pseudo_register_write, has predicate.  */
   if (gdbarch->num_regs == -1)
     fprintf_unfiltered (log, "\n\tnum_regs");
@@ -1084,6 +1087,12 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: pseudo_register_read = <%s>\n",
                       host_address_to_string (gdbarch->pseudo_register_read));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_pseudo_register_read_value_p() = %d\n",
+                      gdbarch_pseudo_register_read_value_p (gdbarch));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: pseudo_register_read_value = <%s>\n",
+                      host_address_to_string (gdbarch->pseudo_register_read_value));
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_pseudo_register_write_p() = %d\n",
                       gdbarch_pseudo_register_write_p (gdbarch));
@@ -1697,6 +1706,30 @@ set_gdbarch_pseudo_register_read (struct gdbarch *gdbarch,
                                   gdbarch_pseudo_register_read_ftype pseudo_register_read)
 {
   gdbarch->pseudo_register_read = pseudo_register_read;
+}
+
+int
+gdbarch_pseudo_register_read_value_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->pseudo_register_read_value != NULL;
+}
+
+struct value *
+gdbarch_pseudo_register_read_value (struct gdbarch *gdbarch, struct regcache *regcache, int cookednum)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->pseudo_register_read_value != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_pseudo_register_read_value called\n");
+  return gdbarch->pseudo_register_read_value (gdbarch, regcache, cookednum);
+}
+
+void
+set_gdbarch_pseudo_register_read_value (struct gdbarch *gdbarch,
+                                        gdbarch_pseudo_register_read_value_ftype pseudo_register_read_value)
+{
+  gdbarch->pseudo_register_read_value = pseudo_register_read_value;
 }
 
 int

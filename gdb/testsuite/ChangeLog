@@ -1,3 +1,10 @@
+2011-07-22  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.dwarf2/typeddwarf.c: XFAIL 'z' on x86-64.
+	* gdb.dwarf2/typeddwarf.exp (xfail-gdb-test): Add arch_pattern
+	argument.
+	* gdb.dwarf2/typeddwarf-amd64.S: New file.
+
 2011-07-21  Matt Rice  <ratmice@gmail.com>
 
 	* gdb.threads/Makefile.in: Avoid globbing corethreads.exp

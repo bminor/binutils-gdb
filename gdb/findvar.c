@@ -625,10 +625,11 @@ value_from_register (struct type *type, int regnum, struct frame_info *frame)
   struct gdbarch *gdbarch = get_frame_arch (frame);
   struct type *type1 = check_typedef (type);
   struct value *v;
-  int optim, unavail, ok;
 
   if (gdbarch_convert_register_p (gdbarch, regnum, type1))
     {
+      int optim, unavail, ok;
+
       /* The ISA/ABI need to something weird when obtaining the
          specified value from this register.  It might need to
          re-order non-adjacent, starting with REGNUM (see MIPS and
@@ -643,26 +644,27 @@ value_from_register (struct type *type, int regnum, struct frame_info *frame)
       ok = gdbarch_register_to_value (gdbarch, frame, regnum, type1,
 				      value_contents_raw (v), &optim,
 				      &unavail);
+
+      if (!ok)
+	{
+	  if (optim)
+	    set_value_optimized_out (v, 1);
+	  if (unavail)
+	    mark_value_bytes_unavailable (v, 0, TYPE_LENGTH (type));
+	}
     }
   else
     {
       int len = TYPE_LENGTH (type);
+      struct value *v2;
 
       /* Construct the value.  */
       v = gdbarch_value_from_register (gdbarch, type, regnum, frame);
 
       /* Get the data.  */
-      ok = get_frame_register_bytes (frame, regnum, value_offset (v), len,
-				     value_contents_raw (v),
-				     &optim, &unavail);
-    }
+      v2 = get_frame_register_value (frame, regnum);
 
-  if (!ok)
-    {
-      if (optim)
-	set_value_optimized_out (v, 1);
-      if (unavail)
-	mark_value_bytes_unavailable (v, 0, TYPE_LENGTH (type));
+      value_contents_copy (v, 0, v2, value_offset (v), len);
     }
 
   return v;

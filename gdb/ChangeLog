@@ -1,3 +1,28 @@
+2011-07-22  Tom Tromey  <tromey@redhat.com>
+
+	* amd64-tdep.c (amd64_pseudo_register_read_value): Rename
+	from amd64_pseudo_register_read.  Change arguments.  Call
+	mark_value_bytes_unavailable when needed.
+	(amd64_init_abi): Use set_gdbarch_pseudo_register_read_value, not
+	set_gdbarch_pseudo_register_read.
+	* sentinel-frame.c (sentinel_frame_prev_register): Use
+	regcache_cooked_read_value.
+	* regcache.h (regcache_cooked_read_value): Declare.
+	* regcache.c (regcache_cooked_read_value): New function.
+	(regcache_cooked_read): Call
+	gdbarch_pseudo_register_read_value if available.
+	* i386-tdep.h (i386_pseudo_register_read_value): Declare.
+	(i386_pseudo_register_read): Remove.
+	* i386-tdep.c (i386_pseudo_register_read_into_value): Rename from
+	i386_pseudo_register_read.  Change arguments.  Call
+	mark_value_bytes_unavailable when needed.
+	(i386_pseudo_register_read_value): New function.
+	(i386_gdbarch_init): Call set_gdbarch_pseudo_register_read_value,
+	not set_gdbarch_pseudo_register_read.
+	* gdbarch.sh (pseudo_register_read_value): New method.
+	* gdbarch.c, gdbarch.h: Rebuild.
+	* findvar.c (value_from_register): Call get_frame_register_value.
+
 2011-07-22  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* event-top.c (cli_command_loop): Use get_prompt, get_suffix,

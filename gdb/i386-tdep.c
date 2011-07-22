@@ -2780,12 +2780,19 @@ i386_mmx_regnum_to_fp_regnum (struct regcache *regcache, int regnum)
   return (I387_ST0_REGNUM (tdep) + fpreg);
 }
 
-enum register_status
-i386_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
-			   int regnum, gdb_byte *buf)
+/* A helper function for us by i386_pseudo_register_read_value and
+   amd64_pseudo_register_read_value.  It does all the work but reads
+   the data into an already-allocated value.  */
+
+void
+i386_pseudo_register_read_into_value (struct gdbarch *gdbarch,
+				      struct regcache *regcache,
+				      int regnum,
+				      struct value *result_value)
 {
   gdb_byte raw_buf[MAX_REGISTER_SIZE];
   enum register_status status;
+  gdb_byte *buf = value_contents_raw (result_value);
 
   if (i386_mmx_regnum_p (gdbarch, regnum))
     {
@@ -2794,8 +2801,10 @@ i386_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
       /* Extract (always little endian).  */
       status = regcache_raw_read (regcache, fpnum, raw_buf);
       if (status != REG_VALID)
-	return status;
-      memcpy (buf, raw_buf, register_size (gdbarch, regnum));
+	mark_value_bytes_unavailable (result_value, 0,
+				      TYPE_LENGTH (value_type (result_value)));
+      else
+	memcpy (buf, raw_buf, register_size (gdbarch, regnum));
     }
   else
     {
@@ -2810,15 +2819,17 @@ i386_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 				      I387_XMM0_REGNUM (tdep) + regnum,
 				      raw_buf);
 	  if (status != REG_VALID)
-	    return status;
-	  memcpy (buf, raw_buf, 16);
+	    mark_value_bytes_unavailable (result_value, 0, 16);
+	  else
+	    memcpy (buf, raw_buf, 16);
 	  /* Read upper 128bits.  */
 	  status = regcache_raw_read (regcache,
 				      tdep->ymm0h_regnum + regnum,
 				      raw_buf);
 	  if (status != REG_VALID)
-	    return status;
-	  memcpy (buf + 16, raw_buf, 16);
+	    mark_value_bytes_unavailable (result_value, 16, 32);
+	  else
+	    memcpy (buf + 16, raw_buf, 16);
 	}
       else if (i386_word_regnum_p (gdbarch, regnum))
 	{
@@ -2827,8 +2838,10 @@ i386_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 	  /* Extract (always little endian).  */
 	  status = regcache_raw_read (regcache, gpnum, raw_buf);
 	  if (status != REG_VALID)
-	    return status;
-	  memcpy (buf, raw_buf, 2);
+	    mark_value_bytes_unavailable (result_value, 0,
+					  TYPE_LENGTH (value_type (result_value)));
+	  else
+	    memcpy (buf, raw_buf, 2);
 	}
       else if (i386_byte_regnum_p (gdbarch, regnum))
 	{
@@ -2841,8 +2854,9 @@ i386_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 	     upper registers.  */
 	  status = regcache_raw_read (regcache, gpnum % 4, raw_buf);
 	  if (status != REG_VALID)
-	    return status;
-	  if (gpnum >= 4)
+	    mark_value_bytes_unavailable (result_value, 0,
+					  TYPE_LENGTH (value_type (result_value)));
+	  else if (gpnum >= 4)
 	    memcpy (buf, raw_buf + 1, 1);
 	  else
 	    memcpy (buf, raw_buf, 1);
@@ -2850,8 +2864,22 @@ i386_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
       else
 	internal_error (__FILE__, __LINE__, _("invalid regnum"));
     }
+}
 
-  return REG_VALID;
+static struct value *
+i386_pseudo_register_read_value (struct gdbarch *gdbarch,
+				 struct regcache *regcache,
+				 int regnum)
+{
+  struct value *result;
+
+  result = allocate_value (register_type (gdbarch, regnum));
+  VALUE_LVAL (result) = lval_register;
+  VALUE_REGNUM (result) = regnum;
+
+  i386_pseudo_register_read_into_value (gdbarch, regcache, regnum, result);
+
+  return result;
 }
 
 void
@@ -7333,7 +7361,8 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   frame_base_set_default (gdbarch, &i386_frame_base);
 
   /* Pseudo registers may be changed by amd64_init_abi.  */
-  set_gdbarch_pseudo_register_read (gdbarch, i386_pseudo_register_read);
+  set_gdbarch_pseudo_register_read_value (gdbarch,
+					  i386_pseudo_register_read_value);
   set_gdbarch_pseudo_register_write (gdbarch, i386_pseudo_register_write);
 
   set_tdesc_pseudo_register_type (gdbarch, i386_pseudo_register_type);

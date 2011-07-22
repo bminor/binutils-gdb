@@ -104,6 +104,12 @@ enum register_status regcache_cooked_read (struct regcache *regcache,
 void regcache_cooked_write (struct regcache *regcache, int rawnum,
 			    const gdb_byte *buf);
 
+/* Read register REGNUM from REGCACHE and return a new value.  This
+   will call mark_value_bytes_unavailable as appropriate.  */
+
+struct value *regcache_cooked_read_value (struct regcache *regcache,
+					  int regnum);
+
 /* Read a register as a signed/unsigned quantity.  */
 extern enum register_status
   regcache_cooked_read_signed (struct regcache *regcache,
