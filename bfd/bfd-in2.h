@@ -1895,6 +1895,9 @@ enum bfd_architecture
   bfd_arch_l1om,   /* Intel L1OM */
 #define bfd_mach_l1om 66
 #define bfd_mach_l1om_intel_syntax 67
+  bfd_arch_k1om,   /* Intel K1OM */
+#define bfd_mach_k1om 68
+#define bfd_mach_k1om_intel_syntax 69
   bfd_arch_we32k,     /* AT&T WE32xxx */
   bfd_arch_tahoe,     /* CCI/Harris Tahoe */
   bfd_arch_i860,      /* Intel 860 */

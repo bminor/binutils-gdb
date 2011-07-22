@@ -1,3 +1,11 @@
+2011-07-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/k1om.d: New.
+	* gas/i386/k1om-inval.l: Likewise.
+	* gas/i386/k1om-inval.s: Likewise.
+
+	* gas/i386/i386.exp: Run k1om-inval and k1om.
+
 2011-07-04  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* gas/mips/loc-swap.d: New test case for DWARF-2 location with

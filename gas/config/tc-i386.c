@@ -633,6 +633,8 @@ static const arch_entry cpu_arch[] =
     CPU_COREI7_FLAGS, 0, 0 },
   { STRING_COMMA_LEN ("l1om"), PROCESSOR_L1OM,
     CPU_L1OM_FLAGS, 0, 0 },
+  { STRING_COMMA_LEN ("k1om"), PROCESSOR_K1OM,
+    CPU_K1OM_FLAGS, 0, 0 },
   { STRING_COMMA_LEN ("k6"), PROCESSOR_K6,
     CPU_K6_FLAGS, 0, 0 },
   { STRING_COMMA_LEN ("k6_2"), PROCESSOR_K6,
@@ -1081,6 +1083,7 @@ i386_align_code (fragS *fragP, int count)
 	    case PROCESSOR_CORE2:
 	    case PROCESSOR_COREI7:
 	    case PROCESSOR_L1OM:
+	    case PROCESSOR_K1OM:
 	    case PROCESSOR_GENERIC64:
 	      patt = alt_long_patt;
 	      break;
@@ -1133,6 +1136,7 @@ i386_align_code (fragS *fragP, int count)
 	    case PROCESSOR_CORE2:
 	    case PROCESSOR_COREI7:
 	    case PROCESSOR_L1OM:
+	    case PROCESSOR_K1OM:
 	      if (fragP->tc_frag_data.isa_flags.bitfield.cpunop)
 		patt = alt_long_patt;
 	      else
@@ -2125,6 +2129,11 @@ check_cpu_arch_compatible (const char *name ATTRIBUTE_UNUSED,
       || new_flag.bitfield.cpul1om)
     return;
 
+  /* If we are targeting Intel K1OM, we must enable it.  */
+  if (get_elf_backend_data (stdoutput)->elf_machine_code != EM_K1OM
+      || new_flag.bitfield.cpuk1om)
+    return;
+
   as_bad (_("`%s' is not supported on `%s'"), name, arch);
 #endif
 }
@@ -2236,6 +2245,13 @@ i386_arch (void)
 	as_fatal (_("Intel L1OM is 64bit ELF only"));
       return bfd_arch_l1om;
     }
+  else if (cpu_arch_isa == PROCESSOR_K1OM)
+    {
+      if (OUTPUT_FLAVOR != bfd_target_elf_flavour
+	  || flag_code != CODE_64BIT)
+	as_fatal (_("Intel K1OM is 64bit ELF only"));
+      return bfd_arch_k1om;
+    }
   else
     return bfd_arch_i386;
 }
@@ -2251,6 +2267,13 @@ i386_mach (void)
 	      || default_arch[6] != '\0')
 	    as_fatal (_("Intel L1OM is 64bit ELF only"));
 	  return bfd_mach_l1om;
+	}
+      else if (cpu_arch_isa == PROCESSOR_K1OM)
+	{
+	  if (OUTPUT_FLAVOR != bfd_target_elf_flavour
+	      || default_arch[6] != '\0')
+	    as_fatal (_("Intel K1OM is 64bit ELF only"));
+	  return bfd_mach_k1om;
 	}
       else if (default_arch[6] == '\0')
 	return bfd_mach_x86_64;
@@ -8739,6 +8762,12 @@ i386_target_format (void)
 	    if (x86_elf_abi != X86_64_ABI)
 	      as_fatal (_("Intel L1OM is 64bit only"));
 	    return ELF_TARGET_L1OM_FORMAT;
+	  }
+	if (cpu_arch_isa == PROCESSOR_K1OM)
+	  {
+	    if (x86_elf_abi != X86_64_ABI)
+	      as_fatal (_("Intel K1OM is 64bit only"));
+	    return ELF_TARGET_K1OM_FORMAT;
 	  }
 	else
 	  return format;

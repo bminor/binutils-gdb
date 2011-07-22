@@ -96,6 +96,8 @@ enum
   CpuAVX2,
   /* Intel L1OM support required */
   CpuL1OM,
+  /* Intel K1OM support required */
+  CpuK1OM,
   /* Xsave/xrstor New Instructions support required */
   CpuXsave,
   /* Xsaveopt New Instructions support required */
@@ -191,6 +193,7 @@ typedef union i386_cpu_flags
       unsigned int cpuavx:1;
       unsigned int cpuavx2:1;
       unsigned int cpul1om:1;
+      unsigned int cpuk1om:1;
       unsigned int cpuxsave:1;
       unsigned int cpuxsaveopt:1;
       unsigned int cpuaes:1;

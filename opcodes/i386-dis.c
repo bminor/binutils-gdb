@@ -11166,7 +11166,9 @@ print_insn (bfd_vma pc, disassemble_info *info)
       || info->mach == bfd_mach_x64_32_intel_syntax
       || info->mach == bfd_mach_x64_32
       || info->mach == bfd_mach_l1om
-      || info->mach == bfd_mach_l1om_intel_syntax)
+      || info->mach == bfd_mach_l1om_intel_syntax
+      || info->mach == bfd_mach_k1om
+      || info->mach == bfd_mach_k1om_intel_syntax)
     address_mode = mode_64bit;
   else
     address_mode = mode_32bit;
@@ -11175,16 +11177,19 @@ print_insn (bfd_vma pc, disassemble_info *info)
     intel_syntax = (info->mach == bfd_mach_i386_i386_intel_syntax
 		    || info->mach == bfd_mach_x86_64_intel_syntax
 		    || info->mach == bfd_mach_x64_32_intel_syntax
-		    || info->mach == bfd_mach_l1om_intel_syntax);
+		    || info->mach == bfd_mach_l1om_intel_syntax
+		    || info->mach == bfd_mach_k1om_intel_syntax);
 
   if (info->mach == bfd_mach_i386_i386
       || info->mach == bfd_mach_x86_64
       || info->mach == bfd_mach_x64_32
       || info->mach == bfd_mach_l1om
+      || info->mach == bfd_mach_k1om
       || info->mach == bfd_mach_i386_i386_intel_syntax
       || info->mach == bfd_mach_x86_64_intel_syntax
       || info->mach == bfd_mach_x64_32_intel_syntax
-      || info->mach == bfd_mach_l1om_intel_syntax)
+      || info->mach == bfd_mach_l1om_intel_syntax
+      || info->mach == bfd_mach_k1om_intel_syntax)
     priv.orig_sizeflag = AFLAG | DFLAG;
   else if (info->mach == bfd_mach_i386_i8086)
     priv.orig_sizeflag = 0;

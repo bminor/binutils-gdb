@@ -1,3 +1,34 @@
+2011-07-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.am (ALL_MACHINES): Add cpu-k1om.lo.
+	(ALL_MACHINES_CFILES): Add cpu-k1om.c.
+	* Makefile.in: Regenerated.
+
+	* archures.c (bfd_architecture): Add bfd_arch_k1om.
+	(bfd_k1om_arch): New.
+	(bfd_archures_list): Add &bfd_k1om_arch.
+	* bfd-in2.h: Regenerated.
+
+	* config.bfd (targ64_selvecs): Add bfd_elf64_k1om_vec if
+	bfd_elf64_x86_64_vec is supported.  Add bfd_elf64_k1om_freebsd_vec
+	if bfd_elf64_x86_64_freebsd_vec is supported.
+	(targ_selvecs): Likewise.
+
+	* configure.in: Support bfd_elf64_k1om_vec and
+	bfd_elf64_k1om_freebsd_vec.
+	* configure: Regenerated.
+
+	* cpu-k1om.c: New.
+
+	* elf64-x86-64.c (elf64_k1om_elf_object_p): New.
+	(bfd_elf64_k1om_vec): Likewise.
+	(bfd_elf64_k1om_freebsd_vec): Likewise.
+
+	* targets.c (bfd_elf64_k1om_vec): New.
+	(bfd_elf64_k1om_freebsd_vec): Likewise.
+	(_bfd_target_vector): Add bfd_elf64_k1om_vec and
+	bfd_elf64_k1om_freebsd_vec.
+
 2011-07-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix false coff-go32-exe matches.

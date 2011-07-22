@@ -1,3 +1,23 @@
+2011-07-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure.in: Handle bfd_k1om_arch.
+	* configure: Regenerated.
+
+	* disassemble.c (disassembler): Handle bfd_k1om_arch.
+
+	* i386-dis.c (print_insn): Handle bfd_mach_k1om and
+	bfd_mach_k1om_intel_syntax.
+
+	* i386-gen.c (cpu_flag_init): Set CPU_UNKNOWN_FLAGS to
+	~(CpuL1OM|CpuK1OM).  Add CPU_K1OM_FLAGS.
+	(cpu_flags): Add CpuK1OM.
+
+	* i386-opc.h (CpuK1OM): New.
+	(i386_cpu_flags): Add cpuk1om.
+
+	* i386-init.h: Regenerated.
+	* i386-tbl.h: Likewise.
+
 2011-07-12  Nick Clifton  <nickc@redhat.com>
 
 	* arm-dis.c (print_insn_arm): Revert previous, undocumented,

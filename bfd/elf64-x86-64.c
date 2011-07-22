@@ -5037,6 +5037,56 @@ elf64_l1om_elf_object_p (bfd *abfd)
 
 #include "elf64-target.h"
 
+/* Intel K1OM support.  */
+
+static bfd_boolean
+elf64_k1om_elf_object_p (bfd *abfd)
+{
+  /* Set the right machine number for an K1OM elf64 file.  */
+  bfd_default_set_arch_mach (abfd, bfd_arch_k1om, bfd_mach_k1om);
+  return TRUE;
+}
+
+#undef  TARGET_LITTLE_SYM
+#define TARGET_LITTLE_SYM		    bfd_elf64_k1om_vec
+#undef  TARGET_LITTLE_NAME
+#define TARGET_LITTLE_NAME		    "elf64-k1om"
+#undef ELF_ARCH
+#define ELF_ARCH			    bfd_arch_k1om
+
+#undef	ELF_MACHINE_CODE
+#define ELF_MACHINE_CODE		    EM_K1OM
+
+#undef	ELF_OSABI
+
+#undef  elf64_bed
+#define elf64_bed elf64_k1om_bed
+
+#undef elf_backend_object_p
+#define elf_backend_object_p		    elf64_k1om_elf_object_p
+
+#undef  elf_backend_static_tls_alignment
+
+#undef elf_backend_want_plt_sym
+#define elf_backend_want_plt_sym	    0
+
+#include "elf64-target.h"
+
+/* FreeBSD K1OM support.  */
+
+#undef  TARGET_LITTLE_SYM
+#define TARGET_LITTLE_SYM		    bfd_elf64_k1om_freebsd_vec
+#undef  TARGET_LITTLE_NAME
+#define TARGET_LITTLE_NAME		    "elf64-k1om-freebsd"
+
+#undef	ELF_OSABI
+#define	ELF_OSABI			    ELFOSABI_FREEBSD
+
+#undef  elf64_bed
+#define elf64_bed elf64_k1om_fbsd_bed
+
+#include "elf64-target.h"
+
 /* 32bit x86-64 support.  */
 
 static bfd_boolean

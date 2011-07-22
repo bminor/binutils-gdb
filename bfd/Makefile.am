@@ -91,6 +91,7 @@ ALL_MACHINES = \
 	cpu-i370.lo \
 	cpu-i386.lo \
 	cpu-l1om.lo \
+	cpu-k1om.lo \
 	cpu-i860.lo \
 	cpu-i960.lo \
 	cpu-ia64.lo \
@@ -165,6 +166,7 @@ ALL_MACHINES_CFILES = \
 	cpu-i370.c \
 	cpu-i386.c \
 	cpu-l1om.c \
+	cpu-k1om.c \
 	cpu-i860.c \
 	cpu-i960.c \
 	cpu-ia64.c \

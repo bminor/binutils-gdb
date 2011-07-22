@@ -390,6 +390,7 @@ ALL_MACHINES = \
 	cpu-i370.lo \
 	cpu-i386.lo \
 	cpu-l1om.lo \
+	cpu-k1om.lo \
 	cpu-i860.lo \
 	cpu-i960.lo \
 	cpu-ia64.lo \
@@ -464,6 +465,7 @@ ALL_MACHINES_CFILES = \
 	cpu-i370.c \
 	cpu-i386.c \
 	cpu-l1om.c \
+	cpu-k1om.c \
 	cpu-i860.c \
 	cpu-i960.c \
 	cpu-ia64.c \
@@ -1270,6 +1272,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cpu-ia64.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cpu-ip2k.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cpu-iq2000.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cpu-k1om.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cpu-l1om.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cpu-lm32.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cpu-m10200.Plo@am__quote@

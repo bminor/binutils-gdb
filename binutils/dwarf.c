@@ -4233,6 +4233,7 @@ init_dwarf_regnames (unsigned int e_machine)
 
     case EM_X86_64:
     case EM_L1OM:
+    case EM_K1OM:
       init_dwarf_regnames_x86_64 ();
       break;
 

@@ -1,3 +1,12 @@
+2011-07-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-x86-64/abs-k1om.d: New.
+	* ld-x86-64/protected2-k1om.d: Likewise.
+	* ld-x86-64/protected3-k1om.d: Likewise.
+
+	* ld-x86-64/x86-64.exp: Run abs-k1om, protected2-k1om and
+	protected3-k1om.
+
 2011-07-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-elf/binutils.exp (binutils_test): Also check ignored

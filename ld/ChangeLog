@@ -1,3 +1,18 @@
+2011-07-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.am (ALL_64_EMULATIONS): Add eelf_k1om.o and
+	eelf_k1om_fbsd.o
+	(eelf_k1om.c): New.
+	(eelf_k1om_fbsd.c): Likewise.
+	* Makefile.in: Regenerated.
+
+	* configure.tgt (targ64_extra_emuls): Add elf_k1om if elf_x86_64
+	is supported.  Add elf_k1om_fbsd if elf_x86_64_fbsd is supported.
+	(targ_extra_emuls): Likewise.
+
+	* emulparams/elf_k1om.sh: New.
+	* emulparams/elf_k1om_fbsd.sh: Likewise.
+
 2011-07-16  Roland McGrath  <roland@hack.frob.com>
 
 	* ld.h (args_type): New field print_output_format.

@@ -1,3 +1,18 @@
+2011-07-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (cpu_arch): Add k1om.
+	(i386_align_code): Handle PROCESSOR_K1OM.
+	(check_cpu_arch_compatible): Check EM_K1OM.
+	(i386_arch): Handle Intel K1OM.
+	(i386_mach): Return bfd_mach_k1om for Intel K1OM.
+	(i386_target_format): Return ELF_TARGET_K1OM_FORMAT for Intel
+	K1OM.
+
+	* config/tc-i386.h (ELF_TARGET_K1OM_FORMAT): New.
+	(processor_type): Add PROCESSOR_K1OM.
+
+	* doc/c-i386.texi: Document k1om.
+
 2011-07-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* doc/c-i386.texi: Fix a typo.

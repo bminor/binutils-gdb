@@ -1,3 +1,25 @@
+2011-07-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* dwarf.c (init_dwarf_regnames): Handle EM_K1OM.
+
+	* elfedit.c (elf_machine): Support EM_K1OM.
+	(elf_class): Likewise.
+
+	* readelf.c (guess_is_rela): Handle EM_K1OM.
+	(dump_relocations): Likewise.
+	(get_machine_name): Likewise.
+	(get_section_type_name): Likewise.
+	(get_elf_section_flags): Likewise.
+	(process_section_headers): Likewise.
+	(get_symbol_index_type): Likewise.
+	(is_32bit_abs_reloc): Likewise.
+	(is_32bit_pcrel_reloc): Likewise.
+	(is_64bit_abs_reloc): Likewise.
+	(is_64bit_pcrel_reloc): Likewise.
+	(is_none_reloc): Likewise.
+
+	* doc/binutils.texi: Mention K1OM for elfedit.
+
 2011-07-11  Cary Coutant  <ccoutant@google.com>
 
 	PR 12983

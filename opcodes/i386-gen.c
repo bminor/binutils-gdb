@@ -43,7 +43,7 @@ typedef struct initializer
 static initializer cpu_flag_init[] =
 {
   { "CPU_UNKNOWN_FLAGS",
-    "~CpuL1OM" },
+    "~(CpuL1OM|CpuK1OM)" },
   { "CPU_GENERIC32_FLAGS",
     "Cpu186|Cpu286|Cpu386" },
   { "CPU_GENERIC64_FLAGS", 
@@ -184,6 +184,8 @@ static initializer cpu_flag_init[] =
     "CpuAVX|CpuAVX2" },
   { "CPU_L1OM_FLAGS",
     "unknown" },
+  { "CPU_K1OM_FLAGS",
+    "unknown" },
 };
 
 static initializer operand_type_init[] =
@@ -319,6 +321,7 @@ static bitfield cpu_flags[] =
   BITFIELD (CpuAVX),
   BITFIELD (CpuAVX2),
   BITFIELD (CpuL1OM),
+  BITFIELD (CpuK1OM),
   BITFIELD (CpuSSE4a),
   BITFIELD (Cpu3dnow),
   BITFIELD (Cpu3dnowA),

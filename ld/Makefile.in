@@ -786,6 +786,8 @@ ALL_64_EMULATION_SOURCES = \
 	eelf64tilegx.c \
 	eelf_l1om.c \
 	eelf_l1om_fbsd.c \
+	eelf_k1om.c \
+	eelf_k1om_fbsd.c \
 	eelf_x86_64.c \
 	eelf_x86_64_fbsd.c \
 	eelf_x86_64_sol2.c \
@@ -1186,6 +1188,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf_i386_ldso.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf_i386_sol2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf_i386_vxworks.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf_k1om.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf_k1om_fbsd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf_l1om.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf_l1om_fbsd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf_s390.Po@am__quote@
@@ -3432,6 +3436,13 @@ eelf_l1om_fbsd.c: $(srcdir)/emulparams/elf_l1om_fbsd.sh \
   $(srcdir)/emulparams/elf_l1om.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf_l1om_fbsd "$(tdir_elf_l1om_fbsd)"
+eelf_k1om.c: $(srcdir)/emulparams/elf_k1om.sh \
+  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf_k1om "$(tdir_elf_k1om)"
+eelf_k1om_fbsd.c: $(srcdir)/emulparams/elf_k1om_fbsd.sh \
+  $(srcdir)/emulparams/elf_k1om.sh \
+  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf_k1om_fbsd "$(tdir_elf_k1om_fbsd)"
 eelf_x86_64.c: $(srcdir)/emulparams/elf_x86_64.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf_x86_64 "$(tdir_elf_x86_64)"
