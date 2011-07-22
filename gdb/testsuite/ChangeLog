@@ -1,5 +1,10 @@
 2011-07-21  Matt Rice  <ratmice@gmail.com>
 
+	* gdb.threads/Makefile.in: Avoid globbing corethreads.exp
+	in mostlyclean rule.  Add files ending in .core.
+
+2011-07-21  Matt Rice  <ratmice@gmail.com>
+
 	PR macros/12999
 	* gdb.base/info-macros.c: New test sources.
 	* gdb.base/info-macros.exp: New tests.
