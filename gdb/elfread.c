@@ -667,14 +667,14 @@ elf_rel_plt_read (struct objfile *objfile, asymbol **dyn_symbol_table)
 	 OBJFILE the symbol is undefined and the objfile having NAME defined
 	 may not yet have been loaded.  */
 
-      if (string_buffer_size < name_len + got_suffix_len)
+      if (string_buffer_size < name_len + got_suffix_len + 1)
 	{
 	  string_buffer_size = 2 * (name_len + got_suffix_len);
 	  string_buffer = xrealloc (string_buffer, string_buffer_size);
 	}
       memcpy (string_buffer, name, name_len);
       memcpy (&string_buffer[name_len], SYMBOL_GOT_PLT_SUFFIX,
-	      got_suffix_len);
+	      got_suffix_len + 1);
 
       msym = record_minimal_symbol (string_buffer, name_len + got_suffix_len,
                                     1, address, mst_slot_got_plt, got_plt,
