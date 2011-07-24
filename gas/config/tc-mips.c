@@ -3148,21 +3148,13 @@ can_swap_branch_p (struct mips_cl_insn *ip)
       && history[0].frag->fr_type == rs_machine_dependent)
     return FALSE;
 
-  /* We do not swap with a trap instruction, since it complicates trap
-     handlers to have the trap instruction be in a delay slot.  */
+  /* We do not swap with instructions that cannot architecturally
+     be placed in a branch delay slot, such as SYNC or ERET.  We
+     also refrain from swapping with a trap instruction, since it
+     complicates trap handlers to have the trap instruction be in
+     a delay slot.  */
   prev_pinfo = history[0].insn_mo->pinfo;
-  if (prev_pinfo & INSN_TRAP)
-    return FALSE;
-
-  /* If the previous instruction is a sync, sync.l, or sync.p, we can
-     not swap.  */
-  if (prev_pinfo & INSN_SYNC)
-    return FALSE;
-
-  /* If the previous instruction is an ERET or DERET, avoid the swap.  */
-  if (history[0].insn_opcode == INSN_ERET)
-    return FALSE;
-  if (history[0].insn_opcode == INSN_DERET)
+  if (prev_pinfo & INSN_NO_DELAY_SLOT)
     return FALSE;
 
   /* Check for conflicts between the branch and the instructions

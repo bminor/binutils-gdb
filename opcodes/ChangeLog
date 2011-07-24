@@ -1,3 +1,16 @@
+2011-07-24  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* mips-opc.c (NODS): New macro.
+	(TRAP): Adjust for the rename of INSN_TRAP to INSN_NO_DELAY_SLOT.
+	(DSP_VOLA): Likewise.
+	(mips_builtin_opcodes): Add NODS annotation to "deret" and
+	"eret". Replace INSN_SYNC with NODS throughout.  Use NODS in
+	place of TRAP for "wait", "waiti" and "yield".
+	* mips16-opc.c (NODS): New macro.
+	(TRAP): Adjust for the rename of INSN_TRAP to INSN_NO_DELAY_SLOT.
+	(mips16_opcodes):  Use NODS in place of TRAP for "jalrc", "jrc",
+	"restore" and "save".
+
 2011-07-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* configure.in: Handle bfd_k1om_arch.

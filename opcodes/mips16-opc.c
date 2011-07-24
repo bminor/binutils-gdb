@@ -58,7 +58,8 @@
 #define RD_HI	INSN_READ_HI
 #define RD_LO	INSN_READ_LO
 
-#define TRAP	INSN_TRAP
+#define NODS	INSN_NO_DELAY_SLOT
+#define TRAP	INSN_NO_DELAY_SLOT
 
 #define I1	INSN_ISA1
 #define I3	INSN_ISA3
@@ -174,10 +175,10 @@ const struct mips_opcode mips16_opcodes[] =
 /* MIPS16e compact branches.  We keep them near the ordinary branches
    so that we easily find them when converting a normal branch to a
    compact one.  */
-{"jalrc",   "x",	0xe8c0, 0xf8ff, UBR|WR_31|RD_x|TRAP, 0,     I32 },
-{"jalrc",   "R,x",	0xe8c0, 0xf8ff, UBR|WR_31|RD_x|TRAP, 0,     I32 },
-{"jrc",     "x",	0xe880, 0xf8ff, UBR|RD_x|TRAP,	0,      I32 },
-{"jrc",     "R",	0xe8a0, 0xffff, UBR|RD_31|TRAP,	0,      I32 },
+{"jalrc",   "x",	0xe8c0, 0xf8ff, UBR|WR_31|RD_x|NODS, 0,	I32 },
+{"jalrc",   "R,x",	0xe8c0, 0xf8ff, UBR|WR_31|RD_x|NODS, 0,	I32 },
+{"jrc",	    "x",	0xe880, 0xf8ff, UBR|RD_x|NODS,	0,	I32 },
+{"jrc",	    "R",	0xe8a0, 0xffff, UBR|RD_31|NODS,	0,	I32 },
 {"lb",	    "y,5(x)",	0x8000, 0xf800, WR_y|RD_x,	0,	I1 },
 {"lbu",	    "y,5(x)",	0xa000, 0xf800, WR_y|RD_x,	0,	I1 },
 {"ld",	    "y,D(x)",	0x3800, 0xf800, WR_y|RD_x, 	0,	I3 },
@@ -234,8 +235,8 @@ const struct mips_opcode mips16_opcodes[] =
 {"sw",	    "R,V(S)",	0x6200, 0xff00, RD_31|RD_SP,	0,	I1 },
 {"xor",	    "x,y",	0xe80e, 0xf81f, WR_x|RD_x|RD_y, 0,	I1 },
   /* MIPS16e additions */
-{"restore", "M",	0x6400, 0xff80, WR_31|RD_SP|WR_SP|TRAP,	0,	I32 },
-{"save",    "m",	0x6480, 0xff80, RD_31|RD_SP|WR_SP|TRAP,	0,	I32 },
+{"restore", "M",	0x6400, 0xff80, WR_31|RD_SP|WR_SP|NODS,	0, I32 },
+{"save",    "m",	0x6480, 0xff80, RD_31|RD_SP|WR_SP|NODS,	0, I32 },
 {"sdbbp",   "6",	0xe801, 0xf81f, TRAP,		0,	I32 },
 {"seb",	    "x",	0xe891, 0xf8ff, WR_x|RD_x,	0,      I32 },
 {"seh",	    "x",	0xe8b1, 0xf8ff, WR_x|RD_x,	0,      I32 },
