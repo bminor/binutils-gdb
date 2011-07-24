@@ -1,4 +1,4 @@
-#objdump: -rst -mips16
+#objdump: -rst --special-syms -mips16
 #name: MIPS16 reloc
 #as: -32 -mips16
 #source: mips16-e.s

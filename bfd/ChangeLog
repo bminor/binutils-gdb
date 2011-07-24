@@ -1,3 +1,159 @@
+2011-07-24  Chao-ying Fu  <fu@mips.com>
+            Ilie Garbacea  <ilie@mips.com>
+            Maciej W. Rozycki  <macro@codesourcery.com>
+            Joseph Myers  <joseph@codesourcery.com>
+            Catherine Moore  <clm@codesourcery.com>
+	    Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* archures.c (bfd_mach_mips_micromips): New macro.
+	* cpu-mips.c (I_micromips): New enum value.
+	(arch_info_struct): Add bfd_mach_mips_micromips.
+	* elfxx-mips.h (_bfd_mips_elf_is_target_special_symbol): New
+	prototype.
+	(_bfd_mips_elf_relax_section): Likewise.
+	(_bfd_mips16_elf_reloc_unshuffle): Rename to...
+	(_bfd_mips_elf_reloc_unshuffle): ... this.  Handle microMIPS
+	ASE.
+	(_bfd_mips16_elf_reloc_shuffle): Rename to...
+	(_bfd_mips_elf_reloc_shuffle): ... this.  Handle microMIPS ASE.
+	(gprel16_reloc_p): Handle microMIPS ASE.
+	(literal_reloc_p): New function.
+	* elf32-mips.c (elf_micromips_howto_table_rel): New variable.
+	(_bfd_mips_elf32_gprel16_reloc): Handle microMIPS ASE.
+	(mips16_gprel_reloc): Update for _bfd_mips_elf_reloc_unshuffle
+	and _bfd_mips_elf_reloc_shuffle changes.
+	(mips_elf_gprel32_reloc): Update comment.
+	(micromips_reloc_map): New variable.
+	(bfd_elf32_bfd_reloc_type_lookup): Handle microMIPS ASE.
+	(mips_elf32_rtype_to_howto): Likewise.
+	(mips_info_to_howto_rel): Likewise.
+	(bfd_elf32_bfd_is_target_special_symbol): Define.
+	(bfd_elf32_bfd_relax_section): Likewise.
+	* elf64-mips.c (micromips_elf64_howto_table_rel): New variable.
+	(micromips_elf64_howto_table_rela): Likewise.
+	(mips16_gprel_reloc): Update for _bfd_mips_elf_reloc_unshuffle
+	and _bfd_mips_elf_reloc_shuffle changes.
+	(micromips_reloc_map): Likewise.
+	(bfd_elf64_bfd_reloc_type_lookup): Handle microMIPS ASE.
+	(bfd_elf64_bfd_reloc_name_lookup): Likewise.
+	(mips_elf64_rtype_to_howto): Likewise.
+	(bfd_elf64_bfd_is_target_special_symbol): Define.
+	* elfn32-mips.c (elf_micromips_howto_table_rel): New variable.
+	(elf_micromips_howto_table_rela): Likewise.
+	(mips16_gprel_reloc): Update for _bfd_mips_elf_reloc_unshuffle
+	and _bfd_mips_elf_reloc_shuffle changes.
+	(micromips_reloc_map): Likewise.
+	(bfd_elf32_bfd_reloc_type_lookup): Handle microMIPS ASE.
+	(bfd_elf32_bfd_reloc_name_lookup): Likewise.
+	(mips_elf_n32_rtype_to_howto): Likewise.
+	(bfd_elf32_bfd_is_target_special_symbol): Define.
+	* elfxx-mips.c (LA25_LUI_MICROMIPS_1): New macro.
+	(LA25_LUI_MICROMIPS_2): Likewise.
+	(LA25_J_MICROMIPS_1, LA25_J_MICROMIPS_2): Likewise.
+	(LA25_ADDIU_MICROMIPS_1, LA25_ADDIU_MICROMIPS_2): Likewise.
+	(TLS_RELOC_P): Handle microMIPS ASE.
+	(mips_elf_create_stub_symbol): Adjust value of stub symbol if
+	target is a microMIPS function.
+	(micromips_reloc_p): New function.
+	(micromips_reloc_shuffle_p): Likewise.
+	(got16_reloc_p, call16_reloc_p): Handle microMIPS ASE.
+	(got_disp_reloc_p, got_page_reloc_p): New functions.
+	(got_ofst_reloc_p): Likewise.
+	(got_hi16_reloc_p, got_lo16_reloc_p): Likewise.
+	(call_hi16_reloc_p, call_lo16_reloc_p): Likewise.
+	(hi16_reloc_p, lo16_reloc_p, jal_reloc_p): Handle microMIPS ASE.
+	(micromips_branch_reloc_p): New function.
+	(tls_gd_reloc_p, tls_ldm_reloc_p): Likewise.
+	(tls_gottprel_reloc_p): Likewise.
+	(_bfd_mips16_elf_reloc_unshuffle): Rename to...
+	(_bfd_mips_elf_reloc_unshuffle): ... this.  Handle microMIPS
+	ASE.
+	(_bfd_mips16_elf_reloc_shuffle): Rename to...
+	(_bfd_mips_elf_reloc_shuffle): ... this.  Handle microMIPS ASE.
+	(_bfd_mips_elf_lo16_reloc): Handle microMIPS ASE.
+	(mips_tls_got_index, mips_elf_got_page): Likewise.
+	(mips_elf_create_local_got_entry): Likewise.
+	(mips_elf_relocation_needs_la25_stub): Likewise.
+	(mips_elf_calculate_relocation): Likewise.
+	(mips_elf_perform_relocation): Likewise.
+	(_bfd_mips_elf_symbol_processing): Likewise.
+	(_bfd_mips_elf_add_symbol_hook): Likewise.
+	(_bfd_mips_elf_link_output_symbol_hook): Likewise.
+	(mips_elf_add_lo16_rel_addend): Likewise.
+	(_bfd_mips_elf_check_relocs): Likewise.
+	(mips_elf_adjust_addend): Likewise.
+	(_bfd_mips_elf_relocate_section): Likewise.
+	(mips_elf_create_la25_stub): Likewise.
+	(_bfd_mips_vxworks_finish_dynamic_symbol): Likewise.
+	(_bfd_mips_elf_gc_sweep_hook): Likewise.
+	(_bfd_mips_elf_is_target_special_symbol): New function.
+	(mips_elf_relax_delete_bytes): Likewise.
+	(opcode_descriptor): New structure.
+	(RA): New macro.
+	(OP32_SREG, OP32_TREG, OP16_VALID_REG): Likewise.
+	(b_insns_32, bc_insn_32, bz_insn_32, bzal_insn_32): New variables.
+	(beq_insn_32): Likewise.
+	(b_insn_16, bz_insn_16): New variables.
+	(BZC32_REG_FIELD): New macro.
+	(bz_rs_insns_32, bz_rt_insns_32): New variables.
+	(bzc_insns_32, bz_insns_16):Likewise.
+	(BZ16_REG, BZ16_REG_FIELD): New macros.
+	(jal_insn_32_bd16, jal_insn_32_bd32): New variables.
+	(jal_x_insn_32_bd32): Likewise.
+	(j_insn_32, jalr_insn_32): Likewise.
+	(ds_insns_32_bd16, ds_insns_32_bd32): Likewise.
+	(jalr_insn_16_bd16, jalr_insn_16_bd32, jr_insn_16): Likewise.
+	(JR16_REG): New macro.
+	(ds_insns_16_bd16): New variable.
+	(lui_insn): Likewise.
+	(addiu_insn, addiupc_insn): Likewise.
+	(ADDIUPC_REG_FIELD): New macro.
+	(MOVE32_RD, MOVE32_RS): Likewise.
+	(MOVE16_RD_FIELD, MOVE16_RS_FIELD): Likewise.
+	(move_insns_32, move_insns_16): New variables.
+	(nop_insn_32, nop_insn_16): Likewise.
+	(MATCH): New macro.
+	(find_match): New function.
+	(check_br16_dslot, check_br32_dslot): Likewise.
+	(check_br16, check_br32): Likewise.
+	(IS_BITSIZE): New macro.
+	(check_4byte_branch): New function.
+	(_bfd_mips_elf_relax_section): Likewise.
+	(_bfd_mips_elf_merge_private_bfd_data): Disallow linking MIPS16
+	and microMIPS modules together.
+	(_bfd_mips_elf_print_private_bfd_data):	Handle microMIPS ASE.
+	* reloc.c (BFD_RELOC_MICROMIPS_7_PCREL_S1): New relocation.
+	(BFD_RELOC_MICROMIPS_10_PCREL_S1): Likewise.
+	(BFD_RELOC_MICROMIPS_16_PCREL_S1): Likewise.
+	(BFD_RELOC_MICROMIPS_GPREL16): Likewise.
+	(BFD_RELOC_MICROMIPS_JMP, BFD_RELOC_MICROMIPS_HI16): Likewise.
+	(BFD_RELOC_MICROMIPS_HI16_S): Likewise.
+	(BFD_RELOC_MICROMIPS_LO16): Likewise.
+	(BFD_RELOC_MICROMIPS_LITERAL): Likewise.
+	(BFD_RELOC_MICROMIPS_GOT16): Likewise.
+	(BFD_RELOC_MICROMIPS_CALL16): Likewise.
+	(BFD_RELOC_MICROMIPS_GOT_HI16): Likewise.
+	(BFD_RELOC_MICROMIPS_GOT_LO16): Likewise.
+	(BFD_RELOC_MICROMIPS_CALL_HI16): Likewise.
+	(BFD_RELOC_MICROMIPS_CALL_LO16): Likewise.
+	(BFD_RELOC_MICROMIPS_SUB): Likewise.
+	(BFD_RELOC_MICROMIPS_GOT_PAGE): Likewise.
+	(BFD_RELOC_MICROMIPS_GOT_OFST): Likewise.
+	(BFD_RELOC_MICROMIPS_GOT_DISP): Likewise.
+	(BFD_RELOC_MICROMIPS_HIGHEST): Likewise.
+	(BFD_RELOC_MICROMIPS_HIGHER): Likewise.
+	(BFD_RELOC_MICROMIPS_SCN_DISP): Likewise.
+	(BFD_RELOC_MICROMIPS_JALR): Likewise.
+	(BFD_RELOC_MICROMIPS_TLS_GD): Likewise.
+	(BFD_RELOC_MICROMIPS_TLS_LDM): Likewise.
+	(BFD_RELOC_MICROMIPS_TLS_DTPREL_HI16): Likewise.
+	(BFD_RELOC_MICROMIPS_TLS_DTPREL_LO16): Likewise.
+	(BFD_RELOC_MICROMIPS_TLS_GOTTPREL): Likewise.
+	(BFD_RELOC_MICROMIPS_TLS_TPREL_HI16): Likewise.
+	(BFD_RELOC_MICROMIPS_TLS_TPREL_LO16): Likewise.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
 2011-07-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.am (ALL_MACHINES): Add cpu-k1om.lo.

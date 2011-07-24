@@ -1,3 +1,152 @@
+2011-07-24  Maciej W. Rozycki  <macro@codesourcery.com>
+            Chao-ying Fu  <fu@mips.com>
+	    Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* gas/mips/micromips.d: New test.
+	* gas/mips/micromips-branch-delay.d: Likewise.
+	* gas/mips/micromips-branch-relax.d: Likewise.
+	* gas/mips/micromips-branch-relax-pic.d: Likewise.
+	* gas/mips/micromips-size-1.d: Likewise.
+	* gas/mips/micromips-trap.d: Likewise.
+	* gas/mips/micromips.l: New stderr output.
+	* gas/mips/micromips-branch-delay.l: Likewise.
+	* gas/mips/micromips-branch-relax.l: Likewise.
+	* gas/mips/micromips-branch-relax-pic.l: Likewise.
+	* gas/mips/micromips-size-0.l: New list test.
+	* gas/mips/micromips-size-1.l: New stderr output.
+	* gas/mips/micromips.s: New test source.
+	* gas/mips/micromips-branch-delay.s: Likewise.
+	* gas/mips/micromips-branch-relax.s: Likewise.
+	* gas/mips/micromips-size-0.s: Likewise.
+	* gas/mips/micromips-size-1.s: Likewise.
+	* gas/mips/mips.exp: Run the new tests.
+
+	* gas/mips/dli.s: Use .p2align.
+	* gas/mips/elf_ase_micromips.d: New test.
+	* gas/mips/elf_ase_micromips-2.d: Likewise.
+	* gas/mips/micromips@abs.d: Likewise.
+	* gas/mips/micromips@add.d: Likewise.
+	* gas/mips/micromips@alnv_ps-swap.d: Likewise.
+	* gas/mips/micromips@and.d: Likewise.
+	* gas/mips/micromips@beq.d: Likewise.
+	* gas/mips/micromips@bge.d: Likewise.
+	* gas/mips/micromips@bgeu.d: Likewise.
+	* gas/mips/micromips@blt.d: Likewise.
+	* gas/mips/micromips@bltu.d: Likewise.
+	* gas/mips/micromips@branch-likely.d: Likewise.
+	* gas/mips/micromips@branch-misc-1.d: Likewise.
+	* gas/mips/micromips@branch-misc-2-64.d: Likewise.
+	* gas/mips/micromips@branch-misc-2.d: Likewise.
+	* gas/mips/micromips@branch-misc-2pic-64.d: Likewise.
+	* gas/mips/micromips@branch-misc-2pic.d: Likewise.
+	* gas/mips/micromips@branch-misc-4-64.d: Likewise.
+	* gas/mips/micromips@branch-misc-4.d: Likewise.
+	* gas/mips/micromips@branch-self.d: Likewise.
+	* gas/mips/micromips@cache.d: Likewise.
+	* gas/mips/micromips@daddi.d: Likewise.
+	* gas/mips/micromips@dli.d: Likewise.
+	* gas/mips/micromips@elf-jal.d: Likewise.
+	* gas/mips/micromips@elf-rel2.d: Likewise.
+	* gas/mips/micromips@elfel-rel2.d: Likewise.
+	* gas/mips/micromips@elf-rel4.d: Likewise.
+	* gas/mips/micromips@jal-svr4pic.d: Likewise.
+	* gas/mips/micromips@jal-svr4pic-noreorder.d: Likewise.
+	* gas/mips/micromips@lb-svr4pic-ilocks.d: Likewise.
+	* gas/mips/micromips@li.d: Likewise.
+	* gas/mips/micromips@loc-swap-dis.d: Likewise.
+	* gas/mips/micromips@loc-swap.d: Likewise.
+	* gas/mips/micromips@mips1-fp.d: Likewise.
+	* gas/mips/micromips@mips32-cp2.d: Likewise.
+	* gas/mips/micromips@mips32-imm.d: Likewise.
+	* gas/mips/micromips@mips32-sf32.d: Likewise.
+	* gas/mips/micromips@mips32.d: Likewise.
+	* gas/mips/micromips@mips32r2-cp2.d: Likewise.
+	* gas/mips/micromips@mips32r2-fp32.d: Likewise.
+	* gas/mips/micromips@mips32r2-sync.d: Likewise.
+	* gas/mips/micromips@mips32r2.d: Likewise.
+	* gas/mips/micromips@mips4-branch-likely.d: Likewise.
+	* gas/mips/micromips@mips4-fp.d: Likewise.
+	* gas/mips/micromips@mips4.d: Likewise.
+	* gas/mips/micromips@mips5.d: Likewise.
+	* gas/mips/micromips@mips64-cp2.d: Likewise.
+	* gas/mips/micromips@mips64.d: Likewise.
+	* gas/mips/micromips@mips64r2.d: Likewise.
+	* gas/mips/micromips@pref.d: Likewise.
+	* gas/mips/micromips@relax-at.d: Likewise.
+	* gas/mips/micromips@relax.d: Likewise.
+	* gas/mips/micromips@rol-hw.d: Likewise.
+	* gas/mips/micromips@uld2-eb.d: Likewise.
+	* gas/mips/micromips@uld2-el.d: Likewise.
+	* gas/mips/micromips@ulh2-eb.d: Likewise.
+	* gas/mips/micromips@ulh2-el.d: Likewise.
+	* gas/mips/micromips@ulw2-eb-ilocks.d: Likewise.
+	* gas/mips/micromips@ulw2-el-ilocks.d: Likewise.
+	* gas/mips/cache.d: Likewise.
+	* gas/mips/daddi.d: Likewise.
+	* gas/mips/mips32-imm.d: Likewise.
+	* gas/mips/pref.d: Likewise.
+	* gas/mips/elf-rel27.d: Handle microMIPS ASE.
+	* gas/mips/l_d.d: Likewise.
+	* gas/mips/l_d-n32.d: Likewise.
+	* gas/mips/l_d-n64.d: Likewise.
+	* gas/mips/ld.d: Likewise.
+	* gas/mips/ld-n32.d: Likewise.
+	* gas/mips/ld-n64.d: Likewise.
+	* gas/mips/s_d.d: Likewise.
+	* gas/mips/s_d-n32.d: Likewise.
+	* gas/mips/s_d-n64.d: Likewise.
+	* gas/mips/sd.d: Likewise.
+	* gas/mips/sd-n32.d: Likewise.
+	* gas/mips/sd-n64.d: Likewise.
+	* gas/mips/mips32.d: Update immediates.
+	* gas/mips/micromips@mips32-cp2.s: New test source.
+	* gas/mips/micromips@mips32-imm.s: Likewise.
+	* gas/mips/micromips@mips32r2-cp2.s: Likewise.
+	* gas/mips/micromips@mips64-cp2.s: Likewise.
+	* gas/mips/cache.s: Likewise.
+	* gas/mips/daddi.s: Likewise.
+	* gas/mips/mips32-imm.s: Likewise.
+	* gas/mips/elf-rel4.s: Handle microMIPS ASE.
+	* gas/mips/lb-pic.s: Likewise.
+	* gas/mips/ld.s: Likewise.
+	* gas/mips/mips32.s: Likewise.
+	* gas/mips/mips.exp: Add the micromips arch.  Exclude mips16e
+	from micromips.  Run mips32-imm.
+
+	* gas/mips/jal-mask-11.d: New test.
+	* gas/mips/jal-mask-12.d: Likewise.
+	* gas/mips/micromips@jal-mask-11.d: Likewise.
+	* gas/mips/jal-mask-1.s: Source for the new tests.
+	* gas/mips/jal-mask-21.d: New test.
+	* gas/mips/jal-mask-22.d: Likewise.
+	* gas/mips/micromips@jal-mask-12.d: Likewise.
+	* gas/mips/jal-mask-2.s: Source for the new tests.
+	* gas/mips/mips.exp: Run the new tests.
+
+	* gas/mips/mips16-e.d: Add --special-syms to `objdump'.
+	* gas/mips/tmips16-e.d: Likewise.
+	* gas/mips/mipsel16-e.d: Likewise.
+	* gas/mips/tmipsel16-e.d: Likewise.
+
+	* gas/mips/and.s: Adjust padding.
+	* gas/mips/beq.s: Likewise.
+	* gas/mips/bge.s: Likewise.
+	* gas/mips/bgeu.s: Likewise.
+	* gas/mips/blt.s: Likewise.
+	* gas/mips/bltu.s: Likewise.
+	* gas/mips/branch-misc-2.s: Likewise.
+	* gas/mips/jal.s: Likewise.
+	* gas/mips/li.s: Likewise.
+	* gas/mips/mips4.s: Likewise.
+	* gas/mips/mips4-fp.s: Likewise.
+	* gas/mips/relax.s: Likewise.
+	* gas/mips/and.d: Update accordingly.
+	* gas/mips/elf-jal.d: Likewise.
+	* gas/mips/jal.d: Likewise.
+	* gas/mips/li.d: Likewise.
+	* gas/mips/relax-at.d: Likewise.
+	* gas/mips/relax.d: Likewise.
+
 2011-07-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/k1om.d: New.

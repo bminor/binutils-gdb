@@ -2428,6 +2428,9 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 	  if (e_flags & EF_MIPS_ARCH_ASE_M16)
 	    strcat (buf, ", mips16");
 
+	  if (e_flags & EF_MIPS_ARCH_ASE_MICROMIPS)
+	    strcat (buf, ", micromips");
+
 	  switch ((e_flags & EF_MIPS_ARCH))
 	    {
 	    case E_MIPS_ARCH_1: strcat (buf, ", mips1"); break;
@@ -8679,11 +8682,20 @@ get_mips_symbol_other (unsigned int other)
 {
   switch (other)
     {
-    case STO_OPTIONAL:  return "OPTIONAL";
-    case STO_MIPS16:    return "MIPS16";
-    case STO_MIPS_PLT:	return "MIPS PLT";
-    case STO_MIPS_PIC:	return "MIPS PIC";
-    default:      	return NULL;
+    case STO_OPTIONAL:
+      return "OPTIONAL";
+    case STO_MIPS_PLT:
+      return "MIPS PLT";
+    case STO_MIPS_PIC:
+      return "MIPS PIC";
+    case STO_MICROMIPS:
+      return "MICROMIPS";
+    case STO_MICROMIPS | STO_MIPS_PIC:
+      return "MICROMIPS, MIPS PIC";
+    case STO_MIPS16:
+      return "MIPS16";
+    default:
+      return NULL;
     }
 }
 

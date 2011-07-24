@@ -93,7 +93,8 @@ enum
   I_loongson_2f,
   I_loongson_3a,
   I_mipsocteon,
-  I_xlr
+  I_xlr,
+  I_micromips
 };
 
 #define NN(index) (&arch_info_struct[(index) + 1])
@@ -133,7 +134,8 @@ static const bfd_arch_info_type arch_info_struct[] =
   N (64, 64, bfd_mach_mips_loongson_2f, "mips:loongson_2f",       FALSE, NN(I_loongson_2f)),
   N (64, 64, bfd_mach_mips_loongson_3a, "mips:loongson_3a",       FALSE, NN(I_loongson_3a)),
   N (64, 64, bfd_mach_mips_octeon,"mips:octeon",  FALSE, NN(I_mipsocteon)),
-  N (64, 64, bfd_mach_mips_xlr, "mips:xlr",       FALSE, 0)
+  N (64, 64, bfd_mach_mips_xlr, "mips:xlr",       FALSE, NN(I_xlr)),
+  N (64, 64, bfd_mach_mips_micromips,"mips:micromips",FALSE,0)
 };
 
 /* The default architecture is mips:3000, but with a machine number of

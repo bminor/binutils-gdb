@@ -391,6 +391,8 @@ mips_arch_create mips64r2 64	mips64	{ mips32r2 ror } \
 			{ mipsisa64r2-*-* mipsisa64r2el-*-* }
 mips_arch_create mips16	32	{}	{} \
 			{ -march=mips1 -mips16 } { -mmips:16 }
+mips_arch_create micromips 64	mips64r2 {} \
+			{ -march=mips64 -mmicromips } {}
 mips_arch_create r3000 	32	mips1	{} \
 			{ -march=r3000 -mtune=r3000 } { -mmips:3000 }
 mips_arch_create r3900 	32	mips1	{ gpr_ilocks } \
@@ -425,6 +427,7 @@ if { [istarget mips*-*-vxworks*] } {
     set addr32 [expr [istarget mipstx39*-*-*] || [istarget mips-*-linux*] || [istarget mipsel-*-linux*] || [istarget mips*-*-ecoff]]
     set has_newabi [expr [istarget *-*-irix6*] || [istarget mips64*-*-linux*]]
     set no_mips16 [expr !$elf]
+    set no_micromips [expr !$elf]
 
     if { [istarget "mips*-*-*linux*"] || [istarget "mips*-sde-elf*"] } then {
 	set tmips "t"
@@ -438,6 +441,9 @@ if { [istarget mips*-*-vxworks*] } {
     }
     if { $no_mips16 } {
 	mips_arch_destroy mips16
+    }
+    if { $no_micromips } {
+	mips_arch_destroy micromips
     }
     
     run_dump_test_arches "abs"		[mips_arch_list_matching mips1]
@@ -476,24 +482,38 @@ if { [istarget mips*-*-vxworks*] } {
     } else {
 	run_dump_test "jal"
     }
+    run_dump_test_arches "jal-mask-11"	[mips_arch_list_matching mips1]
+    run_dump_test_arches "jal-mask-12"	[mips_arch_list_matching mips1]
+    run_dump_test_arches "jal-mask-21"	[mips_arch_list_matching micromips]
+    run_dump_test_arches "jal-mask-22"	[mips_arch_list_matching micromips]
     run_dump_test "eret-1"
     run_dump_test "eret-2"
     run_dump_test "eret-3"
-    run_dump_test_arches "24k-branch-delay-1" [mips_arch_list_matching mips1]
+    run_dump_test_arches "24k-branch-delay-1" \
+	[mips_arch_list_matching mips1 !micromips]
     run_dump_test_arches "24k-triple-stores-1" \
-				    [mips_arch_list_matching mips32r2 !octeon]
-    run_dump_test_arches "24k-triple-stores-2" [mips_arch_list_matching mips2]
-    run_dump_test_arches "24k-triple-stores-3" [mips_arch_list_matching mips3]
-    run_dump_test_arches "24k-triple-stores-4" [mips_arch_list_matching mips2]
-    run_dump_test_arches "24k-triple-stores-5" [mips_arch_list_matching mips1]
-    run_dump_test_arches "24k-triple-stores-6" [mips_arch_list_matching mips2]
-    run_dump_test_arches "24k-triple-stores-7" [mips_arch_list_matching mips2]
-    run_dump_test_arches "24k-triple-stores-8" [mips_arch_list_matching mips1]
-    run_dump_test_arches "24k-triple-stores-9" [mips_arch_list_matching mips1]
-    run_dump_test_arches "24k-triple-stores-10" [mips_arch_list_matching mips1]
+	[mips_arch_list_matching mips32r2 !octeon !micromips]
+    run_dump_test_arches "24k-triple-stores-2" \
+	[mips_arch_list_matching mips2 !micromips]
+    run_dump_test_arches "24k-triple-stores-3" \
+	[mips_arch_list_matching mips3 !micromips]
+    run_dump_test_arches "24k-triple-stores-4" \
+	[mips_arch_list_matching mips2 !micromips]
+    run_dump_test_arches "24k-triple-stores-5" \
+	[mips_arch_list_matching mips1 !micromips]
+    run_dump_test_arches "24k-triple-stores-6" \
+	[mips_arch_list_matching mips2 !micromips]
+    run_dump_test_arches "24k-triple-stores-7" \
+	[mips_arch_list_matching mips2 !micromips]
+    run_dump_test_arches "24k-triple-stores-8" \
+	[mips_arch_list_matching mips1 !micromips]
+    run_dump_test_arches "24k-triple-stores-9" \
+	[mips_arch_list_matching mips1 !micromips]
+    run_dump_test_arches "24k-triple-stores-10" \
+	[mips_arch_list_matching mips1 !micromips]
     if $elf {
 	run_dump_test_arches "24k-triple-stores-11" \
-	    [mips_arch_list_matching mips1]
+	    [mips_arch_list_matching mips1 !micromips]
     }
 
     if $elf {
@@ -649,7 +669,8 @@ if { [istarget mips*-*-vxworks*] } {
 	run_dump_test "mips16"
 	run_dump_test "mips16-64"
 	# Check MIPS16e extensions
-	run_dump_test_arches "mips16e" 	[mips_arch_list_matching mips32]
+	run_dump_test_arches "mips16e" \
+				[mips_arch_list_matching mips32 !micromips]
 	# Check jalx handling
 	run_dump_test "mips16-jalx"
 	run_dump_test "mips-jalx"
@@ -678,6 +699,7 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "sync"
 
     run_dump_test_arches "mips32"	[mips_arch_list_matching mips32]
+    run_dump_test_arches "mips32-imm"	[mips_arch_list_matching mips32]
 
     run_dump_test_arches "mips32-sf32"	[mips_arch_list_matching mips32]
     run_list_test_arches "mips32-sf32" "-32 -msoft-float" \
@@ -724,7 +746,8 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "relax-swap1-mips2"
     run_dump_test "relax-swap2"
     run_list_test_arches "relax-bposge" "-mdsp -relax-branch" \
-					[mips_arch_list_matching mips64r2]
+					[mips_arch_list_matching mips64r2 \
+					    !micromips]
 
     run_list_test "illegal" "-32"
     run_list_test "baddata1" "-32"
@@ -765,6 +788,10 @@ if { [istarget mips*-*-vxworks*] } {
 	if { !$no_mips16 } {
 	    run_dump_test "elf_ase_mips16"
 	    run_dump_test "elf_ase_mips16-2"
+	}
+	if { !$no_micromips } {
+	    run_dump_test "elf_ase_micromips"
+	    run_dump_test "elf_ase_micromips-2"
 	}
 
  	run_dump_test "mips-gp32-fp32-pic"
@@ -1002,10 +1029,28 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test_arches "alnv_ps-swap" [lsort -dictionary -unique [concat \
 					[mips_arch_list_matching mips5] \
 					[mips_arch_list_matching mips32r2] ] ]
+    run_dump_test_arches "cache" [lsort -dictionary -unique [concat \
+					[mips_arch_list_matching mips3] \
+					[mips_arch_list_matching mips32] ] ]
+    run_dump_test_arches "daddi"	[mips_arch_list_matching mips3]
+    run_dump_test_arches "pref" [lsort -dictionary -unique [concat \
+					[mips_arch_list_matching mips4] \
+					[mips_arch_list_matching mips32] ] ]
 
     if $has_newabi { run_dump_test "cfi-n64-1" }
 
     run_dump_test "pr12915"
     run_dump_test "reginfo-1a"
     run_dump_test "reginfo-1b"
+
+    if { !$no_micromips } {
+	run_dump_test "micromips"
+	run_dump_test "micromips-trap"
+	run_list_test "micromips-size-0" \
+	    "-32 -march=mips64 -mmicromips" "microMIPS instruction size 0"
+	run_dump_test "micromips-size-1"
+	run_dump_test "micromips-branch-relax"
+	run_dump_test "micromips-branch-relax-pic"
+	run_dump_test "micromips-branch-delay"
+    }
 }

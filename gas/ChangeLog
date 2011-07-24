@@ -1,4 +1,162 @@
 2011-07-24  Maciej W. Rozycki  <macro@codesourcery.com>
+            Chao-ying Fu  <fu@mips.com>
+	    Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* config/tc-mips.h (mips_segment_info): Add one bit for
+	microMIPS.
+	(TC_LABEL_IS_LOCAL): New macro.
+	(mips_label_is_local): New prototype.
+	* config/tc-mips.c (S0, S7): New macros.
+	(emit_branch_likely_macro): New variable.
+	(mips_set_options): Add micromips.
+	(mips_opts): Initialise micromips to -1.
+	(file_ase_micromips): New variable.
+	(CPU_HAS_MICROMIPS): New macro.
+	(hilo_interlocks): Set for microMIPS too.
+	(gpr_interlocks): Likewise.
+	(cop_interlocks): Likewise.
+	(cop_mem_interlocks): Likewise.
+	(HAVE_CODE_COMPRESSION): New macro.
+	(micromips_op_hash): New variable.
+	(micromips_nop16_insn, micromips_nop32_insn): New variables.
+	(NOP_INSN): Handle microMIPS ASE.
+	(mips32_to_micromips_reg_b_map): New macro.
+	(mips32_to_micromips_reg_c_map): Likewise.
+	(mips32_to_micromips_reg_d_map): Likewise.
+	(mips32_to_micromips_reg_e_map): Likewise.
+	(mips32_to_micromips_reg_f_map): Likewise.
+	(mips32_to_micromips_reg_g_map): Likewise.
+	(mips32_to_micromips_reg_l_map): Likewise.
+	(mips32_to_micromips_reg_n_map): Likewise.
+	(mips32_to_micromips_reg_h_map): New variable.
+	(mips32_to_micromips_reg_m_map): Likewise.
+	(mips32_to_micromips_reg_q_map): Likewise.
+	(micromips_to_32_reg_h_map): New variable.
+	(micromips_to_32_reg_i_map): Likewise.
+	(micromips_to_32_reg_m_map): Likewise.
+	(micromips_to_32_reg_q_map): Likewise.
+	(micromips_to_32_reg_b_map): New macro.
+	(micromips_to_32_reg_c_map): Likewise.
+	(micromips_to_32_reg_d_map): Likewise.
+	(micromips_to_32_reg_e_map): Likewise.
+	(micromips_to_32_reg_f_map): Likewise.
+	(micromips_to_32_reg_g_map): Likewise.
+	(micromips_to_32_reg_l_map): Likewise.
+	(micromips_to_32_reg_n_map): Likewise.
+	(micromips_imm_b_map, micromips_imm_c_map): New macros.
+	(RELAX_DELAY_SLOT_16BIT): New macro.
+	(RELAX_DELAY_SLOT_SIZE_FIRST): Likewise.
+	(RELAX_DELAY_SLOT_SIZE_SECOND): Likewise.
+	(RELAX_MICROMIPS_ENCODE, RELAX_MICROMIPS_P): New macros.
+	(RELAX_MICROMIPS_TYPE, RELAX_MICROMIPS_AT): Likewise.
+	(RELAX_MICROMIPS_U16BIT, RELAX_MICROMIPS_UNCOND): Likewise.
+	(RELAX_MICROMIPS_COMPACT, RELAX_MICROMIPS_LINK): Likewise.
+	(RELAX_MICROMIPS_RELAX32, RELAX_MICROMIPS_TOOFAR16): Likewise.
+	(RELAX_MICROMIPS_MARK_TOOFAR16): Likewise.
+	(RELAX_MICROMIPS_CLEAR_TOOFAR16): Likewise.
+	(RELAX_MICROMIPS_TOOFAR32): Likewise.
+	(RELAX_MICROMIPS_MARK_TOOFAR32): Likewise.
+	(RELAX_MICROMIPS_CLEAR_TOOFAR32): Likewise.
+	(INSERT_OPERAND, EXTRACT_OPERAND): Handle microMIPS ASE.
+	(mips_macro_warning): Add delay_slot_16bit_p, delay_slot_32bit_p,
+	fsize and insns.
+	(mips_mark_labels): New function.
+	(mips16_small, mips16_ext): Remove variables, replacing with...
+	(forced_insn_size): ... this.
+	(append_insn, mips16_ip): Update accordingly.
+	(micromips_insn_length): New function.
+	(insn_length): Return the length of microMIPS instructions.
+	(mips_record_mips16_mode): Rename to...
+	(mips_record_compressed_mode): ... this.  Handle microMIPS ASE.
+	(install_insn): Handle microMIPS ASE.
+	(reglist_lookup): New function.
+	(is_size_valid, is_delay_slot_valid): Likewise.
+	(md_begin): Handle microMIPS ASE.
+	(md_assemble): Likewise.  Update for append_insn interface change.
+	(micromips_reloc_p): New function.
+	(got16_reloc_p): Handle microMIPS ASE.
+	(hi16_reloc_p): Likewise.
+	(lo16_reloc_p): Likewise.
+	(jmp_reloc_p): New function.
+	(jalr_reloc_p): Likewise.
+	(matching_lo_reloc): Handle microMIPS ASE.
+	(insn_uses_reg, reg_needs_delay): Likewise.
+	(mips_move_labels): Likewise.
+	(mips16_mark_labels): Rename to...
+	(mips_compressed_mark_labels): ... this.  Handle microMIPS ASE.
+	(gpr_mod_mask): New function.
+	(gpr_read_mask, gpr_write_mask): Handle microMIPS ASE.
+	(fpr_read_mask, fpr_write_mask): Likewise.
+	(insns_between, nops_for_vr4130, nops_for_insn): Likewise.
+	(fix_loongson2f_nop, fix_loongson2f_jump): Likewise.
+	(MICROMIPS_LABEL_CHAR): New macro.
+	(micromips_target_label, micromips_target_name): New variables.
+	(micromips_label_name, micromips_label_expr): New functions.
+	(micromips_label_inc, micromips_add_label): Likewise.
+	(mips_label_is_local): Likewise.
+	(micromips_map_reloc): Likewise.
+	(can_swap_branch_p): Handle microMIPS ASE.
+	(append_insn): Add expansionp argument.  Handle microMIPS ASE.
+	(start_noreorder, end_noreorder): Handle microMIPS ASE.
+	(macro_start, macro_warning, macro_end): Likewise.
+	(brk_fmt, cop12_fmt, jalr_fmt, lui_fmt): New variables.
+	(mem12_fmt, mfhl_fmt, shft_fmt, trap_fmt): Likewise.
+	(BRK_FMT, COP12_FMT, JALR_FMT, LUI_FMT): New macros.
+	(MEM12_FMT, MFHL_FMT, SHFT_FMT, TRAP_FMT): Likewise.
+	(macro_build): Handle microMIPS ASE.  Update for append_insn
+	interface change.
+	(mips16_macro_build): Update for append_insn interface change.
+	(macro_build_jalr): Handle microMIPS ASE.
+	(macro_build_lui): Likewise.  Simplify.
+	(load_register): Handle microMIPS ASE.
+	(load_address): Likewise.
+	(move_register): Likewise.
+	(macro_build_branch_likely): New function.
+	(macro_build_branch_ccl): Likewise.
+	(macro_build_branch_rs): Likewise.
+	(macro_build_branch_rsrt): Likewise.
+	(macro): Handle microMIPS ASE.
+	(validate_micromips_insn): New function.
+	(expr_const_in_range): Likewise.
+	(mips_ip): Handle microMIPS ASE.
+	(options): Add OPTION_MICROMIPS and OPTION_NO_MICROMIPS.
+	(md_longopts): Add mmicromips and mno-micromips.
+	(md_parse_option): Handle OPTION_MICROMIPS and
+	OPTION_NO_MICROMIPS.
+	(mips_after_parse_args): Handle microMIPS ASE.
+	(md_pcrel_from): Handle microMIPS relocations.
+	(mips_force_relocation): Likewise.
+	(md_apply_fix): Likewise.
+	(mips_align): Handle microMIPS ASE.
+	(s_mipsset): Likewise.
+	(s_cpload, s_cpsetup, s_cpreturn): Use relocation wrappers.
+	(s_dtprel_internal): Likewise.
+	(s_gpword, s_gpdword): Likewise.
+	(s_insn): Handle microMIPS ASE.
+	(s_mips_stab): Likewise.
+	(relaxed_micromips_32bit_branch_length): New function.
+	(relaxed_micromips_16bit_branch_length): New function.
+	(md_estimate_size_before_relax): Handle microMIPS ASE.
+	(mips_fix_adjustable): Likewise.
+	(tc_gen_reloc): Handle microMIPS relocations.
+	(mips_relax_frag): Handle microMIPS ASE.
+	(md_convert_frag): Likewise.
+	(mips_frob_file_after_relocs): Likewise.
+	(mips_elf_final_processing): Likewise.
+	(mips_nop_opcode): Likewise.
+	(mips_handle_align): Likewise.
+	(md_show_usage): Handle microMIPS options.
+	* symbols.c (TC_LABEL_IS_LOCAL): New macro.
+	(S_IS_LOCAL): Add a TC_LABEL_IS_LOCAL check.
+
+	* doc/as.texinfo (Target MIPS options): Add -mmicromips and
+	-mno-micromips.
+	(-mmicromips, -mno-micromips): New options.
+	* doc/c-mips.texi (-mmicromips, -mno-micromips): New options.
+	(MIPS ISA): Document .set micromips and .set nomicromips.
+	(MIPS insn): Update for microMIPS support.
+
+2011-07-24  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* config/tc-mips.c (mips_ip): Make a copy of the instruction's
 	mnemonic and use it for further processing.

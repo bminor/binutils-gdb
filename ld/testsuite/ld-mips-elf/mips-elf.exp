@@ -123,6 +123,31 @@ run_dump_test "mips16-1"
 # MIPS branch offset final link checking.
 run_dump_test "branch-misc-1"
 
+# Jalx test
+run_dump_test "jalx-1"
+
+if { $linux_gnu } {
+    run_ld_link_tests [list \
+	[list "Dummy shared library for JALX test 2" \
+	      "-shared -nostdlib -melf32btsmip" \
+	      "-G0 -EB -mmicromips -no-mdebug -mabi=32 -march=mips32r2 -KPIC" \
+	      { jalx-2-printf.s } \
+	      {} \
+	      "libjalx-2.so"] \
+	[list "Dummy external function for JALX test 2" \
+	      "-r -melf32btsmip" \
+	      "-G0 -EB -no-mdebug -mabi=32 -march=mips32r2 -mno-shared -call_nonpic" \
+	      { jalx-2-ex.s } \
+	      {} \
+	      "jalx-2-ex.o.r"] \
+	[list "MIPS JALX test 2" \
+	      "-nostdlib -T jalx-2.ld tmpdir/libjalx-2.so tmpdir/jalx-2-ex.o.r -melf32btsmip" \
+	      "-G0 -EB -mmicromips -no-mdebug -mabi=32 -march=mips32r2 -mno-shared -call_nonpic" \
+	      { jalx-2-main.s } \
+	      { { objdump -d jalx-2.dd } } \
+	      "jalx-2"]]
+}
+
 # Test multi-got link.  We only do this on GNU/Linux because it requires
 # the "traditional" emulations.
 if { $linux_gnu } {
@@ -549,3 +574,6 @@ if { $linux_gnu } {
     run_dump_test "jr-to-b-1"
     run_dump_test "jr-to-b-2"
 }
+
+# MIPS16 and microMIPS interlinking test.
+run_dump_test "mips16-and-micromips"

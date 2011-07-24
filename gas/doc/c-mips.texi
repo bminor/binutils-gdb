@@ -129,6 +129,13 @@ Generate code for the MIPS 16 processor.  This is equivalent to putting
 @code{.set mips16} at the start of the assembly file.  @samp{-no-mips16}
 turns off this option.
 
+@item -mmicromips
+@itemx -mno-micromips
+Generate code for the microMIPS processor.  This is equivalent to putting
+@code{.set micromips} at the start of the assembly file.  @samp{-mno-micromips}
+turns off this option.  This is equivalent to putting @code{.set nomicromips}
+at the start of the assembly file.
+
 @item -msmartmips
 @itemx -mno-smartmips
 Enables the SmartMIPS extensions to the MIPS32 instruction set, which
@@ -527,6 +534,12 @@ in which it will assemble instructions for the MIPS 16 processor.  Use
 
 Traditional @sc{mips} assemblers do not support this directive.
 
+The directive @code{.set micromips} puts the assembler into microMIPS mode,
+in which it will assemble instructions for the microMIPS processor.  Use
+@code{.set nomicromips} to return to normal 32 bit mode.
+
+Traditional @sc{mips} assemblers do not support this directive.
+
 @node MIPS autoextend
 @section Directives for extending MIPS 16 bit instructions
 
@@ -547,10 +560,10 @@ This directive is only meaningful when in MIPS 16 mode.  Traditional
 
 @kindex @code{.insn}
 The @code{.insn} directive tells @code{@value{AS}} that the following
-data is actually instructions.  This makes a difference in MIPS 16 mode:
-when loading the address of a label which precedes instructions,
-@code{@value{AS}} automatically adds 1 to the value, so that jumping to
-the loaded address will do the right thing.
+data is actually instructions.  This makes a difference in MIPS 16 and
+microMIPS modes: when loading the address of a label which precedes
+instructions, @code{@value{AS}} automatically adds 1 to the value, so
+that jumping to the loaded address will do the right thing.
 
 @kindex @code{.global}
 The @code{.global} and @code{.globl} directives supported by

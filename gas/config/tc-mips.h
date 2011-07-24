@@ -68,6 +68,7 @@ struct insn_label_list;
 struct mips_segment_info {
   struct insn_label_list *labels;
   unsigned int mips16 : 1;
+  unsigned int micromips : 1;
 };
 #define TC_SEGMENT_INFO_TYPE struct mips_segment_info
 

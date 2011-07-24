@@ -1,3 +1,20 @@
+2011-07-24  Catherine Moore  <clm@codesourcery.com>
+            Chao-ying Fu  <fu@mips.com>
+            Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* lib/ld-lib.exp (run_dump_test): Support distinct assembler
+	flags for the same source named multiple times.
+	* ld-mips-elf/jalx-1.s: New test source.
+	* ld-mips-elf/jalx-1.d: New test output.
+	* ld-mips-elf/jalx-1.ld: New test linker script.
+	* ld-mips-elf/jalx-2-main.s: New test source.
+	* ld-mips-elf/jalx-2-ex.s: Likewise.
+	* ld-mips-elf/jalx-2-printf.s: Likewise.
+	* ld-mips-elf/jalx-2.dd: New test output.
+	* ld-mips-elf/jalx-2.ld: New test linker script.
+	* ld-mips-elf/mips16-and-micromips.d: New test.
+	* ld-mips-elf/mips-elf.exp: Run the new tests
+
 2011-07-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-x86-64/abs-k1om.d: New.

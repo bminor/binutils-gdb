@@ -552,7 +552,6 @@ proc run_dump_test { name } {
     set opts(error) {}
     set opts(warning) {}
     set opts(objcopy_linked_file) {}
-    set asflags(${file}.s) {}
 
     foreach i $opt_array {
 	set opt_name [lindex $i 0]
@@ -570,13 +569,13 @@ proc run_dump_test { name } {
 	    warning {}
 	    error {}
 	    source {
-		# Move any source-specific as-flags to a separate array to
+		# Move any source-specific as-flags to a separate list to
 		# simplify processing.
 		if { [llength $opt_val] > 1 } {
-		    set asflags([lindex $opt_val 0]) [lrange $opt_val 1 end]
+		    lappend asflags [lrange $opt_val 1 end]
 		    set opt_val [lindex $opt_val 0]
 		} else {
-		    set asflags($opt_val) {}
+		    lappend asflags {}
 		}
 	    }
 	    default {
@@ -669,6 +668,7 @@ proc run_dump_test { name } {
 
     if { $opts(source) == "" } {
 	set sourcefiles [list ${file}.s]
+	set asflags [list ""]
     } else {
 	set sourcefiles {}
 	foreach sf $opts(source) {
@@ -677,8 +677,6 @@ proc run_dump_test { name } {
 	    } else {
 		lappend sourcefiles "$srcdir/$subdir/$sf"
 	    }
-	    # Must have asflags indexed on source name.
-	    set asflags($srcdir/$subdir/$sf) $asflags($sf)
 	}
     }
 
@@ -691,11 +689,12 @@ proc run_dump_test { name } {
     set objfiles {}
     for { set i 0 } { $i < [llength $sourcefiles] } { incr i } {
 	set sourcefile [lindex $sourcefiles $i]
+	set sourceasflags [lindex $asflags $i]
 
 	set objfile "tmpdir/dump$i.o"
 	catch "exec rm -f $objfile" exec_output
 	lappend objfiles $objfile
-	set cmd "$AS $ASFLAGS $opts(as) $asflags($sourcefile) -o $objfile $sourcefile"
+	set cmd "$AS $ASFLAGS $opts(as) $sourceasflags -o $objfile $sourcefile"
 
 	send_log "$cmd\n"
 	set cmdret [remote_exec host [concat sh -c [list "$cmd 2>&1"]] "" "/dev/null" "ld.tmp"]

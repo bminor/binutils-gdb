@@ -306,6 +306,12 @@ struct mips_elf_la25_stub {
 #define LA25_LUI(VAL) (0x3c190000 | (VAL))	/* lui t9,VAL */
 #define LA25_J(VAL) (0x08000000 | (((VAL) >> 2) & 0x3ffffff)) /* j VAL */
 #define LA25_ADDIU(VAL) (0x27390000 | (VAL))	/* addiu t9,t9,VAL */
+#define LA25_LUI_MICROMIPS_1(VAL) (0x41b9)	/* lui t9,VAL */
+#define LA25_LUI_MICROMIPS_2(VAL) (VAL)
+#define LA25_J_MICROMIPS_1(VAL) (0xd400 | (((VAL) >> 17) & 0x3ff)) /* j VAL */
+#define LA25_J_MICROMIPS_2(VAL) ((VAL) >> 1)
+#define LA25_ADDIU_MICROMIPS_1(VAL) (0x3339)	/* addiu t9,t9,VAL */
+#define LA25_ADDIU_MICROMIPS_2(VAL) (VAL)
 
 /* This structure is passed to mips_elf_sort_hash_table_f when sorting
    the dynamic symbols.  */
@@ -522,7 +528,14 @@ struct mips_htab_traverse_info
    || r_type == R_MIPS_TLS_TPREL32		\
    || r_type == R_MIPS_TLS_TPREL64		\
    || r_type == R_MIPS_TLS_TPREL_HI16		\
-   || r_type == R_MIPS_TLS_TPREL_LO16)
+   || r_type == R_MIPS_TLS_TPREL_LO16		\
+   || r_type == R_MICROMIPS_TLS_GD		\
+   || r_type == R_MICROMIPS_TLS_LDM		\
+   || r_type == R_MICROMIPS_TLS_DTPREL_HI16	\
+   || r_type == R_MICROMIPS_TLS_DTPREL_LO16	\
+   || r_type == R_MICROMIPS_TLS_GOTTPREL	\
+   || r_type == R_MICROMIPS_TLS_TPREL_HI16	\
+   || r_type == R_MICROMIPS_TLS_TPREL_LO16)
 
 /* Structure used to pass information to mips_elf_output_extsym.  */
 
@@ -1359,6 +1372,9 @@ mips_elf_create_stub_symbol (struct bfd_link_info *info,
   struct elf_link_hash_entry *elfh;
   const char *name;
 
+  if (ELF_ST_IS_MICROMIPS (h->root.other))
+    value |= 1;
+
   /* Create a new symbol.  */
   name = ACONCAT ((prefix, h->root.root.root.string, NULL));
   bh = NULL;
@@ -1851,28 +1867,98 @@ mips16_reloc_p (int r_type)
     }
 }
 
+/* Check if a microMIPS reloc.  */
+
+static inline bfd_boolean
+micromips_reloc_p (unsigned int r_type)
+{
+  return r_type >= R_MICROMIPS_min && r_type < R_MICROMIPS_max;
+}
+
+/* Similar to MIPS16, the two 16-bit halves in microMIPS must be swapped
+   on a little-endian system.  This does not apply to R_MICROMIPS_PC7_S1
+   and R_MICROMIPS_PC10_S1 relocs that apply to 16-bit instructions.  */
+
+static inline bfd_boolean
+micromips_reloc_shuffle_p (unsigned int r_type)
+{
+  return (micromips_reloc_p (r_type)
+	  && r_type != R_MICROMIPS_PC7_S1
+	  && r_type != R_MICROMIPS_PC10_S1);
+}
+
 static inline bfd_boolean
 got16_reloc_p (int r_type)
 {
-  return r_type == R_MIPS_GOT16 || r_type == R_MIPS16_GOT16;
+  return (r_type == R_MIPS_GOT16
+	  || r_type == R_MIPS16_GOT16
+	  || r_type == R_MICROMIPS_GOT16);
 }
 
 static inline bfd_boolean
 call16_reloc_p (int r_type)
 {
-  return r_type == R_MIPS_CALL16 || r_type == R_MIPS16_CALL16;
+  return (r_type == R_MIPS_CALL16
+	  || r_type == R_MIPS16_CALL16
+	  || r_type == R_MICROMIPS_CALL16);
+}
+
+static inline bfd_boolean
+got_disp_reloc_p (unsigned int r_type)
+{
+  return r_type == R_MIPS_GOT_DISP || r_type == R_MICROMIPS_GOT_DISP;
+}
+
+static inline bfd_boolean
+got_page_reloc_p (unsigned int r_type)
+{
+  return r_type == R_MIPS_GOT_PAGE || r_type == R_MICROMIPS_GOT_PAGE;
+}
+
+static inline bfd_boolean
+got_ofst_reloc_p (unsigned int r_type)
+{
+  return r_type == R_MIPS_GOT_OFST || r_type == R_MICROMIPS_GOT_OFST;
+}
+
+static inline bfd_boolean
+got_hi16_reloc_p (unsigned int r_type)
+{
+  return r_type == R_MIPS_GOT_HI16 || r_type == R_MICROMIPS_GOT_HI16;
+}
+
+static inline bfd_boolean
+got_lo16_reloc_p (unsigned int r_type)
+{
+  return r_type == R_MIPS_GOT_LO16 || r_type == R_MICROMIPS_GOT_LO16;
+}
+
+static inline bfd_boolean
+call_hi16_reloc_p (unsigned int r_type)
+{
+  return r_type == R_MIPS_CALL_HI16 || r_type == R_MICROMIPS_CALL_HI16;
+}
+
+static inline bfd_boolean
+call_lo16_reloc_p (unsigned int r_type)
+{
+  return r_type == R_MIPS_CALL_LO16 || r_type == R_MICROMIPS_CALL_LO16;
 }
 
 static inline bfd_boolean
 hi16_reloc_p (int r_type)
 {
-  return r_type == R_MIPS_HI16 || r_type == R_MIPS16_HI16;
+  return (r_type == R_MIPS_HI16
+	  || r_type == R_MIPS16_HI16
+	  || r_type == R_MICROMIPS_HI16);
 }
 
 static inline bfd_boolean
 lo16_reloc_p (int r_type)
 {
-  return r_type == R_MIPS_LO16 || r_type == R_MIPS16_LO16;
+  return (r_type == R_MIPS_LO16
+	  || r_type == R_MIPS16_LO16
+	  || r_type == R_MICROMIPS_LO16);
 }
 
 static inline bfd_boolean
@@ -1884,66 +1970,89 @@ mips16_call_reloc_p (int r_type)
 static inline bfd_boolean
 jal_reloc_p (int r_type)
 {
-  return r_type == R_MIPS_26 || r_type == R_MIPS16_26;
+  return (r_type == R_MIPS_26
+	  || r_type == R_MIPS16_26
+	  || r_type == R_MICROMIPS_26_S1);
+}
+
+static inline bfd_boolean
+micromips_branch_reloc_p (int r_type)
+{
+  return (r_type == R_MICROMIPS_26_S1
+	  || r_type == R_MICROMIPS_PC16_S1
+	  || r_type == R_MICROMIPS_PC10_S1
+	  || r_type == R_MICROMIPS_PC7_S1);
+}
+
+static inline bfd_boolean
+tls_gd_reloc_p (unsigned int r_type)
+{
+  return r_type == R_MIPS_TLS_GD || r_type == R_MICROMIPS_TLS_GD;
+}
+
+static inline bfd_boolean
+tls_ldm_reloc_p (unsigned int r_type)
+{
+  return r_type == R_MIPS_TLS_LDM || r_type == R_MICROMIPS_TLS_LDM;
+}
+
+static inline bfd_boolean
+tls_gottprel_reloc_p (unsigned int r_type)
+{
+  return r_type == R_MIPS_TLS_GOTTPREL || r_type == R_MICROMIPS_TLS_GOTTPREL;
 }
 
 void
-_bfd_mips16_elf_reloc_unshuffle (bfd *abfd, int r_type,
-				 bfd_boolean jal_shuffle, bfd_byte *data)
+_bfd_mips_elf_reloc_unshuffle (bfd *abfd, int r_type,
+			       bfd_boolean jal_shuffle, bfd_byte *data)
 {
-  bfd_vma extend, insn, val;
+  bfd_vma first, second, val;
 
-  if (!mips16_reloc_p (r_type))
+  if (!mips16_reloc_p (r_type) && !micromips_reloc_shuffle_p (r_type))
     return;
 
-  /* Pick up the mips16 extend instruction and the real instruction.  */
-  extend = bfd_get_16 (abfd, data);
-  insn = bfd_get_16 (abfd, data + 2);
-  if (r_type == R_MIPS16_26)
-    {
-      if (jal_shuffle)
-	val = ((extend & 0xfc00) << 16) | ((extend & 0x3e0) << 11)
-	      | ((extend & 0x1f) << 21) | insn;
-      else
-	val = extend << 16 | insn;
-    }
+  /* Pick up the first and second halfwords of the instruction.  */
+  first = bfd_get_16 (abfd, data);
+  second = bfd_get_16 (abfd, data + 2);
+  if (micromips_reloc_p (r_type) || (r_type == R_MIPS16_26 && !jal_shuffle))
+    val = first << 16 | second;
+  else if (r_type != R_MIPS16_26)
+    val = (((first & 0xf800) << 16) | ((second & 0xffe0) << 11)
+	   | ((first & 0x1f) << 11) | (first & 0x7e0) | (second & 0x1f));
   else
-    val = ((extend & 0xf800) << 16) | ((insn & 0xffe0) << 11)
-	  | ((extend & 0x1f) << 11) | (extend & 0x7e0) | (insn & 0x1f);
+    val = (((first & 0xfc00) << 16) | ((first & 0x3e0) << 11)
+	   | ((first & 0x1f) << 21) | second);
   bfd_put_32 (abfd, val, data);
 }
 
 void
-_bfd_mips16_elf_reloc_shuffle (bfd *abfd, int r_type,
-			       bfd_boolean jal_shuffle, bfd_byte *data)
+_bfd_mips_elf_reloc_shuffle (bfd *abfd, int r_type,
+			     bfd_boolean jal_shuffle, bfd_byte *data)
 {
-  bfd_vma extend, insn, val;
+  bfd_vma first, second, val;
 
-  if (!mips16_reloc_p (r_type))
+  if (!mips16_reloc_p (r_type) && !micromips_reloc_shuffle_p (r_type))
     return;
 
   val = bfd_get_32 (abfd, data);
-  if (r_type == R_MIPS16_26)
+  if (micromips_reloc_p (r_type) || (r_type == R_MIPS16_26 && !jal_shuffle))
     {
-      if (jal_shuffle)
-	{
-	  insn = val & 0xffff;
-	  extend = ((val >> 16) & 0xfc00) | ((val >> 11) & 0x3e0)
-		   | ((val >> 21) & 0x1f);
-	}
-      else
-	{
-	  insn = val & 0xffff;
-	  extend = val >> 16;
-	}
+      second = val & 0xffff;
+      first = val >> 16;
+    }
+  else if (r_type != R_MIPS16_26)
+    {
+      second = ((val >> 11) & 0xffe0) | (val & 0x1f);
+      first = ((val >> 16) & 0xf800) | ((val >> 11) & 0x1f) | (val & 0x7e0);
     }
   else
     {
-      insn = ((val >> 11) & 0xffe0) | (val & 0x1f);
-      extend = ((val >> 16) & 0xf800) | ((val >> 11) & 0x1f) | (val & 0x7e0);
+      second = val & 0xffff;
+      first = ((val >> 16) & 0xfc00) | ((val >> 11) & 0x3e0)
+	       | ((val >> 21) & 0x1f);
     }
-  bfd_put_16 (abfd, insn, data + 2);
-  bfd_put_16 (abfd, extend, data);
+  bfd_put_16 (abfd, second, data + 2);
+  bfd_put_16 (abfd, first, data);
 }
 
 bfd_reloc_status_type
@@ -2084,11 +2193,11 @@ _bfd_mips_elf_lo16_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
   if (reloc_entry->address > bfd_get_section_limit (abfd, input_section))
     return bfd_reloc_outofrange;
 
-  _bfd_mips16_elf_reloc_unshuffle (abfd, reloc_entry->howto->type, FALSE,
-				   location);
-  vallo = bfd_get_32 (abfd, location);
-  _bfd_mips16_elf_reloc_shuffle (abfd, reloc_entry->howto->type, FALSE,
+  _bfd_mips_elf_reloc_unshuffle (abfd, reloc_entry->howto->type, FALSE,
 				 location);
+  vallo = bfd_get_32 (abfd, location);
+  _bfd_mips_elf_reloc_shuffle (abfd, reloc_entry->howto->type, FALSE,
+			       location);
 
   while (mips_hi16_list != NULL)
     {
@@ -2106,6 +2215,8 @@ _bfd_mips_elf_lo16_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
 	hi->rel.howto = MIPS_ELF_RTYPE_TO_HOWTO (abfd, R_MIPS_HI16, FALSE);
       else if (hi->rel.howto->type == R_MIPS16_GOT16)
 	hi->rel.howto = MIPS_ELF_RTYPE_TO_HOWTO (abfd, R_MIPS16_HI16, FALSE);
+      else if (hi->rel.howto->type == R_MICROMIPS_GOT16)
+	hi->rel.howto = MIPS_ELF_RTYPE_TO_HOWTO (abfd, R_MICROMIPS_HI16, FALSE);
 
       /* VALLO is a signed 16-bit number.  Bias it by 0x8000 so that any
 	 carry or borrow will induce a change of +1 or -1 in the high part.  */
@@ -2183,12 +2294,12 @@ _bfd_mips_elf_generic_reloc (bfd *abfd ATTRIBUTE_UNUSED, arelent *reloc_entry,
       val += reloc_entry->addend;
 
       /* Add VAL to the relocation field.  */
-      _bfd_mips16_elf_reloc_unshuffle (abfd, reloc_entry->howto->type, FALSE,
-				       location);
+      _bfd_mips_elf_reloc_unshuffle (abfd, reloc_entry->howto->type, FALSE,
+				     location);
       status = _bfd_relocate_contents (reloc_entry->howto, abfd, val,
 				       location);
-      _bfd_mips16_elf_reloc_shuffle (abfd, reloc_entry->howto->type, FALSE,
-				     location);
+      _bfd_mips_elf_reloc_shuffle (abfd, reloc_entry->howto->type, FALSE,
+				   location);
 
       if (status != bfd_reloc_ok)
 	return status;
@@ -2977,12 +3088,13 @@ mips_tls_got_index (bfd *abfd, bfd_vma got_index, unsigned char *tls_type,
 		    int r_type, struct bfd_link_info *info,
 		    struct mips_elf_link_hash_entry *h, bfd_vma symbol)
 {
-  BFD_ASSERT (r_type == R_MIPS_TLS_GOTTPREL || r_type == R_MIPS_TLS_GD
-	      || r_type == R_MIPS_TLS_LDM);
+  BFD_ASSERT (tls_gottprel_reloc_p (r_type)
+	      || tls_gd_reloc_p (r_type)
+	      || tls_ldm_reloc_p (r_type));
 
   mips_elf_initialize_tls_slots (abfd, got_index, tls_type, info, h, symbol);
 
-  if (r_type == R_MIPS_TLS_GOTTPREL)
+  if (tls_gottprel_reloc_p (r_type))
     {
       BFD_ASSERT (*tls_type & GOT_TLS_IE);
       if (*tls_type & GOT_TLS_GD)
@@ -2991,13 +3103,13 @@ mips_tls_got_index (bfd *abfd, bfd_vma got_index, unsigned char *tls_type,
 	return got_index;
     }
 
-  if (r_type == R_MIPS_TLS_GD)
+  if (tls_gd_reloc_p (r_type))
     {
       BFD_ASSERT (*tls_type & GOT_TLS_GD);
       return got_index;
     }
 
-  if (r_type == R_MIPS_TLS_LDM)
+  if (tls_ldm_reloc_p (r_type))
     {
       BFD_ASSERT (*tls_type & GOT_TLS_LDM);
       return got_index;
@@ -3279,7 +3391,7 @@ mips_elf_create_local_got_entry (bfd *abfd, struct bfd_link_info *info,
       struct mips_got_entry *p;
 
       entry.abfd = ibfd;
-      if (r_type == R_MIPS_TLS_LDM)
+      if (tls_ldm_reloc_p (r_type))
 	{
 	  entry.tls_type = GOT_TLS_LDM;
 	  entry.symndx = 0;
@@ -4810,6 +4922,11 @@ mips_elf_relocation_needs_la25_stub (bfd *input_bfd, int r_type)
     case R_MIPS_26:
     case R_MIPS_PC16:
     case R_MIPS16_26:
+    case R_MICROMIPS_26_S1:
+    case R_MICROMIPS_PC7_S1:
+    case R_MICROMIPS_PC10_S1:
+    case R_MICROMIPS_PC16_S1:
+    case R_MICROMIPS_PC23_S2:
       return TRUE;
 
     default:
@@ -4823,7 +4940,7 @@ mips_elf_relocation_needs_la25_stub (bfd *input_bfd, int r_type)
 
    The result of the relocation calculation is stored in VALUEP.
    On exit, set *CROSS_MODE_JUMP_P to true if the relocation field
-   is a MIPS16 jump to non-MIPS16 code, or vice versa.
+   is a MIPS16 or microMIPS jump to standard MIPS code, or vice versa.
 
    This function returns bfd_reloc_continue if the caller need take no
    further action regarding this relocation, bfd_reloc_notsupported if
@@ -4880,6 +4997,7 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
   bfd_boolean overflowed_p;
   /* TRUE if this relocation refers to a MIPS16 function.  */
   bfd_boolean target_is_16_bit_code_p = FALSE;
+  bfd_boolean target_is_micromips_code_p = FALSE;
   struct mips_elf_link_hash_table *htab;
   bfd *dynobj;
 
@@ -4932,8 +5050,8 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 	  addend += sec->output_section->vma + sec->output_offset;
 	}
 
-      /* MIPS16 text labels should be treated as odd.  */
-      if (ELF_ST_IS_MIPS16 (sym->st_other))
+      /* MIPS16/microMIPS text labels should be treated as odd.  */
+      if (ELF_ST_IS_COMPRESSED (sym->st_other))
 	++symbol;
 
       /* Record the name of this symbol, for our caller.  */
@@ -4944,6 +5062,7 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 	*namep = bfd_section_name (input_bfd, sec);
 
       target_is_16_bit_code_p = ELF_ST_IS_MIPS16 (sym->st_other);
+      target_is_micromips_code_p = ELF_ST_IS_MICROMIPS (sym->st_other);
     }
   else
     {
@@ -5041,6 +5160,10 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 	}
 
       target_is_16_bit_code_p = ELF_ST_IS_MIPS16 (h->root.other);
+      /* If the output section is the PLT section,
+         then the target is not microMIPS.  */
+      target_is_micromips_code_p = (htab->splt != sec
+				    && ELF_ST_IS_MICROMIPS (h->root.other));
     }
 
   /* If this is a reference to a 16-bit function with a stub, we need
@@ -5128,12 +5251,29 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 	      + h->la25_stub->stub_section->output_offset
 	      + h->la25_stub->offset);
 
+  /* Make sure MIPS16 and microMIPS are not used together.  */
+  if ((r_type == R_MIPS16_26 && target_is_micromips_code_p)
+      || (micromips_branch_reloc_p (r_type) && target_is_16_bit_code_p))
+   {
+      (*_bfd_error_handler)
+	(_("MIPS16 and microMIPS functions cannot call each other"));
+      return bfd_reloc_notsupported;
+   }
+
   /* Calls from 16-bit code to 32-bit code and vice versa require the
-     mode change.  */
-  *cross_mode_jump_p = !info->relocatable
-		       && ((r_type == R_MIPS16_26 && !target_is_16_bit_code_p)
-			   || ((r_type == R_MIPS_26 || r_type == R_MIPS_JALR)
-			       && target_is_16_bit_code_p));
+     mode change.  However, we can ignore calls to undefined weak symbols,
+     which should never be executed at runtime.  This exception is important
+     because the assembly writer may have "known" that any definition of the
+     symbol would be 16-bit code, and that direct jumps were therefore
+     acceptable.  */
+  *cross_mode_jump_p = (!info->relocatable
+			&& !(h && h->root.root.type == bfd_link_hash_undefweak)
+			&& ((r_type == R_MIPS16_26 && !target_is_16_bit_code_p)
+			    || (r_type == R_MICROMIPS_26_S1
+				&& !target_is_micromips_code_p)
+			    || ((r_type == R_MIPS_26 || r_type == R_MIPS_JALR)
+				&& (target_is_16_bit_code_p
+				    || target_is_micromips_code_p))));
 
   local_p = h == NULL || SYMBOL_REFERENCES_LOCAL (info, &h->root);
 
@@ -5145,11 +5285,13 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
   if (gnu_local_gp_p)
     symbol = gp;
 
-  /* Global R_MIPS_GOT_PAGE relocations are equivalent to R_MIPS_GOT_DISP.
-     The addend is applied by the corresponding R_MIPS_GOT_OFST.  */
-  if (r_type == R_MIPS_GOT_PAGE && !local_p)
+  /* Global R_MIPS_GOT_PAGE/R_MICROMIPS_GOT_PAGE relocations are equivalent
+     to R_MIPS_GOT_DISP/R_MICROMIPS_GOT_DISP.  The addend is applied by the
+     corresponding R_MIPS_GOT_OFST/R_MICROMIPS_GOT_OFST.  */
+  if (got_page_reloc_p (r_type) && !local_p)
     {
-      r_type = R_MIPS_GOT_DISP;
+      r_type = (micromips_reloc_p (r_type)
+		? R_MICROMIPS_GOT_DISP : R_MIPS_GOT_DISP);
       addend = 0;
     }
 
@@ -5166,11 +5308,21 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
     case R_MIPS_CALL_HI16:
     case R_MIPS_GOT_LO16:
     case R_MIPS_CALL_LO16:
+    case R_MICROMIPS_CALL16:
+    case R_MICROMIPS_GOT16:
+    case R_MICROMIPS_GOT_DISP:
+    case R_MICROMIPS_GOT_HI16:
+    case R_MICROMIPS_CALL_HI16:
+    case R_MICROMIPS_GOT_LO16:
+    case R_MICROMIPS_CALL_LO16:
     case R_MIPS_TLS_GD:
     case R_MIPS_TLS_GOTTPREL:
     case R_MIPS_TLS_LDM:
+    case R_MICROMIPS_TLS_GD:
+    case R_MICROMIPS_TLS_GOTTPREL:
+    case R_MICROMIPS_TLS_LDM:
       /* Find the index into the GOT where this value is located.  */
-      if (r_type == R_MIPS_TLS_LDM)
+      if (tls_ldm_reloc_p (r_type))
 	{
 	  g = mips_elf_local_got_index (abfd, input_bfd, info,
 					0, 0, NULL, r_type);
@@ -5182,8 +5334,8 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 	  /* On VxWorks, CALL relocations should refer to the .got.plt
 	     entry, which is initialized to point at the PLT stub.  */
 	  if (htab->is_vxworks
-	      && (r_type == R_MIPS_CALL_HI16
-		  || r_type == R_MIPS_CALL_LO16
+	      && (call_hi16_reloc_p (r_type)
+		  || call_lo16_reloc_p (r_type)
 		  || call16_reloc_p (r_type)))
 	    {
 	      BFD_ASSERT (addend == 0);
@@ -5311,18 +5463,31 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 	 mips_elf_perform_relocation.  So, we just fall through to the
 	 R_MIPS_26 case here.  */
     case R_MIPS_26:
-      if (was_local_p)
-	value = ((addend | ((p + 4) & 0xf0000000)) + symbol) >> 2;
-      else
-	{
-	  value = (_bfd_mips_elf_sign_extend (addend, 28) + symbol) >> 2;
-	  if (h->root.root.type != bfd_link_hash_undefweak)
-	    overflowed_p = (value >> 26) != ((p + 4) >> 28);
-	}
-      value &= howto->dst_mask;
+    case R_MICROMIPS_26_S1:
+      {
+	unsigned int shift;
+
+	/* Make sure the target of JALX is word-aligned.  Bit 0 must be
+	   the correct ISA mode selector and bit 1 must be 0.  */
+	if (*cross_mode_jump_p && (symbol & 3) != (r_type == R_MIPS_26))
+	  return bfd_reloc_outofrange;
+
+	/* Shift is 2, unusually, for microMIPS JALX.  */
+	shift = (!*cross_mode_jump_p && r_type == R_MICROMIPS_26_S1) ? 1 : 2;
+
+	if (was_local_p)
+	  value = addend | ((p + 4) & (0xfc000000 << shift));
+	else
+	  value = _bfd_mips_elf_sign_extend (addend, 26 + shift);
+	value = (value + symbol) >> shift;
+	if (!was_local_p && h->root.root.type != bfd_link_hash_undefweak)
+	  overflowed_p = (value >> 26) != ((p + 4) >> (26 + shift));
+	value &= howto->dst_mask;
+      }
       break;
 
     case R_MIPS_TLS_DTPREL_HI16:
+    case R_MICROMIPS_TLS_DTPREL_HI16:
       value = (mips_elf_high (addend + symbol - dtprel_base (info))
 	       & howto->dst_mask);
       break;
@@ -5330,20 +5495,24 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
     case R_MIPS_TLS_DTPREL_LO16:
     case R_MIPS_TLS_DTPREL32:
     case R_MIPS_TLS_DTPREL64:
+    case R_MICROMIPS_TLS_DTPREL_LO16:
       value = (symbol + addend - dtprel_base (info)) & howto->dst_mask;
       break;
 
     case R_MIPS_TLS_TPREL_HI16:
+    case R_MICROMIPS_TLS_TPREL_HI16:
       value = (mips_elf_high (addend + symbol - tprel_base (info))
 	       & howto->dst_mask);
       break;
 
     case R_MIPS_TLS_TPREL_LO16:
+    case R_MICROMIPS_TLS_TPREL_LO16:
       value = (symbol + addend - tprel_base (info)) & howto->dst_mask;
       break;
 
     case R_MIPS_HI16:
     case R_MIPS16_HI16:
+    case R_MICROMIPS_HI16:
       if (!gp_disp_p)
 	{
 	  value = mips_elf_high (addend + symbol);
@@ -5362,6 +5531,11 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 	     both reloc addends by 4. */
 	  if (r_type == R_MIPS16_HI16)
 	    value = mips_elf_high (addend + gp - p - 4);
+	  /* The microMIPS .cpload sequence uses the same assembly
+	     instructions as the traditional psABI version, but the
+	     incoming $t9 has the low bit set.  */
+	  else if (r_type == R_MICROMIPS_HI16)
+	    value = mips_elf_high (addend + gp - p - 1);
 	  else
 	    value = mips_elf_high (addend + gp - p);
 	  overflowed_p = mips_elf_overflow_p (value, 16);
@@ -5370,6 +5544,8 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 
     case R_MIPS_LO16:
     case R_MIPS16_LO16:
+    case R_MICROMIPS_LO16:
+    case R_MICROMIPS_HI0_LO16:
       if (!gp_disp_p)
 	value = (symbol + addend) & howto->dst_mask;
       else
@@ -5378,6 +5554,9 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 	     for this conditional.  */
 	  if (r_type == R_MIPS16_LO16)
 	    value = addend + gp - p;
+	  else if (r_type == R_MICROMIPS_LO16
+		   || r_type == R_MICROMIPS_HI0_LO16)
+	    value = addend + gp - p + 3;
 	  else
 	    value = addend + gp - p + 4;
 	  /* The MIPS ABI requires checking the R_MIPS_LO16 relocation
@@ -5400,6 +5579,7 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
       break;
 
     case R_MIPS_LITERAL:
+    case R_MICROMIPS_LITERAL:
       /* Because we don't merge literal sections, we can handle this
 	 just like R_MIPS_GPREL16.  In the long run, we should merge
 	 shared literals, and then we will need to additional work
@@ -5413,6 +5593,8 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 	 order.  We don't need to do anything special here; the
 	 differences are handled in mips_elf_perform_relocation.  */
     case R_MIPS_GPREL16:
+    case R_MICROMIPS_GPREL7_S2:
+    case R_MICROMIPS_GPREL16:
       /* Only sign-extend the addend if it was extracted from the
 	 instruction.  If the addend was separate, leave it alone,
 	 otherwise we may lose significant bits.  */
@@ -5433,6 +5615,8 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
     case R_MIPS16_CALL16:
     case R_MIPS_GOT16:
     case R_MIPS_CALL16:
+    case R_MICROMIPS_GOT16:
+    case R_MICROMIPS_CALL16:
       /* VxWorks does not have separate local and global semantics for
 	 R_MIPS*_GOT16; every relocation evaluates to "G".  */
       if (!htab->is_vxworks && local_p)
@@ -5453,6 +5637,10 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
     case R_MIPS_TLS_GOTTPREL:
     case R_MIPS_TLS_LDM:
     case R_MIPS_GOT_DISP:
+    case R_MICROMIPS_TLS_GD:
+    case R_MICROMIPS_TLS_GOTTPREL:
+    case R_MICROMIPS_TLS_LDM:
+    case R_MICROMIPS_GOT_DISP:
       value = g;
       overflowed_p = mips_elf_overflow_p (value, 16);
       break;
@@ -5471,8 +5659,38 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
       value &= howto->dst_mask;
       break;
 
+    case R_MICROMIPS_PC7_S1:
+      value = symbol + _bfd_mips_elf_sign_extend (addend, 8) - p;
+      overflowed_p = mips_elf_overflow_p (value, 8);
+      value >>= howto->rightshift;
+      value &= howto->dst_mask;
+      break;
+
+    case R_MICROMIPS_PC10_S1:
+      value = symbol + _bfd_mips_elf_sign_extend (addend, 11) - p;
+      overflowed_p = mips_elf_overflow_p (value, 11);
+      value >>= howto->rightshift;
+      value &= howto->dst_mask;
+      break;
+
+    case R_MICROMIPS_PC16_S1:
+      value = symbol + _bfd_mips_elf_sign_extend (addend, 17) - p;
+      overflowed_p = mips_elf_overflow_p (value, 17);
+      value >>= howto->rightshift;
+      value &= howto->dst_mask;
+      break;
+
+    case R_MICROMIPS_PC23_S2:
+      value = symbol + _bfd_mips_elf_sign_extend (addend, 25) - ((p | 3) ^ 3);
+      overflowed_p = mips_elf_overflow_p (value, 25);
+      value >>= howto->rightshift;
+      value &= howto->dst_mask;
+      break;
+
     case R_MIPS_GOT_HI16:
     case R_MIPS_CALL_HI16:
+    case R_MICROMIPS_GOT_HI16:
+    case R_MICROMIPS_CALL_HI16:
       /* We're allowed to handle these two relocations identically.
 	 The dynamic linker is allowed to handle the CALL relocations
 	 differently by creating a lazy evaluation stub.  */
@@ -5483,10 +5701,13 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 
     case R_MIPS_GOT_LO16:
     case R_MIPS_CALL_LO16:
+    case R_MICROMIPS_GOT_LO16:
+    case R_MICROMIPS_CALL_LO16:
       value = g & howto->dst_mask;
       break;
 
     case R_MIPS_GOT_PAGE:
+    case R_MICROMIPS_GOT_PAGE:
       value = mips_elf_got_page (abfd, input_bfd, info, symbol + addend, NULL);
       if (value == MINUS_ONE)
 	return bfd_reloc_outofrange;
@@ -5495,6 +5716,7 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
       break;
 
     case R_MIPS_GOT_OFST:
+    case R_MICROMIPS_GOT_OFST:
       if (local_p)
 	mips_elf_got_page (abfd, input_bfd, info, symbol + addend, &value);
       else
@@ -5503,26 +5725,31 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
       break;
 
     case R_MIPS_SUB:
+    case R_MICROMIPS_SUB:
       value = symbol - addend;
       value &= howto->dst_mask;
       break;
 
     case R_MIPS_HIGHER:
+    case R_MICROMIPS_HIGHER:
       value = mips_elf_higher (addend + symbol);
       value &= howto->dst_mask;
       break;
 
     case R_MIPS_HIGHEST:
+    case R_MICROMIPS_HIGHEST:
       value = mips_elf_highest (addend + symbol);
       value &= howto->dst_mask;
       break;
 
     case R_MIPS_SCN_DISP:
+    case R_MICROMIPS_SCN_DISP:
       value = symbol + addend - sec->output_offset;
       value &= howto->dst_mask;
       break;
 
     case R_MIPS_JALR:
+    case R_MICROMIPS_JALR:
       /* This relocation is only a hint.  In some cases, we optimize
 	 it into a bal instruction.  But we don't try to optimize
 	 when the symbol does not resolve locally.  */
@@ -5568,7 +5795,7 @@ mips_elf_obtain_contents (reloc_howto_type *howto,
    appropriate position.  The SECTION is the section to which the
    relocation applies.  
    CROSS_MODE_JUMP_P is true if the relocation field
-   is a MIPS16 jump to non-MIPS16 code, or vice versa.
+   is a MIPS16 or microMIPS jump to standard MIPS code, or vice versa.
 
    Returns FALSE if anything goes wrong.  */
 
@@ -5587,7 +5814,7 @@ mips_elf_perform_relocation (struct bfd_link_info *info,
   /* Figure out where the relocation is occurring.  */
   location = contents + relocation->r_offset;
 
-  _bfd_mips16_elf_reloc_unshuffle (input_bfd, r_type, FALSE, location);
+  _bfd_mips_elf_reloc_unshuffle (input_bfd, r_type, FALSE, location);
 
   /* Obtain the current value.  */
   x = mips_elf_obtain_contents (howto, relocation, input_bfd, contents);
@@ -5610,6 +5837,11 @@ mips_elf_perform_relocation (struct bfd_link_info *info,
 	{
 	  ok = ((opcode == 0x6) || (opcode == 0x7));
 	  jalx_opcode = 0x7;
+	}
+      else if (r_type == R_MICROMIPS_26_S1)
+	{
+	  ok = ((opcode == 0x3d) || (opcode == 0x3c));
+	  jalx_opcode = 0x3c;
 	}
       else
 	{
@@ -5672,8 +5904,8 @@ mips_elf_perform_relocation (struct bfd_link_info *info,
   /* Put the value into the output.  */
   bfd_put (8 * bfd_get_reloc_size (howto), input_bfd, x, location);
 
-  _bfd_mips16_elf_reloc_shuffle(input_bfd, r_type, !info->relocatable,
-				location);
+  _bfd_mips_elf_reloc_shuffle (input_bfd, r_type, !info->relocatable,
+			       location);
 
   return TRUE;
 }
@@ -6134,13 +6366,18 @@ _bfd_mips_elf_symbol_processing (bfd *abfd, asymbol *asym)
       break;
     }
 
-  /* If this is an odd-valued function symbol, assume it's a MIPS16 one.  */
+  /* If this is an odd-valued function symbol, assume it's a MIPS16
+     or microMIPS one.  */
   if (ELF_ST_TYPE (elfsym->internal_elf_sym.st_info) == STT_FUNC
       && (asym->value & 1) != 0)
     {
       asym->value--;
-      elfsym->internal_elf_sym.st_other
-	= ELF_ST_SET_MIPS16 (elfsym->internal_elf_sym.st_other);
+      if (elf_elfheader (abfd)->e_flags & EF_MIPS_ARCH_ASE_MICROMIPS)
+	elfsym->internal_elf_sym.st_other
+	  = ELF_ST_SET_MICROMIPS (elfsym->internal_elf_sym.st_other);
+      else
+	elfsym->internal_elf_sym.st_other
+	  = ELF_ST_SET_MIPS16 (elfsym->internal_elf_sym.st_other);
     }
 }
 
@@ -6849,7 +7086,7 @@ _bfd_mips_elf_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
   /* If this is a mips16 text symbol, add 1 to the value to make it
      odd.  This will cause something like .word SYM to come up with
      the right value when it is loaded into the PC.  */
-  if (ELF_ST_IS_MIPS16 (sym->st_other))
+  if (ELF_ST_IS_COMPRESSED (sym->st_other))
     ++*valp;
 
   return TRUE;
@@ -6872,7 +7109,7 @@ _bfd_mips_elf_link_output_symbol_hook
       && strcmp (input_sec->name, ".scommon") == 0)
     sym->st_shndx = SHN_MIPS_SCOMMON;
 
-  if (ELF_ST_IS_MIPS16 (sym->st_other))
+  if (ELF_ST_IS_COMPRESSED (sym->st_other))
     sym->st_value &= ~1;
 
   return 1;
@@ -7123,9 +7360,9 @@ mips_elf_read_rel_addend (bfd *abfd, const Elf_Internal_Rela *rel,
   location = contents + rel->r_offset;
 
   /* Get the addend, which is stored in the input file.  */
-  _bfd_mips16_elf_reloc_unshuffle (abfd, r_type, FALSE, location);
+  _bfd_mips_elf_reloc_unshuffle (abfd, r_type, FALSE, location);
   addend = mips_elf_obtain_contents (howto, rel, abfd, contents);
-  _bfd_mips16_elf_reloc_shuffle (abfd, r_type, FALSE, location);
+  _bfd_mips_elf_reloc_shuffle (abfd, r_type, FALSE, location);
 
   return addend & howto->src_mask;
 }
@@ -7150,6 +7387,8 @@ mips_elf_add_lo16_rel_addend (bfd *abfd,
   r_type = ELF_R_TYPE (abfd, rel->r_info);
   if (mips16_reloc_p (r_type))
     lo16_type = R_MIPS16_LO16;
+  else if (micromips_reloc_p (r_type))
+    lo16_type = R_MICROMIPS_LO16;
   else
     lo16_type = R_MIPS_LO16;
 
@@ -7542,6 +7781,18 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_MIPS_TLS_GOTTPREL:
 	case R_MIPS_TLS_GD:
 	case R_MIPS_TLS_LDM:
+	case R_MICROMIPS_GOT16:
+	case R_MICROMIPS_CALL16:
+	case R_MICROMIPS_CALL_HI16:
+	case R_MICROMIPS_CALL_LO16:
+	case R_MICROMIPS_GOT_HI16:
+	case R_MICROMIPS_GOT_LO16:
+	case R_MICROMIPS_GOT_PAGE:
+	case R_MICROMIPS_GOT_OFST:
+	case R_MICROMIPS_GOT_DISP:
+	case R_MICROMIPS_TLS_GOTTPREL:
+	case R_MICROMIPS_TLS_GD:
+	case R_MICROMIPS_TLS_LDM:
 	  if (dynobj == NULL)
 	    elf_hash_table (info)->dynobj = dynobj = abfd;
 	  if (!mips_elf_create_got_section (dynobj, info))
@@ -7559,6 +7810,7 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  /* This is just a hint; it can safely be ignored.  Don't set
 	     has_static_relocs for the corresponding symbol.  */
 	case R_MIPS_JALR:
+	case R_MICROMIPS_JALR:
 	  break;
 
 	case R_MIPS_32:
@@ -7618,6 +7870,11 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_MIPS_26:
 	case R_MIPS_PC16:
 	case R_MIPS16_26:
+	case R_MICROMIPS_26_S1:
+	case R_MICROMIPS_PC7_S1:
+	case R_MICROMIPS_PC10_S1:
+	case R_MICROMIPS_PC16_S1:
+	case R_MICROMIPS_PC23_S2:
 	  if (h)
 	    ((struct mips_elf_link_hash_entry *) h)->has_static_relocs = TRUE;
 	  break;
@@ -7643,9 +7900,9 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		info->flags |= DF_TEXTREL;
 	    }
 	}
-      else if (r_type == R_MIPS_CALL_LO16
-	       || r_type == R_MIPS_GOT_LO16
-	       || r_type == R_MIPS_GOT_DISP
+      else if (call_lo16_reloc_p (r_type)
+	       || got_lo16_reloc_p (r_type)
+	       || got_disp_reloc_p (r_type)
 	       || (got16_reloc_p (r_type) && htab->is_vxworks))
 	{
 	  /* We may need a local GOT entry for this relocation.  We
@@ -7668,6 +7925,7 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	{
 	case R_MIPS_CALL16:
 	case R_MIPS16_CALL16:
+	case R_MICROMIPS_CALL16:
 	  if (h == NULL)
 	    {
 	      (*_bfd_error_handler)
@@ -7680,6 +7938,8 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
 	case R_MIPS_CALL_HI16:
 	case R_MIPS_CALL_LO16:
+	case R_MICROMIPS_CALL_HI16:
+	case R_MICROMIPS_CALL_LO16:
 	  if (h != NULL)
 	    {
 	      /* Make sure there is room in the regular GOT to hold the
@@ -7697,6 +7957,7 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  break;
 
 	case R_MIPS_GOT_PAGE:
+	case R_MICROMIPS_GOT_PAGE:
 	  /* If this is a global, overridable symbol, GOT_PAGE will
 	     decay to GOT_DISP, so we'll need a GOT entry for it.  */
 	  if (h)
@@ -7716,7 +7977,10 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_MIPS_GOT16:
 	case R_MIPS_GOT_HI16:
 	case R_MIPS_GOT_LO16:
-	  if (!h || r_type == R_MIPS_GOT_PAGE)
+	case R_MICROMIPS_GOT16:
+	case R_MICROMIPS_GOT_HI16:
+	case R_MICROMIPS_GOT_LO16:
+	  if (!h || got_page_reloc_p (r_type))
 	    {
 	      /* This relocation needs (or may need, if h != NULL) a
 		 page entry in the GOT.  For R_MIPS_GOT_PAGE we do not
@@ -7744,18 +8008,21 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  /* Fall through.  */
 
 	case R_MIPS_GOT_DISP:
+	case R_MICROMIPS_GOT_DISP:
 	  if (h && !mips_elf_record_global_got_symbol (h, abfd, info,
 						       FALSE, 0))
 	    return FALSE;
 	  break;
 
 	case R_MIPS_TLS_GOTTPREL:
+	case R_MICROMIPS_TLS_GOTTPREL:
 	  if (info->shared)
 	    info->flags |= DF_STATIC_TLS;
 	  /* Fall through */
 
 	case R_MIPS_TLS_LDM:
-	  if (r_type == R_MIPS_TLS_LDM)
+	case R_MICROMIPS_TLS_LDM:
+	  if (tls_ldm_reloc_p (r_type))
 	    {
 	      r_symndx = STN_UNDEF;
 	      h = NULL;
@@ -7763,14 +8030,15 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  /* Fall through */
 
 	case R_MIPS_TLS_GD:
+	case R_MICROMIPS_TLS_GD:
 	  /* This symbol requires a global offset table entry, or two
 	     for TLS GD relocations.  */
 	  {
-	    unsigned char flag = (r_type == R_MIPS_TLS_GD
-				  ? GOT_TLS_GD
-				  : r_type == R_MIPS_TLS_LDM
-				  ? GOT_TLS_LDM
-				  : GOT_TLS_IE);
+	    unsigned char flag;
+
+	    flag = (tls_gd_reloc_p (r_type)
+		    ? GOT_TLS_GD
+		    : tls_ldm_reloc_p (r_type) ? GOT_TLS_LDM : GOT_TLS_IE);
 	    if (h != NULL)
 	      {
 		struct mips_elf_link_hash_entry *hmips =
@@ -7851,6 +8119,10 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_MIPS_GPREL16:
 	case R_MIPS_LITERAL:
 	case R_MIPS_GPREL32:
+	case R_MICROMIPS_26_S1:
+	case R_MICROMIPS_GPREL16:
+	case R_MICROMIPS_LITERAL:
+	case R_MICROMIPS_GPREL7_S2:
 	  if (SGI_COMPAT (abfd))
 	    mips_elf_hash_table (info)->compact_rel_size +=
 	      sizeof (Elf32_External_crinfo);
@@ -7891,6 +8163,10 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  case R_MIPS_CALL_HI16:
 	  case R_MIPS_CALL_LO16:
 	  case R_MIPS_JALR:
+	  case R_MICROMIPS_CALL16:
+	  case R_MICROMIPS_CALL_HI16:
+	  case R_MICROMIPS_CALL_LO16:
+	  case R_MICROMIPS_JALR:
 	    break;
 	  }
 
@@ -7921,6 +8197,9 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    case R_MIPS_HI16:
 	    case R_MIPS_HIGHER:
 	    case R_MIPS_HIGHEST:
+	    case R_MICROMIPS_HI16:
+	    case R_MICROMIPS_HIGHER:
+	    case R_MICROMIPS_HIGHEST:
 	      /* Don't refuse a high part relocation if it's against
 		 no symbol (e.g. part of a compound relocation).  */
 	      if (r_symndx == STN_UNDEF)
@@ -7940,6 +8219,7 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
 	    case R_MIPS16_26:
 	    case R_MIPS_26:
+	    case R_MICROMIPS_26_S1:
 	      howto = MIPS_ELF_RTYPE_TO_HOWTO (abfd, r_type, FALSE);
 	      (*_bfd_error_handler)
 		(_("%B: relocation %s against `%s' can not be used when making a shared object; recompile with -fPIC"),
@@ -8930,10 +9210,9 @@ mips_elf_adjust_addend (bfd *output_bfd, struct bfd_link_info *info,
   if (mips_elf_local_relocation_p (input_bfd, rel, local_sections))
     {
       r_type = ELF_R_TYPE (output_bfd, rel->r_info);
-      if (r_type == R_MIPS16_GPREL
-	  || r_type == R_MIPS_GPREL16
+      if (gprel16_reloc_p (r_type)
 	  || r_type == R_MIPS_GPREL32
-	  || r_type == R_MIPS_LITERAL)
+	  || literal_reloc_p (r_type))
 	{
 	  rel->r_addend += _bfd_get_gp_value (input_bfd);
 	  rel->r_addend -= _bfd_get_gp_value (output_bfd);
@@ -9204,7 +9483,7 @@ _bfd_mips_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	      BFD_ASSERT (name != NULL);
 	      if (!htab->small_data_overflow_reported
 		  && (gprel16_reloc_p (howto->type)
-		      || howto->type == R_MIPS_LITERAL))
+		      || literal_reloc_p (howto->type)))
 		{
 		  msg = _("small-data section exceeds 64KB;"
 			  " lower small-data size limit (see option -G)");
@@ -9221,6 +9500,16 @@ _bfd_mips_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 
 	case bfd_reloc_ok:
 	  break;
+
+	case bfd_reloc_outofrange:
+	  if (jal_reloc_p (howto->type))
+	    {
+	      msg = _("JALX to a non-word-aligned address");
+	      info->callbacks->warning
+		(info, msg, name, input_bfd, input_section, rel->r_offset);
+	      return FALSE;
+	    }
+	  /* Fall through.  */
 
 	default:
 	  abort ();
@@ -9334,21 +9623,52 @@ mips_elf_create_la25_stub (void **slot, void *data)
 
   if (stub->stub_section != htab->strampoline)
     {
-      /* This is a simple LUI/ADIDU stub.  Zero out the beginning
+      /* This is a simple LUI/ADDIU stub.  Zero out the beginning
 	 of the section and write the two instructions at the end.  */
       memset (loc, 0, offset);
       loc += offset;
-      bfd_put_32 (hti->output_bfd, LA25_LUI (target_high), loc);
-      bfd_put_32 (hti->output_bfd, LA25_ADDIU (target_low), loc + 4);
+      if (ELF_ST_IS_MICROMIPS (stub->h->root.other))
+	{
+	  bfd_put_16 (hti->output_bfd, LA25_LUI_MICROMIPS_1 (target_high),
+		      loc);
+	  bfd_put_16 (hti->output_bfd, LA25_LUI_MICROMIPS_2 (target_high),
+		      loc + 2);
+	  bfd_put_16 (hti->output_bfd, LA25_ADDIU_MICROMIPS_1 (target_low),
+		      loc + 4);
+	  bfd_put_16 (hti->output_bfd, LA25_ADDIU_MICROMIPS_2 (target_low),
+		      loc + 6);
+	}
+      else
+	{
+	  bfd_put_32 (hti->output_bfd, LA25_LUI (target_high), loc);
+	  bfd_put_32 (hti->output_bfd, LA25_ADDIU (target_low), loc + 4);
+	}
     }
   else
     {
       /* This is trampoline.  */
       loc += offset;
-      bfd_put_32 (hti->output_bfd, LA25_LUI (target_high), loc);
-      bfd_put_32 (hti->output_bfd, LA25_J (target), loc + 4);
-      bfd_put_32 (hti->output_bfd, LA25_ADDIU (target_low), loc + 8);
-      bfd_put_32 (hti->output_bfd, 0, loc + 12);
+      if (ELF_ST_IS_MICROMIPS (stub->h->root.other))
+	{
+	  bfd_put_16 (hti->output_bfd, LA25_LUI_MICROMIPS_1 (target_high),
+		      loc);
+	  bfd_put_16 (hti->output_bfd, LA25_LUI_MICROMIPS_2 (target_high),
+		      loc + 2);
+	  bfd_put_16 (hti->output_bfd, LA25_J_MICROMIPS_1 (target), loc + 4);
+	  bfd_put_16 (hti->output_bfd, LA25_J_MICROMIPS_2 (target), loc + 6);
+	  bfd_put_16 (hti->output_bfd, LA25_ADDIU_MICROMIPS_1 (target_low),
+		      loc + 8);
+	  bfd_put_16 (hti->output_bfd, LA25_ADDIU_MICROMIPS_2 (target_low),
+		      loc + 10);
+	  bfd_put_32 (hti->output_bfd, 0, loc + 12);
+	}
+      else
+	{
+	  bfd_put_32 (hti->output_bfd, LA25_LUI (target_high), loc);
+	  bfd_put_32 (hti->output_bfd, LA25_J (target), loc + 4);
+	  bfd_put_32 (hti->output_bfd, LA25_ADDIU (target_low), loc + 8);
+	  bfd_put_32 (hti->output_bfd, 0, loc + 12);
+	}
     }
   return TRUE;
 }
@@ -9911,8 +10231,8 @@ _bfd_mips_vxworks_finish_dynamic_symbol (bfd *output_bfd,
       ++htab->srelbss->reloc_count;
     }
 
-  /* If this is a mips16 symbol, force the value to be even.  */
-  if (ELF_ST_IS_MIPS16 (sym->st_other))
+  /* If this is a mips16/microMIPS symbol, force the value to be even.  */
+  if (ELF_ST_IS_COMPRESSED (sym->st_other))
     sym->st_value &= ~1;
 
   return TRUE;
@@ -11033,6 +11353,15 @@ _bfd_mips_elf_gc_sweep_hook (bfd *abfd ATTRIBUTE_UNUSED,
       case R_MIPS_GOT_DISP:
       case R_MIPS_GOT_PAGE:
       case R_MIPS_GOT_OFST:
+      case R_MICROMIPS_GOT16:
+      case R_MICROMIPS_CALL16:
+      case R_MICROMIPS_CALL_HI16:
+      case R_MICROMIPS_CALL_LO16:
+      case R_MICROMIPS_GOT_HI16:
+      case R_MICROMIPS_GOT_LO16:
+      case R_MICROMIPS_GOT_DISP:
+      case R_MICROMIPS_GOT_PAGE:
+      case R_MICROMIPS_GOT_OFST:
 	/* ??? It would seem that the existing MIPS code does no sort
 	   of reference counting or whatnot on its GOT and PLT entries,
 	   so it is not possible to garbage collect them at this time.  */
@@ -11206,6 +11535,15 @@ _bfd_mips_elf_write_section (bfd *output_bfd,
   return TRUE;
 }
 
+/* microMIPS code retains local labels for linker relaxation.  Omit them
+   from output by default for clarity.  */
+
+bfd_boolean
+_bfd_mips_elf_is_target_special_symbol (bfd *abfd, asymbol *sym)
+{
+  return _bfd_elf_is_local_label_name (abfd, sym->name);
+}
+
 /* MIPS ELF uses a special find_nearest_line routine in order the
    handle the ECOFF debugging information.  */
 
@@ -11529,6 +11867,900 @@ error_return:
   if (reloc_vector != NULL)
     free (reloc_vector);
   return NULL;
+}
+
+static bfd_boolean
+mips_elf_relax_delete_bytes (bfd *abfd,
+			     asection *sec, bfd_vma addr, int count)
+{
+  Elf_Internal_Shdr *symtab_hdr;
+  unsigned int sec_shndx;
+  bfd_byte *contents;
+  Elf_Internal_Rela *irel, *irelend;
+  Elf_Internal_Sym *isym;
+  Elf_Internal_Sym *isymend;
+  struct elf_link_hash_entry **sym_hashes;
+  struct elf_link_hash_entry **end_hashes;
+  struct elf_link_hash_entry **start_hashes;
+  unsigned int symcount;
+
+  sec_shndx = _bfd_elf_section_from_bfd_section (abfd, sec);
+  contents = elf_section_data (sec)->this_hdr.contents;
+
+  irel = elf_section_data (sec)->relocs;
+  irelend = irel + sec->reloc_count;
+
+  /* Actually delete the bytes.  */
+  memmove (contents + addr, contents + addr + count,
+	   (size_t) (sec->size - addr - count));
+  sec->size -= count;
+
+  /* Adjust all the relocs.  */
+  for (irel = elf_section_data (sec)->relocs; irel < irelend; irel++)
+    {
+      /* Get the new reloc address.  */
+      if (irel->r_offset > addr)
+	irel->r_offset -= count;
+    }
+
+  BFD_ASSERT (addr % 2 == 0);
+  BFD_ASSERT (count % 2 == 0);
+
+  /* Adjust the local symbols defined in this section.  */
+  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
+  isym = (Elf_Internal_Sym *) symtab_hdr->contents;
+  for (isymend = isym + symtab_hdr->sh_info; isym < isymend; isym++)
+    if (isym->st_shndx == sec_shndx
+	&& isym->st_value > addr)
+      isym->st_value -= count;
+
+  /* Now adjust the global symbols defined in this section.  */
+  symcount = (symtab_hdr->sh_size / sizeof (Elf32_External_Sym)
+	      - symtab_hdr->sh_info);
+  sym_hashes = start_hashes = elf_sym_hashes (abfd);
+  end_hashes = sym_hashes + symcount;
+
+  for (; sym_hashes < end_hashes; sym_hashes++)
+    {
+      struct elf_link_hash_entry *sym_hash = *sym_hashes;
+
+      if ((sym_hash->root.type == bfd_link_hash_defined
+	   || sym_hash->root.type == bfd_link_hash_defweak)
+	  && sym_hash->root.u.def.section == sec)
+	{
+	  bfd_vma value;
+
+	  value = sym_hash->root.u.def.value;
+	  if (ELF_ST_IS_MICROMIPS (sym_hash->other))
+	    value &= MINUS_TWO;
+	  if (value > addr)
+	    sym_hash->root.u.def.value -= count;
+	}
+    }
+
+  return TRUE;
+}
+
+
+/* Opcodes needed for microMIPS relaxation as found in
+   opcodes/micromips-opc.c.  */
+
+struct opcode_descriptor {
+  unsigned long match;
+  unsigned long mask;
+};
+
+/* The $ra register aka $31.  */
+
+#define RA 31
+
+/* 32-bit instruction format register fields.  */
+
+#define OP32_SREG(opcode) (((opcode) >> 16) & 0x1f)
+#define OP32_TREG(opcode) (((opcode) >> 21) & 0x1f)
+
+/* Check if a 5-bit register index can be abbreviated to 3 bits.  */
+
+#define OP16_VALID_REG(r) \
+  ((2 <= (r) && (r) <= 7) || (16 <= (r) && (r) <= 17))
+
+
+/* 32-bit and 16-bit branches.  */
+
+static const struct opcode_descriptor b_insns_32[] = {
+  { /* "b",	"p",		*/ 0x40400000, 0xffff0000 }, /* bgez 0 */
+  { /* "b",	"p",		*/ 0x94000000, 0xffff0000 }, /* beq 0, 0 */
+  { 0, 0 }  /* End marker for find_match().  */
+};
+
+static const struct opcode_descriptor bc_insn_32 =
+  { /* "bc(1|2)(ft)", "N,p",	*/ 0x42800000, 0xfec30000 };
+
+static const struct opcode_descriptor bz_insn_32 =
+  { /* "b(g|l)(e|t)z", "s,p",	*/ 0x40000000, 0xff200000 };
+
+static const struct opcode_descriptor bzal_insn_32 =
+  { /* "b(ge|lt)zal", "s,p",	*/ 0x40200000, 0xffa00000 };
+
+static const struct opcode_descriptor beq_insn_32 =
+  { /* "b(eq|ne)", "s,t,p",	*/ 0x94000000, 0xdc000000 };
+
+static const struct opcode_descriptor b_insn_16 =
+  { /* "b",	"mD",		*/ 0xcc00,     0xfc00 };
+
+static const struct opcode_descriptor bz_insn_16 =
+  { /* "b(eq|ne)z", "md,mE",	*/ 0x8c00,     0xac00 };
+
+
+/* 32-bit and 16-bit branch EQ and NE zero.  */
+
+/* NOTE: All opcode tables have BEQ/BNE in the same order: first the
+   eq and second the ne.  This convention is used when replacing a
+   32-bit BEQ/BNE with the 16-bit version.  */
+
+#define BZC32_REG_FIELD(r) (((r) & 0x1f) << 16)
+
+static const struct opcode_descriptor bz_rs_insns_32[] = {
+  { /* "beqz",	"s,p",		*/ 0x94000000, 0xffe00000 },
+  { /* "bnez",	"s,p",		*/ 0xb4000000, 0xffe00000 },
+  { 0, 0 }  /* End marker for find_match().  */
+};
+
+static const struct opcode_descriptor bz_rt_insns_32[] = {
+  { /* "beqz",	"t,p",		*/ 0x94000000, 0xfc01f000 },
+  { /* "bnez",	"t,p",		*/ 0xb4000000, 0xfc01f000 },
+  { 0, 0 }  /* End marker for find_match().  */
+};
+
+static const struct opcode_descriptor bzc_insns_32[] = {
+  { /* "beqzc",	"s,p",		*/ 0x40e00000, 0xffe00000 },
+  { /* "bnezc",	"s,p",		*/ 0x40a00000, 0xffe00000 },
+  { 0, 0 }  /* End marker for find_match().  */
+};
+
+static const struct opcode_descriptor bz_insns_16[] = {
+  { /* "beqz",	"md,mE",	*/ 0x8c00,     0xfc00 },
+  { /* "bnez",	"md,mE",	*/ 0xac00,     0xfc00 },
+  { 0, 0 }  /* End marker for find_match().  */
+};
+
+/* Switch between a 5-bit register index and its 3-bit shorthand.  */
+
+#define BZ16_REG(opcode) ((((((opcode) >> 7) & 7) + 0x1e) & 0x17) + 2)
+#define BZ16_REG_FIELD(r) \
+  (((2 <= (r) && (r) <= 7) ? (r) : ((r) - 16)) << 7)
+
+
+/* 32-bit instructions with a delay slot.  */
+
+static const struct opcode_descriptor jal_insn_32_bd16 =
+  { /* "jals",	"a",		*/ 0x74000000, 0xfc000000 };
+
+static const struct opcode_descriptor jal_insn_32_bd32 =
+  { /* "jal",	"a",		*/ 0xf4000000, 0xfc000000 };
+
+static const struct opcode_descriptor jal_x_insn_32_bd32 =
+  { /* "jal[x]", "a",		*/ 0xf0000000, 0xf8000000 };
+
+static const struct opcode_descriptor j_insn_32 =
+  { /* "j",	"a",		*/ 0xd4000000, 0xfc000000 };
+
+static const struct opcode_descriptor jalr_insn_32 =
+  { /* "jalr[.hb]", "t,s",	*/ 0x00000f3c, 0xfc00efff };
+
+/* This table can be compacted, because no opcode replacement is made.  */
+
+static const struct opcode_descriptor ds_insns_32_bd16[] = {
+  { /* "jals",	"a",		*/ 0x74000000, 0xfc000000 },
+
+  { /* "jalrs[.hb]", "t,s",	*/ 0x00004f3c, 0xfc00efff },
+  { /* "b(ge|lt)zals", "s,p",	*/ 0x42200000, 0xffa00000 },
+
+  { /* "b(g|l)(e|t)z", "s,p",	*/ 0x40000000, 0xff200000 },
+  { /* "b(eq|ne)", "s,t,p",	*/ 0x94000000, 0xdc000000 },
+  { /* "j",	"a",		*/ 0xd4000000, 0xfc000000 },
+  { 0, 0 }  /* End marker for find_match().  */
+};
+
+/* This table can be compacted, because no opcode replacement is made.  */
+
+static const struct opcode_descriptor ds_insns_32_bd32[] = {
+  { /* "jal[x]", "a",		*/ 0xf0000000, 0xf8000000 },
+
+  { /* "jalr[.hb]", "t,s",	*/ 0x00000f3c, 0xfc00efff },
+  { /* "b(ge|lt)zal", "s,p",	*/ 0x40200000, 0xffa00000 },
+  { 0, 0 }  /* End marker for find_match().  */
+};
+
+
+/* 16-bit instructions with a delay slot.  */
+
+static const struct opcode_descriptor jalr_insn_16_bd16 =
+  { /* "jalrs",	"my,mj",	*/ 0x45e0,     0xffe0 };
+
+static const struct opcode_descriptor jalr_insn_16_bd32 =
+  { /* "jalr",	"my,mj",	*/ 0x45c0,     0xffe0 };
+
+static const struct opcode_descriptor jr_insn_16 =
+  { /* "jr",	"mj",		*/ 0x4580,     0xffe0 };
+
+#define JR16_REG(opcode) ((opcode) & 0x1f)
+
+/* This table can be compacted, because no opcode replacement is made.  */
+
+static const struct opcode_descriptor ds_insns_16_bd16[] = {
+  { /* "jalrs",	"my,mj",	*/ 0x45e0,     0xffe0 },
+
+  { /* "b",	"mD",		*/ 0xcc00,     0xfc00 },
+  { /* "b(eq|ne)z", "md,mE",	*/ 0x8c00,     0xdc00 },
+  { /* "jr",	"mj",		*/ 0x4580,     0xffe0 },
+  { 0, 0 }  /* End marker for find_match().  */
+};
+
+
+/* LUI instruction.  */
+
+static const struct opcode_descriptor lui_insn =
+ { /* "lui",	"s,u",		*/ 0x41a00000, 0xffe00000 };
+
+
+/* ADDIU instruction.  */
+
+static const struct opcode_descriptor addiu_insn =
+  { /* "addiu",	"t,r,j",	*/ 0x30000000, 0xfc000000 };
+
+static const struct opcode_descriptor addiupc_insn =
+  { /* "addiu",	"mb,$pc,mQ",	*/ 0x78000000, 0xfc000000 };
+
+#define ADDIUPC_REG_FIELD(r) \
+  (((2 <= (r) && (r) <= 7) ? (r) : ((r) - 16)) << 23)
+
+
+/* Relaxable instructions in a JAL delay slot: MOVE.  */
+
+/* The 16-bit move has rd in 9:5 and rs in 4:0.  The 32-bit moves
+   (ADDU, OR) have rd in 15:11 and rs in 10:16.  */
+#define MOVE32_RD(opcode) (((opcode) >> 11) & 0x1f)
+#define MOVE32_RS(opcode) (((opcode) >> 16) & 0x1f)
+
+#define MOVE16_RD_FIELD(r) (((r) & 0x1f) << 5)
+#define MOVE16_RS_FIELD(r) (((r) & 0x1f)     )
+
+static const struct opcode_descriptor move_insns_32[] = {
+  { /* "move",	"d,s",		*/ 0x00000150, 0xffe007ff }, /* addu d,s,$0 */
+  { /* "move",	"d,s",		*/ 0x00000290, 0xffe007ff }, /* or   d,s,$0 */
+  { 0, 0 }  /* End marker for find_match().  */
+};
+
+static const struct opcode_descriptor move_insn_16 =
+  { /* "move",	"mp,mj",	*/ 0x0c00,     0xfc00 };
+
+
+/* NOP instructions.  */
+
+static const struct opcode_descriptor nop_insn_32 =
+  { /* "nop",	"",		*/ 0x00000000, 0xffffffff };
+
+static const struct opcode_descriptor nop_insn_16 =
+  { /* "nop",	"",		*/ 0x0c00,     0xffff };
+
+
+/* Instruction match support.  */
+
+#define MATCH(opcode, insn) ((opcode & insn.mask) == insn.match)
+
+static int
+find_match (unsigned long opcode, const struct opcode_descriptor insn[])
+{
+  unsigned long indx;
+
+  for (indx = 0; insn[indx].mask != 0; indx++)
+    if (MATCH (opcode, insn[indx]))
+      return indx;
+
+  return -1;
+}
+
+
+/* Branch and delay slot decoding support.  */
+
+/* If PTR points to what *might* be a 16-bit branch or jump, then
+   return the minimum length of its delay slot, otherwise return 0.
+   Non-zero results are not definitive as we might be checking against
+   the second half of another instruction.  */
+
+static int
+check_br16_dslot (bfd *abfd, bfd_byte *ptr)
+{
+  unsigned long opcode;
+  int bdsize;
+
+  opcode = bfd_get_16 (abfd, ptr);
+  if (MATCH (opcode, jalr_insn_16_bd32) != 0)
+    /* 16-bit branch/jump with a 32-bit delay slot.  */
+    bdsize = 4;
+  else if (MATCH (opcode, jalr_insn_16_bd16) != 0
+	   || find_match (opcode, ds_insns_16_bd16) >= 0)
+    /* 16-bit branch/jump with a 16-bit delay slot.  */
+    bdsize = 2;
+  else
+    /* No delay slot.  */
+    bdsize = 0;
+
+  return bdsize;
+}
+
+/* If PTR points to what *might* be a 32-bit branch or jump, then
+   return the minimum length of its delay slot, otherwise return 0.
+   Non-zero results are not definitive as we might be checking against
+   the second half of another instruction.  */
+
+static int
+check_br32_dslot (bfd *abfd, bfd_byte *ptr)
+{
+  unsigned long opcode;
+  int bdsize;
+
+  opcode = (bfd_get_16 (abfd, ptr) << 16) | bfd_get_16 (abfd, ptr + 2);
+  if (find_match (opcode, ds_insns_32_bd32) >= 0)
+    /* 32-bit branch/jump with a 32-bit delay slot.  */
+    bdsize = 4;
+  else if (find_match (opcode, ds_insns_32_bd16) >= 0)
+    /* 32-bit branch/jump with a 16-bit delay slot.  */
+    bdsize = 2;
+  else
+    /* No delay slot.  */
+    bdsize = 0;
+
+  return bdsize;
+}
+
+/* If PTR points to a 16-bit branch or jump with a 32-bit delay slot
+   that doesn't fiddle with REG, then return TRUE, otherwise FALSE.  */
+
+static bfd_boolean
+check_br16 (bfd *abfd, bfd_byte *ptr, unsigned long reg)
+{
+  unsigned long opcode;
+
+  opcode = bfd_get_16 (abfd, ptr);
+  if (MATCH (opcode, b_insn_16)
+						/* B16  */
+      || (MATCH (opcode, jr_insn_16) && reg != JR16_REG (opcode))
+						/* JR16  */
+      || (MATCH (opcode, bz_insn_16) && reg != BZ16_REG (opcode))
+						/* BEQZ16, BNEZ16  */
+      || (MATCH (opcode, jalr_insn_16_bd32)
+						/* JALR16  */
+	  && reg != JR16_REG (opcode) && reg != RA))
+    return TRUE;
+
+  return FALSE;
+}
+
+/* If PTR points to a 32-bit branch or jump that doesn't fiddle with REG,
+   then return TRUE, otherwise FALSE.  */
+
+static int
+check_br32 (bfd *abfd, bfd_byte *ptr, unsigned long reg)
+{
+  unsigned long opcode;
+
+  opcode = (bfd_get_16 (abfd, ptr) << 16) | bfd_get_16 (abfd, ptr + 2);
+  if (MATCH (opcode, j_insn_32)
+						/* J  */
+      || MATCH (opcode, bc_insn_32)
+						/* BC1F, BC1T, BC2F, BC2T  */
+      || (MATCH (opcode, jal_x_insn_32_bd32) && reg != RA)
+						/* JAL, JALX  */
+      || (MATCH (opcode, bz_insn_32) && reg != OP32_SREG (opcode))
+						/* BGEZ, BGTZ, BLEZ, BLTZ  */
+      || (MATCH (opcode, bzal_insn_32)
+						/* BGEZAL, BLTZAL  */
+	  && reg != OP32_SREG (opcode) && reg != RA)
+      || ((MATCH (opcode, jalr_insn_32) || MATCH (opcode, beq_insn_32))
+						/* JALR, JALR.HB, BEQ, BNE  */
+	  && reg != OP32_SREG (opcode) && reg != OP32_TREG (opcode)))
+    return TRUE;
+
+  return FALSE;
+}
+
+/* Bitsize checking.  */
+#define IS_BITSIZE(val, N)						\
+  (((((val) & ((1ULL << (N)) - 1)) ^ (1ULL << ((N) - 1)))		\
+    - (1ULL << ((N) - 1))) == (val))
+
+/* See if relocations [INTERNAL_RELOCS, IRELEND) confirm that there
+   is a 4-byte branch at offset OFFSET.  */
+
+static bfd_boolean
+check_4byte_branch (Elf_Internal_Rela *internal_relocs,
+		    Elf_Internal_Rela *irelend, bfd_vma offset)
+{
+  Elf_Internal_Rela *irel;
+  unsigned long r_type;
+
+  for (irel = internal_relocs; irel < irelend; irel++)
+    if (irel->r_offset == offset)
+      {
+	r_type = ELF32_R_TYPE (irel->r_info);
+	if (r_type == R_MICROMIPS_26_S1
+	    || r_type == R_MICROMIPS_PC16_S1
+	    || r_type == R_MICROMIPS_JALR)
+	  return TRUE;
+      }
+  return FALSE;
+}
+
+bfd_boolean
+_bfd_mips_elf_relax_section (bfd *abfd, asection *sec,
+			     struct bfd_link_info *link_info,
+			     bfd_boolean *again)
+{
+  Elf_Internal_Shdr *symtab_hdr;
+  Elf_Internal_Rela *internal_relocs;
+  Elf_Internal_Rela *irel, *irelend;
+  bfd_byte *contents = NULL;
+  Elf_Internal_Sym *isymbuf = NULL;
+
+  /* Assume nothing changes.  */
+  *again = FALSE;
+
+  /* We don't have to do anything for a relocatable link, if
+     this section does not have relocs, or if this is not a
+     code section.  */
+
+  if (link_info->relocatable
+      || (sec->flags & SEC_RELOC) == 0
+      || sec->reloc_count == 0
+      || (sec->flags & SEC_CODE) == 0)
+    return TRUE;
+
+  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
+
+  /* Get a copy of the native relocations.  */
+  internal_relocs = (_bfd_elf_link_read_relocs
+		     (abfd, sec, (PTR) NULL, (Elf_Internal_Rela *) NULL,
+		      link_info->keep_memory));
+  if (internal_relocs == NULL)
+    goto error_return;
+
+  /* Walk through them looking for relaxing opportunities.  */
+  irelend = internal_relocs + sec->reloc_count;
+  for (irel = internal_relocs; irel < irelend; irel++)
+    {
+      unsigned long r_symndx = ELF32_R_SYM (irel->r_info);
+      unsigned int r_type = ELF32_R_TYPE (irel->r_info);
+      bfd_boolean target_is_micromips_code_p;
+      unsigned long opcode;
+      bfd_vma symval;
+      bfd_vma pcrval;
+      int fndopc;
+
+      /* The number of bytes to delete for relaxation and from where
+         to delete these bytes starting at irel->r_offset.  */
+      int delcnt = 0;
+      int deloff = 0;
+
+      /* If this isn't something that can be relaxed, then ignore
+         this reloc.  */
+      if (r_type != R_MICROMIPS_HI16
+	  && r_type != R_MICROMIPS_PC16_S1
+	  && r_type != R_MICROMIPS_26_S1
+	  && r_type != R_MICROMIPS_GPREL16)
+	continue;
+
+      /* Get the section contents if we haven't done so already.  */
+      if (contents == NULL)
+	{
+	  /* Get cached copy if it exists.  */
+	  if (elf_section_data (sec)->this_hdr.contents != NULL)
+	    contents = elf_section_data (sec)->this_hdr.contents;
+	  /* Go get them off disk.  */
+	  else if (!bfd_malloc_and_get_section (abfd, sec, &contents))
+	    goto error_return;
+	}
+
+      /* Read this BFD's local symbols if we haven't done so already.  */
+      if (isymbuf == NULL && symtab_hdr->sh_info != 0)
+	{
+	  isymbuf = (Elf_Internal_Sym *) symtab_hdr->contents;
+	  if (isymbuf == NULL)
+	    isymbuf = bfd_elf_get_elf_syms (abfd, symtab_hdr,
+					    symtab_hdr->sh_info, 0,
+					    NULL, NULL, NULL);
+	  if (isymbuf == NULL)
+	    goto error_return;
+	}
+
+      /* Get the value of the symbol referred to by the reloc.  */
+      if (r_symndx < symtab_hdr->sh_info)
+	{
+	  /* A local symbol.  */
+	  Elf_Internal_Sym *isym;
+	  asection *sym_sec;
+
+	  isym = isymbuf + r_symndx;
+	  if (isym->st_shndx == SHN_UNDEF)
+	    sym_sec = bfd_und_section_ptr;
+	  else if (isym->st_shndx == SHN_ABS)
+	    sym_sec = bfd_abs_section_ptr;
+	  else if (isym->st_shndx == SHN_COMMON)
+	    sym_sec = bfd_com_section_ptr;
+	  else
+	    sym_sec = bfd_section_from_elf_index (abfd, isym->st_shndx);
+	  symval = (isym->st_value
+		    + sym_sec->output_section->vma
+		    + sym_sec->output_offset);
+	  target_is_micromips_code_p = ELF_ST_IS_MICROMIPS (isym->st_other);
+	}
+      else
+	{
+	  unsigned long indx;
+	  struct elf_link_hash_entry *h;
+
+	  /* An external symbol.  */
+	  indx = r_symndx - symtab_hdr->sh_info;
+	  h = elf_sym_hashes (abfd)[indx];
+	  BFD_ASSERT (h != NULL);
+
+	  if (h->root.type != bfd_link_hash_defined
+	      && h->root.type != bfd_link_hash_defweak)
+	    /* This appears to be a reference to an undefined
+	       symbol.  Just ignore it -- it will be caught by the
+	       regular reloc processing.  */
+	    continue;
+
+	  symval = (h->root.u.def.value
+		    + h->root.u.def.section->output_section->vma
+		    + h->root.u.def.section->output_offset);
+	  target_is_micromips_code_p = (!h->needs_plt
+					&& ELF_ST_IS_MICROMIPS (h->other));
+	}
+
+
+      /* For simplicity of coding, we are going to modify the
+         section contents, the section relocs, and the BFD symbol
+         table.  We must tell the rest of the code not to free up this
+         information.  It would be possible to instead create a table
+         of changes which have to be made, as is done in coff-mips.c;
+         that would be more work, but would require less memory when
+         the linker is run.  */
+
+      /* Only 32-bit instructions relaxed.  */
+      if (irel->r_offset + 4 > sec->size)
+	continue;
+
+      opcode  = bfd_get_16 (abfd, contents + irel->r_offset    ) << 16;
+      opcode |= bfd_get_16 (abfd, contents + irel->r_offset + 2);
+
+      /* This is the pc-relative distance from the instruction the
+         relocation is applied to, to the symbol referred.  */
+      pcrval = (symval
+		- (sec->output_section->vma + sec->output_offset)
+		- irel->r_offset);
+
+      /* R_MICROMIPS_HI16 / LUI relaxation to nil, performing relaxation
+         of corresponding R_MICROMIPS_LO16 to R_MICROMIPS_HI0_LO16 or
+         R_MICROMIPS_PC23_S2.  The R_MICROMIPS_PC23_S2 condition is
+
+           (symval % 4 == 0 && IS_BITSIZE (pcrval, 25))
+
+         where pcrval has first to be adjusted to apply against the LO16
+         location (we make the adjustment later on, when we have figured
+         out the offset).  */
+      if (r_type == R_MICROMIPS_HI16 && MATCH (opcode, lui_insn))
+	{
+	  unsigned long nextopc;
+	  unsigned long reg;
+	  bfd_vma offset;
+
+	  /* Give up if the previous reloc was a HI16 against this symbol
+	     too.  */
+	  if (irel > internal_relocs
+	      && ELF32_R_TYPE (irel[-1].r_info) == R_MICROMIPS_HI16
+	      && ELF32_R_SYM (irel[-1].r_info) == r_symndx)
+	    continue;
+
+	  /* Or if the next reloc is not a LO16 against this symbol.  */
+	  if (irel + 1 >= irelend
+	      || ELF32_R_TYPE (irel[1].r_info) != R_MICROMIPS_LO16
+	      || ELF32_R_SYM (irel[1].r_info) != r_symndx)
+	    continue;
+
+	  /* Or if the second next reloc is a LO16 against this symbol too.  */
+	  if (irel + 2 >= irelend
+	      && ELF32_R_TYPE (irel[2].r_info) == R_MICROMIPS_LO16
+	      && ELF32_R_SYM (irel[2].r_info) == r_symndx)
+	    continue;
+
+	  /* See if the LUI instruction *might* be in a branch delay slot.  */
+	  if (irel->r_offset >= 2
+	      && check_br16_dslot (abfd, contents + irel->r_offset - 2) > 0
+	      && !(irel->r_offset >= 4
+		   /* If the instruction is actually a 4-byte branch,
+		      the value of check_br16_dslot doesn't matter.
+		      We should use check_br32_dslot to check whether
+		      the branch has a delay slot.  */
+		   && check_4byte_branch (internal_relocs, irelend,
+					  irel->r_offset - 4)))
+	    continue;
+	  if (irel->r_offset >= 4
+	      && check_br32_dslot (abfd, contents + irel->r_offset - 4) > 0)
+	    continue;
+
+	  reg = OP32_SREG (opcode);
+
+	  /* We only relax adjacent instructions or ones separated with
+	     a branch or jump that has a delay slot.  The branch or jump
+	     must not fiddle with the register used to hold the address.
+	     Subtract 4 for the LUI itself.  */
+	  offset = irel[1].r_offset - irel[0].r_offset;
+	  switch (offset - 4)
+	    {
+	    case 0:
+	      break;
+	    case 2:
+	      if (check_br16 (abfd, contents + irel->r_offset + 4, reg))
+		break;
+	      continue;
+	    case 4:
+	      if (check_br32 (abfd, contents + irel->r_offset + 4, reg))
+		break;
+	      continue;
+	    default:
+	      continue;
+	    }
+
+	  nextopc  = bfd_get_16 (abfd, contents + irel[1].r_offset    ) << 16;
+	  nextopc |= bfd_get_16 (abfd, contents + irel[1].r_offset + 2);
+
+	  /* Give up unless the same register is used with both
+	     relocations.  */
+	  if (OP32_SREG (nextopc) != reg)
+	    continue;
+
+	  /* Now adjust pcrval, subtracting the offset to the LO16 reloc
+	     and rounding up to take masking of the two LSBs into account.  */
+	  pcrval = ((pcrval - offset + 3) | 3) ^ 3;
+
+	  /* R_MICROMIPS_LO16 relaxation to R_MICROMIPS_HI0_LO16.  */
+	  if (IS_BITSIZE (symval, 16))
+	    {
+	      /* Fix the relocation's type.  */
+	      irel[1].r_info = ELF32_R_INFO (r_symndx, R_MICROMIPS_HI0_LO16);
+
+	      /* Instructions using R_MICROMIPS_LO16 have the base or
+	         source register in bits 20:16.  This register becomes $0
+	         (zero) as the result of the R_MICROMIPS_HI16 being 0.  */
+	      nextopc &= ~0x001f0000;
+	      bfd_put_16 (abfd, (nextopc >> 16) & 0xffff,
+			  contents + irel[1].r_offset);
+	    }
+
+	  /* R_MICROMIPS_LO16 / ADDIU relaxation to R_MICROMIPS_PC23_S2.
+	     We add 4 to take LUI deletion into account while checking
+	     the PC-relative distance.  */
+	  else if (symval % 4 == 0
+		   && IS_BITSIZE (pcrval + 4, 25)
+		   && MATCH (nextopc, addiu_insn)
+		   && OP32_TREG (nextopc) == OP32_SREG (nextopc)
+		   && OP16_VALID_REG (OP32_TREG (nextopc)))
+	    {
+	      /* Fix the relocation's type.  */
+	      irel[1].r_info = ELF32_R_INFO (r_symndx, R_MICROMIPS_PC23_S2);
+
+	      /* Replace ADDIU with the ADDIUPC version.  */
+	      nextopc = (addiupc_insn.match
+			 | ADDIUPC_REG_FIELD (OP32_TREG (nextopc)));
+
+	      bfd_put_16 (abfd, (nextopc >> 16) & 0xffff,
+			  contents + irel[1].r_offset);
+	      bfd_put_16 (abfd,  nextopc        & 0xffff,
+			  contents + irel[1].r_offset + 2);
+	    }
+
+	  /* Can't do anything, give up, sigh...  */
+	  else
+	    continue;
+
+	  /* Fix the relocation's type.  */
+	  irel->r_info = ELF32_R_INFO (r_symndx, R_MIPS_NONE);
+
+	  /* Delete the LUI instruction: 4 bytes at irel->r_offset.  */
+	  delcnt = 4;
+	  deloff = 0;
+	}
+
+      /* Compact branch relaxation -- due to the multitude of macros
+         employed by the compiler/assembler, compact branches are not
+         always generated.  Obviously, this can/will be fixed elsewhere,
+         but there is no drawback in double checking it here.  */
+      else if (r_type == R_MICROMIPS_PC16_S1
+	       && irel->r_offset + 5 < sec->size
+	       && ((fndopc = find_match (opcode, bz_rs_insns_32)) >= 0
+		   || (fndopc = find_match (opcode, bz_rt_insns_32)) >= 0)
+	       && MATCH (bfd_get_16 (abfd, contents + irel->r_offset + 4),
+			 nop_insn_16))
+	{
+	  unsigned long reg;
+
+	  reg = OP32_SREG (opcode) ? OP32_SREG (opcode) : OP32_TREG (opcode);
+
+	  /* Replace BEQZ/BNEZ with the compact version.  */
+	  opcode = (bzc_insns_32[fndopc].match
+		    | BZC32_REG_FIELD (reg)
+		    | (opcode & 0xffff));		/* Addend value.  */
+
+	  bfd_put_16 (abfd, (opcode >> 16) & 0xffff,
+		      contents + irel->r_offset);
+	  bfd_put_16 (abfd,  opcode        & 0xffff,
+		      contents + irel->r_offset + 2);
+
+	  /* Delete the 16-bit delay slot NOP: two bytes from
+	     irel->offset + 4.  */
+	  delcnt = 2;
+	  deloff = 4;
+	}
+
+      /* R_MICROMIPS_PC16_S1 relaxation to R_MICROMIPS_PC10_S1.  We need
+         to check the distance from the next instruction, so subtract 2.  */
+      else if (r_type == R_MICROMIPS_PC16_S1
+	       && IS_BITSIZE (pcrval - 2, 11)
+	       && find_match (opcode, b_insns_32) >= 0)
+	{
+	  /* Fix the relocation's type.  */
+	  irel->r_info = ELF32_R_INFO (r_symndx, R_MICROMIPS_PC10_S1);
+
+	  /* Replace the the 32-bit opcode with a 16-bit opcode.  */
+	  bfd_put_16 (abfd,
+		      (b_insn_16.match
+		       | (opcode & 0x3ff)),		/* Addend value.  */
+		      contents + irel->r_offset);
+
+	  /* Delete 2 bytes from irel->r_offset + 2.  */
+	  delcnt = 2;
+	  deloff = 2;
+	}
+
+      /* R_MICROMIPS_PC16_S1 relaxation to R_MICROMIPS_PC7_S1.  We need
+         to check the distance from the next instruction, so subtract 2.  */
+      else if (r_type == R_MICROMIPS_PC16_S1
+	       && IS_BITSIZE (pcrval - 2, 8)
+	       && (((fndopc = find_match (opcode, bz_rs_insns_32)) >= 0
+		    && OP16_VALID_REG (OP32_SREG (opcode)))
+		   || ((fndopc = find_match (opcode, bz_rt_insns_32)) >= 0
+		       && OP16_VALID_REG (OP32_TREG (opcode)))))
+	{
+	  unsigned long reg;
+
+	  reg = OP32_SREG (opcode) ? OP32_SREG (opcode) : OP32_TREG (opcode);
+
+	  /* Fix the relocation's type.  */
+	  irel->r_info = ELF32_R_INFO (r_symndx, R_MICROMIPS_PC7_S1);
+
+	  /* Replace the the 32-bit opcode with a 16-bit opcode.  */
+	  bfd_put_16 (abfd,
+		      (bz_insns_16[fndopc].match
+		       | BZ16_REG_FIELD (reg)
+		       | (opcode & 0x7f)),		/* Addend value.  */
+		      contents + irel->r_offset);
+
+	  /* Delete 2 bytes from irel->r_offset + 2.  */
+	  delcnt = 2;
+	  deloff = 2;
+	}
+
+      /* R_MICROMIPS_26_S1 -- JAL to JALS relaxation for microMIPS targets.  */
+      else if (r_type == R_MICROMIPS_26_S1
+	       && target_is_micromips_code_p
+	       && irel->r_offset + 7 < sec->size
+	       && MATCH (opcode, jal_insn_32_bd32))
+	{
+	  unsigned long n32opc;
+	  bfd_boolean relaxed = FALSE;
+
+	  n32opc  = bfd_get_16 (abfd, contents + irel->r_offset + 4) << 16;
+	  n32opc |= bfd_get_16 (abfd, contents + irel->r_offset + 6);
+
+	  if (MATCH (n32opc, nop_insn_32))
+	    {
+	      /* Replace delay slot 32-bit NOP with a 16-bit NOP.  */
+	      bfd_put_16 (abfd, nop_insn_16.match,
+			  contents + irel->r_offset + 4);
+
+	      relaxed = TRUE;
+	    }
+	  else if (find_match (n32opc, move_insns_32) >= 0)
+	    {
+	      /* Replace delay slot 32-bit MOVE with 16-bit MOVE.  */
+	      bfd_put_16 (abfd,
+			  (move_insn_16.match
+			   | MOVE16_RD_FIELD (MOVE32_RD (n32opc))
+			   | MOVE16_RS_FIELD (MOVE32_RS (n32opc))),
+			  contents + irel->r_offset + 4);
+
+	      relaxed = TRUE;
+	    }
+	  /* Other 32-bit instructions relaxable to 16-bit
+	     instructions will be handled here later.  */
+
+	  if (relaxed)
+	    {
+	      /* JAL with 32-bit delay slot that is changed to a JALS
+	         with 16-bit delay slot.  */
+	      bfd_put_16 (abfd, (jal_insn_32_bd16.match >> 16) & 0xffff,
+			  contents + irel->r_offset);
+	      bfd_put_16 (abfd,  jal_insn_32_bd16.match        & 0xffff,
+			  contents + irel->r_offset + 2);
+
+	      /* Delete 2 bytes from irel->r_offset + 6.  */
+	      delcnt = 2;
+	      deloff = 6;
+	    }
+	}
+
+      if (delcnt != 0)
+	{
+	  /* Note that we've changed the relocs, section contents, etc.  */
+	  elf_section_data (sec)->relocs = internal_relocs;
+	  elf_section_data (sec)->this_hdr.contents = contents;
+	  symtab_hdr->contents = (unsigned char *) isymbuf;
+
+	  /* Delete bytes depending on the delcnt and deloff.  */
+	  if (!mips_elf_relax_delete_bytes (abfd, sec,
+					    irel->r_offset + deloff, delcnt))
+	    goto error_return;
+
+	  /* That will change things, so we should relax again.
+	     Note that this is not required, and it may be slow.  */
+	  *again = TRUE;
+	}
+    }
+
+  if (isymbuf != NULL
+      && symtab_hdr->contents != (unsigned char *) isymbuf)
+    {
+      if (! link_info->keep_memory)
+	free (isymbuf);
+      else
+	{
+	  /* Cache the symbols for elf_link_input_bfd.  */
+	  symtab_hdr->contents = (unsigned char *) isymbuf;
+	}
+    }
+
+  if (contents != NULL
+      && elf_section_data (sec)->this_hdr.contents != contents)
+    {
+      if (! link_info->keep_memory)
+	free (contents);
+      else
+	{
+	  /* Cache the section contents for elf_link_input_bfd.  */
+	  elf_section_data (sec)->this_hdr.contents = contents;
+	}
+    }
+
+  if (internal_relocs != NULL
+      && elf_section_data (sec)->relocs != internal_relocs)
+    free (internal_relocs);
+
+  return TRUE;
+
+ error_return:
+  if (isymbuf != NULL
+      && symtab_hdr->contents != (unsigned char *) isymbuf)
+    free (isymbuf);
+  if (contents != NULL
+      && elf_section_data (sec)->this_hdr.contents != contents)
+    free (contents);
+  if (internal_relocs != NULL
+      && elf_section_data (sec)->relocs != internal_relocs)
+    free (internal_relocs);
+
+  return FALSE;
 }
 
 /* Create a MIPS ELF linker hash table.  */
@@ -12698,9 +13930,27 @@ _bfd_mips_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
       old_flags &= ~EF_MIPS_ABI;
     }
 
-  /* For now, allow arbitrary mixing of ASEs (retain the union).  */
+  /* Compare ASEs.  Forbid linking MIPS16 and microMIPS ASE modules together
+     and allow arbitrary mixing of the remaining ASEs (retain the union).  */
   if ((new_flags & EF_MIPS_ARCH_ASE) != (old_flags & EF_MIPS_ARCH_ASE))
     {
+      int old_micro = old_flags & EF_MIPS_ARCH_ASE_MICROMIPS;
+      int new_micro = new_flags & EF_MIPS_ARCH_ASE_MICROMIPS;
+      int old_m16 = old_flags & EF_MIPS_ARCH_ASE_M16;
+      int new_m16 = new_flags & EF_MIPS_ARCH_ASE_M16;
+      int micro_mis = old_m16 && new_micro;
+      int m16_mis = old_micro && new_m16;
+
+      if (m16_mis || micro_mis)
+	{
+	  (*_bfd_error_handler)
+	    (_("%B: ASE mismatch: linking %s module with previous %s modules"),
+	     ibfd,
+	     m16_mis ? "MIPS16" : "microMIPS",
+	     m16_mis ? "microMIPS" : "MIPS16");
+	  ok = FALSE;
+	}
+
       elf_elfheader (obfd)->e_flags |= new_flags & EF_MIPS_ARCH_ASE;
 
       new_flags &= ~ EF_MIPS_ARCH_ASE;
@@ -12894,6 +14144,9 @@ _bfd_mips_elf_print_private_bfd_data (bfd *abfd, void *ptr)
 
   if (elf_elfheader (abfd)->e_flags & EF_MIPS_ARCH_ASE_M16)
     fprintf (file, " [mips16]");
+
+  if (elf_elfheader (abfd)->e_flags & EF_MIPS_ARCH_ASE_MICROMIPS)
+    fprintf (file, " [micromips]");
 
   if (elf_elfheader (abfd)->e_flags & EF_MIPS_32BITMODE)
     fprintf (file, " [32bitmode]");

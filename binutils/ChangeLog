@@ -1,3 +1,9 @@
+2011-07-24  Chao-ying Fu  <fu@mips.com>
+            Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* readelf.c (get_machine_flags): Handle microMIPS ASE.
+	(get_mips_symbol_other): Likewise.
+
 2011-07-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* dwarf.c (init_dwarf_regnames): Handle EM_K1OM.

@@ -429,6 +429,7 @@ TARGET_LIBOPCODES_CFILES = \
 	mep-ibld.c \
 	mep-opc.c \
 	microblaze-dis.c \
+	micromips-opc.c \
 	mips-dis.c \
 	mips-opc.c \
 	mips16-opc.c \

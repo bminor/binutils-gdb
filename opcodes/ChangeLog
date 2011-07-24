@@ -1,3 +1,29 @@
+2011-07-24  Chao-ying Fu  <fu@mips.com>
+            Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* micromips-opc.c: New file.
+	* mips-dis.c (micromips_to_32_reg_b_map): New array.
+	(micromips_to_32_reg_c_map, micromips_to_32_reg_d_map): Likewise.
+	(micromips_to_32_reg_e_map, micromips_to_32_reg_f_map): Likewise.
+	(micromips_to_32_reg_g_map, micromips_to_32_reg_l_map): Likewise.
+	(micromips_to_32_reg_q_map): Likewise.
+	(micromips_imm_b_map, micromips_imm_c_map): Likewise.
+	(micromips_ase): New variable.
+	(is_micromips): New function.
+	(set_default_mips_dis_options): Handle microMIPS ASE.
+	(print_insn_micromips): New function.
+	(is_compressed_mode_p): Likewise.
+	(_print_insn_mips): Handle microMIPS instructions.
+	* Makefile.am (CFILES): Add micromips-opc.c.
+	* configure.in (bfd_mips_arch): Add micromips-opc.lo.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+
+	* mips-dis.c (micromips_to_32_reg_h_map): New variable.
+	(micromips_to_32_reg_i_map): Likewise.
+	(micromips_to_32_reg_m_map): Likewise.
+	(micromips_to_32_reg_n_map): New macro.
+
 2011-07-24  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* mips-opc.c (NODS): New macro.
