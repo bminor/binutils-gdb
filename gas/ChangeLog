@@ -1,5 +1,10 @@
 2011-07-24  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* config/tc-mips.c (mips_ip): Make a copy of the instruction's
+	mnemonic and use it for further processing.
+
+2011-07-24  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* config/tc-mips.c (can_swap_branch_p): Adjust for the rename of
 	INSN_TRAP to INSN_NO_DELAY_SLOT.  Remove the check for INSN_SYNC
 	as well as explicit checks for ERET and DERET when scheduling

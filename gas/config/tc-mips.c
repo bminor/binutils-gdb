@@ -8931,67 +8931,38 @@ mips_ip (char *str, struct mips_cl_insn *ip)
   unsigned int lastpos = 0;
   unsigned int limlo, limhi;
   char *s_reset;
-  char save_c = 0;
   offsetT min_range, max_range;
+  char *name;
   int argnum;
   unsigned int rtype;
+  long end;
 
   insn_error = NULL;
 
-  /* If the instruction contains a '.', we first try to match an instruction
-     including the '.'.  Then we try again without the '.'.  */
   insn = NULL;
-  for (s = str; *s != '\0' && !ISSPACE (*s); ++s)
+
+  /* Try to match an instruction up to a space or to the end.  */
+  for (end = 0; str[end] != '\0' && !ISSPACE (str[end]); end++)
     continue;
 
-  /* If we stopped on whitespace, then replace the whitespace with null for
-     the call to hash_find.  Save the character we replaced just in case we
-     have to re-parse the instruction.  */
-  if (ISSPACE (*s))
-    {
-      save_c = *s;
-      *s++ = '\0';
-    }
+  /* Make a copy of the instruction so that we can fiddle with it.  */
+  name = alloca (end + 1);
+  memcpy (name, str, end);
+  name[end] = '\0';
 
-  insn = (struct mips_opcode *) hash_find (op_hash, str);
-
-  /* If we didn't find the instruction in the opcode table, try again, but
-     this time with just the instruction up to, but not including the
-     first '.'.  */
+  insn = (struct mips_opcode *) hash_find (op_hash, name);
   if (insn == NULL)
     {
-      /* Restore the character we overwrite above (if any).  */
-      if (save_c)
-	*(--s) = save_c;
-
-      /* Scan up to the first '.' or whitespace.  */
-      for (s = str;
-	   *s != '\0' && *s != '.' && !ISSPACE (*s);
-	   ++s)
-	continue;
-
-      /* If we did not find a '.', then we can quit now.  */
-      if (*s != '.')
-	{
-	  insn_error = _("Unrecognized opcode");
-	  return;
-	}
-
-      /* Lookup the instruction in the hash table.  */
-      *s++ = '\0';
-      if ((insn = (struct mips_opcode *) hash_find (op_hash, str)) == NULL)
-	{
-	  insn_error = _("Unrecognized opcode");
-	  return;
-	}
+      insn_error = _("Unrecognized opcode");
+      return;
     }
 
-  argsStart = s;
+  argsStart = s = str + end;
   for (;;)
     {
       bfd_boolean ok;
 
-      gas_assert (strcmp (insn->name, str) == 0);
+      gas_assert (strcmp (insn->name, name) == 0);
 
       ok = is_opcode_valid (insn);
       if (! ok)
@@ -9013,8 +8984,6 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 			   mips_cpu_info_from_isa (mips_opts.isa)->name);
 		  insn_error = buf;
 		}
-	      if (save_c)
-		*(--s) = save_c;
 	      return;
 	    }
 	}
@@ -10474,8 +10443,6 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 	  insn_error = _("Illegal operands");
 	  continue;
 	}
-      if (save_c)
-	*(--argsStart) = save_c;
       insn_error = _("Illegal operands");
       return;
     }
