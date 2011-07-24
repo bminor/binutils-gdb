@@ -1,3 +1,7 @@
+2011-07-15  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* MAINTAINERS (Write After Approval): Add myself to the list.
+
 2011-07-23  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* elfread.c (elf_rel_plt_read): Fix off-by-one bug.
