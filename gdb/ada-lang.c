@@ -10989,7 +10989,7 @@ dtor_exception (enum exception_catchpoint_kind ex, struct breakpoint *b)
 
   xfree (c->excep_string);
 
-  bkpt_dtor (b);
+  bkpt_breakpoint_ops.dtor (b);
 }
 
 /* Implement the ALLOCATE_LOCATION method in the breakpoint_ops
@@ -11017,7 +11017,7 @@ re_set_exception (enum exception_catchpoint_kind ex, struct breakpoint *b)
 
   /* Call the base class's method.  This updates the catchpoint's
      locations.  */
-  bkpt_re_set (b);
+  bkpt_breakpoint_ops.re_set (b);
 
   /* Reparse the exception conditional expressions.  One for each
      location.  */
@@ -11314,23 +11314,7 @@ print_recreate_catch_exception (struct breakpoint *b, struct ui_file *fp)
   print_recreate_exception (ex_catch_exception, b, fp);
 }
 
-static struct breakpoint_ops catch_exception_breakpoint_ops =
-{
-  dtor_catch_exception,
-  allocate_location_catch_exception,
-  re_set_catch_exception,
-  bkpt_insert_location,
-  bkpt_remove_location,
-  bkpt_breakpoint_hit,
-  check_status_catch_exception,
-  bkpt_resources_needed,
-  null_works_in_software_mode,
-  print_it_catch_exception,
-  print_one_catch_exception,
-  null_print_one_detail,
-  print_mention_catch_exception,
-  print_recreate_catch_exception
-};
+static struct breakpoint_ops catch_exception_breakpoint_ops;
 
 /* Virtual table for "catch exception unhandled" breakpoints.  */
 
@@ -11384,22 +11368,7 @@ print_recreate_catch_exception_unhandled (struct breakpoint *b,
   print_recreate_exception (ex_catch_exception_unhandled, b, fp);
 }
 
-static struct breakpoint_ops catch_exception_unhandled_breakpoint_ops = {
-  dtor_catch_exception_unhandled,
-  allocate_location_catch_exception_unhandled,
-  re_set_catch_exception_unhandled,
-  bkpt_insert_location,
-  bkpt_remove_location,
-  bkpt_breakpoint_hit,
-  check_status_catch_exception_unhandled,
-  bkpt_resources_needed,
-  null_works_in_software_mode,
-  print_it_catch_exception_unhandled,
-  print_one_catch_exception_unhandled,
-  null_print_one_detail,
-  print_mention_catch_exception_unhandled,
-  print_recreate_catch_exception_unhandled
-};
+static struct breakpoint_ops catch_exception_unhandled_breakpoint_ops;
 
 /* Virtual table for "catch assert" breakpoints.  */
 
@@ -11451,22 +11420,7 @@ print_recreate_catch_assert (struct breakpoint *b, struct ui_file *fp)
   print_recreate_exception (ex_catch_assert, b, fp);
 }
 
-static struct breakpoint_ops catch_assert_breakpoint_ops = {
-  dtor_catch_assert,
-  allocate_location_catch_assert,
-  re_set_catch_assert,
-  bkpt_insert_location,
-  bkpt_remove_location,
-  bkpt_breakpoint_hit,
-  check_status_catch_assert,
-  bkpt_resources_needed,
-  null_works_in_software_mode,
-  print_it_catch_assert,
-  print_one_catch_assert,
-  null_print_one_detail,
-  print_mention_catch_assert,
-  print_recreate_catch_assert
-};
+static struct breakpoint_ops catch_assert_breakpoint_ops;
 
 /* Return a newly allocated copy of the first space-separated token
    in ARGSP, and then adjust ARGSP to point immediately after that
@@ -12354,10 +12308,53 @@ show_ada_command (char *args, int from_tty)
   cmd_show_list (show_ada_list, from_tty, "");
 }
 
+static void
+initialize_ada_catchpoint_ops (void)
+{
+  struct breakpoint_ops *ops;
+
+  initialize_breakpoint_ops ();
+
+  ops = &catch_exception_breakpoint_ops;
+  *ops = bkpt_breakpoint_ops;
+  ops->dtor = dtor_catch_exception;
+  ops->allocate_location = allocate_location_catch_exception;
+  ops->re_set = re_set_catch_exception;
+  ops->check_status = check_status_catch_exception;
+  ops->print_it = print_it_catch_exception;
+  ops->print_one = print_one_catch_exception;
+  ops->print_mention = print_mention_catch_exception;
+  ops->print_recreate = print_recreate_catch_exception;
+
+  ops = &catch_exception_unhandled_breakpoint_ops;
+  *ops = bkpt_breakpoint_ops;
+  ops->dtor = dtor_catch_exception_unhandled;
+  ops->allocate_location = allocate_location_catch_exception_unhandled;
+  ops->re_set = re_set_catch_exception_unhandled;
+  ops->check_status = check_status_catch_exception_unhandled;
+  ops->print_it = print_it_catch_exception_unhandled;
+  ops->print_one = print_one_catch_exception_unhandled;
+  ops->print_mention = print_mention_catch_exception_unhandled;
+  ops->print_recreate = print_recreate_catch_exception_unhandled;
+
+  ops = &catch_assert_breakpoint_ops;
+  *ops = bkpt_breakpoint_ops;
+  ops->dtor = dtor_catch_assert;
+  ops->allocate_location = allocate_location_catch_assert;
+  ops->re_set = re_set_catch_assert;
+  ops->check_status = check_status_catch_assert;
+  ops->print_it = print_it_catch_assert;
+  ops->print_one = print_one_catch_assert;
+  ops->print_mention = print_mention_catch_assert;
+  ops->print_recreate = print_recreate_catch_assert;
+}
+
 void
 _initialize_ada_language (void)
 {
   add_language (&ada_language_defn);
+
+  initialize_ada_catchpoint_ops ();
 
   add_prefix_cmd ("ada", no_class, set_ada_command,
                   _("Prefix command for changing Ada-specfic settings"),

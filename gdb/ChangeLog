@@ -1,5 +1,65 @@
 2011-07-25  Pedro Alves  <pedro@codesourcery.com>
 
+	* ada-lang.c (dtor_exception, re_set_exception): Indirect through
+	the the base class ops table.
+	(catch_exception_breakpoint_ops)
+	(catch_exception_unhandled_breakpoint_ops)
+	(catch_assert_breakpoint_ops): Don't statically initialize.
+	(initialize_ada_catchpoint_ops): New.
+	(_initialize_ada_language): Call it.
+	* breakpoint.c (base_breakpoint_ops, bkpt_base_breakpoint_ops)
+	(bkpt_breakpoint_ops): Forward declare.
+	(catch_fork_breakpoint_ops, catch_vfork_breakpoint_ops)
+	(catch_syscall_breakpoint_ops, catch_exec_breakpoint_ops)
+	(ranged_breakpoint_ops, watchpoint_breakpoint_ops)
+	(masked_watchpoint_breakpoint_ops)
+	(gnu_v3_exception_catchpoint_ops): Don't statically initialize.
+	(dtor_catch_syscall, dtor_catch_exec): Indirect through the the
+	base class ops table.
+	(null_re_set, null_check_status, null_works_in_software_mode)
+	(null_resources_needed, null_print_one_detail): Delete.
+	(bkpt_dtor): Rename to ...
+	(base_breakpoint_dtor): ... this.  Make static.
+	(bkpt_allocate_location): Rename to ...
+	(base_breakpoint_allocate_location): ... this.  Make static.
+	(base_breakpoint_re_set): New.
+	(internal_error_pure_virtual_called): New.
+	(base_breakpoint_insert_location, base_breakpoint_remove_location)
+	(base_breakpoint_breakpoint_hit, base_breakpoint_check_status)
+	(base_breakpoint_works_in_software_mode)
+	(base_breakpoint_resources_needed, base_breakpoint_print_it)
+	(base_breakpoint_print_one_detail, base_breakpoint_print_mention)
+	(base_breakpoint_print_recreate): New functions.
+	(base_breakpoint_ops): New global.
+	(bkpt_re_set, bkpt_insert_location, bkpt_remove_location)
+	(bkpt_breakpoint_hit): Make static.
+	(bkpt_check_status): Delete.
+	(bkpt_resources_needed): Make static.
+	(bkpt_works_in_software_mode): Delete.
+	(bkpt_print_it, bkpt_print_mention, bkpt_print_recreate): Make
+	static.
+	(bkpt_breakpoint_ops, internal_breakpoint_ops)
+	(momentary_breakpoint_ops): Don't statically initialize.
+	(internal_bkpt_print_recreate, momentary_bkpt_print_recreate):
+	Delete.
+	(tracepoint_insert_location, tracepoint_remove_location)
+	(tracepoint_check_status, tracepoint_works_in_software_mode)
+	(tracepoint_print_it): Delete.
+	(tracepoint_breakpoint_ops): Don't statically initialize.
+	(initialize_breakpoint_ops): New.
+	(_initialize_breakpoint): Call it.
+	* breakpoint.h (null_re_set, null_works_in_software_mode)
+	(null_resources_needed, null_check_status, null_print_one_detail):
+	(bkpt_dtor, bkpt_allocate_location, bkpt_re_set)
+	(bkpt_insert_location, bkpt_remove_location, bkpt_breakpoint_hit)
+	(bkpt_check_status, bkpt_resources_needed)
+	(bkpt_works_in_software_mode, bkpt_print_it)
+	(null_print_one_detail, bkpt_print_mention, bkpt_print_recreate):
+	Delete declarations.
+	(initialize_breakpoint_ops): Declare.
+
+2011-07-25  Pedro Alves  <pedro@codesourcery.com>
+
 	* breakpoint.c (bkpt_print_it, internal_bkpt_print_it)
 	(momentary_bkpt_print_it): Simplify.
 

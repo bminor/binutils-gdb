@@ -1029,31 +1029,9 @@ extern void awatch_command_wrapper (char *, int, int);
 extern void rwatch_command_wrapper (char *, int, int);
 extern void tbreak_command (char *, int);
 
-extern void null_re_set (struct breakpoint *b);
-extern int null_works_in_software_mode (const struct breakpoint *b);
-extern int null_resources_needed (const struct bp_location *bl);
-extern void null_check_status (bpstat bs);
-extern void null_print_one_detail (const struct breakpoint *self,
-				   struct ui_out *uiout);
-
 extern struct breakpoint_ops bkpt_breakpoint_ops;
 
-extern void bkpt_dtor (struct breakpoint *self);
-extern struct bp_location *bkpt_allocate_location (struct breakpoint *self);
-extern void bkpt_re_set (struct breakpoint *b);
-extern int bkpt_insert_location (struct bp_location *bl);
-extern int bkpt_remove_location (struct bp_location *bl);
-extern int bkpt_breakpoint_hit (const struct bp_location *bl,
-				struct address_space *aspace,
-				CORE_ADDR bp_addr);
-extern void bkpt_check_status (bpstat bs);
-extern int bkpt_resources_needed (const struct bp_location *bl);
-extern int bkpt_works_in_software_mode (const struct breakpoint *b);
-extern enum print_stop_action bkpt_print_it (bpstat bs);
-extern void null_print_one_detail (const struct breakpoint *self,
-				   struct ui_out *uiout);
-extern void bkpt_print_mention (struct breakpoint *b);
-extern void bkpt_print_recreate (struct breakpoint *tp, struct ui_file *fp);
+extern void initialize_breakpoint_ops (void);
 
 /* Arguments to pass as context to some catch command handlers.  */
 #define CATCH_PERMANENT ((void *) (uintptr_t) 0)

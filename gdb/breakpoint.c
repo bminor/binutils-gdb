@@ -236,9 +236,24 @@ static int is_masked_watchpoint (const struct breakpoint *b);
 #define is_marker_spec(s)						\
   (s != NULL && strncmp (s, "-m", 2) == 0 && ((s)[2] == ' ' || (s)[2] == '\t'))
 
-/* Forward declarations.  */
+/* The abstract base class all breakpoint_ops structures inherit
+   from.  */
+static struct breakpoint_ops base_breakpoint_ops;
+
+/* The breakpoint_ops structure to be inherited by all breakpoint_ops
+   that are implemented on top of software or hardware breakpoints
+   (user breakpoints, internal and momentary breakpoints, etc.).  */
+static struct breakpoint_ops bkpt_base_breakpoint_ops;
+
+/* Internal breakpoints class type.  */
 static struct breakpoint_ops internal_breakpoint_ops;
+
+/* Momentary breakpoints class type.  */
 static struct breakpoint_ops momentary_breakpoint_ops;
+
+/* The breakpoint_ops structure to be used in regular user created
+   breakpoints.  */
+struct breakpoint_ops bkpt_breakpoint_ops;
 
 /* A reference-counted struct command_line.  This lets multiple
    breakpoints share a single command list.  */
@@ -6105,23 +6120,7 @@ print_recreate_catch_fork (struct breakpoint *b, struct ui_file *fp)
 
 /* The breakpoint_ops structure to be used in fork catchpoints.  */
 
-static struct breakpoint_ops catch_fork_breakpoint_ops =
-{
-  bkpt_dtor,
-  bkpt_allocate_location,
-  null_re_set,
-  insert_catch_fork,
-  remove_catch_fork,
-  breakpoint_hit_catch_fork,
-  null_check_status,
-  null_resources_needed,
-  null_works_in_software_mode,
-  print_it_catch_fork,
-  print_one_catch_fork,
-  null_print_one_detail,
-  print_mention_catch_fork,
-  print_recreate_catch_fork
-};
+static struct breakpoint_ops catch_fork_breakpoint_ops;
 
 /* Implement the "insert" breakpoint_ops method for vfork
    catchpoints.  */
@@ -6214,23 +6213,7 @@ print_recreate_catch_vfork (struct breakpoint *b, struct ui_file *fp)
 
 /* The breakpoint_ops structure to be used in vfork catchpoints.  */
 
-static struct breakpoint_ops catch_vfork_breakpoint_ops =
-{
-  bkpt_dtor,
-  bkpt_allocate_location,
-  null_re_set,
-  insert_catch_vfork,
-  remove_catch_vfork,
-  breakpoint_hit_catch_vfork,
-  null_check_status,
-  null_resources_needed,
-  null_works_in_software_mode,
-  print_it_catch_vfork,
-  print_one_catch_vfork,
-  null_print_one_detail,
-  print_mention_catch_vfork,
-  print_recreate_catch_vfork
-};
+static struct breakpoint_ops catch_vfork_breakpoint_ops;
 
 /* An instance of this type is used to represent a syscall catchpoint.
    It includes a "struct breakpoint" as a kind of base class; users
@@ -6260,7 +6243,7 @@ dtor_catch_syscall (struct breakpoint *b)
 
   VEC_free (int, c->syscalls_to_be_caught);
 
-  bkpt_dtor (b);
+  base_breakpoint_ops.dtor (b);
 }
 
 /* Implement the "insert" breakpoint_ops method for syscall
@@ -6546,23 +6529,7 @@ print_recreate_catch_syscall (struct breakpoint *b, struct ui_file *fp)
 
 /* The breakpoint_ops structure to be used in syscall catchpoints.  */
 
-static struct breakpoint_ops catch_syscall_breakpoint_ops =
-{
-  dtor_catch_syscall,
-  bkpt_allocate_location,
-  null_re_set,
-  insert_catch_syscall,
-  remove_catch_syscall,
-  breakpoint_hit_catch_syscall,
-  null_check_status,
-  null_resources_needed,
-  null_works_in_software_mode,
-  print_it_catch_syscall,
-  print_one_catch_syscall,
-  null_print_one_detail,
-  print_mention_catch_syscall,
-  print_recreate_catch_syscall
-};
+static struct breakpoint_ops catch_syscall_breakpoint_ops;
 
 /* Returns non-zero if 'b' is a syscall catchpoint.  */
 
@@ -6648,7 +6615,7 @@ dtor_catch_exec (struct breakpoint *b)
 
   xfree (c->exec_pathname);
 
-  bkpt_dtor (b);
+  base_breakpoint_ops.dtor (b);
 }
 
 static int
@@ -6722,23 +6689,7 @@ print_recreate_catch_exec (struct breakpoint *b, struct ui_file *fp)
   fprintf_unfiltered (fp, "catch exec");
 }
 
-static struct breakpoint_ops catch_exec_breakpoint_ops =
-{
-  dtor_catch_exec,
-  bkpt_allocate_location,
-  null_re_set,
-  insert_catch_exec,
-  remove_catch_exec,
-  breakpoint_hit_catch_exec,
-  null_check_status,
-  null_resources_needed,
-  null_works_in_software_mode,
-  print_it_catch_exec,
-  print_one_catch_exec,
-  null_print_one_detail,
-  print_mention_catch_exec,
-  print_recreate_catch_exec
-};
+static struct breakpoint_ops catch_exec_breakpoint_ops;
 
 static void
 create_syscall_event_catchpoint (int tempflag, VEC(int) *filter,
@@ -8201,23 +8152,7 @@ print_recreate_ranged_breakpoint (struct breakpoint *b, struct ui_file *fp)
 
 /* The breakpoint_ops structure to be used in ranged breakpoints.  */
 
-static struct breakpoint_ops ranged_breakpoint_ops =
-{
-  bkpt_dtor,
-  bkpt_allocate_location,
-  bkpt_re_set,
-  bkpt_insert_location,
-  bkpt_remove_location,
-  breakpoint_hit_ranged_breakpoint,
-  null_check_status,
-  resources_needed_ranged_breakpoint,
-  null_works_in_software_mode,
-  print_it_ranged_breakpoint,
-  print_one_ranged_breakpoint,
-  print_one_detail_ranged_breakpoint,
-  print_mention_ranged_breakpoint,
-  print_recreate_ranged_breakpoint
-};
+static struct breakpoint_ops ranged_breakpoint_ops;
 
 /* Find the address where the end of the breakpoint range should be
    placed, given the SAL of the end of the range.  This is so that if
@@ -8743,23 +8678,7 @@ print_recreate_watchpoint (struct breakpoint *b, struct ui_file *fp)
 
 /* The breakpoint_ops structure to be used in hardware watchpoints.  */
 
-static struct breakpoint_ops watchpoint_breakpoint_ops =
-{
-  bkpt_dtor,
-  bkpt_allocate_location,
-  re_set_watchpoint,
-  insert_watchpoint,
-  remove_watchpoint,
-  breakpoint_hit_watchpoint,
-  check_status_watchpoint,
-  resources_needed_watchpoint,
-  works_in_software_mode_watchpoint,
-  print_it_watchpoint,
-  NULL, /* print_one */
-  null_print_one_detail,
-  print_mention_watchpoint,
-  print_recreate_watchpoint
-};
+static struct breakpoint_ops watchpoint_breakpoint_ops;
 
 /* Implement the "insert" breakpoint_ops method for
    masked hardware watchpoints.  */
@@ -8927,23 +8846,7 @@ print_recreate_masked_watchpoint (struct breakpoint *b, struct ui_file *fp)
 
 /* The breakpoint_ops structure to be used in masked hardware watchpoints.  */
 
-static struct breakpoint_ops masked_watchpoint_breakpoint_ops =
-{
-  bkpt_dtor,
-  bkpt_allocate_location,
-  re_set_watchpoint,
-  insert_masked_watchpoint,
-  remove_masked_watchpoint,
-  breakpoint_hit_watchpoint,
-  check_status_watchpoint,
-  resources_needed_masked_watchpoint,
-  works_in_software_mode_masked_watchpoint,
-  print_it_masked_watchpoint,
-  NULL, /* print_one */
-  print_one_detail_masked_watchpoint,
-  print_mention_masked_watchpoint,
-  print_recreate_masked_watchpoint
-};
+static struct breakpoint_ops masked_watchpoint_breakpoint_ops;
 
 /* Tell whether the given watchpoint is a masked hardware watchpoint.  */
 
@@ -9753,22 +9656,7 @@ print_recreate_exception_catchpoint (struct breakpoint *b,
   fprintf_unfiltered (fp, bp_throw ? "throw" : "catch");
 }
 
-static struct breakpoint_ops gnu_v3_exception_catchpoint_ops = {
-  bkpt_dtor,
-  bkpt_allocate_location,
-  bkpt_re_set,
-  bkpt_insert_location,
-  bkpt_remove_location,
-  bkpt_breakpoint_hit,
-  bkpt_check_status,
-  bkpt_resources_needed,
-  null_works_in_software_mode,
-  print_it_exception_catchpoint,
-  print_one_exception_catchpoint,
-  null_print_one_detail,
-  print_mention_exception_catchpoint,
-  print_recreate_exception_catchpoint
-};
+static struct breakpoint_ops gnu_v3_exception_catchpoint_ops;
 
 static int
 handle_gnu_v3_exceptions (int tempflag, char *cond_string,
@@ -10624,45 +10512,6 @@ say_where (struct breakpoint *b)
     }
 }
 
-/* Default breakpoint_ops methods that do nothing.  */
-
-void
-null_re_set (struct breakpoint *b)
-{
-  /* Nothing to re-set. */
-}
-
-void
-null_check_status (bpstat bs)
-{
-  /* nothing */
-}
-
-/* A "works_in_software_mode" breakpoint_ops method that just internal
-   errors.  */
-
-int
-null_works_in_software_mode (const struct breakpoint *b)
-{
-  gdb_assert_not_reached ("null_works_in_software_mode called");
-}
-
-/* A "resources_needed" breakpoint_ops method that just internal
-   errors.  */
-
-int
-null_resources_needed (const struct bp_location *bl)
-{
-  gdb_assert_not_reached ("null_resources_needed");
-}
-
-void
-null_print_one_detail (const struct breakpoint *self,
-		       struct ui_out *uiout)
-{
-  /* nothing */
-}
-
 /* Default bp_location_ops methods.  */
 
 static void
@@ -10677,10 +10526,11 @@ static const struct bp_location_ops bp_location_ops =
   bp_location_dtor
 };
 
-/* Default breakpoint_ops methods.  */
+/* Default breakpoint_ops methods all breakpoint_ops ultimately
+   inherit from.  */
 
-void
-bkpt_dtor (struct breakpoint *self)
+static void
+base_breakpoint_dtor (struct breakpoint *self)
 {
   decref_counted_command_line (&self->commands);
   xfree (self->cond_string);
@@ -10694,8 +10544,8 @@ bkpt_dtor (struct breakpoint *self)
   xfree (self->source_file);
 }
 
-struct bp_location *
-bkpt_allocate_location (struct breakpoint *self)
+static struct bp_location *
+base_breakpoint_allocate_location (struct breakpoint *self)
 {
   struct bp_location *loc;
 
@@ -10704,7 +10554,105 @@ bkpt_allocate_location (struct breakpoint *self)
   return loc;
 }
 
-void
+static void
+base_breakpoint_re_set (struct breakpoint *b)
+{
+  /* Nothing to re-set. */
+}
+
+#define internal_error_pure_virtual_called() \
+  gdb_assert_not_reached ("pure virtual function called")
+
+static int
+base_breakpoint_insert_location (struct bp_location *bl)
+{
+  internal_error_pure_virtual_called ();
+}
+
+static int
+base_breakpoint_remove_location (struct bp_location *bl)
+{
+  internal_error_pure_virtual_called ();
+}
+
+static int
+base_breakpoint_breakpoint_hit (const struct bp_location *bl,
+				struct address_space *aspace,
+				CORE_ADDR bp_addr)
+{
+  internal_error_pure_virtual_called ();
+}
+
+static void
+base_breakpoint_check_status (bpstat bs)
+{
+  /* Always stop.   */
+}
+
+/* A "works_in_software_mode" breakpoint_ops method that just internal
+   errors.  */
+
+static int
+base_breakpoint_works_in_software_mode (const struct breakpoint *b)
+{
+  internal_error_pure_virtual_called ();
+}
+
+/* A "resources_needed" breakpoint_ops method that just internal
+   errors.  */
+
+static int
+base_breakpoint_resources_needed (const struct bp_location *bl)
+{
+  internal_error_pure_virtual_called ();
+}
+
+static enum print_stop_action
+base_breakpoint_print_it (bpstat bs)
+{
+  internal_error_pure_virtual_called ();
+}
+
+static void
+base_breakpoint_print_one_detail (const struct breakpoint *self,
+				  struct ui_out *uiout)
+{
+  /* nothing */
+}
+
+static void
+base_breakpoint_print_mention (struct breakpoint *b)
+{
+  internal_error_pure_virtual_called ();
+}
+
+static void
+base_breakpoint_print_recreate (struct breakpoint *b, struct ui_file *fp)
+{
+  internal_error_pure_virtual_called ();
+}
+
+static struct breakpoint_ops base_breakpoint_ops =
+{
+  base_breakpoint_dtor,
+  base_breakpoint_allocate_location,
+  base_breakpoint_re_set,
+  base_breakpoint_insert_location,
+  base_breakpoint_remove_location,
+  base_breakpoint_breakpoint_hit,
+  base_breakpoint_check_status,
+  base_breakpoint_resources_needed,
+  base_breakpoint_works_in_software_mode,
+  base_breakpoint_print_it,
+  NULL,
+  base_breakpoint_print_one_detail,
+  base_breakpoint_print_mention,
+  base_breakpoint_print_recreate
+};
+
+/* Default breakpoint_ops methods.  */
+
+static void
 bkpt_re_set (struct breakpoint *b)
 {
   /* Do not attempt to re-set breakpoints disabled during startup.  */
@@ -10722,7 +10670,7 @@ bkpt_re_set (struct breakpoint *b)
   breakpoint_re_set_default (b);
 }
 
-int
+static int
 bkpt_insert_location (struct bp_location *bl)
 {
   if (bl->loc_type == bp_loc_hardware_breakpoint)
@@ -10733,7 +10681,7 @@ bkpt_insert_location (struct bp_location *bl)
 				     &bl->target_info);
 }
 
-int
+static int
 bkpt_remove_location (struct bp_location *bl)
 {
   if (bl->loc_type == bp_loc_hardware_breakpoint)
@@ -10742,7 +10690,7 @@ bkpt_remove_location (struct bp_location *bl)
     return target_remove_breakpoint (bl->gdbarch, &bl->target_info);
 }
 
-int
+static int
 bkpt_breakpoint_hit (const struct bp_location *bl,
 		     struct address_space *aspace, CORE_ADDR bp_addr)
 {
@@ -10760,13 +10708,7 @@ bkpt_breakpoint_hit (const struct bp_location *bl,
   return 1;
 }
 
-void
-bkpt_check_status (bpstat bs)
-{
-  /* nothing, always stop */
-}
-
-int
+static int
 bkpt_resources_needed (const struct bp_location *bl)
 {
   gdb_assert (bl->owner->type == bp_hardware_breakpoint);
@@ -10774,13 +10716,7 @@ bkpt_resources_needed (const struct bp_location *bl)
   return 1;
 }
 
-int
-bkpt_works_in_software_mode (const struct breakpoint *b)
-{
-  gdb_assert_not_reached ("bkpt_works_in_software_mode called");
-}
-
-enum print_stop_action
+static enum print_stop_action
 bkpt_print_it (bpstat bs)
 {
   struct breakpoint *b;
@@ -10814,7 +10750,7 @@ bkpt_print_it (bpstat bs)
   return PRINT_SRC_AND_LOC;
 }
 
-void
+static void
 bkpt_print_mention (struct breakpoint *b)
 {
   if (ui_out_is_mi_like_p (uiout))
@@ -10840,7 +10776,7 @@ bkpt_print_mention (struct breakpoint *b)
   say_where (b);
 }
 
-void
+static void
 bkpt_print_recreate (struct breakpoint *tp, struct ui_file *fp)
 {
   if (tp->type == bp_breakpoint && tp->disposition == disp_del)
@@ -10856,38 +10792,8 @@ bkpt_print_recreate (struct breakpoint *tp, struct ui_file *fp)
     internal_error (__FILE__, __LINE__,
 		    _("unhandled breakpoint type %d"), (int) tp->type);
 
-  if (tp->exp_string)
-    fprintf_unfiltered (fp, " %s", tp->exp_string);
-  else if (tp->addr_string)
-    fprintf_unfiltered (fp, " %s", tp->addr_string);
-  else
-    {
-      char tmp[40];
-
-      sprintf_vma (tmp, tp->loc->address);
-      fprintf_unfiltered (fp, " *0x%s", tmp);
-    }
+  fprintf_unfiltered (fp, " %s", tp->addr_string);
 }
-
-/* The breakpoint_ops structure to be used in regular breakpoints.  */
-
-struct breakpoint_ops bkpt_breakpoint_ops =
-{
-  bkpt_dtor,
-  bkpt_allocate_location,
-  bkpt_re_set,
-  bkpt_insert_location,
-  bkpt_remove_location,
-  bkpt_breakpoint_hit,
-  bkpt_check_status,
-  bkpt_resources_needed,
-  null_works_in_software_mode,
-  bkpt_print_it,
-  NULL, /* print_one */
-  null_print_one_detail,
-  bkpt_print_mention,
-  bkpt_print_recreate
-};
 
 /* Virtual table for internal breakpoints.  */
 
@@ -10977,33 +10883,6 @@ internal_bkpt_print_mention (struct breakpoint *b)
   /* Nothing to mention.  These breakpoints are internal.  */
 }
 
-static void
-internal_bkpt_print_recreate (struct breakpoint *tp, struct ui_file *fp)
-{
-  gdb_assert_not_reached ("internal_bkpt_print_recreate called");
-}
-
-/* The breakpoint_ops structure to be used with internal
-   breakpoints.  */
-
-static struct breakpoint_ops internal_breakpoint_ops =
-{
-  bkpt_dtor,
-  bkpt_allocate_location,
-  internal_bkpt_re_set,
-  bkpt_insert_location,
-  bkpt_remove_location,
-  bkpt_breakpoint_hit,
-  internal_bkpt_check_status,
-  bkpt_resources_needed,
-  null_works_in_software_mode,
-  internal_bkpt_print_it,
-  NULL, /* print_one */
-  null_print_one_detail,
-  internal_bkpt_print_mention,
-  internal_bkpt_print_recreate
-};
-
 /* Virtual table for momentary breakpoints  */
 
 static void
@@ -11053,33 +10932,6 @@ momentary_bkpt_print_mention (struct breakpoint *b)
   /* Nothing to mention.  These breakpoints are internal.  */
 }
 
-static void
-momentary_bkpt_print_recreate (struct breakpoint *tp, struct ui_file *fp)
-{
-  gdb_assert_not_reached ("momentary_bkpt_print_recreate called");
-}
-
-/* The breakpoint_ops structure to be used with momentary
-   breakpoints.  */
-
-static struct breakpoint_ops momentary_breakpoint_ops =
-{
-  bkpt_dtor,
-  bkpt_allocate_location,
-  momentary_bkpt_re_set,
-  bkpt_insert_location,
-  bkpt_remove_location,
-  bkpt_breakpoint_hit,
-  momentary_bkpt_check_status,
-  bkpt_resources_needed,
-  null_works_in_software_mode,
-  momentary_bkpt_print_it,
-  NULL, /* print_one */
-  null_print_one_detail,
-  momentary_bkpt_print_mention,
-  momentary_bkpt_print_recreate
-};
-
 /* The breakpoint_ops structure to be used in tracepoints.  */
 
 static void
@@ -11089,42 +10941,12 @@ tracepoint_re_set (struct breakpoint *b)
 }
 
 static int
-tracepoint_insert_location (struct bp_location *bl)
-{
-  gdb_assert_not_reached ("tracepoint_insert_location called");
-}
-
-static int
-tracepoint_remove_location (struct bp_location *bl)
-{
-  gdb_assert_not_reached ("tracepoint_remove_location called");
-}
-
-static int
 tracepoint_breakpoint_hit (const struct bp_location *bl,
 			   struct address_space *aspace, CORE_ADDR bp_addr)
 {
   /* By definition, the inferior does not report stops at
      tracepoints.  */
   return 0;
-}
-
-static void
-tracepoint_check_status (bpstat bs)
-{
-  gdb_assert_not_reached ("tracepoint_check_status called");
-}
-
-static int
-tracepoint_works_in_software_mode (const struct breakpoint *b)
-{
-  gdb_assert_not_reached ("tracepoint_works_in_software_mode called");
-}
-
-static enum print_stop_action
-tracepoint_print_it (bpstat bs)
-{
-  gdb_assert_not_reached ("tracepoint_print_it called");
 }
 
 static void
@@ -11186,23 +11008,7 @@ tracepoint_print_recreate (struct breakpoint *tp, struct ui_file *fp)
   fprintf_unfiltered (fp, " %s", tp->addr_string);
 }
 
-struct breakpoint_ops tracepoint_breakpoint_ops =
-{
-  bkpt_dtor,
-  bkpt_allocate_location,
-  tracepoint_re_set,
-  tracepoint_insert_location,
-  tracepoint_remove_location,
-  tracepoint_breakpoint_hit,
-  tracepoint_check_status,
-  null_resources_needed,
-  tracepoint_works_in_software_mode,
-  tracepoint_print_it,
-  NULL, /* print_one */
-  tracepoint_print_one_detail,
-  tracepoint_print_mention,
-  tracepoint_print_recreate
-};
+struct breakpoint_ops tracepoint_breakpoint_ops;
 
 /* Delete a breakpoint and clean up all traces of it in the data
    structures.  */
@@ -13232,9 +13038,158 @@ iterate_over_breakpoints (int (*callback) (struct breakpoint *, void *),
 }
 
 void
+initialize_breakpoint_ops (void)
+{
+  static int initialized = 0;
+
+  struct breakpoint_ops *ops;
+
+  if (initialized)
+    return;
+  initialized = 1;
+
+  /* The breakpoint_ops structure to be inherit by all kinds of
+     breakpoints (real breakpoints, i.e., user "break" breakpoints,
+     internal and momentary breakpoints, etc.).  */
+  ops = &bkpt_base_breakpoint_ops;
+  *ops = base_breakpoint_ops;
+  ops->re_set = bkpt_re_set;
+  ops->insert_location = bkpt_insert_location;
+  ops->remove_location = bkpt_remove_location;
+  ops->breakpoint_hit = bkpt_breakpoint_hit;
+
+  /* The breakpoint_ops structure to be used in regular breakpoints.  */
+  ops = &bkpt_breakpoint_ops;
+  *ops = bkpt_base_breakpoint_ops;
+  ops->re_set = bkpt_re_set;
+  ops->resources_needed = bkpt_resources_needed;
+  ops->print_it = bkpt_print_it;
+  ops->print_mention = bkpt_print_mention;
+  ops->print_recreate = bkpt_print_recreate;
+
+  /* Ranged breakpoints.  */
+  ops = &ranged_breakpoint_ops;
+  *ops = bkpt_breakpoint_ops;
+  ops->breakpoint_hit = breakpoint_hit_ranged_breakpoint;
+  ops->resources_needed = resources_needed_ranged_breakpoint;
+  ops->print_it = print_it_ranged_breakpoint;
+  ops->print_one = print_one_ranged_breakpoint;
+  ops->print_one_detail = print_one_detail_ranged_breakpoint;
+  ops->print_mention = print_mention_ranged_breakpoint;
+  ops->print_recreate = print_recreate_ranged_breakpoint;
+
+  /* Internal breakpoints.  */
+  ops = &internal_breakpoint_ops;
+  *ops = bkpt_base_breakpoint_ops;
+  ops->re_set = internal_bkpt_re_set;
+  ops->check_status = internal_bkpt_check_status;
+  ops->print_it = internal_bkpt_print_it;
+  ops->print_mention = internal_bkpt_print_mention;
+
+  /* Momentary breakpoints.  */
+  ops = &momentary_breakpoint_ops;
+  *ops = bkpt_base_breakpoint_ops;
+  ops->re_set = momentary_bkpt_re_set;
+  ops->check_status = momentary_bkpt_check_status;
+  ops->print_it = momentary_bkpt_print_it;
+  ops->print_mention = momentary_bkpt_print_mention;
+
+  /* GNU v3 exception catchpoints.  */
+  ops = &gnu_v3_exception_catchpoint_ops;
+  *ops = bkpt_breakpoint_ops;
+  ops->print_it = print_it_exception_catchpoint;
+  ops->print_one = print_one_exception_catchpoint;
+  ops->print_mention = print_mention_exception_catchpoint;
+  ops->print_recreate = print_recreate_exception_catchpoint;
+
+  /* Watchpoints.  */
+  ops = &watchpoint_breakpoint_ops;
+  *ops = base_breakpoint_ops;
+  ops->re_set = re_set_watchpoint;
+  ops->insert_location = insert_watchpoint;
+  ops->remove_location = remove_watchpoint;
+  ops->breakpoint_hit = breakpoint_hit_watchpoint;
+  ops->check_status = check_status_watchpoint;
+  ops->resources_needed = resources_needed_watchpoint;
+  ops->works_in_software_mode = works_in_software_mode_watchpoint;
+  ops->print_it = print_it_watchpoint;
+  ops->print_mention = print_mention_watchpoint;
+  ops->print_recreate = print_recreate_watchpoint;
+
+  /* Masked watchpoints.  */
+  ops = &masked_watchpoint_breakpoint_ops;
+  *ops = watchpoint_breakpoint_ops;
+  ops->insert_location = insert_masked_watchpoint;
+  ops->remove_location = remove_masked_watchpoint;
+  ops->resources_needed = resources_needed_masked_watchpoint;
+  ops->works_in_software_mode = works_in_software_mode_masked_watchpoint;
+  ops->print_it = print_it_masked_watchpoint;
+  ops->print_one_detail = print_one_detail_masked_watchpoint;
+  ops->print_mention = print_mention_masked_watchpoint;
+  ops->print_recreate = print_recreate_masked_watchpoint;
+
+  /* Tracepoints.  */
+  ops = &tracepoint_breakpoint_ops;
+  *ops = base_breakpoint_ops;
+  ops->re_set = tracepoint_re_set;
+  ops->breakpoint_hit = tracepoint_breakpoint_hit;
+  ops->print_one_detail = tracepoint_print_one_detail;
+  ops->print_mention = tracepoint_print_mention;
+  ops->print_recreate = tracepoint_print_recreate;
+
+  /* Fork catchpoints.  */
+  ops = &catch_fork_breakpoint_ops;
+  *ops = base_breakpoint_ops;
+  ops->insert_location = insert_catch_fork;
+  ops->remove_location = remove_catch_fork;
+  ops->breakpoint_hit = breakpoint_hit_catch_fork;
+  ops->print_it = print_it_catch_fork;
+  ops->print_one = print_one_catch_fork;
+  ops->print_mention = print_mention_catch_fork;
+  ops->print_recreate = print_recreate_catch_fork;
+
+  /* Vfork catchpoints.  */
+  ops = &catch_vfork_breakpoint_ops;
+  *ops = base_breakpoint_ops;
+  ops->insert_location = insert_catch_vfork;
+  ops->remove_location = remove_catch_vfork;
+  ops->breakpoint_hit = breakpoint_hit_catch_vfork;
+  ops->print_it = print_it_catch_vfork;
+  ops->print_one = print_one_catch_vfork;
+  ops->print_mention = print_mention_catch_vfork;
+  ops->print_recreate = print_recreate_catch_vfork;
+
+  /* Exec catchpoints.  */
+  ops = &catch_exec_breakpoint_ops;
+  *ops = base_breakpoint_ops;
+  ops->dtor = dtor_catch_exec;
+  ops->insert_location = insert_catch_exec;
+  ops->remove_location = remove_catch_exec;
+  ops->breakpoint_hit = breakpoint_hit_catch_exec;
+  ops->print_it = print_it_catch_exec;
+  ops->print_one = print_one_catch_exec;
+  ops->print_mention = print_mention_catch_exec;
+  ops->print_recreate = print_recreate_catch_exec;
+
+  /* Syscall catchpoints.  */
+  ops = &catch_syscall_breakpoint_ops;
+  *ops = base_breakpoint_ops;
+  ops->dtor = dtor_catch_syscall;
+  ops->insert_location = insert_catch_syscall;
+  ops->remove_location = remove_catch_syscall;
+  ops->breakpoint_hit = breakpoint_hit_catch_syscall;
+  ops->print_it = print_it_catch_syscall;
+  ops->print_one = print_one_catch_syscall;
+  ops->print_mention = print_mention_catch_syscall;
+  ops->print_recreate = print_recreate_catch_syscall;
+}
+
+void
 _initialize_breakpoint (void)
 {
   struct cmd_list_element *c;
+
+  initialize_breakpoint_ops ();
 
   observer_attach_solib_unloaded (disable_breakpoints_in_unloaded_shlib);
   observer_attach_inferior_exit (clear_syscall_counts);
