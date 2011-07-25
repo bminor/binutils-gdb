@@ -75,6 +75,13 @@ struct _mmix_elf_section_data
        stubs_size_sum for relocation.  */
     bfd_size_type stub_offset;
   } pjs;
+
+  /* Whether there has been a warning that this section could not be
+     linked due to a specific cause.  FIXME: a way to access the
+     linker info or output section, then stuff the limiter guard
+     there. */
+  bfd_boolean has_warned_bpo;
+  bfd_boolean has_warned_pushj;
 };
 
 #define mmix_elf_section_data(sec) \
@@ -190,11 +197,11 @@ static bfd_boolean mmix_elf_relocate_section
 	   Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
 
 static bfd_reloc_status_type mmix_final_link_relocate
-  PARAMS ((reloc_howto_type *, asection *, bfd_byte *,
-	   bfd_vma, bfd_signed_vma, bfd_vma, const char *, asection *));
+  (reloc_howto_type *, asection *, bfd_byte *, bfd_vma, bfd_signed_vma,
+   bfd_vma, const char *, asection *, char **);
 
 static bfd_reloc_status_type mmix_elf_perform_relocation
-  PARAMS ((asection *, reloc_howto_type *, PTR, bfd_vma, bfd_vma));
+  (asection *, reloc_howto_type *, void *, bfd_vma, bfd_vma, char **);
 
 static bfd_boolean mmix_elf_section_from_bfd_section
   PARAMS ((bfd *, asection *, int *));
@@ -934,12 +941,9 @@ mmix_elf_new_section_hook (abfd, sec)
    R_MMIX_ADDR19 and R_MMIX_ADDR27 are just filled in.  */
 
 static bfd_reloc_status_type
-mmix_elf_perform_relocation (isec, howto, datap, addr, value)
-     asection *isec;
-     reloc_howto_type *howto;
-     PTR datap;
-     bfd_vma addr;
-     bfd_vma value;
+mmix_elf_perform_relocation (asection *isec, reloc_howto_type *howto,
+			     void *datap, bfd_vma addr, bfd_vma value,
+			     char **error_message)
 {
   bfd *abfd = isec->owner;
   bfd_reloc_status_type flag = bfd_reloc_ok;
@@ -1013,6 +1017,36 @@ mmix_elf_perform_relocation (isec, howto, datap, addr, value)
 	       + mmix_elf_section_data (isec)->pjs.stub_offset);
 	  bfd_vma stubaddr;
 
+	  if (mmix_elf_section_data (isec)->pjs.n_pushj_relocs == 0)
+	    {
+	      /* This shouldn't happen when linking to ELF or mmo, so
+		 this is an attempt to link to "binary", right?  We
+		 can't access the output bfd, so we can't verify that
+		 assumption.  We only know that the critical
+		 mmix_elf_check_common_relocs has not been called,
+		 which happens when the output format is different
+		 from the input format (and is not mmo).  */
+	      if (! mmix_elf_section_data (isec)->has_warned_pushj)
+		{
+		  /* For the first such error per input section, produce
+		     a verbose message.  */
+		  *error_message
+		    = _("invalid input relocation when producing"
+			" non-ELF, non-mmo format output."
+			"\n Please use the objcopy program to convert from"
+			" ELF or mmo,"
+			"\n or assemble using"
+			" \"-no-expand\" (for gcc, \"-Wa,-no-expand\"");
+		  mmix_elf_section_data (isec)->has_warned_pushj = TRUE;
+		  return bfd_reloc_dangerous;
+		}
+
+	      /* For subsequent errors, return this one, which is
+		 rate-limited but looks a little bit different,
+		 hopefully without affecting user-friendliness.  */
+	      return bfd_reloc_overflow;
+	    }
+
 	  /* The address doesn't fit, so redirect the PUSHJ to the
 	     location of the stub.  */
 	  r = mmix_elf_perform_relocation (isec,
@@ -1025,7 +1059,8 @@ mmix_elf_perform_relocation (isec, howto, datap, addr, value)
 					   + size
 					   + (mmix_elf_section_data (isec)
 					      ->pjs.stub_offset)
-					   - addr);
+					   - addr,
+					   error_message);
 	  if (r != bfd_reloc_ok)
 	    return r;
 
@@ -1049,7 +1084,8 @@ mmix_elf_perform_relocation (isec, howto, datap, addr, value)
 					       [R_MMIX_ADDR27],
 					       stubcontents,
 					       stubaddr,
-					       value + addr - stubaddr);
+					       value + addr - stubaddr,
+					       error_message);
 	      mmix_elf_section_data (isec)->pjs.stub_offset += 4;
 
 	      if (size + mmix_elf_section_data (isec)->pjs.stub_offset
@@ -1161,12 +1197,43 @@ mmix_elf_perform_relocation (isec, howto, datap, addr, value)
       {
 	struct bpo_reloc_section_info *bpodata
 	  = mmix_elf_section_data (isec)->bpo.reloc;
-	asection *bpo_greg_section
-	  = bpodata->bpo_greg_section;
-	struct bpo_greg_section_info *gregdata
-	  = mmix_elf_section_data (bpo_greg_section)->bpo.greg;
-	size_t bpo_index
-	  = gregdata->bpo_reloc_indexes[bpodata->bpo_index++];
+	asection *bpo_greg_section;
+	struct bpo_greg_section_info *gregdata;
+	size_t bpo_index;
+
+	if (bpodata == NULL)
+	  {
+	    /* This shouldn't happen when linking to ELF or mmo, so
+	       this is an attempt to link to "binary", right?  We
+	       can't access the output bfd, so we can't verify that
+	       assumption.  We only know that the critical
+	       mmix_elf_check_common_relocs has not been called, which
+	       happens when the output format is different from the
+	       input format (and is not mmo).  */
+	    if (! mmix_elf_section_data (isec)->has_warned_bpo)
+	      {
+		/* For the first such error per input section, produce
+		   a verbose message.  */
+		*error_message
+		  = _("invalid input relocation when producing"
+		      " non-ELF, non-mmo format output."
+		      "\n Please use the objcopy program to convert from"
+		      " ELF or mmo,"
+		      "\n or compile using the gcc-option"
+		      " \"-mno-base-addresses\".");
+		mmix_elf_section_data (isec)->has_warned_bpo = TRUE;
+		return bfd_reloc_dangerous;
+	      }
+
+	    /* For subsequent errors, return this one, which is
+	       rate-limited but looks a little bit different,
+	       hopefully without affecting user-friendliness.  */
+	    return bfd_reloc_overflow;
+	  }
+
+	bpo_greg_section = bpodata->bpo_greg_section;
+	gregdata = mmix_elf_section_data (bpo_greg_section)->bpo.greg;
+	bpo_index = gregdata->bpo_reloc_indexes[bpodata->bpo_index++];
 
 	/* A consistency check: The value we now have in "relocation" must
 	   be the same as the value we stored for that relocation.  It
@@ -1260,7 +1327,7 @@ mmix_elf_reloc (abfd, reloc_entry, symbol, data, input_section,
      PTR data;
      asection *input_section;
      bfd *output_bfd;
-     char **error_message ATTRIBUTE_UNUSED;
+     char **error_message;
 {
   bfd_vma relocation;
   bfd_reloc_status_type r;
@@ -1322,7 +1389,8 @@ mmix_elf_reloc (abfd, reloc_entry, symbol, data, input_section,
 				   data, reloc_entry->address,
 				   reloc_entry->addend, relocation,
 				   bfd_asymbol_name (symbol),
-				   reloc_target_output_section);
+				   reloc_target_output_section,
+				   error_message);
 }
 
 /* Relocate an MMIX ELF section.  Modified from elf32-fr30.c; look to it
@@ -1454,7 +1522,7 @@ mmix_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 						+ size
 						+ mmix_elf_section_data (input_section)
 						->pjs.stub_offset,
-						NULL, NULL) != bfd_reloc_ok)
+						NULL, NULL, NULL) != bfd_reloc_ok)
 		    return FALSE;
 
 		  /* Put a JMP insn at the stub; it goes with the
@@ -1494,7 +1562,7 @@ mmix_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
       r = mmix_final_link_relocate (howto, input_section,
 				    contents, rel->r_offset,
-				    rel->r_addend, relocation, name, sec);
+				    rel->r_addend, relocation, name, sec, NULL);
 
       if (r != bfd_reloc_ok)
 	{
@@ -1551,16 +1619,11 @@ mmix_elf_relocate_section (output_bfd, info, input_bfd, input_section,
    routines.  A few relocs we have to do ourselves.  */
 
 static bfd_reloc_status_type
-mmix_final_link_relocate (howto, input_section, contents,
-			  r_offset, r_addend, relocation, symname, symsec)
-     reloc_howto_type *howto;
-     asection *input_section;
-     bfd_byte *contents;
-     bfd_vma r_offset;
-     bfd_signed_vma r_addend;
-     bfd_vma relocation;
-     const char *symname;
-     asection *symsec;
+mmix_final_link_relocate (reloc_howto_type *howto, asection *input_section,
+			  bfd_byte *contents, bfd_vma r_offset,
+			  bfd_signed_vma r_addend, bfd_vma relocation,
+			  const char *symname, asection *symsec,
+			  char **error_message)
 {
   bfd_reloc_status_type r = bfd_reloc_ok;
   bfd_vma addr
@@ -1587,7 +1650,7 @@ mmix_final_link_relocate (howto, input_section, contents,
 	       + r_offset);
 
       r = mmix_elf_perform_relocation (input_section, howto, contents,
-				       addr, srel);
+				       addr, srel, error_message);
       break;
 
     case R_MMIX_BASE_PLUS_OFFSET:
@@ -1669,7 +1732,7 @@ mmix_final_link_relocate (howto, input_section, contents,
     do_mmix_reloc:
       contents += r_offset;
       r = mmix_elf_perform_relocation (input_section, howto, contents,
-				       addr, srel);
+				       addr, srel, error_message);
       break;
 
     case R_MMIX_LOCAL:

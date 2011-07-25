@@ -1,3 +1,16 @@
+2011-07-25  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	PR ld/12815
+	* elf64-mmix.c (struct _mmix_elf_section_data): New members
+	has_warned_bpo and has_warned_pushj.
+	(mmix_final_link_relocate): Remove PARAMS and PTR macros,
+	converting to ISO C.  Add new parameter error_message.  All
+	callers changed.
+	(mmix_elf_perform_relocation): Ditto.
+	<case R_MMIX_PUSHJ_STUBBABLE, case R_MMIX_BASE_PLUS_OFFSET>:
+	Handle the case where mmix_elf_check_common_relocs has not been
+	called, missing preparations for relocs of the respective type.
+
 2011-07-24  Chao-ying Fu  <fu@mips.com>
             Ilie Garbacea  <ilie@mips.com>
             Maciej W. Rozycki  <macro@codesourcery.com>
