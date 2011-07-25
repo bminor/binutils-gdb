@@ -1,3 +1,27 @@
+2011-07-25  Tom Tromey  <tromey@redhat.com>
+
+	* ada-lang.c (ada_exception_breakpoint_ops): Make return type
+	const.
+	(ada_exception_sal): Make 'ops' const.
+	(ada_decode_exception_location): Likewise.
+	(ada_decode_assert_location): Likewise.
+	(catch_assert_command): Update.
+	(catch_ada_exception_command): Update.
+	(create_ada_exception_catchpoint): Make 'ops' const.
+	* breakpoint.c (set_raw_breakpoint_without_location)
+	(set_raw_breakpoint, momentary_breakpoint_from_master): Make 'ops'
+	const.
+	(create_internal_breakpoint): Update.
+	(init_raw_breakpoint_without_location): Make 'ops' const.
+	(init_raw_breakpoint, init_catchpoint)
+	(create_fork_vfork_event_catchpoint)
+	(create_syscall_event_catchpoint, init_breakpoint_sal)
+	(create_breakpoint_sal, create_breakpoints_sal)
+	(create_breakpoint, init_ada_exception_breakpoint): Likewise.
+	* breakpoint.h (struct breakpoint) <ops>: Now const.
+	(init_ada_exception_breakpoint, create_breakpoint): Make 'ops'
+	const.
+
 2011-07-25  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* linux-thread-db.c (thread_from_lwp): Initialize th.th_unique.

@@ -108,17 +108,18 @@ static void mention (struct breakpoint *);
 
 static struct breakpoint *set_raw_breakpoint_without_location (struct gdbarch *,
 							       enum bptype,
-							       struct breakpoint_ops *);
+							       const struct breakpoint_ops *);
 /* This function is used in gdbtk sources and thus can not be made
    static.  */
 struct breakpoint *set_raw_breakpoint (struct gdbarch *gdbarch,
 				       struct symtab_and_line,
-				       enum bptype, struct breakpoint_ops *);
+				       enum bptype,
+				       const struct breakpoint_ops *);
 
 static struct breakpoint *
   momentary_breakpoint_from_master (struct breakpoint *orig,
 				    enum bptype type,
-				    struct breakpoint_ops *ops);
+				    const struct breakpoint_ops *ops);
 
 static void breakpoint_adjustment_warning (CORE_ADDR, CORE_ADDR, int, int);
 
@@ -2110,7 +2111,7 @@ set_breakpoint_number (int internal, struct breakpoint *b)
 static struct breakpoint *
 create_internal_breakpoint (struct gdbarch *gdbarch,
 			    CORE_ADDR address, enum bptype type,
-			    struct breakpoint_ops *ops)
+			    const struct breakpoint_ops *ops)
 {
   struct symtab_and_line sal;
   struct breakpoint *b;
@@ -5605,7 +5606,7 @@ static void
 init_raw_breakpoint_without_location (struct breakpoint *b,
 				      struct gdbarch *gdbarch,
 				      enum bptype bptype,
-				      struct breakpoint_ops *ops)
+				      const struct breakpoint_ops *ops)
 {
   memset (b, 0, sizeof (*b));
 
@@ -5634,7 +5635,7 @@ init_raw_breakpoint_without_location (struct breakpoint *b,
 static struct breakpoint *
 set_raw_breakpoint_without_location (struct gdbarch *gdbarch,
 				     enum bptype bptype,
-				     struct breakpoint_ops *ops)
+				     const struct breakpoint_ops *ops)
 {
   struct breakpoint *b = XNEW (struct breakpoint);
 
@@ -5711,7 +5712,7 @@ get_sal_arch (struct symtab_and_line sal)
 static void
 init_raw_breakpoint (struct breakpoint *b, struct gdbarch *gdbarch,
 		     struct symtab_and_line sal, enum bptype bptype,
-		     struct breakpoint_ops *ops)
+		     const struct breakpoint_ops *ops)
 {
   CORE_ADDR adjusted_address;
   struct gdbarch *loc_gdbarch;
@@ -5775,7 +5776,7 @@ init_raw_breakpoint (struct breakpoint *b, struct gdbarch *gdbarch,
 struct breakpoint *
 set_raw_breakpoint (struct gdbarch *gdbarch,
 		    struct symtab_and_line sal, enum bptype bptype,
-		    struct breakpoint_ops *ops)
+		    const struct breakpoint_ops *ops)
 {
   struct breakpoint *b = XNEW (struct breakpoint);
 
@@ -6616,7 +6617,7 @@ static void
 init_catchpoint (struct breakpoint *b,
 		 struct gdbarch *gdbarch, int tempflag,
 		 char *cond_string,
-		 struct breakpoint_ops *ops)
+		 const struct breakpoint_ops *ops)
 {
   struct symtab_and_line sal;
 
@@ -6643,7 +6644,7 @@ install_breakpoint (int internal, struct breakpoint *b)
 static void
 create_fork_vfork_event_catchpoint (struct gdbarch *gdbarch,
 				    int tempflag, char *cond_string,
-                                    struct breakpoint_ops *ops)
+                                    const struct breakpoint_ops *ops)
 {
   struct fork_catchpoint *c = XNEW (struct fork_catchpoint);
 
@@ -6762,7 +6763,7 @@ static struct breakpoint_ops catch_exec_breakpoint_ops;
 
 static void
 create_syscall_event_catchpoint (int tempflag, VEC(int) *filter,
-                                 struct breakpoint_ops *ops)
+                                 const struct breakpoint_ops *ops)
 {
   struct syscall_catchpoint *c;
   struct gdbarch *gdbarch = get_current_arch ();
@@ -6942,7 +6943,7 @@ set_momentary_breakpoint (struct gdbarch *gdbarch, struct symtab_and_line sal,
 static struct breakpoint *
 momentary_breakpoint_from_master (struct breakpoint *orig,
 				  enum bptype type,
-				  struct breakpoint_ops *ops)
+				  const struct breakpoint_ops *ops)
 {
   struct breakpoint *copy;
 
@@ -7093,7 +7094,7 @@ init_breakpoint_sal (struct breakpoint *b, struct gdbarch *gdbarch,
 		     char *cond_string,
 		     enum bptype type, enum bpdisp disposition,
 		     int thread, int task, int ignore_count,
-		     struct breakpoint_ops *ops, int from_tty,
+		     const struct breakpoint_ops *ops, int from_tty,
 		     int enabled, int internal, int display_canonical)
 {
   int i;
@@ -7218,7 +7219,7 @@ create_breakpoint_sal (struct gdbarch *gdbarch,
 		       char *cond_string,
 		       enum bptype type, enum bpdisp disposition,
 		       int thread, int task, int ignore_count,
-		       struct breakpoint_ops *ops, int from_tty,
+		       const struct breakpoint_ops *ops, int from_tty,
 		       int enabled, int internal, int display_canonical)
 {
   struct breakpoint *b;
@@ -7402,7 +7403,7 @@ create_breakpoints_sal (struct gdbarch *gdbarch,
 			char *cond_string,
 			enum bptype type, enum bpdisp disposition,
 			int thread, int task, int ignore_count,
-			struct breakpoint_ops *ops, int from_tty,
+			const struct breakpoint_ops *ops, int from_tty,
 			int enabled, int internal)
 {
   int i;
@@ -7682,7 +7683,7 @@ create_breakpoint (struct gdbarch *gdbarch,
 		   int tempflag, enum bptype type_wanted,
 		   int ignore_count,
 		   enum auto_boolean pending_break_support,
-		   struct breakpoint_ops *ops,
+		   const struct breakpoint_ops *ops,
 		   int from_tty, int enabled, int internal)
 {
   volatile struct gdb_exception e;
@@ -9864,7 +9865,7 @@ init_ada_exception_breakpoint (struct breakpoint *b,
 			       struct gdbarch *gdbarch,
 			       struct symtab_and_line sal,
 			       char *addr_string,
-			       struct breakpoint_ops *ops,
+			       const struct breakpoint_ops *ops,
 			       int tempflag,
 			       int from_tty)
 {

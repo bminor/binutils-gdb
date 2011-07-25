@@ -533,7 +533,7 @@ extern int target_exact_watchpoints;
 struct breakpoint
   {
     /* Methods associated with this breakpoint.  */
-    struct breakpoint_ops *ops;
+    const struct breakpoint_ops *ops;
 
     struct breakpoint *next;
     /* Type of breakpoint.  */
@@ -1093,7 +1093,7 @@ extern void
 				 struct gdbarch *gdbarch,
 				 struct symtab_and_line sal,
 				 char *addr_string,
-				 struct breakpoint_ops *ops,
+				 const struct breakpoint_ops *ops,
 				 int tempflag,
 				 int from_tty);
 
@@ -1110,7 +1110,7 @@ extern int create_breakpoint (struct gdbarch *gdbarch, char *arg,
 			      int tempflag, enum bptype wanted_type,
 			      int ignore_count,
 			      enum auto_boolean pending_break_support,
-			      struct breakpoint_ops *ops,
+			      const struct breakpoint_ops *ops,
 			      int from_tty,
 			      int enabled,
 			      int internal);

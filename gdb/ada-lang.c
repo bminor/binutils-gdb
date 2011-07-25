@@ -10863,7 +10863,7 @@ ada_exception_name_addr (enum exception_catchpoint_kind ex,
 
 static struct symtab_and_line ada_exception_sal (enum exception_catchpoint_kind,
 						 char *, char **,
-						 struct breakpoint_ops **);
+						 const struct breakpoint_ops **);
 static char *ada_exception_catchpoint_cond_string (const char *excep_string);
 
 /* Ada catchpoints.
@@ -11538,7 +11538,7 @@ ada_exception_sym_name (enum exception_catchpoint_kind ex)
 /* Return the breakpoint ops "virtual table" used for catchpoints
    of the EX kind.  */
 
-static struct breakpoint_ops *
+static const struct breakpoint_ops *
 ada_exception_breakpoint_ops (enum exception_catchpoint_kind ex)
 {
   switch (ex)
@@ -11613,7 +11613,7 @@ ada_exception_catchpoint_cond_string (const char *excep_string)
 
 static struct symtab_and_line
 ada_exception_sal (enum exception_catchpoint_kind ex, char *excep_string,
-		   char **addr_string, struct breakpoint_ops **ops)
+		   char **addr_string, const struct breakpoint_ops **ops)
 {
   const char *sym_name;
   struct symbol *sym;
@@ -11676,7 +11676,7 @@ ada_exception_sal (enum exception_catchpoint_kind ex, char *excep_string,
 static struct symtab_and_line
 ada_decode_exception_location (char *args, char **addr_string,
                                char **excep_string,
-                               struct breakpoint_ops **ops)
+                               const struct breakpoint_ops **ops)
 {
   enum exception_catchpoint_kind ex;
 
@@ -11691,7 +11691,7 @@ create_ada_exception_catchpoint (struct gdbarch *gdbarch,
 				 struct symtab_and_line sal,
 				 char *addr_string,
 				 char *excep_string,
-				 struct breakpoint_ops *ops,
+				 const struct breakpoint_ops *ops,
 				 int tempflag,
 				 int from_tty)
 {
@@ -11716,7 +11716,7 @@ catch_ada_exception_command (char *arg, int from_tty,
   struct symtab_and_line sal;
   char *addr_string = NULL;
   char *excep_string = NULL;
-  struct breakpoint_ops *ops = NULL;
+  const struct breakpoint_ops *ops = NULL;
 
   tempflag = get_cmd_context (command) == CATCH_TEMPORARY;
 
@@ -11729,7 +11729,7 @@ catch_ada_exception_command (char *arg, int from_tty,
 
 static struct symtab_and_line
 ada_decode_assert_location (char *args, char **addr_string,
-                            struct breakpoint_ops **ops)
+                            const struct breakpoint_ops **ops)
 {
   /* Check that no argument where provided at the end of the command.  */
 
@@ -11754,7 +11754,7 @@ catch_assert_command (char *arg, int from_tty,
   int tempflag;
   struct symtab_and_line sal;
   char *addr_string = NULL;
-  struct breakpoint_ops *ops = NULL;
+  const struct breakpoint_ops *ops = NULL;
 
   tempflag = get_cmd_context (command) == CATCH_TEMPORARY;
 
