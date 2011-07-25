@@ -215,12 +215,18 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 
 # We also want to make sure we do something reasonable when there's no
 # debug info available.  For the best test, we use .so's.
+
+# This version won't be runnable, because there is no way to put the
+# PT_PHDR segment at file offset 0.  We just make sure that we can
+# build it without error.
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_29 = debug_msg_so.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg_ndebug.err \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	undef_symbol.err ver_test_1.syms \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_2.syms ver_test_4.syms \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_5.syms ver_test_7.syms \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_10.syms protected_3.err \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	undef_symbol.err \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_ttext_2 \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_1.syms ver_test_2.syms \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_4.syms ver_test_5.syms \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_7.syms ver_test_10.syms \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	protected_3.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	relro_test.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_matching_test.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_3.stdout \
@@ -253,9 +259,12 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@HAVE_ZLIB_TRUE@@NATIVE_LINKER_TRUE@am__append_31 = flagstest_compress_debug_sections \
 @GCC_TRUE@@HAVE_ZLIB_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_specialfile_and_compress_debug_sections
 
+# Test -TText and -Tdata.
+
 # Test symbol versioning.
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_32 = ver_test ver_test_2 \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_6 ver_test_8 ver_test_9 \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_32 = flagstest_o_ttext_1 \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test ver_test_2 ver_test_6 \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_8 ver_test_9 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_11 ver_test_12 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	protected_1 protected_2 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	relro_test relro_now_test \
@@ -653,7 +662,9 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_specialfile$(EXEEXT)
 @GCC_TRUE@@HAVE_ZLIB_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_21 = flagstest_compress_debug_sections$(EXEEXT) \
 @GCC_TRUE@@HAVE_ZLIB_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_specialfile_and_compress_debug_sections$(EXEEXT)
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_22 = ver_test$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_22 =  \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_ttext_1$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_2$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_6$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_8$(EXEEXT) \
@@ -891,6 +902,12 @@ flagstest_o_specialfile_and_compress_debug_sections_DEPENDENCIES =  \
 	libgoldtest.a ../libgold.a ../../libiberty/libiberty.a \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1)
+flagstest_o_ttext_1_SOURCES = flagstest_o_ttext_1.c
+flagstest_o_ttext_1_OBJECTS = flagstest_o_ttext_1.$(OBJEXT)
+flagstest_o_ttext_1_LDADD = $(LDADD)
+flagstest_o_ttext_1_DEPENDENCIES = libgoldtest.a ../libgold.a \
+	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 icf_virtual_function_folding_test_SOURCES =  \
 	icf_virtual_function_folding_test.c
 icf_virtual_function_folding_test_OBJECTS =  \
@@ -1595,12 +1612,12 @@ SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c basic_pie_test.c \
 	$(exclude_libs_test_SOURCES) \
 	flagstest_compress_debug_sections.c flagstest_o_specialfile.c \
 	flagstest_o_specialfile_and_compress_debug_sections.c \
-	icf_virtual_function_folding_test.c $(ifuncmain1_SOURCES) \
-	ifuncmain1pic.c ifuncmain1picstatic.c ifuncmain1pie.c \
-	$(ifuncmain1static_SOURCES) ifuncmain1staticpic.c \
-	ifuncmain1staticpie.c $(ifuncmain1vis_SOURCES) \
-	ifuncmain1vispic.c ifuncmain1vispie.c $(ifuncmain2_SOURCES) \
-	ifuncmain2pic.c ifuncmain2picstatic.c \
+	flagstest_o_ttext_1.c icf_virtual_function_folding_test.c \
+	$(ifuncmain1_SOURCES) ifuncmain1pic.c ifuncmain1picstatic.c \
+	ifuncmain1pie.c $(ifuncmain1static_SOURCES) \
+	ifuncmain1staticpic.c ifuncmain1staticpie.c \
+	$(ifuncmain1vis_SOURCES) ifuncmain1vispic.c ifuncmain1vispie.c \
+	$(ifuncmain2_SOURCES) ifuncmain2pic.c ifuncmain2picstatic.c \
 	$(ifuncmain2static_SOURCES) $(ifuncmain3_SOURCES) \
 	$(ifuncmain4_SOURCES) ifuncmain4picstatic.c \
 	$(ifuncmain4static_SOURCES) $(ifuncmain5_SOURCES) \
@@ -2511,6 +2528,12 @@ exclude_libs_test$(EXEEXT): $(exclude_libs_test_OBJECTS) $(exclude_libs_test_DEP
 @NATIVE_LINKER_FALSE@flagstest_o_specialfile_and_compress_debug_sections$(EXEEXT): $(flagstest_o_specialfile_and_compress_debug_sections_OBJECTS) $(flagstest_o_specialfile_and_compress_debug_sections_DEPENDENCIES) 
 @NATIVE_LINKER_FALSE@	@rm -f flagstest_o_specialfile_and_compress_debug_sections$(EXEEXT)
 @NATIVE_LINKER_FALSE@	$(LINK) $(flagstest_o_specialfile_and_compress_debug_sections_OBJECTS) $(flagstest_o_specialfile_and_compress_debug_sections_LDADD) $(LIBS)
+@GCC_FALSE@flagstest_o_ttext_1$(EXEEXT): $(flagstest_o_ttext_1_OBJECTS) $(flagstest_o_ttext_1_DEPENDENCIES) 
+@GCC_FALSE@	@rm -f flagstest_o_ttext_1$(EXEEXT)
+@GCC_FALSE@	$(LINK) $(flagstest_o_ttext_1_OBJECTS) $(flagstest_o_ttext_1_LDADD) $(LIBS)
+@NATIVE_LINKER_FALSE@flagstest_o_ttext_1$(EXEEXT): $(flagstest_o_ttext_1_OBJECTS) $(flagstest_o_ttext_1_DEPENDENCIES) 
+@NATIVE_LINKER_FALSE@	@rm -f flagstest_o_ttext_1$(EXEEXT)
+@NATIVE_LINKER_FALSE@	$(LINK) $(flagstest_o_ttext_1_OBJECTS) $(flagstest_o_ttext_1_LDADD) $(LIBS)
 @GCC_FALSE@icf_virtual_function_folding_test$(EXEEXT): $(icf_virtual_function_folding_test_OBJECTS) $(icf_virtual_function_folding_test_DEPENDENCIES) 
 @GCC_FALSE@	@rm -f icf_virtual_function_folding_test$(EXEEXT)
 @GCC_FALSE@	$(LINK) $(icf_virtual_function_folding_test_OBJECTS) $(icf_virtual_function_folding_test_LDADD) $(LIBS)
@@ -3151,6 +3174,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flagstest_compress_debug_sections.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flagstest_o_specialfile.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flagstest_o_specialfile_and_compress_debug_sections.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flagstest_o_ttext_1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/icf_virtual_function_folding_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifuncdep2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifuncmain1.Po@am__quote@
@@ -3738,6 +3762,8 @@ flagstest_compress_debug_sections.log: flagstest_compress_debug_sections$(EXEEXT
 	@p='flagstest_compress_debug_sections$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 flagstest_o_specialfile_and_compress_debug_sections.log: flagstest_o_specialfile_and_compress_debug_sections$(EXEEXT)
 	@p='flagstest_o_specialfile_and_compress_debug_sections$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+flagstest_o_ttext_1.log: flagstest_o_ttext_1$(EXEEXT)
+	@p='flagstest_o_ttext_1$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 ver_test.log: ver_test$(EXEEXT)
 	@p='ver_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 ver_test_2.log: ver_test_2$(EXEEXT)
@@ -4418,6 +4444,10 @@ uninstall-am:
 @GCC_TRUE@@HAVE_ZLIB_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -o /dev/stdout $< -Wl,--compress-debug-sections=zlib 2>&1 | cat > $@
 @GCC_TRUE@@HAVE_ZLIB_TRUE@@NATIVE_LINKER_TRUE@	chmod a+x $@
 @GCC_TRUE@@HAVE_ZLIB_TRUE@@NATIVE_LINKER_TRUE@	test -s $@
+@GCC_TRUE@@NATIVE_LINKER_TRUE@flagstest_o_ttext_1: flagstest_debug.o gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -o $@ $< -Wl,-Ttext,0x400000 -Wl,-Tdata,0x800000
+@GCC_TRUE@@NATIVE_LINKER_TRUE@flagstest_o_ttext_2: flagstest_debug.o gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -o $@ $< -Wl,-Ttext,0x400010 -Wl,-Tdata,0x800010
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_1.so: ver_test_1.o ver_test_2.so ver_test_3.o ver_test_4.so gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared ver_test_1.o ver_test_2.so ver_test_3.o ver_test_4.so
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_2.so: ver_test_2.o $(srcdir)/ver_test_2.script ver_test_4.so gcctestdir/ld

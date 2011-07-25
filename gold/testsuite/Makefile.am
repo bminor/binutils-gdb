@@ -1005,6 +1005,18 @@ flagstest_o_specialfile_and_compress_debug_sections: flagstest_debug.o \
 
 endif HAVE_ZLIB
 
+# Test -TText and -Tdata.
+check_PROGRAMS += flagstest_o_ttext_1
+flagstest_o_ttext_1: flagstest_debug.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -o $@ $< -Wl,-Ttext,0x400000 -Wl,-Tdata,0x800000
+
+# This version won't be runnable, because there is no way to put the
+# PT_PHDR segment at file offset 0.  We just make sure that we can
+# build it without error.
+check_DATA += flagstest_o_ttext_2
+flagstest_o_ttext_2: flagstest_debug.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -o $@ $< -Wl,-Ttext,0x400010 -Wl,-Tdata,0x800010
+
 # Test symbol versioning.
 check_PROGRAMS += ver_test
 ver_test_SOURCES = ver_test_main.cc

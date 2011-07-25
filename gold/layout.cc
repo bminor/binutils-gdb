@@ -2095,8 +2095,12 @@ Layout::relaxation_loop_body(
   // If the user set the address of the text segment, that may not be
   // compatible with putting the segment headers and file headers into
   // that segment.
-  if (parameters->options().user_set_Ttext())
-    load_seg = NULL;
+  if (parameters->options().user_set_Ttext()
+      && parameters->options().Ttext() % target->common_pagesize() != 0)
+    {
+      load_seg = NULL;
+      phdr_seg = NULL;
+    }
 
   gold_assert(phdr_seg == NULL
 	      || load_seg != NULL
