@@ -10783,53 +10783,35 @@ bkpt_works_in_software_mode (const struct breakpoint *b)
 enum print_stop_action
 bkpt_print_it (bpstat bs)
 {
-  struct cleanup *old_chain;
   struct breakpoint *b;
   const struct bp_location *bl;
-  struct ui_stream *stb;
-  int bp_temp = 0;
-  enum print_stop_action result;
+  int bp_temp;
 
   gdb_assert (bs->bp_location_at != NULL);
 
   bl = bs->bp_location_at;
   b = bs->breakpoint_at;
 
-  stb = ui_out_stream_new (uiout);
-  old_chain = make_cleanup_ui_out_stream_delete (stb);
-
-  switch (b->type)
+  bp_temp = b->disposition == disp_del;
+  if (bl->address != bl->requested_address)
+    breakpoint_adjustment_warning (bl->requested_address,
+				   bl->address,
+				   b->number, 1);
+  annotate_breakpoint (b->number);
+  if (bp_temp)
+    ui_out_text (uiout, "\nTemporary breakpoint ");
+  else
+    ui_out_text (uiout, "\nBreakpoint ");
+  if (ui_out_is_mi_like_p (uiout))
     {
-    case bp_breakpoint:
-    case bp_hardware_breakpoint:
-      bp_temp = b->disposition == disp_del;
-      if (bl->address != bl->requested_address)
-	breakpoint_adjustment_warning (bl->requested_address,
-	                               bl->address,
-				       b->number, 1);
-      annotate_breakpoint (b->number);
-      if (bp_temp)
-	ui_out_text (uiout, "\nTemporary breakpoint ");
-      else
-	ui_out_text (uiout, "\nBreakpoint ");
-      if (ui_out_is_mi_like_p (uiout))
-	{
-	  ui_out_field_string (uiout, "reason",
-			  async_reason_lookup (EXEC_ASYNC_BREAKPOINT_HIT));
-	  ui_out_field_string (uiout, "disp", bpdisp_text (b->disposition));
-	}
-      ui_out_field_int (uiout, "bkptno", b->number);
-      ui_out_text (uiout, ", ");
-      result = PRINT_SRC_AND_LOC;
-      break;
-
-    default:
-      result = PRINT_UNKNOWN;
-      break;
+      ui_out_field_string (uiout, "reason",
+			   async_reason_lookup (EXEC_ASYNC_BREAKPOINT_HIT));
+      ui_out_field_string (uiout, "disp", bpdisp_text (b->disposition));
     }
+  ui_out_field_int (uiout, "bkptno", b->number);
+  ui_out_text (uiout, ", ");
 
-  do_cleanups (old_chain);
-  return result;
+  return PRINT_SRC_AND_LOC;
 }
 
 void
@@ -10944,20 +10926,9 @@ internal_bkpt_check_status (bpstat bs)
 static enum print_stop_action
 internal_bkpt_print_it (bpstat bs)
 {
-  struct cleanup *old_chain;
   struct breakpoint *b;
-  const struct bp_location *bl;
-  struct ui_stream *stb;
-  int bp_temp = 0;
-  enum print_stop_action result;
 
-  gdb_assert (bs->bp_location_at != NULL);
-
-  bl = bs->bp_location_at;
   b = bs->breakpoint_at;
-
-  stb = ui_out_stream_new (uiout);
-  old_chain = make_cleanup_ui_out_stream_delete (stb);
 
   switch (b->type)
     {
@@ -10966,49 +10937,38 @@ internal_bkpt_print_it (bpstat bs)
 	 variable?  (If so, we report this as a generic, "Stopped due
 	 to shlib event" message.) */
       printf_filtered (_("Stopped due to shared library event\n"));
-      result = PRINT_NOTHING;
       break;
 
     case bp_thread_event:
       /* Not sure how we will get here.
 	 GDB should not stop for these breakpoints.  */
       printf_filtered (_("Thread Event Breakpoint: gdb should not stop!\n"));
-      result = PRINT_NOTHING;
       break;
 
     case bp_overlay_event:
       /* By analogy with the thread event, GDB should not stop for these.  */
       printf_filtered (_("Overlay Event Breakpoint: gdb should not stop!\n"));
-      result = PRINT_NOTHING;
       break;
 
     case bp_longjmp_master:
       /* These should never be enabled.  */
       printf_filtered (_("Longjmp Master Breakpoint: gdb should not stop!\n"));
-      result = PRINT_NOTHING;
       break;
 
     case bp_std_terminate_master:
       /* These should never be enabled.  */
       printf_filtered (_("std::terminate Master Breakpoint: "
 			 "gdb should not stop!\n"));
-      result = PRINT_NOTHING;
       break;
 
     case bp_exception_master:
       /* These should never be enabled.  */
       printf_filtered (_("Exception Master Breakpoint: "
 			 "gdb should not stop!\n"));
-      result = PRINT_NOTHING;
-      break;
-
-    default:
-      result = PRINT_UNKNOWN;
       break;
     }
 
-  do_cleanups (old_chain);
-  return result;
+  return PRINT_NOTHING;
 }
 
 static void
@@ -11064,46 +11024,27 @@ momentary_bkpt_check_status (bpstat bs)
 static enum print_stop_action
 momentary_bkpt_print_it (bpstat bs)
 {
-  struct cleanup *old_chain;
-  struct breakpoint *b;
-  const struct bp_location *bl;
-  struct ui_stream *stb;
-  int bp_temp = 0;
-  enum print_stop_action result;
-
-  gdb_assert (bs->bp_location_at != NULL);
-
-  bl = bs->bp_location_at;
-  b = bs->breakpoint_at;
-
-  stb = ui_out_stream_new (uiout);
-  old_chain = make_cleanup_ui_out_stream_delete (stb);
-
-  switch (b->type)
+  if (ui_out_is_mi_like_p (uiout))
     {
-    case bp_finish:
-      if (ui_out_is_mi_like_p (uiout))
-	ui_out_field_string
-	  (uiout, "reason",
-	   async_reason_lookup (EXEC_ASYNC_FUNCTION_FINISHED));
-      result = PRINT_UNKNOWN;
-      break;
+      struct breakpoint *b = bs->breakpoint_at;
 
-    case bp_until:
-      if (ui_out_is_mi_like_p (uiout))
-	ui_out_field_string
-	  (uiout, "reason",
-	   async_reason_lookup (EXEC_ASYNC_LOCATION_REACHED));
-      result = PRINT_UNKNOWN;
-      break;
+      switch (b->type)
+	{
+	case bp_finish:
+	  ui_out_field_string
+	    (uiout, "reason",
+	     async_reason_lookup (EXEC_ASYNC_FUNCTION_FINISHED));
+	  break;
 
-    default:
-      result = PRINT_UNKNOWN;
-      break;
+	case bp_until:
+	  ui_out_field_string
+	    (uiout, "reason",
+	     async_reason_lookup (EXEC_ASYNC_LOCATION_REACHED));
+	  break;
+	}
     }
 
-  do_cleanups (old_chain);
-  return result;
+  return PRINT_UNKNOWN;
 }
 
 static void

@@ -1,5 +1,10 @@
 2011-07-25  Pedro Alves  <pedro@codesourcery.com>
 
+	* breakpoint.c (bkpt_print_it, internal_bkpt_print_it)
+	(momentary_bkpt_print_it): Simplify.
+
+2011-07-25  Pedro Alves  <pedro@codesourcery.com>
+
 	Split internal, momentary and user breakpoints breakpoint_ops
 	tables.
 
