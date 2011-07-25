@@ -115,6 +115,11 @@ struct breakpoint *set_raw_breakpoint (struct gdbarch *gdbarch,
 				       struct symtab_and_line,
 				       enum bptype, struct breakpoint_ops *);
 
+static struct breakpoint *
+  momentary_breakpoint_from_master (struct breakpoint *orig,
+				    enum bptype type,
+				    struct breakpoint_ops *ops);
+
 static void breakpoint_adjustment_warning (CORE_ADDR, CORE_ADDR, int, int);
 
 static CORE_ADDR adjust_breakpoint_address (struct gdbarch *gdbarch,
@@ -230,6 +235,10 @@ static int is_masked_watchpoint (const struct breakpoint *b);
    static tracepoint marker spec ("-m MARKER_ID")?  */
 #define is_marker_spec(s)						\
   (s != NULL && strncmp (s, "-m", 2) == 0 && ((s)[2] == ' ' || (s)[2] == '\t'))
+
+/* Forward declarations.  */
+static struct breakpoint_ops internal_breakpoint_ops;
+static struct breakpoint_ops momentary_breakpoint_ops;
 
 /* A reference-counted struct command_line.  This lets multiple
    breakpoints share a single command list.  */
@@ -2066,7 +2075,8 @@ set_breakpoint_number (int internal, struct breakpoint *b)
 
 static struct breakpoint *
 create_internal_breakpoint (struct gdbarch *gdbarch,
-			    CORE_ADDR address, enum bptype type)
+			    CORE_ADDR address, enum bptype type,
+			    struct breakpoint_ops *ops)
 {
   struct symtab_and_line sal;
   struct breakpoint *b;
@@ -2077,7 +2087,7 @@ create_internal_breakpoint (struct gdbarch *gdbarch,
   sal.section = find_pc_overlay (sal.pc);
   sal.pspace = current_program_space;
 
-  b = set_raw_breakpoint (gdbarch, sal, type, &bkpt_breakpoint_ops);
+  b = set_raw_breakpoint (gdbarch, sal, type, ops);
   b->number = internal_breakpoint_number--;
   b->disposition = disp_donttouch;
 
@@ -2172,7 +2182,8 @@ create_overlay_event_breakpoint (void)
 
       addr = SYMBOL_VALUE_ADDRESS (bp_objfile_data->overlay_msym);
       b = create_internal_breakpoint (get_objfile_arch (objfile), addr,
-                                      bp_overlay_event);
+                                      bp_overlay_event,
+				      &internal_breakpoint_ops);
       b->addr_string = xstrdup (func_name);
 
       if (overlay_debugging == ovly_auto)
@@ -2240,7 +2251,8 @@ create_longjmp_master_breakpoint (void)
 	    }
 
 	  addr = SYMBOL_VALUE_ADDRESS (bp_objfile_data->longjmp_msym[i]);
-	  b = create_internal_breakpoint (gdbarch, addr, bp_longjmp_master);
+	  b = create_internal_breakpoint (gdbarch, addr, bp_longjmp_master,
+					  &internal_breakpoint_ops);
 	  b->addr_string = xstrdup (func_name);
 	  b->enable_state = bp_disabled;
 	}
@@ -2295,7 +2307,8 @@ create_std_terminate_master_breakpoint (void)
 
       addr = SYMBOL_VALUE_ADDRESS (bp_objfile_data->terminate_msym);
       b = create_internal_breakpoint (get_objfile_arch (objfile), addr,
-                                      bp_std_terminate_master);
+                                      bp_std_terminate_master,
+				      &internal_breakpoint_ops);
       b->addr_string = xstrdup (func_name);
       b->enable_state = bp_disabled;
     }
@@ -2345,7 +2358,8 @@ create_exception_master_breakpoint (void)
       addr = SYMBOL_VALUE_ADDRESS (bp_objfile_data->exception_msym);
       addr = gdbarch_convert_from_func_ptr_addr (gdbarch, addr,
 						 &current_target);
-      b = create_internal_breakpoint (gdbarch, addr, bp_exception_master);
+      b = create_internal_breakpoint (gdbarch, addr, bp_exception_master,
+				      &internal_breakpoint_ops);
       b->addr_string = xstrdup (func_name);
       b->enable_state = bp_disabled;
     }
@@ -5728,9 +5742,11 @@ set_longjmp_breakpoint (struct thread_info *tp, struct frame_id frame)
 	&& (b->type == bp_longjmp_master
 	    || b->type == bp_exception_master))
       {
-	struct breakpoint *clone = clone_momentary_breakpoint (b);
+	enum bptype type = b->type == bp_longjmp_master ? bp_longjmp : bp_exception;
+	struct breakpoint *clone;
 
-	clone->type = b->type == bp_longjmp_master ? bp_longjmp : bp_exception;
+	clone = momentary_breakpoint_from_master (b, type,
+						  &momentary_breakpoint_ops);
 	clone->thread = thread;
       }
 
@@ -5790,8 +5806,8 @@ set_std_terminate_breakpoint (void)
     if (b->pspace == current_program_space
 	&& b->type == bp_std_terminate_master)
       {
-	struct breakpoint *clone = clone_momentary_breakpoint (b);
-	clone->type = bp_std_terminate;
+	momentary_breakpoint_from_master (b, bp_std_terminate,
+					  &momentary_breakpoint_ops);
       }
 }
 
@@ -5811,8 +5827,9 @@ create_thread_event_breakpoint (struct gdbarch *gdbarch, CORE_ADDR address)
 {
   struct breakpoint *b;
 
-  b = create_internal_breakpoint (gdbarch, address, bp_thread_event);
-  
+  b = create_internal_breakpoint (gdbarch, address, bp_thread_event,
+				  &internal_breakpoint_ops);
+
   b->enable_state = bp_enabled;
   /* addr_string has to be used or breakpoint_re_set will delete me.  */
   b->addr_string
@@ -5847,7 +5864,8 @@ create_jit_event_breakpoint (struct gdbarch *gdbarch, CORE_ADDR address)
 {
   struct breakpoint *b;
 
-  b = create_internal_breakpoint (gdbarch, address, bp_jit_event);
+  b = create_internal_breakpoint (gdbarch, address, bp_jit_event,
+				  &internal_breakpoint_ops);
   update_global_location_list_nothrow (1);
   return b;
 }
@@ -5881,7 +5899,8 @@ create_solib_event_breakpoint (struct gdbarch *gdbarch, CORE_ADDR address)
 {
   struct breakpoint *b;
 
-  b = create_internal_breakpoint (gdbarch, address, bp_shlib_event);
+  b = create_internal_breakpoint (gdbarch, address, bp_shlib_event,
+				  &internal_breakpoint_ops);
   update_global_location_list_nothrow (1);
   return b;
 }
@@ -6880,7 +6899,7 @@ set_momentary_breakpoint (struct gdbarch *gdbarch, struct symtab_and_line sal,
      one.  */
   gdb_assert (!frame_id_inlined_p (frame_id));
 
-  b = set_raw_breakpoint (gdbarch, sal, type, &bkpt_breakpoint_ops);
+  b = set_raw_breakpoint (gdbarch, sal, type, &momentary_breakpoint_ops);
   b->enable_state = bp_enabled;
   b->disposition = disp_donttouch;
   b->frame_id = frame_id;
@@ -6896,20 +6915,18 @@ set_momentary_breakpoint (struct gdbarch *gdbarch, struct symtab_and_line sal,
   return b;
 }
 
-/* Make a deep copy of momentary breakpoint ORIG.  Returns NULL if
-   ORIG is NULL.  */
+/* Make a momentary breakpoint based on the master breakpoint ORIG.
+   The new breakpoint will have type TYPE, and use OPS as it
+   breakpoint_ops.  */
 
-struct breakpoint *
-clone_momentary_breakpoint (struct breakpoint *orig)
+static struct breakpoint *
+momentary_breakpoint_from_master (struct breakpoint *orig,
+				  enum bptype type,
+				  struct breakpoint_ops *ops)
 {
   struct breakpoint *copy;
 
-  /* If there's nothing to clone, then return nothing.  */
-  if (orig == NULL)
-    return NULL;
-
-  copy = set_raw_breakpoint_without_location (orig->gdbarch,
-					      orig->type, orig->ops);
+  copy = set_raw_breakpoint_without_location (orig->gdbarch, type, ops);
   copy->loc = allocate_bp_location (copy);
   set_breakpoint_location_function (copy->loc, 1);
 
@@ -6935,6 +6952,19 @@ clone_momentary_breakpoint (struct breakpoint *orig)
 
   update_global_location_list_nothrow (0);
   return copy;
+}
+
+/* Make a deep copy of momentary breakpoint ORIG.  Returns NULL if
+   ORIG is NULL.  */
+
+struct breakpoint *
+clone_momentary_breakpoint (struct breakpoint *orig)
+{
+  /* If there's nothing to clone, then return nothing.  */
+  if (orig == NULL)
+    return NULL;
+
+  return momentary_breakpoint_from_master (orig, orig->type, orig->ops);
 }
 
 struct breakpoint *
@@ -9121,7 +9151,8 @@ watch_command_1 (char *arg, int accessflag, int from_tty,
  	  scope_breakpoint
 	    = create_internal_breakpoint (frame_unwind_caller_arch (frame),
 					  frame_unwind_caller_pc (frame),
-					  bp_watchpoint_scope);
+					  bp_watchpoint_scope,
+					  &momentary_breakpoint_ops);
 
 	  scope_breakpoint->enable_state = bp_enabled;
 
@@ -10676,66 +10707,19 @@ bkpt_allocate_location (struct breakpoint *self)
 void
 bkpt_re_set (struct breakpoint *b)
 {
-  switch (b->type)
+  /* Do not attempt to re-set breakpoints disabled during startup.  */
+  if (b->enable_state == bp_startup_disabled)
+    return;
+
+  /* FIXME: is this still reachable?  */
+  if (b->addr_string == NULL)
     {
-    case bp_breakpoint:
-    case bp_hardware_breakpoint:
-    case bp_gnu_ifunc_resolver:
-      /* Do not attempt to re-set breakpoints disabled during
-	 startup.  */
-      if (b->enable_state == bp_startup_disabled)
-	return;
-
-      if (b->addr_string == NULL)
-	{
-	  /* Anything without a string can't be re-set.  */
-	  delete_breakpoint (b);
-	  return;
-	}
-
-      breakpoint_re_set_default (b);
-      break;
-
-    default:
-      printf_filtered (_("Deleting unknown breakpoint type %d\n"), b->type);
-      /* fall through */
-      /* Delete overlay event and longjmp master breakpoints; they
-	 will be reset later by breakpoint_re_set.  */
-    case bp_overlay_event:
-    case bp_longjmp_master:
-    case bp_std_terminate_master:
-    case bp_exception_master:
+      /* Anything without a string can't be re-set.  */
       delete_breakpoint (b);
-      break;
-
-      /* This breakpoint is special, it's set up when the inferior
-         starts and we really don't want to touch it.  */
-    case bp_shlib_event:
-
-      /* Like bp_shlib_event, this breakpoint type is special.  Once
-	 it is set up, we do not want to touch it.  */
-    case bp_thread_event:
-
-      /* Keep temporary breakpoints, which can be encountered when we
-         step over a dlopen call and SOLIB_ADD is resetting the
-         breakpoints.  Otherwise these should have been blown away via
-         the cleanup chain or by breakpoint_init_inferior when we
-         rerun the executable.  */
-    case bp_until:
-    case bp_finish:
-    case bp_watchpoint_scope:
-    case bp_call_dummy:
-    case bp_std_terminate:
-    case bp_step_resume:
-    case bp_hp_step_resume:
-    case bp_longjmp:
-    case bp_longjmp_resume:
-    case bp_exception:
-    case bp_exception_resume:
-    case bp_jit_event:
-    case bp_gnu_ifunc_resolver_return:
-      break;
+      return;
     }
+
+  breakpoint_re_set_default (b);
 }
 
 int
@@ -10779,15 +10763,7 @@ bkpt_breakpoint_hit (const struct bp_location *bl,
 void
 bkpt_check_status (bpstat bs)
 {
-  struct breakpoint *b = bs->breakpoint_at;
-
-  if (b->type == bp_thread_event
-      || b->type == bp_overlay_event
-      || b->type == bp_longjmp_master
-      || b->type == bp_std_terminate_master
-      || b->type == bp_exception_master)
-    /* We do not stop for these.  */
-    bs->stop = 0;
+  /* nothing, always stop */
 }
 
 int
@@ -10847,79 +10823,6 @@ bkpt_print_it (bpstat bs)
       result = PRINT_SRC_AND_LOC;
       break;
 
-    case bp_shlib_event:
-      /* Did we stop because the user set the stop_on_solib_events
-	 variable?  (If so, we report this as a generic, "Stopped due
-	 to shlib event" message.) */
-      printf_filtered (_("Stopped due to shared library event\n"));
-      result = PRINT_NOTHING;
-      break;
-
-    case bp_thread_event:
-      /* Not sure how we will get here.
-	 GDB should not stop for these breakpoints.  */
-      printf_filtered (_("Thread Event Breakpoint: gdb should not stop!\n"));
-      result = PRINT_NOTHING;
-      break;
-
-    case bp_overlay_event:
-      /* By analogy with the thread event, GDB should not stop for these.  */
-      printf_filtered (_("Overlay Event Breakpoint: gdb should not stop!\n"));
-      result = PRINT_NOTHING;
-      break;
-
-    case bp_longjmp_master:
-      /* These should never be enabled.  */
-      printf_filtered (_("Longjmp Master Breakpoint: gdb should not stop!\n"));
-      result = PRINT_NOTHING;
-      break;
-
-    case bp_std_terminate_master:
-      /* These should never be enabled.  */
-      printf_filtered (_("std::terminate Master Breakpoint: "
-			 "gdb should not stop!\n"));
-      result = PRINT_NOTHING;
-      break;
-
-    case bp_exception_master:
-      /* These should never be enabled.  */
-      printf_filtered (_("Exception Master Breakpoint: "
-			 "gdb should not stop!\n"));
-      result = PRINT_NOTHING;
-      break;
-
-    /* Fall through, we don't deal with these types of breakpoints
-       here.  */
-
-    case bp_finish:
-      if (ui_out_is_mi_like_p (uiout))
-	ui_out_field_string
-	  (uiout, "reason",
-	   async_reason_lookup (EXEC_ASYNC_FUNCTION_FINISHED));
-      result = PRINT_UNKNOWN;
-      break;
-
-    case bp_until:
-      if (ui_out_is_mi_like_p (uiout))
-	ui_out_field_string
-	  (uiout, "reason",
-	   async_reason_lookup (EXEC_ASYNC_LOCATION_REACHED));
-      result = PRINT_UNKNOWN;
-      break;
-
-    case bp_none:
-    case bp_longjmp:
-    case bp_longjmp_resume:
-    case bp_exception:
-    case bp_exception_resume:
-    case bp_step_resume:
-    case bp_hp_step_resume:
-    case bp_watchpoint_scope:
-    case bp_call_dummy:
-    case bp_std_terminate:
-    case bp_jit_event:
-    case bp_gnu_ifunc_resolver:
-    case bp_gnu_ifunc_resolver_return:
     default:
       result = PRINT_UNKNOWN;
       break;
@@ -10946,33 +10849,13 @@ bkpt_print_mention (struct breakpoint *b)
       printf_filtered (_(" %d"), b->number);
       if (b->type == bp_gnu_ifunc_resolver)
 	printf_filtered (_(" at gnu-indirect-function resolver"));
-      say_where (b);
       break;
     case bp_hardware_breakpoint:
       printf_filtered (_("Hardware assisted breakpoint %d"), b->number);
-      say_where (b);
-      break;
-    case bp_until:
-    case bp_finish:
-    case bp_longjmp:
-    case bp_longjmp_resume:
-    case bp_exception:
-    case bp_exception_resume:
-    case bp_step_resume:
-    case bp_hp_step_resume:
-    case bp_call_dummy:
-    case bp_std_terminate:
-    case bp_watchpoint_scope:
-    case bp_shlib_event:
-    case bp_thread_event:
-    case bp_overlay_event:
-    case bp_jit_event:
-    case bp_longjmp_master:
-    case bp_std_terminate_master:
-    case bp_exception_master:
-    case bp_gnu_ifunc_resolver_return:
       break;
     }
+
+  say_where (b);
 }
 
 void
@@ -11022,6 +10905,238 @@ struct breakpoint_ops bkpt_breakpoint_ops =
   null_print_one_detail,
   bkpt_print_mention,
   bkpt_print_recreate
+};
+
+/* Virtual table for internal breakpoints.  */
+
+static void
+internal_bkpt_re_set (struct breakpoint *b)
+{
+  switch (b->type)
+    {
+      /* Delete overlay event and longjmp master breakpoints; they
+	 will be reset later by breakpoint_re_set.  */
+    case bp_overlay_event:
+    case bp_longjmp_master:
+    case bp_std_terminate_master:
+    case bp_exception_master:
+      delete_breakpoint (b);
+      break;
+
+      /* This breakpoint is special, it's set up when the inferior
+         starts and we really don't want to touch it.  */
+    case bp_shlib_event:
+
+      /* Like bp_shlib_event, this breakpoint type is special.  Once
+	 it is set up, we do not want to touch it.  */
+    case bp_thread_event:
+      break;
+    }
+}
+
+static void
+internal_bkpt_check_status (bpstat bs)
+{
+  /* We do not stop for these.  */
+  bs->stop = 0;
+}
+
+static enum print_stop_action
+internal_bkpt_print_it (bpstat bs)
+{
+  struct cleanup *old_chain;
+  struct breakpoint *b;
+  const struct bp_location *bl;
+  struct ui_stream *stb;
+  int bp_temp = 0;
+  enum print_stop_action result;
+
+  gdb_assert (bs->bp_location_at != NULL);
+
+  bl = bs->bp_location_at;
+  b = bs->breakpoint_at;
+
+  stb = ui_out_stream_new (uiout);
+  old_chain = make_cleanup_ui_out_stream_delete (stb);
+
+  switch (b->type)
+    {
+    case bp_shlib_event:
+      /* Did we stop because the user set the stop_on_solib_events
+	 variable?  (If so, we report this as a generic, "Stopped due
+	 to shlib event" message.) */
+      printf_filtered (_("Stopped due to shared library event\n"));
+      result = PRINT_NOTHING;
+      break;
+
+    case bp_thread_event:
+      /* Not sure how we will get here.
+	 GDB should not stop for these breakpoints.  */
+      printf_filtered (_("Thread Event Breakpoint: gdb should not stop!\n"));
+      result = PRINT_NOTHING;
+      break;
+
+    case bp_overlay_event:
+      /* By analogy with the thread event, GDB should not stop for these.  */
+      printf_filtered (_("Overlay Event Breakpoint: gdb should not stop!\n"));
+      result = PRINT_NOTHING;
+      break;
+
+    case bp_longjmp_master:
+      /* These should never be enabled.  */
+      printf_filtered (_("Longjmp Master Breakpoint: gdb should not stop!\n"));
+      result = PRINT_NOTHING;
+      break;
+
+    case bp_std_terminate_master:
+      /* These should never be enabled.  */
+      printf_filtered (_("std::terminate Master Breakpoint: "
+			 "gdb should not stop!\n"));
+      result = PRINT_NOTHING;
+      break;
+
+    case bp_exception_master:
+      /* These should never be enabled.  */
+      printf_filtered (_("Exception Master Breakpoint: "
+			 "gdb should not stop!\n"));
+      result = PRINT_NOTHING;
+      break;
+
+    default:
+      result = PRINT_UNKNOWN;
+      break;
+    }
+
+  do_cleanups (old_chain);
+  return result;
+}
+
+static void
+internal_bkpt_print_mention (struct breakpoint *b)
+{
+  /* Nothing to mention.  These breakpoints are internal.  */
+}
+
+static void
+internal_bkpt_print_recreate (struct breakpoint *tp, struct ui_file *fp)
+{
+  gdb_assert_not_reached ("internal_bkpt_print_recreate called");
+}
+
+/* The breakpoint_ops structure to be used with internal
+   breakpoints.  */
+
+static struct breakpoint_ops internal_breakpoint_ops =
+{
+  bkpt_dtor,
+  bkpt_allocate_location,
+  internal_bkpt_re_set,
+  bkpt_insert_location,
+  bkpt_remove_location,
+  bkpt_breakpoint_hit,
+  internal_bkpt_check_status,
+  bkpt_resources_needed,
+  null_works_in_software_mode,
+  internal_bkpt_print_it,
+  NULL, /* print_one */
+  null_print_one_detail,
+  internal_bkpt_print_mention,
+  internal_bkpt_print_recreate
+};
+
+/* Virtual table for momentary breakpoints  */
+
+static void
+momentary_bkpt_re_set (struct breakpoint *b)
+{
+  /* Keep temporary breakpoints, which can be encountered when we step
+     over a dlopen call and SOLIB_ADD is resetting the breakpoints.
+     Otherwise these should have been blown away via the cleanup chain
+     or by breakpoint_init_inferior when we rerun the executable.  */
+}
+
+static void
+momentary_bkpt_check_status (bpstat bs)
+{
+  /* Nothing.  The point of these breakpoints is causing a stop.  */
+}
+
+static enum print_stop_action
+momentary_bkpt_print_it (bpstat bs)
+{
+  struct cleanup *old_chain;
+  struct breakpoint *b;
+  const struct bp_location *bl;
+  struct ui_stream *stb;
+  int bp_temp = 0;
+  enum print_stop_action result;
+
+  gdb_assert (bs->bp_location_at != NULL);
+
+  bl = bs->bp_location_at;
+  b = bs->breakpoint_at;
+
+  stb = ui_out_stream_new (uiout);
+  old_chain = make_cleanup_ui_out_stream_delete (stb);
+
+  switch (b->type)
+    {
+    case bp_finish:
+      if (ui_out_is_mi_like_p (uiout))
+	ui_out_field_string
+	  (uiout, "reason",
+	   async_reason_lookup (EXEC_ASYNC_FUNCTION_FINISHED));
+      result = PRINT_UNKNOWN;
+      break;
+
+    case bp_until:
+      if (ui_out_is_mi_like_p (uiout))
+	ui_out_field_string
+	  (uiout, "reason",
+	   async_reason_lookup (EXEC_ASYNC_LOCATION_REACHED));
+      result = PRINT_UNKNOWN;
+      break;
+
+    default:
+      result = PRINT_UNKNOWN;
+      break;
+    }
+
+  do_cleanups (old_chain);
+  return result;
+}
+
+static void
+momentary_bkpt_print_mention (struct breakpoint *b)
+{
+  /* Nothing to mention.  These breakpoints are internal.  */
+}
+
+static void
+momentary_bkpt_print_recreate (struct breakpoint *tp, struct ui_file *fp)
+{
+  gdb_assert_not_reached ("momentary_bkpt_print_recreate called");
+}
+
+/* The breakpoint_ops structure to be used with momentary
+   breakpoints.  */
+
+static struct breakpoint_ops momentary_breakpoint_ops =
+{
+  bkpt_dtor,
+  bkpt_allocate_location,
+  momentary_bkpt_re_set,
+  bkpt_insert_location,
+  bkpt_remove_location,
+  bkpt_breakpoint_hit,
+  momentary_bkpt_check_status,
+  bkpt_resources_needed,
+  null_works_in_software_mode,
+  momentary_bkpt_print_it,
+  NULL, /* print_one */
+  null_print_one_detail,
+  momentary_bkpt_print_mention,
+  momentary_bkpt_print_recreate
 };
 
 /* The breakpoint_ops structure to be used in tracepoints.  */

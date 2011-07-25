@@ -1,5 +1,43 @@
 2011-07-25  Pedro Alves  <pedro@codesourcery.com>
 
+	Split internal, momentary and user breakpoints breakpoint_ops
+	tables.
+
+	* breakpoint.c (internal_breakpoint_ops)
+	(momentary_breakpoint_ops): Forward declare.
+	(create_internal_breakpoint): Add new breakpoint_ops parameter.
+	Pass it down, rather than hardcoding bkpt_breakpoint_ops.
+	(create_overlay_event_breakpoint)
+	(create_std_terminate_master_breakpoint)
+	(create_exception_master_breakpoint): Create breakpoints with
+	internal_breakpoint_ops vtable.
+	(set_longjmp_breakpoint): Create momentary breakpoints with
+	momentary_breakpoint_ops vtable, using
+	momentary_breakpoint_from_master.
+	(create_thread_event_breakpoint, create_jit_event_breakpoint)
+	(create_solib_event_breakpoint): Create breakpoints with
+	internal_breakpoint_ops vtable.
+	(set_momentary_breakpoint): Create breakpoints with
+	momentary_breakpoint_ops vtable.
+	(momentary_breakpoint_from_master): New, factored out from
+	clone_momentary_breakpoint.
+	(clone_momentary_breakpoint): Adjust.
+	(watch_command_1): Create scope breakpoints with
+	momentary_breakpoint_ops vtable.
+	(bkpt_re_set): Remove handling of internal and momentary
+	breakpoints.
+	(bkpt_print_mention, bkpt_print_recreate): New.
+	(bkpt_breakpoint_ops): Adjust.
+	(internal_bkpt_re_set, internal_bkpt_check_status)
+	(internal_bkpt_print_it, internal_bkpt_print_mention)
+	(internal_bkpt_print_recreate, internal_breakpoint_ops): New.
+	(momentary_bkpt_re_set, momentary_bkpt_check_status)
+	(momentary_bkpt_print_it, momentary_bkpt_print_mention)
+	(momentary_bkpt_print_recreate): New.
+	(momentary_breakpoint_ops): New.
+
+2011-07-25  Pedro Alves  <pedro@codesourcery.com>
+
 	Implement most breakpoint_ops methods for all breakpoint types,
 	and move the default handlings to the proper callbacks.
 
