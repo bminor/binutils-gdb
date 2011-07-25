@@ -31,7 +31,7 @@ int u[6];
 static inline void
 add (struct S *a, struct S *b, int c)
 {
-  *a->x += *b->x;
+  *a->x += *b->x;		/* baz breakpoint */
   a->y += b->y;
   u[c + 0]++;
   a = (struct S *) 0;

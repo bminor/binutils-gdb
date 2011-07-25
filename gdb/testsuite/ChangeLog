@@ -1,3 +1,15 @@
+2011-07-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix implicit pointer offsets.
+	* gdb.dwarf2/implptr.c (add): New marker baz breakpoint.
+	* gdb.dwarf2/implptr.exp (set baz breakpoint for implptr)
+	(continue to breakpoint: continue to baz breakpoint for implptr)
+	(sanity check element 0, sanity check element 1)
+	(enter the inlined function, check element 0 for the offset)
+	(check element 1 for the offset)
+	(continue to breakpoint: ignore the second baz breakpoint): New tests.
+	(set foo breakpoint for implptr): Update the breakpoint number.
+
 2011-07-22  Ulrich Weigand  <ulrich.weigand@linaro.org>
 
 	* gdb.python/py-mi.exp: Use different file names for different
