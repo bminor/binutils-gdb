@@ -734,14 +734,20 @@ check_no_tracepoint_commands (struct command_line *commands)
 
 /* Encapsulate tests for different types of tracepoints.  */
 
+static int
+is_tracepoint_type (enum bptype type)
+{
+  return (type == bp_tracepoint
+	  || type == bp_fast_tracepoint
+	  || type == bp_static_tracepoint);
+}
+
 int
 is_tracepoint (const struct breakpoint *b)
 {
-  return (b->type == bp_tracepoint
-	  || b->type == bp_fast_tracepoint
-	  || b->type == bp_static_tracepoint);
+  return is_tracepoint_type (b->type);
 }
-  
+
 /* A helper function that validates that COMMANDS are valid for a
    breakpoint.  This function will throw an exception if a problem is
    found.  */
@@ -4849,12 +4855,17 @@ print_one_breakpoint_location (struct breakpoint *b,
       do_cleanups (script_chain);
     }
 
-  if (!part_of_multiple && b->pass_count)
+  if (is_tracepoint (b))
     {
-      annotate_field (10);
-      ui_out_text (uiout, "\tpass count ");
-      ui_out_field_int (uiout, "pass", b->pass_count);
-      ui_out_text (uiout, " \n");
+      struct tracepoint *t = (struct tracepoint *) b;
+
+      if (!part_of_multiple && t->pass_count)
+	{
+	  annotate_field (10);
+	  ui_out_text (uiout, "\tpass count ");
+	  ui_out_field_int (uiout, "pass", t->pass_count);
+	  ui_out_text (uiout, " \n");
+	}
     }
 
   if (ui_out_is_mi_like_p (uiout) && !part_of_multiple)
@@ -6170,6 +6181,7 @@ static void
 print_recreate_catch_fork (struct breakpoint *b, struct ui_file *fp)
 {
   fprintf_unfiltered (fp, "catch fork");
+  print_recreate_thread (b, fp);
 }
 
 /* The breakpoint_ops structure to be used in fork catchpoints.  */
@@ -6263,6 +6275,7 @@ static void
 print_recreate_catch_vfork (struct breakpoint *b, struct ui_file *fp)
 {
   fprintf_unfiltered (fp, "catch vfork");
+  print_recreate_thread (b, fp);
 }
 
 /* The breakpoint_ops structure to be used in vfork catchpoints.  */
@@ -6579,6 +6592,7 @@ print_recreate_catch_syscall (struct breakpoint *b, struct ui_file *fp)
             fprintf_unfiltered (fp, " %d", s.number);
         }
     }
+  print_recreate_thread (b, fp);
 }
 
 /* The breakpoint_ops structure to be used in syscall catchpoints.  */
@@ -6741,6 +6755,7 @@ static void
 print_recreate_catch_exec (struct breakpoint *b, struct ui_file *fp)
 {
   fprintf_unfiltered (fp, "catch exec");
+  print_recreate_thread (b, fp);
 }
 
 static struct breakpoint_ops catch_exec_breakpoint_ops;
@@ -7073,15 +7088,14 @@ bp_loc_is_permanent (struct bp_location *loc)
    as condition expression.  */
 
 static void
-create_breakpoint_sal (struct gdbarch *gdbarch,
-		       struct symtabs_and_lines sals, char *addr_string,
-		       char *cond_string,
-		       enum bptype type, enum bpdisp disposition,
-		       int thread, int task, int ignore_count,
-		       struct breakpoint_ops *ops, int from_tty,
-		       int enabled, int internal, int display_canonical)
+init_breakpoint_sal (struct breakpoint *b, struct gdbarch *gdbarch,
+		     struct symtabs_and_lines sals, char *addr_string,
+		     char *cond_string,
+		     enum bptype type, enum bpdisp disposition,
+		     int thread, int task, int ignore_count,
+		     struct breakpoint_ops *ops, int from_tty,
+		     int enabled, int internal, int display_canonical)
 {
-  struct breakpoint *b = NULL;
   int i;
 
   if (type == bp_hardware_breakpoint)
@@ -7115,8 +7129,7 @@ create_breakpoint_sal (struct gdbarch *gdbarch,
 
       if (i == 0)
 	{
-	  b = set_raw_breakpoint (gdbarch, sal, type, ops);
-	  set_breakpoint_number (internal, b);
+	  init_raw_breakpoint (b, gdbarch, sal, type, ops);
 	  b->thread = thread;
 	  b->task = task;
   
@@ -7128,6 +7141,7 @@ create_breakpoint_sal (struct gdbarch *gdbarch,
 
 	  if (type == bp_static_tracepoint)
 	    {
+	      struct tracepoint *t = (struct tracepoint *) b;
 	      struct static_tracepoint_marker marker;
 
 	      if (is_marker_spec (addr_string))
@@ -7144,20 +7158,20 @@ create_breakpoint_sal (struct gdbarch *gdbarch,
 		  endp = skip_to_space (p);
 
 		  marker_str = savestring (p, endp - p);
-		  b->static_trace_marker_id = marker_str;
+		  t->static_trace_marker_id = marker_str;
 
 		  printf_filtered (_("Probed static tracepoint "
 				     "marker \"%s\"\n"),
-				   b->static_trace_marker_id);
+				   t->static_trace_marker_id);
 		}
 	      else if (target_static_tracepoint_marker_at (sal.pc, &marker))
 		{
-		  b->static_trace_marker_id = xstrdup (marker.str_id);
+		  t->static_trace_marker_id = xstrdup (marker.str_id);
 		  release_static_tracepoint_marker (&marker);
 
 		  printf_filtered (_("Probed static tracepoint "
 				     "marker \"%s\"\n"),
-				   b->static_trace_marker_id);
+				   t->static_trace_marker_id);
 		}
 	      else
 		warning (_("Couldn't determine the static "
@@ -7196,12 +7210,42 @@ create_breakpoint_sal (struct gdbarch *gdbarch,
        me.  */
     b->addr_string
       = xstrprintf ("*%s", paddress (b->loc->gdbarch, b->loc->address));
+}
 
-  /* Do not mention breakpoints with a negative number, but do
-     notify observers.  */
-  if (!internal)
-    mention (b);
-  observer_notify_breakpoint_created (b);
+static void
+create_breakpoint_sal (struct gdbarch *gdbarch,
+		       struct symtabs_and_lines sals, char *addr_string,
+		       char *cond_string,
+		       enum bptype type, enum bpdisp disposition,
+		       int thread, int task, int ignore_count,
+		       struct breakpoint_ops *ops, int from_tty,
+		       int enabled, int internal, int display_canonical)
+{
+  struct breakpoint *b;
+  struct cleanup *old_chain;
+
+  if (is_tracepoint_type (type))
+    {
+      struct tracepoint *t;
+
+      t = XCNEW (struct tracepoint);
+      b = &t->base;
+    }
+  else
+    b = XNEW (struct breakpoint);
+
+  old_chain = make_cleanup (xfree, b);
+
+  init_breakpoint_sal (b, gdbarch,
+		       sals, addr_string,
+		       cond_string,
+		       type, disposition,
+		       thread, task, ignore_count,
+		       ops, from_tty,
+		       enabled, internal, display_canonical);
+  discard_cleanups (old_chain);
+
+  install_breakpoint (internal, b);
 }
 
 /* Remove element at INDEX_TO_REMOVE from SAL, shifting other
@@ -7802,7 +7846,7 @@ create_breakpoint (struct gdbarch *gdbarch,
 	  for (i = 0; i < sals.nelts; ++i)
 	    {
 	      struct symtabs_and_lines expanded;
-	      struct breakpoint *tp;
+	      struct tracepoint *tp;
 	      struct cleanup *old_chain;
 
 	      expanded.nelts = 1;
@@ -7810,22 +7854,14 @@ create_breakpoint (struct gdbarch *gdbarch,
 	      expanded.sals[0] = sals.sals[i];
 	      old_chain = make_cleanup (xfree, expanded.sals);
 
-	      create_breakpoint_sal (gdbarch, expanded, canonical.canonical[i],
-				     cond_string, type_wanted,
-				     tempflag ? disp_del : disp_donttouch,
-				     thread, task, ignore_count, ops,
-				     from_tty, enabled, internal,
-				     canonical.special_display);
-
-	      do_cleanups (old_chain);
-
-	      /* Get the tracepoint we just created.  */
-	      if (internal)
-		tp = get_breakpoint (internal_breakpoint_number);
-	      else
-		tp = get_breakpoint (breakpoint_count);
-	      gdb_assert (tp != NULL);
-
+	      tp = XCNEW (struct tracepoint);
+	      init_breakpoint_sal (&tp->base, gdbarch, expanded,
+				   canonical.canonical[i],
+				   cond_string, type_wanted,
+				   tempflag ? disp_del : disp_donttouch,
+				   thread, task, ignore_count, ops,
+				   from_tty, enabled, internal,
+				   canonical.special_display);
 	      /* Given that its possible to have multiple markers with
 		 the same string id, if the user is creating a static
 		 tracepoint by marker id ("strace -m MARKER_ID"), then
@@ -7833,6 +7869,10 @@ create_breakpoint (struct gdbarch *gdbarch,
 		 try to match up which of the newly found markers
 		 corresponds to this one  */
 	      tp->static_trace_marker_id_idx = i;
+
+	      install_breakpoint (internal, &tp->base);
+
+	      do_cleanups (old_chain);
 	    }
 	}
       else
@@ -8202,6 +8242,7 @@ print_recreate_ranged_breakpoint (struct breakpoint *b, struct ui_file *fp)
 {
   fprintf_unfiltered (fp, "break-range %s, %s", b->addr_string,
 		      b->addr_string_range_end);
+  print_recreate_thread (b, fp);
 }
 
 /* The breakpoint_ops structure to be used in ranged breakpoints.  */
@@ -8755,6 +8796,7 @@ print_recreate_watchpoint (struct breakpoint *b, struct ui_file *fp)
     }
 
   fprintf_unfiltered (fp, " %s", w->exp_string);
+  print_recreate_thread (b, fp);
 }
 
 /* The breakpoint_ops structure to be used in hardware watchpoints.  */
@@ -8932,6 +8974,7 @@ print_recreate_masked_watchpoint (struct breakpoint *b, struct ui_file *fp)
 
   sprintf_vma (tmp, w->hw_wp_mask);
   fprintf_unfiltered (fp, " %s mask 0x%s", w->exp_string, tmp);
+  print_recreate_thread (b, fp);
 }
 
 /* The breakpoint_ops structure to be used in masked hardware watchpoints.  */
@@ -9740,6 +9783,7 @@ print_recreate_exception_catchpoint (struct breakpoint *b,
   bp_throw = strstr (b->addr_string, "throw") != NULL;
   fprintf_unfiltered (fp, bp_temp ? "tcatch " : "catch ");
   fprintf_unfiltered (fp, bp_throw ? "throw" : "catch");
+  print_recreate_thread (b, fp);
 }
 
 static struct breakpoint_ops gnu_v3_exception_catchpoint_ops;
@@ -11034,13 +11078,14 @@ static void
 tracepoint_print_one_detail (const struct breakpoint *self,
 			     struct ui_out *uiout)
 {
-  if (self->static_trace_marker_id)
+  struct tracepoint *tp = (struct tracepoint *) self;
+  if (tp->static_trace_marker_id)
     {
       gdb_assert (self->type == bp_static_tracepoint);
 
       ui_out_text (uiout, "\tmarker id is ");
       ui_out_field_string (uiout, "static-tracepoint-marker-string-id",
-			   self->static_trace_marker_id);
+			   tp->static_trace_marker_id);
       ui_out_text (uiout, "\n");
     }
 }
@@ -11074,19 +11119,25 @@ tracepoint_print_mention (struct breakpoint *b)
 }
 
 static void
-tracepoint_print_recreate (struct breakpoint *tp, struct ui_file *fp)
+tracepoint_print_recreate (struct breakpoint *self, struct ui_file *fp)
 {
-  if (tp->type == bp_fast_tracepoint)
+  struct tracepoint *tp = (struct tracepoint *) self;
+
+  if (self->type == bp_fast_tracepoint)
     fprintf_unfiltered (fp, "ftrace");
-  if (tp->type == bp_static_tracepoint)
+  if (self->type == bp_static_tracepoint)
     fprintf_unfiltered (fp, "strace");
-  else if (tp->type == bp_tracepoint)
+  else if (self->type == bp_tracepoint)
     fprintf_unfiltered (fp, "trace");
   else
     internal_error (__FILE__, __LINE__,
-		    _("unhandled tracepoint type %d"), (int) tp->type);
+		    _("unhandled tracepoint type %d"), (int) self->type);
 
-  fprintf_unfiltered (fp, " %s", tp->addr_string);
+  fprintf_unfiltered (fp, " %s", self->addr_string);
+  print_recreate_thread (self, fp);
+
+  if (tp->pass_count)
+    fprintf_unfiltered (fp, "  passcount %d\n", tp->pass_count);
 }
 
 struct breakpoint_ops tracepoint_breakpoint_ops;
@@ -11368,6 +11419,7 @@ ambiguous_names_p (struct bp_location *loc)
 static struct symtab_and_line
 update_static_tracepoint (struct breakpoint *b, struct symtab_and_line sal)
 {
+  struct tracepoint *tp = (struct tracepoint *) b;
   struct static_tracepoint_marker marker;
   CORE_ADDR pc;
   int i;
@@ -11378,13 +11430,13 @@ update_static_tracepoint (struct breakpoint *b, struct symtab_and_line sal)
 
   if (target_static_tracepoint_marker_at (pc, &marker))
     {
-      if (strcmp (b->static_trace_marker_id, marker.str_id) != 0)
+      if (strcmp (tp->static_trace_marker_id, marker.str_id) != 0)
 	warning (_("static tracepoint %d changed probed marker from %s to %s"),
 		 b->number,
-		 b->static_trace_marker_id, marker.str_id);
+		 tp->static_trace_marker_id, marker.str_id);
 
-      xfree (b->static_trace_marker_id);
-      b->static_trace_marker_id = xstrdup (marker.str_id);
+      xfree (tp->static_trace_marker_id);
+      tp->static_trace_marker_id = xstrdup (marker.str_id);
       release_static_tracepoint_marker (&marker);
 
       return sal;
@@ -11395,12 +11447,12 @@ update_static_tracepoint (struct breakpoint *b, struct symtab_and_line sal)
   if (!sal.explicit_pc
       && sal.line != 0
       && sal.symtab != NULL
-      && b->static_trace_marker_id != NULL)
+      && tp->static_trace_marker_id != NULL)
     {
       VEC(static_tracepoint_marker_p) *markers;
 
       markers
-	= target_static_tracepoint_markers_by_strid (b->static_trace_marker_id);
+	= target_static_tracepoint_markers_by_strid (tp->static_trace_marker_id);
 
       if (!VEC_empty(static_tracepoint_marker_p, markers))
 	{
@@ -11410,12 +11462,12 @@ update_static_tracepoint (struct breakpoint *b, struct symtab_and_line sal)
 
 	  marker = VEC_index (static_tracepoint_marker_p, markers, 0);
 
-	  xfree (b->static_trace_marker_id);
-	  b->static_trace_marker_id = xstrdup (marker->str_id);
+	  xfree (tp->static_trace_marker_id);
+	  tp->static_trace_marker_id = xstrdup (marker->str_id);
 
 	  warning (_("marker for static tracepoint %d (%s) not "
 		     "found at previous line number"),
-		   b->number, b->static_trace_marker_id);
+		   b->number, tp->static_trace_marker_id);
 
 	  init_sal (&sal);
 
@@ -11630,14 +11682,16 @@ addr_string_to_sals (struct breakpoint *b, char *addr_string, int *found)
     {
       if (marker_spec)
 	{
+	  struct tracepoint *tp = (struct tracepoint *) b;
+
 	  sals = decode_static_tracepoint_spec (&s);
-	  if (sals.nelts > b->static_trace_marker_id_idx)
+	  if (sals.nelts > tp->static_trace_marker_id_idx)
 	    {
-	      sals.sals[0] = sals.sals[b->static_trace_marker_id_idx];
+	      sals.sals[0] = sals.sals[tp->static_trace_marker_id_idx];
 	      sals.nelts = 1;
 	    }
 	  else
-	    error (_("marker %s not found"), b->static_trace_marker_id);
+	    error (_("marker %s not found"), tp->static_trace_marker_id);
 	}
       else
 	sals = decode_line_1 (&s, 1, (struct symtab *) NULL, 0, NULL);
@@ -12587,11 +12641,11 @@ read_uploaded_action (void)
    the target does not necessarily have all the information used when
    the tracepoint was originally defined.  */
   
-struct breakpoint *
+struct tracepoint *
 create_tracepoint_from_upload (struct uploaded_tp *utp)
 {
   char *addr_str, small_buf[100];
-  struct breakpoint *tp;
+  struct tracepoint *tp;
 
   if (utp->at_string)
     addr_str = utp->at_string;
@@ -12635,7 +12689,7 @@ create_tracepoint_from_upload (struct uploaded_tp *utp)
 
   if (utp->pass > 0)
     {
-      sprintf (small_buf, "%d %d", utp->pass, tp->number);
+      sprintf (small_buf, "%d %d", utp->pass, tp->base.number);
 
       trace_pass_command (small_buf, 0);
     }
@@ -12653,7 +12707,7 @@ create_tracepoint_from_upload (struct uploaded_tp *utp)
 
       cmd_list = read_command_lines_1 (read_uploaded_action, 1, NULL, NULL);
 
-      breakpoint_set_commands (tp, cmd_list);
+      breakpoint_set_commands (&tp->base, cmd_list);
     }
   else if (!VEC_empty (char_ptr, utp->actions)
 	   || !VEC_empty (char_ptr, utp->step_actions))
@@ -12662,7 +12716,7 @@ create_tracepoint_from_upload (struct uploaded_tp *utp)
 	     utp->number);
 
   return tp;
-  }
+}
   
 /* Print information on tracepoint number TPNUM_EXP, or all if
    omitted.  */
@@ -12740,13 +12794,13 @@ delete_trace_command (char *arg, int from_tty)
 /* Helper function for trace_pass_command.  */
 
 static void
-trace_pass_set_count (struct breakpoint *bp, int count, int from_tty)
+trace_pass_set_count (struct tracepoint *tp, int count, int from_tty)
 {
-  bp->pass_count = count;
-  observer_notify_tracepoint_modified (bp->number);
+  tp->pass_count = count;
+  observer_notify_tracepoint_modified (tp->base.number);
   if (from_tty)
     printf_filtered (_("Setting tracepoint %d's passcount to %d\n"),
-		     bp->number, count);
+		     tp->base.number, count);
 }
 
 /* Set passcount for tracepoint.
@@ -12758,7 +12812,7 @@ trace_pass_set_count (struct breakpoint *bp, int count, int from_tty)
 static void
 trace_pass_command (char *args, int from_tty)
 {
-  struct breakpoint *t1;
+  struct tracepoint *t1;
   unsigned int count;
 
   if (args == 0 || *args == 0)
@@ -12772,12 +12826,15 @@ trace_pass_command (char *args, int from_tty)
 
   if (*args && strncasecmp (args, "all", 3) == 0)
     {
+      struct breakpoint *b;
+
       args += 3;			/* Skip special argument "all".  */
       if (*args)
 	error (_("Junk at end of arguments."));
 
-      ALL_TRACEPOINTS (t1)
+      ALL_TRACEPOINTS (b)
       {
+	t1 = (struct tracepoint *) b;
 	trace_pass_set_count (t1, count, from_tty);
       }
     }
@@ -12801,14 +12858,14 @@ trace_pass_command (char *args, int from_tty)
     }
 }
 
-struct breakpoint *
+struct tracepoint *
 get_tracepoint (int num)
 {
   struct breakpoint *t;
 
   ALL_TRACEPOINTS (t)
     if (t->number == num)
-      return t;
+      return (struct tracepoint *) t;
 
   return NULL;
 }
@@ -12817,14 +12874,18 @@ get_tracepoint (int num)
    different from the tracepoint number after disconnecting and
    reconnecting).  */
 
-struct breakpoint *
+struct tracepoint *
 get_tracepoint_by_number_on_target (int num)
 {
-  struct breakpoint *t;
+  struct breakpoint *b;
 
-  ALL_TRACEPOINTS (t)
-    if (t->number_on_target == num)
-      return t;
+  ALL_TRACEPOINTS (b)
+    {
+      struct tracepoint *t = (struct tracepoint *) b;
+
+      if (t->number_on_target == num)
+	return t;
+    }
 
   return NULL;
 }
@@ -12833,7 +12894,7 @@ get_tracepoint_by_number_on_target (int num)
    If STATE is not NULL, use, get_number_or_range_state and ignore ARG.
    If OPTIONAL_P is true, then if the argument is missing, the most
    recent tracepoint (tracepoint_count) is returned.  */
-struct breakpoint *
+struct tracepoint *
 get_tracepoint_by_number (char **arg,
 			  struct get_number_or_range_state *state,
 			  int optional_p)
@@ -12872,11 +12933,23 @@ get_tracepoint_by_number (char **arg,
   ALL_TRACEPOINTS (t)
     if (t->number == tpnum)
     {
-      return t;
+      return (struct tracepoint *) t;
     }
 
   printf_unfiltered ("No tracepoint number %d.\n", tpnum);
   return NULL;
+}
+
+void
+print_recreate_thread (struct breakpoint *b, struct ui_file *fp)
+{
+  if (b->thread != -1)
+    fprintf_unfiltered (fp, " thread %d", b->thread);
+
+  if (b->task != 0)
+    fprintf_unfiltered (fp, " task %d", b->task);
+
+  fprintf_unfiltered (fp, "\n");
 }
 
 /* Save information on user settable breakpoints (watchpoints, etc) to
@@ -12949,14 +13022,6 @@ save_breakpoints (char *filename, int from_tty,
 
     tp->ops->print_recreate (tp, fp);
 
-    if (tp->thread != -1)
-      fprintf_unfiltered (fp, " thread %d", tp->thread);
-
-    if (tp->task != 0)
-      fprintf_unfiltered (fp, " task %d", tp->task);
-
-    fprintf_unfiltered (fp, "\n");
-
     /* Note, we can't rely on tp->number for anything, as we can't
        assume the recreated breakpoint numbers will match.  Use $bpnum
        instead.  */
@@ -12966,9 +13031,6 @@ save_breakpoints (char *filename, int from_tty,
 
     if (tp->ignore_count)
       fprintf_unfiltered (fp, "  ignore $bpnum %d\n", tp->ignore_count);
-
-    if (tp->pass_count)
-      fprintf_unfiltered (fp, "  passcount %d\n", tp->pass_count);
 
     if (tp->commands)
       {

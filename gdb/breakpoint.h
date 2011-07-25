@@ -482,6 +482,15 @@ struct breakpoint_ops
   void (*print_recreate) (struct breakpoint *, struct ui_file *fp);
 };
 
+/* Helper for breakpoint_ops->print_recreate implementations.  Prints
+   the "thread" or "task" condition of B, and then a newline.
+
+   Necessary because most breakpoint implementations accept
+   thread/task conditions at the end of the spec line, like "break foo
+   thread 1", which needs outputting before any breakpoint-type
+   specific extra command necessary for B's recreation.  */
+extern void print_recreate_thread (struct breakpoint *b, struct ui_file *fp);
+
 enum watchpoint_triggered
 {
   /* This watchpoint definitely did not trigger.  */
@@ -610,29 +619,6 @@ struct breakpoint
        the condition in.  */
     int condition_not_parsed;
 
-    /* Number of times this tracepoint should single-step 
-       and collect additional data.  */
-    long step_count;
-
-    /* Number of times this tracepoint should be hit before 
-       disabling/ending.  */
-    int pass_count;
-
-    /* The number of the tracepoint on the target.  */
-    int number_on_target;
-
-    /* The static tracepoint marker id, if known.  */
-    char *static_trace_marker_id;
-
-    /* LTTng/UST allow more than one marker with the same ID string,
-       although it unadvised because it confuses tools.  When setting
-       static tracepoints by marker ID, this will record the index in
-       the array of markers we found for the given marker ID for which
-       this static tracepoint corresponds.  When resetting
-       breakpoints, we will use this index to try to find the same
-       marker again.  */
-    int static_trace_marker_id_idx;
-
     /* With a Python scripting enabled GDB, store a reference to the
        Python object that has been associated with this breakpoint.
        This is always NULL for a GDB that is not script enabled.  It
@@ -699,6 +685,38 @@ struct watchpoint
 /* Returns true if BPT is really a watchpoint.  */
 
 extern int is_watchpoint (const struct breakpoint *bpt);
+
+/* An instance of this type is used to represent all kinds of
+   tracepoints.  It includes a "struct breakpoint" as a kind of base
+   class; users downcast to "struct breakpoint *" when needed.  */
+
+struct tracepoint
+{
+  /* The base class.  */
+  struct breakpoint base;
+
+  /* Number of times this tracepoint should single-step and collect
+     additional data.  */
+  long step_count;
+
+  /* Number of times this tracepoint should be hit before
+     disabling/ending.  */
+  int pass_count;
+
+  /* The number of the tracepoint on the target.  */
+  int number_on_target;
+
+  /* The static tracepoint marker id, if known.  */
+  char *static_trace_marker_id;
+
+  /* LTTng/UST allow more than one marker with the same ID string,
+     although it unadvised because it confuses tools.  When setting
+     static tracepoints by marker ID, this will record the index in
+     the array of markers we found for the given marker ID for which
+     this static tracepoint corresponds.  When resetting breakpoints,
+     we will use this index to try to find the same marker again.  */
+  int static_trace_marker_id_idx;
+};
 
 typedef struct breakpoint *breakpoint_p;
 DEF_VEC_P(breakpoint_p);
@@ -1301,12 +1319,12 @@ extern int catch_syscall_enabled (void);
 extern int catching_syscall_number (int syscall_number);
 
 /* Return a tracepoint with the given number if found.  */
-extern struct breakpoint *get_tracepoint (int num);
+extern struct tracepoint *get_tracepoint (int num);
 
-extern struct breakpoint *get_tracepoint_by_number_on_target (int num);
+extern struct tracepoint *get_tracepoint_by_number_on_target (int num);
 
 /* Find a tracepoint by parsing a number in the supplied string.  */
-extern struct breakpoint *
+extern struct tracepoint *
      get_tracepoint_by_number (char **arg, 
 			       struct get_number_or_range_state *state,
 			       int optional_p);

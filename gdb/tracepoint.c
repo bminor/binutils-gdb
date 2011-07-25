@@ -577,7 +577,7 @@ teval_pseudocommand (char *args, int from_tty)
 static void
 trace_actions_command (char *args, int from_tty)
 {
-  struct breakpoint *t;
+  struct tracepoint *t;
   struct command_line *l;
 
   t = get_tracepoint_by_number (&args, NULL, 1);
@@ -585,13 +585,13 @@ trace_actions_command (char *args, int from_tty)
     {
       char *tmpbuf =
 	xstrprintf ("Enter actions for tracepoint %d, one per line.",
-		    t->number);
+		    t->base.number);
       struct cleanup *cleanups = make_cleanup (xfree, tmpbuf);
 
       l = read_command_lines (tmpbuf, from_tty, 1,
 			      check_tracepoint_command, t);
       do_cleanups (cleanups);
-      breakpoint_set_commands (t, l);
+      breakpoint_set_commands (&t->base, l);
     }
   /* else just return */
 }
@@ -625,7 +625,7 @@ report_agent_reqs_errors (struct agent_expr *aexpr)
 
 /* worker function */
 void
-validate_actionline (char **line, struct breakpoint *t)
+validate_actionline (char **line, struct breakpoint *b)
 {
   struct cmd_list_element *c;
   struct expression *exp = NULL;
@@ -633,6 +633,7 @@ validate_actionline (char **line, struct breakpoint *t)
   char *p, *tmp_p;
   struct bp_location *loc;
   struct agent_expr *aexpr;
+  struct tracepoint *t = (struct tracepoint *) b;
 
   /* If EOF is typed, *line is NULL.  */
   if (*line == NULL)
@@ -673,7 +674,7 @@ validate_actionline (char **line, struct breakpoint *t)
 	      /* else fall thru, treat p as an expression and parse it!  */
 	    }
 	  tmp_p = p;
-	  for (loc = t->loc; loc; loc = loc->next)
+	  for (loc = t->base.loc; loc; loc = loc->next)
 	    {
 	      p = tmp_p;
 	      exp = parse_exp_1 (&p, block_for_pc (loc->address), 1);
@@ -725,7 +726,7 @@ validate_actionline (char **line, struct breakpoint *t)
 	    p++;
 
 	  tmp_p = p;
-	  for (loc = t->loc; loc; loc = loc->next)
+	  for (loc = t->base.loc; loc; loc = loc->next)
 	    {
 	      p = tmp_p;
 	      /* Only expressions are allowed for this action.  */
@@ -1559,7 +1560,7 @@ start_tracing (void)
 {
   VEC(breakpoint_p) *tp_vec = NULL;
   int ix;
-  struct breakpoint *t;
+  struct breakpoint *b;
   struct trace_state_variable *tsv;
   int any_enabled = 0, num_to_download = 0;
   
@@ -1572,18 +1573,20 @@ start_tracing (void)
       error (_("No tracepoints defined, not starting trace"));
     }
 
-  for (ix = 0; VEC_iterate (breakpoint_p, tp_vec, ix, t); ix++)
+  for (ix = 0; VEC_iterate (breakpoint_p, tp_vec, ix, b); ix++)
     {
-      if (t->enable_state == bp_enabled)
+      struct tracepoint *t = (struct tracepoint *) b;
+
+      if (b->enable_state == bp_enabled)
 	any_enabled = 1;
 
-      if ((t->type == bp_fast_tracepoint
+      if ((b->type == bp_fast_tracepoint
 	   ? may_insert_fast_tracepoints
 	   : may_insert_tracepoints))
 	++num_to_download;
       else
 	warning (_("May not insert %stracepoints, skipping tracepoint %d"),
-		 (t->type == bp_fast_tracepoint ? "fast " : ""), t->number);
+		 (b->type == bp_fast_tracepoint ? "fast " : ""), b->number);
     }
 
   if (!any_enabled)
@@ -1607,16 +1610,18 @@ start_tracing (void)
 
   target_trace_init ();
 
-  for (ix = 0; VEC_iterate (breakpoint_p, tp_vec, ix, t); ix++)
+  for (ix = 0; VEC_iterate (breakpoint_p, tp_vec, ix, b); ix++)
     {
-      if ((t->type == bp_fast_tracepoint
+      struct tracepoint *t = (struct tracepoint *) b;
+
+      if ((b->type == bp_fast_tracepoint
 	   ? !may_insert_fast_tracepoints
 	   : !may_insert_tracepoints))
 	continue;
 
       t->number_on_target = 0;
-      target_download_tracepoint (t);
-      t->number_on_target = t->number;
+      target_download_tracepoint (b);
+      t->number_on_target = b->number;
     }
   VEC_free (breakpoint_p, tp_vec);
 
@@ -1944,7 +1949,7 @@ tfind_1 (enum trace_find_type type, int num,
 {
   int target_frameno = -1, target_tracept = -1;
   struct frame_id old_frame_id = null_frame_id;
-  struct breakpoint *tp;
+  struct tracepoint *tp;
 
   /* Only try to get the current stack frame if we have a chance of
      succeeding.  In particular, if we're trying to get a first trace
@@ -2009,7 +2014,7 @@ tfind_1 (enum trace_find_type type, int num,
   target_dcache_invalidate ();
   set_traceframe_num (target_frameno);
   clear_traceframe_info ();
-  set_tracepoint_num (tp ? tp->number : target_tracept);
+  set_tracepoint_num (tp ? tp->base.number : target_tracept);
   if (target_frameno == -1)
     set_traceframe_context (NULL);
   else
@@ -2160,7 +2165,7 @@ static void
 trace_find_tracepoint_command (char *args, int from_tty)
 {
   int tdp;
-  struct breakpoint *tp;
+  struct tracepoint *tp;
 
   if (current_trace_status ()->running && !current_trace_status ()->from_file)
     error (_("May not look at trace frames while trace is running."));
@@ -2578,7 +2583,7 @@ static void
 trace_dump_command (char *args, int from_tty)
 {
   struct regcache *regcache;
-  struct breakpoint *t;
+  struct tracepoint *t;
   int stepping_frame = 0;
   struct bp_location *loc;
   char *line, *default_collect_line = NULL;
@@ -2611,11 +2616,11 @@ trace_dump_command (char *args, int from_tty)
      frame.  (FIXME this is not reliable, should record each frame's
      type.)  */
   stepping_frame = 1;
-  for (loc = t->loc; loc; loc = loc->next)
+  for (loc = t->base.loc; loc; loc = loc->next)
     if (loc->address == regcache_read_pc (regcache))
       stepping_frame = 0;
 
-  actions = breakpoint_commands (t);
+  actions = breakpoint_commands (&t->base);
 
   /* If there is a default-collect list, make up a collect command,
      prepend to the tracepoint's commands, and pass the whole mess to
@@ -2626,7 +2631,7 @@ trace_dump_command (char *args, int from_tty)
       default_collect_line = xstrprintf ("collect %s", default_collect);
       old_chain = make_cleanup (xfree, default_collect_line);
       line = default_collect_line;
-      validate_actionline (&line, t);
+      validate_actionline (&line, &t->base);
       default_collect_action = xmalloc (sizeof (struct command_line));
       make_cleanup (xfree, default_collect_action);
       default_collect_action->next = actions;
@@ -3088,24 +3093,26 @@ free_uploaded_tsvs (struct uploaded_tsv **utsvp)
    toggle that freely, and may have done so in anticipation of the
    next trace run.  */
 
-struct breakpoint *
+struct tracepoint *
 find_matching_tracepoint (struct uploaded_tp *utp)
 {
   VEC(breakpoint_p) *tp_vec = all_tracepoints ();
   int ix;
-  struct breakpoint *t;
+  struct breakpoint *b;
   struct bp_location *loc;
 
-  for (ix = 0; VEC_iterate (breakpoint_p, tp_vec, ix, t); ix++)
+  for (ix = 0; VEC_iterate (breakpoint_p, tp_vec, ix, b); ix++)
     {
-      if (t->type == utp->type
+      struct tracepoint *t = (struct tracepoint *) b;
+
+      if (b->type == utp->type
 	  && t->step_count == utp->step
 	  && t->pass_count == utp->pass
 	  /* FIXME also test conditionals and actions.  */
 	  )
 	{
 	  /* Scan the locations for an address match.  */
-	  for (loc = t->loc; loc; loc = loc->next)
+	  for (loc = b->loc; loc; loc = loc->next)
 	    {
 	      if (loc->address == utp->addr)
 		return t;
@@ -3123,7 +3130,7 @@ void
 merge_uploaded_tracepoints (struct uploaded_tp **uploaded_tps)
 {
   struct uploaded_tp *utp;
-  struct breakpoint *t;
+  struct tracepoint *t;
 
   /* Look for GDB tracepoints that match up with our uploaded versions.  */
   for (utp = *uploaded_tps; utp; utp = utp->next)
@@ -3132,7 +3139,7 @@ merge_uploaded_tracepoints (struct uploaded_tp **uploaded_tps)
       if (t)
 	printf_filtered (_("Assuming tracepoint %d is same "
 			   "as target's tracepoint %d at %s.\n"),
-			 t->number, utp->number,
+			 t->base.number, utp->number,
 			 paddress (get_current_arch (), utp->addr));
       else
 	{
@@ -3140,7 +3147,7 @@ merge_uploaded_tracepoints (struct uploaded_tp **uploaded_tps)
 	  if (t)
 	    printf_filtered (_("Created tracepoint %d for "
 			       "target's tracepoint %d at %s.\n"),
-			     t->number, utp->number,
+			     t->base.number, utp->number,
 			     paddress (get_current_arch (), utp->addr));
 	  else
 	    printf_filtered (_("Failed to create tracepoint for target's "
@@ -3754,7 +3761,7 @@ tfile_get_traceframe_address (off_t tframe_offset)
 {
   ULONGEST addr = 0;
   short tpnum;
-  struct breakpoint *tp;
+  struct tracepoint *tp;
   off_t saved_offset = cur_offset;
 
   /* FIXME dig pc out of collected registers.  */
@@ -3768,8 +3775,8 @@ tfile_get_traceframe_address (off_t tframe_offset)
 
   tp = get_tracepoint_by_number_on_target (tpnum);
   /* FIXME this is a poor heuristic if multiple locations.  */
-  if (tp && tp->loc)
-    addr = tp->loc->address;
+  if (tp && tp->base.loc)
+    addr = tp->base.loc->address;
 
   /* Restore our seek position.  */
   cur_offset = saved_offset;
@@ -3811,7 +3818,7 @@ tfile_trace_find (enum trace_find_type type, int num,
   short tpnum;
   int tfnum = 0, found = 0;
   unsigned int data_size;
-  struct breakpoint *tp;
+  struct tracepoint *tp;
   off_t offset, tframe_offset;
   ULONGEST tfaddr;
 
@@ -4040,16 +4047,16 @@ tfile_fetch_registers (struct target_ops *ops,
   pc_regno = gdbarch_pc_regnum (gdbarch);
   if (pc_regno >= 0 && (regno == -1 || regno == pc_regno))
     {
-      struct breakpoint *tp = get_tracepoint (tracepoint_number);
+      struct tracepoint *tp = get_tracepoint (tracepoint_number);
 
-      if (tp && tp->loc)
+      if (tp && tp->base.loc)
 	{
 	  /* But don't try to guess if tracepoint is multi-location...  */
-	  if (tp->loc->next)
+	  if (tp->base.loc->next)
 	    {
 	      warning (_("Tracepoint %d has multiple "
 			 "locations, cannot infer $pc"),
-		       tp->number);
+		       tp->base.number);
 	      return;
 	    }
 	  /* ... or does while-stepping.  */
@@ -4057,13 +4064,13 @@ tfile_fetch_registers (struct target_ops *ops,
 	    {
 	      warning (_("Tracepoint %d does while-stepping, "
 			 "cannot infer $pc"),
-		       tp->number);
+		       tp->base.number);
 	      return;
 	    }
 
 	  store_unsigned_integer (regs, register_size (gdbarch, pc_regno),
 				  gdbarch_byte_order (gdbarch),
-				  tp->loc->address);
+				  tp->base.loc->address);
 	  regcache_raw_supply (regcache, pc_regno, regs);
 	}
     }

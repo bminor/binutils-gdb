@@ -9751,7 +9751,7 @@ remote_download_command_source (int num, ULONGEST addr,
 }
 
 static void
-remote_download_tracepoint (struct breakpoint *t)
+remote_download_tracepoint (struct breakpoint *b)
 {
   struct bp_location *loc;
   CORE_ADDR tpaddr;
@@ -9764,13 +9764,14 @@ remote_download_tracepoint (struct breakpoint *t)
   struct agent_expr *aexpr;
   struct cleanup *aexpr_chain = NULL;
   char *pkt;
+  struct tracepoint *t = (struct tracepoint *) b;
 
   /* Iterate over all the tracepoint locations.  It's up to the target to
      notice multiple tracepoint packets with the same number but different
      addresses, and treat them as multiple locations.  */
-  for (loc = t->loc; loc; loc = loc->next)
+  for (loc = b->loc; loc; loc = loc->next)
     {
-      encode_actions (t, loc, &tdp_actions, &stepping_actions);
+      encode_actions (b, loc, &tdp_actions, &stepping_actions);
       old_chain = make_cleanup (free_actions_list_cleanup_wrapper,
 				tdp_actions);
       (void) make_cleanup (free_actions_list_cleanup_wrapper,
@@ -9778,14 +9779,14 @@ remote_download_tracepoint (struct breakpoint *t)
 
       tpaddr = loc->address;
       sprintf_vma (addrbuf, tpaddr);
-      sprintf (buf, "QTDP:%x:%s:%c:%lx:%x", t->number, 
+      sprintf (buf, "QTDP:%x:%s:%c:%lx:%x", b->number,
 	       addrbuf, /* address */
-	       (t->enable_state == bp_enabled ? 'E' : 'D'),
+	       (b->enable_state == bp_enabled ? 'E' : 'D'),
 	       t->step_count, t->pass_count);
       /* Fast tracepoints are mostly handled by the target, but we can
 	 tell the target how big of an instruction block should be moved
 	 around.  */
-      if (t->type == bp_fast_tracepoint)
+      if (b->type == bp_fast_tracepoint)
 	{
 	  /* Only test for support at download time; we may not know
 	     target capabilities at definition time.  */
@@ -9808,9 +9809,9 @@ remote_download_tracepoint (struct breakpoint *t)
 	       tracepoints, so don't take lack of support as a reason to
 	       give up on the trace run.  */
 	    warning (_("Target does not support fast tracepoints, "
-		       "downloading %d as regular tracepoint"), t->number);
+		       "downloading %d as regular tracepoint"), b->number);
 	}
-      else if (t->type == bp_static_tracepoint)
+      else if (b->type == bp_static_tracepoint)
 	{
 	  /* Only test for support at download time; we may not know
 	     target capabilities at definition time.  */
@@ -9848,10 +9849,10 @@ remote_download_tracepoint (struct breakpoint *t)
 	    }
 	  else
 	    warning (_("Target does not support conditional tracepoints, "
-		       "ignoring tp %d cond"), t->number);
+		       "ignoring tp %d cond"), b->number);
 	}
 
-  if (t->commands || *default_collect)
+  if (b->commands || *default_collect)
 	strcat (buf, "-");
       putpkt (buf);
       remote_get_noisy_reply (&target_buf, &target_buf_size);
@@ -9865,7 +9866,7 @@ remote_download_tracepoint (struct breakpoint *t)
 	    {
 	      QUIT;	/* Allow user to bail out with ^C.  */
 	      sprintf (buf, "QTDP:-%x:%s:%s%c",
-		       t->number, addrbuf, /* address */
+		       b->number, addrbuf, /* address */
 		       tdp_actions[ndx],
 		       ((tdp_actions[ndx + 1] || stepping_actions)
 			? '-' : 0));
@@ -9882,7 +9883,7 @@ remote_download_tracepoint (struct breakpoint *t)
 	    {
 	      QUIT;	/* Allow user to bail out with ^C.  */
 	      sprintf (buf, "QTDP:-%x:%s:%s%s%s",
-		       t->number, addrbuf, /* address */
+		       b->number, addrbuf, /* address */
 		       ((ndx == 0) ? "S" : ""),
 		       stepping_actions[ndx],
 		       (stepping_actions[ndx + 1] ? "-" : ""));
@@ -9897,11 +9898,11 @@ remote_download_tracepoint (struct breakpoint *t)
       if (remote_protocol_packets[PACKET_TracepointSource].support
 	  == PACKET_ENABLE)
 	{
-	  if (t->addr_string)
+	  if (b->addr_string)
 	    {
 	      strcpy (buf, "QTDPsrc:");
-	      encode_source_string (t->number, loc->address,
-				    "at", t->addr_string, buf + strlen (buf),
+	      encode_source_string (b->number, loc->address,
+				    "at", b->addr_string, buf + strlen (buf),
 				    2048 - strlen (buf));
 
 	      putpkt (buf);
@@ -9909,19 +9910,19 @@ remote_download_tracepoint (struct breakpoint *t)
 	      if (strcmp (target_buf, "OK"))
 		warning (_("Target does not support source download."));
 	    }
-	  if (t->cond_string)
+	  if (b->cond_string)
 	    {
 	      strcpy (buf, "QTDPsrc:");
-	      encode_source_string (t->number, loc->address,
-				    "cond", t->cond_string, buf + strlen (buf),
+	      encode_source_string (b->number, loc->address,
+				    "cond", b->cond_string, buf + strlen (buf),
 				    2048 - strlen (buf));
 	      putpkt (buf);
 	      remote_get_noisy_reply (&target_buf, &target_buf_size);
 	      if (strcmp (target_buf, "OK"))
 		warning (_("Target does not support source download."));
 	    }
-	  remote_download_command_source (t->number, loc->address,
-					  breakpoint_commands (t));
+	  remote_download_command_source (b->number, loc->address,
+					  breakpoint_commands (b));
 	}
 
       do_cleanups (old_chain);

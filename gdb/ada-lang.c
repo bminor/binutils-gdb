@@ -11262,6 +11262,7 @@ print_recreate_exception (enum exception_catchpoint_kind ex,
       default:
 	internal_error (__FILE__, __LINE__, _("unexpected catchpoint type"));
     }
+  print_recreate_thread (b, fp);
 }
 
 /* Virtual table for "catch exception" breakpoints.  */

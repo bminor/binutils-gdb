@@ -186,7 +186,7 @@ mi_cmd_break_passcount (char *command, char **argv, int argc)
 {
   int n;
   int p;
-  struct breakpoint *t;
+  struct tracepoint *t;
 
   if (argc != 2)
     error (_("Usage: tracepoint-number passcount"));

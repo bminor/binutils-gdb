@@ -1,5 +1,62 @@
 2011-07-25  Pedro Alves  <pedro@codesourcery.com>
 
+	* breakpoint.h (print_recreate_thread): Declare.
+	(struct breakpoint): Move step_count, pass_count,
+	number_on_target, static_trace_marker_id,
+	static_trace_marker_id_idx ...
+	(struct tracepoint): ... to this new struct.
+	(get_tracepoint, get_tracepoint_by_number_on_target)
+	(get_tracepoint_by_number): Change return type to struct
+	tracepoint pointer.
+	* breakpoint.c (is_tracepoint_type): New, factored out from
+	is_tracepoint.
+	(is_tracepoint): Adjust.
+	(print_one_breakpoint_location): Cast to struct tracepoint as
+	necessary, and adjust.
+	(print_recreate_catch_fork, print_recreate_catch_vfork)
+	(print_recreate_catch_syscall, print_recreate_catch_exec): Call
+	print_recreate_thread.
+	(init_breakpoint_sal): New, factored out from
+	create_breakpoint_sal.
+	(create_breakpoint_sal): Reimplement.
+	(create_breakpoint): Allocate a struct tracecepoint if the caller
+	wanted a tracepoint.  Use init_breakpoint_sal and
+	install_breakpoint.
+	(print_recreate_ranged_breakpoint, print_recreate_watchpoint)
+	(print_recreate_masked_watchpoint)
+	(print_recreate_exception_catchpoint): Call print_recreate_thread.
+	(tracepoint_print_one_detail): Adjust.
+	(tracepoint_print_recreate): Adjust.  Call print_recreate_thread.
+	Dump the pass count here.
+	(update_static_tracepoint): Adjust.
+	(addr_string_to_sals): Adjust.
+	(create_tracepoint_from_upload): Adjust.  Change return type to
+	struct tracepoint pointer.
+	(trace_pass_set_count): Change parameter type to struct tracepoint
+	pointer, and adjust.
+	(trace_pass_command): Adjust.
+	(get_tracepoint, get_tracepoint_by_number_on_target)
+	(get_tracepoint_by_number): Change return type to struct
+	tracepoint pointer, and adjust.
+	(print_recreate_thread): New, factored out from save_breakpoints.
+	(save_breakpoints): Don't print thread and task and passcount
+	recreation here.
+	* remote.c (remote_download_tracepoint): Adjust.
+	* tracepoint.c (trace_actions_command, validate_actionline)
+	(start_tracing, tfind_1, trace_find_tracepoint_command)
+	(trace_dump_command): Adjust.
+	(find_matching_tracepoint): Change return type to struct
+	tracepoint pointer, and adjust.
+	(merge_uploaded_tracepoints, tfile_get_traceframe_address)
+	(tfile_trace_find, tfile_fetch_registers): Adjust.
+	* tracepoint.h (create_tracepoint_from_upload): Change return type
+	to struct tracepoint pointer.
+	* ada-lang.c (print_recreate_exception): Call
+	print_recreate_thread.
+	* mi/mi-cmd-break.c (mi_cmd_break_passcount): Adjust.
+
+2011-07-25  Pedro Alves  <pedro@codesourcery.com>
+
 	* breakpoint.h (struct breakpoint): Move ops as first field.  Move
 	exp_string, exp_string_reparse, exp, exp_valid_block, cond_exp,
 	cond_exp_valid_block, val, val_valid, watchpoint_frame,
