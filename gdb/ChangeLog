@@ -1,5 +1,56 @@
 2011-07-25  Pedro Alves  <pedro@codesourcery.com>
 
+	* breakpoint.h (struct breakpoint): Move ops as first field.  Move
+	exp_string, exp_string_reparse, exp, exp_valid_block, cond_exp,
+	cond_exp_valid_block, val, val_valid, watchpoint_frame,
+	watchpoint_thread, watchpoint_triggered ...
+	(struct watchpoint): ... to this new struct.
+	(is_watchpoint): Declare.
+	(install_breakpoint): Add new `internal' parameter.
+	* breakpoint.c (is_watchpoint): Delete declaration.
+	(set_breakpoint_condition): Handle watchpoints.
+	(is_watchpoint): Make public.
+	(watchpoint_in_thread_scope): Change parameter type to struct
+	watchpoint.
+	(watchpoint_del_at_next_stop): Change parameter type to struct
+	watchpoint.  Remove assertion.  Adjust.
+	(update_watchpoint): Ditto.
+	(insert_breakpoints, breakpoint_init_inferior)
+	(watchpoints_triggered, watchpoint_check)
+	(bpstat_check_watchpoint, bpstat_check_breakpoint_conditions)
+	(bpstat_stop_status, print_one_breakpoint_location)
+	(print_one_breakpoint_location, watchpoint_locations_match): Cast
+	to struct watchpoint as necessary, and adjust.
+	(install_breakpoint): Add `internal' argument.  If true, don't
+	mention the new breakpoint.  Use set_breakpoint_number.
+	(create_fork_vfork_event_catchpoint)
+	(create_syscall_event_catchpoint): Adjust.
+	(dtor_watchpoint): New.
+	(re_set_watchpoint, insert_watchpoint, remove_watchpoint)
+	(breakpoint_hit_watchpoint, resources_needed_watchpoint)
+	(print_it_watchpoint, print_mention_watchpoint)
+	(print_recreate_watchpoint, insert_masked_watchpoint)
+	(remove_masked_watchpoint, resources_needed_masked_watchpoint)
+	(print_one_detail_masked_watchpoint)
+	(print_mention_masked_watchpoint)
+	(print_recreate_masked_watchpoint): Cast to struct watchpoint as
+	necessary, and adjust.
+	(watch_command_1): Allocate and initialize a struct watchpoint
+	instead of a struct breakpoint.  Use install_breakpoint.
+	(catch_exec_command_1): Adjust.
+	(base_breakpoint_dtor): Delete accesses to watchpoint specific
+	fields.
+	(delete_breakpoint, enable_breakpoint_disp)
+	(invalidate_bp_value_on_memory_change): Cast to struct watchpoint
+	as necessary, and adjust.
+	(initialize_breakpoint_ops): Install dtor_watchpoint as
+	watchpoints' dtor method.
+	* ada-lang.c (create_ada_exception_catchpoint): Adjust.
+	* python/py-breakpoint.c (bppy_get_expression): Use is_watchpoint.
+	to struct watchpoint as necessary, and adjust.
+
+2011-07-25  Pedro Alves  <pedro@codesourcery.com>
+
 	* ada-lang.c (dtor_exception, re_set_exception): Indirect through
 	the the base class ops table.
 	(catch_exception_breakpoint_ops)

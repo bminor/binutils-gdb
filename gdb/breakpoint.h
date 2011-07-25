@@ -519,10 +519,13 @@ extern int target_exact_watchpoints;
    useful for a hack I had to put in; I'm going to leave it in because
    I can see how there might be times when it would indeed be useful */
 
-/* This is for a breakpoint or a watchpoint.  */
+/* This is for all kinds of breakpoints.  */
 
 struct breakpoint
   {
+    /* Methods associated with this breakpoint.  */
+    struct breakpoint_ops *ops;
+
     struct breakpoint *next;
     /* Type of breakpoint.  */
     enum bptype type;
@@ -580,27 +583,6 @@ struct breakpoint
     char *cond_string;
     /* String form of exp to use for displaying to the user
        (malloc'd), or NULL if none.  */
-    char *exp_string;
-    /* String form to use for reparsing of EXP (malloc'd) or NULL.  */
-    char *exp_string_reparse;
-
-    /* The expression we are watching, or NULL if not a watchpoint.  */
-    struct expression *exp;
-    /* The largest block within which it is valid, or NULL if it is
-       valid anywhere (e.g. consists just of global symbols).  */
-    struct block *exp_valid_block;
-    /* The conditional expression if any.  NULL if not a watchpoint.  */
-    struct expression *cond_exp;
-    /* The largest block within which it is valid, or NULL if it is
-       valid anywhere (e.g. consists just of global symbols).  */
-    struct block *cond_exp_valid_block;
-    /* Value of the watchpoint the last time we checked it, or NULL
-       when we do not know the value yet or the value was not
-       readable.  VAL is never lazy.  */
-    struct value *val;
-    /* Nonzero if VAL is valid.  If VAL_VALID is set but VAL is NULL,
-       then an error occurred reading the value.  */
-    int val_valid;
 
     /* Holds the address of the related watchpoint_scope breakpoint
        when using watchpoints on local variables (might the concept of
@@ -608,20 +590,6 @@ struct breakpoint
        the watchpoint_scope breakpoint or something like that.
        FIXME).  */
     struct breakpoint *related_breakpoint;
-
-    /* Holds the frame address which identifies the frame this
-       watchpoint should be evaluated in, or `null' if the watchpoint
-       should be evaluated on the outermost frame.  */
-    struct frame_id watchpoint_frame;
-
-    /* Holds the thread which identifies the frame this watchpoint
-       should be considered in scope for, or `null_ptid' if the
-       watchpoint should be evaluated in all threads.  */
-    ptid_t watchpoint_thread;
-
-    /* For hardware watchpoints, the triggered status according to the
-       hardware.  */
-    enum watchpoint_triggered watchpoint_triggered;
 
     /* Thread number for thread-specific breakpoint, 
        or -1 if don't care.  */
@@ -636,9 +604,6 @@ struct breakpoint
        seeing how many times you hit a break prior to the program
        aborting, so you can back up to just before the abort.  */
     int hit_count;
-
-    /* Methods associated with this breakpoint.  */
-    struct breakpoint_ops *ops;
 
     /* Is breakpoint's condition not yet parsed because we found
        no location initially so had no context to parse
@@ -674,13 +639,66 @@ struct breakpoint
        can sometimes be NULL for enabled GDBs as not all breakpoint
        types are tracked by the Python scripting API.  */
     struct breakpoint_object *py_bp_object;
-
-    /* Whether this watchpoint is exact (see target_exact_watchpoints).  */
-    int exact;
-
-    /* The mask address for a masked hardware watchpoint.  */
-    CORE_ADDR hw_wp_mask;
   };
+
+/* An instance of this type is used to represent a watchpoint.  It
+   includes a "struct breakpoint" as a kind of base class; users
+   downcast to "struct breakpoint *" when needed.  */
+
+struct watchpoint
+{
+  /* The base class.  */
+  struct breakpoint base;
+
+  /* String form of exp to use for displaying to the user (malloc'd),
+     or NULL if none.  */
+  char *exp_string;
+  /* String form to use for reparsing of EXP (malloc'd) or NULL.  */
+  char *exp_string_reparse;
+
+  /* The expression we are watching, or NULL if not a watchpoint.  */
+  struct expression *exp;
+  /* The largest block within which it is valid, or NULL if it is
+     valid anywhere (e.g. consists just of global symbols).  */
+  struct block *exp_valid_block;
+  /* The conditional expression if any.  */
+  struct expression *cond_exp;
+  /* The largest block within which it is valid, or NULL if it is
+     valid anywhere (e.g. consists just of global symbols).  */
+  struct block *cond_exp_valid_block;
+  /* Value of the watchpoint the last time we checked it, or NULL when
+     we do not know the value yet or the value was not readable.  VAL
+     is never lazy.  */
+  struct value *val;
+  /* Nonzero if VAL is valid.  If VAL_VALID is set but VAL is NULL,
+     then an error occurred reading the value.  */
+  int val_valid;
+
+  /* Holds the frame address which identifies the frame this
+     watchpoint should be evaluated in, or `null' if the watchpoint
+     should be evaluated on the outermost frame.  */
+  struct frame_id watchpoint_frame;
+
+  /* Holds the thread which identifies the frame this watchpoint
+     should be considered in scope for, or `null_ptid' if the
+     watchpoint should be evaluated in all threads.  */
+  ptid_t watchpoint_thread;
+
+  /* For hardware watchpoints, the triggered status according to the
+     hardware.  */
+  enum watchpoint_triggered watchpoint_triggered;
+
+  /* Whether this watchpoint is exact (see
+     target_exact_watchpoints).  */
+  int exact;
+
+  /* The mask address for a masked hardware watchpoint.  */
+  CORE_ADDR hw_wp_mask;
+};
+
+/* Returns true if BPT is really a watchpoint.  */
+
+extern int is_watchpoint (const struct breakpoint *bpt);
 
 typedef struct breakpoint *breakpoint_p;
 DEF_VEC_P(breakpoint_p);
@@ -1062,9 +1080,11 @@ extern void
 				 int from_tty);
 
 /* Add breakpoint B on the breakpoint list, and notify the user, the
-   target and breakpoint_created observers of its existence.  */
+   target and breakpoint_created observers of its existence.  If
+   INTERNAL is non-zero, the breakpoint number will be allocated from
+   the internal breakpoint count.  */
 
-extern void install_breakpoint (struct breakpoint *b);
+extern void install_breakpoint (int internal, struct breakpoint *b);
 
 extern int create_breakpoint (struct gdbarch *gdbarch, char *arg,
 			      char *cond_string, int thread,
