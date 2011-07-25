@@ -422,8 +422,8 @@ struct breakpoint_ops
   void (*re_set) (struct breakpoint *self);
 
   /* Insert the breakpoint or watchpoint or activate the catchpoint.
-     Return 0 for success, 1 if the breakpoint, watchpoint or catchpoint
-     type is not supported, -1 for failure.  */
+     Return 0 for success, 1 if the breakpoint, watchpoint or
+     catchpoint type is not supported, -1 for failure.  */
   int (*insert_location) (struct bp_location *);
 
   /* Remove the breakpoint/catchpoint that was previously inserted
@@ -454,7 +454,7 @@ struct breakpoint_ops
 
   /* The normal print routine for this breakpoint, called when we
      hit it.  */
-  enum print_stop_action (*print_it) (struct breakpoint *);
+  enum print_stop_action (*print_it) (struct bpstats *bs);
 
   /* Display information about this breakpoint, for "info
      breakpoints".  */
@@ -801,9 +801,19 @@ struct bpstat_what
    print_it_done, print_it_noop.  */
 enum print_stop_action
   {
+    /* We printed nothing or we need to do some more analysis.  */
     PRINT_UNKNOWN = -1,
+
+    /* We printed something, and we *do* desire that something to be
+       followed by a location.  */
     PRINT_SRC_AND_LOC,
+
+    /* We printed something, and we do *not* desire that something to
+       be followed by a location.  */
     PRINT_SRC_ONLY,
+
+    /* We already printed all we needed to print, don't print anything
+       else.  */
     PRINT_NOTHING
   };
 
@@ -980,12 +990,6 @@ extern void breakpoint_re_set (void);
 
 extern void breakpoint_re_set_thread (struct breakpoint *);
 
-/* The default re_set method, for typical hardware or software
-   breakpoints.  Reevaluate the breakpoint and recreate its
-   locations.  */
-
-extern void breakpoint_re_set_default (struct breakpoint *);
-
 extern struct breakpoint *set_momentary_breakpoint
   (struct gdbarch *, struct symtab_and_line, struct frame_id, enum bptype);
 
@@ -1024,6 +1028,32 @@ extern void watch_command_wrapper (char *, int, int);
 extern void awatch_command_wrapper (char *, int, int);
 extern void rwatch_command_wrapper (char *, int, int);
 extern void tbreak_command (char *, int);
+
+extern void null_re_set (struct breakpoint *b);
+extern int null_works_in_software_mode (const struct breakpoint *b);
+extern int null_resources_needed (const struct bp_location *bl);
+extern void null_check_status (bpstat bs);
+extern void null_print_one_detail (const struct breakpoint *self,
+				   struct ui_out *uiout);
+
+extern struct breakpoint_ops bkpt_breakpoint_ops;
+
+extern void bkpt_dtor (struct breakpoint *self);
+extern struct bp_location *bkpt_allocate_location (struct breakpoint *self);
+extern void bkpt_re_set (struct breakpoint *b);
+extern int bkpt_insert_location (struct bp_location *bl);
+extern int bkpt_remove_location (struct bp_location *bl);
+extern int bkpt_breakpoint_hit (const struct bp_location *bl,
+				struct address_space *aspace,
+				CORE_ADDR bp_addr);
+extern void bkpt_check_status (bpstat bs);
+extern int bkpt_resources_needed (const struct bp_location *bl);
+extern int bkpt_works_in_software_mode (const struct breakpoint *b);
+extern enum print_stop_action bkpt_print_it (bpstat bs);
+extern void null_print_one_detail (const struct breakpoint *self,
+				   struct ui_out *uiout);
+extern void bkpt_print_mention (struct breakpoint *b);
+extern void bkpt_print_recreate (struct breakpoint *tp, struct ui_file *fp);
 
 /* Arguments to pass as context to some catch command handlers.  */
 #define CATCH_PERMANENT ((void *) (uintptr_t) 0)

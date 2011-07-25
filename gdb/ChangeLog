@@ -1,3 +1,138 @@
+2011-07-25  Pedro Alves  <pedro@codesourcery.com>
+
+	Implement most breakpoint_ops methods for all breakpoint types,
+	and move the default handlings to the proper callbacks.
+
+	* breakpoint.c (update_watchpoint): Always call the breakpoint's
+	works_in_software_mode method.
+	(insert_bp_location): Go through breakpoint_ops->insert_location
+	for software and hardware watchpoints.
+	(create_internal_breakpoint): Pass bkpt_breakpoint_ops as
+	breakpoint_ops.
+	(remove_breakpoint_1): Go through breakpoint_ops->remove_location
+	for software and hardware watchpoints.
+	(print_it_typical): Delete.
+	(print_bp_stop_message): Always call the breakpoint_ops->print_it
+	method.
+	(watchpoint_check): Adjust comment.
+	(bpstat_check_location): Simply always call the breakpoint's
+	breakpoint_hit method.
+	(bpstat_stop_status): Always call the breakpoint's check_status
+	method.  Remove special cases for watchpoints and internal event
+	breakpoints from here (moved to the check_status implementations).
+	(print_one_breakpoint_location): Assume b->ops is never NULL.
+	Remove static tracepoint marker id printing from here (moved to
+	the print_one_detail callback implementation of tracepoints).
+	(init_bp_location): Assert OPS is never NULL.
+	(allocate_bp_location): Always call the breakpoint's
+	allocate_location method, and remove the default code from here.
+	(free_bp_location): Always call the location's dtor method, and
+	remove the default code from here.
+	(init_raw_breakpoint_without_location): Assert OPS is never NULL.
+	(set_raw_breakpoint_without_location): Add new breakpoint_ops
+	parameter.  Pass it down.
+	(set_raw_breakpoint): Ditto.
+	(print_it_catch_fork): Adjust to take a bpstat as argument.
+	(catch_fork_breakpoint_ops): Install methods.
+	(print_it_catch_vfork): Adjust to take a bpstat as argument.
+	(catch_vfork_breakpoint_ops): Install methods.
+	(dtor_catch_syscall): Call the base dtor.
+	(print_it_catch_syscall): Adjust to take a bpstat as argument.
+	(catch_syscall_breakpoint_ops): Install methods.
+	(dtor_catch_exec): Call the base dtor.
+	(print_it_catch_exec): Adjust to take a bpstat as argument.
+	(catch_exec_breakpoint_ops): Install methods.
+	(hw_breakpoint_used_count, hw_watchpoint_used_count): Always call
+	the breakpoint's resources_needed method, and remove the default
+	code from here.
+	(set_momentary_breakpoint): Pass bkpt_breakpoint_ops as
+	breakpoint_ops.
+	(clone_momentary_breakpoint): Clone the original's ops.
+	(mention): Always call the breakpoint's print_mention method, and
+	remove the default code from here.
+	(create_breakpoint_sal): Adjust to pass the ops to
+	set_raw_breakpoint rather than setting it manually.
+	(create_breakpoint): Assert ops is never NULL.  Adjust to pass the
+	ops to set_raw_breakpoint_without_location rather than setting it
+	manually.
+	(break_command_1): Pass bkpt_breakpoint_ops as breakpoint_ops.
+	(print_it_ranged_breakpoint): Adjust to take a bpstat as argument.
+	(ranged_breakpoint_ops): Install methods.
+	(break_range_command): Adjust to pass the ops to
+	set_raw_breakpoint rather than setting it manually.
+	(re_set_watchpoint, breakpoint_hit_watchpoint)
+	(check_status_watchpoint, resources_needed_watchpoint)
+	(works_in_software_mode_watchpoint, print_it_watchpoint)
+	(print_mention_watchpoint, print_recreate_watchpoint): New
+	functions.
+	(watchpoint_breakpoint_ops): Install new methods.
+	(print_it_masked_watchpoint): New function.
+	(masked_watchpoint_breakpoint_ops): Install new methods.
+	(watch_command_1): Adjust to pass the right breakpoint_ops to
+	set_raw_breakpoint_without_location rather than setting it
+	manually later.  Record the current pspace.
+	(print_it_exception_catchpoint): Adjust to take a bpstat as
+	argument.
+	(gnu_v3_exception_catchpoint_ops): Install new methods.
+	(say_where): New function.
+	(null_re_set, null_check_status, null_works_in_software_mode)
+	(null_resources_needed, null_print_one_detail, bp_location_dtor):
+	New functions.
+	(bp_location_ops): New global.
+	(bkpt_dtor, bkpt_allocate_location, bkpt_re_set)
+	(bkpt_insert_location, bkpt_remove_location, bkpt_breakpoint_hit)
+	(bkpt_check_status, bkpt_resources_needed)
+	(bkpt_works_in_software_mode, bkpt_print_it, bkpt_print_mention)
+	(bkpt_print_recreate): New functions.
+	(bkpt_breakpoint_ops): New global.
+	(tracepoint_re_set, tracepoint_insert_location)
+	(tracepoint_remove_location, tracepoint_breakpoint_hit)
+	(tracepoint_check_status, tracepoint_works_in_software_mode)
+	(tracepoint_print_it, tracepoint_print_one_detail)
+	(tracepoint_print_mention, tracepoint_print_recreate): New
+	functions.
+	(tracepoint_breakpoint_ops): New global.
+	(delete_breakpoint): Always call the breakpoint's dtor method, and
+	remove the default handling from here.
+	(breakpoint_re_set_default): Make static.
+	(breakpoint_re_set_one): Always call the breakpoints re_set
+	method, and remove the default handling from here.
+	(trace_command, ftrace_command, strace_command)
+	(create_tracepoint_from_upload): Pass appropriate breakpoints_ops
+	to create_breakpoint.
+	(save_breakpoints): Always call the breakpoint's print_recreate
+	method, and remove the default handling from here.
+
+	* ada-lang.c (dtor_exception): Call the base dtor.
+	(re_set_exception): Call the base method.
+	(print_it_exception, print_it_catch_exception): Adjust to take a
+	bpstat as argument.
+	(catch_exception_breakpoint_ops): Install methods.
+	(print_it_catch_exception_unhandled): Adjust to take a bpstat as
+	argument.
+	(catch_exception_unhandled_breakpoint_ops): Install methods.
+	(print_it_catch_assert): Adjust to take a bpstat as argument.
+	(catch_assert_breakpoint_ops): Install methods.
+
+	* breakpoint.h (struct breakpoint_ops): Adjust the print_it method
+	to take a bpstat as argument.
+	(enum print_stop_action): Add describing comments to each enum
+	value.
+	(breakpoint_re_set_default): Delete declaration.
+	(null_re_set, null_works_in_software_mode, null_resources_needed)
+	(null_check_status, null_print_one_detail): Declare.
+	(bkpt_breakpoint_ops): Declare.
+	(bkpt_dtor, bkpt_allocate_location, bkpt_re_set)
+	(bkpt_insert_location, bkpt_remove_location, bkpt_breakpoint_hit)
+	(bkpt_check_status, bkpt_resources_needed)
+	(bkpt_works_in_software_mode, bkpt_print_it)
+	(null_print_one_detail, bkpt_print_mention, bkpt_print_recreate):
+	Declare.
+
+	* mi/mi-cmd-break.c (mi_cmd_break_insert): Adjust to pass
+	bkpt_breakpoint_ops.
+	* python/py-breakpoint.c (bppy_init): Ditto.
+
 2011-07-15  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* MAINTAINERS (Write After Approval): Add myself to the list.

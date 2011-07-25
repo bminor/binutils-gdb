@@ -636,7 +636,8 @@ bppy_init (PyObject *self, PyObject *args, PyObject *kwargs)
 			       0, bp_breakpoint,
 			       0,
 			       AUTO_BOOLEAN_TRUE,
-			       NULL, 0, 1, internal_bp);
+			       &bkpt_breakpoint_ops,
+			       0, 1, internal_bp);
 	    break;
 	  }
         case bp_watchpoint:

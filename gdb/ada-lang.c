@@ -10988,6 +10988,8 @@ dtor_exception (enum exception_catchpoint_kind ex, struct breakpoint *b)
   struct ada_catchpoint *c = (struct ada_catchpoint *) b;
 
   xfree (c->excep_string);
+
+  bkpt_dtor (b);
 }
 
 /* Implement the ALLOCATE_LOCATION method in the breakpoint_ops
@@ -11015,7 +11017,7 @@ re_set_exception (enum exception_catchpoint_kind ex, struct breakpoint *b)
 
   /* Call the base class's method.  This updates the catchpoint's
      locations.  */
-  breakpoint_re_set_default (b);
+  bkpt_re_set (b);
 
   /* Reparse the exception conditional expressions.  One for each
      location.  */
@@ -11074,8 +11076,10 @@ check_status_exception (enum exception_catchpoint_kind ex, bpstat bs)
    for all exception catchpoint kinds.  */
 
 static enum print_stop_action
-print_it_exception (enum exception_catchpoint_kind ex, struct breakpoint *b)
+print_it_exception (enum exception_catchpoint_kind ex, bpstat bs)
 {
+  struct breakpoint *b = bs->breakpoint_at;
+
   annotate_catchpoint (b->number);
 
   if (ui_out_is_mi_like_p (uiout))
@@ -11287,9 +11291,9 @@ check_status_catch_exception (bpstat bs)
 }
 
 static enum print_stop_action
-print_it_catch_exception (struct breakpoint *b)
+print_it_catch_exception (bpstat bs)
 {
-  return print_it_exception (ex_catch_exception, b);
+  return print_it_exception (ex_catch_exception, bs);
 }
 
 static void
@@ -11315,15 +11319,15 @@ static struct breakpoint_ops catch_exception_breakpoint_ops =
   dtor_catch_exception,
   allocate_location_catch_exception,
   re_set_catch_exception,
-  NULL, /* insert */
-  NULL, /* remove */
-  NULL, /* breakpoint_hit */
+  bkpt_insert_location,
+  bkpt_remove_location,
+  bkpt_breakpoint_hit,
   check_status_catch_exception,
-  NULL, /* resources_needed */
-  NULL, /* works_in_software_mode */
+  bkpt_resources_needed,
+  null_works_in_software_mode,
   print_it_catch_exception,
   print_one_catch_exception,
-  NULL, /* print_one_detail */
+  null_print_one_detail,
   print_mention_catch_exception,
   print_recreate_catch_exception
 };
@@ -11355,9 +11359,9 @@ check_status_catch_exception_unhandled (bpstat bs)
 }
 
 static enum print_stop_action
-print_it_catch_exception_unhandled (struct breakpoint *b)
+print_it_catch_exception_unhandled (bpstat bs)
 {
-  return print_it_exception (ex_catch_exception_unhandled, b);
+  return print_it_exception (ex_catch_exception_unhandled, bs);
 }
 
 static void
@@ -11384,15 +11388,15 @@ static struct breakpoint_ops catch_exception_unhandled_breakpoint_ops = {
   dtor_catch_exception_unhandled,
   allocate_location_catch_exception_unhandled,
   re_set_catch_exception_unhandled,
-  NULL, /* insert */
-  NULL, /* remove */
-  NULL, /* breakpoint_hit */
+  bkpt_insert_location,
+  bkpt_remove_location,
+  bkpt_breakpoint_hit,
   check_status_catch_exception_unhandled,
-  NULL, /* resources_needed */
-  NULL, /* works_in_software_mode */
+  bkpt_resources_needed,
+  null_works_in_software_mode,
   print_it_catch_exception_unhandled,
   print_one_catch_exception_unhandled,
-  NULL, /* print_one_detail */
+  null_print_one_detail,
   print_mention_catch_exception_unhandled,
   print_recreate_catch_exception_unhandled
 };
@@ -11424,9 +11428,9 @@ check_status_catch_assert (bpstat bs)
 }
 
 static enum print_stop_action
-print_it_catch_assert (struct breakpoint *b)
+print_it_catch_assert (bpstat bs)
 {
-  return print_it_exception (ex_catch_assert, b);
+  return print_it_exception (ex_catch_assert, bs);
 }
 
 static void
@@ -11451,15 +11455,15 @@ static struct breakpoint_ops catch_assert_breakpoint_ops = {
   dtor_catch_assert,
   allocate_location_catch_assert,
   re_set_catch_assert,
-  NULL, /* insert */
-  NULL, /* remove */
-  NULL, /* breakpoint_hit */
+  bkpt_insert_location,
+  bkpt_remove_location,
+  bkpt_breakpoint_hit,
   check_status_catch_assert,
-  NULL, /* resources_needed */
-  NULL, /* works_in_software_mode */
+  bkpt_resources_needed,
+  null_works_in_software_mode,
   print_it_catch_assert,
   print_one_catch_assert,
-  NULL, /* print_one_detail */
+  null_print_one_detail,
   print_mention_catch_assert,
   print_recreate_catch_assert
 };
