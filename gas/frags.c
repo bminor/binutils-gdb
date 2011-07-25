@@ -75,41 +75,47 @@ frag_alloc (struct obstack *ob)
   return ptr;
 }
 
-/* Try to augment current frag by nchars chars.
+/* Try to augment current frag by NCHARS chars.
    If there is no room, close of the current frag with a ".fill 0"
-   and begin a new frag. Unless the new frag has nchars chars available
-   do not return. Do not set up any fields of *now_frag.  */
+   and begin a new frag.  Do not set up any fields of *now_frag.  */
 
 void
 frag_grow (unsigned int nchars)
 {
   if (obstack_room (&frchain_now->frch_obstack) < nchars)
     {
-      unsigned int n;
       long oldc;
+      long newc;
 
+      /* Not enough room in this frag.  Close it.  */
       frag_wane (frag_now);
-      frag_new (0);
-      oldc = frchain_now->frch_obstack.chunk_size;
+
       /* Try to allocate a bit more than needed right now.  But don't do
          this if we would waste too much memory.  Especially necessary
-	 for extremely big (like 2GB initialized) frags.  */
+         for extremely big (like 2GB initialized) frags.  */
       if (nchars < 0x10000)
-	frchain_now->frch_obstack.chunk_size = 2 * nchars;
+        newc = 2 * nchars;
       else
-        frchain_now->frch_obstack.chunk_size = nchars + 0x10000;
-      frchain_now->frch_obstack.chunk_size += SIZEOF_STRUCT_FRAG;
-      if (frchain_now->frch_obstack.chunk_size > 0)
-	while ((n = obstack_room (&frchain_now->frch_obstack)) < nchars
-	       && (unsigned long) frchain_now->frch_obstack.chunk_size > nchars)
-	  {
-	    frag_wane (frag_now);
-	    frag_new (0);
-	  }
-      frchain_now->frch_obstack.chunk_size = oldc;
+        newc = nchars + 0x10000;
+      newc += SIZEOF_STRUCT_FRAG;
+
+      if (newc > 0)
+        {
+          /* Force to allocate at least NEWC bytes.  */
+          oldc = obstack_chunk_size (&frchain_now->frch_obstack);
+          obstack_chunk_size (&frchain_now->frch_obstack) = newc;
+
+          /* Do the real work: create a new frag.  */
+          frag_new (0);
+
+          /* Restore the old chunk size.  */
+          obstack_chunk_size (&frchain_now->frch_obstack) = oldc;
+        }
+
+      /* Check for success (also handles negative values of NEWC).  */
+      if (obstack_room (&frchain_now->frch_obstack) < nchars)
+        as_fatal (_("can't extend frag %u chars"), nchars);
     }
-  if (obstack_room (&frchain_now->frch_obstack) < nchars)
-    as_fatal (_("can't extend frag %u chars"), nchars);
 }
 
 /* Call this to close off a completed frag, and start up a new (empty)

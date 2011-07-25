@@ -1,3 +1,7 @@
+2011-07-25  Tristan Gingold  <gingold@adacore.com>
+
+	* frags.c (frag_grow): Simplify the code.
+
 2011-07-24  Maciej W. Rozycki  <macro@codesourcery.com>
             Chao-ying Fu  <fu@mips.com>
 	    Richard Sandiford  <rdsandiford@googlemail.com>
