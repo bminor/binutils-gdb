@@ -1,3 +1,20 @@
+2011-07-26  Tom Tromey  <tromey@redhat.com>
+
+	* symfile.h (struct dwarf2_debug_sections) <macro>: New field.
+	* dwarf2read.c (read_indirect_string_at_offset): New function.
+	(read_indirect_string): Use it.
+	(dwarf_decode_macro_bytes): New function, taken from
+	dwarf_decode_macros.  Handle DW_MACRO_GNU_*.
+	(dwarf_decode_macros): Use it.  handle DW_MACRO_GNU_*.
+	(dwarf_parse_macro_header, skip_form_bytes, skip_unknown_opcode):
+	New functions.
+	(struct dwarf2_per_objfile) <macro>: New field.
+	(dwarf2_elf_names): Add .debug_macro.
+	(dwarf2_macros_too_long_complaint): Add 'section' argument.
+	(dwarf2_locate_sections): Handle new section.
+	(read_file_scope): Handle DW_AT_GNU_macros.
+	(dwarf2_per_objfile_free): Unmap the .debug_macro section.
+
 2011-07-26  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* NEWS: Mention dcache configuration.
