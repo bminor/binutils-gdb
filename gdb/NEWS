@@ -3,6 +3,16 @@
 
 *** Changes since GDB 7.3
 
+* GDB has two new commands: "set remote hardware-watchpoint-length-limit"
+  and "show remote hardware-watchpoint-length-limit".  These allows to
+  set or show the maximum length limit (in bytes) of a remote
+  target hardware watchpoint.
+
+  This allows e.g. to use "unlimited" hardware watchpoints with the
+  gdbserver integrated in Valgrind version >= 3.7.0.  Such Valgrind
+  watchpoints are slower than real hardware watchpoints but are
+  significantly faster than gdb software watchpoints.
+
 * Python scripting
 
   ** The "maint set python print-stack on|off" command has been

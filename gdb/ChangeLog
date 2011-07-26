@@ -1,3 +1,11 @@
+2011-07-26  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* remote.c (remote_region_ok_for_hw_watchpoint): New function.
+	(remote_hw_watchpoint_length_limit): New variable.
+	(_initialize_remote) add set,show cmds for this new variable.
+	* gdb.texinfo: document these new commands.
+	* NEWS: Mention these new commands.
+
 2011-07-26  Pedro Alves  <pedro@codesourcery.com>
 
 	* breakpoint.c (works_in_software_mode_watchpoint): Also return

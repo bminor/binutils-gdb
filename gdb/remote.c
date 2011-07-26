@@ -7763,7 +7763,21 @@ remote_remove_watchpoint (CORE_ADDR addr, int len, int type,
 
 
 int remote_hw_watchpoint_limit = -1;
+int remote_hw_watchpoint_length_limit = -1;
 int remote_hw_breakpoint_limit = -1;
+
+static int
+remote_region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
+{
+  if (remote_hw_watchpoint_length_limit == 0)
+    return 0;
+  else if (remote_hw_watchpoint_length_limit < 0)
+    return 1;
+  else if (len <= remote_hw_watchpoint_length_limit)
+    return 1;
+  else
+    return 0;
+}
 
 static int
 remote_check_watch_resources (int type, int cnt, int ot)
@@ -10356,6 +10370,8 @@ Specify the serial device it is connected to\n\
   remote_ops.to_can_use_hw_breakpoint = remote_check_watch_resources;
   remote_ops.to_insert_hw_breakpoint = remote_insert_hw_breakpoint;
   remote_ops.to_remove_hw_breakpoint = remote_remove_hw_breakpoint;
+  remote_ops.to_region_ok_for_hw_watchpoint
+     = remote_region_ok_for_hw_watchpoint;
   remote_ops.to_insert_watchpoint = remote_insert_watchpoint;
   remote_ops.to_remove_watchpoint = remote_remove_watchpoint;
   remote_ops.to_kill = remote_kill;
@@ -10750,6 +10766,15 @@ Specify a negative limit for unlimited."),
 			    NULL, NULL, /* FIXME: i18n: The maximum
 					   number of target hardware
 					   watchpoints is %s.  */
+			    &remote_set_cmdlist, &remote_show_cmdlist);
+  add_setshow_zinteger_cmd ("hardware-watchpoint-length-limit", no_class,
+			    &remote_hw_watchpoint_length_limit, _("\
+Set the maximum length (in bytes) of a target hardware watchpoint."), _("\
+Show the maximum length (in bytes) of a target hardware watchpoint."), _("\
+Specify a negative limit for unlimited."),
+			    NULL, NULL, /* FIXME: i18n: The maximum
+                                           length (in bytes) of a target
+                                           hardware watchpoint is %s.  */
 			    &remote_set_cmdlist, &remote_show_cmdlist);
   add_setshow_zinteger_cmd ("hardware-breakpoint-limit", no_class,
 			    &remote_hw_breakpoint_limit, _("\

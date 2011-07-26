@@ -16655,6 +16655,18 @@ responses.
 Restrict @value{GDBN} to using @var{limit} remote hardware breakpoint or
 watchpoints.  A limit of -1, the default, is treated as unlimited.
 
+@cindex limit hardware watchpoints length
+@cindex remote target, limit watchpoints length
+@anchor{set remote hardware-watchpoint-length-limit}
+@item set remote hardware-watchpoint-length-limit @var{limit}
+Restrict @value{GDBN} to using @var{limit} bytes for the maximum length of
+a remote hardware watchpoint.  A limit of -1, the default, is treated
+as unlimited.
+
+@item show remote hardware-watchpoint-length-limit
+Show the current limit (in bytes) of the maximum length of
+a remote hardware watchpoint.
+
 @item set remote exec-file @var{filename}
 @itemx show remote exec-file
 @anchor{set remote exec-file}
