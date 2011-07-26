@@ -185,6 +185,9 @@ struct program_space
        solib.c.  */
     struct so_list *so_list;
 
+    /* Number of calls to solib_add.  */
+    unsigned solib_add_generation;
+
     /* Per pspace data-pointers required by other GDB modules.  */
     void **data;
     unsigned num_data;

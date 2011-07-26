@@ -914,6 +914,8 @@ solib_add (char *pattern, int from_tty,
 {
   struct so_list *gdb;
 
+  current_program_space->solib_add_generation++;
+
   if (pattern)
     {
       char *re_err = re_comp (pattern);

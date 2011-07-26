@@ -1,3 +1,10 @@
+2011-07-26  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* progspace.h (struct program_space): Add solib_add_generation.
+	* infcmd.c (post_create_inferior): Only call solib_add if not
+	already done.
+	* solib.c (solib_add): Increment solib_add_generation.
+
 2011-07-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix implicit pointer offsets.
