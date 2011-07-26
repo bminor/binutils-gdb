@@ -174,7 +174,7 @@ append_command (char *cmd, int from_tty)
 
 static void
 dump_binary_file (const char *filename, const char *mode, 
-		  const bfd_byte *buf, int len)
+		  const bfd_byte *buf, ULONGEST len)
 {
   FILE *file;
   int status;
@@ -188,7 +188,7 @@ dump_binary_file (const char *filename, const char *mode,
 static void
 dump_bfd_file (const char *filename, const char *mode, 
 	       const char *target, CORE_ADDR vaddr, 
-	       const bfd_byte *buf, int len)
+	       const bfd_byte *buf, ULONGEST len)
 {
   bfd *obfd;
   asection *osection;

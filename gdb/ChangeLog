@@ -1,3 +1,9 @@
+2011-07-26  Sterling Augustine  <saugustine@google.com>
+
+	* cli/cli-dump.c (dump_binary_file): Change parameter type to
+	ULONGEST.
+	(dump_bfd_file): Likewise.
+
 2011-07-26  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* remote.c (remote_region_ok_for_hw_watchpoint): New function.
