@@ -1701,7 +1701,7 @@ md_convert_frag (bfd *   abfd ATTRIBUTE_UNUSED,
 	  reloc_adjust = 1;
 	  break;
 	case OPCODE (OT_beq, 5): /* BEQ.A - synthetic.  */
-	  op[0] = 0x1e; /* bne.s .+4.  */
+	  op[0] = 0x1d; /* bne.s .+5.  */
 	  op[1] = 0x04; /* bra.a dsp:24.  */
 	  disp -= 1;
 #if RX_OPCODE_BIG_ENDIAN
@@ -1739,7 +1739,7 @@ md_convert_frag (bfd *   abfd ATTRIBUTE_UNUSED,
 	  reloc_adjust = 1;
 	  break;
 	case OPCODE (OT_bne, 5): /* BNE.A - synthetic.  */
-	  op[0] = 0x15; /* beq.s .+4.  */
+	  op[0] = 0x15; /* beq.s .+5.  */
 	  op[1] = 0x04; /* bra.a dsp:24.  */
 	  disp -= 1;
 #if RX_OPCODE_BIG_ENDIAN
