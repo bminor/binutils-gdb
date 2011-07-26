@@ -9332,6 +9332,26 @@ operation.
 
 If a line number is specified, the contents of that line will be
 printed in hex.
+
+@item set dcache size @var{size}
+@cindex dcache size
+@kindex set dcache size
+Set maximum number of entries in dcache (dcache depth above).
+
+@item set dcache line-size @var{line-size}
+@cindex dcache line-size
+@kindex set dcache line-size
+Set number of bytes each dcache entry caches (dcache width above).
+Must be a power of 2.
+
+@item show dcache size
+@kindex show dcache size
+Show maximum number of dcache entries.  See also @ref{Caching Remote Data, info dcache}.
+
+@item show dcache line-size
+@kindex show dcache line-size
+Show default size of dcache lines.  See also @ref{Caching Remote Data, info dcache}.
+
 @end table
 
 @node Searching Memory

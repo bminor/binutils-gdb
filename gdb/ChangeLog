@@ -1,5 +1,20 @@
 2011-07-26  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
+	* NEWS: Mention dcache configuration.
+	* dcache.c (dcache_set_list, dcache_show_list): New variables.
+	(dcache_size, dcache_line_size): New variables.
+	(LINE_SIZE_MASK, XFORM, MASK): Adjust.
+	(struct dcache_block): Make it expandable.
+	(struct dcache_struct): New field.
+	(dcache_invalidate): Discard freelist upon dcache_line_size changes.
+	(dcache_hit, dcache_alloc, dcache_peek_byte): Adjust.
+	(dcache_poke_byte, dcache_print_line): Adjust.
+	(set_dcache_size, set_dcache_line_size): New functions.
+	(set_dcache_command, show_dcache_command): New functions.
+	(_initialize_dcache): Add new commands.
+
+2011-07-26  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
 	* progspace.h (struct program_space): Add solib_add_generation.
 	* infcmd.c (post_create_inferior): Only call solib_add if not
 	already done.

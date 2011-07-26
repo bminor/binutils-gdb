@@ -1,3 +1,8 @@
+2011-07-26  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* gdb.texinfo (Caching Remote Data): Document {set,show} dcache
+	size and line-size.
+
 2011-07-21  Matt Rice  <ratmice@gmail.com>
 
 	PR macros/12999

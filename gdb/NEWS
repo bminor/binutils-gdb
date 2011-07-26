@@ -74,6 +74,9 @@ QTDisable
 
   Dynamically disable a tracepoint in a started trace experiment.
 
+* Dcache size (number of lines) and line-size are now runtime-configurable
+  via "set dcache line" and "set dcache line-size" commands.
+
 *** Changes in GDB 7.3
 
 * GDB has a new command: "thread find [REGEXP]".
