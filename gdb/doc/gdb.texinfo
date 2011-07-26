@@ -13895,16 +13895,34 @@ __read_nocancel + 6 in section .text of /usr/lib64/libc.so.6
 
 @kindex whatis
 @item whatis [@var{arg}]
-Print the data type of @var{arg}, which can be either an expression or
-a data type.  With no argument, print the data type of @code{$}, the
-last value in the value history.  If @var{arg} is an expression, it is
-not actually evaluated, and any side-effecting operations (such as
-assignments or function calls) inside it do not take place.  If
-@var{arg} is a type name, it may be the name of a type or typedef, or
-for C code it may have the form @samp{class @var{class-name}},
-@samp{struct @var{struct-tag}}, @samp{union @var{union-tag}} or
-@samp{enum @var{enum-tag}}.
-@xref{Expressions, ,Expressions}.
+Print the data type of @var{arg}, which can be either an expression
+or a name of a data type.  With no argument, print the data type of
+@code{$}, the last value in the value history.
+
+If @var{arg} is an expression (@pxref{Expressions, ,Expressions}), it
+is not actually evaluated, and any side-effecting operations (such as
+assignments or function calls) inside it do not take place.
+
+If @var{arg} is a variable or an expression, @code{whatis} prints its
+literal type as it is used in the source code.  If the type was
+defined using a @code{typedef}, @code{whatis} will @emph{not} print
+the data type underlying the @code{typedef}.  If the type of the
+variable or the expression is a compound data type, such as
+@code{struct} or  @code{class}, @code{whatis} never prints their
+fields or methods.  It just prints the @code{struct}/@code{class}
+name (a.k.a.@: its @dfn{tag}).  If you want to see the members of
+such a compound data type, use @code{ptype}.
+
+If @var{arg} is a type name that was defined using @code{typedef},
+@code{whatis} @dfn{unrolls} only one level of that @code{typedef}.
+Unrolling means that @code{whatis} will show the underlying type used
+in the @code{typedef} declaration of @var{arg}.  However, if that
+underlying type is also a @code{typedef}, @code{whatis} will not
+unroll it.
+
+For C code, the type names may also have the form @samp{class
+@var{class-name}}, @samp{struct @var{struct-tag}}, @samp{union
+@var{union-tag}} or @samp{enum @var{enum-tag}}.
 
 @kindex ptype
 @item ptype [@var{arg}]
@@ -13912,10 +13930,23 @@ for C code it may have the form @samp{class @var{class-name}},
 detailed description of the type, instead of just the name of the type.
 @xref{Expressions, ,Expressions}.
 
+Contrary to @code{whatis}, @code{ptype} always unrolls any
+@code{typedef}s in its argument declaration, whether the argument is
+a variable, expression, or a data type.  This means that @code{ptype}
+of a variable or an expression will not print literally its type as
+present in the source code---use @code{whatis} for that.  @code{typedef}s at
+the pointer or reference targets are also unrolled.  Only @code{typedef}s of
+fields, methods and inner @code{class typedef}s of @code{struct}s,
+@code{class}es and @code{union}s are not unrolled even with @code{ptype}.
+
 For example, for this variable declaration:
 
 @smallexample
-struct complex @{double real; double imag;@} v;
+typedef double real_t;
+struct complex @{ real_t real; double imag; @};
+typedef struct complex complex_t;
+complex_t var;
+real_t *real_pointer_var;
 @end smallexample
 
 @noindent
@@ -13923,13 +13954,26 @@ the two commands give this output:
 
 @smallexample
 @group
-(@value{GDBP}) whatis v
-type = struct complex
-(@value{GDBP}) ptype v
+(@value{GDBP}) whatis var
+type = complex_t
+(@value{GDBP}) ptype var
 type = struct complex @{
-    double real;
+    real_t real;
     double imag;
 @}
+(@value{GDBP}) whatis complex_t
+type = struct complex
+(@value{GDBP}) whatis struct complex
+type = struct complex
+(@value{GDBP}) ptype struct complex
+type = struct complex @{
+    real_t real;
+    double imag;
+@}
+(@value{GDBP}) whatis real_pointer_var
+type = real_t *
+(@value{GDBP}) ptype real_pointer_var
+type = double *
 @end group
 @end smallexample
 

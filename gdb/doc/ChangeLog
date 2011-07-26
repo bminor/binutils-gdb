@@ -1,3 +1,10 @@
+2011-07-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (whatis, ptype): Highlight their differences.  Describe
+	typedefs unrolling.  Extend the sample code by an inner typedef and
+	outer typedefs unrolling.
+
 2011-07-26  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* gdb.texinfo (Caching Remote Data): Document {set,show} dcache
