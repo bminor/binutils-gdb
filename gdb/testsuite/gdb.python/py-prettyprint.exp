@@ -33,9 +33,9 @@ gdb_start
 # Skip all tests if Python scripting is not enabled.
 if { [skip_python_tests] } { continue }
 
-proc run_lang_tests {lang} {
-    global srcdir subdir srcfile binfile testfile hex
-    if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}-${lang}" executable "debug $lang"] != "" } {
+proc run_lang_tests {exefile lang} {
+    global srcdir subdir srcfile testfile hex
+    if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${exefile}" executable "debug $lang"] != "" } {
 	untested "Couldn't compile ${srcfile} in $lang mode"
 	return -1
     }
@@ -46,7 +46,7 @@ proc run_lang_tests {lang} {
     gdb_exit
     gdb_start
     gdb_reinitialize_dir $srcdir/$subdir
-    gdb_load ${binfile}-${lang}
+    gdb_load ${exefile}
 
     if ![runto_main ] then {
 	perror "couldn't run to breakpoint"
@@ -113,15 +113,10 @@ proc run_lang_tests {lang} {
     remote_file host delete ${remote_python_file}
 }
 
-run_lang_tests "c"
-run_lang_tests "c++"
+run_lang_tests "${binfile}" "c"
+run_lang_tests "${binfile}-cxx" "c++"
 
 # Run various other tests.
-
-if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable "debug"] != "" } {
-    untested "Couldn't compile ${srcfile}"
-    return -1
-}
 
 # Start with a fresh gdb.
 gdb_exit

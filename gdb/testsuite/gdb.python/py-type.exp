@@ -31,23 +31,23 @@ if [get_compiler_info not-used c++] {
 }
 
 # Build inferior to language specification.
-proc build_inferior {lang} {
-  global srcdir subdir srcfile binfile testfile hex
+proc build_inferior {exefile lang} {
+  global srcdir subdir srcfile testfile hex
 
-  if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}-${lang}" executable "debug $lang"] != "" } {
+  if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${exefile}" executable "debug $lang"] != "" } {
       untested "Couldn't compile ${srcfile} in $lang mode"
       return -1
   }
 }
 
 # Restart GDB.
-proc restart_gdb {lang} { 
-  global srcdir subdir srcfile binfile testfile hex
+proc restart_gdb {exefile} { 
+  global srcdir subdir srcfile testfile hex
 
   gdb_exit
   gdb_start
   gdb_reinitialize_dir $srcdir/$subdir
-  gdb_load ${binfile}-${lang}
+  gdb_load ${exefile}
 
   if ![runto_main ] then {
       perror "couldn't run to breakpoint"
@@ -161,8 +161,8 @@ proc test_template {} {
 }
 
 # Perform C Tests.
-build_inferior "c"
-restart_gdb "c"
+build_inferior "${binfile}" "c"
+restart_gdb "${binfile}"
 
 # Skip all tests if Python scripting is not enabled.
 if { [skip_python_tests] } { continue }
@@ -171,8 +171,8 @@ runto_bp "break to inspect struct and array."
 test_fields "c"
 
 # Perform C++ Tests.
-build_inferior "c++"
-restart_gdb "c++"
+build_inferior "${binfile}-cxx" "c++"
+restart_gdb "${binfile}-cxx"
 runto_bp "break to inspect struct and array."
 test_fields "c++"
 test_base_class

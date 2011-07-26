@@ -25,9 +25,15 @@ load_lib gdb-python.exp
 set testfile "py-value"
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
-if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-    untested "Couldn't compile ${srcfile}"
-    return -1
+
+# Build inferior to language specification.
+proc build_inferior {exefile lang} {
+  global srcdir subdir srcfile testfile hex
+
+  if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${exefile}" executable "debug $lang"] != "" } {
+      untested "Couldn't compile ${srcfile} in $lang mode"
+      return -1
+  }
 }
 
 proc test_value_creation {} {
@@ -323,19 +329,15 @@ proc test_value_after_death {} {
 # the type of the value was not being checked before allowing a
 # subscript operation to proceed.
 
-proc test_subscript_regression {lang} {
+proc test_subscript_regression {exefile lang} {
 
- global srcdir subdir srcfile binfile testfile hex
- if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}-${lang}" executable "debug $lang"] != "" } {
-     untested "Couldn't compile ${srcfile} in $lang mode"
-     return -1
- }
+ global srcdir subdir
 
  # Start with a fresh gdb.
  gdb_exit
  gdb_start
  gdb_reinitialize_dir $srcdir/$subdir
- gdb_load ${binfile}-${lang}
+ gdb_load ${exefile}
 
  if ![runto_main ] then {
      perror "couldn't run to breakpoint"
@@ -426,6 +428,9 @@ proc test_value_hash {} {
     gdb_test "python print one.__hash__() == hash(one)" "True" "Test inbuilt hash"
 }
 
+# Build C and C++ versions of executable
+build_inferior "${binfile}" "c"
+build_inferior "${binfile}-cxx" "c++"
 
 # Start with a fresh gdb.
 
@@ -457,7 +462,6 @@ test_inferior_function_call
 test_lazy_strings
 test_value_after_death
 
-# The following test recompiles the binary to test either C or C++
-# values. 
-test_subscript_regression "c++"
-test_subscript_regression "c"
+# Test either C or C++ values. 
+test_subscript_regression "${binfile}" "c"
+test_subscript_regression "${binfile}-cxx" "c++"

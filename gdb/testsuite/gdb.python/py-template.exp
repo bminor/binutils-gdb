@@ -40,15 +40,15 @@ gdb_reinitialize_dir $srcdir/$subdir
 # Skip all tests if Python scripting is not enabled.
 if { [skip_python_tests] } { continue }
 
-proc test_template_arg {name type} {
-    global testfile srcdir subdir srcfile binfile
-    if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}-${name}" \
+proc test_template_arg {exefile type} {
+    global testfile srcdir subdir srcfile
+    if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${exefile}" \
 		executable \
 	  	[list debug c++ additional_flags="-DTYPE=$type"]] != "" } {
 	untested $type
 	return -1
     }
-    gdb_load ${binfile}-${name}
+    gdb_load ${exefile}
     if ![runto_main ] then {
 	perror "couldn't run to breakpoint"
 	return
@@ -62,11 +62,11 @@ proc test_template_arg {name type} {
     gdb_test "python print foo.type.template_argument(0)" $t $type
 }
 
-test_template_arg "ci" "const int"
-test_template_arg "vi" "volatile int"
-test_template_arg "cir" "const int &"
-test_template_arg "vir" "volatile int &"
-test_template_arg "vipc" "volatile int * const"
-test_template_arg "vipcp" "volatile int * const *"
-test_template_arg "cipv" "const int * volatile"
-test_template_arg "cipvpcpvp" "const int * volatile * const * volatile *"
+test_template_arg "${binfile}-ci" "const int"
+test_template_arg "${binfile}-vi" "volatile int"
+test_template_arg "${binfile}-cir" "const int &"
+test_template_arg "${binfile}-vir" "volatile int &"
+test_template_arg "${binfile}-vipc" "volatile int * const"
+test_template_arg "${binfile}-vipcp" "volatile int * const *"
+test_template_arg "${binfile}-cipv" "const int * volatile"
+test_template_arg "${binfile}-cipvpcpvp" "const int * volatile * const * volatile *"
