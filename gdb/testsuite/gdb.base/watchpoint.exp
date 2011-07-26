@@ -630,6 +630,23 @@ proc test_constant_watchpoint {} {
     gdb_test_no_output "delete \$bpnum" "delete watchpoint `7 + count'"
 }
 
+proc test_disable_enable_software_watchpoint {} {
+    # This is regression test for a bug that caused `enable' to fail
+    # for software watchpoints.
+
+    # Watch something not memory to force a software watchpoint.
+    gdb_test {watch $pc} ".*atchpoint \[0-9\]+: .pc"
+
+    gdb_test_no_output "disable \$bpnum" "disable watchpoint `\$pc'"
+    gdb_test_no_output "enable \$bpnum" "reenable watchpoint `\$pc'"
+
+    gdb_test "info watchpoint \$bpnum" \
+	".*watchpoint\[ \t\]+keep\[ \t\]+y\[ \t\]+.pc.*" \
+	"watchpoint `\$pc' is enabled"
+
+    gdb_test_no_output "delete \$bpnum" "delete watchpoint `\$pc'"
+}
+
 proc test_watch_location {} {
     gdb_breakpoint [gdb_get_line_number "func5 breakpoint here"]
     gdb_continue_to_breakpoint "func5 breakpoint here"
@@ -902,6 +919,8 @@ if [initialize] then {
     }
 
     test_constant_watchpoint
+
+    test_disable_enable_software_watchpoint
 
     test_watch_location
 }

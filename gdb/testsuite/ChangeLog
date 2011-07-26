@@ -1,3 +1,9 @@
+2011-07-26  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.base/watchpoint.exp
+	(test_disable_enable_software_watchpoint): New procedure.
+	(top level): Run it.
+
 2011-07-26  Ulrich Weigand  <ulrich.weigand@linaro.org>
 
 	* gdb.python/py-mi.exp: Avoid '+' in filenames.  Call C version of

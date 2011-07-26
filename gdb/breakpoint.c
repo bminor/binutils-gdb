@@ -8637,7 +8637,8 @@ resources_needed_watchpoint (const struct bp_location *bl)
 static int
 works_in_software_mode_watchpoint (const struct breakpoint *b)
 {
-  return b->type == bp_hardware_watchpoint;
+  /* Read and access watchpoints only work with hardware support.  */
+  return b->type == bp_watchpoint || b->type == bp_hardware_watchpoint;
 }
 
 static enum print_stop_action

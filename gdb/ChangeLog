@@ -1,3 +1,8 @@
+2011-07-26  Pedro Alves  <pedro@codesourcery.com>
+
+	* breakpoint.c (works_in_software_mode_watchpoint): Also return
+	true for software watchpoints.
+
 2011-07-26  Joel Brobecker  <brobecker@adacore.com>
 
 	GDB 7.3 released.
