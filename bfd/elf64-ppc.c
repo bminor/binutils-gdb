@@ -34,6 +34,7 @@
 #include "elf-bfd.h"
 #include "elf/ppc64.h"
 #include "elf64-ppc.h"
+#include "dwarf2.h"
 
 static bfd_reloc_status_type ppc64_elf_ha_reloc
   (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);
@@ -3720,6 +3721,7 @@ struct ppc_link_hash_table
   asection *sfpr;
   asection *brlt;
   asection *relbrlt;
+  asection *glink_eh_frame;
 
   /* Shortcut to .__tls_get_addr and __tls_get_addr.  */
   struct ppc_link_hash_entry *tls_get_addr;
@@ -4169,6 +4171,18 @@ create_linkage_sections (bfd *dynobj, struct bfd_link_info *info)
   if (htab->glink == NULL
       || ! bfd_set_section_alignment (dynobj, htab->glink, 3))
     return FALSE;
+
+  if (!info->no_ld_generated_unwind_info)
+    {
+      flags = (SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_HAS_CONTENTS
+	       | SEC_IN_MEMORY | SEC_LINKER_CREATED);
+      htab->glink_eh_frame = bfd_make_section_anyway_with_flags (dynobj,
+								 ".eh_frame",
+								 flags);
+      if (htab->glink_eh_frame == NULL
+	  || !bfd_set_section_alignment (abfd, htab->glink_eh_frame, 2))
+	return FALSE;
+    }
 
   flags = SEC_ALLOC | SEC_LINKER_CREATED;
   htab->iplt = bfd_make_section_anyway_with_flags (dynobj, ".iplt", flags);
@@ -9025,6 +9039,12 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	  /* Strip this section if we don't need it; see the
 	     comment below.  */
 	}
+      else if (s == htab->glink_eh_frame)
+	{
+	  if (!bfd_is_abs_section (s->output_section))
+	    /* Not sized yet.  */
+	    continue;
+	}
       else if (CONST_STRNEQ (s->name, ".rela"))
 	{
 	  if (s->size != 0)
@@ -10826,6 +10846,20 @@ group_sections (struct ppc_link_hash_table *htab,
 #undef PREV_SEC
 }
 
+static const unsigned char glink_eh_frame_cie[] =
+{
+  0, 0, 0, 16,				/* length.  */
+  0, 0, 0, 0,				/* id.  */
+  1,					/* CIE version.  */
+  'z', 'R', 0,				/* Augmentation string.  */
+  4,					/* Code alignment.  */
+  0x78,					/* Data alignment.  */
+  65,					/* RA reg.  */
+  1,					/* Augmentation size.  */
+  DW_EH_PE_pcrel | DW_EH_PE_sdata4,	/* FDE encoding.  */
+  DW_CFA_def_cfa, 1, 0			/* def_cfa: r1 offset 0.  */
+};
+
 /* Determine and set the size of the stub section for a final link.
 
    The basic idea here is to examine all the relocations looking for
@@ -11169,6 +11203,25 @@ ppc64_elf_size_stubs (struct bfd_link_info *info, bfd_signed_vma group_size,
 	  htab->glink->flags |= SEC_RELOC;
 	}
 
+      if (htab->glink_eh_frame != NULL
+	  && !bfd_is_abs_section (htab->glink_eh_frame->output_section)
+	  && (htab->glink_eh_frame->flags & SEC_EXCLUDE) == 0)
+	{
+	  bfd_size_type size = 0;
+
+	  for (stub_sec = htab->stub_bfd->sections;
+	       stub_sec != NULL;
+	       stub_sec = stub_sec->next)
+	    if ((stub_sec->flags & SEC_LINKER_CREATED) == 0)
+	      size += 20;
+	  if (htab->glink != NULL && htab->glink->size != 0)
+	    size += 24;
+	  if (size != 0)
+	    size += sizeof (glink_eh_frame_cie);
+	  htab->glink_eh_frame->rawsize = htab->glink_eh_frame->size;
+	  htab->glink_eh_frame->size = size;
+	}
+
       for (stub_sec = htab->stub_bfd->sections;
 	   stub_sec != NULL;
 	   stub_sec = stub_sec->next)
@@ -11178,7 +11231,9 @@ ppc64_elf_size_stubs (struct bfd_link_info *info, bfd_signed_vma group_size,
 
       /* Exit from this loop when no stubs have been added, and no stubs
 	 have changed size.  */
-      if (stub_sec == NULL)
+      if (stub_sec == NULL
+	  && (htab->glink_eh_frame == NULL
+	      || htab->glink_eh_frame->rawsize == htab->glink_eh_frame->size))
 	break;
 
       /* Ask the linker to do its stuff.  */
@@ -11393,6 +11448,100 @@ ppc64_elf_build_stubs (bfd_boolean emit_stub_syms,
 	return FALSE;
     }
 
+  if (htab->glink_eh_frame != NULL
+      && htab->glink_eh_frame->size != 0)
+    {
+      bfd_vma val;
+
+      p = bfd_zalloc (htab->glink_eh_frame->owner, htab->glink_eh_frame->size);
+      if (p == NULL)
+	return FALSE;
+      htab->glink_eh_frame->contents = p;
+
+      htab->glink_eh_frame->rawsize = htab->glink_eh_frame->size;
+
+      memcpy (p, glink_eh_frame_cie, sizeof (glink_eh_frame_cie));
+      /* CIE length (rewrite in case little-endian).  */
+      bfd_put_32 (htab->elf.dynobj, sizeof (glink_eh_frame_cie) - 4, p);
+      p += sizeof (glink_eh_frame_cie);
+
+      for (stub_sec = htab->stub_bfd->sections;
+	   stub_sec != NULL;
+	   stub_sec = stub_sec->next)
+	if ((stub_sec->flags & SEC_LINKER_CREATED) == 0)
+	  {
+	    /* FDE length.  */
+	    bfd_put_32 (htab->elf.dynobj, 16, p);
+	    p += 4;
+	    /* CIE pointer.  */
+	    val = p - htab->glink_eh_frame->contents;
+	    bfd_put_32 (htab->elf.dynobj, val, p);
+	    p += 4;
+	    /* Offset to stub section.  */
+	    val = (stub_sec->output_section->vma
+		   + stub_sec->output_offset);
+	    val -= (htab->glink_eh_frame->output_section->vma
+		    + htab->glink_eh_frame->output_offset);
+	    val -= p - htab->glink_eh_frame->contents;
+	    if (val + 0x80000000 > 0xffffffff)
+	      {
+		info->callbacks->einfo
+		  (_("%s offset too large for .eh_frame sdata4 encoding"),
+		   stub_sec->name);
+		return FALSE;
+	      }
+	    bfd_put_32 (htab->elf.dynobj, val, p);
+	    p += 4;
+	    /* stub section size.  */
+	    bfd_put_32 (htab->elf.dynobj, stub_sec->rawsize, p);
+	    p += 4;
+	    /* Augmentation.  */
+	    p += 1;
+	    /* Pad.  */
+	    p += 3;
+	  }
+      if (htab->glink != NULL && htab->glink->size != 0)
+	{
+	  /* FDE length.  */
+	  bfd_put_32 (htab->elf.dynobj, 20, p);
+	  p += 4;
+	  /* CIE pointer.  */
+	  val = p - htab->glink_eh_frame->contents;
+	  bfd_put_32 (htab->elf.dynobj, val, p);
+	  p += 4;
+	  /* Offset to .glink.  */
+	  val = (htab->glink->output_section->vma
+		 + htab->glink->output_offset
+		 + 8);
+	  val -= (htab->glink_eh_frame->output_section->vma
+		  + htab->glink_eh_frame->output_offset);
+	  val -= p - htab->glink_eh_frame->contents;
+	  if (val + 0x80000000 > 0xffffffff)
+	    {
+	      info->callbacks->einfo
+		(_("%s offset too large for .eh_frame sdata4 encoding"),
+		 htab->glink->name);
+	      return FALSE;
+	    }
+	  bfd_put_32 (htab->elf.dynobj, val, p);
+	  p += 4;
+	  /* .glink size.  */
+	  bfd_put_32 (htab->elf.dynobj, htab->glink->rawsize - 8, p);
+	  p += 4;
+	  /* Augmentation.  */
+	  p += 1;
+
+	  *p++ = DW_CFA_advance_loc + 1;
+	  *p++ = DW_CFA_register;
+	  *p++ = 65;
+	  *p++ = 12;
+	  *p++ = DW_CFA_advance_loc + 4;
+	  *p++ = DW_CFA_restore_extended;
+	  *p++ = 65;
+	}
+      htab->glink_eh_frame->size = p - htab->glink_eh_frame->contents;
+    }
+
   /* Build the stubs as directed by the stub hash table.  */
   bfd_hash_traverse (&htab->stub_hash_table, ppc_build_one_stub, info);
 
@@ -11410,7 +11559,9 @@ ppc64_elf_build_stubs (bfd_boolean emit_stub_syms,
       }
 
   if (stub_sec != NULL
-      || htab->glink->rawsize != htab->glink->size)
+      || htab->glink->rawsize != htab->glink->size
+      || (htab->glink_eh_frame != NULL
+	  && htab->glink_eh_frame->rawsize != htab->glink_eh_frame->size))
     {
       htab->stub_error = TRUE;
       info->callbacks->einfo (_("stubs don't match calculated size\n"));
@@ -13557,6 +13708,14 @@ ppc64_elf_finish_dynamic_sections (bfd *output_bfd,
 				       elf_section_data (htab->glink)->rela.hdr,
 				       elf_section_data (htab->glink)->relocs,
 				       NULL))
+    return FALSE;
+
+
+  if (htab->glink_eh_frame != NULL
+      && htab->glink_eh_frame->sec_info_type == ELF_INFO_TYPE_EH_FRAME
+      && !_bfd_elf_write_section_eh_frame (output_bfd, info,
+					   htab->glink_eh_frame,
+					   htab->glink_eh_frame->contents))
     return FALSE;
 
   /* We need to handle writing out multiple GOT sections ourselves,

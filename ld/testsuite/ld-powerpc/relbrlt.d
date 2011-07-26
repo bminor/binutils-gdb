@@ -1,6 +1,6 @@
 #source: relbrlt.s
 #as: -a64
-#ld: -melf64ppc --emit-relocs
+#ld: -melf64ppc --no-ld-generated-unwind-info --emit-relocs
 #objdump: -Dr
 
 .*:     file format elf64-powerpc

@@ -1,5 +1,6 @@
 # This shell script emits a C file. -*- C -*-
-#   Copyright 2003, 2005, 2007, 2008, 2009 Free Software Foundation, Inc.
+#   Copyright 2003, 2005, 2007, 2008, 2009, 2010, 2011
+#   Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -176,8 +177,8 @@ fi
 # Define some shell vars to insert bits of code into the standard elf
 # parse_args and list_options functions.
 #
-PARSE_AND_LIST_PROLOGUE='
-#define OPTION_NO_TLS_OPT		301
+PARSE_AND_LIST_PROLOGUE=${PARSE_AND_LIST_PROLOGUE}'
+#define OPTION_NO_TLS_OPT		321
 #define OPTION_NO_TLS_GET_ADDR_OPT	(OPTION_NO_TLS_OPT + 1)
 #define OPTION_NEW_PLT			(OPTION_NO_TLS_GET_ADDR_OPT + 1)
 #define OPTION_OLD_PLT			(OPTION_NEW_PLT + 1)
@@ -186,7 +187,7 @@ PARSE_AND_LIST_PROLOGUE='
 #define OPTION_NO_STUBSYMS		(OPTION_STUBSYMS + 1)
 '
 
-PARSE_AND_LIST_LONGOPTS='
+PARSE_AND_LIST_LONGOPTS=${PARSE_AND_LIST_LONGOPTS}'
   { "emit-stub-syms", no_argument, NULL, OPTION_STUBSYMS },
   { "no-emit-stub-syms", no_argument, NULL, OPTION_NO_STUBSYMS },
   { "no-tls-optimize", no_argument, NULL, OPTION_NO_TLS_OPT },
@@ -196,7 +197,7 @@ PARSE_AND_LIST_LONGOPTS='
   { "sdata-got", no_argument, NULL, OPTION_OLD_GOT },
 '
 
-PARSE_AND_LIST_OPTIONS='
+PARSE_AND_LIST_OPTIONS=${PARSE_AND_LIST_OPTIONS}'
   fprintf (file, _("\
   --emit-stub-syms            Label linker stubs with a symbol.\n\
   --no-emit-stub-syms         Don'\''t label linker stubs with a symbol.\n\
@@ -208,7 +209,7 @@ PARSE_AND_LIST_OPTIONS='
 		   ));
 '
 
-PARSE_AND_LIST_ARGS_CASES='
+PARSE_AND_LIST_ARGS_CASES=${PARSE_AND_LIST_ARGS_CASES}'
     case OPTION_STUBSYMS:
       emit_stub_syms = 1;
       break;

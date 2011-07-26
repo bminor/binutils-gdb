@@ -1,3 +1,16 @@
+2011-07-26  Alan Modra  <amodra@gmail.com>
+
+	* emulparams/elf32ppc.sh: Source plt_unwind.sh.
+	* emulparams/elf64ppc.sh: Likewise.
+	* emultempl/ppc32elf.em (OPTION_NO_TLS_OPT): Adjust.
+	(PARSE_AND_LIST_PROLOGUE, PARSE_AND_LIST_LONGOPTS,
+	PARSE_AND_LIST_OPTIONS, PARSE_AND_LIST_ARGS_CASES): Append to
+	existing values.
+	* emultempl/ppc64elf.em (OPTION_STUBGROUP_SIZE): Adjust.
+	(PARSE_AND_LIST_PROLOGUE, PARSE_AND_LIST_LONGOPTS,
+	PARSE_AND_LIST_OPTIONS, PARSE_AND_LIST_ARGS_CASES): Append to
+	existing values.
+
 2011-07-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.am (ALL_64_EMULATIONS): Add eelf_k1om.o and

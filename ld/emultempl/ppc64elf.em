@@ -652,8 +652,8 @@ fi
 # Define some shell vars to insert bits of code into the standard elf
 # parse_args and list_options functions.
 #
-PARSE_AND_LIST_PROLOGUE='
-#define OPTION_STUBGROUP_SIZE		301
+PARSE_AND_LIST_PROLOGUE=${PARSE_AND_LIST_PROLOGUE}'
+#define OPTION_STUBGROUP_SIZE		321
 #define OPTION_PLT_STATIC_CHAIN		(OPTION_STUBGROUP_SIZE + 1)
 #define OPTION_NO_PLT_STATIC_CHAIN	(OPTION_PLT_STATIC_CHAIN + 1)
 #define OPTION_STUBSYMS			(OPTION_NO_PLT_STATIC_CHAIN + 1)
@@ -669,7 +669,7 @@ PARSE_AND_LIST_PROLOGUE='
 #define OPTION_NON_OVERLAPPING_OPD	(OPTION_NO_TOC_SORT + 1)
 '
 
-PARSE_AND_LIST_LONGOPTS='
+PARSE_AND_LIST_LONGOPTS=${PARSE_AND_LIST_LONGOPTS}'
   { "stub-group-size", required_argument, NULL, OPTION_STUBGROUP_SIZE },
   { "plt-static-chain", no_argument, NULL, OPTION_PLT_STATIC_CHAIN },
   { "no-plt-static-chain", no_argument, NULL, OPTION_NO_PLT_STATIC_CHAIN },
@@ -686,7 +686,7 @@ PARSE_AND_LIST_LONGOPTS='
   { "non-overlapping-opd", no_argument, NULL, OPTION_NON_OVERLAPPING_OPD },
 '
 
-PARSE_AND_LIST_OPTIONS='
+PARSE_AND_LIST_OPTIONS=${PARSE_AND_LIST_OPTIONS}'
   fprintf (file, _("\
   --stub-group-size=N         Maximum size of a group of input sections that\n\
                                 can be handled by one stub section.  A negative\n\
@@ -742,7 +742,7 @@ PARSE_AND_LIST_OPTIONS='
 		   ));
 '
 
-PARSE_AND_LIST_ARGS_CASES='
+PARSE_AND_LIST_ARGS_CASES=${PARSE_AND_LIST_ARGS_CASES}'
     case OPTION_STUBGROUP_SIZE:
       {
 	const char *end;

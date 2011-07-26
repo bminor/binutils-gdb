@@ -1,3 +1,21 @@
+2011-07-26  Alan Modra  <amodra@gmail.com>
+
+	* elf32-ppc.c: Include dwarf2.h.
+	(struct ppc_elf_link_hash_table): Add glink_eh_frame.
+	(ppc_elf_create_glink): Create .eh_frame section.
+	(glink_eh_frame_cie): New array.
+	(ppc_elf_size_dynamic_sections): Size glink_eh_frame.
+	(ppc_elf_finish_dynamic_sections): Write glink_eh_frame.
+	* elf64-ppc.c: Include dwarg2.h.
+	(struct ppc_link_hash_table): Add glink_eh_frame.
+	(create_linkage_sections): Create .eh_frame section.
+	(ppc64_elf_size_dynamic_sections): Arrange to drop unneeded
+	glink_eh_frame.
+	(glink_eh_frame_cie): New array.
+	(ppc64_elf_size_stubs): Size glink_eh_frame.
+	(ppc64_elf_build_stubs): Init glink_eh_frame contents.
+	(ppc64_elf_finish_dynamic_sections): Write glink_eh_frame.
+
 2011-07-25  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	PR ld/12815
@@ -12,10 +30,10 @@
 	called, missing preparations for relocs of the respective type.
 
 2011-07-24  Chao-ying Fu  <fu@mips.com>
-            Ilie Garbacea  <ilie@mips.com>
-            Maciej W. Rozycki  <macro@codesourcery.com>
-            Joseph Myers  <joseph@codesourcery.com>
-            Catherine Moore  <clm@codesourcery.com>
+	    Ilie Garbacea  <ilie@mips.com>
+	    Maciej W. Rozycki  <macro@codesourcery.com>
+	    Joseph Myers  <joseph@codesourcery.com>
+	    Catherine Moore  <clm@codesourcery.com>
 	    Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* archures.c (bfd_mach_mips_micromips): New macro.
@@ -248,7 +266,7 @@
 	* aout-adobe.c (aout_32_bfd_lookup_section_flags): New definition.
 	* aout-target.h (MY_bfd_lookup_section_flags): New definition.
 	* aout-tic30.c (MY_bfd_lookup_section_flags): New definition.
-        * bfd-in2.h: Regenerated.
+	* bfd-in2.h: Regenerated.
 	* bfd.c (bfd_lookup_section_flags): New definition.
 	* binary.c (binary_bfd_lookup_section_flags): New definition.
 	* bout.c (b_out_bfd_lookup_section_flags): New definition.
