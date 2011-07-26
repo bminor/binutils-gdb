@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add support for displaying the contents of .debug.macro sections.
+
 * Add --preprocessor-arg option to windres to specify additional options
   passed to preprocessor.
 

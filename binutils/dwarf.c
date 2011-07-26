@@ -1542,7 +1542,7 @@ read_and_display_attr_value (unsigned long attribute,
 	}
     }
 
-  if (do_loc)
+  if (do_loc || attribute == 0)
     return data;
 
   /* For some attributes we can display further information.  */
@@ -1960,6 +1960,7 @@ get_AT_name (unsigned long attribute)
     case DW_AT_GNU_all_tail_call_sites:		return "DW_AT_GNU_all_tail_call_sites";
     case DW_AT_GNU_all_call_sites:		return "DW_AT_GNU_all_call_sites";
     case DW_AT_GNU_all_source_call_sites:	return "DW_AT_GNU_all_source_call_sites";
+    case DW_AT_GNU_macros:			return "DW_AT_GNU_macros";
 
       /* UPC extension.  */
     case DW_AT_upc_threads_scaled:	return "DW_AT_upc_threads_scaled";
@@ -3446,6 +3447,321 @@ display_debug_macinfo (struct dwarf_section *section,
 	  break;
 	}
     }
+
+  return 1;
+}
+
+/* Given LINE_OFFSET into the .debug_line section, attempt to return
+   filename and dirname corresponding to file name table entry with index
+   FILEIDX.  Return NULL on failure.  */
+
+static unsigned char *
+get_line_filename_and_dirname (dwarf_vma line_offset, dwarf_vma fileidx,
+			       unsigned char **dir_name)
+{
+  struct dwarf_section *section = &debug_displays [line].section;
+  unsigned char *hdrptr, *dirtable, *file_name;
+  unsigned int offset_size, initial_length_size;
+  unsigned int version, opcode_base, bytes_read;
+  dwarf_vma length, diridx;
+
+  *dir_name = NULL;
+  if (section->start == NULL
+      || line_offset >= section->size
+      || fileidx == 0)
+    return NULL;
+
+  hdrptr = section->start + line_offset;
+  length = byte_get (hdrptr, 4);
+  hdrptr += 4;
+  if (length == 0xffffffff)
+    {
+      /* This section is 64-bit DWARF 3.  */
+      length = byte_get (hdrptr, 8);
+      hdrptr += 8;
+      offset_size = 8;
+      initial_length_size = 12;
+    }
+  else
+    {
+      offset_size = 4;
+      initial_length_size = 4;
+    }
+  if (length + initial_length_size > section->size)
+    return NULL;
+  version = byte_get (hdrptr, 2);
+  hdrptr += 2;
+  if (version != 2 && version != 3 && version != 4)
+    return NULL;
+  hdrptr += offset_size + 1;/* Skip prologue_length and min_insn_length.  */
+  if (version >= 4)
+    hdrptr++;		    /* Skip max_ops_per_insn.  */
+  hdrptr += 3;		    /* Skip default_is_stmt, line_base, line_range.  */
+  opcode_base = byte_get (hdrptr, 1);
+  if (opcode_base == 0)
+    return NULL;
+  hdrptr++;
+  hdrptr += opcode_base - 1;
+  dirtable = hdrptr;
+  /* Skip over dirname table.  */
+  while (*hdrptr != '\0')
+    hdrptr += strlen ((char *) hdrptr) + 1;
+  hdrptr++;		    /* Skip the NUL at the end of the table.  */
+  /* Now skip over preceding filename table entries.  */
+  for (; *hdrptr != '\0' && fileidx > 1; fileidx--)
+    {
+      hdrptr += strlen ((char *) hdrptr) + 1;
+      read_leb128 (hdrptr, &bytes_read, 0);
+      hdrptr += bytes_read;
+      read_leb128 (hdrptr, &bytes_read, 0);
+      hdrptr += bytes_read;
+      read_leb128 (hdrptr, &bytes_read, 0);
+      hdrptr += bytes_read;
+    }
+  if (*hdrptr == '\0')
+    return NULL;
+  file_name = hdrptr;
+  hdrptr += strlen ((char *) hdrptr) + 1;
+  diridx = read_leb128 (hdrptr, &bytes_read, 0);
+  if (diridx == 0)
+    return file_name;
+  for (; *dirtable != '\0' && diridx > 1; diridx--)
+    dirtable += strlen ((char *) dirtable) + 1;
+  if (*dirtable == '\0')
+    return NULL;
+  *dir_name = dirtable;
+  return file_name;
+}
+
+static int
+display_debug_macro (struct dwarf_section *section,
+		     void *file)
+{
+  unsigned char *start = section->start;
+  unsigned char *end = start + section->size;
+  unsigned char *curr = start;
+  unsigned char *extended_op_buf[256];
+  unsigned int bytes_read;
+
+  load_debug_section (str, file);
+  load_debug_section (line, file);
+
+  printf (_("Contents of the %s section:\n\n"), section->name);
+
+  while (curr < end)
+    {
+      unsigned int lineno, version, flags;
+      unsigned int offset_size = 4;
+      const char *string;
+      dwarf_vma line_offset = 0, sec_offset = curr - start, offset;
+      unsigned char **extended_ops = NULL;
+
+      version = byte_get (curr, 2);
+      curr += 2;
+
+      if (version != 4)
+	{
+	  error (_("Only GNU extension to DWARF 4 of %s is currently supported.\n"),
+		 section->name);
+	  return 0;
+	}
+
+      flags = byte_get (curr++, 1);
+      if (flags & 1)
+	offset_size = 8;
+      printf (_("  Offset:                      0x%lx\n"),
+	      (unsigned long) sec_offset);
+      printf (_("  Version:                     %d\n"), version);
+      printf (_("  Offset size:                 %d\n"), offset_size);
+      if (flags & 2)
+	{
+	  line_offset = byte_get (curr, offset_size);
+	  curr += offset_size;
+	  printf (_("  Offset into .debug_line:     0x%lx\n"),
+		  (unsigned long) line_offset);
+	}
+      if (flags & 4)
+	{
+	  unsigned int i, count = byte_get (curr++, 1), op;
+	  dwarf_vma nargs, n;
+	  memset (extended_op_buf, 0, sizeof (extended_op_buf));
+	  extended_ops = extended_op_buf;
+	  if (count)
+	    {
+	      printf (_("  Extension opcode arguments:\n"));
+	      for (i = 0; i < count; i++)
+		{
+		  op = byte_get (curr++, 1);
+		  extended_ops[op] = curr;
+		  nargs = read_leb128 (curr, &bytes_read, 0);
+		  curr += bytes_read;
+		  if (nargs == 0)
+		    printf (_("    DW_MACRO_GNU_%02x has no arguments\n"), op);
+		  else
+		    {
+		      printf (_("    DW_MACRO_GNU_%02x arguments: "), op);
+		      for (n = 0; n < nargs; n++)
+			{
+			  unsigned int form = byte_get (curr++, 1);
+			  printf ("%s%s", get_FORM_name (form),
+				  n == nargs - 1 ? "\n" : ", ");
+			  switch (form)
+			    {
+			    case DW_FORM_data1:
+			    case DW_FORM_data2:
+			    case DW_FORM_data4:
+			    case DW_FORM_data8:
+			    case DW_FORM_sdata:
+			    case DW_FORM_udata:
+			    case DW_FORM_block:
+			    case DW_FORM_block1:
+			    case DW_FORM_block2:
+			    case DW_FORM_block4:
+			    case DW_FORM_flag:
+			    case DW_FORM_string:
+			    case DW_FORM_strp:
+			    case DW_FORM_sec_offset:
+			      break;
+			    default:
+			      error (_("Invalid extension opcode form %s\n"),
+				     get_FORM_name (form));
+			      return 0;
+			    }
+			}
+		    }
+		}
+	    }
+	}
+      printf ("\n");
+
+      while (1)
+	{
+	  unsigned int op;
+
+	  if (curr >= end)
+	    {
+	      error (_(".debug_macro section not zero terminated\n"));
+	      return 0;
+	    }
+
+	  op = byte_get (curr++, 1);
+	  if (op == 0)
+	    break;
+
+	  switch (op)
+	    {
+	    case DW_MACRO_GNU_start_file:
+	      {
+		unsigned int filenum;
+		unsigned char *file_name = NULL, *dir_name = NULL;
+
+		lineno = read_leb128 (curr, &bytes_read, 0);
+		curr += bytes_read;
+		filenum = read_leb128 (curr, &bytes_read, 0);
+		curr += bytes_read;
+
+		if ((flags & 2) == 0)
+		  error (_("DW_MACRO_GNU_start_file used, but no .debug_line offset provided.\n"));
+		else
+		  file_name
+		    = get_line_filename_and_dirname (line_offset, filenum,
+						     &dir_name);
+		if (file_name == NULL)
+		  printf (_(" DW_MACRO_GNU_start_file - lineno: %d filenum: %d\n"),
+			  lineno, filenum);
+		else
+		  printf (_(" DW_MACRO_GNU_start_file - lineno: %d filenum: %d filename: %s%s%s\n"),
+			  lineno, filenum,
+			  dir_name != NULL ? (const char *) dir_name : "",
+			  dir_name != NULL ? "/" : "", file_name);
+	      }
+	      break;
+
+	    case DW_MACRO_GNU_end_file:
+	      printf (_(" DW_MACRO_GNU_end_file\n"));
+	      break;
+
+	    case DW_MACRO_GNU_define:
+	      lineno = read_leb128 (curr, &bytes_read, 0);
+	      curr += bytes_read;
+	      string = (char *) curr;
+	      curr += strlen (string) + 1;
+	      printf (_(" DW_MACRO_GNU_define - lineno : %d macro : %s\n"),
+		      lineno, string);
+	      break;
+
+	    case DW_MACRO_GNU_undef:
+	      lineno = read_leb128 (curr, &bytes_read, 0);
+	      curr += bytes_read;
+	      string = (char *) curr;
+	      curr += strlen (string) + 1;
+	      printf (_(" DW_MACRO_GNU_undef - lineno : %d macro : %s\n"),
+		      lineno, string);
+	      break;
+
+	    case DW_MACRO_GNU_define_indirect:
+	      lineno = read_leb128 (curr, &bytes_read, 0);
+	      curr += bytes_read;
+	      offset = byte_get (curr, offset_size);
+	      curr += offset_size;
+	      string = fetch_indirect_string (offset);
+	      printf (_(" DW_MACRO_GNU_define_indirect - lineno : %d macro : %s\n"),
+		      lineno, string);
+	      break;
+
+	    case DW_MACRO_GNU_undef_indirect:
+	      lineno = read_leb128 (curr, &bytes_read, 0);
+	      curr += bytes_read;
+	      offset = byte_get (curr, offset_size);
+	      curr += offset_size;
+	      string = fetch_indirect_string (offset);
+	      printf (_(" DW_MACRO_GNU_undef_indirect - lineno : %d macro : %s\n"),
+		      lineno, string);
+	      break;
+
+	    case DW_MACRO_GNU_transparent_include:
+	      offset = byte_get (curr, offset_size);
+	      curr += offset_size;
+	      printf (_(" DW_MACRO_GNU_transparent_include - offset : 0x%lx\n"),
+		      (unsigned long) offset);
+	      break;
+
+	    default:
+	      if (extended_ops == NULL || extended_ops[op] == NULL)
+		{
+		  error (_(" Unknown macro opcode %02x seen\n"), op);
+		  return 0;
+		}
+	      else
+		{
+		  /* Skip over unhandled opcodes.  */
+		  dwarf_vma nargs, n;
+		  unsigned char *desc = extended_ops[op];
+		  nargs = read_leb128 (desc, &bytes_read, 0);
+		  desc += bytes_read;
+		  if (nargs == 0)
+		    {
+		      printf (_(" DW_MACRO_GNU_%02x\n"), op);
+		      break;
+		    }
+		  printf (_(" DW_MACRO_GNU_%02x -"), op);
+		  for (n = 0; n < nargs; n++)
+		    {
+		      curr
+			= read_and_display_attr_value (0, byte_get (desc++, 1),
+						       curr, 0, 0, offset_size,
+						       version, NULL, 0, NULL);
+		      if (n != nargs - 1)
+			printf (",");
+		    }
+		  printf ("\n");
+		}
+	      break;
+	    }
+	}
+
+      printf ("\n");
+    }	
 
   return 1;
 }
@@ -5537,6 +5853,8 @@ struct dwarf_section_display debug_displays[] =
     display_debug_frames,		&do_debug_frames,	1 },
   { { ".debug_macinfo",		".zdebug_macinfo",	NULL, NULL, 0, 0 },
     display_debug_macinfo,		&do_debug_macinfo,	0 },
+  { { ".debug_macro",		".zdebug_macro",	NULL, NULL, 0, 0 },
+    display_debug_macro,		&do_debug_macinfo,	1 },
   { { ".debug_str",		".zdebug_str",		NULL, NULL, 0, 0 },
     display_debug_str,			&do_debug_str,		0 },
   { { ".debug_loc",		".zdebug_loc",		NULL, NULL, 0, 0 },

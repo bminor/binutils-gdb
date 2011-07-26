@@ -143,6 +143,7 @@ enum dwarf_section_display_enum
   pubnames,
   eh_frame,
   macinfo,
+  macro,
   str,
   loc,
   pubtypes,
