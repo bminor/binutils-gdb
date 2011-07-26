@@ -1,3 +1,7 @@
+2011-07-26  Joel Brobecker  <brobecker@adacore.com>
+
+	GDB 7.3 released.
+
 2011-07-26  Tom Tromey  <tromey@redhat.com>
 
 	* symfile.h (struct dwarf2_debug_sections) <macro>: New field.
