@@ -1,5 +1,13 @@
 2011-07-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* dwarf2expr.c (ctx_no_read_reg): New function.
+	* dwarf2expr.h (ctx_no_read_reg): New declaration.
+	* dwarf2read.c (read_2_signed_bytes, read_4_signed_bytes): Remove.
+	(decode_locdesc_read_mem, decode_locdesc_ctx_funcs): New.
+	(decode_locdesc): Replace by a caller of dwarf_expr_eval.
+
+2011-07-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* dwarf2-frame.c (no_get_frame_base, no_get_frame_cfa, no_get_frame_pc)
 	(no_get_tls_address, no_dwarf_call, no_base_type): Move to the other
 	file.
