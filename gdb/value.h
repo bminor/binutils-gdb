@@ -615,7 +615,7 @@ extern struct value *value_dynamic_cast (struct type *type, struct value *arg);
 
 extern struct value *value_zero (struct type *type, enum lval_type lv);
 
-extern struct value *value_one (struct type *type, enum lval_type lv);
+extern struct value *value_one (struct type *type);
 
 extern struct value *value_repeat (struct value *arg1, int count);
 

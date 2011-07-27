@@ -1,4 +1,13 @@
 2011-07-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Pedro Alves  <pedro@codesourcery.com>
+
+	* eval.c (evaluate_subexp_standard): Remove not_lval from all calls of
+	value_one.
+	* valops.c (value_one): Remove parameter lv.  Do not pass it to itself.
+	Assert the result kind.
+	* value.h (value_one): Remove parameter lv.
+
+2011-07-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix crash on lval_computed values.
 	* valops.c (value_zero): Use not_lval for lval_computed.

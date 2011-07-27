@@ -864,10 +864,10 @@ value_zero (struct type *type, enum lval_type lv)
   return val;
 }
 
-/* Create a value of numeric type TYPE that is one, and return it.  */
+/* Create a not_lval value of numeric type TYPE that is one, and return it.  */
 
 struct value *
-value_one (struct type *type, enum lval_type lv)
+value_one (struct type *type)
 {
   struct type *type1 = check_typedef (type);
   struct value *val;
@@ -901,7 +901,7 @@ value_one (struct type *type, enum lval_type lv)
       val = allocate_value (type);
       for (i = 0; i < high_bound - low_bound + 1; i++)
 	{
-	  tmp = value_one (eltype, lv);
+	  tmp = value_one (eltype);
 	  memcpy (value_contents_writeable (val) + i * TYPE_LENGTH (eltype),
 		  value_contents_all (tmp), TYPE_LENGTH (eltype));
 	}
@@ -911,7 +911,9 @@ value_one (struct type *type, enum lval_type lv)
       error (_("Not a numeric type."));
     }
 
-  VALUE_LVAL (val) = lv;
+  /* value_one result is never used for assignments to.  */
+  gdb_assert (VALUE_LVAL (val) == not_lval);
+
   return val;
 }
 
