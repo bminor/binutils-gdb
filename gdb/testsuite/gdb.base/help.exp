@@ -685,7 +685,7 @@ test_class_help "user-defined" {
 # test help watch
 gdb_test "help watch" "Set a watchpoint for an expression\.\[\r\n\]+Usage: watch .-l.-location. EXPRESSION\[\r\n\]+A watchpoint stops execution of your program whenever the value of\[\r\n\]+an expression changes\.\[\r\n\]+If -l or -location is given, this evaluates EXPRESSION and watches\[\r\n\]+the memory to which it refers\." "help watch"
 # test help whatis
-gdb_test "help whatis" "Print data type of expression EXP\." "help whatis"
+gdb_test "help whatis" "Print data type of expression EXP\.\r\nOnly one level .*" "help whatis"
 # test help where
 gdb_test "help where" "Print backtrace of all stack frames, or innermost COUNT frames\.\[\r\n\]+With a negative argument, print outermost -COUNT frames\.\[\r\n\]+Use of the 'full' qualifier also prints the values of the local variables\." "help where"
 # test help x

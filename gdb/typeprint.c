@@ -316,8 +316,10 @@ _initialize_typeprint (void)
 Print definition of type TYPE.\n\
 Argument may be a type name defined by typedef, or \"struct STRUCT-TAG\"\n\
 or \"class CLASS-NAME\" or \"union UNION-TAG\" or \"enum ENUM-TAG\".\n\
-The selected stack frame's lexical context is used to look up the name."));
+The selected stack frame's lexical context is used to look up the name.\n\
+Contrary to \"whatis\", \"ptype\" always unrolls any typedefs."));
 
   add_com ("whatis", class_vars, whatis_command,
-	   _("Print data type of expression EXP."));
+	   _("Print data type of expression EXP.\n\
+Only one level of typedefs is unrolled.  See also \"ptype\"."));
 }

@@ -1,5 +1,10 @@
 2011-07-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* typeprint.c (_initialize_typeprint): Extend the help of "whatis" and
+	"ptype" by their typedefs difference.
+
+2011-07-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* dwarf2expr.c (ctx_no_read_reg): New function.
 	* dwarf2expr.h (ctx_no_read_reg): New declaration.
 	* dwarf2read.c (read_2_signed_bytes, read_4_signed_bytes): Remove.
