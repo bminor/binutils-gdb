@@ -1,3 +1,8 @@
+2011-07-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf.c (read_and_display_attr_value): Recognize DW_FORM_data4 and
+	DW_FORM_data8 as location list pointers only for DWARF < 4.
+
 2011-07-26  Jakub Jelinek  <jakub@redhat.com>
 
 	* NEWS: Mention .debug_macro support.

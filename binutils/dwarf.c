@@ -1485,8 +1485,8 @@ read_and_display_attr_value (unsigned long attribute,
 	case DW_AT_GNU_call_site_data_value:
 	case DW_AT_GNU_call_site_target:
 	case DW_AT_GNU_call_site_target_clobbered:
-    	  if (form == DW_FORM_data4
-	      || form == DW_FORM_data8
+    	  if ((dwarf_version < 4
+	       && (form == DW_FORM_data4 || form == DW_FORM_data8))
 	      || form == DW_FORM_sec_offset)
 	    {
 	      /* Process location list.  */
@@ -1516,8 +1516,8 @@ read_and_display_attr_value (unsigned long attribute,
 	  break;
 
 	case DW_AT_ranges:
-	  if (form == DW_FORM_data4
-	      || form == DW_FORM_data8
+    	  if ((dwarf_version < 4
+	       && (form == DW_FORM_data4 || form == DW_FORM_data8))
 	      || form == DW_FORM_sec_offset)
 	    {
 	      /* Process range list.  */
@@ -1734,8 +1734,8 @@ read_and_display_attr_value (unsigned long attribute,
     case DW_AT_GNU_call_site_data_value:
     case DW_AT_GNU_call_site_target:
     case DW_AT_GNU_call_site_target_clobbered:
-      if (form == DW_FORM_data4
-	  || form == DW_FORM_data8
+      if ((dwarf_version < 4
+           && (form == DW_FORM_data4 || form == DW_FORM_data8))
 	  || form == DW_FORM_sec_offset)
 	printf (_("(location list)"));
       /* Fall through.  */
