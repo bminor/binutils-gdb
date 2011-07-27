@@ -1,5 +1,17 @@
 2011-07-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* gdb.dwarf2/dw2-simple-locdesc.S: Change DWARF version to 3.
+	(.Ldie26, .Ldie41, .Ldie4a, .Ldie54, .Ldie5b): Remove.
+	(.Ldie30) Add as field "data4".
+	(.Ldie32) Rename field "b" to "shl".
+	(abbrev4) Change for the "data4" field.
+	(abbrev5, abbrev6) Remove.
+	* gdb.dwarf2/dw2-simple-locdesc.exp (p &s.b): Rename to ...
+	(p &s.shl): ... here.  Add comment.
+	(p &s.data4): New.
+
+2011-07-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Fix crash on lval_computed values.
 	* gdb.dwarf2/implptr.exp (print sizeof (j[0])): New test.
 

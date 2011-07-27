@@ -27,7 +27,7 @@ var:
 d:
 	.4byte	.Lcu_end - 1f	/* Length of Compilation Unit Info */
 1:
-	.value	0x2	/* DWARF version number */
+	.value	0x3	/* DWARF version number */
 	.4byte	.Ldebug_abbrev0	/* Offset Into Abbrev. Section */
 	.byte	0x4	/* Pointer Size (in bytes) */
 	.uleb128 0x1	/* (DIE (0xb) DW_TAG_compile_unit) */
@@ -39,18 +39,16 @@ d:
 	.4byte	0x1000004	/* DW_AT_byte_size */
 	.byte	0x1	/* DW_AT_decl_file (<stdin>) */
 	.byte	0x1	/* DW_AT_decl_line */
-.Ldie26:
-	.uleb128 0x3	/* (DIE (0x26) DW_TAG_member) */
-	.ascii "a\0"	/* DW_AT_name */
+.Ldie30:
+	.uleb128 0x4	/* (DIE (0x30) DW_TAG_member) */
+	.ascii "data4\0"	/* DW_AT_name */
 	.byte	0x1	/* DW_AT_decl_file (<stdin>) */
 	.byte	0x1	/* DW_AT_decl_line */
-	.4byte	.Ldie41 - d	/* DW_AT_type */
-	.byte	0x2	/* DW_AT_data_member_location */
-	.byte	0x23	/* DW_OP_plus_uconst */
-	.uleb128 0
+	.4byte	.Ldie62 - d	/* DW_AT_type */
+	.4byte	0x10000	/* DW_AT_data_member_location */
 .Ldie32:
 	.uleb128 0x3	/* (DIE (0x32) DW_TAG_member) */
-	.ascii "b\0"	/* DW_AT_name */
+	.ascii "shl\0"	/* DW_AT_name */
 	.byte	0x1	/* DW_AT_decl_file (<stdin>) */
 	.byte	0x1	/* DW_AT_decl_line */
 	.4byte	.Ldie62 - d	/* DW_AT_type */
@@ -60,24 +58,6 @@ d:
 	.byte	0x24	/* DW_OP_shl */
 	.byte	0x22	/* DW_OP_plus */
 	.byte	0	/* end of children of DIE 0x19 */
-.Ldie41:
-	.uleb128 0x4	/* (DIE (0x41) DW_TAG_array_type) */
-	.4byte	.Ldie5b - d	/* DW_AT_type */
-.Ldie4a:
-	.uleb128 0x5	/* (DIE (0x4a) DW_TAG_subrange_type) */
-	.4byte	.Ldie54 - d	/* DW_AT_type */
-	.4byte	0xffffff	/* DW_AT_upper_bound */
-	.byte	0	/* end of children of DIE 0x41 */
-.Ldie54:
-	.uleb128 0x6	/* (DIE (0x54) DW_TAG_base_type) */
-	.byte	0x8	/* DW_AT_byte_size */
-	.byte	0x7	/* DW_AT_encoding */
-	.4byte	.LASF0	/* DW_AT_name: "sizetype" */
-.Ldie5b:
-	.uleb128 0x6	/* (DIE (0x5b) DW_TAG_base_type) */
-	.byte	0x1	/* DW_AT_byte_size */
-	.byte	0x6	/* DW_AT_encoding */
-	.4byte	.LASF1	/* DW_AT_name: "char" */
 .Ldie62:
 	.uleb128 0x7	/* (DIE (0x62) DW_TAG_base_type) */
 	.byte	0x4	/* DW_AT_byte_size */
@@ -137,30 +117,18 @@ d:
 	.byte	0
 	.byte	0
 	.uleb128 0x4	/* (abbrev code) */
-	.uleb128 0x1	/* (TAG: DW_TAG_array_type) */
-	.byte	0x1	/* DW_children_yes */
-	.uleb128 0x49	/* (DW_AT_type) */
-	.uleb128 0x13	/* (DW_FORM_ref4) */
-	.byte	0
-	.byte	0
-	.uleb128 0x5	/* (abbrev code) */
-	.uleb128 0x21	/* (TAG: DW_TAG_subrange_type) */
+	.uleb128 0xd	/* (TAG: DW_TAG_member) */
 	.byte	0	/* DW_children_no */
-	.uleb128 0x49	/* (DW_AT_type) */
-	.uleb128 0x13	/* (DW_FORM_ref4) */
-	.uleb128 0x2f	/* (DW_AT_upper_bound) */
-	.uleb128 0x6	/* (DW_FORM_data4) */
-	.byte	0
-	.byte	0
-	.uleb128 0x6	/* (abbrev code) */
-	.uleb128 0x24	/* (TAG: DW_TAG_base_type) */
-	.byte	0	/* DW_children_no */
-	.uleb128 0xb	/* (DW_AT_byte_size) */
-	.uleb128 0xb	/* (DW_FORM_data1) */
-	.uleb128 0x3e	/* (DW_AT_encoding) */
-	.uleb128 0xb	/* (DW_FORM_data1) */
 	.uleb128 0x3	/* (DW_AT_name) */
-	.uleb128 0xe	/* (DW_FORM_strp) */
+	.uleb128 0x8	/* (DW_FORM_string) */
+	.uleb128 0x3a	/* (DW_AT_decl_file) */
+	.uleb128 0xb	/* (DW_FORM_data1) */
+	.uleb128 0x3b	/* (DW_AT_decl_line) */
+	.uleb128 0xb	/* (DW_FORM_data1) */
+	.uleb128 0x49	/* (DW_AT_type) */
+	.uleb128 0x13	/* (DW_FORM_ref4) */
+	.uleb128 0x38	/* (DW_AT_data_member_location) */
+	.uleb128 0x6	/* (DW_FORM_data4) */
 	.byte	0
 	.byte	0
 	.uleb128 0x7	/* (abbrev code) */

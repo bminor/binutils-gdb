@@ -30,4 +30,10 @@ if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" object {}] != ""
 
 clean_restart $executable
 
-gdb_test "p &s.b" { = \(int \*\) 0x1000000}
+# Re: [patch 2/2] Fix decode_locdesc for gcc-4.7.x optimized DWARF
+# http://sourceware.org/ml/gdb-patches/2011-07/msg00766.html
+gdb_test "p &s.shl" { = \(int \*\) 0x1000000}
+
+# Re: RFC: fix DW_AT_data_member_location buglet
+# http://sourceware.org/ml/gdb-patches/2011-05/msg00291.html
+gdb_test "p &s.data4" { = \(int \*\) 0x10000}
