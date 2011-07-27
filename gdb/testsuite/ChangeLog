@@ -1,5 +1,10 @@
 2011-07-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Fix crash on lval_computed values.
+	* gdb.dwarf2/implptr.exp (print sizeof (j[0])): New test.
+
+2011-07-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdb.base/help.exp (help whatis): Update the expected string.
 
 2011-07-27  Jan Kratochvil  <jan.kratochvil@redhat.com>

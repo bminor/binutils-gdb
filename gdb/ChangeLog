@@ -1,3 +1,8 @@
+2011-07-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix crash on lval_computed values.
+	* valops.c (value_zero): Use not_lval for lval_computed.
+
 2011-07-27  Tom Tromey  <tromey@redhat.com>
 
 	* Makefile.in (HFILES_NO_SRCDIR): Add 'common' prefix for

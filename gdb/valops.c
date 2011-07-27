@@ -860,7 +860,7 @@ value_zero (struct type *type, enum lval_type lv)
 {
   struct value *val = allocate_value (type);
 
-  VALUE_LVAL (val) = lv;
+  VALUE_LVAL (val) = (lv == lval_computed ? not_lval : lv);
   return val;
 }
 

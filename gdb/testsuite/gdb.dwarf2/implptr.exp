@@ -55,6 +55,7 @@ proc implptr_test_bar {} {
        "set bar breakpoint for implptr"
     gdb_continue_to_breakpoint "continue to bar breakpoint for implptr"
     gdb_test "print j" " = \\(intp\\) <synthetic pointer>" "print j in implptr:bar"
+    gdb_test {print sizeof (j[0])} " = 4" {print sizeof (j[0]) in implptr:bar}
     gdb_test "print *j" " = 5" "print *j in implptr:bar"
     gdb_test "print **k" " = 5" "print **k in implptr:bar"
     gdb_test "print ***l" " = 5" "print ***l in implptr:bar"
