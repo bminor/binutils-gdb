@@ -1,3 +1,7 @@
+2011-07-27  Tristan Gingold  <gingold@adacore.com>
+
+	* frags.c (frag_grow): Revert previous patch.
+
 2011-07-26  Kazuhiro Inaoka  <kazuhiro.inaoka.ud@renesas.com>
 
 	* config/tc-rx.c (md_convert_frag): Fix encoding of beq.a
