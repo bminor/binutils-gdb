@@ -160,12 +160,14 @@ static const struct dwarf2_debug_sections dwarf2_xcoff_names = {
   { ".dwline", NULL },
   { ".dwloc", NULL },
   { NULL, NULL }, /* debug_macinfo */
+  { NULL, NULL }, /* debug_macro */
   { ".dwstr", NULL },
   { ".dwrnges", NULL },
   { NULL, NULL }, /* debug_types */
   { ".dwframe", NULL },
   { NULL, NULL }, /* eh_frame */
-  { NULL, NULL } /* gdb_index */
+  { NULL, NULL }, /* gdb_index */
+  23
 };
 
 static void

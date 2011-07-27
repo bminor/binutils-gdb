@@ -271,7 +271,8 @@ static const struct dwarf2_debug_sections dwarf2_elf_names = {
   { ".debug_types", ".zdebug_types" },
   { ".debug_frame", ".zdebug_frame" },
   { ".eh_frame", NULL },
-  { ".gdb_index", ".zgdb_index" }
+  { ".gdb_index", ".zgdb_index" },
+  23
 };
 
 /* local data types */
