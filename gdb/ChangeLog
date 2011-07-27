@@ -1,3 +1,16 @@
+2011-07-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf2-frame.c (no_get_frame_base, no_get_frame_cfa, no_get_frame_pc)
+	(no_get_tls_address, no_dwarf_call, no_base_type): Move to the other
+	file.
+	(dwarf2_frame_ctx_funcs): Reference the renamed functions.
+	* dwarf2expr.c (ctx_no_get_frame_base, ctx_no_get_frame_cfa)
+	(ctx_no_get_frame_pc, ctx_no_get_tls_address, ctx_no_dwarf_call)
+	(ctx_no_get_base_type): Move the functions here.
+	* dwarf2expr.h (ctx_no_get_frame_base, ctx_no_get_frame_cfa)
+	(ctx_no_get_frame_pc, ctx_no_get_tls_address, ctx_no_dwarf_call)
+	(ctx_no_get_base_type): New declarations.
+
 2011-07-27  Tom Tromey  <tromey@redhat.com>
 
 	* xcoffread.c (dwarf2_xcoff_names): Add 'macro' and 'sentinel'

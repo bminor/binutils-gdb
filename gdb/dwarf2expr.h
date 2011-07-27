@@ -253,4 +253,14 @@ const char *dwarf_stack_op_name (unsigned int);
 void dwarf_expr_require_composition (const gdb_byte *, const gdb_byte *,
 				     const char *);
 
+/* Stub dwarf_expr_context_funcs implementations.  */
+
+void ctx_no_get_frame_base (void *baton, const gdb_byte **start,
+			    size_t *length);
+CORE_ADDR ctx_no_get_frame_cfa (void *baton);
+CORE_ADDR ctx_no_get_frame_pc (void *baton);
+CORE_ADDR ctx_no_get_tls_address (void *baton, CORE_ADDR offset);
+void ctx_no_dwarf_call (struct dwarf_expr_context *ctx, size_t die_offset);
+struct type *ctx_no_get_base_type (struct dwarf_expr_context *ctx, size_t die);
+
 #endif /* dwarf2expr.h */

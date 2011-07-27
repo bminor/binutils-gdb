@@ -312,55 +312,6 @@ read_mem (void *baton, gdb_byte *buf, CORE_ADDR addr, size_t len)
   read_memory (addr, buf, len);
 }
 
-static void
-no_get_frame_base (void *baton, const gdb_byte **start, size_t *length)
-{
-  internal_error (__FILE__, __LINE__,
-		  _("Support for DW_OP_fbreg is unimplemented"));
-}
-
-/* Helper function for execute_stack_op.  */
-
-static CORE_ADDR
-no_get_frame_cfa (void *baton)
-{
-  internal_error (__FILE__, __LINE__,
-		  _("Support for DW_OP_call_frame_cfa is unimplemented"));
-}
-
-/* Helper function for execute_stack_op.  */
-
-static CORE_ADDR
-no_get_frame_pc (void *baton)
-{
-  internal_error (__FILE__, __LINE__, _("\
-Support for DW_OP_GNU_implicit_pointer is unimplemented"));
-}
-
-static CORE_ADDR
-no_get_tls_address (void *baton, CORE_ADDR offset)
-{
-  internal_error (__FILE__, __LINE__, _("\
-Support for DW_OP_GNU_push_tls_address is unimplemented"));
-}
-
-/* Helper function for execute_stack_op.  */
-
-static void
-no_dwarf_call (struct dwarf_expr_context *ctx, size_t die_offset)
-{
-  internal_error (__FILE__, __LINE__,
-		  _("Support for DW_OP_call* is invalid in CFI"));
-}
-
-/* Helper function for execute_stack_op.  */
-
-static struct type *
-no_base_type (struct dwarf_expr_context *ctx, size_t die)
-{
-  error (_("Support for typed DWARF is not supported in CFI"));
-}
-
 /* Execute the required actions for both the DW_CFA_restore and
 DW_CFA_restore_extended instructions.  */
 static void
@@ -397,12 +348,12 @@ static const struct dwarf_expr_context_funcs dwarf2_frame_ctx_funcs =
 {
   read_reg,
   read_mem,
-  no_get_frame_base,
-  no_get_frame_cfa,
-  no_get_frame_pc,
-  no_get_tls_address,
-  no_dwarf_call,
-  no_base_type
+  ctx_no_get_frame_base,
+  ctx_no_get_frame_cfa,
+  ctx_no_get_frame_pc,
+  ctx_no_get_tls_address,
+  ctx_no_dwarf_call,
+  ctx_no_get_base_type
 };
 
 static CORE_ADDR
