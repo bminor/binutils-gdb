@@ -2610,25 +2610,21 @@ value_get_print_value (struct value *value, enum varobj_display_formats format,
 
 	if (PyObject_HasAttr (value_formatter, gdbpy_to_string_cst))
 	  {
-	    char *hint;
 	    struct value *replacement;
 	    PyObject *output = NULL;
-
-	    hint = gdbpy_get_display_hint (value_formatter);
-	    if (hint)
-	      {
-		if (!strcmp (hint, "string"))
-		  string_print = 1;
-		xfree (hint);
-	      }
 
 	    output = apply_varobj_pretty_printer (value_formatter,
 						  &replacement,
 						  stb);
+
+	    /* If we have string like output ...  */
 	    if (output)
 	      {
 		make_cleanup_py_decref (output);
 
+		/* If this is a lazy string, extract it.  For lazy
+		   strings we always print as a string, so set
+		   string_print.  */
 		if (gdbpy_is_lazy_string (output))
 		  {
 		    gdbpy_extract_lazy_string (output, &str_addr, &type,
@@ -2638,12 +2634,27 @@ value_get_print_value (struct value *value, enum varobj_display_formats format,
 		  }
 		else
 		  {
+		    /* If it is a regular (non-lazy) string, extract
+		       it and copy the contents into THEVALUE.  If the
+		       hint says to print it as a string, set
+		       string_print.  Otherwise just return the extracted
+		       string as a value.  */
+
 		    PyObject *py_str
 		      = python_string_to_target_python_string (output);
 
 		    if (py_str)
 		      {
 			char *s = PyString_AsString (py_str);
+			char *hint;
+
+			hint = gdbpy_get_display_hint (value_formatter);
+			if (hint)
+			  {
+			    if (!strcmp (hint, "string"))
+			      string_print = 1;
+			    xfree (hint);
+			  }
 
 			len = PyString_Size (py_str);
 			thevalue = xmemdup (s, len + 1, len + 1);
@@ -2662,6 +2673,9 @@ value_get_print_value (struct value *value, enum varobj_display_formats format,
 		      gdbpy_print_stack ();
 		  }
 	      }
+	    /* If the printer returned a replacement value, set VALUE
+	       to REPLACEMENT.  If there is not a replacement value,
+	       just use the value passed to this function.  */
 	    if (replacement)
 	      value = replacement;
 	  }
@@ -2672,12 +2686,18 @@ value_get_print_value (struct value *value, enum varobj_display_formats format,
   get_formatted_print_options (&opts, format_code[(int) format]);
   opts.deref_ref = 0;
   opts.raw = 1;
+
+  /* If the THEVALUE has contents, it is a regular string.  */
   if (thevalue)
     LA_PRINT_STRING (stb, type, thevalue, len, encoding, 0, &opts);
   else if (string_print)
+    /* Otherwise, if string_print is set, and it is not a regular
+       string, it is a lazy string.  */
     val_print_string (type, encoding, str_addr, len, stb, &opts);
   else
+    /* All other cases.  */
     common_val_print (value, stb, 0, &opts, current_language);
+
   thevalue = ui_file_xstrdup (stb, NULL);
 
   do_cleanups (old_chain);

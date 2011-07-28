@@ -1,3 +1,8 @@
+2011-07-28  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* varobj.c (value_get_print_value): Move hint check later into the
+	function.  Comment function.  Free thevalue before reusing it.
+
 2011-07-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Pedro Alves  <pedro@codesourcery.com>
 

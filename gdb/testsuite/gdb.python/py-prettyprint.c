@@ -149,6 +149,11 @@ struct justchildren
 
 typedef struct justchildren nostring_type;
 
+struct memory_error
+{
+  const char *s;
+};
+
 struct container
 {
   string name;
@@ -227,12 +232,15 @@ main ()
   /* Clearing by being `static' could invoke an other GDB C++ bug.  */
   struct nullstr nullstr;
   nostring_type nstype, nstype2;
+  struct memory_error me;
   struct ns ns, ns2;
   struct lazystring estring, estring2;
   struct hint_error hint_error;
 
   nstype.elements = narray;
   nstype.len = 0;
+
+  me.s = "blah";
 
   init_ss(&ss, 1, 2);
   init_ss(ssa+0, 3, 4);

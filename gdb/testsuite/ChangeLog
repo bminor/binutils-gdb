@@ -1,3 +1,10 @@
+2011-07-28  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* gdb.python/py-mi.exp: Test printers returning string hint, and
+	also not returning a value.
+	* gdb.python/py-prettyprint.c: Add testcase for above.
+	* gdb.python/py-prettyprint.py: Add test printer for above.
+
 2011-07-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.dwarf2/dw2-simple-locdesc.S: Change DWARF version to 3.

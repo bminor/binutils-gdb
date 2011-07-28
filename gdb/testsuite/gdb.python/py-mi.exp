@@ -284,6 +284,13 @@ mi_list_varobj_children nstype2 {
     { {nstype2.<error at 0>} {<error at 0>} 6 {char \[6\]} }
 } "list children after setting exception flag"
 
+mi_create_varobj me me \
+  "create me varobj"
+
+mi_gdb_test "-var-evaluate-expression me" \
+	"\\^done,value=\"<error reading variable: Cannot access memory.>.*\"" \
+	"evaluate me varobj"
+
 # C++ MI tests
 gdb_exit
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}-cxx" \
