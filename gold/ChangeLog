@@ -1,3 +1,20 @@
+2011-07-28  Cary Coutant  <ccoutant@google.com>
+
+	* workqueue-internal.h (Workqueue_threader::should_cancel_thread):
+	Add thread_number parameter.
+	(Workqueue_threader_threadpool::should_cancel_thread): Likewise.
+	* workqueue-threads.cc
+	(Workqueue_threader_threadpool::should_cancel_thread): Cancel
+	current thread if its thread number is greater than desired thread
+	count.
+	* workqueue.cc (Workqueue_threader_single::should_cancel_thread):
+	Add thread_number parameter.
+	(Workqueue::should_cancel_thread): Likewise.
+	(Workqueue::find_runnable_or_wait): Pass thread_number to
+	should_cancel_thread.
+	* workqueue.h (Workqueue::should_cancel_thread): Add thread_number
+	parameter.
+
 2011-07-22  Sriraman Tallam  <tmsriram@google.com>
 
 	* symtab.cc (Symbol_table::add_from_relobj): Mark symbol as referenced
