@@ -1,3 +1,8 @@
+2011-07-28  Mikulas Patocka  <mikulas@artax.karlin.mff.cuni.cz>
+
+	* elf64-hppa.c (elf_hppa_final_link_relocate): Fix handling of out
+	of range branches.
+
 2011-07-26  Jakub Jelinek  <jakub@redhat.com>
 
 	* dwarf2.c (dwarf_debug_sections): Add .debug_macro

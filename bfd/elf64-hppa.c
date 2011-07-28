@@ -3272,13 +3272,13 @@ elf_hppa_final_link_relocate (Elf_Internal_Rela *rel,
 	    && value + addend + max_branch_offset >= 2*max_branch_offset)
 	  {
 	    (*_bfd_error_handler)
-	      (_("%B(%A+0x%lx): cannot reach %s"),
+	      (_("%B(%A+0x" BFD_VMA_FMT "x): cannot reach %s"),
 	      input_bfd,
 	      input_section,
 	      offset,
-	      eh->root.root.string);
+	      eh ? eh->root.root.string : "unknown");
 	    bfd_set_error (bfd_error_bad_value);
-	    return bfd_reloc_notsupported;
+	    return bfd_reloc_overflow;
 	  }
 
 	/* Adjust for any field selectors.  */
