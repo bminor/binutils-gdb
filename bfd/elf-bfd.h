@@ -714,6 +714,10 @@ struct elf_backend_data
   /* The BFD flags applied to sections created for dynamic linking.  */
   flagword dynamic_sec_flags;
 
+  /* Architecture-specific data for this backend.
+     This is actually a pointer to some type like struct elf_ARCH_data.  */
+  const void *arch_data;
+
   /* A function to translate an ELF RELA relocation to a BFD arelent
      structure.  */
   void (*elf_info_to_howto)
@@ -1553,7 +1557,7 @@ struct elf_obj_tdata
   const char *dt_name;
 
   /* The linker emulation needs to know what audit libs
-     are used by a dynamic object.  */ 
+     are used by a dynamic object.  */
   const char *dt_audit;
 
   /* Records the result of `get_program_header_size'.  */
@@ -1893,7 +1897,7 @@ extern bfd_boolean bfd_section_from_phdr
 extern int _bfd_elf_symbol_from_bfd_symbol
   (bfd *, asymbol **);
 
-extern Elf_Internal_Sym *bfd_sym_from_r_symndx 
+extern Elf_Internal_Sym *bfd_sym_from_r_symndx
   (struct sym_cache *, bfd *, unsigned long);
 extern asection *bfd_section_from_elf_index
   (bfd *, unsigned int);
@@ -2390,7 +2394,7 @@ extern asection _bfd_elf_large_com_section;
 /* This macro is to avoid lots of duplicated code in the body of the
    loop over relocations in xxx_relocate_section() in the various
    elfxx-xxxx.c files.
-   
+
    Handle relocations against symbols from removed linkonce sections,
    or sections discarded by a linker script.  When doing a relocatable
    link, we remove such relocations.  Otherwise, we just want the

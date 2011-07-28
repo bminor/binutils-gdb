@@ -310,6 +310,10 @@
 #define elf_info_to_howto_rel 0
 #endif
 
+#ifndef elf_backend_arch_data
+#define elf_backend_arch_data NULL
+#endif
+
 #ifndef ELF_TARGET_ID
 #define ELF_TARGET_ID	GENERIC_ELF_DATA
 #endif
@@ -507,7 +511,7 @@
 #define elf_backend_hide_symbol		_bfd_elf_link_hash_hide_symbol
 #endif
 #ifndef elf_backend_fixup_symbol
-#define elf_backend_fixup_symbol		NULL	
+#define elf_backend_fixup_symbol		NULL
 #endif
 #ifndef elf_backend_merge_symbol_attribute
 #define elf_backend_merge_symbol_attribute	NULL
@@ -668,6 +672,7 @@ static struct elf_backend_data elfNN_bed =
   ELF_MINPAGESIZE,		/* minpagesize */
   ELF_COMMONPAGESIZE,		/* commonpagesize */
   ELF_DYNAMIC_SEC_FLAGS,	/* dynamic_sec_flags */
+  elf_backend_arch_data,
   elf_info_to_howto,
   elf_info_to_howto_rel,
   elf_backend_sym_is_global,

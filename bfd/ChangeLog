@@ -1,3 +1,28 @@
+2011-07-28  Roland McGrath  <mcgrathr@google.com>
+
+	* elf32-i386.c (struct elf_i386_backend_data): New type.
+	(get_elf_i386_backend_data): New macro.
+	(elf_i386_arch_bed): New variable.
+	(elf_backend_arch_data): New macro.
+	(struct elf_i386_link_hash_table): Remove plt0_pad_byte and is_vxworks.
+	(elf_i386_link_hash_table_create): Don't initialize them.
+	(elf_i386_create_dynamic_sections): Find is_vxworks flags in
+	elf_i386_backend_data, not elf_i386_link_hash_table.
+	(elf_i386_adjust_dynamic_symbol): Likewise.
+	(elf_i386_allocate_dynrelocs): Likewise.
+	(elf_i386_readonly_dynrelocs): Likewise.
+	(elf_i386_size_dynamic_sections): Likewise.
+	(elf_i386_relocate_section): Likewise.
+	(elf_i386_finish_dynamic_symbol): Likewise.
+	(elf_i386_finish_dynamic_sections): Likewise.  Same for plt0_pad_byte.
+	(elf_i386_vxworks_link_hash_table_create): Function removed.
+	(elf_i386_vxworks_arch_bed): New variable.
+	(elf_backend_arch_data): New macro in elf32-i386-vxworks stanza.
+
+	* elf-bfd.h (elf_backend_data): New member arch_backend_data.
+	* elfxx-target.h (elf_backend_arch_data): New macro.
+	(elfNN_bed): Use it as initializer for the new member.
+
 2011-07-28  Mikulas Patocka  <mikulas@artax.karlin.mff.cuni.cz>
 
 	* elf64-hppa.c (elf_hppa_final_link_relocate): Fix handling of out
