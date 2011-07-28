@@ -1,3 +1,8 @@
+2011-07-27  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* gas/elf/warn-2.s: New.
+	* gas/elf/elf.exp: Run the new test.
+
 2011-07-26  Kazuhiro Inaoka  <kazuhiro.inaoka.ud@renesas.com>
 
 	* gas/rx/r-bcc.d: Update expected disassembly of synthetic beq.a

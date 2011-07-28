@@ -181,4 +181,10 @@ if { ([istarget "*-*-*elf*"]
     run_dump_test "dwarf2-4"
     run_dump_test "bad-section-flag"
     run_dump_test "bad-size"
+
+load_lib gas-dg.exp
+dg-init
+dg-runtest [lsort [glob -nocomplain $srcdir/$subdir/err-*.s $srcdir/$subdir/warn-*.s]] "" ""
+dg-finish
+    
 }

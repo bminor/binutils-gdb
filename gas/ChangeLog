@@ -1,3 +1,9 @@
+2011-07-27  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* dwarf2dbg.c (out_debug_line): Ignore non-normal segments, with a
+	warning.
+	* doc/as.texinfo (Offset): Document .offset directive.
+
 2011-07-27  Tristan Gingold  <gingold@adacore.com>
 
 	* frags.c (frag_grow): Revert previous patch.

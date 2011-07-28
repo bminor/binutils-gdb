@@ -4017,6 +4017,7 @@ Some machine configurations provide additional directives.
 * Noaltmacro::                  @code{.noaltmacro}
 * Nolist::                      @code{.nolist}
 * Octa::                        @code{.octa @var{bignums}}
+* Offset::			@code{.offset @var{loc}}
 * Org::                         @code{.org @var{new-lc}, @var{fill}}
 * P2align::                     @code{.p2align @var{abs-expr}, @var{abs-expr}, @var{abs-expr}}
 @ifset ELF
@@ -5479,6 +5480,15 @@ bignum, it emits a 16-byte integer.
 
 The term ``octa'' comes from contexts in which a ``word'' is two bytes;
 hence @emph{octa}-word for 16 bytes.
+
+@node Offset
+@section @code{.offset @var{loc}}
+
+@cindex @code{offset} directive
+Set the location counter to @var{loc} in the absolute section.  @var{loc} must
+be an absolute expression.  This directive may be useful for defining
+symbols with absolute values.  Do not confuse it with the @code{.org}
+directive. 
 
 @node Org
 @section @code{.org @var{new-lc} , @var{fill}}

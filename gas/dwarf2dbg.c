@@ -1459,7 +1459,11 @@ out_debug_line (segT line_seg)
 
   /* For each section, emit a statement program.  */
   for (s = all_segs; s; s = s->next)
-    process_entries (s->seg, s->head->head);
+    if (SEG_NORMAL (s->seg))
+      process_entries (s->seg, s->head->head);
+    else
+      as_warn ("dwarf line number information for %s ignored",
+	       segment_name (s->seg));
 
   symbol_set_value_now (line_end);
 }
