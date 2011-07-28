@@ -1,5 +1,20 @@
 2011-07-28  Roland McGrath  <mcgrathr@google.com>
 
+	* elf32-i386.c (NACL_PLT_ENTRY_SIZE, NACLMASK): New macros.
+	(elf_i386_nacl_plt0_entry): New variable.
+	(elf_i386_plt_entry): New variable.
+	(elf_i386_nacl_pic_plt0_entry): New variable.
+	(elf_i386_nacl_pic_plt_entry): New variable.
+	(elf_i386_nacl_plt, elf_i386_nacl_arch_bed): New variables.
+	(elf_backend_arch_data): New macro setting for elf_i386_nacl_vec stanza.
+	(elf_backend_plt_alignment): Likewise.
+
+	* config.bfd: Handle i[3-7]86-*-nacl*.
+	* elf32-i386.c (bfd_elf32_i386_nacl_vec): New backend vector stanza.
+	* targets.c: Support bfd_elf32_i386_nacl_vec.
+	* configure.in: Likewise.
+	* configure: Regenerated.
+
 	* elf32-i386.c (struct elf_i386_plt_layout): New type.
 	(GET_PLT_ENTRY_SIZE): New macro.
 	(elf_i386_plt): New variable.

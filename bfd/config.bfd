@@ -566,6 +566,10 @@ case "${targ}" in
     targ_selvecs="i386linux_vec i386pei_vec"
     targ64_selvecs="bfd_elf64_x86_64_vec bfd_elf32_x86_64_vec bfd_elf64_l1om_vec bfd_elf64_k1om_vec"
     ;;
+  i[3-7]86-*-nacl*)
+    targ_defvec=bfd_elf32_i386_nacl_vec
+    targ_selvecs="bfd_elf32_i386_vec"
+    ;;
 #ifdef BFD64
   x86_64-*-darwin*)
     targ_defvec=mach_o_x86_64_vec
@@ -714,12 +718,12 @@ case "${targ}" in
     targ_defvec=bfd_elf32_lm32_vec
     targ_selvecs=bfd_elf32_lm32fdpic_vec
     ;;
-    
+
   lm32-*-*linux*)
     targ_defvec=bfd_elf32_lm32fdpic_vec
     targ_selvecs=bfd_elf32_lm32_vec
     ;;
-    
+
   m32c-*-elf | m32c-*-rtems*)
     targ_defvec=bfd_elf32_m32c_vec
     ;;
@@ -927,11 +931,11 @@ case "${targ}" in
     want64=true
     ;;
 #endif
-  mips*el-sde-elf*)    
+  mips*el-sde-elf*)
     targ_defvec=bfd_elf32_tradlittlemips_vec
     targ_selvecs="bfd_elf32_tradbigmips_vec bfd_elf32_ntradbigmips_vec bfd_elf32_ntradlittlemips_vec bfd_elf64_tradbigmips_vec bfd_elf64_tradlittlemips_vec"
     want64=true
-    ;;  
+    ;;
   mips*-sde-elf*)
     targ_defvec=bfd_elf32_tradbigmips_vec
     targ_selvecs="bfd_elf32_tradlittlemips_vec bfd_elf32_ntradbigmips_vec bfd_elf32_ntradlittlemips_vec bfd_elf64_tradbigmips_vec bfd_elf64_tradlittlemips_vec"
@@ -1541,7 +1545,7 @@ case "${targ}" in
  xc16x-*-elf)
     targ_defvec=bfd_elf32_xc16x_vec
     ;;
-  
+
   z80-*-*)
     targ_defvec=z80coff_vec
     targ_underscore=no
