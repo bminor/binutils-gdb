@@ -614,6 +614,62 @@ static const bfd_byte elf_i386_eh_frame_plt[] =
   DW_CFA_nop, DW_CFA_nop, DW_CFA_nop, DW_CFA_nop
 };
 
+struct elf_i386_plt_layout
+{
+  /* The first entry in an absolute procedure linkage table looks like this.  */
+  const bfd_byte *plt0_entry;
+  unsigned int plt0_entry_size;
+
+  /* Offsets into plt0_entry that are to be replaced with GOT[1] and GOT[2].  */
+  unsigned int plt0_got1_offset;
+  unsigned int plt0_got2_offset;
+
+  /* Later entries in an absolute procedure linkage table look like this.  */
+  const bfd_byte *plt_entry;
+  unsigned int plt_entry_size;
+
+  /* Offsets into plt_entry that are to be replaced with...  */
+  unsigned int plt_got_offset;    /* ... address of this symbol in .got. */
+  unsigned int plt_reloc_offset;  /* ... offset into relocation table. */
+  unsigned int plt_plt_offset;    /* ... offset to start of .plt. */
+
+  /* Offset into plt_entry where the initial value of the GOT entry points.  */
+  unsigned int plt_lazy_offset;
+
+  /* The first entry in a PIC procedure linkage table looks like this.  */
+  const bfd_byte *pic_plt0_entry;
+
+  /* Subsequent entries in a PIC procedure linkage table look like this.  */
+  const bfd_byte *pic_plt_entry;
+
+  /* .eh_frame covering the .plt section.  */
+  const bfd_byte *eh_frame_plt;
+  unsigned int eh_frame_plt_size;
+};
+
+#define GET_PLT_ENTRY_SIZE(abfd) \
+  get_elf_i386_backend_data (abfd)->plt->plt_entry_size
+
+/* These are the standard parameters.  */
+static const struct elf_i386_plt_layout elf_i386_plt =
+  {
+    elf_i386_plt0_entry,                /* plt0_entry */
+    sizeof (elf_i386_plt0_entry),       /* plt0_entry_size */
+    2,                                  /* plt0_got1_offset */
+    8,                                  /* plt0_got2_offset */
+    elf_i386_plt_entry,                 /* plt_entry */
+    PLT_ENTRY_SIZE,                     /* plt_entry_size */
+    2,                                  /* plt_got_offset */
+    7,                                  /* plt_reloc_offset */
+    12,                                 /* plt_plt_offset */
+    6,                                  /* plt_lazy_offset */
+    elf_i386_pic_plt0_entry,            /* pic_plt0_entry */
+    elf_i386_pic_plt_entry,             /* pic_plt_entry */
+    elf_i386_eh_frame_plt,              /* eh_frame_plt */
+    sizeof (elf_i386_eh_frame_plt),     /* eh_frame_plt_size */
+  };
+
+
 /* On VxWorks, the .rel.plt.unloaded section has absolute relocations
    for the PLTResolve stub and then for each PLT entry.  */
 #define PLTRESOLVE_RELOCS_SHLIB 0
@@ -624,6 +680,9 @@ static const bfd_byte elf_i386_eh_frame_plt[] =
 
 struct elf_i386_backend_data
 {
+  /* Parameters describing PLT generation.  */
+  const struct elf_i386_plt_layout *plt;
+
   /* Value used to fill the unused bytes of the first PLT entry.  */
   bfd_byte plt0_pad_byte;
 
@@ -638,6 +697,7 @@ struct elf_i386_backend_data
 /* These are the standard parameters.  */
 static const struct elf_i386_backend_data elf_i386_arch_bed =
   {
+    &elf_i386_plt,                      /* plt */
     0,                                  /* plt0_pad_byte */
     0,                                  /* is_vxworks */
   };
@@ -2157,6 +2217,7 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
   struct elf_i386_link_hash_table *htab;
   struct elf_i386_link_hash_entry *eh;
   struct elf_dyn_relocs *p;
+  unsigned plt_entry_size;
 
   if (h->root.type == bfd_link_hash_indirect)
     return TRUE;
@@ -2168,13 +2229,14 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
   if (htab == NULL)
     return FALSE;
 
+  plt_entry_size = GET_PLT_ENTRY_SIZE (info->output_bfd);
+
   /* Since STT_GNU_IFUNC symbol must go through PLT, we handle it
      here if it is defined and referenced in a non-shared object.  */
   if (h->type == STT_GNU_IFUNC
       && h->def_regular)
-    return _bfd_elf_allocate_ifunc_dyn_relocs (info, h,
-					       &eh->dyn_relocs,
-					       PLT_ENTRY_SIZE, 4);
+    return _bfd_elf_allocate_ifunc_dyn_relocs (info, h, &eh->dyn_relocs,
+                                               plt_entry_size, 4);
   else if (htab->elf.dynamic_sections_created
 	   && h->plt.refcount > 0)
     {
@@ -2195,7 +2257,7 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	  /* If this is the first .plt entry, make room for the special
 	     first entry.  */
 	  if (s->size == 0)
-	    s->size += PLT_ENTRY_SIZE;
+	    s->size += plt_entry_size;
 
 	  h->plt.offset = s->size;
 
@@ -2212,7 +2274,7 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	    }
 
 	  /* Make room for this entry.  */
-	  s->size += PLT_ENTRY_SIZE;
+	  s->size += plt_entry_size;
 
 	  /* We also need to make an entry in the .got.plt section, which
 	     will be placed in the .got section by the linker script.  */
@@ -2233,7 +2295,7 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 		 R_386_32 relocation for _GLOBAL_OFFSET_TABLE_ + 4 and an
 		 R_386_32 relocation for _GLOBAL_OFFSET_TABLE_ + 8.  */
 
-	      if (h->plt.offset == PLT_ENTRY_SIZE)
+	      if (h->plt.offset == plt_entry_size)
 		htab->srelplt2->size += (sizeof (Elf32_External_Rel) * 2);
 
 	      /* There are two extra relocations for each subsequent PLT entry:
@@ -2959,6 +3021,7 @@ elf_i386_relocate_section (bfd *output_bfd,
   Elf_Internal_Rela *rel;
   Elf_Internal_Rela *relend;
   bfd_boolean is_vxworks_tls;
+  unsigned plt_entry_size;
 
   BFD_ASSERT (is_i386_elf (input_bfd));
 
@@ -2977,6 +3040,8 @@ elf_i386_relocate_section (bfd *output_bfd,
 				".tls_vars"));
 
   elf_i386_set_tls_module_base (info);
+
+  plt_entry_size = GET_PLT_ENTRY_SIZE (output_bfd);
 
   rel = relocs;
   relend = relocs + input_section->reloc_count;
@@ -3244,13 +3309,13 @@ elf_i386_relocate_section (bfd *output_bfd,
 
 		  if (htab->elf.splt != NULL)
 		    {
-		      plt_index = h->plt.offset / PLT_ENTRY_SIZE - 1;
+		      plt_index = h->plt.offset / plt_entry_size - 1;
 		      off = (plt_index + 3) * 4;
 		      base_got = htab->elf.sgotplt;
 		    }
 		  else
 		    {
-		      plt_index = h->plt.offset / PLT_ENTRY_SIZE;
+		      plt_index = h->plt.offset / plt_entry_size;
 		      off = plt_index * 4;
 		      base_got = htab->elf.igotplt;
 		    }
@@ -4246,10 +4311,15 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
 				Elf_Internal_Sym *sym)
 {
   struct elf_i386_link_hash_table *htab;
+  unsigned plt_entry_size;
+  const struct elf_i386_backend_data *abed;
 
   htab = elf_i386_hash_table (info);
   if (htab == NULL)
     return FALSE;
+
+  abed = get_elf_i386_backend_data (output_bfd);
+  plt_entry_size = GET_PLT_ENTRY_SIZE (output_bfd);
 
   if (h->plt.offset != (bfd_vma) -1)
     {
@@ -4299,27 +4369,28 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
 
       if (plt == htab->elf.splt)
 	{
-	  plt_index = h->plt.offset / PLT_ENTRY_SIZE - 1;
+	  plt_index = h->plt.offset / plt_entry_size - 1;
 	  got_offset = (plt_index + 3) * 4;
 	}
       else
 	{
-	  plt_index = h->plt.offset / PLT_ENTRY_SIZE;
+	  plt_index = h->plt.offset / plt_entry_size;
 	  got_offset = plt_index * 4;
 	}
 
       /* Fill in the entry in the procedure linkage table.  */
       if (! info->shared)
 	{
-	  memcpy (plt->contents + h->plt.offset, elf_i386_plt_entry,
-		  PLT_ENTRY_SIZE);
+	  memcpy (plt->contents + h->plt.offset, abed->plt->plt_entry,
+		  abed->plt->plt_entry_size);
 	  bfd_put_32 (output_bfd,
 		      (gotplt->output_section->vma
 		       + gotplt->output_offset
 		       + got_offset),
-		      plt->contents + h->plt.offset + 2);
+		      plt->contents + h->plt.offset
+                      + abed->plt->plt_got_offset);
 
-	  if (get_elf_i386_backend_data (output_bfd)->is_vxworks)
+	  if (abed->is_vxworks)
 	    {
 	      int s, k, reloc_index;
 
@@ -4327,7 +4398,8 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
 		 for this PLT entry.  */
 
 	      /* S: Current slot number (zero-based).  */
-	      s = (h->plt.offset - PLT_ENTRY_SIZE) / PLT_ENTRY_SIZE;
+	      s = ((h->plt.offset - abed->plt->plt_entry_size)
+                   / abed->plt->plt_entry_size);
 	      /* K: Number of relocations for PLTResolve. */
 	      if (info->shared)
 		k = PLTRESOLVE_RELOCS_SHLIB;
@@ -4357,19 +4429,23 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
 	}
       else
 	{
-	  memcpy (plt->contents + h->plt.offset, elf_i386_pic_plt_entry,
-		  PLT_ENTRY_SIZE);
+	  memcpy (plt->contents + h->plt.offset, abed->plt->pic_plt_entry,
+		  abed->plt->plt_entry_size);
 	  bfd_put_32 (output_bfd, got_offset,
-		      plt->contents + h->plt.offset + 2);
+		      plt->contents + h->plt.offset
+                      + abed->plt->plt_got_offset);
 	}
 
       /* Don't fill PLT entry for static executables.  */
       if (plt == htab->elf.splt)
 	{
 	  bfd_put_32 (output_bfd, plt_index * sizeof (Elf32_External_Rel),
-		      plt->contents + h->plt.offset + 7);
-	  bfd_put_32 (output_bfd, - (h->plt.offset + PLT_ENTRY_SIZE),
-		      plt->contents + h->plt.offset + 12);
+		      plt->contents + h->plt.offset
+                      + abed->plt->plt_reloc_offset);
+	  bfd_put_32 (output_bfd, - (h->plt.offset
+                                     + abed->plt->plt_plt_offset + 4),
+		      plt->contents + h->plt.offset
+                      + abed->plt->plt_plt_offset);
 	}
 
       /* Fill in the entry in the global offset table.  */
@@ -4377,7 +4453,7 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
 		  (plt->output_section->vma
 		   + plt->output_offset
 		   + h->plt.offset
-		   + 6),
+		   + abed->plt->plt_lazy_offset),
 		  gotplt->contents + got_offset);
 
       /* Fill in the entry in the .rel.plt section.  */
@@ -4518,7 +4594,7 @@ do_glob_dat:
      is relative to the ".got" section.  */
   if (sym != NULL
       && (strcmp (h->root.root.string, "_DYNAMIC") == 0
-	  || (!get_elf_i386_backend_data (output_bfd)->is_vxworks
+	  || (!abed->is_vxworks
               && h == htab->elf.hgot)))
     sym->st_shndx = SHN_ABS;
 
@@ -4568,6 +4644,7 @@ elf_i386_finish_dynamic_sections (bfd *output_bfd,
   struct elf_i386_link_hash_table *htab;
   bfd *dynobj;
   asection *sdyn;
+  const struct elf_i386_backend_data *abed;
 
   htab = elf_i386_hash_table (info);
   if (htab == NULL)
@@ -4575,6 +4652,7 @@ elf_i386_finish_dynamic_sections (bfd *output_bfd,
 
   dynobj = htab->elf.dynobj;
   sdyn = bfd_get_section_by_name (dynobj, ".dynamic");
+  abed = get_elf_i386_backend_data (output_bfd);
 
   if (htab->elf.dynamic_sections_created)
     {
@@ -4595,8 +4673,8 @@ elf_i386_finish_dynamic_sections (bfd *output_bfd,
 	  switch (dyn.d_tag)
 	    {
 	    default:
-	      if (get_elf_i386_backend_data (output_bfd)->is_vxworks
-		  && elf_vxworks_finish_dynamic_entry (output_bfd, &dyn))
+	      if (abed->is_vxworks
+                  && elf_vxworks_finish_dynamic_entry (output_bfd, &dyn))
 		break;
 	      continue;
 
@@ -4649,31 +4727,33 @@ elf_i386_finish_dynamic_sections (bfd *output_bfd,
 	{
 	  if (info->shared)
 	    {
-	      memcpy (htab->elf.splt->contents, elf_i386_pic_plt0_entry,
-		      sizeof (elf_i386_pic_plt0_entry));
-	      memset (htab->elf.splt->contents + sizeof (elf_i386_pic_plt0_entry),
-		      get_elf_i386_backend_data (output_bfd)->plt0_pad_byte,
-		      PLT_ENTRY_SIZE - sizeof (elf_i386_pic_plt0_entry));
+	      memcpy (htab->elf.splt->contents, abed->plt->pic_plt0_entry,
+		      abed->plt->plt0_entry_size);
+	      memset (htab->elf.splt->contents + abed->plt->plt0_entry_size,
+		      abed->plt0_pad_byte,
+		      abed->plt->plt_entry_size - abed->plt->plt0_entry_size);
 	    }
 	  else
 	    {
-	      memcpy (htab->elf.splt->contents, elf_i386_plt0_entry,
-		      sizeof(elf_i386_plt0_entry));
-	      memset (htab->elf.splt->contents + sizeof (elf_i386_plt0_entry),
-		      get_elf_i386_backend_data (output_bfd)->plt0_pad_byte,
-		      PLT_ENTRY_SIZE - sizeof (elf_i386_plt0_entry));
+	      memcpy (htab->elf.splt->contents, abed->plt->plt0_entry,
+		      abed->plt->plt0_entry_size);
+	      memset (htab->elf.splt->contents + abed->plt->plt0_entry_size,
+		      abed->plt0_pad_byte,
+		      abed->plt->plt_entry_size - abed->plt->plt0_entry_size);
 	      bfd_put_32 (output_bfd,
 			  (htab->elf.sgotplt->output_section->vma
 			   + htab->elf.sgotplt->output_offset
 			   + 4),
-			  htab->elf.splt->contents + 2);
+			  htab->elf.splt->contents
+                          + abed->plt->plt0_got1_offset);
 	      bfd_put_32 (output_bfd,
 			  (htab->elf.sgotplt->output_section->vma
 			   + htab->elf.sgotplt->output_offset
 			   + 8),
-			  htab->elf.splt->contents + 8);
+			  htab->elf.splt->contents
+                          + abed->plt->plt0_got2_offset);
 
-	      if (get_elf_i386_backend_data (output_bfd)->is_vxworks)
+	      if (abed->is_vxworks)
 		{
 		  Elf_Internal_Rela rel;
 
@@ -4682,14 +4762,14 @@ elf_i386_finish_dynamic_sections (bfd *output_bfd,
 		     the PLT directly.  */
 		  rel.r_offset = (htab->elf.splt->output_section->vma
 				  + htab->elf.splt->output_offset
-				  + 2);
+				  + abed->plt->plt0_got1_offset);
 		  rel.r_info = ELF32_R_INFO (htab->elf.hgot->indx, R_386_32);
 		  bfd_elf32_swap_reloc_out (output_bfd, &rel,
 					    htab->srelplt2->contents);
 		  /* Generate a relocation for _GLOBAL_OFFSET_TABLE_ + 8.  */
 		  rel.r_offset = (htab->elf.splt->output_section->vma
 				  + htab->elf.splt->output_offset
-				  + 8);
+				  + abed->plt->plt0_got2_offset);
 		  rel.r_info = ELF32_R_INFO (htab->elf.hgot->indx, R_386_32);
 		  bfd_elf32_swap_reloc_out (output_bfd, &rel,
 					    htab->srelplt2->contents +
@@ -4703,10 +4783,10 @@ elf_i386_finish_dynamic_sections (bfd *output_bfd,
 	    ->this_hdr.sh_entsize = 4;
 
 	  /* Correct the .rel.plt.unloaded relocations.  */
-	  if (get_elf_i386_backend_data (output_bfd)->is_vxworks
-              && !info->shared)
+	  if (abed->is_vxworks && !info->shared)
 	    {
-	      int num_plts = (htab->elf.splt->size / PLT_ENTRY_SIZE) - 1;
+	      int num_plts = (htab->elf.splt->size
+                              / abed->plt->plt_entry_size) - 1;
 	      unsigned char *p;
 
 	      p = htab->srelplt2->contents;
@@ -4800,7 +4880,7 @@ static bfd_vma
 elf_i386_plt_sym_val (bfd_vma i, const asection *plt,
 		      const arelent *rel ATTRIBUTE_UNUSED)
 {
-  return plt->vma + (i + 1) * PLT_ENTRY_SIZE;
+  return plt->vma + (i + 1) * GET_PLT_ENTRY_SIZE (plt->owner);
 }
 
 /* Return TRUE if symbol should be hashed in the `.gnu.hash' section.  */
@@ -4960,6 +5040,7 @@ elf_i386_fbsd_post_process_headers (bfd *abfd, struct bfd_link_info *info)
 
 static const struct elf_i386_backend_data elf_i386_vxworks_arch_bed =
   {
+    &elf_i386_plt,                      /* plt */
     0x90,                               /* plt0_pad_byte */
     1,                                  /* is_vxworks */
   };

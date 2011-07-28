@@ -1,5 +1,18 @@
 2011-07-28  Roland McGrath  <mcgrathr@google.com>
 
+	* elf32-i386.c (struct elf_i386_plt_layout): New type.
+	(GET_PLT_ENTRY_SIZE): New macro.
+	(elf_i386_plt): New variable.
+	(struct elf_i386_backend_data): New member `plt'.
+	(elf_i386_arch_bed): Add initializer for it.
+	(elf_i386_vxworks_arch_bed): Likewise.
+	(elf_i386_allocate_dynrelocs): Use GET_PLT_ENTRY_SIZE.
+	(elf_i386_plt_sym_val): Likewise.
+	(elf_i386_relocate_section): Likewise.
+	(elf_i386_finish_dynamic_symbol): Likewise.
+	Also use other elf_i386_plt_layout members for PLT details.
+	(elf_i386_finish_dynamic_sections): Likewise.
+
 	* elf32-i386.c (struct elf_i386_backend_data): New type.
 	(get_elf_i386_backend_data): New macro.
 	(elf_i386_arch_bed): New variable.
