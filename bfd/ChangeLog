@@ -1,5 +1,9 @@
 2011-07-29  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* elfxx-mips.c (bz_insn_16): Correct opcode mask.
+
+2011-07-29  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* elfxx-mips.c: Adjust comments throughout.
 	(mips_elf_relax_delete_bytes): Reshape code.
 	(_bfd_mips_elf_relax_section): Remove check for

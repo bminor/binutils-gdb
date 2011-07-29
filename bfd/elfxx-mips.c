@@ -11987,7 +11987,7 @@ static const struct opcode_descriptor b_insn_16 =
   { /* "b",	"mD",		*/ 0xcc00,     0xfc00 };
 
 static const struct opcode_descriptor bz_insn_16 =
-  { /* "b(eq|ne)z", "md,mE",	*/ 0x8c00,     0xac00 };
+  { /* "b(eq|ne)z", "md,mE",	*/ 0x8c00,     0xdc00 };
 
 
 /* 32-bit and 16-bit branch EQ and NE zero.  */
