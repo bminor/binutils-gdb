@@ -1,3 +1,7 @@
+2011-07-29  Nick Clifton  <nickc@redhat.com>
+
+	* gas/elf/warn-2.s: Add other types of NOP insn.
+
 2011-07-27  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* gas/elf/warn-2.s: New.
