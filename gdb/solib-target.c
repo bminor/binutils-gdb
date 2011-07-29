@@ -28,7 +28,7 @@
 
 #include "gdb_string.h"
 
-DEF_VEC_O(CORE_ADDR);
+DEF_VEC_I(CORE_ADDR);
 
 /* Private data for each loaded library.  */
 struct lm_info
@@ -93,7 +93,7 @@ library_list_start_segment (struct gdb_xml_parser *parser,
     gdb_xml_error (parser,
 		   _("Library list with both segments and sections"));
 
-  VEC_safe_push (CORE_ADDR, last->segment_bases, &address);
+  VEC_safe_push (CORE_ADDR, last->segment_bases, address);
 }
 
 static void
@@ -110,7 +110,7 @@ library_list_start_section (struct gdb_xml_parser *parser,
     gdb_xml_error (parser,
 		   _("Library list with both segments and sections"));
 
-  VEC_safe_push (CORE_ADDR, last->section_bases, &address);
+  VEC_safe_push (CORE_ADDR, last->section_bases, address);
 }
 
 /* Handle the start of a <library> element.  */

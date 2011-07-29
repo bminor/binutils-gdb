@@ -1,3 +1,9 @@
+2011-07-29  Tom Tromey  <tromey@redhat.com>
+
+	* solib-target.c: Use DEF_VEC_I, not DEF_VEC_O.
+	(library_list_start_segment): Update.
+	(library_list_start_section): Update.
+
 2011-07-28  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* varobj.c (value_get_print_value): Move hint check later into the
