@@ -12239,7 +12239,7 @@ check_br16 (bfd *abfd, bfd_byte *ptr, unsigned long reg)
 /* If PTR points to a 32-bit branch or jump that doesn't fiddle with REG,
    then return TRUE, otherwise FALSE.  */
 
-static int
+static bfd_boolean
 check_br32 (bfd *abfd, bfd_byte *ptr, unsigned long reg)
 {
   unsigned long opcode;

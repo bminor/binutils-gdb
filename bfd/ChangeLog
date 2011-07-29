@@ -1,5 +1,9 @@
 2011-07-29  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* elfxx-mips.c (check_br32): Fix return type.
+
+2011-07-29  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* elfxx-mips.c (bz_insn_16): Correct opcode mask.
 
 2011-07-29  Maciej W. Rozycki  <macro@codesourcery.com>
