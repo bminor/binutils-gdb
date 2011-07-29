@@ -1,3 +1,7 @@
+2011-07-29  Sterling Augustine  <saugustine@google.com>
+
+	* MAINTAINERS (Write After Approval): Add myself to the list.
+
 2011-07-29  Tom Tromey  <tromey@redhat.com>
 
 	* solib-target.c: Use DEF_VEC_I, not DEF_VEC_O.
