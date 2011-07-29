@@ -1,3 +1,10 @@
+2011-07-29  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* elfxx-mips.c: Adjust comments throughout.
+	(mips_elf_relax_delete_bytes): Reshape code.
+	(_bfd_mips_elf_relax_section): Remove check for
+	R_MICROMIPS_GPREL16 relocations.  Reshape code.
+
 2011-07-28  Roland McGrath  <mcgrathr@google.com>
 
 	* elf32-i386.c (NACL_PLT_ENTRY_SIZE, NACLMASK): New macros.

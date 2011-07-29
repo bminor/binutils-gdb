@@ -1,3 +1,20 @@
+2011-07-29  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* config/tc-mips.c: Adjust comments throughout.
+	(reglist_lookup): Reshape code.
+	(jmp_reloc_p, jalr_reloc_p): Reformat.
+	(got16_reloc_p, hi16_reloc_p, lo16_reloc_p): Handle microMIPS
+	relocations.
+	(gpr_mod_mask): Remove unused variable.
+	(gpr_read_mask, gpr_write_mask): Reshape code.
+	(fpr_read_mask, fpr_write_mask): Likewise.
+	(nops_for_vr4130): Ensure non-microMIPS mode.
+	(can_swap_branch_p): Correct pinfo2 reference.  Reshape code.
+	(append_insn): Skip Loongson 2F workaround in MIPS16 mode.  Use
+	the outermost operator of a compound relocation to determines
+	the relocated field.  Fix formatting.
+	(md_convert_frag): Reshape code.
+
 2011-07-29  Tristan Gingold  <gingold@adacore.com>
 
 	* frags.c (frag_var_init): New function.
