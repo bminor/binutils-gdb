@@ -1,3 +1,9 @@
+2011-07-29  Tristan Gingold  <gingold@adacore.com>
+
+	* frags.c (frag_var_init): New function.
+	(frag_var): Call frag_var_init to initialize.
+	(frag_variant): Ditto.
+
 2011-07-27  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* dwarf2dbg.c (out_debug_line): Ignore non-normal segments, with a

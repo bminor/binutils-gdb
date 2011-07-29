@@ -193,6 +193,33 @@ frag_more (int nchars)
   return (retval);
 }
 
+/* Close the current frag, setting its fields for a relaxable frag.  Start a
+   new frag.  */
+
+static void
+frag_var_init (relax_stateT type, int max_chars, int var,
+               relax_substateT subtype, symbolS *symbol, offsetT offset,
+               char *opcode)
+{
+  frag_now->fr_var = var;
+  frag_now->fr_type = type;
+  frag_now->fr_subtype = subtype;
+  frag_now->fr_symbol = symbol;
+  frag_now->fr_offset = offset;
+  frag_now->fr_opcode = opcode;
+#ifdef USING_CGEN
+  frag_now->fr_cgen.insn = 0;
+  frag_now->fr_cgen.opindex = 0;
+  frag_now->fr_cgen.opinfo = 0;
+#endif
+#ifdef TC_FRAG_INIT
+  TC_FRAG_INIT (frag_now);
+#endif
+  as_where (&frag_now->fr_file, &frag_now->fr_line);
+
+  frag_new (max_chars);
+}
+
 /* Start a new frag unless we have max_chars more chars of room in the
    current frag.  Close off the old frag with a .fill 0.
 
@@ -209,23 +236,8 @@ frag_var (relax_stateT type, int max_chars, int var, relax_substateT subtype,
   frag_grow (max_chars);
   retval = obstack_next_free (&frchain_now->frch_obstack);
   obstack_blank_fast (&frchain_now->frch_obstack, max_chars);
-  frag_now->fr_var = var;
-  frag_now->fr_type = type;
-  frag_now->fr_subtype = subtype;
-  frag_now->fr_symbol = symbol;
-  frag_now->fr_offset = offset;
-  frag_now->fr_opcode = opcode;
-#ifdef USING_CGEN
-  frag_now->fr_cgen.insn = 0;
-  frag_now->fr_cgen.opindex = 0;
-  frag_now->fr_cgen.opinfo = 0;
-#endif
-#ifdef TC_FRAG_INIT
-  TC_FRAG_INIT (frag_now);
-#endif
-  as_where (&frag_now->fr_file, &frag_now->fr_line);
-  frag_new (max_chars);
-  return (retval);
+  frag_var_init (type, max_chars, var, subtype, symbol, offset, opcode);
+  return retval;
 }
 
 /* OVE: This variant of frag_var assumes that space for the tail has been
@@ -240,23 +252,9 @@ frag_variant (relax_stateT type, int max_chars, int var,
   register char *retval;
 
   retval = obstack_next_free (&frchain_now->frch_obstack);
-  frag_now->fr_var = var;
-  frag_now->fr_type = type;
-  frag_now->fr_subtype = subtype;
-  frag_now->fr_symbol = symbol;
-  frag_now->fr_offset = offset;
-  frag_now->fr_opcode = opcode;
-#ifdef USING_CGEN
-  frag_now->fr_cgen.insn = 0;
-  frag_now->fr_cgen.opindex = 0;
-  frag_now->fr_cgen.opinfo = 0;
-#endif
-#ifdef TC_FRAG_INIT
-  TC_FRAG_INIT (frag_now);
-#endif
-  as_where (&frag_now->fr_file, &frag_now->fr_line);
-  frag_new (max_chars);
-  return (retval);
+  frag_var_init (type, max_chars, var, subtype, symbol, offset, opcode);
+
+  return retval;
 }
 
 /* Reduce the variable end of a frag to a harmless state.  */
