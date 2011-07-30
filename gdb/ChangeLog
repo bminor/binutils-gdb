@@ -1,3 +1,7 @@
+2011-07-30  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* stack.c (print_frame_info): Comment typo fix.
+
 2011-07-29  Sterling Augustine  <saugustine@google.com>
 
 	* MAINTAINERS (Write After Approval): Add myself to the list.

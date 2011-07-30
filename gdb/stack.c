@@ -517,7 +517,7 @@ do_gdb_disassembly (struct gdbarch *gdbarch,
 }
 
 /* Print information about frame FRAME.  The output is format according
-   to PRINT_LEVEL and PRINT_WHAT and PRINT ARGS.  The meaning of
+   to PRINT_LEVEL and PRINT_WHAT and PRINT_ARGS.  The meaning of
    PRINT_WHAT is:
    
    SRC_LINE: Print only source line.
