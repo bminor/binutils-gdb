@@ -3275,7 +3275,6 @@ nops_for_vr4130 (int ignore, const struct mips_cl_insn *hist,
     if (MF_HILO_INSN (hist[i].insn_mo->pinfo))
       {
 	/* Extract the destination register.  */
-	gas_assert (!mips_opts.micromips);
 	mask = gpr_write_mask (&hist[i]);
 
 	/* No nops are needed if INSN reads that register.  */

@@ -1,3 +1,7 @@
+2011-07-30  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* config/tc-mips.c (nops_for_vr4130): Revert previous commit.
+
 2011-07-29  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* config/tc-mips.c: Adjust comments throughout.
