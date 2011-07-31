@@ -1573,14 +1573,13 @@ should_be_inserted (struct bp_location *bl)
 
 /* Insert a low-level "breakpoint" of some type.  BL is the breakpoint
    location.  Any error messages are printed to TMP_ERROR_STREAM; and
-   DISABLED_BREAKS, and HW_BREAKPOINT_ERROR are used to report problems.
+   HW_BREAKPOINT_ERROR is used to report problems.
 
    NOTE drow/2003-09-09: This routine could be broken down to an
    object-style method for each breakpoint or catchpoint type.  */
 static int
 insert_bp_location (struct bp_location *bl,
 		    struct ui_file *tmp_error_stream,
-		    int *disabled_breaks,
 		    int *hw_breakpoint_error)
 {
   int val = 0;
@@ -1714,16 +1713,12 @@ insert_bp_location (struct bp_location *bl,
 	      val = 0;
 	      bl->shlib_disabled = 1;
 	      observer_notify_breakpoint_modified (bl->owner);
-	      if (!*disabled_breaks)
-		{
-		  fprintf_unfiltered (tmp_error_stream, 
-				      "Cannot insert breakpoint %d.\n", 
-				      bl->owner->number);
-		  fprintf_unfiltered (tmp_error_stream, 
-				      "Temporarily disabling shared "
-				      "library breakpoints:\n");
-		}
-	      *disabled_breaks = 1;
+	      fprintf_unfiltered (tmp_error_stream, 
+			          "Cannot insert breakpoint %d.\n", 
+				  bl->owner->number);
+	      fprintf_unfiltered (tmp_error_stream, 
+				  "Temporarily disabling shared "
+				  "library breakpoints:\n");
 	      fprintf_unfiltered (tmp_error_stream,
 				  "breakpoint #%d\n", bl->owner->number);
 	    }
@@ -1914,7 +1909,6 @@ insert_breakpoint_locations (void)
   struct bp_location *bl, **blp_tmp;
   int error = 0;
   int val = 0;
-  int disabled_breaks = 0;
   int hw_breakpoint_error = 0;
 
   struct ui_file *tmp_error_stream = mem_fileopen ();
@@ -1948,8 +1942,8 @@ insert_breakpoint_locations (void)
 	  && ptid_equal (inferior_ptid, null_ptid))
 	continue;
 
-      val = insert_bp_location (bl, tmp_error_stream, &disabled_breaks,
-				    &hw_breakpoint_error);
+      val = insert_bp_location (bl, tmp_error_stream,
+				&hw_breakpoint_error);
       if (val)
 	error = val;
     }
@@ -2052,7 +2046,7 @@ reattach_breakpoints (int pid)
   struct bp_location *bl, **blp_tmp;
   int val;
   struct ui_file *tmp_error_stream;
-  int dummy1 = 0, dummy2 = 0;
+  int dummy = 0;
   struct inferior *inf;
   struct thread_info *tp;
 
@@ -2076,7 +2070,7 @@ reattach_breakpoints (int pid)
     if (bl->inserted)
       {
 	bl->inserted = 0;
-	val = insert_bp_location (bl, tmp_error_stream, &dummy1, &dummy2);
+	val = insert_bp_location (bl, tmp_error_stream, &dummy);
 	if (val != 0)
 	  {
 	    do_cleanups (old_chain);

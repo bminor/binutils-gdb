@@ -1,3 +1,8 @@
+2011-07-31  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* breakpoint.c (insert_bp_location): Remove disabled_breaks
+	argument.  Update callers.
+
 2011-07-30  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* stack.c (print_frame_info): Comment typo fix.
