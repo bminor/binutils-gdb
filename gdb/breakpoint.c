@@ -1574,6 +1574,8 @@ should_be_inserted (struct bp_location *bl)
 /* Insert a low-level "breakpoint" of some type.  BL is the breakpoint
    location.  Any error messages are printed to TMP_ERROR_STREAM; and
    HW_BREAKPOINT_ERROR is used to report problems.
+   Returns 0 for success, 1 if the bp_location type is not supported or
+   -1 for failure.
 
    NOTE drow/2003-09-09: This routine could be broken down to an
    object-style method for each breakpoint or catchpoint type.  */
@@ -1897,10 +1899,7 @@ insert_breakpoints (void)
     insert_breakpoint_locations ();
 }
 
-/* insert_breakpoints is used when starting or continuing the program.
-   remove_breakpoints is used when the program stops.
-   Both return zero if successful,
-   or an `errno' value if could not write the inferior.  */
+/* Used when starting or continuing the program.  */
 
 static void
 insert_breakpoint_locations (void)
@@ -2000,6 +1999,10 @@ You may have requested too many hardware breakpoints/watchpoints.\n");
 
   do_cleanups (cleanups);
 }
+
+/* Used when the program stops.
+   Returns zero if successful, or non-zero if there was a problem
+   removing a breakpoint location.  */
 
 int
 remove_breakpoints (void)

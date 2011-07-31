@@ -1,5 +1,11 @@
 2011-07-31  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
+	* breakpoint.c (insert_bp_location): Document return value.
+	(insert_breakpoint_locations): Fix documentation.
+	(remove_breakpoints): Add documentation.
+
+2011-07-31  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
 	* breakpoint.c (insert_bp_location): Remove disabled_breaks
 	argument.  Update callers.
 
