@@ -1,3 +1,9 @@
+2011-07-30  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	PR gdb/13045
+	* gdb.base/float.exp: Add new test case for PR gdb/13045
+	* gdb.base/float.c: New file.
+
 2011-07-28  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* gdb.python/py-mi.exp: Test printers returning string hint, and

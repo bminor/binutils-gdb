@@ -27,7 +27,7 @@ if $tracelevel {
 #
 
 
-if { [prepare_for_testing float.exp float run.c] } {
+if { [prepare_for_testing float.exp float float.c] } {
     return -1
 }
 
@@ -99,3 +99,6 @@ if { [istarget "alpha*-*-*"] } then {
 } else {
     gdb_test "info float" "No floating.point info available for this processor." "info float (unknown target)"
 }
+
+gdb_test "step"
+gdb_test "finish" "Value returned is .* = (inf|nan).*"

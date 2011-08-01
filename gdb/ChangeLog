@@ -1,3 +1,9 @@
+2011-08-01  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	PR gdb/13045
+	* doublest.c (convert_doublest_to_floatformat): Pass correct
+	mantissa length to put_field.
+
 2011-08-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* stack.c (do_gdb_disassembly): Use RETURN_MASK_ERROR, simplify the
@@ -25,7 +31,7 @@
 	(struct backtrace_command_args, backtrace_command_stub): Remove, merge
 	them into ...
 	(backtrace_command, backtrace_full_command): ... here with a TRY_CATCH.
-	New variable e, remove variable btargs and its initialization.  
+	New variable e, remove variable btargs and its initialization.
 
 2011-08-01  Tristan Gingold  <gingold@adacore.com>
 

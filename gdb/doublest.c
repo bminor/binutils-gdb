@@ -274,10 +274,6 @@ convert_floatformat_to_doublest (const struct floatformat *fmt,
   *to = dto;
 }
 
-static void put_field (unsigned char *, enum floatformat_byteorders,
-		       unsigned int,
-		       unsigned int, unsigned int, unsigned long);
-
 /* Set a field which starts at START and is LEN bytes long.  DATA and
    TOTAL_LEN are the thing we are extracting it from, in byteorder ORDER.  */
 static void
@@ -449,7 +445,7 @@ convert_doublest_to_floatformat (CONST struct floatformat *fmt,
 		 fmt->exp_len, fmt->exp_nan);
       /* Be sure it's not infinity, but NaN value is irrel.  */
       put_field (uto, order, fmt->totalsize, fmt->man_start,
-		 32, 1);
+		 fmt->man_len, 1);
       goto finalize_byteorder;
     }
 
