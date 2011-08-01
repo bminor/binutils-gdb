@@ -434,15 +434,17 @@ do_gdb_disassembly (struct gdbarch *gdbarch,
 {
   volatile struct gdb_exception exception;
 
-  TRY_CATCH (exception, RETURN_MASK_ALL)
+  TRY_CATCH (exception, RETURN_MASK_ERROR)
     {
       gdb_disassembly (gdbarch, uiout, 0, DISASSEMBLY_RAW_INSN, how_many, low,
 		       high);
     }
-  /* If an exception was thrown while doing the disassembly, print
-     the error message, to give the user a clue of what happened.  */
-  if (exception.reason == RETURN_ERROR)
-    exception_print (gdb_stderr, exception);
+  if (exception.reason < 0)
+    {
+      /* If an exception was thrown while doing the disassembly, print
+	 the error message, to give the user a clue of what happened.  */
+      exception_print (gdb_stderr, exception);
+    }
 }
 
 /* Print information about frame FRAME.  The output is format according
@@ -1348,7 +1350,6 @@ backtrace_command (char *arg, int from_tty)
 {
   struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
   int fulltrace_arg = -1, arglen = 0, argc = 0;
-  volatile struct gdb_exception e;
 
   if (arg)
     {
@@ -1379,7 +1380,8 @@ backtrace_command (char *arg, int from_tty)
 	  if (arglen > 0)
 	    {
 	      arg = xmalloc (arglen + 1);
-	      memset (arg, 0, arglen + 1);
+	      make_cleanup (xfree, arg);
+	      arg[0] = 0;
 	      for (i = 0; i < (argc + 1); i++)
 		{
 		  if (i != fulltrace_arg)
@@ -1394,13 +1396,7 @@ backtrace_command (char *arg, int from_tty)
 	}
     }
 
-  TRY_CATCH (e, RETURN_MASK_ERROR)
-    {
-      backtrace_command_1 (arg, fulltrace_arg >= 0 /* show_locals */, from_tty);
-    }
-
-  if (fulltrace_arg >= 0 && arglen > 0)
-    xfree (arg);
+  backtrace_command_1 (arg, fulltrace_arg >= 0 /* show_locals */, from_tty);
 
   do_cleanups (old_chain);
 }
@@ -1408,12 +1404,7 @@ backtrace_command (char *arg, int from_tty)
 static void
 backtrace_full_command (char *arg, int from_tty)
 {
-  volatile struct gdb_exception e;
-
-  TRY_CATCH (e, RETURN_MASK_ERROR)
-    {
-      backtrace_command_1 (arg, 1 /* show_locals */, from_tty);
-    }
+  backtrace_command_1 (arg, 1 /* show_locals */, from_tty);
 }
 
 

@@ -1,5 +1,13 @@
 2011-08-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* stack.c (do_gdb_disassembly): Use RETURN_MASK_ERROR, simplify the
+	exception_print code path.
+	(backtrace_command): Remove variable e.  Protect arg by make_cleanup in
+	advance.  Simplify memset.  Remove TRY_CATCH.  Remove explicit xfree.
+	(backtrace_full_command):  Remove variable e.  Remove TRY_CATCH.
+
+2011-08-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Code cleanup.
 	* stack.c (struct print_stack_frame_args, print_stack_frame_stub):
 	Remove, merge them into ...
