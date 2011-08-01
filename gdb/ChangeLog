@@ -1,3 +1,24 @@
+2011-08-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Code cleanup.
+	* stack.c (struct print_stack_frame_args, print_stack_frame_stub):
+	Remove, merge them into ...
+	(print_stack_frame): ... here with a TRY_CATCH.  New variable e, remove
+	variable args and its initialization.
+	(struct print_args_args, print_args_stub): Remove, merge them into
+	print_frame.
+	(struct gdb_disassembly_stub_args, gdb_disassembly_stub): Remove, merge
+	them into ...
+	(do_gdb_disassembly): ... here.  Remove variable args and its
+	initialization.
+	(print_frame): Remove variable args and its initialization, new
+	variable gdbarch and numargs (from print_args_stub), inline here
+	print_args_stub with a TRY_CATCH.
+	(struct backtrace_command_args, backtrace_command_stub): Remove, merge
+	them into ...
+	(backtrace_command, backtrace_full_command): ... here with a TRY_CATCH.
+	New variable e, remove variable btargs and its initialization.  
+
 2011-08-01  Tristan Gingold  <gingold@adacore.com>
 
 	* darwin-nat.c (darwin_decode_exception_message): Adjust assertion.

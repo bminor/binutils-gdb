@@ -82,27 +82,6 @@ static void print_frame (struct frame_info *frame, int print_level,
 int annotation_level = 0;
 
 
-struct print_stack_frame_args
-{
-  struct frame_info *frame;
-  int print_level;
-  enum print_what print_what;
-  int print_args;
-};
-
-/* Show or print the frame arguments; stub for catch_errors.  */
-
-static int
-print_stack_frame_stub (void *args)
-{
-  struct print_stack_frame_args *p = args;
-  int center = (p->print_what == SRC_LINE || p->print_what == SRC_AND_LOC);
-
-  print_frame_info (p->frame, p->print_level, p->print_what, p->print_args);
-  set_current_sal_from_frame (p->frame, center);
-  return 0;
-}
-
 /* Return 1 if we should display the address in addition to the location,
    because we are in the middle of a statement.  */
 
@@ -137,26 +116,20 @@ void
 print_stack_frame (struct frame_info *frame, int print_level,
 		   enum print_what print_what)
 {
-  struct print_stack_frame_args args;
+  volatile struct gdb_exception e;
 
-  args.frame = frame;
-  args.print_level = print_level;
-  args.print_what = print_what;
   /* For mi, alway print location and address.  */
-  args.print_what = ui_out_is_mi_like_p (uiout) ? LOC_AND_ADDRESS : print_what;
-  args.print_args = 1;
+  if (ui_out_is_mi_like_p (uiout))
+    print_what = LOC_AND_ADDRESS;
 
-  catch_errors (print_stack_frame_stub, &args, "", RETURN_MASK_ERROR);
-}  
+  TRY_CATCH (e, RETURN_MASK_ERROR)
+    {
+      int center = (print_what == SRC_LINE || print_what == SRC_AND_LOC);
 
-struct print_args_args
-{
-  struct symbol *func;
-  struct frame_info *frame;
-  struct ui_file *stream;
-};
-
-static int print_args_stub (void *args);
+      print_frame_info (frame, print_level, print_what, 1 /* print_args */);
+      set_current_sal_from_frame (frame, center);
+    }
+}
 
 /* Print nameless arguments of frame FRAME on STREAM, where START is
    the offset of the first nameless argument, and NUM is the number of
@@ -415,26 +388,6 @@ print_frame_args (struct symbol *func, struct frame_info *frame,
   do_cleanups (old_chain);
 }
 
-/* Stub for catch_errors.  */
-
-static int
-print_args_stub (void *args)
-{
-  struct print_args_args *p = args;
-  struct gdbarch *gdbarch = get_frame_arch (p->frame);
-  int numargs;
-
-  if (gdbarch_frame_num_args_p (gdbarch))
-    {
-      numargs = gdbarch_frame_num_args (gdbarch, p->frame);
-      gdb_assert (numargs >= 0);
-    }
-  else
-    numargs = -1;
-  print_frame_args (p->func, p->frame, numargs, p->stream);
-  return 0;
-}
-
 /* Set the current source and line to the location given by frame
    FRAME, if possible.  When CENTER is true, adjust so the relevant
    line is in the center of the next 'list'.  */
@@ -472,26 +425,6 @@ show_disassemble_next_line (struct ui_file *file, int from_tty,
                     value);
 }
 
-/* Show assembly codes; stub for catch_errors.  */
-
-struct gdb_disassembly_stub_args
-{
-  struct gdbarch *gdbarch;
-  int how_many;
-  CORE_ADDR low;
-  CORE_ADDR high;
-};
-
-static void
-gdb_disassembly_stub (void *args)
-{
-  struct gdb_disassembly_stub_args *p = args;
-
-  gdb_disassembly (p->gdbarch, uiout, 0,
-                   DISASSEMBLY_RAW_INSN, p->how_many,
-                   p->low, p->high);
-}
-
 /* Use TRY_CATCH to catch the exception from the gdb_disassembly
    because it will be broken by filter sometime.  */
 
@@ -500,15 +433,11 @@ do_gdb_disassembly (struct gdbarch *gdbarch,
 		    int how_many, CORE_ADDR low, CORE_ADDR high)
 {
   volatile struct gdb_exception exception;
-  struct gdb_disassembly_stub_args args;
 
-  args.gdbarch = gdbarch;
-  args.how_many = how_many;
-  args.low = low;
-  args.high = high;
   TRY_CATCH (exception, RETURN_MASK_ALL)
     {
-      gdb_disassembly_stub (&args);
+      gdb_disassembly (gdbarch, uiout, 0, DISASSEMBLY_RAW_INSN, how_many, low,
+		       high);
     }
   /* If an exception was thrown while doing the disassembly, print
      the error message, to give the user a clue of what happened.  */
@@ -818,14 +747,24 @@ print_frame (struct frame_info *frame, int print_level,
   ui_out_text (uiout, " (");
   if (print_args)
     {
-      struct print_args_args args;
+      struct gdbarch *gdbarch = get_frame_arch (frame);
+      int numargs;
       struct cleanup *args_list_chain;
+      volatile struct gdb_exception e;
 
-      args.frame = frame;
-      args.func = func;
-      args.stream = gdb_stdout;
+      if (gdbarch_frame_num_args_p (gdbarch))
+	{
+	  numargs = gdbarch_frame_num_args (gdbarch, frame);
+	  gdb_assert (numargs >= 0);
+	}
+      else
+	numargs = -1;
+    
       args_list_chain = make_cleanup_ui_out_list_begin_end (uiout, "args");
-      catch_errors (print_args_stub, &args, "", RETURN_MASK_ERROR);
+      TRY_CATCH (e, RETURN_MASK_ERROR)
+	{
+	  print_frame_args (func, frame, numargs, gdb_stdout);
+	}
       /* FIXME: ARGS must be a list.  If one argument is a string it
 	  will have " that will not be properly escaped.  */
       /* Invoke ui_out_tuple_end.  */
@@ -1404,30 +1343,12 @@ backtrace_command_1 (char *count_exp, int show_locals, int from_tty)
     }
 }
 
-struct backtrace_command_args
-{
-  char *count_exp;
-  int show_locals;
-  int from_tty;
-};
-
-/* Stub for catch_errors.  */
-
-static int
-backtrace_command_stub (void *data)
-{
-  struct backtrace_command_args *args = data;
-
-  backtrace_command_1 (args->count_exp, args->show_locals, args->from_tty);
-  return 0;
-}
-
 static void
 backtrace_command (char *arg, int from_tty)
 {
   struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
   int fulltrace_arg = -1, arglen = 0, argc = 0;
-  struct backtrace_command_args btargs;
+  volatile struct gdb_exception e;
 
   if (arg)
     {
@@ -1473,10 +1394,10 @@ backtrace_command (char *arg, int from_tty)
 	}
     }
 
-  btargs.count_exp = arg;
-  btargs.show_locals = (fulltrace_arg >= 0);
-  btargs.from_tty = from_tty;
-  catch_errors (backtrace_command_stub, &btargs, "", RETURN_MASK_ERROR);
+  TRY_CATCH (e, RETURN_MASK_ERROR)
+    {
+      backtrace_command_1 (arg, fulltrace_arg >= 0 /* show_locals */, from_tty);
+    }
 
   if (fulltrace_arg >= 0 && arglen > 0)
     xfree (arg);
@@ -1487,12 +1408,12 @@ backtrace_command (char *arg, int from_tty)
 static void
 backtrace_full_command (char *arg, int from_tty)
 {
-  struct backtrace_command_args btargs;
+  volatile struct gdb_exception e;
 
-  btargs.count_exp = arg;
-  btargs.show_locals = 1;
-  btargs.from_tty = from_tty;
-  catch_errors (backtrace_command_stub, &btargs, "", RETURN_MASK_ERROR);
+  TRY_CATCH (e, RETURN_MASK_ERROR)
+    {
+      backtrace_command_1 (arg, 1 /* show_locals */, from_tty);
+    }
 }
 
 
