@@ -271,7 +271,8 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	relro_strip_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	relro_script_test script_test_1 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_2 justsyms \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	binary_test script_test_3 \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	justsyms_exec binary_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_3 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	tls_phdrs_script_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	tls_script_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	thin_archive_test_1 \
@@ -282,6 +283,8 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @NATIVE_LINKER_FALSE@script_test_2_DEPENDENCIES =
 @GCC_FALSE@justsyms_DEPENDENCIES =
 @NATIVE_LINKER_FALSE@justsyms_DEPENDENCIES =
+@GCC_FALSE@justsyms_exec_DEPENDENCIES =
+@NATIVE_LINKER_FALSE@justsyms_exec_DEPENDENCIES =
 @GCC_FALSE@binary_test_DEPENDENCIES =
 @NATIVE_LINKER_FALSE@binary_test_DEPENDENCIES =
 @GCC_FALSE@thin_archive_test_2_DEPENDENCIES =
@@ -680,6 +683,7 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_1$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_2$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	justsyms$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	justsyms_exec$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	binary_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_3$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	tls_phdrs_script_test$(EXEEXT) \
@@ -1147,6 +1151,11 @@ initpri3b_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(initpri3b_LDFLAGS) \
 justsyms_OBJECTS = $(am_justsyms_OBJECTS)
 justsyms_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 	$(justsyms_LDFLAGS) $(LDFLAGS) -o $@
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am_justsyms_exec_OBJECTS =  \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	justsyms_exec.$(OBJEXT)
+justsyms_exec_OBJECTS = $(am_justsyms_exec_OBJECTS)
+justsyms_exec_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(justsyms_exec_LDFLAGS) $(LDFLAGS) -o $@
 @GCC_TRUE@@MCMODEL_MEDIUM_TRUE@@NATIVE_LINKER_TRUE@am_large_OBJECTS = large-large.$(OBJEXT)
 large_OBJECTS = $(am_large_OBJECTS)
 large_LINK = $(CCLD) $(large_CFLAGS) $(CFLAGS) $(large_LDFLAGS) \
@@ -1630,12 +1639,13 @@ SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c basic_pie_test.c \
 	incremental_test_2.c incremental_test_3.c incremental_test_4.c \
 	incremental_test_5.c incremental_test_6.c $(initpri1_SOURCES) \
 	$(initpri2_SOURCES) $(initpri3a_SOURCES) $(initpri3b_SOURCES) \
-	$(justsyms_SOURCES) $(large_SOURCES) local_labels_test.c \
-	many_sections_r_test.c $(many_sections_test_SOURCES) \
-	$(object_unittest_SOURCES) permission_test.c plugin_test_1.c \
-	plugin_test_2.c plugin_test_3.c plugin_test_4.c \
-	plugin_test_5.c plugin_test_6.c plugin_test_7.c \
-	plugin_test_8.c $(protected_1_SOURCES) $(protected_2_SOURCES) \
+	$(justsyms_SOURCES) $(justsyms_exec_SOURCES) $(large_SOURCES) \
+	local_labels_test.c many_sections_r_test.c \
+	$(many_sections_test_SOURCES) $(object_unittest_SOURCES) \
+	permission_test.c plugin_test_1.c plugin_test_2.c \
+	plugin_test_3.c plugin_test_4.c plugin_test_5.c \
+	plugin_test_6.c plugin_test_7.c plugin_test_8.c \
+	$(protected_1_SOURCES) $(protected_2_SOURCES) \
 	$(relro_now_test_SOURCES) $(relro_script_test_SOURCES) \
 	$(relro_strip_test_SOURCES) $(relro_test_SOURCES) \
 	$(script_test_1_SOURCES) $(script_test_2_SOURCES) \
@@ -2279,6 +2289,10 @@ LDADD = libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@justsyms_DEPENDENCIES = gcctestdir/ld justsyms_2r.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@justsyms_LDFLAGS = -Bgcctestdir/ -Wl,-R,justsyms_2r.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@justsyms_LDADD = 
+@GCC_TRUE@@NATIVE_LINKER_TRUE@justsyms_exec_SOURCES = justsyms_exec.c
+@GCC_TRUE@@NATIVE_LINKER_TRUE@justsyms_exec_DEPENDENCIES = gcctestdir/ld justsyms_lib
+@GCC_TRUE@@NATIVE_LINKER_TRUE@justsyms_exec_LDFLAGS = -Bgcctestdir/ -Wl,-R,justsyms_lib
+@GCC_TRUE@@NATIVE_LINKER_TRUE@justsyms_exec_LDADD = 
 @GCC_TRUE@@NATIVE_LINKER_TRUE@binary_test_SOURCES = binary_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@binary_test_DEPENDENCIES = gcctestdir/ld binary.txt
 @GCC_TRUE@@NATIVE_LINKER_TRUE@binary_test_LDFLAGS = -Bgcctestdir/ -Wl,--format,binary,binary.txt,--format,elf
@@ -2834,6 +2848,9 @@ initpri3b$(EXEEXT): $(initpri3b_OBJECTS) $(initpri3b_DEPENDENCIES)
 justsyms$(EXEEXT): $(justsyms_OBJECTS) $(justsyms_DEPENDENCIES) 
 	@rm -f justsyms$(EXEEXT)
 	$(justsyms_LINK) $(justsyms_OBJECTS) $(justsyms_LDADD) $(LIBS)
+justsyms_exec$(EXEEXT): $(justsyms_exec_OBJECTS) $(justsyms_exec_DEPENDENCIES) 
+	@rm -f justsyms_exec$(EXEEXT)
+	$(justsyms_exec_LINK) $(justsyms_exec_OBJECTS) $(justsyms_exec_LDADD) $(LIBS)
 large$(EXEEXT): $(large_OBJECTS) $(large_DEPENDENCIES) 
 	@rm -f large$(EXEEXT)
 	$(large_LINK) $(large_OBJECTS) $(large_LDADD) $(LIBS)
@@ -3214,6 +3231,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/initpri2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/initpri3.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/justsyms_1.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/justsyms_exec.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/large-large.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/local_labels_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/many_sections_r_test.Po@am__quote@
@@ -3796,6 +3814,8 @@ script_test_2.log: script_test_2$(EXEEXT)
 	@p='script_test_2$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 justsyms.log: justsyms$(EXEEXT)
 	@p='justsyms$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+justsyms_exec.log: justsyms_exec$(EXEEXT)
+	@p='justsyms_exec$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 binary_test.log: binary_test$(EXEEXT)
 	@p='binary_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 script_test_3.log: script_test_3$(EXEEXT)
@@ -4532,6 +4552,10 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@justsyms_2r.o: justsyms_2.o gcctestdir/ld $(srcdir)/justsyms.t
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	gcctestdir/ld -o $@ -r -T $(srcdir)/justsyms.t justsyms_2.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@justsyms_lib.o: justsyms_lib.c
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -c -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@justsyms_lib: justsyms_lib.o gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	gcctestdir/ld -o $@ -Ttext=0x1000200 -Tdata=0x2000000 -e exported_func justsyms_lib.o
 # Copy the file to the build directory to avoid worrying about the
 # full pathname in the generated symbols.
 @GCC_TRUE@@NATIVE_LINKER_TRUE@binary.txt: $(srcdir)/binary.in

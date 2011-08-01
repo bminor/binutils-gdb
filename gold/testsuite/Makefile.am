@@ -1221,6 +1221,16 @@ justsyms_2.o: justsyms_2.cc
 justsyms_2r.o: justsyms_2.o gcctestdir/ld $(srcdir)/justsyms.t
 	gcctestdir/ld -o $@ -r -T $(srcdir)/justsyms.t justsyms_2.o
 
+check_PROGRAMS += justsyms_exec
+justsyms_exec_SOURCES = justsyms_exec.c
+justsyms_exec_DEPENDENCIES = gcctestdir/ld justsyms_lib
+justsyms_exec_LDFLAGS = -Bgcctestdir/ -Wl,-R,justsyms_lib
+justsyms_exec_LDADD =
+justsyms_lib.o: justsyms_lib.c
+	$(COMPILE) -c -o $@ $<
+justsyms_lib: justsyms_lib.o gcctestdir/ld
+	gcctestdir/ld -o $@ -Ttext=0x1000200 -Tdata=0x2000000 -e exported_func justsyms_lib.o
+
 check_PROGRAMS += binary_test
 MOSTLYCLEANFILES += binary.txt
 binary_test_SOURCES = binary_test.cc

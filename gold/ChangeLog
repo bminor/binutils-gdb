@@ -1,5 +1,12 @@
 2011-08-01  Cary Coutant  <ccoutant@google.com>
 
+	* gold/testsuite/Makefile.am (justsyms_exec): New testcase.
+	* gold/testsuite/Makefile.in: Regenerate.
+	* gold/testsuite/justsyms_exec.c: New source file.
+	* gold/testsuite/justsyms_lib.c: New source file.
+
+2011-08-01  Cary Coutant  <ccoutant@google.com>
+
 	* layout.cc (Layout::set_segment_offsets): Don't realign text
 	segment if -Ttext was specified.
 	* object.cc (Sized_relobj_file::Sized_relobj_file): Store the ELF
