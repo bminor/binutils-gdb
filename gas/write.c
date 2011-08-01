@@ -1233,15 +1233,15 @@ write_relocs (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
 
 #ifdef DEBUG4
   {
-    unsigned int i, j, nsyms;
+    unsigned int k, j, nsyms;
     asymbol **sympp;
     sympp = bfd_get_outsymbols (stdoutput);
     nsyms = bfd_get_symcount (stdoutput);
-    for (i = 0; i < n; i++)
-      if (((*relocs[i]->sym_ptr_ptr)->flags & BSF_SECTION_SYM) == 0)
+    for (k = 0; k < n; k++)
+      if (((*relocs[k]->sym_ptr_ptr)->flags & BSF_SECTION_SYM) == 0)
 	{
 	  for (j = 0; j < nsyms; j++)
-	    if (sympp[j] == *relocs[i]->sym_ptr_ptr)
+	    if (sympp[j] == *relocs[k]->sym_ptr_ptr)
 	      break;
 	  if (j == nsyms)
 	    abort ();
@@ -1280,16 +1280,16 @@ write_relocs (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
 
 #ifdef DEBUG3
   {
-    unsigned int i;
-    arelent *r;
-    asymbol *s;
+    unsigned int k;
+
     fprintf (stderr, "relocs for sec %s\n", sec->name);
-    for (i = 0; i < n; i++)
+    for (k = 0; k < n; k++)
       {
-	r = relocs[i];
-	s = *r->sym_ptr_ptr;
+	arelent *rel = relocs[k];
+	asymbol *s = *rel->sym_ptr_ptr;
 	fprintf (stderr, "  reloc %2d @%p off %4lx : sym %-10s addend %lx\n",
-		 i, r, (unsigned long)r->address, s->name, (unsigned long)r->addend);
+		 k, rel, (unsigned long)rel->address, s->name,
+		 (unsigned long)rel->addend);
       }
   }
 #endif

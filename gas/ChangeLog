@@ -1,5 +1,9 @@
 2011-08-01  Tristan Gingold  <gingold@adacore.com>
 
+	* write.c (write_relocs): Fix -Wshadow in DEBUG3 and DEBUG4.
+
+2011-08-01  Tristan Gingold  <gingold@adacore.com>
+
 	* frags.c (frag_grow): Simplify the code.
 
 2011-07-30  Richard Sandiford  <rdsandiford@googlemail.com>
