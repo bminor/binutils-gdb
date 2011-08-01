@@ -1,3 +1,7 @@
+2011-08-01  Tristan Gingold  <gingold@adacore.com>
+
+	* darwin-nat.c (darwin_decode_exception_message): Adjust assertion.
+
 2011-07-31  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* breakpoint.c (insert_bp_location): Document return value.
