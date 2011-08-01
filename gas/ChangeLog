@@ -1,3 +1,11 @@
+2011-08-01  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/12974
+	* config/tc-arm.c (literal_pool): Add locs field.
+	(add_to_lit_pool): Initialise the locs entry for the new literal.
+	(s_ltorg): Generate a DWARF2 line number entry for each emitted
+	literal pool entry.
+
 2011-08-01  Tristan Gingold  <gingold@adacore.com>
 
 	* write.c (write_relocs): Fix -Wshadow in DEBUG3 and DEBUG4.

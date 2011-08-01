@@ -759,6 +759,9 @@ typedef struct literal_pool
   symbolS *	         symbol;
   segT		         section;
   subsegT	         sub_section;
+#ifdef OBJ_ELF
+  struct dwarf2_line_info locs [MAX_LITERAL_POOL_SIZE];
+#endif
   struct literal_pool *  next;
 } literal_pool;
 
@@ -3074,6 +3077,14 @@ add_to_lit_pool (void)
 	}
 
       pool->literals[entry] = inst.reloc.exp;
+#ifdef OBJ_ELF
+      /* PR ld/12974: Record the location of the first source line to reference
+	 this entry in the literal pool.  If it turns out during linking that the
+	 symbol does not exist we will be able to give an accurate line number for
+	 the (first use of the) missing reference.  */
+      if (debug_type == DEBUG_DWARF2)
+	dwarf2_where (pool->locs + entry);
+#endif
       pool->next_free_entry += 1;
     }
 
@@ -3171,8 +3182,14 @@ s_ltorg (int ignored ATTRIBUTE_UNUSED)
 #endif
 
   for (entry = 0; entry < pool->next_free_entry; entry ++)
-    /* First output the expression in the instruction to the pool.  */
-    emit_expr (&(pool->literals[entry]), 4); /* .word  */
+    {
+#ifdef OBJ_ELF
+      if (debug_type == DEBUG_DWARF2)
+	dwarf2_gen_line_info (frag_now_fix (), pool->locs + entry);
+#endif
+      /* First output the expression in the instruction to the pool.  */
+      emit_expr (&(pool->literals[entry]), 4); /* .word  */
+    }
 
   /* Mark the pool as empty.  */
   pool->next_free_entry = 0;
