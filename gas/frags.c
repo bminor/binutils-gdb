@@ -85,31 +85,38 @@ frag_grow (unsigned int nchars)
 {
   if (obstack_room (&frchain_now->frch_obstack) < nchars)
     {
-      unsigned int n;
       long oldc;
+      long newc;
 
-      frag_wane (frag_now);
-      frag_new (0);
-      oldc = frchain_now->frch_obstack.chunk_size;
       /* Try to allocate a bit more than needed right now.  But don't do
          this if we would waste too much memory.  Especially necessary
-	 for extremely big (like 2GB initialized) frags.  */
+         for extremely big (like 2GB initialized) frags.  */
       if (nchars < 0x10000)
-	frchain_now->frch_obstack.chunk_size = 2 * nchars;
+        newc = 2 * nchars;
       else
-        frchain_now->frch_obstack.chunk_size = nchars + 0x10000;
-      frchain_now->frch_obstack.chunk_size += SIZEOF_STRUCT_FRAG;
-      if (frchain_now->frch_obstack.chunk_size > 0)
-	while ((n = obstack_room (&frchain_now->frch_obstack)) < nchars
-	       && (unsigned long) frchain_now->frch_obstack.chunk_size > nchars)
-	  {
-	    frag_wane (frag_now);
-	    frag_new (0);
-	  }
-      frchain_now->frch_obstack.chunk_size = oldc;
+        newc = nchars + 0x10000;
+      newc += SIZEOF_STRUCT_FRAG;
+
+      /* Check for possible overflow.  */
+      if (newc < 0)
+        as_fatal (_("can't extend frag %u chars"), nchars);
+
+      /* Force to allocate at least NEWC bytes.  */
+      oldc = obstack_chunk_size (&frchain_now->frch_obstack);
+      obstack_chunk_size (&frchain_now->frch_obstack) = newc;
+
+      while (obstack_room (&frchain_now->frch_obstack) < nchars)
+        {
+          /* Not enough room in this frag.  Close it and start a new one.
+             This must be done in a loop because the created frag may not
+             be big enough if the current obstack chunk is used.  */
+          frag_wane (frag_now);
+          frag_new (0);
+        }
+
+      /* Restore the old chunk size.  */
+      obstack_chunk_size (&frchain_now->frch_obstack) = oldc;
     }
-  if (obstack_room (&frchain_now->frch_obstack) < nchars)
-    as_fatal (_("can't extend frag %u chars"), nchars);
 }
 
 /* Call this to close off a completed frag, and start up a new (empty)
