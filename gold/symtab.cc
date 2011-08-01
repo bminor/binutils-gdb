@@ -1192,12 +1192,14 @@ Symbol_table::add_from_relobj(
 	{
 	  memcpy(symbuf, p, sym_size);
 	  elfcpp::Sym_write<size, big_endian> sw(symbuf);
-	  if (orig_st_shndx != elfcpp::SHN_UNDEF && is_ordinary)
+	  if (orig_st_shndx != elfcpp::SHN_UNDEF
+	      && is_ordinary
+	      && relobj->e_type() == elfcpp::ET_REL)
 	    {
-	      // Symbol values in object files are section relative.
-	      // This is normally what we want, but since here we are
-	      // converting the symbol to absolute we need to add the
-	      // section address.  The section address in an object
+	      // Symbol values in relocatable object files are section
+	      // relative.  This is normally what we want, but since here
+	      // we are converting the symbol to absolute we need to add
+	      // the section address.  The section address in an object
 	      // file is normally zero, but people can use a linker
 	      // script to change it.
 	      sw.put_st_value(sym.get_st_value()

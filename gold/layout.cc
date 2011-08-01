@@ -3039,6 +3039,11 @@ Layout::set_segment_offsets(const Target* target, Output_segment* load_seg,
 	      // the physical address.
 	      addr = (*p)->paddr();
 	    }
+	  else if (parameters->options().user_set_Ttext()
+		   && ((*p)->flags() & elfcpp::PF_W) == 0)
+	    {
+	      are_addresses_set = true;
+	    }
 	  else if (parameters->options().user_set_Tdata()
 		   && ((*p)->flags() & elfcpp::PF_W) != 0
 		   && (!parameters->options().user_set_Tbss()

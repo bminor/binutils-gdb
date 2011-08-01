@@ -421,6 +421,7 @@ Sized_relobj_file<size, big_endian>::Sized_relobj_file(
     deferred_layout_relocs_(),
     compressed_sections_()
 {
+  this->e_type_ = ehdr.get_e_type();
 }
 
 template<int size, bool big_endian>

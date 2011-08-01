@@ -1912,6 +1912,11 @@ class Sized_relobj_file : public Sized_relobj<size, big_endian>
   sized_relobj() const
   { return this; }
 
+  // Return the ELF file type.
+  int
+  e_type() const
+  { return this->e_type_; }
+
   // Return the number of symbols.  This is only valid after
   // Object::add_symbols has been called.
   unsigned int
@@ -2504,6 +2509,9 @@ class Sized_relobj_file : public Sized_relobj<size, big_endian>
 
   // General access to the ELF file.
   elfcpp::Elf_file<size, big_endian, Object> elf_file_;
+  // Type of ELF file (ET_REL or ET_EXEC).  ET_EXEC files are allowed
+  // as input files only for the --just-symbols option.
+  int e_type_;
   // Index of SHT_SYMTAB section.
   unsigned int symtab_shndx_;
   // The number of local symbols.

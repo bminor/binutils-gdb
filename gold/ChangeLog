@@ -1,3 +1,16 @@
+2011-08-01  Cary Coutant  <ccoutant@google.com>
+
+	* layout.cc (Layout::set_segment_offsets): Don't realign text
+	segment if -Ttext was specified.
+	* object.cc (Sized_relobj_file::Sized_relobj_file): Store the ELF
+	file type.
+	* object.h (Sized_relobj_file::e_type): New function.
+	(Sized_relobj_file::e_type_): New data member.
+	* symtab.cc (Symbol_table::add_from_relobj): Don't add section
+	base address for ET_EXEC files.
+	* target.cc (Target::do_make_elf_object_implementation): Allow
+	ET_EXEC files with --just-symbols option.
+
 2011-07-28  Cary Coutant  <ccoutant@google.com>
 
 	* workqueue-internal.h (Workqueue_threader::should_cancel_thread):

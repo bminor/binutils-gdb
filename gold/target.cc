@@ -72,7 +72,10 @@ Target::do_make_elf_object_implementation(
     const elfcpp::Ehdr<size, big_endian>& ehdr)
 {
   int et = ehdr.get_e_type();
-  if (et == elfcpp::ET_REL)
+  // ET_EXEC files are valid input for --just-symbols/-R,
+  // and we treat them as relocatable objects.
+  if (et == elfcpp::ET_REL
+      || (et == elfcpp::ET_EXEC && input_file->just_symbols()))
     {
       Sized_relobj_file<size, big_endian>* obj =
 	new Sized_relobj_file<size, big_endian>(name, input_file, offset, ehdr);
