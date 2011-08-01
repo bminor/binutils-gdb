@@ -1,3 +1,17 @@
+2011-08-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/13048
+	* ld-x86-64/ilp32-6.d: New.
+	* ld-x86-64/ilp32-6.s: Likewise.
+	* ld-x86-64/ilp32-7.d: Likewise.
+	* ld-x86-64/ilp32-7.s: Likewise.
+	* ld-x86-64/ilp32-8.d: Likewise.
+	* ld-x86-64/ilp32-8.s: Likewise.
+	* ld-x86-64/ilp32-9.d: Likewise.
+	* ld-x86-64/ilp32-9.s: Likewise.
+
+	* ld-x86-64/x86-64.exp: Run ilp32-6, ilp32-7, ilp32-8 and ilp32-9.
+
 2011-07-27  Roland McGrath  <mcgrathr@google.com>
 
 	* ld-i386/vxworks1-lib.rd: Swap order of sections expected in output.

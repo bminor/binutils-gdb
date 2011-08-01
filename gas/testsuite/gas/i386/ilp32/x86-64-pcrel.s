@@ -9,3 +9,5 @@ _start:
 	movw	$xtrn, %ax
 	movl	$xtrn, %eax
 	movq	$xtrn, %rax
+	movabs	$xtrn, %rax
+	movabsq	xtrn, %rax

@@ -279,6 +279,9 @@ extern unsigned int x86_dwarf2_return_column;
 extern int x86_cie_data_alignment;
 #define DWARF2_CIE_DATA_ALIGNMENT x86_cie_data_alignment
 
+extern int x86_dwarf2_addr_size (void);
+#define DWARF2_ADDR_SIZE(bfd) x86_dwarf2_addr_size ()
+
 #define tc_parse_to_dw2regnum tc_x86_parse_to_dw2regnum
 extern void tc_x86_parse_to_dw2regnum (expressionS *);
 

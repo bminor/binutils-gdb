@@ -1,3 +1,14 @@
+2011-08-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/13048
+	* config/tc-i386.c (handle_quad): Removed.
+	(md_pseudo_table): Remove "quad".
+	(tc_gen_reloc): Don't check BFD_RELOC_64 for disallow_64bit_reloc.
+	(x86_dwarf2_addr_size): New.
+
+	* config/tc-i386.h (x86_dwarf2_addr_size): New.
+	(DWARF2_ADDR_SIZE): Likewise.
+
 2011-08-01  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/12974

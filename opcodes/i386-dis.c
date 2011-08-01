@@ -11161,40 +11161,19 @@ print_insn (bfd_vma pc, disassemble_info *info)
   int prefix_length;
   int default_prefixes;
 
-  if (info->mach == bfd_mach_x86_64_intel_syntax
-      || info->mach == bfd_mach_x86_64
-      || info->mach == bfd_mach_x64_32_intel_syntax
-      || info->mach == bfd_mach_x64_32
-      || info->mach == bfd_mach_l1om
-      || info->mach == bfd_mach_l1om_intel_syntax
-      || info->mach == bfd_mach_k1om
-      || info->mach == bfd_mach_k1om_intel_syntax)
-    address_mode = mode_64bit;
-  else
+  priv.orig_sizeflag = AFLAG | DFLAG;
+  if ((info->mach & bfd_mach_i386_i386) != 0)
     address_mode = mode_32bit;
+  else if (info->mach == bfd_mach_i386_i8086)
+    {
+      address_mode = mode_16bit;
+      priv.orig_sizeflag = 0;
+    }
+  else
+    address_mode = mode_64bit;
 
   if (intel_syntax == (char) -1)
-    intel_syntax = (info->mach == bfd_mach_i386_i386_intel_syntax
-		    || info->mach == bfd_mach_x86_64_intel_syntax
-		    || info->mach == bfd_mach_x64_32_intel_syntax
-		    || info->mach == bfd_mach_l1om_intel_syntax
-		    || info->mach == bfd_mach_k1om_intel_syntax);
-
-  if (info->mach == bfd_mach_i386_i386
-      || info->mach == bfd_mach_x86_64
-      || info->mach == bfd_mach_x64_32
-      || info->mach == bfd_mach_l1om
-      || info->mach == bfd_mach_k1om
-      || info->mach == bfd_mach_i386_i386_intel_syntax
-      || info->mach == bfd_mach_x86_64_intel_syntax
-      || info->mach == bfd_mach_x64_32_intel_syntax
-      || info->mach == bfd_mach_l1om_intel_syntax
-      || info->mach == bfd_mach_k1om_intel_syntax)
-    priv.orig_sizeflag = AFLAG | DFLAG;
-  else if (info->mach == bfd_mach_i386_i8086)
-    priv.orig_sizeflag = 0;
-  else
-    abort ();
+    intel_syntax = (info->mach & bfd_mach_i386_intel_syntax) != 0;
 
   for (p = info->disassembler_options; p != NULL; )
     {
@@ -11299,8 +11278,7 @@ print_insn (bfd_vma pc, disassemble_info *info)
   /* The output looks better if we put 7 bytes on a line, since that
      puts most long word instructions on a single line.  Use 8 bytes
      for Intel L1OM.  */
-  if (info->mach == bfd_mach_l1om
-      || info->mach == bfd_mach_l1om_intel_syntax)
+  if ((info->mach & bfd_mach_l1om) != 0)
     info->bytes_per_line = 8;
   else
     info->bytes_per_line = 7;

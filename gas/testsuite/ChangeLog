@@ -1,5 +1,19 @@
 2011-08-01  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/13048
+	* gas/i386/ilp32/ilp32.exp: Don't run inval.
+
+	* gas/i386/ilp32/inval.l: Removed.
+	* gas/i386/ilp32/inval.s: Likewise.
+
+	* gas/i386/ilp32/quad.d: Expect R_X86_64_64 instead of
+	R_X86_64_32.
+
+	* gas/i386/ilp32/x86-64-pcrel.s: Add tests for movabs.
+	* gas/i386/ilp32/x86-64-pcrel.d: Updated.
+
+2011-08-01  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR gas/13046
 	* gas/i386/x86-64-branch.s: Add tests for direct branch.
 	* gas/i386/x86-64-branch.d: Updated.

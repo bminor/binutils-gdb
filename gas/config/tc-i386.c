@@ -182,7 +182,6 @@ static void s_bss (int);
 #endif
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
 static void handle_large_common (int small ATTRIBUTE_UNUSED);
-static void handle_quad (int);
 #endif
 
 static const char *default_arch = DEFAULT_ARCH;
@@ -828,7 +827,6 @@ const pseudo_typeS md_pseudo_table[] =
   {"sse_check", set_sse_check, 0},
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
   {"largecomm", handle_large_common, 0},
-  {"quad", handle_quad, 8},
 #else
   {"file", (void (*) (int)) dwarf2_directive_file, 0},
   {"loc", dwarf2_directive_loc, 0},
@@ -9059,7 +9057,6 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
       if (disallow_64bit_reloc)
 	switch (code)
 	  {
-	  case BFD_RELOC_64:
 	  case BFD_RELOC_X86_64_DTPOFF64:
 	  case BFD_RELOC_X86_64_TPOFF64:
 	  case BFD_RELOC_64_PCREL:
@@ -9169,6 +9166,16 @@ tc_x86_frame_initial_instructions (void)
 }
 
 int
+x86_dwarf2_addr_size (void)
+{
+#if defined (OBJ_MAYBE_ELF) || defined (OBJ_ELF)
+  if (x86_elf_abi == X86_64_X32_ABI)
+    return 4;
+#endif
+  return bfd_arch_bits_per_address (stdoutput) / 8;
+}
+
+int
 i386_elf_section_type (const char *str, size_t len)
 {
   if (flag_code == CODE_64BIT
@@ -9266,51 +9273,5 @@ handle_large_common (int small ATTRIBUTE_UNUSED)
       elf_com_section_ptr = saved_com_section_ptr;
       bss_section = saved_bss_section;
     }
-}
-
-static void
-handle_quad (int nbytes)
-{
-  expressionS exp;
-
-  if (x86_elf_abi != X86_64_X32_ABI)
-    {
-      cons (nbytes);
-      return;
-    }
-
-  if (is_it_end_of_statement ())
-    {
-      demand_empty_rest_of_line ();
-      return;
-    }
-
-  do
-    {
-      if (*input_line_pointer == '"')
-	{
-	  as_bad (_("unexpected `\"' in expression"));
-	  ignore_rest_of_line ();
-	  return;
-	}
-      x86_cons (&exp, nbytes);
-      /* Output 4 bytes if not constant.  */
-      if (exp.X_op != O_constant)
-	nbytes = 4;
-      emit_expr (&exp, (unsigned int) nbytes);
-      /* Zero-extends to 8 bytes if not constant.  */
-      if (nbytes == 4)
-	{
-	  memset (&exp, '\0', sizeof (exp));
-	  exp.X_op = O_constant;
-	  emit_expr (&exp, nbytes);
-	}
-      nbytes = 8;
-    }
-  while (*input_line_pointer++ == ',');
-
-  input_line_pointer--;		/* Put terminator back into stream.  */
-
-  demand_empty_rest_of_line ();
 }
 #endif /* OBJ_ELF || OBJ_MAYBE_ELF */

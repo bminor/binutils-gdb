@@ -1,3 +1,34 @@
+2011-08-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/13048
+	* archures.c (bfd_mach_i386_intel_syntax): New.
+	(bfd_mach_i386_i8086): Updated.
+	(bfd_mach_i386_i386): Likewise.
+	(bfd_mach_x86_64): Likewise.
+	(bfd_mach_x64_32): Likewise.
+	(bfd_mach_i386_i386_intel_syntax): Likewise.
+	(bfd_mach_x86_64_intel_syntax): Likewise.
+	(bfd_mach_x64_32_intel_syntax): Likewise.
+	(bfd_mach_l1om): Likewise.
+	(bfd_mach_l1om_intel_syntax): Likewise.
+	(bfd_mach_k1om): Likewise.
+	(bfd_mach_k1om_intel_syntax): Likewise.
+
+	* bfd-in2.h: Regenerated.
+
+	* cpu-i386.c (bfd_i386_compatible): Check mach instead of
+	bits_per_address.
+	(bfd_x64_32_arch_intel_syntax): Set bits_per_address to 64.
+	(bfd_x64_32_arch): Likewise.
+
+	* elf64-x86-64.c: Include "libiberty.h".
+	(x86_64_elf_howto_table): Append x32 R_X86_64_32.
+	(elf_x86_64_rtype_to_howto): Support x32 R_X86_64_32.
+	(elf_x86_64_reloc_type_lookup): Likewise.
+	(elf_x86_64_reloc_name_lookup): Likewise.
+	(elf_x86_64_relocate_section): Likewise.
+	(elf_x86_64_check_relocs): Allow R_X86_64_64 relocations for x32.
+
 2011-07-29  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* elfxx-mips.c (check_br32): Fix return type.

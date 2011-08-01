@@ -1,14 +1,14 @@
 #objdump: -sr
-#name: xquad
+#name: x86-64 (ILP32) quad
 
 .*: +file format .*
 
 RELOCATION RECORDS FOR \[.data\]:
 OFFSET +TYPE +VALUE 
-0+ R_X86_64_32 +foo
-0+10 R_X86_64_32 +bar
-0+20 R_X86_64_32 +foo
-0+30 R_X86_64_32 +bar
+0+ R_X86_64_64 +foo
+0+10 R_X86_64_64 +bar
+0+20 R_X86_64_64 +foo
+0+30 R_X86_64_64 +bar
 
 
 Contents of section .data:
