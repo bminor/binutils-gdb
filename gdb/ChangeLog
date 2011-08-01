@@ -1,3 +1,10 @@
+2011-08-01  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	Revert:
+	2011-07-31  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+	* breakpoint.c (insert_bp_location): Remove disabled_breaks
+	argument.  Update callers.
+
 2011-08-01  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	PR gdb/13045
