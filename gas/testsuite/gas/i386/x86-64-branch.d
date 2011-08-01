@@ -17,6 +17,8 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	66 ff e0             	jmpw   \*%ax
 [ 	]*[a-f0-9]+:	66 ff e0             	jmpw   \*%ax
 [ 	]*[a-f0-9]+:	66 ff 20             	jmpw   \*\(%rax\)
+[ 	]*[a-f0-9]+:	e8 00 00 00 00       	callq  0x1f	1b: R_X86_64_PC32	\*ABS\*\+0x10003c
+[ 	]*[a-f0-9]+:	e9 00 00 00 00       	jmpq   0x24	20: R_X86_64_PC32	\*ABS\*\+0x10003c
 [ 	]*[a-f0-9]+:	ff d0                	callq  \*%rax
 [ 	]*[a-f0-9]+:	ff d0                	callq  \*%rax
 [ 	]*[a-f0-9]+:	66 ff d0             	callw  \*%ax
@@ -27,4 +29,6 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	66 ff e0             	jmpw   \*%ax
 [ 	]*[a-f0-9]+:	66 ff e0             	jmpw   \*%ax
 [ 	]*[a-f0-9]+:	66 ff 20             	jmpw   \*\(%rax\)
+[ 	]*[a-f0-9]+:	e8 00 00 00 00       	callq  0x43	3f: R_X86_64_PC32	\*ABS\*\+0x10003c
+[ 	]*[a-f0-9]+:	e9 00 00 00 00       	jmpq   0x48	44: R_X86_64_PC32	\*ABS\*\+0x10003c
 #pass

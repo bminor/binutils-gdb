@@ -320,7 +320,7 @@ shrd, 2, 0xfad, None, 2, Cpu386, Modrm|CheckRegSize|No_bSuf|No_sSuf|No_ldSuf, { 
 
 // Control transfer instructions.
 call, 1, 0xe8, None, 1, CpuNo64, JumpDword|DefaultSize|No_bSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp16|Disp32 }
-call, 1, 0xe8, None, 1, Cpu64, JumpDword|DefaultSize|No_bSuf|No_lSuf|No_sSuf|No_ldSuf|NoRex64, { Disp16|Disp32 }
+call, 1, 0xe8, None, 1, Cpu64, JumpDword|DefaultSize|No_bSuf|No_lSuf|No_sSuf|No_ldSuf|NoRex64, { Disp16|Disp32|Disp32S }
 call, 1, 0xff, 0x2, 1, CpuNo64, Modrm|DefaultSize|No_bSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg16|Reg32|Word|Dword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|JumpAbsolute }
 call, 1, 0xff, 0x2, 1, Cpu64, Modrm|DefaultSize|No_bSuf|No_lSuf|No_sSuf|No_ldSuf|NoRex64, { Reg16|Reg64|Word|Qword|Unspecified|BaseIndex|Disp8|Disp32|Disp32S|JumpAbsolute }
 // Intel Syntax

@@ -1,3 +1,9 @@
+2011-08-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/13046
+	* i386-opc.tbl: Add Disp32S to 64bit call.
+	* i386-tbl.h: Regenerated.
+
 2011-07-24  Chao-ying Fu  <fu@mips.com>
             Maciej W. Rozycki  <macro@codesourcery.com>
 
