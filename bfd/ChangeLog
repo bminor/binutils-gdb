@@ -1,3 +1,11 @@
+2011-08-02  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* elfxx-mips.c (check_4byte_branch): Remove function.
+	(check_relocated_bzc): New function.
+	(_bfd_mips_elf_relax_section): Permit the relaxation of LUI
+	instructions that immediately follow a compact branch
+	instruction.
+
 2011-08-02  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (build_plt_stub): Correct emitted relocs when no

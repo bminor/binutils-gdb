@@ -12264,32 +12264,37 @@ check_br32 (bfd *abfd, bfd_byte *ptr, unsigned long reg)
   return FALSE;
 }
 
+/* If the instruction encoding at PTR and relocations [INTERNAL_RELOCS,
+   IRELEND) at OFFSET indicate that there must be a compact branch there,
+   then return TRUE, otherwise FALSE.  */
+
+static bfd_boolean
+check_relocated_bzc (bfd *abfd, const bfd_byte *ptr, bfd_vma offset,
+		     const Elf_Internal_Rela *internal_relocs,
+		     const Elf_Internal_Rela *irelend)
+{
+  const Elf_Internal_Rela *irel;
+  unsigned long opcode;
+
+  opcode   = bfd_get_16 (abfd, ptr);
+  opcode <<= 16;
+  opcode  |= bfd_get_16 (abfd, ptr + 2);
+  if (find_match (opcode, bzc_insns_32) < 0)
+    return FALSE;
+
+  for (irel = internal_relocs; irel < irelend; irel++)
+    if (irel->r_offset == offset
+	&& ELF32_R_TYPE (irel->r_info) == R_MICROMIPS_PC16_S1)
+      return TRUE;
+
+  return FALSE;
+}
+
 /* Bitsize checking.  */
 #define IS_BITSIZE(val, N)						\
   (((((val) & ((1ULL << (N)) - 1)) ^ (1ULL << ((N) - 1)))		\
     - (1ULL << ((N) - 1))) == (val))
 
-/* See if relocations [INTERNAL_RELOCS, IRELEND) confirm that there
-   is a 4-byte branch at offset OFFSET.  */
-
-static bfd_boolean
-check_4byte_branch (Elf_Internal_Rela *internal_relocs,
-		    Elf_Internal_Rela *irelend, bfd_vma offset)
-{
-  Elf_Internal_Rela *irel;
-  unsigned long r_type;
-
-  for (irel = internal_relocs; irel < irelend; irel++)
-    if (irel->r_offset == offset)
-      {
-	r_type = ELF32_R_TYPE (irel->r_info);
-	if (r_type == R_MICROMIPS_26_S1
-	    || r_type == R_MICROMIPS_PC16_S1
-	    || r_type == R_MICROMIPS_JALR)
-	  return TRUE;
-      }
-  return FALSE;
-}
 
 bfd_boolean
 _bfd_mips_elf_relax_section (bfd *abfd, asection *sec,
@@ -12451,6 +12456,7 @@ _bfd_mips_elf_relax_section (bfd *abfd, asection *sec,
          out the offset).  */
       if (r_type == R_MICROMIPS_HI16 && MATCH (opcode, lui_insn))
 	{
+	  bfd_boolean bzc = FALSE;
 	  unsigned long nextopc;
 	  unsigned long reg;
 	  bfd_vma offset;
@@ -12474,18 +12480,19 @@ _bfd_mips_elf_relax_section (bfd *abfd, asection *sec,
 	      && ELF32_R_SYM (irel[2].r_info) == r_symndx)
 	    continue;
 
-	  /* See if the LUI instruction *might* be in a branch delay slot.  */
+	  /* See if the LUI instruction *might* be in a branch delay slot.
+	     We check whether what looks like a 16-bit branch or jump is
+	     actually an immediate argument to a compact branch, and let
+	     it through if so.  */
 	  if (irel->r_offset >= 2
 	      && check_br16_dslot (abfd, ptr - 2)
 	      && !(irel->r_offset >= 4
-		   /* If the instruction is actually a 4-byte branch,
-		      the value of check_br16_dslot doesn't matter.
-		      We should use check_br32_dslot to check whether
-		      the branch has a delay slot.  */
-		   && check_4byte_branch (internal_relocs, irelend,
-					  irel->r_offset - 4)))
+		   && (bzc = check_relocated_bzc (abfd,
+						  ptr - 4, irel->r_offset - 4,
+						  internal_relocs, irelend))))
 	    continue;
 	  if (irel->r_offset >= 4
+	      && !bzc
 	      && check_br32_dslot (abfd, ptr - 4))
 	    continue;
 
