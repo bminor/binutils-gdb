@@ -1,3 +1,8 @@
+2011-08-02  Tom Tromey  <tromey@redhat.com>
+
+	PR gdb/11289:
+	* gdb.cp/overload.exp: Fix regexps.  Remove kfails.
+
 2011-08-01  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	PR gdb/13045

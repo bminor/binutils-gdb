@@ -315,13 +315,10 @@ gdb_test "list '${srcfile}:intToChar(char)'" "int intToChar.*"
 gdb_test "list '${srcfile}':intToChar(char)" "int intToChar.*"
 gdb_test "list '${srcfile}':'intToChar(char)'" "int intToChar.*"
 
-# And with filename and namespace... which does not work.
+# And with filename and namespace.
 
-setup_kfail gdb/11289 *-*-*
-gdb_test "list ${srcfile}:foo::overloadfnarg(int)" "int foo::overloadfnarg"
-
-setup_kfail gdb/11289 *-*-*
-gdb_test "list ${srcfile}:'foo::overloadfnarg(int)'" "int foo::overloadfnarg"
+gdb_test "list ${srcfile}:foo::overloadfnarg(int)" "int foo::overloadfnarg.*}"
+gdb_test "list ${srcfile}:'foo::overloadfnarg(int)'" "int foo::overloadfnarg.*}"
 
 # Now some tests to see how overloading and namespaces interact.
 
