@@ -6645,7 +6645,7 @@ static const struct dis386 xop_table[][256] = {
     { Bad_Opcode },
     { Bad_Opcode },
     /* 10 */
-    { "bextr",	{ Gv, Ev, Iq } },
+    { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
