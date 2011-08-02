@@ -9291,7 +9291,7 @@ build_plt_stub (bfd *obfd, bfd_byte *p, int offset, Elf_Internal_Rela *r,
 	  r[1].r_offset = r[0].r_offset + 8;
 	  r[1].r_info = ELF64_R_INFO (0, R_PPC64_TOC16_LO_DS);
 	  r[1].r_addend = r[0].r_addend;
-	  if (PPC_HA (offset + 16) != PPC_HA (offset))
+	  if (PPC_HA (offset + 8 + 8 * plt_static_chain) != PPC_HA (offset))
 	    {
 	      r[2].r_offset = r[1].r_offset + 4;
 	      r[2].r_info = ELF64_R_INFO (0, R_PPC64_TOC16_LO);
@@ -9302,9 +9302,12 @@ build_plt_stub (bfd *obfd, bfd_byte *p, int offset, Elf_Internal_Rela *r,
 	      r[2].r_offset = r[1].r_offset + 8;
 	      r[2].r_info = ELF64_R_INFO (0, R_PPC64_TOC16_LO_DS);
 	      r[2].r_addend = r[0].r_addend + 8;
-	      r[3].r_offset = r[2].r_offset + 4;
-	      r[3].r_info = ELF64_R_INFO (0, R_PPC64_TOC16_LO_DS);
-	      r[3].r_addend = r[0].r_addend + 16;
+	      if (plt_static_chain)
+		{
+		  r[3].r_offset = r[2].r_offset + 4;
+		  r[3].r_info = ELF64_R_INFO (0, R_PPC64_TOC16_LO_DS);
+		  r[3].r_addend = r[0].r_addend + 16;
+		}
 	    }
 	}
       bfd_put_32 (obfd, ADDIS_R12_R2 | PPC_HA (offset), p),	p += 4;
@@ -9327,7 +9330,7 @@ build_plt_stub (bfd *obfd, bfd_byte *p, int offset, Elf_Internal_Rela *r,
 	{
 	  r[0].r_offset += 4;
 	  r[0].r_info = ELF64_R_INFO (0, R_PPC64_TOC16_DS);
-	  if (PPC_HA (offset + 16) != PPC_HA (offset))
+	  if (PPC_HA (offset + 8 + 8 * plt_static_chain) != PPC_HA (offset))
 	    {
 	      r[1].r_offset = r[0].r_offset + 4;
 	      r[1].r_info = ELF64_R_INFO (0, R_PPC64_TOC16);
@@ -9337,10 +9340,13 @@ build_plt_stub (bfd *obfd, bfd_byte *p, int offset, Elf_Internal_Rela *r,
 	    {
 	      r[1].r_offset = r[0].r_offset + 8;
 	      r[1].r_info = ELF64_R_INFO (0, R_PPC64_TOC16_DS);
-	      r[1].r_addend = r[0].r_addend + 16;
-	      r[2].r_offset = r[1].r_offset + 4;
-	      r[2].r_info = ELF64_R_INFO (0, R_PPC64_TOC16_DS);
-	      r[2].r_addend = r[0].r_addend + 8;
+	      r[1].r_addend = r[0].r_addend + 8 + 8 * plt_static_chain;
+	      if (plt_static_chain)
+		{
+		  r[2].r_offset = r[1].r_offset + 4;
+		  r[2].r_info = ELF64_R_INFO (0, R_PPC64_TOC16_DS);
+		  r[2].r_addend = r[0].r_addend + 8;
+		}
 	    }
 	}
       bfd_put_32 (obfd, STD_R2_40R1, p),			p += 4;
@@ -9808,8 +9814,10 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
       if (info->emitrelocations)
 	{
 	  r = get_relocs (stub_entry->stub_sec,
-			  (2 + (PPC_HA (off) != 0)
-			   + (PPC_HA (off + 16) == PPC_HA (off))));
+			  (2
+			   + (PPC_HA (off) != 0)
+			   + (htab->plt_static_chain
+			      && PPC_HA (off + 16) == PPC_HA (off))));
 	  if (r == NULL)
 	    return FALSE;
 	  r[0].r_offset = loc - stub_entry->stub_sec->contents;
@@ -9916,7 +9924,7 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	size -= 4;
       if (PPC_HA (off) == 0)
 	size -= 4;
-      if (PPC_HA (off + 16) != PPC_HA (off))
+      if (PPC_HA (off + 8 + 8 * htab->plt_static_chain) != PPC_HA (off))
 	size += 4;
       if (stub_entry->h != NULL
 	  && (stub_entry->h == htab->tls_get_addr_fd
@@ -9926,7 +9934,10 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
       if (info->emitrelocations)
 	{
 	  stub_entry->stub_sec->reloc_count
-	    += 2 + (PPC_HA (off) != 0) + (PPC_HA (off + 16) == PPC_HA (off));
+	    += (2
+		+ (PPC_HA (off) != 0)
+		+ (htab->plt_static_chain
+		   && PPC_HA (off + 16) == PPC_HA (off)));
 	  stub_entry->stub_sec->flags |= SEC_RELOC;
 	}
     }

@@ -1,3 +1,10 @@
+2011-08-02  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (build_plt_stub): Correct emitted relocs when no
+	plt_static_chain.
+	(ppc_build_one_stub): Adjust get_relocs call to suit..
+	(ppc_size_one_stub): ..and reloc sizing.  Correct plt size corner case.
+
 2011-08-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/13048
