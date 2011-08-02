@@ -2121,7 +2121,7 @@
 	* testsuite/Makefile.am (final_layout.stdout): Use -n option with nm.
 	* testsuite/Makefile.in: Regenerate.
 
-2010-03-23  Rafael Ávila de Espíndola <respindola@mozilla.com>
+2011-03-23  Rafael Ávila de Espíndola <respindola@mozilla.com>
 
 	* plugin.cc (get_view): New.
 	(Plugin::load): Pass get_view to the plugin.
@@ -2222,7 +2222,7 @@
 	the toolchain building binutils.
 	* configure: Rebuild.
 
-2010-02-18  Rafael Ávila de Espíndola <respindola@mozilla.com>
+2011-02-18  Rafael Ávila de Espíndola <respindola@mozilla.com>
 
 	* symtab.cc (Symbol::should_add_dynsym_entry) Return false for
 	plugin only symbols.
@@ -2241,7 +2241,7 @@
 	* reloc.cc (Sized_relobj::do_relocate): Don't call
 	clear_local_symbols.
 
-2010-02-08  Rafael Ávila de Espíndola <respindola@mozilla.com>
+2011-02-08  Rafael Ávila de Espíndola <respindola@mozilla.com>
 
 	* plugin.cc (is_visible_from_outside): Return true for symbols
 	in the -u option.
