@@ -1,3 +1,12 @@
+2011-08-03  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* breakpoint.c (update_global_location_list): Ensure
+	invariant 'first loc marked not duplicated and inserted,
+	following locs marked duplicated/not inserted' is respected
+	for multiple locations at the same address.
+	(unduplicated_should_be_inserted) New function.
+	(swap_insertion) New function.
+
 2011-08-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* stack.c (print_frame_arguments_choices): Comment typo fix.

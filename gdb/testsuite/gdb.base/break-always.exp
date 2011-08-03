@@ -14,6 +14,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # Test that 'set breakpoint always-inserted 1' is not a brick
+# Also verifies that breakpoint enabling/disabling works properly
+# with duplicated breakpoints.
 
 if { [prepare_for_testing break-always.exp break-always break-always.c] } {
     return -1
@@ -29,6 +31,24 @@ gdb_test "show breakpoint always-inserted" "mode is on\." \
 runto foo
 
 gdb_test "break bar" "Breakpoint 2.*" "set breakpoint on bar"
+gdb_test "break bar" "Note: breakpoint 2 also set.*Breakpoint 3.*" "set 2nd breakpoint on bar"
+gdb_test "break bar" "Note: breakpoints 2 and 3 also set.*Breakpoint 4.*" "set 3rd breakpoint on bar"
+gdb_test "break bar" "Note: breakpoints 2, 3 and 4 also set.*Breakpoint 5.*" "set 4th breakpoint on bar"
+gdb_test "info breakpoints" "keep y.*keep y.*keep y.*keep y.*keep y.*" "initial check breakpoint state"
+gdb_test_no_output "disable" "initial disable all breakpoints"
+gdb_test_no_output "enable" "initial enable all breakpoints"
+gdb_test_no_output "disable" "re-disable all breakpoints"
+gdb_test_no_output "enable 3" "enable 3.A"
+gdb_test_no_output "disable 3" "disable 3.B"
+gdb_test_no_output "enable 3" "enable 3.C"
+gdb_test_no_output "enable 2" "enable 2.D"
+gdb_test_no_output "disable 2" "disable 2.E"
+gdb_test_no_output "disable 3" "disable 3.F"
+gdb_test_no_output "enable 3" "enable 3.G"
+gdb_test_no_output "enable 2" "enable 2.H"
+gdb_test_no_output "disable 2" "disable 2.I"
+gdb_test "info breakpoints" "keep n.*keep n.*keep y.*keep n.*keep n.*" "before re-enable check breakpoint state"
+gdb_test_no_output "enable" "re-enable all breakpoints"
 gdb_continue_to_breakpoint "bar" ".*break-always.c:$bar_location.*"
 
 

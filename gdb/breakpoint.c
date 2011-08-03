@@ -1571,6 +1571,21 @@ should_be_inserted (struct bp_location *bl)
   return 1;
 }
 
+/* Same as should_be_inserted but does the check assuming
+   that the location is not duplicated.  */
+
+static int
+unduplicated_should_be_inserted (struct bp_location *bl)
+{
+  int result;
+  const int save_duplicate = bl->duplicate;
+
+  bl->duplicate = 0;
+  result = should_be_inserted (bl);
+  bl->duplicate = save_duplicate;
+  return result;
+}
+
 /* Insert a low-level "breakpoint" of some type.  BL is the breakpoint
    location.  Any error messages are printed to TMP_ERROR_STREAM; and
    DISABLED_BREAKS, and HW_BREAKPOINT_ERROR are used to report problems.
@@ -10241,6 +10256,23 @@ bp_location_target_extensions_update (void)
     }
 }
 
+/* Swap the insertion/duplication state between two locations.  */
+
+static void
+swap_insertion (struct bp_location *left, struct bp_location *right)
+{
+  const int left_inserted = left->inserted;
+  const int left_duplicate = left->duplicate;
+  const struct bp_target_info left_target_info = left->target_info;
+
+  left->inserted = right->inserted;
+  left->duplicate = right->duplicate;
+  left->target_info = right->target_info;
+  right->inserted = left_inserted;
+  right->duplicate = left_duplicate;
+  right->target_info = left_target_info;
+}
+
 /* If SHOULD_INSERT is false, do not insert any breakpoint locations
    into the inferior, only remove already-inserted locations that no
    longer should be inserted.  Functions that delete a breakpoint or
@@ -10377,11 +10409,6 @@ update_global_location_list (int should_insert)
 
 		      if (breakpoint_locations_match (loc2, old_loc))
 			{
-			  /* For the sake of should_be_inserted.
-			     Duplicates check below will fix up this
-			     later.  */
-			  loc2->duplicate = 0;
-
 			  /* Read watchpoint locations are switched to
 			     access watchpoints, if the former are not
 			     supported, but the latter are.  */
@@ -10391,10 +10418,13 @@ update_global_location_list (int should_insert)
 			      loc2->watchpoint_type = old_loc->watchpoint_type;
 			    }
 
-			  if (loc2 != old_loc && should_be_inserted (loc2))
+			  /* loc2 is a duplicated location. We need to check
+			     if it should be inserted in case it will be
+			     unduplicated.  */
+			  if (loc2 != old_loc
+			      && unduplicated_should_be_inserted (loc2))
 			    {
-			      loc2->inserted = 1;
-			      loc2->target_info = old_loc->target_info;
+			      swap_insertion (old_loc, loc2);
 			      keep_in_target = 1;
 			      break;
 			    }
@@ -10541,6 +10571,12 @@ update_global_location_list (int should_insert)
 	  continue;
 	}
 
+
+      /* This and the above ensure the invariant that the first location
+	 is not duplicated, and is the inserted one.
+	 All following are marked as duplicated, and are not inserted.  */
+      if (loc->inserted)
+	swap_insertion (loc, *loc_first_p);
       loc->duplicate = 1;
 
       if ((*loc_first_p)->owner->enable_state == bp_permanent && loc->inserted
