@@ -8501,6 +8501,21 @@ do_strex (void)
 }
 
 static void
+do_t_strexbh (void)
+{
+  constraint (!inst.operands[2].isreg || !inst.operands[2].preind
+	      || inst.operands[2].postind || inst.operands[2].writeback
+	      || inst.operands[2].immisreg || inst.operands[2].shifted
+	      || inst.operands[2].negative,
+	      BAD_ADDR_MODE);
+
+  constraint (inst.operands[0].reg == inst.operands[1].reg
+	      || inst.operands[0].reg == inst.operands[2].reg, BAD_OVERLAP);
+
+  do_rm_rd_rn ();
+}
+
+static void
 do_strexd (void)
 {
   constraint (inst.operands[1].reg % 2 != 0,
@@ -17516,9 +17531,9 @@ static const struct asm_opcode insns[] =
  TCE("ldrexh",	1f00f9f, e8d00f5f, 2, (RRnpc_npcsp, RRnpcb),
      rd_rn,  rd_rn),
  TCE("strexb",	1c00f90, e8c00f40, 3, (RRnpc_npcsp, RRnpc_npcsp, ADDR),
-     strex, rm_rd_rn),
+     strex, t_strexbh),
  TCE("strexh",	1e00f90, e8c00f50, 3, (RRnpc_npcsp, RRnpc_npcsp, ADDR),
-     strex, rm_rd_rn), 
+     strex, t_strexbh),
  TUF("clrex",	57ff01f, f3bf8f2f, 0, (),			      noargs, noargs),
 
 #undef  ARM_VARIANT

@@ -1,3 +1,11 @@
+2011-08-03  James Greenhalgh  <james.greenhalgh@arm.com>
+
+	* gas/arm/strex-bad-t.d: New testcase.
+	* gas/arm/strex-bad-t.s: Likewise.
+	* gas/arm/strex-bad-t.l: Likewise.
+	* gas/arm/strex-t.s: Likewise.
+	* gas/arm/strex-t.d: Likewise.
+
 2011-08-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/13048
@@ -17,7 +25,7 @@
 	PR gas/13046
 	* gas/i386/x86-64-branch.s: Add tests for direct branch.
 	* gas/i386/x86-64-branch.d: Updated.
-	* gas/i386/ilp32/x86-64-branch.d: Likewise. 
+	* gas/i386/ilp32/x86-64-branch.d: Likewise.
 
 2011-07-29  Nick Clifton  <nickc@redhat.com>
 
