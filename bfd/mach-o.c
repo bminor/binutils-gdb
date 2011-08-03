@@ -376,6 +376,13 @@ bfd_mach_o_canonicalize_symtab (bfd *abfd, asymbol **alocation)
   if (nsyms < 0)
     return nsyms;
 
+  if (nsyms == 0)
+    {
+      /* Do not try to read symbols if there are none.  */
+      alocation[0] = NULL;
+      return 0;
+    }
+
   if (bfd_mach_o_read_symtab_symbols (abfd) != 0)
     {
       (*_bfd_error_handler) (_("bfd_mach_o_canonicalize_symtab: unable to load symbols"));
@@ -1830,8 +1837,11 @@ bfd_mach_o_read_symtab_symbols (bfd *abfd)
   unsigned long i;
   int ret;
 
-  if (sym->symbols)
-    return 0;
+  if (sym == NULL || sym->symbols)
+    {
+      /* Return now if there are no symbols or if already loaded.  */
+      return 0;
+    }
 
   sym->symbols = bfd_alloc (abfd, sym->nsyms * sizeof (bfd_mach_o_asymbol));
 

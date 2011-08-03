@@ -1,3 +1,8 @@
+2011-08-03  Tristan Gingold  <gingold@adacore.com>
+
+	* mach-o.c (bfd_mach_o_canonicalize_symtab): Handle no symbols case.
+	(bfd_mach_o_read_symtab_symbols): Return if no symbols.
+
 2011-08-02  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* elfxx-mips.c (check_4byte_branch): Remove function.
