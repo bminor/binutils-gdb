@@ -57,7 +57,7 @@
 
 void (*deprecated_selected_frame_level_changed_hook) (int);
 
-/* The possible choices of "set print frame-arguments, and the value
+/* The possible choices of "set print frame-arguments", and the value
    of this setting.  */
 
 static const char *print_frame_arguments_choices[] =
