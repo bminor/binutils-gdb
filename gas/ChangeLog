@@ -1,3 +1,7 @@
+2011-08-04  Tristan Gingold  <gingold@adacore.com>
+
+	* config/obj-elf.c (obj_elf_section): Do not free name.
+
 2011-08-03  James Greenhalgh  <james.greenhalgh@arm.com>
 
 	* config/tc-arm.c (do_t_strexbh): New.
