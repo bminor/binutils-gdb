@@ -38,6 +38,10 @@ runto_main
 gdb_breakpoint [gdb_get_line_number "linuxthreads.exp: info threads 2"]
 gdb_continue_to_breakpoint "main thread's sleep"
 
+# Make sure thread list is up-to-date (in case remote targets have not yet
+# reported thread creation events)
+gdb_test "info threads"
+
 # Create thread names.
 gdb_test "thread apply 1 thread name threadname_1" \
     "Thread 1 .*" \
