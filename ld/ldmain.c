@@ -491,7 +491,7 @@ main (int argc, char **argv)
 	einfo (_("%P: link errors found, deleting executable `%s'\n"),
 	       output_filename);
 
-      /* The file will be removed by remove_output.  */
+      /* The file will be removed by ld_cleanup.  */
       xexit (1);
     }
   else
@@ -564,7 +564,7 @@ main (int argc, char **argv)
       fflush (stderr);
     }
 
-  /* Prevent remove_output from doing anything, after a successful link.  */
+  /* Prevent ld_cleanup from doing anything, after a successful link.  */
   output_filename = NULL;
 
   xexit (0);

@@ -1,3 +1,8 @@
+2011-08-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ldmain.c (main): Replace remove_output with ld_cleanup in
+	comments.
+
 2011-07-26  Alan Modra  <amodra@gmail.com>
 
 	* emulparams/elf32ppc.sh: Source plt_unwind.sh.
