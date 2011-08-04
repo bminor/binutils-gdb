@@ -43,7 +43,7 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
 set solib_testfile "jit-solib"
 set solib_srcfile "${srcdir}/${subdir}/${solib_testfile}.c"
 set solib_binfile "${objdir}/${subdir}/${solib_testfile}.so"
-set solib_binfile_test_msg "OBJDIR/${subdir}/${solib_testfile}.so"
+set solib_binfile_test_msg "SHLIBDIR/${solib_testfile}.so"
 
 # Note: compiling without debug info: the library goes through symbol
 # renaming by munging on its symbol table, and that wouldn't work for .debug
@@ -53,8 +53,10 @@ if { [gdb_compile_shlib ${solib_srcfile} ${solib_binfile} {-fPIC}] != "" } {
     return -1
 }
 
+set solib_binfile_target [gdb_download ${solib_binfile}]
+
 proc one_jit_test {count match_str} {
-    global verbose testfile solib_binfile solib_binfile_test_msg pf_prefix
+    global verbose testfile solib_binfile_target solib_binfile_test_msg pf_prefix
 
     set old_pf_prefix $pf_prefix
     set pf_prefix "one_jit_test-$count"
@@ -77,7 +79,7 @@ proc one_jit_test {count match_str} {
     # Poke desired values directly into inferior instead of using "set args"
     # because "set args" does not work under gdbserver.
     gdb_test_no_output "set var argc = 2"
-    gdb_test_no_output "set var libname = \"$solib_binfile\"" "set var libname = \"$solib_binfile_test_msg\""
+    gdb_test_no_output "set var libname = \"$solib_binfile_target\"" "set var libname = \"$solib_binfile_test_msg\""
     gdb_test_no_output "set var count = $count"
 
     gdb_breakpoint [gdb_get_line_number "break here 1"]

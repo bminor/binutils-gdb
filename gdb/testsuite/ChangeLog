@@ -1,3 +1,11 @@
+2011-08-04  Ulrich Weigand  <ulrich.weigand@linaro.org>
+
+	* gdb.base/jit.exp: Download solib_binfile to target.
+	* gdb.base/jit-so.exp:  Likewise.  Also, use gdb_load_shlibs
+	and call dlopen without full path name.
+	* gdb.cp/infcall-dlopen.exp: Use gdb_load_shlibs and call
+	dlopen without full path name.
+
 2011-08-03  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* gdb.base/break-always.exp: Complete the test

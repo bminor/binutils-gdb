@@ -46,6 +46,7 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
 set testfile2 jit-main
 set srcfile2 ${testfile2}.c
 set binfile2 ${objdir}/${subdir}/${testfile2}.so
+set binfile2_dlopen [shlib_target_file ${testfile2}.so]
 if { [gdb_compile_shlib "${srcdir}/${subdir}/${srcfile2}" ${binfile2} {debug additional_flags="-DMAIN=jit_dl_main"}] != "" } {
     untested jit.exp
     return -1
@@ -54,7 +55,7 @@ if { [gdb_compile_shlib "${srcdir}/${subdir}/${srcfile2}" ${binfile2} {debug add
 set solib_testfile "jit-solib"
 set solib_srcfile "${srcdir}/${subdir}/${solib_testfile}.c"
 set solib_binfile "${objdir}/${subdir}/${solib_testfile}.so"
-set solib_binfile_test_msg "OBJDIR/${subdir}/${solib_testfile}.so"
+set solib_binfile_test_msg "SHLIBDIR/${solib_testfile}.so"
 
 # Note: compiling without debug info: the library goes through symbol
 # renaming by munging on its symbol table, and that wouldn't work for .debug
@@ -64,13 +65,16 @@ if { [gdb_compile_shlib ${solib_srcfile} ${solib_binfile} {}] != "" } {
     return -1
 }
 
+set solib_binfile_target [gdb_download ${solib_binfile}]
+
 proc one_jit_test {count match_str} {
-    global verbose testfile srcfile2 binfile2 solib_binfile solib_binfile_test_msg pf_prefix
+    global verbose testfile srcfile2 binfile2 binfile2_dlopen solib_binfile_target solib_binfile_test_msg pf_prefix
 
     set old_pf_prefix $pf_prefix
     set pf_prefix "one_jit_test-$count"
 
     clean_restart $testfile
+    gdb_load_shlibs $binfile2
 
     # This is just to help debugging when things fail
     if {$verbose > 0} {
@@ -86,7 +90,7 @@ proc one_jit_test {count match_str} {
     gdb_continue_to_breakpoint "break here before-dlopen"
     # Poke desired values directly into inferior instead of using "set args"
     # because "set args" does not work under gdbserver.
-    gdb_test_no_output "set var jit_libname = \"$binfile2\""
+    gdb_test_no_output "set var jit_libname = \"$binfile2_dlopen\""
 
     gdb_breakpoint [gdb_get_line_number "break here after-dlopen" ]
     gdb_continue_to_breakpoint "break here after-dlopen"
@@ -95,7 +99,7 @@ proc one_jit_test {count match_str} {
     gdb_continue_to_breakpoint "break here 0"
 
     gdb_test_no_output "set var argc = 2"
-    gdb_test_no_output "set var libname = \"$solib_binfile\"" "set var libname = \"$solib_binfile_test_msg\""
+    gdb_test_no_output "set var libname = \"$solib_binfile_target\"" "set var libname = \"$solib_binfile_test_msg\""
     gdb_test_no_output "set var count = $count"
 
     gdb_breakpoint "$srcfile2:[gdb_get_line_number {break here 1} $srcfile2]"
