@@ -2073,13 +2073,14 @@ write_object_file (void)
   obj_adjust_symtab ();
 #endif
 
+  set_symtab ();
+
   /* Stop if there is an error.  */
   if (had_errors ())
     return;
 
   /* Now that all the sizes are known, and contents correct, we can
      start writing to the file.  */
-  set_symtab ();
 
   /* If *_frob_file changes the symbol value at this point, it is
      responsible for moving the changed value into symp->bsym->value
