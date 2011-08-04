@@ -410,11 +410,10 @@ process_event (void)
 /* Process one high level event.  If nothing is ready at this time,
    wait for something to happen (via gdb_wait_for_event), then process
    it.  Returns >0 if something was done otherwise returns <0 (this
-   can happen if there are no event sources to wait for).  If an error
-   occurs catch_errors() which calls this function returns zero.  */
+   can happen if there are no event sources to wait for).  */
 
 int
-gdb_do_one_event (void *data)
+gdb_do_one_event (void)
 {
   static int event_source_head = 0;
   const int number_of_sources = 3;
@@ -478,30 +477,30 @@ gdb_do_one_event (void *data)
 void
 start_event_loop (void)
 {
-  /* Loop until there is nothing to do.  This is the entry point to the
-     event loop engine.  gdb_do_one_event, called via catch_errors()
-     will process one event for each invocation.  It blocks waits for
-     an event and then processes it.  >0 when an event is processed, 0
-     when catch_errors() caught an error and <0 when there are no
-     longer any event sources registered.  */
+  /* Loop until there is nothing to do.  This is the entry point to
+     the event loop engine.  gdb_do_one_event will process one event
+     for each invocation.  It blocks waiting for an event and then
+     processes it.  */
   while (1)
     {
-      int gdb_result;
+      volatile struct gdb_exception ex;
+      int result = 0;
 
-      gdb_result = catch_errors (gdb_do_one_event, 0, "", RETURN_MASK_ALL);
-      if (gdb_result < 0)
-	break;
-
-      /* If we long-jumped out of do_one_event, we probably
-         didn't get around to resetting the prompt, which leaves
-         readline in a messed-up state.  Reset it here.  */
-
-      if (gdb_result == 0)
+      TRY_CATCH (ex, RETURN_MASK_ALL)
 	{
+	  result = gdb_do_one_event ();
+	}
+      if (ex.reason < 0)
+	{
+	  exception_print (gdb_stderr, ex);
+
 	  /* If any exception escaped to here, we better enable
 	     stdin.  Otherwise, any command that calls async_disable_stdin,
 	     and then throws, will leave stdin inoperable.  */
 	  async_enable_stdin ();
+	  /* If we long-jumped out of do_one_event, we probably didn't
+	     get around to resetting the prompt, which leaves readline
+	     in a messed-up state.  Reset it here.  */
 	  /* FIXME: this should really be a call to a hook that is
 	     interface specific, because interfaces can display the
 	     prompt in their own way.  */
@@ -517,6 +516,8 @@ start_event_loop (void)
 	  /* Maybe better to set a flag to be checked somewhere as to
 	     whether display the prompt or not.  */
 	}
+      if (result < 0)
+	break;
     }
 
   /* We are done with the event loop.  There are no more event sources

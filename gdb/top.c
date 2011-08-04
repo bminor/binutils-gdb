@@ -797,8 +797,7 @@ gdb_readline_wrapper (char *prompt)
     (*after_char_processing_hook) ();
   gdb_assert (after_char_processing_hook == NULL);
 
-  /* gdb_do_one_event argument is unused.  */
-  while (gdb_do_one_event (NULL) >= 0)
+  while (gdb_do_one_event () >= 0)
     if (gdb_readline_wrapper_done)
       break;
 

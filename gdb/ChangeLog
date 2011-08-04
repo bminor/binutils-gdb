@@ -1,5 +1,14 @@
 2011-08-04  Pedro Alves  <pedro@codesourcery.com>
 
+	* event-loop.c (gdb_do_one_event): Remove `data' parameter.
+	(start_event_loop): Use TRY_CATCH instead of catch_errors.
+	* event-loop.h (gdb_do_one_event): Remove `data' parameter.
+	* top.c (gdb_readline_wrapper): Adjust.
+	* tui/tui-interp.c (tui_command_loop):
+	(_initialize_tui_interp): Don't install it.
+
+2011-08-04  Pedro Alves  <pedro@codesourcery.com>
+
 	* ui-out.h (uiout): Rename to ...
 	(current_uiout): ... this.
 	* ui-out.c (uiout): Rename to ...
