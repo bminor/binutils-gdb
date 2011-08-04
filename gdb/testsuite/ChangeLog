@@ -1,5 +1,10 @@
 2011-08-04  Ulrich Weigand  <ulrich.weigand@linaro.org>
 
+	* gdb.base/nostdlib.exp: Skip on gdb_stub targets.
+	* gdb.base/watch-vfork.exp: Skip on remote targets.
+
+2011-08-04  Ulrich Weigand  <ulrich.weigand@linaro.org>
+
 	* gdb.threads/thread-find.exp: Support remote targets.
 
 2011-08-04  Ulrich Weigand  <ulrich.weigand@linaro.org>

@@ -18,6 +18,14 @@ set srcfile ${testfile}.c
 set executable ${testfile}
 set binfile ${objdir}/${subdir}/${executable}
 
+# If we're using a stub, breakpoints at the entry point will not trigger.
+# See also the comment in break-entry.exp.
+
+if [target_info exists use_gdb_stub] {
+    untested ${testfile}.exp
+    return
+}
+
 # default_target_compile would otherwise add "-lm" making the testcase
 # dependent on whether the system libraries are already prelinked.
 # prelink: Could not set /lib64/libm-2.11.1.so owner or mode: Operation not permitted
