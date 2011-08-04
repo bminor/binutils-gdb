@@ -1,3 +1,11 @@
+2011-08-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/13056
+	* output-file.c (output_file_close): Call bfd_cache_close_all
+	on error.
+
+	* write.c (write_object_file): Revert the last change.
+
 2011-08-04  Alan Modra  <amodra@gmail.com>
 
 	* write.c (write_object_file): Call set_symtab even if we had
