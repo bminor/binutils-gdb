@@ -114,8 +114,7 @@ extern const struct gdb_exception exception_none;
 
 /* Functions to drive the exceptions state m/c (internal to
    exceptions).  */
-EXCEPTIONS_SIGJMP_BUF *exceptions_state_mc_init (struct ui_out *func_uiout,
-						 volatile struct
+EXCEPTIONS_SIGJMP_BUF *exceptions_state_mc_init (volatile struct
 						 gdb_exception *exception,
 						 return_mask mask);
 int exceptions_state_mc_action_iter (void);
@@ -146,7 +145,7 @@ int exceptions_state_mc_action_iter_1 (void);
 #define TRY_CATCH(EXCEPTION,MASK) \
      { \
        EXCEPTIONS_SIGJMP_BUF *buf = \
-	 exceptions_state_mc_init (uiout, &(EXCEPTION), (MASK)); \
+	 exceptions_state_mc_init (&(EXCEPTION), (MASK)); \
        EXCEPTIONS_SIGSETJMP (*buf); \
      } \
      while (exceptions_state_mc_action_iter ()) \

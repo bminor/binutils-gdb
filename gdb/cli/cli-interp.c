@@ -112,14 +112,23 @@ cli_interpreter_exec (void *data, const char *command_str)
 }
 
 static struct gdb_exception
-safe_execute_command (struct ui_out *uiout, char *command, int from_tty)
+safe_execute_command (struct ui_out *command_uiout, char *command, int from_tty)
 {
   volatile struct gdb_exception e;
+  struct ui_out *saved_uiout;
+
+  /* Save and override the global ``struct ui_out'' builder.  */
+  saved_uiout = uiout;
+  uiout = command_uiout;
 
   TRY_CATCH (e, RETURN_MASK_ALL)
     {
       execute_command (command, from_tty);
     }
+
+  /* Restore the global builder.  */
+  uiout = saved_uiout;
+
   /* FIXME: cagney/2005-01-13: This shouldn't be needed.  Instead the
      caller should print the exception.  */
   exception_print (gdb_stderr, e);

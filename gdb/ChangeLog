@@ -1,3 +1,19 @@
+2011-08-04  Pedro Alves  <pedro@codesourcery.com>
+
+	* exceptions.c (struct catcher): Remove saved_uiout field.
+	(exceptions_state_mc_init): Remove the `func_uiout' parameter, and
+	no longer save/resvore the global ui_out builder.
+	(catch_exceptions_with_msg): Save/override/restore the global
+	ui_out builder manually instead of relying on TRY_CATCH to do it.
+	(catch_errors): Save/restore the global ui_out builder manually
+	instead of relying on TRY_CATCH to do it.
+	* exceptions.h (exceptions_state_mc_init): Remove the `func_uiout'
+	parameter.
+	(TRY_CATCH): Adjust.
+	* cli/cli-interp.c (safe_execute_command): Save/override/restore
+	the global ui_out builder manually instead of relying on TRY_CATCH
+	to do it.
+
 2011-08-03  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* breakpoint.c (update_global_location_list): Ensure

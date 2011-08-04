@@ -60,7 +60,6 @@ struct catcher
   volatile struct gdb_exception *exception;
   /* Saved/current state.  */
   int mask;
-  struct ui_out *saved_uiout;
   struct cleanup *saved_cleanup_chain;
   /* Back link.  */
   struct catcher *prev;
@@ -70,8 +69,7 @@ struct catcher
 static struct catcher *current_catcher;
 
 EXCEPTIONS_SIGJMP_BUF *
-exceptions_state_mc_init (struct ui_out *func_uiout,
-			  volatile struct gdb_exception *exception,
+exceptions_state_mc_init (volatile struct gdb_exception *exception,
 			  return_mask mask)
 {
   struct catcher *new_catcher = XZALLOC (struct catcher);
@@ -83,10 +81,6 @@ exceptions_state_mc_init (struct ui_out *func_uiout,
   new_catcher->exception = exception;
 
   new_catcher->mask = mask;
-
-  /* Override the global ``struct ui_out'' builder.  */
-  new_catcher->saved_uiout = uiout;
-  uiout = func_uiout;
 
   /* Prevent error/quit during FUNC from calling cleanups established
      prior to here.  */
@@ -111,8 +105,6 @@ catcher_pop (void)
      builder, to their original states.  */
 
   restore_cleanups (old_catcher->saved_cleanup_chain);
-
-  uiout = old_catcher->saved_uiout;
 
   xfree (old_catcher);
 }
@@ -459,7 +451,7 @@ catch_exceptions (struct ui_out *uiout,
 }
 
 int
-catch_exceptions_with_msg (struct ui_out *uiout,
+catch_exceptions_with_msg (struct ui_out *func_uiout,
 		  	   catch_exceptions_ftype *func,
 		  	   void *func_args,
 			   char **gdberrmsg,
@@ -467,11 +459,27 @@ catch_exceptions_with_msg (struct ui_out *uiout,
 {
   volatile struct gdb_exception exception;
   volatile int val = 0;
+  struct ui_out *saved_uiout;
 
-  TRY_CATCH (exception, mask)
+  /* Save and override the global ``struct ui_out'' builder.  */
+  saved_uiout = uiout;
+  uiout = func_uiout;
+
+  TRY_CATCH (exception, RETURN_MASK_ALL)
     {
       val = (*func) (uiout, func_args);
     }
+
+  /* Restore the global builder.  */
+  uiout = saved_uiout;
+
+  if (exception.reason < 0 && (mask & RETURN_MASK (exception.reason)) == 0)
+    {
+      /* The caller didn't request that the event be caught.
+	 Rethrow.  */
+      throw_exception (exception);
+    }
+
   print_any_exception (gdb_stderr, NULL, exception);
   gdb_assert (val >= 0);
   gdb_assert (exception.reason <= 0);
@@ -500,11 +508,26 @@ catch_errors (catch_errors_ftype *func, void *func_args, char *errstring,
 {
   volatile int val = 0;
   volatile struct gdb_exception exception;
+  struct ui_out *saved_uiout;
 
-  TRY_CATCH (exception, mask)
+  /* Save the global ``struct ui_out'' builder.  */
+  saved_uiout = uiout;
+
+  TRY_CATCH (exception, RETURN_MASK_ALL)
     {
       val = func (func_args);
     }
+
+  /* Restore the global builder.  */
+  uiout = saved_uiout;
+
+  if (exception.reason < 0 && (mask & RETURN_MASK (exception.reason)) == 0)
+    {
+      /* The caller didn't request that the event be caught.
+	 Rethrow.  */
+      throw_exception (exception);
+    }
+
   print_any_exception (gdb_stderr, errstring, exception);
   if (exception.reason != 0)
     return 0;
