@@ -1,3 +1,8 @@
+2011-08-04  Tristan Gingold  <gingold@adacore.com>
+
+	* vms-alpha.c (_bfd_vms_write_eeom): Round vms_linkage_index.
+	(_bfd_vms_write_etir): Initialize vms_linkage_index to 0.
+
 2011-08-03  Tristan Gingold  <gingold@adacore.com>
 
 	* mach-o.c (bfd_mach_o_canonicalize_symtab): Handle no symbols case.

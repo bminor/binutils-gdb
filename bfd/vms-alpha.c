@@ -2660,7 +2660,7 @@ _bfd_vms_write_eeom (bfd *abfd)
   _bfd_vms_output_alignment (recwr, 2);
 
   _bfd_vms_output_begin (recwr, EOBJ__C_EEOM);
-  _bfd_vms_output_long (recwr, (unsigned long) (PRIV (vms_linkage_index) >> 1));
+  _bfd_vms_output_long (recwr, PRIV (vms_linkage_index + 1) >> 1);
   _bfd_vms_output_byte (recwr, 0);	/* Completion code.  */
   _bfd_vms_output_byte (recwr, 0);	/* Fill byte.  */
 
@@ -3736,7 +3736,7 @@ _bfd_vms_write_etir (bfd * abfd, int objtype ATTRIBUTE_UNUSED)
 
   _bfd_vms_output_alignment (recwr, 4);
 
-  PRIV (vms_linkage_index) = 1;
+  PRIV (vms_linkage_index) = 0;
 
   for (section = abfd->sections; section; section = section->next)
     {
