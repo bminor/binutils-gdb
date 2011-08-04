@@ -1864,7 +1864,7 @@ load_progress (ULONGEST bytes, void *untyped_arg)
     {
       /* The write is just starting.  Let the user know we've started
 	 this section.  */
-      ui_out_message (uiout, 0, "Loading section %s, size %s lma %s\n",
+      ui_out_message (current_uiout, 0, "Loading section %s, size %s lma %s\n",
 		      args->section_name, hex_string (args->section_size),
 		      paddress (target_gdbarch, args->lma));
       return;
@@ -1976,6 +1976,7 @@ generic_load (char *args, int from_tty)
   struct cleanup *old_cleanups = make_cleanup (null_cleanup, 0);
   struct load_section_data cbdata;
   struct load_progress_data total_progress;
+  struct ui_out *uiout = current_uiout;
 
   CORE_ADDR entry;
   char **argv;
@@ -2103,6 +2104,7 @@ print_transfer_performance (struct ui_file *stream,
 			    const struct timeval *end_time)
 {
   ULONGEST time_count;
+  struct ui_out *uiout = current_uiout;
 
   /* Compute the elapsed time in milliseconds, as a tradeoff between
      accuracy and overflow.  */

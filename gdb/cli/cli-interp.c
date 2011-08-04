@@ -118,8 +118,8 @@ safe_execute_command (struct ui_out *command_uiout, char *command, int from_tty)
   struct ui_out *saved_uiout;
 
   /* Save and override the global ``struct ui_out'' builder.  */
-  saved_uiout = uiout;
-  uiout = command_uiout;
+  saved_uiout = current_uiout;
+  current_uiout = command_uiout;
 
   TRY_CATCH (e, RETURN_MASK_ALL)
     {
@@ -127,7 +127,7 @@ safe_execute_command (struct ui_out *command_uiout, char *command, int from_tty)
     }
 
   /* Restore the global builder.  */
-  uiout = saved_uiout;
+  current_uiout = saved_uiout;
 
   /* FIXME: cagney/2005-01-13: This shouldn't be needed.  Instead the
      caller should print the exception.  */

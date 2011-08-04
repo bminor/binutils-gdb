@@ -1416,7 +1416,8 @@ remote_fileio_request (char *buf, int ctrlc_pending_p)
       remote_fio_ctrl_c_flag = 0;
       remote_fio_no_longjmp = 0;
 
-      ex = catch_exceptions (uiout, do_remote_fileio_request, (void *)buf,
+      ex = catch_exceptions (current_uiout,
+			     do_remote_fileio_request, (void *)buf,
 			     RETURN_MASK_ALL);
       switch (ex)
 	{

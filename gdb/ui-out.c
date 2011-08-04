@@ -222,7 +222,7 @@ struct ui_out def_uiout =
 /* FIXME: This should not be a global, but something passed down from main.c
    or top.c.  */
 
-struct ui_out *uiout = &def_uiout;
+struct ui_out *current_uiout = &def_uiout;
 
 /* These are the interfaces to implementation functions.  */
 

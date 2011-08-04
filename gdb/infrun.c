@@ -5614,8 +5614,8 @@ print_end_stepping_range_reason (void)
 {
   if ((!inferior_thread ()->step_multi
        || !inferior_thread ()->control.stop_step)
-      && ui_out_is_mi_like_p (uiout))
-    ui_out_field_string (uiout, "reason",
+      && ui_out_is_mi_like_p (current_uiout))
+    ui_out_field_string (current_uiout, "reason",
                          async_reason_lookup (EXEC_ASYNC_END_STEPPING_RANGE));
 }
 
@@ -5624,6 +5624,8 @@ print_end_stepping_range_reason (void)
 static void
 print_signal_exited_reason (enum target_signal siggnal)
 {
+  struct ui_out *uiout = current_uiout;
+
   annotate_signalled ();
   if (ui_out_is_mi_like_p (uiout))
     ui_out_field_string
@@ -5649,6 +5651,7 @@ print_exited_reason (int exitstatus)
 {
   struct inferior *inf = current_inferior ();
   const char *pidstr = target_pid_to_str (pid_to_ptid (inf->pid));
+  struct ui_out *uiout = current_uiout;
 
   annotate_exited (exitstatus);
   if (exitstatus)
@@ -5685,6 +5688,8 @@ print_exited_reason (int exitstatus)
 static void
 print_signal_received_reason (enum target_signal siggnal)
 {
+  struct ui_out *uiout = current_uiout;
+
   annotate_signal ();
 
   if (siggnal == TARGET_SIGNAL_0 && !ui_out_is_mi_like_p (uiout))
@@ -5722,7 +5727,7 @@ print_signal_received_reason (enum target_signal siggnal)
 static void
 print_no_history_reason (void)
 {
-  ui_out_text (uiout, "\nNo more reverse-execution history.\n");
+  ui_out_text (current_uiout, "\nNo more reverse-execution history.\n");
 }
 
 /* Here to return control to GDB when the inferior stops for real.

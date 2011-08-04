@@ -971,7 +971,7 @@ No selected thread.  See `help thread'.\n");
 static void
 info_threads_command (char *arg, int from_tty)
 {
-  print_thread_info (uiout, arg, -1);
+  print_thread_info (current_uiout, arg, -1);
 }
 
 /* Switch from one thread to another.  */
@@ -1063,7 +1063,7 @@ restore_selected_frame (struct frame_id a_frame_id, int frame_level)
   select_frame (get_current_frame ());
 
   /* Warn the user.  */
-  if (frame_level > 0 && !ui_out_is_mi_like_p (uiout))
+  if (frame_level > 0 && !ui_out_is_mi_like_p (current_uiout))
     {
       warning (_("Couldn't restore frame #%d in "
 		 "current thread, at reparsed frame #0\n"),
@@ -1292,7 +1292,7 @@ thread_command (char *tidstr, int from_tty)
       return;
     }
 
-  gdb_thread_select (uiout, tidstr, NULL);
+  gdb_thread_select (current_uiout, tidstr, NULL);
 }
 
 /* Implementation of `thread name'.  */

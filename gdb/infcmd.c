@@ -503,6 +503,7 @@ run_command_1 (char *args, int from_tty, int tbreak_at_main)
   char *exec_file;
   struct cleanup *old_chain;
   ptid_t ptid;
+  struct ui_out *uiout = current_uiout;
 
   dont_repeat ();
 
@@ -1421,6 +1422,7 @@ print_return_value (struct type *func_type, struct type *value_type)
   struct cleanup *old_chain;
   struct ui_stream *stb;
   struct value *value;
+  struct ui_out *uiout = current_uiout;
 
   CHECK_TYPEDEF (value_type);
   gdb_assert (TYPE_CODE (value_type) != TYPE_CODE_VOID);

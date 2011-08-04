@@ -342,7 +342,7 @@ out_field_fmt (struct ui_out *uiout, int fldno,
 static void
 field_separator (void)
 {
-  cli_out_data *data = ui_out_data (uiout);
+  cli_out_data *data = ui_out_data (current_uiout);
   struct ui_file *stream = VEC_last (ui_filep, data->streams);
 
   fputc_filtered (' ', stream);

@@ -1009,6 +1009,7 @@ info_sharedlibrary_command (char *pattern, int from_tty)
   int nr_libs;
   struct cleanup *table_cleanup;
   struct gdbarch *gdbarch = target_gdbarch;
+  struct ui_out *uiout = current_uiout;
 
   if (pattern)
     {

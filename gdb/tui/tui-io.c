@@ -530,7 +530,7 @@ tui_setup_io (int mode)
       /* Keep track of previous gdb output.  */
       tui_old_stdout = gdb_stdout;
       tui_old_stderr = gdb_stderr;
-      tui_old_uiout = uiout;
+      tui_old_uiout = current_uiout;
 
       /* Reconfigure gdb output.  */
       gdb_stdout = tui_stdout;
@@ -538,7 +538,7 @@ tui_setup_io (int mode)
       gdb_stdlog = gdb_stdout;	/* for moment */
       gdb_stdtarg = gdb_stderr;	/* for moment */
       gdb_stdtargerr = gdb_stderr;	/* for moment */
-      uiout = tui_out;
+      current_uiout = tui_out;
 
       /* Save tty for SIGCONT.  */
       savetty ();
@@ -551,7 +551,7 @@ tui_setup_io (int mode)
       gdb_stdlog = gdb_stdout;	/* for moment */
       gdb_stdtarg = gdb_stderr;	/* for moment */
       gdb_stdtargerr = gdb_stderr;	/* for moment */
-      uiout = tui_old_uiout;
+      current_uiout = tui_old_uiout;
 
       /* Restore readline.  */
       rl_redisplay_function = tui_old_rl_redisplay_function;
@@ -607,7 +607,7 @@ tui_initialize_io (void)
 
   /* Create the default UI.  It is not created because we installed a
      deprecated_init_ui_hook.  */
-  tui_old_uiout = uiout = cli_out_new (gdb_stdout);
+  tui_old_uiout = current_uiout = cli_out_new (gdb_stdout);
 
 #ifdef TUI_USE_PIPE_FOR_READLINE
   /* Temporary solution for readline writing to stdout: redirect

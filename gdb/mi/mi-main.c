@@ -117,7 +117,7 @@ mi_cmd_gdb_exit (char *command, char **argv, int argc)
   if (current_token)
     fputs_unfiltered (current_token, raw_stdout);
   fputs_unfiltered ("^exit\n", raw_stdout);
-  mi_out_put (uiout, raw_stdout);
+  mi_out_put (current_uiout, raw_stdout);
   gdb_flush (raw_stdout);
   /* FIXME: The function called is not yet a formal libgdb function.  */
   quit_force (NULL, FROM_TTY);
@@ -470,7 +470,7 @@ mi_cmd_thread_select (char *command, char **argv, int argc)
   if (argc != 1)
     error (_("-thread-select: USAGE: threadnum."));
 
-  rc = gdb_thread_select (uiout, argv[0], &mi_error_message);
+  rc = gdb_thread_select (current_uiout, argv[0], &mi_error_message);
 
   if (rc == GDB_RC_FAIL)
     {
@@ -488,7 +488,7 @@ mi_cmd_thread_list_ids (char *command, char **argv, int argc)
   if (argc != 0)
     error (_("-thread-list-ids: No arguments required."));
 
-  rc = gdb_list_thread_ids (uiout, &mi_error_message);
+  rc = gdb_list_thread_ids (current_uiout, &mi_error_message);
 
   if (rc == GDB_RC_FAIL)
     {
@@ -503,7 +503,7 @@ mi_cmd_thread_info (char *command, char **argv, int argc)
   if (argc != 0 && argc != 1)
     error (_("Invalid MI command"));
 
-  print_thread_info (uiout, argv[0], -1);
+  print_thread_info (current_uiout, argv[0], -1);
 }
 
 struct collect_cores_data
@@ -550,6 +550,7 @@ static int
 print_one_inferior (struct inferior *inferior, void *xdata)
 {
   struct print_one_inferior_data *top_data = xdata;
+  struct ui_out *uiout = current_uiout;
 
   if (VEC_empty (int, top_data->inferiors)
       || bsearch (&(inferior->pid), VEC_address (int, top_data->inferiors),
@@ -670,6 +671,7 @@ list_available_thread_groups (VEC (int) *ids, int recurse)
   struct osdata *data;
   struct osdata_item *item;
   int ix_items;
+  struct ui_out *uiout = current_uiout;
 
   /* This keeps a map from integer (pid) to VEC (struct osdata_item *)*
      The vector contains information about all threads for the given pid.
@@ -787,6 +789,7 @@ list_available_thread_groups (VEC (int) *ids, int recurse)
 void
 mi_cmd_list_thread_groups (char *command, char **argv, int argc)
 {
+  struct ui_out *uiout = current_uiout;
   struct cleanup *back_to;
   int available = 0;
   int recurse = 0;
@@ -889,6 +892,7 @@ void
 mi_cmd_data_list_register_names (char *command, char **argv, int argc)
 {
   struct gdbarch *gdbarch;
+  struct ui_out *uiout = current_uiout;
   int regnum, numregs;
   int i;
   struct cleanup *cleanup;
@@ -940,6 +944,7 @@ void
 mi_cmd_data_list_changed_registers (char *command, char **argv, int argc)
 {
   static struct regcache *this_regs = NULL;
+  struct ui_out *uiout = current_uiout;
   struct regcache *prev_regs;
   struct gdbarch *gdbarch;
   int regnum, numregs, changed;
@@ -1044,6 +1049,7 @@ register_changed_p (int regnum, struct regcache *prev_regs,
 void
 mi_cmd_data_list_register_values (char *command, char **argv, int argc)
 {
+  struct ui_out *uiout = current_uiout;
   struct frame_info *frame;
   struct gdbarch *gdbarch;
   int regnum, numregs, format;
@@ -1110,6 +1116,7 @@ static void
 get_register (struct frame_info *frame, int regnum, int format)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
+  struct ui_out *uiout = current_uiout;
   CORE_ADDR addr;
   enum lval_type lval;
   static struct ui_stream *stb = NULL;
@@ -1229,6 +1236,7 @@ mi_cmd_data_evaluate_expression (char *command, char **argv, int argc)
   struct value *val;
   struct ui_stream *stb = NULL;
   struct value_print_options opts;
+  struct ui_out *uiout = current_uiout;
 
   stb = ui_out_stream_new (uiout);
 
@@ -1279,6 +1287,7 @@ void
 mi_cmd_data_read_memory (char *command, char **argv, int argc)
 {
   struct gdbarch *gdbarch = get_current_arch ();
+  struct ui_out *uiout = current_uiout;
   struct cleanup *cleanups = make_cleanup (null_cleanup, NULL);
   CORE_ADDR addr;
   long total_bytes;
@@ -1470,6 +1479,7 @@ void
 mi_cmd_data_read_memory_bytes (char *command, char **argv, int argc)
 {
   struct gdbarch *gdbarch = get_current_arch ();
+  struct ui_out *uiout = current_uiout;
   struct cleanup *cleanups;
   CORE_ADDR addr;
   LONGEST length;
@@ -1702,6 +1712,7 @@ mi_cmd_list_features (char *command, char **argv, int argc)
   if (argc == 0)
     {
       struct cleanup *cleanup = NULL;
+      struct ui_out *uiout = current_uiout;
 
       cleanup = make_cleanup_ui_out_list_begin_end (uiout, "features");      
       ui_out_field_string (uiout, NULL, "frozen-varobjs");
@@ -1727,6 +1738,7 @@ mi_cmd_list_target_features (char *command, char **argv, int argc)
   if (argc == 0)
     {
       struct cleanup *cleanup = NULL;
+      struct ui_out *uiout = current_uiout;
 
       cleanup = make_cleanup_ui_out_list_begin_end (uiout, "features");      
       if (target_can_async_p ())
@@ -1751,7 +1763,7 @@ mi_cmd_add_inferior (char *command, char **argv, int argc)
 
   inf = add_inferior_with_spaces ();
 
-  ui_out_field_fmt (uiout, "inferior", "i%d", inf->num);
+  ui_out_field_fmt (current_uiout, "inferior", "i%d", inf->num);
 }
 
 /* Callback used to find the first inferior other than the
@@ -1958,14 +1970,14 @@ mi_execute_command (char *cmd, int from_tty)
 
       TRY_CATCH (result, RETURN_MASK_ALL)
 	{
-	  captured_mi_execute_command (uiout, command);
+	  captured_mi_execute_command (current_uiout, command);
 	}
       if (result.reason < 0)
 	{
 	  /* The command execution failed and error() was called
 	     somewhere.  */
 	  mi_print_exception (command->token, result);
-	  mi_out_rewind (uiout);
+	  mi_out_rewind (current_uiout);
 	}
 
       bpstat_do_actions ();
@@ -2177,21 +2189,24 @@ mi_load_progress (const char *section_name,
   static char *previous_sect_name = NULL;
   int new_section;
   struct ui_out *saved_uiout;
+  struct ui_out *uiout;
 
   /* This function is called through deprecated_show_load_progress
      which means uiout may not be correct.  Fix it for the duration
      of this function.  */
-  saved_uiout = uiout;
+  saved_uiout = current_uiout;
 
   if (current_interp_named_p (INTERP_MI)
       || current_interp_named_p (INTERP_MI2))
-    uiout = mi_out_new (2);
+    current_uiout = mi_out_new (2);
   else if (current_interp_named_p (INTERP_MI1))
-    uiout = mi_out_new (1);
+    current_uiout = mi_out_new (1);
   else if (current_interp_named_p (INTERP_MI3))
-    uiout = mi_out_new (3);
+    current_uiout = mi_out_new (3);
   else
     return;
+
+  uiout = current_uiout;
 
   update_threshold.tv_sec = 0;
   update_threshold.tv_usec = 500000;

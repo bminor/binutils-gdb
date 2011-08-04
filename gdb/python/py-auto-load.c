@@ -494,6 +494,7 @@ collect_matching_scripts (void **slot, void *info)
 static void
 print_script (struct loaded_script *script)
 {
+  struct ui_out *uiout = current_uiout;
   struct cleanup *chain;
 
   chain = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
@@ -530,6 +531,7 @@ sort_scripts_by_name (const void *ap, const void *bp)
 static void
 info_auto_load_scripts (char *pattern, int from_tty)
 {
+  struct ui_out *uiout = current_uiout;
   struct auto_load_pspace_info *pspace_info;
   struct cleanup *script_chain;
   VEC (loaded_script_ptr) *scripts;

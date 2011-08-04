@@ -78,7 +78,7 @@ mi_cmd_stack_list_frames (char *command, char **argv, int argc)
   if (fi == NULL)
     error (_("-stack-list-frames: Not enough frames in stack."));
 
-  cleanup_stack = make_cleanup_ui_out_list_begin_end (uiout, "stack");
+  cleanup_stack = make_cleanup_ui_out_list_begin_end (current_uiout, "stack");
 
   /* Now let;s print the frames up to frame_high, or until there are
      frames in the stack. */
@@ -117,7 +117,7 @@ mi_cmd_stack_info_depth (char *command, char **argv, int argc)
        i++, fi = get_prev_frame (fi))
     QUIT;
 
-  ui_out_field_int (uiout, "depth", i);
+  ui_out_field_int (current_uiout, "depth", i);
 }
 
 static enum print_values
@@ -166,6 +166,7 @@ mi_cmd_stack_list_args (char *command, char **argv, int argc)
   struct frame_info *fi;
   struct cleanup *cleanup_stack_args;
   enum print_values print_values;
+  struct ui_out *uiout = current_uiout;
 
   if (argc < 1 || argc > 3 || argc == 2)
     error (_("-stack-list-arguments: Usage: "
@@ -249,6 +250,7 @@ list_args_or_locals (enum what_to_list what, int values, struct frame_info *fi)
   static struct ui_stream *stb = NULL;
   struct type *type;
   char *name_of_result;
+  struct ui_out *uiout = current_uiout;
 
   stb = ui_out_stream_new (uiout);
 

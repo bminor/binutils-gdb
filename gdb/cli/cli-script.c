@@ -1661,7 +1661,7 @@ show_user_1 (struct cmd_list_element *c, char *prefix, char *name,
     return;
   fprintf_filtered (stream, "User command \"%s%s\":\n", prefix, name);
 
-  print_command_lines (uiout, cmdlines, 1);
+  print_command_lines (current_uiout, cmdlines, 1);
   fputs_filtered ("\n", stream);
 }
 

@@ -69,6 +69,8 @@ env_execute_cli_command (const char *cmd, const char *args)
 void
 mi_cmd_env_pwd (char *command, char **argv, int argc)
 {
+  struct ui_out *uiout = current_uiout;
+
   if (argc > 0)
     error (_("-environment-pwd: No arguments required"));
           
@@ -112,6 +114,7 @@ env_mod_path (char *dirname, char **which_path)
 void
 mi_cmd_env_path (char *command, char **argv, int argc)
 {
+  struct ui_out *uiout = current_uiout;
   char *exec_path;
   char *env;
   int reset = 0;
@@ -185,6 +188,7 @@ mi_cmd_env_path (char *command, char **argv, int argc)
 void
 mi_cmd_env_dir (char *command, char **argv, int argc)
 {
+  struct ui_out *uiout = current_uiout;
   int i;
   int optind = 0;
   int reset = 0;
@@ -257,7 +261,8 @@ mi_cmd_inferior_tty_show (char *command, char **argv, int argc)
     error (_("-inferior-tty-show: Usage: No args"));
 
   if (inferior_io_terminal)
-    ui_out_field_string (uiout, "inferior_tty_terminal", inferior_io_terminal);
+    ui_out_field_string (current_uiout,
+			 "inferior_tty_terminal", inferior_io_terminal);
 }
 
 void 

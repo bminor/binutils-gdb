@@ -10541,6 +10541,7 @@ show_remote_cmd (char *args, int from_tty)
      the redundant "show remote Z-packet" and the legacy aliases.  */
   struct cleanup *showlist_chain;
   struct cmd_list_element *list = remote_show_cmdlist;
+  struct ui_out *uiout = current_uiout;
 
   showlist_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "showlist");
   for (; list != NULL; list = list->next)

@@ -178,10 +178,10 @@ tui_command_loop (void *data)
          preserves the uiout from changing, this must be done at top
          level of event loop.  */
       if (tui_active)
-        uiout = tui_out;
+        current_uiout = tui_out;
       else
-        uiout = tui_old_uiout;
-      
+        current_uiout = tui_old_uiout;
+
       if (result == 0)
 	{
 	  /* If any exception escaped to here, we better enable

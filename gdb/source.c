@@ -1277,6 +1277,7 @@ print_source_lines_base (struct symtab *s, int line, int stopline, int noerror)
   FILE *stream;
   int nlines = stopline - line;
   struct cleanup *cleanup;
+  struct ui_out *uiout = current_uiout;
 
   /* Regardless of whether we can open the file, set current_source_symtab.  */
   current_source_symtab = s;

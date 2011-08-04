@@ -50,7 +50,7 @@ static void
 breakpoint_notify (struct breakpoint *b)
 {
   if (mi_can_breakpoint_notify)
-    gdb_breakpoint_query (uiout, b->number, NULL);
+    gdb_breakpoint_query (current_uiout, b->number, NULL);
 }
 
 enum bp_type

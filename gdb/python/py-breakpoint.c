@@ -492,12 +492,12 @@ bppy_get_commands (PyObject *self, void *closure)
   string_file = mem_fileopen ();
   chain = make_cleanup_ui_file_delete (string_file);
 
-  ui_out_redirect (uiout, string_file);
+  ui_out_redirect (current_uiout, string_file);
   TRY_CATCH (except, RETURN_MASK_ALL)
     {
-      print_command_lines (uiout, breakpoint_commands (bp), 0);
+      print_command_lines (current_uiout, breakpoint_commands (bp), 0);
     }
-  ui_out_redirect (uiout, NULL);
+  ui_out_redirect (current_uiout, NULL);
   GDB_PY_HANDLE_EXCEPTION (except);
 
   cmdstr = ui_file_xstrdup (string_file, &length);

@@ -401,18 +401,18 @@ mi_on_normal_stop (struct bpstats *bs, int print_frame)
     {
       int core;
 
-      if (uiout != mi_uiout)
+      if (current_uiout != mi_uiout)
 	{
 	  /* The normal_stop function has printed frame information into 
 	     CLI uiout, or some other non-MI uiout.  There's no way we
 	     can extract proper fields from random uiout object, so we print
 	     the frame again.  In practice, this can only happen when running
 	     a CLI command in MI.  */
-	  struct ui_out *saved_uiout = uiout;
+	  struct ui_out *saved_uiout = current_uiout;
 
-	  uiout = mi_uiout;
+	  current_uiout = mi_uiout;
 	  print_stack_frame (get_selected_frame (NULL), 0, SRC_AND_LOC);
-	  uiout = saved_uiout;
+	  current_uiout = saved_uiout;
 	}
 
       ui_out_field_int (mi_uiout, "thread-id",

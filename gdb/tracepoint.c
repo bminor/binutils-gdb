@@ -457,6 +457,7 @@ tvariables_info_1 (void)
   int ix;
   int count = 0;
   struct cleanup *back_to;
+  struct ui_out *uiout = current_uiout;
 
   if (VEC_length (tsv_s, tvariables) == 0 && !ui_out_is_mi_like_p (uiout))
     {
@@ -1811,6 +1812,7 @@ trace_status_command (char *args, int from_tty)
 void
 trace_status_mi (int on_stop)
 {
+  struct ui_out *uiout = current_uiout;
   struct trace_status *ts = current_trace_status ();
   int status;
 
@@ -1950,6 +1952,7 @@ tfind_1 (enum trace_find_type type, int num,
   int target_frameno = -1, target_tracept = -1;
   struct frame_id old_frame_id = null_frame_id;
   struct tracepoint *tp;
+  struct ui_out *uiout = current_uiout;
 
   /* Only try to get the current stack frame if we have a chance of
      succeeding.  In particular, if we're trying to get a first trace
@@ -4366,6 +4369,7 @@ print_one_static_tracepoint_marker (int count,
 
   char wrap_indent[80];
   char extra_field_indent[80];
+  struct ui_out *uiout = current_uiout;
   struct ui_stream *stb = ui_out_stream_new (uiout);
   struct cleanup *old_chain = make_cleanup_ui_out_stream_delete (stb);
   struct cleanup *bkpt_chain;
@@ -4483,6 +4487,7 @@ info_static_tracepoint_markers_command (char *arg, int from_tty)
   VEC(static_tracepoint_marker_p) *markers;
   struct cleanup *old_chain;
   struct static_tracepoint_marker *marker;
+  struct ui_out *uiout = current_uiout;
   int i;
 
   old_chain

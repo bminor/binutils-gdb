@@ -397,7 +397,7 @@ maintenance_info_program_spaces_command (char *args, int from_tty)
 	error (_("program space ID %d not known."), requested);
     }
 
-  print_program_space (uiout, requested);
+  print_program_space (current_uiout, requested);
 }
 
 /* Simply returns the count of program spaces.  */

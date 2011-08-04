@@ -11078,6 +11078,7 @@ check_status_exception (enum exception_catchpoint_kind ex, bpstat bs)
 static enum print_stop_action
 print_it_exception (enum exception_catchpoint_kind ex, bpstat bs)
 {
+  struct ui_out *uiout = current_uiout;
   struct breakpoint *b = bs->breakpoint_at;
 
   annotate_catchpoint (b->number);
@@ -11150,6 +11151,7 @@ static void
 print_one_exception (enum exception_catchpoint_kind ex,
                      struct breakpoint *b, struct bp_location **last_loc)
 { 
+  struct ui_out *uiout = current_uiout;
   struct ada_catchpoint *c = (struct ada_catchpoint *) b;
   struct value_print_options opts;
 
@@ -11199,6 +11201,7 @@ print_mention_exception (enum exception_catchpoint_kind ex,
                          struct breakpoint *b)
 {
   struct ada_catchpoint *c = (struct ada_catchpoint *) b;
+  struct ui_out *uiout = current_uiout;
 
   ui_out_text (uiout, b->disposition == disp_del ? _("Temporary catchpoint ")
                                                  : _("Catchpoint "));

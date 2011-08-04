@@ -1063,7 +1063,7 @@ print_disassembly (struct gdbarch *gdbarch, const char *name,
 			 paddress (gdbarch, low), paddress (gdbarch, high));
 
       /* Dump the specified range.  */
-      gdb_disassembly (gdbarch, uiout, 0, flags, -1, low, high);
+      gdb_disassembly (gdbarch, current_uiout, 0, flags, -1, low, high);
 
       printf_filtered ("End of assembler dump.\n");
       gdb_flush (gdb_stdout);

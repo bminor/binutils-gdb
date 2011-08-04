@@ -33,7 +33,7 @@ struct ui_file;
 
 /* FIXME: This should not be a global but something passed down from main.c
    or top.c.  */
-extern struct ui_out *uiout;
+extern struct ui_out *current_uiout;
 
 /* alignment enum */
 enum ui_align

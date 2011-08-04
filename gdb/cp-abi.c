@@ -262,6 +262,7 @@ find_cp_abi (const char *short_name)
 static void
 list_cp_abis (int from_tty)
 {
+  struct ui_out *uiout = current_uiout;
   struct cleanup *cleanup_chain;
   int i;
 
@@ -309,6 +310,8 @@ set_cp_abi_cmd (char *args, int from_tty)
 static void
 show_cp_abi_cmd (char *args, int from_tty)
 {
+  struct ui_out *uiout = current_uiout;
+
   ui_out_text (uiout, "The currently selected C++ ABI is \"");
 
   ui_out_field_string (uiout, "cp-abi", current_cp_abi.shortname);

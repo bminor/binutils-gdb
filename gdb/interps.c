@@ -150,7 +150,7 @@ interp_set (struct interp *interp, int top_level)
 
   if (current_interpreter != NULL)
     {
-      ui_out_flush (uiout);
+      ui_out_flush (current_uiout);
       if (current_interpreter->procs->suspend_proc
 	  && !current_interpreter->procs->suspend_proc (current_interpreter->
 							data))
@@ -178,7 +178,7 @@ interp_set (struct interp *interp, int top_level)
       interpreter_p = xstrdup (current_interpreter->name);
     }
 
-  uiout = interp->interpreter_out;
+  current_uiout = interp->interpreter_out;
 
   /* Run the init proc.  If it fails, try to restore the old interp.  */
 
@@ -214,7 +214,7 @@ interp_set (struct interp *interp, int top_level)
 	{
 	  sprintf (buffer, "Switching to interpreter \"%.24s\".\n",
 		   interp->name);
-	  ui_out_text (uiout, buffer);
+	  ui_out_text (current_uiout, buffer);
 	}
       display_gdb_prompt (NULL);
     }

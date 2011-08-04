@@ -55,6 +55,7 @@ void
 mi_cmd_disassemble (char *command, char **argv, int argc)
 {
   struct gdbarch *gdbarch = get_current_arch ();
+  struct ui_out *uiout = current_uiout;
   CORE_ADDR start;
 
   int mode, disasm_flags;

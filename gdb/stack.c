@@ -119,7 +119,7 @@ print_stack_frame (struct frame_info *frame, int print_level,
   volatile struct gdb_exception e;
 
   /* For mi, alway print location and address.  */
-  if (ui_out_is_mi_like_p (uiout))
+  if (ui_out_is_mi_like_p (current_uiout))
     print_what = LOC_AND_ADDRESS;
 
   TRY_CATCH (e, RETURN_MASK_ERROR)
@@ -175,6 +175,7 @@ static void
 print_frame_args (struct symbol *func, struct frame_info *frame,
 		  int num, struct ui_file *stream)
 {
+  struct ui_out *uiout = current_uiout;
   int first = 1;
   /* Offset of next stack argument beyond the one we have seen that is
      at the highest offset, or -1 if we haven't come to a stack
@@ -436,8 +437,9 @@ do_gdb_disassembly (struct gdbarch *gdbarch,
 
   TRY_CATCH (exception, RETURN_MASK_ERROR)
     {
-      gdb_disassembly (gdbarch, uiout, 0, DISASSEMBLY_RAW_INSN, how_many, low,
-		       high);
+      gdb_disassembly (gdbarch, current_uiout, 0,
+		       DISASSEMBLY_RAW_INSN, how_many,
+		       low, high);
     }
   if (exception.reason < 0)
     {
@@ -466,6 +468,7 @@ print_frame_info (struct frame_info *frame, int print_level,
   struct symtab_and_line sal;
   int source_print;
   int location_print;
+  struct ui_out *uiout = current_uiout;
 
   if (get_frame_type (frame) == DUMMY_FRAME
       || get_frame_type (frame) == SIGTRAMP_FRAME
@@ -698,6 +701,7 @@ print_frame (struct frame_info *frame, int print_level,
 	     struct symtab_and_line sal)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
+  struct ui_out *uiout = current_uiout;
   char *funname = NULL;
   enum language funlang = language_unknown;
   struct ui_stream *stb;

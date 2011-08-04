@@ -1,5 +1,93 @@
 2011-08-04  Pedro Alves  <pedro@codesourcery.com>
 
+	* ui-out.h (uiout): Rename to ...
+	(current_uiout): ... this.
+	* ui-out.c (uiout): Rename to ...
+	(current_uiout): ... this.
+	* ada-lang.c (print_it_exception, print_one_exception)
+	(print_mention_exception): Adjust.
+	* breakpoint.c (watchpoint_check): Adjust.
+	(print_breakpoint_location, print_one_breakpoint, breakpoint_1)
+	(default_collect_info, watchpoints_info, print_one_catch_fork)
+	(print_one_catch_vfork, print_one_catch_syscall)
+	(print_one_catch_exec, mention, print_it_ranged_breakpoint)
+	(print_one_ranged_breakpoint, print_mention_ranged_breakpoint)
+	(print_it_watchpoint, print_mention_watchpoint)
+	(print_it_masked_watchpoint, print_mention_masked_watchpoint)
+	(print_it_exception_catchpoint, print_one_exception_catchpoint)
+	(print_mention_exception_catchpoint, say_where, bkpt_print_it)
+	(bkpt_print_mention, momentary_bkpt_print_it)
+	(tracepoint_print_mention, update_static_tracepoint)
+	(tracepoints_info, save_breakpoints): Adjust.
+	* cli-out.c (field_separator): Adjust.
+	* cp-abi.c (list_cp_abis, show_cp_abi_cmd): Adjust.
+	* exceptions.c (catch_exceptions_with_msg, catch_errors): Adjust.
+	* frame.c (get_current_frame): Adjust.
+	* infcmd.c (run_command_1, print_return_value): Adjust.
+	* inferior.c (inferior_command, info_inferiors_command): Adjust.
+	* infrun.c (print_end_stepping_range_reason): Adjust.
+	(print_signal_exited_reason, print_exited_reason): Adjust.
+	(print_signal_received_reason, print_no_history_reason): Adjust.
+	* interps.c (interp_set): Adjust.
+	* osdata.c (info_osdata_command): Adjust.
+	* progspace.c (maintenance_info_program_spaces_command): Adjust.
+	* remote-fileio.c (remote_fileio_request): Adjust.
+	* remote.c (show_remote_cmd): Adjust.
+	* solib.c (info_sharedlibrary_command): Adjust.
+	* source.c (print_source_lines_base): Adjust.
+	* stack.c (print_stack_frame): Adjust.
+	(do_gdb_disassembly, print_frame_info, print_frame): Adjust.
+	* symfile-mem.c (add_vsyscall_page): Adjust.
+	* symfile.c (load_progress, generic_load)
+	(print_transfer_performance): Adjust.
+	* thread.c (info_threads_command, restore_selected_frame)
+	(thread_command): Adjust.
+	* top.c (make_cleanup_restore_ui_file): Adjust.
+	* tracepoint.c (tvariables_info_1, trace_status_mi, tfind_1)
+	(print_one_static_tracepoint_marker): Adjust.
+	* cli/cli-cmds.c (print_disassembly): Adjust.
+	* cli/cli-decode.c (print_doc_line): Adjust.
+	* cli/cli-interp.c (safe_execute_command): Adjust.
+	* cli/cli-logging.c (set_logging_redirect, pop_output_files)
+	(handle_redirections): Adjust.
+	* cli/cli-script.c (show_user_1): Adjust.
+	* cli/cli-setshow.c (do_setshow_command, cmd_show_list): Adjust.
+	* mi/mi-cmd-break.c (breakpoint_notify): Adjust.
+	* mi/mi-cmd-disas.c (mi_cmd_disassemble): Adjust.
+	* mi/mi-cmd-env.c (mi_cmd_env_pwd, mi_cmd_env_path)
+	(mi_cmd_env_dir): Adjust.
+	* mi/mi-cmd-file.c (mi_cmd_file_list_exec_source_file)
+	(print_partial_file_name, mi_cmd_file_list_exec_source_files): Adjust.
+	* mi/mi-cmd-stack.c (mi_cmd_stack_list_frames)
+	(mi_cmd_stack_info_depth, mi_cmd_stack_list_args)
+	(list_args_or_locals): Adjust.
+	* mi/mi-cmd-var.c (print_varobj, mi_cmd_var_create)
+	(mi_cmd_var_delete, mi_cmd_var_set_format, mi_cmd_var_set_frozen)
+	(mi_cmd_var_show_format, mi_cmd_var_info_num_children)
+	(mi_cmd_var_list_children, mi_cmd_var_info_type)
+	(mi_cmd_var_info_path_expression, mi_cmd_var_info_expression)
+	(mi_cmd_var_show_attributes, mi_cmd_var_evaluate_expression)
+	(mi_cmd_var_assign, mi_cmd_var_update, varobj_update_one): Adjust.
+	* mi/mi-interp.c (mi_on_normal_stop): Adjust.
+	* mi/mi-main.c (mi_cmd_gdb_exit, mi_cmd_thread_select)
+	(mi_cmd_thread_list_ids, mi_cmd_thread_info, print_one_inferior)
+	(list_available_thread_groups, mi_cmd_list_thread_groups)
+	(mi_cmd_data_list_register_names)
+	(mi_cmd_data_list_changed_registers)
+	(mi_cmd_data_list_register_values, get_register)
+	(mi_cmd_data_evaluate_expression, mi_cmd_data_read_memory)
+	(mi_cmd_data_read_memory_bytes, mi_cmd_list_features)
+	(mi_cmd_list_target_features, mi_cmd_add_inferior)
+	(mi_execute_command, mi_load_progress): Adjust.
+	* mi/mi-symbol-cmds.c (mi_cmd_symbol_list_lines): Adjust.
+	* python/py-auto-load.c (print_script, info_auto_load_scripts):
+	Adjust.
+	* python/py-breakpoint.c (bppy_get_commands): Adjust.
+	* tui/tui-interp.c (tui_command_loop): Adjust.
+	* tui/tui-io.c (tui_setup_io, tui_initialize_io): Adjust.
+
+2011-08-04  Pedro Alves  <pedro@codesourcery.com>
+
 	* exceptions.c (struct catcher): Remove saved_uiout field.
 	(exceptions_state_mc_init): Remove the `func_uiout' parameter, and
 	no longer save/resvore the global ui_out builder.
