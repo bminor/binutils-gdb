@@ -1,3 +1,8 @@
+2011-08-05  David S. Miller  <davem@davemloft.net>
+
+	* config/tc-sparc.c (v9a_asr_table): Add "cps".
+	(sparc_ip): Handle '4', '5' and '(' format codes.
+
 2011-08-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/13056

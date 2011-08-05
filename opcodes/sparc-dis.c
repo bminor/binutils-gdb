@@ -108,7 +108,8 @@ static char *v9_hpriv_reg_names[] =
 static char *v9a_asr_reg_names[] =
 {
   "pcr", "pic", "dcr", "gsr", "set_softint", "clear_softint",
-  "softint", "tick_cmpr", "stick", "stick_cmpr"
+  "softint", "tick_cmpr", "stick", "stick_cmpr", "resv26",
+  "resv27", "cps"
 };
 
 /* Macros used to extract instruction fields.  Not all fields have
@@ -119,6 +120,7 @@ static char *v9a_asr_reg_names[] =
 #define X_LDST_I(i)  (((i) >> 13) & 1)
 #define X_ASI(i)     (((i) >> 5) & 0xff)
 #define X_RS2(i)     (((i) >> 0) & 0x1f)
+#define X_RS3(i)     (((i) >> 9) & 0x1f)
 #define X_IMM(i,n)   (((i) >> 0) & ((1 << (n)) - 1))
 #define X_SIMM(i,n)  SEX (X_IMM ((i), (n)), (n))
 #define X_DISP22(i)  (((i) >> 0) & 0x3fffff)
@@ -634,6 +636,13 @@ print_insn_sparc (bfd_vma memaddr, disassemble_info *info)
 		    fregx (X_RS2 (insn));
 		    break;
 
+		  case '4':
+		    freg (X_RS3 (insn));
+		    break;
+		  case '5':	/* Double/even.  */
+		    fregx (X_RS3 (insn));
+		    break;
+
 		  case 'g':
 		    freg (X_RD (insn));
 		    break;
@@ -814,7 +823,7 @@ print_insn_sparc (bfd_vma memaddr, disassemble_info *info)
 		    break;
 
 		  case '/':
-		    if (X_RS1 (insn) < 16 || X_RS1 (insn) > 25)
+		    if (X_RS1 (insn) < 16 || X_RS1 (insn) > 28)
 		      (*info->fprintf_func) (stream, "%%reserved");
 		    else
 		      (*info->fprintf_func) (stream, "%%%s",
@@ -822,7 +831,7 @@ print_insn_sparc (bfd_vma memaddr, disassemble_info *info)
 		    break;
 
 		  case '_':
-		    if (X_RD (insn) < 16 || X_RD (insn) > 25)
+		    if (X_RD (insn) < 16 || X_RD (insn) > 28)
 		      (*info->fprintf_func) (stream, "%%reserved");
 		    else
 		      (*info->fprintf_func) (stream, "%%%s",
@@ -880,6 +889,10 @@ print_insn_sparc (bfd_vma memaddr, disassemble_info *info)
 
 		  case 'F':
 		    (*info->fprintf_func) (stream, "%%fsr");
+		    break;
+
+		  case '(':
+		    (*info->fprintf_func) (stream, "%%efsr");
 		    break;
 
 		  case 'p':

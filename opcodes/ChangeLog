@@ -1,3 +1,12 @@
+2011-08-05  David S. Miller  <davem@davemloft.net>
+
+	* sparc-dis.c (v9a_ast_reg_names): Add "cps".
+	(X_RS3): New macro.
+	(print_insn_sparc): Handle '4', '5', and '(' format codes.
+	Accept %asr numbers below 28.
+	* sparc-opc.c (sparc_opcodes): Add entries for HPC and VIS3
+	instructions.
+
 2011-08-02  Quentin Neill  <quentin.neill@amd.com>
 
 	* i386-dis.c (xop_table): Remove spurious bextr insn.

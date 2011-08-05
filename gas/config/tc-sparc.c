@@ -773,6 +773,7 @@ struct priv_reg_entry v9a_asr_table[] =
   {"pcr", 16},
   {"gsr", 19},
   {"dcr", 18},
+  {"cps", 28},
   {"clear_softint", 21},
   {"", -1},			/* End marker.  */
 };
@@ -2136,6 +2137,9 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 	    case 'B':
 	    case 'R':
 
+	    case '4':
+	    case '5':
+
 	    case 'g':
 	    case 'H':
 	    case 'J':
@@ -2153,6 +2157,7 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 
 		    if ((*args == 'v'
 			 || *args == 'B'
+			 || *args == '5'
 			 || *args == 'H')
 			&& (mask & 1))
 		      {
@@ -2214,6 +2219,11 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 		    opcode |= RS2 (mask);
 		    continue;
 
+		  case '4':
+		  case '5':
+		    opcode |= RS3 (mask);
+		    continue;
+
 		  case 'g':
 		  case 'H':
 		  case 'J':
@@ -2229,6 +2239,14 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 	      if (strncmp (s, "%fsr", 4) == 0)
 		{
 		  s += 4;
+		  continue;
+		}
+	      break;
+
+	    case '(':
+	      if (strncmp (s, "%efsr", 5) == 0)
+		{
+		  s += 5;
 		  continue;
 		}
 	      break;
