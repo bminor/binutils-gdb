@@ -1,3 +1,7 @@
+2011-08-05  Mark Kettenis  <kettenis@gnu.org>
+
+	* netbsd-core.c (netbsd_core_vec): Init match_priority field.
+
 2011-08-05  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (maybe_strip_output): New function.
