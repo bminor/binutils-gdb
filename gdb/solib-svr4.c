@@ -116,8 +116,8 @@ svr4_same_1 (const char *gdb_so_name, const char *inferior_so_name)
     return 1;
 
   /* On Solaris, when starting inferior we think that dynamic linker is
-     /usr/lib/ld.so.1, but later on, the table of loaded shared libraries 
-     contains /lib/ld.so.1.  Sometimes one file is a link to another, but 
+     /usr/lib/ld.so.1, but later on, the table of loaded shared libraries
+     contains /lib/ld.so.1.  Sometimes one file is a link to another, but
      sometimes they have identical content, but are not linked to each
      other.  We don't restrict this check for Solaris, but the chances
      of running into this situation elsewhere are very low.  */
@@ -1662,7 +1662,7 @@ enable_break (struct svr4_info *info, int from_tty)
    DESCRIPTION
 
    Once the symbols from a shared object have been loaded in the usual
-   way, we are called to do any system specific symbol handling that 
+   way, we are called to do any system specific symbol handling that
    is needed.
 
    For SunOS4, this consisted of grunging around in the dynamic
@@ -1737,7 +1737,7 @@ read_program_headers_from_bfd (bfd *abfd, int *phdrs_size)
 
    So, to summarize, relocations are necessary when the start address obtained
    from the executable is different from the address in auxv AT_ENTRY entry.
-   
+
    [ The astute reader will note that we also test to make sure that
      the executable in question has the DYNAMIC flag set.  It is my
      opinion that this test is unnecessary (undesirable even).  It
@@ -2359,7 +2359,7 @@ svr4_have_link_map_offsets (void)
 
 /* Fetch (and possibly build) an appropriate `struct link_map_offsets'
    for an ILP32 SVR4 system.  */
-  
+
 struct link_map_offsets *
 svr4_ilp32_fetch_link_map_offsets (void)
 {
@@ -2390,7 +2390,7 @@ svr4_ilp32_fetch_link_map_offsets (void)
 
 /* Fetch (and possibly build) an appropriate `struct link_map_offsets'
    for an LP64 SVR4 system.  */
-  
+
 struct link_map_offsets *
 svr4_lp64_fetch_link_map_offsets (void)
 {
