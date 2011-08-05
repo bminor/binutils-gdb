@@ -1,3 +1,7 @@
+2011-08-05  Eli Zaretskii  <eliz@gnu.org>
+
+	* win32-low.c: Include <stdint.h>.
+
 2011-07-22  Pedro Alves  <pedro@codesourcery.com>
 
 	* i386-low.c (i386_insert_aligned_watchpoint): Don't pass the info

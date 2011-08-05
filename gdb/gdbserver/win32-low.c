@@ -26,6 +26,7 @@
 #include "mem-break.h"
 #include "win32-low.h"
 
+#include <stdint.h>
 #include <windows.h>
 #include <winnt.h>
 #include <imagehlp.h>
