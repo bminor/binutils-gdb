@@ -512,8 +512,8 @@ BFD_JUMP_TABLE macros.
 .
 .  {* Check if SEC has been already linked during a reloceatable or
 .     final link.  *}
-.  void (*_section_already_linked) (bfd *, struct already_linked *,
-.				    struct bfd_link_info *);
+.  bfd_boolean (*_section_already_linked) (bfd *, struct already_linked *,
+.					   struct bfd_link_info *);
 .
 .  {* Define a common symbol.  *}
 .  bfd_boolean (*_bfd_define_common_symbol) (bfd *, struct bfd_link_info *,

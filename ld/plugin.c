@@ -380,10 +380,11 @@ add_symbols (void *handle, int nsyms, const struct ld_plugin_symbol *syms)
 {
   asymbol **symptrs;
   bfd *abfd = handle;
-  int n;
+  int n, k;
+
   ASSERT (called_plugin);
   symptrs = xmalloc (nsyms * sizeof *symptrs);
-  for (n = 0; n < nsyms; n++)
+  for (n = 0, k = 0; n < nsyms; n++)
     {
       enum ld_plugin_status rv;
       asymbol *bfdsym;
@@ -393,15 +394,16 @@ add_symbols (void *handle, int nsyms, const struct ld_plugin_symbol *syms)
 	  struct already_linked linked;
 	  linked.comdat_key = xstrdup (syms[n].comdat_key);
 	  linked.u.abfd = abfd;
-	  bfd_section_already_linked (abfd, &linked, &link_info);
+	  if (bfd_section_already_linked (abfd, &linked, &link_info))
+	    continue;
 	}
       bfdsym = bfd_make_empty_symbol (abfd);
-      symptrs[n] = bfdsym;
+      symptrs[k++] = bfdsym;
       rv = asymbol_from_plugin_symbol (abfd, bfdsym, syms + n);
       if (rv != LDPS_OK)
 	return rv;
     }
-  bfd_set_symtab (abfd, symptrs, nsyms);
+  bfd_set_symtab (abfd, symptrs, k);
   return LDPS_OK;
 }
 

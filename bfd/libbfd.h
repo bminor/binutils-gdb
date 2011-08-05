@@ -486,8 +486,8 @@ extern bfd_boolean _bfd_generic_set_section_contents
 #define _bfd_nolink_bfd_link_split_section \
   ((bfd_boolean (*) (bfd *, struct bfd_section *)) bfd_false)
 #define _bfd_nolink_section_already_linked \
-  ((void (*) (bfd *, struct already_linked*, \
-	      struct bfd_link_info *)) bfd_void)
+  ((bfd_boolean (*) (bfd *, struct already_linked*, \
+		     struct bfd_link_info *)) bfd_false)
 #define _bfd_nolink_bfd_define_common_symbol \
   ((bfd_boolean (*) (bfd *, struct bfd_link_info *, \
 		     struct bfd_link_hash_entry *)) bfd_false)
@@ -607,7 +607,7 @@ extern bfd_boolean _bfd_generic_final_link
 extern bfd_boolean _bfd_generic_link_split_section
   (bfd *, struct bfd_section *);
 
-extern void _bfd_generic_section_already_linked
+extern bfd_boolean _bfd_generic_section_already_linked
   (bfd *, struct already_linked *, struct bfd_link_info *);
 
 /* Generic reloc_link_order processing routine.  */

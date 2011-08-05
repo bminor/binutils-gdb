@@ -1,5 +1,20 @@
 2011-08-05  Alan Modra  <amodra@gmail.com>
 
+	PR ld/12762
+	* elflink.c (_bfd_elf_section_already_linked): Return matched
+	status.  Remove COFF comdat section handling.
+	* linker.c (_bfd_generic_section_already_linked): Return matched
+	status.  Don't set SEC_GROUP in l_flags for plugin entries.
+	(bfd_section_already_linked): Update prototype.
+	* targets.c (_section_already_linked): Likewise.
+	* elf-bfd.h (_bfd_elf_section_already_linked): Likewise.
+	* libbfd-in.h (_bfd_generic_section_already_linked): Likewise.
+	(_bfd_nolink_section_already_linked): Update.
+	* libbfd.h: Regenerate.
+	* bfd-in2.h: Regenerate.
+
+2011-08-05  Alan Modra  <amodra@gmail.com>
+
 	* elf32-ppc.c: Include dwarf2.h.
 	(struct ppc_elf_link_hash_table): Add glink_eh_frame.
 	(ppc_elf_create_glink): Create .eh_frame section.

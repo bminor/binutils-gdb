@@ -12515,7 +12515,7 @@ section_signature (asection *sec)
   return sec->name;
 }
 
-void
+bfd_boolean
 _bfd_elf_section_already_linked (bfd *abfd,
 				 struct already_linked *linked,
 				 struct bfd_link_info *info)
@@ -12525,6 +12525,7 @@ _bfd_elf_section_already_linked (bfd *abfd,
   struct bfd_section_already_linked *l;
   struct bfd_section_already_linked_hash_entry *already_linked_list;
   asection *sec, *l_sec;
+  bfd_boolean matched;
 
   p = name = linked->comdat_key;
   if (name)
@@ -12536,20 +12537,20 @@ _bfd_elf_section_already_linked (bfd *abfd,
     {
       sec = linked->u.sec;
       if (sec->output_section == bfd_abs_section_ptr)
-	return;
+	return FALSE;
 
       flags = sec->flags;
 
       /* Return if it isn't a linkonce section.  A comdat group section
 	 also has SEC_LINK_ONCE set.  */
       if ((flags & SEC_LINK_ONCE) == 0)
-	return;
+	return FALSE;
 
       /* Don't put group member sections on our list of already linked
 	 sections.  They are handled as a group via their group section.
 	 */
       if (elf_sec_group (sec) != NULL)
-	return;
+	return FALSE;
 
       /* FIXME: When doing a relocatable link, we may have trouble
 	 copying relocations in other sections that refer to local symbols
@@ -12582,7 +12583,6 @@ _bfd_elf_section_already_linked (bfd *abfd,
 
   for (l = already_linked_list->entry; l != NULL; l = l->next)
     {
-      bfd_boolean l_coff_comdat_sec;
       flagword l_flags;
       bfd *l_owner;
       const char *l_name = l->linked.comdat_key;
@@ -12593,23 +12593,19 @@ _bfd_elf_section_already_linked (bfd *abfd,
 	  l_flags = (SEC_GROUP
 		     | SEC_LINK_ONCE
 		     | SEC_LINK_DUPLICATES_DISCARD);
-	  l_coff_comdat_sec = FALSE;
 	}
       else
 	{
 	  l_sec = l->linked.u.sec;
 	  l_owner = l_sec->owner;
 	  l_flags = l_sec->flags;
-	  l_coff_comdat_sec
-	    = !!bfd_coff_get_comdat_section (l_sec->owner, l_sec);
 	  l_name = section_signature (l_sec);
 	}
 
       /* We may have 2 different types of sections on the list: group
 	 sections and linkonce sections.  Match like sections.  */
       if ((flags & SEC_GROUP) == (l_flags & SEC_GROUP)
-	  && strcmp (name, l_name) == 0
-	  && !l_coff_comdat_sec)
+	  && strcmp (name, l_name) == 0)
 	{
 	  /* The section has already been linked.  See if we should
 	     issue a warning.  */
@@ -12629,7 +12625,7 @@ _bfd_elf_section_already_linked (bfd *abfd,
 		  && (l_owner->flags & BFD_PLUGIN) != 0)
 		{
 		  l->linked = *linked;
-		  return;
+		  return FALSE;
 		}
 	      break;
 
@@ -12711,10 +12707,11 @@ _bfd_elf_section_already_linked (bfd *abfd,
 		}
 	    }
 
-	  return;
+	  return TRUE;
 	}
     }
 
+  matched = FALSE;
   if (sec)
     {
       /* A single member comdat group section may be discarded by a
@@ -12742,6 +12739,7 @@ _bfd_elf_section_already_linked (bfd *abfd,
 			first->output_section = bfd_abs_section_ptr;
 			first->kept_section = l_sec;
 			sec->output_section = bfd_abs_section_ptr;
+			matched = TRUE;
 			break;
 		      }
 		  }
@@ -12767,6 +12765,7 @@ _bfd_elf_section_already_linked (bfd *abfd,
 		      {
 			sec->output_section = bfd_abs_section_ptr;
 			sec->kept_section = first;
+			matched = TRUE;
 			break;
 		      }
 		  }
@@ -12799,7 +12798,10 @@ _bfd_elf_section_already_linked (bfd *abfd,
 		    && CONST_STRNEQ (l_sec->name, ".gnu.linkonce.t."))
 		  {
 		    if (abfd != l_sec->owner)
-		      sec->output_section = bfd_abs_section_ptr;
+		      {
+			sec->output_section = bfd_abs_section_ptr;
+			matched = TRUE;
+		      }
 		    break;
 		  }
 	      }
@@ -12810,6 +12812,7 @@ _bfd_elf_section_already_linked (bfd *abfd,
   if (! bfd_section_already_linked_table_insert (already_linked_list,
 						 linked))
     info->callbacks->einfo (_("%F%P: already_linked_table: %E\n"));
+  return matched;
 }
 
 bfd_boolean

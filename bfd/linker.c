@@ -2888,13 +2888,13 @@ FUNCTION
 	bfd_section_already_linked
 
 SYNOPSIS
-        void bfd_section_already_linked (bfd *abfd,
-					 struct already_linked *data,
-					 struct bfd_link_info *info);
+        bfd_boolean bfd_section_already_linked (bfd *abfd,
+						struct already_linked *data,
+						struct bfd_link_info *info);
 
 DESCRIPTION
 	Check if @var{data} has been already linked during a reloceatable
-	or final link.
+	or final link.  Return TRUE if it has.
 
 .#define bfd_section_already_linked(abfd, data, info) \
 .       BFD_SEND (abfd, _section_already_linked, (abfd, data, info))
@@ -2990,7 +2990,7 @@ bfd_section_already_linked_table_free (void)
 
 /* This is used on non-ELF inputs.  */
 
-void
+bfd_boolean
 _bfd_generic_section_already_linked (bfd *abfd,
 				     struct already_linked *linked,
 				     struct bfd_link_info *info)
@@ -3006,7 +3006,7 @@ _bfd_generic_section_already_linked (bfd *abfd,
   if (name)
     {
       sec = NULL;
-      flags = SEC_GROUP | SEC_LINK_ONCE | SEC_LINK_DUPLICATES_DISCARD;
+      flags = SEC_LINK_ONCE | SEC_LINK_DUPLICATES_DISCARD;
       s_comdat = NULL;
     }
   else
@@ -3014,7 +3014,7 @@ _bfd_generic_section_already_linked (bfd *abfd,
       sec = linked->u.sec;
       flags = sec->flags;
       if ((flags & SEC_LINK_ONCE) == 0)
-	return;
+	return FALSE;
 
       s_comdat = bfd_coff_get_comdat_section (abfd, sec);
 
@@ -3049,9 +3049,7 @@ _bfd_generic_section_already_linked (bfd *abfd,
 	  l_sec = NULL;
 	  l_owner = l->linked.u.abfd;
 	  l_comdat = NULL;
-	  l_flags = (SEC_GROUP
-		     | SEC_LINK_ONCE
-		     | SEC_LINK_DUPLICATES_DISCARD);
+	  l_flags = SEC_LINK_ONCE | SEC_LINK_DUPLICATES_DISCARD;
 	}
       else
 	{
@@ -3100,7 +3098,7 @@ _bfd_generic_section_already_linked (bfd *abfd,
 		  && (l_owner->flags & BFD_PLUGIN) != 0)
 		{
 		  l->linked = *linked;
-		  return;
+		  return FALSE;
 		}
 	      break;
 
@@ -3136,7 +3134,7 @@ _bfd_generic_section_already_linked (bfd *abfd,
 	      sec->kept_section = l_sec;
 	    }
 
-	  return;
+	  return TRUE;
 	}
     }
 
@@ -3144,6 +3142,7 @@ _bfd_generic_section_already_linked (bfd *abfd,
   if (! bfd_section_already_linked_table_insert (already_linked_list,
 						 linked))
     info->callbacks->einfo (_("%F%P: already_linked_table: %E\n"));
+  return FALSE;
 }
 
 /* Convert symbols in excluded output sections to use a kept section.  */
