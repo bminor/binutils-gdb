@@ -1,3 +1,10 @@
+2011-08-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* spu-tdep.c (info_spu_event_command, info_spu_signal_command)
+	(info_spu_mailbox_list, info_spu_mailbox_command, info_spu_dma_cmdlist)
+	(info_spu_dma_command, info_spu_proxydma_command): Rename uiout
+	references to current_uiout.
+
 2011-08-04  Pedro Alves  <pedro@codesourcery.com>
 
 	* event-loop.c (gdb_do_one_event): Remove `data' parameter.
