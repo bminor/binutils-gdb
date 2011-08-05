@@ -181,17 +181,17 @@ solib_target_free_library_list (void *p)
 /* The allowed elements and attributes for an XML library list.
    The root element is a <library-list>.  */
 
-const struct gdb_xml_attribute segment_attributes[] = {
+static const struct gdb_xml_attribute segment_attributes[] = {
   { "address", GDB_XML_AF_NONE, gdb_xml_parse_attr_ulongest, NULL },
   { NULL, GDB_XML_AF_NONE, NULL, NULL }
 };
 
-const struct gdb_xml_attribute section_attributes[] = {
+static const struct gdb_xml_attribute section_attributes[] = {
   { "address", GDB_XML_AF_NONE, gdb_xml_parse_attr_ulongest, NULL },
   { NULL, GDB_XML_AF_NONE, NULL, NULL }
 };
 
-const struct gdb_xml_element library_children[] = {
+static const struct gdb_xml_element library_children[] = {
   { "segment", segment_attributes, NULL,
     GDB_XML_EF_REPEATABLE | GDB_XML_EF_OPTIONAL,
     library_list_start_segment, NULL },
@@ -201,24 +201,24 @@ const struct gdb_xml_element library_children[] = {
   { NULL, NULL, NULL, GDB_XML_EF_NONE, NULL, NULL }
 };
 
-const struct gdb_xml_attribute library_attributes[] = {
+static const struct gdb_xml_attribute library_attributes[] = {
   { "name", GDB_XML_AF_NONE, NULL, NULL },
   { NULL, GDB_XML_AF_NONE, NULL, NULL }
 };
 
-const struct gdb_xml_element library_list_children[] = {
+static const struct gdb_xml_element library_list_children[] = {
   { "library", library_attributes, library_children,
     GDB_XML_EF_REPEATABLE | GDB_XML_EF_OPTIONAL,
     library_list_start_library, library_list_end_library },
   { NULL, NULL, NULL, GDB_XML_EF_NONE, NULL, NULL }
 };
 
-const struct gdb_xml_attribute library_list_attributes[] = {
+static const struct gdb_xml_attribute library_list_attributes[] = {
   { "version", GDB_XML_AF_NONE, NULL, NULL },
   { NULL, GDB_XML_AF_NONE, NULL, NULL }
 };
 
-const struct gdb_xml_element library_list_elements[] = {
+static const struct gdb_xml_element library_list_elements[] = {
   { "library-list", library_list_attributes, library_list_children,
     GDB_XML_EF_NONE, library_list_start_list, NULL },
   { NULL, NULL, NULL, GDB_XML_EF_NONE, NULL, NULL }
