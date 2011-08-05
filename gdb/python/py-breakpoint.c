@@ -862,6 +862,7 @@ gdbpy_initialize_breakpoints (void)
 {
   int i;
 
+  breakpoint_object_type.tp_new = PyType_GenericNew;
   if (PyType_Ready (&breakpoint_object_type) < 0)
     return;
 
@@ -1016,5 +1017,4 @@ static PyTypeObject breakpoint_object_type =
   0,				  /* tp_dictoffset */
   bppy_init,			  /* tp_init */
   0,				  /* tp_alloc */
-  PyType_GenericNew		  /* tp_new */
 };

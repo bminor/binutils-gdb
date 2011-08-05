@@ -559,6 +559,7 @@ gdbpy_initialize_commands (void)
 {
   int i;
 
+  cmdpy_object_type.tp_new = PyType_GenericNew;
   if (PyType_Ready (&cmdpy_object_type) < 0)
     return;
 
@@ -646,7 +647,6 @@ static PyTypeObject cmdpy_object_type =
   0,				  /* tp_dictoffset */
   cmdpy_init,			  /* tp_init */
   0,				  /* tp_alloc */
-  PyType_GenericNew		  /* tp_new */
 };
 
 

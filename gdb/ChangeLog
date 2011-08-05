@@ -1,3 +1,14 @@
+2011-08-05  Eli Zaretskii  <eliz@gnu.org>
+
+	* python/py-breakpoint.c (gdbpy_initialize_breakpoints): Move the
+	initialization of the tp_new member to the corresponding
+	gdbpy_initialize_* function.
+	* python/py-cmd.c (gdbpy_initialize_commands): Likewise.
+	* python/py-frame.c (gdbpy_initialize_frames): Likewise.
+	* python/py-function.c (gdbpy_initialize_functions): Likewise.
+	* python/py-inferior.c (gdbpy_initialize_inferior): Likewise.
+	* python/py-param.c (gdbpy_initialize_parameters): Likewise.
+
 2011-08-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* spu-tdep.c (info_spu_event_command, info_spu_signal_command)

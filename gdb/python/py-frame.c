@@ -593,6 +593,7 @@ frapy_richcompare (PyObject *self, PyObject *other, int op)
 void
 gdbpy_initialize_frames (void)
 {
+  frame_object_type.tp_new = PyType_GenericNew;
   if (PyType_Ready (&frame_object_type) < 0)
     return;
 
@@ -702,5 +703,4 @@ static PyTypeObject frame_object_type = {
   0,				  /* tp_dictoffset */
   0,				  /* tp_init */
   0,				  /* tp_alloc */
-  PyType_GenericNew		  /* tp_new */
 };

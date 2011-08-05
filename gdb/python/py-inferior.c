@@ -702,6 +702,7 @@ gdbpy_initialize_inferior (void)
   observer_attach_target_resumed (python_on_resume);
   observer_attach_inferior_exit (python_inferior_exit);
 
+  membuf_object_type.tp_new = PyType_GenericNew;
   if (PyType_Ready (&membuf_object_type) < 0)
     return;
 
@@ -839,5 +840,4 @@ static PyTypeObject membuf_object_type = {
   0,				  /* tp_dictoffset */
   0,				  /* tp_init */
   0,				  /* tp_alloc */
-  PyType_GenericNew		  /* tp_new */
 };
