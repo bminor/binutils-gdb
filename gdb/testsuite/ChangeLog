@@ -1,3 +1,9 @@
+2011-08-05  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.base/callfuncs.exp: Set language after main.
+	* gdb.cp/cplusfuncs.exp: Likewise.
+	* gdb.cp/inherit.exp: Likewise.
+
 2011-08-04  Ulrich Weigand  <ulrich.weigand@linaro.org>
 
 	* gdb.base/nostdlib.exp: Skip on gdb_stub targets.

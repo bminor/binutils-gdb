@@ -728,7 +728,6 @@ proc do_tests { } {
     gdb_reinitialize_dir $srcdir/$subdir
     gdb_load $binfile
 
-    gdb_test_no_output "set language c++"
     gdb_test_no_output "set width 0"
 
     if { ![runto_main] } then {
@@ -736,6 +735,7 @@ proc do_tests { } {
 	return
     }
 
+    gdb_test_no_output "set language c++"
     test_ptype_si
     test_ptype_mi
     test_ptype_vi

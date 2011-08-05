@@ -338,10 +338,10 @@ proc rerun_and_prepare {} {
 
 	gdb_test_no_output "set overload-resolution 0"
     } else {
-	gdb_test_no_output "set language c"
 	if { ![runto_main] } {
 	    gdb_suppress_tests;
 	}
+	gdb_test_no_output "set language c"
     }
 
     get_debug_format
