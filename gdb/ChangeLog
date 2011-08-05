@@ -1,3 +1,11 @@
+2011-08-05  Pedro Alves  <pedro@codesourcery.com>
+
+	* exceptions.c (throw_exception): Don't disable the current
+	display.
+	* printcmd.c (disable_current_display_cleanup): New function.
+	(do_one_display): Install a cleanup to disable the current display
+	if doing the display throws.
+
 2011-08-05  Eli Zaretskii  <eliz@gnu.org>
 
 	* python/py-breakpoint.c (gdbpy_initialize_breakpoints): Move the

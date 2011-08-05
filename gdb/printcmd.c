@@ -1656,6 +1656,14 @@ undisplay_command (char *args, int from_tty)
   dont_repeat ();
 }
 
+/* Cleanup that just disables the current display.  */
+
+static void
+disable_current_display_cleanup (void *arg)
+{
+  disable_current_display ();
+}
+
 /* Display a single auto-display.  
    Do nothing if the display cannot be printed in the current context,
    or if the display is disabled.  */
@@ -1663,6 +1671,7 @@ undisplay_command (char *args, int from_tty)
 static void
 do_one_display (struct display *d)
 {
+  struct cleanup *old_chain;
   int within_current_scope;
 
   if (d->enabled_p == 0)
@@ -1715,6 +1724,7 @@ do_one_display (struct display *d)
     return;
 
   current_display_number = d->number;
+  old_chain = make_cleanup (disable_current_display_cleanup, NULL);
 
   annotate_display_begin ();
   printf_filtered ("%d", d->number);
@@ -1782,6 +1792,7 @@ do_one_display (struct display *d)
   annotate_display_end ();
 
   gdb_flush (gdb_stdout);
+  discard_cleanups (old_chain);
   current_display_number = -1;
 }
 

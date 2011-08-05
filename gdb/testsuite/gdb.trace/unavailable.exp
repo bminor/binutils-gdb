@@ -103,6 +103,36 @@ proc run_trace_experiment { test_func } {
 	    "tfind test frame"
 }
 
+# Test that "display VAR" works as expected, assuming VAR is wholly
+# unavailable.
+
+proc test_maybe_regvar_display { var } {
+    global gdb_prompt
+
+    # Evaluating VAR's location description may throw an internal
+    # "unavailable" exception, if for example, the value of a register
+    # necessary for computing VAR's location is unavailable.  Such an
+    # exception is caught, and should not cause automatic disablement
+    # of the current display being printed.  (GDB used to disable the
+    # current display whenever any exception was thrown.)
+    set test "display $var"
+    gdb_test_multiple "$test" "$test" {
+	-re "Disabling display ? to avoid infinite recursion.*$gdb_prompt $" {
+	    fail "$test"
+	}
+	-re "display ${var}\r\n1: ${var} = <unavailable>\r\n$gdb_prompt $" {
+	    pass "$test"
+	}
+    }
+    gdb_test "info display" ".*1:\[ \t\]+y\[ \t\]+${var}" "display ${var} is enabled"
+
+    gdb_test "undisp" \
+	"" \
+	"delete $var display" \
+	".*Delete all auto-display expressions.*y or n. $" \
+	"y"
+}
+
 #
 # Test procs
 #
@@ -171,6 +201,8 @@ proc gdb_collect_args_test {} {
     set r "${r}argarray = <unavailable>${cr}"
     gdb_test "info args" "$r" "info args"
 
+    test_maybe_regvar_display "argc"
+
     gdb_test "tfind none" \
 	"#0  end .*" \
 	"cease trace debugging"
@@ -225,6 +257,8 @@ proc gdb_collect_locals_test { func msg } {
     set r "${r}locc = <unavailable>${cr}"
     set r "${r}loci = <unavailable>${cr}"
     gdb_test "info locals" "$r" "info locals"
+
+    test_maybe_regvar_display "loci"
 
     gdb_test "tfind none" \
 	"#0  end .*" \

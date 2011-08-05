@@ -223,7 +223,6 @@ throw_exception (struct gdb_exception exception)
       bpstat_clear_actions (tp->control.stop_bpstat);
     }
 
-  disable_current_display ();
   do_cleanups (ALL_CLEANUPS);
 
   /* Jump to the containing catch_errors() call, communicating REASON
