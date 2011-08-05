@@ -1,3 +1,12 @@
+2011-08-05  Alan Modra  <amodra@gmail.com>
+
+	* elf32-ppc.c: Include dwarf2.h.
+	(struct ppc_elf_link_hash_table): Add glink_eh_frame.
+	(ppc_elf_create_glink): Create .eh_frame section.
+	(glink_eh_frame_cie): New array.
+	(ppc_elf_size_dynamic_sections): Size glink_eh_frame.
+	(ppc_elf_finish_dynamic_sections): Write glink_eh_frame.
+
 2011-08-04  Tristan Gingold  <gingold@adacore.com>
 
 	* vms-alpha.c (_bfd_vms_write_eeom): Round vms_linkage_index.
@@ -135,13 +144,7 @@
 
 2011-07-26  Alan Modra  <amodra@gmail.com>
 
-	* elf32-ppc.c: Include dwarf2.h.
-	(struct ppc_elf_link_hash_table): Add glink_eh_frame.
-	(ppc_elf_create_glink): Create .eh_frame section.
-	(glink_eh_frame_cie): New array.
-	(ppc_elf_size_dynamic_sections): Size glink_eh_frame.
-	(ppc_elf_finish_dynamic_sections): Write glink_eh_frame.
-	* elf64-ppc.c: Include dwarg2.h.
+	* elf64-ppc.c: Include dwarf2.h.
 	(struct ppc_link_hash_table): Add glink_eh_frame.
 	(create_linkage_sections): Create .eh_frame section.
 	(ppc64_elf_size_dynamic_sections): Arrange to drop unneeded

@@ -36,6 +36,7 @@
 #include "elf/ppc.h"
 #include "elf32-ppc.h"
 #include "elf-vxworks.h"
+#include "dwarf2.h"
 
 /* RELA relocations are used here.  */
 
@@ -2679,6 +2680,7 @@ struct ppc_elf_link_hash_table
   asection *relsbss;
   elf_linker_section_t sdata[2];
   asection *sbss;
+  asection *glink_eh_frame;
 
   /* The (unloaded but important) .rela.plt.unloaded on VxWorks.  */
   asection *srelplt2;
@@ -2868,6 +2870,17 @@ ppc_elf_create_glink (bfd *abfd, struct bfd_link_info *info)
   if (s == NULL
       || !bfd_set_section_alignment (abfd, s, 4))
     return FALSE;
+
+  if (!info->no_ld_generated_unwind_info)
+    {
+      flags = (SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_HAS_CONTENTS
+	       | SEC_IN_MEMORY | SEC_LINKER_CREATED);
+      s = bfd_make_section_anyway_with_flags (abfd, ".eh_frame", flags);
+      htab->glink_eh_frame = s;
+      if (s == NULL
+	  || !bfd_set_section_alignment (abfd, s, 2))
+	return FALSE;
+    }
 
   flags = SEC_ALLOC | SEC_LINKER_CREATED;
   s = bfd_make_section_anyway_with_flags (abfd, ".iplt", flags);
@@ -5508,6 +5521,20 @@ maybe_set_textrel (struct elf_link_hash_entry *h, void *info)
   return TRUE;
 }
 
+static const unsigned char glink_eh_frame_cie[] =
+{
+  0, 0, 0, 16,				/* length.  */
+  0, 0, 0, 0,				/* id.  */
+  1,					/* CIE version.  */
+  'z', 'R', 0,				/* Augmentation string.  */
+  4,					/* Code alignment.  */
+  0x7c,					/* Data alignment.  */
+  65,					/* RA reg.  */
+  1,					/* Augmentation size.  */
+  DW_EH_PE_pcrel | DW_EH_PE_sdata4,	/* FDE encoding.  */
+  DW_CFA_def_cfa, 1, 0			/* def_cfa: r1 offset 0.  */
+};
+
 /* Set the sizes of the dynamic sections.  */
 
 static bfd_boolean
@@ -5768,6 +5795,21 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	}
     }
 
+  if (htab->glink != NULL
+      && htab->glink->size != 0
+      && htab->glink_eh_frame != NULL
+      && !bfd_is_abs_section (htab->glink_eh_frame->output_section))
+    {
+      s = htab->glink_eh_frame;
+      s->size = sizeof (glink_eh_frame_cie) + 20;
+      if (info->shared)
+	{
+	  s->size += 4;
+	  if (htab->glink->size - GLINK_PLTRESOLVE + 8 >= 256)
+	    s->size += 4;
+	}
+    }
+
   /* We've now determined the sizes of the various dynamic sections.
      Allocate memory for them.  */
   relocs = FALSE;
@@ -5791,6 +5833,7 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	}
       else if (s == htab->iplt
 	       || s == htab->glink
+	       || s == htab->glink_eh_frame
 	       || s == htab->sgotplt
 	       || s == htab->sbss
 	       || s == htab->dynbss
@@ -8913,6 +8956,78 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 			  LWZ_12_12 + 4, p + 6*4);
 	    }
 	}
+    }
+
+  if (htab->glink_eh_frame != NULL
+      && htab->glink_eh_frame->contents != NULL)
+    {
+      unsigned char *p = htab->glink_eh_frame->contents;
+      bfd_vma val;
+
+      memcpy (p, glink_eh_frame_cie, sizeof (glink_eh_frame_cie));
+      /* CIE length (rewrite in case little-endian).  */
+      bfd_put_32 (htab->elf.dynobj, sizeof (glink_eh_frame_cie) - 4, p);
+      p += sizeof (glink_eh_frame_cie);
+      /* FDE length.  */
+      val = htab->glink_eh_frame->size - 4 - sizeof (glink_eh_frame_cie);
+      bfd_put_32 (htab->elf.dynobj, val, p);
+      p += 4;
+      /* CIE pointer.  */
+      val = p - htab->glink_eh_frame->contents;
+      bfd_put_32 (htab->elf.dynobj, val, p);
+      p += 4;
+      /* Offset to .glink.  */
+      val = (htab->glink->output_section->vma
+	     + htab->glink->output_offset);
+      val -= (htab->glink_eh_frame->output_section->vma
+	      + htab->glink_eh_frame->output_offset);
+      val -= p - htab->glink_eh_frame->contents;
+      bfd_put_32 (htab->elf.dynobj, val, p);
+      p += 4;
+      /* .glink size.  */
+      bfd_put_32 (htab->elf.dynobj, htab->glink->size, p);
+      p += 4;
+      /* Augmentation.  */
+      p += 1;
+
+      if (info->shared
+	  && htab->elf.dynamic_sections_created)
+	{
+	  bfd_vma adv = (htab->glink->size - GLINK_PLTRESOLVE + 8) >> 2;
+	  if (adv < 64)
+	    *p++ = DW_CFA_advance_loc + adv;
+	  else if (adv < 256)
+	    {
+	      *p++ = DW_CFA_advance_loc1;
+	      *p++ = adv;
+	    }
+	  else if (adv < 65536)
+	    {
+	      *p++ = DW_CFA_advance_loc2;
+	      bfd_put_16 (htab->elf.dynobj, adv, p);
+	      p += 2;
+	    }
+	  else
+	    {
+	      *p++ = DW_CFA_advance_loc4;
+	      bfd_put_32 (htab->elf.dynobj, adv, p);
+	      p += 4;
+	    }
+	  *p++ = DW_CFA_register;
+	  *p++ = 65;
+	  p++;
+	  *p++ = DW_CFA_advance_loc + 4;
+	  *p++ = DW_CFA_restore_extended;
+	  *p++ = 65;
+	}
+      BFD_ASSERT ((bfd_vma) ((p + 3 - htab->glink_eh_frame->contents) & -4)
+		  == htab->glink_eh_frame->size);
+
+      if (htab->glink_eh_frame->sec_info_type == ELF_INFO_TYPE_EH_FRAME
+	  && !_bfd_elf_write_section_eh_frame (output_bfd, info,
+					       htab->glink_eh_frame,
+					       htab->glink_eh_frame->contents))
+	return FALSE;
     }
 
   return ret;
