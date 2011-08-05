@@ -1,3 +1,8 @@
+2011-08-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/x86-64-branch.d: Pass -dw to objdump and support
+	win64.
+
 2011-08-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/elf/bad-group.d: New.
