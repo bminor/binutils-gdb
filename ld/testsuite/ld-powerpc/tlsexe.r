@@ -20,7 +20,6 @@ Section Headers:
  +\[[ 0-9]+\] \.tdata +PROGBITS .* 0+38 0+ WAT +0 +0 +8
  +\[[ 0-9]+\] \.tbss +NOBITS .* 0+38 0+ WAT +0 +0 +8
  +\[[ 0-9]+\] \.dynamic +DYNAMIC .* 0+160 10 +WA +4 +0 +8
- +\[[ 0-9]+\] \.branch_lt + PROGBITS .* 0+ 0+ +WA +0 +0 +8
  +\[[ 0-9]+\] \.got +PROGBITS .* 0+30 08 +WA +0 +0 +8
  +\[[ 0-9]+\] \.plt +.*
  +\[[ 0-9]+\] \.shstrtab +.*
@@ -47,7 +46,7 @@ Program Headers:
  +0+ +
  +01 +\.interp 
  +02 +\.interp \.hash \.dynsym \.dynstr \.rela\.dyn \.rela\.plt \.text 
- +03 +\.tdata \.dynamic (\.branch_lt |)\.got \.plt 
+ +03 +\.tdata \.dynamic \.got \.plt 
  +04 +\.dynamic 
  +05 +\.tdata \.tbss 
 
@@ -87,7 +86,6 @@ Symbol table '\.symtab' contains [0-9]+ entries:
 .* SECTION +LOCAL +DEFAULT +10 
 .* SECTION +LOCAL +DEFAULT +11 
 .* SECTION +LOCAL +DEFAULT +12 
-.* SECTION +LOCAL +DEFAULT +13 
 .* TLS +LOCAL +DEFAULT +8 gd4
 .* TLS +LOCAL +DEFAULT +8 ld4
 .* TLS +LOCAL +DEFAULT +8 ld5

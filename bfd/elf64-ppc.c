@@ -10871,6 +10871,26 @@ static const unsigned char glink_eh_frame_cie[] =
   DW_CFA_def_cfa, 1, 0			/* def_cfa: r1 offset 0.  */
 };
 
+/* Stripping output sections is normally done before dynamic section
+   symbols have been allocated.  This function is called later, and
+   handles cases like htab->brlt which is mapped to its own output
+   section.  */
+
+static void
+maybe_strip_output (struct bfd_link_info *info, asection *isec)
+{
+  if (isec->size == 0
+      && isec->output_section->size == 0
+      && !bfd_section_removed_from_list (info->output_bfd,
+					 isec->output_section)
+      && elf_section_data (isec->output_section)->dynindx == 0)
+    {
+      isec->output_section->flags |= SEC_EXCLUDE;
+      bfd_section_list_remove (info->output_bfd, isec->output_section);
+      info->output_bfd->section_count--;
+    }
+}
+
 /* Determine and set the size of the stub section for a final link.
 
    The basic idea here is to examine all the relocations looking for
@@ -11251,10 +11271,9 @@ ppc64_elf_size_stubs (struct bfd_link_info *info, bfd_signed_vma group_size,
       (*htab->layout_sections_again) ();
     }
 
-  /* It would be nice to strip htab->brlt from the output if the
-     section is empty, but it's too late.  If we strip sections here,
-     the dynamic symbol table is corrupted since the section symbol
-     for the stripped section isn't written.  */
+  maybe_strip_output (info, htab->brlt);
+  if (htab->glink_eh_frame != NULL)
+    maybe_strip_output (info, htab->glink_eh_frame);
 
   return TRUE;
 }

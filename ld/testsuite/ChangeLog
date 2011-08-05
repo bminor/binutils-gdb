@@ -1,3 +1,10 @@
+2011-08-05  Alan Modra  <amodra@gmail.com>
+
+	* ld-powerpc/tlsexe.r: Update for stripped .branch_lt.
+	* ld-powerpc/tlsexetoc.r: Likewise.
+	* ld-powerpc/tlsso.r: Likewise.
+	* ld-powerpc/tlstocso.r: Likewise.
+
 2011-08-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/13048

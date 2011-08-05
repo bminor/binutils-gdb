@@ -1,5 +1,10 @@
 2011-08-05  Alan Modra  <amodra@gmail.com>
 
+	* elf64-ppc.c (maybe_strip_output): New function.
+	(ppc64_elf_size_stubs): Use it to strip .branch_lt and .eh_frame.
+
+2011-08-05  Alan Modra  <amodra@gmail.com>
+
 	PR ld/12762
 	* elflink.c (_bfd_elf_section_already_linked): Return matched
 	status.  Remove COFF comdat section handling.
