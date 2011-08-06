@@ -1,3 +1,11 @@
+2011-08-06  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* config/tc-mips.c (delayed_branch_p, compact_branch_p)
+	(uncond_branch_p, branch_likely_p): New functions.
+	(insns_between, nops_for_insn_or_target, append_insn)
+	(macro_start): Use them.
+	(get_append_method): Likewise.  Remove redundant test.
+
 2011-08-05  David S. Miller  <davem@davemloft.net>
 
 	* config/tc-sparc.c (v9a_asr_table): Add "cps".

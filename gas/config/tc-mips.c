@@ -2888,6 +2888,48 @@ relax_end (void)
   mips_relax.sequence = 0;
 }
 
+/* Return true if IP is a delayed branch or jump.  */
+
+static inline bfd_boolean
+delayed_branch_p (const struct mips_cl_insn *ip)
+{
+  return (ip->insn_mo->pinfo & (INSN_UNCOND_BRANCH_DELAY
+				| INSN_COND_BRANCH_DELAY
+				| INSN_COND_BRANCH_LIKELY)) != 0;
+}
+
+/* Return true if IP is a compact branch or jump.  */
+
+static inline bfd_boolean
+compact_branch_p (const struct mips_cl_insn *ip)
+{
+  if (mips_opts.mips16)
+    return (ip->insn_mo->pinfo & (MIPS16_INSN_UNCOND_BRANCH
+				  | MIPS16_INSN_COND_BRANCH)) != 0;
+  else
+    return (ip->insn_mo->pinfo2 & (INSN2_UNCOND_BRANCH
+				   | INSN2_COND_BRANCH)) != 0;
+}
+
+/* Return true if IP is an unconditional branch or jump.  */
+
+static inline bfd_boolean
+uncond_branch_p (const struct mips_cl_insn *ip)
+{
+  return ((ip->insn_mo->pinfo & INSN_UNCOND_BRANCH_DELAY) != 0
+	  || (mips_opts.mips16
+	      ? (ip->insn_mo->pinfo & MIPS16_INSN_UNCOND_BRANCH) != 0
+	      : (ip->insn_mo->pinfo2 & INSN2_UNCOND_BRANCH) != 0));
+}
+
+/* Return true if IP is a branch-likely instruction.  */
+
+static inline bfd_boolean
+branch_likely_p (const struct mips_cl_insn *ip)
+{
+  return (ip->insn_mo->pinfo & INSN_COND_BRANCH_LIKELY) != 0;
+}
+
 /* Return the mask of core registers that IP reads or writes.  */
 
 static unsigned int
@@ -3160,10 +3202,7 @@ insns_between (const struct mips_cl_insn *insn1,
 	  if (insn2 == NULL
 	      || insn2->insn_opcode == INSN_ERET
 	      || insn2->insn_opcode == INSN_DERET
-	      || (insn2->insn_mo->pinfo
-		  & (INSN_UNCOND_BRANCH_DELAY
-		     | INSN_COND_BRANCH_DELAY
-		     | INSN_COND_BRANCH_LIKELY)) != 0)
+	      || delayed_branch_p (insn2))
 	    return 1;
 	}
     }
@@ -3554,18 +3593,14 @@ nops_for_insn_or_target (int ignore, const struct mips_cl_insn *hist,
   int nops, tmp_nops;
 
   nops = nops_for_insn (ignore, hist, insn);
-  if (insn->insn_mo->pinfo & (INSN_UNCOND_BRANCH_DELAY
-			      | INSN_COND_BRANCH_DELAY
-			      | INSN_COND_BRANCH_LIKELY))
+  if (delayed_branch_p (insn))
     {
       tmp_nops = nops_for_sequence (2, ignore ? ignore + 2 : 0,
 				    hist, insn, NOP_INSN);
       if (tmp_nops > nops)
 	nops = tmp_nops;
     }
-  else if (mips_opts.mips16
-	   && (insn->insn_mo->pinfo & (MIPS16_INSN_UNCOND_BRANCH
-				       | MIPS16_INSN_COND_BRANCH)))
+  else if (compact_branch_p (insn))
     {
       tmp_nops = nops_for_sequence (1, ignore ? ignore + 1 : 0, hist, insn);
       if (tmp_nops > nops)
@@ -3771,26 +3806,19 @@ get_append_method (struct mips_cl_insn *ip)
     return APPEND_ADD;
 
   /* Otherwise, it's our responsibility to fill branch delay slots.  */
-  pinfo = ip->insn_mo->pinfo;
-  if ((pinfo & INSN_UNCOND_BRANCH_DELAY)
-      || (pinfo & INSN_COND_BRANCH_DELAY))
+  if (delayed_branch_p (ip))
     {
-      if (can_swap_branch_p (ip))
+      if (!branch_likely_p (ip) && can_swap_branch_p (ip))
 	return APPEND_SWAP;
 
+      pinfo = ip->insn_mo->pinfo;
       if (mips_opts.mips16
 	  && ISA_SUPPORTS_MIPS16E
-	  && (pinfo & INSN_UNCOND_BRANCH_DELAY)
 	  && (pinfo & (MIPS16_INSN_READ_X | MIPS16_INSN_READ_31)))
 	return APPEND_ADD_COMPACT;
 
       return APPEND_ADD_WITH_NOP;
     }
-
-  /* We don't bother trying to track the target of branches, so there's
-     nothing we can use to fill a branch-likely slot.  */
-  if (pinfo & INSN_COND_BRANCH_LIKELY)
-    return APPEND_ADD_WITH_NOP;
 
   return APPEND_ADD;
 }
@@ -3941,7 +3969,7 @@ static void
 append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	     bfd_reloc_code_real_type *reloc_type, bfd_boolean expansionp)
 {
-  unsigned long prev_pinfo, prev_pinfo2, pinfo, pinfo2;
+  unsigned long prev_pinfo2, pinfo, pinfo2;
   bfd_boolean relaxed_branch = FALSE;
   enum append_method method;
   bfd_boolean relax32;
@@ -3954,7 +3982,6 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
   file_ase_mips16 |= mips_opts.mips16;
   file_ase_micromips |= mips_opts.micromips;
 
-  prev_pinfo = history[0].insn_mo->pinfo;
   prev_pinfo2 = history[0].insn_mo->pinfo2;
   pinfo = ip->insn_mo->pinfo;
   pinfo2 = ip->insn_mo->pinfo2;
@@ -4175,19 +4202,18 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
       && address_expr
       && relax32
       && *reloc_type == BFD_RELOC_16_PCREL_S2
-      && (pinfo & INSN_UNCOND_BRANCH_DELAY || pinfo & INSN_COND_BRANCH_DELAY
-	  || pinfo & INSN_COND_BRANCH_LIKELY))
+      && delayed_branch_p (ip))
     {
       relaxed_branch = TRUE;
       add_relaxed_insn (ip, (relaxed_branch_length
 			     (NULL, NULL,
-			      (pinfo & INSN_UNCOND_BRANCH_DELAY) ? -1
-			      : (pinfo & INSN_COND_BRANCH_LIKELY) ? 1
+			      uncond_branch_p (ip) ? -1
+			      : branch_likely_p (ip) ? 1
 			      : 0)), 4,
 			RELAX_BRANCH_ENCODE
 			(AT,
-			 pinfo & INSN_UNCOND_BRANCH_DELAY,
-			 pinfo & INSN_COND_BRANCH_LIKELY,
+			 uncond_branch_p (ip),
+			 branch_likely_p (ip),
 			 pinfo & INSN_WRITE_GPR_31,
 			 0),
 			address_expr->X_add_symbol,
@@ -4198,16 +4224,12 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	   && address_expr
 	   && ((relax32 && *reloc_type == BFD_RELOC_16_PCREL_S2)
 	       || *reloc_type > BFD_RELOC_UNUSED)
-	   && (pinfo & INSN_UNCOND_BRANCH_DELAY
-	       || pinfo & INSN_COND_BRANCH_DELAY
-	       || (pinfo2 & ~INSN2_ALIAS) == INSN2_UNCOND_BRANCH
-	       || pinfo2 & INSN2_COND_BRANCH))
+	   && (delayed_branch_p (ip) || compact_branch_p (ip)))
     {
       bfd_boolean relax16 = *reloc_type > BFD_RELOC_UNUSED;
       int type = relax16 ? *reloc_type - BFD_RELOC_UNUSED : 0;
-      int uncond = (pinfo & INSN_UNCOND_BRANCH_DELAY
-		    || pinfo2 & INSN2_UNCOND_BRANCH) ? -1 : 0;
-      int compact = pinfo2 & (INSN2_COND_BRANCH | INSN2_UNCOND_BRANCH);
+      int uncond = uncond_branch_p (ip) ? -1 : 0;
+      int compact = compact_branch_p (ip);
       int al = pinfo & INSN_WRITE_GPR_31;
       int length32;
 
@@ -4232,7 +4254,7 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 			RELAX_MIPS16_ENCODE
 			(*reloc_type - BFD_RELOC_UNUSED,
 			 forced_insn_length == 2, forced_insn_length == 4,
-			 prev_pinfo & INSN_UNCOND_BRANCH_DELAY,
+			 delayed_branch_p (&history[0]),
 			 history[0].mips16_absolute_jump_p),
 			make_expr_symbol (address_expr), 0);
     }
@@ -4240,7 +4262,7 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	   && ! ip->use_extend
 	   && *reloc_type != BFD_RELOC_MIPS16_JMP)
     {
-      if ((pinfo & INSN_UNCOND_BRANCH_DELAY) == 0)
+      if (!delayed_branch_p (ip))
 	/* Make sure there is enough room to swap this instruction with
 	   a following jump instruction.  */
 	frag_grow (6);
@@ -4250,7 +4272,7 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
     {
       if (mips_opts.mips16
 	  && mips_opts.noreorder
-	  && (prev_pinfo & INSN_UNCOND_BRANCH_DELAY) != 0)
+	  && delayed_branch_p (&history[0]))
 	as_warn (_("extended instruction in delay slot"));
 
       if (mips_relax.sequence)
@@ -4464,9 +4486,8 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
     }
 
   /* If we have just completed an unconditional branch, clear the history.  */
-  if ((history[1].insn_mo->pinfo & INSN_UNCOND_BRANCH_DELAY)
-      || (mips_opts.mips16
-	  && (history[0].insn_mo->pinfo & MIPS16_INSN_UNCOND_BRANCH)))
+  if ((delayed_branch_p (&history[1]) && uncond_branch_p (&history[1]))
+      || (compact_branch_p (&history[0]) && uncond_branch_p (&history[0])))
     mips_no_prev_insn ();
 
   /* We need to emit a label at the end of branch-likely macros.  */
@@ -4586,10 +4607,7 @@ macro_start (void)
 	  sizeof (mips_macro_warning.first_insn_sizes));
   memset (&mips_macro_warning.insns, 0, sizeof (mips_macro_warning.insns));
   mips_macro_warning.delay_slot_p = (mips_opts.noreorder
-				     && (history[0].insn_mo->pinfo
-					 & (INSN_UNCOND_BRANCH_DELAY
-					    | INSN_COND_BRANCH_DELAY
-					    | INSN_COND_BRANCH_LIKELY)) != 0);
+				     && delayed_branch_p (&history[0]));
   switch (history[0].insn_mo->pinfo2
 	  & (INSN2_BRANCH_DELAY_32BIT | INSN2_BRANCH_DELAY_16BIT))
     {
