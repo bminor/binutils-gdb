@@ -1,3 +1,8 @@
+2011-08-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* cp-name-parser.y (xfree): Wrap the name free by CONCAT2.
+	(main): Uncomment "Demangling error\n".
+
 2011-08-05  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* solib-target.c (segment_attributes): Make them static.
