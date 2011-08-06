@@ -298,6 +298,11 @@ SECTIONS
     *(.debug_varnames)
   }
 
+  .debug_macro ${RELOCATING+BLOCK(__section_alignment__)} ${RELOCATING+(NOLOAD)} :
+  {
+    *(.debug_macro)
+  }
+
   /* DWARF 3.  */
   .debug_ranges ${RELOCATING+BLOCK(__section_alignment__)} ${RELOCATING+(NOLOAD)} :
   {

@@ -1,3 +1,8 @@
+2011-08-06  Kai Tietz  <ktietz@redhat.com>
+
+	* scripttempl/pep.sc: Add .debug_macro section.
+	* scripttempl/pe.sc: Likewise.
+
 2011-08-05  Alan Modra  <amodra@gmail.com>
 
 	PR ld/12762
