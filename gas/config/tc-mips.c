@@ -1785,15 +1785,6 @@ insert_into_history (unsigned int first, unsigned int n,
     }
 }
 
-/* Emit a nop instruction, recording it in the history buffer.  */
-
-static void
-emit_nop (void)
-{
-  add_fixed_insn (NOP_INSN);
-  insert_into_history (0, 1, NOP_INSN);
-}
-
 /* Initialize vr4120_conflicts.  There is a bit of duplication here:
    the idea is to make it obvious at a glance that each errata is
    included.  */
@@ -2930,6 +2921,18 @@ branch_likely_p (const struct mips_cl_insn *ip)
   return (ip->insn_mo->pinfo & INSN_COND_BRANCH_LIKELY) != 0;
 }
 
+/* Return the type of nop that should be used to fill the delay slot
+   of delayed branch IP.  */
+
+static struct mips_cl_insn *
+get_delay_slot_nop (const struct mips_cl_insn *ip)
+{
+  if (mips_opts.micromips
+      && (ip->insn_mo->pinfo2 & INSN2_BRANCH_DELAY_32BIT))
+    return &micromips_nop32_insn;
+  return NOP_INSN;
+}
+
 /* Return the mask of core registers that IP reads or writes.  */
 
 static unsigned int
@@ -3596,7 +3599,7 @@ nops_for_insn_or_target (int ignore, const struct mips_cl_insn *hist,
   if (delayed_branch_p (insn))
     {
       tmp_nops = nops_for_sequence (2, ignore ? ignore + 2 : 0,
-				    hist, insn, NOP_INSN);
+				    hist, insn, get_delay_slot_nop (insn));
       if (tmp_nops > nops)
 	nops = tmp_nops;
     }
@@ -3969,7 +3972,7 @@ static void
 append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	     bfd_reloc_code_real_type *reloc_type, bfd_boolean expansionp)
 {
-  unsigned long prev_pinfo2, pinfo, pinfo2;
+  unsigned long prev_pinfo2, pinfo;
   bfd_boolean relaxed_branch = FALSE;
   enum append_method method;
   bfd_boolean relax32;
@@ -3984,7 +3987,6 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 
   prev_pinfo2 = history[0].insn_mo->pinfo2;
   pinfo = ip->insn_mo->pinfo;
-  pinfo2 = ip->insn_mo->pinfo2;
 
   if (mips_opts.micromips
       && !expansionp
@@ -4107,7 +4109,8 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	  old_frag_offset = frag_now_fix ();
 
 	  for (i = 0; i < nops; i++)
-	    emit_nop ();
+	    add_fixed_insn (NOP_INSN);
+	  insert_into_history (0, nops, NOP_INSN);
 
 	  if (listing)
 	    {
@@ -4422,21 +4425,16 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
       break;
 
     case APPEND_ADD_WITH_NOP:
-      insert_into_history (0, 1, ip);
-      if (mips_opts.micromips
-	  && (pinfo2 & INSN2_BRANCH_DELAY_32BIT))
-	{
-	  add_fixed_insn (&micromips_nop32_insn);
-	  insert_into_history (0, 1, &micromips_nop32_insn);
-	  if (mips_relax.sequence)
-	    mips_relax.sizes[mips_relax.sequence - 1] += 4;
-	}
-      else
-	{
-	  emit_nop ();
-	  if (mips_relax.sequence)
-	    mips_relax.sizes[mips_relax.sequence - 1] += NOP_INSN_SIZE;
-	}
+      {
+	struct mips_cl_insn *nop;
+
+	insert_into_history (0, 1, ip);
+	nop = get_delay_slot_nop (ip);
+	add_fixed_insn (nop);
+	insert_into_history (0, 1, nop);
+	if (mips_relax.sequence)
+	  mips_relax.sizes[mips_relax.sequence - 1] += insn_length (nop);
+      }
       break;
 
     case APPEND_ADD_COMPACT:

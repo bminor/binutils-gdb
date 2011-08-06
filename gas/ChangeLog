@@ -1,5 +1,13 @@
 2011-08-06  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* config/tc-mips.c (emit_nop): Delete.
+	(get_delay_slot_nop): New function.
+	(nops_for_insn_or_target): Use it.
+	(append_insn): Likewise.  When avoiding hazards, call add_fixed_insn
+	and insert_into_history directly.
+
+2011-08-06  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* config/tc-mips.c (delayed_branch_p, compact_branch_p)
 	(uncond_branch_p, branch_likely_p): New functions.
 	(insns_between, nops_for_insn_or_target, append_insn)
