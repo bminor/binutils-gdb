@@ -118,6 +118,9 @@ struct fde_entry
 #endif
 };
 
+/* The list of all FDEs that have been collected.  */
+extern struct fde_entry *all_fde_data;
+
 /* Fake CFI type; outside the byte range of any real CFI insn.  */
 #define CFI_adjust_cfa_offset	0x100
 #define CFI_return_column	0x101

@@ -287,7 +287,7 @@ struct cie_entry
 
 /* List of FDE entries.  */
 
-static struct fde_entry *all_fde_data;
+struct fde_entry *all_fde_data;
 static struct fde_entry **last_fde_data = &all_fde_data;
 
 /* List of CIEs so that they could be reused.  */

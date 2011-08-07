@@ -4042,6 +4042,14 @@ alpha_elf_md_end (void)
   if (bfd_get_section_by_name (stdoutput, ".eh_frame") != NULL)
     return;
 
+  /* ??? In theory we could look for functions for which we have
+     generated unwind info via CFI directives, and those we have not.
+     Those we have not could still get their unwind info from here.
+     For now, do nothing if we've seen any CFI directives.  Note that
+     the above test will not trigger, as we've not emitted data yet.  */
+  if (all_fde_data != NULL)
+    return;
+
   /* Generate .eh_frame data for the unwind directives specified.  */
   for (p = all_frame_data; p ; p = p->next)
     if (p->prologue_sym)
