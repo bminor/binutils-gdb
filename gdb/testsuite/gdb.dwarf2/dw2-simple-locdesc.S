@@ -27,7 +27,7 @@ var:
 d:
 	.4byte	.Lcu_end - 1f	/* Length of Compilation Unit Info */
 1:
-	.value	0x3	/* DWARF version number */
+	.2byte	0x3	/* DWARF version number */
 	.4byte	.Ldebug_abbrev0	/* Offset Into Abbrev. Section */
 	.byte	0x4	/* Pointer Size (in bytes) */
 	.uleb128 0x1	/* (DIE (0xb) DW_TAG_compile_unit) */
