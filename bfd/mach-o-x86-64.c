@@ -24,6 +24,7 @@
 #include "bfd.h"
 #include "libbfd.h"
 #include "libiberty.h"
+#include "mach-o/x86-64.h"
 
 #define bfd_mach_o_object_p bfd_mach_o_x86_64_object_p
 #define bfd_mach_o_core_p bfd_mach_o_x86_64_core_p

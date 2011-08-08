@@ -24,6 +24,7 @@
 #include "bfd.h"
 #include "libbfd.h"
 #include "libiberty.h"
+#include "mach-o/reloc.h"
 
 #define bfd_mach_o_object_p bfd_mach_o_i386_object_p
 #define bfd_mach_o_core_p bfd_mach_o_i386_core_p

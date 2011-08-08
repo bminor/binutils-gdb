@@ -1,5 +1,41 @@
 2011-08-08  Tristan Gingold  <gingold@adacore.com>
 
+	* mach-o.h: Move size macros to external.h
+	Move reloc macros to reloc.h and x86-64.h.
+	* mach-o-i386.c: Includes mach-o/reloc.h
+	* mach-o-x86-64.c: Ditto and includes mach-o/x86-64.h
+	* mach-o.c: Add includes.
+	(bfd_mach_o_write_header): Use structure from external.h to convert.
+	(bfd_mach_o_write_thread): Ditto.
+	(bfd_mach_o_write_relocs): Ditto.
+	(bfd_mach_o_write_section_32): Ditto.
+	(bfd_mach_o_write_section_64): Ditto.
+	(bfd_mach_o_write_segment_32): Ditto.
+	(bfd_mach_o_write_segment_64): Ditto.
+	(bfd_mach_o_write_symtab): Ditto.
+	(bfd_mach_o_write_contents): Ditto.
+	(bfd_mach_o_read_header): Ditto.
+	(bfd_mach_o_read_section_32): Ditto.
+	(bfd_mach_o_read_section_64): Ditto.
+	(bfd_mach_o_read_symtab_symbol): Ditto.
+	(bfd_mach_o_read_dylinker): Ditto.
+	(bfd_mach_o_read_dylib): Ditto.
+	(bfd_mach_o_read_dysymtab): Ditto.
+	(bfd_mach_o_read_symtab): Ditto.
+	(bfd_mach_o_read_linkedit): Ditto.
+	(bfd_mach_o_read_str): Ditto.
+	(bfd_mach_o_read_dyld_info): Ditto.
+	(bfd_mach_o_read_segment): Ditto.
+	(bfd_mach_o_read_command): Ditto.
+	(bfd_mach_o_archive_p): Ditto.
+	(bfd_mach_o_canonicalize_one_reloc): Ditto. Change the BUF parameter.
+	(bfd_mach_o_canonicalize_relocs): Adjust to call the above function.
+	(bfd_mach_o_read_dysymtab_symbol): Rename BUF variable.
+	(bfd_mach_o_read_uuid): Remove useless cast.  Use a macro instead
+	of an hard-coded value.
+
+2011-08-08  Tristan Gingold  <gingold@adacore.com>
+
 	* mach-o-x86-64.c (bfd_mach_o_x86_64_mkobject): Fix cut-and-past typos.
 	(bfd_mach_o_x86_64_swap_reloc_out): Handle BFD_RELOC_32_PCREL,
 	BFD_RELOC_MACH_O_X86_64_SUBTRACTOR64 and

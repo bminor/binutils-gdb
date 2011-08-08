@@ -41,9 +41,6 @@ typedef struct bfd_mach_o_header
 }
 bfd_mach_o_header;
 
-#define BFD_MACH_O_HEADER_SIZE 28
-#define BFD_MACH_O_HEADER_64_SIZE 32
-
 typedef struct bfd_mach_o_section
 {
   /* Fields present in the file.  */
@@ -64,8 +61,6 @@ typedef struct bfd_mach_o_section
   asection *bfdsection;
 }
 bfd_mach_o_section;
-#define BFD_MACH_O_SECTION_SIZE 68
-#define BFD_MACH_O_SECTION_64_SIZE 80
 
 typedef struct bfd_mach_o_segment_command
 {
@@ -81,54 +76,11 @@ typedef struct bfd_mach_o_segment_command
   bfd_mach_o_section *sections;
 }
 bfd_mach_o_segment_command;
-#define BFD_MACH_O_LC_SEGMENT_SIZE 56
-#define BFD_MACH_O_LC_SEGMENT_64_SIZE 72
 
 /* Protection flags.  */
 #define BFD_MACH_O_PROT_READ    0x01
 #define BFD_MACH_O_PROT_WRITE   0x02
 #define BFD_MACH_O_PROT_EXECUTE 0x04
-
-/* Generic relocation types (used by i386).  */
-#define BFD_MACH_O_GENERIC_RELOC_VANILLA 	0
-#define BFD_MACH_O_GENERIC_RELOC_PAIR	 	1
-#define BFD_MACH_O_GENERIC_RELOC_SECTDIFF	2
-#define BFD_MACH_O_GENERIC_RELOC_PB_LA_PTR	3
-#define BFD_MACH_O_GENERIC_RELOC_LOCAL_SECTDIFF	4
-
-/* X86-64 relocations.  */
-#define BFD_MACH_O_X86_64_RELOC_UNSIGNED   0 /* Absolute addresses.  */
-#define BFD_MACH_O_X86_64_RELOC_SIGNED     1 /* 32-bit disp.  */
-#define BFD_MACH_O_X86_64_RELOC_BRANCH     2 /* 32-bit pcrel disp.  */
-#define BFD_MACH_O_X86_64_RELOC_GOT_LOAD   3 /* Movq load of a GOT entry.  */
-#define BFD_MACH_O_X86_64_RELOC_GOT        4 /* GOT reference.  */
-#define BFD_MACH_O_X86_64_RELOC_SUBTRACTOR 5 /* Symbol difference.  */
-#define BFD_MACH_O_X86_64_RELOC_SIGNED_1   6 /* 32-bit signed disp -1.  */
-#define BFD_MACH_O_X86_64_RELOC_SIGNED_2   7 /* 32-bit signed disp -2.  */
-#define BFD_MACH_O_X86_64_RELOC_SIGNED_4   8 /* 32-bit signed disp -4.  */
-
-/* Size of a relocation entry.  */
-#define BFD_MACH_O_RELENT_SIZE 8
-
-/* Fields for a normal (non-scattered) entry.  */
-#define BFD_MACH_O_R_PCREL		0x01000000
-#define BFD_MACH_O_GET_R_LENGTH(s)	(((s) >> 25) & 0x3)
-#define BFD_MACH_O_R_EXTERN		0x08000000
-#define BFD_MACH_O_GET_R_TYPE(s)	(((s) >> 28) & 0x0f)
-#define BFD_MACH_O_GET_R_SYMBOLNUM(s)	((s) & 0x00ffffff)
-#define BFD_MACH_O_SET_R_LENGTH(l)	(((l) & 0x3) << 25)
-#define BFD_MACH_O_SET_R_TYPE(t)	(((t) & 0xf) << 28)
-#define BFD_MACH_O_SET_R_SYMBOLNUM(s)	((s) & 0x00ffffff)
-
-/* Fields for a scattered entry.  */
-#define BFD_MACH_O_SR_SCATTERED		0x80000000
-#define BFD_MACH_O_SR_PCREL		0x40000000
-#define BFD_MACH_O_GET_SR_LENGTH(s)	(((s) >> 28) & 0x3)
-#define BFD_MACH_O_GET_SR_TYPE(s)	(((s) >> 24) & 0x0f)
-#define BFD_MACH_O_GET_SR_ADDRESS(s)	((s) & 0x00ffffff)
-#define BFD_MACH_O_SET_SR_LENGTH(l)	(((l) & 0x3) << 28)
-#define BFD_MACH_O_SET_SR_TYPE(t)	(((t) & 0xf) << 24)
-#define BFD_MACH_O_SET_SR_ADDRESS(s)	((s) & 0x00ffffff)
 
 /* Expanded internal representation of a relocation entry.  */
 typedef struct bfd_mach_o_reloc_info
@@ -154,8 +106,6 @@ typedef struct bfd_mach_o_asymbol
   unsigned short n_desc;
 }
 bfd_mach_o_asymbol;
-#define BFD_MACH_O_NLIST_SIZE 12
-#define BFD_MACH_O_NLIST_64_SIZE 16
 
 typedef struct bfd_mach_o_symtab_command
 {
@@ -262,8 +212,6 @@ typedef struct bfd_mach_o_dylib_module
   bfd_vma objc_module_info_addr;
 }
 bfd_mach_o_dylib_module;
-#define BFD_MACH_O_DYLIB_MODULE_SIZE 52
-#define BFD_MACH_O_DYLIB_MODULE_64_SIZE 56
 
 typedef struct bfd_mach_o_dylib_table_of_content
 {
@@ -274,7 +222,6 @@ typedef struct bfd_mach_o_dylib_table_of_content
   unsigned long module_index;
 }
 bfd_mach_o_dylib_table_of_content;
-#define BFD_MACH_O_TABLE_OF_CONTENT_SIZE 8
 
 typedef struct bfd_mach_o_dylib_reference
 {
