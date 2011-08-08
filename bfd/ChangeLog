@@ -1,5 +1,22 @@
 2011-08-08  Tristan Gingold  <gingold@adacore.com>
 
+	* mach-o.h (bfd_mach_o_version_min_command): New structure.
+	(bfd_mach_o_load_command): Add version_min.
+	(mach_o_data_struct): Fix comment.
+	* mach-o.c (bfd_mach_o_read_version_min): New function.
+	(bfd_mach_o_read_command): Handle BFD_MACH_O_LC_FUNCTION_STARTS,
+	BFD_MACH_O_LC_VERSION_MIN_MACOSX and
+	BFD_MACH_O_LC_VERSION_MIN_IPHONEOS.
+	(bfd_mach_o_get_name_or_null): New function.
+	(bfd_mach_o_get_name): Use the above new one.
+	(bfd_mach_o_load_command_name): Add the above new commands.
+	(bfd_mach_o_bfd_print_private_bfd_data): Display numerically
+	unknown commands.  Handle BFD_MACH_O_LC_FUNCTION_STARTS,
+	BFD_MACH_O_LC_VERSION_MIN_MACOSX and
+	BFD_MACH_O_LC_VERSION_MIN_IPHONEOS.
+
+2011-08-08  Tristan Gingold  <gingold@adacore.com>
+
 	* mach-o.h: Move size macros to external.h
 	Move reloc macros to reloc.h and x86-64.h.
 	* mach-o-i386.c: Includes mach-o/reloc.h

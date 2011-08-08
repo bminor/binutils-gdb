@@ -2433,6 +2433,25 @@ bfd_mach_o_read_dyld_info (bfd *abfd, bfd_mach_o_load_command *command)
   return 0;
 }
 
+static bfd_boolean
+bfd_mach_o_read_version_min (bfd *abfd, bfd_mach_o_load_command *command)
+{
+  bfd_mach_o_version_min_command *cmd = &command->command.version_min;
+  struct mach_o_version_min_command_external raw;
+  unsigned int ver;
+
+  if (bfd_seek (abfd, command->offset + BFD_MACH_O_LC_SIZE, SEEK_SET) != 0
+      || bfd_bread (&raw, sizeof (raw), abfd) != sizeof (raw))
+    return FALSE;
+
+  ver = bfd_get_32 (abfd, raw.version);
+  cmd->rel = ver >> 16;
+  cmd->maj = ver >> 8;
+  cmd->min = ver;
+  cmd->reserved = bfd_get_32 (abfd, raw.reserved);
+  return TRUE;
+}
+
 static int
 bfd_mach_o_read_segment (bfd *abfd,
                          bfd_mach_o_load_command *command,
@@ -2606,11 +2625,17 @@ bfd_mach_o_read_command (bfd *abfd, bfd_mach_o_load_command *command)
       break;
     case BFD_MACH_O_LC_CODE_SIGNATURE:
     case BFD_MACH_O_LC_SEGMENT_SPLIT_INFO:
+    case BFD_MACH_O_LC_FUNCTION_STARTS:
       if (bfd_mach_o_read_linkedit (abfd, command) != 0)
 	return -1;
       break;
     case BFD_MACH_O_LC_DYLD_INFO:
       if (bfd_mach_o_read_dyld_info (abfd, command) != 0)
+	return -1;
+      break;
+    case BFD_MACH_O_LC_VERSION_MIN_MACOSX:
+    case BFD_MACH_O_LC_VERSION_MIN_IPHONEOS:
+      if (!bfd_mach_o_read_version_min (abfd, command))
 	return -1;
       break;
     default:
@@ -3308,12 +3333,24 @@ bfd_mach_o_print_flags (const bfd_mach_o_xlat_name *table,
 }
 
 static const char *
-bfd_mach_o_get_name (const bfd_mach_o_xlat_name *table, unsigned long val)
+bfd_mach_o_get_name_or_null (const bfd_mach_o_xlat_name *table,
+                             unsigned long val)
 {
   for (; table->name; table++)
     if (table->val == val)
       return table->name;
-  return "*UNKNOWN*";
+  return NULL;
+}
+
+static const char *
+bfd_mach_o_get_name (const bfd_mach_o_xlat_name *table, unsigned long val)
+{
+  const char *res = bfd_mach_o_get_name_or_null (table, val);
+
+  if (res == NULL)
+    return "*UNKNOWN*";
+  else
+    return res;
 }
 
 static bfd_mach_o_xlat_name bfd_mach_o_cpu_name[] =
@@ -3451,6 +3488,11 @@ static bfd_mach_o_xlat_name bfd_mach_o_load_command_name[] =
   { "lazy_load_dylib", BFD_MACH_O_LC_LAZY_LOAD_DYLIB},
   { "encryption_info", BFD_MACH_O_LC_ENCRYPTION_INFO},
   { "dyld_info", BFD_MACH_O_LC_DYLD_INFO},
+  { "load_upward_lib", BFD_MACH_O_LC_LOAD_UPWARD_DYLIB},
+  { "version_min_macosx", BFD_MACH_O_LC_VERSION_MIN_MACOSX},
+  { "version_min_iphoneos", BFD_MACH_O_LC_VERSION_MIN_IPHONEOS},
+  { "function_starts", BFD_MACH_O_LC_FUNCTION_STARTS},
+  { "dyld_environment", BFD_MACH_O_LC_DYLD_ENVIRONMENT},
   { NULL, 0}
 };
 
@@ -3843,9 +3885,16 @@ bfd_mach_o_bfd_print_private_bfd_data (bfd *abfd, void * ptr)
   for (i = 0; i < mdata->header.ncmds; i++)
     {
       bfd_mach_o_load_command *cmd = &mdata->commands[i];
+      const char *cmd_name;
       
-      fprintf (file, "Load command %s:",
-               bfd_mach_o_get_name (bfd_mach_o_load_command_name, cmd->type));
+      cmd_name = bfd_mach_o_get_name_or_null
+        (bfd_mach_o_load_command_name, cmd->type);
+      fprintf (file, "Load command ");
+      if (cmd_name == NULL)
+        fprintf (file, "0x%02x:", cmd->type);
+      else
+        fprintf (file, "%s:", cmd_name);
+
       switch (cmd->type)
 	{
 	case BFD_MACH_O_LC_SEGMENT:
@@ -3903,6 +3952,7 @@ bfd_mach_o_bfd_print_private_bfd_data (bfd *abfd, void * ptr)
           break;
         case BFD_MACH_O_LC_CODE_SIGNATURE:
         case BFD_MACH_O_LC_SEGMENT_SPLIT_INFO:
+        case BFD_MACH_O_LC_FUNCTION_STARTS:
 	  {
 	    bfd_mach_o_linkedit_command *linkedit = &cmd->command.linkedit;
 	    fprintf
@@ -3957,8 +4007,18 @@ bfd_mach_o_bfd_print_private_bfd_data (bfd *abfd, void * ptr)
           fprintf (file, "\n");
           bfd_mach_o_print_dyld_info (abfd, cmd, file);
           break;
+	case BFD_MACH_O_LC_VERSION_MIN_MACOSX:
+	case BFD_MACH_O_LC_VERSION_MIN_IPHONEOS:
+          {
+            bfd_mach_o_version_min_command *ver = &cmd->command.version_min;
+
+            fprintf (file, " %u.%u.%u\n", ver->rel, ver->maj, ver->min);
+          }
+          break;
 	default:
 	  fprintf (file, "\n");
+          fprintf (file, "  offset: 0x%08lx\n", (unsigned long)cmd->offset);
+          fprintf (file, "    size: 0x%08lx\n", (unsigned long)cmd->len);
 	  break;
 	}
       fputc ('\n', file);

@@ -453,6 +453,15 @@ typedef struct bfd_mach_o_dyld_info_command
 }
 bfd_mach_o_dyld_info_command;
 
+typedef struct bfd_mach_o_version_min_command
+{
+  unsigned char rel;
+  unsigned char maj;
+  unsigned char min;
+  unsigned int reserved;
+}
+bfd_mach_o_version_min_command;
+
 typedef struct bfd_mach_o_load_command
 {
   bfd_mach_o_load_command_type type;
@@ -472,6 +481,7 @@ typedef struct bfd_mach_o_load_command
     bfd_mach_o_linkedit_command linkedit;
     bfd_mach_o_str_command str;
     bfd_mach_o_dyld_info_command dyld_info;
+    bfd_mach_o_version_min_command version_min;
   }
   command;
 }
@@ -493,7 +503,7 @@ typedef struct mach_o_data_struct
   ufile_ptr filelen;
 
   /* As symtab is referenced by other load command, it is handy to have
-     a direct access to it.  Also it is not clearly stated, only one symtab
+     a direct access to it.  Although it is not clearly stated, only one symtab
      is expected.  */
   bfd_mach_o_symtab_command *symtab;
   bfd_mach_o_dysymtab_command *dysymtab;
