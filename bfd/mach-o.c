@@ -134,15 +134,20 @@ static const struct mach_o_section_name_xlat data_section_names_xlat[] =
 
 struct mach_o_segment_name_xlat
 {
+  /* Segment name.  */
   const char *segname;
+
+  /* List of known sections for the segment.  */
   const struct mach_o_section_name_xlat *sections;
 };
 
+/* List of known segment names.  */
+
 static const struct mach_o_segment_name_xlat segsec_names_xlat[] =
   {
-    { "__DWARF", dwarf_section_names_xlat },
     { "__TEXT", text_section_names_xlat },
     { "__DATA", data_section_names_xlat },
+    { "__DWARF", dwarf_section_names_xlat },
     { NULL, NULL }
   };
 
@@ -1675,7 +1680,7 @@ bfd_mach_o_read_section_32 (bfd *abfd,
           != BFD_MACH_O_SECTION_SIZE))
     return NULL;
 
-  sec = bfd_mach_o_make_bfd_section (abfd, raw.sectname, raw.segname);
+  sec = bfd_mach_o_make_bfd_section (abfd, raw.segname, raw.sectname);
   if (sec == NULL)
     return NULL;
 
@@ -1714,7 +1719,7 @@ bfd_mach_o_read_section_64 (bfd *abfd,
           != BFD_MACH_O_SECTION_64_SIZE))
     return NULL;
 
-  sec = bfd_mach_o_make_bfd_section (abfd, raw.sectname, raw.segname);
+  sec = bfd_mach_o_make_bfd_section (abfd, raw.segname, raw.sectname);
   if (sec == NULL)
     return NULL;
 

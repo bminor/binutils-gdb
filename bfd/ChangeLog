@@ -1,5 +1,12 @@
 2011-08-08  Tristan Gingold  <gingold@adacore.com>
 
+	* mach-o.c (struct mach_o_segment_name_xlat): Add comments.
+	(segsec_names_xlat): Reorder elements.
+	(bfd_mach_o_read_section_32): Fix typo.
+	(bfd_mach_o_read_section_64): Fix typo.
+
+2011-08-08  Tristan Gingold  <gingold@adacore.com>
+
 	* mach-o.h (BFD_MACH_O_SEGNAME_SIZE): New macro.
 	(BFD_MACH_O_SECTNAME_SIZE): Ditto.
 	(bfd_mach_o_section): Use them.  Add next field.
