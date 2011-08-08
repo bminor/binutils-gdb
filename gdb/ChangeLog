@@ -1,3 +1,8 @@
+2011-08-08  Tom Tromey  <tromey@redhat.com>
+
+	* breakpoint.c (clean_up_filters): Remove.
+	(catch_syscall_split_args): Use VEC_cleanup.
+
 2011-08-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* cp-name-parser.y (xfree): Wrap the name free by CONCAT2.

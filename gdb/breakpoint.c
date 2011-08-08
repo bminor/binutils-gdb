@@ -9937,21 +9937,13 @@ init_ada_exception_breakpoint (struct breakpoint *b,
   b->language = language_ada;
 }
 
-/* Cleanup function for a syscall filter list.  */
-static void
-clean_up_filters (void *arg)
-{
-  VEC(int) *iter = *(VEC(int) **) arg;
-  VEC_free (int, iter);
-}
-
 /* Splits the argument using space as delimiter.  Returns an xmalloc'd
    filter list, or NULL if no filtering is required.  */
 static VEC(int) *
 catch_syscall_split_args (char *arg)
 {
   VEC(int) *result = NULL;
-  struct cleanup *cleanup = make_cleanup (clean_up_filters, &result);
+  struct cleanup *cleanup = make_cleanup (VEC_cleanup (int), &result);
 
   while (*arg != '\0')
     {
