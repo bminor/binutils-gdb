@@ -1,3 +1,12 @@
+2011-08-08  Tristan Gingold  <gingold@adacore.com>
+
+	* mach-o.c (bfd_mach_o_normalize_section_name): New function.
+	(bfd_mach_o_convert_section_name_to_bfd): Use it.
+	(bfd_mach_o_get_section_type_from_name): New function.
+	(bfd_mach_o_get_section_attribute_from_name): Ditto.
+	* mach-o.h (bfd_mach_o_section): Move bfdsection field at the end.
+	Add comments.  Add prototypes for the above new functions.
+
 2011-08-05  Mark Kettenis  <kettenis@gnu.org>
 
 	* netbsd-core.c (netbsd_core_vec): Init match_priority field.

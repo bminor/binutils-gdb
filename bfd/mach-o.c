@@ -144,44 +144,52 @@ static const struct mach_o_segment_name_xlat segsec_names_xlat[] =
     { NULL, NULL }
   };
 
-
 /* Mach-O to bfd names.  */
 
-static void
-bfd_mach_o_convert_section_name_to_bfd (bfd *abfd, bfd_mach_o_section *section,
-                                        char **name, flagword *flags)
+void
+bfd_mach_o_normalize_section_name (const char *segname, const char *sectname,
+                                   const char **name, flagword *flags)
 {
   const struct mach_o_segment_name_xlat *seg;
-  char *res;
-  unsigned int len;
-  const char *pfx = "";
 
   *name = NULL;
   *flags = SEC_NO_FLAGS;
 
   for (seg = segsec_names_xlat; seg->segname; seg++)
     {
-      if (strcmp (seg->segname, section->segname) == 0)
+      if (strcmp (seg->segname, segname) == 0)
         {
           const struct mach_o_section_name_xlat *sec;
 
           for (sec = seg->sections; sec->mach_o_name; sec++)
             {
-              if (strcmp (sec->mach_o_name, section->sectname) == 0)
+              if (strcmp (sec->mach_o_name, sectname) == 0)
                 {
-                  len = strlen (sec->bfd_name);
-                  res = bfd_alloc (abfd, len + 1);
-
-                  if (res == NULL)
-                    return;
-                  strcpy (res, sec->bfd_name);
-                  *name = res;
+                  *name = sec->bfd_name;
                   *flags = sec->flags;
                   return;
                 }
             }
+          return;
         }
     }
+}
+
+static void
+bfd_mach_o_convert_section_name_to_bfd (bfd *abfd, bfd_mach_o_section *section,
+                                        const char **name, flagword *flags)
+{
+  char *res;
+  unsigned int len;
+  const char *pfx = "";
+
+  /* First search for a canonical name.  */
+  bfd_mach_o_normalize_section_name (section->segname, section->sectname,
+                                     name, flags);
+
+  /* Return now if found.  */
+  if (*name)
+    return;
 
   len = strlen (section->segname) + 1
     + strlen (section->sectname) + 1;
@@ -201,6 +209,7 @@ bfd_mach_o_convert_section_name_to_bfd (bfd *abfd, bfd_mach_o_section *section,
     return;
   snprintf (res, len, "%s%s.%s", pfx, section->segname, section->sectname);
   *name = res;
+  *flags = SEC_NO_FLAGS;
 }
 
 /* Convert a bfd section name to a Mach-O segment + section name.  */
@@ -1496,7 +1505,7 @@ bfd_mach_o_make_bfd_section (bfd *abfd, bfd_mach_o_section *section,
 			     unsigned long prot)
 {
   asection *bfdsec;
-  char *sname;
+  const char *sname;
   flagword flags;
 
   bfd_mach_o_convert_section_name_to_bfd (abfd, section, &sname, &flags);
@@ -3403,6 +3412,32 @@ static bfd_mach_o_xlat_name bfd_mach_o_load_command_name[] =
   { "dyld_info", BFD_MACH_O_LC_DYLD_INFO},
   { NULL, 0}
 };
+
+/* Get the section type from NAME.  Return -1 if NAME is unknown.  */
+
+unsigned int
+bfd_mach_o_get_section_type_from_name (const char *name)
+{
+  bfd_mach_o_xlat_name *x;
+
+  for (x = bfd_mach_o_section_type_name; x->name; x++)
+    if (strcmp (x->name, name) == 0)
+      return x->val;
+  return (unsigned int)-1;
+}
+
+/* Get the section attribute from NAME.  Return -1 if NAME is unknown.  */
+
+unsigned int
+bfd_mach_o_get_section_attribute_from_name (const char *name)
+{
+  bfd_mach_o_xlat_name *x;
+
+  for (x = bfd_mach_o_section_attribute_name; x->name; x++)
+    if (strcmp (x->name, name) == 0)
+      return x->val;
+  return (unsigned int)-1;
+}
 
 static void
 bfd_mach_o_print_private_header (bfd *abfd, FILE *file)

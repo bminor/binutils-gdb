@@ -46,7 +46,7 @@ bfd_mach_o_header;
 
 typedef struct bfd_mach_o_section
 {
-  asection *bfdsection;
+  /* Fields present in the file.  */
   char sectname[16 + 1];
   char segname[16 + 1];
   bfd_vma addr;
@@ -59,6 +59,9 @@ typedef struct bfd_mach_o_section
   unsigned long reserved1;
   unsigned long reserved2;
   unsigned long reserved3;
+
+  /* Corresponding bfd section.  */
+  asection *bfdsection;
 }
 bfd_mach_o_section;
 #define BFD_MACH_O_SECTION_SIZE 68
@@ -609,6 +612,11 @@ bfd_boolean bfd_mach_o_build_commands (bfd *);
 bfd_boolean bfd_mach_o_set_section_contents (bfd *, asection *, const void *,
                                              file_ptr, bfd_size_type);
 unsigned int bfd_mach_o_version (bfd *);
+
+unsigned int bfd_mach_o_get_section_type_from_name (const char *);
+unsigned int bfd_mach_o_get_section_attribute_from_name (const char *);
+void bfd_mach_o_normalize_section_name (const char *, const char *,
+                                        const char **, flagword *);
 
 extern const bfd_target mach_o_fat_vec;
 
