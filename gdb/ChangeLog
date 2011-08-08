@@ -1,3 +1,9 @@
+2011-08-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf2loc.c (dwarf2_evaluate_loc_desc_full) <DWARF_VALUE_STACK>
+	(dwarf2_evaluate_loc_desc_full) <DWARF_VALUE_LITERAL>: New variable
+	objfile_gdbarch.  Fix BFD_ENDIAN_BIG case.
+
 2011-08-08  Tom Tromey  <tromey@redhat.com>
 
 	* breakpoint.c (clean_up_filters): Remove.

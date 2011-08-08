@@ -1232,7 +1232,13 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 	    retval = allocate_value (type);
 	    contents = value_contents_raw (retval);
 	    if (n > TYPE_LENGTH (type))
-	      n = TYPE_LENGTH (type);
+	      {
+		struct gdbarch *objfile_gdbarch = get_objfile_arch (objfile);
+
+		if (gdbarch_byte_order (objfile_gdbarch) == BFD_ENDIAN_BIG)
+		  val_bytes += n - TYPE_LENGTH (type);
+		n = TYPE_LENGTH (type);
+	      }
 	    memcpy (contents, val_bytes, n);
 	  }
 	  break;
@@ -1254,7 +1260,13 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 	    n -= byte_offset;
 
 	    if (n > TYPE_LENGTH (type))
-	      n = TYPE_LENGTH (type);
+	      {
+		struct gdbarch *objfile_gdbarch = get_objfile_arch (objfile);
+
+		if (gdbarch_byte_order (objfile_gdbarch) == BFD_ENDIAN_BIG)
+		  ldata += n - TYPE_LENGTH (type);
+		n = TYPE_LENGTH (type);
+	      }
 	    memcpy (contents, ldata, n);
 	  }
 	  break;
