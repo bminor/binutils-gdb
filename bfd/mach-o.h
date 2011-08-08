@@ -41,11 +41,14 @@ typedef struct bfd_mach_o_header
 }
 bfd_mach_o_header;
 
+#define BFD_MACH_O_SEGNAME_SIZE 16
+#define BFD_MACH_O_SECTNAME_SIZE 16
+
 typedef struct bfd_mach_o_section
 {
   /* Fields present in the file.  */
-  char sectname[16 + 1];
-  char segname[16 + 1];
+  char sectname[BFD_MACH_O_SECTNAME_SIZE + 1];	/* Always NUL padded.  */
+  char segname[BFD_MACH_O_SEGNAME_SIZE + 1];
   bfd_vma addr;
   bfd_vma size;
   bfd_vma offset;
@@ -59,6 +62,9 @@ typedef struct bfd_mach_o_section
 
   /* Corresponding bfd section.  */
   asection *bfdsection;
+
+  /* Simply linked list.  */
+  struct bfd_mach_o_section *next;
 }
 bfd_mach_o_section;
 
@@ -73,7 +79,10 @@ typedef struct bfd_mach_o_segment_command
   unsigned long initprot;	/* Initial protection.  */
   unsigned long nsects;
   unsigned long flags;
-  bfd_mach_o_section *sections;
+
+  /* Linked list of sections.  */
+  bfd_mach_o_section *sect_head;
+  bfd_mach_o_section *sect_tail;
 }
 bfd_mach_o_segment_command;
 
@@ -525,6 +534,10 @@ bfd_mach_o_backend_data;
 #define bfd_mach_o_get_backend_data(abfd) \
   ((bfd_mach_o_backend_data*)(abfd)->xvec->backend_data)
 
+/* Get the Mach-O header for section SEC.  */
+#define bfd_mach_o_get_mach_o_section(sec) \
+  ((bfd_mach_o_section *)(sec)->used_by_bfd)
+
 bfd_boolean bfd_mach_o_valid (bfd *);
 int bfd_mach_o_read_dysymtab_symbol (bfd *, bfd_mach_o_dysymtab_command *, bfd_mach_o_symtab_command *, bfd_mach_o_asymbol *, unsigned long);
 int bfd_mach_o_scan_start_address (bfd *);
@@ -536,8 +549,8 @@ const bfd_target *bfd_mach_o_archive_p (bfd *);
 bfd *bfd_mach_o_openr_next_archived_file (bfd *, bfd *);
 bfd_boolean bfd_mach_o_set_arch_mach (bfd *, enum bfd_architecture,
                                       unsigned long);
-int bfd_mach_o_lookup_section (bfd *, asection *, bfd_mach_o_load_command **, bfd_mach_o_section **);
 int bfd_mach_o_lookup_command (bfd *, bfd_mach_o_load_command_type, bfd_mach_o_load_command **);
+bfd_boolean bfd_mach_o_new_section_hook (bfd *, asection *);
 bfd_boolean bfd_mach_o_write_contents (bfd *);
 bfd_boolean bfd_mach_o_bfd_copy_private_symbol_data (bfd *, asymbol *,
                                                      bfd *, asymbol *);

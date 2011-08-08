@@ -1,5 +1,39 @@
 2011-08-08  Tristan Gingold  <gingold@adacore.com>
 
+	* mach-o.h (BFD_MACH_O_SEGNAME_SIZE): New macro.
+	(BFD_MACH_O_SECTNAME_SIZE): Ditto.
+	(bfd_mach_o_section): Use them.  Add next field.
+	(bfd_mach_o_segment_command): Replace sections array by
+	sect_head and sect_tail.
+	(bfd_mach_o_get_mach_o_section): New macro.
+	(bfd_mach_o_lookup_section): Remove.
+	(bfd_mach_o_new_section_hook): New function.
+	* mach-o.c (bfd_mach_o_normalize_section_name): Use strncmp
+	instead of strcmp.
+	(bfd_mach_o_convert_section_name_to_bfd): Replaces section
+	parameter with segname and sectname parameters.  Adjust.
+	(bfd_mach_o_append_section_to_segment): New function.  Use a
+	linked list for Mach-O sections.
+	(bfd_mach_o_write_segment_32): Adjust.
+	(bfd_mach_o_write_segment_64): Ditto.
+	(bfd_mach_o_build_commands): Fix comment.  Adjust.
+	(bfd_mach_o_flatten_sections): Adjust.
+	(bfd_mach_o_print_section_map): Adjust.
+	(bfd_mach_o_set_section_flags_from_bfd): Ditto.
+	(bfd_mach_o_new_section_hook): New function.
+	(bfd_mach_o_init_section_from_mach_o): Ditto.
+	(bfd_mach_o_read_section_32): Remove section parameter.
+	Return a section instead.
+	(bfd_mach_o_read_section_64): Ditto.
+	(bfd_mach_o_read_section): Ditto.
+	(bfd_mach_o_make_bfd_section): Adjust.
+	(bfd_mach_o_read_segment): Adjust for new profile of
+	bfd_mach_o_read_section.
+	(bfd_mach_o_lookup_section): Remove.
+	* mach-o-target.c (bfd_mach_o_new_section_hook): Remove.
+
+2011-08-08  Tristan Gingold  <gingold@adacore.com>
+
 	* mach-o.h (bfd_mach_o_version_min_command): New structure.
 	(bfd_mach_o_load_command): Add version_min.
 	(mach_o_data_struct): Fix comment.

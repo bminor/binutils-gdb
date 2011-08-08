@@ -27,7 +27,6 @@
 
 #define bfd_mach_o_close_and_cleanup                  _bfd_generic_close_and_cleanup
 #define bfd_mach_o_bfd_free_cached_info               _bfd_generic_bfd_free_cached_info
-#define bfd_mach_o_new_section_hook                   _bfd_generic_new_section_hook
 #define bfd_mach_o_get_section_contents_in_window     _bfd_generic_get_section_contents_in_window
 #define bfd_mach_o_bfd_is_target_special_symbol       ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false)
 #define bfd_mach_o_bfd_is_local_label_name            bfd_generic_is_local_label_name

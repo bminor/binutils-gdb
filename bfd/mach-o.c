@@ -159,13 +159,14 @@ bfd_mach_o_normalize_section_name (const char *segname, const char *sectname,
 
   for (seg = segsec_names_xlat; seg->segname; seg++)
     {
-      if (strcmp (seg->segname, segname) == 0)
+      if (strncmp (seg->segname, segname, BFD_MACH_O_SEGNAME_SIZE) == 0)
         {
           const struct mach_o_section_name_xlat *sec;
 
           for (sec = seg->sections; sec->mach_o_name; sec++)
             {
-              if (strcmp (sec->mach_o_name, sectname) == 0)
+              if (strncmp (sec->mach_o_name, sectname,
+                           BFD_MACH_O_SECTNAME_SIZE) == 0)
                 {
                   *name = sec->bfd_name;
                   *flags = sec->flags;
@@ -178,27 +179,26 @@ bfd_mach_o_normalize_section_name (const char *segname, const char *sectname,
 }
 
 static void
-bfd_mach_o_convert_section_name_to_bfd (bfd *abfd, bfd_mach_o_section *section,
-                                        const char **name, flagword *flags)
+bfd_mach_o_convert_section_name_to_bfd
+  (bfd *abfd, const char *segname, const char *sectname,
+   const char **name, flagword *flags)
 {
   char *res;
   unsigned int len;
   const char *pfx = "";
 
   /* First search for a canonical name.  */
-  bfd_mach_o_normalize_section_name (section->segname, section->sectname,
-                                     name, flags);
+  bfd_mach_o_normalize_section_name (segname, sectname, name, flags);
 
   /* Return now if found.  */
   if (*name)
     return;
 
-  len = strlen (section->segname) + 1
-    + strlen (section->sectname) + 1;
+  len = strlen (segname) + 1 + strlen (sectname) + 1;
 
   /* Put "LC_SEGMENT." prefix if the segment name is weird (ie doesn't start
      with an underscore.  */
-  if (section->segname[0] != '_')
+  if (segname[0] != '_')
     {
       static const char seg_pfx[] = "LC_SEGMENT.";
 
@@ -209,7 +209,7 @@ bfd_mach_o_convert_section_name_to_bfd (bfd *abfd, bfd_mach_o_section *section,
   res = bfd_alloc (abfd, len);
   if (res == NULL)
     return;
-  snprintf (res, len, "%s%s.%s", pfx, section->segname, section->sectname);
+  snprintf (res, len, "%s%s.%s", pfx, segname, sectname);
   *name = res;
   *flags = SEC_NO_FLAGS;
 }
@@ -1000,12 +1000,12 @@ bfd_mach_o_write_segment_32 (bfd *abfd, bfd_mach_o_load_command *command)
 {
   struct mach_o_segment_command_32_external raw;
   bfd_mach_o_segment_command *seg = &command->command.segment;
-  unsigned long i;
+  bfd_mach_o_section *sec;
 
   BFD_ASSERT (command->type == BFD_MACH_O_LC_SEGMENT);
 
-  for (i = 0; i < seg->nsects; i++)
-    if (!bfd_mach_o_write_relocs (abfd, &seg->sections[i]))
+  for (sec = seg->sect_head; sec != NULL; sec = sec->next)
+    if (!bfd_mach_o_write_relocs (abfd, sec))
       return -1;
 
   memcpy (raw.segname, seg->segname, 16);
@@ -1022,8 +1022,8 @@ bfd_mach_o_write_segment_32 (bfd *abfd, bfd_mach_o_load_command *command)
       || bfd_bwrite (&raw, sizeof (raw), abfd) != sizeof (raw))
     return -1;
 
-  for (i = 0; i < seg->nsects; i++)
-    if (bfd_mach_o_write_section_32 (abfd, &seg->sections[i]))
+  for (sec = seg->sect_head; sec != NULL; sec = sec->next)
+    if (bfd_mach_o_write_section_32 (abfd, sec))
       return -1;
 
   return 0;
@@ -1034,12 +1034,12 @@ bfd_mach_o_write_segment_64 (bfd *abfd, bfd_mach_o_load_command *command)
 {
   struct mach_o_segment_command_64_external raw;
   bfd_mach_o_segment_command *seg = &command->command.segment;
-  unsigned long i;
+  bfd_mach_o_section *sec;
 
   BFD_ASSERT (command->type == BFD_MACH_O_LC_SEGMENT_64);
 
-  for (i = 0; i < seg->nsects; i++)
-    if (!bfd_mach_o_write_relocs (abfd, &seg->sections[i]))
+  for (sec = seg->sect_head; sec != NULL; sec = sec->next)
+    if (!bfd_mach_o_write_relocs (abfd, sec))
       return -1;
 
   memcpy (raw.segname, seg->segname, 16);
@@ -1056,8 +1056,8 @@ bfd_mach_o_write_segment_64 (bfd *abfd, bfd_mach_o_load_command *command)
       || bfd_bwrite (&raw, sizeof (raw), abfd) != sizeof (raw))
     return -1;
 
-  for (i = 0; i < seg->nsects; i++)
-    if (bfd_mach_o_write_section_64 (abfd, &seg->sections[i]))
+  for (sec = seg->sect_head; sec != NULL; sec = sec->next)
+    if (bfd_mach_o_write_section_64 (abfd, sec))
       return -1;
 
   return 0;
@@ -1299,6 +1299,40 @@ bfd_mach_o_write_contents (bfd *abfd)
   return TRUE;
 }
 
+static void
+bfd_mach_o_append_section_to_segment (bfd_mach_o_segment_command *seg,
+                                      asection *sec)
+{
+  bfd_mach_o_section *s = (bfd_mach_o_section *)sec->used_by_bfd;
+  if (seg->sect_head == NULL)
+    seg->sect_head = s;
+  else
+    seg->sect_tail->next = s;
+  seg->sect_tail = s;
+}
+
+/* Create section Mach-O flags from BFD flags.  */
+
+static void
+bfd_mach_o_set_section_flags_from_bfd (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
+{
+  flagword bfd_flags;
+  bfd_mach_o_section *s = bfd_mach_o_get_mach_o_section (sec);
+
+  /* Create default flags.  */
+  bfd_flags = bfd_get_section_flags (abfd, sec);
+  if ((bfd_flags & SEC_CODE) == SEC_CODE)
+    s->flags = BFD_MACH_O_S_ATTR_PURE_INSTRUCTIONS
+      | BFD_MACH_O_S_ATTR_SOME_INSTRUCTIONS
+      | BFD_MACH_O_S_REGULAR;
+  else if ((bfd_flags & (SEC_ALLOC | SEC_LOAD)) == SEC_ALLOC)
+    s->flags = BFD_MACH_O_S_ZEROFILL;
+  else if (bfd_flags & SEC_DEBUGGING)
+    s->flags = BFD_MACH_O_S_REGULAR |  BFD_MACH_O_S_ATTR_DEBUG;
+  else
+    s->flags = BFD_MACH_O_S_REGULAR;
+}
+
 /* Build Mach-O load commands from the sections.  */
 
 bfd_boolean
@@ -1307,7 +1341,6 @@ bfd_mach_o_build_commands (bfd *abfd)
   bfd_mach_o_data_struct *mdata = bfd_mach_o_get_data (abfd);
   unsigned int wide = mach_o_wide_p (&mdata->header);
   bfd_mach_o_segment_command *seg;
-  bfd_mach_o_section *sections;
   asection *sec;
   bfd_mach_o_load_command *cmd;
   bfd_mach_o_load_command *symtab_cmd;
@@ -1317,7 +1350,8 @@ bfd_mach_o_build_commands (bfd *abfd)
   if (mdata->header.ncmds)
     return FALSE;
 
-  /* Very simple version: 1 command (segment) containing all sections.  */
+  /* Very simple version: a command (segment) to contain all the sections and
+     a command for the symbol table.  */
   mdata->header.ncmds = 2;
   mdata->commands = bfd_alloc (abfd, mdata->header.ncmds
                                * sizeof (bfd_mach_o_load_command));
@@ -1327,10 +1361,6 @@ bfd_mach_o_build_commands (bfd *abfd)
   seg = &cmd->command.segment;
 
   seg->nsects = bfd_count_sections (abfd);
-  sections = bfd_alloc (abfd, seg->nsects * sizeof (bfd_mach_o_section));
-  if (sections == NULL)
-    return FALSE;
-  seg->sections = sections;
 
   /* Set segment command.  */
   if (wide)
@@ -1376,30 +1406,31 @@ bfd_mach_o_build_commands (bfd *abfd)
   target_index = 0;
   for (sec = abfd->sections; sec; sec = sec->next)
     {
-      sections->bfdsection = sec;
-      bfd_mach_o_convert_section_name_to_mach_o (abfd, sec, sections);
-      sections->addr = bfd_get_section_vma (abfd, sec);
-      sections->size = bfd_get_section_size (sec);
-      sections->align = bfd_get_section_alignment (abfd, sec);
+      bfd_mach_o_section *msect = bfd_mach_o_get_mach_o_section (sec);
 
-      if (sections->size != 0)
+      bfd_mach_o_append_section_to_segment (seg, sec);
+
+      if (msect->flags == 0)
         {
-          mdata->filelen = FILE_ALIGN (mdata->filelen, sections->align);
-          sections->offset = mdata->filelen;
+          /* We suppose it hasn't been set.  Convert from BFD flags.  */
+          bfd_mach_o_set_section_flags_from_bfd (abfd, sec);
+        }
+      msect->addr = bfd_get_section_vma (abfd, sec);
+      msect->size = bfd_get_section_size (sec);
+      msect->align = bfd_get_section_alignment (abfd, sec);
+
+      if (msect->size != 0)
+        {
+          mdata->filelen = FILE_ALIGN (mdata->filelen, msect->align);
+          msect->offset = mdata->filelen;
         }
       else
-        sections->offset = 0;
-      sections->reloff = 0;
-      sections->nreloc = 0;
-      sections->reserved1 = 0;
-      sections->reserved2 = 0;
-      sections->reserved3 = 0;
+        msect->offset = 0;
 
-      sec->filepos = sections->offset;
+      sec->filepos = msect->offset;
       sec->target_index = ++target_index;
 
-      mdata->filelen += sections->size;
-      sections++;
+      mdata->filelen += msect->size;
     }
   seg->filesize = mdata->filelen - seg->fileoff;
   seg->vmsize = seg->filesize;
@@ -1524,17 +1555,51 @@ bfd_mach_o_read_header (bfd *abfd, bfd_mach_o_header *header)
   return TRUE;
 }
 
-static asection *
-bfd_mach_o_make_bfd_section (bfd *abfd, bfd_mach_o_section *section,
-			     unsigned long prot)
+bfd_boolean
+bfd_mach_o_new_section_hook (bfd *abfd, asection *sec)
 {
-  asection *bfdsec;
-  const char *sname;
-  flagword flags;
+  bfd_mach_o_section *s;
 
-  bfd_mach_o_convert_section_name_to_bfd (abfd, section, &sname, &flags);
-  if (sname == NULL)
-    return NULL;
+  s = bfd_mach_o_get_mach_o_section (sec);
+  if (s == NULL)
+    {
+      flagword bfd_flags;
+
+      s = (bfd_mach_o_section *) bfd_zalloc (abfd, sizeof (*s));
+      if (s == NULL)
+	return FALSE;
+      sec->used_by_bfd = s;
+      s->bfdsection = sec;
+
+      /* Create default name.  */
+      bfd_mach_o_convert_section_name_to_mach_o (abfd, sec, s);
+
+      /* Create default flags.  */
+      bfd_flags = bfd_get_section_flags (abfd, sec);
+      if ((bfd_flags & SEC_CODE) == SEC_CODE)
+        s->flags = BFD_MACH_O_S_ATTR_PURE_INSTRUCTIONS
+          | BFD_MACH_O_S_ATTR_SOME_INSTRUCTIONS
+          | BFD_MACH_O_S_REGULAR;
+      else if ((bfd_flags & (SEC_ALLOC | SEC_LOAD)) == SEC_ALLOC)
+        s->flags = BFD_MACH_O_S_ZEROFILL;
+      else if (bfd_flags & SEC_DEBUGGING)
+        s->flags = BFD_MACH_O_S_REGULAR |  BFD_MACH_O_S_ATTR_DEBUG;
+      else
+        s->flags = BFD_MACH_O_S_REGULAR;
+    }
+
+  return _bfd_generic_new_section_hook (abfd, sec);
+}
+
+static void
+bfd_mach_o_init_section_from_mach_o (bfd *abfd, asection *sec,
+                                     unsigned long prot)
+{
+  flagword flags;
+  bfd_mach_o_section *section;
+
+  flags = bfd_get_section_flags (abfd, sec);
+  section = bfd_mach_o_get_mach_o_section (sec);
 
   if (flags == SEC_NO_FLAGS)
     {
@@ -1568,39 +1633,57 @@ bfd_mach_o_make_bfd_section (bfd *abfd, bfd_mach_o_section *section,
   if (section->nreloc != 0)
     flags |= SEC_RELOC;
 
-  bfdsec = bfd_make_section_anyway_with_flags (abfd, sname, flags);
-  if (bfdsec == NULL)
-    return NULL;
+  bfd_set_section_flags (abfd, sec, flags);
 
-  bfdsec->vma = section->addr;
-  bfdsec->lma = section->addr;
-  bfdsec->size = section->size;
-  bfdsec->filepos = section->offset;
-  bfdsec->alignment_power = section->align;
-  bfdsec->segment_mark = 0;
-  bfdsec->reloc_count = section->nreloc;
-  bfdsec->rel_filepos = section->reloff;
-
-  return bfdsec;
+  sec->vma = section->addr;
+  sec->lma = section->addr;
+  sec->size = section->size;
+  sec->filepos = section->offset;
+  sec->alignment_power = section->align;
+  sec->segment_mark = 0;
+  sec->reloc_count = section->nreloc;
+  sec->rel_filepos = section->reloff;
 }
 
-static int
+static asection *
+bfd_mach_o_make_bfd_section (bfd *abfd,
+                             const unsigned char *segname,
+                             const unsigned char *sectname)
+{
+  const char *sname;
+  flagword flags;
+
+  bfd_mach_o_convert_section_name_to_bfd
+    (abfd, (const char *)segname, (const char *)sectname, &sname, &flags);
+  if (sname == NULL)
+    return NULL;
+
+  return bfd_make_section_anyway_with_flags (abfd, sname, flags);
+}
+
+static asection *
 bfd_mach_o_read_section_32 (bfd *abfd,
-                            bfd_mach_o_section *section,
                             unsigned int offset,
                             unsigned long prot)
 {
   struct mach_o_section_32_external raw;
+  asection *sec;
+  bfd_mach_o_section *section;
 
   if (bfd_seek (abfd, offset, SEEK_SET) != 0
       || (bfd_bread (&raw, BFD_MACH_O_SECTION_SIZE, abfd)
           != BFD_MACH_O_SECTION_SIZE))
-    return -1;
+    return NULL;
 
-  memcpy (section->sectname, raw.sectname, 16);
-  section->sectname[16] = '\0';
-  memcpy (section->segname, raw.segname, 16);
-  section->segname[16] = '\0';
+  sec = bfd_mach_o_make_bfd_section (abfd, raw.sectname, raw.segname);
+  if (sec == NULL)
+    return NULL;
+
+  section = bfd_mach_o_get_mach_o_section (sec);
+  memcpy (section->segname, raw.segname, sizeof (raw.segname));
+  section->segname[BFD_MACH_O_SEGNAME_SIZE] = 0;
+  memcpy (section->sectname, raw.sectname, sizeof (raw.sectname));
+  section->segname[BFD_MACH_O_SECTNAME_SIZE] = 0;
   section->addr = bfd_h_get_32 (abfd, raw.addr);
   section->size = bfd_h_get_32 (abfd, raw.size);
   section->offset = bfd_h_get_32 (abfd, raw.offset);
@@ -1611,31 +1694,35 @@ bfd_mach_o_read_section_32 (bfd *abfd,
   section->reserved1 = bfd_h_get_32 (abfd, raw.reserved1);
   section->reserved2 = bfd_h_get_32 (abfd, raw.reserved2);
   section->reserved3 = 0;
-  section->bfdsection = bfd_mach_o_make_bfd_section (abfd, section, prot);
 
-  if (section->bfdsection == NULL)
-    return -1;
+  bfd_mach_o_init_section_from_mach_o (abfd, sec, prot);
 
-  return 0;
+  return sec;
 }
 
-static int
+static asection *
 bfd_mach_o_read_section_64 (bfd *abfd,
-                            bfd_mach_o_section *section,
                             unsigned int offset,
                             unsigned long prot)
 {
   struct mach_o_section_64_external raw;
+  asection *sec;
+  bfd_mach_o_section *section;
 
   if (bfd_seek (abfd, offset, SEEK_SET) != 0
       || (bfd_bread (&raw, BFD_MACH_O_SECTION_64_SIZE, abfd)
           != BFD_MACH_O_SECTION_64_SIZE))
-    return -1;
+    return NULL;
 
-  memcpy (section->sectname, raw.sectname, 16);
-  section->sectname[16] = '\0';
-  memcpy (section->segname, raw.segname, 16);
-  section->segname[16] = '\0';
+  sec = bfd_mach_o_make_bfd_section (abfd, raw.sectname, raw.segname);
+  if (sec == NULL)
+    return NULL;
+
+  section = bfd_mach_o_get_mach_o_section (sec);
+  memcpy (section->segname, raw.segname, sizeof (raw.segname));
+  section->segname[BFD_MACH_O_SEGNAME_SIZE] = 0;
+  memcpy (section->sectname, raw.sectname, sizeof (raw.sectname));
+  section->segname[BFD_MACH_O_SECTNAME_SIZE] = 0;
   section->addr = bfd_h_get_64 (abfd, raw.addr);
   section->size = bfd_h_get_64 (abfd, raw.size);
   section->offset = bfd_h_get_32 (abfd, raw.offset);
@@ -1646,25 +1733,22 @@ bfd_mach_o_read_section_64 (bfd *abfd,
   section->reserved1 = bfd_h_get_32 (abfd, raw.reserved1);
   section->reserved2 = bfd_h_get_32 (abfd, raw.reserved2);
   section->reserved3 = bfd_h_get_32 (abfd, raw.reserved3);
-  section->bfdsection = bfd_mach_o_make_bfd_section (abfd, section, prot);
 
-  if (section->bfdsection == NULL)
-    return -1;
+  bfd_mach_o_init_section_from_mach_o (abfd, sec, prot);
 
-  return 0;
+  return sec;
 }
 
-static int
+static asection *
 bfd_mach_o_read_section (bfd *abfd,
-                         bfd_mach_o_section *section,
                          unsigned int offset,
                          unsigned long prot,
                          unsigned int wide)
 {
   if (wide)
-    return bfd_mach_o_read_section_64 (abfd, section, offset, prot);
+    return bfd_mach_o_read_section_64 (abfd, offset, prot);
   else
-    return bfd_mach_o_read_section_32 (abfd, section, offset, prot);
+    return bfd_mach_o_read_section_32 (abfd, offset, prot);
 }
 
 static int
@@ -2505,27 +2589,23 @@ bfd_mach_o_read_segment (bfd *abfd,
       seg->flags = bfd_h_get_32 (abfd, raw.flags);
     }
 
-  if (seg->nsects != 0)
+  for (i = 0; i < seg->nsects; i++)
     {
-      seg->sections = bfd_alloc (abfd, seg->nsects
-                                 * sizeof (bfd_mach_o_section));
-      if (seg->sections == NULL)
-	return -1;
+      bfd_vma segoff;
+      asection *sec;
 
-      for (i = 0; i < seg->nsects; i++)
-	{
-	  bfd_vma segoff;
-          if (wide)
-            segoff = command->offset + BFD_MACH_O_LC_SEGMENT_64_SIZE
-              + (i * BFD_MACH_O_SECTION_64_SIZE);
-          else
-            segoff = command->offset + BFD_MACH_O_LC_SEGMENT_SIZE
-              + (i * BFD_MACH_O_SECTION_SIZE);
+      if (wide)
+        segoff = command->offset + BFD_MACH_O_LC_SEGMENT_64_SIZE
+          + (i * BFD_MACH_O_SECTION_64_SIZE);
+      else
+        segoff = command->offset + BFD_MACH_O_LC_SEGMENT_SIZE
+          + (i * BFD_MACH_O_SECTION_SIZE);
 
-	  if (bfd_mach_o_read_section
-	      (abfd, &seg->sections[i], segoff, seg->initprot, wide) != 0)
-	    return -1;
-	}
+      sec = bfd_mach_o_read_section (abfd, segoff, seg->initprot, wide);
+      if (sec == NULL)
+        return -1;
+
+      bfd_mach_o_append_section_to_segment (seg, sec);
     }
 
   return 0;
@@ -2652,7 +2732,7 @@ bfd_mach_o_flatten_sections (bfd *abfd)
 {
   bfd_mach_o_data_struct *mdata = bfd_mach_o_get_data (abfd);
   long csect = 0;
-  unsigned long i, j;
+  unsigned long i;
 
   /* Count total number of sections.  */
   mdata->nsects = 0;
@@ -2682,12 +2762,13 @@ bfd_mach_o_flatten_sections (bfd *abfd)
 	  || mdata->commands[i].type == BFD_MACH_O_LC_SEGMENT_64)
 	{
 	  bfd_mach_o_segment_command *seg;
+          bfd_mach_o_section *sec;
 
 	  seg = &mdata->commands[i].command.segment;
 	  BFD_ASSERT (csect + seg->nsects <= mdata->nsects);
 
-	  for (j = 0; j < seg->nsects; j++)
-	    mdata->sections[csect++] = &seg->sections[j];
+          for (sec = seg->sect_head; sec != NULL; sec = sec->next)
+	    mdata->sections[csect++] = sec;
 	}
     }
 }
@@ -3197,53 +3278,6 @@ bfd_mach_o_fat_extract (bfd *abfd,
 }
 
 int
-bfd_mach_o_lookup_section (bfd *abfd,
-			   asection *section,
-			   bfd_mach_o_load_command **mcommand,
-			   bfd_mach_o_section **msection)
-{
-  struct mach_o_data_struct *md = bfd_mach_o_get_data (abfd);
-  unsigned int i, j, num;
-
-  bfd_mach_o_load_command *ncmd = NULL;
-  bfd_mach_o_section *nsect = NULL;
-
-  BFD_ASSERT (mcommand != NULL);
-  BFD_ASSERT (msection != NULL);
-
-  num = 0;
-  for (i = 0; i < md->header.ncmds; i++)
-    {
-      struct bfd_mach_o_load_command *cmd = &md->commands[i];
-      struct bfd_mach_o_segment_command *seg = NULL;
-
-      if (cmd->type != BFD_MACH_O_LC_SEGMENT
-	  || cmd->type != BFD_MACH_O_LC_SEGMENT_64)
-	continue;
-      seg = &cmd->command.segment;
-
-      for (j = 0; j < seg->nsects; j++)
-	{
-	  struct bfd_mach_o_section *sect = &seg->sections[j];
-
-	  if (sect->bfdsection == section)
-	    {
-	      if (num == 0)
-                {
-                  nsect = sect;
-                  ncmd = cmd;
-                }
-	      num++;
-	    }
-	}
-    }
-
-  *mcommand = ncmd;
-  *msection = nsect;
-  return num;
-}
-
-int
 bfd_mach_o_lookup_command (bfd *abfd,
 			   bfd_mach_o_load_command_type type,
 			   bfd_mach_o_load_command **mcommand)
@@ -3548,7 +3582,7 @@ static void
 bfd_mach_o_print_section_map (bfd *abfd, FILE *file)
 {
   bfd_mach_o_data_struct *mdata = bfd_mach_o_get_data (abfd);
-  unsigned int i, j;
+  unsigned int i;
   unsigned int sec_nbr = 0;
 
   fputs (_("Segments and Sections:\n"), file);
@@ -3557,6 +3591,7 @@ bfd_mach_o_print_section_map (bfd *abfd, FILE *file)
   for (i = 0; i < mdata->header.ncmds; i++)
     {
       bfd_mach_o_segment_command *seg;
+      bfd_mach_o_section *sec;
 
       if (mdata->commands[i].type != BFD_MACH_O_LC_SEGMENT
 	  && mdata->commands[i].type != BFD_MACH_O_LC_SEGMENT_64)
@@ -3573,9 +3608,9 @@ bfd_mach_o_print_section_map (bfd *abfd, FILE *file)
       fputc (seg->initprot & BFD_MACH_O_PROT_WRITE ? 'w' : '-', file);
       fputc (seg->initprot & BFD_MACH_O_PROT_EXECUTE ? 'x' : '-', file);
       fprintf (file, "]\n");
-      for (j = 0; j < seg->nsects; j++)
+
+      for (sec = seg->sect_head; sec != NULL; sec = sec->next)
 	{
-	  bfd_mach_o_section *sec = &seg->sections[j];
 	  fprintf (file, "%02u: %-16s %-16s ", ++sec_nbr,
 		   sec->segname, sec->sectname);
 	  fprintf_vma (file, sec->addr);
@@ -3641,7 +3676,7 @@ bfd_mach_o_print_segment (bfd *abfd ATTRIBUTE_UNUSED,
                           bfd_mach_o_load_command *cmd, FILE *file)
 {
   bfd_mach_o_segment_command *seg = &cmd->command.segment;
-  unsigned int i;
+  bfd_mach_o_section *sec;
 
   fprintf (file, " name: %s\n", *seg->segname ? seg->segname : "*none*");
   fprintf (file, "    vmaddr: ");
@@ -3658,8 +3693,8 @@ bfd_mach_o_print_segment (bfd *abfd ATTRIBUTE_UNUSED,
   fprintf (file, "\n");
   fprintf (file, "   nsects: %lu  ", seg->nsects);
   fprintf (file, " flags: %lx\n", seg->flags);
-  for (i = 0; i < seg->nsects; i++)
-    bfd_mach_o_print_section (abfd, &seg->sections[i], file);
+  for (sec = seg->sect_head; sec != NULL; sec = sec->next)
+    bfd_mach_o_print_section (abfd, sec, file);
 }
 
 static void
