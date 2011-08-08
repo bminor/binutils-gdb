@@ -1,3 +1,9 @@
+2011-08-08  Marcus Comstedt  <marcus@mc.pp.se>
+
+	PR binutils/12964
+	* Makefile.am (embedspu): Use awk rather than sed.
+	* Makefile.in: Regenerate.
+
 2011-07-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* dwarf.c (read_and_display_attr_value): Recognize DW_FORM_data4 and
