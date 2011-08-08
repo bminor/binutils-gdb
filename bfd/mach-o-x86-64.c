@@ -51,11 +51,11 @@ bfd_mach_o_x86_64_mkobject (bfd *abfd)
     return FALSE;
 
   mdata = bfd_mach_o_get_data (abfd);
-  mdata->header.magic = BFD_MACH_O_MH_MAGIC;
+  mdata->header.magic = BFD_MACH_O_MH_MAGIC_64;
   mdata->header.cputype = BFD_MACH_O_CPU_TYPE_X86_64;
   mdata->header.cpusubtype = BFD_MACH_O_CPU_SUBTYPE_X86_ALL;
   mdata->header.byteorder = BFD_ENDIAN_LITTLE;
-  mdata->header.version = 1;
+  mdata->header.version = 2;
 
   return TRUE;
 }
@@ -220,26 +220,41 @@ static bfd_boolean
 bfd_mach_o_x86_64_swap_reloc_out (arelent *rel, bfd_mach_o_reloc_info *rinfo)
 {
   rinfo->r_address = rel->address;
+  rinfo->r_scattered = 0;
   switch (rel->howto->type)
     {
     case BFD_RELOC_64:
-      rinfo->r_scattered = 0;
       rinfo->r_type = BFD_MACH_O_X86_64_RELOC_UNSIGNED;
       rinfo->r_pcrel = 0;
-      rinfo->r_length = rel->howto->size; /* Correct in practice.  */
-      if ((*rel->sym_ptr_ptr)->flags & BSF_SECTION_SYM)
-        {
-          rinfo->r_extern = 0;
-          rinfo->r_value = (*rel->sym_ptr_ptr)->section->target_index;
-        }
-      else
-        {
-          rinfo->r_extern = 1;
-          rinfo->r_value = (*rel->sym_ptr_ptr)->udata.i;
-        }
+      rinfo->r_length = 3;
+      break;
+    case BFD_RELOC_32_PCREL:
+      rinfo->r_type = BFD_MACH_O_X86_64_RELOC_BRANCH;
+      rinfo->r_pcrel = 1;
+      rinfo->r_length = 2;
+      break;
+    case BFD_RELOC_MACH_O_X86_64_SUBTRACTOR64:
+      rinfo->r_type = BFD_MACH_O_X86_64_RELOC_SUBTRACTOR;
+      rinfo->r_pcrel = 0;
+      rinfo->r_length = 3;
+      break;
+    case BFD_RELOC_MACH_O_X86_64_GOT_LOAD:
+      rinfo->r_type = BFD_MACH_O_X86_64_RELOC_GOT_LOAD;
+      rinfo->r_pcrel = 1;
+      rinfo->r_length = 2;
       break;
     default:
       return FALSE;
+    }
+  if ((*rel->sym_ptr_ptr)->flags & BSF_SECTION_SYM)
+    {
+      rinfo->r_extern = 0;
+      rinfo->r_value = (*rel->sym_ptr_ptr)->section->target_index;
+    }
+  else
+    {
+      rinfo->r_extern = 1;
+      rinfo->r_value = (*rel->sym_ptr_ptr)->udata.i;
     }
   return TRUE;
 }

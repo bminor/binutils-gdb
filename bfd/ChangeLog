@@ -1,5 +1,12 @@
 2011-08-08  Tristan Gingold  <gingold@adacore.com>
 
+	* mach-o-x86-64.c (bfd_mach_o_x86_64_mkobject): Fix cut-and-past typos.
+	(bfd_mach_o_x86_64_swap_reloc_out): Handle BFD_RELOC_32_PCREL,
+	BFD_RELOC_MACH_O_X86_64_SUBTRACTOR64 and
+	BFD_RELOC_MACH_O_X86_64_GOT_LOAD.  Share common code.
+
+2011-08-08  Tristan Gingold  <gingold@adacore.com>
+
 	* mach-o.c (bfd_mach_o_normalize_section_name): New function.
 	(bfd_mach_o_convert_section_name_to_bfd): Use it.
 	(bfd_mach_o_get_section_type_from_name): New function.
