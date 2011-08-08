@@ -33,12 +33,13 @@ gdb_test "info functions fUnC_lang" \
 
 gdb_test "set case-sensitive off" {warning: the current case sensitivity setting does not match the language\.}
 
+# The dot-leading symbol is for ppc64 function descriptors.
 gdb_test "info functions fUnC_lang" \
-	 "All functions matching regular expression \"fUnC_lang\":\[\r\n\]+File file1.txt:\r\nfoo FUNC_lang\\(void\\);" \
+	 "All functions matching regular expression \"fUnC_lang\":\[\r\n\]+File file1.txt:\r\nfoo FUNC_lang\\(void\\);(\r\n\r\nNon-debugging symbols:\r\n0x\[0-9a-f\]+ +\\.FUNC_lang)?" \
 	 "regexp case-sensitive off"
 
 gdb_test "p fuNC_lang" { = {foo \(void\)} 0x[0-9a-f]+ <FUNC_lang>}
-gdb_test "p fuNC_symtab" { = {<text variable, no debug info>} 0x[0-9a-f]+ <FUNC_symtab>}
+gdb_test "p fuNC_symtab" { = {<text variable, no debug info>} 0x[0-9a-f]+ <\.?FUNC_symtab>}
 
 if {[gdb_breakpoint "fuNC_lang"] == 1} {
     pass "setting breakpoint at fuNC_lang"
