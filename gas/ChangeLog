@@ -1,3 +1,14 @@
+2011-08-08  Tristan Gingold  <gingold@adacore.com>
+
+	* config/obj-macho.c (obj_mach_o_section): New function.
+	(struct known_section): New type.
+	(known_sections): Declare.
+	(obj_mach_o_known_section): New function.
+	(obj_mach_o_common_parse): Ditto.
+	(obj_mach_o_comm): Ditto.
+	(obj_mach_o_subsections_via_symbols): Ditto.
+	(mach_o_pseudo_table): Add new pseudos.
+
 2011-08-06  Richard Henderson  <rth@redhat.com>
 
 	* dw2gencfi.c (all_fde_data): Export.
