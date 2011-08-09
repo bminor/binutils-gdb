@@ -1302,13 +1302,13 @@ def GdbSetPythonDirectory (dir):\n\
   sys.path.insert (0, gdb.PYTHONDIR)\n\
 \n\
   # Tell python where to find submodules of gdb.\n\
-  gdb.__path__ = [gdb.PYTHONDIR + '/gdb']\n\
+  gdb.__path__ = [os.path.join (gdb.PYTHONDIR, 'gdb')]\n\
 \n\
   # The gdb module is implemented in C rather than in Python.  As a result,\n\
   # the associated __init.py__ script is not not executed by default when\n\
   # the gdb module gets imported.  Execute that script manually if it\n\
   # exists.\n\
-  ipy = gdb.PYTHONDIR + '/gdb/__init__.py'\n\
+  ipy = os.path.join (gdb.PYTHONDIR, 'gdb', '__init__.py')\n\
   if os.path.exists (ipy):\n\
     execfile (ipy)\n\
 \n\

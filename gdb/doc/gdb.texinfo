@@ -20845,6 +20845,12 @@ This directory, known as the @dfn{python directory},
 is automatically added to the Python Search Path in order to allow
 the Python interpreter to locate all scripts installed at this location.
 
+Additionally, @value{GDBN} commands and convenience functions which
+are written in Python and are located in the
+@file{@var{data-directory}/python/gdb/command} or
+@file{@var{data-directory}/python/gdb/function} directories are
+automatically imported when @value{GDBN} starts.
+
 @menu
 * Python Commands::             Accessing Python from @value{GDBN}.
 * Python API::                  Accessing @value{GDBN} from Python.

@@ -368,3 +368,5 @@ def register_pretty_printer_commands():
     InfoPrettyPrinter()
     EnablePrettyPrinter()
     DisablePrettyPrinter()
+
+register_pretty_printer_commands()

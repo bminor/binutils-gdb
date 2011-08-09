@@ -23,6 +23,11 @@
   ** A prompt subsitution hook (prompt_hook) is now available to the
      Python API.
 
+  ** Python commands and convenience-functions located in
+    'data-directory'/python/gdb/command and
+    'data-directory'/python/gdb/function are now automatically loaded
+     on GDB start-up.
+
 * libthread-db-search-path now supports two special values: $sdir and $pdir.
   $sdir specifies the default system locations of shared libraries.
   $pdir specifies the directory where the libpthread used by the application
