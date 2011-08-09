@@ -1,3 +1,9 @@
+2011-08-09  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.base/display.c (do_loops): New `p_i' local.
+	* gdb.base/display.exp: Test displaying a variable that is
+	temporarily at a bad address.
+
 2011-08-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.dwarf2/dw2-op-stack-value.S: New file.

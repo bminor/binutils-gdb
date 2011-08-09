@@ -119,6 +119,32 @@ gdb_test "undisp" \
     "y"
 
 
+# Test displaying a variable that is temporarily at a bad address.
+# But if we can examine what's at memory address 0, then we'll also be
+# able to display it without error.  Don't run the test in that case.
+set can_read_0 0
+gdb_test_multiple "x 0" "memory at address 0" {
+    -re "0x0:.*Cannot access memory at address 0x0.*$gdb_prompt $" { }
+    -re "0x0:.*Error accessing memory address 0x0.*$gdb_prompt $" { }
+    -re ".*$gdb_prompt $" {
+	set can_read_0 1
+    }
+}
+
+if { !$can_read_0 } {
+    gdb_test "disp *p_i" ".*: \\*p_i = 0"
+    gdb_test "p p_i = 0x0" " = \\(int \\*\\) 0x0"
+    gdb_test "display" ".*: \\*p_i = <error: .*>" "display bad address"
+    gdb_test "p p_i = &i" " = \\(int \\*\\) $hex"
+    gdb_test "display" ".*: \\*p_i = 0" "display good address"
+
+    gdb_test "undisp" \
+	"" \
+	"undisp all again" \
+	".*Delete all auto-display expressions.*y or n. $" \
+	"y"
+}
+
 gdb_test "disab 3" ".*.*" "disab 3"
 gdb_test "cont" ".*Breakpoint 4.*" "watch off"
 

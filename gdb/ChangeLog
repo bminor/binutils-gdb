@@ -1,3 +1,10 @@
+2011-08-09  Pedro Alves  <pedro@codesourcery.com>
+
+	* printcmd.c (current_display_number): Update comment.
+	(disable_current_display_cleanup): Delete.
+	(do_one_display): Use make_cleanup_restore_integer.  Gracefully
+	catch errors thrown while evaluating and printing the display.
+
 2011-08-09  Tom Tromey  <tromey@redhat.com>
 
 	* mi/mi-cmd-break.c (mi_cmd_break_passcount): Fix typo.
