@@ -39,9 +39,7 @@ Disassembly of section \.text:
 [0-9a-f]+ <[^>]*> 03f9 4f3c 	jalrs	t9
 [ 	]*[0-9a-f]+: R_MICROMIPS_JALR	external_text_label
 [0-9a-f]+ <[^>]*> 0c00      	nop
-[0-9a-f]+ <[^>]*> ff9d 0000 	lw	gp,0\(sp\)
 ([0-9a-f]+) <[^>]*> 9400 fffe 	b	\1 <.*>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	text_label
-[0-9a-f]+ <[^>]*> 0c00      	nop
-[0-9a-f]+ <[^>]*> 0c00      	nop
+[0-9a-f]+ <[^>]*> ff9d 0000 	lw	gp,0\(sp\)
 	\.\.\.

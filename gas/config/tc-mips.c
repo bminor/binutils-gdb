@@ -2942,33 +2942,10 @@ gpr_mod_mask (const struct mips_cl_insn *ip)
   pinfo2 = ip->insn_mo->pinfo2;
   if (mips_opts.micromips)
     {
-      if (pinfo2 & INSN2_MOD_GPR_MB)
-	mask |= 1 << micromips_to_32_reg_b_map[EXTRACT_OPERAND (1, MB, *ip)];
-      if (pinfo2 & INSN2_MOD_GPR_MC)
-	mask |= 1 << micromips_to_32_reg_c_map[EXTRACT_OPERAND (1, MC, *ip)];
       if (pinfo2 & INSN2_MOD_GPR_MD)
 	mask |= 1 << micromips_to_32_reg_d_map[EXTRACT_OPERAND (1, MD, *ip)];
-      if (pinfo2 & INSN2_MOD_GPR_ME)
-	mask |= 1 << micromips_to_32_reg_e_map[EXTRACT_OPERAND (1, ME, *ip)];
       if (pinfo2 & INSN2_MOD_GPR_MF)
 	mask |= 1 << micromips_to_32_reg_f_map[EXTRACT_OPERAND (1, MF, *ip)];
-      if (pinfo2 & INSN2_MOD_GPR_MG)
-	mask |= 1 << micromips_to_32_reg_g_map[EXTRACT_OPERAND (1, MG, *ip)];
-      if (pinfo2 & INSN2_MOD_GPR_MHI)
-	{
-	  mask |= 1 << micromips_to_32_reg_h_map[EXTRACT_OPERAND (1, MH, *ip)];
-	  mask |= 1 << micromips_to_32_reg_i_map[EXTRACT_OPERAND (1, MI, *ip)];
-	}
-      if (pinfo2 & INSN2_MOD_GPR_MJ)
-	mask |= 1 << EXTRACT_OPERAND (1, MJ, *ip);
-      if (pinfo2 & INSN2_MOD_GPR_MM)
-	mask |= 1 << micromips_to_32_reg_m_map[EXTRACT_OPERAND (1, MM, *ip)];
-      if (pinfo2 & INSN2_MOD_GPR_MN)
-	mask |= 1 << micromips_to_32_reg_n_map[EXTRACT_OPERAND (1, MN, *ip)];
-      if (pinfo2 & INSN2_MOD_GPR_MP)
-	mask |= 1 << EXTRACT_OPERAND (1, MP, *ip);
-      if (pinfo2 & INSN2_MOD_GPR_MQ)
-	mask |= 1 << micromips_to_32_reg_q_map[EXTRACT_OPERAND (1, MQ, *ip)];
       if (pinfo2 & INSN2_MOD_SP)
 	mask |= 1 << SP;
     }
@@ -3019,6 +2996,26 @@ gpr_read_mask (const struct mips_cl_insn *ip)
       if (pinfo2 & INSN2_READ_GPR_Z)
 	mask |= 1 << EXTRACT_OPERAND (mips_opts.micromips, RZ, *ip);
     }
+  if (mips_opts.micromips)
+    {
+      if (pinfo2 & INSN2_READ_GPR_MC)
+	mask |= 1 << micromips_to_32_reg_c_map[EXTRACT_OPERAND (1, MC, *ip)];
+      if (pinfo2 & INSN2_READ_GPR_ME)
+	mask |= 1 << micromips_to_32_reg_e_map[EXTRACT_OPERAND (1, ME, *ip)];
+      if (pinfo2 & INSN2_READ_GPR_MG)
+	mask |= 1 << micromips_to_32_reg_g_map[EXTRACT_OPERAND (1, MG, *ip)];
+      if (pinfo2 & INSN2_READ_GPR_MJ)
+	mask |= 1 << EXTRACT_OPERAND (1, MJ, *ip);
+      if (pinfo2 & INSN2_READ_GPR_MMN)
+	{
+	  mask |= 1 << micromips_to_32_reg_m_map[EXTRACT_OPERAND (1, MM, *ip)];
+	  mask |= 1 << micromips_to_32_reg_n_map[EXTRACT_OPERAND (1, MN, *ip)];
+	}
+      if (pinfo2 & INSN2_READ_GPR_MP)
+	mask |= 1 << EXTRACT_OPERAND (1, MP, *ip);
+      if (pinfo2 & INSN2_READ_GPR_MQ)
+	mask |= 1 << micromips_to_32_reg_q_map[EXTRACT_OPERAND (1, MQ, *ip)];
+    }
   /* Don't include register 0.  */
   return mask & ~1;
 }
@@ -3057,12 +3054,26 @@ gpr_write_mask (const struct mips_cl_insn *ip)
 	mask |= 1 << EXTRACT_OPERAND (mips_opts.micromips, RD, *ip);
       if (pinfo & INSN_WRITE_GPR_T)
 	mask |= 1 << EXTRACT_OPERAND (mips_opts.micromips, RT, *ip);
-      if (pinfo2 & INSN2_WRITE_GPR_S)
+      if (pinfo & INSN_WRITE_GPR_S)
 	mask |= 1 << EXTRACT_OPERAND (mips_opts.micromips, RS, *ip);
       if (pinfo & INSN_WRITE_GPR_31)
 	mask |= 1 << RA;
       if (pinfo2 & INSN2_WRITE_GPR_Z)
 	mask |= 1 << EXTRACT_OPERAND (mips_opts.micromips, RZ, *ip);
+    }
+  if (mips_opts.micromips)
+    {
+      if (pinfo2 & INSN2_WRITE_GPR_MB)
+	mask |= 1 << micromips_to_32_reg_b_map[EXTRACT_OPERAND (1, MB, *ip)];
+      if (pinfo2 & INSN2_WRITE_GPR_MHI)
+	{
+	  mask |= 1 << micromips_to_32_reg_h_map[EXTRACT_OPERAND (1, MH, *ip)];
+	  mask |= 1 << micromips_to_32_reg_i_map[EXTRACT_OPERAND (1, MI, *ip)];
+	}
+      if (pinfo2 & INSN2_WRITE_GPR_MJ)
+	mask |= 1 << EXTRACT_OPERAND (1, MJ, *ip);
+      if (pinfo2 & INSN2_WRITE_GPR_MP)
+	mask |= 1 << EXTRACT_OPERAND (1, MP, *ip);
     }
   /* Don't include register 0.  */
   return mask & ~1;
@@ -3666,12 +3677,9 @@ fix_loongson2f (struct mips_cl_insn * ip)
 static bfd_boolean
 can_swap_branch_p (struct mips_cl_insn *ip)
 {
-  unsigned long pinfo, pinfo2, prev_pinfo;
+  unsigned long pinfo, pinfo2, prev_pinfo, prev_pinfo2;
   unsigned int gpr_read, gpr_write, prev_gpr_read, prev_gpr_write;
 
-  /* For microMIPS, disable reordering.  */
-  if (mips_opts.micromips)
-    return FALSE;
 
   /* -O2 and above is required for this optimization.  */
   if (mips_optimize < 2)
@@ -3771,7 +3779,10 @@ can_swap_branch_p (struct mips_cl_insn *ip)
     return FALSE;
 
   /* If the previous instruction uses the PC, we can not swap.  */
+  prev_pinfo2 = history[0].insn_mo->pinfo2;
   if (mips_opts.mips16 && (prev_pinfo & MIPS16_INSN_READ_PC))
+    return FALSE;
+  if (mips_opts.micromips && (prev_pinfo2 & INSN2_READ_PC))
     return FALSE;
 
   /* If the previous instruction has an incorrect size for a fixed
@@ -3973,6 +3984,7 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
   bfd_boolean relaxed_branch = FALSE;
   enum append_method method;
   bfd_boolean relax32;
+  int branch_disp;
 
   if (mips_fix_loongson2f && !HAVE_CODE_COMPRESSION)
     fix_loongson2f (ip);
@@ -4164,6 +4176,7 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
     }
 
   method = get_append_method (ip);
+  branch_disp = method == APPEND_SWAP ? insn_length (history) : 0;
 
 #ifdef OBJ_ELF
   /* The value passed to dwarf2_emit_insn is the distance between
@@ -4181,8 +4194,7 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
      and for MIPS16/microMIPS code also prevents a debugger from
      placing a breakpoint in the middle of the branch (and corrupting
      code if software breakpoints are used).  */
-  dwarf2_emit_insn ((HAVE_CODE_COMPRESSION ? -1 : 0)
-		    + (method == APPEND_SWAP ? insn_length (history) : 0));
+  dwarf2_emit_insn ((HAVE_CODE_COMPRESSION ? -1 : 0) + branch_disp);
 #endif
 
   relax32 = (mips_relax_branch
@@ -4236,6 +4248,7 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
       gas_assert (address_expr != NULL);
       gas_assert (!mips_relax.sequence);
 
+      relaxed_branch = TRUE;
       length32 = relaxed_micromips_32bit_branch_length (NULL, NULL, uncond);
       add_relaxed_insn (ip, relax32 ? length32 : 4, relax16 ? 2 : 4,
 			RELAX_MICROMIPS_ENCODE (type, AT, uncond, compact, al,
@@ -4450,25 +4463,21 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	    move_insn (ip, delay.frag, delay.where);
 	    move_insn (&delay, ip->frag, ip->where + insn_length (ip));
 	  }
-	else if (mips_opts.micromips)
-	  {
-	    /* We don't reorder for micromips.  */
-	    abort ();
-	  }
 	else if (relaxed_branch)
 	  {
 	    /* Add the delay slot instruction to the end of the
 	       current frag and shrink the fixed part of the
 	       original frag.  If the branch occupies the tail of
 	       the latter, move it backwards to cover the gap.  */
-	    delay.frag->fr_fix -= 4;
+	    delay.frag->fr_fix -= branch_disp;
 	    if (delay.frag == ip->frag)
-	      move_insn (ip, ip->frag, ip->where - 4);
+	      move_insn (ip, ip->frag, ip->where - branch_disp);
 	    add_fixed_insn (&delay);
 	  }
 	else
 	  {
-	    move_insn (&delay, ip->frag, ip->where);
+	    move_insn (&delay, ip->frag,
+		       ip->where - branch_disp + insn_length (ip));
 	    move_insn (ip, history[0].frag, history[0].where);
 	  }
 	history[0] = *ip;

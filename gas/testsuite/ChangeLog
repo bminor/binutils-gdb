@@ -1,3 +1,12 @@
+2011-08-09  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* gas/mips/micromips.d: Update according to changes to enable
+	microMIPS branch swapping.
+	* gas/mips/micromips-trap.d: Likewise.
+	* gas/mips/micromips@jal-svr4pic.d: Likewise.
+	* gas/mips/micromips@loc-swap.d: Likewise.
+	* gas/mips/micromips@loc-swap-dis.d: Likewise.
+
 2011-08-05  David S. Miller  <davem@davemloft.net>
 
 	* gas/sparc/hpcvis3.d: New test.

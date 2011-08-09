@@ -1,5 +1,23 @@
 2011-08-09  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* config/tc-mips.c (gpr_mod_mask): Remove INSN2_MOD_GPR_MB,
+	INSN2_MOD_GPR_MC, INSN2_MOD_GPR_ME, INSN2_MOD_GPR_MG,
+	INSN2_MOD_GPR_MHI, INSN2_MOD_GPR_MJ, INSN2_MOD_GPR_MM,
+	INSN2_MOD_GPR_MN, INSN2_MOD_GPR_MP and INSN2_MOD_GPR_MQ opcode
+	register use checks.
+	(gpr_read_mask): Add INSN2_READ_GPR_MC, INSN2_READ_GPR_ME
+	INSN2_READ_GPR_MG, INSN2_READ_GPR_MJ, INSN2_READ_GPR_MMN,
+	INSN2_READ_GPR_MP and INSN2_READ_GPR_MQ opcode register use
+	checks.
+	(gpr_write_mask): Replace INSN2_WRITE_GPR_S opcode register
+	use flag with INSN_WRITE_GPR_S.  Add INSN2_WRITE_GPR_MB,
+	INSN2_WRITE_GPR_MHI, INSN2_WRITE_GPR_MJ and INSN2_WRITE_GPR_MP
+	opcode register use checks.
+	(can_swap_branch_p): Enable microMIPS branch swapping.
+	(append_insn): Likewise.
+
+2011-08-09  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* config/tc-mips.c (RELAX_MICROMIPS_ENCODE): Remove forced 16-bit
 	branch size information.
 	(RELAX_MICROMIPS_U16BIT): Remove macro.
