@@ -18963,6 +18963,8 @@ static const struct mips_cpu_info mips_cpu_info_table[] =
   { "4ksd",           MIPS_CPU_ASE_SMARTMIPS,	ISA_MIPS32R2,   CPU_MIPS32R2 },
   { "m4k",            0,			ISA_MIPS32R2,   CPU_MIPS32R2 },
   { "m4kp",           0,			ISA_MIPS32R2,   CPU_MIPS32R2 },
+  { "m14k",           MIPS_CPU_ASE_MCU,		ISA_MIPS32R2,   CPU_MIPS32R2 },
+  { "m14kc",          MIPS_CPU_ASE_MCU,		ISA_MIPS32R2,   CPU_MIPS32R2 },
   { "24kc",           0,			ISA_MIPS32R2,   CPU_MIPS32R2 },
   { "24kf2_1",        0,			ISA_MIPS32R2,   CPU_MIPS32R2 },
   { "24kf",           0,			ISA_MIPS32R2,   CPU_MIPS32R2 },

@@ -1,4 +1,12 @@
 2011-08-09  Chao-ying Fu  <fu@mips.com>
+            Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* config/tc-mips.c (mips_cpu_info_table): Add "m14k" and
+	"m14kc".
+	* doc/c-mips.texi (MIPS architecture options): Add "m14k" and
+	"m14kc" to the list of -march options.
+
+2011-08-09  Chao-ying Fu  <fu@mips.com>
             Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* config/tc-mips.c (mips_set_options): Add ase_mcu.
