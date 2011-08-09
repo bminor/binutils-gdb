@@ -1,5 +1,16 @@
 2011-08-09  Pedro Alves  <pedro@codesourcery.com>
 
+	* lib/mi-support.exp (detect_async): Rename to...
+	(mi_detect_async): ... this.
+	* gdb.mi/mi-nonstop-exit.exp: Adjust.
+	* gdb.mi/mi-nonstop.exp: Adjust.
+	* gdb.mi/mi-ns-stale-regcache.exp: Adjust.
+	* gdb.mi/mi-nsintrall.exp: Adjust.
+	* gdb.mi/mi-nsmoribund.exp: Adjust.
+	* gdb.mi/mi-nsthrexec.exp: Adjust.
+
+2011-08-09  Pedro Alves  <pedro@codesourcery.com>
+
 	* gdb.base/display.c (do_loops): New `p_i' local.
 	* gdb.base/display.exp: Test displaying a variable that is
 	temporarily at a bad address.

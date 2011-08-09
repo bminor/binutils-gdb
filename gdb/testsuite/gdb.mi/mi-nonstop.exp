@@ -54,7 +54,7 @@ mi_gdb_load $binfile
 
 mi_gdb_test "-gdb-set non-stop 1" ".*"
 mi_gdb_test "-gdb-set target-async 1" ".*"
-detect_async
+mi_detect_async
 
 if { [mi_run_to_main] < 0 } {
     continue
