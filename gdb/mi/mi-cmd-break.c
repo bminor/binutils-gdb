@@ -202,7 +202,7 @@ mi_cmd_break_passcount (char *command, char **argv, int argc)
     }
   else
     {
-      error (_("Cound not find tracepoint %d"), n);
+      error (_("Could not find tracepoint %d"), n);
     }
 }
 
