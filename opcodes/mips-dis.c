@@ -564,7 +564,7 @@ const struct mips_arch_choice mips_arch_choices[] =
 
   { "mips32r2",	1, bfd_mach_mipsisa32r2, CPU_MIPS32R2,
     (ISA_MIPS32R2 | INSN_SMARTMIPS | INSN_DSP | INSN_DSPR2
-     | INSN_MIPS3D | INSN_MT),
+     | INSN_MIPS3D | INSN_MT | INSN_MCU),
     mips_cp0_names_mips3264r2,
     mips_cp0sel_names_mips3264r2, ARRAY_SIZE (mips_cp0sel_names_mips3264r2),
     mips_hwr_names_mips3264r2 },
@@ -578,7 +578,7 @@ const struct mips_arch_choice mips_arch_choices[] =
 
   { "mips64r2",	1, bfd_mach_mipsisa64r2, CPU_MIPS64R2,
     (ISA_MIPS64R2 | INSN_MIPS3D | INSN_DSP | INSN_DSPR2
-     | INSN_DSP64 | INSN_MT | INSN_MDMX),
+     | INSN_DSP64 | INSN_MT | INSN_MDMX | INSN_MCU),
     mips_cp0_names_mips3264r2,
     mips_cp0sel_names_mips3264r2, ARRAY_SIZE (mips_cp0sel_names_mips3264r2),
     mips_hwr_names_mips3264r2 },
@@ -1168,6 +1168,18 @@ print_insn_args (const char *d,
 	  if (delta & 0x40) /* test sign bit */
 	    delta |= ~OP_MASK_DSPSFT_7;
 	  (*info->fprintf_func) (info->stream, "%d", delta);
+	  break;
+
+	case '~':
+	  delta = (l >> OP_SH_OFFSET12) & OP_MASK_OFFSET12;
+	  if (delta & 0x800)
+	    delta |= ~0x7ff;
+	  (*info->fprintf_func) (info->stream, "%d", delta);
+	  break;
+
+	case '\\':
+	  (*info->fprintf_func) (info->stream, "0x%lx",
+				 (l >> OP_SH_3BITPOS) & OP_MASK_3BITPOS);
 	  break;
 
 	case '\'':
@@ -2386,6 +2398,10 @@ print_insn_micromips (bfd_vma memaddr, struct disassemble_info *info)
 
 		case '<':
 		  iprintf (is, "0x%lx", GET_OP (insn, SHAMT));
+		  break;
+
+		case '\\':
+		  iprintf (is, "0x%lx", GET_OP (insn, 3BITPOS));
 		  break;
 
 		case '|':

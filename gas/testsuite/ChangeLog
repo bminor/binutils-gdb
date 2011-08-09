@@ -1,4 +1,12 @@
 2011-08-09  Maciej W. Rozycki  <macro@codesourcery.com>
+            Chao-ying Fu  <fu@mips.com>
+
+	* gas/mips/micromips@mcu.d: New test.
+	* gas/mips/mcu.d: Likewise.
+	* gas/mips/mcu.s: New test source.
+	* gas/mips/mips.exp: Run the new tests.
+
+2011-08-09  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* gas/mips/micromips.d: Update according to changes to enable
 	microMIPS branch swapping.

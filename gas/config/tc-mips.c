@@ -218,6 +218,7 @@ struct mips_set_options
   int ase_dsp;
   int ase_dspr2;
   int ase_mt;
+  int ase_mcu;
   /* Whether we are assembling for the mips16 processor.  0 if we are
      not, 1 if we are, and -1 if the value has not been initialized.
      Changed by `.set mips16' and `.set nomips16', and the -mips16 and
@@ -292,8 +293,8 @@ static struct mips_set_options mips_opts =
 {
   /* isa */ ISA_UNKNOWN, /* ase_mips3d */ -1, /* ase_mdmx */ -1,
   /* ase_smartmips */ 0, /* ase_dsp */ -1, /* ase_dspr2 */ -1, /* ase_mt */ -1,
-  /* mips16 */ -1, /* micromips */ -1, /* noreorder */ 0, /* at */ ATREG,
-  /* warn_about_macros */ 0, /* nomove */ 0, /* nobopt */ 0,
+  /* ase_mcu */ -1, /* mips16 */ -1, /* micromips */ -1, /* noreorder */ 0,
+  /* at */ ATREG, /* warn_about_macros */ 0, /* nomove */ 0, /* nobopt */ 0,
   /* noautoextend */ 0, /* gp32 */ 0, /* fp32 */ 0, /* arch */ CPU_UNKNOWN,
   /* sym32 */ FALSE, /* soft_float */ FALSE, /* single_float */ FALSE
 };
@@ -367,6 +368,9 @@ static int file_ase_mt;
 
 #define ISA_SUPPORTS_MT_ASE (mips_opts.isa == ISA_MIPS32R2		\
 			     || mips_opts.isa == ISA_MIPS64R2)
+
+#define ISA_SUPPORTS_MCU_ASE (mips_opts.isa == ISA_MIPS32R2		\
+			      || mips_opts.isa == ISA_MIPS64R2)
 
 /* The argument of the -march= flag.  The architecture we are assembling.  */
 static int file_mips_arch = CPU_UNKNOWN;
@@ -1388,6 +1392,7 @@ struct mips_cpu_info
 #define MIPS_CPU_ASE_MIPS3D	0x0010	/* CPU implements MIPS-3D ASE */
 #define MIPS_CPU_ASE_MDMX	0x0020	/* CPU implements MDMX ASE */
 #define MIPS_CPU_ASE_DSPR2	0x0040	/* CPU implements DSP R2 ASE */
+#define MIPS_CPU_ASE_MCU	0x0080	/* CPU implements MCU ASE */
 
 static const struct mips_cpu_info *mips_parse_cpu (const char *, const char *);
 static const struct mips_cpu_info *mips_cpu_info_from_isa (int);
@@ -2203,6 +2208,8 @@ is_opcode_valid (const struct mips_opcode *mo)
     isa |= INSN_MIPS3D;
   if (mips_opts.ase_smartmips)
     isa |= INSN_SMARTMIPS;
+  if (mips_opts.ase_mcu)
+    isa |= INSN_MCU;
 
   /* Don't accept instructions based on the ISA if the CPU does not implement
      all the coprocessor insns. */
@@ -5044,9 +5051,14 @@ macro_build (expressionS *ep, const char *name, const char *fmt, ...)
 	  INSERT_OPERAND (1, OFFSET10, insn, va_arg (args, int));
 	  continue;
 
+	case '\\':
+	  INSERT_OPERAND (mips_opts.micromips,
+			  3BITPOS, insn, va_arg (args, unsigned int));
+	  continue;
+
 	case '~':
-	  gas_assert (mips_opts.micromips);
-	  INSERT_OPERAND (1, OFFSET12, insn, va_arg (args, unsigned long));
+	  INSERT_OPERAND (mips_opts.micromips,
+			  OFFSET12, insn, va_arg (args, unsigned long));
 	  continue;
 
 	case 'N':
@@ -7881,6 +7893,22 @@ macro (struct mips_cl_insn *ip)
 
       break;
 
+    case M_ACLR_AB:
+      ab = 1;
+    case M_ACLR_OB:
+      s = "aclr";
+      treg = EXTRACT_OPERAND (mips_opts.micromips, 3BITPOS, *ip);
+      fmt = "\\,~(b)";
+      off12 = 1;
+      goto ld_st;
+    case M_ASET_AB:
+      ab = 1;
+    case M_ASET_OB:
+      s = "aset";
+      treg = EXTRACT_OPERAND (mips_opts.micromips, 3BITPOS, *ip);
+      fmt = "\\,~(b)";
+      off12 = 1;
+      goto ld_st;
     case M_LB_AB:
       ab = 1;
       s = "lb";
@@ -10270,6 +10298,8 @@ validate_mips_insn (const struct mips_opcode *opc)
       case '$': USE_BITS (OP_MASK_MT_H,		OP_SH_MT_H);	break;
       case '*': USE_BITS (OP_MASK_MTACC_T,	OP_SH_MTACC_T);	break;
       case '&': USE_BITS (OP_MASK_MTACC_D,	OP_SH_MTACC_D);	break;
+      case '\\': USE_BITS (OP_MASK_3BITPOS,	OP_SH_3BITPOS);	break;
+      case '~': USE_BITS (OP_MASK_OFFSET12,	OP_SH_OFFSET12); break;
       case 'g': USE_BITS (OP_MASK_RD,		OP_SH_RD);	break;
       default:
 	as_bad (_("internal: bad mips opcode (unknown operand type `%c'): %s %s"),
@@ -10427,6 +10457,7 @@ validate_micromips_insn (const struct mips_opcode *opc)
       case 'S': USE_BITS (FS);		break;
       case 'T': USE_BITS (FT);		break;
       case 'V': USE_BITS (FS);		break;
+      case '\\': USE_BITS (3BITPOS);	break;
       case 'a': USE_BITS (TARGET);	break;
       case 'b': USE_BITS (RS);		break;
       case 'c': USE_BITS (CODE);	break;
@@ -10933,6 +10964,25 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 		as_bad (_("Invalid dsp/smartmips acc register"));
 	      break;
 
+	    case '\\':		/* 3-bit bit position.  */
+	      {
+		unsigned long mask = (!mips_opts.micromips
+				      ? OP_MASK_3BITPOS
+				      : MICROMIPSOP_MASK_3BITPOS);
+
+		my_getExpression (&imm_expr, s);
+		check_absolute_expr (ip, &imm_expr);
+		if ((unsigned long) imm_expr.X_add_number > mask)
+		  as_warn (_("Bit position for %s not in range 0..%lu (%lu)"),
+			   ip->insn_mo->name,
+			   mask, (unsigned long) imm_expr.X_add_number);
+		INSERT_OPERAND (mips_opts.micromips,
+				3BITPOS, *ip, imm_expr.X_add_number);
+		imm_expr.X_op = O_absent;
+		s = expr_end;
+	      }
+	      continue;
+
 	    case ',':
 	      ++argnum;
 	      if (*s++ == *args)
@@ -11371,8 +11421,8 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 	      break;
 
 	    case '.':		/* 10-bit offset.  */
-	    case '~':		/* 12-bit offset.  */
 	      gas_assert (mips_opts.micromips);
+	    case '~':		/* 12-bit offset.  */
 	      {
 		int shift = *args == '.' ? 9 : 11;
 		size_t i;
@@ -11398,7 +11448,8 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 		if (shift == 9)
 		  INSERT_OPERAND (1, OFFSET10, *ip, imm_expr.X_add_number);
 		else
-		  INSERT_OPERAND (1, OFFSET12, *ip, imm_expr.X_add_number);
+		  INSERT_OPERAND (mips_opts.micromips,
+				  OFFSET12, *ip, imm_expr.X_add_number);
 		imm_expr.X_op = O_absent;
 		s = expr_end;
 	      }
@@ -14176,6 +14227,8 @@ enum options
     OPTION_NO_DSPR2,
     OPTION_MICROMIPS,
     OPTION_NO_MICROMIPS,
+    OPTION_MCU,
+    OPTION_NO_MCU,
     OPTION_COMPAT_ARCH_BASE,
     OPTION_M4650,
     OPTION_NO_M4650,
@@ -14270,6 +14323,8 @@ struct option md_longopts[] =
   {"mno-dspr2", no_argument, NULL, OPTION_NO_DSPR2},
   {"mmicromips", no_argument, NULL, OPTION_MICROMIPS},
   {"mno-micromips", no_argument, NULL, OPTION_NO_MICROMIPS},
+  {"mmcu", no_argument, NULL, OPTION_MCU},
+  {"mno-mcu", no_argument, NULL, OPTION_NO_MCU},
 
   /* Old-style architecture options.  Don't add more of these.  */
   {"m4650", no_argument, NULL, OPTION_M4650},
@@ -14522,6 +14577,14 @@ md_parse_option (int c, char *arg)
 
     case OPTION_NO_MT:
       mips_opts.ase_mt = 0;
+      break;
+
+    case OPTION_MCU:
+      mips_opts.ase_mcu = 1;
+      break;
+
+    case OPTION_NO_MCU:
+      mips_opts.ase_mcu = 0;
       break;
 
     case OPTION_MICROMIPS:
@@ -15022,6 +15085,12 @@ mips_after_parse_args (void)
   if (mips_opts.ase_mt && !ISA_SUPPORTS_MT_ASE)
     as_warn (_("%s ISA does not support MT ASE"),
 	     mips_cpu_info_from_isa (mips_opts.isa)->name);
+
+  if (mips_opts.ase_mcu == -1)
+    mips_opts.ase_mcu = (arch_info->flags & MIPS_CPU_ASE_MCU) ? 1 : 0;
+  if (mips_opts.ase_mcu && !ISA_SUPPORTS_MCU_ASE)
+      as_warn (_("%s ISA does not support MCU ASE"),
+	       mips_cpu_info_from_isa (mips_opts.isa)->name);
 
   file_mips_isa = mips_opts.isa;
   file_ase_mips3d = mips_opts.ase_mips3d;
@@ -16069,6 +16138,10 @@ s_mipsset (int x ATTRIBUTE_UNUSED)
     }
   else if (strcmp (name, "nomt") == 0)
     mips_opts.ase_mt = 0;
+  else if (strcmp (name, "mcu") == 0)
+    mips_opts.ase_mcu = 1;
+  else if (strcmp (name, "nomcu") == 0)
+    mips_opts.ase_mcu = 0;
   else if (strncmp (name, "mips", 4) == 0 || strncmp (name, "arch=", 5) == 0)
     {
       int reset = 0;
@@ -19189,6 +19262,9 @@ MIPS options:\n\
   fprintf (stream, _("\
 -mmt			generate MT instructions\n\
 -mno-mt			do not generate MT instructions\n"));
+  fprintf (stream, _("\
+-mmcu			generate MCU instructions\n\
+-mno-mcu		do not generate MCU instructions\n"));
   fprintf (stream, _("\
 -mfix-loongson2f-jump	work around Loongson2F JUMP instructions\n\
 -mfix-loongson2f-nop	work around Loongson2F NOP errata\n\

@@ -1053,4 +1053,7 @@ if { [istarget mips*-*-vxworks*] } {
 	run_dump_test "micromips-branch-relax-pic"
 	run_dump_test "micromips-branch-delay"
     }
+
+    run_dump_test_arches "mcu"		[mips_arch_list_matching mips32r2 \
+					    !octeon]
 }

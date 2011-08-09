@@ -173,6 +173,9 @@
 #define RD_Z	INSN2_READ_FPR_Z
 #define RD_d	INSN2_READ_GPR_D
 
+/* MIPS MCU (MicroController) ASE support.  */
+#define MC	INSN_MCU
+
 /* The order of overloaded instructions matters.  Label arguments and
    register arguments look the same. Instructions that can have either
    for arguments must apear in the correct order in this table for the
@@ -272,6 +275,9 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"abs.d",   "D,V",	0x46200005, 0xffff003f,	WR_D|RD_S|FP_D,		0,		I1	},
 {"abs.ps",  "D,V",	0x46c00005, 0xffff003f,	WR_D|RD_S|FP_D,		0,		I5_33|IL2F	},
 {"abs.ps",  "D,V",	0x45600005, 0xffff003f,	WR_D|RD_S|FP_D,		0,		IL2E	},
+{"aclr",    "\\,~(b)",	0x04070000, 0xfc1f8000,	SM|RD_b|NODS,		0,		MC	},
+{"aclr",    "\\,o(b)",	0,    (int) M_ACLR_OB,	INSN_MACRO,		0,		MC	},
+{"aclr",    "\\,A(b)",	0,    (int) M_ACLR_AB,	INSN_MACRO,		0,		MC	},
 {"add",     "d,v,t",	0x00000020, 0xfc0007ff,	WR_d|RD_s|RD_t,		0,		I1	},
 {"add",     "t,r,I",	0,    (int) M_ADD_I,	INSN_MACRO,		0,		I1	},
 {"add",	"D,S,T",	0x45c00000,	0xffe0003f,	RD_S|RD_T|WR_D|FP_S,	0,	IL2E	},
@@ -312,6 +318,9 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"and.ob",  "D,S,k",	0x4bc0000c, 0xffe0003f,	WR_D|RD_S|RD_T,		0,		N54	},
 {"and.qh",  "X,Y,Q",	0x7820000c, 0xfc20003f,	WR_D|RD_S|RD_T|FP_D,	0,		MX	},
 {"andi",    "t,r,i",	0x30000000, 0xfc000000,	WR_t|RD_s,		0,		I1	},
+{"aset",    "\\,~(b)",	0x04078000, 0xfc1f8000,	SM|RD_b|NODS,		0,		MC	},
+{"aset",    "\\,o(b)",	0,    (int) M_ASET_OB,	INSN_MACRO,		0,		MC	},
+{"aset",    "\\,A(b)",	0,    (int) M_ASET_AB,	INSN_MACRO,		0,		MC	},
 {"baddu",   "d,v,t",	0x70000028, 0xfc0007ff, WR_d|RD_s|RD_t,		0,		IOCT	},
 /* b is at the top of the table.  */
 /* bal is at the top of the table.  */
@@ -778,6 +787,7 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"floor.w.s", "D,S",	0x4600000f, 0xffff003f, WR_D|RD_S|FP_S,		0,		I2	},
 {"hibernate","",        0x42000023, 0xffffffff,	0, 			0,		V1	},
 {"ins",     "t,r,+A,+B", 0x7c000004, 0xfc00003f, WR_t|RD_s,    		0,		I33	},
+{"iret",    "",		0x42000038, 0xffffffff,	NODS,			0,		MC	},
 {"jr",      "s",	0x00000008, 0xfc1fffff,	UBD|RD_s,		0,		I1	},
 /* jr.hb is officially MIPS{32,64}R2, but it works on R1 as jr with
    the same hazard barrier effect.  */

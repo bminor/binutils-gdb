@@ -1,3 +1,14 @@
+2011-08-09  Chao-ying Fu  <fu@mips.com>
+            Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* mips-dis.c (mips_arch_choices): Enable MCU for "mips32r2"
+	and "mips64r2".
+	(print_insn_args, print_insn_micromips): Handle MCU.
+	* micromips-opc.c (MC): New macro.
+	(micromips_opcodes): Add "aclr", "aset" and "iret".
+	* mips-opc.c (MC): New macro.
+	(mips_builtin_opcodes): Add "aclr", "aset" and "iret".
+
 2011-08-09  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* micromips-opc.c (MOD_mb, MOD_mc, MOD_md): Remove macros.

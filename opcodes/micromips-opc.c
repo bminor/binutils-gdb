@@ -99,6 +99,9 @@
 #define I1	INSN_ISA1
 #define I3	INSN_ISA3
 
+/* MIPS MCU (MicroController) ASE support.  */
+#define MC	INSN_MCU
+
 const struct mips_opcode micromips_opcodes[] =
 {
 /* These instructions appear first so that the disassembler will find
@@ -138,6 +141,9 @@ const struct mips_opcode micromips_opcodes[] =
 {"abs.d",   "T,V",	0x5400237b, 0xfc00ffff,	WR_T|RD_S|FP_D,		0,		I1	},
 {"abs.s",   "T,V",	0x5400037b, 0xfc00ffff,	WR_T|RD_S|FP_S,		0,		I1	},
 {"abs.ps",  "T,V",	0x5400437b, 0xfc00ffff,	WR_T|RD_S|FP_D,		0,		I1	},
+{"aclr",    "\\,~(b)",	0x2000b000, 0xff00f000,	SM|RD_b|NODS,		0,		MC	},
+{"aclr",    "\\,o(b)",	0,    (int) M_ACLR_OB,	INSN_MACRO,		0,		MC	},
+{"aclr",    "\\,A(b)",	0,    (int) M_ACLR_AB,	INSN_MACRO,		0,		MC	},
 {"add",     "d,v,t",	0x00000110, 0xfc0007ff,	WR_d|RD_s|RD_t,		0,		I1	},
 {"add",     "t,r,I",	0,    (int) M_ADD_I,	INSN_MACRO,		0,		I1	},
 {"add.d",   "D,V,T",	0x54000130, 0xfc0007ff,	WR_D|RD_S|RD_T|FP_D,	0,		I1	},
@@ -170,6 +176,9 @@ const struct mips_opcode micromips_opcodes[] =
 {"and",     "t,r,I",	0,    (int) M_AND_I,	INSN_MACRO,		0,		I1	},
 {"andi",    "md,mc,mC",	    0x2c00,     0xfc00,	0,			WR_md|RD_mc,	I1	},
 {"andi",    "t,r,i",	0xd0000000, 0xfc000000,	WR_t|RD_s,		0,		I1	},
+{"aset",    "\\,~(b)",	0x20003000, 0xff00f000,	SM|RD_b|NODS,		0,		MC	},
+{"aset",    "\\,o(b)",	0,    (int) M_ASET_OB,	INSN_MACRO,		0,		MC	},
+{"aset",    "\\,A(b)",	0,    (int) M_ASET_AB,	INSN_MACRO,		0,		MC	},
 /* b is at the top of the table.  */
 /* bal is at the top of the table.  */
 {"bc1f",    "p",	0x43800000, 0xffff0000,	CBD|RD_CC|FP_S,		0,		I1	},
@@ -508,6 +517,7 @@ const struct mips_opcode micromips_opcodes[] =
 {"floor.w.d", "T,V",	0x54004b3b, 0xfc00ffff,	WR_T|RD_S|FP_S|FP_D,	0,		I1	},
 {"floor.w.s", "T,V",	0x54000b3b, 0xfc00ffff,	WR_T|RD_S|FP_S,		0,		I1	},
 {"ins",     "t,r,+A,+B", 0x0000000c, 0xfc00003f, WR_t|RD_s,		0,		I1	},
+{"iret",    "",		0x0000d37c, 0xffffffff,	NODS,			0,		MC	},
 {"jr",      "mj",	    0x4580,     0xffe0,	UBD,			RD_mj,		I1	},
 {"jr",      "s",	0x00000f3c, 0xffe0ffff,	UBD|RD_s,		BD32,		I1	}, /* jalr */
 {"jrs",     "s",	0x00004f3c, 0xffe0ffff,	UBD|RD_s,		BD16,		I1	}, /* jalrs */

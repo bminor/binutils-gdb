@@ -401,6 +401,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
    [@b{-mdsp}] [@b{-mno-dsp}]
    [@b{-mdspr2}] [@b{-mno-dspr2}]
    [@b{-mmt}] [@b{-mno-mt}]
+   [@b{-mmcu}] [@b{-mno-mcu}]
    [@b{-mfix7000}] [@b{-mno-fix7000}]
    [@b{-mfix-vr4120}] [@b{-mno-fix-vr4120}]
    [@b{-mfix-vr4130}] [@b{-mno-fix-vr4130}]
@@ -1222,6 +1223,12 @@ This tells the assembler to accept DSP Release 2 instructions.
 Generate code for the MT Application Specific Extension.
 This tells the assembler to accept MT instructions.
 @samp{-mno-mt} turns off this option.
+
+@item -mmcu
+@itemx -mno-mcu
+Generate code for the MCU Application Specific Extension.
+This tells the assembler to accept MCU instructions.
+@samp{-mno-mcu} turns off this option.
 
 @item --construct-floats
 @itemx --no-construct-floats

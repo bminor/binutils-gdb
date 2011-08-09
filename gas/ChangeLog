@@ -1,3 +1,25 @@
+2011-08-09  Chao-ying Fu  <fu@mips.com>
+            Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* config/tc-mips.c (mips_set_options): Add ase_mcu.
+	(mips_opts): Initialise ase_mcu to -1.
+	(ISA_SUPPORTS_MCU_ASE): New macro.
+	(MIPS_CPU_ASE_MCU): Likewise.
+	(is_opcode_valid): Handle MCU.
+	(macro_build, macro): Likewise.
+	(validate_mips_insn, validate_micromips_insn): Likewise.
+	(mips_ip): Likewise.
+	(options): Add OPTION_MCU and OPTION_NO_MCU.
+	(md_longopts): Add mmcu and mno-mcu.
+	(md_parse_option): Handle OPTION_MCU and OPTION_NO_MCU.
+	(mips_after_parse_args): Handle MCU.
+	(s_mipsset): Likewise.
+	(md_show_usage): Handle MCU options.
+
+	* doc/as.texinfo: Document -mmcu and -mno-mcu options.
+	* doc/c-mips.texi: Likewise, and document ".set mcu" and
+	".set nomcu" directives.
+
 2011-08-09  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* config/tc-mips.c (gpr_mod_mask): Remove INSN2_MOD_GPR_MB,

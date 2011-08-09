@@ -175,6 +175,12 @@ Generate code for the MT Application Specific Extension.
 This tells the assembler to accept MT instructions.
 @samp{-mno-mt} turns off this option.
 
+@item -mmcu
+@itemx -mno-mcu
+Generate code for the MCU Application Specific Extension.
+This tells the assembler to accept MCU instructions.
+@samp{-mno-mcu} turns off this option.
+
 @item -mfix7000
 @itemx -mno-fix7000
 Cause nops to be inserted if the read of the destination register
@@ -660,6 +666,14 @@ being accepted.
 The directive @code{.set mt} makes the assembler accept instructions
 from the MT Application Specific Extension from that point on
 in the assembly.  The @code{.set nomt} directive prevents MT
+instructions from being accepted.
+
+@cindex MIPS MCU instruction generation override
+@kindex @code{.set mcu}
+@kindex @code{.set nomcu}
+The directive @code{.set mcu} makes the assembler accept instructions
+from the MCU Application Specific Extension from that point on
+in the assembly.  The @code{.set nomcu} directive prevents MCU
 instructions from being accepted.
 
 Traditional @sc{mips} assemblers do not support these directives.
