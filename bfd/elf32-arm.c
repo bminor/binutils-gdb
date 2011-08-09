@@ -2776,6 +2776,9 @@ struct elf32_arm_link_hash_table
   /* Whether we should fix the Cortex-A8 Thumb-2 branch/TLB erratum.  */
   int fix_cortex_a8;
 
+  /* Whether we should fix the ARM1176 BLX immediate issue.  */
+  int fix_arm1176;
+
   /* Nonzero if the ARM/Thumb BLX instructions are available for use.  */
   int use_blx;
 
@@ -3315,6 +3318,7 @@ elf32_arm_link_hash_table_create (bfd *abfd)
   ret->vfp11_erratum_glue_size = 0;
   ret->num_vfp11_fixes = 0;
   ret->fix_cortex_a8 = 0;
+  ret->fix_arm1176 = 0;
   ret->bfd_of_glue_owner = NULL;
   ret->byteswap_code = 0;
   ret->target1_is_rel = 0;
@@ -5930,9 +5934,21 @@ bfd_elf32_arm_get_bfd_for_interworking (bfd *abfd, struct bfd_link_info *info)
 static void
 check_use_blx (struct elf32_arm_link_hash_table *globals)
 {
-  if (bfd_elf_get_obj_attr_int (globals->obfd, OBJ_ATTR_PROC,
-				Tag_CPU_arch) > 2)
-    globals->use_blx = 1;
+  int cpu_arch;
+
+  cpu_arch = bfd_elf_get_obj_attr_int (globals->obfd, OBJ_ATTR_PROC, 
+				       Tag_CPU_arch);
+
+  if (globals->fix_arm1176)
+    {
+      if (cpu_arch == TAG_CPU_ARCH_V6T2 || cpu_arch > TAG_CPU_ARCH_V6K)
+	globals->use_blx = 1;
+    }
+  else
+    {
+      if (cpu_arch > TAG_CPU_ARCH_V4T)
+	globals->use_blx = 1;
+    }
 }
 
 bfd_boolean
@@ -6786,7 +6802,8 @@ bfd_elf32_arm_set_target_relocs (struct bfd *output_bfd,
 				 int use_blx,
                                  bfd_arm_vfp11_fix vfp11_fix,
 				 int no_enum_warn, int no_wchar_warn,
-				 int pic_veneer, int fix_cortex_a8)
+				 int pic_veneer, int fix_cortex_a8,
+				 int fix_arm1176)
 {
   struct elf32_arm_link_hash_table *globals;
 
@@ -6811,6 +6828,7 @@ bfd_elf32_arm_set_target_relocs (struct bfd *output_bfd,
   globals->vfp11_fix = vfp11_fix;
   globals->pic_veneer = pic_veneer;
   globals->fix_cortex_a8 = fix_cortex_a8;
+  globals->fix_arm1176 = fix_arm1176;
 
   BFD_ASSERT (is_arm_elf (output_bfd));
   elf_arm_tdata (output_bfd)->no_enum_size_warning = no_enum_warn;

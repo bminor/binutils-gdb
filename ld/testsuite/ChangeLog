@@ -1,3 +1,13 @@
+2011-08-09  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
+	* ld-arm/arm-elf.exp (armelftests): Update for new command-line
+	options.
+	(armeabitests): Update for new command-line options, and add
+	new test cases.
+	* ld-arm/fix-arm1176.s: Add test case.
+	* ld-arm/fix-arm1176-off.d: Likewise.
+	* ld-arm/fix-arm1176-on.d: Likewise.
+
 2011-08-05  Alan Modra  <amodra@gmail.com>
 
 	* ld-powerpc/tlsexe.r: Update for stripped .branch_lt.

@@ -6321,6 +6321,18 @@ instruction. The original instruction is then replaced with a branch to
 the veneer. The extra cycles required to call and return from the veneer
 are sufficient to avoid the erratum in both the scalar and vector cases.
 
+@cindex ARM1176 erratum workaround
+@kindex --fix-arm1176
+@kindex --no-fix-arm1176
+The @samp{--fix-arm1176} switch enables a link-time workaround for an erratum 
+in certain ARM1176 processors.  The workaround is enabled by default if you 
+are targetting ARM v6 (excluding ARM v6T2) or earlier.  It can be disabled 
+unconditionally by specifying @samp{--no-fix-arm1176}.
+
+Further information is available in the ``ARM1176JZ-S and ARM1176JZF-S 
+Programmer Advice Notice'' available on the ARM documentaion website at:
+http://infocenter.arm.com/.
+
 @cindex NO_ENUM_SIZE_WARNING
 @kindex --no-enum-size-warning
 The @option{--no-enum-size-warning} switch prevents the linker from

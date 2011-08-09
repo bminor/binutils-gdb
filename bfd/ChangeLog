@@ -1,3 +1,13 @@
+2011-08-09  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
+	* bfd-in.h (bfd_elf32_arm_set_target_relocs): Update prototype.
+	* bfd-in2.h (bfd_elf32_arm_set_target_relocs): Likewise.
+	* elf32-arm.c (elf32_arm_link_hash_table): New field.
+	(elf232_arm_link_hash_table_create): Initialise new field.
+	(check_use_blx): Change test depending on fix_arm1176.
+	(bfd_elf32_arm_set_target_relocs): Set fix_arm1176 from
+	command line options.
+
 2011-08-08  Tristan Gingold  <gingold@adacore.com>
 
 	* mach-o.c (struct mach_o_segment_name_xlat): Add comments.

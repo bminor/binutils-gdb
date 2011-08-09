@@ -1,3 +1,15 @@
+2011-08-09  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
+	* emultempl/armelf.em (fix_arm1176): New variable.
+	(arm_elf_create_output_section_statements): Pass
+	fix_arm1176 option to bfd backend.
+	(OPTION_FIX_ARM1176): New define.
+	(OPTION_NO_FIX_ARM1176): Likewise.
+	(PARSE_AND_LIST_LONGOPTS): Add new command line options.
+	(PARSE_AND_LIST_OPTIONS): Likewise.
+	(PARSE_AND_LIST_ARGS_CASES): Likewise.
+	* ld.texinfo: Document new command line options.
+
 2011-08-09  Alan Modra  <amodra@gmail.com>
 
 	PR ld/13066
