@@ -36,24 +36,12 @@
 
 #include "solib-som.h"
 
-/*
-
-   LOCAL FUNCTION
-
-   som_symtab_read -- read the symbol table of a SOM file
-
-   SYNOPSIS
-
-   void som_symtab_read (bfd *abfd, struct objfile *objfile,
-   struct section_offsets *section_offsets)
-
-   DESCRIPTION
+/* Read the symbol table of a SOM file.
 
    Given an open bfd, a base address to relocate symbols to, and a
    flag that specifies whether or not this bfd is for an executable
    or not (may be shared library for example), add all the global
-   function and data symbols to the minimal symbol table.
- */
+   function and data symbols to the minimal symbol table.  */
 
 static void
 som_symtab_read (bfd *abfd, struct objfile *objfile,

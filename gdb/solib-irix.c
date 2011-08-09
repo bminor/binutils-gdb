@@ -244,17 +244,7 @@ static void *base_breakpoint;
 
 static CORE_ADDR debug_base;	/* Base of dynamic linker structures.  */
 
-/*
-
-   LOCAL FUNCTION
-
-   locate_base -- locate the base address of dynamic linker structs
-
-   SYNOPSIS
-
-   CORE_ADDR locate_base (void)
-
-   DESCRIPTION
+/* Locate the base address of dynamic linker structs.
 
    For both the SunOS and SVR4 shared library implementations, if the
    inferior executable has been linked dynamically, there is a single
@@ -287,9 +277,7 @@ static CORE_ADDR debug_base;	/* Base of dynamic linker structures.  */
    we need to find this address.  We may be stopped on the first instruc-
    tion of the interpreter (C shared library), the first instruction of
    the executable itself, or somewhere else entirely (if we attached
-   to the process for example).
-
- */
+   to the process for example).  */
 
 static CORE_ADDR
 locate_base (void)
@@ -305,22 +293,10 @@ locate_base (void)
   return (address);
 }
 
-/*
-
-   LOCAL FUNCTION
-
-   disable_break -- remove the "mapping changed" breakpoint
-
-   SYNOPSIS
-
-   static int disable_break ()
-
-   DESCRIPTION
+/* Remove the "mapping changed" breakpoint.
 
    Removes the breakpoint that gets hit when the dynamic linker
-   completes a mapping change.
-
- */
+   completes a mapping change.  */
 
 static int
 disable_break (void)
@@ -346,21 +322,10 @@ disable_break (void)
   return (status);
 }
 
-/*
-
-   LOCAL FUNCTION
-
-   enable_break -- arrange for dynamic linker to hit breakpoint
-
-   SYNOPSIS
-
-   int enable_break (void)
-
-   DESCRIPTION
+/* Arrange for dynamic linker to hit breakpoint.
 
    This functions inserts a breakpoint at the entry point of the
-   main executable, where all shared libraries are mapped in.
- */
+   main executable, where all shared libraries are mapped in.  */
 
 static int
 enable_break (void)
@@ -384,22 +349,7 @@ enable_break (void)
   return 0;
 }
 
-/*
-
-   LOCAL FUNCTION
-
-   irix_solib_create_inferior_hook -- shared library startup support
-
-   SYNOPSIS
-
-   void solib_create_inferior_hook (int from_tty)
-
-   DESCRIPTION
-
-   When gdb starts up the inferior, it nurses it along (through the
-   shell) until it is ready to execute it's first instruction.  At this
-   point, this function gets called via expansion of the macro
-   SOLIB_CREATE_INFERIOR_HOOK.
+/* Implement the "create_inferior_hook" target_solib_ops method.
 
    For SunOS executables, this first instruction is typically the
    one at "_start", or a similar text label, regardless of whether
@@ -433,8 +383,7 @@ enable_break (void)
    handling will probably have to wait until the implementation is
    changed to use the "breakpoint handler function" method.
 
-   Also, what if child has exit()ed?  Must exit loop somehow.
- */
+   Also, what if child has exit()ed?  Must exit loop somehow.  */
 
 static void
 irix_solib_create_inferior_hook (int from_tty)
@@ -499,24 +448,7 @@ irix_solib_create_inferior_hook (int from_tty)
   inf->control.stop_soon = NO_STOP_QUIETLY;
 }
 
-/* LOCAL FUNCTION
-
-   current_sos -- build a list of currently loaded shared objects
-
-   SYNOPSIS
-
-   struct so_list *current_sos ()
-
-   DESCRIPTION
-
-   Build a list of `struct so_list' objects describing the shared
-   objects currently loaded in the inferior.  This list does not
-   include an entry for the main executable file.
-
-   Note that we only gather information directly available from the
-   inferior --- we don't examine any of the shared library files
-   themselves.  The declaration of `struct so_list' says which fields
-   we provide values for.  */
+/* Implement the "current_sos" target_so_ops method.  */
 
 static struct so_list *
 irix_current_sos (void)
@@ -603,27 +535,12 @@ irix_current_sos (void)
   return head;
 }
 
-/*
+/* Implement the "open_symbol_file_object" target_so_ops method.
 
-  LOCAL FUNCTION
-
-  irix_open_symbol_file_object
-
-  SYNOPSIS
-
-  void irix_open_symbol_file_object (void *from_tty)
-
-  DESCRIPTION
-
-  If no open symbol file, attempt to locate and open the main symbol
-  file.  On IRIX, this is the first link map entry.  If its name is
-  here, we can open it.  Useful when attaching to a process without
-  first loading its symbol file.
-
-  If FROM_TTYP dereferences to a non-zero integer, allow messages to
-  be printed.  This parameter is a pointer rather than an int because
-  open_symbol_file_object() is called via catch_errors() and
-  catch_errors() requires a pointer argument.  */
+   If no open symbol file, attempt to locate and open the main symbol
+   file.  On IRIX, this is the first link map entry.  If its name is
+   here, we can open it.  Useful when attaching to a process without
+   first loading its symbol file.  */
 
 static int
 irix_open_symbol_file_object (void *from_ttyp)
@@ -676,31 +593,9 @@ irix_open_symbol_file_object (void *from_ttyp)
   return 1;
 }
 
+/* Implement the "special_symbol_handling" target_so_ops method.
 
-/*
-
-   LOCAL FUNCTION
-
-   irix_special_symbol_handling -- additional shared library symbol handling
-
-   SYNOPSIS
-
-   void irix_special_symbol_handling ()
-
-   DESCRIPTION
-
-   Once the symbols from a shared object have been loaded in the usual
-   way, we are called to do any system specific symbol handling that 
-   is needed.
-
-   For SunOS4, this consisted of grunging around in the dynamic
-   linkers structures to find symbol definitions for "common" symbols
-   and adding them to the minimal symbol table for the runtime common
-   objfile.
-
-   However, for IRIX, there's nothing to do.
-
- */
+   For IRIX, there's nothing to do.  */
 
 static void
 irix_special_symbol_handling (void)

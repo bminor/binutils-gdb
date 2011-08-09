@@ -74,19 +74,7 @@ show_watchdog (struct ui_file *file, int from_tty,
   fprintf_filtered (file, _("Watchdog timer is %s.\n"), value);
 }
 
-/*
-
-   LOCAL FUNCTION
-
-   maintenance_command -- access the maintenance subcommands
-
-   SYNOPSIS
-
-   void maintenance_command (char *args, int from_tty)
-
-   DESCRIPTION
-
- */
+/* Access the maintenance subcommands.  */
 
 static void
 maintenance_command (char *args, int from_tty)

@@ -1,3 +1,31 @@
+2011-08-09  Pedro Alves  <pedro@codesourcery.com>
+
+	* elfread.c (elf_symtab_read): Ditto.
+	* maint.c (maintenance_command): Ditto.
+	* somread.c (som_symtab_read): Ditto.
+	* solib.c (solib_find, solib_map_sections, update_solib_list)
+	(solib_add, info_sharedlibrary_command, solib_name_from_address)
+	(solib_create_inferior_hook, in_solib_dynsym_resolve_code)
+	(sharedlibrary_command, no_shared_libraries): Rework comments.
+	* solib-irix.c (locate_base, disable_break, enable_break)
+	(irix_solib_create_inferior_hook, irix_solib_create_inferior_hook)
+	(irix_current_sos, irix_open_symbol_file_object)
+	(irix_special_symbol_handling): Ditto.
+	* solib-sunos.c (locate_base, first_link_map_member)
+	(sunos_current_sos, disable_break, enable_break)
+	(sunos_special_symbol_handling, sunos_solib_create_inferior_hook):
+	Ditto.
+	* solib-svr4.c (bfd_lookup_symbol, elf_locate_base, locate_base)
+	(open_symbol_file_object, svr4_current_sos, enable_break)
+	(svr4_special_symbol_handling, svr4_solib_create_inferior_hook):
+	Ditto.
+	* solib-frv.c (bfd_lookup_symbol, open_symbol_file_object)
+	(frv_current_sos, enable_break, frv_special_symbol_handling)
+	(frv_solib_create_inferior_hook): Ditto.
+	* solist.h (struct target_so_ops): Extend the comments of the
+	special_symbol_handling, current_sos and open_symbol_file_object
+	methods.
+
 2011-08-09  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* python/lib/gdb/__init__.py: Auto-load files in command and

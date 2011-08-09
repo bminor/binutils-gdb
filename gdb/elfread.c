@@ -206,18 +206,7 @@ record_minimal_symbol (const char *name, int name_len, int copy_name,
 					  bfd_section, objfile);
 }
 
-/*
-
-   LOCAL FUNCTION
-
-   elf_symtab_read -- read the symbol table of an ELF file
-
-   SYNOPSIS
-
-   void elf_symtab_read (struct objfile *objfile, int type,
-			 long number_of_symbols, asymbol **symbol_table)
-
-   DESCRIPTION
+/* Read the symbol table of an ELF file.
 
    Given an objfile, a symbol table, and a flag indicating whether the
    symbol table contains regular, dynamic, or synthetic symbols, add all
@@ -227,9 +216,7 @@ record_minimal_symbol (const char *name, int name_len, int copy_name,
    defined in the ELF symbol table, which can be used to locate
    the beginnings of sections from each ".o" file that was linked to
    form the executable objfile.  We gather any such info and record it
-   in data structures hung off the objfile's private data.
-
- */
+   in data structures hung off the objfile's private data.  */
 
 #define ST_REGULAR 0
 #define ST_DYNAMIC 1

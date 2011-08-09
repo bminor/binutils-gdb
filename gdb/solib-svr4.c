@@ -370,17 +370,7 @@ get_svr4_info (void)
 
 static int match_main (const char *);
 
-/*
-
-   LOCAL FUNCTION
-
-   bfd_lookup_symbol -- lookup the value for a specific symbol
-
-   SYNOPSIS
-
-   CORE_ADDR bfd_lookup_symbol (bfd *abfd, char *symname)
-
-   DESCRIPTION
+/* Lookup the value for a specific symbol.
 
    An expensive way to lookup the value of a single symbol for
    bfd's that are only temporary anyway.  This is used by the
@@ -392,8 +382,7 @@ static int match_main (const char *);
    if this architecture uses function descriptors.
 
    Note that 0 is specifically allowed as an error return (no
-   such symbol).
- */
+   such symbol).  */
 
 static CORE_ADDR
 bfd_lookup_symbol (bfd *abfd, const char *symname)
@@ -764,19 +753,8 @@ scan_dyntag_auxv (int dyntag, CORE_ADDR *ptr)
   return 0;
 }
 
-
-/*
-
-   LOCAL FUNCTION
-
-   elf_locate_base -- locate the base address of dynamic linker structs
-   for SVR4 elf targets.
-
-   SYNOPSIS
-
-   CORE_ADDR elf_locate_base (void)
-
-   DESCRIPTION
+/* Locate the base address of dynamic linker structs for SVR4 elf
+   targets.
 
    For SVR4 elf targets the address of the dynamic linker's runtime
    structure is contained within the dynamic info section in the
@@ -785,9 +763,7 @@ scan_dyntag_auxv (int dyntag, CORE_ADDR *ptr)
    real address before starting the inferior, we have to read in the
    dynamic info section from the inferior address space.
    If there are any errors while trying to find the address, we
-   silently return 0, otherwise the found address is returned.
-
- */
+   silently return 0, otherwise the found address is returned.  */
 
 static CORE_ADDR
 elf_locate_base (void)
@@ -828,17 +804,7 @@ elf_locate_base (void)
   return 0;
 }
 
-/*
-
-   LOCAL FUNCTION
-
-   locate_base -- locate the base address of dynamic linker structs
-
-   SYNOPSIS
-
-   CORE_ADDR locate_base (struct svr4_info *)
-
-   DESCRIPTION
+/* Locate the base address of dynamic linker structs.
 
    For both the SunOS and SVR4 shared library implementations, if the
    inferior executable has been linked dynamically, there is a single
@@ -861,9 +827,7 @@ elf_locate_base (void)
    to a lot more work to discover the address of the debug base symbol.
    Because of this complexity, we cache the value we find and return that
    value on subsequent invocations.  Note there is no copy in the
-   executable symbol tables.
-
- */
+   executable symbol tables.  */
 
 static CORE_ADDR
 locate_base (struct svr4_info *info)
@@ -983,27 +947,12 @@ svr4_keep_data_in_core (CORE_ADDR vaddr, unsigned long size)
   return (name_lm >= vaddr && name_lm < vaddr + size);
 }
 
-/*
+/* Implement the "open_symbol_file_object" target_so_ops method.
 
-  LOCAL FUNCTION
-
-  open_symbol_file_object
-
-  SYNOPSIS
-
-  void open_symbol_file_object (void *from_tty)
-
-  DESCRIPTION
-
-  If no open symbol file, attempt to locate and open the main symbol
-  file.  On SVR4 systems, this is the first link map entry.  If its
-  name is here, we can open it.  Useful when attaching to a process
-  without first loading its symbol file.
-
-  If FROM_TTYP dereferences to a non-zero integer, allow messages to
-  be printed.  This parameter is a pointer rather than an int because
-  open_symbol_file_object() is called via catch_errors() and
-  catch_errors() requires a pointer argument.  */
+   If no open symbol file, attempt to locate and open the main symbol
+   file.  On SVR4 systems, this is the first link map entry.  If its
+   name is here, we can open it.  Useful when attaching to a process
+   without first loading its symbol file.  */
 
 static int
 open_symbol_file_object (void *from_ttyp)
@@ -1108,24 +1057,7 @@ svr4_default_sos (void)
   return head;
 }
 
-/* LOCAL FUNCTION
-
-   current_sos -- build a list of currently loaded shared objects
-
-   SYNOPSIS
-
-   struct so_list *current_sos ()
-
-   DESCRIPTION
-
-   Build a list of `struct so_list' objects describing the shared
-   objects currently loaded in the inferior.  This list does not
-   include an entry for the main executable file.
-
-   Note that we only gather information directly available from the
-   inferior --- we don't examine any of the shared library files
-   themselves.  The declaration of `struct so_list' says which fields
-   we provide values for.  */
+/* Implement the "current_sos" target_so_ops method.  */
 
 static struct so_list *
 svr4_current_sos (void)
@@ -1321,17 +1253,7 @@ exec_entry_point (struct bfd *abfd, struct target_ops *targ)
 					     targ);
 }
 
-/*
-
-   LOCAL FUNCTION
-
-   enable_break -- arrange for dynamic linker to hit breakpoint
-
-   SYNOPSIS
-
-   int enable_break (void)
-
-   DESCRIPTION
+/* Arrange for dynamic linker to hit breakpoint.
 
    Both the SunOS and the SVR4 dynamic linkers have, as part of their
    debugger interface, support for arranging for the inferior to hit
@@ -1361,8 +1283,7 @@ exec_entry_point (struct bfd *abfd, struct target_ops *targ)
    The debugger interface structure also contains an enumeration which
    is set to either RT_ADD or RT_DELETE prior to changing the mapping,
    depending upon whether or not the library is being mapped or unmapped,
-   and then set to RT_CONSISTENT after the library is mapped/unmapped.
- */
+   and then set to RT_CONSISTENT after the library is mapped/unmapped.  */
 
 static int
 enable_break (struct svr4_info *info, int from_tty)
@@ -1649,34 +1570,12 @@ enable_break (struct svr4_info *info, int from_tty)
   return 0;
 }
 
-/*
-
-   LOCAL FUNCTION
-
-   special_symbol_handling -- additional shared library symbol handling
-
-   SYNOPSIS
-
-   void special_symbol_handling ()
-
-   DESCRIPTION
-
-   Once the symbols from a shared object have been loaded in the usual
-   way, we are called to do any system specific symbol handling that
-   is needed.
-
-   For SunOS4, this consisted of grunging around in the dynamic
-   linkers structures to find symbol definitions for "common" symbols
-   and adding them to the minimal symbol table for the runtime common
-   objfile.
-
-   However, for SVR4, there's nothing to do.
-
- */
+/* Implement the "special_symbol_handling" target_so_ops method.  */
 
 static void
 svr4_special_symbol_handling (void)
 {
+  /* Nothing to do.  */
 }
 
 /* Read the ELF program headers from ABFD.  Return the contents and
@@ -2133,28 +2032,7 @@ svr4_relocate_main_executable (void)
     }
 }
 
-/*
-
-   GLOBAL FUNCTION
-
-   svr4_solib_create_inferior_hook -- shared library startup support
-
-   SYNOPSIS
-
-   void svr4_solib_create_inferior_hook (int from_tty)
-
-   DESCRIPTION
-
-   When gdb starts up the inferior, it nurses it along (through the
-   shell) until it is ready to execute it's first instruction.  At this
-   point, this function gets called via expansion of the macro
-   SOLIB_CREATE_INFERIOR_HOOK.
-
-   For SunOS executables, this first instruction is typically the
-   one at "_start", or a similar text label, regardless of whether
-   the executable is statically or dynamically linked.  The runtime
-   startup code takes care of dynamically linking in any shared
-   libraries, once gdb allows the inferior to continue.
+/* Implement the "create_inferior_hook" target_solib_ops method.
 
    For SVR4 executables, this first instruction is either the first
    instruction in the dynamic linker (for dynamically linked
@@ -2165,10 +2043,9 @@ svr4_relocate_main_executable (void)
    shared libraries, maps in the actual user executable, and then
    jumps to "start" in the user executable.
 
-   For both SunOS shared libraries, and SVR4 shared libraries, we
-   can arrange to cooperate with the dynamic linker to discover the
-   names of shared libraries that are dynamically linked, and the
-   base addresses to which they are linked.
+   We can arrange to cooperate with the dynamic linker to discover the
+   names of shared libraries that are dynamically linked, and the base
+   addresses to which they are linked.
 
    This function is responsible for discovering those names and
    addresses, and saving sufficient information about them to allow
@@ -2182,8 +2059,7 @@ svr4_relocate_main_executable (void)
    handling will probably have to wait until the implementation is
    changed to use the "breakpoint handler function" method.
 
-   Also, what if child has exit()ed?  Must exit loop somehow.
- */
+   Also, what if child has exit()ed?  Must exit loop somehow.  */
 
 static void
 svr4_solib_create_inferior_hook (int from_tty)

@@ -274,17 +274,7 @@ solib_add_common_symbols (CORE_ADDR rtc_symp)
 }
 
 
-/*
-
-   LOCAL FUNCTION
-
-   locate_base -- locate the base address of dynamic linker structs
-
-   SYNOPSIS
-
-   CORE_ADDR locate_base (void)
-
-   DESCRIPTION
+/* Locate the base address of dynamic linker structs.
 
    For both the SunOS and SVR4 shared library implementations, if the
    inferior executable has been linked dynamically, there is a single
@@ -307,9 +297,7 @@ solib_add_common_symbols (CORE_ADDR rtc_symp)
    to a lot more work to discover the address of the debug base symbol.
    Because of this complexity, we cache the value we find and return that
    value on subsequent invocations.  Note there is no copy in the
-   executable symbol tables.
-
- */
+   executable symbol tables.  */
 
 static CORE_ADDR
 locate_base (void)
@@ -334,17 +322,7 @@ locate_base (void)
   return (0);
 }
 
-/*
-
-   LOCAL FUNCTION
-
-   first_link_map_member -- locate first member in dynamic linker's map
-
-   SYNOPSIS
-
-   static CORE_ADDR first_link_map_member (void)
-
-   DESCRIPTION
+/* Locate first member in dynamic linker's map.
 
    Find the first element in the inferior's dynamic link map, and
    return its address in the inferior.  This function doesn't copy the
@@ -375,24 +353,7 @@ open_symbol_file_object (void *from_ttyp)
 }
 
 
-/* LOCAL FUNCTION
-
-   current_sos -- build a list of currently loaded shared objects
-
-   SYNOPSIS
-
-   struct so_list *current_sos ()
-
-   DESCRIPTION
-
-   Build a list of `struct so_list' objects describing the shared
-   objects currently loaded in the inferior.  This list does not
-   include an entry for the main executable file.
-
-   Note that we only gather information directly available from the
-   inferior --- we don't examine any of the shared library files
-   themselves.  The declaration of `struct so_list' says which fields
-   we provide values for.  */
+/* Implement the "current_sos" target_so_ops method.  */
 
 static struct so_list *
 sunos_current_sos (void)
@@ -495,22 +456,10 @@ sunos_in_dynsym_resolve_code (CORE_ADDR pc)
   return 0;
 }
 
-/*
-
-   LOCAL FUNCTION
-
-   disable_break -- remove the "mapping changed" breakpoint
-
-   SYNOPSIS
-
-   static int disable_break ()
-
-   DESCRIPTION
+/* Remove the "mapping changed" breakpoint.
 
    Removes the breakpoint that gets hit when the dynamic linker
-   completes a mapping change.
-
- */
+   completes a mapping change.  */
 
 static int
 disable_break (void)
@@ -547,18 +496,7 @@ disable_break (void)
   return 1;
 }
 
-
-/*
-
-   LOCAL FUNCTION
-
-   enable_break -- arrange for dynamic linker to hit breakpoint
-
-   SYNOPSIS
-
-   int enable_break (void)
-
-   DESCRIPTION
+/* Arrange for dynamic linker to hit breakpoint.
 
    Both the SunOS and the SVR4 dynamic linkers have, as part of their
    debugger interface, support for arranging for the inferior to hit
@@ -587,9 +525,9 @@ disable_break (void)
 
    The debugger interface structure also contains an enumeration which
    is set to either RT_ADD or RT_DELETE prior to changing the mapping,
-   depending upon whether or not the library is being mapped or unmapped,
-   and then set to RT_CONSISTENT after the library is mapped/unmapped.
- */
+   depending upon whether or not the library is being mapped or
+   unmapped, and then set to RT_CONSISTENT after the library is
+   mapped/unmapped.  */
 
 static int
 enable_break (void)
@@ -626,28 +564,12 @@ enable_break (void)
   return (success);
 }
 
-/*
-
-   LOCAL FUNCTION
-
-   special_symbol_handling -- additional shared library symbol handling
-
-   SYNOPSIS
-
-   void special_symbol_handling ()
-
-   DESCRIPTION
-
-   Once the symbols from a shared object have been loaded in the usual
-   way, we are called to do any system specific symbol handling that 
-   is needed.
+/* Implement the "special_symbol_handling" target_so_ops method.
 
    For SunOS4, this consists of grunging around in the dynamic
    linkers structures to find symbol definitions for "common" symbols
    and adding them to the minimal symbol table for the runtime common
-   objfile.
-
- */
+   objfile.  */
 
 static void
 sunos_special_symbol_handling (void)
@@ -689,22 +611,7 @@ sunos_special_symbol_handling (void)
     }
 }
 
-/*
-
-   GLOBAL FUNCTION
-
-   sunos_solib_create_inferior_hook -- shared library startup support
-
-   SYNOPSIS
-
-   void sunos_solib_create_inferior_hook ()
-
-   DESCRIPTION
-
-   When gdb starts up the inferior, it nurses it along (through the
-   shell) until it is ready to execute it's first instruction.  At this
-   point, this function gets called via expansion of the macro
-   SOLIB_CREATE_INFERIOR_HOOK.
+/* Implement the "create_inferior_hook" target_solib_ops method.
 
    For SunOS executables, this first instruction is typically the
    one at "_start", or a similar text label, regardless of whether
@@ -712,19 +619,9 @@ sunos_special_symbol_handling (void)
    startup code takes care of dynamically linking in any shared
    libraries, once gdb allows the inferior to continue.
 
-   For SVR4 executables, this first instruction is either the first
-   instruction in the dynamic linker (for dynamically linked
-   executables) or the instruction at "start" for statically linked
-   executables.  For dynamically linked executables, the system
-   first exec's /lib/libc.so.N, which contains the dynamic linker,
-   and starts it running.  The dynamic linker maps in any needed
-   shared libraries, maps in the actual user executable, and then
-   jumps to "start" in the user executable.
-
-   For both SunOS shared libraries, and SVR4 shared libraries, we
-   can arrange to cooperate with the dynamic linker to discover the
-   names of shared libraries that are dynamically linked, and the
-   base addresses to which they are linked.
+   We can arrange to cooperate with the dynamic linker to discover the
+   names of shared libraries that are dynamically linked, and the base
+   addresses to which they are linked.
 
    This function is responsible for discovering those names and
    addresses, and saving sufficient information about them to allow
@@ -738,8 +635,7 @@ sunos_special_symbol_handling (void)
    handling will probably have to wait until the implementation is
    changed to use the "breakpoint handler function" method.
 
-   Also, what if child has exit()ed?  Must exit loop somehow.
- */
+   Also, what if child has exit()ed?  Must exit loop somehow.  */
 
 static void
 sunos_solib_create_inferior_hook (int from_tty)
