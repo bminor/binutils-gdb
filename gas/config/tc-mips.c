@@ -1153,40 +1153,37 @@ static int mips_relax_branch;
 
    The information we store for this type of relaxation is the argument
    code found in the opcode file for this relocation, the register
-   selected as the assembler temporary, whether the user explicitly
-   requested a 16-bit form, whether the branch is unconditional, whether
-   it is compact, whether it stores the link address implicitly in $ra,
-   whether relaxation of out-of-range 32-bit branches to a sequence of
-   instructions is enabled, and whether the displacement of a branch is
-   too large to fit as an immediate argument of a 16-bit and a 32-bit
-   branch, respectively.  */
-#define RELAX_MICROMIPS_ENCODE(type, at, u16bit, uncond, compact, link,	\
-			       relax32, toofar16, toofar32)		\
-  (0x40000000								\
-   | ((type) & 0xff)							\
-   | (((at) & 0x1f) << 8)						\
-   | ((u16bit) ? 0x2000 : 0)						\
-   | ((uncond) ? 0x4000 : 0)						\
-   | ((compact) ? 0x8000 : 0)						\
-   | ((link) ? 0x10000 : 0)						\
-   | ((relax32) ? 0x20000 : 0)						\
-   | ((toofar16) ? 0x40000 : 0)						\
-   | ((toofar32) ? 0x80000 : 0))
+   selected as the assembler temporary, whether the branch is
+   unconditional, whether it is compact, whether it stores the link
+   address implicitly in $ra, whether relaxation of out-of-range 32-bit
+   branches to a sequence of instructions is enabled, and whether the
+   displacement of a branch is too large to fit as an immediate argument
+   of a 16-bit and a 32-bit branch, respectively.  */
+#define RELAX_MICROMIPS_ENCODE(type, at, uncond, compact, link,	\
+			       relax32, toofar16, toofar32)	\
+  (0x40000000							\
+   | ((type) & 0xff)						\
+   | (((at) & 0x1f) << 8)					\
+   | ((uncond) ? 0x2000 : 0)					\
+   | ((compact) ? 0x4000 : 0)					\
+   | ((link) ? 0x8000 : 0)					\
+   | ((relax32) ? 0x10000 : 0)					\
+   | ((toofar16) ? 0x20000 : 0)					\
+   | ((toofar32) ? 0x40000 : 0))
 #define RELAX_MICROMIPS_P(i) (((i) & 0xc0000000) == 0x40000000)
 #define RELAX_MICROMIPS_TYPE(i) ((i) & 0xff)
 #define RELAX_MICROMIPS_AT(i) (((i) >> 8) & 0x1f)
-#define RELAX_MICROMIPS_U16BIT(i) (((i) & 0x2000) != 0)
-#define RELAX_MICROMIPS_UNCOND(i) (((i) & 0x4000) != 0)
-#define RELAX_MICROMIPS_COMPACT(i) (((i) & 0x8000) != 0)
-#define RELAX_MICROMIPS_LINK(i) (((i) & 0x10000) != 0)
-#define RELAX_MICROMIPS_RELAX32(i) (((i) & 0x20000) != 0)
+#define RELAX_MICROMIPS_UNCOND(i) (((i) & 0x2000) != 0)
+#define RELAX_MICROMIPS_COMPACT(i) (((i) & 0x4000) != 0)
+#define RELAX_MICROMIPS_LINK(i) (((i) & 0x8000) != 0)
+#define RELAX_MICROMIPS_RELAX32(i) (((i) & 0x10000) != 0)
 
-#define RELAX_MICROMIPS_TOOFAR16(i) (((i) & 0x40000) != 0)
-#define RELAX_MICROMIPS_MARK_TOOFAR16(i) ((i) | 0x40000)
-#define RELAX_MICROMIPS_CLEAR_TOOFAR16(i) ((i) & ~0x40000)
-#define RELAX_MICROMIPS_TOOFAR32(i) (((i) & 0x80000) != 0)
-#define RELAX_MICROMIPS_MARK_TOOFAR32(i) ((i) | 0x80000)
-#define RELAX_MICROMIPS_CLEAR_TOOFAR32(i) ((i) & ~0x80000)
+#define RELAX_MICROMIPS_TOOFAR16(i) (((i) & 0x20000) != 0)
+#define RELAX_MICROMIPS_MARK_TOOFAR16(i) ((i) | 0x20000)
+#define RELAX_MICROMIPS_CLEAR_TOOFAR16(i) ((i) & ~0x20000)
+#define RELAX_MICROMIPS_TOOFAR32(i) (((i) & 0x40000) != 0)
+#define RELAX_MICROMIPS_MARK_TOOFAR32(i) ((i) | 0x40000)
+#define RELAX_MICROMIPS_CLEAR_TOOFAR32(i) ((i) & ~0x40000)
 
 /* Is the given value a sign-extended 32-bit value?  */
 #define IS_SEXT_32BIT_NUM(x)						\
@@ -4196,10 +4193,7 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	     && (mips_opts.at || mips_pic == NO_PIC)
 	     /* Don't relax BPOSGE32/64 as they have no complementing
 	        branches.  */
-	     && !(ip->insn_mo->membership & (INSN_DSP64 | INSN_DSP))
-	     /* Don't try 32-bit branch relaxation when users specify
-	        16-bit/32-bit instructions.  */
-	     && !forced_insn_length);
+	     && !(ip->insn_mo->membership & (INSN_DSP64 | INSN_DSP)));
 
   if (!HAVE_CODE_COMPRESSION
       && address_expr
@@ -4227,7 +4221,10 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	   && address_expr
 	   && ((relax32 && *reloc_type == BFD_RELOC_16_PCREL_S2)
 	       || *reloc_type > BFD_RELOC_UNUSED)
-	   && (delayed_branch_p (ip) || compact_branch_p (ip)))
+	   && (delayed_branch_p (ip) || compact_branch_p (ip))
+	   /* Don't try branch relaxation when users specify
+	      16-bit/32-bit instructions.  */
+	   && !forced_insn_length)
     {
       bfd_boolean relax16 = *reloc_type > BFD_RELOC_UNUSED;
       int type = relax16 ? *reloc_type - BFD_RELOC_UNUSED : 0;
@@ -4241,10 +4238,8 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 
       length32 = relaxed_micromips_32bit_branch_length (NULL, NULL, uncond);
       add_relaxed_insn (ip, relax32 ? length32 : 4, relax16 ? 2 : 4,
-			RELAX_MICROMIPS_ENCODE (type, AT,
-						forced_insn_length == 2,
-						uncond, compact, al, relax32,
-						0, 0),
+			RELAX_MICROMIPS_ENCODE (type, AT, uncond, compact, al,
+						relax32, 0, 0),
 			address_expr->X_add_symbol,
 			address_expr->X_add_number);
       *reloc_type = BFD_RELOC_UNUSED;
@@ -12676,7 +12671,12 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 		  if (offset_expr.X_op == O_register)
 		    break;
 
-		  *offset_reloc = (int) BFD_RELOC_UNUSED + c;
+		  if (!forced_insn_length)
+		    *offset_reloc = (int) BFD_RELOC_UNUSED + c;
+		  else if (c == 'D')
+		    *offset_reloc = BFD_RELOC_MICROMIPS_10_PCREL_S1;
+		  else
+		    *offset_reloc = BFD_RELOC_MICROMIPS_7_PCREL_S1;
 		  s = expr_end;
 		  continue;
 
@@ -17241,9 +17241,6 @@ static int
 relaxed_micromips_16bit_branch_length (fragS *fragp, asection *sec, int update)
 {
   bfd_boolean toofar;
-
-  if (RELAX_MICROMIPS_U16BIT (fragp->fr_subtype))
-    return 2;
 
   if (fragp
       && S_IS_DEFINED (fragp->fr_symbol)

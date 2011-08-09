@@ -1,3 +1,25 @@
+2011-08-09  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* config/tc-mips.c (RELAX_MICROMIPS_ENCODE): Remove forced 16-bit
+	branch size information.
+	(RELAX_MICROMIPS_U16BIT): Remove macro.
+	(RELAX_MICROMIPS_UNCOND): Adjust accordingly.
+	(RELAX_MICROMIPS_COMPACT, RELAX_MICROMIPS_LINK): Likewise.
+	(RELAX_MICROMIPS_RELAX32): Likewise.
+	(RELAX_MICROMIPS_TOOFAR16): Likewise.
+	(RELAX_MICROMIPS_MARK_TOOFAR16): Likewise.
+	(RELAX_MICROMIPS_CLEAR_TOOFAR16): Likewise.
+	(RELAX_MICROMIPS_TOOFAR32): Likewise.
+	(RELAX_MICROMIPS_MARK_TOOFAR32): Likewise.
+	(RELAX_MICROMIPS_CLEAR_TOOFAR32): Likewise.
+	(append_insn): Always check forced_insn_length for microMIPS
+	relaxation.  Adjust code for the removal of
+	RELAX_MICROMIPS_U16BIT.
+	(mips_ip) <'D', 'E'>: If forced_insn_length, then emit the
+	relocation straight away.
+	(relaxed_micromips_16bit_branch_length): Adjust code for the
+	removal of RELAX_MICROMIPS_U16BIT.
+
 2011-08-08  Tristan Gingold  <gingold@adacore.com>
 
 	* config/obj-macho.c (obj_mach_o_section): New function.
