@@ -1,12 +1,12 @@
 2011-08-09  Pedro Alves  <pedro@codesourcery.com>
 
-	* elfread.c (elf_symtab_read): Ditto.
+	* elfread.c (elf_symtab_read): Rework comments.
 	* maint.c (maintenance_command): Ditto.
 	* somread.c (som_symtab_read): Ditto.
 	* solib.c (solib_find, solib_map_sections, update_solib_list)
 	(solib_add, info_sharedlibrary_command, solib_name_from_address)
 	(solib_create_inferior_hook, in_solib_dynsym_resolve_code)
-	(sharedlibrary_command, no_shared_libraries): Rework comments.
+	(sharedlibrary_command, no_shared_libraries): Ditto.
 	* solib-irix.c (locate_base, disable_break, enable_break)
 	(irix_solib_create_inferior_hook, irix_solib_create_inferior_hook)
 	(irix_current_sos, irix_open_symbol_file_object)
