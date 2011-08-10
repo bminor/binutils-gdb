@@ -1,7 +1,7 @@
 #objdump: -dr --prefix-addresses --show-raw-insn -M reg-names=numeric
 #name: MIPS mips5 instructions
-#source: mips5.s
-#stderr: mips5.l
+#source: mips5-fp.s
+#stderr: mips5-fp.l
 
 # Check MIPS V instruction assembly (microMIPS).
 

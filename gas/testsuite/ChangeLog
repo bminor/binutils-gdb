@@ -1,5 +1,17 @@
 2011-08-10  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* gas/mips/micromips@mips5.d: Rename to...
+	* gas/mips/micromips@mips5-fp.d: ... this.
+	* gas/mips/mips5.d: Rename to...
+	* gas/mips/mips5-fp.d: ... this.
+	* gas/mips/mips5.l: Rename to...
+	* gas/mips/mips5-fp.l: ... this.
+	* gas/mips/mips5.s: Rename to...
+	* gas/mips/mips5-fp.s: ... this.
+	* gas/mips/mips.exp: Update accordingly.
+
+2011-08-10  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* gas/mips/mips.exp: Define new "fpisa3", "fpisa4" and "fpisa5"
 	architecture properties adding them to "mips3", "mips4", "mips5"
 	and "mips32r2" architectures.  Use the new properties for the
