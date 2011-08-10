@@ -55,6 +55,10 @@
 #		The architecture includes the instructions defined
 #		by that MIPS ISA.
 #
+#	fpisa3, fpisa4, fpisa5
+#		The architecture includes the floating-point
+#		instructions defined by that MIPS ISA.
+#
 #	gpr_ilocks
 #		The architecture interlocks GPRs accesses.  (That is,
 #		there are no load delay slots.)
@@ -369,16 +373,16 @@ mips_arch_create mips1 	32	{}	{} \
 			{ -march=mips1 -mtune=mips1 } { -mmips:3000 }
 mips_arch_create mips2 	32	mips1	{ gpr_ilocks } \
 		        { -march=mips2 -mtune=mips2 } { -mmips:6000 }
-mips_arch_create mips3 	64	mips2	{} \
+mips_arch_create mips3 	64	mips2	{ fpisa3 } \
 			{ -march=mips3 -mtune=mips3 } { -mmips:4000 }
-mips_arch_create mips4 	64	mips3	{} \
+mips_arch_create mips4 	64	mips3	{ fpisa4 } \
 			{ -march=mips4 -mtune=mips4 } { -mmips:8000 }
-mips_arch_create mips5 	64	mips4	{} \
+mips_arch_create mips5 	64	mips4	{ fpisa5 } \
 			{ -march=mips5 -mtune=mips5 } { -mmips:mips5 }
 mips_arch_create mips32	32	mips2	{} \
 			{ -march=mips32 -mtune=mips32 } { -mmips:isa32 } \
 			{ mipsisa32-*-* mipsisa32el-*-* }
-mips_arch_create mips32r2 32	mips32	{ ror } \
+mips_arch_create mips32r2 32	mips32	{ fpisa3 fpisa4 fpisa5 ror } \
 			{ -march=mips32r2 -mtune=mips32r2 } \
 			{ -mmips:isa32r2 } \
 			{ mipsisa32r2-*-* mipsisa32r2el-*-* }
@@ -492,11 +496,11 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test_arches "24k-branch-delay-1" \
 	[mips_arch_list_matching mips1 !micromips]
     run_dump_test_arches "24k-triple-stores-1" \
-	[mips_arch_list_matching mips32r2 !octeon !micromips]
+	[mips_arch_list_matching fpisa5 !octeon !micromips]
     run_dump_test_arches "24k-triple-stores-2" \
 	[mips_arch_list_matching mips2 !micromips]
     run_dump_test_arches "24k-triple-stores-3" \
-	[mips_arch_list_matching mips3 !micromips]
+	[mips_arch_list_matching mips2 !micromips]
     run_dump_test_arches "24k-triple-stores-4" \
 	[mips_arch_list_matching mips2 !micromips]
     run_dump_test_arches "24k-triple-stores-5" \
@@ -623,14 +627,14 @@ if { [istarget mips*-*-vxworks*] } {
     if $elf { run_dump_test "lif-svr4pic" }
     if $elf { run_dump_test "lif-xgot" }
     run_dump_test_arches "mips4"	[mips_arch_list_matching mips4]
-    run_dump_test_arches "mips4-fp"	[mips_arch_list_matching mips4]
+    run_dump_test_arches "mips4-fp"	[mips_arch_list_matching fpisa4]
     run_list_test_arches "mips4-fp" "-32 -msoft-float" \
-					[mips_arch_list_matching mips4]
+					[mips_arch_list_matching fpisa4]
     run_dump_test_arches "mips4-branch-likely" \
 					[mips_arch_list_matching mips4]
     run_list_test_arches "mips4-branch-likely" "-32 -msoft-float" \
 					[mips_arch_list_matching mips4]
-    run_dump_test_arches "mips5"	[mips_arch_list_matching mips5]
+    run_dump_test_arches "mips5"	[mips_arch_list_matching fpisa5]
     run_dump_test "mul"
 
     run_dump_test_arches "rol"		[mips_arch_list_matching mips1 !ror]
@@ -1026,9 +1030,7 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "mips32-sync"
     run_dump_test_arches "mips32r2-sync" \
 					[mips_arch_list_matching mips32r2]
-    run_dump_test_arches "alnv_ps-swap" [lsort -dictionary -unique [concat \
-					[mips_arch_list_matching mips5] \
-					[mips_arch_list_matching mips32r2] ] ]
+    run_dump_test_arches "alnv_ps-swap" [mips_arch_list_matching fpisa5]
     run_dump_test_arches "cache" [lsort -dictionary -unique [concat \
 					[mips_arch_list_matching mips3] \
 					[mips_arch_list_matching mips32] ] ]

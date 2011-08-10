@@ -1,3 +1,11 @@
+2011-08-10  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* gas/mips/mips.exp: Define new "fpisa3", "fpisa4" and "fpisa5"
+	architecture properties adding them to "mips3", "mips4", "mips5"
+	and "mips32r2" architectures.  Use the new properties for the
+	"24k-triple-stores-1", "24k-triple-stores-3", "mips4-fp",
+	"mips5" and "alnv_ps-swap" tests.
+
 2011-08-09  Maciej W. Rozycki  <macro@codesourcery.com>
             Chao-ying Fu  <fu@mips.com>
 
