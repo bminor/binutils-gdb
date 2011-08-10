@@ -3715,9 +3715,8 @@ can_swap_branch_p (struct mips_cl_insn *ip)
   if (history[1].noreorder_p)
     return FALSE;
 
-  /* If the previous instruction had a fixup in mips16 mode, we can not
-     swap.  This normally means that the previous instruction was a 4
-     byte branch anyhow.  */
+  /* If the previous instruction had a fixup in mips16 mode, we can not swap.
+     This means that the previous instruction was a 4-byte one anyhow.  */
   if (mips_opts.mips16 && history[0].fixp[0])
     return FALSE;
 
