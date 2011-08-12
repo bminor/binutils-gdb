@@ -164,6 +164,9 @@ static reloc_howto_type x86_64_elf_howto_table[] =
   HOWTO(R_X86_64_IRELATIVE, 0, 4, 64, FALSE, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_X86_64_IRELATIVE", FALSE, MINUS_ONE,
 	MINUS_ONE, FALSE),
+  HOWTO(R_X86_64_RELATIVE64, 0, 4, 64, FALSE, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_X86_64_RELATIVE64", FALSE, MINUS_ONE,
+	MINUS_ONE, FALSE),
 
   /* We have a gap in the reloc numbers here.
      R_X86_64_standard counts the number up to this point, and
@@ -3083,6 +3086,16 @@ elf_x86_64_relocate_section (bfd *output_bfd,
       if (info->relocatable)
 	continue;
 
+      if (rel->r_addend == 0
+	  && r_type == R_X86_64_64
+	  && !ABI_64_P (output_bfd))
+	{
+	  /* For x32, treat R_X86_64_64 like R_X86_64_32 and zero-extend
+	     it to 64bit if addend is zero.  */
+	  r_type = R_X86_64_32;
+	  memset (contents + rel->r_offset + 4, 0, 4);
+	}
+
       /* Since STT_GNU_IFUNC symbol must go through PLT, we handle
 	 it here if it is defined in a non-shared object.  */
       if (h != NULL
@@ -3595,6 +3608,14 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 		    {
 		      relocate = TRUE;
 		      outrel.r_info = htab->r_info (0, R_X86_64_RELATIVE);
+		      outrel.r_addend = relocation + rel->r_addend;
+		    }
+		  else if (r_type == R_X86_64_64
+			   && !ABI_64_P (output_bfd))
+		    {
+		      relocate = TRUE;
+		      outrel.r_info = htab->r_info (0,
+						    R_X86_64_RELATIVE64);
 		      outrel.r_addend = relocation + rel->r_addend;
 		    }
 		  else

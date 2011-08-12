@@ -1,3 +1,27 @@
+2011-08-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/13082
+	* ld-x86-64/pr13082-1.s: New.
+	* ld-x86-64/pr13082-1a.d: Likewise.
+	* ld-x86-64/pr13082-1b.d: Likewise.
+	* ld-x86-64/pr13082-2.s: Likewise.
+	* ld-x86-64/pr13082-2a.d: Likewise.
+	* ld-x86-64/pr13082-2b.d: Likewise.
+	* ld-x86-64/pr13082-3.s: Likewise.
+	* ld-x86-64/pr13082-3a.d: Likewise.
+	* ld-x86-64/pr13082-3b.d: Likewise.
+	* ld-x86-64/pr13082-4.s: Likewise.
+	* ld-x86-64/pr13082-4a.d: Likewise.
+	* ld-x86-64/pr13082-4b.d: Likewise.
+	* ld-x86-64/pr13082-5.s: Likewise.
+	* ld-x86-64/pr13082-5a.d: Likewise.
+	* ld-x86-64/pr13082-5b.d: Likewise.
+	* ld-x86-64/pr13082-6.s: Likewise.
+	* ld-x86-64/pr13082-6a.d: Likewise.
+	* ld-x86-64/pr13082-6b.d: Likewise.
+
+	* ld-x86-64/x86-64.exp: Run pr13082-[1-6][ab].
+
 2011-08-09  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	* ld-arm/arm-elf.exp (armelftests): Update for new command-line

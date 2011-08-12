@@ -213,6 +213,18 @@ run_dump_test "ia32-3"
 run_dump_test "lp64-1"
 run_dump_test "lp64-2"
 run_dump_test "lp64-3"
+run_dump_test "pr13082-1a"
+run_dump_test "pr13082-1b"
+run_dump_test "pr13082-2a"
+run_dump_test "pr13082-2b"
+run_dump_test "pr13082-3a"
+run_dump_test "pr13082-3b"
+run_dump_test "pr13082-4a"
+run_dump_test "pr13082-4b"
+run_dump_test "pr13082-5a"
+run_dump_test "pr13082-5b"
+run_dump_test "pr13082-6a"
+run_dump_test "pr13082-6b"
 
 # Must be native with the C compiler
 if { [isnative] && [which $CC] != 0 } {

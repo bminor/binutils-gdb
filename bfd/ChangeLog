@@ -1,3 +1,11 @@
+2011-08-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/13082
+	* elf64-x86-64.c (x86_64_elf_howto_table): Add R_X86_64_RELATIVE64.
+	(elf_x86_64_relocate_section): Treat R_X86_64_64 like R_X86_64_32
+	and zero-extend it to 64bit if addend is zero for x32.  Generate
+	R_X86_64_RELATIVE64 for x32.
+
 2011-08-09  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	* bfd-in.h (bfd_elf32_arm_set_target_relocs): Update prototype.
