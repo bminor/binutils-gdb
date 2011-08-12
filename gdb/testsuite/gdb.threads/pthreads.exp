@@ -21,11 +21,6 @@ if $tracelevel then {
 }
 
 
-# This only works with native configurations
-if ![isnative] then {
-    return
-}
-
 set testfile "pthreads"
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}

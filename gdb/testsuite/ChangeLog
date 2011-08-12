@@ -1,3 +1,10 @@
+2011-08-12  Ulrich Weigand  <ulrich.weigand@linaro.org>
+
+	* gdb.threads/pthreads.exp: Enable on non-native configurations.
+	* gdb.mi/mi-pthreads.exp: Likewise.
+	* gdb.mi/mi2-pthreads.exp: Likewise.
+	* gdb.mi/gdb669.exp.exp: Likewise.
+
 2011-08-09  Pedro Alves  <pedro@codesourcery.com>
 
 	* lib/mi-support.exp (detect_async): Rename to...

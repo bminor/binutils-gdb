@@ -20,11 +20,6 @@
 # via these command pathways are properly executed. Console commands
 # executed via MI should use MI output wrappers, MI event handlers, etc.
 
-# This only works with native configurations
-if {![isnative]} {
-  return
-}
-
 load_lib mi-support.exp
 set MIFLAGS "-i=mi"
 

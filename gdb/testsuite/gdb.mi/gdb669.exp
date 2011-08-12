@@ -18,11 +18,6 @@
 # command "info threads" and the MI command "-thread-list-ids"
 # return different threads in the system.
 
-# This only works with native configurations
-if {![isnative]} {
-  return
-}
-
 load_lib mi-support.exp
 set MIFLAGS "-i=mi"
 
