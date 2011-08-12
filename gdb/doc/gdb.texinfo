@@ -23198,6 +23198,12 @@ is not found.
 A @code{gdb.Symbol} object has the following attributes:
 
 @table @code
+@defivar Symbol type
+The type of the symbol or @code{None} if no type is recorded.
+This attribute is represented as a @code{gdb.Type} object.
+@xref{Types In Python}.  This attribute is not writable.
+@end defivar
+
 @defivar Symbol symtab
 The symbol table in which the symbol appears.  This attribute is
 represented as a @code{gdb.Symtab} object.  @xref{Symbol Tables In

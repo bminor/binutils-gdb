@@ -1,3 +1,7 @@
+2011-08-12  Doug Evans  <dje@google.com>
+
+	* gdb.texinfo (Symbols In Python): Document symbol.type.
+
 2011-08-09  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* gdb.texinfo (Python): Document command and function

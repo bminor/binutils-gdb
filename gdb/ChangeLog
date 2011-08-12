@@ -1,3 +1,9 @@
+2011-08-12  Doug Evans  <dje@google.com>
+
+	* NEWS: Mention new "type" attribute of python gdb.Symbol objects.
+	* python/py-symbol.c (sympy_get_type): New function.
+	(symbol_object_getset): Add "type".
+
 2011-08-12  Pedro Alves  <pedro@codesourcery.com>
 
 	PR tui/13073

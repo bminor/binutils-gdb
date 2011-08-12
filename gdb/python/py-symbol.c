@@ -66,6 +66,22 @@ sympy_str (PyObject *self)
 }
 
 static PyObject *
+sympy_get_type (PyObject *self, void *closure)
+{
+  struct symbol *symbol = NULL;
+
+  SYMPY_REQUIRE_VALID (self, symbol);
+
+  if (SYMBOL_TYPE (symbol) == NULL)
+    {
+      Py_INCREF (Py_None);
+      return Py_None;
+    }
+
+  return type_to_type_object (SYMBOL_TYPE (symbol));
+}
+
+static PyObject *
 sympy_get_symtab (PyObject *self, void *closure)
 {
   struct symbol *symbol = NULL;
@@ -412,6 +428,8 @@ gdbpy_initialize_symbols (void)
 
 
 static PyGetSetDef symbol_object_getset[] = {
+  { "type", sympy_get_type, NULL,
+    "Type of the symbol.", NULL },
   { "symtab", sympy_get_symtab, NULL,
     "Symbol table in which the symbol appears.", NULL },
   { "name", sympy_get_name, NULL,

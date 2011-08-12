@@ -1,3 +1,7 @@
+2011-08-12  Doug Evans  <dje@google.com>
+
+	* gdb.python/py-symbol.exp: Add test for symbol.type.
+
 2011-08-12  Ulrich Weigand  <ulrich.weigand@linaro.org>
 
 	* gdb.threads/pthreads.exp: Enable on non-native configurations.
