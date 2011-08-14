@@ -143,6 +143,7 @@ process_saved_regs thrower { main } { }
 # Continue to the signal catcher, check main's saved-reg info, capture
 # catcher's saved-reg info.
 gdb_test "handle SIGSEGV pass print nostop"
+gdb_test "handle SIGILL pass print nostop"
 gdb_test "advance catcher" "catcher .* at .*"
 process_saved_regs catcher { sigtramp thrower } { main }
 

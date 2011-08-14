@@ -394,6 +394,11 @@ gdb_test_multiple "maint info sections" "maint info sections" {
 	set data_section ER_RW
 	pass "maint info sections"
     }
+    -re "Exec file:\r\n.*break($EXEEXT)?., file type.*neardata.*$gdb_prompt $" {
+	# c6x doesn't have .data section.  It has .neardata and .fardata section.
+	set data_section ".neardata"
+	pass "maint info sections"
+    }
     -re "Exec file:\r\n.*break($EXEEXT)?., file type.*$gdb_prompt $" {
 	pass "maint info sections"
     }

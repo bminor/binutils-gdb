@@ -53,6 +53,9 @@ switch -glob -- [istarget] {
 	unsupported "register tests"
 	return 0
     }
+    "tic6x-*-*" {
+	set core-regs {tic6x-core.xml}
+    }
     "i?86-*-*" {
 	set architecture "i386"
 	set regdir "i386/"

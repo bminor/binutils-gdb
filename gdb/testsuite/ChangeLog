@@ -1,3 +1,11 @@
+2011-08-14  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.base/maint.exp: set data_section to ".neardata".
+	* gdb.base/savedregs.c (thrower): Trigger SIGILL on NO-MMU machine.
+	* gdb.base/savedregs.exp: Handle SIGILL.
+	* gdb.mi/mi-syn-frame.c (bar): Trigger SIGILL on NO-MMU machine.
+	* gdb.xml/tdesc-regs.exp: Set core-regs for tic6x-*-*.
+
 2011-08-12  Doug Evans  <dje@google.com>
 
 	* gdb.python/py-symbol.exp: Add test for symbol.type.
