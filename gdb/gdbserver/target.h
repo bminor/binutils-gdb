@@ -313,7 +313,7 @@ struct target_ops
 
   /* Read loadmaps.  Read LEN bytes at OFFSET into a buffer at MYADDR.  */
   int (*read_loadmap) (const char *annex, CORE_ADDR offset,
-			     unsigned char *myaddr, unsigned int len);
+		       unsigned char *myaddr, unsigned int len);
 
   /* Target specific qSupported support.  */
   void (*process_qsupported) (const char *);

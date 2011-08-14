@@ -1,3 +1,8 @@
+2011-08-14  Yao Qi  <yao@codesourcery.com>
+
+	* target.h (struct target_ops): Fix indent.
+	* win32-low.c (win32_target_ops): Fix comment.
+
 2011-08-14  Andrew Jenner  <andrew@codesourcery.com>
 	    Yao Qi  <yao@codesourcery.com>
 
