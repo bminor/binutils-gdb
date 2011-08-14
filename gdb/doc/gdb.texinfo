@@ -36959,6 +36959,7 @@ registers using the capitalization used in the description.
 * MIPS Features::
 * M68K Features::
 * PowerPC Features::
+* TIC6x Features::
 @end menu
 
 
@@ -37119,6 +37120,21 @@ contain registers @samp{ev0h} through @samp{ev31h}, @samp{acc}, and
 @samp{ev0h} through @samp{ev31h}.  @value{GDBN} will combine
 these to present registers @samp{ev0} through @samp{ev31} to the
 user.
+
+@node TIC6x Features
+@subsection TMS320C6x Features
+@cindex target descriptions, TIC6x features
+@cindex target descriptions, TMS320C6x features
+The @samp{org.gnu.gdb.tic6x.core} feature is required for TMS320C6x
+targets.  It should contain registers @samp{A0} through @samp{A15},
+registers @samp{B0} through @samp{B15}, @samp{CSR} and @samp{PC}.
+
+The @samp{org.gnu.gdb.tic6x.gp} feature is optional.  It should
+contain registers @samp{A16} through @samp{A31} and @samp{B16}
+through @samp{B31}.
+
+The @samp{org.gnu.gdb.tic6x.c6xp} feature is optional.  It should
+contain registers @samp{TSR}, @samp{ILC} and @samp{RILC}.
 
 @node Operating System Information
 @appendix Operating System Information

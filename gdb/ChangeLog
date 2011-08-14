@@ -1,3 +1,23 @@
+2011-08-14  Yao Qi  <yao@codesourcery.com>
+
+	Target description for tic6x.
+	* features/Makefile (WHICH): Add tic6x-c64xp tic6x-c64x tic6x-c62x
+	tic6x-c64xp-linux tic6x-c64x-linux and tic6x-c62x-linux.
+	* features/tic6x-c6xp.xml, features/tic6x-core.xml: New.
+	* features/tic6x-gp.xml, features/tic6x-c62x.xml: New.
+	* features/tic6x-c64x.xml, features/tic6x-c64xp.xml: New.
+	* features/tic6x-c62x-linux.xml, features/tic6x-c64x-linux.xml: New.
+	* features/tic6x-c64xp-linux.xml: New.
+	* features/tic6x-c64xp.c, features/tic6x-c64x.c: Generated.
+	* features/tic6x-c62x.c, features/tic6x-c64xp-linux.c: Generated.
+	* features/tic6x-c64x-linux.c, features/tic6x-c62x-linux.c: Generated.
+	* regformats/tic6x-c62x.dat, regformats/tic6x-c64x.dat: Generated.
+	* regformats/tic6x-c64xp.dat, regformats/tic6x-c62x-linux.dat: Generated.
+	* regformats/tic6x-c64x-linux.dat, regformats/tic6x-c64xp-linux.dat: Generated.
+	* config/djgpp/fnchange.lst: Add features/tic6x-*.xml and
+	features/tic6x-*.c files.
+	Add regformats/tic6x-*.dat files.
+
 2011-08-12  Doug Evans  <dje@google.com>
 
 	* NEWS: Mention new "type" attribute of python gdb.Symbol objects.

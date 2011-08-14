@@ -1,3 +1,8 @@
+2011-08-14  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.texinfo: (Standard Target Features): Document C6x features.
+	(TIC6x Features): New node.
+
 2011-08-12  Doug Evans  <dje@google.com>
 
 	* gdb.texinfo (Symbols In Python): Document symbol.type.
