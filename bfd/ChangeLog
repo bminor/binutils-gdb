@@ -1,3 +1,10 @@
+2011-08-14  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c: Prefix all einfo error strings with "%P: ".
+	* elf32-ppc.c: Likewise.
+	(ppc_elf_select_plt_layout): Use einfo rather than info to report
+	forced bss-plt.
+
 2011-08-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/13082

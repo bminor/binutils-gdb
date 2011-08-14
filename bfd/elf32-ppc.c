@@ -3697,7 +3697,7 @@ ppc_elf_check_relocs (bfd *abfd,
 	    {
 	      /* It does not make sense to have a procedure linkage
 		 table entry for a local symbol.  */
-	      info->callbacks->einfo (_("%H: %s reloc against local symbol\n"),
+	      info->callbacks->einfo (_("%P: %H: %s reloc against local symbol\n"),
 				      abfd, sec, rel->r_offset,
 				      ppc_elf_howto_table[r_type]->name);
 	      bfd_set_error (bfd_error_bad_value);
@@ -4285,7 +4285,7 @@ ppc_elf_select_plt_layout (bfd *output_bfd ATTRIBUTE_UNUSED,
 	}
     }
   if (htab->plt_type == PLT_OLD && plt_style == PLT_NEW)
-    info->callbacks->info (_("Using bss-plt due to %B"), htab->old_bfd);
+    info->callbacks->einfo (_("%P: bss-plt forced due to %B\n"), htab->old_bfd);
 
   BFD_ASSERT (htab->plt_type != PLT_VXWORKS);
 
@@ -5016,7 +5016,7 @@ ppc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 
   if (h->size == 0)
     {
-      info->callbacks->einfo (_("dynamic variable `%s' is zero size\n"),
+      info->callbacks->einfo (_("%P: dynamic variable `%s' is zero size\n"),
 			      h->root.root.string);
       return TRUE;
     }
@@ -7235,7 +7235,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	{
 	default:
 	  info->callbacks->einfo
-	    (_("%B: unknown relocation type %d for symbol %s\n"),
+	    (_("%P: %B: unknown relocation type %d for symbol %s\n"),
 	     input_bfd, (int) r_type, sym_name);
 
 	  bfd_set_error (bfd_error_bad_value);
@@ -7496,7 +7496,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	       got at entry m+n bears little relation to the entry m.  */
 	    if (addend != 0)
 	      info->callbacks->einfo
-		(_("%H: non-zero addend on %s reloc against `%s'\n"),
+		(_("%P: %H: non-zero addend on %s reloc against `%s'\n"),
 		 input_bfd, input_section, rel->r_offset,
 		 howto->name,
 		 sym_name);
@@ -7692,7 +7692,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 			     So we'll segfault when trying to run the
 			     indirection function to resolve the reloc.  */
 			  info->callbacks->einfo
-			    (_("%H: relocation %s for indirect "
+			    (_("%P: %H: relocation %s for indirect "
 			       "function %s unsupported\n"),
 			     input_bfd, input_section, rel->r_offset,
 			     howto->name,
@@ -7920,7 +7920,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		       && (name[5] == 0 || name[5] == '.'))))
 	      {
 		info->callbacks->einfo
-		  (_("%B: the target (%s) of a %s relocation is "
+		  (_("%P: %B: the target (%s) of a %s relocation is "
 		     "in the wrong output section (%s)\n"),
 		   input_bfd,
 		   sym_name,
@@ -7950,7 +7950,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		   || CONST_STRNEQ (name, ".sbss2")))
 	      {
 		info->callbacks->einfo
-		  (_("%B: the target (%s) of a %s relocation is "
+		  (_("%P: %B: the target (%s) of a %s relocation is "
 		     "in the wrong output section (%s)\n"),
 		   input_bfd,
 		   sym_name,
@@ -7997,7 +7997,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	    else
 	      {
 		info->callbacks->einfo
-		  (_("%B: the target (%s) of a %s relocation is "
+		  (_("%P: %B: the target (%s) of a %s relocation is "
 		     "in the wrong output section (%s)\n"),
 		   input_bfd,
 		   sym_name,
@@ -8069,7 +8069,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	case R_PPC_EMB_RELST_HA:
 	case R_PPC_EMB_BIT_FLD:
 	  info->callbacks->einfo
-	    (_("%B: relocation %s is not yet supported for symbol %s\n"),
+	    (_("%P: %B: relocation %s is not yet supported for symbol %s\n"),
 	     input_bfd,
 	     howto->name,
 	     sym_name);
@@ -8128,7 +8128,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	       && h->def_dynamic))
 	{
 	  info->callbacks->einfo
-	    (_("%H: unresolvable %s relocation against symbol `%s'\n"),
+	    (_("%P: %H: unresolvable %s relocation against symbol `%s'\n"),
 	     input_bfd, input_section, rel->r_offset,
 	     howto->name,
 	     sym_name);
@@ -8175,7 +8175,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	  else
 	    {
 	      info->callbacks->einfo
-		(_("%H: %s reloc against `%s': error %d\n"),
+		(_("%P: %H: %s reloc against `%s': error %d\n"),
 		 input_bfd, input_section, rel->r_offset,
 		 howto->name, sym_name, (int) r);
 	      ret = FALSE;
@@ -8666,7 +8666,7 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 	}
       else
 	{
-	  info->callbacks->einfo (_("%s not defined in linker created %s\n"),
+	  info->callbacks->einfo (_("%P: %s not defined in linker created %s\n"),
 				  htab->elf.hgot->root.root.string,
 				  (htab->sgotplt != NULL
 				   ? htab->sgotplt->name : htab->got->name));
