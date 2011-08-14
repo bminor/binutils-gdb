@@ -4256,8 +4256,27 @@ ppc_elf_select_plt_layout (bfd *output_bfd ATTRIBUTE_UNUSED,
 
   if (htab->plt_type == PLT_UNSET)
     {
+      struct elf_link_hash_entry *h;
+
       if (plt_style == PLT_OLD)
 	htab->plt_type = PLT_OLD;
+      else if (info->shared
+	       && htab->elf.dynamic_sections_created
+	       && (h = elf_link_hash_lookup (&htab->elf, "_mcount",
+					     FALSE, FALSE, TRUE)) != NULL
+	       && (h->type == STT_FUNC
+		   || h->needs_plt)
+	       && h->ref_regular
+	       && !(SYMBOL_CALLS_LOCAL (info, h)
+		    || (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
+			&& h->root.type == bfd_link_hash_undefweak)))
+	{
+	  /* Profiling of shared libs (and pies) is not supported with
+	     secure plt, because ppc32 does profiling before a
+	     function prologue and a secure plt pic call stubs needs
+	     r30 to be set up.  */
+	  htab->plt_type = PLT_OLD;
+	}
       else
 	{
 	  bfd *ibfd;
@@ -4285,7 +4304,13 @@ ppc_elf_select_plt_layout (bfd *output_bfd ATTRIBUTE_UNUSED,
 	}
     }
   if (htab->plt_type == PLT_OLD && plt_style == PLT_NEW)
-    info->callbacks->einfo (_("%P: bss-plt forced due to %B\n"), htab->old_bfd);
+    {
+      if (htab->old_bfd != NULL)
+	info->callbacks->einfo (_("%P: bss-plt forced due to %B\n"),
+				htab->old_bfd);
+      else
+	info->callbacks->einfo (_("%P: bss-plt forced by profiling\n"));
+    }
 
   BFD_ASSERT (htab->plt_type != PLT_VXWORKS);
 

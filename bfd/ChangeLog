@@ -1,5 +1,10 @@
 2011-08-14  Alan Modra  <amodra@gmail.com>
 
+	* elf32-ppc.c (ppc_elf_select_plt_layout): Force bss-plt when
+	shared and call to _mcount will go via plt.
+
+2011-08-14  Alan Modra  <amodra@gmail.com>
+
 	* elf64-ppc.c: Prefix all einfo error strings with "%P: ".
 	* elf32-ppc.c: Likewise.
 	(ppc_elf_select_plt_layout): Use einfo rather than info to report
