@@ -1,3 +1,14 @@
+2011-08-14  Andrew Stubbs <ams@codesourcery.com>
+	    Yao Qi  <yao@codesourcery.com>
+
+	* target.h (struct target_ops): Add read_loadmap.
+	* linux-low.c (struct target_loadseg): New type.
+	(struct target_loadmap): New type.
+	(linux_read_loadmap): New function.
+	(linux_target_ops): Add linux_read_loadmap.
+	* server.c (handle_query): Support qXfer:fdpic:read packet.
+	* win32-low.c (win32_target_ops): Initialize field `read_loadmap' to NULL.
+
 2011-08-05  Eli Zaretskii  <eliz@gnu.org>
 
 	* win32-low.c: Include <stdint.h>.

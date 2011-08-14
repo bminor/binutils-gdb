@@ -33776,6 +33776,10 @@ These are the currently defined stub features and their properties:
 @tab @samp{-}
 @tab Yes
 
+@item @samp{qXfer:fdpic:read}
+@tab No
+@tab @samp{-}
+@tab Yes
 
 @item @samp{QNonStop}
 @tab No
@@ -33886,6 +33890,10 @@ The remote stub understands the @samp{qXfer:threads:read} packet
 @item qXfer:traceframe-info:read
 The remote stub understands the @samp{qXfer:traceframe-info:read}
 packet (@pxref{qXfer traceframe info read}).
+
+@item qXfer:fdpic:read
+The remote stub understands the @samp{qXfer:fdpic:read}
+packet (@pxref{qXfer fdpic loadmap read}).
 
 @item QNonStop
 The remote stub understands the @samp{QNonStop} packet
@@ -34138,6 +34146,15 @@ by supplying an appropriate @samp{qSupported} response (@pxref{qSupported}).
 Return a description of the current traceframe's contents.
 @xref{Traceframe Info Format}.  The annex part of the generic
 @samp{qXfer} packet must be empty (@pxref{qXfer read}).
+
+This packet is not probed by default; the remote stub must request it,
+by supplying an appropriate @samp{qSupported} response (@pxref{qSupported}).
+
+@item qXfer:fdpic:read:@var{annex}:@var{offset},@var{length}
+@anchor{qXfer fdpic loadmap read}
+Read contents of @code{loadmap}s on the target system.  The
+annex, either @samp{exec} or @samp{interp}, specifies which @code{loadmap},
+executable @code{loadmap} or interpreter @code{loadmap} to read.
 
 This packet is not probed by default; the remote stub must request it,
 by supplying an appropriate @samp{qSupported} response (@pxref{qSupported}).

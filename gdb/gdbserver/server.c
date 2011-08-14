@@ -1171,9 +1171,25 @@ handle_qxfer_traceframe_info (const char *annex,
   return len;
 }
 
+/* Handle qXfer:fdpic:read.  */
+
+static int
+handle_qxfer_fdpic (const char *annex, gdb_byte *readbuf,
+		    const gdb_byte *writebuf, ULONGEST offset, LONGEST len)
+{
+  if (the_target->read_loadmap == NULL)
+    return -2;
+
+  if (!target_running ())
+    return -1;
+
+  return (*the_target->read_loadmap) (annex, offset, readbuf, len);
+}
+
 static const struct qxfer qxfer_packets[] =
   {
     { "auxv", handle_qxfer_auxv },
+    { "fdpic", handle_qxfer_fdpic},
     { "features", handle_qxfer_features },
     { "libraries", handle_qxfer_libraries },
     { "osdata", handle_qxfer_osdata },
@@ -1508,6 +1524,9 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 
       if (the_target->qxfer_siginfo != NULL)
 	strcat (own_buf, ";qXfer:siginfo:read+;qXfer:siginfo:write+");
+
+      if (the_target->read_loadmap != NULL)
+	strcat (own_buf, ";qXfer:fdpic:read+");
 
       /* We always report qXfer:features:read, as targets may
 	 install XML files on a subsequent call to arch_setup.

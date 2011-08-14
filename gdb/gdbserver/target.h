@@ -311,6 +311,10 @@ struct target_ops
   /* Returns the core given a thread, or -1 if not known.  */
   int (*core_of_thread) (ptid_t);
 
+  /* Read loadmaps.  Read LEN bytes at OFFSET into a buffer at MYADDR.  */
+  int (*read_loadmap) (const char *annex, CORE_ADDR offset,
+			     unsigned char *myaddr, unsigned int len);
+
   /* Target specific qSupported support.  */
   void (*process_qsupported) (const char *);
 

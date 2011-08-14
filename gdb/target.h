@@ -274,6 +274,8 @@ enum target_object
   TARGET_OBJECT_HPUX_SOLIB_GOT,
   /* Traceframe info, in XML format.  */
   TARGET_OBJECT_TRACEFRAME_INFO,
+  /* Load maps for FDPIC systems.  */
+  TARGET_OBJECT_FDPIC,
   /* Possible future objects: TARGET_OBJECT_FILE, ...  */
 };
 

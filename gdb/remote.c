@@ -1262,6 +1262,7 @@ enum {
   PACKET_bs,
   PACKET_TracepointSource,
   PACKET_QAllow,
+  PACKET_qXfer_fdpic,
   PACKET_MAX
 };
 
@@ -3758,6 +3759,8 @@ static struct protocol_feature remote_protocol_features[] = {
     PACKET_QAllow },
   { "EnableDisableTracepoints", PACKET_DISABLE,
     remote_enable_disable_tracepoint_feature, -1 },
+  { "qXfer:fdpic:read", PACKET_DISABLE, remote_supported_packet,
+    PACKET_qXfer_fdpic },
 };
 
 static char *remote_support_xml;
@@ -8302,6 +8305,10 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
       return remote_read_qxfer
 	(ops, "traceframe-info", annex, readbuf, offset, len,
 	 &remote_protocol_packets[PACKET_qXfer_traceframe_info]);
+
+    case TARGET_OBJECT_FDPIC:
+      return remote_read_qxfer (ops, "fdpic", annex, readbuf, offset, len,
+				&remote_protocol_packets[PACKET_qXfer_fdpic]);
     default:
       return -1;
     }
@@ -10929,6 +10936,9 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qXfer_statictrace_read],
                          "qXfer:statictrace:read", "read-sdata-object", 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_qXfer_fdpic],
+			 "qXfer:fdpic:read", "read-fdpic-loadmap", 0);
 
   /* Keep the old ``set remote Z-packet ...'' working.  Each individual
      Z sub-packet has its own set and show commands, but users may

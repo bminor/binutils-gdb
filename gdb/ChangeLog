@@ -1,3 +1,12 @@
+2011-08-14  Andrew Stubbs <ams@codesourcery.com>
+	    Yao Qi  <yao@codesourcery.com>
+
+	* remote.c (PACKET_qXfer_fdpic): New enum value.
+	(remote_protocol_features): Add qXfer:fdpic:read packet.
+	(remote_xfer_partial): Support TARGET_OBJECT_FDPIC.
+	(_initialize_remote): Add set/show remote read-fdpic-loadmap command.
+	* target.h (enum target_object): Add TARGET_OBJECT_FDPIC.
+
 2011-08-14  Yao Qi  <yao@codesourcery.com>
 
 	Target description for tic6x.
