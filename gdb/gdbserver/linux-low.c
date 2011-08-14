@@ -4347,6 +4347,10 @@ linux_stopped_data_address (void)
 #define PT_TEXT_ADDR 220
 #define PT_TEXT_END_ADDR 224
 #define PT_DATA_ADDR 228
+#elif defined(__TMS320C6X__)
+#define PT_TEXT_ADDR     (0x10000*4)
+#define PT_DATA_ADDR     (0x10004*4)
+#define PT_TEXT_END_ADDR (0x10008*4)
 #endif
 
 /* Under uClinux, programs are loaded at non-zero offsets, which we need

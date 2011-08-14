@@ -1,3 +1,14 @@
+2011-08-14  Andrew Jenner  <andrew@codesourcery.com>
+	    Yao Qi  <yao@codesourcery.com>
+
+	* Makefile.in (clean): Remove tic6x-*.c files.
+	(linux-tic6x-low.o, tic6x-c62x-linux.o, tic6x-c64x-linux.o): New rules.
+	(tic6x-c64xp-linux.o, tic6x-c62x-linux.c, tic6x-c64x-linux.c): Likewise.
+	(tic6x-c64xp-linux.c): Likewise.
+	* configure.srv: Add support for tic6x-*-uclinux.
+	* linux-tic6x-low.c: New.
+	* linux-low.c (PT_TEXT_ADDR, PT_DATA_ADDR, PT_TEXT_END_ADDR): Define.
+
 2011-08-14  Andrew Stubbs <ams@codesourcery.com>
 	    Yao Qi  <yao@codesourcery.com>
 

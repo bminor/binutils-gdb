@@ -280,6 +280,7 @@ clean:
 	rm -f powerpc-isa205-altivec32l.c powerpc-isa205-vsx32l.c powerpc-isa205-altivec64l.c
 	rm -f powerpc-isa205-vsx64l.c
 	rm -f s390-linux32.c s390-linux64.c s390x-linux64.c
+	rm -f tic6x-c64xp-linux.c tic6x-c64x-linux.c tic6x-c62x-linux.c
 	rm -f xml-builtin.c stamp-xml
 	rm -f i386-avx.c i386-avx-linux.c
 	rm -f amd64-avx.c amd64-avx-linux.c
@@ -457,6 +458,7 @@ linux-mips-low.o: linux-mips-low.c $(linux_low_h) $(server_h) \
 linux-ppc-low.o: linux-ppc-low.c $(linux_low_h) $(server_h)
 linux-s390-low.o: linux-s390-low.c $(linux_low_h) $(server_h)
 linux-sh-low.o: linux-sh-low.c $(linux_low_h) $(server_h)
+linux-tic6x-low.o: linux-tic6x-low.c $(linux_low_h) $(server_h)
 linux-x86-low.o: linux-x86-low.c $(linux_low_h) $(server_h) \
 	$(gdb_proc_service_h) $(i386_low_h)
 linux-xtensa-low.o: linux-xtensa-low.c xtensa-xtregs.c $(linux_low_h) $(server_h)
@@ -592,6 +594,17 @@ s390-linux64.c : $(srcdir)/../regformats/s390-linux64.dat $(regdat_sh)
 s390x-linux64.o : s390x-linux64.c $(regdef_h)
 s390x-linux64.c : $(srcdir)/../regformats/s390x-linux64.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/s390x-linux64.dat s390x-linux64.c
+
+tic6x-c64xp-linux.o : tic6x-c64xp-linux.c $(regdef_h)
+tic6x-c64xp-linux.c : $(srcdir)/../regformats/tic6x-c64xp-linux.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/tic6x-c64xp-linux.dat tic6x-c64xp-linux.c
+tic6x-c64x-linux.o : tic6x-c64x-linux.c $(regdef_h)
+tic6x-c64x-linux.c : $(srcdir)/../regformats/tic6x-c64x-linux.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/tic6x-c64x-linux.dat tic6x-c64x-linux.c
+tic6x-c62x-linux.o : tic6x-c62x-linux.c $(regdef_h)
+tic6x-c62x-linux.c : $(srcdir)/../regformats/tic6x-c62x-linux.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/tic6x-c62x-linux.dat tic6x-c62x-linux.c
+
 reg-sh.o : reg-sh.c $(regdef_h)
 reg-sh.c : $(srcdir)/../regformats/reg-sh.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-sh.dat reg-sh.c

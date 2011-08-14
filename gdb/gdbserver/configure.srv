@@ -243,6 +243,20 @@ case "${target}" in
   spu*-*-*)		srv_regobj=reg-spu.o
 			srv_tgtobj="spu-low.o"
 			;;
+  tic6x-*-uclinux)	srv_regobj="tic6x-c64xp-linux.o"
+			srv_regobj="${srv_regobj} tic6x-c64x-linux.o"
+			srv_regobj="${srv_regobj} tic6x-c62x-linux.o"
+			srv_xmlfiles="tic6x-c64xp-linux.xml"
+			srv_xmlfiles="${srv_xmlfiles} tic6x-c64x-linux.xml"
+			srv_xmlfiles="${srv_xmlfiles} tic6x-c62x-linux.xml"
+			srv_xmlfiles="${srv_xmlfiles} tic6x-core.xml"
+			srv_xmlfiles="${srv_xmlfiles} tic6x-gp.xml"
+			srv_xmlfiles="${srv_xmlfiles} tic6x-c6xp.xml"
+  			srv_tgtobj="linux-low.o linux-osdata.o linux-tic6x-low.o"
+			srv_linux_regsets=yes
+			srv_linux_usrregs=yes
+			srv_linux_thread_db=yes
+			;;
   x86_64-*-linux*)	srv_regobj="$srv_amd64_linux_regobj $srv_i386_linux_regobj"
 			srv_tgtobj="linux-low.o linux-osdata.o linux-x86-low.o i386-low.o i387-fp.o"
 			srv_xmlfiles="$srv_i386_linux_xmlfiles $srv_amd64_linux_xmlfiles"
