@@ -552,6 +552,17 @@ spu*-*-*)
 	build_gdbserver=yes
 	;;
 
+tic6x-*-*linux)
+	# Target: GNU/Linux TI C6x
+	gdb_target_obs="tic6x-tdep.o tic6x-linux-tdep.o solib-dsbt.o \
+			glibc-tdep.o corelow.o linux-tdep.o"
+	;;
+
+tic6x-*-*)
+	# Target: TI C6X 
+	gdb_target_obs="tic6x-tdep.o"
+	;;
+
 xstormy16-*-*)
 	# Target: Sanyo Xstormy16a processor
 	gdb_target_obs="xstormy16-tdep.o"

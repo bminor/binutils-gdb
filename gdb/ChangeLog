@@ -1,3 +1,13 @@
+2011-08-14  Andrew Jenner  <andrew@codesourcery.com>
+	    Bernd Schmidt  <bernds@codesourcery.com>
+	    Yao Qi  <yao@codesourcery.com>
+
+	* configure.tgt: Handle tic6x-*-*linux and tic6x-*-*.
+	* solib-dsbt.c: New file.  Support DSBT shared object.
+	* tic6x-linux-tdep.c: New file.
+	* tic6x-tdep.c: New file.
+	* tic6x-tdep.h: New file.
+
 2011-08-14  Andrew Stubbs <ams@codesourcery.com>
 	    Yao Qi  <yao@codesourcery.com>
 
