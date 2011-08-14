@@ -94,6 +94,10 @@ QTDisable
 * Dcache size (number of lines) and line-size are now runtime-configurable
   via "set dcache line" and "set dcache line-size" commands.
 
+* New targets
+
+Texas Instruments TMS320C6x		tic6x-*-*
+
 *** Changes in GDB 7.3
 
 * GDB has a new command: "thread find [REGEXP]".
