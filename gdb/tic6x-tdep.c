@@ -61,6 +61,9 @@
 #define INST_S_BIT(INST) ((INST >> 1) & 1)
 #define INST_X_BIT(INST) ((INST >> 12) & 1)
 
+const gdb_byte tic6x_bkpt_illegal_opcode_be[] = { 0x56, 0x45, 0x43, 0x14 };
+const gdb_byte tic6x_bkpt_illegal_opcode_le[] = { 0x14, 0x43, 0x45, 0x56 };
+
 struct tic6x_unwind_cache
 {
   /* The frame's base, optionally used by the high-level debug info.  */

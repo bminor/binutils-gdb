@@ -41,9 +41,6 @@
    size_t respectively.  */
 #define TIC6X_STACK_T_SIZE (3 * 4)
 
-const gdb_byte tic6x_bkpt_illegal_opcode_be[] = { 0x56, 0x45, 0x43, 0x14 };
-const gdb_byte tic6x_bkpt_illegal_opcode_le[] = { 0x14, 0x43, 0x45, 0x56 };
-
 static const gdb_byte tic6x_bkpt_bnop_be[] = { 0x00, 0x00, 0xa1, 0x22 };
 static const gdb_byte tic6x_bkpt_bnop_le[] = { 0x22, 0xa1, 0x00, 0x00 };
 
