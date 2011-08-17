@@ -957,7 +957,7 @@ bfd_mach_o_write_section_32 (bfd *abfd, bfd_mach_o_section *section)
   struct mach_o_section_32_external raw;
 
   memcpy (raw.sectname, section->sectname, 16);
-  memcpy (raw.segname + 16, section->segname, 16);
+  memcpy (raw.segname, section->segname, 16);
   bfd_h_put_32 (abfd, section->addr, raw.addr);
   bfd_h_put_32 (abfd, section->size, raw.size);
   bfd_h_put_32 (abfd, section->offset, raw.offset);

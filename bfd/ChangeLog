@@ -1,3 +1,7 @@
+2011-08-17  Tristan Gingold  <gingold@adacore.com>
+
+	* mach-o.c (bfd_mach_o_write_section_32): Fix typo.
+
 2011-08-17  Alan Modra  <amodra@gmail.com>
 
 	PR ld/12762
