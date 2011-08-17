@@ -5670,7 +5670,7 @@ static bfd_coff_backend_data ticoff1_swap_table =
 
 #ifndef coff_section_already_linked
 #define coff_section_already_linked \
-  _bfd_generic_section_already_linked
+  _bfd_coff_section_already_linked
 #endif
 
 #ifndef coff_bfd_define_common_symbol

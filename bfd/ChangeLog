@@ -1,3 +1,32 @@
+2011-08-17  Alan Modra  <amodra@gmail.com>
+
+	PR ld/12762
+	* bfd-in.h (struct bfd_section_already_linked): Forward declare.
+	(_bfd_handle_already_linked): Declare.
+	* coff-alpha.c (_bfd_ecoff_section_already_linked): Define as
+	_bfd_coff_section_already_linked.
+	* coff-mips.c (_bfd_ecoff_section_already_linked): Likewise.
+	* coffcode.h (coff_section_already_linked): Likewise.
+	* cofflink.c (coff_link_add_symbols): Revert 2011-07-09 changes.
+	* elf-bfd.h: Likewise.
+	* libbfd-in.h: Likewise.
+	* targets.c: Likewise.
+	* linker.c (bfd_section_already_linked): Likewise.
+	(bfd_section_already_linked_table_lookup): Likewise.
+	(bfd_section_already_linked_table_insert): Likewise.
+	(_bfd_generic_section_already_linked): Likewise.  Call
+	_bfd_handle_already_linked.
+	(_bfd_handle_already_linked): New function, split out from..
+	* elflink.c (_bfd_elf_section_already_linked): ..here.  Revert
+	2011-07-09 changes.  Avoid unnecessary strcmp when matching
+	already_linked_list entries.  Match plugin linkonce section.
+	(section_signature): Delete.
+	* coffgen.c (_bfd_coff_section_already_linked): New function.
+	* libcoff-in.h (_bfd_coff_section_already_linked): Declare.
+	* libbfd.h: Regenerate.
+	* libcoff.h: Regenerate.
+	* bfd-in2.h: Regenerate.
+
 2011-08-14  Alan Modra  <amodra@gmail.com>
 
 	* elf32-ppc.c (ppc_elf_select_plt_layout): Force bss-plt when

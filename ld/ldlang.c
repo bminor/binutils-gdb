@@ -2240,12 +2240,7 @@ section_already_linked (bfd *abfd, asection *sec, void *data)
     }
 
   if (!(abfd->flags & DYNAMIC))
-    {
-      struct already_linked linked;
-      linked.comdat_key = NULL;
-      linked.u.sec = sec;
-      bfd_section_already_linked (abfd, &linked, &link_info);
-    }
+    bfd_section_already_linked (abfd, sec, &link_info);
 }
 
 /* The wild routines.

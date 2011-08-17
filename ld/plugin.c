@@ -32,7 +32,6 @@
 #include "plugin.h"
 #include "plugin-api.h"
 #include "elf-bfd.h"
-#include "libbfd.h"
 #if !defined (HAVE_DLFCN_H) && defined (HAVE_WINDOWS_H)
 #include <windows.h>
 #endif
@@ -240,7 +239,7 @@ plugin_get_ir_dummy_bfd (const char *name, bfd *srctemplate)
 	{
 	  flagword flags;
 
-	  /* Create sections to own the symbols.  */
+	  /* Create section to own the symbols.  */
 	  flags = (SEC_CODE | SEC_HAS_CONTENTS | SEC_READONLY
 		   | SEC_ALLOC | SEC_LOAD | SEC_KEEP | SEC_EXCLUDE);
 	  if (bfd_make_section_anyway_with_flags (abfd, ".text", flags))
@@ -285,7 +284,27 @@ asymbol_from_plugin_symbol (bfd *abfd, asymbol *asym,
       /* FALLTHRU */
     case LDPK_DEF:
       flags |= BSF_GLOBAL;
-      section = bfd_get_section_by_name (abfd, ".text");
+      if (ldsym->comdat_key)
+	{
+	  char *name = concat (".gnu.linkonce.t.", ldsym->comdat_key,
+			       (const char *) NULL);
+	  section = bfd_get_section_by_name (abfd, name);
+	  if (section != NULL)
+	    free (name);
+	  else
+	    {
+	      flagword sflags;
+
+	      sflags = (SEC_CODE | SEC_HAS_CONTENTS | SEC_READONLY
+			| SEC_ALLOC | SEC_LOAD | SEC_KEEP | SEC_EXCLUDE
+			| SEC_LINK_ONCE | SEC_LINK_DUPLICATES_DISCARD);
+	      section = bfd_make_section_anyway_with_flags (abfd, name, sflags);
+	      if (section == NULL)
+		return LDPS_ERR;
+	    }
+	}
+      else
+	section = bfd_get_section_by_name (abfd, ".text");
       break;
 
     case LDPK_WEAKUNDEF:
@@ -389,13 +408,6 @@ add_symbols (void *handle, int nsyms, const struct ld_plugin_symbol *syms)
       enum ld_plugin_status rv;
       asymbol *bfdsym;
 
-      if (syms[n].comdat_key)
-	{
-	  struct already_linked linked;
-	  linked.comdat_key = xstrdup (syms[n].comdat_key);
-	  linked.u.abfd = abfd;
-	  bfd_section_already_linked (abfd, &linked, &link_info);
-	}
       bfdsym = bfd_make_empty_symbol (abfd);
       symptrs[n] = bfdsym;
       rv = asymbol_from_plugin_symbol (abfd, bfdsym, syms + n);

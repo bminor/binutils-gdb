@@ -8,7 +8,7 @@
 
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
    1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009,
-   2010
+   2010, 2011
    Free Software Foundation, Inc.
 
    Written by Cygnus Support.
@@ -486,7 +486,7 @@ extern bfd_boolean _bfd_generic_set_section_contents
 #define _bfd_nolink_bfd_link_split_section \
   ((bfd_boolean (*) (bfd *, struct bfd_section *)) bfd_false)
 #define _bfd_nolink_section_already_linked \
-  ((bfd_boolean (*) (bfd *, struct already_linked*, \
+  ((bfd_boolean (*) (bfd *, asection *, \
 		     struct bfd_link_info *)) bfd_false)
 #define _bfd_nolink_bfd_define_common_symbol \
   ((bfd_boolean (*) (bfd *, struct bfd_link_info *, \
@@ -608,7 +608,7 @@ extern bfd_boolean _bfd_generic_link_split_section
   (bfd *, struct bfd_section *);
 
 extern bfd_boolean _bfd_generic_section_already_linked
-  (bfd *, struct already_linked *, struct bfd_link_info *);
+  (bfd *, asection *, struct bfd_link_info *);
 
 /* Generic reloc_link_order processing routine.  */
 extern bfd_boolean _bfd_generic_reloc_link_order
@@ -800,26 +800,16 @@ struct bfd_section_already_linked_hash_entry
   struct bfd_section_already_linked *entry;
 };
 
-struct already_linked
-{
-  const char *comdat_key;
-  union
-    {
-      asection *sec;
-      bfd *abfd;
-    } u;
-};
-
 struct bfd_section_already_linked
 {
   struct bfd_section_already_linked *next;
-  struct already_linked linked;
+  asection *sec;
 };
 
 extern struct bfd_section_already_linked_hash_entry *
   bfd_section_already_linked_table_lookup (const char *);
 extern bfd_boolean bfd_section_already_linked_table_insert
-  (struct bfd_section_already_linked_hash_entry *, struct already_linked *);
+  (struct bfd_section_already_linked_hash_entry *, asection *);
 extern void bfd_section_already_linked_table_traverse
   (bfd_boolean (*) (struct bfd_section_already_linked_hash_entry *,
 		    void *), void *);

@@ -1,3 +1,11 @@
+2011-08-17  Alan Modra  <amodra@gmail.com>
+
+	PR ld/12762
+	* ldlang.c (section_already_linked): Revert 2011-07-09 changes.
+	* plugin.c: Likewise.
+	(asymbol_from_plugin_symbol): Create linkonce section for syms
+	with comdat_key.
+
 2011-08-09  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	* emultempl/armelf.em (fix_arm1176): New variable.

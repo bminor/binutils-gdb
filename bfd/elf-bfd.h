@@ -1801,9 +1801,8 @@ extern bfd_boolean _bfd_elf_match_sections_by_type
   (bfd *, const asection *, bfd *, const asection *);
 extern bfd_boolean bfd_elf_is_group_section
   (bfd *, const struct bfd_section *);
-struct already_linked;
 extern bfd_boolean _bfd_elf_section_already_linked
-  (bfd *, struct already_linked *, struct bfd_link_info *);
+  (bfd *, asection *, struct bfd_link_info *);
 extern void bfd_elf_set_group_contents
   (bfd *, asection *, void *);
 extern asection *_bfd_elf_check_kept_section

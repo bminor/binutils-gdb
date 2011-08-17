@@ -552,11 +552,6 @@ void bfd_putl16 (bfd_vma, void *);
 bfd_uint64_t bfd_get_bits (const void *, int, bfd_boolean);
 void bfd_put_bits (bfd_uint64_t, void *, int, bfd_boolean);
 
-extern bfd_boolean bfd_section_already_linked_table_init (void);
-extern void bfd_section_already_linked_table_free (void);
-
-/* Externally visible ECOFF routines.  */
-
 #if defined(__STDC__) || defined(ALMOST_STDC)
 struct ecoff_debug_info;
 struct ecoff_debug_swap;
@@ -564,8 +559,18 @@ struct ecoff_extr;
 struct bfd_symbol;
 struct bfd_link_info;
 struct bfd_link_hash_entry;
+struct bfd_section_already_linked;
 struct bfd_elf_version_tree;
 #endif
+
+extern bfd_boolean bfd_section_already_linked_table_init (void);
+extern void bfd_section_already_linked_table_free (void);
+extern bfd_boolean _bfd_handle_already_linked
+  (struct bfd_section *, struct bfd_section_already_linked *,
+   struct bfd_link_info *);
+
+/* Externally visible ECOFF routines.  */
+
 extern bfd_vma bfd_ecoff_get_gp_value
   (bfd * abfd);
 extern bfd_boolean bfd_ecoff_set_gp_value

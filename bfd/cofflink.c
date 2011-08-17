@@ -392,11 +392,7 @@ coff_link_add_symbols (bfd *abfd,
 	      section = coff_section_from_bfd_index (abfd, sym.n_scnum);
 	      if (! obj_pe (abfd))
 		value -= section->vma;
-	      /* Treat a symbol from a discarded section as undefined.  */
-	      if (bfd_is_abs_section (section)
-		  || !bfd_is_abs_section (section->output_section))
-		break;
-	      /* Fall thru */
+	      break;
 
 	    case COFF_SYMBOL_UNDEFINED:
 	      flags = 0;

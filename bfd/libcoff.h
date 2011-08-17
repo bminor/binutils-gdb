@@ -550,6 +550,8 @@ extern struct bfd_link_hash_table *_bfd_coff_link_hash_table_create
   (bfd *);
 extern const char *_bfd_coff_internal_syment_name
   (bfd *, const struct internal_syment *, char *);
+extern bfd_boolean _bfd_coff_section_already_linked
+  (bfd *, asection *, struct bfd_link_info *);
 extern bfd_boolean _bfd_coff_link_add_symbols
   (bfd *, struct bfd_link_info *);
 extern bfd_boolean _bfd_coff_final_link

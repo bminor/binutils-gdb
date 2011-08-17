@@ -176,7 +176,6 @@ DESCRIPTION
 .
 .{* Forward declaration.  *}
 .typedef struct bfd_link_info _bfd_link_info;
-.struct already_linked;
 .
 .{* Forward declaration.  *}
 .typedef struct flag_info flag_info;
@@ -512,7 +511,7 @@ BFD_JUMP_TABLE macros.
 .
 .  {* Check if SEC has been already linked during a reloceatable or
 .     final link.  *}
-.  bfd_boolean (*_section_already_linked) (bfd *, struct already_linked *,
+.  bfd_boolean (*_section_already_linked) (bfd *, asection *,
 .					   struct bfd_link_info *);
 .
 .  {* Define a common symbol.  *}
