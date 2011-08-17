@@ -1,3 +1,7 @@
+2011-08-17  Phil Muldoon  <pmuldoon@redhat.com>
+
+        * gdb.python/python.exp: Add extended-prompt tests.
+
 2011-08-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.arch/i386-dr3-watch.exp

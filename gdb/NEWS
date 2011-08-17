@@ -23,6 +23,14 @@
   ** A prompt subsitution hook (prompt_hook) is now available to the
      Python API.
 
+  ** A new command set/show extended-prompt has been added.
+
+  ** A new Python module, gdb.prompt has been added to the GDB Python
+     modules library.  This module provides functionality for
+     escape sequentions in prompts (used by set/show
+     extended-prompt).  These escape sequences are replaced by their
+     corresponding value.
+
   ** Python commands and convenience-functions located in
     'data-directory'/python/gdb/command and
     'data-directory'/python/gdb/function are now automatically loaded

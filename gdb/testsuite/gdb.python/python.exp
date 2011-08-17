@@ -275,3 +275,29 @@ gdb_test_multiple "end" "end programming" {
 	pass "end programming"
     }
 }
+
+gdb_py_test_multiple "prompt substitution readline" \
+  "python" "" \
+  "import gdb.command.prompt" "" \
+  "end" ""
+
+gdb_test_multiple "set extended-prompt one two three " \
+    "set basic extended prompt" {
+    -re "\[\r\n\]one two three $" {
+	pass "set basic extended prompt"
+    }
+}
+
+gdb_test_multiple "set extended-prompt \\w " \
+    "set extended prompt working directory" {
+    -re "\[\r\n\].*gdb.*testsuite.* $" {
+	pass "set extended prompt working directory"
+    }
+}
+
+gdb_test_multiple "set extended-prompt some param \\p{python print-stack} " \
+    "set extended prompt parameter" {
+    -re "\[\r\n\]some param True $" {
+	pass "set extended prompt parameter"
+    }
+}

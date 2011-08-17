@@ -19620,6 +19620,35 @@ Directs @value{GDBN} to use @var{newprompt} as its prompt string henceforth.
 Prints a line of the form: @samp{Gdb's prompt is: @var{your-prompt}}
 @end table
 
+Versions of @value{GDBN} that ship with Python scripting enabled have
+prompt extensions.  The commands for interacting with these extensions
+are:
+
+@table @code
+@kindex set extended-prompt
+@item set extended-prompt @var{prompt}
+Set an extended prompt that allows for substitutions.
+@xref{gdb.prompt}, for a list of escape sequences that can be used for
+substitution.  Any escape sequences specified as part of the prompt
+string are replaced with the corresponding strings each time the prompt
+is displayed.
+
+For example:
+
+@smallexample
+set extended-prompt Current working directory: \w (gdb)
+@end smallexample
+
+Note that when an extended-prompt is set, it takes control of the
+@var{prompt_hook} hook.  @xref{prompt_hook}, for further information.
+
+@kindex show extended-prompt
+@item show extended-prompt
+Prints the extended prompt.  Any escape sequences specified as part of
+the prompt string with @code{set extended-prompt}, are replaced with the
+corresponding strings each time the prompt is displayed.
+@end table
+
 @node Editing
 @section Command Editing
 @cindex readline
@@ -21176,6 +21205,8 @@ provided, it is decoded the way that @value{GDBN}'s inbuilt
 @end defun
 
 @defop Operation {@value{GDBN}} prompt_hook current_prompt
+@anchor{prompt_hook}
+
 If @var{prompt_hook} is callable, @value{GDBN} will call the method
 assigned to this operation before a prompt is displayed by
 @value{GDBN}.
@@ -23887,11 +23918,12 @@ top of the source tree to the source search path.
 @subsection Python modules
 @cindex python modules
 
-@value{GDBN} comes with a module to assist writing Python code.
+@value{GDBN} comes with several modules to assist writing Python code.
 
 @menu
 * gdb.printing::       Building and registering pretty-printers.
 * gdb.types::          Utilities for working with types.
+* gdb.prompt::         Utilities for prompt value substitution.
 @end menu
 
 @node gdb.printing
@@ -23957,6 +23989,62 @@ Return @code{True} if @var{type}, assumed to be a type with fields
 
 @item make_enum_dict (@var{enum_type})
 Return a Python @code{dictionary} type produced from @var{enum_type}.
+@end table
+
+@node gdb.prompt
+@subsubsection gdb.prompt
+@cindex gdb.prompt
+
+This module provides a method for prompt value-substitution.
+
+@table @code
+@item substitute_prompt (@var{string})
+Return @var{string} with escape sequences substituted by values.  Some
+escape sequences take arguments.  You can specify arguments inside
+``@{@}'' immediately following the escape sequence.
+
+The escape sequences you can pass to this function are:
+
+@table @code
+@item \\
+Substitute a backslash.
+@item \e
+Substitute an ESC character.
+@item \f
+Substitute the selected frame; an argument names a frame parameter.
+@item \n
+Substitute a newline.
+@item \p
+Substitute a parameter's value; the argument names the parameter.
+@item \r
+Substitute a carriage return.
+@item \t
+Substitute the selected thread; an argument names a thread parameter.
+@item \v
+Substitute the version of GDB.
+@item \w
+Substitute the current working directory.
+@item \[
+Begin a sequence of non-printing characters.  These sequences are
+typically used with the ESC character, and are not counted in the string
+length.  Example: ``\[\e[0;34m\](gdb)\[\e[0m\]'' will return a
+blue-colored ``(gdb)'' prompt where the length is five.
+@item \]
+End a sequence of non-printing characters.
+@end table
+
+For example:
+
+@smallexample
+substitute_prompt (``frame: \f,
+                   print arguments: \p@{print frame-arguments@}'')
+@end smallexample
+
+@exdent will return the string:
+
+@smallexample
+"frame: main, print arguments: scalars"
+@end smallexample
 @end table
 
 @node Interpreters
