@@ -1,3 +1,11 @@
+2011-08-18  Alan Modra  <amodra@gmail.com>
+
+	* write.c (resolve_reloc_expr_symbols): Convert local symbols
+	on relocs to section+offset.
+	(get_frag_for_reloc): New function.
+	(write_relocs): Merge sort fixup relocs with those from .reloc
+	directives.
+
 2011-08-10  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* config/tc-mips.c (can_swap_branch_p): Update the comment on
