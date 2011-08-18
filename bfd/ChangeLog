@@ -1,3 +1,7 @@
+2011-08-18  Tristan Gingold  <gingold@adacore.com>
+
+	* mach-o.c (bfd_mach_o_read_segment): Initialize list.
+
 2011-08-17  Tristan Gingold  <gingold@adacore.com>
 
 	* mach-o.c (bfd_mach_o_write_section_32): Fix typo.

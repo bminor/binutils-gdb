@@ -2593,6 +2593,8 @@ bfd_mach_o_read_segment (bfd *abfd,
       seg->nsects = bfd_h_get_32 (abfd, raw.nsects);
       seg->flags = bfd_h_get_32 (abfd, raw.flags);
     }
+  seg->sect_head = NULL;
+  seg->sect_tail = NULL;
 
   for (i = 0; i < seg->nsects; i++)
     {
