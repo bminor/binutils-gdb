@@ -26,13 +26,12 @@
 /* We need this for 'domain_enum', alas...  */
 
 #include "symtab.h"
-
 #include "vec.h"
+#include "gdb_obstack.h"
 
 /* Opaque declarations.  */
 
 struct symbol;
-struct obstack;
 struct block;
 struct objfile;
 struct type;
@@ -45,6 +44,20 @@ struct demangle_component;
 /* The length of the string representing the anonymous namespace.  */
 
 #define CP_ANONYMOUS_NAMESPACE_LEN 21
+
+/* The result of parsing a name.  */
+
+struct demangle_parse_info
+{
+  /* The memory used during the parse.  */
+  struct demangle_info *info;
+
+  /* The result of the parse.  */
+  struct demangle_component *tree;
+
+  /* Any temporary memory used during typedef replacement.  */
+  struct obstack obstack;
+};
 
 /* This struct is designed to store data from using directives.  It
    says that names from namespace IMPORT_SRC should be visible within
@@ -134,6 +147,8 @@ struct using_direct
 
 extern char *cp_canonicalize_string (const char *string);
 
+extern char *cp_canonicalize_string_no_typedefs (const char *string);
+
 extern char *cp_class_name_from_physname (const char *physname);
 
 extern char *method_name_from_physname (const char *physname);
@@ -214,11 +229,20 @@ struct type *cp_lookup_transparent_type (const char *name);
 
 /* Functions from cp-name-parser.y.  */
 
-extern struct demangle_component *cp_demangled_name_to_comp
-  (const char *demangled_name, const char **errmsg);
+extern struct demangle_parse_info *cp_demangled_name_to_comp
+     (const char *demangled_name, const char **errmsg);
 
 extern char *cp_comp_to_string (struct demangle_component *result,
 				int estimated_len);
+
+extern void cp_demangled_name_parse_free (struct demangle_parse_info *);
+extern struct cleanup *make_cleanup_cp_demangled_name_parse_free
+     (struct demangle_parse_info *);
+extern void cp_merge_demangle_parse_infos (struct demangle_parse_info *,
+					   struct demangle_component *,
+					   struct demangle_parse_info *);
+
+extern struct demangle_parse_info *cp_new_demangle_parse_info (void);
 
 /* The list of "maint cplus" commands.  */
 

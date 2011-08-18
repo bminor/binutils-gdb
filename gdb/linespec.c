@@ -245,7 +245,7 @@ find_methods (struct type *t, char *name, enum language language,
 
   /* NAME is typed by the user: it needs to be canonicalized before
      passing to lookup_symbol.  */
-  canon = cp_canonicalize_string (name);
+  canon = cp_canonicalize_string_no_typedefs (name);
   if (canon != NULL)
     {
       name = canon;
@@ -1365,7 +1365,7 @@ decode_compound (char **argptr, int funfirstline,
 		 char *the_real_saved_arg, char *p)
 {
   struct symtabs_and_lines values;
-  char *p2;
+  char *p2, *name, *canon;
   char *saved_arg2 = *argptr;
   char *temp_end;
   struct symbol *sym;
@@ -1373,6 +1373,7 @@ decode_compound (char **argptr, int funfirstline,
   struct symbol *sym_class;
   struct type *t;
   char *saved_arg;
+  struct cleanup *cleanup;
 
   /* If the user specified any completer quote characters in the input,
      strip them.  They are superfluous.  */
@@ -1597,7 +1598,18 @@ decode_compound (char **argptr, int funfirstline,
   *argptr = (*p == '\'') ? p + 1 : p;
 
   /* Look up entire name.  */
-  sym = lookup_symbol (copy, get_selected_block (0), VAR_DOMAIN, 0);
+  name = copy;
+
+  cleanup = make_cleanup (null_cleanup, NULL);
+  canon = cp_canonicalize_string_no_typedefs (copy);
+  if (canon != NULL)
+    {
+      name = canon;
+      make_cleanup (xfree, name);
+    }
+
+  sym = lookup_symbol (name, get_selected_block (0), VAR_DOMAIN, 0);
+  do_cleanups (cleanup);
   if (sym)
     return symbol_found (funfirstline, canonical, copy, sym, NULL, NULL);
   else
@@ -1743,7 +1755,7 @@ find_method (int funfirstline, struct linespec_result *canonical,
 	  strcpy (name, SYMBOL_NATURAL_NAME (sym_class));
 	  strcat (name, "::");
 	  strcat (name, copy);
-	  canon = cp_canonicalize_string (name);
+	  canon = cp_canonicalize_string_no_typedefs (name);
 	  if (canon != NULL)
 	    {
 	      xfree (name);
@@ -2085,16 +2097,31 @@ decode_variable (char *copy, int funfirstline,
 		 struct linespec_result *canonical,
 		 struct symtab *file_symtab)
 {
+  char *name, *canon;
   struct symbol *sym;
+  struct cleanup *cleanup;
   struct minimal_symbol *msymbol;
 
-  sym = lookup_symbol (copy, get_search_block (file_symtab),
-		       VAR_DOMAIN, 0);
+  name = copy;
+  cleanup = make_cleanup (null_cleanup, NULL);
+  canon = cp_canonicalize_string_no_typedefs (copy);
+  if (canon != NULL)
+    {
+      name = canon;
+      make_cleanup (xfree, name);
+    }
+
+  sym = lookup_symbol (name, get_search_block (file_symtab), VAR_DOMAIN, 0);
 
   if (sym != NULL)
-    return symbol_found (funfirstline, canonical, copy, sym, file_symtab, NULL);
+    {
+      do_cleanups (cleanup);
+      return symbol_found (funfirstline, canonical, copy, sym,
+			   file_symtab, NULL);
+    }
 
-  msymbol = lookup_minimal_symbol (copy, NULL, NULL);
+  msymbol = lookup_minimal_symbol (name, NULL, NULL);
+  do_cleanups (cleanup);
 
   if (msymbol != NULL)
     return minsym_found (funfirstline, msymbol);

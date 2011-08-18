@@ -1,3 +1,55 @@
+2011-08-18  Keith Seitz  <keiths@redhat.com>
+
+	PR c++/12266
+	* cp-name-parser.y (struct demangle_info): Remove unused
+	member PREV.
+	(d_grab): Likewise.
+	(allocate_info): Change return type to struct demangle_info *.
+	Always allocate a new demangle_info.
+	Remove unused PREV pointer.
+	(cp_new_demangle_parse_info): New function.
+	(cp_demangled_name_parse_free): New function.
+	(do_demangled_name_parse_free_cleanup): New function.
+	(make_cleanup_cp_demangled_name_parse_free): New function.
+	(cp_demangled_name_to_comp): Change return type to
+	struct demangle_parse_info *.
+	Allocate a new storage for each call.
+	(main): Update usage for cp_demangled_name_to_comp
+	API change.
+	* cp-support.h (struct demangle_parse_info): New structure.
+	(cp_demangled_name_to_comp): Update API change for
+	return type.
+	(cp_new_demangle_parse_info): Declare.
+	(make_cleanup_cp_demangled_name_parse_free): New declaration.
+	(cp_demangled_name_parse_free): Declare.
+	* cp-support.c (cp_canonicalize_string): Update API
+	change for cp_demangled_name_to_comp.
+	(mangled_name_to_comp): Likewise.
+	Return struct demangle_parse_info, too.
+	(cp_class_name_from_physname): Update mangled_name_to_comp
+	API change.
+	(method_name_from_physname): Likewise.
+	(cp_func_name): Update API change for cp_demangled_name_to_comp.
+	(cp_remove_params): Likewise.
+	* python/py-type.c (typy_legacy_template_argument): Likewise.
+
+	* cp-support.h (cp_canonicalize_string_no_typedefs): Declare.
+	(cp_merge_demangle_parse_infos): Declare.
+	* cp-support.c (ignore_typedefs): New file global.
+	(copy_string_to_obstack): New function.
+	(inspect_type): New function.
+	(replace_typedefs): New function.
+	(replace_typedefs_qualified_name): New function.
+	(cp_canonicalize_string_no_typedefs): New function.
+	* cp-name-parser.y (cp_merge_demangle_parse_infos): New function.
+	(cp_new_demangle__parse_info): Allocate and initialize the obstack.
+	* linespec.c (find_methods): Use cp_canonicalize_string_no_typedefs
+	instead of cp_canonicalize_string.
+	(find_method): Likewise.
+	(decode_compound): Before looking up the name, call
+	cp_canonicalize_string_no_typedefs.
+	(decode_variable): Likewise.
+
 2011-08-17  Phil Muldoon  <pmuldoon@redhat.com>
             Tom Tromey  <tromey@redhat.com>
             Matt Rice <ratmice@gmail.com>
