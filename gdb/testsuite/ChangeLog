@@ -1,3 +1,9 @@
+2011-08-18  Keith Seitz  <keiths@redhat.com>
+
+	PR c++/12266
+	* gdb.cp/meth-typedefs.cc: New file.
+	* gdb.cp/meth-typedefs.exp: New file.
+
 2011-08-17  Phil Muldoon  <pmuldoon@redhat.com>
 
         * gdb.python/python.exp: Add extended-prompt tests.
