@@ -8267,7 +8267,7 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 		some_unused = 1;
 	      last = 0;
 	    }
-	  else if (*drop)
+	  else if (*drop & ref_from_discarded)
 	    {
 	      some_unused = 1;
 	      last = ref_from_discarded;
