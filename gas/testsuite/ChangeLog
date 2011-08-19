@@ -1,3 +1,20 @@
+2011-08-19  Sergey A. Guriev  <sergeya.a.guriev@intel.com>
+
+	* gas/i386/avx-gather-intel.d: Added missing vpgather tests.
+	* gas/i386/avx-gather.d: Likewise.
+	* gas/i386/x86-64-avx-gather-intel.d: Likewise.
+	* gas/i386/x86-64-avx-gather.d: Likewise.
+
+	* gas/i386/avx-intel.d: Added missing vpinsrd and removed
+	duplicated vpinsrb instructions.
+	* gas/i386/avx.d: Likewise.
+	* gas/i386/avx.s: Likewise.
+	* gas/i386/ilp32/x86-64-avx-intel.d: Likewise.
+	* gas/i386/ilp32/x86-64-avx.d: Likewise.
+	* gas/i386/x86-64-avx-intel.d: Likewise.
+	* gas/i386/x86-64-avx.d: Likewise.
+	* gas/i386/x86-64-avx.s: Likewise.
+
 2011-08-10  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* gas/mips/micromips@mips5.d: Rename to...
