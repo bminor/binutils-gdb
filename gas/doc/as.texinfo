@@ -6943,6 +6943,9 @@ subject, see the hardware manufacturer's manual.
 @ifset V850
 * V850-Dependent::              V850 Dependent Features
 @end ifset
+@ifset XSTORMY16
+* XSTORMY16-Dependent::         XStormy16 Dependent Features
+@end ifset
 @ifset XTENSA
 * Xtensa-Dependent::            Xtensa Dependent Features
 @end ifset
@@ -7157,6 +7160,10 @@ family.
 
 @ifset V850
 @include c-v850.texi
+@end ifset
+
+@ifset XSTORMY16
+@include c-xstormy16.texi
 @end ifset
 
 @ifset XTENSA
