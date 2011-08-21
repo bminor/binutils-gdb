@@ -1,3 +1,15 @@
+2011-08-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Code cleanup.
+	* breakpoint.c (bpstat_clear_actions): Remove clearing of commands_left.
+	(command_line_is_silent): New function.
+	(bpstat_do_actions_1): No longer use commands_left, use
+	command_line_is_silent for commands.
+	(bpstat_alloc): Remove clearing of commands_left.
+	(bpstat_stop_status): Remove initialization of commands_left, use
+	command_line_is_silent.
+	* breakpoint.h (struct bpstats): Remove commands_left.
+
 2011-08-18  Keith Seitz  <keiths@redhat.com>
 
 	PR c++/12266

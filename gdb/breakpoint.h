@@ -950,10 +950,6 @@ struct bpstats
     /* The associated command list.  */
     struct counted_command_line *commands;
 
-    /* Commands left to be done.  This points somewhere in
-       base_command.  */
-    struct command_line *commands_left;
-
     /* Old value associated with a watchpoint.  */
     struct value *old_val;
 

@@ -3194,7 +3194,7 @@ bpstat_clear_actions (bpstat bs)
   for (; bs != NULL; bs = bs->next)
     {
       decref_counted_command_line (&bs->commands);
-      bs->commands_left = NULL;
+
       if (bs->old_val != NULL)
 	{
 	  value_free (bs->old_val);
@@ -3229,6 +3229,16 @@ static void
 cleanup_executing_breakpoints (void *ignore)
 {
   executing_breakpoint_commands = 0;
+}
+
+/* Return non-zero iff CMD as the first line of a command sequence is `silent'
+   or its equivalent.  */
+
+static int
+command_line_is_silent (struct command_line *cmd)
+{
+  return cmd && (strcmp ("silent", cmd->line) == 0
+		 || (xdb_commands && strcmp ("Q", cmd->line) == 0));
 }
 
 /* Execute all the commands associated with all the breakpoints at
@@ -3279,10 +3289,13 @@ bpstat_do_actions_1 (bpstat *bsp)
          the tree when we're done.  */
       ccmd = bs->commands;
       bs->commands = NULL;
-      this_cmd_tree_chain
-	= make_cleanup_decref_counted_command_line (&ccmd);
-      cmd = bs->commands_left;
-      bs->commands_left = NULL;
+      this_cmd_tree_chain = make_cleanup_decref_counted_command_line (&ccmd);
+      cmd = ccmd ? ccmd->commands : NULL;
+      if (command_line_is_silent (cmd))
+	{
+	  /* The action has been already done by bpstat_stop_status.  */
+	  cmd = cmd->next;
+	}
 
       while (cmd != NULL)
 	{
@@ -3474,7 +3487,6 @@ bpstat_alloc (struct bp_location *bl, bpstat **bs_link_pointer)
   incref_bp_location (bl);
   /* If the condition is false, etc., don't do the commands.  */
   bs->commands = NULL;
-  bs->commands_left = NULL;
   bs->old_val = NULL;
   bs->print_it = print_it_normal;
   return bs;
@@ -4151,16 +4163,9 @@ bpstat_stop_status (struct address_space *aspace,
 		bs->print = 0;
 	      bs->commands = b->commands;
 	      incref_counted_command_line (bs->commands);
-	      bs->commands_left = bs->commands ? bs->commands->commands : NULL;
-	      if (bs->commands_left
-		  && (strcmp ("silent", bs->commands_left->line) == 0
-		      || (xdb_commands
-			  && strcmp ("Q",
-				     bs->commands_left->line) == 0)))
-		{
-		  bs->commands_left = bs->commands_left->next;
-		  bs->print = 0;
-		}
+	      if (command_line_is_silent (bs->commands
+					  ? bs->commands->commands : NULL))
+		bs->print = 0;
 	    }
 
 	  /* Print nothing for this entry if we don't stop or don't print.  */
