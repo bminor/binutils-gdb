@@ -209,6 +209,8 @@ set ppc64elftests {
 	{{ld tocopt2.out} {objdump -s tocopt2.d}} "tocopt2"}
     {"TOC opt3" "-melf64ppc -no-keep-memory --defsym x=2" "-a64"  {tocopt3.s}
 	{{objdump -s tocopt3.d}} "tocopt3"}
+    {"TOC opt4" "-melf64ppc -no-keep-memory --defsym x=2" "-a64"
+        {tocopt4a.s tocopt4b.s} {{objdump -s tocopt4.d}} "tocopt4"}
 }
 
 
