@@ -1,3 +1,8 @@
+2011-08-22  Michael Matz  <matz@suse.de>
+
+	* ldmain.c (add_DT_NEEDED_for_dynamic): Default to FALSE.
+	* ld.texinfo (--copy-dt-needed-entries): Mention new default.
+
 2011-08-17  Alan Modra  <amodra@gmail.com>
 
 	PR ld/12762

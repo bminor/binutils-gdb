@@ -1258,21 +1258,20 @@ option.
 @itemx --no-copy-dt-needed-entries
 This option affects the treatment of dynamic libraries referred to 
 by DT_NEEDED tags @emph{inside} ELF dynamic libraries mentioned on the
-command line.  Normally the linker will add a DT_NEEDED tag to the
+command line.  Normally the linker won't add a DT_NEEDED tag to the
 output binary for each library mentioned in a DT_NEEDED tag in an
-input dynamic library.  With @option{--no-copy-dt-needed-entries}
+input dynamic library.  With @option{--copy-dt-needed-entries}
 specified on the command line however any dynamic libraries that
-follow it will have their DT_NEEDED entries ignored.  The default
-behaviour can be restored with @option{--copy-dt-needed-entries}.
+follow it will have their DT_NEEDED entries added.  The default
+behaviour can be restored with @option{--no-copy-dt-needed-entries}.
 
 This option also has an effect on the resolution of symbols in dynamic
-libraries.  With the default setting dynamic libraries mentioned on
-the command line will be recursively searched, following their
-DT_NEEDED tags to other libraries, in order to resolve symbols
-required by the output binary.  With
-@option{--no-copy-dt-needed-entries} specified however the searching
-of dynamic libraries that follow it will stop with the dynamic
-library itself.  No DT_NEEDED links will be traversed to resolve
+libraries.  With @option{--copy-dt-needed-entries} dynamic libraries
+mentioned on the command line will be recursively searched, following
+their DT_NEEDED tags to other libraries, in order to resolve symbols
+required by the output binary.  With the default setting however
+the searching of dynamic libraries that follow it will stop with the
+dynamic library itself.  No DT_NEEDED links will be traversed to resolve
 symbols.
 
 @cindex cross reference table
