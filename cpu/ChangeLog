@@ -1,3 +1,27 @@
+2011-08-22  Nick Clifton  <nickc@redhat.com>
+
+	* fr30.cpu: Newly contributed file.
+	* fr30.opc: Likewise.
+	* ip2k.cpu: Likewise.
+	* ip2k.opc: Likewise.
+	* mep-avc.cpu: Likewise.
+	* mep-avc2.cpu: Likewise.
+	* mep-c5.cpu: Likewise.
+	* mep-core.cpu: Likewise.
+	* mep-default.cpu: Likewise.
+	* mep-ext-cop.cpu: Likewise.
+	* mep-fmax.cpu: Likewise.
+	* mep-h1.cpu: Likewise.
+	* mep-ivc2.cpu: Likewise.
+	* mep-rhcop.cpu: Likewise.
+	* mep-sample-ucidsp.cpu: Likewise.
+	* mep.cpu: Likewise.
+	* mep.opc: Likewise.
+	* openrisc.cpu: Likewise.
+	* openrisc.opc: Likewise.
+	* xstormy16.cpu: Likewise.
+	* xstormy16.opc: Likewise.
+
 2010-10-08  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* frv.opc: #undef DEBUG.

@@ -1,3 +1,15 @@
+2011-08-22  Nick Clifton  <nickc@redhat.com>
+
+	* Makefile.am (CPUDIR): Redfine to point to top level cpu
+	directory.
+	(stamp-frv): Use CPUDIR.
+	(stamp-iq2000): Likewise.
+	(stamp-lm32): Likewise.
+	(stamp-m32c): Likewise.
+	(stamp-mt): Likewise.
+	(stamp-xc16x): Likewise.
+	* Makefile.in: Regenerate.
+
 2011-08-09  Chao-ying Fu  <fu@mips.com>
             Maciej W. Rozycki  <macro@codesourcery.com>
 
