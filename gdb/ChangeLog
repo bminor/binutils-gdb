@@ -123,8 +123,10 @@
 	* features/tic6x-c62x.c, features/tic6x-c64xp-linux.c: Generated.
 	* features/tic6x-c64x-linux.c, features/tic6x-c62x-linux.c: Generated.
 	* regformats/tic6x-c62x.dat, regformats/tic6x-c64x.dat: Generated.
-	* regformats/tic6x-c64xp.dat, regformats/tic6x-c62x-linux.dat: Generated.
-	* regformats/tic6x-c64x-linux.dat, regformats/tic6x-c64xp-linux.dat: Generated.
+	* regformats/tic6x-c64xp.dat,
+	regformats/tic6x-c62x-linux.dat: Generated.
+	* regformats/tic6x-c64x-linux.dat,
+	regformats/tic6x-c64xp-linux.dat: Generated.
 	* config/djgpp/fnchange.lst: Add features/tic6x-*.xml and
 	features/tic6x-*.c files.
 	Add regformats/tic6x-*.dat files.
