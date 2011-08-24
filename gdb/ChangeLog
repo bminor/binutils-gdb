@@ -1,3 +1,9 @@
+2011-08-24  Hui Zhu  <teawater@gmail.com>
+
+	* tracepoint.c (cond_string_is_same): New function.
+	(find_matching_tracepoint): Add condition check
+	by cond_string_is_same.
+
 2011-08-23  Josh Matthews  <josh@joshmatthews.net>
 
 	Fix build error in Darwin port.

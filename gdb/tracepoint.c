@@ -3091,6 +3091,19 @@ free_uploaded_tsvs (struct uploaded_tsv **utsvp)
     }
 }
 
+/* FIXME this function is heuristic and will miss the cases where the
+   conditional is semantically identical but differs in whitespace,
+   such as "x == 0" vs "x==0".  */
+
+static int
+cond_string_is_same (char *str1, char *str2)
+{
+  if (str1 == NULL || str2 == NULL)
+    return (str1 == str2);
+
+  return (strcmp (str1, str2) == 0);
+}
+
 /* Look for an existing tracepoint that seems similar enough to the
    uploaded one.  Enablement isn't compared, because the user can
    toggle that freely, and may have done so in anticipation of the
@@ -3111,7 +3124,8 @@ find_matching_tracepoint (struct uploaded_tp *utp)
       if (b->type == utp->type
 	  && t->step_count == utp->step
 	  && t->pass_count == utp->pass
-	  /* FIXME also test conditionals and actions.  */
+	  && cond_string_is_same (t->base.cond_string, utp->cond_string)
+	  /* FIXME also test actions.  */
 	  )
 	{
 	  /* Scan the locations for an address match.  */
