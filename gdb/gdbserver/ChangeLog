@@ -1,5 +1,13 @@
 2011-08-24  Luis Machado  <lgustavo@codesourcery.com>
 
+	* linux-low.c: Include linux-procfs.h.
+	(linux_attach_lwp_1): Update comments.
+	(linux_attach): Scan for existing threads when attaching to a
+	process that is the tgid.
+	* Makefile.in: Update dependencies.
+
+2011-08-24  Luis Machado  <lgustavo@codesourcery.com>
+
 	* configure.srv: Add linux-procfs.o dependencies.
 
 2011-08-14  Yao Qi  <yao@codesourcery.com>

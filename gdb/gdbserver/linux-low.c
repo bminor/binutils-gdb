@@ -26,6 +26,7 @@
 #include <sys/param.h>
 #include <sys/ptrace.h>
 #include "linux-ptrace.h"
+#include "linux-procfs.h"
 #include <signal.h>
 #include <sys/ioctl.h>
 #include <fcntl.h>
@@ -586,7 +587,9 @@ linux_attach_lwp_1 (unsigned long lwpid, int initial)
     }
 
   if (initial)
-    /* NOTE/FIXME: This lwp might have not been the tgid.  */
+    /* If lwp is the tgid, we handle adding existing threads later.
+       Otherwise we just add lwp without bothering about any other
+       threads.  */
     ptid = ptid_build (lwpid, lwpid, 0);
   else
     {
@@ -621,8 +624,10 @@ linux_attach_lwp_1 (unsigned long lwpid, int initial)
 	In this case we want the process thread to stop.
 	This is handled by having linux_attach set last_resume_kind ==
 	resume_stop after we return.
-	??? If the process already has several threads we leave the other
-	threads running.
+
+	If the pid we are attaching to is also the tgid, we attach to and
+	stop all the existing threads.  Otherwise, we attach to pid and
+	ignore any other threads in the same group as this pid.
 
      3) GDB is connecting to gdbserver and is requesting an enumeration of all
 	existing threads.
@@ -646,9 +651,14 @@ linux_attach_lwp (unsigned long lwpid)
   linux_attach_lwp_1 (lwpid, 0);
 }
 
+/* Attach to PID.  If PID is the tgid, attach to it and all
+   of its threads.  */
+
 int
 linux_attach (unsigned long pid)
 {
+  /* Attach to PID.  We will check for other threads
+     soon.  */
   linux_attach_lwp_1 (pid, 1);
   linux_add_process (pid, 1);
 
@@ -660,6 +670,65 @@ linux_attach (unsigned long pid)
 	process.  It will be collected by wait shortly.  */
       thread = find_thread_ptid (ptid_build (pid, pid, 0));
       thread->last_resume_kind = resume_stop;
+    }
+
+  if (linux_proc_get_tgid (pid) == pid)
+    {
+      DIR *dir;
+      char pathname[128];
+
+      sprintf (pathname, "/proc/%ld/task", pid);
+
+      dir = opendir (pathname);
+
+      if (!dir)
+	{
+	  fprintf (stderr, "Could not open /proc/%ld/task.\n", pid);
+	  fflush (stderr);
+	}
+      else
+	{
+	  /* At this point we attached to the tgid.  Scan the task for
+	     existing threads.  */
+	  unsigned long lwp;
+	  int new_threads_found;
+	  int iterations = 0;
+	  struct dirent *dp;
+
+	  while (iterations < 2)
+	    {
+	      new_threads_found = 0;
+	      /* Add all the other threads.  While we go through the
+		 threads, new threads may be spawned.  Cycle through
+		 the list of threads until we have done two iterations without
+		 finding new threads.  */
+	      while ((dp = readdir (dir)) != NULL)
+		{
+		  /* Fetch one lwp.  */
+		  lwp = strtoul (dp->d_name, NULL, 10);
+
+		  /* Is this a new thread?  */
+		  if (lwp
+		      && find_thread_ptid (ptid_build (pid, lwp, 0)) == NULL)
+		    {
+		      linux_attach_lwp_1 (lwp, 0);
+		      new_threads_found++;
+
+		      if (debug_threads)
+			fprintf (stderr, "\
+Found and attached to new lwp %ld\n", lwp);
+		    }
+		}
+
+	      if (!new_threads_found)
+		iterations++;
+	      else
+		iterations = 0;
+
+	      rewinddir (dir);
+	    }
+	  closedir (dir);
+	}
     }
 
   return 0;
