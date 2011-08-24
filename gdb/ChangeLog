@@ -1,3 +1,29 @@
+2011-08-24  Luis Machado  <lgustavo@codesourcery.com>
+
+	* linux-nat.h (linux_proc_get_tgid): Remove declaration.
+	* linux-nat.c: Include linux-procfs.h.
+	(linux_proc_get_tgid): Move to ...
+	* common/linux-procfs.c: ... here. New file.
+	* common/linux-procfs.h: New file.
+	* linux-thread-db.c: Include linux-procfs.h.
+	* Makefile.in: Update dependencies.
+	* config/alpha/alpha-linux.mh: Add linux-procfs.o dependency.
+	* config/arm/linux.mh: Likewise.
+	* config/i386/linux.mh: Likewise.
+	* config/i386/linux64.mh: Likewise.
+	* config/ia64/linux.mh: Likewise.
+	* config/m32r/linux.mh: Likewise.
+	* config/m68k/linux.mh: Likewise.
+	* config/mips/linux.mh: Likewise.
+	* config/pa/linux.mh: Likewise.
+	* config/pa/linux.mh: Likewise.
+	* config/powerpc/linux.mh: Likewise.
+	* config/powerpc/ppc64-linux.mh: Likewise.
+	* config/powerpc/spu-linux.mh: Likewise.
+	* config/sparc/linux.mh: Likewise.
+	* config/sparc/linux64.mh: Likewise.
+	* config/xtensa/linux.mh: Likewise.
+
 2011-08-24  Hui Zhu  <teawater@gmail.com>
 
 	* tracepoint.c (cond_string_is_same): New function.

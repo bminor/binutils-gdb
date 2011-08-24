@@ -1959,6 +1959,10 @@ linux-osdata.o: ${srcdir}/common/linux-osdata.c
 	$(COMPILE) $(srcdir)/common/linux-osdata.c
 	$(POSTCOMPILE)
 
+linux-procfs.o: $(srcdir)/common/linux-procfs.c
+	$(COMPILE) $(srcdir)/common/linux-procfs.c
+	$(POSTCOMPILE)
+
 #
 # gdb/tui/ dependencies
 #

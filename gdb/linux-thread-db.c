@@ -40,6 +40,7 @@
 #include "gdbcore.h"
 #include "observer.h"
 #include "linux-nat.h"
+#include "linux-procfs.h"
 
 #include <signal.h>
 
