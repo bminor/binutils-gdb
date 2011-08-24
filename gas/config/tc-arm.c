@@ -11609,7 +11609,9 @@ do_t_swi (void)
      to ARM_EXT_V6M.  */
   if (ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v6m))
     {
-      if (!ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_os))
+      if (!ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_os)
+         /* This only applies to the v6m howver, not later architectures.  */
+         && ! ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v7))
 	as_bad (_("SVC is not permitted on this architecture"));
       ARM_MERGE_FEATURE_SETS (thumb_arch_used, thumb_arch_used, arm_ext_os);
     }

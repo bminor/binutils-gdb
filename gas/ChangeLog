@@ -1,3 +1,11 @@
+2011-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
+	Backport from mainline.
+	2011-04-18  Julian Brown  <julian@codesourcery.com>
+	            Nick Clifton  <nickc@redhat.com>
+	* config/tc-arm.c (do_t_swi): Exclude v7 and higher variants from 
+	arm_ext_os test.
+
 2011-05-29  Alan Modra  <amodra@gmail.com>
 
 	Apply from mainline
