@@ -21575,7 +21575,8 @@ Each field is an object, with some pre-defined attributes:
 @item bitpos
 This attribute is not available for @code{static} fields (as in
 C@t{++} or Java).  For non-@code{static} fields, the value is the bit
-position of the field.
+position of the field.  For @code{enum} fields, the value is the
+enumeration member's integer representation.
 
 @item name
 The name of the field, or @code{None} for anonymous fields.
