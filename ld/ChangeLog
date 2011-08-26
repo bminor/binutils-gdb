@@ -1,3 +1,8 @@
+2011-08-26  Nick Clifton  <nickc@redhat.com>
+
+	* NEWS: Mention that --no-copy-dt-needed-entries is now the
+	default.
+
 2011-08-22  Michael Matz  <matz@suse.de>
 
 	* ldmain.c (add_DT_NEEDED_for_dynamic): Default to FALSE.

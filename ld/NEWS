@@ -1,5 +1,8 @@
 -*- text -*-
 
+* --copy-dt-needed-entries is no longer enabled by default.  Instead
+  --no-copy-dt-needed-entries is the default.
+
 * INPUT_SECTION_FLAGS has been added to the linker script language
 to allow selection of input sections by section header section flags.
 
