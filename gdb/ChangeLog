@@ -1,3 +1,8 @@
+2011-08-26  Pedro Alves  <pedro@codesourcery.com>
+
+	* common/linux-osdata.c (get_cores_used_by_process): Don't assume
+	opening /proc/PID/task always succeeds.
+
 2011-08-26  Aleksandar Ristovski <aristovski@qnx.com>
 
 	* linespec.c (symtab_from_filename): Check for the end of string.

@@ -259,27 +259,29 @@ get_cores_used_by_process (pid_t pid, int *cores)
 
   sprintf (taskdir, "/proc/%d/task", pid);
   dir = opendir (taskdir);
-
-  while ((dp = readdir (dir)) != NULL)
+  if (dir)
     {
-      pid_t tid;
-      int core;
-
-      if (!isdigit (dp->d_name[0])
-	  || NAMELEN (dp) > sizeof ("4294967295") - 1)
-	continue;
-
-      tid = atoi (dp->d_name);
-      core = linux_common_core_of_thread (ptid_build (pid, tid, 0));
-
-      if (core >= 0)
+      while ((dp = readdir (dir)) != NULL)
 	{
-	  ++cores[core];
-	  ++task_count;
-	}
-    }
+	  pid_t tid;
+	  int core;
 
-  closedir (dir);
+	  if (!isdigit (dp->d_name[0])
+	      || NAMELEN (dp) > sizeof ("4294967295") - 1)
+	    continue;
+
+	  tid = atoi (dp->d_name);
+	  core = linux_common_core_of_thread (ptid_build (pid, tid, 0));
+
+	  if (core >= 0)
+	    {
+	      ++cores[core];
+	      ++task_count;
+	    }
+	}
+
+      closedir (dir);
+    }
 
   return task_count;
 }
