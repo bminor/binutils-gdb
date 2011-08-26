@@ -3412,19 +3412,22 @@ add_to_link_pool (symbolS *sym, offsetT addend)
   p = frag_more (8);
   memset (p, 0, 8);
 
-  /* Create the basesym - linksym expression (offset of the added entry).  */
+  /* Create a symbol for 'basesym - linksym' (offset of the added entry).  */
   e.X_op = O_subtract;
   e.X_add_symbol = linksym;
   e.X_op_symbol = basesym;
   e.X_add_number = 0;
   expsym = make_expr_symbol (&e);
 
+  /* Create a fixup for the entry.  */
   fixp = fix_new
     (frag_now, p - frag_now->fr_literal, 8, sym, addend, 0, BFD_RELOC_64);
   fixp->tc_fix_data.info = get_alpha_reloc_tag (next_sequence_num--);
   fixp->tc_fix_data.info->sym = expsym;
 
   subseg_set (current_section, current_subsec);
+
+  /* Return the symbol.  */
   return expsym;
 }
 #endif /* OBJ_EVAX */
@@ -4756,7 +4759,6 @@ s_alpha_code_address (int ignore ATTRIBUTE_UNUSED)
 static void
 s_alpha_fp_save (int ignore ATTRIBUTE_UNUSED)
 {
-
   alpha_evax_proc->fp_save = tc_get_register (1);
 
   demand_empty_rest_of_line ();
