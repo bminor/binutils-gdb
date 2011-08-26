@@ -1,5 +1,11 @@
 2011-08-26  Pedro Alves  <pedro@codesourcery.com>
 
+	* linux-nat.c (wait_lwp): Avoid assuming errno is preserved by a
+	library call.  Avoid reading the `status' local if all waitpid
+	calls failed.
+
+2011-08-26  Pedro Alves  <pedro@codesourcery.com>
+
 	* common/linux-osdata.c (get_cores_used_by_process): Don't assume
 	opening /proc/PID/task always succeeds.
 

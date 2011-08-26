@@ -2377,6 +2377,18 @@ wait_lwp (struct lwp_info *lp)
       pid = my_waitpid (GET_LWP (lp->ptid), &status, WNOHANG);
       if (pid == -1 && errno == ECHILD)
 	pid = my_waitpid (GET_LWP (lp->ptid), &status, __WCLONE | WNOHANG);
+      if (pid == -1 && errno == ECHILD)
+	{
+	  /* The thread has previously exited.  We need to delete it
+	     now because, for some vendor 2.4 kernels with NPTL
+	     support backported, there won't be an exit event unless
+	     it is the main thread.  2.6 kernels will report an exit
+	     event for each thread that exits, as expected.  */
+	  thread_dead = 1;
+	  if (debug_linux_nat)
+	    fprintf_unfiltered (gdb_stdlog, "WL: %s vanished.\n",
+				target_pid_to_str (lp->ptid));
+	}
       if (pid != 0)
 	break;
 
@@ -2418,19 +2430,6 @@ wait_lwp (struct lwp_info *lp)
 
   restore_child_signals_mask (&prev_mask);
 
-  if (pid == -1 && errno == ECHILD)
-    {
-      /* The thread has previously exited.  We need to delete it
-	 now because, for some vendor 2.4 kernels with NPTL
-	 support backported, there won't be an exit event unless
-	 it is the main thread.  2.6 kernels will report an exit
-	 event for each thread that exits, as expected.  */
-      thread_dead = 1;
-      if (debug_linux_nat)
-	fprintf_unfiltered (gdb_stdlog, "WL: %s vanished.\n",
-			    target_pid_to_str (lp->ptid));
-    }
-
   if (!thread_dead)
     {
       gdb_assert (pid == GET_LWP (lp->ptid));
@@ -2442,15 +2441,15 @@ wait_lwp (struct lwp_info *lp)
 			      target_pid_to_str (lp->ptid),
 			      status_to_str (status));
 	}
-    }
 
-  /* Check if the thread has exited.  */
-  if (WIFEXITED (status) || WIFSIGNALED (status))
-    {
-      thread_dead = 1;
-      if (debug_linux_nat)
-	fprintf_unfiltered (gdb_stdlog, "WL: %s exited.\n",
-			    target_pid_to_str (lp->ptid));
+      /* Check if the thread has exited.  */
+      if (WIFEXITED (status) || WIFSIGNALED (status))
+	{
+	  thread_dead = 1;
+	  if (debug_linux_nat)
+	    fprintf_unfiltered (gdb_stdlog, "WL: %s exited.\n",
+				target_pid_to_str (lp->ptid));
+	}
     }
 
   if (thread_dead)
