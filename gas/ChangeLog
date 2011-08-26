@@ -1,3 +1,12 @@
+2011-08-26  Tristan Gingold  <gingold@adacore.com>
+
+	* config/tc-alpha.c (s_alpha_linkage): Simplify.  Add comments.
+
+2011-08-26  Tristan Gingold  <gingold@adacore.com>
+
+	* config/tc-alpha.c (add_to_link_pool): Improve comment.
+	(s_alpha_fp_save): Fix indentation.
+
 2011-08-19  Nick Clifton  <nickc@redhat.com>
 
 	* doc/as.texinfo: Include c-xstormy16.texi.

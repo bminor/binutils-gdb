@@ -4701,31 +4701,26 @@ s_alpha_linkage (int ignore ATTRIBUTE_UNUSED)
       p = frag_more (LKP_S_K_SIZE);
       memset (p, 0, LKP_S_K_SIZE);
       fixp = fix_new_exp
-	(frag_now, p - frag_now->fr_literal, LKP_S_K_SIZE, &exp, 0,\
+	(frag_now, p - frag_now->fr_literal, LKP_S_K_SIZE, &exp, 0,
 	 BFD_RELOC_ALPHA_LINKAGE);
 
-      linkage_fixup = (struct alpha_linkage_fixups *)
-	xmalloc (sizeof (struct alpha_linkage_fixups));
-
-      linkage_fixup->fixp = fixp;
-      linkage_fixup->next = 0;
-
-      if (alpha_insn_label == 0)
+      if (alpha_insn_label == NULL)
 	alpha_insn_label = symbol_new
 	  (FAKE_LABEL_NAME, now_seg, (valueT) frag_now_fix (), frag_now);
+
+      /* Create a linkage element.  */
+      linkage_fixup = (struct alpha_linkage_fixups *)
+	xmalloc (sizeof (struct alpha_linkage_fixups));
+      linkage_fixup->fixp = fixp;
+      linkage_fixup->next = NULL;
       linkage_fixup->label = alpha_insn_label;
 
-      if (alpha_linkage_fixup_root == 0)
-	{
-	  alpha_linkage_fixup_root = alpha_linkage_fixup_tail = linkage_fixup;
-	  alpha_linkage_fixup_tail->next = 0;
-	}
+      /* Append it to the list.  */
+      if (alpha_linkage_fixup_root == NULL)
+        alpha_linkage_fixup_root = linkage_fixup;
       else
-	{
-	  alpha_linkage_fixup_tail->next = linkage_fixup;
-	  alpha_linkage_fixup_tail = linkage_fixup;
-	  alpha_linkage_fixup_tail->next = 0;
-	}
+        alpha_linkage_fixup_tail->next = linkage_fixup;
+      alpha_linkage_fixup_tail = linkage_fixup;
     }
   demand_empty_rest_of_line ();
 }
