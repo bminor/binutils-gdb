@@ -66,7 +66,7 @@ verbose "Using $path for data-evaluate-expression" 2
 
 
 mi_gdb_test "-data-evaluate-expression \"$path\"" \
-    "\\^done,value=\"\{a = \[0-9\]*\}\"" \
+    "\\^done,value=\"\{a = 5\}\"" \
     "-data-evaluate-expression $path"
 
 mi_gdb_exit

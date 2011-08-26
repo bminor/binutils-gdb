@@ -1,3 +1,10 @@
+2011-08-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.mi/mi-inheritance-syntax-error.cc (A): Make `a' public.
+	(C): Initialize `a'.
+	* gdb.mi/mi-inheritance-syntax-error.exp
+	(-data-evaluate-expression $path):  Expect `a' as 5.
+
 2011-08-26  Marc Khouzam  <marc.khouzam@ericsson.com>
 
 	PR mi/11912
