@@ -1,5 +1,10 @@
 2011-08-26  Pedro Alves  <pedro@codesourcery.com>
 
+	* linux-nat.c (linux_child_follow_fork): Don't set lp->resumed on
+	either the parent or the child forks.  Rename a couple locals.
+
+2011-08-26  Pedro Alves  <pedro@codesourcery.com>
+
 	* linux-nat.c (wait_lwp): Avoid assuming errno is preserved by a
 	library call.  Avoid reading the `status' local if all waitpid
 	calls failed.

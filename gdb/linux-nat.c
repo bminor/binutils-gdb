@@ -696,7 +696,6 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 	  add_thread (inferior_ptid);
 	  child_lp = add_lwp (inferior_ptid);
 	  child_lp->stopped = 1;
-	  child_lp->resumed = 1;
 
 	  /* If this is a vfork child, then the address-space is
 	     shared with the parent.  */
@@ -738,7 +737,7 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 
       if (has_vforked)
 	{
-	  struct lwp_info *lp;
+	  struct lwp_info *parent_lp;
 	  struct inferior *parent_inf;
 
 	  parent_inf = current_inferior ();
@@ -753,17 +752,16 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 	  parent_inf->waiting_for_vfork_done = detach_fork;
 	  parent_inf->pspace->breakpoints_not_allowed = detach_fork;
 
-	  lp = find_lwp_pid (pid_to_ptid (parent_pid));
+	  parent_lp = find_lwp_pid (pid_to_ptid (parent_pid));
 	  gdb_assert (linux_supports_tracefork_flag >= 0);
+
 	  if (linux_supports_tracevforkdone (0))
 	    {
   	      if (debug_linux_nat)
   		fprintf_unfiltered (gdb_stdlog,
   				    "LCFF: waiting for VFORK_DONE on %d\n",
   				    parent_pid);
-
-	      lp->stopped = 1;
-	      lp->resumed = 1;
+	      parent_lp->stopped = 1;
 
 	      /* We'll handle the VFORK_DONE event like any other
 		 event, in target_wait.  */
@@ -812,10 +810,9 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 		 and leave it pending.  The next linux_nat_resume call
 		 will notice a pending event, and bypasses actually
 		 resuming the inferior.  */
-	      lp->status = 0;
-	      lp->waitstatus.kind = TARGET_WAITKIND_VFORK_DONE;
-	      lp->stopped = 0;
-	      lp->resumed = 1;
+	      parent_lp->status = 0;
+	      parent_lp->waitstatus.kind = TARGET_WAITKIND_VFORK_DONE;
+	      parent_lp->stopped = 1;
 
 	      /* If we're in async mode, need to tell the event loop
 		 there's something here to process.  */
@@ -827,7 +824,7 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
   else
     {
       struct inferior *parent_inf, *child_inf;
-      struct lwp_info *lp;
+      struct lwp_info *child_lp;
       struct program_space *parent_pspace;
 
       if (info_verbose || debug_linux_nat)
@@ -887,9 +884,8 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 
       inferior_ptid = ptid_build (child_pid, child_pid, 0);
       add_thread (inferior_ptid);
-      lp = add_lwp (inferior_ptid);
-      lp->stopped = 1;
-      lp->resumed = 1;
+      child_lp = add_lwp (inferior_ptid);
+      child_lp->stopped = 1;
 
       /* If this is a vfork child, then the address-space is shared
 	 with the parent.  If we detached from the parent, then we can
