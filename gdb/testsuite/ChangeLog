@@ -1,3 +1,11 @@
+2011-08-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.trace/backtrace.exp: Use is_lp64_target to check 64bit target.
+	* gdb.trace/collection.exp: Likewise.
+	* gdb.trace/report.exp: Likewise.
+	* gdb.trace/unavailable.exp: Likewise.
+	* gdb.trace/while-dyn.exp: Likewise.
+
 2011-08-18  Keith Seitz  <keiths@redhat.com>
 
 	PR c++/12266

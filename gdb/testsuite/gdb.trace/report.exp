@@ -159,11 +159,11 @@ gdb_trace_setactions "9.x: setup TP to collect locals" \
 	"$tdp4" \
 	"collect \$locs" "^$"
 
-if [istarget "x86_64-*"] then {
+if {([istarget "x86_64-*"] || [istarget "i?86-*"]) && [is_lp64_target]} then {
     set fpreg "rbp"
     set spreg "rsp"
     set pcreg "rip"
-} elseif [istarget "i?86-*"] then {
+} elseif {[istarget "x86_64-*"] || [istarget "i?86-*"]} then {
     set fpreg "ebp"
     set spreg "esp"
     set pcreg "eip"
