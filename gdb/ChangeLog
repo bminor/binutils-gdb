@@ -1,3 +1,7 @@
+2011-08-26  Aleksandar Ristovski <aristovski@qnx.com>
+
+	* linespec.c (symtab_from_filename): Check for the end of string.
+
 2011-08-26  Marc Khouzam  <marc.khouzam@ericsson.com>
 
 	PR mi/11912

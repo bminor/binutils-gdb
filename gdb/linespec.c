@@ -1835,6 +1835,8 @@ symtab_from_filename (char **argptr, char *p, int is_quote_enclosed)
     }
 
   /* Discard the file name from the arg.  */
+  if (*p1 == '\0')
+    return file_symtab;
   p = p1 + 1;
   while (*p == ' ' || *p == '\t')
     p++;
