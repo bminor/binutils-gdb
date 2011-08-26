@@ -1,3 +1,11 @@
+2011-08-26  Marc Khouzam  <marc.khouzam@ericsson.com>
+
+	PR mi/11912
+	* gdb.mi/mi-inheritance-syntax-error.cc: New file.
+	* gdb.mi/mi-inheritance-syntax-error.exp: New file.
+	* gdb.mi/mi-var-cp.cc: Updated for new 'class'
+	keyword in output of -var-info-path-expression.
+
 2011-08-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.trace/backtrace.exp: Use is_lp64_target to check 64bit target.

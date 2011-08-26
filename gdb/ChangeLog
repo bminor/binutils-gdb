@@ -1,3 +1,10 @@
+2011-08-26  Marc Khouzam  <marc.khouzam@ericsson.com>
+
+	PR mi/11912
+	* varobj.c (cplus_describe_child): Add the keyword
+	'class' to the output of the method when dealing 
+	with a cast to a base class.
+
 2011-08-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	No functionality change.
