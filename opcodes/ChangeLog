@@ -1,3 +1,7 @@
+2011-08-26  Nick Clifton  <nickc@redhat.com>
+
+	* po/es.po: Updated Spanish translation.
+
 2011-08-22  Nick Clifton  <nickc@redhat.com>
 
 	* Makefile.am (CPUDIR): Redfine to point to top level cpu

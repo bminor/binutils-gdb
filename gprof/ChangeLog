@@ -1,3 +1,7 @@
+2011-08-26  Nick Clifton  <nickc@redhat.com>
+
+	* po/es.po: Updated Spanish translation.
+
 2011-06-07  David Warme  <dwarme@groupw.com>
 
 	* corefile.c (core_sym_class): Allow for multiple iterations of
