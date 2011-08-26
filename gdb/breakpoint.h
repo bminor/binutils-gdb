@@ -895,8 +895,9 @@ extern int bpstat_num (bpstat *, int *);
    command loop).  */
 extern void bpstat_do_actions (void);
 
-/* Modify BS so that the actions will not be performed.  */
-extern void bpstat_clear_actions (bpstat);
+/* Modify all entries of STOP_BPSTAT of INFERIOR_PTID so that the actions will
+   not be performed.  */
+extern void bpstat_clear_actions (void);
 
 /* Implementation:  */
 

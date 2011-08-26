@@ -1,3 +1,14 @@
+2011-08-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	No functionality change.
+	* breakpoint.c (bpstat_clear_actions): Remove the BS parameter, make
+	function comment a reference, new variables tp and bs, move here code
+	from throw_exception.
+	* breakpoint.h (bpstat_clear_actions): Remove the BS parameter,
+	describe it in the comment.
+	* exceptions.c (throw_exception): Remove variable tp, move the code for
+	bpstat_clear_actions to bpstat_clear_actions.
+
 2011-08-24  Luis Machado  <lgustavo@codesourcery.com>
 
 	* linux-nat.h (linux_proc_get_tgid): Remove declaration.

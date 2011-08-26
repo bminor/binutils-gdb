@@ -207,21 +207,12 @@ exceptions_state_mc_action_iter_1 (void)
 void
 throw_exception (struct gdb_exception exception)
 {
-  struct thread_info *tp = NULL;
-
   quit_flag = 0;
   immediate_quit = 0;
 
-  if (!ptid_equal (inferior_ptid, null_ptid))
-    tp = find_thread_ptid (inferior_ptid);
-
   /* Perhaps it would be cleaner to do this via the cleanup chain (not sure
      I can think of a reason why that is vital, though).  */
-  if (tp != NULL)
-    {
-      /* Clear queued breakpoint commands.  */
-      bpstat_clear_actions (tp->control.stop_bpstat);
-    }
+  bpstat_clear_actions ();
 
   do_cleanups (ALL_CLEANUPS);
 
