@@ -368,12 +368,13 @@ prepare_execute_command (void)
 void
 execute_command (char *p, int from_tty)
 {
-  struct cleanup *cleanup;
+  struct cleanup *cleanup_if_error, *cleanup;
   struct cmd_list_element *c;
   enum language flang;
   static int warned = 0;
   char *line;
 
+  cleanup_if_error = make_bpstat_clear_actions_cleanup ();
   cleanup = prepare_execute_command ();
 
   /* Force cleanup of any alloca areas if using C alloca instead of
@@ -477,7 +478,8 @@ execute_command (char *p, int from_tty)
 	}
     }
 
-    do_cleanups (cleanup);
+  do_cleanups (cleanup);
+  discard_cleanups (cleanup_if_error);
 }
 
 /* Run execute_command for P and FROM_TTY.  Capture its output into the

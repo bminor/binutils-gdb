@@ -42,6 +42,7 @@ inferior_event_handler (enum inferior_event_type event_type,
 {
   struct gdb_exception e;
   int was_sync = 0;
+  struct cleanup *cleanup_if_error = make_bpstat_clear_actions_cleanup ();
 
   switch (event_type)
     {
@@ -53,6 +54,7 @@ inferior_event_handler (enum inferior_event_type event_type,
       if (!catch_errors (fetch_inferior_event_wrapper, 
 			 client_data, "", RETURN_MASK_ALL))
 	{
+	  bpstat_clear_actions ();
 	  do_all_intermediate_continuations (1);
 	  do_all_continuations (1);
 	  async_enable_stdin ();
@@ -142,6 +144,8 @@ inferior_event_handler (enum inferior_event_type event_type,
       printf_unfiltered (_("Event type not recognized.\n"));
       break;
     }
+
+  discard_cleanups (cleanup_if_error);
 }
 
 static int 

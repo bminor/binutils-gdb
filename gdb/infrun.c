@@ -2779,6 +2779,10 @@ fetch_inferior_event (void *client_data)
   else
     ts_old_chain = make_cleanup (finish_thread_state_cleanup, &ecs->ptid);
 
+  /* Get executed before make_cleanup_restore_current_thread above to apply
+     still for the thread which has thrown the exception.  */
+  make_bpstat_clear_actions_cleanup ();
+
   /* Now figure out what to do with the result of the result.  */
   handle_inferior_event (ecs);
 

@@ -429,6 +429,8 @@ extern const char *gdb_bfd_errmsg (bfd_error_type error_tag, char **matching);
 
 extern int parse_pid_to_attach (char *args);
 
+extern struct cleanup *make_bpstat_clear_actions_cleanup (void);
+
 /* From demangle.c */
 
 extern void set_demangling_style (char *);

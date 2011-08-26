@@ -1,3 +1,19 @@
+2011-08-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* breakpoint.c (bpstat_do_actions): New variable cleanup_if_error, call
+	make_bpstat_clear_actions_cleanup and discard_cleanups for it.
+	* defs.h (make_bpstat_clear_actions_cleanup): New declaration.
+	* exceptions.c (throw_exception): Remove the bpstat_clear_actions call.
+	* inf-loop.c (inferior_event_handler): New variable cleanup_if_error,
+	call make_bpstat_clear_actions_cleanup and discard_cleanups for it.
+	Call bpstat_clear_actions for failed fetch_inferior_event_wrapper.
+	* infrun.c (fetch_inferior_event): Call
+	make_bpstat_clear_actions_cleanup.
+	* top.c (execute_command): New variable cleanup_if_error, call
+	make_bpstat_clear_actions_cleanup and discard_cleanups for it.
+	* utils.c (do_bpstat_clear_actions_cleanup)
+	(make_bpstat_clear_actions_cleanup): New functions.
+
 2011-08-26  Pedro Alves  <pedro@codesourcery.com>
 
 	* linux-nat.c (linux_child_follow_fork): Don't set lp->resumed on

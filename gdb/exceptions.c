@@ -210,10 +210,6 @@ throw_exception (struct gdb_exception exception)
   quit_flag = 0;
   immediate_quit = 0;
 
-  /* Perhaps it would be cleaner to do this via the cleanup chain (not sure
-     I can think of a reason why that is vital, though).  */
-  bpstat_clear_actions ();
-
   do_cleanups (ALL_CLEANUPS);
 
   /* Jump to the containing catch_errors() call, communicating REASON

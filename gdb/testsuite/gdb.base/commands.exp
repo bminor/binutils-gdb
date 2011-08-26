@@ -678,6 +678,74 @@ proc if_commands_test {} {
     }
 }
 
+# Verify an error during "commands" commands execution will prevent any other
+# "commands" from other breakpoints at the same location to be executed.
+
+proc error_clears_commands_left {} {
+    set test "hook-stop 1"
+    gdb_test_multiple {define hook-stop} $test {
+	-re "End with a line saying just \"end\"\\.\r\n>$" {
+	    pass $test
+	}
+    }
+    set test "hook-stop 1a"
+    gdb_test_multiple {echo hook-stop1\n} $test {
+	-re "\r\n>$" {
+	    pass $test
+	}
+    }
+    gdb_test_no_output "end" "hook-stop 1b"
+
+    delete_breakpoints
+    gdb_breakpoint "main"
+
+    set test "main commands 1"
+    gdb_test_multiple {commands $bpnum} $test {
+	-re "End with a line saying just \"end\"\\.\r\n>$" {
+	    pass $test
+	}
+    }
+    set test "main commands 1a"
+    gdb_test_multiple {echo cmd1\n} $test {
+	-re "\r\n>$" {
+	    pass $test
+	}
+    }
+    set test "main commands 1b"
+    gdb_test_multiple {errorcommandxy\n} $test {
+	-re "\r\n>$" {
+	    pass $test
+	}
+    }
+    gdb_test_no_output "end" "main commands 1c"
+
+    gdb_breakpoint "main"
+    set test "main commands 2"
+    gdb_test_multiple {commands $bpnum} $test {
+	-re "End with a line saying just \"end\"\\.\r\n>$" {
+	    pass $test
+	}
+    }
+    set test "main commands 2a"
+    gdb_test_multiple {echo cmd2\n} $test {
+	-re "\r\n>$" {
+	    pass $test
+	}
+    }
+    set test "main commands 2b"
+    gdb_test_multiple {errorcommandyz\n} $test {
+	-re "\r\n>$" {
+	    pass $test
+	}
+    }
+    gdb_test_no_output "end" "main commands 2c"
+
+    gdb_run_cmd
+    gdb_test "" "\r\nhook-stop1\r\n.*\r\ncmd1\r\nUndefined command: \"errorcommandxy\"\\.  Try \"help\"\\." "cmd1 error"
+
+    gdb_test {echo idle\n} "\r\nidle" "no cmd2"
+}
+
 proc redefine_hook_test {} {
     global gdb_prompt
 
@@ -758,6 +826,7 @@ stray_arg0_test
 source_file_with_indented_comment
 recursive_source_test
 if_commands_test
+error_clears_commands_left
 redefine_hook_test
 # This one should come last, as it redefines "backtrace".
 redefine_backtrace_test

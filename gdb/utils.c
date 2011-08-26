@@ -3674,6 +3674,23 @@ parse_pid_to_attach (char *args)
   return pid;
 }
 
+/* Helper for make_bpstat_clear_actions_cleanup.  */
+
+static void
+do_bpstat_clear_actions_cleanup (void *unused)
+{
+  bpstat_clear_actions ();
+}
+
+/* Call bpstat_clear_actions for the case an exception is throw.  You should
+   discard_cleanups if no exception is caught.  */
+
+struct cleanup *
+make_bpstat_clear_actions_cleanup (void)
+{
+  return make_cleanup (do_bpstat_clear_actions_cleanup, NULL);
+}
+
 /* Provide a prototype to silence -Wmissing-prototypes.  */
 extern initialize_file_ftype _initialize_utils;
 

@@ -1,5 +1,10 @@
 2011-08-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* gdb.base/commands.exp (error_clears_commands_left): New function.
+	(): Call it.
+
+2011-08-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdb.mi/mi-inheritance-syntax-error.cc (A): Make `a' public.
 	(C): Initialize `a'.
 	* gdb.mi/mi-inheritance-syntax-error.exp

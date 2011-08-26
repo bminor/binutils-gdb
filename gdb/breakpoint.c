@@ -3352,6 +3352,8 @@ bpstat_do_actions_1 (bpstat *bsp)
 void
 bpstat_do_actions (void)
 {
+  struct cleanup *cleanup_if_error = make_bpstat_clear_actions_cleanup ();
+
   /* Do any commands attached to breakpoint we are stopped at.  */
   while (!ptid_equal (inferior_ptid, null_ptid)
 	 && target_has_execution
@@ -3363,6 +3365,8 @@ bpstat_do_actions (void)
        indicate the inferior was not resumed.  */
     if (!bpstat_do_actions_1 (&inferior_thread ()->control.stop_bpstat))
       break;
+
+  discard_cleanups (cleanup_if_error);
 }
 
 /* Print out the (old or new) value associated with a watchpoint.  */
