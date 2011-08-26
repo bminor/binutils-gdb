@@ -1,5 +1,10 @@
 2011-08-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* inf-loop.c (inferior_event_handler): Add exception_print in
+	INF_EXEC_COMPLETE.
+
+2011-08-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* breakpoint.c (bpstat_do_actions): New variable cleanup_if_error, call
 	make_bpstat_clear_actions_cleanup and discard_cleanups for it.
 	* defs.h (make_bpstat_clear_actions_cleanup): New declaration.

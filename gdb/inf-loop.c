@@ -121,6 +121,7 @@ inferior_event_handler (enum inferior_event_type event_type,
 	{
 	  bpstat_do_actions ();
 	}
+      exception_print (gdb_stderr, e);
 
       if (!was_sync
 	  && exec_done_display_p
