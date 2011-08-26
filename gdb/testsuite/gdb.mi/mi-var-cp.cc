@@ -157,7 +157,7 @@ int path_expression ()
        {DP.Base2 Base2 1 Base2}                         \
        {DP.public public 1}} "list children of DP"
       mi_gdb_test "-var-info-path-expression DP.Base1" \
-          "\\^done,path_expr=\"\\(\\*\\(Base1\\*\\) dp\\)\"" \
+          "\\^done,path_expr=\"\\(\\*\\(class Base1\\*\\) dp\\)\"" \
 	  "-var-info-path-expression DP.Base1"       
       mi_list_varobj_children DP.public {               \
         {DP.public.i i 0 int}                           \
@@ -172,7 +172,7 @@ int path_expression ()
         {DP.Base1.public.i i 0 int}                           \
       } "list children of DP.Base1.public"
       mi_gdb_test "-var-info-path-expression DP.Base1.public.i" \
-          "\\^done,path_expr=\"\\(\\(\\(\\*\\(Base1\\*\\) dp\\)\\).i\\)\"" \
+          "\\^done,path_expr=\"\\(\\(\\(\\*\\(class Base1\\*\\) dp\\)\\).i\\)\"" \
 	  "-var-info-path-expression DP.Base1.public.i"
 
       mi_gdb_test "-var-info-path-expression DP.public" \
@@ -185,7 +185,7 @@ int path_expression ()
        {D.Base2 Base2 1 Base2}                         \
        {D.public public 1}} "list children of D"
       mi_gdb_test "-var-info-path-expression D.Base1" \
-          "\\^done,path_expr=\"\\(\\(Base1\\) d\\)\"" \
+          "\\^done,path_expr=\"\\(\\(class Base1\\) d\\)\"" \
 	  "-var-info-path-expression D.Base1"
   :*/
   int array[4] = {1,2,3};

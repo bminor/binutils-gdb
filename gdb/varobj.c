@@ -3389,8 +3389,14 @@ cplus_describe_child (struct varobj *parent, int index,
 		 will create an lvalue, for all appearences, so we don't
 		 need to use more fancy:
 		         *(Base1*)(&d)
-		 construct.  */
-	      *cfull_expression = xstrprintf ("(%s(%s%s) %s)", 
+		 construct.
+
+		 When we are in the scope of the base class or of one
+		 of its children, the type field name will be interpreted
+		 as a constructor, if it exists.  Therefore, we must
+		 indicate that the name is a class name by using the
+		 'class' keyword.  See PR mi/11912  */
+	      *cfull_expression = xstrprintf ("(%s(class %s%s) %s)", 
 					      ptr, 
 					      TYPE_FIELD_NAME (type, index),
 					      ptr,
