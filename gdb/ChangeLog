@@ -1,3 +1,10 @@
+2011-08-26  Matt Rice  <ratmice@gmail.com>
+
+	* solib-sunos.c (allocate_rt_common_objfile): Add missing arguments to
+	bcache_xmalloc,  replace bcache_xmalloc with call to
+	psymbol_bcache_init for psymbol_cache.
+	* symfile.c (reread_symbols): Remove extra calls to bcache_xmalloc.
+
 2011-08-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* inf-loop.c (inferior_event_handler): Add exception_print in

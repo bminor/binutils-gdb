@@ -2472,9 +2472,6 @@ reread_symbols (void)
 	  memset (&objfile->msymbol_demangled_hash, 0,
 		  sizeof (objfile->msymbol_demangled_hash));
 
-	  objfile->psymbol_cache = psymbol_bcache_init ();
-	  objfile->macro_cache = bcache_xmalloc (NULL, NULL);
-	  objfile->filename_cache = bcache_xmalloc (NULL, NULL);
 	  /* obstack_init also initializes the obstack so it is
 	     empty.  We could use obstack_specify_allocation but
 	     gdb_obstack.h specifies the alloc/dealloc
