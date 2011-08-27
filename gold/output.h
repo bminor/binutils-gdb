@@ -2615,6 +2615,99 @@ class Output_section_lookup_maps
   Relaxed_input_sections_by_id relaxed_input_sections_by_id_;
 };
 
+// This abstract base class defines the interface for the
+// types of methods used to fill free space left in an output
+// section during an incremental link.  These methods are used
+// to insert dummy compilation units into debug info so that
+// debug info consumers can scan the debug info serially.
+
+class Output_fill
+{
+ public:
+  Output_fill()
+    : is_big_endian_(parameters->target().is_big_endian())
+  { }
+
+  // Return the smallest size chunk of free space that can be
+  // filled with a dummy compilation unit.
+  size_t
+  minimum_hole_size() const
+  { return this->do_minimum_hole_size(); }
+
+  // Write a fill pattern of length LEN at offset OFF in the file.
+  void
+  write(Output_file* of, off_t off, size_t len) const
+  { this->do_write(of, off, len); }
+
+ protected:
+  virtual size_t
+  do_minimum_hole_size() const = 0;
+
+  virtual void
+  do_write(Output_file* of, off_t off, size_t len) const = 0;
+
+  bool
+  is_big_endian() const
+  { return this->is_big_endian_; }
+
+ private:
+  bool is_big_endian_;
+};
+
+// Fill method that introduces a dummy compilation unit in
+// a .debug_info or .debug_types section.
+
+class Output_fill_debug_info : public Output_fill
+{
+ public:
+  Output_fill_debug_info(bool is_debug_types)
+    : is_debug_types_(is_debug_types)
+  { }
+
+ protected:
+  virtual size_t
+  do_minimum_hole_size() const;
+
+  virtual void
+  do_write(Output_file* of, off_t off, size_t len) const;
+
+ private:
+  // Version of the header.
+  static const int version = 4;
+  // True if this is a .debug_types section.
+  bool is_debug_types_;
+};
+
+// Fill method that introduces a dummy compilation unit in
+// a .debug_line section.
+
+class Output_fill_debug_line : public Output_fill
+{
+ public:
+  Output_fill_debug_line()
+  { }
+
+ protected:
+  virtual size_t
+  do_minimum_hole_size() const;
+
+  virtual void
+  do_write(Output_file* of, off_t off, size_t len) const;
+
+ private:
+  // Version of the header.  We write a DWARF-3 header because it's smaller
+  // and many tools have not yet been updated to understand the DWARF-4 header.
+  static const int version = 3;
+  // Length of the portion of the header that follows the header_length
+  // field.  This includes the following fields:
+  // minimum_instruction_length, default_is_stmt, line_base, line_range,
+  // opcode_base, standard_opcode_lengths[], include_directories, filenames.
+  // The standard_opcode_lengths array is 12 bytes long, and the
+  // include_directories and filenames fields each contain only a single
+  // null byte.
+  static const size_t header_length = 19;
+};
+
 // An output section.  We don't expect to have too many output
 // sections, so we don't bother to do a template on the size.
 
@@ -3438,6 +3531,15 @@ class Output_section : public Output_data
   set_is_patch_space_allowed()
   { this->is_patch_space_allowed_ = true; }
 
+  // Set a fill method to use for free space left in the output section
+  // during incremental links.
+  void
+  set_free_space_fill(Output_fill* free_space_fill)
+  {
+    this->free_space_fill_ = free_space_fill;
+    this->free_list_.set_min_hole_size(free_space_fill->minimum_hole_size());
+  }
+
   // Reserve space within the fixed layout for the section.  Used for
   // incremental update links.
   void
@@ -3913,6 +4015,8 @@ class Output_section : public Output_data
   // List of available regions within the section, for incremental
   // update links.
   Free_list free_list_;
+  // Method for filling chunks of free space.
+  Output_fill* free_space_fill_;
   // Amount added as patch space for incremental linking.
   off_t patch_space_;
 };

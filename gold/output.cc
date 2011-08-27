@@ -36,6 +36,7 @@
 
 #include "libiberty.h"
 
+#include "dwarf.h"
 #include "parameters.h"
 #include "object.h"
 #include "symtab.h"
@@ -1926,6 +1927,140 @@ Output_symtab_xindex::endian_do_write(unsigned char* const oview)
     }
 }
 
+// Output_fill_debug_info methods.
+
+// Return the minimum size needed for a dummy compilation unit header.
+
+size_t
+Output_fill_debug_info::do_minimum_hole_size() const
+{
+  // Compile unit header fields: unit_length, version, debug_abbrev_offset,
+  // address_size.
+  const size_t len = 4 + 2 + 4 + 1;
+  // For type units, add type_signature, type_offset.
+  if (this->is_debug_types_)
+    return len + 8 + 4;
+  return len;
+}
+
+// Write a dummy compilation unit header to fill a hole in the
+// .debug_info or .debug_types section.
+
+void
+Output_fill_debug_info::do_write(Output_file* of, off_t off, size_t len) const
+{
+  gold_debug(DEBUG_INCREMENTAL, "fill_debug_info(%08lx, %08lx)", off, len);
+
+  gold_assert(len >= this->do_minimum_hole_size());
+
+  unsigned char* const oview = of->get_output_view(off, len);
+  unsigned char* pov = oview;
+
+  // Write header fields: unit_length, version, debug_abbrev_offset,
+  // address_size.
+  if (this->is_big_endian())
+    {
+      elfcpp::Swap<32, true>::writeval(pov, len - 4);
+      elfcpp::Swap<16, true>::writeval(pov + 4, this->version);
+      elfcpp::Swap<32, true>::writeval(pov + 6, 0);
+    }
+  else
+    {
+      elfcpp::Swap<32, false>::writeval(pov, len - 4);
+      elfcpp::Swap<16, false>::writeval(pov + 4, this->version);
+      elfcpp::Swap<32, false>::writeval(pov + 6, 0);
+    }
+  pov += 4 + 2 + 4;
+  *pov++ = 4;
+
+  // For type units, the additional header fields -- type_signature,
+  // type_offset -- can be filled with zeroes.
+
+  // Fill the remainder of the free space with zeroes.  The first
+  // zero should tell the consumer there are no DIEs to read in this
+  // compilation unit.
+  if (pov < oview + len)
+    memset(pov, 0, oview + len - pov);
+
+  of->write_output_view(off, len, oview);
+}
+
+// Output_fill_debug_line methods.
+
+// Return the minimum size needed for a dummy line number program header.
+
+size_t
+Output_fill_debug_line::do_minimum_hole_size() const
+{
+  // Line number program header fields: unit_length, version, header_length,
+  // minimum_instruction_length, default_is_stmt, line_base, line_range,
+  // opcode_base, standard_opcode_lengths[], include_directories, filenames.
+  const size_t len = 4 + 2 + 4 + this->header_length;
+  return len;
+}
+
+// Write a dummy line number program header to fill a hole in the
+// .debug_line section.
+
+void
+Output_fill_debug_line::do_write(Output_file* of, off_t off, size_t len) const
+{
+  gold_debug(DEBUG_INCREMENTAL, "fill_debug_line(%08lx, %08lx)", off, len);
+
+  gold_assert(len >= this->do_minimum_hole_size());
+
+  unsigned char* const oview = of->get_output_view(off, len);
+  unsigned char* pov = oview;
+
+  // Write header fields: unit_length, version, header_length,
+  // minimum_instruction_length, default_is_stmt, line_base, line_range,
+  // opcode_base, standard_opcode_lengths[], include_directories, filenames.
+  // We set the header_length field to cover the entire hole, so the
+  // line number program is empty.
+  if (this->is_big_endian())
+    {
+      elfcpp::Swap<32, true>::writeval(pov, len - 4);
+      elfcpp::Swap<16, true>::writeval(pov + 4, this->version);
+      elfcpp::Swap<32, true>::writeval(pov + 6, len - (4 + 2 + 4));
+    }
+  else
+    {
+      elfcpp::Swap<32, false>::writeval(pov, len - 4);
+      elfcpp::Swap<16, false>::writeval(pov + 4, this->version);
+      elfcpp::Swap<32, false>::writeval(pov + 6, len - (4 + 2 + 4));
+    }
+  pov += 4 + 2 + 4;
+  *pov++ = 1;	// minimum_instruction_length
+  *pov++ = 0;	// default_is_stmt
+  *pov++ = 0;	// line_base
+  *pov++ = 5;	// line_range
+  *pov++ = 13;	// opcode_base
+  *pov++ = 0;	// standard_opcode_lengths[1]
+  *pov++ = 1;	// standard_opcode_lengths[2]
+  *pov++ = 1;	// standard_opcode_lengths[3]
+  *pov++ = 1;	// standard_opcode_lengths[4]
+  *pov++ = 1;	// standard_opcode_lengths[5]
+  *pov++ = 0;	// standard_opcode_lengths[6]
+  *pov++ = 0;	// standard_opcode_lengths[7]
+  *pov++ = 0;	// standard_opcode_lengths[8]
+  *pov++ = 1;	// standard_opcode_lengths[9]
+  *pov++ = 0;	// standard_opcode_lengths[10]
+  *pov++ = 0;	// standard_opcode_lengths[11]
+  *pov++ = 1;	// standard_opcode_lengths[12]
+  *pov++ = 0;	// include_directories (empty)
+  *pov++ = 0;	// filenames (empty)
+
+  // Some consumers don't check the header_length field, and simply
+  // start reading the line number program immediately following the
+  // header.  For those consumers, we fill the remainder of the free
+  // space with DW_LNS_set_basic_block opcodes.  These are effectively
+  // no-ops: the resulting line table program will not create any rows.
+  if (pov < oview + len)
+    memset(pov, elfcpp::DW_LNS_set_basic_block, oview + len - pov);
+
+  of->write_output_view(off, len, oview);
+}
+
 // Output_section::Input_section methods.
 
 // Return the current data size.  For an input section we store the size here.
@@ -2158,6 +2293,7 @@ Output_section::Output_section(const char* name, elfcpp::Elf_Word type,
     checkpoint_(NULL),
     lookup_maps_(new Output_section_lookup_maps),
     free_list_(),
+    free_space_fill_(NULL),
     patch_space_(0)
 {
   // An unallocated section has no address.  Forcing this means that
@@ -2981,7 +3117,10 @@ Output_section::set_final_data_size()
   if (this->is_patch_space_allowed_ && parameters->incremental_full())
     {
       double pct = parameters->options().incremental_patch();
-      off_t extra = static_cast<off_t>(data_size * pct);
+      size_t extra = static_cast<size_t>(data_size * pct);
+      if (this->free_space_fill_ != NULL
+          && this->free_space_fill_->minimum_hole_size() > extra)
+	extra = this->free_space_fill_->minimum_hole_size();
       off_t new_size = align_address(data_size + extra, this->addralign());
       this->patch_space_ = new_size - data_size;
       gold_debug(DEBUG_INCREMENTAL,
@@ -3514,6 +3653,26 @@ Output_section::do_write(Output_file* of)
 
       p->write(of);
       off = aligned_off + p->data_size();
+    }
+
+  // For incremental links, fill in unused chunks in debug sections
+  // with dummy compilation unit headers.
+  if (this->free_space_fill_ != NULL)
+    {
+      for (Free_list::Const_iterator p = this->free_list_.begin();
+	   p != this->free_list_.end();
+	   ++p)
+	{
+	  off_t off = p->start_;
+	  size_t len = p->end_ - off;
+	  this->free_space_fill_->write(of, this->offset() + off, len);
+	}
+      if (this->patch_space_ > 0)
+	{
+	  off_t off = this->current_data_size_for_child() - this->patch_space_;
+	  this->free_space_fill_->write(of, this->offset() + off,
+					this->patch_space_);
+	}
     }
 }
 

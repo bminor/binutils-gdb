@@ -1,3 +1,36 @@
+2011-08-26  Cary Coutant  <ccoutant@google.com>
+
+	* layout.cc (Free_list::allocate): Provide guarantee of minimum
+	remaining hole size when allocating.
+	(Layout::make_output_section): Set fill methods for debug sections.
+	* layout.h (Free_list::Free_list_node): Move from private to
+	public.
+	(Free_list::set_min_hole_size): New function.
+	(Free_list::begin, Free_list::end): New functions.
+	(Free_list::min_hole_): New data member.
+	* output.cc: Include dwarf.h.
+	(Output_fill_debug_info::do_minimum_hole_size): New function.
+	(Output_fill_debug_info::do_write): New function.
+	(Output_fill_debug_line::do_minimum_hole_size): New function.
+	(Output_fill_debug_line::do_write): New function.
+	(Output_section::Output_section): Initialize new data member.
+	(Output_section::set_final_data_size): Ensure patch space is larger
+	than minimum hole size.
+	(Output_section::do_write): Fill holes in debug sections.
+	* output.h (Output_fill): New class.
+	(Output_fill_debug_info): New class.
+	(Output_fill_debug_line): New class.
+	(Output_section::set_free_space_fill): New function.
+	(Output_section::free_space_fill_): New data member.
+	* testsuite/Makefile.am (incremental_test_3): Add
+	--incremental-patch option.
+	(incremental_test_4): Likewise.
+	(incremental_test_5): Likewise.
+	(incremental_test_6): Likewise.
+	(incremental_copy_test): Likewise.
+	(incremental_common_test_1): Likewise.
+	* testsuite/Makefile.in: Regenerate.
+
 2011-08-26  Nick Clifton  <nickc@redhat.com>
 
 	* po/es.po: Updated Spanish translation.

@@ -71,26 +71,6 @@ is_compressed_debug_section(const char* secname);
 class Free_list
 {
  public:
-  Free_list()
-    : list_(), last_remove_(list_.begin()), extend_(false), length_(0)
-  { }
-
-  void
-  init(off_t len, bool extend);
-
-  void
-  remove(off_t start, off_t end);
-
-  off_t
-  allocate(off_t len, uint64_t align, off_t minoff);
-
-  void
-  dump();
-
-  static void
-  print_stats();
-
- private:
   struct Free_list_node
   {
     Free_list_node(off_t start, off_t end)
@@ -99,6 +79,52 @@ class Free_list
     off_t start_;
     off_t end_;
   };
+  typedef std::list<Free_list_node>::const_iterator Const_iterator;
+
+  Free_list()
+    : list_(), last_remove_(list_.begin()), extend_(false), length_(0),
+      min_hole_(0)
+  { }
+
+  // Initialize the free list for a section of length LEN.
+  // If EXTEND is true, free space may be allocated past the end.
+  void
+  init(off_t len, bool extend);
+
+  // Set the minimum hole size that is allowed when allocating
+  // from the free list.
+  void
+  set_min_hole_size(off_t min_hole)
+  { this->min_hole_ = min_hole; }
+
+  // Remove a chunk from the free list.
+  void
+  remove(off_t start, off_t end);
+
+  // Allocate a chunk of space from the free list of length LEN,
+  // with alignment ALIGN, and minimum offset MINOFF.
+  off_t
+  allocate(off_t len, uint64_t align, off_t minoff);
+
+  // Return an iterator for the beginning of the free list.
+  Const_iterator
+  begin() const
+  { return this->list_.begin(); }
+
+  // Return an iterator for the end of the free list.
+  Const_iterator
+  end() const
+  { return this->list_.end(); }
+
+  // Dump the free list (for debugging).
+  void
+  dump();
+
+  // Print usage statistics.
+  static void
+  print_stats();
+
+ private:
   typedef std::list<Free_list_node>::iterator Iterator;
 
   // The free list.
@@ -112,6 +138,10 @@ class Free_list
 
   // The total length of the section, segment, or file.
   off_t length_;
+
+  // The minimum hole size allowed.  When allocating from the free list,
+  // we must not leave a hole smaller than this.
+  off_t min_hole_;
 
   // Statistics:
   // The total number of free lists used.
