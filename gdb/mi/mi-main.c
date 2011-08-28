@@ -1119,7 +1119,7 @@ get_register (struct frame_info *frame, int regnum, int format)
   struct ui_out *uiout = current_uiout;
   CORE_ADDR addr;
   enum lval_type lval;
-  static struct ui_stream *stb = NULL;
+  struct ui_stream *stb;
   struct value *val;
 
   stb = ui_out_stream_new (uiout);

@@ -247,7 +247,7 @@ list_args_or_locals (enum what_to_list what, int values, struct frame_info *fi)
   struct symbol *sym;
   struct dict_iterator iter;
   struct cleanup *cleanup_list;
-  static struct ui_stream *stb = NULL;
+  struct ui_stream *stb;
   struct type *type;
   char *name_of_result;
   struct ui_out *uiout = current_uiout;

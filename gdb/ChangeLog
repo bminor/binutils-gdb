@@ -1,5 +1,16 @@
 2011-08-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Code cleanup.
+	* mi/mi-cmd-stack.c (list_args_or_locals): Remove stb initialization
+	and the static keyword.
+	* mi/mi-cmd-target.c (mi_cmd_target_file_get, mi_cmd_target_file_put):
+	Make prefix an array.
+	* mi/mi-cmd-target.c (mi_cmd_target_file_delete): Likewise.
+	* mi/mi-main.c (get_register): Remove stb initialization and the static
+	keyword.
+
+2011-08-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Code cleanup - make mi_opt const.
 	* mi/mi-cmd-break.c (mi_cmd_break_insert, mi_cmd_break_watch): Make
 	opts const.
