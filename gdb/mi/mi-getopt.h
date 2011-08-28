@@ -42,7 +42,7 @@
 
 struct mi_opt;
 extern int mi_getopt (const char *prefix, int argc, char **argv,
-		      struct mi_opt *opt, int *optind, char **optarg);
+		      const struct mi_opt *opt, int *optind, char **optarg);
 
 /* The option list.  Terminated by NAME==NULL.  ARG_P that the option
    requires an argument.  INDEX is returned to identify th option. */

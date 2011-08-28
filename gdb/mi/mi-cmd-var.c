@@ -561,7 +561,7 @@ mi_cmd_var_evaluate_expression (char *command, char **argv, int argc)
     {
       OP_FORMAT
     };
-  static struct mi_opt opts[] =
+  static const struct mi_opt opts[] =
   {
     {"f", OP_FORMAT, 1},
     { 0, 0, 0 }

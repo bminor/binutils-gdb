@@ -83,7 +83,7 @@ mi_cmd_disassemble (char *command, char **argv, int argc)
   {
     FILE_OPT, LINE_OPT, NUM_OPT, START_OPT, END_OPT
   };
-  static struct mi_opt opts[] = {
+  static const struct mi_opt opts[] = {
     {"f", FILE_OPT, 1},
     {"l", LINE_OPT, 1},
     {"n", NUM_OPT, 1},

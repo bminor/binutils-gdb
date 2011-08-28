@@ -29,7 +29,7 @@ mi_cmd_target_file_get (char *command, char **argv, int argc)
   int optind = 0;
   char *optarg;
   const char *remote_file, *local_file;
-  static struct mi_opt opts[] =
+  static const struct mi_opt opts[] =
   {
     { 0, 0, 0 }
   };
@@ -53,7 +53,7 @@ mi_cmd_target_file_put (char *command, char **argv, int argc)
   int optind = 0;
   char *optarg;
   const char *remote_file, *local_file;
-  static struct mi_opt opts[] =
+  static const struct mi_opt opts[] =
   {
     { 0, 0, 0 }
   };
@@ -77,7 +77,7 @@ mi_cmd_target_file_delete (char *command, char **argv, int argc)
   int optind = 0;
   char *optarg;
   const char *remote_file;
-  static struct mi_opt opts[] =
+  static const struct mi_opt opts[] =
   {
     { 0, 0, 0 }
   };

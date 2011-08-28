@@ -84,7 +84,7 @@ mi_cmd_break_insert (char *command, char **argv, int argc)
       IGNORE_COUNT_OPT, THREAD_OPT, PENDING_OPT, DISABLE_OPT,
       TRACEPOINT_OPT,
     };
-  static struct mi_opt opts[] =
+  static const struct mi_opt opts[] =
   {
     {"h", HARDWARE_OPT, 0},
     {"t", TEMP_OPT, 0},
@@ -221,7 +221,7 @@ mi_cmd_break_watch (char *command, char **argv, int argc)
     {
       READ_OPT, ACCESS_OPT
     };
-  static struct mi_opt opts[] =
+  static const struct mi_opt opts[] =
   {
     {"r", READ_OPT, 0},
     {"a", ACCESS_OPT, 0},

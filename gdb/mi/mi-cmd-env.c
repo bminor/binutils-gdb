@@ -125,7 +125,7 @@ mi_cmd_env_path (char *command, char **argv, int argc)
     {
       RESET_OPT
     };
-  static struct mi_opt opts[] =
+  static const struct mi_opt opts[] =
   {
     {"r", RESET_OPT, 0},
     { 0, 0, 0 }
@@ -197,7 +197,7 @@ mi_cmd_env_dir (char *command, char **argv, int argc)
     {
       RESET_OPT
     };
-  static struct mi_opt opts[] =
+  static const struct mi_opt opts[] =
   {
     {"r", RESET_OPT, 0},
     { 0, 0, 0 }

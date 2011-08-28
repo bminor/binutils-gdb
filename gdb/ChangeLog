@@ -1,3 +1,23 @@
+2011-08-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Code cleanup - make mi_opt const.
+	* mi/mi-cmd-break.c (mi_cmd_break_insert, mi_cmd_break_watch): Make
+	opts const.
+	* mi/mi-cmd-disas.c (mi_cmd_disassemble): Likewise.
+	* mi/mi-cmd-env.c (mi_cmd_env_path): Likewise.
+	(mi_cmd_env_dir): Likewise.
+	* mi/mi-cmd-target.c (mi_cmd_target_file_get): Likewise.
+	(mi_cmd_target_file_put): Likewise.
+	* mi/mi-cmd-target.c (mi_cmd_target_file_delete): Likewise.
+	* mi/mi-cmd-var.c (mi_cmd_var_evaluate_expression): Likewise.
+	* mi/mi-getopt.c (mi_getopt): Make opts and opt const.
+	(mi_valid_noargs): Make opts const.
+	* mi/mi-getopt.h (mi_getopt): Make opts and opt const.
+	* mi/mi-main.c (mi_cmd_list_thread_groups): Make opts const.
+	(mi_cmd_data_read_memory): Likewise.
+	(mi_cmd_data_read_memory_bytes): Likewise.
+	(mi_cmd_data_write_memory): Likewise.
+
 2011-08-26  Matt Rice  <ratmice@gmail.com>
 
 	* solib-sunos.c (allocate_rt_common_objfile): Add missing arguments to

@@ -799,7 +799,7 @@ mi_cmd_list_thread_groups (char *command, char **argv, int argc)
     {
       AVAILABLE_OPT, RECURSE_OPT
     };
-  static struct mi_opt opts[] =
+  static const struct mi_opt opts[] =
   {
     {"-available", AVAILABLE_OPT, 0},
     {"-recurse", RECURSE_OPT, 1},
@@ -1307,7 +1307,7 @@ mi_cmd_data_read_memory (char *command, char **argv, int argc)
     {
       OFFSET_OPT
     };
-  static struct mi_opt opts[] =
+  static const struct mi_opt opts[] =
   {
     {"o", OFFSET_OPT, 1},
     { 0, 0, 0 }
@@ -1493,7 +1493,7 @@ mi_cmd_data_read_memory_bytes (char *command, char **argv, int argc)
     {
       OFFSET_OPT
     };
-  static struct mi_opt opts[] =
+  static const struct mi_opt opts[] =
   {
     {"o", OFFSET_OPT, 1},
     { 0, 0, 0 }
@@ -1594,7 +1594,7 @@ mi_cmd_data_write_memory (char *command, char **argv, int argc)
     {
       OFFSET_OPT
     };
-  static struct mi_opt opts[] =
+  static const struct mi_opt opts[] =
   {
     {"o", OFFSET_OPT, 1},
     { 0, 0, 0 }

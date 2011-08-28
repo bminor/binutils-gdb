@@ -25,11 +25,11 @@
 int
 mi_getopt (const char *prefix,
 	   int argc, char **argv,
-	   struct mi_opt *opts,
+	   const struct mi_opt *opts,
 	   int *optind, char **optarg)
 {
   char *arg;
-  struct mi_opt *opt;
+  const struct mi_opt *opt;
 
   /* We assume that argv/argc are ok. */
   if (*optind > argc || *optind < 0)
@@ -80,7 +80,7 @@ mi_valid_noargs (const char *prefix, int argc, char **argv)
 {
   int optind = 0;
   char *optarg;
-  static struct mi_opt opts[] =
+  static const struct mi_opt opts[] =
   {
     { 0, 0, 0 }
   };
