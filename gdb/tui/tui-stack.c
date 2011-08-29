@@ -380,8 +380,11 @@ tui_show_frame_info (struct frame_info *fi)
 	    {
 	      if (find_pc_partial_function (get_frame_pc (fi), (char **) NULL,
 					    &low, (CORE_ADDR) 0) == 0)
-		error (_("No function contains program "
-			 "counter for selected frame."));
+		{
+		  /* There is no symbol available for current PC.  There is no
+		     safe way how to "disassemble backwards".  */
+		  low = get_frame_pc (fi);
+		}
 	      else
 		low = tui_get_low_disassembly_address (get_frame_arch (fi),
 						       low, get_frame_pc (fi));

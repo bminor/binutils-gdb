@@ -1,3 +1,9 @@
+2011-08-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix TUI stepi on code without symbols.
+	* tui/tui-stack.c (tui_show_frame_info): Remove error, set LOW for
+	current PC instead.
+
 2011-08-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Code cleanup.
