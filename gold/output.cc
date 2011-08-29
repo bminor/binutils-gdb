@@ -1949,7 +1949,8 @@ Output_fill_debug_info::do_minimum_hole_size() const
 void
 Output_fill_debug_info::do_write(Output_file* of, off_t off, size_t len) const
 {
-  gold_debug(DEBUG_INCREMENTAL, "fill_debug_info(%08lx, %08lx)", off, len);
+  gold_debug(DEBUG_INCREMENTAL, "fill_debug_info(%08lx, %08lx)",
+	     static_cast<long>(off), static_cast<long>(len));
 
   gold_assert(len >= this->do_minimum_hole_size());
 
@@ -2005,7 +2006,8 @@ Output_fill_debug_line::do_minimum_hole_size() const
 void
 Output_fill_debug_line::do_write(Output_file* of, off_t off, size_t len) const
 {
-  gold_debug(DEBUG_INCREMENTAL, "fill_debug_line(%08lx, %08lx)", off, len);
+  gold_debug(DEBUG_INCREMENTAL, "fill_debug_line(%08lx, %08lx)",
+	     static_cast<long>(off), static_cast<long>(len));
 
   gold_assert(len >= this->do_minimum_hole_size());
 

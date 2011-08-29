@@ -1,3 +1,9 @@
+2011-08-29  Cary Coutant  <ccoutant@google.com>
+
+	* output.cc: (Output_fill_debug_info::do_minimum_hole_size): Add
+	casts to match formatting specs.
+	(Output_fill_debug_line::do_minimum_hole_size): Likewise.
+
 2011-08-26  Cary Coutant  <ccoutant@google.com>
 
 	* layout.cc (Free_list::allocate): Provide guarantee of minimum
