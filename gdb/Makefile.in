@@ -565,6 +565,7 @@ ALL_TARGET_OBS = \
 	sparc-linux-tdep.o sparcnbsd-tdep.o sparcobsd-tdep.o \
 	sparc-sol2-tdep.o sparc-tdep.o \
 	spu-tdep.o spu-multiarch.o solib-spu.o \
+	tic6x-tdep.o tic6x-linux-tdep.o \
 	v850-tdep.o \
 	vaxnbsd-tdep.o vaxobsd-tdep.o vax-tdep.o \
 	xstormy16-tdep.o \
@@ -574,7 +575,7 @@ ALL_TARGET_OBS = \
 	nbsd-tdep.o obsd-tdep.o \
 	sol2-tdep.o \
 	solib-frv.o solib-irix.o solib-svr4.o solib-target.o \
-	solib-som.o solib-pa64.o solib-darwin.o \
+	solib-som.o solib-pa64.o solib-darwin.o solib-dsbt.o \
 	dbug-rom.o dink32-rom.o ppcbug-rom.o m32r-rom.o dsrec.o monitor.o \
 	remote-m32r-sdi.o remote-mips.o \
 	xcoffread.o \

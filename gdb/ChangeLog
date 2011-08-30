@@ -1,3 +1,8 @@
+2011-08-29  Yao Qi  <yao@codesourcery.com>
+
+	* Makefile.in (ALL_TARGET_OBS): Add tic6x-tdep.o tic6x-linux-tdep.o
+	and solib-dsbt.o.
+
 2011-08-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix TUI stepi on code without symbols.
