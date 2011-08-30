@@ -508,76 +508,6 @@ scan_dyntag (int dyntag, bfd *abfd, CORE_ADDR *ptr)
   return 0;
 }
 
-/* An expensive way to lookup the value of a single symbol for
-   bfd's that are only temporary anyway.  This is used by the
-   shared library support to find the address of the debugger
-   interface structures in the shared library.
-
-   Note that 0 is specifically allowed as an error return (no
-   such symbol).  */
-
-static CORE_ADDR
-bfd_lookup_symbol (bfd *abfd, char *symname)
-{
-  long storage_needed;
-  asymbol *sym;
-  asymbol **symbol_table;
-  unsigned int number_of_symbols;
-  unsigned int i;
-  struct cleanup *back_to;
-  CORE_ADDR symaddr = 0;
-
-  storage_needed = bfd_get_symtab_upper_bound (abfd);
-
-  if (storage_needed > 0)
-    {
-      symbol_table = (asymbol **) xmalloc (storage_needed);
-      back_to = make_cleanup (xfree, symbol_table);
-      number_of_symbols = bfd_canonicalize_symtab (abfd, symbol_table);
-
-      for (i = 0; i < number_of_symbols; i++)
-	{
-	  sym = *symbol_table++;
-	  if (strcmp (sym->name, symname) == 0)
-	    {
-	      /* Bfd symbols are section relative. */
-	      symaddr = sym->value + sym->section->vma;
-	      break;
-	    }
-	}
-      do_cleanups (back_to);
-    }
-
-  if (symaddr)
-    return symaddr;
-
-  /* Look for the symbol in the dynamic string table too.  */
-
-  storage_needed = bfd_get_dynamic_symtab_upper_bound (abfd);
-
-  if (storage_needed > 0)
-    {
-      symbol_table = (asymbol **) xmalloc (storage_needed);
-      back_to = make_cleanup (xfree, symbol_table);
-      number_of_symbols = bfd_canonicalize_dynamic_symtab (abfd, symbol_table);
-
-      for (i = 0; i < number_of_symbols; i++)
-	{
-	  sym = *symbol_table++;
-	  if (strcmp (sym->name, symname) == 0)
-	    {
-	      /* Bfd symbols are section relative. */
-	      symaddr = sym->value + sym->section->vma;
-	      break;
-	    }
-	}
-      do_cleanups (back_to);
-    }
-
-  return symaddr;
-}
-
-
 /* If no open symbol file, attempt to locate and open the main symbol
    file.
 
@@ -852,6 +782,14 @@ enable_break_failure_warning (void)
 	   "and track explicitly loaded dynamic code."));
 }
 
+/* Helper function for gdb_bfd_lookup_symbol.  */
+
+static int
+cmp_name (asymbol *sym, void *data)
+{
+  return (strcmp (sym->name, (const char *) data) == 0);
+}
+
 /* The dynamic linkers has, as part of its debugger interface, support
    for arranging for the inferior to hit a breakpoint after mapping in
    the shared libraries.  This function enables that breakpoint.
@@ -957,7 +895,7 @@ enable_break2 (void)
 	    info->interp_plt_sect_low + bfd_section_size (tmp_bfd, interp_sect);
 	}
 
-      addr = bfd_lookup_symbol (tmp_bfd, "_dl_debug_addr");
+      addr = gdb_bfd_lookup_symbol (tmp_bfd, cmp_name, "_dl_debug_addr");
       if (addr == 0)
 	{
 	  warning (_("Could not find symbol _dl_debug_addr in dynamic linker"));

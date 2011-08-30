@@ -269,50 +269,13 @@ read_dynamic_info (asection *dyninfo_sect, dld_cache_t *dld_cache_p)
   return 1;
 }
 
-/* bfd_lookup_symbol -- lookup the value for a specific symbol
+/* Helper function for gdb_bfd_lookup_symbol_from_symtab.  */
 
-   An expensive way to lookup the value of a single symbol for
-   bfd's that are only temporary anyway.  This is used by the
-   shared library support to find the address of the debugger
-   interface structures in the shared library.
-
-   Note that 0 is specifically allowed as an error return (no
-   such symbol).  */
-
-static CORE_ADDR
-bfd_lookup_symbol (bfd *abfd, char *symname)
+static int
+cmp_name (asymbol *sym, void *data)
 {
-  unsigned int storage_needed;
-  asymbol *sym;
-  asymbol **symbol_table;
-  unsigned int number_of_symbols;
-  unsigned int i;
-  struct cleanup *back_to;
-  CORE_ADDR symaddr = 0;
-
-  storage_needed = bfd_get_symtab_upper_bound (abfd);
-
-  if (storage_needed > 0)
-    {
-      symbol_table = (asymbol **) xmalloc (storage_needed);
-      back_to = make_cleanup (xfree, symbol_table);
-      number_of_symbols = bfd_canonicalize_symtab (abfd, symbol_table);
-
-      for (i = 0; i < number_of_symbols; i++)
-	{
-	  sym = *symbol_table++;
-	  if (strcmp (sym->name, symname) == 0)
-	    {
-	      /* Bfd symbols are section relative.  */
-	      symaddr = sym->value + sym->section->vma;
-	      break;
-	    }
-	}
-      do_cleanups (back_to);
-    }
-  return (symaddr);
+  return (strcmp (sym->name, (const char *) data) == 0);
 }
-
 
 /* This hook gets called just before the first instruction in the
    inferior process is executed.
@@ -421,7 +384,8 @@ manpage for methods to privately map shared library text."));
 	 routine.  */
       load_addr = regcache_read_pc (get_current_regcache ())
 		  - tmp_bfd->start_address;
-      sym_addr = bfd_lookup_symbol (tmp_bfd, "__dld_break");
+      sym_addr = bfd_lookup_symbol_from_symtab (tmp_bfd, cmp_name,
+						"__dld_break");
       sym_addr = load_addr + sym_addr + 4;
       
       /* Create the shared library breakpoint.  */

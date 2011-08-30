@@ -78,4 +78,17 @@ extern void set_solib_ops (struct gdbarch *gdbarch,
 
 extern int libpthread_name_p (const char *name);
 
+/* Look up symbol from both symbol table and dynamic string table.  */
+
+extern CORE_ADDR gdb_bfd_lookup_symbol (bfd *abfd,
+					int (*match_sym) (asymbol *, void *),
+					void *data);
+
+/* Look up symbol from symbol table.  */
+
+extern CORE_ADDR bfd_lookup_symbol_from_symtab (bfd *abfd,
+						int (*match_sym) (asymbol *,
+								  void *),
+						void *data);
+
 #endif /* SOLIB_H */

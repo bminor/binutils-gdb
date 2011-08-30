@@ -1,5 +1,23 @@
 2011-08-29  Yao Qi  <yao@codesourcery.com>
 
+	* solib-dsbt.c (bfd_lookup_symbol): Removed.
+	(cmp_name): New.
+	(enable_break2): Update caller.
+	* solib-frv.c (bfd_lookup_symbol): Removed.
+	(cmp_name): New.
+	(enable_break2): Update caller.
+	* solib-pa64.c (bfd_lookup_symbol): Removed.
+	(cmp_name): New.
+	* solib-svr4.c (bfd_lookup_symbol): Removed.
+	(cmp_name_and_sec_flags): New.
+	(enable_break): Update caller.
+	* solib.c (gdb_bfd_lookup_symbol_from_symtab): New.
+	(gdb_bfd_lookup_symbol_from_dyn_symtab): New.
+	(gdb_bfd_lookup_symbol): New.
+	* solib.h: Functions declarations.
+
+2011-08-29  Yao Qi  <yao@codesourcery.com>
+
 	* Makefile.in (ALL_TARGET_OBS): Add tic6x-tdep.o tic6x-linux-tdep.o
 	and solib-dsbt.o.
 
