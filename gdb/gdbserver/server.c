@@ -32,7 +32,6 @@
 
 ptid_t cont_thread;
 ptid_t general_thread;
-ptid_t step_thread;
 
 int server_waiting;
 
@@ -2931,8 +2930,6 @@ process_serial_event (void)
 	    }
 	  else if (own_buf[1] == 'c')
 	    cont_thread = thread_id;
-	  else if (own_buf[1] == 's')
-	    step_thread = thread_id;
 
 	  write_ok (own_buf);
 	}

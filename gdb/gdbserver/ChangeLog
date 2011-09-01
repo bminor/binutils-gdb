@@ -1,3 +1,10 @@
+2011-08-31  Jie Zhang  <jzhang918@gmail.com>
+
+	* server.c (step_thread): Remove definition.
+	(process_serial_event): Don't handle Hs.
+	* server.h (step_thread): Remove declaration.
+	* target.c (set_desired_inferior): Remove use of step_thread.
+
 2011-08-24  Luis Machado  <lgustavo@codesourcery.com>
 
 	* linux-low.c: Include linux-procfs.h.

@@ -282,7 +282,6 @@ void unloaded_dll (const char *name, CORE_ADDR base_addr);
 
 extern ptid_t cont_thread;
 extern ptid_t general_thread;
-extern ptid_t step_thread;
 
 extern int server_waiting;
 extern int debug_threads;

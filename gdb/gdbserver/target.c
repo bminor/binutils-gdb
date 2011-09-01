@@ -31,21 +31,7 @@ set_desired_inferior (int use_general)
   if (use_general == 1)
     found = find_thread_ptid (general_thread);
   else
-    {
-      found = NULL;
-
-      /* If we are continuing any (all) thread(s), use step_thread
-	 to decide which thread to step and/or send the specified
-	 signal to.  */
-      if ((!ptid_equal (step_thread, null_ptid)
-	   && !ptid_equal (step_thread, minus_one_ptid))
-	  && (ptid_equal (cont_thread, null_ptid)
-	      || ptid_equal (cont_thread, minus_one_ptid)))
-	found = find_thread_ptid (step_thread);
-
-      if (found == NULL)
-	found = find_thread_ptid (cont_thread);
-    }
+    found = find_thread_ptid (cont_thread);
 
   if (found == NULL)
     current_inferior = (struct thread_info *) all_threads.head;
