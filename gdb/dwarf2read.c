@@ -11578,14 +11578,6 @@ new_symbol_full (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	    {
 	      dwarf2_const_value (attr, sym, cu);
 	    }
-	  attr = dwarf2_attr (die, DW_AT_variable_parameter, cu);
-	  if (attr && DW_UNSND (attr))
-	    {
-	      struct type *ref_type;
-
-	      ref_type = lookup_reference_type (SYMBOL_TYPE (sym));
-	      SYMBOL_TYPE (sym) = ref_type;
-	    }
 
 	  list_to_add = cu->list_in_scope;
 	  break;
