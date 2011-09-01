@@ -1,5 +1,9 @@
 2011-09-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* dw2-ifort-parameter-debug.S: Update copyright year.
+	* dw2-ifort-parameter.c: Update copyright year.
+	* dw2-ifort-parameter.exp: Update copyright year.
+
 	* dw2-ifort-parameter-debug.S: New file.
 	* dw2-ifort-parameter.c: New file.
 	* dw2-ifort-parameter.exp: New file.
