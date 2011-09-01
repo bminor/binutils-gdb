@@ -1,3 +1,8 @@
+2011-09-01  Christophe Lyon  <christophe.lyon@st.com>
+
+	* elf32-arm.c (elf32_arm_output_arch_local_syms): Skip excluded
+	sections.
+
 2011-08-26  Nick Clifton  <nickc@redhat.com>
 
 	* po/es.po: Updated Spanish translation.

@@ -14506,7 +14506,8 @@ elf32_arm_output_arch_local_syms (bfd *output_bfd,
 		   == SEC_HAS_CONTENTS
 		&& get_arm_elf_section_data (osi.sec) != NULL
 		&& get_arm_elf_section_data (osi.sec)->mapcount == 0
-		&& osi.sec->size > 0)
+		&& osi.sec->size > 0
+		&& (osi.sec->flags & SEC_EXCLUDE) == 0)
 	      {
 		osi.sec_shndx = _bfd_elf_section_from_bfd_section
 		  (output_bfd, osi.sec->output_section);

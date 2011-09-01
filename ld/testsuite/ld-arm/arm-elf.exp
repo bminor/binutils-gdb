@@ -323,6 +323,9 @@ set armelftests {
     {"Data only mapping symbols" "-T data-only-map.ld -Map map" "" {data-only-map.s}
      {{objdump -dr data-only-map.d}}
      "data-only-map"}
+    {"Data only mapping symbols for merged sections" "-T rodata-merge-map.ld" "" {rodata-merge-map1.s rodata-merge-map2.s rodata-merge-map3.s}
+     {{readelf -s rodata-merge-map.sym}}
+     "rodata-merge-map"}
     {"GOT relocations in executables (setup)" "-shared"
      "" {exec-got-1a.s}
      {}

@@ -1,3 +1,12 @@
+2011-09-01  Christophe Lyon  <christophe.lyon@st.com>
+
+	* ld-arm/arm-elf.exp: Add new rodata-merge-map test.
+	* ld-arm/rodata-merge-map.ld: New file.
+	* ld-arm/rodata-merge-map.sym: Likewise.
+	* ld-arm/rodata-merge-map1.s Likewise.
+	* ld-arm/rodata-merge-map2.s: Likewise.
+	* ld-arm/rodata-merge-map3.s: Likewise.
+
 2011-08-22  Alan Modra  <amodra@gmail.com>
 
 	* ld-powerpc/tocopt4a.s, * ld-powerpc/tocopt4b.s,
