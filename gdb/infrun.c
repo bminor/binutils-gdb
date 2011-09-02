@@ -6384,6 +6384,25 @@ signals_info (char *signum_exp, int from_tty)
 		     "to change these tables.\n"));
 }
 
+/* Check if it makes sense to read $_siginfo from the current thread
+   at this point.  If not, throw an error.  */
+
+static void
+validate_siginfo_access (void)
+{
+  /* No current inferior, no siginfo.  */
+  if (ptid_equal (inferior_ptid, null_ptid))
+    error (_("No thread selected."));
+
+  /* Don't try to read from a dead thread.  */
+  if (is_exited (inferior_ptid))
+    error (_("The current thread has terminated"));
+
+  /* ... or from a spinning thread.  */
+  if (is_running (inferior_ptid))
+    error (_("Selected thread is running."));
+}
+
 /* The $_siginfo convenience variable is a bit special.  We don't know
    for sure the type of the value until we actually have a chance to
    fetch the data.  The type can change depending on gdbarch, so it is
@@ -6401,6 +6420,8 @@ static void
 siginfo_value_read (struct value *v)
 {
   LONGEST transferred;
+
+  validate_siginfo_access ();
 
   transferred =
     target_read (&current_target, TARGET_OBJECT_SIGNAL_INFO,
@@ -6420,6 +6441,8 @@ static void
 siginfo_value_write (struct value *v, struct value *fromval)
 {
   LONGEST transferred;
+
+  validate_siginfo_access ();
 
   transferred = target_write (&current_target,
 			      TARGET_OBJECT_SIGNAL_INFO,

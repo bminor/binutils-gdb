@@ -1,3 +1,10 @@
+2011-09-02  Pedro Alves  <pedro@codesourcery.com>
+
+	* value.c (show_convenience): Catch errors thrown while printing
+	each internal variable.
+	* infrun.c (validate_siginfo_access): New function.
+	(siginfo_value_read, siginfo_value_write): Call it.
+
 2011-09-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Revert:

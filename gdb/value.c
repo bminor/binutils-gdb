@@ -2095,13 +2095,23 @@ show_convenience (char *ignore, int from_tty)
   get_user_print_options (&opts);
   for (var = internalvars; var; var = var->next)
     {
+      volatile struct gdb_exception ex;
+
       if (!varseen)
 	{
 	  varseen = 1;
 	}
       printf_filtered (("$%s = "), var->name);
-      value_print (value_of_internalvar (gdbarch, var), gdb_stdout,
-		   &opts);
+
+      TRY_CATCH (ex, RETURN_MASK_ERROR)
+	{
+	  struct value *val;
+
+	  val = value_of_internalvar (gdbarch, var);
+	  value_print (val, gdb_stdout, &opts);
+	}
+      if (ex.reason < 0)
+	fprintf_filtered (gdb_stdout, _("<error: %s>"), ex.message);
       printf_filtered (("\n"));
     }
   if (!varseen)
