@@ -227,6 +227,10 @@ get_init_files (char **system_gdbinit,
 static int
 captured_command_loop (void *data)
 {
+  /* Top-level execution commands can be run on the background from
+     here on.  */
+  interpreter_async = 1;
+
   current_interp_command_loop ();
   /* FIXME: cagney/1999-11-05: A correct command_loop() implementaton
      would clean things up (restoring the cleanup chain) to the state

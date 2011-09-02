@@ -1,5 +1,29 @@
 2011-09-02  Pedro Alves  <pedro@codesourcery.com>
 
+	* top.c: Include interps.h.
+	(execute_command): If the target can async, but the interpreter is
+	in sync mode, synchronously wait for the command to finish before
+	returning.
+	(execute_command_to_string): Force the interpreter to sync mode.
+	* infrun.c: Include interps.h.
+	(fetch_inferior_event): Don't restore the prompt yet if the
+	interpreter is in sync mode.
+	* interps.c (interpreter_async): New global.
+	* interps.h (interpreter_async): Declare.
+	* inf-loop.c: Include interps.h.
+	(inferior_event_handler): Don't print the language change or run
+	breakpoint commands yet if the interpreter in is sync mode.
+	* main.c (captured_command_loop): Flip the interpreter to async
+	mode.
+	* cli/cli-script.c: Include interps.h.
+	(execute_user_command, while_command, if_command): Force the
+	interpreter to sync mode.
+	* python/python.c: Include interps.h.
+	(python_command, execute_gdb_command): Force the interpreter to
+	sync mode.
+
+2011-09-02  Pedro Alves  <pedro@codesourcery.com>
+
 	* value.c (show_convenience): Catch errors thrown while printing
 	each internal variable.
 	* infrun.c (validate_siginfo_access): New function.

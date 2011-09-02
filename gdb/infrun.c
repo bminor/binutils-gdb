@@ -55,6 +55,7 @@
 #include "jit.h"
 #include "tracepoint.h"
 #include "continuations.h"
+#include "interps.h"
 
 /* Prototypes for local functions */
 
@@ -2814,7 +2815,7 @@ fetch_inferior_event (void *client_data)
 
   /* If the inferior was in sync execution mode, and now isn't,
      restore the prompt.  */
-  if (was_sync && !sync_execution)
+  if (interpreter_async && was_sync && !sync_execution)
     display_gdb_prompt (0);
 }
 

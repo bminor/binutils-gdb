@@ -48,6 +48,7 @@
 #include "event-loop.h"
 #include "gdbthread.h"
 #include "python/python.h"
+#include "interps.h"
 
 /* readline include files.  */
 #include "readline/readline.h"
@@ -441,7 +442,18 @@ execute_command (char *p, int from_tty)
 	deprecated_call_command_hook (c, arg, from_tty & caution);
       else
 	cmd_func (c, arg, from_tty & caution);
-       
+
+      /* If the interpreter is in sync mode (we're running a user
+	 command's list, running command hooks or similars), and we
+	 just ran a synchronous command that started the target, wait
+	 for that command to end.  */
+      if (!interpreter_async && sync_execution && is_running (inferior_ptid))
+	{
+	  while (gdb_do_one_event () >= 0)
+	    if (!sync_execution)
+	      break;
+	}
+
       /* If this command has been post-hooked, run the hook last.  */
       execute_cmd_post_hook (c);
 
@@ -496,6 +508,9 @@ execute_command_to_string (char *p, int from_tty)
   /* GDB_STDOUT should be better already restored during these
      restoration callbacks.  */
   cleanup = set_batch_flag_and_make_cleanup_restore_page_info ();
+
+  make_cleanup_restore_integer (&interpreter_async);
+  interpreter_async = 0;
 
   str_file = mem_fileopen ();
 

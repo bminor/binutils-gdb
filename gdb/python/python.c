@@ -52,6 +52,7 @@ static int gdbpy_should_print_stack = 0;
 #include "target.h"
 #include "gdbthread.h"
 #include "observer.h"
+#include "interps.h"
 
 static PyMethodDef GdbMethods[];
 
@@ -199,6 +200,10 @@ python_command (char *arg, int from_tty)
   struct cleanup *cleanup;
 
   cleanup = ensure_python_env (get_current_arch (), current_language);
+
+  make_cleanup_restore_integer (&interpreter_async);
+  interpreter_async = 0;
+
   while (arg && *arg && isspace (*arg))
     ++arg;
   if (arg && *arg)
@@ -377,6 +382,9 @@ execute_gdb_command (PyObject *self, PyObject *args, PyObject *kw)
       /* Copy the argument text in case the command modifies it.  */
       char *copy = xstrdup (arg);
       struct cleanup *cleanup = make_cleanup (xfree, copy);
+
+      make_cleanup_restore_integer (&interpreter_async);
+      interpreter_async = 0;
 
       prevent_dont_repeat ();
       if (to_string)

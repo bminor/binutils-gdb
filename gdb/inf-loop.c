@@ -29,6 +29,7 @@
 #include "language.h"
 #include "gdbthread.h"
 #include "continuations.h"
+#include "interps.h"
 
 static int fetch_inferior_event_wrapper (gdb_client_data client_data);
 
@@ -40,7 +41,6 @@ void
 inferior_event_handler (enum inferior_event_type event_type, 
 			gdb_client_data client_data)
 {
-  struct gdb_exception e;
   int was_sync = 0;
   struct cleanup *cleanup_if_error = make_bpstat_clear_actions_cleanup ();
 
@@ -109,19 +109,26 @@ inferior_event_handler (enum inferior_event_type event_type,
       else
 	do_all_continuations (0);
 
-      if (info_verbose
-	  && current_language != expected_language
-	  && language_mode == language_mode_auto)
-	language_info (1);	/* Print what changed.  */
-
-      /* Don't propagate breakpoint commands errors.  Either we're
-	 stopping or some command resumes the inferior.  The user will
-	 be informed.  */
-      TRY_CATCH (e, RETURN_MASK_ALL)
+      /* When running a command list (from a user command, say), these
+	 are only run when the command list is all done.  */
+      if (interpreter_async)
 	{
-	  bpstat_do_actions ();
+	  volatile struct gdb_exception e;
+
+	  if (info_verbose
+	      && current_language != expected_language
+	      && language_mode == language_mode_auto)
+	    language_info (1);	/* Print what changed.  */
+
+	  /* Don't propagate breakpoint commands errors.  Either we're
+	     stopping or some command resumes the inferior.  The user will
+	     be informed.  */
+	  TRY_CATCH (e, RETURN_MASK_ALL)
+	    {
+	      bpstat_do_actions ();
+	    }
+	  exception_print (gdb_stderr, e);
 	}
-      exception_print (gdb_stderr, e);
 
       if (!was_sync
 	  && exec_done_display_p

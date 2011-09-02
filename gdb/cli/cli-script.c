@@ -35,6 +35,7 @@
 #include "gdb_assert.h"
 
 #include "python/python.h"
+#include "interps.h"
 
 /* Prototypes for local functions.  */
 
@@ -338,6 +339,9 @@ execute_user_command (struct cmd_list_element *c, char *args)
      not confused with Insight.  */
   in_user_command = 1;
 
+  make_cleanup_restore_integer (&interpreter_async);
+  interpreter_async = 0;
+
   command_nest_depth++;
   while (cmdlines)
     {
@@ -598,6 +602,7 @@ void
 while_command (char *arg, int from_tty)
 {
   struct command_line *command = NULL;
+  struct cleanup *old_chain;
 
   control_level = 1;
   command = get_command_line (while_control, arg);
@@ -605,8 +610,13 @@ while_command (char *arg, int from_tty)
   if (command == NULL)
     return;
 
+  old_chain = make_cleanup_restore_integer (&interpreter_async);
+  interpreter_async = 0;
+
   execute_control_command_untraced (command);
   free_command_lines (&command);
+
+  do_cleanups (old_chain);
 }
 
 /* "if" command support.  Execute either the true or false arm depending
@@ -616,6 +626,7 @@ void
 if_command (char *arg, int from_tty)
 {
   struct command_line *command = NULL;
+  struct cleanup *old_chain;
 
   control_level = 1;
   command = get_command_line (if_control, arg);
@@ -623,8 +634,13 @@ if_command (char *arg, int from_tty)
   if (command == NULL)
     return;
 
+  old_chain = make_cleanup_restore_integer (&interpreter_async);
+  interpreter_async = 0;
+
   execute_control_command_untraced (command);
   free_command_lines (&command);
+
+  do_cleanups (old_chain);
 }
 
 /* Cleanup */

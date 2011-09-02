@@ -43,6 +43,12 @@
 #include "exceptions.h"
 #include "continuations.h"
 
+/* True if the current interpreter in is async mode.  See interps.h
+   for more details.  This starts out disabled, until all the explicit
+   command line arguments (e.g., `gdb -ex "start" -ex "next"') are
+   processed.  */
+int interpreter_async = 0;
+
 struct interp
 {
   /* This is the name in "-i=" and set interpreter.  */
