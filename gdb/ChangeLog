@@ -1,3 +1,7 @@
+2011-09-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* config/s390/s390.mh (NATDEPFILES): Add linux-procfs.o dependency.
+
 2011-09-02  Matt Rice  <ratmice@gmail.com>
 
 	PR gdb/10720
