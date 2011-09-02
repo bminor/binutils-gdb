@@ -1,3 +1,9 @@
+2011-09-02  Matt Rice  <ratmice@gmail.com>
+
+	* lib/prompt.exp: New file for testing the first prompt.
+	* gdb.python/py-prompt.exp: Ditto.
+	* gdb.python/py-prompt.c: Ditto (copy of ext-attach.c).
+
 2011-09-02  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.threads/gcore-thread.exp: Set the global core_supported to

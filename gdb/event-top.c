@@ -185,27 +185,7 @@ rl_callback_read_char_wrapper (gdb_client_data client_data)
 void
 cli_command_loop (void)
 {
-  /* If we are using readline, set things up and display the first
-     prompt, otherwise just print the prompt.  */
-  if (async_command_editing_p)
-    {
-      int length;
-      char *a_prompt;
-      char *gdb_prompt = get_prompt (0);
-
-      /* Tell readline what the prompt to display is and what function
-         it will need to call after a whole line is read.  This also
-         displays the first prompt.  */
-      length = strlen (get_prefix (0))
-	+ strlen (gdb_prompt) + strlen (get_suffix(0)) + 1;
-      a_prompt = (char *) alloca (length);
-      strcpy (a_prompt, get_prefix (0));
-      strcat (a_prompt, gdb_prompt);
-      strcat (a_prompt, get_suffix (0));
-      rl_callback_handler_install (a_prompt, input_handler);
-    }
-  else
-    display_gdb_prompt (0);
+  display_gdb_prompt (0);
 
   /* Now it's time to start the event loop.  */
   start_event_loop ();
@@ -272,8 +252,11 @@ display_gdb_prompt (char *new_prompt)
   /* Get the prompt before the observers are called as observer hook
      functions may change the prompt.  Do not call observers on an
      explicit prompt change as passed to this function, as this forms
-     a temporary prompt, IE, displayed but not set.  */
-  if (! new_prompt)
+     a temporary prompt, IE, displayed but not set.  Do not call
+     observers for a prompt change if sync_execution is set, it will
+     call us again with sync_execution not set when it wants to
+     display an actual prompt.  */
+  if (! sync_execution && ! new_prompt)
     {
       char *post_gdb_prompt = NULL;
       char *pre_gdb_prompt = xstrdup (get_prompt (0));
@@ -288,6 +271,10 @@ display_gdb_prompt (char *new_prompt)
       xfree (pre_gdb_prompt);
     }
 
+  /* In the sync_execution && !is_running case we need to display the prompt
+     even though it may be "" to avoid a double prompt, while installing the
+     callback handlers, in the async_editing_p case for pagination,
+     So fall through.  */
   if (sync_execution && is_running (inferior_ptid))
     {
       /* This is to trick readline into not trying to display the
