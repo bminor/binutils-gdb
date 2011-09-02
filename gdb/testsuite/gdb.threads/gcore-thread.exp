@@ -100,6 +100,7 @@ gdb_test "continue" "Continuing.*Breakpoint.* thread2 .*" "thread 2 is running"
 
 set escapedfilename [string_to_regexp $corefile]
 # Drop corefile
+set core_supported 0
 gdb_test_multiple "gcore $corefile" "save a corefile" \
 {
   -re "Saved corefile ${escapedfilename}\[\r\n\]+$gdb_prompt $" {
@@ -109,12 +110,9 @@ gdb_test_multiple "gcore $corefile" "save a corefile" \
   }
   -re "Can't create a corefile\[\r\n\]+$gdb_prompt $" {
     unsupported "save a corefile"
-    global core_supported
-    set core_supported 0
   }
 }
 
-global core_supported
 if {!$core_supported} {
   return -1
 }
