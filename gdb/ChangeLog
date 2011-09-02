@@ -1,5 +1,15 @@
 2011-09-02  Pedro Alves  <pedro@codesourcery.com>
 
+	* linux-nat.c (in_pid_list_p): New.
+	(linux_record_stopped_pid): Delete.
+	(lin_lwp_attach_lwp): Check if PTRACE_ATTACH failed because we're
+	already attached to the LWP.  Return an indication if so.
+	(linux_nat_filter_event): Adjust.
+	* linux-thread-db.c (attach_thread): Handle lin_lwp_attach_lwp
+	returning an indication to ignore this thread.
+
+2011-09-02  Pedro Alves  <pedro@codesourcery.com>
+
 	* top.c: Include interps.h.
 	(execute_command): If the target can async, but the interpreter is
 	in sync mode, synchronously wait for the command to finish before

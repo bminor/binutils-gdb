@@ -1140,9 +1140,25 @@ attach_thread (ptid_t ptid, const td_thrhandle_t *th_p,
 
   /* Under GNU/Linux, we have to attach to each and every thread.  */
   if (target_has_execution
-      && tp == NULL
-      && lin_lwp_attach_lwp (BUILD_LWP (ti_p->ti_lid, GET_PID (ptid))) < 0)
-    return 0;
+      && tp == NULL)
+    {
+      int res;
+
+      res = lin_lwp_attach_lwp (BUILD_LWP (ti_p->ti_lid, GET_PID (ptid)));
+      if (res < 0)
+	{
+	  /* Error, stop iterating.  */
+	  return 0;
+	}
+      else if (res > 0)
+	{
+	  /* Pretend this thread doesn't exist yet, and keep
+	     iterating.  */
+	  return 1;
+	}
+
+      /* Otherwise, we sucessfully attached to the thread.  */
+    }
 
   /* Construct the thread's private data.  */
   private = xmalloc (sizeof (struct private_thread_info));

@@ -331,6 +331,17 @@ add_to_pid_list (struct simple_pid_list **listp, int pid, int status)
 }
 
 static int
+in_pid_list_p (struct simple_pid_list *list, int pid)
+{
+  struct simple_pid_list *p;
+
+  for (p = list; p != NULL; p = p->next)
+    if (p->pid == pid)
+      return 1;
+  return 0;
+}
+
+static int
 pull_pid_from_list (struct simple_pid_list **listp, int pid, int *statusp)
 {
   struct simple_pid_list **p;
@@ -346,12 +357,6 @@ pull_pid_from_list (struct simple_pid_list **listp, int pid, int *statusp)
 	return 1;
       }
   return 0;
-}
-
-static void
-linux_record_stopped_pid (int pid, int status)
-{
-  add_to_pid_list (&stopped_pids, pid, status);
 }
 
 
@@ -1386,20 +1391,25 @@ linux_nat_post_attach_wait (ptid_t ptid, int first, int *cloned,
   return status;
 }
 
-/* Attach to the LWP specified by PID.  Return 0 if successful or -1
-   if the new LWP could not be attached.  */
+/* Attach to the LWP specified by PID.  Return 0 if successful, -1 if
+   the new LWP could not be attached, or 1 if we're already auto
+   attached to this thread, but haven't processed the
+   PTRACE_EVENT_CLONE event of its parent thread, so we just ignore
+   its existance, without considering it an error.  */
 
 int
 lin_lwp_attach_lwp (ptid_t ptid)
 {
   struct lwp_info *lp;
   sigset_t prev_mask;
+  int lwpid;
 
   gdb_assert (is_lwp (ptid));
 
   block_child_signals (&prev_mask);
 
   lp = find_lwp_pid (ptid);
+  lwpid = GET_LWP (ptid);
 
   /* We assume that we're already attached to any LWP that has an id
      equal to the overall process id, and to any LWP that is already
@@ -1407,12 +1417,48 @@ lin_lwp_attach_lwp (ptid_t ptid)
      and we've had PID wraparound since we last tried to stop all threads,
      this assumption might be wrong; fortunately, this is very unlikely
      to happen.  */
-  if (GET_LWP (ptid) != GET_PID (ptid) && lp == NULL)
+  if (lwpid != GET_PID (ptid) && lp == NULL)
     {
       int status, cloned = 0, signalled = 0;
 
-      if (ptrace (PTRACE_ATTACH, GET_LWP (ptid), 0, 0) < 0)
+      if (ptrace (PTRACE_ATTACH, lwpid, 0, 0) < 0)
 	{
+	  if (linux_supports_tracefork_flag)
+	    {
+	      /* If we haven't stopped all threads when we get here,
+		 we may have seen a thread listed in thread_db's list,
+		 but not processed the PTRACE_EVENT_CLONE yet.  If
+		 that's the case, ignore this new thread, and let
+		 normal event handling discover it later.  */
+	      if (in_pid_list_p (stopped_pids, lwpid))
+		{
+		  /* We've already seen this thread stop, but we
+		     haven't seen the PTRACE_EVENT_CLONE extended
+		     event yet.  */
+		  restore_child_signals_mask (&prev_mask);
+		  return 0;
+		}
+	      else
+		{
+		  int new_pid;
+		  int status;
+
+		  /* See if we've got a stop for this new child
+		     pending.  If so, we're already attached.  */
+		  new_pid = my_waitpid (lwpid, &status, WNOHANG);
+		  if (new_pid == -1 && errno == ECHILD)
+		    new_pid = my_waitpid (lwpid, &status, __WCLONE | WNOHANG);
+		  if (new_pid != -1)
+		    {
+		      if (WIFSTOPPED (status))
+			add_to_pid_list (&stopped_pids, lwpid, status);
+
+		      restore_child_signals_mask (&prev_mask);
+		      return 1;
+		    }
+		}
+	    }
+
 	  /* If we fail to attach to the thread, issue a warning,
 	     but continue.  One way this can happen is if thread
 	     creation is interrupted; as of Linux kernel 2.6.19, a
@@ -3084,7 +3130,7 @@ linux_nat_filter_event (int lwpid, int status, int options)
      from waitpid before or after the event is.  */
   if (WIFSTOPPED (status) && !lp)
     {
-      linux_record_stopped_pid (lwpid, status);
+      add_to_pid_list (&stopped_pids, lwpid, status);
       return NULL;
     }
 
