@@ -1,6 +1,10 @@
 		What has changed in GDB?
 	     (Organized release by release)
 
+*** Changes in GDB 7.3.1
+
+* The build failure for NetBSD and OpenBSD targets have now been fixed.
+
 *** Changes in GDB 7.3
 
 * GDB has a new command: "thread find [REGEXP]".
