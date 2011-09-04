@@ -1,7 +1,7 @@
 		What has changed in GDB?
 	     (Organized release by release)
 
-*** Changes since GDB 7.3
+*** Changes since GDB 7.3.1
 
 * GDB has two new commands: "set remote hardware-watchpoint-length-limit"
   and "show remote hardware-watchpoint-length-limit".  These allows to
