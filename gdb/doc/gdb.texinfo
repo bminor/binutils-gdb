@@ -30,7 +30,7 @@
 
 @c !!set GDB manual's edition---not the same as GDB version!
 @c This is updated by GNU Press.
-@set EDITION Ninth
+@set EDITION Tenth
 
 @c !!set GDB edit command default editor
 @set EDITOR /bin/ex
@@ -97,7 +97,7 @@ Version @value{GDBVN}.
 Published by the Free Software Foundation @*
 51 Franklin Street, Fifth Floor,
 Boston, MA 02110-1301, USA@*
-ISBN 1-882114-77-9 @*
+ISBN 978-0-9831592-3-0 @*
 
 @insertcopying
 @page
