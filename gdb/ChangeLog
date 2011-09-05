@@ -1,5 +1,12 @@
 2011-09-05  Pedro Alves  <pedro@codesourcery.com>
 
+	PR cli/13110
+
+	* infrun.c (fetch_inferior_event): Check if there's a selected
+	thread before checking if the selected thread is executing.
+
+2011-09-05  Pedro Alves  <pedro@codesourcery.com>
+
 	* inf-loop.c (execute_command): Don't check if the current thread
 	if running before synchronously waiting for command completion.
 	* infrun.c (fetch_inferior_event): Handle "set exec-done-display"

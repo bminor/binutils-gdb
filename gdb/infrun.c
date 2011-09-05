@@ -2749,7 +2749,9 @@ fetch_inferior_event (void *client_data)
      switches threads anyway).  If we didn't do this, a spurious
      delayed event in all-stop mode would make the user lose the
      selected frame.  */
-  if (non_stop || is_executing (inferior_ptid))
+  if (non_stop
+      || (!ptid_equal (inferior_ptid, null_ptid)
+	  && is_executing (inferior_ptid)))
     registers_changed ();
 
   make_cleanup_restore_integer (&execution_direction);
