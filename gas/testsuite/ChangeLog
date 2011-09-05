@@ -1,3 +1,10 @@
+2011-09-05  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* gas/mips/loc-swap-2.s, gas/mips/loc-swap-2.d,
+	gas/mips/micromips@loc-swap-2.d,
+	gas/mips/mips16@loc-swap-2.d: New test.
+	* gas/mips/mips.exp: Run it.
+
 2011-08-19  Sergey A. Guriev  <sergeya.a.guriev@intel.com>
 
 	* gas/i386/avx-gather-intel.d: Added missing vpgather tests.

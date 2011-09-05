@@ -207,6 +207,10 @@ static struct dwarf2_line_info current = {
   0
 };
 
+/* Lines that are at the same location as CURRENT, and which are waiting
+   for a label.  */
+static struct line_entry *pending_lines, **pending_lines_tail = &pending_lines;
+
 /* The size of an address on the target.  */
 static unsigned int sizeof_address;
 
@@ -280,22 +284,47 @@ get_line_subseg (segT seg, subsegT subseg)
   return lss;
 }
 
-/* Record an entry for LOC occurring at LABEL.  */
+/* Push LOC onto the pending lines list.  */
 
 static void
-dwarf2_gen_line_info_1 (symbolS *label, struct dwarf2_line_info *loc)
+dwarf2_push_line (struct dwarf2_line_info *loc)
 {
-  struct line_subseg *lss;
   struct line_entry *e;
 
   e = (struct line_entry *) xmalloc (sizeof (*e));
   e->next = NULL;
-  e->label = label;
+  e->label = NULL;
   e->loc = *loc;
 
-  lss = get_line_subseg (now_seg, now_subseg);
-  *lss->ptail = e;
-  lss->ptail = &e->next;
+  *pending_lines_tail = e;
+  pending_lines_tail = &(*pending_lines_tail)->next;
+}
+
+/* Emit all pending line information.  LABEL is the label with which the
+   lines should be associated, or null if they should be associated with
+   the current position.  */
+
+static void
+dwarf2_flush_pending_lines (symbolS *label)
+{
+  if (pending_lines)
+    {
+      struct line_subseg *lss;
+      struct line_entry *e;
+
+      if (!label)
+	label = symbol_temp_new (now_seg, 0, frag_now);
+
+      for (e = pending_lines; e; e = e->next)
+	e->label = label;
+
+      lss = get_line_subseg (now_seg, now_subseg);
+      *lss->ptail = pending_lines;
+      lss->ptail = pending_lines_tail;
+
+      pending_lines = NULL;
+      pending_lines_tail = &pending_lines;
+    }
 }
 
 /* Record an entry for LOC occurring at OFS within the current fragment.  */
@@ -305,8 +334,6 @@ dwarf2_gen_line_info (addressT ofs, struct dwarf2_line_info *loc)
 {
   static unsigned int line = -1;
   static unsigned int filenum = -1;
-
-  symbolS *sym;
 
   /* Early out for as-yet incomplete location information.  */
   if (loc->filenum == 0 || loc->line == 0)
@@ -323,8 +350,8 @@ dwarf2_gen_line_info (addressT ofs, struct dwarf2_line_info *loc)
   line = loc->line;
   filenum = loc->filenum;
 
-  sym = symbol_temp_new (now_seg, ofs, frag_now);
-  dwarf2_gen_line_info_1 (sym, loc);
+  dwarf2_push_line (loc);
+  dwarf2_flush_pending_lines (symbol_temp_new (now_seg, ofs, frag_now));
 }
 
 /* Returns the current source information.  If .file directives have
@@ -385,6 +412,11 @@ dwarf2_emit_insn (int size)
 void
 dwarf2_consume_line_info (void)
 {
+  /* If the consumer has stashed the current location away for later use,
+     assume that any earlier location information should be associated
+     with ".".  */
+  dwarf2_flush_pending_lines (NULL);
+
   /* Unless we generate DWARF2 debugging information for each
      assembler line, we only emit one line symbol for one LOC.  */
   dwarf2_loc_directive_seen = FALSE;
@@ -416,7 +448,8 @@ dwarf2_emit_label (symbolS *label)
 
   loc.flags |= DWARF2_FLAG_BASIC_BLOCK;
 
-  dwarf2_gen_line_info_1 (label, &loc);
+  dwarf2_push_line (&loc);
+  dwarf2_flush_pending_lines (label);
   dwarf2_consume_line_info ();
 }
 
@@ -576,7 +609,7 @@ dwarf2_directive_loc (int dummy ATTRIBUTE_UNUSED)
   /* If we see two .loc directives in a row, force the first one to be
      output now.  */
   if (dwarf2_loc_directive_seen)
-    dwarf2_emit_insn (0);
+    dwarf2_push_line (&current);
 
   filenum = get_absolute_expression ();
   SKIP_WHITESPACE ();

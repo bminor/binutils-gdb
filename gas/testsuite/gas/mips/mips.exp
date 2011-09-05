@@ -889,6 +889,7 @@ if { [istarget mips*-*-vxworks*] } {
 	run_dump_test_arches "loc-swap"	[mips_arch_list_all]
 	run_dump_test_arches "loc-swap-dis" \
 					[mips_arch_list_all]
+	run_dump_test_arches "loc-swap-2" [mips_arch_list_all]
     }
 
     if $has_newabi {
