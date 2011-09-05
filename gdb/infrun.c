@@ -2713,6 +2713,7 @@ fetch_inferior_event (void *client_data)
   struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
   struct cleanup *ts_old_chain;
   int was_sync = sync_execution;
+  int cmd_done = 0;
 
   memset (ecs, 0, sizeof (*ecs));
 
@@ -2804,7 +2805,10 @@ fetch_inferior_event (void *client_data)
 	  && ecs->event_thread->control.stop_step)
 	inferior_event_handler (INF_EXEC_CONTINUE, NULL);
       else
-	inferior_event_handler (INF_EXEC_COMPLETE, NULL);
+	{
+	  inferior_event_handler (INF_EXEC_COMPLETE, NULL);
+	  cmd_done = 1;
+	}
     }
 
   /* No error, don't finish the thread states yet.  */
@@ -2814,9 +2818,17 @@ fetch_inferior_event (void *client_data)
   do_cleanups (old_chain);
 
   /* If the inferior was in sync execution mode, and now isn't,
-     restore the prompt.  */
+     restore the prompt (a synchronous execution command has finished,
+     and we're ready for input).  */
   if (interpreter_async && was_sync && !sync_execution)
     display_gdb_prompt (0);
+
+  if (cmd_done
+      && !was_sync
+      && exec_done_display_p
+      && (ptid_equal (inferior_ptid, null_ptid)
+	  || !is_running (inferior_ptid)))
+    printf_unfiltered (_("completed.\n"));
 }
 
 /* Record the frame and location we're currently stepping through.  */
@@ -5814,6 +5826,7 @@ normal_stop (void)
     goto done;
 
   target_terminal_ours ();
+  async_enable_stdin ();
 
   /* Set the current source location.  This will also happen if we
      display the frame below, but the current SAL will be incorrect

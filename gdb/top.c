@@ -447,7 +447,7 @@ execute_command (char *p, int from_tty)
 	 command's list, running command hooks or similars), and we
 	 just ran a synchronous command that started the target, wait
 	 for that command to end.  */
-      if (!interpreter_async && sync_execution && is_running (inferior_ptid))
+      if (!interpreter_async && sync_execution)
 	{
 	  while (gdb_do_one_event () >= 0)
 	    if (!sync_execution)

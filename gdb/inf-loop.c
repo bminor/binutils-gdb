@@ -41,7 +41,6 @@ void
 inferior_event_handler (enum inferior_event_type event_type, 
 			gdb_client_data client_data)
 {
-  int was_sync = 0;
   struct cleanup *cleanup_if_error = make_bpstat_clear_actions_cleanup ();
 
   switch (event_type)
@@ -63,7 +62,6 @@ inferior_event_handler (enum inferior_event_type event_type,
       break;
 
     case INF_EXEC_COMPLETE:
-
       if (!non_stop)
 	{
 	  /* Unregister the inferior from the event loop.  This is done
@@ -72,12 +70,6 @@ inferior_event_handler (enum inferior_event_type event_type,
 	  if (target_has_execution)
 	    target_async (NULL, 0);
 	}
-
-      /* The call to async_enable_stdin below resets 'sync_execution'.
-	 However, if sync_execution is 1 now, we also need to show the
-	 prompt below, so save the current value.  */
-      was_sync = sync_execution;
-      async_enable_stdin ();
 
       /* Do all continuations associated with the whole inferior (not
 	 a particular thread).  */
@@ -129,12 +121,6 @@ inferior_event_handler (enum inferior_event_type event_type,
 	    }
 	  exception_print (gdb_stderr, e);
 	}
-
-      if (!was_sync
-	  && exec_done_display_p
-	  && (ptid_equal (inferior_ptid, null_ptid)
-	      || !is_running (inferior_ptid)))
-	printf_unfiltered (_("completed.\n"));
       break;
 
     case INF_EXEC_CONTINUE:
