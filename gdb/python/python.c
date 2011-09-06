@@ -753,7 +753,7 @@ before_prompt_hook (const char *current_gdb_prompt)
   /* If a prompt has been set, PROMPT will not be NULL.  If it is
      NULL, do not set the prompt.  */
   if (prompt != NULL)
-    set_prompt (prompt, 0);
+    set_prompt (prompt);
 
   do_cleanups (cleanup);
   return;

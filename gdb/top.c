@@ -554,7 +554,7 @@ command_loop (void)
   while (instream && !feof (instream))
     {
       if (window_hook && instream == stdin)
-	(*window_hook) (instream, get_prompt (0));
+	(*window_hook) (instream, get_prompt ());
 
       quit_flag = 0;
       if (instream == stdin && stdin_is_tty)
@@ -563,7 +563,7 @@ command_loop (void)
 
       /* Get a command-line.  This calls the readline package.  */
       command = command_line_input (instream == stdin ?
-				    get_prompt (0) : (char *) NULL,
+				    get_prompt () : (char *) NULL,
 				    instream == stdin, "prompt");
       if (command == 0)
 	{
@@ -1145,97 +1145,27 @@ and \"show warranty\" for details.\n");
 }
 
 
-/* get_prefix: access method for the GDB prefix string.  */
+/* The current top level prompt, settable with "set prompt", and/or
+   with the python `gdb.prompt_hook' hook.  */
+static char *top_prompt;
+
+/* Access method for the GDB prompt string.  */
 
 char *
-get_prefix (int level)
+get_prompt (void)
 {
-  return PREFIX (level);
+  return top_prompt;
 }
 
-/* set_prefix: set method for the GDB prefix string.  */
+/* Set method for the GDB prompt string.  */
 
 void
-set_prefix (const char *s, int level)
+set_prompt (const char *s)
 {
-  /* If S is NULL, just free the PREFIX at level LEVEL and set to
-     NULL.  */
-  if (s == NULL)
-    {
-      xfree (PREFIX (level));
-      PREFIX (level) = NULL;
-    }
-  else
-    {
-      char *p = xstrdup (s);
+  char *p = xstrdup (s);
 
-      xfree (PREFIX (level));
-      PREFIX (level) =  p;
-    }
-}
-
-/* get_suffix: access method for the GDB suffix string.  */
-
-char *
-get_suffix (int level)
-{
-  return SUFFIX (level);
-}
-
-/* set_suffix: set method for the GDB suffix string.  */
-
-void
-set_suffix (const char *s, int level)
-{
-  /* If S is NULL, just free the SUFFIX at level LEVEL and set to
-     NULL.  */
-  if (s == NULL)
-    {
-      xfree (SUFFIX (level));
-      SUFFIX (level) = NULL;
-    }
-  else
-    {
-      char *p = xstrdup (s);
-
-      xfree (SUFFIX (level));
-      SUFFIX (level) =  p;
-    }
-}
-
- /* get_prompt: access method for the GDB prompt string.  */
-
-char *
-get_prompt (int level)
-{
-  return PROMPT (level);
-}
-
-void
-set_prompt (const char *s, int level)
-{
-  /* If S is NULL, just free the PROMPT at level LEVEL and set to
-     NULL.  */
-  if (s == NULL)
-    {
-      xfree (PROMPT (level));
-      PROMPT (level) = NULL;
-    }
-  else
-    {
-      char *p = xstrdup (s);
-
-      xfree (PROMPT (0));
-      PROMPT (0) = p;
-
-      if (level == 0)
-	{
-	  /* Also, free and set new_async_prompt so prompt changes sync up
-	     with set/show prompt.  */
-	    xfree (new_async_prompt);
-	    new_async_prompt = xstrdup (PROMPT (0));
-	  }
-      }
+  xfree (top_prompt);
+  top_prompt = p;
 }
 
 
@@ -1589,8 +1519,8 @@ init_history (void)
 }
 
 static void
-show_new_async_prompt (struct ui_file *file, int from_tty,
-		       struct cmd_list_element *c, const char *value)
+show_prompt (struct ui_file *file, int from_tty,
+	     struct cmd_list_element *c, const char *value)
 {
   fprintf_filtered (file, _("Gdb's prompt is \"%s\".\n"), value);
 }
@@ -1622,21 +1552,13 @@ show_exec_done_display_p (struct ui_file *file, int from_tty,
 static void
 init_main (void)
 {
-  /* initialize the prompt stack to a simple "(gdb) " prompt or to
-     whatever the DEFAULT_PROMPT is.  */
-  the_prompts.top = 0;
-  PREFIX (0) = "";
-  set_prompt (DEFAULT_PROMPT, 0);
-  SUFFIX (0) = "";
+  /* Initialize the prompt to a simple "(gdb) " prompt or to whatever
+     the DEFAULT_PROMPT is.  */
+  set_prompt (DEFAULT_PROMPT);
+
   /* Set things up for annotation_level > 1, if the user ever decides
      to use it.  */
   async_annotation_suffix = "prompt";
-
-  /* If gdb was started with --annotate=2, this is equivalent to the
-     user entering the command 'set annotate 2' at the gdb prompt, so
-     we need to do extra processing.  */
-  if (annotation_level > 1)
-    set_async_annotation_level (NULL, 0, NULL);
 
   /* Set the important stuff up for command editing.  */
   command_editing_p = 1;
@@ -1656,11 +1578,11 @@ init_main (void)
   rl_add_defun ("operate-and-get-next", gdb_rl_operate_and_get_next, 15);
 
   add_setshow_string_cmd ("prompt", class_support,
-			  &new_async_prompt,
+			  &top_prompt,
 			  _("Set gdb's prompt"),
 			  _("Show gdb's prompt"),
-			  NULL, set_async_prompt,
-			  show_new_async_prompt,
+			  NULL, NULL,
+			  show_prompt,
 			  &setlist, &showlist);
 
   add_com ("dont-repeat", class_support, dont_repeat_command, _("\
@@ -1716,7 +1638,7 @@ Set annotation_level."), _("\
 Show annotation_level."), _("\
 0 == normal;     1 == fullname (for use when running under emacs)\n\
 2 == output annotated suitably for use by programs that control GDB."),
-			    set_async_annotation_level,
+			    NULL,
 			    show_annotation_level,
 			    &setlist, &showlist);
 

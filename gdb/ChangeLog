@@ -1,3 +1,38 @@
+2011-09-06  Pedro Alves  <pedro@codesourcery.com>
+
+	* event-top.h (MAXPROMPTS, struct prompts): Delete.
+	(set_async_annotation_level, set_async_prompt, pop_prompt)
+	(push_prompt, new_async_prompt): Delete declarations.
+	* top.h (get_prompt, set_prompt): Change prototype.
+	(get_prefix, set_prefix, get_suffix, set_suffix): Delete
+	declarations.
+	* top.c (command_loop):
+	(top_prompt): New global.
+	(get_prefix, set_prefix, get_suffix, ): Delete.
+	(get_prompt, set_prompt): Rewrite.
+	(show_new_async_prompt): Rename to ...
+	(show_prompt): ... this.
+	(init_main): Adjust.  Don't handle --annotate=2 here.
+	* event-top.c (new_async_prompt): Delete.
+	(the_prompts): Delete.
+	(more_to_come): Make static.
+	(display_gdb_prompt): Use top_level_prompt() to compute the top
+	level prompt, and don't notify the before_prompt observers
+	directly here.  Always trick readline into not trying to display
+	the prompt if sync_execution and displaying the primary prompt.
+	If displaying a local/secondary prompt, always show it, even if
+	sync_execution is set.
+	(change_annotation_level): Delete.
+	(top_level_prompt): New, based on change_annotation_level.
+	(push_prompt, pop_prompt): Delete.
+	(async_disable_stdin): No longer pushes prompt.
+	(command_line_handler): No longer pushes or pops prompt.  If more
+	input is expected, call display_gdb_prompt with an explicit empty
+	prompt.
+	(async_stop_sig): Adjust.
+	(set_async_annotation_level, set_async_prompt): Delete.
+	* python/python.c (before_prompt_hook): Adjust.
+
 2011-09-05  Pedro Alves  <pedro@codesourcery.com>
 
 	PR cli/13110
