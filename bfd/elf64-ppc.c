@@ -8382,6 +8382,8 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 			  break;
 
 			default:
+			  if (!ppc64_elf_howto_table[R_PPC64_ADDR32])
+			    ppc_howto_init ();
 			  info->callbacks->einfo
 			    (_("%P: %H: %s relocation references "
 			       "optimized away TOC entry\n"),
