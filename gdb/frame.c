@@ -1328,17 +1328,21 @@ has_stack_frames (void)
   if (!target_has_registers || !target_has_stack || !target_has_memory)
     return 0;
 
-  /* No current inferior, no frame.  */
-  if (ptid_equal (inferior_ptid, null_ptid))
-    return 0;
+  /* Traceframes are effectively a substitute for the live inferior.  */
+  if (get_traceframe_number () < 0)
+    {
+      /* No current inferior, no frame.  */
+      if (ptid_equal (inferior_ptid, null_ptid))
+	return 0;
 
-  /* Don't try to read from a dead thread.  */
-  if (is_exited (inferior_ptid))
-    return 0;
+      /* Don't try to read from a dead thread.  */
+      if (is_exited (inferior_ptid))
+	return 0;
 
-  /* ... or from a spinning thread.  */
-  if (is_executing (inferior_ptid))
-    return 0;
+      /* ... or from a spinning thread.  */
+      if (is_executing (inferior_ptid))
+	return 0;
+    }
 
   return 1;
 }
