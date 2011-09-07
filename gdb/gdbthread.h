@@ -176,7 +176,14 @@ struct thread_info
   int stepping_over_breakpoint;
 
   /* Set to TRUE if we should finish single-stepping over a breakpoint
-     after hitting the current step-resume breakpoint.  */
+     after hitting the current step-resume breakpoint.  The context here
+     is that GDB is to do `next' or `step' while signal arrives.
+     When stepping over a breakpoint and signal arrives, GDB will attempt
+     to skip signal handler, so it inserts a step_resume_breakpoint at the
+     signal return address, and resume inferior.
+     step_after_step_resume_breakpoint is set to TRUE at this moment in
+     order to keep GDB in mind that there is still a breakpoint to step over
+     when GDB gets back SIGTRAP from step_resume_breakpoint.  */
   int step_after_step_resume_breakpoint;
 
   /* This is set TRUE when a catchpoint of a shared library event
