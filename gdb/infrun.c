@@ -2853,8 +2853,6 @@ init_thread_stepping_state (struct thread_info *tss)
 {
   tss->stepping_over_breakpoint = 0;
   tss->step_after_step_resume_breakpoint = 0;
-  tss->stepping_through_solib_after_catch = 0;
-  tss->stepping_through_solib_catchpoints = NULL;
 }
 
 /* Return the cached copy of the last pid/waitstatus returned by
@@ -4553,37 +4551,6 @@ process_event_stop_test:
 	}
     }
 
-  /* Are we stepping to get the inferior out of the dynamic linker's
-     hook (and possibly the dld itself) after catching a shlib
-     event?  */
-  if (ecs->event_thread->stepping_through_solib_after_catch)
-    {
-#if defined(SOLIB_ADD)
-      /* Have we reached our destination?  If not, keep going.  */
-      if (SOLIB_IN_DYNAMIC_LINKER (PIDGET (ecs->ptid), stop_pc))
-	{
-          if (debug_infrun)
-	    fprintf_unfiltered (gdb_stdlog,
-				"infrun: stepping in dynamic linker\n");
-	  ecs->event_thread->stepping_over_breakpoint = 1;
-	  keep_going (ecs);
-	  return;
-	}
-#endif
-      if (debug_infrun)
-	 fprintf_unfiltered (gdb_stdlog, "infrun: step past dynamic linker\n");
-      /* Else, stop and report the catchpoint(s) whose triggering
-         caused us to begin stepping.  */
-      ecs->event_thread->stepping_through_solib_after_catch = 0;
-      bpstat_clear (&ecs->event_thread->control.stop_bpstat);
-      ecs->event_thread->control.stop_bpstat
-	= bpstat_copy (ecs->event_thread->stepping_through_solib_catchpoints);
-      bpstat_clear (&ecs->event_thread->stepping_through_solib_catchpoints);
-      stop_print_frame = 1;
-      stop_stepping (ecs);
-      return;
-    }
-
   if (ecs->event_thread->control.step_resume_breakpoint)
     {
       if (debug_infrun)
@@ -5143,7 +5110,6 @@ currently_stepping (struct thread_info *tp)
   return ((tp->control.step_range_end
 	   && tp->control.step_resume_breakpoint == NULL)
 	  || tp->control.trap_expected
-	  || tp->stepping_through_solib_after_catch
 	  || bpstat_should_step ());
 }
 
@@ -5157,8 +5123,7 @@ currently_stepping_or_nexting_callback (struct thread_info *tp, void *data)
     return 0;
 
   return (tp->control.step_range_end
- 	  || tp->control.trap_expected
- 	  || tp->stepping_through_solib_after_catch);
+ 	  || tp->control.trap_expected);
 }
 
 /* Inferior has stepped into a subroutine call with source code that

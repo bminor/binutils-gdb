@@ -186,17 +186,6 @@ struct thread_info
      when GDB gets back SIGTRAP from step_resume_breakpoint.  */
   int step_after_step_resume_breakpoint;
 
-  /* This is set TRUE when a catchpoint of a shared library event
-     triggers.  Since we don't wish to leave the inferior in the
-     solib hook when we report the event, we step the inferior
-     back to user code before stopping and reporting the event.  */
-  int stepping_through_solib_after_catch;
-
-  /* When stepping_through_solib_after_catch is TRUE, this is a
-     list of the catchpoints that should be reported as triggering
-     when we finally do stop stepping.  */
-  bpstat stepping_through_solib_catchpoints;
-
   /* Per-thread command support.  */
 
   /* Pointer to what is left to do for an execution command after the

@@ -1,5 +1,14 @@
 2011-09-07  Yao Qi  <yao@codesourcery.com>
 
+	* gdbthread.h (struct thread_info): Remove fields
+	`stepping_through_solib_after_catch' and
+	`stepping_through_solib_catchpoints'.
+	* infrun.c (init_thread_stepping_state): Update.
+	(process_event_stop_test, currently_stepping): Update.
+	(currently_stepping_or_nexting_callback): Update.
+
+2011-09-07  Yao Qi  <yao@codesourcery.com>
+
 	* gdbthread.h (struct thread_info): Comment on field
 	`step_after_step_resume_breakpoint'.
 
