@@ -4879,8 +4879,8 @@ remote_console_output (char *msg)
       tb[1] = 0;
       fputs_unfiltered (tb, gdb_stdtarg);
     }
-    gdb_flush (gdb_stdtarg);
-  }
+  gdb_flush (gdb_stdtarg);
+}
 
 typedef struct cached_reg
 {
