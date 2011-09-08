@@ -1,5 +1,12 @@
 2011-09-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	PR breakpoints/12435
+	* gdb.arch/amd64-prologue-xmm.c: New file.
+	* gdb.arch/amd64-prologue-xmm.exp: New file.
+	* gdb.arch/amd64-prologue-xmm.s: New file.
+
+2011-09-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdb.dwarf2/dw2-param-error-main.c: New file.
 	* gdb.dwarf2/dw2-param-error.S: New file.
 	* gdb.dwarf2/dw2-param-error.exp: New file.

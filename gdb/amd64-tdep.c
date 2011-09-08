@@ -1917,6 +1917,9 @@ amd64_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
 {
   struct amd64_frame_cache cache;
   CORE_ADDR pc;
+  struct symtab_and_line start_pc_sal, next_sal;
+  gdb_byte buf[4 + 8 * 7];
+  int offset, xmmreg;
 
   amd64_init_frame_cache (&cache);
   pc = amd64_analyze_prologue (gdbarch, start_pc, 0xffffffffffffffffLL,
@@ -1924,7 +1927,71 @@ amd64_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
   if (cache.frameless_p)
     return start_pc;
 
-  return pc;
+  /* GCC PR debug/48827 produced false prologue end:
+     84 c0                test   %al,%al
+     74 23                je     after
+     <-- here is 0 lines advance - the false prologue end marker.
+     0f 29 85 70 ff ff ff movaps %xmm0,-0x90(%rbp)
+     0f 29 4d 80          movaps %xmm1,-0x80(%rbp)
+     0f 29 55 90          movaps %xmm2,-0x70(%rbp)
+     0f 29 5d a0          movaps %xmm3,-0x60(%rbp)
+     0f 29 65 b0          movaps %xmm4,-0x50(%rbp)
+     0f 29 6d c0          movaps %xmm5,-0x40(%rbp)
+     0f 29 75 d0          movaps %xmm6,-0x30(%rbp)
+     0f 29 7d e0          movaps %xmm7,-0x20(%rbp)
+     after:  */
+
+  if (pc == start_pc)
+    return pc;
+
+  start_pc_sal = find_pc_sect_line (start_pc, NULL, 0);
+  if (start_pc_sal.symtab == NULL
+      || !start_pc_sal.symtab->amd64_prologue_line_bug
+      || start_pc_sal.pc != start_pc || pc >= start_pc_sal.end)
+    return pc;
+
+  next_sal = find_pc_sect_line (start_pc_sal.end, NULL, 0);
+  if (next_sal.line != start_pc_sal.line)
+    return pc;
+
+  /* START_PC can be from overlayed memory, ignored here.  */
+  if (target_read_memory (next_sal.pc - 4, buf, sizeof (buf)) != 0)
+    return pc;
+
+  /* test %al,%al */
+  if (buf[0] != 0x84 || buf[1] != 0xc0)
+    return pc;
+  /* je AFTER */
+  if (buf[2] != 0x74)
+    return pc;
+
+  offset = 4;
+  for (xmmreg = 0; xmmreg < 8; xmmreg++)
+    {
+      /* movaps %xmmreg?,-0x??(%rbp) */
+      if (buf[offset] != 0x0f || buf[offset + 1] != 0x29
+          || (buf[offset + 2] & 0b00111111) != (xmmreg << 3 | 0b101))
+	return pc;
+
+      if ((buf[offset + 2] & 0b11000000) == 0b01000000)
+	{
+	  /* 8-bit displacement.  */
+	  offset += 4;
+	}
+      else if ((buf[offset + 2] & 0b11000000) == 0b10000000)
+	{
+	  /* 32-bit displacement.  */
+	  offset += 7;
+	}
+      else
+	return pc;
+    }
+
+  /* je AFTER */
+  if (offset - 4 != buf[3])
+    return pc;
+
+  return next_sal.end;
 }
 
 
