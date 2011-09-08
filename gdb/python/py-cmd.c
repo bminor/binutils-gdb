@@ -70,7 +70,6 @@ typedef struct cmdpy_object cmdpy_object;
 
 static PyTypeObject cmdpy_object_type;
 
-
 /* Constants used by this module.  */
 static PyObject *invoke_cst;
 static PyObject *complete_cst;
@@ -206,6 +205,7 @@ cmdpy_function (struct cmd_list_element *command, char *args, int from_tty)
 }
 
 /* Called by gdb for command completion.  */
+
 static char **
 cmdpy_completer (struct cmd_list_element *command, char *text, char *word)
 {
@@ -300,7 +300,7 @@ cmdpy_completer (struct cmd_list_element *command, char *text, char *word)
 /* Helper for cmdpy_init which locates the command list to use and
    pulls out the command name.
    
-   TEXT is the command name list.  The final word in the list is the
+   NAME is the command name list.  The final word in the list is the
    name of the new command.  All earlier words must be existing prefix
    commands.
 
@@ -311,19 +311,20 @@ cmdpy_completer (struct cmd_list_element *command, char *text, char *word)
 
    This function returns the xmalloc()d name of the new command.  On
    error sets the Python error and returns NULL.  */
+
 char *
-gdbpy_parse_command_name (char *text,
+gdbpy_parse_command_name (const char *name,
 			  struct cmd_list_element ***base_list,
 			  struct cmd_list_element **start_list)
 {
   struct cmd_list_element *elt;
-  int len = strlen (text);
+  int len = strlen (name);
   int i, lastchar;
-  char *prefix_text;
+  char *prefix_text, *prefix_text2;
   char *result;
 
   /* Skip trailing whitespace.  */
-  for (i = len - 1; i >= 0 && (text[i] == ' ' || text[i] == '\t'); --i)
+  for (i = len - 1; i >= 0 && (name[i] == ' ' || name[i] == '\t'); --i)
     ;
   if (i < 0)
     {
@@ -333,17 +334,17 @@ gdbpy_parse_command_name (char *text,
   lastchar = i;
 
   /* Find first character of the final word.  */
-  for (; i > 0 && (isalnum (text[i - 1])
-		   || text[i - 1] == '-'
-		   || text[i - 1] == '_');
+  for (; i > 0 && (isalnum (name[i - 1])
+		   || name[i - 1] == '-'
+		   || name[i - 1] == '_');
        --i)
     ;
   result = xmalloc (lastchar - i + 2);
-  memcpy (result, &text[i], lastchar - i + 1);
+  memcpy (result, &name[i], lastchar - i + 1);
   result[lastchar - i + 1] = '\0';
 
   /* Skip whitespace again.  */
-  for (--i; i >= 0 && (text[i] == ' ' || text[i] == '\t'); --i)
+  for (--i; i >= 0 && (name[i] == ' ' || name[i] == '\t'); --i)
     ;
   if (i < 0)
     {
@@ -352,11 +353,11 @@ gdbpy_parse_command_name (char *text,
     }
 
   prefix_text = xmalloc (i + 2);
-  memcpy (prefix_text, text, i + 1);
+  memcpy (prefix_text, name, i + 1);
   prefix_text[i + 1] = '\0';
 
-  text = prefix_text;
-  elt = lookup_cmd_1 (&text, *start_list, NULL, 1);
+  prefix_text2 = prefix_text;
+  elt = lookup_cmd_1 (&prefix_text2, *start_list, NULL, 1);
   if (!elt || elt == (struct cmd_list_element *) -1)
     {
       PyErr_Format (PyExc_RuntimeError, _("Could not find command prefix %s."),
@@ -398,15 +399,13 @@ gdbpy_parse_command_name (char *text,
    If PREFIX is True, then this command is a prefix command.
 
    The documentation for the command is taken from the doc string for
-   the python class.
-   
-*/
+   the python class.  */
+
 static int
 cmdpy_init (PyObject *self, PyObject *args, PyObject *kw)
 {
   cmdpy_object *obj = (cmdpy_object *) self;
   const char *name;
-  char *copy;
   int cmdtype;
   int completetype = -1;
   char *docstring = NULL;
@@ -450,9 +449,7 @@ cmdpy_init (PyObject *self, PyObject *args, PyObject *kw)
       return -1;
     }
 
-  copy = xstrdup (name);
-  cmd_name = gdbpy_parse_command_name (copy, &cmd_list, &cmdlist);
-  xfree (copy);
+  cmd_name = gdbpy_parse_command_name (name, &cmd_list, &cmdlist);
   if (! cmd_name)
     return -1;
 
@@ -554,6 +551,7 @@ cmdpy_init (PyObject *self, PyObject *args, PyObject *kw)
 
 
 /* Initialize the 'commands' code.  */
+
 void
 gdbpy_initialize_commands (void)
 {

@@ -1,5 +1,10 @@
 2011-09-08  Doug Evans  <dje@google.com>
 
+	* py-cmd.c: Some minor formatting fixes.
+	(gdbpy_parse_command_name): Rename text arg to name, make const.
+	All callers updated.
+	* python-internal.h (gdbpy_parse_command_name): Update.
+
 	* cli/cli-decode.c (add_cmd): Add comment.
 
 2011-09-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
