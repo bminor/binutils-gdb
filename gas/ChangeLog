@@ -1,3 +1,8 @@
+2011-09-08  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	PR gas/13167
+	* dwarf2dbg.c (dwarf2_flush_pending_lines): Use symbol_temp_new_now.
+
 2011-09-05  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	PR gas/13024

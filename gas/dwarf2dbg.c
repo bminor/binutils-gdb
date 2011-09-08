@@ -313,7 +313,7 @@ dwarf2_flush_pending_lines (symbolS *label)
       struct line_entry *e;
 
       if (!label)
-	label = symbol_temp_new (now_seg, 0, frag_now);
+	label = symbol_temp_new_now ();
 
       for (e = pending_lines; e; e = e->next)
 	e->label = label;

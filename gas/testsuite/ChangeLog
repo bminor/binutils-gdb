@@ -1,3 +1,9 @@
+2011-09-08  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	PR gas/13167
+	* gas/ia64/pr13167.d, gas/ia64/pr13167.s: New test.
+	* gas/ia64/ia64.exp: Run it.
+
 2011-09-07  Andreas Schwab  <schwab@linux-m68k.org>
 
 	* gas/m68k/all.exp: Run "mode5" test also with -mcpu=5200.

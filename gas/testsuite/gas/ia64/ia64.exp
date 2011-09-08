@@ -94,4 +94,7 @@ if [istarget "ia64-*"] then {
 	run_dump_test "slotcount"
     }
 
+    if { [istarget "ia64-*-elf*"] || [istarget "ia64-*-linux*"] } {
+	run_dump_test "pr13167"
+    }
 }
