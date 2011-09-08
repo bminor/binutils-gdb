@@ -1,3 +1,7 @@
+2011-09-08  Doug Evans  <dje@google.com>
+
+	* cli/cli-decode.c (add_cmd): Add comment.
+
 2011-09-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	PR breakpoints/12435

@@ -128,6 +128,7 @@ set_cmd_completer (struct cmd_list_element *cmd,
 
 
 /* Add element named NAME.
+   Space for NAME and DOC must be allocated by the caller.
    CLASS is the top level category into which commands are broken down
    for "help" purposes.
    FUN should be the function to execute the command;
