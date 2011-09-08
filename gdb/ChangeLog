@@ -1,5 +1,10 @@
 2011-09-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* stack.c (print_frame_args): New variable except.  Wrap
+	read_var_value and common_val_print into TRY_CATCH.
+
+2011-09-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* eval.c (evaluate_subexp_standard) <OP_THIS>: Update the value_of_this
 	caller to value_of_this.
 	* p-exp.y: Update the value_of_this caller to value_of_this_silent.

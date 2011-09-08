@@ -326,37 +326,49 @@ print_frame_args (struct symbol *func, struct frame_info *frame,
 
           if (print_args)
             {
-	      /* Avoid value_print because it will deref ref parameters.
-		 We just want to print their addresses.  Print ??? for
-		 args whose address we do not know.  We pass 2 as
-		 "recurse" to val_print because our standard indentation
-		 here is 4 spaces, and val_print indents 2 for each
-		 recurse.  */
-	      val = read_var_value (sym, frame);
+	      volatile struct gdb_exception except;
 
-	      annotate_arg_value (val == NULL ? NULL : value_type (val));
+	      TRY_CATCH (except, RETURN_MASK_ERROR)
+		{
+		  /* Avoid value_print because it will deref ref parameters.
+		     We just want to print their addresses.  Print ??? for
+		     args whose address we do not know.  We pass 2 as
+		     "recurse" to val_print because our standard indentation
+		     here is 4 spaces, and val_print indents 2 for each
+		     recurse.  */
+		  val = read_var_value (sym, frame);
 
-	      if (val)
-	        {
-                  const struct language_defn *language;
-		  struct value_print_options opts;
+		  annotate_arg_value (val == NULL ? NULL : value_type (val));
 
-                  /* Use the appropriate language to display our symbol,
-                     unless the user forced the language to a specific
-                     language.  */
-                  if (language_mode == language_mode_auto)
-                    language = language_def (SYMBOL_LANGUAGE (sym));
-                  else
-                    language = current_language;
+		  if (val)
+		    {
+		      const struct language_defn *language;
+		      struct value_print_options opts;
 
-		  get_raw_print_options (&opts);
-		  opts.deref_ref = 0;
-		  opts.summary = summary;
-		  common_val_print (val, stb->stream, 2, &opts, language);
+		      /* Use the appropriate language to display our symbol,
+			 unless the user forced the language to a specific
+			 language.  */
+		      if (language_mode == language_mode_auto)
+			language = language_def (SYMBOL_LANGUAGE (sym));
+		      else
+			language = current_language;
+
+		      get_raw_print_options (&opts);
+		      opts.deref_ref = 0;
+		      opts.summary = summary;
+		      common_val_print (val, stb->stream, 2, &opts, language);
+		      ui_out_field_stream (uiout, "value", stb);
+		    }
+		  else
+		    ui_out_text (uiout, "???");
+		}
+	      if (except.reason < 0)
+		{
+		  fprintf_filtered (stb->stream,
+				    _("<error reading variable: %s>"),
+				    except.message);
 		  ui_out_field_stream (uiout, "value", stb);
-	        }
-	      else
-		ui_out_text (uiout, "???");
+		}
             }
           else
             ui_out_text (uiout, "...");
