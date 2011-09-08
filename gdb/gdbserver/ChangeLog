@@ -1,3 +1,8 @@
+2011-09-08  Stan Shebs  <stan@codesourcery.com>
+
+	* linux-x86-low.c (i386_emit_prologue): Save %ebx.
+	(i386_emit_epilogue): Restore %ebx.
+
 2011-08-31  Jie Zhang  <jzhang918@gmail.com>
 
 	* server.c (step_thread): Remove definition.

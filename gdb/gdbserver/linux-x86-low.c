@@ -2035,7 +2035,8 @@ i386_emit_prologue (void)
 {
   EMIT_ASM32 (i386_prologue,
 	    "push %ebp\n\t"
-	    "mov %esp,%ebp");
+	    "mov %esp,%ebp\n\t"
+	    "push %ebx");
   /* At this point, the raw regs base address is at 8(%ebp), and the
      value pointer is at 12(%ebp).  */
 }
@@ -2048,6 +2049,7 @@ i386_emit_epilogue (void)
 	    "mov %eax,(%ecx)\n\t"
 	    "mov %ebx,0x4(%ecx)\n\t"
 	    "xor %eax,%eax\n\t"
+	    "pop %ebx\n\t"
 	    "pop %ebp\n\t"
 	    "ret");
 }
