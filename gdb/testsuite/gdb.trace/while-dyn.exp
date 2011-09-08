@@ -52,9 +52,9 @@ if { ![gdb_target_supports_trace] } then {
 # test while-stepping dynamically (live target)
 #
 
-if {([istarget "x86_64-*"] || [istarget "i?86-*"]) && [is_lp64_target]} then {
+if [is_amd64_regs_target] {
     set fpreg "\$rbp"
-} elseif {[istarget "x86_64-*"] || [istarget "i?86-*"]} then {
+} elseif [is_x86_like_target] {
     set fpreg "\$ebp"
 } else {
     set fpreg "\$fp"

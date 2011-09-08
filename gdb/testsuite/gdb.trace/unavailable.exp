@@ -30,11 +30,11 @@ if { [gdb_compile "$srcdir/$subdir/$srcfile" $binfile \
 set ws "\[\r\n\t \]+"
 set cr "\[\r\n\]+"
 
-if {([istarget "x86_64-*"] || [istarget "i?86-*"]) && [is_lp64_target]} then {
+if [is_amd64_regs_target] {
     set fpreg "rbp"
     set spreg "rsp"
     set pcreg "rip"
-} elseif {[istarget "x86_64-*"] || [istarget "i?86-*"]} then {
+} elseif [is_x86_like_target] {
     set fpreg "ebp"
     set spreg "esp"
     set pcreg "eip"
@@ -295,12 +295,12 @@ proc gdb_unavailable_registers_test { } {
 
     # Test reading uncollected pseudo-registers.  The set of which
     # depends on target.
-    if {$pcreg == "rip"} then {
+    if [is_amd64_regs_target] {
 	# Check the raw register first.
 	test_register_unavailable "\$rax"
 	test_register_unavailable "\$eax"
 	test_register_unavailable "\$ax"
-    } elseif {$pcreg == "eip"} then {
+    } elseif [is_x86_like_target] {
 	# Check the raw register first.
 	test_register_unavailable "\$eax"
 	test_register_unavailable "\$ax"

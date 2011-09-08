@@ -1,5 +1,18 @@
 2011-09-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Fix compatibility with x32 arch.
+	* testsuite/gdb.dwarf2/typeddwarf.exp: Check also is_lp64_target.
+	* testsuite/gdb.trace/backtrace.exp: Use is_amd64_regs_target and
+	is_x86_like_target.
+	* testsuite/gdb.trace/collection.exp: Likewise.
+	* testsuite/gdb.trace/report.exp: Likewise.
+	* testsuite/gdb.trace/unavailable.exp: Likewise.
+	* testsuite/gdb.trace/while-dyn.exp: Likewise.
+	* testsuite/lib/gdb.exp (is_amd64_regs_target): New function.
+	(is_x86_like_target): Check also is_amd64_regs_target.
+
+2011-09-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	PR breakpoints/12435
 	* gdb.arch/amd64-prologue-xmm.c: New file.
 	* gdb.arch/amd64-prologue-xmm.exp: New file.
