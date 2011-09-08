@@ -2131,8 +2131,8 @@ fputs_maybe_filtered (const char *linebuffer, struct ui_file *stream,
 
   /* Don't do any filtering if it is disabled.  */
   if (stream != gdb_stdout
-      || ! pagination_enabled
-      || ! input_from_terminal_p ()
+      || !pagination_enabled
+      || batch_flag
       || (lines_per_page == UINT_MAX && chars_per_line == UINT_MAX)
       || top_level_interpreter () == NULL
       || ui_out_is_mi_like_p (interp_ui_out (top_level_interpreter ())))
