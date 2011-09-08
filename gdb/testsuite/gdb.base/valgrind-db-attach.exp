@@ -83,3 +83,6 @@ gdb_test_no_output "set height 0"
 gdb_test_no_output "set width 0"
 
 gdb_test "bt" "in main \\(.*\\) at .*${srcfile}:$double_free"
+
+# Explicitly kill the program so it doesn't dump core when we quit->detach.
+gdb_test "kill" "" "kill program" "Kill the program being debugged.*y or n. $" "y"

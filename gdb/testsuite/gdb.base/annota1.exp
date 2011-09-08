@@ -392,6 +392,17 @@ gdb_test_multiple "next" "breakpoint ignore count" {
     }
 }
 
+# Get the inferior's PID for later.
+
+set test "get inferior pid"
+set pid -1
+gdb_test_multiple "info inferior 1" "$test" {
+    -re "process (\[0-9\]*).*$gdb_prompt$" {
+	set pid $expect_out(1,string)
+	pass "$test"
+    }
+}
+
 #
 # Send a signal that is not handled; test:
 # annotate-signalled
@@ -422,21 +433,17 @@ if [target_info exists gdb,nosignals] {
     }
 }
 
-
 # Check for production of a core file and remove it!
 
-set exec_output [remote_exec build "ls core"]
-
 set test "cleanup core file"
-if [ regexp "core not found" $exec_output]  {
-    pass "$test (not dumped)"
+if { [remote_file host exists core] } {
+    remote_file host delete core
+    pass "$test (removed)"
+} elseif { $pid != -1 && [remote_file host exists core.$pid] } {
+    remote_file host delete core.$pid
+    pass "$test (removed)"
 } else {
-    if [ regexp "No such file or directory" $exec_output] {
-	pass "$test (not dumped)"
-    } else {
-	remote_exec build "rm -f core"
-	pass "$test (removed)"
-    }
+    pass "$test (not dumped)"
 }
 
 proc thread_test {} {
