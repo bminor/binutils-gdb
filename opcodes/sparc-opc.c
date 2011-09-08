@@ -684,6 +684,7 @@ const struct sparc_opcode sparc_opcodes[] = {
 
 { "save",	F3(2, 0x3c, 0), F3(~2, ~0x3c, ~0)|ASI(~0),	"1,2,d", 0, v6 },
 { "save",	F3(2, 0x3c, 1), F3(~2, ~0x3c, ~1),		"1,i,d", 0, v6 },
+{ "save",	F3(2, 0x3c, 1), F3(~2, ~0x3c, ~1),		"i,1,d", 0, v6 }, /* Sun assembler compatibility */
 { "save",	0x81e00000,	~0x81e00000,			"", F_ALIAS, v6 },
 
 { "ret",  F3(2, 0x38, 1)|RS1(0x1f)|SIMM13(8), F3(~2, ~0x38, ~1)|SIMM13(~8),	       "", F_UNBR|F_DELAYED, v6 }, /* jmpl %i7+8,%g0 */
