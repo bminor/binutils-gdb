@@ -3600,49 +3600,45 @@ value_full_object (struct value *argp,
 }
 
 
-/* Return the value of the local variable, if one exists.
-   Flag COMPLAIN signals an error if the request is made in an
-   inappropriate context.  */
+/* Return the value of the local variable, if one exists.  Throw error
+   otherwise, such as if the request is made in an inappropriate context.  */
 
 struct value *
-value_of_this (const struct language_defn *lang, int complain)
+value_of_this (const struct language_defn *lang)
 {
   struct symbol *sym;
   struct block *b;
-  struct value * ret;
   struct frame_info *frame;
 
   if (!lang->la_name_of_this)
-    {
-      if (complain)
-	error (_("no `this' in current language"));
-      return 0;
-    }
+    error (_("no `this' in current language"));
 
-  if (complain)
-    frame = get_selected_frame (_("no frame selected"));
-  else
-    {
-      frame = deprecated_safe_get_selected_frame ();
-      if (frame == 0)
-	return 0;
-    }
+  frame = get_selected_frame (_("no frame selected"));
 
   b = get_frame_block (frame, NULL);
 
   sym = lookup_language_this (lang, b);
   if (sym == NULL)
+    error (_("current stack frame does not contain a variable named `%s'"),
+	   lang->la_name_of_this);
+
+  return read_var_value (sym, frame);
+}
+
+/* Return the value of the local variable, if one exists.  Return NULL
+   otherwise.  Never throw error.  */
+
+struct value *
+value_of_this_silent (const struct language_defn *lang)
+{
+  struct value *ret = NULL;
+  volatile struct gdb_exception except;
+
+  TRY_CATCH (except, RETURN_MASK_ERROR)
     {
-      if (complain)
-	error (_("current stack frame does not contain a variable named `%s'"),
-	       lang->la_name_of_this);
-      else
-	return NULL;
+      ret = value_of_this (lang);
     }
 
-  ret = read_var_value (sym, frame);
-  if (ret == 0 && complain)
-    error (_("`%s' argument unreadable"), lang->la_name_of_this);
   return ret;
 }
 

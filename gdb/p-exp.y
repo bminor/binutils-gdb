@@ -612,7 +612,7 @@ exp	:	THIS
 			  write_exp_elt_opcode (OP_THIS);
 			  write_exp_elt_opcode (OP_THIS);
 			  /* We need type of this.  */
-			  this_val = value_of_this (parse_language, 0);
+			  this_val = value_of_this_silent (parse_language);
 			  if (this_val)
 			    this_type = value_type (this_val);
 			  else
@@ -760,7 +760,7 @@ variable:	name_not_typename
 			      write_exp_string ($1.stoken);
 			      write_exp_elt_opcode (STRUCTOP_PTR);
 			      /* We need type of this.  */
-			      this_val = value_of_this (parse_language, 0);
+			      this_val = value_of_this_silent (parse_language);
 			      if (this_val)
 				this_type = value_type (this_val);
 			      else

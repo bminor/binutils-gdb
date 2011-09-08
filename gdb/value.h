@@ -717,8 +717,9 @@ extern int value_logical_not (struct value *arg1);
 
 /* C++ */
 
-extern struct value *value_of_this (const struct language_defn *lang,
-				    int complain);
+extern struct value *value_of_this (const struct language_defn *lang);
+
+extern struct value *value_of_this_silent (const struct language_defn *lang);
 
 extern struct value *value_x_binop (struct value *arg1, struct value *arg2,
 				    enum exp_opcode op,

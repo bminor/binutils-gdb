@@ -2830,7 +2830,7 @@ evaluate_subexp_standard (struct type *expect_type,
 
     case OP_THIS:
       (*pos) += 1;
-      return value_of_this (exp->language_defn, 1);
+      return value_of_this (exp->language_defn);
 
     case OP_TYPE:
       /* The value is not supposed to be used.  This is here to make it

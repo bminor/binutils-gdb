@@ -1,3 +1,15 @@
+2011-09-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* eval.c (evaluate_subexp_standard) <OP_THIS>: Update the value_of_this
+	caller to value_of_this.
+	* p-exp.y: Update the value_of_this caller to value_of_this_silent.
+	Twice.
+	* valops.c (value_of_this): Remove parameter complain and variable ret.
+	Update function comment.  Never return NULL by this code.
+	(value_of_this_silent): New function.
+	* value.h (value_of_this): Remove parameter complain.
+	(value_of_this_silent): New declaration.
+
 2011-09-07  Yao Qi  <yao@codesourcery.com>
 
 	* gdbthread.h (struct thread_info): Remove fields
