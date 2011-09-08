@@ -1,16 +1,17 @@
-# Japanese message for binutils
+# Japanese messages for binutils
 # This file is distributed under the same license as the binutils package.
 # Copyright (C) 2001, 2010 Free Software Foundation, Inc.
 # Daisuke Yamashita <yamad@mb.infoweb.ne.jp>, 2001.
-# Yasuaki Taniguchi <yasuakit@gmail.com>, 2010.
+# Yasuaki Taniguchi <yasuakit@gmail.com>, 2010, 2011.
 msgid ""
 msgstr ""
 "Project-Id-Version: binutils 2.20.90\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
 "POT-Creation-Date: 2010-11-05 11:33+0100\n"
-"PO-Revision-Date: 2010-11-25 18:46+0900\n"
+"PO-Revision-Date: 2011-08-28 14:39+0900\n"
 "Last-Translator: Yasuaki Taniguchi <yasuakit@gmail.com>\n"
 "Language-Team: Japanese <translation-team-ja@lists.sourceforge.net>\n"
+"Language: ja\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -963,12 +964,12 @@ msgstr "      --add-stdcall-underscore インターフェースライブラリ�
 #: dlltool.c:3904
 #, c-format
 msgid "      --no-leading-underscore All symbols shouldn't be prefixed by an underscore.\n"
-msgstr "      --no-leading-underscore 全てのシンボルの先頭に下線 (_) が付いていないとする\n"
+msgstr "      --no-leading-underscore すべてのシンボルの先頭に下線 (_) が付いていないとする\n"
 
 #: dlltool.c:3905
 #, c-format
 msgid "      --leading-underscore   All symbols should be prefixed by an underscore.\n"
-msgstr "      --leading-underscore   すべのシンボルの先頭に下線 (_) が付いているとする\n"
+msgstr "      --leading-underscore   すべてのシンボルの先頭に下線 (_) が付いているとする\n"
 
 #: dlltool.c:3906
 #, c-format
@@ -1488,7 +1489,7 @@ msgstr "(非 inline)"
 #: dwarf.c:1488
 #, c-format
 msgid "(inlined)"
-msgstr "(inlined 化)"
+msgstr "(inline 化)"
 
 #: dwarf.c:1491
 #, c-format
@@ -2201,12 +2202,12 @@ msgstr "%s セクションの内容:\n"
 #: dwarf.c:4962
 #, c-format
 msgid "  DW_CFA_??? (User defined call frame op: %#x)\n"
-msgstr ""
+msgstr "  DW_CFA_??? (ユーザ定義フレーム呼び出し操作: %#x)\n"
 
 #: dwarf.c:4964
 #, c-format
 msgid "unsupported or unknown Dwarf Call Frame Instruction number: %#x\n"
-msgstr ""
+msgstr "サポートされないまたは不明な Dwarf フレーム呼び出し命令番号: %#x\n"
 
 #: dwarf.c:4989
 #, c-format
@@ -2273,6 +2274,8 @@ msgid ""
 "This executable has been built without support for a\n"
 "64 bit data type and so it cannot process 64 bit ELF files.\n"
 msgstr ""
+"この実行ファイルは 64 ビットサポート無しでコンパイルされているため\n"
+"64 ビット ELF ファイルを処理できません。\n"
 
 #: elfedit.c:440
 #, c-format
@@ -2321,7 +2324,7 @@ msgstr "書庫内の長いシンボル名の読み込み中にメモリが足り
 #: elfedit.c:602 readelf.c:12726
 #, c-format
 msgid "%s: failed to read long symbol name string table\n"
-msgstr ""
+msgstr "%s: 長いシンボル名文字列表の読み込みに失敗しました\n"
 
 #: elfedit.c:734 readelf.c:12852
 #, c-format
@@ -2361,7 +2364,7 @@ msgstr "'%s': そのようなファイルはありません\n"
 #: elfedit.c:961 readelf.c:13136
 #, c-format
 msgid "Could not locate '%s'.  System error message: %s\n"
-msgstr ""
+msgstr "'%s' を配置できませんでした。システムエラーメッセージ: %s\n"
 
 #: elfedit.c:968 readelf.c:13143
 #, c-format
@@ -2541,7 +2544,7 @@ msgstr "Pascal ファイル名はサポートされていません"
 
 #: ieee.c:1889
 msgid "unsupported qualifier"
-msgstr ""
+msgstr "サポートされない修飾子です"
 
 #: ieee.c:2158
 msgid "undefined variable in ATN"
@@ -3272,7 +3275,7 @@ msgstr ""
 "     --add-section <name>=<file>   Add section <name> found in <file> to output\n"
 "     --rename-section <old>=<new>[,<flags>] セクション名を <old> から <new> に変更する\n"
 "     --long-section-names {enable|disable|keep}\n"
-"                                   Handle long section names in Coff objects.\n"
+"                                   Coff オブジェクトでの長いセクション名の扱い\n"
 "     --change-leading-char         Force output format's leading character style\n"
 "     --remove-leading-char         大域シンボルから先頭文字を削除する\n"
 "     --reverse-bytes=<num>         Reverse <num> bytes at a time, in output sections with content\n"
@@ -3397,7 +3400,7 @@ msgstr "%s: fread(3) が失敗しました"
 #: objcopy.c:837
 #, c-format
 msgid "%s:%d: Ignoring rubbish found on this line"
-msgstr ""
+msgstr "%s:%d: この行で見つかったゴミを無視しています"
 
 #: objcopy.c:1128
 #, c-format
@@ -3422,7 +3425,7 @@ msgstr "シンボル再定義ファイル %s を開けません (エラー: %s)"
 #: objcopy.c:1321
 #, c-format
 msgid "%s:%d: garbage found at end of line"
-msgstr "%s:%d: 行末にごみが存在します"
+msgstr "%s:%d: 行末にゴミが存在します"
 
 #: objcopy.c:1324
 #, c-format
@@ -3508,11 +3511,11 @@ msgstr "プライベート BFD データをコピー中にエラーが発生し�
 #: objcopy.c:1960
 #, c-format
 msgid "this target does not support %lu alternative machine codes"
-msgstr ""
+msgstr "このターゲットは %lu 代替マシンコードをサポートしません"
 
 #: objcopy.c:1964
 msgid "treating that number as an absolute e_machine value instead"
-msgstr ""
+msgstr "その番号を代わりに絶対的な e_machine 値として扱います"
 
 #: objcopy.c:1968
 msgid "ignoring the alternative value"
@@ -3639,20 +3642,20 @@ msgstr "警告: 0x%s から 0x%x までの隙間の埋め込みを切り詰め�
 #: objcopy.c:3677
 #, c-format
 msgid "unknown long section names option '%s'"
-msgstr ""
+msgstr "長いセクション名の扱いに対する不明なオプション '%s' です"
 
 #: objcopy.c:3695
 msgid "unable to parse alternative machine code"
-msgstr ""
+msgstr "代替マシンコードを解析できません"
 
 #: objcopy.c:3740
 msgid "number of bytes to reverse must be positive and even"
-msgstr ""
+msgstr "逆にするバイト数は正の偶数でなければいけません"
 
 #: objcopy.c:3743
 #, c-format
 msgid "Warning: ignoring previous --reverse-bytes value of %d"
-msgstr ""
+msgstr "警告: 前にある --reverse-bytes の値 %d は無視しています"
 
 #: objcopy.c:3758
 #, c-format
@@ -3814,7 +3817,7 @@ msgid ""
 "      --stop-address=ADDR        Only process data whose address is <= ADDR\n"
 "      --prefix-addresses         Print complete address alongside disassembly\n"
 "      --[no-]show-raw-insn       Display hex alongside symbolic disassembly\n"
-"      --insn-width=WIDTH         Display WIDTH bytes on a single line for -d\n"
+"      --insn-width=WIDTH         Display WIDTH bytes on a signle line for -d\n"
 "      --adjust-vma=OFFSET        Add OFFSET to all displayed section addresses\n"
 "      --special-syms             Include special symbols in symbol dumps\n"
 "      --prefix=PREFIX            Add PREFIX to absolute paths for -S\n"
@@ -3841,7 +3844,7 @@ msgstr ""
 "      --stop-address=ADDR        アドレスが ADDR 以下のデータのみ処理する\n"
 "      --prefix-addresses         Print complete address alongside disassembly\n"
 "      --[no-]show-raw-insn       Display hex alongside symbolic disassembly\n"
-"      --insn-width=WIDTH         Display WIDTH bytes on a single line for -d\n"
+"      --insn-width=WIDTH         Display WIDTH bytes on a signle line for -d\n"
 "      --adjust-vma=OFFSET        Add OFFSET to all displayed section addresses\n"
 "      --special-syms             シンボルダンプ時に特殊シンボルを含める\n"
 "      --prefix=PREFIX            Add PREFIX to absolute paths for -S\n"
@@ -3891,7 +3894,7 @@ msgstr " (ファイルオフセット: 0x%lx)"
 #: objdump.c:1634
 #, c-format
 msgid "disassemble_fn returned length %d"
-msgstr ""
+msgstr "disassemble_fn が長さ %d を返しました"
 
 #: objdump.c:1939
 #, c-format
@@ -4021,7 +4024,7 @@ msgstr "エラー: 停止アドレスは開始アドレスより後でなけれ�
 
 #: objdump.c:3333
 msgid "error: prefix strip must be non-negative"
-msgstr ""
+msgstr "エラー: prefix strip は非負の値でなければいけません"
 
 #: objdump.c:3338
 msgid "error: instruction width must be positive"
@@ -4249,9 +4252,8 @@ msgid "unknown"
 msgstr "不明"
 
 #: readelf.c:2292
-#, fuzzy
 msgid "unknown mac"
-msgstr "不明なセクションです"
+msgstr "不明な mac"
 
 #: readelf.c:2356
 msgid ", relocatable"
@@ -4279,11 +4281,11 @@ msgstr ", 不明な ISA"
 
 #: readelf.c:2680
 msgid "Standalone App"
-msgstr ""
+msgstr "独立アプリケーション"
 
 #: readelf.c:2689
 msgid "Bare-metal C6000"
-msgstr ""
+msgstr "ベアメタル C6000"
 
 #: readelf.c:2699 readelf.c:3462 readelf.c:3478
 #, c-format
@@ -4601,9 +4603,9 @@ msgid "  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align
 msgstr "  タイプ       オフセット 仮想Addr   物理Addr   FileSiz MemSiz  Flg Align\n"
 
 #: readelf.c:3731
-#, fuzzy, c-format
+#, c-format
 msgid "  Type           Offset   VirtAddr           PhysAddr           FileSiz  MemSiz   Flg Align\n"
-msgstr "  タイプ       オフセット 仮想Addr   物理Addr   FileSiz MemSiz  Flg Align\n"
+msgstr ""
 
 #: readelf.c:3735
 #, c-format
@@ -4761,12 +4763,12 @@ msgstr ""
 #: readelf.c:4656 readelf.c:4667 readelf.c:4678
 #, c-format
 msgid "  [Nr] Name\n"
-msgstr ""
+msgstr "  [番] 名前\n"
 
 #: readelf.c:4657
-#, fuzzy, c-format
+#, c-format
 msgid "       Type            Addr     Off    Size   ES   Lk Inf Al\n"
-msgstr "  [番] 名前              タイプ          アドレス Off    サイズ ES Flg Lk Inf Al\n"
+msgstr "       型              アドレス Off    サイズ ES   Lk Inf Al\n"
 
 #: readelf.c:4661
 #, c-format
@@ -4774,34 +4776,34 @@ msgid "  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk
 msgstr "  [番] 名前              タイプ          アドレス Off    サイズ ES Flg Lk Inf Al\n"
 
 #: readelf.c:4668
-#, fuzzy, c-format
+#, c-format
 msgid "       Type            Address          Off    Size   ES   Lk Inf Al\n"
-msgstr "  [番] 名前              タイプ          アドレス Off    サイズ ES Flg Lk Inf Al\n"
+msgstr "       型              アドレス         Off    サイズ ES   Lk Inf Al\n"
 
 #: readelf.c:4672
-#, fuzzy, c-format
+#, c-format
 msgid "  [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al\n"
-msgstr "  [番] 名前              タイプ          アドレス Off    サイズ ES Flg Lk Inf Al\n"
+msgstr "  [番] 名前              型              アドレス         Off    サイズ ES Flg Lk Inf Al\n"
 
 #: readelf.c:4679
-#, fuzzy, c-format
+#, c-format
 msgid "       Type              Address          Offset            Link\n"
-msgstr "  [番] 名前              タイプ          アドレス           Offset\n"
+msgstr "       型                アドレス         オフセット        リンク\n"
 
 #: readelf.c:4680
-#, fuzzy, c-format
+#, c-format
 msgid "       Size              EntSize          Info              Align\n"
-msgstr "     サイズ              EntSize         フラグ  Link  Info  Align\n"
+msgstr "       サイズ            EntSize          情報              整列\n"
 
 #: readelf.c:4684
 #, c-format
 msgid "  [Nr] Name              Type             Address           Offset\n"
-msgstr "  [番] 名前              タイプ          アドレス           Offset\n"
+msgstr "  [番] 名前              タイプ           アドレス          オフセット\n"
 
 #: readelf.c:4685
 #, c-format
 msgid "       Size              EntSize          Flags  Link  Info  Align\n"
-msgstr "     サイズ              EntSize         フラグ  Link  Info  Align\n"
+msgstr "       サイズ            EntSize          フラグ Link  情報  整列\n"
 
 #: readelf.c:4690
 #, c-format
@@ -4922,9 +4924,8 @@ msgid "Seg Offset           Type                             SymVec DataType\n"
 msgstr ""
 
 #: readelf.c:5214
-#, fuzzy
 msgid "dynamic section image relas"
-msgstr "rpc セクション"
+msgstr ""
 
 #: readelf.c:5218
 #, c-format
@@ -4936,9 +4937,9 @@ msgstr ""
 "イメージ再配置\n"
 
 #: readelf.c:5220
-#, fuzzy, c-format
+#, c-format
 msgid "Seg Offset   Type                            Addend            Seg Sym Off\n"
-msgstr "  [番] 名前              タイプ          アドレス           Offset\n"
+msgstr ""
 
 #: readelf.c:5275
 msgid "dynamic string section"
@@ -5405,12 +5406,12 @@ msgstr " フラグ: %s  バージョン: %d\n"
 #: readelf.c:7995
 #, c-format
 msgid "  Version need aux past end of section\n"
-msgstr ""
+msgstr "  セクション終了後の必要バージョン補助\n"
 
 #: readelf.c:8000
 #, c-format
 msgid "  Version need past end of section\n"
-msgstr ""
+msgstr "  セクション終了後の必要バージョン\n"
 
 #: readelf.c:8037
 msgid "version string table"
@@ -5583,13 +5584,13 @@ msgstr ""
 "動的シンボル情報は表示用シンボルとしては利用できません。\n"
 
 #: readelf.c:9026
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "\n"
 "Histogram for bucket list length (total of %lu buckets):\n"
 msgstr ""
 "\n"
-"バケットリストの度数分布 (全 %d 個のバケット):\n"
+"バケットリスト長の度数分布 (全 %lu 個のバケット):\n"
 
 #: readelf.c:9028 readelf.c:9098
 #, c-format
@@ -5597,13 +5598,13 @@ msgid " Length  Number     %% of total  Coverage\n"
 msgstr "   長さ  個数        占有率      範囲\n"
 
 #: readelf.c:9096
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "\n"
 "Histogram for `.gnu.hash' bucket list length (total of %lu buckets):\n"
 msgstr ""
 "\n"
-"バケットリストの度数分布 (全 %d 個のバケット):\n"
+"`.gnu.hash' バケットリスト長の度数分布 (全 %lu 個のバケット):\n"
 
 #: readelf.c:9162
 #, c-format
@@ -5744,7 +5745,7 @@ msgstr "セクション %d は存在しないためダンプされませんで�
 #: readelf.c:10430 readelf.c:10444 readelf.c:10463 readelf.c:10781
 #, c-format
 msgid "None\n"
-msgstr ""
+msgstr "なし\n"
 
 #: readelf.c:10431
 #, c-format
@@ -5850,7 +5851,7 @@ msgstr "ハードウェア浮動小数 (MIPS32r2 64-bit FPU)\n"
 #: readelf.c:10814
 #, c-format
 msgid "Not used\n"
-msgstr ""
+msgstr "未使用\n"
 
 #: readelf.c:10817
 #, c-format
@@ -6591,7 +6592,7 @@ msgstr "予期しないバージョン文字列"
 #: resbin.c:966
 #, c-format
 msgid "version length %d does not match resource length %lu"
-msgstr "バージョ長 %d はリソース長 %lu の一致しません"
+msgstr "バージョン長 %d はリソース長 %lu の一致しません"
 
 #: resbin.c:970
 #, c-format
