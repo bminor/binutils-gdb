@@ -820,18 +820,28 @@ const struct sparc_opcode sparc_opcodes[] = {
 
 { "wr",	F3(2, 0x30, 0),		F3(~2, ~0x30, ~0)|ASI(~0),		"1,2,m", 0, v8 }, /* wr r,r,%asrX */
 { "wr",	F3(2, 0x30, 1),		F3(~2, ~0x30, ~1),			"1,i,m", 0, v8 }, /* wr r,i,%asrX */
+{ "wr",	F3(2, 0x30, 0),		F3(~2, ~0x30, ~0)|RS1_G0|ASI(~0),	"2,m", F_ALIAS, v8 }, /* wr %g0,rs2,%asrX */
+{ "wr",	F3(2, 0x30, 1),		F3(~2, ~0x30, ~1)|RS1_G0,		"i,m", F_ALIAS, v8 }, /* wr %g0,i,%asrX */
 { "wr",	F3(2, 0x30, 0),		F3(~2, ~0x30, ~0)|ASI_RS2(~0),		"1,m", F_ALIAS, v8 }, /* wr rs1,%g0,%asrX */
 { "wr",	F3(2, 0x30, 0),		F3(~2, ~0x30, ~0)|RD_G0|ASI(~0),	"1,2,y", 0, v6 }, /* wr r,r,%y */
 { "wr",	F3(2, 0x30, 1),		F3(~2, ~0x30, ~1)|RD_G0,		"1,i,y", 0, v6 }, /* wr r,i,%y */
+{ "wr",	F3(2, 0x30, 0),		F3(~2, ~0x30, ~0)|RD_G0|RS1_G0|ASI(~0),	"2,y", F_ALIAS, v6 }, /* wr %g0,rs2,%y */
+{ "wr",	F3(2, 0x30, 1),		F3(~2, ~0x30, ~1)|RD_G0|RS1_G0,		"i,y", F_ALIAS, v6 }, /* wr %g0,i,%y */
 { "wr",	F3(2, 0x30, 0),		F3(~2, ~0x30, ~0)|RD_G0|ASI_RS2(~0),	"1,y", F_ALIAS, v6 }, /* wr rs1,%g0,%y */
 { "wr",	F3(2, 0x31, 0),		F3(~2, ~0x31, ~0)|RD_G0|ASI(~0),	"1,2,p", 0, v6notv9 }, /* wr r,r,%psr */
 { "wr",	F3(2, 0x31, 1),		F3(~2, ~0x31, ~1)|RD_G0,		"1,i,p", 0, v6notv9 }, /* wr r,i,%psr */
+{ "wr",	F3(2, 0x31, 0),		F3(~2, ~0x31, ~0)|RD_G0|RS1_G0|ASI(~0),	"2,p", F_ALIAS, v6notv9 }, /* wr %g0,rs2,%psr */
+{ "wr",	F3(2, 0x31, 1),		F3(~2, ~0x31, ~1)|RD_G0|RS1_G0,		"i,p", F_ALIAS, v6notv9 }, /* wr %g0,i,%psr */
 { "wr",	F3(2, 0x31, 0),		F3(~2, ~0x31, ~0)|RD_G0|ASI_RS2(~0),	"1,p", F_ALIAS, v6notv9 }, /* wr rs1,%g0,%psr */
 { "wr",	F3(2, 0x32, 0),		F3(~2, ~0x32, ~0)|RD_G0|ASI(~0),	"1,2,w", 0, v6notv9 }, /* wr r,r,%wim */
 { "wr",	F3(2, 0x32, 1),		F3(~2, ~0x32, ~1)|RD_G0,		"1,i,w", 0, v6notv9 }, /* wr r,i,%wim */
+{ "wr",	F3(2, 0x32, 0),		F3(~2, ~0x32, ~0)|RD_G0|RS1_G0|ASI(~0),	"2,w", F_ALIAS, v6notv9 }, /* wr %g0,rs2,%wim */
+{ "wr",	F3(2, 0x32, 1),		F3(~2, ~0x32, ~1)|RD_G0|RS1_G0,		"i,w", F_ALIAS, v6notv9 }, /* wr %g0,i,%wim */
 { "wr",	F3(2, 0x32, 0),		F3(~2, ~0x32, ~0)|RD_G0|ASI_RS2(~0),	"1,w", F_ALIAS, v6notv9 }, /* wr rs1,%g0,%wim */
 { "wr",	F3(2, 0x33, 0),		F3(~2, ~0x33, ~0)|RD_G0|ASI(~0),	"1,2,t", 0, v6notv9 }, /* wr r,r,%tbr */
 { "wr",	F3(2, 0x33, 1),		F3(~2, ~0x33, ~1)|RD_G0,		"1,i,t", 0, v6notv9 }, /* wr r,i,%tbr */
+{ "wr",	F3(2, 0x33, 0),		F3(~2, ~0x33, ~0)|RD_G0|RS1_G0|ASI(~0),	"2,t", F_ALIAS, v6notv9 }, /* wr %g0,rs2,%tbr */
+{ "wr",	F3(2, 0x33, 1),		F3(~2, ~0x33, ~1)|RD_G0|RS1_G0,		"i,t", F_ALIAS, v6notv9 }, /* wr %g0,i,%tbr */
 { "wr",	F3(2, 0x33, 0),		F3(~2, ~0x33, ~0)|RD_G0|ASI_RS2(~0),	"1,t", F_ALIAS, v6notv9 }, /* wr rs1,%g0,%tbr */
 
 { "wr", F3(2, 0x30, 0)|RD(2),	F3(~2, ~0x30, ~0)|RD(~2)|ASI(~0),	"1,2,E", 0, v9 }, /* wr r,r,%ccr */
@@ -918,20 +928,25 @@ const struct sparc_opcode sparc_opcodes[] = {
 { "mov",	F3(2, 0x2a, 0), F3(~2, ~0x2a, ~0)|RS1_G0|SIMM13(~0),	"w,d", F_ALIAS, v6notv9 }, /* rd %wim,r */
 { "mov",	F3(2, 0x2b, 0), F3(~2, ~0x2b, ~0)|RS1_G0|SIMM13(~0),	"t,d", F_ALIAS, v6notv9 }, /* rd %tbr,r */
 
+{ "mov",	F3(2, 0x30, 0), F3(~2, ~0x30, ~0)|RS1_G0|ASI(~0),	"2,m", F_ALIAS, v8 }, /* wr %g0,rs2,%asrX */
+{ "mov",	F3(2, 0x30, 1), F3(~2, ~0x30, ~1)|RS1_G0,		"i,m", F_ALIAS, v8 }, /* wr %g0,i,%asrX */
 { "mov",	F3(2, 0x30, 0), F3(~2, ~0x30, ~0)|ASI_RS2(~0),		"1,m", F_ALIAS, v8 }, /* wr rs1,%g0,%asrX */
-{ "mov",	F3(2, 0x30, 1), F3(~2, ~0x30, ~1),			"i,m", F_ALIAS, v8 }, /* wr %g0,i,%asrX */
 { "mov",	F3(2, 0x30, 1), F3(~2, ~0x30, ~1)|SIMM13(~0),		"1,m", F_ALIAS, v8 }, /* wr rs1,0,%asrX */
+{ "mov",	F3(2, 0x30, 0), F3(~2, ~0x30, ~0)|RD_G0|RS1_G0|ASI(~0),	"2,y", F_ALIAS, v6 }, /* wr %g0,rs2,%y */
+{ "mov",	F3(2, 0x30, 1), F3(~2, ~0x30, ~1)|RD_G0|RS1_G0,		"i,y", F_ALIAS, v6 }, /* wr %g0,i,%y */
 { "mov",	F3(2, 0x30, 0), F3(~2, ~0x30, ~0)|RD_G0|ASI_RS2(~0),	"1,y", F_ALIAS, v6 }, /* wr rs1,%g0,%y */
-{ "mov",	F3(2, 0x30, 1), F3(~2, ~0x30, ~1)|RD_G0,		"i,y", F_ALIAS, v6 }, /* wr %g0,i,%y */
 { "mov",	F3(2, 0x30, 1), F3(~2, ~0x30, ~1)|RD_G0|SIMM13(~0),	"1,y", F_ALIAS, v6 }, /* wr rs1,0,%y */
+{ "mov",	F3(2, 0x31, 0), F3(~2, ~0x31, ~0)|RD_G0|RS1_G0|ASI(~0),	"2,p", F_ALIAS, v6notv9 }, /* wr %g0,rs2,%psr */
+{ "mov",	F3(2, 0x31, 1), F3(~2, ~0x31, ~1)|RD_G0|RS1_G0,		"i,p", F_ALIAS, v6notv9 }, /* wr %g0,i,%psr */
 { "mov",	F3(2, 0x31, 0), F3(~2, ~0x31, ~0)|RD_G0|ASI_RS2(~0),	"1,p", F_ALIAS, v6notv9 }, /* wr rs1,%g0,%psr */
-{ "mov",	F3(2, 0x31, 1), F3(~2, ~0x31, ~1)|RD_G0,		"i,p", F_ALIAS, v6notv9 }, /* wr %g0,i,%psr */
 { "mov",	F3(2, 0x31, 1), F3(~2, ~0x31, ~1)|RD_G0|SIMM13(~0),	"1,p", F_ALIAS, v6notv9 }, /* wr rs1,0,%psr */
+{ "mov",	F3(2, 0x32, 0), F3(~2, ~0x32, ~0)|RD_G0|RS1_G0|ASI(~0),	"2,w", F_ALIAS, v6notv9 }, /* wr %g0,rs2,%wim */
+{ "mov",	F3(2, 0x32, 1), F3(~2, ~0x32, ~1)|RD_G0|RS1_G0,		"i,w", F_ALIAS, v6notv9 }, /* wr %g0,i,%wim */
 { "mov",	F3(2, 0x32, 0), F3(~2, ~0x32, ~0)|RD_G0|ASI_RS2(~0),	"1,w", F_ALIAS, v6notv9 }, /* wr rs1,%g0,%wim */
-{ "mov",	F3(2, 0x32, 1), F3(~2, ~0x32, ~1)|RD_G0,		"i,w", F_ALIAS, v6notv9 }, /* wr %g0,i,%wim */
 { "mov",	F3(2, 0x32, 1), F3(~2, ~0x32, ~1)|RD_G0|SIMM13(~0),	"1,w", F_ALIAS, v6notv9 }, /* wr rs1,0,%wim */
+{ "mov",	F3(2, 0x33, 0), F3(~2, ~0x33, ~0)|RD_G0|RS1_G0|ASI(~0),	"2,t", F_ALIAS, v6notv9 }, /* wr %g0,rs2,%tbr */
+{ "mov",	F3(2, 0x33, 1), F3(~2, ~0x33, ~1)|RD_G0|RS1_G0,		"i,t", F_ALIAS, v6notv9 }, /* wr %g0,i,%tbr */
 { "mov",	F3(2, 0x33, 0), F3(~2, ~0x33, ~0)|RD_G0|ASI_RS2(~0),	"1,t", F_ALIAS, v6notv9 }, /* wr rs1,%g0,%tbr */
-{ "mov",	F3(2, 0x33, 1), F3(~2, ~0x33, ~1)|RD_G0,		"i,t", F_ALIAS, v6notv9 }, /* wr %g0,i,%tbr */
 { "mov",	F3(2, 0x33, 1), F3(~2, ~0x33, ~1)|RD_G0|SIMM13(~0),	"1,t", F_ALIAS, v6notv9 }, /* wr rs1,0,%tbr */
 
 { "mov",	F3(2, 0x02, 0), F3(~2, ~0x02, ~0)|RS1_G0|ASI(~0),	"2,d", 0, v6 }, /* or %g0,rs2,d */
@@ -1107,6 +1122,7 @@ const struct sparc_opcode sparc_opcodes[] = {
  { opcode, (mask), IMMED|(lose)|RS2_G0,	"z,1",   (flags)|F_ALIAS, v9 }, /* rs1 + %g0 */ \
  { opcode, (mask)|IMMED, (lose)|RS1_G0,		"i",     (flags), v6 }, /* %g0 + imm */ \
  { opcode, (mask)|IMMED, (lose),		"1+i",   (flags), v6 }, /* rs1 + imm */ \
+ { opcode, (mask)|IMMED, (lose),		"i+1",   (flags), v6 }, /* imm + rs1 */ \
  { opcode, (mask), IMMED|(lose),		"1+2",   (flags), v6 }, /* rs1 + rs2 */ \
  { opcode, (mask), IMMED|(lose)|RS2_G0,		"1",     (flags), v6 } /* rs1 + %g0 */
 

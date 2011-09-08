@@ -51,6 +51,8 @@ if [istarget sparc*-*-*] {
 	run_dump_test "gotop64"
     }
     run_dump_test "imm-plus-rreg"
+    run_dump_test "ticc-imm-reg"
+    run_dump_test "v8-movwr-imm"
     run_dump_test "v9branch1"
     run_dump_test "v9branch2"
     run_dump_test "v9branch3"
