@@ -48,7 +48,7 @@
 	fsra16	%f42, %f44, %f46
 	fslas32	%f44, %f46, %f48
 	fsra32	%f46, %f48, %f50
-	pdistn	%f48, %f50, %f52
+	pdistn	%f48, %f50, %g1
 	fmean16	%f50, %f52, %f54
 	fpadd64	%f52, %f54, %f56
 	fchksum16 %f54, %f56, %f58
