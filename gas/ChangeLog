@@ -1,3 +1,9 @@
+2011-09-08  Joern Rennecke <joern.rennecke@embecosm.com>
+
+	* cgen.c (gas_cgen_pcrel_r_type): New function.
+	(gas_cgen_tc_gen_reloc): Check for GAS_CGEN_PCREL_R_TYPE.
+	* cgen.h (gas_cgen_pcrel_r_type): Declare.
+
 2011-09-08  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	PR gas/13167

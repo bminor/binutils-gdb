@@ -1,6 +1,6 @@
 /* GAS interface for targets using CGEN: Cpu tools GENerator.
    Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
-   2006, 2007, 2009, 2010 Free Software Foundation, Inc.
+   2006, 2007, 2009, 2010, 2011 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -1018,6 +1018,22 @@ gas_cgen_md_apply_fix (fixP, valP, seg)
   fixP->fx_addnumber = value;
 }
 
+bfd_reloc_code_real_type
+gas_cgen_pcrel_r_type (bfd_reloc_code_real_type r)
+{
+  switch (r)
+    {
+    case BFD_RELOC_8:  r = BFD_RELOC_8_PCREL;  break;
+    case BFD_RELOC_16: r = BFD_RELOC_16_PCREL; break;
+    case BFD_RELOC_24: r = BFD_RELOC_24_PCREL; break;
+    case BFD_RELOC_32: r = BFD_RELOC_32_PCREL; break;
+    case BFD_RELOC_64: r = BFD_RELOC_64_PCREL; break;
+    default:
+      break;
+    }
+  return r;
+}
+
 /* Translate internal representation of relocation info to BFD target format.
 
    FIXME: To what extent can we get all relevant targets to use this?  */
@@ -1027,10 +1043,17 @@ gas_cgen_tc_gen_reloc (section, fixP)
      asection * section ATTRIBUTE_UNUSED;
      fixS *     fixP;
 {
+  bfd_reloc_code_real_type r_type = fixP->fx_r_type;
   arelent *reloc;
+
   reloc = (arelent *) xmalloc (sizeof (arelent));
 
-  reloc->howto = bfd_reloc_type_lookup (stdoutput, fixP->fx_r_type);
+#ifdef GAS_CGEN_PCREL_R_TYPE
+  if (fixP->fx_pcrel)
+    r_type = GAS_CGEN_PCREL_R_TYPE (r_type);
+#endif
+  reloc->howto = bfd_reloc_type_lookup (stdoutput, r_type);
+
   if (reloc->howto == (reloc_howto_type *) NULL)
     {
       as_bad_where (fixP->fx_file, fixP->fx_line,
