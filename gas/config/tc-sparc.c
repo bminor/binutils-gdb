@@ -2408,8 +2408,10 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 		  {
 		    if (s1[-2] == '%' && s1[-3] == '+')
 		      s1 -= 3;
-		    else if (strchr ("goli0123456789", s1[-2]) && s1[-3] == '%' && s1[-4] == '+')
+		    else if (strchr ("golir0123456789", s1[-2]) && s1[-3] == '%' && s1[-4] == '+')
 		      s1 -= 4;
+		    else if (s1[-3] == 'r' && s1[-4] == '%' && s1[-5] == '+')
+		      s1 -= 5;
 		    else
 		      s1 = NULL;
 		    if (s1)
