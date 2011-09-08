@@ -330,6 +330,9 @@ print_frame_args (struct symbol *func, struct frame_info *frame,
 
 	      TRY_CATCH (except, RETURN_MASK_ERROR)
 		{
+		  const struct language_defn *language;
+		  struct value_print_options opts;
+
 		  /* Avoid value_print because it will deref ref parameters.
 		     We just want to print their addresses.  Print ??? for
 		     args whose address we do not know.  We pass 2 as
@@ -338,29 +341,21 @@ print_frame_args (struct symbol *func, struct frame_info *frame,
 		     recurse.  */
 		  val = read_var_value (sym, frame);
 
-		  annotate_arg_value (val == NULL ? NULL : value_type (val));
+		  annotate_arg_value (value_type (val));
 
-		  if (val)
-		    {
-		      const struct language_defn *language;
-		      struct value_print_options opts;
-
-		      /* Use the appropriate language to display our symbol,
-			 unless the user forced the language to a specific
-			 language.  */
-		      if (language_mode == language_mode_auto)
-			language = language_def (SYMBOL_LANGUAGE (sym));
-		      else
-			language = current_language;
-
-		      get_raw_print_options (&opts);
-		      opts.deref_ref = 0;
-		      opts.summary = summary;
-		      common_val_print (val, stb->stream, 2, &opts, language);
-		      ui_out_field_stream (uiout, "value", stb);
-		    }
+		  /* Use the appropriate language to display our symbol,
+		     unless the user forced the language to a specific
+		     language.  */
+		  if (language_mode == language_mode_auto)
+		    language = language_def (SYMBOL_LANGUAGE (sym));
 		  else
-		    ui_out_text (uiout, "???");
+		    language = current_language;
+
+		  get_raw_print_options (&opts);
+		  opts.deref_ref = 0;
+		  opts.summary = summary;
+		  common_val_print (val, stb->stream, 2, &opts, language);
+		  ui_out_field_stream (uiout, "value", stb);
 		}
 	      if (except.reason < 0)
 		{

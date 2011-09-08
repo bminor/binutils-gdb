@@ -1,5 +1,15 @@
 2011-09-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* findvar.c (read_var_value): Never return NULL, throw an error
+	instead.  Update the function comment.  State symbol name in the error
+	messages.
+	* python/py-frame.c (frapy_read_var): Remove handling of NULL from
+	read_var_value.
+	* stack.c (print_frame_args): Likewise.
+	* valops.c (value_of_variable): Likewise.
+
+2011-09-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* stack.c (print_frame_args): New variable except.  Wrap
 	read_var_value and common_val_print into TRY_CATCH.
 

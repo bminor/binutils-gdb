@@ -1488,7 +1488,6 @@ value_repeat (struct value *arg1, int count)
 struct value *
 value_of_variable (struct symbol *var, struct block *b)
 {
-  struct value *val;
   struct frame_info *frame;
 
   if (!symbol_read_needs_frame (var))
@@ -1509,11 +1508,7 @@ value_of_variable (struct symbol *var, struct block *b)
 	}
     }
 
-  val = read_var_value (var, frame);
-  if (!val)
-    error (_("Address of symbol \"%s\" is unknown."), SYMBOL_PRINT_NAME (var));
-
-  return val;
+  return read_var_value (var, frame);
 }
 
 struct value *

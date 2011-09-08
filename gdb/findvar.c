@@ -409,7 +409,7 @@ symbol_read_needs_frame (struct symbol *sym)
 /* Given a struct symbol for a variable,
    and a stack frame id, read the value of the variable
    and return a (pointer to a) struct value containing the value.
-   If the variable cannot be found, return a zero pointer.  */
+   If the variable cannot be found, throw error.  */
 
 struct value *
 read_var_value (struct symbol *var, struct frame_info *frame)
@@ -477,7 +477,8 @@ read_var_value (struct symbol *var, struct frame_info *frame)
     case LOC_ARG:
       addr = get_frame_args_address (frame);
       if (!addr)
-	return 0;
+	error (_("Unknown argument list address for `%s'."),
+	       SYMBOL_PRINT_NAME (var));
       addr += SYMBOL_VALUE (var);
       v = allocate_value_lazy (type);
       break;
@@ -489,7 +490,8 @@ read_var_value (struct symbol *var, struct frame_info *frame)
 
 	argref = get_frame_args_address (frame);
 	if (!argref)
-	  return 0;
+	  error (_("Unknown argument list address for `%s'."),
+		 SYMBOL_PRINT_NAME (var));
 	argref += SYMBOL_VALUE (var);
 	ref = value_at (lookup_pointer_type (type), argref);
 	addr = value_as_address (ref);
@@ -504,7 +506,8 @@ read_var_value (struct symbol *var, struct frame_info *frame)
       break;
 
     case LOC_TYPEDEF:
-      error (_("Cannot look up value of a typedef"));
+      error (_("Cannot look up value of a typedef `%s'."),
+	     SYMBOL_PRINT_NAME (var));
       break;
 
     case LOC_BLOCK:
@@ -530,7 +533,8 @@ read_var_value (struct symbol *var, struct frame_info *frame)
 					  frame);
 
 	    if (regval == NULL)
-	      error (_("Value of register variable not available."));
+	      error (_("Value of register variable not available for `%s'."),
+	             SYMBOL_PRINT_NAME (var));
 
 	    addr = value_as_address (regval);
 	    v = allocate_value_lazy (type);
@@ -540,7 +544,8 @@ read_var_value (struct symbol *var, struct frame_info *frame)
 	    regval = value_from_register (type, regno, frame);
 
 	    if (regval == NULL)
-	      error (_("Value of register variable not available."));
+	      error (_("Value of register variable not available for `%s'."),
+	             SYMBOL_PRINT_NAME (var));
 	    return regval;
 	  }
       }
@@ -561,7 +566,7 @@ read_var_value (struct symbol *var, struct frame_info *frame)
 
 	msym = lookup_minimal_symbol (SYMBOL_LINKAGE_NAME (var), NULL, NULL);
 	if (msym == NULL)
-	  return 0;
+	  error (_("No global symbol \"%s\"."), SYMBOL_LINKAGE_NAME (var));
 	if (overlay_debugging)
 	  addr = symbol_overlayed_address (SYMBOL_VALUE_ADDRESS (msym),
 					   SYMBOL_OBJ_SECTION (msym));
@@ -580,7 +585,8 @@ read_var_value (struct symbol *var, struct frame_info *frame)
       return allocate_optimized_out_value (type);
 
     default:
-      error (_("Cannot look up value of a botched symbol."));
+      error (_("Cannot look up value of a botched symbol `%s'."),
+	     SYMBOL_PRINT_NAME (var));
       break;
     }
 

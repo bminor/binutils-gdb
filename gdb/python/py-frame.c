@@ -467,14 +467,6 @@ frapy_read_var (PyObject *self, PyObject *args)
     }
   GDB_PY_HANDLE_EXCEPTION (except);
 
-  if (!val)
-    {
-      PyErr_Format (PyExc_ValueError,
-		    _("Variable cannot be found for symbol '%s'."),
-		    SYMBOL_NATURAL_NAME (var));
-      return NULL;
-    }
-
   return value_to_value_object (val);
 }
 
