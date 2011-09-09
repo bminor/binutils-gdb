@@ -2,8 +2,8 @@
 
 	* linux-nat.h (enum resume_kind): New.
 	(struct lwp_info) <last_resume_kind>: New field.
-	(linux_child_follow_fork): Set last_resume_kind to resume_stop on
-	the new lwp.
+	* linux-nat.c (linux_child_follow_fork): Set last_resume_kind to
+	resume_stop on the new lwp.
 	(add_lwp): Set last_resume_kind as resume_continue by default.
 	(lin_lwp_attach_lwp): Set last_resume_kind as resume_stop.
 	(resume_lwp): New, factored out from resume_callback.  Also check
