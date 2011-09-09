@@ -1,3 +1,8 @@
+2011-09-09  Pedro Alves  <pedro@codesourcery.com>
+
+	* linux-nat.c (lin_lwp_attach_lwp): Return 1 (ignore) instead of
+	-1 (error), if the lwp exits right after attaching.
+
 2011-09-08  Doug Evans  <dje@google.com>
 
 	* py-cmd.c: Some minor formatting fixes.

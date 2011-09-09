@@ -1479,7 +1479,7 @@ lin_lwp_attach_lwp (ptid_t ptid)
       if (!WIFSTOPPED (status))
 	{
 	  restore_child_signals_mask (&prev_mask);
-	  return -1;
+	  return 1;
 	}
 
       lp = add_lwp (ptid);
