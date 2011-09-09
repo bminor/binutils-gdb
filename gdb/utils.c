@@ -3691,6 +3691,50 @@ make_bpstat_clear_actions_cleanup (void)
   return make_cleanup (do_bpstat_clear_actions_cleanup, NULL);
 }
 
+/* Check for GCC >= 4.x according to the symtab->producer string.  Return minor
+   version (x) of 4.x in such case.  If it is not GCC or it is GCC older than
+   4.x return -1.  If it is GCC 5.x or higher return INT_MAX.  */
+
+int
+producer_is_gcc_ge_4 (const char *producer)
+{
+  const char *cs;
+  int major, minor;
+
+  if (producer == NULL)
+    {
+      /* For unknown compilers expect their behavior is not compliant.  For GCC
+	 this case can also happen for -gdwarf-4 type units supported since
+	 gcc-4.5.  */
+
+      return -1;
+    }
+
+  /* Skip any identifier after "GNU " - such as "C++" or "Java".  */
+
+  if (strncmp (producer, "GNU ", strlen ("GNU ")) != 0)
+    {
+      /* For non-GCC compilers expect their behavior is not compliant.  */
+
+      return -1;
+    }
+  cs = &producer[strlen ("GNU ")];
+  while (*cs && !isdigit (*cs))
+    cs++;
+  if (sscanf (cs, "%d.%d", &major, &minor) != 2)
+    {
+      /* Not recognized as GCC.  */
+
+      return -1;
+    }
+
+  if (major < 4)
+    return -1;
+  if (major > 4)
+    return INT_MAX;
+  return minor;
+}
+
 /* Provide a prototype to silence -Wmissing-prototypes.  */
 extern initialize_file_ftype _initialize_utils;
 

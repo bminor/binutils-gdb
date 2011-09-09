@@ -784,11 +784,6 @@ struct symtab
 
   unsigned int epilogue_unwind_valid : 1;
 
-  /* At least GCC 4.6.0 and 4.6.1 can produce invalid false prologue and marker
-     on amd64.  This flag is set independently of the symtab arch.  */
-
-  unsigned amd64_prologue_line_bug : 1;
-
   /* The macro table for this symtab.  Like the blockvector, this
      may be shared between different symtabs --- and normally is for
      all the symtabs in a given compilation unit.  */

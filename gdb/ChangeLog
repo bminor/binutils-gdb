@@ -1,3 +1,16 @@
+2011-09-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Code cleanup.
+	* amd64-tdep.c (amd64_skip_prologue): Move the XMM code to ...
+	(amd64_skip_xmm_prologue): ... this new function.  Describe its
+	parameters.  No longer use amd64_prologue_line_bug.
+	* defs.h (producer_is_gcc_ge_4): New declaration.
+	* dwarf2read.c (producer_is_gcc_ge_4): Move to utils.c.
+	(process_full_comp_unit): Update its caller.  Remove
+	amd64_prologue_line_bug initialization.
+	* symtab.h (struct symtab): Remove field amd64_prologue_line_bug.
+	* utils.c (producer_is_gcc_ge_4): Moved here from dwarf2read.c.
+
 2011-09-09  Pedro Alves  <pedro@codesourcery.com>
 
 	* linux-nat.h (enum resume_kind): New.

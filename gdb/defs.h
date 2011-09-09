@@ -431,6 +431,8 @@ extern int parse_pid_to_attach (char *args);
 
 extern struct cleanup *make_bpstat_clear_actions_cleanup (void);
 
+extern int producer_is_gcc_ge_4 (const char *producer);
+
 /* From demangle.c */
 
 extern void set_demangling_style (char *);
