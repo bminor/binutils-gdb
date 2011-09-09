@@ -22,6 +22,20 @@
 
 #include <signal.h>
 
+/* Ways to "resume" a thread.  */
+
+enum resume_kind
+{
+  /* Thread should continue.  */
+  resume_continue,
+
+  /* Thread should single-step.  */
+  resume_step,
+
+  /* Thread should be stopped.  */
+  resume_stop
+};
+
 /* Structure describing an LWP.  This is public only for the purposes
    of ALL_LWPS; target-specific code should generally not access it
    directly.  */
@@ -51,6 +65,9 @@ struct lwp_info
      been processed, but we should not report that wait status if GDB
      didn't try to let the LWP run.  */
   int resumed;
+
+  /* The last resume GDB requested on this thread.  */
+  enum resume_kind last_resume_kind;
 
   /* If non-zero, a pending wait status.  */
   int status;

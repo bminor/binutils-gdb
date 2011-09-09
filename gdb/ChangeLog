@@ -1,5 +1,36 @@
 2011-09-09  Pedro Alves  <pedro@codesourcery.com>
 
+	* linux-nat.h (enum resume_kind): New.
+	(struct lwp_info) <last_resume_kind>: New field.
+	(linux_child_follow_fork): Set last_resume_kind to resume_stop on
+	the new lwp.
+	(add_lwp): Set last_resume_kind as resume_continue by default.
+	(lin_lwp_attach_lwp): Set last_resume_kind as resume_stop.
+	(resume_lwp): New, factored out from resume_callback.  Also check
+	for pending status in lp->waitstatus.
+	(resume_callback): Reimplement.
+	(resume_clear_callback): Set last_resume_kind as resume_stop.
+	(resume_set_callback): Set last_resume_kind as resume_continue.
+	(linux_nat_resume, linux_handle_extended_wait): Set
+	last_resume_kind.
+	(running_callback): Also check lp->waitstatus for pending events.
+	(select_singlestep_lwp_callback): Check that lp->last_resume_kind
+	is resume_step.
+	(stop_and_resume_callback): Don't re-resume if the core wanted the
+	lwp stopped.  Use resume_lwp instead of resume_callback.  Avoid
+	using an invalidated pointer.
+	(linux_nat_filter_event): Don't discard SIGSTOPs as delayed
+	SIGSTOPs if the core wanted the LWP to stop.
+	(linux_nat_wait_1) Don't consume a pending SIGSTOP if the core
+	wanted the lwp to stop.  If the core wanted the lwp to stop, and
+	the lwp stopped with a SIGSTOP, report a TARGET_SIGNAL_0 instead
+	of TARGET_SIGNAL_STOP.
+	(linux_nat_stop_lwp): Don't synchronously wait for the lwp to stop
+	here.  Instead, signal the lwp, and set the last_resume_kind to
+	resume_stop.
+
+2011-09-09  Pedro Alves  <pedro@codesourcery.com>
+
 	* linux-nat.c (lin_lwp_attach_lwp): Return 1 (ignore) instead of
 	-1 (error), if the lwp exits right after attaching.
 
