@@ -1,3 +1,8 @@
+2011-09-09  Kai Tietz  <ktietz@redhat.com>
+
+	* peicode.h (pe_ILF_build_a_bfd): Don't remove leading underscore
+	for targets without symbol_leading_char.
+
 2011-09-08  Bernd Jendrissek  <bernd.jendrissek@gmail.com>
 
 	* bfdwin.c (bfd_get_file_window): Fix memory leak.
