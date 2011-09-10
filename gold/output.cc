@@ -1961,15 +1961,15 @@ Output_fill_debug_info::do_write(Output_file* of, off_t off, size_t len) const
   // address_size.
   if (this->is_big_endian())
     {
-      elfcpp::Swap<32, true>::writeval(pov, len - 4);
-      elfcpp::Swap<16, true>::writeval(pov + 4, this->version);
-      elfcpp::Swap<32, true>::writeval(pov + 6, 0);
+      elfcpp::Swap_unaligned<32, true>::writeval(pov, len - 4);
+      elfcpp::Swap_unaligned<16, true>::writeval(pov + 4, this->version);
+      elfcpp::Swap_unaligned<32, true>::writeval(pov + 6, 0);
     }
   else
     {
-      elfcpp::Swap<32, false>::writeval(pov, len - 4);
-      elfcpp::Swap<16, false>::writeval(pov + 4, this->version);
-      elfcpp::Swap<32, false>::writeval(pov + 6, 0);
+      elfcpp::Swap_unaligned<32, false>::writeval(pov, len - 4);
+      elfcpp::Swap_unaligned<16, false>::writeval(pov + 4, this->version);
+      elfcpp::Swap_unaligned<32, false>::writeval(pov + 6, 0);
     }
   pov += 4 + 2 + 4;
   *pov++ = 4;
@@ -2021,15 +2021,15 @@ Output_fill_debug_line::do_write(Output_file* of, off_t off, size_t len) const
   // line number program is empty.
   if (this->is_big_endian())
     {
-      elfcpp::Swap<32, true>::writeval(pov, len - 4);
-      elfcpp::Swap<16, true>::writeval(pov + 4, this->version);
-      elfcpp::Swap<32, true>::writeval(pov + 6, len - (4 + 2 + 4));
+      elfcpp::Swap_unaligned<32, true>::writeval(pov, len - 4);
+      elfcpp::Swap_unaligned<16, true>::writeval(pov + 4, this->version);
+      elfcpp::Swap_unaligned<32, true>::writeval(pov + 6, len - (4 + 2 + 4));
     }
   else
     {
-      elfcpp::Swap<32, false>::writeval(pov, len - 4);
-      elfcpp::Swap<16, false>::writeval(pov + 4, this->version);
-      elfcpp::Swap<32, false>::writeval(pov + 6, len - (4 + 2 + 4));
+      elfcpp::Swap_unaligned<32, false>::writeval(pov, len - 4);
+      elfcpp::Swap_unaligned<16, false>::writeval(pov + 4, this->version);
+      elfcpp::Swap_unaligned<32, false>::writeval(pov + 6, len - (4 + 2 + 4));
     }
   pov += 4 + 2 + 4;
   *pov++ = 1;	// minimum_instruction_length
