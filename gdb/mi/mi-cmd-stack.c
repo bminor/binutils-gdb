@@ -36,7 +36,8 @@
 enum what_to_list { locals, arguments, all };
 
 static void list_args_or_locals (enum what_to_list what, 
-				 int values, struct frame_info *fi);
+				 enum print_values values,
+				 struct frame_info *fi);
 
 /* Print a list of the stack frames. Args can be none, in which case
    we want to print the whole backtrace, or a pair of numbers
@@ -241,7 +242,8 @@ mi_cmd_stack_list_variables (char *command, char **argv, int argc)
    of the variables, if an argument of 1 is passed, print the values
    as well. */
 static void
-list_args_or_locals (enum what_to_list what, int values, struct frame_info *fi)
+list_args_or_locals (enum what_to_list what, enum print_values values,
+		     struct frame_info *fi)
 {
   struct block *block;
   struct symbol *sym;

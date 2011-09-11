@@ -1,3 +1,9 @@
+2011-09-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Code cleanup.
+	* mi/mi-cmd-stack.c (list_args_or_locals): Use enum for the parameter
+	values.
+
 2011-09-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Code cleanup.
