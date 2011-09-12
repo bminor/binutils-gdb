@@ -1,3 +1,9 @@
+2011-09-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/13178
+	* elf-ifunc.c (_bfd_elf_allocate_ifunc_dyn_relocs): Use .got.plt
+	if there are no GOT relocations.
+
 2011-09-09  Kai Tietz  <ktietz@redhat.com>
 
 	* peicode.h (pe_ILF_build_a_bfd): Don't remove leading underscore
