@@ -40,7 +40,7 @@ static struct gdb_exception safe_execute_command (struct ui_out *uiout,
 /* These implement the cli out interpreter: */
 
 static void *
-cli_interpreter_init (int top_level)
+cli_interpreter_init (struct interp *self, int top_level)
 {
   return NULL;
 }
@@ -135,6 +135,11 @@ safe_execute_command (struct ui_out *command_uiout, char *command, int from_tty)
   return e;
 }
 
+static struct ui_out *
+cli_ui_out (struct interp *self)
+{
+  return cli_uiout;
+}
 
 /* Standard gdb initialization hook.  */
 extern initialize_file_ftype _initialize_cli_interp; /* -Wmissing-prototypes */
@@ -147,13 +152,14 @@ _initialize_cli_interp (void)
     cli_interpreter_resume,	/* resume_proc */
     cli_interpreter_suspend,	/* suspend_proc */
     cli_interpreter_exec,	/* exec_proc */
-    cli_interpreter_display_prompt_p	/* prompt_proc_p */
+    cli_interpreter_display_prompt_p,	/* prompt_proc_p */
+    cli_ui_out			/* ui_out_proc */
   };
   struct interp *cli_interp;
 
   /* Create a default uiout builder for the CLI.  */
   cli_uiout = cli_out_new (gdb_stdout);
-  cli_interp = interp_new (INTERP_CONSOLE, NULL, cli_uiout, &procs);
+  cli_interp = interp_new (INTERP_CONSOLE, &procs);
 
   interp_add (cli_interp);
 }

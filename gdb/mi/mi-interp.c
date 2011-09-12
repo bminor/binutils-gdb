@@ -72,9 +72,11 @@ static void mi_breakpoint_modified (struct breakpoint *b);
 static int report_initial_inferior (struct inferior *inf, void *closure);
 
 static void *
-mi_interpreter_init (int top_level)
+mi_interpreter_init (struct interp *interp, int top_level)
 {
   struct mi_interp *mi = XMALLOC (struct mi_interp);
+  const char *name;
+  int mi_version;
 
   /* HACK: We need to force stdout/stderr to point at the console.  This avoids
      any potential side effects caused by legacy code that is still
@@ -89,6 +91,22 @@ mi_interpreter_init (int top_level)
   mi->log = mi->err;
   mi->targ = mi_console_file_new (raw_stdout, "@", '"');
   mi->event_channel = mi_console_file_new (raw_stdout, "=", 0);
+
+  name = interp_name (interp);
+  /* INTERP_MI selects the most recent released version.  "mi2" was
+     released as part of GDB 6.0.  */
+  if (strcmp (name, INTERP_MI) == 0)
+    mi_version = 2;
+  else if (strcmp (name, INTERP_MI1) == 0)
+    mi_version = 1;
+  else if (strcmp (name, INTERP_MI2) == 0)
+    mi_version = 2;
+  else if (strcmp (name, INTERP_MI3) == 0)
+    mi_version = 3;
+  else
+    gdb_assert_not_reached ("unhandled MI version");
+
+  mi->uiout = mi_out_new (mi_version);
 
   if (top_level)
     {
@@ -701,6 +719,14 @@ report_initial_inferior (struct inferior *inf, void *closure)
   return 0;
 }
 
+static struct ui_out *
+mi_ui_out (struct interp *interp)
+{
+  struct mi_interp *mi = interp_data (interp);
+
+  return mi->uiout;
+}
+
 extern initialize_file_ftype _initialize_mi_interp; /* -Wmissing-prototypes */
 
 void
@@ -712,15 +738,13 @@ _initialize_mi_interp (void)
     mi_interpreter_resume,	/* resume_proc */
     mi_interpreter_suspend,	/* suspend_proc */
     mi_interpreter_exec,	/* exec_proc */
-    mi_interpreter_prompt_p	/* prompt_proc_p */
+    mi_interpreter_prompt_p,	/* prompt_proc_p */
+    mi_ui_out 			/* ui_out_proc */
   };
 
   /* The various interpreter levels.  */
-  interp_add (interp_new (INTERP_MI1, NULL, mi_out_new (1), &procs));
-  interp_add (interp_new (INTERP_MI2, NULL, mi_out_new (2), &procs));
-  interp_add (interp_new (INTERP_MI3, NULL, mi_out_new (3), &procs));
-
-  /* "mi" selects the most recent released version.  "mi2" was
-     released as part of GDB 6.0.  */
-  interp_add (interp_new (INTERP_MI, NULL, mi_out_new (2), &procs));
+  interp_add (interp_new (INTERP_MI1, &procs));
+  interp_add (interp_new (INTERP_MI2, &procs));
+  interp_add (interp_new (INTERP_MI3, &procs));
+  interp_add (interp_new (INTERP_MI, &procs));
 }

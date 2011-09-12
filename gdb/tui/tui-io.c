@@ -607,7 +607,7 @@ tui_initialize_io (void)
 
   /* Create the default UI.  It is not created because we installed a
      deprecated_init_ui_hook.  */
-  tui_old_uiout = current_uiout = cli_out_new (gdb_stdout);
+  tui_old_uiout = cli_out_new (gdb_stdout);
 
 #ifdef TUI_USE_PIPE_FOR_READLINE
   /* Temporary solution for readline writing to stdout: redirect

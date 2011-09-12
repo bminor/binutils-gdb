@@ -52,7 +52,7 @@ static int tui_is_toplevel = 0;
 /* These implement the TUI interpreter.  */
 
 static void *
-tui_init (int top_level)
+tui_init (struct interp *self, int top_level)
 {
   tui_is_toplevel = top_level;
 
@@ -126,6 +126,15 @@ tui_display_prompt_p (void *data)
     return 1;
 }
 
+static struct ui_out *
+tui_ui_out (struct interp *self)
+{
+  if (tui_active)
+    return tui_out;
+  else
+    return tui_old_uiout;
+}
+
 static struct gdb_exception
 tui_exec (void *data, const char *command_str)
 {
@@ -144,11 +153,13 @@ _initialize_tui_interp (void)
     tui_suspend,
     tui_exec,
     tui_display_prompt_p,
+    tui_ui_out,
   };
+  struct interp *tui_interp;
 
   /* Create a default uiout builder for the TUI.  */
-  tui_out = tui_out_new (gdb_stdout);
-  interp_add (interp_new (INTERP_TUI, NULL, tui_out, &procs));
+  tui_interp = interp_new (INTERP_TUI, &procs);
+  interp_add (tui_interp);
   if (interpreter_p && strcmp (interpreter_p, INTERP_TUI) == 0)
     tui_start_enabled = 1;
 

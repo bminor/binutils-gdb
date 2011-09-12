@@ -1,3 +1,11 @@
+2011-09-12  Matt Rice  <ratmice@gmail.com>
+	    Pedro Alves  <pedro@codesourcery.com>
+
+	PR gdb/13175
+
+	* gdb.base/interp.exp: New tests.
+	* gdb.base/interp.c: New file.
+
 2011-09-12  Doug Evans  <dje@google.com>
 
 	* gdb.dwarf2/clztest.exp: Fix initialization of tests array.

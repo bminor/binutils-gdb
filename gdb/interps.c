@@ -67,11 +67,6 @@ struct interp
   /* Has the init_proc been run?  */
   int inited;
 
-  /* This is the ui_out used to collect results for this interpreter.
-     It can be a formatter for stdout, as is the case for the console
-     & mi outputs, or it might be a result formatter.  */
-  struct ui_out *interpreter_out;
-
   const struct interp_procs *procs;
   int quiet_p;
 };
@@ -97,16 +92,14 @@ static int interpreter_initialized = 0;
    fills the fields from the inputs, and returns a pointer to the
    interpreter.  */
 struct interp *
-interp_new (const char *name, void *data, struct ui_out *uiout,
-	    const struct interp_procs *procs)
+interp_new (const char *name, const struct interp_procs *procs)
 {
   struct interp *new_interp;
 
   new_interp = XMALLOC (struct interp);
 
   new_interp->name = xstrdup (name);
-  new_interp->data = data;
-  new_interp->interpreter_out = uiout;
+  new_interp->data = NULL;
   new_interp->quiet_p = 0;
   new_interp->procs = procs;
   new_interp->inited = 0;
@@ -184,18 +177,19 @@ interp_set (struct interp *interp, int top_level)
       interpreter_p = xstrdup (current_interpreter->name);
     }
 
-  current_uiout = interp->interpreter_out;
-
   /* Run the init proc.  If it fails, try to restore the old interp.  */
 
   if (!interp->inited)
     {
       if (interp->procs->init_proc != NULL)
 	{
-	  interp->data = interp->procs->init_proc (top_level);
+	  interp->data = interp->procs->init_proc (interp, top_level);
 	}
       interp->inited = 1;
     }
+
+  /* Do this only after the interpreter is initialized.  */
+  current_uiout = interp->procs->ui_out_proc (interp);
 
   /* Clear out any installed interpreter hooks/event handlers.  */
   clear_interpreter_hooks ();
@@ -254,9 +248,25 @@ struct ui_out *
 interp_ui_out (struct interp *interp)
 {
   if (interp != NULL)
-    return interp->interpreter_out;
+    return interp->procs->ui_out_proc (interp);
 
-  return current_interpreter->interpreter_out;
+  return current_interpreter->procs->ui_out_proc (current_interpreter);
+}
+
+/* Returns the interpreter's cookie.  */
+
+void *
+interp_data (struct interp *interp)
+{
+  return interp->data;
+}
+
+/* Returns the interpreter's name.  */
+
+const char *
+interp_name (struct interp *interp)
+{
+  return interp->name;
 }
 
 /* Returns true if the current interp is the passed in name.  */

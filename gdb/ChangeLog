@@ -1,3 +1,36 @@
+2011-09-12  Pedro Alves  <pedro@codesourcery.com>
+	    Matt Rice  <ratmice@gmail.com>
+
+	PR gdb/13175
+
+	* interps.c (struct interp) <interpreter_out>: Delete field.
+	(interp_new): Remove the data and uiout parameters and adjust.
+	(interp_set): Only set the current_uiout from the interpreter's
+	uiout after initializing the interpreter.  Adjust call to
+	init_proc.
+	(interp_ui_out): Adjust to call procs->ui_out_proc.
+	(interp_data, interp_name): New.
+	* interps.h (interp_init_ftype): Add `self' parameter.
+	(interp_ui_out_ftype): New typedef.
+	(struct interp_procs) <ui_out_proc>: New method pointer.
+	(interp_new): Remove the data and uiout parameters.
+	(interp_data, interp_name): Declare.
+	* tui/tui-interp.c (tui_init): Adjust prototype.
+	(tui_ui_out): New.
+	(_initialize_tui_interp): Install tui_ui_out.  Don't instanciate
+	tui_out here.  Adjust call to interp_new.
+	* tui/tui-io.c (tui_initialize_io): Don't set current_uiout here.
+	* cli/cli-interp.c (cli_interpreter_init): Adjust prototype.
+	(cli_ui_out): New.
+	(_initialize_cli_interp): Install it.  Adjust call to interp_new.
+	* mi/mi-common.h (struct mi_interp) <uiout>: New field.
+	* mi/mi-interp.c (mi_interpreter_init): Adjust prototype.
+	Initialize mi->uiout depending on the mi_version as extracted from
+	the interpreter's name.
+	(mi_ui_out): New.
+	(_initialize_mi_interp): Install mi_ui_out.  Adjust calls to
+	interp_new.  Don't allocate the ui_out's of the interpreters here.
+
 2011-09-12  Aleksandar Ristovski  <aristovski@qnx.com>
 
 	* solib.c (solib_used): New function.

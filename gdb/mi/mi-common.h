@@ -52,6 +52,9 @@ struct mi_interp
   struct ui_file *targ;
   struct ui_file *event_channel;
 
+  /* MI's builder.  */
+  struct ui_out *uiout;
+
   /* This is the interpreter for the mi... */
   struct interp *mi2_interp;
   struct interp *mi1_interp;
