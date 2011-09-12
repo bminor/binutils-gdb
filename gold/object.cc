@@ -1582,8 +1582,6 @@ Sized_relobj_file<size, big_endian>::do_layout(Symbol_table* symtab,
        p != eh_frame_sections.end();
        ++p)
     {
-      gold_assert(external_symbols_offset != 0);
-
       unsigned int i = *p;
       const unsigned char* pshdr;
       pshdr = section_headers_data + i * This::shdr_size;
