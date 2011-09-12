@@ -1,3 +1,8 @@
+2011-09-12  Doug Evans  <dje@google.com>
+
+	* gdb.dwarf2/clztest.exp: Fix initialization of tests array.
+	* gdb.dwarf2/typeddwarf.exp: Ditto.
+
 2011-09-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix compatibility with x32 arch.

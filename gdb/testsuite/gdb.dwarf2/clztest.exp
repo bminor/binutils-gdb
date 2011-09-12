@@ -35,9 +35,9 @@ if ![runto_main] {
     return -1
 }
 
-global tests
-set tests(_) -
-unset tests(_)
+# Initialize tests to be an empty array.
+unset -nocomplain tests
+array set tests {}
 
 proc gdb-test {line var value} {
     global tests
