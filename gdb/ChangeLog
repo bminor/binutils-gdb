@@ -1,3 +1,9 @@
+2011-09-01  Aleksandar Ristovski  <aristovski@qnx.com>
+
+	* solib.c (used): New function.
+	(update_solib_list, reload_shared_libraries_1): Check if objfile is used
+	by another so_list object before freeing it.
+
 2011-09-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Code cleanup.
