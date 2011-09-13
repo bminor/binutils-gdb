@@ -1,3 +1,21 @@
+2011-09-13  Sami Wagiaalla  <swagiaal@redhat.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.python/py-events.exp: Remove pretty printing comment.
+	* gdb.python/py-evsignal.exp: New file.
+	* gdb.python/py-evthreads.c: Include signal.h.
+	(thread3): Remove variable count3.  Remove variable bad and use raise
+	instead.
+	(thread2): Remove variable count2.  Move thread3 pthread_create here,
+	merge pthread_join to a single line.
+	(main): Remove variable count1.  Merge pthread_join with pthread_create
+	to a single line.
+	* gdb.python/py-evthreads.exp: Remove pretty printing comment.  New
+	KFAIL python/12966 for gdbserver.  Test return value of
+	gdb_compile_pthreads.  Use gdb_run_cmd.  Replace send_gdb and
+	gdb_expect by gdb_test and gdb_test_multiple.
+	(thread 2, thread 3): New tests.
+
 2011-09-12  Matt Rice  <ratmice@gmail.com>
 	    Pedro Alves  <pedro@codesourcery.com>
 

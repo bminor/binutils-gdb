@@ -19,19 +19,14 @@ if $tracelevel then {
 
 if {[is_remote target]} {
     # RuntimeError: Could not find event thread
-    kfail "python/12966" "Run to breakpoint 1"
-    return -1
-}
-
-if { ![support_displaced_stepping] } { 
-    unsupported "displaced stepping"
+    kfail "python/12966" "Signal Thread 3"
     return -1
 }
 
 load_lib gdb-python.exp
 
-set testfile "py-evthreads"
-set srcfile ${testfile}.c
+set testfile "py-evsignal"
+set srcfile py-evthreads.c
 set binfile ${objdir}/${subdir}/${testfile}
 set pyfile ${srcdir}/${subdir}/py-events.py
 
@@ -48,41 +43,12 @@ gdb_test "Test_Events" "Event testers registered."
 gdb_test_no_output "set non-stop on"
 gdb_test_no_output "set target-async on"
 
-gdb_breakpoint "main"
-gdb_breakpoint "thread2"
-gdb_breakpoint "thread3"
-
 gdb_run_cmd
-set test "Run to breakpoint 1"
-gdb_test_multiple "" $test {
-    -re "event type: stop\r\nstop reason: breakpoint\r\nbreakpoint number: 1\r\nthread num: 1\r\n$gdb_prompt $" {
-        pass $test
+gdb_test_multiple "" "Signal Thread 3"  {
+    -re "event type: stop\r\nstop reason: signal\r\nstop signal: SIGUSR1\r\nthread num: 3\r\nevent type: stop\r\n$gdb_prompt $" {
+        pass "thread 3 was signaled"
     }
-    -re "The target does not support running in non-stop mode" {
+    -re "The target does not support running in non-stop mode"  {
         unsupported "non-stop mode is unsupported"
-        return
-    }
-}
-
-gdb_test "next" "event type: stop\r\nstop reason: breakpoint\r\nbreakpoint number: 2\r\nthread num: 2" "reached breakpoint 2"
-
-gdb_test "thread 2" {\[Switching to thread 2 .*}
-
-gdb_test "next" "event type: stop\r\nstop reason: breakpoint\r\nbreakpoint number: 3\r\nthread num: 3" "reached breakpoint 3"
-
-gdb_test "thread 3" {\[Switching to thread 3 .*}
-
-set test "continue thread 1"
-gdb_test_multiple "continue&" $test {
-    -re "event type: continue\r\nthread num: 3\r\n$gdb_prompt " {
-	# This expect string must not expect the end-of-buffer '$'.
-        pass $test
-    }
-}
-
-set test "thread 3 was signaled"
-gdb_test_multiple "" $test {
-    -re "event type: stop\r\nstop reason: signal\r\nstop signal: SIGUSR1\r\nthread num: 3\r\nevent type: stop\r\n$" {
-        pass $test
     }
 }
