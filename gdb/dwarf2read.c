@@ -13854,9 +13854,9 @@ follow_die_ref (struct die_info *src_die, struct attribute *attr,
   return die;
 }
 
-/* Return DWARF block and its CU referenced by OFFSET at PER_CU.  Returned
-   value is intended for DW_OP_call*.  You must call xfree on returned
-   dwarf2_locexpr_baton->data.  */
+/* Return DWARF block referenced by DW_AT_location of DIE at OFFSET at PER_CU.
+   Returned value is intended for DW_OP_call*.  Returned
+   dwarf2_locexpr_baton->data has lifetime of PER_CU->OBJFILE.  */
 
 struct dwarf2_locexpr_baton
 dwarf2_fetch_die_location_block (unsigned int offset,
@@ -13911,9 +13911,6 @@ dwarf2_fetch_die_location_block (unsigned int offset,
       retval.size = DW_BLOCK (attr)->size;
     }
   retval.per_cu = cu->per_cu;
-
-  if (retval.data)
-    retval.data = xmemdup (retval.data, retval.size, retval.size);
 
   age_cached_comp_units ();
 

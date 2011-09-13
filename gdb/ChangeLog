@@ -1,3 +1,15 @@
+2011-09-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Remove excessive DWARF expressions memory duplication.
+	* dwarf2loc.c (per_cu_dwarf_call): Remove variable back_to and its use
+	for block.data.
+	(indirect_pieced_value): Remove variable result.  Remove variable
+	back_to and its use for baton.data.
+	(dwarf2_compile_expr_to_ax): Remove variable back_to and its use for
+	block.data.
+	* dwarf2read.c (dwarf2_fetch_die_location_block): Remove xmemdup.
+	Update the function comment.
+
 2011-09-13  Pedro Alves  <pedro@codesourcery.com>
 
 	* inferior.h (ALL_INFERIORS): New.
