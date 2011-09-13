@@ -1,3 +1,15 @@
+2011-09-13  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdbthread.h (enum thread_state): Moved here.
+	(struct thread_info): Rename `executing_' field to `executing' and
+	`state_' to `state'.
+	* thread.c (enum thread_state): Moved to gdbthread.h.
+	(new_thread, add_thread_silent, delete_thread_1)
+	(any_live_thread_of_process, thread_alive, set_running)
+	(set_running, is_thread_state, any_running, is_executing)
+	(set_executing, finish_thread_state, print_thread_info)
+	(do_captured_thread_select): Adjust.
+
 2011-09-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix compatibility with gcc < 4.3 and non-gcc compilers.

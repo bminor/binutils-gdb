@@ -29,6 +29,15 @@ struct symtab;
 #include "ui-out.h"
 #include "inferior.h"
 
+/* Frontend view of the thread state.  Possible extensions: stepping,
+   finishing, until(ling),...  */
+enum thread_state
+{
+  THREAD_STOPPED,
+  THREAD_RUNNING,
+  THREAD_EXITED,
+};
+
 /* Inferior thread specific part of `struct infcall_control_state'.
 
    Inferior process counterpart is `struct inferior_control_state'.  */
@@ -133,9 +142,7 @@ struct thread_info
      from saying that there is an active target and we are stopped at
      a breakpoint, for instance.  This is a real indicator whether the
      thread is off and running.  */
-  /* This field is internal to thread.c.  Never access it directly,
-     use is_executing instead.  */
-  int executing_;
+  int executing;
 
   /* Frontend view of the thread state.  Note that the RUNNING/STOPPED
      states are different from EXECUTING.  When the thread is stopped
@@ -144,9 +151,7 @@ struct thread_info
      still be true.  As a possible future extension, this could turn
      into enum { stopped, exited, stepping, finishing, until(ling),
      running ... }  */
-  /* This field is internal to thread.c.  Never access it directly,
-     use is_running instead.  */
-  int state_;
+  int state;
 
   /* If this is > 0, then it means there's code out there that relies
      on this thread being listed.  Don't delete it from the lists even
@@ -342,7 +347,7 @@ extern int any_running (void);
    marks all threads.
 
    Note that this is different from the running state.  See the
-   description of state_ and executing_ fields of struct
+   description of state and executing fields of struct
    thread_info.  */
 extern void set_executing (ptid_t ptid, int executing);
 
