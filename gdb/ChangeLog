@@ -1,5 +1,16 @@
 2011-09-13  Pedro Alves  <pedro@codesourcery.com>
 
+	* breakpoint.c (update_watchpoint): Handle the case of the
+	watchpoint to update not being in the breakpoint list yet.
+	(hw_watchpoint_use_count): New, factored out from
+	hw_watchpoint_used_count.
+	(hw_watchpoint_used_count): Rename to ...
+	(hw_watchpoint_used_count_others): ... this.  Add `except'
+	parameter.  Don't count resources of `except'.  Use
+	hw_watchpoint_use_count.
+
+2011-09-13  Pedro Alves  <pedro@codesourcery.com>
+
 	* gdbthread.h (enum thread_state): Moved here.
 	(struct thread_info): Rename `executing_' field to `executing' and
 	`state_' to `state'.

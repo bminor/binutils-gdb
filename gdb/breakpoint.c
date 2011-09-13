@@ -176,7 +176,11 @@ static void maintenance_info_breakpoints (char *, int);
 
 static int hw_breakpoint_used_count (void);
 
-static int hw_watchpoint_used_count (enum bptype, int *);
+static int hw_watchpoint_use_count (struct breakpoint *);
+
+static int hw_watchpoint_used_count_others (struct breakpoint *except,
+					    enum bptype type,
+					    int *other_type_used);
 
 static void hbreak_command (char *, int);
 
@@ -1458,6 +1462,7 @@ update_watchpoint (struct watchpoint *b, int reparse)
 	  if (reg_cnt)
 	    {
 	      int i, target_resources_ok, other_type_used;
+	      enum bptype type;
 
 	      /* Use an exact watchpoint when there's only one memory region to be
 		 watched, and only one debug register is needed to watch it.  */
@@ -1466,16 +1471,29 @@ update_watchpoint (struct watchpoint *b, int reparse)
 	      /* We need to determine how many resources are already
 		 used for all other hardware watchpoints plus this one
 		 to see if we still have enough resources to also fit
-		 this watchpoint in as well.  To guarantee the
-		 hw_watchpoint_used_count call below counts this
-		 watchpoint, make sure that it is marked as a hardware
-		 watchpoint.  */
-	      if (b->base.type == bp_watchpoint)
-		b->base.type = bp_hardware_watchpoint;
+		 this watchpoint in as well.  */
 
-	      i = hw_watchpoint_used_count (b->base.type, &other_type_used);
-	      target_resources_ok = target_can_use_hardware_watchpoint
-		    (b->base.type, i, other_type_used);
+	      /* If this is a software watchpoint, we try to turn it
+		 to a hardware one -- count resources as if B was of
+		 hardware watchpoint type.  */
+	      type = b->base.type;
+	      if (type == bp_watchpoint)
+		type = bp_hardware_watchpoint;
+
+	      /* This watchpoint may or may not have been placed on
+		 the list yet at this point (it won't be in the list
+		 if we're trying to create it for the first time,
+		 through watch_command), so always account for it
+		 manually.  */
+
+	      /* Count resources used by all watchpoints except B.  */
+	      i = hw_watchpoint_used_count_others (&b->base, type, &other_type_used);
+
+	      /* Add in the resources needed for B.  */
+	      i += hw_watchpoint_use_count (&b->base);
+
+	      target_resources_ok
+		= target_can_use_hardware_watchpoint (type, i, other_type_used);
 	      if (target_resources_ok <= 0)
 		{
 		  int sw_mode = b->base.ops->works_in_software_mode (&b->base);
@@ -1486,8 +1504,17 @@ update_watchpoint (struct watchpoint *b, int reparse)
 		  else if (target_resources_ok < 0 && !sw_mode)
 		    error (_("There are not enough available hardware "
 			     "resources for this watchpoint."));
-		  else
-		    b->base.type = bp_watchpoint;
+
+		  /* Downgrade to software watchpoint.  */
+		  b->base.type = bp_watchpoint;
+		}
+	      else
+		{
+		  /* If this was a software watchpoint, we've just
+		     found we have enough resources to turn it to a
+		     hardware watchpoint.  Otherwise, this is a
+		     nop.  */
+		  b->base.type = type;
 		}
 	    }
 	  else if (!b->base.ops->works_in_software_mode (&b->base))
@@ -6846,28 +6873,52 @@ hw_breakpoint_used_count (void)
   return i;
 }
 
+/* Returns the resources B would use if it were a hardware
+   watchpoint.  */
+
 static int
-hw_watchpoint_used_count (enum bptype type, int *other_type_used)
+hw_watchpoint_use_count (struct breakpoint *b)
+{
+  int i = 0;
+  struct bp_location *bl;
+
+  if (!breakpoint_enabled (b))
+    return 0;
+
+  for (bl = b->loc; bl; bl = bl->next)
+    {
+      /* Special types of hardware watchpoints may use more than
+	 one register.  */
+      i += b->ops->resources_needed (bl);
+    }
+
+  return i;
+}
+
+/* Returns the sum the used resources of all hardware watchpoints of
+   type TYPE in the breakpoints list.  Also returns in OTHER_TYPE_USED
+   the sum of the used resources of all hardware watchpoints of other
+   types _not_ TYPE.  */
+
+static int
+hw_watchpoint_used_count_others (struct breakpoint *except,
+				 enum bptype type, int *other_type_used)
 {
   int i = 0;
   struct breakpoint *b;
-  struct bp_location *bl;
 
   *other_type_used = 0;
   ALL_BREAKPOINTS (b)
     {
+      if (b == except)
+	continue;
       if (!breakpoint_enabled (b))
 	continue;
 
-	if (b->type == type)
-	  for (bl = b->loc; bl; bl = bl->next)
-	    {
-	      /* Special types of hardware watchpoints may use more than
-		 one register.  */
-	      i += b->ops->resources_needed (bl);
-	    }
-	else if (is_hardware_watchpoint (b))
-	  *other_type_used = 1;
+      if (b->type == type)
+	i += hw_watchpoint_use_count (b);
+      else if (is_hardware_watchpoint (b))
+	*other_type_used = 1;
     }
 
   return i;
