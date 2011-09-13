@@ -1,3 +1,8 @@
+2011-09-13  Ian Lance Taylor  <iant@google.com>
+
+	* object.cc (Sized_relobj_file::do_layout): Remove unused local
+	variable external_symbols_offset.
+
 2011-09-12  Ian Lance Taylor  <iant@google.com>
 
 	* object.cc (Sized_relobj_file::do_layout): Remove assertion which

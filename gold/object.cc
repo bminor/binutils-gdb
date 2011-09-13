@@ -1149,7 +1149,6 @@ Sized_relobj_file<size, big_endian>::do_layout(Symbol_table* symtab,
   section_size_type section_names_size;
   const unsigned char* symbols_data = NULL;
   section_size_type symbols_size;
-  section_offset_type external_symbols_offset;
   const unsigned char* symbol_names_data = NULL;
   section_size_type symbol_names_size;
  
@@ -1159,7 +1158,6 @@ Sized_relobj_file<size, big_endian>::do_layout(Symbol_table* symtab,
       section_names_size = gc_sd->section_names_size;
       symbols_data = gc_sd->symbols_data;
       symbols_size = gc_sd->symbols_size;
-      external_symbols_offset = gc_sd->external_symbols_offset;
       symbol_names_data = gc_sd->symbol_names_data;
       symbol_names_size = gc_sd->symbol_names_size;
     }
@@ -1170,7 +1168,6 @@ Sized_relobj_file<size, big_endian>::do_layout(Symbol_table* symtab,
       if (sd->symbols != NULL)
         symbols_data = sd->symbols->data();
       symbols_size = sd->symbols_size;
-      external_symbols_offset = sd->external_symbols_offset;
       if (sd->symbol_names != NULL)
         symbol_names_data = sd->symbol_names->data();
       symbol_names_size = sd->symbol_names_size;
