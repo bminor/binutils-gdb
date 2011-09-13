@@ -1552,20 +1552,6 @@ thread_db_find_new_threads_2 (ptid_t ptid, int until_no_new)
   int pid = ptid_get_pid (ptid);
   int i, loop;
 
-  if (target_has_execution)
-    {
-      struct lwp_info *lp;
-
-      /* In linux, we can only read memory through a stopped lwp.  */
-      ALL_LWPS (lp, ptid)
-	if (lp->stopped && ptid_get_pid (lp->ptid) == pid)
-	  break;
-
-      if (!lp)
-	/* There is no stopped thread.  Bail out.  */
-	return;
-    }
-
   info = get_thread_db_info (GET_PID (ptid));
 
   /* Access an lwp we know is stopped.  */
@@ -1607,13 +1593,25 @@ static void
 thread_db_find_new_threads (struct target_ops *ops)
 {
   struct thread_db_info *info;
+  struct inferior *inf;
 
-  info = get_thread_db_info (GET_PID (inferior_ptid));
+  ALL_INFERIORS (inf)
+    {
+      struct thread_info *thread;
 
-  if (info == NULL)
-    return;
+      if (inf->pid == 0)
+	continue;
 
-  thread_db_find_new_threads_1 (inferior_ptid);
+      info = get_thread_db_info (inf->pid);
+      if (info == NULL)
+	continue;
+
+      thread = any_live_thread_of_process (inf->pid);
+      if (thread == NULL || thread->executing)
+	continue;
+
+      thread_db_find_new_threads_1 (thread->ptid);
+    }
 
   if (target_has_execution)
     iterate_over_lwps (minus_one_ptid /* iterate over all */,

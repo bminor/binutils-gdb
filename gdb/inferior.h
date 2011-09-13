@@ -615,6 +615,11 @@ extern void set_current_inferior (struct inferior *);
 
 extern struct cleanup *save_current_inferior (void);
 
+/* Traverse all inferiors.  */
+
+#define ALL_INFERIORS(I) \
+  for ((I) = inferior_list; (I); (I) = (I)->next)
+
 extern struct inferior *inferior_list;
 
 /* Prune away automatically added inferiors that aren't required
