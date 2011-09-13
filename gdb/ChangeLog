@@ -1,3 +1,8 @@
+2011-09-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix compatibility with gcc < 4.3 and non-gcc compilers.
+	* amd64-tdep.c (amd64_skip_xmm_prologue): Convert 0b constants.
+
 2011-09-12  Pedro Alves  <pedro@codesourcery.com>
 	    Matt Rice  <ratmice@gmail.com>
 

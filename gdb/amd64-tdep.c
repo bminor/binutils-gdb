@@ -1962,17 +1962,19 @@ amd64_skip_xmm_prologue (CORE_ADDR pc, CORE_ADDR start_pc)
   offset = 4;
   for (xmmreg = 0; xmmreg < 8; xmmreg++)
     {
-      /* movaps %xmmreg?,-0x??(%rbp) */
+      /* 0x0f 0x29 0b??000101 movaps %xmmreg?,-0x??(%rbp) */
       if (buf[offset] != 0x0f || buf[offset + 1] != 0x29
-          || (buf[offset + 2] & 0b00111111) != (xmmreg << 3 | 0b101))
+          || (buf[offset + 2] & 0x3f) != (xmmreg << 3 | 0x5))
 	return pc;
 
-      if ((buf[offset + 2] & 0b11000000) == 0b01000000)
+      /* 0b01?????? */
+      if ((buf[offset + 2] & 0xc0) == 0x40)
 	{
 	  /* 8-bit displacement.  */
 	  offset += 4;
 	}
-      else if ((buf[offset + 2] & 0b11000000) == 0b10000000)
+      /* 0b10?????? */
+      else if ((buf[offset + 2] & 0xc0) == 0x80)
 	{
 	  /* 32-bit displacement.  */
 	  offset += 7;
