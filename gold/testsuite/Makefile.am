@@ -2024,6 +2024,17 @@ incremental_common_test_1: common_test_1_v1.o common_test_1_v2.o gcctestdir/ld
 	cp -f common_test_1_v2.o common_test_1_tmp.o
 	$(CXXLINK) -Wl,--incremental-update -Bgcctestdir/ common_test_1_tmp.o
 
+check_PROGRAMS += incremental_comdat_test_1
+incremental_comdat_test_1: incr_comdat_test_1.o incr_comdat_test_2_v1.o incr_comdat_test_2_v2.o incr_comdat_test_2_v3.o gcctestdir/ld
+	cp -f incr_comdat_test_2_v1.o incr_comdat_test_1_tmp.o
+	$(CXXLINK) -Wl,--incremental-full,--incremental-patch=100 -Bgcctestdir/ incr_comdat_test_1.o incr_comdat_test_1_tmp.o
+	@sleep 1
+	cp -f incr_comdat_test_2_v2.o incr_comdat_test_1_tmp.o
+	$(CXXLINK) -Wl,--incremental-update -Bgcctestdir/ incr_comdat_test_1.o incr_comdat_test_1_tmp.o
+	@sleep 1
+	cp -f incr_comdat_test_2_v3.o incr_comdat_test_1_tmp.o
+	$(CXXLINK) -Wl,--incremental-update -Bgcctestdir/ incr_comdat_test_1.o incr_comdat_test_1_tmp.o
+
 endif DEFAULT_TARGET_X86_64
 
 endif GCC

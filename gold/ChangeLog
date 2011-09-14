@@ -1,3 +1,14 @@
+2011-09-13  Cary Coutant  <ccoutant@google.com>
+
+	* incremental.cc (Sized_relobj_incr::do_layout): Call
+	report_comdat_group for kept comdat sections.
+	* testsuite/Makefile.am (incremental_comdat_test_1): New test.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/incr_comdat_test_1.cc: New source file.
+	* testsuite/incr_comdat_test_2_v1.cc: New source file.
+	* testsuite/incr_comdat_test_2_v2.cc: New source file.
+	* testsuite/incr_comdat_test_2_v3.cc: New source file.
+
 2011-09-13  Ian Lance Taylor  <iant@google.com>
 
 	* object.cc (Sized_relobj_file::do_layout): Remove unused local

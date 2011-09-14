@@ -472,7 +472,8 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	incremental_test_5 \
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	incremental_test_6 \
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	incremental_copy_test \
-@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	incremental_common_test_1
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	incremental_common_test_1 \
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	incremental_comdat_test_1
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_55 = two_file_test_tmp_2.o \
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_test_tmp_3.o \
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	incremental_test_4.base \
@@ -749,7 +750,8 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	incremental_test_5$(EXEEXT) \
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	incremental_test_6$(EXEEXT) \
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	incremental_copy_test$(EXEEXT) \
-@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	incremental_common_test_1$(EXEEXT)
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	incremental_common_test_1$(EXEEXT) \
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	incremental_comdat_test_1$(EXEEXT)
 basic_pic_test_SOURCES = basic_pic_test.c
 basic_pic_test_OBJECTS = basic_pic_test.$(OBJEXT)
 basic_pic_test_LDADD = $(LDADD)
@@ -1083,6 +1085,13 @@ ifuncmain7static_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 ifuncvar_OBJECTS = $(am_ifuncvar_OBJECTS)
 ifuncvar_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(ifuncvar_LDFLAGS) \
 	$(LDFLAGS) -o $@
+incremental_comdat_test_1_SOURCES = incremental_comdat_test_1.c
+incremental_comdat_test_1_OBJECTS =  \
+	incremental_comdat_test_1.$(OBJEXT)
+incremental_comdat_test_1_LDADD = $(LDADD)
+incremental_comdat_test_1_DEPENDENCIES = libgoldtest.a ../libgold.a \
+	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 incremental_common_test_1_SOURCES = incremental_common_test_1.c
 incremental_common_test_1_OBJECTS =  \
 	incremental_common_test_1.$(OBJEXT)
@@ -1635,17 +1644,17 @@ SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c basic_pie_test.c \
 	ifuncmain6pie.c $(ifuncmain7_SOURCES) ifuncmain7pic.c \
 	ifuncmain7picstatic.c ifuncmain7pie.c \
 	$(ifuncmain7static_SOURCES) $(ifuncvar_SOURCES) \
-	incremental_common_test_1.c incremental_copy_test.c \
-	incremental_test_2.c incremental_test_3.c incremental_test_4.c \
-	incremental_test_5.c incremental_test_6.c $(initpri1_SOURCES) \
-	$(initpri2_SOURCES) $(initpri3a_SOURCES) $(initpri3b_SOURCES) \
-	$(justsyms_SOURCES) $(justsyms_exec_SOURCES) $(large_SOURCES) \
-	local_labels_test.c many_sections_r_test.c \
-	$(many_sections_test_SOURCES) $(object_unittest_SOURCES) \
-	permission_test.c plugin_test_1.c plugin_test_2.c \
-	plugin_test_3.c plugin_test_4.c plugin_test_5.c \
-	plugin_test_6.c plugin_test_7.c plugin_test_8.c \
-	$(protected_1_SOURCES) $(protected_2_SOURCES) \
+	incremental_comdat_test_1.c incremental_common_test_1.c \
+	incremental_copy_test.c incremental_test_2.c \
+	incremental_test_3.c incremental_test_4.c incremental_test_5.c \
+	incremental_test_6.c $(initpri1_SOURCES) $(initpri2_SOURCES) \
+	$(initpri3a_SOURCES) $(initpri3b_SOURCES) $(justsyms_SOURCES) \
+	$(justsyms_exec_SOURCES) $(large_SOURCES) local_labels_test.c \
+	many_sections_r_test.c $(many_sections_test_SOURCES) \
+	$(object_unittest_SOURCES) permission_test.c plugin_test_1.c \
+	plugin_test_2.c plugin_test_3.c plugin_test_4.c \
+	plugin_test_5.c plugin_test_6.c plugin_test_7.c \
+	plugin_test_8.c $(protected_1_SOURCES) $(protected_2_SOURCES) \
 	$(relro_now_test_SOURCES) $(relro_script_test_SOURCES) \
 	$(relro_strip_test_SOURCES) $(relro_test_SOURCES) \
 	$(script_test_1_SOURCES) $(script_test_2_SOURCES) \
@@ -2770,6 +2779,15 @@ ifuncmain7static$(EXEEXT): $(ifuncmain7static_OBJECTS) $(ifuncmain7static_DEPEND
 ifuncvar$(EXEEXT): $(ifuncvar_OBJECTS) $(ifuncvar_DEPENDENCIES) 
 	@rm -f ifuncvar$(EXEEXT)
 	$(ifuncvar_LINK) $(ifuncvar_OBJECTS) $(ifuncvar_LDADD) $(LIBS)
+@DEFAULT_TARGET_X86_64_FALSE@incremental_comdat_test_1$(EXEEXT): $(incremental_comdat_test_1_OBJECTS) $(incremental_comdat_test_1_DEPENDENCIES) 
+@DEFAULT_TARGET_X86_64_FALSE@	@rm -f incremental_comdat_test_1$(EXEEXT)
+@DEFAULT_TARGET_X86_64_FALSE@	$(LINK) $(incremental_comdat_test_1_OBJECTS) $(incremental_comdat_test_1_LDADD) $(LIBS)
+@GCC_FALSE@incremental_comdat_test_1$(EXEEXT): $(incremental_comdat_test_1_OBJECTS) $(incremental_comdat_test_1_DEPENDENCIES) 
+@GCC_FALSE@	@rm -f incremental_comdat_test_1$(EXEEXT)
+@GCC_FALSE@	$(LINK) $(incremental_comdat_test_1_OBJECTS) $(incremental_comdat_test_1_LDADD) $(LIBS)
+@NATIVE_LINKER_FALSE@incremental_comdat_test_1$(EXEEXT): $(incremental_comdat_test_1_OBJECTS) $(incremental_comdat_test_1_DEPENDENCIES) 
+@NATIVE_LINKER_FALSE@	@rm -f incremental_comdat_test_1$(EXEEXT)
+@NATIVE_LINKER_FALSE@	$(LINK) $(incremental_comdat_test_1_OBJECTS) $(incremental_comdat_test_1_LDADD) $(LIBS)
 @DEFAULT_TARGET_X86_64_FALSE@incremental_common_test_1$(EXEEXT): $(incremental_common_test_1_OBJECTS) $(incremental_common_test_1_DEPENDENCIES) 
 @DEFAULT_TARGET_X86_64_FALSE@	@rm -f incremental_common_test_1$(EXEEXT)
 @DEFAULT_TARGET_X86_64_FALSE@	$(LINK) $(incremental_common_test_1_OBJECTS) $(incremental_common_test_1_LDADD) $(LIBS)
@@ -3220,6 +3238,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifuncmain7picstatic.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifuncmain7pie.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifuncvar3.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/incremental_comdat_test_1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/incremental_common_test_1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/incremental_copy_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/incremental_test_2.Po@am__quote@
@@ -3934,6 +3953,8 @@ incremental_copy_test.log: incremental_copy_test$(EXEEXT)
 	@p='incremental_copy_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 incremental_common_test_1.log: incremental_common_test_1$(EXEEXT)
 	@p='incremental_common_test_1$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+incremental_comdat_test_1.log: incremental_comdat_test_1$(EXEEXT)
+	@p='incremental_comdat_test_1$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 .test.log:
 	@p='$<'; $(am__check_pre) $(TEST_LOG_COMPILE) "$$tst" $(am__check_post)
 @am__EXEEXT_TRUE@.test$(EXEEXT).log:
@@ -4984,6 +5005,15 @@ uninstall-am:
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	@sleep 1
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	cp -f common_test_1_v2.o common_test_1_tmp.o
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Wl,--incremental-update -Bgcctestdir/ common_test_1_tmp.o
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@incremental_comdat_test_1: incr_comdat_test_1.o incr_comdat_test_2_v1.o incr_comdat_test_2_v2.o incr_comdat_test_2_v3.o gcctestdir/ld
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	cp -f incr_comdat_test_2_v1.o incr_comdat_test_1_tmp.o
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Wl,--incremental-full,--incremental-patch=100 -Bgcctestdir/ incr_comdat_test_1.o incr_comdat_test_1_tmp.o
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	@sleep 1
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	cp -f incr_comdat_test_2_v2.o incr_comdat_test_1_tmp.o
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Wl,--incremental-update -Bgcctestdir/ incr_comdat_test_1.o incr_comdat_test_1_tmp.o
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	@sleep 1
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	cp -f incr_comdat_test_2_v3.o incr_comdat_test_1_tmp.o
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Wl,--incremental-update -Bgcctestdir/ incr_comdat_test_1.o incr_comdat_test_1_tmp.o
 @NATIVE_OR_CROSS_LINKER_TRUE@script_test_10.o: script_test_10.s
 @NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -o $@ $<
 @NATIVE_OR_CROSS_LINKER_TRUE@script_test_10: $(srcdir)/script_test_10.t script_test_10.o gcctestdir/ld

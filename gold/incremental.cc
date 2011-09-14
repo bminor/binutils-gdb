@@ -2008,7 +2008,9 @@ Sized_relobj_incr<size, big_endian>::do_layout(
         this->error(_("COMDAT group has no signature"));
       bool keep = layout->find_or_add_kept_section(signature, this, i, true,
 						   true, NULL);
-      if (!keep)
+      if (keep)
+	incremental_inputs->report_comdat_group(this, signature);
+      else
         this->error(_("COMDAT group %s included twice in incremental link"),
 		    signature);
     }
