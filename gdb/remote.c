@@ -4898,6 +4898,10 @@ struct stop_reply
 
   struct target_waitstatus ws;
 
+  /* Expedited registers.  This makes remote debugging a bit more
+     efficient for those targets that provide critical registers as
+     part of their normal status mechanism (as another roundtrip to
+     fetch them is avoided).  */
   VEC(cached_reg_t) *regcache;
 
   int stopped_by_watchpoint_p;

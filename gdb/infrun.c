@@ -2580,14 +2580,6 @@ prepare_for_detach (void)
 
       overlay_cache_invalid = 1;
 
-      /* We have to invalidate the registers BEFORE calling
-	 target_wait because they can be loaded from the target while
-	 in target_wait.  This makes remote debugging a bit more
-	 efficient for those targets that provide critical registers
-	 as part of their normal status mechanism.  */
-
-      registers_changed ();
-
       if (deprecated_target_wait_hook)
 	ecs->ptid = deprecated_target_wait_hook (pid_ptid, &ecs->ws, 0);
       else
@@ -2657,14 +2649,7 @@ wait_for_inferior (void)
     {
       struct cleanup *old_chain;
 
-      /* We have to invalidate the registers BEFORE calling target_wait
-	 because they can be loaded from the target while in target_wait.
-	 This makes remote debugging a bit more efficient for those
-	 targets that provide critical registers as part of their normal
-	 status mechanism.  */
-
       overlay_cache_invalid = 1;
-      registers_changed ();
 
       if (deprecated_target_wait_hook)
 	ecs->ptid = deprecated_target_wait_hook (waiton_ptid, &ecs->ws, 0);
@@ -2734,25 +2719,7 @@ fetch_inferior_event (void *client_data)
        running any breakpoint commands.  */
     make_cleanup_restore_current_thread ();
 
-  /* We have to invalidate the registers BEFORE calling target_wait
-     because they can be loaded from the target while in target_wait.
-     This makes remote debugging a bit more efficient for those
-     targets that provide critical registers as part of their normal
-     status mechanism.  */
-
   overlay_cache_invalid = 1;
-
-  /* But don't do it if the current thread is already stopped (hence
-     this is either a delayed event that will result in
-     TARGET_WAITKIND_IGNORE, or it's an event for another thread (and
-     we always clear the register and frame caches when the user
-     switches threads anyway).  If we didn't do this, a spurious
-     delayed event in all-stop mode would make the user lose the
-     selected frame.  */
-  if (non_stop
-      || (!ptid_equal (inferior_ptid, null_ptid)
-	  && is_executing (inferior_ptid)))
-    registers_changed ();
 
   make_cleanup_restore_integer (&execution_direction);
   execution_direction = target_execution_direction ();
