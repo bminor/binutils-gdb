@@ -1664,6 +1664,7 @@ ifuncmain1pie.o: ifuncmain1.c
 	$(COMPILE) -c -fpie -o $@ $<
 
 if HAVE_STATIC
+if IFUNC_STATIC
 check_PROGRAMS += ifuncmain1static
 ifuncmain1static_SOURCES = ifuncmain1.c
 ifuncmain1static_DEPENDENCIES = gcctestdir/ld ifuncdep1.o
@@ -1673,6 +1674,7 @@ ifuncmain1static_LDADD = ifuncdep1.o
 check_PROGRAMS += ifuncmain1picstatic
 ifuncmain1picstatic: ifuncmain1pic.o ifuncmod1.o gcctestdir/ld
 	$(LINK) -Bgcctestdir/ -static ifuncmain1pic.o ifuncmod1.o
+endif
 endif
 
 check_PROGRAMS += ifuncmain1
@@ -1722,6 +1724,7 @@ ifuncdep2pic.o: ifuncdep2.c
 	$(COMPILE) -c -fpic -o $@ $<
 
 if HAVE_STATIC
+if IFUNC_STATIC
 check_PROGRAMS += ifuncmain2static
 ifuncmain2static_SOURCES = ifuncmain2.c ifuncdep2.c
 ifuncmain2static_DEPENDENCIES = gcctestdir/ld
@@ -1731,6 +1734,7 @@ ifuncmain2static_LDADD =
 check_PROGRAMS += ifuncmain2picstatic
 ifuncmain2picstatic: ifuncmain2pic.o ifuncdep2pic.o gcctestdir/ld
 	$(LINK) -Bgcctestdir/ -static ifuncmain2pic.o ifuncdep2pic.o
+endif
 endif
 
 check_PROGRAMS += ifuncmain2
@@ -1758,6 +1762,7 @@ ifuncmain4pic.o: ifuncmain4.c
 	$(COMPILE) -c -fpic -o $@ $<
 
 if HAVE_STATIC
+if IFUNC_STATIC
 check_PROGRAMS += ifuncmain4static
 ifuncmain4static_SOURCES = ifuncmain4.c
 ifuncmain4static_DEPENDENCIES = gcctestdir/ld
@@ -1767,6 +1772,7 @@ ifuncmain4static_LDADD =
 check_PROGRAMS += ifuncmain4picstatic
 ifuncmain4picstatic: ifuncmain4pic.o gcctestdir/ld
 	$(LINK) -Bgcctestdir/ -static ifuncmain4pic.o
+endif
 endif
 
 check_PROGRAMS += ifuncmain4
@@ -1790,6 +1796,7 @@ ifuncdep5.o: ifuncmod5.c
 	$(COMPILE) -c -o $@ $<
 
 if HAVE_STATIC
+if IFUNC_STATIC
 check_PROGRAMS += ifuncmain5static
 ifuncmain5static_SOURCES = ifuncmain5.c
 ifuncmain5static_DEPENDENCIES = gcctestdir/ld ifuncdep5.o
@@ -1799,6 +1806,7 @@ ifuncmain5static_LDADD = ifuncdep5.o
 check_PROGRAMS += ifuncmain5picstatic
 ifuncmain5picstatic: ifuncmain5pic.o ifuncmod5.o gcctestdir/ld
 	$(LINK) -Bgcctestdir/ -static ifuncmain5pic.o ifuncmod5.o
+endif
 endif
 
 check_PROGRAMS += ifuncmain5
@@ -1838,6 +1846,7 @@ ifuncmain7pie.o: ifuncmain7.c
 	$(COMPILE) -c -fpie -o $@ $<
 
 if HAVE_STATIC
+if IFUNC_STATIC
 check_PROGRAMS += ifuncmain7static
 ifuncmain7static_SOURCES = ifuncmain7.c
 ifuncmain7static_DEPENDENCIES = gcctestdir/ld
@@ -1847,6 +1856,7 @@ ifuncmain7static_LDADD =
 check_PROGRAMS += ifuncmain7picstatic
 ifuncmain7picstatic: ifuncmain7pic.o gcctestdir/ld
 	$(LINK) -Bgcctestdir/ -static ifuncmain7pic.o
+endif
 endif
 
 check_PROGRAMS += ifuncmain7

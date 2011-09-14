@@ -1,5 +1,18 @@
 2011-09-13  Cary Coutant  <ccoutant@google.com>
 
+	* configure.ac: Check for glibc support for gnu_indirect_function
+	support with static linking, setting automake conditional
+	IFUNC_STATIC.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+
+	* testsuite/Makefile.am (ifuncmain1static, ifuncmain2static)
+	(ifuncmain4static, ifuncmain5static, ifuncmain7static): Add check
+	for IFUNC_STATIC.
+	* testsuite/Makefile.in: Regenerate.
+
+2011-09-13  Cary Coutant  <ccoutant@google.com>
+
 	* incremental.cc (Sized_relobj_incr::do_layout): Call
 	report_comdat_group for kept comdat sections.
 	* testsuite/Makefile.am (incremental_comdat_test_1): New test.
