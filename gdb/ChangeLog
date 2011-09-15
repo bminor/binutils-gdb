@@ -1,5 +1,11 @@
 2011-09-15  Paul Koning  <paul_koning@dell.com>
 
+	* python/py-cmd.c (gdbpy_string_to_argv): Decrement reference
+	count of item appended to list.
+	* python/py-type.c (typy_fields): Likewise.
+
+2011-09-15  Paul Koning  <paul_koning@dell.com>
+
 	* MAINTAINERS (Write After Approval): Add myself to the list.
 
 2011-09-15  Kevin Pouget  <kevin.pouget@st.com>

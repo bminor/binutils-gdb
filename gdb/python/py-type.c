@@ -246,6 +246,7 @@ typy_fields (PyObject *self, PyObject *args)
 	  Py_DECREF (result);
 	  return NULL;
 	}
+      Py_DECREF (dict);
     }
 
   return result;

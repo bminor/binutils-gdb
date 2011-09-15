@@ -683,14 +683,12 @@ gdbpy_string_to_argv (PyObject *self, PyObject *args)
 	  if (argp == NULL
 	      || PyList_Append (py_argv, argp) < 0)
 	    {
-	      if (argp != NULL)
-		{
-		  Py_DECREF (argp);
-		}
+	      Py_XDECREF (argp);
 	      Py_DECREF (py_argv);
 	      freeargv (c_argv);
 	      return NULL;
 	    }
+	  Py_DECREF (argp);
 	}
 
       freeargv (c_argv);
