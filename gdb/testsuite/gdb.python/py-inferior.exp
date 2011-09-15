@@ -206,8 +206,18 @@ gdb_test "python print inf_list\[0\].is_valid()" "True" \
          "Check inferior validity"
 gdb_test "python print inf_list\[1\].is_valid()" "True" \
          "Check inferior validity"
-gdb_test_no_output "remove-inferiors 2" "remove-inferiors 2"
+gdb_test_no_output "remove-inferiors 2" "remove-inferiors 3"
 gdb_test "python print inf_list\[0\].is_valid()" "False" \
          "Check inferior validity"
 gdb_test "python print inf_list\[1\].is_valid()" "True" \
          "Check inferior validity"
+
+# Test gdb.selected_inferior()
+gdb_test "inferior 1" ".*" "Switch to first inferior"
+gdb_test "py print gdb.selected_inferior().num" "1" "First inferior selected"
+
+gdb_test "add-inferior" "Added inferior 3" "Create new inferior"
+gdb_test "inferior 3" ".*" "Switch to third inferior"
+gdb_test "py print gdb.selected_inferior().num" "3" "Third inferior selected"
+gdb_test "inferior 1" ".*" "Switch to first inferior"
+gdb_test_no_output "remove-inferiors 3" "Remove second inferior"

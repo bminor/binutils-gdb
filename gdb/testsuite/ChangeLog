@@ -1,3 +1,8 @@
+2011-09-15  Kevin Pouget  <kevin.pouget@st.com>
+
+	PR Python/12692 Add gdb.selected_inferior() to Python interface.
+	* gdb.python/py-inferior.exp: Add testcase for gdb.selected_inferior().
+
 2011-04-30  Kevin Pouget  <kevin.pouget@st.com>
 
 	Handle multiple breakpoint hits in Python interface:

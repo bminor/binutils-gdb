@@ -22146,6 +22146,10 @@ module:
 Return a tuple containing all inferior objects.
 @end defun
 
+@defun selected_inferior
+Return an object representing the current inferior.
+@end defun
+
 A @code{gdb.Inferior} object has the following attributes:
 
 @table @code

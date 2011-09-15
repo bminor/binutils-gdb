@@ -1,5 +1,11 @@
 2011-09-15  Kevin Pouget  <kevin.pouget@st.com>
 
+	PR Python/12692 Add gdb.selected_inferior() to Python interface.
+	* gdb.texinfo (Inferiors In Python): Describe new
+	gdb.selected_inferior() function.
+
+2011-09-15  Kevin Pouget  <kevin.pouget@st.com>
+
 	Handle multiple breakpoint hits in Python interface:
 	* gdb.texinfo (Events In Python): New function documentation:
 	gdb.BreakpointEvent.breakpoints. Indicate that

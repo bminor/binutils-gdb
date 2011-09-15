@@ -1423,6 +1423,9 @@ Arguments are separate by spaces and may be quoted."
   { "selected_thread", gdbpy_selected_thread, METH_NOARGS,
     "selected_thread () -> gdb.InferiorThread.\n\
 Return the selected thread object." },
+  { "selected_inferior", gdbpy_selected_inferior, METH_NOARGS,
+    "selected_inferior () -> gdb.Inferior.\n\
+Return the selected inferior object." },
   { "inferiors", gdbpy_inferiors, METH_NOARGS,
     "inferiors () -> (gdb.Inferior, ...).\n\
 Return a tuple containing all inferiors." },
