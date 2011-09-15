@@ -28,7 +28,8 @@ extern void stop_evpy_dealloc (PyObject *self);
 extern int emit_stop_event (struct bpstats *bs,
                             enum target_signal stop_signal);
 
-extern PyObject *create_breakpoint_event_object (PyObject *breakpoint);
+extern PyObject *create_breakpoint_event_object (PyObject *breakpoint_list,
+                                                 PyObject *first_bp);
 
 extern PyObject *create_signal_event_object (enum target_signal stop_signal);
 

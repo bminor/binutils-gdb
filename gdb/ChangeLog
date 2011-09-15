@@ -1,5 +1,15 @@
 2011-09-15  Kevin Pouget  <kevin.pouget@st.com>
 
+	Handle multiple breakpoint hits in Python interface:
+	* python/py-bpevent.c (create_breakpoint_event_object): Rename C/Python
+	variable to breakpoints.
+	* python/py-stopevent.c (emit_stop_event): Return a Python tuple of
+	bps instead of single breakpoint. Fix some space typos.
+	* python/py-stopevent.c (create_breakpoint_event_object): Rename
+	variable to breakpoints.
+
+2011-09-15  Kevin Pouget  <kevin.pouget@st.com>
+
 	* breakpoint.c (describe_other_breakpoints): Do not write 'duplicate'
 	note if the breakpoint is internal.
 

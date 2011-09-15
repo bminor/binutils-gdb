@@ -38,6 +38,9 @@
 
   ** Symbols now provide the "type" attribute, the type of the symbol.
 
+  ** The "gdb.breakpoint" function has been deprecated in favor of
+     "gdb.breakpoints".
+
 * libthread-db-search-path now supports two special values: $sdir and $pdir.
   $sdir specifies the default system locations of shared libraries.
   $pdir specifies the directory where the libpthread used by the application

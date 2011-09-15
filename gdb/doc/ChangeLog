@@ -1,3 +1,10 @@
+2011-09-15  Kevin Pouget  <kevin.pouget@st.com>
+
+	Handle multiple breakpoint hits in Python interface:
+	* gdb.texinfo (Events In Python): New function documentation:
+	gdb.BreakpointEvent.breakpoints. Indicate that
+	gdb.BreakpointEvent.breakpoint is now deprecated.
+
 2011-09-04  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.texinfo: Set EDITION to "Tenth" and change ISBN.

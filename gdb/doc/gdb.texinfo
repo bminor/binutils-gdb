@@ -22317,14 +22317,19 @@ the @value{GDBN} command prompt.
 
 Also emits  @code{gdb.BreakpointEvent} which extends @code{gdb.StopEvent}.
 
-@code{gdb.BreakpointEvent} event indicates that a breakpoint has been hit, and
-has the following attributes:
+@code{gdb.BreakpointEvent} event indicates that one or more breakpoints have
+been hit, and has the following attributes:
 
 @table @code
-@defivar BreakpointEvent breakpoint
-A reference to the breakpoint that was hit of type @code{gdb.Breakpoint}.
+@defivar BreakpointEvent breakpoints
+A sequence containing references to all the breakpoints (type 
+@code{gdb.Breakpoint}) that were hit.
 @xref{Breakpoints In Python}, for details of the @code{gdb.Breakpoint} object.
 @end defivar
+@defivar BreakpointEvent breakpoint
+A reference to the first breakpoint that was hit.
+This function is maintained for backward compatibility and is now deprecated 
+in favor of the @code{gdb.BreakpointEvent.breakpoints} function.
 @end table
 
 @end table

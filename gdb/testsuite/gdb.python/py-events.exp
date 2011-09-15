@@ -40,12 +40,15 @@ if ![runto_main ] then {
 gdb_test "Test_Events" "Event testers registered."
 
 gdb_breakpoint "first"
+gdb_breakpoint "first"
 
 # Test continue event and breakpoint stop event
 gdb_test "continue" ".*event type: continue.*
 .*event type: stop.*
 .*stop reason: breakpoint.*
+.*first breakpoint number: 2.*
 .*breakpoint number: 2.*
+.*breakpoint number: 3.*
 all threads stopped"
 
 #test exited event.
