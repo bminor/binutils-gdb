@@ -5292,7 +5292,7 @@ breakpoint_has_pc (struct breakpoint *b,
   return 0;
 }
 
-/* Print a message describing any breakpoints set at PC.  This
+/* Print a message describing any user-breakpoints set at PC.  This
    concerns with logical breakpoints, so we match program spaces, not
    address spaces.  */
 
@@ -5305,7 +5305,8 @@ describe_other_breakpoints (struct gdbarch *gdbarch,
   struct breakpoint *b;
 
   ALL_BREAKPOINTS (b)
-    others += breakpoint_has_pc (b, pspace, pc, section);
+    others += (user_breakpoint_p (b)
+               && breakpoint_has_pc (b, pspace, pc, section));
   if (others > 0)
     {
       if (others == 1)
@@ -5313,7 +5314,7 @@ describe_other_breakpoints (struct gdbarch *gdbarch,
       else /* if (others == ???) */
 	printf_filtered (_("Note: breakpoints "));
       ALL_BREAKPOINTS (b)
-	if (breakpoint_has_pc (b, pspace, pc, section))
+	if (user_breakpoint_p (b) && breakpoint_has_pc (b, pspace, pc, section))
 	  {
 	    others--;
 	    printf_filtered ("%d", b->number);
