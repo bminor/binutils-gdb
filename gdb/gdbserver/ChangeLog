@@ -1,3 +1,31 @@
+2011-09-15  Stan Shebs  <stan@codesourcery.com>
+
+	* server.h (struct emit_ops): Add compare-goto fields.
+	* tracepoint.c (gdb_agent_op_sizes): New table.
+	(emit_eq_goto): New function.
+	(emit_ne_goto): New function.
+	(emit_lt_goto): New function.
+	(emit_le_goto): New function.
+	(emit_gt_goto): New function.
+	(emit_ge_goto): New function.
+	(is_goto_target): New function.
+	(compile_bytecodes): Recognize special cases of compare-goto
+	combinations and call specialized emitters for them.
+	* linux-x86-low.c (amd64_emit_eq_goto): New function.
+	(amd64_emit_ne_goto): New function.
+	(amd64_emit_lt_goto): New function.
+	(amd64_emit_le_goto): New function.
+	(amd64_emit_gt_goto): New function.
+	(amd64_emit_ge_goto): New function.
+	(amd64_emit_ops): Add the new functions.
+	(i386_emit_eq_goto): New function.
+	(i386_emit_ne_goto): New function.
+	(i386_emit_lt_goto): New function.
+	(i386_emit_le_goto): New function.
+	(i386_emit_gt_goto): New function.
+	(i386_emit_ge_goto): New function.
+	(i386_emit_ops): Add the new functions.
+
 2011-09-08  Stan Shebs  <stan@codesourcery.com>
 
 	* linux-x86-low.c (i386_emit_prologue): Save %ebx.

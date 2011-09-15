@@ -1993,6 +1993,127 @@ amd64_emit_void_call_2 (CORE_ADDR fn, int arg1)
 	    "pop %rax");
 }
 
+void
+amd64_emit_eq_goto (int *offset_p, int *size_p)
+{
+  EMIT_ASM (amd64_eq,
+	    "cmp %rax,(%rsp)\n\t"
+	    "jne .Lamd64_eq_fallthru\n\t"
+	    "lea 0x8(%rsp),%rsp\n\t"
+	    "pop %rax\n\t"
+	    /* jmp, but don't trust the assembler to choose the right jump */
+	    ".byte 0xe9, 0x0, 0x0, 0x0, 0x0\n\t"
+	    ".Lamd64_eq_fallthru:\n\t"
+	    "lea 0x8(%rsp),%rsp\n\t"
+	    "pop %rax");
+
+  if (offset_p)
+    *offset_p = 13;
+  if (size_p)
+    *size_p = 4;
+}
+
+void
+amd64_emit_ne_goto (int *offset_p, int *size_p)
+{
+  EMIT_ASM (amd64_ne,
+	    "cmp %rax,(%rsp)\n\t"
+	    "je .Lamd64_ne_fallthru\n\t"
+	    "lea 0x8(%rsp),%rsp\n\t"
+	    "pop %rax\n\t"
+	    /* jmp, but don't trust the assembler to choose the right jump */
+	    ".byte 0xe9, 0x0, 0x0, 0x0, 0x0\n\t"
+	    ".Lamd64_ne_fallthru:\n\t"
+	    "lea 0x8(%rsp),%rsp\n\t"
+	    "pop %rax");
+
+  if (offset_p)
+    *offset_p = 13;
+  if (size_p)
+    *size_p = 4;
+}
+
+void
+amd64_emit_lt_goto (int *offset_p, int *size_p)
+{
+  EMIT_ASM (amd64_lt,
+	    "cmp %rax,(%rsp)\n\t"
+	    "jnl .Lamd64_lt_fallthru\n\t"
+	    "lea 0x8(%rsp),%rsp\n\t"
+	    "pop %rax\n\t"
+	    /* jmp, but don't trust the assembler to choose the right jump */
+	    ".byte 0xe9, 0x0, 0x0, 0x0, 0x0\n\t"
+	    ".Lamd64_lt_fallthru:\n\t"
+	    "lea 0x8(%rsp),%rsp\n\t"
+	    "pop %rax");
+
+  if (offset_p)
+    *offset_p = 13;
+  if (size_p)
+    *size_p = 4;
+}
+
+void
+amd64_emit_le_goto (int *offset_p, int *size_p)
+{
+  EMIT_ASM (amd64_le,
+	    "cmp %rax,(%rsp)\n\t"
+	    "jnle .Lamd64_le_fallthru\n\t"
+	    "lea 0x8(%rsp),%rsp\n\t"
+	    "pop %rax\n\t"
+	    /* jmp, but don't trust the assembler to choose the right jump */
+	    ".byte 0xe9, 0x0, 0x0, 0x0, 0x0\n\t"
+	    ".Lamd64_le_fallthru:\n\t"
+	    "lea 0x8(%rsp),%rsp\n\t"
+	    "pop %rax");
+
+  if (offset_p)
+    *offset_p = 13;
+  if (size_p)
+    *size_p = 4;
+}
+
+void
+amd64_emit_gt_goto (int *offset_p, int *size_p)
+{
+  EMIT_ASM (amd64_gt,
+	    "cmp %rax,(%rsp)\n\t"
+	    "jng .Lamd64_gt_fallthru\n\t"
+	    "lea 0x8(%rsp),%rsp\n\t"
+	    "pop %rax\n\t"
+	    /* jmp, but don't trust the assembler to choose the right jump */
+	    ".byte 0xe9, 0x0, 0x0, 0x0, 0x0\n\t"
+	    ".Lamd64_gt_fallthru:\n\t"
+	    "lea 0x8(%rsp),%rsp\n\t"
+	    "pop %rax");
+
+  if (offset_p)
+    *offset_p = 13;
+  if (size_p)
+    *size_p = 4;
+}
+
+void
+amd64_emit_ge_goto (int *offset_p, int *size_p)
+{
+  EMIT_ASM (amd64_ge,
+	    "cmp %rax,(%rsp)\n\t"
+	    "jnge .Lamd64_ge_fallthru\n\t"
+	    ".Lamd64_ge_jump:\n\t"
+	    "lea 0x8(%rsp),%rsp\n\t"
+	    "pop %rax\n\t"
+	    /* jmp, but don't trust the assembler to choose the right jump */
+	    ".byte 0xe9, 0x0, 0x0, 0x0, 0x0\n\t"
+	    ".Lamd64_ge_fallthru:\n\t"
+	    "lea 0x8(%rsp),%rsp\n\t"
+	    "pop %rax");
+
+  if (offset_p)
+    *offset_p = 13;
+  if (size_p)
+    *size_p = 4;
+}
+
 struct emit_ops amd64_emit_ops =
   {
     amd64_emit_prologue,
@@ -2025,7 +2146,13 @@ struct emit_ops amd64_emit_ops =
     amd64_emit_swap,
     amd64_emit_stack_adjust,
     amd64_emit_int_call_1,
-    amd64_emit_void_call_2
+    amd64_emit_void_call_2,
+    amd64_emit_eq_goto,
+    amd64_emit_ne_goto,
+    amd64_emit_lt_goto,
+    amd64_emit_le_goto,
+    amd64_emit_gt_goto,
+    amd64_emit_ge_goto
   };
 
 #endif /* __x86_64__ */
@@ -2500,6 +2627,162 @@ i386_emit_void_call_2 (CORE_ADDR fn, int arg1)
 	    "pop %eax");
 }
 
+
+void
+i386_emit_eq_goto (int *offset_p, int *size_p)
+{
+  EMIT_ASM32 (eq,
+	      /* Check low half first, more likely to be decider  */
+	      "cmpl %eax,(%esp)\n\t"
+	      "jne .Leq_fallthru\n\t"
+	      "cmpl %ebx,4(%esp)\n\t"
+	      "jne .Leq_fallthru\n\t"
+	      "lea 0x8(%esp),%esp\n\t"
+	      "pop %eax\n\t"
+	      "pop %ebx\n\t"
+	      /* jmp, but don't trust the assembler to choose the right jump */
+	      ".byte 0xe9, 0x0, 0x0, 0x0, 0x0\n\t"
+	      ".Leq_fallthru:\n\t"
+	      "lea 0x8(%esp),%esp\n\t"
+	      "pop %eax\n\t"
+	      "pop %ebx");
+
+  if (offset_p)
+    *offset_p = 18;
+  if (size_p)
+    *size_p = 4;
+}
+
+void
+i386_emit_ne_goto (int *offset_p, int *size_p)
+{
+  EMIT_ASM32 (ne,
+	      /* Check low half first, more likely to be decider  */
+	      "cmpl %eax,(%esp)\n\t"
+	      "jne .Lne_jump\n\t"
+	      "cmpl %ebx,4(%esp)\n\t"
+	      "je .Lne_fallthru\n\t"
+	      ".Lne_jump:\n\t"
+	      "lea 0x8(%esp),%esp\n\t"
+	      "pop %eax\n\t"
+	      "pop %ebx\n\t"
+	      /* jmp, but don't trust the assembler to choose the right jump */
+	      ".byte 0xe9, 0x0, 0x0, 0x0, 0x0\n\t"
+	      ".Lne_fallthru:\n\t"
+	      "lea 0x8(%esp),%esp\n\t"
+	      "pop %eax\n\t"
+	      "pop %ebx");
+
+  if (offset_p)
+    *offset_p = 18;
+  if (size_p)
+    *size_p = 4;
+}
+
+void
+i386_emit_lt_goto (int *offset_p, int *size_p)
+{
+  EMIT_ASM32 (lt,
+	      "cmpl %ebx,4(%esp)\n\t"
+	      "jl .Llt_jump\n\t"
+	      "jne .Llt_fallthru\n\t"
+	      "cmpl %eax,(%esp)\n\t"
+	      "jnl .Llt_fallthru\n\t"
+	      ".Llt_jump:\n\t"
+	      "lea 0x8(%esp),%esp\n\t"
+	      "pop %eax\n\t"
+	      "pop %ebx\n\t"
+	      /* jmp, but don't trust the assembler to choose the right jump */
+	      ".byte 0xe9, 0x0, 0x0, 0x0, 0x0\n\t"
+	      ".Llt_fallthru:\n\t"
+	      "lea 0x8(%esp),%esp\n\t"
+	      "pop %eax\n\t"
+	      "pop %ebx");
+
+  if (offset_p)
+    *offset_p = 20;
+  if (size_p)
+    *size_p = 4;
+}
+
+void
+i386_emit_le_goto (int *offset_p, int *size_p)
+{
+  EMIT_ASM32 (le,
+	      "cmpl %ebx,4(%esp)\n\t"
+	      "jle .Lle_jump\n\t"
+	      "jne .Lle_fallthru\n\t"
+	      "cmpl %eax,(%esp)\n\t"
+	      "jnle .Lle_fallthru\n\t"
+	      ".Lle_jump:\n\t"
+	      "lea 0x8(%esp),%esp\n\t"
+	      "pop %eax\n\t"
+	      "pop %ebx\n\t"
+	      /* jmp, but don't trust the assembler to choose the right jump */
+	      ".byte 0xe9, 0x0, 0x0, 0x0, 0x0\n\t"
+	      ".Lle_fallthru:\n\t"
+	      "lea 0x8(%esp),%esp\n\t"
+	      "pop %eax\n\t"
+	      "pop %ebx");
+
+  if (offset_p)
+    *offset_p = 20;
+  if (size_p)
+    *size_p = 4;
+}
+
+void
+i386_emit_gt_goto (int *offset_p, int *size_p)
+{
+  EMIT_ASM32 (gt,
+	      "cmpl %ebx,4(%esp)\n\t"
+	      "jg .Lgt_jump\n\t"
+	      "jne .Lgt_fallthru\n\t"
+	      "cmpl %eax,(%esp)\n\t"
+	      "jng .Lgt_fallthru\n\t"
+	      ".Lgt_jump:\n\t"
+	      "lea 0x8(%esp),%esp\n\t"
+	      "pop %eax\n\t"
+	      "pop %ebx\n\t"
+	      /* jmp, but don't trust the assembler to choose the right jump */
+	      ".byte 0xe9, 0x0, 0x0, 0x0, 0x0\n\t"
+	      ".Lgt_fallthru:\n\t"
+	      "lea 0x8(%esp),%esp\n\t"
+	      "pop %eax\n\t"
+	      "pop %ebx");
+
+  if (offset_p)
+    *offset_p = 20;
+  if (size_p)
+    *size_p = 4;
+}
+
+void
+i386_emit_ge_goto (int *offset_p, int *size_p)
+{
+  EMIT_ASM32 (ge,
+	      "cmpl %ebx,4(%esp)\n\t"
+	      "jge .Lge_jump\n\t"
+	      "jne .Lge_fallthru\n\t"
+	      "cmpl %eax,(%esp)\n\t"
+	      "jnge .Lge_fallthru\n\t"
+	      ".Lge_jump:\n\t"
+	      "lea 0x8(%esp),%esp\n\t"
+	      "pop %eax\n\t"
+	      "pop %ebx\n\t"
+	      /* jmp, but don't trust the assembler to choose the right jump */
+	      ".byte 0xe9, 0x0, 0x0, 0x0, 0x0\n\t"
+	      ".Lge_fallthru:\n\t"
+	      "lea 0x8(%esp),%esp\n\t"
+	      "pop %eax\n\t"
+	      "pop %ebx");
+
+  if (offset_p)
+    *offset_p = 20;
+  if (size_p)
+    *size_p = 4;
+}
+
 struct emit_ops i386_emit_ops =
   {
     i386_emit_prologue,
@@ -2532,7 +2815,13 @@ struct emit_ops i386_emit_ops =
     i386_emit_swap,
     i386_emit_stack_adjust,
     i386_emit_int_call_1,
-    i386_emit_void_call_2
+    i386_emit_void_call_2,
+    i386_emit_eq_goto,
+    i386_emit_ne_goto,
+    i386_emit_lt_goto,
+    i386_emit_le_goto,
+    i386_emit_gt_goto,
+    i386_emit_ge_goto
   };
 
 

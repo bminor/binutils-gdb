@@ -483,6 +483,14 @@ static const char *gdb_agent_op_names [gdb_agent_op_last] =
 #undef DEFOP
   };
 
+static const unsigned char gdb_agent_op_sizes [gdb_agent_op_last] =
+  {
+    0
+#define DEFOP(NAME, SIZE, DATA_SIZE, CONSUMED, PRODUCED, VALUE)  , SIZE
+#include "ax.def"
+#undef DEFOP
+  };
+
 struct agent_expr
 {
   int length;
@@ -5663,6 +5671,42 @@ emit_void_call_2 (CORE_ADDR fn, int arg1)
   target_emit_ops ()->emit_void_call_2 (fn, arg1);
 }
 
+static void
+emit_eq_goto (int *offset_p, int *size_p)
+{
+  target_emit_ops ()->emit_eq_goto (offset_p, size_p);
+}
+
+static void
+emit_ne_goto (int *offset_p, int *size_p)
+{
+  target_emit_ops ()->emit_ne_goto (offset_p, size_p);
+}
+
+static void
+emit_lt_goto (int *offset_p, int *size_p)
+{
+  target_emit_ops ()->emit_lt_goto (offset_p, size_p);
+}
+
+static void
+emit_ge_goto (int *offset_p, int *size_p)
+{
+  target_emit_ops ()->emit_ge_goto (offset_p, size_p);
+}
+
+static void
+emit_gt_goto (int *offset_p, int *size_p)
+{
+  target_emit_ops ()->emit_gt_goto (offset_p, size_p);
+}
+
+static void
+emit_le_goto (int *offset_p, int *size_p)
+{
+  target_emit_ops ()->emit_le_goto (offset_p, size_p);
+}
+
 static enum eval_result_type compile_bytecodes (struct agent_expr *aexpr);
 
 static void
@@ -5712,6 +5756,30 @@ compile_tracepoint_condition (struct tracepoint *tpoint,
   *jump_entry += 16;
 }
 
+/* Scan an agent expression for any evidence that the given PC is the
+   target of a jump bytecode in the expression.  */
+
+int
+is_goto_target (struct agent_expr *aexpr, int pc)
+{
+  int i;
+  unsigned char op;
+
+  for (i = 0; i < aexpr->length; i += 1 + gdb_agent_op_sizes[op])
+    {
+      op = aexpr->bytes[i];
+
+      if (op == gdb_agent_op_goto || op == gdb_agent_op_if_goto)
+	{
+	  int target = (aexpr->bytes[i + 1] << 8) + aexpr->bytes[i + 2];
+	  if (target == pc)
+	    return 1;
+	}
+    }
+
+  return 0;
+}
+
 /* Given an agent expression, turn it into native code.  */
 
 static enum eval_result_type
@@ -5719,7 +5787,7 @@ compile_bytecodes (struct agent_expr *aexpr)
 {
   int pc = 0;
   int done = 0;
-  unsigned char op;
+  unsigned char op, next_op;
   int arg;
   /* This is only used to build 64-bit value for constants.  */
   ULONGEST top;
@@ -5831,11 +5899,64 @@ compile_bytecodes (struct agent_expr *aexpr)
 	  break;
 
 	case gdb_agent_op_equal:
-	  emit_equal ();
+	  next_op = aexpr->bytes[pc];
+	  if (next_op == gdb_agent_op_if_goto
+	      && !is_goto_target (aexpr, pc)
+	      && target_emit_ops ()->emit_eq_goto)
+	    {
+	      trace_debug ("Combining equal & if_goto");
+	      pc += 1;
+	      aentry->pc = pc;
+	      arg = aexpr->bytes[pc++];
+	      arg = (arg << 8) + aexpr->bytes[pc++];
+	      aentry->goto_pc = arg;
+	      emit_eq_goto (&(aentry->from_offset), &(aentry->from_size));
+	    }
+	  else if (next_op == gdb_agent_op_log_not
+		   && (aexpr->bytes[pc + 1] == gdb_agent_op_if_goto)
+		   && !is_goto_target (aexpr, pc + 1)
+		   && target_emit_ops ()->emit_ne_goto)
+	    {
+	      trace_debug ("Combining equal & log_not & if_goto");
+	      pc += 2;
+	      aentry->pc = pc;
+	      arg = aexpr->bytes[pc++];
+	      arg = (arg << 8) + aexpr->bytes[pc++];
+	      aentry->goto_pc = arg;
+	      emit_ne_goto (&(aentry->from_offset), &(aentry->from_size));
+	    }
+	  else
+	    emit_equal ();
 	  break;
 
 	case gdb_agent_op_less_signed:
-	  emit_less_signed ();
+	  next_op = aexpr->bytes[pc];
+	  if (next_op == gdb_agent_op_if_goto
+	      && !is_goto_target (aexpr, pc))
+	    {
+	      trace_debug ("Combining less_signed & if_goto");
+	      pc += 1;
+	      aentry->pc = pc;
+	      arg = aexpr->bytes[pc++];
+	      arg = (arg << 8) + aexpr->bytes[pc++];
+	      aentry->goto_pc = arg;
+	      emit_lt_goto (&(aentry->from_offset), &(aentry->from_size));
+	    }
+	  else if (next_op == gdb_agent_op_log_not
+		   && !is_goto_target (aexpr, pc)
+		   && (aexpr->bytes[pc + 1] == gdb_agent_op_if_goto)
+		   && !is_goto_target (aexpr, pc + 1))
+	    {
+	      trace_debug ("Combining less_signed & log_not & if_goto");
+	      pc += 2;
+	      aentry->pc = pc;
+	      arg = aexpr->bytes[pc++];
+	      arg = (arg << 8) + aexpr->bytes[pc++];
+	      aentry->goto_pc = arg;
+	      emit_ge_goto (&(aentry->from_offset), &(aentry->from_size));
+	    }
+	  else
+	    emit_less_signed ();
 	  break;
 
 	case gdb_agent_op_less_unsigned:
@@ -5946,7 +6067,38 @@ compile_bytecodes (struct agent_expr *aexpr)
 	  break;
 
 	case gdb_agent_op_swap:
-	  emit_swap ();
+	  next_op = aexpr->bytes[pc];
+	  /* Detect greater-than comparison sequences.  */
+	  if (next_op == gdb_agent_op_less_signed
+	      && !is_goto_target (aexpr, pc)
+	      && (aexpr->bytes[pc + 1] == gdb_agent_op_if_goto)
+	      && !is_goto_target (aexpr, pc + 1))
+	    {
+	      trace_debug ("Combining swap & less_signed & if_goto");
+	      pc += 2;
+	      aentry->pc = pc;
+	      arg = aexpr->bytes[pc++];
+	      arg = (arg << 8) + aexpr->bytes[pc++];
+	      aentry->goto_pc = arg;
+	      emit_gt_goto (&(aentry->from_offset), &(aentry->from_size));
+	    }
+	  else if (next_op == gdb_agent_op_less_signed
+		   && !is_goto_target (aexpr, pc)
+		   && (aexpr->bytes[pc + 1] == gdb_agent_op_log_not)
+		   && !is_goto_target (aexpr, pc + 1)
+		   && (aexpr->bytes[pc + 2] == gdb_agent_op_if_goto)
+		   && !is_goto_target (aexpr, pc + 2))
+	    {
+	      trace_debug ("Combining swap & less_signed & log_not & if_goto");
+	      pc += 3;
+	      aentry->pc = pc;
+	      arg = aexpr->bytes[pc++];
+	      arg = (arg << 8) + aexpr->bytes[pc++];
+	      aentry->goto_pc = arg;
+	      emit_le_goto (&(aentry->from_offset), &(aentry->from_size));
+	    }
+	  else
+	    emit_swap ();
 	  break;
 
 	case gdb_agent_op_getv:
