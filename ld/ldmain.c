@@ -808,12 +808,12 @@ add_archive_element (struct bfd_link_info *info,
      BFD, but we still want to output the original BFD filename.  */
   orig_input = *input;
 #ifdef ENABLE_PLUGINS
-  if (bfd_my_archive (abfd) != NULL
-      && plugin_active_plugins_p ()
-      && !no_more_claiming)
+  if (plugin_active_plugins_p () && !no_more_claiming)
     {
       /* We must offer this archive member to the plugins to claim.  */
-      int fd = open (bfd_my_archive (abfd)->filename, O_RDONLY | O_BINARY);
+      const char *filename = (bfd_my_archive (abfd) != NULL
+			      ? bfd_my_archive (abfd)->filename : abfd->filename);
+      int fd = open (filename, O_RDONLY | O_BINARY);
       if (fd >= 0)
 	{
 	  struct ld_plugin_input_file file;
@@ -822,7 +822,7 @@ add_archive_element (struct bfd_link_info *info,
 	     member, not the whole file, and must exclude the header.
 	     Fortunately for us, that is how the data is stored in the
 	     origin field of the bfd and in the arelt_data.  */
-	  file.name = bfd_my_archive (abfd)->filename;
+	  file.name = filename;
 	  file.offset = abfd->origin;
 	  file.filesize = arelt_size (abfd);
 	  file.fd = fd;

@@ -1,3 +1,9 @@
+2011-09-15  Dmitry Gorbachev  <d.g.gorbachev@gmail.com>
+
+	PR ld/13183
+	* ldmain.c (add_archive_element): Support thin archive member
+	for LTO.
+
 2011-08-26  Nick Clifton  <nickc@redhat.com>
 
 	* po/es.po: Updated Spanish translation.
