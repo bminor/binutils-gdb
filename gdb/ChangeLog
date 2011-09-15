@@ -1,3 +1,11 @@
+2011-09-15  Kevin Pouget  <kevin.pouget@st.com>
+
+	PR threads/12628
+	* linux-fork.c (checkpoint_command): Disallow checkpointing of
+	processes with multiple threads.
+	(inf_has_multiple_thread_cb): New function.
+	(inf_has_multiple_threads): New function.
+
 2011-09-15  Kevin Pouget <kevin.pouget@st.com>
 
 	PR Python/12692 Add gdb.selected_inferior() to Python interface.
