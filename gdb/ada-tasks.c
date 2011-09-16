@@ -24,6 +24,8 @@
 #include "gdbcore.h"
 #include "inferior.h"
 #include "gdbthread.h"
+#include "progspace.h"
+#include "objfiles.h"
 
 /* The name of the array in the GNAT runtime where the Ada Task Control
    Block of each task is stored.  */
@@ -131,18 +133,33 @@ struct atcb_fieldnos
   int call_self;
 };
 
-/* The type description for the ATCB record and subrecords, and
-   the associated atcb_fieldnos.  For efficiency reasons, these are made
-   static globals so that we can compute them only once the first time
-   and reuse them later.  Set to NULL if the types haven't been computed
-   yet, or if they may be obsolete (for instance after having loaded
-   a new binary).  */
+/* This module's per-program-space data.  */
 
-static struct type *atcb_type = NULL;
-static struct type *atcb_common_type = NULL;
-static struct type *atcb_ll_type = NULL;
-static struct type *atcb_call_type = NULL;
-static struct atcb_fieldnos atcb_fieldno;
+struct ada_tasks_pspace_data
+{
+  /* Nonzero if the data has been initialized.  If set to zero,
+     it means that the data has either not been initialized, or
+     has potentially become stale.  */
+  int initialized_p;
+
+  /* The ATCB record type.  */
+  struct type *atcb_type;
+
+  /* The ATCB "Common" component type.  */
+  struct type *atcb_common_type;
+
+  /* The type of the "ll" field, from the atcb_common_type.  */
+  struct type *atcb_ll_type;
+
+  /* The type of the "call" field, from the atcb_common_type.  */
+  struct type *atcb_call_type;
+
+  /* The index of various fields in the ATCB record and sub-records.  */
+  struct atcb_fieldnos atcb_fieldno;
+};
+
+/* Key to our per-program-space data.  */
+static const struct program_space_data *ada_tasks_pspace_data_handle;
 
 /* Set to 1 when the cached address of System.Tasking.Debug.Known_Tasks
    might be stale and so needs to be recomputed.  */
@@ -162,6 +179,26 @@ static VEC(ada_task_info_s) *task_list = NULL;
 /* When non-zero, this flag indicates that the current task_list
    is obsolete, and should be recomputed before it is accessed.  */
 static int stale_task_list_p = 1;
+
+/* Return the ada-tasks module's data for the given program space (PSPACE).
+   If none is found, add a zero'ed one now.
+
+   This function always returns a valid object.  */
+
+static struct ada_tasks_pspace_data *
+get_ada_tasks_pspace_data (struct program_space *pspace)
+{
+  struct ada_tasks_pspace_data *data;
+
+  data = program_space_data (pspace, ada_tasks_pspace_data_handle);
+  if (data == NULL)
+    {
+      data = XZALLOC (struct ada_tasks_pspace_data);
+      set_program_space_data (pspace, ada_tasks_pspace_data_handle, data);
+    }
+
+  return data;
+}
 
 /* Return the task number of the task whose ptid is PTID, or zero
    if the task could not be found.  */
@@ -323,6 +360,7 @@ get_tcb_types_info (void)
   struct type *ll_type;
   struct type *call_type;
   struct atcb_fieldnos fieldnos;
+  struct ada_tasks_pspace_data *pspace_data;
 
   const char *atcb_name = "system__tasking__ada_task_control_block___XVE";
   const char *atcb_name_fixed = "system__tasking__ada_task_control_block";
@@ -412,11 +450,13 @@ get_tcb_types_info (void)
 
   /* Set all the out parameters all at once, now that we are certain
      that there are no potential error() anymore.  */
-  atcb_type = type;
-  atcb_common_type = common_type;
-  atcb_ll_type = ll_type;
-  atcb_call_type = call_type;
-  atcb_fieldno = fieldnos;
+  pspace_data = get_ada_tasks_pspace_data (current_program_space);
+  pspace_data->initialized_p = 1;
+  pspace_data->atcb_type = type;
+  pspace_data->atcb_common_type = common_type;
+  pspace_data->atcb_ll_type = ll_type;
+  pspace_data->atcb_call_type = call_type;
+  pspace_data->atcb_fieldno = fieldnos;
 }
 
 /* Build the PTID of the task from its COMMON_VALUE, which is the "Common"
@@ -430,12 +470,16 @@ ptid_from_atcb_common (struct value *common_value)
   CORE_ADDR lwp = 0;
   struct value *ll_value;
   ptid_t ptid;
+  const struct ada_tasks_pspace_data *pspace_data
+    = get_ada_tasks_pspace_data (current_program_space);
 
-  ll_value = value_field (common_value, atcb_fieldno.ll);
+  ll_value = value_field (common_value, pspace_data->atcb_fieldno.ll);
 
-  if (atcb_fieldno.ll_lwp >= 0)
-    lwp = value_as_address (value_field (ll_value, atcb_fieldno.ll_lwp));
-  thread = value_as_long (value_field (ll_value, atcb_fieldno.ll_thread));
+  if (pspace_data->atcb_fieldno.ll_lwp >= 0)
+    lwp = value_as_address (value_field (ll_value,
+					 pspace_data->atcb_fieldno.ll_lwp));
+  thread = value_as_long (value_field (ll_value,
+				       pspace_data->atcb_fieldno.ll_thread));
 
   ptid = target_get_ada_task_ptid (lwp, thread);
 
@@ -456,12 +500,15 @@ read_atcb (CORE_ADDR task_id, struct ada_task_info *task_info)
   struct value *entry_calls_value_element;
   int called_task_fieldno = -1;
   const char ravenscar_task_name[] = "Ravenscar task";
+  const struct ada_tasks_pspace_data *pspace_data
+    = get_ada_tasks_pspace_data (current_program_space);
 
-  if (atcb_type == NULL)
+  if (!pspace_data->initialized_p)
     get_tcb_types_info ();
 
-  tcb_value = value_from_contents_and_address (atcb_type, NULL, task_id);
-  common_value = value_field (tcb_value, atcb_fieldno.common);
+  tcb_value = value_from_contents_and_address (pspace_data->atcb_type,
+					       NULL, task_id);
+  common_value = value_field (tcb_value, pspace_data->atcb_fieldno.common);
 
   /* Fill in the task_id.  */
 
@@ -482,37 +529,44 @@ read_atcb (CORE_ADDR task_id, struct ada_task_info *task_info)
      we may want to get it from the first user frame of the stack.  For now,
      we just give a dummy name.  */
 
-  if (atcb_fieldno.image_len == -1)
+  if (pspace_data->atcb_fieldno.image_len == -1)
     {
-      if (atcb_fieldno.image >= 0)
+      if (pspace_data->atcb_fieldno.image >= 0)
         read_fat_string_value (task_info->name,
-                               value_field (common_value, atcb_fieldno.image),
+                               value_field (common_value,
+					    pspace_data->atcb_fieldno.image),
                                sizeof (task_info->name) - 1);
       else
         strcpy (task_info->name, ravenscar_task_name);
     }
   else
     {
-      int len = value_as_long (value_field (common_value,
-                                            atcb_fieldno.image_len));
+      int len = value_as_long
+		  (value_field (common_value,
+				pspace_data->atcb_fieldno.image_len));
 
       value_as_string (task_info->name,
-                       value_field (common_value, atcb_fieldno.image), len);
+                       value_field (common_value,
+				    pspace_data->atcb_fieldno.image),
+		       len);
     }
 
   /* Compute the task state and priority.  */
 
   task_info->state =
-    value_as_long (value_field (common_value, atcb_fieldno.state));
+    value_as_long (value_field (common_value,
+				pspace_data->atcb_fieldno.state));
   task_info->priority =
-    value_as_long (value_field (common_value, atcb_fieldno.priority));
+    value_as_long (value_field (common_value,
+				pspace_data->atcb_fieldno.priority));
 
   /* If the ATCB contains some information about the parent task,
      then compute it as well.  Otherwise, zero.  */
 
-  if (atcb_fieldno.parent >= 0)
+  if (pspace_data->atcb_fieldno.parent >= 0)
     task_info->parent =
-      value_as_address (value_field (common_value, atcb_fieldno.parent));
+      value_as_address (value_field (common_value,
+				     pspace_data->atcb_fieldno.parent));
   else
     task_info->parent = 0;
   
@@ -520,16 +574,17 @@ read_atcb (CORE_ADDR task_id, struct ada_task_info *task_info)
   /* If the ATCB contains some information about entry calls, then
      compute the "called_task" as well.  Otherwise, zero.  */
 
-  if (atcb_fieldno.atc_nesting_level > 0 && atcb_fieldno.entry_calls > 0)
+  if (pspace_data->atcb_fieldno.atc_nesting_level > 0
+      && pspace_data->atcb_fieldno.entry_calls > 0)
     {
       /* Let My_ATCB be the Ada task control block of a task calling the
          entry of another task; then the Task_Id of the called task is
          in My_ATCB.Entry_Calls (My_ATCB.ATC_Nesting_Level).Called_Task.  */
-      atc_nesting_level_value = value_field (tcb_value,
-                                             atcb_fieldno.atc_nesting_level);
+      atc_nesting_level_value =
+        value_field (tcb_value, pspace_data->atcb_fieldno.atc_nesting_level);
       entry_calls_value =
-        ada_coerce_to_simple_array_ptr (value_field (tcb_value,
-                                                     atcb_fieldno.entry_calls));
+        ada_coerce_to_simple_array_ptr
+	  (value_field (tcb_value, pspace_data->atcb_fieldno.entry_calls));
       entry_calls_value_element =
         value_subscript (entry_calls_value,
 			 value_as_long (atc_nesting_level_value));
@@ -549,20 +604,23 @@ read_atcb (CORE_ADDR task_id, struct ada_task_info *task_info)
      then compute the "caller_task".  Otherwise, zero.  */
 
   task_info->caller_task = 0;
-  if (atcb_fieldno.call >= 0)
+  if (pspace_data->atcb_fieldno.call >= 0)
     {
       /* Get the ID of the caller task from Common_ATCB.Call.all.Self.
          If Common_ATCB.Call is null, then there is no caller.  */
       const CORE_ADDR call =
-        value_as_address (value_field (common_value, atcb_fieldno.call));
+        value_as_address (value_field (common_value,
+				       pspace_data->atcb_fieldno.call));
       struct value *call_val;
 
       if (call != 0)
         {
           call_val =
-            value_from_contents_and_address (atcb_call_type, NULL, call);
+            value_from_contents_and_address (pspace_data->atcb_call_type,
+					     NULL, call);
           task_info->caller_task =
-            value_as_address (value_field (call_val, atcb_fieldno.call_self));
+            value_as_address
+	      (value_field (call_val, pspace_data->atcb_fieldno.call_self));
         }
     }
 
@@ -637,9 +695,11 @@ read_known_tasks_list (CORE_ADDR known_tasks_addr)
   struct type *data_ptr_type =
     builtin_type (target_gdbarch)->builtin_data_ptr;
   CORE_ADDR task_id;
+  const struct ada_tasks_pspace_data *pspace_data
+    = get_ada_tasks_pspace_data (current_program_space);
 
   /* Sanity check.  */
-  if (atcb_fieldno.activation_link < 0)
+  if (pspace_data->atcb_fieldno.activation_link < 0)
     return 0;
 
   /* Build a new list by reading the ATCBs.  Read head of the list.  */
@@ -653,10 +713,12 @@ read_known_tasks_list (CORE_ADDR known_tasks_addr)
       add_ada_task (task_id);
 
       /* Read the chain.  */
-      tcb_value = value_from_contents_and_address (atcb_type, NULL, task_id);
-      common_value = value_field (tcb_value, atcb_fieldno.common);
-      task_id = value_as_address (value_field (common_value,
-                                               atcb_fieldno.activation_link));
+      tcb_value = value_from_contents_and_address (pspace_data->atcb_type,
+						   NULL, task_id);
+      common_value = value_field (tcb_value, pspace_data->atcb_fieldno.common);
+      task_id = value_as_address
+		  (value_field (common_value,
+                                pspace_data->atcb_fieldno.activation_link));
     }
 
   return 1;
@@ -1030,6 +1092,14 @@ ada_task_list_changed (void)
   stale_task_list_p = 1;  
 }
 
+/* Invalidate the per-program-space data.  */
+
+static void
+ada_tasks_invalidate_pspace_data (struct program_space *pspace)
+{
+  get_ada_tasks_pspace_data (pspace)->initialized_p = 0;
+}
+
 /* The 'normal_stop' observer notification callback.  */
 
 static void
@@ -1045,14 +1115,25 @@ ada_normal_stop_observer (struct bpstats *unused_args, int unused_args2)
 static void
 ada_new_objfile_observer (struct objfile *objfile)
 {
-  /* Invalidate all cached data that were extracted from an objfile.  */
-
-  atcb_type = NULL;
-  atcb_common_type = NULL;
-  atcb_ll_type = NULL;
-  atcb_call_type = NULL;
-
   ada_tasks_check_symbol_table = 1;
+
+  /* Invalidate the relevant data in our program-space data.  */
+
+  if (objfile == NULL)
+    {
+      /* All objfiles are being cleared, so we should clear all
+	 our caches for all program spaces.  */
+      struct program_space *pspace;
+
+      for (pspace = program_spaces; pspace != NULL; pspace = pspace->next)
+        ada_tasks_invalidate_pspace_data (pspace);
+    }
+  else
+    {
+      /* The associated program-space data might have changed after
+	 this objfile was added.  Invalidate all cached data.  */
+      ada_tasks_invalidate_pspace_data (objfile->pspace);
+    }
 }
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */
@@ -1061,6 +1142,8 @@ extern initialize_file_ftype _initialize_tasks;
 void
 _initialize_tasks (void)
 {
+  ada_tasks_pspace_data_handle = register_program_space_data ();
+
   /* Attach various observers.  */
   observer_attach_normal_stop (ada_normal_stop_observer);
   observer_attach_new_objfile (ada_new_objfile_observer);

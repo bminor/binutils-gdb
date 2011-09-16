@@ -1,5 +1,19 @@
 2011-09-16  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-tasks.c: #include "progspace.h" and "objfiles.h".
+	(atcb_type, atcb_common_type, atcb_ll_type, atcb_call_type)
+	(atcb_fieldno): Delete these static globals.
+	(struct ada_tasks_pspace_data): New struct.
+	(ada_tasks_pspace_data_handle): New static global.
+	(get_ada_tasks_pspace_data): New function.
+	(ada_tasks_invalidate_pspace_data): New function.
+	(get_tcb_types_info, ptid_from_atcb_common, read_atcb)
+	(read_known_tasks_list, ada_new_objfile_observer): Adjust.
+	(_initialize_tasks): Create this module's per-progspace
+	data handle.
+
+2011-09-16  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-tasks.c (struct atcb_fieldnos): Renames struct tcb_fieldnos.
 
 2011-09-16  Tristan Gingold  <gingold@adacore.com>
