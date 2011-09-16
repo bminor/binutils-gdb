@@ -982,7 +982,7 @@ short_task_info (int taskno, struct inferior *inf)
 /* FIXME: Shouldn't we be using ui_out???  */
 
 static void
-info_tasks (int from_tty, struct inferior *inf)
+info_tasks (struct inferior *inf)
 {
   struct ada_tasks_inferior_data *data = get_ada_tasks_inferior_data (inf);
   int taskno;
@@ -1094,7 +1094,7 @@ info_tasks_command (char *arg, int from_tty)
     }
 
   if (arg == NULL || *arg == '\0')
-    info_tasks (from_tty, current_inferior ());
+    info_tasks (current_inferior ());
   else
     info_task (arg, from_tty, current_inferior ());
 }
