@@ -10627,7 +10627,7 @@ by @code{ptr}.
 @item
 It is not possible to collect a complete stack backtrace at a
 tracepoint.  Instead, you may collect the registers and a few hundred
-bytes from the stack pointer with something like @code{*$esp@@300}
+bytes from the stack pointer with something like @code{*(unsigned char *)$esp@@300}
 (adjust to use the name of the actual stack pointer register on your
 target architecture, and the amount of stack you wish to capture).
 Then the @code{backtrace} command will show a partial backtrace when
