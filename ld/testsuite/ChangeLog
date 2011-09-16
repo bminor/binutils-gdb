@@ -1,5 +1,11 @@
 2011-09-15  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/13177
+	* ld-elf/pr13177.d: New.
+	* ld-elf/pr13177.s: Likewise.
+
+2011-09-15  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/12975
 	* ld-elf/pr12975.d: New.
 	* ld-elf/pr12975.s: Likewise.
