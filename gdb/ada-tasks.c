@@ -106,7 +106,7 @@ static const char *long_task_states[] = {
 /* The index of certain important fields in the Ada Task Control Block
    record and sub-records.  */
 
-struct tcb_fieldnos
+struct atcb_fieldnos
 {
   /* Fields in record Ada_Task_Control_Block.  */
   int common;
@@ -132,7 +132,7 @@ struct tcb_fieldnos
 };
 
 /* The type description for the ATCB record and subrecords, and
-   the associated tcb_fieldnos.  For efficiency reasons, these are made
+   the associated atcb_fieldnos.  For efficiency reasons, these are made
    static globals so that we can compute them only once the first time
    and reuse them later.  Set to NULL if the types haven't been computed
    yet, or if they may be obsolete (for instance after having loaded
@@ -142,7 +142,7 @@ static struct type *atcb_type = NULL;
 static struct type *atcb_common_type = NULL;
 static struct type *atcb_ll_type = NULL;
 static struct type *atcb_call_type = NULL;
-static struct tcb_fieldnos atcb_fieldno;
+static struct atcb_fieldnos atcb_fieldno;
 
 /* Set to 1 when the cached address of System.Tasking.Debug.Known_Tasks
    might be stale and so needs to be recomputed.  */
@@ -322,7 +322,7 @@ get_tcb_types_info (void)
   struct type *common_type;
   struct type *ll_type;
   struct type *call_type;
-  struct tcb_fieldnos fieldnos;
+  struct atcb_fieldnos fieldnos;
 
   const char *atcb_name = "system__tasking__ada_task_control_block___XVE";
   const char *atcb_name_fixed = "system__tasking__ada_task_control_block";
