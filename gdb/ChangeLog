@@ -1,5 +1,27 @@
 2011-09-16  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-tasks.c (ada_tasks_check_symbol_table, task_list): Delete.
+	(enum ada_known_tasks_kind, struct ada_tasks_inferior_data): New.
+	(ada_tasks_inferior_data_handle): New static global.
+	(get_ada_tasks_inferior_data): New function.
+	(ada_get_task_number, get_task_number_from_id, valid_task_id)
+	(ada_get_environment_task, iterate_over_live_ada_tasks)
+	(add_ada_task, read_known_tasks_array, read_known_tasks_list):
+	Adjust.
+	(ada_set_current_inferior_known_tasks_addr): New function.
+	(read_known_tasks, ada_build_task_list, short_task_info)
+	(info_tasks, info_task, info_tasks_command, task_command_1)
+	(task_command, ada_task_list_changed): Adjust.
+	(ada_tasks_invalidate_inferior_data): New function.
+	(ada_normal_stop_observer, ada_new_objfile_observer): Adjust.
+	(_initialize_tasks): Set ada_tasks_inferior_data_handle.
+	* ada-lang.h (struct inferior): Add declaration.
+	(ada_task_list_changed): Update profile.
+	* remote-wtx-pd.c: #include "inferior.h".
+	(switch_to_pd_internal): Update call to ada_task_list_changed.
+
+2011-09-16  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-tasks.c: #include "progspace.h" and "objfiles.h".
 	(atcb_type, atcb_common_type, atcb_ll_type, atcb_call_type)
 	(atcb_fieldno): Delete these static globals.
