@@ -998,7 +998,7 @@ info_tasks (struct inferior *inf)
    for the given inferior (INF).  */
 
 static void
-info_task (char *taskno_str, int from_tty, struct inferior *inf)
+info_task (char *taskno_str, struct inferior *inf)
 {
   const int taskno = value_as_long (parse_and_eval (taskno_str));
   struct ada_task_info *task_info;
@@ -1096,7 +1096,7 @@ info_tasks_command (char *arg, int from_tty)
   if (arg == NULL || *arg == '\0')
     info_tasks (current_inferior ());
   else
-    info_task (arg, from_tty, current_inferior ());
+    info_task (arg, current_inferior ());
 }
 
 /* Print a message telling the user id of the current task.

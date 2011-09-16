@@ -1,5 +1,9 @@
 2011-09-16  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-tasks.c (info_task): Delete parameter `from_tty'.
+
+2011-09-16  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-tasks.c (info_tasks): Delete parameter `from_tty'.
 
 2011-09-16  Joel Brobecker  <brobecker@adacore.com>
