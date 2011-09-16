@@ -1,3 +1,11 @@
+2011-09-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-elf/pr12975.d: Only run for *-*-linux* and *-*-gnu*
+	targets.
+	* ld-elf/pr13177.d: Likewise.
+
+	* ld-elf/pr13177.s: Avoid relocations in text sections.
+
 2011-09-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/13177
