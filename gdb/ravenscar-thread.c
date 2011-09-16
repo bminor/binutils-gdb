@@ -222,7 +222,7 @@ ravenscar_add_thread (struct ada_task_info *task)
 static void
 ravenscar_find_new_threads (struct target_ops *ops)
 {
-  ada_build_task_list (0);
+  ada_build_task_list ();
 
   /* Do not clear the thread list before adding the Ada task, to keep
      the thread that the process stratum has included into it

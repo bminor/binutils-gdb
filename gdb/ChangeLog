@@ -1,5 +1,18 @@
 2011-09-16  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.h (ada_build_task_list): Remove parameter
+	`warn_if_null'.
+	* ada-tasks.c (ada_build_task_list): Remove parameter
+	`warn_if_null'.  Adjust implementation and documentation.
+	(valid_task_id, ada_get_environment_task)
+	iterate_over_live_ada_tasks): Adjust call to ada_build_task_list.
+	(info_tasks_command): Adjust implementation.
+	(task_command): Likewise.
+	* ravenscar-thread.c (ravenscar_find_new_threads): Fix call
+	to ada_build_task_list.
+
+2011-09-16  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-tasks.c (ada_tasks_check_symbol_table, task_list): Delete.
 	(enum ada_known_tasks_kind, struct ada_tasks_inferior_data): New.
 	(ada_tasks_inferior_data_handle): New static global.

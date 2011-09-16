@@ -330,7 +330,7 @@ valid_task_id (int task_num)
 {
   struct ada_tasks_inferior_data *data;
 
-  ada_build_task_list (0);
+  ada_build_task_list ();
   data = get_ada_tasks_inferior_data (current_inferior ());
   return (task_num > 0
           && task_num <= VEC_length (ada_task_info_s, data->task_list));
@@ -355,7 +355,7 @@ iterate_over_live_ada_tasks (ada_task_list_iterator_ftype *iterator)
   struct ada_task_info *task;
   struct ada_tasks_inferior_data *data;
 
-  ada_build_task_list (0);
+  ada_build_task_list ();
   data = get_ada_tasks_inferior_data (current_inferior ());
   nb_tasks = VEC_length (ada_task_info_s, data->task_list);
 
@@ -905,12 +905,12 @@ read_known_tasks (void)
   return 1;
 }
 
-/* Builds the task_list by reading the Known_Tasks array from
-   the inferior.  Prints an appropriate message and returns non-zero
-   if it failed to build this list.  */
+/* Build the task_list by reading the Known_Tasks array from
+   the inferior, and return the number of tasks in that list
+   (zero means that the program is not using tasking at all).  */
 
 int
-ada_build_task_list (int warn_if_null)
+ada_build_task_list (void)
 {
   struct ada_tasks_inferior_data *data;
 
@@ -921,14 +921,7 @@ ada_build_task_list (int warn_if_null)
   if (!data->task_list_valid_p)
     read_known_tasks ();
 
-  if (data->task_list == NULL)
-    {
-      if (warn_if_null)
-        printf_filtered (_("Your application does not use any Ada tasks.\n"));
-      return 0;
-    }
-
-  return 1;
+  return VEC_length (ada_task_info_s, data->task_list);
 }
 
 /* Print a one-line description of the task running in inferior INF
@@ -1091,10 +1084,14 @@ info_task (char *taskno_str, int from_tty, struct inferior *inf)
 static void
 info_tasks_command (char *arg, int from_tty)
 {
-  const int task_list_built = ada_build_task_list (1);
+  struct ui_out *uiout = current_uiout;
 
-  if (!task_list_built)
-    return;
+  if (ada_build_task_list () == 0)
+    {
+      ui_out_message (uiout, 0,
+		      _("Your application does not use any Ada tasks.\n"));
+      return;
+    }
 
   if (arg == NULL || *arg == '\0')
     info_tasks (from_tty, current_inferior ());
@@ -1170,10 +1167,14 @@ task_command_1 (char *taskno_str, int from_tty, struct inferior *inf)
 static void
 task_command (char *taskno_str, int from_tty)
 {
-  const int task_list_built = ada_build_task_list (1);
+  struct ui_out *uiout = current_uiout;
 
-  if (!task_list_built)
-    return;
+  if (ada_build_task_list () == 0)
+    {
+      ui_out_message (uiout, 0,
+		      _("Your application does not use any Ada tasks.\n"));
+      return;
+    }
 
   if (taskno_str == NULL || taskno_str[0] == '\0')
     display_current_task_id ();
