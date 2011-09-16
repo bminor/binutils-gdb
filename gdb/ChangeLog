@@ -1,3 +1,16 @@
+2011-09-16  Abhijit Halder  <abhijit.k.halder@gmail.com>
+
+	Code cleanup.
+	* parse.c (write_exp_elt): Change argument to pass a pointer of union
+	`exp_element' instead of an element of the same and make the function
+	static.
+	(write_exp_elt_opcode, write_exp_elt_sym, write_exp_elt_block)
+	(write_exp_elt_objfile, write_exp_elt_longcst, write_exp_elt_dblcst)
+	(write_exp_elt_decfloatcst, write_exp_elt_type, write_exp_elt_intern):
+	Change argument of `write_exp_elt' function call.
+	Remove extra spaces from comments.
+	* parser-defs.h (write_exp_elt): Remove prototype.
+
 2011-09-15  Paul Koning  <paul_koning@dell.com>
 
 	* python/py-cmd.c (gdbpy_string_to_argv): Decrement reference

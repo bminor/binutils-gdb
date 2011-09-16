@@ -131,8 +131,6 @@ union type_stack_elt
 extern union type_stack_elt *type_stack;
 extern int type_stack_depth, type_stack_size;
 
-extern void write_exp_elt (union exp_element);
-
 extern void write_exp_elt_opcode (enum exp_opcode);
 
 extern void write_exp_elt_sym (struct symbol *);
