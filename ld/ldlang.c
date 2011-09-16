@@ -7458,10 +7458,6 @@ lang_leave_overlay (etree_type *lma_expr,
 
 /* Version handling.  This is only useful for ELF.  */
 
-/* This global variable holds the version tree that we build.  */
-
-struct bfd_elf_version_tree *lang_elf_version_info;
-
 /* If PREV is NULL, return first version pattern matching particular symbol.
    If PREV is non-NULL, return first version pattern matching particular
    symbol after PREV (previously returned by lang_vers_match).  */
@@ -7803,8 +7799,8 @@ lang_register_vers_node (const char *name,
   if (name == NULL)
     name = "";
 
-  if ((name[0] == '\0' && lang_elf_version_info != NULL)
-      || (lang_elf_version_info && lang_elf_version_info->name[0] == '\0'))
+  if (link_info.version_info != NULL
+      && (name[0] == '\0' || link_info.version_info->name[0] == '\0'))
     {
       einfo (_("%X%P: anonymous version tag cannot be combined"
 	       " with other version tags\n"));
@@ -7813,7 +7809,7 @@ lang_register_vers_node (const char *name,
     }
 
   /* Make sure this node has a unique name.  */
-  for (t = lang_elf_version_info; t != NULL; t = t->next)
+  for (t = link_info.version_info; t != NULL; t = t->next)
     if (strcmp (t->name, name) == 0)
       einfo (_("%X%P: duplicate version tag `%s'\n"), name);
 
@@ -7825,7 +7821,7 @@ lang_register_vers_node (const char *name,
 
   for (e1 = version->globals.list; e1 != NULL; e1 = e1->next)
     {
-      for (t = lang_elf_version_info; t != NULL; t = t->next)
+      for (t = link_info.version_info; t != NULL; t = t->next)
 	{
 	  struct bfd_elf_version_expr *e2;
 
@@ -7852,7 +7848,7 @@ lang_register_vers_node (const char *name,
 
   for (e1 = version->locals.list; e1 != NULL; e1 = e1->next)
     {
-      for (t = lang_elf_version_info; t != NULL; t = t->next)
+      for (t = link_info.version_info; t != NULL; t = t->next)
 	{
 	  struct bfd_elf_version_expr *e2;
 
@@ -7888,7 +7884,7 @@ lang_register_vers_node (const char *name,
   else
     version->vernum = 0;
 
-  for (pp = &lang_elf_version_info; *pp != NULL; pp = &(*pp)->next)
+  for (pp = &link_info.version_info; *pp != NULL; pp = &(*pp)->next)
     ;
   *pp = version;
 }
@@ -7904,7 +7900,7 @@ lang_add_vers_depend (struct bfd_elf_version_deps *list, const char *name)
   ret = (struct bfd_elf_version_deps *) xmalloc (sizeof *ret);
   ret->next = list;
 
-  for (t = lang_elf_version_info; t != NULL; t = t->next)
+  for (t = link_info.version_info; t != NULL; t = t->next)
     {
       if (strcmp (t->name, name) == 0)
 	{

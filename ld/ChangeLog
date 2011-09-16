@@ -1,3 +1,21 @@
+2011-09-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/12975
+	* ldlang.c (lang_elf_version_info): Removed.
+	(lang_register_vers_node): Replace lang_elf_version_info with
+	link_info.version_info.
+	(lang_add_vers_depend): Likewise.
+	* pe-dll.c (process_def_file_and_drectve): Likewise.
+	* emultempl/solaris2.em (elf_solaris2_before_allocation): Likewise.
+
+	* ldlang.h (lang_elf_version_info): Removed.
+
+	* plugin.c  (is_visible_from_outside): Check if symbol is hidden
+	by version script.
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_before_allocation):
+	Remove lang_elf_version_info.
+
 2011-09-15  Dmitry Gorbachev  <d.g.gorbachev@gmail.com>
 
 	PR ld/13183

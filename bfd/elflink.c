@@ -36,7 +36,6 @@
 struct elf_info_failed
 {
   struct bfd_link_info *info;
-  struct bfd_elf_version_tree *verdefs;
   bfd_boolean failed;
 };
 
@@ -1820,20 +1819,14 @@ _bfd_elf_export_symbol (struct elf_link_hash_entry *h, void *data)
     return TRUE;
 
   if (h->dynindx == -1
-      && (h->def_regular
-	  || h->ref_regular))
+      && (h->def_regular || h->ref_regular)
+      && ! bfd_hide_sym_by_version (eif->info->version_info,
+				    h->root.root.string))
     {
-      bfd_boolean hide;
-
-      if (eif->verdefs == NULL
-	  || (bfd_find_version_for_sym (eif->verdefs, h->root.root.string, &hide)
-	      && !hide))
+      if (! bfd_elf_link_record_dynamic_symbol (eif->info, h))
 	{
-	  if (! bfd_elf_link_record_dynamic_symbol (eif->info, h))
-	    {
-	      eif->failed = TRUE;
-	      return FALSE;
-	    }
+	  eif->failed = TRUE;
+	  return FALSE;
 	}
     }
 
@@ -1981,7 +1974,7 @@ _bfd_elf_link_assign_sym_version (struct elf_link_hash_entry *h, void *data)
 	}
 
       /* Look for the version.  If we find it, it is no longer weak.  */
-      for (t = sinfo->verdefs; t != NULL; t = t->next)
+      for (t = sinfo->info->version_info; t != NULL; t = t->next)
 	{
 	  if (strcmp (t->name, p) == 0)
 	    {
@@ -2050,9 +2043,12 @@ _bfd_elf_link_assign_sym_version (struct elf_link_hash_entry *h, void *data)
 
 	  version_index = 1;
 	  /* Don't count anonymous version tag.  */
-	  if (sinfo->verdefs != NULL && sinfo->verdefs->vernum == 0)
+	  if (sinfo->info->version_info != NULL
+	      && sinfo->info->version_info->vernum == 0)
 	    version_index = 0;
-	  for (pp = &sinfo->verdefs; *pp != NULL; pp = &(*pp)->next)
+	  for (pp = &sinfo->info->version_info;
+	       *pp != NULL;
+	       pp = &(*pp)->next)
 	    ++version_index;
 	  t->vernum = version_index;
 
@@ -2078,12 +2074,13 @@ _bfd_elf_link_assign_sym_version (struct elf_link_hash_entry *h, void *data)
 
   /* If we don't have a version for this symbol, see if we can find
      something.  */
-  if (h->verinfo.vertree == NULL && sinfo->verdefs != NULL)
+  if (h->verinfo.vertree == NULL && sinfo->info->version_info != NULL)
     {
       bfd_boolean hide;
 
-      h->verinfo.vertree = bfd_find_version_for_sym (sinfo->verdefs,
-						 h->root.root.string, &hide);
+      h->verinfo.vertree
+	= bfd_find_version_for_sym (sinfo->info->version_info,
+				    h->root.root.string, &hide);
       if (h->verinfo.vertree != NULL && hide)
 	(*bed->elf_backend_hide_symbol) (info, h, TRUE);
     }
@@ -5493,8 +5490,7 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 			       const char *depaudit,
 			       const char * const *auxiliary_filters,
 			       struct bfd_link_info *info,
-			       asection **sinterpptr,
-			       struct bfd_elf_version_tree *verdefs)
+			       asection **sinterpptr)
 {
   bfd_size_type soname_indx;
   bfd *dynobj;
@@ -5671,7 +5667,6 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 	}
 
       eif.info = info;
-      eif.verdefs = verdefs;
       eif.failed = FALSE;
 
       /* If we are supposed to export all symbols into the dynamic symbol
@@ -5687,7 +5682,7 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 	}
 
       /* Make all global versions with definition.  */
-      for (t = verdefs; t != NULL; t = t->next)
+      for (t = info->version_info; t != NULL; t = t->next)
 	for (d = t->globals.list; d != NULL; d = d->next)
 	  if (!d->symver && d->literal)
 	    {
@@ -5740,7 +5735,6 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 
       /* Attach all the symbols to their version information.  */
       asvinfo.info = info;
-      asvinfo.verdefs = verdefs;
       asvinfo.failed = FALSE;
 
       elf_link_hash_traverse (elf_hash_table (info),
@@ -5753,7 +5747,7 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 	{
 	  /* Check if all global versions have a definition.  */
 	  all_defined = TRUE;
-	  for (t = verdefs; t != NULL; t = t->next)
+	  for (t = info->version_info; t != NULL; t = t->next)
 	    for (d = t->globals.list; d != NULL; d = d->next)
 	      if (d->literal && !d->symver && !d->script)
 		{
@@ -5886,6 +5880,7 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
   if (elf_hash_table (info)->dynamic_sections_created)
     {
       unsigned long section_sym_count;
+      struct bfd_elf_version_tree *verdefs;
       asection *s;
 
       /* Set up the version definition section.  */
@@ -5894,7 +5889,7 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 
       /* We may have created additional version definitions if we are
 	 just linking a regular application.  */
-      verdefs = asvinfo.verdefs;
+      verdefs = info->version_info;
 
       /* Skip anonymous version tag.  */
       if (verdefs != NULL && verdefs->vernum == 0)
@@ -11913,7 +11908,9 @@ bfd_elf_gc_mark_dynamic_ref_symbol (struct elf_link_hash_entry *h, void *inf)
 	  || (!info->executable
 	      && h->def_regular
 	      && ELF_ST_VISIBILITY (h->other) != STV_INTERNAL
-	      && ELF_ST_VISIBILITY (h->other) != STV_HIDDEN)))
+	      && ELF_ST_VISIBILITY (h->other) != STV_HIDDEN
+	      && !bfd_hide_sym_by_version (info->version_info,
+					   h->root.root.string))))
     h->root.u.def.section->flags |= SEC_KEEP;
 
   return TRUE;

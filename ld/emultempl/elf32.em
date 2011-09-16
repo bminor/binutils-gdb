@@ -1535,7 +1535,7 @@ gld${EMULATION_NAME}_before_allocation (void)
 	 (link_info.output_bfd, command_line.soname, rpath,
 	  command_line.filter_shlib, audit, depaudit,
 	  (const char * const *) command_line.auxiliary_filters,
-	  &link_info, &sinterp, lang_elf_version_info)))
+	  &link_info, &sinterp)))
     einfo ("%P%F: failed to set dynamic section sizes: %E\n");
 
 ${ELF_INTERPRETER_SET_DEFAULT}

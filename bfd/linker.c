@@ -3380,3 +3380,26 @@ bfd_find_version_for_sym (struct bfd_elf_version_tree *verdefs,
 
   return NULL;
 }
+
+/*
+FUNCTION
+	bfd_hide_sym_by_version
+
+SYNOPSIS
+	bfd_boolean bfd_hide_sym_by_version
+	  (struct bfd_elf_version_tree *verdefs, const char *sym_name);
+
+DESCRIPTION
+	Search an elf version script tree for symbol versioning
+	info for a given symbol.  Return TRUE if the symbol is hidden.
+
+*/
+
+bfd_boolean
+bfd_hide_sym_by_version (struct bfd_elf_version_tree *verdefs,
+			 const char *sym_name)
+{
+  bfd_boolean hidden = FALSE;
+  bfd_find_version_for_sym (verdefs, sym_name, &hidden);
+  return hidden;
+}

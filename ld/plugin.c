@@ -454,6 +454,10 @@ is_visible_from_outside (struct ld_plugin_symbol *lsym, asection *section,
     return TRUE;
   if (link_info.export_dynamic || link_info.shared)
     {
+      /* Check if symbol is hidden by version script.  */
+      if (bfd_hide_sym_by_version (link_info.version_info,
+				   blhe->root.string))
+	return FALSE;
       /* Only ELF symbols really have visibility.  */
       if (bfd_get_flavour (link_info.output_bfd) == bfd_target_elf_flavour)
 	{

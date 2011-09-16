@@ -718,13 +718,10 @@ process_def_file_and_drectve (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *
 	      bfd_boolean would_export = symbols[j]->section != &bfd_und_section
 		      && ((symbols[j]->flags & BSF_GLOBAL)
 			  || (symbols[j]->flags == 0));
-	      if (lang_elf_version_info && would_export)
-		{
-		  bfd_boolean hide = 0;
-		  (void) bfd_find_version_for_sym (lang_elf_version_info,
-				symbols[j]->name, &hide);
-		  would_export = !hide;
-		}
+	      if (link_info.version_info && would_export)
+		  would_export
+		    = !bfd_hide_sym_by_version (link_info.version_info,
+						symbols[j]->name);
 	      if (would_export)
 		{
 		  const char *sn = symbols[j]->name;

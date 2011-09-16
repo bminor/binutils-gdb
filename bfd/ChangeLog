@@ -1,3 +1,21 @@
+2011-09-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/12975
+	* bfd-in.h (bfd_elf_size_dynamic_sections): Remove pointer
+	to struct bfd_elf_version_tree.
+
+	* elflink.c (elf_info_failed): Remove verdefs.
+	(_bfd_elf_export_symbol): Updated.
+	_bfd_elf_link_assign_sym_version): Likewise.
+	(bfd_elf_size_dynamic_sections): Remove pointer to struct
+	bfd_elf_version_tree.  Updated.
+	(bfd_elf_gc_mark_dynamic_ref_symbol): Check if a symbol is hidden
+	by linker script.
+
+	* linker.c (bfd_hide_sym_by_version): New.
+
+	* bfd-in2.h: Regenerated.
+
 2011-09-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/13178

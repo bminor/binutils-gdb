@@ -652,8 +652,7 @@ extern bfd_boolean bfd_elf_get_bfd_needed_list
   (bfd *, struct bfd_link_needed_list **);
 extern bfd_boolean bfd_elf_size_dynamic_sections
   (bfd *, const char *, const char *, const char *, const char *, const char *,
-   const char * const *, struct bfd_link_info *, struct bfd_section **,
-   struct bfd_elf_version_tree *);
+   const char * const *, struct bfd_link_info *, struct bfd_section **);
 extern bfd_boolean bfd_elf_size_dynsym_hash_dynstr
   (bfd *, struct bfd_link_info *);
 extern void bfd_elf_set_dt_needed_name
@@ -6198,6 +6197,9 @@ bfd_boolean bfd_generic_define_common_symbol
 struct bfd_elf_version_tree * bfd_find_version_for_sym
    (struct bfd_elf_version_tree *verdefs,
     const char *sym_name, bfd_boolean *hide);
+
+bfd_boolean bfd_hide_sym_by_version
+   (struct bfd_elf_version_tree *verdefs, const char *sym_name);
 
 /* Extracted from simple.c.  */
 bfd_byte *bfd_simple_get_relocated_section_contents
