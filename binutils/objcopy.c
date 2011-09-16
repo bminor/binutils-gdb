@@ -925,10 +925,10 @@ group_signature (asection *group)
   return NULL;
 }
 
-/* See if a section is being removed.  */
+/* See if a non-group section is being removed.  */
 
 static bfd_boolean
-is_strip_section (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
+is_strip_section_1 (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
 {
   if (sections_removed || sections_copied)
     {
@@ -955,10 +955,22 @@ is_strip_section (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
 	return FALSE;
     }
 
+  return FALSE;
+}
+
+/* See if a section is being removed.  */
+
+static bfd_boolean
+is_strip_section (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
+{
+  if (is_strip_section_1 (abfd, sec))
+    return TRUE;
+
   if ((bfd_get_section_flags (abfd, sec) & SEC_GROUP) != 0)
     {
       asymbol *gsym;
       const char *gname;
+      asection *elt, *first;
 
       /* PR binutils/3181
 	 If we are going to strip the group signature symbol, then
@@ -972,6 +984,19 @@ is_strip_section (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
 	   && !is_specified_symbol (gname, keep_specific_htab))
 	  || is_specified_symbol (gname, strip_specific_htab))
 	return TRUE;
+
+      /* Remove the group section if all members are removed.  */
+      first = elt = elf_next_in_group (sec);
+      while (elt != NULL)
+	{
+	  if (!is_strip_section_1 (abfd, elt))
+	    return FALSE;
+	  elt = elf_next_in_group (elt);
+	  if (elt == first)
+	    break;
+	}
+
+      return TRUE;
     }
 
   return FALSE;
