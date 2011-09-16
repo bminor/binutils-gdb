@@ -1,5 +1,18 @@
 2011-09-16  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-tasks.c (print_ada_task_info): New function, merging
+	short_task_info and info_tasks together.  Reimplement using
+	ui-out instead of printing to stdout directly.  Move the code
+	building and checking the task list here, instead of leaving it
+	in info_tasks_command.
+	(info_task): Move the code building and checking the task
+	list here, instead of leaving it in info_tasks_command.
+	(info_tasks_command): Delete code building and checking
+	the task list - moved elsewhere.  Update calls to info_tasks
+	and info_task.
+
+2011-09-16  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-tasks.c (info_task): Delete parameter `from_tty'.
 
 2011-09-16  Joel Brobecker  <brobecker@adacore.com>

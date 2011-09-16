@@ -1,3 +1,9 @@
+2011-09-16  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/tasks.exp: Make the expected output for
+	the `info tasks' tests more resilient to spacing
+	changes.
+
 2011-09-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.python/py-evthreads.exp (Run to breakpoint 1)

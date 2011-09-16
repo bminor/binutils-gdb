@@ -924,86 +924,133 @@ ada_build_task_list (void)
   return VEC_length (ada_task_info_s, data->task_list);
 }
 
-/* Print a one-line description of the task running in inferior INF
-   whose number is TASKNO.
-
-   The formatting should fit the "info tasks" array.  */
-
-static void
-short_task_info (int taskno, struct inferior *inf)
-{
-  struct ada_tasks_inferior_data *data = get_ada_tasks_inferior_data (inf);
-  const struct ada_task_info *const task_info =
-    VEC_index (ada_task_info_s, data->task_list, taskno - 1);
-  int active_task_p;
-
-  gdb_assert (task_info != NULL);
-
-  /* Print a star if this task is the current task (or the task currently
-     selected).  */
-
-  active_task_p = ptid_equal (task_info->ptid, inferior_ptid);
-  if (active_task_p)
-    printf_filtered ("*");
-  else
-    printf_filtered (" ");
-
-  /* Print the task number.  */
-  printf_filtered ("%3d", taskno);
-
-  /* Print the Task ID.  */
-  printf_filtered (" %9lx", (long) task_info->task_id);
-
-  /* Print the Task ID of the task parent.  */
-  printf_filtered (" %4d", get_task_number_from_id (task_info->parent, inf));
-
-  /* Print the base priority of the task.  */
-  printf_filtered (" %3d", task_info->priority);
-
-  /* Print the task current state.  */
-  if (task_info->caller_task)
-    printf_filtered (_(" Accepting RV with %-4d"),
-                     get_task_number_from_id (task_info->caller_task, inf));
-  else if (task_info->state == Entry_Caller_Sleep && task_info->called_task)
-    printf_filtered (_(" Waiting on RV with %-3d"),
-                     get_task_number_from_id (task_info->called_task, inf));
-  else
-    printf_filtered (" %-22s", _(task_states[task_info->state]));
-
-  /* Finally, print the task name.  */
-  if (task_info->name[0] != '\0')
-    printf_filtered (" %s\n", task_info->name);
-  else
-    printf_filtered (_(" <no name>\n"));
-}
-
-/* Print a list containing a short description of all Ada tasks
-   running inside inferior INF.  */
-/* FIXME: Shouldn't we be using ui_out???  */
+/* Print a table providing a short description of all Ada tasks
+   running inside inferior INF.  If ARG_STR is set, it will be
+   interpreted as a task number, and the table will be limited to
+   that task only.  */
 
 static void
-info_tasks (struct inferior *inf)
+print_ada_task_info (struct ui_out *uiout,
+		     char *arg_str,
+		     struct inferior *inf)
 {
-  struct ada_tasks_inferior_data *data = get_ada_tasks_inferior_data (inf);
-  int taskno;
-  const int nb_tasks = VEC_length (ada_task_info_s, data->task_list);
+  struct ada_tasks_inferior_data *data;
+  int taskno, nb_tasks;
+  int taskno_arg = 0;
+  struct cleanup *old_chain;
 
-  printf_filtered (_("  ID       TID P-ID Pri State                  Name\n"));
-  
+  if (ada_build_task_list () == 0)
+    {
+      ui_out_message (uiout, 0,
+		      _("Your application does not use any Ada tasks.\n"));
+      return;
+    }
+
+  if (arg_str != NULL && arg_str[0] != '\0')
+    taskno_arg = value_as_long (parse_and_eval (arg_str));
+
+  data = get_ada_tasks_inferior_data (inf);
+  nb_tasks = VEC_length (ada_task_info_s, data->task_list);
+
+  old_chain = make_cleanup_ui_out_table_begin_end (uiout, 7, nb_tasks,
+                                                   "tasks");
+  ui_out_table_header (uiout, 1, ui_left, "current", "");
+  ui_out_table_header (uiout, 3, ui_right, "id", "ID");
+  ui_out_table_header (uiout, 9, ui_right, "task-id", "TID");
+  ui_out_table_header (uiout, 4, ui_right, "parent-id", "P-ID");
+  ui_out_table_header (uiout, 3, ui_right, "priority", "Pri");
+  ui_out_table_header (uiout, 22, ui_left, "state", "State");
+  /* Use ui_noalign for the last column, to prevent the CLI uiout
+     from printing an extra space at the end of each row.  This
+     is a bit of a hack, but does get the job done.  */
+  ui_out_table_header (uiout, 1, ui_noalign, "name", "Name");
+  ui_out_table_body (uiout);
+
   for (taskno = 1; taskno <= nb_tasks; taskno++)
-    short_task_info (taskno, inf);
+    {
+      const struct ada_task_info *const task_info =
+	VEC_index (ada_task_info_s, data->task_list, taskno - 1);
+      int parent_id;
+      struct cleanup *chain2;
+
+      gdb_assert (task_info != NULL);
+
+      /* If the user asked for the output to be restricted
+	 to one task only, and this is not the task, skip
+	 to the next one.  */
+      if (taskno_arg && taskno != taskno_arg)
+        continue;
+
+      chain2 = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
+
+      /* Print a star if this task is the current task (or the task
+         currently selected).  */
+      if (ptid_equal (task_info->ptid, inferior_ptid))
+	ui_out_field_string (uiout, "current", "*");
+      else
+	ui_out_field_skip (uiout, "current");
+
+      /* Print the task number.  */
+      ui_out_field_int (uiout, "id", taskno);
+
+      /* Print the Task ID.  */
+      ui_out_field_fmt (uiout, "task-id", "%9lx", (long) task_info->task_id);
+
+      /* Print the ID of the parent task.  */
+      parent_id = get_task_number_from_id (task_info->parent, inf);
+      if (parent_id)
+        ui_out_field_int (uiout, "parent-id", parent_id);
+      else
+        ui_out_field_skip (uiout, "parent-id");
+
+      /* Print the base priority of the task.  */
+      ui_out_field_int (uiout, "priority", task_info->priority);
+
+      /* Print the task current state.  */
+      if (task_info->caller_task)
+	ui_out_field_fmt (uiout, "state",
+			  _("Accepting RV with %-4d"),
+			  get_task_number_from_id (task_info->caller_task,
+						   inf));
+      else if (task_info->state == Entry_Caller_Sleep
+	       && task_info->called_task)
+	ui_out_field_fmt (uiout, "state",
+			  _("Waiting on RV with %-3d"),
+			  get_task_number_from_id (task_info->called_task,
+						   inf));
+      else
+	ui_out_field_string (uiout, "state", task_states[task_info->state]);
+
+      /* Finally, print the task name.  */
+      ui_out_field_fmt (uiout, "name",
+			"%s",
+			task_info->name[0] != '\0' ? task_info->name
+						   : _("<no name>"));
+
+      ui_out_text (uiout, "\n");
+      do_cleanups (chain2);
+    }
+
+  do_cleanups (old_chain);
 }
 
 /* Print a detailed description of the Ada task whose ID is TASKNO_STR
    for the given inferior (INF).  */
 
 static void
-info_task (char *taskno_str, struct inferior *inf)
+info_task (struct ui_out *uiout, char *taskno_str, struct inferior *inf)
 {
   const int taskno = value_as_long (parse_and_eval (taskno_str));
   struct ada_task_info *task_info;
   int parent_taskno = 0;
   struct ada_tasks_inferior_data *data = get_ada_tasks_inferior_data (inf);
+
+  if (ada_build_task_list () == 0)
+    {
+      ui_out_message (uiout, 0,
+		      _("Your application does not use any Ada tasks.\n"));
+      return;
+    }
 
   if (taskno <= 0 || taskno > VEC_length (ada_task_info_s, data->task_list))
     error (_("Task ID %d not known.  Use the \"info tasks\" command to\n"
@@ -1086,17 +1133,10 @@ info_tasks_command (char *arg, int from_tty)
 {
   struct ui_out *uiout = current_uiout;
 
-  if (ada_build_task_list () == 0)
-    {
-      ui_out_message (uiout, 0,
-		      _("Your application does not use any Ada tasks.\n"));
-      return;
-    }
-
   if (arg == NULL || *arg == '\0')
-    info_tasks (current_inferior ());
+    print_ada_task_info (uiout, NULL, current_inferior ());
   else
-    info_task (arg, current_inferior ());
+    info_task (uiout, arg, current_inferior ());
 }
 
 /* Print a message telling the user id of the current task.
