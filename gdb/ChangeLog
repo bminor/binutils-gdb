@@ -1,5 +1,13 @@
 2011-09-17  Yao Qi  <yao@codesourcery.com>
 
+        * arm-tdep.c (install_ldr_str_ldrb_strb): Renamed to ...
+        (install_load_store): ... this.  New.
+        Change parameter BYTE to SIZE.
+        (arm_copy_ldr_str_ldrb_strb): Update caller.
+        (arm_decode_ld_st_word_ubyte): Update caller.
+
+2011-09-17  Yao Qi  <yao@codesourcery.com>
+
 	* infrun.c (displaced_step_fixup): Move some code ...
 	(displaced_step_restore): ... here.  New function.
 	(handle_inferior_event): Cleanup displaced stepping state for both

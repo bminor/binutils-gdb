@@ -5982,13 +5982,13 @@ arm_copy_extra_ld_st (struct gdbarch *gdbarch, uint32_t insn, int unpriveleged,
   return 0;
 }
 
-/* Copy byte/word loads and stores.  */
+/* Copy byte/half word/word loads and stores.  */
 
 static void
-install_ldr_str_ldrb_strb (struct gdbarch *gdbarch, struct regcache *regs,
-			   struct displaced_step_closure *dsc, int load,
-			   int immed, int writeback, int byte, int usermode,
-			   int rt, int rm, int rn)
+install_load_store (struct gdbarch *gdbarch, struct regcache *regs,
+		    struct displaced_step_closure *dsc, int load,
+		    int immed, int writeback, int size, int usermode,
+		    int rt, int rm, int rn)
 {
   ULONGEST rt_val, rn_val, rm_val = 0;
 
@@ -6009,7 +6009,7 @@ install_ldr_str_ldrb_strb (struct gdbarch *gdbarch, struct regcache *regs,
   if (!immed)
     displaced_write_reg (regs, dsc, 3, rm_val, CANNOT_WRITE_PC);
   dsc->rd = rt;
-  dsc->u.ldst.xfersize = byte ? 1 : 4;
+  dsc->u.ldst.xfersize = size;
   dsc->u.ldst.rn = rn;
   dsc->u.ldst.immed = immed;
   dsc->u.ldst.writeback = writeback;
@@ -6042,7 +6042,7 @@ static int
 arm_copy_ldr_str_ldrb_strb (struct gdbarch *gdbarch, uint32_t insn,
 			    struct regcache *regs,
 			    struct displaced_step_closure *dsc,
-			    int load, int byte, int usermode)
+			    int load, int size, int usermode)
 {
   int immed = !bit (insn, 25);
   int writeback = (bit (insn, 24) == 0 || bit (insn, 21) != 0);
@@ -6056,13 +6056,13 @@ arm_copy_ldr_str_ldrb_strb (struct gdbarch *gdbarch, uint32_t insn,
   if (debug_displaced)
     fprintf_unfiltered (gdb_stdlog,
 			"displaced: copying %s%s r%d [r%d] insn %.8lx\n",
-			load ? (byte ? "ldrb" : "ldr")
-			     : (byte ? "strb" : "str"), usermode ? "t" : "",
+			load ? (size == 1 ? "ldrb" : "ldr")
+			     : (size == 1 ? "strb" : "str"), usermode ? "t" : "",
 			rt, rn,
 			(unsigned long) insn);
 
-  install_ldr_str_ldrb_strb (gdbarch, regs, dsc, load, immed, writeback, byte,
-			     usermode, rt, rm, rn);
+  install_load_store (gdbarch, regs, dsc, load, immed, writeback, size,
+		      usermode, rt, rm, rn);
 
   if (load || rt != ARM_PC_REGNUM)
     {
@@ -6762,16 +6762,16 @@ arm_decode_ld_st_word_ubyte (struct gdbarch *gdbarch, uint32_t insn,
 
   if ((!a && (op1 & 0x05) == 0x00 && (op1 & 0x17) != 0x02)
       || (a && (op1 & 0x05) == 0x00 && (op1 & 0x17) != 0x02 && !b))
-    return arm_copy_ldr_str_ldrb_strb (gdbarch, insn, regs, dsc, 0, 0, 0);
+    return arm_copy_ldr_str_ldrb_strb (gdbarch, insn, regs, dsc, 0, 4, 0);
   else if ((!a && (op1 & 0x17) == 0x02)
 	    || (a && (op1 & 0x17) == 0x02 && !b))
-    return arm_copy_ldr_str_ldrb_strb (gdbarch, insn, regs, dsc, 0, 0, 1);
+    return arm_copy_ldr_str_ldrb_strb (gdbarch, insn, regs, dsc, 0, 4, 1);
   else if ((!a && (op1 & 0x05) == 0x01 && (op1 & 0x17) != 0x03)
 	    || (a && (op1 & 0x05) == 0x01 && (op1 & 0x17) != 0x03 && !b))
-    return arm_copy_ldr_str_ldrb_strb (gdbarch, insn, regs, dsc, 1, 0, 0);
+    return arm_copy_ldr_str_ldrb_strb (gdbarch, insn, regs, dsc, 1, 4, 0);
   else if ((!a && (op1 & 0x17) == 0x03)
 	   || (a && (op1 & 0x17) == 0x03 && !b))
-    return arm_copy_ldr_str_ldrb_strb (gdbarch, insn, regs, dsc, 1, 0, 1);
+    return arm_copy_ldr_str_ldrb_strb (gdbarch, insn, regs, dsc, 1, 4, 1);
   else if ((!a && (op1 & 0x05) == 0x04 && (op1 & 0x17) != 0x06)
 	    || (a && (op1 & 0x05) == 0x04 && (op1 & 0x17) != 0x06 && !b))
     return arm_copy_ldr_str_ldrb_strb (gdbarch, insn, regs, dsc, 0, 1, 0);
