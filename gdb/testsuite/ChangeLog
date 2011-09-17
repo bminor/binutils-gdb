@@ -1,3 +1,9 @@
+2011-09-17  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.base/disp-step-fork.c: New.
+	* gdb.base/disp-step-syscall.exp: New.
+	* gdb.base/disp-step-vfork.c: New.
+
 2011-09-16  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/tasks.exp: Make the expected output for
