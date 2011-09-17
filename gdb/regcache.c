@@ -450,16 +450,32 @@ struct regcache_list
 static struct regcache_list *current_regcache;
 
 struct regcache *
-get_thread_arch_regcache (ptid_t ptid, struct gdbarch *gdbarch)
+get_thread_arch_aspace_regcache (ptid_t ptid, struct gdbarch *gdbarch,
+				 struct address_space *aspace)
 {
   struct regcache_list *list;
   struct regcache *new_regcache;
-  struct address_space *aspace;
 
   for (list = current_regcache; list; list = list->next)
     if (ptid_equal (list->regcache->ptid, ptid)
 	&& get_regcache_arch (list->regcache) == gdbarch)
       return list->regcache;
+
+  new_regcache = regcache_xmalloc_1 (gdbarch, aspace, 0);
+  new_regcache->ptid = ptid;
+
+  list = xmalloc (sizeof (struct regcache_list));
+  list->regcache = new_regcache;
+  list->next = current_regcache;
+  current_regcache = list;
+
+  return new_regcache;
+}
+
+struct regcache *
+get_thread_arch_regcache (ptid_t ptid, struct gdbarch *gdbarch)
+{
+  struct address_space *aspace;
 
   /* For the benefit of "maint print registers" & co when debugging an
      executable, allow dumping the regcache even when there is no
@@ -471,15 +487,7 @@ get_thread_arch_regcache (ptid_t ptid, struct gdbarch *gdbarch)
 	    ? NULL
 	    : target_thread_address_space (ptid));
 
-  new_regcache = regcache_xmalloc_1 (gdbarch, aspace, 0);
-  new_regcache->ptid = ptid;
-
-  list = xmalloc (sizeof (struct regcache_list));
-  list->regcache = new_regcache;
-  list->next = current_regcache;
-  current_regcache = list;
-
-  return new_regcache;
+  return get_thread_arch_aspace_regcache  (ptid, gdbarch, aspace);
 }
 
 static ptid_t current_thread_ptid;
