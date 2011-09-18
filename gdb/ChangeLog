@@ -1,3 +1,8 @@
+2011-09-18  Yao Qi  <yao@codesourcery.com>
+
+	* arm-tdep.c (install_copro_load_store): PC is set 4-byte aligned.
+	(install_b_bl_blx): Likewise.
+
 2011-09-17  Yao Qi  <yao@codesourcery.com>
 
         * arm-tdep.c (install_ldr_str_ldrb_strb): Renamed to ...

@@ -5475,6 +5475,8 @@ install_copro_load_store (struct gdbarch *gdbarch, struct regcache *regs,
 
   dsc->tmp[0] = displaced_read_reg (regs, dsc, 0);
   rn_val = displaced_read_reg (regs, dsc, rn);
+  /* PC should be 4-byte aligned.  */
+  rn_val = rn_val & 0xfffffffc;
   displaced_write_reg (regs, dsc, 0, rn_val, CANNOT_WRITE_PC);
 
   dsc->u.ldst.writeback = writeback;
@@ -5555,10 +5557,15 @@ install_b_bl_blx (struct gdbarch *gdbarch, struct regcache *regs,
   dsc->u.branch.link = link;
   dsc->u.branch.exchange = exchange;
 
+  dsc->u.branch.dest = dsc->insn_addr;
+  if (link && exchange)
+    /* For BLX, offset is computed from the Align (PC, 4).  */
+    dsc->u.branch.dest = dsc->u.branch.dest & 0xfffffffc;
+
   if (dsc->is_thumb)
-    dsc->u.branch.dest = dsc->insn_addr + 4 + offset;
+    dsc->u.branch.dest += 4 + offset;
   else
-    dsc->u.branch.dest = dsc->insn_addr + 8 + offset;
+    dsc->u.branch.dest += 8 + offset;
 
   dsc->cleanup = &cleanup_branch;
 }
