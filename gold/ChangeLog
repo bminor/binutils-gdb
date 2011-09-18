@@ -1,3 +1,12 @@
+2011-09-18  Cary Coutant  <ccoutant@google.com>
+
+	* incremental.cc (can_incremental_update): New function.
+	* incremental.h (can_incremental_update): New function.
+	* layout.cc (Layout::init_fixed_output_section): Call it.
+	(Layout::make_output_section): Don't allow patch space in .eh_frame.
+	* object.cc (Sized_relobj_file::do_layout): Call
+	can_incremental_update.
+
 2011-09-13  Cary Coutant  <ccoutant@google.com>
 
 	* configure.ac: Check for glibc support for gnu_indirect_function

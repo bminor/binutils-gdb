@@ -1344,9 +1344,7 @@ Sized_relobj_file<size, big_endian>::do_layout(Symbol_table* symtab,
 	  Incremental_inputs* incremental_inputs = layout->incremental_inputs();
 	  if (incremental_inputs != NULL
 	      && !discard
-	      && (shdr.get_sh_type() == elfcpp::SHT_PROGBITS
-	          || shdr.get_sh_type() == elfcpp::SHT_NOBITS
-	          || shdr.get_sh_type() == elfcpp::SHT_NOTE))
+	      && can_incremental_update(shdr.get_sh_type()))
 	    {
 	      off_t sh_size = shdr.get_sh_size();
 	      section_size_type uncompressed_size;

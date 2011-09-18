@@ -898,11 +898,10 @@ Layout::init_fixed_output_section(const char* name,
 {
   unsigned int sh_type = shdr.get_sh_type();
 
-  // We preserve the layout of PROGBITS, NOBITS, and NOTE sections.
+  // We preserve the layout of PROGBITS, NOBITS, INIT_ARRAY, FINI_ARRAY,
+  // PRE_INIT_ARRAY, and NOTE sections.
   // All others will be created from scratch and reallocated.
-  if (sh_type != elfcpp::SHT_PROGBITS
-      && sh_type != elfcpp::SHT_NOBITS
-      && sh_type != elfcpp::SHT_NOTE)
+  if (!can_incremental_update(sh_type))
     return NULL;
 
   typename elfcpp::Elf_types<size>::Elf_Addr sh_addr = shdr.get_sh_addr();
@@ -1442,6 +1441,7 @@ Layout::make_output_section(const char* name, elfcpp::Elf_Word type,
       && order != ORDER_FINI
       && order != ORDER_RELRO_LAST
       && order != ORDER_NON_RELRO_FIRST
+      && strcmp(name, ".eh_frame") != 0
       && strcmp(name, ".ctors") != 0
       && strcmp(name, ".dtors") != 0
       && strcmp(name, ".jcr") != 0)
