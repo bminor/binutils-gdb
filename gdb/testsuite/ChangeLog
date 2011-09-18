@@ -1,5 +1,11 @@
 2011-09-17  Yao Qi  <yao@codesourcery.com>
 
+	* lib/gdb.exp (can_single_step_to_signal_handler): New.
+	* gdb.base/kill-after-signal.exp: Call it.  Skip if target doesn't
+	support single step to signal handler.
+
+2011-09-17  Yao Qi  <yao@codesourcery.com>
+
 	* gdb.base/disp-step-fork.c: New.
 	* gdb.base/disp-step-syscall.exp: New.
 	* gdb.base/disp-step-vfork.c: New.

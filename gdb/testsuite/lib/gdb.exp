@@ -1527,6 +1527,22 @@ proc support_complex_tests {} {
     return $support_complex_tests_saved
 }
 
+# Return 1 if target hardware or OS supports single stepping to signal
+# handler, otherwise, return 0.
+
+proc can_single_step_to_signal_handler {} {
+
+    # Targets don't have hardware single step.  On these targets, when
+    # a signal is delivered during software single step, gdb is unable
+    # to determine the next instruction addresses, because start of signal
+    # handler is one of them.
+    if { [istarget "arm*-*-*"] || [istarget "mips*-*-*"] } {
+	return 0
+    }
+
+    return 1
+}
+
 # Return 1 if target is ILP32.
 # This cannot be decided simply from looking at the target string,
 # as it might depend on externally passed compiler options like -m64.

@@ -14,6 +14,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 set testfile "kill-after-signal"
+
+if { ![can_single_step_to_signal_handler] } {
+    untested ${testfile}.exp
+    return
+}
+
 if [prepare_for_testing ${testfile}.exp ${testfile}] {
     return -1
 }
