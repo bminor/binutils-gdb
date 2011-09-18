@@ -1,3 +1,14 @@
+2011-09-18  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.arch/arm-disp-step.S (test_ldr_literal): Test for Thumb
+	instructions.
+	(test_adr_32bit, test_pop_pc): Likewise.
+	(test_ldr_literal_16, test_cbz_cbnz, test_adr): New test for
+	Thumb instructions.
+	* gdb.arch/arm-disp-step.exp (test_ldm_stm_pc): Match $gdb_prompt
+	in gdb_test_multiple.
+	(test_ldr_literal_16, test_cbz_cbnz, test_adr): New.
+
 2011-09-17  Yao Qi  <yao@codesourcery.com>
 
 	* lib/gdb.exp (can_single_step_to_signal_handler): New.

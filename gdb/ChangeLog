@@ -1,4 +1,47 @@
 2011-09-18  Yao Qi  <yao@codesourcery.com>
+	    Ulrich Weigand  <ulrich.weigand@linaro.org>
+
+	Support displaced stepping for Thumb 16-bit insns.
+	* arm-tdep.c (THUMB_NOP) Define.
+	(thumb_copy_unmodified_16bit): New.
+	(thumb_copy_b, thumb_copy_bx_blx_reg): New.
+	(thumb_copy_alu_reg): New.
+	(arm_copy_svc): Move some common code to ...
+	(install_svc): ... here.  New.
+	(thumb_copy_svc): New.
+	(install_pc_relative): New.
+	(thumb_copy_pc_relative_16bit): New.
+	(thumb_decode_pc_relative_16bit): New.
+	(thumb_copy_16bit_ldr_literal): New.
+	(thumb_copy_cbnz_cbz): New.
+	(cleanup_pop_pc_16bit_all): New.
+	(thumb_copy_pop_pc_16bit): New.
+	(thumb_process_displaced_16bit_insn): New.
+	(thumb_process_displaced_32bit_insn): New.
+	(thumb_process_displaced_insn): process thumb instruction.
+
+	Support displaced stepping for Thumb 32-bit insns.
+	* arm-tdep.c (thumb_copy_unmodified_32bit): New.
+	(thumb2_copy_preload): New.
+	(thumb2_copy_copro_load_store): New.
+	(thumb2_copy_b_bl_blx): New.
+	(thumb2_copy_alu_imm): New.
+	(thumb2_copy_load_reg_imm): New.
+	(thumb2_copy_load_literal): New
+	(thumb2_copy_block_xfer): New.
+	(thumb_32bit_copy_undef): New.
+	(thumb_32bit_copy_unpred): New.
+	(thumb2_decode_ext_reg_ld_st): New.
+	(thumb2_decode_svc_copro): New.
+	(decode_thumb_32bit_store_single_data_item): New.
+	(thumb_copy_pc_relative_32bit): New.
+	(thumb_decode_pc_relative_32bit): New.
+	(decode_thumb_32bit_ld_mem_hints): New.
+	(thumb2_copy_table_branch): New
+	(thumb_process_displaced_32bit_insn): Process Thumb 32-bit
+	instructions.
+
+2011-09-18  Yao Qi  <yao@codesourcery.com>
 
 	* arm-tdep.c (install_copro_load_store): PC is set 4-byte aligned.
 	(install_b_bl_blx): Likewise.

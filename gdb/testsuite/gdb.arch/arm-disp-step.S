@@ -48,20 +48,32 @@ test_ret_end:
 	bl test_ldm_stm_pc
 #endif
 
-	/* Test ldrX literal in ARM */
-#if !defined (__thumb__)
+	/* Test ldrX literal in ARM and Thumb-2 */
+#if !defined (__thumb__) || defined(__thumb2__)
 	bl test_ldr_literal
 #endif
 
-	/* Test 32-bit adr in ARM */
-#if !defined(__thumb__)
+	/* Test ldr literal in Thumb */
+#if defined(__thumb__)
+	bl test_ldr_literal_16
+#endif
+
+	/* Test cbnz/cbz in Thumb-2 */
+#if defined(__thumb2__)
+	bl test_cbz_cbnz
+#endif
+
+	/* Test adr in Thumb and Thumb-2 */
+#if defined(__thumb__)
+	bl test_adr
+#endif
+	/* Test 32-bit adr in ARM and Thumb-2 */
+#if defined(__thumb2__) || !defined(__thumb__)
 	bl test_adr_32bit
 #endif
 
-#if !defined(__thumb__)
 	bl test_pop_pc
-#endif
-
+	
 	/* Test str in ARM mode and Thumb-2 */
 #if !defined(__thumb__)
 	bl test_str_pc
@@ -136,8 +148,8 @@ test_ldm_stm_pc_ret:
 	.word	test_ldm_stm_pc_ret
 	.size test_ldm_stm_pc, .-test_ldm_stm_pc
 #endif
-
-#if !defined (__thumb__)
+	
+#if !defined (__thumb__) || defined(__thumb2__)
 	.global test_ldr_literal
 	.type test_ldr_literal, %function
 test_ldr_literal:
@@ -154,8 +166,66 @@ test_ldr_literal_end:
 	.size test_ldr_literal, .-test_ldr_literal
 #endif
 
+#if defined(__thumb__)
+	.global test_ldr_literal_16
+	.code   16
+	.thumb_func
+test_ldr_literal_16:
+	ldr	r0, .L2
+	.global test_ldr_literal_16_end
+test_ldr_literal_16_end:
+	bx lr
+	.align	2
+.L2:
+	.word	test_ldr_literal_16
+	.size test_ldr_literal_16, .-test_ldr_literal_16
+#endif
 
-#if !defined(__thumb__)
+#if defined(__thumb2__)
+	.global test_cbz_cbnz
+	.code   16
+	.thumb_func
+test_cbz_cbnz:
+	movs 	r0, #0
+	.global test_zero_cbnz
+test_zero_cbnz:
+	cbnz	r0, .L3
+	.global test_zero_cbz
+test_zero_cbz:
+	cbz	r0, .L3
+.L3:
+	movs	r0, #1
+	.global test_non_zero_cbz
+test_non_zero_cbz:
+	cbz	r0, .L4
+	.global test_non_zero_cbnz
+test_non_zero_cbnz:
+	cbnz	r0, .L4
+	nop
+.L4:
+	.global test_cbz_cbnz_end
+test_cbz_cbnz_end:
+	bx lr
+	.size test_cbz_cbnz, .-test_cbz_cbnz
+#endif
+
+#if defined(__thumb__)
+	.global test_adr
+	.code   16
+	.thumb_func
+test_adr:
+	adr	r0, .L8
+	nop
+	nop
+	nop
+.L8:
+	.global test_adr_end
+test_adr_end:
+	bx lr
+	.size test_adr, .-test_adr
+#endif
+
+#if defined(__thumb2__) || !defined(__thumb__)
 	.global test_adr_32bit
 #if defined(__thumb2__)
 	.code   16
@@ -184,22 +254,90 @@ test_adr_32bit_end:
 #endif
 
 test_pop_pc:
-	ldr     r1, .L5
+	ldr     r1, .L1_right
+	ldr	r2, .L1_wrong
+#if defined(__thumb__)
+	movs    r0, #1
+	orrs    r1, r0
+	orrs	r2, r0
+#endif
+	push    {r1}
+	push    {r2}
+	.global test_pop_pc_1
+test_pop_pc_1:
+	pop     {r1, pc}
+
+test_pop_pc_2_start:
+	ldr r1, .L2_right
 #if defined(__thumb__)
 	movs    r0, #1
 	orrs    r1, r0
 #endif
-	push    {r1}
-	push    {r1}
-	.global test_pop_pc_1
-test_pop_pc_1:
-	pop     {r1, pc}
+	push	{r1}
+	.global test_pop_pc_2
+test_pop_pc_2:
+	pop	{pc}
+
+	/* Test pop instruction with full register list.  */
+test_pop_pc_3_start:
+	ldr     r1, .L3_right
+	ldr	r2, .L3_wrong
+#if defined(__thumb__)
+	movs    r0, #1
+	orrs    r1, r0
+	orrs	r2, r0
+#endif
+	push 	{r7}
+	push    {r1} /* Push the right address so that PC will get it.  */
+	/* Push the wrong address so r0-r7 will get the wrong a	ddress.  If PC
+	is set from any of them, we can get a FAIL.  */
+	push	{r2} 
+	push	{r2}
+	push	{r2}
+	push	{r2}
+	push	{r2}
+	push	{r2}
+	push	{r2}
+	push	{r2}
+test_pop_pc_3:
+	pop	{r0,r1,r2,r3,r4,r5,r6,r7,pc}
 	.global test_pop_pc_ret
 test_pop_pc_ret:
+	pop	{r7}
 	bx lr
+
+	.global test_pop_pc_1_right
+test_pop_pc_1_right:
+	b	test_pop_pc_2_start /* right */
+	.global test_pop_pc_1_wrong
+test_pop_pc_1_wrong:
+	b	test_pop_pc_2_start /* wrong */
+	.global test_pop_pc_2_right
+test_pop_pc_2_right:
+	b	test_pop_pc_3_start /* right */
+	.global test_pop_pc_2_wrong
+test_pop_pc_2_wrong:
+	b	test_pop_pc_3_start /* wrong */
+	.global test_pop_pc_3_right
+test_pop_pc_3_right:
+	b	test_pop_pc_ret /* right */
+	.global test_pop_pc_3_wrong
+test_pop_pc_3_wrong:
+	b	test_pop_pc_ret /* wrong */
+	
 	.align  2
-.L5:
-	.word   test_pop_pc_ret
+.L1_right:
+	.word   test_pop_pc_1_right
+.L1_wrong:
+	.word	test_pop_pc_1_wrong
+.L2_right:
+	.word   test_pop_pc_2_right
+.L2_wrong:
+	.word	test_pop_pc_2_wrong
+.L3_right:
+	.word   test_pop_pc_3_right
+.L3_wrong:
+	.word	test_pop_pc_3_wrong
 	.size test_pop_pc, .-test_pop_pc
 
 #if !defined(__thumb__)
