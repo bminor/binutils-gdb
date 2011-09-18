@@ -1,3 +1,8 @@
+2011-09-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/13196
+	* dwarf.c (display_debug_aranges): Check zero address size.
+
 2011-09-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/13180

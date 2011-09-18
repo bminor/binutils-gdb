@@ -4215,6 +4215,13 @@ display_debug_aranges (struct dwarf_section *section,
 
       address_size = arange.ar_pointer_size + arange.ar_segment_size;
 
+      if (address_size == 0)
+	{
+	  error (_("Invalid address size in %s section!\n"),
+		 section->name);
+	  break;
+	}
+
       /* The DWARF spec does not require that the address size be a power
 	 of two, but we do.  This will have to change if we ever encounter
 	 an uneven architecture.  */
