@@ -81,7 +81,7 @@ enum Incremental_shlib_symbol_flags
 
 static const int INCREMENTAL_SHLIB_SYM_FLAGS_SHIFT = 30;
 
-// Return TRUE if a section of type SH_TYPE will can be updated in place
+// Return TRUE if a section of type SH_TYPE can be updated in place
 // during an incremental update.
 bool
 can_incremental_update(unsigned int sh_type);

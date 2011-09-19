@@ -161,7 +161,7 @@ Incremental_binary::error(const char* format, ...) const
   va_end(args);
 }
 
-// Return TRUE if a section of type SH_TYPE will can be updated in place
+// Return TRUE if a section of type SH_TYPE can be updated in place
 // during an incremental update.  We can update sections of type PROGBITS,
 // NOBITS, INIT_ARRAY, FINI_ARRAY, PREINIT_ARRAY, and NOTE.  All others
 // will be regenerated.
