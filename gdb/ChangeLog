@@ -175,7 +175,7 @@
 	(inf_has_multiple_thread_cb): New function.
 	(inf_has_multiple_threads): New function.
 
-2011-09-15  Kevin Pouget <kevin.pouget@st.com>
+2011-09-15  Kevin Pouget  <kevin.pouget@st.com>
 
 	PR Python/12692 Add gdb.selected_inferior() to Python interface.
 	* python/py-inferior.c (GdbMethods): New Python method definition.
@@ -197,7 +197,7 @@
 
 2011-09-15  Kevin Pouget  <kevin.pouget@st.com>
 
-	* MAINTAINERS (Right After Approval): Add myself to the list
+	* MAINTAINERS (Write After Approval): Add myself to the list
 
 2011-09-14  Pedro Alves  <pedro@codesourcery.com>
 
