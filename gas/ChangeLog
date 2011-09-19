@@ -1,3 +1,8 @@
+2011-09-19  Tristan Gingold  <gingold@adacore.com>
+
+	* config/tc-alpha.c (insert_operand): Call as_bad_value_out_of_range
+	instead of as_warn_out_of_range.
+
 2011-09-08  Mark Fortescue <mark@mtfhpc.demon.co.uk>
 
 	* config/tc-sparc.c (sparc_ip): Handle 'i' + r<0..31>

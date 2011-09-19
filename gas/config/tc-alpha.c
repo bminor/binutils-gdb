@@ -1995,7 +1995,7 @@ insert_operand (unsigned insn,
 	}
 
       if (val < min || val > max)
-	as_warn_value_out_of_range (_("operand"), val, min, max, file, line);
+	as_bad_value_out_of_range (_("operand"), val, min, max, file, line);
     }
 
   if (operand->insert)
