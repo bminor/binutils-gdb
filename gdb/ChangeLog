@@ -1,3 +1,9 @@
+2011-09-19  Doug Evans  <dje@google.com>
+
+	* python/py-auto-load.c (source_section_scripts): Fix file
+	descriptor leak.
+	* python/python.c (source_python_script_for_objfile): Tweak comments.
+
 2011-09-18  Yao Qi  <yao@codesourcery.com>
 	    Ulrich Weigand  <ulrich.weigand@linaro.org>
 

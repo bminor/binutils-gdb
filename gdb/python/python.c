@@ -903,7 +903,10 @@ gdbpy_progspaces (PyObject *unused1, PyObject *unused2)
 static struct objfile *gdbpy_current_objfile;
 
 /* Set the current objfile to OBJFILE and then read STREAM,FILE as
-   Python code.  */
+   Python code.
+   STREAM is left open, it is up to the caller to close it.
+   If an exception occurs python will print the traceback and
+   clear the error indicator.  */
 
 void
 source_python_script_for_objfile (struct objfile *objfile,
@@ -914,8 +917,6 @@ source_python_script_for_objfile (struct objfile *objfile,
   cleanups = ensure_python_env (get_objfile_arch (objfile), current_language);
   gdbpy_current_objfile = objfile;
 
-  /* Note: If an exception occurs python will print the traceback and
-     clear the error indicator.  */
   PyRun_SimpleFile (stream, file);
 
   do_cleanups (cleanups);

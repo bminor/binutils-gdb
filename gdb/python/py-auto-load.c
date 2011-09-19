@@ -296,9 +296,6 @@ source_section_scripts (struct objfile *objfile, const char *source_name,
       in_hash_table = maybe_add_script (pspace_info->loaded_scripts, file,
 					opened ? full_path : NULL);
 
-      if (opened)
-	free (full_path);
-
       if (! opened)
 	{
 	  /* We don't throw an error, the program is still debuggable.  */
@@ -310,12 +307,15 @@ Use `info auto-load-scripts [REGEXP]' to list them."),
 		       GDBPY_AUTO_SECTION_NAME, objfile->name);
 	      pspace_info->script_not_found_warning_printed = TRUE;
 	    }
-	  continue;
 	}
-
-      /* If this file is not currently loaded, load it.  */
-      if (! in_hash_table)
-	source_python_script_for_objfile (objfile, stream, file);
+      else
+	{
+	  /* If this file is not currently loaded, load it.  */
+	  if (! in_hash_table)
+	    source_python_script_for_objfile (objfile, stream, file);
+	  fclose (stream);
+	  free (full_path);
+	}
     }
 }
 
