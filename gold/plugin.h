@@ -243,7 +243,7 @@ class Plugin_manager
   // and we are still in the initial input phase.
   bool
   should_defer_layout() const
-  { return !this->objects_.empty() && !this->in_replacement_phase_; }
+  { return this->any_claimed_ && !this->in_replacement_phase_; }
 
   // Add a regular object to the deferred layout list.  These are
   // objects whose layout has been deferred until after the

@@ -1,3 +1,7 @@
+2011-09-19  Sriraman Tallam  <tmsriram@google.com>
+
+	* plugin.h (should_defer_layout): Modify to check for any_claimed_.
+
 2011-09-19  Cary Coutant  <ccoutant@google.com>
 
 	* incremental.cc (can_incremental_update): Fix typo in comment.
