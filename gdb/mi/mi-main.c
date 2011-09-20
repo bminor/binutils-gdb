@@ -2266,7 +2266,7 @@ mi_load_progress (const char *section_name,
     }
 
   xfree (uiout);
-  uiout = saved_uiout;
+  current_uiout = saved_uiout;
 }
 
 static void 
