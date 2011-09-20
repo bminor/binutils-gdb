@@ -1,6 +1,6 @@
 2011-09-20  Alan Modra  <amodra@gmail.com>
 
-	PR ld/12301
+	PR ld/13201
 	* ldlang.h (lang_input_statement_type): Add "reload" bitfield.
 	Clarify comments.
 	* ldlang.c (new_afile): Init new field.
