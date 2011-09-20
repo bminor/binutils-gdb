@@ -1,3 +1,12 @@
+2011-09-20  Alan Modra  <amodra@gmail.com>
+
+	PR ld/12301
+	* ldlang.h (lang_input_statement_type): Add "reload" bitfield.
+	Clarify comments.
+	* ldlang.c (new_afile): Init new field.
+	(load_symbols): Don't call ldlang_add_file when reloading.
+	(open_input_bfds): Reload as-needed libs during plugin rescan.
+
 2011-09-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/12975

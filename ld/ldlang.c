@@ -1133,6 +1133,7 @@ new_afile (const char *name,
 #ifdef ENABLE_PLUGINS
   p->claimed = FALSE;
   p->claim_archive = FALSE;
+  p->reload = FALSE;
 #endif /* ENABLE_PLUGINS */
 
   lang_statement_append (&input_file_chain,
@@ -2780,7 +2781,10 @@ load_symbols (lang_input_statement_type *entry,
       break;
 
     case bfd_object:
-      ldlang_add_file (entry);
+#ifdef ENABLE_PLUGINS
+      if (!entry->reload)
+#endif
+	ldlang_add_file (entry);
       if (trace_files || trace_file_tries)
 	info_msg ("%I\n", entry);
       break;
@@ -3272,6 +3276,18 @@ open_input_bfds (lang_statement_union_type *s, enum open_bfd_mode mode)
 		  && bfd_check_format (s->input_statement.the_bfd,
 				       bfd_archive))
 		s->input_statement.loaded = FALSE;
+#ifdef ENABLE_PLUGINS
+	      /* When rescanning, reload --as-needed shared libs.  */
+	      else if ((mode & OPEN_BFD_RESCAN) != 0
+		       && plugin_insert == NULL
+		       && s->input_statement.loaded
+		       && s->input_statement.add_DT_NEEDED_for_regular
+		       && ((s->input_statement.the_bfd->flags) & DYNAMIC) != 0)
+		{
+		  s->input_statement.loaded = FALSE;
+		  s->input_statement.reload = TRUE;
+		}
+#endif
 
 	      os_tail = lang_output_section_statement.tail;
 	      lang_list_init (&add);
