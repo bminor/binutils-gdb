@@ -1,5 +1,17 @@
 2011-11-15  Ulrich Weigand  <ulrich.weigand@linaro.org>
 
+	* linux-arm-low.c (struct arm_linux_hwbp_cap): Remove.
+	(arm_linux_hwbp_cap): New static variable.
+	(arm_linux_get_hwbp_cap): Replace by ...
+	(arm_linux_init_hwbp_cap): ... this new function.
+	(arm_linux_get_hw_breakpoint_count): Use arm_linux_hwbp_cap.
+	(arm_linux_get_hw_watchpoint_count): Likewise.
+	(arm_linux_get_hw_watchpoint_max_length): Likewise.
+	(arm_arch_setup): Call arm_linux_init_hwbp_cap.
+	(arm_prepare_to_resume): Use perror_with_name instead of error.
+
+2011-11-15  Ulrich Weigand  <ulrich.weigand@linaro.org>
+
 	* linux-arm-low.c: Include <signal.h>.
 	(PTRACE_GETHBPREGS, PTRACE_SETHBPREGS): Define if necessary.
 	(struct arm_linux_hwbp_cap): New data type.

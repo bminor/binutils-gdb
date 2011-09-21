@@ -55,13 +55,13 @@ void init_registers_arm_with_neon (void);
 #endif
 
 /* Information describing the hardware breakpoint capabilities.  */
-struct arm_linux_hwbp_cap
+static struct
 {
   unsigned char arch;
   unsigned char max_wp_length;
   unsigned char wp_count;
   unsigned char bp_count;
-};
+} arm_linux_hwbp_cap;
 
 /* Enum describing the different types of ARM hardware break-/watch-points.  */
 typedef enum
@@ -341,72 +341,49 @@ ps_get_thread_area (const struct ps_prochandle *ph,
 }
 
 
-/* Get hold of the Hardware Breakpoint information for the target we are
-   attached to.  Returns NULL if the kernel doesn't support Hardware
-   breakpoints at all, or a pointer to the information structure.  */
-static const struct arm_linux_hwbp_cap *
-arm_linux_get_hwbp_cap (void)
+/* Query Hardware Breakpoint information for the target we are attached to
+   (using PID as ptrace argument) and set up arm_linux_hwbp_cap.  */
+static void
+arm_linux_init_hwbp_cap (int pid)
 {
-  /* The info structure we return.  */
-  static struct arm_linux_hwbp_cap info;
+  unsigned int val;
 
-  /* Is INFO in a good state?  -1 means that no attempt has been made to
-     initialize INFO; 0 means an attempt has been made, but it failed; 1
-     means INFO is in an initialized state.  */
-  static int available = -1;
+  if (ptrace (PTRACE_GETHBPREGS, pid, 0, &val) < 0)
+    return;
 
-  if (available == -1)
-    {
-      int pid = lwpid_of (get_thread_lwp (current_inferior));
-      unsigned int val;
+  arm_linux_hwbp_cap.arch = (unsigned char)((val >> 24) & 0xff);
+  if (arm_linux_hwbp_cap.arch == 0)
+    return;
 
-      if (ptrace (PTRACE_GETHBPREGS, pid, 0, &val) < 0)
-	available = 0;
-      else
-	{
-	  info.arch = (unsigned char)((val >> 24) & 0xff);
-	  info.max_wp_length = (unsigned char)((val >> 16) & 0xff);
-	  info.wp_count = (unsigned char)((val >> 8) & 0xff);
-	  info.bp_count = (unsigned char)(val & 0xff);
-	  available = (info.arch != 0);
-	}
+  arm_linux_hwbp_cap.max_wp_length = (unsigned char)((val >> 16) & 0xff);
+  arm_linux_hwbp_cap.wp_count = (unsigned char)((val >> 8) & 0xff);
+  arm_linux_hwbp_cap.bp_count = (unsigned char)(val & 0xff);
 
-      if (available)
-	{
-	  if (info.wp_count > MAX_WPTS)
-	    internal_error (__FILE__, __LINE__,
-			    "Unsupported number of watchpoints");
-	  if (info.bp_count > MAX_BPTS)
-	    internal_error (__FILE__, __LINE__,
-			    "Unsupported number of breakpoints");
-	}
-    }
-
-  return available == 1 ? &info : NULL;
+  if (arm_linux_hwbp_cap.wp_count > MAX_WPTS)
+    internal_error (__FILE__, __LINE__, "Unsupported number of watchpoints");
+  if (arm_linux_hwbp_cap.bp_count > MAX_BPTS)
+    internal_error (__FILE__, __LINE__, "Unsupported number of breakpoints");
 }
 
 /* How many hardware breakpoints are available?  */
 static int
 arm_linux_get_hw_breakpoint_count (void)
 {
-  const struct arm_linux_hwbp_cap *cap = arm_linux_get_hwbp_cap ();
-  return cap != NULL ? cap->bp_count : 0;
+  return arm_linux_hwbp_cap.bp_count;
 }
 
 /* How many hardware watchpoints are available?  */
 static int
 arm_linux_get_hw_watchpoint_count (void)
 {
-  const struct arm_linux_hwbp_cap *cap = arm_linux_get_hwbp_cap ();
-  return cap != NULL ? cap->wp_count : 0;
+  return arm_linux_hwbp_cap.wp_count;
 }
 
 /* Maximum length of area watched by hardware watchpoint.  */
 static int
 arm_linux_get_hw_watchpoint_max_length (void)
 {
-  const struct arm_linux_hwbp_cap *cap = arm_linux_get_hwbp_cap ();
-  return cap != NULL ? cap->max_wp_length : 0;
+  return arm_linux_hwbp_cap.max_wp_length;
 }
 
 /* Initialize an ARM hardware break-/watch-point control register value.
@@ -735,12 +712,12 @@ arm_prepare_to_resume (struct lwp_info *lwp)
 	if (arm_hwbp_control_is_enabled (proc_info->bpts[i].control))
 	  if (ptrace (PTRACE_SETHBPREGS, pid, ((i << 1) + 1),
 	      &proc_info->bpts[i].address) < 0)
-	    error (_("Unexpected error setting breakpoint address"));
+	    perror_with_name ("Unexpected error setting breakpoint address");
 
 	if (arm_hwbp_control_is_initialized (proc_info->bpts[i].control))
 	  if (ptrace (PTRACE_SETHBPREGS, pid, ((i << 1) + 2),
 	      &proc_info->bpts[i].control) < 0)
-	    error (_("Unexpected error setting breakpoint"));
+	    perror_with_name ("Unexpected error setting breakpoint");
 
 	lwp_info->bpts_changed[i] = 0;
       }
@@ -753,12 +730,12 @@ arm_prepare_to_resume (struct lwp_info *lwp)
 	if (arm_hwbp_control_is_enabled (proc_info->wpts[i].control))
 	  if (ptrace (PTRACE_SETHBPREGS, pid, -((i << 1) + 1),
 	      &proc_info->wpts[i].address) < 0)
-	    error (_("Unexpected error setting watchpoint address"));
+	    perror_with_name ("Unexpected error setting watchpoint address");
 
 	if (arm_hwbp_control_is_initialized (proc_info->wpts[i].control))
 	  if (ptrace (PTRACE_SETHBPREGS, pid, -((i << 1) + 2),
 	      &proc_info->wpts[i].control) < 0)
-	    error (_("Unexpected error setting watchpoint"));
+	    perror_with_name ("Unexpected error setting watchpoint");
 
 	lwp_info->wpts_changed[i] = 0;
       }
@@ -790,6 +767,11 @@ arm_get_hwcap (unsigned long *valp)
 static void
 arm_arch_setup (void)
 {
+  int pid = lwpid_of (get_thread_lwp (current_inferior));
+
+  /* Query hardware watchpoint/breakpoint capabilities.  */
+  arm_linux_init_hwbp_cap (pid);
+
   arm_hwcap = 0;
   if (arm_get_hwcap (&arm_hwcap) == 0)
     {
@@ -805,7 +787,6 @@ arm_arch_setup (void)
 
   if (arm_hwcap & HWCAP_VFP)
     {
-      int pid;
       char *buf;
 
       /* NEON implies either no VFP, or VFPv3-D32.  We only support
@@ -819,7 +800,6 @@ arm_arch_setup (void)
 
       /* Now make sure that the kernel supports reading these
 	 registers.  Support was added in 2.6.30.  */
-      pid = lwpid_of (get_thread_lwp (current_inferior));
       errno = 0;
       buf = xmalloc (32 * 8 + 4);
       if (ptrace (PTRACE_GETVFPREGS, pid, 0, buf) < 0
