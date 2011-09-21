@@ -112,7 +112,7 @@ responsibility among the other maintainers.
   SCORE		   Mei Ligang <ligang@sunnorth.com.cn>
   SH		   Alexandre Oliva <aoliva@redhat.com>
   SH		   Kaz Kojima <kkojima@rr.iij4u.or.jp>
-  SPARC		   Jakub Jelinek <jakub@redhat.com>
+  SPARC		   David S. Miller <davem@davemloft.net>
   SPU		   Alan Modra <amodra@gmail.com>
   TIC4X            Svein Seldal <svein@dev.seldal.com>
   TIC54X           Timothy Wall <twall@alum.mit.edu>
