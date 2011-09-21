@@ -41,7 +41,7 @@ extern void command_loop (void);
 extern int quit_confirm (void);
 extern void quit_force (char *, int);
 extern void quit_command (char *, int);
-extern int quit_cover (void *);
+extern void quit_cover (void);
 extern void execute_command (char *, int);
 
 /* Prepare for execution of a command.

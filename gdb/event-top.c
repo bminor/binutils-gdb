@@ -870,9 +870,25 @@ handle_sighup (int sig)
 static void
 async_disconnect (gdb_client_data arg)
 {
-  catch_errors (quit_cover, NULL,
-		"Could not kill the program being debugged",
-		RETURN_MASK_ALL);
+  volatile struct gdb_exception exception;
+
+  TRY_CATCH (exception, RETURN_MASK_ALL)
+    {
+      quit_cover ();
+    }
+
+  if (exception.reason < 0)
+    {
+      fputs_filtered ("Could not kill the program being debugged",
+		      gdb_stderr);
+      exception_print (gdb_stderr, exception);
+    }
+
+  TRY_CATCH (exception, RETURN_MASK_ALL)
+    {
+      pop_all_targets (1);
+    }
+
   signal (SIGHUP, SIG_DFL);	/*FIXME: ???????????  */
   raise (SIGHUP);
 }

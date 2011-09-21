@@ -288,14 +288,13 @@ void (*deprecated_context_hook) (int id);
 /* NOTE 1999-04-29: This function will be static again, once we modify
    gdb to use the event loop as the default command loop and we merge
    event-top.c into this file, top.c.  */
-/* static */ int
-quit_cover (void *s)
+/* static */ void
+quit_cover (void)
 {
   caution = 0;			/* Throw caution to the wind -- we're exiting.
 				   This prevents asking the user dumb 
 				   questions.  */
   quit_command ((char *) 0, 0);
-  return 0;
 }
 #endif /* defined SIGHUP */
 

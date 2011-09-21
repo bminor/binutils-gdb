@@ -1,3 +1,11 @@
+2011-09-21  Joseph Myers  <joseph@codesourcery.com>
+
+	* event-top.c (async_disconnect): If an exception is thrown from
+	quit_cover, call pop_all_targets.  Use TRY_CATCH instead of
+	catch_errors.
+	* top.c (quit_cover): Return void and take no arguments.
+	* top.h (quit_cover): Update prototype.
+
 2011-09-20  Joseph Myers  <joseph@codesourcery.com>
 
 	* mi/mi-main.c (mi_load_progress): Restore saved_uiout value to
