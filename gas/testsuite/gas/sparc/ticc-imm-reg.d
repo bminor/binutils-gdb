@@ -1,4 +1,4 @@
-#as: -Av8
+#as: -32 -Av8
 #objdump: -dr
 #name: software traps
 
@@ -6,7 +6,7 @@
 
 Disassembly of section .text:
 
-00000000 <foo>:
+0+ <foo>:
    0:	91 d2 00 00 	ta  %o0
    4:	91 d2 00 0a 	ta  %o0 \+ %o2
    8:	91 d4 20 0a 	ta  %l0 \+ 0xa

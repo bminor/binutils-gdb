@@ -1,4 +1,4 @@
-#as: -Av8
+#as: -32 -Av8
 #objdump: -dr
 #name: V8 mov/wr aliases
 
@@ -6,7 +6,7 @@
 
 Disassembly of section .text:
 
-00000000 <foo>:
+0+ <foo>:
    0:	83 80 00 10 	mov  %l0, %asr1
    4:	81 80 00 10 	mov  %l0, %y
    8:	81 88 00 10 	mov  %l0, %psr

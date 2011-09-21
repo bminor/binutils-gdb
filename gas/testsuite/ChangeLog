@@ -3,6 +3,11 @@
 	* gas/sparc/hpcvis3.s: Update for fixed fchksum16 mnemonic.
 	* gas/sparc/hpcvis3.d: Likewise.
 
+	* gas/sparc/imm-plus-rreg.d: Fix address regex for 64-bit.
+	* gas/sparc/save-args.d: Likewise.
+	* gas/sparc/ticc-imm-reg.d: Likewise, add -32 to options.
+	* gas/sparc/v8-movwr-imm.d: Likewise.
+
 2011-09-08  Mark Fortescue <mark@mtfhpc.demon.co.uk>
 
 	* gas/sparc/imm-plus-rreg.[sd]: New test.
