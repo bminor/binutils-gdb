@@ -1,4 +1,4 @@
-2011-11-15  Ulrich Weigand  <ulrich.weigand@linaro.org>
+2011-09-21  Ulrich Weigand  <ulrich.weigand@linaro.org>
 
 	* linux-arm-low.c (struct arm_linux_hwbp_cap): Remove.
 	(arm_linux_hwbp_cap): New static variable.
@@ -10,7 +10,7 @@
 	(arm_arch_setup): Call arm_linux_init_hwbp_cap.
 	(arm_prepare_to_resume): Use perror_with_name instead of error.
 
-2011-11-15  Ulrich Weigand  <ulrich.weigand@linaro.org>
+2011-09-21  Ulrich Weigand  <ulrich.weigand@linaro.org>
 
 	* linux-arm-low.c: Include <signal.h>.
 	(PTRACE_GETHBPREGS, PTRACE_SETHBPREGS): Define if necessary.
