@@ -1,3 +1,35 @@
+2011-11-15  Ulrich Weigand  <ulrich.weigand@linaro.org>
+
+	* linux-arm-low.c: Include <signal.h>.
+	(PTRACE_GETHBPREGS, PTRACE_SETHBPREGS): Define if necessary.
+	(struct arm_linux_hwbp_cap): New data type.
+	(arm_hwbp_type, arm_hwbp_control_t): New typedefs.
+	(struct arm_linux_hw_breakpoint): New data type.
+	(MAX_BPTS, MAX_WPTS): Define.
+	(struct arch_process_info, struct arch_lwp_info): New data types.
+	(arm_linux_get_hwbp_cap): New function.
+	(arm_linux_get_hw_breakpoint_count): Likewise.
+	(arm_linux_get_hw_watchpoint_count): Likewise.
+	(arm_linux_get_hw_watchpoint_max_length): Likewise.
+	(arm_hwbp_control_initialize): Likewise.
+	(arm_hwbp_control_is_enabled): Likewise.
+	(arm_hwbp_control_is_initialized): Likewise.
+	(arm_hwbp_control_disable): Likewise.
+	(arm_linux_hw_breakpoint_equal): Likewise.
+	(arm_linux_hw_point_initialize): Likewise.
+	(struct update_registers_data): New data structure.
+	(update_registers_callback: New function.
+	(arm_insert_point): Likewise.
+	(arm_remove_point): Likewise.
+	(arm_stopped_by_watchpoint): Likewise.
+	(arm_stopped_data_address): Likewise.
+	(arm_new_process): Likewise.
+	(arm_new_thread): Likewise.
+	(arm_prepare_to_resume): Likewise.
+	(the_low_target): Register arm_insert_point, arm_remove_point,
+	arm_stopped_by_watchpoint, arm_stopped_data_address, arm_new_process,
+	arm_new_thread, and arm_prepare_to_resume.
+
 2011-09-15  Stan Shebs  <stan@codesourcery.com>
 
 	* server.h (struct emit_ops): Add compare-goto fields.
