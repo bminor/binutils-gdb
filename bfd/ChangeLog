@@ -1,3 +1,9 @@
+2011-09-21  Tristan Gingold  <gingold@adacore.com>
+
+	* mach-o.c (bfd_mach_o_convert_section_name_to_bfd): Add comment.
+	Deals with size limited strings.
+	(bfd_mach_o_build_commands): Initialize more fields.
+
 2011-09-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/13177

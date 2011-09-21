@@ -183,6 +183,9 @@ bfd_mach_o_normalize_section_name (const char *segname, const char *sectname,
     }
 }
 
+/* Convert Mach-O section name to BFD.  Try to use standard names, otherwise
+   forge a new name.  SEGNAME and SECTNAME are 16 bytes strings.  */
+
 static void
 bfd_mach_o_convert_section_name_to_bfd
   (bfd *abfd, const char *segname, const char *sectname,
@@ -199,7 +202,7 @@ bfd_mach_o_convert_section_name_to_bfd
   if (*name)
     return;
 
-  len = strlen (segname) + 1 + strlen (sectname) + 1;
+  len = 16 + 1 + 16 + 1;
 
   /* Put "LC_SEGMENT." prefix if the segment name is weird (ie doesn't start
      with an underscore.  */
@@ -214,7 +217,7 @@ bfd_mach_o_convert_section_name_to_bfd
   res = bfd_alloc (abfd, len);
   if (res == NULL)
     return;
-  snprintf (res, len, "%s%s.%s", pfx, segname, sectname);
+  snprintf (res, len, "%s%.16s.%.16s", pfx, segname, sectname);
   *name = res;
   *flags = SEC_NO_FLAGS;
 }
@@ -1406,6 +1409,8 @@ bfd_mach_o_build_commands (bfd *abfd)
     | BFD_MACH_O_PROT_EXECUTE;
   seg->initprot = seg->maxprot;
   seg->flags = 0;
+  seg->sect_head = NULL;
+  seg->sect_tail = NULL;
 
   /* Create Mach-O sections.  */
   target_index = 0;
