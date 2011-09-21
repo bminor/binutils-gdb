@@ -11096,6 +11096,88 @@ display_power_gnu_attribute (unsigned char * p, int tag)
   return p;
 }
 
+static void
+display_sparc_hwcaps (int mask)
+{
+  if (mask)
+    {
+      int first = 1;
+      if (mask & ELF_SPARC_HWCAP_MUL32)
+	fputs ("mul32", stdout), first = 0;
+      if (mask & ELF_SPARC_HWCAP_DIV32)
+	printf ("%sdiv32", first ? "" : "|"), first = 0;
+      if (mask & ELF_SPARC_HWCAP_FSMULD)
+	printf ("%sfsmuld", first ? "" : "|"), first = 0;
+      if (mask & ELF_SPARC_HWCAP_V8PLUS)
+	printf ("%sv8plus", first ? "" : "|"), first = 0;
+      if (mask & ELF_SPARC_HWCAP_POPC)
+	printf ("%spopc", first ? "" : "|"), first = 0;
+      if (mask & ELF_SPARC_HWCAP_VIS)
+	printf ("%svis", first ? "" : "|"), first = 0;
+      if (mask & ELF_SPARC_HWCAP_VIS2)
+	printf ("%svis2", first ? "" : "|"), first = 0;
+      if (mask & ELF_SPARC_HWCAP_ASI_BLK_INIT)
+	printf ("%sASIBlkInit", first ? "" : "|"), first = 0;
+      if (mask & ELF_SPARC_HWCAP_FMAF)
+	printf ("%sfmaf", first ? "" : "|"), first = 0;
+      if (mask & ELF_SPARC_HWCAP_VIS3)
+	printf ("%svis3", first ? "" : "|"), first = 0;
+      if (mask & ELF_SPARC_HWCAP_HPC)
+	printf ("%shpc", first ? "" : "|"), first = 0;
+      if (mask & ELF_SPARC_HWCAP_RANDOM)
+	printf ("%srandom", first ? "" : "|"), first = 0;
+      if (mask & ELF_SPARC_HWCAP_TRANS)
+	printf ("%strans", first ? "" : "|"), first = 0;
+      if (mask & ELF_SPARC_HWCAP_FJFMAU)
+	printf ("%sfjfmau", first ? "" : "|"), first = 0;
+      if (mask & ELF_SPARC_HWCAP_IMA)
+	printf ("%sima", first ? "" : "|"), first = 0;
+      if (mask & ELF_SPARC_HWCAP_ASI_CACHE_SPARING)
+	printf ("%scspare", first ? "" : "|"), first = 0;
+    }
+  else
+    fputc('0', stdout);
+  fputc('\n', stdout);
+}
+
+static unsigned char *
+display_sparc_gnu_attribute (unsigned char * p, int tag)
+{
+  int type;
+  unsigned int len;
+  int val;
+
+  if (tag == Tag_GNU_Sparc_HWCAPS)
+    {
+      val = read_uleb128 (p, &len);
+      p += len;
+      printf ("  Tag_GNU_Sparc_HWCAPS: ");
+
+      display_sparc_hwcaps (val);
+      return p;
+   }
+
+  if (tag & 1)
+    type = 1; /* String.  */
+  else
+    type = 2; /* uleb128.  */
+  printf ("  Tag_unknown_%d: ", tag);
+
+  if (type == 1)
+    {
+      printf ("\"%s\"\n", p);
+      p += strlen ((char *) p) + 1;
+    }
+  else
+    {
+      val = read_uleb128 (p, &len);
+      p += len;
+      printf ("%d (0x%x)\n", val, val);
+    }
+
+  return p;
+}
+
 static unsigned char *
 display_mips_gnu_attribute (unsigned char * p, int tag)
 {
@@ -11542,6 +11624,13 @@ process_power_specific (FILE * file)
 {
   return process_attributes (file, NULL, SHT_GNU_ATTRIBUTES, NULL,
 			     display_power_gnu_attribute);
+}
+
+static int
+process_sparc_specific (FILE * file)
+{
+  return process_attributes (file, NULL, SHT_GNU_ATTRIBUTES, NULL,
+			     display_sparc_gnu_attribute);
 }
 
 static int
@@ -12897,6 +12986,11 @@ process_arch_specific (FILE * file)
       break;
     case EM_PPC:
       return process_power_specific (file);
+      break;
+    case EM_SPARC:
+    case EM_SPARC32PLUS:
+    case EM_SPARCV9:
+      return process_sparc_specific (file);
       break;
     case EM_TI_C6000:
       return process_tic6x_specific (file);

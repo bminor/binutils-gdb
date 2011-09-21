@@ -58,7 +58,7 @@ Disassembly of section .text:
   c0:	83 b4 47 f3 	pdistn  %f48, %f50, %g1
   c4:	af b4 c8 15 	fmean16  %f50, %f52, %f54
   c8:	b3 b5 48 57 	fpadd64  %f52, %f54, %f56
-  cc:	b7 b5 c8 99 	fchksum16  %f54, %f56, %f58
+  cc:	b7 b5 c8 99 	fchksm16  %f54, %f56, %f58
   d0:	bb b6 48 db 	fpsub64  %f56, %f58, %f60
   d4:	bf b6 cb 1d 	fpadds16  %f58, %f60, %f62
   d8:	8d b0 8b 24 	fpadds16s  %f2, %f4, %f6

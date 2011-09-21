@@ -1,3 +1,10 @@
+2011-09-21  David S. Miller  <davem@davemloft.net>
+
+	* elfxx-sparc.c (_bfd_sparc_elf_merge_private_bfd_data): New.
+	* elfxx-sparc.h: Declare it.
+	* elf32-sparc.c (elf32_sparc_merge_private_bfd_data): Call it.
+	* elf64-sparc.c (elf64_sparc_merge_private_bfd_data): Likewise.
+
 2011-09-21  Tristan Gingold  <gingold@adacore.com>
 
 	* mach-o.c (bfd_mach_o_convert_section_name_to_bfd): Add comment.

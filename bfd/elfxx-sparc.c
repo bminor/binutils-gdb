@@ -4754,3 +4754,38 @@ _bfd_sparc_elf_plt_sym_val (bfd_vma i, const asection *plt, const arelent *rel)
   else
     return rel->address;
 }
+
+/* Merge backend specific data from an object file to the output
+   object file when linking.  */
+
+bfd_boolean
+_bfd_sparc_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
+{
+  obj_attribute *in_attr, *in_attrs;
+  obj_attribute *out_attr, *out_attrs;
+
+  if (!elf_known_obj_attributes_proc (obfd)[0].i)
+    {
+      /* This is the first object.  Copy the attributes.  */
+      _bfd_elf_copy_obj_attributes (ibfd, obfd);
+
+      /* Use the Tag_null value to indicate the attributes have been
+	 initialized.  */
+      elf_known_obj_attributes_proc (obfd)[0].i = 1;
+
+      return TRUE;
+    }
+
+  in_attrs = elf_known_obj_attributes (ibfd)[OBJ_ATTR_GNU];
+  out_attrs = elf_known_obj_attributes (obfd)[OBJ_ATTR_GNU];
+
+  in_attr = &in_attrs[Tag_GNU_Sparc_HWCAPS];
+  out_attr = &out_attrs[Tag_GNU_Sparc_HWCAPS];
+
+  out_attr->i |= in_attr->i;
+
+  /* Merge Tag_compatibility attributes and any common GNU ones.  */
+  _bfd_elf_merge_object_attributes (ibfd, obfd);
+
+  return TRUE;
+}

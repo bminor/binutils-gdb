@@ -1,6 +1,7 @@
 /* tc-sparc.c -- Assemble for the SPARC
    Copyright 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010
+   1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010,
+   2011
    Free Software Foundation, Inc.
    This file is part of GAS, the GNU Assembler.
 
@@ -75,6 +76,12 @@ static int default_arch_size;
 /* The currently selected v9 memory model.  Currently only used for
    ELF.  */
 static enum { MM_TSO, MM_PSO, MM_RMO } sparc_memory_model = MM_RMO;
+
+#ifndef TE_SOLARIS
+/* Bitmask of instruction types seen so far, used to populate the
+   GNU attributes section with hwcap information.  */
+static int hwcap_seen;
+#endif
 #endif
 
 static int architecture_requested;
@@ -915,6 +922,48 @@ sparc_md_end (void)
       default: break;
       }
   bfd_set_arch_mach (stdoutput, bfd_arch_sparc, mach);
+
+#if defined(OBJ_ELF) && !defined(TE_SOLARIS)
+  if (hwcap_seen)
+    {
+      int bits = 0;
+
+      if (hwcap_seen & F_MUL32)
+	bits |= ELF_SPARC_HWCAP_MUL32;
+      if (hwcap_seen & F_DIV32)
+	bits |= ELF_SPARC_HWCAP_DIV32;
+      if (hwcap_seen & F_FSMULD)
+	bits |= ELF_SPARC_HWCAP_FSMULD;
+      if (hwcap_seen & F_V8PLUS)
+	bits |= ELF_SPARC_HWCAP_V8PLUS;
+      if (hwcap_seen & F_POPC)
+	bits |= ELF_SPARC_HWCAP_POPC;
+      if (hwcap_seen & F_VIS)
+	bits |= ELF_SPARC_HWCAP_VIS;
+      if (hwcap_seen & F_VIS2)
+	bits |= ELF_SPARC_HWCAP_VIS2;
+      if (hwcap_seen & F_ASI_BLK_INIT)
+	bits |= ELF_SPARC_HWCAP_ASI_BLK_INIT;
+      if (hwcap_seen & F_FMAF)
+	bits |= ELF_SPARC_HWCAP_FMAF;
+      if (hwcap_seen & F_VIS3)
+	bits |= ELF_SPARC_HWCAP_VIS3;
+      if (hwcap_seen & F_HPC)
+	bits |= ELF_SPARC_HWCAP_HPC;
+      if (hwcap_seen & F_RANDOM)
+	bits |= ELF_SPARC_HWCAP_RANDOM;
+      if (hwcap_seen & F_TRANS)
+	bits |= ELF_SPARC_HWCAP_TRANS;
+      if (hwcap_seen & F_FJFMAU)
+	bits |= ELF_SPARC_HWCAP_FJFMAU;
+      if (hwcap_seen & F_IMA)
+	bits |= ELF_SPARC_HWCAP_IMA;
+      if (hwcap_seen & F_ASI_CACHE_SPARING)
+	bits |= ELF_SPARC_HWCAP_ASI_CACHE_SPARING;
+
+      bfd_elf_add_obj_attr_int (stdoutput, OBJ_ATTR_GNU, Tag_GNU_Sparc_HWCAPS, bits);
+    }
+#endif
 }
 
 /* Return non-zero if VAL is in the range -(MAX+1) to MAX.  */
@@ -2743,7 +2792,12 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 	{
 	  /* We have a match.  Now see if the architecture is OK.  */
 	  int needed_arch_mask = insn->architecture;
+#if defined(OBJ_ELF) && !defined(TE_SOLARIS)
+	  int hwcaps = insn->flags & F_HWCAP_MASK;
 
+	  if (hwcaps)
+		  hwcap_seen |= hwcaps;
+#endif
 	  if (v9_arg_p)
 	    {
 	      needed_arch_mask &=
