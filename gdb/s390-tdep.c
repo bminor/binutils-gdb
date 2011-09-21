@@ -336,7 +336,7 @@ s390_value_from_register (struct type *type, int regnum,
 			  struct frame_info *frame)
 {
   struct value *value = default_value_from_register (type, regnum, frame);
-  int len = TYPE_LENGTH (type);
+  int len = TYPE_LENGTH (check_typedef (type));
 
   if (regnum >= S390_F0_REGNUM && regnum <= S390_F15_REGNUM && len < 8)
     set_value_offset (value, 0);
@@ -2254,8 +2254,9 @@ s390_function_arg_pass_by_reference (struct type *type)
   if (length > 8)
     return 1;
 
-  /* FIXME: All complex and vector types are also returned by reference.  */
-  return is_struct_like (type) && !is_power_of_two (length);
+  return (is_struct_like (type) && !is_power_of_two (TYPE_LENGTH (type)))
+	  || TYPE_CODE (type) == TYPE_CODE_COMPLEX
+	  || (TYPE_CODE (type) == TYPE_CODE_ARRAY && TYPE_VECTOR (type));
 }
 
 /* Return non-zero if TYPE should be passed in a float register
@@ -2290,7 +2291,7 @@ static LONGEST
 extend_simple_arg (struct gdbarch *gdbarch, struct value *arg)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  struct type *type = value_type (arg);
+  struct type *type = check_typedef (value_type (arg));
 
   /* Even structs get passed in the least significant bits of the
      register / memory word.  It's not really right to extract them as
@@ -2323,7 +2324,8 @@ alignment_of (struct type *type)
       alignment = 1;
       for (i = 0; i < TYPE_NFIELDS (type); i++)
         {
-          int field_alignment = alignment_of (TYPE_FIELD_TYPE (type, i));
+          int field_alignment
+	    = alignment_of (check_typedef (TYPE_FIELD_TYPE (type, i)));
 
           if (field_alignment > alignment)
             alignment = field_alignment;
@@ -2374,7 +2376,7 @@ s390_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   for (i = 0; i < nargs; i++)
     {
       struct value *arg = args[i];
-      struct type *type = value_type (arg);
+      struct type *type = check_typedef (value_type (arg));
       unsigned length = TYPE_LENGTH (type);
 
       if (s390_function_arg_pass_by_reference (type))
@@ -2427,7 +2429,7 @@ s390_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
     for (i = 0; i < nargs; i++)
       {
         struct value *arg = args[i];
-        struct type *type = value_type (arg);
+        struct type *type = check_typedef (value_type (arg));
         unsigned length = TYPE_LENGTH (type);
 
 	if (s390_function_arg_pass_by_reference (type))
@@ -2561,6 +2563,7 @@ s390_return_value_convention (struct gdbarch *gdbarch, struct type *type)
     case TYPE_CODE_STRUCT:
     case TYPE_CODE_UNION:
     case TYPE_CODE_ARRAY:
+    case TYPE_CODE_COMPLEX:
       return RETURN_VALUE_STRUCT_CONVENTION;
 
     default:
@@ -2575,9 +2578,13 @@ s390_return_value (struct gdbarch *gdbarch, struct type *func_type,
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int word_size = gdbarch_ptr_bit (gdbarch) / 8;
-  int length = TYPE_LENGTH (type);
-  enum return_value_convention rvc = 
-			s390_return_value_convention (gdbarch, type);
+  enum return_value_convention rvc;
+  int length;
+
+  type = check_typedef (type);
+  rvc = s390_return_value_convention (gdbarch, type);
+  length = TYPE_LENGTH (type);
+
   if (in)
     {
       switch (rvc)

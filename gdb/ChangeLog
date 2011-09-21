@@ -1,3 +1,15 @@
+2011-09-21  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* s390-tdep.c (s390_function_arg_pass_by_reference): Handle
+	complex and vector types.
+	(s390_return_value_convention): Likewise.
+
+	(s390_value_from_register): Call check_typedef.
+	(extend_simple_arg): Likewise.
+	(alignment_of): Likewise.
+	(s390_push_dummy_call): Likewise.
+	(s390_return_value): Likewise.
+
 2011-09-21  Joseph Myers  <joseph@codesourcery.com>
 
 	* event-top.c (async_disconnect): If an exception is thrown from
