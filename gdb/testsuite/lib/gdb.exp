@@ -2233,7 +2233,7 @@ proc gdb_compile {source dest type options} {
 	      || [istarget *-*-pe*]
 	      || [istarget hppa*-*-hpux*])} {
 	    # Do not need anything.
-	} elseif { [istarget *-*-openbsd*] } {
+	} elseif { [istarget *-*-freebsd*] || [istarget *-*-openbsd*] } {
 	    lappend new_options "ldflags=-Wl,-rpath,${outdir}"
 	} elseif { [istarget arm*-*-symbianelf*] } {
 	    if { $shlib_load } {
