@@ -1,3 +1,8 @@
+2011-09-22  Tristan Gingold  <gingold@adacore.com>
+
+	* configure.in: Bump version to 2.22.51
+	* configure: Regenerate.
+
 2011-09-21  David S. Miller  <davem@davemloft.net>
 
 	* elfxx-sparc.c (_bfd_sparc_elf_merge_private_bfd_data): New.
