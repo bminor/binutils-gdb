@@ -1,5 +1,18 @@
 2011-09-21  David S. Miller  <davem@davemloft.net>
 
+	* config/tc-sparc.c (hwcap_allowed): New.
+	(struct sparc_arch): New field 'hwcap_allowed' containing a bitmask
+	of F_FOO flags which are enabled by the particular arch setting.
+	Add new options that provide explicit access to new instructions.
+	(md_parse_option): Only bump max_architecture if the requested one
+	is larger, or this is the first explicit request.
+	(get_hwcap_name): New function.
+	(sparc_ip): Validate that hwcaps used by an instruction have actually
+	been enabled.
+	* doc/c-sparc.texi: Document new sparc options.
+
+2011-09-21  David S. Miller  <davem@davemloft.net>
+
 	* config/tc-sparc.c (hwcap_seen): New bitmask, defined when
 	not TE_SOLARIS.
 	(sparc_ip): When not TE_SOLARIS, accumulate hwcap bits from

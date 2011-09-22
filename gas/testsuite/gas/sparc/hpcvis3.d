@@ -1,4 +1,4 @@
-#as: -Av9b
+#as: -Av9v
 #objdump: -dr
 #name: sparc HPC+VIS3
 

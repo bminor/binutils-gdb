@@ -84,6 +84,8 @@ static int hwcap_seen;
 #endif
 #endif
 
+static int hwcap_allowed;
+
 static int architecture_requested;
 static int warn_on_bump;
 
@@ -231,23 +233,38 @@ static struct sparc_arch {
   int default_arch_size;
   /* Allowable arg to -A?  */
   int user_option_p;
+  int hwcap_allowed;
 } sparc_arch_table[] = {
-  { "v6", "v6", v6, 0, 1 },
-  { "v7", "v7", v7, 0, 1 },
-  { "v8", "v8", v8, 32, 1 },
-  { "sparclet", "sparclet", sparclet, 32, 1 },
-  { "sparclite", "sparclite", sparclite, 32, 1 },
-  { "sparc86x", "sparclite", sparc86x, 32, 1 },
-  { "v8plus", "v9", v9, 0, 1 },
-  { "v8plusa", "v9a", v9, 0, 1 },
-  { "v8plusb", "v9b", v9, 0, 1 },
-  { "v9", "v9", v9, 0, 1 },
-  { "v9a", "v9a", v9, 0, 1 },
-  { "v9b", "v9b", v9, 0, 1 },
+  { "v6", "v6", v6, 0, 1, 0 },
+  { "v7", "v7", v7, 0, 1, 0 },
+  { "v8", "v8", v8, 32, 1, F_MUL32|F_DIV32|F_FSMULD },
+  { "v8a", "v8", v8, 32, 1, F_MUL32|F_DIV32|F_FSMULD },
+  { "sparc", "v9", v9, 0, 1, F_MUL32|F_DIV32|F_FSMULD|F_POPC|F_V8PLUS },
+  { "sparcvis", "v9a", v9, 0, 1, F_MUL32|F_DIV32|F_FSMULD|F_POPC|F_VIS },
+  { "sparcvis2", "v9b", v9, 0, 1, F_MUL32|F_DIV32|F_FSMULD|F_POPC|F_VIS|F_VIS2 },
+  { "sparcfmaf", "v9b", v9, 0, 1, F_MUL32|F_DIV32|F_FSMULD|F_POPC|F_VIS|F_VIS2|F_FMAF },
+  { "sparcima", "v9b", v9, 0, 1, F_MUL32|F_DIV32|F_FSMULD|F_POPC|F_VIS|F_VIS2|F_FMAF|F_IMA },
+  { "sparcvis3", "v9b", v9, 0, 1, F_MUL32|F_DIV32|F_FSMULD|F_POPC|F_VIS|F_VIS2|F_FMAF|F_VIS3|F_HPC },
+  { "sparcvis3r", "v9b", v9, 0, 1, F_MUL32|F_DIV32|F_FSMULD|F_POPC|F_VIS|F_VIS2|F_FMAF|F_VIS3|F_HPC|F_RANDOM|F_TRANS|F_FJFMAU },
+  { "sparclet", "sparclet", sparclet, 32, 1, F_MUL32|F_DIV32|F_FSMULD },
+  { "sparclite", "sparclite", sparclite, 32, 1, F_MUL32|F_DIV32|F_FSMULD },
+  { "sparc86x", "sparclite", sparc86x, 32, 1, F_MUL32|F_DIV32|F_FSMULD },
+  { "v8plus", "v9", v9, 0, 1, F_MUL32|F_DIV32|F_FSMULD|F_POPC|F_V8PLUS },
+  { "v8plusa", "v9a", v9, 0, 1, F_MUL32|F_DIV32|F_FSMULD|F_POPC|F_V8PLUS|F_VIS },
+  { "v8plusb", "v9b", v9, 0, 1, F_MUL32|F_DIV32|F_FSMULD|F_POPC|F_V8PLUS|F_VIS|F_VIS2 },
+  { "v8plusc", "v9b", v9, 0, 1, F_MUL32|F_DIV32|F_FSMULD|F_POPC|F_V8PLUS|F_VIS|F_VIS2|F_ASI_BLK_INIT },
+  { "v8plusd", "v9b", v9, 0, 1, F_MUL32|F_DIV32|F_FSMULD|F_POPC|F_V8PLUS|F_VIS|F_VIS2|F_ASI_BLK_INIT|F_FMAF|F_VIS3|F_HPC },
+  { "v8plusv", "v9b", v9, 0, 1, F_MUL32|F_DIV32|F_FSMULD|F_POPC|F_V8PLUS|F_VIS|F_VIS2|F_ASI_BLK_INIT|F_FMAF|F_VIS3|F_HPC|F_RANDOM|F_TRANS|F_FJFMAU|F_IMA|F_ASI_CACHE_SPARING },
+  { "v9", "v9", v9, 0, 1, F_MUL32|F_DIV32|F_FSMULD|F_POPC },
+  { "v9a", "v9a", v9, 0, 1, F_MUL32|F_DIV32|F_FSMULD|F_POPC|F_VIS },
+  { "v9b", "v9b", v9, 0, 1, F_MUL32|F_DIV32|F_FSMULD|F_POPC|F_VIS|F_VIS2 },
+  { "v9c", "v9b", v9, 0, 1, F_MUL32|F_DIV32|F_FSMULD|F_POPC|F_VIS|F_VIS2|F_ASI_BLK_INIT },
+  { "v9d", "v9b", v9, 0, 1, F_MUL32|F_DIV32|F_FSMULD|F_POPC|F_VIS|F_VIS2|F_ASI_BLK_INIT|F_FMAF|F_VIS3|F_HPC },
+  { "v9v", "v9b", v9, 0, 1, F_MUL32|F_DIV32|F_FSMULD|F_POPC|F_VIS|F_VIS2|F_ASI_BLK_INIT|F_FMAF|F_VIS3|F_HPC|F_RANDOM|F_TRANS|F_FJFMAU|F_IMA|F_ASI_CACHE_SPARING },
   /* This exists to allow configure.in/Makefile.in to pass one
      value to specify both the default machine and default word size.  */
-  { "v9-64", "v9", v9, 64, 0 },
-  { NULL, NULL, v8, 0, 0 }
+  { "v9-64", "v9", v9, 64, 0, F_MUL32|F_DIV32|F_FSMULD|F_POPC },
+  { NULL, NULL, v8, 0, 0, 0 }
 };
 
 /* Variant of default_arch */
@@ -487,7 +504,10 @@ md_parse_option (int c, char *arg)
 	if (opcode_arch == SPARC_OPCODE_ARCH_BAD)
 	  as_fatal (_("Bad opcode table, broken assembler."));
 
-	max_architecture = opcode_arch;
+	if (!architecture_requested
+	    || opcode_arch > max_architecture)
+	  max_architecture = opcode_arch;
+	hwcap_allowed |= sa->hwcap_allowed;
 	architecture_requested = 1;
       }
       break;
@@ -1415,6 +1435,44 @@ md_assemble (char *str)
     default:
       as_fatal (_("failed special case insn sanity check"));
     }
+}
+
+static const char *
+get_hwcap_name (int mask)
+{
+  if (mask & F_MUL32)
+    return "mul32";
+  if (mask & F_DIV32)
+    return "div32";
+  if (mask & F_FSMULD)
+    return "fsmuld";
+  if (mask & F_V8PLUS)
+    return "v8plus";
+  if (mask & F_POPC)
+    return "popc";
+  if (mask & F_VIS)
+    return "vis";
+  if (mask & F_VIS2)
+    return "vis2";
+  if (mask & F_ASI_BLK_INIT)
+    return "ASIBlkInit";
+  if (mask & F_FMAF)
+    return "fmaf";
+  if (mask & F_VIS3)
+    return "vis3";
+  if (mask & F_HPC)
+    return "hpc";
+  if (mask & F_RANDOM)
+    return "random";
+  if (mask & F_TRANS)
+    return "trans";
+  if (mask & F_FJFMAU)
+    return "fjfmau";
+  if (mask & F_IMA)
+    return "ima";
+  if (mask & F_ASI_CACHE_SPARING)
+    return "cspare";
+  return "UNKNOWN";
 }
 
 /* Subroutine of md_assemble to do the actual parsing.  */
@@ -2792,9 +2850,9 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 	{
 	  /* We have a match.  Now see if the architecture is OK.  */
 	  int needed_arch_mask = insn->architecture;
-#if defined(OBJ_ELF) && !defined(TE_SOLARIS)
 	  int hwcaps = insn->flags & F_HWCAP_MASK;
 
+#if defined(OBJ_ELF) && !defined(TE_SOLARIS)
 	  if (hwcaps)
 		  hwcap_seen |= hwcaps;
 #endif
@@ -2863,6 +2921,17 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 	      as_tsktsk (_(" (Requires %s; requested architecture is %s.)"),
 			 required_archs,
 			 sparc_opcode_archs[max_architecture].name);
+	      return special_case;
+	    }
+
+	  /* Make sure the the hwcaps used by the instruction are
+	     currently enabled.  */
+	  if (hwcaps & ~hwcap_allowed)
+	    {
+	      const char *hwcap_name = get_hwcap_name(hwcaps & ~hwcap_allowed);
+
+	      as_bad (_("Hardware capability \"%s\" not enabled for \"%s\"."),
+		      hwcap_name, str);
 	      return special_case;
 	    }
 	} /* If no match.  */
