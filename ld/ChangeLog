@@ -1,3 +1,7 @@
+2011-09-22  Tristan Gingold  <gingold@adacore.com>
+
+	* NEWS: Add marker for 2.22.
+
 2011-09-20  Alan Modra  <amodra@gmail.com>
 
 	PR ld/13201

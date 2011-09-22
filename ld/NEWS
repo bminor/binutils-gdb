@@ -1,5 +1,7 @@
 -*- text -*-
 
+Changes in 2.22:
+
 * --copy-dt-needed-entries is no longer enabled by default.  Instead
   --no-copy-dt-needed-entries is the default.
 

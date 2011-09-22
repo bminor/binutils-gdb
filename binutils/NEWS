@@ -1,5 +1,7 @@
 -*- text -*-
 
+Changes in 2.22:
+
 * Add support for displaying the contents of .debug.macro sections.
 
 * Add --preprocessor-arg option to windres to specify additional options
