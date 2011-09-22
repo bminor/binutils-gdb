@@ -2852,7 +2852,7 @@ nullify_last_target_wait_ptid (void)
 static void
 context_switch (ptid_t ptid)
 {
-  if (debug_infrun)
+  if (debug_infrun && !ptid_equal (ptid, inferior_ptid))
     {
       fprintf_unfiltered (gdb_stdlog, "infrun: Switching context from %s ",
 			  target_pid_to_str (inferior_ptid));

@@ -1,3 +1,8 @@
+2011-09-22  Yao Qi  <yao@codesourcery.com>
+
+	* infrun.c (context_switch): Print debug message when switching to
+	a different thread.
+
 2011-09-21  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* s390-tdep.c (s390_function_arg_pass_by_reference): Handle
