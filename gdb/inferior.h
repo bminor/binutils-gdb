@@ -189,7 +189,9 @@ extern void terminal_init_inferior_with_pgrp (int pgrp);
 
 extern int fork_inferior (char *, char *, char **,
 			  void (*)(void),
-			  void (*)(int), void (*)(void), char *);
+			  void (*)(int), void (*)(void), char *,
+                          void (*)(const char *,
+                                   char * const *, char * const *));
 
 
 extern void startup_inferior (int);

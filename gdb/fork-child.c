@@ -115,6 +115,7 @@ escape_bang_in_quoted_argument (const char *shell_file)
    pid.  EXEC_FILE is the file to run.  ALLARGS is a string containing
    the arguments to the program.  ENV is the environment vector to
    pass.  SHELL_FILE is the shell file, or NULL if we should pick
+   one.  EXEC_FUN is the exec(2) function to use, or NULL for the default
    one.  */
 
 /* This function is NOT reentrant.  Some of the variables have been
@@ -123,7 +124,9 @@ escape_bang_in_quoted_argument (const char *shell_file)
 int
 fork_inferior (char *exec_file_arg, char *allargs, char **env,
 	       void (*traceme_fun) (void), void (*init_trace_fun) (int),
-	       void (*pre_trace_fun) (void), char *shell_file_arg)
+	       void (*pre_trace_fun) (void), char *shell_file_arg,
+               void (*exec_fun)(const char *file, char * const *argv,
+                                char * const *env))
 {
   int pid;
   static char default_shell_file[] = SHELL_FILE;
@@ -359,7 +362,10 @@ fork_inferior (char *exec_file_arg, char *allargs, char **env,
          path to find $SHELL.  Rich Pixley says so, and I agree.  */
       environ = env;
 
-      execvp (argv[0], argv);
+      if (exec_fun != NULL)
+        (*exec_fun) (argv[0], argv, env);
+      else
+        execvp (argv[0], argv);
 
       /* If we get here, it's an error.  */
       save_errno = errno;

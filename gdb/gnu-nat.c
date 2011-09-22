@@ -2114,7 +2114,8 @@ gnu_create_inferior (struct target_ops *ops,
 
   inf_debug (inf, "creating inferior");
 
-  pid = fork_inferior (exec_file, allargs, env, trace_me, NULL, NULL, NULL);
+  pid = fork_inferior (exec_file, allargs, env, trace_me,
+                       NULL, NULL, NULL, NULL);
 
   /* Attach to the now stopped child, which is actually a shell...  */
   inf_debug (inf, "attaching to child: %d", pid);

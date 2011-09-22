@@ -4915,7 +4915,7 @@ procfs_create_inferior (struct target_ops *ops, char *exec_file,
     }
 
   pid = fork_inferior (exec_file, allargs, env, procfs_set_exec_trap,
-		       NULL, NULL, shell_file);
+		       NULL, NULL, shell_file, NULL);
 
   procfs_init_inferior (ops, pid);
 }

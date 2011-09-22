@@ -134,7 +134,7 @@ inf_ptrace_create_inferior (struct target_ops *ops,
     }
 
   pid = fork_inferior (exec_file, allargs, env, inf_ptrace_me, NULL,
-		       NULL, NULL);
+		       NULL, NULL, NULL);
 
   if (! ops_already_pushed)
     discard_cleanups (back_to);

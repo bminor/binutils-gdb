@@ -1,3 +1,15 @@
+2011-09-22  Tristan Gingold  <gingold@adacore.com>
+
+	* fork-child.c (fork_inferior): Add exec_fun parameter.
+	Call exec_fun or execvp.
+	* inferior.h: Adjust prototype.
+	* gnu-nat.c (gnu_create_inferior): Adjust fork_inferior call.
+	* inf-ttrace.c (inf_ttrace_create_inferior): Ditto.
+	* inf-ptrace.c (inf_ptrace_create_inferior): Ditto.
+	* procfs.c (procfs_create_inferior): Ditto.
+	* darwin-nat.c (darwin_execvp): New function.
+	(darwin_create_inferior): Use it.
+
 2011-09-22  Yao Qi  <yao@codesourcery.com>
 
 	* infrun.c (context_switch): Print debug message when switching to
