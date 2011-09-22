@@ -7881,6 +7881,9 @@ adjust_toc_syms (struct elf_link_hash_entry *h, void *inf)
   struct adjust_toc_info *toc_inf = (struct adjust_toc_info *) inf;
   unsigned long i;
 
+  if (h->root.type == bfd_link_hash_indirect)
+    return TRUE;
+
   if (h->root.type != bfd_link_hash_defined
       && h->root.type != bfd_link_hash_defweak)
     return TRUE;
@@ -8264,7 +8267,7 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 		some_unused = 1;
 	      last = 0;
 	    }
-	  else if ((*drop & ref_from_discarded) != 0)
+	  else if (*drop & ref_from_discarded)
 	    {
 	      some_unused = 1;
 	      last = ref_from_discarded;
@@ -8382,15 +8385,7 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 			  break;
 
 			default:
-			  if (!ppc64_elf_howto_table[R_PPC64_ADDR32])
-			    ppc_howto_init ();
-			  info->callbacks->einfo
-			    (_("%P: %H: %s relocation references "
-			       "optimized away TOC entry\n"),
-			     ibfd, sec, rel->r_offset,
-			     ppc64_elf_howto_table[r_type]->name);
-			  bfd_set_error (bfd_error_bad_value);
-			  goto error_ret;
+			  abort ();
 			}
 		      rel->r_addend = tocrel->r_addend;
 		      elf_section_data (sec)->relocs = relstart;

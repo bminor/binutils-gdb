@@ -884,11 +884,7 @@ pe_ILF_build_a_bfd (bfd *           abfd,
       if (import_name_type != IMPORT_NAME)
 	{
 	  char c = symbol[0];
-	  
-	  /* Check that we don't remove for targets with empty
-	     USER_LABEL_PREFIX the leading underscore.  */
-	  if ((c == '_' && abfd->xvec->symbol_leading_char != 0)
-	      || c == '@' || c == '?')
+	  if (c == '_' || c == '@' || c == '?')
 	    symbol++;
 	}
       
