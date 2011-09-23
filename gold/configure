@@ -599,6 +599,8 @@ HAVE_ZLIB_FALSE
 HAVE_ZLIB_TRUE
 LIBOBJS
 LFS_CFLAGS
+GOLD_LDADD
+GOLD_LDFLAGS
 WARN_CXXFLAGS
 NO_WERROR
 WARN_CFLAGS
@@ -777,6 +779,8 @@ enable_dependency_tracking
 enable_nls
 enable_werror
 enable_build_warnings
+with_gold_ldflags
+with_gold_ldadd
 enable_maintainer_mode
 '
       ac_precious_vars='build_alias
@@ -1431,6 +1435,8 @@ Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
   --with-sysroot=DIR    search for usr/lib et al within DIR
+  --with-gold-ldflags=FLAGS  additional link flags for gold
+  --with-gold-ldadd=LIBS     additional libraries for gold
 
 Some influential environment variables:
   CC          C compiler command
@@ -6617,6 +6623,34 @@ fi
 
 
 WARN_CXXFLAGS=`echo ${WARN_CFLAGS} | sed -e 's/-Wstrict-prototypes//' -e 's/-Wmissing-prototypes//' -e 's/-Wshadow//'`
+
+
+
+# Check whether --with-gold-ldflags was given.
+if test "${with_gold_ldflags+set}" = set; then :
+  withval=$with_gold_ldflags; if test "$withval" = "no" -o "$withval" = "yes"; then
+   GOLD_LDFLAGS=
+ else
+   GOLD_LDFLAGS=$withval
+ fi
+else
+  GOLD_LDFLAGS=
+fi
+
+
+
+
+# Check whether --with-gold-ldadd was given.
+if test "${with_gold_ldadd+set}" = set; then :
+  withval=$with_gold_ldadd; if test "$withval" = "no" -o "$withval" = "yes"; then
+   GOLD_LDADD=
+ else
+   GOLD_LDADD=$withval
+ fi
+else
+  GOLD_LDADD=
+fi
+
 
 
 LFS_CFLAGS="-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"

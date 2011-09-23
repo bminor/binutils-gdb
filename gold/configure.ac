@@ -409,6 +409,26 @@ AM_BINUTILS_WARNINGS
 WARN_CXXFLAGS=`echo ${WARN_CFLAGS} | sed -e 's/-Wstrict-prototypes//' -e 's/-Wmissing-prototypes//' -e 's/-Wshadow//'`
 AC_SUBST(WARN_CXXFLAGS)
 
+AC_ARG_WITH(gold-ldflags,
+[  --with-gold-ldflags=FLAGS  additional link flags for gold],
+[if test "$withval" = "no" -o "$withval" = "yes"; then
+   GOLD_LDFLAGS=
+ else
+   GOLD_LDFLAGS=$withval
+ fi],
+[GOLD_LDFLAGS=])
+AC_SUBST(GOLD_LDFLAGS)
+
+AC_ARG_WITH(gold-ldadd,
+[  --with-gold-ldadd=LIBS     additional libraries for gold],
+[if test "$withval" = "no" -o "$withval" = "yes"; then
+   GOLD_LDADD=
+ else
+   GOLD_LDADD=$withval
+ fi],
+[GOLD_LDADD=])
+AC_SUBST(GOLD_LDADD)
+
 dnl Force support for large files by default.  This may need to be
 dnl host dependent.  If build == host, we can check getconf LFS_CFLAGS.
 LFS_CFLAGS="-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
