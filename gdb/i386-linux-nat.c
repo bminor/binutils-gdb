@@ -893,7 +893,8 @@ i386_linux_resume (struct target_ops *ops,
 
 	      regcache_cooked_read_unsigned (regcache, I386_ESP_REGNUM, &sp);
 	      if (syscall == SYS_rt_sigreturn)
-		addr = read_memory_integer (sp + 8, 4, byte_order) + 20;
+		addr = read_memory_unsigned_integer (sp + 8, 4, byte_order)
+		  + 20;
 	      else
 		addr = sp;
 
