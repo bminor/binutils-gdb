@@ -2228,6 +2228,15 @@ i386_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame)
   /* See the end of i386_push_dummy_call.  */
   return frame_id_build (fp + 8, get_frame_pc (this_frame));
 }
+
+/* _Decimal128 function return values need 16-byte alignment on the
+   stack.  */
+
+static CORE_ADDR
+i386_frame_align (struct gdbarch *gdbarch, CORE_ADDR sp)
+{
+  return sp & -(CORE_ADDR)16;
+}
 
 
 /* Figure out where the longjmp will land.  Slurp the args out of the
@@ -7316,6 +7325,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Call dummy code.  */
   set_gdbarch_push_dummy_call (gdbarch, i386_push_dummy_call);
+  set_gdbarch_frame_align (gdbarch, i386_frame_align);
 
   set_gdbarch_convert_register_p (gdbarch, i386_convert_register_p);
   set_gdbarch_register_to_value (gdbarch,  i386_register_to_value);
