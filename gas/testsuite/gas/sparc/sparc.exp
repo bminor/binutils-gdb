@@ -61,6 +61,7 @@ if [istarget sparc*-*-*] {
     run_dump_test "v9branch5"
     run_dump_test "pc2210"
     run_dump_test "hpcvis3"
+    run_dump_test "ima"
 
     run_list_test "pr4587" ""
 }

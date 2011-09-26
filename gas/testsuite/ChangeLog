@@ -1,3 +1,9 @@
+2011-09-26  David S. Miller  <davem@davemloft.net>
+
+	* gas/sparc/ima.d: New test.
+	* gas/sparc/ima.s: New test source.
+	* gas/sparc/sparc.exp: Run new test.
+
 2011-09-21  David S. Miller  <davem@davemloft.net>
 
 	* gas/sparc/hpcvis3.s: Update for fixed fchksum16 mnemonic.
