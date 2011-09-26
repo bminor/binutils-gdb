@@ -1,5 +1,11 @@
 2011-09-26  Cary Coutant  <ccoutant@google.com>
 
+	* gold/gold.cc (queue_initial_tasks): Move option checks ...
+	* gold/options.cc (General_options::finalize): ... to here. Disable
+	some options; make others fatal.
+
+2011-09-26  Cary Coutant  <ccoutant@google.com>
+
 	gcc PR lto/47247
 	* plugin.cc (get_symbols_v2): New function.
 	(Plugin::load): Add LDPT_GET_SYMBOLS_V2.

@@ -197,45 +197,28 @@ queue_initial_tasks(const General_options& options,
   // For incremental links, the base output file.
   Incremental_binary* ibase = NULL;
 
-  if (parameters->incremental())
+  if (parameters->incremental_update())
     {
-      if (options.relocatable())
-	gold_error(_("incremental linking is incompatible with -r"));
-      if (options.emit_relocs())
-	gold_error(_("incremental linking is incompatible with --emit-relocs"));
-      if (options.gc_sections())
-	gold_error(_("incremental linking is incompatible with --gc-sections"));
-      if (options.icf_enabled())
-	gold_error(_("incremental linking is incompatible with --icf"));
-      if (options.has_plugins())
-	gold_error(_("incremental linking is incompatible with --plugin"));
-      if (strcmp(options.compress_debug_sections(), "none") != 0)
-	gold_error(_("incremental linking is incompatible with "
-		     "--compress-debug-sections"));
-
-      if (parameters->incremental_update())
+      Output_file* of = new Output_file(options.output_file_name());
+      if (of->open_base_file(options.incremental_base(), true))
 	{
-	  Output_file* of = new Output_file(options.output_file_name());
-	  if (of->open_base_file(options.incremental_base(), true))
+	  ibase = open_incremental_binary(of);
+	  if (ibase != NULL
+	      && ibase->check_inputs(cmdline, layout->incremental_inputs()))
+	    ibase->init_layout(layout);
+	  else
 	    {
-	      ibase = open_incremental_binary(of);
-	      if (ibase != NULL
-		  && ibase->check_inputs(cmdline, layout->incremental_inputs()))
-		ibase->init_layout(layout);
-	      else
-		{
-		  delete ibase;
-		  ibase = NULL;
-		  of->close();
-		}
+	      delete ibase;
+	      ibase = NULL;
+	      of->close();
 	    }
-	  if (ibase == NULL)
-	    {
-	      if (set_parameters_incremental_full())
-		gold_info(_("linking with --incremental-full"));
-	      else
-		gold_fallback(_("restart link with --incremental-full"));
-	    }
+	}
+      if (ibase == NULL)
+	{
+	  if (set_parameters_incremental_full())
+	    gold_info(_("linking with --incremental-full"));
+	  else
+	    gold_fallback(_("restart link with --incremental-full"));
 	}
     }
 
