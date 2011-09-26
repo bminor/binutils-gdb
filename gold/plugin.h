@@ -393,7 +393,9 @@ class Pluginobj : public Object
 
   // Fill in the symbol resolution status for the given plugin symbols.
   ld_plugin_status
-  get_symbol_resolution_info(int nsyms, ld_plugin_symbol* syms) const;
+  get_symbol_resolution_info(int nsyms,
+			     ld_plugin_symbol* syms,
+			     int version) const;
 
   // Store the incoming symbols from the plugin for later processing.
   void
