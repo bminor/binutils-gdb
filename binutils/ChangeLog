@@ -1,5 +1,14 @@
 2011-09-27  Tristan Gingold  <gingold@adacore.com>
 
+	* od-xcoff.c (dump_xcoff32_aout_header): Remove some gettext macros.
+	(dump_xcoff32_sections_header): Likewise.
+	(dump_xcoff32_symbols, dump_xcoff32_relocs): Likewise.
+	(dump_xcoff32_lineno, dump_xcoff32_loader): Likewise.
+	(dump_xcoff32_except): Likewise.
+	(dump_xcoff32_typchk, dump_xcoff32_tbtags): Likewise.
+
+2011-09-27  Tristan Gingold  <gingold@adacore.com>
+
 	* readelf.c (print_ia64_vms_note): Fix xgettext warnings.
 
 2011-09-22  Tristan Gingold  <gingold@adacore.com>
