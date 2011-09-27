@@ -12694,7 +12694,8 @@ print_ia64_vms_note (Elf_Internal_Note * pnote)
       break;
 #ifdef BFD64
     case NT_VMS_FPMODE:
-      printf (_("   FP mode: 0x%016" BFD_VMA_FMT "x\n"),
+      printf (_("   FP mode: "));
+      printf ("0x%016" BFD_VMA_FMT "x\n",
               (bfd_vma)byte_get ((unsigned char *)pnote->descdata, 8));
       break;
     case NT_VMS_LINKTIME:
@@ -12717,7 +12718,8 @@ print_ia64_vms_note (Elf_Internal_Note * pnote)
       print_vms_time
         ((bfd_int64_t) byte_get ((unsigned char *)pnote->descdata + 8, 8));
       printf (_("\n"
-                "   Link flags  : 0x%016" BFD_VMA_FMT "x\n"),
+                "   Link flags  : "));
+      printf ("0x%016" BFD_VMA_FMT "x\n",
               (bfd_vma)byte_get ((unsigned char *)pnote->descdata + 16, 8));
       printf (_("   Header flags: 0x%08x\n"),
               (unsigned)byte_get ((unsigned char *)pnote->descdata + 24, 4));
