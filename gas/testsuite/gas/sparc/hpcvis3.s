@@ -34,7 +34,7 @@
 	fnumaddd %f4, %f6, %f8, %f10
 	addxc	%g5, %g6, %g7
 	addxccc	%o1, %o2, %o3
-	random	%o4
+	random	%f6
 	umulxhi	%o5, %o6, %o7
 	lzd	%i1, %i2
 	cmask8	%i3

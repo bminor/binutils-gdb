@@ -1,3 +1,8 @@
+2011-09-27  David S. Miller  <davem@davemloft.net>
+
+	* sparc-opc.c (sparc_opcodes): Fix random instruction to write
+	to a float instead of an integer register.
+
 2011-09-26  David S. Miller  <davem@davemloft.net>
 
 	* sparc-opc.c (sparc_opcodes): Add integer multiply-add

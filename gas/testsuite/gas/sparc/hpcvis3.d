@@ -41,7 +41,7 @@ Disassembly of section .text:
   7c:	95 f9 11 c6 	fnumaddd  %f4, %f6, %f8, %f10
   80:	8f b1 42 26 	addxc  %g5, %g6, %g7
   84:	97 b2 42 6a 	addxccc  %o1, %o2, %o3
-  88:	99 b0 02 a0 	random  %o4
+  88:	8d b0 02 a0 	random  %f6
   8c:	9f b3 42 ce 	umulxhi  %o5, %sp, %o7
   90:	b5 b0 02 f9 	lzd  %i1, %i2
   94:	81 b0 03 7b 	cmask8  %i3
