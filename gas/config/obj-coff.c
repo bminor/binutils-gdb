@@ -1531,6 +1531,7 @@ coff_frob_file_after_relocs (void)
                                                  'o' for over
                                                  'w' for data
   						 'd' (apparently m88k for data)
+						 'e' for exclude
                                                  'x' for text
   						 'r' for read-only data
   						 's' for shared data (PE)
@@ -1598,6 +1599,11 @@ obj_coff_section (int ignore ATTRIBUTE_UNUSED)
 		}
 	      switch (attr)
 		{
+		case 'e':
+		  /* Exclude section from linking.  */
+		  flags |= SEC_EXCLUDE;
+		  break;
+
 		case 'b':
 		  /* Uninitialised data section.  */
 		  flags |= SEC_ALLOC;

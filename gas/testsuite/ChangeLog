@@ -1,3 +1,9 @@
+2011-09-27  Kai Tietz  <ktietz@redhat.com>
+
+	* gas/pe/pe.exp: Add new testcase.
+	* gas/pe/section-exclude.d: New file.
+	* gas/pe/section-exclude.s: New file.
+
 2011-09-27  David S. Miller  <davem@davemloft.net>
 
 	* gas/sparc/hpcvis3.s: Update to use float reg for random insn.
