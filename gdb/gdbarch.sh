@@ -820,6 +820,14 @@ v:const char *:solib_symbols_extension:::::::pstring (gdbarch->solib_symbols_ext
 # is, absolute paths include a drive name, and the backslash is
 # considered a directory separator.
 v:int:has_dos_based_file_system:::0:0::0
+
+# Generate bytecodes to collect the return address in a frame.
+# Since the bytecodes run on the target, possibly with GDB not even
+# connected, the full unwinding machinery is not available, and
+# typically this function will issue bytecodes for one or more likely
+# places that the return address may be found.
+m:void:gen_return_address:struct agent_expr *ax, struct axs_value *value, CORE_ADDR scope:ax, value, scope::default_gen_return_address::0
+
 EOF
 }
 
@@ -934,6 +942,7 @@ struct displaced_step_closure;
 struct core_regset_section;
 struct syscall;
 struct agent_expr;
+struct axs_value;
 
 /* The architecture associated with the connection to the target.
  

@@ -10284,6 +10284,10 @@ Collect all function arguments.
 @item $locals
 Collect all local variables.
 
+@item $_ret
+Collect the return address.  This is helpful if you want to see more
+of a backtrace.
+
 @item $_sdata
 @vindex $_sdata@r{, collect}
 Collect static tracepoint marker specific data.  Only available for

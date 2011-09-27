@@ -270,6 +270,7 @@ struct gdbarch
   gdbarch_auto_wide_charset_ftype *auto_wide_charset;
   const char * solib_symbols_extension;
   int has_dos_based_file_system;
+  gdbarch_gen_return_address_ftype *gen_return_address;
 };
 
 
@@ -423,6 +424,7 @@ struct gdbarch startup_gdbarch =
   default_auto_wide_charset,  /* auto_wide_charset */
   0,  /* solib_symbols_extension */
   0,  /* has_dos_based_file_system */
+  default_gen_return_address,  /* gen_return_address */
   /* startup_gdbarch() */
 };
 
@@ -513,6 +515,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->fast_tracepoint_valid_at = default_fast_tracepoint_valid_at;
   gdbarch->auto_charset = default_auto_charset;
   gdbarch->auto_wide_charset = default_auto_wide_charset;
+  gdbarch->gen_return_address = default_gen_return_address;
   /* gdbarch_alloc() */
 
   return gdbarch;
@@ -707,6 +710,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of auto_charset, invalid_p == 0 */
   /* Skip verify of auto_wide_charset, invalid_p == 0 */
   /* Skip verify of has_dos_based_file_system, invalid_p == 0 */
+  /* Skip verify of gen_return_address, invalid_p == 0 */
   buf = ui_file_xstrdup (log, &length);
   make_cleanup (xfree, buf);
   if (length > 0)
@@ -946,6 +950,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: gcore_bfd_target = %s\n",
                       gdbarch->gcore_bfd_target);
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gen_return_address = <%s>\n",
+                      host_address_to_string (gdbarch->gen_return_address));
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_get_longjmp_target_p() = %d\n",
                       gdbarch_get_longjmp_target_p (gdbarch));
@@ -3861,6 +3868,23 @@ set_gdbarch_has_dos_based_file_system (struct gdbarch *gdbarch,
                                        int has_dos_based_file_system)
 {
   gdbarch->has_dos_based_file_system = has_dos_based_file_system;
+}
+
+void
+gdbarch_gen_return_address (struct gdbarch *gdbarch, struct agent_expr *ax, struct axs_value *value, CORE_ADDR scope)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->gen_return_address != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_gen_return_address called\n");
+  gdbarch->gen_return_address (gdbarch, ax, value, scope);
+}
+
+void
+set_gdbarch_gen_return_address (struct gdbarch *gdbarch,
+                                gdbarch_gen_return_address_ftype gen_return_address)
+{
+  gdbarch->gen_return_address = gen_return_address;
 }
 
 

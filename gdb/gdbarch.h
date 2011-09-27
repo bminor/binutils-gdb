@@ -54,6 +54,7 @@ struct displaced_step_closure;
 struct core_regset_section;
 struct syscall;
 struct agent_expr;
+struct axs_value;
 
 /* The architecture associated with the connection to the target.
  
@@ -1013,6 +1014,16 @@ extern void set_gdbarch_solib_symbols_extension (struct gdbarch *gdbarch, const 
 
 extern int gdbarch_has_dos_based_file_system (struct gdbarch *gdbarch);
 extern void set_gdbarch_has_dos_based_file_system (struct gdbarch *gdbarch, int has_dos_based_file_system);
+
+/* Generate bytecodes to collect the return address in a frame.
+   Since the bytecodes run on the target, possibly with GDB not even
+   connected, the full unwinding machinery is not available, and
+   typically this function will issue bytecodes for one or more likely
+   places that the return address may be found. */
+
+typedef void (gdbarch_gen_return_address_ftype) (struct gdbarch *gdbarch, struct agent_expr *ax, struct axs_value *value, CORE_ADDR scope);
+extern void gdbarch_gen_return_address (struct gdbarch *gdbarch, struct agent_expr *ax, struct axs_value *value, CORE_ADDR scope);
+extern void set_gdbarch_gen_return_address (struct gdbarch *gdbarch, gdbarch_gen_return_address_ftype *gen_return_address);
 
 /* Definition for an unknown syscall, used basically in error-cases.  */
 #define UNKNOWN_SYSCALL (-1)

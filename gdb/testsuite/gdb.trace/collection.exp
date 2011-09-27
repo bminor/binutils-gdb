@@ -588,6 +588,37 @@ proc gdb_collect_global_in_pieces_test { } {
 	"collect global in pieces: cease trace debugging"
 }
 
+proc gdb_collect_return_test { } {
+
+    prepare_for_trace_test
+
+    # We'll simply re-use the args_test_function for this test
+    gdb_test "trace args_test_func" \
+	    "Tracepoint \[0-9\]+ at .*" \
+	    "collect \$_ret: set tracepoint"
+    gdb_trace_setactions "collect \$_ret: define actions" \
+	    "" \
+	    "collect \$_ret" "^$"
+
+    # Begin the test.
+    run_trace_experiment \$_ret args_test_func
+
+    # Since we can't guarantee that $_ret will give us the caller,
+    # pass either way, but giving different messages.
+    gdb_test_multiple "backtrace" "" {
+	-re ".*#1 .* in main .*" {
+	    pass "collect \$_ret: backtrace lists main"
+	}
+	-re ".*#1 .* in ?? .*" {
+	    pass "collect \$_ret: backtrace not listing main"
+	}
+    }
+
+    gdb_test "tfind none" \
+	    "#0  end .*" \
+	    "collect \$_ret: cease trace debugging"
+}
+
 proc gdb_trace_collection_test {} {
     global fpreg
     global spreg
@@ -696,6 +727,7 @@ proc gdb_trace_collection_test {} {
     gdb_collect_expression_test globals_test_func \
 	    "globalarr\[\(l6, l7\)\]" "7"    "a\[\(b, c\)\]"
 
+    gdb_collect_return_test
 }
 
 clean_restart $executable

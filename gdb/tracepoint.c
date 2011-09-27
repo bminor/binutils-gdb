@@ -667,6 +667,7 @@ validate_actionline (char **line, struct breakpoint *b)
 	      if (0 == strncasecmp ("reg", p + 1, 3)
 		  || 0 == strncasecmp ("arg", p + 1, 3)
 		  || 0 == strncasecmp ("loc", p + 1, 3)
+		  || 0 == strncasecmp ("_ret", p + 1, 4)
 		  || 0 == strncasecmp ("_sdata", p + 1, 6))
 		{
 		  p = strchr (p, ',');
@@ -1342,6 +1343,43 @@ encode_actions_1 (struct command_line *action,
 				     frame_reg,
 				     frame_offset,
 				     'L');
+		  action_exp = strchr (action_exp, ',');	/* more? */
+		}
+	      else if (0 == strncasecmp ("$_ret", action_exp, 5))
+		{
+		  struct cleanup *old_chain1 = NULL;
+
+		  aexpr = gen_trace_for_return_address (tloc->address,
+							t->gdbarch);
+
+		  old_chain1 = make_cleanup_free_agent_expr (aexpr);
+
+		  ax_reqs (aexpr);
+		  report_agent_reqs_errors (aexpr);
+
+		  discard_cleanups (old_chain1);
+		  add_aexpr (collect, aexpr);
+
+		  /* take care of the registers */
+		  if (aexpr->reg_mask_len > 0)
+		    {
+		      int ndx1, ndx2;
+
+		      for (ndx1 = 0; ndx1 < aexpr->reg_mask_len; ndx1++)
+			{
+			  QUIT;	/* allow user to bail out with ^C */
+			  if (aexpr->reg_mask[ndx1] != 0)
+			    {
+			      /* assume chars have 8 bits */
+			      for (ndx2 = 0; ndx2 < 8; ndx2++)
+				if (aexpr->reg_mask[ndx1] & (1 << ndx2))
+				  /* it's used -- record it */
+				  add_register (collect, 
+						ndx1 * 8 + ndx2);
+			    }
+			}
+		    }
+
 		  action_exp = strchr (action_exp, ',');	/* more? */
 		}
 	      else if (0 == strncasecmp ("$_sdata", action_exp, 7))
@@ -2555,6 +2593,8 @@ trace_dump_actions (struct command_line *action,
 
 		  if (0 == strncasecmp (action_exp, "$reg", 4))
 		    registers_info (NULL, from_tty);
+		  else if (0 == strncasecmp (action_exp, "$_ret", 5))
+		    ;
 		  else if (0 == strncasecmp (action_exp, "$loc", 4))
 		    locals_info (NULL, from_tty);
 		  else if (0 == strncasecmp (action_exp, "$arg", 4))

@@ -1,3 +1,24 @@
+2011-09-27  Stan Shebs  <stan@codesourcery.com>
+
+	Add return address collection for tracepoints.
+	* tracepoint.c (encode_actions_1): Add case for $_ret.
+	(validate_actionline): Check for $_ret.
+	(trace_dump_actions): Ditto.
+	* ax-gdb.h (gen_trace_for_return_address): Declare.
+	* ax-gdb.c: Include arch-utils.h.
+	(gen_trace_for_return_address): New function.
+	(agent_command): Add return address special case.
+	* amd64-tdep.c: Include ax.h and ax-gdb.h.
+	(amd64_gen_return_address): New function.
+	(amd64_init_abi): Call it.
+	* i386-tdep.c: Include ax.h and ax-gdb.h.
+	(i386_gen_return_address): New function.
+	(i386_init_abi): Call it.
+	* arch-utils.h (default_gen_return_address): Declare.
+	* arch-utils.c (default_gen_return_address): New function.
+	* gdbarch.sh (gen_return_address): New method.
+	* gdbarch.h, gdbarch.c: Regenerate.
+
 2011-09-23  Joseph Myers  <joseph@codesourcery.com>
 
 	PR gdb/13079

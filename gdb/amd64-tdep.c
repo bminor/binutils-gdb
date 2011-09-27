@@ -45,6 +45,9 @@
 #include "features/i386/amd64.c"
 #include "features/i386/amd64-avx.c"
 
+#include "ax.h"
+#include "ax-gdb.h"
+
 /* Note that the AMD64 architecture was previously known as x86-64.
    The latter is (forever) engraved into the canonical system name as
    returned by config.guess, and used as the name for the AMD64 port
@@ -2165,6 +2168,22 @@ static const struct frame_unwind amd64_frame_unwind =
   default_frame_sniffer
 };
 
+/* Generate a bytecode expression to get the value of the saved PC.  */
+
+static void
+amd64_gen_return_address (struct gdbarch *gdbarch,
+			  struct agent_expr *ax, struct axs_value *value,
+			  CORE_ADDR scope)
+{
+  /* The following sequence assumes the traditional use of the base
+     register.  */
+  ax_reg (ax, AMD64_RBP_REGNUM);
+  ax_const_l (ax, 8);
+  ax_simple (ax, aop_add);
+  value->type = register_type (gdbarch, AMD64_RIP_REGNUM);
+  value->kind = axs_lvalue_memory;
+}
+
 
 /* Signal trampolines.  */
 
@@ -2669,6 +2688,8 @@ amd64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_get_longjmp_target (gdbarch, amd64_get_longjmp_target);
 
   set_gdbarch_relocate_instruction (gdbarch, amd64_relocate_instruction);
+
+  set_gdbarch_gen_return_address (gdbarch, amd64_gen_return_address);
 }
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */

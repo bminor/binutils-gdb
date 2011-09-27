@@ -786,6 +786,14 @@ default_remote_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr,
   gdbarch_breakpoint_from_pc (gdbarch, pcptr, kindptr);
 }
 
+void
+default_gen_return_address (struct gdbarch *gdbarch,
+			    struct agent_expr *ax, struct axs_value *value,
+			    CORE_ADDR scope)
+{
+  error (_("This architecture has no method to collect a return address."));
+}
+
 /* */
 
 /* -Wmissing-prototypes */

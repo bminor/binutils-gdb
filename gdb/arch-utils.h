@@ -164,6 +164,11 @@ extern int default_fast_tracepoint_valid_at (struct gdbarch *gdbarch,
 extern void default_remote_breakpoint_from_pc (struct gdbarch *,
 					       CORE_ADDR *pcptr, int *kindptr);
 
+extern void default_gen_return_address (struct gdbarch *gdbarch,
+					struct agent_expr *ax,
+					struct axs_value *value,
+					CORE_ADDR scope);
+
 extern const char *default_auto_charset (void);
 extern const char *default_auto_wide_charset (void);
 

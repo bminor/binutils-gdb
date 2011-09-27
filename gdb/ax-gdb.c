@@ -40,6 +40,7 @@
 #include "breakpoint.h"
 #include "tracepoint.h"
 #include "cp-support.h"
+#include "arch-utils.h"
 
 /* To make sense of this file, you should read doc/agentexpr.texi.
    Then look at the types and enums in ax-gdb.h.  For the code itself,
@@ -2444,6 +2445,32 @@ gen_eval_for_expr (CORE_ADDR scope, struct expression *expr)
   return ax;
 }
 
+struct agent_expr *
+gen_trace_for_return_address (CORE_ADDR scope, struct gdbarch *gdbarch)
+{
+  struct cleanup *old_chain = 0;
+  struct agent_expr *ax = new_agent_expr (gdbarch, scope);
+  struct axs_value value;
+
+  old_chain = make_cleanup_free_agent_expr (ax);
+
+  trace_kludge = 1;
+
+  gdbarch_gen_return_address (gdbarch, ax, &value, scope);
+
+  /* Make sure we record the final object, and get rid of it.  */
+  gen_traced_pop (gdbarch, ax, &value);
+
+  /* Oh, and terminate.  */
+  ax_simple (ax, aop_end);
+
+  /* We have successfully built the agent expr, so cancel the cleanup
+     request.  If we add more cleanups that we always want done, this
+     will have to get more complicated.  */
+  discard_cleanups (old_chain);
+  return ax;
+}
+
 static void
 agent_command (char *exp, int from_tty)
 {
@@ -2462,10 +2489,22 @@ agent_command (char *exp, int from_tty)
   if (exp == 0)
     error_no_arg (_("expression to translate"));
 
-  expr = parse_expression (exp);
-  old_chain = make_cleanup (free_current_contents, &expr);
-  agent = gen_trace_for_expr (get_frame_pc (fi), expr);
-  make_cleanup_free_agent_expr (agent);
+  /* Recognize the return address collection directive specially.  Note
+     that it is not really an expression of any sort.  */
+  if (strcmp (exp, "$_ret") == 0)
+    {
+      agent = gen_trace_for_return_address (get_frame_pc (fi),
+					    get_current_arch ());
+      old_chain = make_cleanup_free_agent_expr (agent);
+    }
+  else
+    {
+      expr = parse_expression (exp);
+      old_chain = make_cleanup (free_current_contents, &expr);
+      agent = gen_trace_for_expr (get_frame_pc (fi), expr);
+      make_cleanup_free_agent_expr (agent);
+    }
+
   ax_reqs (agent);
   ax_print (gdb_stdout, agent);
 
