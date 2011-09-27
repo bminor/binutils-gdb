@@ -1,3 +1,15 @@
+2011-09-27  Tristan Gingold  <gingold@adacore.com>
+
+	* target.h (enum target_object): Add TARGET_OBJECT_DARWIN_DYLD_INFO.
+	* solib-darwin.c (DYLD_VERSION_MAX): Update number.
+	(darwin_solib_get_all_image_info_addr_at_init): New function.
+	(darwin_solib_read_all_image_info_addr): Likewise.
+	(darwin_solib_create_inferior_hook): Use the above two functions.
+	* darwin-nat.c (darwin_execvp): Renames retval to res.
+	(darwin_read_write_inferior): Update comment.
+	(darwin_read_dyld_info): New function.
+	(darwin_xfer_partial): Handle DYLD_INFO.
+
 2011-09-27  Stan Shebs  <stan@codesourcery.com>
 
 	Add return address collection for tracepoints.

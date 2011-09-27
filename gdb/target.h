@@ -276,6 +276,8 @@ enum target_object
   TARGET_OBJECT_TRACEFRAME_INFO,
   /* Load maps for FDPIC systems.  */
   TARGET_OBJECT_FDPIC,
+  /* Darwin dynamic linker info data.  */
+  TARGET_OBJECT_DARWIN_DYLD_INFO
   /* Possible future objects: TARGET_OBJECT_FILE, ...  */
 };
 

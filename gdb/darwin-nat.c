@@ -1512,10 +1512,10 @@ darwin_execvp (const char *file, char * const argv[], char * const env[])
 {
   posix_spawnattr_t attr;
   short ps_flags = 0;
-  int retval;
+  int res;
 
-  retval = posix_spawnattr_init (&attr);
-  if (retval != 0)
+  res = posix_spawnattr_init (&attr);
+  if (res != 0)
     {
       fprintf_unfiltered
         (gdb_stderr, "Cannot initialize attribute for posix_spawn\n");
@@ -1531,11 +1531,10 @@ darwin_execvp (const char *file, char * const argv[], char * const env[])
 #define _POSIX_SPAWN_DISABLE_ASLR 0x0100
 #endif
   ps_flags |= _POSIX_SPAWN_DISABLE_ASLR;
-  retval = posix_spawnattr_setflags (&attr, ps_flags);
-  if (retval != 0)
+  res = posix_spawnattr_setflags (&attr, ps_flags);
+  if (res != 0)
     {
-      fprintf_unfiltered
-        (gdb_stderr, "Cannot set posix_spawn flags\n");
+      fprintf_unfiltered (gdb_stderr, "Cannot set posix_spawn flags\n");
       return;
     }
 
@@ -1695,7 +1694,7 @@ darwin_thread_alive (struct target_ops *ops, ptid_t ptid)
    copy it to RDADDR in gdb's address space.
    If WRADDR is not NULL, write gdb's LEN bytes from WRADDR and copy it
    to ADDR in inferior task's address space.
-   Return 0 on failure; number of bytes read / writen  otherwise.  */
+   Return 0 on failure; number of bytes read / writen otherwise.  */
 static int
 darwin_read_write_inferior (task_t task, CORE_ADDR addr,
 			    char *rdaddr, const char *wraddr, int length)
@@ -1824,6 +1823,32 @@ out:
   return length;
 }
 
+/* Read LENGTH bytes at offset ADDR of task_dyld_info for TASK, and copy them
+   to RDADDR.
+   Return 0 on failure; number of bytes read / writen otherwise.  */
+
+static int
+darwin_read_dyld_info (task_t task, CORE_ADDR addr, char *rdaddr, int length)
+{
+  struct task_dyld_info task_dyld_info;
+  mach_msg_type_number_t count = TASK_DYLD_INFO_COUNT;
+  int sz = TASK_DYLD_INFO_COUNT * sizeof (natural_t);
+  kern_return_t kret;
+
+  if (addr >= sz)
+    return 0;
+
+  kret = task_info (task, TASK_DYLD_INFO, (task_info_t) &task_dyld_info, &count);
+  MACH_CHECK_ERROR (kret);
+  if (kret != KERN_SUCCESS)
+    return -1;
+  /* Truncate.  */
+  if (addr + length > sz)
+    length = sz - addr;
+  memcpy (rdaddr, (char *)&task_dyld_info + addr, length);
+  return length;
+}
+
 
 /* Return 0 on failure, number of bytes handled otherwise.  TARGET
    is ignored.  */
@@ -1860,11 +1885,22 @@ darwin_xfer_partial (struct target_ops *ops,
      host_address_to_string (readbuf), host_address_to_string (writebuf),
      inf->pid);
 
-  if (object != TARGET_OBJECT_MEMORY)
-    return -1;
+  switch (object)
+    {
+    case TARGET_OBJECT_MEMORY:
+      return darwin_read_write_inferior (inf->private->task, offset,
+                                         readbuf, writebuf, len);
+    case TARGET_OBJECT_DARWIN_DYLD_INFO:
+      if (writebuf != NULL || readbuf == NULL)
+        {
+          /* Support only read.  */
+          return -1;
+        }
+      return darwin_read_dyld_info (inf->private->task, offset, readbuf, len);
+    default:
+      return -1;
+    }
 
-  return darwin_read_write_inferior (inf->private->task, offset,
-				     readbuf, writebuf, len);
 }
 
 static void
