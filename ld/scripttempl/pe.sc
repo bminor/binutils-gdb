@@ -73,6 +73,7 @@ SECTIONS
     *(.text)
     ${R_TEXT}
     ${RELOCATING+ *(.text.*)}
+    ${RELOCATING+ *(.gnu.linkonce.t.*)}
     *(.glue_7t)
     *(.glue_7)
     ${CONSTRUCTING+ ___CTOR_LIST__ = .; __CTOR_LIST__ = . ; 
@@ -238,7 +239,7 @@ SECTIONS
   /* DWARF 2.  */
   .debug_info ${RELOCATING+BLOCK(__section_alignment__)} ${RELOCATING+(NOLOAD)} :
   {
-    *(.debug_info) *(.gnu.linkonce.wi.*)
+    *(.debug_info${RELOCATING+ .gnu.linkonce.wi.*})
   }
 
   .debug_abbrev ${RELOCATING+BLOCK(__section_alignment__)} ${RELOCATING+(NOLOAD)} :
@@ -306,7 +307,7 @@ SECTIONS
   /* DWARF 4.  */
   .debug_types ${RELOCATING+BLOCK(__section_alignment__)} ${RELOCATING+(NOLOAD)} :
   {
-    *(.debug_types) *(.gnu.linkonce.wt.*)
+    *(.debug_types${RELOCATING+ .gnu.linkonce.wt.*})
   }
 }
 EOF
