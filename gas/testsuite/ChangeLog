@@ -1,3 +1,7 @@
+2011-09-28  Kai Tietz  <ktietz@redhat.com>
+
+	* gas/pe/section-exclude.d: Correct testcase.
+
 2011-09-27  Kai Tietz  <ktietz@redhat.com>
 
 	* gas/pe/pe.exp: Add new testcase.
