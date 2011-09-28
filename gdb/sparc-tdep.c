@@ -221,6 +221,25 @@ sparc_floating_p (const struct type *type)
   return 0;
 }
 
+/* Check whether TYPE is "Complex Floating".  */
+
+static int
+sparc_complex_floating_p (const struct type *type)
+{
+  switch (TYPE_CODE (type))
+    {
+    case TYPE_CODE_COMPLEX:
+      {
+	int len = TYPE_LENGTH (type);
+	return (len == 8 || len == 16 || len == 32);
+      }
+    default:
+      break;
+    }
+
+  return 0;
+}
+
 /* Check whether TYPE is "Structure or Union".
 
    In terms of Ada subprogram calls, arrays are treated the same as
@@ -454,7 +473,8 @@ sparc32_store_arguments (struct regcache *regcache, int nargs,
       int len = TYPE_LENGTH (type);
 
       if (sparc_structure_or_union_p (type)
-	  || (sparc_floating_p (type) && len == 16))
+	  || (sparc_floating_p (type) && len == 16)
+	  || sparc_complex_floating_p (type))
 	{
 	  /* Structure, Union and Quad-Precision Arguments.  */
 	  sp -= len;
@@ -1233,17 +1253,29 @@ sparc32_extract_return_value (struct type *type, struct regcache *regcache,
 			      gdb_byte *valbuf)
 {
   int len = TYPE_LENGTH (type);
-  gdb_byte buf[8];
+  gdb_byte buf[32];
 
   gdb_assert (!sparc_structure_or_union_p (type));
   gdb_assert (!(sparc_floating_p (type) && len == 16));
 
-  if (sparc_floating_p (type))
+  if (sparc_floating_p (type) || sparc_complex_floating_p (type))
     {
       /* Floating return values.  */
       regcache_cooked_read (regcache, SPARC_F0_REGNUM, buf);
       if (len > 4)
 	regcache_cooked_read (regcache, SPARC_F1_REGNUM, buf + 4);
+      if (len > 8)
+	{
+	  regcache_cooked_read (regcache, SPARC_F2_REGNUM, buf + 8);
+	  regcache_cooked_read (regcache, SPARC_F3_REGNUM, buf + 12);
+	}
+      if (len > 16)
+	{
+	  regcache_cooked_read (regcache, SPARC_F4_REGNUM, buf + 16);
+	  regcache_cooked_read (regcache, SPARC_F5_REGNUM, buf + 20);
+	  regcache_cooked_read (regcache, SPARC_F6_REGNUM, buf + 24);
+	  regcache_cooked_read (regcache, SPARC_F7_REGNUM, buf + 28);
+	}
       memcpy (valbuf, buf, len);
     }
   else
@@ -1281,13 +1313,25 @@ sparc32_store_return_value (struct type *type, struct regcache *regcache,
   gdb_assert (!(sparc_floating_p (type) && len == 16));
   gdb_assert (len <= 8);
 
-  if (sparc_floating_p (type))
+  if (sparc_floating_p (type) || sparc_complex_floating_p (type))
     {
       /* Floating return values.  */
       memcpy (buf, valbuf, len);
       regcache_cooked_write (regcache, SPARC_F0_REGNUM, buf);
       if (len > 4)
 	regcache_cooked_write (regcache, SPARC_F1_REGNUM, buf + 4);
+      if (len > 8)
+	{
+	  regcache_cooked_write (regcache, SPARC_F2_REGNUM, buf + 8);
+	  regcache_cooked_write (regcache, SPARC_F3_REGNUM, buf + 12);
+	}
+      if (len > 16)
+	{
+	  regcache_cooked_write (regcache, SPARC_F4_REGNUM, buf + 16);
+	  regcache_cooked_write (regcache, SPARC_F5_REGNUM, buf + 20);
+	  regcache_cooked_write (regcache, SPARC_F6_REGNUM, buf + 24);
+	  regcache_cooked_write (regcache, SPARC_F7_REGNUM, buf + 28);
+	}
     }
   else
     {
@@ -1351,7 +1395,8 @@ static int
 sparc32_stabs_argument_has_addr (struct gdbarch *gdbarch, struct type *type)
 {
   return (sparc_structure_or_union_p (type)
-	  || (sparc_floating_p (type) && TYPE_LENGTH (type) == 16));
+	  || (sparc_floating_p (type) && TYPE_LENGTH (type) == 16)
+	  || sparc_complex_floating_p (type));
 }
 
 static int

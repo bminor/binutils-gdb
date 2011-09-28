@@ -103,6 +103,26 @@ sparc64_floating_p (const struct type *type)
   return 0;
 }
 
+/* Check whether TYPE is "Complex Floating".  */
+
+static int
+sparc64_complex_floating_p (const struct type *type)
+{
+  switch (TYPE_CODE (type))
+    {
+    case TYPE_CODE_COMPLEX:
+      {
+	int len = TYPE_LENGTH (type);
+	gdb_assert (len == 8 || len == 16 || len == 32);
+      }
+      return 1;
+    default:
+      break;
+    }
+
+  return 0;
+}
+
 /* Check whether TYPE is "Structure or Union".
 
    In terms of Ada subprogram calls, arrays are treated the same as
@@ -622,11 +642,13 @@ static void
 sparc64_store_floating_fields (struct regcache *regcache, struct type *type,
 			       const gdb_byte *valbuf, int element, int bitpos)
 {
+  int len = TYPE_LENGTH (type);
+
   gdb_assert (element < 16);
 
-  if (sparc64_floating_p (type))
+  if (sparc64_floating_p (type)
+      || (sparc64_complex_floating_p (type) && len <= 16))
     {
-      int len = TYPE_LENGTH (type);
       int regnum;
 
       if (len == 16)
@@ -886,7 +908,7 @@ sparc64_store_arguments (struct regcache *regcache, int nargs,
 	  if (element < 16)
 	    sparc64_store_floating_fields (regcache, type, valbuf, element, 0);
 	}
-      else if (sparc64_floating_p (type))
+      else if (sparc64_floating_p (type) || sparc64_complex_floating_p (type))
 	{
 	  /* Floating arguments.  */
 	  if (len == 16)
@@ -901,7 +923,7 @@ sparc64_store_arguments (struct regcache *regcache, int nargs,
 	      if (element < 16)
 		regnum = SPARC64_D0_REGNUM + element;
 	    }
-	  else
+	  else if (len == 4)
 	    {
 	      /* The psABI says "Each single-precision parameter value
                  will be assigned to one extended word in the
@@ -1067,7 +1089,7 @@ sparc64_store_return_value (struct type *type, struct regcache *regcache,
       if (TYPE_CODE (type) != TYPE_CODE_UNION)
 	sparc64_store_floating_fields (regcache, type, buf, 0, 0);
     }
-  else if (sparc64_floating_p (type))
+  else if (sparc64_floating_p (type) || sparc64_complex_floating_p (type))
     {
       /* Floating return values.  */
       memcpy (buf, valbuf, len);
