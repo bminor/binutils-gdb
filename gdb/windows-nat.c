@@ -1951,6 +1951,18 @@ windows_set_console_info (STARTUPINFO *si, DWORD *flags)
   *flags |= CREATE_NEW_CONSOLE;
 }
 
+#ifndef __CYGWIN__
+/* Function called by qsort to sort environment strings.  */
+
+static int
+envvar_cmp (const void *a, const void *b)
+{
+  const char **p = (const char **) a;
+  const char **q = (const char **) b;
+  return strcasecmp (*p, *q);
+}
+#endif
+
 /* Start an inferior windows child process and sets inferior_ptid to its pid.
    EXEC_FILE is the file to run.
    ALLARGS is a string containing the arguments to the program.
@@ -1977,6 +1989,12 @@ windows_create_inferior (struct target_ops *ops, char *exec_file,
   char *toexec;
   char *args;
   HANDLE tty;
+  char *w32env;
+  char *temp;
+  size_t envlen;
+  int i;
+  size_t envsize;
+  char **env;
 #endif
   PROCESS_INFORMATION pi;
   BOOL ret;
@@ -2124,6 +2142,31 @@ windows_create_inferior (struct target_ops *ops, char *exec_file,
 	}
     }
 
+  /* CreateProcess takes the environment list as a null terminated set of
+     strings (i.e. two nulls terminate the list).  */
+
+  /* Get total size for env strings.  */
+  for (envlen = 0, i = 0; in_env[i] && *in_env[i]; i++)
+    envlen += strlen (in_env[i]) + 1;
+
+  envsize = sizeof (in_env[0]) * (i + 1);
+  env = (char **) alloca (envsize);
+  memcpy (env, in_env, envsize);
+  /* Windows programs expect the environment block to be sorted.  */
+  qsort (env, i, sizeof (char *), envvar_cmp);
+
+  w32env = alloca (envlen + 1);
+
+  /* Copy env strings into new buffer.  */
+  for (temp = w32env, i = 0; env[i] && *env[i]; i++)
+    {
+      strcpy (temp, env[i]);
+      temp += strlen (temp) + 1;
+    }
+
+  /* Final nil string to terminate new env.  */
+  *temp = 0;
+
   windows_init_thread_list ();
   ret = CreateProcessA (0,
 			args,	/* command line */
@@ -2131,7 +2174,7 @@ windows_create_inferior (struct target_ops *ops, char *exec_file,
 			NULL,	/* thread */
 			TRUE,	/* inherit handles */
 			flags,	/* start flags */
-			NULL,	/* environment */
+			w32env,	/* environment */
 			NULL,	/* current directory */
 			&si,
 			&pi);
