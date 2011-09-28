@@ -2,7 +2,7 @@
 #elfedit: --output-mach k1om
 #source: empty.s
 #readelf: -h
-#name: Update ELF header 1
+#name: Update ELF header 4
 #target: x86_64-*-*
 
 #...
