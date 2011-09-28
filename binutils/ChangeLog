@@ -1,3 +1,7 @@
+2011-09-28  Tristan Gingold  <gingold@adacore.com>
+
+	* od-xcoff.c (dump_xcoff32_aout_header): Fix typo.
+
 2011-09-27  Tristan Gingold  <gingold@adacore.com>
 
 	* od-xcoff.c (dump_xcoff32_aout_header): Remove some gettext macros.

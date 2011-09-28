@@ -459,7 +459,7 @@ dump_xcoff32_aout_header (bfd *abfd, struct xcoff_dump *data)
     }
 
   magic = bfd_h_get_16 (abfd, auxhdr.magic);
-  /* We don't translate these strings are they are fields name.  */
+  /* We don't translate these strings as they are fields name.  */
   printf ("  o_mflag (magic): 0x%04x 0%04o\n", magic, magic);
   printf ("  o_vstamp:        0x%04x\n",
           (unsigned short)bfd_h_get_16 (abfd, auxhdr.vstamp));
