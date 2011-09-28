@@ -104,6 +104,8 @@ typedef unsigned long gdb_py_ulongest;
 
 #include "exceptions.h"
 
+enum gdbpy_iter_kind { iter_keys, iter_values, iter_items };
+
 struct block;
 struct value;
 struct language_defn;

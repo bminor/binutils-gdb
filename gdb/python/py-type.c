@@ -55,6 +55,19 @@ typedef struct pyty_field_object
 
 static PyTypeObject field_object_type;
 
+/* A type iterator object.  */
+typedef struct {
+  PyObject_HEAD
+  /* The current field index.  */
+  int field;
+  /* What to return.  */
+  enum gdbpy_iter_kind kind;
+  /* Pointer back to the original source type object.  */
+  struct pyty_type_object *source;
+} typy_iterator_object;
+
+static PyTypeObject type_iterator_object_type;
+
 /* This is used to initialize various gdb.TYPE_ constants.  */
 struct pyty_code
 {
@@ -137,7 +150,8 @@ typy_get_code (PyObject *self, void *closure)
 }
 
 /* Helper function for typy_fields which converts a single field to a
-   dictionary.  Returns NULL on error.  */
+   gdb.Field object.  Returns NULL on error.  */
+
 static PyObject *
 convert_field (struct type *type, int field)
 {
@@ -210,12 +224,73 @@ convert_field (struct type *type, int field)
   return NULL;
 }
 
-/* Return a sequence of all fields.  Each field is a dictionary with
-   some pre-defined keys.  */
+/* Helper function to return the name of a field, as a gdb.Field object.
+   If the field doesn't have a name, None is returned.  */
+
 static PyObject *
-typy_fields (PyObject *self, PyObject *args)
+field_name (struct type *type, int field)
 {
   PyObject *result;
+
+  if (TYPE_FIELD_NAME (type, field))
+    result = PyString_FromString (TYPE_FIELD_NAME (type, field));
+  else
+    {
+      result = Py_None;
+      Py_INCREF (result);
+    }
+  return result;
+}
+
+/* Helper function for Type standard mapping methods.  Returns a
+   Python object for field i of the type.  "kind" specifies what to
+   return: the name of the field, a gdb.Field object corresponding to
+   the field, or a tuple consisting of field name and gdb.Field
+   object.  */
+
+static PyObject *
+make_fielditem (struct type *type, int i, enum gdbpy_iter_kind kind)
+{
+  PyObject *item = NULL, *key = NULL, *value = NULL;
+
+  switch (kind)
+    {
+    case iter_items:
+      key = field_name (type, i);
+      if (key == NULL)
+	goto fail;
+      value = convert_field (type, i);
+      if (value == NULL)
+	goto fail;
+      item = PyTuple_New (2);
+      if (item == NULL)
+	goto fail;
+      PyTuple_SET_ITEM (item, 0, key);
+      PyTuple_SET_ITEM (item, 1, value);
+      break;
+    case iter_keys:
+      item = field_name (type, i);
+      break;
+    case iter_values:
+      item =  convert_field (type, i);
+      break;
+    }
+  return item;
+  
+ fail:
+  Py_XDECREF (key);
+  Py_XDECREF (value);
+  Py_XDECREF (item);
+  return NULL;
+}
+
+/* Return a sequence of all field names, fields, or (name, field) pairs.
+   Each field is a gdb.Field object.  */
+
+static PyObject *
+typy_fields_items (PyObject *self, enum gdbpy_iter_kind kind)
+{
+  PyObject *result = NULL, *item = NULL;
   int i;
   struct type *type = ((type_object *) self)->type;
   volatile struct gdb_exception except;
@@ -230,26 +305,50 @@ typy_fields (PyObject *self, PyObject *args)
      then memoize the result (and perhaps make Field.type() lazy).
      However, that can lead to cycles.  */
   result = PyList_New (0);
-
+  if (result == NULL)
+    return NULL;
+  
   for (i = 0; i < TYPE_NFIELDS (type); ++i)
     {
-      PyObject *dict = convert_field (type, i);
-
-      if (!dict)
-	{
-	  Py_DECREF (result);
-	  return NULL;
-	}
-      if (PyList_Append (result, dict))
-	{
-	  Py_DECREF (dict);
-	  Py_DECREF (result);
-	  return NULL;
-	}
-      Py_DECREF (dict);
+      item = make_fielditem (type, i, kind);
+      if (!item)
+	goto fail;
+      if (PyList_Append (result, item))
+	goto fail;
+      Py_DECREF (item);
     }
 
   return result;
+
+ fail:
+  Py_XDECREF (item);
+  Py_XDECREF (result);
+  return NULL;
+}
+
+/* Return a sequence of all fields.  Each field is a gdb.Field object.  */
+
+static PyObject *
+typy_fields (PyObject *self, PyObject *args)
+{
+  return typy_fields_items (self, iter_values);
+}
+
+/* Return a sequence of all field names.  Each field is a gdb.Field object.  */
+
+static PyObject *
+typy_field_names (PyObject *self, PyObject *args)
+{
+  return typy_fields_items (self, iter_keys);
+}
+
+/* Return a sequence of all (name, fields) pairs.  Each field is a 
+   gdb.Field object.  */
+
+static PyObject *
+typy_items (PyObject *self, PyObject *args)
+{
+  return typy_fields_items (self, iter_items);
 }
 
 /* Return the type's tag, or None.  */
@@ -1000,6 +1099,209 @@ typy_dealloc (PyObject *obj)
   type->ob_type->tp_free (type);
 }
 
+/* Return number of fields ("length" of the field dictionary).  */
+
+static Py_ssize_t
+typy_length (PyObject *self)
+{
+  struct type *type = ((type_object *) self)->type;
+
+  return TYPE_NFIELDS (type);
+}
+
+/* Return a gdb.Field object for the field named by the argument.  */
+
+static PyObject *
+typy_getitem (PyObject *self, PyObject *key)
+{
+  struct type *type = ((type_object *) self)->type;
+  char *field;
+  int i;
+  
+  field = python_string_to_host_string (key);
+  if (field == NULL)
+    return NULL;
+
+  /* We want just fields of this type, not of base types, so instead of 
+     using lookup_struct_elt_type, portions of that function are
+     copied here.  */
+
+  for (;;)
+    {
+      CHECK_TYPEDEF (type);
+      if (TYPE_CODE (type) != TYPE_CODE_PTR
+	  && TYPE_CODE (type) != TYPE_CODE_REF)
+	break;
+      type = TYPE_TARGET_TYPE (type);
+    }
+
+  for (i = 0; i < TYPE_NFIELDS (type); i++)
+    {
+      char *t_field_name = TYPE_FIELD_NAME (type, i);
+
+      if (t_field_name && (strcmp_iw (t_field_name, field) == 0))
+	{
+	  return convert_field (type, i);
+	}
+    }
+  PyErr_SetObject (PyExc_KeyError, key);
+  return NULL;
+}
+
+/* Implement the "get" method on the type object.  This is the 
+   same as getitem if the key is present, but returns the supplied
+   default value or None if the key is not found.  */
+
+static PyObject *
+typy_get (PyObject *self, PyObject *args)
+{
+  PyObject *key, *defval = Py_None, *result;
+  
+  if (!PyArg_UnpackTuple (args, "get", 1, 2, &key, &defval))
+    return NULL;
+  
+  result = typy_getitem (self, key);
+  if (result != NULL)
+    return result;
+  
+  /* typy_getitem returned error status.  If the exception is
+     KeyError, clear the exception status and return the defval
+     instead.  Otherwise return the exception unchanged.  */
+  if (!PyErr_ExceptionMatches (PyExc_KeyError))
+    return NULL;
+  
+  PyErr_Clear ();
+  Py_INCREF (defval);
+  return defval;
+}
+
+/* Implement the "has_key" method on the type object.  */
+
+static PyObject *
+typy_has_key (PyObject *self, PyObject *args)
+{
+  struct type *type = ((type_object *) self)->type;
+  char *field;
+  int i;
+  
+  if (!PyArg_ParseTuple (args, "s", &field))
+    return NULL;
+
+  /* We want just fields of this type, not of base types, so instead of 
+     using lookup_struct_elt_type, portions of that function are
+     copied here.  */
+
+  for (;;)
+    {
+      CHECK_TYPEDEF (type);
+      if (TYPE_CODE (type) != TYPE_CODE_PTR
+	  && TYPE_CODE (type) != TYPE_CODE_REF)
+	break;
+      type = TYPE_TARGET_TYPE (type);
+    }
+
+  for (i = 0; i < TYPE_NFIELDS (type); i++)
+    {
+      char *t_field_name = TYPE_FIELD_NAME (type, i);
+
+      if (t_field_name && (strcmp_iw (t_field_name, field) == 0))
+	Py_RETURN_TRUE;
+    }
+  Py_RETURN_FALSE;
+}
+
+/* Make an iterator object to iterate over keys, values, or items.  */
+
+static PyObject *
+typy_make_iter (PyObject *self, enum gdbpy_iter_kind kind)
+{
+  typy_iterator_object *typy_iter_obj;
+
+  typy_iter_obj = PyObject_New (typy_iterator_object,
+				&type_iterator_object_type);
+  if (typy_iter_obj == NULL)
+      return NULL;
+
+  typy_iter_obj->field = 0;
+  typy_iter_obj->kind = kind;
+  Py_INCREF (self);
+  typy_iter_obj->source = (type_object *) self;
+
+  return (PyObject *) typy_iter_obj;
+}
+
+/* iteritems() method.  */
+
+static PyObject *
+typy_iteritems (PyObject *self, PyObject *args)
+{
+  return typy_make_iter (self, iter_items);
+}
+
+/* iterkeys() method.  */
+
+static PyObject *
+typy_iterkeys (PyObject *self, PyObject *args)
+{
+  return typy_make_iter (self, iter_keys);
+}
+
+/* Iterating over the class, same as iterkeys except for the function
+   signature.  */
+
+static PyObject *
+typy_iter (PyObject *self)
+{
+  return typy_make_iter (self, iter_keys);
+}
+
+/* itervalues() method.  */
+
+static PyObject *
+typy_itervalues (PyObject *self, PyObject *args)
+{
+  return typy_make_iter (self, iter_values);
+}
+
+/* Return a reference to the type iterator.  */
+
+static PyObject *
+typy_iterator_iter (PyObject *self)
+{
+  Py_INCREF (self);
+  return self;
+}
+
+/* Return the next field in the iteration through the list of fields
+   of the type.  */
+
+static PyObject *
+typy_iterator_iternext (PyObject *self)
+{
+  typy_iterator_object *iter_obj = (typy_iterator_object *) self;
+  struct type *type = iter_obj->source->type;
+  int i;
+  PyObject *result;
+  
+  if (iter_obj->field < TYPE_NFIELDS (type))
+    {
+      result = make_fielditem (type, iter_obj->field, iter_obj->kind);
+      if (result != NULL)
+	iter_obj->field++;
+      return result;
+    }
+
+  return NULL;
+}
+
+static void
+typy_iterator_dealloc (PyObject *obj)
+{
+  typy_iterator_object *iter_obj = (typy_iterator_object *) obj;
+
+  Py_DECREF (iter_obj->source);
+}
+
 /* Create a new Type referring to TYPE.  */
 PyObject *
 type_to_type_object (struct type *type)
@@ -1067,6 +1369,8 @@ gdbpy_initialize_types (void)
     return;
   if (PyType_Ready (&field_object_type) < 0)
     return;
+  if (PyType_Ready (&type_iterator_object_type) < 0)
+    return;
 
   for (i = 0; pyty_codes[i].name; ++i)
     {
@@ -1079,6 +1383,10 @@ gdbpy_initialize_types (void)
 
   Py_INCREF (&type_object_type);
   PyModule_AddObject (gdb_module, "Type", (PyObject *) &type_object_type);
+
+  Py_INCREF (&type_iterator_object_type);
+  PyModule_AddObject (gdb_module, "TypeIterator",
+		      (PyObject *) &type_iterator_object_type);
 
   Py_INCREF (&field_object_type);
   PyModule_AddObject (gdb_module, "Field", (PyObject *) &field_object_type);
@@ -1102,13 +1410,35 @@ static PyMethodDef type_object_methods[] =
   { "array", typy_array, METH_VARARGS,
     "array (N) -> Type\n\
 Return a type which represents an array of N objects of this type." },
+   { "__contains__", typy_has_key, METH_VARARGS,
+     "T.__contains__(k) -> True if T has a field named k, else False" },
   { "const", typy_const, METH_NOARGS,
     "const () -> Type\n\
 Return a const variant of this type." },
   { "fields", typy_fields, METH_NOARGS,
-    "field () -> list\n\
-Return a sequence holding all the fields of this type.\n\
-Each field is a dictionary." },
+    "fields () -> list\n\
+Return a list holding all the fields of this type.\n\
+Each field is a gdb.Field object." },
+  { "get", typy_get, METH_VARARGS,
+    "T.get(k[,default]) -> returns field named k in T, if it exists;\n\
+otherwise returns default, if supplied, or None if not." },
+  { "has_key", typy_has_key, METH_VARARGS,
+    "T.has_key(k) -> True if T has a field named k, else False" },
+  { "items", typy_items, METH_NOARGS,
+    "items () -> list\n\
+Return a list of (name, field) pairs of this type.\n\
+Each field is a gdb.Field object." },
+  { "iteritems", typy_iteritems, METH_NOARGS,
+    "iteritems () -> an iterator over the (name, field)\n\
+pairs of this type.  Each field is a gdb.Field object." },
+  { "iterkeys", typy_iterkeys, METH_NOARGS,
+    "iterkeys () -> an iterator over the field names of this type." },
+  { "itervalues", typy_itervalues, METH_NOARGS,
+    "itervalues () -> an iterator over the fields of this type.\n\
+Each field is a gdb.Field object." },
+  { "keys", typy_field_names, METH_NOARGS,
+    "keys () -> list\n\
+Return a list holding all the fields names of this type." },
   { "pointer", typy_pointer, METH_NOARGS,
     "pointer () -> Type\n\
 Return a type of pointer to this type." },
@@ -1130,10 +1460,20 @@ Return the type of a template argument." },
   { "unqualified", typy_unqualified, METH_NOARGS,
     "unqualified () -> Type\n\
 Return a variant of this type without const or volatile attributes." },
+  { "values", typy_fields, METH_NOARGS,
+    "values () -> list\n\
+Return a list holding all the fields of this type.\n\
+Each field is a gdb.Field object." },
   { "volatile", typy_volatile, METH_NOARGS,
     "volatile () -> Type\n\
 Return a volatile variant of this type" },
   { NULL }
+};
+
+static PyMappingMethods typy_mapping = {
+  typy_length,
+  typy_getitem,
+  NULL				  /* no "set" method */
 };
 
 static PyTypeObject type_object_type =
@@ -1151,7 +1491,7 @@ static PyTypeObject type_object_type =
   0,				  /*tp_repr*/
   0,				  /*tp_as_number*/
   0,				  /*tp_as_sequence*/
-  0,				  /*tp_as_mapping*/
+  &typy_mapping,		  /*tp_as_mapping*/
   0,				  /*tp_hash */
   0,				  /*tp_call*/
   typy_str,			  /*tp_str*/
@@ -1164,7 +1504,7 @@ static PyTypeObject type_object_type =
   0,				  /* tp_clear */
   typy_richcompare,		  /* tp_richcompare */
   0,				  /* tp_weaklistoffset */
-  0,				  /* tp_iter */
+  typy_iter,			  /* tp_iter */
   0,				  /* tp_iternext */
   type_object_methods,		  /* tp_methods */
   0,				  /* tp_members */
@@ -1220,4 +1560,36 @@ static PyTypeObject field_object_type =
   0,				  /* tp_init */
   0,				  /* tp_alloc */
   0,				  /* tp_new */
+};
+
+static PyTypeObject type_iterator_object_type = {
+  PyObject_HEAD_INIT (NULL)
+  0,				  /*ob_size*/
+  "gdb.TypeIterator",		  /*tp_name*/
+  sizeof (typy_iterator_object),  /*tp_basicsize*/
+  0,				  /*tp_itemsize*/
+  typy_iterator_dealloc,	  /*tp_dealloc*/
+  0,				  /*tp_print*/
+  0,				  /*tp_getattr*/
+  0,				  /*tp_setattr*/
+  0,				  /*tp_compare*/
+  0,				  /*tp_repr*/
+  0,				  /*tp_as_number*/
+  0,				  /*tp_as_sequence*/
+  0,				  /*tp_as_mapping*/
+  0,				  /*tp_hash */
+  0,				  /*tp_call*/
+  0,				  /*tp_str*/
+  0,				  /*tp_getattro*/
+  0,				  /*tp_setattro*/
+  0,				  /*tp_as_buffer*/
+  Py_TPFLAGS_DEFAULT | Py_TPFLAGS_HAVE_ITER,  /*tp_flags*/
+  "GDB type iterator object",	  /*tp_doc */
+  0,				  /*tp_traverse */
+  0,				  /*tp_clear */
+  0,				  /*tp_richcompare */
+  0,				  /*tp_weaklistoffset */
+  typy_iterator_iter,             /*tp_iter */
+  typy_iterator_iternext,	  /*tp_iternext */
+  0				  /*tp_methods */
 };

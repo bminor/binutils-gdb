@@ -21541,6 +21541,19 @@ Ordinarily, this function will return an instance of @code{gdb.Type}.
 If the named type cannot be found, it will throw an exception.
 @end defun
 
+If the type is a structure or class type, or an enum type, the fields
+of that type can be accessed using the Python @dfn{dictionary syntax}.
+For example, if @code{some_type} is a @code{gdb.Type} instance holding
+a structure type, you can access its @code{foo} field with:
+
+@smallexample
+bar = some_type['foo']
+@end smallexample
+
+@code{bar} will be a @code{gdb.Field} object; see below under the
+description of the @code{Type.fields} method for a description of the
+@code{gdb.Field} class.
+
 An instance of @code{Type} has the following attributes:
 
 @table @code
@@ -21574,7 +21587,7 @@ field per parameter.  The base types of C@t{++} classes are also
 represented as fields.  If the type has no fields, or does not fit
 into one of these categories, an empty sequence will be returned.
 
-Each field is an object, with some pre-defined attributes:
+Each field is a @code{gdb.Field} object, with some pre-defined attributes:
 @table @code
 @item bitpos
 This attribute is not available for @code{static} fields (as in
