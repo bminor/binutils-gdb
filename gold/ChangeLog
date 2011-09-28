@@ -1,3 +1,9 @@
+2011-09-27  Viktor Kutuzov  <vkutuzov@accesssoftek.com>
+	    Ian Lance Taylor  <iant@google.com>
+
+	* symtab.cc (Symbol_table::define_special_symbol): Always
+	canonicalize version string.
+
 2011-09-26  Cary Coutant  <ccoutant@google.com>
 
 	* gold/gold.cc (queue_initial_tasks): Move option checks ...

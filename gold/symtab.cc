@@ -1683,7 +1683,9 @@ Symbol_table::define_special_symbol(const char** pname, const char** pversion,
 	return NULL;
 
       *pname = oldsym->name();
-      if (!is_default_version)
+      if (is_default_version)
+	*pversion = this->namepool_.add(*pversion, true, NULL);
+      else
 	*pversion = oldsym->version();
     }
   else
