@@ -86,6 +86,14 @@ proc test_fields {lang} {
   gdb_test "python print fields\[0\].name" "a" "Check structure field a name"
   gdb_test "python print fields\[1\].name" "b" "Check structure field b name"
 
+  # Test Python mapping behavior of gdb.Type for structs/classes
+  gdb_test "python print len(st.type)" "2" "Check number of fields"
+  gdb_test "python print st.type\['a'\].name" "a" "Check fields lookup by name"
+    gdb_test "python print \[v.bitpos for v in st.type.itervalues()\]" {\[0L, 32L\]} "Check fields iteration over values"
+    gdb_test "python print \[(n, v.bitpos) for (n, v) in st.type.items()\]" {\[\('a', 0L\), \('b', 32L\)\]} "Check fields items list"
+  gdb_test "python print 'a' in st.type" "True" "Check field name exists test"
+  gdb_test "python print 'nosuch' in st.type" "False" "Check field name nonexists test"
+  
   # Test regression PR python/10805
   gdb_py_test_silent_cmd "print ar" "print value" 1
   gdb_py_test_silent_cmd "python ar = gdb.history (0)" "get value from  history" 1
@@ -101,6 +109,21 @@ proc test_fields {lang} {
   gdb_test "python print ar\[0\].type == ar\[0\].type" "True"
 }
 
+proc test_enums {} {
+  gdb_py_test_silent_cmd "print e" "print value" 1
+  gdb_py_test_silent_cmd "python e = gdb.history (0)" "get value from  history" 1
+  gdb_py_test_silent_cmd "python fields = e.type.fields()" "get value from history" 1
+  gdb_test "python print len(fields)" "3" "Check the number of enum fields"
+  gdb_test "python print fields\[0\].name" "v1" "Check enum field name"
+  gdb_test "python print fields\[1\].name" "v2" "Check enum field name"
+
+  # Ditto but by mapping operations
+  gdb_test "python print len(e.type)" "3" "Check the number of enum fields"
+  gdb_test "python print e.type\['v1'\].name" "v1" "Check enum field lookup by name"
+  gdb_test "python print e.type\['v3'\].name" "v3" "Check enum field lookup by name"
+    gdb_test "python print \[v.bitpos for v in e.type.itervalues()\]" {\[0L, 1L, 2L\]} "Check num fields iteration over values"
+    gdb_test "python print \[(n, v.bitpos) for (n, v) in e.type.items()\]" {\[\('v1', 0L\), \('v2', 1L\), \('v3', 2L\)\]} "Check enum fields items list"
+}
 proc test_base_class {} {
   gdb_py_test_silent_cmd "print d" "print value" 1
   gdb_py_test_silent_cmd "python d = gdb.history (0)" "get value from  history" 1
@@ -169,6 +192,7 @@ if { [skip_python_tests] } { continue }
 
 runto_bp "break to inspect struct and array."
 test_fields "c"
+test_enums
 
 # Perform C++ Tests.
 build_inferior "${binfile}-cxx" "c++"
@@ -178,3 +202,4 @@ test_fields "c++"
 test_base_class
 test_range
 test_template
+test_enums
