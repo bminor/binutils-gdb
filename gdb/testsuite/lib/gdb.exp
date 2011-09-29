@@ -1626,7 +1626,7 @@ proc is_lp64_target {} {
 proc is_amd64_regs_target {} {
     global is_amd64_regs_target_saved
 
-    if {![istarget "x86_64-*-*"]} {
+    if {![istarget "x86_64-*-*"] && ![istarget "i?86-*"]} {
 	return 0
     }
 
@@ -1665,10 +1665,7 @@ proc is_amd64_regs_target {} {
 
 # Return 1 if this target is an x86 or x86-64 with -m32.
 proc is_x86_like_target {} {
-    if {[istarget i?86-*]} {
-	return 1
-    }
-    if {![istarget "x86_64-*-*"]} {
+    if {![istarget "x86_64-*-*"] && ![istarget i?86-*]} {
 	return 0
     }
     return [expr [is_ilp32_target] && ![is_amd64_regs_target]]

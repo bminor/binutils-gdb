@@ -1,3 +1,8 @@
+2011-09-29  Joseph Myers  <joseph@codesourcery.com>
+
+	* lib/gdb.exp (is_amd64_regs_target, is_x86_like_target): Allow
+	for 64-bit multilibs from i?86-* targets.
+
 2011-09-29  Marek Polacek  <mpolacek@redhat.com>
 
 	* lib/gdb.exp: Fix a typo in one of the comments.
