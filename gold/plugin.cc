@@ -1630,7 +1630,7 @@ get_input_section_contents(const struct ld_plugin_section section,
 // which they should appear in the final layout.
 
 static enum ld_plugin_status
-update_section_order(const struct ld_plugin_section *section_list,
+update_section_order(const struct ld_plugin_section* section_list,
 		     unsigned int num_sections)
 {
   gold_assert(parameters->options().has_plugins());
@@ -1641,8 +1641,14 @@ update_section_order(const struct ld_plugin_section *section_list,
   if (section_list == NULL)
     return LDPS_ERR;
 
-  std::map<Section_id, unsigned int> order_map;
+  Layout* layout = parameters->options().plugins()->layout();
+  gold_assert (layout != NULL);
 
+  std::map<Section_id, unsigned int>* order_map
+    = layout->get_section_order_map();
+
+  /* Store the mapping from Section_id to section position in layout's
+     order_map to consult after output sections are added.  */
   for (unsigned int i = 0; i < num_sections; ++i)
     {
       Object* obj = parameters->options().plugins()->get_elf_object(
@@ -1651,16 +1657,8 @@ update_section_order(const struct ld_plugin_section *section_list,
 	return LDPS_BAD_HANDLE;
       unsigned int shndx = section_list[i].shndx;
       Section_id secn_id(obj, shndx);
-      order_map[secn_id] = i + 1;
+      (*order_map)[secn_id] = i + 1;
     }
-
-  Layout* layout = parameters->options().plugins()->layout();
-  gold_assert (layout != NULL);
-
-  for (Layout::Section_list::const_iterator p = layout->section_list().begin();
-       p != layout->section_list().end();
-       ++p)
-    (*p)->update_section_layout(order_map);
 
   return LDPS_OK;
 }

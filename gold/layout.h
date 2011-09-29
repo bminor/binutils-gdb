@@ -522,6 +522,10 @@ class Layout
 	 const char* name, const elfcpp::Shdr<size, big_endian>& shdr,
 	 unsigned int reloc_shndx, unsigned int reloc_type, off_t* offset);
 
+  std::map<Section_id, unsigned int>*
+  get_section_order_map()
+  { return &this->section_order_map_; }
+ 
   bool
   is_section_ordering_specified()
   { return this->section_ordering_specified_; }
@@ -1322,6 +1326,9 @@ class Layout
   Segment_states* segment_states_;
   // A relaxation debug checker.  We only create one when in debugging mode.
   Relaxation_debug_check* relaxation_debug_check_;
+  // Plugins specify section_ordering using this map.  This is set in
+  // update_section_order in plugin.cc
+  std::map<Section_id, unsigned int> section_order_map_;
   // Hash a pattern to its position in the section ordering file.
   Unordered_map<std::string, unsigned int> input_section_position_;
   // Vector of glob only patterns in the section_ordering file.

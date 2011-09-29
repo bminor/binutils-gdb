@@ -1,3 +1,20 @@
+2011-09-29  Sriraman Tallam  <tmsriram@google.com>
+
+	* layout.h (section_order_map_): New member.
+	(get_section_order_map): New member function.
+	* output.cc (Output_section::add_input_section): Check for patterns
+	only when --section-ordering-file is specified.
+	* gold.cc (queue_middle_tasks): Delay updating order of sections till
+	output_sections have been formed.
+	* layout.cc (Layout_Layout): Initialize section_order_map_.
+	* plugin.cc (update_section_order): Store order in order_map. Do not
+	update the order.
+	* testsuite/Makefile.am: Add test case for plugin_final_layout.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/plugin_section_order.c: New file.
+	* testsuite/plugin_final_layout.cc: New file.
+	* testsuite/plugin_final_layout.sh: New file.
+
 2011-09-29  Cary Coutant  <ccoutant@google.com>
 
 	* gold/incremental.cc (Sized_incremental_binary::do_process_got_plt):

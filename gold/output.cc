@@ -2476,7 +2476,10 @@ Output_section::add_input_section(Layout* layout,
       || layout->is_section_ordering_specified())
     {
       Input_section isecn(object, shndx, input_section_size, addralign);
-      if (layout->is_section_ordering_specified())
+      /* If section ordering is requested by specifying a ordering file,
+	 using --section-ordering-file, match the section name with
+	 a pattern.  */
+      if (parameters->options().section_ordering_file())
         {
           unsigned int section_order_index =
             layout->find_section_order_index(std::string(secname));
@@ -3485,7 +3488,7 @@ Output_section::Input_section_sort_section_order_index_compare::operator()(
 
 void
 Output_section::update_section_layout(
-  const Section_layout_order& order_map)
+  const Section_layout_order* order_map)
 {
   for (Input_section_list::iterator p = this->input_sections_.begin();
        p != this->input_sections_.end();
@@ -3499,8 +3502,8 @@ Output_section::update_section_layout(
 		         : p->relaxed_input_section()->relobj());
 	  unsigned int shndx = p->shndx();
 	  Section_layout_order::const_iterator it
-	    = order_map.find(Section_id(obj, shndx));
-	  if (it == order_map.end())
+	    = order_map->find(Section_id(obj, shndx));
+	  if (it == order_map->end())
 	    continue;
 	  unsigned int section_order_index = it->second;
 	  if (section_order_index != 0)

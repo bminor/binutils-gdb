@@ -2761,7 +2761,7 @@ class Output_section : public Output_data
   typedef std::map<Section_id, unsigned int> Section_layout_order;
 
   void
-  update_section_layout(const Section_layout_order& order_map);
+  update_section_layout(const Section_layout_order* order_map);
 
   // Update the output section flags based on input section flags.
   void

@@ -539,6 +539,20 @@ queue_middle_tasks(const General_options& options,
         }
     }
 
+  /* If plugins have specified a section order, re-arrange input sections
+     according to a specified section order.  If --section-ordering-file is
+     also specified, do not do anything here.  */
+  if (parameters->options().has_plugins()
+      && layout->is_section_ordering_specified()
+      && !parameters->options().section_ordering_file ())
+    {
+      for (Layout::Section_list::const_iterator p
+	     = layout->section_list().begin();
+           p != layout->section_list().end();
+           ++p)
+        (*p)->update_section_layout(layout->get_section_order_map());
+    }
+
   // Layout deferred objects due to plugins.
   if (parameters->options().has_plugins())
     {

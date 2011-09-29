@@ -410,6 +410,7 @@ Layout::Layout(int number_of_input_files, Script_options* script_options)
     script_output_section_data_list_(),
     segment_states_(NULL),
     relaxation_debug_check_(NULL),
+    section_order_map_(),
     input_section_position_(),
     input_section_glob_(),
     incremental_base_(NULL),
