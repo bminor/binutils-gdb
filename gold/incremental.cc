@@ -685,7 +685,7 @@ Sized_incremental_binary<size, big_endian>::do_process_got_plt(
       gold_assert(plt_desc >= first_global && plt_desc < symtab_count);
       Symbol* sym = this->global_symbol(plt_desc - first_global);
       // Add the PLT entry only if the symbol is still referenced.
-      if (sym->in_reg())
+      if (sym != NULL && sym->in_reg())
 	{
 	  gold_debug(DEBUG_INCREMENTAL,
 		     "PLT entry %d: %s",

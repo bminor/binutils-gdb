@@ -1143,6 +1143,14 @@ Symbol_table::add_from_relobj(
       bool is_default_version = false;
       bool is_forced_local = false;
 
+      // FIXME: For incremental links, we don't store version information,
+      // so we need to ignore version symbols for now.
+      if (parameters->incremental_update() && ver != NULL)
+	{
+	  namelen = ver - name;
+	  ver = NULL;
+	}
+
       if (ver != NULL)
         {
           // The symbol name is of the form foo@VERSION or foo@@VERSION
@@ -1345,6 +1353,11 @@ Symbol_table::add_from_dynobj(
       gold_error(_("--just-symbols does not make sense with a shared object"));
       return;
     }
+
+  // FIXME: For incremental links, we don't store version information,
+  // so we need to ignore version symbols for now.
+  if (parameters->incremental_update())
+    versym = NULL;
 
   if (versym != NULL && versym_size / 2 < count)
     {
