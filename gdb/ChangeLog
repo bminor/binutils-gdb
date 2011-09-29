@@ -1,3 +1,7 @@
+2011-09-28  Yao Qi  <yao@codesourcery.com>
+
+	* symfile.c (add_symbol_file_command): Update message on usage.
+
 2011-09-28  Paul Koning  <paul_koning@dell.com>
 
 	* python/py-type.c (make_fielditem, typy_field_names, typy_items)

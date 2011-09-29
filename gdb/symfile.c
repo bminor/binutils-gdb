@@ -2256,7 +2256,7 @@ add_symbol_file_command (char *args, int from_tty)
 		    }
 		  else
 		    error (_("USAGE: add-symbol-file <filename> <textaddress>"
-			     " [-mapped] [-readnow] [-s <secname> <addr>]*"));
+			     " [-readnow] [-s <secname> <addr>]*"));
 	      }
 	  }
     }
