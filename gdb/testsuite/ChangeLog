@@ -1,3 +1,8 @@
+2011-09-29  Marek Polacek  <mpolacek@redhat.com>
+
+	* gdb.base/foll-fork.exp: Fix race by adding "y or n" to the
+	matching pattern.
+
 2011-09-28  Paul Koning  <paul_koning@dell.com>
 
 	* gdb.python/py-type.c (enum E): New.

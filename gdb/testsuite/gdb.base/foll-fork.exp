@@ -168,7 +168,7 @@ proc catch_fork_child_follow {} {
     gdb_test "delete breakpoints" \
 	"" \
 	"set follow-fork child, cleanup" \
-	"Delete all breakpoints.*$" \
+	"Delete all breakpoints. \\(y or n\\) $" \
 	"y"
 }
 
@@ -255,7 +255,7 @@ proc tcatch_fork_parent_follow {} {
     gdb_test "delete breakpoints" \
 	"" \
 	"set follow-fork parent, cleanup" \
-	"Delete all breakpoints.*$" \
+	"Delete all breakpoints. \\(y or n\\) $" \
 	"y"
 }
 
