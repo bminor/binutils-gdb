@@ -11668,9 +11668,10 @@ _bfd_elf_gc_mark_extra_sections (struct bfd_link_info *info,
 	continue;
 
       /* Keep debug and special sections like .comment when they are
-	 not part of a group.  */
+	 not part of a group, or when we have single-member groups.  */
       for (isec = ibfd->sections; isec != NULL; isec = isec->next)
-	if (elf_next_in_group (isec) == NULL
+	if ((elf_next_in_group (isec) == NULL
+	     || elf_next_in_group (isec) == isec)
 	    && ((isec->flags & SEC_DEBUGGING) != 0
 		|| (isec->flags & (SEC_ALLOC | SEC_LOAD | SEC_RELOC)) == 0))
 	  isec->gc_mark = 1;

@@ -1,3 +1,9 @@
+2011-09-29  Alan Modra  <amodra@gmail.com>
+
+	PR ld/13233
+	* elflink.c (_bfd_elf_gc_mark_extra_sections): Mark single member
+	debug and special section groups.
+
 2011-09-27  Kai Tietz  <ktietz@redhat.com>
 
 	* coffcode.h (sec_to_styp_flags): Handle
