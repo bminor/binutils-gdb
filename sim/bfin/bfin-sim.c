@@ -5516,7 +5516,7 @@ decode_dsp32shift_0 (SIM_CPU *cpu, bu16 iw0, bu16 iw1)
 	out = sL;
 
       SET_AREG (0, acc0);
-      SET_DREG (dst0, REG_H_L (DREG (dst0), out));
+      STORE (DREG (dst0), REG_H_L (DREG (dst0), out));
     }
   else if ((sop == 2 || sop == 3) && sopcde == 9)
     {
@@ -5553,7 +5553,7 @@ decode_dsp32shift_0 (SIM_CPU *cpu, bu16 iw0, bu16 iw1)
 	out1 = s1L;
 
       SET_AREG (0, acc0);
-      SET_DREG (dst0, REG_H_L (out1 << 16, out0));
+      STORE (DREG (dst0), REG_H_L (out1 << 16, out0));
     }
   else if (sop == 0 && sopcde == 10)
     {
