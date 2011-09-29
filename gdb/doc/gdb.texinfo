@@ -14821,14 +14821,14 @@ the program is running.  To do this, use the @code{kill} command
 @cindex dynamic linking
 @item add-symbol-file @var{filename} @var{address}
 @itemx add-symbol-file @var{filename} @var{address} @r{[} -readnow @r{]}
-@itemx add-symbol-file @var{filename} @r{-s}@var{section} @var{address} @dots{}
+@itemx add-symbol-file @var{filename} @var{address} -s @var{section} @var{address} @dots{}
 The @code{add-symbol-file} command reads additional symbol table
 information from the file @var{filename}.  You would use this command
 when @var{filename} has been dynamically loaded (by some other means)
 into the program that is running.  @var{address} should be the memory
 address at which the file has been loaded; @value{GDBN} cannot figure
 this out for itself.  You can additionally specify an arbitrary number
-of @samp{@r{-s}@var{section} @var{address}} pairs, to give an explicit
+of @samp{-s @var{section} @var{address}} pairs, to give an explicit
 section name and base address for that section.  You can specify any
 @var{address} as an expression.
 

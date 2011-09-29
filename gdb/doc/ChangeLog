@@ -1,3 +1,8 @@
+2011-09-28  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.texinfo (Files): Update options for `add-symbol-file'.
+	Add one space after option `-s'.  Remove @r{} markup.
+
 2011-09-27  Stan Shebs  <stan@codesourcery.com>
 
 	* gdb.texinfo (Tracepoint Action Lists): Document $_ret.
