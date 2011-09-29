@@ -1238,7 +1238,6 @@ _bfd_elf_merge_symbol (bfd *abfd,
 	{
 	  h->def_dynamic = 0;
 	  h->ref_dynamic = 1;
-	  h->dynamic_def = 1;
 	}
       /* FIXME: Should we check type and size for protected symbol?  */
       h->size = 0;
@@ -4353,7 +4352,6 @@ error_free_dyn:
 		    {
 		      h->def_dynamic = 0;
 		      h->ref_dynamic = 1;
-		      h->dynamic_def = 1;
 		    }
 		}
 	      if (! info->executable
@@ -4366,7 +4364,10 @@ error_free_dyn:
 	      if (! definition)
 		h->ref_dynamic = 1;
 	      else
-		h->def_dynamic = 1;
+		{
+		  h->def_dynamic = 1;
+		  h->dynamic_def = 1;
+		}
 	      if (h->def_regular
 		  || h->ref_regular
 		  || (h->u.weakdef != NULL
@@ -11914,8 +11915,9 @@ bfd_elf_gc_mark_dynamic_ref_symbol (struct elf_link_hash_entry *h, void *inf)
 	      && h->def_regular
 	      && ELF_ST_VISIBILITY (h->other) != STV_INTERNAL
 	      && ELF_ST_VISIBILITY (h->other) != STV_HIDDEN
-	      && !bfd_hide_sym_by_version (info->version_info,
-					   h->root.root.string))))
+	      && (strchr (h->root.root.string, ELF_VER_CHR) != NULL
+		  || !bfd_hide_sym_by_version (info->version_info,
+					       h->root.root.string)))))
     h->root.u.def.section->flags |= SEC_KEEP;
 
   return TRUE;
