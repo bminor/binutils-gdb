@@ -3540,7 +3540,7 @@ proc help_test_raw { gdb_command expected_lines args } {
     gdb_test "${gdb_command}" "${expected_output}" $message
 }
 
-# Test the output of "help COMMNAD_CLASS". EXPECTED_INITIAL_LINES
+# Test the output of "help COMMAND_CLASS". EXPECTED_INITIAL_LINES
 # are regular expressions that should match the beginning of output,
 # before the list of commands in that class.  The presence of 
 # command list and standard epilogue will be tested automatically.
