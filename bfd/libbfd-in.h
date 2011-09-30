@@ -521,10 +521,21 @@ extern bfd_boolean _bfd_dwarf1_find_nearest_line
   (bfd *, asection *, asymbol **, bfd_vma, const char **,
    const char **, unsigned int *);
 
+struct dwarf_debug_section
+{
+  const char *uncompressed_name;
+  const char *compressed_name;
+};
+
+/* Map of uncompressed DWARF debug section name to compressed one.  It
+   is terminated by NULL uncompressed_name.  */
+
+extern const struct dwarf_debug_section dwarf_debug_sections[];
+
 /* Find the nearest line using DWARF 2 debugging information.  */
 extern bfd_boolean _bfd_dwarf2_find_nearest_line
-  (bfd *, asection *, asymbol **, bfd_vma, const char **, const char **,
-   unsigned int *, unsigned int, void **);
+  (bfd *, const struct dwarf_debug_section *, asection *, asymbol **, bfd_vma,
+   const char **, const char **, unsigned int *, unsigned int, void **);
 
 /* Find the line using DWARF 2 debugging information.  */
 extern bfd_boolean _bfd_dwarf2_find_line
@@ -811,14 +822,3 @@ extern void bfd_section_already_linked_table_traverse
 
 extern bfd_vma read_unsigned_leb128 (bfd *, bfd_byte *, unsigned int *);
 extern bfd_signed_vma read_signed_leb128 (bfd *, bfd_byte *, unsigned int *);
-
-struct dwarf_debug_section
-{
-  const char *uncompressed_name;
-  const char *compressed_name;
-};
-
-/* Map of uncompressed DWARF debug section name to compressed one.  It
-   is terminated by NULL uncompressed_name.  */
-
-extern const struct dwarf_debug_section dwarf_debug_sections[];

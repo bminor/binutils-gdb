@@ -405,6 +405,50 @@ _bfd_xcoff_is_local_label_name (bfd *abfd ATTRIBUTE_UNUSED,
 {
   return FALSE;
 }
+
+static const struct dwarf_debug_section xcoff_debug_sections[] =
+{
+  { ".dwabrev",		NULL },
+  { ".dwarnge",		NULL },
+  { NULL,	NULL }, /* .debug_frame */
+  { ".dwinfo",		NULL },
+  { ".dwline",		NULL },
+  { NULL,	NULL }, /* .debug_loc */
+  { NULL,	NULL }, /* .debug_macinfo */
+  { NULL,	NULL }, /* .debug_macro */
+  { ".dwpbnms",		NULL },
+  { ".dwpbtyp",		NULL },
+  { ".dwrnges",		NULL },
+  { NULL,	NULL }, /* .debug_static_func */
+  { NULL,	NULL }, /* .debug_static_vars */
+  { ".dwstr",	NULL },
+  { NULL,	NULL }, /* .debug_types */
+  /* GNU DWARF 1 extensions */
+  { NULL,	NULL }, /* .debug_sfnames */
+  { NULL,	NULL }, /* .debug_srcinfo */
+  /* SGI/MIPS DWARF 2 extensions */
+  { NULL,	NULL }, /* .debug_funcnames */
+  { NULL,	NULL }, /* .debug_typenames */
+  { NULL,	NULL }, /* .debug_varnames */
+  { NULL,	NULL }, /* .debug_weaknames */
+  { NULL,	NULL },
+};
+
+static bfd_boolean
+xcoff_find_nearest_line (bfd *abfd,
+                         asection *section,
+                         asymbol **symbols,
+                         bfd_vma offset,
+                         const char **filename_ptr,
+                         const char **functionname_ptr,
+                         unsigned int *line_ptr)
+{
+  return coff_find_nearest_line_with_names (abfd, xcoff_debug_sections,
+                                            section, symbols, offset,
+                                            filename_ptr, functionname_ptr,
+                                            line_ptr);
+}
+
 
 void
 _bfd_xcoff_swap_sym_in (bfd *abfd, PTR ext1, PTR in1)
@@ -4073,7 +4117,7 @@ const bfd_target rs6000coff_vec =
     _bfd_xcoff_is_local_label_name,
     coff_bfd_is_target_special_symbol,
     coff_get_lineno,
-    coff_find_nearest_line,
+    xcoff_find_nearest_line,
     _bfd_generic_find_line,
     coff_find_inliner_info,
     coff_bfd_make_debug_symbol,
@@ -4328,7 +4372,7 @@ const bfd_target pmac_xcoff_vec =
     _bfd_xcoff_is_local_label_name,
     coff_bfd_is_target_special_symbol,
     coff_get_lineno,
-    coff_find_nearest_line,
+    xcoff_find_nearest_line,
     _bfd_generic_find_line,
     coff_find_inliner_info,
     coff_bfd_make_debug_symbol,

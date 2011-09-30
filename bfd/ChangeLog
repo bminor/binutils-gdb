@@ -1,3 +1,41 @@
+2011-09-30  Tristan Gingold  <gingold@adacore.com>
+
+	* dwarf2.c (struct dwarf2_debug): Add field debug_sections.
+	(read_section): Add sec argument. Adjust the code to get section
+	names from it.
+	(read_indirect_string): Adjust call to read_section.
+	(read_abbrevs): Ditto.
+	(decode_line_info): Ditto.
+	(read_debug_ranges): Ditto.
+	(DWARF2_DEBUG_INFO, DWARF2_COMPRESSED_DEBUG_INFO): Remove.
+	(find_debug_info): Add debug_sections parameter.  Use it instead
+	the above macros.
+	(place_sections): Get section names from stash.
+	(find_line): Add debug_sections argument.  Initialize
+	debug_sections field of stash from it.
+	Adjust calls to find_debug_info.
+	(_bfd_dwarf2_find_nearest_line): Add debug_sections argument.
+	Adjust call to find_line.
+	(_bfd_dwarf2_find_line): Adjust call to find_line.
+	* libcoff-in.h (struct dwarf_debug_section): New declaration.
+	(coff_find_nearest_line_with_names): Likewise.
+	* libcoff.h: Regenerate.
+	* libbfd-in.h (struct dwarf_debug_section): Move declaration.
+	(dwarf_debug_sections): Likewise.
+	(_bfd_dwarf2_find_nearest_line): Add debug_sections argument.
+	* libbfd.h: Regenerate.
+	* elf.c (_bfd_elf_find_nearest_line): Adjust call to
+	_bfd_dwarf2_find_nearest_line.
+	* elfxx-mips.c (_bfd_mips_elf_find_nearest_line): Ditto.
+	* elf64-alpha.c (elf64_alpha_find_nearest_line): Ditto.
+	* elf32-arm.c (elf32_arm_find_nearest_line): Ditto.
+	* coffgen.c (coff_find_nearest_line_with_names): New function.
+	(coff_find_nearest_line): Calls coff_find_nearest_line_with_names.
+	* coff-rs6000.c (xcoff_debug_sections): New constant.
+	(xcoff_find_nearest_line): New function.
+	(rs6000coff_vec): Use xcoff_find_nearest_line.
+	(pmac_xcoff_vec): Ditto.
+
 2011-09-30  Alan Modra  <amodra@gmail.com>
 
 	PR ld/13235

@@ -351,6 +351,10 @@ extern asymbol *coff_bfd_make_debug_symbol
 extern bfd_boolean coff_find_nearest_line
   (bfd *, asection *, asymbol **, bfd_vma, const char **,
    const char **, unsigned int *);
+struct dwarf_debug_section;
+extern bfd_boolean coff_find_nearest_line_with_names
+  (bfd *, const struct dwarf_debug_section *, asection *, asymbol **,
+   bfd_vma, const char **, const char **, unsigned int *);
 extern bfd_boolean coff_find_inliner_info
   (bfd *, const char **, const char **, unsigned int *);
 extern int coff_sizeof_headers

@@ -12611,7 +12611,8 @@ elf32_arm_find_nearest_line (bfd *          abfd,
 
   /* We skip _bfd_dwarf1_find_nearest_line since no known ARM toolchain uses it.  */
 
-  if (_bfd_dwarf2_find_nearest_line (abfd, section, symbols, offset,
+  if (_bfd_dwarf2_find_nearest_line (abfd, dwarf_debug_sections,
+                                     section, symbols, offset,
 				     filename_ptr, functionname_ptr,
 				     line_ptr, 0,
 				     & elf_tdata (abfd)->dwarf2_find_line_info))
