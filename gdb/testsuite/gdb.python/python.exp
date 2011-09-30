@@ -106,7 +106,13 @@ gdb_test_no_output "set height $lines"
 
 set test "verify pagination beforehand"
 gdb_test_multiple "python print \"\\n\" * $lines" $test {
-    -re "---Type <return> to continue, or q <return> to quit---$" {
+    -re "---Type <return>" {
+	exp_continue
+    }
+    -re " to continue, or q <return>" {
+	exp_continue
+    }
+    -re " to quit---$" {
 	pass $test
     }
 }
@@ -116,7 +122,13 @@ gdb_test "python if gdb.execute('python print \"\\\\n\" * $lines', to_string=Tru
 
 set test "verify pagination afterwards"
 gdb_test_multiple "python print \"\\n\" * $lines" $test {
-    -re "---Type <return> to continue, or q <return> to quit---$" {
+    -re "---Type <return>" {
+	exp_continue
+    }
+    -re " to continue, or q <return>" {
+	exp_continue
+    }
+    -re " to quit---$" {
 	pass $test
     }
 }
