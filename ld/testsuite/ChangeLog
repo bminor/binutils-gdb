@@ -1,3 +1,9 @@
+2011-09-30  Alan Modra  <amodra@gmail.com>
+
+	* ld-powerpc/tocopt.d: Update.
+	* ld-powerpc/tocopt5.d, * ld-powerpc/tocopt5.s: New test.
+	* ld-powerpc/powerpc.exp: Run new test.
+
 2011-09-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-elf/pr12975.d: Only run for *-*-linux* and *-*-gnu*
