@@ -1,3 +1,8 @@
+2011-09-29  Mike Frysinger  <vapier@gentoo.org>
+
+	* common/linux-ptrace.h (PTRACE_GETFDPIC, PTRACE_GETFDPIC_EXEC,
+	PTRACE_GETFDPIC_INTERP): Define.
+
 2011-09-28  Yao Qi  <yao@codesourcery.com>
 
 	* symfile.c (add_symbol_file_command): Update message on usage.

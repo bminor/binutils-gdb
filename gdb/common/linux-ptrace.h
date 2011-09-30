@@ -51,6 +51,13 @@
 
 #endif /* PTRACE_EVENT_FORK */
 
+#if (defined __bfin__ || defined __frv__ || defined __sh__) \
+    && !defined PTRACE_GETFDPIC
+#define PTRACE_GETFDPIC		31
+#define PTRACE_GETFDPIC_EXEC	0
+#define PTRACE_GETFDPIC_INTERP	1
+#endif
+
 /* We can't always assume that this flag is available, but all systems
    with the ptrace event handlers also have __WALL, so it's safe to use
    in some contexts.  */

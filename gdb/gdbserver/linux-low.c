@@ -4727,7 +4727,7 @@ linux_qxfer_spu (const char *annex, unsigned char *readbuf,
   return ret;
 }
 
-#if defined PT_GETDSBT
+#if defined PT_GETDSBT || defined PTRACE_GETFDPIC
 struct target_loadseg
 {
   /* Core address to which the segment is mapped.  */
@@ -4738,6 +4738,7 @@ struct target_loadseg
   Elf32_Word p_memsz;
 };
 
+# if defined PT_GETDSBT
 struct target_loadmap
 {
   /* Protocol version number, must be zero.  */
@@ -4750,9 +4751,24 @@ struct target_loadmap
   /* The actual memory map.  */
   struct target_loadseg segs[/*nsegs*/];
 };
-#endif
+#  define LINUX_LOADMAP		PT_GETDSBT
+#  define LINUX_LOADMAP_EXEC	PTRACE_GETDSBT_EXEC
+#  define LINUX_LOADMAP_INTERP	PTRACE_GETDSBT_INTERP
+# else
+struct target_loadmap
+{
+  /* Protocol version number, must be zero.  */
+  Elf32_Half version;
+  /* Number of segments in this map.  */
+  Elf32_Half nsegs;
+  /* The actual memory map.  */
+  struct target_loadseg segs[/*nsegs*/];
+};
+#  define LINUX_LOADMAP		PTRACE_GETFDPIC
+#  define LINUX_LOADMAP_EXEC	PTRACE_GETFDPIC_EXEC
+#  define LINUX_LOADMAP_INTERP	PTRACE_GETFDPIC_INTERP
+# endif
 
-#if defined PT_GETDSBT
 static int
 linux_read_loadmap (const char *annex, CORE_ADDR offset,
 		    unsigned char *myaddr, unsigned int len)
@@ -4763,13 +4779,13 @@ linux_read_loadmap (const char *annex, CORE_ADDR offset,
   unsigned int actual_length, copy_length;
 
   if (strcmp (annex, "exec") == 0)
-    addr= (int) PTRACE_GETDSBT_EXEC;
+    addr = (int) LINUX_LOADMAP_EXEC;
   else if (strcmp (annex, "interp") == 0)
-    addr = (int) PTRACE_GETDSBT_INTERP;
+    addr = (int) LINUX_LOADMAP_INTERP;
   else
     return -1;
 
-  if (ptrace (PT_GETDSBT, pid, addr, &data) != 0)
+  if (ptrace (LINUX_LOADMAP, pid, addr, &data) != 0)
     return -1;
 
   if (data == NULL)
@@ -4785,7 +4801,9 @@ linux_read_loadmap (const char *annex, CORE_ADDR offset,
   memcpy (myaddr, (char *) data + offset, copy_length);
   return copy_length;
 }
-#endif /* defined PT_GETDSBT */
+#else
+# define linux_read_loadmap NULL
+#endif /* defined PT_GETDSBT || defined PTRACE_GETFDPIC */
 
 static void
 linux_process_qsupported (const char *query)
@@ -4935,11 +4953,7 @@ static struct target_ops linux_target_ops = {
   NULL,
 #endif
   linux_common_core_of_thread,
-#if defined PT_GETDSBT
   linux_read_loadmap,
-#else
-  NULL,
-#endif
   linux_process_qsupported,
   linux_supports_tracepoints,
   linux_read_pc,

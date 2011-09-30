@@ -1,3 +1,16 @@
+2011-09-29  Mike Frysinger  <vapier@gentoo.org>
+
+	* linux-low.c (target_loadseg): Add defined PTRACE_GETFDPIC to the
+	ifdef check.
+	[PT_GETDSBT] (target_loadmap): Wrap in a defined PT_GETDSBT check.
+	[!PT_GETDSBT] (target_loadmap): New definition.
+	(LINUX_LOADMAP, LINUX_LOADMAP_EXEC, LINUX_LOADMAP_INTERP): Define.
+	(linux_read_loadmap): Change PTRACE_GETDSBT_EXEC to
+	LINUX_LOADMAP_EXEC, PTRACE_GETDSBT_INTERP to LINUX_LOADMAP_INTERP,
+	and PT_GETDSBT to LINUX_LOADMAP.
+	[!PT_GETDSBT] (linux_read_loadmap): Define to NULL.
+	(linux_target_ops): Delete unnecessary ifdef PT_GETDSBT check.
+
 2011-09-21  Ulrich Weigand  <ulrich.weigand@linaro.org>
 
 	* linux-arm-low.c (struct arm_linux_hwbp_cap): Remove.
