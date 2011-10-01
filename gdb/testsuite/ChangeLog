@@ -1,3 +1,12 @@
+2011-10-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.python/py-value.exp (test_value_in_inferior): New variable
+	can_read_0, test for it.
+	(python print gdb.parse_and_eval('*(int*)0')): Rename to ...
+	(parse_and_eval with memory error): ... here, make it untested if
+	can_read_0.
+
 2011-09-30  Marek Polacek  <mpolacek@redhat.com>
 
 	* gdb.python/python.exp (verify pagination beforehand)

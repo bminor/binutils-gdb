@@ -216,8 +216,25 @@ proc test_value_in_inferior {} {
   # Test address attribute
   gdb_test "python print 'result =', arg0.address" "= 0x\[\[:xdigit:\]\]+" "Test address attribute"
 
+  # Test displaying a variable that is temporarily at a bad address.
+  # But if we can examine what's at memory address 0, then we'll also be
+  # able to display it without error.  Don't run the test in that case.
+  set can_read_0 0
+  gdb_test_multiple "x 0" "memory at address 0" {
+      -re "0x0:\[ \t\]*Cannot access memory at address 0x0\r\n$gdb_prompt $" { }
+      -re "0x0:\[ \t\]*Error accessing memory address 0x0\r\n$gdb_prompt $" { }
+      -re "\r\n$gdb_prompt $" {
+	  set can_read_0 1
+      }
+  }
+
   # Test memory error.
-  gdb_test "python print gdb.parse_and_eval('*(int*)0')" "gdb.MemoryError: Cannot access memory at address 0x0.*"
+  set test "parse_and_eval with memory error"
+  if {$can_read_0} {
+    untested $test
+  } else {
+    gdb_test "python print gdb.parse_and_eval('*(int*)0')" "gdb.MemoryError: Cannot access memory at address 0x0.*" $test
+  }
 
   # Test string fetches,  both partial and whole.
   gdb_test "print st" "\"divide et impera\""
