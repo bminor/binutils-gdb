@@ -949,32 +949,26 @@ static struct so_list *
 svr4_default_sos (void)
 {
   struct svr4_info *info = get_svr4_info ();
+  struct so_list *new;
 
-  struct so_list *head = NULL;
-  struct so_list **link_ptr = &head;
+  if (!info->debug_loader_offset_p)
+    return NULL;
 
-  if (info->debug_loader_offset_p)
-    {
-      struct so_list *new = XZALLOC (struct so_list);
+  new = XZALLOC (struct so_list);
 
-      new->lm_info = xmalloc (sizeof (struct lm_info));
+  new->lm_info = xmalloc (sizeof (struct lm_info));
 
-      /* Nothing will ever check the cached copy of the link
-	 map if we set l_addr.  */
-      new->lm_info->l_addr = info->debug_loader_offset;
-      new->lm_info->lm_addr = 0;
-      new->lm_info->lm = NULL;
+  /* Nothing will ever check the cached copy of the link
+     map if we set l_addr.  */
+  new->lm_info->l_addr = info->debug_loader_offset;
+  new->lm_info->lm_addr = 0;
+  new->lm_info->lm = NULL;
 
-      strncpy (new->so_name, info->debug_loader_name,
-	       SO_NAME_MAX_PATH_SIZE - 1);
-      new->so_name[SO_NAME_MAX_PATH_SIZE - 1] = '\0';
-      strcpy (new->so_original_name, new->so_name);
+  strncpy (new->so_name, info->debug_loader_name, SO_NAME_MAX_PATH_SIZE - 1);
+  new->so_name[SO_NAME_MAX_PATH_SIZE - 1] = '\0';
+  strcpy (new->so_original_name, new->so_name);
 
-      *link_ptr = new;
-      link_ptr = &new->next;
-    }
-
-  return head;
+  return new;
 }
 
 /* Implement the "current_sos" target_so_ops method.  */

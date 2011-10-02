@@ -1,3 +1,9 @@
+2011-10-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Code cleanup.
+	* solib-svr4.c (svr4_default_sos):  Remove variables head and link_ptr.
+	Rearrange the code for it.
+
 2011-10-02  Joel Brobecker  <brobecker@adacore.com>
 
 	* breakpoint.c (bkpt_print_recreate): Add call to
