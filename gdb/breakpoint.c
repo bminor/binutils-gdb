@@ -11047,6 +11047,7 @@ bkpt_print_recreate (struct breakpoint *tp, struct ui_file *fp)
 		    _("unhandled breakpoint type %d"), (int) tp->type);
 
   fprintf_unfiltered (fp, " %s", tp->addr_string);
+  print_recreate_thread (tp, fp);
 }
 
 /* Virtual table for internal breakpoints.  */

@@ -1,3 +1,7 @@
+2011-10-02  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.base/save-bp.exp, gdb.base/save-bp.c: New files.
+
 2011-10-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Pedro Alves  <pedro@codesourcery.com>
 
