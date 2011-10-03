@@ -1,5 +1,10 @@
 2011-10-03  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.texinfo (GDB/MI Miscellaneous Commands): Minor
+	rephasing.
+
+2011-10-03  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.texinfo (GDB/MI Ada Tasking Commands): New node.
 	(GDB/MI Miscellaneous Commands): Add `ada-task-info'
 	as possible feature returned by the `-list-features'

@@ -30378,19 +30378,20 @@ The current list of features is:
 
 @table @samp
 @item frozen-varobjs
-Indicates presence of the @code{-var-set-frozen} command, as well 
-as possible presense of the @code{frozen} field in the output 
+Indicates support for the @code{-var-set-frozen} command, as well
+as possible presense of the @code{frozen} field in the output
 of @code{-varobj-create}.
 @item pending-breakpoints
-Indicates presence of the @option{-f} option to the @code{-break-insert} command.
+Indicates support for the @option{-f} option to the @code{-break-insert}
+command.
 @item python
-Indicates presence of Python scripting support, Python-based
+Indicates Python scripting support, Python-based
 pretty-printing commands, and possible presence of the
 @samp{display_hint} field in the output of @code{-var-list-children}
 @item thread-info
-Indicates presence of the @code{-thread-info} command.
+Indicates support for the @code{-thread-info} command.
 @item data-read-memory-bytes
-Indicates presense of the @code{-data-read-memory-bytes} and the
+Indicates support for the @code{-data-read-memory-bytes} and the
 @code{-data-write-memory-bytes} commands.
 @item breakpoint-notifications
 Indicates that changes to breakpoints and breakpoints created via the
