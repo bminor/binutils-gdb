@@ -24782,6 +24782,7 @@ may repeat one or more times.
 * GDB/MI Breakpoint Commands::
 * GDB/MI Program Context::
 * GDB/MI Thread Commands::
+* GDB/MI Ada Tasking Commands::
 * GDB/MI Program Execution::
 * GDB/MI Stack Manipulation::
 * GDB/MI Variable Objects::
@@ -26654,6 +26655,83 @@ number-of-threads="3"
 frame=@{level="0",func="vprintf",
 args=[@{name="format",value="0x8048e9c \"%*s%c %d %c\\n\""@},
 @{name="arg",value="0x2"@}],file="vprintf.c",line="31"@}
+(gdb)
+@end smallexample
+
+@c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+@node GDB/MI Ada Tasking Commands
+@section @sc{gdb/mi} Ada Tasking Commands
+
+@subheading The @code{-ada-task-info} Command
+@findex -ada-task-info
+
+@subsubheading Synopsis
+
+@smallexample
+ -ada-task-info [ @var{task-id} ]
+@end smallexample
+
+Reports information about either a specific Ada task, if the
+@var{task-id} parameter is present, or about all Ada tasks.
+
+@subsubheading @value{GDBN} Command
+
+The @samp{info tasks} command prints the same information
+about all Ada tasks (@pxref{Ada Tasks}).
+
+@subsubheading Result
+
+The result is a table of Ada tasks.  The following columns are
+defined for each Ada task:
+
+@table @samp
+@item current
+This field exists only for the current thread.  It has the value @samp{*}.
+
+@item id
+The identifier that @value{GDBN} uses to refer to the Ada task.
+
+@item task-id
+The identifier that the target uses to refer to the Ada task.
+
+@item thread-id
+The identifier of the thread corresponding to the Ada task.
+
+This field should always exist, as Ada tasks are always implemented
+on top of a thread.  But if @value{GDBN} cannot find this corresponding
+thread for any reason, the field is omitted.
+
+@item parent-id
+This field exists only when the task was created by another task.
+In this case, it provides the ID of the parent task.
+
+@item priority
+The base priority of the task.
+
+@item state
+The current state of the task.  For a detailed description of the
+possible states, see @ref{Ada Tasks}.
+
+@item name
+The name of the task.
+
+@end table
+
+@subsubheading Example
+
+@smallexample
+-ada-task-info
+^done,tasks=@{nr_rows="3",nr_cols="8",
+hdr=[@{width="1",alignment="-1",col_name="current",colhdr=""@},
+@{width="3",alignment="1",col_name="id",colhdr="ID"@},
+@{width="9",alignment="1",col_name="task-id",colhdr="TID"@},
+@{width="4",alignment="1",col_name="thread-id",colhdr=""@},
+@{width="4",alignment="1",col_name="parent-id",colhdr="P-ID"@},
+@{width="3",alignment="1",col_name="priority",colhdr="Pri"@},
+@{width="22",alignment="-1",col_name="state",colhdr="State"@},
+@{width="1",alignment="2",col_name="name",colhdr="Name"@}],
+body=[@{current="*",id="1",task-id="   644010",thread-id="1",priority="48",
+state="Child Termination Wait",name="main_task"@}]@}
 (gdb)
 @end smallexample
 
@@ -30317,7 +30395,8 @@ Indicates presense of the @code{-data-read-memory-bytes} and the
 @item breakpoint-notifications
 Indicates that changes to breakpoints and breakpoints created via the
 CLI will be announced via async records.
-
+@item ada-task-info
+Indicates support for the @code{-ada-task-info} command.
 @end table
 
 @subheading The @code{-list-target-features} Command

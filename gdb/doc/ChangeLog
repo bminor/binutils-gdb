@@ -1,3 +1,10 @@
+2011-10-03  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (GDB/MI Ada Tasking Commands): New node.
+	(GDB/MI Miscellaneous Commands): Add `ada-task-info'
+	as possible feature returned by the `-list-features'
+	command.
+
 2011-09-28  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.texinfo (Files): Update options for `add-symbol-file'.
