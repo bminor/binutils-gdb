@@ -134,6 +134,45 @@ ensure_python_env (struct gdbarch *gdbarch,
   return make_cleanup (restore_python_env, env);
 }
 
+/* A wrapper around PyRun_SimpleFile.  FILENAME is the name of
+   the Python script to run.
+
+   One of the parameters of PyRun_SimpleFile is a FILE *.
+   The problem is that type FILE is extremely system and compiler
+   dependent.  So, unless the Python library has been compiled using
+   the same build environment as GDB, we run the risk of getting
+   a crash due to inconsistencies between the definition used by GDB,
+   and the definition used by Python.  A mismatch can very likely
+   lead to a crash.
+
+   There is also the situation where the Python library and GDB
+   are using two different versions of the C runtime library.
+   This is particularly visible on Windows, where few users would
+   build Python themselves (this is no trivial task on this platform),
+   and thus use binaries built by someone else instead. Python,
+   being built with VC, would use one version of the msvcr DLL
+   (Eg. msvcr100.dll), while MinGW uses msvcrt.dll.  A FILE *
+   from one runtime does not necessarily operate correctly in
+   the other runtime.
+
+   To work around this potential issue, we create the FILE object
+   using Python routines, thus making sure that it is compatible
+   with the Python library.  */
+
+static void
+python_run_simple_file (const char *filename)
+{
+  char *filename_copy;
+  PyObject *python_file;
+  struct cleanup *cleanup;
+
+  filename_copy = xstrdup (filename);
+  cleanup = make_cleanup (xfree, filename_copy);
+  python_file = PyFile_FromString (filename_copy, "r");
+  make_cleanup_py_decref (python_file);
+  PyRun_SimpleFile (PyFile_AsFile (python_file), filename);
+  do_cleanups (cleanup);
+}
 
 /* Given a command_line, return a command string suitable for passing
    to Python.  Lines in the string are separated by newlines.  The
@@ -573,7 +612,7 @@ source_python_script (FILE *stream, const char *file)
 
   /* Note: If an exception occurs python will print the traceback and
      clear the error indicator.  */
-  PyRun_SimpleFile (stream, file);
+  python_run_simple_file (file);
 
   do_cleanups (cleanup);
 }
@@ -917,7 +956,7 @@ source_python_script_for_objfile (struct objfile *objfile,
   cleanups = ensure_python_env (get_objfile_arch (objfile), current_language);
   gdbpy_current_objfile = objfile;
 
-  PyRun_SimpleFile (stream, file);
+  python_run_simple_file (file);
 
   do_cleanups (cleanups);
   gdbpy_current_objfile = NULL;

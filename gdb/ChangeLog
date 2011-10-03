@@ -1,3 +1,10 @@
+2011-10-03  Joel Brobecker  <brobecker@adacore.com>
+
+	* python/python.c (python_run_simple_file): New function.
+	(source_python_script, source_python_script_for_objfile):
+	Replace call to PyRun_SimpleFile by call to
+	python_run_simple_file.
+
 2011-10-03  Paul Koning  <paul_koning@dell.com>
 
 	* python/py-value.c (valpy_get_address): Use Py_XINCREF.
