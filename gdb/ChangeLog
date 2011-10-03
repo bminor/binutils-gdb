@@ -1,5 +1,17 @@
 2011-10-03  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.h (struct inferior): Declare.
+	(print_ada_task_info): Add declaration.
+	* ada-tasks.c (print_ada_task_info): Make non-static.
+	* mi/mi-cmds.c (mi_cmds): Add "ada-task-info".
+	* mi/mi-cmds.h (mi_cmd_ada_task_info): Add declaration.
+	* mi/mi-main.c: #include "ada-lang.h".
+	(mi_cmd_list_features): Add "ada-task-info" to the list
+	of supported features.
+	(mi_cmd_ada_task_info): New function.
+
+2011-10-03  Joel Brobecker  <brobecker@adacore.com>
+
 	* python/python.c (python_run_simple_file): New function.
 	(source_python_script, source_python_script_for_objfile):
 	Replace call to PyRun_SimpleFile by call to

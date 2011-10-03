@@ -929,7 +929,7 @@ ada_build_task_list (void)
    interpreted as a task number, and the table will be limited to
    that task only.  */
 
-static void
+void
 print_ada_task_info (struct ui_out *uiout,
 		     char *arg_str,
 		     struct inferior *inf)

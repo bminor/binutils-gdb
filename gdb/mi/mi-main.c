@@ -52,6 +52,7 @@
 #include "osdata.h"
 #include "splay-tree.h"
 #include "tracepoint.h"
+#include "ada-lang.h"
 
 #include <ctype.h>
 #include <sys/time.h>
@@ -1720,6 +1721,7 @@ mi_cmd_list_features (char *command, char **argv, int argc)
       ui_out_field_string (uiout, NULL, "thread-info");
       ui_out_field_string (uiout, NULL, "data-read-memory-bytes");
       ui_out_field_string (uiout, NULL, "breakpoint-notifications");
+      ui_out_field_string (uiout, NULL, "ada-task-info");
       
 #if HAVE_PYTHON
       ui_out_field_string (uiout, NULL, "python");
@@ -2502,4 +2504,15 @@ mi_cmd_trace_stop (char *command, char **argv, int argc)
 {
   stop_tracing ();
   trace_status_mi (1);
+}
+
+/* Implement the "-ada-task-info" GDB/MI command.  */
+
+void
+mi_cmd_ada_task_info (char *command, char **argv, int argc)
+{
+  if (argc != 0 && argc != 1)
+    error (_("Invalid MI command"));
+
+  print_ada_task_info (current_uiout, argv[0], current_inferior ());
 }

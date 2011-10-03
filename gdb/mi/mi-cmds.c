@@ -33,6 +33,7 @@ static void build_table (struct mi_cmd *commands);
 
 struct mi_cmd mi_cmds[] =
 {
+  { "ada-task-info", { NULL, 0 }, mi_cmd_ada_task_info },
   { "add-inferior", { NULL, 0 }, mi_cmd_add_inferior },
   { "break-after", { "ignore", 1 }, NULL },
   { "break-condition", { "cond", 1 }, NULL },

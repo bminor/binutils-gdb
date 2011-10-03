@@ -22,6 +22,7 @@
 #define ADA_LANG_H 1
 
 struct frame_info;
+struct inferior;
 
 #include "value.h"
 #include "gdbtypes.h"
@@ -384,5 +385,9 @@ extern void iterate_over_live_ada_tasks
   (ada_task_list_iterator_ftype *iterator);
 
 extern int ada_build_task_list (void);
+
+extern void print_ada_task_info (struct ui_out *uiout,
+				 char *taskno_str,
+				 struct inferior *inf);
 
 #endif
