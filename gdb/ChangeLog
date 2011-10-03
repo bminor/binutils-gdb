@@ -1,3 +1,8 @@
+2011-10-03  Paul Koning  <paul_koning@dell.com>
+
+	* python/py-value.c (valpy_get_address): Use Py_XINCREF.
+	(value_to_value_object): Fetch value if it was lazy.
+
 2011-10-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Code cleanup.

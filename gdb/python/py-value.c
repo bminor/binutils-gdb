@@ -209,7 +209,7 @@ valpy_get_address (PyObject *self, void *closure)
 	val_obj->address = value_to_value_object (res_val);
     }
 
-  Py_INCREF (val_obj->address);
+  Py_XINCREF (val_obj->address);
 
   return val_obj->address;
 }
@@ -1045,7 +1045,15 @@ PyObject *
 value_to_value_object (struct value *val)
 {
   value_object *val_obj;
+  volatile struct gdb_exception except;
 
+  TRY_CATCH (except, RETURN_MASK_ALL)
+    {
+      if (value_lazy (val))
+	value_fetch_lazy (val);
+    }
+  GDB_PY_HANDLE_EXCEPTION (except);
+  
   val_obj = PyObject_New (value_object, &value_object_type);
   if (val_obj != NULL)
     {
