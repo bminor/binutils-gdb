@@ -198,7 +198,7 @@ parse_uint(const char* option_name, const char* arg, int* retval)
 {
   char* endptr;
   *retval = strtol(arg, &endptr, 0);
-  if (*endptr != '\0' || retval < 0)
+  if (*endptr != '\0' || *retval < 0)
     gold_fatal(_("%s: invalid option value (expected an integer): %s"),
                option_name, arg);
 }

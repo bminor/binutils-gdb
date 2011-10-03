@@ -1,3 +1,7 @@
+2011-10-03   Diego Novillo  <dnovillo@google.com>
+
+	* options.cc (parse_uint): Fix dereference of RETVAL.
+
 2011-09-29  Sriraman Tallam  <tmsriram@google.com>
 
 	* layout.h (section_order_map_): New member.
