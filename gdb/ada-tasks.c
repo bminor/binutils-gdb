@@ -938,6 +938,7 @@ print_ada_task_info (struct ui_out *uiout,
   int taskno, nb_tasks;
   int taskno_arg = 0;
   struct cleanup *old_chain;
+  int nb_columns;
 
   if (ada_build_task_list () == 0)
     {
@@ -949,14 +950,29 @@ print_ada_task_info (struct ui_out *uiout,
   if (arg_str != NULL && arg_str[0] != '\0')
     taskno_arg = value_as_long (parse_and_eval (arg_str));
 
+  if (ui_out_is_mi_like_p (uiout))
+    /* In GDB/MI mode, we want to provide the thread ID corresponding
+       to each task.  This allows clients to quickly find the thread
+       associated to any task, which is helpful for commands that
+       take a --thread argument.  However, in order to be able to
+       provide that thread ID, the thread list must be up to date
+       first.  */
+    target_find_new_threads ();
+
   data = get_ada_tasks_inferior_data (inf);
   nb_tasks = VEC_length (ada_task_info_s, data->task_list);
 
-  old_chain = make_cleanup_ui_out_table_begin_end (uiout, 7, nb_tasks,
-                                                   "tasks");
+  nb_columns = ui_out_is_mi_like_p (uiout) ? 8 : 7;
+  old_chain = make_cleanup_ui_out_table_begin_end (uiout, nb_columns,
+						   nb_tasks, "tasks");
   ui_out_table_header (uiout, 1, ui_left, "current", "");
   ui_out_table_header (uiout, 3, ui_right, "id", "ID");
   ui_out_table_header (uiout, 9, ui_right, "task-id", "TID");
+  /* The following column is provided in GDB/MI mode only because
+     it is only really useful in that mode, and also because it
+     allows us to keep the CLI output shorter and more compact.  */
+  if (ui_out_is_mi_like_p (uiout))
+    ui_out_table_header (uiout, 4, ui_right, "thread-id", "");
   ui_out_table_header (uiout, 4, ui_right, "parent-id", "P-ID");
   ui_out_table_header (uiout, 3, ui_right, "priority", "Pri");
   ui_out_table_header (uiout, 22, ui_left, "state", "State");
@@ -995,6 +1011,19 @@ print_ada_task_info (struct ui_out *uiout,
 
       /* Print the Task ID.  */
       ui_out_field_fmt (uiout, "task-id", "%9lx", (long) task_info->task_id);
+
+      /* Print the associated Thread ID.  */
+      if (ui_out_is_mi_like_p (uiout))
+        {
+	  const int thread_id = pid_to_thread_id (task_info->ptid);
+
+	  if (thread_id != 0)
+	    ui_out_field_int (uiout, "thread-id", thread_id);
+	  else
+	    /* This should never happen unless there is a bug somewhere,
+	       but be resilient when that happens.  */
+	    ui_out_field_skip (uiout, "thread-id");
+	}
 
       /* Print the ID of the parent task.  */
       parent_id = get_task_number_from_id (task_info->parent, inf);

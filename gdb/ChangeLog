@@ -1,5 +1,10 @@
 2011-10-03  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-tasks.c (print_ada_task_info): Add "thread-id" field
+	in output of -ada-task-info GDB/MI command.
+
+2011-10-03  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.h (struct inferior): Declare.
 	(print_ada_task_info): Add declaration.
 	* ada-tasks.c (print_ada_task_info): Make non-static.
