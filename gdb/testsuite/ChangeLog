@@ -1,3 +1,11 @@
+2011-10-03  Paul Koning  <paul_koning@dell.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.python/py-value.exp
+	(python inval = gdb.parse_and_eval('*(int*)0'))
+	(python argc_lazy = gdb.parse_and_eval('argc'), sanity check argc)
+	(set argc=2, python print argc_lazy): New tests.
+
 2011-10-02  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.base/save-bp.exp, gdb.base/save-bp.c: New files.
