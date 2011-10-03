@@ -59,7 +59,7 @@ proc one_jit_test {count match_str} {
     global verbose testfile solib_binfile_target solib_binfile_test_msg pf_prefix
 
     set old_pf_prefix $pf_prefix
-    set pf_prefix "one_jit_test-$count"
+    lappend pf_prefix "one_jit_test-$count:"
 
     clean_restart $testfile
 
@@ -97,7 +97,7 @@ proc one_jit_test {count match_str} {
     gdb_continue_to_breakpoint "break here 2"
     # All jit librares must have been unregistered
     gdb_test "info function jit_function" \
-	"All functions matching regular expression \"jit_function\":" \
+	"All functions matching regular expression \"jit_function\":" 
     set pf_prefix $old_pf_prefix
 }
 

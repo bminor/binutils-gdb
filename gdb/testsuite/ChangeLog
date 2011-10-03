@@ -1,3 +1,7 @@
+2011-10-03  Edjunior Machado  <emachado@linux.vnet.ibm.com>
+
+	* gdb.base/jit.exp: Add testcase name to log message
+
 2011-10-03  Paul Koning  <paul_koning@dell.com>
 	    Jan Kratochvil  <jan.kratochvil@redhat.com>
 
