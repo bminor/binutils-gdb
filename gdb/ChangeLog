@@ -1,3 +1,7 @@
+2011-10-04  Paul Koning  <paul_koning@dell.com>
+
+	* NEWS: Add entry for Python gdb.Type mapping methods.
+
 2011-10-04  Kevin Pouget  <kevin.pouget@st.com>
 
 	PR python/12691: Add the inferior to Python exited event

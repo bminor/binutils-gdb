@@ -41,6 +41,11 @@
   ** The "gdb.breakpoint" function has been deprecated in favor of
      "gdb.breakpoints".
 
+  ** Type objects for struct and union types now allow access to
+     the fields using standard Python dictionary (mapping) methods.
+     For example, "some_type['myfield']" now works, as does
+     "some_type.items()".
+
 * libthread-db-search-path now supports two special values: $sdir and $pdir.
   $sdir specifies the default system locations of shared libraries.
   $pdir specifies the directory where the libpthread used by the application
