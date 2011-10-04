@@ -1,3 +1,10 @@
+2011-10-04  Carlos O'Donell  <carlos@codesourcery.com>
+
+	* binutils-all/dw2-decodedline.S: New file.
+	* binutils-all/objdump.WL: New file.
+	* binutils-all/objdump.exp: Update copyright year.
+	New test case for -WL.
+
 2011-09-28  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	* binutils-all/elfedit-4.d: Give test a unique name.

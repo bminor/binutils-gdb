@@ -1,5 +1,5 @@
 #   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
-#   2003, 2004, 2007, 2008, 2009
+#   2003, 2004, 2007, 2008, 2009, 2011
 #   Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
@@ -202,6 +202,31 @@ if { ![is_elf_format] } then {
     }
 }
 
+# Test objdump -WL on a file that contains line information for multiple files and search directories.
+
+if { ![binutils_assemble $srcdir/$subdir/dw2-decodedline.S tmpdir/dw2-decodedline.o] } then {
+    fail "objdump decoded line"
+}
+
+if [is_remote host] {
+    set decodedline_testfile [remote_download host tmpdir/dw2-decodedline.o]
+} else {
+    set decodedline_testfile tmpdir/dw2-decodedline.o
+}
+
+set got [remote_exec host "$OBJDUMP $OBJDUMPFLAGS -WL $decodedline_testfile" "" "/dev/null" "objdump.out"]
+
+if { [lindex $got 0] != 0 || ![string match "" [lindex $got 1]] } then {
+    fail "objdump -WL (reason: unexpected output)"
+    send_log $got
+    send_log "\n"
+}
+
+if { [regexp_diff objdump.out $srcdir/$subdir/objdump.WL] } then {
+    fail "objdump -WL"
+} else {
+    pass "objdump -WL"
+}
 
 # Options which are not tested: -a -d -D -R -T -x -l --stabs
 # I don't see any generic way to test any of these other than -a.

@@ -2961,9 +2961,10 @@ display_debug_lines_decoded (struct dwarf_section *section,
             }
           else
             {
-              if (do_wide || strlen ((char *) directory_table[0]) < 76)
-		printf (_("CU: %s/%s:\n"), directory_table[0],
-			file_table[0].name);
+              unsigned int ix = file_table[0].directory_index;
+              const char *directory = ix ? (char *)directory_table[ix - 1] : ".";
+              if (do_wide || strlen (directory) < 76)
+		printf (_("CU: %s/%s:\n"), directory, file_table[0].name);
               else
 		printf ("%s:\n", file_table[0].name);
 
