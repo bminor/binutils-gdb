@@ -15,6 +15,11 @@
 	as possible feature returned by the `-list-features'
 	command.
 
+2011-09-28  Paul Koning  <paul_koning@dell.com>
+
+	* gdb.texinfo (gdb.Type): Document field access by dictionary
+	key syntax.
+
 2011-09-28  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.texinfo (Files): Update options for `add-symbol-file'.

@@ -65,8 +65,6 @@
 	Python mapping methods on gdb.Type object.
 	(gdb.TypeIterator): New Python type.
 	* python/python-internal.h (gdbpy_iter_kind): New enum.
-	* doc/gdb.texinfo (gdb.Type): Document field access by dictionary
-	key syntax.
 
 2011-09-28  David S. Miller  <davem@davemloft.net>
 
