@@ -1,3 +1,7 @@
+2011-10-04  Paul Koning  <paul_koning@dell.com>
+
+	* gdb.python/py-value.c (main): Break before return.
+
 2011-10-04  Kevin Pouget  <kevin.pouget@st.com>
 
 	PR python/12691: Add the inferior to Python exited event

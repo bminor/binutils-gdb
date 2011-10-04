@@ -66,6 +66,8 @@ int func2 (int arg1, int arg2)
   return arg1 + arg2;
 }
 
+char **save_argv;
+
 int
 main (int argc, char *argv[])
 {
@@ -94,5 +96,6 @@ main (int argc, char *argv[])
   ptr_ref(ptr_i);
 #endif
 
-  return 0;      /* break to inspect struct and union */
+  save_argv = argv;      /* break to inspect struct and union */
+  return 0;
 }
