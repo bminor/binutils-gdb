@@ -43,6 +43,7 @@ def exit_handler (event):
     if (isinstance (event, gdb.ExitedEvent)):
         print "event type: exit"
     print "exit code: %d" % (event.exit_code)
+    print "exit inf: %d" % (event.inferior.num)
 
 def continue_handler (event):
     if (isinstance (event, gdb.ContinueEvent)):

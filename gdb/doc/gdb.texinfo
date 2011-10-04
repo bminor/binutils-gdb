@@ -22306,12 +22306,16 @@ inherited attribute refer to @code{gdb.ThreadEvent} above.
 
 @item events.exited
 Emits @code{events.ExitedEvent} which indicates that the inferior has exited.
-@code{events.ExitedEvent} has one optional attribute.  This attribute
-will exist only in the case that the inferior exited with some
-status.
+@code{events.ExitedEvent} has two attributes:
 @table @code
 @defvar ExitedEvent.exit_code
-An integer representing the exit code which the inferior has returned.
+An integer representing the exit code, if available, which the inferior 
+has returned.  (The exit code could be unavailable if, for example,
+@value{GDBN} detaches from the inferior.) If the exit code is unavailable,
+the attribute does not exist.
+@end defvar
+@defvar ExitedEvent inferior
+A reference to the inferior which triggered the @code{exited} event.
 @end defvar
 @end table
 

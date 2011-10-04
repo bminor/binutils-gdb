@@ -1,3 +1,11 @@
+2011-10-04  Kevin Pouget  <kevin.pouget@st.com>
+
+	PR python/12691: Add the inferior to Python exited event
+	* python/py-exitedevent.c (create_exited_event_object): Add inferior
+	to exited_event.
+	* python/py-event.h (emit_exited_event): Likewise
+	* python/-inferior.c (python_inferior_exit): Likewise
+
 2011-10-03  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-tasks.c (print_ada_task_info): Add "thread-id" field

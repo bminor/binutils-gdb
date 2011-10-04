@@ -17,6 +17,7 @@
 */
 
 int second(){
+  fork() ;
   return 12;
 }
 

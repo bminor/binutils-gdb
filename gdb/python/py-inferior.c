@@ -119,7 +119,7 @@ python_inferior_exit (struct inferior *inf)
   if (inf->has_exit_code)
     exit_code = &inf->exit_code;
 
-  if (emit_exited_event (exit_code) < 0)
+  if (emit_exited_event (exit_code, inf) < 0)
     gdbpy_print_stack ();
 
   do_cleanups (cleanup);
