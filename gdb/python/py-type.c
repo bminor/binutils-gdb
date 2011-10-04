@@ -77,6 +77,9 @@ struct pyty_code
   const char *name;
 };
 
+/* Forward declarations.  */
+static PyObject *typy_make_iter (PyObject *self, enum gdbpy_iter_kind kind);
+
 #define ENTRY(X) { X, #X }
 
 static struct pyty_code pyty_codes[] =
@@ -290,40 +293,15 @@ make_fielditem (struct type *type, int i, enum gdbpy_iter_kind kind)
 static PyObject *
 typy_fields_items (PyObject *self, enum gdbpy_iter_kind kind)
 {
-  PyObject *result = NULL, *item = NULL;
-  int i;
-  struct type *type = ((type_object *) self)->type;
-  volatile struct gdb_exception except;
-
-  TRY_CATCH (except, RETURN_MASK_ALL)
-    {
-      CHECK_TYPEDEF (type);
-    }
-  GDB_PY_HANDLE_EXCEPTION (except);
-
-  /* We would like to make a tuple here, make fields immutable, and
-     then memoize the result (and perhaps make Field.type() lazy).
-     However, that can lead to cycles.  */
-  result = PyList_New (0);
-  if (result == NULL)
-    return NULL;
+  PyObject *result = NULL, *iter = NULL;
   
-  for (i = 0; i < TYPE_NFIELDS (type); ++i)
-    {
-      item = make_fielditem (type, i, kind);
-      if (!item)
-	goto fail;
-      if (PyList_Append (result, item))
-	goto fail;
-      Py_DECREF (item);
-    }
-
+  iter = typy_make_iter (self, kind);
+  if (iter == NULL)
+    return NULL;
+    
+  result = PySequence_List (iter);
+  Py_DECREF (iter);
   return result;
-
- fail:
-  Py_XDECREF (item);
-  Py_XDECREF (result);
-  return NULL;
 }
 
 /* Return a sequence of all fields.  Each field is a gdb.Field object.  */

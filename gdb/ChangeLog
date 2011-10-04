@@ -1,5 +1,10 @@
 2011-10-04  Paul Koning  <paul_koning@dell.com>
 
+	* python/py-type.c (typy_make_iter): Add forward declaration.
+	(typy_fields_items):  Use the gdb.Type iterator.
+
+2011-10-04  Paul Koning  <paul_koning@dell.com>
+
 	* NEWS: Add entry for Python gdb.Type mapping methods.
 
 2011-10-04  Kevin Pouget  <kevin.pouget@st.com>
