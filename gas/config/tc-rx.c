@@ -1,5 +1,5 @@
 /* tc-rx.c -- Assembler for the Renesas RX
-   Copyright 2008, 2009, 2010
+   Copyright 2008, 2009, 2010, 2011
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -51,6 +51,11 @@ static int elf_flags = 0;
 bfd_boolean rx_use_conventional_section_names = FALSE;
 static bfd_boolean rx_use_small_data_limit = FALSE;
 
+static bfd_boolean rx_pid_mode = FALSE;
+static int rx_num_int_regs = 0;
+int rx_pid_register;
+int rx_gp_register;
+
 enum options
 {
   OPTION_BIG = OPTION_MD_BASE,
@@ -60,7 +65,9 @@ enum options
   OPTION_CONVENTIONAL_SECTION_NAMES,
   OPTION_RENESAS_SECTION_NAMES,
   OPTION_SMALL_DATA_LIMIT,
-  OPTION_RELAX
+  OPTION_RELAX,
+  OPTION_PID,
+  OPTION_INT_REGS,
 };
 
 #define RX_SHORTOPTS ""
@@ -83,6 +90,8 @@ struct option md_longopts[] =
   {"muse-renesas-section-names", no_argument, NULL, OPTION_RENESAS_SECTION_NAMES},
   {"msmall-data-limit", no_argument, NULL, OPTION_SMALL_DATA_LIMIT},
   {"relax", no_argument, NULL, OPTION_RELAX},
+  {"mpid", no_argument, NULL, OPTION_PID},
+  {"mint-register", required_argument, NULL, OPTION_INT_REGS},
   {NULL, no_argument, NULL, 0}
 };
 size_t md_longopts_size = sizeof (md_longopts);
@@ -123,6 +132,15 @@ md_parse_option (int c ATTRIBUTE_UNUSED, char * arg ATTRIBUTE_UNUSED)
     case OPTION_RELAX:
       linkrelax = 1;
       return 1;
+
+    case OPTION_PID:
+      rx_pid_mode = TRUE;
+      elf_flags |= E_FLAG_RX_PID;
+      return 1;
+
+    case OPTION_INT_REGS:
+      rx_num_int_regs = atoi (optarg);
+      return 1;
     }
   return 0;
 }
@@ -138,6 +156,9 @@ md_show_usage (FILE * stream)
   fprintf (stream, _("  --muse-conventional-section-names\n"));
   fprintf (stream, _("  --muse-renesas-section-names [default]\n"));
   fprintf (stream, _("  --msmall-data-limit\n"));
+  fprintf (stream, _("  --mrelax\n"));
+  fprintf (stream, _("  --mpid\n"));
+  fprintf (stream, _("  --mint-register=<value>\n"));
 }
 
 static void
@@ -584,16 +605,44 @@ const pseudo_typeS md_pseudo_table[] =
 };
 
 static asymbol * gp_symbol;
+static asymbol * rx_pid_symbol;
+
+static symbolS * rx_pidreg_symbol;
+static symbolS * rx_gpreg_symbol;
 
 void
 md_begin (void)
 {
+  /* Make the __gp and __pid_base symbols now rather
+     than after the symbol table is frozen.  We only do this
+     when supporting small data limits because otherwise we
+     pollute the symbol table.  */
+
+  /* The meta-registers %pidreg and %gpreg depend on what other
+     options are specified.  The __rx_*_defined symbols exist so we
+     can .ifdef asm code based on what options were passed to gas,
+     without needing a preprocessor  */
+
+  if (rx_pid_mode)
+    {
+      rx_pid_register = 13 - rx_num_int_regs;
+      rx_pid_symbol = symbol_get_bfdsym (symbol_find_or_make ("__pid_base"));
+      rx_pidreg_symbol = symbol_find_or_make ("__rx_pidreg_defined");
+      S_SET_VALUE (rx_pidreg_symbol, rx_pid_register);
+      S_SET_SEGMENT (rx_pidreg_symbol, absolute_section);
+    }
+
   if (rx_use_small_data_limit)
-    /* Make the __gp symbol now rather
-       than after the symbol table is frozen.  We only do this
-       when supporting small data limits because otherwise we
-       pollute the symbol table.  */
-    gp_symbol = symbol_get_bfdsym (symbol_find_or_make ("__gp"));
+    {
+      if (rx_pid_mode)
+	rx_gp_register = rx_pid_register - 1;
+      else
+	rx_gp_register = 13 - rx_num_int_regs;
+      gp_symbol = symbol_get_bfdsym (symbol_find_or_make ("__gp"));
+      rx_gpreg_symbol = symbol_find_or_make ("__rx_gpreg_defined");
+      S_SET_VALUE (rx_gpreg_symbol, rx_gp_register);
+      S_SET_SEGMENT (rx_gpreg_symbol, absolute_section);
+    }
 }
 
 char * rx_lex_start;
@@ -1150,7 +1199,7 @@ rx_handle_align (fragS * frag)
       && subseg_text_p (now_seg))
     {
       int count = (frag->fr_next->fr_address
-		   - frag->fr_address	
+		   - frag->fr_address
 		   - frag->fr_fix);
       unsigned char *base = (unsigned char *)frag->fr_literal + frag->fr_fix;
 
@@ -2222,10 +2271,10 @@ md_apply_fix (struct fix * f ATTRIBUTE_UNUSED,
 }
 
 arelent **
-tc_gen_reloc (asection * seg ATTRIBUTE_UNUSED, fixS * fixp)
+tc_gen_reloc (asection * sec ATTRIBUTE_UNUSED, fixS * fixp)
 {
   static arelent * reloc[5];
-  int is_opcode = 0;
+  bfd_boolean is_opcode = FALSE;
 
   if (fixp->fx_r_type == BFD_RELOC_NONE)
     {
@@ -2250,9 +2299,11 @@ tc_gen_reloc (asection * seg ATTRIBUTE_UNUSED, fixS * fixp)
       && fixp->fx_subsy)
     {
       fixp->fx_r_type = BFD_RELOC_RX_DIFF;
-      is_opcode = 1;
+      is_opcode = TRUE;
     }
-
+  else if (sec)
+    is_opcode = sec->flags & SEC_CODE;
+      
   /* Certain BFD relocations cannot be translated directly into
      a single (non-Red Hat) RX relocation, but instead need
      multiple RX relocations - handle them here.  */
@@ -2283,6 +2334,8 @@ tc_gen_reloc (asection * seg ATTRIBUTE_UNUSED, fixS * fixp)
 	case 2:
 	  if (!is_opcode && target_big_endian)
 	    reloc[3]->howto   = bfd_reloc_type_lookup (stdoutput, BFD_RELOC_RX_ABS16_REV);
+	  else if (is_opcode)
+	    reloc[3]->howto   = bfd_reloc_type_lookup (stdoutput, BFD_RELOC_RX_ABS16UL);
 	  else
 	    reloc[3]->howto   = bfd_reloc_type_lookup (stdoutput, BFD_RELOC_RX_ABS16);
 	  break;

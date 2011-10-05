@@ -1,3 +1,26 @@
+2011-10-05  DJ Delorie  <dj@redhat.com>
+	    Nick Clifton  <nickc@redhat.com>
+
+	* config/rx-defs.h (rx_pid_register): New.
+	(rx_gp_register): New.
+	* config/rx-parse.y (rx_lex): Add support for %gpreg and %pidreg.
+	(displacement): Add PID support.
+	* config/tc-rx.c (rx_pid_mode): New.
+	(rx_num_int_regs): New.
+	(rx_pid_register): New.
+	(rx_gp_register): New.
+	(options): Add -mpid and -mint-register= options.
+	(md_longopts): Likewise.
+	(md_parse_option): Likewise.
+	(md_show_usage): Likewise.
+	(rx_pid_symbol): New.
+	(rx_pidreg_symbol): New.
+	(rx_gpreg_symbol): New.
+	(md_begin): Support PID.
+	(rx_validate_fix_sub): Support PID.
+	(tc_gen_reloc): Support PID.
+	* doc/c-rx.texi: Document PID support.
+
 2011-09-27  Kai Tietz  <ktietz@redhat.com>
 
 	* config/obj-coff.c (obj_coff_section): Add 'e' as specifier

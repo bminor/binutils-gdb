@@ -1170,6 +1170,8 @@ rx_lex (void)
     return 0;
 
   if (ISALPHA (*rx_lex_start)
+      || (rx_pid_register != -1 && memcmp (rx_lex_start, "%pidreg", 7) == 0)
+      || (rx_gp_register != -1 && memcmp (rx_lex_start, "%gpreg", 6) == 0)
       || (*rx_lex_start == '.' && ISALPHA (rx_lex_start[1])))
     {
       unsigned int i;
@@ -1182,6 +1184,28 @@ rx_lex (void)
 	;
       save = *e;
       *e = 0;
+
+      if (strcmp (rx_lex_start, "%pidreg") == 0)
+	{
+	  {
+	    rx_lval.regno = rx_pid_register;
+	    *e = save;
+	    rx_lex_start = e;
+	    rx_last_token = REG;
+	    return REG;
+	  }
+	}
+
+      if (strcmp (rx_lex_start, "%gpreg") == 0)
+	{
+	  {
+	    rx_lval.regno = rx_gp_register;
+	    *e = save;
+	    rx_lex_start = e;
+	    rx_last_token = REG;
+	    return REG;
+	  }
+	}
 
       if (rx_last_token == 0)
 	for (ci = 0; ci < NUM_CONDITION_OPCODES; ci ++)
@@ -1480,6 +1504,13 @@ displacement (expressionS exp, int msize)
 	  O2 (exp);
 	  return 2;
 	}
+    }
+
+  if (exp.X_op == O_subtract)
+    {
+      exp.X_md = BFD_RELOC_RX_DIFF;
+      O2 (exp);
+      return 2;
     }
 
   if (exp.X_op != O_constant)

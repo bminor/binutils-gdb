@@ -1,3 +1,10 @@
+2011-10-05  DJ Delorie  <dj@redhat.com>
+	    Nick Clifton  <nickc@redhat.com>
+
+	* elf32-rx.c: Add support for PID mode.
+	(rx_elf_relocate_section): Add checks for unsafe PID relocations.
+	Include addend in R_RX_SYM relocations.
+
 2011-09-30  Tristan Gingold  <gingold@adacore.com>
 
 	* dwarf2.c (struct dwarf2_debug): Add field debug_sections.

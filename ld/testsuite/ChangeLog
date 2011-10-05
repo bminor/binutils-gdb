@@ -1,3 +1,7 @@
+2011-10-05  Nick Clifton  <nickc@redhat.com>
+
+	* ld-scripts/phdrs.exp: Expect to fail for the RX.
+
 2011-09-30  Alan Modra  <amodra@gmail.com>
 
 	* ld-powerpc/tocopt.d: Update.

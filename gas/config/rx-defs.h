@@ -34,6 +34,9 @@
 #define RX_RELAX_IMM	2
 #define RX_RELAX_DISP	3
 
+extern int rx_pid_register;
+extern int rx_gp_register;
+
 extern int    rx_error (char *);
 extern void   rx_lex_init (char *, char *);
 extern void   rx_base1 (int);

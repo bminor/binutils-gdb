@@ -1,4 +1,9 @@
-2011-10-04  Paul Woegerer  <paul_woegerer@mentor.com> 
+2011-10-05  DJ Delorie  <dj@redhat.com>
+	    Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (get_machine_dlags): Add support for RX's PID mode.
+
+2011-10-04  Paul Woegerer  <paul_woegerer@mentor.com>
 	    Carlos O'Donell  <carlos@codesourcery.com>
 
 	* dwarf.c (display_debug_lines_decoded): Index directory_table with

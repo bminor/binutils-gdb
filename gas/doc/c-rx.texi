@@ -74,10 +74,24 @@ This is the default.
 @item -msmall-data-limit
 This option tells the assembler that the small data limit feature of
 the RX port of GCC is being used.  This results in the assembler
-generating an undefined reference to a symbol called __gp for use by
-the relocations that are needed to support the small data limit
+generating an undefined reference to a symbol called @code{__gp} for
+use by the relocations that are needed to support the small data limit
 feature.   This option is not enabled by default as it would otherwise
 pollute the symbol table.
+
+@cindex @samp{-mpid}
+@item -mpid
+This option tells the assembler that the position independent data of the
+RX port of GCC is being used.  This results in the assembler
+generating an undefined reference to a symbol called @code{__pid_base},
+and also setting the RX_PID flag bit in the e_flags field of the ELF
+header of the object file.
+
+@cindex @samp{-mint-register}
+@item -mint-register=@var{num}
+This option tells the assembler how many registers have been reserved
+for use by interrupt handlers.  This is needed in order to compute the
+correct values for the @code{%gpreg} and @code{%pidreg} meta registers.
 
 @end table
 
@@ -86,21 +100,44 @@ pollute the symbol table.
 
 @cindex RX modifiers
 @cindex syntax, RX
+@cindex %gp
 
-The assembler supports several modifiers when using symbol addresses
+The assembler supports one modifier when using symbol addresses
 in RX instruction operands.  The general syntax is the following:
 
 @smallexample
-%modifier(symbol)
+%gp(symbol)
 @end smallexample
 
-@table @code
-@cindex symbol modifiers
+The modifier returns the offset from the @var{__gp} symbol to the
+specified symbol as a 16-bit value.  The intent is that this offset
+should be used in a register+offset move instruction when generating
+references to small data.  Ie, like this:
 
-@item %gp
-@c FIXME: Add documentation here.
+@smallexample
+  mov.W	 %gp(_foo)[%gpreg], r1
+@end smallexample
+
+The assembler also supports two meta register names which can be used
+to refer to registers whose values may not be known to the
+programmer.  These meta register names are:
+
+@table @code
+
+@cindex @samp{%gpreg}
+@item %gpreg
+The small data address register.
+
+@cindex @samp{%pidreg}
+@item %pidreg
+The PID base address register.
 
 @end table
+
+Both registers normally have the value r13, but this can change if
+some registers have been reserved for use by interrupt handlers or if
+both the small data limit and position independent data features are
+being used at the same time.
 
 @node RX-Directives
 @section Assembler Directives

@@ -2595,14 +2595,19 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 	    strcat (buf, ", 64-bit doubles");
 	  if (e_flags & E_FLAG_RX_DSP)
 	    strcat (buf, ", dsp");
+	  if (e_flags & E_FLAG_RX_PID)
+	    strcat (buf, ", pid");	  
+	  break;
 
 	case EM_S390:
 	  if (e_flags & EF_S390_HIGH_GPRS)
 	    strcat (buf, ", highgprs");
+	  break;
 
 	case EM_TI_C6000:
 	  if ((e_flags & EF_C6000_REL))
 	    strcat (buf, ", relocatable module");
+	  break;
 	}
     }
 
