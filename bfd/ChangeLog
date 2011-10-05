@@ -1,3 +1,13 @@
+2011-09-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/13195
+	* elflink.c (_bfd_elf_merge_symbol): Don't set dynamic_def when
+	clearing def_dynamic.
+	(elf_link_add_object_symbols): Likewise.  Set dynamic_def when
+	setting def_dynamic.
+	(bfd_elf_gc_mark_dynamic_ref_symbol): Check if a symbol is
+	versioned.
+
 2011-09-29  Alan Modra  <amodra@gmail.com>
 
 	PR ld/13233
