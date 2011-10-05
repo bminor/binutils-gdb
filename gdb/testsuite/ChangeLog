@@ -1,3 +1,9 @@
+2011-10-05  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	Add tests for passing of environment variables to inferior.
+	* gdb.base/testenv.c: New test source.
+	* gdb.base/testenv.exp: New expect test.
+
 2011-10-04  Paul Koning  <paul_koning@dell.com>
 
 	* gdb.python/py-value.c (main): Break before return.
