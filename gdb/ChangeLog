@@ -1,3 +1,8 @@
+2011-10-05  Tristan Gingold  <gingold@adacore.com>
+
+	* ada-tasks.c (read_atcb): Make ravenscar_task_name static.
+	Extract the ravenscar task name from the symbol for the atcb.
+
 2011-10-04  Paul Koning  <paul_koning@dell.com>
 
 	* python/py-type.c (typy_make_iter): Add forward declaration.

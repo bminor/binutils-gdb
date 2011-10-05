@@ -591,7 +591,7 @@ read_atcb (CORE_ADDR task_id, struct ada_task_info *task_info)
   struct value *entry_calls_value;
   struct value *entry_calls_value_element;
   int called_task_fieldno = -1;
-  const char ravenscar_task_name[] = "Ravenscar task";
+  static const char ravenscar_task_name[] = "Ravenscar task";
   const struct ada_tasks_pspace_data *pspace_data
     = get_ada_tasks_pspace_data (current_program_space);
 
@@ -629,7 +629,31 @@ read_atcb (CORE_ADDR task_id, struct ada_task_info *task_info)
 					    pspace_data->atcb_fieldno.image),
                                sizeof (task_info->name) - 1);
       else
-        strcpy (task_info->name, ravenscar_task_name);
+	{
+	  struct minimal_symbol *msym;
+
+	  msym = lookup_minimal_symbol_by_pc (task_id);
+	  if (msym)
+	    {
+	      const char *full_name = SYMBOL_LINKAGE_NAME (msym);
+	      const char *task_name = full_name;
+	      const char *p;
+
+	      /* Strip the prefix.  */
+	      for (p = full_name; *p; p++)
+		if (p[0] == '_' && p[1] == '_')
+		  task_name = p + 2;
+
+	      /* Copy the task name.  */
+	      strncpy (task_info->name, task_name, sizeof (task_info->name));
+	      task_info->name[sizeof (task_info->name) - 1] = 0;
+	    }
+	  else
+	    {
+	      /* No symbol found.  Use a default name.  */
+	      strcpy (task_info->name, ravenscar_task_name);
+	    }
+	}
     }
   else
     {
