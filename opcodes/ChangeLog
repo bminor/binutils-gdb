@@ -1,3 +1,14 @@
+2011-09-28  Jan Beulich  <jbeulich@suse.com>
+
+	* ppc-opc.c (insert_nbi, insert_rbx, FRAp, FRBp, FRSp, FRTp, NBI, RAX,
+	RBX): New.
+	(insert_bo, insert_boe): Reject bcctr with bit 2 in bo unset.
+	(powerpc_opcodes): Use RAX for second and RBXC for third operand of
+	lswx. Use NBI for third operand of lswi. Use FRTp for first operand of
+	lfdp and lfdpx. Use FRSp for first operand of stfdp and stfdpx, and
+	mark them as invalid on POWER7. Use FRTp, FRAp, and FRBp repsectively
+	on DFP quad instructions.
+
 2011-09-27  David S. Miller  <davem@davemloft.net>
 
 	* sparc-opc.c (sparc_opcodes): Fix random instruction to write
