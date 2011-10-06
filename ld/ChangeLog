@@ -1,6 +1,6 @@
 2011-10-06  Alan Modra  <amodra@gmail.com>
 
-	PR ld/13329
+	PR ld/13229
 	* plugin.c (tv_header_tags): Add LDPT_GET_SYMBOLS_V2.
 	(set_tv_header): Handle it.  Adjust LDPT_GET_SYMBOLS.  Return void.
 	(get_symbols): Add def_ironly_exp param.  Return that value for
