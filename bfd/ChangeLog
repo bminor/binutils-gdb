@@ -1,3 +1,10 @@
+2011-10-05  Kai Tietz  <ktietz@redhat.com>
+
+	* coffgen.c (coff_write_alien_symbol): Don't write
+	symbol for discarded sections, if strip_discarded isn't
+	explicit set to false.
+	(coff_write_native_symbol): Likewise.
+
 2011-10-05  DJ Delorie  <dj@redhat.com>
 	    Nick Clifton  <nickc@redhat.com>
 

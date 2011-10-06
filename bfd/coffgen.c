@@ -996,7 +996,15 @@ coff_write_alien_symbol (bfd *abfd,
   asection *output_section = symbol->section->output_section
 			       ? symbol->section->output_section
 			       : symbol->section;
+  struct bfd_link_info *link_info = coff_data (abfd)->link_info;
 
+  if ((!link_info || link_info->strip_discarded)
+      && !bfd_is_abs_section (symbol->section)
+      && symbol->section->output_section == bfd_abs_section_ptr)
+    {
+      symbol->name = "";
+      return TRUE;
+    }
   native = &dummy;
   native->u.syment.n_type = T_NULL;
   native->u.syment.n_flags = 0;
@@ -1061,6 +1069,15 @@ coff_write_native_symbol (bfd *abfd,
 {
   combined_entry_type *native = symbol->native;
   alent *lineno = symbol->lineno;
+  struct bfd_link_info *link_info = coff_data (abfd)->link_info;
+
+  if ((!link_info || link_info->strip_discarded)
+      && !bfd_is_abs_section (symbol->symbol.section)
+      && symbol->symbol.section->output_section == bfd_abs_section_ptr)
+    {
+      symbol->symbol.name = "";
+      return TRUE;
+    }
 
   /* If this symbol has an associated line number, we must store the
      symbol index in the line number field.  We also tag the auxent to
