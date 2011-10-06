@@ -116,6 +116,7 @@ static const enum ld_plugin_tag tv_header_tags[] =
   LDPT_GET_INPUT_FILE,
   LDPT_RELEASE_INPUT_FILE,
   LDPT_GET_SYMBOLS,
+  LDPT_GET_SYMBOLS_V2,
   LDPT_ADD_INPUT_FILE,
   LDPT_ADD_INPUT_LIBRARY,
   LDPT_SET_EXTRA_LIBRARY_PATH
@@ -489,16 +490,19 @@ is_visible_from_outside (struct ld_plugin_symbol *lsym, asection *section,
 
 /* Get the symbol resolution info for a plugin-claimed input file.  */
 static enum ld_plugin_status
-get_symbols (const void *handle, int nsyms, struct ld_plugin_symbol *syms)
+get_symbols (const void *handle, int nsyms, struct ld_plugin_symbol *syms,
+	     int def_ironly_exp)
 {
   const bfd *abfd = handle;
   int n;
+
   ASSERT (called_plugin);
   for (n = 0; n < nsyms; n++)
     {
       struct bfd_link_hash_entry *blhe;
-      bfd_boolean ironly;
       asection *owner_sec;
+      int res;
+
       if (syms[n].def != LDPK_UNDEF)
 	blhe = bfd_link_hash_lookup (link_info.hash, syms[n].name,
 				     FALSE, FALSE, TRUE);
@@ -507,7 +511,7 @@ get_symbols (const void *handle, int nsyms, struct ld_plugin_symbol *syms)
 					     syms[n].name, FALSE, FALSE, TRUE);
       if (!blhe)
 	{
-	  syms[n].resolution = LDPR_UNKNOWN;
+	  res = LDPR_UNKNOWN;
 	  goto report_symbol;
 	}
 
@@ -515,7 +519,7 @@ get_symbols (const void *handle, int nsyms, struct ld_plugin_symbol *syms)
       if (blhe->type == bfd_link_hash_undefined
 	  || blhe->type == bfd_link_hash_undefweak)
 	{
-	  syms[n].resolution = LDPR_UNDEF;
+	  res = LDPR_UNDEF;
 	  goto report_symbol;
 	}
       if (blhe->type != bfd_link_hash_defined
@@ -534,12 +538,6 @@ get_symbols (const void *handle, int nsyms, struct ld_plugin_symbol *syms)
 		   ? blhe->u.c.p->section
 		   : blhe->u.def.section);
 
-      /* We need to know if the sym is referenced from non-IR files.  Or
-	 even potentially-referenced, perhaps in a future final link if
-	 this is a partial one, perhaps dynamically at load-time if the
-	 symbol is externally visible.  */
-      ironly = !(blhe->non_ir_ref
-		 || is_visible_from_outside (&syms[n], owner_sec, blhe));
 
       /* If it was originally undefined or common, then it has been
 	 resolved; determine how.  */
@@ -548,47 +546,65 @@ get_symbols (const void *handle, int nsyms, struct ld_plugin_symbol *syms)
 	  || syms[n].def == LDPK_COMMON)
 	{
 	  if (owner_sec->owner == link_info.output_bfd)
-	    syms[n].resolution = LDPR_RESOLVED_EXEC;
+	    res = LDPR_RESOLVED_EXEC;
 	  else if (owner_sec->owner == abfd)
-	    syms[n].resolution = (ironly
-				  ? LDPR_PREVAILING_DEF_IRONLY
-				  : LDPR_PREVAILING_DEF);
+	    res = LDPR_PREVAILING_DEF_IRONLY;
 	  else if (is_ir_dummy_bfd (owner_sec->owner))
-	    syms[n].resolution = LDPR_RESOLVED_IR;
+	    res = LDPR_RESOLVED_IR;
 	  else if (owner_sec->owner != NULL
 		   && (owner_sec->owner->flags & DYNAMIC) != 0)
-	    syms[n].resolution =  LDPR_RESOLVED_DYN;
+	    res = LDPR_RESOLVED_DYN;
 	  else
-	    syms[n].resolution = LDPR_RESOLVED_EXEC;
-	  goto report_symbol;
+	    res = LDPR_RESOLVED_EXEC;
 	}
 
       /* Was originally def, or weakdef.  Does it prevail?  If the
 	 owner is the original dummy bfd that supplied it, then this
 	 is the definition that has prevailed.  */
-      if (owner_sec->owner == link_info.output_bfd)
-	syms[n].resolution = LDPR_PREEMPTED_REG;
+      else if (owner_sec->owner == link_info.output_bfd)
+	res = LDPR_PREEMPTED_REG;
       else if (owner_sec->owner == abfd)
-	{
-	  syms[n].resolution = (ironly
-				? LDPR_PREVAILING_DEF_IRONLY
-				: LDPR_PREVAILING_DEF);
-	  goto report_symbol;
-	}
+	res = LDPR_PREVAILING_DEF_IRONLY;
 
       /* Was originally def, weakdef, or common, but has been pre-empted.  */
-      syms[n].resolution = (is_ir_dummy_bfd (owner_sec->owner)
-			    ? LDPR_PREEMPTED_IR
-			    : LDPR_PREEMPTED_REG);
+      else if (is_ir_dummy_bfd (owner_sec->owner))
+	res = LDPR_PREEMPTED_IR;
+      else
+	res = LDPR_PREEMPTED_REG;
+
+      if (res == LDPR_PREVAILING_DEF_IRONLY)
+	{
+	  /* We need to know if the sym is referenced from non-IR files.  Or
+	     even potentially-referenced, perhaps in a future final link if
+	     this is a partial one, perhaps dynamically at load-time if the
+	     symbol is externally visible.  */
+	  if (blhe->non_ir_ref)
+	    res = LDPR_PREVAILING_DEF;
+	  else if (is_visible_from_outside (&syms[n], owner_sec, blhe))
+	    res = def_ironly_exp;
+	}
 
     report_symbol:
+      syms[n].resolution = res;
       if (report_plugin_symbols)
 	einfo (_("%P: %B: symbol `%s' "
 		 "definition: %d, visibility: %d, resolution: %d\n"),
 	       abfd, syms[n].name,
-	       syms[n].def, syms[n].visibility, syms[n].resolution);
+	       syms[n].def, syms[n].visibility, res);
     }
   return LDPS_OK;
+}
+
+static enum ld_plugin_status
+get_symbols_v1 (const void *handle, int nsyms, struct ld_plugin_symbol *syms)
+{
+  return get_symbols (handle, nsyms, syms, LDPR_PREVAILING_DEF);
+}
+
+static enum ld_plugin_status
+get_symbols_v2 (const void *handle, int nsyms, struct ld_plugin_symbol *syms)
+{
+  return get_symbols (handle, nsyms, syms, LDPR_PREVAILING_DEF_IRONLY_EXP);
 }
 
 /* Add a new (real) input file generated by a plugin.  */
@@ -658,7 +674,7 @@ message (int level, const char *format, ...)
 }
 
 /* Helper to size leading part of tv array and set it up. */
-static size_t
+static void
 set_tv_header (struct ld_plugin_tv *tv)
 {
   size_t i;
@@ -666,9 +682,6 @@ set_tv_header (struct ld_plugin_tv *tv)
   /* Version info.  */
   static const unsigned int major = (unsigned)(BFD_VERSION / 100000000UL);
   static const unsigned int minor = (unsigned)(BFD_VERSION / 1000000UL) % 100;
-
-  if (!tv)
-    return tv_header_size;
 
   for (i = 0; i < tv_header_size; i++)
     {
@@ -712,7 +725,10 @@ set_tv_header (struct ld_plugin_tv *tv)
 	  TVU(release_input_file) = release_input_file;
 	  break;
 	case LDPT_GET_SYMBOLS:
-	  TVU(get_symbols) = get_symbols;
+	  TVU(get_symbols) = get_symbols_v1;
+	  break;
+	case LDPT_GET_SYMBOLS_V2:
+	  TVU(get_symbols) = get_symbols_v2;
 	  break;
 	case LDPT_ADD_INPUT_FILE:
 	  TVU(add_input_file) = add_input_file;
@@ -730,7 +746,6 @@ set_tv_header (struct ld_plugin_tv *tv)
 	}
 #undef TVU
     }
-  return tv_header_size;
 }
 
 /* Append the per-plugin args list and trailing LDPT_NULL to tv.  */

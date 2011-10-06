@@ -1,3 +1,10 @@
+2011-10-06  Alan Modra  <amodra@gmail.com>
+
+	* ld-plugin/plugin-1.d, * ld-plugin/plugin-2.d, * ld-plugin/plugin-3.d,
+	* ld-plugin/plugin-4.d, * ld-plugin/plugin-5.d, * ld-plugin/plugin-6.d,
+	* ld-plugin/plugin-7.d, * ld-plugin/plugin-8.d, * ld-plugin/plugin-9.d,
+	* ld-plugin/plugin-10.d, * ld-plugin/plugin-11.d: Update.
+
 2011-10-05  Nick Clifton  <nickc@redhat.com>
 
 	* ld-scripts/phdrs.exp: Expect to fail for the RX.
