@@ -204,7 +204,7 @@ if { ![is_elf_format] } then {
 
 # Test objdump -WL on a file that contains line information for multiple files and search directories.
 
-if { ![is_elf_format] } then {
+if { ![is_elf_format] || [istarget "ia64*-*-*"]} then {
     unsupported "objump decode line"
 } else {
     if { ![binutils_assemble $srcdir/$subdir/dw2-decodedline.S tmpdir/dw2-decodedline.o] } then {

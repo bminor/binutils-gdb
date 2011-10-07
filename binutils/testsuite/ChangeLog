@@ -1,3 +1,7 @@
+2011-10-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* binutils-all/objdump.exp: Don't run dw2-decodedline.S on ia64.
+
 2011-10-04  Carlos O'Donell  <carlos@codesourcery.com>
 
 	* binutils-all/dw2-decodedline.S: New file.
