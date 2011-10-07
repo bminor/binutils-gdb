@@ -124,6 +124,10 @@ extern int non_stop;
    detached depends on 'set follow-fork-mode' setting.  */
 extern int detach_fork;
 
+/* When set (default), the target should attempt to disable the operating
+   system's address space randomization feature when starting an inferior.  */
+extern int disable_randomization;
+
 extern void generic_mourn_inferior (void);
 
 extern void terminal_save_ours (void);

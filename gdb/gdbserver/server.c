@@ -45,6 +45,10 @@ int run_once;
 int multi_process;
 int non_stop;
 
+/* Whether we should attempt to disable the operating system's address
+   space randomization feature before starting an inferior.  */
+int disable_randomization = 1;
+
 static char **program_argv, **wrapper_argv;
 
 /* Enable miscellaneous debugging output.  The name is historical - it
@@ -492,6 +496,27 @@ handle_general_set (char *own_buf)
 
       if (remote_debug)
 	fprintf (stderr, "[%s mode enabled]\n", req_str);
+
+      write_ok (own_buf);
+      return;
+    }
+
+  if (strncmp ("QDisableRandomization:", own_buf,
+	       strlen ("QDisableRandomization:")) == 0)
+    {
+      char *packet = own_buf + strlen ("QDisableRandomization:");
+      ULONGEST setting;
+
+      unpack_varlen_hex (packet, &setting);
+      disable_randomization = setting;
+
+      if (remote_debug)
+	{
+	  if (disable_randomization)
+	    fprintf (stderr, "[address space randomization disabled]\n");
+	  else
+	    fprintf (stderr, "[address space randomization enabled]\n");
+	}
 
       write_ok (own_buf);
       return;
@@ -1545,6 +1570,9 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
       if (target_supports_non_stop ())
 	strcat (own_buf, ";QNonStop+");
 
+      if (target_supports_disable_randomization ())
+	strcat (own_buf, ";QDisableRandomization+");
+
       strcat (own_buf, ";qXfer:threads:read+");
 
       if (target_supports_tracepoints ())
@@ -2549,6 +2577,10 @@ main (int argc, char *argv[])
 		}
 	    }
 	}
+      else if (strcmp (*next_arg, "--disable-randomization") == 0)
+	disable_randomization = 1;
+      else if (strcmp (*next_arg, "--no-disable-randomization") == 0)
+	disable_randomization = 0;
       else if (strcmp (*next_arg, "--once") == 0)
 	run_once = 1;
       else

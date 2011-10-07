@@ -1,3 +1,23 @@
+2011-10-07  Ulrich Weigand  <ulrich.weigand@linaro.org>
+
+	* configure.ac: Check support for personality routine.
+	* configure: Regenerate.
+	* config.in: Likewise.
+	* linux-low.c: Include <sys/personality.h>.
+	Define ADDR_NO_RANDOMIZE if necessary.
+	(linux_create_inferior): Disable address space randomization when
+	forking inferior, if requested.
+	(linux_supports_disable_randomization): New function.
+	(linux_target_ops): Install it.
+	* server.h (disable_randomization): Declare.
+	* server.c (disable_randomization): New global variable.
+	(handle_general_set): Handle QDisableRandomization.
+	(handle_query): Likewise for qSupported.
+	(main): Support --disable-randomization and --no-disable-randomization
+	command line arguments.
+	* target.h (struct target_ops): Add supports_disable_randomization.
+	(target_supports_disable_randomization): New macro.
+
 2011-09-29  Mike Frysinger  <vapier@gentoo.org>
 
 	* linux-low.c (target_loadseg): Add defined PTRACE_GETFDPIC to the

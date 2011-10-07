@@ -299,6 +299,8 @@ extern int run_once;
 extern int multi_process;
 extern int non_stop;
 
+extern int disable_randomization;
+
 #if USE_WIN32API
 #include <winsock2.h>
 typedef SOCKET gdb_fildes_t;

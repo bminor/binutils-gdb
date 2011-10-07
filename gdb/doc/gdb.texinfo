@@ -2044,8 +2044,8 @@ randomization of the virtual address space of the started program.  This option
 is useful for multiple debugging sessions to make the execution better
 reproducible and memory addresses reusable across debugging sessions.
 
-This feature is implemented only on @sc{gnu}/Linux.  You can get the same
-behavior using
+This feature is implemented only on certain targets, including @sc{gnu}/Linux.
+On @sc{gnu}/Linux you can get the same behavior using
 
 @smallexample
 (@value{GDBP}) set exec-wrapper setarch `uname -m` -R
@@ -2059,8 +2059,8 @@ disappears when you run the program under @value{GDBN}, that might be because
 as @sc{gnu}/Linux, which do that for stand-alone programs.  Use @kbd{set
 disable-randomization off} to try to reproduce such elusive bugs.
 
-The virtual address space randomization is implemented only on @sc{gnu}/Linux.
-It protects the programs against some kinds of security attacks.  In these
+On targets where it is available, virtual address space randomization
+protects the programs against certain kinds of security attacks.  In these
 cases the attacker needs to know the exact location of a concrete executable
 code.  Randomizing its location makes it impossible to inject jumps misusing
 a code at its expected addresses.
@@ -16906,6 +16906,10 @@ are:
 @item @code{traceframe-info}
 @tab @code{qXfer:traceframe-info:read}
 @tab Traceframe info
+
+@item @code{disable-randomization}
+@tab @code{QDisableRandomization}
+@tab @code{set disable-randomization}
 @end multitable
 
 @node Remote Stub
@@ -33534,6 +33538,38 @@ An error (such as memory fault)
 The specified memory region's checksum is @var{crc32}.
 @end table
 
+@item QDisableRandomization:@var{value}
+@cindex disable address space randomization, remote request
+@cindex @samp{QDisableRandomization} packet
+Some target operating systems will randomize the virtual address space
+of the inferior process as a security feature, but provide a feature
+to disable such randomization, e.g.@: to allow for a more deterministic
+debugging experience.  On such systems, this packet with a @var{value}
+of 1 directs the target to disable address space randomization for
+processes subsequently started via @samp{vRun} packets, while a packet
+with a @var{value} of 0 tells the target to enable address space
+randomization.
+
+This packet is only available in extended mode (@pxref{extended mode}).
+
+Reply:
+@table @samp
+@item OK
+The request succeeded.
+
+@item E @var{nn}
+An error occurred.  @var{nn} are hex digits.
+
+@item
+An empty reply indicates that @samp{QDisableRandomization} is not supported
+by the stub.
+@end table
+
+This packet is not probed by default; the remote stub must request it,
+by supplying an appropriate @samp{qSupported} response (@pxref{qSupported}).
+This should only be done on targets that actually support disabling
+address space randomization.
+
 @item qfThreadInfo
 @itemx qsThreadInfo
 @cindex list active threads, remote request
@@ -34037,6 +34073,11 @@ These are the currently defined stub features and their properties:
 @tab @samp{-}
 @tab No
 
+@item @samp{QDisableRandomization}
+@tab No
+@tab @samp{-}
+@tab No
+
 @item @samp{EnableDisableTracepoints}
 @tab No
 @tab @samp{-}
@@ -34153,6 +34194,9 @@ the source form of tracepoint definitions.
 
 @item QAllow
 The remote stub understands the @samp{QAllow} packet.
+
+@item QDisableRandomization
+The remote stub understands the @samp{QDisableRandomization} packet.
 
 @item StaticTracepoint
 @cindex static tracepoints, in remote protocol

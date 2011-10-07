@@ -200,35 +200,6 @@ show_debug_linux_nat (struct ui_file *file, int from_tty,
 		    value);
 }
 
-static int disable_randomization = 1;
-
-static void
-show_disable_randomization (struct ui_file *file, int from_tty,
-			    struct cmd_list_element *c, const char *value)
-{
-#ifdef HAVE_PERSONALITY
-  fprintf_filtered (file,
-		    _("Disabling randomization of debuggee's "
-		      "virtual address space is %s.\n"),
-		    value);
-#else /* !HAVE_PERSONALITY */
-  fputs_filtered (_("Disabling randomization of debuggee's "
-		    "virtual address space is unsupported on\n"
-		    "this platform.\n"), file);
-#endif /* !HAVE_PERSONALITY */
-}
-
-static void
-set_disable_randomization (char *args, int from_tty,
-			   struct cmd_list_element *c)
-{
-#ifndef HAVE_PERSONALITY
-  error (_("Disabling randomization of debuggee's "
-	   "virtual address space is unsupported on\n"
-	   "this platform."));
-#endif /* !HAVE_PERSONALITY */
-}
-
 struct simple_pid_list
 {
   int pid;
@@ -5308,6 +5279,16 @@ linux_nat_supports_multi_process (void)
   return linux_multi_process;
 }
 
+static int
+linux_nat_supports_disable_randomization (void)
+{
+#ifdef HAVE_PERSONALITY
+  return 1;
+#else
+  return 0;
+#endif
+}
+
 static int async_terminal_is_ours = 1;
 
 /* target_terminal_inferior implementation.  */
@@ -5677,6 +5658,9 @@ linux_nat_add_target (struct target_ops *t)
 
   t->to_supports_multi_process = linux_nat_supports_multi_process;
 
+  t->to_supports_disable_randomization
+    = linux_nat_supports_disable_randomization;
+
   t->to_core_of_thread = linux_nat_core_of_thread;
 
   /* We don't change the stratum; this target will sit at
@@ -5762,17 +5746,6 @@ Enables printf debugging output."),
   sigdelset (&suspend_mask, SIGCHLD);
 
   sigemptyset (&blocked_mask);
-
-  add_setshow_boolean_cmd ("disable-randomization", class_support,
-			   &disable_randomization, _("\
-Set disabling of debuggee's virtual address space randomization."), _("\
-Show disabling of debuggee's virtual address space randomization."), _("\
-When this mode is on (which is the default), randomization of the virtual\n\
-address space is disabled.  Standalone programs run with the randomization\n\
-enabled by default on some platforms."),
-			   &set_disable_randomization,
-			   &show_disable_randomization,
-			   &setlist, &showlist);
 }
 
 

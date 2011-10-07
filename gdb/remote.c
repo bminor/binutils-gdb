@@ -1263,6 +1263,7 @@ enum {
   PACKET_TracepointSource,
   PACKET_QAllow,
   PACKET_qXfer_fdpic,
+  PACKET_QDisableRandomization,
   PACKET_MAX
 };
 
@@ -3761,6 +3762,8 @@ static struct protocol_feature remote_protocol_features[] = {
     remote_enable_disable_tracepoint_feature, -1 },
   { "qXfer:fdpic:read", PACKET_DISABLE, remote_supported_packet,
     PACKET_qXfer_fdpic },
+  { "QDisableRandomization", PACKET_DISABLE, remote_supported_packet,
+    PACKET_QDisableRandomization },
 };
 
 static char *remote_support_xml;
@@ -7484,6 +7487,28 @@ extended_remote_mourn (struct target_ops *ops)
 }
 
 static int
+extended_remote_supports_disable_randomization (void)
+{
+  return (remote_protocol_packets[PACKET_QDisableRandomization].support
+	  == PACKET_ENABLE);
+}
+
+static void
+extended_remote_disable_randomization (int val)
+{
+  struct remote_state *rs = get_remote_state ();
+  char *reply;
+
+  sprintf (rs->buf, "QDisableRandomization:%x", val);
+  putpkt (rs->buf);
+  reply = remote_get_noisy_reply (&target_buf, &target_buf_size);
+  if (*reply == '\0')
+    error (_("Target does not support QDisableRandomization."));
+  if (strcmp (reply, "OK") != 0)
+    error (_("Bogus QDisableRandomization reply from target: %s"), reply);
+}
+
+static int
 extended_remote_run (char *args)
 {
   struct remote_state *rs = get_remote_state ();
@@ -7558,6 +7583,10 @@ extended_remote_create_inferior_1 (char *exec_file, char *args,
      with the event loop.  */
   if (target_can_async_p ())
     target_async (inferior_event_handler, 0);
+
+  /* Disable address space randomization if requested (and supported).  */
+  if (extended_remote_supports_disable_randomization ())
+    extended_remote_disable_randomization (disable_randomization);
 
   /* Now restart the remote server.  */
   if (extended_remote_run (args) == -1)
@@ -9665,6 +9694,13 @@ remote_supports_non_stop (void)
 }
 
 static int
+remote_supports_disable_randomization (void)
+{
+  /* Only supported in extended mode.  */
+  return 0;
+}
+
+static int
 remote_supports_multi_process (void)
 {
   struct remote_state *rs = get_remote_state ();
@@ -10420,6 +10456,8 @@ Specify the serial device it is connected to\n\
   remote_ops.to_terminal_ours = remote_terminal_ours;
   remote_ops.to_supports_non_stop = remote_supports_non_stop;
   remote_ops.to_supports_multi_process = remote_supports_multi_process;
+  remote_ops.to_supports_disable_randomization
+    = remote_supports_disable_randomization;
   remote_ops.to_supports_enable_disable_tracepoint = remote_supports_enable_disable_tracepoint;
   remote_ops.to_trace_init = remote_trace_init;
   remote_ops.to_download_tracepoint = remote_download_tracepoint;
@@ -10472,6 +10510,8 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   extended_remote_ops.to_detach = extended_remote_detach;
   extended_remote_ops.to_attach = extended_remote_attach;
   extended_remote_ops.to_kill = extended_remote_kill;
+  extended_remote_ops.to_supports_disable_randomization
+    = extended_remote_supports_disable_randomization;
 }
 
 static int
@@ -10943,6 +10983,9 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qXfer_fdpic],
 			 "qXfer:fdpic:read", "read-fdpic-loadmap", 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_QDisableRandomization],
+			 "QDisableRandomization", "disable-randomization", 0);
 
   /* Keep the old ``set remote Z-packet ...'' working.  Each individual
      Z sub-packet has its own set and show commands, but users may

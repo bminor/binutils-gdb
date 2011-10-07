@@ -653,6 +653,9 @@ struct target_ops
        experiment is running?  */
     int (*to_supports_enable_disable_tracepoint) (void);
 
+    /* Does this target support disabling address space randomization?  */
+    int (*to_supports_disable_randomization) (void);
+
     /* Determine current architecture of thread PTID.
 
        The target is supposed to determine the architecture of the code where
@@ -887,6 +890,10 @@ struct address_space *target_thread_address_space (ptid_t);
 
 #define	target_supports_multi_process()	\
      (*current_target.to_supports_multi_process) ()
+
+/* Returns true if this target can disable address space randomization.  */
+
+int target_supports_disable_randomization (void);
 
 /* Returns true if this target can enable and disable tracepoints
    while a trace experiment is running.  */

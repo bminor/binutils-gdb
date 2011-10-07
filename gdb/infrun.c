@@ -147,6 +147,37 @@ show_debug_infrun (struct ui_file *file, int from_tty,
   fprintf_filtered (file, _("Inferior debugging is %s.\n"), value);
 }
 
+
+/* Support for disabling address space randomization.  */
+
+int disable_randomization = 1;
+
+static void
+show_disable_randomization (struct ui_file *file, int from_tty,
+			    struct cmd_list_element *c, const char *value)
+{
+  if (target_supports_disable_randomization ())
+    fprintf_filtered (file,
+		      _("Disabling randomization of debuggee's "
+			"virtual address space is %s.\n"),
+		      value);
+  else
+    fputs_filtered (_("Disabling randomization of debuggee's "
+		      "virtual address space is unsupported on\n"
+		      "this platform.\n"), file);
+}
+
+static void
+set_disable_randomization (char *args, int from_tty,
+			   struct cmd_list_element *c)
+{
+  if (!target_supports_disable_randomization ())
+    error (_("Disabling randomization of debuggee's "
+	     "virtual address space is unsupported on\n"
+	     "this platform."));
+}
+
+
 /* If the program uses ELF-style shared libraries, then calls to
    functions in shared libraries go through stubs, which live in a
    table called the PLT (Procedure Linkage Table).  The first time the
@@ -7231,6 +7262,19 @@ Set whether gdb will detach the child of a fork."), _("\
 Show whether gdb will detach the child of a fork."), _("\
 Tells gdb whether to detach the child of a fork."),
 			   NULL, NULL, &setlist, &showlist);
+
+  /* Set/show disable address space randomization mode.  */
+
+  add_setshow_boolean_cmd ("disable-randomization", class_support,
+			   &disable_randomization, _("\
+Set disabling of debuggee's virtual address space randomization."), _("\
+Show disabling of debuggee's virtual address space randomization."), _("\
+When this mode is on (which is the default), randomization of the virtual\n\
+address space is disabled.  Standalone programs run with the randomization\n\
+enabled by default on some platforms."),
+			   &set_disable_randomization,
+			   &show_disable_randomization,
+			   &setlist, &showlist);
 
   /* ptid initializations */
   inferior_ptid = null_ptid;

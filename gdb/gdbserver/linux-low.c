@@ -55,6 +55,13 @@
 #define SPUFS_MAGIC 0x23c9b64e
 #endif
 
+#ifdef HAVE_PERSONALITY
+# include <sys/personality.h>
+# if !HAVE_DECL_ADDR_NO_RANDOMIZE
+#  define ADDR_NO_RANDOMIZE 0x0040000
+# endif
+#endif
+
 #ifndef O_LARGEFILE
 #define O_LARGEFILE 0
 #endif
@@ -520,9 +527,29 @@ add_lwp (ptid_t ptid)
 static int
 linux_create_inferior (char *program, char **allargs)
 {
+#ifdef HAVE_PERSONALITY
+  int personality_orig = 0, personality_set = 0;
+#endif
   struct lwp_info *new_lwp;
   int pid;
   ptid_t ptid;
+
+#ifdef HAVE_PERSONALITY
+  if (disable_randomization)
+    {
+      errno = 0;
+      personality_orig = personality (0xffffffff);
+      if (errno == 0 && !(personality_orig & ADDR_NO_RANDOMIZE))
+	{
+	  personality_set = 1;
+	  personality (personality_orig | ADDR_NO_RANDOMIZE);
+	}
+      if (errno != 0 || (personality_set
+			 && !(personality (0xffffffff) & ADDR_NO_RANDOMIZE)))
+	warning ("Error disabling address space randomization: %s",
+		 strerror (errno));
+    }
+#endif
 
 #if defined(__UCLIBC__) && defined(HAS_NOMMU)
   pid = vfork ();
@@ -551,6 +578,17 @@ linux_create_inferior (char *program, char **allargs)
       fflush (stderr);
       _exit (0177);
     }
+
+#ifdef HAVE_PERSONALITY
+  if (personality_set)
+    {
+      errno = 0;
+      personality (personality_orig);
+      if (errno != 0)
+	warning ("Error restoring address space randomization: %s",
+		 strerror (errno));
+    }
+#endif
 
   linux_add_process (pid, 0);
 
@@ -4633,6 +4671,15 @@ linux_supports_multi_process (void)
   return 1;
 }
 
+static int
+linux_supports_disable_randomization (void)
+{
+#ifdef HAVE_PERSONALITY
+  return 1;
+#else
+  return 0;
+#endif
+}
 
 /* Enumerate spufs IDs for process PID.  */
 static int
@@ -4965,7 +5012,8 @@ static struct target_ops linux_target_ops = {
   linux_cancel_breakpoints,
   linux_stabilize_threads,
   linux_install_fast_tracepoint_jump_pad,
-  linux_emit_ops
+  linux_emit_ops,
+  linux_supports_disable_randomization,
 };
 
 static void

@@ -1,3 +1,33 @@
+2011-10-07  Ulrich Weigand  <ulrich.weigand@linaro.org>
+
+	* inferior.h (disable_randomization): Declare.
+	* infrun.c (disable_randomization): New global variable.
+	(show_disable_randomization): New function.
+	(set_disable_randomization): Likewise.
+	(_initialize_infrun): Install set/show disable-randomization
+	commands.
+	* linux-nat.c (disable_randomization): Remove.
+	(show_disable_randomization): Likewise.
+	(set_disable_randomization): Likewise.
+	(_initialize_linux_nat): No longer install set/show
+	disable-randomization commands here.
+	(linux_nat_supports_disable_randomization): New function.
+	(linux_nat_add_target): Install it.
+	* remote.c (PACKET_QDisableRandomization): New enum value.
+	(remote_protocol_packets): Support QDisableRandomization.
+	(_initialize_remote): Likewise.
+	(remote_supports_disable_randomization): New function.
+	(init_remote_ops): Install it.
+	(extended_remote_supports_disable_randomization): New function.
+	(init_extended_remote_ops): Install it.
+	(extended_remote_disable_randomization): New function.
+	(extended_remote_create_inferior_1): Call it.
+	* target.h (struct target_ops): Add to_supports_disable_randomization.
+	(target_supports_disable_randomization): Add prototype.
+	* target.c (target_supports_disable_randomization): New function.
+	(find_default_supports_disable_randomization): Likewise.
+	(init_dummy_target): Install it.
+
 2011-10-07  Kevin Pouget  <kevin.pouget@st.com>
 
 	Allow Python notification of new object-file loadings.
