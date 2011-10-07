@@ -24001,8 +24001,11 @@ Utility class for handling multiple printers, all recognized via
 regular expressions.
 @xref{Writing a Pretty-Printer}, for an example.
 
-@item register_pretty_printer (@var{obj}, @var{printer})
+@item register_pretty_printer (@var{obj}, @var{printer}, @var{replace}=False)
 Register @var{printer} with the pretty-printer list of @var{obj}.
+If @var{replace} is @code{True} then any existing copy of the printer
+is replaced.  Otherwise a @code{RuntimeError} exception is raised
+if a printer with the same name already exists.
 @end table
 
 @node gdb.types
