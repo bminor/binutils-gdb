@@ -68,7 +68,7 @@ class SubPrettyPrinter(object):
         self.enabled = True
 
 
-def register_pretty_printer(obj, printer):
+def register_pretty_printer(obj, printer, replace=False):
     """Register pretty-printer PRINTER with OBJ.
 
     The printer is added to the front of the search list, thus one can override
@@ -81,6 +81,8 @@ def register_pretty_printer(obj, printer):
             is registered globally).
         printer: Either a function of one argument (old way) or any object
             which has attributes: name, enabled, __call__.
+        replace: If True replace any existing copy of the printer.
+            Otherwise if the printer already exists raise an exception.
 
     Returns:
         Nothing.
@@ -128,10 +130,16 @@ def register_pretty_printer(obj, printer):
         # Alas, we can't do the same for functions and __name__, they could
         # all have a canonical name like "lookup_function".
         # PERF: gdb records printers in a list, making this inefficient.
-        if (printer.name in
-              [p.name for p in obj.pretty_printers if hasattr(p, "name")]):
-            raise RuntimeError("pretty-printer already registered: %s" %
-                               printer.name)
+        i = 0
+        for p in obj.pretty_printers:
+            if hasattr(p, "name") and p.name == printer.name:
+                if replace:
+                    del obj.pretty_printers[i]
+                    break
+                else:
+                  raise RuntimeError("pretty-printer already registered: %s" %
+                                     printer.name)
+            i = i + 1
 
     obj.pretty_printers.insert(0, printer)
 

@@ -71,4 +71,16 @@ def build_pretty_printer():
 
 
 gdb.printing.register_pretty_printer(gdb, lookup_function_lookup_test)
-gdb.printing.register_pretty_printer(gdb, build_pretty_printer())
+my_pretty_printer = build_pretty_printer()
+gdb.printing.register_pretty_printer(gdb, my_pretty_printer)
+
+# Exercise the "replace" argument to register pretty_printer.
+saw_runtime_error = False
+try:
+  gdb.printing.register_pretty_printer(gdb, my_pretty_printer, replace=False)
+except RuntimeError:
+  saw_runtime_error = True
+  pass
+if not saw_runtime_error:
+  raise RuntimeError("Missing RuntimeError from register_pretty_printer")
+gdb.printing.register_pretty_printer(gdb, my_pretty_printer, replace=True)

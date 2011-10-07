@@ -1,5 +1,8 @@
 2011-10-07  Doug Evans  <dje@google.com>
 
+	* python/lib/gdb/printing.py (register_pretty_printer): New argument
+	`replace'.
+
 	* python/lib/gdb/printing.py: Whitespace cleanup.
 
 	* python/py-value.c (valpy_call): Initialize ftype to avoid compiler
