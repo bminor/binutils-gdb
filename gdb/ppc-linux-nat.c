@@ -1654,7 +1654,6 @@ static int
 ppc_linux_insert_hw_breakpoint (struct gdbarch *gdbarch,
 				  struct bp_target_info *bp_tgt)
 {
-  ptid_t ptid;
   struct lwp_info *lp;
   struct ppc_hw_breakpoint p;
 
@@ -1681,8 +1680,8 @@ ppc_linux_insert_hw_breakpoint (struct gdbarch *gdbarch,
       p.addr2 = 0;
     }
 
-  ALL_LWPS (lp, ptid)
-    booke_insert_point (&p, TIDGET (ptid));
+  ALL_LWPS (lp)
+    booke_insert_point (&p, TIDGET (lp->ptid));
 
   return 0;
 }
@@ -1691,7 +1690,6 @@ static int
 ppc_linux_remove_hw_breakpoint (struct gdbarch *gdbarch,
 				  struct bp_target_info *bp_tgt)
 {
-  ptid_t ptid;
   struct lwp_info *lp;
   struct ppc_hw_breakpoint p;
 
@@ -1718,8 +1716,8 @@ ppc_linux_remove_hw_breakpoint (struct gdbarch *gdbarch,
       p.addr2 = 0;
     }
 
-  ALL_LWPS (lp, ptid)
-    booke_remove_point (&p, TIDGET (ptid));
+  ALL_LWPS (lp)
+    booke_remove_point (&p, TIDGET (lp->ptid));
 
   return 0;
 }
@@ -1748,7 +1746,6 @@ static int
 ppc_linux_insert_mask_watchpoint (struct target_ops *ops, CORE_ADDR addr,
 				  CORE_ADDR mask, int rw)
 {
-  ptid_t ptid;
   struct lwp_info *lp;
   struct ppc_hw_breakpoint p;
 
@@ -1762,8 +1759,8 @@ ppc_linux_insert_mask_watchpoint (struct target_ops *ops, CORE_ADDR addr,
   p.addr2 = mask;
   p.condition_value = 0;
 
-  ALL_LWPS (lp, ptid)
-    booke_insert_point (&p, TIDGET (ptid));
+  ALL_LWPS (lp)
+    booke_insert_point (&p, TIDGET (lp->ptid));
 
   return 0;
 }
@@ -1777,7 +1774,6 @@ static int
 ppc_linux_remove_mask_watchpoint (struct target_ops *ops, CORE_ADDR addr,
 				  CORE_ADDR mask, int rw)
 {
-  ptid_t ptid;
   struct lwp_info *lp;
   struct ppc_hw_breakpoint p;
 
@@ -1791,8 +1787,8 @@ ppc_linux_remove_mask_watchpoint (struct target_ops *ops, CORE_ADDR addr,
   p.addr2 = mask;
   p.condition_value = 0;
 
-  ALL_LWPS (lp, ptid)
-    booke_remove_point (&p, TIDGET (ptid));
+  ALL_LWPS (lp)
+    booke_remove_point (&p, TIDGET (lp->ptid));
 
   return 0;
 }
@@ -2059,7 +2055,6 @@ ppc_linux_insert_watchpoint (CORE_ADDR addr, int len, int rw,
 			     struct expression *cond)
 {
   struct lwp_info *lp;
-  ptid_t ptid;
   int ret = -1;
 
   if (have_ptrace_booke_interface ())
@@ -2068,8 +2063,8 @@ ppc_linux_insert_watchpoint (CORE_ADDR addr, int len, int rw,
 
       create_watchpoint_request (&p, addr, len, rw, cond, 1);
 
-      ALL_LWPS (lp, ptid)
-	booke_insert_point (&p, TIDGET (ptid));
+      ALL_LWPS (lp)
+	booke_insert_point (&p, TIDGET (lp->ptid));
 
       ret = 0;
     }
@@ -2112,8 +2107,8 @@ ppc_linux_insert_watchpoint (CORE_ADDR addr, int len, int rw,
 
       saved_dabr_value = dabr_value;
 
-      ALL_LWPS (lp, ptid)
-	if (ptrace (PTRACE_SET_DEBUGREG, TIDGET (ptid), 0,
+      ALL_LWPS (lp)
+	if (ptrace (PTRACE_SET_DEBUGREG, TIDGET (lp->ptid), 0,
 		    saved_dabr_value) < 0)
 	  return -1;
 
@@ -2128,7 +2123,6 @@ ppc_linux_remove_watchpoint (CORE_ADDR addr, int len, int rw,
 			     struct expression *cond)
 {
   struct lwp_info *lp;
-  ptid_t ptid;
   int ret = -1;
 
   if (have_ptrace_booke_interface ())
@@ -2137,16 +2131,16 @@ ppc_linux_remove_watchpoint (CORE_ADDR addr, int len, int rw,
 
       create_watchpoint_request (&p, addr, len, rw, cond, 0);
 
-      ALL_LWPS (lp, ptid)
-	booke_remove_point (&p, TIDGET (ptid));
+      ALL_LWPS (lp)
+	booke_remove_point (&p, TIDGET (lp->ptid));
 
       ret = 0;
     }
   else
     {
       saved_dabr_value = 0;
-      ALL_LWPS (lp, ptid)
-	if (ptrace (PTRACE_SET_DEBUGREG, TIDGET (ptid), 0,
+      ALL_LWPS (lp)
+	if (ptrace (PTRACE_SET_DEBUGREG, TIDGET (lp->ptid), 0,
 		    saved_dabr_value) < 0)
 	  return -1;
 

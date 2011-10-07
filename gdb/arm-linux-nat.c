@@ -1075,7 +1075,6 @@ static int
 arm_linux_insert_hw_breakpoint (struct gdbarch *gdbarch, 
 				struct bp_target_info *bp_tgt)
 {
-  ptid_t ptid;
   struct lwp_info *lp;
   struct arm_linux_hw_breakpoint p;
 
@@ -1083,8 +1082,8 @@ arm_linux_insert_hw_breakpoint (struct gdbarch *gdbarch,
     return -1;
 
   arm_linux_hw_breakpoint_initialize (gdbarch, bp_tgt, &p);
-  ALL_LWPS (lp, ptid)
-    arm_linux_insert_hw_breakpoint1 (&p, TIDGET (ptid), 0);
+  ALL_LWPS (lp)
+    arm_linux_insert_hw_breakpoint1 (&p, TIDGET (lp->ptid), 0);
 
   return 0;
 }
@@ -1094,7 +1093,6 @@ static int
 arm_linux_remove_hw_breakpoint (struct gdbarch *gdbarch, 
 				struct bp_target_info *bp_tgt)
 {
-  ptid_t ptid;
   struct lwp_info *lp;
   struct arm_linux_hw_breakpoint p;
 
@@ -1102,8 +1100,8 @@ arm_linux_remove_hw_breakpoint (struct gdbarch *gdbarch,
     return -1;
 
   arm_linux_hw_breakpoint_initialize (gdbarch, bp_tgt, &p);
-  ALL_LWPS (lp, ptid)
-    arm_linux_remove_hw_breakpoint1 (&p, TIDGET (ptid), 0);
+  ALL_LWPS (lp)
+    arm_linux_remove_hw_breakpoint1 (&p, TIDGET (lp->ptid), 0);
 
   return 0;
 }
@@ -1146,7 +1144,6 @@ static int
 arm_linux_insert_watchpoint (CORE_ADDR addr, int len, int rw,
 			     struct expression *cond)
 {
-  ptid_t ptid;
   struct lwp_info *lp;
   struct arm_linux_hw_breakpoint p;
 
@@ -1154,8 +1151,8 @@ arm_linux_insert_watchpoint (CORE_ADDR addr, int len, int rw,
     return -1;
 
   arm_linux_hw_watchpoint_initialize (addr, len, rw, &p);
-  ALL_LWPS (lp, ptid)
-    arm_linux_insert_hw_breakpoint1 (&p, TIDGET (ptid), 1);
+  ALL_LWPS (lp)
+    arm_linux_insert_hw_breakpoint1 (&p, TIDGET (lp->ptid), 1);
 
   return 0;
 }
@@ -1165,7 +1162,6 @@ static int
 arm_linux_remove_watchpoint (CORE_ADDR addr, int len, int rw,
 			     struct expression *cond)
 {
-  ptid_t ptid;
   struct lwp_info *lp;
   struct arm_linux_hw_breakpoint p;
 
@@ -1173,8 +1169,8 @@ arm_linux_remove_watchpoint (CORE_ADDR addr, int len, int rw,
     return -1;
 
   arm_linux_hw_watchpoint_initialize (addr, len, rw, &p);
-  ALL_LWPS (lp, ptid)
-    arm_linux_remove_hw_breakpoint1 (&p, TIDGET (ptid), 1);
+  ALL_LWPS (lp)
+    arm_linux_remove_hw_breakpoint1 (&p, TIDGET (lp->ptid), 1);
 
   return 0;
 }

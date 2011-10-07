@@ -1,3 +1,24 @@
+2011-10-07  Pedro Alves  <pedro@codesourcery.com>
+
+	* linux-nat.h (ALL_LWPS): Remove the ptid parameter.
+	* amd64-linux-nat.c (amd64_linux_dr_set_control)
+	(amd64_linux_dr_set_addr, amd64_linux_dr_unset_status): Adjust.
+	* arm-linux-nat.c (arm_linux_insert_hw_breakpoint)
+	(arm_linux_remove_hw_breakpoint, arm_linux_insert_watchpoint)
+	(arm_linux_remove_watchpoint): Adjust.
+	* i386-linux-nat.c (i386_linux_dr_set_control)
+	(i386_linux_dr_set_addr, i386_linux_dr_unset_status): Adjust.
+	* ia64-linux-nat.c (ia64_linux_insert_watchpoint)
+	(ia64_linux_remove_watchpoint): Adjust.
+	* mips-linux-nat.c (write_watchpoint_regs): Adjust.
+	* ppc-linux-nat.c (ppc_linux_insert_hw_breakpoint)
+	(ppc_linux_insert_hw_breakpoint, ppc_linux_remove_hw_breakpoint)
+	(ppc_linux_insert_mask_watchpoint)
+	(ppc_linux_remove_mask_watchpoint, ppc_linux_insert_watchpoint)
+	(ppc_linux_remove_watchpoint): Adjust.
+	* s390-nat.c (s390_insert_watchpoint, s390_remove_watchpoint):
+	Adjust.
+
 2011-10-07  Corinna Vinschen  <vinschen@redhat.com>
 
 	* windows-nat.c: Include wchar.h to avoid compiler warnings.

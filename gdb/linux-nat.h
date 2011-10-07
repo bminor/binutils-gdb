@@ -118,12 +118,11 @@ struct lwp_info
    native target is active.  */
 extern struct lwp_info *lwp_list;
 
-/* Iterate over the PTID each active thread (light-weight process).  There
-   must be at least one.  */
-#define ALL_LWPS(LP, PTID)						\
-  for ((LP) = lwp_list, (PTID) = (LP)->ptid;				\
+/* Iterate over each active thread (light-weight process).  */
+#define ALL_LWPS(LP)							\
+  for ((LP) = lwp_list;							\
        (LP) != NULL;							\
-       (LP) = (LP)->next, (PTID) = (LP) ? (LP)->ptid : (PTID))
+       (LP) = (LP)->next)
 
 #define GET_LWP(ptid)		ptid_get_lwp (ptid)
 #define GET_PID(ptid)		ptid_get_pid (ptid)

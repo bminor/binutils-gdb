@@ -339,7 +339,6 @@ s390_insert_watchpoint (CORE_ADDR addr, int len, int type,
 			struct expression *cond)
 {
   struct lwp_info *lp;
-  ptid_t ptid;
   struct watch_area *area = xmalloc (sizeof (struct watch_area));
 
   if (!area)
@@ -351,8 +350,8 @@ s390_insert_watchpoint (CORE_ADDR addr, int len, int type,
   area->next = watch_base;
   watch_base = area;
 
-  ALL_LWPS (lp, ptid)
-    s390_fix_watch_points (ptid);
+  ALL_LWPS (lp)
+    s390_fix_watch_points (lp->ptid);
   return 0;
 }
 
@@ -361,7 +360,6 @@ s390_remove_watchpoint (CORE_ADDR addr, int len, int type,
 			struct expression *cond)
 {
   struct lwp_info *lp;
-  ptid_t ptid;
   struct watch_area *area, **parea;
 
   for (parea = &watch_base; *parea; parea = &(*parea)->next)
@@ -380,8 +378,8 @@ s390_remove_watchpoint (CORE_ADDR addr, int len, int type,
   *parea = area->next;
   xfree (area);
 
-  ALL_LWPS (lp, ptid)
-    s390_fix_watch_points (ptid);
+  ALL_LWPS (lp)
+    s390_fix_watch_points (lp->ptid);
   return 0;
 }
 

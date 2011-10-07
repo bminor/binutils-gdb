@@ -871,12 +871,11 @@ static int
 write_watchpoint_regs (void)
 {
   struct lwp_info *lp;
-  ptid_t ptid;
   int tid;
 
-  ALL_LWPS (lp, ptid)
+  ALL_LWPS (lp)
     {
-      tid = ptid_get_lwp (ptid);
+      tid = ptid_get_lwp (lp->ptid);
       if (ptrace (PTRACE_SET_WATCH_REGS, tid, &watch_mirror) == -1)
 	perror_with_name (_("Couldn't write debug register"));
     }
