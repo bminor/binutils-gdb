@@ -1,3 +1,20 @@
+2011-10-07  Phil Muldoon  <pmuldoon@redhat.com>
+
+	PR python/13624
+
+	* python/py-value.c (valpy_call): Check that arguments are
+	a tuple.
+        (is_intlike): Remove call to CHECK_TYPEDEF.
+	(valpy_nonzero): Catch GDB exceptions.
+	(valpy_absolute): Ditto.
+        (valpy_lazy_string): Ditto.
+        (valpy_call): Ditto.
+        (valpy_get_is_optimized_out): Ditto.
+        (valpy_long): Ditto.
+        (valpy_float): Ditto.
+        (valpy_int): Call CHECK_TYPEDEF.  Catch GDB exceptions.
+        (valpy_richcompare): Ditto.
+
 2011-10-07  Ulrich Weigand  <ulrich.weigand@linaro.org>
 
 	* inferior.h (disable_randomization): Declare.

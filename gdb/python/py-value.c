@@ -312,13 +312,18 @@ valpy_lazy_string (PyObject *self, PyObject *args, PyObject *kw)
   const char *user_encoding = NULL;
   static char *keywords[] = { "encoding", "length", NULL };
   PyObject *str_obj;
+  volatile struct gdb_exception except;
 
   if (!PyArg_ParseTupleAndKeywords (args, kw, "|s" GDB_PY_LL_ARG, keywords,
 				    &user_encoding, &length))
     return NULL;
 
-  if (TYPE_CODE (value_type (value)) == TYPE_CODE_PTR)
-    value = value_ind (value);
+  TRY_CATCH (except, RETURN_MASK_ALL)
+    {
+      if (TYPE_CODE (value_type (value)) == TYPE_CODE_PTR)
+	value = value_ind (value);
+    }
+  GDB_PY_HANDLE_EXCEPTION (except);
 
   str_obj = gdbpy_create_lazy_string_object (value_address (value), length,
 					     user_encoding,
@@ -510,12 +515,25 @@ valpy_call (PyObject *self, PyObject *args, PyObject *keywords)
   volatile struct gdb_exception except;
   struct value *function = ((value_object *) self)->value;
   struct value **vargs = NULL;
-  struct type *ftype = check_typedef (value_type (function));
+  struct type *ftype;
+
+  TRY_CATCH (except, RETURN_MASK_ALL)
+    {
+      ftype = check_typedef (value_type (function));
+    }
+  GDB_PY_HANDLE_EXCEPTION (except);
 
   if (TYPE_CODE (ftype) != TYPE_CODE_FUNC)
     {
       PyErr_SetString (PyExc_RuntimeError,
 		       _("Value is not callable (not TYPE_CODE_FUNC)."));
+      return NULL;
+    }
+
+  if (! PyTuple_Check (args))
+    {
+      PyErr_SetString (PyExc_TypeError,
+		       _("Inferior arguments must be provided in a tuple."));
       return NULL;
     }
 
@@ -584,8 +602,16 @@ static PyObject *
 valpy_get_is_optimized_out (PyObject *self, void *closure)
 {
   struct value *value = ((value_object *) self)->value;
+  int opt = 0;
+  volatile struct gdb_exception except;
 
-  if (value_optimized_out (value))
+  TRY_CATCH (except, RETURN_MASK_ALL)
+    {
+      opt = value_optimized_out (value);
+    }
+  GDB_PY_HANDLE_EXCEPTION (except);
+
+  if (opt)
     Py_RETURN_TRUE;
 
   Py_RETURN_FALSE;
@@ -792,33 +818,53 @@ static PyObject *
 valpy_absolute (PyObject *self)
 {
   struct value *value = ((value_object *) self)->value;
+  volatile struct gdb_exception except;
+  int isabs = 1;
 
-  if (value_less (value, value_zero (value_type (value), not_lval)))
-    return valpy_negative (self);
-  else
+  TRY_CATCH (except, RETURN_MASK_ALL)
+    {
+      if (value_less (value, value_zero (value_type (value), not_lval)))
+	isabs = 0;
+    }
+  GDB_PY_HANDLE_EXCEPTION (except);
+
+  if (isabs)
     return valpy_positive (self);
+  else
+    return valpy_negative (self);
 }
 
 /* Implements boolean evaluation of gdb.Value.  */
 static int
 valpy_nonzero (PyObject *self)
 {
+  volatile struct gdb_exception except;
   value_object *self_value = (value_object *) self;
   struct type *type;
+  int nonzero = 0; /* Appease GCC warning.  */
 
   type = check_typedef (value_type (self_value->value));
 
-  if (is_integral_type (type) || TYPE_CODE (type) == TYPE_CODE_PTR)
-    return !!value_as_long (self_value->value);
-  else if (TYPE_CODE (type) == TYPE_CODE_FLT)
-    return value_as_double (self_value->value) != 0;
-  else if (TYPE_CODE (type) == TYPE_CODE_DECFLOAT)
-    return !decimal_is_zero (value_contents (self_value->value),
-			     TYPE_LENGTH (type),
-			     gdbarch_byte_order (get_type_arch (type)));
-  else
-    /* All other values are True.  */
-    return 1;
+  TRY_CATCH (except, RETURN_MASK_ALL)
+    {
+      if (is_integral_type (type) || TYPE_CODE (type) == TYPE_CODE_PTR)
+	nonzero = !!value_as_long (self_value->value);
+      else if (TYPE_CODE (type) == TYPE_CODE_FLT)
+	nonzero = value_as_double (self_value->value) != 0;
+      else if (TYPE_CODE (type) == TYPE_CODE_DECFLOAT)
+	nonzero = !decimal_is_zero (value_contents (self_value->value),
+				 TYPE_LENGTH (type),
+				 gdbarch_byte_order (get_type_arch (type)));
+      else
+	/* All other values are True.  */
+	nonzero = 1;
+    }
+  /* This is not documented in the Python documentation, but if this
+     function fails, return -1 as slot_nb_nonzero does (the default
+     Python nonzero function).  */
+  GDB_PY_SET_HANDLE_EXCEPTION (except);
+
+  return nonzero;
 }
 
 /* Implements ~ for value objects.  */
@@ -954,7 +1000,6 @@ valpy_richcompare (PyObject *self, PyObject *other, int op)
 static int
 is_intlike (struct type *type, int ptr_ok)
 {
-  CHECK_TYPEDEF (type);
   return (TYPE_CODE (type) == TYPE_CODE_INT
 	  || TYPE_CODE (type) == TYPE_CODE_ENUM
 	  || TYPE_CODE (type) == TYPE_CODE_BOOL
@@ -971,16 +1016,12 @@ valpy_int (PyObject *self)
   LONGEST l = 0;
   volatile struct gdb_exception except;
 
-  CHECK_TYPEDEF (type);
-  if (!is_intlike (type, 0))
-    {
-      PyErr_SetString (PyExc_RuntimeError, 
-		       _("Cannot convert value to int."));
-      return NULL;
-    }
-
   TRY_CATCH (except, RETURN_MASK_ALL)
     {
+      CHECK_TYPEDEF (type);
+      if (!is_intlike (type, 0))
+	error (_("Cannot convert value to int."));
+
       l = value_as_long (value);
     }
   GDB_PY_HANDLE_EXCEPTION (except);
@@ -997,15 +1038,13 @@ valpy_long (PyObject *self)
   LONGEST l = 0;
   volatile struct gdb_exception except;
 
-  if (!is_intlike (type, 1))
-    {
-      PyErr_SetString (PyExc_RuntimeError, 
-		       _("Cannot convert value to long."));
-      return NULL;
-    }
-
   TRY_CATCH (except, RETURN_MASK_ALL)
     {
+      CHECK_TYPEDEF (type);
+
+      if (!is_intlike (type, 1))
+	error (_("Cannot convert value to long."));
+
       l = value_as_long (value);
     }
   GDB_PY_HANDLE_EXCEPTION (except);
@@ -1022,16 +1061,13 @@ valpy_float (PyObject *self)
   double d = 0;
   volatile struct gdb_exception except;
 
-  CHECK_TYPEDEF (type);
-  if (TYPE_CODE (type) != TYPE_CODE_FLT)
-    {
-      PyErr_SetString (PyExc_RuntimeError, 
-		       _("Cannot convert value to float."));
-      return NULL;
-    }
-
   TRY_CATCH (except, RETURN_MASK_ALL)
     {
+      CHECK_TYPEDEF (type);
+
+      if (TYPE_CODE (type) != TYPE_CODE_FLT)
+	error (_("Cannot convert value to float."));
+
       d = value_as_double (value);
     }
   GDB_PY_HANDLE_EXCEPTION (except);
