@@ -515,7 +515,7 @@ valpy_call (PyObject *self, PyObject *args, PyObject *keywords)
   volatile struct gdb_exception except;
   struct value *function = ((value_object *) self)->value;
   struct value **vargs = NULL;
-  struct type *ftype;
+  struct type *ftype = NULL;
 
   TRY_CATCH (except, RETURN_MASK_ALL)
     {

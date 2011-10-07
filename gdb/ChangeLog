@@ -1,3 +1,8 @@
+2011-10-07  Doug Evans  <dje@google.com>
+
+	* python/py-value.c (valpy_call): Initialize ftype to avoid compiler
+	warning.
+
 2011-10-07  Pedro Alves  <pedro@codesourcery.com>
 
 	* linux-nat.h (ALL_LWPS): Remove the ptid parameter.
