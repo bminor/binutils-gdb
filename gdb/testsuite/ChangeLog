@@ -1,3 +1,8 @@
+2011-10-06  Joseph Myers  <joseph@codesourcery.com>
+
+	* gdb.base/fixsection.exp: Do not include directories in filename
+	in expected message.
+
 2011-10-05  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	Add tests for passing of environment variables to inferior.

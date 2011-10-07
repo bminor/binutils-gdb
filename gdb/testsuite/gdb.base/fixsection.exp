@@ -60,7 +60,7 @@ if ![runto_main] then {
 # set breakpoint at static function static_fun
 #
 gdb_test "break static_fun" \
-    "Breakpoint.*at.* file .*${srcfile}, line.*" \
+    "Breakpoint.*at.* file .*${testfile}\\.c, line.*" \
     "breakpoint at static_fun"
 
 #
