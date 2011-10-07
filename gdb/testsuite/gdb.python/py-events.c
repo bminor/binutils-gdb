@@ -16,6 +16,8 @@
    along with this program.  If not, see  <http://www.gnu.org/licenses/>.
 */
 
+extern void do_nothing (void);
+
 int second(){
   fork() ;
   return 12;
@@ -26,5 +28,6 @@ int first(){
 }
 
 int main (){
+  do_nothing();
   return first();
 }

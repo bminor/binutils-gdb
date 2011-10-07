@@ -58,6 +58,9 @@ gdbpy_initialize_py_events (void)
   if (add_new_registry (&gdb_py_events.exited, "exited") < 0)
     goto fail;
 
+  if (add_new_registry (&gdb_py_events.new_objfile, "new_objfile") < 0)
+    goto fail;
+
   Py_INCREF (gdb_py_events.module);
   if (PyModule_AddObject (gdb_module,
                           "events",

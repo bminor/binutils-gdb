@@ -111,6 +111,7 @@ extern int evpy_emit_event (PyObject *event,
 
 extern PyObject *create_event_object (PyTypeObject *py_type);
 extern PyObject *create_thread_event_object (PyTypeObject *py_type);
+extern int emit_new_objfile_event (struct objfile *objfile);
 
 extern void evpy_dealloc (PyObject *self);
 extern int evpy_add_attribute (PyObject *event,

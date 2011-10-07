@@ -214,6 +214,7 @@ void gdbpy_initialize_breakpoint_event (void);
 void gdbpy_initialize_continue_event (void);
 void gdbpy_initialize_exited_event (void);
 void gdbpy_initialize_thread_event (void);
+void gdbpy_initialize_new_objfile_event (void);
 
 struct cleanup *make_cleanup_py_decref (PyObject *py);
 

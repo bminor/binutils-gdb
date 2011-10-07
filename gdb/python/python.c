@@ -1257,6 +1257,7 @@ Enables or disables printing of Python stack traces."),
   gdbpy_initialize_continue_event ();
   gdbpy_initialize_exited_event ();
   gdbpy_initialize_thread_event ();
+  gdbpy_initialize_new_objfile_event () ;
 
   observer_attach_before_prompt (before_prompt_hook);
 

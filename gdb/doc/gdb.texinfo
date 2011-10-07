@@ -22358,6 +22358,17 @@ in favor of the @code{gdb.BreakpointEvent.breakpoints} attribute.
 @end defvar
 @end table
 
+@item events.new_objfile
+Emits @code{gdb.NewObjFileEvent} which indicates that a new object file has
+been loaded by @value{GDBN}.  @code{gdb.NewObjFileEvent} has one attribute:
+
+@table @code
+@defvar NewObjFileEvent.new_objfile
+A reference to the object file (@code{gdb.Objfile}) which has been loaded.
+@xref{Objfiles In Python}, for details of the @code{gdb.Objfile} object.
+@end defvar
+@end table
+
 @end table
 
 @node Threads In Python

@@ -19,23 +19,39 @@ if $tracelevel then {
 
 load_lib gdb-python.exp
 
+set libfile "py-events-shlib"
+set libsrc  $srcdir/$subdir/$libfile.c
+set lib_sl  $objdir/$subdir/$libfile.so
+set lib_opts  debug
+
 set testfile "py-events"
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
+set exec_opts [list debug shlib=$lib_sl]
 set pyfile ${srcdir}/${subdir}/${testfile}.py
 
-if { [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile}] } {
+if [get_compiler_info ${binfile}] {
     return -1
 }
+
+if { [gdb_compile_shlib $libsrc $lib_sl $lib_opts] != ""
+     || [gdb_compile $srcdir/$subdir/$srcfile $binfile executable $exec_opts] != ""} {
+    untested "Could not compile either $libsrc or $srcdir/$subdir/$srcfile."
+    return -1
+}
+
+# Start with a fresh gdb.
+clean_restart ${testfile}
 
 if { [skip_python_tests] } { continue }
 
 gdb_test_no_output "python execfile ('${pyfile}')" ""
 
-if ![runto_main ] then {
-    fail "Can't run to main"
-    return -1
-}
+gdb_test "Test_Newobj_Events" "New ObjectFile Event tester registered." "Register new objfile event handler"
+
+gdb_breakpoint "main" {temporary}
+
+gdb_test "run" ".*event type: new_objfile.*new objfile name.*" "New objfile notification"
 
 gdb_test_no_output "set detach-on-fork off" ""
 

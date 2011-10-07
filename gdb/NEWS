@@ -46,6 +46,9 @@
      For example, "some_type['myfield']" now works, as does
      "some_type.items()".
 
+  ** A new event "gdb.new_objfile" has been added, triggered by loading a
+     new object file.
+
 * libthread-db-search-path now supports two special values: $sdir and $pdir.
   $sdir specifies the default system locations of shared libraries.
   $pdir specifies the directory where the libpthread used by the application
