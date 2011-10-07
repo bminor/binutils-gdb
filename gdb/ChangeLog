@@ -29,8 +29,7 @@
 
 2011-10-07  Phil Muldoon  <pmuldoon@redhat.com>
 
-	PR python/13624
-
+	PR python/13264
 	* python/py-value.c (valpy_call): Check that arguments are
 	a tuple.
         (is_intlike): Remove call to CHECK_TYPEDEF.
