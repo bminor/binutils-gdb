@@ -1,3 +1,8 @@
+2011-10-08  Alan Modra  <amodra@gmail.com>
+
+	* elflink.c (elf_link_output_extsym): Strip defined plugin symbols
+	even when strip_discarded is false.
+
 2011-10-05  Kai Tietz  <ktietz@redhat.com>
 
 	* coffgen.c (coff_write_alien_symbol): Don't write
