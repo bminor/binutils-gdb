@@ -26,12 +26,12 @@ class PrettyPrinter(object):
 
     Attributes:
         name: A unique string among all printers for the context in which
-              it is defined (objfile, progspace, or global(gdb)), and should
-              meaningfully describe what can be pretty-printed.
-              E.g., "StringPiece" or "protobufs".
+            it is defined (objfile, progspace, or global(gdb)), and should
+            meaningfully describe what can be pretty-printed.
+            E.g., "StringPiece" or "protobufs".
         subprinters: An iterable object with each element having a `name'
-                     attribute, and, potentially, "enabled" attribute.
-                     Or this is None if there are no subprinters.
+            attribute, and, potentially, "enabled" attribute.
+            Or this is None if there are no subprinters.
         enabled: A boolean indicating if the printer is enabled.
 
     Subprinters are for situations where "one" pretty-printer is actually a
@@ -72,13 +72,15 @@ def register_pretty_printer(obj, printer):
     """Register pretty-printer PRINTER with OBJ.
 
     The printer is added to the front of the search list, thus one can override
-    an existing printer if one needs to.
+    an existing printer if one needs to.  Use a different name when overriding
+    an existing printer, otherwise an exception will be raised; multiple
+    printers with the same name are disallowed.
 
     Arguments:
         obj: Either an objfile, progspace, or None (in which case the printer
-             is registered globally).
+            is registered globally).
         printer: Either a function of one argument (old way) or any object
-                 which has attributes: name, enabled, __call__.
+            which has attributes: name, enabled, __call__.
 
     Returns:
         Nothing.
@@ -165,7 +167,7 @@ class RegexpCollectionPrettyPrinter(PrettyPrinter):
             name: The name of the subprinter.
             regexp: The regular expression, as a string.
             gen_printer: A function/method that given a value returns an
-                         object to pretty-print it.
+                object to pretty-print it.
 
         Returns:
             Nothing.
