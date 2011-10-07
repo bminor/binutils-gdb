@@ -1,3 +1,11 @@
+2011-10-07  Kevin Pouget  <kevin.pouget@st.com>
+
+	Allow Python notification of new object-file loadings.
+	* gdb.python/py-events.exp: Test newobjfile event.
+	* gdb.python/py-events.py: Register newobjfile callback.
+	* gdb.python/py-events.c: Add call to shared library
+	* gdb.python/py-events-shlib.c: New file.
+
 2011-10-06  Joseph Myers  <joseph@codesourcery.com>
 
 	* gdb.base/fixsection.exp: Do not include directories in filename

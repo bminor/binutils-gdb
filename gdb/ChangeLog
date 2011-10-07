@@ -19,20 +19,6 @@
 	gdbpy_initialize_new_objfile_event call.
 	* NEWS: Add item for new Python event "gdb.newobjfile"
 
-2011-10-07  Kevin Pouget  <kevin.pouget@st.com>
-
-	Allow Python notification of new object-file loadings.
-	* gdb.texinfo (Events In Python): Document `gdb.NewObjFileEvent'
-	event type.
-
-2011-10-07  Kevin Pouget  <kevin.pouget@st.com>
-
-	Allow Python notification of new object-file loadings.
-	* gdb.python/py-events.exp: Test newobjfile event.
-	* gdb.python/py-events.py: Register newobjfile callback.
-	* gdb.python/py-events.c: Add call to shared library
-	* gdb.python/py-events-shlib.c: New file.
-
 2011-10-05  Tristan Gingold  <gingold@adacore.com>
 
 	* ada-tasks.c (read_atcb): Make ravenscar_task_name static.
