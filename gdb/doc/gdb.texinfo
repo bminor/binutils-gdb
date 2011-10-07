@@ -23567,6 +23567,12 @@ methods have a chance to execute at that location.  In this scenario
 if one of the methods returns @code{True} but the others return
 @code{False}, the inferior will still be stopped.
 
+You should not alter the execution state of the inferior (i.e.@:, step,
+next, etc.), alter the current frame context (i.e.@:, change the current
+active frame), or alter, add or delete any breakpoint.  As a general
+rule, you should not alter any data within @value{GDBN} or the inferior
+at this time.
+
 Example @code{stop} implementation:
 
 @smallexample

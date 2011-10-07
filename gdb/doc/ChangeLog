@@ -1,3 +1,11 @@
+2011-10-07  Phil Muldoon  <pmuldoon@redhat.com>
+
+	PR python/12930
+	PR python/12802
+
+	* gdb.texinfo (Breakpoints In Python): Clarify behavior in the
+	stop method.
+
 2011-10-07  Ulrich Weigand  <ulrich.weigand@linaro.org>
 
 	* gdb.texinfo (Starting your Program): "set disable-randomization"
