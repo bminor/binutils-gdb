@@ -1,3 +1,11 @@
+2011-10-07  Corinna Vinschen  <vinschen@redhat.com>
+
+	* windows-nat.c: Include wchar.h to avoid compiler warnings.
+	(clear_win32_environment): New function for Cygwin to clear out
+	Win32 environment.
+	(windows_create_inferior): Prepare new environment from in_env
+	for Cygwin, too.
+
 2011-10-07  Phil Muldoon  <pmuldoon@redhat.com>
 
 	PR python/13624

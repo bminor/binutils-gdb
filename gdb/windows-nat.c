@@ -40,7 +40,9 @@
 #include <imagehlp.h>
 #include <psapi.h>
 #ifdef __CYGWIN__
+#include <wchar.h>
 #include <sys/cygwin.h>
+#include <cygwin/version.h>
 #endif
 #include <signal.h>
 
@@ -1963,6 +1965,28 @@ envvar_cmp (const void *a, const void *b)
 }
 #endif
 
+#ifdef __CYGWIN__
+static void
+clear_win32_environment (char **env)
+{
+  int i;
+  size_t len;
+  wchar_t *copy = NULL, *equalpos;
+
+  for (i = 0; env[i] && *env[i]; i++)
+    {
+      len = mbstowcs (NULL, env[i], 0) + 1;
+      copy = (wchar_t *) xrealloc (copy, len * sizeof (wchar_t));
+      mbstowcs (copy, env[i], len);
+      equalpos = wcschr (copy, L'=');
+      if (equalpos)
+        *equalpos = L'\0';
+      SetEnvironmentVariableW (copy, NULL);
+    }
+  xfree (copy);
+}
+#endif
+
 /* Start an inferior windows child process and sets inferior_ptid to its pid.
    EXEC_FILE is the file to run.
    ALLARGS is a string containing the arguments to the program.
@@ -1980,6 +2004,8 @@ windows_create_inferior (struct target_ops *ops, char *exec_file,
   cygwin_buf_t *toexec;
   cygwin_buf_t *cygallargs;
   cygwin_buf_t *args;
+  char **old_env = NULL;
+  PWCHAR w32_env;
   size_t len;
   int tty;
   int ostdin, ostdout, ostderr;
@@ -2066,8 +2092,23 @@ windows_create_inferior (struct target_ops *ops, char *exec_file,
   strcat (args, cygallargs);
 #endif
 
-  /* Prepare the environment vars for CreateProcess.  */
-  cygwin_internal (CW_SYNC_WINENV);
+#ifdef CW_CVT_ENV_TO_WINENV
+  /* First try to create a direct Win32 copy of the POSIX environment. */
+  w32_env = (PWCHAR) cygwin_internal (CW_CVT_ENV_TO_WINENV, in_env);
+  if (w32_env != (PWCHAR) -1)
+    flags |= CREATE_UNICODE_ENVIRONMENT;
+  else
+    /* If that fails, fall back to old method tweaking GDB's environment. */
+#endif
+    {
+      /* Reset all Win32 environment variables to avoid leftover on next run. */
+      clear_win32_environment (environ);
+      /* Prepare the environment vars for CreateProcess.  */
+      old_env = environ;
+      environ = in_env;
+      cygwin_internal (CW_SYNC_WINENV);
+      w32_env = NULL;
+    }
 
   if (!inferior_io_terminal)
     tty = ostdin = ostdout = ostderr = -1;
@@ -2097,10 +2138,22 @@ windows_create_inferior (struct target_ops *ops, char *exec_file,
 		       NULL,	/* thread */
 		       TRUE,	/* inherit handles */
 		       flags,	/* start flags */
-		       NULL,	/* environment */
+		       w32_env,	/* environment */
 		       NULL,	/* current directory */
 		       &si,
 		       &pi);
+  if (w32_env)
+    /* Just free the Win32 environment, if it could be created. */
+    free (w32_env);
+  else
+    {
+      /* Reset all environment variables to avoid leftover on next run. */
+      clear_win32_environment (in_env);
+      /* Restore normal GDB environment variables.  */
+      environ = old_env;
+      cygwin_internal (CW_SYNC_WINENV);
+    }
+
   if (tty >= 0)
     {
       close (tty);
