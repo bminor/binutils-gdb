@@ -1,3 +1,8 @@
+2011-10-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-elf/elf.exp: Run --gc-sections tests only if --gc-sections
+	is available.
+
 2011-10-06  Alan Modra  <amodra@gmail.com>
 
 	* ld-plugin/plugin-1.d, * ld-plugin/plugin-2.d, * ld-plugin/plugin-3.d,

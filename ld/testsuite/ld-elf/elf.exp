@@ -138,9 +138,11 @@ if ![isnative] {
     return
 }
 
-run_cc_link_tests {
-    {"PR ld/13195" "-Wl,--gc-sections" ""
-     {pr13195.c} {} "pr13195"}
+if [check_gc_sections_available] {
+    run_cc_link_tests {
+	{"PR ld/13195" "-Wl,--gc-sections" ""
+	 {pr13195.c} {} "pr13195"}
+    }
 }
 
 set array_tests {
