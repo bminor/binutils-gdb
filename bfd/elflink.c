@@ -4515,6 +4515,8 @@ error_free_dyn:
 	{
 	  struct bfd_hash_entry *p;
 	  struct elf_link_hash_entry *h;
+	  bfd_size_type size;
+	  unsigned int alignment_power;
 
 	  for (p = htab->root.table.table[i]; p != NULL; p = p->next)
 	    {
@@ -4524,6 +4526,20 @@ error_free_dyn:
 	      if (h->dynindx >= old_dynsymcount)
 		_bfd_elf_strtab_delref (htab->dynstr, h->dynstr_index);
 
+	      /* Preserve the maximum alignment and size for common
+		 symbols even if this dynamic lib isn't on DT_NEEDED
+		 since it can still be loaded at the run-time by another
+		 dynamic lib.  */
+	      if (h->root.type == bfd_link_hash_common)
+		{
+		  size = h->root.u.c.size;
+		  alignment_power = h->root.u.c.p->alignment_power;
+		}
+	      else
+		{
+		  size = 0;
+		  alignment_power = 0;
+		}
 	      memcpy (p, old_ent, htab->root.table.entsize);
 	      old_ent = (char *) old_ent + htab->root.table.entsize;
 	      h = (struct elf_link_hash_entry *) p;
@@ -4531,6 +4547,13 @@ error_free_dyn:
 		{
 		  memcpy (h->root.u.i.link, old_ent, htab->root.table.entsize);
 		  old_ent = (char *) old_ent + htab->root.table.entsize;
+		}
+	      else if (h->root.type == bfd_link_hash_common)
+		{
+		  if (size > h->root.u.c.size)
+		    h->root.u.c.size = size;
+		  if (alignment_power > h->root.u.c.p->alignment_power)
+		    h->root.u.c.p->alignment_power = alignment_power;
 		}
 	    }
 	}

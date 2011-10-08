@@ -1,3 +1,13 @@
+2011-10-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/13250
+	* ld-elf/shared.exp (build_tests): Add tests for PR ld/13250.
+	(run_tests): Likewise.
+
+	* ld-elf/pr13250-1.c: New.
+	* ld-elf/pr13250-2.c: Likewise.
+	* ld-elf/pr13250-3.c: Likewise.
+
 2011-10-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-elf/elf.exp: Run --gc-sections tests only if --gc-sections
