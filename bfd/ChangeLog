@@ -1,5 +1,13 @@
 2011-10-08  Alan Modra  <amodra@gmail.com>
 
+	PR ld/13229
+	PR ld/13244
+	* elflink.c (elf_link_add_object_symbols): Don't make IR symbols
+	dynamic.
+
+2011-10-08  Alan Modra  <amodra@gmail.com>
+
+	PR ld/13229
 	* elflink.c (elf_link_output_extsym): Strip defined plugin symbols
 	even when strip_discarded is false.
 
