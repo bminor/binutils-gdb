@@ -91,6 +91,29 @@ amb_a (int i)
   amb_b (i + 1);
 }
 
+static void __attribute__((noinline, noclone)) self (int i);
+
+static void __attribute__((noinline, noclone))
+self2 (int i)
+{
+  self (i);
+}
+
+static void __attribute__((noinline, noclone))
+self (int i)
+{
+  if (i == 200)
+    {
+      /* GCC would inline `self' as `cmovne' without the `self2' indirect.  */
+      self2 (i + 1);
+    }
+  else
+    {
+      e (v, v);
+      d (i + 2, i + 2.5);
+    }
+}
+
 int
 main ()
 {
@@ -100,5 +123,6 @@ main ()
   else
     b (5, 5.25);
   amb_a (100);
+  self (200);
   return 0;
 }

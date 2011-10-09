@@ -1,5 +1,13 @@
 2011-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Protect entry values against self tail calls.
+	* gdb.arch/amd64-entry-value.cc (self2, self): New.
+	(main): Call self.
+	* gdb.arch/amd64-entry-value.exp (self: breakhere, self: bt)
+	(set debug entry-values 1, self: bt debug entry-values): New tests.
+
+2011-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Recognize virtual tail call frames.
 	* gdb.arch/amd64-entry-value.cc (c, a, b, amb_z, amb_y, amb_x, amb)
 	(amb_b, amb_a): New.

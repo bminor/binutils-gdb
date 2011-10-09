@@ -73,3 +73,16 @@ gdb_continue_to_breakpoint "ambiguous: breakhere"
 
 gdb_test "bt" "^bt\r\n#0 +d \\(i=<optimized out>, j=<optimized out>\\)\[^\r\n\]*\r\n#1 +0x\[0-9a-f\]+ in amb_z \\(i=<optimized out>\\)\[^\r\n\]*\r\n#2 +0x\[0-9a-f\]+ in amb_y \\(i=<optimized out>\\)\[^\r\n\]*\r\n#3 +0x\[0-9a-f\]+ in amb_x \\(i=<optimized out>\\)\[^\r\n\]*\r\n#4 +0x\[0-9a-f\]+ in amb_b \\(i=101\\)\[^\r\n\]*\r\n#5 +0x\[0-9a-f\]+ in amb_a \\(i=100\\)\[^\r\n\]*\r\n#6 +0x\[0-9a-f\]+ in main \\(\\)\[^\r\n\]*" \
 	 "ambiguous: bt"
+
+
+# Test self tail calls verification.
+# GDB should not print the real value as it is ambiguous.
+
+gdb_continue_to_breakpoint "self: breakhere"
+
+gdb_test "bt" "^bt\r\n#0 +d \\(i=<optimized out>, j=<optimized out>\\)\[^\r\n\]*\r\n#1 +0x\[0-9a-f\]+ in self \\(i=<optimized out>\\)\[^\r\n\]*\r\n#2 +0x\[0-9a-f\]+ in main \\(\\)\[^\r\n\]*" \
+	 "self: bt"
+
+gdb_test_no_output "set debug entry-values 1"
+gdb_test "bt" "DW_OP_GNU_entry_value resolving has found function \"self\\(int\\)\" at 0x\[0-9a-f\]+ can call itself via tail calls\r\n.*" \
+	 "self: bt debug entry-values"

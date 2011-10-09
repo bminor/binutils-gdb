@@ -422,6 +422,87 @@ func_addr_to_tail_call_list (struct gdbarch *gdbarch, CORE_ADDR addr)
   return sym;
 }
 
+/* Define VEC (CORE_ADDR) functions.  */
+DEF_VEC_I (CORE_ADDR);
+
+/* Verify function with entry point exact address ADDR can never call itself
+   via its tail calls (incl. transitively).  Throw NO_ENTRY_VALUE_ERROR if it
+   can call itself via tail calls.
+
+   If a funtion can tail call itself its entry value based parameters are
+   unreliable.  There is no verification whether the value of some/all
+   parameters is unchanged through the self tail call, we expect if there is
+   a self tail call all the parameters can be modified.  */
+
+static void
+func_verify_no_selftailcall (struct gdbarch *gdbarch, CORE_ADDR verify_addr)
+{
+  struct obstack addr_obstack;
+  struct cleanup *old_chain;
+  CORE_ADDR addr;
+
+  /* Track here CORE_ADDRs which were already visited.  */
+  htab_t addr_hash;
+
+  /* The verification is completely unordered.  Track here function addresses
+     which still need to be iterated.  */
+  VEC (CORE_ADDR) *todo = NULL;
+
+  obstack_init (&addr_obstack);
+  old_chain = make_cleanup_obstack_free (&addr_obstack);   
+  addr_hash = htab_create_alloc_ex (64, core_addr_hash, core_addr_eq, NULL,
+				    &addr_obstack, hashtab_obstack_allocate,
+				    NULL);
+  make_cleanup_htab_delete (addr_hash);
+
+  make_cleanup (VEC_cleanup (CORE_ADDR), &todo);
+
+  VEC_safe_push (CORE_ADDR, todo, verify_addr);
+  while (!VEC_empty (CORE_ADDR, todo))
+    {
+      struct symbol *func_sym;
+      struct call_site *call_site;
+
+      addr = VEC_pop (CORE_ADDR, todo);
+
+      func_sym = func_addr_to_tail_call_list (gdbarch, addr);
+
+      for (call_site = TYPE_TAIL_CALL_LIST (SYMBOL_TYPE (func_sym));
+	   call_site; call_site = call_site->tail_call_next)
+	{
+	  CORE_ADDR target_addr;
+	  void **slot;
+
+	  /* CALLER_FRAME with registers is not available for tail-call jumped
+	     frames.  */
+	  target_addr = call_site_to_target_addr (gdbarch, call_site, NULL);
+
+	  if (target_addr == verify_addr)
+	    {
+	      struct minimal_symbol *msym;
+	      
+	      msym = lookup_minimal_symbol_by_pc (verify_addr);
+	      throw_error (NO_ENTRY_VALUE_ERROR,
+			   _("DW_OP_GNU_entry_value resolving has found "
+			     "function \"%s\" at %s can call itself via tail "
+			     "calls"),
+			   msym == NULL ? "???" : SYMBOL_PRINT_NAME (msym),
+			   paddress (gdbarch, verify_addr));
+	    }
+
+	  slot = htab_find_slot (addr_hash, &target_addr, INSERT);
+	  if (*slot == NULL)
+	    {
+	      *slot = obstack_copy (&addr_obstack, &target_addr,
+				    sizeof (target_addr));
+	      VEC_safe_push (CORE_ADDR, todo, target_addr);
+	    }
+	}
+    }
+
+  do_cleanups (old_chain);
+}
+
 /* Print user readable form of CALL_SITE->PC to gdb_stdlog.  Used only for
    ENTRY_VALUES_DEBUG.  */
 
@@ -779,6 +860,10 @@ dwarf_expr_reg_to_entry_parameter (struct frame_info *frame, int dwarf_reg,
 		   func_msym == NULL ? "???" : SYMBOL_PRINT_NAME (func_msym),
 		   paddress (gdbarch, func_addr));
     }
+
+  /* No entry value based parameters would be reliable if this function can
+     call itself via tail calls.  */
+  func_verify_no_selftailcall (gdbarch, func_addr);
 
   for (iparams = 0; iparams < call_site->parameter_count; iparams++)
     {

@@ -1,5 +1,11 @@
 2011-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Protect entry values against self tail calls.
+	* dwarf2loc.c (VEC (CORE_ADDR), func_verify_no_selftailcall): New.
+	(dwarf_expr_dwarf_reg_entry_value): Call func_verify_no_selftailcall.
+
+2011-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Recognize virtual tail call frames.
 	* Makefile.in (SFILES): Add dwarf2-frame-tailcall.c.
 	(HFILES_NO_SRCDIR): Add dwarf2-frame-tailcall.h.
