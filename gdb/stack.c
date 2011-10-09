@@ -1086,6 +1086,8 @@ frame_info (char *addr_exp, int from_tty)
 	printf_filtered (_(" Outermost frame: %s\n"),
 			 frame_stop_reason_string (reason));
     }
+  else if (get_frame_type (fi) == TAILCALL_FRAME)
+    puts_filtered (" tail call frame");
   else if (get_frame_type (fi) == INLINE_FRAME)
     printf_filtered (" inlined into frame %d",
 		     frame_relative_level (get_prev_frame (fi)));

@@ -399,6 +399,321 @@ call_site_to_target_addr (struct gdbarch *call_site_gdbarch,
     }
 }
 
+/* Convert function entry point exact address ADDR to the function which is
+   compliant with TAIL_CALL_LIST_COMPLETE condition.  Throw
+   NO_ENTRY_VALUE_ERROR otherwise.  */
+
+static struct symbol *
+func_addr_to_tail_call_list (struct gdbarch *gdbarch, CORE_ADDR addr)
+{
+  struct symbol *sym = find_pc_function (addr);
+  struct type *type;
+
+  if (sym == NULL || BLOCK_START (SYMBOL_BLOCK_VALUE (sym)) != addr)
+    throw_error (NO_ENTRY_VALUE_ERROR,
+		 _("DW_TAG_GNU_call_site resolving failed to find function "
+		   "name for address %s"),
+		 paddress (gdbarch, addr));
+
+  type = SYMBOL_TYPE (sym);
+  gdb_assert (TYPE_CODE (type) == TYPE_CODE_FUNC);
+  gdb_assert (TYPE_SPECIFIC_FIELD (type) == TYPE_SPECIFIC_FUNC);
+
+  return sym;
+}
+
+/* Print user readable form of CALL_SITE->PC to gdb_stdlog.  Used only for
+   ENTRY_VALUES_DEBUG.  */
+
+static void
+tailcall_dump (struct gdbarch *gdbarch, const struct call_site *call_site)
+{
+  CORE_ADDR addr = call_site->pc;
+  struct minimal_symbol *msym = lookup_minimal_symbol_by_pc (addr - 1);
+
+  fprintf_unfiltered (gdb_stdlog, " %s(%s)", paddress (gdbarch, addr),
+		      msym == NULL ? "???" : SYMBOL_PRINT_NAME (msym));
+
+}
+
+/* vec.h needs single word type name, typedef it.  */
+typedef struct call_site *call_sitep;
+
+/* Define VEC (call_sitep) functions.  */
+DEF_VEC_P (call_sitep);
+
+/* Intersect RESULTP with CHAIN to keep RESULTP unambiguous, keep in RESULTP
+   only top callers and bottom callees which are present in both.  GDBARCH is
+   used only for ENTRY_VALUES_DEBUG.  RESULTP is NULL after return if there are
+   no remaining possibilities to provide unambiguous non-trivial result.
+   RESULTP should point to NULL on the first (initialization) call.  Caller is
+   responsible for xfree of any RESULTP data.  */
+
+static void
+chain_candidate (struct gdbarch *gdbarch, struct call_site_chain **resultp,
+		 VEC (call_sitep) *chain)
+{
+  struct call_site_chain *result = *resultp;
+  long length = VEC_length (call_sitep, chain);
+  int callers, callees, idx;
+
+  if (result == NULL)
+    {
+      /* Create the initial chain containing all the passed PCs.  */
+
+      result = xmalloc (sizeof (*result) + sizeof (*result->call_site)
+					   * (length - 1));
+      result->length = length;
+      result->callers = result->callees = length;
+      memcpy (result->call_site, VEC_address (call_sitep, chain),
+	      sizeof (*result->call_site) * length);
+      *resultp = result;
+
+      if (entry_values_debug)
+	{
+	  fprintf_unfiltered (gdb_stdlog, "tailcall: initial:");
+	  for (idx = 0; idx < length; idx++)
+	    tailcall_dump (gdbarch, result->call_site[idx]);
+	  fputc_unfiltered ('\n', gdb_stdlog);
+	}
+
+      return;
+    }
+
+  if (entry_values_debug)
+    {
+      fprintf_unfiltered (gdb_stdlog, "tailcall: compare:");
+      for (idx = 0; idx < length; idx++)
+	tailcall_dump (gdbarch, VEC_index (call_sitep, chain, idx));
+      fputc_unfiltered ('\n', gdb_stdlog);
+    }
+
+  /* Intersect callers.  */
+
+  callers = min (result->callers, length);
+  for (idx = 0; idx < callers; idx++)
+    if (result->call_site[idx] != VEC_index (call_sitep, chain, idx))
+      {
+	result->callers = idx;
+	break;
+      }
+
+  /* Intersect callees.  */
+
+  callees = min (result->callees, length);
+  for (idx = 0; idx < callees; idx++)
+    if (result->call_site[result->length - 1 - idx]
+	!= VEC_index (call_sitep, chain, length - 1 - idx))
+      {
+	result->callees = idx;
+	break;
+      }
+
+  if (entry_values_debug)
+    {
+      fprintf_unfiltered (gdb_stdlog, "tailcall: reduced:");
+      for (idx = 0; idx < result->callers; idx++)
+	tailcall_dump (gdbarch, result->call_site[idx]);
+      fputs_unfiltered (" |", gdb_stdlog);
+      for (idx = 0; idx < result->callees; idx++)
+	tailcall_dump (gdbarch, result->call_site[result->length
+						  - result->callees + idx]);
+      fputc_unfiltered ('\n', gdb_stdlog);
+    }
+
+  if (result->callers == 0 && result->callees == 0)
+    {
+      /* There are no common callers or callees.  It could be also a direct
+	 call (which has length 0) with ambiguous possibility of an indirect
+	 call - CALLERS == CALLEES == 0 is valid during the first allocation
+	 but any subsequence processing of such entry means ambiguity.  */
+      xfree (result);
+      *resultp = NULL;
+      return;
+    }
+
+  /* See call_site_find_chain_1 why there is no way to reach the bottom callee
+     PC again.  In such case there must be two different code paths to reach
+     it, therefore some of the former determined intermediate PCs must differ
+     and the unambiguous chain gets shortened.  */
+  gdb_assert (result->callers + result->callees < result->length);
+}
+
+/* Create and return call_site_chain for CALLER_PC and CALLEE_PC.  All the
+   assumed frames between them use GDBARCH.  Use depth first search so we can
+   keep single CHAIN of call_site's back to CALLER_PC.  Function recursion
+   would have needless GDB stack overhead.  Caller is responsible for xfree of
+   the returned result.  Any unreliability results in thrown
+   NO_ENTRY_VALUE_ERROR.  */
+
+static struct call_site_chain *
+call_site_find_chain_1 (struct gdbarch *gdbarch, CORE_ADDR caller_pc,
+			CORE_ADDR callee_pc)
+{
+  struct func_type *func_specific;
+  struct obstack addr_obstack;
+  struct cleanup *back_to_retval, *back_to_workdata;
+  struct call_site_chain *retval = NULL;
+  struct call_site *call_site;
+
+  /* Mark CALL_SITEs so we do not visit the same ones twice.  */
+  htab_t addr_hash;
+
+  /* CHAIN contains only the intermediate CALL_SITEs.  Neither CALLER_PC's
+     call_site nor any possible call_site at CALLEE_PC's function is there.
+     Any CALL_SITE in CHAIN will be iterated to its siblings - via
+     TAIL_CALL_NEXT.  This is inappropriate for CALLER_PC's call_site.  */
+  VEC (call_sitep) *chain = NULL;
+
+  /* We are not interested in the specific PC inside the callee function.  */
+  callee_pc = get_pc_function_start (callee_pc);
+  if (callee_pc == 0)
+    throw_error (NO_ENTRY_VALUE_ERROR, _("Unable to find function for PC %s"),
+		 paddress (gdbarch, callee_pc));
+
+  back_to_retval = make_cleanup (free_current_contents, &retval);
+
+  obstack_init (&addr_obstack);
+  back_to_workdata = make_cleanup_obstack_free (&addr_obstack);   
+  addr_hash = htab_create_alloc_ex (64, core_addr_hash, core_addr_eq, NULL,
+				    &addr_obstack, hashtab_obstack_allocate,
+				    NULL);
+  make_cleanup_htab_delete (addr_hash);
+
+  make_cleanup (VEC_cleanup (call_sitep), &chain);
+
+  /* Do not push CALL_SITE to CHAIN.  Push there only the first tail call site
+     at the target's function.  All the possible tail call sites in the
+     target's function will get iterated as already pushed into CHAIN via their
+     TAIL_CALL_NEXT.  */
+  call_site = call_site_for_pc (gdbarch, caller_pc);
+
+  while (call_site)
+    {
+      CORE_ADDR target_func_addr;
+      struct call_site *target_call_site;
+
+      /* CALLER_FRAME with registers is not available for tail-call jumped
+	 frames.  */
+      target_func_addr = call_site_to_target_addr (gdbarch, call_site, NULL);
+
+      if (target_func_addr == callee_pc)
+	{
+	  chain_candidate (gdbarch, &retval, chain);
+	  if (retval == NULL)
+	    break;
+
+	  /* There is no way to reach CALLEE_PC again as we would prevent
+	     entering it twice as being already marked in ADDR_HASH.  */
+	  target_call_site = NULL;
+	}
+      else
+	{
+	  struct symbol *target_func;
+
+	  target_func = func_addr_to_tail_call_list (gdbarch, target_func_addr);
+	  target_call_site = TYPE_TAIL_CALL_LIST (SYMBOL_TYPE (target_func));
+	}
+
+      do
+	{
+	  /* Attempt to visit TARGET_CALL_SITE.  */
+
+	  if (target_call_site)
+	    {
+	      void **slot;
+
+	      slot = htab_find_slot (addr_hash, &target_call_site->pc, INSERT);
+	      if (*slot == NULL)
+		{
+		  /* Successfully entered TARGET_CALL_SITE.  */
+
+		  *slot = &target_call_site->pc;
+		  VEC_safe_push (call_sitep, chain, target_call_site);
+		  break;
+		}
+	    }
+
+	  /* Backtrack (without revisiting the originating call_site).  Try the
+	     callers's sibling; if there isn't any try the callers's callers's
+	     sibling etc.  */
+
+	  target_call_site = NULL;
+	  while (!VEC_empty (call_sitep, chain))
+	    {
+	      call_site = VEC_pop (call_sitep, chain);
+
+	      gdb_assert (htab_find_slot (addr_hash, &call_site->pc,
+					  NO_INSERT) != NULL);
+	      htab_remove_elt (addr_hash, &call_site->pc);
+
+	      target_call_site = call_site->tail_call_next;
+	      if (target_call_site)
+		break;
+	    }
+	}
+      while (target_call_site);
+
+      if (VEC_empty (call_sitep, chain))
+	call_site = NULL;
+      else
+	call_site = VEC_last (call_sitep, chain);
+    }
+
+  if (retval == NULL)
+    {
+      struct minimal_symbol *msym_caller, *msym_callee;
+      
+      msym_caller = lookup_minimal_symbol_by_pc (caller_pc);
+      msym_callee = lookup_minimal_symbol_by_pc (callee_pc);
+      throw_error (NO_ENTRY_VALUE_ERROR,
+		   _("There are no unambiguously determinable intermediate "
+		     "callers or callees between caller function \"%s\" at %s "
+		     "and callee function \"%s\" at %s"),
+		   (msym_caller == NULL
+		    ? "???" : SYMBOL_PRINT_NAME (msym_caller)),
+		   paddress (gdbarch, caller_pc),
+		   (msym_callee == NULL
+		    ? "???" : SYMBOL_PRINT_NAME (msym_callee)),
+		   paddress (gdbarch, callee_pc));
+    }
+
+  do_cleanups (back_to_workdata);
+  discard_cleanups (back_to_retval);
+  return retval;
+}
+
+/* Create and return call_site_chain for CALLER_PC and CALLEE_PC.  All the
+   assumed frames between them use GDBARCH.  If valid call_site_chain cannot be
+   constructed return NULL.  Caller is responsible for xfree of the returned
+   result.  */
+
+struct call_site_chain *
+call_site_find_chain (struct gdbarch *gdbarch, CORE_ADDR caller_pc,
+		      CORE_ADDR callee_pc)
+{
+  volatile struct gdb_exception e;
+  struct call_site_chain *retval = NULL;
+
+  TRY_CATCH (e, RETURN_MASK_ERROR)
+    {
+      retval = call_site_find_chain_1 (gdbarch, caller_pc, callee_pc);
+    }
+  if (e.reason < 0)
+    {
+      if (e.error == NO_ENTRY_VALUE_ERROR)
+	{
+	  if (entry_values_debug)
+	    exception_print (gdb_stdout, e);
+
+	  return NULL;
+	}
+      else
+	throw_exception (e);
+    }
+  return retval;
+}
+
 /* Fetch call_site_parameter from caller matching the parameters.  FRAME is for
    callee.  See DWARF_REG and FB_OFFSET description at struct
    dwarf_expr_context_funcs->push_dwarf_reg_entry_value.

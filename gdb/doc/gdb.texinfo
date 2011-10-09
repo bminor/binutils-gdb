@@ -9486,6 +9486,7 @@ please report it to us as a bug (including a test case!).
 
 @menu
 * Inline Functions::            How @value{GDBN} presents inlining
+* Tail Call Frames::            @value{GDBN} analysis of jumps to functions
 @end menu
 
 @node Inline Functions
@@ -9553,6 +9554,126 @@ and print a variable where your program stored the return value.
 
 @end itemize
 
+@node Tail Call Frames
+@section Tail Call Frames
+@cindex tail call frames, debugging
+
+Function @code{B} can call function @code{C} in its very last statement.  In
+unoptimized compilation the call of @code{C} is immediately followed by return
+instruction at the end of @code{B} code.  Optimizing compiler may replace the
+call and return in function @code{B} into one jump to function @code{C}
+instead.  Such use of a jump instruction is called @dfn{tail call}.
+
+During execution of function @code{C}, there will be no indication in the
+function call stack frames that it was tail-called from @code{B}.  If function
+@code{A} regularly calls function @code{B} which tail-calls function @code{C},
+then @value{GDBN} will see @code{A} as the caller of @code{C}.  However, in
+some cases @value{GDBN} can determine that @code{C} was tail-called from
+@code{B}, and it will then create fictitious call frame for that, with the
+return address set up as if @code{B} called @code{C} normally.
+
+This functionality is currently supported only by DWARF 2 debugging format and
+the compiler has to produce @samp{DW_TAG_GNU_call_site} tags.  With
+@value{NGCC}, you need to specify @option{-O -g} during compilation, to get
+this information.
+
+@kbd{info frame} command (@pxref{Frame Info}) will indicate the tail call frame
+kind by text @code{tail call frame} such as in this sample @value{GDBN} output:
+
+@smallexample
+(gdb) x/i $pc - 2
+   0x40066b <b(int, double)+11>: jmp 0x400640 <c(int, double)>
+(gdb) info frame
+Stack level 1, frame at 0x7fffffffda30:
+ rip = 0x40066d in b (amd64-entry-value.cc:59); saved rip 0x4004c5
+ tail call frame, caller of frame at 0x7fffffffda30
+ source language c++.
+ Arglist at unknown address.
+ Locals at unknown address, Previous frame's sp is 0x7fffffffda30
+@end smallexample
+
+The detection of all the possible code path executions can find them ambiguous.
+There is no execution history stored (possible @ref{Reverse Execution} is never
+used for this purpose) and the last known caller could have reached the known
+callee by multiple different jump sequences.  In such case @value{GDBN} still
+tries to show at least all the unambiguous top tail callers and all the
+unambiguous bottom tail calees, if any.
+
+@table @code
+@item set debug entry-values
+@kindex set debug entry-values
+When set to on, enables printing of analysis messages for both frame argument
+values at function entry and tail calls.  It will show all the possible valid
+tail calls code paths it has considered.  It will also print the intersection
+of them with the final unambiguous (possibly partial or even empty) code path
+result.
+
+@item show debug entry-values
+@kindex show debug entry-values
+Show the current state of analysis messages printing for both frame argument
+values at function entry and tail calls.
+@end table
+
+The analysis messages for tail calls can for example show why the virtual tail
+call frame for function @code{c} has not been recognized (due to the indirect
+reference by variable @code{x}):
+
+@smallexample
+static void __attribute__((noinline, noclone)) c (void);
+void (*x) (void) = c;
+static void __attribute__((noinline, noclone)) a (void) @{ x++; @}
+static void __attribute__((noinline, noclone)) c (void) @{ a (); @}
+int main (void) @{ x (); return 0; @}
+
+Breakpoint 1, DW_OP_GNU_entry_value resolving cannot find
+DW_TAG_GNU_call_site 0x40039a in main
+a () at t.c:3
+3	static void __attribute__((noinline, noclone)) a (void) @{ x++; @}
+(gdb) bt
+#0  a () at t.c:3
+#1  0x000000000040039a in main () at t.c:5
+@end smallexample
+
+Another possibility is an ambiguous virtual tail call frames resolution:
+
+@smallexample
+int i;
+static void __attribute__((noinline, noclone)) f (void) @{ i++; @}
+static void __attribute__((noinline, noclone)) e (void) @{ f (); @}
+static void __attribute__((noinline, noclone)) d (void) @{ f (); @}
+static void __attribute__((noinline, noclone)) c (void) @{ d (); @}
+static void __attribute__((noinline, noclone)) b (void)
+@{ if (i) c (); else e (); @}
+static void __attribute__((noinline, noclone)) a (void) @{ b (); @}
+int main (void) @{ a (); return 0; @}
+
+tailcall: initial: 0x4004d2(a) 0x4004ce(b) 0x4004b2(c) 0x4004a2(d)
+tailcall: compare: 0x4004d2(a) 0x4004cc(b) 0x400492(e)
+tailcall: reduced: 0x4004d2(a) |
+(gdb) bt
+#0  f () at t.c:2
+#1  0x00000000004004d2 in a () at t.c:8
+#2  0x0000000000400395 in main () at t.c:9
+@end smallexample
+
+Frames #0 and #2 are real, #1 is a virtual tail call frame.  The code can have
+possible execution paths
+@code{main@arrow{}a@arrow{}b@arrow{}c@arrow{}d@arrow{}f} or
+@code{main@arrow{}a@arrow{}b@arrow{}e@arrow{}f}, @value{GDBN} cannot find which
+one from the inferior state.
+
+@code{initial:} state shows some random possible calling sequence @value{GDBN}
+has found.  It then finds another possible calling sequcen - that one is
+prefixed by @code{compare:}.  The non-ambiguous intersection of these two is
+printed as the @code{reduced:} calling sequence.  That one could have many
+futher @code{compare:} and @code{reduced:} statements as long as there remain
+any non-ambiguous sequence entries.
+
+For the frame of function @code{b} in both cases there are different possible
+@code{$pc} values (@code{0x4004cc} or @code{0x4004ce}), therefore this frame is
+also ambigous.  The only non-ambiguous frame is the one for function @code{a},
+therefore this one is displayed to the user while the ambiguous frames are
+omitted.
 
 @node Macros
 @chapter C Preprocessor Macros
@@ -23098,6 +23219,9 @@ inferior function call.
 @item gdb.INLINE_FRAME
 A frame representing an inlined function.  The function was inlined
 into a @code{gdb.NORMAL_FRAME} that is older than this one.
+
+@item gdb.TAILCALL_FRAME
+A frame representing a tail call.  @xref{Tail Call Frames}.
 
 @item gdb.SIGTRAMP_FRAME
 A signal trampoline frame.  This is the frame created by the OS when

@@ -34,9 +34,71 @@ asm ("breakhere:");
   e (v, v);
 }
 
+static void __attribute__((noinline, noclone))
+c (int i, double j)
+{
+  d (i * 10, j * 10);
+}
+
+static void __attribute__((noinline, noclone))
+a (int i, double j)
+{
+  c (i + 1, j + 1);
+}
+
+static void __attribute__((noinline, noclone))
+b (int i, double j)
+{
+  c (i + 2, j + 2);
+}
+
+static void __attribute__((noinline, noclone))
+amb_z (int i)
+{
+  d (i + 7, i + 7.5);
+}
+
+static void __attribute__((noinline, noclone))
+amb_y (int i)
+{
+  amb_z (i + 6);
+}
+
+static void __attribute__((noinline, noclone))
+amb_x (int i)
+{
+  amb_y (i + 5);
+}
+
+static void __attribute__((noinline, noclone))
+amb (int i)
+{
+  if (i < 0)
+    amb_x (i + 3);
+  else
+    amb_x (i + 4);
+}
+
+static void __attribute__((noinline, noclone))
+amb_b (int i)
+{
+  amb (i + 2);
+}
+
+static void __attribute__((noinline, noclone))
+amb_a (int i)
+{
+  amb_b (i + 1);
+}
+
 int
 main ()
 {
   d (30, 30.5);
+  if (v)
+    a (1, 1.25);
+  else
+    b (5, 5.25);
+  amb_a (100);
   return 0;
 }

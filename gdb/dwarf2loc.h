@@ -139,4 +139,23 @@ extern void dwarf2_compile_expr_to_ax (struct agent_expr *expr,
 				       const gdb_byte *op_end,
 				       struct dwarf2_per_cu_data *per_cu);
 
+/* Determined tail calls for constructing virtual tail call frames.  */
+
+struct call_site_chain
+  {
+    /* Initially CALLERS == CALLEES == LENGTH.  For partially ambiguous result
+       CALLERS + CALLEES < LENGTH.  */
+    int callers, callees, length;
+
+    /* Variably sized array with LENGTH elements.  Later [0..CALLERS-1] contain
+       top (GDB "prev") sites and [LENGTH-CALLEES..LENGTH-1] contain bottom
+       (GDB "next") sites.  One is interested primarily in the PC field.  */
+    struct call_site *call_site[1];
+  };
+
+struct call_site_stuff;
+extern struct call_site_chain *call_site_find_chain (struct gdbarch *gdbarch,
+						     CORE_ADDR caller_pc,
+						     CORE_ADDR callee_pc);
+
 #endif /* dwarf2loc.h */

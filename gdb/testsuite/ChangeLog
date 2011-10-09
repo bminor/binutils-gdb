@@ -1,5 +1,16 @@
 2011-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Recognize virtual tail call frames.
+	* gdb.arch/amd64-entry-value.cc (c, a, b, amb_z, amb_y, amb_x, amb)
+	(amb_b, amb_a): New.
+	(main): Call a and b.
+	* gdb.arch/amd64-entry-value.exp (tailcall: breakhere, tailcall: bt)
+	(tailcall: p i, tailcall: p j, set $sp0=$sp, up, p $sp0 == $sp, frame 3)
+	(p $sp0 + sizeof (void *) == $sp, ambiguous: breakhere, ambiguous: bt):
+	New tests.
+
+2011-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Implement basic support for DW_TAG_GNU_call_site.
 	* gdb.arch/Makefile.in (EXECUTABLES): Add amd64-entry-value.
 	* gdb.arch/amd64-entry-value.cc: New file.

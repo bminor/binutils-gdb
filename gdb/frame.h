@@ -206,6 +206,8 @@ enum frame_type
   /* A frame representing an inlined function, associated with an
      upcoming (prev, outer, older) NORMAL_FRAME.  */
   INLINE_FRAME,
+  /* A virtual frame of a tail call - see dwarf2_tailcall_frame_unwind.  */
+  TAILCALL_FRAME,
   /* In a signal handler, various OSs handle this in various ways.
      The main thing is that the frame may be far from normal.  */
   SIGTRAMP_FRAME,

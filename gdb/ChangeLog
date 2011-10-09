@@ -1,5 +1,39 @@
 2011-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Recognize virtual tail call frames.
+	* Makefile.in (SFILES): Add dwarf2-frame-tailcall.c.
+	(HFILES_NO_SRCDIR): Add dwarf2-frame-tailcall.h.
+	(COMMON_OBS): Add dwarf2-frame-tailcall.o.
+	* dwarf2-frame-tailcall.c: New file.
+	* dwarf2-frame-tailcall.h: New file.
+	* dwarf2-frame.c: Include dwarf2-frame-tailcall.h.
+	(execute_cfa_program): New function comment.  Return INSN_PTR.  Reset
+	REGS.PREV only after CIE execution.
+	(struct dwarf2_frame_cache): New field tailcall_cache.
+	(dwarf2_frame_cache): New variables entry_pc, entry_cfa_sp_offset,
+	entry_cfa_sp_offset_p and instr.  Execute FDE instructions in two
+	parts, try to find entry_cfa_sp_offset.  Call
+	dwarf2_tailcall_sniffer_first.
+	(dwarf2_frame_prev_register): Call dwarf2_tailcall_prev_register_first
+	when appropriate.
+	(dwarf2_frame_dealloc_cache): New function.
+	(dwarf2_frame_sniffer): Preinitialize cache by dwarf2_frame_cache.
+	(dwarf2_frame_unwind): Install dwarf2_frame_dealloc_cache.
+	(dwarf2_signal_frame_unwind): Do not install dwarf2_frame_dealloc_cache.
+	(dwarf2_append_unwinders): Add dwarf2_tailcall_frame_unwind.
+	(dwarf2_frame_cfa): Support also dwarf2_tailcall_frame_unwind.
+	* dwarf2loc.c (func_addr_to_tail_call_list)
+	(tailcall_dump, call_sitep, VEC (call_sitep), chain_candidate)
+	(call_site_find_chain_1, call_site_find_chain): New.
+	* dwarf2loc.h (struct call_site_chain): New.
+	(call_site_find_chain): New declaration.
+	* frame.c (get_frame_address_in_block): Support also TAILCALL_FRAME.
+	* frame.h (enum frame_type): New entry TAILCALL_FRAME.
+	* python/py-frame.c (gdbpy_initialize_frames): Add TAILCALL_FRAME.
+	* stack.c (frame_info): Support also TAILCALL_FRAME.
+
+2011-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Tail call sites reader implementation.
 	* dwarf2read.c (read_call_site_scope): Recognize DW_AT_GNU_tail_call,
 	fill in TYPE_TAIL_CALL_LIST.

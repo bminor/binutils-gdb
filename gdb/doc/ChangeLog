@@ -1,3 +1,11 @@
+2011-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Eli Zaretskii  <eliz@gnu.org>
+
+	Recognize virtual tail call frames.
+	* gdb.texinfo (Optimized Code): Add reference to Tail Call Frames.
+	(Tail Call Frames): New node.
+	(Frames In Python): Add gdb.TAILCALL_FRAME.
+
 2011-10-07  Doug Evans  <dje@google.com>
 
 	* gdb.texinfo (gdb.printing): Document new `replace' arg to

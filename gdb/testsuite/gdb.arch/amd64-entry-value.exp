@@ -45,3 +45,31 @@ gdb_test "bt" "^bt\r\n#0 +d *\\(i=31, j=31\\.5\\) \[^\r\n\]*\r\n#1 +0x\[0-9a-f\]
 	 "entry: bt"
 gdb_test "p i" " = 31" "entry: p i"
 gdb_test "p j" { = 31\.5} "entry: p j"
+
+
+# Test virtual tail call frames.
+
+gdb_continue_to_breakpoint "tailcall: breakhere"
+
+gdb_test "bt" "^bt\r\n#0 +d *\\(i=71, j=73\\.5\\) \[^\r\n\]*\r\n#1 +0x\[0-9a-f\]+ in c \\(i=7, j=7\\.25\\) \[^\r\n\]*\r\n#2 +0x\[0-9a-f\]+ in b \\(i=5, j=5\\.25\\) \[^\r\n\]*\r\n#3 +0x\[0-9a-f\]+ in main \[^\r\n\]*" \
+	 "tailcall: bt"
+gdb_test "p i" " = 71" "tailcall: p i"
+gdb_test "p j" " = 73\\.5" "tailcall: p j"
+
+# Test $sp simulation for tail call frames.
+#gdb_test {p/x $sp} " = 0x.*"
+#gdb_test {p/x $pc} " = 0x.*"
+gdb_test_no_output {set $sp0=$sp}
+gdb_test "up" "\r\n#1 .*"
+#gdb_test {p/x $sp} " = 0x.*"
+gdb_test {p $sp0 == $sp} " = true"
+gdb_test "frame 3" "\r\n#3 .*"
+gdb_test {p $sp0 + sizeof (void *) == $sp} " = true"
+
+
+# Test partial-ambiguous virtual tail call frames chain.
+
+gdb_continue_to_breakpoint "ambiguous: breakhere"
+
+gdb_test "bt" "^bt\r\n#0 +d \\(i=<optimized out>, j=<optimized out>\\)\[^\r\n\]*\r\n#1 +0x\[0-9a-f\]+ in amb_z \\(i=<optimized out>\\)\[^\r\n\]*\r\n#2 +0x\[0-9a-f\]+ in amb_y \\(i=<optimized out>\\)\[^\r\n\]*\r\n#3 +0x\[0-9a-f\]+ in amb_x \\(i=<optimized out>\\)\[^\r\n\]*\r\n#4 +0x\[0-9a-f\]+ in amb_b \\(i=101\\)\[^\r\n\]*\r\n#5 +0x\[0-9a-f\]+ in amb_a \\(i=100\\)\[^\r\n\]*\r\n#6 +0x\[0-9a-f\]+ in main \\(\\)\[^\r\n\]*" \
+	 "ambiguous: bt"

@@ -595,6 +595,7 @@ gdbpy_initialize_frames (void)
   PyModule_AddIntConstant (gdb_module, "NORMAL_FRAME", NORMAL_FRAME);
   PyModule_AddIntConstant (gdb_module, "DUMMY_FRAME", DUMMY_FRAME);
   PyModule_AddIntConstant (gdb_module, "INLINE_FRAME", INLINE_FRAME);
+  PyModule_AddIntConstant (gdb_module, "TAILCALL_FRAME", TAILCALL_FRAME);
   PyModule_AddIntConstant (gdb_module, "SIGTRAMP_FRAME", SIGTRAMP_FRAME);
   PyModule_AddIntConstant (gdb_module, "ARCH_FRAME", ARCH_FRAME);
   PyModule_AddIntConstant (gdb_module, "SENTINEL_FRAME", SENTINEL_FRAME);

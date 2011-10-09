@@ -2035,8 +2035,10 @@ get_frame_address_in_block (struct frame_info *this_frame)
   while (get_frame_type (next_frame) == INLINE_FRAME)
     next_frame = next_frame->next;
 
-  if (get_frame_type (next_frame) == NORMAL_FRAME
+  if ((get_frame_type (next_frame) == NORMAL_FRAME
+       || get_frame_type (next_frame) == TAILCALL_FRAME)
       && (get_frame_type (this_frame) == NORMAL_FRAME
+	  || get_frame_type (this_frame) == TAILCALL_FRAME
 	  || get_frame_type (this_frame) == INLINE_FRAME))
     return pc - 1;
 
