@@ -15262,26 +15262,42 @@ dwarf2_per_cu_objfile (struct dwarf2_per_cu_data *per_cu)
   return objfile;
 }
 
+/* Return comp_unit_head for PER_CU, either already available in PER_CU->CU
+   (CU_HEADERP is unused in such case) or prepare a temporary copy at
+   CU_HEADERP first.  */
+
+static const struct comp_unit_head *
+per_cu_header_read_in (struct comp_unit_head *cu_headerp,
+		       struct dwarf2_per_cu_data *per_cu)
+{
+  struct objfile *objfile;
+  struct dwarf2_per_objfile *per_objfile;
+  gdb_byte *info_ptr;
+
+  if (per_cu->cu)
+    return &per_cu->cu->header;
+
+  objfile = per_cu->objfile;
+  per_objfile = objfile_data (objfile, dwarf2_objfile_data_key);
+  info_ptr = per_objfile->info.buffer + per_cu->offset;
+
+  memset (cu_headerp, 0, sizeof (*cu_headerp));
+  read_comp_unit_head (cu_headerp, info_ptr, objfile->obfd);
+
+  return cu_headerp;
+}
+
 /* Return the address size given in the compilation unit header for CU.  */
 
 CORE_ADDR
 dwarf2_per_cu_addr_size (struct dwarf2_per_cu_data *per_cu)
 {
-  if (per_cu->cu)
-    return per_cu->cu->header.addr_size;
-  else
-    {
-      /* If the CU is not currently read in, we re-read its header.  */
-      struct objfile *objfile = per_cu->objfile;
-      struct dwarf2_per_objfile *per_objfile
-	= objfile_data (objfile, dwarf2_objfile_data_key);
-      gdb_byte *info_ptr = per_objfile->info.buffer + per_cu->offset;
-      struct comp_unit_head cu_header;
+  struct comp_unit_head cu_header_local;
+  const struct comp_unit_head *cu_headerp;
 
-      memset (&cu_header, 0, sizeof cu_header);
-      read_comp_unit_head (&cu_header, info_ptr, objfile->obfd);
-      return cu_header.addr_size;
-    }
+  cu_headerp = per_cu_header_read_in (&cu_header_local, per_cu);
+
+  return cu_headerp->addr_size;
 }
 
 /* Return the offset size given in the compilation unit header for CU.  */
@@ -15289,21 +15305,12 @@ dwarf2_per_cu_addr_size (struct dwarf2_per_cu_data *per_cu)
 int
 dwarf2_per_cu_offset_size (struct dwarf2_per_cu_data *per_cu)
 {
-  if (per_cu->cu)
-    return per_cu->cu->header.offset_size;
-  else
-    {
-      /* If the CU is not currently read in, we re-read its header.  */
-      struct objfile *objfile = per_cu->objfile;
-      struct dwarf2_per_objfile *per_objfile
-	= objfile_data (objfile, dwarf2_objfile_data_key);
-      gdb_byte *info_ptr = per_objfile->info.buffer + per_cu->offset;
-      struct comp_unit_head cu_header;
+  struct comp_unit_head cu_header_local;
+  const struct comp_unit_head *cu_headerp;
 
-      memset (&cu_header, 0, sizeof cu_header);
-      read_comp_unit_head (&cu_header, info_ptr, objfile->obfd);
-      return cu_header.offset_size;
-    }
+  cu_headerp = per_cu_header_read_in (&cu_header_local, per_cu);
+
+  return cu_headerp->offset_size;
 }
 
 /* Return the text offset of the CU.  The returned offset comes from

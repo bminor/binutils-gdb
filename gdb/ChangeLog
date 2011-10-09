@@ -1,5 +1,12 @@
 2011-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Code cleanup.
+	* dwarf2read.c (per_cu_header_read_in): New function.
+	(dwarf2_per_cu_addr_size, dwarf2_per_cu_offset_size): Use it, with new
+	variables cu_header_local and cu_headerp.
+
+2011-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Fix initial language detection with -readnow.
 	* dwarf2read.c (dw2_find_symbol_file): Handle OBJF_READNOW case.
 	* symfile.h (struct quick_symbol_functions): State find_symbol_file
