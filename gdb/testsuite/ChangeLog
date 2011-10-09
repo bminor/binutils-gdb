@@ -1,3 +1,8 @@
+2011-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix printed anonymous struct name.
+	* gdb.cp/anon-struct.exp (print type of X::t2): New test.
+
 2011-10-09  Joseph Myers  <joseph@codesourcery.com>
 
 	* gdb.base/solib-symbol.exp: Do not include directories in

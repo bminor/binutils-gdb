@@ -1,3 +1,12 @@
+2011-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix printed anonymous struct name.
+	* dwarf2read.c (fixup_partial_die): Handle for anonymous structs also
+	DW_TAG_interface_type.  Strip for anonymous structs any prefixes.
+	(anonymous_struct_prefix): New function.
+	(determine_prefix): New variables retval.  Call anonymous_struct_prefix.
+	(dwarf2_name): Strip for anonymous structs any prefixes.
+
 2011-10-07  Doug Evans  <dje@google.com>
 
 	* python/lib/gdb/printing.py (register_pretty_printer): New argument

@@ -24,6 +24,9 @@ if { [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile} {debug c++}] } 
 gdb_test "ptype t::t" "type = void \\(t \\* const\\)" \
     "print type of t::t"
 
+gdb_test "ptype X::t2" "type = struct X::t2 {\[\r\n \]*X::C2 m;\[\r\n \]*}" \
+    "print type of X::t2"
+
 gdb_test "ptype X::t2::t2" "type = void \\(X::t2 \\* const\\)" \
     "print type of X::t2::t2"
 
