@@ -126,7 +126,6 @@ set_cmd_completer (struct cmd_list_element *cmd,
   cmd->completer = completer; /* Ok.  */
 }
 
-
 /* Add element named NAME.
    Space for NAME and DOC must be allocated by the caller.
    CLASS is the top level category into which commands are broken down
@@ -1136,6 +1135,34 @@ find_command_name_length (const char *text)
     p++;
 
   return p - text;
+}
+
+/* Return TRUE if NAME is a valid user-defined command name.
+   This is a stricter subset of all gdb commands,
+   see find_command_name_length.  */
+
+int
+valid_user_defined_cmd_name_p (const char *name)
+{
+  const char *p;
+
+  if (*name == '\0')
+    return FALSE;
+
+  /* Alas "42" is a legitimate user-defined command.
+     In the interests of not breaking anything we preserve that.  */
+
+  for (p = name; *p != '\0'; ++p)
+    {
+      if (isalnum (*p)
+	  || *p == '-'
+	  || *p == '_')
+	; /* Ok.  */
+      else
+	return FALSE;
+    }
+
+  return TRUE;
 }
 
 /* This routine takes a line of TEXT and a CLIST in which to start the

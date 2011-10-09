@@ -20609,11 +20609,12 @@ Displays whether the debugger is operating in interactive mode or not.
 @chapter Extending @value{GDBN}
 @cindex extending GDB
 
-@value{GDBN} provides two mechanisms for extension.  The first is based
-on composition of @value{GDBN} commands, and the second is based on the
-Python scripting language.
+@value{GDBN} provides three mechanisms for extension.  The first is based
+on composition of @value{GDBN} commands, the second is based on the
+Python scripting language, and the third is for defining new aliases of
+existing commands.
 
-To facilitate the use of these extensions, @value{GDBN} is capable
+To facilitate the use of the first two extensions, @value{GDBN} is capable
 of evaluating the contents of a file.  When doing so, @value{GDBN}
 can recognize which scripting language is being used by looking at
 the filename extension.  Files with an unrecognized filename extension
@@ -20648,6 +20649,7 @@ Display the current value of the @code{script-extension} option.
 @menu
 * Sequences::          Canned Sequences of Commands
 * Python::             Scripting @value{GDBN} using Python
+* Aliases::            Creating new spellings of existing commands
 @end menu
 
 @node Sequences
@@ -24385,6 +24387,95 @@ substitute_prompt (``frame: \f,
 "frame: main, print arguments: scalars"
 @end smallexample
 @end table
+
+@node Aliases
+@section Creating new spellings of existing commands
+@cindex aliases for commands
+
+It is often useful to define alternate spellings of existing commands.
+For example, if a new @value{GDBN} command defined in Python has
+a long name to type, it is handy to have an abbreviated version of it
+that involves less typing.
+
+@value{GDBN} itself uses aliases.  For example @samp{s} is an alias
+of the @samp{step} command even though it is otherwise an ambiguous
+abbreviation of other commands like @samp{set} and @samp{show}.
+
+Aliases are also used to provide shortened or more common versions
+of multi-word commands.  For example, @value{GDBN} provides the
+@samp{tty} alias of the @samp{set inferior-tty} command.
+
+You can define a new alias with the @samp{alias} command.
+
+@table @code
+
+@kindex alias
+@item alias [-a] [--] @var{ALIAS} = @var{COMMAND}
+
+@end table
+
+@var{ALIAS} specifies the name of the new alias.
+Each word of @var{ALIAS} must consist of letters, numbers, dashes and
+underscores.
+
+@var{COMMAND} specifies the name of an existing command
+that is being aliased.
+
+The @samp{-a} option specifies that the new alias is an abbreviation
+of the command.  Abbreviations are not shown in command
+lists displayed by the @samp{help} command.
+
+The @samp{--} option specifies the end of options,
+and is useful when @var{ALIAS} begins with a dash.
+
+Here is a simple example showing how to make an abbreviation
+of a command so that there is less to type.
+Suppose you were tired of typing @samp{disas}, the current
+shortest unambiguous abbreviation of the @samp{disassemble} command
+and you wanted an even shorter version named @samp{di}.
+The following will accomplish this.
+
+@smallexample
+(gdb) alias -a di = disas
+@end smallexample
+
+Note that aliases are different from user-defined commands.
+With a user-defined command, you also need to write documentation
+for it with the @samp{document} command.
+An alias automatically picks up the documentation of the existing command.
+
+Here is an example where we make @samp{elms} an abbreviation of
+@samp{elements} in the @samp{set print elements} command.
+This is to show that you can make an abbreviation of any part
+of a command.
+
+@smallexample
+(gdb) alias -a set print elms = set print elements
+(gdb) alias -a show print elms = show print elements
+(gdb) set p elms 20
+(gdb) show p elms
+Limit on string chars or array elements to print is 200.
+@end smallexample
+
+Note that if you are defining an alias of a @samp{set} command,
+and you want to have an alias for the corresponding @samp{show}
+command, then you need to define the latter separately.
+
+Unambiguously abbreviated commands are allowed in @var{COMMAND} and
+@var{ALIAS}, just as they are normally.
+
+@smallexample
+(gdb) alias -a set pr elms = set p ele
+@end smallexample
+
+Finally, here is an example showing the creation of a one word
+alias for a more complex command.
+This creates alias @samp{spe} of the command @samp{set print elements}.
+
+@smallexample
+(gdb) alias spe = set print elements
+(gdb) spe 20
+@end smallexample
 
 @node Interpreters
 @chapter Command Interpreters

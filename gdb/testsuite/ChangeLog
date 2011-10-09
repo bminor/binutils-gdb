@@ -1,3 +1,7 @@
+2011-10-09  Doug Evans  <dje@google.com>
+
+	* gdb.base/alias.exp: Add tests for alias command.
+
 2011-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.arch/amd64-entry-value.s: New file.

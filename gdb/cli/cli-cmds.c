@@ -21,6 +21,7 @@
 #include "defs.h"
 #include "exceptions.h"
 #include "arch-utils.h"
+#include "dyn-string.h"
 #include "readline/readline.h"
 #include "readline/tilde.h"
 #include "completer.h"
@@ -1272,6 +1273,180 @@ apropos_command (char *searchstr, int from_tty)
       error (_("Error in regular expression: %s"), err);
     }
 }
+
+/* Subroutine of alias_command to simplify it.
+   Return the first N elements of ARGV flattened back to a string
+   with a space separating each element.
+   ARGV may not be NULL.
+   This does not take care of quoting elements in case they contain spaces
+   on purpose.  */
+
+static dyn_string_t
+argv_to_dyn_string (char **argv, int n)
+{
+  int i;
+  dyn_string_t result = dyn_string_new (10);
+
+  gdb_assert (argv != NULL);
+  gdb_assert (n >= 0 && n <= countargv (argv));
+
+  for (i = 0; i < n; ++i)
+    {
+      if (i > 0)
+	dyn_string_append_char (result, ' ');
+      dyn_string_append_cstr (result, argv[i]);
+    }
+
+  return result;
+}
+
+/* Subroutine of alias_command to simplify it.
+   Return TRUE if COMMAND exists, unambiguously.  Otherwise FALSE.  */
+
+static int
+valid_command_p (char *command)
+{
+  struct cmd_list_element *c;
+
+  c = lookup_cmd_1 (& command, cmdlist, NULL, 1);
+
+  if (c == NULL || c == (struct cmd_list_element *) -1)
+    return FALSE;
+
+  /* This is the slightly tricky part.
+     lookup_cmd_1 will return a pointer to the last part of COMMAND
+     to match, leaving COMMAND pointing at the remainder.  */
+  while (*command == ' ' || *command == '\t')
+    ++command;
+  return *command == '\0';
+}
+
+/* Make an alias of an existing command.  */
+
+static void
+alias_command (char *args, int from_tty)
+{
+  int i, alias_argc, command_argc;
+  int abbrev_flag = 0;
+  char *args2, *equals, *alias, *command;
+  char **alias_argv, **command_argv;
+  dyn_string_t alias_dyn_string, command_dyn_string;
+  struct cmd_list_element *c;
+  static const char usage[] = N_("Usage: alias [-a] [--] ALIAS = COMMAND");
+
+  if (args == NULL || strchr (args, '=') == NULL)
+    error (_(usage));
+
+  args2 = xstrdup (args);
+  make_cleanup (xfree, args2);
+  equals = strchr (args2, '=');
+  *equals = '\0';
+  alias_argv = gdb_buildargv (args2);
+  make_cleanup_freeargv (alias_argv);
+  command_argv = gdb_buildargv (equals + 1);
+  make_cleanup_freeargv (command_argv);
+
+  for (i = 0; alias_argv[i] != NULL; )
+    {
+      if (strcmp (alias_argv[i], "-a") == 0)
+	{
+	  ++alias_argv;
+	  abbrev_flag = 1;
+	}
+      else if (strcmp (alias_argv[i], "--") == 0)
+	{
+	  ++alias_argv;
+	  break;
+	}
+      else
+	break;
+    }
+
+  if (alias_argv[0] == NULL || command_argv[0] == NULL
+      || *alias_argv[0] == '\0' || *command_argv[0] == '\0')
+    error (_(usage));
+
+  for (i = 0; alias_argv[i] != NULL; ++i)
+    {
+      if (! valid_user_defined_cmd_name_p (alias_argv[i]))
+	{
+	  if (i == 0)
+	    error (_("Invalid command name: %s"), alias_argv[i]);
+	  else
+	    error (_("Invalid command element name: %s"), alias_argv[i]);
+	}
+    }
+
+  alias_argc = countargv (alias_argv);
+  command_argc = countargv (command_argv);
+
+  /* COMMAND must exist.
+     Reconstruct the command to remove any extraneous spaces,
+     for better error messages.  */
+  command_dyn_string = argv_to_dyn_string (command_argv, command_argc);
+  make_cleanup_dyn_string_delete (command_dyn_string);
+  command = dyn_string_buf (command_dyn_string);
+  if (! valid_command_p (command))
+    error (_("Invalid command to alias to: %s"), command);
+
+  /* ALIAS must not exist.  */
+  alias_dyn_string = argv_to_dyn_string (alias_argv, alias_argc);
+  make_cleanup_dyn_string_delete (alias_dyn_string);
+  alias = dyn_string_buf (alias_dyn_string);
+  if (valid_command_p (alias))
+    error (_("Alias already exists: %s"), alias);
+
+  /* If ALIAS is one word, it is an alias for the entire COMMAND.
+     Example: alias spe = set print elements
+
+     Otherwise ALIAS and COMMAND must have the same number of words,
+     and every word except the last must match; and the last word of
+     ALIAS is made an alias of the last word of COMMAND.
+     Example: alias set print elms = set pr elem
+     Note that unambiguous abbreviations are allowed.  */
+
+  if (alias_argc == 1)
+    {
+      /* add_cmd requires *we* allocate space for name, hence the xstrdup.  */
+      add_com_alias (xstrdup (alias_argv[0]), command, class_alias,
+		     abbrev_flag);
+    }
+  else
+    {
+      int i;
+      dyn_string_t alias_prefix_dyn_string, command_prefix_dyn_string;
+      char *alias_prefix, *command_prefix;
+      struct cmd_list_element *c_alias, *c_command;
+
+      if (alias_argc != command_argc)
+	error (_("Mismatched command length between ALIAS and COMMAND."));
+
+      /* Create copies of ALIAS and COMMAND without the last word,
+	 and use that to verify the leading elements match.  */
+      alias_prefix_dyn_string =
+	argv_to_dyn_string (alias_argv, alias_argc - 1);
+      make_cleanup_dyn_string_delete (alias_prefix_dyn_string);
+      command_prefix_dyn_string =
+	argv_to_dyn_string (alias_argv, command_argc - 1);
+      make_cleanup_dyn_string_delete (command_prefix_dyn_string);
+      alias_prefix = dyn_string_buf (alias_prefix_dyn_string);
+      command_prefix = dyn_string_buf (command_prefix_dyn_string);
+
+      c_command = lookup_cmd_1 (& command_prefix, cmdlist, NULL, 1);
+      /* We've already tried to look up COMMAND.  */
+      gdb_assert (c_command != NULL
+		  && c_command != (struct cmd_list_element *) -1);
+      gdb_assert (c_command->prefixlist != NULL);
+      c_alias = lookup_cmd_1 (& alias_prefix, cmdlist, NULL, 1);
+      if (c_alias != c_command)
+	error (_("ALIAS and COMMAND prefixes do not match."));
+
+      /* add_cmd requires *we* allocate space for name, hence the xstrdup.  */
+      add_alias_cmd (xstrdup (alias_argv[alias_argc - 1]),
+		     command_argv[command_argc - 1],
+		     class_alias, abbrev_flag, c_command->prefixlist);
+    }
+}
 
 /* Print a list of files and line numbers which a user may choose from
    in order to list a function which was specified ambiguously (as
@@ -1674,4 +1849,18 @@ When 'on', each command is displayed as it is executed."),
 			   NULL,
 			   NULL,
 			   &setlist, &showlist);
+
+  c = add_com ("alias", class_support, alias_command, _("\
+Define a new command that is an alias of an existing command.\n\
+Usage: alias [-a] [--] ALIAS = COMMAND\n\
+ALIAS is the name of the alias command to create.\n\
+COMMAND is the command being aliased to.\n\
+If \"-a\" is specified, the command is an abbreviation,\n\
+and will not appear in help command list output.\n\
+\n\
+Examples:\n\
+Make \"spe\" an alias of \"set print elements\":\n\
+  alias spe = set print elements\n\
+Make \"elms\" an alias of \"elements\" in the \"set print\" command:\n\
+  alias -a set print elms = set print elements"));
 }

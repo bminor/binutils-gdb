@@ -20,6 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+#include "dyn-string.h"
 #include "gdb_assert.h"
 #include <ctype.h>
 #include "gdb_string.h"
@@ -235,6 +236,18 @@ struct cleanup *
 make_cleanup_freeargv (char **arg)
 {
   return make_my_cleanup (&cleanup_chain, do_freeargv, arg);
+}
+
+static void
+do_dyn_string_delete (void *arg)
+{
+  dyn_string_delete ((dyn_string_t) arg);
+}
+
+struct cleanup *
+make_cleanup_dyn_string_delete (dyn_string_t arg)
+{
+  return make_my_cleanup (&cleanup_chain, do_dyn_string_delete, arg);
 }
 
 static void

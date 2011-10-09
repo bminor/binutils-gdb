@@ -106,6 +106,8 @@ struct cmd_list_element;
 
 /* Forward-declarations of the entry-points of cli/cli-decode.c.  */
 
+extern int valid_user_defined_cmd_name_p (const char *name);
+
 extern struct cmd_list_element *add_cmd (char *, enum command_class,
 					 void (*fun) (char *, int), char *,
 					 struct cmd_list_element **);

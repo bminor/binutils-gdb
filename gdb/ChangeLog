@@ -1,3 +1,16 @@
+2011-10-09  Doug Evans  <dje@google.com>
+
+	Add new "alias" command.
+	* NEWS: Mention new command.
+	* command.h (valid_user_defined_cmd_name_p): Declare.
+	* defs.h (make_cleanup_dyn_string_delete): Declare.
+	* utils.c: #include "dyn-string.h".
+	(do_dyn_string_delete, make_cleanup_dyn_string_delete): New functions.
+	* cli/cli-cmds.c: #include "dyn-string.h".
+	(argv_to_dyn_string, valid_command_p, alias_command): New functions.
+	(init_cli_cmds): Add new command.
+	* cli/cli-decode.c (valid_user_defined_cmd_name_p): New function.
+
 2011-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix compatibility with older GCCs.

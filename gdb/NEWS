@@ -81,7 +81,8 @@
   the first connection is made.  The listening port used by GDBserver will
   become available after that.
 
-* New commands "info macros", and "info definitions" have been added.
+* New commands "info macros", "info definitions",
+  and "alias" have been added.
 
 * New function parameters suffix @entry specifies value of function parameter
   at the time the function got called.  Entry values are available only since

@@ -1,3 +1,7 @@
+2011-10-09  Doug Evans  <dje@google.com>
+
+	* gdb.texinfo (Extending GDB): Document alias command.
+
 2011-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Support @entry in input expressions.
