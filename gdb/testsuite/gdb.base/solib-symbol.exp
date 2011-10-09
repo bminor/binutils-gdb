@@ -53,14 +53,14 @@ if ![runto_main] then {
 
 # Set a breakpoint in the binary.
 gdb_test "br foo2" \
-	 "Breakpoint.*file.*${srcfile}.*" \
+	 "Breakpoint.*file.*${testfile}\\.c.*" \
 	 "foo2 in main"
 
 delete_breakpoints
 
 # Break in the library.
 gdb_test "br foo" \
-	 "Breakpoint.*file.*${srcfile_lib}.*" \
+	 "Breakpoint.*file.*${libname}\\.c.*" \
 	 "foo in libmd"
 
 gdb_test "continue" \
@@ -69,7 +69,7 @@ gdb_test "continue" \
 
 # This symbol is now looked up in the ELF library.
 gdb_test "br foo2" \
-	 "Breakpoint.*file.*${srcfile_lib}.*" \
+	 "Breakpoint.*file.*${libname}\\.c.*" \
 	 "foo2 in mdlib"
 
 gdb_exit
