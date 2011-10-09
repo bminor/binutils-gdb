@@ -1,5 +1,59 @@
 2011-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Implement basic support for DW_TAG_GNU_call_site.
+	* block.c: Include gdbtypes.h and exceptions.h.
+	(call_site_for_pc): New function.
+	* block.h (call_site_for_pc): New declaration.
+	* defs.h: Include hashtab.h.
+	(make_cleanup_htab_delete, core_addr_hash, core_addr_eq): New
+	declarations.
+	* dwarf2-frame.c (dwarf2_frame_ctx_funcs): Install
+	ctx_no_push_dwarf_reg_entry_value.
+	* dwarf2expr.c (read_uleb128, read_sleb128): Support R as NULL.
+	(dwarf_block_to_dwarf_reg): New function.
+	(execute_stack_op) <DW_OP_GNU_entry_value>: Implement it.
+	(ctx_no_push_dwarf_reg_entry_value): New function.
+	* dwarf2expr.h (struct dwarf_expr_context_funcs): New field
+	push_dwarf_reg_entry_value.
+	(ctx_no_push_dwarf_reg_entry_value, dwarf_block_to_dwarf_reg): New
+	declarations.
+	* dwarf2loc.c: Include gdbcmd.h.
+	(dwarf_expr_ctx_funcs): New forward declaration.
+	(entry_values_debug, show_entry_values_debug, call_site_to_target_addr)
+	(dwarf_expr_reg_to_entry_parameter)
+	(dwarf_expr_push_dwarf_reg_entry_value): New.
+	(dwarf_expr_ctx_funcs): Install dwarf_expr_push_dwarf_reg_entry_value.
+	(dwarf2_evaluate_loc_desc_full): Handle NO_ENTRY_VALUE_ERROR.
+	(needs_dwarf_reg_entry_value): New function.
+	(needs_frame_ctx_funcs): Install it.
+	(_initialize_dwarf2loc): New function.
+	* dwarf2loc.h (entry_values_debug): New declaration.
+	* dwarf2read.c (struct dwarf2_cu): New field call_site_htab.
+	(read_call_site_scope): New forward declaration.
+	(process_full_comp_unit): Copy call_site_htab.
+	(process_die): Support DW_TAG_GNU_call_site.
+	(read_call_site_scope): New function.
+	(dwarf2_get_pc_bounds): Support NULL HIGHPC.
+	(dwarf_tag_name): Support DW_TAG_GNU_call_site.
+	(cleanup_htab): Delete.
+	(write_psymtabs_to_index): Use make_cleanup_htab_delete instead of it.
+	* exceptions.h (enum errors): New NO_ENTRY_VALUE_ERROR.
+	* gdb-gdb.py (StructMainTypePrettyPrinter): Support
+	FIELD_LOC_KIND_DWARF_BLOCK.
+	* gdbtypes.h (enum field_loc_kind): New entry
+	FIELD_LOC_KIND_DWARF_BLOCK.
+	(struct main_type): New loc entry dwarf_block.
+	(struct call_site, FIELD_DWARF_BLOCK, SET_FIELD_DWARF_BLOCK)
+	(TYPE_FIELD_DWARF_BLOCK): New.
+	* python/py-type.c: Include dwarf2loc.h.
+	(check_types_equal): Support FIELD_LOC_KIND_DWARF_BLOCK.  New
+	internal_error call on unknown FIELD_LOC_KIND.
+	* symtab.h (struct symtab): New field call_site_htab.
+	* utils.c (do_htab_delete_cleanup, make_cleanup_htab_delete)
+	(core_addr_hash, core_addr_eq): New functions.
+
+2011-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Code reshuffle.
 	* gdb-gdb.py (StructMainTypePrettyPrinter): Change
 	TYPE_SPECIFIC_CALLING_CONVENTION to TYPE_SPECIFIC_FUNC.  Move

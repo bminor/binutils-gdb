@@ -1,5 +1,12 @@
 2011-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Implement basic support for DW_TAG_GNU_call_site.
+	* gdb.arch/Makefile.in (EXECUTABLES): Add amd64-entry-value.
+	* gdb.arch/amd64-entry-value.cc: New file.
+	* gdb.arch/amd64-entry-value.exp: New file.
+
+2011-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Fix DW_OP_GNU_implicit_pointer for DWARF32 v3+ on 64-bit arches.
 	* gdb.dwarf2/implptr-64bit.S: New file.
 	* gdb.dwarf2/implptr-64bit.exp: New file.

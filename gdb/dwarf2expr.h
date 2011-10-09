@@ -62,6 +62,15 @@ struct dwarf_expr_context_funcs
      meaningful to substitute a stub type of the correct size.  */
   struct type *(*get_base_type) (struct dwarf_expr_context *ctx, size_t die);
 
+  /* Push on DWARF stack an entry evaluated for DW_TAG_GNU_call_site's
+     DWARF_REG/FB_OFFSET at the caller of specified BATON.  If DWARF register
+     number DWARF_REG specifying the push_dwarf_reg_entry_value parameter is
+     not -1 FB_OFFSET is ignored.  Otherwise FB_OFFSET specifies stack
+     parameter offset against caller's stack pointer (which equals the callee's
+     frame base).  */
+  void (*push_dwarf_reg_entry_value) (struct dwarf_expr_context *ctx,
+				      int dwarf_reg, CORE_ADDR fb_offset);
+
 #if 0
   /* Not yet implemented.  */
 
@@ -267,5 +276,9 @@ CORE_ADDR ctx_no_get_frame_pc (void *baton);
 CORE_ADDR ctx_no_get_tls_address (void *baton, CORE_ADDR offset);
 void ctx_no_dwarf_call (struct dwarf_expr_context *ctx, size_t die_offset);
 struct type *ctx_no_get_base_type (struct dwarf_expr_context *ctx, size_t die);
+void ctx_no_push_dwarf_reg_entry_value (struct dwarf_expr_context *ctx,
+					int dwarf_reg, CORE_ADDR fb_offset);
+
+int dwarf_block_to_dwarf_reg (const gdb_byte *buf, const gdb_byte *buf_end);
 
 #endif /* dwarf2expr.h */

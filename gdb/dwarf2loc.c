@@ -33,6 +33,7 @@
 #include "objfiles.h"
 #include "exceptions.h"
 #include "block.h"
+#include "gdbcmd.h"
 
 #include "dwarf2.h"
 #include "dwarf2expr.h"
@@ -46,6 +47,8 @@ extern int dwarf2_always_disassemble;
 
 static void dwarf_expr_frame_base_1 (struct symbol *framefunc, CORE_ADDR pc,
 				     const gdb_byte **start, size_t *length);
+
+static const struct dwarf_expr_context_funcs dwarf_expr_ctx_funcs;
 
 static struct value *dwarf2_evaluate_loc_desc_full (struct type *type,
 						    struct frame_info *frame,
@@ -294,6 +297,249 @@ dwarf_expr_get_base_type (struct dwarf_expr_context *ctx, size_t die_offset)
   struct dwarf_expr_baton *debaton = ctx->baton;
 
   return dwarf2_get_die_type (die_offset, debaton->per_cu);
+}
+
+/* See dwarf2loc.h.  */
+
+int entry_values_debug = 0;
+
+/* Helper to set entry_values_debug.  */
+
+static void
+show_entry_values_debug (struct ui_file *file, int from_tty,
+			 struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file,
+		    _("Entry values and tail call frames debugging is %s.\n"),
+		    value);
+}
+
+/* Find DW_TAG_GNU_call_site's DW_AT_GNU_call_site_target address.
+   CALLER_FRAME (for registers) can be NULL if it is not known.  This function
+   always returns valid address or it throws NO_ENTRY_VALUE_ERROR.  */
+
+static CORE_ADDR
+call_site_to_target_addr (struct gdbarch *call_site_gdbarch,
+			  struct call_site *call_site,
+			  struct frame_info *caller_frame)
+{
+  switch (FIELD_LOC_KIND (call_site->target))
+    {
+    case FIELD_LOC_KIND_DWARF_BLOCK:
+      {
+	struct dwarf2_locexpr_baton *dwarf_block;
+	struct value *val;
+	struct type *caller_core_addr_type;
+	struct gdbarch *caller_arch;
+
+	dwarf_block = FIELD_DWARF_BLOCK (call_site->target);
+	if (dwarf_block == NULL)
+	  {
+	    struct minimal_symbol *msym;
+	    
+	    msym = lookup_minimal_symbol_by_pc (call_site->pc - 1);
+	    throw_error (NO_ENTRY_VALUE_ERROR,
+			 _("DW_AT_GNU_call_site_target is not specified "
+			   "at %s in %s"),
+			 paddress (call_site_gdbarch, call_site->pc),
+			 msym == NULL ? "???" : SYMBOL_PRINT_NAME (msym));
+			
+	  }
+	if (caller_frame == NULL)
+	  {
+	    struct minimal_symbol *msym;
+	    
+	    msym = lookup_minimal_symbol_by_pc (call_site->pc - 1);
+	    throw_error (NO_ENTRY_VALUE_ERROR,
+			 _("DW_AT_GNU_call_site_target DWARF block resolving "
+			   "requires known frame which is currently not "
+			   "available at %s in %s"),
+			 paddress (call_site_gdbarch, call_site->pc),
+			 msym == NULL ? "???" : SYMBOL_PRINT_NAME (msym));
+			
+	  }
+	caller_arch = get_frame_arch (caller_frame);
+	caller_core_addr_type = builtin_type (caller_arch)->builtin_func_ptr;
+	val = dwarf2_evaluate_loc_desc (caller_core_addr_type, caller_frame,
+					dwarf_block->data, dwarf_block->size,
+					dwarf_block->per_cu);
+	/* DW_AT_GNU_call_site_target is a DWARF expression, not a DWARF
+	   location.  */
+	if (VALUE_LVAL (val) == lval_memory)
+	  return value_address (val);
+	else
+	  return value_as_address (val);
+      }
+
+    case FIELD_LOC_KIND_PHYSNAME:
+      {
+	const char *physname;
+	struct minimal_symbol *msym;
+
+	physname = FIELD_STATIC_PHYSNAME (call_site->target);
+	msym = lookup_minimal_symbol_text (physname, NULL);
+	if (msym == NULL)
+	  {
+	    msym = lookup_minimal_symbol_by_pc (call_site->pc - 1);
+	    throw_error (NO_ENTRY_VALUE_ERROR,
+			 _("Cannot find function \"%s\" for a call site target "
+			   "at %s in %s"),
+			 physname, paddress (call_site_gdbarch, call_site->pc),
+			 msym == NULL ? "???" : SYMBOL_PRINT_NAME (msym));
+			
+	  }
+	return SYMBOL_VALUE_ADDRESS (msym);
+      }
+
+    case FIELD_LOC_KIND_PHYSADDR:
+      return FIELD_STATIC_PHYSADDR (call_site->target);
+
+    default:
+      internal_error (__FILE__, __LINE__, _("invalid call site target kind"));
+    }
+}
+
+/* Fetch call_site_parameter from caller matching the parameters.  FRAME is for
+   callee.  See DWARF_REG and FB_OFFSET description at struct
+   dwarf_expr_context_funcs->push_dwarf_reg_entry_value.
+
+   Function always returns non-NULL, it throws NO_ENTRY_VALUE_ERROR
+   otherwise.  */
+
+static struct call_site_parameter *
+dwarf_expr_reg_to_entry_parameter (struct frame_info *frame, int dwarf_reg,
+				   CORE_ADDR fb_offset,
+				   struct dwarf2_per_cu_data **per_cu_return)
+{
+  CORE_ADDR func_addr = get_frame_func (frame);
+  CORE_ADDR caller_pc;
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+  struct frame_info *caller_frame = get_prev_frame (frame);
+  struct call_site *call_site;
+  int iparams;
+  struct value *val;
+  struct dwarf2_locexpr_baton *dwarf_block;
+  struct call_site_parameter *parameter;
+  CORE_ADDR target_addr;
+
+  if (gdbarch != frame_unwind_arch (frame))
+    {
+      struct minimal_symbol *msym = lookup_minimal_symbol_by_pc (func_addr);
+      struct gdbarch *caller_gdbarch = frame_unwind_arch (frame);
+
+      throw_error (NO_ENTRY_VALUE_ERROR,
+		   _("DW_OP_GNU_entry_value resolving callee gdbarch %s "
+		     "(of %s (%s)) does not match caller gdbarch %s"),
+		   gdbarch_bfd_arch_info (gdbarch)->printable_name,
+		   paddress (gdbarch, func_addr),
+		   msym == NULL ? "???" : SYMBOL_PRINT_NAME (msym),
+		   gdbarch_bfd_arch_info (caller_gdbarch)->printable_name);
+    }
+
+  if (caller_frame == NULL)
+    {
+      struct minimal_symbol *msym = lookup_minimal_symbol_by_pc (func_addr);
+
+      throw_error (NO_ENTRY_VALUE_ERROR, _("DW_OP_GNU_entry_value resolving "
+					   "requires caller of %s (%s)"),
+		   paddress (gdbarch, func_addr),
+		   msym == NULL ? "???" : SYMBOL_PRINT_NAME (msym));
+    }
+  caller_pc = get_frame_pc (caller_frame);
+  call_site = call_site_for_pc (gdbarch, caller_pc);
+
+  target_addr = call_site_to_target_addr (gdbarch, call_site, caller_frame);
+  if (target_addr != func_addr)
+    {
+      struct minimal_symbol *target_msym, *func_msym;
+
+      target_msym = lookup_minimal_symbol_by_pc (target_addr);
+      func_msym = lookup_minimal_symbol_by_pc (func_addr);
+      throw_error (NO_ENTRY_VALUE_ERROR,
+		   _("DW_OP_GNU_entry_value resolving expects callee %s at %s "
+		     "but the called frame is for %s at %s"),
+		   (target_msym == NULL ? "???"
+					: SYMBOL_PRINT_NAME (target_msym)),
+		   paddress (gdbarch, target_addr),
+		   func_msym == NULL ? "???" : SYMBOL_PRINT_NAME (func_msym),
+		   paddress (gdbarch, func_addr));
+    }
+
+  for (iparams = 0; iparams < call_site->parameter_count; iparams++)
+    {
+      parameter = &call_site->parameter[iparams];
+      if (parameter->dwarf_reg == -1 && dwarf_reg == -1)
+	{
+	  if (parameter->fb_offset == fb_offset)
+	    break;
+	}
+      else if (parameter->dwarf_reg == dwarf_reg)
+	break;
+    }
+  if (iparams == call_site->parameter_count)
+    {
+      struct minimal_symbol *msym = lookup_minimal_symbol_by_pc (caller_pc);
+
+      /* DW_TAG_GNU_call_site_parameter will be missing just if GCC could not
+	 determine its value.  */
+      throw_error (NO_ENTRY_VALUE_ERROR, _("Cannot find matching parameter "
+					   "at DW_TAG_GNU_call_site %s at %s"),
+		   paddress (gdbarch, caller_pc),
+		   msym == NULL ? "???" : SYMBOL_PRINT_NAME (msym)); 
+    }
+
+  *per_cu_return = call_site->per_cu;
+  return parameter;
+}
+
+/* Execute call_site_parameter's DWARF block for caller of the CTX's frame.
+   CTX must be of dwarf_expr_ctx_funcs kind.  See DWARF_REG and FB_OFFSET
+   description at struct dwarf_expr_context_funcs->push_dwarf_reg_entry_value.
+
+   The CTX caller can be from a different CU - per_cu_dwarf_call implementation
+   can be more simple as it does not support cross-CU DWARF executions.  */
+
+static void
+dwarf_expr_push_dwarf_reg_entry_value (struct dwarf_expr_context *ctx,
+				       int dwarf_reg, CORE_ADDR fb_offset)
+{
+  struct dwarf_expr_baton *debaton;
+  struct frame_info *frame, *caller_frame;
+  struct dwarf2_per_cu_data *caller_per_cu;
+  struct dwarf_expr_baton baton_local;
+  struct dwarf_expr_context saved_ctx;
+  struct call_site_parameter *parameter;
+  const gdb_byte *data_src;
+  size_t size;
+
+  gdb_assert (ctx->funcs == &dwarf_expr_ctx_funcs);
+  debaton = ctx->baton;
+  frame = debaton->frame;
+  caller_frame = get_prev_frame (frame);
+
+  parameter = dwarf_expr_reg_to_entry_parameter (frame, dwarf_reg, fb_offset,
+						 &caller_per_cu);
+  data_src = parameter->value;
+  size = parameter->value_size;
+
+  baton_local.frame = caller_frame;
+  baton_local.per_cu = caller_per_cu;
+
+  saved_ctx.gdbarch = ctx->gdbarch;
+  saved_ctx.addr_size = ctx->addr_size;
+  saved_ctx.offset = ctx->offset;
+  saved_ctx.baton = ctx->baton;
+  ctx->gdbarch = get_objfile_arch (dwarf2_per_cu_objfile (baton_local.per_cu));
+  ctx->addr_size = dwarf2_per_cu_addr_size (baton_local.per_cu);
+  ctx->offset = dwarf2_per_cu_text_offset (baton_local.per_cu);
+  ctx->baton = &baton_local;
+
+  dwarf_expr_eval (ctx, data_src, size);
+
+  ctx->gdbarch = saved_ctx.gdbarch;
+  ctx->addr_size = saved_ctx.addr_size;
+  ctx->offset = saved_ctx.offset;
+  ctx->baton = saved_ctx.baton;
 }
 
 struct piece_closure
@@ -1082,7 +1328,8 @@ static const struct dwarf_expr_context_funcs dwarf_expr_ctx_funcs =
   dwarf_expr_frame_pc,
   dwarf_expr_tls_address,
   dwarf_expr_dwarf_call,
-  dwarf_expr_get_base_type
+  dwarf_expr_get_base_type,
+  dwarf_expr_push_dwarf_reg_entry_value
 };
 
 /* Evaluate a location description, starting at DATA and with length
@@ -1135,6 +1382,13 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 	  retval = allocate_value (type);
 	  mark_value_bytes_unavailable (retval, 0, TYPE_LENGTH (type));
 	  return retval;
+	}
+      else if (ex.error == NO_ENTRY_VALUE_ERROR)
+	{
+	  if (entry_values_debug)
+	    exception_print (gdb_stdout, ex);
+	  do_cleanups (old_chain);
+	  return allocate_optimized_out_value (type);
 	}
       else
 	throw_exception (ex);
@@ -1363,6 +1617,17 @@ needs_frame_dwarf_call (struct dwarf_expr_context *ctx, size_t die_offset)
 		     ctx->funcs->get_frame_pc, ctx->baton);
 }
 
+/* DW_OP_GNU_entry_value accesses require a caller, therefore a frame.  */
+
+static void
+needs_dwarf_reg_entry_value (struct dwarf_expr_context *ctx,
+			     int dwarf_reg, CORE_ADDR fb_offset)
+{
+  struct needs_frame_baton *nf_baton = ctx->baton;
+
+  nf_baton->needs_frame = 1;
+}
+
 /* Virtual method table for dwarf2_loc_desc_needs_frame below.  */
 
 static const struct dwarf_expr_context_funcs needs_frame_ctx_funcs =
@@ -1374,7 +1639,8 @@ static const struct dwarf_expr_context_funcs needs_frame_ctx_funcs =
   needs_frame_frame_cfa,	/* get_frame_pc */
   needs_frame_tls_address,
   needs_frame_dwarf_call,
-  NULL				/* get_base_type */
+  NULL,				/* get_base_type */
+  needs_dwarf_reg_entry_value
 };
 
 /* Return non-zero iff the location expression at DATA (length SIZE)
@@ -2981,3 +3247,20 @@ const struct symbol_computed_ops dwarf2_loclist_funcs = {
   loclist_describe_location,
   loclist_tracepoint_var_ref
 };
+
+void
+_initialize_dwarf2loc (void)
+{
+  add_setshow_zinteger_cmd ("entry-values", class_maintenance,
+			    &entry_values_debug,
+			    _("Set entry values and tail call frames "
+			      "debugging."),
+			    _("Show entry values and tail call frames "
+			      "debugging."),
+			    _("When non-zero, the process of determining "
+			      "parameter values from function entry point "
+			      "and tail call frames will be printed."),
+			    NULL,
+			    show_entry_values_debug,
+			    &setdebuglist, &showdebuglist);
+}

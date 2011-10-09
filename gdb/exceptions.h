@@ -85,6 +85,9 @@ enum errors {
      traceframe.  */
   NOT_AVAILABLE_ERROR,
 
+  /* DW_OP_GNU_entry_value resolving failed.  */
+  NO_ENTRY_VALUE_ERROR,
+
   /* Add more errors here.  */
   NR_ERRORS
 };

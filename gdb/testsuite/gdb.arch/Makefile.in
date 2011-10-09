@@ -1,8 +1,8 @@
 VPATH = @srcdir@
 srcdir = @srcdir@
 
-EXECUTABLES = altivec-abi altivec-regs amd64-byte amd64-disp-step \
-	amd64-dword amd64-i386-address amd64-word i386-bp_permanent \
+EXECUTABLES = altivec-abi altivec-regs amd64-byte amd64-disp-step amd64-dword \
+	amd64-entry-value amd64-i386-address amd64-word i386-bp_permanent \
 	i386-permbkpt i386-avx i386-signal i386-sse
 
 all info install-info dvi install uninstall installcheck check:

@@ -831,6 +831,9 @@ struct symtab
 
   struct objfile *objfile;
 
+  /* struct call_site entries for this compilation unit or NULL.  */
+
+  htab_t call_site_htab;
 };
 
 #define BLOCKVECTOR(symtab)	(symtab)->blockvector

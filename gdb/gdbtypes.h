@@ -348,7 +348,8 @@ enum field_loc_kind
   {
     FIELD_LOC_KIND_BITPOS,	/* bitpos */
     FIELD_LOC_KIND_PHYSADDR,	/* physaddr */
-    FIELD_LOC_KIND_PHYSNAME	/* physname */
+    FIELD_LOC_KIND_PHYSNAME,	/* physname */
+    FIELD_LOC_KIND_DWARF_BLOCK	/* dwarf_block */
   };
 
 /* A discriminant to determine which field in the main_type.type_specific
@@ -510,6 +511,12 @@ struct main_type
 
 	CORE_ADDR physaddr;
 	const char *physname;
+
+	/* The field location can be computed by evaluating the following DWARF
+	   block.  Its DATA is allocated on objfile_obstack - no CU load is
+	   needed to access it.  */
+
+	struct dwarf2_locexpr_baton *dwarf_block;
       }
       loc;
 
@@ -897,6 +904,59 @@ struct func_type
     unsigned calling_convention;
   };
 
+/* A place where a function gets called from, represented by
+   DW_TAG_GNU_call_site.  It can be looked up from symtab->call_site_htab.  */
+
+struct call_site
+  {
+    /* Address of the first instruction after this call.  It must be the first
+       field as we overload core_addr_hash and core_addr_eq for it.  */
+    CORE_ADDR pc;
+
+    /* Describe DW_AT_GNU_call_site_target.  Missing attribute uses
+       FIELD_LOC_KIND_DWARF_BLOCK with FIELD_DWARF_BLOCK == NULL.  */
+    struct
+      {
+	union field_location loc;
+
+	/* Discriminant for union field_location.  */
+	ENUM_BITFIELD(field_loc_kind) loc_kind : 2;
+      }
+    target;
+
+    /* Size of the PARAMETER array.  */
+    unsigned parameter_count;
+
+    /* CU of the function where the call is located.  It gets used for DWARF
+       blocks execution in the parameter array below.  */
+    struct dwarf2_per_cu_data *per_cu;
+
+    /* Describe DW_TAG_GNU_call_site's DW_TAG_formal_parameter.  */
+    struct call_site_parameter
+      {
+	/* DW_TAG_formal_parameter's DW_AT_location's DW_OP_regX as DWARF
+	   register number, for register passed parameters.  If -1 then use
+	   fb_offset.  */
+	int dwarf_reg;
+
+	/* Offset from the callee's frame base, for stack passed parameters.
+	   This equals offset from the caller's stack pointer.  Valid only if
+	   DWARF_REGNUM is -1.  */
+	CORE_ADDR fb_offset;
+
+	/* DW_TAG_formal_parameter's DW_AT_GNU_call_site_value.  It is never
+	   NULL.  */
+	const gdb_byte *value;
+	size_t value_size;
+
+	/* DW_TAG_formal_parameter's DW_AT_GNU_call_site_data_value.  It may be
+	   NULL if not provided by DWARF.  */
+	const gdb_byte *data_value;
+	size_t data_value_size;
+      }
+    parameter[1];
+  };
+
 /* The default value of TYPE_CPLUS_SPECIFIC(T) points to the
    this shared static structure.  */
 
@@ -1019,6 +1079,7 @@ extern void allocate_gnat_aux_type (struct type *);
 #define FIELD_BITPOS(thisfld) ((thisfld).loc.bitpos)
 #define FIELD_STATIC_PHYSNAME(thisfld) ((thisfld).loc.physname)
 #define FIELD_STATIC_PHYSADDR(thisfld) ((thisfld).loc.physaddr)
+#define FIELD_DWARF_BLOCK(thisfld) ((thisfld).loc.dwarf_block)
 #define SET_FIELD_BITPOS(thisfld, bitpos)			\
   (FIELD_LOC_KIND (thisfld) = FIELD_LOC_KIND_BITPOS,		\
    FIELD_BITPOS (thisfld) = (bitpos))
@@ -1028,6 +1089,9 @@ extern void allocate_gnat_aux_type (struct type *);
 #define SET_FIELD_PHYSADDR(thisfld, addr)			\
   (FIELD_LOC_KIND (thisfld) = FIELD_LOC_KIND_PHYSADDR,		\
    FIELD_STATIC_PHYSADDR (thisfld) = (addr))
+#define SET_FIELD_DWARF_BLOCK(thisfld, addr)			\
+  (FIELD_LOC_KIND (thisfld) = FIELD_LOC_KIND_DWARF_BLOCK,	\
+   FIELD_DWARF_BLOCK (thisfld) = (addr))
 #define FIELD_ARTIFICIAL(thisfld) ((thisfld).artificial)
 #define FIELD_BITSIZE(thisfld) ((thisfld).bitsize)
 
@@ -1038,6 +1102,7 @@ extern void allocate_gnat_aux_type (struct type *);
 #define TYPE_FIELD_BITPOS(thistype, n) FIELD_BITPOS (TYPE_FIELD (thistype, n))
 #define TYPE_FIELD_STATIC_PHYSNAME(thistype, n) FIELD_STATIC_PHYSNAME (TYPE_FIELD (thistype, n))
 #define TYPE_FIELD_STATIC_PHYSADDR(thistype, n) FIELD_STATIC_PHYSADDR (TYPE_FIELD (thistype, n))
+#define TYPE_FIELD_DWARF_BLOCK(thistype, n) FIELD_DWARF_BLOCK (TYPE_FIELD (thistype, n))
 #define TYPE_FIELD_ARTIFICIAL(thistype, n) FIELD_ARTIFICIAL(TYPE_FIELD(thistype,n))
 #define TYPE_FIELD_BITSIZE(thistype, n) FIELD_BITSIZE(TYPE_FIELD(thistype,n))
 #define TYPE_FIELD_PACKED(thistype, n) (FIELD_BITSIZE(TYPE_FIELD(thistype,n))!=0)

@@ -371,7 +371,7 @@ dwarf_expr_eval (struct dwarf_expr_context *ctx, const gdb_byte *addr,
 
 /* Decode the unsigned LEB128 constant at BUF into the variable pointed to
    by R, and return the new value of BUF.  Verify that it doesn't extend
-   past BUF_END.  */
+   past BUF_END.  R can be NULL, the constant is then only skipped.  */
 
 const gdb_byte *
 read_uleb128 (const gdb_byte *buf, const gdb_byte *buf_end, ULONGEST * r)
@@ -391,13 +391,14 @@ read_uleb128 (const gdb_byte *buf, const gdb_byte *buf_end, ULONGEST * r)
 	break;
       shift += 7;
     }
-  *r = result;
+  if (r)
+    *r = result;
   return buf;
 }
 
 /* Decode the signed LEB128 constant at BUF into the variable pointed to
    by R, and return the new value of BUF.  Verify that it doesn't extend
-   past BUF_END.  */
+   past BUF_END.  R can be NULL, the constant is then only skipped.  */
 
 const gdb_byte *
 read_sleb128 (const gdb_byte *buf, const gdb_byte *buf_end, LONGEST * r)
@@ -420,7 +421,8 @@ read_sleb128 (const gdb_byte *buf, const gdb_byte *buf_end, LONGEST * r)
   if (shift < (sizeof (*r) * 8) && (byte & 0x40) != 0)
     result |= -(((LONGEST) 1) << shift);
 
-  *r = result;
+  if (r)
+    *r = result;
   return buf;
 }
 
@@ -479,6 +481,41 @@ dwarf_get_base_type (struct dwarf_expr_context *ctx, ULONGEST die, int size)
     result = builtin_type (ctx->gdbarch)->builtin_int;
 
   return result;
+}
+
+/* If <BUF..BUF_END] contains DW_FORM_block* with single DW_OP_reg* return the
+   DWARF register number.  Otherwise return -1.  */
+
+int
+dwarf_block_to_dwarf_reg (const gdb_byte *buf, const gdb_byte *buf_end)
+{
+  ULONGEST dwarf_reg;
+
+  if (buf_end <= buf)
+    return -1;
+  if (*buf >= DW_OP_reg0 && *buf <= DW_OP_reg31)
+    {
+      if (buf_end - buf != 1)
+	return -1;
+      return *buf - DW_OP_reg0;
+    }
+
+  if (*buf == DW_OP_GNU_regval_type)
+    {
+      buf++;
+      buf = read_uleb128 (buf, buf_end, &dwarf_reg);
+      buf = read_uleb128 (buf, buf_end, NULL);
+    }
+  else if (*buf == DW_OP_regx)
+    {
+      buf++;
+      buf = read_uleb128 (buf, buf_end, &dwarf_reg);
+    }
+  else
+    return -1;
+  if (buf != buf_end || (int) dwarf_reg != dwarf_reg)
+    return -1;
+  return dwarf_reg;
 }
 
 /* The engine for the expression evaluator.  Using the context in CTX,
@@ -1191,11 +1228,27 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	  goto no_push;
 	
 	case DW_OP_GNU_entry_value:
-	  /* This operation is not yet supported by GDB.  */
-	  ctx->location = DWARF_VALUE_OPTIMIZED_OUT;
-	  ctx->stack_len = 0;
-	  ctx->num_pieces = 0;
-	  goto abort_expression;
+	  {
+	    ULONGEST len;
+	    int dwarf_reg;
+	    CORE_ADDR deref_size;
+
+	    op_ptr = read_uleb128 (op_ptr, op_end, &len);
+	    if (op_ptr + len > op_end)
+	      error (_("DW_OP_GNU_entry_value: too few bytes available."));
+
+	    dwarf_reg = dwarf_block_to_dwarf_reg (op_ptr, op_ptr + len);
+	    if (dwarf_reg != -1)
+	      {
+		op_ptr += len;
+		ctx->funcs->push_dwarf_reg_entry_value (ctx, dwarf_reg,
+							0 /* unused */);
+		goto no_push;
+	      }
+
+	    error (_("DWARF-2 expression error: DW_OP_GNU_entry_value is "
+		     "supported only for single DW_OP_reg*"));
+	  }
 
 	case DW_OP_GNU_const_type:
 	  {
@@ -1338,6 +1391,17 @@ struct type *
 ctx_no_get_base_type (struct dwarf_expr_context *ctx, size_t die)
 {
   error (_("Support for typed DWARF is not supported in this context"));
+}
+
+/* Stub dwarf_expr_context_funcs.push_dwarf_block_entry_value
+   implementation.  */
+
+void
+ctx_no_push_dwarf_reg_entry_value (struct dwarf_expr_context *ctx,
+				   int dwarf_reg, CORE_ADDR fb_offset)
+{
+  internal_error (__FILE__, __LINE__,
+		  _("Support for DW_OP_GNU_entry_value is unimplemented"));
 }
 
 void

@@ -29,6 +29,7 @@
 #include "language.h"
 #include "vec.h"
 #include "bcache.h"
+#include "dwarf2loc.h"
 
 typedef struct pyty_type_object
 {
@@ -900,6 +901,22 @@ check_types_equal (struct type *type1, struct type *type2,
 				    FIELD_STATIC_PHYSNAME (*field2)))
 		return Py_NE;
 	      break;
+	    case FIELD_LOC_KIND_DWARF_BLOCK:
+	      {
+		struct dwarf2_locexpr_baton *block1, *block2;
+
+		block1 = FIELD_DWARF_BLOCK (*field1);
+		block2 = FIELD_DWARF_BLOCK (*field2);
+		if (block1->per_cu != block2->per_cu
+		    || block1->size != block2->size
+		    || memcmp (block1->data, block2->data, block1->size) != 0)
+		return Py_NE;
+	      }
+	      break;
+	    default:
+	      internal_error (__FILE__, __LINE__, _("Unsupported field kind "
+						    "%d by check_types_equal"),
+			      FIELD_LOC_KIND (*field1));
 	    }
 
 	  entry.type1 = FIELD_TYPE (*field1);

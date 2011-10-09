@@ -31,6 +31,9 @@ struct axs_value;
 /* This header is private to the DWARF-2 reader.  It is shared between
    dwarf2read.c and dwarf2loc.c.  */
 
+/* `set debug entry-values' setting.  */
+extern int entry_values_debug;
+
 /* Return the OBJFILE associated with the compilation unit CU.  If CU
    came from a separate debuginfo file, then the master objfile is
    returned.  */

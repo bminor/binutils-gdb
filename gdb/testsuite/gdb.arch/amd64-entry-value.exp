@@ -1,0 +1,47 @@
+# Copyright (C) 2011 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+set testfile amd64-entry-value
+set srcfile ${testfile}.s
+set opts {}
+
+if [info exists COMPILE] {
+    # make check RUNTESTFLAGS="gdb.arch/amd64-entry-value.exp COMPILE=1"
+    set srcfile ${testfile}.cc
+    lappend opts debug optimize=-O2
+} elseif { ![istarget x86_64-*-* ] || ![is_lp64_target] } {
+    verbose "Skipping amd64-entry-value."
+    return
+}
+
+if { [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile} $opts] } {
+    return -1
+}
+
+if ![runto_main] {
+    return -1
+}
+
+gdb_breakpoint "breakhere"
+
+
+# Test @entry values for register passed parameters.
+
+gdb_continue_to_breakpoint "entry: breakhere"
+
+gdb_test "bt" "^bt\r\n#0 +d *\\(i=31, j=31\\.5\\) \[^\r\n\]*\r\n#1 +0x\[0-9a-f\]+ in main .*" \
+	 "entry: bt"
+gdb_test "p i" " = 31" "entry: p i"
+gdb_test "p j" { = 31\.5} "entry: p j"

@@ -403,6 +403,24 @@ make_cleanup_unpush_target (struct target_ops *ops)
   return make_my_cleanup (&cleanup_chain, do_unpush_target, ops);
 }
 
+/* Helper for make_cleanup_htab_delete compile time checking the types.  */
+
+static void
+do_htab_delete_cleanup (void *htab_voidp)
+{
+  htab_t htab = htab_voidp;
+
+  htab_delete (htab);
+}
+
+/* Return a new cleanup that deletes HTAB.  */
+
+struct cleanup *
+make_cleanup_htab_delete (htab_t htab)
+{
+  return make_cleanup (do_htab_delete_cleanup, htab);
+}
+
 struct restore_ui_file_closure
 {
   struct ui_file **variable;
@@ -2909,6 +2927,27 @@ print_core_address (struct gdbarch *gdbarch, CORE_ADDR address)
     return hex_string_custom (address, 8);
   else
     return hex_string_custom (address, 16);
+}
+
+/* Callback hash_f for htab_create_alloc or htab_create_alloc_ex.  */
+
+hashval_t
+core_addr_hash (const void *ap)
+{
+  const CORE_ADDR *addrp = ap;
+
+  return *addrp;
+}
+
+/* Callback eq_f for htab_create_alloc or htab_create_alloc_ex.  */
+
+int
+core_addr_eq (const void *ap, const void *bp)
+{
+  const CORE_ADDR *addr_ap = ap;
+  const CORE_ADDR *addr_bp = bp;
+
+  return *addr_ap == *addr_bp;
 }
 
 static char *

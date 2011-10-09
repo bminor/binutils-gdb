@@ -407,6 +407,9 @@ struct dwarf2_cu
      after all type information has been read.  */
   VEC (delayed_method_info) *method_list;
 
+  /* To be copied to symtab->call_site_htab.  */
+  htab_t call_site_htab;
+
   /* Mark used when releasing cached dies.  */
   unsigned int mark : 1;
 
@@ -1078,6 +1081,8 @@ static void read_type_unit_scope (struct die_info *, struct dwarf2_cu *);
 static void read_func_scope (struct die_info *, struct dwarf2_cu *);
 
 static void read_lexical_block_scope (struct die_info *, struct dwarf2_cu *);
+
+static void read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu);
 
 static int dwarf2_ranges_read (unsigned, CORE_ADDR *, CORE_ADDR *,
 			       struct dwarf2_cu *, struct partial_symtab *);
@@ -4799,6 +4804,8 @@ process_full_comp_unit (struct dwarf2_per_cu_data *per_cu)
 
       if (gcc_4_minor >= 5)
 	symtab->epilogue_unwind_valid = 1;
+
+      symtab->call_site_htab = cu->call_site_htab;
     }
 
   if (dwarf2_per_objfile->using_index)
@@ -4836,6 +4843,9 @@ process_die (struct die_info *die, struct dwarf2_cu *cu)
     case DW_TAG_try_block:
     case DW_TAG_catch_block:
       read_lexical_block_scope (die, cu);
+      break;
+    case DW_TAG_GNU_call_site:
+      read_call_site_scope (die, cu);
       break;
     case DW_TAG_class_type:
     case DW_TAG_interface_type:
@@ -6131,6 +6141,208 @@ read_lexical_block_scope (struct die_info *die, struct dwarf2_cu *cu)
   using_directives = new->using_directives;
 }
 
+/* Read in DW_TAG_GNU_call_site and insert it to CU->call_site_htab.  */
+
+static void
+read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
+{
+  struct objfile *objfile = cu->objfile;
+  struct gdbarch *gdbarch = get_objfile_arch (objfile);
+  CORE_ADDR pc, baseaddr;
+  struct attribute *attr;
+  struct call_site *call_site, call_site_local;
+  void **slot;
+  int nparams;
+  struct die_info *child_die;
+
+  baseaddr = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
+
+  attr = dwarf2_attr (die, DW_AT_low_pc, cu);
+  if (!attr)
+    {
+      complaint (&symfile_complaints,
+		 _("missing DW_AT_low_pc for DW_TAG_GNU_call_site "
+		   "DIE 0x%x [in module %s]"),
+		 die->offset, cu->objfile->name);
+      return;
+    }
+  pc = DW_ADDR (attr) + baseaddr;
+
+  if (cu->call_site_htab == NULL)
+    cu->call_site_htab = htab_create_alloc_ex (16, core_addr_hash, core_addr_eq,
+					       NULL, &objfile->objfile_obstack,
+					       hashtab_obstack_allocate, NULL);
+  call_site_local.pc = pc;
+  slot = htab_find_slot (cu->call_site_htab, &call_site_local, INSERT);
+  if (*slot != NULL)
+    {
+      complaint (&symfile_complaints,
+		 _("Duplicate PC %s for DW_TAG_GNU_call_site "
+		   "DIE 0x%x [in module %s]"),
+		 paddress (gdbarch, pc), die->offset, cu->objfile->name);
+      return;
+    }
+
+  /* Count parameters at the caller.  */
+
+  nparams = 0;
+  for (child_die = die->child; child_die && child_die->tag;
+       child_die = sibling_die (child_die))
+    {
+      if (child_die->tag != DW_TAG_GNU_call_site_parameter)
+	{
+	  complaint (&symfile_complaints,
+		     _("Tag %d is not DW_TAG_GNU_call_site_parameter in "
+		       "DW_TAG_GNU_call_site child DIE 0x%x [in module %s]"),
+		     child_die->tag, child_die->offset, cu->objfile->name);
+	  continue;
+	}
+
+      nparams++;
+    }
+
+  call_site = obstack_alloc (&objfile->objfile_obstack,
+			     (sizeof (*call_site)
+			      + (sizeof (*call_site->parameter)
+				 * (nparams - 1))));
+  *slot = call_site;
+  memset (call_site, 0, sizeof (*call_site) - sizeof (*call_site->parameter));
+  call_site->pc = pc;
+
+  attr = dwarf2_attr (die, DW_AT_GNU_call_site_target, cu);
+  if (attr == NULL)
+    attr = dwarf2_attr (die, DW_AT_abstract_origin, cu);
+  SET_FIELD_DWARF_BLOCK (call_site->target, NULL);
+  if (!attr || (attr_form_is_block (attr) && DW_BLOCK (attr)->size == 0))
+    /* Keep NULL DWARF_BLOCK.  */;
+  else if (attr_form_is_block (attr))
+    {
+      struct dwarf2_locexpr_baton *dlbaton;
+
+      dlbaton = obstack_alloc (&objfile->objfile_obstack, sizeof (*dlbaton));
+      dlbaton->data = DW_BLOCK (attr)->data;
+      dlbaton->size = DW_BLOCK (attr)->size;
+      dlbaton->per_cu = cu->per_cu;
+
+      SET_FIELD_DWARF_BLOCK (call_site->target, dlbaton);
+    }
+  else if (is_ref_attr (attr))
+    {
+      struct objfile *objfile = cu->objfile;
+      struct dwarf2_cu *target_cu = cu;
+      struct die_info *target_die;
+
+      target_die = follow_die_ref_or_sig (die, attr, &target_cu);
+      gdb_assert (target_cu->objfile == objfile);
+      if (die_is_declaration (target_die, target_cu))
+	{
+	  const char *target_physname;
+
+	  target_physname = dwarf2_physname (NULL, target_die, target_cu);
+	  if (target_physname == NULL)
+	    complaint (&symfile_complaints,
+		       _("DW_AT_GNU_call_site_target target DIE has invalid "
+		         "physname, for referencing DIE 0x%x [in module %s]"),
+		       die->offset, cu->objfile->name);
+	  else
+	    SET_FIELD_PHYSNAME (call_site->target, (char *) target_physname);
+	}
+      else
+	{
+	  CORE_ADDR lowpc;
+
+	  /* DW_AT_entry_pc should be preferred.  */
+	  if (!dwarf2_get_pc_bounds (target_die, &lowpc, NULL, target_cu, NULL))
+	    complaint (&symfile_complaints,
+		       _("DW_AT_GNU_call_site_target target DIE has invalid "
+		         "low pc, for referencing DIE 0x%x [in module %s]"),
+		       die->offset, cu->objfile->name);
+	  else
+	    SET_FIELD_PHYSADDR (call_site->target, lowpc + baseaddr);
+	}
+    }
+  else
+    complaint (&symfile_complaints,
+	       _("DW_TAG_GNU_call_site DW_AT_GNU_call_site_target is neither "
+		 "block nor reference, for DIE 0x%x [in module %s]"),
+	       die->offset, cu->objfile->name);
+
+  call_site->per_cu = cu->per_cu;
+
+  for (child_die = die->child;
+       child_die && child_die->tag;
+       child_die = sibling_die (child_die))
+    {
+      struct dwarf2_locexpr_baton *dlbaton;
+      struct call_site_parameter *parameter;
+
+      if (child_die->tag != DW_TAG_GNU_call_site_parameter)
+	{
+	  /* Already printed the complaint above.  */
+	  continue;
+	}
+
+      gdb_assert (call_site->parameter_count < nparams);
+      parameter = &call_site->parameter[call_site->parameter_count];
+
+      /* DW_AT_location specifies the register number.  Value of the data
+	 assumed for the register is contained in DW_AT_GNU_call_site_value.  */
+
+      attr = dwarf2_attr (child_die, DW_AT_location, cu);
+      if (!attr || !attr_form_is_block (attr))
+	{
+	  complaint (&symfile_complaints,
+		     _("No DW_FORM_block* DW_AT_location for "
+		       "DW_TAG_GNU_call_site child DIE 0x%x [in module %s]"),
+		     child_die->offset, cu->objfile->name);
+	  continue;
+	}
+      parameter->dwarf_reg = dwarf_block_to_dwarf_reg (DW_BLOCK (attr)->data,
+				 &DW_BLOCK (attr)->data[DW_BLOCK (attr)->size]);
+      if (parameter->dwarf_reg == -1)
+	{
+	  complaint (&symfile_complaints,
+		     _("Only single DW_OP_reg is supported "
+		       "for DW_FORM_block* DW_AT_location for "
+		       "DW_TAG_GNU_call_site child DIE 0x%x [in module %s]"),
+		     child_die->offset, cu->objfile->name);
+	  continue;
+	}
+
+      attr = dwarf2_attr (child_die, DW_AT_GNU_call_site_value, cu);
+      if (!attr_form_is_block (attr))
+	{
+	  complaint (&symfile_complaints,
+		     _("No DW_FORM_block* DW_AT_GNU_call_site_value for "
+		       "DW_TAG_GNU_call_site child DIE 0x%x [in module %s]"),
+		     child_die->offset, cu->objfile->name);
+	  continue;
+	}
+      parameter->value = DW_BLOCK (attr)->data;
+      parameter->value_size = DW_BLOCK (attr)->size;
+
+      /* Parameters are not pre-cleared by memset above.  */
+      parameter->data_value = NULL;
+      parameter->data_value_size = 0;
+      call_site->parameter_count++;
+
+      attr = dwarf2_attr (child_die, DW_AT_GNU_call_site_data_value, cu);
+      if (attr)
+	{
+	  if (!attr_form_is_block (attr))
+	    complaint (&symfile_complaints,
+		       _("No DW_FORM_block* DW_AT_GNU_call_site_data_value for "
+			 "DW_TAG_GNU_call_site child DIE 0x%x [in module %s]"),
+		       child_die->offset, cu->objfile->name);
+	  else
+	    {
+	      parameter->data_value = DW_BLOCK (attr)->data;
+	      parameter->data_value_size = DW_BLOCK (attr)->size;
+	    }
+	}
+    }
+}
+
 /* Get low and high pc attributes from DW_AT_ranges attribute value OFFSET.
    Return 1 if the attributes are present and valid, otherwise, return 0.
    If RANGES_PST is not NULL we should setup `objfile->psymtabs_addrmap'.  */
@@ -6330,7 +6542,8 @@ dwarf2_get_pc_bounds (struct die_info *die, CORE_ADDR *lowpc,
     return 0;
 
   *lowpc = low;
-  *highpc = high;
+  if (highpc)
+    *highpc = high;
   return ret;
 }
 
@@ -12741,6 +12954,8 @@ dwarf_tag_name (unsigned tag)
       return "DW_TAG_PGI_kanji_type";
     case DW_TAG_PGI_interface_block:
       return "DW_TAG_PGI_interface_block";
+    case DW_TAG_GNU_call_site:
+      return "DW_TAG_GNU_call_site";
     default:
       return "DW_TAG_<unknown>";
     }
@@ -16426,14 +16641,6 @@ write_one_signatured_type (void **slot, void *d)
   return 1;
 }
 
-/* A cleanup function for an htab_t.  */
-
-static void
-cleanup_htab (void *arg)
-{
-  htab_delete (arg);
-}
-
 /* Create an index file for OBJFILE in the directory DIR.  */
 
 static void
@@ -16490,7 +16697,7 @@ write_psymtabs_to_index (struct objfile *objfile, const char *dir)
 
   psyms_seen = htab_create_alloc (100, htab_hash_pointer, htab_eq_pointer,
 				  NULL, xcalloc, xfree);
-  make_cleanup (cleanup_htab, psyms_seen);
+  make_cleanup_htab_delete (psyms_seen);
 
   /* While we're scanning CU's create a table that maps a psymtab pointer
      (which is what addrmap records) to its index (which is what is recorded
@@ -16500,7 +16707,7 @@ write_psymtabs_to_index (struct objfile *objfile, const char *dir)
 				     hash_psymtab_cu_index,
 				     eq_psymtab_cu_index,
 				     NULL, xcalloc, xfree);
-  make_cleanup (cleanup_htab, cu_index_htab);
+  make_cleanup_htab_delete (cu_index_htab);
   psymtab_cu_index_map = (struct psymtab_cu_index_map *)
     xmalloc (sizeof (struct psymtab_cu_index_map)
 	     * dwarf2_per_objfile->n_comp_units);
