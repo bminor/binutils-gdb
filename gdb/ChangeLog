@@ -1,5 +1,20 @@
 2011-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Support @entry in input expressions.
+	* c-exp.y (ENTRY, unknown_cpp_name): New.
+	(exp: UNKNOWN_CPP_NAME): Change to `exp: unknown_cpp_name'.
+	(unknown_cpp_name: UNKNOWN_CPP_NAME, unknown_cpp_name: ENTRY)
+	(variable: name_not_typename '@' ENTRY, name: ENTRY)
+	(name_not_typename: ENTRY): New.
+	(yylex): Recognize ENTRY.
+	* eval.c (evaluate_subexp_standard): Support also OP_VAR_ENTRY_VALUE.
+	* expprint.c (print_subexp_standard, dump_subexp_body_standard):
+	Likewise.
+	* parse.c (operator_length_standard): Likewise.
+	* std-operator.def: New operator OP_VAR_ENTRY_VALUE.
+
+2011-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Display referenced values in backtraces.
 	* printcmd.c (print_variable_and_value): Set OPTS.DEREF_REF to 1.
 	* stack.c (print_frame_arg): Likewise.

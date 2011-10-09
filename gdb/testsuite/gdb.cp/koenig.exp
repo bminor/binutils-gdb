@@ -33,6 +33,9 @@ gdb_test "p first(c)" "= 11"
 # the qualifying parameter
 gdb_test "p second(0,0,c,0,0)" "= 33"
 
+# Test the name "entry" being used for `variablename@entry' entry values.
+gdb_test "p entry (c)" " = 44"
+
 # Test that koenig lookup finds correct function
 # even if it is overloaded
 gdb_test "p first(0,c)" "= 22"

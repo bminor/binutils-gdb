@@ -853,6 +853,7 @@ operator_length_standard (const struct expression *expr, int endpos,
     case OP_BOOL:
     case OP_LAST:
     case OP_INTERNALVAR:
+    case OP_VAR_ENTRY_VALUE:
       oplen = 3;
       break;
 

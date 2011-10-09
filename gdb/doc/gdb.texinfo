@@ -7277,6 +7277,23 @@ If you ask to print an object whose contents are unknown to
 by the debug information, @value{GDBN} will say @samp{<incomplete
 type>}.  @xref{Symbols, incomplete type}, for more about this.
 
+If you append @kbd{@@entry} string to a function parameter name you get its
+value at the time the function got called.  If the value is not available an
+error message is printed.  Entry values are available only with some compilers.
+Entry values are normally also printed at the function parameter list according
+to @ref{set print entry-values}.
+
+@smallexample
+Breakpoint 1, d (i=30) at gdb.base/entry-value.c:29
+29	  i++;
+(gdb) next
+30	  e (i);
+(gdb) print i
+$1 = 31
+(gdb) print i@@entry
+$2 = 30
+@end smallexample
+
 Strings are identified as arrays of @code{char} values without specified
 signedness.  Arrays of either @code{signed char} or @code{unsigned char} get
 printed as arrays of 1 byte sized integers.  @code{-fsigned-char} or
@@ -7941,6 +7958,7 @@ thus speeding up the display of each Ada frame.
 @item show print frame-arguments
 Show how the value of arguments should be displayed when printing a frame.
 
+@anchor{set print entry-values}
 @item set print entry-values @var{value}
 @kindex set print entry-values
 Set printing of frame argument values at function entry.  In some cases

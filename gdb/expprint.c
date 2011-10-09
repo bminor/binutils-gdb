@@ -135,6 +135,16 @@ print_subexp_standard (struct expression *exp, int *pos,
       }
       return;
 
+    case OP_VAR_ENTRY_VALUE:
+      {
+	struct block *b;
+
+	(*pos) += 2;
+	fprintf_filtered (stream, "%s@entry",
+			  SYMBOL_PRINT_NAME (exp->elts[pc + 1].symbol));
+      }
+      return;
+
     case OP_LAST:
       (*pos) += 2;
       fprintf_filtered (stream, "$%d",
@@ -852,6 +862,13 @@ dump_subexp_body_standard (struct expression *exp,
       fprintf_filtered (stream, " (%s)",
 			SYMBOL_PRINT_NAME (exp->elts[elt + 1].symbol));
       elt += 3;
+      break;
+    case OP_VAR_ENTRY_VALUE:
+      fprintf_filtered (stream, "Entry value of symbol @");
+      gdb_print_host_address (exp->elts[elt].symbol, stream);
+      fprintf_filtered (stream, " (%s)",
+			SYMBOL_PRINT_NAME (exp->elts[elt].symbol));
+      elt += 2;
       break;
     case OP_LAST:
       fprintf_filtered (stream, "History element %ld",

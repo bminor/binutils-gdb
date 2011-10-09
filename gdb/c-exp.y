@@ -186,6 +186,7 @@ static struct stoken operator_stoken (const char *);
 %token <tsval> STRING
 %token <tsval> CHAR
 %token <ssym> NAME /* BLOCKNAME defined below to give it higher precedence. */
+%token <ssym> ENTRY
 %token <ssym> UNKNOWN_CPP_NAME
 %token <voidval> COMPLETE
 %token <tsym> TYPENAME
@@ -193,6 +194,9 @@ static struct stoken operator_stoken (const char *);
 %type <svec> string_exp
 %type <ssym> name_not_typename
 %type <tsym> typename
+
+/* It is UNKNOWN_CPP_NAME or ENTRY, depending on the context.  */
+%type <ssym> unknown_cpp_name
 
 /* A NAME_OR_INT is a symbol which is not known in the symbol table,
    but which would parse as a valid number in the current input radix.
@@ -392,7 +396,7 @@ exp	:	exp '('
 			  write_exp_elt_opcode (OP_FUNCALL); }
 	;
 
-exp	:	UNKNOWN_CPP_NAME '('
+exp	:	unknown_cpp_name '('
 			{
 			  /* This could potentially be a an argument defined
 			     lookup function (Koenig).  */
@@ -414,6 +418,10 @@ exp	:	UNKNOWN_CPP_NAME '('
 			  write_exp_elt_opcode (OP_FUNCALL);
 			}
 	;
+
+unknown_cpp_name	: UNKNOWN_CPP_NAME
+			| ENTRY
+			;
 
 lcurly	:	'{'
 			{ start_arglist (); }
@@ -754,6 +762,21 @@ block	:	block COLONCOLON name
 			    error (_("No function \"%s\" in specified context."),
 				   copy_name ($3));
 			  $$ = SYMBOL_BLOCK_VALUE (tem); }
+	;
+
+variable:	name_not_typename '@' ENTRY
+			{ struct symbol *sym = $1.sym;
+
+			  if (sym == NULL || !SYMBOL_IS_ARGUMENT (sym)
+			      || !symbol_read_needs_frame (sym))
+			    error (_("@entry can be used only for function "
+				     "parameters, not for \"%s\""),
+				   copy_name ($1.stoken));
+
+			  write_exp_elt_opcode (OP_VAR_ENTRY_VALUE);
+			  write_exp_elt_sym (sym);
+			  write_exp_elt_opcode (OP_VAR_ENTRY_VALUE);
+			}
 	;
 
 variable:	block COLONCOLON name
@@ -1317,11 +1340,13 @@ name	:	NAME { $$ = $1.stoken; }
 	|	TYPENAME { $$ = $1.stoken; }
 	|	NAME_OR_INT  { $$ = $1.stoken; }
 	|	UNKNOWN_CPP_NAME  { $$ = $1.stoken; }
+	|	ENTRY { $$ = $1.stoken; }
 	|	operator { $$ = $1; }
 	;
 
 name_not_typename :	NAME
 	|	BLOCKNAME
+	|	ENTRY
 /* These would be useful if name_not_typename was useful, but it is just
    a fake for "variable", so these cause reduce/reduce conflicts because
    the parser can't tell whether NAME_OR_INT is a name_not_typename (=variable,
@@ -2525,6 +2550,11 @@ yylex (void)
   current.token = lex_one_token ();
   if (current.token == NAME)
     current.token = classify_name (expression_context_block);
+  if ((current.token == NAME || current.token == UNKNOWN_CPP_NAME)
+      && yylval.sval.length == strlen ("entry")
+      && strncmp (yylval.sval.ptr, "entry", strlen ("entry")) == 0)
+    current.token = ENTRY;
+
   if (parse_language->la_language != language_cplus
       || (current.token != TYPENAME && current.token != COLONCOLON))
     return current.token;

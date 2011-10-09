@@ -51,7 +51,9 @@ gdb_continue_to_breakpoint "entry: breakhere"
 gdb_test "bt" "^bt\r\n#0 +d *\\(i=31, i@entry=30, j=31\\.5, j@entry=30\\.5\\) \[^\r\n\]*\r\n#1 +0x\[0-9a-f\]+ in main .*" \
 	 "entry: bt"
 gdb_test "p i" " = 31" "entry: p i"
+gdb_test "p i@entry" " = 30" "entry: p i@entry"
 gdb_test "p j" { = 31\.5} "entry: p j"
+gdb_test "p j@entry" { = 30\.5} "entry: p j@entry"
 
 
 # Test @entry values when parameter in function is locexpr (and not loclist).
@@ -76,9 +78,13 @@ gdb_test "bt" "^bt\r\n#0 +stacktest *\\(r1=r1@entry=1, r2=r2@entry=2, \[^\r\n\]+
 	 "entry_stack: bt"
 
 gdb_test "p s1" " = 3" "entry_stack: p s1"
+gdb_test "p s1@entry" " = 11" "entry_stack: p s1@entry"
 gdb_test "p s2" " = 4" "entry_stack: p s2"
+gdb_test "p s2@entry" " = 12" "entry_stack: p s2@entry"
 gdb_test "p d9" " = 3\\.5" "entry_stack: p d9"
+gdb_test "p d9@entry" " = 11\\.5" "entry_stack: p d9@entry"
 gdb_test "p da" " = 4\\.5" "entry_stack: p da"
+gdb_test "p da@entry" " = 12\\.5" "entry_stack: p da@entry"
 
 
 # Test various kinds of `set print entry-values'.
@@ -159,7 +165,9 @@ gdb_continue_to_breakpoint "tailcall: breakhere"
 gdb_test "bt" "^bt\r\n#0 +d *\\(i=71, i@entry=70, j=73\\.5, j@entry=72\\.5\\) \[^\r\n\]*\r\n#1 +0x\[0-9a-f\]+ in c \\(i=i@entry=7, j=j@entry=7\\.25\\) \[^\r\n\]*\r\n#2 +0x\[0-9a-f\]+ in b \\(i=i@entry=5, j=j@entry=5\\.25\\) \[^\r\n\]*\r\n#3 +0x\[0-9a-f\]+ in main \[^\r\n\]*" \
 	 "tailcall: bt"
 gdb_test "p i" " = 71" "tailcall: p i"
+gdb_test "p i@entry" " = 70" "tailcall: p i@entry"
 gdb_test "p j" " = 73\\.5" "tailcall: p j"
+gdb_test "p j@entry" " = 72\\.5" "tailcall: p j@entry"
 
 # Test $sp simulation for tail call frames.
 #gdb_test {p/x $sp} " = 0x.*"

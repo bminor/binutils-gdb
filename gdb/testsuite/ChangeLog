@@ -1,5 +1,16 @@
 2011-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Support @entry in input expressions.
+	* gdb.arch/amd64-entry-value.exp (entry: p i@entry, entry: p j@entry)
+	(entry_stack: p s1@entry, entry_stack: p s2@entry)
+	(entry_stack: p d9@entry, entry_stack: p da@entry, tailcall: p i@entry)
+	(tailcall: p j@entry): New tests.
+	* gdb.cp/koenig.cc (A::entry): New function.
+	(main): Call it.
+	* gdb.cp/koenig.exp (p entry (c)): New test.
+
+2011-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Display @entry parameter values (without references).
 	* gdb.arch/amd64-entry-value.cc (locexpr, stacktest, data, data2)
 	(different, validity, invalid): New functions.

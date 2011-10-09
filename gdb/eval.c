@@ -860,6 +860,27 @@ evaluate_subexp_standard (struct type *expect_type,
 	return ret;
       }
 
+    case OP_VAR_ENTRY_VALUE:
+      (*pos) += 2;
+      if (noside == EVAL_SKIP)
+	goto nosideret;
+
+      {
+	struct symbol *sym = exp->elts[pc + 1].symbol;
+	struct frame_info *frame;
+
+	if (noside == EVAL_AVOID_SIDE_EFFECTS)
+	  return value_zero (SYMBOL_TYPE (sym), not_lval);
+
+	if (SYMBOL_CLASS (sym) != LOC_COMPUTED
+	    || SYMBOL_COMPUTED_OPS (sym)->read_variable_at_entry == NULL)
+	  error (_("Symbol \"%s\" does not have any specific entry value"),
+		 SYMBOL_PRINT_NAME (sym));
+
+	frame = get_selected_frame (NULL);
+	return SYMBOL_COMPUTED_OPS (sym)->read_variable_at_entry (sym, frame);
+      }
+
     case OP_LAST:
       (*pos) += 2;
       return

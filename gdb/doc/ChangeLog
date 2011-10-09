@@ -1,4 +1,10 @@
 2011-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Support @entry in input expressions.
+	* gdb.texinfo (Variables): Describe @entry names suffix.
+	(Print Settings): Add anchor for `set print entry-values'.
+
+2011-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Eli Zaretskii  <eliz@gnu.org>
 
 	Display @entry parameter values (without references).
