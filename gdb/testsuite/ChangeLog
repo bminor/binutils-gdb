@@ -1,5 +1,10 @@
 2011-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* gdb.arch/amd64-entry-value.s: New file.
+	* gdb.mi/mi2-amd64-entry-value.s: New file.
+
+2011-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Display @entry parameter values even for references.
 	* gdb.arch/amd64-entry-value.cc (reference, datap, datap_input): New
 	functions.

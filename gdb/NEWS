@@ -83,6 +83,10 @@
 
 * New commands "info macros", and "info definitions" have been added.
 
+* New function parameters suffix @entry specifies value of function parameter
+  at the time the function got called.  Entry values are available only since
+  gcc version 4.7.
+
 * Changed commands
 
 watch EXPRESSION mask MASK_VALUE
@@ -99,6 +103,19 @@ info auto-load-scripts [REGEXP]
   tracepoints; GDB will display a warning, but will allow the experiment to
   begin, assuming that tracepoints will be enabled as needed while the trace
   is running.
+
+* New options
+
+set print entry-values (both|compact|default|if-needed|no|only|preferred)
+show print entry-values
+  Set printing of frame argument values at function entry.  In some cases
+  GDB can determine the value of function argument which was passed by the
+  function caller, even if the value was modified inside the called function.
+
+set debug entry-values
+show debug entry-values
+  Control display of debugging info for determining frame argument values at
+  function entry and virtual tail call frames.
 
 * New remote packets
 

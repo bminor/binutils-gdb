@@ -3258,15 +3258,11 @@ locexpr_describe_location_piece (struct symbol *symbol, struct ui_file *stream,
 static const gdb_byte *
 disassemble_dwarf_expression (struct ui_file *stream,
 			      struct gdbarch *arch, unsigned int addr_size,
-			      int offset_size,
+			      int offset_size, const gdb_byte *start,
 			      const gdb_byte *data, const gdb_byte *end,
-			      int all,
+			      int indent, int all,
 			      struct dwarf2_per_cu_data *per_cu)
 {
-  const gdb_byte *start = data;
-
-  fprintf_filtered (stream, _("a complex DWARF expression:\n"));
-
   while (data < end
 	 && (all
 	     || (data[0] != DW_OP_piece && data[0] != DW_OP_bit_piece)))
@@ -3281,7 +3277,8 @@ disassemble_dwarf_expression (struct ui_file *stream,
       if (!name)
 	error (_("Unrecognized DWARF opcode 0x%02x at %ld"),
 	       op, (long) (data - 1 - start));
-      fprintf_filtered (stream, "  % 4ld: %s", (long) (data - 1 - start), name);
+      fprintf_filtered (stream, "  %*ld: %s", indent + 4,
+			(long) (data - 1 - start), name);
 
       switch (op)
 	{
@@ -3579,6 +3576,15 @@ disassemble_dwarf_expression (struct ui_file *stream,
 	      }
 	  }
 	  break;
+
+	case DW_OP_GNU_entry_value:
+	  data = read_uleb128 (data, end, &ul);
+	  fputc_filtered ('\n', stream);
+	  disassemble_dwarf_expression (stream, arch, addr_size, offset_size,
+					start, data, data + ul, indent + 2,
+					all, per_cu);
+	  data += ul;
+	  continue;
 	}
 
       fprintf_filtered (stream, "\n");
@@ -3623,11 +3629,15 @@ locexpr_describe_location_1 (struct symbol *symbol, CORE_ADDR addr,
 	    disassemble = 0;
 	}
       if (disassemble)
-	data = disassemble_dwarf_expression (stream,
-					     get_objfile_arch (objfile),
-					     addr_size, offset_size, data, end,
-					     dwarf2_always_disassemble,
-					     per_cu);
+	{
+	  fprintf_filtered (stream, _("a complex DWARF expression:\n"));
+	  data = disassemble_dwarf_expression (stream,
+					       get_objfile_arch (objfile),
+					       addr_size, offset_size, data,
+					       data, end, 0,
+					       dwarf2_always_disassemble,
+					       per_cu);
+	}
 
       if (data < end)
 	{

@@ -1,5 +1,17 @@
 2011-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Entry values NEWS entries, DWARF disassembly support.
+	* NEWS: New entry values entry.
+	(set print entry-values, show print entry-values)
+	(set debug entry-values, show debug entry-values): New entries.
+	* dwarf2loc.c (disassemble_dwarf_expression): New parameters start and
+	indent.  Remove variable start.  Move header printing out.  Respect
+	INDENT.  Support DW_OP_GNU_entry_value.
+	(locexpr_describe_location_1): Move the header printing here, extend
+	the disassemble_dwarf_expression passed parameters.
+
+2011-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Display @entry parameter values even for references.
 	* ada-valprint.c (ada_val_print_1) <TYPE_CODE_REF>: Try also
 	coerce_ref_if_computed.
