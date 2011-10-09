@@ -125,6 +125,10 @@ struct dwarf_expr_context
   /* Target address size in bytes.  */
   int addr_size;
 
+  /* DW_FORM_ref_addr size in bytes.  If -1 DWARF is executed from a frame
+     context and operations depending on DW_FORM_ref_addr are not allowed.  */
+  int ref_addr_size;
+
   /* Offset used to relocate DW_OP_addr argument.  */
   CORE_ADDR offset;
 

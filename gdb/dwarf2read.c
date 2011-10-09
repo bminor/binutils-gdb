@@ -14223,6 +14223,7 @@ decode_locdesc (struct dwarf_block *blk, struct dwarf2_cu *cu)
 
   ctx->gdbarch = get_objfile_arch (objfile);
   ctx->addr_size = cu->header.addr_size;
+  ctx->ref_addr_size = dwarf2_per_cu_ref_addr_size (cu->per_cu);
   ctx->offset = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
   ctx->baton = ctx;
   ctx->funcs = &decode_locdesc_ctx_funcs;
@@ -15311,6 +15312,22 @@ dwarf2_per_cu_offset_size (struct dwarf2_per_cu_data *per_cu)
   cu_headerp = per_cu_header_read_in (&cu_header_local, per_cu);
 
   return cu_headerp->offset_size;
+}
+
+/* See its dwarf2loc.h declaration.  */
+
+int
+dwarf2_per_cu_ref_addr_size (struct dwarf2_per_cu_data *per_cu)
+{
+  struct comp_unit_head cu_header_local;
+  const struct comp_unit_head *cu_headerp;
+
+  cu_headerp = per_cu_header_read_in (&cu_header_local, per_cu);
+
+  if (cu_headerp->version == 2)
+    return cu_headerp->addr_size;
+  else
+    return cu_headerp->offset_size;
 }
 
 /* Return the text offset of the CU.  The returned offset comes from

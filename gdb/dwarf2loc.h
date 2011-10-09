@@ -39,6 +39,10 @@ struct objfile *dwarf2_per_cu_objfile (struct dwarf2_per_cu_data *cu);
 /* Return the address size given in the compilation unit header for CU.  */
 CORE_ADDR dwarf2_per_cu_addr_size (struct dwarf2_per_cu_data *cu);
 
+/* Return the DW_FORM_ref_addr size given in the compilation unit header for
+   CU.  */
+int dwarf2_per_cu_ref_addr_size (struct dwarf2_per_cu_data *cu);
+
 /* Return the offset size given in the compilation unit header for CU.  */
 int dwarf2_per_cu_offset_size (struct dwarf2_per_cu_data *cu);
 

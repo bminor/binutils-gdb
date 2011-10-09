@@ -1118,6 +1118,7 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 
   ctx->gdbarch = get_objfile_arch (objfile);
   ctx->addr_size = dwarf2_per_cu_addr_size (per_cu);
+  ctx->ref_addr_size = dwarf2_per_cu_ref_addr_size (per_cu);
   ctx->offset = dwarf2_per_cu_text_offset (per_cu);
   ctx->baton = &baton;
   ctx->funcs = &dwarf_expr_ctx_funcs;
@@ -1398,6 +1399,7 @@ dwarf2_loc_desc_needs_frame (const gdb_byte *data, unsigned short size,
 
   ctx->gdbarch = get_objfile_arch (objfile);
   ctx->addr_size = dwarf2_per_cu_addr_size (per_cu);
+  ctx->ref_addr_size = dwarf2_per_cu_ref_addr_size (per_cu);
   ctx->offset = dwarf2_per_cu_text_offset (per_cu);
   ctx->baton = &baton;
   ctx->funcs = &needs_frame_ctx_funcs;

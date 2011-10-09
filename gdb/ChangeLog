@@ -1,5 +1,18 @@
 2011-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Fix DW_OP_GNU_implicit_pointer for DWARF32 v3+ on 64-bit arches.
+	* dwarf2-frame.c (execute_stack_op): Initialize ctx->ref_addr_size.
+	* dwarf2expr.c (execute_stack_op) <DW_OP_GNU_implicit_pointer>: Use
+	ctx->ref_addr_size.  Handle its invalid value.
+	* dwarf2expr.h (struct dwarf_expr_context): New field ref_addr_size.
+	* dwarf2loc.c (dwarf2_evaluate_loc_desc_full)
+	(dwarf2_loc_desc_needs_frame): Initialize ctx->ref_addr_size.
+	* dwarf2loc.h (dwarf2_per_cu_ref_addr_size): New declaration.
+	* dwarf2read.c (decode_locdesc): Initialize ctx->ref_addr_size.
+	(dwarf2_per_cu_ref_addr_size): New function.
+
+2011-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Code cleanup.
 	* dwarf2read.c (per_cu_header_read_in): New function.
 	(dwarf2_per_cu_addr_size, dwarf2_per_cu_offset_size): Use it, with new

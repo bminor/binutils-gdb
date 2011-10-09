@@ -709,10 +709,14 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	    ULONGEST die;
 	    LONGEST len;
 
+	    if (ctx->ref_addr_size == -1)
+	      error (_("DWARF-2 expression error: DW_OP_GNU_implicit_pointer "
+		       "is not allowed in frame context"));
+
 	    /* The referred-to DIE.  */
-	    ctx->len = extract_unsigned_integer (op_ptr, ctx->addr_size,
+	    ctx->len = extract_unsigned_integer (op_ptr, ctx->ref_addr_size,
 						 byte_order);
-	    op_ptr += ctx->addr_size;
+	    op_ptr += ctx->ref_addr_size;
 
 	    /* The byte offset into the data.  */
 	    op_ptr = read_sleb128 (op_ptr, op_end, &len);

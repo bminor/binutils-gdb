@@ -371,6 +371,7 @@ execute_stack_op (const gdb_byte *exp, ULONGEST len, int addr_size,
 
   ctx->gdbarch = get_frame_arch (this_frame);
   ctx->addr_size = addr_size;
+  ctx->ref_addr_size = -1;
   ctx->offset = offset;
   ctx->baton = this_frame;
   ctx->funcs = &dwarf2_frame_ctx_funcs;
