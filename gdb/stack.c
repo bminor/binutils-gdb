@@ -350,7 +350,8 @@ read_frame_arg (struct symbol *sym, struct frame_info *frame,
 	      if (!value_optimized_out (val)
 		  && value_available_contents_eq (val, 0, entryval, 0, len))
 		{
-		  struct value *val_deref, *entryval_deref;
+		  /* Initialize it just to avoid a GCC false warning.  */
+		  struct value *val_deref = NULL, *entryval_deref;
 
 		  /* DW_AT_GNU_call_site_value does match with the current
 		     value.  If it is a reference still try to verify if

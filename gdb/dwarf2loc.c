@@ -833,7 +833,8 @@ dwarf_expr_reg_to_entry_parameter (struct frame_info *frame, int dwarf_reg,
   int iparams;
   struct value *val;
   struct dwarf2_locexpr_baton *dwarf_block;
-  struct call_site_parameter *parameter;
+  /* Initialize it just to avoid a GCC false warning.  */
+  struct call_site_parameter *parameter = NULL;
   CORE_ADDR target_addr;
 
   if (gdbarch != frame_unwind_arch (frame))

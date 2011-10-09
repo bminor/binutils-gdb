@@ -1,5 +1,11 @@
 2011-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Fix compatibility with older GCCs.
+	* dwarf2loc.c (dwarf_expr_reg_to_entry_parameter): Initialize parameter.
+	* stack.c (read_frame_arg): Initialize val_deref.
+
+2011-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Entry values NEWS entries, DWARF disassembly support.
 	* NEWS: New entry values entry.
 	(set print entry-values, show print entry-values)
