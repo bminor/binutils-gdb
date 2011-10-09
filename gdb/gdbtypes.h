@@ -902,6 +902,13 @@ struct func_type
        this is only fetched from the Dwarf-2 DW_AT_calling_convention
        attribute.  */
     unsigned calling_convention;
+
+    /* Only those DW_TAG_GNU_call_site's in this function that have
+       DW_AT_GNU_tail_call set are linked in this list.  Function without its
+       tail call list complete (DW_AT_GNU_all_tail_call_sites or its superset
+       DW_AT_GNU_all_call_sites) has TAIL_CALL_LIST NULL, even if some
+       DW_TAG_GNU_call_site's exist in such function. */
+    struct call_site *tail_call_list;
   };
 
 /* A place where a function gets called from, represented by
@@ -912,6 +919,9 @@ struct call_site
     /* Address of the first instruction after this call.  It must be the first
        field as we overload core_addr_hash and core_addr_eq for it.  */
     CORE_ADDR pc;
+
+    /* List successor with head in FUNC_TYPE.TAIL_CALL_LIST.  */
+    struct call_site *tail_call_next;
 
     /* Describe DW_AT_GNU_call_site_target.  Missing attribute uses
        FIELD_LOC_KIND_DWARF_BLOCK with FIELD_DWARF_BLOCK == NULL.  */
@@ -1060,6 +1070,7 @@ extern void allocate_gnat_aux_type (struct type *);
 #define TYPE_GNAT_SPECIFIC(thistype) TYPE_MAIN_TYPE(thistype)->type_specific.gnat_stuff
 #define TYPE_DESCRIPTIVE_TYPE(thistype) TYPE_GNAT_SPECIFIC(thistype)->descriptive_type
 #define TYPE_CALLING_CONVENTION(thistype) TYPE_MAIN_TYPE(thistype)->type_specific.func_stuff->calling_convention
+#define TYPE_TAIL_CALL_LIST(thistype) TYPE_MAIN_TYPE(thistype)->type_specific.func_stuff->tail_call_list
 #define TYPE_BASECLASS(thistype,index) TYPE_FIELD_TYPE(thistype, index)
 #define TYPE_N_BASECLASSES(thistype) TYPE_CPLUS_SPECIFIC(thistype)->n_baseclasses
 #define TYPE_BASECLASS_NAME(thistype,index) TYPE_FIELD_NAME(thistype, index)

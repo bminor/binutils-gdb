@@ -6209,6 +6209,53 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
   memset (call_site, 0, sizeof (*call_site) - sizeof (*call_site->parameter));
   call_site->pc = pc;
 
+  if (dwarf2_flag_true_p (die, DW_AT_GNU_tail_call, cu))
+    {
+      struct die_info *func_die;
+
+      /* Skip also over DW_TAG_inlined_subroutine.  */
+      for (func_die = die->parent;
+	   func_die && func_die->tag != DW_TAG_subprogram
+	   && func_die->tag != DW_TAG_subroutine_type;
+	   func_die = func_die->parent);
+
+      /* DW_AT_GNU_all_call_sites is a superset
+	 of DW_AT_GNU_all_tail_call_sites.  */
+      if (func_die
+          && !dwarf2_flag_true_p (func_die, DW_AT_GNU_all_call_sites, cu)
+	  && !dwarf2_flag_true_p (func_die, DW_AT_GNU_all_tail_call_sites, cu))
+	{
+	  /* TYPE_TAIL_CALL_LIST is not interesting in functions where it is
+	     not complete.  But keep CALL_SITE for look ups via call_site_htab,
+	     both the initial caller containing the real return address PC and
+	     the final callee containing the current PC of a chain of tail
+	     calls do not need to have the tail call list complete.  But any
+	     function candidate for a virtual tail call frame searched via
+	     TYPE_TAIL_CALL_LIST must have the tail call list complete to be
+	     determined unambiguously.  */
+	}
+      else
+	{
+	  struct type *func_type = NULL;
+
+	  if (func_die)
+	    func_type = get_die_type (func_die, cu);
+	  if (func_type != NULL)
+	    {
+	      gdb_assert (TYPE_CODE (func_type) == TYPE_CODE_FUNC);
+
+	      /* Enlist this call site to the function.  */
+	      call_site->tail_call_next = TYPE_TAIL_CALL_LIST (func_type);
+	      TYPE_TAIL_CALL_LIST (func_type) = call_site;
+	    }
+	  else
+	    complaint (&symfile_complaints,
+		       _("Cannot find function owning DW_TAG_GNU_call_site "
+			 "DIE 0x%x [in module %s]"),
+		       die->offset, cu->objfile->name);
+	}
+    }
+
   attr = dwarf2_attr (die, DW_AT_GNU_call_site_target, cu);
   if (attr == NULL)
     attr = dwarf2_attr (die, DW_AT_abstract_origin, cu);
