@@ -6346,10 +6346,13 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
 	}
       parameter->dwarf_reg = dwarf_block_to_dwarf_reg (DW_BLOCK (attr)->data,
 				 &DW_BLOCK (attr)->data[DW_BLOCK (attr)->size]);
-      if (parameter->dwarf_reg == -1)
+      if (parameter->dwarf_reg == -1
+	  && !dwarf_block_to_sp_offset (gdbarch, DW_BLOCK (attr)->data,
+				  &DW_BLOCK (attr)->data[DW_BLOCK (attr)->size],
+					&parameter->fb_offset))
 	{
 	  complaint (&symfile_complaints,
-		     _("Only single DW_OP_reg is supported "
+		     _("Only single DW_OP_reg or DW_OP_fbreg is supported "
 		       "for DW_FORM_block* DW_AT_location for "
 		       "DW_TAG_GNU_call_site child DIE 0x%x [in module %s]"),
 		     child_die->offset, cu->objfile->name);

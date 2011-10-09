@@ -281,4 +281,11 @@ void ctx_no_push_dwarf_reg_entry_value (struct dwarf_expr_context *ctx,
 
 int dwarf_block_to_dwarf_reg (const gdb_byte *buf, const gdb_byte *buf_end);
 
+int dwarf_block_to_fb_offset (const gdb_byte *buf, const gdb_byte *buf_end,
+			      CORE_ADDR *fb_offset_return);
+
+int dwarf_block_to_sp_offset (struct gdbarch *gdbarch, const gdb_byte *buf,
+			      const gdb_byte *buf_end,
+			      CORE_ADDR *sp_offset_return);
+
 #endif /* dwarf2expr.h */

@@ -1,5 +1,53 @@
 2011-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Display @entry parameter values (without references).
+	* dwarf2expr.c (dwarf_block_to_fb_offset, dwarf_block_to_sp_offset):
+	New functions.
+	* dwarf2expr.h (dwarf_block_to_fb_offset, dwarf_block_to_sp_offset):
+	New declarations.
+	* dwarf2loc.c (dwarf2_find_location_expression): Support location list
+	entry record.
+	(dwarf_entry_parameter_to_value, value_of_dwarf_reg_entry)
+	(value_of_dwarf_block_entry, locexpr_read_variable_at_entry): New
+	functions.
+	(dwarf2_locexpr_funcs): Install locexpr_read_variable_at_entry.
+	(loclist_read_variable_at_entry): New function.
+	(dwarf2_loclist_funcs): Install loclist_read_variable_at_entry.
+	* dwarf2read.c (read_call_site_scope): Support also DW_OP_fbreg in
+	DW_AT_location, call dwarf_block_to_sp_offset for it.
+	* frame.h (print_entry_values_no, print_entry_values_only)
+	(print_entry_values_preferred, print_entry_values_if_needed)
+	(print_entry_values_both, print_entry_values_compact)
+	(print_entry_values_default, print_entry_values): New declarations.
+	(struct frame_arg): New field entry_kind.
+	(read_frame_arg): New parameter entryargp.
+	* mi/mi-cmd-stack.c (list_arg_or_local): New gdb_assert for
+	arg->entry_kind.  Optionally print the `@entry' suffix.
+	(list_args_or_locals): New variable entryarg, initialize it.
+	Initialize also entry_kind of arg and entryarg.  Conditionalize
+	list_arg_or_local for arg, add list_arg_or_local for entryarg.  Call
+	xfree for entryarg.error.
+	* stack.c (print_entry_values_no, print_entry_values_only)
+	(print_entry_values_preferred, print_entry_values_if_needed)
+	(print_entry_values_both, print_entry_values_compact)
+	(print_entry_values_default, print_entry_values_choices)
+	(print_entry_values): New variables.
+	(print_frame_arg): New gdb_assert for arg->entry_kind.  Optionally
+	print the `@entry' suffix, possibly in combination for
+	print_entry_values_compact.
+	(read_frame_arg): New parameter entryargp, new variables entryval,
+	entryval_error and val_equal.  Read in also entryargp, respect
+	print_entry_values, compare the values using val_equal, fill in also
+	argp->entry_kind (together with entryargp->entry_kind).
+	(print_frame_args): New variable entryarg, initialize it.
+	Conditionalize print_frame_arg for arg, add print_frame_arg for
+	entryarg.  Call xfree for entryarg.error.
+	(_initialize_stack): Call add_setshow_enum_cmd for `entry-values'.
+	* symtab.h (struct symbol_computed_ops): New field
+	read_variable_at_entry.
+
+2011-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Code reshuffle.
 	* frame.h (struct frame_arg): New definition.
 	(read_frame_arg): New declaration.

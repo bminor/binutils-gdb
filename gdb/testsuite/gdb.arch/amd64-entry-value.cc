@@ -35,6 +35,13 @@ asm ("breakhere:");
 }
 
 static void __attribute__((noinline, noclone))
+locexpr (int i)
+{
+  i = i;
+asm ("breakhere_locexpr:");
+}
+
+static void __attribute__((noinline, noclone))
 c (int i, double j)
 {
   d (i * 10, j * 10);
@@ -114,10 +121,68 @@ self (int i)
     }
 }
 
+static void __attribute__((noinline, noclone))
+stacktest (int r1, int r2, int r3, int r4, int r5, int r6, int s1, int s2,
+	   double d1, double d2, double d3, double d4, double d5, double d6,
+	   double d7, double d8, double d9, double da)
+{
+  s1 = 3;
+  s2 = 4;
+  d9 = 3.5;
+  da = 4.5;
+  e (v, v);
+asm ("breakhere_stacktest:");
+  e (v, v);
+}
+
+static int __attribute__((noinline, noclone))
+data (void)
+{
+  return 10;
+}
+
+static int __attribute__((noinline, noclone))
+data2 (void)
+{
+  return 20;
+}
+
+static int __attribute__((noinline, noclone))
+different (int val)
+{
+  val++;
+  e (val, val);
+asm ("breakhere_different:");
+  return val;
+}
+
+static int __attribute__((noinline, noclone))
+validity (int lost, int born)
+{
+  lost = data ();
+  e (0, 0.0);
+asm ("breakhere_validity:");
+  return born;
+}
+
+static void __attribute__((noinline, noclone))
+invalid (int inv)
+{
+  e (0, 0.0);
+asm ("breakhere_invalid:");
+}
+
 int
 main ()
 {
   d (30, 30.5);
+  locexpr (30);
+  stacktest (1, 2, 3, 4, 5, 6, 11, 12,
+	     1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 11.5, 12.5);
+  different (5);
+  validity (5, data ());
+  invalid (data2 ());
+
   if (v)
     a (1, 1.25);
   else

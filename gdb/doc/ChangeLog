@@ -1,6 +1,15 @@
 2011-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Eli Zaretskii  <eliz@gnu.org>
 
+	Display @entry parameter values (without references).
+	* gdb.texinfo (Tail Call Frames): Add anchor.  Add self tail call
+	example.
+	(Print Settings): New description of set print entry-values and show
+	print entry-values.
+
+2011-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Eli Zaretskii  <eliz@gnu.org>
+
 	Recognize virtual tail call frames.
 	* gdb.texinfo (Optimized Code): Add reference to Tail Call Frames.
 	(Tail Call Frames): New node.

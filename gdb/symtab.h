@@ -533,6 +533,12 @@ struct symbol_computed_ops
   struct value *(*read_variable) (struct symbol * symbol,
 				  struct frame_info * frame);
 
+  /* Read variable SYMBOL like read_variable at (callee) FRAME's function
+     entry.  SYMBOL should be a function parameter, otherwise
+     NO_ENTRY_VALUE_ERROR will be thrown.  */
+  struct value *(*read_variable_at_entry) (struct symbol *symbol,
+					   struct frame_info *frame);
+
   /* Return non-zero if we need a frame to find the value of the SYMBOL.  */
   int (*read_needs_frame) (struct symbol * symbol);
 

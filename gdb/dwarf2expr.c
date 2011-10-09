@@ -518,6 +518,68 @@ dwarf_block_to_dwarf_reg (const gdb_byte *buf, const gdb_byte *buf_end)
   return dwarf_reg;
 }
 
+/* If <BUF..BUF_END] contains DW_FORM_block* with single DW_OP_fbreg(X) fill
+   in FB_OFFSET_RETURN with the X offset and return 1.  Otherwise return 0.  */
+
+int
+dwarf_block_to_fb_offset (const gdb_byte *buf, const gdb_byte *buf_end,
+			  CORE_ADDR *fb_offset_return)
+{
+  LONGEST fb_offset;
+
+  if (buf_end <= buf)
+    return 0;
+
+  if (*buf != DW_OP_fbreg)
+    return 0;
+  buf++;
+
+  buf = read_sleb128 (buf, buf_end, &fb_offset);
+  *fb_offset_return = fb_offset;
+  if (buf != buf_end || fb_offset != (LONGEST) *fb_offset_return)
+    return 0;
+
+  return 1;
+}
+
+/* If <BUF..BUF_END] contains DW_FORM_block* with single DW_OP_bregSP(X) fill
+   in SP_OFFSET_RETURN with the X offset and return 1.  Otherwise return 0.
+   The matched SP register number depends on GDBARCH.  */
+
+int
+dwarf_block_to_sp_offset (struct gdbarch *gdbarch, const gdb_byte *buf,
+			  const gdb_byte *buf_end, CORE_ADDR *sp_offset_return)
+{
+  ULONGEST dwarf_reg;
+  LONGEST sp_offset;
+
+  if (buf_end <= buf)
+    return 0;
+  if (*buf >= DW_OP_breg0 && *buf <= DW_OP_breg31)
+    {
+      dwarf_reg = *buf - DW_OP_breg0;
+      buf++;
+    }
+  else
+    {
+      if (*buf != DW_OP_bregx)
+       return 0;
+      buf++;
+      buf = read_uleb128 (buf, buf_end, &dwarf_reg);
+    }
+
+  if (gdbarch_dwarf2_reg_to_regnum (gdbarch, dwarf_reg)
+      != gdbarch_sp_regnum (gdbarch))
+    return 0;
+
+  buf = read_sleb128 (buf, buf_end, &sp_offset);
+  *sp_offset_return = sp_offset;
+  if (buf != buf_end || sp_offset != (LONGEST) *sp_offset_return)
+    return 0;
+
+  return 1;
+}
+
 /* The engine for the expression evaluator.  Using the context in CTX,
    evaluate the expression between OP_PTR and OP_END.  */
 

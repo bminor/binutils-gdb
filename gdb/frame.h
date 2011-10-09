@@ -712,6 +712,15 @@ extern int frame_register_read (struct frame_info *frame, int regnum,
 
 /* From stack.c.  */
 
+extern const char print_entry_values_no[];
+extern const char print_entry_values_only[];
+extern const char print_entry_values_preferred[];
+extern const char print_entry_values_if_needed[];
+extern const char print_entry_values_both[];
+extern const char print_entry_values_compact[];
+extern const char print_entry_values_default[];
+extern const char *print_entry_values;
+
 /* Inferior function parameter value read in from a frame.  */
 
 struct frame_arg
@@ -726,10 +735,22 @@ struct frame_arg
   /* String containing the error message, it is more usually NULL indicating no
      error occured reading this parameter.  */
   char *error;
+
+  /* One of the print_entry_values_* entries as appropriate specifically for
+     this frame_arg.  It will be different from print_entry_values.  With
+     print_entry_values_no this frame_arg should be printed as a normal
+     parameter.  print_entry_values_only says it should be printed as entry
+     value parameter.  print_entry_values_compact says it should be printed as
+     both as a normal parameter and entry values parameter having the same
+     value - print_entry_values_compact is not permitted fi ui_out_is_mi_like_p
+     (in such case print_entry_values_no and print_entry_values_only is used
+     for each parameter kind specifically.  */
+  const char *entry_kind;
 };
 
 extern void read_frame_arg (struct symbol *sym, struct frame_info *frame,
-			    struct frame_arg *argp);
+			    struct frame_arg *argp,
+			    struct frame_arg *entryargp);
 
 extern void args_info (char *, int);
 

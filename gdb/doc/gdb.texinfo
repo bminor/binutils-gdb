@@ -7941,6 +7941,120 @@ thus speeding up the display of each Ada frame.
 @item show print frame-arguments
 Show how the value of arguments should be displayed when printing a frame.
 
+@item set print entry-values @var{value}
+@kindex set print entry-values
+Set printing of frame argument values at function entry.  In some cases
+@value{GDBN} can determine the value of function argument which was passed by
+the function caller, even if the value was modified inside the called function
+and therefore is different.  With optimized code, the current value could be
+unavailable, but the entry value may still be known.
+
+The default value is @code{default} (see below for its description).  Older
+@value{GDBN} behaved as with the setting @code{no}.  Compilers not supporting
+this feature will behave in the @code{default} setting the same way as with the
+@code{no} setting.
+
+This functionality is currently supported only by DWARF 2 debugging format and
+the compiler has to produce @samp{DW_TAG_GNU_call_site} tags.  With
+@value{NGCC}, you need to specify @option{-O -g} during compilation, to get
+this information.
+
+The @var{value} parameter can be one of the following:
+
+@table @code
+@item no
+Print only actual parameter values, never print values from function entry
+point.
+@smallexample
+#0  equal (val=5)
+#0  different (val=6)
+#0  lost (val=<optimized out>)
+#0  born (val=10)
+#0  invalid (val=<optimized out>)
+@end smallexample
+
+@item only
+Print only parameter values from function entry point.  The actual parameter
+values are never printed.
+@smallexample
+#0  equal (val@@entry=5)
+#0  different (val@@entry=5)
+#0  lost (val@@entry=5)
+#0  born (val@@entry=<optimized out>)
+#0  invalid (val@@entry=<optimized out>)
+@end smallexample
+
+@item preferred
+Print only parameter values from function entry point.  If value from function
+entry point is not known while the actual value is known, print the actual
+value for such parameter.
+@smallexample
+#0  equal (val@@entry=5)
+#0  different (val@@entry=5)
+#0  lost (val@@entry=5)
+#0  born (val=10)
+#0  invalid (val@@entry=<optimized out>)
+@end smallexample
+
+@item if-needed
+Print actual parameter values.  If actual parameter value is not known while
+value from function entry point is known, print the entry point value for such
+parameter.
+@smallexample
+#0  equal (val=5)
+#0  different (val=6)
+#0  lost (val@@entry=5)
+#0  born (val=10)
+#0  invalid (val=<optimized out>)
+@end smallexample
+
+@item both
+Always print both the actual parameter value and its value from function entry
+point, even if values of one or both are not available due to compiler
+optimizations.
+@smallexample
+#0  equal (val=5, val@@entry=5)
+#0  different (val=6, val@@entry=5)
+#0  lost (val=<optimized out>, val@@entry=5)
+#0  born (val=10, val@@entry=<optimized out>)
+#0  invalid (val=<optimized out>, val@@entry=<optimized out>)
+@end smallexample
+
+@item compact
+Print the actual parameter value if it is known and also its value from
+function entry point if it is known.  If neither is known, print for the actual
+value @code{<optimized out>}.  If not in MI mode (@pxref{GDB/MI}) and if both
+values are known and identical, print the shortened
+@code{param=param@@entry=VALUE} notation.
+@smallexample
+#0  equal (val=val@@entry=5)
+#0  different (val=6, val@@entry=5)
+#0  lost (val@@entry=5)
+#0  born (val=10)
+#0  invalid (val=<optimized out>)
+@end smallexample
+
+@item default
+Always print the actual parameter value.  Print also its value from function
+entry point, but only if it is known.  If not in MI mode (@pxref{GDB/MI}) and
+if both values are known and identical, print the shortened
+@code{param=param@@entry=VALUE} notation.
+@smallexample
+#0  equal (val=val@@entry=5)
+#0  different (val=6, val@@entry=5)
+#0  lost (val=<optimized out>, val@@entry=5)
+#0  born (val=10)
+#0  invalid (val=<optimized out>)
+@end smallexample
+@end table
+
+For analysis messages on possible failures of frame argument values at function
+entry resolution see @ref{set debug entry-values}.
+
+@item show print entry-values
+Show the method being used for printing of frame argument values at function
+entry.
+
 @item set print repeats
 @cindex repeated array elements
 Set the threshold for suppressing display of repeated array
@@ -9600,6 +9714,7 @@ tries to show at least all the unambiguous top tail callers and all the
 unambiguous bottom tail calees, if any.
 
 @table @code
+@anchor{set debug entry-values}
 @item set debug entry-values
 @kindex set debug entry-values
 When set to on, enables printing of analysis messages for both frame argument
@@ -9674,6 +9789,32 @@ For the frame of function @code{b} in both cases there are different possible
 also ambigous.  The only non-ambiguous frame is the one for function @code{a},
 therefore this one is displayed to the user while the ambiguous frames are
 omitted.
+
+There can be also reasons why printing of frame argument values at function
+entry may fail:
+
+@smallexample
+int v;
+static void __attribute__((noinline, noclone)) c (int i) @{ v++; @}
+static void __attribute__((noinline, noclone)) a (int i);
+static void __attribute__((noinline, noclone)) b (int i) @{ a (i); @}
+static void __attribute__((noinline, noclone)) a (int i)
+@{ if (i) b (i - 1); else c (0); @}
+int main (void) @{ a (5); return 0; @}
+
+(gdb) bt
+#0  c (i=i@@entry=0) at t.c:2
+#1  0x0000000000400428 in a (DW_OP_GNU_entry_value resolving has found
+function "a" at 0x400420 can call itself via tail calls
+i=<optimized out>) at t.c:6
+#2  0x000000000040036e in main () at t.c:7
+@end smallexample
+
+@value{GDBN} cannot find out from the inferior state if and how many times did
+function @code{a} call itself (via function @code{b}) as these calls would be
+tail calls.  Such tail calls would modify thue @code{i} variable, therefore
+@value{GDBN} cannot be sure the value it knows would be right - @value{GDBN}
+prints @code{<optimized out>} instead.
 
 @node Macros
 @chapter C Preprocessor Macros

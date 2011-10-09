@@ -1,5 +1,24 @@
 2011-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Display @entry parameter values (without references).
+	* gdb.arch/amd64-entry-value.cc (locexpr, stacktest, data, data2)
+	(different, validity, invalid): New functions.
+	(main): Call them.
+	* gdb.arch/amd64-entry-value.exp: New breakpoints breakhere_locexpr,
+	stacktest, breakhere_stacktest, different, breakhere_different,
+	breakhere_validity and breakhere_invalid.
+	(entry: bt): Update for @entry.
+	(entry_locexpr: *, entry_stack: *, entry_equal: *, entry_different: *)
+	(entry_validity: *, entry_invalid: *): Many new tests.
+	* gdb.base/break.exp
+	(run until breakpoint set at small function, optimized file): Accept
+	also the @entry suffix.
+	* gdb.mi/Makefile.in (PROGS): Add mi2-amd64-entry-value.
+	* gdb.mi/mi2-amd64-entry-value.c: New files.
+	* gdb.mi/mi2-amd64-entry-value.exp: New files.
+
+2011-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Protect entry values against self tail calls.
 	* gdb.arch/amd64-entry-value.cc (self2, self): New.
 	(main): Call self.

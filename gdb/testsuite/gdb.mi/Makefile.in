@@ -9,7 +9,8 @@ PROGS = basics c_variable cpp_variable var-cmd dw2-ref-missing-frame	\
 	mi-pending mi-pthreads mi-read-memory mi-regs mi-return		\
 	mi-reverse mi-simplerun mi-stack mi-stepi mi-syn-frame		\
 	mi-var-block mi-var-child mi-var-cmd mi-var-cp mi-var-display	\
-	mi-var-invalidate mi-var-invalidate_bis mi-watch mi2-basics	\
+	mi-var-invalidate mi-var-invalidate_bis mi-watch		\
+	mi2-amd64-entry-value mi2-basics				\
 	mi2-break mi2-cli mi2-disassemble mi2-eval mi2-file		\
 	mi2-pthreads mi2-regs mi2-return mi2-simplerun mi2-stepi	\
 	mi2-var-block mi2-var-child mi2-var-cmd mi2-var-display		\

@@ -121,6 +121,24 @@ dwarf2_find_location_expression (struct dwarf2_loclist_baton *baton,
       length = extract_unsigned_integer (loc_ptr, 2, byte_order);
       loc_ptr += 2;
 
+      if (low == high && pc == low)
+	{
+	  /* This is entry PC record present only at entry point
+	     of a function.  Verify it is really the function entry point.  */
+
+	  struct block *pc_block = block_for_pc (pc);
+	  struct symbol *pc_func = NULL;
+
+	  if (pc_block)
+	    pc_func = block_linkage_function (pc_block);
+
+	  if (pc_func && pc == BLOCK_START (SYMBOL_BLOCK_VALUE (pc_func)))
+	    {
+	      *locexpr_length = length;
+	      return loc_ptr;
+	    }
+	}
+
       if (pc >= low && pc < high)
 	{
 	  *locexpr_length = length;
@@ -892,6 +910,33 @@ dwarf_expr_reg_to_entry_parameter (struct frame_info *frame, int dwarf_reg,
   return parameter;
 }
 
+/* Return value for PARAMETER for DW_AT_GNU_call_site_value.
+
+   TYPE and CALLER_FRAME specify how to evaluate the DWARF block into returned
+   struct value.
+
+   Function always returns non-NULL, non-optimized out value.  It throws
+   NO_ENTRY_VALUE_ERROR if it cannot resolve the value for any reason.  */
+
+static struct value *
+dwarf_entry_parameter_to_value (struct call_site_parameter *parameter,
+				struct type *type,
+				struct frame_info *caller_frame,
+				struct dwarf2_per_cu_data *per_cu)
+{
+  gdb_byte *data;
+
+  /* DW_AT_GNU_call_site_value is a DWARF expression, not a DWARF
+     location.  Postprocessing of DWARF_VALUE_MEMORY would lose the type from
+     DWARF block.  */
+  data = alloca (parameter->value_size + 1);
+  memcpy (data, parameter->value, parameter->value_size);
+  data[parameter->value_size] = DW_OP_stack_value;
+
+  return dwarf2_evaluate_loc_desc (type, caller_frame, data,
+				   parameter->value_size + 1, per_cu);
+}
+
 /* Execute call_site_parameter's DWARF block for caller of the CTX's frame.
    CTX must be of dwarf_expr_ctx_funcs kind.  See DWARF_REG and FB_OFFSET
    description at struct dwarf_expr_context_funcs->push_dwarf_reg_entry_value.
@@ -940,6 +985,58 @@ dwarf_expr_push_dwarf_reg_entry_value (struct dwarf_expr_context *ctx,
   ctx->addr_size = saved_ctx.addr_size;
   ctx->offset = saved_ctx.offset;
   ctx->baton = saved_ctx.baton;
+}
+
+/* Read parameter of TYPE at (callee) FRAME's function entry.  DWARF_REG and
+   FB_OFFSET are used to match DW_AT_location at the caller's
+   DW_TAG_GNU_call_site_parameter.  See DWARF_REG and FB_OFFSET description at
+   struct dwarf_expr_context_funcs->push_dwarf_reg_entry_value.
+
+   Function always returns non-NULL value.  It throws NO_ENTRY_VALUE_ERROR if it
+   cannot resolve the parameter for any reason.  */
+
+static struct value *
+value_of_dwarf_reg_entry (struct type *type, struct frame_info *frame,
+			  int dwarf_reg, CORE_ADDR fb_offset)
+{
+  struct frame_info *caller_frame = get_prev_frame (frame);
+  struct call_site_parameter *parameter;
+  struct dwarf2_per_cu_data *caller_per_cu;
+
+  parameter = dwarf_expr_reg_to_entry_parameter (frame, dwarf_reg, fb_offset,
+						 &caller_per_cu);
+
+  return dwarf_entry_parameter_to_value (parameter, type, caller_frame,
+					 caller_per_cu);
+}
+
+/* Read parameter of TYPE at (callee) FRAME's function entry.  DATA and
+   SIZE are DWARF block used to match DW_AT_location at the caller's
+   DW_TAG_GNU_call_site_parameter.
+
+   Function always returns non-NULL value.  It throws NO_ENTRY_VALUE_ERROR if it
+   cannot resolve the parameter for any reason.  */
+
+static struct value *
+value_of_dwarf_block_entry (struct type *type, struct frame_info *frame,
+			    const gdb_byte *block, size_t block_len)
+{
+  int dwarf_reg;
+  CORE_ADDR fb_offset;
+
+  dwarf_reg = dwarf_block_to_dwarf_reg (block, block + block_len);
+  if (dwarf_reg != -1)
+    return value_of_dwarf_reg_entry (type, frame, dwarf_reg, 0 /* unused */);
+
+  if (dwarf_block_to_fb_offset (block, block + block_len, &fb_offset))
+    return value_of_dwarf_reg_entry (type, frame, -1, fb_offset);
+
+  /* This can normally happen - throw NO_ENTRY_VALUE_ERROR to get the message
+     suppressed during normal operation.  The expression can be arbitrary if
+     there is no caller-callee entry value binding expected.  */
+  throw_error (NO_ENTRY_VALUE_ERROR,
+	       _("DWARF-2 expression error: DW_OP_GNU_entry_value is supported "
+		 "only for single DW_OP_reg* or for DW_OP_fbreg(*)"));
 }
 
 struct piece_closure
@@ -2853,6 +2950,19 @@ locexpr_read_variable (struct symbol *symbol, struct frame_info *frame)
   return val;
 }
 
+/* Return the value of SYMBOL in FRAME at (callee) FRAME's function
+   entry.  SYMBOL should be a function parameter, otherwise NO_ENTRY_VALUE_ERROR
+   will be thrown.  */
+
+static struct value *
+locexpr_read_variable_at_entry (struct symbol *symbol, struct frame_info *frame)
+{
+  struct dwarf2_locexpr_baton *dlbaton = SYMBOL_LOCATION_BATON (symbol);
+
+  return value_of_dwarf_block_entry (SYMBOL_TYPE (symbol), frame, dlbaton->data,
+				     dlbaton->size);
+}
+
 /* Return non-zero iff we need a frame to evaluate SYMBOL.  */
 static int
 locexpr_read_needs_frame (struct symbol *symbol)
@@ -3494,6 +3604,7 @@ locexpr_tracepoint_var_ref (struct symbol *symbol, struct gdbarch *gdbarch,
    evaluator.  */
 const struct symbol_computed_ops dwarf2_locexpr_funcs = {
   locexpr_read_variable,
+  locexpr_read_variable_at_entry,
   locexpr_read_needs_frame,
   locexpr_describe_location,
   locexpr_tracepoint_var_ref
@@ -3522,6 +3633,32 @@ loclist_read_variable (struct symbol *symbol, struct frame_info *frame)
 				    dlbaton->per_cu);
 
   return val;
+}
+
+/* Read variable SYMBOL like loclist_read_variable at (callee) FRAME's function
+   entry.  SYMBOL should be a function parameter, otherwise NO_ENTRY_VALUE_ERROR
+   will be thrown.
+
+   Function always returns non-NULL value, it may be marked optimized out if
+   inferior frame information is not available.  It throws NO_ENTRY_VALUE_ERROR
+   if it cannot resolve the parameter for any reason.  */
+
+static struct value *
+loclist_read_variable_at_entry (struct symbol *symbol, struct frame_info *frame)
+{
+  struct dwarf2_loclist_baton *dlbaton = SYMBOL_LOCATION_BATON (symbol);
+  const gdb_byte *data;
+  size_t size;
+  CORE_ADDR pc;
+
+  if (frame == NULL || !get_frame_func_if_available (frame, &pc))
+    return allocate_optimized_out_value (SYMBOL_TYPE (symbol));
+
+  data = dwarf2_find_location_expression (dlbaton, &size, pc);
+  if (data == NULL)
+    return allocate_optimized_out_value (SYMBOL_TYPE (symbol));
+
+  return value_of_dwarf_block_entry (SYMBOL_TYPE (symbol), frame, data, size);
 }
 
 /* Return non-zero iff we need a frame to evaluate SYMBOL.  */
@@ -3643,6 +3780,7 @@ loclist_tracepoint_var_ref (struct symbol *symbol, struct gdbarch *gdbarch,
    evaluator and location lists.  */
 const struct symbol_computed_ops dwarf2_loclist_funcs = {
   loclist_read_variable,
+  loclist_read_variable_at_entry,
   loclist_read_needs_frame,
   loclist_describe_location,
   loclist_tracepoint_var_ref

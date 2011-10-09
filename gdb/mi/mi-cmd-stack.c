@@ -256,11 +256,17 @@ list_arg_or_local (const struct frame_arg *arg, enum what_to_list what,
 	      || values == PRINT_SIMPLE_VALUES
 	      || (values == PRINT_ALL_VALUES
 		  && (arg->val != NULL || arg->error != NULL)));
+  gdb_assert (arg->entry_kind == print_entry_values_no
+	      || (arg->entry_kind == print_entry_values_only
+	          && (arg->val || arg->error)));
 
   if (values != PRINT_NO_VALUES || what == all)
     cleanup_tuple = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
 
-  ui_out_field_string (uiout, "name", SYMBOL_PRINT_NAME (arg->sym));
+  fputs_filtered (SYMBOL_PRINT_NAME (arg->sym), stb->stream);
+  if (arg->entry_kind == print_entry_values_only)
+    fputs_filtered ("@entry", stb->stream);
+  ui_out_field_stream (uiout, "name", stb);
 
   if (what == all && SYMBOL_IS_ARGUMENT (arg->sym))
     ui_out_field_int (uiout, "arg", 1);
@@ -380,7 +386,7 @@ list_args_or_locals (enum what_to_list what, enum print_values values,
 	  if (print_me)
 	    {
 	      struct symbol *sym2;
-	      struct frame_arg arg;
+	      struct frame_arg arg, entryarg;
 
 	      if (SYMBOL_IS_ARGUMENT (sym))
 		sym2 = lookup_symbol (SYMBOL_NATURAL_NAME (sym),
@@ -391,6 +397,10 @@ list_args_or_locals (enum what_to_list what, enum print_values values,
 
 	      memset (&arg, 0, sizeof (arg));
 	      arg.sym = sym2;
+	      arg.entry_kind = print_entry_values_no;
+	      memset (&entryarg, 0, sizeof (entryarg));
+	      entryarg.sym = sym2;
+	      entryarg.entry_kind = print_entry_values_no;
 
 	      switch (values)
 		{
@@ -401,13 +411,17 @@ list_args_or_locals (enum what_to_list what, enum print_values values,
 		      && TYPE_CODE (type) != TYPE_CODE_UNION)
 		    {
 		case PRINT_ALL_VALUES:
-		      read_frame_arg (sym2, fi, &arg);
+		      read_frame_arg (sym2, fi, &arg, &entryarg);
 		    }
 		  break;
 		}
 
-	      list_arg_or_local (&arg, what, values);
+	      if (arg.entry_kind != print_entry_values_only)
+		list_arg_or_local (&arg, what, values);
+	      if (entryarg.entry_kind != print_entry_values_no)
+		list_arg_or_local (&entryarg, what, values);
 	      xfree (arg.error);
+	      xfree (entryarg.error);
 	    }
 	}
       if (BLOCK_FUNCTION (block))

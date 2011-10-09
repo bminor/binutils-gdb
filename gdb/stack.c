@@ -64,6 +64,29 @@ static const char *print_frame_arguments_choices[] =
   {"all", "scalars", "none", NULL};
 static const char *print_frame_arguments = "scalars";
 
+/* The possible choices of "set print entry-values", and the value
+   of this setting.  */
+
+const char print_entry_values_no[] = "no";
+const char print_entry_values_only[] = "only";
+const char print_entry_values_preferred[] = "preferred";
+const char print_entry_values_if_needed[] = "if-needed";
+const char print_entry_values_both[] = "both";
+const char print_entry_values_compact[] = "compact";
+const char print_entry_values_default[] = "default";
+static const char *print_entry_values_choices[] =
+{
+  print_entry_values_no,
+  print_entry_values_only,
+  print_entry_values_preferred,
+  print_entry_values_if_needed,
+  print_entry_values_both,
+  print_entry_values_compact,
+  print_entry_values_default,
+  NULL
+};
+const char *print_entry_values = print_entry_values_default;
+
 /* Prototypes for local functions.  */
 
 static void print_frame_local_vars (struct frame_info *, int,
@@ -180,12 +203,29 @@ print_frame_arg (const struct frame_arg *arg)
   old_chain = make_cleanup_ui_out_stream_delete (stb);
 
   gdb_assert (!arg->val || !arg->error);
+  gdb_assert (arg->entry_kind == print_entry_values_no
+	      || arg->entry_kind == print_entry_values_only
+	      || (!ui_out_is_mi_like_p (uiout)
+		  && arg->entry_kind == print_entry_values_compact));
 
   annotate_arg_begin ();
 
   make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
   fprintf_symbol_filtered (stb->stream, SYMBOL_PRINT_NAME (arg->sym),
 			   SYMBOL_LANGUAGE (arg->sym), DMGL_PARAMS | DMGL_ANSI);
+  if (arg->entry_kind == print_entry_values_compact)
+    {
+      /* It is OK to provide invalid MI-like stream as with
+	 PRINT_ENTRY_VALUE_COMPACT we never use MI.  */
+      fputs_filtered ("=", stb->stream);
+
+      fprintf_symbol_filtered (stb->stream, SYMBOL_PRINT_NAME (arg->sym),
+			       SYMBOL_LANGUAGE (arg->sym),
+			       DMGL_PARAMS | DMGL_ANSI);
+    }
+  if (arg->entry_kind == print_entry_values_only
+      || arg->entry_kind == print_entry_values_compact)
+    fputs_filtered ("@entry", stb->stream);
   ui_out_field_stream (uiout, "name", stb);
   annotate_arg_name_end ();
   ui_out_text (uiout, "=");
@@ -248,25 +288,138 @@ print_frame_arg (const struct frame_arg *arg)
 
 void
 read_frame_arg (struct symbol *sym, struct frame_info *frame,
-	        struct frame_arg *argp)
+	        struct frame_arg *argp, struct frame_arg *entryargp)
 {
-  struct value *val = NULL;
-  char *val_error = NULL;
+  struct value *val = NULL, *entryval = NULL;
+  char *val_error = NULL, *entryval_error = NULL;
+  int val_equal = 0;
   volatile struct gdb_exception except;
 
-  TRY_CATCH (except, RETURN_MASK_ERROR)
+  if (print_entry_values != print_entry_values_only
+      && print_entry_values != print_entry_values_preferred)
     {
-      val = read_var_value (sym, frame);
+      TRY_CATCH (except, RETURN_MASK_ERROR)
+	{
+	  val = read_var_value (sym, frame);
+	}
+      if (!val)
+	{
+	  val_error = alloca (strlen (except.message) + 1);
+	  strcpy (val_error, except.message);
+	}
     }
-  if (!val)
+
+  if (SYMBOL_CLASS (sym) == LOC_COMPUTED
+      && print_entry_values != print_entry_values_no
+      && (print_entry_values != print_entry_values_if_needed
+	  || !val || value_optimized_out (val)))
     {
-      val_error = alloca (strlen (except.message) + 1);
-      strcpy (val_error, except.message);
+      TRY_CATCH (except, RETURN_MASK_ERROR)
+	{
+	  const struct symbol_computed_ops *ops;
+
+	  ops = SYMBOL_COMPUTED_OPS (sym);
+	  entryval = ops->read_variable_at_entry (sym, frame);
+	}
+      if (!entryval)
+	{
+	  entryval_error = alloca (strlen (except.message) + 1);
+	  strcpy (entryval_error, except.message);
+	}
+
+      if (except.error == NO_ENTRY_VALUE_ERROR
+	  || (entryval && value_optimized_out (entryval)))
+	{
+	  entryval = NULL;
+	  entryval_error = NULL;
+	}
+
+      if (print_entry_values == print_entry_values_compact
+	  || print_entry_values == print_entry_values_default)
+	{
+	  /* For MI do not try to use print_entry_values_compact for ARGP.  */
+
+	  if (val && entryval && !ui_out_is_mi_like_p (current_uiout))
+	    {
+	      unsigned len = TYPE_LENGTH (value_type (val));
+
+	      if (!value_optimized_out (val) && value_lazy (val))
+		value_fetch_lazy (val);
+	      if (!value_optimized_out (val) && value_lazy (entryval))
+		value_fetch_lazy (entryval);
+	      if (!value_optimized_out (val)
+		  && value_available_contents_eq (val, 0, entryval, 0, len))
+		{
+		  entryval = NULL;
+		  val_equal = 1;
+		}
+	    }
+
+	  /* Try to remove possibly duplicate error message for ENTRYARGP even
+	     in MI mode.  */
+
+	  if (val_error && entryval_error
+	      && strcmp (val_error, entryval_error) == 0)
+	    {
+	      entryval_error = NULL;
+
+	      /* Do not se VAL_EQUAL as the same error message may be shown for
+		 the entry value even if no entry values are present in the
+		 inferior.  */
+	    }
+	}
+    }
+
+  if (entryval == NULL)
+    {
+      if (print_entry_values == print_entry_values_preferred)
+	{
+	  TRY_CATCH (except, RETURN_MASK_ERROR)
+	    {
+	      val = read_var_value (sym, frame);
+	    }
+	  if (!val)
+	    {
+	      val_error = alloca (strlen (except.message) + 1);
+	      strcpy (val_error, except.message);
+	    }
+	}
+      if (print_entry_values == print_entry_values_only
+	  || print_entry_values == print_entry_values_both
+	  || (print_entry_values == print_entry_values_preferred
+	      && (!val || value_optimized_out (val))))
+	entryval = allocate_optimized_out_value (SYMBOL_TYPE (sym));
+    }
+  if ((print_entry_values == print_entry_values_compact
+       || print_entry_values == print_entry_values_if_needed
+       || print_entry_values == print_entry_values_preferred)
+      && (!val || value_optimized_out (val)) && entryval != NULL)
+    {
+      val = NULL;
+      val_error = NULL;
     }
 
   argp->sym = sym;
   argp->val = val;
   argp->error = val_error ? xstrdup (val_error) : NULL;
+  if (!val && !val_error)
+    argp->entry_kind = print_entry_values_only;
+  else if ((print_entry_values == print_entry_values_compact
+	   || print_entry_values == print_entry_values_default) && val_equal)
+    {
+      argp->entry_kind = print_entry_values_compact;
+      gdb_assert (!ui_out_is_mi_like_p (current_uiout));
+    }
+  else
+    argp->entry_kind = print_entry_values_no;
+
+  entryargp->sym = sym;
+  entryargp->val = entryval;
+  entryargp->error = entryval_error ? xstrdup (entryval_error) : NULL;
+  if (!entryval && !entryval_error)
+    entryargp->entry_kind = print_entry_values_no;
+  else
+    entryargp->entry_kind = print_entry_values_only;
 }
 
 /* Print the arguments of frame FRAME on STREAM, given the function
@@ -308,7 +461,7 @@ print_frame_args (struct symbol *func, struct frame_info *frame,
 
       ALL_BLOCK_SYMBOLS (b, iter, sym)
         {
-	  struct frame_arg arg;
+	  struct frame_arg arg, entryarg;
 
 	  QUIT;
 
@@ -426,13 +579,30 @@ print_frame_args (struct symbol *func, struct frame_info *frame,
 	    {
 	      memset (&arg, 0, sizeof (arg));
 	      arg.sym = sym;
+	      arg.entry_kind = print_entry_values_no;
+	      memset (&entryarg, 0, sizeof (entryarg));
+	      entryarg.sym = sym;
+	      entryarg.entry_kind = print_entry_values_no;
 	    }
 	  else
-	    read_frame_arg (sym, frame, &arg);
+	    read_frame_arg (sym, frame, &arg, &entryarg);
 
-	  print_frame_arg (&arg);
+	  if (arg.entry_kind != print_entry_values_only)
+	    print_frame_arg (&arg);
+
+	  if (entryarg.entry_kind != print_entry_values_no)
+	    {
+	      if (arg.entry_kind != print_entry_values_only)
+		{
+		  ui_out_text (uiout, ", ");
+		  ui_out_wrap_hint (uiout, "    ");
+		}
+
+	      print_frame_arg (&entryarg);
+	    }
 
 	  xfree (arg.error);
+	  xfree (entryarg.error);
 
 	  first = 0;
 	}
@@ -2313,4 +2483,17 @@ source line."),
 			        show_disassemble_next_line,
 			        &setlist, &showlist);
   disassemble_next_line = AUTO_BOOLEAN_FALSE;
+
+  add_setshow_enum_cmd ("entry-values", class_stack,
+			print_entry_values_choices, &print_entry_values,
+			_("Set printing of function arguments at function "
+			  "entry"),
+			_("Show printing of function arguments at function "
+			  "entry"),
+			_("\
+GDB can sometimes determine the values of function arguments at entry,\n\
+in addition to their current values.  This option tells GDB whether\n\
+to print the current value, the value at entry (marked as val@entry),\n\
+or both.  Note that one or both of these values may be <optimized out>."),
+			NULL, NULL, &setprintlist, &showprintlist);
 }
