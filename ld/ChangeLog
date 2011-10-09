@@ -1,3 +1,9 @@
+2011-10-09  Alan Modra  <amodra@gmail.com>
+
+	* emultempl/ppc64elf.em (ppc_create_output_section_statements): Add
+	missing colon to error message.
+	(ppc_before_allocation): Likewise.
+
 2011-10-06  Alan Modra  <amodra@gmail.com>
 
 	PR ld/13229

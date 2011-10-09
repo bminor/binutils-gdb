@@ -94,7 +94,7 @@ ppc_create_output_section_statements (void)
 			     bfd_get_arch (link_info.output_bfd),
 			     bfd_get_mach (link_info.output_bfd)))
     {
-      einfo ("%F%P: can not create BFD %E\n");
+      einfo ("%F%P: can not create BFD: %E\n");
       return;
     }
 
@@ -249,7 +249,7 @@ ppc_before_allocation (void)
     {
       if (!no_opd_opt
 	  && !ppc64_elf_edit_opd (&link_info, non_overlapping_opd))
-	einfo ("%X%P: can not edit %s %E\n", "opd");
+	einfo ("%X%P: can not edit %s: %E\n", "opd");
 
       if (ppc64_elf_tls_setup (&link_info, no_tls_get_addr_opt, &no_multi_toc)
 	  && !no_tls_opt)
@@ -268,7 +268,7 @@ ppc_before_allocation (void)
 	  prelim_size_sections ();
 
 	  if (!ppc64_elf_edit_toc (&link_info))
-	    einfo ("%X%P: can not edit %s %E\n", "toc");
+	    einfo ("%X%P: can not edit %s: %E\n", "toc");
 	}
 
       if (!no_toc_sort)
