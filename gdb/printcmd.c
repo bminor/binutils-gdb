@@ -1976,6 +1976,7 @@ print_variable_and_value (const char *name, struct symbol *var,
 
       val = read_var_value (var, frame);
       get_user_print_options (&opts);
+      opts.deref_ref = 1;
       common_val_print (val, stream, indent, &opts, current_language);
     }
   if (except.reason < 0)

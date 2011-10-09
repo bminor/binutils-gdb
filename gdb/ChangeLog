@@ -1,5 +1,11 @@
 2011-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Display referenced values in backtraces.
+	* printcmd.c (print_variable_and_value): Set OPTS.DEREF_REF to 1.
+	* stack.c (print_frame_arg): Likewise.
+
+2011-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Make some lval_funcs methods to default on NULL.
 	* valops.c (value_fetch_lazy): Check if lval_computed read method is
 	NULL.

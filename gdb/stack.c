@@ -261,7 +261,7 @@ print_frame_arg (const struct frame_arg *arg)
 		language = current_language;
 
 	      get_raw_print_options (&opts);
-	      opts.deref_ref = 0;
+	      opts.deref_ref = 1;
 
 	      /* True in "summary" mode, false otherwise.  */
 	      opts.summary = !strcmp (print_frame_arguments, "scalars");
