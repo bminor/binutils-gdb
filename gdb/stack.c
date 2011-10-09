@@ -162,6 +162,113 @@ print_frame_nameless_args (struct frame_info *frame, long start, int num,
     }
 }
 
+/* Print single argument of inferior function.  ARG must be already
+   read in.
+
+   Errors are printed as if they would be the parameter value.  Use zeroed ARG
+   iff it should not be printed accoring to user settings.  */
+
+static void
+print_frame_arg (const struct frame_arg *arg)
+{
+  struct ui_out *uiout = current_uiout;
+  volatile struct gdb_exception except;
+  struct cleanup *old_chain;
+  struct ui_stream *stb;
+
+  stb = ui_out_stream_new (uiout);
+  old_chain = make_cleanup_ui_out_stream_delete (stb);
+
+  gdb_assert (!arg->val || !arg->error);
+
+  annotate_arg_begin ();
+
+  make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
+  fprintf_symbol_filtered (stb->stream, SYMBOL_PRINT_NAME (arg->sym),
+			   SYMBOL_LANGUAGE (arg->sym), DMGL_PARAMS | DMGL_ANSI);
+  ui_out_field_stream (uiout, "name", stb);
+  annotate_arg_name_end ();
+  ui_out_text (uiout, "=");
+
+  if (!arg->val && !arg->error)
+    ui_out_text (uiout, "...");
+  else
+    {
+      if (arg->error)
+	except.message = arg->error;
+      else
+	{
+	  /* TRY_CATCH has two statements, wrap it in a block.  */
+
+	  TRY_CATCH (except, RETURN_MASK_ERROR)
+	    {
+	      const struct language_defn *language;
+	      struct value_print_options opts;
+
+	      /* Avoid value_print because it will deref ref parameters.  We
+		 just want to print their addresses.  Print ??? for args whose
+		 address we do not know.  We pass 2 as "recurse" to val_print
+		 because our standard indentation here is 4 spaces, and
+		 val_print indents 2 for each recurse.  */ 
+
+	      annotate_arg_value (value_type (arg->val));
+
+	      /* Use the appropriate language to display our symbol, unless the
+		 user forced the language to a specific language.  */
+	      if (language_mode == language_mode_auto)
+		language = language_def (SYMBOL_LANGUAGE (arg->sym));
+	      else
+		language = current_language;
+
+	      get_raw_print_options (&opts);
+	      opts.deref_ref = 0;
+
+	      /* True in "summary" mode, false otherwise.  */
+	      opts.summary = !strcmp (print_frame_arguments, "scalars");
+
+	      common_val_print (arg->val, stb->stream, 2, &opts, language);
+	    }
+	}
+      if (except.message)
+	fprintf_filtered (stb->stream, _("<error reading variable: %s>"),
+			  except.message);
+    }
+
+  ui_out_field_stream (uiout, "value", stb);
+
+  /* Aleo invoke ui_out_tuple_end.  */
+  do_cleanups (old_chain);
+
+  annotate_arg_end ();
+}
+
+/* Read in inferior function parameter SYM at FRAME into ARGP.  Caller is
+   responsible for xfree of ARGP->ERROR.  This function never throws an
+   exception.  */
+
+void
+read_frame_arg (struct symbol *sym, struct frame_info *frame,
+	        struct frame_arg *argp)
+{
+  struct value *val = NULL;
+  char *val_error = NULL;
+  volatile struct gdb_exception except;
+
+  TRY_CATCH (except, RETURN_MASK_ERROR)
+    {
+      val = read_var_value (sym, frame);
+    }
+  if (!val)
+    {
+      val_error = alloca (strlen (except.message) + 1);
+      strcpy (val_error, except.message);
+    }
+
+  argp->sym = sym;
+  argp->val = val;
+  argp->error = val_error ? xstrdup (val_error) : NULL;
+}
+
 /* Print the arguments of frame FRAME on STREAM, given the function
    FUNC running in that frame (as a symbol), where NUM is the number
    of arguments according to the stack frame (or -1 if the number of
@@ -198,10 +305,11 @@ print_frame_args (struct symbol *func, struct frame_info *frame,
       struct block *b = SYMBOL_BLOCK_VALUE (func);
       struct dict_iterator iter;
       struct symbol *sym;
-      struct value *val;
 
       ALL_BLOCK_SYMBOLS (b, iter, sym)
         {
+	  struct frame_arg arg;
+
 	  QUIT;
 
 	  /* Keep track of the highest stack argument offset seen, and
@@ -314,65 +422,17 @@ print_frame_args (struct symbol *func, struct frame_info *frame,
 	    ui_out_text (uiout, ", ");
 	  ui_out_wrap_hint (uiout, "    ");
 
-	  annotate_arg_begin ();
+	  if (!print_args)
+	    {
+	      memset (&arg, 0, sizeof (arg));
+	      arg.sym = sym;
+	    }
+	  else
+	    read_frame_arg (sym, frame, &arg);
 
-	  list_chain = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
-	  fprintf_symbol_filtered (stb->stream, SYMBOL_PRINT_NAME (sym),
-				   SYMBOL_LANGUAGE (sym),
-				   DMGL_PARAMS | DMGL_ANSI);
-	  ui_out_field_stream (uiout, "name", stb);
-	  annotate_arg_name_end ();
-	  ui_out_text (uiout, "=");
+	  print_frame_arg (&arg);
 
-          if (print_args)
-            {
-	      volatile struct gdb_exception except;
-
-	      TRY_CATCH (except, RETURN_MASK_ERROR)
-		{
-		  const struct language_defn *language;
-		  struct value_print_options opts;
-
-		  /* Avoid value_print because it will deref ref parameters.
-		     We just want to print their addresses.  Print ??? for
-		     args whose address we do not know.  We pass 2 as
-		     "recurse" to val_print because our standard indentation
-		     here is 4 spaces, and val_print indents 2 for each
-		     recurse.  */
-		  val = read_var_value (sym, frame);
-
-		  annotate_arg_value (value_type (val));
-
-		  /* Use the appropriate language to display our symbol,
-		     unless the user forced the language to a specific
-		     language.  */
-		  if (language_mode == language_mode_auto)
-		    language = language_def (SYMBOL_LANGUAGE (sym));
-		  else
-		    language = current_language;
-
-		  get_raw_print_options (&opts);
-		  opts.deref_ref = 0;
-		  opts.summary = summary;
-		  common_val_print (val, stb->stream, 2, &opts, language);
-		  ui_out_field_stream (uiout, "value", stb);
-		}
-	      if (except.reason < 0)
-		{
-		  fprintf_filtered (stb->stream,
-				    _("<error reading variable: %s>"),
-				    except.message);
-		  ui_out_field_stream (uiout, "value", stb);
-		}
-            }
-          else
-            ui_out_text (uiout, "...");
-
-
-	  /* Invoke ui_out_tuple_end.  */
-	  do_cleanups (list_chain);
-
-	  annotate_arg_end ();
+	  xfree (arg.error);
 
 	  first = 0;
 	}

@@ -236,6 +236,72 @@ mi_cmd_stack_list_variables (char *command, char **argv, int argc)
   list_args_or_locals (all, parse_print_values (argv[0]), frame);
 }
 
+/* Print single local or argument.  ARG must be already read in.  For WHAT and
+   VALUES see list_args_or_locals.
+
+   Errors are printed as if they would be the parameter value.  Use zeroed ARG
+   iff it should not be printed accoring to VALUES.  */
+
+static void
+list_arg_or_local (const struct frame_arg *arg, enum what_to_list what,
+		   enum print_values values)
+{
+  struct cleanup *cleanup_tuple = NULL;
+  struct ui_out *uiout = current_uiout;
+  struct ui_stream *stb = ui_out_stream_new (uiout);
+
+  gdb_assert (!arg->val || !arg->error);
+  gdb_assert ((values == PRINT_NO_VALUES && arg->val == NULL
+	       && arg->error == NULL)
+	      || values == PRINT_SIMPLE_VALUES
+	      || (values == PRINT_ALL_VALUES
+		  && (arg->val != NULL || arg->error != NULL)));
+
+  if (values != PRINT_NO_VALUES || what == all)
+    cleanup_tuple = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
+
+  ui_out_field_string (uiout, "name", SYMBOL_PRINT_NAME (arg->sym));
+
+  if (what == all && SYMBOL_IS_ARGUMENT (arg->sym))
+    ui_out_field_int (uiout, "arg", 1);
+
+  if (values == PRINT_SIMPLE_VALUES)
+    {
+      check_typedef (arg->sym->type);
+      type_print (arg->sym->type, "", stb->stream, -1);
+      ui_out_field_stream (uiout, "type", stb);
+    }
+
+  if (arg->val || arg->error)
+    {
+      volatile struct gdb_exception except;
+
+      if (arg->error)
+	except.message = arg->error;
+      else
+	{
+	  /* TRY_CATCH has two statements, wrap it in a block.  */
+
+	  TRY_CATCH (except, RETURN_MASK_ERROR)
+	    {
+	      struct value_print_options opts;
+
+	      get_raw_print_options (&opts);
+	      opts.deref_ref = 1;
+	      common_val_print (arg->val, stb->stream, 0, &opts,
+				language_def (SYMBOL_LANGUAGE (arg->sym)));
+	    }
+	}
+      if (except.message)
+	fprintf_filtered (stb->stream, _("<error reading variable: %s>"),
+			  except.message);
+      ui_out_field_stream (uiout, "value", stb);
+    }
+
+  ui_out_stream_delete (stb);
+  if (values != PRINT_NO_VALUES || what == all)
+    do_cleanups (cleanup_tuple);
+}
 
 /* Print a list of the locals or the arguments for the currently
    selected frame.  If the argument passed is 0, printonly the names
@@ -313,16 +379,8 @@ list_args_or_locals (enum what_to_list what, enum print_values values,
 	    }
 	  if (print_me)
 	    {
-	      struct cleanup *cleanup_tuple = NULL;
 	      struct symbol *sym2;
-	      struct value *val;
-
-	      if (values != PRINT_NO_VALUES || what == all)
-		cleanup_tuple =
-		  make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
-	      ui_out_field_string (uiout, "name", SYMBOL_PRINT_NAME (sym));
-	      if (what == all && SYMBOL_IS_ARGUMENT (sym))
-		ui_out_field_int (uiout, "arg", 1);
+	      struct frame_arg arg;
 
 	      if (SYMBOL_IS_ARGUMENT (sym))
 		sym2 = lookup_symbol (SYMBOL_NATURAL_NAME (sym),
@@ -330,64 +388,26 @@ list_args_or_locals (enum what_to_list what, enum print_values values,
 				      (int *) NULL);
 	      else
 		sym2 = sym;
+
+	      memset (&arg, 0, sizeof (arg));
+	      arg.sym = sym2;
+
 	      switch (values)
 		{
 		case PRINT_SIMPLE_VALUES:
 		  type = check_typedef (sym2->type);
-		  type_print (sym2->type, "", stb->stream, -1);
-		  ui_out_field_stream (uiout, "type", stb);
 		  if (TYPE_CODE (type) != TYPE_CODE_ARRAY
 		      && TYPE_CODE (type) != TYPE_CODE_STRUCT
 		      && TYPE_CODE (type) != TYPE_CODE_UNION)
 		    {
-		      volatile struct gdb_exception except;
-
-		      TRY_CATCH (except, RETURN_MASK_ERROR)
-			{
-			  struct value_print_options opts;
-
-			  val = read_var_value (sym2, fi);
-			  get_raw_print_options (&opts);
-			  opts.deref_ref = 1;
-			  common_val_print
-			    (val, stb->stream, 0, &opts,
-			     language_def (SYMBOL_LANGUAGE (sym2)));
-			}
-		      if (except.reason < 0)
-			fprintf_filtered (stb->stream,
-					  _("<error reading variable: %s>"),
-					  except.message);
-
-		      ui_out_field_stream (uiout, "value", stb);
-		    }
-		  break;
 		case PRINT_ALL_VALUES:
-		  {
-		    volatile struct gdb_exception except;
-
-		    TRY_CATCH (except, RETURN_MASK_ERROR)
-		      {
-			struct value_print_options opts;
-
-			val = read_var_value (sym2, fi);
-			get_raw_print_options (&opts);
-			opts.deref_ref = 1;
-			common_val_print
-			  (val, stb->stream, 0, &opts,
-			   language_def (SYMBOL_LANGUAGE (sym2)));
-		      }
-		    if (except.reason < 0)
-		      fprintf_filtered (stb->stream,
-					_("<error reading variable: %s>"),
-					except.message);
-
-		    ui_out_field_stream (uiout, "value", stb);
-		  }
+		      read_frame_arg (sym2, fi, &arg);
+		    }
 		  break;
 		}
 
-	      if (values != PRINT_NO_VALUES || what == all)
-		do_cleanups (cleanup_tuple);
+	      list_arg_or_local (&arg, what, values);
+	      xfree (arg.error);
 	    }
 	}
       if (BLOCK_FUNCTION (block))

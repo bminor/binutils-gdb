@@ -711,6 +711,26 @@ extern int frame_register_read (struct frame_info *frame, int regnum,
 				gdb_byte *buf);
 
 /* From stack.c.  */
+
+/* Inferior function parameter value read in from a frame.  */
+
+struct frame_arg
+{
+  /* Symbol for this parameter used for example for its name.  */
+  struct symbol *sym;
+
+  /* Value of the parameter.  It is NULL if ERROR is not NULL; if both VAL and
+     ERROR are NULL this parameter's value should not be printed.  */
+  struct value *val;
+
+  /* String containing the error message, it is more usually NULL indicating no
+     error occured reading this parameter.  */
+  char *error;
+};
+
+extern void read_frame_arg (struct symbol *sym, struct frame_info *frame,
+			    struct frame_arg *argp);
+
 extern void args_info (char *, int);
 
 extern void locals_info (char *, int);

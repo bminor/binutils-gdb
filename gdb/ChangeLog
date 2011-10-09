@@ -1,5 +1,21 @@
 2011-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Code reshuffle.
+	* frame.h (struct frame_arg): New definition.
+	(read_frame_arg): New declaration.
+	* mi/mi-cmd-stack.c (list_arg_or_local): New functiom from ...
+	(list_args_or_locals): ... the code here.  New variable arg, call
+	read_frame_arg and list_arg_or_local with it.  Unify the
+	PRINT_SIMPLE_VALUES and PRINT_ALL_VALUES cases.  Call xfree for
+	arg.error.
+	* stack.c (print_frame_arg): New functiom from the code of
+	print_frame_args.
+	(read_frame_arg): New function.
+	(print_frame_args): Remove variable val.  New variable arg, call
+	read_frame_arg and print_frame_arg with it.  Call xfree for arg.error.
+
+2011-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Protect entry values against self tail calls.
 	* dwarf2loc.c (VEC (CORE_ADDR), func_verify_no_selftailcall): New.
 	(dwarf_expr_dwarf_reg_entry_value): Call func_verify_no_selftailcall.
