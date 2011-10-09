@@ -450,6 +450,8 @@ make_function_type (struct type *type, struct type **typeptr)
   TYPE_LENGTH (ntype) = 1;
   TYPE_CODE (ntype) = TYPE_CODE_FUNC;
 
+  INIT_FUNC_SPECIFIC (ntype);
+
   return ntype;
 }
 
@@ -1951,7 +1953,7 @@ init_type (enum type_code code, int length, int flags,
         TYPE_SPECIFIC_FIELD (type) = TYPE_SPECIFIC_FLOATFORMAT;
         break;
       case TYPE_CODE_FUNC:
-        TYPE_SPECIFIC_FIELD (type) = TYPE_SPECIFIC_CALLING_CONVENTION;
+	INIT_FUNC_SPECIFIC (type);
         break;
     }
   return type;
@@ -3257,9 +3259,10 @@ recursive_dump_type (struct type *type, int spaces)
 	puts_filtered ("\n");
 	break;
 
-      case TYPE_SPECIFIC_CALLING_CONVENTION:
+      case TYPE_SPECIFIC_FUNC:
 	printfi_filtered (spaces, "calling_convention %d\n",
                           TYPE_CALLING_CONVENTION (type));
+	/* tail_call_list is not printed.  */
 	break;
     }
 

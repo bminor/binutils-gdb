@@ -368,7 +368,7 @@ enum type_specific_kind
   TYPE_SPECIFIC_CPLUS_STUFF,
   TYPE_SPECIFIC_GNAT_STUFF,
   TYPE_SPECIFIC_FLOATFORMAT,
-  TYPE_SPECIFIC_CALLING_CONVENTION
+  TYPE_SPECIFIC_FUNC
 };
 
 /* This structure is space-critical.
@@ -601,10 +601,8 @@ struct main_type
 
     const struct floatformat **floatformat;
 
-    /* For TYPE_CODE_FUNC types, the calling convention for targets
-       supporting multiple ABIs.  Right now this is only fetched from
-       the Dwarf-2 DW_AT_calling_convention attribute.  */
-    unsigned calling_convention;
+    /* For TYPE_CODE_FUNC types,  */
+    struct func_type *func_stuff;
   } type_specific;
 };
 
@@ -890,6 +888,15 @@ struct gnat_aux_type
     struct type* descriptive_type;
   };
 
+/* For TYPE_CODE_FUNC types,  */
+struct func_type
+  {
+    /* The calling convention for targets supporting multiple ABIs.  Right now
+       this is only fetched from the Dwarf-2 DW_AT_calling_convention
+       attribute.  */
+    unsigned calling_convention;
+  };
+
 /* The default value of TYPE_CPLUS_SPECIFIC(T) points to the
    this shared static structure.  */
 
@@ -920,6 +927,12 @@ extern void allocate_gnat_aux_type (struct type *);
    read as "gnat-stuff".  */
 #define HAVE_GNAT_AUX_INFO(type) \
   (TYPE_SPECIFIC_FIELD (type) == TYPE_SPECIFIC_GNAT_STUFF)
+
+#define INIT_FUNC_SPECIFIC(type)					       \
+  (TYPE_SPECIFIC_FIELD (type) = TYPE_SPECIFIC_FUNC,			       \
+   TYPE_MAIN_TYPE (type)->type_specific.func_stuff			       \
+     = TYPE_ZALLOC (type,						       \
+		    sizeof (*TYPE_MAIN_TYPE (type)->type_specific.func_stuff)))
 
 #define TYPE_INSTANCE_FLAGS(thistype) (thistype)->instance_flags
 #define TYPE_MAIN_TYPE(thistype) (thistype)->main_type
@@ -986,7 +999,7 @@ extern void allocate_gnat_aux_type (struct type *);
 #define TYPE_FLOATFORMAT(thistype) TYPE_MAIN_TYPE(thistype)->type_specific.floatformat
 #define TYPE_GNAT_SPECIFIC(thistype) TYPE_MAIN_TYPE(thistype)->type_specific.gnat_stuff
 #define TYPE_DESCRIPTIVE_TYPE(thistype) TYPE_GNAT_SPECIFIC(thistype)->descriptive_type
-#define TYPE_CALLING_CONVENTION(thistype) TYPE_MAIN_TYPE(thistype)->type_specific.calling_convention
+#define TYPE_CALLING_CONVENTION(thistype) TYPE_MAIN_TYPE(thistype)->type_specific.func_stuff->calling_convention
 #define TYPE_BASECLASS(thistype,index) TYPE_FIELD_TYPE(thistype, index)
 #define TYPE_N_BASECLASSES(thistype) TYPE_CPLUS_SPECIFIC(thistype)->n_baseclasses
 #define TYPE_BASECLASS_NAME(thistype,index) TYPE_FIELD_NAME(thistype, index)

@@ -1,5 +1,23 @@
 2011-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Code reshuffle.
+	* gdb-gdb.py (StructMainTypePrettyPrinter): Change
+	TYPE_SPECIFIC_CALLING_CONVENTION to TYPE_SPECIFIC_FUNC.  Move
+	calling_convention under func_stuff there.
+	* gdbtypes.c (make_function_type): Call INIT_FUNC_SPECIFIC.
+	(init_type) <TYPE_CODE_FUNC>: Likewise.
+	(recursive_dump_type): Change TYPE_SPECIFIC_CALLING_CONVENTION to
+	TYPE_SPECIFIC_FUNC.  New comment for tail_call_list.
+	* gdbtypes.h (enum type_specific_kind): Change
+	TYPE_SPECIFIC_CALLING_CONVENTION to TYPE_SPECIFIC_FUNC.
+	(struct main_type) <type_specific>: Change calling_convention to
+	func_stuff.  Move calling_convention to ...
+	(struct func_type): ... this new struct.
+	(INIT_FUNC_SPECIFIC): New #define.
+	(TYPE_CALLING_CONVENTION): Change calling_convention to func_stuff.
+
+2011-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Fix DW_OP_GNU_implicit_pointer for DWARF32 v3+ on 64-bit arches.
 	* dwarf2-frame.c (execute_stack_op): Initialize ctx->ref_addr_size.
 	* dwarf2expr.c (execute_stack_op) <DW_OP_GNU_implicit_pointer>: Use

@@ -201,9 +201,10 @@ class StructMainTypePrettyPrinter:
                    % type_specific['gnat_stuff']['descriptive_type'])
         elif type_specific_kind == "TYPE_SPECIFIC_FLOATFORMAT":
             img = "floatformat[0..1] = %s" % type_specific['floatformat']
-        elif type_specific_kind == "TYPE_SPECIFIC_CALLING_CONVENTION":
+        elif type_specific_kind == "TYPE_SPECIFIC_FUNC":
             img = ("calling_convention = %d"
-                   % type_specific['calling_convention'])
+                   % type_specific['func_stuff']['calling_convention'])
+            # tail_call_list is not printed.
         else:
             img = ("type_specific = ??? (unknown type_secific_kind: %s)"
                    % type_specific_kind)
