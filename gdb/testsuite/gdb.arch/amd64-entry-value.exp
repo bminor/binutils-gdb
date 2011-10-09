@@ -42,6 +42,8 @@ gdb_breakpoint "different"
 gdb_breakpoint "breakhere_different"
 gdb_breakpoint "breakhere_validity"
 gdb_breakpoint "breakhere_invalid"
+gdb_breakpoint "reference"
+gdb_breakpoint "breakhere_reference"
 
 
 # Test @entry values for register passed parameters.
@@ -156,6 +158,38 @@ gdb_test_no_output "set print entry-values compact" "entry_invalid: set print en
 gdb_test "frame" {\(inv=<optimized out>\).*} "entry_invalid: frame: compact"
 gdb_test_no_output "set print entry-values default" "entry_invalid: set print entry-values default"
 gdb_test "frame" {\(inv=<optimized out>\).*} "entry_invalid: frame: default"
+
+
+# Test @entry values for DW_AT_GNU_call_site_data_value parameters.
+
+gdb_continue_to_breakpoint "entry_reference: reference"
+
+# GCC PR debug/49980: Missing stackparam1@entry and stackparam2@entry.
+gdb_test "bt" "#0 +reference \\(regparam=regparam@entry=@0x\[0-9a-f\]+: 1, nodataparam=@0x\[0-9a-f\]+: 2, \[^\r\n\]+, stackparam1=@0x\[0-9a-f\]+: 11, stackparam2=@0x\[0-9a-f\]+: 12\\) \[^\r\n\]*\r\n#1 +0x\[0-9a-f\]+ in main \\(\\) \[^\r\n\]*" \
+	 "entry_reference: bt at entry"
+
+gdb_continue_to_breakpoint "entry_reference: breakhere_reference"
+
+# GCC PR debug/49980: Missing stackparam1@entry and stackparam2@entry.
+gdb_test "bt" "#0 +reference \\(regparam=@0x\[0-9a-f\]+: 21, regparam@entry=@0x\[0-9a-f\]+: 1, nodataparam=@0x\[0-9a-f\]+: 22, \[^\r\n\]+, stackparam1=@0x\[0-9a-f\]+: 31, stackparam2=@0x\[0-9a-f\]+: 32\\) \[^\r\n\]*\r\n#1 +0x\[0-9a-f\]+ in main \\(\\) \[^\r\n\]*" \
+	 "entry_reference: bt"
+gdb_test "ptype regparam" " = int &" "entry_reference: ptype regparam"
+
+set test "entry_reference: p regparam"
+set addr ""
+gdb_test_multiple "p regparam" $test {
+    -re " = \\(int &\\) @(0x\[0-9a-f\]+): 21\r\n$gdb_prompt $" {
+	set addr $expect_out(1,string)
+	pass $test
+    }
+}
+
+gdb_test "ptype regparam@entry" " = int &" "entry_reference: ptype regparam@entry"
+gdb_test "p regparam@entry" " = \\(int &\\) @$addr: 1" "entry_reference: p regparam@entry"
+gdb_test "p &regparam@entry" " = \\(int \\*\\) $addr" "entry_reference: p &regparam@entry"
+gdb_test "p regcopy" " = 1" "entry_reference: p regcopy"
+gdb_test "p nodataparam" " = \\(int &\\) @0x\[0-9a-f\]+: 22" "entry_reference: p nodataparam"
+gdb_test "p nodataparam@entry" "Cannot resolve DW_AT_GNU_call_site_data_value" "entry_reference: p nodataparam@entry"
 
 
 # Test virtual tail call frames.

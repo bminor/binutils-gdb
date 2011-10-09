@@ -1,5 +1,47 @@
 2011-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Display @entry parameter values even for references.
+	* ada-valprint.c (ada_val_print_1) <TYPE_CODE_REF>: Try also
+	coerce_ref_if_computed.
+	* c-valprint.c (c_val_print) <TYPE_CODE_REF>: Likewise.
+	* dwarf2expr.c (dwarf_block_to_dwarf_reg_deref): New function.
+	(execute_stack_op) <DW_OP_GNU_entry_value>: Add -1 deref_size to the
+	existing push_dwarf_reg_entry_value call.  Add new detection calling
+	dwarf_block_to_dwarf_reg_deref.  Update the error message.
+	(ctx_no_push_dwarf_reg_entry_value): New parameter deref_size.
+	* dwarf2expr.h
+	(struct dwarf_expr_context_funcs) <push_dwarf_reg_entry_value>: Add new
+	parameter deref_size, describe it in the comment.
+	(ctx_no_push_dwarf_reg_entry_value): Add new parameter deref_size.
+	(dwarf_block_to_dwarf_reg_deref): New declaration.
+	* dwarf2loc.c (dwarf_entry_parameter_to_value): Add new parameter
+	deref_size, describe it in the function comment.  New variables
+	data_src and size, fetch the alternative block accoring to DEREF_SIZE.
+	(dwarf_expr_push_dwarf_reg_entry_value): Add new parameter deref_size,
+	describe it in the function comment.  Fetch the alternative block
+	accoring to DEREF_SIZE.
+	(entry_data_value_coerce_ref, entry_data_value_copy_closure)
+	(entry_data_value_free_closure, entry_data_value_funcs): New.
+	(value_of_dwarf_reg_entry): New variables checked_type, target_type,
+	outer_val, target_val, val and addr.  Try to fetch and create also
+	referenced value content.
+	(pieced_value_funcs): NULL value for coerce_ref.
+	(needs_dwarf_reg_entry_value): Add new parameter deref_size.
+	* f-valprint.c (f_val_print) <TYPE_CODE_REF>: Try also
+	coerce_ref_if_computed.
+	* opencl-lang.c (opencl_value_funcs): NULL value for coerce_ref.
+	* p-valprint.c (pascal_val_print) <TYPE_CODE_REF>: Likewise.
+	* stack.c (read_frame_arg): Compare also dereferenced values.
+	* value.c (value_computed_funcs): Make the parameter v const, use
+	value_lval_const for it.
+	(value_lval_const, coerce_ref_if_computed): New function.
+	(coerce_ref): New variable retval.  Call also coerce_ref_if_computed.
+	* value.h (struct lval_funcs): New field coerce_ref.
+	(value_computed_funcs): Make the parameter v const.
+	(value_lval_const, coerce_ref_if_computed): New declarations.
+
+2011-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Support @entry in input expressions.
 	* c-exp.y (ENTRY, unknown_cpp_name): New.
 	(exp: UNKNOWN_CPP_NAME): Change to `exp: unknown_cpp_name'.

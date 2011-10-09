@@ -135,6 +135,40 @@ asm ("breakhere_stacktest:");
   e (v, v);
 }
 
+/* nodataparam has DW_AT_GNU_call_site_value but it does not have
+   DW_AT_GNU_call_site_data_value.  GDB should not display dereferenced @entry
+   value for it.  */
+
+static void __attribute__((noinline, noclone))
+reference (int &regparam, int &nodataparam, int r3, int r4, int r5, int r6,
+	   int &stackparam1, int &stackparam2)
+{
+  int regcopy = regparam, nodatacopy = nodataparam;
+  int stackcopy1 = stackparam1, stackcopy2 = stackparam2;
+
+  regparam = 21;
+  nodataparam = 22;
+  stackparam1 = 31;
+  stackparam2 = 32;
+  e (v, v);
+asm ("breakhere_reference:");
+  e (v, v);
+}
+
+static int *__attribute__((noinline, noclone))
+datap ()
+{
+  static int two = 2;
+
+  return &two;
+}
+
+static void __attribute__((noinline, noclone))
+datap_input (int *datap)
+{
+  (*datap)++;
+}
+
 static int __attribute__((noinline, noclone))
 data (void)
 {
@@ -182,6 +216,12 @@ main ()
   different (5);
   validity (5, data ());
   invalid (data2 ());
+
+  {
+    int regvar = 1, *nodatavarp = datap (), stackvar1 = 11, stackvar2 = 12;
+    reference (regvar, *nodatavarp, 3, 4, 5, 6, stackvar1, stackvar2);
+    datap_input (nodatavarp);
+  }
 
   if (v)
     a (1, 1.25);

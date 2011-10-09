@@ -180,6 +180,11 @@ struct lval_funcs
      will fall back to ordinary indirection.  */
   struct value *(*indirect) (struct value *value);
 
+  /* If non-NULL, this is used to implement reference resolving for
+     this value.  This method may return NULL, in which case coerce_ref
+     will fall back to ordinary references resolving.  */
+  struct value *(*coerce_ref) (const struct value *value);
+
   /* If non-NULL, this is used to determine whether the indicated bits
      of VALUE are a synthetic pointer.  */
   int (*check_synthetic_pointer) (const struct value *value,
@@ -213,7 +218,7 @@ extern struct value *allocate_optimized_out_value (struct type *type);
 
 /* If VALUE is lval_computed, return its lval_funcs structure.  */
 
-extern const struct lval_funcs *value_computed_funcs (struct value *value);
+extern const struct lval_funcs *value_computed_funcs (const struct value *);
 
 /* If VALUE is lval_computed, return its closure.  The meaning of the
    returned value depends on the functions VALUE uses.  */
@@ -314,6 +319,9 @@ extern void set_value_component_location (struct value *component,
 extern enum lval_type *deprecated_value_lval_hack (struct value *);
 #define VALUE_LVAL(val) (*deprecated_value_lval_hack (val))
 
+/* Like VALUE_LVAL, except the parameter can be const.  */
+extern enum lval_type value_lval_const (const struct value *value);
+
 /* If lval == lval_memory, return the address in the inferior.  If
    lval == lval_register, return the byte offset into the registers
    structure.  Otherwise, return 0.  The returned address
@@ -339,6 +347,11 @@ extern struct frame_id *deprecated_value_frame_id_hack (struct value *);
 /* Register number if the value is from a register.  */
 extern short *deprecated_value_regnum_hack (struct value *);
 #define VALUE_REGNUM(val) (*deprecated_value_regnum_hack (val))
+
+/* Return value after lval_funcs->coerce_ref (after check_typedef).  Return
+   NULL if lval_funcs->coerce_ref is not applicable for whatever reason.  */
+
+extern struct value *coerce_ref_if_computed (const struct value *arg);
 
 /* Convert a REF to the object referenced.  */
 

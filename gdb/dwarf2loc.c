@@ -910,7 +910,9 @@ dwarf_expr_reg_to_entry_parameter (struct frame_info *frame, int dwarf_reg,
   return parameter;
 }
 
-/* Return value for PARAMETER for DW_AT_GNU_call_site_value.
+/* Return value for PARAMETER matching DEREF_SIZE.  If DEREF_SIZE is -1, return
+   the normal DW_AT_GNU_call_site_value block.  Otherwise return the
+   DW_AT_GNU_call_site_data_value (dereferenced) block.
 
    TYPE and CALLER_FRAME specify how to evaluate the DWARF block into returned
    struct value.
@@ -920,33 +922,44 @@ dwarf_expr_reg_to_entry_parameter (struct frame_info *frame, int dwarf_reg,
 
 static struct value *
 dwarf_entry_parameter_to_value (struct call_site_parameter *parameter,
-				struct type *type,
+				CORE_ADDR deref_size, struct type *type,
 				struct frame_info *caller_frame,
 				struct dwarf2_per_cu_data *per_cu)
 {
+  const gdb_byte *data_src;
   gdb_byte *data;
+  size_t size;
+
+  data_src = deref_size == -1 ? parameter->value : parameter->data_value;
+  size = deref_size == -1 ? parameter->value_size : parameter->data_value_size;
+
+  /* DEREF_SIZE size is not verified here.  */
+  if (data_src == NULL)
+    throw_error (NO_ENTRY_VALUE_ERROR,
+		 _("Cannot resolve DW_AT_GNU_call_site_data_value"));
 
   /* DW_AT_GNU_call_site_value is a DWARF expression, not a DWARF
      location.  Postprocessing of DWARF_VALUE_MEMORY would lose the type from
      DWARF block.  */
-  data = alloca (parameter->value_size + 1);
-  memcpy (data, parameter->value, parameter->value_size);
-  data[parameter->value_size] = DW_OP_stack_value;
+  data = alloca (size + 1);
+  memcpy (data, data_src, size);
+  data[size] = DW_OP_stack_value;
 
-  return dwarf2_evaluate_loc_desc (type, caller_frame, data,
-				   parameter->value_size + 1, per_cu);
+  return dwarf2_evaluate_loc_desc (type, caller_frame, data, size + 1, per_cu);
 }
 
-/* Execute call_site_parameter's DWARF block for caller of the CTX's frame.
-   CTX must be of dwarf_expr_ctx_funcs kind.  See DWARF_REG and FB_OFFSET
-   description at struct dwarf_expr_context_funcs->push_dwarf_reg_entry_value.
+/* Execute call_site_parameter's DWARF block matching DEREF_SIZE for caller of
+   the CTX's frame.  CTX must be of dwarf_expr_ctx_funcs kind.  See DWARF_REG
+   and FB_OFFSET description at struct
+   dwarf_expr_context_funcs->push_dwarf_reg_entry_value.
 
    The CTX caller can be from a different CU - per_cu_dwarf_call implementation
    can be more simple as it does not support cross-CU DWARF executions.  */
 
 static void
 dwarf_expr_push_dwarf_reg_entry_value (struct dwarf_expr_context *ctx,
-				       int dwarf_reg, CORE_ADDR fb_offset)
+				       int dwarf_reg, CORE_ADDR fb_offset,
+				       int deref_size)
 {
   struct dwarf_expr_baton *debaton;
   struct frame_info *frame, *caller_frame;
@@ -964,8 +977,13 @@ dwarf_expr_push_dwarf_reg_entry_value (struct dwarf_expr_context *ctx,
 
   parameter = dwarf_expr_reg_to_entry_parameter (frame, dwarf_reg, fb_offset,
 						 &caller_per_cu);
-  data_src = parameter->value;
-  size = parameter->value_size;
+  data_src = deref_size == -1 ? parameter->value : parameter->data_value;
+  size = deref_size == -1 ? parameter->value_size : parameter->data_value_size;
+
+  /* DEREF_SIZE size is not verified here.  */
+  if (data_src == NULL)
+    throw_error (NO_ENTRY_VALUE_ERROR,
+		 _("Cannot resolve DW_AT_GNU_call_site_data_value"));
 
   baton_local.frame = caller_frame;
   baton_local.per_cu = caller_per_cu;
@@ -987,6 +1005,62 @@ dwarf_expr_push_dwarf_reg_entry_value (struct dwarf_expr_context *ctx,
   ctx->baton = saved_ctx.baton;
 }
 
+/* VALUE must be of type lval_computed with entry_data_value_funcs.  Perform
+   the indirect method on it, that is use its stored target value, the sole
+   purpose of entry_data_value_funcs..  */
+
+static struct value *
+entry_data_value_coerce_ref (const struct value *value)
+{
+  struct type *checked_type = check_typedef (value_type (value));
+  struct value *target_val;
+
+  if (TYPE_CODE (checked_type) != TYPE_CODE_REF)
+    return NULL;
+
+  target_val = value_computed_closure (value);
+  value_incref (target_val);
+  return target_val;
+}
+
+/* Implement copy_closure.  */
+
+static void *
+entry_data_value_copy_closure (const struct value *v)
+{
+  struct value *target_val = value_computed_closure (v);
+
+  value_incref (target_val);
+  return target_val;
+}
+
+/* Implement free_closure.  */
+
+static void
+entry_data_value_free_closure (struct value *v)
+{
+  struct value *target_val = value_computed_closure (v);
+
+  value_free (target_val);
+}
+
+/* Vector for methods for an entry value reference where the referenced value
+   is stored in the caller.  On the first dereference use
+   DW_AT_GNU_call_site_data_value in the caller.  */
+
+static const struct lval_funcs entry_data_value_funcs =
+{
+  NULL,	/* read */
+  NULL,	/* write */
+  NULL,	/* check_validity */
+  NULL,	/* check_any_valid */
+  NULL,	/* indirect */
+  entry_data_value_coerce_ref,
+  NULL,	/* check_synthetic_pointer */
+  entry_data_value_copy_closure,
+  entry_data_value_free_closure
+};
+
 /* Read parameter of TYPE at (callee) FRAME's function entry.  DWARF_REG and
    FB_OFFSET are used to match DW_AT_location at the caller's
    DW_TAG_GNU_call_site_parameter.  See DWARF_REG and FB_OFFSET description at
@@ -999,15 +1073,53 @@ static struct value *
 value_of_dwarf_reg_entry (struct type *type, struct frame_info *frame,
 			  int dwarf_reg, CORE_ADDR fb_offset)
 {
+  struct type *checked_type = check_typedef (type);
+  struct type *target_type = TYPE_TARGET_TYPE (checked_type);
   struct frame_info *caller_frame = get_prev_frame (frame);
+  struct value *outer_val, *target_val, *val;
   struct call_site_parameter *parameter;
   struct dwarf2_per_cu_data *caller_per_cu;
+  CORE_ADDR addr;
 
   parameter = dwarf_expr_reg_to_entry_parameter (frame, dwarf_reg, fb_offset,
 						 &caller_per_cu);
 
-  return dwarf_entry_parameter_to_value (parameter, type, caller_frame,
-					 caller_per_cu);
+  outer_val = dwarf_entry_parameter_to_value (parameter, -1 /* deref_size */,
+					      type, caller_frame,
+					      caller_per_cu);
+
+  /* Check if DW_AT_GNU_call_site_data_value cannot be used.  If it should be
+     used and it is not available do not fall back to OUTER_VAL - dereferencing
+     TYPE_CODE_REF with non-entry data value would give current value - not the
+     entry value.  */
+
+  if (TYPE_CODE (checked_type) != TYPE_CODE_REF
+      || TYPE_TARGET_TYPE (checked_type) == NULL)
+    return outer_val;
+
+  target_val = dwarf_entry_parameter_to_value (parameter,
+					       TYPE_LENGTH (target_type),
+					       target_type, caller_frame,
+					       caller_per_cu);
+
+  /* value_as_address dereferences TYPE_CODE_REF.  */
+  addr = extract_typed_address (value_contents (outer_val), checked_type);
+
+  /* The target entry value has artificial address of the entry value
+     reference.  */
+  VALUE_LVAL (target_val) = lval_memory;
+  set_value_address (target_val, addr);
+
+  release_value (target_val);
+  val = allocate_computed_value (type, &entry_data_value_funcs,
+				 target_val /* closure */);
+
+  /* Copy the referencing pointer to the new computed value.  */
+  memcpy (value_contents_raw (val), value_contents_raw (outer_val),
+	  TYPE_LENGTH (checked_type));
+  set_value_lazy (val, 0);
+
+  return val;
 }
 
 /* Read parameter of TYPE at (callee) FRAME's function entry.  DATA and
@@ -1799,6 +1911,7 @@ static const struct lval_funcs pieced_value_funcs = {
   check_pieced_value_validity,
   check_pieced_value_invalid,
   indirect_pieced_value,
+  NULL,	/* coerce_ref */
   check_pieced_synthetic_pointer,
   copy_pieced_value_closure,
   free_pieced_value_closure
@@ -2118,7 +2231,7 @@ needs_frame_dwarf_call (struct dwarf_expr_context *ctx, size_t die_offset)
 
 static void
 needs_dwarf_reg_entry_value (struct dwarf_expr_context *ctx,
-			     int dwarf_reg, CORE_ADDR fb_offset)
+			     int dwarf_reg, CORE_ADDR fb_offset, int deref_size)
 {
   struct needs_frame_baton *nf_baton = ctx->baton;
 

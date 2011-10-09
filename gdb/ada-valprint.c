@@ -898,9 +898,18 @@ ada_val_print_1 (struct type *type, const gdb_byte *valaddr,
       
       if (TYPE_CODE (elttype) != TYPE_CODE_UNDEF)
         {
-          CORE_ADDR deref_val_int
-	    = unpack_pointer (type, valaddr + offset_aligned);
+          CORE_ADDR deref_val_int;
+	  struct value *deref_val;
 
+	  deref_val = coerce_ref_if_computed (original_value);
+	  if (deref_val)
+	    {
+	      common_val_print (deref_val, stream, recurse + 1, options,
+				current_language);
+	      break;
+	    }
+
+          deref_val_int = unpack_pointer (type, valaddr + offset_aligned);
           if (deref_val_int != 0)
             {
               struct value *deref_val =

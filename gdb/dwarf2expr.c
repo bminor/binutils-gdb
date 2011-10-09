@@ -518,6 +518,63 @@ dwarf_block_to_dwarf_reg (const gdb_byte *buf, const gdb_byte *buf_end)
   return dwarf_reg;
 }
 
+/* If <BUF..BUF_END] contains DW_FORM_block* with just DW_OP_breg*(0) and
+   DW_OP_deref* return the DWARF register number.  Otherwise return -1.
+   DEREF_SIZE_RETURN contains -1 for DW_OP_deref; otherwise it contains the
+   size from DW_OP_deref_size.  */
+
+int
+dwarf_block_to_dwarf_reg_deref (const gdb_byte *buf, const gdb_byte *buf_end,
+				CORE_ADDR *deref_size_return)
+{
+  ULONGEST dwarf_reg;
+  LONGEST offset;
+
+  if (buf_end <= buf)
+    return -1;
+  if (*buf >= DW_OP_breg0 && *buf <= DW_OP_breg31)
+    {
+      dwarf_reg = *buf - DW_OP_breg0;
+      buf++;
+    }
+  else if (*buf == DW_OP_bregx)
+    {
+      buf++;
+      buf = read_uleb128 (buf, buf_end, &dwarf_reg);
+      if ((int) dwarf_reg != dwarf_reg)
+       return -1;
+    }
+  else
+    return -1;
+
+  buf = read_sleb128 (buf, buf_end, &offset);
+  if (offset != 0)
+    return -1;
+
+  if (buf >= buf_end)
+    return -1;
+
+  if (*buf == DW_OP_deref)
+    {
+      buf++;
+      *deref_size_return = -1;
+    }
+  else if (*buf == DW_OP_deref_size)
+    {
+      buf++;
+      if (buf >= buf_end)
+       return -1;
+      *deref_size_return = *buf++;
+    }
+  else
+    return -1;
+
+  if (buf != buf_end)
+    return -1;
+
+  return dwarf_reg;
+}
+
 /* If <BUF..BUF_END] contains DW_FORM_block* with single DW_OP_fbreg(X) fill
    in FB_OFFSET_RETURN with the X offset and return 1.  Otherwise return 0.  */
 
@@ -1304,12 +1361,27 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	      {
 		op_ptr += len;
 		ctx->funcs->push_dwarf_reg_entry_value (ctx, dwarf_reg,
-							0 /* unused */);
+							0 /* unused */,
+							-1 /* deref_size */);
+		goto no_push;
+	      }
+
+	    dwarf_reg = dwarf_block_to_dwarf_reg_deref (op_ptr, op_ptr + len,
+							&deref_size);
+	    if (dwarf_reg != -1)
+	      {
+		if (deref_size == -1)
+		  deref_size = ctx->addr_size;
+		op_ptr += len;
+		ctx->funcs->push_dwarf_reg_entry_value (ctx, dwarf_reg,
+							0 /* unused */,
+							deref_size);
 		goto no_push;
 	      }
 
 	    error (_("DWARF-2 expression error: DW_OP_GNU_entry_value is "
-		     "supported only for single DW_OP_reg*"));
+		     "supported only for single DW_OP_reg* "
+		     "or for DW_OP_breg*(0)+DW_OP_deref*"));
 	  }
 
 	case DW_OP_GNU_const_type:
@@ -1460,7 +1532,8 @@ ctx_no_get_base_type (struct dwarf_expr_context *ctx, size_t die)
 
 void
 ctx_no_push_dwarf_reg_entry_value (struct dwarf_expr_context *ctx,
-				   int dwarf_reg, CORE_ADDR fb_offset)
+				   int dwarf_reg, CORE_ADDR fb_offset,
+				   int deref_size)
 {
   internal_error (__FILE__, __LINE__,
 		  _("Support for DW_OP_GNU_entry_value is unimplemented"));

@@ -346,10 +346,19 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	{
 	  if (TYPE_CODE (elttype) != TYPE_CODE_UNDEF)
 	    {
-	      struct value *deref_val =
-		value_at
-		(TYPE_TARGET_TYPE (type),
-		 unpack_pointer (type, valaddr + embedded_offset));
+	      struct value *deref_val;
+
+	      deref_val = coerce_ref_if_computed (original_value);
+	      if (deref_val != NULL)
+		{
+		  /* More complicated computed references are not supported.  */
+		  gdb_assert (embedded_offset == 0);
+		}
+	      else
+		deref_val = value_at (TYPE_TARGET_TYPE (type),
+				      unpack_pointer (type,
+						      (valaddr
+						       + embedded_offset)));
 
 	      common_val_print (deref_val, stream, recurse,
 				options, current_language);

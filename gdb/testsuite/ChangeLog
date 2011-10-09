@@ -1,5 +1,23 @@
 2011-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Display @entry parameter values even for references.
+	* gdb.arch/amd64-entry-value.cc (reference, datap, datap_input): New
+	functions.
+	(main): New variables regvar, nodatavarp, stackvar1, stackvar2.  Call
+	reference and datap_input.
+	* gdb.arch/amd64-entry-value.exp (reference, breakhere_reference): New
+	breakpoints.
+	(continue to breakpoint: entry_reference: reference)
+	(entry_reference: bt at entry)
+	(continue to breakpoint: entry_reference: breakhere_reference)
+	(entry_reference: bt, entry_reference: ptype regparam)
+	(entry_reference: p regparam, entry_reference: ptype regparam@entry)
+	(entry_reference: p regparam@entry, entry_reference: p &regparam@entry)
+	(entry_reference: p regcopy, entry_reference: p nodataparam)
+	(entry_reference: p nodataparam@entry): New tests.
+
+2011-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Support @entry in input expressions.
 	* gdb.arch/amd64-entry-value.exp (entry: p i@entry, entry: p j@entry)
 	(entry_stack: p s1@entry, entry_stack: p s2@entry)

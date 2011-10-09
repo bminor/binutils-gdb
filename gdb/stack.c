@@ -350,8 +350,50 @@ read_frame_arg (struct symbol *sym, struct frame_info *frame,
 	      if (!value_optimized_out (val)
 		  && value_available_contents_eq (val, 0, entryval, 0, len))
 		{
-		  entryval = NULL;
-		  val_equal = 1;
+		  struct value *val_deref, *entryval_deref;
+
+		  /* DW_AT_GNU_call_site_value does match with the current
+		     value.  If it is a reference still try to verify if
+		     dereferenced DW_AT_GNU_call_site_data_value does not
+		     differ.  */
+
+		  TRY_CATCH (except, RETURN_MASK_ERROR)
+		    {
+		      unsigned len_deref;
+
+		      val_deref = coerce_ref (val);
+		      if (value_lazy (val_deref))
+			value_fetch_lazy (val_deref);
+		      len_deref = TYPE_LENGTH (value_type (val_deref));
+
+		      entryval_deref = coerce_ref (entryval);
+		      if (value_lazy (entryval_deref))
+			value_fetch_lazy (entryval_deref);
+
+		      /* If the reference addresses match but dereferenced
+			 content does not match print them.  */
+		      if (val != val_deref
+			  && value_available_contents_eq (val_deref, 0,
+							  entryval_deref, 0,
+							  len_deref))
+			val_equal = 1;
+		    }
+
+		  /* Value was not a reference; and its content matches.  */
+		  if (val == val_deref)
+		    val_equal = 1;
+		  /* If the dereferenced content could not be fetched do not
+		     display anything.  */
+		  else if (except.error == NO_ENTRY_VALUE_ERROR)
+		    val_equal = 1;
+		  else if (except.message)
+		    {
+		      entryval_error = alloca (strlen (except.message) + 1);
+		      strcpy (entryval_error, except.message);
+		    }
+
+		  if (val_equal)
+		    entryval = NULL;
 		}
 	    }
 

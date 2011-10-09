@@ -1063,9 +1063,9 @@ set_value_pointed_to_offset (struct value *value, int val)
 }
 
 const struct lval_funcs *
-value_computed_funcs (struct value *v)
+value_computed_funcs (const struct value *v)
 {
-  gdb_assert (VALUE_LVAL (v) == lval_computed);
+  gdb_assert (value_lval_const (v) == lval_computed);
 
   return v->location.computed.funcs;
 }
@@ -1082,6 +1082,12 @@ enum lval_type *
 deprecated_value_lval_hack (struct value *value)
 {
   return &value->lval;
+}
+
+enum lval_type
+value_lval_const (const struct value *value)
+{
+  return value->lval;
 }
 
 CORE_ADDR
@@ -3083,15 +3089,39 @@ value_from_history_ref (char *h, char **endp)
 }
 
 struct value *
+coerce_ref_if_computed (const struct value *arg)
+{
+  const struct lval_funcs *funcs;
+
+  if (TYPE_CODE (check_typedef (value_type (arg))) != TYPE_CODE_REF)
+    return NULL;
+
+  if (value_lval_const (arg) != lval_computed)
+    return NULL;
+
+  funcs = value_computed_funcs (arg);
+  if (funcs->coerce_ref == NULL)
+    return NULL;
+
+  return funcs->coerce_ref (arg);
+}
+
+struct value *
 coerce_ref (struct value *arg)
 {
   struct type *value_type_arg_tmp = check_typedef (value_type (arg));
+  struct value *retval;
 
-  if (TYPE_CODE (value_type_arg_tmp) == TYPE_CODE_REF)
-    arg = value_at_lazy (TYPE_TARGET_TYPE (value_type_arg_tmp),
-			 unpack_pointer (value_type (arg),		
-					 value_contents (arg)));
-  return arg;
+  retval = coerce_ref_if_computed (arg);
+  if (retval)
+    return retval;
+
+  if (TYPE_CODE (value_type_arg_tmp) != TYPE_CODE_REF)
+    return arg;
+
+  return value_at_lazy (TYPE_TARGET_TYPE (value_type_arg_tmp),
+			unpack_pointer (value_type (arg),
+					value_contents (arg)));
 }
 
 struct value *
