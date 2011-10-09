@@ -1,5 +1,14 @@
 2011-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Make some lval_funcs methods to default on NULL.
+	* valops.c (value_fetch_lazy): Check if lval_computed read method is
+	NULL.
+	(value_assign): Check if lval_computed write method is NULL.
+	* value.h (struct lval_funcs): Comment NULL values for read and write
+	methods.
+
+2011-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Display @entry parameter values (without references).
 	* dwarf2expr.c (dwarf_block_to_fb_offset, dwarf_block_to_sp_offset):
 	New functions.

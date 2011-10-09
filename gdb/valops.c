@@ -1110,7 +1110,8 @@ value_fetch_lazy (struct value *val)
 	 watchpoints from trying to watch the saved frame pointer.  */
       value_free_to_mark (mark);
     }
-  else if (VALUE_LVAL (val) == lval_computed)
+  else if (VALUE_LVAL (val) == lval_computed
+	   && value_computed_funcs (val)->read != NULL)
     value_computed_funcs (val)->read (val);
   else if (value_optimized_out (val))
     /* Keep it optimized out.  */;
@@ -1381,9 +1382,13 @@ value_assign (struct value *toval, struct value *fromval)
       {
 	const struct lval_funcs *funcs = value_computed_funcs (toval);
 
-	funcs->write (toval, fromval);
+	if (funcs->write != NULL)
+	  {
+	    funcs->write (toval, fromval);
+	    break;
+	  }
       }
-      break;
+      /* Fall through.  */
 
     default:
       error (_("Left operand of assignment is not an lvalue."));

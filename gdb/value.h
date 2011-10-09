@@ -156,13 +156,15 @@ struct lval_funcs
 {
   /* Fill in VALUE's contents.  This is used to "un-lazy" values.  If
      a problem arises in obtaining VALUE's bits, this function should
-     call 'error'.  */
+     call 'error'.  If it is NULL value_fetch_lazy on "un-lazy"
+     non-optimized-out value is an internal error.  */
   void (*read) (struct value *v);
 
   /* Handle an assignment TOVAL = FROMVAL by writing the value of
      FROMVAL to TOVAL's location.  The contents of TOVAL have not yet
      been updated.  If a problem arises in doing so, this function
-     should call 'error'.  */
+     should call 'error'.  If it is NULL such TOVAL assignment is an error as
+     TOVAL is not considered as an lvalue.  */
   void (*write) (struct value *toval, struct value *fromval);
 
   /* Check the validity of some bits in VALUE.  This should return 1
