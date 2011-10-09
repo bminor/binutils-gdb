@@ -1,5 +1,11 @@
 2011-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Fix initial language detection with -readnow.
+	* gdb.cp/readnow-language.cc: New file.
+	* gdb.cp/readnow-language.exp: New file.
+
+2011-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Fix printed anonymous struct name.
 	* gdb.cp/anon-struct.exp (print type of X::t2): New test.
 

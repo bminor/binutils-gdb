@@ -2650,7 +2650,21 @@ dw2_find_symbol_file (struct objfile *objfile, const char *name)
 
   /* index_table is NULL if OBJF_READNOW.  */
   if (!dwarf2_per_objfile->index_table)
-    return NULL;
+    {
+      struct symtab *s;
+
+      ALL_OBJFILE_SYMTABS (objfile, s)
+	if (s->primary)
+	  {
+	    struct blockvector *bv = BLOCKVECTOR (s);
+	    const struct block *block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
+	    struct symbol *sym = lookup_block_symbol (block, name, VAR_DOMAIN);
+
+	    if (sym)
+	      return sym->symtab->filename;
+	  }
+      return NULL;
+    }
 
   if (!find_slot_in_mapped_hash (dwarf2_per_objfile->index_table,
 				 name, &vec))

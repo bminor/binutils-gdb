@@ -1,5 +1,12 @@
 2011-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Fix initial language detection with -readnow.
+	* dwarf2read.c (dw2_find_symbol_file): Handle OBJF_READNOW case.
+	* symfile.h (struct quick_symbol_functions): State find_symbol_file
+	searches only for global symbols.
+
+2011-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Fix printed anonymous struct name.
 	* dwarf2read.c (fixup_partial_die): Handle for anonymous structs also
 	DW_TAG_interface_type.  Strip for anonymous structs any prefixes.

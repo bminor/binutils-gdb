@@ -222,7 +222,7 @@ struct quick_symbol_functions
   void (*expand_symtabs_with_filename) (struct objfile *objfile,
 					const char *filename);
 
-  /* Return the file name of the file holding the symbol in OBJFILE
+  /* Return the file name of the file holding the global symbol in OBJFILE
      named NAME.  If no such symbol exists in OBJFILE, return NULL.  */
   const char *(*find_symbol_file) (struct objfile *objfile, const char *name);
 
