@@ -1,3 +1,17 @@
+2011-10-10  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_howto_table): Add R_PPC64_TOCSAVE entry.
+	(struct ppc_link_hash_table): Add tocsave_htab.
+	(struct tocsave_entry): New.
+	(tocsave_htab_hash, tocsave_htab_eq, tocsave_find): New functions.
+	(ppc64_elf_link_hash_table_create): Create tocsave_htab..
+	(ppc64_elf_link_hash_table_free): ..and delete it.
+	(build_plt_stub): Always put STD_R2_40R1 first.
+	(ppc64_elf_size_stubs): Check for R_PPC64_TOCSAVE following reloc
+	on plt call.  If present add prologue nop location to tocsave_htab.
+	(ppc64_elf_relocate_section): Convert prologue nop to std.  Skip
+	first insn of plt call stub when R_PPC64_TOCSAVE present.
+
 2011-10-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/13250
