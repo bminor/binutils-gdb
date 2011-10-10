@@ -2237,7 +2237,29 @@ linux_handle_extended_wait (struct lwp_info *lp, int status,
 	      new_lp->signalled = 1;
 	    }
 	  else
-	    status = 0;
+	    {
+	      struct thread_info *tp;
+
+	      /* When we stop for an event in some other thread, and
+		 pull the thread list just as this thread has cloned,
+		 we'll have seen the new thread in the thread_db list
+		 before handling the CLONE event (glibc's
+		 pthread_create adds the new thread to the thread list
+		 before clone'ing, and has the kernel fill in the
+		 thread's tid on the clone call with
+		 CLONE_PARENT_SETTID).  If that happened, and the core
+		 had requested the new thread to stop, we'll have
+		 killed it with SIGSTOP.  But since SIGSTOP is not an
+		 RT signal, it can only be queued once.  We need to be
+		 careful to not resume the LWP if we wanted it to
+		 stop.  In that case, we'll leave the SIGSTOP pending.
+		 It will later be reported as TARGET_SIGNAL_0.  */
+	      tp = find_thread_ptid (new_lp->ptid);
+	      if (tp != NULL && tp->stop_requested)
+		new_lp->last_resume_kind = resume_stop;
+	      else
+		status = 0;
+	    }
 
 	  if (non_stop)
 	    {
@@ -2266,39 +2288,37 @@ linux_handle_extended_wait (struct lwp_info *lp, int status,
 		}
 	    }
 
+	  if (status != 0)
+	    {
+	      /* We created NEW_LP so it cannot yet contain STATUS.  */
+	      gdb_assert (new_lp->status == 0);
+
+	      /* Save the wait status to report later.  */
+	      if (debug_linux_nat)
+		fprintf_unfiltered (gdb_stdlog,
+				    "LHEW: waitpid of new LWP %ld, "
+				    "saving status %s\n",
+				    (long) GET_LWP (new_lp->ptid),
+				    status_to_str (status));
+	      new_lp->status = status;
+	    }
+
 	  /* Note the need to use the low target ops to resume, to
 	     handle resuming with PT_SYSCALL if we have syscall
 	     catchpoints.  */
 	  if (!stopping)
 	    {
-	      enum target_signal signo;
-
-	      new_lp->stopped = 0;
 	      new_lp->resumed = 1;
-	      new_lp->last_resume_kind = resume_continue;
 
-	      signo = (status
-		       ? target_signal_from_host (WSTOPSIG (status))
-		       : TARGET_SIGNAL_0);
-
-	      linux_ops->to_resume (linux_ops, pid_to_ptid (new_pid),
-				    0, signo);
-	    }
-	  else
-	    {
-	      if (status != 0)
+	      if (status == 0)
 		{
-		  /* We created NEW_LP so it cannot yet contain STATUS.  */
-		  gdb_assert (new_lp->status == 0);
-
-		  /* Save the wait status to report later.  */
 		  if (debug_linux_nat)
 		    fprintf_unfiltered (gdb_stdlog,
-					"LHEW: waitpid of new LWP %ld, "
-					"saving status %s\n",
-					(long) GET_LWP (new_lp->ptid),
-					status_to_str (status));
-		  new_lp->status = status;
+					"LHEW: resuming new LWP %ld\n",
+					GET_LWP (new_lp->ptid));
+		  linux_ops->to_resume (linux_ops, pid_to_ptid (new_pid),
+					0, TARGET_SIGNAL_0);
+		  new_lp->stopped = 0;
 		}
 	    }
 

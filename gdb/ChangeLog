@@ -1,5 +1,11 @@
 2011-10-10  Pedro Alves  <pedro@codesourcery.com>
 
+	* linux-nat.c (linux_handle_extended_wait): Don't resume the new
+	new clone lwp if the core asked it to stop.  Don't pass on
+	unexpected signals to the new clone; leave them pending instead.
+
+2011-10-10  Pedro Alves  <pedro@codesourcery.com>
+
 	* linux-nat.c (resume_lwp): Remove redundant debug output.
 
 2011-10-10  Pedro Alves  <pedro@codesourcery.com>
