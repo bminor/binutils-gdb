@@ -1,14 +1,14 @@
-# Mensajes en español para gold 2.20.90.
+# Mensajes en español para gold 2.21.53.
 # Copyright (C) 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
 # This file is distributed under the same license as the binutils package.
 # Cristian Othón Martínez Vera <cfuga@cfuga.mx>, 2008, 2009, 2010, 2011.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: gold 2.20.90\n"
+"Project-Id-Version: gold 2.21.53\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
 "POT-Creation-Date: 2010-03-03 15:08+0100\n"
-"PO-Revision-Date: 2011-08-24 11:49-0500\n"
+"PO-Revision-Date: 2011-09-25 20:48-0500\n"
 "Last-Translator: Cristian Othón Martínez Vera <cfuga@cfuga.mx>\n"
 "Language-Team: Spanish <es@li.org>\n"
 "Language: es\n"
