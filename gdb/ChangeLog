@@ -1,3 +1,10 @@
+2011-10-10  Pedro Alves  <pedro@codesourcery.com>
+
+	* linux-nat.c (linux_nat_wait_1): Copy the event lwp's
+	last_resume_kind before clearing it, and use the copy instead to
+	determine whether to report a SIGSTOP as TARGET_SIGNAL_0.  Use
+	resume_clear_callback in the non-stop path too.
+
 2011-10-09  Yao Qi  <yao@codesourcery.com>
 
 	* valprint.c (value_check_printable): Add one parameter OPTIONS.

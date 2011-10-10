@@ -3335,6 +3335,7 @@ linux_nat_wait_1 (struct target_ops *ops,
 		  int target_options)
 {
   static sigset_t prev_mask;
+  enum resume_kind last_resume_kind;
   struct lwp_info *lp = NULL;
   int options = 0;
   int status = 0;
@@ -3747,14 +3748,20 @@ retry:
 	 why.  */
       iterate_over_lwps (minus_one_ptid, cancel_breakpoints_callback, lp);
 
+      /* We'll need this to determine whether to report a SIGSTOP as
+	 TARGET_WAITKIND_0.  Need to take a copy because
+	 resume_clear_callback clears it.  */
+      last_resume_kind = lp->last_resume_kind;
+
       /* In all-stop, from the core's perspective, all LWPs are now
 	 stopped until a new resume action is sent over.  */
       iterate_over_lwps (minus_one_ptid, resume_clear_callback, NULL);
     }
   else
     {
-      lp->resumed = 0;
-      lp->last_resume_kind = resume_stop;
+      /* See above.  */
+      last_resume_kind = lp->last_resume_kind;
+      resume_clear_callback (lp, NULL);
     }
 
   if (linux_nat_status_is_event (status))
@@ -3778,7 +3785,7 @@ retry:
 
   restore_child_signals_mask (&prev_mask);
 
-  if (lp->last_resume_kind == resume_stop
+  if (last_resume_kind == resume_stop
       && ourstatus->kind == TARGET_WAITKIND_STOPPED
       && WSTOPSIG (status) == SIGSTOP)
     {
