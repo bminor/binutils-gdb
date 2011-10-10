@@ -1,5 +1,9 @@
 2011-10-09  Mike Frysinger  <vapier@gentoo.org>
 
+	* dv-cfi.c: Include stdbool.h.
+
+2011-10-09  Mike Frysinger  <vapier@gentoo.org>
+
 	* dv-cfi.c: Replace devices.h include with hw-base.h and hw-main.h.
 
 2011-10-04  Mike Frysinger  <vapier@gentoo.org>
