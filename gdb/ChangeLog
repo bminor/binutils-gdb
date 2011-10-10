@@ -1,3 +1,9 @@
+2011-10-09  Yao Qi  <yao@codesourcery.com>
+
+	* valprint.c (value_check_printable): Add one parameter OPTIONS.
+	Honor OPTIONS and VAL's type.
+	(common_val_print, value_print): Update to pass one more parameter.
+
 2011-10-09  Doug Evans  <dje@google.com>
 
 	Add new "alias" command.

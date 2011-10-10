@@ -399,11 +399,12 @@ val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 }
 
 /* Check whether the value VAL is printable.  Return 1 if it is;
-   return 0 and print an appropriate error message to STREAM if it
-   is not.  */
+   return 0 and print an appropriate error message to STREAM according to
+   OPTIONS if it is not.  */
 
 static int
-value_check_printable (struct value *val, struct ui_file *stream)
+value_check_printable (struct value *val, struct ui_file *stream,
+		       const struct value_print_options *options)
 {
   if (val == 0)
     {
@@ -413,7 +414,10 @@ value_check_printable (struct value *val, struct ui_file *stream)
 
   if (value_entirely_optimized_out (val))
     {
-      val_print_optimized_out (stream);
+      if (options->summary && !scalar_type_p (value_type (val)))
+	fprintf_filtered (stream, "...");
+      else
+	val_print_optimized_out (stream);
       return 0;
     }
 
@@ -441,7 +445,7 @@ common_val_print (struct value *val, struct ui_file *stream, int recurse,
 		  const struct value_print_options *options,
 		  const struct language_defn *language)
 {
-  if (!value_check_printable (val, stream))
+  if (!value_check_printable (val, stream, options))
     return 0;
 
   if (language->la_language == language_ada)
@@ -467,7 +471,7 @@ int
 value_print (struct value *val, struct ui_file *stream,
 	     const struct value_print_options *options)
 {
-  if (!value_check_printable (val, stream))
+  if (!value_check_printable (val, stream, options))
     return 0;
 
   if (!options->raw)
