@@ -33,7 +33,8 @@
 #endif
 
 #include "sim-main.h"
-#include "devices.h"
+#include "hw-base.h"
+#include "hw-main.h"
 #include "dv-cfi.h"
 
 /* Flashes are simple state machines, so here we cover all the
