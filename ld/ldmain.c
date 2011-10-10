@@ -297,73 +297,13 @@ main (int argc, char **argv)
   if (config.hash_table_size != 0)
     bfd_hash_set_default_size (config.hash_table_size);
 
+#ifdef ENABLE_PLUGINS
+  /* Now all the plugin arguments have been gathered, we can load them.  */
+  if (plugin_load_plugins ())
+    einfo (_("%P%F: %s: error loading plugin\n"), plugin_error_plugin ());
+#endif /* ENABLE_PLUGINS */
+
   ldemul_set_symbols ();
-
-  if (link_info.relocatable)
-    {
-      if (command_line.check_section_addresses < 0)
-	command_line.check_section_addresses = 0;
-      if (link_info.shared)
-	einfo (_("%P%F: -r and -shared may not be used together\n"));
-    }
-
-  /* We may have -Bsymbolic, -Bsymbolic-functions, --dynamic-list-data,
-     --dynamic-list-cpp-new, --dynamic-list-cpp-typeinfo and
-     --dynamic-list FILE.  -Bsymbolic and -Bsymbolic-functions are
-     for shared libraries.  -Bsymbolic overrides all others and vice
-     versa.  */
-  switch (command_line.symbolic)
-    {
-    case symbolic_unset:
-      break;
-    case symbolic:
-      /* -Bsymbolic is for shared library only.  */
-      if (link_info.shared)
-	{
-	  link_info.symbolic = TRUE;
-	  /* Should we free the unused memory?  */
-	  link_info.dynamic_list = NULL;
-	  command_line.dynamic_list = dynamic_list_unset;
-	}
-      break;
-    case symbolic_functions:
-      /* -Bsymbolic-functions is for shared library only.  */
-      if (link_info.shared)
-	command_line.dynamic_list = dynamic_list_data;
-      break;
-    }
-
-  switch (command_line.dynamic_list)
-    {
-    case dynamic_list_unset:
-      break;
-    case dynamic_list_data:
-      link_info.dynamic_data = TRUE;
-    case dynamic_list:
-      link_info.dynamic = TRUE;
-      break;
-    }
-
-  if (! link_info.shared)
-    {
-      if (command_line.filter_shlib)
-	einfo (_("%P%F: -F may not be used without -shared\n"));
-      if (command_line.auxiliary_filters)
-	einfo (_("%P%F: -f may not be used without -shared\n"));
-    }
-
-  if (! link_info.shared || link_info.pie)
-    link_info.executable = TRUE;
-
-  /* Treat ld -r -s as ld -r -S -x (i.e., strip all local symbols).  I
-     don't see how else this can be handled, since in this case we
-     must preserve all externally visible symbols.  */
-  if (link_info.relocatable && link_info.strip == strip_all)
-    {
-      link_info.strip = strip_debugger;
-      if (link_info.discard == discard_sec_merge)
-	link_info.discard = discard_all;
-    }
 
   /* If we have not already opened and parsed a linker script,
      try the default script from command line first.  */
