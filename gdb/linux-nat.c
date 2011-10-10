@@ -1829,10 +1829,6 @@ resume_lwp (struct lwp_info *lp, int step)
 	  linux_ops->to_resume (linux_ops,
 				pid_to_ptid (GET_LWP (lp->ptid)),
 				step, TARGET_SIGNAL_0);
-	  if (debug_linux_nat)
-	    fprintf_unfiltered (gdb_stdlog,
-				"RC:  PTRACE_CONT %s, 0, 0 (resume sibling)\n",
-				target_pid_to_str (lp->ptid));
 	  lp->stopped = 0;
 	  lp->step = step;
 	  memset (&lp->siginfo, 0, sizeof (lp->siginfo));
