@@ -7,6 +7,6 @@
 .*: +file format elf64-powerpc
 
 Contents of section \.got:
-.* 00000000 10018610 ffffffff ffff8018  .*
+.* 00000000 10018620 ffffffff ffff8018  .*
 .* 00000000 00000000 00000000 00000000  .*
 .* 00000000 00000000 00000000 00000000  .*

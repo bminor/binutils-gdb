@@ -378,7 +378,8 @@ ppc_add_stub_section (const char *stub_sec_name, asection *input_section)
 	   | SEC_HAS_CONTENTS | SEC_IN_MEMORY | SEC_KEEP);
   stub_sec = bfd_make_section_anyway_with_flags (stub_file->the_bfd,
 						 stub_sec_name, flags);
-  if (stub_sec == NULL)
+  if (stub_sec == NULL
+      || !bfd_set_section_alignment (stub_file->the_bfd, stub_sec, 5))
     goto err_ret;
 
   output_section = input_section->output_section;
