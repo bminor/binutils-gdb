@@ -1,5 +1,20 @@
 2011-10-10  Cary Coutant  <ccoutant@google.com>
 
+	* gold/incremental.cc (Sized_relobj_incr::Sized_relobj_incr):
+	Initialize defined_count_.
+	(Sized_relobj_incr::do_add_symbols): Count defined symbols.
+	(Sized_relobj_incr::do_get_global_symbol_counts): Rewrite.
+	(Sized_incr_dynobj::Sized_incr_dynobj): Initialize defined_count_.
+	(Sized_incr_dynobj::do_add_symbols): Count defined symbols.
+	(Sized_incr_dynobj::do_get_global_symbol_counts): Rewrite.
+	* gold/incremental.h (Sized_relobj_incr::defined_count_): New data
+	member.
+	(Sized_incr_dynobj::defined_count_): New data member.
+	* gold/plugin.cc (Sized_pluginobj::do_get_global_symbol_counts):
+	Return zeroes instead of internal error.
+
+2011-10-10  Cary Coutant  <ccoutant@google.com>
+
 	PR gold/13249
 	* gold/output.cc (Output_reloc::Output_reloc): Add use_plt_offset flag.
 	(Output_reloc::symbol_value): Return PLT offset if flag is set.

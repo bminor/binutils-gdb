@@ -1966,8 +1966,9 @@ Sized_relobj_incr<size, big_endian>::Sized_relobj_incr(
     input_reader_(ibase->inputs_reader().input_file(input_file_index)),
     local_symbol_count_(0), output_local_dynsym_count_(0),
     local_symbol_index_(0), local_symbol_offset_(0), local_dynsym_offset_(0),
-    symbols_(), incr_reloc_offset_(-1U), incr_reloc_count_(0),
-    incr_reloc_output_index_(0), incr_relocs_(NULL), local_symbols_()
+    symbols_(), defined_count_(0), incr_reloc_offset_(-1U),
+    incr_reloc_count_(0), incr_reloc_output_index_(0), incr_relocs_(NULL),
+    local_symbols_()
 {
   if (this->input_reader_.is_in_system_directory())
     this->set_is_in_system_directory();
@@ -2119,6 +2120,9 @@ Sized_relobj_incr<size, big_endian>::do_add_symbols(
       osym.put_st_shndx(shndx);
 
       Symbol* res = symtab->add_from_incrobj(this, name, NULL, &sym);
+
+      if (shndx != elfcpp::SHN_UNDEF)
+        ++this->defined_count_;
 
       // If this is a linker-defined symbol that hasn't yet been defined,
       // define it now.
@@ -2283,9 +2287,21 @@ Sized_relobj_incr<size, big_endian>::do_initialize_xindex()
 template<int size, bool big_endian>
 void
 Sized_relobj_incr<size, big_endian>::do_get_global_symbol_counts(
-    const Symbol_table*, size_t*, size_t*) const
+    const Symbol_table*,
+    size_t* defined,
+    size_t* used) const
 {
-  gold_unreachable();
+  *defined = this->defined_count_;
+  size_t count = 0;
+  for (typename Symbols::const_iterator p = this->symbols_.begin();
+       p != this->symbols_.end();
+       ++p)
+    if (*p != NULL
+	&& (*p)->source() == Symbol::FROM_OBJECT
+	&& (*p)->object() == this
+	&& (*p)->is_defined())
+      ++count;
+  *used = count;
 }
 
 // Read the relocs.
@@ -2579,7 +2595,7 @@ Sized_incr_dynobj<size, big_endian>::Sized_incr_dynobj(
   : Dynobj(name, NULL), ibase_(ibase),
     input_file_index_(input_file_index),
     input_reader_(ibase->inputs_reader().input_file(input_file_index)),
-    symbols_()
+    symbols_(), defined_count_(0)
 {
   if (this->input_reader_.is_in_system_directory())
     this->set_is_in_system_directory();
@@ -2677,6 +2693,7 @@ Sized_incr_dynobj<size, big_endian>::do_add_symbols(
 	  // is meaningless, as long as it's not SHN_UNDEF.
 	  shndx = 1;
 	  v = gsym.get_st_value();
+	  ++this->defined_count_;
 	}
 
       osym.put_st_name(0);
@@ -2845,9 +2862,22 @@ Sized_incr_dynobj<size, big_endian>::do_initialize_xindex()
 template<int size, bool big_endian>
 void
 Sized_incr_dynobj<size, big_endian>::do_get_global_symbol_counts(
-    const Symbol_table*, size_t*, size_t*) const
+    const Symbol_table*,
+    size_t* defined,
+    size_t* used) const
 {
-  gold_unreachable();
+  *defined = this->defined_count_;
+  size_t count = 0;
+  for (typename Symbols::const_iterator p = this->symbols_.begin();
+       p != this->symbols_.end();
+       ++p)
+    if (*p != NULL
+	&& (*p)->source() == Symbol::FROM_OBJECT
+	&& (*p)->object() == this
+	&& (*p)->is_defined()
+	&& (*p)->dynsym_index() != -1U)
+      ++count;
+  *used = count;
 }
 
 // Allocate an incremental object of the appropriate size and endianness.

@@ -1244,14 +1244,18 @@ Sized_pluginobj<size, big_endian>::do_initialize_xindex()
   return NULL;
 }
 
-// Get symbol counts.  Not used for plugin objects.
+// Get symbol counts.  Don't count plugin objects; the replacement
+// files will provide the counts.
 
 template<int size, bool big_endian>
 void
-Sized_pluginobj<size, big_endian>::do_get_global_symbol_counts(const Symbol_table*,
-                                                   size_t*, size_t*) const
+Sized_pluginobj<size, big_endian>::do_get_global_symbol_counts(
+    const Symbol_table*,
+    size_t* defined,
+    size_t* used) const
 {
-  gold_unreachable();
+  *defined = 0;
+  *used = 0;
 }
 
 // Get symbols.  Not used for plugin objects.

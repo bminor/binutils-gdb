@@ -1996,6 +1996,8 @@ class Sized_relobj_incr : public Sized_relobj<size, big_endian>
   unsigned int local_dynsym_offset_;
   // The entries in the symbol table for the external symbols.
   Symbols symbols_;
+  // Number of symbols defined in object file itself.
+  size_t defined_count_;
   // The offset of the first incremental relocation for this object.
   unsigned int incr_reloc_offset_;
   // The number of incremental relocations for this object.
@@ -2127,6 +2129,8 @@ class Sized_incr_dynobj : public Dynobj
   Input_entry_reader input_reader_;
   // The entries in the symbol table for the external symbols.
   Symbols symbols_;
+  // Number of symbols defined in object file itself.
+  size_t defined_count_;
 };
 
 // Allocate an incremental object of the appropriate size and endianness.
