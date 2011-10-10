@@ -1852,7 +1852,7 @@ Target_sparc<size, big_endian>::Scan::local(
           rela_dyn->add_local_relative(object, r_sym, elfcpp::R_SPARC_RELATIVE,
 				       output_section, data_shndx,
 				       reloc.get_r_offset(),
-				       reloc.get_r_addend());
+				       reloc.get_r_addend(), false);
         }
       break;
 
@@ -1943,7 +1943,7 @@ Target_sparc<size, big_endian>::Scan::local(
 		object->set_local_got_offset(r_sym, GOT_TYPE_STANDARD, off);
 		rela_dyn->add_local_relative(object, r_sym,
 					     elfcpp::R_SPARC_RELATIVE,
-					     got, off, 0);
+					     got, off, 0, false);
 	      }
 	  }
 	else

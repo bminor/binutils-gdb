@@ -1033,12 +1033,14 @@ class Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>
   Output_reloc(Sized_relobj<size, big_endian>* relobj,
 	       unsigned int local_sym_index, unsigned int type,
 	       Output_data* od, Address address, bool is_relative,
-               bool is_symbolless, bool is_section_symbol);
+               bool is_symbolless, bool is_section_symbol,
+               bool use_plt_offset);
 
   Output_reloc(Sized_relobj<size, big_endian>* relobj,
 	       unsigned int local_sym_index, unsigned int type,
 	       unsigned int shndx, Address address, bool is_relative,
-               bool is_symbolless, bool is_section_symbol);
+               bool is_symbolless, bool is_section_symbol,
+               bool use_plt_offset);
 
   // A reloc against the STT_SECTION symbol of an output section.
 
@@ -1216,7 +1218,7 @@ class Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>
   // input file.
   unsigned int local_sym_index_;
   // The reloc type--a processor specific code.
-  unsigned int type_ : 29;
+  unsigned int type_ : 28;
   // True if the relocation is a RELATIVE relocation.
   bool is_relative_ : 1;
   // True if the relocation is one which should not use
@@ -1224,6 +1226,10 @@ class Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>
   bool is_symbolless_ : 1;
   // True if the relocation is against a section symbol.
   bool is_section_symbol_ : 1;
+  // True if the addend should be the PLT offset.  This is used only
+  // for RELATIVE relocations to local symbols.
+  // (Used only for RELA, but stored here for space.)
+  bool use_plt_offset_ : 1;
   // If the reloc address is an input section in an object, the
   // section index.  This is INVALID_CODE if the reloc address is
   // specified in some other way.
@@ -1268,9 +1274,10 @@ class Output_reloc<elfcpp::SHT_RELA, dynamic, size, big_endian>
 	       unsigned int local_sym_index, unsigned int type,
 	       Output_data* od, Address address,
 	       Addend addend, bool is_relative,
-	       bool is_symbolless, bool is_section_symbol)
+	       bool is_symbolless, bool is_section_symbol,
+	       bool use_plt_offset)
     : rel_(relobj, local_sym_index, type, od, address, is_relative,
-           is_symbolless, is_section_symbol),
+           is_symbolless, is_section_symbol, use_plt_offset),
       addend_(addend)
   { }
 
@@ -1278,9 +1285,10 @@ class Output_reloc<elfcpp::SHT_RELA, dynamic, size, big_endian>
 	       unsigned int local_sym_index, unsigned int type,
 	       unsigned int shndx, Address address,
 	       Addend addend, bool is_relative,
-	       bool is_symbolless, bool is_section_symbol)
+	       bool is_symbolless, bool is_section_symbol,
+	       bool use_plt_offset)
     : rel_(relobj, local_sym_index, type, shndx, address, is_relative,
-           is_symbolless, is_section_symbol),
+           is_symbolless, is_section_symbol, use_plt_offset),
       addend_(addend)
   { }
 
@@ -1571,7 +1579,7 @@ class Output_data_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>
 	    Output_data* od, Address address)
   {
     this->add(od, Output_reloc_type(relobj, local_sym_index, type, od,
-                                    address, false, false, false));
+                                    address, false, false, false, false));
   }
 
   void
@@ -1580,7 +1588,7 @@ class Output_data_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>
 	    Output_data* od, unsigned int shndx, Address address)
   {
     this->add(od, Output_reloc_type(relobj, local_sym_index, type, shndx,
-				    address, false, false, false));
+				    address, false, false, false, false));
   }
 
   // Add a RELATIVE reloc against a local symbol.
@@ -1591,7 +1599,7 @@ class Output_data_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>
 	             Output_data* od, Address address)
   {
     this->add(od, Output_reloc_type(relobj, local_sym_index, type, od,
-                                    address, true, true, false));
+                                    address, true, true, false, false));
   }
 
   void
@@ -1600,7 +1608,7 @@ class Output_data_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>
 	             Output_data* od, unsigned int shndx, Address address)
   {
     this->add(od, Output_reloc_type(relobj, local_sym_index, type, shndx,
-				    address, true, true, false));
+				    address, true, true, false, false));
   }
 
   // Add a local relocation which does not use a symbol for the relocation,
@@ -1612,7 +1620,7 @@ class Output_data_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>
 			      Output_data* od, Address address)
   {
     this->add(od, Output_reloc_type(relobj, local_sym_index, type, od,
-                                    address, false, true, false));
+                                    address, false, true, false, false));
   }
 
   void
@@ -1622,7 +1630,7 @@ class Output_data_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>
 			      Address address)
   {
     this->add(od, Output_reloc_type(relobj, local_sym_index, type, shndx,
-				    address, false, true, false));
+				    address, false, true, false, false));
   }
 
   // Add a reloc against a local section symbol.  This will be
@@ -1635,7 +1643,7 @@ class Output_data_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>
                     Output_data* od, Address address)
   {
     this->add(od, Output_reloc_type(relobj, input_shndx, type, od,
-                                    address, false, false, true));
+                                    address, false, false, true, false));
   }
 
   void
@@ -1644,7 +1652,7 @@ class Output_data_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>
                     Output_data* od, unsigned int shndx, Address address)
   {
     this->add(od, Output_reloc_type(relobj, input_shndx, type, shndx,
-                                    address, false, false, true));
+                                    address, false, false, true, false));
   }
 
   // A reloc against the STT_SECTION symbol of an output section.
@@ -1767,7 +1775,7 @@ class Output_data_reloc<elfcpp::SHT_RELA, dynamic, size, big_endian>
 	    Output_data* od, Address address, Addend addend)
   {
     this->add(od, Output_reloc_type(relobj, local_sym_index, type, od, address,
-				    addend, false, false, false));
+				    addend, false, false, false, false));
   }
 
   void
@@ -1777,7 +1785,8 @@ class Output_data_reloc<elfcpp::SHT_RELA, dynamic, size, big_endian>
 	    Addend addend)
   {
     this->add(od, Output_reloc_type(relobj, local_sym_index, type, shndx,
-                                    address, addend, false, false, false));
+                                    address, addend, false, false, false,
+                                    false));
   }
 
   // Add a RELATIVE reloc against a local symbol.
@@ -1785,20 +1794,23 @@ class Output_data_reloc<elfcpp::SHT_RELA, dynamic, size, big_endian>
   void
   add_local_relative(Sized_relobj<size, big_endian>* relobj,
 	             unsigned int local_sym_index, unsigned int type,
-	             Output_data* od, Address address, Addend addend)
+	             Output_data* od, Address address, Addend addend,
+	             bool use_plt_offset)
   {
     this->add(od, Output_reloc_type(relobj, local_sym_index, type, od, address,
-				    addend, true, true, false));
+				    addend, true, true, false,
+				    use_plt_offset));
   }
 
   void
   add_local_relative(Sized_relobj<size, big_endian>* relobj,
 	             unsigned int local_sym_index, unsigned int type,
 	             Output_data* od, unsigned int shndx, Address address,
-	             Addend addend)
+	             Addend addend, bool use_plt_offset)
   {
     this->add(od, Output_reloc_type(relobj, local_sym_index, type, shndx,
-                                    address, addend, true, true, false));
+                                    address, addend, true, true, false,
+                                    use_plt_offset));
   }
 
   // Add a local relocation which does not use a symbol for the relocation,
@@ -1810,7 +1822,7 @@ class Output_data_reloc<elfcpp::SHT_RELA, dynamic, size, big_endian>
 			      Output_data* od, Address address, Addend addend)
   {
     this->add(od, Output_reloc_type(relobj, local_sym_index, type, od, address,
-				    addend, false, true, false));
+				    addend, false, true, false, false));
   }
 
   void
@@ -1820,7 +1832,8 @@ class Output_data_reloc<elfcpp::SHT_RELA, dynamic, size, big_endian>
 			      Address address, Addend addend)
   {
     this->add(od, Output_reloc_type(relobj, local_sym_index, type, shndx,
-                                    address, addend, false, true, false));
+                                    address, addend, false, true, false,
+                                    false));
   }
 
   // Add a reloc against a local section symbol.  This will be
@@ -1833,7 +1846,7 @@ class Output_data_reloc<elfcpp::SHT_RELA, dynamic, size, big_endian>
                     Output_data* od, Address address, Addend addend)
   {
     this->add(od, Output_reloc_type(relobj, input_shndx, type, od, address,
-				    addend, false, false, true));
+				    addend, false, false, true, false));
   }
 
   void
@@ -1843,7 +1856,8 @@ class Output_data_reloc<elfcpp::SHT_RELA, dynamic, size, big_endian>
 		    Addend addend)
   {
     this->add(od, Output_reloc_type(relobj, input_shndx, type, shndx,
-                                    address, addend, false, false, true));
+                                    address, addend, false, false, true,
+                                    false));
   }
 
   // A reloc against the STT_SECTION symbol of an output section.

@@ -1549,7 +1549,7 @@ Target_x86_64::reserve_local_got_entry(
     case GOT_TYPE_STANDARD:
       if (parameters->options().output_is_position_independent())
 	rela_dyn->add_local_relative(obj, r_sym, elfcpp::R_X86_64_RELATIVE,
-				     this->got_, got_offset, 0);
+				     this->got_, got_offset, 0, false);
       break;
     case GOT_TYPE_TLS_OFFSET:
       rela_dyn->add_local(obj, r_sym, elfcpp::R_X86_64_TPOFF64,
@@ -1953,8 +1953,8 @@ Target_x86_64::Scan::local(Symbol_table* symtab,
                            const elfcpp::Sym<64, false>& lsym)
 {
   // A local STT_GNU_IFUNC symbol may require a PLT entry.
-  if (lsym.get_st_type() == elfcpp::STT_GNU_IFUNC
-      && this->reloc_needs_plt_for_ifunc(object, r_type))
+  bool is_ifunc = lsym.get_st_type() == elfcpp::STT_GNU_IFUNC;
+  if (is_ifunc && this->reloc_needs_plt_for_ifunc(object, r_type))
     {
       unsigned int r_sym = elfcpp::elf_r_sym<64>(reloc.get_r_info());
       target->make_local_ifunc_plt_entry(symtab, layout, object, r_sym);
@@ -1982,7 +1982,7 @@ Target_x86_64::Scan::local(Symbol_table* symtab,
 				       elfcpp::R_X86_64_RELATIVE,
 				       output_section, data_shndx,
 				       reloc.get_r_offset(),
-				       reloc.get_r_addend());
+				       reloc.get_r_addend(), is_ifunc);
         }
       break;
 
@@ -2058,7 +2058,7 @@ Target_x86_64::Scan::local(Symbol_table* symtab,
 	// lets function pointers compare correctly with shared
 	// libraries.  Otherwise we would need an IRELATIVE reloc.
 	bool is_new;
-	if (lsym.get_st_type() == elfcpp::STT_GNU_IFUNC)
+	if (is_ifunc)
 	  is_new = got->add_local_plt(object, r_sym, GOT_TYPE_STANDARD);
 	else
 	  is_new = got->add_local(object, r_sym, GOT_TYPE_STANDARD);
@@ -2076,7 +2076,7 @@ Target_x86_64::Scan::local(Symbol_table* symtab,
 		      object->local_got_offset(r_sym, GOT_TYPE_STANDARD);
 		    rela_dyn->add_local_relative(object, r_sym,
 						 elfcpp::R_X86_64_RELATIVE,
-						 got, got_offset, 0);
+						 got, got_offset, 0, is_ifunc);
 		  }
                 else
                   {

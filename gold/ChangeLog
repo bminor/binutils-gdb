@@ -1,3 +1,17 @@
+2011-10-10  Cary Coutant  <ccoutant@google.com>
+
+	PR gold/13249
+	* gold/output.cc (Output_reloc::Output_reloc): Add use_plt_offset flag.
+	(Output_reloc::symbol_value): Return PLT offset if flag is set.
+	* gold/output.h (class Output_reloc): Add use_plt_offset flag.
+	(Output_reloc::type_): Adjust size of bit field.
+	(Output_reloc::use_plt_offset_): New bit field.
+	(class Output_data_reloc): Adjust all calls to Output_reloc_type.
+	(Output_data_reloc::add_local_relative): (RELA only) Add use_plt_offset
+	flag.  Adjust all callers.
+	* gold/x86_64.cc (Target_x86_64::Scan::local): Check for IFUNC when
+	creating RELATIVE relocations.
+
 2011-10-10  Nick Clifton  <nickc@redhat.com>
 
 	* po/es.po: Updated Spanish translation.
