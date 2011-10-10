@@ -72,22 +72,6 @@ static int arm_linux_vfp_register_count;
 
 extern int arm_apcs_32;
 
-/* The following variables are used to determine the version of the
-   underlying GNU/Linux operating system.  Examples:
-
-   GNU/Linux 2.0.35             GNU/Linux 2.2.12
-   os_version = 0x00020023      os_version = 0x0002020c
-   os_major = 2                 os_major = 2
-   os_minor = 0                 os_minor = 2
-   os_release = 35              os_release = 12
-
-   Note: os_version = (os_major << 16) | (os_minor << 8) | os_release
-
-   These are initialized using get_linux_version() from
-   _initialize_arm_linux_nat().  */
-
-static unsigned int os_version, os_major, os_minor, os_release;
-
 /* On GNU/Linux, threads are implemented as pseudo-processes, in which
    case we may be tracing more than one process at a time.  In that
    case, inferior_ptid will contain the main process ID and the
@@ -642,31 +626,6 @@ ps_get_thread_area (const struct ps_prochandle *ph,
   *base = (void *) ((char *)*base - idx);
 
   return PS_OK;
-}
-
-static unsigned int
-get_linux_version (unsigned int *vmajor,
-		   unsigned int *vminor,
-		   unsigned int *vrelease)
-{
-  struct utsname info;
-  char *pmajor, *pminor, *prelease, *tail;
-
-  if (-1 == uname (&info))
-    {
-      warning (_("Unable to determine GNU/Linux version."));
-      return -1;
-    }
-
-  pmajor = strtok (info.release, ".");
-  pminor = strtok (NULL, ".");
-  prelease = strtok (NULL, ".");
-
-  *vmajor = (unsigned int) strtoul (pmajor, &tail, 0);
-  *vminor = (unsigned int) strtoul (pminor, &tail, 0);
-  *vrelease = (unsigned int) strtoul (prelease, &tail, 0);
-
-  return ((*vmajor << 16) | (*vminor << 8) | *vrelease);
 }
 
 static const struct target_desc *
@@ -1286,8 +1245,6 @@ void
 _initialize_arm_linux_nat (void)
 {
   struct target_ops *t;
-
-  os_version = get_linux_version (&os_major, &os_minor, &os_release);
 
   /* Fill in the generic GNU/Linux methods.  */
   t = linux_target ();
