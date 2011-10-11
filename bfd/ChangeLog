@@ -1,5 +1,13 @@
 2011-10-11  Alan Modra  <amodra@gmail.com>
 
+	PR binutils/13278
+	* archive.c (bfd_generic_archive_p): Only check first element
+	when target_defaulted.
+	(_bfd_construct_extended_name_table): Use ar_maxnamelen.
+	(_bfd_archive_bsd44_construct_extended_name_table): Likewise.
+
+2011-10-11  Alan Modra  <amodra@gmail.com>
+
 	PR binutils/13257
 	* archive.c (_bfd_find_nested_archive, _bfd_get_elt_at_filepos): Open
 	thin archive element using container target if not defaulted.

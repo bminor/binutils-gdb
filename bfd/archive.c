@@ -793,7 +793,7 @@ bfd_generic_archive_p (bfd *abfd)
       return NULL;
     }
 
-  if (bfd_has_map (abfd))
+  if (abfd->target_defaulted && bfd_has_map (abfd))
     {
       bfd *first;
 
@@ -1512,7 +1512,7 @@ _bfd_construct_extended_name_table (bfd *abfd,
 				    char **tabloc,
 				    bfd_size_type *tablen)
 {
-  unsigned int maxname = abfd->xvec->ar_max_namelen;
+  unsigned int maxname = ar_maxnamelen (abfd);
   bfd_size_type total_namelen = 0;
   bfd *current;
   char *strptr;
@@ -1707,7 +1707,7 @@ _bfd_archive_bsd44_construct_extended_name_table (bfd *abfd,
                                                   bfd_size_type *tablen,
                                                   const char **name)
 {
-  unsigned int maxname = abfd->xvec->ar_max_namelen;
+  unsigned int maxname = ar_maxnamelen (abfd);
   bfd *current;
 
   *tablen = 0;
