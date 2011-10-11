@@ -1,3 +1,10 @@
+2011-10-11  Sterling Augustine  <saugustine@google.com>
+
+	* gdb.cp/Makefile.in: Add namespace-enum test.
+	* gdb.cp/namespace-enum.exp: New file.
+	* gdb.cp/namespace-enum.c: New file.
+	* gdb.cp/namespace-enum-main.c: New file.
+
 2011-10-11  Ulrich Weigand  <ulrich.weigand@linaro.org>
 
 	* gdb.python/py-shared.exp: Relax filename check to handle remote:
