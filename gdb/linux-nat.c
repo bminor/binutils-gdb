@@ -2382,7 +2382,8 @@ linux_lwp_is_zombie (long lwp)
 {
   char buffer[MAXPATHLEN];
   FILE *procfile;
-  int retval = 0;
+  int retval;
+  int have_state;
 
   xsnprintf (buffer, sizeof (buffer), "/proc/%ld/status", lwp);
   procfile = fopen (buffer, "r");
@@ -2391,14 +2392,17 @@ linux_lwp_is_zombie (long lwp)
       warning (_("unable to open /proc file '%s'"), buffer);
       return 0;
     }
+
+  have_state = 0;
   while (fgets (buffer, sizeof (buffer), procfile) != NULL)
-    if (strcmp (buffer, "State:\tZ (zombie)\n") == 0)
+    if (strncmp (buffer, "State:", 6) == 0)
       {
-	retval = 1;
+	have_state = 1;
 	break;
       }
+  retval = (have_state
+	    && strcmp (buffer, "State:\tZ (zombie)\n") == 0);
   fclose (procfile);
-
   return retval;
 }
 

@@ -1,3 +1,8 @@
+2011-10-11  Pedro Alves  <pedro@codesourcery.com>
+
+	* linux-nat.c (linux_lwp_is_zombie): Return early if the LWP is
+	not zombie instead of reading the whole file.
+
 2011-10-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix separate debuginfo warning with "remote:" access.
