@@ -1,3 +1,8 @@
+2011-10-10  Joseph Myers  <joseph@codesourcery.com>
+
+	* gdb.cp/gdb2495.exp: Do not include directories in filename in
+	expected message.
+
 2011-10-09  Doug Evans  <dje@google.com>
 
 	* gdb.base/alias.exp: Add tests for alias command.

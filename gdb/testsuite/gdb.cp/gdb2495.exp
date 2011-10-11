@@ -104,7 +104,7 @@ gdb_test "bt" \
 # call and that the std::terminate breakpoint has evaporated and
 # cleaned-up.
 gdb_test "info breakpoints" \
-    "gdb.cp/gdb2495\.cc.*"
+    "gdb2495\.cc.*"
 
 # Turn off this new behaviour.
 gdb_test_multiple "set unwind-on-terminating-exception off" \
