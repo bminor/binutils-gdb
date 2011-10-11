@@ -1,3 +1,23 @@
+2011-10-11  Chris  <player1@onet.eu>
+
+	PR binutils/13051
+	Fix a syntax error bug when compiling rc files with the VERSIONINFO resource
+	containing more than one language block inside a single StringFileInfo block.
+
+	* windint.h (rc_ver_stringtable): New structure definition.
+	(rc_ver_info): Use it.
+	* rcparse.y (verstringtable): New variable.
+	(verstringtables): New type.
+	(verstringtables:): New rule declaration.
+	(verblocks:): Use it.
+	* resrc.c (append_ver_stringtable): New function.
+	(append_ver_stringfileinfo): Update to use stringtables.
+	* windres.h (append_ver_stringfileinfo): Update declaration.
+	(append_ver_stringtable): New declaration.
+	* resrc.c (write_rc_versioninfo): Update to support multiple blocks.
+	* resbin.c (bin_to_res_version): Likewise.
+	(res_to_bin_versioninfo): Likewise.
+
 2011-10-10  Nick Clifton  <nickc@redhat.com>
 
 	* po/bg.po: Updated Bulgarian translation.

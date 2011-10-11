@@ -1,5 +1,5 @@
 /* resrc.c -- read and write Windows rc files.
-   Copyright 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2005, 2007, 2008
+   Copyright 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2005, 2007, 2008, 2011
    Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
    Rewritten by Kai Tietz, Onevision.
@@ -1803,22 +1803,40 @@ define_versioninfo (rc_res_id id, rc_uint_type language,
 /* Add string version info to a list of version information.  */
 
 rc_ver_info *
-append_ver_stringfileinfo (rc_ver_info *verinfo, const char *language,
-			   rc_ver_stringinfo *strings)
+append_ver_stringfileinfo (rc_ver_info *verinfo,
+			   rc_ver_stringtable *stringtables)
 {
   rc_ver_info *vi, **pp;
 
   vi = (rc_ver_info *) res_alloc (sizeof (rc_ver_info));
   vi->next = NULL;
   vi->type = VERINFO_STRING;
-  unicode_from_ascii ((rc_uint_type *) NULL, &vi->u.string.language, language);
-  vi->u.string.strings = strings;
+  vi->u.string.stringtables = stringtables;
 
   for (pp = &verinfo; *pp != NULL; pp = &(*pp)->next)
     ;
   *pp = vi;
 
   return verinfo;
+}
+
+rc_ver_stringtable *
+append_ver_stringtable (rc_ver_stringtable *stringtable,
+			const char *language,
+			rc_ver_stringinfo *strings)
+{
+  rc_ver_stringtable *vst, **pp;
+
+  vst = (rc_ver_stringtable *) res_alloc (sizeof (rc_ver_stringtable));
+  vst->next = NULL;
+  unicode_from_ascii ((rc_uint_type *) NULL, &vst->language, language);
+  vst->strings = strings;
+
+  for (pp = &stringtable; *pp != NULL; pp = &(*pp)->next)
+    ;
+  *pp = vst;
+
+  return stringtable;
 }
 
 /* Add variable version info to a list of version information.  */
@@ -3264,25 +3282,31 @@ write_rc_versioninfo (FILE *e, const rc_versioninfo *versioninfo)
 	{
 	case VERINFO_STRING:
 	  {
+	    const rc_ver_stringtable *vst;
 	    const rc_ver_stringinfo *vs;
 
 	    fprintf (e, "  BLOCK \"StringFileInfo\"\n");
 	    fprintf (e, "  BEGIN\n");
-	    fprintf (e, "    BLOCK ");
-	    unicode_print_quoted (e, vi->u.string.language, -1);
-	    fprintf (e, "\n");
-	    fprintf (e, "    BEGIN\n");
 
-	    for (vs = vi->u.string.strings; vs != NULL; vs = vs->next)
+	    for (vst = vi->u.string.stringtables; vst != NULL; vst = vst->next)
 	      {
-		fprintf (e, "      VALUE ");
-		unicode_print_quoted (e, vs->key, -1);
-		fprintf (e, ", ");
-		unicode_print_quoted (e, vs->value, -1);
-		fprintf (e, "\n");
-	      }
+		fprintf (e, "    BLOCK ");
+		unicode_print_quoted (e, vst->language, -1);
 
-	    fprintf (e, "    END\n");
+		fprintf (e, "\n");
+		fprintf (e, "    BEGIN\n");
+
+		for (vs = vst->strings; vs != NULL; vs = vs->next)
+		  {
+		    fprintf (e, "      VALUE ");
+		    unicode_print_quoted (e, vs->key, -1);
+		    fprintf (e, ", ");
+		    unicode_print_quoted (e, vs->value, -1);
+		    fprintf (e, "\n");
+		  }
+
+		fprintf (e, "    END\n");
+	      }
 	    fprintf (e, "  END\n");
 	    break;
 	  }

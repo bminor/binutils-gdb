@@ -1,6 +1,6 @@
 %{ /* rcparse.y -- parser for Windows rc files
-   Copyright 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2005, 2007, 2008
-   Free Software Foundation, Inc.
+   Copyright 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2005, 2007, 2008,
+   2011  Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
    Extended by Kai Tietz, Onevision.
 
@@ -79,6 +79,7 @@ static const rc_res_id res_null_text = { 1, {{0, &null_unichar}}};
   rc_rcdata_item *rcdata_item;
   rc_fixed_versioninfo *fixver;
   rc_ver_info *verinfo;
+  rc_ver_stringtable *verstringtable;
   rc_ver_stringinfo *verstring;
   rc_ver_varinfo *vervar;
   rc_toolbar_item *toobar_item;
@@ -150,6 +151,7 @@ static const rc_res_id res_null_text = { 1, {{0, &null_unichar}}};
 %type <rcdata_item> opt_control_data
 %type <fixver> fixedverinfo
 %type <verinfo> verblocks
+%type <verstringtable> verstringtables
 %type <verstring> vervals
 %type <vervar> vertrans
 %type <toobar_item> toolbar_data
@@ -1471,13 +1473,24 @@ verblocks:
 	  {
 	    $$ = NULL;
 	  }
-	| verblocks BLOCKSTRINGFILEINFO BEG BLOCK BEG vervals END END
+	| verblocks BLOCKSTRINGFILEINFO BEG verstringtables END
 	  {
-	    $$ = append_ver_stringfileinfo ($1, $4, $6);
+	    $$ = append_ver_stringfileinfo ($1, $4);
 	  }
 	| verblocks BLOCKVARFILEINFO BEG VALUE res_unicode_string_concat vertrans END
 	  {
 	    $$ = append_ver_varfileinfo ($1, $5, $6);
+	  }
+	;
+
+verstringtables:
+      /* empty */
+	  {
+	    $$ = NULL;
+	  }
+	| verstringtables BLOCK BEG vervals END
+	  {
+	    $$ = append_ver_stringtable ($1, $2, $4);
 	  }
 	;
 

@@ -1,3 +1,11 @@
+2011-10-11  Chris  <player1@onet.eu>
+
+	PR binutils/13051
+	* binutils-all\windres\version.rsd: Regenerate.
+	* binutils-all\windres\version_cat.rsd: Regenerate.
+	* binutils-all\windres\version_mlang.rc: Add new test.
+	* binutils-all\windres\version_mlang.rsd: Likewise.
+
 2011-10-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* binutils-all/objdump.exp: Don't run dw2-decodedline.S on ia64.
