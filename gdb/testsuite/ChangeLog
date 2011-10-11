@@ -1,3 +1,12 @@
+2011-10-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Reimplement @entry in input expressions.
+	* gdb.base/exprs.c (v_int_array_init): New variable.
+	* gdb.base/exprs.exp (print v_int_array_init)
+	(print *v_int_array_init@1, print *v_int_array_init@2)
+	(print v_int_array_init[0]@1, print v_int_array_init[0]@2)
+	(print v_int_array_init[1]@1): New tests.
+
 2011-10-10  Joseph Myers  <joseph@codesourcery.com>
 
 	* gdb.cp/gdb2495.exp: Do not include directories in filename in

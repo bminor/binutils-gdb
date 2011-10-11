@@ -1,3 +1,20 @@
+2011-10-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Revert this part of:
+	2011-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	Support @entry in input expressions.
+	* c-exp.y (ENTRY, unknown_cpp_name): New.
+	(exp: UNKNOWN_CPP_NAME): Change to `exp: unknown_cpp_name'.
+	(unknown_cpp_name: UNKNOWN_CPP_NAME, unknown_cpp_name: ENTRY)
+	(variable: name_not_typename '@' ENTRY, name: ENTRY)
+	(name_not_typename: ENTRY): New.
+	(yylex): Recognize ENTRY.
+
+	Reimplement @entry in input expressions.
+	* c-exp.y (ENTRY): New.
+	(variable: name_not_typename ENTRY): New.
+	(lex_one_token): Optionally return ENTRY instead of the '@' lex.
+
 2011-10-11  Pedro Alves  <pedro@codesourcery.com>
 
 	* linux-nat.c (linux_handle_extended_wait): Always dump both the

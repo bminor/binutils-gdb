@@ -75,6 +75,11 @@ unsigned long	v_unsigned_long_array[2];
 
 float		v_float_array[2];
 double		v_double_array[2];
+
+/**** initialized array *******/
+
+int		v_int_array_init[2] = { 10, 20 };
+
 /**** pointers *******/
 
 char		*v_char_pointer;

@@ -262,3 +262,11 @@ gdb_test "print v_int--" "\\$\[0-9\]* = 3"
 gdb_test "print --v_int" "\\$\[0-9\]* = 1"
 gdb_test "print v_int++ = 5" "Left operand of assignment is not an lvalue."
 gdb_test "print v_int-- = 5" "Left operand of assignment is not an lvalue."
+
+# initialized array
+gdb_test {print v_int_array_init} { = \{10, 20\}}
+gdb_test {print *v_int_array_init@1} { = \{10\}}
+gdb_test {print *v_int_array_init@2} { = \{10, 20\}}
+gdb_test {print v_int_array_init[0]@1} { = \{10\}}
+gdb_test {print v_int_array_init[0]@2} { = \{10, 20\}}
+gdb_test {print v_int_array_init[1]@1} { = \{20\}}
