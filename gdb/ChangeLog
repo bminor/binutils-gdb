@@ -1,3 +1,8 @@
+2011-10-11  Yao Qi  <yao@codesourcery.com>
+
+	* arm-tdep.c (arm_get_next_pc_raw): Use read_memory_unsigned_integer
+	to get address.
+
 2011-10-10  Doug Evans  <dje@google.com>
 
 	* linux-thread-db.c (thread_db_new_objfile): Only try to load

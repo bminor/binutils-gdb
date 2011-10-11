@@ -4779,8 +4779,9 @@ arm_get_next_pc_raw (struct frame_info *frame, CORE_ADDR pc)
 		      else
 			base -= offset;
 		    }
-		  nextpc = (CORE_ADDR) read_memory_integer ((CORE_ADDR) base,
-							    4, byte_order);
+		  nextpc =
+		    (CORE_ADDR) read_memory_unsigned_integer ((CORE_ADDR) base,
+							      4, byte_order);
 		}
 	    }
 	  break;
@@ -4794,6 +4795,9 @@ arm_get_next_pc_raw (struct frame_info *frame, CORE_ADDR pc)
 		{
 		  /* loading pc */
 		  int offset = 0;
+		  unsigned long rn_val
+		    = get_frame_register_unsigned (frame,
+						   bits (this_instr, 16, 19));
 
 		  if (bit (this_instr, 23))
 		    {
@@ -4806,15 +4810,10 @@ arm_get_next_pc_raw (struct frame_info *frame, CORE_ADDR pc)
 		  else if (bit (this_instr, 24))
 		    offset = -4;
 
-		  {
-		    unsigned long rn_val =
-		    get_frame_register_unsigned (frame,
-						 bits (this_instr, 16, 19));
-		    nextpc =
-		      (CORE_ADDR) read_memory_integer ((CORE_ADDR) (rn_val
-								  + offset),
-						       4, byte_order);
-		  }
+		  nextpc =
+		    (CORE_ADDR) read_memory_unsigned_integer ((CORE_ADDR)
+							      (rn_val + offset),
+							      4, byte_order);
 		}
 	    }
 	  break;
