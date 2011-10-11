@@ -2218,6 +2218,12 @@ linux_handle_extended_wait (struct lwp_info *lp, int status,
 
 	  ourstatus->kind = TARGET_WAITKIND_IGNORE;
 
+	  if (debug_linux_nat)
+	    fprintf_unfiltered (gdb_stdlog,
+				"LHEW: Got clone event "
+				"from LWP %d, new child is LWP %ld\n",
+				pid, new_pid);
+
 	  new_lp = add_lwp (BUILD_LWP (new_pid, GET_PID (lp->ptid)));
 	  new_lp->cloned = 1;
 	  new_lp->stopped = 1;
@@ -2322,9 +2328,7 @@ linux_handle_extended_wait (struct lwp_info *lp, int status,
 
 	  if (debug_linux_nat)
 	    fprintf_unfiltered (gdb_stdlog,
-				"LHEW: Got clone event "
-				"from LWP %ld, resuming\n",
-				GET_LWP (lp->ptid));
+				"LHEW: resuming parent LWP %d\n", pid);
 	  linux_ops->to_resume (linux_ops, pid_to_ptid (GET_LWP (lp->ptid)),
 				0, TARGET_SIGNAL_0);
 

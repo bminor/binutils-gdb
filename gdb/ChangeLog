@@ -1,5 +1,11 @@
 2011-10-11  Pedro Alves  <pedro@codesourcery.com>
 
+	* linux-nat.c (linux_handle_extended_wait): Always dump both the
+	parent and child's pids as soon as we detect a clone event.
+	Adjust another debug message.
+
+2011-10-11  Pedro Alves  <pedro@codesourcery.com>
+
 	* linux-nat.c (linux_lwp_is_zombie): Return early if the LWP is
 	not zombie instead of reading the whole file.
 
