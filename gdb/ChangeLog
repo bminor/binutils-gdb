@@ -8,6 +8,11 @@
 	static.
 	* regcache.h (regcache_restore): Remove declaration.
 
+	* gdbarch.sh: New field 'long_long_align_bit'.
+	* gdbarch.c, gdbarch.h: Regenerate.
+	* i386-tdep.c (i386_gdbarch_init): Set long_long_align_bit to 32.
+	* jit.c (jit_read_code_entry): Use it to determine correct size offset.
+
 2011-10-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Revert this part of:

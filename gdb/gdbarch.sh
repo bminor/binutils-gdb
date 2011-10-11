@@ -362,6 +362,9 @@ v:int:long_bit:::8 * sizeof (long):4*TARGET_CHAR_BIT::0
 # Number of bits in a long long or unsigned long long for the target
 # machine.
 v:int:long_long_bit:::8 * sizeof (LONGEST):2*gdbarch->long_bit::0
+# Alignment of a long long or unsigned long long for the target
+# machine.
+v:int:long_long_align_bit:::8 * sizeof (LONGEST):2*gdbarch->long_bit::0
 
 # The ABI default bit-size and format for "half", "float", "double", and
 # "long double".  These bit/format pairs should eventually be combined

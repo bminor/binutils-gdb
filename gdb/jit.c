@@ -205,10 +205,11 @@ static void
 jit_read_code_entry (struct gdbarch *gdbarch,
 		     CORE_ADDR code_addr, struct jit_code_entry *code_entry)
 {
-  int err;
+  int err, off;
   struct type *ptr_type;
   int ptr_size;
   int entry_size;
+  int align_bytes;
   gdb_byte *entry_buf;
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
@@ -230,8 +231,13 @@ jit_read_code_entry (struct gdbarch *gdbarch,
       extract_typed_address (&entry_buf[ptr_size], ptr_type);
   code_entry->symfile_addr =
       extract_typed_address (&entry_buf[2 * ptr_size], ptr_type);
+
+  align_bytes = gdbarch_long_long_align_bit (gdbarch) / 8;
+  off = 3 * ptr_size;
+  off = (off + (align_bytes - 1)) & ~(align_bytes - 1);
+
   code_entry->symfile_size =
-      extract_unsigned_integer (&entry_buf[3 * ptr_size], 8, byte_order);
+      extract_unsigned_integer (&entry_buf[off], 8, byte_order);
 }
 
 /* This function registers code associated with a JIT code entry.  It uses the
