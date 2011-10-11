@@ -1,5 +1,9 @@
 2011-10-11  Sterling Augustine  <saugustine@google.com>
 
+	* dwarf2read.c: Undo inadvertent changes in previous commit.
+
+2011-10-11  Sterling Augustine  <saugustine@google.com>
+
 	* dwarf2read.c (partial_die_parent_scope): Rearrange conditional
 	logic.
 
