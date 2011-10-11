@@ -196,7 +196,8 @@ struct objfile
 
     CORE_ADDR addr_low;
 
-    /* Some flag bits for this objfile.  */
+    /* Some flag bits for this objfile.
+       The values are defined by OBJF_*.  */
 
     unsigned short flags;
 
@@ -433,6 +434,11 @@ struct objfile
    This is used to allow lazy reading of partial symtabs.  */
 
 #define OBJF_PSYMTABS_READ (1 << 4)
+
+/* Set if this is the main symbol file
+   (as opposed to symbol file for dynamically loaded code).  */
+
+#define OBJF_MAINLINE (1 << 5)
 
 /* The object file that contains the runtime common minimal symbols
    for SunOS4.  Note that this objfile has no associated BFD.  */

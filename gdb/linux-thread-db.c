@@ -1077,14 +1077,35 @@ check_for_thread_db (void)
     return;
 }
 
+/* This function is called via the new_objfile observer.  */
+
 static void
 thread_db_new_objfile (struct objfile *objfile)
 {
   /* This observer must always be called with inferior_ptid set
      correctly.  */
 
-  if (objfile != NULL)
+  if (objfile != NULL
+      /* Only check for thread_db if we loaded libpthread,
+	 or if this is the main symbol file.
+	 We need to check OBJF_MAINLINE to handle the case of debugging
+	 a statically linked executable AND the symbol file is specified AFTER
+	 the exec file is loaded (e.g., gdb -c core ; file foo).
+	 For dynamically linked executables, libpthread can be near the end
+	 of the list of shared libraries to load, and in an app of several
+	 thousand shared libraries, this can otherwise be painful.  */
+      && ((objfile->flags & OBJF_MAINLINE) != 0
+	  || libpthread_name_p (objfile->name)))
     check_for_thread_db ();
+}
+
+/* This function is called via the inferior_created observer.
+   This handles the case of debugging statically linked executables.  */
+
+static void
+thread_db_inferior_created (struct target_ops *target, int from_tty)
+{
+  check_for_thread_db ();
 }
 
 /* Attach to a new thread.  This function is called when we receive a
@@ -1845,4 +1866,9 @@ When non-zero, libthread-db debugging is enabled."),
 
   /* Add ourselves to objfile event chain.  */
   observer_attach_new_objfile (thread_db_new_objfile);
+
+  /* Add ourselves to inferior_created event chain.
+     This is needed to handle debugging statically linked programs where
+     the new_objfile observer won't get called for libpthread.  */
+  observer_attach_inferior_created (thread_db_inferior_created);
 }

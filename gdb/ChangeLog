@@ -1,3 +1,16 @@
+2011-10-10  Doug Evans  <dje@google.com>
+
+	* linux-thread-db.c (thread_db_new_objfile): Only try to load
+	libthread_db when we load libpthread or the main symbol file.
+	(thread_db_inferior_created): New function.
+	(_initialize_thread_db): Attach inferior_created observer.
+	* linux-nat.c (linux_child_post_attach): Remove call to
+	check_for_thread_db.
+	(linux_child_post_startup_inferior): Ditto.
+	* objfiles.h (OBJF_MAINLINE): Define.
+	* symfile.c (symbol_file_add_with_addrs_or_offsets): Pass it to
+	allocate_objfile when appropriate.
+
 2011-10-10  Ulrich Weigand  <ulrich.weigand@linaro.org>
 
 	PR gdb/13218

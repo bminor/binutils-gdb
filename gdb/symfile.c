@@ -1081,6 +1081,7 @@ symbol_file_add_with_addrs_or_offsets (bfd *abfd,
   struct cleanup *my_cleanups;
   const char *name = bfd_get_filename (abfd);
   const int from_tty = add_flags & SYMFILE_VERBOSE;
+  const int mainline = add_flags & SYMFILE_MAINLINE;
   const int should_print = ((from_tty || info_verbose)
 			    && (readnow_symbol_files
 				|| (add_flags & SYMFILE_NO_READ) == 0));
@@ -1097,12 +1098,12 @@ symbol_file_add_with_addrs_or_offsets (bfd *abfd,
      interactively wiping out any existing symbols.  */
 
   if ((have_full_symbols () || have_partial_symbols ())
-      && (add_flags & SYMFILE_MAINLINE)
+      && mainline
       && from_tty
       && !query (_("Load new symbol table from \"%s\"? "), name))
     error (_("Not confirmed."));
 
-  objfile = allocate_objfile (abfd, flags);
+  objfile = allocate_objfile (abfd, flags | (mainline ? OBJF_MAINLINE : 0));
   discard_cleanups (my_cleanups);
 
   if (parent)

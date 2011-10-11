@@ -571,7 +571,6 @@ static void
 linux_child_post_attach (int pid)
 {
   linux_enable_event_reporting (pid_to_ptid (pid));
-  check_for_thread_db ();
   linux_enable_tracesysgood (pid_to_ptid (pid));
 }
 
@@ -579,7 +578,6 @@ static void
 linux_child_post_startup_inferior (ptid_t ptid)
 {
   linux_enable_event_reporting (ptid);
-  check_for_thread_db ();
   linux_enable_tracesysgood (ptid);
 }
 
