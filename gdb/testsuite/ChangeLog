@@ -1,3 +1,8 @@
+2011-10-11  Ulrich Weigand  <ulrich.weigand@linaro.org>
+
+	* gdb.python/py-shared.exp: Relax filename check to handle remote:
+	sysroot.
+
 2011-10-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Reimplement @entry in input expressions.

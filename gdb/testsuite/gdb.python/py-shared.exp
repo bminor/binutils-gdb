@@ -62,7 +62,7 @@ runto [gdb_get_line_number "Break to end."]
 # Test gdb.solib_name
 gdb_test "p &func1" "" "func1 address"
 gdb_py_test_silent_cmd "python func1 = gdb.history(0)" "Aquire func1 address" 1
-gdb_test "python print gdb.solib_name(long(func1))" "gdb/testsuite/gdb.python/py-shared-sl.sl" "test func1 solib location"
+gdb_test "python print gdb.solib_name(long(func1))" "py-shared-sl.sl" "test func1 solib location"
 
 gdb_test "p &main" "" "main address"
 gdb_py_test_silent_cmd "python main = gdb.history(0)" "Aquire main address" 1
