@@ -1,3 +1,9 @@
+2011-10-11  David S. Miller  <davem@davemloft.net>
+
+	* regcache.c (regcache_restore): Do not write unavailable regs, mark
+	static.
+	* regcache.h (regcache_restore): Remove declaration.
+
 2011-10-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Revert this part of:

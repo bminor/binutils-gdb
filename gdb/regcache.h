@@ -174,9 +174,6 @@ typedef enum register_status (regcache_cooked_read_ftype) (void *src,
 extern void regcache_save (struct regcache *dst,
 			   regcache_cooked_read_ftype *cooked_read,
 			   void *cooked_read_context);
-extern void regcache_restore (struct regcache *dst,
-			      regcache_cooked_read_ftype *cooked_read,
-			      void *cooked_read_context);
 
 /* Copy/duplicate the contents of a register cache.  By default, the
    operation is pass-through.  Writes to DST and reads from SRC will

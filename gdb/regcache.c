@@ -331,7 +331,7 @@ regcache_save (struct regcache *dst, regcache_cooked_read_ftype *cooked_read,
     }
 }
 
-void
+static void
 regcache_restore (struct regcache *dst,
 		  regcache_cooked_read_ftype *cooked_read,
 		  void *cooked_read_context)
@@ -351,9 +351,10 @@ regcache_restore (struct regcache *dst,
     {
       if (gdbarch_register_reggroup_p (gdbarch, regnum, restore_reggroup))
 	{
-	  int valid = cooked_read (cooked_read_context, regnum, buf);
+	  enum register_status status;
 
-	  if (valid)
+	  status = cooked_read (cooked_read_context, regnum, buf);
+	  if (status == REG_VALID)
 	    regcache_cooked_write (dst, regnum, buf);
 	}
     }
