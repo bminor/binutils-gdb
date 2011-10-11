@@ -1,3 +1,13 @@
+2011-10-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix separate debuginfo warning with "remote:" access.
+	* objfiles.h (struct objfile): New fields crc32 and crc32_p.
+	* symfile.c (get_file_crc): New function with the code moved from ...
+	(separate_debug_file_exists): ... this function, specifically variables
+	buffer and count.  New variable verified_as_different, set it.  Remove
+	file_crc initialization.  Verify also if both files are not the same
+	manually, if needed.
+
 2011-10-11  Yao Qi  <yao@codesourcery.com>
 
 	* arm-tdep.c (arm_get_next_pc_raw): Use read_memory_unsigned_integer

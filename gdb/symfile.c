@@ -1311,15 +1311,52 @@ get_debug_link_info (struct objfile *objfile, unsigned long *crc32_out)
   return contents;
 }
 
+/* Return 32-bit CRC for ABFD.  If successful store it to *FILE_CRC_RETURN and
+   return 1.  Otherwise print a warning and return 0.  ABFD seek position is
+   not preserved.  */
+
+static int
+get_file_crc (bfd *abfd, unsigned long *file_crc_return)
+{
+  unsigned long file_crc = 0;
+
+  if (bfd_seek (abfd, 0, SEEK_SET) != 0)
+    {
+      warning (_("Problem reading \"%s\" for CRC: %s"),
+	       bfd_get_filename (abfd), bfd_errmsg (bfd_get_error ()));
+      return 0;
+    }
+
+  for (;;)
+    {
+      gdb_byte buffer[8 * 1024];
+      bfd_size_type count;
+
+      count = bfd_bread (buffer, sizeof (buffer), abfd);
+      if (count == (bfd_size_type) -1)
+	{
+	  warning (_("Problem reading \"%s\" for CRC: %s"),
+		   bfd_get_filename (abfd), bfd_errmsg (bfd_get_error ()));
+	  return 0;
+	}
+      if (count == 0)
+	break;
+      file_crc = gnu_debuglink_crc32 (file_crc, buffer, count);
+    }
+
+  *file_crc_return = file_crc;
+  return 1;
+}
+
 static int
 separate_debug_file_exists (const char *name, unsigned long crc,
 			    struct objfile *parent_objfile)
 {
-  unsigned long file_crc = 0;
+  unsigned long file_crc;
+  int file_crc_p;
   bfd *abfd;
-  gdb_byte buffer[8*1024];
-  int count;
   struct stat parent_stat, abfd_stat;
+  int verified_as_different;
 
   /* Find a separate debug info file as if symbols would be present in
      PARENT_OBJFILE itself this function would not be called.  .gnu_debuglink
@@ -1346,25 +1383,46 @@ separate_debug_file_exists (const char *name, unsigned long crc,
      negatives.  */
 
   if (bfd_stat (abfd, &abfd_stat) == 0
-      && bfd_stat (parent_objfile->obfd, &parent_stat) == 0
-      && abfd_stat.st_dev == parent_stat.st_dev
-      && abfd_stat.st_ino == parent_stat.st_ino
-      && abfd_stat.st_ino != 0)
+      && abfd_stat.st_ino != 0
+      && bfd_stat (parent_objfile->obfd, &parent_stat) == 0)
     {
-      bfd_close (abfd);
-      return 0;
+      if (abfd_stat.st_dev == parent_stat.st_dev
+	  && abfd_stat.st_ino == parent_stat.st_ino)
+	{
+	  bfd_close (abfd);
+	  return 0;
+	}
+      verified_as_different = 1;
     }
+  else
+    verified_as_different = 0;
 
-  while ((count = bfd_bread (buffer, sizeof (buffer), abfd)) > 0)
-    file_crc = gnu_debuglink_crc32 (file_crc, buffer, count);
+  file_crc_p = get_file_crc (abfd, &file_crc);
 
   bfd_close (abfd);
 
+  if (!file_crc_p)
+    return 0;
+
   if (crc != file_crc)
     {
-      warning (_("the debug information found in \"%s\""
-		 " does not match \"%s\" (CRC mismatch).\n"),
-	       name, parent_objfile->name);
+      /* If one (or both) the files are accessed for example the via "remote:"
+	 gdbserver way it does not support the bfd_stat operation.  Verify
+	 whether those two files are not the same manually.  */
+
+      if (!verified_as_different && !parent_objfile->crc32_p)
+	{
+	  parent_objfile->crc32_p = get_file_crc (parent_objfile->obfd,
+						  &parent_objfile->crc32);
+	  if (!parent_objfile->crc32_p)
+	    return 0;
+	}
+
+      if (verified_as_different || parent_objfile->crc32 != crc)
+	warning (_("the debug information found in \"%s\""
+		   " does not match \"%s\" (CRC mismatch).\n"),
+		 name, parent_objfile->name);
+
       return 0;
     }
 

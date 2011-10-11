@@ -245,6 +245,11 @@ struct objfile
 
     long mtime;
 
+    /* Cached 32-bit CRC as computed by gnu_debuglink_crc32.  CRC32 is valid
+       iff CRC32_P.  */
+    unsigned long crc32;
+    int crc32_p;
+
     /* Obstack to hold objects that should be freed when we load a new symbol
        table from this object file.  */
 
