@@ -1418,7 +1418,7 @@ separate_debug_file_exists (const char *name, unsigned long crc,
 	    return 0;
 	}
 
-      if (verified_as_different || parent_objfile->crc32 != crc)
+      if (verified_as_different || parent_objfile->crc32 != file_crc)
 	warning (_("the debug information found in \"%s\""
 		   " does not match \"%s\" (CRC mismatch).\n"),
 		 name, parent_objfile->name);

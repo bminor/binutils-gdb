@@ -1,3 +1,7 @@
+2011-10-11  Ulrich Weigand  <ulrich.weigand@linaro.org>
+
+	* symfile.c (separate_debug_file_exists): Fix condition.
+
 2011-10-11  David S. Miller  <davem@davemloft.net>
 
 	* regcache.c (regcache_restore): Do not write unavailable regs, mark
