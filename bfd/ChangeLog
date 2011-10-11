@@ -1,3 +1,9 @@
+2011-10-11  Alan Modra  <amodra@gmail.com>
+
+	PR binutils/13257
+	* archive.c (_bfd_find_nested_archive, _bfd_get_elt_at_filepos): Open
+	thin archive element using container target if not defaulted.
+
 2011-10-10  Nick Clifton  <nickc@redhat.com>
 
 	* po/es.po: Updated Spanish translation.
