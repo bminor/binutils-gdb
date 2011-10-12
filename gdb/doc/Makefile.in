@@ -45,9 +45,12 @@ gdbdir = $(srcdir)/..
 TEXIDIR=${gdbdir}/../texinfo
 
 # where to find makeinfo, preferably one designed for texinfo-2
-MAKEINFO=makeinfo
+MAKEINFO = @MAKEINFO@
+MAKEINFOFLAGS = @MAKEINFOFLAGS@
+MAKEINFO_EXTRA_FLAGS = @MAKEINFO_EXTRA_FLAGS@
+MAKEINFO_CMD = $(MAKEINFO) $(MAKEINFOFLAGS) $(MAKEINFO_EXTRA_FLAGS)
 
-MAKEHTML = $(MAKEINFO) --html 
+MAKEHTML = $(MAKEINFO_CMD) --html
 MAKEHTMLFLAGS =
 
 # where to find texi2roff, ditto
@@ -365,7 +368,7 @@ gdb.pdf: ${GDB_DOC_FILES}
 
 # GDB MANUAL: info file
 gdb.info: ${GDB_DOC_FILES}
-	$(MAKEINFO) $(READLINE_TEXI_INCFLAG) -I ${GDBMI_DIR} -I $(srcdir) \
+	$(MAKEINFO_CMD) $(READLINE_TEXI_INCFLAG) -I ${GDBMI_DIR} -I $(srcdir) \
 		-o gdb.info $(srcdir)/gdb.texinfo
 
 # GDB MANUAL: roff translations
@@ -464,7 +467,7 @@ gdbint.pdf: $(GDBINT_DOC_FILES)
 # GDB INTERNALS MANUAL: info file
 
 gdbint.info: $(GDBINT_DOC_FILES)
-	$(MAKEINFO) -I $(srcdir) -o gdbint.info $(srcdir)/gdbint.texinfo
+	$(MAKEINFO_CMD) -I $(srcdir) -o gdbint.info $(srcdir)/gdbint.texinfo
 
 # GDB INTERNALS MANUAL: HTML file
 
@@ -472,7 +475,7 @@ gdbint/index.html: $(GDBINT_DOC_FILES)
 	$(MAKEHTML) $(MAKEHTMLFLAGS) -I $(srcdir) $(srcdir)/gdbint.texinfo
 
 stabs.info: $(STABS_DOC_FILES)
-	$(MAKEINFO) -I $(srcdir) -o stabs.info $(srcdir)/stabs.texinfo
+	$(MAKEINFO_CMD) -I $(srcdir) -o stabs.info $(srcdir)/stabs.texinfo
 
 # STABS DOCUMENTATION: HTML file
 
@@ -516,7 +519,7 @@ annotate.pdf: $(ANNOTATE_DOC_FILES)
 	$(TEXI2DVI) --pdf -I $(srcdir) $(srcdir)/annotate.texinfo
 
 annotate.info: $(ANNOTATE_DOC_FILES)
-	$(MAKEINFO)  -I $(srcdir) -o annotate.info $(srcdir)/annotate.texinfo
+	$(MAKEINFO_CMD) -I $(srcdir) -o annotate.info $(srcdir)/annotate.texinfo
 
 annotate/index.html: $(ANNOTATE_DOC_FILES)
 	$(MAKEHTML) $(MAKEHTMLFLAGS) -I $(srcdir) $(srcdir)/annotate.texinfo

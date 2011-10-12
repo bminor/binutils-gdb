@@ -1,3 +1,14 @@
+2011-10-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix compatibility with texinfo versions older than 4.12.
+	* Makefile.in (MAKEINFO): Set to @MAKEINFO@.
+	(MAKEINFOFLAGS, MAKEINFO_EXTRA_FLAGS, MAKEINFO_CMD): New.
+	(MAKEHTMLFLAGS): Use MAKEINFO_CMD.
+	(gdb.info, gdbint.info, stabs.info, annotate.info): Use MAKEINFO_CMD.
+	* gdb.texinfo (Tail Call Frames): Convert @arrow{} to @click, when possible.
+	Make the conversion conditional on HAVE_MAKEINFO_CLICK, using variables
+	CALLSEQ1A, CALLSEQ1B, CALLSEQ2A and CALLSEQ2B.
+
 2011-10-09  Doug Evans  <dje@google.com>
 
 	* gdb.texinfo (Extending GDB): Document alias command.

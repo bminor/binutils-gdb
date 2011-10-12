@@ -1,3 +1,15 @@
+2011-10-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix compatibility with texinfo versions older than 4.12.
+	* Makefile.in (MAKEINFO): Set to @MAKEINFO@.
+	(MAKEINFOFLAGS, MAKEINFO_EXTRA_FLAGS, MAKEINFO_CMD): New.
+	(MAKEHTMLFLAGS): Use MAKEINFO_CMD.
+	(FLAGS_TO_PASS): Add MAKEINFOFLAGS and MAKEINFO_EXTRA_FLAGS.
+	* configure: Regenerate.
+	* configure.ac (MAKEINFO): Find it, from libiberty/configure.ac.
+	(MAKEINFOFLAGS): Pre-set it to --split-size=5000000.
+	(MAKEINFO_EXTRA_FLAGS): New test for -DHAVE_MAKEINFO_CLICK.
+
 2011-10-12  Gary Benson  <gbenson@redhat.com>
 
 	* breakpoint.h (pc_at_non_inline_function): Declare.

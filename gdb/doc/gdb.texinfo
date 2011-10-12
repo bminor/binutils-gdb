@@ -9789,11 +9789,24 @@ tailcall: reduced: 0x4004d2(a) |
 #2  0x0000000000400395 in main () at t.c:9
 @end smallexample
 
-Frames #0 and #2 are real, #1 is a virtual tail call frame.  The code can have
-possible execution paths
-@code{main@arrow{}a@arrow{}b@arrow{}c@arrow{}d@arrow{}f} or
-@code{main@arrow{}a@arrow{}b@arrow{}e@arrow{}f}, @value{GDBN} cannot find which
-one from the inferior state.
+@set CALLSEQ1A @code{main@value{ARROW}a@value{ARROW}b@value{ARROW}c@value{ARROW}d@value{ARROW}f}
+@set CALLSEQ2A @code{main@value{ARROW}a@value{ARROW}b@value{ARROW}e@value{ARROW}f}
+
+@c Convert CALLSEQ#A to CALLSEQ#B depending on HAVE_MAKEINFO_CLICK.
+@ifset HAVE_MAKEINFO_CLICK
+@set ARROW @click{}
+@set CALLSEQ1B @clicksequence{@value{CALLSEQ1A}}
+@set CALLSEQ2B @clicksequence{@value{CALLSEQ2A}}
+@end ifset
+@ifclear HAVE_MAKEINFO_CLICK
+@set ARROW ->
+@set CALLSEQ1B @value{CALLSEQ1A}
+@set CALLSEQ2B @value{CALLSEQ2A}
+@end ifclear
+
+Frames #0 and #2 are real, #1 is a virtual tail call frame.
+The code can have possible execution paths @value{CALLSEQ1B} or
+@value{CALLSEQ2B}, @value{GDBN} cannot find which one from the inferior state.
 
 @code{initial:} state shows some random possible calling sequence @value{GDBN}
 has found.  It then finds another possible calling sequcen - that one is
