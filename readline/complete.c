@@ -1994,8 +1994,7 @@ rl_completion_matches (text, entry_function)
   match_list[1] = (char *)NULL;
 
   _rl_interrupt_immediately++;
-  while (string = (*entry_function) (text, matches)
-         && matches <= rl_completion_query_items)
+  while (string = (*entry_function) (text, matches))
     {
       if (matches + 1 == match_list_size)
 	match_list = (char **)xrealloc
