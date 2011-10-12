@@ -18,7 +18,8 @@ set srcfile0 ${testfile}.cc
 set objfile0 ${testfile}.o
 set srcfile1 ${testfile}-main.cc
 set objfile1 ${testfile}-main.o
-set binfile ${testfile}
+set executable ${testfile}
+set binfile ${objdir}/${subdir}/${executable}
 
 if  { [gdb_compile "$srcdir/$subdir/$srcfile0" "$objdir/$subdir/$objfile0" object {debug c++}] != "" } {
      untested namespace-enum.exp
@@ -35,7 +36,7 @@ if  { [gdb_compile "$objdir/$subdir/$objfile0 $objdir/$subdir/$objfile1" "${binf
      return -1
 }
 
-clean_restart ${binfile}
+clean_restart ${executable}
 gdb_test "print foo::B::B_B" "`foo::B' is not defined as an aggregate type."
 gdb_test "print foo::B_B" "foo::B_B"
 gdb_test "print A_A" "A_A"

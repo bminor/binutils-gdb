@@ -1,3 +1,9 @@
+2011-10-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.cp/namespace-enum.exp (executable): New variable.
+	(binfile): Use ${objdir}/${subdir}/ prefix.
+	Use ${executable} for clean_restart.
+
 2011-10-11  Sterling Augustine  <saugustine@google.com>
 
 	* gdb.cp/Makefile.in: Add namespace-enum test.
