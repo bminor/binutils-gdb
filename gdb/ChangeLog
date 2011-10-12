@@ -1,3 +1,8 @@
+2011-10-12  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (partial_read_comp_unit_head): Set header->offset,
+	header->first_die_offset here.  All callers updated.
+
 2011-10-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix compatibility with texinfo versions older than 4.12.

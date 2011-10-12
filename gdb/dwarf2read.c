@@ -2273,7 +2273,7 @@ dw2_get_file_names (struct objfile *objfile,
   struct cleanup *cleanups;
   struct die_info *comp_unit_die;
   struct dwarf2_section_info* sec;
-  gdb_byte *beg_of_comp_unit, *info_ptr, *buffer;
+  gdb_byte *info_ptr, *buffer;
   int has_children, i;
   struct dwarf2_cu cu;
   unsigned int bytes_read, buffer_size;
@@ -2300,15 +2300,10 @@ dw2_get_file_names (struct objfile *objfile,
   buffer_size = sec->size;
   buffer = sec->buffer;
   info_ptr = buffer + this_cu->offset;
-  beg_of_comp_unit = info_ptr;
 
   info_ptr = partial_read_comp_unit_head (&cu.header, info_ptr,
 					  buffer, buffer_size,
 					  abfd);
-
-  /* Complete the cu_header.  */
-  cu.header.offset = beg_of_comp_unit - buffer;
-  cu.header.first_die_offset = info_ptr - beg_of_comp_unit;
 
   this_cu->cu = &cu;
   cu.per_cu = this_cu;
@@ -2959,6 +2954,8 @@ read_comp_unit_head (struct comp_unit_head *cu_header,
   return info_ptr;
 }
 
+/* Read in a CU header and perform some basic error checking.  */
+
 static gdb_byte *
 partial_read_comp_unit_head (struct comp_unit_head *header, gdb_byte *info_ptr,
 			     gdb_byte *buffer, unsigned int buffer_size,
@@ -2966,7 +2963,11 @@ partial_read_comp_unit_head (struct comp_unit_head *header, gdb_byte *info_ptr,
 {
   gdb_byte *beg_of_comp_unit = info_ptr;
 
+  header->offset = beg_of_comp_unit - buffer;
+
   info_ptr = read_comp_unit_head (header, info_ptr, abfd);
+
+  header->first_die_offset = info_ptr - beg_of_comp_unit;
 
   if (header->version != 2 && header->version != 3 && header->version != 4)
     error (_("Dwarf Error: wrong version in compilation unit header "
@@ -3353,10 +3354,6 @@ process_psymtab_comp_unit (struct objfile *objfile,
 					  buffer, buffer_size,
 					  abfd);
 
-  /* Complete the cu_header.  */
-  cu.header.offset = beg_of_comp_unit - buffer;
-  cu.header.first_die_offset = info_ptr - beg_of_comp_unit;
-
   cu.list_in_scope = &file_symbols;
 
   /* If this compilation unit was already read in, free the
@@ -3617,7 +3614,7 @@ load_partial_comp_unit (struct dwarf2_per_cu_data *this_cu,
 			struct objfile *objfile)
 {
   bfd *abfd = objfile->obfd;
-  gdb_byte *info_ptr, *beg_of_comp_unit;
+  gdb_byte *info_ptr;
   struct die_info *comp_unit_die;
   struct dwarf2_cu *cu;
   struct cleanup *free_abbrevs_cleanup, *free_cu_cleanup = NULL;
@@ -3629,7 +3626,6 @@ load_partial_comp_unit (struct dwarf2_per_cu_data *this_cu,
 
   gdb_assert (dwarf2_per_objfile->info.readin);
   info_ptr = dwarf2_per_objfile->info.buffer + this_cu->offset;
-  beg_of_comp_unit = info_ptr;
 
   if (this_cu->cu == NULL)
     {
@@ -3645,10 +3641,6 @@ load_partial_comp_unit (struct dwarf2_per_cu_data *this_cu,
 					      dwarf2_per_objfile->info.buffer,
 					      dwarf2_per_objfile->info.size,
 					      abfd);
-
-      /* Complete the cu_header.  */
-      cu->header.offset = this_cu->offset;
-      cu->header.first_die_offset = info_ptr - beg_of_comp_unit;
 
       /* Link this compilation unit into the compilation unit tree.  */
       this_cu->cu = cu;
