@@ -118,8 +118,7 @@ extern addressT frag_now_fix_octets (void);
 
 /* For foreign-segment symbol fixups.  */
 COMMON fragS zero_address_frag;
-/* For local common (N_BSS segment) fixups.  */
-COMMON fragS bss_address_frag;
+COMMON fragS predefined_address_frag;
 
 extern void frag_append_1_char (int);
 #define FRAG_APPEND_1_CHAR(X) frag_append_1_char (X)

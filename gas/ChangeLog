@@ -1,3 +1,14 @@
+2011-10-13  Alan Modra  <amodra@gmail.com>
+
+	* as.c (main): Define .gasversion. rather than __GAS_VERSION__.
+	* frags.h (bss_address_frag): Delete
+	(predefined_address_frag): New.
+	* frags.c (frag_init): Init predefined_address_frag.  Delete ref
+	to bss_addres_frag.
+	* symbols.c (S_CAN_BE_REDEFINED): New function.
+	* symbols.h (S_CAN_BE_REDEFINED): Declare.
+	* read.c (assign_symbol): Use S_CAN_BE_REDEFINED.
+
 2011-10-12  Alan Modra  <amodra@gmail.com>
 
 	* symbols.c (local_symbol_make): Make global.

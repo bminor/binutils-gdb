@@ -2137,6 +2137,16 @@ S_IS_STABD (symbolS *s)
 }
 
 int
+S_CAN_BE_REDEFINED (const symbolS *s)
+{
+  if (LOCAL_SYMBOL_CHECK (s))
+    return (local_symbol_get_frag ((struct local_symbol *) s)
+	    == &predefined_address_frag);
+  /* Permit register names to be redefined.  */
+  return s->bsym->section == reg_section;
+}
+
+int
 S_IS_VOLATILE (const symbolS *s)
 {
   if (LOCAL_SYMBOL_CHECK (s))

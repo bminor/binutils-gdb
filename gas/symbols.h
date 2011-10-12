@@ -100,6 +100,7 @@ extern int S_FORCE_RELOC (symbolS *, int);
 extern int S_IS_DEBUG (symbolS *);
 extern int S_IS_LOCAL (symbolS *);
 extern int S_IS_STABD (symbolS *);
+extern int S_CAN_BE_REDEFINED (const symbolS *);
 extern int S_IS_VOLATILE (const symbolS *);
 extern int S_IS_FORWARD_REF (const symbolS *);
 extern const char *S_GET_NAME (symbolS *);

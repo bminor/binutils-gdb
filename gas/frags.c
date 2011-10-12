@@ -25,7 +25,7 @@
 #include "obstack.h"
 
 extern fragS zero_address_frag;
-extern fragS bss_address_frag;
+extern fragS predefined_address_frag;
 
 /* Initialization for frag routines.  */
 
@@ -33,7 +33,7 @@ void
 frag_init (void)
 {
   zero_address_frag.fr_type = rs_fill;
-  bss_address_frag.fr_type = rs_fill;
+  predefined_address_frag.fr_type = rs_fill;
 }
 
 /* Check that we're not trying to assemble into a section that can't
