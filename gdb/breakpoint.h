@@ -1357,6 +1357,12 @@ extern void end_rbreak_breakpoints (void);
 extern struct breakpoint *iterate_over_breakpoints (int (*) (struct breakpoint *,
 							     void *), void *);
 
+/* Nonzero if the specified PC cannot be a location where functions
+   have been inlined.  */
+
+extern int pc_at_non_inline_function (struct address_space *aspace,
+				      CORE_ADDR pc);
+
 extern int user_breakpoint_p (struct breakpoint *);
 
 #endif /* !defined (BREAKPOINT_H) */

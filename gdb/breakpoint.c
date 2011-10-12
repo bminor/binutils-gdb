@@ -13325,6 +13325,45 @@ iterate_over_breakpoints (int (*callback) (struct breakpoint *, void *),
   return NULL;
 }
 
+/* Zero if any of the breakpoint's locations could be a location where
+   functions have been inlined, nonzero otherwise.  */
+
+static int
+is_non_inline_function (struct breakpoint *b)
+{
+  /* The shared library event breakpoint is set on the address of a
+     non-inline function.  */
+  if (b->type == bp_shlib_event)
+    return 1;
+
+  return 0;
+}
+
+/* Nonzero if the specified PC cannot be a location where functions
+   have been inlined.  */
+
+int
+pc_at_non_inline_function (struct address_space *aspace, CORE_ADDR pc)
+{
+  struct breakpoint *b;
+  struct bp_location *bl;
+
+  ALL_BREAKPOINTS (b)
+    {
+      if (!is_non_inline_function (b))
+	continue;
+
+      for (bl = b->loc; bl != NULL; bl = bl->next)
+	{
+	  if (!bl->shlib_disabled
+	      && bpstat_check_location (bl, aspace, pc))
+	    return 1;
+	}
+    }
+
+  return 0;
+}
+
 void
 initialize_breakpoint_ops (void)
 {

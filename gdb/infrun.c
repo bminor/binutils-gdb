@@ -4044,7 +4044,32 @@ handle_inferior_event (struct execution_control_state *ecs)
      nexti.  After stepi and nexti, always show the innermost frame (not any
      inline function call sites).  */
   if (ecs->event_thread->control.step_range_end != 1)
-    skip_inline_frames (ecs->ptid);
+    {
+      struct address_space *aspace = 
+	get_regcache_aspace (get_thread_regcache (ecs->ptid));
+
+      /* skip_inline_frames is expensive, so we avoid it if we can
+	 determine that the address is one where functions cannot have
+	 been inlined.  This improves performance with inferiors that
+	 load a lot of shared libraries, because the solib event
+	 breakpoint is defined as the address of a function (i.e. not
+	 inline).  Note that we have to check the previous PC as well
+	 as the current one to catch cases when we have just
+	 single-stepped off a breakpoint prior to reinstating it.
+	 Note that we're assuming that the code we single-step to is
+	 not inline, but that's not definitive: there's nothing
+	 preventing the event breakpoint function from containing
+	 inlined code, and the single-step ending up there.  If the
+	 user had set a breakpoint on that inlined code, the missing
+	 skip_inline_frames call would break things.  Fortunately
+	 that's an extremely unlikely scenario.  */
+      if (!pc_at_non_inline_function (aspace, stop_pc)
+          && !(ecs->event_thread->suspend.stop_signal == TARGET_SIGNAL_TRAP
+               && ecs->event_thread->control.trap_expected
+               && pc_at_non_inline_function (aspace,
+                                             ecs->event_thread->prev_pc)))
+	skip_inline_frames (ecs->ptid);
+    }
 
   if (ecs->event_thread->suspend.stop_signal == TARGET_SIGNAL_TRAP
       && ecs->event_thread->control.trap_expected

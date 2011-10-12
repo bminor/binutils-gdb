@@ -1,3 +1,11 @@
+2011-10-12  Gary Benson  <gbenson@redhat.com>
+
+	* breakpoint.h (pc_at_non_inline_function): Declare.
+	* breakpoint.c (is_non_inline_function,
+	pc_at_non_inline_function): New functions.
+	* infrun.c (handle_inferior_event): Don't call skip_inline_frames
+	if the stop is at a location where functions cannot be inlined.
+
 2011-10-12  Pedro Alves  <pedro@codesourcery.com>
 
 	* linux-nat.c (stop_and_resume_callback): Don't re-resume LWPs if
