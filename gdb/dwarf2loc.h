@@ -87,10 +87,12 @@ struct value *dwarf2_evaluate_loc_desc (struct type *type,
 
 struct dwarf2_locexpr_baton
 {
-  /* Pointer to the start of the location expression.  */
+  /* Pointer to the start of the location expression.  Valid only if SIZE is
+     not zero.  */
   const gdb_byte *data;
 
-  /* Length of the location expression.  */
+  /* Length of the location expression.  For optimized out expressions it is
+     zero.  */
   unsigned long size;
 
   /* The compilation unit containing the symbol whose location

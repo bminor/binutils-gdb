@@ -722,6 +722,8 @@ struct function_range
 struct dwarf_block
   {
     unsigned int size;
+
+    /* Valid only if SIZE is not zero.  */
     gdb_byte *data;
   };
 
@@ -14217,7 +14219,6 @@ dwarf2_fetch_die_location_block (unsigned int offset,
     {
       /* DWARF: "If there is no such attribute, then there is no effect.".  */
 
-      retval.data = NULL;
       retval.size = 0;
     }
   else if (attr_form_is_section_offset (attr))
@@ -15495,7 +15496,6 @@ dwarf2_symbol_mark_computed (struct attribute *attr, struct symbol *sym,
 	  dwarf2_invalid_attrib_class_complaint ("location description",
 						 SYMBOL_NATURAL_NAME (sym));
 	  baton->size = 0;
-	  baton->data = NULL;
 	}
 
       SYMBOL_COMPUTED_OPS (sym) = &dwarf2_locexpr_funcs;

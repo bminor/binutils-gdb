@@ -22,14 +22,9 @@ if {![dwarf2_support]} {
 }
 
 set testfile "dw2-op-call"
-set srcfile ${testfile}.S
-set executable ${testfile}.x
-
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${objdir}/${subdir}/${executable}" object {nodebug}] != "" } {
+if { [prepare_for_testing ${testfile}.exp ${testfile} [list ${testfile}.S main.c] {nodebug}] } {
     return -1
 }
-
-clean_restart $executable
 
 # Additional test to verify the referenced CU is not aged out.
 gdb_test_no_output "maintenance set dwarf2 max-cache-age 0"
@@ -37,3 +32,10 @@ gdb_test_no_output "maintenance set dwarf2 max-cache-age 0"
 gdb_test "p array1" " = 1"
 gdb_test "p array2" " = 2" "array2 using DW_OP_call2"
 gdb_test "p array3" " = 3" "array3 using DW_OP_call4"
+
+# Location lists need PC.
+if ![runto_main] {
+    return -1
+}
+gdb_test "p arraynoloc" " = <optimized out>"
+gdb_test "p arraycallnoloc" {Asked for position 0 of stack, stack only has 0 elements on it\.}

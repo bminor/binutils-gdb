@@ -1,3 +1,17 @@
+2011-10-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix empty DWARF expressions DATA vs. SIZE conditionals.
+	* dwarf2loc.c (dwarf2_find_location_expression): Clear *LOCEXPR_LENGTH.
+	(dwarf_expr_frame_base_1): Indicate unavailability via zero *LENGTH.
+	(locexpr_tracepoint_var_ref): Check only zero SIZE, not zero DATA.
+	(loclist_read_variable, loclist_tracepoint_var_ref): Do not check for
+	zero DATA.
+	* dwarf2loc.h (struct dwarf2_locexpr_baton): Comment DATA vs. SIZE
+	validity.
+	* dwarf2read.c (struct dwarf_block): Comment DATA validity.
+	(dwarf2_fetch_die_location_block, dwarf2_symbol_mark_computed): Do not
+	clear DATA on zero SIZE.
+
 2011-10-12  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (partial_read_comp_unit_head): Set header->offset,

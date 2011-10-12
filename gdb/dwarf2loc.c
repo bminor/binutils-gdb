@@ -112,7 +112,10 @@ dwarf2_find_location_expression (struct dwarf2_loclist_baton *baton,
 
       /* An end-of-list entry.  */
       if (low == 0 && high == 0)
-	return NULL;
+	{
+	  *locexpr_length = 0;
+	  return NULL;
+	}
 
       /* Otherwise, a location expression entry.  */
       low += base_address;
@@ -215,7 +218,7 @@ dwarf_expr_frame_base_1 (struct symbol *framefunc, CORE_ADDR pc,
 			 const gdb_byte **start, size_t *length)
 {
   if (SYMBOL_LOCATION_BATON (framefunc) == NULL)
-    *start = NULL;
+    *length = 0;
   else if (SYMBOL_COMPUTED_OPS (framefunc) == &dwarf2_loclist_funcs)
     {
       struct dwarf2_loclist_baton *symbaton;
@@ -234,10 +237,10 @@ dwarf_expr_frame_base_1 (struct symbol *framefunc, CORE_ADDR pc,
 	  *start = symbaton->data;
 	}
       else
-	*start = NULL;
+	*length = 0;
     }
 
-  if (*start == NULL)
+  if (*length == 0)
     error (_("Could not find the frame base for \"%s\"."),
 	   SYMBOL_NATURAL_NAME (framefunc));
 }
@@ -3716,7 +3719,7 @@ locexpr_tracepoint_var_ref (struct symbol *symbol, struct gdbarch *gdbarch,
   struct dwarf2_locexpr_baton *dlbaton = SYMBOL_LOCATION_BATON (symbol);
   unsigned int addr_size = dwarf2_per_cu_addr_size (dlbaton->per_cu);
 
-  if (dlbaton->data == NULL || dlbaton->size == 0)
+  if (dlbaton->size == 0)
     value->optimized_out = 1;
   else
     dwarf2_compile_expr_to_ax (ax, value, gdbarch, addr_size,
@@ -3750,11 +3753,8 @@ loclist_read_variable (struct symbol *symbol, struct frame_info *frame)
   CORE_ADDR pc = frame ? get_frame_address_in_block (frame) : 0;
 
   data = dwarf2_find_location_expression (dlbaton, &size, pc);
-  if (data == NULL)
-    val = allocate_optimized_out_value (SYMBOL_TYPE (symbol));
-  else
-    val = dwarf2_evaluate_loc_desc (SYMBOL_TYPE (symbol), frame, data, size,
-				    dlbaton->per_cu);
+  val = dwarf2_evaluate_loc_desc (SYMBOL_TYPE (symbol), frame, data, size,
+				  dlbaton->per_cu);
 
   return val;
 }
@@ -3893,7 +3893,7 @@ loclist_tracepoint_var_ref (struct symbol *symbol, struct gdbarch *gdbarch,
   unsigned int addr_size = dwarf2_per_cu_addr_size (dlbaton->per_cu);
 
   data = dwarf2_find_location_expression (dlbaton, &size, ax->scope);
-  if (data == NULL || size == 0)
+  if (size == 0)
     value->optimized_out = 1;
   else
     dwarf2_compile_expr_to_ax (ax, value, gdbarch, addr_size, data, data + size,

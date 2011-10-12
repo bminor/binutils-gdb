@@ -1,5 +1,15 @@
 2011-10-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Fix empty DWARF expressions DATA vs. SIZE conditionals.
+	* gdb.dwarf2/dw2-op-call.S (arraycallnoloc, arraynoloc): New DIEs.
+	(loclist): New.
+	(4): New abbrev.
+	* gdb.dwarf2/dw2-op-call.exp: Remove variable srcfile and executable.
+	Use prepare_for_testing, remove clean_restart.
+	(p arraynoloc, p arraycallnoloc): New tests.
+
+2011-10-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdb.cp/namespace-enum.exp (executable): New variable.
 	(binfile): Use ${objdir}/${subdir}/ prefix.
 	Use ${executable} for clean_restart.
