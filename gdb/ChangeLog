@@ -3,6 +3,10 @@
 	* linux-nat.c (stop_and_resume_callback): Don't re-resume LWPs if
 	the core wanted them stopped, or if they now have a pending event
 	to report.
+	(linux_nat_filter_event): New parameter `new_pending_p'.  Pass it
+	down to stop_and_resume_callback.
+	(linux_nat_wait_1): Always clear `options' when retrying.  Handle
+	having new pending events after calling linux_nat_filter_event.
 
 2011-10-11  Sterling Augustine  <saugustine@google.com>
 
