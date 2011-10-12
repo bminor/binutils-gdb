@@ -1,3 +1,9 @@
+2011-10-12  Alan Modra  <amodra@gmail.com>
+
+	* symbols.c (local_symbol_make): Make global.
+	* symbols.h (local_symbol_make): Declare.
+	* as.c (main): Define __GAS_VERSION__.
+
 2011-10-10  Nick Clifton  <nickc@redhat.com>
 
 	* po/es.po: Updated Spanish translation.

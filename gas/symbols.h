@@ -50,6 +50,8 @@ symbolS *symbol_new (const char *name, segT segment, valueT value,
 		     fragS * frag);
 symbolS *symbol_create (const char *name, segT segment, valueT value,
 			fragS * frag);
+struct local_symbol *local_symbol_make (const char *name, segT section,
+					valueT val, fragS *frag);
 symbolS *symbol_clone (symbolS *, int);
 #undef symbol_clone_if_forward_ref
 symbolS *symbol_clone_if_forward_ref (symbolS *, int);

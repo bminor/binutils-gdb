@@ -1206,6 +1206,9 @@ main (int argc, char ** argv)
 
   dwarf2_init ();
 
+  local_symbol_make ("__GAS_VERSION__", absolute_section,
+		     BFD_VERSION / 10000UL, &zero_address_frag);
+
   /* Now that we have fully initialized, and have created the output
      file, define any symbols requested by --defsym command line
      arguments.  */
