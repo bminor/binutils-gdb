@@ -1,3 +1,9 @@
+2011-10-12  Pedro Alves  <pedro@codesourcery.com>
+
+	* linux-nat.c (stop_and_resume_callback): Don't re-resume LWPs if
+	the core wanted them stopped, or if they now have a pending event
+	to report.
+
 2011-10-11  Sterling Augustine  <saugustine@google.com>
 
 	* dwarf2read.c: Undo inadvertent changes in previous commit.

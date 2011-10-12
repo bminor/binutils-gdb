@@ -3109,14 +3109,17 @@ resumed_callback (struct lwp_info *lp, void *data)
   return lp->resumed;
 }
 
-/* Stop an active thread, verify it still exists, then resume it.  */
+/* Stop an active thread, verify it still exists, then resume it.  If
+   the thread ends up with a pending status, then it is not resumed,
+   and *DATA (really a pointer to int), is set.  */
 
 static int
 stop_and_resume_callback (struct lwp_info *lp, void *data)
 {
+  int *new_pending_p = data;
+
   if (!lp->stopped)
     {
-      enum resume_kind last_resume_kind = lp->last_resume_kind;
       ptid_t ptid = lp->ptid;
 
       stop_callback (lp, NULL);
@@ -3124,22 +3127,56 @@ stop_and_resume_callback (struct lwp_info *lp, void *data)
 
       /* Resume if the lwp still exists, and the core wanted it
 	 running.  */
-      if (last_resume_kind != resume_stop)
+      lp = find_lwp_pid (ptid);
+      if (lp != NULL)
 	{
-	  lp = find_lwp_pid (ptid);
-	  if (lp)
-	    resume_lwp (lp, lp->step);
+	  if (lp->last_resume_kind == resume_stop
+	      && lp->status == 0)
+	    {
+	      /* The core wanted the LWP to stop.  Even if it stopped
+		 cleanly (with SIGSTOP), leave the event pending.  */
+	      if (debug_linux_nat)
+		fprintf_unfiltered (gdb_stdlog,
+				    "SARC: core wanted LWP %ld stopped "
+				    "(leaving SIGSTOP pending)\n",
+				    GET_LWP (lp->ptid));
+	      lp->status = W_STOPCODE (SIGSTOP);
+	    }
+
+	  if (lp->status == 0)
+	    {
+	      if (debug_linux_nat)
+		fprintf_unfiltered (gdb_stdlog,
+				    "SARC: re-resuming LWP %ld\n",
+				    GET_LWP (lp->ptid));
+	      resume_lwp (lp, lp->step);
+	    }
+	  else
+	    {
+	      if (debug_linux_nat)
+		fprintf_unfiltered (gdb_stdlog,
+				    "SARC: not re-resuming LWP %ld "
+				    "(has pending)\n",
+				    GET_LWP (lp->ptid));
+	      if (new_pending_p)
+		*new_pending_p = 1;
+	    }
 	}
     }
   return 0;
 }
 
 /* Check if we should go on and pass this event to common code.
-   Return the affected lwp if we are, or NULL otherwise.  */
+   Return the affected lwp if we are, or NULL otherwise.  If we stop
+   all lwps temporarily, we may end up with new pending events in some
+   other lwp.  In that case set *NEW_PENDING_P to true.  */
+
 static struct lwp_info *
-linux_nat_filter_event (int lwpid, int status, int options)
+linux_nat_filter_event (int lwpid, int status, int options, int *new_pending_p)
 {
   struct lwp_info *lp;
+
+  *new_pending_p = 0;
 
   lp = find_lwp_pid (pid_to_ptid (lwpid));
 
@@ -3240,7 +3277,7 @@ linux_nat_filter_event (int lwpid, int status, int options)
 	{
 	  lp->stopped = 1;
 	  iterate_over_lwps (pid_to_ptid (GET_PID (lp->ptid)),
-			     stop_and_resume_callback, NULL);
+			     stop_and_resume_callback, new_pending_p);
 	}
 
       if (debug_linux_nat)
@@ -3358,9 +3395,9 @@ linux_nat_wait_1 (struct target_ops *ops,
 {
   static sigset_t prev_mask;
   enum resume_kind last_resume_kind;
-  struct lwp_info *lp = NULL;
-  int options = 0;
-  int status = 0;
+  struct lwp_info *lp;
+  int options;
+  int status;
   pid_t pid;
 
   if (debug_linux_nat)
@@ -3397,6 +3434,7 @@ linux_nat_wait_1 (struct target_ops *ops,
 retry:
   lp = NULL;
   status = 0;
+  options = 0;
 
   /* Make sure that of those LWPs we want to get an event from, there
      is at least one LWP that has been resumed.  If there's none, just
@@ -3527,6 +3565,10 @@ retry:
 
       if (lwpid > 0)
 	{
+	  /* If this is true, then we paused LWPs momentarily, and may
+	     now have pending events to handle.  */
+	  int new_pending;
+
 	  gdb_assert (pid == -1 || lwpid == pid);
 
 	  if (debug_linux_nat)
@@ -3536,7 +3578,7 @@ retry:
 				  (long) lwpid, status_to_str (status));
 	    }
 
-	  lp = linux_nat_filter_event (lwpid, status, options);
+	  lp = linux_nat_filter_event (lwpid, status, options, &new_pending);
 
 	  /* STATUS is now no longer valid, use LP->STATUS instead.  */
 	  status = 0;
@@ -3616,6 +3658,9 @@ retry:
 		  store_waitstatus (&lp->waitstatus, lp->status);
 		}
 
+	      if (new_pending)
+		goto retry;
+
 	      /* Keep looking.  */
 	      lp = NULL;
 	      continue;
@@ -3625,6 +3670,9 @@ retry:
 	    break;
 	  else
 	    {
+	      if (new_pending)
+		goto retry;
+
 	      if (pid == -1)
 		{
 		  /* waitpid did return something.  Restart over.  */
