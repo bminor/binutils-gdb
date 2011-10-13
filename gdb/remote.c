@@ -10274,7 +10274,7 @@ remote_save_trace_data (const char *filename)
   *p++ = '\0';
   putpkt (rs->buf);
   reply = remote_get_noisy_reply (&target_buf, &target_buf_size);
-  if (*reply != '\0')
+  if (*reply == '\0')
     error (_("Target does not support this command."));
   if (strcmp (reply, "OK") != 0)
     error (_("Bogus reply from target: %s"), reply);
