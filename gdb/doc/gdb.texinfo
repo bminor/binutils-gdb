@@ -23414,7 +23414,39 @@ newest frame.
 Return an integer representing the reason why it's not possible to find
 more frames toward the outermost frame.  Use
 @code{gdb.frame_stop_reason_string} to convert the value returned by this
-function to a string.
+function to a string. The value can be one of:
+
+@table @code
+@item gdb.FRAME_UNWIND_NO_REASON
+No particular reason (older frames should be available).
+
+@item gdb.FRAME_UNWIND_NULL_ID
+The previous frame's analyzer returns an invalid result.
+
+@item gdb.FRAME_UNWIND_OUTERMOST
+This frame is the outermost.
+
+@item gdb.FRAME_UNWIND_UNAVAILABLE
+Cannot unwind further, because that would require knowing the 
+values of registers or memory that have not been collected.
+
+@item gdb.FRAME_UNWIND_INNER_ID
+This frame ID looks like it ought to belong to a NEXT frame,
+but we got it for a PREV frame.  Normally, this is a sign of
+unwinder failure.  It could also indicate stack corruption.
+
+@item gdb.FRAME_UNWIND_SAME_ID
+This frame has the same ID as the previous one.  That means
+that unwinding further would almost certainly give us another
+frame with exactly the same ID, so break the chain.  Normally,
+this is a sign of unwinder failure.  It could also indicate
+stack corruption.
+
+@item gdb.FRAME_UNWIND_NO_SAVED_PC
+The frame unwinder did not find any saved PC, but we needed
+one to unwind further.
+@end table
+
 @end defun
 
 @defun Frame.pc ()

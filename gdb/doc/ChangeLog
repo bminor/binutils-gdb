@@ -1,3 +1,9 @@
+2011-10-13  Kevin Pouget  <kevin.pouget@st.com>
+
+	PR python/13285 Document named constants for frame unwind stop reasons
+	* gdb.texinfo (Frames In Python): Document gdb.FRAME_UNWIND_* 
+	constants.
+
 2011-10-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix compatibility with texinfo versions older than 4.12.
