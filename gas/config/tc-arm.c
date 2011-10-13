@@ -7915,6 +7915,18 @@ do_ldrexd (void)
   inst.instruction |= inst.operands[2].reg << 16;
 }
 
+/* In both ARM and thumb state 'ldr pc, #imm'  with an immediate
+   which is not a multiple of four is UNPREDICTABLE.  */
+static void
+check_ldr_r15_aligned (void)
+{
+  constraint (!(inst.operands[1].immisreg)
+	      && (inst.operands[0].reg == REG_PC
+	      && inst.operands[1].reg == REG_PC
+	      && (inst.reloc.exp.X_add_number & 0x3)),
+	      _("ldr to register 15 must be 4-byte alligned"));
+}
+
 static void
 do_ldst (void)
 {
@@ -7923,6 +7935,7 @@ do_ldst (void)
     if (move_or_literal_pool (0, /*thumb_p=*/FALSE, /*mode_3=*/FALSE))
       return;
   encode_arm_addr_mode_2 (1, /*is_t=*/FALSE);
+  check_ldr_r15_aligned ();
 }
 
 static void
@@ -10533,13 +10546,17 @@ do_t_ldst (void)
 	}
 
       /* Do some validations regarding addressing modes.  */
-      if (inst.operands[1].immisreg && opcode != T_MNEM_ldr
-	  && opcode != T_MNEM_str)
+      if (inst.operands[1].immisreg)
 	reject_bad_reg (inst.operands[1].imm);
+
+      constraint (inst.operands[1].writeback == 1
+		  && inst.operands[0].reg == inst.operands[1].reg,
+		  BAD_OVERLAP);
 
       inst.instruction = THUMB_OP32 (opcode);
       inst.instruction |= inst.operands[0].reg << 12;
       encode_thumb32_addr_mode (1, /*is_t=*/FALSE, /*is_d=*/FALSE);
+      check_ldr_r15_aligned ();
       return;
     }
 

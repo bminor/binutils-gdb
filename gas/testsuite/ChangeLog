@@ -1,3 +1,18 @@
+2011-10-13  James Greenhalgh  <james.greenhalgh@arm.com>
+
+	* gas/arm/ldr-bad.s: New testcase.
+	* gas/arm/ldr-bad.l: Likewise.
+	* gas/arm/ldr-bad.d: Likewise.
+	* gas/arm/ldr.s: Likewise.
+	* gas/arm/ldr.d: Likewise.
+	* gas/arm/ldr-t-bad.s: Likewise.
+	* gas/arm/ldr-t-bad.l: Likewise.
+	* gas/arm/ldr-t-bad.d: Likewise.
+	* gas/arm/ldr-t.s: Likewise.
+	* gas/arm/ldr-t.d: Likewise.
+	* gas/arm/sp-pc-usage-t.s: Correct.
+	* gas/arm/sp-pc-usage-t.d: Update accordingly.
+
 2011-09-28  Jan Beulich  <jbeulich@suse.com>
 
 	* gas/ppc/476.s: Fix lswi first operand.

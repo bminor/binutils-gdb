@@ -1,3 +1,10 @@
+2011-10-13  James Greenhalgh  <james.greenhalgh@arm.com>
+
+	* config/tc-arm.c (check_ldr_r15_aligned): New.
+	(do_ldst): Warn in upredictable cases.
+	(do_t_ldst): Likewise.
+	(insns): Update accordingly.
+
 2011-10-13  Alan Modra  <amodra@gmail.com>
 
 	* as.c (main): Define .gasversion. rather than __GAS_VERSION__.
