@@ -1,3 +1,8 @@
+2011-10-13  Luis Machado  <lgustavo@codesourcery.com>
+
+	* tracepoint.c (trace_save_command): Use filename instead of
+	args when printing.
+
 2011-10-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* dwarf2read.c (dwarf2_fetch_die_location_block): Initialize .data even

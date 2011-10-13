@@ -2925,7 +2925,7 @@ trace_save_command (char *args, int from_tty)
   trace_save (filename, target_does_save);
 
   if (from_tty)
-    printf_filtered (_("Trace data saved to file '%s'.\n"), args);
+    printf_filtered (_("Trace data saved to file '%s'.\n"), filename);
 
   do_cleanups (back_to);
 }
