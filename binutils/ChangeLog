@@ -1,5 +1,51 @@
 2011-10-13  Nick Clifton  <nickc@redhat.com>
 
+	Fixes to aid translation:
+	* addr2line.c (translate_address): Add comments describing context
+	of a couple of printf statements.
+	* ar.c (write_archive): Allow translation of error message.
+	* bucomm.c (endian_string): Allow translation of strings.
+	(display_target_list): Allow translation.
+	* coffdump.c (dump_coff_type): Allow translation of output.
+	(dump_coff_where): Likewise.
+	(dump_coff_symbol): Likewise.
+	(dump_coff_scope): Likewise.
+	(dump_coff_sfile): Likewise.
+	(dump_coff_section): Likewise.
+	(coff_dump): Likewise.
+	* dlltool (def_version): Allow translation of output.
+	(run): Likewise.
+	* dllwrap.c (run): Allow translation of output.
+	* dwarf.c (print_dwarf_vma): Allow translation of output.
+	(process_extended_line_op): Remove spurious translation.
+	Add translation for strings that can be translated.
+	(decode_location_exression): Allow translation of output.
+	(read_and_display_attr_value): Allow translation of output.
+	* readelf.c (slurp_rela_relocs): Add translation for error
+	messages when failing to get data.
+	(slurp_rel_relocs): Likewise.
+	(get_32bit_elf_symbols): Likewise.
+	(get_64bit_elf_symbols): Likewise.
+	(dump_ia64_vms_dynamic_relocs): Replace abbreviation with full
+	word.
+	(process_relocs): Remove spurious translation.
+	(decode_tic6x_unwind_bytecode): Likewise.
+	(process_version_section): Improve error messages.
+	(process_mips_specific): Likewise.
+	(print_gnu_note): Remove spurious translation.
+	(print_stapsdt_note): Likewise.
+	(get_ia64_vms_note_type): Likewise.
+	* sysdump.c (getCHARS): Allow translation.
+	(fillup): Allow translation of output.
+	(getone): Likewise.
+	(must): Likewise.
+	(derived_type): Likewise.
+	* doc/binutils.doc (addr2line): Extend description of command line
+	options.
+	* po/binutils.pot: Regenerate.
+
+2011-10-13  Nick Clifton  <nickc@redhat.com>
+
 	PR binutils/13219
 	* readelf.c (GET_ELF_SYMBOLS): Add sym_count parameter.
 	(get_32bit_elf_symbols): Add num_syms_return argument.

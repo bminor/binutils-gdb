@@ -129,7 +129,7 @@ print_dwarf_vma (dwarf_vma val, unsigned byte_size)
       if (byte_size > 0 && byte_size <= 8)
 	offset = 16 - 2 * byte_size;
       else
-	error ("Wrong size in print_dwarf_vma");
+	error (_("Wrong size in print_dwarf_vma"));
     }
 
   fputs (buff + offset, stdout);
@@ -353,21 +353,21 @@ process_extended_line_op (unsigned char *data, int is_stmt)
                 break;
               case DW_LNE_HP_SFC_associate:
                 printf ("    DW_LNE_HP_SFC_associate ");
-                printf (_("(%s"),
+                printf ("(%s",
                         dwarf_vmatoa ("u",
                                       read_leb128 (data, & bytes_read, 0)));
                 data += bytes_read;
-                printf (_(",%s"),
+                printf (",%s",
                         dwarf_vmatoa ("u",
                                       read_leb128 (data, & bytes_read, 0)));
                 data += bytes_read;
-                printf (_(",%s)\n"),
+                printf (",%s)\n",
                         dwarf_vmatoa ("u",
                                       read_leb128 (data, & bytes_read, 0)));
                 data += bytes_read;
                 break;
               default:
-                printf ("    UNKNOW DW_LNE_HP_SFC opcode (%u)\n", opc);
+                printf (_("    UNKNOWN DW_LNE_HP_SFC opcode (%u)\n"), opc);
                 data = edata;
                 break;
               }
@@ -1072,10 +1072,10 @@ decode_location_expression (unsigned char * data,
 	  break;
 	case DW_OP_bit_piece:
 	  printf ("DW_OP_bit_piece: ");
-	  printf ("size: %s ",
+	  printf (_("size: %s "),
 		  dwarf_vmatoa ("u", read_leb128 (data, &bytes_read, 0)));
 	  data += bytes_read;
-	  printf ("offset: %s ",
+	  printf (_("offset: %s "),
 		  dwarf_vmatoa ("u", read_leb128 (data, &bytes_read, 0)));
 	  data += bytes_read;
 	  break;
@@ -1095,7 +1095,7 @@ decode_location_expression (unsigned char * data,
 
 	  /* GNU extensions.  */
 	case DW_OP_GNU_push_tls_address:
-	  printf ("DW_OP_GNU_push_tls_address or DW_OP_HP_unknown");
+	  printf (_("DW_OP_GNU_push_tls_address or DW_OP_HP_unknown"));
 	  break;
 	case DW_OP_GNU_uninit:
 	  printf ("DW_OP_GNU_uninit");
@@ -1605,10 +1605,10 @@ read_and_display_attr_value (unsigned long attribute,
 	case DW_LANG_Upc:		printf ("(Unified Parallel C)"); break;
 	default:
 	  if (uvalue >= DW_LANG_lo_user && uvalue <= DW_LANG_hi_user)
-	    printf ("(implementation defined: %s)",
+	    printf (_("(implementation defined: %s)"),
 		    dwarf_vmatoa ("x", uvalue));
 	  else
-	    printf ("(Unknown: %s)", dwarf_vmatoa ("x", uvalue));
+	    printf (_("(Unknown: %s)"), dwarf_vmatoa ("x", uvalue));
 	  break;
 	}
       break;
@@ -1646,9 +1646,9 @@ read_and_display_attr_value (unsigned long attribute,
 	default:
 	  if (uvalue >= DW_ATE_lo_user
 	      && uvalue <= DW_ATE_hi_user)
-	    printf ("(user defined type)");
+	    printf (_("(user defined type)"));
 	  else
-	    printf ("(unknown type)");
+	    printf (_("(unknown type)"));
 	  break;
 	}
       break;
@@ -1660,7 +1660,7 @@ read_and_display_attr_value (unsigned long attribute,
 	case DW_ACCESS_protected:	printf ("(protected)"); break;
 	case DW_ACCESS_private:		printf ("(private)"); break;
 	default:
-	  printf ("(unknown accessibility)");
+	  printf (_("(unknown accessibility)"));
 	  break;
 	}
       break;
@@ -1671,7 +1671,7 @@ read_and_display_attr_value (unsigned long attribute,
 	case DW_VIS_local:		printf ("(local)"); break;
 	case DW_VIS_exported:		printf ("(exported)"); break;
 	case DW_VIS_qualified:		printf ("(qualified)"); break;
-	default:			printf ("(unknown visibility)"); break;
+	default:			printf (_("(unknown visibility)")); break;
 	}
       break;
 
@@ -1681,7 +1681,7 @@ read_and_display_attr_value (unsigned long attribute,
 	case DW_VIRTUALITY_none:	printf ("(none)"); break;
 	case DW_VIRTUALITY_virtual:	printf ("(virtual)"); break;
 	case DW_VIRTUALITY_pure_virtual:printf ("(pure_virtual)"); break;
-	default:			printf ("(unknown virtuality)"); break;
+	default:			printf (_("(unknown virtuality)")); break;
 	}
       break;
 
@@ -1692,7 +1692,7 @@ read_and_display_attr_value (unsigned long attribute,
 	case DW_ID_up_case:		printf ("(up_case)"); break;
 	case DW_ID_down_case:		printf ("(down_case)"); break;
 	case DW_ID_case_insensitive:	printf ("(case_insensitive)"); break;
-	default:			printf ("(unknown case)"); break;
+	default:			printf (_("(unknown case)")); break;
 	}
       break;
 
@@ -1705,16 +1705,16 @@ read_and_display_attr_value (unsigned long attribute,
 	default:
 	  if (uvalue >= DW_CC_lo_user
 	      && uvalue <= DW_CC_hi_user)
-	    printf ("(user defined)");
+	    printf (_("(user defined)"));
 	  else
-	    printf ("(unknown convention)");
+	    printf (_("(unknown convention)"));
 	}
       break;
 
     case DW_AT_ordering:
       switch (uvalue)
 	{
-	case -1: printf ("(undefined)"); break;
+	case -1: printf (_("(undefined)")); break;
 	case 0:  printf ("(row major)"); break;
 	case 1:  printf ("(column major)"); break;
 	}
@@ -1783,7 +1783,7 @@ read_and_display_attr_value (unsigned long attribute,
 
 	    abbrev_number = read_leb128 (section->start + uvalue, NULL, 0);
 
-	    printf ("[Abbrev Number: %ld", abbrev_number);
+	    printf (_("[Abbrev Number: %ld"), abbrev_number);
 	    for (entry = first_abbrev; entry != NULL; entry = entry->next)
 	      if (entry->entry == abbrev_number)
 		break;

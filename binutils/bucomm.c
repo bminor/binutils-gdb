@@ -225,9 +225,9 @@ endian_string (enum bfd_endian endian)
 {
   switch (endian)
     {
-    case BFD_ENDIAN_BIG: return "big endian";
-    case BFD_ENDIAN_LITTLE: return "little endian";
-    default: return "endianness unknown";
+    case BFD_ENDIAN_BIG: return _("big endian");
+    case BFD_ENDIAN_LITTLE: return _("little endian");
+    default: return _("endianness unknown");
     }
 }
 
@@ -248,7 +248,7 @@ display_target_list (void)
       bfd *abfd = bfd_openw (dummy_name, p->name);
       int a;
 
-      printf ("%s\n (header %s, data %s)\n", p->name,
+      printf (_("%s\n (header %s, data %s)\n"), p->name,
 	      endian_string (p->header_byteorder),
 	      endian_string (p->byteorder));
 

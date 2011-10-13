@@ -3040,11 +3040,25 @@ address on standard output.  In this mode, @command{addr2line} may be used
 in a pipe to convert dynamically chosen addresses.
 
 The format of the output is @samp{FILENAME:LINENO}.  The file name and
-line number for each address is printed on a separate line.  If the
-@command{-f} option is used, then each @samp{FILENAME:LINENO} line is
-preceded by a @samp{FUNCTIONNAME} line which is the name of the function
-containing the address.  If the @command{-a} option is used, then the
-address read is first printed.
+line number for each input address is printed on separate lines.
+
+If the @option{-f} option is used, then each @samp{FILENAME:LINENO}
+line is preceded by @samp{FUNCTIONNAME} which is the name of the
+function containing the address.
+
+If the @option{-i} option is used and the code at the given address is
+present there because of inlining by the compiler then the
+@samp{@{FUNCTIONNAME@} FILENAME:LINENO} information for the inlining
+function will be displayed afterwards.  This continues recursively
+until there is no more inlining to report.
+
+If the @option{-a} option is used then the output is prefixed by the
+input address.
+
+If the @option{-p} option is used then the output for each input
+address is displayed on one, possibly quite long, line.  If
+@option{-p} is not used then the output is broken up into multiple
+lines, based on the paragraphs above.
 
 If the file name or function name can not be determined,
 @command{addr2line} will print two question marks in their place.  If the
@@ -3060,7 +3074,7 @@ equivalent.
 @table @env
 @item -a
 @itemx --addresses
-Display address before function names or file and line number
+Display the address before the function name, file and line number
 information.  The address is printed with a @samp{0x} prefix to easily
 identify it.
 

@@ -1,6 +1,6 @@
 /* dlltool.c -- tool to generate stuff for PE style DLLs
    Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
-   2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+   2005, 2006, 2007, 2008, 2009, 2011  Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -1263,7 +1263,7 @@ def_import (const char *app_name, const char *module, const char *dllext,
 void
 def_version (int major, int minor)
 {
-  printf ("VERSION %d.%d\n", major, minor);
+  printf (_("VERSION %d.%d\n"), major, minor);
 }
 
 void
@@ -1311,7 +1311,7 @@ run (const char *what, char *args)
   char *errmsg_fmt, *errmsg_arg;
   char *temp_base = choose_temp_base ();
 
-  inform ("run: %s %s", what, args);
+  inform (_("run: %s %s"), what, args);
 
   /* Count the args */
   i = 0;

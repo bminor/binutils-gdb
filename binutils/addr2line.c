@@ -268,6 +268,11 @@ translate_addresses (bfd *abfd, asection *section)
 
                   printf ("%s", name);
                   if (pretty_print)
+		    /* Note for translators:  This printf is used to join the
+		       function name just printed above to the line number/
+		       file name pair that is about to be printed below.  Eg:
+
+		         foo at 123:bar.c  */
                     printf (_(" at "));
                   else
                     printf ("\n");
@@ -289,10 +294,17 @@ translate_addresses (bfd *abfd, asection *section)
               if (!unwind_inlines)
                 found = FALSE;
               else
-                found = bfd_find_inliner_info (abfd, &filename, &functionname, &line);
+                found = bfd_find_inliner_info (abfd, &filename, &functionname,
+					       &line);
               if (! found)
                 break;
               if (pretty_print)
+		/* Note for translators: This printf is used to join the
+		   line number/file name pair that has just been printed with
+		   the line number/file name pair that is going to be printed
+		   by the next iteration of the while loop.  Eg:
+
+		     123:bar.c (inlined by) 456:main.c  */
                 printf (_(" (inlined by) "));
             }
 	}

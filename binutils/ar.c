@@ -1031,7 +1031,7 @@ write_archive (bfd *iarch)
   new_name = make_tempname (old_name);
 
   if (new_name == NULL)
-    bfd_fatal ("could not create temporary file whilst writing archive");
+    bfd_fatal (_("could not create temporary file whilst writing archive"));
 
   output_filename = new_name;
 
