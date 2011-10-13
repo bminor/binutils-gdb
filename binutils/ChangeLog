@@ -1,3 +1,23 @@
+2011-10-13  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/13219
+	* readelf.c (GET_ELF_SYMBOLS): Add sym_count parameter.
+	(get_32bit_elf_symbols): Add num_syms_return argument.
+	Return the number of symbols loaded into the symbol table.
+	(get_64bit_elf_symbols): Likewise.
+	(process_section_headers): Use GET_ELF_SYMBOLS to initialise
+	symbol count.
+	(proces_relocs): Likewise.
+	(ia64_process_unwind): Likewise.
+	(hppa_process_unwind): Likewise.
+	(arm_process_unwind): Likewise.
+	(process_dynamic_section): Likewise.
+	(process_version_sections): Likewise.
+	(process_symbol_table): Likewise.
+	(process_section_groups): Likewise.
+	Add check before indexing into the symbol table.
+	(apply_relocations): Likewise.
+
 2011-10-11  Chris  <player1@onet.eu>
 
 	PR binutils/13051
