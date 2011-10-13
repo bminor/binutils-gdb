@@ -1,3 +1,8 @@
+2011-10-13  Dave Korn  <dave.korn.cygwin@gmail.com>
+
+	* pe-dll.c (generate_reloc): Don't emit a base reloc for an
+	underlying BFD reloc that will be discarded in eh_frame data.
+
 2011-10-10  Nick Clifton  <nickc@redhat.com>
 
 	* po/bg.po: Updated Bulgarian translation.
