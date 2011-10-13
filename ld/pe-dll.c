@@ -1395,6 +1395,15 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
 		      else if (!blhe || blhe->type != bfd_link_hash_defined)
 			continue;
 		    }
+		  /* Nor for Dwarf FDE references to discarded sections.  */
+		  else if (bfd_is_abs_section (sym->section->output_section))
+		    {
+		      /* We only ignore relocs from .eh_frame sections, as
+			 they are discarded by the final link rather than
+			 resolved against the kept section.  */
+		      if (!strcmp (s->name, ".eh_frame"))
+			continue;
+		    }
 
 		  reloc_data[total_relocs].vma = sec_vma + relocs[i]->address;
 
