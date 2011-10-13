@@ -1,3 +1,7 @@
+2011-10-13  Tom Tromey  <tromey@redhat.com>
+
+	* python/py-type.c (typy_has_key): Make 'field' const.
+
 2011-10-13  Luis Machado  <lgustavo@codesourcery.com>
 
 	* remote.c (remote_save_trace_data): Invert comparison.

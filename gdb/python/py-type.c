@@ -1176,7 +1176,7 @@ static PyObject *
 typy_has_key (PyObject *self, PyObject *args)
 {
   struct type *type = ((type_object *) self)->type;
-  char *field;
+  const char *field;
   int i;
   
   if (!PyArg_ParseTuple (args, "s", &field))
