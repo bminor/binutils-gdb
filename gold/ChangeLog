@@ -1,3 +1,8 @@
+2011-10-12  Cary Coutant  <ccoutant@google.com>
+
+	* gold/output.cc (Output_file::open_base_file): Handle case where
+	::read returns less than requested size.
+
 2011-10-10  Cary Coutant  <ccoutant@google.com>
 
 	* gold/incremental.cc (Sized_relobj_incr::Sized_relobj_incr):

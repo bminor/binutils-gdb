@@ -4893,17 +4893,27 @@ Output_file::open_base_file(const char* base_name, bool writable)
   if (use_base_file)
     {
       this->open(s.st_size);
-      ssize_t len = ::read(o, this->base_, s.st_size);
-      if (len < 0)
-        {
-	  gold_info(_("%s: read failed: %s"), base_name, strerror(errno));
-	  return false;
-        }
-      if (len < s.st_size)
-        {
-	  gold_info(_("%s: file too short"), base_name);
-	  return false;
-        }
+      ssize_t bytes_to_read = s.st_size;
+      unsigned char* p = this->base_;
+      while (bytes_to_read > 0)
+	{
+	  ssize_t len = ::read(o, p, bytes_to_read);
+	  if (len < 0)
+	    {
+	      gold_info(_("%s: read failed: %s"), base_name, strerror(errno));
+	      return false;
+	    }
+	  if (len == 0)
+	    {
+	      gold_info(_("%s: file too short: read only %lld of %lld bytes"),
+			base_name,
+			static_cast<long long>(s.st_size - bytes_to_read),
+			static_cast<long long>(s.st_size));
+	      return false;
+	    }
+	  p += len;
+	  bytes_to_read -= len;
+	}
       ::close(o);
       return true;
     }
