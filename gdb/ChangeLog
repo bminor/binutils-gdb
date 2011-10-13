@@ -1,5 +1,10 @@
 2011-10-13  Tom Tromey  <tromey@redhat.com>
 
+	* python/py-breakpoint.c (gdbpy_breakpoint_deleted): Ensure GIL is
+	always released.
+
+2011-10-13  Tom Tromey  <tromey@redhat.com>
+
 	* python/py-type.c (typy_has_key): Make 'field' const.
 
 2011-10-13  Luis Machado  <lgustavo@codesourcery.com>

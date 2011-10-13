@@ -841,15 +841,15 @@ gdbpy_breakpoint_deleted (struct breakpoint *b)
 
   state = PyGILState_Ensure ();
   bp = get_breakpoint (num);
-  if (! bp)
-    return;
-
-  bp_obj = bp->py_bp_object;
-  if (bp_obj)
+  if (bp)
     {
-      bp_obj->bp = NULL;
-      --bppy_live;
-      Py_DECREF (bp_obj);
+      bp_obj = bp->py_bp_object;
+      if (bp_obj)
+	{
+	  bp_obj->bp = NULL;
+	  --bppy_live;
+	  Py_DECREF (bp_obj);
+	}
     }
   PyGILState_Release (state);
 }
