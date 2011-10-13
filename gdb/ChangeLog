@@ -1,3 +1,9 @@
+2011-10-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix internal error regression.
+	* value.c (value_primitive_field): Handle value_optimized_out.  Move
+	packed bitfields comment.
+
 2011-10-13  Tom Tromey  <tromey@redhat.com>
 
 	* python/py-breakpoint.c (gdbpy_breakpoint_deleted): Ensure GIL is

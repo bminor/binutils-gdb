@@ -2488,16 +2488,19 @@ value_primitive_field (struct value *arg1, int offset,
      description correctly.  */
   check_typedef (type);
 
-  /* Handle packed fields */
-
-  if (TYPE_FIELD_BITSIZE (arg_type, fieldno))
+  if (value_optimized_out (arg1))
+    v = allocate_optimized_out_value (type);
+  else if (TYPE_FIELD_BITSIZE (arg_type, fieldno))
     {
-      /* Create a new value for the bitfield, with bitpos and bitsize
+      /* Handle packed fields.
+
+	 Create a new value for the bitfield, with bitpos and bitsize
 	 set.  If possible, arrange offset and bitpos so that we can
 	 do a single aligned read of the size of the containing type.
 	 Otherwise, adjust offset to the byte containing the first
 	 bit.  Assume that the address, offset, and embedded offset
 	 are sufficiently aligned.  */
+
       int bitpos = TYPE_FIELD_BITPOS (arg_type, fieldno);
       int container_bitsize = TYPE_LENGTH (type) * 8;
 

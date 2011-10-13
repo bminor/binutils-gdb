@@ -1,3 +1,9 @@
+2011-10-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix internal error regression.
+	* gdb.dwarf2/implptr-optimized-out.S: New file.
+	* gdb.dwarf2/implptr-optimized-out.exp: New file.
+
 2011-10-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix empty DWARF expressions DATA vs. SIZE conditionals.
