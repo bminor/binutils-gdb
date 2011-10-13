@@ -231,6 +231,8 @@ static void arm_neon_quad_write (struct gdbarch *gdbarch,
 				 struct regcache *regcache,
 				 int regnum, const gdb_byte *buf);
 
+static int thumb_insn_size (unsigned short inst1);
+
 struct arm_prologue_cache
 {
   /* The stack pointer at the time this frame was created; i.e. the
@@ -836,7 +838,7 @@ thumb_analyze_prologue (struct gdbarch *gdbarch,
 	  constant = read_memory_unsigned_integer (loc, 4, byte_order);
 	  regs[bits (insn, 8, 10)] = pv_constant (constant);
 	}
-      else if ((insn & 0xe000) == 0xe000)
+      else if (thumb_insn_size (insn) == 4) /* 32-bit Thumb-2 instructions.  */
 	{
 	  unsigned short inst2;
 
@@ -3093,7 +3095,7 @@ thumb_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 	  if (insn & 0x0100)  /* <registers> include PC.  */
 	    found_return = 1;
 	}
-      else if ((insn & 0xe000) == 0xe000)  /* 32-bit Thumb-2 instruction */
+      else if (thumb_insn_size (insn) == 4)  /* 32-bit Thumb-2 instruction */
 	{
 	  if (target_read_memory (scan_pc, buf, 2))
 	    break;
@@ -4335,14 +4337,9 @@ thumb_get_next_pc_raw (struct frame_info *frame, CORE_ADDR pc)
       int cond = itstate >> 4;
 
       if (! condition_true (cond, status))
-	{
-	  /* Advance to the next instruction.  All the 32-bit
-	     instructions share a common prefix.  */
-	  if ((inst1 & 0xe000) == 0xe000 && (inst1 & 0x1800) != 0)
-	    return MAKE_THUMB_ADDR (pc + 4);
-	  else
-	    return MAKE_THUMB_ADDR (pc + 2);
-	}
+	/* Advance to the next instruction.  All the 32-bit
+	   instructions share a common prefix.  */
+	return MAKE_THUMB_ADDR (pc + thumb_insn_size (inst1));
 
       /* Otherwise, handle the instruction normally.  */
     }
@@ -4376,7 +4373,7 @@ thumb_get_next_pc_raw (struct frame_info *frame, CORE_ADDR pc)
     {
       nextpc = pc_val + (sbits (inst1, 0, 10) << 1);
     }
-  else if ((inst1 & 0xe000) == 0xe000) /* 32-bit instruction */
+  else if (thumb_insn_size (inst1) == 4) /* 32-bit instruction */
     {
       unsigned short inst2;
       inst2 = read_memory_unsigned_integer (pc + 2, 2, byte_order_for_code);
@@ -8472,7 +8469,7 @@ arm_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *lenptr)
 	    {
 	      unsigned short inst1;
 	      inst1 = extract_unsigned_integer (buf, 2, byte_order_for_code);
-	      if ((inst1 & 0xe000) == 0xe000 && (inst1 & 0x1800) != 0)
+	      if (thumb_insn_size (inst1) == 4)
 		{
 		  *lenptr = tdep->thumb2_breakpoint_size;
 		  return tdep->thumb2_breakpoint;

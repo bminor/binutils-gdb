@@ -1,3 +1,12 @@
+2011-10-13  Yao Qi  <yao@codesourcery.com>
+
+	PR gdb/12703
+	* arm-tdep.c (thumb_analyze_prologue): Call thumb_insn_size to check
+	whether insn is a 32-bit Thumb-2 instruction.
+	(thumb_in_function_epilogue_p): Likewise.
+	(thumb_get_next_pc_raw): Likewise.
+	(arm_breakpoint_from_pc): Likewise.
+
 2011-10-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix empty DWARF expressions DATA vs. SIZE conditionals.
