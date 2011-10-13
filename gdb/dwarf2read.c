@@ -14217,8 +14217,10 @@ dwarf2_fetch_die_location_block (unsigned int offset,
   attr = dwarf2_attr (die, DW_AT_location, cu);
   if (!attr)
     {
-      /* DWARF: "If there is no such attribute, then there is no effect.".  */
+      /* DWARF: "If there is no such attribute, then there is no effect.".
+	 DATA is ignored if SIZE is 0.  */
 
+      retval.data = NULL;
       retval.size = 0;
     }
   else if (attr_form_is_section_offset (attr))

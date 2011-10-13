@@ -1,3 +1,8 @@
+2011-10-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf2read.c (dwarf2_fetch_die_location_block): Initialize .data even
+	if .size is 0.
+
 2011-10-13  Yao Qi  <yao@codesourcery.com>
 
 	PR gdb/12703
