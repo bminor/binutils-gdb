@@ -8220,15 +8220,19 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 		{
 		  /* The target is out of reach, so redirect the
 		     branch to the local stub for this function.  */
-
 		  stub_entry = elf32_arm_get_stub_entry (input_section,
 							 sym_sec, h,
 							 rel, globals,
 							 stub_type);
-		  if (stub_entry != NULL)
-		    value = (stub_entry->stub_offset
-			     + stub_entry->stub_sec->output_offset
-			     + stub_entry->stub_sec->output_section->vma);
+		  {
+		    if (stub_entry != NULL)
+		      value = (stub_entry->stub_offset
+			       + stub_entry->stub_sec->output_offset
+			       + stub_entry->stub_sec->output_section->vma);
+
+		    if (plt_offset != (bfd_vma) -1)
+		      *unresolved_reloc_p = FALSE;
+		  }
 		}
 	      else
 		{
@@ -8653,9 +8657,14 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 						       rel, globals,
 						       stub_type);
 		if (stub_entry != NULL)
-		  value = (stub_entry->stub_offset
-			   + stub_entry->stub_sec->output_offset
-			   + stub_entry->stub_sec->output_section->vma);
+		  {
+		    value = (stub_entry->stub_offset
+			     + stub_entry->stub_sec->output_offset
+			     + stub_entry->stub_sec->output_section->vma);
+
+		    if (plt_offset != (bfd_vma) -1)
+		      *unresolved_reloc_p = FALSE;
+		  }
 
 		/* If this call becomes a call to Arm, force BLX.  */
 		if (globals->use_blx && (r_type == R_ARM_THM_CALL))

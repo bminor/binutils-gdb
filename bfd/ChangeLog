@@ -1,3 +1,8 @@
+2011-10-13  Richard Sandiford  <richard.sandiford@linaro.org>
+
+	* elf32-arm.c (elf32_arm_final_link_relocate): Mark PLT calls via
+	stubs as resolved.
+
 2011-10-11  Alan Modra  <amodra@gmail.com>
 
 	PR binutils/13278
