@@ -302,17 +302,6 @@ lm_name (struct so_list *so)
 				ptr_type);
 }
 
-static int
-ignore_first_link_map_entry (struct so_list *so)
-{
-  /* Assume that everything is a library if the dynamic loader was loaded
-     late by a static executable.  */
-  if (exec_bfd && bfd_get_section_by_name (exec_bfd, ".dynamic") == NULL)
-    return 0;
-
-  return lm_prev (so) == 0;
-}
-
 /* Per pspace SVR4 specific data.  */
 
 struct svr4_info
@@ -942,6 +931,32 @@ open_symbol_file_object (void *from_ttyp)
   return 1;
 }
 
+/* Implementation for target_so_ops.free_so.  */
+
+static void
+svr4_free_so (struct so_list *so)
+{
+  if (so->lm_info)
+    xfree (so->lm_info->lm);
+  xfree (so->lm_info);
+}
+
+/* Free so_list built so far (called via cleanup).  */
+
+static void
+svr4_free_library_list (void *p_list)
+{
+  struct so_list *list = *(struct so_list **) p_list;
+
+  while (list != NULL)
+    {
+      struct so_list *next = list->next;
+
+      svr4_free_so (list);
+      list = next;
+    }
+}
+
 /* If no shared library information is available from the dynamic
    linker, build a fallback list from other sources.  */
 
@@ -971,16 +986,99 @@ svr4_default_sos (void)
   return new;
 }
 
+/* Read the whole inferior libraries chain starting at address LM.  Add the
+   entries to the tail referenced by LINK_PTR_PTR.  Ignore the first entry if
+   IGNORE_FIRST and set global MAIN_LM_ADDR according to it.  */
+
+static void
+svr4_read_so_list (CORE_ADDR lm, struct so_list ***link_ptr_ptr,
+		   int ignore_first)
+{
+  CORE_ADDR prev_lm = 0, next_lm;
+
+  for (; lm != 0; prev_lm = lm, lm = next_lm)
+    {
+      struct link_map_offsets *lmo = svr4_fetch_link_map_offsets ();
+      struct so_list *new;
+      struct cleanup *old_chain;
+      int errcode;
+      char *buffer;
+
+      new = XZALLOC (struct so_list);
+      old_chain = make_cleanup_free_so (new);
+
+      new->lm_info = xmalloc (sizeof (struct lm_info));
+      new->lm_info->l_addr = (CORE_ADDR) -1;
+      new->lm_info->lm_addr = lm;
+      new->lm_info->lm = xzalloc (lmo->link_map_size);
+
+      read_memory (lm, new->lm_info->lm, lmo->link_map_size);
+
+      next_lm = lm_next (new);
+
+      if (lm_prev (new) != prev_lm)
+	{
+	  warning (_("Corrupted shared library list"));
+	  do_cleanups (old_chain);
+	  break;
+	}
+
+      /* For SVR4 versions, the first entry in the link map is for the
+         inferior executable, so we must ignore it.  For some versions of
+         SVR4, it has no name.  For others (Solaris 2.3 for example), it
+         does have a name, so we can no longer use a missing name to
+         decide when to ignore it.  */
+      if (ignore_first && lm_prev (new) == 0)
+	{
+	  struct svr4_info *info = get_svr4_info ();
+
+	  info->main_lm_addr = new->lm_info->lm_addr;
+	  do_cleanups (old_chain);
+	  continue;
+	}
+
+      /* Extract this shared object's name.  */
+      target_read_string (lm_name (new), &buffer,
+			  SO_NAME_MAX_PATH_SIZE - 1, &errcode);
+      if (errcode != 0)
+	{
+	  warning (_("Can't read pathname for load map: %s."),
+		   safe_strerror (errcode));
+	  do_cleanups (old_chain);
+	  continue;
+	}
+
+      strncpy (new->so_name, buffer, SO_NAME_MAX_PATH_SIZE - 1);
+      new->so_name[SO_NAME_MAX_PATH_SIZE - 1] = '\0';
+      strcpy (new->so_original_name, new->so_name);
+      xfree (buffer);
+
+      /* If this entry has no name, or its name matches the name
+	 for the main executable, don't include it in the list.  */
+      if (! new->so_name[0] || match_main (new->so_name))
+	{
+	  do_cleanups (old_chain);
+	  continue;
+	}
+
+      discard_cleanups (old_chain);
+      new->next = 0;
+      **link_ptr_ptr = new;
+      *link_ptr_ptr = &new->next;
+    }
+}
+
 /* Implement the "current_sos" target_so_ops method.  */
 
 static struct so_list *
 svr4_current_sos (void)
 {
-  CORE_ADDR lm, prev_lm;
-  struct so_list *head = 0;
+  CORE_ADDR lm;
+  struct so_list *head = NULL;
   struct so_list **link_ptr = &head;
-  CORE_ADDR ldsomap = 0;
   struct svr4_info *info;
+  struct cleanup *back_to;
+  int ignore_first;
 
   info = get_svr4_info ();
 
@@ -993,94 +1091,30 @@ svr4_current_sos (void)
   if (! info->debug_base)
     return svr4_default_sos ();
 
+  /* Assume that everything is a library if the dynamic loader was loaded
+     late by a static executable.  */
+  if (exec_bfd && bfd_get_section_by_name (exec_bfd, ".dynamic") == NULL)
+    ignore_first = 0;
+  else
+    ignore_first = 1;
+
+  back_to = make_cleanup (svr4_free_library_list, &head);
+
   /* Walk the inferior's link map list, and build our list of
      `struct so_list' nodes.  */
-  prev_lm = 0;
   lm = solib_svr4_r_map (info);
+  if (lm)
+    svr4_read_so_list (lm, &link_ptr, ignore_first);
 
-  while (lm)
-    {
-      struct link_map_offsets *lmo = svr4_fetch_link_map_offsets ();
-      struct so_list *new = XZALLOC (struct so_list);
-      struct cleanup *old_chain = make_cleanup (xfree, new);
-      CORE_ADDR next_lm;
+  /* On Solaris, the dynamic linker is not in the normal list of
+     shared objects, so make sure we pick it up too.  Having
+     symbol information for the dynamic linker is quite crucial
+     for skipping dynamic linker resolver code.  */
+  lm = solib_svr4_r_ldsomap (info);
+  if (lm)
+    svr4_read_so_list (lm, &link_ptr, 0);
 
-      new->lm_info = xmalloc (sizeof (struct lm_info));
-      make_cleanup (xfree, new->lm_info);
-
-      new->lm_info->l_addr = (CORE_ADDR)-1;
-      new->lm_info->lm_addr = lm;
-      new->lm_info->lm = xzalloc (lmo->link_map_size);
-      make_cleanup (xfree, new->lm_info->lm);
-
-      read_memory (lm, new->lm_info->lm, lmo->link_map_size);
-
-      next_lm = lm_next (new);
-
-      if (lm_prev (new) != prev_lm)
-	{
-	  warning (_("Corrupted shared library list"));
-	  free_so (new);
-	  next_lm = 0;
-	}
-
-      /* For SVR4 versions, the first entry in the link map is for the
-         inferior executable, so we must ignore it.  For some versions of
-         SVR4, it has no name.  For others (Solaris 2.3 for example), it
-         does have a name, so we can no longer use a missing name to
-         decide when to ignore it.  */
-      else if (ignore_first_link_map_entry (new) && ldsomap == 0)
-	{
-	  info->main_lm_addr = new->lm_info->lm_addr;
-	  free_so (new);
-	}
-      else
-	{
-	  int errcode;
-	  char *buffer;
-
-	  /* Extract this shared object's name.  */
-	  target_read_string (lm_name (new), &buffer,
-			      SO_NAME_MAX_PATH_SIZE - 1, &errcode);
-	  if (errcode != 0)
-	    warning (_("Can't read pathname for load map: %s."),
-		     safe_strerror (errcode));
-	  else
-	    {
-	      strncpy (new->so_name, buffer, SO_NAME_MAX_PATH_SIZE - 1);
-	      new->so_name[SO_NAME_MAX_PATH_SIZE - 1] = '\0';
-	      strcpy (new->so_original_name, new->so_name);
-	    }
-	  xfree (buffer);
-
-	  /* If this entry has no name, or its name matches the name
-	     for the main executable, don't include it in the list.  */
-	  if (! new->so_name[0]
-	      || match_main (new->so_name))
-	    free_so (new);
-	  else
-	    {
-	      new->next = 0;
-	      *link_ptr = new;
-	      link_ptr = &new->next;
-	    }
-	}
-
-      prev_lm = lm;
-      lm = next_lm;
-
-      /* On Solaris, the dynamic linker is not in the normal list of
-	 shared objects, so make sure we pick it up too.  Having
-	 symbol information for the dynamic linker is quite crucial
-	 for skipping dynamic linker resolver code.  */
-      if (lm == 0 && ldsomap == 0)
-	{
-	  lm = ldsomap = solib_svr4_r_ldsomap (info);
-	  prev_lm = 0;
-	}
-
-      discard_cleanups (old_chain);
-    }
+  discard_cleanups (back_to);
 
   if (head == NULL)
     return svr4_default_sos ();
@@ -2047,14 +2081,6 @@ svr4_clear_solib (void)
   xfree (info->debug_loader_name);
   info->debug_loader_name = NULL;
 }
-
-static void
-svr4_free_so (struct so_list *so)
-{
-  xfree (so->lm_info->lm);
-  xfree (so->lm_info);
-}
-
 
 /* Clear any bits of ADDR that wouldn't fit in a target-format
    data pointer.  "Data pointer" here refers to whatever sort of

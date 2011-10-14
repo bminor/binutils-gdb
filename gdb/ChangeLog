@@ -1,3 +1,21 @@
+2011-10-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* defs.h (struct so_list): New forward declaration.
+	(make_cleanup_free_so): New declaration.
+	* solib-svr4.c (ignore_first_link_map_entry): Remove.
+	(svr4_free_so): Move the function here from downwards.  Handle NULL
+	so->lm_info.
+	(svr4_free_library_list): New.
+	(svr4_read_so_list): New, moved here code from svr4_current_sos.
+	Use more cleanups.  Use new parameter ignore_first instead of
+	ignore_first_link_map_entry.
+	(svr4_current_sos): New variable ignore_first, initialize it.  New
+	variable back_to, use it for svr4_free_library_list protection.
+	(svr4_free_so): Remove - move upwards.
+	* utils.c: Include solist.h.
+	(do_free_so, make_cleanup_free_so): New functions.
+
 2011-10-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix internal error regression.

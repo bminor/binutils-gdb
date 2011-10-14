@@ -375,6 +375,9 @@ extern struct cleanup *
 extern struct cleanup *make_cleanup_value_free_to_mark (struct value *);
 extern struct cleanup *make_cleanup_value_free (struct value *);
 
+struct so_list;
+extern struct cleanup *make_cleanup_free_so (struct so_list *so);
+
 extern struct cleanup *make_final_cleanup (make_cleanup_ftype *, void *);
 
 extern struct cleanup *make_my_cleanup (struct cleanup **,
