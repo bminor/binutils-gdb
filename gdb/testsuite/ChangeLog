@@ -1,3 +1,9 @@
+2011-10-14  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.threads/attachstop-mt.exp: Add $srcfile to the linespecs.
+	* gdb.threads/attach-stopped.exp (corefunc): Add $srcfile to the
+	linespec.
+
 2011-10-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix internal error regression.

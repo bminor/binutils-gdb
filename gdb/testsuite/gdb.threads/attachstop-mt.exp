@@ -208,8 +208,8 @@ gdb_test "thread 2" ".*(witching to thread 2 |hread ID 2 not known).*" "attach4 
 gdb_test "bt" ".*sleep.*(func|main).*" "attach4 to stopped bt"
 
 # RHEL3U8 kernel-2.4.21-47.EL will not return SIGINT but only shorten the sleep.
-gdb_breakpoint [gdb_get_line_number "Ridiculous time"]
-gdb_breakpoint [gdb_get_line_number "cut the sleep time"]
+gdb_breakpoint $srcfile:[gdb_get_line_number "Ridiculous time"]
+gdb_breakpoint $srcfile:[gdb_get_line_number "cut the sleep time"]
 set test "attach4 continue"
 gdb_test_multiple "continue" "continue ($test)" {
     -re "Continuing" {

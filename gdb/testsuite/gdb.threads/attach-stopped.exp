@@ -78,7 +78,7 @@ proc corefunc { threadtype } {
 	gdb_test "bt" ".*sleep.*main.*" "$threadtype: attach2 to stopped bt"
     }
     # This breakpoint is there for old/non-x86 kernels not restarting syscalls.
-    gdb_breakpoint [gdb_get_line_number "Second sleep"]
+    gdb_breakpoint $srcfile:[gdb_get_line_number "Second sleep"]
     set test "$threadtype: attach2 continue"
     gdb_test_multiple "continue" "continue ($test)" {
 	-re "Continuing" {
