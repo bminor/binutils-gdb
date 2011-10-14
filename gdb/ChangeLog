@@ -1,4 +1,23 @@
 2011-10-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Drop lazy lm_info reading.
+	* solib-svr4.c (struct lm_info): Remove field lm.  New fields l_addr_p,
+	l_addr_inferior, l_ld, l_next, l_prev and l_name.
+	(lm_info_read): New function.
+	(lm_addr_from_link_map, lm_dynamic_from_link_map): Remove.
+	(lm_addr_check): Use l_addr_p.  No longer use lm_addr_from_link_map and
+	lm_dynamic_from_link_map.
+	(lm_next, lm_prev, lm_name): Remove.
+	(svr4_keep_data_in_core): Use lm_info_read, drop the lm_info entries
+	initialization incl. read_memory.  No longer use lm_name.
+	(svr4_free_so): Drop lm_info->lm freeing.
+	(svr4_default_sos): Initialize lminfo with zeroes.  Use l_addr_p.  Drop
+	explicit lm_addr and lm initialization.
+	(svr4_read_so_list): Use lm_info_read, drop the initailization of
+	fields by hand, incl. read_memory.  No longer use lm_next, lm_prev and
+	lm_name.
+
+2011-10-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* defs.h (struct so_list): New forward declaration.
