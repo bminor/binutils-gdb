@@ -1007,14 +1007,14 @@ do {									\
 #define ALU32_AND(VAL)							\
 do {									\
   alu32_r &= (VAL);							\
-  alu32_r = 0;								\
+  alu32_c = 0;								\
   alu32_v = 0;								\
 } while (0)
 
 #define ALU64_AND(VAL)							\
 do {									\
   alu64_r &= (VAL);							\
-  alu64_r = 0;								\
+  alu64_c = 0;								\
   alu64_v = 0;								\
 } while (0)
 

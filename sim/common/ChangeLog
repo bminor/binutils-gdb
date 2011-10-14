@@ -1,3 +1,8 @@
+2011-10-14  Alexey Makhalov  <makhaloff@gmail.com>
+
+	* sim-alu.h (ALU32_AND): Clear carry flag.
+	(ALU32_AND): Clear carry flag.
+
 2011-10-09  Mike Frysinger  <vapier@gentoo.org>
 
 	* dv-cfi.c: Include stdbool.h.
