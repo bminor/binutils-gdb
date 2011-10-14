@@ -1,3 +1,13 @@
+2011-10-14  Hans-Peter Nilsson  <hp@axis.com>
+
+	* elf32-cris.c (cris_elf_gc_sweep_hook) <R_CRIS_16_GOTPLT>
+	<R_CRIS_32_GOTPLT>: Fix missing update of gotplt refcount for
+	global symbols.
+	<R_CRIS_8, R_CRIS_16, R_CRIS_32>: New cases for similar missing
+	updates of the plt refcount.
+	(elf_cris_adjust_gotplt_to_got): Assert integrity of the gotplt
+	refcount in relation to the plt refcount.
+
 2011-10-13  Richard Sandiford  <richard.sandiford@linaro.org>
 
 	* elf32-arm.c (elf32_arm_final_link_relocate): Mark PLT calls via
