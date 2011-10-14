@@ -49,3 +49,30 @@ gdb_test "p foo2_1 (b)" "= 21"             "pointer pointer to pointer pointer"
 gdb_test "p foo2_2 (b)" "Cannot resolve.*" "pointer pointer to array of arrays"
 gdb_test "p foo2_3 (b)" "= 23"             "pointer pointer to array of pointers"
 gdb_test "p foo2_4 (b)" "Cannot resolve.*" "pointer pointer to array of wrong pointers"
+
+gdb_test "p foo3_1 ((char *) 0, ta)" "Cannot resolve.*" \
+    "check all parameters for badness"
+
+# Tests for null pointer conversion
+global gdb_prompt
+set nl {[\r\n]+}
+set t "null pointer conversion"
+gdb_test_multiple "p foo3_1 (0, 0)" $t {
+  -re "warning: Using non-standard conversion.*$nl$gdb_prompt $" {
+    fail "$t (warning issued)"
+  }
+
+  -re "Cannot resolve function foo3_1 to any overloaded instance$nl$gdb_prompt $" {
+    fail "$t (conversion failed)"
+  }
+
+  -re "\\$\[0-9\]+ = 31$nl$gdb_prompt $" {
+    pass $t
+  }
+}
+gdb_test "p foo3_1 (0, 1)" \
+    "Cannot resolve function foo3_1 to any overloaded instance"
+gdb_test "p foo3_1 (0, (const char**) 1)" " = 31"
+gdb_test "p foo3_2 (0, 0)" "= 32"
+gdb_test "p foo3_2 (0, (char const**) 0)" " = 320"
+

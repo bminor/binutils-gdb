@@ -23,6 +23,10 @@ int foo2_2 (char[][1]) {return 22;}
 int foo2_3 (char *[])  {return 23;}
 int foo2_4 (int  *[])  {return 24;}
 
+int foo3_1 (int a, const char **b) { return 31; }
+int foo3_2 (int a, int b) { return 32; }
+int foo3_2 (int a, const char **b) { return 320; }
+
 int main()
 {
 
@@ -53,5 +57,10 @@ int main()
   foo2_2 (ba);       // ..array of arrays
   foo2_3 (b);        // ..array of pointers
   foo2_4 ((int**)b); // ..array of wrong pointers
+
+  foo3_1 (0, 0);
+  foo3_2 (0, static_cast<char const**> (0));
+  foo3_2 (0, 0);
+
   return 0;          // end of main
 }
