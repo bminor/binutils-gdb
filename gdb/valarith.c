@@ -335,15 +335,8 @@ value_user_defined_cpp_op (struct value **args, int nargs, char *operator,
 
   struct symbol *symp = NULL;
   struct value *valp = NULL;
-  struct type **arg_types;
-  int i;
 
-  arg_types = (struct type **) alloca (nargs * (sizeof (struct type *)));
-  /* Prepare list of argument types for overload resolution.  */
-  for (i = 0; i < nargs; i++)
-    arg_types[i] = value_type (args[i]);
-
-  find_overload_match (arg_types, nargs, operator, BOTH /* could be method */,
+  find_overload_match (args, nargs, operator, BOTH /* could be method */,
                        0 /* strict match */, &args[0], /* objp */
                        NULL /* pass NULL symbol since symbol is unknown */,
                        &valp, &symp, static_memfuncp, 0);

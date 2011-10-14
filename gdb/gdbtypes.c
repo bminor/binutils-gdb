@@ -60,7 +60,7 @@ const struct rank VOID_PTR_CONVERSION_BADNESS = {2,0};
 const struct rank BOOL_PTR_CONVERSION_BADNESS = {3,0};
 const struct rank BASE_CONVERSION_BADNESS = {2,0};
 const struct rank REFERENCE_CONVERSION_BADNESS = {2,0};
-
+const struct rank NULL_POINTER_CONVERSION_BADNESS = {2,0};
 const struct rank NS_POINTER_CONVERSION_BADNESS = {10,0};
 
 /* Floatformat pairs.  */
@@ -2283,7 +2283,7 @@ compare_badness (struct badness_vector *a, struct badness_vector *b)
 
 struct badness_vector *
 rank_function (struct type **parms, int nparms, 
-	       struct type **args, int nargs)
+	       struct value **args, int nargs)
 {
   int i;
   struct badness_vector *bv;
@@ -2306,7 +2306,8 @@ rank_function (struct type **parms, int nparms,
 
   /* Now rank all the parameters of the candidate function.  */
   for (i = 1; i <= min_len; i++)
-    bv->rank[i] = rank_one_type (parms[i-1], args[i-1]);
+    bv->rank[i] = rank_one_type (parms[i - 1], value_type (args[i - 1]),
+				 args[i - 1]);
 
   /* If more arguments than parameters, add dummy entries.  */
   for (i = min_len + 1; i <= nargs; i++)
@@ -2405,6 +2406,7 @@ types_equal (struct type *a, struct type *b)
  * PARM is intended to be the parameter type of a function; and
  * ARG is the supplied argument's type.  This function tests if
  * the latter can be converted to the former.
+ * VALUE is the argument's value or NULL if none (or called recursively)
  *
  * Return 0 if they are identical types;
  * Otherwise, return an integer which corresponds to how compatible
@@ -2412,7 +2414,7 @@ types_equal (struct type *a, struct type *b)
  * Generally the "bad" conversions are all uniformly assigned a 100.  */
 
 struct rank
-rank_one_type (struct type *parm, struct type *arg)
+rank_one_type (struct type *parm, struct type *arg, struct value *value)
 {
   struct rank rank = {0,0};
 
@@ -2428,10 +2430,10 @@ rank_one_type (struct type *parm, struct type *arg)
   /* See through references, since we can almost make non-references
      references.  */
   if (TYPE_CODE (arg) == TYPE_CODE_REF)
-    return (sum_ranks (rank_one_type (parm, TYPE_TARGET_TYPE (arg)),
+    return (sum_ranks (rank_one_type (parm, TYPE_TARGET_TYPE (arg), NULL),
                        REFERENCE_CONVERSION_BADNESS));
   if (TYPE_CODE (parm) == TYPE_CODE_REF)
-    return (sum_ranks (rank_one_type (TYPE_TARGET_TYPE (parm), arg),
+    return (sum_ranks (rank_one_type (TYPE_TARGET_TYPE (parm), arg, NULL),
                        REFERENCE_CONVERSION_BADNESS));
   if (overload_debug)
   /* Debugging only.  */
@@ -2468,8 +2470,16 @@ rank_one_type (struct type *parm, struct type *arg)
 	    return EXACT_MATCH_BADNESS;
 	  return INCOMPATIBLE_TYPE_BADNESS;
 	case TYPE_CODE_FUNC:
-	  return rank_one_type (TYPE_TARGET_TYPE (parm), arg);
+	  return rank_one_type (TYPE_TARGET_TYPE (parm), arg, NULL);
 	case TYPE_CODE_INT:
+	  if (value != NULL && TYPE_CODE (value_type (value)) == TYPE_CODE_INT
+	      && value_as_long (value) == 0)
+	    {
+	      /* Null pointer conversion: allow it to be cast to a pointer.
+		 [4.10.1 of C++ standard draft n3290]  */
+	      return NULL_POINTER_CONVERSION_BADNESS;
+	    }
+	  /* fall through  */
 	case TYPE_CODE_ENUM:
 	case TYPE_CODE_FLAGS:
 	case TYPE_CODE_CHAR:
@@ -2484,7 +2494,7 @@ rank_one_type (struct type *parm, struct type *arg)
 	case TYPE_CODE_PTR:
 	case TYPE_CODE_ARRAY:
 	  return rank_one_type (TYPE_TARGET_TYPE (parm), 
-				TYPE_TARGET_TYPE (arg));
+				TYPE_TARGET_TYPE (arg), NULL);
 	default:
 	  return INCOMPATIBLE_TYPE_BADNESS;
 	}
@@ -2492,7 +2502,7 @@ rank_one_type (struct type *parm, struct type *arg)
       switch (TYPE_CODE (arg))
 	{
 	case TYPE_CODE_PTR:	/* funcptr -> func */
-	  return rank_one_type (parm, TYPE_TARGET_TYPE (arg));
+	  return rank_one_type (parm, TYPE_TARGET_TYPE (arg), NULL);
 	default:
 	  return INCOMPATIBLE_TYPE_BADNESS;
 	}
@@ -2748,7 +2758,7 @@ rank_one_type (struct type *parm, struct type *arg)
 	  /* Not in C++ */
 	case TYPE_CODE_SET:
 	  return rank_one_type (TYPE_FIELD_TYPE (parm, 0), 
-				TYPE_FIELD_TYPE (arg, 0));
+				TYPE_FIELD_TYPE (arg, 0), NULL);
 	default:
 	  return INCOMPATIBLE_TYPE_BADNESS;
 	}

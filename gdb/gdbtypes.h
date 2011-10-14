@@ -1555,6 +1555,8 @@ extern const struct rank BOOL_PTR_CONVERSION_BADNESS;
 extern const struct rank BASE_CONVERSION_BADNESS;
 /* Badness of converting from non-reference to reference.  */
 extern const struct rank REFERENCE_CONVERSION_BADNESS;
+/* Badness of converting integer 0 to NULL pointer.  */
+extern const struct rank NULL_POINTER_CONVERSION;
 
 /* Non-standard conversions allowed by the debugger */
 /* Converting a pointer to an int is usually OK.  */
@@ -1567,9 +1569,10 @@ extern int compare_ranks (struct rank a, struct rank b);
 extern int compare_badness (struct badness_vector *, struct badness_vector *);
 
 extern struct badness_vector *rank_function (struct type **, int,
-					     struct type **, int);
+					     struct value **, int);
 
-extern struct rank rank_one_type (struct type *, struct type *);
+extern struct rank rank_one_type (struct type *, struct type *,
+				  struct value *);
 
 extern void recursive_dump_type (struct type *, int);
 

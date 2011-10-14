@@ -1,3 +1,39 @@
+2011-10-14  Keith Seitz  <keiths@redhat.com>
+
+	PR c++/13225
+	* eval.c (evaluate_subexp_standard): Do not construct
+	an array of types; pass the value array directly to
+	find_overload_match.
+	* gdbtypes.h (NULL_POINTER_CONVERSION_BADNESS): Declare.
+	(rank_function): Take an array of values instead of types.
+	(rank_one_type): Add struct value * parameter.
+	* gdbtypes.c (NULL_POINTER_CONVERSION_BADNESS): Define.
+	(rank_function): For each argument, pass the argument's
+	value to rank_one_type.
+	(rank_one_type): Add VALUE parameter.
+	If the parameter type is a pointer and the argument type
+	is an integer, return NULL_POINTER_CONVERSION_BADNESS if
+	VALUE is zero.
+	Update all calls to rank_one_type, passing NULL for new
+	VALUE parameter.
+	* valarith.c (value_user_defined_cpp_op): Do not construct
+	an array of types; pass the value array directly to
+	find_overload_match.
+	* valops.c (find_overload_method_list): Take an array of
+	values instead of types.
+	Save the type of OBJP for later use.
+	Update calls to find_oload_champ, and find_oload_champ_namespace.
+	(find_oload_champ_namespace): Take an array of values instead
+	of types.
+	(find_oload_champ_namespace_loop): Likewise.
+	(find_oload_champ): Likewise.
+	(classify_oload_match): Inspect all arguments
+	until INCOMPATIBLE is found. Return the worst badness found
+	otherwise.
+	(compare_parameters): Update call to rank_one_type.
+	* value.h (find_overload_match): Take an array of values instead
+	of types.
+
 2011-10-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Drop lazy lm_info reading.
