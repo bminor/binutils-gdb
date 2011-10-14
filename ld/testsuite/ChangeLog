@@ -1,3 +1,8 @@
+2011-10-14  Hans-Peter Nilsson  <hp@axis.com>
+
+	* ld-cris/pic-gc-72.d: Adjust for dropping unused undefined
+	dynamic symbol "dsofn".
+
 2011-09-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/13195
