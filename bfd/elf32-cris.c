@@ -2663,6 +2663,9 @@ cris_elf_gc_sweep_hook (bfd *abfd,
 	  /* For local symbols, treat these like GOT relocs.  */
 	  if (h == NULL)
 	    goto local_got_reloc;
+	  else
+	    /* For global symbols, adjust the reloc-specific refcount.  */
+	    elf_cris_hash_entry (h)->gotplt_refcount--;
 	  /* Fall through.  */
 
 	case R_CRIS_32_PLT_GOTREL:
@@ -2671,10 +2674,14 @@ cris_elf_gc_sweep_hook (bfd *abfd,
 	    local_got_refcounts[-1]--;
 	  /* Fall through.  */
 
+	case R_CRIS_8:
+	case R_CRIS_16:
+	case R_CRIS_32:
 	case R_CRIS_8_PCREL:
 	case R_CRIS_16_PCREL:
 	case R_CRIS_32_PCREL:
 	case R_CRIS_32_PLT_PCREL:
+	  /* Negate the increment we did in cris_elf_check_relocs.  */
 	  if (h != NULL)
 	    {
 	      if (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
@@ -2732,6 +2739,11 @@ elf_cris_adjust_gotplt_to_got (h, p)
      PTR p;
 {
   struct bfd_link_info *info = (struct bfd_link_info *) p;
+
+  /* A GOTPLT reloc, when activated, is supposed to be included into
+     the PLT refcount.  */
+  BFD_ASSERT (h->gotplt_refcount == 0
+	      || h->gotplt_refcount <= h->root.plt.refcount);
 
   /* If nobody wanted a GOTPLT with this symbol, we're done.  */
   if (h->gotplt_refcount <= 0)
