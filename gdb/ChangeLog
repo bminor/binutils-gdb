@@ -1,3 +1,8 @@
+2011-10-16  Doug Evans  <dje@google.com>
+
+	* NEWS: Document python gdb.printing.register_pretty_printer's new
+	`replace' parameter.
+
 2011-10-14  Keith Seitz  <keiths@redhat.com>
 
 	PR c++/13225
