@@ -16,7 +16,7 @@
 * Python scripting
 
   ** The register_pretty_printer function in module gdb.printing now takes
-     an optional `replace' argument.  If True the new printer replaces any
+     an optional `replace' argument.  If True, the new printer replaces any
      existing one.
 
   ** The "maint set python print-stack on|off" command has been
