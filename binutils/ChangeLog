@@ -1,3 +1,9 @@
+2011-10-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/13278
+	* ar.c (open_inarch): Set the target from the the first object
+	on the list only if it isn't set.
+
 2011-10-13  Nick Clifton  <nickc@redhat.com>
 
 	Fixes to aid translation:

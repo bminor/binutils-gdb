@@ -815,9 +815,9 @@ open_inarch (const char *archive_filename, const char *file)
 	  return NULL;
 	}
 
-      /* Try to figure out the target to use for the archive from the
-         first object on the list.  */
-      if (file != NULL)
+      /* If the target isn't set, try to figure out the target to use
+	 for the archive from the first object on the list.  */
+      if (target == NULL && file != NULL)
 	{
 	  bfd *obj;
 
