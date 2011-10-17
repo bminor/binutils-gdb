@@ -270,7 +270,6 @@ void dwarf_expr_require_composition (const gdb_byte *, const gdb_byte *,
 
 /* Stub dwarf_expr_context_funcs implementations.  */
 
-CORE_ADDR ctx_no_read_reg (void *baton, int regnum);
 void ctx_no_get_frame_base (void *baton, const gdb_byte **start,
 			    size_t *length);
 CORE_ADDR ctx_no_get_frame_cfa (void *baton);

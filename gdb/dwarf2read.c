@@ -10297,10 +10297,22 @@ read_2_bytes (bfd *abfd, gdb_byte *buf)
   return bfd_get_16 (abfd, buf);
 }
 
+static int
+read_2_signed_bytes (bfd *abfd, gdb_byte *buf)
+{
+  return bfd_get_signed_16 (abfd, buf);
+}
+
 static unsigned int
 read_4_bytes (bfd *abfd, gdb_byte *buf)
 {
   return bfd_get_32 (abfd, buf);
+}
+
+static int
+read_4_signed_bytes (bfd *abfd, gdb_byte *buf)
+{
+  return bfd_get_signed_32 (abfd, buf);
 }
 
 static ULONGEST
@@ -14419,37 +14431,6 @@ read_signatured_type (struct objfile *objfile,
   dwarf2_per_objfile->read_in_chain = &type_sig->per_cu;
 }
 
-/* Workaround as dwarf_expr_context_funcs.read_mem implementation before
-   a proper runtime DWARF expressions evaluator gets implemented.
-   Otherwise gnuv3_baseclass_offset would error by:
-   Expected a negative vbase offset (old compiler?)  */
-
-static void
-decode_locdesc_read_mem (void *baton, gdb_byte *buf, CORE_ADDR addr,
-			 size_t length)
-{
-  struct dwarf_expr_context *ctx = baton;
-  struct gdbarch *gdbarch = ctx->gdbarch;
-  struct type *ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
-
-  memset (buf, 0, length);
-
-  if (TYPE_LENGTH (ptr_type) == length)
-    store_typed_address (buf, ptr_type, addr);
-}
-
-static const struct dwarf_expr_context_funcs decode_locdesc_ctx_funcs =
-{
-  ctx_no_read_reg,
-  decode_locdesc_read_mem,
-  ctx_no_get_frame_base,
-  ctx_no_get_frame_cfa,
-  ctx_no_get_frame_pc,
-  ctx_no_get_tls_address,
-  ctx_no_dwarf_call,
-  ctx_no_get_base_type
-};
-
 /* Decode simple location descriptions.
    Given a pointer to a dwarf block that defines a location, compute
    the location and return the value.
@@ -14467,60 +14448,235 @@ static const struct dwarf_expr_context_funcs decode_locdesc_ctx_funcs =
    object is optimized out.  The return value is 0 for that case.
    FIXME drow/2003-11-16: No callers check for this case any more; soon all
    callers will only want a very basic result and this can become a
-   complaint.  */
+   complaint.
+
+   Note that stack[0] is unused except as a default error return.  */
 
 static CORE_ADDR
 decode_locdesc (struct dwarf_block *blk, struct dwarf2_cu *cu)
 {
   struct objfile *objfile = cu->objfile;
-  struct dwarf_expr_context *ctx;
-  struct cleanup *old_chain;
-  volatile struct gdb_exception ex;
+  int i;
+  int size = blk->size;
+  gdb_byte *data = blk->data;
+  CORE_ADDR stack[64];
+  int stacki;
+  unsigned int bytes_read, unsnd;
+  gdb_byte op;
 
-  ctx = new_dwarf_expr_context ();
-  old_chain = make_cleanup_free_dwarf_expr_context (ctx);
-  make_cleanup_value_free_to_mark (value_mark ());
+  i = 0;
+  stacki = 0;
+  stack[stacki] = 0;
+  stack[++stacki] = 0;
 
-  ctx->gdbarch = get_objfile_arch (objfile);
-  ctx->addr_size = cu->header.addr_size;
-  ctx->ref_addr_size = dwarf2_per_cu_ref_addr_size (cu->per_cu);
-  ctx->offset = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
-  ctx->baton = ctx;
-  ctx->funcs = &decode_locdesc_ctx_funcs;
-
-  /* DW_AT_data_member_location expects the structure address to be pushed on
-     the stack.  Simulate the offset by address 0.  */
-  dwarf_expr_push_address (ctx, 0, 0);
-
-  TRY_CATCH (ex, RETURN_MASK_ERROR)
+  while (i < size)
     {
-      dwarf_expr_eval (ctx, blk->data, blk->size);
-    }
-  if (ex.reason < 0)
-    {
-      if (ex.message)
-	complaint (&symfile_complaints, "%s", ex.message);
-    }
-  else if (ctx->num_pieces == 0)
-    switch (ctx->location)
-      {
-      /* The returned number will be bogus, just do not complain for locations
-	 in global registers - it is here only a partial symbol address.  */
-      case DWARF_VALUE_REGISTER:
-
-      case DWARF_VALUE_MEMORY:
-      case DWARF_VALUE_STACK:
+      op = data[i++];
+      switch (op)
 	{
-	  CORE_ADDR address = dwarf_expr_fetch_address (ctx, 0);
+	case DW_OP_lit0:
+	case DW_OP_lit1:
+	case DW_OP_lit2:
+	case DW_OP_lit3:
+	case DW_OP_lit4:
+	case DW_OP_lit5:
+	case DW_OP_lit6:
+	case DW_OP_lit7:
+	case DW_OP_lit8:
+	case DW_OP_lit9:
+	case DW_OP_lit10:
+	case DW_OP_lit11:
+	case DW_OP_lit12:
+	case DW_OP_lit13:
+	case DW_OP_lit14:
+	case DW_OP_lit15:
+	case DW_OP_lit16:
+	case DW_OP_lit17:
+	case DW_OP_lit18:
+	case DW_OP_lit19:
+	case DW_OP_lit20:
+	case DW_OP_lit21:
+	case DW_OP_lit22:
+	case DW_OP_lit23:
+	case DW_OP_lit24:
+	case DW_OP_lit25:
+	case DW_OP_lit26:
+	case DW_OP_lit27:
+	case DW_OP_lit28:
+	case DW_OP_lit29:
+	case DW_OP_lit30:
+	case DW_OP_lit31:
+	  stack[++stacki] = op - DW_OP_lit0;
+	  break;
 
-	  do_cleanups (old_chain);
-	  return address;
+	case DW_OP_reg0:
+	case DW_OP_reg1:
+	case DW_OP_reg2:
+	case DW_OP_reg3:
+	case DW_OP_reg4:
+	case DW_OP_reg5:
+	case DW_OP_reg6:
+	case DW_OP_reg7:
+	case DW_OP_reg8:
+	case DW_OP_reg9:
+	case DW_OP_reg10:
+	case DW_OP_reg11:
+	case DW_OP_reg12:
+	case DW_OP_reg13:
+	case DW_OP_reg14:
+	case DW_OP_reg15:
+	case DW_OP_reg16:
+	case DW_OP_reg17:
+	case DW_OP_reg18:
+	case DW_OP_reg19:
+	case DW_OP_reg20:
+	case DW_OP_reg21:
+	case DW_OP_reg22:
+	case DW_OP_reg23:
+	case DW_OP_reg24:
+	case DW_OP_reg25:
+	case DW_OP_reg26:
+	case DW_OP_reg27:
+	case DW_OP_reg28:
+	case DW_OP_reg29:
+	case DW_OP_reg30:
+	case DW_OP_reg31:
+	  stack[++stacki] = op - DW_OP_reg0;
+	  if (i < size)
+	    dwarf2_complex_location_expr_complaint ();
+	  break;
+
+	case DW_OP_regx:
+	  unsnd = read_unsigned_leb128 (NULL, (data + i), &bytes_read);
+	  i += bytes_read;
+	  stack[++stacki] = unsnd;
+	  if (i < size)
+	    dwarf2_complex_location_expr_complaint ();
+	  break;
+
+	case DW_OP_addr:
+	  stack[++stacki] = read_address (objfile->obfd, &data[i],
+					  cu, &bytes_read);
+	  i += bytes_read;
+	  break;
+
+	case DW_OP_const1u:
+	  stack[++stacki] = read_1_byte (objfile->obfd, &data[i]);
+	  i += 1;
+	  break;
+
+	case DW_OP_const1s:
+	  stack[++stacki] = read_1_signed_byte (objfile->obfd, &data[i]);
+	  i += 1;
+	  break;
+
+	case DW_OP_const2u:
+	  stack[++stacki] = read_2_bytes (objfile->obfd, &data[i]);
+	  i += 2;
+	  break;
+
+	case DW_OP_const2s:
+	  stack[++stacki] = read_2_signed_bytes (objfile->obfd, &data[i]);
+	  i += 2;
+	  break;
+
+	case DW_OP_const4u:
+	  stack[++stacki] = read_4_bytes (objfile->obfd, &data[i]);
+	  i += 4;
+	  break;
+
+	case DW_OP_const4s:
+	  stack[++stacki] = read_4_signed_bytes (objfile->obfd, &data[i]);
+	  i += 4;
+	  break;
+
+	case DW_OP_constu:
+	  stack[++stacki] = read_unsigned_leb128 (NULL, (data + i),
+						  &bytes_read);
+	  i += bytes_read;
+	  break;
+
+	case DW_OP_consts:
+	  stack[++stacki] = read_signed_leb128 (NULL, (data + i), &bytes_read);
+	  i += bytes_read;
+	  break;
+
+	case DW_OP_dup:
+	  stack[stacki + 1] = stack[stacki];
+	  stacki++;
+	  break;
+
+	case DW_OP_plus:
+	  stack[stacki - 1] += stack[stacki];
+	  stacki--;
+	  break;
+
+	case DW_OP_plus_uconst:
+	  stack[stacki] += read_unsigned_leb128 (NULL, (data + i),
+						 &bytes_read);
+	  i += bytes_read;
+	  break;
+
+	case DW_OP_minus:
+	  stack[stacki - 1] -= stack[stacki];
+	  stacki--;
+	  break;
+
+	case DW_OP_deref:
+	  /* If we're not the last op, then we definitely can't encode
+	     this using GDB's address_class enum.  This is valid for partial
+	     global symbols, although the variable's address will be bogus
+	     in the psymtab.  */
+	  if (i < size)
+	    dwarf2_complex_location_expr_complaint ();
+	  break;
+
+        case DW_OP_GNU_push_tls_address:
+	  /* The top of the stack has the offset from the beginning
+	     of the thread control block at which the variable is located.  */
+	  /* Nothing should follow this operator, so the top of stack would
+	     be returned.  */
+	  /* This is valid for partial global symbols, but the variable's
+	     address will be bogus in the psymtab.  */
+	  if (i < size)
+	    dwarf2_complex_location_expr_complaint ();
+          break;
+
+	case DW_OP_GNU_uninit:
+	  break;
+
+	default:
+	  {
+	    const char *name = dwarf_stack_op_name (op);
+
+	    if (name)
+	      complaint (&symfile_complaints, _("unsupported stack op: '%s'"),
+			 name);
+	    else
+	      complaint (&symfile_complaints, _("unsupported stack op: '%02x'"),
+			 op);
+	  }
+
+	  return (stack[stacki]);
 	}
-      }
 
-  do_cleanups (old_chain);
-  dwarf2_complex_location_expr_complaint ();
-  return 0;
+      /* Enforce maximum stack depth of SIZE-1 to avoid writing
+         outside of the allocated space.  Also enforce minimum>0.  */
+      if (stacki >= ARRAY_SIZE (stack) - 1)
+	{
+	  complaint (&symfile_complaints,
+		     _("location description stack overflow"));
+	  return 0;
+	}
+
+      if (stacki <= 0)
+	{
+	  complaint (&symfile_complaints,
+		     _("location description stack underflow"));
+	  return 0;
+	}
+    }
+  return (stack[stacki]);
 }
 
 /* memory allocation interface */

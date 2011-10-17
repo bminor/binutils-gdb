@@ -1471,14 +1471,6 @@ abort_expression:
   gdb_assert (ctx->recursion_depth >= 0);
 }
 
-/* Stub dwarf_expr_context_funcs.read_reg implementation.  */
-
-CORE_ADDR
-ctx_no_read_reg (void *baton, int regnum)
-{
-  error (_("Registers access is invalid in this context"));
-}
-
 /* Stub dwarf_expr_context_funcs.get_frame_base implementation.  */
 
 void

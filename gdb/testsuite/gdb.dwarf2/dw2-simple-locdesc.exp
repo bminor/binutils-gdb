@@ -32,7 +32,15 @@ clean_restart $executable
 
 # Re: [patch 2/2] Fix decode_locdesc for gcc-4.7.x optimized DWARF
 # http://sourceware.org/ml/gdb-patches/2011-07/msg00766.html
-gdb_test "p &s.shl" { = \(int \*\) 0x1000000}
+set test "p &s.shl"
+gdb_test_multiple $test $test {
+    -re " = \\(int \\*\\) 0x1000000\r\n$gdb_prompt $" {
+	pass $test
+    }
+    -re " = \\(int \\*\\) 0x14\r\n$gdb_prompt $" {
+	kfail "symtab/13307" $test
+    }
+}
 
 # Re: RFC: fix DW_AT_data_member_location buglet
 # http://sourceware.org/ml/gdb-patches/2011-05/msg00291.html

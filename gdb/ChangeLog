@@ -1,3 +1,13 @@
+2011-10-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Revert:
+	2011-07-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
+        * dwarf2expr.c (ctx_no_read_reg): New function.
+        * dwarf2expr.h (ctx_no_read_reg): New declaration.
+        * dwarf2read.c (read_2_signed_bytes, read_4_signed_bytes): Remove.
+        (decode_locdesc_read_mem, decode_locdesc_ctx_funcs): New.
+        (decode_locdesc): Replace by a caller of dwarf_expr_eval.
+
 2011-10-16  Doug Evans  <dje@google.com>
 
 	* NEWS: Document python gdb.printing.register_pretty_printer's new
