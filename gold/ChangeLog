@@ -1,42 +1,42 @@
 2011-10-17  Cary Coutant  <ccoutant@google.com>
 
 	PR gold/13288
-	* gold/fileread.cc (File_read::find_view): Add assert.
+	* fileread.cc (File_read::find_view): Add assert.
 	(File_read::make_view): Move bounds check (replace with assert)...
 	(File_read::find_or_make_view): ... to here.
 
 2011-10-12  Cary Coutant  <ccoutant@google.com>
 
-	* gold/output.cc (Output_file::open_base_file): Handle case where
+	* output.cc (Output_file::open_base_file): Handle case where
 	::read returns less than requested size.
 
 2011-10-10  Cary Coutant  <ccoutant@google.com>
 
-	* gold/incremental.cc (Sized_relobj_incr::Sized_relobj_incr):
+	* incremental.cc (Sized_relobj_incr::Sized_relobj_incr):
 	Initialize defined_count_.
 	(Sized_relobj_incr::do_add_symbols): Count defined symbols.
 	(Sized_relobj_incr::do_get_global_symbol_counts): Rewrite.
 	(Sized_incr_dynobj::Sized_incr_dynobj): Initialize defined_count_.
 	(Sized_incr_dynobj::do_add_symbols): Count defined symbols.
 	(Sized_incr_dynobj::do_get_global_symbol_counts): Rewrite.
-	* gold/incremental.h (Sized_relobj_incr::defined_count_): New data
+	* incremental.h (Sized_relobj_incr::defined_count_): New data
 	member.
 	(Sized_incr_dynobj::defined_count_): New data member.
-	* gold/plugin.cc (Sized_pluginobj::do_get_global_symbol_counts):
+	* plugin.cc (Sized_pluginobj::do_get_global_symbol_counts):
 	Return zeroes instead of internal error.
 
 2011-10-10  Cary Coutant  <ccoutant@google.com>
 
 	PR gold/13249
-	* gold/output.cc (Output_reloc::Output_reloc): Add use_plt_offset flag.
+	* output.cc (Output_reloc::Output_reloc): Add use_plt_offset flag.
 	(Output_reloc::symbol_value): Return PLT offset if flag is set.
-	* gold/output.h (class Output_reloc): Add use_plt_offset flag.
+	* output.h (class Output_reloc): Add use_plt_offset flag.
 	(Output_reloc::type_): Adjust size of bit field.
 	(Output_reloc::use_plt_offset_): New bit field.
 	(class Output_data_reloc): Adjust all calls to Output_reloc_type.
 	(Output_data_reloc::add_local_relative): (RELA only) Add use_plt_offset
 	flag.  Adjust all callers.
-	* gold/x86_64.cc (Target_x86_64::Scan::local): Check for IFUNC when
+	* x86_64.cc (Target_x86_64::Scan::local): Check for IFUNC when
 	creating RELATIVE relocations.
 
 2011-10-10  Nick Clifton  <nickc@redhat.com>
@@ -67,9 +67,9 @@
 
 2011-09-29  Cary Coutant  <ccoutant@google.com>
 
-	* gold/incremental.cc (Sized_incremental_binary::do_process_got_plt):
+	* incremental.cc (Sized_incremental_binary::do_process_got_plt):
 	Check for NULL.
-	* gold/symtab.cc (Symbol_table::add_from_relobj): Ignore version
+	* symtab.cc (Symbol_table::add_from_relobj): Ignore version
 	symbols during incremental update.
 	(Symbol_table::add_from_dynobj): Likewise.
 
@@ -81,8 +81,8 @@
 
 2011-09-26  Cary Coutant  <ccoutant@google.com>
 
-	* gold/gold.cc (queue_initial_tasks): Move option checks ...
-	* gold/options.cc (General_options::finalize): ... to here. Disable
+	* gold.cc (queue_initial_tasks): Move option checks ...
+	* options.cc (General_options::finalize): ... to here. Disable
 	some options; make others fatal.
 
 2011-09-26  Cary Coutant  <ccoutant@google.com>
