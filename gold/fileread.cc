@@ -329,6 +329,10 @@ inline File_read::View*
 File_read::find_view(off_t start, section_size_type size,
 		     unsigned int byteshift, File_read::View** vshifted) const
 {
+  gold_assert(start <= this->size_
+	      && (static_cast<unsigned long long>(size)
+		  <= static_cast<unsigned long long>(this->size_ - start)));
+
   if (vshifted != NULL)
     *vshifted = NULL;
 
@@ -456,16 +460,9 @@ File_read::make_view(off_t start, section_size_type size,
 		     unsigned int byteshift, bool cache)
 {
   gold_assert(size > 0);
-
-  // Check that start and end of the view are within the file.
-  if (start > this->size_
-      || (static_cast<unsigned long long>(size)
-          > static_cast<unsigned long long>(this->size_ - start)))
-    gold_fatal(_("%s: attempt to map %lld bytes at offset %lld exceeds "
-                 "size of file; the file may be corrupt"),
-		   this->filename().c_str(),
-		   static_cast<long long>(size),
-		   static_cast<long long>(start));
+  gold_assert(start <= this->size_
+	      && (static_cast<unsigned long long>(size)
+		  <= static_cast<unsigned long long>(this->size_ - start)));
 
   off_t poff = File_read::page_offset(start);
 
@@ -523,6 +520,16 @@ File_read::View*
 File_read::find_or_make_view(off_t offset, off_t start,
 			     section_size_type size, bool aligned, bool cache)
 {
+  // Check that start and end of the view are within the file.
+  if (start > this->size_
+      || (static_cast<unsigned long long>(size)
+          > static_cast<unsigned long long>(this->size_ - start)))
+    gold_fatal(_("%s: attempt to map %lld bytes at offset %lld exceeds "
+                 "size of file; the file may be corrupt"),
+		   this->filename().c_str(),
+		   static_cast<long long>(size),
+		   static_cast<long long>(start));
+
   unsigned int byteshift;
   if (offset == 0)
     byteshift = 0;

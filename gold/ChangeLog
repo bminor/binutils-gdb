@@ -1,3 +1,10 @@
+2011-10-17  Cary Coutant  <ccoutant@google.com>
+
+	PR gold/13288
+	* gold/fileread.cc (File_read::find_view): Add assert.
+	(File_read::make_view): Move bounds check (replace with assert)...
+	(File_read::find_or_make_view): ... to here.
+
 2011-10-12  Cary Coutant  <ccoutant@google.com>
 
 	* gold/output.cc (Output_file::open_base_file): Handle case where
