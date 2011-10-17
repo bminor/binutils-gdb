@@ -1204,6 +1204,11 @@ extern void allocate_gnat_aux_type (struct type *);
        || TYPE_NFN_FIELDS (thistype) == 0) \
    && (TYPE_STUB (thistype) || !TYPE_STUB_SUPPORTED (thistype)))
 
+/* A helper macro that returns the name of a type or "unnamed type" if the type
+   has no name.  */
+#define TYPE_SAFE_NAME(type) \
+  (TYPE_NAME (type) ? TYPE_NAME (type) : _("<unnamed type>"))
+
 /* A helper macro that returns the name of an error type.  If the type
    has a name, it is used; otherwise, a default is used.  */
 #define TYPE_ERROR_NAME(type) \

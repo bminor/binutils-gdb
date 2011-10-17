@@ -319,7 +319,7 @@ gnuv3_rtti_type (struct value *value,
       || strncmp (vtable_symbol_name, "vtable for ", 11))
     {
       warning (_("can't find linker symbol for virtual table for `%s' value"),
-	       TYPE_NAME (values_type));
+	       TYPE_SAFE_NAME (values_type));
       if (vtable_symbol_name)
 	warning (_("  found `%s' instead"), vtable_symbol_name);
       return NULL;
