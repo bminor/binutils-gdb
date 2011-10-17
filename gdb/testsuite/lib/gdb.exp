@@ -677,6 +677,7 @@ proc gdb_test_multiple { command message user_code } {
     set result -1
     set string "${command}\n";
     if { $command != "" } {
+	set multi_line_re "\[\r\n\] *>"
 	while { "$string" != "" } {
 	    set foo [string first "\n" "$string"];
 	    set len [string length "$string"];
@@ -697,10 +698,11 @@ proc gdb_test_multiple { command message user_code } {
 		# command output is not lost for pattern matching
 		# - guo
 		gdb_expect 2 {
-		    -notransfer -re "\[\r\n\]" { verbose "partial: match" 3 }
+		    -notransfer -re "$multi_line_re$" { verbose "partial: match" 3 }
 		    timeout { verbose "partial: timeout" 3 }
 		}
 		set string [string range "$string" [expr $foo + 1] end];
+		set multi_line_re "$multi_line_re.*\[\r\n\] *>"
 	    } else {
 		break;
 	    }

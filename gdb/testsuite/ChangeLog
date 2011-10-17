@@ -1,3 +1,8 @@
+2011-10-17  Joseph Myers  <joseph@codesourcery.com>
+
+	* lib/gdb.exp (gdb_test_multiple): Expect newline and secondary
+	prompt for each extra line in command.
+
 2011-10-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.dwarf2/dw2-simple-locdesc.exp (p &s.shl): KFAIL it.
