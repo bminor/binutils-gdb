@@ -1,5 +1,9 @@
 2011-10-18  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.base/jit-so.exp (one_jit_test): Remove spurious backslash.
+
+2011-10-18  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.base/source.exp: Don't include full file name in test name.
 	* gdb.python/python.exp: Don't include full file name in test
 	name.
