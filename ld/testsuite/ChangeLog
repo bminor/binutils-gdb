@@ -1,3 +1,9 @@
+2011-10-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/13177
+	* ld-elf/pr13177.d: Removed.
+	* ld-elf/pr13177.s: Likewise.
+
 2011-10-14  Hans-Peter Nilsson  <hp@axis.com>
 
 	* ld-cris/pic-gc-72.d: Adjust for dropping unused undefined

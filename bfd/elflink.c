@@ -11691,18 +11691,13 @@ struct elf_gc_sweep_symbol_info
 static bfd_boolean
 elf_gc_sweep_symbol (struct elf_link_hash_entry *h, void *data)
 {
-  if (((h->root.type == bfd_link_hash_defined
-	|| h->root.type == bfd_link_hash_defweak)
-       && !h->root.u.def.section->gc_mark
-       && (!(h->root.u.def.section->owner->flags & DYNAMIC)
-	   || (h->plt.refcount <= 0
-	       && h->got.refcount <= 0)))
-      || (h->root.type == bfd_link_hash_undefined
-	  && h->plt.refcount <= 0
-	  && h->got.refcount <= 0))
+  if ((h->root.type == bfd_link_hash_defined
+       || h->root.type == bfd_link_hash_defweak)
+      && !h->root.u.def.section->gc_mark
+      && !(h->root.u.def.section->owner->flags & DYNAMIC))
     {
       struct elf_gc_sweep_symbol_info *inf =
-	(struct elf_gc_sweep_symbol_info *) data;
+          (struct elf_gc_sweep_symbol_info *) data;
       (*inf->hide_symbol) (inf->info, h, TRUE);
     }
 

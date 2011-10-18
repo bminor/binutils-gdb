@@ -1,3 +1,9 @@
+2011-10-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/13177
+	* elflink.c (elf_gc_sweep_symbol): Don't hide symbols without PLT
+	nor GOT references.
+
 2011-10-14  Hans-Peter Nilsson  <hp@axis.com>
 
 	* elf32-cris.c (cris_elf_gc_sweep_hook) <R_CRIS_16_GOTPLT>
