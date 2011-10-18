@@ -1,3 +1,10 @@
+2011-10-18  Jie Zhang  <jie@codesourcery.com>
+	    Julian Brown  <julian@codesourcery.com>
+
+	* gas/arm/adrl.d: Adjust.
+	* gas/arm/immed2.d: New test.
+	* gas/arm/immed2.s: New test.
+
 2011-10-13  James Greenhalgh  <james.greenhalgh@arm.com>
 
 	* gas/arm/ldr-bad.s: New testcase.

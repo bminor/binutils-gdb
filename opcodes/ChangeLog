@@ -1,3 +1,8 @@
+2011-10-18  Jie Zhang  <jie@codesourcery.com>
+	    Julian Brown  <julian@codesourcery.com>
+
+	* arm-dis.c (print_insn_arm): Explicitly specify rotation if needed.
+
 2011-10-10  Nick Clifton  <nickc@redhat.com>
 
 	* po/es.po: Updated Spanish translation.

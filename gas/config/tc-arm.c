@@ -4884,10 +4884,9 @@ parse_shifter_operand (char **str, int i)
 	  return FAIL;
 	}
 
-      /* Convert to decoded value.  md_apply_fix will put it back.  */
-      inst.reloc.exp.X_add_number
-	= (((inst.reloc.exp.X_add_number << (32 - value))
-	    | (inst.reloc.exp.X_add_number >> value)) & 0xffffffff);
+      /* Encode as specified.  */
+      inst.operands[i].imm = inst.reloc.exp.X_add_number | value << 7;
+      return SUCCESS;
     }
 
   inst.reloc.type = BFD_RELOC_ARM_IMMEDIATE;
@@ -7018,7 +7017,11 @@ encode_arm_shifter_operand (int i)
       encode_arm_shift (i);
     }
   else
-    inst.instruction |= INST_IMMEDIATE;
+    {
+      inst.instruction |= INST_IMMEDIATE;
+      if (inst.reloc.type != BFD_RELOC_ARM_IMMEDIATE)
+	inst.instruction |= inst.operands[i].imm;
+    }
 }
 
 /* Subroutine of encode_arm_addr_mode_2 and encode_arm_addr_mode_3.  */

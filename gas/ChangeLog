@@ -1,3 +1,10 @@
+2011-10-18  Jie Zhang  <jie@codesourcery.com>
+	    Julian Brown  <julian@codesourcery.com>
+
+	* config/tc-arm.c (parse_shifter_operand): Fix handling of explicit
+	rotation.
+	(encode_arm_shifter_operand): Likewise.
+
 2011-10-13  James Greenhalgh  <james.greenhalgh@arm.com>
 
 	* config/tc-arm.c (check_ldr_r15_aligned): New.

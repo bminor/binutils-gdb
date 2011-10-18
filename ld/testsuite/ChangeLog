@@ -1,3 +1,25 @@
+2011-10-18  Jie Zhang  <jie@codesourcery.com>
+	    Julian Brown  <julian@codesourcery.com>
+
+	* ld-arm/cortex-a8-fix-b-plt.d: Adjust.
+	* ld-arm/cortex-a8-fix-bcc-plt.d: Adjust.
+	* ld-arm/cortex-a8-fix-bl-plt.d: Adjust.
+	* ld-arm/cortex-a8-fix-bl-rel-plt.d: Adjust.
+	* ld-arm/cortex-a8-fix-blx-plt.d: Adjust.
+	* ld-arm/ifunc-1.dd: Adjust.
+	* ld-arm/ifunc-2.dd: Adjust.
+	* ld-arm/ifunc-3.dd: Adjust.
+	* ld-arm/ifunc-4.dd: Adjust.
+	* ld-arm/ifunc-5.dd: Adjust.
+	* ld-arm/ifunc-6.dd: Adjust.
+	* ld-arm/ifunc-7.dd: Adjust.
+	* ld-arm/ifunc-8.dd: Adjust.
+	* ld-arm/ifunc-9.dd: Adjust.
+	* ld-arm/ifunc-10.dd: Adjust.
+	* ld-arm/ifunc-14.dd: Adjust.
+	* ld-arm/ifunc-15.dd: Adjust.
+	* ld-arm/ifunc-16.dd: Adjust.
+
 2011-10-14  Hans-Peter Nilsson  <hp@axis.com>
 
 	* ld-cris/pic-gc-72.d: Adjust for dropping unused undefined
