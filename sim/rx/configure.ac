@@ -21,7 +21,7 @@ dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
 dnl
 AC_PREREQ(2.64)dnl
 AC_INIT(Makefile.in)
-sinclude(../common/aclocal.m4)
+sinclude(../common/acinclude.m4)
 
 SIM_AC_COMMON
 

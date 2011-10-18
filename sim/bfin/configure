@@ -5190,6 +5190,7 @@ BFIN_SIM_EXTRA_OBJS=${BFIN_SIM_EXTRA_OBJS}
 
 
 
+
 if test "x$ac_cv_env_PKG_CONFIG_set" != "xset"; then
 	if test -n "$ac_tool_prefix"; then
   # Extract the first word of "${ac_tool_prefix}pkg-config", so it can be a program name with args.
@@ -5318,6 +5319,7 @@ if test -n "$SDL_CFLAGS"; then
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
   pkg_cv_SDL_CFLAGS=`$PKG_CONFIG --cflags "sdl" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
 else
   pkg_failed=yes
 fi
@@ -5334,6 +5336,7 @@ if test -n "$SDL_LIBS"; then
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
   pkg_cv_SDL_LIBS=`$PKG_CONFIG --libs "sdl" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
 else
   pkg_failed=yes
 fi
@@ -5353,9 +5356,9 @@ else
         _pkg_short_errors_supported=no
 fi
         if test $_pkg_short_errors_supported = yes; then
-	        SDL_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors "sdl" 2>&1`
+	        SDL_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "sdl" 2>&1`
         else
-	        SDL_PKG_ERRORS=`$PKG_CONFIG --print-errors "sdl" 2>&1`
+	        SDL_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "sdl" 2>&1`
         fi
 	# Put the nasty error message in config.log where it belongs
 	echo "$SDL_PKG_ERRORS" >&5

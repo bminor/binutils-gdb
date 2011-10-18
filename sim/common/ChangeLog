@@ -1,5 +1,10 @@
 2011-10-17  Mike Frysinger  <vapier@gentoo.org>
 
+	* acinclude.m4: Rename from aclocal.m4.
+	* aclocal.m4: Regenerate.
+
+2011-10-17  Mike Frysinger  <vapier@gentoo.org>
+
 	* aclocal.m4: Change AC_PREREQ comment to 2.64.
 	* common.m4: Delete.
 	* configure.ac: Change AC_PREREQ to 2.64.  Replace AC_CONFIG_HEADER
