@@ -1832,6 +1832,7 @@ case "${target}" in
        ;;
    bfin-*-*)
        sim_arch=bfin
+       sim_testsuite=yes
        ;;
    cr16*-*-*)
        sim_arch=cr16

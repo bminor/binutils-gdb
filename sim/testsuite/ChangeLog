@@ -1,3 +1,7 @@
+2011-10-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate after bfin testsuite update.
+
 2011-07-01  Nick Clifton  <nickc@redhat.com>
 
 	PR sim/12737
