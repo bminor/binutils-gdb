@@ -1,3 +1,9 @@
+2011-10-18  Cary Coutant  <ccoutant@google.com>
+
+	* output.cc (posix_fallocate): Return 0 on success, errno on failure.
+	(Output_file::map_no_anonymous): Check for non-zero
+	return code from posix_fallocate.
+
 2011-10-17  Cary Coutant  <ccoutant@google.com>
 
 	PR gold/13245

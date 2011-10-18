@@ -119,7 +119,9 @@ extern "C" void *gold_mremap(void *, size_t, size_t, int);
 static int
 posix_fallocate(int o, off_t offset, off_t len)
 {
-  return ftruncate(o, offset + len);
+  if (ftruncate(o, offset + len) < 0)
+    return errno;
+  return 0;
 }
 #endif // !defined(HAVE_POSIX_FALLOCATE)
 
@@ -5075,8 +5077,12 @@ Output_file::map_no_anonymous(bool writable)
   // output file will wind up incomplete, but we will have already
   // exited.  The alternative to fallocate would be to use fdatasync,
   // but that would be a more significant performance hit.
-  if (writable && ::posix_fallocate(o, 0, this->file_size_) < 0)
-    gold_fatal(_("%s: %s"), this->name_, strerror(errno));
+  if (writable)
+    {
+      int err = ::posix_fallocate(o, 0, this->file_size_);
+      if (err != 0)
+       gold_fatal(_("%s: %s"), this->name_, strerror(err));
+    }
 
   // Map the file into memory.
   int prot = PROT_READ;
