@@ -49,7 +49,8 @@ gdb_test_multiple "source ${srcdir}/${subdir}/source-test.gdb" $test {
     }
 }
 
-gdb_test "dir ${srcdir}/${subdir}" "Source directories searched: .*"
+gdb_test "dir ${srcdir}/${subdir}" "Source directories searched: .*" \
+    "set search directories"
 gdb_test "source -s ./source-test.gdb" \
     "test source options" \
     "source -s"
