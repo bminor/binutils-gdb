@@ -1,5 +1,25 @@
 2011-10-17  Cary Coutant  <ccoutant@google.com>
 
+	* gold.cc: Include timer.h.
+	(queue_middle_tasks): Stamp time.
+	(queue_final_tasks): Likewise.
+	* main.cc (main): Store timer in parameters.  Print timers
+	for each pass.
+	* parameters.cc (Parameters::Parameters): Initialize timer_.
+	(Parameters::set_timer): New function.
+	(set_parameters_timer): New function.
+	* parameters.h (Parameters::set_timer): New function.
+	(Parameters::timer): New function.
+	(Parameters::timer_): New data member.
+	(set_parameters_timer): New function.
+	* timer.cc (Timer::stamp): New function.
+	(Timer::get_pass_time): New function.
+	* timer.h (Timer::stamp): New function.
+	(Timer::get_pass_time): New function.
+	(Timer::pass_times_): New data member.
+
+2011-10-17  Cary Coutant  <ccoutant@google.com>
+
 	* readsyms.cc (Read_symbols::run): Don't queue an unblocker
 	task for members of lib groups.
 

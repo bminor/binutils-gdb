@@ -48,9 +48,17 @@ class Timer
   TimeStats
   get_elapsed_time();
 
+  // Return the stats for pass N (0 <= N <= 2).
+  TimeStats
+  get_pass_time(int n);
+
   // Start counting the time.
   void
   start();
+
+  // Record the time used by pass N (0 <= N <= 2).
+  void
+  stamp(int n);
 
  private:
   // This class cannot be copied.
@@ -63,6 +71,9 @@ class Timer
 
   // The time of the last call to start.
   TimeStats start_time_;
+
+  // Times for each pass.
+  TimeStats pass_times_[3];
 };
 
 }

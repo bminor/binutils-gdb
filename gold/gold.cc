@@ -45,6 +45,7 @@
 #include "gc.h"
 #include "icf.h"
 #include "incremental.h"
+#include "timer.h"
 
 namespace gold
 {
@@ -487,6 +488,10 @@ queue_middle_tasks(const General_options& options,
 		   Workqueue* workqueue,
 		   Mapfile* mapfile)
 {
+  Timer* timer = parameters->timer();
+  if (timer != NULL)
+    timer->stamp(0);
+
   // Add any symbols named with -u options to the symbol table.
   symtab->add_undefined_symbols_from_command_line(layout);
 
@@ -786,6 +791,10 @@ queue_final_tasks(const General_options& options,
 		  Workqueue* workqueue,
 		  Output_file* of)
 {
+  Timer* timer = parameters->timer();
+  if (timer != NULL)
+    timer->stamp(1);
+
   int thread_count = options.thread_count_final();
   if (thread_count == 0)
     thread_count = std::max(2, input_objects->number_of_input_objects());

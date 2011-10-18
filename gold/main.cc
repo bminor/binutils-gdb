@@ -165,7 +165,10 @@ main(int argc, char** argv)
 
   Timer timer;
   if (command_line.options().stats())
-    timer.start();
+    {
+      timer.start();
+      set_parameters_timer(&timer);
+    }
 
   // Store some options in the globally accessible parameters.
   set_parameters_options(&command_line.options());
@@ -252,7 +255,32 @@ main(int argc, char** argv)
 
   if (command_line.options().stats())
     {
-      Timer::TimeStats elapsed = timer.get_elapsed_time();
+      timer.stamp(2);
+      Timer::TimeStats elapsed = timer.get_pass_time(0);
+      fprintf(stderr,
+             _("%s: initial tasks run time: " \
+               "(user: %ld.%06ld sys: %ld.%06ld wall: %ld.%06ld)\n"),
+              program_name,
+              elapsed.user / 1000, (elapsed.user % 1000) * 1000,
+              elapsed.sys / 1000, (elapsed.sys % 1000) * 1000,
+              elapsed.wall / 1000, (elapsed.wall % 1000) * 1000);
+      elapsed = timer.get_pass_time(1);
+      fprintf(stderr,
+             _("%s: middle tasks run time: " \
+               "(user: %ld.%06ld sys: %ld.%06ld wall: %ld.%06ld)\n"),
+              program_name,
+              elapsed.user / 1000, (elapsed.user % 1000) * 1000,
+              elapsed.sys / 1000, (elapsed.sys % 1000) * 1000,
+              elapsed.wall / 1000, (elapsed.wall % 1000) * 1000);
+      elapsed = timer.get_pass_time(2);
+      fprintf(stderr,
+             _("%s: final tasks run time: " \
+               "(user: %ld.%06ld sys: %ld.%06ld wall: %ld.%06ld)\n"),
+              program_name,
+              elapsed.user / 1000, (elapsed.user % 1000) * 1000,
+              elapsed.sys / 1000, (elapsed.sys % 1000) * 1000,
+              elapsed.wall / 1000, (elapsed.wall % 1000) * 1000);
+      elapsed = timer.get_elapsed_time();
       fprintf(stderr,
              _("%s: total run time: " \
                "(user: %ld.%06ld sys: %ld.%06ld wall: %ld.%06ld)\n"),
