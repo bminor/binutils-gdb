@@ -623,6 +623,27 @@ CC
 INSTALL_DATA
 INSTALL_SCRIPT
 INSTALL_PROGRAM
+WERROR_CFLAGS
+WARN_CFLAGS
+sim_xor_endian
+sim_stdcall
+sim_smp
+sim_reserved_bits
+sim_regparm
+sim_packages
+sim_inline
+sim_hw
+sim_hw_objs
+sim_hw_cflags
+sim_default_model
+sim_scache
+sim_float
+sim_hostendian
+sim_endian
+sim_bitsize
+sim_assert
+sim_alignment
+sim_environment
 target_alias
 host_alias
 build_alias
@@ -660,28 +681,7 @@ PACKAGE_VERSION
 PACKAGE_TARNAME
 PACKAGE_NAME
 PATH_SEPARATOR
-SHELL
-WERROR_CFLAGS
-WARN_CFLAGS
-sim_xor_endian
-sim_stdcall
-sim_smp
-sim_reserved_bits
-sim_regparm
-sim_packages
-sim_inline
-sim_hw
-sim_hw_objs
-sim_hw_cflags
-sim_default_model
-sim_scache
-sim_float
-sim_hostendian
-sim_endian
-sim_bitsize
-sim_assert
-sim_alignment
-sim_environment'
+SHELL'
 ac_subst_files=''
 ac_user_opts='
 enable_option_checking
@@ -2037,6 +2037,276 @@ ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+
+# This file contains common code used by all simulators.
+#
+# SIM_AC_COMMON invokes AC macros used by all simulators and by the common
+# directory.  It is intended to be invoked before any target specific stuff.
+# SIM_AC_OUTPUT is a cover function to AC_OUTPUT to generate the Makefile.
+# It is intended to be invoked last.
+#
+# The simulator's configure.in should look like:
+#
+# dnl Process this file with autoconf to produce a configure script.
+# AC_PREREQ(2.64)dnl
+# AC_INIT(Makefile.in)
+# sinclude(../common/aclocal.m4)
+#
+# SIM_AC_COMMON
+#
+# ... target specific stuff ...
+#
+# SIM_AC_OUTPUT
+
+# Include global overrides and fixes for Autoconf.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# _AC_CHECK_DECL_BODY
+# -------------------
+# Shell function body for AC_CHECK_DECL.
+# _AC_CHECK_DECL_BODY
+
+# _AC_CHECK_DECLS(SYMBOL, ACTION-IF_FOUND, ACTION-IF-NOT-FOUND,
+#                 INCLUDES)
+# -------------------------------------------------------------
+# Helper to AC_CHECK_DECLS, which generates the check for a single
+# SYMBOL with INCLUDES, performs the AC_DEFINE, then expands
+# ACTION-IF-FOUND or ACTION-IF-NOT-FOUND.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+sim_inline="-DDEFAULT_INLINE=0"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# intl sister-directory configuration rules.
+#
+
+# The idea behind this macro is that there's no need to repeat all the
+# autoconf probes done by the intl directory - it's already done them
+# for us.  In fact, there's no need even to look at the cache for the
+# answers.  All we need to do is nab a few pieces of information.
+# The intl directory is set up to make this easy, by generating a
+# small file which can be sourced as a shell script; then we produce
+# the necessary substitutions and definitions for this directory.
+
+
+
+# Autoconf M4 include file defining utility macros for complex Canadian
+# cross builds.
+
+
+
+
+
+
+
+
+
+####
+# _NCN_TOOL_PREFIXES:  Some stuff that oughtta be done in AC_CANONICAL_SYSTEM
+# or AC_INIT.
+# These demand that AC_CANONICAL_SYSTEM be called beforehand.
+
+####
+# NCN_STRICT_CHECK_TOOLS(variable, progs-to-check-for,[value-if-not-found],[path])
+# Like plain AC_CHECK_TOOLS, but require prefix if build!=host.
+
+
+####
+# NCN_STRICT_CHECK_TARGET_TOOLS(variable, progs-to-check-for,[value-if-not-found],[path])
+# Like CVS Autoconf AC_CHECK_TARGET_TOOLS, but require prefix if build!=target.
+
+
+
+# Backported from Autoconf 2.5x; can go away when and if
+# we switch.  Put the OS path separator in $PATH_SEPARATOR.
+
+
+
+
+# ACX_HAVE_GCC_FOR_TARGET
+# Check if the variable GCC_FOR_TARGET really points to a GCC binary.
+
+
+# ACX_CHECK_INSTALLED_TARGET_TOOL(VAR, PROG)
+# Searching for installed target binutils.  We need to take extra care,
+# else we may find the wrong assembler, linker, etc., and lose.
+#
+# First try --with-build-time-tools, if specified.
+#
+# For build != host, we ask the installed GCC for the name of the tool it
+# uses, and accept it if it is an absolute path.  This is because the
+# only good choice for a compiler is the same GCC version that is being
+# installed (or we couldn't make target libraries), and we assume that
+# on the host system we'll have not only the same GCC version, but also
+# the same binutils version.
+#
+# For build == host, search the same directories that the installed
+# compiler will search.  We used to do this for the assembler, linker,
+# and nm only; for simplicity of configuration, however, we extend this
+# criterion to tools (such as ar and ranlib) that are never invoked by
+# the compiler, to avoid mismatches.
+#
+# Also note we have to check MD_EXEC_PREFIX before checking the user's path
+# if build == target.  This makes the most sense only when bootstrapping,
+# but we also do so when build != host.  In this case, we hope that the
+# build and host systems will have similar contents of MD_EXEC_PREFIX.
+#
+# If we do not find a suitable binary, then try the user's path.
+
+
+###
+# AC_PROG_CPP_WERROR
+# Used for autoconf 2.5x to force AC_PREPROC_IFELSE to reject code which
+# triggers warnings from the preprocessor.  Will be in autoconf 2.58.
+# For now, using this also overrides header checks to use only the
+# preprocessor (matches 2.13 behavior; matching 2.58's behavior is a
+# bit harder from here).
+# Eventually autoconf will default to checking headers with the compiler
+# instead, and we'll have to do this differently.
+
+# AC_PROG_CPP_WERROR
+
+# Test for GNAT.
+# We require the gnatbind program, and a compiler driver that
+# understands Ada.  We use the user's CC setting, already found,
+# and possibly add $1 to the command-line parameters.
+#
+# Sets the shell variable have_gnat to yes or no as appropriate, and
+# substitutes GNATBIND and GNATMAKE.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
