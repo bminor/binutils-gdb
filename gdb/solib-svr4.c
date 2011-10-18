@@ -364,10 +364,11 @@ static gdb_byte *
 read_program_header (int type, int *p_sect_size, int *p_arch_size)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
-  CORE_ADDR at_phdr, at_phent, at_phnum;
+  CORE_ADDR at_phdr, at_phent, at_phnum, pt_phdr = 0;
   int arch_size, sect_size;
   CORE_ADDR sect_addr;
   gdb_byte *buf;
+  int pt_phdr_p = 0;
 
   /* Get required auxv elements from target.  */
   if (target_auxv_search (&current_target, AT_PHDR, &at_phdr) <= 0)
@@ -401,12 +402,23 @@ read_program_header (int type, int *p_sect_size, int *p_arch_size)
       /* Search for requested PHDR.  */
       for (i = 0; i < at_phnum; i++)
 	{
+	  int p_type;
+
 	  if (target_read_memory (at_phdr + i * sizeof (phdr),
 				  (gdb_byte *)&phdr, sizeof (phdr)))
 	    return 0;
 
-	  if (extract_unsigned_integer ((gdb_byte *)phdr.p_type,
-					4, byte_order) == type)
+	  p_type = extract_unsigned_integer ((gdb_byte *) phdr.p_type,
+					     4, byte_order);
+
+	  if (p_type == PT_PHDR)
+	    {
+	      pt_phdr_p = 1;
+	      pt_phdr = extract_unsigned_integer ((gdb_byte *) phdr.p_vaddr,
+						  4, byte_order);
+	    }
+
+	  if (p_type == type)
 	    break;
 	}
 
@@ -427,12 +439,23 @@ read_program_header (int type, int *p_sect_size, int *p_arch_size)
       /* Search for requested PHDR.  */
       for (i = 0; i < at_phnum; i++)
 	{
+	  int p_type;
+
 	  if (target_read_memory (at_phdr + i * sizeof (phdr),
 				  (gdb_byte *)&phdr, sizeof (phdr)))
 	    return 0;
 
-	  if (extract_unsigned_integer ((gdb_byte *)phdr.p_type,
-					4, byte_order) == type)
+	  p_type = extract_unsigned_integer ((gdb_byte *) phdr.p_type,
+					     4, byte_order);
+
+	  if (p_type == PT_PHDR)
+	    {
+	      pt_phdr_p = 1;
+	      pt_phdr = extract_unsigned_integer ((gdb_byte *) phdr.p_vaddr,
+						  8, byte_order);
+	    }
+
+	  if (p_type == type)
 	    break;
 	}
 
@@ -444,6 +467,16 @@ read_program_header (int type, int *p_sect_size, int *p_arch_size)
 					    8, byte_order);
       sect_size = extract_unsigned_integer ((gdb_byte *)phdr.p_memsz,
 					    8, byte_order);
+    }
+
+  /* PT_PHDR is optional, but we really need it
+     for PIE to make this work in general.  */
+
+  if (pt_phdr_p)
+    {
+      /* at_phdr is real address in memory. pt_phdr is what pheader says it is.
+	 Relocation offset is the difference between the two. */
+      sect_addr = sect_addr + (at_phdr - pt_phdr);
     }
 
   /* Read in requested program header.  */

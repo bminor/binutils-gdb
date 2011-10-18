@@ -1,3 +1,8 @@
+2011-10-18  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/attach-pie-noexec.c: New files.
+	* gdb.base/attach-pie-noexec.exp: New files.
+
 2011-10-17  Joseph Myers  <joseph@codesourcery.com>
 
 	* lib/gdb.exp (gdb_test_multiple): Expect newline and secondary
