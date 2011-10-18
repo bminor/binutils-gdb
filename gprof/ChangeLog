@@ -1,3 +1,8 @@
+2011-10-18  Nick Clifton  <nickc@redhat.com>
+
+	* po/it.po: New Italian translation.
+	* po/gprof.pot: Regenerate.
+
 2011-10-10  Nick Clifton  <nickc@redhat.com>
 
 	* po/uk.po: New Ukranian translation.
