@@ -1,5 +1,14 @@
 2011-10-17  Cary Coutant  <ccoutant@google.com>
 
+	PR gold/13245
+	* plugin.cc (is_visible_from_outside): Check for symbols
+	referenced from dynamic objects.
+	* resolve.cc (Symbol_table::resolve): Don't count references
+	from dynamic objects as references from real ELF files.
+	* testsuite/plugin_test_2.sh: Adjust expected result.
+
+2011-10-17  Cary Coutant  <ccoutant@google.com>
+
 	* gold.cc: Include timer.h.
 	(queue_middle_tasks): Stamp time.
 	(queue_final_tasks): Likewise.

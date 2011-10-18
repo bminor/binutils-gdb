@@ -818,7 +818,9 @@ Pluginobj::Pluginobj(const std::string& name, Input_file* input_file,
 }
 
 // Return TRUE if a defined symbol is referenced from outside the
-// universe of claimed objects.
+// universe of claimed objects.  Only references from relocatable,
+// non-IR (unclaimed) objects count as a reference.  References from
+// dynamic objects count only as "visible".
 
 static inline bool
 is_referenced_from_outside(Symbol* lsym)
@@ -838,6 +840,8 @@ is_referenced_from_outside(Symbol* lsym)
 static inline bool
 is_visible_from_outside(Symbol* lsym)
 {
+  if (lsym->in_dyn())
+    return true;
   if (parameters->options().export_dynamic() || parameters->options().shared())
     return lsym->is_externally_visible();
   return false;
