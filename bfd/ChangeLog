@@ -1,3 +1,8 @@
+2011-10-19  Alan Modra  <amodra@gmail.com>
+
+	PR ld/13254
+	* elflink.c (bfd_elf_final_link): Emit error_textrel error.
+
 2011-10-18  David S. Miller  <davem@davemloft.net>
 
 	PR binutils/13301
