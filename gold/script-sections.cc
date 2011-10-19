@@ -892,6 +892,12 @@ class Output_section_element_dot_assignment : public Output_section_element
     : val_(val)
   { }
 
+  // An assignment to dot within an output section is enough to force
+  // the output section to exist.
+  bool
+  needs_output_section() const
+  { return true; }
+
   // Finalize the symbol.
   void
   finalize_symbols(Symbol_table* symtab, const Layout* layout,

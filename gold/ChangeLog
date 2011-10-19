@@ -1,5 +1,12 @@
 2011-10-19  Ian Lance Taylor  <iant@google.com>
 
+	PR gold/13163
+	* script-sections.cc
+	(Output_section_element_dot_assignment::needs_output_section): New
+	function.
+
+2011-10-19  Ian Lance Taylor  <iant@google.com>
+
 	PR gold/13204
 	* layout.cc (Layout::segment_precedes): Don't assert failure if a
 	--section-start option was seen.
