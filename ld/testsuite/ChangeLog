@@ -1,3 +1,11 @@
+2011-10-18  David S. Miller  <davem@davemloft.net>
+
+	* ld-sparc/tlssunbin32.dd: Update for TLS call relaxation fix
+	for PR 13301.
+	* ld-sparc/tlssunbin64.dd: Likewise.
+	* ld-sparc/tlssunpic32.dd: Likewise.
+	* ld-sparc/tlssunpic64.dd: Likewise.
+
 2011-10-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/13177

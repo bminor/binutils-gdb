@@ -1,3 +1,16 @@
+2011-10-18  David S. Miller  <davem@davemloft.net>
+
+	PR binutils/13301
+	* sparc.cc (Target_sparc::Relocate::reloc_adjust_addr_): New
+	member to track relocation locations that have moved during TLS
+	reloc optimizations.
+	(Target_sparc::Relocate::Relocate): Initialize to NULL.
+	(Target_sparc::Relocate::relocate): Adjust view down by 4
+	bytes if it matches reloc_adjust_addr_.
+	(Target_sparc::Relocate::relocate_tls): Always move the
+	__tls_get_addr call delay slot instruction forward 4 bytes when
+	performing relaxation.
+
 2011-09-27  Viktor Kutuzov  <vkutuzov@accesssoftek.com>
 	    Ian Lance Taylor  <iant@google.com>
 
