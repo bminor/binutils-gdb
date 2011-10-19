@@ -22752,7 +22752,7 @@ You can implement new @value{GDBN} CLI commands in Python.  A CLI
 command is implemented using an instance of the @code{gdb.Command}
 class, most commonly using a subclass.
 
-@defun Command.__init__ (name, @var{command_class} @r{[}, var{completer_class} @r{[}, var{prefix}@r{]]})
+@defun Command.__init__ (name, @var{command_class} @r{[}, @var{completer_class} @r{[}, @var{prefix}@r{]]})
 The object initializer for @code{Command} registers the new command
 with @value{GDBN}.  This initializer is normally invoked from the
 subclass' own @code{__init__} method.

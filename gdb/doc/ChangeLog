@@ -1,3 +1,7 @@
+2011-10-19  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.texinfo (Commands In Python): Add missing "@"s.
+
 2011-10-13  Kevin Pouget  <kevin.pouget@st.com>
 
 	PR python/13285 Document named constants for frame unwind stop reasons
