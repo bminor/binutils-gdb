@@ -1,5 +1,11 @@
 2011-10-19  Alan Modra  <amodra@gmail.com>
 
+	PR ld/13311
+	* elflink.c (elf_link_output_extsym): Correct test for warning when
+	forced local executable syms are referenced from shared libraries.
+
+2011-10-19  Alan Modra  <amodra@gmail.com>
+
 	PR ld/13254
 	* elflink.c (bfd_elf_final_link): Emit error_textrel error.
 
