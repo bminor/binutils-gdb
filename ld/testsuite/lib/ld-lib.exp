@@ -1418,7 +1418,7 @@ proc check_gc_sections_available { } {
 	     || [istarget or32-*-*]
 	     || [istarget pj*-*-*]
 	     || [istarget alpha-*-*]
-	     || [istarget hppa64-*-*]
+	     || [istarget hppa*64-*-*]
 	     || [istarget i370-*-*]
 	     || [istarget i860-*-*]
 	     || [istarget ia64-*-*]
@@ -1439,6 +1439,8 @@ proc check_gc_sections_available { } {
 	}
 
 	# Check if the ld used by gcc supports --gc-sections.
+	# FIXME: this test is useless since ld --help always says
+	# --gc-sections is available
 	set ld_output [remote_exec host $ld "--help"]
 	if { [ string first "--gc-sections" $ld_output ] >= 0 } {
 	    set gc_sections_available_saved 1
@@ -1447,6 +1449,50 @@ proc check_gc_sections_available { } {
 	}
     }
     return $gc_sections_available_saved
+}
+
+# Returns true if -shared is supported on the target
+# Only used and accurate for ELF targets at the moment
+
+proc check_shared_lib_support { } {
+    if {![istarget arc-*-*]
+	 && ![istarget avr-*-*]
+	 && ![istarget cr16-*-*]
+	 && ![istarget cris*-*-*]
+	 && ![istarget crx-*-*]
+	 && ![istarget d10v-*-*]
+	 && ![istarget d30v-*-*]
+	 && ![istarget dlx-*-*]
+	 && ![istarget fr30-*-*]
+	 && ![istarget frv-*-*]
+	 && ![istarget h8300-*-*]
+	 && ![istarget i860-*-*]
+	 && ![istarget i960-*-*]
+	 && ![istarget ip2k-*-*]
+	 && ![istarget iq2000-*-*]
+	 && ![istarget lm32-*-*]
+	 && ![istarget m32c-*-*]
+	 && ![istarget m32r-*-*]
+	 && ![istarget m68hc1*-*-*]
+	 && ![istarget mcore*-*-*]
+	 && ![istarget mep-*-*]
+	 && ![istarget microblaze-*-*]
+	 && ![istarget mn10200-*-*]
+	 && ![istarget moxie-*-*]
+	 && ![istarget msp430-*-*]
+	 && ![istarget mt-*-*]
+	 && ![istarget openrisc-*-*]
+	 && ![istarget or32-*-*]
+	 && ![istarget pj-*-*]
+	 && ![istarget rx-*-*]
+	 && ![istarget spu-*-*]
+	 && ![istarget v850*-*-*]
+	 && ![istarget xstormy16-*-*]
+	 && ![istarget *-*-irix*]
+	 && ![istarget *-*-rtems] } {
+	return 1
+    }
+    return 0
 }
 
 # Returns true if the target ld supports the plugin API.

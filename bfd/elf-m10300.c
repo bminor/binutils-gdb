@@ -1499,7 +1499,10 @@ mn10300_elf_relocate_section (bfd *output_bfd,
 	       obscure cases sec->output_section will be NULL.  */
 	    relocation = 0;
 
-	  else if (!info->relocatable && unresolved_reloc)
+	  else if (!info->relocatable && unresolved_reloc
+		   && _bfd_elf_section_offset (output_bfd, info, input_section,
+					       rel->r_offset) != (bfd_vma) -1)
+
 	    (*_bfd_error_handler)
 	      (_("%B(%A+0x%lx): unresolvable %s relocation against symbol `%s'"),
 	       input_bfd,

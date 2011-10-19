@@ -1,3 +1,13 @@
+2011-10-19  Alan Modra  <amodra@gmail.com>
+
+	* ld-elf/elf.exp: Move test for shared lib support..
+	* lib/ld-lib.exp (check_shared_lib_support): ..to here. Add m68hc1*,
+	and s/ms1/mt/.
+	(check_gc_sections_available): Match hppa*64 not hppa64.  Comment.
+	* ld-gc/libpersonality.s: New.
+	* ld-gc/personality.s, * ld-gc/personality.d: New.
+	* ld-gc/gc.exp: Run personality test.
+
 2011-10-18  David S. Miller  <davem@davemloft.net>
 
 	* ld-sparc/tlssunbin32.dd: Update for TLS call relaxation fix

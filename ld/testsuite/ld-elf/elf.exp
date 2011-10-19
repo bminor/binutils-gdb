@@ -58,40 +58,7 @@ if { ![istarget hppa64*-hpux*] } {
 # should not seg-fault whilst creating the binary.
 #
 # Only run the test on targets thats support creating shared libraries.
-if {    ! [istarget arc-*-*]
-     && ! [istarget avr-*-*]
-     && ! [istarget cr16-*-*]
-     && ! [istarget cris*-*-*]
-     && ! [istarget crx-*-*]
-     && ! [istarget d10v-*-*]
-     && ! [istarget d30v-*-*]
-     && ! [istarget dlx-*-*]
-     && ! [istarget fr30-*-*]
-     && ! [istarget frv-*-*]
-     && ! [istarget h8300-*-*]
-     && ! [istarget i860-*-*]
-     && ! [istarget i960-*-*]
-     && ! [istarget ip2k-*-*]
-     && ! [istarget iq2000-*-*]
-     && ! [istarget lm32-*-*]
-     && ! [istarget m32c-*-*]
-     && ! [istarget m32r-*-*]
-     && ! [istarget mcore*-*-*]
-     && ! [istarget mep-*-*]
-     && ! [istarget microblaze-*-*]
-     && ! [istarget mn10200-*-*]
-     && ! [istarget moxie-*-*]
-     && ! [istarget ms1-*-*]
-     && ! [istarget msp430-*-*]
-     && ! [istarget openrisc-*-*]
-     && ! [istarget or32-*-*]
-     && ! [istarget pj-*-*]
-     && ! [istarget rx-*-*]
-     && ! [istarget spu-*-*]
-     && ! [istarget v850*-*-*]
-     && ! [istarget xstormy16-*-*]
-     && ! [istarget *-*-irix*]
-     && ! [istarget *-*-rtems] } {
+if { [check_shared_lib_support] } then {
   run_ld_link_tests {
       {"Build shared library for next test"
        "-shared" "" "note-3.s" {} "note-3.so" }

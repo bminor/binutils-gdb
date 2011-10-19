@@ -5000,7 +5000,9 @@ spu_elf_relocate_section (bfd *output_bfd,
       else if (is_ea_sym)
 	unresolved_reloc = TRUE;
 
-      if (unresolved_reloc)
+      if (unresolved_reloc
+	  && _bfd_elf_section_offset (output_bfd, info, input_section,
+				      rel->r_offset) != (bfd_vma) -1)
 	{
 	  (*_bfd_error_handler)
 	    (_("%B(%s+0x%lx): unresolvable %s relocation against symbol `%s'"),

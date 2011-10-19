@@ -11577,6 +11577,7 @@ _bfd_elf_gc_mark_rsec (struct bfd_link_info *info, asection *sec,
       while (h->root.type == bfd_link_hash_indirect
 	     || h->root.type == bfd_link_hash_warning)
 	h = (struct elf_link_hash_entry *) h->root.u.i.link;
+      h->mark = 1;
       return (*gc_mark_hook) (sec, info, cookie->rel, h, NULL);
     }
 
@@ -11724,19 +11725,20 @@ struct elf_gc_sweep_symbol_info
 static bfd_boolean
 elf_gc_sweep_symbol (struct elf_link_hash_entry *h, void *data)
 {
-  if (((h->root.type == bfd_link_hash_defined
-	|| h->root.type == bfd_link_hash_defweak)
-       && !h->root.u.def.section->gc_mark
-       && (!(h->root.u.def.section->owner->flags & DYNAMIC)
-	   || (h->plt.refcount <= 0
-	       && h->got.refcount <= 0)))
-      || (h->root.type == bfd_link_hash_undefined
-	  && h->plt.refcount <= 0
-	  && h->got.refcount <= 0))
+  if (!h->mark
+      && (((h->root.type == bfd_link_hash_defined
+	    || h->root.type == bfd_link_hash_defweak)
+	   && !h->root.u.def.section->gc_mark)
+	  || h->root.type == bfd_link_hash_undefined
+	  || h->root.type == bfd_link_hash_undefweak))
     {
-      struct elf_gc_sweep_symbol_info *inf =
-	(struct elf_gc_sweep_symbol_info *) data;
+      struct elf_gc_sweep_symbol_info *inf;
+
+      inf = (struct elf_gc_sweep_symbol_info *) data;
       (*inf->hide_symbol) (inf->info, h, TRUE);
+      h->def_regular = 0;
+      h->ref_regular = 0;
+      h->ref_regular_nonweak = 0;
     }
 
   return TRUE;

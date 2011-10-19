@@ -4213,6 +4213,7 @@ elf64_alpha_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
       bfd_vma value;
       bfd_vma addend;
       bfd_boolean dynamic_symbol_p;
+      bfd_boolean unresolved_reloc = FALSE;
       bfd_boolean undef_weak_ref = FALSE;
       unsigned long r_type;
 
@@ -4294,7 +4295,6 @@ elf64_alpha_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
       else
 	{
 	  bfd_boolean warned;
-	  bfd_boolean unresolved_reloc;
 	  struct elf_link_hash_entry *hh;
 	  struct elf_link_hash_entry **sym_hashes = elf_sym_hashes (input_bfd);
 
@@ -4527,7 +4527,12 @@ elf64_alpha_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	    else if (info->shared
 		     && r_symndx != STN_UNDEF
 		     && (input_section->flags & SEC_ALLOC)
-		     && !undef_weak_ref)
+		     && !undef_weak_ref
+		     && !(unresolved_reloc
+			  && (_bfd_elf_section_offset (output_bfd, info,
+						       input_section,
+						       rel->r_offset)
+			      == (bfd_vma) -1)))
 	      {
 		if (r_type == R_ALPHA_REFLONG)
 		  {
@@ -4573,7 +4578,11 @@ elf64_alpha_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	  /* ??? .eh_frame references to discarded sections will be smashed
 	     to relocations against SHN_UNDEF.  The .eh_frame format allows
 	     NULL to be encoded as 0 in any format, so this works here.  */
-	  if (r_symndx == STN_UNDEF)
+	  if (r_symndx == STN_UNDEF
+	      || (unresolved_reloc
+		  && _bfd_elf_section_offset (output_bfd, info,
+					      input_section,
+					      rel->r_offset) == (bfd_vma) -1))
 	    howto = (elf64_alpha_howto_table
 		     + (r_type - R_ALPHA_SREL32 + R_ALPHA_REFLONG));
 	  goto default_reloc;
