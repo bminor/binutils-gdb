@@ -1,3 +1,8 @@
+2011-10-20  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-mips.c (micromips_add_label): Avoid gcc warning.
+	(md_convert_frag): Likewise.
+
 2011-10-18  Jie Zhang  <jie@codesourcery.com>
 	    Julian Brown  <julian@codesourcery.com>
 
@@ -18,7 +23,7 @@
 	* frags.h (bss_address_frag): Delete
 	(predefined_address_frag): New.
 	* frags.c (frag_init): Init predefined_address_frag.  Delete ref
-	to bss_addres_frag.
+	to bss_address_frag.
 	* symbols.c (S_CAN_BE_REDEFINED): New function.
 	* symbols.h (S_CAN_BE_REDEFINED): Declare.
 	* read.c (assign_symbol): Use S_CAN_BE_REDEFINED.

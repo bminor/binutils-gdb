@@ -1,6 +1,6 @@
 /* tc-mips.c -- assemble code for a MIPS chip.
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
-   2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010
+   2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011
    Free Software Foundation, Inc.
    Contributed by the OSF and Ralph Campbell.
    Written by Keith Knowles and Ralph Campbell, working independently.
@@ -3920,6 +3920,8 @@ micromips_add_label (void)
 #if defined(OBJ_ELF) || defined(OBJ_MAYBE_ELF)
   if (IS_ELF)
     S_SET_OTHER (s, ELF_ST_SET_MICROMIPS (S_GET_OTHER (s)));
+#else
+  (void) s;
 #endif
 }
 
@@ -18228,7 +18230,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 			 | RELAX_DELAY_SLOT_SIZE_SECOND);
 	  msg = macro_warning (s);
 	  if (msg != NULL)
-	    as_warn_where (fragp->fr_file, fragp->fr_line, msg);
+	    as_warn_where (fragp->fr_file, fragp->fr_line, "%s", msg);
 	  subtype &= ~s;
 	}
 
@@ -18242,7 +18244,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 	       & (RELAX_SECOND_LONGER | RELAX_NOMACRO | RELAX_DELAY_SLOT));
 	  msg = macro_warning (s);
 	  if (msg != NULL)
-	    as_warn_where (fragp->fr_file, fragp->fr_line, msg);
+	    as_warn_where (fragp->fr_file, fragp->fr_line, "%s", msg);
 	  subtype &= ~s;
 	}
 
