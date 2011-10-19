@@ -1132,7 +1132,7 @@ profile_info (SIM_DESC sd, int verbose)
   /* FIXME: If the number of processors can be selected on the command line,
      then MAX_NR_PROCESSORS will need to take an argument of `sd'.  */
 
-  for (c = 0; c < MAX_NR_PROCESSORS; ++c)
+  for (c = 0; c < MAX_NR_PROCESSORS && !print_title_p; ++c)
     {
       sim_cpu *cpu = STATE_CPU (sd, c);
       PROFILE_DATA *data = CPU_PROFILE_DATA (cpu);
@@ -1142,6 +1142,7 @@ profile_info (SIM_DESC sd, int verbose)
 	  {
 	    profile_printf (sd, cpu, "Summary profiling results:\n\n");
 	    print_title_p = 1;
+	    break;
 	  }
     }
 
