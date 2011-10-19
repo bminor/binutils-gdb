@@ -1830,6 +1830,20 @@ _bfd_sparc_elf_gc_mark_hook (asection *sec,
   return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
 }
 
+static Elf_Internal_Rela *
+sparc_elf_find_reloc_at_ofs (Elf_Internal_Rela *rel,
+			     Elf_Internal_Rela *relend,
+			     bfd_vma offset)
+{
+  while (rel < relend)
+    {
+      if (rel->r_offset == offset)
+	return rel;
+      rel++;
+    }
+  return NULL;
+}
+
 /* Update the got entry reference counts for the section being removed.  */
 bfd_boolean
 _bfd_sparc_elf_gc_sweep_hook (bfd *abfd, struct bfd_link_info *info,
@@ -3676,6 +3690,7 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd,
 	  if (! info->shared
 	      || (r_type == R_SPARC_TLS_GD_CALL && tls_type == GOT_TLS_IE))
 	    {
+	      Elf_Internal_Rela *rel2;
 	      bfd_vma insn;
 
 	      if (!info->shared && (h == NULL || h->dynindx == -1))
@@ -3711,7 +3726,26 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd,
 		  continue;
 		}
 
-	      bfd_put_32 (output_bfd, 0x9001c008, contents + rel->r_offset);
+	      /* We cannot just overwrite the delay slot instruction,
+		 as it might be what puts the %o0 argument to
+		 __tls_get_addr into place.  So we have to transpose
+		 the delay slot with the add we patch in.  */
+	      insn = bfd_get_32 (input_bfd, contents + rel->r_offset + 4);
+	      bfd_put_32 (output_bfd, insn,
+			  contents + rel->r_offset);
+	      bfd_put_32 (output_bfd, 0x9001c008,
+			  contents + rel->r_offset + 4);
+
+	      rel2 = rel;
+	      while ((rel2 = sparc_elf_find_reloc_at_ofs (rel2 + 1, relend,
+							  rel->r_offset + 4))
+		     != NULL)
+		{
+		  /* If the instruction we moved has a relocation attached to
+		     it, adjust the offset so that it will apply to the correct
+		     instruction.  */
+		  rel2->r_offset -= 4;
+		}
 	      continue;
 	    }
 

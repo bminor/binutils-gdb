@@ -265,7 +265,7 @@ class Target_sparc : public Sized_target<size, big_endian>
   {
    public:
     Relocate()
-      : ignore_gd_add_(false)
+      : ignore_gd_add_(false), reloc_adjust_addr_(NULL)
     { }
 
     ~Relocate()
@@ -302,6 +302,9 @@ class Target_sparc : public Sized_target<size, big_endian>
 
     // Ignore the next relocation which should be R_SPARC_TLS_GD_ADD
     bool ignore_gd_add_;
+
+    // If we hit a reloc at this view address, adjust it back by 4 bytes.
+    unsigned char *reloc_adjust_addr_;
   };
 
   // A class which returns the size required for a relocation type,
@@ -2622,6 +2625,8 @@ Target_sparc<size, big_endian>::Relocate::relocate(
 	  return false;
 	}
     }
+  if (this->reloc_adjust_addr_ == view)
+    view -= 4;
 
   typedef Sparc_relocate_functions<size, big_endian> Reloc;
 
@@ -3101,7 +3106,15 @@ Target_sparc<size, big_endian>::Relocate::relocate_tls(
 		      wv += 1;
 		      this->ignore_gd_add_ = true;
 		    }
-
+		  else
+		    {
+		      // Even if the delay slot isn't the TLS_GD_ADD
+		      // instruction, we still have to handle the case
+		      // where it sets up %o0 in some other way.
+		      elfcpp::Swap<32, true>::writeval(wv, val);
+		      wv += 1;
+		      this->reloc_adjust_addr_ = view + 4;
+		    }
 		  // call __tls_get_addr --> add %g7, %o0, %o0
 		  elfcpp::Swap<32, true>::writeval(wv, 0x9001c008);
 		  break;

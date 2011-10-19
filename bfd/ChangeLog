@@ -1,3 +1,11 @@
+2011-10-18  David S. Miller  <davem@davemloft.net>
+
+	PR binutils/13301
+	* elfxx-sparc.c (sparc_elf_find_reloc_at_ofs): New function.
+	(_bfd_sparc_elf_relocate_section): Always move the __tls_get_addr
+	call delay slot instruction forward 4 bytes when performing
+	relaxation.
+
 2011-10-17  Alan Modra  <amodra@gmail.com>
 
 	PR ld/12975
