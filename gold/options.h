@@ -1381,6 +1381,11 @@ class General_options
   bool
   section_start(const char* secname, uint64_t* paddr) const;
 
+  // Return whether any --section-start option was used.
+  bool
+  any_section_start() const
+  { return !this->section_starts_.empty(); }
+
   enum Fix_v4bx
   {
     // Leave original instruction.

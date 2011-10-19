@@ -1,3 +1,10 @@
+2011-10-19  Ian Lance Taylor  <iant@google.com>
+
+	PR gold/13204
+	* layout.cc (Layout::segment_precedes): Don't assert failure if a
+	--section-start option was seen.
+	* options.h (General_options::any_section_start): New function.
+
 2011-10-18  David S. Miller  <davem@davemloft.net>
 
 	PR binutils/13301

@@ -2976,8 +2976,9 @@ Layout::segment_precedes(const Output_segment* seg1,
 
   // We shouldn't get here--we shouldn't create segments which we
   // can't distinguish.  Unless of course we are using a weird linker
-  // script.
-  gold_assert(this->script_options_->saw_phdrs_clause());
+  // script or overlapping --section-start options.
+  gold_assert(this->script_options_->saw_phdrs_clause()
+	      || parameters->options().any_section_start());
   return false;
 }
 
