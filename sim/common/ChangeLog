@@ -1,3 +1,7 @@
+2011-10-19  Mike Frysinger  <vapier@gentoo.org>
+
+	* acinclude.m4: Call AC_CHECK_LIB when $hardware contains cfi.
+
 2011-10-18  John Wehle  <john@feith.com>  (tiny patch)
 
 	* sim-profile.c (profile_info): Only print the title once.

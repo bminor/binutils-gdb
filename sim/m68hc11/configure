@@ -5022,6 +5022,54 @@ if test x"$silent" != x"yes"; then
 fi
 fi
 
+case " $hardware " in
+  *" cfi "*) { $as_echo "$as_me:${as_lineno-$LINENO}: checking for log2 in -lm" >&5
+$as_echo_n "checking for log2 in -lm... " >&6; }
+if test "${ac_cv_lib_m_log2+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lm  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char log2 ();
+int
+main ()
+{
+return log2 ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_m_log2=yes
+else
+  ac_cv_lib_m_log2=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_m_log2" >&5
+$as_echo "$ac_cv_lib_m_log2" >&6; }
+if test "x$ac_cv_lib_m_log2" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBM 1
+_ACEOF
+
+  LIBS="-lm $LIBS"
+
+fi
+;;
+esac
+
 
 for ac_header in string.h strings.h stdlib.h stdlib.h fcntl.h
 do :
