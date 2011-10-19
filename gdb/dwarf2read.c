@@ -936,6 +936,8 @@ static void dwarf2_read_abbrevs (bfd *abfd, struct dwarf2_cu *cu);
 
 static void dwarf2_free_abbrev_table (void *);
 
+static unsigned int peek_abbrev_code (bfd *, gdb_byte *);
+
 static struct abbrev_info *peek_die_abbrev (gdb_byte *, unsigned int *,
 					    struct dwarf2_cu *);
 
@@ -2307,6 +2309,14 @@ dw2_get_file_names (struct objfile *objfile,
 					  buffer, buffer_size,
 					  abfd);
 
+  /* Skip dummy compilation units.  */
+  if (info_ptr >= buffer + buffer_size
+      || peek_abbrev_code (abfd, info_ptr) == 0)
+    {
+      do_cleanups (cleanups);
+      return NULL;
+    }
+
   this_cu->cu = &cu;
   cu.per_cu = this_cu;
 
@@ -3204,6 +3214,14 @@ create_debug_types_hash_table (struct objfile *objfile)
 	  signature = bfd_get_64 (objfile->obfd, ptr);
 	  ptr += 8;
 	  type_offset = read_offset_1 (objfile->obfd, ptr, offset_size);
+	  ptr += 1;
+
+	  /* Skip dummy type units.  */
+	  if (ptr >= end_ptr || peek_abbrev_code (objfile->obfd, ptr) == 0)
+	    {
+	      info_ptr = info_ptr + initial_length_size + length;
+	      continue;
+	    }
 
 	  type_sig = obstack_alloc (&objfile->objfile_obstack, sizeof (*type_sig));
 	  memset (type_sig, 0, sizeof (*type_sig));
@@ -3355,6 +3373,16 @@ process_psymtab_comp_unit (struct objfile *objfile,
   info_ptr = partial_read_comp_unit_head (&cu.header, info_ptr,
 					  buffer, buffer_size,
 					  abfd);
+
+  /* Skip dummy compilation units.  */
+  if (info_ptr >= buffer + buffer_size
+      || peek_abbrev_code (abfd, info_ptr) == 0)
+    {
+      info_ptr = (beg_of_comp_unit + cu.header.length
+		  + cu.header.initial_length_size);
+      do_cleanups (back_to_inner);
+      return info_ptr;
+    }
 
   cu.list_in_scope = &file_symbols;
 
@@ -3643,6 +3671,15 @@ load_partial_comp_unit (struct dwarf2_per_cu_data *this_cu,
 					      dwarf2_per_objfile->info.buffer,
 					      dwarf2_per_objfile->info.size,
 					      abfd);
+
+      /* Skip dummy compilation units.  */
+      if (info_ptr >= (dwarf2_per_objfile->info.buffer
+		       + dwarf2_per_objfile->info.size)
+	  || peek_abbrev_code (abfd, info_ptr) == 0)
+	{
+	  do_cleanups (free_cu_cleanup);
+	  return;
+	}
 
       /* Link this compilation unit into the compilation unit tree.  */
       this_cu->cu = cu;
@@ -4256,6 +4293,16 @@ add_partial_enumeration (struct partial_die_info *enum_pdi,
     }
 }
 
+/* Return the initial uleb128 in the die at INFO_PTR.  */
+
+static unsigned int
+peek_abbrev_code (bfd *abfd, gdb_byte *info_ptr)
+{
+  unsigned int bytes_read;
+
+  return read_unsigned_leb128 (abfd, info_ptr, &bytes_read);
+}
+
 /* Read the initial uleb128 in the die at INFO_PTR in compilation unit CU.
    Return the corresponding abbrev, or NULL if the number is zero (indicating
    an empty DIE).  In either case *BYTES_READ will be set to the length of
@@ -4639,6 +4686,15 @@ load_full_comp_unit (struct dwarf2_per_cu_data *per_cu,
 
       /* Read in the comp_unit header.  */
       info_ptr = read_comp_unit_head (&cu->header, info_ptr, abfd);
+
+      /* Skip dummy compilation units.  */
+      if (info_ptr >= (dwarf2_per_objfile->info.buffer
+		       + dwarf2_per_objfile->info.size)
+	  || peek_abbrev_code (abfd, info_ptr) == 0)
+	{
+	  do_cleanups (free_cu_cleanup);
+	  return;
+	}
 
       /* Complete the cu_header.  */
       cu->header.offset = offset;

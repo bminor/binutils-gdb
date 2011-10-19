@@ -1,3 +1,12 @@
+2011-10-19  Cary Coutant  <ccoutant@google.com>
+
+	* dwarf2read.c (peek_abbrev_code): New function.
+	(dw2_get_file_names): Check for dummy compilation units.
+	(create_debug_types_hash_table): Likewise.
+	(process_psymtab_comp_unit): Likewise.
+	(load_partial_comp_unit): Likewise.
+	(load_full_comp_unit): Likewise.
+
 2011-10-18  Aleksandar Ristovski  <aristovski@qnx.com>
 
 	* solib-svr4.c (read_program_header): New variables pt_phdr, pt_phdr_p,
