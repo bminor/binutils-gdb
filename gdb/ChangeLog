@@ -1,5 +1,10 @@
 2011-10-19  Cary Coutant  <ccoutant@google.com>
 
+	* dwarf2read.c (create_debug_types_hash_table): Fix size of
+	type_offset field.
+
+2011-10-19  Cary Coutant  <ccoutant@google.com>
+
 	* dwarf2read.c (peek_abbrev_code): New function.
 	(dw2_get_file_names): Check for dummy compilation units.
 	(create_debug_types_hash_table): Likewise.

@@ -3214,7 +3214,7 @@ create_debug_types_hash_table (struct objfile *objfile)
 	  signature = bfd_get_64 (objfile->obfd, ptr);
 	  ptr += 8;
 	  type_offset = read_offset_1 (objfile->obfd, ptr, offset_size);
-	  ptr += 1;
+	  ptr += offset_size;
 
 	  /* Skip dummy type units.  */
 	  if (ptr >= end_ptr || peek_abbrev_code (objfile->obfd, ptr) == 0)
