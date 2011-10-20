@@ -1,3 +1,11 @@
+2011-10-20  Cary Coutant  <ccoutant@google.com>
+
+	* dwarf2read.c (dw2_get_file_names): Move adjustment for type
+	section to...
+	(partial_read_comp_unit_head): ...here.  Add is_debug_type_section
+	flag.  Adjust all callers.
+	(process_psymtab_comp_unit): Remove adjustment for type section.
+
 2011-10-20  Aleksandar Ristovski  <aristovski@qnx.com>
 
 	* cp-namespace.c (cp_scan_for_anonymous_namespaces): Changed function

@@ -1336,7 +1336,8 @@ static gdb_byte *partial_read_comp_unit_head (struct comp_unit_head *header,
 					      gdb_byte *info_ptr,
 					      gdb_byte *buffer,
 					      unsigned int buffer_size,
-					      bfd *abfd);
+					      bfd *abfd,
+					      int is_debug_type_section);
 
 static void init_cu_die_reader (struct die_reader_specs *reader,
 				struct dwarf2_cu *cu);
@@ -2307,7 +2308,8 @@ dw2_get_file_names (struct objfile *objfile,
 
   info_ptr = partial_read_comp_unit_head (&cu.header, info_ptr,
 					  buffer, buffer_size,
-					  abfd);
+					  abfd,
+					  this_cu->debug_type_section != NULL);
 
   /* Skip dummy compilation units.  */
   if (info_ptr >= buffer + buffer_size
@@ -2323,8 +2325,6 @@ dw2_get_file_names (struct objfile *objfile,
   dwarf2_read_abbrevs (abfd, &cu);
   make_cleanup (dwarf2_free_abbrev_table, &cu);
 
-  if (this_cu->debug_type_section)
-    info_ptr += 8 /*signature*/ + cu.header.offset_size;
   init_cu_die_reader (&reader_specs, &cu);
   read_full_die (&reader_specs, &comp_unit_die, info_ptr,
 		 &has_children);
@@ -2971,13 +2971,18 @@ read_comp_unit_head (struct comp_unit_head *cu_header,
 static gdb_byte *
 partial_read_comp_unit_head (struct comp_unit_head *header, gdb_byte *info_ptr,
 			     gdb_byte *buffer, unsigned int buffer_size,
-			     bfd *abfd)
+			     bfd *abfd, int is_debug_type_section)
 {
   gdb_byte *beg_of_comp_unit = info_ptr;
 
   header->offset = beg_of_comp_unit - buffer;
 
   info_ptr = read_comp_unit_head (header, info_ptr, abfd);
+
+  /* If we're reading a type unit, skip over the signature and
+     type_offset fields.  */
+  if (is_debug_type_section)
+    info_ptr += 8 /*signature*/ + header->offset_size;
 
   header->first_die_offset = info_ptr - beg_of_comp_unit;
 
@@ -3372,7 +3377,8 @@ process_psymtab_comp_unit (struct objfile *objfile,
 
   info_ptr = partial_read_comp_unit_head (&cu.header, info_ptr,
 					  buffer, buffer_size,
-					  abfd);
+					  abfd,
+					  this_cu->debug_type_section != NULL);
 
   /* Skip dummy compilation units.  */
   if (info_ptr >= buffer + buffer_size
@@ -3407,8 +3413,6 @@ process_psymtab_comp_unit (struct objfile *objfile,
   make_cleanup (dwarf2_free_abbrev_table, &cu);
 
   /* Read the compilation unit die.  */
-  if (this_cu->debug_type_section)
-    info_ptr += 8 /*signature*/ + cu.header.offset_size;
   init_cu_die_reader (&reader_specs, &cu);
   info_ptr = read_full_die (&reader_specs, &comp_unit_die, info_ptr,
 			    &has_children);
@@ -3670,7 +3674,7 @@ load_partial_comp_unit (struct dwarf2_per_cu_data *this_cu,
       info_ptr = partial_read_comp_unit_head (&cu->header, info_ptr,
 					      dwarf2_per_objfile->info.buffer,
 					      dwarf2_per_objfile->info.size,
-					      abfd);
+					      abfd, 0);
 
       /* Skip dummy compilation units.  */
       if (info_ptr >= (dwarf2_per_objfile->info.buffer
