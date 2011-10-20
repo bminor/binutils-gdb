@@ -1,5 +1,15 @@
 2011-10-20  Phil Muldoon  <pmuldoon@redhat.com>
 
+        PR python/13308
+        PR python/13309
+
+	* python/py-breakpoint.c (gdbpy_breakpoints): Fix List reference
+	leak.
+	* python/py-inferior.c (gdbpy_inferiors): Fix List reference
+	leak.  Delete unused variables.
+
+2011-10-20  Phil Muldoon  <pmuldoon@redhat.com>
+
 	PR python/12656
 
 	* python/py-frame.c (frapy_read_var): Use const struct *block.
