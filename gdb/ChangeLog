@@ -1,3 +1,15 @@
+2011-10-20  Aleksandar Ristovski  <aristovski@qnx.com>
+
+	* cp-namespace.c (cp_scan_for_anonymous_namespaces): Changed function
+	arguments by adding OBJFILE.  Instead of getting objfile from
+	symbol's symtab, use new argument OBJFILE.
+	* cp-support.h (cp_scan_for_anonymous_namespaces): Changed function
+	arguments by adding OBJFILE.
+	* gdb/dwarf2read.c (new_symbol_full): Change call to
+	cp_scan_for_anonymous_namespaces to match new signature.
+	* gdb/stabsread.c (define_symbol): Change call to
+	cp_scan_for_anonymous_namespaces to match new signature.
+
 2011-10-20  Phil Muldoon  <pmuldoon@redhat.com>
 
         PR python/13308

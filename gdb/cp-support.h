@@ -197,7 +197,8 @@ extern void cp_set_block_scope (const struct symbol *symbol,
 				const char *processing_current_prefix,
 				int processing_has_namespace_info);
 
-extern void cp_scan_for_anonymous_namespaces (const struct symbol *symbol);
+extern void cp_scan_for_anonymous_namespaces (const struct symbol *symbol,
+					      struct objfile *objfile);
 
 extern struct symbol *cp_lookup_symbol_nonlocal (const char *name,
 						 const struct block *block,
