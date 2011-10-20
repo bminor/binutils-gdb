@@ -2354,9 +2354,32 @@ static const insn_sequence elf32_arm_stub_a8_veneer_blx[] =
     ARM_REL_INSN(0xea000000, -8)	/* b original_branch_dest.  */
   };
 
-/* Section name for stubs is the associated section name plus this
-   string.  */
-#define STUB_SUFFIX ".stub"
+/* For each section group there can be a specially created linker section
+   to hold the stubs for that group.  The name of the stub section is based
+   upon the name of another section within that group with the suffix below
+   applied.
+
+   PR 13049: STUB_SUFFIX used to be ".stub", but this allowed the user to
+   create what appeared to be a linker stub section when it actually
+   contained user code/data.  For example, consider this fragment:
+   
+     const char * stubborn_problems[] = { "np" };
+
+   If this is compiled with "-fPIC -fdata-sections" then gcc produces a
+   section called:
+
+     .data.rel.local.stubborn_problems
+
+   This then causes problems in arm32_arm_build_stubs() as it triggers:
+
+      // Ignore non-stub sections.
+      if (!strstr (stub_sec->name, STUB_SUFFIX))
+	continue;
+
+   And so the section would be ignored instead of being processed.  Hence
+   the change in definition of STUB_SUFFIX to a name that cannot be a valid
+   C identifier.  */
+#define STUB_SUFFIX ".__stub"
 
 /* One entry per long/short branch stub defined above.  */
 #define DEF_STUBS \
@@ -3557,7 +3580,7 @@ arm_type_of_stub (struct bfd_link_info *info,
 		  stub_type = (info->shared | globals->pic_veneer)
 		    /* PIC stubs.  */
 		    ? ((globals->use_blx
-			&& (r_type ==R_ARM_THM_CALL))
+			&& (r_type == R_ARM_THM_CALL))
 		       /* V5T and above. Stub starts with ARM code, so
 			  we must be able to switch mode before
 			  reaching it, which is only possible for 'bl'
@@ -3568,7 +3591,7 @@ arm_type_of_stub (struct bfd_link_info *info,
 
 		    /* non-PIC stubs.  */
 		    : ((globals->use_blx
-			&& (r_type ==R_ARM_THM_CALL))
+			&& (r_type == R_ARM_THM_CALL))
 		       /* V5T and above.  */
 		       ? arm_stub_long_branch_any_any
 		       /* V4T.  */
@@ -3797,7 +3820,9 @@ elf32_arm_create_or_find_stub_sec (asection **link_sec_p, asection *section,
   asection *stub_sec;
 
   link_sec = htab->stub_group[section->id].link_sec;
+  BFD_ASSERT (link_sec != NULL);
   stub_sec = htab->stub_group[section->id].stub_sec;
+
   if (stub_sec == NULL)
     {
       stub_sec = htab->stub_group[link_sec->id].stub_sec;

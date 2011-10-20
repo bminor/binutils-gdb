@@ -3527,8 +3527,8 @@ must_be_dyn_reloc (struct bfd_link_info *info,
 #define ELIMINATE_COPY_RELOCS 1
 
 /* Section name for stubs is the associated section name plus this
-   string.  */
-#define STUB_SUFFIX ".stub"
+   string.  PR 13049: Use a name that is not a valid C identifier.  */
+#define STUB_SUFFIX ".__stub"
 
 /* Linker stubs.
    ppc_stub_long_branch:

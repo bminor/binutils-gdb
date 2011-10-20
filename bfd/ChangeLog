@@ -1,3 +1,11 @@
+2011-10-20  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/13049
+	* elf32-arm.c (STUB_SUFFIX): Avoid collision with user namespace
+	symbol names.
+	* elf64-ppc.c (STUB_SUFFIX): Likewise.
+	* elf32-hppa.c (STUB_SUFFIX): Likewise.
+
 2011-10-20  Alan Modra  <amodra@gmail.com>
 
 	* elf32-i386.c (i386_opcode16): Delete.
