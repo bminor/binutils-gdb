@@ -20,7 +20,7 @@
 
 # Test for ELF here, so we don't have to qualify on ELF specifically
 # in every .d-file.
-if ![is_elf_format] {
+if { ![is_elf_format] || ![check_gc_sections_available] } {
     return
 }
 
@@ -28,8 +28,5 @@ set test_list [lsort [glob -nocomplain $srcdir/$subdir/*.d]]
 for { set i 0 } { $i < [llength $test_list] } { incr i } {
     # We need to strip the ".d", but can leave the dirname.
     verbose [file rootname [lindex $test_list $i]]
-    setup_xfail "am33*-*" "arc*-*" "d30v*-*" "dlx*-*"
-    setup_xfail "hppa*64-*-*" "i370*-*" "i860*-*" "i960*-*" "ia64*-*"
-    setup_xfail "m88*-*" "mn10200-*" "mep-*" "or32-*" "pj-*"
     run_dump_test [file rootname [lindex $test_list $i]]
 }

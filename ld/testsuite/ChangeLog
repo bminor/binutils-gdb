@@ -1,3 +1,9 @@
+2011-10-20  Alan Modra  <amodra@gmail.com>
+
+	* ld-selective/selective.exp: Use check_gc_sections_available.
+	Remove redundant xfails.
+	* ld-selective/sel-dump.exp: Likewise.
+
 2011-10-19  Alan Modra  <amodra@gmail.com>
 
 	* ld-elf/elf.exp: Move test for shared lib support..

@@ -23,19 +23,7 @@
 # Make sure that constructors are handled correctly.
 
 # Only ELF based ports support selective linking
-if ![is_elf_format] {
-    return
-}
-
-# These targets do not support selective linking
-if {[istarget "am33*-*-*"] ||
-    [istarget "arc-*-*"] || [istarget "d30v-*-*"] ||
-    [istarget "dlx-*-*"] || [istarget "hppa*64*-*-*"] ||
-    [istarget "i370-*-*"] || [istarget "i860-*-*"] ||
-    [istarget "i960-*-*"] || [istarget "ia64-*-*"] ||
-    [istarget "m88*-*-*"] || [istarget "mn10200-*-*"] ||
-    [istarget "mep-*-*"] || [istarget "or32-*-*"] ||
-    [istarget "pj*-*-*"]} {
+if { ![is_elf_format] || ![check_gc_sections_available] } {
     return
 }
 
@@ -101,8 +89,6 @@ foreach testitem $seltests {
     foreach xfail_target $xfails {
 	setup_xfail $xfail_target
     }
-    setup_xfail "arc*-*" "d30v*-*" "dlx*-*" "i370*-*" "i860*-*"
-    setup_xfail "i960*-*" "mn10200-*" "or32-*" "pj-*"
 
     # It's either C or C++ at the moment.
     if { $testtype == "C++" } {
