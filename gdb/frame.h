@@ -691,7 +691,7 @@ extern void print_stack_frame (struct frame_info *, int print_level,
 extern void print_frame_info (struct frame_info *, int print_level,
 			      enum print_what print_what, int args);
 
-extern struct frame_info *block_innermost_frame (struct block *);
+extern struct frame_info *block_innermost_frame (const struct block *);
 
 extern int deprecated_pc_in_call_dummy (struct gdbarch *gdbarch, CORE_ADDR pc);
 

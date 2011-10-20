@@ -23549,6 +23549,27 @@ attribute is not writable.
 The block containing this block.  If this parent block does not exist,
 this attribute holds @code{None}.  This attribute is not writable.
 @end defvar
+
+@defvar Block.global_block
+The global block associated with this block.  This attribute is not
+writable.
+@end defvar
+
+@defvar Block.static_block
+The static block associated with this block.  This attribute is not
+writable.
+@end defvar
+
+@defvar Block.is_global
+@code{True} if the @code{gdb.Block} object is a global block,
+@code{False} if not.  This attribute is not
+writable.
+@end defvar
+
+@defvar Block.is_static
+@code{True} if the @code{gdb.Block} object is a static block,
+@code{False} if not.  This attribute is not writable.
+@end defvar
 @end table
 
 @node Symbols In Python

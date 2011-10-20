@@ -1,3 +1,34 @@
+2011-10-20  Phil Muldoon  <pmuldoon@redhat.com>
+
+	PR python/12656
+
+	* python/py-frame.c (frapy_read_var): Use const struct *block.
+	* python/py-type.c (typy_lookup_typename): Likewise.
+	(typy_lookup_type): Likewise.
+	(typy_legacy_template_argument): Likewise.
+	(typy_template_argument): Likewise.
+	(gdbpy_lookup_type): Likewise.
+	* python/py-symbol.c (gdbpy_lookup_symbol): Likewise.
+	* python/py-block.c (blpy_block_object): Likewise.
+	(blpy_iter): Likewise.
+	(blpy_get_start): Likewise.
+	(blpy_get_end): Likewise.
+	(blpy_get_function): Likewise.
+	(blpy_get_superblock): Likewise.
+	(set_block):  Likewise.
+	(block_to_block_object): Likewise.
+	(block_object_to_block): Likewise.
+	(blpy_is_valid): Likewise.
+	(blpy_get_global_block): New function.
+	(blpy_get_static_block): New function.
+	(blpy_is_global): New function.
+	(blpy_is_static): New function.
+	* blockframe.c (block_innermost_frame): Likewise.
+	* valops.c (value_of_variable): Likewise.
+	* frame.h: Update prototypes.
+	* python/python-internal.h: Likewise.
+	* value.h: Likewise.
+
 2011-10-19  Cary Coutant  <ccoutant@google.com>
 
 	* dwarf2read.c (create_debug_types_hash_table): Fix size of

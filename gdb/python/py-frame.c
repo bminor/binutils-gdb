@@ -411,7 +411,7 @@ frapy_read_var (PyObject *self, PyObject *args)
   else if (gdbpy_is_string (sym_obj))
     {
       char *var_name;
-      struct block *block = NULL;
+      const struct block *block = NULL;
       struct cleanup *cleanup;
       volatile struct gdb_exception except;
 

@@ -1,3 +1,10 @@
+2011-10-20  Phil Muldoon  <pmuldoon@redhat.com>
+
+	PR python/12656
+
+	* gdb.texinfo (Blocks In Python): Document is_static, is_global,
+	global_block, static_block function.
+
 2011-10-19  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (Commands In Python): Add missing "@"s.

@@ -48,6 +48,16 @@ gdb_test "python print block.function" "None" "First anonymous block"
 gdb_test "python print block.start" "${decimal}" "Check start not None"
 gdb_test "python print block.end" "${decimal}" "Check end not None"
 
+# Test global/static blocks
+gdb_py_test_silent_cmd "python frame = gdb.selected_frame()" "Get Frame" 0
+gdb_py_test_silent_cmd "python block = frame.block()" "Get block" 0
+gdb_test "python print block.is_global" "False" "Not a global block"
+gdb_test "python print block.is_static" "False" "Not a static block"
+gdb_py_test_silent_cmd "python gblock = block.global_block" "Get block" 1
+gdb_py_test_silent_cmd "python sblock = block.static_block" "Get block" 1
+gdb_test "python print gblock.is_global" "True" "Is the global block"
+gdb_test "python print sblock.is_static" "True" "Is the static block"
+
 # Move up superblock(s) until we reach function block_func.
 gdb_test_no_output "python block = block.superblock" "Get superblock"
 gdb_test "python print block.function" "None" "Second anonymous block"

@@ -508,7 +508,8 @@ extern struct value *value_from_register (struct type *type, int regnum,
 extern CORE_ADDR address_from_register (struct type *type, int regnum,
 					struct frame_info *frame);
 
-extern struct value *value_of_variable (struct symbol *var, struct block *b);
+extern struct value *value_of_variable (struct symbol *var,
+					const struct block *b);
 
 extern struct value *address_of_variable (struct symbol *var, struct block *b);
 

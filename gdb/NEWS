@@ -40,6 +40,11 @@
     'data-directory'/python/gdb/function are now automatically loaded
      on GDB start-up.
 
+  ** Blocks now provide four new attributes.  global_block and
+     static_block will return the global and static blocks
+     respectively.  is_static and is_global are boolean attributes
+     that indicate if the block is one of those two types.
+
   ** Symbols now provide the "type" attribute, the type of the symbol.
 
   ** The "gdb.breakpoint" function has been deprecated in favor of

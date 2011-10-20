@@ -1491,7 +1491,7 @@ value_repeat (struct value *arg1, int count)
 }
 
 struct value *
-value_of_variable (struct symbol *var, struct block *b)
+value_of_variable (struct symbol *var, const struct block *b)
 {
   struct frame_info *frame;
 

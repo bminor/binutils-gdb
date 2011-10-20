@@ -576,7 +576,7 @@ typy_get_sizeof (PyObject *self, void *closure)
 }
 
 static struct type *
-typy_lookup_typename (const char *type_name, struct block *block)
+typy_lookup_typename (const char *type_name, const struct block *block)
 {
   struct type *type = NULL;
   volatile struct gdb_exception except;
@@ -606,7 +606,7 @@ typy_lookup_typename (const char *type_name, struct block *block)
 
 static struct type *
 typy_lookup_type (struct demangle_component *demangled,
-		  struct block *block)
+		  const struct block *block)
 {
   struct type *type;
   char *type_name;
@@ -651,7 +651,7 @@ typy_lookup_type (struct demangle_component *demangled,
    versions of GCC, that do not emit DW_TAG_template_*.  */
 
 static PyObject *
-typy_legacy_template_argument (struct type *type, struct block *block,
+typy_legacy_template_argument (struct type *type, const struct block *block,
 			       int argno)
 {
   int i;
@@ -716,7 +716,7 @@ typy_template_argument (PyObject *self, PyObject *args)
 {
   int argno;
   struct type *type = ((type_object *) self)->type;
-  struct block *block = NULL;
+  const struct block *block = NULL;
   PyObject *block_obj = NULL;
   struct symbol *sym;
   struct value *val = NULL;
@@ -1328,7 +1328,7 @@ gdbpy_lookup_type (PyObject *self, PyObject *args, PyObject *kw)
   const char *type_name = NULL;
   struct type *type = NULL;
   PyObject *block_obj = NULL;
-  struct block *block = NULL;
+  const struct block *block = NULL;
 
   if (! PyArg_ParseTupleAndKeywords (args, kw, "s|O", keywords,
 				     &type_name, &block_obj))

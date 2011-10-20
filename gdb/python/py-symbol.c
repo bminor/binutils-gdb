@@ -276,7 +276,7 @@ gdbpy_lookup_symbol (PyObject *self, PyObject *args, PyObject *kw)
   static char *keywords[] = { "name", "block", "domain", NULL };
   struct symbol *symbol;
   PyObject *block_obj = NULL, *ret_tuple, *sym_obj, *bool_obj;
-  struct block *block = NULL;
+  const struct block *block = NULL;
 
   if (! PyArg_ParseTupleAndKeywords (args, kw, "s|O!i", keywords, &name,
 				     &block_object_type, &block_obj, &domain))

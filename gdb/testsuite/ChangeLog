@@ -1,3 +1,10 @@
+2011-10-20  Phil Muldoon  <pmuldoon@redhat.com>
+
+	PR python/12656
+
+	* gdb.python/py-block.exp: Add is_global, is_static, static_block,
+	global_block tests.
+
 2011-10-18  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.base/jit-so.exp (one_jit_test): Remove spurious backslash.

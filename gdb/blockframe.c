@@ -358,7 +358,7 @@ find_pc_partial_function (CORE_ADDR pc, char **name, CORE_ADDR *address,
    if there is no such frame.  If BLOCK is NULL, just return NULL.  */
 
 struct frame_info *
-block_innermost_frame (struct block *block)
+block_innermost_frame (const struct block *block)
 {
   struct frame_info *frame;
   CORE_ADDR start;
