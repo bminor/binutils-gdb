@@ -3282,7 +3282,8 @@ open_input_bfds (lang_statement_union_type *s, enum open_bfd_mode mode)
 		       && plugin_insert == NULL
 		       && s->input_statement.loaded
 		       && s->input_statement.add_DT_NEEDED_for_regular
-		       && ((s->input_statement.the_bfd->flags) & DYNAMIC) != 0)
+		       && ((s->input_statement.the_bfd->flags) & DYNAMIC) != 0
+		       && plugin_should_reload (s->input_statement.the_bfd))
 		{
 		  s->input_statement.loaded = FALSE;
 		  s->input_statement.reload = TRUE;

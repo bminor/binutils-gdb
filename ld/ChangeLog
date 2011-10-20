@@ -1,3 +1,10 @@
+2011-10-20  Alan Modra  <amodra@gmail.com>
+
+	PR ld/13287
+	* plugin.c (plugin_should_reload): New function.
+	* plugin.h (plugin_should_reload): Declare.
+	* ldlang.c (open_input_bfds): Use above function.
+
 2011-10-19  Alan Modra  <amodra@gmail.com>
 
 	PR ld/13254
