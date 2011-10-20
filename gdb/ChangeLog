@@ -1,3 +1,12 @@
+2011-10-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* dwarf2-frame-tailcall.c: Include dwarf2-frame.h.
+	(dwarf2_tailcall_prev_register_first): Use dwarf2_frame_cfa.
+	(dwarf2_tailcall_sniffer_first): Remove variable pc_regnum.  Replace
+	gdbarch_pc_regnum and frame_unwind_register_unsigned by
+	gdbarch_unwind_pc.
+
 2011-10-20  Cary Coutant  <ccoutant@google.com>
 
 	* dwarf2read.c (dw2_get_file_names): Move adjustment for type

@@ -29,6 +29,7 @@
 #include "gdbtypes.h"
 #include "regcache.h"
 #include "value.h"
+#include "dwarf2-frame.h"
 
 /* Contains struct tailcall_cache indexed by next_bottom_frame.  */
 static htab_t cache_htab;
@@ -280,7 +281,7 @@ dwarf2_tailcall_prev_register_first (struct frame_info *this_frame,
       if (next_levels == cache->chain_levels - 1)
 	addr = cache->prev_sp;
       else
-	addr = get_frame_base (this_frame) - cache->entry_cfa_sp_offset;
+	addr = dwarf2_frame_cfa (this_frame) - cache->entry_cfa_sp_offset;
     }
   else
     return NULL;
@@ -380,15 +381,12 @@ dwarf2_tailcall_sniffer_first (struct frame_info *this_frame,
   /* Catch any unwinding errors.  */
   TRY_CATCH (except, RETURN_MASK_ERROR)
     {
-      int pc_regnum, sp_regnum;
+      int sp_regnum;
 
       prev_gdbarch = frame_unwind_arch (this_frame);
-      pc_regnum = gdbarch_pc_regnum (prev_gdbarch);
-      if (pc_regnum == -1)
-	break;
 
       /* Simulate frame_unwind_pc without setting this_frame->prev_pc.p.  */
-      prev_pc = frame_unwind_register_unsigned (this_frame, pc_regnum);
+      prev_pc = gdbarch_unwind_pc (prev_gdbarch, this_frame);
 
       /* call_site_find_chain can throw an exception.  */
       chain = call_site_find_chain (prev_gdbarch, prev_pc, this_pc);
