@@ -3156,7 +3156,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 		}
 
 	      /* Generate dynamic relcoation only when there is a
-		 non-GOF reference in a shared object.  */
+		 non-GOT reference in a shared object.  */
 	      if (info->shared && h->non_got_ref)
 		{
 		  Elf_Internal_Rela outrel;

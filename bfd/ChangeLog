@@ -1,3 +1,9 @@
+2011-10-21  H.J. Lu  <hongjiu.lu@intel.com>.
+
+	* elf32-i386.c (elf_i386_relocate_section): Fix a typo in
+	comments.
+	* elf64-x86-64.c (elf_x86_64_relocate_section): Likewise.
+
 2011-10-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/13302
