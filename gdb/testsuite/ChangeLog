@@ -1,3 +1,8 @@
+2011-10-21  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/mi_task_info/task_switch.adb: New file.
+	* gdb.ada/mi_task_info.exp: New file.
+
 2011-10-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.cp/expand-psymtabs-cxx.exp: New file.

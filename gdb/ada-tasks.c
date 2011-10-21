@@ -984,7 +984,21 @@ print_ada_task_info (struct ui_out *uiout,
     target_find_new_threads ();
 
   data = get_ada_tasks_inferior_data (inf);
-  nb_tasks = VEC_length (ada_task_info_s, data->task_list);
+
+  /* Compute the number of tasks that are going to be displayed
+     in the output.  If an argument was given, there will be
+     at most 1 entry.  Otherwise, there will be as many entries
+     as we have tasks.  */
+  if (taskno_arg)
+    {
+      if (taskno_arg > 0
+	  && taskno_arg <= VEC_length (ada_task_info_s, data->task_list))
+	nb_tasks = 1;
+      else
+	nb_tasks = 0;
+    }
+  else
+    nb_tasks = VEC_length (ada_task_info_s, data->task_list);
 
   nb_columns = ui_out_is_mi_like_p (uiout) ? 8 : 7;
   old_chain = make_cleanup_ui_out_table_begin_end (uiout, nb_columns,
@@ -1006,7 +1020,9 @@ print_ada_task_info (struct ui_out *uiout,
   ui_out_table_header (uiout, 1, ui_noalign, "name", "Name");
   ui_out_table_body (uiout);
 
-  for (taskno = 1; taskno <= nb_tasks; taskno++)
+  for (taskno = 1;
+       taskno <= VEC_length (ada_task_info_s, data->task_list);
+       taskno++)
     {
       const struct ada_task_info *const task_info =
 	VEC_index (ada_task_info_s, data->task_list, taskno - 1);
