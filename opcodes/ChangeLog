@@ -1,3 +1,7 @@
+2011-10-21  Jan Glauber  <jang@linux.vnet.ibm.com>
+
+	* s390-opc.txt: Add CPUMF instructions.
+
 2011-10-18  Jie Zhang  <jie@codesourcery.com>
 	    Julian Brown  <julian@codesourcery.com>
 

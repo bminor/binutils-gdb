@@ -960,6 +960,17 @@ b9a2 ptf RRE_R0 "perform topology function" z10 zarch
 b9af pfmf RRE_RR "perform frame management function" z10 zarch
 b9bf trte RRF_M0RER "translate and test extended" z10 zarch
 b9bd trtre RRF_M0RER "translate and test reverse extended" z10 zarch
+b2ed ecpga RRE_RR "extract coprocessor-group address" z10 zarch
+b2e4 ecctr RRE_RR "extract cpu counter" z10 zarch
+b2e5 epctr RRE_RR "extract peripheral counter" z10 zarch
+b284 lcctl S_RD "load cpu-counter-set controls" z10 zarch
+b285 lpctl S_RD "load peripheral-counter-set controls" z10 zarch
+b287 lsctl S_RD "load sampling controls" z10 zarch
+b28e qctri S_RD "query counter information" z10 zarch
+b286 qsi S_RD "query sampling information" z10 zarch
+b2e0 scctr RRE_RR "set cpu counter" z10 zarch
+b2e1 spctr RRE_RR "set peripheral counter" z10 zarch
+b280 lpp S_RD "load program parameter" z10 zarch
 b9c8 ahhhr RRF_R0RR2 "add high high" z196 zarch
 b9d8 ahhlr RRF_R0RR2 "add high low" z196 zarch
 cc08 aih RIL_RI "add immediate high" z196 zarch
