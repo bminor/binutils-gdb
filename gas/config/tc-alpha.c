@@ -1394,7 +1394,7 @@ load_expression (int targreg,
 		    gas_assert (insn.nfixups + 1 <= MAX_INSN_FIXUPS);
 		    insn.fixups[insn.nfixups].reloc = BFD_RELOC_ALPHA_NOP;
 		    ensym = symbol_find_or_make (ensymname);
-		    ensym->sy_used = 1;
+		    symbol_mark_used (ensym);
 		    /* The fixup must be the same as the BFD_RELOC_ALPHA_BOH
 		       case in emit_jsrjmp.  See B.4.5.2 of the OpenVMS Linker
 		       Utility Manual.  */
@@ -1426,7 +1426,7 @@ load_expression (int targreg,
 		    gas_assert (insn.nfixups + 1 <= MAX_INSN_FIXUPS);
 		    insn.fixups[insn.nfixups].reloc = BFD_RELOC_ALPHA_LDA;
 		    psym = symbol_find_or_make (psymname);
-		    psym->sy_used = 1;
+		    symbol_mark_used (psym);
 		    insn.fixups[insn.nfixups].exp.X_op = O_subtract;
 		    insn.fixups[insn.nfixups].exp.X_add_symbol = psym;
 		    insn.fixups[insn.nfixups].exp.X_op_symbol = alpha_evax_proc->symbol;
@@ -3602,7 +3602,7 @@ s_alpha_comm (int ignore ATTRIBUTE_UNUSED)
       frag_align (log_align, 0, 0);
       record_alignment (bss_section, log_align);
 
-      symbolP->sy_frag = frag_now;
+      symbol_set_frag (symbolP, frag_now);
       pfrag = frag_var (rs_org, 1, 1, (relax_substateT)0, symbolP,
                         size, NULL);
       *pfrag = 0;

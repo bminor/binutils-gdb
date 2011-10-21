@@ -1,3 +1,8 @@
+2011-10-21  Tristan Gingold  <gingold@adacore.com>
+
+	* config/tc-alpha.c (load_expression): Use symbol_mark_used accessor.
+	(s_alpha_comm): Use symbol_set_frag accessor.
+
 2011-10-20  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-mips.c (micromips_add_label): Avoid gcc warning.
