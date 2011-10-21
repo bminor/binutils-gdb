@@ -1,3 +1,8 @@
+2011-10-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.cp/expand-psymtabs-cxx.exp: New file.
+	* gdb.cp/expand-psymtabs-cxx.cc: New file.
+
 2011-10-20  Phil Muldoon  <pmuldoon@redhat.com>
 
 	PR python/12656
