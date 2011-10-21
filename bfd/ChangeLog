@@ -1,3 +1,12 @@
+2011-10-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/13302
+	* elf32-i386.c (elf_i386_relocate_section): Replace
+	R_386_IRELATIVE with R_386_RELATIVE.
+
+	* elf64-x86-64.c (elf_x86_64_relocate_section): Replace
+	R_X86_64_IRELATIVE with R_X86_64_RELATIVE.
+
 2011-10-21  H.J. Lu  <hongjiu.lu@intel.com>.
 
 	* elf32-i386.c (elf_i386_relocate_section): Fix a typo in

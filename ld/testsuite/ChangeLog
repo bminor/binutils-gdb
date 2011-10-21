@@ -1,6 +1,18 @@
 2011-10-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/13302
+	* ld-i386/i386.exp: Run pr13302.
+
+	* ld-i386/pr13302.d: New.
+	* ld-i386/pr13302.s: Likewise.
+
+	* ld-x86-64/pr13082-5b.d: Updated.
+	* ld-x86-64/pr13082-6a.d: Likewise.
+	* ld-x86-64/pr13082-6b.d: Likewise.
+
+2011-10-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/13302
 	* ld-ifunc/ifunc-16-i386.d: New.
 	* ld-ifunc/ifunc-16-x86-64.d: Likewise.
 	* ld-ifunc/ifunc-16-x86.s: Likewise.

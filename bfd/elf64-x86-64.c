@@ -3161,6 +3161,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 		{
 		  Elf_Internal_Rela outrel;
 		  asection *sreloc;
+		  bfd_boolean relocate;
 
 		  /* Need a dynamic relocation to get the real function
 		     address.  */
@@ -3180,15 +3181,15 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 		      || info->executable)
 		    {
 		      /* This symbol is resolved locally.  */
-		      outrel.r_info = htab->r_info (0, R_X86_64_IRELATIVE);
-		      outrel.r_addend = (h->root.u.def.value
-					 + h->root.u.def.section->output_section->vma
-					 + h->root.u.def.section->output_offset);
+		      outrel.r_info = htab->r_info (0, R_X86_64_RELATIVE);
+		      outrel.r_addend = relocation;
+		      relocate = FALSE;
 		    }
 		  else
 		    {
 		      outrel.r_info = htab->r_info (h->dynindx, r_type);
 		      outrel.r_addend = 0;
+		      relocate = FALSE;
 		    }
 
 		  sreloc = htab->elf.irelifunc;
@@ -3199,7 +3200,8 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 		     we need to include the symbol value so that it
 		     becomes an addend for the dynamic reloc.  For an
 		     internal symbol, we have updated addend.  */
-		  continue;
+		  if (! relocate)
+		    continue;
 		}
 	      /* FALLTHROUGH */
 	    case R_X86_64_PC32:

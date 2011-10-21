@@ -210,3 +210,4 @@ if { !([istarget "i?86-*-linux*"]
 
 run_dump_test "compressed1"
 run_dump_test "pr12627"
+run_dump_test "pr13302"
