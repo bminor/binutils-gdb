@@ -1,3 +1,10 @@
+2011-10-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/13302
+	* ld-ifunc/ifunc-16-i386.d: New.
+	* ld-ifunc/ifunc-16-x86-64.d: Likewise.
+	* ld-ifunc/ifunc-16-x86.s: Likewise.
+
 2011-10-20  Alan Modra  <amodra@gmail.com>
 
 	* ld-selective/selective.exp: Use check_gc_sections_available.

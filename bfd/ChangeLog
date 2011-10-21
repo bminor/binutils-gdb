@@ -1,3 +1,26 @@
+2011-10-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/13302
+	* elf32-i386.c (elf_i386_link_hash_table): Add next_jump_slot_index
+	and next_irelative_index.
+	(elf_i386_link_hash_table_create): Initialize next_jump_slot_index
+	and next_irelative_index.
+	(elf_i386_allocate_dynrelocs): Increment reloc_count instead of
+	next_tls_desc_index.
+	(elf_i386_size_dynamic_sections): Set next_tls_desc_index and
+	next_irelative_index from reloc_count.
+	(elf_i386_finish_dynamic_symbol): Put R_386_IRELATIVE after
+	R_386_JUMP_SLOT.
+
+	* elf64-x86-64.c (elf_x86_64_link_hash_table): Add
+	next_jump_slot_index and next_irelative_index.
+	(elf_x86_64_link_hash_table_create): Initialize
+	next_jump_slot_index and next_irelative_index.
+	(elf_x86_64_size_dynamic_sections): Set next_irelative_index
+	from reloc_count.
+	(elf_x86_64_finish_dynamic_symbol): Put R_X86_64_IRELATIVE after
+	R_X86_64_JUMP_SLOT.
+
 2011-10-20  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/13049
