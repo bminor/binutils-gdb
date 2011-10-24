@@ -5945,7 +5945,7 @@ move_register (int dest, int source)
      instruction specifically requires a 32-bit one.  */
   if (mips_opts.micromips
       && !(history[0].insn_mo->pinfo2 & INSN2_BRANCH_DELAY_32BIT))
-    macro_build (NULL, "move", "mp,mj", dest, source );
+    macro_build (NULL, "move", "mp,mj", dest, source);
   else
     macro_build (NULL, HAVE_32BIT_GPRS ? "addu" : "daddu", "d,v,t",
 		 dest, source, 0);
