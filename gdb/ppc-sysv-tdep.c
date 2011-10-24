@@ -692,6 +692,7 @@ do_ppc_sysv_return_value (struct gdbarch *gdbarch, struct type *func_type,
   int opencl_abi = 0;
 
   if (func_type
+      && TYPE_CODE (func_type) == TYPE_CODE_FUNC
       && TYPE_CALLING_CONVENTION (func_type) == DW_CC_GDB_IBM_OpenCL)
     opencl_abi = 1;
 

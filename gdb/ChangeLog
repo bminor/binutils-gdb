@@ -1,3 +1,8 @@
+2011-10-24  Joel Brobecker  <brobecker@adacore.com>
+
+	* ppc-sysv-tdep.c (do_ppc_sysv_return_value): Do not check
+	FUNC_TYPE's calling convention if FUNC_TYPE is not a function.
+
 2011-10-24  Pedro Alves  <pedro@codesourcery.com>
 
 	* linux-nat.c (linux_handle_extended_wait): When handling a clone
