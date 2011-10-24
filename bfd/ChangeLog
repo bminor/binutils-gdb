@@ -1,3 +1,8 @@
+2011-10-24  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* elfxx-mips.c (_bfd_mips_elf_symbol_processing): Remove
+	assertions.
+
 2011-10-24  Eugeniy Meshcheryakov  <eugen@debian.org>
 
 	PR ld/13273
