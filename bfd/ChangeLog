@@ -1,3 +1,10 @@
+2011-10-24  Pau Garcia i Quiles  <pgquiles@elpauer.org>
+
+	PR binutils/13292
+	* bfd-in.h: Include <sys/stat.h> rather than forward defining
+	struct stat.
+	* bfd-in2.h: Regenerate.
+
 2011-10-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/13302
