@@ -1,5 +1,10 @@
 2011-10-24  Phil Muldoon  <pmuldoon@redhat.com>
 
+	* NEWS: Move set/show extended-prompt to "New Options". Expand
+	description. Fix typos.
+
+2011-10-24  Phil Muldoon  <pmuldoon@redhat.com>
+
         PR python/13310
 
 	* python/py-param.c (call_doc_function): Correctly deference on

@@ -24,14 +24,12 @@
      replaced it.  Additionally, the default for "print-stack" is now
      "off".
    
-  ** A prompt subsitution hook (prompt_hook) is now available to the
+  ** A prompt substitution hook (prompt_hook) is now available to the
      Python API.
-
-  ** A new command set/show extended-prompt has been added.
 
   ** A new Python module, gdb.prompt has been added to the GDB Python
      modules library.  This module provides functionality for
-     escape sequentions in prompts (used by set/show
+     escape sequences in prompts (used by set/show
      extended-prompt).  These escape sequences are replaced by their
      corresponding value.
 
@@ -115,6 +113,14 @@ info auto-load-scripts [REGEXP]
   is running.
 
 * New options
+
+set extended-prompt
+show extended-prompt
+  Set the GDB prompt, and allow escape sequences to be inserted to
+  display miscellaneous information (see 'help set extended-prompt'
+  for the list of sequences).  This prompt (and any information
+  accessed through the escape sequences) is updated every time the
+  prompt is displayed.
 
 set print entry-values (both|compact|default|if-needed|no|only|preferred)
 show print entry-values
