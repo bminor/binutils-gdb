@@ -1,3 +1,7 @@
+2011-10-24  Julian Brown  <julian@codesourcery.com>
+
+	* m68k-opc.c (m68k_opcodes): Fix entries for ColdFire moveml.
+
 2011-10-21  Jan Glauber  <jang@linux.vnet.ibm.com>
 
 	* s390-opc.txt: Add CPUMF instructions.

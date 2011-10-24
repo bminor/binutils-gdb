@@ -52,6 +52,8 @@ if { [istarget m68*-*-*] || [istarget fido*-*-*] } then {
     run_dump_test mcf-movsr
     run_dump_test mode5
     run_dump_test mode5 "{name {cf}} {as {-mcpu=5200}}"
+    run_dump_test movem-offset
+    run_dump_test movem-offset "{name {cf}} {as {-mcpu=5485}}"
     run_dump_test mcf-mac
     run_dump_test mcf-emac
     run_dump_test mcf-coproc

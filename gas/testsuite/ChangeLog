@@ -1,3 +1,9 @@
+2011-10-24  Julian Brown  <julian@codesourcery.com>
+
+	* gas/m68k/all.exp (movem-offset): Add test.
+	* gas/m68k/movem-offset.s: New test.
+	* gas/m68k/movem-offset.d: New.
+
 2011-10-21  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
 
 	* gas/s390/zarch-z10.d: Add CPUMF instructions.
