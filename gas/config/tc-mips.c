@@ -3687,7 +3687,6 @@ can_swap_branch_p (struct mips_cl_insn *ip)
   unsigned long pinfo, pinfo2, prev_pinfo, prev_pinfo2;
   unsigned int gpr_read, gpr_write, prev_gpr_read, prev_gpr_write;
 
-
   /* -O2 and above is required for this optimization.  */
   if (mips_optimize < 2)
     return FALSE;
@@ -4593,7 +4592,6 @@ start_noreorder (void)
 static void
 end_noreorder (void)
 {
-
   mips_opts.noreorder--;
   if (mips_opts.noreorder == 0 && prev_nop_frag != NULL)
     {

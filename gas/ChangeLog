@@ -1,5 +1,10 @@
 2011-10-24  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* config/tc-mips.c (can_swap_branch_p): Remove empty line.
+	(start_noreorder): Likewise.
+
+2011-10-24  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* config/tc-mips.c (s_option): Fix formatting.
 	(mips_elf_final_processing): Likewise.
 
