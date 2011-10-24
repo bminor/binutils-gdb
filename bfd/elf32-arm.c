@@ -11549,7 +11549,7 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
 	case Tag_PCS_config:
 	  if (out_attr[i].i == 0)
 	    out_attr[i].i = in_attr[i].i;
-	  else if (in_attr[i].i != 0 && out_attr[i].i != 0)
+	  else if (in_attr[i].i != 0 && out_attr[i].i != in_attr[i].i)
 	    {
 	      /* It's sometimes ok to mix different configs, so this is only
 	         a warning.  */

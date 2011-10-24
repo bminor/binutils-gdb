@@ -1,3 +1,9 @@
+2011-10-24  Eugeniy Meshcheryakov  <eugen@debian.org>
+
+	PR ld/13273
+	* elf32-arm.c (elf32_arm_merge_eabi_attributes): Do not warn about
+	identical TAG_PCS_config attributes.
+
 2011-10-24  Nick Clifton  <nickc@redhat.com>
 
 	* po/ja.po: Updated Japanese translation.
