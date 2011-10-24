@@ -331,6 +331,7 @@ call_doc_function (PyObject *obj, PyObject *method, PyObject *arg)
   if (gdbpy_is_string (result))
     {
       data = python_string_to_host_string (result);
+      Py_DECREF (result);
       if (! data)
 	return NULL;
     }
@@ -338,6 +339,7 @@ call_doc_function (PyObject *obj, PyObject *method, PyObject *arg)
     {
       PyErr_SetString (PyExc_RuntimeError,
 		       _("Parameter must return a string value."));
+      Py_DECREF (result);
       return NULL;
     }
 

@@ -1,3 +1,10 @@
+2011-10-24  Phil Muldoon  <pmuldoon@redhat.com>
+
+        PR python/13310
+
+	* python/py-param.c (call_doc_function): Correctly deference on
+	function exit.
+
 2011-10-21  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-tasks.c (print_ada_task_info): Fix computation of
