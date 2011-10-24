@@ -3656,6 +3656,8 @@ handle_inferior_event (struct execution_control_state *ecs)
       break;
 
     case TARGET_WAITKIND_NO_HISTORY:
+      if (debug_infrun)
+        fprintf_unfiltered (gdb_stdlog, "infrun: TARGET_WAITKIND_NO_HISTORY\n");
       /* Reverse execution: target ran out of history info.  */
       stop_pc = regcache_read_pc (get_thread_regcache (ecs->ptid));
       print_no_history_reason ();

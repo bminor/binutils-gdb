@@ -1,3 +1,8 @@
+2011-10-24  Pedro Alves  <pedro@codesourcery.com>
+
+	* infrun.c (handle_inferior_event): Add debug output for
+	TARGET_WAITKIND_NO_HISTORY.
+
 2011-10-24  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* NEWS: Move set/show extended-prompt to "New Options". Expand
