@@ -1,5 +1,12 @@
 2011-10-24  Pedro Alves  <pedro@codesourcery.com>
 
+	* linux-nat.c (linux_handle_extended_wait): When handling a clone
+	event, in non-stop, if not stopping, make sure the new lwp has
+	last_resume_kind set to resume_continue.  Assert that when we're
+	resuming the new lwp, its last_resume_kind is resume_continue.
+
+2011-10-24  Pedro Alves  <pedro@codesourcery.com>
+
 	* infrun.c (handle_inferior_event): Don't assume inferior_ptid is
 	already set when marking the event thread as not executing in
 	non-stop mode.

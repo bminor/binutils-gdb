@@ -2289,6 +2289,9 @@ linux_handle_extended_wait (struct lwp_info *lp, int status,
 		{
 		  set_running (new_lp->ptid, 1);
 		  set_executing (new_lp->ptid, 1);
+		  /* thread_db_attach_lwp -> lin_lwp_attach_lwp forced
+		     resume_stop.  */
+		  new_lp->last_resume_kind = resume_continue;
 		}
 	    }
 
@@ -2316,6 +2319,7 @@ linux_handle_extended_wait (struct lwp_info *lp, int status,
 
 	      if (status == 0)
 		{
+		  gdb_assert (new_lp->last_resume_kind == resume_continue);
 		  if (debug_linux_nat)
 		    fprintf_unfiltered (gdb_stdlog,
 					"LHEW: resuming new LWP %ld\n",
