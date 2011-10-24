@@ -1,3 +1,9 @@
+2011-10-24  Nick Clifton  <nickc@redhat.com>
+
+	* po/ja.po: New Japanese translation.
+	* configure.in (ALL_LINGUAS): Add ja.
+	* configure: Regenerate.
+
 2011-10-18  Nick Clifton  <nickc@redhat.com>
 
 	* po/it.po: New Italian translation.

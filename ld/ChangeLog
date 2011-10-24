@@ -1,3 +1,7 @@
+2011-10-24  Nick Clifton  <nickc@redhat.com>
+
+	* po/ja.po: Updated Japanese translation.
+
 2011-10-20  Alan Modra  <amodra@gmail.com>
 
 	PR ld/13287
