@@ -1,3 +1,8 @@
+2011-10-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf.c (read_and_display_attr_value) <DW_AT_import>: Add CU_OFFSET
+	also for DW_FORM_ref_udata.
+
 2011-10-24  Nick Clifton  <nickc@redhat.com>
 
 	* po/ja.po: Updated Japanese translation.

@@ -1769,7 +1769,8 @@ read_and_display_attr_value (unsigned long attribute,
 
 	if (form == DW_FORM_ref1
 	    || form == DW_FORM_ref2
-	    || form == DW_FORM_ref4)
+	    || form == DW_FORM_ref4
+	    || form == DW_FORM_ref_udata)
 	  uvalue += cu_offset;
 
 	if (uvalue >= section->size)
