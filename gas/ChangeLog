@@ -1,3 +1,7 @@
+2011-10-24  David Binderman  <dcb314@hotmail.com>
+
+	* config/tc-mn10200.c (md_convert_frag): Add missing break.
+
 2011-10-21  Tristan Gingold  <gingold@adacore.com>
 
 	* config/tc-alpha.c (load_expression): Use symbol_mark_used accessor.
