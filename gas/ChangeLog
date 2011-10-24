@@ -1,5 +1,10 @@
 2011-10-24  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* config/tc-mips.c (s_option): Fix formatting.
+	(mips_elf_final_processing): Likewise.
+
+2011-10-24  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* config/tc-mips.c (validate_micromips_insn): Fix formatting.
 
 2011-10-24  David Binderman  <dcb314@hotmail.com>

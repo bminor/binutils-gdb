@@ -15945,7 +15945,7 @@ s_option (int x ATTRIBUTE_UNUSED)
 	mips_pic = NO_PIC;
       else if (i == 2)
 	{
-	mips_pic = SVR4_PIC;
+	  mips_pic = SVR4_PIC;
 	  mips_abicalls = TRUE;
 	}
       else
@@ -18400,7 +18400,7 @@ mips_elf_final_processing (void)
     elf_elfheader (stdoutput)->e_flags |= EF_MIPS_NOREORDER;
   if (mips_pic != NO_PIC)
     {
-    elf_elfheader (stdoutput)->e_flags |= EF_MIPS_PIC;
+      elf_elfheader (stdoutput)->e_flags |= EF_MIPS_PIC;
       elf_elfheader (stdoutput)->e_flags |= EF_MIPS_CPIC;
     }
   if (mips_abicalls)
