@@ -10450,7 +10450,7 @@ validate_micromips_insn (const struct mips_opcode *opc)
       case 'D': USE_BITS (FD);		break;
       case 'E': USE_BITS (RT);		break;
       case 'G': USE_BITS (RS);		break;
-      case 'H': USE_BITS (SEL);	break;
+      case 'H': USE_BITS (SEL);		break;
       case 'K': USE_BITS (RS);		break;
       case 'M': USE_BITS (CCC);		break;
       case 'N': USE_BITS (BCC);		break;
