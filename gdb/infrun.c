@@ -3239,7 +3239,7 @@ handle_inferior_event (struct execution_control_state *ecs)
     set_executing (minus_one_ptid, 0);
   else if (ecs->ws.kind != TARGET_WAITKIND_SIGNALLED
 	   && ecs->ws.kind != TARGET_WAITKIND_EXITED)
-    set_executing (inferior_ptid, 0);
+    set_executing (ecs->ptid, 0);
 
   switch (infwait_state)
     {

@@ -1,5 +1,11 @@
 2011-10-24  Pedro Alves  <pedro@codesourcery.com>
 
+	* infrun.c (handle_inferior_event): Don't assume inferior_ptid is
+	already set when marking the event thread as not executing in
+	non-stop mode.
+
+2011-10-24  Pedro Alves  <pedro@codesourcery.com>
+
 	* infrun.c (handle_inferior_event): Add debug output for
 	TARGET_WAITKIND_NO_HISTORY.
 
