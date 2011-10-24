@@ -1,3 +1,8 @@
+2011-10-24  Yao Qi  <yao@codesourcery.com>
+
+	* lib/gdb.exp (can_single_step_to_signal_handler): Return 0 when
+	target is tic6x-*-*.
+
 2011-10-21  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/mi_task_info/task_switch.adb: New file.

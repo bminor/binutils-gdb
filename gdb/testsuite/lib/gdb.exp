@@ -1538,7 +1538,8 @@ proc can_single_step_to_signal_handler {} {
     # a signal is delivered during software single step, gdb is unable
     # to determine the next instruction addresses, because start of signal
     # handler is one of them.
-    if { [istarget "arm*-*-*"] || [istarget "mips*-*-*"] } {
+    if { [istarget "arm*-*-*"] || [istarget "mips*-*-*"]
+	 || [istarget "tic6x-*-*"] } {
 	return 0
     }
 
