@@ -1,3 +1,9 @@
+2011-10-25  Joern Rennecke  <joern.rennecke@embecosm.com>
+
+	* ld-srec/srec.exp: xfail epiphany.
+	* lib/ld-lib.exp (check_shared_lib_support): Add Epiphany to list
+	of targets not supporting shared libraries.
+
 2011-10-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/13302

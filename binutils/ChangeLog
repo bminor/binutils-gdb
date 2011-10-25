@@ -1,3 +1,11 @@
+2011-10-25  Joern Rennecke  <joern.rennecke@embecosm.com>
+
+	* readelf.c: Include "elf/epiphany.h".
+	(guess_is_rela, dump_relocation): Handle EM_ADAPTEVA_EPIPHANY.
+	(get_machine_name, is_32bit_abs_reloc, is_32bit_pcrel_reloc): Likewise.
+	(is_16bit_abs_reloc, is_none_reloc): Likewise.
+	* po/binutils.pot: Regenerate.
+
 2011-10-25  Kai Tietz  <ktietz@redhat.com>
 
 	* winduni.h (unicode_from_ascii_len): New prototype.

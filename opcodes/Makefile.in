@@ -310,6 +310,7 @@ BFD_H = ../bfd/bfd.h
 
 # Header files.
 HFILES = \
+	epiphany-desc.h epiphany-opc.h \
 	fr30-desc.h fr30-opc.h \
 	frv-desc.h frv-opc.h \
 	h8500-opc.h \
@@ -365,6 +366,11 @@ TARGET_LIBOPCODES_CFILES = \
 	d30v-dis.c \
 	d30v-opc.c \
 	dlx-dis.c \
+	epiphany-asm.c \
+	epiphany-desc.c \
+	epiphany-dis.c \
+	epiphany-ibld.c \
+	epiphany-opc.c \
 	fr30-asm.c \
 	fr30-desc.c \
 	fr30-dis.c \
@@ -550,7 +556,7 @@ noinst_LIBRARIES = libopcodes.a
 libopcodes_a_SOURCES = 
 POTFILES = $(HFILES) $(CFILES)
 CLEANFILES = \
-	stamp-fr30 stamp-frv stamp-ip2k stamp-iq2000 stamp-lm32 \
+	stamp-epiphany stamp-fr30 stamp-frv stamp-ip2k stamp-iq2000 stamp-lm32 \
 	stamp-m32c stamp-m32r stamp-mep stamp-mt \
 	stamp-openrisc stamp-xc16x stamp-xstormy16 \
 	libopcodes.a stamp-lib
@@ -566,7 +572,9 @@ CGENDEPS = \
 	$(CGENDIR)/opc-opinst.scm \
 	cgen-asm.in cgen-dis.in cgen-ibld.in
 
-CGEN_CPUS = fr30 frv ip2k iq2000 lm32 m32c m32r mep mt openrisc xc16x xstormy16
+CGEN_CPUS = epiphany fr30 frv ip2k iq2000 lm32 m32c m32r mep mt openrisc xc16x xstormy16
+@CGEN_MAINT_FALSE@EPIPHANY_DEPS = 
+@CGEN_MAINT_TRUE@EPIPHANY_DEPS = stamp-epiphany
 @CGEN_MAINT_FALSE@FR30_DEPS = 
 @CGEN_MAINT_TRUE@FR30_DEPS = stamp-fr30
 @CGEN_MAINT_FALSE@FRV_DEPS = 
@@ -741,6 +749,11 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dis-init.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/disassemble.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlx-dis.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/epiphany-asm.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/epiphany-desc.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/epiphany-dis.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/epiphany-ibld.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/epiphany-opc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fr30-asm.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fr30-desc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fr30-dis.Plo@am__quote@
@@ -1228,6 +1241,16 @@ run-cgen-all:
 .PHONY: run-cgen-all
 
 # For now, require developers to configure with --enable-cgen-maint.
+
+$(srcdir)/epiphany-desc.h $(srcdir)/epiphany-desc.c $(srcdir)/epiphany-opc.h \
+		$(srcdir)/epiphany-opc.c $(srcdir)/epiphany-ibld.c \
+		$(srcdir)/epiphany-opinst.c $(srcdir)/epiphany-asm.c \
+		$(srcdir)/epiphany-dis.c: $(EPIPHANY_DEPS)
+	@true
+
+stamp-epiphany: $(CGENDEPS) $(CPUDIR)/epiphany.cpu $(CPUDIR)/epiphany.opc
+	$(MAKE) run-cgen arch=epiphany prefix=epiphany options= \
+		archfile=$(CPUDIR)/epiphany.cpu opcfile=$(CPUDIR)/epiphany.opc extrafiles=
 
 $(srcdir)/fr30-desc.h $(srcdir)/fr30-desc.c $(srcdir)/fr30-opc.h $(srcdir)/fr30-opc.c $(srcdir)/fr30-ibld.c $(srcdir)/fr30-asm.c $(srcdir)/fr30-dis.c: $(FR30_DEPS)
 	@true

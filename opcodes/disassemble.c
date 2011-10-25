@@ -26,6 +26,7 @@
 #define ARCH_alpha
 #define ARCH_arc
 #define ARCH_arm
+#define ARCH_epiphany
 #define ARCH_avr
 #define ARCH_bfin
 #define ARCH_cr16
@@ -222,6 +223,11 @@ disassembler (abfd)
 #ifdef ARCH_ip2k
     case bfd_arch_ip2k:
       disassemble = print_insn_ip2k;
+      break;
+#endif
+#ifdef ARCH_epiphany
+    case bfd_arch_epiphany:
+      disassemble = print_insn_epiphany;
       break;
 #endif
 #ifdef ARCH_fr30

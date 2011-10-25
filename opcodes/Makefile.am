@@ -41,6 +41,7 @@ BUILD_LIB_DEPS = @BUILD_LIB_DEPS@
 
 # Header files.
 HFILES = \
+	epiphany-desc.h epiphany-opc.h \
 	fr30-desc.h fr30-opc.h \
 	frv-desc.h frv-opc.h \
 	h8500-opc.h \
@@ -95,6 +96,11 @@ TARGET_LIBOPCODES_CFILES = \
 	d30v-dis.c \
 	d30v-opc.c \
 	dlx-dis.c \
+	epiphany-asm.c \
+	epiphany-desc.c \
+	epiphany-dis.c \
+	epiphany-ibld.c \
+	epiphany-opc.c \
 	fr30-asm.c \
 	fr30-desc.c \
 	fr30-dis.c \
@@ -311,7 +317,7 @@ po/POTFILES.in: @MAINT@ Makefile
 	  && mv tmp $(srcdir)/po/POTFILES.in
 
 CLEANFILES = \
-	stamp-fr30 stamp-frv stamp-ip2k stamp-iq2000 stamp-lm32 \
+	stamp-epiphany stamp-fr30 stamp-frv stamp-ip2k stamp-iq2000 stamp-lm32 \
 	stamp-m32c stamp-m32r stamp-mep stamp-mt \
 	stamp-openrisc stamp-xc16x stamp-xstormy16 \
 	libopcodes.a stamp-lib
@@ -329,9 +335,10 @@ CGENDEPS = \
 	$(CGENDIR)/opc-opinst.scm \
 	cgen-asm.in cgen-dis.in cgen-ibld.in
 
-CGEN_CPUS = fr30 frv ip2k iq2000 lm32 m32c m32r mep mt openrisc xc16x xstormy16
+CGEN_CPUS = epiphany fr30 frv ip2k iq2000 lm32 m32c m32r mep mt openrisc xc16x xstormy16
 
 if CGEN_MAINT
+EPIPHANY_DEPS = stamp-epiphany
 FR30_DEPS = stamp-fr30
 FRV_DEPS = stamp-frv
 IP2K_DEPS = stamp-ip2k
@@ -345,6 +352,7 @@ OPENRISC_DEPS = stamp-openrisc
 XC16X_DEPS = stamp-xc16x
 XSTORMY16_DEPS = stamp-xstormy16
 else
+EPIPHANY_DEPS =
 FR30_DEPS =
 FRV_DEPS =
 IP2K_DEPS =
@@ -375,6 +383,16 @@ run-cgen-all:
 .PHONY: run-cgen-all
 
 # For now, require developers to configure with --enable-cgen-maint.
+
+$(srcdir)/epiphany-desc.h $(srcdir)/epiphany-desc.c $(srcdir)/epiphany-opc.h \
+		$(srcdir)/epiphany-opc.c $(srcdir)/epiphany-ibld.c \
+		$(srcdir)/epiphany-opinst.c $(srcdir)/epiphany-asm.c \
+		$(srcdir)/epiphany-dis.c: $(EPIPHANY_DEPS)
+	@true
+
+stamp-epiphany: $(CGENDEPS) $(CPUDIR)/epiphany.cpu $(CPUDIR)/epiphany.opc
+	$(MAKE) run-cgen arch=epiphany prefix=epiphany options= \
+		archfile=$(CPUDIR)/epiphany.cpu opcfile=$(CPUDIR)/epiphany.opc extrafiles=
 
 $(srcdir)/fr30-desc.h $(srcdir)/fr30-desc.c $(srcdir)/fr30-opc.h $(srcdir)/fr30-opc.c $(srcdir)/fr30-ibld.c $(srcdir)/fr30-asm.c $(srcdir)/fr30-dis.c: $(FR30_DEPS)
 	@true

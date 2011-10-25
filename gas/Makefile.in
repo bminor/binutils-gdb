@@ -385,6 +385,7 @@ TARGET_CPU_CFILES = \
 	config/tc-d10v.c \
 	config/tc-d30v.c \
 	config/tc-dlx.c \
+	config/tc-epiphany.c \
 	config/tc-fr30.c \
 	config/tc-frv.c \
 	config/tc-h8300.c \
@@ -451,6 +452,7 @@ TARGET_CPU_HFILES = \
 	config/tc-d10v.h \
 	config/tc-d30v.h \
 	config/tc-dlx.h \
+	config/tc-epiphany.h \
 	config/tc-fr30.h \
 	config/tc-frv.h \
 	config/tc-h8300.h \
@@ -796,6 +798,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tc-d10v.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tc-d30v.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tc-dlx.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tc-epiphany.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tc-fr30.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tc-frv.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tc-h8300.Po@am__quote@
@@ -1026,6 +1029,20 @@ tc-dlx.obj: config/tc-dlx.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='config/tc-dlx.c' object='tc-dlx.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tc-dlx.obj `if test -f 'config/tc-dlx.c'; then $(CYGPATH_W) 'config/tc-dlx.c'; else $(CYGPATH_W) '$(srcdir)/config/tc-dlx.c'; fi`
+
+tc-epiphany.o: config/tc-epiphany.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tc-epiphany.o -MD -MP -MF $(DEPDIR)/tc-epiphany.Tpo -c -o tc-epiphany.o `test -f 'config/tc-epiphany.c' || echo '$(srcdir)/'`config/tc-epiphany.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/tc-epiphany.Tpo $(DEPDIR)/tc-epiphany.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='config/tc-epiphany.c' object='tc-epiphany.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tc-epiphany.o `test -f 'config/tc-epiphany.c' || echo '$(srcdir)/'`config/tc-epiphany.c
+
+tc-epiphany.obj: config/tc-epiphany.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tc-epiphany.obj -MD -MP -MF $(DEPDIR)/tc-epiphany.Tpo -c -o tc-epiphany.obj `if test -f 'config/tc-epiphany.c'; then $(CYGPATH_W) 'config/tc-epiphany.c'; else $(CYGPATH_W) '$(srcdir)/config/tc-epiphany.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/tc-epiphany.Tpo $(DEPDIR)/tc-epiphany.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='config/tc-epiphany.c' object='tc-epiphany.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tc-epiphany.obj `if test -f 'config/tc-epiphany.c'; then $(CYGPATH_W) 'config/tc-epiphany.c'; else $(CYGPATH_W) '$(srcdir)/config/tc-epiphany.c'; fi`
 
 tc-fr30.o: config/tc-fr30.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tc-fr30.o -MD -MP -MF $(DEPDIR)/tc-fr30.Tpo -c -o tc-fr30.o `test -f 'config/tc-fr30.c' || echo '$(srcdir)/'`config/tc-fr30.c

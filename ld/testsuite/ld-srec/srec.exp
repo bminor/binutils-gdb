@@ -270,6 +270,12 @@ proc run_srec_test { test objs } {
 	set flags "$flags --no-toc-optimize"
     }
 
+    # Epiphany needs some help too
+    if [istarget epiphany*-*-*] {
+	set flags "$flags --defsym _start=00000060"
+	setup_xfail "epiphany*-*-*"
+    }
+
     if { ![ld_simple_link $ld tmpdir/sr1 "$flags $objs"] \
 	 || ![ld_simple_link $ld tmpdir/sr2.sr "$flags --oformat srec $objs"] } {
 	fail $test

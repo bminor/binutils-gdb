@@ -24,6 +24,13 @@ dis-buf.c
 dis-init.c
 disassemble.c
 dlx-dis.c
+epiphany-asm.c
+epiphany-desc.c
+epiphany-desc.h
+epiphany-dis.c
+epiphany-ibld.c
+epiphany-opc.c
+epiphany-opc.h
 fr30-asm.c
 fr30-desc.c
 fr30-desc.h
@@ -121,6 +128,7 @@ mep-opc.c
 mep-opc.h
 microblaze-dis.c
 microblaze-opc.h
+micromips-opc.c
 mips-dis.c
 mips-opc.c
 mips16-opc.c

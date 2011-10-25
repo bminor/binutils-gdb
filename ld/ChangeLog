@@ -1,3 +1,13 @@
+2011-10-25  Joern Rennecke  <joern.rennecke@embecosm.com>
+
+	* NEWS: Mention addition of Adapteva Epiphany support.
+	* Makefile.am (ALL_EMULATION_SOURCES): Add eelf32epiphany.c .
+	(eelf32epiphany.c): New rule.
+	* configure.tgt: Handle epiphany-*-elf.
+	* emulparams/elf32epiphany.sh: New file.
+	* Makefile.in: Regenerate.
+	* po/ld.pot: Regenerate.
+
 2011-10-24  Nick Clifton  <nickc@redhat.com>
 
 	* po/ja.po: Updated Japanese translation.

@@ -35,6 +35,7 @@
 @set CRIS
 @set D10V
 @set D30V
+@set EPIPHANY
 @set H8/300
 @set HPPA
 @set I370

@@ -1,3 +1,26 @@
+2011-10-25  Joern Rennecke  <joern.rennecke@embecosm.com>
+
+	* Makefile.am (HFILES): Add epiphany-desc.h and epiphany-opc.h .
+	(TARGET_LIBOPCODES_CFILES): Add  epiphany-asm.c, epiphany-desc.c,
+	epiphany-dis.c, epiphany-ibld.c and epiphany-opc.c .
+	(CLEANFILES): Add stamp-epiphany.
+	(EPIPHANY_DEPS): Set.  Make CGEN-generated Epiphany files depend on it.
+	(stamp-epiphany): New rule.
+	* configure.in: Handle bfd_epiphany_arch.
+	* disassemble.c (ARCH_epiphany): Define.
+	(disassembler): Handle bfd_arch_epiphany.
+	* epiphany-asm.c: New file.
+	* epiphany-desc.c: New file.
+	* epiphany-desc.h: New file.
+	* epiphany-dis.c: New file.
+	* epiphany-ibld.c: New file.
+	* epiphany-opc.c: New file.
+	* epiphany-opc.h: New file.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+	* po/POTFILES.in: Regenerate.
+	* po/opcodes.pot: Regenerate.
+
 2011-10-24  Julian Brown  <julian@codesourcery.com>
 
 	* m68k-opc.c (m68k_opcodes): Fix entries for ColdFire moveml.

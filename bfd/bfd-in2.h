@@ -2071,6 +2071,9 @@ enum bfd_architecture
  bfd_arch_iq2000,     /* Vitesse IQ2000.  */
 #define bfd_mach_iq2000        1
 #define bfd_mach_iq10          2
+  bfd_arch_epiphany,   /* Adapteva EPIPHANY */
+#define bfd_mach_epiphany16    1
+#define bfd_mach_epiphany32    2
   bfd_arch_mt,
 #define bfd_mach_ms1           1
 #define bfd_mach_mrisc2        2
@@ -5023,6 +5026,27 @@ the dynamic object into the runtime process image.  */
   BFD_RELOC_TILEGX_TLS_DTPMOD32,
   BFD_RELOC_TILEGX_TLS_DTPOFF32,
   BFD_RELOC_TILEGX_TLS_TPOFF32,
+
+/* Adapteva EPIPHANY - 8 bit signed pc-relative displacement  */
+  BFD_RELOC_EPIPHANY_SIMM8,
+
+/* Adapteva EPIPHANY - 24 bit signed pc-relative displacement  */
+  BFD_RELOC_EPIPHANY_SIMM24,
+
+/* Adapteva EPIPHANY - 16 most-significant bits of absolute address  */
+  BFD_RELOC_EPIPHANY_HIGH,
+
+/* Adapteva EPIPHANY - 16 least-significant bits of absolute address  */
+  BFD_RELOC_EPIPHANY_LOW,
+
+/* Adapteva EPIPHANY - 11 bit signed number - add/sub immediate  */
+  BFD_RELOC_EPIPHANY_SIMM11,
+
+/* Adapteva EPIPHANY - 11 bit sign-magnitude number (ld/st displacement)  */
+  BFD_RELOC_EPIPHANY_IMM11,
+
+/* Adapteva EPIPHANY - 8 bit immediate for 16 bit mov instruction.  */
+  BFD_RELOC_EPIPHANY_IMM8,
   BFD_RELOC_UNUSED };
 typedef enum bfd_reloc_code_real bfd_reloc_code_real_type;
 reloc_howto_type *bfd_reloc_type_lookup

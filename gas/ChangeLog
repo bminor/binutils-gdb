@@ -1,3 +1,22 @@
+2011-10-25  Joern Rennecke  <joern.rennecke@embecosm.com>
+
+	* NEWS: Mention addition of Adapteva Epiphany support.
+	* config/tc-epiphany.c: New file.
+	* config/tc-epiphany.h: New file.
+	* Makefile.am (TARGET_CPU_CFILES): Add config/tc-epiphany.c .
+	(TARGET_CPU_HFILES): Add config/tc-epiphany.h .
+	* configure.in: Also set using_cgen for epiphany.
+	* configure.tgt: Handle epiphany.
+	* doc/Makefile.am (CPU_DOCS): Add c-epiphany.texi .
+	* doc/all.texi: Set EPIPHANY.
+	* doc/as.texinfo: Add EPIPHANY-specific text.
+	* doc/c-epiphany.texi: New file.
+	* po/gas.pot: Regenerate.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+	* doc/Makefile.in: Regenerate.
+	* po/POTFILES.in: Regenerate.
+
 2011-10-24  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* config/tc-mips.c (move_register): Fix formatting.

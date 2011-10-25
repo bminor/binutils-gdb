@@ -1463,6 +1463,7 @@ proc check_shared_lib_support { } {
 	 && ![istarget d10v-*-*]
 	 && ![istarget d30v-*-*]
 	 && ![istarget dlx-*-*]
+	 && ![istarget epiphany-*-*]
 	 && ![istarget fr30-*-*]
 	 && ![istarget frv-*-*]
 	 && ![istarget h8300-*-*]

@@ -1,3 +1,8 @@
+2011-10-25  Joern Rennecke  <joern.rennecke@embecosm.com>
+
+	* cpu/epiphany.cpu: New file.
+	* cpu/epiphany.opc: New file.
+
 2011-08-22  Nick Clifton  <nickc@redhat.com>
 
 	* fr30.cpu: Newly contributed file.

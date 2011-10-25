@@ -1,3 +1,21 @@
+2011-10-25  Joern Rennecke  <joern.rennecke@embecosm.com>
+
+	* gas/epiphany: New directory.
+	* gas/testsuite/gas/epiphany/addr-syntax.d: New file.
+	* gas/testsuite/gas/epiphany/addr-syntax.s: New file.
+	* gas/testsuite/gas/epiphany/allinsn.d: New file.
+	* gas/testsuite/gas/epiphany/allinsn.exp: New file.
+	* gas/testsuite/gas/epiphany/allinsn.s: New file.
+	* gas/testsuite/gas/epiphany/badpostmod.s: New file.
+	* gas/testsuite/gas/epiphany/badrelax.d: New file.
+	* gas/testsuite/gas/epiphany/badrelax.s: New file.
+	* gas/testsuite/gas/epiphany/branch_lit.d: New file.
+	* gas/testsuite/gas/epiphany/branch_lit.s: New file.
+	* gas/testsuite/gas/epiphany/regression.d: New file.
+	* gas/testsuite/gas/epiphany/regression.s: New file.
+	* gas/testsuite/gas/epiphany/sample.d: New file.
+	* gas/testsuite/gas/epiphany/sample.s: New file.
+
 2011-10-24  Julian Brown  <julian@codesourcery.com>
 
 	* gas/m68k/all.exp (movem-offset): Add test.

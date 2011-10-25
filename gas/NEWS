@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add support for the Adapteva EPIPHANY architecture.
+
 Changes in 2.22:
 
 * Add support for the Tilera TILEPRO and TILE-Gx architectures.

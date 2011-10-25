@@ -1,3 +1,30 @@
+2011-10-25  Joern Rennecke  <joern.rennecke@embecosm.com>
+
+	* Makefile.am (ALL_MACHINES): Add cpu-epiphany.lo.
+	(ALL_MACHINES_CFILES): Add cpu-epiphany.c.
+	(BFD32_BACKENDS): Add elf32-epiphany.lo.
+	(BFD32_BACKENDS_CFILES): Add elf32-epiphany.c.
+	* archures.c (bfd_arch_epiphany): Add.
+	(bfd_mach_epiphany16, bfd_mach_epiphany32): Define.
+	(bfd_epiphany_arch): Declare.
+	(bfd_archures_list): Add &bfd_epiphany_arch.
+	* config.bfd (epiphany-*-elf): New target case.
+	* configure.in (bfd_elf32_epiphany_vec): New target vector case.
+	* reloc.c (BFD_RELOC_EPIPHANY_SIMM8): New relocation.
+	(BFD_RELOC_EPIPHANY_SIMM24, BFD_RELOC_EPIPHANY_HIGH): Likewise.
+	(BFD_RELOC_EPIPHANY_LOW, BFD_RELOC_EPIPHANY_SIMM11): Likewise.
+	(BFD_RELOC_EPIPHANY_IMM11, BFD_RELOC_EPIPHANY_IMM8): Likewise.
+	* targets.c (bfd_elf32_epiphany_vec): Declare.
+	(_bfd_target_vector): Add bfd_elf32_epiphany_vec.
+	* Makefile.in: Regenerate.
+	* bfd-in2.h: Regenerate.
+	* configure: Regenerate.
+	* libbfd.h: Regenerate.
+	* po/SRC-POTFILES.in: Regenerate.
+	* po/bfd.pot: Regenerate.
+	* cpu-epiphany.c: New file.
+	* elf32-epiphany.c: New file.
+
 2011-10-24  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* elfxx-mips.c (_bfd_mips_elf_symbol_processing): Remove

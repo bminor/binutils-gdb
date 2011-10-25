@@ -5960,6 +5960,35 @@ ENUMX
 ENUMDOC
   Tilera TILE-Gx Relocations.
 
+ENUM
+  BFD_RELOC_EPIPHANY_SIMM8
+ENUMDOC
+  Adapteva EPIPHANY - 8 bit signed pc-relative displacement
+ENUM
+  BFD_RELOC_EPIPHANY_SIMM24
+ENUMDOC
+  Adapteva EPIPHANY - 24 bit signed pc-relative displacement
+ENUM
+  BFD_RELOC_EPIPHANY_HIGH
+ENUMDOC
+  Adapteva EPIPHANY - 16 most-significant bits of absolute address
+ENUM
+  BFD_RELOC_EPIPHANY_LOW
+ENUMDOC
+  Adapteva EPIPHANY - 16 least-significant bits of absolute address
+ENUM
+  BFD_RELOC_EPIPHANY_SIMM11
+ENUMDOC
+  Adapteva EPIPHANY - 11 bit signed number - add/sub immediate
+ENUM
+  BFD_RELOC_EPIPHANY_IMM11
+ENUMDOC
+  Adapteva EPIPHANY - 11 bit sign-magnitude number (ld/st displacement)
+ENUM
+  BFD_RELOC_EPIPHANY_IMM8
+ENUMDOC
+  Adapteva EPIPHANY - 8 bit immediate for 16 bit mov instruction.
+
 
 ENDSENUM
   BFD_RELOC_UNUSED
