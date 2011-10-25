@@ -21681,6 +21681,21 @@ that includes @acronym{RTTI} for the object in question.  Otherwise,
 it will just return the static type of the value as in @kbd{ptype foo}
 (@pxref{Symbols, ptype}).
 @end defvar
+
+@defvar Value.is_lazy
+The value of this read-only boolean attribute is @code{True} if this
+@code{gdb.Value} has not yet been fetched from the inferior.  
+@value{GDBN} does not fetch values until necessary, for efficiency.  
+For example:
+
+@smallexample
+myval = gdb.parse_and_eval ('somevar')
+@end smallexample
+
+The value of @code{somevar} is not fetched at this time.  It will be 
+fetched when the value is needed, or when the @code{fetch_lazy}
+method is invoked.  
+@end defvar
 @end table
 
 The following methods are provided:
@@ -21814,6 +21829,19 @@ fetched and encoded to the length of characters specified.  If
 the @var{length} argument is not provided, the string will be fetched
 and encoded until a null of appropriate width is found.
 @end defun
+
+@defun Value.fetch_lazy ()
+If the @code{gdb.Value} object is currently a lazy value 
+(@code{gdb.Value.is_lazy} is @code{True}), then the value is
+fetched from the inferior.  Any errors that occur in the process
+will produce a Python exception.
+
+If the @code{gdb.Value} object is not a lazy value, this method
+has no effect.
+
+This method does not return a value.
+@end defun
+
 @end table
 
 @node Types In Python

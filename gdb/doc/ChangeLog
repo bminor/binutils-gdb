@@ -1,3 +1,10 @@
+2011-10-25  Paul Koning  <paul_koning@dell.com>
+
+	PR python/13327
+	
+	* gdb.texinfo (Values From Inferior): Add is_lazy attribute,
+	fetch_lazy method.
+
 2011-10-20  Phil Muldoon  <pmuldoon@redhat.com>
 
 	PR python/12656
