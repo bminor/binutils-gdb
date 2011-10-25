@@ -71,7 +71,8 @@ static void maintenance_cplus_namespace (char *args, int from_tty);
    anonymous namespace; if so, add an appropriate using directive.  */
 
 void
-cp_scan_for_anonymous_namespaces (const struct symbol *symbol)
+cp_scan_for_anonymous_namespaces (const struct symbol *const symbol,
+				  struct objfile *const objfile)
 {
   if (SYMBOL_DEMANGLED_NAME (symbol) != NULL)
     {
@@ -114,7 +115,7 @@ cp_scan_for_anonymous_namespaces (const struct symbol *symbol)
 		 namespace given by the previous component if there is
 		 one, or to the global namespace if there isn't.  */
 	      cp_add_using_directive (dest, src, NULL, NULL,
-	                              &SYMBOL_SYMTAB (symbol)->objfile->objfile_obstack);
+	                              &objfile->objfile_obstack);
 	    }
 	  /* The "+ 2" is for the "::".  */
 	  previous_component = next_component + 2;

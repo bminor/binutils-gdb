@@ -729,7 +729,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	SYMBOL_SET_NAMES (sym, string, p - string, 1, objfile);
 
       if (SYMBOL_LANGUAGE (sym) == language_cplus)
-	cp_scan_for_anonymous_namespaces (sym);
+	cp_scan_for_anonymous_namespaces (sym, objfile);
 
     }
   p++;
