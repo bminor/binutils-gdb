@@ -1,6 +1,9 @@
 2011-10-25  Alan Modra  <amodra@gmail.com>
 
 	Apply mainline patches
+	2011-10-10  Alan Modra  <amodra@gmail.com>
+	* emultempl/ppc64elf.em (ppc_add_stub_section): Align to 32 bytes.
+
 	2011-10-06  Alan Modra  <amodra@gmail.com>
 	PR ld/13229
 	* plugin.c (tv_header_tags): Add LDPT_GET_SYMBOLS_V2.

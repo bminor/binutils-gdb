@@ -1,6 +1,15 @@
 2011-10-25  Alan Modra  <amodra@gmail.com>
 
 	Apply mainline patches
+	2011-10-10  Alan Modra  <amodra@gmail.com>
+	* ld-powerpc/relbrlt.d: Update for stub alignment change.
+	* ld-powerpc/tlsexe.g: Likewise.
+	* ld-powerpc/tlsexe.r: Likewise.
+	* ld-powerpc/tlsexetoc.g: Likewise.
+	* ld-powerpc/tlsexetoc.r: Likewise.
+	* ld-powerpc/tlsso.g: Likewise.
+	* ld-powerpc/tlsso.r: Likewise.
+
 	2011-10-08  H.J. Lu  <hongjiu.lu@intel.com>
 	PR ld/13250
 	* ld-elf/shared.exp (build_tests): Add tests for PR ld/13250.
