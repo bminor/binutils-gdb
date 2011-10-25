@@ -365,13 +365,13 @@ hist_assign_samples_1 (histogram *r)
   bfd_vma sym_low_pc, sym_high_pc;
   bfd_vma overlap, addr;
   unsigned int bin_count;
-  unsigned int i, j;
+  unsigned int i, j, k;
   double count_time, credit;
 
   bfd_vma lowpc = r->lowpc / sizeof (UNIT);
 
   /* Iterate over all sample bins.  */
-  for (i = 0, j = 1; i < r->num_bins; ++i)
+  for (i = 0, k = 1; i < r->num_bins; ++i)
     {
       bin_count = r->sample[i];
       if (! bin_count)
@@ -390,7 +390,8 @@ hist_assign_samples_1 (histogram *r)
       total_time += count_time;
 
       /* Credit all symbols that are covered by bin I.  */
-      for (j = j - 1; j < symtab.len; ++j)
+      /* PR gprof/13325: Make sure that J does not go below I.  */
+      for (j = k - 1; j < symtab.len; k = ++j)
 	{
 	  sym_low_pc = symtab.base[j].hist.scaled_addr;
 	  sym_high_pc = symtab.base[j + 1].hist.scaled_addr;
@@ -398,12 +399,7 @@ hist_assign_samples_1 (histogram *r)
 	  /* If high end of bin is below entry address,
 	     go for next bin.  */
 	  if (bin_high_pc < sym_low_pc)
-	    {
-	      /* PR gprof/13325: Make sure that j does not go below 1.  */
-	      if (j < 1)
-		j = 1;
-	      break;
-	    }
+	    break;
 
 	  /* If low end of bin is above high end of symbol,
 	     go for next symbol.  */
