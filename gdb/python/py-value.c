@@ -617,6 +617,43 @@ valpy_get_is_optimized_out (PyObject *self, void *closure)
   Py_RETURN_FALSE;
 }
 
+/* Implements gdb.Value.is_lazy.  */
+static PyObject *
+valpy_get_is_lazy (PyObject *self, void *closure)
+{
+  struct value *value = ((value_object *) self)->value;
+  int opt = 0;
+  volatile struct gdb_exception except;
+
+  TRY_CATCH (except, RETURN_MASK_ALL)
+    {
+      opt = value_lazy (value);
+    }
+  GDB_PY_HANDLE_EXCEPTION (except);
+
+  if (opt)
+    Py_RETURN_TRUE;
+
+  Py_RETURN_FALSE;
+}
+
+/* Implements gdb.Value.fetch_lazy ().  */
+static PyObject *
+valpy_fetch_lazy (PyObject *self, PyObject *args)
+{
+  struct value *value = ((value_object *) self)->value;
+  volatile struct gdb_exception except;
+
+  TRY_CATCH (except, RETURN_MASK_ALL)
+    {
+      if (value_lazy (value))
+	value_fetch_lazy (value);
+    }
+  GDB_PY_HANDLE_EXCEPTION (except);
+
+  Py_RETURN_NONE;
+}
+
 /* Calculate and return the address of the PyObject as the value of
    the builtin __hash__ call.  */
 static long 
@@ -1081,15 +1118,7 @@ PyObject *
 value_to_value_object (struct value *val)
 {
   value_object *val_obj;
-  volatile struct gdb_exception except;
 
-  TRY_CATCH (except, RETURN_MASK_ALL)
-    {
-      if (value_lazy (val))
-	value_fetch_lazy (val);
-    }
-  GDB_PY_HANDLE_EXCEPTION (except);
-  
   val_obj = PyObject_New (value_object, &value_object_type);
   if (val_obj != NULL)
     {
@@ -1276,6 +1305,10 @@ static PyGetSetDef value_object_getset[] = {
   { "type", valpy_get_type, NULL, "Type of the value.", NULL },
   { "dynamic_type", valpy_get_dynamic_type, NULL,
     "Dynamic type of the value.", NULL },
+  { "is_lazy", valpy_get_is_lazy, NULL,
+    "Boolean telling whether the value is lazy (not fetched yet\n\
+from the inferior).  A lazy value is fetched when needed, or when\n\
+the \"fetch_lazy()\" method is called.", NULL },
   {NULL}  /* Sentinel */
 };
 
@@ -1298,6 +1331,8 @@ Return a lazy string representation of the value." },
   { "string", (PyCFunction) valpy_string, METH_VARARGS | METH_KEYWORDS,
     "string ([encoding] [, errors] [, length]) -> string\n\
 Return Unicode string representation of the value." },
+  { "fetch_lazy", valpy_fetch_lazy, METH_NOARGS, 
+    "Fetches the value from the inferior, if it was lazy." },
   {NULL}  /* Sentinel */
 };
 

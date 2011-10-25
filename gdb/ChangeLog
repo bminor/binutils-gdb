@@ -1,3 +1,12 @@
+2011-10-25  Paul Koning  <paul_koning@dell.com>
+
+	PR python/13327
+	
+	* python/py-value.c (value_to_value_object): Remove fetching of
+	the value if it was lazy.
+	(valpy_get_is_lazy): New function.
+	(valpy_fetch_lazy): New function.
+
 2011-10-24  Joel Brobecker  <brobecker@adacore.com>
 
 	* ppc-sysv-tdep.c (do_ppc_sysv_return_value): Do not check
