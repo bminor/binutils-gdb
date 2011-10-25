@@ -1,3 +1,8 @@
+2011-10-25  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-ns32k.c (md_begin): Rename local variable 'stat' to
+	'status'.
+
 2011-10-25  Joern Rennecke  <joern.rennecke@embecosm.com>
 
 	* NEWS: Mention addition of Adapteva Epiphany support.
