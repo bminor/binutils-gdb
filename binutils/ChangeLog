@@ -1,3 +1,11 @@
+2011-10-25  Alan Modra  <amodra@gmail.com>
+
+	Apply mainline patches
+	2011-10-16  H.J. Lu  <hongjiu.lu@intel.com>
+	PR binutils/13278
+	* ar.c (open_inarch): Set the target from the the first object
+	on the list only if it isn't set.
+
 2011-09-22  Tristan Gingold  <gingold@adacore.com>
 
 	* NEWS: Add marker for 2.22.
