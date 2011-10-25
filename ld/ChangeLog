@@ -1,6 +1,9 @@
 2011-10-25  Alan Modra  <amodra@gmail.com>
 
 	Apply mainline patches
+	2011-10-15  Alan Modra  <amodra@gmail.com>
+	* emultempl/ppc64elf.em (gld${EMULATION_NAME}_finish): Remove toc check.
+
 	2011-10-10  Alan Modra  <amodra@gmail.com>
 	* ldmain.c (main): Move code twiddling various config and link_info
 	bits to..

@@ -530,14 +530,6 @@ gld${EMULATION_NAME}_finish (void)
      descriptor in the .opd section.  */
   entry_section = ".opd";
 
-  if (link_info.relocatable)
-    {
-      asection *toc = bfd_get_section_by_name (link_info.output_bfd, ".toc");
-      if (toc != NULL
-	  && bfd_section_size (link_info.output_bfd, toc) > 0x10000)
-	einfo ("%X%P: TOC section size exceeds 64k\n");
-    }
-
   if (stub_added)
     {
       char *msg = NULL;
