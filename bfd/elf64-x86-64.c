@@ -1007,20 +1007,6 @@ elf64_x86_64_elf_object_p (bfd *abfd)
   return TRUE;
 }
 
-typedef union
-  {
-    unsigned char c[2];
-    uint16_t i;
-  }
-x86_64_opcode16;
-
-typedef union
-  {
-    unsigned char c[4];
-    uint32_t i;
-  }
-x86_64_opcode32;
-
 /* Return TRUE if the TLS access code sequence support transition
    from R_TYPE.  */
 
@@ -1076,24 +1062,23 @@ elf_x86_64_check_tls_transition (bfd *abfd,
 		.word 0x6666; rex64; call __tls_get_addr
 	     can transit to different access model.  */
 
-	  static x86_64_opcode32 call = { { 0x66, 0x66, 0x48, 0xe8 } };
+	  static const unsigned char call[] = { 0x66, 0x66, 0x48, 0xe8 };
+	  static const unsigned char leaq[] = { 0x66, 0x48, 0x8d, 0x3d };
+
 	  if ((offset + 12) > sec->size
-	      || bfd_get_32 (abfd, contents + offset + 4) != call.i)
+	      || memcmp (contents + offset + 4, call, 4) != 0)
 	    return FALSE;
 
 	  if (ABI_64_P (abfd))
 	    {
-	      static x86_64_opcode32 leaq = { { 0x66, 0x48, 0x8d, 0x3d } };
 	      if (offset < 4
-		  || bfd_get_32 (abfd, contents + offset - 4) != leaq.i)
+		  || memcmp (contents + offset - 4, leaq, 4) != 0)
 		return FALSE;
 	    }
 	  else
 	    {
-	      static x86_64_opcode16 lea = { { 0x8d, 0x3d } };
 	      if (offset < 3
-		  || bfd_get_8 (abfd, contents + offset - 3) != 0x48
-		  || bfd_get_16 (abfd, contents + offset - 2) != lea.i)
+		  || memcmp (contents + offset - 3, leaq + 1, 3) != 0)
 		return FALSE;
 	    }
 	}
@@ -1104,15 +1089,13 @@ elf_x86_64_check_tls_transition (bfd *abfd,
 		call __tls_get_addr
 	     can transit to different access model.  */
 
-	  static x86_64_opcode32 ld = { { 0x48, 0x8d, 0x3d, 0xe8 } };
-	  x86_64_opcode32 op;
+	  static const unsigned char lea[] = { 0x48, 0x8d, 0x3d };
 
 	  if (offset < 3 || (offset + 9) > sec->size)
 	    return FALSE;
 
-	  op.i = bfd_get_32 (abfd, contents + offset - 3);
-	  op.c[3] = bfd_get_8 (abfd, contents + offset + 4);
-	  if (op.i != ld.i)
+	  if (memcmp (contents + offset - 3, lea, 3) != 0
+	      || 0xe8 != *(contents + offset + 4))
 	    return FALSE;
 	}
 
@@ -1191,8 +1174,8 @@ elf_x86_64_check_tls_transition (bfd *abfd,
       if (offset + 2 <= sec->size)
 	{
 	  /* Make sure that it's a call *x@tlsdesc(%rax).  */
-	  static x86_64_opcode16 call = { { 0xff, 0x10 } };
-	  return bfd_get_16 (abfd, contents + offset) == call.i;
+	  static const unsigned char call[] = { 0xff, 0x10 };
+	  return memcmp (contents + offset, call, 2) == 0;
 	}
 
       return FALSE;

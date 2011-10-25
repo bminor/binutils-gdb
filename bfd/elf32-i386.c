@@ -1094,13 +1094,6 @@ elf_i386_copy_indirect_symbol (struct bfd_link_info *info,
     _bfd_elf_link_hash_copy_indirect (info, dir, ind);
 }
 
-typedef union
-  {
-    unsigned char c[2];
-    uint16_t i;
-  }
-i386_opcode16;
-
 /* Return TRUE if the TLS access code sequence support transition
    from R_TYPE.  */
 
@@ -1271,8 +1264,8 @@ elf_i386_check_tls_transition (bfd *abfd, asection *sec,
       if (offset + 2 <= sec->size)
 	{
 	  /* Make sure that it's a call *x@tlsdesc(%rax).  */
-	  static i386_opcode16 call = { { 0xff, 0x10 } };
-	  return bfd_get_16 (abfd, contents + offset) == call.i;
+	  static const unsigned char call[] = { 0xff, 0x10 };
+	  return memcmp (contents + offset, call, 2) == 0;
 	}
 
       return FALSE;

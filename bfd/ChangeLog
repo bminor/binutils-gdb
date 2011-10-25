@@ -1,6 +1,12 @@
 2011-10-25  Alan Modra  <amodra@gmail.com>
 
 	Apply mainline patches
+	2011-10-20  Alan Modra  <amodra@gmail.com>
+	* elf32-i386.c (i386_opcode16): Delete.
+	(elf_i386_check_tls_transition): Use memcmp to compare contents.
+	* elf64-x86-64.c (x86_64_opcode16, x86_64_opcode32): Delete.
+	(elf_x86_64_check_tls_transition): Use memcmp to compare contents.
+
 	2011-10-19  Alan Modra  <amodra@gmail.com>
 	PR ld/13311
 	* elflink.c (elf_link_output_extsym): Correct test for warning when
