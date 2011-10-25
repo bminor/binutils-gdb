@@ -104,7 +104,7 @@ extern void define_rcdata_file  (rc_res_id, const rc_res_res_info *, const char 
 extern rc_rcdata_item *define_rcdata_string (const char *, rc_uint_type);
 extern rc_rcdata_item *define_rcdata_unistring (const unichar *, rc_uint_type);
 extern rc_rcdata_item *define_rcdata_number (rc_uint_type, int);
-extern void define_stringtable (const rc_res_res_info *, rc_uint_type, const unichar *);
+extern void define_stringtable (const rc_res_res_info *, rc_uint_type, const unichar *, int);
 extern void define_user_data (rc_res_id, rc_res_id, const rc_res_res_info *, rc_rcdata_item *);
 extern void define_toolbar (rc_res_id, rc_res_res_info *, rc_uint_type ,rc_uint_type ,rc_toolbar_item *);
 extern void define_user_file (rc_res_id, rc_res_id, const rc_res_res_info *, const char *);

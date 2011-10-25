@@ -164,7 +164,7 @@ static const rc_res_id res_null_text = { 1, {{0, &null_unichar}}};
 %type <s> file_name
 %type <uni> res_unicode_string resname res_unicode_string_concat
 %type <ss> sizedstring
-%type <suni> sizedunistring
+%type <suni> sizedunistring res_unicode_sizedstring res_unicode_sizedstring_concat
 %type <i> sizednumexpr sizedposnumexpr
 
 %left '|'
@@ -1260,20 +1260,20 @@ rcdata_data:
 
 stringtable:
 	  STRINGTABLE suboptions BEG 
-	    { sub_res_info = $2; }
-	    string_data END
+	    { sub_res_info = $2; rcparse_rcdata (); }
+	    string_data END { rcparse_normal (); }
 	;
 
 string_data:
 	  /* empty */
-	| string_data numexpr res_unicode_string_concat
+	| string_data numexpr res_unicode_sizedstring_concat
 	  {
-	    define_stringtable (&sub_res_info, $2, $3);
+	    define_stringtable (&sub_res_info, $2, $3.s, $3.length);
 	    rcparse_discard_strings ();
 	  }
-	| string_data numexpr ',' res_unicode_string_concat
+	| string_data numexpr ',' res_unicode_sizedstring_concat
 	  {
-	    define_stringtable (&sub_res_info, $2, $4);
+	    define_stringtable (&sub_res_info, $2, $4.s, $4.length);
 	    rcparse_discard_strings ();
 	  }
 	| string_data error
@@ -1715,6 +1715,43 @@ res_unicode_string:
 	    unichar *h = NULL;
 	    unicode_from_ascii ((rc_uint_type *) NULL, &h, $1);
 	    $$ = h;
+	  }
+	;
+
+res_unicode_sizedstring:
+	  sizedunistring
+	  {
+	    $$ = $1;
+	  }
+	| sizedstring
+	  {
+	    unichar *h = NULL;
+	    rc_uint_type l = 0;
+	    unicode_from_ascii_len (&l, &h, $1.s, $1.length);
+	    $$.s = h;
+	    $$.length = l;
+	  }
+	;
+
+/* Concat string */
+res_unicode_sizedstring_concat:
+	  res_unicode_sizedstring
+	  {
+	    $$ = $1;
+	  }
+	|
+	  res_unicode_sizedstring_concat res_unicode_sizedstring
+	  {
+	    rc_uint_type l1 = $1.length;
+	    rc_uint_type l2 = $2.length;
+	    unichar *h = (unichar *) res_alloc ((l1 + l2 + 1) * sizeof (unichar));
+	    if (l1 != 0)
+	      memcpy (h, $1.s, l1 * sizeof (unichar));
+	    if (l2 != 0)
+	      memcpy (h + l1, $2.s, l2  * sizeof (unichar));
+	    h[l1 + l2] = 0;
+	    $$.length = l1 + l2;
+	    $$.s = h;
 	  }
 	;
 

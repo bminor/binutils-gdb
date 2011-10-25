@@ -1591,8 +1591,9 @@ define_rcdata_number (rc_uint_type val, int dword)
 
 void
 define_stringtable (const rc_res_res_info *resinfo,
-		    rc_uint_type stringid, const unichar *string)
+		    rc_uint_type stringid, const unichar *string, int len)
 {
+  unichar *h;
   rc_res_id id;
   rc_res_resource *r;
 
@@ -1616,9 +1617,12 @@ define_stringtable (const rc_res_res_info *resinfo,
 
       r->res_info = *resinfo;
     }
-
-  r->u.stringtable->strings[stringid & 0xf].length = unichar_len (string);
-  r->u.stringtable->strings[stringid & 0xf].string = unichar_dup (string);
+  h = (unichar *) res_alloc ((len + 1) * sizeof (unichar));
+  if (len)
+    memcpy (h, string, len * sizeof (unichar));
+  h[len] = 0;
+  r->u.stringtable->strings[stringid & 0xf].length = (rc_uint_type) len;
+  r->u.stringtable->strings[stringid & 0xf].string = h;
 }
 
 void

@@ -1,3 +1,8 @@
+2011-10-25  Kai Tietz  <ktietz@redhat.com>
+
+	* binutils-all/windres/strtab4.rc: New test.
+	* binutils-all/windres/strtab4.rsd: Likewise.
+
 2011-10-11  Chris  <player1@onet.eu>
 
 	PR binutils/13051
