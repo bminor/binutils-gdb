@@ -58,6 +58,7 @@ static long extract_mbe (unsigned long, ppc_cpu_t, int *);
 static unsigned long insert_mb6 (unsigned long, long, ppc_cpu_t, const char **);
 static long extract_mb6 (unsigned long, ppc_cpu_t, int *);
 static long extract_nb (unsigned long, ppc_cpu_t, int *);
+static unsigned long insert_nbi (unsigned long, long, ppc_cpu_t, const char **);
 static unsigned long insert_nsi (unsigned long, long, ppc_cpu_t, const char **);
 static long extract_nsi (unsigned long, ppc_cpu_t, int *);
 static unsigned long insert_ral (unsigned long, long, ppc_cpu_t, const char **);
@@ -66,6 +67,7 @@ static unsigned long insert_raq (unsigned long, long, ppc_cpu_t, const char **);
 static unsigned long insert_ras (unsigned long, long, ppc_cpu_t, const char **);
 static unsigned long insert_rbs (unsigned long, long, ppc_cpu_t, const char **);
 static long extract_rbs (unsigned long, ppc_cpu_t, int *);
+static unsigned long insert_rbx (unsigned long, long, ppc_cpu_t, const char **);
 static unsigned long insert_sh6 (unsigned long, long, ppc_cpu_t, const char **);
 static long extract_sh6 (unsigned long, ppc_cpu_t, int *);
 static unsigned long insert_spr (unsigned long, long, ppc_cpu_t, const char **);
@@ -269,13 +271,21 @@ const struct powerpc_operand powerpc_operands[] =
 #define FRA_MASK (0x1f << 16)
   { 0x1f, 16, NULL, NULL, PPC_OPERAND_FPR },
 
+  /* The FRAp field of DFP instructions.  */
+#define FRAp FRA + 1
+  { 0x1e, 16, NULL, NULL, PPC_OPERAND_FPR },
+
   /* The FRB field in an X or A form instruction.  */
-#define FRB FRA + 1
+#define FRB FRAp + 1
 #define FRB_MASK (0x1f << 11)
   { 0x1f, 11, NULL, NULL, PPC_OPERAND_FPR },
 
+  /* The FRBp field of DFP instructions.  */
+#define FRBp FRB + 1
+  { 0x1e, 11, NULL, NULL, PPC_OPERAND_FPR },
+
   /* The FRC field in an A form instruction.  */
-#define FRC FRB + 1
+#define FRC FRBp + 1
 #define FRC_MASK (0x1f << 6)
   { 0x1f, 6, NULL, NULL, PPC_OPERAND_FPR },
 
@@ -285,8 +295,14 @@ const struct powerpc_operand powerpc_operands[] =
 #define FRT FRS
   { 0x1f, 21, NULL, NULL, PPC_OPERAND_FPR },
 
+  /* The FRSp field of stfdp or the FRTp field of lfdp and DFP
+     instructions.  */
+#define FRSp FRS + 1
+#define FRTp FRSp
+  { 0x1e, 21, NULL, NULL, PPC_OPERAND_FPR },
+
   /* The FXM field in an XFX instruction.  */
-#define FXM FRS + 1
+#define FXM FRSp + 1
   { 0xff, 12, insert_fxm, extract_fxm, 0 },
 
   /* Power4 version for mfcr.  */
@@ -345,9 +361,14 @@ const struct powerpc_operand powerpc_operands[] =
 #define NB MB6 + 1
   { 0x1f, 11, NULL, extract_nb, PPC_OPERAND_PLUS1 },
 
+  /* The NBI field in an lswi instruction, which has special value
+     restrictions.  The value 32 is stored as 0.  */
+#define NBI NB + 1
+  { 0x1f, 11, insert_nbi, extract_nb, PPC_OPERAND_PLUS1 },
+
   /* The NSI field in a D form instruction.  This is the same as the
      SI field, only negated.  */
-#define NSI NB + 1
+#define NSI NBI + 1
   { 0xffff, 0, insert_nsi, extract_nsi,
       PPC_OPERAND_NEGATIVE | PPC_OPERAND_SIGNED },
 
@@ -360,9 +381,10 @@ const struct powerpc_operand powerpc_operands[] =
 #define RA0 RA + 1
   { 0x1f, 16, NULL, NULL, PPC_OPERAND_GPR_0 },
 
-  /* The RA field in the DQ form lq instruction, which has special
+  /* The RA field in the DQ form lq or an lswx instruction, which have special
      value restrictions.  */
 #define RAQ RA0 + 1
+#define RAX RAQ
   { 0x1f, 16, insert_raq, NULL, PPC_OPERAND_GPR_0 },
 
   /* The RA field in a D or X form instruction which is an updating
@@ -398,8 +420,13 @@ const struct powerpc_operand powerpc_operands[] =
 #define RBS RB + 1
   { 0x1f, 11, insert_rbs, extract_rbs, PPC_OPERAND_FAKE },
 
+  /* The RB field in an lswx instruction, which has special value
+     restrictions.  */
+#define RBX RBS + 1
+  { 0x1f, 11, insert_rbx, NULL, PPC_OPERAND_GPR },
+
   /* The RB field of the dccci and iccci instructions, which are optional.  */
-#define RBOPT RBS + 1
+#define RBOPT RBX + 1
   { 0x1f, 11, NULL, NULL, PPC_OPERAND_GPR | PPC_OPERAND_OPTIONAL },
 
   /* The RS field in a D, DS, X, XFX, XS, M, MD or MDS form
@@ -877,6 +904,8 @@ insert_bo (unsigned long insn,
 {
   if (!valid_bo (value, dialect, 0))
     *errmsg = _("invalid conditional option");
+  else if (PPC_OP (insn) == 19 && (insn & 0x400) && ! (value & 4))
+    *errmsg = _("invalid counter access");
   return insn | ((value & 0x1f) << 21);
 }
 
@@ -905,6 +934,8 @@ insert_boe (unsigned long insn,
 {
   if (!valid_bo (value, dialect, 0))
     *errmsg = _("invalid conditional option");
+  else if (PPC_OP (insn) == 19 && (insn & 0x400) && ! (value & 4))
+    *errmsg = _("invalid counter access");
   else if ((value & 1) != 0)
     *errmsg = _("attempt to set y bit when using + or - modifier");
 
@@ -1120,6 +1151,26 @@ extract_nb (unsigned long insn,
   return ret;
 }
 
+/* The NB field in an lswi instruction, which has special value
+   restrictions.  The value 32 is stored as 0.  */
+
+static unsigned long
+insert_nbi (unsigned long insn,
+	    long value,
+	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	    const char **errmsg ATTRIBUTE_UNUSED)
+{
+  long rtvalue = (insn & RT_MASK) >> 21;
+  long ravalue = (insn & RA_MASK) >> 16;
+
+  if (value == 0)
+    value = 32;
+  if (rtvalue + (value + 3) / 4 > (rtvalue > ravalue ? ravalue + 32
+						     : ravalue))
+    *errmsg = _("address register in load range");
+  return insn | ((value & 0x1f) << 11);
+}
+
 /* The NSI field in a D form instruction.  This is the same as the SI
    field, only negated.  The extraction function always marks it as
    invalid, since we never want to recognize an instruction which uses
@@ -1173,7 +1224,7 @@ insert_ram (unsigned long insn,
   return insn | ((value & 0x1f) << 16);
 }
 
-/* The RA field in the DQ form lq instruction, which has special
+/* The RA field in the DQ form lq or an lswx instruction, which have special
    value restrictions.  */
 
 static unsigned long
@@ -1227,6 +1278,22 @@ extract_rbs (unsigned long insn,
   if (((insn >> 21) & 0x1f) != ((insn >> 11) & 0x1f))
     *invalid = 1;
   return 0;
+}
+
+/* The RB field in an lswx instruction, which has special value
+   restrictions.  */
+
+static unsigned long
+insert_rbx (unsigned long insn,
+	    long value,
+	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	    const char **errmsg)
+{
+  long rtvalue = (insn & RT_MASK) >> 21;
+
+  if (value == rtvalue)
+    *errmsg = _("source and target register operands must be different");
+  return insn | ((value & 0x1f) << 11);
 }
 
 /* The SH field in an MD form instruction.  This is split.  */
@@ -4421,7 +4488,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 {"ldbrx",	X(31,532),	X_MASK, CELL|POWER7|PPCA2, PPCNONE,	{RT, RA0, RB}},
 
-{"lswx",	X(31,533),	X_MASK,      PPCCOM,	E500|E500MC,	{RT, RA0, RB}},
+{"lswx",	X(31,533),	X_MASK,      PPCCOM,	E500|E500MC,	{RT, RAX, RBX}},
 {"lsx",		X(31,533),	X_MASK,      PWRCOM,	PPCNONE,	{RT, RA, RB}},
 
 {"lwbrx",	X(31,534),	X_MASK,      PPCCOM,	PPCNONE,	{RT, RA0, RB}},
@@ -4467,7 +4534,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 {"mfsr",	X(31,595), XRB_MASK|(1<<20), COM,	NON32,  	{RT, SR}},
 
-{"lswi",	X(31,597),	X_MASK,      PPCCOM,	E500|E500MC,	{RT, RA0, NB}},
+{"lswi",	X(31,597),	X_MASK,      PPCCOM,	E500|E500MC,	{RT, RA0, NBI}},
 {"lsi",		X(31,597),	X_MASK,      PWRCOM,	PPCNONE,	{RT, RA0, NB}},
 
 {"lwsync",	XSYNC(31,598,1), 0xffffffff, PPC,	E500,		{0}},
@@ -4625,7 +4692,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 {"lhbrx",	X(31,790),	X_MASK,      COM,	PPCNONE,	{RT, RA0, RB}},
 
-{"lfdpx",	X(31,791),	X_MASK,      POWER6,	POWER7,		{FRT, RA, RB}},
+{"lfdpx",	X(31,791),	X_MASK,      POWER6,	POWER7,		{FRTp, RA, RB}},
 {"lfqx",	X(31,791),	X_MASK,      POWER2,	PPCNONE,	{FRT, RA, RB}},
 
 {"sraw",	XRC(31,792,0),	X_MASK,      PPCCOM,	PPCNONE,	{RA, RS, RB}},
@@ -4705,7 +4772,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 {"sthbrx",	X(31,918),	X_MASK,      COM,	PPCNONE,	{RS, RA0, RB}},
 
-{"stfdpx",	X(31,919),	X_MASK,      POWER6,	PPCNONE,	{FRS, RA, RB}},
+{"stfdpx",	X(31,919),	X_MASK,      POWER6,	POWER7,		{FRSp, RA, RB}},
 {"stfqx",	X(31,919),	X_MASK,      POWER2,	PPCNONE,	{FRS, RA, RB}},
 
 {"sraq",	XRC(31,920,0),	X_MASK,      M601,	PPCNONE,	{RA, RS, RB}},
@@ -4869,7 +4936,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"psq_l",	OP(56),		OP_MASK,     PPCPS,	PPCNONE,	{FRT,PSD,RA,PSW,PSQ}},
 {"lfq",		OP(56),		OP_MASK,     POWER2,	PPCNONE,	{FRT, D, RA0}},
 
-{"lfdp",	OP(57),		OP_MASK,     POWER6,	POWER7,		{FRT, D, RA0}},
+{"lfdp",	OP(57),		OP_MASK,     POWER6,	POWER7,		{FRTp, D, RA0}},
 {"psq_lu",	OP(57),		OP_MASK,     PPCPS,	PPCNONE,	{FRT,PSD,RA,PSW,PSQ}},
 {"lfqu",	OP(57),		OP_MASK,     POWER2,	PPCNONE,	{FRT, D, RA0}},
 
@@ -5132,7 +5199,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"psq_st",	OP(60),		OP_MASK,     PPCPS,	PPCNONE,	{FRS,PSD,RA,PSW,PSQ}},
 {"stfq",	OP(60),		OP_MASK,     POWER2,	PPCNONE,	{FRS, D, RA}},
 
-{"stfdp",	OP(61),		OP_MASK,     POWER6,	PPCNONE,	{FRT, D, RA0}},
+{"stfdp",	OP(61),		OP_MASK,     POWER6,	POWER7,		{FRSp, D, RA0}},
 {"psq_stu",	OP(61),		OP_MASK,     PPCPS,	PPCNONE,	{FRS,PSD,RA,PSW,PSQ}},
 {"stfqu",	OP(61),		OP_MASK,     POWER2,	PPCNONE,	{FRS, D, RA}},
 
@@ -5142,11 +5209,11 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 {"fcmpu",	X(63,0),     X_MASK|(3<<21), COM,	PPCEFS,		{BF, FRA, FRB}},
 
-{"daddq",	XRC(63,2,0),	X_MASK,      POWER6,	PPCNONE,	{FRT, FRA, FRB}},
-{"daddq.",	XRC(63,2,1),	X_MASK,      POWER6,	PPCNONE,	{FRT, FRA, FRB}},
+{"daddq",	XRC(63,2,0),	X_MASK,      POWER6,	PPCNONE,	{FRTp, FRAp, FRBp}},
+{"daddq.",	XRC(63,2,1),	X_MASK,      POWER6,	PPCNONE,	{FRTp, FRAp, FRBp}},
 
-{"dquaq",	ZRC(63,3,0),	Z2_MASK,     POWER6,	PPCNONE,	{FRT, FRA, FRB, RMC}},
-{"dquaq.",	ZRC(63,3,1),	Z2_MASK,     POWER6,	PPCNONE,	{FRT, FRA, FRB, RMC}},
+{"dquaq",	ZRC(63,3,0),	Z2_MASK,     POWER6,	PPCNONE,	{FRTp, FRAp, FRBp, RMC}},
+{"dquaq.",	ZRC(63,3,1),	Z2_MASK,     POWER6,	PPCNONE,	{FRTp, FRAp, FRBp, RMC}},
 
 {"fcpsgn",	XRC(63,8,0),	X_MASK, POWER6|PPCA2|PPC476, PPCNONE,	{FRT, FRA, FRB}},
 {"fcpsgn.",	XRC(63,8,1),	X_MASK, POWER6|PPCA2|PPC476, PPCNONE,	{FRT, FRA, FRB}},
@@ -5222,11 +5289,11 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 {"fcmpo",	X(63,32),    X_MASK|(3<<21), COM,	PPCEFS,		{BF, FRA, FRB}},
 
-{"dmulq",	XRC(63,34,0),	X_MASK,      POWER6,	PPCNONE,	{FRT, FRA, FRB}},
-{"dmulq.",	XRC(63,34,1),	X_MASK,      POWER6,	PPCNONE,	{FRT, FRA, FRB}},
+{"dmulq",	XRC(63,34,0),	X_MASK,      POWER6,	PPCNONE,	{FRTp, FRAp, FRBp}},
+{"dmulq.",	XRC(63,34,1),	X_MASK,      POWER6,	PPCNONE,	{FRTp, FRAp, FRBp}},
 
-{"drrndq",	ZRC(63,35,0),	Z2_MASK,     POWER6,	PPCNONE,	{FRT, FRA, FRB, RMC}},
-{"drrndq.",	ZRC(63,35,1),	Z2_MASK,     POWER6,	PPCNONE,	{FRT, FRA, FRB, RMC}},
+{"drrndq",	ZRC(63,35,0),	Z2_MASK,     POWER6,	PPCNONE,	{FRTp, FRAp, FRBp, RMC}},
+{"drrndq.",	ZRC(63,35,1),	Z2_MASK,     POWER6,	PPCNONE,	{FRTp, FRAp, FRBp, RMC}},
 
 {"mtfsb1",	XRC(63,38,0),	XRARB_MASK,  COM,	PPCNONE,	{BT}},
 {"mtfsb1.",	XRC(63,38,1),	XRARB_MASK,  COM,	PPCNONE,	{BT}},
@@ -5236,11 +5303,11 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 {"mcrfs",      X(63,64), XRB_MASK|(3<<21)|(3<<16), COM,	PPCNONE,	{BF, BFA}},
 
-{"dscliq",	ZRC(63,66,0),	Z_MASK,      POWER6,	PPCNONE,	{FRT, FRA, SH16}},
-{"dscliq.",	ZRC(63,66,1),	Z_MASK,      POWER6,	PPCNONE,	{FRT, FRA, SH16}},
+{"dscliq",	ZRC(63,66,0),	Z_MASK,      POWER6,	PPCNONE,	{FRTp, FRAp, SH16}},
+{"dscliq.",	ZRC(63,66,1),	Z_MASK,      POWER6,	PPCNONE,	{FRTp, FRAp, SH16}},
 
-{"dquaiq",	ZRC(63,67,0),	Z2_MASK,     POWER6,	PPCNONE,	{TE, FRT, FRB, RMC}},
-{"dquaiq.",	ZRC(63,67,1),	Z2_MASK,     POWER6,	PPCNONE,	{TE, FRT, FRB, RMC}},
+{"dquaiq",	ZRC(63,67,0),	Z2_MASK,     POWER6,	PPCNONE,	{TE, FRTp, FRBp, RMC}},
+{"dquaiq.",	ZRC(63,67,1),	Z2_MASK,     POWER6,	PPCNONE,	{TE, FRTp, FRBp, RMC}},
 
 {"mtfsb0",	XRC(63,70,0),	XRARB_MASK,  COM,	PPCNONE,	{BT}},
 {"mtfsb0.",	XRC(63,70,1),	XRARB_MASK,  COM,	PPCNONE,	{BT}},
@@ -5248,15 +5315,15 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"fmr",		XRC(63,72,0),	XRA_MASK,    COM,	PPCEFS,		{FRT, FRB}},
 {"fmr.",	XRC(63,72,1),	XRA_MASK,    COM,	PPCEFS,		{FRT, FRB}},
 
-{"dscriq",	ZRC(63,98,0),	Z_MASK,      POWER6,	PPCNONE,	{FRT, FRA, SH16}},
-{"dscriq.",	ZRC(63,98,1),	Z_MASK,      POWER6,	PPCNONE,	{FRT, FRA, SH16}},
+{"dscriq",	ZRC(63,98,0),	Z_MASK,      POWER6,	PPCNONE,	{FRTp, FRAp, SH16}},
+{"dscriq.",	ZRC(63,98,1),	Z_MASK,      POWER6,	PPCNONE,	{FRTp, FRAp, SH16}},
 
-{"drintxq",	ZRC(63,99,0),	Z2_MASK,     POWER6,	PPCNONE,	{R, FRT, FRB, RMC}},
-{"drintxq.",	ZRC(63,99,1),	Z2_MASK,     POWER6,	PPCNONE,	{R, FRT, FRB, RMC}},
+{"drintxq",	ZRC(63,99,0),	Z2_MASK,     POWER6,	PPCNONE,	{R, FRTp, FRBp, RMC}},
+{"drintxq.",	ZRC(63,99,1),	Z2_MASK,     POWER6,	PPCNONE,	{R, FRTp, FRBp, RMC}},
 
 {"ftdiv",	X(63,128),   X_MASK|(3<<21), POWER7,	PPCNONE,	{BF, FRA, FRB}},
 
-{"dcmpoq",	X(63,130),	X_MASK,      POWER6,	PPCNONE,	{BF, FRA, FRB}},
+{"dcmpoq",	X(63,130),	X_MASK,      POWER6,	PPCNONE,	{BF, FRAp, FRBp}},
 
 {"mtfsfi",  XRC(63,134,0), XWRA_MASK|(3<<21)|(1<<11), POWER6|PPCA2|PPC476, PPCNONE, {BFF, U, W}},
 {"mtfsfi",  XRC(63,134,0), XRA_MASK|(3<<21)|(1<<11), COM, POWER6|PPCA2|PPC476, {BFF, U}},
@@ -5273,27 +5340,27 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 {"ftsqrt",	X(63,160), X_MASK|(3<<21|FRA_MASK), POWER7, PPCNONE,	{BF, FRB}},
 
-{"dtstexq",	X(63,162),	X_MASK,      POWER6,	PPCNONE,	{BF, FRA, FRB}},
-{"dtstdcq",	Z(63,194),	Z_MASK,      POWER6,	PPCNONE,	{BF, FRA, DCM}},
-{"dtstdgq",	Z(63,226),	Z_MASK,      POWER6,	PPCNONE,	{BF, FRA, DGM}},
+{"dtstexq",	X(63,162),	X_MASK,      POWER6,	PPCNONE,	{BF, FRAp, FRB}},
+{"dtstdcq",	Z(63,194),	Z_MASK,      POWER6,	PPCNONE,	{BF, FRAp, DCM}},
+{"dtstdgq",	Z(63,226),	Z_MASK,      POWER6,	PPCNONE,	{BF, FRAp, DGM}},
 
-{"drintnq",	ZRC(63,227,0),	Z2_MASK,     POWER6,	PPCNONE,	{R, FRT, FRB, RMC}},
-{"drintnq.",	ZRC(63,227,1),	Z2_MASK,     POWER6,	PPCNONE,	{R, FRT, FRB, RMC}},
+{"drintnq",	ZRC(63,227,0),	Z2_MASK,     POWER6,	PPCNONE,	{R, FRTp, FRBp, RMC}},
+{"drintnq.",	ZRC(63,227,1),	Z2_MASK,     POWER6,	PPCNONE,	{R, FRTp, FRBp, RMC}},
 
-{"dctqpq",	XRC(63,258,0),	X_MASK,      POWER6,	PPCNONE,	{FRT, FRB}},
-{"dctqpq.",	XRC(63,258,1),	X_MASK,      POWER6,	PPCNONE,	{FRT, FRB}},
+{"dctqpq",	XRC(63,258,0),	X_MASK,      POWER6,	PPCNONE,	{FRTp, FRBp}},
+{"dctqpq.",	XRC(63,258,1),	X_MASK,      POWER6,	PPCNONE,	{FRTp, FRBp}},
 
 {"fabs",	XRC(63,264,0),	XRA_MASK,    COM,	PPCEFS,		{FRT, FRB}},
 {"fabs.",	XRC(63,264,1),	XRA_MASK,    COM,	PPCEFS,		{FRT, FRB}},
 
-{"dctfixq",	XRC(63,290,0),	X_MASK,      POWER6,	PPCNONE,	{FRT, FRB}},
-{"dctfixq.",	XRC(63,290,1),	X_MASK,      POWER6,	PPCNONE,	{FRT, FRB}},
+{"dctfixq",	XRC(63,290,0),	X_MASK,      POWER6,	PPCNONE,	{FRTp, FRBp}},
+{"dctfixq.",	XRC(63,290,1),	X_MASK,      POWER6,	PPCNONE,	{FRTp, FRBp}},
 
-{"ddedpdq",	XRC(63,322,0),	X_MASK,      POWER6,	PPCNONE,	{SP, FRT, FRB}},
-{"ddedpdq.",	XRC(63,322,1),	X_MASK,      POWER6,	PPCNONE,	{SP, FRT, FRB}},
+{"ddedpdq",	XRC(63,322,0),	X_MASK,      POWER6,	PPCNONE,	{SP, FRTp, FRBp}},
+{"ddedpdq.",	XRC(63,322,1),	X_MASK,      POWER6,	PPCNONE,	{SP, FRTp, FRBp}},
 
-{"dxexq",	XRC(63,354,0),	X_MASK,      POWER6,	PPCNONE,	{FRT, FRB}},
-{"dxexq.",	XRC(63,354,1),	X_MASK,      POWER6,	PPCNONE,	{FRT, FRB}},
+{"dxexq",	XRC(63,354,0),	X_MASK,      POWER6,	PPCNONE,	{FRTp, FRBp}},
+{"dxexq.",	XRC(63,354,1),	X_MASK,      POWER6,	PPCNONE,	{FRTp, FRBp}},
 
 {"frin",	XRC(63,392,0),	XRA_MASK,    POWER5,	PPCNONE,	{FRT, FRB}},
 {"frin.",	XRC(63,392,1),	XRA_MASK,    POWER5,	PPCNONE,	{FRT, FRB}},
@@ -5304,29 +5371,29 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"frim",	XRC(63,488,0),	XRA_MASK,    POWER5,	PPCNONE,	{FRT, FRB}},
 {"frim.",	XRC(63,488,1),	XRA_MASK,    POWER5,	PPCNONE,	{FRT, FRB}},
 
-{"dsubq",	XRC(63,514,0),	X_MASK,      POWER6,	PPCNONE,	{FRT, FRA, FRB}},
-{"dsubq.",	XRC(63,514,1),	X_MASK,      POWER6,	PPCNONE,	{FRT, FRA, FRB}},
+{"dsubq",	XRC(63,514,0),	X_MASK,      POWER6,	PPCNONE,	{FRTp, FRAp, FRBp}},
+{"dsubq.",	XRC(63,514,1),	X_MASK,      POWER6,	PPCNONE,	{FRTp, FRAp, FRBp}},
 
-{"ddivq",	XRC(63,546,0),	X_MASK,      POWER6,	PPCNONE,	{FRT, FRA, FRB}},
-{"ddivq.",	XRC(63,546,1),	X_MASK,      POWER6,	PPCNONE,	{FRT, FRA, FRB}},
+{"ddivq",	XRC(63,546,0),	X_MASK,      POWER6,	PPCNONE,	{FRTp, FRAp, FRBp}},
+{"ddivq.",	XRC(63,546,1),	X_MASK,      POWER6,	PPCNONE,	{FRTp, FRAp, FRBp}},
 
 {"mffs",	XRC(63,583,0),	XRARB_MASK,  COM,	PPCEFS,		{FRT}},
 {"mffs.",	XRC(63,583,1),	XRARB_MASK,  COM,	PPCEFS,		{FRT}},
 
-{"dcmpuq",	X(63,642),	X_MASK,      POWER6,	PPCNONE,	{BF, FRA, FRB}},
+{"dcmpuq",	X(63,642),	X_MASK,      POWER6,	PPCNONE,	{BF, FRAp, FRBp}},
 
-{"dtstsfq",	X(63,674),	X_MASK,      POWER6,	PPCNONE,	{BF, FRA, FRB}},
+{"dtstsfq",	X(63,674),	X_MASK,      POWER6,	PPCNONE,	{BF, FRAp, FRBp}},
 
 {"mtfsf",	XFL(63,711,0),	XFL_MASK, POWER6|PPCA2|PPC476, PPCNONE,	{FLM, FRB, XFL_L, W}},
 {"mtfsf",	XFL(63,711,0),	XFL_MASK,    COM, POWER6|PPCA2|PPC476|PPCEFS,	{FLM, FRB}},
 {"mtfsf.",	XFL(63,711,1),	XFL_MASK, POWER6|PPCA2|PPC476, PPCNONE,	{FLM, FRB, XFL_L, W}},
 {"mtfsf.",	XFL(63,711,1),	XFL_MASK,    COM, POWER6|PPCA2|PPC476|PPCEFS,	{FLM, FRB}},
 
-{"drdpq",	XRC(63,770,0),	X_MASK,      POWER6,	PPCNONE,	{FRT, FRB}},
-{"drdpq.",	XRC(63,770,1),	X_MASK,      POWER6,	PPCNONE,	{FRT, FRB}},
+{"drdpq",	XRC(63,770,0),	X_MASK,      POWER6,	PPCNONE,	{FRTp, FRBp}},
+{"drdpq.",	XRC(63,770,1),	X_MASK,      POWER6,	PPCNONE,	{FRTp, FRBp}},
 
-{"dcffixq",	XRC(63,802,0),	X_MASK,      POWER6,	PPCNONE,	{FRT, FRB}},
-{"dcffixq.",	XRC(63,802,1),	X_MASK,      POWER6,	PPCNONE,	{FRT, FRB}},
+{"dcffixq",	XRC(63,802,0),	X_MASK,      POWER6,	PPCNONE,	{FRTp, FRBp}},
+{"dcffixq.",	XRC(63,802,1),	X_MASK,      POWER6,	PPCNONE,	{FRTp, FRBp}},
 
 {"fctid",	XRC(63,814,0),	XRA_MASK,    PPC64,	PPCNONE,	{FRT, FRB}},
 {"fctid",	XRC(63,814,0),	XRA_MASK,    PPC476,	PPCNONE,	{FRT, FRB}},
@@ -5338,16 +5405,16 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"fctidz.",	XRC(63,815,1),	XRA_MASK,    PPC64,	PPCNONE,	{FRT, FRB}},
 {"fctidz.",	XRC(63,815,1),	XRA_MASK,    PPC476,	PPCNONE,	{FRT, FRB}},
 
-{"denbcdq",	XRC(63,834,0),	X_MASK,      POWER6,	PPCNONE,	{S, FRT, FRB}},
-{"denbcdq.",	XRC(63,834,1),	X_MASK,      POWER6,	PPCNONE,	{S, FRT, FRB}},
+{"denbcdq",	XRC(63,834,0),	X_MASK,      POWER6,	PPCNONE,	{S, FRTp, FRBp}},
+{"denbcdq.",	XRC(63,834,1),	X_MASK,      POWER6,	PPCNONE,	{S, FRTp, FRBp}},
 
 {"fcfid",	XRC(63,846,0),	XRA_MASK,    PPC64,	PPCNONE,	{FRT, FRB}},
 {"fcfid",	XRC(63,846,0),	XRA_MASK,    PPC476,	PPCNONE,	{FRT, FRB}},
 {"fcfid.",	XRC(63,846,1),	XRA_MASK,    PPC64,	PPCNONE,	{FRT, FRB}},
 {"fcfid.",	XRC(63,846,1),	XRA_MASK,    PPC476,	PPCNONE,	{FRT, FRB}},
 
-{"diexq",	XRC(63,866,0),	X_MASK,      POWER6,	PPCNONE,	{FRT, FRA, FRB}},
-{"diexq.",	XRC(63,866,1),	X_MASK,      POWER6,	PPCNONE,	{FRT, FRA, FRB}},
+{"diexq",	XRC(63,866,0),	X_MASK,      POWER6,	PPCNONE,	{FRTp, FRAp, FRBp}},
+{"diexq.",	XRC(63,866,1),	X_MASK,      POWER6,	PPCNONE,	{FRTp, FRAp, FRBp}},
 
 {"fctidu",	XRC(63,942,0),	XRA_MASK, POWER7|PPCA2,	PPCNONE,	{FRT, FRB}},
 {"fctidu.",	XRC(63,942,1),	XRA_MASK, POWER7|PPCA2,	PPCNONE,	{FRT, FRB}},

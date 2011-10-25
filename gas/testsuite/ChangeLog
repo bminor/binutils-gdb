@@ -1,3 +1,14 @@
+2011-10-25  Alan Modra  <amodra@gmail.com>
+
+	Apply mainline patches
+	2011-09-28  Jan Beulich  <jbeulich@suse.com>
+	* gas/ppc/476.s: Fix lswi first operand.
+	* gas/ppc/476.d: Adjust expected output.
+	* gas/ppc/a2.s: Fix lswi first operand.
+	* gas/ppc/a2.d: Adjust expected output.
+	* gas/ppc/power6.s: Fix lfdpx first operand.
+	* gas/ppc/power6.d: Adjust expected output.
+
 2011-09-21  David S. Miller  <davem@davemloft.net>
 
 	* gas/sparc/hpcvis3.s: Update for fixed fchksum16 mnemonic.

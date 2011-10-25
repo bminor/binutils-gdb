@@ -234,7 +234,7 @@ Disassembly of section \.text:
  380:	7e 96 c2 6e 	lhzux   r20,r22,r24
  384:	7e f8 ca 2e 	lhzx    r23,r24,r25
  388:	b8 61 ff f0 	lmw     r3,-16\(r1\)
- 38c:	7c 64 84 aa 	lswi    r3,r4,16
+ 38c:	7c a4 84 aa 	lswi    r5,r4,16
  390:	7c 64 2c 2a 	lswx    r3,r4,r5
  394:	7c 64 28 28 	lwarx   r3,r4,r5
  398:	7c 64 28 28 	lwarx   r3,r4,r5

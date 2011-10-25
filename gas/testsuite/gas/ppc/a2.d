@@ -322,7 +322,7 @@ Disassembly of section \.text:
  498:	7d 4b 62 2e 	lhzx    r10,r11,r12
  49c:	ba 8a 00 10 	lmw     r20,16\(r10\)
  4a0:	7d 4b 0c aa 	lswi    r10,r11,1
- 4a4:	7d 4b 04 aa 	lswi    r10,r11,32
+ 4a4:	7d 8b 04 aa 	lswi    r12,r11,32
  4a8:	7d 4b 64 2a 	lswx    r10,r11,r12
  4ac:	e9 4b ff fe 	lwa     r10,-4\(r11\)
  4b0:	e9 4b 00 06 	lwa     r10,4\(r11\)
