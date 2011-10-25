@@ -1,3 +1,8 @@
+2011-10-25  Mike Frysinger  <vapier@gentoo.org>
+
+	* config/rx-defs.h (rx_error): Add const to first arg.
+	* config/rx-parse.y (rx_error): Likewise.
+
 2011-10-25  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-ns32k.c (md_begin): Rename local variable 'stat' to

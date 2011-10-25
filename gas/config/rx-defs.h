@@ -37,7 +37,7 @@
 extern int rx_pid_register;
 extern int rx_gp_register;
 
-extern int    rx_error (char *);
+extern int    rx_error (const char *);
 extern void   rx_lex_init (char *, char *);
 extern void   rx_base1 (int);
 extern void   rx_base2 (int, int);

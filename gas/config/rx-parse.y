@@ -1277,7 +1277,7 @@ rx_lex (void)
 }
 
 int
-rx_error (char * str)
+rx_error (const char * str)
 {
   int len;
 
