@@ -1,6 +1,11 @@
 2011-10-25  Alan Modra  <amodra@gmail.com>
 
 	Apply mainline patches
+	2011-10-11  Alan Modra  <amodra@gmail.com>
+	PR binutils/13257
+	* archive.c (_bfd_find_nested_archive, _bfd_get_elt_at_filepos): Open
+	thin archive element using container target if not defaulted.
+
 	2011-10-10  Alan Modra  <amodra@gmail.com>
 	* elf64-ppc.c (ppc64_elf_howto_table): Add R_PPC64_TOCSAVE entry.
 	(struct ppc_link_hash_table): Add tocsave_htab.

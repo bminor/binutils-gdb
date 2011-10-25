@@ -343,6 +343,7 @@ static bfd *
 _bfd_find_nested_archive (bfd *arch_bfd, const char *filename)
 {
   bfd *abfd;
+  const char *target;
 
   for (abfd = arch_bfd->nested_archives;
        abfd != NULL;
@@ -351,7 +352,10 @@ _bfd_find_nested_archive (bfd *arch_bfd, const char *filename)
       if (filename_cmp (filename, abfd->filename) == 0)
         return abfd;
     }
-  abfd = bfd_openr (filename, NULL);
+  target = NULL;
+  if (!arch_bfd->target_defaulted)
+    target = arch_bfd->xvec->name;
+  abfd = bfd_openr (filename, target);
   if (abfd)
     {
       abfd->archive_next = arch_bfd->nested_archives;
@@ -597,6 +601,8 @@ _bfd_get_elt_at_filepos (bfd *archive, file_ptr filepos)
 
   if (bfd_is_thin_archive (archive))
     {
+      const char *target;
+
       /* This is a proxy entry for an external file.  */
       if (! IS_ABSOLUTE_PATH (filename))
         {
@@ -628,7 +634,10 @@ _bfd_get_elt_at_filepos (bfd *archive, file_ptr filepos)
         }
       /* It's not an element of a nested archive;
          open the external file as a bfd.  */
-      n_nfd = bfd_openr (filename, NULL);
+      target = NULL;
+      if (!archive->target_defaulted)
+	target = archive->xvec->name;
+      n_nfd = bfd_openr (filename, target);
       if (n_nfd == NULL)
 	bfd_set_error (bfd_error_malformed_archive);
     }
