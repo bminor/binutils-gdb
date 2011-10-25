@@ -1,3 +1,9 @@
+2011-10-25   Wei Guozhi  <carrot@google.com>
+
+	PR gprof/13325
+	* hist.c (hist_assign_samples_1): Make sure that inner loop
+	iterator remains valid.
+
 2011-10-24  Nick Clifton  <nickc@redhat.com>
 
 	* po/ja.po: New Japanese translation.

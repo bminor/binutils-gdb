@@ -398,7 +398,12 @@ hist_assign_samples_1 (histogram *r)
 	  /* If high end of bin is below entry address,
 	     go for next bin.  */
 	  if (bin_high_pc < sym_low_pc)
-	    break;
+	    {
+	      /* PR gprof/13325: Make sure that j does not go below 1.  */
+	      if (j < 1)
+		j = 1;
+	      break;
+	    }
 
 	  /* If low end of bin is above high end of symbol,
 	     go for next symbol.  */
