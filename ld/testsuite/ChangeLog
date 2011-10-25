@@ -1,6 +1,14 @@
 2011-10-25  Alan Modra  <amodra@gmail.com>
 
 	Apply mainline patches
+	2011-10-08  H.J. Lu  <hongjiu.lu@intel.com>
+	PR ld/13250
+	* ld-elf/shared.exp (build_tests): Add tests for PR ld/13250.
+	(run_tests): Likewise.
+	* ld-elf/pr13250-1.c: New.
+	* ld-elf/pr13250-2.c: Likewise.
+	* ld-elf/pr13250-3.c: Likewise.
+
 	2011-10-06  Alan Modra  <amodra@gmail.com>
 	* ld-plugin/plugin-1.d, * ld-plugin/plugin-2.d, * ld-plugin/plugin-3.d,
 	* ld-plugin/plugin-4.d, * ld-plugin/plugin-5.d, * ld-plugin/plugin-6.d,
