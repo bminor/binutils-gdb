@@ -1,3 +1,8 @@
+2011-10-25  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.am (syslex.@OBJEXT@): Add -I$(srcdir).
+	* Makefile.in: Regen.
+
 2011-10-25  Joern Rennecke  <joern.rennecke@embecosm.com>
 
 	* readelf.c: Include "elf/epiphany.h".

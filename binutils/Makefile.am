@@ -272,7 +272,7 @@ sysinfo$(EXEEXT_FOR_BUILD): sysinfo.@OBJEXT@ syslex.@OBJEXT@
 
 syslex.@OBJEXT@: syslex.c sysinfo.h config.h
 	if [ -r syslex.c ]; then \
-	  $(CC_FOR_BUILD) -c -I. $(AM_CFLAGS) $(CFLAGS_FOR_BUILD) $(NO_WERROR) syslex.c ; \
+	  $(CC_FOR_BUILD) -c -I. -I$(srcdir) $(AM_CFLAGS) $(CFLAGS_FOR_BUILD) $(NO_WERROR) syslex.c ; \
 	else \
 	  $(CC_FOR_BUILD) -c -I. -I$(srcdir) $(AM_CFLAGS) $(CFLAGS_FOR_BUILD) $(NO_WERROR) $(srcdir)/syslex.c ;\
 	fi
