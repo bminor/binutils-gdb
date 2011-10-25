@@ -56,6 +56,7 @@ static ld_plugin_register_all_symbols_read register_all_symbols_read_hook = NULL
 static ld_plugin_register_cleanup register_cleanup_hook = NULL;
 static ld_plugin_add_symbols add_symbols = NULL;
 static ld_plugin_get_symbols get_symbols = NULL;
+static ld_plugin_get_symbols get_symbols_v2 = NULL;
 static ld_plugin_add_input_file add_input_file = NULL;
 static ld_plugin_message message = NULL;
 static ld_plugin_get_input_file get_input_file = NULL;
@@ -119,6 +120,9 @@ onload(struct ld_plugin_tv *tv)
           break;
         case LDPT_GET_SYMBOLS:
           get_symbols = entry->tv_u.tv_get_symbols;
+          break;
+        case LDPT_GET_SYMBOLS_V2:
+          get_symbols_v2 = entry->tv_u.tv_get_symbols;
           break;
         case LDPT_ADD_INPUT_FILE:
           add_input_file = entry->tv_u.tv_add_input_file;
@@ -394,9 +398,9 @@ all_symbols_read_hook(void)
 
   (*message)(LDPL_INFO, "all symbols read hook called");
 
-  if (get_symbols == NULL)
+  if (get_symbols_v2 == NULL)
     {
-      fprintf(stderr, "tv_get_symbols interface missing\n");
+      fprintf(stderr, "tv_get_symbols (v2) interface missing\n");
       return LDPS_ERR;
     }
 
@@ -404,7 +408,7 @@ all_symbols_read_hook(void)
        claimed_file != NULL;
        claimed_file = claimed_file->next)
     {
-      (*get_symbols)(claimed_file->handle, claimed_file->nsyms,
+      (*get_symbols_v2)(claimed_file->handle, claimed_file->nsyms,
                      claimed_file->syms);
 
       for (i = 0; i < claimed_file->nsyms; ++i)
@@ -422,6 +426,9 @@ all_symbols_read_hook(void)
               break;
             case LDPR_PREVAILING_DEF_IRONLY:
               res = "PREVAILING_DEF_IRONLY";
+              break;
+            case LDPR_PREVAILING_DEF_IRONLY_EXP:
+              res = "PREVAILING_DEF_IRONLY_EXP";
               break;
             case LDPR_PREEMPTED_REG:
               res = "PREEMPTED_REG";
