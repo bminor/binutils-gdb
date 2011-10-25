@@ -66,4 +66,7 @@ extern void plugin_call_cleanup (void);
    add_symbols hook has been called so that it can be read when linking.  */
 extern bfd *plugin_get_ir_dummy_bfd (const char *name, bfd *template);
 
+/* Return true if bfd is a dynamic library that should be reloaded.  */
+extern bfd_boolean plugin_should_reload (bfd *);
+
 #endif /* !def GLD_PLUGIN_H */
