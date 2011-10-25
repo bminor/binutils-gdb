@@ -2327,6 +2327,12 @@ fragment <<EOF
 	link_info.relro = TRUE;
       else if (strcmp (optarg, "norelro") == 0)
 	link_info.relro = FALSE;
+      else if (strcmp (optarg, "text") == 0)
+	link_info.error_textrel = TRUE;
+      else if (strcmp (optarg, "notext") == 0)
+	link_info.error_textrel = FALSE;
+      else if (strcmp (optarg, "textoff") == 0)
+	link_info.error_textrel = FALSE;
 EOF
 fi
 

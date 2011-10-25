@@ -1,6 +1,12 @@
 2011-10-25  Alan Modra  <amodra@gmail.com>
 
 	Apply mainline patches
+	2011-10-19  Alan Modra  <amodra@gmail.com>
+	PR ld/13254
+	* emultempl/elf32.em (gld${EMULATION_NAME}_handle_option): Add
+	-z text, -z notext, -z textoff options for all targets having
+	shared lib support.
+
 	2011-10-15  Alan Modra  <amodra@gmail.com>
 	* emultempl/ppc64elf.em (gld${EMULATION_NAME}_finish): Remove toc check.
 
