@@ -1,3 +1,11 @@
+2011-10-25  Alan Modra  <amodra@gmail.com>
+
+	Apply mainline patches
+	2011-09-30  Alan Modra  <amodra@gmail.com>
+	* ld-powerpc/tocopt.d: Update.
+	* ld-powerpc/tocopt5.d, * ld-powerpc/tocopt5.s: New test.
+	* ld-powerpc/powerpc.exp: Run new test.
+
 2011-10-18  David S. Miller  <davem@davemloft.net>
 
 	* ld-sparc/tlssunbin32.dd: Update for TLS call relaxation fix
