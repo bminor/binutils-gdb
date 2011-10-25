@@ -23,11 +23,9 @@
 /* #define DEBUG_SYMS / * to debug symbol list maintenance.  */
 
 #include "as.h"
-
 #include "safe-ctype.h"
 #include "obstack.h"		/* For "symbols.h" */
 #include "subsegs.h"
-
 #include "struc-symbol.h"
 
 /* This is non-zero if symbols are case sensitive, which is the
@@ -191,7 +189,7 @@ static unsigned long local_symbol_conversion_count;
 
 /* Create a local symbol and insert it into the local hash table.  */
 
-static struct local_symbol *
+struct local_symbol *
 local_symbol_make (const char *name, segT section, valueT val, fragS *frag)
 {
   char *name_copy;
@@ -2136,6 +2134,16 @@ int
 S_IS_STABD (symbolS *s)
 {
   return S_GET_NAME (s) == 0;
+}
+
+int
+S_CAN_BE_REDEFINED (const symbolS *s)
+{
+  if (LOCAL_SYMBOL_CHECK (s))
+    return (local_symbol_get_frag ((struct local_symbol *) s)
+	    == &predefined_address_frag);
+  /* Permit register names to be redefined.  */
+  return s->bsym->section == reg_section;
 }
 
 int

@@ -3091,9 +3091,8 @@ assign_symbol (char *name, int mode)
 
   if (S_IS_DEFINED (symbolP) || symbol_equated_p (symbolP))
     {
-      /* Permit register names to be redefined.  */
       if ((mode != 0 || !S_IS_VOLATILE (symbolP))
-	  && S_GET_SEGMENT (symbolP) != reg_section)
+	  && !S_CAN_BE_REDEFINED (symbolP))
 	{
 	  as_bad (_("symbol `%s' is already defined"), name);
 	  symbolP = symbol_clone (symbolP, 0);
