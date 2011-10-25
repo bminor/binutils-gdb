@@ -236,17 +236,27 @@ proc test_value_in_inferior {} {
     gdb_test "python print gdb.parse_and_eval('*(int*)0')" "gdb.MemoryError: Cannot access memory at address 0x0.*" $test
   }
 
-  # Test Python values are not lazy.
-  set test "memory error occurs even for possibly lazy values"
+  # Test Python lazy value handling
+  set test "memory error and lazy values"
   if {$can_read_0} {
     untested $test
   } else {
-    gdb_test "python inval = gdb.parse_and_eval('*(int*)0')" "gdb.MemoryError: Cannot access memory at address 0x0.*" $test
+    gdb_test "python inval = gdb.parse_and_eval('*(int*)0')"
+    gdb_test "python print inval.is_lazy" "True"
+    gdb_test "python inval2 = inval+1" "gdb.MemoryError: Cannot access memory at address 0x0.*" $test
+    gdb_test "python inval.fetch_lazy ()" "gdb.MemoryError: Cannot access memory at address 0x0.*" $test
   }
   gdb_test "python argc_lazy = gdb.parse_and_eval('argc')"
+  gdb_test "python argc_notlazy = gdb.parse_and_eval('argc')"
+  gdb_test "python argc_notlazy.fetch_lazy()"
+  gdb_test "python print argc_lazy.is_lazy" "True"
+  gdb_test "python print argc_notlazy.is_lazy" "False"
   gdb_test "print argc" " = 1" "sanity check argc"
+  gdb_test "python print argc_lazy.is_lazy" "\r\nTrue"
   gdb_test_no_output "set argc=2"
-  gdb_test "python print argc_lazy" "\r\n1"
+  gdb_test "python print argc_notlazy" "\r\n1"
+  gdb_test "python print argc_lazy" "\r\n2"
+  gdb_test "python print argc_lazy.is_lazy" "False"
 
   # Test string fetches,  both partial and whole.
   gdb_test "print st" "\"divide et impera\""

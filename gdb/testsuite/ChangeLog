@@ -1,3 +1,10 @@
+2011-10-25  Paul Koning  <paul_koning@dell.com>
+
+	PR python/13327
+	
+	* gdb.python/py-value.exp: Add testcases for is_lazy attribute,
+	fetch_lazy method.
+
 2011-10-24  Yao Qi  <yao@codesourcery.com>
 
 	* lib/gdb.exp (can_single_step_to_signal_handler): Return 0 when
