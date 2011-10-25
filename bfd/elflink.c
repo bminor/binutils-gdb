@@ -4376,11 +4376,13 @@ error_free_dyn:
 		dynsym = TRUE;
 	    }
 
+	  /* We don't want to make debug symbol dynamic.  */
 	  if (definition && (sec->flags & SEC_DEBUGGING) && !info->relocatable)
-	    {
-	      /* We don't want to make debug symbol dynamic.  */
-	      dynsym = FALSE;
-	    }
+	    dynsym = FALSE;
+
+	  /* Nor should we make plugin symbols dynamic.  */
+	  if ((abfd->flags & BFD_PLUGIN) != 0)
+	    dynsym = FALSE;
 
 	  if (definition)
 	    h->target_internal = isym->st_target_internal;
