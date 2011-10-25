@@ -1,6 +1,10 @@
 2011-10-25  Alan Modra  <amodra@gmail.com>
 
 	Apply mainline patches
+	2011-10-08  Alan Modra  <amodra@gmail.com>
+	* elflink.c (elf_link_output_extsym): Strip defined plugin symbols
+	even when strip_discarded is false.
+
 	2011-09-30  Alan Modra  <amodra@gmail.com>
 	PR ld/13235
 	* elf64-ppc.c (struct ppc64_elf_obj_tdata): Add ha_relocs_not_using_r2.

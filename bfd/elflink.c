@@ -8679,10 +8679,12 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
 	   && bfd_hash_lookup (finfo->info->keep_hash,
 			       h->root.root.string, FALSE, FALSE) == NULL)
     strip = TRUE;
-  else if (finfo->info->strip_discarded
-	   && (h->root.type == bfd_link_hash_defined
-	       || h->root.type == bfd_link_hash_defweak)
-	   && elf_discarded_section (h->root.u.def.section))
+  else if ((h->root.type == bfd_link_hash_defined
+	    || h->root.type == bfd_link_hash_defweak)
+	   && ((finfo->info->strip_discarded
+		&& elf_discarded_section (h->root.u.def.section))
+	       || (h->root.u.def.section->owner != NULL
+		   && (h->root.u.def.section->owner->flags & BFD_PLUGIN) != 0)))
     strip = TRUE;
   else if ((h->root.type == bfd_link_hash_undefined
 	    || h->root.type == bfd_link_hash_undefweak)
