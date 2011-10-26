@@ -1,7 +1,11 @@
+2011-10-26  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/13348
+	* i386-dis.c (print_insn): Fix testing of array subscript.
+
 2011-10-26  Joern Rennecke  <joern.rennecke@embecosm.com>
 
 	* disassemble.c (ARCH_epiphany): Move into alphasorted spot.
-
 	* epiphany-asm.c, epiphany-opc.h: Regenerate.
 
 2011-10-25  Joern Rennecke  <joern.rennecke@embecosm.com>

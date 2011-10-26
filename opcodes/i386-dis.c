@@ -11331,7 +11331,7 @@ print_insn (bfd_vma pc, disassemble_info *info)
     {
       /* Too many prefixes or unused REX prefixes.  */
       for (i = 0;
-	   all_prefixes[i] && i < (int) ARRAY_SIZE (all_prefixes);
+	   i < (int) ARRAY_SIZE (all_prefixes) && all_prefixes[i];
 	   i++)
 	(*info->fprintf_func) (info->stream, "%s",
 			       prefix_name (all_prefixes[i], sizeflag));
