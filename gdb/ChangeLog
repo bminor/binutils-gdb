@@ -1,3 +1,7 @@
+2011-10-26  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdbarch.h: Regenerate.
+
 2011-10-26  Meador Inge  <meadori@codesourcery.com>
 
 	* gdbarch.sh (function_list): Use 'pstring' when printing
