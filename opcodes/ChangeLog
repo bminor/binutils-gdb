@@ -1,3 +1,7 @@
+2011-10-26  Joern Rennecke  <joern.rennecke@embecosm.com>
+
+	* disassemble.c (ARCH_epiphany): Move into alphasorted spot.
+
 2011-10-25  Joern Rennecke  <joern.rennecke@embecosm.com>
 
 	* Makefile.am (HFILES): Add epiphany-desc.h and epiphany-opc.h .

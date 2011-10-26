@@ -852,16 +852,21 @@ Warn when a nop after a 32-bit multiply instruction is generated.
 The following options are available when @value{AS} is configured for the
 Adapteva EPIPHANY series.
 
-@table @gcctabopt
+@ifclear man
+@xref{Epiphany Options}, for the options available when @value{AS} is
+configured for an Epiphany processor.
+@end ifclear
 
-@item -mepiphany
-Specifies that the both 32 and 16 bit instructions are allowed.  This is the
-default behavior.
+@ifset man
+@c man begin OPTIONS
+The following options are available when @value{AS} is configured for
+an Epiphany processor.
+@c man end
+@c man begin INCLUDE
+@include c-epiphany.texi
+@c ended inside the included file
+@end ifset
 
-@item -mepiphany16
-Restricts the permitted instructions to just the 16 bit set.
-
-@end table
 @end ifset
 
 @ifset I80386

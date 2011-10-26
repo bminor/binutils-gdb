@@ -1,3 +1,8 @@
+2011-10-26  Joern Rennecke  <joern.rennecke@embecosm.com>
+
+	* doc/as.texinfo [EPIPHANY]: Include c-epiphany.texi to avoid
+	duplication.
+
 2011-10-25  Mike Frysinger  <vapier@gentoo.org>
 
 	* config/rx-defs.h (rx_error): Add const to first arg.

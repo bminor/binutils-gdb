@@ -26,7 +26,6 @@
 #define ARCH_alpha
 #define ARCH_arc
 #define ARCH_arm
-#define ARCH_epiphany
 #define ARCH_avr
 #define ARCH_bfin
 #define ARCH_cr16
@@ -35,6 +34,7 @@
 #define ARCH_d10v
 #define ARCH_d30v
 #define ARCH_dlx
+#define ARCH_epiphany
 #define ARCH_fr30
 #define ARCH_frv
 #define ARCH_h8300
