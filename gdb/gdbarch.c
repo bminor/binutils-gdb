@@ -953,7 +953,7 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       gdbarch_gcore_bfd_target_p (gdbarch));
   fprintf_unfiltered (file,
                       "gdbarch_dump: gcore_bfd_target = %s\n",
-                      gdbarch->gcore_bfd_target);
+                      pstring (gdbarch->gcore_bfd_target));
   fprintf_unfiltered (file,
                       "gdbarch_dump: gen_return_address = <%s>\n",
                       host_address_to_string (gdbarch->gen_return_address));
