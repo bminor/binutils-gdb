@@ -155,8 +155,8 @@ static const bfd_byte plt_stub[] =
 };
 
 /* Section name for stubs is the associated section name plus this
-   string.  PR 13049: Use a name that is not a valid C identifier.  */
-#define STUB_SUFFIX ".__stub"
+   string.  */
+#define STUB_SUFFIX ".stub"
 
 /* We don't need to copy certain PC- or GP-relative dynamic relocs
    into a shared object's dynamic section.  All the relocs of the

@@ -1,3 +1,9 @@
+2011-10-26  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/13049
+	* elf64-ppc.c (STUB_SUFFIX): Revert previous delta.
+	* elf32-hppa.c (STUB_SUFFIX): Likewise.
+
 2011-10-25  Joern Rennecke  <joern.rennecke@embecosm.com>
 
 	* Makefile.am (ALL_MACHINES): Add cpu-epiphany.lo.
