@@ -1,3 +1,7 @@
+2011-10-26  Nick Clifton  <nickc@redhat.com>
+
+	* hist.c (hist_assign_samples_1): Update comment.
+
 2011-10-25   Wei Guozhi  <carrot@google.com>
 
 	PR gprof/13325

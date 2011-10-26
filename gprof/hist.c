@@ -389,8 +389,10 @@ hist_assign_samples_1 (histogram *r)
 		    bin_count));
       total_time += count_time;
 
-      /* Credit all symbols that are covered by bin I.  */
-      /* PR gprof/13325: Make sure that J does not go below I.  */
+      /* Credit all symbols that are covered by bin I.
+
+         PR gprof/13325: Make sure that K does not get decremented
+	 and J will never be less than 0.  */
       for (j = k - 1; j < symtab.len; k = ++j)
 	{
 	  sym_low_pc = symtab.base[j].hist.scaled_addr;
