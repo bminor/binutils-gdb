@@ -1,3 +1,11 @@
+2011-10-26  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* ppc-sysv-tdep.c (ppc_sysv_use_opencl_abi): New function.
+	(ppc_sysv_abi_push_dummy_call): Use it.
+	(do_ppc_sysv_return_value): Likewise.
+	(ppc64_sysv_abi_push_dummy_call): Likewise.
+	(ppc64_sysv_abi_return_value): Likewise.
+
 2011-10-26  Paul Koning  <paul_koning@dell.com>
 
 	* python/lib/gdb/types.py (deepitems): New function.

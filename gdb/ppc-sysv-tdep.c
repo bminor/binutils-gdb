@@ -32,6 +32,22 @@
 #include "infcall.h"
 #include "dwarf2.h"
 
+
+/* Check whether FTPYE is a (pointer to) function type that should use
+   the OpenCL vector ABI.  */
+
+static int
+ppc_sysv_use_opencl_abi (struct type *ftype)
+{
+  ftype = check_typedef (ftype);
+
+  if (TYPE_CODE (ftype) == TYPE_CODE_PTR)
+    ftype = check_typedef (TYPE_TARGET_TYPE (ftype));
+
+  return (TYPE_CODE (ftype) == TYPE_CODE_FUNC
+	  && TYPE_CALLING_CONVENTION (ftype) == DW_CC_GDB_IBM_OpenCL);
+}
+
 /* Pass the arguments in either registers, or in the stack.  Using the
    ppc sysv ABI, the first eight words of the argument list (that might
    be less than eight parameters if some parameters occupy more than one
@@ -51,8 +67,7 @@ ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  struct type *ftype;
-  int opencl_abi = 0;
+  int opencl_abi = ppc_sysv_use_opencl_abi (value_type (function));
   ULONGEST saved_sp;
   int argspace = 0;		/* 0 is an initial wrong guess.  */
   int write_pass;
@@ -61,13 +76,6 @@ ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
   regcache_cooked_read_unsigned (regcache, gdbarch_sp_regnum (gdbarch),
 				 &saved_sp);
-
-  ftype = check_typedef (value_type (function));
-  if (TYPE_CODE (ftype) == TYPE_CODE_PTR)
-    ftype = check_typedef (TYPE_TARGET_TYPE (ftype));
-  if (TYPE_CODE (ftype) == TYPE_CODE_FUNC
-      && TYPE_CALLING_CONVENTION (ftype) == DW_CC_GDB_IBM_OpenCL)
-    opencl_abi = 1;
 
   /* Go through the argument list twice.
 
@@ -689,12 +697,7 @@ do_ppc_sysv_return_value (struct gdbarch *gdbarch, struct type *func_type,
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  int opencl_abi = 0;
-
-  if (func_type
-      && TYPE_CODE (func_type) == TYPE_CODE_FUNC
-      && TYPE_CALLING_CONVENTION (func_type) == DW_CC_GDB_IBM_OpenCL)
-    opencl_abi = 1;
+  int opencl_abi = func_type? ppc_sysv_use_opencl_abi (func_type) : 0;
 
   gdb_assert (tdep->wordsize == 4);
 
@@ -1115,8 +1118,7 @@ ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch,
   CORE_ADDR func_addr = find_function_addr (function, NULL);
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  struct type *ftype;
-  int opencl_abi = 0;
+  int opencl_abi = ppc_sysv_use_opencl_abi (value_type (function));
   ULONGEST back_chain;
   /* See for-loop comment below.  */
   int write_pass;
@@ -1145,13 +1147,6 @@ ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch,
      before this and use that as the BACK_CHAIN.  */
   regcache_cooked_read_unsigned (regcache, gdbarch_sp_regnum (gdbarch),
 				 &back_chain);
-
-  ftype = check_typedef (value_type (function));
-  if (TYPE_CODE (ftype) == TYPE_CODE_PTR)
-    ftype = check_typedef (TYPE_TARGET_TYPE (ftype));
-  if (TYPE_CODE (ftype) == TYPE_CODE_FUNC
-      && TYPE_CALLING_CONVENTION (ftype) == DW_CC_GDB_IBM_OpenCL)
-    opencl_abi = 1;
 
   /* Go through the argument list twice.
 
@@ -1721,11 +1716,7 @@ ppc64_sysv_abi_return_value (struct gdbarch *gdbarch, struct type *func_type,
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  int opencl_abi = 0;
-
-  if (func_type
-      && TYPE_CALLING_CONVENTION (func_type) == DW_CC_GDB_IBM_OpenCL)
-    opencl_abi = 1;
+  int opencl_abi = func_type? ppc_sysv_use_opencl_abi (func_type) : 0;
 
   /* This function exists to support a calling convention that
      requires floating-point registers.  It shouldn't be used on
