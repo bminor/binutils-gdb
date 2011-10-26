@@ -54,6 +54,34 @@ enum enum1 { A, B, C };
 
 enum1 enum1_obj (A);
 
+struct A
+{
+	int a;
+	union {
+		int b0;
+		int b1;
+		union {
+			int bb0;
+			int bb1;
+			union {
+				int bbb0;
+				int bbb1;
+			};
+		};
+	};
+	int c;
+	union {
+		union {
+			int dd0;
+			int dd1;
+		};
+		int d2;
+		int d3;
+	};
+};
+
+struct A a = {1,20,3,40};
+
 int
 main ()
 {

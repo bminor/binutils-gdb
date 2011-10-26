@@ -138,3 +138,8 @@ gdb_test_no_output "python enum1_dict = gdb.types.make_enum_dict (enum1_obj.type
 gdb_test_no_output "python enum1_list = enum1_dict.items ()"
 gdb_test_no_output "python enum1_list.sort ()"
 gdb_test "python print enum1_list" {\[\('A', 0L\), \('B', 1L\), \('C', 2L\)\]}
+
+# test deepitems
+gdb_test_no_output "python struct_a = gdb.lookup_type ('struct A')"
+gdb_test "python print struct_a.keys ()" {\['a', '', 'c', ''\]}
+gdb_test "python print \[k for k,v in gdb.types.deepitems(struct_a)\]" {\['a', 'b0', 'b1', 'bb0', 'bb1', 'bbb0', 'bbb1', 'c', 'dd0', 'dd1', 'd2', 'd3'\]}

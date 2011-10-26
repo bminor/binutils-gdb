@@ -1,3 +1,8 @@
+2011-10-26  Paul Koning  <paul_koning@dell.com>
+
+	* gdb.python/lib-types.cc (struct A): New structure.
+	* gdb.python/lib-types.exp (deepitems): New tests.
+	
 2011-10-25  Paul Koning  <paul_koning@dell.com>
 
 	PR python/13327
