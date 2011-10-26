@@ -1,3 +1,9 @@
+2011-10-26  Joern Rennecke  <joern.rennecke@embecosm.com>
+
+	* epiphany.opc (parse_branch_addr): Fix type of valuep.
+	Cast value before printing it as a long.
+	(parse_postindex): Fix type of valuep.
+
 2011-10-25  Joern Rennecke  <joern.rennecke@embecosm.com>
 
 	* cpu/epiphany.cpu: New file.

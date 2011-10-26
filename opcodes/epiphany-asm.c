@@ -133,7 +133,7 @@ static const char *
 parse_postindex (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
 		 const char ** strp,
 		 int opindex ATTRIBUTE_UNUSED,
-		 bfd_vma * valuep)
+		 unsigned long *valuep)
 {
   if (**strp == '#')
     ++*strp;			/* Skip leading hashes.  */
@@ -249,7 +249,7 @@ parse_branch_addr (CGEN_CPU_DESC cd,
 		   int opindex,
 		   int opinfo ATTRIBUTE_UNUSED,
 		   enum cgen_parse_operand_result * resultp ATTRIBUTE_UNUSED,
-		   unsigned long * valuep ATTRIBUTE_UNUSED)
+		   bfd_vma *valuep ATTRIBUTE_UNUSED)
 {
   const char * errmsg;
   enum cgen_parse_operand_result result_type;
@@ -281,7 +281,7 @@ parse_branch_addr (CGEN_CPU_DESC cd,
 	  char buf[20];
 	  const char * bufp = (const char *) buf;
 
-	  sprintf (buf, ".+%ld", value);
+	  sprintf (buf, ".+%ld", (long) value);
 	  errmsg = cgen_parse_address (cd, &bufp, opindex, code, &result_type,
 				       &value);
 	}

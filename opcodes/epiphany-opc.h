@@ -73,7 +73,7 @@ extern const char * parse_branch_addr (CGEN_CPU_DESC cd,
 				       int opindex,
 				       int opinfo,
 				       enum cgen_parse_operand_result * resultp,
-				       unsigned long * valuep);
+				       bfd_vma *valuep);
 
 /* Allows reason codes to be output when assembler errors occur.  */
 #define CGEN_VERBOSE_ASSEMBLER_ERRORS
