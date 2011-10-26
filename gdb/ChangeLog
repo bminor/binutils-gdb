@@ -1,5 +1,10 @@
 2011-10-26  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* regcache.c (registers_changed_ptid): Invalidate thread architecture
+	and frame caches if PTID refers to all threads of a process.
+
+2011-10-26  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* spu-tdep.c (spu_catch_start): Pass non-NULL breakpoint ops
 	to create_breakpoint.
 

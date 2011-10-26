@@ -548,7 +548,6 @@ void
 registers_changed_ptid (ptid_t ptid)
 {
   struct regcache_list *list, **list_link;
-  int wildcard = ptid_equal (ptid, minus_one_ptid);
 
   list = current_regcache;
   list_link = &current_regcache;
@@ -569,13 +568,13 @@ registers_changed_ptid (ptid_t ptid)
       list = *list_link;
     }
 
-  if (wildcard || ptid_equal (ptid, current_thread_ptid))
+  if (ptid_match (current_thread_ptid, ptid))
     {
       current_thread_ptid = null_ptid;
       current_thread_arch = NULL;
     }
 
-  if (wildcard || ptid_equal (ptid, inferior_ptid))
+  if (ptid_match (inferior_ptid, ptid))
     {
       /* We just deleted the regcache of the current thread.  Need to
 	 forget about any frames we have cached, too.  */
