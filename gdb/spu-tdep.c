@@ -1939,8 +1939,8 @@ spu_catch_start (struct objfile *objfile)
 		     bp_breakpoint /* type_wanted */,
 		     0 /* ignore_count */,
 		     AUTO_BOOLEAN_FALSE /* pending_break_support */,
-		     NULL /* ops */, 0 /* from_tty */, 1 /* enabled */,
-		     0 /* internal  */);
+		     &bkpt_breakpoint_ops /* ops */, 0 /* from_tty */,
+		     1 /* enabled */, 0 /* internal  */);
 }
 
 

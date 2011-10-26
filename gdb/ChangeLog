@@ -1,5 +1,10 @@
 2011-10-26  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* spu-tdep.c (spu_catch_start): Pass non-NULL breakpoint ops
+	to create_breakpoint.
+
+2011-10-26  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* ppc-sysv-tdep.c (ppc_sysv_use_opencl_abi): New function.
 	(ppc_sysv_abi_push_dummy_call): Use it.
 	(do_ppc_sysv_return_value): Likewise.
