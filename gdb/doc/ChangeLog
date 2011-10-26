@@ -1,3 +1,7 @@
+2011-10-26  Paul Koning  <paul_koning@dell.com>
+
+	* gdb.texinfo (gdb.types): Document new deepitems function.
+	
 2011-10-25  Paul Koning  <paul_koning@dell.com>
 
 	PR python/13327
