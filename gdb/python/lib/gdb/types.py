@@ -89,3 +89,23 @@ def make_enum_dict(enum_type):
         # The enum's value is stored in "bitpos".
         enum_dict[field.name] = field.bitpos
     return enum_dict
+
+
+def deepitems (type_):
+    """Return an iterator that recursively traverses anonymous fields.
+
+    Arguments:
+        type_: The type to traverse.  It should be one of
+        gdb.TYPE_CODE_STRUCT or gdb.TYPE_CODE_UNION.
+
+    Returns:
+        an iterator similar to gdb.Type.iteritems(), i.e., it returns
+        pairs of key, value, but for any anonymous struct or union
+        field that field is traversed recursively, depth-first.
+    """
+    for k, v in type_.iteritems ():
+        if k:
+            yield k, v
+        else:
+            for i in deepitems (v.type):
+                yield i
