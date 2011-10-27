@@ -1,3 +1,8 @@
+2011-10-27  Tom Tromey  <tromey@redhat.com>
+
+	* ada-lang.h (ada_start_decode_line_1, ada_finish_decode_line_1)
+	(ada_sals_for_line): Remove declarations.
+
 2011-10-27  Kevin Pouget  <kevin.pouget@st.com>
 
 	Move unwind reasons to an external .def file
