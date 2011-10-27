@@ -150,6 +150,7 @@ bppy_set_enabled (PyObject *self, PyObject *newvalue, void *closure)
 {
   breakpoint_object *self_bp = (breakpoint_object *) self;
   int cmp;
+  volatile struct gdb_exception except;
 
   BPPY_SET_REQUIRE_VALID (self_bp);
 
@@ -170,10 +171,16 @@ bppy_set_enabled (PyObject *self, PyObject *newvalue, void *closure)
   cmp = PyObject_IsTrue (newvalue);
   if (cmp < 0)
     return -1;
-  else if (cmp == 1)
-    enable_breakpoint (self_bp->bp);
-  else 
-    disable_breakpoint (self_bp->bp);
+
+  TRY_CATCH (except, RETURN_MASK_ALL)
+    {
+      if (cmp == 1)
+	enable_breakpoint (self_bp->bp);
+      else
+	disable_breakpoint (self_bp->bp);
+    }
+  GDB_PY_SET_HANDLE_EXCEPTION (except);
+
   return 0;
 }
 
@@ -255,6 +262,8 @@ bppy_set_task (PyObject *self, PyObject *newvalue, void *closure)
 {
   breakpoint_object *self_bp = (breakpoint_object *) self;
   long id;
+  int valid_id = 0;
+  volatile struct gdb_exception except;
 
   BPPY_SET_REQUIRE_VALID (self_bp);
 
@@ -269,7 +278,13 @@ bppy_set_task (PyObject *self, PyObject *newvalue, void *closure)
       if (! gdb_py_int_as_long (newvalue, &id))
 	return -1;
 
-      if (! valid_task_id (id))
+      TRY_CATCH (except, RETURN_MASK_ALL)
+	{
+	  valid_id = valid_task_id (id);
+	}
+      GDB_PY_SET_HANDLE_EXCEPTION (except);
+
+      if (! valid_id)
 	{
 	  PyErr_SetString (PyExc_RuntimeError, 
 			   _("Invalid task ID."));
@@ -299,10 +314,15 @@ static PyObject *
 bppy_delete_breakpoint (PyObject *self, PyObject *args)
 {
   breakpoint_object *self_bp = (breakpoint_object *) self;
+  volatile struct gdb_exception except;
 
   BPPY_REQUIRE_VALID (self_bp);
 
-  delete_breakpoint (self_bp->bp);
+  TRY_CATCH (except, RETURN_MASK_ALL)
+    {
+      delete_breakpoint (self_bp->bp);
+    }
+  GDB_PY_HANDLE_EXCEPTION (except);
 
   Py_RETURN_NONE;
 }

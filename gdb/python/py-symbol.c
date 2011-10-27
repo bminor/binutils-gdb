@@ -274,9 +274,10 @@ gdbpy_lookup_symbol (PyObject *self, PyObject *args, PyObject *kw)
   int domain = VAR_DOMAIN, is_a_field_of_this = 0;
   const char *name;
   static char *keywords[] = { "name", "block", "domain", NULL };
-  struct symbol *symbol;
+  struct symbol *symbol = NULL;
   PyObject *block_obj = NULL, *ret_tuple, *sym_obj, *bool_obj;
   const struct block *block = NULL;
+  volatile struct gdb_exception except;
 
   if (! PyArg_ParseTupleAndKeywords (args, kw, "s|O!i", keywords, &name,
 				     &block_object_type, &block_obj, &domain))
@@ -297,7 +298,11 @@ gdbpy_lookup_symbol (PyObject *self, PyObject *args, PyObject *kw)
       GDB_PY_HANDLE_EXCEPTION (except);
     }
 
-  symbol = lookup_symbol (name, block, domain, &is_a_field_of_this);
+  TRY_CATCH (except, RETURN_MASK_ALL)
+    {
+      symbol = lookup_symbol (name, block, domain, &is_a_field_of_this);
+    }
+  GDB_PY_HANDLE_EXCEPTION (except);
 
   ret_tuple = PyTuple_New (2);
   if (!ret_tuple)
@@ -335,14 +340,19 @@ gdbpy_lookup_global_symbol (PyObject *self, PyObject *args, PyObject *kw)
   int domain = VAR_DOMAIN;
   const char *name;
   static char *keywords[] = { "name", "domain", NULL };
-  struct symbol *symbol;
+  struct symbol *symbol = NULL;
   PyObject *sym_obj;
+  volatile struct gdb_exception except;
 
   if (! PyArg_ParseTupleAndKeywords (args, kw, "s|i", keywords, &name,
 				     &domain))
     return NULL;
 
-  symbol = lookup_symbol_global (name, NULL, domain);
+  TRY_CATCH (except, RETURN_MASK_ALL)
+    {
+      symbol = lookup_symbol_global (name, NULL, domain);
+    }
+  GDB_PY_HANDLE_EXCEPTION (except);
 
   if (symbol)
     {

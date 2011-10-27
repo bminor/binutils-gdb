@@ -595,9 +595,7 @@ typy_lookup_typename (const char *type_name, const struct block *block)
     }
   if (except.reason < 0)
     {
-      PyErr_Format (except.reason == RETURN_QUIT
-		    ? PyExc_KeyboardInterrupt : PyExc_RuntimeError,
-		    "%s", except.message);
+      gdbpy_convert_exception (except);
       return NULL;
     }
 
@@ -609,8 +607,9 @@ typy_lookup_type (struct demangle_component *demangled,
 		  const struct block *block)
 {
   struct type *type;
-  char *type_name;
+  char *type_name = NULL;
   enum demangle_component_type demangled_type;
+  volatile struct gdb_exception except;
 
   /* Save the type: typy_lookup_type() may (indirectly) overwrite
      memory pointed by demangled.  */
@@ -625,20 +624,29 @@ typy_lookup_type (struct demangle_component *demangled,
       if (! type)
 	return NULL;
 
-      switch (demangled_type)
+      TRY_CATCH (except, RETURN_MASK_ALL)
 	{
-	case DEMANGLE_COMPONENT_REFERENCE:
-	  return lookup_reference_type (type);
-	case DEMANGLE_COMPONENT_POINTER:
-	  return lookup_pointer_type (type);
-	case DEMANGLE_COMPONENT_CONST:
-	  return make_cv_type (1, 0, type, NULL);
-	case DEMANGLE_COMPONENT_VOLATILE:
-	  return make_cv_type (0, 1, type, NULL);
+	  switch (demangled_type)
+	    {
+	    case DEMANGLE_COMPONENT_REFERENCE:
+	      return lookup_reference_type (type);
+	    case DEMANGLE_COMPONENT_POINTER:
+	      return lookup_pointer_type (type);
+	    case DEMANGLE_COMPONENT_CONST:
+	      return make_cv_type (1, 0, type, NULL);
+	    case DEMANGLE_COMPONENT_VOLATILE:
+	      return make_cv_type (0, 1, type, NULL);
+	    }
+
+	  type_name = cp_comp_to_string (demangled, 10);
+	}
+      if (except.reason < 0)
+	{
+	  gdbpy_convert_exception (except);
+	  return NULL;
 	}
     }
 
-  type_name = cp_comp_to_string (demangled, 10);
   type = typy_lookup_typename (type_name, block);
   xfree (type_name);
 
@@ -1007,11 +1015,13 @@ typy_richcompare (PyObject *self, PyObject *other, int op)
 	{
 	  result = check_types_worklist (&worklist, cache);
 	}
-      if (except.reason < 0)
-	result = Py_NE;
-
+      /* check_types_worklist calls several nested Python helper
+	 functions, some of which can raise a GDB Exception, so we
+	 just check and convert here.  If there is a GDB exception, a
+	 comparison is not capable (or trusted), so exit.  */
       bcache_xfree (cache);
       VEC_free (type_equality_entry_d, worklist);
+      GDB_PY_HANDLE_EXCEPTION (except);
     }
 
   if (op == result)
@@ -1112,7 +1122,8 @@ typy_getitem (PyObject *self, PyObject *key)
   struct type *type = ((type_object *) self)->type;
   char *field;
   int i;
-  
+  volatile struct gdb_exception except;
+
   field = python_string_to_host_string (key);
   if (field == NULL)
     return NULL;
@@ -1123,7 +1134,12 @@ typy_getitem (PyObject *self, PyObject *key)
 
   for (;;)
     {
-      CHECK_TYPEDEF (type);
+      TRY_CATCH (except, RETURN_MASK_ALL)
+	{
+	  CHECK_TYPEDEF (type);
+	}
+      GDB_PY_HANDLE_EXCEPTION (except);
+
       if (TYPE_CODE (type) != TYPE_CODE_PTR
 	  && TYPE_CODE (type) != TYPE_CODE_REF)
 	break;
@@ -1178,7 +1194,8 @@ typy_has_key (PyObject *self, PyObject *args)
   struct type *type = ((type_object *) self)->type;
   const char *field;
   int i;
-  
+  volatile struct gdb_exception except;
+
   if (!PyArg_ParseTuple (args, "s", &field))
     return NULL;
 
@@ -1188,7 +1205,11 @@ typy_has_key (PyObject *self, PyObject *args)
 
   for (;;)
     {
-      CHECK_TYPEDEF (type);
+      TRY_CATCH (except, RETURN_MASK_ALL)
+	{
+	  CHECK_TYPEDEF (type);
+	}
+      GDB_PY_HANDLE_EXCEPTION (except);
       if (TYPE_CODE (type) != TYPE_CODE_PTR
 	  && TYPE_CODE (type) != TYPE_CODE_REF)
 	break;

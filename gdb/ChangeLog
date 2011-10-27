@@ -1,3 +1,18 @@
+2011-10-27  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* python/py-breakpoint.c (bppy_set_enabled): Use TRY_CATCH.
+	(bppy_set_task): Ditto.
+	(bppy_delete_breakpoint): Ditto.
+	* python/py-symbol.c (gdbpy_lookup_symbol): Ditto.
+	(gdbpy_lookup_global_symbol): Ditto.
+	* python/py-lazy-string.c (stpy_convert_to_value): Ditto.
+	* python/py-frame.c (frapy_is_valid): Ditto.
+	(frame_info_to_frame_object): Ditto.
+	* python/py-type.c (typy_lookup_type): Ditto.
+	(typy_getitem): Ditto.
+	(typy_has_key): Ditto.
+	(typy_richcompare): Use TRY_CATCH.  Do not return Py_NE on error.
+
 2011-10-26  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdbarch.h: Regenerate.
