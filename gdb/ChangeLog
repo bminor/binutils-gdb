@@ -1,3 +1,15 @@
+2011-10-27  Doug Evans  <dje@google.com>
+
+	* cli/cli-cmds.c (source_script_with_search): Pass full path to
+	source_script_from_stream if it may have been found on the search path.
+	* python/py-auto-load.c (source_section_scripts): Pass full path to
+	source_python_script_for_objfile.
+	* python/python.c (source_python_script): Delete stream parameter.
+	All callers updated.
+	(source_python_script_for_objfile): Ditto.
+	* python/python-internal.h (source_python_script_for_objfile): Update.
+	* python/python.h (source_python_script): Update.
+
 2011-10-27  Tom Tromey  <tromey@redhat.com>
 
 	* ada-lang.h (ada_start_decode_line_1, ada_finish_decode_line_1)

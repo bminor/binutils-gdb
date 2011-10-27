@@ -535,7 +535,9 @@ source_script_from_stream (FILE *stream, const char *file)
 
       TRY_CATCH (e, RETURN_MASK_ERROR)
 	{
-	  source_python_script (stream, file);
+          /* The python support reopens the file using python functions,
+             so there's no point in passing STREAM here.  */
+	  source_python_script (file);
 	}
       if (e.reason < 0)
 	{
@@ -577,7 +579,7 @@ source_script_with_search (const char *file, int from_tty, int search_path)
 
   if (!find_and_open_script (file, search_path, &stream, &full_path))
     {
-      /* The script wasn't found, or was otherwise inaccessible.  
+      /* The script wasn't found, or was otherwise inaccessible.
          If the source command was invoked interactively, throw an
 	 error.  Otherwise (e.g. if it was invoked by a script),
 	 silently ignore the error.  */
@@ -588,7 +590,12 @@ source_script_with_search (const char *file, int from_tty, int search_path)
     }
 
   old_cleanups = make_cleanup (xfree, full_path);
-  source_script_from_stream (stream, file);
+  /* The python support reopens the file, so we need to pass full_path here
+     in case the file was found on the search path.  It's useful to do this
+     anyway so that error messages show the actual file used.  But only do
+     this if we (may have) used search_path, as printing the full path in
+     errors for the non-search case can be more noise than signal.  */
+  source_script_from_stream (stream, search_path ? full_path : file);
   do_cleanups (old_cleanups);
 }
 

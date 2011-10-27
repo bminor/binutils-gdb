@@ -1,12 +1,16 @@
+2011-10-27  Doug Evans  <dje@google.com>
+
+	* gdb.python/python.exp: Test source -s.
+
 2011-10-26  Paul Koning  <paul_koning@dell.com>
 
 	* gdb.python/lib-types.cc (struct A): New structure.
 	* gdb.python/lib-types.exp (deepitems): New tests.
-	
+
 2011-10-25  Paul Koning  <paul_koning@dell.com>
 
 	PR python/13327
-	
+
 	* gdb.python/py-value.exp: Add testcases for is_lazy attribute,
 	fetch_lazy method.
 
