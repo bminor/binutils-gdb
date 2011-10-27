@@ -1,3 +1,7 @@
+2011-10-27  Joern Rennecke  <joern.rennecke@embecosm.com>
+
+	* MAINTAINERS: Add myself as EPIPHANY port maintainer.
+
 2011-10-25  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.am (syslex.@OBJEXT@): Add -I$(srcdir).
