@@ -553,7 +553,7 @@ gdbpy_frame_stop_reason_string (PyObject *self, PyObject *args)
   if (!PyArg_ParseTuple (args, "i", &reason))
     return NULL;
 
-  if (reason < 0 || reason > UNWIND_NO_SAVED_PC)
+  if (reason < UNWIND_FIRST || reason > UNWIND_LAST)
     {
       PyErr_SetString (PyExc_ValueError, 
 		       _("Invalid frame stop reason."));
@@ -610,18 +610,13 @@ gdbpy_initialize_frames (void)
   PyModule_AddIntConstant (gdb_module, "SIGTRAMP_FRAME", SIGTRAMP_FRAME);
   PyModule_AddIntConstant (gdb_module, "ARCH_FRAME", ARCH_FRAME);
   PyModule_AddIntConstant (gdb_module, "SENTINEL_FRAME", SENTINEL_FRAME);
-  PyModule_AddIntConstant (gdb_module,
-			   "FRAME_UNWIND_NO_REASON", UNWIND_NO_REASON);
-  PyModule_AddIntConstant (gdb_module,
-			   "FRAME_UNWIND_NULL_ID", UNWIND_NULL_ID);
-  PyModule_AddIntConstant (gdb_module,
-			   "FRAME_UNWIND_FIRST_ERROR", UNWIND_FIRST_ERROR);
-  PyModule_AddIntConstant (gdb_module,
-			   "FRAME_UNWIND_INNER_ID", UNWIND_INNER_ID);
-  PyModule_AddIntConstant (gdb_module,
-			   "FRAME_UNWIND_SAME_ID", UNWIND_SAME_ID);
-  PyModule_AddIntConstant (gdb_module,
-			   "FRAME_UNWIND_NO_SAVED_PC", UNWIND_NO_SAVED_PC);
+
+#define SET(name, description) \
+  PyModule_AddIntConstant (gdb_module, "FRAME_"#name, name);
+#define FIRST_ERROR(name) \
+  PyModule_AddIntConstant (gdb_module, "FRAME_"#name, name);
+#include "unwind_stop_reasons.def"
+#undef SET
 
   Py_INCREF (&frame_object_type);
   PyModule_AddObject (gdb_module, "Frame", (PyObject *) &frame_object_type);

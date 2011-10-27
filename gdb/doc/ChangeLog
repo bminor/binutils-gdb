@@ -1,3 +1,8 @@
+2011-10-27  Kevin Pouget  <kevin.pouget@st.com>
+
+	* gdb.texinfo ((Frames In Python): Document 
+	gdb.FRAME_UNWIND_FIRST_ERROR contant.
+
 2011-10-26  Paul Koning  <paul_koning@dell.com>
 
 	* gdb.texinfo (gdb.types): Document new deepitems function.

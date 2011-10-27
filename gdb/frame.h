@@ -446,47 +446,16 @@ extern struct address_space *get_frame_address_space (struct frame_info *);
 
 enum unwind_stop_reason
   {
-    /* No particular reason; either we haven't tried unwinding yet,
-       or we didn't fail.  */
-    UNWIND_NO_REASON,
+#define SET(name, description) name,
+#define FIRST_ENTRY(name) UNWIND_FIRST = name,
+#define LAST_ENTRY(name) UNWIND_LAST = name,
+#define FIRST_ERROR(name) UNWIND_FIRST_ERROR = name,
 
-    /* The previous frame's analyzer returns an invalid result
-       from this_id.
-
-       FIXME drow/2006-08-16: This is how GDB used to indicate end of
-       stack.  We should migrate to a model where frames always have a
-       valid ID, and this becomes not just an error but an internal
-       error.  But that's a project for another day.  */
-    UNWIND_NULL_ID,
-
-    /* This frame is the outermost.  */
-    UNWIND_OUTERMOST,
-
-    /* All the conditions after this point are considered errors;
-       abnormal stack termination.  If a backtrace stops for one
-       of these reasons, we'll let the user know.  This marker
-       is not a valid stop reason.  */
-    UNWIND_FIRST_ERROR,
-
-    /* Can't unwind further, because that would require knowing the
-       values of registers or memory that haven't been collected.  */
-    UNWIND_UNAVAILABLE,
-
-    /* This frame ID looks like it ought to belong to a NEXT frame,
-       but we got it for a PREV frame.  Normally, this is a sign of
-       unwinder failure.  It could also indicate stack corruption.  */
-    UNWIND_INNER_ID,
-
-    /* This frame has the same ID as the previous one.  That means
-       that unwinding further would almost certainly give us another
-       frame with exactly the same ID, so break the chain.  Normally,
-       this is a sign of unwinder failure.  It could also indicate
-       stack corruption.  */
-    UNWIND_SAME_ID,
-
-    /* The frame unwinder didn't find any saved PC, but we needed
-       one to unwind further.  */
-    UNWIND_NO_SAVED_PC,
+#include "unwind_stop_reasons.def"
+#undef SET
+#undef FIRST_ENTRY
+#undef LAST_ENTRY
+#undef FIRST_ERROR
   };
 
 /* Return the reason why we can't unwind past this frame.  */

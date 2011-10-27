@@ -23473,6 +23473,19 @@ stack corruption.
 @item gdb.FRAME_UNWIND_NO_SAVED_PC
 The frame unwinder did not find any saved PC, but we needed
 one to unwind further.
+
+@item gdb.FRAME_UNWIND_FIRST_ERROR
+Any stop reason greater or equal to this value indicates some kind
+of error.  This special value facilitates writing code that tests
+for errors in unwinding in a way that will work correctly even if
+the list of the other values is modified in future @value{GDBN}
+versions.  Using it, you could write:
+@smallexample
+reason = gdb.selected_frame().unwind_stop_reason ()
+reason_str =  gdb.frame_stop_reason_string (reason)
+if reason >=  gdb.FRAME_UNWIND_FIRST_ERROR:
+    print "An error occured: %s" % reason_str
+@end smallexample
 @end table
 
 @end defun

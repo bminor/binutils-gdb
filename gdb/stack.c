@@ -1625,7 +1625,7 @@ backtrace_command_1 (char *count_exp, int show_locals, int from_tty)
       enum unwind_stop_reason reason;
 
       reason = get_frame_unwind_stop_reason (trailing);
-      if (reason > UNWIND_FIRST_ERROR)
+      if (reason >= UNWIND_FIRST_ERROR)
 	printf_filtered (_("Backtrace stopped: %s\n"),
 			 frame_stop_reason_string (reason));
     }

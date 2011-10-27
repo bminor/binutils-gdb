@@ -1,3 +1,16 @@
+2011-10-27  Kevin Pouget  <kevin.pouget@st.com>
+
+	Move unwind reasons to an external .def file
+	* frame.c (frame_stop_reason_string): Rewrite using
+	unwind_stop_reasons.def.
+	* frame.h (enum unwind_stop_reason): Likewise.
+	* python/py-frame.c (gdbpy_initialize_frames): Likewise.
+	(gdbpy_frame_stop_reason_string): Use new enum unwind_stop_reason
+	constants for bound-checking.
+	* unwind_stop_reasons.def: New file.
+	* stack.c (backtrace_command_1): Handle UNWIND_FIRST_ERROR as an alias
+	instead of a distinct value.
+
 2011-10-27  Phil Muldoon  <pmuldoon@redhat.com>
 
         PR python/13331
