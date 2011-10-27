@@ -1,3 +1,10 @@
+2011-10-27  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* ppc-opc.c (powerpc_opcodes) <drrndq, drrndq., dtstexq, dctqpq,
+	dctqpq., dctfixq, dctfixq., dxexq, dxexq., dtstsfq, dcffixq, dcffixq.,
+	diexq, diexq.>: Use FRT, FRA, FRB and FRBp repsectively on DFP quad
+	instructions.
+
 2011-10-25  Alan Modra  <amodra@gmail.com>
 
 	Apply mainline patches
