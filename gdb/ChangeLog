@@ -1,5 +1,13 @@
 2011-10-27  Phil Muldoon  <pmuldoon@redhat.com>
 
+        PR python/13331
+
+	* python/py-function.c (fnpy_call): Check 'args' is not NULL.
+	(convert_values_to_python): Return on Python tuple allocation
+	failure.  Return NULL on value conversion error.
+
+2011-10-27  Phil Muldoon  <pmuldoon@redhat.com>
+
 	* python/py-breakpoint.c (bppy_set_enabled): Use TRY_CATCH.
 	(bppy_set_task): Ditto.
 	(bppy_delete_breakpoint): Ditto.
