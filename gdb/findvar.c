@@ -623,6 +623,35 @@ default_value_from_register (struct type *type, int regnum,
   return value;
 }
 
+/* VALUE must be an lval_register value.  If regnum is the value's
+   associated register number, and len the length of the values type,
+   read one or more registers in FRAME, starting with register REGNUM,
+   until we've read LEN bytes.  */
+
+void
+read_frame_register_value (struct value *value, struct frame_info *frame)
+{
+  int offset = 0;
+  int regnum = VALUE_REGNUM (value);
+  const int len = TYPE_LENGTH (check_typedef (value_type (value)));
+
+  gdb_assert (VALUE_LVAL (value) == lval_register);
+
+  while (offset < len)
+    {
+      struct value *regval = get_frame_register_value (frame, regnum);
+      int reg_len = TYPE_LENGTH (value_type (regval));
+
+      if (offset + reg_len > len)
+        reg_len = len - offset;
+      value_contents_copy (value, offset, regval, value_offset (regval),
+			   reg_len);
+
+      offset += reg_len;
+      regnum++;
+    }
+}
+
 /* Return a value of type TYPE, stored in register REGNUM, in frame FRAME.  */
 
 struct value *
@@ -661,16 +690,11 @@ value_from_register (struct type *type, int regnum, struct frame_info *frame)
     }
   else
     {
-      int len = TYPE_LENGTH (type);
-      struct value *v2;
-
       /* Construct the value.  */
       v = gdbarch_value_from_register (gdbarch, type, regnum, frame);
 
       /* Get the data.  */
-      v2 = get_frame_register_value (frame, regnum);
-
-      value_contents_copy (v, 0, v2, value_offset (v), len);
+      read_frame_register_value (v, frame);
     }
 
   return v;
@@ -695,3 +719,4 @@ address_from_register (struct type *type, int regnum, struct frame_info *frame)
 
   return result;
 }
+

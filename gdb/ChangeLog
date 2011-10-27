@@ -1,3 +1,11 @@
+2011-10-27  Joel Brobecker  <brobecker@adacore.com>
+
+	* value.h (read_frame_register_value): Add declaration.
+	* findvar.c (read_frame_register_value): New function.
+	(value_from_register): Use read_frame_register_value
+	instead of get_frame_register_value + value_contents_copy
+	to get value contents.
+
 2011-10-27  Doug Evans  <dje@google.com>
 
 	* cli/cli-cmds.c (source_script_with_search): Pass full path to
