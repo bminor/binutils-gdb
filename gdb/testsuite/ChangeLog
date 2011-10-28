@@ -1,14 +1,26 @@
+2011-10-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/async-shell.exp: Skip the testfile for use_gdb_stub.
+	* gdb.base/attach-pie-misread.exp: Likewise.
+	* gdb.base/break-interp.exp: Likewise.
+	* gdb.base/default.exp (attach, run "r" abbreviation, run): Skip these
+	testcases for use_gdb_stub.
+	* gdb.dwarf2/dw2-restore.exp: Fix the run for use_gdb_stub.
+	(continue): New testcase.
+	* gdb.python/py-events.exp: Skip the testfile for use_gdb_stub.
+	* gdb.threads/attach-into-signal.exp: Likewise.
+	* gdb.threads/attach-stopped.exp: Likewise.
+	* gdb.threads/attachstop-mt.exp: Likewise.
+
 2011-10-28  Paul Koning  <paul_koning@dell.com>
 
 	* gdb.python/lib-types.exp (deep_items): Rename from deepitems.
-
 
 2011-10-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* lib/mi-support.exp (breakpoint_re): Suppress match reporting.
 	(mi_gdb_test): Import globals thread_selected_re
 	and breakpoint_re.  Expect them optionally at the regex start.
-
 
 2011-10-27  Doug Evans  <dje@google.com>
 

@@ -20,6 +20,11 @@ if { ![support_displaced_stepping] } {
     return -1
 }
 
+# The testfile uses "run".  The real bug happened only for ![is_remote target].
+if [target_info exists use_gdb_stub] {
+    return 0
+}
+
 if { [prepare_for_testing ${testfile}.exp ${testfile}] } {
     return -1
 }

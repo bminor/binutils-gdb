@@ -14,7 +14,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # This test only works on GNU/Linux.
-if { ![isnative] || [is_remote host] || ![istarget *-linux*] || [skip_shlib_tests]} {
+if { ![isnative] || [is_remote host] || [target_info exists use_gdb_stub]
+     || ![istarget *-linux*] || [skip_shlib_tests]} {
     continue
 }
 

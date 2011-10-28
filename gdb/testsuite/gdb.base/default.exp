@@ -39,23 +39,23 @@ gdb_test "append value"  "Missing filename\."
 gdb_test "append binary memory" "Missing filename\." 
 gdb_test "append binary value"  "Missing filename\." 
 
-setup_xfail "mips-idt-*"
-gdb_test_multiple "attach" "attach" {
-    -re "Argument required .(process-id|program) to attach.*$gdb_prompt $"\
-	{ pass "attach" }
-    -re "You can't do that when your target is `None'.*$gdb_prompt $"\
-	{ pass "attach" }
-    -re "You can't do that without a process to debug.*$gdb_prompt $"\
-	{ pass "attach" }
-    -re "Don't know how to attach.  Try \"help target\"..*$gdb_prompt $"\
-	{ pass "attach" }
-    -re "Kill it. .y or n." {
-	send_gdb "y\n"
-	exp_continue
-    }
-}
-
 if ![target_info exists use_gdb_stub] {
+    setup_xfail "mips-idt-*"
+    gdb_test_multiple "attach" "attach" {
+	-re "Argument required .(process-id|program) to attach.*$gdb_prompt $"\
+	    { pass "attach" }
+	-re "You can't do that when your target is `None'.*$gdb_prompt $"\
+	    { pass "attach" }
+	-re "You can't do that without a process to debug.*$gdb_prompt $"\
+	    { pass "attach" }
+	-re "Don't know how to attach.  Try \"help target\"..*$gdb_prompt $"\
+	    { pass "attach" }
+	-re "Kill it. .y or n." {
+	    send_gdb "y\n"
+	    exp_continue
+	}
+    }
+
     gdb_test "break" "No default breakpoint address now." "break"
     foreach i "b br bre brea" {
 	gdb_test $i "No default breakpoint address now." "break \"$i\" abbreviation"
@@ -420,7 +420,9 @@ gdb_test "ptype" "The history is empty." "ptype"
 gdb_test "pwd" "Working directory .*" "pwd"
 
 #test run "r" abbreviation
-if [istarget "*-*-vxworks*"] then {
+if [target_info exists use_gdb_stub] {
+    # Only extended-remote supports "run".
+} elseif [istarget "*-*-vxworks*"] then {
     gdb_test "set args" ".*" "" 
 
     gdb_test "r" "Starting program: .*
@@ -446,7 +448,9 @@ You must specify a function name to run, and arguments if any"\
 }
 
 #test run
-if [istarget "*-*-vxworks*"] then {
+if [target_info exists use_gdb_stub] {
+    # Only extended-remote supports "run".
+} elseif [istarget "*-*-vxworks*"] then {
     gdb_test "set args" ".*" "" 
 
     gdb_test "run" "Starting program: .*
