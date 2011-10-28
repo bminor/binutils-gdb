@@ -1,6 +1,7 @@
 2011-10-28  Walter Lee  <walt@tilera.com>
 
 	* NEWS: Mention addition of TILEPro and TILE-Gx support.
+	* MAINTAINERS: Add myself as TILEPro and TILE-Gx port maintainer.
 
 2011-10-27  Joern Rennecke  <joern.rennecke@embecosm.com>
 
