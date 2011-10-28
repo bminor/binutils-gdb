@@ -691,15 +691,19 @@ emit_tilegx_instruction (tilegx_bundle_bits bits,
 
 	      if (operand_exp->X_add_symbol->sy_value.X_md)
 		{
-		  if (require_symbol)
-		    {
-		      as_bad (_("Operator may only be applied to symbols."));
-		    }
-
 		  /* HACK: We used X_md to mark this symbol as a fake wrapper
 		     around a real expression. To unwrap it, we just grab its
 		     value here.  */
 		  operand_exp = &operand_exp->X_add_symbol->sy_value;
+
+		  if (require_symbol)
+		    {
+		      /* Look at the expression, and reject it if it's not a
+			 plain symbol.  */
+		      if (operand_exp->X_op != O_symbol
+			  || operand_exp->X_add_number != 0)
+			as_bad (_("Operator may only be applied to symbols."));
+		    }
 		}
 	      else
 		{

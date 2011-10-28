@@ -1,6 +1,9 @@
 2011-10-28  Walter Lee  <walt@tilera.com>
 
 	* NEWS: Fix TILEPro capitalization.
+	* config/tc-tilegx.c (emit_tilegx_instruction) Handle
+        relocations of aliases.
+	* config/tc-tilepro.c: (emit_tilepro_instruction) Likewise.
 
 2011-10-28  Nick Clifton  <nickc@redhat.com>
 
