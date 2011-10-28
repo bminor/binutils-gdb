@@ -1,3 +1,21 @@
+2011-10-28  Pedro Alves  <pedro@codesourcery.com>
+
+	* linux-nat.c (linux_nat_filter_event): Remove `options'
+	parameter, and dead code that used it.  If we're handling a
+	PTRACE_EVENT_EXEC event, and the thread group leader is no longer
+	in our lwp list, re-add it.
+	(check_zombie_leaders): New.
+	(linux_nat_wait_1): Remove `options' and `pid' locals.  Always
+	wait for children with WNOHANG, and always wait for all children.
+	Don't check for no resumed children upfront.  Simplify wait loop.
+	Check for zombie thread group leaders after handling all wait
+	statuses.  Return TARGET_WAITKIND_NO_RESUMED if there no
+	unwaited-for children left.
+	* infrun.c (fetch_inferior_event): Handle TARGET_WAITKIND_NO_RESUMED.
+	(handle_inferior_event): Handle TARGET_WAITKIND_NO_RESUMED.
+	(normal_stop): Handle TARGET_WAITKIND_NO_RESUMED.
+	* target.h (enum target_waitkind) <TARGET_WAITKIND_NO_RESUMED>: New.
+
 2011-10-28  Sterling Augustine  <saugustine@google.com>
 
 	* psymtab.c (map_symbol_filenames_psymtab): Call QUIT.

@@ -2773,6 +2773,7 @@ fetch_inferior_event (void *client_data)
 
   if (non_stop
       && ecs->ws.kind != TARGET_WAITKIND_IGNORE
+      && ecs->ws.kind != TARGET_WAITKIND_NO_RESUMED
       && ecs->ws.kind != TARGET_WAITKIND_EXITED
       && ecs->ws.kind != TARGET_WAITKIND_SIGNALLED)
     /* In non-stop mode, each thread is handled individually.  Switch
@@ -2806,6 +2807,7 @@ fetch_inferior_event (void *client_data)
 	normal_stop ();
 
       if (target_has_execution
+	  && ecs->ws.kind != TARGET_WAITKIND_NO_RESUMED
 	  && ecs->ws.kind != TARGET_WAITKIND_EXITED
 	  && ecs->ws.kind != TARGET_WAITKIND_SIGNALLED
 	  && ecs->event_thread->step_multi
@@ -3164,8 +3166,24 @@ handle_inferior_event (struct execution_control_state *ecs)
       return;
     }
 
+  if (ecs->ws.kind == TARGET_WAITKIND_NO_RESUMED
+      && target_can_async_p () && !sync_execution)
+    {
+      /* There were no unwaited-for children left in the target, but,
+	 we're not synchronously waiting for events either.  Just
+	 ignore.  Otherwise, if we were running a synchronous
+	 execution command, we need to cancel it and give the user
+	 back the terminal.  */
+      if (debug_infrun)
+	fprintf_unfiltered (gdb_stdlog,
+			    "infrun: TARGET_WAITKIND_NO_RESUMED (ignoring)\n");
+      prepare_to_wait (ecs);
+      return;
+    }
+
   if (ecs->ws.kind != TARGET_WAITKIND_EXITED
-      && ecs->ws.kind != TARGET_WAITKIND_SIGNALLED)
+      && ecs->ws.kind != TARGET_WAITKIND_SIGNALLED
+      && ecs->ws.kind != TARGET_WAITKIND_NO_RESUMED)
     {
       struct inferior *inf = find_inferior_pid (ptid_get_pid (ecs->ptid));
 
@@ -3181,6 +3199,18 @@ handle_inferior_event (struct execution_control_state *ecs)
 
   /* Always clear state belonging to the previous time we stopped.  */
   stop_stack_dummy = STOP_NONE;
+
+  if (ecs->ws.kind == TARGET_WAITKIND_NO_RESUMED)
+    {
+      /* No unwaited-for children left.  IOW, all resumed children
+	 have exited.  */
+      if (debug_infrun)
+	fprintf_unfiltered (gdb_stdlog, "infrun: TARGET_WAITKIND_NO_RESUMED\n");
+
+      stop_print_frame = 0;
+      stop_stepping (ecs);
+      return;
+    }
 
   /* If it's a new process, add it to the thread database.  */
 
@@ -5824,7 +5854,8 @@ normal_stop (void)
   if (!non_stop)
     make_cleanup (finish_thread_state_cleanup, &minus_one_ptid);
   else if (last.kind != TARGET_WAITKIND_SIGNALLED
-	   && last.kind != TARGET_WAITKIND_EXITED)
+	   && last.kind != TARGET_WAITKIND_EXITED
+	   && last.kind != TARGET_WAITKIND_NO_RESUMED)
     make_cleanup (finish_thread_state_cleanup, &inferior_ptid);
 
   /* In non-stop mode, we don't want GDB to switch threads behind the
@@ -5843,13 +5874,22 @@ normal_stop (void)
       && !ptid_equal (previous_inferior_ptid, inferior_ptid)
       && target_has_execution
       && last.kind != TARGET_WAITKIND_SIGNALLED
-      && last.kind != TARGET_WAITKIND_EXITED)
+      && last.kind != TARGET_WAITKIND_EXITED
+      && last.kind != TARGET_WAITKIND_NO_RESUMED)
     {
       target_terminal_ours_for_output ();
       printf_filtered (_("[Switching to %s]\n"),
 		       target_pid_to_str (inferior_ptid));
       annotate_thread_changed ();
       previous_inferior_ptid = inferior_ptid;
+    }
+
+  if (last.kind == TARGET_WAITKIND_NO_RESUMED)
+    {
+      gdb_assert (sync_execution || !target_can_async_p ());
+
+      target_terminal_ours_for_output ();
+      printf_filtered (_("No unwaited-for children left.\n"));
     }
 
   if (!breakpoints_always_inserted_mode () && target_has_execution)
@@ -6038,6 +6078,7 @@ done:
   if (!target_has_execution
       || last.kind == TARGET_WAITKIND_SIGNALLED
       || last.kind == TARGET_WAITKIND_EXITED
+      || last.kind == TARGET_WAITKIND_NO_RESUMED
       || (!inferior_thread ()->step_multi
 	  && !(inferior_thread ()->control.stop_bpstat
 	       && inferior_thread ()->control.proceed_to_finish)

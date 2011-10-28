@@ -3176,7 +3176,7 @@ stop_and_resume_callback (struct lwp_info *lp, void *data)
    other lwp.  In that case set *NEW_PENDING_P to true.  */
 
 static struct lwp_info *
-linux_nat_filter_event (int lwpid, int status, int options, int *new_pending_p)
+linux_nat_filter_event (int lwpid, int status, int *new_pending_p)
 {
   struct lwp_info *lp;
 
@@ -3191,7 +3191,27 @@ linux_nat_filter_event (int lwpid, int status, int options, int *new_pending_p)
      fork, vfork, and clone events, then we'll just add the
      new one to our list and go back to waiting for the event
      to be reported - the stopped process might be returned
-     from waitpid before or after the event is.  */
+     from waitpid before or after the event is.
+
+     But note the case of a non-leader thread exec'ing after the
+     leader having exited, and gone from our lists.  The non-leader
+     thread changes its tid to the tgid.  */
+
+  if (WIFSTOPPED (status) && lp == NULL
+      && (WSTOPSIG (status) == SIGTRAP && status >> 16 == PTRACE_EVENT_EXEC))
+    {
+      /* A multi-thread exec after we had seen the leader exiting.  */
+      if (debug_linux_nat)
+	fprintf_unfiltered (gdb_stdlog,
+			    "LLW: Re-adding thread group leader LWP %d.\n",
+			    lwpid);
+
+      lp = add_lwp (BUILD_LWP (lwpid, lwpid));
+      lp->stopped = 1;
+      lp->resumed = 1;
+      add_thread (lp->ptid);
+    }
+
   if (WIFSTOPPED (status) && !lp)
     {
       add_to_pid_list (&stopped_pids, lwpid, status);
@@ -3204,33 +3224,6 @@ linux_nat_filter_event (int lwpid, int status, int options, int *new_pending_p)
      exits.  */
   if (!WIFSTOPPED (status) && !lp)
     return NULL;
-
-  /* NOTE drow/2003-06-17: This code seems to be meant for debugging
-     CLONE_PTRACE processes which do not use the thread library -
-     otherwise we wouldn't find the new LWP this way.  That doesn't
-     currently work, and the following code is currently unreachable
-     due to the two blocks above.  If it's fixed some day, this code
-     should be broken out into a function so that we can also pick up
-     LWPs from the new interface.  */
-  if (!lp)
-    {
-      lp = add_lwp (BUILD_LWP (lwpid, GET_PID (inferior_ptid)));
-      if (options & __WCLONE)
-	lp->cloned = 1;
-
-      gdb_assert (WIFSTOPPED (status)
-		  && WSTOPSIG (status) == SIGSTOP);
-      lp->signalled = 1;
-
-      if (!in_thread_list (inferior_ptid))
-	{
-	  inferior_ptid = BUILD_LWP (GET_PID (inferior_ptid),
-				     GET_PID (inferior_ptid));
-	  add_thread (inferior_ptid);
-	}
-
-      add_thread (lp->ptid);
-    }
 
   /* Handle GNU/Linux's syscall SIGTRAPs.  */
   if (WIFSTOPPED (status) && WSTOPSIG (status) == SYSCALL_SIGTRAP)
@@ -3392,6 +3385,71 @@ linux_nat_filter_event (int lwpid, int status, int options, int *new_pending_p)
   return lp;
 }
 
+/* Detect zombie thread group leaders, and "exit" them.  We can't reap
+   their exits until all other threads in the group have exited.  */
+
+static void
+check_zombie_leaders (void)
+{
+  struct inferior *inf;
+
+  ALL_INFERIORS (inf)
+    {
+      struct lwp_info *leader_lp;
+
+      if (inf->pid == 0)
+	continue;
+
+      leader_lp = find_lwp_pid (pid_to_ptid (inf->pid));
+      if (leader_lp != NULL
+	  /* Check if there are other threads in the group, as we may
+	     have raced with the inferior simply exiting.  */
+	  && num_lwps (inf->pid) > 1
+	  && linux_lwp_is_zombie (inf->pid))
+	{
+	  if (debug_linux_nat)
+	    fprintf_unfiltered (gdb_stdlog,
+				"CZL: Thread group leader %d zombie "
+				"(it exited, or another thread execd).\n",
+				inf->pid);
+
+	  /* A leader zombie can mean one of two things:
+
+	     - It exited, and there's an exit status pending
+	     available, or only the leader exited (not the whole
+	     program).  In the latter case, we can't waitpid the
+	     leader's exit status until all other threads are gone.
+
+	     - There are 3 or more threads in the group, and a thread
+	     other than the leader exec'd.  On an exec, the Linux
+	     kernel destroys all other threads (except the execing
+	     one) in the thread group, and resets the execing thread's
+	     tid to the tgid.  No exit notification is sent for the
+	     execing thread -- from the ptracer's perspective, it
+	     appears as though the execing thread just vanishes.
+	     Until we reap all other threads except the leader and the
+	     execing thread, the leader will be zombie, and the
+	     execing thread will be in `D (disc sleep)'.  As soon as
+	     all other threads are reaped, the execing thread changes
+	     it's tid to the tgid, and the previous (zombie) leader
+	     vanishes, giving place to the "new" leader.  We could try
+	     distinguishing the exit and exec cases, by waiting once
+	     more, and seeing if something comes out, but it doesn't
+	     sound useful.  The previous leader _does_ go away, and
+	     we'll re-add the new one once we see the exec event
+	     (which is just the same as what would happen if the
+	     previous leader did exit voluntarily before some other
+	     thread execs).  */
+
+	  if (debug_linux_nat)
+	    fprintf_unfiltered (gdb_stdlog,
+				"CZL: Thread group leader %d vanished.\n",
+				inf->pid);
+	  exit_lwp (leader_lp);
+	}
+    }
+}
+
 static ptid_t
 linux_nat_wait_1 (struct target_ops *ops,
 		  ptid_t ptid, struct target_waitstatus *ourstatus,
@@ -3400,9 +3458,7 @@ linux_nat_wait_1 (struct target_ops *ops,
   static sigset_t prev_mask;
   enum resume_kind last_resume_kind;
   struct lwp_info *lp;
-  int options;
   int status;
-  pid_t pid;
 
   if (debug_linux_nat)
     fprintf_unfiltered (gdb_stdlog, "LLW: enter\n");
@@ -3424,41 +3480,14 @@ linux_nat_wait_1 (struct target_ops *ops,
   /* Make sure SIGCHLD is blocked.  */
   block_child_signals (&prev_mask);
 
-  if (ptid_equal (ptid, minus_one_ptid))
-    pid = -1;
-  else if (ptid_is_pid (ptid))
-    /* A request to wait for a specific tgid.  This is not possible
-       with waitpid, so instead, we wait for any child, and leave
-       children we're not interested in right now with a pending
-       status to report later.  */
-    pid = -1;
-  else
-    pid = GET_LWP (ptid);
-
 retry:
   lp = NULL;
   status = 0;
-  options = 0;
-
-  /* Make sure that of those LWPs we want to get an event from, there
-     is at least one LWP that has been resumed.  If there's none, just
-     bail out.  The core may just be flushing asynchronously all
-     events.  */
-  if (iterate_over_lwps (ptid, resumed_callback, NULL) == NULL)
-    {
-      ourstatus->kind = TARGET_WAITKIND_IGNORE;
-
-      if (debug_linux_nat)
-	fprintf_unfiltered (gdb_stdlog, "LLW: exit (no resumed LWP)\n");
-
-      restore_child_signals_mask (&prev_mask);
-      return minus_one_ptid;
-    }
 
   /* First check if there is a LWP with a wait status pending.  */
-  if (pid == -1)
+  if (ptid_equal (ptid, minus_one_ptid) || ptid_is_pid (ptid))
     {
-      /* Any LWP that's been resumed will do.  */
+      /* Any LWP in the PTID group that's been resumed will do.  */
       lp = iterate_over_lwps (ptid, status_callback, NULL);
       if (lp)
 	{
@@ -3468,11 +3497,6 @@ retry:
 				status_to_str (lp->status),
 				target_pid_to_str (lp->ptid));
 	}
-
-      /* But if we don't find one, we'll have to wait, and check both
-	 cloned and uncloned processes.  We start with the cloned
-	 processes.  */
-      options = __WCLONE | WNOHANG;
     }
   else if (is_lwp (ptid))
     {
@@ -3490,12 +3514,6 @@ retry:
 			    "LLW: Using pending wait status %s for %s.\n",
 			    status_to_str (lp->status),
 			    target_pid_to_str (lp->ptid));
-
-      /* If we have to wait, take into account whether PID is a cloned
-         process or not.  And we have to convert it to something that
-         the layer beneath us can understand.  */
-      options = lp->cloned ? __WCLONE : 0;
-      pid = GET_LWP (ptid);
 
       /* We check for lp->waitstatus in addition to lp->status,
 	 because we can have pending process exits recorded in
@@ -3557,23 +3575,40 @@ retry:
       set_sigint_trap ();
     }
 
-  /* Translate generic target_wait options into waitpid options.  */
-  if (target_options & TARGET_WNOHANG)
-    options |= WNOHANG;
+  /* But if we don't find a pending event, we'll have to wait.  */
 
   while (lp == NULL)
     {
       pid_t lwpid;
 
-      lwpid = my_waitpid (pid, &status, options);
+      /* Always use -1 and WNOHANG, due to couple of a kernel/ptrace
+	 quirks:
+
+	 - If the thread group leader exits while other threads in the
+	   thread group still exist, waitpid(TGID, ...) hangs.  That
+	   waitpid won't return an exit status until the other threads
+	   in the group are reapped.
+
+	 - When a non-leader thread execs, that thread just vanishes
+	   without reporting an exit (so we'd hang if we waited for it
+	   explicitly in that case).  The exec event is reported to
+	   the TGID pid.  */
+
+      errno = 0;
+      lwpid = my_waitpid (-1, &status,  __WCLONE | WNOHANG);
+      if (lwpid == 0 || (lwpid == -1 && errno == ECHILD))
+	lwpid = my_waitpid (-1, &status, WNOHANG);
+
+      if (debug_linux_nat)
+	fprintf_unfiltered (gdb_stdlog,
+			    "LNW: waitpid(-1, ...) returned %d, %s\n",
+			    lwpid, errno ? safe_strerror (errno) : "ERRNO-OK");
 
       if (lwpid > 0)
 	{
 	  /* If this is true, then we paused LWPs momentarily, and may
 	     now have pending events to handle.  */
 	  int new_pending;
-
-	  gdb_assert (pid == -1 || lwpid == pid);
 
 	  if (debug_linux_nat)
 	    {
@@ -3582,14 +3617,12 @@ retry:
 				  (long) lwpid, status_to_str (status));
 	    }
 
-	  lp = linux_nat_filter_event (lwpid, status, options, &new_pending);
+	  lp = linux_nat_filter_event (lwpid, status, &new_pending);
 
 	  /* STATUS is now no longer valid, use LP->STATUS instead.  */
 	  status = 0;
 
-	  if (lp
-	      && ptid_is_pid (ptid)
-	      && ptid_get_pid (lp->ptid) != ptid_get_pid (ptid))
+	  if (lp && !ptid_match (lp->ptid, ptid))
 	    {
 	      gdb_assert (lp->resumed);
 
@@ -3662,69 +3695,65 @@ retry:
 		  store_waitstatus (&lp->waitstatus, lp->status);
 		}
 
-	      if (new_pending)
-		goto retry;
-
 	      /* Keep looking.  */
 	      lp = NULL;
-	      continue;
+	    }
+
+	  if (new_pending)
+	    {
+	      /* Some LWP now has a pending event.  Go all the way
+		 back to check it.  */
+	      goto retry;
 	    }
 
 	  if (lp)
-	    break;
-	  else
 	    {
-	      if (new_pending)
-		goto retry;
-
-	      if (pid == -1)
-		{
-		  /* waitpid did return something.  Restart over.  */
-		  options |= __WCLONE;
-		}
-	      continue;
+	      /* We got an event to report to the core.  */
+	      break;
 	    }
+
+	  /* Retry until nothing comes out of waitpid.  A single
+	     SIGCHLD can indicate more than one child stopped.  */
+	  continue;
 	}
 
-      if (pid == -1)
+      /* Check for zombie thread group leaders.  Those can't be reaped
+	 until all other threads in the thread group are.  */
+      check_zombie_leaders ();
+
+      /* If there are no resumed children left, bail.  We'd be stuck
+	 forever in the sigsuspend call below otherwise.  */
+      if (iterate_over_lwps (ptid, resumed_callback, NULL) == NULL)
 	{
-	  /* Alternate between checking cloned and uncloned processes.  */
-	  options ^= __WCLONE;
+	  if (debug_linux_nat)
+	    fprintf_unfiltered (gdb_stdlog, "LLW: exit (no resumed LWP)\n");
 
-	  /* And every time we have checked both:
-	     In async mode, return to event loop;
-	     In sync mode, suspend waiting for a SIGCHLD signal.  */
-	  if (options & __WCLONE)
-	    {
-	      if (target_options & TARGET_WNOHANG)
-		{
-		  /* No interesting event.  */
-		  ourstatus->kind = TARGET_WAITKIND_IGNORE;
+	  ourstatus->kind = TARGET_WAITKIND_NO_RESUMED;
 
-		  if (debug_linux_nat)
-		    fprintf_unfiltered (gdb_stdlog, "LLW: exit (ignore)\n");
+	  if (!target_can_async_p ())
+	    clear_sigint_trap ();
 
-		  restore_child_signals_mask (&prev_mask);
-		  return minus_one_ptid;
-		}
-
-	      sigsuspend (&suspend_mask);
-	    }
+	  restore_child_signals_mask (&prev_mask);
+	  return minus_one_ptid;
 	}
-      else if (target_options & TARGET_WNOHANG)
-	{
-	  /* No interesting event for PID yet.  */
-	  ourstatus->kind = TARGET_WAITKIND_IGNORE;
 
+      /* No interesting event to report to the core.  */
+
+      if (target_options & TARGET_WNOHANG)
+	{
 	  if (debug_linux_nat)
 	    fprintf_unfiltered (gdb_stdlog, "LLW: exit (ignore)\n");
 
+	  ourstatus->kind = TARGET_WAITKIND_IGNORE;
 	  restore_child_signals_mask (&prev_mask);
 	  return minus_one_ptid;
 	}
 
       /* We shouldn't end up here unless we want to try again.  */
       gdb_assert (lp == NULL);
+
+      /* Block until we get an event reported with SIGCHLD.  */
+      sigsuspend (&suspend_mask);
     }
 
   if (!target_can_async_p ())
@@ -3813,7 +3842,7 @@ retry:
 	 from among those that have had events.  Giving equal priority
 	 to all LWPs that have had events helps prevent
 	 starvation.  */
-      if (pid == -1)
+      if (ptid_equal (ptid, minus_one_ptid) || ptid_is_pid (ptid))
 	select_event_lwp (ptid, &lp, &status);
 
       /* Now that we've selected our final event LWP, cancel any

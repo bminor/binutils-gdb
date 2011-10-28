@@ -1,3 +1,16 @@
+2011-10-28  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.threads/no-unwaited-for-left.c: New.
+	* gdb.threads/no-unwaited-for-left.exp: New.
+	* gdb.threads/non-ldr-exc-1.c: New.
+	* gdb.threads/non-ldr-exc-1.exp: New.
+	* gdb.threads/non-ldr-exc-2.c: New.
+	* gdb.threads/non-ldr-exc-2.exp: New.
+	* gdb.threads/non-ldr-exc-3.c: New.
+	* gdb.threads/non-ldr-exc-3.exp: New.
+	* gdb.threads/non-ldr-exc-4.c: New.
+	* gdb.threads/non-ldr-exc-4.exp: New.
+
 2011-10-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/async-shell.exp: Skip the testfile for use_gdb_stub.

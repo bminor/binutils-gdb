@@ -151,7 +151,10 @@ enum target_waitkind
 
     /* The target has run out of history information,
        and cannot run backward any further.  */
-    TARGET_WAITKIND_NO_HISTORY
+    TARGET_WAITKIND_NO_HISTORY,
+
+    /* There are no resumed children left in the program.  */
+    TARGET_WAITKIND_NO_RESUMED
   };
 
 struct target_waitstatus
