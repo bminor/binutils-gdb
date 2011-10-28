@@ -1,3 +1,8 @@
+2011-10-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.threads/no-unwaited-for-left.exp: Specify $srcfile for
+	break-here-2.
+
 2011-10-28  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.threads/no-unwaited-for-left.c: New.

@@ -53,7 +53,7 @@ gdb_test "thread 1" "" "select main thread"
 gdb_test_no_output "set scheduler-locking off" \
     "disable scheduler-locking, letting new thread start"
 
-gdb_breakpoint [gdb_get_line_number "break-here-2"]
+gdb_breakpoint $srcfile:[gdb_get_line_number "break-here-2"]
 gdb_continue_to_breakpoint "break-here-2" ".* break-here-2 .*"
 
 # Let the main thread continue alone.
