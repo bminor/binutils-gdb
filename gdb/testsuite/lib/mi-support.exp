@@ -32,7 +32,7 @@ set MIFLAGS "-i=mi"
 
 set thread_selected_re "=thread-selected,id=\"\[0-9\]+\"\r\n"
 set library_loaded_re "=library-loaded\[^\n\]+\"\r\n"
-set breakpoint_re "=(breakpoint-created|breakpoint-deleted)\[^\n\]+\"\r\n"
+set breakpoint_re "=(?:breakpoint-created|breakpoint-deleted)\[^\n\]+\"\r\n"
 
 #
 # mi_gdb_exit -- exit the GDB, killing the target program if necessary
@@ -576,7 +576,7 @@ proc mi_gdb_test { args } {
     global verbose
     global mi_gdb_prompt
     global GDB expect_out
-    global inferior_exited_re
+    global inferior_exited_re thread_selected_re breakpoint_re
     upvar timeout timeout
 
     set command [lindex $args 0]
@@ -668,7 +668,7 @@ proc mi_gdb_test { args } {
 	    gdb_start
 	    set result -1
 	}
-	 -re "^($string_regex\[\r\n\]+)?($pattern\[\r\n\]+$mi_gdb_prompt\[ \]*)" {
+	 -re "^(?:$thread_selected_re|$breakpoint_re)*($string_regex\[\r\n\]+)?($pattern\[\r\n\]+$mi_gdb_prompt\[ \]*)" {
 	    # At this point, $expect_out(1,string) is the MI input command.
 	    # and $expect_out(2,string) is the MI output command.
 	    # If $expect_out(1,string) is "", then there was no MI input command here.
