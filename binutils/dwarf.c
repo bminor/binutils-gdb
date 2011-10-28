@@ -5110,6 +5110,9 @@ display_debug_frames (struct dwarf_section *section,
 		{
 		  fc->col_type[opa] = cie->col_type[opa];
 		  fc->col_offset[opa] = cie->col_offset[opa];
+		  if (do_debug_frames_interp
+		      && fc->col_type[opa] == DW_CFA_unreferenced)
+		    fc->col_type[opa] = DW_CFA_undefined;
 		}
 	      break;
 
