@@ -1,8 +1,14 @@
+2011-10-28  Paul Koning  <paul_koning@dell.com>
+
+	* gdb.python/lib-types.exp (deep_items): Rename from deepitems.
+
+
 2011-10-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* lib/mi-support.exp (breakpoint_re): Suppress match reporting.
 	(mi_gdb_test): Import globals thread_selected_re
 	and breakpoint_re.  Expect them optionally at the regex start.
+
 
 2011-10-27  Doug Evans  <dje@google.com>
 
