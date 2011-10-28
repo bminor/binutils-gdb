@@ -1,3 +1,8 @@
+2011-10-28  Paul Koning  <paul_koning@dell.com>
+
+	* python/lib/gdb/types.py (deep_items): Rename from deepitems.
+	* NEWS: Mention deep_items.
+
 2011-10-28  Alen Skondro  <askondro@gmail.com>
 
 	* ser-tcp.c [USE_WIN32API] (ETIMEOUT): Don't define if already

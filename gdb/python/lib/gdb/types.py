@@ -91,7 +91,7 @@ def make_enum_dict(enum_type):
     return enum_dict
 
 
-def deepitems (type_):
+def deep_items (type_):
     """Return an iterator that recursively traverses anonymous fields.
 
     Arguments:
@@ -107,5 +107,5 @@ def deepitems (type_):
         if k:
             yield k, v
         else:
-            for i in deepitems (v.type):
+            for i in deep_items (v.type):
                 yield i

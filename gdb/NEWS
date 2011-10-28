@@ -56,6 +56,12 @@
   ** A new event "gdb.new_objfile" has been added, triggered by loading a
      new object file.
 
+  ** A new function, "deep_items" has been added to the gdb.types
+     module in the GDB Python modules library.  This function returns
+     an iterator over the fields of a struct or union type.  Unlike
+     the standard Python "iteritems" method, it will recursively traverse
+     any anonymous fields.
+
 * libthread-db-search-path now supports two special values: $sdir and $pdir.
   $sdir specifies the default system locations of shared libraries.
   $pdir specifies the directory where the libpthread used by the application
