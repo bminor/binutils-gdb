@@ -24438,10 +24438,10 @@ Return @code{True} if @var{type}, assumed to be a type with fields
 @item make_enum_dict (@var{enum_type})
 Return a Python @code{dictionary} type produced from @var{enum_type}.
 
-@item deepitems (@var{type})
+@item deep_items (@var{type})
 Returns a Python iterator similar to the standard
 @code{gdb.Type.iteritems} method, except that the iterator returned
-by @code{deepitems} will recursively traverse anonymous struct or
+by @code{deep_items} will recursively traverse anonymous struct or
 union fields.  For example:
 
 @smallexample
@@ -24462,7 +24462,7 @@ Then in @value{GDBN}:
 (@value{GDBP}) python struct_a = gdb.lookup_type("struct A")
 (@value{GDBP}) python print struct_a.keys ()
 @{['a', '']@}
-(@value{GDBP}) python print [k for k,v in gdb.types.deepitems(struct_a)]
+(@value{GDBP}) python print [k for k,v in gdb.types.deep_items(struct_a)]
 @{['a', 'b0', 'b1']@}
 @end smallexample
 

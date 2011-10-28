@@ -1,3 +1,7 @@
+2011-10-28  Paul Koning  <paul_koning@dell.com>
+
+	* gdb.texinfo (gdb.types): Rename deepitems to deep_items.
+
 2011-10-27  Kevin Pouget  <kevin.pouget@st.com>
 
 	* gdb.texinfo ((Frames In Python): Document 
