@@ -1,3 +1,10 @@
+2011-10-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR symtab/13208
+	* jit.c (jit_register_code): Remove unused variable my_cleanups.  Check
+	for NULL from bfd_open_from_target_memory.  Fix ownership of NBFD and
+	SAI.
+
 2011-10-28  Pedro Alves  <pedro@codesourcery.com>
 
 	* linux-nat.c (linux_nat_filter_event): Remove `options'
