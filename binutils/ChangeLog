@@ -1,3 +1,7 @@
+2011-10-28  Walter Lee  <walt@tilera.com>
+
+	* NEWS: Mention addition of TILEPro and TILE-Gx support.
+
 2011-10-27  Joern Rennecke  <joern.rennecke@embecosm.com>
 
 	* MAINTAINERS: Add myself as EPIPHANY port maintainer.

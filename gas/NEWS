@@ -4,7 +4,7 @@
 
 Changes in 2.22:
 
-* Add support for the Tilera TILEPRO and TILE-Gx architectures.
+* Add support for the Tilera TILEPro and TILE-Gx architectures.
 
 Changes in 2.21:
 

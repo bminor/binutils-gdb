@@ -10,7 +10,7 @@ Changes in 2.22:
 * INPUT_SECTION_FLAGS has been added to the linker script language
   to allow selection of input sections by section header section flags.
 
-* Add support for the Tilera TILEPRO and TILE-Gx architectures.
+* Add support for the Tilera TILEPro and TILE-Gx architectures.
 
 * Added SORT_BY_INIT_PRIORITY to the linker script language to permit
   sorting sections by numerical value of the GCC init_priority attribute
