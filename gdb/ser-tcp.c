@@ -39,7 +39,9 @@
 
 #ifdef USE_WIN32API
 #include <winsock2.h>
+#ifndef ETIMEDOUT
 #define ETIMEDOUT WSAETIMEDOUT
+#endif
 #define close(fd) closesocket (fd)
 #define ioctl ioctlsocket
 #else
