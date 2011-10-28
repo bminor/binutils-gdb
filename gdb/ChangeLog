@@ -1,3 +1,7 @@
+2011-10-27  Meador Inge  <meadori@codesourcery.com>
+
+	* MAINTAINERS (Write After Approval): Add myself to the list.
+
 2011-10-27  Joel Brobecker  <brobecker@adacore.com>
 
 	* value.h (read_frame_register_value): Add declaration.
