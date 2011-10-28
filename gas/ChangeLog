@@ -1,3 +1,9 @@
+2011-10-28  Nick Clifton  <nickc@redhat.com>
+
+	* po/ja.po: New Japanese translation.
+	* configure.in (ALL_LINGUAS): Add ja.
+	* configure: Regenerate.
+
 2011-10-26  Joern Rennecke  <joern.rennecke@embecosm.com>
 
 	* doc/as.texinfo [EPIPHANY]: Include c-epiphany.texi to avoid
