@@ -1093,6 +1093,7 @@ map_symbol_filenames_psymtab (struct objfile *objfile,
       if (ps->readin)
 	continue;
 
+      QUIT;
       fullname = psymtab_to_fullname (ps);
       (*fun) (ps->filename, fullname, data);
     }

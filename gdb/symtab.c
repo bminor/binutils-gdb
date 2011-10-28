@@ -3573,6 +3573,30 @@ compare_symbol_name (const char *name, const char *sym_text, int sym_text_len)
   return 1;
 }
 
+/* Free any memory associated with a completion list.  */
+
+static void
+free_completion_list (char ***list_ptr)
+{
+  int i = 0;
+  char **list = *list_ptr;
+
+  while (list[i] != NULL)
+    {
+      xfree (list[i]);
+      i++;
+    }
+  xfree (list);
+}
+
+/* Callback for make_cleanup.  */
+
+static void
+do_free_completion_list (void *list)
+{
+  free_completion_list (list);
+}
+
 /* Helper routine for make_symbol_completion_list.  */
 
 static int return_val_size;
@@ -3810,6 +3834,7 @@ default_make_symbol_completion_list_break_on (char *text, char *word,
   /* Length of sym_text.  */
   int sym_text_len;
   struct add_name_data datum;
+  struct cleanup *back_to;
 
   /* Now look for the symbol we are supposed to complete on.  */
   {
@@ -3886,6 +3911,7 @@ default_make_symbol_completion_list_break_on (char *text, char *word,
   return_val_index = 0;
   return_val = (char **) xmalloc ((return_val_size + 1) * sizeof (char *));
   return_val[0] = NULL;
+  back_to = make_cleanup (do_free_completion_list, &return_val);
 
   datum.sym_text = sym_text;
   datum.sym_text_len = sym_text_len;
@@ -3995,6 +4021,7 @@ default_make_symbol_completion_list_break_on (char *text, char *word,
       macro_for_each (macro_user_macros, add_macro_name, &datum);
     }
 
+  discard_cleanups (back_to);
   return (return_val);
 }
 
@@ -4244,11 +4271,14 @@ make_source_files_completion_list (char *text, char *word)
   char **list = (char **) xmalloc (list_alloced * sizeof (char *));
   const char *base_name;
   struct add_partial_filename_data datum;
+  struct cleanup *back_to;
 
   list[0] = NULL;
 
   if (!have_full_symbols () && !have_partial_symbols ())
     return list;
+
+  back_to = make_cleanup (do_free_completion_list, &list);
 
   ALL_SYMTABS (objfile, s)
     {
@@ -4285,6 +4315,7 @@ make_source_files_completion_list (char *text, char *word)
   datum.list_used = &list_used;
   datum.list_alloced = &list_alloced;
   map_partial_symbol_filenames (maybe_add_partial_symtab_filename, &datum);
+  discard_cleanups (back_to);
 
   return list;
 }

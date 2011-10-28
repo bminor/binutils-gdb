@@ -1,3 +1,12 @@
+2011-10-28  Sterling Augustine  <saugustine@google.com>
+
+	* psymtab.c (map_symbol_filenames_psymtab): Call QUIT.
+	* symtab.c (free_completion_list): New function.
+	(do_free_completion_list): Likewise.
+	(default_make_symbol_completion_list_break_on): New variable
+	back_to. Call make_cleanup and discard_cleanups.
+	(make_source_files_completion_list): Likewise.
+
 2011-10-28  Paul Koning  <paul_koning@dell.com>
 
 	* python/lib/gdb/types.py (deep_items): Rename from deepitems.
