@@ -1,3 +1,8 @@
+2011-10-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Code cleanup.
+	* symtab.c (skip_prologue_sal): Code reformatting.
+
 2011-10-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	PR symtab/13208
