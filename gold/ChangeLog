@@ -1,5 +1,11 @@
 2011-10-31  Cary Coutant  <ccoutant@google.com>
 
+	* options.h (class General_options): Add --[no-]gnu-unique options.
+	* symtab.cc (Symbol_table::sized_write_globals): Convert
+	STB_GNU_UNIQUE to STB_GLOBAL if --no-gnu-unique.
+
+2011-10-31  Cary Coutant  <ccoutant@google.com>
+
 	PR gold/13359
 	* i386.cc (Target_i386::Relocate::relocate_tls): Remove
 	unnecessary assertion.

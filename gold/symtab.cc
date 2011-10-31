@@ -2814,6 +2814,12 @@ Symbol_table::sized_write_globals(const Stringpool* sympool,
       typename elfcpp::Elf_types<size>::Elf_Addr sym_value = sym->value();
       typename elfcpp::Elf_types<size>::Elf_Addr dynsym_value = sym_value;
       elfcpp::STB binding = sym->binding();
+
+      // If --no-gnu-unique is set, change STB_GNU_UNIQUE to STB_GLOBAL.
+      if (binding == elfcpp::STB_GNU_UNIQUE
+	  && !parameters->options().gnu_unique())
+	binding = elfcpp::STB_GLOBAL;
+
       switch (sym->source())
 	{
 	case Symbol::FROM_OBJECT:
