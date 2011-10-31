@@ -1,3 +1,10 @@
+2011-10-31  Cary Coutant  <ccoutant@google.com>
+
+	PR gold/13359
+	* i386.cc (Target_i386::Relocate::relocate_tls): Remove
+	unnecessary assertion.
+	* x86_64.cc (Target_x86_64::Relocate::relocate_tls): Likewise.
+
 2011-10-31 Sriraman Tallam  <tmsriram@google.com>
 
 	* symtab.h (Symbol_table::gc_mark_symbol_for_shlib): Rename to
