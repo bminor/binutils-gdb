@@ -1,3 +1,14 @@
+2011-10-31 Sriraman Tallam  <tmsriram@google.com>
+
+	* symtab.h (Symbol_table::gc_mark_symbol_for_shlib): Rename to
+	gc_mark_symbol.
+	* symtab.cc (Symbol_table::gc_mark_symbol_for_shlib): Rename to
+	gc_mark_symbol.
+	Change to just keep the section associated with symbol.
+	(Symbol_table::add_from_relobj): Mark symbols as not garbage when
+	they are externally visible and --export-dynamic is turned on.
+	(Symbol_table::gc_mark_dyn_syms): Call gc_mark_symbol.
+
 2011-10-19  Ian Lance Taylor  <iant@google.com>
 
 	PR gold/13163

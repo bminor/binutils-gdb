@@ -1313,10 +1313,9 @@ class Symbol_table
   void
   gc_mark_undef_symbols(Layout*);
 
-  // During garbage collection, this ensures externally visible symbols
-  // are not treated as garbage while building shared objects.
+  // This tells garbage collection that this symbol is referenced.
   void
-  gc_mark_symbol_for_shlib(Symbol* sym);
+  gc_mark_symbol(Symbol* sym);
 
   // During garbage collection, this keeps sections that correspond to 
   // symbols seen in dynamic objects.
