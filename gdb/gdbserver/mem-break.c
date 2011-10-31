@@ -1029,7 +1029,8 @@ check_mem_read (CORE_ADDR mem_addr, unsigned char *buf, int mem_len)
 }
 
 void
-check_mem_write (CORE_ADDR mem_addr, unsigned char *buf, int mem_len)
+check_mem_write (CORE_ADDR mem_addr, unsigned char *buf,
+		 const unsigned char *myaddr, int mem_len)
 {
   struct process_info *proc = current_process ();
   struct raw_breakpoint *bp = proc->raw_breakpoints;
@@ -1063,7 +1064,7 @@ check_mem_write (CORE_ADDR mem_addr, unsigned char *buf, int mem_len)
       buf_offset = start - mem_addr;
 
       memcpy (fast_tracepoint_jump_shadow (jp) + copy_offset,
-	      buf + buf_offset, copy_len);
+	      myaddr + buf_offset, copy_len);
       if (jp->inserted)
 	memcpy (buf + buf_offset,
 		fast_tracepoint_jump_insn (jp) + copy_offset, copy_len);
@@ -1092,7 +1093,7 @@ check_mem_write (CORE_ADDR mem_addr, unsigned char *buf, int mem_len)
       copy_offset = start - bp->pc;
       buf_offset = start - mem_addr;
 
-      memcpy (bp->old_data + copy_offset, buf + buf_offset, copy_len);
+      memcpy (bp->old_data + copy_offset, myaddr + buf_offset, copy_len);
       if (bp->inserted)
 	{
 	  if (validate_inserted_breakpoint (bp))

@@ -102,9 +102,11 @@ void check_mem_read (CORE_ADDR mem_addr, unsigned char *buf, int mem_len);
 
 /* See if any breakpoints shadow the target memory area from MEM_ADDR
    to MEM_ADDR + MEM_LEN.  Update the data to be written to the target
-   (in BUF) if necessary, as well as the original data for any breakpoints.  */
+   (in BUF, a copy of MYADDR on entry) if necessary, as well as the
+   original data for any breakpoints.  */
 
-void check_mem_write (CORE_ADDR mem_addr, unsigned char *buf, int mem_len);
+void check_mem_write (CORE_ADDR mem_addr,
+		      unsigned char *buf, const unsigned char *myaddr, int mem_len);
 
 /* Set the byte pattern to insert for memory breakpoints.  This function
    must be called before any breakpoints are set.  */

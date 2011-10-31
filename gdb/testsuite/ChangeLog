@@ -1,3 +1,9 @@
+2011-10-31  Yao Qi  <yao@codesourcery.com>
+	    Pedro Alves  <pedro@codesourcery.com>
+
+        * gdb.trace/trace-break.c: New.
+        * gdb.trace/trace-break.exp: New.
+
 2011-10-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.threads/no-unwaited-for-left.exp: Specify $srcfile for
