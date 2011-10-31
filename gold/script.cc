@@ -983,18 +983,20 @@ Symbol_assignment::sized_finalize(Symbol_table* symtab, const Layout* layout,
   uint64_t final_val = this->val_->eval_maybe_dot(symtab, layout, true,
 						  is_dot_available,
 						  dot_value, dot_section,
-						  &section, NULL);
+						  &section, NULL, false);
   Sized_symbol<size>* ssym = symtab->get_sized_symbol<size>(this->sym_);
   ssym->set_value(final_val);
   if (section != NULL)
     ssym->set_output_section(section);
 }
 
-// Set the symbol value if the expression yields an absolute value.
+// Set the symbol value if the expression yields an absolute value or
+// a value relative to DOT_SECTION.
 
 void
 Symbol_assignment::set_if_absolute(Symbol_table* symtab, const Layout* layout,
-				   bool is_dot_available, uint64_t dot_value)
+				   bool is_dot_available, uint64_t dot_value,
+				   Output_section* dot_section)
 {
   if (this->sym_ == NULL)
     return;
@@ -1002,8 +1004,9 @@ Symbol_assignment::set_if_absolute(Symbol_table* symtab, const Layout* layout,
   Output_section* val_section;
   uint64_t val = this->val_->eval_maybe_dot(symtab, layout, false,
 					    is_dot_available, dot_value,
-					    NULL, &val_section, NULL);
-  if (val_section != NULL)
+					    dot_section, &val_section, NULL,
+					    false);
+  if (val_section != NULL && val_section != dot_section)
     return;
 
   if (parameters->target().get_size() == 32)
@@ -1026,6 +1029,8 @@ Symbol_assignment::set_if_absolute(Symbol_table* symtab, const Layout* layout,
     }
   else
     gold_unreachable();
+  if (val_section != NULL)
+    this->sym_->set_output_section(val_section);
 }
 
 // Print for debugging.
@@ -1215,7 +1220,7 @@ Script_options::set_section_addresses(Symbol_table* symtab, Layout* layout)
   for (Symbol_assignments::iterator p = this->symbol_assignments_.begin();
        p != this->symbol_assignments_.end();
        ++p)
-    (*p)->set_if_absolute(symtab, layout, false, 0);
+    (*p)->set_if_absolute(symtab, layout, false, 0, NULL);
 
   return this->script_sections_.set_section_addresses(symtab, layout);
 }
