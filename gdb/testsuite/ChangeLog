@@ -1,3 +1,8 @@
+2011-11-01  Joseph Myers  <joseph@codesourcery.com>
+
+	* gdb.base/maint.exp: XFAIL "maint info sections DATA" on MinGW as
+	well as Cygwin.
+
 2011-10-06  Justin Lebar <justin.lebar@gmail.com>
 
 	Add tests for skip command.
