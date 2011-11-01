@@ -576,7 +576,7 @@ proc mi_gdb_test { args } {
     global verbose
     global mi_gdb_prompt
     global GDB expect_out
-    global inferior_exited_re thread_selected_re breakpoint_re
+    global inferior_exited_re async
     upvar timeout timeout
 
     set command [lindex $args 0]
@@ -651,6 +651,11 @@ proc mi_gdb_test { args } {
 	    set tmt 60;
 	}
     }
+    if {$async} {
+	# With $prompt_re "" there may come arbitrary asynchronous response
+	# from the previous command, before or after $string_regex.
+	set string_regex ".*"
+    }
     verbose -log "Expecting: ^($string_regex\[\r\n\]+)?($pattern\[\r\n\]+$mi_gdb_prompt\[ \]*)"
     gdb_expect $tmt {
 	 -re "\\*\\*\\* DOSEXIT code.*" {
@@ -668,7 +673,7 @@ proc mi_gdb_test { args } {
 	    gdb_start
 	    set result -1
 	}
-	 -re "^(?:$thread_selected_re|$breakpoint_re)*($string_regex\[\r\n\]+)?($pattern\[\r\n\]+$mi_gdb_prompt\[ \]*)" {
+	 -re "^($string_regex\[\r\n\]+)?($pattern\[\r\n\]+$mi_gdb_prompt\[ \]*)" {
 	    # At this point, $expect_out(1,string) is the MI input command.
 	    # and $expect_out(2,string) is the MI output command.
 	    # If $expect_out(1,string) is "", then there was no MI input command here.

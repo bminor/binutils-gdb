@@ -1,3 +1,11 @@
+2011-11-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix racy FAILs.
+	* lib/mi-support.exp (mi_gdb_test): Replace thread_selected_re and
+	breakpoint_re globals import by async.  Set string_regex to .* for
+	async.  Remove the optional thread_selected_re and breakpoint_re
+	globals expectations.
+
 2011-11-01  Joseph Myers  <joseph@codesourcery.com>
 
 	* gdb.base/maint.exp: XFAIL "maint info sections DATA" on MinGW as
