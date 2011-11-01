@@ -1,3 +1,7 @@
+2011-11-01  Justin Lebar <justin.lebar@gmail.com>
+
+	* MAINTAINERS (Write After Approval): Add myself to the list.
+
 2011-10-29  Yao Qi  <yao@codesourcery.com>
 
 	* infcmd.c (disconnect_command): Call disconnect_tracing.
