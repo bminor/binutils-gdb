@@ -4854,6 +4854,111 @@ proceed until the function returns.
 An argument is a repeat count, as in @code{next}.
 @end table
 
+@node Skipping Over Functions and Files
+@subsection Skipping Over Functions and Files
+@cindex skipping over functions and files
+
+The program you are debugging may contain some functions which are
+uninteresting to debug.  The @code{skip} comand lets you tell @value{GDBN} to
+skip a function or all functions in a file when stepping.
+
+For example, consider the following C function:
+
+@smallexample
+101     int func()
+102     @{
+103         foo(boring());
+104         bar(boring());
+105     @}
+@end smallexample
+
+@noindent
+Suppose you wish to step into the functions @code{foo} and @code{bar}, but you
+are not interested in stepping through @code{boring}.  If you run @code{step}
+at line 103, you'll enter @code{boring()}, but if you run @code{next}, you'll
+step over both @code{foo} and @code{boring}!
+
+One solution is to @code{step} into @code{boring} and use the @code{finish}
+command to immediately exit it.  But this can become tedious if @code{boring}
+is called from many places.
+
+A more flexible solution is to execute @kbd{skip boring}.  This instructs
+@value{GDBN} never to step into @code{boring}.  Now when you execute
+@code{step} at line 103, you'll step over @code{boring} and directly into
+@code{foo}.
+
+You can also instruct @value{GDBN} to skip all functions in a file, with, for
+example, @code{skip file boring.c}.
+
+@table @code
+@kindex skip function
+@item skip @r{[}@var{linespec}@r{]}
+@itemx skip function @r{[}@var{linespec}@r{]}
+After running this command, the function named by @var{linespec} or the
+function containing the line named by @var{linespec} will be skipped over when
+stepping.  @xref{Specify Location}
+
+If you do not specify @var{linespec}, the function you're currently debugging
+will be skipped.
+
+(If you have a function called @code{file} that you want to skip, use
+@kbd{skip function file}.)
+
+@kindex skip file
+@item skip file @r{[}@var{filename}@r{]}
+After running this command, any function whose source lives in @var{filename}
+will be skipped over when stepping.
+
+If you do not specify @var{filename}, functions whose source lives in the file
+you're currently debugging will be skipped.
+@end table
+
+Skips can be listed, deleted, disabled, and enabled, much like breakpoints.
+These are the commands for managing your list of skips:
+
+@table @code
+@kindex info skip
+@item info skip @r{[}@var{range}@r{]}
+Print details about the specified skip(s).  If @var{range} is not specified,
+print a table with details about all functions and files marked for skipping.
+@code{info skip} prints the following information about each skip:
+
+@table @emph
+@item Identifier
+A number identifying this skip.
+@item Type
+The type of this skip, either @samp{function} or @samp{file}.
+@item Enabled or Disabled
+Enabled skips are marked with @samp{y}.  Disabled skips are marked with @samp{n}.
+@item Address
+For function skips, this column indicates the address in memory of the function
+being skipped.  If you've set a function skip on a function which has not yet
+been loaded, this field will contain @samp{<PENDING>}.  Once a shared library
+which has the function is loaded, @code{info skip} will show the function's
+address here.
+@item What
+For file skips, this field contains the filename being skipped.  For functions
+skips, this field contains the function name and its line number in the file
+where it is defined.
+@end table
+
+@kindex skip delete
+@item skip delete @r{[}@var{range}@r{]}
+Delete the specified skip(s).  If @var{range} is not specified, delete all
+skips.
+
+@kindex skip enable
+@item skip enable @r{[}@var{range}@r{]}
+Enable the specified skip(s).  If @var{range} is not specified, enable all
+skips.
+
+@kindex skip disable
+@item skip disable @r{[}@var{range}@r{]}
+Disable the specified skip(s).  If @var{range} is not specified, disable all
+skips.
+
+@end table
+
 @node Signals
 @section Signals
 @cindex signals

@@ -1,3 +1,41 @@
+2011-10-06  Justin Lebar  <justin.lebar@gmail.com>
+
+	* Makefile.in: (SFILES): Add skip.c.
+	(HFILES_NO_SRCDIR): Add skip.h.
+	(COMMON_OBS): Add skip.o.
+	* skip.h, skip.c: New.
+	* breakpoint.h (set_default_breakpoint): Remove.
+	(get_sal_arch): Declare.
+	* breakpoint.c: Remove default_breakpoint_valid,
+	default_breakpoint_address, default_breakpoint_symtab,
+	default_breakpoint_line, default_breakpoint_pspace variables.
+	(get_sal_arch): Make public.
+	(set_default_breakpoint): Remove.
+	(parse_breakpoint_sals, create_breakpoint, clear_command,
+	decode_line_spec_1): Remove uses of default_breakpoint variables;
+	replaced with function calls into stack.c.
+	* cli/cli-cmds.h: Add cmd_list_element *skiplist.
+	* cli/cli-cmds.c: Add skiplist.
+	(init_cmd_lists): Initialize skiplist.
+	(init_cli_cmds): Fix comment (classes of commands appear in
+	alphabetical order).
+	* infrun.c (handle_inferior_event): Add check that we don't step into
+	a function whose pc is marked for skip.
+	* stack.c: Declare last_displayed_sal_valid, last_displayed_pspace,
+	last_displayed_addr, last_displayed_symtab, last_displayed_line
+	variables.
+	(set_last_displayed_sal): New static function.
+	(print_frame_info): Switch call to set_default_breakpoint to call to
+	set_last_displayed_sal.
+	(clear_last_displayed_sal, last_displayed_sal_is_valid,
+	get_last_displayed_pspace, get_last_displayed_addr,
+	get_last_displayed_symtab, get_last_displayed_line,
+	get_last_displayed_sal): New public functions.
+	* stack.h (clear_last_displayed_sal, last_displayed_sal_is_valid,
+	get_last_displayed_pspace, get_last_displayed_addr,
+	get_last_displayed_symtab, get_last_displayed_line,
+	get_last_displayed_sal): Declare.
+
 2011-11-01  Justin Lebar <justin.lebar@gmail.com>
 
 	* MAINTAINERS (Write After Approval): Add myself to the list.

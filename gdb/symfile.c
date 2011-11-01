@@ -56,6 +56,7 @@
 #include "elf-bfd.h"
 #include "solib.h"
 #include "remote.h"
+#include "stack.h"
 
 #include <sys/types.h>
 #include <fcntl.h>
@@ -2839,7 +2840,7 @@ clear_symtab_users (int add_flags)
   clear_displays ();
   if ((add_flags & SYMFILE_DEFER_BP_RESET) == 0)
     breakpoint_re_set ();
-  set_default_breakpoint (0, NULL, 0, 0, 0);
+  clear_last_displayed_sal ();
   clear_pc_function_cache ();
   observer_notify_new_objfile (NULL);
 

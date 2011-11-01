@@ -1,3 +1,14 @@
+2011-10-06  Justin Lebar <justin.lebar@gmail.com>
+
+	Add tests for skip command.
+	* testsuite/gdb.base/skip-solib-lib.c: New
+	* testsuite/gdb.base/skip-solib-main.c: New
+	* testsuite/gdb.base/skip-solib.exp: New
+	* testsuite/gdb.base/skip.c: New
+	* testsuite/gdb.base/skip.exp: New
+	* testsuite/gdb.base/skip1.c: New
+	* testsuite/gdb.base/Makefile.in: Adding new files.
+
 2011-10-31  Yao Qi  <yao@codesourcery.com>
 	    Pedro Alves  <pedro@codesourcery.com>
 

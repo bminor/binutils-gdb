@@ -186,6 +186,8 @@ struct cmd_list_element *setchecklist;
 
 struct cmd_list_element *showchecklist;
 
+struct cmd_list_element *skiplist;
+
 /* Command tracing state.  */
 
 int source_verbose = 0;
@@ -1511,6 +1513,7 @@ init_cmd_lists (void)
   showprintlist = NULL;
   setchecklist = NULL;
   showchecklist = NULL;
+  skiplist = NULL;
 }
 
 static void
@@ -1576,7 +1579,7 @@ init_cli_cmds (void)
   char *source_help_text;
 
   /* Define the classes of commands.
-     They will appear in the help list in the reverse of this order.  */
+     They will appear in the help list in alphabetical order.  */
 
   add_cmd ("internals", class_maintenance, NULL, _("\
 Maintenance commands.\n\

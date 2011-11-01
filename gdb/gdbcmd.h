@@ -124,6 +124,8 @@ extern struct cmd_list_element *setchecklist;
 
 extern struct cmd_list_element *showchecklist;
 
+extern struct cmd_list_element *skiplist;
+
 /* Chain containing all defined "save" subcommands.  */
 
 extern struct cmd_list_element *save_cmdlist;

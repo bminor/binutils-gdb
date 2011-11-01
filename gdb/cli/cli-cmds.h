@@ -106,6 +106,8 @@ extern struct cmd_list_element *setchecklist;
 
 extern struct cmd_list_element *showchecklist;
 
+extern struct cmd_list_element *skiplist;
+
 /* Exported to gdb/top.c */
 
 void init_cmd_lists (void);

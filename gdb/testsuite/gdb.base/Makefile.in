@@ -30,8 +30,8 @@ EXECUTABLES = a2-run advance all-types annota1 annota1-watch_thread_num \
 	sepsymtab.debug sepsymtab.stripped setshow setvar shmain shreloc \
 	sigall sigaltstack sigbpt sigchld siginfo siginfo-addr \
 	siginfo-infcall siginfo-obj signals signull sigrepeat sigstep \
-	sizeof solib solib-corrupted solib-display-main solib-nodir \
-	solib-overlap-main-0x40000000 solib-symbol-main solib-weak \
+	sizeof skip skip-solib solib solib-corrupted solib-display-main
+	solib-nodir solib-overlap-main-0x40000000 solib-symbol-main solib-weak \
 	solib-weak-lib2 solib_sl so-impl-ld so-indr-cl \
 	stack-checking start step-break step-bt step-line step-resume-infcall \
 	step-test store structs-t* structs2 structs3 \

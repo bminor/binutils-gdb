@@ -56,6 +56,7 @@
 #include "tracepoint.h"
 #include "continuations.h"
 #include "interps.h"
+#include "skip.h"
 
 /* Prototypes for local functions */
 
@@ -4917,7 +4918,8 @@ process_event_stop_test:
 	}
 
       /* If we have line number information for the function we are
-         thinking of stepping into, step into it.
+	 thinking of stepping into and the function isn't on the skip
+	 list, step into it.
 
          If there are several symtabs at that PC (e.g. with include
          files), just want to know whether *any* of them have line
@@ -4926,7 +4928,8 @@ process_event_stop_test:
 	struct symtab_and_line tmp_sal;
 
 	tmp_sal = find_pc_line (ecs->stop_func_start, 0);
-	if (tmp_sal.line != 0)
+	if (tmp_sal.line != 0 &&
+	    !function_pc_is_marked_for_skip (ecs->stop_func_start))
 	  {
 	    if (execution_direction == EXEC_REVERSE)
 	      handle_step_into_function_backward (gdbarch, ecs);

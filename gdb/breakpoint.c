@@ -65,6 +65,8 @@
 #include "parser-defs.h"
 #include "cli/cli-utils.h"
 #include "continuations.h"
+#include "stack.h"
+#include "skip.h"
 
 /* readline include files */
 #include "readline/readline.h"
@@ -571,19 +573,6 @@ make_cleanup_decref_counted_command_line (struct counted_command_line **cmdp)
 {
   return make_cleanup (do_cleanup_counted_command_line, cmdp);
 }
-
-/* Default address, symtab and line to put a breakpoint at
-   for "break" command with no arg.
-   If default_breakpoint_valid is zero, the other three are
-   not valid, and "break" with no arg is an error.
-
-   This set by print_stack_frame, which calls set_default_breakpoint.  */
-
-int default_breakpoint_valid;
-CORE_ADDR default_breakpoint_address;
-struct symtab *default_breakpoint_symtab;
-int default_breakpoint_line;
-struct program_space *default_breakpoint_pspace;
 
 
 /* Return the breakpoint with the specified number, or NULL
@@ -5339,20 +5328,6 @@ describe_other_breakpoints (struct gdbarch *gdbarch,
     }
 }
 
-/* Set the default place to put a breakpoint
-   for the `break' command with no arguments.  */
-
-void
-set_default_breakpoint (int valid, struct program_space *pspace,
-			CORE_ADDR addr, struct symtab *symtab,
-			int line)
-{
-  default_breakpoint_valid = valid;
-  default_breakpoint_pspace = pspace;
-  default_breakpoint_address = addr;
-  default_breakpoint_symtab = symtab;
-  default_breakpoint_line = line;
-}
 
 /* Return true iff it is meaningful to use the address member of
    BPT.  For some breakpoint types, the address member is irrelevant
@@ -5764,7 +5739,7 @@ set_breakpoint_location_function (struct bp_location *loc, int explicit_loc)
 }
 
 /* Attempt to determine architecture of location identified by SAL.  */
-static struct gdbarch *
+struct gdbarch *
 get_sal_arch (struct symtab_and_line sal)
 {
   if (sal.section)
@@ -7543,24 +7518,26 @@ parse_breakpoint_sals (char **address,
   if ((*address) == NULL
       || (strncmp ((*address), "if", 2) == 0 && isspace ((*address)[2])))
     {
-      if (default_breakpoint_valid)
+      /* The last displayed codepoint, if it's valid, is our default breakpoint
+         address.  */
+      if (last_displayed_sal_is_valid ())
 	{
 	  struct symtab_and_line sal;
 
 	  init_sal (&sal);		/* Initialize to zeroes.  */
 	  sals->sals = (struct symtab_and_line *)
 	    xmalloc (sizeof (struct symtab_and_line));
-	  sal.pc = default_breakpoint_address;
-	  sal.line = default_breakpoint_line;
-	  sal.symtab = default_breakpoint_symtab;
-	  sal.pspace = default_breakpoint_pspace;
-	  sal.section = find_pc_overlay (sal.pc);
+
+	  /* Set sal's pspace, pc, symtab, and line to the values
+	     corresponding to the last call to print_frame_info.  */
+	  get_last_displayed_sal (&sal);
+          sal.section = find_pc_overlay (sal.pc);
 
 	  /* "break" without arguments is equivalent to "break *PC"
-	     where PC is the default_breakpoint_address.  So make sure
-	     to set sal.explicit_pc to prevent GDB from trying to
-	     expand the list of sals to include all other instances
-	     with the same symtab and line.  */
+	     where PC is the last displayed codepoint's address.  So
+	     make sure to set sal.explicit_pc to prevent GDB from
+	     trying to expand the list of sals to include all other
+	     instances with the same symtab and line.  */
 	  sal.explicit_pc = 1;
 
 	  sals->sals[0] = sal;
@@ -7574,19 +7551,22 @@ parse_breakpoint_sals (char **address,
       /* Force almost all breakpoints to be in terms of the
          current_source_symtab (which is decode_line_1's default).
          This should produce the results we want almost all of the
-         time while leaving default_breakpoint_* alone.
+	 time while leaving the last displayed codepoint pointers
+	 alone.
 
          ObjC: However, don't match an Objective-C method name which
          may have a '+' or '-' succeeded by a '[' */
 	 
       struct symtab_and_line cursal = get_current_source_symtab_and_line ();
 			
-      if (default_breakpoint_valid
+      if (last_displayed_sal_is_valid ()
 	  && (!cursal.symtab
  	      || ((strchr ("+-", (*address)[0]) != NULL)
  		  && ((*address)[1] != '['))))
-	*sals = decode_line_1 (address, 1, default_breakpoint_symtab,
-			       default_breakpoint_line, canonical);
+	*sals = decode_line_1 (address, 1,
+			       get_last_displayed_symtab (),
+			       get_last_displayed_line (),
+			       canonical);
       else
 	*sals = decode_line_1 (address, 1, (struct symtab *) NULL, 0,
 		               canonical);
@@ -9611,9 +9591,11 @@ until_break_command (char *arg, int from_tty, int anywhere)
   /* Set a breakpoint where the user wants it and at return from
      this function.  */
 
-  if (default_breakpoint_valid)
-    sals = decode_line_1 (&arg, 1, default_breakpoint_symtab,
-			  default_breakpoint_line, NULL);
+  if (last_displayed_sal_is_valid ())
+    sals = decode_line_1 (&arg, 1,
+			  get_last_displayed_symtab (),
+			  get_last_displayed_line (),
+			  NULL);
   else
     sals = decode_line_1 (&arg, 1, (struct symtab *) NULL, 0, NULL);
 
@@ -10135,10 +10117,11 @@ clear_command (char *arg, int from_tty)
 	xmalloc (sizeof (struct symtab_and_line));
       make_cleanup (xfree, sals.sals);
       init_sal (&sal);		/* Initialize to zeroes.  */
-      sal.line = default_breakpoint_line;
-      sal.symtab = default_breakpoint_symtab;
-      sal.pc = default_breakpoint_address;
-      sal.pspace = default_breakpoint_pspace;
+
+      /* Set sal's line, symtab, pc, and pspace to the values
+	 corresponding to the last call to print_frame_info.  If the
+	 codepoint is not valid, this will set all the fields to 0.  */
+      get_last_displayed_sal (&sal);
       if (sal.symtab == 0)
 	error (_("No source file specified."));
 
@@ -11986,6 +11969,9 @@ breakpoint_re_set (void)
   create_longjmp_master_breakpoint ();
   create_std_terminate_master_breakpoint ();
   create_exception_master_breakpoint ();
+
+  /* While we're at it, reset the skip list too.  */
+  skip_re_set ();
 }
 
 /* Reset the thread number of this breakpoint:
@@ -12435,7 +12421,8 @@ invalidate_bp_value_on_memory_change (CORE_ADDR addr, int len,
       }
 }
 
-/* Use default_breakpoint_'s, or nothing if they aren't valid.  */
+/* Use the last displayed codepoint's values, or nothing
+   if they aren't valid.  */
 
 struct symtabs_and_lines
 decode_line_spec_1 (char *string, int funfirstline)
@@ -12444,10 +12431,10 @@ decode_line_spec_1 (char *string, int funfirstline)
 
   if (string == 0)
     error (_("Empty line specification."));
-  if (default_breakpoint_valid)
+  if (last_displayed_sal_is_valid ())
     sals = decode_line_1 (&string, funfirstline,
-			  default_breakpoint_symtab,
-			  default_breakpoint_line,
+			  get_last_displayed_symtab (),
+			  get_last_displayed_line (),
 			  NULL);
   else
     sals = decode_line_1 (&string, funfirstline,

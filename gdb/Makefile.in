@@ -727,7 +727,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	prologue-value.c psymtab.c \
 	regcache.c reggroups.c remote.c remote-fileio.c reverse.c \
 	sentinel-frame.c \
-	serial.c ser-base.c ser-unix.c \
+	serial.c ser-base.c ser-unix.c skip.c \
 	solib.c solib-target.c source.c \
 	stabsread.c stack.c std-regs.c symfile.c symfile-mem.c symmisc.c \
 	symtab.c \
@@ -827,7 +827,7 @@ osdata.h procfs.h python/py-event.h python/py-events.h python/py-stopevent.h \
 python/python-internal.h python/python.h ravenscar-thread.h record.h \
 solib-darwin.h solib-ia64-hpux.h solib-spu.h windows-nat.h xcoffread.h \
 gnulib/extra/arg-nonnull.h gnulib/extra/c++defs.h gnulib/extra/warn-on-use.h \
-gnulib/stddef.in.h inline-frame.h \
+gnulib/stddef.in.h inline-frame.h skip.h \
 common/common-utils.h common/xml-utils.h common/buffer.h common/ptid.h \
 common/linux-osdata.h
 
@@ -915,7 +915,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	xml-support.o xml-syscall.o xml-utils.o \
 	target-descriptions.o target-memory.o xml-tdesc.o xml-builtin.o \
 	inferior.o osdata.o gdb_usleep.o record.o gcore.o \
-	jit.o progspace.o \
+	jit.o progspace.o skip.o \
 	common-utils.o buffer.o ptid.o
 
 TSOBS = inflow.o
