@@ -1,3 +1,7 @@
+2011-11-02  Nick Clifton  <nickc@redhat.com>
+
+	* gas/arm/pic.d: Update expected output.
+
 2011-10-25  Joern Rennecke  <joern.rennecke@embecosm.com>
 
 	* gas/epiphany: New directory.

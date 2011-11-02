@@ -32,7 +32,7 @@
 #include "safe-ctype.h"
 #include "subsegs.h"
 #include "obstack.h"
-
+#include "libiberty.h"
 #include "opcode/arm.h"
 
 #ifdef OBJ_ELF
@@ -2054,6 +2054,7 @@ parse_neon_el_struct_list (char **str, unsigned *pbase,
    arm_reloc_hsh contains no entries, so this function can only
    succeed if there is no () after the word.  Returns -1 on error,
    BFD_RELOC_UNUSED if there wasn't any suffix.	 */
+
 static int
 parse_reloc (char **str)
 {
@@ -22420,8 +22421,16 @@ md_begin (void)
     hash_insert (arm_barrier_opt_hsh, barrier_opt_names[i].template_name,
 		 (void *) (barrier_opt_names + i));
 #ifdef OBJ_ELF
-  for (i = 0; i < sizeof (reloc_names) / sizeof (struct reloc_entry); i++)
-    hash_insert (arm_reloc_hsh, reloc_names[i].name, (void *) (reloc_names + i));
+  for (i = 0; i < ARRAY_SIZE (reloc_names); i++)
+    {
+      struct reloc_entry * entry = reloc_names + i;
+
+      if (arm_is_eabi() && entry->reloc == BFD_RELOC_ARM_PLT32)
+	/* This makes encode_branch() use the EABI versions of this relocation.  */
+	entry->reloc = BFD_RELOC_UNUSED;
+
+      hash_insert (arm_reloc_hsh, entry->name, (void *) entry);
+    }
 #endif
 
   set_constant_flonums ();

@@ -1,3 +1,10 @@
+2011-11-02  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-arm.c (md_begin): Remove ARM_PLT32 reloc associated
+	with the (PLT) instruction suffix when operating in eabi mode.
+	* doc/c-arm.texi (ARM_Relocations): Extend description of (PLT)
+	suffix.
+
 2011-11-01  DJ Delorie  <dj@redhat.com>
 
 	* Makefile.am (TARGET_CPU_CFILES): Add tc-rl78.c.
