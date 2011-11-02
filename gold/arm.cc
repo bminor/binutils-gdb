@@ -2177,21 +2177,11 @@ class Target_arm : public Sized_target<32, big_endian>
       copy_relocs_(elfcpp::R_ARM_COPY), dynbss_(NULL), 
       got_mod_index_offset_(-1U), tls_base_symbol_defined_(false),
       stub_tables_(), stub_factory_(Stub_factory::get_instance()),
-      may_use_blx_(false), should_force_pic_veneer_(false),
+      should_force_pic_veneer_(false),
       arm_input_section_map_(), attributes_section_data_(NULL),
       fix_cortex_a8_(false), cortex_a8_relocs_info_()
   { }
 
-  // Whether we can use BLX.
-  bool
-  may_use_blx() const
-  { return this->may_use_blx_; }
-
-  // Set use-BLX flag.
-  void
-  set_may_use_blx(bool value)
-  { this->may_use_blx_ = value; }
-  
   // Whether we force PCI branch veneers.
   bool
   should_force_pic_veneer() const
@@ -2252,6 +2242,29 @@ class Target_arm : public Sized_target<32, big_endian>
     return (arch == elfcpp::TAG_CPU_ARCH_V6T2
 	    || arch == elfcpp::TAG_CPU_ARCH_V7
 	    || arch == elfcpp::TAG_CPU_ARCH_V7E_M);
+  }
+
+  // Whether we have v4T interworking instructions available.
+  bool
+  may_use_v4t_interworking() const
+  {
+    Object_attribute* attr =
+      this->get_aeabi_object_attribute(elfcpp::Tag_CPU_arch);
+    int arch = attr->int_value();
+    return (arch != elfcpp::TAG_CPU_ARCH_PRE_V4
+	    && arch != elfcpp::TAG_CPU_ARCH_V4);
+  }
+  
+  // Whether we have v5T interworking instructions available.
+  bool
+  may_use_v5t_interworking() const
+  {
+    Object_attribute* attr =
+      this->get_aeabi_object_attribute(elfcpp::Tag_CPU_arch);
+    int arch = attr->int_value();
+    return (arch != elfcpp::TAG_CPU_ARCH_PRE_V4
+	    && arch != elfcpp::TAG_CPU_ARCH_V4
+	    && arch != elfcpp::TAG_CPU_ARCH_V4T);
   }
   
   // Process the relocations to determine unreferenced sections for 
@@ -2922,8 +2935,6 @@ class Target_arm : public Sized_target<32, big_endian>
   Stub_table_list stub_tables_;
   // Stub factory.
   const Stub_factory &stub_factory_;
-  // Whether we can use BLX.
-  bool may_use_blx_;
   // Whether we force PIC branch veneers.
   bool should_force_pic_veneer_;
   // Map for locating Arm_input_sections.
@@ -3950,7 +3961,7 @@ Arm_relocate_functions<big_endian>::arm_branch_common(
 
   // We need a stub if the branch offset is too large or if we need
   // to switch mode.
-  bool may_use_blx = arm_target->may_use_blx();
+  bool may_use_blx = arm_target->may_use_v5t_interworking();
   Reloc_stub* stub = NULL;
 
   if (!parameters->options().relocatable()
@@ -4081,7 +4092,7 @@ Arm_relocate_functions<big_endian>::thumb_branch_common(
   Arm_address branch_target = psymval->value(object, addend);
 
   // For BLX, bit 1 of target address comes from bit 1 of base address.
-  bool may_use_blx = arm_target->may_use_blx();
+  bool may_use_blx = arm_target->may_use_v5t_interworking();
   if (thumb_bit == 0 && may_use_blx)
     branch_target = utils::bit_select(branch_target, address, 0x2);
 
@@ -4464,7 +4475,7 @@ Reloc_stub::stub_type_for_reloc(
     {
       const Target_arm<true>* big_endian_target =
 	Target_arm<true>::default_target();
-      may_use_blx = big_endian_target->may_use_blx();
+      may_use_blx = big_endian_target->may_use_v5t_interworking();
       should_force_pic_veneer = big_endian_target->should_force_pic_veneer();
       thumb2 = big_endian_target->using_thumb2();
       thumb_only = big_endian_target->using_thumb_only();
@@ -4473,7 +4484,7 @@ Reloc_stub::stub_type_for_reloc(
     {
       const Target_arm<false>* little_endian_target =
 	Target_arm<false>::default_target();
-      may_use_blx = little_endian_target->may_use_blx();
+      may_use_blx = little_endian_target->may_use_v5t_interworking();
       should_force_pic_veneer = little_endian_target->should_force_pic_veneer();
       thumb2 = little_endian_target->using_thumb2();
       thumb_only = little_endian_target->using_thumb_only();
@@ -8604,12 +8615,8 @@ Target_arm<big_endian>::do_finalize_sections(
   if (this->attributes_section_data_ == NULL)
     this->attributes_section_data_ = new Attributes_section_data(NULL, 0);
 
-  // Check BLX use.
   const Object_attribute* cpu_arch_attr =
     this->get_aeabi_object_attribute(elfcpp::Tag_CPU_arch);
-  if (cpu_arch_attr->int_value() > elfcpp::TAG_CPU_ARCH_V4)
-    this->set_may_use_blx(true);
- 
   // Check if we need to use Cortex-A8 workaround.
   if (parameters->options().user_set_fix_cortex_a8())
     this->fix_cortex_a8_ = parameters->options().fix_cortex_a8();
@@ -8630,7 +8637,7 @@ Target_arm<big_endian>::do_finalize_sections(
   // The V4BX interworking stub contains BX instruction,
   // which is not specified for some profiles.
   if (this->fix_v4bx() == General_options::FIX_V4BX_INTERWORKING
-      && !this->may_use_blx())
+      && !this->may_use_v4t_interworking())
     gold_error(_("unable to provide V4BX reloc interworking fix up; "
 	         "the target profile does not support BX instruction"));
 
@@ -11797,7 +11804,7 @@ Target_arm<big_endian>::scan_span_for_cortex_a8_erratum(
 	      // an ARM instruction.  If we were not making a stub,
 	      // the BL would have been converted to a BLX.  Use the
 	      // BLX stub instead in that case.
-	      if (this->may_use_blx() && force_target_arm
+	      if (this->may_use_v5t_interworking() && force_target_arm
 		  && stub_type == arm_stub_a8_veneer_bl)
 		{
 		  stub_type = arm_stub_a8_veneer_blx;

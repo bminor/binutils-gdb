@@ -2471,6 +2471,120 @@ arm_unaligned_reloc.o: arm_unaligned_reloc.s
 
 MOSTLYCLEANFILES += arm_unaligned_reloc
 
+# Check ARM to ARM farcall veneers
+
+check_SCRIPTS += arm_farcall_arm_arm.sh
+check_DATA += arm_farcall_arm_arm.stdout
+
+arm_farcall_arm_arm.stdout: arm_farcall_arm_arm
+	$(TEST_OBJDUMP) -d $< > $@
+
+arm_farcall_arm_arm: arm_farcall_arm_arm.o ../ld-new
+	../ld-new --section-start .text=0x1000 --section-start .foo=0x2001020 -o $@ $<
+
+arm_farcall_arm_arm.o: arm_farcall_arm_arm.s
+	$(TEST_AS) -o $@ $<
+
+MOSTLYCLEANFILES += arm_farcall_arm_arm
+
+# Check ARM to Thumb farcall veneers
+
+check_SCRIPTS += arm_farcall_arm_thumb.sh
+check_DATA += arm_farcall_arm_thumb.stdout arm_farcall_arm_thumb_5t.stdout
+
+arm_farcall_arm_thumb.stdout: arm_farcall_arm_thumb
+	$(TEST_OBJDUMP) -D $< > $@
+
+arm_farcall_arm_thumb: arm_farcall_arm_thumb.o ../ld-new
+	../ld-new --section-start .text=0x1000 --section-start .foo=0x2001014 -o $@ $<
+
+arm_farcall_arm_thumb.o: arm_farcall_arm_thumb.s
+	$(TEST_AS) -o $@ $<
+
+arm_farcall_arm_thumb_5t.stdout: arm_farcall_arm_thumb_5t
+	$(TEST_OBJDUMP) -D $< > $@
+
+arm_farcall_arm_thumb_5t: arm_farcall_arm_thumb_5t.o ../ld-new
+	../ld-new --section-start .text=0x1000 --section-start .foo=0x2001014 -o $@ $<
+
+arm_farcall_arm_thumb_5t.o: arm_farcall_arm_thumb.s
+	$(TEST_AS) -march=armv5t -o $@ $<
+
+MOSTLYCLEANFILES += arm_farcall_arm_thumb arm_farcall_arm_thumb_5t
+
+# Check Thumb to Thumb farcall veneers
+
+check_SCRIPTS += arm_farcall_thumb_thumb.sh
+check_DATA += arm_farcall_thumb_thumb.stdout \
+	      arm_farcall_thumb_thumb_5t.stdout \
+	      arm_farcall_thumb_thumb_7m.stdout \
+	      arm_farcall_thumb_thumb_6m.stdout
+
+arm_farcall_thumb_thumb.stdout: arm_farcall_thumb_thumb
+	$(TEST_OBJDUMP) -D $< > $@
+
+arm_farcall_thumb_thumb: arm_farcall_thumb_thumb.o ../ld-new
+	../ld-new --section-start .text=0x1000 --section-start .foo=0x2001014 -o $@ $<
+
+arm_farcall_thumb_thumb.o: arm_farcall_thumb_thumb.s
+	$(TEST_AS) -march=armv4t -o $@ $<
+
+arm_farcall_thumb_thumb_5t.stdout: arm_farcall_thumb_thumb_5t
+	$(TEST_OBJDUMP) -D $< > $@
+
+arm_farcall_thumb_thumb_5t: arm_farcall_thumb_thumb_5t.o ../ld-new
+	../ld-new --section-start .text=0x1000 --section-start .foo=0x2001014 -o $@ $<
+
+arm_farcall_thumb_thumb_5t.o: arm_farcall_thumb_thumb.s
+	$(TEST_AS) -march=armv5t -o $@ $<
+
+arm_farcall_thumb_thumb_7m.stdout: arm_farcall_thumb_thumb_7m
+	$(TEST_OBJDUMP) -D $< > $@
+
+arm_farcall_thumb_thumb_7m: arm_farcall_thumb_thumb_7m.o ../ld-new
+	../ld-new --section-start .text=0x1000 --section-start .foo=0x2001014 -o $@ $<
+
+arm_farcall_thumb_thumb_7m.o: arm_farcall_thumb_thumb.s
+	$(TEST_AS) -march=armv7-m -o $@ $<
+
+arm_farcall_thumb_thumb_6m.stdout: arm_farcall_thumb_thumb_6m
+	$(TEST_OBJDUMP) -D $< > $@
+
+arm_farcall_thumb_thumb_6m: arm_farcall_thumb_thumb_6m.o ../ld-new
+	../ld-new --section-start .text=0x1000 --section-start .foo=0x2001014 -o $@ $<
+
+arm_farcall_thumb_thumb_6m.o: arm_farcall_thumb_thumb.s
+	$(TEST_AS) -march=armv6-m -o $@ $<
+
+MOSTLYCLEANFILES += arm_farcall_thumb_thumb arm_farcall_thumb_thumb_5t \
+		    arm_farcall_thumb_thumb_7m arm_farcall_thumb_thumb_6m
+
+# Check Thumb to ARM farcall veneers
+
+check_SCRIPTS += arm_farcall_thumb_arm.sh
+check_DATA += arm_farcall_thumb_arm.stdout \
+	      arm_farcall_thumb_arm_5t.stdout
+
+arm_farcall_thumb_arm.stdout: arm_farcall_thumb_arm
+	$(TEST_OBJDUMP) -D $< > $@
+
+arm_farcall_thumb_arm: arm_farcall_thumb_arm.o ../ld-new
+	../ld-new --section-start .text=0x1c01010 --section-start .foo=0x2001014 -o $@ $<
+
+arm_farcall_thumb_arm.o: arm_farcall_thumb_arm.s
+	$(TEST_AS) -o $@ $<
+
+arm_farcall_thumb_arm_5t.stdout: arm_farcall_thumb_arm_5t
+	$(TEST_OBJDUMP) -D $< > $@
+
+arm_farcall_thumb_arm_5t: arm_farcall_thumb_arm_5t.o ../ld-new
+	../ld-new --section-start .text=0x1c01010 --section-start .foo=0x2001014 -o $@ $<
+
+arm_farcall_thumb_arm_5t.o: arm_farcall_thumb_arm.s
+	$(TEST_AS) -march=armv5t -o $@ $<
+
+MOSTLYCLEANFILES += arm_farcall_thumb_arm arm_farcall_thumb_arm_5t
+
 endif DEFAULT_TARGET_ARM
 
 endif NATIVE_OR_CROSS_LINKER

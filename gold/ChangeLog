@@ -1,3 +1,28 @@
+2011-11-02  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
+	* arm.cc (Target_arm::Target_arm): Remove initialisation of
+	may_use_blx_.
+	(Target_arm::may_use_blx): Remove method.
+	(Target_arm::set_may_use_blx): Likewise.
+	(Target_arm::may_use_v4t_interworking): New method.
+	(Target_arm::may_use_v5t_interworking): Likewise.
+	(Target_arm::may_use_blx_): Remove member variable.
+	(Arm_relocate_functions::arm_branch_common): Check for v5T
+	interworking.
+	(Arm_relocate_functions::thumb_branch_common): Likewise.
+	(Reloc_stub::stub_type_for_reloc): Likewise.
+	(Target_arm::do_finalize_sections): Correct interworking checks.
+	* testsuite/Makefile.am: Add new tests.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/arm_farcall_arm_arm.s: New test.
+	* testsuite/arm_farcall_arm_arm.sh: Likewise.
+	* testsuite/arm_farcall_arm_thumb.s: Likewise.
+	* testsuite/arm_farcall_arm_thumb.sh: Likewise.
+	* testsuite/arm_farcall_thumb_arm.s: Likewise.
+	* testsuite/arm_farcall_thumb_arm.sh: Likewise.
+	* testsuite/arm_farcall_thumb_thumb.s: Likewise.
+	* testsuite/arm_farcall_thumb_thumb.sh: Likewise.
+
 2011-10-31  Cary Coutant  <ccoutant@google.com>
 
 	PR gold/13023
