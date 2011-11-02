@@ -1,5 +1,9 @@
 2011-11-02  Yao Qi  <yao@codesourcery.com>
 
+	* tracepoint.c (cmd_qtstart): Remove unused local variables.
+
+2011-11-02  Yao Qi  <yao@codesourcery.com>
+
 	* target.h: Fix a typo in comment.
 
 2011-10-31  Pedro Alves  <pedro@codesourcery.com>

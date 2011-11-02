@@ -2740,7 +2740,6 @@ static void
 cmd_qtstart (char *packet)
 {
   struct tracepoint *tpoint, *prev_ftpoint, *prev_stpoint;
-  int slow_tracepoint_count, fast_count;
   CORE_ADDR jump_entry;
 
   /* The jump to the jump pad of the last fast tracepoint
@@ -2749,8 +2748,6 @@ cmd_qtstart (char *packet)
   ULONGEST fjump_size;
 
   trace_debug ("Starting the trace");
-
-  slow_tracepoint_count = fast_count = 0;
 
   /* Sort tracepoints by ascending address.  This makes installing
      fast tracepoints at the same address easier to handle. */
@@ -2791,8 +2788,6 @@ cmd_qtstart (char *packet)
 
       if (tpoint->type == trap_tracepoint)
 	{
-	  ++slow_tracepoint_count;
-
 	  /* Tracepoints are installed as memory breakpoints.  Just go
 	     ahead and install the trap.  The breakpoints module
 	     handles duplicated breakpoints, and the memory read
@@ -2802,8 +2797,6 @@ cmd_qtstart (char *packet)
 	}
       else if (tpoint->type == fast_tracepoint)
 	{
-	  ++fast_count;
-
 	  if (maybe_write_ipa_not_loaded (packet))
 	    {
 	      trace_debug ("Requested a fast tracepoint, but fast "
