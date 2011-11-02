@@ -1,3 +1,9 @@
+2011-11-02  Tristan Gingold  <gingold@adacore.com>
+
+	* emultempl/aix.em (read_file_list): New function.
+	(_handle_option): Handle '-f'.
+	* NEWS: Mention this feature.
+
 2011-11-02  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	* configure.tgt (x86_64-*-solaris2*): Use $targ_extra_emuls for
