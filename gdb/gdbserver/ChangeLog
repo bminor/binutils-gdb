@@ -1,3 +1,7 @@
+2011-11-02  Yao Qi  <yao@codesourcery.com>
+
+	* target.h: Fix a typo in comment.
+
 2011-10-31  Pedro Alves  <pedro@codesourcery.com>
 
 	* mem-break.c (check_mem_write): Add `myaddr' parameter.  Don't

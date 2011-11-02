@@ -334,7 +334,7 @@ struct target_ops
   /* Read Thread Information Block address.  */
   int (*get_tib_address) (ptid_t ptid, CORE_ADDR *address);
 
-  /* Pause all threads.  If FREEZE, arrange for any resume attempt be
+  /* Pause all threads.  If FREEZE, arrange for any resume attempt to
      be ignored until an unpause_all call unfreezes threads again.
      There can be nested calls to pause_all, so a freeze counter
      should be maintained.  */
