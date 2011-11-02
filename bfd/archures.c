@@ -403,6 +403,8 @@ DESCRIPTION
 .#define bfd_mach_cris_v0_v10	255
 .#define bfd_mach_cris_v32	32
 .#define bfd_mach_cris_v10_v32	1032
+.  bfd_arch_rl78,
+.#define bfd_mach_rl78	0x75
 .  bfd_arch_rx,        {* Renesas RX.  *}
 .#define bfd_mach_rx            0x75
 .  bfd_arch_s390,      {* IBM s390 *}
@@ -540,6 +542,7 @@ extern const bfd_arch_info_type bfd_plugin_arch;
 extern const bfd_arch_info_type bfd_powerpc_archs[];
 #define bfd_powerpc_arch bfd_powerpc_archs[0]
 extern const bfd_arch_info_type bfd_rs6000_arch;
+extern const bfd_arch_info_type bfd_rl78_arch;
 extern const bfd_arch_info_type bfd_rx_arch;
 extern const bfd_arch_info_type bfd_s390_arch;
 extern const bfd_arch_info_type bfd_score_arch;
@@ -618,6 +621,7 @@ static const bfd_arch_info_type * const bfd_archures_list[] =
     &bfd_pdp11_arch,
     &bfd_powerpc_arch,
     &bfd_rs6000_arch,
+    &bfd_rl78_arch,
     &bfd_rx_arch,
     &bfd_s390_arch,
     &bfd_score_arch,

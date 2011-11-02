@@ -2109,6 +2109,8 @@ enum bfd_architecture
 #define bfd_mach_cris_v0_v10   255
 #define bfd_mach_cris_v32      32
 #define bfd_mach_cris_v10_v32  1032
+  bfd_arch_rl78,
+#define bfd_mach_rl78  0x75
   bfd_arch_rx,        /* Renesas RX.  */
 #define bfd_mach_rx            0x75
   bfd_arch_s390,      /* IBM s390 */
@@ -4056,6 +4058,40 @@ instructions  */
 /* This is a 6 bit reloc for the AVR that stores offset for adiw/sbiw
 instructions  */
   BFD_RELOC_AVR_6_ADIW,
+
+/* Renesas RL78 Relocations.  */
+  BFD_RELOC_RL78_NEG8,
+  BFD_RELOC_RL78_NEG16,
+  BFD_RELOC_RL78_NEG24,
+  BFD_RELOC_RL78_NEG32,
+  BFD_RELOC_RL78_16_OP,
+  BFD_RELOC_RL78_24_OP,
+  BFD_RELOC_RL78_32_OP,
+  BFD_RELOC_RL78_8U,
+  BFD_RELOC_RL78_16U,
+  BFD_RELOC_RL78_24U,
+  BFD_RELOC_RL78_DIR3U_PCREL,
+  BFD_RELOC_RL78_DIFF,
+  BFD_RELOC_RL78_GPRELB,
+  BFD_RELOC_RL78_GPRELW,
+  BFD_RELOC_RL78_GPRELL,
+  BFD_RELOC_RL78_SYM,
+  BFD_RELOC_RL78_OP_SUBTRACT,
+  BFD_RELOC_RL78_OP_NEG,
+  BFD_RELOC_RL78_OP_AND,
+  BFD_RELOC_RL78_OP_SHRA,
+  BFD_RELOC_RL78_ABS8,
+  BFD_RELOC_RL78_ABS16,
+  BFD_RELOC_RL78_ABS16_REV,
+  BFD_RELOC_RL78_ABS32,
+  BFD_RELOC_RL78_ABS32_REV,
+  BFD_RELOC_RL78_ABS16U,
+  BFD_RELOC_RL78_ABS16UW,
+  BFD_RELOC_RL78_ABS16UL,
+  BFD_RELOC_RL78_RELAX,
+  BFD_RELOC_RL78_HI16,
+  BFD_RELOC_RL78_HI8,
+  BFD_RELOC_RL78_LO16,
 
 /* Renesas RX Relocations.  */
   BFD_RELOC_RX_NEG8,

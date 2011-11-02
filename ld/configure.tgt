@@ -516,6 +516,7 @@ powerpc-*-lynxos*)	targ_emul=ppclynx ;;
 rs6000-*-aix[5-9]*)	targ_emul=aix5rs6 ;;
 rs6000-*-aix*)		targ_emul=aixrs6
 			;;
+rl78-*-*)		targ_emul=elf32rl78 ;;
 rx-*-*)			targ_emul=elf32rx ;;
 s390x-*-linux*)         targ_emul=elf64_s390
 			targ_extra_emuls=elf_s390

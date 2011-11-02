@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add support for the Renesas RL78 architecture.
+
 Changes in 2.22:
 
 * Add support for displaying the contents of .debug.macro sections.

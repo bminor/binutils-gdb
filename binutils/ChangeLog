@@ -1,3 +1,13 @@
+2011-11-01  DJ Delorie  <dj@redhat.com>
+
+	* readelf.c: Include elf/rl78.h
+	(guess_is_rela): Handle EM_RL78.
+	(dump_relocations): Likewise.
+	(get_machine_name): Likewise.
+	(is_32bit_abs_reloc): Likewise.
+	* NEWS: Mention addition of RL78 support.
+	* MAINTAINERS: Add myself as RL78 port maintainer.
+
 2011-10-28  Ian Lance Taylor  <iant@google.com>
 
 	* dwarf.c (display_debug_frames): If do_debug_frames_interp,

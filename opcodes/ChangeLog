@@ -1,3 +1,18 @@
+2011-11-01  DJ Delorie  <dj@redhat.com>
+
+	* Makefile.am (TARGET_LIBOPCODES_CFILES): Add rl78-decode.c and
+	rl78-dis.c.
+	(MAINTAINERCLEANFILES): Add rl78-decode.c.
+	(rl78-decode.c): New rule, built from rl78-decode.opc and opc2c.
+	* Makefile.in: Regenerate.
+	* configure.in: Add bfd_rl78_arch case.
+	* configure: Regenerate.
+	* disassemble.c: Define ARCH_rl78.
+	(disassembler): Add ARCH_rl78 case.
+	* rl78-decode.c: New file.
+	* rl78-decode.opc: New file.
+	* rl78-dis.c: New file.
+
 2011-10-27  Peter Bergner  <bergner@vnet.ibm.com>
 
         * ppc-opc.c (powerpc_opcodes) <drrndq, drrndq., dtstexq, dctqpq,

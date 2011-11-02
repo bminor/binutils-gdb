@@ -151,6 +151,7 @@ TARGET_CPU_CFILES = \
 	config/tc-pdp11.c \
 	config/tc-pj.c \
 	config/tc-ppc.c \
+	config/tc-rl78.c \
 	config/tc-rx.c \
 	config/tc-s390.c \
 	config/tc-score.c \
@@ -217,6 +218,7 @@ TARGET_CPU_HFILES = \
 	config/tc-pdp11.h \
 	config/tc-pj.h \
 	config/tc-ppc.h \
+	config/tc-rl78.h \
 	config/tc-rx.h \
 	config/tc-s390.h \
 	config/tc-score.h \
@@ -336,6 +338,7 @@ EXTRA_SCRIPTS = .gdbinit
 
 EXTRA_DIST = m68k-parse.c itbl-parse.c itbl-parse.h itbl-lex.c \
 	bfin-parse.c bfin-parse.h bfin-lex.c \
+	rl78-parse.c rl78-parse.h \
 	rx-parse.c rx-parse.h
 
 diststuff: $(EXTRA_DIST) info
@@ -464,6 +467,14 @@ if AMDEP
 endif
 	$(COMPILE) -c `test -f bfin-lex.c || echo $(srcdir)/`bfin-lex.c $(NO_WERROR)
 endif
+
+rl78-parse.c: $(srcdir)/config/rl78-parse.y
+	$(SHELL) $(YLWRAP) $(srcdir)/config/rl78-parse.y y.tab.c rl78-parse.c y.tab.h rl78-parse.h -- $(YACCCOMPILE) -d ;
+rl78-parse.h: rl78-parse.c
+rl78-parse.@OBJEXT@: rl78-parse.c rl78-parse.h $(srcdir)/config/rl78-defs.h \
+ $(INCDIR)/elf/common.h $(INCDIR)/elf/rl78.h $(BFDDIR)/libbfd.h
+
+rl78-defs.h: ; @true
 
 rx-parse.c: $(srcdir)/config/rx-parse.y
 	$(SHELL) $(YLWRAP) $(srcdir)/config/rx-parse.y y.tab.c rx-parse.c y.tab.h rx-parse.h -- $(YACCCOMPILE) -d ;

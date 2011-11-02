@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add support for the Renesas RL78 architecture.
+
 * Add support for the Adapteva EPIPHANY architecture.
 
 Changes in 2.22:

@@ -71,6 +71,7 @@
 #define ARCH_pj
 #define ARCH_powerpc
 #define ARCH_rs6000
+#define ARCH_rl78
 #define ARCH_rx
 #define ARCH_s390
 #define ARCH_score
@@ -353,6 +354,11 @@ disassembler (abfd)
 	disassemble = print_insn_big_powerpc;
       else
 	disassemble = print_insn_rs6000;
+      break;
+#endif
+#ifdef ARCH_rl78
+    case bfd_arch_rl78:
+      disassemble = print_insn_rl78;
       break;
 #endif
 #ifdef ARCH_rx

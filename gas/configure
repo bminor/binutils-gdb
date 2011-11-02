@@ -12195,6 +12195,13 @@ _ACEOF
 	fi
 	;;
 
+      rl78)
+        echo ${extra_objects} | grep -s "rl78-parse.o"
+        if test $? -ne 0 ; then
+          extra_objects="$extra_objects rl78-parse.o"
+        fi
+	;;
+
       rx)
         echo ${extra_objects} | grep -s "rx-parse.o"
         if test $? -ne 0 ; then

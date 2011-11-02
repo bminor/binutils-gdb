@@ -6945,6 +6945,9 @@ subject, see the hardware manufacturer's manual.
 @ifset PPC
 * PPC-Dependent::               PowerPC Dependent Features
 @end ifset
+@ifset RL78
+* RL78-Dependent::              RL78 Dependent Features
+@end ifset
 @ifset RX
 * RX-Dependent::                RX Dependent Features
 @end ifset
@@ -7140,6 +7143,10 @@ family.
 
 @ifset PPC
 @include c-ppc.texi
+@end ifset
+
+@ifset RL78
+@include c-rl78.texi
 @end ifset
 
 @ifset RX

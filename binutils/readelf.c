@@ -134,6 +134,7 @@
 #include "elf/pj.h"
 #include "elf/ppc.h"
 #include "elf/ppc64.h"
+#include "elf/rl78.h"
 #include "elf/rx.h"
 #include "elf/s390.h"
 #include "elf/score.h"
@@ -593,6 +594,7 @@ guess_is_rela (unsigned int e_machine)
     case EM_NIOS32:
     case EM_PPC64:
     case EM_PPC:
+    case EM_RL78:
     case EM_RX:
     case EM_S390:
     case EM_S390_OLD:
@@ -1217,6 +1219,10 @@ dump_relocations (FILE * file,
 	case EM_MICROBLAZE:
 	case EM_MICROBLAZE_OLD:
 	  rtype = elf_microblaze_reloc_type (type);
+	  break;
+
+	case EM_RL78:
+	  rtype = elf_rl78_reloc_type (type);
 	  break;
 
 	case EM_RX:
@@ -1978,6 +1984,7 @@ get_machine_name (unsigned e_machine)
     case EM_CR16_OLD:		return "National Semiconductor's CR16";
     case EM_MICROBLAZE:		return "Xilinx MicroBlaze";
     case EM_MICROBLAZE_OLD:	return "Xilinx MicroBlaze";
+    case EM_RL78:		return "Renesas RL78";
     case EM_RX:			return "Renesas RX";
     case EM_METAG:		return "Imagination Technologies META processor architecture";
     case EM_MCST_ELBRUS:	return "MCST Elbrus general purpose hardware architecture";
@@ -9768,6 +9775,8 @@ is_32bit_abs_reloc (unsigned int reloc_type)
       return reloc_type == 1; /* R_PPC64_ADDR32.  */
     case EM_PPC:
       return reloc_type == 1; /* R_PPC_ADDR32.  */
+    case EM_RL78:
+      return reloc_type == 1; /* R_RL78_DIR32.  */
     case EM_RX:
       return reloc_type == 1; /* R_RX_DIR32.  */
     case EM_S370:

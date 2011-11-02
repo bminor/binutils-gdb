@@ -1,3 +1,23 @@
+2011-11-01  DJ Delorie  <dj@redhat.com>
+
+	* Makefile.am (ALL_MACHINES): Add cpu-rl78.lo.
+	(ALL_MACHINES_CFILES): Add cpu-rl78.c.
+	(BFD32_BACKENDS): Add elf32-rl78.lo.
+	(BFD32_BACKENDS_CFILES): Add elf32-rl78.c.
+	(Makefile.in): Regenerate.
+	* archures.c (bfd_architecture): Define bfd_arch_rl78.
+	(bfd_archures_list): Add bfd_rl78_arch.
+	* config.bfd: Add rl78-*-elf.
+	* configure.in: Add bfd_elf32_rl78_vec.
+	* reloc.c (bfd_reloc_code_type): Add BFD_RELOC_RL78_* relocations.
+	* targets.c (bfd_target_vector): Add bfd_elf32_rl78_vec.
+	* Makefile.in: Regenerate.
+	* bfd-in2.h: Regenerate.
+	* configure: Regenerate.
+	* libbfd.h: Regenerate.
+	* cpu-rl78.c: New file.
+	* elf32-rl78.c: New file.
+
 2011-10-26  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/13049

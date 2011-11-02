@@ -1,3 +1,25 @@
+2011-11-01  DJ Delorie  <dj@redhat.com>
+
+	* Makefile.am (TARGET_CPU_CFILES): Add tc-rl78.c.
+	(TARGET_CPU_HFILES): Add rc-rl78.h.
+	(EXTRA_DIST): Add rl78-parse.c and rl78-parse.y.
+	(rl78-parse.c, rl78-parse.h, rl78-parse.o, rl78-defs.h): New rules.
+	* Makefile.in: Regenerate.
+	* configure.in: Add rl78 case.
+	* configure: Regenerate.
+	* configure.tgt: Add rl78 case.
+	* config/rl78-defs.h: New file.
+	* config/rl78-parse.y: New file.
+	* config/tc-rl78.c: New file.
+	* config/tc-rl78.h: New file.
+	* NEWS: Add Renesas RL78.
+
+	* doc/Makefile.am (c-rl78.texi): New.
+	* doc/Makefile.in: Likewise.
+	* doc/all.texi: Enable it.
+	* doc/as.texi: Add it.
+	* doc/c-rl78.texi: New file.
+
 2011-10-28  Walter Lee  <walt@tilera.com>
 
 	* NEWS: Fix TILEPro capitalization.
