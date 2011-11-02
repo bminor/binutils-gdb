@@ -1,3 +1,21 @@
+2011-11-02  Pedro Alves  <pedro@codesourcery.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* linux-nat.c: Include cli/cli-utils.h.
+	(enum info_proc_what): New.
+	(linux_nat_info_proc_cmd): Rename to ...
+	(linux_nat_info_proc_cmd_1): ... here.  Remove variables argv and all.
+	New parameter what.  Initialize cmdline_f, cwd_f, exe_f, mappings_f,
+	status_f and stat_f from WHAT.  Throw error on extra parameters.
+	(linux_nat_info_proc_cmd, linux_nat_info_proc_cmd_mappings)
+	(linux_nat_info_proc_cmd_stat, linux_nat_info_proc_cmd_status)
+	(linux_nat_info_proc_cmd_cwd, linux_nat_info_proc_cmd_cmdline)
+	(linux_nat_info_proc_cmd_exe, linux_nat_info_proc_cmd_all): New.
+	(_initialize_linux_nat): New variable info_proc_cmdlist.  Install `info
+	proc mappings', `info proc stat`, `info proc status', `info proc cwd',
+	`info proc cmdline', `info proc exe' and `info proc all' as real
+	subcommands of `info proc'.
+
 2011-11-01  Justin Lebar  <justin.lebar@gmail.com>
 
 	* Makefile.in: (SFILES): Add skip.c.

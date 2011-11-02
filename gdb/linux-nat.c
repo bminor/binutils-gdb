@@ -59,6 +59,7 @@
 #include <sys/vfs.h>
 #include "solib.h"
 #include "linux-osdata.h"
+#include "cli/cli-utils.h"
 
 #ifndef SPUFS_MAGIC
 #define SPUFS_MAGIC 0x23c9b64e
@@ -4746,71 +4747,57 @@ linux_nat_make_corefile_notes (bfd *obfd, int *note_size)
 
 /* Implement the "info proc" command.  */
 
+enum info_proc_what
+  {
+    /* Display the default cmdline, cwd and exe outputs.  */
+    IP_MINIMAL,
+
+    /* Display `info proc mappings'.  */
+    IP_MAPPINGS,
+
+    /* Display `info proc status'.  */
+    IP_STATUS,
+
+    /* Display `info proc stat'.  */
+    IP_STAT,
+
+    /* Display `info proc cmdline'.  */
+    IP_CMDLINE,
+
+    /* Display `info proc exe'.  */
+    IP_EXE,
+
+    /* Display `info proc cwd'.  */
+    IP_CWD,
+
+    /* Display all of the above.  */
+    IP_ALL
+  };
+
 static void
-linux_nat_info_proc_cmd (char *args, int from_tty)
+linux_nat_info_proc_cmd_1 (char *args, enum info_proc_what what, int from_tty)
 {
   /* A long is used for pid instead of an int to avoid a loss of precision
      compiler warning from the output of strtoul.  */
   long pid = PIDGET (inferior_ptid);
   FILE *procfile;
-  char **argv = NULL;
   char buffer[MAXPATHLEN];
   char fname1[MAXPATHLEN], fname2[MAXPATHLEN];
-  int cmdline_f = 1;
-  int cwd_f = 1;
-  int exe_f = 1;
-  int mappings_f = 0;
-  int status_f = 0;
-  int stat_f = 0;
-  int all = 0;
+  int cmdline_f = (what == IP_MINIMAL || what == IP_CMDLINE || what == IP_ALL);
+  int cwd_f = (what == IP_MINIMAL || what == IP_CWD || what == IP_ALL);
+  int exe_f = (what == IP_MINIMAL || what == IP_EXE || what == IP_ALL);
+  int mappings_f = (what == IP_MAPPINGS || what == IP_ALL);
+  int status_f = (what == IP_STATUS || what == IP_ALL);
+  int stat_f = (what == IP_STAT || what == IP_ALL);
   struct stat dummy;
 
-  if (args)
-    {
-      /* Break up 'args' into an argv array.  */
-      argv = gdb_buildargv (args);
-      make_cleanup_freeargv (argv);
-    }
-  while (argv != NULL && *argv != NULL)
-    {
-      if (isdigit (argv[0][0]))
-	{
-	  pid = strtoul (argv[0], NULL, 10);
-	}
-      else if (strncmp (argv[0], "mappings", strlen (argv[0])) == 0)
-	{
-	  mappings_f = 1;
-	}
-      else if (strcmp (argv[0], "status") == 0)
-	{
-	  status_f = 1;
-	}
-      else if (strcmp (argv[0], "stat") == 0)
-	{
-	  stat_f = 1;
-	}
-      else if (strcmp (argv[0], "cmd") == 0)
-	{
-	  cmdline_f = 1;
-	}
-      else if (strncmp (argv[0], "exe", strlen (argv[0])) == 0)
-	{
-	  exe_f = 1;
-	}
-      else if (strcmp (argv[0], "cwd") == 0)
-	{
-	  cwd_f = 1;
-	}
-      else if (strncmp (argv[0], "all", strlen (argv[0])) == 0)
-	{
-	  all = 1;
-	}
-      else
-	{
-	  /* [...] (future options here).  */
-	}
-      argv++;
-    }
+  if (args && isdigit (args[0]))
+    pid = strtoul (args, &args, 10);
+
+  args = skip_spaces (args);
+  if (args && args[0])
+    error (_("Too many parameters: %s"), args);
+
   if (pid == 0)
     error (_("No current process: you must name one."));
 
@@ -4819,7 +4806,7 @@ linux_nat_info_proc_cmd (char *args, int from_tty)
     error (_("No /proc directory: '%s'"), fname1);
 
   printf_filtered (_("process %ld\n"), pid);
-  if (cmdline_f || all)
+  if (cmdline_f)
     {
       sprintf (fname1, "/proc/%ld/cmdline", pid);
       if ((procfile = fopen (fname1, "r")) != NULL)
@@ -4835,7 +4822,7 @@ linux_nat_info_proc_cmd (char *args, int from_tty)
       else
 	warning (_("unable to open /proc file '%s'"), fname1);
     }
-  if (cwd_f || all)
+  if (cwd_f)
     {
       sprintf (fname1, "/proc/%ld/cwd", pid);
       memset (fname2, 0, sizeof (fname2));
@@ -4844,7 +4831,7 @@ linux_nat_info_proc_cmd (char *args, int from_tty)
       else
 	warning (_("unable to read link '%s'"), fname1);
     }
-  if (exe_f || all)
+  if (exe_f)
     {
       sprintf (fname1, "/proc/%ld/exe", pid);
       memset (fname2, 0, sizeof (fname2));
@@ -4853,7 +4840,7 @@ linux_nat_info_proc_cmd (char *args, int from_tty)
       else
 	warning (_("unable to read link '%s'"), fname1);
     }
-  if (mappings_f || all)
+  if (mappings_f)
     {
       sprintf (fname1, "/proc/%ld/maps", pid);
       if ((procfile = fopen (fname1, "r")) != NULL)
@@ -4915,7 +4902,7 @@ linux_nat_info_proc_cmd (char *args, int from_tty)
       else
 	warning (_("unable to open /proc file '%s'"), fname1);
     }
-  if (status_f || all)
+  if (status_f)
     {
       sprintf (fname1, "/proc/%ld/status", pid);
       if ((procfile = fopen (fname1, "r")) != NULL)
@@ -4929,7 +4916,7 @@ linux_nat_info_proc_cmd (char *args, int from_tty)
       else
 	warning (_("unable to open /proc file '%s'"), fname1);
     }
-  if (stat_f || all)
+  if (stat_f)
     {
       sprintf (fname1, "/proc/%ld/stat", pid);
       if ((procfile = fopen (fname1, "r")) != NULL)
@@ -5027,6 +5014,70 @@ linux_nat_info_proc_cmd (char *args, int from_tty)
       else
 	warning (_("unable to open /proc file '%s'"), fname1);
     }
+}
+
+/* Implement `info proc' when given without any futher parameters.  */
+
+static void
+linux_nat_info_proc_cmd (char *args, int from_tty)
+{
+  linux_nat_info_proc_cmd_1 (args, IP_MINIMAL, from_tty);
+}
+
+/* Implement `info proc mappings'.  */
+
+static void
+linux_nat_info_proc_cmd_mappings (char *args, int from_tty)
+{
+  linux_nat_info_proc_cmd_1 (args, IP_MAPPINGS, from_tty);
+}
+
+/* Implement `info proc stat'.  */
+
+static void
+linux_nat_info_proc_cmd_stat (char *args, int from_tty)
+{
+  linux_nat_info_proc_cmd_1 (args, IP_STAT, from_tty);
+}
+
+/* Implement `info proc status'.  */
+
+static void
+linux_nat_info_proc_cmd_status (char *args, int from_tty)
+{
+  linux_nat_info_proc_cmd_1 (args, IP_STATUS, from_tty);
+}
+
+/* Implement `info proc cwd'.  */
+
+static void
+linux_nat_info_proc_cmd_cwd (char *args, int from_tty)
+{
+  linux_nat_info_proc_cmd_1 (args, IP_CWD, from_tty);
+}
+
+/* Implement `info proc cmdline'.  */
+
+static void
+linux_nat_info_proc_cmd_cmdline (char *args, int from_tty)
+{
+  linux_nat_info_proc_cmd_1 (args, IP_CMDLINE, from_tty);
+}
+
+/* Implement `info proc exe'.  */
+
+static void
+linux_nat_info_proc_cmd_exe (char *args, int from_tty)
+{
+  linux_nat_info_proc_cmd_1 (args, IP_EXE, from_tty);
+}
+
+/* Implement `info proc all'.  */
+
+static void
+linux_nat_info_proc_cmd_all (char *args, int from_tty)
+{
+  linux_nat_info_proc_cmd_1 (args, IP_ALL, from_tty);
 }
 
 /* Implement the to_xfer_partial interface for memory reads using the /proc
@@ -5822,14 +5873,42 @@ extern initialize_file_ftype _initialize_linux_nat;
 void
 _initialize_linux_nat (void)
 {
-  add_info ("proc", linux_nat_info_proc_cmd, _("\
+  static struct cmd_list_element *info_proc_cmdlist;
+
+  add_prefix_cmd ("proc", class_info, linux_nat_info_proc_cmd,
+		  _("\
 Show /proc process information about any running process.\n\
-Specify any process id, or use the program being debugged by default.\n\
-Specify any of the following keywords for detailed info:\n\
-  mappings -- list of mapped memory regions.\n\
-  stat     -- list a bunch of random process info.\n\
-  status   -- list a different bunch of random process info.\n\
-  all      -- list all available /proc info."));
+Specify any process id, or use the program being debugged by default."),
+		  &info_proc_cmdlist, "info proc ",
+		  1/*allow-unknown*/, &infolist);
+
+  add_cmd ("mappings", class_info, linux_nat_info_proc_cmd_mappings, _("\
+List of mapped memory regions."),
+	   &info_proc_cmdlist);
+
+  add_cmd ("stat", class_info, linux_nat_info_proc_cmd_stat, _("\
+List a bunch of random process info."),
+	   &info_proc_cmdlist);
+
+  add_cmd ("status", class_info, linux_nat_info_proc_cmd_status, _("\
+List a different bunch of random process info."),
+	   &info_proc_cmdlist);
+
+  add_cmd ("cwd", class_info, linux_nat_info_proc_cmd_cwd, _("\
+List a different bunch of random process info."),
+	   &info_proc_cmdlist);
+
+  add_cmd ("cmdline", class_info, linux_nat_info_proc_cmd_cmdline, _("\
+List a different bunch of random process info."),
+	   &info_proc_cmdlist);
+
+  add_cmd ("exe", class_info, linux_nat_info_proc_cmd_exe, _("\
+List a different bunch of random process info."),
+	   &info_proc_cmdlist);
+
+  add_cmd ("all", class_info, linux_nat_info_proc_cmd_all, _("\
+List all available /proc info."),
+	   &info_proc_cmdlist);
 
   add_setshow_zinteger_cmd ("lin-lwp", class_maintenance,
 			    &debug_linux_nat, _("\
