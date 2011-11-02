@@ -1,3 +1,16 @@
+2011-11-02  Jan Beulich  <jbeulich@suse.com>
+
+	* coffgen.c (coff_write_alien_symbol): Make public. Add 'struct
+	internal_syment *' parameter. Extend 'dummy' to an array with two
+	elements. Set n_numaux early. Handle BSF_FILE.
+	(coff_write_symbols): Pass NULL as new third argument to
+	coff_write_alien_symbol().
+	* cofflink.c (_bfd_coff_final_link): Don't use COFF-specific
+	obj_raw_syment_count() on non-COFF input BFD. Insert local symbols
+	from non-COFF input BFDs.
+	* libcoff-in.h (coff_write_alien_symbol): Declare.
+	* libcoff.h (coff_write_alien_symbol): Re-generate.
+
 2011-11-01  DJ Delorie  <dj@redhat.com>
 
 	* Makefile.am (ALL_MACHINES): Add cpu-rl78.lo.

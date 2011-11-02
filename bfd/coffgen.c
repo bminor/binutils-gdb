@@ -983,31 +983,36 @@ coff_write_symbol (bfd *abfd,
    file originally.  This symbol may have been created by the linker,
    or we may be linking a non COFF file to a COFF file.  */
 
-static bfd_boolean
+bfd_boolean
 coff_write_alien_symbol (bfd *abfd,
 			 asymbol *symbol,
+			 struct internal_syment *isym,
 			 bfd_vma *written,
 			 bfd_size_type *string_size_p,
 			 asection **debug_string_section_p,
 			 bfd_size_type *debug_string_size_p)
 {
   combined_entry_type *native;
-  combined_entry_type dummy;
+  combined_entry_type dummy[2];
   asection *output_section = symbol->section->output_section
 			       ? symbol->section->output_section
 			       : symbol->section;
   struct bfd_link_info *link_info = coff_data (abfd)->link_info;
+  bfd_boolean ret;
 
   if ((!link_info || link_info->strip_discarded)
       && !bfd_is_abs_section (symbol->section)
       && symbol->section->output_section == bfd_abs_section_ptr)
     {
       symbol->name = "";
+      if (isym != NULL)
+        memset (isym, 0, sizeof(*isym));
       return TRUE;
     }
-  native = &dummy;
+  native = dummy;
   native->u.syment.n_type = T_NULL;
   native->u.syment.n_flags = 0;
+  native->u.syment.n_numaux = 0;
   if (bfd_is_und_section (symbol->section))
     {
       native->u.syment.n_scnum = N_UNDEF;
@@ -1018,6 +1023,11 @@ coff_write_alien_symbol (bfd *abfd,
       native->u.syment.n_scnum = N_UNDEF;
       native->u.syment.n_value = symbol->value;
     }
+  else if (symbol->flags & BSF_FILE)
+    {
+      native->u.syment.n_scnum = N_DEBUG;
+      native->u.syment.n_numaux = 1;
+    }
   else if (symbol->flags & BSF_DEBUGGING)
     {
       /* There isn't much point to writing out a debugging symbol
@@ -1025,6 +1035,8 @@ coff_write_alien_symbol (bfd *abfd,
          format.  So, we just ignore them.  We must clobber the symbol
          name to keep it from being put in the string table.  */
       symbol->name = "";
+      if (isym != NULL)
+        memset (isym, 0, sizeof(*isym));
       return TRUE;
     }
   else
@@ -1045,16 +1057,20 @@ coff_write_alien_symbol (bfd *abfd,
     }
 
   native->u.syment.n_type = 0;
-  if (symbol->flags & BSF_LOCAL)
+  if (symbol->flags & BSF_FILE)
+    native->u.syment.n_sclass = C_FILE;
+  else if (symbol->flags & BSF_LOCAL)
     native->u.syment.n_sclass = C_STAT;
   else if (symbol->flags & BSF_WEAK)
     native->u.syment.n_sclass = obj_pe (abfd) ? C_NT_WEAK : C_WEAKEXT;
   else
     native->u.syment.n_sclass = C_EXT;
-  native->u.syment.n_numaux = 0;
 
-  return coff_write_symbol (abfd, symbol, native, written, string_size_p,
-			    debug_string_section_p, debug_string_size_p);
+  ret = coff_write_symbol (abfd, symbol, native, written, string_size_p,
+			   debug_string_section_p, debug_string_size_p);
+  if (isym != NULL)
+    *isym = native->u.syment;
+  return ret;
 }
 
 /* Write a native symbol to a COFF file.  */
@@ -1170,8 +1186,8 @@ coff_write_symbols (bfd *abfd)
       if (c_symbol == (coff_symbol_type *) NULL
 	  || c_symbol->native == (combined_entry_type *) NULL)
 	{
-	  if (!coff_write_alien_symbol (abfd, symbol, &written, &string_size,
-					&debug_string_section,
+	  if (!coff_write_alien_symbol (abfd, symbol, NULL, &written,
+					&string_size, &debug_string_section,
 					&debug_string_size))
 	    return FALSE;
 	}

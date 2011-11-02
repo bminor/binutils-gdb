@@ -322,6 +322,9 @@ extern void coff_mangle_symbols
   (bfd *);
 extern bfd_boolean coff_write_symbols
   (bfd *);
+extern bfd_boolean coff_write_alien_symbol
+  (bfd *, asymbol *, struct internal_syment *, bfd_vma *,
+   bfd_size_type *, asection **, bfd_size_type *);
 extern bfd_boolean coff_write_linenumbers
   (bfd *);
 extern alent *coff_get_lineno

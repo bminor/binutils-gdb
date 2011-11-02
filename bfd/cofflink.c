@@ -866,7 +866,7 @@ _bfd_coff_final_link (bfd *abfd,
       size_t sz;
 
       sub->output_has_begun = FALSE;
-      sz = obj_raw_syment_count (sub);
+      sz = bfd_family_coff (sub) ? obj_raw_syment_count (sub) : 2;
       if (sz > max_sym_count)
 	max_sym_count = sz;
     }
@@ -939,6 +939,92 @@ _bfd_coff_final_link (bfd *abfd,
 	    {
 	      if (! _bfd_default_link_order (abfd, info, o, p))
 		goto error_return;
+	    }
+	}
+    }
+
+  if (finfo.info->strip != strip_all && finfo.info->discard != discard_all)
+    {
+      /* Add local symbols from foreign inputs.  */
+      for (sub = info->input_bfds; sub != NULL; sub = sub->link_next)
+	{
+	  unsigned int i;
+
+	  if (bfd_family_coff (sub) || ! bfd_get_outsymbols (sub))
+	    continue;
+	  for (i = 0; i < bfd_get_symcount (sub); ++i)
+	    {
+	      asymbol *sym = bfd_get_outsymbols (sub) [i];
+	      file_ptr pos;
+	      struct internal_syment isym;
+	      bfd_size_type string_size = 0;
+	      bfd_vma written = 0;
+	      bfd_boolean rewrite = FALSE;
+
+	      if (! (sym->flags & BSF_LOCAL)
+		  || (sym->flags & (BSF_SECTION_SYM | BSF_DEBUGGING_RELOC
+				    | BSF_THREAD_LOCAL | BSF_RELC | BSF_SRELC
+				    | BSF_SYNTHETIC))
+		  || ((sym->flags & BSF_DEBUGGING)
+		      && ! (sym->flags & BSF_FILE)))
+		continue;
+
+	      /* See if we are discarding symbols with this name.  */
+	      if ((finfo.info->strip == strip_some
+		   && (bfd_hash_lookup (finfo.info->keep_hash,
+					bfd_asymbol_name(sym), FALSE, FALSE)
+		       == NULL))
+		  || (((finfo.info->discard == discard_sec_merge
+			&& (bfd_get_section (sym)->flags & SEC_MERGE)
+			&& ! finfo.info->relocatable)
+		       || finfo.info->discard == discard_l)
+		      && bfd_is_local_label_name (sub, bfd_asymbol_name(sym))))
+		continue;
+
+	      pos = obj_sym_filepos (abfd) + obj_raw_syment_count (abfd)
+					     * symesz;
+	      if (bfd_seek (abfd, pos, SEEK_SET) != 0)
+		goto error_return;
+	      if (! coff_write_alien_symbol(abfd, sym, &isym, &written,
+					    &string_size, NULL, NULL))
+		goto error_return;
+
+	      if (string_size)
+		{
+		  bfd_boolean hash = ! (abfd->flags & BFD_TRADITIONAL_FORMAT);
+		  bfd_size_type indx;
+
+		  indx = _bfd_stringtab_add (finfo.strtab,
+					     bfd_asymbol_name (sym), hash,
+					     FALSE);
+		  if (indx == (bfd_size_type) -1)
+		    goto error_return;
+		  isym._n._n_n._n_offset = STRING_SIZE_SIZE + indx;
+		  bfd_coff_swap_sym_out (abfd, &isym, finfo.outsyms);
+		  rewrite = TRUE;
+		}
+
+	      if (isym.n_sclass == C_FILE)
+		{
+		  if (finfo.last_file_index != -1)
+		    {
+		      finfo.last_file.n_value = obj_raw_syment_count (abfd);
+		      bfd_coff_swap_sym_out (abfd, &finfo.last_file,
+					     finfo.outsyms);
+		      pos = obj_sym_filepos (abfd) + finfo.last_file_index
+						     * symesz;
+		      rewrite = TRUE;
+		    }
+		  finfo.last_file_index = obj_raw_syment_count (abfd);
+		  finfo.last_file = isym;
+		}
+
+	      if (rewrite
+		  && (bfd_seek (abfd, pos, SEEK_SET) != 0
+		      || bfd_bwrite (finfo.outsyms, symesz, abfd) != symesz))
+		goto error_return;
+
+	      obj_raw_syment_count (abfd) += written;
 	    }
 	}
     }
