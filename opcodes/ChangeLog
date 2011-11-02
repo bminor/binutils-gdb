@@ -1,3 +1,10 @@
+2011-11-02  Nick Clifton  <nickc@redhat.com>
+
+	* po/it.po: New Italian translation.
+	* configure.in (ALL_LINGUAS): Add it.
+	* configure: Regenerate.
+	* po/opcodes.pot: Regenerate.
+
 2011-11-01  DJ Delorie  <dj@redhat.com>
 
 	* Makefile.am (TARGET_LIBOPCODES_CFILES): Add rl78-decode.c and
