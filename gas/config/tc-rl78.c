@@ -482,7 +482,6 @@ tc_gen_reloc (asection * seg ATTRIBUTE_UNUSED, fixS * fixp)
 {
   static arelent * reloc[8];
   int rp;
-  int is_opcode = 0;
 
   if (fixp->fx_r_type == BFD_RELOC_NONE)
     {
@@ -507,7 +506,6 @@ tc_gen_reloc (asection * seg ATTRIBUTE_UNUSED, fixS * fixp)
       && fixp->fx_subsy)
     {
       fixp->fx_r_type = BFD_RELOC_RL78_DIFF;
-      is_opcode = 1;
     }
 
 #define OPX(REL,SYM,ADD)							\

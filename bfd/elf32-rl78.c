@@ -1013,12 +1013,10 @@ bfd_elf32_rl78_set_target_flags (bfd_boolean user_no_warn_mismatch)
 static bfd_boolean
 rl78_elf_merge_private_bfd_data (bfd * ibfd, bfd * obfd)
 {
-  flagword old_flags;
   flagword new_flags;
   bfd_boolean error = FALSE;
 
   new_flags = elf_elfheader (ibfd)->e_flags;
-  old_flags = elf_elfheader (obfd)->e_flags;
 
   if (!elf_flags_init (obfd))
     {

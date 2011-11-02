@@ -1,3 +1,8 @@
+2011-11-02  DJ Delorie  <dj@redhat.com>
+
+	* elf32-rl78.c (rl78_elf_merge_private_bfd_data): Delete unused
+	variable.
+
 2011-11-02  Jan Beulich  <jbeulich@suse.com>
 
 	* coffgen.c (coff_write_alien_symbol): Make public. Add 'struct

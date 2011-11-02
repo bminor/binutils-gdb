@@ -1,3 +1,7 @@
+2011-11-02  DJ Delorie  <dj@redhat.com>
+
+	* config/tc-rl78.c (tc_gen_reloc): Remove unused variable.
+
 2011-11-02  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-arm.c (md_begin): Remove ARM_PLT32 reloc associated
