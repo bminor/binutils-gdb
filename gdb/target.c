@@ -672,6 +672,7 @@ update_current_target (void)
       /* Do not inherit to_search_memory.  */
       INHERIT (to_supports_multi_process, t);
       INHERIT (to_supports_enable_disable_tracepoint, t);
+      INHERIT (to_supports_string_tracing, t);
       INHERIT (to_trace_init, t);
       INHERIT (to_download_tracepoint, t);
       INHERIT (to_download_trace_state_variable, t);
@@ -838,6 +839,9 @@ update_current_target (void)
 	    (int (*) (void))
 	    return_zero);
   de_fault (to_supports_enable_disable_tracepoint,
+	    (int (*) (void))
+	    return_zero);
+  de_fault (to_supports_string_tracing,
 	    (int (*) (void))
 	    return_zero);
   de_fault (to_trace_init,

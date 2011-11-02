@@ -1,3 +1,27 @@
+2011-11-02  Stan Shebs  <stan@codesourcery.com>
+
+	String collection for tracepoints.
+	* NEWS: Mention string collection.
+	* common/ax.def (tracenz): New bytecode.
+	* ax-gdb.h (trace_string_kludge): Declare.
+	* ax-gdb.c: Include valprint.h and c-lang.h.
+	(trace_string_kludge): New global.
+	(gen_traced_pop): Add string case.
+	(agent_command): Add string case.
+	* tracepoint.h (decode_agent_options): Declare.
+	* tracepoint.c: Include cli-utils.h.
+	(decode_agent_options): New function.
+	(validate_actionline): Call it.
+	(encode_actions_1): Ditto.
+	* target.h (struct target_ops): New method to_supports_string_tracing.
+	(target_supports_string_tracing): New macro.
+	* target.c (update_current_target): Add to_supports_string_tracing.
+	* remote.c (struct remote_state): New field string_tracing.
+	(remote_string_tracing_feature): New function.
+	(remote_protocol_features): New feature tracenz.
+	(remote_supports_string_tracing): New function.
+	(init_remote_ops): Set to_supports_string_tracing.
+
 2011-11-02  Pedro Alves  <pedro@codesourcery.com>
 	    Jan Kratochvil  <jan.kratochvil@redhat.com>
 

@@ -10666,7 +10666,7 @@ end
 @end smallexample
 
 @kindex collect @r{(tracepoints)}
-@item collect @var{expr1}, @var{expr2}, @dots{}
+@item collect@r{[}/@var{mods}@r{]} @var{expr1}, @var{expr2}, @dots{}
 Collect values of the given expressions when the tracepoint is hit.
 This command accepts a comma-separated list of any valid expressions.
 In addition to global, static, or local variables, the following
@@ -10711,6 +10711,15 @@ inspect @samp{$_sdata} like any other variable available to
 You can give several consecutive @code{collect} commands, each one
 with a single argument, or one @code{collect} command with several
 arguments separated by commas; the effect is the same.
+
+The optional @var{mods} changes the usual handling of the arguments.
+@code{s} requests that pointers to chars be handled as strings, in
+particular collecting the contents of the memory being pointed at, up
+to the first zero.  The upper bound is by default the value of the
+@code{print elements} variable; if @code{s} is followed by a decimal
+number, that is the upper bound instead.  So for instance
+@samp{collect/s25 mystr} collects as many as 25 characters at
+@samp{mystr}.
 
 The command @code{info scope} (@pxref{Symbols, info scope}) is
 particularly useful for figuring out what data to collect.
@@ -34707,6 +34716,11 @@ These are the currently defined stub features and their properties:
 @tab @samp{-}
 @tab No
 
+@item @samp{tracenz}
+@tab No
+@tab @samp{-}
+@tab No
+
 @end multitable
 
 These are the currently defined stub features, in more detail:
@@ -34830,6 +34844,11 @@ The remote stub supports static tracepoints.
 The remote stub supports the @samp{QTEnable} (@pxref{QTEnable}) and
 @samp{QTDisable} (@pxref{QTDisable}) packets that allow tracepoints
 to be enabled and disabled while a trace experiment is running.
+
+@item tracenz
+@cindex string tracing, in remote protocol
+The remote stub supports the @samp{tracenz} bytecode for collecting strings.
+See @ref{Bytecode Descriptions} for details about the bytecode.
 
 @end table
 

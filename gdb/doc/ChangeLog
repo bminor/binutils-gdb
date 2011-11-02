@@ -1,3 +1,9 @@
+2011-11-02  Stan Shebs  <stan@codesourcery.com>
+
+	* gdb.texinfo (Tracepoint Action Lists): Document collect/s.
+	(General Query Packets): Describe tracenz feature.
+	* agentexpr.texi (Bytecode Descriptions): Describe tracenz.
+
 2011-10-28  Paul Koning  <paul_koning@dell.com>
 
 	* gdb.texinfo (gdb.types): Rename deepitems to deep_items.

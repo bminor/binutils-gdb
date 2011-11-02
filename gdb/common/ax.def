@@ -86,8 +86,7 @@ DEFOP (swap, 0, 0, 2, 2, 0x2b)
 DEFOP (getv, 2, 0, 0, 1, 0x2c)
 DEFOP (setv, 2, 0, 0, 1, 0x2d)
 DEFOP (tracev, 2, 0, 0, 1, 0x2e)
-/* We need something here just to make the tables come out ok.  */
-DEFOP (invalid, 0, 0, 0, 0, 0x2f)
+DEFOP (tracenz, 0, 0, 2, 0, 0x2f)
 DEFOP (trace16, 2, 0, 1, 1, 0x30)
 /* We need something here just to make the tables come out ok.  */
 DEFOP (invalid2, 0, 0, 0, 0, 0x31)

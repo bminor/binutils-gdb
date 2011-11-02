@@ -1209,6 +1209,9 @@ static enum eval_result_type eval_agent_expr (struct tracepoint_hit_ctx *ctx,
 
 static int agent_mem_read (struct traceframe *tframe,
 			   unsigned char *to, CORE_ADDR from, ULONGEST len);
+static int agent_mem_read_string (struct traceframe *tframe,
+				  unsigned char *to, CORE_ADDR from,
+				  ULONGEST len);
 static int agent_tsv_read (struct traceframe *tframe, int n);
 
 #ifndef IN_PROCESS_AGENT
@@ -4644,6 +4647,13 @@ eval_agent_expr (struct tracepoint_hit_ctx *ctx,
 	  agent_tsv_read (tframe, arg);
 	  break;
 
+	case gdb_agent_op_tracenz:
+	  agent_mem_read_string (tframe, NULL, (CORE_ADDR) stack[--sp],
+				 (ULONGEST) top);
+	  if (--sp >= 0)
+	    top = stack[sp];
+	  break;
+
 	  /* GDB never (currently) generates any of these ops.  */
 	case gdb_agent_op_float:
 	case gdb_agent_op_ref_float:
@@ -4723,6 +4733,66 @@ agent_mem_read (struct traceframe *tframe,
       trace_debug ("%d bytes recorded", blocklen);
       remaining -= blocklen;
       from += blocklen;
+    }
+  return 0;
+}
+
+static int
+agent_mem_read_string (struct traceframe *tframe,
+		       unsigned char *to, CORE_ADDR from, ULONGEST len)
+{
+  unsigned char *buf, *mspace;
+  ULONGEST remaining = len;
+  unsigned short blocklen, i;
+
+  /* To save a bit of space, block lengths are 16-bit, so break large
+     requests into multiple blocks.  Bordering on overkill for strings,
+     but it could happen that someone specifies a large max length.  */
+  while (remaining > 0)
+    {
+      size_t sp;
+
+      blocklen = (remaining > 65535 ? 65535 : remaining);
+      /* We want working space to accumulate nonzero bytes, since
+	 traceframes must have a predecided size (otherwise it gets
+	 harder to wrap correctly for the circular case, etc).  */
+      buf = (unsigned char *) xmalloc (blocklen + 1);
+      for (i = 0; i < blocklen; ++i)
+	{
+	  /* Read the string one byte at a time, in case the string is
+	     at the end of a valid memory area - we don't want a
+	     correctly-terminated string to engender segvio
+	     complaints.  */
+	  read_inferior_memory (from + i, buf + i, 1);
+
+	  if (buf[i] == '\0')
+	    {
+	      blocklen = i + 1;
+	      /* Make sure outer loop stops now too.  */
+	      remaining = blocklen;
+	      break;
+	    }
+	}
+      sp = 1 + sizeof (from) + sizeof (blocklen) + blocklen;
+      mspace = add_traceframe_block (tframe, sp);
+      if (mspace == NULL)
+	{
+	  xfree (buf);
+	  return 1;
+	}
+      /* Identify block as a memory block.  */
+      *mspace = 'M';
+      ++mspace;
+      /* Record address and size.  */
+      memcpy ((void *) mspace, (void *) &from, sizeof (from));
+      mspace += sizeof (from);
+      memcpy ((void *) mspace, (void *) &blocklen, sizeof (blocklen));
+      mspace += sizeof (blocklen);
+      /* Copy the string contents.  */
+      memcpy ((void *) mspace, (void *) buf, blocklen);
+      remaining -= blocklen;
+      from += blocklen;
+      xfree (buf);
     }
   return 0;
 }

@@ -42,6 +42,9 @@
 #include "cp-support.h"
 #include "arch-utils.h"
 
+#include "valprint.h"
+#include "c-lang.h"
+
 /* To make sense of this file, you should read doc/agentexpr.texi.
    Then look at the types and enums in ax-gdb.h.  For the code itself,
    look at gen_expr, towards the bottom; that's the main function that
@@ -335,6 +338,11 @@ maybe_const_expr (union exp_element **pc)
    emits the trace bytecodes at the appropriate points.  */
 int trace_kludge;
 
+/* Inspired by trace_kludge, this indicates that pointers to chars
+   should get an added tracenz bytecode to record nonzero bytes, up to
+   a length that is the value of trace_string_kludge.  */
+int trace_string_kludge;
+
 /* Scan for all static fields in the given class, including any base
    classes, and generate tracing bytecodes for each.  */
 
@@ -393,18 +401,34 @@ static void
 gen_traced_pop (struct gdbarch *gdbarch,
 		struct agent_expr *ax, struct axs_value *value)
 {
+  int string_trace = 0;
+  if (trace_string_kludge
+      && TYPE_CODE (value->type) == TYPE_CODE_PTR
+      && c_textual_element_type (check_typedef (TYPE_TARGET_TYPE (value->type)),
+				 's'))
+    string_trace = 1;
+
   if (trace_kludge)
     switch (value->kind)
       {
       case axs_rvalue:
-	/* We don't trace rvalues, just the lvalues necessary to
-	   produce them.  So just dispose of this value.  */
-	ax_simple (ax, aop_pop);
+	if (string_trace)
+	  {
+	    ax_const_l (ax, trace_string_kludge);
+	    ax_simple (ax, aop_tracenz);
+	  }
+	else
+	  /* We don't trace rvalues, just the lvalues necessary to
+	     produce them.  So just dispose of this value.  */
+	  ax_simple (ax, aop_pop);
 	break;
 
       case axs_lvalue_memory:
 	{
 	  int length = TYPE_LENGTH (check_typedef (value->type));
+
+	  if (string_trace)
+	    ax_simple (ax, aop_dup);
 
 	  /* There's no point in trying to use a trace_quick bytecode
 	     here, since "trace_quick SIZE pop" is three bytes, whereas
@@ -413,6 +437,13 @@ gen_traced_pop (struct gdbarch *gdbarch,
 	     work correctly for objects with large sizes.  */
 	  ax_const_l (ax, length);
 	  ax_simple (ax, aop_trace);
+
+	  if (string_trace)
+	    {
+	      ax_simple (ax, aop_ref32);
+	      ax_const_l (ax, trace_string_kludge);
+	      ax_simple (ax, aop_tracenz);
+	    }
 	}
 	break;
 
@@ -422,6 +453,15 @@ gen_traced_pop (struct gdbarch *gdbarch,
 	   larger than will fit in a stack, so just mark it for
 	   collection and be done with it.  */
 	ax_reg_mask (ax, value->u.reg);
+       
+	/* But if the register points to a string, assume the value
+	   will fit on the stack and push it anyway.  */
+	if (string_trace)
+	  {
+	    ax_reg (ax, value->u.reg);
+	    ax_const_l (ax, trace_string_kludge);
+	    ax_simple (ax, aop_tracenz);
+	  }
 	break;
       }
   else
@@ -2488,6 +2528,10 @@ agent_command (char *exp, int from_tty)
 
   if (exp == 0)
     error_no_arg (_("expression to translate"));
+
+  trace_string_kludge = 0;
+  if (*exp == '/')
+    exp = decode_agent_options (exp);
 
   /* Recognize the return address collection directive specially.  Note
      that it is not really an expression of any sort.  */

@@ -212,6 +212,9 @@ struct cleanup *make_cleanup_restore_current_traceframe (void);
 struct cleanup *make_cleanup_restore_traceframe_number (void);
 
 void free_actions (struct breakpoint *);
+
+extern char *decode_agent_options (char *exp);
+
 extern void validate_actionline (char **, struct breakpoint *);
 
 extern void end_actions_pseudocommand (char *args, int from_tty);

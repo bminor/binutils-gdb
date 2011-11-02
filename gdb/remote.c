@@ -331,6 +331,9 @@ struct remote_state
      tracepoints while a trace experiment is running.  */
   int enable_disable_tracepoints;
 
+  /* True if the stub can collect strings using tracenz bytecode.  */
+  int string_tracing;
+
   /* Nonzero if the user has pressed Ctrl-C, but the target hasn't
      responded to that.  */
   int ctrlc_pending_p;
@@ -3712,6 +3715,16 @@ remote_enable_disable_tracepoint_feature (const struct protocol_feature *feature
   rs->enable_disable_tracepoints = (support == PACKET_ENABLE);
 }
 
+static void
+remote_string_tracing_feature (const struct protocol_feature *feature,
+			       enum packet_support support,
+			       const char *value)
+{
+  struct remote_state *rs = get_remote_state ();
+
+  rs->string_tracing = (support == PACKET_ENABLE);
+}
+
 static struct protocol_feature remote_protocol_features[] = {
   { "PacketSize", PACKET_DISABLE, remote_packet_size, -1 },
   { "qXfer:auxv:read", PACKET_DISABLE, remote_supported_packet,
@@ -3764,6 +3777,8 @@ static struct protocol_feature remote_protocol_features[] = {
     PACKET_qXfer_fdpic },
   { "QDisableRandomization", PACKET_DISABLE, remote_supported_packet,
     PACKET_QDisableRandomization },
+  { "tracenz", PACKET_DISABLE,
+    remote_string_tracing_feature, -1 },
 };
 
 static char *remote_support_xml;
@@ -9740,6 +9755,14 @@ remote_supports_enable_disable_tracepoint (void)
   return rs->enable_disable_tracepoints;
 }
 
+static int
+remote_supports_string_tracing (void)
+{
+  struct remote_state *rs = get_remote_state ();
+
+  return rs->string_tracing;
+}
+
 static void
 remote_trace_init (void)
 {
@@ -10459,6 +10482,7 @@ Specify the serial device it is connected to\n\
   remote_ops.to_supports_disable_randomization
     = remote_supports_disable_randomization;
   remote_ops.to_supports_enable_disable_tracepoint = remote_supports_enable_disable_tracepoint;
+  remote_ops.to_supports_string_tracing = remote_supports_string_tracing;
   remote_ops.to_trace_init = remote_trace_init;
   remote_ops.to_download_tracepoint = remote_download_tracepoint;
   remote_ops.to_download_trace_state_variable

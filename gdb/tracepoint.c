@@ -52,6 +52,7 @@
 #include "ax-gdb.h"
 #include "memrange.h"
 #include "exceptions.h"
+#include "cli/cli-utils.h"
 
 /* readline include files */
 #include "readline/readline.h"
@@ -574,6 +575,46 @@ teval_pseudocommand (char *args, int from_tty)
   error (_("This command can only be used in a tracepoint actions list."));
 }
 
+/* Parse any collection options, such as /s for strings.  */
+
+char *
+decode_agent_options (char *exp)
+{
+  struct value_print_options opts;
+
+  if (*exp != '/')
+    return exp;
+
+  /* Call this to borrow the print elements default for collection
+     size.  */
+  get_user_print_options (&opts);
+
+  exp++;
+  if (*exp == 's')
+    {
+      if (target_supports_string_tracing ())
+	{
+	  /* Allow an optional decimal number giving an explicit maximum
+	     string length, defaulting it to the "print elements" value;
+	     so "collect/s80 mystr" gets at most 80 bytes of string.  */
+	  trace_string_kludge = opts.print_max;
+	  exp++;
+	  if (*exp >= '0' && *exp <= '9')
+	    trace_string_kludge = atoi (exp);
+	  while (*exp >= '0' && *exp <= '9')
+	    exp++;
+	}
+      else
+	error (_("Target does not support \"/s\" option for string tracing."));
+    }
+  else
+    error (_("Undefined collection format \"%c\"."), *exp);
+
+  exp = skip_spaces (exp);
+
+  return exp;
+}
+
 /* Enter a list of actions for a tracepoint.  */
 static void
 trace_actions_command (char *args, int from_tty)
@@ -656,6 +697,10 @@ validate_actionline (char **line, struct breakpoint *b)
 
   if (cmd_cfunc_eq (c, collect_pseudocommand))
     {
+      trace_string_kludge = 0;
+      if (*p == '/')
+	p = decode_agent_options (p);
+
       do
 	{			/* Repeat over a comma-separated list.  */
 	  QUIT;			/* Allow user to bail out with ^C.  */
@@ -1313,6 +1358,10 @@ encode_actions_1 (struct command_line *action,
 
       if (cmd_cfunc_eq (cmd, collect_pseudocommand))
 	{
+	  trace_string_kludge = 0;
+	  if (*action_exp == '/')
+	    action_exp = decode_agent_options (action_exp);
+
 	  do
 	    {			/* Repeat over a comma-separated list.  */
 	      QUIT;		/* Allow user to bail out with ^C.  */
@@ -2581,6 +2630,9 @@ trace_dump_actions (struct command_line *action,
 	     STEPPING_ACTIONS should be equal.  */
 	  if (stepping_frame == stepping_actions)
 	    {
+	      if (*action_exp == '/')
+		action_exp = decode_agent_options (action_exp);
+
 	      do
 		{		/* Repeat over a comma-separated list.  */
 		  QUIT;		/* Allow user to bail out with ^C.  */

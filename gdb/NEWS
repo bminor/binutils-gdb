@@ -114,6 +114,14 @@ info auto-load-scripts [REGEXP]
   This command was formerly named "maintenance print section-scripts".
   It is now generally useful and is no longer a maintenance-only command.
 
+collect[/s] EXPRESSIONS
+  The tracepoint collect command now takes an optional modifier "/s"
+  that directs it to dereference pointer-to-character types and
+  collect the bytes of memory up to a zero byte.  The behavior is
+  similar to what you see when you use the regular print command on a
+  string.  An optional integer following the "/s" sets a bound on the
+  number of bytes that will be collected.
+
 * Tracepoints can now be enabled and disabled at any time after a trace
   experiment has been started using the standard "enable" and "disable"
   commands.  It is now possible to start a trace experiment with no enabled
