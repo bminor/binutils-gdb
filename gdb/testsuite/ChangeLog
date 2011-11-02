@@ -1,3 +1,10 @@
+2011-11-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/skip-solib.exp (executable_main): New variable.
+	(binfile_main): Base it on that.
+	Use $executable_main in clean_restart calls.  Drop gdb_exit and
+	gdb_start calls.
+
 2011-11-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix racy FAILs.
@@ -14,13 +21,13 @@
 2011-11-01  Justin Lebar <justin.lebar@gmail.com>
 
 	Add tests for skip command.
-	* testsuite/gdb.base/skip-solib-lib.c: New
-	* testsuite/gdb.base/skip-solib-main.c: New
-	* testsuite/gdb.base/skip-solib.exp: New
-	* testsuite/gdb.base/skip.c: New
-	* testsuite/gdb.base/skip.exp: New
-	* testsuite/gdb.base/skip1.c: New
-	* testsuite/gdb.base/Makefile.in: Adding new files.
+	* gdb.base/skip-solib-lib.c: New
+	* gdb.base/skip-solib-main.c: New
+	* gdb.base/skip-solib.exp: New
+	* gdb.base/skip.c: New
+	* gdb.base/skip.exp: New
+	* gdb.base/skip1.c: New
+	* gdb.base/Makefile.in: Adding new files.
 
 2011-10-31  Yao Qi  <yao@codesourcery.com>
 	    Pedro Alves  <pedro@codesourcery.com>

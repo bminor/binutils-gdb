@@ -26,7 +26,8 @@ if { ![isnative] || [is_remote host] || ![istarget *-linux*] || [skip_shlib_test
 
 set test "skip-solib"
 set srcfile_main "${test}-main.c"
-set binfile_main "${test}-test"
+set executable_main ${test}-test
+set binfile_main ${objdir}/${subdir}/${executable_main}
 set srcfile_lib "${test}-lib.c"
 set libname "lib${test}"
 set binfile_lib ${objdir}/${subdir}/${libname}.so
@@ -52,8 +53,7 @@ if {[gdb_compile "${binfile_main}.o" "${binfile_main}" executable \
     return -1
 }
 
-gdb_start
-clean_restart ${binfile_main}
+clean_restart ${executable_main}
 
 #
 # At this point, if we try to skip the file ${srcfile_lib} or the function
@@ -96,9 +96,7 @@ gdb_test "info skip" \
 #
 # Now restart gdb and testing ignoring of a function inside a solib.
 #
-gdb_exit
-gdb_start
-clean_restart ${binfile_main}
+clean_restart ${executable_main}
 
 gdb_test "skip function multiply" \
   "Function multiply will be skipped when stepping, pending shared library load." \
