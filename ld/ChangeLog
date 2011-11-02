@@ -1,3 +1,11 @@
+2011-11-02  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	Backport from mainline:
+	2011-11-02  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* configure.tgt (x86_64-*-solaris2*): Use $targ_extra_emuls for
+	targ_extra_libpath.
+
 2011-10-25  Alan Modra  <amodra@gmail.com>
 
 	Apply mainline patches
