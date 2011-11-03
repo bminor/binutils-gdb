@@ -1,3 +1,9 @@
+2011-11-03  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.texinfo (Stopping): Add menu entry.
+	(Continuing and Stepping): Restore @node.  Use @section, not
+	@subsection.
+
 2011-11-03  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* gdb.texinfo (Skipping Over Functions and Files): Remove node

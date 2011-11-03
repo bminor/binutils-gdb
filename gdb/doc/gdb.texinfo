@@ -3216,6 +3216,8 @@ running or not, what process it is, and why it stopped.
 @menu
 * Breakpoints::                 Breakpoints, watchpoints, and catchpoints
 * Continuing and Stepping::     Resuming execution
+* Skipping Over Functions and Files::
+                                Skipping over functions and files
 * Signals::                     Signals
 * Thread Stops::                Stopping and starting multi-thread programs
 @end menu
@@ -4854,7 +4856,8 @@ proceed until the function returns.
 An argument is a repeat count, as in @code{next}.
 @end table
 
-@subsection Skipping Over Functions and Files
+@node Skipping Over Functions and Files
+@section Skipping Over Functions and Files
 @cindex skipping over functions and files
 
 The program you are debugging may contain some functions which are
