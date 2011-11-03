@@ -1,3 +1,7 @@
+2011-11-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/commands.exp (cmd1 error): Fix false ERROR with gdbserver.
+
 2011-11-02  Stan Shebs  <stan@codesourcery.com>
 
 	* gdb.trace/collection.c: Add code using strings.

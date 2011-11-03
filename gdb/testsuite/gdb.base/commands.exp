@@ -741,7 +741,7 @@ proc error_clears_commands_left {} {
     gdb_test_no_output "end" "main commands 2c"
 
     gdb_run_cmd
-    gdb_test "" "\r\nhook-stop1\r\n.*\r\ncmd1\r\nUndefined command: \"errorcommandxy\"\\.  Try \"help\"\\." "cmd1 error"
+    gdb_test "" "hook-stop1\r\n.*\r\ncmd1\r\nUndefined command: \"errorcommandxy\"\\.  Try \"help\"\\." "cmd1 error"
 
     gdb_test {echo idle\n} "\r\nidle" "no cmd2"
 }
