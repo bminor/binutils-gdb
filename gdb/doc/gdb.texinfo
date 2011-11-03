@@ -4854,7 +4854,6 @@ proceed until the function returns.
 An argument is a repeat count, as in @code{next}.
 @end table
 
-@node Skipping Over Functions and Files
 @subsection Skipping Over Functions and Files
 @cindex skipping over functions and files
 
@@ -4896,7 +4895,7 @@ example, @code{skip file boring.c}.
 @itemx skip function @r{[}@var{linespec}@r{]}
 After running this command, the function named by @var{linespec} or the
 function containing the line named by @var{linespec} will be skipped over when
-stepping.  @xref{Specify Location}
+stepping.  @xref{Specify Location}.
 
 If you do not specify @var{linespec}, the function you're currently debugging
 will be skipped.
