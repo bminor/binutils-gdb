@@ -1,3 +1,7 @@
+2011-02-11  Ben Golding  <ben_golding@yahoo.co.uk>
+
+	* events.c: add #include <stdlib.h> for free(). Fix PR build/13372.
+
 2011-10-17  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure.ac: Change include to common/acinclude.m4.

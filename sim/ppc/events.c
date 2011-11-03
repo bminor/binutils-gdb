@@ -26,6 +26,7 @@
 #include "events.h"
 
 #include <signal.h>
+#include <stdlib.h>
 
 #if !defined (SIM_EVENTS_POLL_RATE)
 #define SIM_EVENTS_POLL_RATE 0x1000
