@@ -1,3 +1,10 @@
+2011-11-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Eli Zaretskii  <eliz@gnu.org>
+
+	* linux-nat.c (_initialize_linux_nat): Improve help
+	for `info proc stat', `info proc status', `info proc cwd',
+	`info proc cmdline' and `info proc exe'.
+
 2011-11-02  Stan Shebs  <stan@codesourcery.com>
 
 	String collection for tracepoints.

@@ -5887,23 +5887,23 @@ List of mapped memory regions."),
 	   &info_proc_cmdlist);
 
   add_cmd ("stat", class_info, linux_nat_info_proc_cmd_stat, _("\
-List a bunch of random process info."),
+List process info from /proc/PID/stat."),
 	   &info_proc_cmdlist);
 
   add_cmd ("status", class_info, linux_nat_info_proc_cmd_status, _("\
-List a different bunch of random process info."),
+List process info from /proc/PID/status."),
 	   &info_proc_cmdlist);
 
   add_cmd ("cwd", class_info, linux_nat_info_proc_cmd_cwd, _("\
-List a different bunch of random process info."),
+List current working directory of the process."),
 	   &info_proc_cmdlist);
 
   add_cmd ("cmdline", class_info, linux_nat_info_proc_cmd_cmdline, _("\
-List a different bunch of random process info."),
+List command line arguments of the process."),
 	   &info_proc_cmdlist);
 
   add_cmd ("exe", class_info, linux_nat_info_proc_cmd_exe, _("\
-List a different bunch of random process info."),
+List absolute filename for executable of the process."),
 	   &info_proc_cmdlist);
 
   add_cmd ("all", class_info, linux_nat_info_proc_cmd_all, _("\
