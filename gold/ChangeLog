@@ -1,5 +1,16 @@
 2011-11-02  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
+	* arm.cc (Target_arm::may_use_v5t_interworking): Check whether
+	we are working around the ARM1176 Erratum.
+	* options.h (General_options::fix_arm1176): Add option.
+	* testsuite/Makefile.am: Add testcases, and keep current ones
+	working.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/arm_fix_1176.s: New file.
+	* testsuite/arm_fix_1176.sh: Likewise.
+
+2011-11-02  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
 	* arm.cc (Target_arm::Target_arm): Remove initialisation of
 	may_use_blx_.
 	(Target_arm::may_use_blx): Remove method.
