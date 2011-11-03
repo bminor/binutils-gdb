@@ -238,6 +238,20 @@ AC_DEFINE_UNQUOTED(GOLD_DEFAULT_BIG_ENDIAN, $default_big_endian,
 AC_DEFINE_UNQUOTED(GOLD_DEFAULT_OSABI, $default_osabi,
 		   [Default OSABI code])
 
+AC_ARG_WITH(lib-path,
+[  --with-lib-path=dir1:dir2...  set default LIB_PATH],
+[case "$withval" in
+ yes) LIB_PATH='"/lib:/usr/lib"' ;;
+ no) LIB_PATH='""' ;;
+ *) LIB_PATH='"'"$withval"'"' ;;
+ esac],
+[LIB_PATH='"::DEFAULT::"'])
+AC_DEFINE_UNQUOTED(LIB_PATH, $LIB_PATH,
+		   [Default library search path])
+if test "x$target_alias" = "x" -o "x$host_alias" = "x$target_alias"; then
+  AC_DEFINE(NATIVE_LINKER, 1, [Whether configured as a native linker])
+fi
+
 AC_CHECK_TOOL(NM, nm)
 
 AC_PROG_CC

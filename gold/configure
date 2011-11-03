@@ -775,6 +775,7 @@ enable_gold
 enable_threads
 enable_plugins
 enable_targets
+with_lib_path
 enable_dependency_tracking
 enable_nls
 enable_werror
@@ -1435,6 +1436,7 @@ Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
   --with-sysroot=DIR    search for usr/lib et al within DIR
+  --with-lib-path=dir1:dir2...  set default LIB_PATH
   --with-gold-ldflags=FLAGS  additional link flags for gold
   --with-gold-ldadd=LIBS     additional libraries for gold
 
@@ -3534,6 +3536,29 @@ cat >>confdefs.h <<_ACEOF
 #define GOLD_DEFAULT_OSABI $default_osabi
 _ACEOF
 
+
+
+# Check whether --with-lib-path was given.
+if test "${with_lib_path+set}" = set; then :
+  withval=$with_lib_path; case "$withval" in
+ yes) LIB_PATH='"/lib:/usr/lib"' ;;
+ no) LIB_PATH='""' ;;
+ *) LIB_PATH='"'"$withval"'"' ;;
+ esac
+else
+  LIB_PATH='"::DEFAULT::"'
+fi
+
+
+cat >>confdefs.h <<_ACEOF
+#define LIB_PATH $LIB_PATH
+_ACEOF
+
+if test "x$target_alias" = "x" -o "x$host_alias" = "x$target_alias"; then
+
+$as_echo "#define NATIVE_LINKER 1" >>confdefs.h
+
+fi
 
 if test -n "$ac_tool_prefix"; then
   # Extract the first word of "${ac_tool_prefix}nm", so it can be a program name with args.

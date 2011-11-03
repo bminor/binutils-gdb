@@ -543,7 +543,7 @@ class Search_directory
   { }
 
   // This is the usual constructor.
-  Search_directory(const char* name, bool put_in_sysroot)
+  Search_directory(const std::string& name, bool put_in_sysroot)
     : name_(name), put_in_sysroot_(put_in_sysroot), is_in_sysroot_(false)
   {
     if (this->name_.empty())
@@ -1463,7 +1463,7 @@ class General_options
 
   // These are called by finalize() to set up the search-path correctly.
   void
-  add_to_library_path_with_sysroot(const char* arg)
+  add_to_library_path_with_sysroot(const std::string& arg)
   { this->add_search_directory_to_library_path(Search_directory(arg, true)); }
 
   // Apply any sysroot to the directory lists.

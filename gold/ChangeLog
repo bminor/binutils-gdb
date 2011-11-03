@@ -1,3 +1,17 @@
+2011-11-02  Ian Lance Taylor  <iant@google.com>
+
+	* configure.ac: Add --with-lib-path option.  Define LIB_PATH and
+	NATIVE_LINKER.
+	* Makefile.am (AM_CPPFLAGS): Define TOOLLIBDIR.
+	* options.cc (General_options::finalize): Use library search path
+	from configure script if specified.  If not native and no sysroot,
+	only search TOOLLIBDIR.
+	* options.h (Search_directory::Search_directory): Change name to
+	const std::string&.
+	(General_options::add_to_library_path_with_sysroot): Change arg to
+	const std::string&.
+	* configure, Makefile.in, config.in: Rebuild.
+
 2011-11-02  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	* arm.cc (Target_arm::may_use_v5t_interworking): Check whether

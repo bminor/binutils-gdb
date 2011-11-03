@@ -165,6 +165,12 @@
 /* Define to 1 if you have the <zlib.h> header file. */
 #undef HAVE_ZLIB_H
 
+/* Default library search path */
+#undef LIB_PATH
+
+/* Whether configured as a native linker */
+#undef NATIVE_LINKER
+
 /* Name of package */
 #undef PACKAGE
 
