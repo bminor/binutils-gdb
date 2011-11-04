@@ -370,72 +370,72 @@ cp_lookup_symbol_imports (const char *scope,
          ancestors then it is applicable.  */
       if (directive_match && !current->searched)
 	{
-	/* Mark this import as searched so that the recursive call
-           does not search it again.  */
-	current->searched = 1;
-	searched_cleanup = make_cleanup (reset_directive_searched,
-					 current);
+	  /* Mark this import as searched so that the recursive call
+	     does not search it again.  */
+	  current->searched = 1;
+	  searched_cleanup = make_cleanup (reset_directive_searched,
+					   current);
 
-	/* If there is an import of a single declaration, compare the
-	   imported declaration (after optional renaming by its alias)
-	   with the sought out name.  If there is a match pass
-	   current->import_src as NAMESPACE to direct the search
-	   towards the imported namespace.  */
-	if (current->declaration
-	    && strcmp (name, current->alias
-		       ? current->alias : current->declaration) == 0)
-	  sym = cp_lookup_symbol_in_namespace (current->import_src,
-					       current->declaration,
-					       block, domain);
-
-	/* If this is a DECLARATION_ONLY search or a symbol was found
-	   or this import statement was an import declaration, the
-	   search of this import is complete.  */
-        if (declaration_only || sym != NULL || current->declaration)
-          {
-            current->searched = 0;
-            discard_cleanups (searched_cleanup);
-
-            if (sym != NULL)
-              return sym;
-
-            continue;
-          }
-
-	/* Do not follow CURRENT if NAME matches its EXCLUDES.  */
-	for (excludep = current->excludes; *excludep; excludep++)
-	  if (strcmp (name, *excludep) == 0)
-	    break;
-	if (*excludep)
-	  {
-	    discard_cleanups (searched_cleanup);
-	    continue;
-	  }
-
-	if (current->alias != NULL
-	    && strcmp (name, current->alias) == 0)
-	  /* If the import is creating an alias and the alias matches
-	     the sought name.  Pass current->import_src as the NAME to
-	     direct the search towards the aliased namespace.  */
-	  {
-	    sym = cp_lookup_symbol_in_namespace (scope,
-						 current->import_src,
+	  /* If there is an import of a single declaration, compare the
+	     imported declaration (after optional renaming by its alias)
+	     with the sought out name.  If there is a match pass
+	     current->import_src as NAMESPACE to direct the search
+	     towards the imported namespace.  */
+	  if (current->declaration
+	      && strcmp (name, current->alias
+			 ? current->alias : current->declaration) == 0)
+	    sym = cp_lookup_symbol_in_namespace (current->import_src,
+						 current->declaration,
 						 block, domain);
-	  }
-	else if (current->alias == NULL)
-	  {
-	    /* If this import statement creates no alias, pass
-               current->inner as NAMESPACE to direct the search
-               towards the imported namespace.  */
-	    sym = cp_lookup_symbol_imports (current->import_src,
-					    name, block,
-					    domain, 0, 0);
-	  }
-	current->searched = 0;
-	discard_cleanups (searched_cleanup);
 
-	if (sym != NULL)
-	  return sym;
+	  /* If this is a DECLARATION_ONLY search or a symbol was found
+	     or this import statement was an import declaration, the
+	     search of this import is complete.  */
+	  if (declaration_only || sym != NULL || current->declaration)
+	    {
+	      current->searched = 0;
+	      discard_cleanups (searched_cleanup);
+
+	      if (sym != NULL)
+		return sym;
+
+	      continue;
+	    }
+
+	  /* Do not follow CURRENT if NAME matches its EXCLUDES.  */
+	  for (excludep = current->excludes; *excludep; excludep++)
+	    if (strcmp (name, *excludep) == 0)
+	      break;
+	  if (*excludep)
+	    {
+	      discard_cleanups (searched_cleanup);
+	      continue;
+	    }
+
+	  if (current->alias != NULL
+	      && strcmp (name, current->alias) == 0)
+	    /* If the import is creating an alias and the alias matches
+	       the sought name.  Pass current->import_src as the NAME to
+	       direct the search towards the aliased namespace.  */
+	    {
+	      sym = cp_lookup_symbol_in_namespace (scope,
+						   current->import_src,
+						   block, domain);
+	    }
+	  else if (current->alias == NULL)
+	    {
+	      /* If this import statement creates no alias, pass
+		 current->inner as NAMESPACE to direct the search
+		 towards the imported namespace.  */
+	      sym = cp_lookup_symbol_imports (current->import_src,
+					      name, block,
+					      domain, 0, 0);
+	    }
+	  current->searched = 0;
+	  discard_cleanups (searched_cleanup);
+
+	  if (sym != NULL)
+	    return sym;
 	}
     }
 
