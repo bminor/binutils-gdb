@@ -1,5 +1,11 @@
 2011-11-04  Phil Muldoon  <pmuldoon@redhat.com>
 
+	PR Python/13345
+
+	* python/python.c (python_run_simple_file): Expand tilde in path.
+
+2011-11-04  Phil Muldoon  <pmuldoon@redhat.com>
+
 	PR Python/13363
 
 	* python/py-type.c (typy_lookup_type): Do not return a type in

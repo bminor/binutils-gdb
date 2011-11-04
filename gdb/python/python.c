@@ -30,6 +30,7 @@
 #include "exceptions.h"
 #include "event-loop.h"
 #include "serial.h"
+#include "readline/tilde.h"
 #include "python.h"
 
 #include <ctype.h>
@@ -162,13 +163,22 @@ ensure_python_env (struct gdbarch *gdbarch,
 static void
 python_run_simple_file (const char *filename)
 {
-  char *filename_copy;
+  char *full_path;
   PyObject *python_file;
   struct cleanup *cleanup;
 
-  filename_copy = xstrdup (filename);
-  cleanup = make_cleanup (xfree, filename_copy);
-  python_file = PyFile_FromString (filename_copy, "r");
+  /* Because we have a string for a filename, and are using Python to
+     open the file, we need to expand any tilde in the path first.  */
+  full_path = tilde_expand (filename);
+  cleanup = make_cleanup (xfree, full_path);
+  python_file = PyFile_FromString (full_path, "r");
+  if (! python_file)
+    {
+      do_cleanups (cleanup);
+      gdbpy_print_stack ();
+      error (_("Error while opening file: %s"), full_path);
+    }
+ 
   make_cleanup_py_decref (python_file);
   PyRun_SimpleFile (PyFile_AsFile (python_file), filename);
   do_cleanups (cleanup);
