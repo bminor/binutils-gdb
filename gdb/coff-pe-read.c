@@ -24,9 +24,8 @@
 
 #include "coff-pe-read.h"
 
-#include "bfd.h"
-
 #include "defs.h"
+#include "bfd.h"
 #include "gdbtypes.h"
 
 #include "symtab.h"
