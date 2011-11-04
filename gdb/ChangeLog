@@ -1,3 +1,10 @@
+2011-11-04  Phil Muldoon  <pmuldoon@redhat.com>
+
+	PR Python/13363
+
+	* python/py-type.c (typy_lookup_type): Do not return a type in
+          an exception handler.
+
 2011-11-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Eli Zaretskii  <eliz@gnu.org>
 

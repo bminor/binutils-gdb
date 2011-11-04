@@ -606,7 +606,7 @@ static struct type *
 typy_lookup_type (struct demangle_component *demangled,
 		  const struct block *block)
 {
-  struct type *type;
+  struct type *type, *rtype = NULL;
   char *type_name = NULL;
   enum demangle_component_type demangled_type;
   volatile struct gdb_exception except;
@@ -626,19 +626,25 @@ typy_lookup_type (struct demangle_component *demangled,
 
       TRY_CATCH (except, RETURN_MASK_ALL)
 	{
+	  /* If the demangled_type matches with one of the types
+	     below, run the corresponding function and save the type
+	     to return later.  We cannot just return here as we are in
+	     an exception handler.  */
 	  switch (demangled_type)
 	    {
 	    case DEMANGLE_COMPONENT_REFERENCE:
-	      return lookup_reference_type (type);
+	      rtype =  lookup_reference_type (type);
+	      break;
 	    case DEMANGLE_COMPONENT_POINTER:
-	      return lookup_pointer_type (type);
+	      rtype = lookup_pointer_type (type);
+	      break;
 	    case DEMANGLE_COMPONENT_CONST:
-	      return make_cv_type (1, 0, type, NULL);
+	      rtype = make_cv_type (1, 0, type, NULL);
+	      break;
 	    case DEMANGLE_COMPONENT_VOLATILE:
-	      return make_cv_type (0, 1, type, NULL);
+	      rtype = make_cv_type (0, 1, type, NULL);
+	      break;
 	    }
-
-	  type_name = cp_comp_to_string (demangled, 10);
 	}
       if (except.reason < 0)
 	{
@@ -646,7 +652,14 @@ typy_lookup_type (struct demangle_component *demangled,
 	  return NULL;
 	}
     }
-
+  
+  /* If we have a type from the switch statement above, just return
+     that.  */
+  if (rtype)
+    return rtype;
+  
+  /* We don't have a type, so lookup the type.  */
+  type_name = cp_comp_to_string (demangled, 10);
   type = typy_lookup_typename (type_name, block);
   xfree (type_name);
 
