@@ -1,3 +1,7 @@
+2011-11-04  Doug Evans  <dje@google.com>
+
+	* gdb.texinfo (Maintenance Commands): Update docs of "maint time".
+
 2011-11-03  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (Stopping): Add menu entry.

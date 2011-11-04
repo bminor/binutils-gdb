@@ -45,6 +45,7 @@
 #endif
 
 #include <signal.h>
+#include "timeval-utils.h"
 #include "gdbcmd.h"
 #include "serial.h"
 #include "bfd.h"
@@ -691,7 +692,8 @@ static int display_space;
 struct cmd_stats 
 {
   int msg_type;
-  long start_time;
+  long start_cpu_time;
+  struct timeval start_wall_time;
   long start_space;
 };
 
@@ -723,12 +725,18 @@ report_command_stats (void *arg)
 
   if (display_time)
     {
-      long cmd_time = get_run_time () - start_stats->start_time;
+      long cmd_time = get_run_time () - start_stats->start_cpu_time;
+      struct timeval now_wall_time, delta_wall_time;
+
+      gettimeofday (&now_wall_time, NULL);
+      timeval_sub (&delta_wall_time,
+		   &now_wall_time, &start_stats->start_wall_time);
 
       printf_unfiltered (msg_type == 0
-			 ? _("Startup time: %ld.%06ld\n")
-			 : _("Command execution time: %ld.%06ld\n"),
-			 cmd_time / 1000000, cmd_time % 1000000);
+			 ? _("Startup time: %ld.%06ld (cpu), %ld.%06ld (wall)\n")
+			 : _("Command execution time: %ld.%06ld (cpu), %ld.%06ld (wall)\n"),
+			 cmd_time / 1000000, cmd_time % 1000000,
+			 delta_wall_time.tv_sec, delta_wall_time.tv_usec);
     }
 
   if (display_space)
@@ -764,7 +772,8 @@ make_command_stats_cleanup (int msg_type)
 #endif
 
   new_stat->msg_type = msg_type;
-  new_stat->start_time = get_run_time ();
+  new_stat->start_cpu_time = get_run_time ();
+  gettimeofday (&new_stat->start_wall_time, NULL);
 
   return make_cleanup_dtor (report_command_stats, new_stat, xfree);
 }

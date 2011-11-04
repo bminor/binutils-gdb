@@ -32991,13 +32991,16 @@ switch (@pxref{Mode Options}).
 @kindex maint time
 @cindex time of command execution
 @item maint time
-Control whether to display the execution time for each command.  If
-set to a nonzero value, @value{GDBN} will display how much time it
+Control whether to display the execution time of @value{GDBN} for each command.
+If set to a nonzero value, @value{GDBN} will display how much time it
 took to execute each command, following the command's own output.
-The time is not printed for the commands that run the target, since
-there's no mechanism currently to compute how much time was spend
-by @value{GDBN} and how much time was spend by the program been debugged.
-it's not possibly currently 
+Both CPU time and wallclock time are printed.
+Printing both is useful when trying to determine whether the cost is
+CPU or, e.g., disk/network, latency.
+Note that the CPU time printed is for @value{GDBN} only, it does not include
+the execution time of the inferior because there's no mechanism currently
+to compute how much time was spent by @value{GDBN} and how much time was
+spent by the program been debugged.
 This can also be requested by invoking @value{GDBN} with the
 @option{--statistics} command-line switch (@pxref{Mode Options}).
 

@@ -1,3 +1,11 @@
+2011-11-04  Doug Evans  <dje@google.com>
+
+	* utils.c: #include "timeval-utils.h".
+	(cmd_stats): Rename start_time to start_cpu_time.
+	New member start_wall_time.
+	(report_command_stats): Report wall time.
+	(make_command_stats_cleanup): Record start wall time.
+
 2011-11-04  Tom Tromey  <tromey@redhat.com>
 
 	* cp-namespace.c (cp_lookup_symbol_imports): Reindent.
