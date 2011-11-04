@@ -17,7 +17,6 @@
 * RL78-Opts::                   RL78 Assembler Command Line Options
 * RL78-Modifiers::              Symbolic Operand Modifiers
 * RL78-Directives::             Assembler Directives
-* RL78-Float::                  Floating Point
 * RL78-Syntax::                 Syntax
 @end menu
 

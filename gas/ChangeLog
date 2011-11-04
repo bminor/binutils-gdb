@@ -1,3 +1,7 @@
+2011-11-04  DJ Delorie  <dj@redhat.com>
+
+	* doc/c-rl78.texi (RL78-Float): Remove unused menu entry.
+
 2011-11-02  DJ Delorie  <dj@redhat.com>
 
 	* config/tc-rl78.c (tc_gen_reloc): Remove unused variable.
