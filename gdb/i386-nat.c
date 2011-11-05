@@ -194,9 +194,6 @@ i386_init_dregs (struct i386_debug_reg_state *state)
 
 static struct i386_debug_reg_state dr_mirror;
 
-/* Reference counts for each debug register.  */
-static int dr_ref_count[DR_NADDR];
-
 /* Whether or not to print the mirrored debug registers.  */
 static int maint_show_dr;
 

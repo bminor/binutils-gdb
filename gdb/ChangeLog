@@ -1,3 +1,7 @@
+2011-11-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* i386-nat.c (dr_ref_count): Remove unused variable.
+
 2011-11-05  Doug Evans  <dje@google.com>
 
 	* main.c (captured_main): Set lim_at_start before calling
