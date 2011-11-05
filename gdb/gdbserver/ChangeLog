@@ -1,3 +1,8 @@
+2011-11-05  Yao Qi  <yao@codesourcery.com>
+
+	* tracepoint.c (gdb_collect): Loop over tracepoints of same
+	address as TPOINT's.
+
 2011-11-02  Stan Shebs  <stan@codesourcery.com>
 
 	* tracepoint.c (agent_mem_read_string): New function.

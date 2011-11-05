@@ -1,3 +1,8 @@
+2011-11-05  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.trace/trace-break.exp: Add test on setting two
+	fast tracepoints at the same address.
+
 2011-11-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/commands.exp (cmd1 error): Fix false ERROR with gdbserver.

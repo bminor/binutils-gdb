@@ -234,6 +234,7 @@ if { [gdb_test "info sharedlibrary" ".*libinproctrace\.so.*" "IPA loaded"] != 0 
 	break_trace_same_addr_1 "ftrace" ${break_always_inserted}
 	break_trace_same_addr_2 "trace" "ftrace" ${break_always_inserted}
 	break_trace_same_addr_2 "ftrace" "trace" ${break_always_inserted}
+	break_trace_same_addr_2 "ftrace" "ftrace" ${break_always_inserted}
 	break_trace_same_addr_3 "ftrace" ${break_always_inserted}
 	break_trace_same_addr_4 "ftrace" ${break_always_inserted}
     }

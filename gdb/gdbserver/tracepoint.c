@@ -5480,14 +5480,9 @@ gdb_collect (struct tracepoint *tpoint, unsigned char *regs)
   if (!tracing)
     return;
 
-  if (!tpoint->enabled)
-    return;
-
   ctx.base.type = fast_tracepoint;
   ctx.regs = regs;
   ctx.regcache_initted = 0;
-  ctx.tpoint = tpoint;
-
   /* Wrap the regblock in a register cache (in the stack, we don't
      want to malloc here).  */
   ctx.regspace = alloca (register_cache_size ());
@@ -5497,30 +5492,49 @@ gdb_collect (struct tracepoint *tpoint, unsigned char *regs)
       return;
     }
 
-  /* Test the condition if present, and collect if true.  */
-  if (tpoint->cond == NULL
-      || condition_true_at_tracepoint ((struct tracepoint_hit_ctx *) &ctx,
-				       tpoint))
+  for (ctx.tpoint = tpoint;
+       ctx.tpoint != NULL && ctx.tpoint->address == tpoint->address;
+       ctx.tpoint = ctx.tpoint->next)
     {
-      collect_data_at_tracepoint ((struct tracepoint_hit_ctx *) &ctx,
-				  tpoint->address, tpoint);
+      if (!ctx.tpoint->enabled)
+	continue;
 
-      /* Note that this will cause original insns to be written back
-	 to where we jumped from, but that's OK because we're jumping
-	 back to the next whole instruction.  This will go badly if
-	 instruction restoration is not atomic though.  */
-      if (stopping_tracepoint
-	  || trace_buffer_is_full
-	  || expr_eval_result != expr_eval_no_error)
-	stop_tracing ();
-    }
-  else
-    {
-      /* If there was a condition and it evaluated to false, the only
-	 way we would stop tracing is if there was an error during
-	 condition expression evaluation.  */
-      if (expr_eval_result != expr_eval_no_error)
-	stop_tracing ();
+      /* Multiple tracepoints of different types, such as fast tracepoint and
+	 static tracepoint, can be set at the same address.  */
+      if (ctx.tpoint->type != tpoint->type)
+	continue;
+
+      /* Test the condition if present, and collect if true.  */
+      if (ctx.tpoint->cond == NULL
+	  || condition_true_at_tracepoint ((struct tracepoint_hit_ctx *) &ctx,
+					   ctx.tpoint))
+	{
+	  collect_data_at_tracepoint ((struct tracepoint_hit_ctx *) &ctx,
+				      ctx.tpoint->address, ctx.tpoint);
+
+	  /* Note that this will cause original insns to be written back
+	     to where we jumped from, but that's OK because we're jumping
+	     back to the next whole instruction.  This will go badly if
+	     instruction restoration is not atomic though.  */
+	  if (stopping_tracepoint
+	      || trace_buffer_is_full
+	      || expr_eval_result != expr_eval_no_error)
+	    {
+	      stop_tracing ();
+	      break;
+	    }
+	}
+      else
+	{
+	  /* If there was a condition and it evaluated to false, the only
+	     way we would stop tracing is if there was an error during
+	     condition expression evaluation.  */
+	  if (expr_eval_result != expr_eval_no_error)
+	    {
+	      stop_tracing ();
+	      break;
+	    }
+	}
     }
 }
 
