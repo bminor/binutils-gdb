@@ -300,7 +300,14 @@ captured_main (void *data)
   int save_auto_load;
   struct objfile *objfile;
 
-  struct cleanup *pre_stat_chain = make_command_stats_cleanup (0);
+  struct cleanup *pre_stat_chain;
+
+#ifdef HAVE_SBRK
+  /* Set this before calling make_command_stats_cleanup.  */
+  lim_at_start = (char *) sbrk (0);
+#endif
+
+  pre_stat_chain = make_command_stats_cleanup (0);
 
 #if defined (HAVE_SETLOCALE) && defined (HAVE_LC_MESSAGES)
   setlocale (LC_MESSAGES, "");
@@ -310,10 +317,6 @@ captured_main (void *data)
 #endif
   bindtextdomain (PACKAGE, LOCALEDIR);
   textdomain (PACKAGE);
-
-#ifdef HAVE_SBRK
-  lim_at_start = (char *) sbrk (0);
-#endif
 
   cmdsize = 1;
   cmdarg = (struct cmdarg *) xmalloc (cmdsize * sizeof (*cmdarg));

@@ -1,3 +1,8 @@
+2011-11-05  Doug Evans  <dje@google.com>
+
+	* main.c (captured_main): Set lim_at_start before calling
+	make_command_stats_cleanup.
+
 2011-11-04  Doug Evans  <dje@google.com>
 
 	* utils.c: #include "timeval-utils.h".
