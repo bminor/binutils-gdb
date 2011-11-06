@@ -355,10 +355,10 @@ forget_cached_source_info_for_objfile (struct objfile *objfile)
 	  xfree (s->fullname);
 	  s->fullname = NULL;
 	}
-
-      if (objfile->sf)
-	objfile->sf->qf->forget_cached_source_info (objfile);
     }
+
+  if (objfile->sf)
+    objfile->sf->qf->forget_cached_source_info (objfile);
 }
 
 /* Forget what we learned about line positions in source files, and
@@ -369,7 +369,6 @@ void
 forget_cached_source_info (void)
 {
   struct program_space *pspace;
-  struct symtab *s;
   struct objfile *objfile;
 
   ALL_PSPACES (pspace)
