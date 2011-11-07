@@ -43,6 +43,9 @@
 /* Define to 1 if you have the `munmap' function. */
 #undef HAVE_MUNMAP
 
+/* Define to 1 if you have the `posix_fallocate' function. */
+#undef HAVE_POSIX_FALLOCATE
+
 /* Define to 1 if you have the `sigaction' function. */
 #undef HAVE_SIGACTION
 

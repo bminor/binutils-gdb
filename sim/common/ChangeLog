@@ -1,3 +1,10 @@
+2011-11-07  Mike Frysinger  <vapier@gentoo.org>
+
+	PR sim/13161
+	* configure.ac (AC_CHECK_FUNCS): Add posix_fallocate.
+	* configure, config.in: Regenerate.
+	* dv-cfi.c (attach_cfi_regs): Check for HAVE_POSIX_FALLOCATE.
+
 2011-10-19  Mike Frysinger  <vapier@gentoo.org>
 
 	* acinclude.m4: Call AC_CHECK_LIB when $hardware contains cfi.

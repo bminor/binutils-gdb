@@ -727,7 +727,7 @@ attach_cfi_regs (struct hw *me, struct cfi *cfi)
   /* Figure out where our initial flash data is coming from.  */
   if (fd != -1 && fd_writable)
     {
-#ifdef HAVE_MMAP
+#if defined (HAVE_MMAP) && defined (HAVE_POSIX_FALLOCATE)
       posix_fallocate (fd, 0, cfi->dev_size);
 
       cfi->mmap = mmap (NULL, cfi->dev_size,
