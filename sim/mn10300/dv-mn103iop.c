@@ -463,7 +463,7 @@ write_dedicated_control_reg (struct hw *me,
       /* select on io_port_reg: */
       if ( io_port_reg == P2SS )
 	{
-	  if ( (buf && 0xfc)  != 0 )
+	  if ( (buf & 0xfc)  != 0 )
 	    {
 	      hw_abort(me, "Cannot write to read-only bits in p2ss.");
 	    }
@@ -474,7 +474,7 @@ write_dedicated_control_reg (struct hw *me,
 	}
       else
 	{
-	  if ( (buf && 0xf0) != 0 )
+	  if ( (buf & 0xf0) != 0 )
 	    {
 	      hw_abort(me, "Cannot write to read-only bits in p4ss.");
 	    }
