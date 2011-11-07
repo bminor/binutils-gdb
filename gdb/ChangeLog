@@ -1,3 +1,7 @@
+2011-11-07  Joel Brobecker  <brobecker@adacore.com>
+
+	* infrun.c (handle_inferior_event): Minor reformatting.
+
 2011-11-05  Doug Evans  <dje@google.com>
 
 	* source.c (forget_cached_source_info_for_objfile): Move call to
