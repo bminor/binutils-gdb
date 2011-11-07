@@ -1,3 +1,11 @@
+2011-11-07  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
+	Apply mainline patches
+	2011-11-07  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+	* config/tc-arm.c (arm_cpus): Add cortex-a7 entry.
+	* doc/c-arm.texi (ARM Options): Add cortex-a7 to list of accepted
+	CPUs.
+
 2011-10-25  Alan Modra  <amodra@gmail.com>
 
 	Apply mainline patches

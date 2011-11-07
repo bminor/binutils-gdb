@@ -116,6 +116,7 @@ recognized:
 @code{mpcore},
 @code{mpcorenovfp},
 @code{cortex-a5},
+@code{cortex-a7},
 @code{cortex-a8},
 @code{cortex-a9},
 @code{cortex-a15},
