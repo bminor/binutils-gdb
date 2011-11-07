@@ -1,3 +1,14 @@
+2011-11-07  Joel Brobecker  <brobecker@adacore.com>
+
+	* win32-i386-low.c (dr_status_mirror, dr_control_mirror): Delete.
+	(i386_dr_low_get_control, i386_dr_low_get_status): Use
+	dr_status_mirror and dr_control_mirror from debug_reg_state.
+	(i386_dr_low_get_status): Use debug_reg_state.dr_status_mirror
+	(i386_initial_stuff): Remove use of deleted globals.
+	(i386_get_thread_context, i386_set_thread_context,
+	i386_thread_added): Use dr_status_mirror and dr_control_mirror
+	from debug_reg_state.
+
 2011-11-05  Yao Qi  <yao@codesourcery.com>
 
 	* tracepoint.c (gdb_collect): Loop over tracepoints of same
