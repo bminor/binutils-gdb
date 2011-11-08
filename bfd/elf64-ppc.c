@@ -2614,8 +2614,9 @@ struct ppc64_elf_obj_tdata
      the reloc to be in the range -32768 to 32767.  */
   unsigned int has_small_toc_reloc : 1;
 
-  /* Set if toc/got ha relocs detected not using r2.  */
-  unsigned int ha_relocs_not_using_r2 : 1;
+  /* Set if toc/got ha relocs detected not using r2, or lo reloc
+     instruction not one we handle.  */
+  unsigned int unexpected_toc_insn : 1;
 };
 
 #define ppc64_elf_tdata(bfd) \
@@ -8016,6 +8017,32 @@ adjust_toc_syms (struct elf_link_hash_entry *h, void *inf)
   return TRUE;
 }
 
+/* Return TRUE iff INSN is one we expect on a _LO variety toc/got reloc.  */
+
+static bfd_boolean
+ok_lo_toc_insn (unsigned int insn)
+{
+  return ((insn & (0x3f << 26)) == 14u << 26 /* addi */
+	  || (insn & (0x3f << 26)) == 32u << 26 /* lwz */
+	  || (insn & (0x3f << 26)) == 34u << 26 /* lbz */
+	  || (insn & (0x3f << 26)) == 36u << 26 /* stw */
+	  || (insn & (0x3f << 26)) == 38u << 26 /* stb */
+	  || (insn & (0x3f << 26)) == 40u << 26 /* lhz */
+	  || (insn & (0x3f << 26)) == 42u << 26 /* lha */
+	  || (insn & (0x3f << 26)) == 44u << 26 /* sth */
+	  || (insn & (0x3f << 26)) == 46u << 26 /* lmw */
+	  || (insn & (0x3f << 26)) == 47u << 26 /* stmw */
+	  || (insn & (0x3f << 26)) == 48u << 26 /* lfs */
+	  || (insn & (0x3f << 26)) == 50u << 26 /* lfd */
+	  || (insn & (0x3f << 26)) == 52u << 26 /* stfs */
+	  || (insn & (0x3f << 26)) == 54u << 26 /* stfd */
+	  || ((insn & (0x3f << 26)) == 58u << 26 /* lwa,ld,lmd */
+	      && (insn & 3) != 1)
+	  || ((insn & (0x3f << 26)) == 62u << 26 /* std, stmd */
+	      && ((insn & 3) == 0 || (insn & 3) == 3))
+	  || (insn & (0x3f << 26)) == 12u << 26 /* addic */);
+}
+
 /* Examine all relocs referencing .toc sections in order to remove
    unused .toc entries.  */
 
@@ -8270,11 +8297,13 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 		struct elf_link_hash_entry *h;
 		Elf_Internal_Sym *sym;
 		bfd_vma val;
+		enum {no_check, check_lo, check_ha} insn_check;
 
 		r_type = ELF64_R_TYPE (rel->r_info);
 		switch (r_type)
 		  {
 		  default:
+		    insn_check = no_check;
 		    break;
 
 		  case R_PPC64_GOT_TLSLD16_HA:
@@ -8283,22 +8312,47 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 		  case R_PPC64_GOT_DTPREL16_HA:
 		  case R_PPC64_GOT16_HA:
 		  case R_PPC64_TOC16_HA:
-		    {
-		      bfd_vma off = rel->r_offset & ~3;
-		      unsigned char buf[4];
-		      unsigned int insn;
-
-		      if (!bfd_get_section_contents (ibfd, sec, buf, off, 4))
-			{
-			  free (used);
-			  goto error_ret;
-			}
-		      insn = bfd_get_32 (ibfd, buf);
-		      if ((insn & ((0x3f << 26) | 0x1f << 16))
-			  != ((15u << 26) | (2 << 16)) /* addis rt,2,imm */)
-			ppc64_elf_tdata (ibfd)->ha_relocs_not_using_r2 = 1;
-		    }
+		    insn_check = check_ha;
 		    break;
+
+		  case R_PPC64_GOT_TLSLD16_LO:
+		  case R_PPC64_GOT_TLSGD16_LO:
+		  case R_PPC64_GOT_TPREL16_LO_DS:
+		  case R_PPC64_GOT_DTPREL16_LO_DS:
+		  case R_PPC64_GOT16_LO:
+		  case R_PPC64_GOT16_LO_DS:
+		  case R_PPC64_TOC16_LO:
+		  case R_PPC64_TOC16_LO_DS:
+		    insn_check = check_lo;
+		    break;
+		  }
+
+		if (insn_check != no_check)
+		  {
+		    bfd_vma off = rel->r_offset & ~3;
+		    unsigned char buf[4];
+		    unsigned int insn;
+
+		    if (!bfd_get_section_contents (ibfd, sec, buf, off, 4))
+		      {
+			free (used);
+			goto error_ret;
+		      }
+		    insn = bfd_get_32 (ibfd, buf);
+		    if (insn_check == check_lo
+			? !ok_lo_toc_insn (insn)
+			: ((insn & ((0x3f << 26) | 0x1f << 16))
+			   != ((15u << 26) | (2 << 16)) /* addis rt,2,imm */))
+		      {
+			char str[12];
+
+			ppc64_elf_tdata (ibfd)->unexpected_toc_insn = 1;
+			sprintf (str, "%#08x", insn);
+			info->callbacks->einfo
+			  (_("%P: %H: toc optimization is not supported for"
+			     " %s instruction.\n"),
+			   ibfd, sec, rel->r_offset & ~3, str);
+		      }
 		  }
 
 		switch (r_type)
@@ -13322,7 +13376,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	case R_PPC64_GOT16_HA:
 	case R_PPC64_TOC16_HA:
 	  if (htab->do_toc_opt && relocation + addend + 0x8000 < 0x10000
-	      && !ppc64_elf_tdata (input_bfd)->ha_relocs_not_using_r2)
+	      && !ppc64_elf_tdata (input_bfd)->unexpected_toc_insn)
 	    {
 	      bfd_byte *p = contents + (rel->r_offset & ~3);
 	      bfd_put_32 (input_bfd, NOP, p);
@@ -13338,33 +13392,22 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	case R_PPC64_TOC16_LO:
 	case R_PPC64_TOC16_LO_DS:
 	  if (htab->do_toc_opt && relocation + addend + 0x8000 < 0x10000
-	      && !ppc64_elf_tdata (input_bfd)->ha_relocs_not_using_r2)
+	      && !ppc64_elf_tdata (input_bfd)->unexpected_toc_insn)
 	    {
 	      bfd_byte *p = contents + (rel->r_offset & ~3);
 	      insn = bfd_get_32 (input_bfd, p);
-	      if ((insn & (0x3f << 26)) == 14u << 26 /* addi */
-		  || (insn & (0x3f << 26)) == 32u << 26 /* lwz */
-		  || (insn & (0x3f << 26)) == 34u << 26 /* lbz */
-		  || (insn & (0x3f << 26)) == 36u << 26 /* stw */
-		  || (insn & (0x3f << 26)) == 38u << 26 /* stb */
-		  || (insn & (0x3f << 26)) == 40u << 26 /* lhz */
-		  || (insn & (0x3f << 26)) == 42u << 26 /* lha */
-		  || (insn & (0x3f << 26)) == 44u << 26 /* sth */
-		  || (insn & (0x3f << 26)) == 46u << 26 /* lmw */
-		  || (insn & (0x3f << 26)) == 47u << 26 /* stmw */
-		  || (insn & (0x3f << 26)) == 48u << 26 /* lfs */
-		  || (insn & (0x3f << 26)) == 50u << 26 /* lfd */
-		  || (insn & (0x3f << 26)) == 52u << 26 /* stfs */
-		  || (insn & (0x3f << 26)) == 54u << 26 /* stfd */
-		  || ((insn & (0x3f << 26)) == 58u << 26 /* lwa,ld,lmd */
-		      && (insn & 3) != 1)
-		  || ((insn & (0x3f << 26)) == 62u << 26 /* std, stmd */
-		      && ((insn & 3) == 0 || (insn & 3) == 3)))
+	      if ((insn & (0x3f << 26)) == 12u << 26 /* addic */)
+		{
+		  /* Transform addic to addi when we change reg.  */
+		  insn &= ~((0x3f << 26) | (0x1f << 16));
+		  insn |= (14u << 26) | (2 << 16);
+		}
+	      else
 		{
 		  insn &= ~(0x1f << 16);
 		  insn |= 2 << 16;
-		  bfd_put_32 (input_bfd, insn, p);
 		}
+	      bfd_put_32 (input_bfd, insn, p);
 	    }
 	  break;
 	}

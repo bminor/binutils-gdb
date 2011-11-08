@@ -1,3 +1,8 @@
+2011-11-08  Alan Modra  <amodra@gmail.com>
+
+	* ld-powerpc/powerpc.exp: Expect ld warnings for tocopt test.
+	* ld-powerpc/tocopt.out: New file.
+
 2011-10-25  Joern Rennecke  <joern.rennecke@embecosm.com>
 
 	* ld-srec/srec.exp: xfail epiphany.
