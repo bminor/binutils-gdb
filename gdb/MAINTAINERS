@@ -166,7 +166,6 @@ Daniel Jacobowitz		drow@false.org
 Mark Kettenis           	kettenis@gnu.org
 Jan Kratochvil			jan.kratochvil@redhat.com
 Stan Shebs			stan@codesourcery.com
-Michael Snyder			msnyder@vmware.com
 Tom Tromey			tromey@redhat.com
 Ulrich Weigand			Ulrich.Weigand@de.ibm.com
 Elena Zannoni			elena.zannoni@oracle.com
@@ -298,7 +297,6 @@ the native maintainer when resolving ABI issues.
 
 	mn10300		--target=mn10300-elf broken
 			(sim/ dies with make -j)
-			Michael Snyder		msnyder@vmware.com
 
 	moxie		--target=moxie-elf ,-Werror
 			Anthony Green		green@moxielogic.com
@@ -372,9 +370,8 @@ FreeBSD native & host	Mark Kettenis		kettenis@gnu.org
 
 Core: Generic components used by all of GDB
 
-tracing			Michael Snyder		msnyder@vmware.com
-threads			Michael Snyder		msnyder@vmware.com
-			Mark Kettenis		kettenis@gnu.org
+threads			Mark Kettenis		kettenis@gnu.org
+
 language support
   Ada			Joel Brobecker		brobecker@adacore.com
 			Paul Hilfinger		hilfinger@gnat.com
@@ -387,8 +384,6 @@ documentation		Eli Zaretskii		eliz@gnu.org
   (including NEWS)
 testsuite
   gdbtk (gdb.gdbtk)     Keith Seitz             keiths@redhat.com
-  threads (gdb.threads) Michael Snyder		msnyder@vmware.com
-  trace (gdb.trace)     Michael Snyder		msnyder@vmware.com
 
 
 UI: External (user) interfaces.
@@ -614,7 +609,6 @@ Jiri Smid					smid@suse.cz
 David Smith					dsmith@redhat.com
 Stephen P. Smith				ischis2@cox.net
 Jackie Smith Cashion				jsmith@redhat.com
-Michael Snyder					msnyder@vmware.com
 Petr Sorfa					petrs@caldera.com
 Andrew Stubbs					ams@codesourcery.com
 Emi Suzuki					emi-suzuki@tjsys.co.jp
@@ -675,7 +669,7 @@ Philippe De Muyter (coff)			phdm at macqel dot be
 Michael Chastain (testsuite)			mec.gnu at mindspring dot com
 Fred Fish (global)
 Jim Blandy (global)				jimb@red-bean.com
-
+Michael Snyder (global)
 
 
 Folks that have been caught up in a paper trail:

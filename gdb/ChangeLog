@@ -1,3 +1,7 @@
+2011-11-07  Stan Shebs  <stan@codesourcery.com>
+
+	* MAINTAINERS: Move Michael Snyder to Past Maintainers.
+
 2011-11-07  Joel Brobecker  <brobecker@adacore.com>
 
 	* infrun.c (handle_inferior_event): Minor reformatting.
