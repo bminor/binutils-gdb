@@ -1,3 +1,7 @@
+2010-11-08  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* lib/mi-support.exp (mi_send_resuming_command_raw): Fix a typo.
+
 2011-11-08  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.exp (supports_process_record): New.

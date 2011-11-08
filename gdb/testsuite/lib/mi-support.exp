@@ -1556,7 +1556,7 @@ proc mi_tbreak {location} {
 }
 
 # Send COMMAND that must be a command that resumes
-# the inferiour (run/continue/next/etc) and consumes
+# the inferior (run/continue/next/etc) and consumes
 # the "^running" output from it.
 proc mi_send_resuming_command_raw {command test} {
 
