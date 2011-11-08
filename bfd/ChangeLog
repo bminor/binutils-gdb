@@ -1,3 +1,8 @@
+2011-11-08  Nick Clifton  <nickc@redhat.com>
+
+	* elf-m10300.c (mn10300_elf_relax_section): Fix check for an
+	immediate move into an address register.
+
 2011-11-09  Alan Modra  <amodra@gmail.com>
 
 	* elflink.c (bfd_elf_gc_mark_dynamic_ref_symbol): Mark syms in

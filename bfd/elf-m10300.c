@@ -3604,8 +3604,8 @@ mn10300_elf_relax_section (bfd *abfd,
 			&& (value & 0x8000))
 		      continue;
 
-		    /* mov imm16, an zero-extends the immediate.  */
-		    if (code == 0xdc
+		    /* "mov imm16, an" zero-extends the immediate.  */
+		    if ((code & 0xfc) == 0xdc
 			&& (long) value < 0)
 		      continue;
 
