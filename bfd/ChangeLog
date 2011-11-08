@@ -1,3 +1,12 @@
+2011-11-08  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (struct ppc64_elf_obj_tdata): Rename
+	ha_relocs_not_using_r2 to unexpected_toc_insn.
+	(ok_lo_toc_insn): New function.
+	(ppc64_elf_edit_toc): Check insn on lo toc reloc.  Emit warning.
+	(ppc64_elf_relocate_section): Don't check insn on lo toc reloc here.
+	Handle addic on lo toc reloc.
+
 2011-10-25  Alan Modra  <amodra@gmail.com>
 
 	Apply mainline patches

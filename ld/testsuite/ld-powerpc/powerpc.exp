@@ -204,7 +204,7 @@ set ppc64elftests {
     {"sym@tocbase" "-shared -melf64ppc" "-a64" {symtocbase-1.s symtocbase-2.s}
 	{{objdump -dj.data symtocbase.d}} "symtocbase.so"}
     {"TOC opt" "-melf64ppc" "-a64"  {tocopt.s}
-	{{objdump -s tocopt.d}} "tocopt"}
+	{{ld tocopt.out} {objdump -s tocopt.d}} "tocopt"}
     {"TOC opt2" "-melf64ppc --defsym x=2" "-a64"  {tocopt2.s}
 	{{ld tocopt2.out} {objdump -s tocopt2.d}} "tocopt2"}
     {"TOC opt3" "-melf64ppc -no-keep-memory --defsym x=2" "-a64"  {tocopt3.s}
