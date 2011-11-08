@@ -19840,7 +19840,6 @@ default).
 @item n64
 @item eabi32
 @item eabi64
-@item auto
 @end table
 
 @item show mips abi

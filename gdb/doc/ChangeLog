@@ -1,3 +1,8 @@
+2011-11-08  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* gdb.texinfo (MIPS): Remove duplicate "auto" reference from
+	"set mips abi" documentation.
+
 2011-11-04  Doug Evans  <dje@google.com>
 
 	* gdb.texinfo (Maintenance Commands): Update docs of "maint time".
