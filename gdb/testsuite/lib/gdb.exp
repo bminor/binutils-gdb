@@ -1546,6 +1546,36 @@ proc can_single_step_to_signal_handler {} {
     return 1
 }
 
+# Return 1 if target supports process record, otherwise return 0.
+
+proc supports_process_record {} {
+
+    if [target_info exists gdb,use_precord] {
+	return [target_info gdb,use_precord]
+    }
+
+    if { [istarget "x86_64-*-linux*"] || [istarget "i\[34567\]86-*-linux*"] } {
+	return 1
+    }
+
+    return 0
+}
+
+# Return 1 if target supports reverse debugging, otherwise return 0.
+
+proc supports_reverse {} {
+
+    if [target_info exists gdb,can_reverse] {
+	return [target_info gdb,can_reverse]
+    }
+
+    if { [istarget "x86_64-*-linux*"] || [istarget "i\[34567\]86-*-linux*"] } {
+	return 1
+    }
+
+    return 0
+}
+
 # Return 1 if target is ILP32.
 # This cannot be decided simply from looking at the target string,
 # as it might depend on externally passed compiler options like -m64.

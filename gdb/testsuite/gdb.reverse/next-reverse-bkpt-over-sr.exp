@@ -23,7 +23,7 @@
 # the same location as the step-resume breakpoint isn't ignored.
 #
 
-if ![target_info exists gdb,can_reverse] {
+if ![supports_reverse] {
     return
 }
 
@@ -39,7 +39,7 @@ if ![runto_main] then {
     return 0
 }
 
-if [target_info exists gdb,use_precord] {
+if [supports_process_record] {
     # Activate process record/replay
     gdb_test_no_output "record" "Turn on process record"
 }

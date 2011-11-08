@@ -1,3 +1,33 @@
+2011-11-08  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.exp (supports_process_record): New.
+	(supports_reverse): New.
+	* gdb.reverse/break-precsave.exp: Call support_process_record
+	to run test conditionally.
+	* gdb.reverse/consecutive-precsave.exp: Likewise.
+	* gdb.reverse/i386-precsave.exp: Likewise.
+	* gdb.reverse/machinestate-precsave.exp: Likewise.
+	* gdb.reverse/solib-precsave.exp: Likewise.
+	* gdb.reverse/step-precsave.exp: Likewise.
+	* gdb.reverse/until-precsave.exp: Likewise.
+	* gdb.reverse/watch-precsave.exp: Likewise.
+	* gdb.reverse/break-reverse.exp: Call support_reverse  to run
+	test conditionally.
+	* gdb.reverse/consecutive-reverse.exp: Likewise.
+	* gdb.reverse/finish-precsave.exp: Likewise.
+	* gdb.reverse/finish-reverse-bkpt.exp: Likewise.
+	* gdb.reverse/finish-reverse.exp: Likewise.
+	* gdb.reverse/i386-reverse.exp: Likewise.
+	* gdb.reverse/i386-sse-reverse.exp: Likewise.
+	* gdb.reverse/machinestate.exp: Likewise.
+	* gdb.reverse/next-reverse-bkpt-over-sr.exp: Likewise.
+	* gdb.reverse/sigall-precsave.exp: Likewise.
+	* gdb.reverse/sigall-reverse.exp: Likewise.
+	* gdb.reverse/solib-reverse.exp: Likewise.
+	* gdb.reverse/step-reverse.exp: Likewise.
+	* gdb.reverse/until-reverse.exp: Likewise.
+	* gdb.reverse/watch-reverse.exp: Likewise.
+
 2011-11-05  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.trace/trace-break.exp: Add test on setting two

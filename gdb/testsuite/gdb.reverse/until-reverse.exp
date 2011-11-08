@@ -16,7 +16,7 @@
 # This file is part of the GDB testsuite.  It tests 'until' and 
 # 'advance' in reverse debugging.
 
-if ![target_info exists gdb,can_reverse] {
+if ![supports_reverse] {
     return
 }
 
@@ -37,7 +37,7 @@ set bp_location21 [gdb_get_line_number "set breakpoint 21 here"]
 
 runto main
 
-if [target_info exists gdb,use_precord] {
+if [supports_process_record] {
     # Activate process record/replay
     gdb_test_no_output "record" "Turn on process record"
 }

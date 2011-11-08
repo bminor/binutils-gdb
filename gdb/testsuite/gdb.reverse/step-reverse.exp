@@ -20,7 +20,7 @@
 # Test step and next in reverse
 #
 
-if ![target_info exists gdb,can_reverse] {
+if ![supports_reverse] {
     return
 }
 
@@ -33,7 +33,7 @@ if { [prepare_for_testing $testfile.exp $testfile $srcfile] } {
 
 runto main
 
-if [target_info exists gdb,use_precord] {
+if [supports_process_record] {
     # Activate process record/replay
     gdb_test_no_output "record" "Turn on process record"
 }

@@ -16,7 +16,7 @@
 # This file is part of the GDB testsuite.  It tests reverse debugging
 # with shared libraries.
 
-if ![target_info exists gdb,can_reverse] {
+if ![supports_reverse] {
     return
 }
 
@@ -53,7 +53,7 @@ gdb_load ${binfile}
 
 runto main
 
-if [target_info exists gdb,use_precord] {
+if [supports_process_record] {
     # Activate process record/replay
     gdb_test_no_output "record" "Turn on process record"
 }

@@ -35,7 +35,7 @@
 #   Test forward replay
 #
 
-if ![target_info exists gdb,can_reverse] {
+if ![supports_reverse] {
     return
 }
 
@@ -56,7 +56,7 @@ set endmain   [gdb_get_line_number " end main "   $srcfile]
 
 runto main
 
-if [target_info exists gdb,use_precord] {
+if [supports_process_record] {
     # Activate process record/replay
     gdb_test_no_output "record" "Turn on process record"
 }
