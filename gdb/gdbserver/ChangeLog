@@ -1,3 +1,7 @@
+2011-11-08  Yao Qi  <yao@codesourcery.com>
+
+	* remote-utils.c (relocate_instruction): A comment fix.
+
 2011-11-07  Joel Brobecker  <brobecker@adacore.com>
 
 	* win32-i386-low.c (dr_status_mirror, dr_control_mirror): Delete.

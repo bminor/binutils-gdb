@@ -1613,7 +1613,7 @@ look_up_one_symbol (const char *name, CORE_ADDR *addrp, int may_ask_gdb)
    where we want the instruction to be copied (and possibly adjusted)
    to.  On output, it points to one past the end of the resulting
    instruction(s).  The effect of executing the instruction at TO
-   shall be the same as if executing it at FROM.  For example, call
+   shall be the same as if executing it at OLDLOC.  For example, call
    instructions that implicitly push the return address on the stack
    should be adjusted to return to the instruction after OLDLOC;
    relative branches, and other PC-relative instructions need the
