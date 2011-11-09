@@ -1,3 +1,8 @@
+2011-11-09  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.cp/destrprint.exp: New file.
+	* gdb.cp/destrprint.cc: New file.
+
 2011-11-08  Meador Inge  <meadori@codesourcery.com>
 
 	* gdb.arch/thumb-prologue.c (switch_stack_to_same): New test function.

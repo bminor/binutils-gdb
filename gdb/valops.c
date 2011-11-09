@@ -3581,6 +3581,13 @@ value_full_object (struct value *argp,
   if (!real_type || real_type == value_enclosing_type (argp))
     return argp;
 
+  /* In a destructor we might see a real type that is a superclass of
+     the object's type.  In this case it is better to leave the object
+     as-is.  */
+  if (full
+      && TYPE_LENGTH (real_type) < TYPE_LENGTH (value_enclosing_type (argp)))
+    return argp;
+
   /* If we have the full object, but for some reason the enclosing
      type is wrong, set it.  */
   /* pai: FIXME -- sounds iffy */
