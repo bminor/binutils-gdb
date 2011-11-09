@@ -1551,7 +1551,7 @@ append_insns (CORE_ADDR *to, ULONGEST len, const gdb_byte *buf)
   *to += len;
 }
 
-void
+static void
 amd64_relocate_instruction (struct gdbarch *gdbarch,
 			    CORE_ADDR *to, CORE_ADDR oldloc)
 {

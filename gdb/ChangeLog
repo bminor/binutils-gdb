@@ -1,3 +1,7 @@
+2011-11-08  Yao Qi  <yao@codesourcery.com>
+
+	* amd64-tdep.c (amd64_relocate_instruction): Make it static.
+
 2011-11-08  Meador Inge  <meadori@codesourcery.com>
 
 	* arm-tdep.c (thumb_analyze_prologue): Always fallback on the SP
