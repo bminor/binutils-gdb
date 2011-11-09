@@ -1,3 +1,9 @@
+2011-11-08  Meador Inge  <meadori@codesourcery.com>
+
+	* arm-tdep.c (thumb_analyze_prologue): Always fallback on the SP
+	register when the frame can't be determined.
+	* arm-tdep.c (arm_analyze_prologue): Ditto.
+
 2011-11-07  Stan Shebs  <stan@codesourcery.com>
 
 	* MAINTAINERS: Move Michael Snyder to Past Maintainers.

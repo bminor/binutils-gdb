@@ -1152,17 +1152,11 @@ thumb_analyze_prologue (struct gdbarch *gdbarch,
       cache->framereg = THUMB_FP_REGNUM;
       cache->framesize = -regs[THUMB_FP_REGNUM].k;
     }
-  else if (pv_is_register (regs[ARM_SP_REGNUM], ARM_SP_REGNUM))
+  else
     {
       /* Try the stack pointer... this is a bit desperate.  */
       cache->framereg = ARM_SP_REGNUM;
       cache->framesize = -regs[ARM_SP_REGNUM].k;
-    }
-  else
-    {
-      /* We're just out of luck.  We don't know where the frame is.  */
-      cache->framereg = -1;
-      cache->framesize = 0;
     }
 
   for (i = 0; i < 16; i++)
@@ -1883,17 +1877,11 @@ arm_analyze_prologue (struct gdbarch *gdbarch,
       framereg = ARM_FP_REGNUM;
       framesize = -regs[ARM_FP_REGNUM].k;
     }
-  else if (pv_is_register (regs[ARM_SP_REGNUM], ARM_SP_REGNUM))
+  else
     {
       /* Try the stack pointer... this is a bit desperate.  */
       framereg = ARM_SP_REGNUM;
       framesize = -regs[ARM_SP_REGNUM].k;
-    }
-  else
-    {
-      /* We're just out of luck.  We don't know where the frame is.  */
-      framereg = -1;
-      framesize = 0;
     }
 
   if (cache)
