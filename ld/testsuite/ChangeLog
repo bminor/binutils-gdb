@@ -1,3 +1,9 @@
+2011-11-10  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
+	Apply mainline patches.
+	2011-11-09  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+	* ld-arm/jump-reloc-veneers.s: Update for changes to assembler output.
+
 2011-11-08  Alan Modra  <amodra@gmail.com>
 
 	* ld-powerpc/powerpc.exp: Expect ld warnings for tocopt test.
