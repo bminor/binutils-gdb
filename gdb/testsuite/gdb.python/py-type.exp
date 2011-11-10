@@ -64,6 +64,10 @@ proc runto_bp {bp} {
 proc test_fields {lang} {
   global gdb_prompt
 
+  # .fields() of a typedef should still return the underlying field list
+  gdb_test "python print len(gdb.parse_and_eval('ts').type.fields())" "2" \
+      "$lang typedef field list"
+
   if {$lang == "c++"} {
       # Test usage with a class
       gdb_py_test_silent_cmd "print c" "print value" 1

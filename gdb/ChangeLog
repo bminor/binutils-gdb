@@ -1,3 +1,7 @@
+2011-11-10  Doug Evans  <dje@google.com>
+
+	* python/py-type.c (typy_fields_items): Call check_typedef.
+
 2011-11-10  Joel Brobecker  <brobecker@adacore.com>
 
 	* findvar.c (read_frame_register_value): Read the correct bytes

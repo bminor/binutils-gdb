@@ -21,6 +21,9 @@ struct s
   int b;
 };
 
+typedef struct s TS;
+TS ts;
+
 #ifdef __cplusplus
 struct C
 {

@@ -294,14 +294,33 @@ make_fielditem (struct type *type, int i, enum gdbpy_iter_kind kind)
 static PyObject *
 typy_fields_items (PyObject *self, enum gdbpy_iter_kind kind)
 {
+  PyObject *py_type = self;
   PyObject *result = NULL, *iter = NULL;
-  
-  iter = typy_make_iter (self, kind);
-  if (iter == NULL)
-    return NULL;
-    
-  result = PySequence_List (iter);
-  Py_DECREF (iter);
+  volatile struct gdb_exception except;
+  struct type *type = ((type_object *) py_type)->type;
+  struct type *checked_type = type;
+
+  TRY_CATCH (except, RETURN_MASK_ALL)
+    {
+      CHECK_TYPEDEF (checked_type);
+    }
+  GDB_PY_HANDLE_EXCEPTION (except);
+
+  if (checked_type != type)
+    py_type = type_to_type_object (checked_type);
+  iter = typy_make_iter (py_type, kind);
+  if (checked_type != type)
+    {
+      /* Need to wrap this in braces because Py_DECREF isn't wrapped
+	 in a do{}while(0).  */
+      Py_DECREF (py_type);
+    }
+  if (iter != NULL)
+    {
+      result = PySequence_List (iter);
+      Py_DECREF (iter);
+    }
+
   return result;
 }
 

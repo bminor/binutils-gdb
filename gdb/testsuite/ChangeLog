@@ -1,3 +1,9 @@
+2011-11-10  Doug Evans  <dje@google.com>
+
+	* gdb.python/py-type.c (TS): New typedef.
+	(ts): New global.
+	* gdb.python/py-type.exp: Test field list of typedef.
+
 2011-11-10  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/small_reg_param: New testcase.
