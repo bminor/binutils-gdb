@@ -10,6 +10,9 @@
 
 2011-11-10  Doug Evans  <dje@google.com>
 
+	* psymtab.c (psymtab_to_fullname): Use cached copy if it exists.
+	* source.c (symtab_to_fullname): Ditto.
+
 	* defs.h (is_cplus_marker, set_demangling_style): Moved to ...
 	* gdb-demangle.h: ... here.  New file.
 	* demangle.c: #include "gdb-demangle.h".

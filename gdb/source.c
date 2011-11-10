@@ -1105,6 +1105,7 @@ open_source_file (struct symtab *s)
 
    If this function fails to find the file that this symtab represents,
    NULL will be returned and s->fullname will be set to NULL.  */
+
 char *
 symtab_to_fullname (struct symtab *s)
 {
@@ -1113,8 +1114,12 @@ symtab_to_fullname (struct symtab *s)
   if (!s)
     return NULL;
 
-  /* Don't check s->fullname here, the file could have been 
-     deleted/moved/..., look for it again.  */
+  /* Use cached copy if we have it.
+     We rely on forget_cached_source_info being called appropriately
+     to handle cases like the file being moved.  */
+  if (s->fullname)
+    return s->fullname;
+
   r = find_and_open_source (s->filename, s->dirname, &s->fullname);
 
   if (r >= 0)

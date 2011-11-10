@@ -1110,6 +1110,7 @@ int find_and_open_source (const char *filename,
 
    If this function fails to find the file that this partial_symtab represents,
    NULL will be returned and ps->fullname will be set to NULL.  */
+
 static char *
 psymtab_to_fullname (struct partial_symtab *ps)
 {
@@ -1118,8 +1119,12 @@ psymtab_to_fullname (struct partial_symtab *ps)
   if (!ps)
     return NULL;
 
-  /* Don't check ps->fullname here, the file could have been
-     deleted/moved/..., look for it again.  */
+  /* Use cached copy if we have it.
+     We rely on forget_cached_source_info being called appropriately
+     to handle cases like the file being moved.  */
+  if (ps->fullname)
+    return ps->fullname;
+
   r = find_and_open_source (ps->filename, ps->dirname, &ps->fullname);
 
   if (r >= 0)
