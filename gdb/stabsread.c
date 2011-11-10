@@ -41,6 +41,7 @@
 #include "buildsym.h"
 #include "complaints.h"
 #include "demangle.h"
+#include "gdb-demangle.h"
 #include "language.h"
 #include "doublest.h"
 #include "cp-abi.h"

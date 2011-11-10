@@ -10,6 +10,27 @@
 
 2011-11-10  Doug Evans  <dje@google.com>
 
+	* defs.h (is_cplus_marker, set_demangling_style): Moved to ...
+	* gdb-demangle.h: ... here.  New file.
+	* demangle.c: #include "gdb-demangle.h".
+	(_initialize_demangler): Use initialize_file_ftype for prototype.
+	Move "set demangle" and "set asm-demangle" parameters here from utils.c
+	(demangle, show_demangle, asm_demangle, show_asm_demangle): Move here
+	from utils.c
+	* utils.c: Update. #include "gdb-demangle.h".
+	* symtab.h (asm_demangle): Delete.
+	(demangle): Move declaration next to use.
+	* breakpoint.c: #include "gdb-demangle.h" instead of "demangle.h".
+	* dwarf2read.c: #include "gdb-demangle.h".
+	* gnu-v2-abi.c: Ditto.
+	* jv-typeprint.c: Ditto.
+	* mdebugread.c: Ditto.
+	* p-typeprint.c: Ditto.
+	* stabsread.c: Ditto.
+	* printcmd.c: Ditto.
+	(asm_demangle): Delete declaration.
+	* tui/tui-stack.c: #include "gdb-demangle.h".
+
 	* python/py-type.c (typy_fields_items): Call check_typedef.
 
 2011-11-10  Joel Brobecker  <brobecker@adacore.com>

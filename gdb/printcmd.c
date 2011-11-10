@@ -32,6 +32,7 @@
 #include "target.h"
 #include "breakpoint.h"
 #include "demangle.h"
+#include "gdb-demangle.h"
 #include "valprint.h"
 #include "annotate.h"
 #include "symfile.h"		/* for overlay functions */
@@ -61,9 +62,6 @@
 #else
 # define USE_PRINTF_I64 0
 #endif
-
-extern int asm_demangle;	/* Whether to demangle syms in asm
-				   printouts.  */
 
 struct format_data
   {

@@ -28,6 +28,7 @@
 #include "inferior.h"
 #include "target.h"
 #include "top.h"
+#include "gdb-demangle.h"
 #include "gdb_string.h"
 #include "tui/tui.h"
 #include "tui/tui-data.h"

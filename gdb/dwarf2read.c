@@ -34,6 +34,7 @@
 #include "dwarf2.h"
 #include "buildsym.h"
 #include "demangle.h"
+#include "gdb-demangle.h"
 #include "expression.h"
 #include "filenames.h"	/* for DOSish file names */
 #include "macrotab.h"

@@ -149,9 +149,6 @@ typedef bfd_vma CORE_ADDR;
 
 #include "ptid.h"
 
-/* Check if a character is one of the commonly used C++ marker characters.  */
-extern int is_cplus_marker (int);
-
 /* Enable xdb commands if set.  */
 extern int xdb_commands;
 
@@ -441,10 +438,6 @@ extern int parse_pid_to_attach (char *args);
 extern struct cleanup *make_bpstat_clear_actions_cleanup (void);
 
 extern int producer_is_gcc_ge_4 (const char *producer);
-
-/* From demangle.c */
-
-extern void set_demangling_style (char *);
 
 
 /* Annotation stuff.  */

@@ -31,7 +31,7 @@
 #include "language.h"
 #include "p-lang.h"
 #include "typeprint.h"
-
+#include "gdb-demangle.h"
 #include "gdb_string.h"
 #include <errno.h>
 #include <ctype.h>

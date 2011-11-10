@@ -38,7 +38,7 @@
 #include "target.h"
 #include "language.h"
 #include "gdb_string.h"
-#include "demangle.h"
+#include "gdb-demangle.h"
 #include "filenames.h"
 #include "annotate.h"
 #include "symfile.h"

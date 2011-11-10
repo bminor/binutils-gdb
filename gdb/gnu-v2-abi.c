@@ -26,6 +26,7 @@
 #include "gdbtypes.h"
 #include "value.h"
 #include "demangle.h"
+#include "gdb-demangle.h"
 #include "cp-abi.h"
 #include "cp-support.h"
 #include "exceptions.h"

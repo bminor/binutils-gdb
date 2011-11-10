@@ -23,6 +23,7 @@
 #include "gdbtypes.h"
 #include "value.h"
 #include "demangle.h"
+#include "gdb-demangle.h"
 #include "jv-lang.h"
 #include "gdb_string.h"
 #include "typeprint.h"

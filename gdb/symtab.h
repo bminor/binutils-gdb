@@ -244,11 +244,14 @@ extern char *symbol_demangled_name (const struct general_symbol_info *symbol);
    name if demangle is on and the "mangled" form of the name if
    demangle is off.  In other languages this is just the symbol name.
    The result should never be NULL.  Don't use this for internal
-   purposes (e.g. storing in a hashtable): it's only suitable for
-   output.  */
+   purposes (e.g. storing in a hashtable): it's only suitable for output.
+
+   N.B. symbol may be anything with a ginfo member,
+   e.g., struct symbol or struct minimal_symbol.  */
 
 #define SYMBOL_PRINT_NAME(symbol)					\
   (demangle ? SYMBOL_NATURAL_NAME (symbol) : SYMBOL_LINKAGE_NAME (symbol))
+extern int demangle;
 
 /* Macro that tests a symbol for a match against a specified name string.
    First test the unencoded name, then looks for and test a C++ encoded
@@ -865,10 +868,6 @@ struct symtab
 /* True if we are nested inside psymtab_to_symtab.  */
 
 extern int currently_reading_symtab;
-
-/* From utils.c.  */
-extern int demangle;
-extern int asm_demangle;
 
 /* symtab.c lookup functions */
 
