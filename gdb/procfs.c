@@ -605,7 +605,7 @@ open_procinfo_files (procinfo *pi, int which)
     else
       strcat (tmp, "/ctl");
     fd = open_with_retry (tmp, O_WRONLY);
-    if (fd <= 0)
+    if (fd < 0)
       return 0;		/* fail */
     pi->ctl_fd = fd;
     break;
@@ -614,7 +614,7 @@ open_procinfo_files (procinfo *pi, int which)
       return 0;		/* There is no 'as' file descriptor for an lwp.  */
     strcat (tmp, "/as");
     fd = open_with_retry (tmp, O_RDWR);
-    if (fd <= 0)
+    if (fd < 0)
       return 0;		/* fail */
     pi->as_fd = fd;
     break;
@@ -624,7 +624,7 @@ open_procinfo_files (procinfo *pi, int which)
     else
       strcat (tmp, "/status");
     fd = open_with_retry (tmp, O_RDONLY);
-    if (fd <= 0)
+    if (fd < 0)
       return 0;		/* fail */
     pi->status_fd = fd;
     break;
@@ -646,13 +646,13 @@ open_procinfo_files (procinfo *pi, int which)
 
 #ifdef PIOCTSTATUS	/* OSF */
   /* Only one FD; just open it.  */
-  if ((fd = open_with_retry (pi->pathname, O_RDWR)) == 0)
+  if ((fd = open_with_retry (pi->pathname, O_RDWR)) < 0)
     return 0;
 #else			/* Sol 2.5, Irix, other?  */
   if (pi->tid == 0)	/* Master procinfo for the process */
     {
       fd = open_with_retry (pi->pathname, O_RDWR);
-      if (fd <= 0)
+      if (fd < 0)
 	return 0;	/* fail */
     }
   else			/* LWP thread procinfo */
@@ -666,7 +666,7 @@ open_procinfo_files (procinfo *pi, int which)
 	return 0;	/* fail */
 
       /* Now obtain the file descriptor for the LWP.  */
-      if ((fd = ioctl (process->ctl_fd, PIOCOPENLWP, &lwpid)) <= 0)
+      if ((fd = ioctl (process->ctl_fd, PIOCOPENLWP, &lwpid)) < 0)
 	return 0;	/* fail */
 #else			/* Irix, other?  */
       return 0;		/* Don't know how to open threads.  */
@@ -878,6 +878,7 @@ load_syscalls (procinfo *pi)
   prsysent_t header;
   prsyscall_t *syscalls;
   int i, size, maxcall;
+  struct cleanup *cleanups;
 
   pi->num_syscalls = 0;
   pi->syscall_names = 0;
@@ -889,6 +890,7 @@ load_syscalls (procinfo *pi)
     {
       error (_("load_syscalls: Can't open /proc/%d/sysent"), pi->pid);
     }
+  cleanups = make_cleanup_close (sysent_fd);
 
   size = sizeof header - sizeof (prsyscall_t);
   if (read (sysent_fd, &header, size) != size)
@@ -904,12 +906,10 @@ load_syscalls (procinfo *pi)
 
   size = header.pr_nsyscalls * sizeof (prsyscall_t);
   syscalls = xmalloc (size);
+  make_cleanup (free_current_contents, &syscalls);
 
   if (read (sysent_fd, syscalls, size) != size)
-    {
-      xfree (syscalls);
-      error (_("load_syscalls: Error reading /proc/%d/sysent"), pi->pid);
-    }
+    error (_("load_syscalls: Error reading /proc/%d/sysent"), pi->pid);
 
   /* Find maximum syscall number.  This may not be the same as
      pr_nsyscalls since that value refers to the number of entries
@@ -963,8 +963,7 @@ load_syscalls (procinfo *pi)
       pi->syscall_names[callnum][size-1] = '\0';
     }
 
-  close (sysent_fd);
-  xfree (syscalls);
+  do_cleanups (cleanups);
 }
 
 /* Free the space allocated for the syscall names from the procinfo
