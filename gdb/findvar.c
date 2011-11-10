@@ -641,11 +641,19 @@ read_frame_register_value (struct value *value, struct frame_info *frame)
     {
       struct value *regval = get_frame_register_value (frame, regnum);
       int reg_len = TYPE_LENGTH (value_type (regval));
+      int reg_offset = 0;
 
+      /* If the register length is larger than the number of bytes
+         remaining to copy, then only copy the appropriate bytes.  */
       if (offset + reg_len > len)
-        reg_len = len - offset;
-      value_contents_copy (value, offset, regval, value_offset (regval),
-			   reg_len);
+	{
+	  reg_len = len - offset;
+	  if (gdbarch_byte_order (get_frame_arch (frame)) == BFD_ENDIAN_BIG)
+	    reg_offset = TYPE_LENGTH (value_type (regval)) - reg_len;
+	}
+
+      value_contents_copy (value, offset, regval,
+                           value_offset (regval) + reg_offset, reg_len);
 
       offset += reg_len;
       regnum++;
