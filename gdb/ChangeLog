@@ -1,3 +1,8 @@
+2011-11-10  Pedro Alves  <pedro@codesourcery.com>
+
+	* target.c (target_waitstatus_to_string): Handle
+	TARGET_WAITKIND_NO_RESUMED.
+
 2011-11-10  Doug Evans  <dje@google.com>
 
 	* python/py-type.c (typy_fields_items): Call check_typedef.

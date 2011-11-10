@@ -3443,6 +3443,8 @@ target_waitstatus_to_string (const struct target_waitstatus *ws)
       return xstrprintf ("%signore", kind_str);
     case TARGET_WAITKIND_NO_HISTORY:
       return xstrprintf ("%sno-history", kind_str);
+    case TARGET_WAITKIND_NO_RESUMED:
+      return xstrprintf ("%sno-resumed", kind_str);
     default:
       return xstrprintf ("%sunknown???", kind_str);
     }
