@@ -3,7 +3,7 @@
 	* findvar.c (read_frame_register_value): Read the correct bytes
 	from registers on big-endian architectures.
 
-2011-11-09  Tom Tromey  <tromey@redhat.com>
+2011-11-10  Tom Tromey  <tromey@redhat.com>
 
 	* procfs.c (load_syscalls): Make a cleanup.
 	(open_procinfo_files): fd==0 is ok.
