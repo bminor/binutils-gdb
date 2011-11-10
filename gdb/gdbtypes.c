@@ -1454,6 +1454,10 @@ stub_noname_complaint (void)
    not been computed and we're either in the middle of reading symbols, or
    there was no name for the typedef in the debug info.
 
+   NOTE: Lookup of opaque types can throw errors for invalid symbol files.
+   QUITs in the symbol reading code can also throw.
+   Thus this function can throw an exception.
+
    If TYPE is a TYPE_CODE_TYPEDEF, its length is updated to the length of
    the target type.
 

@@ -1,3 +1,8 @@
+2011-11-09  Doug Evans  <dje@google.com>
+
+	* gdbtypes.c (check_typedef): Document that this function can
+	throw an exception.
+
 2011-11-09  Tom Tromey  <tromey@redhat.com>
 
 	PR c++/13342:
