@@ -1,5 +1,10 @@
 2011-11-10  Pedro Alves  <pedro@codesourcery.com>
 
+	* linux-nat.c (linux_nat_wait): Don't force waking up the event
+	loop when returning a TARGET_WAITKIND_NO_RESUMED.
+
+2011-11-10  Pedro Alves  <pedro@codesourcery.com>
+
 	* target.c (target_waitstatus_to_string): Handle
 	TARGET_WAITKIND_NO_RESUMED.
 

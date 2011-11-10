@@ -3980,7 +3980,8 @@ linux_nat_wait (struct target_ops *ops,
      may be more.  If we requested a specific lwp or process, also
      assume there may be more.  */
   if (target_can_async_p ()
-      && (ourstatus->kind != TARGET_WAITKIND_IGNORE
+      && ((ourstatus->kind != TARGET_WAITKIND_IGNORE
+	   && ourstatus->kind != TARGET_WAITKIND_NO_RESUMED)
 	  || !ptid_equal (ptid, minus_one_ptid)))
     async_file_mark ();
 
