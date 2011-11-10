@@ -5217,6 +5217,7 @@ iterate_over_mappings (procinfo *pi, find_memory_region_ftype child_func,
   int funcstat;
   int map_fd;
   int nmap;
+  struct cleanup *cleanups = make_cleanup (null_cleanup, NULL);
 #ifdef NEW_PROC_API
   struct stat sbuf;
 #endif
@@ -5254,8 +5255,12 @@ iterate_over_mappings (procinfo *pi, find_memory_region_ftype child_func,
 
   for (prmap = prmaps; nmap > 0; prmap++, nmap--)
     if ((funcstat = (*func) (prmap, child_func, data)) != 0)
-      return funcstat;
+      {
+	do_cleanups (cleanups);
+        return funcstat;
+      }
 
+  do_cleanups (cleanups);
   return 0;
 }
 

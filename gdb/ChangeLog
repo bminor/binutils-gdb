@@ -1,3 +1,8 @@
+2011-11-10  Joel Brobecker  <brobecker@adacore.com>
+
+	* procfs.c (iterate_over_mappings): Call do_cleanups before
+	returning.
+
 2011-11-09  Doug Evans  <dje@google.com>
 
 	* gdbtypes.c (check_typedef): Document that this function can
