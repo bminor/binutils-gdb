@@ -2075,7 +2075,8 @@ class Arm_scan_relocatable_relocs :
 	  case elfcpp::R_ARM_TARGET1:
 	  case elfcpp::R_ARM_TARGET2:
 	    gold_unreachable();
-	  // Relocations that write full 32 bits.
+	  // Relocations that write full 32 bits and
+          // have alignment of 1.
 	  case elfcpp::R_ARM_ABS32:
 	  case elfcpp::R_ARM_REL32:
 	  case elfcpp::R_ARM_SBREL32:
@@ -2093,7 +2094,7 @@ class Arm_scan_relocatable_relocs :
 	  case elfcpp::R_ARM_TLS_LDO32:
 	  case elfcpp::R_ARM_TLS_IE32:
 	  case elfcpp::R_ARM_TLS_LE32:
-	    return Relocatable_relocs::RELOC_ADJUST_FOR_SECTION_4;
+	    return Relocatable_relocs::RELOC_ADJUST_FOR_SECTION_4_UNALIGNED;
 	  default:
 	    // For all other static relocations, return RELOC_SPECIAL.
 	    return Relocatable_relocs::RELOC_SPECIAL;

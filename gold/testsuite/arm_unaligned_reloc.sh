@@ -47,4 +47,11 @@ check arm_unaligned_reloc.stdout "^    a005:	ffffeffb .*$"
 check arm_unaligned_reloc.stdout "^0000a009 <abs16>:"
 check arm_unaligned_reloc.stdout "^    a009:	00009000 .*$"
 
+check arm_unaligned_reloc_r.stdout "^   1:	00000000 .*$"
+check arm_unaligned_reloc_r.stdout "^[	]*1: R_ARM_ABS32	.data.0$"
+check arm_unaligned_reloc_r.stdout "^   5:	00000000 .*$"
+check arm_unaligned_reloc_r.stdout "^[	]*5: R_ARM_REL32	.data.0$"
+check arm_unaligned_reloc_r.stdout "^   9:	00000000 .*$"
+check arm_unaligned_reloc_r.stdout "^[	]*9: R_ARM_ABS16	.data.0$"
+
 exit 0

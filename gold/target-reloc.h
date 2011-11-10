@@ -669,6 +669,7 @@ relocate_for_relocatable(
 	    case Relocatable_relocs::RELOC_ADJUST_FOR_SECTION_2:
 	    case Relocatable_relocs::RELOC_ADJUST_FOR_SECTION_4:
 	    case Relocatable_relocs::RELOC_ADJUST_FOR_SECTION_8:
+	    case Relocatable_relocs::RELOC_ADJUST_FOR_SECTION_4_UNALIGNED:
 	      {
 		// We are adjusting a section symbol.  We need to find
 		// the symbol table index of the section symbol for
@@ -788,6 +789,12 @@ relocate_for_relocatable(
 	    case Relocatable_relocs::RELOC_ADJUST_FOR_SECTION_8:
 	      Relocate_functions<size, big_endian>::rel64(padd, object,
 							  psymval);
+	      break;
+
+	    case Relocatable_relocs::RELOC_ADJUST_FOR_SECTION_4_UNALIGNED:
+	      Relocate_functions<size, big_endian>::rel32_unaligned(padd,
+								    object,
+								    psymval);
 	      break;
 
 	    default:

@@ -1,3 +1,20 @@
+2011-11-09  Doug Kwan  <dougkwan@google.com>
+
+	PR gold/13362
+	* arm.cc (Arm_scan_relocatable_relocs::Default_scan_relocatable_relocs):
+	Use unaligned 4-byte relocs for static 32-bit data as required by EABI.
+	* reloc.h (Relocatable_relocs::Reloc_strategy): New enum
+	RELOC_ADJUST_FOR_SECTION_4_UNALIGNED.
+	(Relocate_functions::rel_unaligned): New.
+	(Relocate_functions::rel32_unaligned): New.
+	* target-reloc.h (relocate_for_relocatable): Add code to handle
+	RELOC_ADJUST_FOR_SECTION_4_UNALIGNED.
+	* testsuite/Makefile.am (arm_unaligned_reloc_r.stdout,
+	arm_unaligned_reloc_r): New targets.
+	* testsuite/Makefile.in: Regenerate.
+	* arm_unaligned_reloc.sh: Check unaligned relocs in relocatable
+	linking.
+
 2011-11-02  Ian Lance Taylor  <iant@google.com>
 
 	* configure.ac: Add --with-lib-path option.  Define LIB_PATH and
