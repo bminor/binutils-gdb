@@ -1,5 +1,8 @@
 2011-11-10  Doug Evans  <dje@google.com>
 
+	* gdb.reverse/i387-env-reverse.exp: Extend timeout of
+	"record to end of main" test.
+
 	* gdb.python/py-type.c (TS): New typedef.
 	(ts): New global.
 	* gdb.python/py-type.exp: Test field list of typedef.
