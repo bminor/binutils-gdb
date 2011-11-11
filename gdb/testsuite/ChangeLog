@@ -1,3 +1,8 @@
+2011-11-11  Doug Evans  <dje@google.com>
+
+	* gdb.threads/print-threads.exp: Extend timeout for slower
+	tests.
+
 2011-11-10  Doug Evans  <dje@google.com>
 
 	* gdb.reverse/i387-env-reverse.exp: Extend timeout of
