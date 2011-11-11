@@ -1,3 +1,8 @@
+2011-11-11  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* readelf.c (process_program_headers): Fix typo printing p_memsz
+	field.
+
 2011-11-01  DJ Delorie  <dj@redhat.com>
 
 	* readelf.c: Include elf/rl78.h
