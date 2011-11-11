@@ -1,3 +1,9 @@
+2011-11-10  Tom Tromey  <tromey@redhat.com>
+
+	PR c++/9257:
+	* gdb.texinfo (Print Settings): Add an extra note about the need
+	for a vtable.
+
 2011-11-08  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* gdb.texinfo (MIPS): Remove duplicate "auto" reference from

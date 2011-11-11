@@ -8372,7 +8372,10 @@ Display the encoding style currently in use for decoding C@t{++} symbols.
 @cindex display derived types
 When displaying a pointer to an object, identify the @emph{actual}
 (derived) type of the object rather than the @emph{declared} type, using
-the virtual function table.
+the virtual function table.  Note that the virtual function table is
+required---this feature can only work for objects that have run-time
+type identification; a single virtual method in the object's declared
+type is sufficient.
 
 @item set print object off
 Display only the declared type of objects, without reference to the
