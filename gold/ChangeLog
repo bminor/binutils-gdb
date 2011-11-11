@@ -1,3 +1,8 @@
+2011-11-11  Sterling Augustine  <saugustine@google.com>
+
+	* yyscript.y (section_cmd): Add support for INCLUDE directive.
+	(file_or_sections_cmd): Likewise.
+
 2011-11-11  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc (Target_arm::do_make_elf_object): Allow executable also
