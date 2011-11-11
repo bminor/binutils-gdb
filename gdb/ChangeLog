@@ -1,3 +1,10 @@
+2011-11-11  Keith Seitz  <keiths@redhat.com>
+
+	PR gdb/12843
+	* linespec.c (locate_first_half): Keep ':' if it looks
+	like it could be part of a Windows path starting with
+	a drive letter.
+
 2011-11-10  Pedro Alves  <pedro@codesourcery.com>
 
 	* linux-nat.c (linux_nat_wait): Don't force waking up the event

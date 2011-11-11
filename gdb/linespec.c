@@ -43,6 +43,7 @@
 #include "arch-utils.h"
 #include <ctype.h>
 #include "cli/cli-utils.h"
+#include "filenames.h"
 
 /* Prototypes for local functions.  */
 
@@ -1194,6 +1195,16 @@ locate_first_half (char **argptr, int *is_quote_enclosed)
 	  ++p;
 	}
     }
+
+
+  /* Check for a drive letter in the filename.  This is done on all hosts
+     to capture cross-compilation environments.  On Unixen, directory
+     separators are illegal in filenames, so if the user enters "e:/foo.c",
+     he is referring to a directory named "e:" and a source file named
+     "foo.c", and we still want to keep these two pieces together.  */
+  if (isalpha (p[0]) && p[1] == ':' && IS_DIR_SEPARATOR (p[2]))
+    p += 3;
+
   for (; *p; p++)
     {
       if (p[0] == '<')
