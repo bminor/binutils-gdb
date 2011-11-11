@@ -1082,7 +1082,8 @@ read_psymtabs_with_filename (struct objfile *objfile, const char *filename)
 
 static void
 map_symbol_filenames_psymtab (struct objfile *objfile,
-			      symbol_filename_ftype *fun, void *data)
+			      symbol_filename_ftype *fun, void *data,
+			      int need_fullname)
 {
   struct partial_symtab *ps;
 
@@ -1094,7 +1095,10 @@ map_symbol_filenames_psymtab (struct objfile *objfile,
 	continue;
 
       QUIT;
-      fullname = psymtab_to_fullname (ps);
+      if (need_fullname)
+	fullname = psymtab_to_fullname (ps);
+      else
+	fullname = NULL;
       (*fun) (ps->filename, fullname, data);
     }
 }
@@ -1921,13 +1925,15 @@ expand_partial_symbol_names (int (*fun) (const char *, void *), void *data)
 }
 
 void
-map_partial_symbol_filenames (symbol_filename_ftype *fun, void *data)
+map_partial_symbol_filenames (symbol_filename_ftype *fun, void *data,
+			      int need_fullname)
 {
   struct objfile *objfile;
 
   ALL_OBJFILES (objfile)
   {
     if (objfile->sf)
-      objfile->sf->qf->map_symbol_filenames (objfile, fun, data);
+      objfile->sf->qf->map_symbol_filenames (objfile, fun, data,
+					     need_fullname);
   }
 }

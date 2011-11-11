@@ -2881,7 +2881,8 @@ sources_info (char *ignore, int from_tty)
 		   "will be read in on demand:\n\n");
 
   first = 1;
-  map_partial_symbol_filenames (output_partial_symbol_filename, &first);
+  map_partial_symbol_filenames (output_partial_symbol_filename, &first,
+				1 /*need_fullname*/);
   printf_filtered ("\n");
 }
 
@@ -4314,7 +4315,8 @@ make_source_files_completion_list (char *text, char *word)
   datum.list = &list;
   datum.list_used = &list_used;
   datum.list_alloced = &list_alloced;
-  map_partial_symbol_filenames (maybe_add_partial_symtab_filename, &datum);
+  map_partial_symbol_filenames (maybe_add_partial_symtab_filename, &datum,
+				0 /*need_fullname*/);
   discard_cleanups (back_to);
 
   return list;

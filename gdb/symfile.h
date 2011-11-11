@@ -289,9 +289,11 @@ struct quick_symbol_functions
 
   /* Call a callback for every file defined in OBJFILE whose symtab is
      not already read in.  FUN is the callback.  It is passed the file's
-     FILENAME, the file's FULLNAME, and the DATA passed to this function.  */
+     FILENAME, the file's FULLNAME (if need_fullname is non-zero), and
+     the DATA passed to this function.  */
   void (*map_symbol_filenames) (struct objfile *objfile,
-				symbol_filename_ftype *fun, void *data);
+				symbol_filename_ftype *fun, void *data,
+				int need_fullname);
 };
 
 /* Structure to keep track of symbol reading functions for various

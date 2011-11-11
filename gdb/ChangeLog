@@ -10,6 +10,14 @@
 
 2011-11-10  Doug Evans  <dje@google.com>
 
+	* dwarf2read.c (dw2_map_symbol_filenames): New parameter
+	`need_fullname'.
+	* psymtab.c (map_symbol_filenames_psymtab): Ditto.
+	(map_partial_symbol_filenames): Ditto.  All callers updated.
+	* psymtab.h (map_partial_symbol_filenames): Update prototype.
+	* symfile.h (struct quick_symbol_functions, map_symbol_filenames): New
+	parameter need_fullname.
+
 	* psymtab.c (psymtab_to_fullname): Use cached copy if it exists.
 	* source.c (symtab_to_fullname): Ditto.
 

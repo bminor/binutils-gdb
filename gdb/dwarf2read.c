@@ -2811,7 +2811,7 @@ dw2_find_pc_sect_symtab (struct objfile *objfile,
 
 static void
 dw2_map_symbol_filenames (struct objfile *objfile, symbol_filename_ftype *fun,
-			  void *data)
+			  void *data, int need_fullname)
 {
   int i;
 
@@ -2833,8 +2833,12 @@ dw2_map_symbol_filenames (struct objfile *objfile, symbol_filename_ftype *fun,
 
       for (j = 0; j < file_data->num_file_names; ++j)
 	{
-	  const char *this_real_name = dw2_get_real_path (objfile, file_data,
-							  j);
+	  const char *this_real_name;
+
+	  if (need_fullname)
+	    this_real_name = dw2_get_real_path (objfile, file_data, j);
+	  else
+	    this_real_name = NULL;
 	  (*fun) (file_data->file_names[j], this_real_name, data);
 	}
     }
