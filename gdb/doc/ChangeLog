@@ -1,5 +1,17 @@
 2011-11-10  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.texinfo (Compilation): Don't mention -gdwarf-2.  Link to GCC
+	manual.
+	(Variables): Don't mention -gdwarf-2.  Link to Compilation node.
+	(Macros): Add a footnote.
+	(C): Remove paragraph about compiler options.
+	(C Constants): Mention wide character and string constants.
+	(C Plus Plus Expressions): Update compiler option advice.  Mention
+	using declarations.  Mention ADL.  Remove old HP compiler
+	information.
+
+2011-11-10  Tom Tromey  <tromey@redhat.com>
+
 	PR c++/9257:
 	* gdb.texinfo (Print Settings): Add an extra note about the need
 	for a vtable.

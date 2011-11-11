@@ -1873,14 +1873,18 @@ format; if your @sc{gnu} C compiler has this option, do not use it.
 @value{GDBN} knows about preprocessor macros and can show you their
 expansion (@pxref{Macros}).  Most compilers do not include information
 about preprocessor macros in the debugging information if you specify
-the @option{-g} flag alone, because this information is rather large.
-Version 3.1 and later of @value{NGCC}, the @sc{gnu} C compiler,
-provides macro information if you specify the options
-@option{-gdwarf-2} and @option{-g3}; the former option requests
-debugging information in the Dwarf 2 format, and the latter requests
-``extra information''.  In the future, we hope to find more compact
-ways to represent macro information, so that it can be included with
-@option{-g} alone.
+the @option{-g} flag alone.  Version 3.1 and later of @value{NGCC},
+the @sc{gnu} C compiler, provides macro information if you are using
+the DWARF debugging format, and specify the option @option{-g3}.
+
+@xref{Debugging Options,,Options for Debugging Your Program or GCC,
+gcc.info, Using the @sc{gnu} Compiler Collection (GCC)}, for more
+information on @value{NGCC} options affecting debug information.
+
+You will have the best debugging experience if you use the latest
+version of the DWARF debugging format that your compiler supports.
+DWARF is currently the most expressive and best supported debugging
+format in @value{GDBN}.
 
 @need 2000
 @node Starting
@@ -7369,15 +7373,9 @@ No symbol "foo" in current context.
 
 To solve such problems, either recompile without optimizations, or use a
 different debug info format, if the compiler supports several such
-formats.  For example, @value{NGCC}, the @sc{gnu} C/C@t{++} compiler,
-usually supports the @option{-gstabs+} option.  @option{-gstabs+}
-produces debug info in a format that is superior to formats such as
-COFF.  You may be able to use DWARF 2 (@option{-gdwarf-2}), which is also
-an effective form for debug info.  @xref{Debugging Options,,Options
-for Debugging Your Program or GCC, gcc.info, Using the @sc{gnu}
-Compiler Collection (GCC)}.
-@xref{C, ,C and C@t{++}}, for more information about debug info formats
-that are best suited to C@t{++} programs.
+formats.  @xref{Compilation}, for more information on choosing compiler
+options.  @xref{C, ,C and C@t{++}}, for more information about debug
+info formats that are best suited to C@t{++} programs.
 
 If you ask to print an object whose contents are unknown to
 @value{GDBN}, e.g., because its data type is not completely specified
@@ -10086,9 +10084,12 @@ $ cat sample.h
 $
 @end smallexample
 
-Now, we compile the program using the @sc{gnu} C compiler, @value{NGCC}.
-We pass the @option{-gdwarf-2} and @option{-g3} flags to ensure the
-compiler includes information about preprocessor macros in the debugging
+Now, we compile the program using the @sc{gnu} C compiler,
+@value{NGCC}.  We pass the @option{-gdwarf-2}@footnote{This is the
+minimum.  Recent versions of @value{NGCC} support @option{-gdwarf-3}
+and @option{-gdwarf-4}; we recommend always choosing the most recent
+version of DWARF.} @emph{and} @option{-g3} flags to ensure the compiler
+includes information about preprocessor macros in the debugging
 information.
 
 @smallexample
@@ -12176,13 +12177,6 @@ effectively, you must compile your C@t{++} programs with a supported
 C@t{++} compiler, such as @sc{gnu} @code{g++}, or the HP ANSI C@t{++}
 compiler (@code{aCC}).
 
-For best results when using @sc{gnu} C@t{++}, use the DWARF 2 debugging
-format; if it doesn't work on your system, try the stabs+ debugging
-format.  You can select those formats explicitly with the @code{g++}
-command-line options @option{-gdwarf-2} and @option{-gstabs+}.
-@xref{Debugging Options,,Options for Debugging Your Program or GCC,
-gcc.info, Using the @sc{gnu} Compiler Collection (GCC)}.
-
 @menu
 * C Operators::                 C and C@t{++} operators
 * C Constants::                 C and C@t{++} constants
@@ -12392,12 +12386,21 @@ of the character's ordinal value; or of the form @samp{\@var{x}}, where
 @samp{@var{x}} is a predefined special character---for example,
 @samp{\n} for newline.
 
+Wide character constants can be written by prefixing a character
+constant with @samp{L}, as in C.  For example, @samp{L'x'} is the wide
+form of @samp{x}.  The target wide character set is used when
+computing the value of this constant (@pxref{Character Sets}).
+
 @item
 String constants are a sequence of character constants surrounded by
 double quotes (@code{"}).  Any valid character constant (as described
 above) may appear.  Double quotes within the string must be preceded by
 a backslash, so for instance @samp{"a\"b'c"} is a string of five
 characters.
+
+Wide string constants can be written by prefixing a string constant
+with @samp{L}, as in C.  The target wide character set is used when
+computing the value of this constant (@pxref{Character Sets}).
 
 @item
 Pointer constants are an integral value.  You can also write pointers
@@ -12421,16 +12424,14 @@ and @samp{@{&"hi", &"there", &"fred"@}} is a three-element array of pointers.
 @cindex debug formats and C@t{++}
 @cindex @value{NGCC} and C@t{++}
 @quotation
-@emph{Warning:} @value{GDBN} can only debug C@t{++} code if you use the
-proper compiler and the proper debug format.  Currently, @value{GDBN}
-works best when debugging C@t{++} code that is compiled with
-@value{NGCC} 2.95.3 or with @value{NGCC} 3.1 or newer, using the options
-@option{-gdwarf-2} or @option{-gstabs+}.  DWARF 2 is preferred over
-stabs+.  Most configurations of @value{NGCC} emit either DWARF 2 or
-stabs+ as their default debug format, so you usually don't need to
-specify a debug format explicitly.  Other compilers and/or debug formats
-are likely to work badly or not at all when using @value{GDBN} to debug
-C@t{++} code.
+@emph{Warning:} @value{GDBN} can only debug C@t{++} code if you use
+the proper compiler and the proper debug format.  Currently,
+@value{GDBN} works best when debugging C@t{++} code that is compiled
+with the most recent version of @value{NGCC} possible.  The DWARF
+debugging format is preferred; @value{NGCC} defaults to this on most
+popular platforms.  Other compilers and/or debug formats are likely to
+work badly or not at all when using @value{GDBN} to debug C@t{++}
+code.  @xref{Compilation}.
 @end quotation
 
 @enumerate
@@ -12449,7 +12450,8 @@ count = aml->GetOriginal(x, y)
 While a member function is active (in the selected stack frame), your
 expressions have the same namespace available as the member function;
 that is, @value{GDBN} allows implicit references to the class instance
-pointer @code{this} following the same rules as C@t{++}.
+pointer @code{this} following the same rules as C@t{++}.  @code{using}
+declarations in the current scope are also respected by @value{GDBN}.
 
 @cindex call overloaded functions
 @cindex overloaded functions, calling
@@ -12501,12 +12503,11 @@ necessary, for example in an expression like
 @samp{@var{scope1}::@var{scope2}::@var{name}}.  @value{GDBN} also allows
 resolving name scope by reference to source files, in both C and C@t{++}
 debugging (@pxref{Variables, ,Program Variables}).
-@end enumerate
 
-In addition, when used with HP's C@t{++} compiler, @value{GDBN} supports
-calling virtual functions correctly, printing out virtual bases of
-objects, calling functions in a base subobject, casting objects, and
-invoking user-defined operators.
+@item
+@value{GDBN} performs argument-dependent lookup, following the C@t{++}
+specification.
+@end enumerate
 
 @node C Defaults
 @subsubsection C and C@t{++} Defaults
