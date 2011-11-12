@@ -10011,21 +10011,18 @@ can be any string of tokens.
 @cindex macro definition, showing
 @cindex definition of a macro, showing
 @cindex macros, from debug info
-@item info macro @var{macro}
-Show the current definition of the named @var{macro}, and describe the
-source location or compiler command-line where that definition was established.
+@item info macro [-a|-all] [--] @var{macro}
+Show the current definition or all definitions of the named @var{macro},
+and describe the source location or compiler command-line where that
+definition was established.  The optional double dash is to signify the end of
+argument processing and the beginning of @var{macro} for non C-like macros where
+the macro may begin with a hyphen.
 
 @kindex info macros
 @item info macros @var{linespec}
 Show all macro definitions that are in effect at the location specified
 by @var{linespec},  and describe the source location or compiler
 command-line where those definitions were established.
-
-@kindex info definitions
-@item info definitions @var{macro}
-Show all definitions of the named @var{macro} that are defined in the current
-compilation unit, and describe the source location or compiler command-line
-where those definitions were established.
 
 @kindex macro define
 @cindex user-defined macros

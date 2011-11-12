@@ -23,6 +23,7 @@
 #include "macrotab.h"
 #include "macroexp.h"
 #include "macroscope.h"
+#include "cli/cli-utils.h"
 #include "command.h"
 #include "gdbcmd.h"
 #include "gdb_string.h"
@@ -44,6 +45,14 @@ macro_command (char *arg, int from_tty)
 
 /* Macro expansion commands.  */
 
+
+/* Prints an informational message regarding the lack of macro information.  */
+static void macro_inform_no_debuginfo()
+{
+  fputs_filtered ("GDB has no preprocessor macro information for "
+                  "that code.",
+                  gdb_stdout);
+}
 
 static void
 macro_expand_command (char *exp, int from_tty)
@@ -73,9 +82,7 @@ macro_expand_command (char *exp, int from_tty)
       fputs_filtered ("\n", gdb_stdout);
     }
   else
-    fputs_filtered ("GDB has no preprocessor macro information for "
-                    "that code.\n",
-                    gdb_stdout);
+    macro_inform_no_debuginfo ();
 
   do_cleanups (cleanup_chain);
   return;
@@ -109,9 +116,7 @@ macro_expand_once_command (char *exp, int from_tty)
       fputs_filtered ("\n", gdb_stdout);
     }
   else
-    fputs_filtered ("GDB has no preprocessor macro information for "
-                    "that code.\n",
-                    gdb_stdout);
+    macro_inform_no_debuginfo ();
 
   do_cleanups (cleanup_chain);
   return;
@@ -178,43 +183,6 @@ print_macro_definition (const char *name,
 	fprintf_filtered (gdb_stdout, "=%s\n", d->replacement);
 }
 
-static void
-info_macro_command (char *name, int from_tty)
-{
-  struct macro_scope *ms = NULL;
-  struct cleanup *cleanup_chain = make_cleanup (free_current_contents, &ms);
-  struct macro_definition *d;
-
-  if (! name || ! *name)
-    error (_("You must follow the `info macro' command with the name"
-           " of the macro\n"
-           "whose definition you want to see."));
-
-  ms = default_macro_scope ();
-  if (! ms)
-    error (_("GDB has no preprocessor macro information for that code."));
-
-  d = macro_lookup_definition (ms->file, ms->line, name);
-  if (d)
-    {
-      int line;
-      struct macro_source_file *file
-        = macro_definition_location (ms->file, ms->line, name, &line);
-
-      print_macro_definition (name, d, file, line);
-    }
-  else
-    {
-      fprintf_filtered (gdb_stdout,
-                        "The symbol `%s' has no definition as a C/C++"
-                        " preprocessor macro\n"
-                        "at ", name);
-      show_pp_source_pos (gdb_stdout, ms->file, ms->line);
-    }
-
-  do_cleanups (cleanup_chain);
-}
-
 /* A callback function for usage with macro_for_each and friends.
    If USER_DATA is null all macros will be printed.
    Otherwise USER_DATA is considered to be a string, printing
@@ -229,23 +197,78 @@ print_macro_callback (const char *name, const struct macro_definition *macro,
     print_macro_definition (name, macro, source, line);
 }
 
-/* Implementation of the "info definitions" command. */
+/* The implementation of the `info macro' command.  */
 static void
-info_definitions_command (char *name, int from_tty)
+info_macro_command (char *args, int from_tty)
 {
   struct macro_scope *ms = NULL;
-  struct cleanup *cleanup_chain = make_cleanup (free_current_contents, &ms);
+  struct cleanup *cleanup_chain;
+  char *name;
+  int show_all_macros_named = 0;
+  char *arg_start = args;
+  int processing_args = 1;
+
+  while (processing_args
+	 && arg_start && *arg_start == '-' && *arg_start != '\0')
+    {
+      char *p = skip_to_space (arg_start);
+
+      if (strncmp (arg_start, "-a", p - arg_start) == 0
+	  || strncmp (arg_start, "-all", p - arg_start) == 0)
+	show_all_macros_named = 1;
+      else if (strncmp (arg_start, "--", p - arg_start) == 0)
+          /* Our macro support seems rather C specific but this would
+             seem necessary for languages allowing - in macro names.
+	     e.g. Scheme's (defmacro ->foo () "bar\n")  */
+	processing_args = 0;
+      else
+	{
+	  /* Relies on modified 'args' not making it in to history */
+	  *p = '\0';
+	  error (_("Unrecognized option '%s' to info macro command.  "
+		   "Try \"help info macro\"."), arg_start);
+	}
+
+        arg_start = skip_spaces (p);
+    }
+
+  name = arg_start;
 
   if (! name || ! *name)
-    error (_("The `info definitions' command requires a macro name as an \
-argument."));
+    error (_("You must follow the `info macro' command with the name"
+	     " of the macro\n"
+	     "whose definition you want to see."));
 
   ms = default_macro_scope ();
+  cleanup_chain = make_cleanup (free_current_contents, &ms);
 
-  if (! ms || ! ms->file || ! ms->file->table)
-    error (_("GDB has no preprocessor macro information for that code."));
+  if (! ms)
+    macro_inform_no_debuginfo ();
+  else if (show_all_macros_named)
+    macro_for_each (ms->file->table, print_macro_callback, name);
+  else
+    {
+      struct macro_definition *d;
 
-  macro_for_each (ms->file->table, print_macro_callback, name);
+      d = macro_lookup_definition (ms->file, ms->line, name);
+      if (d)
+	{
+	  int line;
+	  struct macro_source_file *file
+	    = macro_definition_location (ms->file, ms->line, name, &line);
+
+	  print_macro_definition (name, d, file, line);
+	}
+      else
+        {
+          fprintf_filtered (gdb_stdout,
+                            "The symbol `%s' has no definition as a C/C++"
+                            " preprocessor macro\n"
+                            "at ", name);
+          show_pp_source_pos (gdb_stdout, ms->file, ms->line);
+	}
+    }
+
   do_cleanups (cleanup_chain);
 }
 
@@ -267,9 +290,10 @@ info_macros_command (char *args, int from_tty)
     }
 
   if (! ms || ! ms->file || ! ms->file->table)
-    error (_("GDB has no preprocessor macro information for that code."));
+    macro_inform_no_debuginfo ();
+  else
+    macro_for_each_in_scope (ms->file, ms->line, print_macro_callback, NULL);
 
-  macro_for_each_in_scope (ms->file, ms->line, print_macro_callback, NULL);
   do_cleanups (cleanup_chain);
 }
 
@@ -495,18 +519,19 @@ expression work together to yield a pre-processed expression."),
   add_alias_cmd ("exp1", "expand-once", no_class, 1, &macrolist);
 
   add_cmd ("macro", no_class, info_macro_command,
-	   _("Show the definition of MACRO, and its source location."),
+	   _("Show the definition of MACRO, and it's source location.\n\
+Usage: info macro [-a|-all] [--] MACRO\n\
+Options: \n\
+  -a, --all    Output all definitions of MACRO in the current compilation\
+ unit.\n\
+  --           Specify the end of arguments and the beginning of the MACRO."),
+
 	   &infolist);
 
   add_cmd ("macros", no_class, info_macros_command,
 	   _("Show the definitions of all macros at LINESPEC, or the current \
 source location.\n\
 Usage: info macros [LINESPEC]"),
-	   &infolist);
-
-  add_cmd ("definitions", no_class, info_definitions_command,
-	   _("Show all definitions of MACRO in the current compilation unit.\n\
-Usage: info definitions MACRO"),
 	   &infolist);
 
   add_cmd ("define", no_class, macro_define_command, _("\

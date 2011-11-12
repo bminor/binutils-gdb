@@ -1,3 +1,8 @@
+2011-11-12  Matt Rice  <ratmice@gmail.com>
+
+	* gdb.texinfo (C Preprocessor Macros): Remove info definitions.
+	Add arguments to info macro.
+
 2011-11-10  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (Compilation): Don't mention -gdwarf-2.  Link to GCC

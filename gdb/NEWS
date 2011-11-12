@@ -97,8 +97,7 @@
   the first connection is made.  The listening port used by GDBserver will
   become available after that.
 
-* New commands "info macros", "info definitions",
-  and "alias" have been added.
+* New commands "info macros" and "alias" have been added.
 
 * New function parameters suffix @entry specifies value of function parameter
   at the time the function got called.  Entry values are available only since
@@ -113,6 +112,12 @@ watch EXPRESSION mask MASK_VALUE
 info auto-load-scripts [REGEXP]
   This command was formerly named "maintenance print section-scripts".
   It is now generally useful and is no longer a maintenance-only command.
+
+info macro [-all] [--] MACRO
+  The info macro command has new options `-all' and `--'.  The first for
+  printing all definitions of a macro.  The second for explicitly specifying
+  the end of arguments and the beginning of the macro name in case the macro
+  name starts with a hyphen.
 
 collect[/s] EXPRESSIONS
   The tracepoint collect command now takes an optional modifier "/s"

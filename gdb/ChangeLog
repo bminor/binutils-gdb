@@ -1,3 +1,14 @@
+2011-11-12  Matt Rice  <ratmice@gmail.com>
+
+	* macrocmd.c (macro_no_macro_info): New function.
+	(macro_expand_command): Use macro_no_macro_info.
+	(macro_expand_once_command): Ditto.
+	(info_macro_command): Add argument processing,
+	move info_definitions_command here.
+	(_initialize_macrocmd): Remove info definitions command.
+	Add arguments to info macro help text.
+	* NEWS: Replace info definitions command with new info macro options.
+
 2011-11-11  Keith Seitz  <keiths@redhat.com>
 
 	PR gdb/12843
