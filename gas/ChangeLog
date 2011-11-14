@@ -1,3 +1,8 @@
+2011-11-14  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* config/tc-mips.c (can_swap_branch_p): Exclude microMIPS
+	variant frags too.
+
 2011-11-07  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	* config/tc-arm.c (arm_cpus): Add cortex-a7 entry.

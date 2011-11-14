@@ -1,3 +1,11 @@
+2011-11-14  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* gas/mips/relax-swap3.d: New test.
+	* gas/mips/mips16@relax-swap3.d: Likewise.
+	* gas/mips/micromips@relax-swap3.d: Likewise.
+	* gas/mips/relax-swap3.s: New test source.
+	* gas/mips/mips.exp: Run the new tests.
+
 2011-11-02  Nick Clifton  <nickc@redhat.com>
 
 	* gas/arm/pic.d: Update expected output.

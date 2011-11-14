@@ -3728,9 +3728,8 @@ can_swap_branch_p (struct mips_cl_insn *ip)
 
   /* If the previous instruction is in a variant frag other than this
      branch's one, we cannot do the swap.  This does not apply to
-     MIPS16/microMIPS code, which uses variant frags for different
-     purposes.  */
-  if (!HAVE_CODE_COMPRESSION
+     MIPS16 code, which uses variant frags for different purposes.  */
+  if (!mips_opts.mips16
       && history[0].frag
       && history[0].frag->fr_type == rs_machine_dependent)
     return FALSE;
