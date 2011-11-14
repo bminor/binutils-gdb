@@ -686,8 +686,8 @@ struct target_ops
     /* Prepare the target for a tracing run.  */
     void (*to_trace_init) (void);
 
-    /* Send full details of a tracepoint to the target.  */
-    void (*to_download_tracepoint) (struct breakpoint *t);
+    /* Send full details of a tracepoint location to the target.  */
+    void (*to_download_tracepoint) (struct bp_location *location);
 
     /* Send full details of a trace state variable to the target.  */
     void (*to_download_trace_state_variable) (struct trace_state_variable *tsv);

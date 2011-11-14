@@ -848,7 +848,7 @@ update_current_target (void)
 	    (void (*) (void))
 	    tcomplain);
   de_fault (to_download_tracepoint,
-	    (void (*) (struct breakpoint *))
+	    (void (*) (struct bp_location *))
 	    tcomplain);
   de_fault (to_download_trace_state_variable,
 	    (void (*) (struct trace_state_variable *))

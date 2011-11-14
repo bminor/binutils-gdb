@@ -1701,6 +1701,7 @@ start_tracing (void)
   for (ix = 0; VEC_iterate (breakpoint_p, tp_vec, ix, b); ix++)
     {
       struct tracepoint *t = (struct tracepoint *) b;
+      struct bp_location *loc;
 
       if ((b->type == bp_fast_tracepoint
 	   ? !may_insert_fast_tracepoints
@@ -1708,7 +1709,10 @@ start_tracing (void)
 	continue;
 
       t->number_on_target = 0;
-      target_download_tracepoint (b);
+
+      for (loc = b->loc; loc; loc = loc->next)
+	target_download_tracepoint (loc);
+
       t->number_on_target = b->number;
     }
   VEC_free (breakpoint_p, tp_vec);
