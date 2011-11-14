@@ -1245,6 +1245,7 @@ static void do_action_at_tracepoint (struct tracepoint_hit_ctx *ctx,
 
 #ifndef IN_PROCESS_AGENT
 static struct tracepoint *fast_tracepoint_from_ipa_tpoint_address (CORE_ADDR);
+static int install_fast_tracepoint (struct tracepoint *);
 #endif
 
 #if defined(__GNUC__)
@@ -2737,18 +2738,70 @@ probe_marker_at (CORE_ADDR address, char *errout)
   return err;
 }
 
+static void
+clone_fast_tracepoint (struct tracepoint *to, const struct tracepoint *from)
+{
+  to->jump_pad = from->jump_pad;
+  to->jump_pad_end = from->jump_pad_end;
+  to->adjusted_insn_addr = from->adjusted_insn_addr;
+  to->adjusted_insn_addr_end = from->adjusted_insn_addr_end;
+  to->handle = from->handle;
+
+  gdb_assert (from->handle);
+  inc_ref_fast_tracepoint_jump ((struct fast_tracepoint_jump *) from->handle);
+}
+
 #define MAX_JUMP_SIZE 20
+
+/* Install fast tracepoint.  Return 0 if successful, otherwise return
+   non-zero.  */
+
+static int
+install_fast_tracepoint (struct tracepoint *tpoint)
+{
+  CORE_ADDR jentry, jump_entry;
+  int err = 0;
+  /* The jump to the jump pad of the last fast tracepoint
+     installed.  */
+  unsigned char fjump[MAX_JUMP_SIZE];
+  ULONGEST fjump_size;
+
+  jentry = jump_entry = get_jump_space_head ();
+
+  /* Install the jump pad.  */
+  err = install_fast_tracepoint_jump_pad (tpoint->obj_addr_on_target,
+					  tpoint->address,
+					  ipa_sym_addrs.addr_gdb_collect,
+					  ipa_sym_addrs.addr_collecting,
+					  tpoint->orig_size,
+					  &jentry, fjump, &fjump_size,
+					  &tpoint->adjusted_insn_addr,
+					  &tpoint->adjusted_insn_addr_end);
+
+  if (err)
+    return 1;
+
+  /* Wire it in.  */
+  tpoint->handle = set_fast_tracepoint_jump (tpoint->address, fjump,
+					     fjump_size);
+
+  if (tpoint->handle != NULL)
+    {
+      tpoint->jump_pad = jump_entry;
+      tpoint->jump_pad_end = jentry;
+
+      /* Pad to 8-byte alignment.  */
+      jentry = ((jentry + 7) & ~0x7);
+      claim_jump_space (jentry - jump_entry);
+    }
+
+  return 0;
+}
 
 static void
 cmd_qtstart (char *packet)
 {
   struct tracepoint *tpoint, *prev_ftpoint, *prev_stpoint;
-  CORE_ADDR jump_entry;
-
-  /* The jump to the jump pad of the last fast tracepoint
-     installed.  */
-  unsigned char fjump[MAX_JUMP_SIZE];
-  ULONGEST fjump_size;
 
   trace_debug ("Starting the trace");
 
@@ -2808,55 +2861,12 @@ cmd_qtstart (char *packet)
 	    }
 
 	  if (prev_ftpoint != NULL && prev_ftpoint->address == tpoint->address)
-	    {
-	      tpoint->handle = set_fast_tracepoint_jump (tpoint->address,
-							 fjump,
-							 fjump_size);
-	      tpoint->jump_pad = prev_ftpoint->jump_pad;
-	      tpoint->jump_pad_end = prev_ftpoint->jump_pad_end;
-	      tpoint->adjusted_insn_addr = prev_ftpoint->adjusted_insn_addr;
-	      tpoint->adjusted_insn_addr_end
-		= prev_ftpoint->adjusted_insn_addr_end;
-	    }
+	    clone_fast_tracepoint (tpoint, prev_ftpoint);
 	  else
 	    {
-	      CORE_ADDR jentry;
-	      int err = 0;
+	      if (install_fast_tracepoint (tpoint) == 0)
+		prev_ftpoint = tpoint;
 
-	      prev_ftpoint = NULL;
-
-	      jentry = jump_entry = get_jump_space_head ();
-
-	      /* Install the jump pad.  */
-	      err = install_fast_tracepoint_jump_pad
-		(tpoint->obj_addr_on_target,
-		 tpoint->address,
-		 ipa_sym_addrs.addr_gdb_collect,
-		 ipa_sym_addrs.addr_collecting,
-		 tpoint->orig_size,
-		 &jentry,
-		 fjump, &fjump_size,
-		 &tpoint->adjusted_insn_addr,
-		 &tpoint->adjusted_insn_addr_end);
-
-	      /* Wire it in.  */
-	      if (!err)
-		tpoint->handle = set_fast_tracepoint_jump (tpoint->address,
-							   fjump, fjump_size);
-
-	      if (tpoint->handle != NULL)
-		{
-		  tpoint->jump_pad = jump_entry;
-		  tpoint->jump_pad_end = jentry;
-
-		  /* Pad to 8-byte alignment.  */
-		  jentry = ((jentry + 7) & ~0x7);
-		  claim_jump_space (jentry - jump_entry);
-
-		  /* So that we can handle multiple fast tracepoints
-		     at the same address easily.  */
-		  prev_ftpoint = tpoint;
-		}
 	    }
 	}
       else if (tpoint->type == static_tracepoint)
@@ -6325,6 +6335,132 @@ download_agent_expr (struct agent_expr *expr)
 /* Align V up to N bits.  */
 #define UALIGN(V, N) (((V) + ((N) - 1)) & ~((N) - 1))
 
+/* Sync tracepoint with IPA, but leave maintenance of linked list to caller.  */
+
+static void
+download_tracepoint_1 (struct tracepoint *tpoint)
+{
+  struct tracepoint target_tracepoint;
+  CORE_ADDR tpptr = 0;
+
+  gdb_assert (tpoint->type == fast_tracepoint
+	      || tpoint->type == static_tracepoint);
+
+  if (tpoint->cond != NULL && target_emit_ops () != NULL)
+    {
+      CORE_ADDR jentry, jump_entry;
+
+      jentry = jump_entry = get_jump_space_head ();
+
+      if (tpoint->cond != NULL)
+	{
+	  /* Pad to 8-byte alignment. (needed?)  */
+	  /* Actually this should be left for the target to
+	     decide.  */
+	  jentry = UALIGN (jentry, 8);
+
+	  compile_tracepoint_condition (tpoint, &jentry);
+	}
+
+      /* Pad to 8-byte alignment.  */
+      jentry = UALIGN (jentry, 8);
+      claim_jump_space (jentry - jump_entry);
+    }
+
+  target_tracepoint = *tpoint;
+
+  tpptr = target_malloc (sizeof (*tpoint));
+  tpoint->obj_addr_on_target = tpptr;
+
+  /* Write the whole object.  We'll fix up its pointers in a bit.
+     Assume no next for now.  This is fixed up above on the next
+     iteration, if there's any.  */
+  target_tracepoint.next = NULL;
+  /* Need to clear this here too, since we're downloading the
+     tracepoints before clearing our own copy.  */
+  target_tracepoint.hit_count = 0;
+
+  write_inferior_memory (tpptr, (unsigned char *) &target_tracepoint,
+			 sizeof (target_tracepoint));
+
+  if (tpoint->cond)
+    write_inferior_data_ptr (tpptr + offsetof (struct tracepoint,
+					       cond),
+			     download_agent_expr (tpoint->cond));
+
+  if (tpoint->numactions)
+    {
+      int i;
+      CORE_ADDR actions_array;
+
+      /* The pointers array.  */
+      actions_array
+	= target_malloc (sizeof (*tpoint->actions) * tpoint->numactions);
+      write_inferior_data_ptr (tpptr + offsetof (struct tracepoint,
+						 actions),
+			       actions_array);
+
+      /* Now for each pointer, download the action.  */
+      for (i = 0; i < tpoint->numactions; i++)
+	{
+	  CORE_ADDR ipa_action = 0;
+	  struct tracepoint_action *action = tpoint->actions[i];
+
+	  switch (action->type)
+	    {
+	    case 'M':
+	      ipa_action
+		= target_malloc (sizeof (struct collect_memory_action));
+	      write_inferior_memory (ipa_action,
+				     (unsigned char *) action,
+				     sizeof (struct collect_memory_action));
+	      break;
+	    case 'R':
+	      ipa_action
+		= target_malloc (sizeof (struct collect_registers_action));
+	      write_inferior_memory (ipa_action,
+				     (unsigned char *) action,
+				     sizeof (struct collect_registers_action));
+	      break;
+	    case 'X':
+	      {
+		CORE_ADDR expr;
+		struct eval_expr_action *eaction
+		  = (struct eval_expr_action *) action;
+
+		ipa_action = target_malloc (sizeof (*eaction));
+		write_inferior_memory (ipa_action,
+				       (unsigned char *) eaction,
+				       sizeof (*eaction));
+
+		expr = download_agent_expr (eaction->expr);
+		write_inferior_data_ptr
+		  (ipa_action + offsetof (struct eval_expr_action, expr),
+		   expr);
+		break;
+	      }
+	    case 'L':
+	      ipa_action = target_malloc
+		(sizeof (struct collect_static_trace_data_action));
+	      write_inferior_memory
+		(ipa_action,
+		 (unsigned char *) action,
+		 sizeof (struct collect_static_trace_data_action));
+	      break;
+	    default:
+	      trace_debug ("unknown trace action '%c', ignoring",
+			   action->type);
+	      break;
+	    }
+
+	  if (ipa_action != 0)
+	    write_inferior_data_ptr
+	      (actions_array + i * sizeof (sizeof (*tpoint->actions)),
+	       ipa_action);
+	}
+    }
+}
+
 static void
 download_tracepoints (void)
 {
@@ -6336,39 +6472,15 @@ download_tracepoints (void)
 
   for (tpoint = tracepoints; tpoint; tpoint = tpoint->next)
     {
-      struct tracepoint target_tracepoint;
-
       if (tpoint->type != fast_tracepoint
 	  && tpoint->type != static_tracepoint)
 	continue;
 
-      /* Maybe download a compiled condition.  */
-      if (tpoint->cond != NULL && target_emit_ops () != NULL)
-	{
-	  CORE_ADDR jentry, jump_entry;
-
-	  jentry = jump_entry = get_jump_space_head ();
-
-	  if (tpoint->cond != NULL)
-	    {
-	      /* Pad to 8-byte alignment. (needed?)  */
-	      /* Actually this should be left for the target to
-		 decide.  */
-	      jentry = UALIGN (jentry, 8);
-
-	      compile_tracepoint_condition (tpoint, &jentry);
-	    }
-
-	  /* Pad to 8-byte alignment.  */
-	  jentry = UALIGN (jentry, 8);
-	  claim_jump_space (jentry - jump_entry);
-	}
-
-      target_tracepoint = *tpoint;
-
       prev_tpptr = tpptr;
-      tpptr = target_malloc (sizeof (*tpoint));
-      tpoint->obj_addr_on_target = tpptr;
+
+      download_tracepoint_1 (tpoint);
+
+      tpptr = tpoint->obj_addr_on_target;
 
       if (tpoint == tracepoints)
 	{
@@ -6381,94 +6493,6 @@ download_tracepoints (void)
 	  write_inferior_data_ptr (prev_tpptr + offsetof (struct tracepoint,
 							  next),
 				   tpptr);
-	}
-
-      /* Write the whole object.  We'll fix up its pointers in a bit.
-	 Assume no next for now.  This is fixed up above on the next
-	 iteration, if there's any.  */
-      target_tracepoint.next = NULL;
-      /* Need to clear this here too, since we're downloading the
-	 tracepoints before clearing our own copy.  */
-      target_tracepoint.hit_count = 0;
-
-      write_inferior_memory (tpptr, (unsigned char *) &target_tracepoint,
-			     sizeof (target_tracepoint));
-
-      if (tpoint->cond)
-	write_inferior_data_ptr (tpptr + offsetof (struct tracepoint,
-						   cond),
-				 download_agent_expr (tpoint->cond));
-
-      if (tpoint->numactions)
-	{
-	  int i;
-	  CORE_ADDR actions_array;
-
-	  /* The pointers array.  */
-	  actions_array
-	    = target_malloc (sizeof (*tpoint->actions) * tpoint->numactions);
-	  write_inferior_data_ptr (tpptr + offsetof (struct tracepoint,
-						     actions),
-				   actions_array);
-
-	  /* Now for each pointer, download the action.  */
-	  for (i = 0; i < tpoint->numactions; i++)
-	    {
-	      CORE_ADDR ipa_action = 0;
-	      struct tracepoint_action *action = tpoint->actions[i];
-
-	      switch (action->type)
-		{
-		case 'M':
-		  ipa_action
-		    = target_malloc (sizeof (struct collect_memory_action));
-		  write_inferior_memory (ipa_action,
-					 (unsigned char *) action,
-					 sizeof (struct collect_memory_action));
-		  break;
-		case 'R':
-		  ipa_action
-		    = target_malloc (sizeof (struct collect_registers_action));
-		  write_inferior_memory (ipa_action,
-					 (unsigned char *) action,
-					 sizeof (struct collect_registers_action));
-		  break;
-		case 'X':
-		  {
-		    CORE_ADDR expr;
-		    struct eval_expr_action *eaction
-		      = (struct eval_expr_action *) action;
-
-		    ipa_action = target_malloc (sizeof (*eaction));
-		    write_inferior_memory (ipa_action,
-					   (unsigned char *) eaction,
-					   sizeof (*eaction));
-
-		    expr = download_agent_expr (eaction->expr);
-		    write_inferior_data_ptr
-		      (ipa_action + offsetof (struct eval_expr_action, expr),
-		       expr);
-		    break;
-		  }
-		case 'L':
-		  ipa_action = target_malloc
-		    (sizeof (struct collect_static_trace_data_action));
-		  write_inferior_memory
-		    (ipa_action,
-		     (unsigned char *) action,
-		     sizeof (struct collect_static_trace_data_action));
-		  break;
-		default:
-		  trace_debug ("unknown trace action '%c', ignoring",
-			       action->type);
-		  break;
-		}
-
-	      if (ipa_action != 0)
-		write_inferior_data_ptr
-		  (actions_array + i * sizeof (sizeof (*tpoint->actions)),
-		   ipa_action);
-	    }
 	}
     }
 }

@@ -137,6 +137,9 @@ struct fast_tracepoint_jump *set_fast_tracepoint_jump (CORE_ADDR where,
 						       unsigned char *insn,
 						       ULONGEST length);
 
+/* Increment reference counter of JP.  */
+void inc_ref_fast_tracepoint_jump (struct fast_tracepoint_jump *jp);
+
 /* Delete fast tracepoint jump TODEL from our tables, and uninsert if
    from memory.  */
 

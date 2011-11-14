@@ -1,3 +1,13 @@
+2011-11-14  Yao Qi  <yao@codesourcery.com>
+
+	* mem-break.c (inc_ref_fast_tracepoint_jump): New.
+	* mem-break.h: Declare.
+	* tracepoint.c (cmd_qtstart): Move some code to ...
+	(clone_fast_tracepoint, install_fast_tracepoint): ... here.
+	New.
+	(download_tracepoints): Move some code to ...
+	(download_tracepoint_1): ... here.  New.
+
 2011-11-08  Yao Qi  <yao@codesourcery.com>
 
 	* remote-utils.c (relocate_instruction): A comment fix.

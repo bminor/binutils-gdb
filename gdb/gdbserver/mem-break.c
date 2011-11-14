@@ -302,6 +302,12 @@ delete_fast_tracepoint_jump (struct fast_tracepoint_jump *todel)
   return ENOENT;
 }
 
+void
+inc_ref_fast_tracepoint_jump (struct fast_tracepoint_jump *jp)
+{
+  jp->refcount++;
+}
+
 struct fast_tracepoint_jump *
 set_fast_tracepoint_jump (CORE_ADDR where,
 			  unsigned char *insn, ULONGEST length)
