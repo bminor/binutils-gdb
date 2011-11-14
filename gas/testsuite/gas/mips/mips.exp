@@ -749,6 +749,7 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "relax-swap1-mips1"
     run_dump_test "relax-swap1-mips2"
     run_dump_test "relax-swap2"
+    run_dump_test_arches "relax-swap3"	[mips_arch_list_all]
     run_list_test_arches "relax-bposge" "-mdsp -relax-branch" \
 					[mips_arch_list_matching mips64r2 \
 					    !micromips]
