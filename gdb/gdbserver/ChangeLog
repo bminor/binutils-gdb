@@ -1,3 +1,54 @@
+2011-11-14  Stan Shebs  <stan@codesourcery.com>
+	    Kwok Cheung Yeung  <kcy@codesourcery.com>
+
+	* linux-x86-low.c (small_jump_insn): New.
+	(i386_install_fast_tracepoint_jump_pad): Add arguments for
+	trampoline and error message, build a trampoline and issue a small
+	jump instruction to it.
+	(x86_install_fast_tracepoint_jump_pad): Add arguments for
+	trampoline and error message.
+	(x86_get_min_fast_tracepoint_insn_len): New.
+	(the_low_target): Add call to x86_get_min_fast_tracepoint_insn_len.
+	* linux-low.h (struct linux_target_ops): Add arguments to
+	install_fast_tracepoint_jump_pad operation, add new operation.
+	* linux-low.c (linux_install_fast_tracepoint_jump_pad): Add
+	arguments.
+	(linux_get_min_fast_tracepoint_insn_len): New function.
+	(linux_target_op): Add new operation.
+	* tracepoint.c (gdb_trampoline_buffer): New IPA variable.
+	(gdb_trampoline_buffer_end): Ditto.
+	(gdb_trampoline_buffer_error): Ditto.
+	(struct ipa_sym_addresses): Add fields for new IPA variables.
+	(symbol_list): Add entries for new IPA variables.
+	(struct tracepoint): Add fields to hold the address range of the
+	trampoline used by the tracepoint.
+	(trampoline_buffer_head): New static variable.
+	(trampoline_buffer_tail): Ditto.
+	(claim_trampoline_space): New function.
+	(have_fast_tracepoint_trampoline_buffer): New function.
+	(clone_fast_tracepoint): Fill in trampoline fields of tracepoint
+	structure.
+	(install_fast_tracepoint): Ditto, also add error buffer argument.
+	(cmd_qtminftpilen): New function.
+	(handle_tracepoint_query): Add response to qTMinFTPILen packet.
+	(fast_tracepoint_from_trampoline_address): New function.
+	(fast_tracepoint_collecting): Handle trampoline as part of jump
+	pad space.
+	(set_trampoline_buffer_space): New function.
+	(initialize_tracepoint): Initialize new IPA variables.
+	* target.h (struct target_ops): Add arguments to
+	install_fast_tracepoint_jump_pad operation, add new
+	get_min_fast_tracepoint_insn_len operation.
+	(target_get_min_fast_tracepoint_insn_len): New.
+	(install_fast_tracepoint_jump_pad): Add arguments.
+	* server.h (IPA_BUFSIZ): Define.
+	* linux-i386-ipa.c: Include extra header files.
+	(initialize_fast_tracepoint_trampoline_buffer): New function.
+	(initialize_low_tracepoint): Call it.
+	* server.h (set_trampoline_buffer_space): Declare.
+	(claim_trampoline_space): Ditto.
+	(have_fast_tracepoint_trampoline_buffer): Ditto.
+
 2011-11-14  Yao Qi  <yao@codesourcery.com>
 
 	* server.c (handle_query): Handle InstallInTrace for qSupported.

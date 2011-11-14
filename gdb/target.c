@@ -689,6 +689,7 @@ update_current_target (void)
       INHERIT (to_upload_tracepoints, t);
       INHERIT (to_upload_trace_state_variables, t);
       INHERIT (to_get_raw_trace_data, t);
+      INHERIT (to_get_min_fast_tracepoint_insn_len, t);
       INHERIT (to_set_disconnected_tracing, t);
       INHERIT (to_set_circular_trace_buffer, t);
       INHERIT (to_get_tib_address, t);
@@ -893,6 +894,9 @@ update_current_target (void)
   de_fault (to_get_raw_trace_data,
 	    (LONGEST (*) (gdb_byte *, ULONGEST, LONGEST))
 	    tcomplain);
+  de_fault (to_get_min_fast_tracepoint_insn_len,
+	    (int (*) (void))
+	    return_minus_one);
   de_fault (to_set_disconnected_tracing,
 	    (void (*) (int))
 	    target_ignore);

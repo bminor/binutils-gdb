@@ -42,6 +42,7 @@ void init_registers_amd64_avx_linux (void);
 void init_registers_i386_mmx_linux (void);
 
 static unsigned char jump_insn[] = { 0xe9, 0, 0, 0, 0 };
+static unsigned char small_jump_insn[] = { 0x66, 0xe9, 0, 0 };
 
 /* Backward compatibility for gdb without XML support.  */
 
@@ -1182,10 +1183,13 @@ amd64_install_fast_tracepoint_jump_pad (CORE_ADDR tpoint, CORE_ADDR tpaddr,
 					CORE_ADDR lockaddr,
 					ULONGEST orig_size,
 					CORE_ADDR *jump_entry,
+					CORE_ADDR *trampoline,
+					ULONGEST *trampoline_size,
 					unsigned char *jjump_pad_insn,
 					ULONGEST *jjump_pad_insn_size,
 					CORE_ADDR *adjusted_insn_addr,
-					CORE_ADDR *adjusted_insn_addr_end)
+					CORE_ADDR *adjusted_insn_addr_end,
+					char *err)
 {
   unsigned char buf[40];
   int i, offset;
@@ -1346,10 +1350,13 @@ i386_install_fast_tracepoint_jump_pad (CORE_ADDR tpoint, CORE_ADDR tpaddr,
 				       CORE_ADDR lockaddr,
 				       ULONGEST orig_size,
 				       CORE_ADDR *jump_entry,
+				       CORE_ADDR *trampoline,
+				       ULONGEST *trampoline_size,
 				       unsigned char *jjump_pad_insn,
 				       ULONGEST *jjump_pad_insn_size,
 				       CORE_ADDR *adjusted_insn_addr,
-				       CORE_ADDR *adjusted_insn_addr_end)
+				       CORE_ADDR *adjusted_insn_addr_end,
+				       char *err)
 {
   unsigned char buf[0x100];
   int i, offset;
@@ -1455,7 +1462,7 @@ i386_install_fast_tracepoint_jump_pad (CORE_ADDR tpoint, CORE_ADDR tpaddr,
   buf[i++] = 0x0f; /* pop %fs */
   buf[i++] = 0xa1;
   buf[i++] = 0x07; /* pop %es */
-  buf[i++] = 0x1f; /* pop %de */
+  buf[i++] = 0x1f; /* pop %ds */
   buf[i++] = 0x9d; /* popf */
   buf[i++] = 0x83; /* add $0x4,%esp (pop of tpaddr aka $pc) */
   buf[i++] = 0xc4;
@@ -1479,11 +1486,40 @@ i386_install_fast_tracepoint_jump_pad (CORE_ADDR tpoint, CORE_ADDR tpaddr,
      is always done last (by our caller actually), so that we can
      install fast tracepoints with threads running.  This relies on
      the agent's atomic write support.  */
-  offset = *jump_entry - (tpaddr + sizeof (jump_insn));
-  memcpy (buf, jump_insn, sizeof (jump_insn));
-  memcpy (buf + 1, &offset, 4);
-  memcpy (jjump_pad_insn, buf, sizeof (jump_insn));
-  *jjump_pad_insn_size = sizeof (jump_insn);
+  if (orig_size == 4)
+    {
+      /* Create a trampoline.  */
+      *trampoline_size = sizeof (jump_insn);
+      if (!claim_trampoline_space (*trampoline_size, trampoline))
+	{
+	  /* No trampoline space available.  */
+	  strcpy (err,
+		  "E.Cannot allocate trampoline space needed for fast "
+		  "tracepoints on 4-byte instructions.");
+	  return 1;
+	}
+
+      offset = *jump_entry - (*trampoline + sizeof (jump_insn));
+      memcpy (buf, jump_insn, sizeof (jump_insn));
+      memcpy (buf + 1, &offset, 4);
+      write_inferior_memory (*trampoline, buf, sizeof (jump_insn));
+
+      /* Use a 16-bit relative jump instruction to jump to the trampoline.  */
+      offset = (*trampoline - (tpaddr + sizeof (small_jump_insn))) & 0xffff;
+      memcpy (buf, small_jump_insn, sizeof (small_jump_insn));
+      memcpy (buf + 2, &offset, 2);
+      memcpy (jjump_pad_insn, buf, sizeof (small_jump_insn));
+      *jjump_pad_insn_size = sizeof (small_jump_insn);
+    }
+  else
+    {
+      /* Else use a 32-bit relative jump instruction.  */
+      offset = *jump_entry - (tpaddr + sizeof (jump_insn));
+      memcpy (buf, jump_insn, sizeof (jump_insn));
+      memcpy (buf + 1, &offset, 4);
+      memcpy (jjump_pad_insn, buf, sizeof (jump_insn));
+      *jjump_pad_insn_size = sizeof (jump_insn);
+    }
 
   /* Return the end address of our pad.  */
   *jump_entry = buildaddr;
@@ -1497,29 +1533,83 @@ x86_install_fast_tracepoint_jump_pad (CORE_ADDR tpoint, CORE_ADDR tpaddr,
 				      CORE_ADDR lockaddr,
 				      ULONGEST orig_size,
 				      CORE_ADDR *jump_entry,
+				      CORE_ADDR *trampoline,
+				      ULONGEST *trampoline_size,
 				      unsigned char *jjump_pad_insn,
 				      ULONGEST *jjump_pad_insn_size,
 				      CORE_ADDR *adjusted_insn_addr,
-				      CORE_ADDR *adjusted_insn_addr_end)
+				      CORE_ADDR *adjusted_insn_addr_end,
+				      char *err)
 {
 #ifdef __x86_64__
   if (register_size (0) == 8)
     return amd64_install_fast_tracepoint_jump_pad (tpoint, tpaddr,
 						   collector, lockaddr,
 						   orig_size, jump_entry,
+						   trampoline, trampoline_size,
 						   jjump_pad_insn,
 						   jjump_pad_insn_size,
 						   adjusted_insn_addr,
-						   adjusted_insn_addr_end);
+						   adjusted_insn_addr_end,
+						   err);
 #endif
 
   return i386_install_fast_tracepoint_jump_pad (tpoint, tpaddr,
 						collector, lockaddr,
 						orig_size, jump_entry,
+						trampoline, trampoline_size,
 						jjump_pad_insn,
 						jjump_pad_insn_size,
 						adjusted_insn_addr,
-						adjusted_insn_addr_end);
+						adjusted_insn_addr_end,
+						err);
+}
+
+/* Return the minimum instruction length for fast tracepoints on x86/x86-64
+   architectures.  */
+
+static int
+x86_get_min_fast_tracepoint_insn_len (void)
+{
+  static int warned_about_fast_tracepoints = 0;
+
+#ifdef __x86_64__
+  /*  On x86-64, 5-byte jump instructions with a 4-byte offset are always
+      used for fast tracepoints.  */
+  if (register_size (0) == 8)
+    return 5;
+#endif
+
+  if (in_process_agent_loaded ())
+    {
+      char errbuf[IPA_BUFSIZ];
+
+      errbuf[0] = '\0';
+
+      /* On x86, if trampolines are available, then 4-byte jump instructions
+	 with a 2-byte offset may be used, otherwise 5-byte jump instructions
+	 with a 4-byte offset are used instead.  */
+      if (have_fast_tracepoint_trampoline_buffer (errbuf))
+	return 4;
+      else
+	{
+	  /* GDB has no channel to explain to user why a shorter fast
+	     tracepoint is not possible, but at least make GDBserver
+	     mention that something has gone awry.  */
+	  if (!warned_about_fast_tracepoints)
+	    {
+	      warning ("4-byte fast tracepoints not available; %s\n", errbuf);
+	      warned_about_fast_tracepoints = 1;
+	    }
+	  return 5;
+	}
+    }
+  else
+    {
+      /* Indicate that the minimum length is currently unknown since the IPA
+	 has not loaded yet.  */
+      return 0;
+    }
 }
 
 static void
@@ -2873,5 +2963,6 @@ struct linux_target_ops the_low_target =
   x86_supports_tracepoints,
   x86_get_thread_area,
   x86_install_fast_tracepoint_jump_pad,
-  x86_emit_ops
+  x86_emit_ops,
+  x86_get_min_fast_tracepoint_insn_len,
 };

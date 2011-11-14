@@ -1,3 +1,17 @@
+2011-11-14  Stan Shebs  <stan@codesourcery.com>
+	    Kwok Cheung Yeung  <kcy@codesourcery.com>
+
+	* NEWS: Document shorter fast tracepoints and qTMinFTPILen packet.
+	* i386-tdep.c (i386_fast_tracepoint_valid_at): Query target for
+	the minimum instruction size for fast tracepoints.
+	* target.h (struct target_ops): Add new method
+	to_get_min_fast_tracepoint_insn_len.
+	(target_get_min_fast_tracepoint_insn_len): New.
+	* target.c (update_current_target): Set up new target operation.
+	* remote.c (remote_write_bytes_aux): Fix typo.
+	(remote_get_min_fast_tracepoint_insn_len): New.
+	(init_remote_ops): Initialize new field.
+
 2011-11-14  Tom Tromey  <tromey@redhat.com>
 
 	* tracepoint.c (encode_actions_1): Use the location's gdbarch.

@@ -4933,15 +4933,20 @@ linux_install_fast_tracepoint_jump_pad (CORE_ADDR tpoint, CORE_ADDR tpaddr,
 					CORE_ADDR lockaddr,
 					ULONGEST orig_size,
 					CORE_ADDR *jump_entry,
+					CORE_ADDR *trampoline,
+					ULONGEST *trampoline_size,
 					unsigned char *jjump_pad_insn,
 					ULONGEST *jjump_pad_insn_size,
 					CORE_ADDR *adjusted_insn_addr,
-					CORE_ADDR *adjusted_insn_addr_end)
+					CORE_ADDR *adjusted_insn_addr_end,
+					char *err)
 {
   return (*the_low_target.install_fast_tracepoint_jump_pad)
     (tpoint, tpaddr, collector, lockaddr, orig_size,
-     jump_entry, jjump_pad_insn, jjump_pad_insn_size,
-     adjusted_insn_addr, adjusted_insn_addr_end);
+     jump_entry, trampoline, trampoline_size,
+     jjump_pad_insn, jjump_pad_insn_size,
+     adjusted_insn_addr, adjusted_insn_addr_end,
+     err);
 }
 
 static struct emit_ops *
@@ -4951,6 +4956,12 @@ linux_emit_ops (void)
     return (*the_low_target.emit_ops) ();
   else
     return NULL;
+}
+
+static int
+linux_get_min_fast_tracepoint_insn_len (void)
+{
+  return (*the_low_target.get_min_fast_tracepoint_insn_len) ();
 }
 
 static struct target_ops linux_target_ops = {
@@ -5014,6 +5025,7 @@ static struct target_ops linux_target_ops = {
   linux_install_fast_tracepoint_jump_pad,
   linux_emit_ops,
   linux_supports_disable_randomization,
+  linux_get_min_fast_tracepoint_insn_len,
 };
 
 static void

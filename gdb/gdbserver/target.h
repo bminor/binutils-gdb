@@ -359,20 +359,26 @@ struct target_ops
      pad lock object.  ORIG_SIZE is the size in bytes of the
      instruction at TPADDR.  JUMP_ENTRY points to the address of the
      jump pad entry, and on return holds the address past the end of
-     the created jump pad. JJUMP_PAD_INSN is a buffer containing a
-     copy of the instruction at TPADDR.  ADJUST_INSN_ADDR and
-     ADJUST_INSN_ADDR_END are output parameters that return the
-     address range where the instruction at TPADDR was relocated
-     to.  */
+     the created jump pad.  If a trampoline is created by the function,
+     then TRAMPOLINE and TRAMPOLINE_SIZE return the address and size of
+     the trampoline, else they remain unchanged.  JJUMP_PAD_INSN is a
+     buffer containing a copy of the instruction at TPADDR.
+     ADJUST_INSN_ADDR and ADJUST_INSN_ADDR_END are output parameters that
+     return the address range where the instruction at TPADDR was relocated
+     to.  If an error occurs, the ERR may be used to pass on an error
+     message.  */
   int (*install_fast_tracepoint_jump_pad) (CORE_ADDR tpoint, CORE_ADDR tpaddr,
 					   CORE_ADDR collector,
 					   CORE_ADDR lockaddr,
 					   ULONGEST orig_size,
 					   CORE_ADDR *jump_entry,
+					   CORE_ADDR *trampoline,
+					   ULONGEST *trampoline_size,
 					   unsigned char *jjump_pad_insn,
 					   ULONGEST *jjump_pad_insn_size,
 					   CORE_ADDR *adjusted_insn_addr,
-					   CORE_ADDR *adjusted_insn_addr_end);
+					   CORE_ADDR *adjusted_insn_addr_end,
+					   char *err);
 
   /* Return the bytecode operations vector for the current inferior.
      Returns NULL if bytecode compilation is not supported.  */
@@ -380,6 +386,10 @@ struct target_ops
 
   /* Returns true if the target supports disabling randomization.  */
   int (*supports_disable_randomization) (void);
+
+  /* Return the minimum length of an instruction that can be safely overwritten
+     for use as a fast tracepoint.  */
+  int (*get_min_fast_tracepoint_insn_len) (void);
 };
 
 extern struct target_ops *the_target;
@@ -437,6 +447,10 @@ void set_target_ops (struct target_ops *);
 #define target_supports_fast_tracepoints()		\
   (the_target->install_fast_tracepoint_jump_pad != NULL)
 
+#define target_get_min_fast_tracepoint_insn_len()	\
+  (the_target->get_min_fast_tracepoint_insn_len		\
+   ? (*the_target->get_min_fast_tracepoint_insn_len) () : 0)
+
 #define thread_stopped(thread) \
   (*the_target->thread_stopped) (thread)
 
@@ -471,17 +485,23 @@ void set_target_ops (struct target_ops *);
 #define install_fast_tracepoint_jump_pad(tpoint, tpaddr,		\
 					 collector, lockaddr,		\
 					 orig_size,			\
-					 jump_entry, jjump_pad_insn,	\
+					 jump_entry,			\
+					 trampoline, trampoline_size,	\
+					 jjump_pad_insn,		\
 					 jjump_pad_insn_size,		\
 					 adjusted_insn_addr,		\
-					 adjusted_insn_addr_end)	\
+					 adjusted_insn_addr_end,	\
+					 err)				\
   (*the_target->install_fast_tracepoint_jump_pad) (tpoint, tpaddr,	\
 						   collector,lockaddr,	\
 						   orig_size, jump_entry, \
+						   trampoline,		\
+						   trampoline_size,	\
 						   jjump_pad_insn,	\
 						   jjump_pad_insn_size, \
 						   adjusted_insn_addr,	\
-						   adjusted_insn_addr_end)
+						   adjusted_insn_addr_end, \
+						   err)
 
 #define target_emit_ops() \
   (the_target->emit_ops ? (*the_target->emit_ops) () : NULL)

@@ -134,6 +134,10 @@ collect[/s] EXPRESSIONS
   begin, assuming that tracepoints will be enabled as needed while the trace
   is running.
 
+* Fast tracepoints on 32-bit x86-architectures can now be placed at
+  locations with 4-byte instructions, when they were previously
+  limited to locations with instructions of 5 bytes or longer.
+
 * New options
 
 set extended-prompt
@@ -164,6 +168,11 @@ QTEnable
 QTDisable
 
   Dynamically disable a tracepoint in a started trace experiment.
+
+qTMinFTPILen
+
+  Query the minimum length of instruction at which a fast tracepoint may
+  be placed.
 
 * Dcache size (number of lines) and line-size are now runtime-configurable
   via "set dcache line" and "set dcache line-size" commands.

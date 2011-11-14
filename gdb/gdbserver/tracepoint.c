@@ -110,6 +110,9 @@ trace_vdebug (const char *fmt, ...)
 # define gdb_tp_heap_buffer gdb_agent_gdb_tp_heap_buffer
 # define gdb_jump_pad_buffer gdb_agent_gdb_jump_pad_buffer
 # define gdb_jump_pad_buffer_end gdb_agent_gdb_jump_pad_buffer_end
+# define gdb_trampoline_buffer gdb_agent_gdb_trampoline_buffer
+# define gdb_trampoline_buffer_end gdb_agent_gdb_trampoline_buffer_end
+# define gdb_trampoline_buffer_error gdb_agent_gdb_trampoline_buffer_error
 # define collecting gdb_agent_collecting
 # define gdb_collect gdb_agent_gdb_collect
 # define stop_tracing gdb_agent_stop_tracing
@@ -148,6 +151,9 @@ struct ipa_sym_addresses
   CORE_ADDR addr_gdb_tp_heap_buffer;
   CORE_ADDR addr_gdb_jump_pad_buffer;
   CORE_ADDR addr_gdb_jump_pad_buffer_end;
+  CORE_ADDR addr_gdb_trampoline_buffer;
+  CORE_ADDR addr_gdb_trampoline_buffer_end;
+  CORE_ADDR addr_gdb_trampoline_buffer_error;
   CORE_ADDR addr_collecting;
   CORE_ADDR addr_gdb_collect;
   CORE_ADDR addr_stop_tracing;
@@ -192,6 +198,9 @@ static struct
   IPA_SYM(gdb_tp_heap_buffer),
   IPA_SYM(gdb_jump_pad_buffer),
   IPA_SYM(gdb_jump_pad_buffer_end),
+  IPA_SYM(gdb_trampoline_buffer),
+  IPA_SYM(gdb_trampoline_buffer_end),
+  IPA_SYM(gdb_trampoline_buffer_error),
   IPA_SYM(collecting),
   IPA_SYM(gdb_collect),
   IPA_SYM(stop_tracing),
@@ -657,6 +666,12 @@ struct tracepoint
      past the end).*/
   CORE_ADDR jump_pad;
   CORE_ADDR jump_pad_end;
+
+  /* The address range of the piece of the trampoline buffer that was
+     assigned to this fast tracepoint.  (_end is actually one byte
+     past the end).  */
+  CORE_ADDR trampoline;
+  CORE_ADDR trampoline_end;
 
   /* The list of actions to take while in a stepping loop.  These
      fields are only valid for patch-based tracepoints.  */
@@ -1248,7 +1263,7 @@ static struct tracepoint *fast_tracepoint_from_ipa_tpoint_address (CORE_ADDR);
 
 static void install_tracepoint (struct tracepoint *, char *own_buf);
 static void download_tracepoint (struct tracepoint *);
-static int install_fast_tracepoint (struct tracepoint *);
+static int install_fast_tracepoint (struct tracepoint *, char *errbuf);
 #endif
 
 #if defined(__GNUC__)
@@ -2711,6 +2726,85 @@ claim_jump_space (ULONGEST used)
   gdb_jump_pad_head += used;
 }
 
+static CORE_ADDR trampoline_buffer_head = 0;
+static CORE_ADDR trampoline_buffer_tail;
+
+/* Reserve USED bytes from the trampoline buffer and return the
+   address of the start of the reserved space in TRAMPOLINE.  Returns
+   non-zero if the space is successfully claimed.  */
+
+int
+claim_trampoline_space (ULONGEST used, CORE_ADDR *trampoline)
+{
+  if (!trampoline_buffer_head)
+    {
+      if (read_inferior_data_pointer (ipa_sym_addrs.addr_gdb_trampoline_buffer,
+				      &trampoline_buffer_tail))
+	{
+	  fatal ("error extracting trampoline_buffer");
+	  return 0;
+	}
+
+      if (read_inferior_data_pointer (ipa_sym_addrs.addr_gdb_trampoline_buffer_end,
+				      &trampoline_buffer_head))
+	{
+	  fatal ("error extracting trampoline_buffer_end");
+	  return 0;
+	}
+    }
+
+  /* Start claiming space from the top of the trampoline space.  If
+     the space is located at the bottom of the virtual address space,
+     this reduces the possibility that corruption will occur if a null
+     pointer is used to write to memory.  */
+  if (trampoline_buffer_head - trampoline_buffer_tail < used)
+    {
+      trace_debug ("claim_trampoline_space failed to reserve %s bytes",
+		   pulongest (used));
+      return 0;
+    }
+
+  trampoline_buffer_head -= used;
+
+  trace_debug ("claim_trampoline_space reserves %s bytes at %s",
+	       pulongest (used), paddress (trampoline_buffer_head));
+
+  *trampoline = trampoline_buffer_head;
+  return 1;
+}
+
+/* Returns non-zero if there is space allocated for use in trampolines
+   for fast tracepoints.  */
+
+int
+have_fast_tracepoint_trampoline_buffer (char *buf)
+{
+  CORE_ADDR trampoline_end, errbuf;
+
+  if (read_inferior_data_pointer (ipa_sym_addrs.addr_gdb_trampoline_buffer_end,
+				  &trampoline_end))
+    {
+      fatal ("error extracting trampoline_buffer_end");
+      return 0;
+    }
+  
+  if (buf)
+    {
+      buf[0] = '\0';
+      strcpy (buf, "was claiming");
+      if (read_inferior_data_pointer (ipa_sym_addrs.addr_gdb_trampoline_buffer_error,
+				  &errbuf))
+	{
+	  fatal ("error extracting errbuf");
+	  return 0;
+	}
+
+      read_inferior_memory (errbuf, (unsigned char *) buf, 100);
+    }
+
+  return trampoline_end != 0;
+}
+
 /* Ask the IPA to probe the marker at ADDRESS.  Returns -1 if running
    the command fails, or 0 otherwise.  If the command ran
    successfully, but probing the marker failed, ERROUT will be filled
@@ -2743,6 +2837,8 @@ clone_fast_tracepoint (struct tracepoint *to, const struct tracepoint *from)
 {
   to->jump_pad = from->jump_pad;
   to->jump_pad_end = from->jump_pad_end;
+  to->trampoline = from->trampoline;
+  to->trampoline_end = from->trampoline_end;
   to->adjusted_insn_addr = from->adjusted_insn_addr;
   to->adjusted_insn_addr_end = from->adjusted_insn_addr_end;
   to->handle = from->handle;
@@ -2757,16 +2853,28 @@ clone_fast_tracepoint (struct tracepoint *to, const struct tracepoint *from)
    non-zero.  */
 
 static int
-install_fast_tracepoint (struct tracepoint *tpoint)
+install_fast_tracepoint (struct tracepoint *tpoint, char *errbuf)
 {
   CORE_ADDR jentry, jump_entry;
+  CORE_ADDR trampoline;
+  ULONGEST trampoline_size;
   int err = 0;
   /* The jump to the jump pad of the last fast tracepoint
      installed.  */
   unsigned char fjump[MAX_JUMP_SIZE];
   ULONGEST fjump_size;
 
+  if (tpoint->orig_size < target_get_min_fast_tracepoint_insn_len ())
+    {
+      trace_debug ("Requested a fast tracepoint on an instruction "
+		   "that is of less than the minimum length.");
+      return 0;
+    }
+
   jentry = jump_entry = get_jump_space_head ();
+
+  trampoline = 0;
+  trampoline_size = 0;
 
   /* Install the jump pad.  */
   err = install_fast_tracepoint_jump_pad (tpoint->obj_addr_on_target,
@@ -2774,9 +2882,12 @@ install_fast_tracepoint (struct tracepoint *tpoint)
 					  ipa_sym_addrs.addr_gdb_collect,
 					  ipa_sym_addrs.addr_collecting,
 					  tpoint->orig_size,
-					  &jentry, fjump, &fjump_size,
+					  &jentry,
+					  &trampoline, &trampoline_size,
+					  fjump, &fjump_size,
 					  &tpoint->adjusted_insn_addr,
-					  &tpoint->adjusted_insn_addr_end);
+					  &tpoint->adjusted_insn_addr_end,
+					  errbuf);
 
   if (err)
     return 1;
@@ -2789,6 +2900,8 @@ install_fast_tracepoint (struct tracepoint *tpoint)
     {
       tpoint->jump_pad = jump_entry;
       tpoint->jump_pad_end = jentry;
+      tpoint->trampoline = trampoline;
+      tpoint->trampoline_end = trampoline + trampoline_size;
 
       /* Pad to 8-byte alignment.  */
       jentry = ((jentry + 7) & ~0x7);
@@ -2849,7 +2962,7 @@ install_tracepoint (struct tracepoint *tpoint, char *own_buf)
 	  if (tp) /* TPOINT is installed at the same address as TP.  */
 	    clone_fast_tracepoint (tpoint, tp);
 	  else
-	    install_fast_tracepoint (tpoint);
+	    install_fast_tracepoint (tpoint, own_buf);
 	}
       else
 	{
@@ -2937,9 +3050,8 @@ cmd_qtstart (char *packet)
 	    clone_fast_tracepoint (tpoint, prev_ftpoint);
 	  else
 	    {
-	      if (install_fast_tracepoint (tpoint) == 0)
+	      if (install_fast_tracepoint (tpoint, packet) == 0)
 		prev_ftpoint = tpoint;
-
 	    }
 	}
       else if (tpoint->type == static_tracepoint)
@@ -3514,6 +3626,15 @@ cmd_qtstmat (char *packet)
     run_inferior_command (packet);
 }
 
+/* Return the minimum instruction size needed for fast tracepoints as a
+   hexadecimal number.  */
+
+static void
+cmd_qtminftpilen (char *packet)
+{
+  sprintf (packet, "%x", target_get_min_fast_tracepoint_insn_len ());
+}
+
 /* Respond to qTBuffer packet with a block of raw data from the trace
    buffer.  GDB may ask for a lot, but we are allowed to reply with
    only as much as will fit within packet limits or whatever.  */
@@ -3708,6 +3829,11 @@ handle_tracepoint_query (char *packet)
   else if (strncmp ("qTSTMat:", packet, strlen ("qTSTMat:")) == 0)
     {
       cmd_qtstmat (packet);
+      return 1;
+    }
+  else if (strcmp ("qTMinFTPILen", packet) == 0)
+    {
+      cmd_qtminftpilen (packet);
       return 1;
     }
 
@@ -5326,6 +5452,23 @@ fast_tracepoint_from_jump_pad_address (CORE_ADDR pc)
   return NULL;
 }
 
+/* Return the first fast tracepoint whose trampoline contains PC.  */
+
+static struct tracepoint *
+fast_tracepoint_from_trampoline_address (CORE_ADDR pc)
+{
+  struct tracepoint *tpoint;
+
+  for (tpoint = tracepoints; tpoint; tpoint = tpoint->next)
+    {
+      if (tpoint->type == fast_tracepoint
+	  && tpoint->trampoline <= pc && pc < tpoint->trampoline_end)
+	return tpoint;
+    }
+
+  return NULL;
+}
+
 /* Return GDBserver's tracepoint that matches the IP Agent's
    tracepoint object that lives at IPA_TPOINT_OBJ in the IP Agent's
    address space.  */
@@ -5388,6 +5531,8 @@ fast_tracepoint_collecting (CORE_ADDR thread_area,
 {
   CORE_ADDR ipa_collecting;
   CORE_ADDR ipa_gdb_jump_pad_buffer, ipa_gdb_jump_pad_buffer_end;
+  CORE_ADDR ipa_gdb_trampoline_buffer;
+  CORE_ADDR ipa_gdb_trampoline_buffer_end;
   struct tracepoint *tpoint;
   int needs_breakpoint;
 
@@ -5426,6 +5571,13 @@ fast_tracepoint_collecting (CORE_ADDR thread_area,
 				  &ipa_gdb_jump_pad_buffer_end))
     fatal ("error extracting `gdb_jump_pad_buffer_end'");
 
+  if (read_inferior_data_pointer (ipa_sym_addrs.addr_gdb_trampoline_buffer,
+				  &ipa_gdb_trampoline_buffer))
+    fatal ("error extracting `gdb_trampoline_buffer'");
+  if (read_inferior_data_pointer (ipa_sym_addrs.addr_gdb_trampoline_buffer_end,
+				  &ipa_gdb_trampoline_buffer_end))
+    fatal ("error extracting `gdb_trampoline_buffer_end'");
+
   if (ipa_gdb_jump_pad_buffer <= stop_pc
       && stop_pc < ipa_gdb_jump_pad_buffer_end)
     {
@@ -5453,6 +5605,30 @@ fast_tracepoint_collecting (CORE_ADDR thread_area,
       if (tpoint->jump_pad <= stop_pc
 	  && stop_pc < tpoint->adjusted_insn_addr)
 	needs_breakpoint =  1;
+    }
+  else if (ipa_gdb_trampoline_buffer <= stop_pc
+	   && stop_pc < ipa_gdb_trampoline_buffer_end)
+    {
+      /* We can tell which tracepoint(s) the thread is collecting by
+	 matching the trampoline address back to the tracepoint.  */
+      tpoint = fast_tracepoint_from_trampoline_address (stop_pc);
+      if (tpoint == NULL)
+	{
+	  warning ("in trampoline, but no matching tpoint?");
+	  return 0;
+	}
+      else
+	{
+	  trace_debug ("in trampoline of tpoint (%d, %s); trampoline(%s, %s)",
+		       tpoint->number, paddress (tpoint->address),
+		       paddress (tpoint->trampoline),
+		       paddress (tpoint->trampoline_end));
+	}
+
+      /* Have not reached jump pad yet, but treat the trampoline as a
+	 part of the jump pad that is before the adjusted original
+	 instruction.  */
+      needs_breakpoint = 1;
     }
   else
     {
@@ -7842,6 +8018,24 @@ gdb_ust_init (void)
 IP_AGENT_EXPORT char *gdb_tp_heap_buffer;
 IP_AGENT_EXPORT char *gdb_jump_pad_buffer;
 IP_AGENT_EXPORT char *gdb_jump_pad_buffer_end;
+IP_AGENT_EXPORT char *gdb_trampoline_buffer;
+IP_AGENT_EXPORT char *gdb_trampoline_buffer_end;
+IP_AGENT_EXPORT char *gdb_trampoline_buffer_error;
+
+/* Record the result of getting buffer space for fast tracepoint
+   trampolines.  Any error message is copied, since caller may not be
+   using persistent storage.  */
+
+void
+set_trampoline_buffer_space (CORE_ADDR begin, CORE_ADDR end, char *errmsg)
+{
+  gdb_trampoline_buffer = (char *) (uintptr_t) begin;
+  gdb_trampoline_buffer_end = (char *) (uintptr_t) end;
+  if (errmsg)
+    strncpy (gdb_trampoline_buffer_error, errmsg, 99);
+  else
+    strcpy (gdb_trampoline_buffer_error, "no buffer passed");
+}
 
 static void __attribute__ ((constructor))
 initialize_tracepoint_ftlib (void)
@@ -7902,6 +8096,16 @@ initialize_tracepoint (void)
 initialize_tracepoint: mprotect(%p, %d, PROT_READ|PROT_EXEC) failed with %s",
 	     gdb_jump_pad_buffer, pagesize * 20, strerror (errno));
   }
+
+  gdb_trampoline_buffer = gdb_trampoline_buffer_end = 0;
+
+  /* It's not a fatal error for something to go wrong with trampoline
+     buffer setup, but it can be mysterious, so create a channel to
+     report back on what went wrong, using a fixed size since we may
+     not be able to allocate space later when the problem occurs.  */
+  gdb_trampoline_buffer_error = xmalloc (IPA_BUFSIZ);
+
+  strcpy (gdb_trampoline_buffer_error, "No errors reported");
 
   initialize_low_tracepoint ();
 #endif

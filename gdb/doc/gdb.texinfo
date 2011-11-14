@@ -10378,6 +10378,23 @@ message.
 @value{GDBN} handles arguments to @code{ftrace} exactly as for
 @code{trace}.
 
+On 32-bit x86-architecture systems, fast tracepoints normally need to
+be placed at an instruction that is 5 bytes or longer, but can be
+placed at 4-byte instructions if the low 64K of memory of the target
+program is available to install trampolines.  Some Unix-type systems,
+such as @sc{gnu}/Linux, exclude low addresses from the program's
+address space; but for instance with the Linux kernel it is possible
+to let @value{GDBN} use this area by doing a @command{sysctl} command
+to set the @code{mmap_min_addr} kernel parameter, as in
+
+@example
+sudo sysctl -w vm.mmap_min_addr=32768
+@end example
+
+@noindent
+which sets the low address to 32K, which leaves plenty of room for
+trampolines.  The minimum address should be set to a page boundary.
+
 @item strace @var{location} [ if @var{cond} ]
 @cindex set static tracepoint
 @cindex static tracepoints, setting
@@ -34915,6 +34932,8 @@ encoded).  @value{GDBN} will continue to supply the values of symbols
 @itemx qTfP
 @itemx qTfV
 @itemx QTFrame
+@itemx qTMinFTPILen
+
 @xref{Tracepoint Packets}.
 
 @item qThreadExtraInfo,@var{thread-id}
@@ -35437,6 +35456,30 @@ numbers.
 @item QTFrame:outside:@var{start}:@var{end}
 Like @samp{QTFrame:range:@var{start}:@var{end}}, but select the first
 frame @emph{outside} the given range of addresses (exclusive).
+
+@item qTMinFTPILen
+This packet requests the minimum length of instruction at which a fast
+tracepoint (@pxref{Set Tracepoints}) may be placed.  For instance, on
+the 32-bit x86 architecture, it is possible to use a 4-byte jump, but
+it depends on the target system being able to create trampolines in
+the first 64K of memory, which might or might not be possible for that
+system.  So the reply to this packet will be 4 if it is able to
+arrange for that.
+
+Replies:
+
+@table @samp
+@item 0
+The minimum instruction length is currently unknown.
+@item @var{length}
+The minimum instruction length is @var{length}, where @var{length} is greater
+or equal to 1.  @var{length} is a hexadecimal number.  A reply of 1 means
+that a fast tracepoint may be placed on any instruction regardless of size.
+@item E
+An error has occurred.
+@item
+An empty reply indicates that the request is not supported by the stub.
+@end table
 
 @item QTStart
 Begin the tracepoint experiment.  Begin collecting data from

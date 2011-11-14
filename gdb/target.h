@@ -738,6 +738,12 @@ struct target_ops
     LONGEST (*to_get_raw_trace_data) (gdb_byte *buf,
 				      ULONGEST offset, LONGEST len);
 
+    /* Get the minimum length of instruction on which a fast tracepoint
+       may be set on the target.  If this operation is unsupported,
+       return -1.  If for some reason the minimum length cannot be
+       determined, return 0.  */
+    int (*to_get_min_fast_tracepoint_insn_len) (void);
+
     /* Set the target's tracing behavior in response to unexpected
        disconnection - set VAL to 1 to keep tracing, 0 to stop.  */
     void (*to_set_disconnected_tracing) (int val);
@@ -1522,6 +1528,9 @@ extern int target_search_memory (CORE_ADDR start_addr,
 
 #define target_get_raw_trace_data(buf,offset,len) \
   (*current_target.to_get_raw_trace_data) ((buf), (offset), (len))
+
+#define target_get_min_fast_tracepoint_insn_len() \
+  (*current_target.to_get_min_fast_tracepoint_insn_len) ()
 
 #define target_set_disconnected_tracing(val) \
   (*current_target.to_set_disconnected_tracing) (val)

@@ -6370,7 +6370,7 @@ remote_write_bytes_aux (const char *header, CORE_ADDR memaddr,
 
   if (todo <= 0)
     internal_error (__FILE__, __LINE__,
-		    _("minumum packet size too small to write data"));
+		    _("minimum packet size too small to write data"));
 
   /* If we already need another packet, then try to align the end
      of this packet to a useful boundary.  */
@@ -10451,6 +10451,32 @@ remote_traceframe_info (void)
   return NULL;
 }
 
+/* Handle the qTMinFTPILen packet.  Returns the minimum length of
+   instruction on which a fast tracepoint may be placed.  Returns -1
+   if the packet is not supported, and 0 if the minimum instruction
+   length is unknown.  */
+
+static int
+remote_get_min_fast_tracepoint_insn_len (void)
+{
+  struct remote_state *rs = get_remote_state ();
+  char *reply;
+
+  sprintf (rs->buf, "qTMinFTPILen");
+  putpkt (rs->buf);
+  reply = remote_get_noisy_reply (&target_buf, &target_buf_size);
+  if (*reply == '\0')
+    return -1;
+  else
+    {
+      ULONGEST min_insn_len;
+
+      unpack_varlen_hex (reply, &min_insn_len);
+
+      return (int) min_insn_len;
+    }
+}
+
 static void
 init_remote_ops (void)
 {
@@ -10540,6 +10566,7 @@ Specify the serial device it is connected to\n\
   remote_ops.to_upload_trace_state_variables
     = remote_upload_trace_state_variables;
   remote_ops.to_get_raw_trace_data = remote_get_raw_trace_data;
+  remote_ops.to_get_min_fast_tracepoint_insn_len = remote_get_min_fast_tracepoint_insn_len;
   remote_ops.to_set_disconnected_tracing = remote_set_disconnected_tracing;
   remote_ops.to_set_circular_trace_buffer = remote_set_circular_trace_buffer;
   remote_ops.to_core_of_thread = remote_core_of_thread;
