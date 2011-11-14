@@ -1370,14 +1370,14 @@ encode_actions_1 (struct command_line *action,
 
 	      if (0 == strncasecmp ("$reg", action_exp, 4))
 		{
-		  for (i = 0; i < gdbarch_num_regs (t->gdbarch); i++)
+		  for (i = 0; i < gdbarch_num_regs (tloc->gdbarch); i++)
 		    add_register (collect, i);
 		  action_exp = strchr (action_exp, ',');	/* more? */
 		}
 	      else if (0 == strncasecmp ("$arg", action_exp, 4))
 		{
 		  add_local_symbols (collect,
-				     t->gdbarch,
+				     tloc->gdbarch,
 				     tloc->address,
 				     frame_reg,
 				     frame_offset,
@@ -1387,7 +1387,7 @@ encode_actions_1 (struct command_line *action,
 	      else if (0 == strncasecmp ("$loc", action_exp, 4))
 		{
 		  add_local_symbols (collect,
-				     t->gdbarch,
+				     tloc->gdbarch,
 				     tloc->address,
 				     frame_reg,
 				     frame_offset,
@@ -1399,7 +1399,7 @@ encode_actions_1 (struct command_line *action,
 		  struct cleanup *old_chain1 = NULL;
 
 		  aexpr = gen_trace_for_return_address (tloc->address,
-							t->gdbarch);
+							tloc->gdbarch);
 
 		  old_chain1 = make_cleanup_free_agent_expr (aexpr);
 
@@ -1452,7 +1452,7 @@ encode_actions_1 (struct command_line *action,
 		      {
 			const char *name = &exp->elts[2].string;
 
-			i = user_reg_map_name_to_regnum (t->gdbarch,
+			i = user_reg_map_name_to_regnum (tloc->gdbarch,
 							 name, strlen (name));
 			if (i == -1)
 			  internal_error (__FILE__, __LINE__,
@@ -1475,7 +1475,7 @@ encode_actions_1 (struct command_line *action,
 		    case OP_VAR_VALUE:
 		      collect_symbol (collect,
 				      exp->elts[2].symbol,
-				      t->gdbarch,
+				      tloc->gdbarch,
 				      frame_reg,
 				      frame_offset,
 				      tloc->address);
@@ -1588,8 +1588,8 @@ encode_actions (struct breakpoint *t, struct bp_location *tloc,
   *tdp_actions = NULL;
   *stepping_actions = NULL;
 
-  gdbarch_virtual_frame_pointer (t->gdbarch,
-				 t->loc->address, &frame_reg, &frame_offset);
+  gdbarch_virtual_frame_pointer (tloc->gdbarch,
+				 tloc->address, &frame_reg, &frame_offset);
 
   actions = breakpoint_commands (t);
 
