@@ -23,43 +23,20 @@
 
 /* Called from asm.  */
 static void __attribute__((used))
-func (void)
+func5 (void)
 {}
 
 static void
-marker (void)
+func4 (void)
 {
-  /* Some code to make sure `b marker' and `b set_point' set
-     breakpoints at different addresses.  */
-  int a = 0;
-  int b = a;
-
-  /* `set_point' is the label where we'll set multiple tracepoints and
+  /* `set_tracepoint' is the label where we'll set multiple tracepoints and
      breakpoints at.  The insn at the label must the large enough to
      fit a fast tracepoint jump.  */
-  asm ("    .global " SYMBOL(set_point) "\n"
-       SYMBOL(set_point) ":\n"
+  asm ("    .global " SYMBOL(set_tracepoint) "\n"
+       SYMBOL(set_tracepoint) ":\n"
 #if (defined __x86_64__ || defined __i386__)
-       "    call " SYMBOL(func) "\n"
+       "    call " SYMBOL(func5) "\n"
 #endif
        );
 
-  asm ("    .global " SYMBOL(after_set_point) "\n"
-       SYMBOL(after_set_point) ":\n"
-#if (defined __x86_64__ || defined __i386__)
-       "    call " SYMBOL(func) "\n"
-#endif
-       );
-}
-
-static void
-end (void)
-{}
-
-int
-main ()
-{
-  marker ();
-  end ();
-  return 0;
 }

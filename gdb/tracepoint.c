@@ -1711,7 +1711,15 @@ start_tracing (void)
       t->number_on_target = 0;
 
       for (loc = b->loc; loc; loc = loc->next)
-	target_download_tracepoint (loc);
+	{
+	  /* Since tracepoint locations are never duplicated, `inserted'
+	     flag should be zero.  */
+	  gdb_assert (!loc->inserted);
+
+	  target_download_tracepoint (loc);
+
+	  loc->inserted = 1;
+	}
 
       t->number_on_target = b->number;
     }
@@ -3203,10 +3211,10 @@ cond_string_is_same (char *str1, char *str2)
 /* Look for an existing tracepoint that seems similar enough to the
    uploaded one.  Enablement isn't compared, because the user can
    toggle that freely, and may have done so in anticipation of the
-   next trace run.  */
+   next trace run.  Return the location of matched tracepoint.  */
 
-struct tracepoint *
-find_matching_tracepoint (struct uploaded_tp *utp)
+struct bp_location *
+find_matching_tracepoint_location (struct uploaded_tp *utp)
 {
   VEC(breakpoint_p) *tp_vec = all_tracepoints ();
   int ix;
@@ -3228,7 +3236,7 @@ find_matching_tracepoint (struct uploaded_tp *utp)
 	  for (loc = b->loc; loc; loc = loc->next)
 	    {
 	      if (loc->address == utp->addr)
-		return t;
+		return loc;
 	    }
 	}
     }
@@ -3243,17 +3251,24 @@ void
 merge_uploaded_tracepoints (struct uploaded_tp **uploaded_tps)
 {
   struct uploaded_tp *utp;
-  struct tracepoint *t;
 
   /* Look for GDB tracepoints that match up with our uploaded versions.  */
   for (utp = *uploaded_tps; utp; utp = utp->next)
     {
-      t = find_matching_tracepoint (utp);
-      if (t)
-	printf_filtered (_("Assuming tracepoint %d is same "
-			   "as target's tracepoint %d at %s.\n"),
-			 t->base.number, utp->number,
-			 paddress (get_current_arch (), utp->addr));
+      struct bp_location *loc;
+      struct tracepoint *t;
+
+      loc = find_matching_tracepoint_location (utp);
+      if (loc)
+	{
+	  /* Mark this location as already inserted.  */
+	  loc->inserted = 1;
+	  t = (struct tracepoint *) loc->owner;
+	  printf_filtered (_("Assuming tracepoint %d is same "
+			     "as target's tracepoint %d at %s.\n"),
+			   loc->owner->number, utp->number,
+			   paddress (loc->gdbarch, utp->addr));
+	}
       else
 	{
 	  t = create_tracepoint_from_upload (utp);

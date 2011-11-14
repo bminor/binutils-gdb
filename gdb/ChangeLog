@@ -1,5 +1,34 @@
 2011-11-14  Yao Qi  <yao@codesourcery.com>
 
+	* remote.c (struct remote_state): <install_in_trace> new field.
+	(PACKET_InstallInTrace): New enum value.
+	(remote_install_in_trace_feature): Support InstallInTrace.
+	(remote_supports_install_in_trace): Likewise.
+	(remote_protocol_features): Likewise.
+	(_initialize_remote): Likewise.
+	(remote_can_download_tracepoint): New.
+	* target.h (struct target): New field
+	`to_can_download_tracepoint'.
+	(target_can_download_tracepoint): New macro.
+	* target.c (update_current_target): Update.
+	* breakpoint.h (struct bp_location): Add comment on field
+	`duplicate'.
+	(should_be_inserted): Don't differentiate breakpoint and tracepoint.
+	(remove_breakpoints): Don't remove tracepoints.
+	(tracepoint_locations_match ): New.
+	(breakpoint_locations_match): Call it.
+	(disable_breakpoints_in_unloaded_shlib): Handle tracepoint.
+	(download_tracepoint_locations): New.
+	(update_global_location_list): Call it.
+	* tracepoint.c (find_matching_tracepoint): Delete.
+	(find_matching_tracepoint_location): Renamed from
+	find_matching_tracepoint.  Return bp_location rather than
+	tracepoint.
+	(merge_uploaded_tracepoints): Set `inserted' field to 1 if
+	tracepoint is found.
+
+2011-11-14  Yao Qi  <yao@codesourcery.com>
+
 	* target.h (struct target): <to_download_tracepoint> Change type
 	of parameter from tracepoint to bp_location.
 	* target.c (update_current_target): Update.

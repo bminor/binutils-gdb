@@ -1,3 +1,11 @@
+2011-11-14  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.texinfo (Create and Delete Tracepoints): Describe changed
+	behavior of tracepoint.
+	(General Query Packets): New feature InstallInTrace.
+	(Remote Configuration): Document "set remote
+	install-in-trace-packet".
+
 2011-11-12  Matt Rice  <ratmice@gmail.com>
 
 	* gdb.texinfo (C Preprocessor Macros): Remove info definitions.

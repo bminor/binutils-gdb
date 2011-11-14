@@ -1584,6 +1584,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	  if (gdb_supports_qRelocInsn && target_supports_fast_tracepoints ())
 	    strcat (own_buf, ";FastTracepoints+");
 	  strcat (own_buf, ";StaticTracepoints+");
+	  strcat (own_buf, ";InstallInTrace+");
 	  strcat (own_buf, ";qXfer:statictrace:read+");
 	  strcat (own_buf, ";qXfer:traceframe-info:read+");
 	  strcat (own_buf, ";EnableDisableTracepoints+");

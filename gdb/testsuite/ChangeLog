@@ -1,3 +1,15 @@
+2011-11-14  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.trace/change-loc-1.c: New.
+	* gdb.trace/change-loc-2.c: New.
+	* gdb.trace/change-loc.c: New.
+	* gdb.trace/change-loc.exp:  New.
+	* gdb.trace/change-loc.h:  New.
+	* gdb.trace/trace-break.c (marker): Define new symbol.
+	* gdb.trace/trace-break.exp (break_trace_same_addr_5):
+        New.
+	(break_trace_same_addr_6): New.
+
 2011-11-12  Matt Rice  <ratmice@gmail.com>
 
 	* gdb.base/info-macros.exp: Make tests for info definitions

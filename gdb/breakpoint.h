@@ -335,7 +335,11 @@ struct bp_location
   char inserted;
 
   /* Nonzero if this is not the first breakpoint in the list
-     for the given address.  */
+     for the given address.  location of tracepoint can _never_
+     be duplicated with other locations of tracepoints and other
+     kinds of breakpoints, because two locations at the same
+     address may have different actions, so both of these locations
+     should be downloaded and so that `tfind N' always works.  */
   char duplicate;
 
   /* If we someday support real thread-specific breakpoints, then

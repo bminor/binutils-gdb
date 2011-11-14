@@ -323,6 +323,10 @@ struct remote_state
   /* True if the stub reports support for static tracepoints.  */
   int static_tracepoints;
 
+  /* True if the stub reports support for installing tracepoint while
+     tracing.  */
+  int install_in_trace;
+
   /* True if the stub can continue running a trace while GDB is
      disconnected.  */
   int disconnected_tracing;
@@ -1261,6 +1265,7 @@ enum {
   PACKET_ConditionalTracepoints,
   PACKET_FastTracepoints,
   PACKET_StaticTracepoints,
+  PACKET_InstallInTrace,
   PACKET_bc,
   PACKET_bs,
   PACKET_TracepointSource,
@@ -3696,6 +3701,16 @@ remote_static_tracepoint_feature (const struct protocol_feature *feature,
 }
 
 static void
+remote_install_in_trace_feature (const struct protocol_feature *feature,
+				 enum packet_support support,
+				 const char *value)
+{
+  struct remote_state *rs = get_remote_state ();
+
+  rs->install_in_trace = (support == PACKET_ENABLE);
+}
+
+static void
 remote_disconnected_tracing_feature (const struct protocol_feature *feature,
 				     enum packet_support support,
 				     const char *value)
@@ -3761,6 +3776,8 @@ static struct protocol_feature remote_protocol_features[] = {
     PACKET_FastTracepoints },
   { "StaticTracepoints", PACKET_DISABLE, remote_static_tracepoint_feature,
     PACKET_StaticTracepoints },
+  {"InstallInTrace", PACKET_DISABLE, remote_install_in_trace_feature,
+   PACKET_InstallInTrace},
   { "DisconnectedTracing", PACKET_DISABLE, remote_disconnected_tracing_feature,
     -1 },
   { "ReverseContinue", PACKET_DISABLE, remote_supported_packet,
@@ -9748,6 +9765,14 @@ remote_supports_static_tracepoints (void)
 }
 
 static int
+remote_supports_install_in_trace (void)
+{
+  struct remote_state *rs = get_remote_state ();
+
+  return rs->install_in_trace;
+}
+
+static int
 remote_supports_enable_disable_tracepoint (void)
 {
   struct remote_state *rs = get_remote_state ();
@@ -10007,6 +10032,24 @@ remote_download_tracepoint (struct bp_location *loc)
 
   do_cleanups (old_chain);
 }
+
+static int
+remote_can_download_tracepoint (void)
+{
+  struct trace_status *ts = current_trace_status ();
+  int status = remote_get_trace_status (ts);
+
+  if (status == -1 || !ts->running_known || !ts->running)
+    return 0;
+
+  /* If we are in a tracing experiment, but remote stub doesn't support
+     installing tracepoint in trace, we have to return.  */
+  if (!remote_supports_install_in_trace ())
+    return 0;
+
+  return 1;
+}
+
 
 static void
 remote_download_trace_state_variable (struct trace_state_variable *tsv)
@@ -10480,6 +10523,7 @@ Specify the serial device it is connected to\n\
   remote_ops.to_supports_string_tracing = remote_supports_string_tracing;
   remote_ops.to_trace_init = remote_trace_init;
   remote_ops.to_download_tracepoint = remote_download_tracepoint;
+  remote_ops.to_can_download_tracepoint = remote_can_download_tracepoint;
   remote_ops.to_download_trace_state_variable
     = remote_download_trace_state_variable;
   remote_ops.to_enable_tracepoint = remote_enable_tracepoint;
@@ -10996,6 +11040,9 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_StaticTracepoints],
 			 "StaticTracepoints", "static-tracepoints", 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_InstallInTrace],
+			 "InstallInTrace", "install-in-trace", 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qXfer_statictrace_read],
                          "qXfer:statictrace:read", "read-sdata-object", 0);

@@ -10331,7 +10331,11 @@ an address in the target program.  @xref{Specify Location}.  The
 @code{trace} command defines a tracepoint, which is a point in the
 target program where the debugger will briefly stop, collect some
 data, and then allow the program to continue.  Setting a tracepoint or
-changing its actions doesn't take effect until the next @code{tstart}
+changing its actions takes effect immediately if the remote stub
+supports the @samp{InstallInTrace} feature (@pxref{install tracepoint
+in tracing}).
+If remote stub doesn't support the @samp{InstallInTrace} feature, all
+these changes don't take effect until the next @code{tstart}
 command, and once a trace experiment is running, further changes will
 not have any effect until the next trace experiment starts.
 
@@ -17316,6 +17320,10 @@ are:
 @item @code{traceframe-info}
 @tab @code{qXfer:traceframe-info:read}
 @tab Traceframe info
+
+@item @code{install-in-trace}
+@tab @code{InstallInTrace}
+@tab Install tracepoint in tracing
 
 @item @code{disable-randomization}
 @tab @code{QDisableRandomization}
@@ -34844,6 +34852,10 @@ The remote stub understands the @samp{QDisableRandomization} packet.
 @item StaticTracepoint
 @cindex static tracepoints, in remote protocol
 The remote stub supports static tracepoints.
+
+@item InstallInTrace
+@anchor{install tracepoint in tracing}
+The remote stub supports installing tracepoint in tracing.
 
 @item EnableDisableTracepoints
 The remote stub supports the @samp{QTEnable} (@pxref{QTEnable}) and

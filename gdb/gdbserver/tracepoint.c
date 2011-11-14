@@ -1245,6 +1245,9 @@ static void do_action_at_tracepoint (struct tracepoint_hit_ctx *ctx,
 
 #ifndef IN_PROCESS_AGENT
 static struct tracepoint *fast_tracepoint_from_ipa_tpoint_address (CORE_ADDR);
+
+static void install_tracepoint (struct tracepoint *, char *own_buf);
+static void download_tracepoint (struct tracepoint *);
 static int install_fast_tracepoint (struct tracepoint *);
 #endif
 
@@ -1641,12 +1644,13 @@ free_space (void)
 
 static int seen_step_action_flag;
 
-/* Create a tracepoint (location) with given number and address.  */
+/* Create a tracepoint (location) with given number and address.  Add this
+   new tracepoint to list and sort this list.  */
 
 static struct tracepoint *
 add_tracepoint (int num, CORE_ADDR addr)
 {
-  struct tracepoint *tpoint;
+  struct tracepoint *tpoint, **tp_next;
 
   tpoint = xmalloc (sizeof (struct tracepoint));
   tpoint->number = num;
@@ -1666,10 +1670,31 @@ add_tracepoint (int num, CORE_ADDR addr)
   tpoint->handle = NULL;
   tpoint->next = NULL;
 
-  if (!last_tracepoint)
-    tracepoints = tpoint;
-  else
-    last_tracepoint->next = tpoint;
+  /* Find a place to insert this tracepoint into list in order to keep
+     the tracepoint list still in the ascending order.  There may be
+     multiple tracepoints at the same address as TPOINT's, and this
+     guarantees TPOINT is inserted after all the tracepoints which are
+     set at the same address.  For example, fast tracepoints A, B, C are
+     set at the same address, and D is to be insert at the same place as
+     well,
+
+     -->| A |--> | B |-->| C |->...
+
+     One jump pad was created for tracepoint A, B, and C, and the target
+     address of A is referenced/used in jump pad.  So jump pad will let
+     inferior jump to A.  If D is inserted in front of A, like this,
+
+     -->| D |-->| A |--> | B |-->| C |->...
+
+     without updating jump pad, D is not reachable during collect, which
+     is wrong.  As we can see, the order of B, C and D doesn't matter, but
+     A should always be the `first' one.  */
+  for (tp_next = &tracepoints;
+       (*tp_next) != NULL && (*tp_next)->address <= tpoint->address;
+       tp_next = &(*tp_next)->next)
+    ;
+  tpoint->next = *tp_next;
+  *tp_next = tpoint;
   last_tracepoint = tpoint;
 
   seen_step_action_flag = 0;
@@ -2269,6 +2294,8 @@ static void
 cmd_qtdp (char *own_buf)
 {
   int tppacket;
+  /* Whether there is a trailing hyphen at the end of the QTDP packet.  */
+  int trail_hyphen = 0;
   ULONGEST num;
   ULONGEST addr;
   ULONGEST count;
@@ -2346,7 +2373,10 @@ cmd_qtdp (char *own_buf)
 	    trace_debug ("Unknown optional tracepoint field");
 	}
       if (*packet == '-')
-	trace_debug ("Also has actions\n");
+	{
+	  trail_hyphen = 1;
+	  trace_debug ("Also has actions\n");
+	}
 
       trace_debug ("Defined %stracepoint %d at 0x%s, "
 		   "enabled %d step %ld pass %ld",
@@ -2362,6 +2392,29 @@ cmd_qtdp (char *own_buf)
       trace_debug ("Tracepoint error: tracepoint %d at 0x%s not found",
 		   (int) num, paddress (addr));
       write_enn (own_buf);
+      return;
+    }
+
+  /* Install tracepoint during tracing only once for each tracepoint location.
+     For each tracepoint loc, GDB may send multiple QTDP packets, and we can
+     determine the last QTDP packet for one tracepoint location by checking
+     trailing hyphen in QTDP packet.  */
+  if (tracing && !trail_hyphen)
+    {
+      /* Pause all threads temporarily while we patch tracepoints.  */
+      pause_all (0);
+
+      /* download_tracepoint will update global `tracepoints'
+	 list, so it is unsafe to leave threads in jump pad.  */
+      stabilize_threads ();
+
+      /* Freeze threads.  */
+      pause_all (1);
+
+      download_tracepoint (tpoint);
+      install_tracepoint (tpoint, own_buf);
+
+      unpause_all (1);
       return;
     }
 
@@ -2658,59 +2711,6 @@ claim_jump_space (ULONGEST used)
   gdb_jump_pad_head += used;
 }
 
-/* Sort tracepoints by PC, using a bubble sort.  */
-
-static void
-sort_tracepoints (void)
-{
-  struct tracepoint *lst, *tmp, *prev = NULL;
-  int i, j, n = 0;
-
-  if (tracepoints == NULL)
-    return;
-
-  /* Count nodes.  */
-  for (tmp = tracepoints; tmp->next; tmp = tmp->next)
-    n++;
-
-  for (i = 0; i < n - 1; i++)
-    for (j = 0, lst = tracepoints;
-	 lst && lst->next && (j <= n - 1 - i);
-	 j++)
-      {
-	/* If we're at beginning, the start node is the prev
-	   node.  */
-	if (j == 0)
-	  prev = lst;
-
-	/* Compare neighbors.  */
-	if (lst->next->address < lst->address)
-	  {
-	    struct tracepoint *p;
-
-	    /* Swap'em.  */
-	    tmp = (lst->next ? lst->next->next : NULL);
-
-	    if (j == 0 && prev == tracepoints)
-	      tracepoints = lst->next;
-
-	    p = lst->next;
-	    prev->next = lst->next;
-	    lst->next->next = lst;
-	    lst->next = tmp;
-	    prev = p;
-	  }
-	else
-	  {
-	    lst = lst->next;
-	    /* Keep track of the previous node.  We need it if we need
-	       to swap nodes.  */
-	    if (j != 0)
-	      prev = prev->next;
-	  }
-      }
-}
-
 /* Ask the IPA to probe the marker at ADDRESS.  Returns -1 if running
    the command fails, or 0 otherwise.  If the command ran
    successfully, but probing the marker failed, ERROUT will be filled
@@ -2798,16 +2798,89 @@ install_fast_tracepoint (struct tracepoint *tpoint)
   return 0;
 }
 
+
+/* Install tracepoint TPOINT, and write reply message in OWN_BUF.  */
+
+static void
+install_tracepoint (struct tracepoint *tpoint, char *own_buf)
+{
+  tpoint->handle = NULL;
+  *own_buf = '\0';
+
+  if (tpoint->type == trap_tracepoint)
+    {
+      /* Tracepoints are installed as memory breakpoints.  Just go
+	 ahead and install the trap.  The breakpoints module
+	 handles duplicated breakpoints, and the memory read
+	 routine handles un-patching traps from memory reads.  */
+      tpoint->handle = set_breakpoint_at (tpoint->address,
+					  tracepoint_handler);
+    }
+  else if (tpoint->type == fast_tracepoint || tpoint->type == static_tracepoint)
+    {
+      struct tracepoint *tp;
+
+      if (!in_process_agent_loaded ())
+	{
+	  trace_debug ("Requested a %s tracepoint, but fast "
+		       "tracepoints aren't supported.",
+		       tpoint->type == static_tracepoint ? "static" : "fast");
+	  write_e_ipa_not_loaded (own_buf);
+	  return;
+	}
+      if (tpoint->type == static_tracepoint && !in_process_agent_loaded_ust ())
+	{
+	  trace_debug ("Requested a static tracepoint, but static "
+		       "tracepoints are not supported.");
+	  write_e_ust_not_loaded (own_buf);
+	  return;
+	}
+
+      /* Find another fast or static tracepoint at the same address.  */
+      for (tp = tracepoints; tp; tp = tp->next)
+	{
+	  if (tp->address == tpoint->address && tp->type == tpoint->type
+	      && tp->number != tpoint->number)
+	    break;
+	}
+
+      if (tpoint->type == fast_tracepoint)
+	{
+	  if (tp) /* TPOINT is installed at the same address as TP.  */
+	    clone_fast_tracepoint (tpoint, tp);
+	  else
+	    install_fast_tracepoint (tpoint);
+	}
+      else
+	{
+	  if (tp)
+	    tpoint->handle = (void *) -1;
+	  else
+	    {
+	      if (probe_marker_at (tpoint->address, own_buf) == 0)
+		tpoint->handle = (void *) -1;
+	    }
+	}
+
+    }
+  else
+    internal_error (__FILE__, __LINE__, "Unknown tracepoint type");
+
+  if (tpoint->handle == NULL)
+    {
+      if (*own_buf == '\0')
+	write_enn (own_buf);
+    }
+  else
+    write_ok (own_buf);
+}
+
 static void
 cmd_qtstart (char *packet)
 {
   struct tracepoint *tpoint, *prev_ftpoint, *prev_stpoint;
 
   trace_debug ("Starting the trace");
-
-  /* Sort tracepoints by ascending address.  This makes installing
-     fast tracepoints at the same address easier to handle. */
-  sort_tracepoints ();
 
   /* Pause all threads temporarily while we patch tracepoints.  */
   pause_all (0);
@@ -6459,6 +6532,53 @@ download_tracepoint_1 (struct tracepoint *tpoint)
 	       ipa_action);
 	}
     }
+}
+
+static void
+download_tracepoint (struct tracepoint *tpoint)
+{
+  struct tracepoint *tp, *tp_prev;
+
+  if (tpoint->type != fast_tracepoint
+      && tpoint->type != static_tracepoint)
+    return;
+
+  download_tracepoint_1 (tpoint);
+
+  /* Find the previous entry of TPOINT, which is fast tracepoint or
+     static tracepoint.  */
+  tp_prev = NULL;
+  for (tp = tracepoints; tp != tpoint; tp = tp->next)
+    {
+      if (tp->type == fast_tracepoint || tp->type == static_tracepoint)
+	tp_prev = tp;
+    }
+
+  if (tp_prev)
+    {
+      CORE_ADDR tp_prev_target_next_addr;
+
+      /* Insert TPOINT after TP_PREV in IPA.  */
+      if (read_inferior_data_pointer (tp_prev->obj_addr_on_target
+				      + offsetof (struct tracepoint, next),
+				      &tp_prev_target_next_addr))
+	fatal ("error reading `tp_prev->next'");
+
+      /* tpoint->next = tp_prev->next */
+      write_inferior_data_ptr (tpoint->obj_addr_on_target
+			       + offsetof (struct tracepoint, next),
+			       tp_prev_target_next_addr);
+      /* tp_prev->next = tpoint */
+      write_inferior_data_ptr (tp_prev->obj_addr_on_target
+			       + offsetof (struct tracepoint, next),
+			       tpoint->obj_addr_on_target);
+    }
+  else
+    /* First object in list, set the head pointer in the
+       inferior.  */
+    write_inferior_data_ptr (ipa_sym_addrs.addr_tracepoints,
+			     tpoint->obj_addr_on_target);
+
 }
 
 static void

@@ -1,5 +1,14 @@
 2011-11-14  Yao Qi  <yao@codesourcery.com>
 
+	* server.c (handle_query): Handle InstallInTrace for qSupported.
+	* tracepoint.c (add_tracepoint): Sort list.
+	(install_tracepoint, download_tracepoint): New.
+	(cmd_qtdp): Call them to install and download tracepoints.
+	(sort_tracepoints): Removed.
+	(cmd_qtstart): Update.
+
+2011-11-14  Yao Qi  <yao@codesourcery.com>
+
 	* mem-break.c (inc_ref_fast_tracepoint_jump): New.
 	* mem-break.h: Declare.
 	* tracepoint.c (cmd_qtstart): Move some code to ...

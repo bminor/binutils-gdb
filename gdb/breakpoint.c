@@ -1558,7 +1558,10 @@ in which its expression is valid.\n"),
 
 
 /* Returns 1 iff breakpoint location should be
-   inserted in the inferior.  */
+   inserted in the inferior.  We don't differentiate the type of BL's owner
+   (breakpoint vs. tracepoint), although insert_location in tracepoint's
+   breakpoint_ops is not defined, because in insert_bp_location,
+   tracepoint's insert_location will not be called.  */
 static int
 should_be_inserted (struct bp_location *bl)
 {
@@ -1580,11 +1583,6 @@ should_be_inserted (struct bp_location *bl)
      the child could still trip on the parent's breakpoints.  Since
      the parent is blocked anyway, it won't miss any breakpoint.  */
   if (bl->pspace->breakpoints_not_allowed)
-    return 0;
-
-  /* Tracepoints are inserted by the target at a time of its choosing,
-     not by us.  */
-  if (is_tracepoint (bl->owner))
     return 0;
 
   return 1;
@@ -2052,7 +2050,7 @@ remove_breakpoints (void)
 
   ALL_BP_LOCATIONS (bl, blp_tmp)
   {
-    if (bl->inserted)
+    if (bl->inserted && !is_tracepoint (bl->owner))
       val |= remove_breakpoint (bl, mark_uninserted);
   }
   return val;
@@ -5446,6 +5444,23 @@ breakpoint_location_address_match (struct bp_location *bl,
 						 aspace, addr)));
 }
 
+/* If LOC1 and LOC2's owners are not tracepoints, returns false directly.
+   Then, if LOC1 and LOC2 represent the same tracepoint location, returns
+   true, otherwise returns false.  */
+
+static int
+tracepoint_locations_match (struct bp_location *loc1,
+			    struct bp_location *loc2)
+{
+  if (is_tracepoint (loc1->owner) && is_tracepoint (loc2->owner))
+    /* Since tracepoint locations are never duplicated with others', tracepoint
+       locations at the same address of different tracepoints are regarded as
+       different locations.  */
+    return (loc1->address == loc2->address && loc1->owner == loc2->owner);
+  else
+    return 0;
+}
+
 /* Assuming LOC1 and LOC2's types' have meaningful target addresses
    (breakpoint_address_is_meaningful), returns true if LOC1 and LOC2
    represent the same location.  */
@@ -5467,6 +5482,8 @@ breakpoint_locations_match (struct bp_location *loc1,
     return 0;
   else if (hw_point1)
     return watchpoint_locations_match (loc1, loc2);
+  else if (is_tracepoint (loc1->owner) || is_tracepoint (loc2->owner))
+    return tracepoint_locations_match (loc1, loc2);
   else
     /* We compare bp_location.length in order to cover ranged breakpoints.  */
     return (breakpoint_address_match (loc1->pspace->aspace, loc1->address,
@@ -6050,8 +6067,8 @@ disable_breakpoints_in_shlibs (void)
   }
 }
 
-/* Disable any breakpoints that are in an unloaded shared library.
-   Only apply to enabled breakpoints, disabled ones can just stay
+/* Disable any breakpoints and tracepoints that are in an unloaded shared
+   library.  Only apply to enabled breakpoints, disabled ones can just stay
    disabled.  */
 
 static void
@@ -6073,13 +6090,14 @@ disable_breakpoints_in_unloaded_shlib (struct so_list *solib)
     /* ALL_BP_LOCATIONS bp_location has LOC->OWNER always non-NULL.  */
     struct breakpoint *b = loc->owner;
 
-    if ((loc->loc_type == bp_loc_hardware_breakpoint
-	 || loc->loc_type == bp_loc_software_breakpoint)
-	&& solib->pspace == loc->pspace
+    if (solib->pspace == loc->pspace
 	&& !loc->shlib_disabled
-	&& (b->type == bp_breakpoint
-	    || b->type == bp_jit_event
-	    || b->type == bp_hardware_breakpoint)
+	&& (((b->type == bp_breakpoint
+	      || b->type == bp_jit_event
+	      || b->type == bp_hardware_breakpoint)
+	     && (loc->loc_type == bp_loc_hardware_breakpoint
+		 || loc->loc_type == bp_loc_software_breakpoint))
+	    || is_tracepoint (b))
 	&& solib_contains_address_p (solib, loc->address))
       {
 	loc->shlib_disabled = 1;
@@ -10315,6 +10333,49 @@ bp_location_target_extensions_update (void)
     }
 }
 
+/* Download tracepoint locations if they haven't been.  */
+
+static void
+download_tracepoint_locations (void)
+{
+  struct bp_location *bl, **blp_tmp;
+  struct cleanup *old_chain;
+
+  if (!target_can_download_tracepoint ())
+    return;
+
+  old_chain = save_current_space_and_thread ();
+
+  ALL_BP_LOCATIONS (bl, blp_tmp)
+    {
+      struct tracepoint *t;
+
+      if (!is_tracepoint (bl->owner))
+	continue;
+
+      if ((bl->owner->type == bp_fast_tracepoint
+	   ? !may_insert_fast_tracepoints
+	   : !may_insert_tracepoints))
+	continue;
+
+      /* In tracepoint, locations are _never_ duplicated, so
+	 should_be_inserted is equivalent to
+	 unduplicated_should_be_inserted.  */
+      if (!should_be_inserted (bl) || bl->inserted)
+	continue;
+
+      switch_to_program_space_and_thread (bl->pspace);
+
+      target_download_tracepoint (bl);
+
+      bl->inserted = 1;
+      t = (struct tracepoint *) bl->owner;
+      t->number_on_target = bl->owner->number;
+    }
+
+  do_cleanups (old_chain);
+}
+
 /* Swap the insertion/duplication state between two locations.  */
 
 static void
@@ -10323,6 +10384,12 @@ swap_insertion (struct bp_location *left, struct bp_location *right)
   const int left_inserted = left->inserted;
   const int left_duplicate = left->duplicate;
   const struct bp_target_info left_target_info = left->target_info;
+
+  /* Locations of tracepoints can never be duplicated.  */
+  if (is_tracepoint (left->owner))
+    gdb_assert (!left->duplicate);
+  if (is_tracepoint (right->owner))
+    gdb_assert (!right->duplicate);
 
   left->inserted = right->inserted;
   left->duplicate = right->duplicate;
@@ -10603,6 +10670,9 @@ update_global_location_list (int should_insert)
 	  || !loc->enabled
 	  || loc->shlib_disabled
 	  || !breakpoint_address_is_meaningful (b)
+	  /* Don't detect duplicate for tracepoint locations because they are
+	   never duplicated.  See the comments in field `duplicate' of
+	   `struct bp_location'.  */
 	  || is_tracepoint (b))
 	continue;
 
@@ -10649,6 +10719,9 @@ update_global_location_list (int should_insert)
       && (have_live_inferiors ()
 	  || (gdbarch_has_global_breakpoints (target_gdbarch))))
     insert_breakpoint_locations ();
+
+  if (should_insert)
+    download_tracepoint_locations ();
 
   do_cleanups (cleanups);
 }

@@ -689,6 +689,10 @@ struct target_ops
     /* Send full details of a tracepoint location to the target.  */
     void (*to_download_tracepoint) (struct bp_location *location);
 
+    /* Is the target able to download tracepoint locations in current
+       state?  */
+    int (*to_can_download_tracepoint) (void);
+
     /* Send full details of a trace state variable to the target.  */
     void (*to_download_trace_state_variable) (struct trace_state_variable *tsv);
 
@@ -1476,6 +1480,9 @@ extern int target_search_memory (CORE_ADDR start_addr,
 
 #define target_download_tracepoint(t) \
   (*current_target.to_download_tracepoint) (t)
+
+#define target_can_download_tracepoint() \
+  (*current_target.to_can_download_tracepoint) ()
 
 #define target_download_trace_state_variable(tsv) \
   (*current_target.to_download_trace_state_variable) (tsv)

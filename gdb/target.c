@@ -675,6 +675,7 @@ update_current_target (void)
       INHERIT (to_supports_string_tracing, t);
       INHERIT (to_trace_init, t);
       INHERIT (to_download_tracepoint, t);
+      INHERIT (to_can_download_tracepoint, t);
       INHERIT (to_download_trace_state_variable, t);
       INHERIT (to_enable_tracepoint, t);
       INHERIT (to_disable_tracepoint, t);
@@ -850,6 +851,9 @@ update_current_target (void)
   de_fault (to_download_tracepoint,
 	    (void (*) (struct bp_location *))
 	    tcomplain);
+  de_fault (to_can_download_tracepoint,
+	    (int (*) (void))
+	    return_zero);
   de_fault (to_download_trace_state_variable,
 	    (void (*) (struct trace_state_variable *))
 	    tcomplain);
