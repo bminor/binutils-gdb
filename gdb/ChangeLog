@@ -1,3 +1,9 @@
+2011-11-14  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* i386-nat.c (i386_insert_hw_breakpoint): Call
+	i386_update_inferior_debug_regs.
+	(i386_remove_hw_breakpoint): Likewise.
+
 2011-11-14  Yao Qi  <yao@codesourcery.com>
 
 	* breakpoint.c (init_raw_breakpoint): Call
