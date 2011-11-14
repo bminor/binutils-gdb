@@ -111,6 +111,9 @@ static void mention (struct breakpoint *);
 static struct breakpoint *set_raw_breakpoint_without_location (struct gdbarch *,
 							       enum bptype,
 							       const struct breakpoint_ops *);
+static struct bp_location *add_location_to_breakpoint (struct breakpoint *,
+						       const struct symtab_and_line *);
+
 /* This function is used in gdbtk sources and thus can not be made
    static.  */
 struct breakpoint *set_raw_breakpoint (struct gdbarch *gdbarch,
@@ -5763,32 +5766,12 @@ init_raw_breakpoint (struct breakpoint *b, struct gdbarch *gdbarch,
 		     struct symtab_and_line sal, enum bptype bptype,
 		     const struct breakpoint_ops *ops)
 {
-  CORE_ADDR adjusted_address;
-  struct gdbarch *loc_gdbarch;
-
   init_raw_breakpoint_without_location (b, gdbarch, bptype, ops);
 
-  loc_gdbarch = get_sal_arch (sal);
-  if (!loc_gdbarch)
-    loc_gdbarch = b->gdbarch;
+  add_location_to_breakpoint (b, &sal);
 
   if (bptype != bp_catchpoint)
     gdb_assert (sal.pspace != NULL);
-
-  /* Adjust the breakpoint's address prior to allocating a location.
-     Once we call allocate_bp_location(), that mostly uninitialized
-     location will be placed on the location chain.  Adjustment of the
-     breakpoint may cause target_read_memory() to be called and we do
-     not want its scan of the location chain to find a breakpoint and
-     location that's only been partially initialized.  */
-  adjusted_address = adjust_breakpoint_address (loc_gdbarch, 
-						sal.pc, b->type);
-
-  b->loc = allocate_bp_location (b);
-  b->loc->gdbarch = loc_gdbarch;
-  b->loc->requested_address = sal.pc;
-  b->loc->address = adjusted_address;
-  b->loc->pspace = sal.pspace;
 
   /* Store the program space that was used to set the breakpoint, for
      breakpoint resetting.  */
@@ -5798,11 +5781,7 @@ init_raw_breakpoint (struct breakpoint *b, struct gdbarch *gdbarch,
     b->source_file = NULL;
   else
     b->source_file = xstrdup (sal.symtab->filename);
-  b->loc->section = sal.section;
   b->line_number = sal.line;
-
-  set_breakpoint_location_function (b->loc,
-				    sal.explicit_pc || sal.explicit_line);
 
   breakpoints_changed ();
 }
@@ -7097,21 +7076,32 @@ add_location_to_breakpoint (struct breakpoint *b,
 			    const struct symtab_and_line *sal)
 {
   struct bp_location *loc, **tmp;
+  CORE_ADDR adjusted_address;
+  struct gdbarch *loc_gdbarch = get_sal_arch (*sal);
+
+  if (loc_gdbarch == NULL)
+    loc_gdbarch = b->gdbarch;
+
+  /* Adjust the breakpoint's address prior to allocating a location.
+     Once we call allocate_bp_location(), that mostly uninitialized
+     location will be placed on the location chain.  Adjustment of the
+     breakpoint may cause target_read_memory() to be called and we do
+     not want its scan of the location chain to find a breakpoint and
+     location that's only been partially initialized.  */
+  adjusted_address = adjust_breakpoint_address (loc_gdbarch,
+						sal->pc, b->type);
 
   loc = allocate_bp_location (b);
   for (tmp = &(b->loc); *tmp != NULL; tmp = &((*tmp)->next))
     ;
   *tmp = loc;
-  loc->gdbarch = get_sal_arch (*sal);
-  if (!loc->gdbarch)
-    loc->gdbarch = b->gdbarch;
+
   loc->requested_address = sal->pc;
-  loc->address = adjust_breakpoint_address (loc->gdbarch,
-					    loc->requested_address, b->type);
+  loc->address = adjusted_address;
   loc->pspace = sal->pspace;
   gdb_assert (loc->pspace != NULL);
   loc->section = sal->section;
-
+  loc->gdbarch = loc_gdbarch;
   set_breakpoint_location_function (loc,
 				    sal->explicit_pc || sal->explicit_line);
   return loc;
