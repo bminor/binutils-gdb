@@ -1,3 +1,12 @@
+2011-11-15  Alan Modra  <amodra@gmail.com>
+	    Andreas Tobler  <andreast@fgznet.ch>
+
+	* elflink.c (_bfd_elf_create_got_section): Replace
+	bfd_make_section_with_flags with bfd_make_section_anyway_with_flags.
+	(_bfd_elf_link_create_dynamic_sections): Likewise.
+	* elf32-ppc.c (ppc_elf_create_glink): Likewise.
+	(ppc_elf_create_dynamic_sections): Likewise.
+
 2011-11-09  Alan Modra  <amodra@gmail.com>
 
 	* elflink.c (bfd_elf_gc_mark_dynamic_ref_symbol): Mark syms in
