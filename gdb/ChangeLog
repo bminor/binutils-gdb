@@ -32,7 +32,8 @@
 	* target.c (update_current_target): Update.
 	* breakpoint.h (struct bp_location): Add comment on field
 	`duplicate'.
-	(should_be_inserted): Don't differentiate breakpoint and tracepoint.
+	* breakpoint.c (should_be_inserted): Don't differentiate breakpoint
+	and tracepoint.
 	(remove_breakpoints): Don't remove tracepoints.
 	(tracepoint_locations_match ): New.
 	(breakpoint_locations_match): Call it.
