@@ -358,7 +358,7 @@ typedef struct
 {
   lang_statement_header_type header;
   bfd_vma output_offset;
-  size_t size;
+  bfd_size_type size;
   asection *output_section;
   fill_type *fill;
 } lang_padding_statement_type;

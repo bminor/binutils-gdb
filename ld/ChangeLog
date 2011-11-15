@@ -1,3 +1,12 @@
+2011-11-15  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* ldlang.c (insert_pad): Change alignment_needed argument to
+	bfd_size_type.
+	(size_input_section): Change alignment_needed varible to
+	bfd_size_type.
+	* ldlang.h (lang_padding_statement_type): Change size field to
+	bfd_size_type.
+
 2011-11-03  Tristan Gingold  <gingold@adacore.com>
 
 	* scripttempl/aix.sc: Consider header size for .text and .data

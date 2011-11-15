@@ -4596,7 +4596,7 @@ dprint_statement (lang_statement_union_type *s, int n)
 static void
 insert_pad (lang_statement_union_type **ptr,
 	    fill_type *fill,
-	    unsigned int alignment_needed,
+	    bfd_size_type alignment_needed,
 	    asection *output_section,
 	    bfd_vma dot)
 {
@@ -4651,7 +4651,7 @@ size_input_section
   if (!((lang_input_statement_type *) i->owner->usrdata)->just_syms_flag
       && (i->flags & SEC_EXCLUDE) == 0)
     {
-      unsigned int alignment_needed;
+      bfd_size_type alignment_needed;
       asection *o;
 
       /* Align this section first to the input sections requirement,
