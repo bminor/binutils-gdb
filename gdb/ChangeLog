@@ -410,7 +410,7 @@
 
 2011-10-28  Alen Skondro  <askondro@gmail.com>
 
-	* ser-tcp.c [USE_WIN32API] (ETIMEOUT): Don't define if already
+	* ser-tcp.c [USE_WIN32API] (ETIMEDOUT): Don't define if already
 	defined.
 
 2011-10-27  Meador Inge  <meadori@codesourcery.com>
