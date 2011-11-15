@@ -1,3 +1,14 @@
+2011-11-15  Paul Koning  <paul_koning@dell.com>
+
+	* python/py-type.c (typy_get_composite): New function.
+	(typy_nonzero): New function.
+	(typy_values): Rename from typy_fields.
+	(typy_fields): New function.
+	(typy_length): Raise exception if not struct, union, or enum type.
+	(typy_getitem): Ditto.
+	(typy_has_key): Ditto.
+	(typy_make_iter): Ditto.
+
 2011-11-15  Doug Evans  <dje@google.com>
 
 	* NEWS: Mention new parameter basenames-may-differ.
