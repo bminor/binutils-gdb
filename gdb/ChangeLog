@@ -1,3 +1,19 @@
+2011-11-15  Pedro Alves  <pedro@codesourcery.com>
+	    Luis Machado  <lgustavo@codesourcery.com>
+
+	* auxv.c: Include observer.h.
+	(auxv_inferior_data_cleanup): New.
+	(invalidate_auxv_cache_inf): New.
+	(invalidate_auxv_cache): New.
+	(get_auxv_inferior_data): New.
+	(auxv_inferior_data): New static global.
+	(auxv_info): New structure.
+	(target_auxv_search): Use get_auxv_inferior_data instead of
+	target_read_alloc and don't free cached buffers.
+	(fprint_target_auxv): Likewise
+	(_initialize_auxv): Register per-inferior auxv cache and register
+	observers to invalidate auxv cache when needed.
+
 2011-11-14  Doug Evans  <dje@google.com>
 
 	Make "!" an alias for "shell".
