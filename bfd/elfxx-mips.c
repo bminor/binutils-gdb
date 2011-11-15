@@ -917,7 +917,7 @@ static const bfd_vma mips_o32_exec_plt0_entry[] =
   0x8f990000,	/* lw $25, %lo(&GOTPLT[0])($28)				*/
   0x279c0000,	/* addiu $28, $28, %lo(&GOTPLT[0])			*/
   0x031cc023,	/* subu $24, $24, $28					*/
-  0x03e07821,	/* move $15, $31					*/
+  0x03e07821,	/* move $15, $31	# 32-bit move (addu)		*/
   0x0018c082,	/* srl $24, $24, 2					*/
   0x0320f809,	/* jalr $25						*/
   0x2718fffe	/* subu $24, $24, 2					*/
@@ -931,7 +931,7 @@ static const bfd_vma mips_n32_exec_plt0_entry[] =
   0x8dd90000,	/* lw $25, %lo(&GOTPLT[0])($14)				*/
   0x25ce0000,	/* addiu $14, $14, %lo(&GOTPLT[0])			*/
   0x030ec023,	/* subu $24, $24, $14					*/
-  0x03e07821,	/* move $15, $31					*/
+  0x03e07821,	/* move $15, $31	# 32-bit move (addu)		*/
   0x0018c082,	/* srl $24, $24, 2					*/
   0x0320f809,	/* jalr $25						*/
   0x2718fffe	/* subu $24, $24, 2					*/
@@ -945,7 +945,7 @@ static const bfd_vma mips_n64_exec_plt0_entry[] =
   0xddd90000,	/* ld $25, %lo(&GOTPLT[0])($14)				*/
   0x25ce0000,	/* addiu $14, $14, %lo(&GOTPLT[0])			*/
   0x030ec023,	/* subu $24, $24, $14					*/
-  0x03e07821,	/* move $15, $31					*/
+  0x03e0782d,	/* move $15, $31	# 64-bit move (daddu)		*/
   0x0018c0c2,	/* srl $24, $24, 3					*/
   0x0320f809,	/* jalr $25						*/
   0x2718fffe	/* subu $24, $24, 2					*/
