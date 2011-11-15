@@ -1127,11 +1127,16 @@ find_command_name_length (const char *text)
      Note that this is larger than the character set allowed when
      creating user-defined commands.  */
 
+  /* Recognize '!' as a single character command so that, e.g., "!ls"
+     works as expected.  */
+  if (*p == '!')
+    return 1;
+
   while (isalnum (*p) || *p == '-' || *p == '_'
 	 /* Characters used by TUI specific commands.  */
 	 || *p == '+' || *p == '<' || *p == '>' || *p == '$'
 	 /* Characters used for XDB compatibility.  */
-	 || (xdb_commands && (*p == '!' || *p == '/' || *p == '?')))
+	 || (xdb_commands && (*p == '/' || *p == '?')))
     p++;
 
   return p - text;

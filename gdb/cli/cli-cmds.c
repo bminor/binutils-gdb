@@ -1825,14 +1825,7 @@ Two arguments (separated by a comma) are taken as a range of memory to dump,\n\
   if (xdb_commands)
     add_com_alias ("va", "disassemble", class_xdb, 0);
 
-  /* NOTE: cagney/2000-03-20: Being able to enter ``(gdb) !ls'' would
-     be a really useful feature.  Unfortunately, the below wont do
-     this.  Instead it adds support for the form ``(gdb) ! ls''
-     (i.e. the space is required).  If the ``!'' command below is
-     added the complains about no ``!'' command would be replaced by
-     complains about how the ``!'' command is broken :-)  */
-  if (xdb_commands)
-    add_com_alias ("!", "shell", class_support, 0);
+  add_com_alias ("!", "shell", class_support, 0);
 
   c = add_com ("make", class_support, make_command, _("\
 Run the ``make'' program using the rest of the line as arguments."));

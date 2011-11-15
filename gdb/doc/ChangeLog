@@ -1,3 +1,7 @@
+2011-11-14  Doug Evans  <dje@google.com>
+
+	* gdb.texinfo (Shell Commands): Document "!".
+
 2011-11-14  Stan Shebs  <stan@codesourcery.com>
 	    Kwok Cheung Yeung  <kcy@codesourcery.com>
 

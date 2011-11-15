@@ -103,6 +103,12 @@
   at the time the function got called.  Entry values are available only since
   gcc version 4.7.
 
+* New commands
+
+!SHELL COMMAND
+  "!" is now an alias of the "shell" command.
+  Note that no space is needed between "!" and SHELL COMMAND.
+
 * Changed commands
 
 watch EXPRESSION mask MASK_VALUE

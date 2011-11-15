@@ -1347,9 +1347,12 @@ just use the @code{shell} command.
 
 @table @code
 @kindex shell
+@kindex !
 @cindex shell escape
-@item shell @var{command string}
-Invoke a standard shell to execute @var{command string}.
+@item shell @var{command-string}
+@itemx !@var{command-string}
+Invoke a standard shell to execute @var{command-string}.
+Note that no space is needed between @code{!} and @var{command-string}.
 If it exists, the environment variable @code{SHELL} determines which
 shell to run.  Otherwise @value{GDBN} uses the default shell
 (@file{/bin/sh} on Unix systems, @file{COMMAND.COM} on MS-DOS, etc.).
