@@ -771,6 +771,10 @@ class General_options
 	      N_("(ARM only) Fix binaries for Cortex-A8 erratum."),
 	      N_("(ARM only) Do not fix binaries for Cortex-A8 erratum."));
 
+  DEFINE_bool(fix_arm1176, options::TWO_DASHES, '\0', true,
+	      N_("(ARM only) Fix binaries for ARM1176 erratum."),
+	      N_("(ARM only) Do not fix binaries for ARM1176 erratum."));
+
   DEFINE_bool(merge_exidx_entries, options::TWO_DASHES, '\0', true,
 	      N_("(ARM only) Merge exidx entries in debuginfo."),
 	      N_("(ARM only) Do not merge exidx entries in debuginfo."));

@@ -2188,7 +2188,7 @@ thumb_bl_in_range.stdout: thumb_bl_in_range
 	$(TEST_OBJDUMP) -D $< > $@
 
 thumb_bl_in_range: thumb_bl_in_range.o ../ld-new
-	../ld-new -T $(srcdir)/thumb_branch_range.t -o $@ $<
+	../ld-new --no-fix-arm1176 -T $(srcdir)/thumb_branch_range.t -o $@ $<
 
 thumb_bl_in_range.o: thumb_bl_in_range.s
 	$(TEST_AS) -o $@ -march=armv5te $<
@@ -2197,7 +2197,7 @@ thumb_bl_out_of_range.stdout: thumb_bl_out_of_range
 	$(TEST_OBJDUMP) -D $< > $@
 
 thumb_bl_out_of_range: thumb_bl_out_of_range.o ../ld-new
-	../ld-new -T $(srcdir)/thumb_branch_range.t -o $@ $<
+	../ld-new --no-fix-arm1176 -T $(srcdir)/thumb_branch_range.t -o $@ $<
 
 thumb_bl_out_of_range.o: thumb_bl_out_of_range.s
 	$(TEST_AS) -o $@ -march=armv5te $<
@@ -2224,7 +2224,7 @@ thumb_blx_in_range.stdout: thumb_blx_in_range
 	$(TEST_OBJDUMP) -D $< > $@
 
 thumb_blx_in_range: thumb_blx_in_range.o ../ld-new
-	../ld-new -T $(srcdir)/thumb_branch_range.t -o $@ $<
+	../ld-new --no-fix-arm1176 -T $(srcdir)/thumb_branch_range.t -o $@ $<
 
 thumb_blx_in_range.o: thumb_blx_in_range.s
 	$(TEST_AS) -o $@ -march=armv5te $<
@@ -2233,7 +2233,7 @@ thumb_blx_out_of_range.stdout: thumb_blx_out_of_range
 	$(TEST_OBJDUMP) -D $< > $@
 
 thumb_blx_out_of_range: thumb_blx_out_of_range.o ../ld-new
-	../ld-new -T $(srcdir)/thumb_branch_range.t -o $@ $<
+	../ld-new --no-fix-arm1176 -T $(srcdir)/thumb_branch_range.t -o $@ $<
 
 thumb_blx_out_of_range.o: thumb_blx_out_of_range.s
 	$(TEST_AS) -o $@ -march=armv5te $<
@@ -2260,7 +2260,7 @@ thumb_bl_out_of_range_local.stdout: thumb_bl_out_of_range_local
 	$(TEST_OBJDUMP) -D $< > $@
 
 thumb_bl_out_of_range_local: thumb_bl_out_of_range_local.o ../ld-new
-	../ld-new -T $(srcdir)/thumb_branch_range.t -o $@ $<
+	../ld-new --no-fix-arm1176 -T $(srcdir)/thumb_branch_range.t -o $@ $<
 
 thumb_bl_out_of_range_local.o: thumb_bl_out_of_range_local.s
 	$(TEST_AS) -o $@ -march=armv5te $<
@@ -2297,7 +2297,7 @@ arm_fix_v4bx.stdout: arm_fix_v4bx
 	$(TEST_OBJDUMP) -D -j.text $< > $@
 
 arm_fix_v4bx: arm_fix_v4bx.o ../ld-new
-	../ld-new --fix-v4bx -o $@ $<
+	../ld-new --no-fix-arm1176 --fix-v4bx -o $@ $<
 
 arm_fix_v4bx.o: arm_fix_v4bx.s
 	$(TEST_AS) -o $@ $<
@@ -2306,13 +2306,13 @@ arm_fix_v4bx_interworking.stdout: arm_fix_v4bx_interworking
 	$(TEST_OBJDUMP) -D -j.text $< > $@
 
 arm_fix_v4bx_interworking: arm_fix_v4bx.o ../ld-new
-	../ld-new --fix-v4bx-interworking -o $@ $<
+	../ld-new --no-fix-arm1176 --fix-v4bx-interworking -o $@ $<
 
 arm_no_fix_v4bx.stdout: arm_no_fix_v4bx
 	$(TEST_OBJDUMP) -D -j.text $< > $@
 
 arm_no_fix_v4bx: arm_fix_v4bx.o ../ld-new
-	../ld-new -o $@ $<
+	../ld-new --no-fix-arm1176 -o $@ $<
 
 MOSTLYCLEANFILES += arm_fix_v4bx arm_fix_v4bx_interworking arm_no_fix_v4bx
 
@@ -2351,6 +2351,69 @@ arm_attr_merge_7b.o: arm_attr_merge_7b.s
 	$(TEST_AS) -o $@ $<
 
 MOSTLYCLEANFILES += arm_attr_merge_6 arm_attr_merge_6r arm_attr_merge_7
+
+# ARM1176 workaround test.
+check_SCRIPTS += arm_fix_1176.sh
+check_DATA += arm_fix_1176_default_v6z.stdout arm_fix_1176_on_v6z.stdout \
+	arm_fix_1176_off_v6z.stdout arm_fix_1176_default_v5te.stdout \
+	arm_fix_1176_default_v7a.stdout arm_fix_1176_default_1156t2f_s.stdout
+
+arm_fix_1176_default_v6z.stdout: arm_fix_1176_default_v6z
+	$(TEST_OBJDUMP) -D -j.foo $< > $@
+
+arm_fix_1176_default_v6z: arm_fix_1176_default_v6z.o ../ld-new
+	../ld-new --section-start=.foo=0x2001014 -o $@ $<
+
+arm_fix_1176_default_v6z.o: arm_fix_1176.s
+	$(TEST_AS) -march=armv6z -o $@ $<
+
+arm_fix_1176_on_v6z.stdout: arm_fix_1176_on_v6z
+	$(TEST_OBJDUMP) -D -j.foo $< > $@
+
+arm_fix_1176_on_v6z: arm_fix_1176_on_v6z.o ../ld-new
+	../ld-new --section-start=.foo=0x2001014 --fix-arm1176 -o $@ $<
+
+arm_fix_1176_on_v6z.o: arm_fix_1176.s
+	$(TEST_AS) -march=armv6z -o $@ $<
+
+arm_fix_1176_off_v6z.stdout: arm_fix_1176_off_v6z
+	$(TEST_OBJDUMP) -D -j.foo $< > $@
+
+arm_fix_1176_off_v6z: arm_fix_1176_off_v6z.o ../ld-new
+	../ld-new --section-start=.foo=0x2001014 --no-fix-arm1176 -o $@ $<
+
+arm_fix_1176_off_v6z.o: arm_fix_1176.s
+	$(TEST_AS) -march=armv6z -o $@ $<
+
+arm_fix_1176_default_v5te.stdout: arm_fix_1176_default_v5te
+	$(TEST_OBJDUMP) -D -j.foo $< > $@
+
+arm_fix_1176_default_v5te: arm_fix_1176_default_v5te.o ../ld-new
+	../ld-new --section-start=.foo=0x2001014 -o $@ $<
+
+arm_fix_1176_default_v5te.o: arm_fix_1176.s
+	$(TEST_AS) -march=armv5te -o $@ $<
+
+arm_fix_1176_default_v7a.stdout: arm_fix_1176_default_v7a
+	$(TEST_OBJDUMP) -D -j.foo $< > $@
+
+arm_fix_1176_default_v7a: arm_fix_1176_default_v7a.o ../ld-new
+	../ld-new --section-start=.foo=0x2001014 -o $@ $<
+
+arm_fix_1176_default_v7a.o: arm_fix_1176.s
+	$(TEST_AS) -march=armv7-a -o $@ $<
+
+arm_fix_1176_default_1156t2f_s.stdout: arm_fix_1176_default_1156t2f_s
+	$(TEST_OBJDUMP) -D -j.foo $< > $@
+
+arm_fix_1176_default_1156t2f_s: arm_fix_1176_default_1156t2f_s.o ../ld-new
+	../ld-new --section-start=.foo=0x2001014 -o $@ $<
+
+arm_fix_1176_default_1156t2f_s.o: arm_fix_1176.s
+	$(TEST_AS) -mcpu=arm1156t2f-s -o $@ $<
+
+MOSTLYCLEANFILES += arm_fix_1176_default_v6z arm_fix_1176_on_v6z arm_fix_1176_off_v6z \
+	arm_fix_1176_default_v5te arm_fix_1176_default_v7a arm_fix_1176_default_1156t2f_s
 
 # Cortex-A8 workaround test.
 
@@ -2456,6 +2519,120 @@ arm_unaligned_reloc.o: arm_unaligned_reloc.s
 	$(TEST_AS) -o $@ $<
 
 MOSTLYCLEANFILES += arm_unaligned_reloc
+
+# Check ARM to ARM farcall veneers
+
+check_SCRIPTS += arm_farcall_arm_arm.sh
+check_DATA += arm_farcall_arm_arm.stdout
+
+arm_farcall_arm_arm.stdout: arm_farcall_arm_arm
+	$(TEST_OBJDUMP) -d $< > $@
+
+arm_farcall_arm_arm: arm_farcall_arm_arm.o ../ld-new
+	../ld-new --no-fix-arm1176 --section-start .text=0x1000 --section-start .foo=0x2001020 -o $@ $<
+
+arm_farcall_arm_arm.o: arm_farcall_arm_arm.s
+	$(TEST_AS) -o $@ $<
+
+MOSTLYCLEANFILES += arm_farcall_arm_arm
+
+# Check ARM to Thumb farcall veneers
+
+check_SCRIPTS += arm_farcall_arm_thumb.sh
+check_DATA += arm_farcall_arm_thumb.stdout arm_farcall_arm_thumb_5t.stdout
+
+arm_farcall_arm_thumb.stdout: arm_farcall_arm_thumb
+	$(TEST_OBJDUMP) -D $< > $@
+
+arm_farcall_arm_thumb: arm_farcall_arm_thumb.o ../ld-new
+	../ld-new --section-start .text=0x1000 --section-start .foo=0x2001014 -o $@ $<
+
+arm_farcall_arm_thumb.o: arm_farcall_arm_thumb.s
+	$(TEST_AS) -o $@ $<
+
+arm_farcall_arm_thumb_5t.stdout: arm_farcall_arm_thumb_5t
+	$(TEST_OBJDUMP) -D $< > $@
+
+arm_farcall_arm_thumb_5t: arm_farcall_arm_thumb_5t.o ../ld-new
+	../ld-new --no-fix-arm1176 --section-start .text=0x1000 --section-start .foo=0x2001014 -o $@ $<
+
+arm_farcall_arm_thumb_5t.o: arm_farcall_arm_thumb.s
+	$(TEST_AS) -march=armv5t -o $@ $<
+
+MOSTLYCLEANFILES += arm_farcall_arm_thumb arm_farcall_arm_thumb_5t
+
+# Check Thumb to Thumb farcall veneers
+
+check_SCRIPTS += arm_farcall_thumb_thumb.sh
+check_DATA += arm_farcall_thumb_thumb.stdout \
+	      arm_farcall_thumb_thumb_5t.stdout \
+	      arm_farcall_thumb_thumb_7m.stdout \
+	      arm_farcall_thumb_thumb_6m.stdout
+
+arm_farcall_thumb_thumb.stdout: arm_farcall_thumb_thumb
+	$(TEST_OBJDUMP) -D $< > $@
+
+arm_farcall_thumb_thumb: arm_farcall_thumb_thumb.o ../ld-new
+	../ld-new --section-start .text=0x1000 --section-start .foo=0x2001014 -o $@ $<
+
+arm_farcall_thumb_thumb.o: arm_farcall_thumb_thumb.s
+	$(TEST_AS) -march=armv4t -o $@ $<
+
+arm_farcall_thumb_thumb_5t.stdout: arm_farcall_thumb_thumb_5t
+	$(TEST_OBJDUMP) -D $< > $@
+
+arm_farcall_thumb_thumb_5t: arm_farcall_thumb_thumb_5t.o ../ld-new
+	../ld-new --no-fix-arm1176 --section-start .text=0x1000 --section-start .foo=0x2001014 -o $@ $<
+
+arm_farcall_thumb_thumb_5t.o: arm_farcall_thumb_thumb.s
+	$(TEST_AS) -march=armv5t -o $@ $<
+
+arm_farcall_thumb_thumb_7m.stdout: arm_farcall_thumb_thumb_7m
+	$(TEST_OBJDUMP) -D $< > $@
+
+arm_farcall_thumb_thumb_7m: arm_farcall_thumb_thumb_7m.o ../ld-new
+	../ld-new --section-start .text=0x1000 --section-start .foo=0x2001014 -o $@ $<
+
+arm_farcall_thumb_thumb_7m.o: arm_farcall_thumb_thumb.s
+	$(TEST_AS) -march=armv7-m -o $@ $<
+
+arm_farcall_thumb_thumb_6m.stdout: arm_farcall_thumb_thumb_6m
+	$(TEST_OBJDUMP) -D $< > $@
+
+arm_farcall_thumb_thumb_6m: arm_farcall_thumb_thumb_6m.o ../ld-new
+	../ld-new --section-start .text=0x1000 --section-start .foo=0x2001014 -o $@ $<
+
+arm_farcall_thumb_thumb_6m.o: arm_farcall_thumb_thumb.s
+	$(TEST_AS) -march=armv6-m -o $@ $<
+
+MOSTLYCLEANFILES += arm_farcall_thumb_thumb arm_farcall_thumb_thumb_5t \
+		    arm_farcall_thumb_thumb_7m arm_farcall_thumb_thumb_6m
+
+# Check Thumb to ARM farcall veneers
+
+check_SCRIPTS += arm_farcall_thumb_arm.sh
+check_DATA += arm_farcall_thumb_arm.stdout \
+	      arm_farcall_thumb_arm_5t.stdout
+
+arm_farcall_thumb_arm.stdout: arm_farcall_thumb_arm
+	$(TEST_OBJDUMP) -D $< > $@
+
+arm_farcall_thumb_arm: arm_farcall_thumb_arm.o ../ld-new
+	../ld-new --section-start .text=0x1c01010 --section-start .foo=0x2001014 -o $@ $<
+
+arm_farcall_thumb_arm.o: arm_farcall_thumb_arm.s
+	$(TEST_AS) -o $@ $<
+
+arm_farcall_thumb_arm_5t.stdout: arm_farcall_thumb_arm_5t
+	$(TEST_OBJDUMP) -D $< > $@
+
+arm_farcall_thumb_arm_5t: arm_farcall_thumb_arm_5t.o ../ld-new
+	../ld-new --no-fix-arm1176 --section-start .text=0x1c01010 --section-start .foo=0x2001014 -o $@ $<
+
+arm_farcall_thumb_arm_5t.o: arm_farcall_thumb_arm.s
+	$(TEST_AS) -march=armv5t -o $@ $<
+
+MOSTLYCLEANFILES += arm_farcall_thumb_arm arm_farcall_thumb_arm_5t
 
 endif DEFAULT_TARGET_ARM
 
