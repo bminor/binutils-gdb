@@ -1,3 +1,12 @@
+2011-11-15  Alan Modra  <amodra@gmail.com>
+	    Andreas Tobler  <andreast@fgznet.ch>
+
+	* elflink.c (_bfd_elf_create_got_section): Replace
+	bfd_make_section_with_flags with bfd_make_section_anyway_with_flags.
+	(_bfd_elf_link_create_dynamic_sections): Likewise.
+	* elf32-ppc.c (ppc_elf_create_glink): Likewise.
+	(ppc_elf_create_dynamic_sections): Likewise.
+
 2011-11-14  Maxim Kuvyrkov  <maxim@codesourcery.com>
 
 	* elfxx-mips.c (mips_n64_exe_plt0_entry): Use 64-bit move.

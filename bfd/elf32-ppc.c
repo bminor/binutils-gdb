@@ -2891,7 +2891,7 @@ ppc_elf_create_glink (bfd *abfd, struct bfd_link_info *info)
 
   flags = (SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_HAS_CONTENTS
 	   | SEC_IN_MEMORY | SEC_LINKER_CREATED);
-  s = bfd_make_section_with_flags (abfd, ".rela.iplt", flags);
+  s = bfd_make_section_anyway_with_flags (abfd, ".rela.iplt", flags);
   htab->reliplt = s;
   if (s == NULL
       || ! bfd_set_section_alignment (abfd, s, 2))
@@ -2924,8 +2924,8 @@ ppc_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
     return FALSE;
 
   htab->dynbss = bfd_get_section_by_name (abfd, ".dynbss");
-  s = bfd_make_section_with_flags (abfd, ".dynsbss",
-				   SEC_ALLOC | SEC_LINKER_CREATED);
+  s = bfd_make_section_anyway_with_flags (abfd, ".dynsbss",
+					  SEC_ALLOC | SEC_LINKER_CREATED);
   htab->dynsbss = s;
   if (s == NULL)
     return FALSE;
@@ -2935,7 +2935,7 @@ ppc_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
       htab->relbss = bfd_get_section_by_name (abfd, ".rela.bss");
       flags = (SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_HAS_CONTENTS
 	       | SEC_IN_MEMORY | SEC_LINKER_CREATED);
-      s = bfd_make_section_with_flags (abfd, ".rela.sbss", flags);
+      s = bfd_make_section_anyway_with_flags (abfd, ".rela.sbss", flags);
       htab->relsbss = s;
       if (s == NULL
 	  || ! bfd_set_section_alignment (abfd, s, 2))

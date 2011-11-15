@@ -110,17 +110,17 @@ _bfd_elf_create_got_section (bfd *abfd, struct bfd_link_info *info)
 
   flags = bed->dynamic_sec_flags;
 
-  s = bfd_make_section_with_flags (abfd,
-				   (bed->rela_plts_and_copies_p
-				    ? ".rela.got" : ".rel.got"),
-				   (bed->dynamic_sec_flags
-				    | SEC_READONLY));
+  s = bfd_make_section_anyway_with_flags (abfd,
+					  (bed->rela_plts_and_copies_p
+					   ? ".rela.got" : ".rel.got"),
+					  (bed->dynamic_sec_flags
+					   | SEC_READONLY));
   if (s == NULL
       || ! bfd_set_section_alignment (abfd, s, bed->s->log_file_align))
     return FALSE;
   htab->srelgot = s;
 
-  s = bfd_make_section_with_flags (abfd, ".got", flags);
+  s = bfd_make_section_anyway_with_flags (abfd, ".got", flags);
   if (s == NULL
       || !bfd_set_section_alignment (abfd, s, bed->s->log_file_align))
     return FALSE;
@@ -128,7 +128,7 @@ _bfd_elf_create_got_section (bfd *abfd, struct bfd_link_info *info)
 
   if (bed->want_got_plt)
     {
-      s = bfd_make_section_with_flags (abfd, ".got.plt", flags);
+      s = bfd_make_section_anyway_with_flags (abfd, ".got.plt", flags);
       if (s == NULL
 	  || !bfd_set_section_alignment (abfd, s,
 					 bed->s->log_file_align))
@@ -206,44 +206,44 @@ _bfd_elf_link_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
      shared library does not.  */
   if (info->executable)
     {
-      s = bfd_make_section_with_flags (abfd, ".interp",
-				       flags | SEC_READONLY);
+      s = bfd_make_section_anyway_with_flags (abfd, ".interp",
+					      flags | SEC_READONLY);
       if (s == NULL)
 	return FALSE;
     }
 
   /* Create sections to hold version informations.  These are removed
      if they are not needed.  */
-  s = bfd_make_section_with_flags (abfd, ".gnu.version_d",
-				   flags | SEC_READONLY);
+  s = bfd_make_section_anyway_with_flags (abfd, ".gnu.version_d",
+					  flags | SEC_READONLY);
   if (s == NULL
       || ! bfd_set_section_alignment (abfd, s, bed->s->log_file_align))
     return FALSE;
 
-  s = bfd_make_section_with_flags (abfd, ".gnu.version",
-				   flags | SEC_READONLY);
+  s = bfd_make_section_anyway_with_flags (abfd, ".gnu.version",
+					  flags | SEC_READONLY);
   if (s == NULL
       || ! bfd_set_section_alignment (abfd, s, 1))
     return FALSE;
 
-  s = bfd_make_section_with_flags (abfd, ".gnu.version_r",
-				   flags | SEC_READONLY);
+  s = bfd_make_section_anyway_with_flags (abfd, ".gnu.version_r",
+					  flags | SEC_READONLY);
   if (s == NULL
       || ! bfd_set_section_alignment (abfd, s, bed->s->log_file_align))
     return FALSE;
 
-  s = bfd_make_section_with_flags (abfd, ".dynsym",
-				   flags | SEC_READONLY);
+  s = bfd_make_section_anyway_with_flags (abfd, ".dynsym",
+					  flags | SEC_READONLY);
   if (s == NULL
       || ! bfd_set_section_alignment (abfd, s, bed->s->log_file_align))
     return FALSE;
 
-  s = bfd_make_section_with_flags (abfd, ".dynstr",
-				   flags | SEC_READONLY);
+  s = bfd_make_section_anyway_with_flags (abfd, ".dynstr",
+					  flags | SEC_READONLY);
   if (s == NULL)
     return FALSE;
 
-  s = bfd_make_section_with_flags (abfd, ".dynamic", flags);
+  s = bfd_make_section_anyway_with_flags (abfd, ".dynamic", flags);
   if (s == NULL
       || ! bfd_set_section_alignment (abfd, s, bed->s->log_file_align))
     return FALSE;
@@ -259,7 +259,8 @@ _bfd_elf_link_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 
   if (info->emit_hash)
     {
-      s = bfd_make_section_with_flags (abfd, ".hash", flags | SEC_READONLY);
+      s = bfd_make_section_anyway_with_flags (abfd, ".hash",
+					      flags | SEC_READONLY);
       if (s == NULL
 	  || ! bfd_set_section_alignment (abfd, s, bed->s->log_file_align))
 	return FALSE;
@@ -268,8 +269,8 @@ _bfd_elf_link_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 
   if (info->emit_gnu_hash)
     {
-      s = bfd_make_section_with_flags (abfd, ".gnu.hash",
-				       flags | SEC_READONLY);
+      s = bfd_make_section_anyway_with_flags (abfd, ".gnu.hash",
+					      flags | SEC_READONLY);
       if (s == NULL
 	  || ! bfd_set_section_alignment (abfd, s, bed->s->log_file_align))
 	return FALSE;
@@ -320,7 +321,7 @@ _bfd_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
   if (bed->plt_readonly)
     pltflags |= SEC_READONLY;
 
-  s = bfd_make_section_with_flags (abfd, ".plt", pltflags);
+  s = bfd_make_section_anyway_with_flags (abfd, ".plt", pltflags);
   if (s == NULL
       || ! bfd_set_section_alignment (abfd, s, bed->plt_alignment))
     return FALSE;
@@ -337,10 +338,10 @@ _bfd_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 	return FALSE;
     }
 
-  s = bfd_make_section_with_flags (abfd,
-				   (bed->rela_plts_and_copies_p
-				    ? ".rela.plt" : ".rel.plt"),
-				   flags | SEC_READONLY);
+  s = bfd_make_section_anyway_with_flags (abfd,
+					  (bed->rela_plts_and_copies_p
+					   ? ".rela.plt" : ".rel.plt"),
+					  flags | SEC_READONLY);
   if (s == NULL
       || ! bfd_set_section_alignment (abfd, s, bed->s->log_file_align))
     return FALSE;
@@ -357,9 +358,8 @@ _bfd_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 	 image and use a R_*_COPY reloc to tell the dynamic linker to
 	 initialize them at run time.  The linker script puts the .dynbss
 	 section into the .bss section of the final image.  */
-      s = bfd_make_section_with_flags (abfd, ".dynbss",
-				       (SEC_ALLOC
-					| SEC_LINKER_CREATED));
+      s = bfd_make_section_anyway_with_flags (abfd, ".dynbss",
+					      (SEC_ALLOC | SEC_LINKER_CREATED));
       if (s == NULL)
 	return FALSE;
 
@@ -376,10 +376,10 @@ _bfd_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 	 copy relocs.  */
       if (! info->shared)
 	{
-	  s = bfd_make_section_with_flags (abfd,
-					   (bed->rela_plts_and_copies_p
-					    ? ".rela.bss" : ".rel.bss"),
-					   flags | SEC_READONLY);
+	  s = bfd_make_section_anyway_with_flags (abfd,
+						  (bed->rela_plts_and_copies_p
+						   ? ".rela.bss" : ".rel.bss"),
+						  flags | SEC_READONLY);
 	  if (s == NULL
 	      || ! bfd_set_section_alignment (abfd, s, bed->s->log_file_align))
 	    return FALSE;
