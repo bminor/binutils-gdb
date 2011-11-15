@@ -654,15 +654,21 @@ dump_section_relocs (bfd *abfd ATTRIBUTE_UNUSED, asection *sec, FILE *stream)
 static void
 resolve_reloc_expr_symbols (void)
 {
+  bfd_vma addr_mask = 1;
   struct reloc_list *r;
+
+  /* Avoid a shift by the width of type.  */
+  addr_mask <<= bfd_arch_bits_per_address (stdoutput) - 1;
+  addr_mask <<= 1;
+  addr_mask -= 1;
 
   for (r = reloc_list; r; r = r->next)
     {
+      reloc_howto_type *howto = r->u.a.howto;
       expressionS *symval;
       symbolS *sym;
       bfd_vma offset, addend;
       asection *sec;
-      reloc_howto_type *howto;
 
       resolve_symbol_value (r->u.a.offset_sym);
       symval = symbol_get_value_expression (r->u.a.offset_sym);
@@ -709,7 +715,16 @@ resolve_reloc_expr_symbols (void)
 	    }
 	  else if (sym != NULL)
 	    {
-	      if (S_IS_LOCAL (sym) && !symbol_section_p (sym))
+	      /* Convert relocs against local symbols to refer to the
+	         corresponding section symbol plus offset instead.  Keep
+	         PC-relative relocs of the REL variety intact though to
+		 prevent the offset from overflowing the relocated field,
+	         unless it has enough bits to cover the whole address
+	         space.  */
+	      if (S_IS_LOCAL (sym) && !symbol_section_p (sym)
+		  && !(howto->partial_inplace
+		       && howto->pc_relative
+		       && howto->src_mask != addr_mask))
 		{
 		  asection *symsec = S_GET_SEGMENT (sym);
 		  if (!(((symsec->flags & SEC_MERGE) != 0
@@ -729,8 +744,6 @@ resolve_reloc_expr_symbols (void)
 	    abs_section_sym = section_symbol (absolute_section);
 	  sym = abs_section_sym;
 	}
-
-      howto = r->u.a.howto;
 
       r->u.b.sec = sec;
       r->u.b.s = symbol_get_bfdsym (sym);

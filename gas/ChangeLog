@@ -1,3 +1,8 @@
+2011-11-15  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* write.c (dump_section_relocs): Don't convert PC-relative relocs
+	that have an in-place addend narrower than the addresses used.
+
 2011-11-14  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* config/tc-mips.c (can_swap_branch_p): Exclude microMIPS
