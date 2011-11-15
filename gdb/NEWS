@@ -165,6 +165,17 @@ show debug entry-values
   Control display of debugging info for determining frame argument values at
   function entry and virtual tail call frames.
 
+set basenames-may-differ
+show basenames-may-differ
+  Set whether a source file may have multiple base names.
+  (A "base name" is the name of a file with the directory part removed.
+  Example: The base name of "/home/user/hello.c" is "hello.c".)
+  If set, GDB will canonicalize file names (e.g., expand symlinks)
+  before comparing them.  Canonicalization is an expensive operation,
+  but it allows the same file be known by more than one base name.
+  If not set (the default), all source files are assumed to have just
+  one base name, and gdb will do file name comparisons more efficiently.
+
 * New remote packets
 
 QTEnable

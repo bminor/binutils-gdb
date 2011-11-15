@@ -1,3 +1,14 @@
+2011-11-15  Doug Evans  <dje@google.com>
+
+	* NEWS: Mention new parameter basenames-may-differ.
+	* dwarf2read.c (dw2_lookup_symtab): Avoid calling gdb_realpath if
+	! basenames_may_differ.
+	* psymtab.c (lookup_partial_symtab): Ditto.
+	* symtab.c (lookup_symtab): Ditto.
+	(basenames_may_differ): New global.
+	(_initialize_symtab): New parameter basenames-may-differ.
+	* symtab.h (basenames_may_differ): Declare.
+
 2011-11-15  Pedro Alves  <pedro@codesourcery.com>
 	    Luis Machado  <lgustavo@codesourcery.com>
 

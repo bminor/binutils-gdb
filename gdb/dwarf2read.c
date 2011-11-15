@@ -2445,7 +2445,8 @@ dw2_lookup_symtab (struct objfile *objfile, const char *name,
 		   struct symtab **result)
 {
   int i;
-  int check_basename = lbasename (name) == name;
+  const char *name_basename = lbasename (name);
+  int check_basename = name_basename == name;
   struct dwarf2_per_cu_data *base_cu = NULL;
 
   dw2_setup (objfile);
@@ -2477,6 +2478,12 @@ dw2_lookup_symtab (struct objfile *objfile, const char *name,
 	  if (check_basename && ! base_cu
 	      && FILENAME_CMP (lbasename (this_name), name) == 0)
 	    base_cu = per_cu;
+
+	  /* Before we invoke realpath, which can get expensive when many
+	     files are involved, do a quick comparison of the basenames.  */
+	  if (! basenames_may_differ
+	      && FILENAME_CMP (lbasename (this_name), name_basename) != 0)
+	    continue;
 
 	  if (full_path != NULL)
 	    {

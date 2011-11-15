@@ -134,6 +134,7 @@ lookup_partial_symtab (struct objfile *objfile, const char *name,
 		       const char *full_path, const char *real_path)
 {
   struct partial_symtab *pst;
+  const char *name_basename = lbasename (name);
 
   ALL_OBJFILE_PSYMTABS_REQUIRED (objfile, pst)
   {
@@ -141,6 +142,12 @@ lookup_partial_symtab (struct objfile *objfile, const char *name,
       {
 	return (pst);
       }
+
+    /* Before we invoke realpath, which can get expensive when many
+       files are involved, do a quick comparison of the basenames.  */
+    if (! basenames_may_differ
+	&& FILENAME_CMP (name_basename, lbasename (pst->filename)) != 0)
+      continue;
 
     /* If the user gave us an absolute path, try to find the file in
        this symtab and use its absolute path.  */
@@ -172,7 +179,7 @@ lookup_partial_symtab (struct objfile *objfile, const char *name,
 
   /* Now, search for a matching tail (only if name doesn't have any dirs).  */
 
-  if (lbasename (name) == name)
+  if (name_basename == name)
     ALL_OBJFILE_PSYMTABS_REQUIRED (objfile, pst)
     {
       if (FILENAME_CMP (lbasename (pst->filename), name) == 0)

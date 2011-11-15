@@ -15705,6 +15705,33 @@ This is the default.
 @end table
 @end table
 
+@cindex file name canonicalization
+@cindex base name differences
+When processing file names provided by the user, @value{GDBN}
+frequently needs to compare them to the file names recorded in the
+program's debug info.  Normally, @value{GDBN} compares just the
+@dfn{base names} of the files as strings, which is reasonably fast
+even for very large programs.  (The base name of a file is the last
+portion of its name, after stripping all the leading directories.)
+This shortcut in comparison is based upon the assumption that files
+cannot have more than one base name.  This is usually true, but
+references to files that use symlinks or similar filesystem
+facilities violate that assumption.  If your program records files
+using such facilities, or if you provide file names to @value{GDBN}
+using symlinks etc., you can set @code{basenames-may-differ} to
+@code{true} to instruct @value{GDBN} to completely canonicalize each
+pair of file names it needs to compare.  This will make file-name
+comparisons accurate, but at a price of a significant slowdown.
+
+@table @code
+@item set basenames-may-differ
+@kindex set basenames-may-differ
+Set whether a source file may have multiple base names.
+
+@item show basenames-may-differ
+@kindex show basenames-may-differ
+Show whether a source file may have multiple base names.
+@end table
 
 @node Separate Debug Files
 @section Debugging Information in Separate Files

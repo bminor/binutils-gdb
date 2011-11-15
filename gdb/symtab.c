@@ -112,6 +112,11 @@ void _initialize_symtab (void);
 
 /* */
 
+/* Non-zero if a file may be known by two different basenames.
+   This is the uncommon case, and significantly slows down gdb.
+   Default set to "off" to not slow down the common case.  */
+int basenames_may_differ = 0;
+
 /* Allow the user to configure the debugger behavior with respect
    to multiple-choice menus when more than one symbol matches during
    a symbol lookup.  */
@@ -155,6 +160,7 @@ lookup_symtab (const char *name)
   char *real_path = NULL;
   char *full_path = NULL;
   struct cleanup *cleanup;
+  const char* base_name = lbasename (name);
 
   cleanup = make_cleanup (null_cleanup, NULL);
 
@@ -179,6 +185,12 @@ got_symtab:
 	do_cleanups (cleanup);
 	return s;
       }
+
+    /* Before we invoke realpath, which can get expensive when many
+       files are involved, do a quick comparison of the basenames.  */
+    if (! basenames_may_differ
+	&& FILENAME_CMP (base_name, lbasename (s->filename)) != 0)
+      continue;
 
     /* If the user gave us an absolute path, try to find the file in
        this symtab and use its absolute path.  */
@@ -4884,6 +4896,20 @@ in an expression."), _("\
 Show how the debugger handles ambiguities in expressions."), _("\
 Valid values are \"ask\", \"all\", \"cancel\", and the default is \"all\"."),
                         NULL, NULL, &setlist, &showlist);
+
+  add_setshow_boolean_cmd ("basenames-may-differ", class_obscure,
+			   &basenames_may_differ, _("\
+Set whether a source file may have multiple base names."), _("\
+Show whether a source file may have multiple base names."), _("\
+(A \"base name\" is the name of a file with the directory part removed.\n\
+Example: The base name of \"/home/user/hello.c\" is \"hello.c\".)\n\
+If set, GDB will canonicalize file names (e.g., expand symlinks)\n\
+before comparing them.  Canonicalization is an expensive operation,\n\
+but it allows the same file be known by more than one base name.\n\
+If not set (the default), all source files are assumed to have just\n\
+one base name, and gdb will do file name comparisons more efficiently."),
+			   NULL, NULL,
+			   &setlist, &showlist);
 
   observer_attach_executable_changed (symtab_observer_executable_changed);
 }

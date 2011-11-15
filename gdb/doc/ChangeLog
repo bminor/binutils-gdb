@@ -1,3 +1,7 @@
+2011-11-15  Doug Evans  <dje@google.com>
+
+	* gdb.texinfo (Files): Document basenames-may-differ.
+
 2011-11-14  Doug Evans  <dje@google.com>
 
 	* gdb.texinfo (Shell Commands): Document "!".
