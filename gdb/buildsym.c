@@ -112,11 +112,8 @@ add_free_pendings (struct pending *list)
       free_pendings = list;
     }
 }
-      
-/* Add a symbol to one of the lists of symbols.  While we're at it, if
-   we're in the C++ case and don't have full namespace debugging info,
-   check to see if it references an anonymous namespace; if so, add an
-   appropriate using directive.  */
+
+/* Add a symbol to one of the lists of symbols.  */
 
 void
 add_symbol_to_list (struct symbol *symbol, struct pending **listhead)
