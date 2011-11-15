@@ -1,3 +1,8 @@
+2011-11-15  Paul Koning  <paul_koning@dell.com>
+
+	* gdb.python/py-type.exp: New testcases for exceptions on scalar
+	types.
+
 2011-11-14  Doug Evans  <dje@google.com>
 
 	* gdb.base/shell.exp: New file.

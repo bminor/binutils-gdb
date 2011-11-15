@@ -97,6 +97,16 @@ proc test_fields {lang} {
     gdb_test "python print \[(n, v.bitpos) for (n, v) in st.type.items()\]" {\[\('a', 0L\), \('b', 32L\)\]} "Check fields items list"
   gdb_test "python print 'a' in st.type" "True" "Check field name exists test"
   gdb_test "python print 'nosuch' in st.type" "False" "Check field name nonexists test"
+  gdb_test "python print not not st.type" "True" "Check conversion to bool"
+
+  # Test rejection of mapping operations on scalar types
+  gdb_test "python print len (st.type\['a'\].type)" "TypeError: Type is not a structure, union, or enum type.*"
+  gdb_test "python print st.type\['a'\].type.has_key ('x')" "TypeError: Type is not a structure, union, or enum type.*"
+  gdb_test "python print st.type\['a'\].type.keys ()" "TypeError: Type is not a structure, union, or enum type.*"
+  gdb_test "python print st.type\['a'\].type\['x'\]" "TypeError: Type is not a structure, union, or enum type.*"
+
+  # Test conversion to bool on scalar types
+  gdb_test "python print not not st.type\['a'\].type" "True"
   
   # Test regression PR python/10805
   gdb_py_test_silent_cmd "print ar" "print value" 1
