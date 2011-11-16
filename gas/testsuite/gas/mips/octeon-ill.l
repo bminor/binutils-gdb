@@ -8,22 +8,22 @@
 .*:18: Error: Improper size \(25\)
 .*:20: Error: Improper position \(64\)
 .*:21: Error: Improper size \(14\)
-.*:23: Error: opcode not supported on this processor.*
-.*:24: Error: opcode not supported on this processor.*
-.*:25: Error: opcode not supported on this processor.*
-.*:26: Error: opcode not supported on this processor.*
-.*:27: Error: opcode not supported on this processor.*
-.*:28: Error: opcode not supported on this processor.*
-.*:29: Error: opcode not supported on this processor.*
+.*:23: Error: Opcode not supported on this processor.*
+.*:24: Error: Opcode not supported on this processor.*
+.*:25: Error: Opcode not supported on this processor.*
+.*:26: Error: Opcode not supported on this processor.*
+.*:27: Error: Opcode not supported on this processor.*
+.*:28: Error: Opcode not supported on this processor.*
+.*:29: Error: Opcode not supported on this processor.*
 .*:30: Error: Opcode not supported on this processor.*
 .*:31: Error: Opcode not supported on this processor.*
-.*:32: Error: opcode not supported on this processor.*
-.*:33: Error: opcode not supported on this processor.*
-.*:34: Error: opcode not supported on this processor.*
-.*:35: Error: opcode not supported on this processor.*
+.*:32: Error: Opcode not supported on this processor.*
+.*:33: Error: Opcode not supported on this processor.*
+.*:34: Error: Opcode not supported on this processor.*
+.*:35: Error: Opcode not supported on this processor.*
 .*:36: Error: Opcode not supported on this processor.*
 .*:37: Error: Opcode not supported on this processor.*
-.*:39: Error: opcode not supported on this processor.*
+.*:39: Error: Opcode not supported on this processor.*
 .*:40: Error: Opcode not supported on this processor.*
 .*:41: Error: Opcode not supported on this processor.*
 .*:42: Error: Opcode not supported on this processor.*

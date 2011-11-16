@@ -1,3 +1,18 @@
+2011-11-16  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* gas/mips/mips-double-float-flag.l: Adjust according to
+	unsupported opcode message capitalization fix.
+	* gas/mips/mips-hard-float-flag.l: Likewise.
+	* gas/mips/mips-macro-ill-nofp.l: Likewise.
+	* gas/mips/mips-macro-ill-sfp.l: Likewise.
+	* gas/mips/mips1-fp.l: Likewise.
+	* gas/mips/mips16e-64.l: Likewise.
+	* gas/mips/mips32-sf32.l: Likewise.
+	* gas/mips/mips32r2-fp32.l: Likewise.
+	* gas/mips/mips4-branch-likely.l: Likewise.
+	* gas/mips/mips4-fp.l: Likewise.
+	* gas/mips/octeon-ill.l: Likewise.
+
 2011-11-14  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* gas/mips/relax-swap3.d: New test.

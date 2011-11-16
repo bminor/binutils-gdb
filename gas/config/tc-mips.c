@@ -9151,7 +9151,7 @@ macro (struct mips_cl_insn *ip)
       if (NO_ISA_COP (mips_opts.arch)
 	  && (ip->insn_mo->pinfo2 & INSN2_M_FP_S) == 0)
 	{
-	  as_bad (_("opcode not supported on this processor: %s"),
+	  as_bad (_("Opcode not supported on this processor: %s"),
 		  mips_cpu_info_from_arch (mips_opts.arch)->name);
 	  break;
 	}
@@ -10700,7 +10700,7 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 	    return;
 
 	  if (!ok)
-	    sprintf (buf, _("opcode not supported on this processor: %s (%s)"),
+	    sprintf (buf, _("Opcode not supported on this processor: %s (%s)"),
 		     mips_cpu_info_from_arch (mips_opts.arch)->name,
 		     mips_cpu_info_from_isa (mips_opts.isa)->name);
 	  else
@@ -13229,7 +13229,7 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
 		{
 		  static char buf[100];
 		  sprintf (buf,
-			   _("opcode not supported on this processor: %s (%s)"),
+			   _("Opcode not supported on this processor: %s (%s)"),
 			   mips_cpu_info_from_arch (mips_opts.arch)->name,
 			   mips_cpu_info_from_isa (mips_opts.isa)->name);
 		  insn_error = buf;

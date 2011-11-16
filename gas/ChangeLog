@@ -1,5 +1,11 @@
 2011-11-16  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* config/tc-mips.c (macro): Fix unsupported opcode message
+	capitalization.
+	(mips_ip, mips16_ip): Likewise.
+
+2011-11-16  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* config/tc-mips.c (ISA_SUPPORTS_MCU_ASE): Also set if microMIPS
 	mode.
 
