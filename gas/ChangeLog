@@ -1,3 +1,9 @@
+2011-11-16  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* config/tc-mips.c (macro_build_jalr): Reverse a negative
+	conditional.
+	(mips_ip): Likewise.
+
 2011-11-16  Catherine Moore  <clm@codesourcery.com>
             Maciej W. Rozycki  <macro@codesourcery.com>
 

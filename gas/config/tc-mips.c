@@ -5260,9 +5260,7 @@ macro_build_jalr (expressionS *ep, int cprestore)
       frag_grow (8);
       f = frag_more (0);
     }
-  if (!mips_opts.micromips)
-    macro_build (NULL, "jalr", "d,s", RA, PIC_CALL_REG);
-  else
+  if (mips_opts.micromips)
     {
       jalr = mips_opts.noreorder && !cprestore ? "jalr" : "jalrs";
       if (MIPS_JALR_HINT_P (ep))
@@ -5270,6 +5268,8 @@ macro_build_jalr (expressionS *ep, int cprestore)
       else
 	macro_build (NULL, jalr, "mj", PIC_CALL_REG);
     }
+  else
+    macro_build (NULL, "jalr", "d,s", RA, PIC_CALL_REG);
   if (MIPS_JALR_HINT_P (ep))
     fix_new_exp (frag_now, f - frag_now->fr_literal, 4, ep, FALSE, jalr_reloc);
 }
@@ -10964,9 +10964,9 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 
 	    case '\\':		/* 3-bit bit position.  */
 	      {
-		unsigned long mask = (!mips_opts.micromips
-				      ? OP_MASK_3BITPOS
-				      : MICROMIPSOP_MASK_3BITPOS);
+		unsigned long mask = (mips_opts.micromips
+				      ? MICROMIPSOP_MASK_3BITPOS
+				      : OP_MASK_3BITPOS);
 
 		my_getExpression (&imm_expr, s);
 		check_absolute_expr (ip, &imm_expr);
