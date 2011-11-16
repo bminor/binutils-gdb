@@ -1,3 +1,13 @@
+2011-11-16  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* elf64-mips.c (mips_elf64_howto_table_rela): Set src_mask to
+	zero throughout.
+	(mips16_elf64_howto_table_rela): Likewise.
+	(micromips_elf64_howto_table_rela): Likewise.
+	* elfn32-mips.c (elf_mips_howto_table_rela): Likewise.
+	(elf_mips16_howto_table_rela): Likewise.
+	(elf_micromips_howto_table_rela): Likewise.
+
 2011-11-15  Alan Modra  <amodra@gmail.com>
 	    Andreas Tobler  <andreast@fgznet.ch>
 
