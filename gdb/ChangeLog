@@ -1,3 +1,9 @@
+2011-11-16  David S. Miller  <davem@davemloft.net>
+
+	* utils.c (report_command_stats): Cast delta_wall_time 'tv_sec' and
+	'tv_usec' to long for printf since these fields have a type which
+	varies.
+
 2011-11-15  Doug Evans  <dje@google.com>
 
 	* buildsym.c (add_symbol_to_list): Delete outdated comment.

@@ -707,7 +707,8 @@ report_command_stats (void *arg)
 			 ? _("Startup time: %ld.%06ld (cpu), %ld.%06ld (wall)\n")
 			 : _("Command execution time: %ld.%06ld (cpu), %ld.%06ld (wall)\n"),
 			 cmd_time / 1000000, cmd_time % 1000000,
-			 delta_wall_time.tv_sec, delta_wall_time.tv_usec);
+			 (long) delta_wall_time.tv_sec,
+			 (long) delta_wall_time.tv_usec);
     }
 
   if (display_space)
