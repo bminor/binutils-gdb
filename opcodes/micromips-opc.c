@@ -167,9 +167,9 @@ const struct mips_opcode micromips_opcodes[] =
 {"addu",    "md,me,ml",	    0x0400,     0xfc01,	0,			WR_md|RD_me|RD_ml,	I1	},
 {"addu",    "d,v,t",	0x00000150, 0xfc0007ff,	WR_d|RD_s|RD_t,		0,		I1	},
 {"addu",    "t,r,I",	0,    (int) M_ADDU_I,	INSN_MACRO,		0,		I1	},
-/* We have no flag to mark the read from "y", so we use TRAP to disable
+/* We have no flag to mark the read from "y", so we use NODS to disable
    delay slot scheduling of ALNV.PS altogether.  */
-{"alnv.ps", "D,V,T,y",	0x54000019, 0xfc00003f,	TRAP|WR_D|RD_S|RD_T|FP_D, 0,		I1	},
+{"alnv.ps", "D,V,T,y",	0x54000019, 0xfc00003f,	NODS|WR_D|RD_S|RD_T|FP_D, 0,		I1	},
 {"and",     "mf,mt,mg",	    0x4480,     0xffc0,	0,			WR_mf|RD_mf|RD_mg,	I1	},
 {"and",     "mf,mg,mx",	    0x4480,     0xffc0,	0,			WR_mf|RD_mf|RD_mg,	I1	},
 {"and",     "d,v,t",	0x00000250, 0xfc0007ff,	WR_d|RD_s|RD_t,		0,		I1	},
