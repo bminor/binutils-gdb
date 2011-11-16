@@ -160,7 +160,7 @@ skip_function_command (char *arg, int from_tty)
       int pending = 0;
       char *orig_arg = arg; /* decode_line_1 modifies the arg pointer.  */
       volatile struct gdb_exception decode_exception;
-      struct symtabs_and_lines sals;
+      struct symtabs_and_lines sals = { 0 };
 
       TRY_CATCH (decode_exception, RETURN_MASK_ERROR)
 	{
@@ -509,7 +509,7 @@ skip_re_set (void)
       else if (e->function_name != 0)
         {
 	  char *func_name = e->function_name;
-	  struct symtabs_and_lines sals;
+	  struct symtabs_and_lines sals = { 0 };
 	  volatile struct gdb_exception decode_exception;
 
 	  TRY_CATCH (decode_exception, RETURN_MASK_ERROR)
