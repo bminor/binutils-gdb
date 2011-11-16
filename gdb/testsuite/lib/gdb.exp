@@ -1539,7 +1539,7 @@ proc can_single_step_to_signal_handler {} {
     # to determine the next instruction addresses, because start of signal
     # handler is one of them.
     if { [istarget "arm*-*-*"] || [istarget "mips*-*-*"]
-	 || [istarget "tic6x-*-*"] } {
+	 || [istarget "tic6x-*-*"] || [istarget "sparc*-*-linux*"] } {
 	return 0
     }
 

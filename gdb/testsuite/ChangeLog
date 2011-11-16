@@ -1,3 +1,8 @@
+2011-11-16  David S. Miller  <davem@davemloft.net>
+
+	* lib/gdb.exp (can_single_step_to_signal_handler): Return zero when
+	target is sparc*-*-linux*
+
 2011-11-15  Paul Koning  <paul_koning@dell.com>
 
 	* gdb.python/py-type.exp: New testcases for exceptions on scalar
