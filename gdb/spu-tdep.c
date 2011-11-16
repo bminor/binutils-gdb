@@ -1458,11 +1458,19 @@ spu_return_value (struct gdbarch *gdbarch, struct type *func_type,
   enum return_value_convention rvc;
   int opencl_vector = 0;
 
-  if (func_type
-      && TYPE_CALLING_CONVENTION (func_type) == DW_CC_GDB_IBM_OpenCL
-      && TYPE_CODE (type) == TYPE_CODE_ARRAY
-      && TYPE_VECTOR (type))
-    opencl_vector = 1;
+  if (func_type)
+    {
+      func_type = check_typedef (func_type);
+
+      if (TYPE_CODE (func_type) == TYPE_CODE_PTR)
+	func_type = check_typedef (TYPE_TARGET_TYPE (func_type));
+
+      if (TYPE_CODE (func_type) == TYPE_CODE_FUNC
+	  && TYPE_CALLING_CONVENTION (func_type) == DW_CC_GDB_IBM_OpenCL
+	  && TYPE_CODE (type) == TYPE_CODE_ARRAY
+	  && TYPE_VECTOR (type))
+	opencl_vector = 1;
+    }
 
   if (TYPE_LENGTH (type) <= (SPU_ARGN_REGNUM - SPU_ARG1_REGNUM + 1) * 16)
     rvc = RETURN_VALUE_REGISTER_CONVENTION;

@@ -1,5 +1,10 @@
 2011-11-16  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* spu-tdep.c (spu_return_value): Fix handling of
+	TYPE_CALLING_CONVENTION annotation.
+
+2011-11-16  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* skip.c (skip_function_command): Work around uninitialized
 	variable warning.
 
