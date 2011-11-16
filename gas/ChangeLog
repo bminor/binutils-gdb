@@ -1,3 +1,11 @@
+2011-11-16  Catherine Moore  <clm@codesourcery.com>
+            Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* config/tc-mips.c (mips_cpu_info_table): Add "m14ke" and
+	"m14kec".
+	* doc/c-mips.texi (MIPS architecture options): Add "m14ke" and
+	"m14kec" to the list of -march options.
+
 2011-11-15  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* write.c (dump_section_relocs): Don't convert PC-relative relocs
