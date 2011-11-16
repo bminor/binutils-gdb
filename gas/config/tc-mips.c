@@ -370,7 +370,8 @@ static int file_ase_mt;
 			     || mips_opts.isa == ISA_MIPS64R2)
 
 #define ISA_SUPPORTS_MCU_ASE (mips_opts.isa == ISA_MIPS32R2		\
-			      || mips_opts.isa == ISA_MIPS64R2)
+			      || mips_opts.isa == ISA_MIPS64R2		\
+			      || mips_opts.micromips)
 
 /* The argument of the -march= flag.  The architecture we are assembling.  */
 static int file_mips_arch = CPU_UNKNOWN;
