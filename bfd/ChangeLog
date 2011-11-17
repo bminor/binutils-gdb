@@ -1,3 +1,8 @@
+2011-11-17  Philipp Thomas  <philipp@thogro.org>
+
+	* elf32-arm.c (elf32_thumb_to_arm_stub): Sync message so that it
+	needs to be translated only once.
+
 2011-11-16  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* elf64-mips.c (mips_elf64_howto_table_rela): Set src_mask to
