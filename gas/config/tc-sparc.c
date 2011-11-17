@@ -3193,8 +3193,12 @@ md_apply_fix (fixS *fixP, valueT *valP, segT segment ATTRIBUTE_UNUSED)
 
   /* If this is a data relocation, just output VAL.  */
 
-  if (fixP->fx_r_type == BFD_RELOC_16
-      || fixP->fx_r_type == BFD_RELOC_SPARC_UA16)
+  if (fixP->fx_r_type == BFD_RELOC_8)
+    {
+      md_number_to_chars (buf, val, 1);
+    }
+  else if (fixP->fx_r_type == BFD_RELOC_16
+	   || fixP->fx_r_type == BFD_RELOC_SPARC_UA16)
     {
       md_number_to_chars (buf, val, 2);
     }
