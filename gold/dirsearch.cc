@@ -25,6 +25,7 @@
 #include <cerrno>
 #include <cstring>
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <dirent.h>
 
 #include "debug.h"
@@ -275,6 +276,30 @@ Dirsearch::find(const std::vector<std::string>& names,
 
   *pindex = -2;
   return std::string();
+}
+
+// Search for a file in a directory list.  This is a low-level function and
+// therefore can be used before options and parameters are set.
+
+std::string
+Dirsearch::find_file_in_dir_list(const std::string& name,
+                                 const General_options::Dir_list& directories,
+                                 const std::string& extra_search_dir)
+{
+  struct stat buf;
+  std::string extra_name = extra_search_dir + '/' + name;
+
+  if (stat(extra_name.c_str(), &buf) == 0)
+    return extra_name;
+  for (General_options::Dir_list::const_iterator dir = directories.begin();
+       dir != directories.end();
+       ++dir)
+    {
+      std::string full_name = dir->name() + '/' + name;
+      if (stat(full_name.c_str(), &buf) == 0)
+        return full_name;
+    }
+  return name;
 }
 
 } // End namespace gold.

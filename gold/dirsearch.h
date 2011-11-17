@@ -67,6 +67,13 @@ class Dirsearch
   token()
   { return &this->token_; }
 
+  // Search for a file in a directory list.  This is a low-level function and
+  // therefore can be used before options and parameters are set.
+  static std::string
+  find_file_in_dir_list(const std::string& name,
+                        const General_options::Dir_list& directories,
+                        const std::string& extra_search_dir);
+
  private:
   // We can not copy this class.
   Dirsearch(const Dirsearch&);

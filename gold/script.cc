@@ -1535,18 +1535,26 @@ read_input_script(Workqueue* workqueue, Symbol_table* symtab, Layout* layout,
   return true;
 }
 
-// Helper function for read_version_script() and
-// read_commandline_script().  Processes the given file in the mode
-// indicated by first_token and lex_mode.
+// Helper function for read_version_script(), read_commandline_script() and
+// script_include_directive().  Processes the given file in the mode indicated
+// by first_token and lex_mode.
 
 static bool
 read_script_file(const char* filename, Command_line* cmdline,
                  Script_options* script_options,
                  int first_token, Lex::Mode lex_mode)
 {
-  // TODO: if filename is a relative filename, search for it manually
-  // using "." + cmdline->options()->search_path() -- not dirsearch.
   Dirsearch dirsearch;
+  std::string name = filename;
+
+  // If filename is a relative filename, search for it manually using "." +
+  // cmdline->options()->library_path() -- not dirsearch.
+  if (!IS_ABSOLUTE_PATH(filename))
+    {
+      const General_options::Dir_list& search_path =
+          cmdline->options().library_path();
+      name = Dirsearch::find_file_in_dir_list(name, search_path, ".");
+    }
 
   // The file locking code wants to record a Task, but we haven't
   // started the workqueue yet.  This is only for debugging purposes,
@@ -1557,7 +1565,7 @@ read_script_file(const char* filename, Command_line* cmdline,
   Position_dependent_options posdep = cmdline->position_dependent_options();
   if (posdep.format_enum() == General_options::OBJECT_FORMAT_BINARY)
     posdep.set_format_enum(General_options::OBJECT_FORMAT_ELF);
-  Input_file_argument input_argument(filename,
+  Input_file_argument input_argument(name.c_str(),
 				     Input_file_argument::INPUT_FILE_TYPE_FILE,
 				     "", false, posdep);
   Input_file input_file(&input_argument);
@@ -3351,10 +3359,13 @@ script_parse_memory_attr(void* closurev, const char* attrs, size_t attrlen,
 }
 
 extern "C" void
-script_include_directive(void* closurev, const char*, size_t)
+script_include_directive(void* closurev, const char* filename, size_t length)
 {
-  // FIXME: Implement ?
-  yyerror (closurev, _("GOLD does not currently support INCLUDE directives"));
+  Parser_closure* closure = static_cast<Parser_closure*>(closurev);
+  std::string name(filename, length);
+  Command_line* cmdline = closure->command_line();
+  read_script_file(name.c_str(), cmdline, &cmdline->script_options(),
+                   PARSING_LINKER_SCRIPT, Lex::LINKER_SCRIPT);
 }
 
 // Functions for memory regions.

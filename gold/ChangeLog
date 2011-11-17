@@ -1,3 +1,11 @@
+2011-11-17  Sterling Augustine  <saugustine@google.com>
+
+	* script.cc (script_include_directive): Implement.
+	(read_script_file): New local variables name and search_path. Update
+	comment. Call IS_ABSOLUTE_PATH and Dirsearch::find_file_in_dir_list.
+	* dirsearch.h (Dirsearch::find_file_in_dir_list): Declare new method.
+	* dirsearch.cc (Dirsearch::find_file_in_dir_list): Implement it.
+
 2011-11-11  Sterling Augustine  <saugustine@google.com>
 
 	* yyscript.y (section_cmd): Add support for INCLUDE directive.
