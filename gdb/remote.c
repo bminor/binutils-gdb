@@ -7369,12 +7369,20 @@ getpkt_or_notif_sane (char **buf, long *sizeof_buf, int forever)
 }
 
 
+/* A helper function that just calls putpkt; for type correctness.  */
+
+static int
+putpkt_for_catch_errors (void *arg)
+{
+  return putpkt (arg);
+}
+
 static void
 remote_kill (struct target_ops *ops)
 {
   /* Use catch_errors so the user can quit from gdb even when we
      aren't on speaking terms with the remote system.  */
-  catch_errors ((catch_errors_ftype *) putpkt, "k", "", RETURN_MASK_ERROR);
+  catch_errors (putpkt_for_catch_errors, "k", "", RETURN_MASK_ERROR);
 
   /* Don't wait for it to die.  I'm not really sure it matters whether
      we do or not.  For the existing stubs, kill is a noop.  */

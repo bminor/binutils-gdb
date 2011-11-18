@@ -1,3 +1,9 @@
+2011-11-18  Tom Tromey  <tromey@redhat.com>
+
+	PR build/7196:
+	* remote.c (putpkt_for_catch_errors): New function.
+	(remote_kill): Use it.
+
 2011-11-18  Yao Qi  <yao@codesourcery.com>
 
 	* breakpoint.c (create_breakpoint): Produce query message according to
