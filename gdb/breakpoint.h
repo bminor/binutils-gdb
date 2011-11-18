@@ -1098,9 +1098,11 @@ extern void
 /* Add breakpoint B on the breakpoint list, and notify the user, the
    target and breakpoint_created observers of its existence.  If
    INTERNAL is non-zero, the breakpoint number will be allocated from
-   the internal breakpoint count.  */
+   the internal breakpoint count.  If UPDATE_GLL is non-zero,
+   update_global_location_list will be called.  */
 
-extern void install_breakpoint (int internal, struct breakpoint *b);
+extern void install_breakpoint (int internal, struct breakpoint *b,
+				int update_gll);
 
 extern int create_breakpoint (struct gdbarch *gdbarch, char *arg,
 			      char *cond_string, int thread,

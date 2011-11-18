@@ -1,3 +1,15 @@
+2011-11-18  Yao Qi  <yao@codesourcery.com>
+
+	* breakpoint.c (install_breakpoint):  Add one more parameter so that
+	update_global_location_list is called conditionally.
+	(create_fork_vfork_event_catchpoint): Update.
+	(create_syscall_event_catchpoint): Update.
+	(create_breakpoint_sal): Update.
+	(create_breakpoint_sal): Update. Call do_cleanups before
+	install_breakpoint.
+	* ada-lang.c (create_ada_exception_catchpoint): Update.
+	* breakpoint.h (install_breakpoint): Update declaration.
+
 2011-11-16  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* spu-tdep.c (spu_return_value): Fix handling of

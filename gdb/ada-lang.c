@@ -11705,7 +11705,7 @@ create_ada_exception_catchpoint (struct gdbarch *gdbarch,
 				 ops, tempflag, from_tty);
   c->excep_string = excep_string;
   create_excep_cond_exprs (c);
-  install_breakpoint (0, &c->base);
+  install_breakpoint (0, &c->base, 1);
 }
 
 /* Implement the "catch exception" command.  */

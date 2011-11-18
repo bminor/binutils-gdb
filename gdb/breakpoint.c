@@ -6680,14 +6680,16 @@ init_catchpoint (struct breakpoint *b,
 }
 
 void
-install_breakpoint (int internal, struct breakpoint *b)
+install_breakpoint (int internal, struct breakpoint *b, int update_gll)
 {
   add_to_breakpoint_chain (b);
   set_breakpoint_number (internal, b);
   if (!internal)
     mention (b);
   observer_notify_breakpoint_created (b);
-  update_global_location_list (1);
+
+  if (update_gll)
+    update_global_location_list (1);
 }
 
 static void
@@ -6701,7 +6703,7 @@ create_fork_vfork_event_catchpoint (struct gdbarch *gdbarch,
 
   c->forked_inferior_pid = null_ptid;
 
-  install_breakpoint (0, &c->base);
+  install_breakpoint (0, &c->base, 1);
 }
 
 /* Exec catchpoints.  */
@@ -6822,7 +6824,7 @@ create_syscall_event_catchpoint (int tempflag, VEC(int) *filter,
   init_catchpoint (&c->base, gdbarch, tempflag, NULL, ops);
   c->syscalls_to_be_caught = filter;
 
-  install_breakpoint (0, &c->base);
+  install_breakpoint (0, &c->base, 1);
 }
 
 static int
@@ -7331,7 +7333,7 @@ create_breakpoint_sal (struct gdbarch *gdbarch,
 		       enabled, internal, display_canonical);
   discard_cleanups (old_chain);
 
-  install_breakpoint (internal, b);
+  install_breakpoint (internal, b, 0);
 }
 
 /* Remove element at INDEX_TO_REMOVE from SAL, shifting other
@@ -7961,7 +7963,7 @@ create_breakpoint (struct gdbarch *gdbarch,
 		 corresponds to this one  */
 	      tp->static_trace_marker_id_idx = i;
 
-	      install_breakpoint (internal, &tp->base);
+	      install_breakpoint (internal, &tp->base, 0);
 
 	      do_cleanups (old_chain);
 	    }
@@ -9397,7 +9399,7 @@ watch_command_1 (char *arg, int accessflag, int from_tty,
       throw_exception (e);
     }
 
-  install_breakpoint (internal, b);
+  install_breakpoint (internal, b, 1);
 }
 
 /* Return count of debug registers needed to watch the given expression.
@@ -9795,7 +9797,7 @@ catch_exec_command_1 (char *arg, int from_tty,
 		   &catch_exec_breakpoint_ops);
   c->exec_pathname = NULL;
 
-  install_breakpoint (0, &c->base);
+  install_breakpoint (0, &c->base, 1);
 }
 
 static enum print_stop_action
