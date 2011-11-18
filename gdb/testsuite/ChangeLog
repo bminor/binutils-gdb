@@ -1,3 +1,13 @@
+2011-11-18  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.trace/pending.exp: New.
+	* gdb.trace/pending.c: New.
+	* gdb.trace/pendshr1.c: New.
+	* gdb.trace/pendshr2.c: New.
+	* gdb.trace/change-loc.exp (tracepoint_change_loc_1): Check one
+	tracepoint location becomes pending.
+	(tracepoint_change_loc_2): New.
+
 2011-11-16  David S. Miller  <davem@davemloft.net>
 
 	* lib/gdb.exp (can_single_step_to_signal_handler): Return zero when

@@ -7836,8 +7836,8 @@ create_breakpoint (struct gdbarch *gdbarch,
           /* If pending breakpoint support is auto query and the user
 	     selects no, then simply return the error code.  */
 	  if (pending_break_support == AUTO_BOOLEAN_AUTO
-	      && !nquery (_("Make breakpoint pending on "
-			    "future shared library load? ")))
+	      && !nquery (_("Make %s pending on future shared library load? "),
+			  bptype_string (type_wanted)))
 	    return 0;
 
 	  /* At this point, either the user was queried about setting
@@ -7894,7 +7894,7 @@ create_breakpoint (struct gdbarch *gdbarch,
     breakpoint_sals_to_pc (&sals);
 
   /* Fast tracepoints may have additional restrictions on location.  */
-  if (type_wanted == bp_fast_tracepoint)
+  if (!pending && type_wanted == bp_fast_tracepoint)
     check_fast_tracepoint_sals (gdbarch, &sals);
 
   /* Verify that condition can be parsed, before setting any
@@ -7981,9 +7981,18 @@ create_breakpoint (struct gdbarch *gdbarch,
 
       make_cleanup (xfree, copy_arg);
 
-      b = set_raw_breakpoint_without_location (gdbarch, type_wanted, ops);
-      set_breakpoint_number (internal, b);
-      b->thread = -1;
+      if (is_tracepoint_type (type_wanted))
+	{
+	  struct tracepoint *t;
+
+	  t = XCNEW (struct tracepoint);
+	  b = &t->base;
+	}
+      else
+	b = XNEW (struct breakpoint);
+
+      init_raw_breakpoint_without_location (b, gdbarch, type_wanted, ops);
+
       b->addr_string = canonical.canonical[0];
       b->cond_string = NULL;
       b->ignore_count = ignore_count;
@@ -7991,18 +8000,13 @@ create_breakpoint (struct gdbarch *gdbarch,
       b->condition_not_parsed = 1;
       b->enable_state = enabled ? bp_enabled : bp_disabled;
       b->pspace = current_program_space;
-      b->py_bp_object = NULL;
 
       if (enabled && b->pspace->executing_startup
 	  && (b->type == bp_breakpoint
 	      || b->type == bp_hardware_breakpoint))
 	b->enable_state = bp_startup_disabled;
 
-      if (!internal)
-        /* Do not mention breakpoints with a negative number, 
-	   but do notify observers.  */
-	mention (b);
-      observer_notify_breakpoint_created (b);
+      install_breakpoint (internal, b, 0);
     }
   
   if (sals.nelts > 1)

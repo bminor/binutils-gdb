@@ -10340,7 +10340,15 @@ in tracing}).
 If remote stub doesn't support the @samp{InstallInTrace} feature, all
 these changes don't take effect until the next @code{tstart}
 command, and once a trace experiment is running, further changes will
-not have any effect until the next trace experiment starts.
+not have any effect until the next trace experiment starts.  In addition,
+@value{GDBN} supports @dfn{pending tracepoints}---tracepoints whose
+address is not yet resolved.  (This is similar to pending breakpoints.)
+Pending tracepoints are not downloaded to the target and not installed
+until they are resolved.  The resolution of pending tracepoints requires
+@value{GDBN} support---when debugging with the remote target, and
+@value{GDBN} disconnects from the remote stub (@pxref{disconnected
+tracing}), pending tracepoints can not be resolved (and downloaded to
+the remote stub) while @value{GDBN} is disconnected.
 
 Here are some examples of using the @code{trace} command:
 

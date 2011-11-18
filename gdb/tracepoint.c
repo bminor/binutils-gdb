@@ -1642,6 +1642,48 @@ add_aexpr (struct collection_list *collect, struct agent_expr *aexpr)
   collect->next_aexpr_elt++;
 }
 
+static void
+process_tracepoint_on_disconnect (void)
+{
+  VEC(breakpoint_p) *tp_vec = NULL;
+  int ix;
+  struct breakpoint *b;
+  int has_pending_p = 0;
+
+  /* Check whether we still have pending tracepoint.  If we have, warn the
+     user that pending tracepoint will no longer work.  */
+  tp_vec = all_tracepoints ();
+  for (ix = 0; VEC_iterate (breakpoint_p, tp_vec, ix, b); ix++)
+    {
+      if (b->loc == NULL)
+	{
+	  has_pending_p = 1;
+	  break;
+	}
+      else
+	{
+	  struct bp_location *loc1;
+
+	  for (loc1 = b->loc; loc1; loc1 = loc1->next)
+	    {
+	      if (loc1->shlib_disabled)
+		{
+		  has_pending_p = 1;
+		  break;
+		}
+	    }
+
+	  if (has_pending_p)
+	    break;
+	}
+    }
+  VEC_free (breakpoint_p, tp_vec);
+
+  if (has_pending_p)
+    warning (_("Pending tracepoints will not be resolved while"
+	       " GDB is disconnected\n"));
+}
+
 
 void
 start_tracing (void)
@@ -2020,6 +2062,8 @@ disconnect_tracing (int from_tty)
      disconnected-tracing.  */
   if (current_trace_status ()->running && from_tty)
     {
+      process_tracepoint_on_disconnect ();
+
       if (current_trace_status ()->disconnected_tracing)
 	{
 	  if (!query (_("Trace is running and will "

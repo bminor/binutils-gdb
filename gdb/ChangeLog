@@ -1,5 +1,14 @@
 2011-11-18  Yao Qi  <yao@codesourcery.com>
 
+	* breakpoint.c (create_breakpoint): Produce query message according to
+	breakpoint's type.
+	Allocate tracepoint per correct type.
+	Don't check SALs for pending fast tracepoints.
+	* tracepoint.c (process_tracepoint_on_disconnect): New.
+	(disconnect_tracing): Call process_tracepoint_on_disconnect.
+
+2011-11-18  Yao Qi  <yao@codesourcery.com>
+
 	* breakpoint.c (install_breakpoint):  Add one more parameter so that
 	update_global_location_list is called conditionally.
 	(create_fork_vfork_event_catchpoint): Update.
