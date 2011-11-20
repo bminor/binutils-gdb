@@ -627,6 +627,8 @@ fi
 AC_SUBST(TARGET_PTR)
 AC_CONFIG_FILES([jit-reader.h:jit-reader.in])
 
+AC_SEARCH_LIBS(dlopen, dl)
+
 GDB_AC_WITH_DIR([JIT_READER_DIR], [jit-reader-dir],
                 [directory to load the JIT readers from],
                 [${libdir}/gdb])
@@ -981,7 +983,8 @@ AC_CHECK_HEADERS([nlist.h machine/reg.h poll.h sys/poll.h proc_service.h \
 		  sys/resource.h sys/procfs.h sys/ptrace.h ptrace.h \
 		  sys/reg.h sys/debugreg.h sys/select.h sys/syscall.h \
 		  sys/types.h sys/wait.h wait.h termios.h termio.h \
-		  sgtty.h unistd.h elf_hp.h ctype.h time.h locale.h])
+		  sgtty.h unistd.h elf_hp.h ctype.h time.h locale.h \
+		  dlfcn.h])
 AC_CHECK_HEADERS(link.h, [], [],
 [#if HAVE_SYS_TYPES_H
 # include <sys/types.h>

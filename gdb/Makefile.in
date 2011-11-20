@@ -748,7 +748,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	annotate.c common/signals.c copying.c dfp.c gdb.c inf-child.c \
 	regset.c sol-thread.c windows-termcap.c \
 	common/common-utils.c common/xml-utils.c \
-	common/ptid.c common/buffer.c
+	common/ptid.c common/buffer.c gdb-dlfcn.c
 
 LINTFILES = $(SFILES) $(YYFILES) $(CONFIG_SRCS) init.c
 
@@ -829,7 +829,7 @@ solib-darwin.h solib-ia64-hpux.h solib-spu.h windows-nat.h xcoffread.h \
 gnulib/extra/arg-nonnull.h gnulib/extra/c++defs.h gnulib/extra/warn-on-use.h \
 gnulib/stddef.in.h inline-frame.h skip.h \
 common/common-utils.h common/xml-utils.h common/buffer.h common/ptid.h \
-common/linux-osdata.h
+common/linux-osdata.h gdb-dlfcn.h
 
 # Header files that already have srcdir in them, or which are in objdir.
 
@@ -916,7 +916,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	target-descriptions.o target-memory.o xml-tdesc.o xml-builtin.o \
 	inferior.o osdata.o gdb_usleep.o record.o gcore.o \
 	jit.o progspace.o skip.o \
-	common-utils.o buffer.o ptid.o
+	common-utils.o buffer.o ptid.o gdb-dlfcn.o
 
 TSOBS = inflow.o
 
