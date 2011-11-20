@@ -31,6 +31,7 @@
 #include "symfile.h"
 #include "symtab.h"
 #include "target.h"
+#include "gdb-dlfcn.h"
 #include "gdb_stat.h"
 
 static const char *jit_reader_dir = NULL;
@@ -113,6 +114,92 @@ mem_bfd_iovec_stat (struct bfd *abfd, void *stream, struct stat *sb)
 
   sb->st_size = buffer->size;
   return 0;
+}
+
+/* One reader that has been loaded successfully, and can potentially be used to
+   parse debug info.  */
+
+static struct jit_reader
+{
+  struct gdb_reader_funcs *functions;
+  void *handle;
+} *loaded_jit_reader = NULL;
+
+typedef struct gdb_reader_funcs * (reader_init_fn_type) (void);
+static const char *reader_init_fn_sym = "gdb_init_reader";
+
+/* Try to load FILE_NAME as a JIT debug info reader.  */
+
+static struct jit_reader *
+jit_reader_load (const char *file_name)
+{
+  void *so;
+  reader_init_fn_type *init_fn;
+  struct jit_reader *new_reader = NULL;
+  struct gdb_reader_funcs *funcs = NULL;
+  struct cleanup *old_cleanups;
+
+  if (jit_debug)
+    fprintf_unfiltered (gdb_stdlog, _("Opening shared object %s.\n"),
+                        file_name);
+  so = gdb_dlopen (file_name);
+  old_cleanups = make_cleanup_dlclose (so);
+
+  init_fn = gdb_dlsym (so, reader_init_fn_sym);
+  if (!init_fn)
+    error (_("Could not locate initialization function: %s."),
+          reader_init_fn_sym);
+
+  if (gdb_dlsym (so, "plugin_is_GPL_compatible") == NULL)
+    error (_("Reader not GPL compatible."));
+
+  funcs = init_fn ();
+  if (funcs->reader_version != GDB_READER_INTERFACE_VERSION)
+    error (_("Reader version does not match GDB version."));
+
+  new_reader = XZALLOC (struct jit_reader);
+  new_reader->functions = funcs;
+  new_reader->handle = so;
+
+  discard_cleanups (old_cleanups);
+  return new_reader;
+}
+
+/* Provides the jit-reader-load command.  */
+
+static void
+jit_reader_load_command (char *args, int from_tty)
+{
+  char *so_name;
+  int len;
+  struct cleanup *prev_cleanup;
+
+  if (args == NULL)
+    error (_("No reader name provided."));
+
+  if (loaded_jit_reader != NULL)
+    error (_("JIT reader already loaded.  Run jit-reader-unload first."));
+
+  so_name = xstrprintf ("%s/%s", jit_reader_dir, args);
+  prev_cleanup = make_cleanup (xfree, so_name);
+
+  loaded_jit_reader = jit_reader_load (so_name);
+  do_cleanups (prev_cleanup);
+}
+
+/* Provides the jit-reader-unload command.  */
+
+static void
+jit_reader_unload_command (char *args, int from_tty)
+{
+  if (!loaded_jit_reader)
+    error (_("No JIT reader loaded."));
+
+  loaded_jit_reader->functions->destroy (loaded_jit_reader->functions);
+
+  gdb_dlclose (loaded_jit_reader->handle);
+  xfree (loaded_jit_reader);
+  loaded_jit_reader = NULL;
 }
 
 /* Open a BFD from the target's memory.  */
@@ -576,4 +663,17 @@ _initialize_jit (void)
   jit_objfile_data = register_objfile_data ();
   jit_inferior_data =
     register_inferior_data_with_cleanup (jit_inferior_data_cleanup);
+  if (is_dl_available ())
+    {
+      add_com ("jit-reader-load", no_class, jit_reader_load_command, _("\
+Load FILE as debug info reader and unwinder for JIT compiled code.\n\
+Usage: jit-reader-load FILE\n\
+Try to load file FILE as a debug info reader (and unwinder) for\n\
+JIT compiled code.  The file is loaded from " JIT_READER_DIR ",\n\
+relocated relative to the GDB executable if required."));
+      add_com ("jit-reader-unload", no_class, jit_reader_unload_command, _("\
+Unload the currently loaded JIT debug info reader.\n\
+Usage: jit-reader-unload FILE\n\n\
+Do \"help jit-reader-load\" for info on loading debug info readers."));
+    }
 }

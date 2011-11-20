@@ -1,5 +1,14 @@
 2011-11-20  Sanjoy Das  <sdas@igalia.com>
 
+	* jit.c: Include gdb-dlfcn.h.
+	(loaded_jit_reader, reader_init_fn_sym): New static variables.
+	(jit_reader_load, jit_reader_load_command)
+	(jit_reader_unload_command): New functions.
+	(_initialize_jit): Add commands "jit-reader-load" and
+	"jit-reader-unload".
+
+2011-11-20  Sanjoy Das  <sdas@igalia.com>
+
 	* Makefile.in: Add gdb-dlfcn.c and gdb-dlfcn.h to build system.
 	* config.in: Add new #define HAVE_LIBDL.
 	* configure.ac: Add check for -ldl.
