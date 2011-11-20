@@ -20,6 +20,7 @@
 #include "defs.h"
 
 #include "jit.h"
+#include "jit-reader.h"
 #include "breakpoint.h"
 #include "command.h"
 #include "gdbcmd.h"

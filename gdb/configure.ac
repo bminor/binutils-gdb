@@ -605,6 +605,28 @@ AC_SUBST(READLINE_DEPS)
 AC_SUBST(READLINE_CFLAGS)
 AC_SUBST(READLINE_TEXI_INCFLAG)
 
+# Generate jit-reader.h
+
+# This is typedeffed to GDB_CORE_ADDR in jit-reader.h
+TARGET_PTR=
+
+AC_CHECK_SIZEOF(unsigned long long)
+AC_CHECK_SIZEOF(unsigned long)
+AC_CHECK_SIZEOF(unsigned __int128)
+
+if test "x${ac_cv_sizeof_unsigned_long}" = "x8"; then
+  TARGET_PTR="unsigned long"
+elif test "x${ac_cv_sizeof_unsigned_long_long}" = "x8"; then
+  TARGET_PTR="unsigned long long"
+elif test "x${ac_cv_sizeof_unsigned___int128}" = "x16"; then
+  TARGET_PTR="unsigned __int128"
+else
+  TARGET_PTR="unsigned long"
+fi
+
+AC_SUBST(TARGET_PTR)
+AC_CONFIG_FILES([jit-reader.h:jit-reader.in])
+
 AC_ARG_WITH(expat,
   AS_HELP_STRING([--with-expat], [include expat support (auto/yes/no)]),
   [], [with_expat=auto])

@@ -833,7 +833,7 @@ common/linux-osdata.h
 
 # Header files that already have srcdir in them, or which are in objdir.
 
-HFILES_WITH_SRCDIR = ../bfd/bfd.h
+HFILES_WITH_SRCDIR = ../bfd/bfd.h jit-reader.h
 
 
 # GDB "info" files, which should be included in their entirety
@@ -950,7 +950,7 @@ DISTSTUFF = $(YYFILES)
 
 
 # All generated files which can be included by another file.
-generated_files = config.h observer.h observer.inc ada-lex.c \
+generated_files = config.h observer.h observer.inc ada-lex.c jit-reader.h \
 	$(GNULIB_H) $(NAT_GENERATED_FILES)
 
 .c.o:
@@ -1035,7 +1035,9 @@ install-only: $(CONFIG_INSTALL)
 		$(SHELL) $(srcdir)/../mkinstalldirs \
 			$(DESTDIR)$(man1dir) ; \
 		$(INSTALL_DATA) $(srcdir)/gdb.1 \
-			$(DESTDIR)$(man1dir)/$$transformed_name.1
+			$(DESTDIR)$(man1dir)/$$transformed_name.1 ; \
+		$(SHELL) $(srcdir)/../mkinstalldirs $(DESTDIR)$(includedir)/gdb ; \
+		$(INSTALL_DATA) jit-reader.h $(DESTDIR)$(includedir)/gdb/jit-reader.h
 	@$(MAKE) DO=install "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS) subdir_do
 .PHONY: install-tui
 install-tui:
@@ -1263,7 +1265,7 @@ distclean: clean
 	rm -f gdbserver/config.status gdbserver/config.log
 	rm -f gdbserver/tm.h gdbserver/xm.h gdbserver/nm.h
 	rm -f gdbserver/Makefile gdbserver/config.cache
-	rm -f nm.h config.status config.h stamp-h .gdbinit
+	rm -f nm.h config.status config.h stamp-h .gdbinit jit-reader.h
 	rm -f y.output yacc.acts yacc.tmp y.tab.h
 	rm -f config.log config.cache
 	rm -f Makefile
@@ -1328,6 +1330,9 @@ data-directory/Makefile: data-directory/Makefile.in config.status @frags@
 	  CONFIG_HEADERS= \
 	  CONFIG_LINKS= \
 	  $(SHELL) config.status
+
+jit-reader.h: $(srcdir)/jit-reader.in
+	$(SHELL) config.status $@
 
 config.h: stamp-h ; @true
 stamp-h: $(srcdir)/config.in config.status
