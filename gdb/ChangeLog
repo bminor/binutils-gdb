@@ -1,5 +1,18 @@
 2011-11-20  Sanjoy Das  <sdas@igalia.com>
 
+	* jit.c: Include regcache.h.
+	(jit_gdbarch_data, jit_frame_unwind): New static variables.
+	(jit_unwind_reg_set_impl, free_reg_value_impl)
+	(jit_unwind_reg_get_impl, jit_frame_sniffer)
+	(jit_frame_unwind_stop_reason, jit_frame_this_id)
+	(jit_frame_prev_register, jit_dealloc_cache)
+	(jit_prepend_unwinder, jit_gdbarch_data_init): New functions.
+	(jit_inferior_init): Prepend (new) pseudo unwinder by calling
+	jit_prepend_unwinder.
+	(_initialize_jit): Register new gdbarch data jit_gdbarch_data.
+
+2011-11-20  Sanjoy Das  <sdas@igalia.com>
+
 	* jit.c: Include block.h, dictionary.h and frame-unwind.h.
 	(add_objfile_entry, jit_target_read_impl, jit_object_open_impl)
 	(jit_symtab_open_impl, compare_block, jit_block_open_impl)
