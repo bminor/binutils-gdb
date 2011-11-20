@@ -21,8 +21,11 @@
 
 #include "jit.h"
 #include "jit-reader.h"
+#include "block.h"
 #include "breakpoint.h"
 #include "command.h"
+#include "dictionary.h"
+#include "frame-unwind.h"
 #include "gdbcmd.h"
 #include "gdbcore.h"
 #include "inferior.h"
@@ -33,6 +36,7 @@
 #include "target.h"
 #include "gdb-dlfcn.h"
 #include "gdb_stat.h"
+#include "exceptions.h"
 
 static const char *jit_reader_dir = NULL;
 
@@ -228,6 +232,18 @@ struct jit_inferior_data
   CORE_ADDR descriptor_addr;  /* &__jit_debug_descriptor  */
 };
 
+/* Remember a mapping from entry_addr to objfile.  */
+
+static void
+add_objfile_entry (struct objfile *objfile, CORE_ADDR entry)
+{
+  CORE_ADDR *entry_addr_ptr;
+
+  entry_addr_ptr = xmalloc (sizeof (CORE_ADDR));
+  *entry_addr_ptr = entry;
+  set_objfile_data (objfile, jit_objfile_data, entry_addr_ptr);
+}
+
 /* Return jit_inferior_data for current inferior.  Allocate if not already
    present.  */
 
@@ -330,14 +346,423 @@ jit_read_code_entry (struct gdbarch *gdbarch,
       extract_unsigned_integer (&entry_buf[off], 8, byte_order);
 }
 
-/* This function registers code associated with a JIT code entry.  It uses the
-   pointer and size pair in the entry to read the symbol file from the remote
-   and then calls symbol_file_add_from_local_memory to add it as though it were
-   a symbol file added by the user.  */
+/* Proxy object for building a block.  */
+
+struct gdb_block
+{
+  /* gdb_blocks are linked into a tree structure.  Next points to the
+     next node at the same depth as this block and parent to the
+     parent gdb_block.  */
+  struct gdb_block *next, *parent;
+
+  /* Points to the "real" block that is being built out of this
+     instance.  This block will be added to a blockvector, which will
+     then be added to a symtab.  */
+  struct block *real_block;
+
+  /* The first and last code address corresponding to this block.  */
+  CORE_ADDR begin, end;
+
+  /* The name of this block (if any).  If this is non-NULL, the
+     FUNCTION symbol symbol is set to this value.  */
+  const char *name;
+};
+
+/* Proxy object for building a symtab.  */
+
+struct gdb_symtab
+{
+  /* The list of blocks in this symtab.  These will eventually be
+     converted to real blocks.  */
+  struct gdb_block *blocks;
+
+  /* The number of blocks inserted.  */
+  int nblocks;
+
+  /* A mapping between line numbers to PC.  */
+  struct linetable *linetable;
+
+  /* The source file for this symtab.  */
+  const char *file_name;
+  struct gdb_symtab *next;
+};
+
+/* Proxy object for building an object.  */
+
+struct gdb_object
+{
+  struct gdb_symtab *symtabs;
+};
+
+/* The type of the `private' data passed around by the callback
+   functions.  */
+
+typedef CORE_ADDR jit_dbg_reader_data;
+
+/* The reader calls into this function to read data off the targets
+   address space.  */
+
+static enum gdb_status
+jit_target_read_impl (GDB_CORE_ADDR target_mem, void *gdb_buf, int len)
+{
+  int result = target_read_memory ((CORE_ADDR) target_mem, gdb_buf, len);
+  if (result == 0)
+    return GDB_SUCCESS;
+  else
+    return GDB_FAIL;
+}
+
+/* The reader calls into this function to create a new gdb_object
+   which it can then pass around to the other callbacks.  Right now,
+   all that is required is allocating the memory.  */
+
+static struct gdb_object *
+jit_object_open_impl (struct gdb_symbol_callbacks *cb)
+{
+  /* CB is not required right now, but sometime in the future we might
+     need a handle to it, and we'd like to do that without breaking
+     the ABI.  */
+  return XZALLOC (struct gdb_object);
+}
+
+/* Readers call into this function to open a new gdb_symtab, which,
+   again, is passed around to other callbacks.  */
+
+static struct gdb_symtab *
+jit_symtab_open_impl (struct gdb_symbol_callbacks *cb,
+                      struct gdb_object *object,
+                      const char *file_name)
+{
+  struct gdb_symtab *ret;
+
+  /* CB stays unused.  See comment in jit_object_open_impl.  */
+
+  ret = XZALLOC (struct gdb_symtab);
+  ret->file_name = file_name ? xstrdup (file_name) : xstrdup ("");
+  ret->next = object->symtabs;
+  object->symtabs = ret;
+  return ret;
+}
+
+/* Returns true if the block corresponding to old should be placed
+   before the block corresponding to new in the final blockvector.  */
+
+static int
+compare_block (const struct gdb_block *const old,
+               const struct gdb_block *const new)
+{
+  if (old == NULL)
+    return 1;
+  if (old->begin < new->begin)
+    return 1;
+  else if (old->begin == new->begin)
+    {
+      if (old->end > new->end)
+        return 1;
+      else
+        return 0;
+    }
+  else
+    return 0;
+}
+
+/* Called by readers to open a new gdb_block.  This function also
+   inserts the new gdb_block in the correct place in the corresponding
+   gdb_symtab.  */
+
+static struct gdb_block *
+jit_block_open_impl (struct gdb_symbol_callbacks *cb,
+                     struct gdb_symtab *symtab, struct gdb_block *parent,
+                     GDB_CORE_ADDR begin, GDB_CORE_ADDR end, const char *name)
+{
+  struct gdb_block *block = XZALLOC (struct gdb_block);
+
+  block->next = symtab->blocks;
+  block->begin = (CORE_ADDR) begin;
+  block->end = (CORE_ADDR) end;
+  block->name = name ? xstrdup (name) : NULL;
+  block->parent = parent;
+
+  /* Ensure that the blocks are inserted in the correct (reverse of
+     the order expected by blockvector).  */
+  if (compare_block (symtab->blocks, block))
+    {
+      symtab->blocks = block;
+    }
+  else
+    {
+      struct gdb_block *i = symtab->blocks;
+
+      for (;; i = i->next)
+        {
+          /* Guaranteed to terminate, since compare_block (NULL, _)
+             returns 1.  */
+          if (compare_block (i->next, block))
+            {
+              block->next = i->next;
+              i->next = block;
+              break;
+            }
+        }
+    }
+  symtab->nblocks++;
+
+  return block;
+}
+
+/* Readers call this to add a line mapping (from PC to line number) to
+   a gdb_symtab.  */
 
 static void
-jit_register_code (struct gdbarch *gdbarch,
-		   CORE_ADDR entry_addr, struct jit_code_entry *code_entry)
+jit_symtab_line_mapping_add_impl (struct gdb_symbol_callbacks *cb,
+                                  struct gdb_symtab *stab, int nlines,
+                                  struct gdb_line_mapping *map)
+{
+  int i;
+
+  if (nlines < 1)
+    return;
+
+  stab->linetable = xmalloc (sizeof (struct linetable)
+                             + (nlines - 1) * sizeof (struct linetable_entry));
+  stab->linetable->nitems = nlines;
+  for (i = 0; i < nlines; i++)
+    {
+      stab->linetable->item[i].pc = (CORE_ADDR) map[i].pc;
+      stab->linetable->item[i].line = map[i].line;
+    }
+}
+
+/* Called by readers to close a gdb_symtab.  Does not need to do
+   anything as of now.  */
+
+static void
+jit_symtab_close_impl (struct gdb_symbol_callbacks *cb,
+                       struct gdb_symtab *stab)
+{
+  /* Right now nothing needs to be done here.  We may need to do some
+     cleanup here in the future (again, without breaking the plugin
+     ABI).  */
+}
+
+/* Transform STAB to a proper symtab, and add it it OBJFILE.  */
+
+static void
+finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
+{
+  struct symtab *symtab;
+  struct gdb_block *gdb_block_iter, *gdb_block_iter_tmp;
+  struct block *block_iter;
+  int actual_nblocks, i, blockvector_size;
+  CORE_ADDR begin, end;
+
+  actual_nblocks = FIRST_LOCAL_BLOCK + stab->nblocks;
+
+  symtab = allocate_symtab (stab->file_name, objfile);
+  /* JIT compilers compile in memory.  */
+  symtab->dirname = NULL;
+
+  /* Copy over the linetable entry if one was provided.  */
+  if (stab->linetable)
+    {
+      int size = ((stab->linetable->nitems - 1)
+                  * sizeof (struct linetable_entry)
+                  + sizeof (struct linetable));
+      LINETABLE (symtab) = obstack_alloc (&objfile->objfile_obstack, size);
+      memcpy (LINETABLE (symtab), stab->linetable, size);
+    }
+  else
+    {
+      LINETABLE (symtab) = NULL;
+    }
+
+  blockvector_size = (sizeof (struct blockvector)
+                      + (actual_nblocks - 1) * sizeof (struct block *));
+  symtab->blockvector = obstack_alloc (&objfile->objfile_obstack,
+                                       blockvector_size);
+
+  /* (begin, end) will contain the PC range this entire blockvector
+     spans.  */
+  symtab->primary = 1;
+  BLOCKVECTOR_MAP (symtab->blockvector) = NULL;
+  begin = stab->blocks->begin;
+  end = stab->blocks->end;
+  BLOCKVECTOR_NBLOCKS (symtab->blockvector) = actual_nblocks;
+
+  /* First run over all the gdb_block objects, creating a real block
+     object for each.  Simultaneously, keep setting the real_block
+     fields.  */
+  for (i = (actual_nblocks - 1), gdb_block_iter = stab->blocks;
+       i >= FIRST_LOCAL_BLOCK;
+       i--, gdb_block_iter = gdb_block_iter->next)
+    {
+      struct block *new_block = allocate_block (&objfile->objfile_obstack);
+      struct symbol *block_name = obstack_alloc (&objfile->objfile_obstack,
+                                                 sizeof (struct symbol));
+
+      BLOCK_DICT (new_block) = dict_create_linear (&objfile->objfile_obstack,
+                                                   NULL);
+      /* The address range.  */
+      BLOCK_START (new_block) = (CORE_ADDR) gdb_block_iter->begin;
+      BLOCK_END (new_block) = (CORE_ADDR) gdb_block_iter->end;
+
+      /* The name.  */
+      memset (block_name, 0, sizeof (struct symbol));
+      SYMBOL_DOMAIN (block_name) = VAR_DOMAIN;
+      SYMBOL_CLASS (block_name) = LOC_BLOCK;
+      SYMBOL_SYMTAB (block_name) = symtab;
+      SYMBOL_BLOCK_VALUE (block_name) = new_block;
+
+      block_name->ginfo.name = obsavestring (gdb_block_iter->name,
+                                             strlen (gdb_block_iter->name),
+                                             &objfile->objfile_obstack);
+
+      BLOCK_FUNCTION (new_block) = block_name;
+
+      BLOCKVECTOR_BLOCK (symtab->blockvector, i) = new_block;
+      if (begin > BLOCK_START (new_block))
+        begin = BLOCK_START (new_block);
+      if (end < BLOCK_END (new_block))
+        end = BLOCK_END (new_block);
+
+      gdb_block_iter->real_block = new_block;
+    }
+
+  /* Now add the special blocks.  */
+  block_iter = NULL;
+  for (i = 0; i < FIRST_LOCAL_BLOCK; i++)
+    {
+      struct block *new_block = allocate_block (&objfile->objfile_obstack);
+      BLOCK_DICT (new_block) = dict_create_linear (&objfile->objfile_obstack,
+                                                   NULL);
+      BLOCK_SUPERBLOCK (new_block) = block_iter;
+      block_iter = new_block;
+
+      BLOCK_START (new_block) = (CORE_ADDR) begin;
+      BLOCK_END (new_block) = (CORE_ADDR) end;
+
+      BLOCKVECTOR_BLOCK (symtab->blockvector, i) = new_block;
+    }
+
+  /* Fill up the superblock fields for the real blocks, using the
+     real_block fields populated earlier.  */
+  for (gdb_block_iter = stab->blocks;
+       gdb_block_iter;
+       gdb_block_iter = gdb_block_iter->next)
+    {
+      if (gdb_block_iter->parent != NULL)
+        BLOCK_SUPERBLOCK (gdb_block_iter->real_block) =
+          gdb_block_iter->parent->real_block;
+    }
+
+  /* Free memory.  */
+  gdb_block_iter = stab->blocks;
+
+  for (gdb_block_iter = stab->blocks, gdb_block_iter_tmp = gdb_block_iter->next;
+       gdb_block_iter;
+       gdb_block_iter = gdb_block_iter_tmp)
+    {
+      xfree ((void *) gdb_block_iter->name);
+      xfree (gdb_block_iter);
+    }
+  xfree (stab->linetable);
+  xfree ((char *) stab->file_name);
+  xfree (stab);
+}
+
+/* Called when closing a gdb_objfile.  Converts OBJ to a proper
+   objfile.  */
+
+static void
+jit_object_close_impl (struct gdb_symbol_callbacks *cb,
+                       struct gdb_object *obj)
+{
+  struct gdb_symtab *i, *j;
+  struct objfile *objfile;
+  jit_dbg_reader_data *priv_data;
+
+  priv_data = cb->priv_data;
+
+  objfile = allocate_objfile (NULL, 0);
+  objfile->gdbarch = target_gdbarch;
+
+  objfile->msymbols = obstack_alloc (&objfile->objfile_obstack,
+                                     sizeof (struct minimal_symbol));
+  memset (objfile->msymbols, 0, sizeof (struct minimal_symbol));
+
+  xfree (objfile->name);
+  objfile->name = xstrdup ("<< JIT compiled code >>");
+
+  j = NULL;
+  for (i = obj->symtabs; i; i = j)
+    {
+      j = i->next;
+      finalize_symtab (i, objfile);
+    }
+  add_objfile_entry (objfile, *priv_data);
+  xfree (obj);
+}
+
+/* Try to read CODE_ENTRY using the loaded jit reader (if any).  */
+
+static int
+jit_reader_try_read_symtab (struct jit_code_entry *code_entry)
+{
+  void *gdb_mem;
+  int status;
+  struct jit_dbg_reader *i;
+  jit_dbg_reader_data priv_data;
+  struct gdb_reader_funcs *funcs;
+  volatile struct gdb_exception e;
+  struct gdb_symbol_callbacks callbacks =
+    {
+      jit_object_open_impl,
+      jit_symtab_open_impl,
+      jit_block_open_impl,
+      jit_symtab_close_impl,
+      jit_object_close_impl,
+
+      jit_symtab_line_mapping_add_impl,
+      jit_target_read_impl,
+
+      &priv_data
+    };
+
+  priv_data = code_entry->symfile_addr;
+
+  if (!loaded_jit_reader)
+    return 0;
+
+  gdb_mem = xmalloc (code_entry->symfile_size);
+
+  status = 1;
+  TRY_CATCH (e, RETURN_MASK_ALL)
+    if (target_read_memory (code_entry->symfile_addr, gdb_mem,
+                            code_entry->symfile_size))
+      status = 0;
+  if (e.reason < 0)
+    status = 0;
+
+  if (status)
+    {
+      funcs = loaded_jit_reader->functions;
+      if (funcs->read (funcs, &callbacks, gdb_mem, code_entry->symfile_size)
+          != GDB_SUCCESS)
+        status = 0;
+    }
+
+  xfree (gdb_mem);
+  if (jit_debug && status == 0)
+    fprintf_unfiltered (gdb_stdlog,
+                        "Could not read symtab using the loaded JIT reader.\n");
+  return status;
+}
+
+/* Try to read CODE_ENTRY using BFD.  */
+
+static void
+jit_bfd_try_read_symtab (struct jit_code_entry *code_entry,
+                         struct gdbarch *gdbarch)
 {
   bfd *nbfd;
   struct section_addr_info *sai;
@@ -346,7 +771,6 @@ jit_register_code (struct gdbarch *gdbarch,
   struct cleanup *old_cleanups;
   int i;
   const struct bfd_arch_info *b;
-  CORE_ADDR *entry_addr_ptr;
 
   if (jit_debug)
     fprintf_unfiltered (gdb_stdlog,
@@ -400,12 +824,34 @@ JITed symbol file is not an object file, ignoring it.\n"));
   /* This call takes ownership of NBFD.  It does not take ownership of SAI.  */
   objfile = symbol_file_add_from_bfd (nbfd, 0, sai, OBJF_SHARED, NULL);
 
-  /* Remember a mapping from entry_addr to objfile.  */
-  entry_addr_ptr = xmalloc (sizeof (CORE_ADDR));
-  *entry_addr_ptr = entry_addr;
-  set_objfile_data (objfile, jit_objfile_data, entry_addr_ptr);
-
   do_cleanups (old_cleanups);
+  add_objfile_entry (objfile, code_entry->symfile_addr);
+}
+
+/* This function registers code associated with a JIT code entry.  It uses the
+   pointer and size pair in the entry to read the symbol file from the remote
+   and then calls symbol_file_add_from_local_memory to add it as though it were
+   a symbol file added by the user.  */
+
+static void
+jit_register_code (struct gdbarch *gdbarch,
+                   CORE_ADDR entry_addr, struct jit_code_entry *code_entry)
+{
+  int i, success;
+  const struct bfd_arch_info *b;
+  struct jit_inferior_data *inf_data = get_jit_inferior_data ();
+
+  if (jit_debug)
+    fprintf_unfiltered (gdb_stdlog,
+                        "jit_register_code, symfile_addr = %s, "
+                        "symfile_size = %s\n",
+                        paddress (gdbarch, code_entry->symfile_addr),
+                        pulongest (code_entry->symfile_size));
+
+  success = jit_reader_try_read_symtab (code_entry);
+
+  if (!success)
+    jit_bfd_try_read_symtab (code_entry, gdbarch);
 }
 
 /* This function unregisters JITed code and frees the corresponding
@@ -640,6 +1086,14 @@ jit_event_handler (struct gdbarch *gdbarch)
     }
 }
 
+/* Called to free the data allocated to the jit_inferior_data slot.  */
+
+static void
+free_objfile_data (struct objfile *objfile, void *data)
+{
+  xfree (data);
+}
+
 /* Provide a prototype to silence -Wmissing-prototypes.  */
 
 extern void _initialize_jit (void);
@@ -660,7 +1114,8 @@ _initialize_jit (void)
   observer_attach_inferior_created (jit_inferior_created_observer);
   observer_attach_inferior_exit (jit_inferior_exit_hook);
   observer_attach_executable_changed (jit_executable_changed_observer);
-  jit_objfile_data = register_objfile_data ();
+  jit_objfile_data =
+    register_objfile_data_with_cleanup (NULL, free_objfile_data);
   jit_inferior_data =
     register_inferior_data_with_cleanup (jit_inferior_data_cleanup);
   if (is_dl_available ())

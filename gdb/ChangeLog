@@ -1,5 +1,17 @@
 2011-11-20  Sanjoy Das  <sdas@igalia.com>
 
+	* jit.c: Include block.h, dictionary.h and frame-unwind.h.
+	(add_objfile_entry, jit_target_read_impl, jit_object_open_impl)
+	(jit_symtab_open_impl, compare_block, jit_block_open_impl)
+	(jit_symtab_line_mapping_add_impl, jit_symtab_close_impl)
+	(finalize_symtab, jit_object_close_impl)
+	(jit_reader_try_read_symtab, jit_bfd_try_read_symtab)
+	(free_objfile_data): New functions.
+	(_initialize_jit): Register jit_objfile_data with a proper cleanup
+	function.
+
+2011-11-20  Sanjoy Das  <sdas@igalia.com>
+
 	* jit.c: Include gdb-dlfcn.h.
 	(loaded_jit_reader, reader_init_fn_sym): New static variables.
 	(jit_reader_load, jit_reader_load_command)
