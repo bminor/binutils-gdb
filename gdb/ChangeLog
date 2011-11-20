@@ -1,3 +1,46 @@
+2011-11-20  Stan Shebs  <stan@codesourcery.com>
+
+	* NEWS: Mention tracepoint additions.
+	* breakpoint.h (struct tracepoint): New field traceframe_usage.
+	* breakpoint.c (print_one_breakpoint_location): Identify
+	tracepoints as such when reporting hit counts, report
+	trace buffer usage.
+	(create_tracepoint_from_upload): Copy status info.
+	* tracepoint.h (struct trace_status): Rename error_desc to stop_desc,
+	add fields user_name, notes, start_time, stop_time.
+	(struct uploaded_tp): Add fields hit_count, traceframe_usage.
+	* tracepoint.c (trace_user): New global.
+	(trace_notes): New global.
+	(trace_stop_notes): New global.
+	(start_tracing): Add argument and trace note handling.
+	(stop_tracing): Ditto.
+	(trace_start_command): Add notes argument.
+	(trace_stop_command): Ditto.
+	(trace_status_command): Report additional status info.
+	(trace_status_mi): Similarly.
+	(trace_save): Update, record tracepoint status.
+	(set_disconnected_tracing): Call target method directly.
+	(send_disconnected_tracing_value): Remove.
+	(set_trace_user): New function.
+	(set_trace_notes): New function.
+	(set_trace_stop_notes): New function.
+	(parse_trace_status): Handle additional status.
+	(parse_tracepoint_status): New function.
+	(parse_tracepoint_definition): Call it.
+	(tfile_get_tracepoint_status): New function.
+	(init_tfile_ops): Use it.
+	(_initialize_tracepoint): Add new setshows.
+	* target.h (struct target_ops): New methods to_get_tracepoint_status
+	and to_set_trace_notes.
+	(target_get_tracepoint_status): New macro.
+	(target_set_trace_notes): New macro.
+	* target.c (update_current_target): Add new methods.
+	* remote.c (remote_get_tracepoint_status): New function.
+	(remote_set_trace_notes): New function.
+	(init_remote_ops): Add them.
+	* mi/mi-main.c (mi_cmd_trace_start): Add argument to call.
+	(mi_cmd_trace_stop): Ditto.
+
 2011-11-20  Sanjoy Das  <sdas@igalia.com>
 
 	* jit.c: Include regcache.h.

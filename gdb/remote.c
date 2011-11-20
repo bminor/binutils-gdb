@@ -10214,6 +10214,53 @@ remote_get_trace_status (struct trace_status *ts)
   return ts->running;
 }
 
+void
+remote_get_tracepoint_status (struct breakpoint *bp,
+			      struct uploaded_tp *utp)
+{
+  struct remote_state *rs = get_remote_state ();
+  char addrbuf[40];
+  char *reply;
+  struct bp_location *loc;
+  struct tracepoint *tp = (struct tracepoint *) bp;
+
+  if (tp)
+    {
+      tp->base.hit_count = 0;
+      tp->traceframe_usage = 0;
+      for (loc = tp->base.loc; loc; loc = loc->next)
+	{
+	  /* If the tracepoint was never downloaded, don't go asking for
+	     any status.  */
+	  if (tp->number_on_target == 0)
+	    continue;
+	  sprintf_vma (addrbuf, loc->address);
+	  sprintf (rs->buf, "qTP:%x:%s", tp->number_on_target, addrbuf);
+	  putpkt (rs->buf);
+	  reply = remote_get_noisy_reply (&target_buf, &target_buf_size);
+	  if (reply && *reply)
+	    {
+	      if (*reply == 'V')
+		parse_tracepoint_status (reply + 1, bp, utp);
+	    }
+	}
+    }
+  else if (utp)
+    {
+      utp->hit_count = 0;
+      utp->traceframe_usage = 0;
+      sprintf_vma (addrbuf, (long unsigned int) utp->addr);
+      sprintf (rs->buf, "qTP:%x:%s", utp->number, addrbuf);
+      putpkt (rs->buf);
+      reply = remote_get_noisy_reply (&target_buf, &target_buf_size);
+      if (reply && *reply)
+	{
+	  if (*reply == 'V')
+	    parse_tracepoint_status (reply + 1, bp, utp);
+	}
+    }
+}
+
 static void
 remote_trace_stop (void)
 {
@@ -10485,6 +10532,51 @@ remote_get_min_fast_tracepoint_insn_len (void)
     }
 }
 
+static int
+remote_set_trace_notes (char *user, char *notes, char *stop_notes)
+{
+  struct remote_state *rs = get_remote_state ();
+  char *reply;
+  char *buf = rs->buf;
+  char *endbuf = rs->buf + get_remote_packet_size ();
+  int nbytes;
+
+  buf += xsnprintf (buf, endbuf - buf, "QTNotes:");
+  if (user)
+    {
+      buf += xsnprintf (buf, endbuf - buf, "user:");
+      nbytes = bin2hex (user, buf, 0);
+      buf += 2 * nbytes;
+      *buf++ = ';';
+    }
+  if (notes)
+    {
+      buf += xsnprintf (buf, endbuf - buf, "notes:");
+      nbytes = bin2hex (notes, buf, 0);
+      buf += 2 * nbytes;
+      *buf++ = ';';
+    }
+  if (stop_notes)
+    {
+      buf += xsnprintf (buf, endbuf - buf, "tstop:");
+      nbytes = bin2hex (stop_notes, buf, 0);
+      buf += 2 * nbytes;
+      *buf++ = ';';
+    }
+  /* Ensure the buffer is terminated.  */
+  *buf = '\0';
+
+  putpkt (rs->buf);
+  reply = remote_get_noisy_reply (&target_buf, &target_buf_size);
+  if (*reply == '\0')
+    return 0;
+
+  if (strcmp (reply, "OK") != 0)
+    error (_("Bogus reply from target: %s"), reply);
+
+  return 1;
+}
+
 static void
 init_remote_ops (void)
 {
@@ -10565,6 +10657,7 @@ Specify the serial device it is connected to\n\
   remote_ops.to_trace_set_readonly_regions = remote_trace_set_readonly_regions;
   remote_ops.to_trace_start = remote_trace_start;
   remote_ops.to_get_trace_status = remote_get_trace_status;
+  remote_ops.to_get_tracepoint_status = remote_get_tracepoint_status;
   remote_ops.to_trace_stop = remote_trace_stop;
   remote_ops.to_trace_find = remote_trace_find;
   remote_ops.to_get_trace_state_variable_value
@@ -10577,6 +10670,7 @@ Specify the serial device it is connected to\n\
   remote_ops.to_get_min_fast_tracepoint_insn_len = remote_get_min_fast_tracepoint_insn_len;
   remote_ops.to_set_disconnected_tracing = remote_set_disconnected_tracing;
   remote_ops.to_set_circular_trace_buffer = remote_set_circular_trace_buffer;
+  remote_ops.to_set_trace_notes = remote_set_trace_notes;
   remote_ops.to_core_of_thread = remote_core_of_thread;
   remote_ops.to_verify_memory = remote_verify_memory;
   remote_ops.to_get_tib_address = remote_get_tib_address;

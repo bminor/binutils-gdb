@@ -1,3 +1,20 @@
+2011-11-17  Stan Shebs  <stan@codesourcery.com>
+
+	* tracepoint.c (struct tracepoint): New field traceframe_usage.
+	(tracing_start_time): New global.
+	(tracing_stop_time): New global.
+	(tracing_user_name): New global.
+	(tracing_notes): New global.
+	(tracing_stop_note): New global.
+	(cmd_qtstart): Set traceframe_usage, start_time.
+	(stop_tracing): Set stop_time.
+	(cmd_qtstatus): Report additional status.
+	(cmd_qtp): New function.
+	(handle_tracepoint_query): Call it.
+	(cmd_qtnotes): New function.
+	(handle_tracepoint_general_set): Call it.
+	(get_timestamp): Rename from tsv_get_timestamp.
+
 2011-11-14  Stan Shebs  <stan@codesourcery.com>
 	    Kwok Cheung Yeung  <kcy@codesourcery.com>
 

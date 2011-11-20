@@ -682,6 +682,7 @@ update_current_target (void)
       INHERIT (to_trace_set_readonly_regions, t);
       INHERIT (to_trace_start, t);
       INHERIT (to_get_trace_status, t);
+      INHERIT (to_get_tracepoint_status, t);
       INHERIT (to_trace_stop, t);
       INHERIT (to_trace_find, t);
       INHERIT (to_get_trace_state_variable_value, t);
@@ -692,6 +693,7 @@ update_current_target (void)
       INHERIT (to_get_min_fast_tracepoint_insn_len, t);
       INHERIT (to_set_disconnected_tracing, t);
       INHERIT (to_set_circular_trace_buffer, t);
+      INHERIT (to_set_trace_notes, t);
       INHERIT (to_get_tib_address, t);
       INHERIT (to_set_permissions, t);
       INHERIT (to_static_tracepoint_marker_at, t);
@@ -873,6 +875,9 @@ update_current_target (void)
   de_fault (to_get_trace_status,
 	    (int (*) (struct trace_status *))
 	    return_minus_one);
+  de_fault (to_get_tracepoint_status,
+	    (void (*) (struct breakpoint *, struct uploaded_tp *))
+	    tcomplain);
   de_fault (to_trace_stop,
 	    (void (*) (void))
 	    tcomplain);
@@ -903,6 +908,9 @@ update_current_target (void)
   de_fault (to_set_circular_trace_buffer,
 	    (void (*) (int))
 	    target_ignore);
+  de_fault (to_set_trace_notes,
+	    (int (*) (char *, char *, char *))
+	    return_zero);
   de_fault (to_get_tib_address,
 	    (int (*) (ptid_t, CORE_ADDR *))
 	    tcomplain);

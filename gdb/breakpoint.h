@@ -710,6 +710,10 @@ struct tracepoint
   /* The number of the tracepoint on the target.  */
   int number_on_target;
 
+  /* The total space taken by all the trace frames for this
+     tracepoint.  */
+  ULONGEST traceframe_usage;
+
   /* The static tracepoint marker id, if known.  */
   char *static_trace_marker_id;
 

@@ -632,6 +632,9 @@ struct tracepoint
      Note that while-stepping steps are not counted as "hits".  */
   long hit_count;
 
+  /* Cached sum of the sizes of traceframes created by this point.  */
+  long traceframe_usage;
+
   CORE_ADDR compiled_cond;
 
   /* Link to the next tracepoint in the list.  */
@@ -1144,6 +1147,27 @@ static const char *tracing_stop_reason = "tnotrun";
 
 static int tracing_stop_tpnum;
 
+/* 64-bit timestamps for the trace run's start and finish, expressed
+   in microseconds from the Unix epoch.  */
+
+LONGEST tracing_start_time;
+LONGEST tracing_stop_time;
+
+/* The (optional) user-supplied name of the user that started the run.
+   This is an arbitrary string, and may be NULL.  */
+
+char *tracing_user_name;
+
+/* Optional user-supplied text describing the run.  This is
+   an arbitrary string, and may be NULL.  */
+
+char *tracing_notes;
+
+/* Optional user-supplied text explaining a tstop command.  This is an
+   arbitrary string, and may be NULL.  */
+
+char *tracing_stop_note;
+
 #endif
 
 /* Functions local to this file.  */
@@ -1265,6 +1289,8 @@ static void install_tracepoint (struct tracepoint *, char *own_buf);
 static void download_tracepoint (struct tracepoint *);
 static int install_fast_tracepoint (struct tracepoint *, char *errbuf);
 #endif
+
+static LONGEST get_timestamp (void);
 
 #if defined(__GNUC__)
 #  define memory_barrier() asm volatile ("" : : : "memory")
@@ -3027,6 +3053,7 @@ cmd_qtstart (char *packet)
     {
       /* Ensure all the hit counts start at zero.  */
       tpoint->hit_count = 0;
+      tpoint->traceframe_usage = 0;
 
       if (tpoint->type == trap_tracepoint)
 	{
@@ -3103,6 +3130,7 @@ cmd_qtstart (char *packet)
   trace_buffer_is_full = 0;
   expr_eval_result = expr_eval_no_error;
   error_tracepoint = NULL;
+  tracing_start_time = get_timestamp ();
 
   /* Tracing is now active, hits will now start being logged.  */
   tracing = 1;
@@ -3172,6 +3200,7 @@ stop_tracing (void)
 	fatal ("Error clearing tracing variable in lib");
     }
 
+  tracing_stop_time = get_timestamp ();
   tracing_stop_reason = "t???";
   tracing_stop_tpnum = 0;
   if (stopping_tracepoint)
@@ -3352,6 +3381,26 @@ static void
 cmd_qtstatus (char *packet)
 {
   char *stop_reason_rsp = NULL;
+  char *buf1, *buf2, *buf3, *str;
+  int slen;
+
+  /* Translate the plain text of the notes back into hex for
+     transmission.  */
+
+  str = (tracing_user_name ? tracing_user_name : "");
+  slen = strlen (str);
+  buf1 = (char *) alloca (slen * 2 + 1);
+  hexify (buf1, str, slen);
+
+  str = (tracing_notes ? tracing_notes : "");
+  slen = strlen (str);
+  buf2 = (char *) alloca (slen * 2 + 1);
+  hexify (buf2, str, slen);
+
+  str = (tracing_stop_note ? tracing_stop_note : "");
+  slen = strlen (str);
+  buf3 = (char *) alloca (slen * 2 + 1);
+  hexify (buf3, str, slen);
 
   trace_debug ("Returning trace status as %d, stop reason %s",
 	       tracing, tracing_stop_reason);
@@ -3368,7 +3417,7 @@ cmd_qtstatus (char *packet)
   stop_reason_rsp = (char *) tracing_stop_reason;
 
   /* The user visible error string in terror needs to be hex encoded.
-     We leave it as plain string in `tracepoint_stop_reason' to ease
+     We leave it as plain string in `tracing_stop_reason' to ease
      debugging.  */
   if (strncmp (stop_reason_rsp, "terror:", strlen ("terror:")) == 0)
     {
@@ -3384,19 +3433,58 @@ cmd_qtstatus (char *packet)
       convert_int_to_ascii ((gdb_byte *) result_name, p, strlen (result_name));
     }
 
+  /* If this was a forced stop, include any stop note that was supplied.  */
+  if (strcmp (stop_reason_rsp, "tstop") == 0)
+    {
+      stop_reason_rsp = alloca (strlen ("tstop:") + strlen (buf3) + 1);
+      strcpy (stop_reason_rsp, "tstop:");
+      strcat (stop_reason_rsp, buf3);
+    }
+
   sprintf (packet,
 	   "T%d;"
 	   "%s:%x;"
 	   "tframes:%x;tcreated:%x;"
 	   "tfree:%x;tsize:%s;"
 	   "circular:%d;"
-	   "disconn:%d",
+	   "disconn:%d;"
+	   "starttime:%llx;stoptime:%llx;"
+	   "username:%s:;notes:%s:",
 	   tracing ? 1 : 0,
 	   stop_reason_rsp, tracing_stop_tpnum,
 	   traceframe_count, traceframes_created,
 	   free_space (), phex_nz (trace_buffer_hi - trace_buffer_lo, 0),
 	   circular_trace_buffer,
-	   disconnected_tracing);
+	   disconnected_tracing,
+	   tracing_start_time, tracing_stop_time,
+	   buf1, buf2);
+}
+
+static void
+cmd_qtp (char *own_buf)
+{
+  ULONGEST num, addr;
+  struct tracepoint *tpoint;
+  char *packet = own_buf;
+
+  packet += strlen ("qTP:");
+
+  packet = unpack_varlen_hex (packet, &num);
+  ++packet; /* skip a colon */
+  packet = unpack_varlen_hex (packet, &addr);
+
+  /* See if we already have this tracepoint.  */
+  tpoint = find_tracepoint (num, addr);
+
+  if (!tpoint)
+    {
+      trace_debug ("Tracepoint error: tracepoint %d at 0x%s not found",
+		   (int) num, paddress (addr));
+      write_enn (own_buf);
+      return;
+    }
+
+  sprintf (own_buf, "V%lx:%lx", tpoint->hit_count, tpoint->traceframe_usage);
 }
 
 /* State variables to help return all the tracepoint bits.  */
@@ -3710,6 +3798,63 @@ cmd_bigqtbuffer (char *own_buf)
     write_enn (own_buf);
 }
 
+static void
+cmd_qtnotes (char *own_buf)
+{
+  size_t nbytes;
+  char *saved, *user, *notes, *stopnote;
+  char *packet = own_buf;
+
+  packet += strlen ("QTNotes:");
+
+  while (*packet)
+    {
+      if (strncmp ("user:", packet, strlen ("user:")) == 0)
+	{
+	  packet += strlen ("user:");
+	  saved = packet;
+	  packet = strchr (packet, ';');
+	  nbytes = (packet - saved) / 2;
+	  user = xmalloc (nbytes + 1);
+	  nbytes = unhexify (user, saved, nbytes);
+	  user[nbytes] = '\0';
+	  ++packet; /* skip the semicolon */
+	  trace_debug ("User is '%s'", user);
+	  tracing_user_name = user;
+	}
+      else if (strncmp ("notes:", packet, strlen ("notes:")) == 0)
+	{
+	  packet += strlen ("notes:");
+	  saved = packet;
+	  packet = strchr (packet, ';');
+	  nbytes = (packet - saved) / 2;
+	  notes = xmalloc (nbytes + 1);
+	  nbytes = unhexify (notes, saved, nbytes);
+	  notes[nbytes] = '\0';
+	  ++packet; /* skip the semicolon */
+	  trace_debug ("Notes is '%s'", notes);
+	  tracing_notes = notes;
+	}
+      else if (strncmp ("tstop:", packet, strlen ("tstop:")) == 0)
+	{
+	  packet += strlen ("tstop:");
+	  saved = packet;
+	  packet = strchr (packet, ';');
+	  nbytes = (packet - saved) / 2;
+	  stopnote = xmalloc (nbytes + 1);
+	  nbytes = unhexify (stopnote, saved, nbytes);
+	  stopnote[nbytes] = '\0';
+	  ++packet; /* skip the semicolon */
+	  trace_debug ("tstop note is '%s'", stopnote);
+	  tracing_stop_note = stopnote;
+	}
+      else
+	break;
+    }
+
+  write_ok (own_buf);
+}
+
 int
 handle_tracepoint_general_set (char *packet)
 {
@@ -3774,6 +3919,11 @@ handle_tracepoint_general_set (char *packet)
       cmd_bigqtbuffer (packet);
       return 1;
     }
+  else if (strncmp ("QTNotes:", packet, strlen ("QTNotes:")) == 0)
+    {
+      cmd_qtnotes (packet);
+      return 1;
+    }
 
   return 0;
 }
@@ -3784,6 +3934,11 @@ handle_tracepoint_query (char *packet)
   if (strcmp ("qTStatus", packet) == 0)
     {
       cmd_qtstatus (packet);
+      return 1;
+    }
+  else if (strncmp ("qTP:", packet, strlen ("qTP:")) == 0)
+    {
+      cmd_qtp (packet);
       return 1;
     }
   else if (strcmp ("qTfP", packet) == 0)
@@ -8049,8 +8204,12 @@ initialize_tracepoint_ftlib (void)
 
 #endif /* IN_PROCESS_AGENT */
 
+/* Return a timestamp, expressed as microseconds of the usual Unix
+   time.  (As the result is a 64-bit number, it will not overflow any
+   time soon.)  */
+
 static LONGEST
-tsv_get_timestamp (void)
+get_timestamp (void)
 {
    struct timeval tv;
 
@@ -8074,7 +8233,7 @@ initialize_tracepoint (void)
      variable numbered 1, it will be renumbered.)  */
   create_trace_state_variable (1, 0);
   set_trace_state_variable_name (1, "trace_timestamp");
-  set_trace_state_variable_getter (1, tsv_get_timestamp);
+  set_trace_state_variable_getter (1, get_timestamp);
 
 #ifdef IN_PROCESS_AGENT
   {

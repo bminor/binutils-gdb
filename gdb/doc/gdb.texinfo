@@ -10902,20 +10902,27 @@ Cnt ID         Enb Address            What
 @subsection Starting and Stopping Trace Experiments
 
 @table @code
-@kindex tstart
+@kindex tstart [ @var{notes} ]
 @cindex start a new trace experiment
 @cindex collected data discarded
 @item tstart
-This command takes no arguments.  It starts the trace experiment, and
-begins collecting data.  This has the side effect of discarding all
-the data collected in the trace buffer during the previous trace
-experiment.
+This command starts the trace experiment, and begins collecting data.
+It has the side effect of discarding all the data collected in the
+trace buffer during the previous trace experiment.  If any arguments
+are supplied, they are taken as a note and stored with the trace
+experiment's state.  The notes may be arbitrary text, and are
+especially useful with disconnected tracing in a multi-user context;
+the notes can explain what the trace is doing, supply user contact
+information, and so forth.
 
-@kindex tstop
+@kindex tstop [ @var{notes} ]
 @cindex stop a running trace experiment
 @item tstop
-This command takes no arguments.  It ends the trace experiment, and
-stops collecting data.
+This command stops the trace experiment.  If any arguments are
+supplied, they are recorded with the experiment as a note.  This is
+useful if you are stopping a trace started by someone else, for
+instance if the trace is interfering with the system's behavior and
+needs to be stopped quickly.
 
 @strong{Note}: a trace experiment and data collection may stop
 automatically if any tracepoint's passcount is reached
@@ -11016,6 +11023,33 @@ Show the current choice for the trace buffer.  Note that this may not
 match the agent's current buffer handling, nor is it guaranteed to
 match the setting that might have been in effect during a past run,
 for instance if you are looking at frames from a trace file.
+
+@end table
+
+@table @code
+@item set trace-user @var{text}
+@kindex set trace-user
+
+@item show trace-user
+@kindex show trace-user
+
+@item set trace-notes @var{text}
+@kindex set trace-notes
+Set the trace run's notes.
+
+@item show trace-notes
+@kindex show trace-notes
+Show the trace run's notes.
+
+@item set trace-stop-notes @var{text}
+@kindex set trace-stop-notes
+Set the trace run's stop notes.  The handling of the note is as for
+@code{tstop} arguments; the set command is convenient way to fix a
+stop note that is mistaken or incomplete.
+
+@item show trace-stop-notes
+@kindex show trace-stop-notes
+Show the trace run's stop notes.
 
 @end table
 
@@ -35115,6 +35149,8 @@ the command by a @samp{,}, not a @samp{:}, contrary to the naming
 conventions above.  Please don't use this packet as a model for new
 packets.)
 
+@item QTNotes
+@item qTP
 @item QTSave
 @item qTsP
 @item qTsV
@@ -35697,8 +35733,11 @@ explanations as one of the optional fields:
 @item tnotrun:0
 No trace has been run yet.
 
-@item tstop:0
-The trace was stopped by a user-originated stop command.
+@item tstop[:@var{text}]:0
+The trace was stopped by a user-originated stop command.  The optional
+@var{text} field is a user-supplied string supplied as part of the
+stop command (for instance, an explanation of why the trace was
+stopped manually).  It is hex-encoded.
 
 @item tfull:0
 The trace stopped because the trace buffer filled up.
@@ -35751,6 +35790,22 @@ and may fill up.
 The value of the disconnected tracing flag.  @code{1} means that
 tracing will continue after @value{GDBN} disconnects, @code{0} means
 that the trace run will stop.
+
+@end table
+
+@item qTP:@var{tp}:@var{addr}
+@cindex tracepoint status, remote request
+@cindex @samp{qTP} packet
+Ask the stub for the current state of tracepoint number @var{tp} at
+address @var{addr}.
+
+Replies:
+@table @samp
+@item V@var{hits}:@var{usage}
+The tracepoint has been hit @var{hits} times so far during the trace
+run, and accounts for @var{usage} in the trace buffer.  Note that
+@code{while-stepping} steps are not counted as separate hits, but the
+steps' space consumption is added into the usage number.
 
 @end table
 
@@ -35846,6 +35901,11 @@ available.
 @item QTBuffer:circular:@var{value}
 This packet directs the target to use a circular trace buffer if
 @var{value} is 1, or a linear buffer if the value is 0.
+
+@item QTNotes:@r{[}@var{type}:@var{text}@r{]}@r{[};@var{type}:@var{text}@r{]}@dots{}
+This packet adds optional textual notes to the trace run.  Allowable
+types include @code{user}, @code{notes}, and @code{tstop}, the
+@var{text} fields are arbitrary strings, hex-encoded.
 
 @end table
 

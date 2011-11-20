@@ -4879,6 +4879,8 @@ print_one_breakpoint_location (struct breakpoint *b,
       /* FIXME should make an annotation for this.  */
       if (ep_is_catchpoint (b))
 	ui_out_text (uiout, "\tcatchpoint");
+      else if (is_tracepoint (b))
+	ui_out_text (uiout, "\ttracepoint");
       else
 	ui_out_text (uiout, "\tbreakpoint");
       ui_out_text (uiout, " already hit ");
@@ -4903,6 +4905,18 @@ print_one_breakpoint_location (struct breakpoint *b,
       ui_out_text (uiout, " hits\n");
     }
 
+  if (!part_of_multiple && is_tracepoint (b))
+    {
+      struct tracepoint *tp = (struct tracepoint *) b;
+
+      if (tp->traceframe_usage)
+	{
+	  ui_out_text (uiout, "\ttrace buffer usage ");
+	  ui_out_field_int (uiout, "traceframe-usage", tp->traceframe_usage);
+	  ui_out_text (uiout, " bytes\n");
+	}
+    }
+  
   l = b->commands ? b->commands->commands : NULL;
   if (!part_of_multiple && l)
     {
@@ -12903,6 +12917,10 @@ create_tracepoint_from_upload (struct uploaded_tp *utp)
     warning (_("Uploaded tracepoint %d actions "
 	       "have no source form, ignoring them"),
 	     utp->number);
+
+  /* Copy any status information that might be available.  */
+  tp->base.hit_count = utp->hit_count;
+  tp->traceframe_usage = utp->traceframe_usage;
 
   return tp;
 }

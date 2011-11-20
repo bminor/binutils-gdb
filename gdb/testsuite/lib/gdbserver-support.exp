@@ -224,6 +224,7 @@ proc gdbserver_start { options arguments } {
 	global gdbserver_reconnect_p
 	if {![info exists gdbserver_reconnect_p] || !$gdbserver_reconnect_p} {
 	    # GDB client could accidentally connect to a stale server.
+	    # append gdbserver_command " --debug --once"
 	    append gdbserver_command " --once"
 	}
 

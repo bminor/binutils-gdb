@@ -2490,7 +2490,7 @@ mi_cmd_trace_save (char *command, char **argv, int argc)
 void
 mi_cmd_trace_start (char *command, char **argv, int argc)
 {
-  start_tracing ();
+  start_tracing (NULL);
 }
 
 void
@@ -2502,7 +2502,7 @@ mi_cmd_trace_status (char *command, char **argv, int argc)
 void
 mi_cmd_trace_stop (char *command, char **argv, int argc)
 {
-  stop_tracing ();
+  stop_tracing (NULL);
   trace_status_mi (1);
 }
 

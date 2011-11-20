@@ -178,6 +178,18 @@ static int disconnected_tracing;
 
 static int circular_trace_buffer;
 
+/* Textual notes applying to the current and/or future trace runs.  */
+
+char *trace_user = NULL;
+
+/* Textual notes applying to the current and/or future trace runs.  */
+
+char *trace_notes = NULL;
+
+/* Textual notes applying to the stopping of a trace.  */
+
+char *trace_stop_notes = NULL;
+
 /* ======= Important command functions: ======= */
 static void trace_actions_command (char *, int);
 static void trace_start_command (char *, int);
@@ -198,8 +210,6 @@ static void add_aexpr (struct collection_list *, struct agent_expr *);
 static char *mem2hex (gdb_byte *, char *, int);
 static void add_register (struct collection_list *collection,
 			  unsigned int regno);
-
-extern void send_disconnected_tracing_value (int value);
 
 static void free_uploaded_tps (struct uploaded_tp **utpp);
 static void free_uploaded_tsvs (struct uploaded_tsv **utsvp);
@@ -1686,14 +1696,15 @@ process_tracepoint_on_disconnect (void)
 
 
 void
-start_tracing (void)
+start_tracing (char *notes)
 {
   VEC(breakpoint_p) *tp_vec = NULL;
   int ix;
   struct breakpoint *b;
   struct trace_state_variable *tsv;
   int any_enabled = 0, num_to_download = 0;
-  
+  int ret;
+
   tp_vec = all_tracepoints ();
 
   /* No point in tracing without any tracepoints...  */
@@ -1779,6 +1790,13 @@ start_tracing (void)
   target_set_disconnected_tracing (disconnected_tracing);
   target_set_circular_trace_buffer (circular_trace_buffer);
 
+  if (!notes)
+    notes = trace_notes;
+  ret = target_set_trace_notes (trace_user, notes, NULL);
+
+  if (!ret && (trace_user || notes))
+    warning ("Target does not support trace user/notes, info ignored");
+
   /* Now insert traps and begin collecting data.  */
   target_trace_start ();
 
@@ -1790,12 +1808,11 @@ start_tracing (void)
   clear_traceframe_info ();
 }
 
-/* tstart command:
-
-   Tell target to clear any previous trace experiment.
-   Walk the list of tracepoints, and send them (and their actions)
-   to the target.  If no errors,
-   Tell target to start a new trace experiment.  */
+/* The tstart command requests the target to start a new trace run.
+   The command passes any arguments it has to the target verbatim, as
+   an optional "trace note".  This is useful as for instance a warning
+   to other users if the trace runs disconnected, and you don't want
+   anybody else messing with the target.  */
 
 static void
 trace_start_command (char *args, int from_tty)
@@ -1809,23 +1826,37 @@ trace_start_command (char *args, int from_tty)
 	error (_("New trace run not started."));
     }
 
-  start_tracing ();
+  start_tracing (args);
 }
 
-/* tstop command */
+/* The tstop command stops the tracing run.  The command passes any
+   supplied arguments to the target verbatim as a "stop note"; if the
+   target supports trace notes, then it will be reported back as part
+   of the trace run's status.  */
+
 static void
 trace_stop_command (char *args, int from_tty)
 {
   if (!current_trace_status ()->running)
     error (_("Trace is not running."));
 
-  stop_tracing ();
+  stop_tracing (args);
 }
 
 void
-stop_tracing (void)
+stop_tracing (char *note)
 {
+  int ret;
+
   target_trace_stop ();
+
+  if (!note)
+    note = trace_stop_notes;
+  ret = target_set_trace_notes (NULL, NULL, note);
+
+  if (!ret && note)
+    warning ("Target does not support trace notes, note ignored");
+
   /* Should change in response to reply?  */
   current_trace_status ()->running = 0;
 }
@@ -1835,7 +1866,9 @@ static void
 trace_status_command (char *args, int from_tty)
 {
   struct trace_status *ts = current_trace_status ();
-  int status;
+  int status, ix;
+  VEC(breakpoint_p) *tp_vec = NULL;
+  struct breakpoint *t;
   
   status = target_get_trace_status (ts);
 
@@ -1866,7 +1899,11 @@ trace_status_command (char *args, int from_tty)
 	  printf_filtered (_("No trace has been run on the target.\n"));
 	  break;
 	case tstop_command:
-	  printf_filtered (_("Trace stopped by a tstop command.\n"));
+	  if (ts->stop_desc)
+	    printf_filtered (_("Trace stopped by a tstop command (%s).\n"),
+			     ts->stop_desc);
+	  else
+	    printf_filtered (_("Trace stopped by a tstop command.\n"));
 	  break;
 	case trace_buffer_full:
 	  printf_filtered (_("Trace stopped because the buffer was full.\n"));
@@ -1882,10 +1919,10 @@ trace_status_command (char *args, int from_tty)
 	  if (ts->stopping_tracepoint)
 	    printf_filtered (_("Trace stopped by an "
 			       "error (%s, tracepoint %d).\n"),
-			     ts->error_desc, ts->stopping_tracepoint);
+			     ts->stop_desc, ts->stopping_tracepoint);
 	  else
 	    printf_filtered (_("Trace stopped by an error (%s).\n"),
-			     ts->error_desc);
+			     ts->stop_desc);
 	  break;
 	case trace_stop_reason_unknown:
 	  printf_filtered (_("Trace stopped for an unknown reason.\n"));
@@ -1936,12 +1973,46 @@ trace_status_command (char *args, int from_tty)
   if (ts->circular_buffer)
     printf_filtered (_("Trace buffer is circular.\n"));
 
+  if (ts->user_name && strlen (ts->user_name) > 0)
+    printf_filtered (_("Trace user is %s.\n"), ts->user_name);
+
+  if (ts->notes && strlen (ts->notes) > 0)
+    printf_filtered (_("Trace notes: %s.\n"), ts->notes);
+
   /* Now report on what we're doing with tfind.  */
   if (traceframe_number >= 0)
     printf_filtered (_("Looking at trace frame %d, tracepoint %d.\n"),
 		     traceframe_number, tracepoint_number);
   else
     printf_filtered (_("Not looking at any trace frame.\n"));
+
+  /* Report start/stop times if supplied.  */
+  if (ts->start_time)
+    {
+      if (ts->stop_time)
+	{
+	  LONGEST run_time = ts->stop_time - ts->start_time;
+
+	  /* Reporting a run time is more readable than two long numbers.  */
+	  printf_filtered (_("Trace started at %ld.%06ld secs, stopped %ld.%06ld secs later.\n"),
+			   ts->start_time / 1000000, ts->start_time % 1000000,
+			   run_time / 1000000, run_time % 1000000);
+	}
+      else
+	printf_filtered (_("Trace started at %ld.%06ld secs.\n"),
+			 ts->start_time / 1000000, ts->start_time % 1000000);
+    }
+  else if (ts->stop_time)
+    printf_filtered (_("Trace stopped at %ld.%06ld secs.\n"),
+		     ts->stop_time / 1000000, ts->stop_time % 1000000);
+
+  /* Now report any per-tracepoint status available.  */
+  tp_vec = all_tracepoints ();
+
+  for (ix = 0; VEC_iterate (breakpoint_p, tp_vec, ix, t); ix++)
+    target_get_tracepoint_status (t, NULL);
+
+  VEC_free (breakpoint_p, tp_vec);
 }
 
 /* Report the trace status to uiout, in a way suitable for MI, and not
@@ -2024,7 +2095,7 @@ trace_status_mi (int on_stop)
 				  stopping_tracepoint);
 	      if (ts->stop_reason == tracepoint_error)
 		ui_out_field_string (uiout, "error-description",
-				     ts->error_desc);
+				     ts->stop_desc);
 	    }
 	}
     }
@@ -2040,6 +2111,20 @@ trace_status_mi (int on_stop)
 
   ui_out_field_int (uiout, "disconnected",  ts->disconnected_tracing);
   ui_out_field_int (uiout, "circular",  ts->circular_buffer);
+
+  ui_out_field_string (uiout, "user-name", ts->user_name);
+  ui_out_field_string (uiout, "notes", ts->notes);
+
+  {
+    char buf[100];
+
+    xsnprintf (buf, sizeof buf, "%ld.%06ld",
+	       ts->start_time / 1000000, ts->start_time % 1000000);
+    ui_out_field_string (uiout, "start-time", buf);
+    xsnprintf (buf, sizeof buf, "%ld.%06ld",
+	       ts->stop_time / 1000000, ts->stop_time % 1000000);
+    ui_out_field_string (uiout, "stop-time", buf);
+  }
 }
 
 /* This function handles the details of what to do about an ongoing
@@ -2881,9 +2966,9 @@ trace_save (const char *filename, int target_does_save)
 	   (ts->running ? '1' : '0'), stop_reason_names[ts->stop_reason]);
   if (ts->stop_reason == tracepoint_error)
     {
-      char *buf = (char *) alloca (strlen (ts->error_desc) * 2 + 1);
+      char *buf = (char *) alloca (strlen (ts->stop_desc) * 2 + 1);
 
-      bin2hex ((gdb_byte *) ts->error_desc, buf, 0);
+      bin2hex ((gdb_byte *) ts->stop_desc, buf, 0);
       fprintf (fp, ":%s", buf);
     }
   fprintf (fp, ":%x", ts->stopping_tracepoint);
@@ -2936,6 +3021,9 @@ trace_save (const char *filename, int target_does_save)
   target_upload_tracepoints (&uploaded_tps);
 
   for (utp = uploaded_tps; utp; utp = utp->next)
+    target_get_tracepoint_status (NULL, utp);
+
+  for (utp = uploaded_tps; utp; utp = utp->next)
     {
       fprintf (fp, "tp T%x:%s:%c:%x:%x",
 	       utp->number, phex_nz (utp->addr, sizeof (utp->addr)),
@@ -2971,6 +3059,11 @@ trace_save (const char *filename, int target_does_save)
 				buf, MAX_TRACE_UPLOAD);
 	  fprintf (fp, "tp Z%s\n", buf);
 	}
+      fprintf (fp, "tp V%x:%s:%x:%s\n",
+	       utp->number, phex_nz (utp->addr, sizeof (utp->addr)),
+	       utp->hit_count,
+	       phex_nz (utp->traceframe_usage,
+			sizeof (utp->traceframe_usage)));
     }
 
   free_uploaded_tps (&uploaded_tps);
@@ -3041,17 +3134,11 @@ trace_save_command (char *args, int from_tty)
 /* Tell the target what to do with an ongoing tracing run if GDB
    disconnects for some reason.  */
 
-void
-send_disconnected_tracing_value (int value)
-{
-  target_set_disconnected_tracing (value);
-}
-
 static void
 set_disconnected_tracing (char *args, int from_tty,
 			  struct cmd_list_element *c)
 {
-  send_disconnected_tracing_value (disconnected_tracing);
+  target_set_disconnected_tracing (disconnected_tracing);
 }
 
 static void
@@ -3059,6 +3146,42 @@ set_circular_trace_buffer (char *args, int from_tty,
 			   struct cmd_list_element *c)
 {
   target_set_circular_trace_buffer (circular_trace_buffer);
+}
+
+static void
+set_trace_user (char *args, int from_tty,
+		struct cmd_list_element *c)
+{
+  int ret;
+
+  ret = target_set_trace_notes (trace_user, NULL, NULL);
+
+  if (!ret)
+    warning ("Target does not support trace notes, user ignored");
+}
+
+static void
+set_trace_notes (char *args, int from_tty,
+		 struct cmd_list_element *c)
+{
+  int ret;
+
+  ret = target_set_trace_notes (NULL, trace_notes, NULL);
+
+  if (!ret)
+    warning ("Target does not support trace notes, note ignored");
+}
+
+static void
+set_trace_stop_notes (char *args, int from_tty,
+		      struct cmd_list_element *c)
+{
+  int ret;
+
+  ret = target_set_trace_notes (NULL, NULL, trace_stop_notes);
+
+  if (!ret)
+    warning ("Target does not support trace notes, stop note ignored");
 }
 
 /* Convert the memory pointed to by mem into hex, placing result in buf.
@@ -3638,20 +3761,26 @@ tfile_interp_line (char *line,
 void
 parse_trace_status (char *line, struct trace_status *ts)
 {
-  char *p = line, *p1, *p2, *p_temp;
+  char *p = line, *p1, *p2, *p3, *p_temp;
+  int end;
   ULONGEST val;
 
   ts->running_known = 1;
   ts->running = (*p++ == '1');
   ts->stop_reason = trace_stop_reason_unknown;
-  xfree (ts->error_desc);
-  ts->error_desc = NULL;
+  xfree (ts->stop_desc);
+  ts->stop_desc = NULL;
   ts->traceframe_count = -1;
   ts->traceframes_created = -1;
   ts->buffer_free = -1;
   ts->buffer_size = -1;
   ts->disconnected_tracing = 0;
   ts->circular_buffer = 0;
+  xfree (ts->user_name);
+  ts->user_name = NULL;
+  xfree (ts->notes);
+  ts->notes = NULL;
+  ts->start_time = ts->stop_time = 0;
 
   while (*p++)
     {
@@ -3659,6 +3788,9 @@ parse_trace_status (char *line, struct trace_status *ts)
       if (p1 == NULL)
 	error (_("Malformed trace status, at %s\n\
 Status line: '%s'\n"), p, line);
+      p3 = strchr (p, ';');
+      if (p3 == NULL)
+	p3 = p + strlen (p);
       if (strncmp (p, stop_reason_names[trace_buffer_full], p1 - p) == 0)
 	{
 	  p = unpack_varlen_hex (++p1, &val);
@@ -3678,7 +3810,22 @@ Status line: '%s'\n"), p, line);
 	}
       else if (strncmp (p, stop_reason_names[tstop_command], p1 - p) == 0)
 	{
-	  p = unpack_varlen_hex (++p1, &val);
+	  p2 = strchr (++p1, ':');
+	  if (!p2 || p2 > p3)
+	    {
+	      /*older style*/
+	      p2 = p1;
+	    }
+	  else if (p2 != p1)
+	    {
+	      ts->stop_desc = xmalloc (strlen (line));
+	      end = hex2bin (p1, ts->stop_desc, (p2 - p1) / 2);
+	      ts->stop_desc[end] = '\0';
+	    }
+	  else
+	    ts->stop_desc = xstrdup ("");
+
+	  p = unpack_varlen_hex (++p2, &val);
 	  ts->stop_reason = tstop_command;
 	}
       else if (strncmp (p, stop_reason_names[trace_disconnected], p1 - p) == 0)
@@ -3691,14 +3838,12 @@ Status line: '%s'\n"), p, line);
 	  p2 = strchr (++p1, ':');
 	  if (p2 != p1)
 	    {
-	      int end;
-
-	      ts->error_desc = xmalloc ((p2 - p1) / 2 + 1);
-	      end = hex2bin (p1, ts->error_desc, (p2 - p1) / 2);
-	      ts->error_desc[end] = '\0';
+	      ts->stop_desc = xmalloc ((p2 - p1) / 2 + 1);
+	      end = hex2bin (p1, ts->stop_desc, (p2 - p1) / 2);
+	      ts->stop_desc[end] = '\0';
 	    }
 	  else
-	    ts->error_desc = xstrdup ("");
+	    ts->stop_desc = xstrdup ("");
 
 	  p = unpack_varlen_hex (++p2, &val);
 	  ts->stopping_tracepoint = val;
@@ -3734,6 +3879,32 @@ Status line: '%s'\n"), p, line);
 	  p = unpack_varlen_hex (++p1, &val);
 	  ts->circular_buffer = val;
 	}
+      else if (strncmp (p, "starttime", p1 - p) == 0)
+	{
+	  p = unpack_varlen_hex (++p1, &val);
+	  ts->start_time = val;
+	}
+      else if (strncmp (p, "stoptime", p1 - p) == 0)
+	{
+	  p = unpack_varlen_hex (++p1, &val);
+	  ts->stop_time = val;
+	}
+      else if (strncmp (p, "username", p1 - p) == 0)
+	{
+	  ++p1;
+	  ts->user_name = xmalloc (strlen (p) / 2);
+	  end = hex2bin (p1, ts->user_name, (p3 - p1)  / 2);
+	  ts->user_name[end] = '\0';
+	  p = p3;
+	}
+      else if (strncmp (p, "notes", p1 - p) == 0)
+	{
+	  ++p1;
+	  ts->notes = xmalloc (strlen (p) / 2);
+	  end = hex2bin (p1, ts->notes, (p3 - p1) / 2);
+	  ts->notes[end] = '\0';
+	  p = p3;
+	}
       else
 	{
 	  /* Silently skip unknown optional info.  */
@@ -3745,6 +3916,26 @@ Status line: '%s'\n"), p, line);
 	    break;
 	}
     }
+}
+
+void
+parse_tracepoint_status (char *p, struct breakpoint *bp,
+			 struct uploaded_tp *utp)
+{
+  ULONGEST uval;
+  struct tracepoint *tp = (struct tracepoint *) bp;
+
+  p = unpack_varlen_hex (p, &uval);
+  if (tp)
+    tp->base.hit_count += uval;
+  else
+    utp->hit_count += uval;
+  p = unpack_varlen_hex (p + 1, &uval);
+  if (tp)
+    tp->traceframe_usage += uval;
+  else
+    utp->traceframe_usage += uval;
+  /* Ignore any extra, allowing for future extensions.  */
 }
 
 /* Given a line of text defining a part of a tracepoint, parse it into
@@ -3848,6 +4039,12 @@ parse_tracepoint_definition (char *line, struct uploaded_tp **utpp)
       else if (strncmp (srctype, "cmd:", strlen ("cmd:")) == 0)
 	VEC_safe_push (char_ptr, utp->cmd_strings, xstrdup (buf));
     }
+  else if (piece == 'V')
+    {
+      utp = get_uploaded_tp (num, addr, utpp);
+
+      parse_tracepoint_status (p, NULL, utp);
+    }
   else
     {
       /* Don't error out, the target might be sending us optional
@@ -3921,6 +4118,13 @@ tfile_get_trace_status (struct trace_status *ts)
      trace files, so nothing to do here.  */
 
   return -1;
+}
+
+static void
+tfile_get_tracepoint_status (struct breakpoint *tp, struct uploaded_tp *utp)
+{
+  /* Other bits of trace status were collected as part of opening the
+     trace files, so nothing to do here.  */
 }
 
 /* Given the position of a traceframe in the file, figure out what
@@ -4464,6 +4668,7 @@ init_tfile_ops (void)
   tfile_ops.to_xfer_partial = tfile_xfer_partial;
   tfile_ops.to_files_info = tfile_files_info;
   tfile_ops.to_get_trace_status = tfile_get_trace_status;
+  tfile_ops.to_get_tracepoint_status = tfile_get_tracepoint_status;
   tfile_ops.to_trace_find = tfile_trace_find;
   tfile_ops.to_get_trace_state_variable_value
     = tfile_get_trace_state_variable_value;
@@ -5008,11 +5213,17 @@ De-select any trace frame and resume 'live' debugging."),
   add_com ("tstatus", class_trace, trace_status_command,
 	   _("Display the status of the current trace data collection."));
 
-  add_com ("tstop", class_trace, trace_stop_command,
-	   _("Stop trace data collection."));
+  add_com ("tstop", class_trace, trace_stop_command, _("\
+Stop trace data collection.\n\
+Usage: tstop [ <notes> ... ]\n\
+Any arguments supplied are recorded with the trace as a stop reason and\n\
+reported by tstatus (if the target supports trace notes)."));
 
-  add_com ("tstart", class_trace, trace_start_command,
-	   _("Start trace data collection."));
+  add_com ("tstart", class_trace, trace_start_command, _("\
+Start trace data collection.\n\
+Usage: tstart [ <notes> ... ]\n\
+Any arguments supplied are recorded with the trace as a note and\n\
+reported by tstatus (if the target supports trace notes)."));
 
   add_com ("end", class_trace, end_actions_pseudocommand, _("\
 Ends a list of commands or actions.\n\
@@ -5086,6 +5297,27 @@ up and stopping the trace run."),
 			   NULL,
 			   &setlist,
 			   &showlist);
+
+  add_setshow_string_cmd ("trace-user", class_trace,
+			  &trace_user, _("\
+Set the user name to use for current and future trace runs"), _("\
+Show the user name to use for current and future trace runs"), NULL,
+			  set_trace_user, NULL,
+			  &setlist, &showlist);
+
+  add_setshow_string_cmd ("trace-notes", class_trace,
+			  &trace_notes, _("\
+Set notes string to use for current and future trace runs"), _("\
+Show the notes string to use for current and future trace runs"), NULL,
+			  set_trace_notes, NULL,
+			  &setlist, &showlist);
+
+  add_setshow_string_cmd ("trace-stop-notes", class_trace,
+			  &trace_stop_notes, _("\
+Set notes string to use for future tstop commands"), _("\
+Show the notes string to use for future tstop commands"), NULL,
+			  set_trace_stop_notes, NULL,
+			  &setlist, &showlist);
 
   init_tfile_ops ();
 

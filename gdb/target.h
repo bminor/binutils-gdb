@@ -713,6 +713,9 @@ struct target_ops
     /* Get the current status of a tracing run.  */
     int (*to_get_trace_status) (struct trace_status *ts);
 
+    void (*to_get_tracepoint_status) (struct breakpoint *tp,
+				      struct uploaded_tp *utp);
+
     /* Stop a trace run.  */
     void (*to_trace_stop) (void);
 
@@ -748,6 +751,10 @@ struct target_ops
        disconnection - set VAL to 1 to keep tracing, 0 to stop.  */
     void (*to_set_disconnected_tracing) (int val);
     void (*to_set_circular_trace_buffer) (int val);
+
+    /* Add/change textual notes about the trace run, returning 1 if
+       successful, 0 otherwise.  */
+    int (*to_set_trace_notes) (char *user, char *notes, char* stopnotes);
 
     /* Return the processor core that thread PTID was last seen on.
        This information is updated only when:
@@ -1508,6 +1515,9 @@ extern int target_search_memory (CORE_ADDR start_addr,
 #define target_get_trace_status(ts) \
   (*current_target.to_get_trace_status) (ts)
 
+#define target_get_tracepoint_status(tp,utp)		\
+  (*current_target.to_get_tracepoint_status) (tp, utp)
+
 #define target_trace_stop() \
   (*current_target.to_trace_stop) ()
 
@@ -1537,6 +1547,9 @@ extern int target_search_memory (CORE_ADDR start_addr,
 
 #define	target_set_circular_trace_buffer(val)	\
   (*current_target.to_set_circular_trace_buffer) (val)
+
+#define	target_set_trace_notes(user,notes,stopnotes)		\
+  (*current_target.to_set_trace_notes) ((user), (notes), (stopnotes))
 
 #define target_get_tib_address(ptid, addr) \
   (*current_target.to_get_tib_address) ((ptid), (addr))

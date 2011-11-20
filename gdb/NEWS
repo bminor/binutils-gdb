@@ -133,6 +133,17 @@ collect[/s] EXPRESSIONS
   string.  An optional integer following the "/s" sets a bound on the
   number of bytes that will be collected.
 
+tstart [NOTES]
+  The trace start command now interprets any supplied arguments as a
+  note to be recorded with the trace run, with an effect similar to
+  setting the variable trace-notes.
+
+tstop [NOTES]
+  The trace stop command now interprets any arguments as a note to be
+  mentioned along with the tstatus report that the trace was stopped
+  with a command.  The effect is similar to setting the variable
+  trace-stop-notes.
+
 * Tracepoints can now be enabled and disabled at any time after a trace
   experiment has been started using the standard "enable" and "disable"
   commands.  It is now possible to start a trace experiment with no enabled
@@ -176,6 +187,22 @@ show basenames-may-differ
   If not set (the default), all source files are assumed to have just
   one base name, and gdb will do file name comparisons more efficiently.
 
+set trace-user
+show trace-user
+set trace-notes
+show trace-notes
+  Set a user name and notes for the current and any future trace runs.
+  This is useful for long-running and/or disconnected traces, to
+  inform others (or yourself) as to who is running the trace, supply
+  contact information, or otherwise explain what is going on.
+
+set trace-stop-notes
+show trace-stop-notes
+  Set a note attached to the trace run, that is displayed when the
+  trace has been stopped by a tstop command.  This is useful for
+  instance as an explanation, if you are stopping a trace run that was
+  started by someone else.
+
 * New remote packets
 
 QTEnable
@@ -185,6 +212,14 @@ QTEnable
 QTDisable
 
   Dynamically disable a tracepoint in a started trace experiment.
+
+QTNotes
+
+  Set the user and notes of the trace run.
+
+qTP
+
+  Query the current status of a tracepoint.
 
 qTMinFTPILen
 

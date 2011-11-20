@@ -1,3 +1,8 @@
+2011-11-20  Stan Shebs  <stan@codesourcery.com>
+
+	* gdb.trace/tstatus.exp: New.
+	* gdb.trace/actions.c: Include string.h.
+
 2011-11-18  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.trace/pending.exp: New.
