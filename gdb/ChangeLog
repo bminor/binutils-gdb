@@ -1,3 +1,7 @@
+2011-11-20  Sanjoy Das  <sdas@igalia.com>
+
+	* MAINTAINERS (Write After Approval): Add myself to the list.
+
 2011-11-18  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* findvar.c (read_frame_register_value): Respect value_offset
