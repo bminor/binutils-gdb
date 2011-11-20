@@ -1,3 +1,10 @@
+2011-11-20  Sanjoy Das  <sdas@igalia.com>
+
+	* gdb.texinfo (JIT Interface): Add documentation on writing and
+	usind JIT debug info readers.
+	(Custom Debug Info, Using JIT Debug Info Readers, Writing JIT
+	Debug Info Readers): New nodes.
+
 2011-11-18  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.texinfo (Create and Delete Tracepoints): Mention pending
