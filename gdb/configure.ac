@@ -627,6 +627,10 @@ fi
 AC_SUBST(TARGET_PTR)
 AC_CONFIG_FILES([jit-reader.h:jit-reader.in])
 
+GDB_AC_WITH_DIR([JIT_READER_DIR], [jit-reader-dir],
+                [directory to load the JIT readers from],
+                [${libdir}/gdb])
+
 AC_ARG_WITH(expat,
   AS_HELP_STRING([--with-expat], [include expat support (auto/yes/no)]),
   [], [with_expat=auto])

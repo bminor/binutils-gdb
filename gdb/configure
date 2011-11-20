@@ -666,6 +666,7 @@ python_prog_path
 LTLIBEXPAT
 LIBEXPAT
 HAVE_LIBEXPAT
+JIT_READER_DIR
 TARGET_PTR
 READLINE_TEXI_INCFLAG
 READLINE_CFLAGS
@@ -966,6 +967,7 @@ with_zlib
 with_libiconv_prefix
 with_iconv_bin
 with_system_readline
+with_jit_reader_dir
 with_expat
 with_gnu_ld
 enable_rpath
@@ -1666,6 +1668,8 @@ Optional Packages:
                           search for libiconv in DIR/include and DIR/lib
   --with-iconv-bin=PATH   specify where to find the iconv program
   --with-system-readline  use installed readline library
+  --with-jit-reader-dir=PATH
+                          directory to load the JIT readers from
   --with-expat            include expat support (auto/yes/no)
   --with-gnu-ld           assume the C compiler uses GNU ld default=no
   --with-libexpat-prefix[=DIR]  search for libexpat in DIR/include and DIR/lib
@@ -10005,6 +10009,53 @@ fi
 
 
 ac_config_files="$ac_config_files jit-reader.h:jit-reader.in"
+
+
+
+
+# Check whether --with-jit-reader-dir was given.
+if test "${with_jit_reader_dir+set}" = set; then :
+  withval=$with_jit_reader_dir;
+    JIT_READER_DIR=$withval
+else
+  JIT_READER_DIR=${libdir}/gdb
+fi
+
+
+  test "x$prefix" = xNONE && prefix="$ac_default_prefix"
+  test "x$exec_prefix" = xNONE && exec_prefix='${prefix}'
+  ac_define_dir=`eval echo $JIT_READER_DIR`
+  ac_define_dir=`eval echo $ac_define_dir`
+
+cat >>confdefs.h <<_ACEOF
+#define JIT_READER_DIR "$ac_define_dir"
+_ACEOF
+
+
+
+
+  if test "x$exec_prefix" = xNONE || test "x$exec_prefix" = 'x${prefix}'; then
+     if test "x$prefix" = xNONE; then
+     	test_prefix=/usr/local
+     else
+	test_prefix=$prefix
+     fi
+  else
+     test_prefix=$exec_prefix
+  fi
+  value=0
+  case ${ac_define_dir} in
+     "${test_prefix}"|"${test_prefix}/"*|\
+	'${exec_prefix}'|'${exec_prefix}/'*)
+     value=1
+     ;;
+  esac
+
+cat >>confdefs.h <<_ACEOF
+#define JIT_READER_DIR_RELOCATABLE $value
+_ACEOF
+
+
 
 
 

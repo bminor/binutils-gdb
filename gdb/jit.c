@@ -33,6 +33,8 @@
 #include "target.h"
 #include "gdb_stat.h"
 
+static const char *jit_reader_dir = NULL;
+
 static const struct objfile_data *jit_objfile_data;
 
 static const char *const jit_break_name = "__jit_debug_register_code";
@@ -558,6 +560,8 @@ extern void _initialize_jit (void);
 void
 _initialize_jit (void)
 {
+  jit_reader_dir = relocate_gdb_directory (JIT_READER_DIR,
+                                           JIT_READER_DIR_RELOCATABLE);
   add_setshow_zinteger_cmd ("jit", class_maintenance, &jit_debug,
 			    _("Set JIT debugging."),
 			    _("Show JIT debugging."),
