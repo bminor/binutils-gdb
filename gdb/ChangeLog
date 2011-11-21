@@ -1,3 +1,7 @@
+2011-11-21  Yao Qi  <yao@codesourcery.com>
+
+	* MAINTAINERS (Write After Approval): Keep list in alphabetical order.
+
 2011-11-20  Stan Shebs  <stan@codesourcery.com>
 
 	* NEWS: Mention tracepoint additions.
