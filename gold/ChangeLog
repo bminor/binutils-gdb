@@ -1,3 +1,8 @@
+2011-11-11  Doug Kwan  <dougkwan@google.com>
+
+	* arm.cc (Target_arm::do_make_elf_object): Allow executable also
+	if --just-symbols is given.
+
 2011-11-10  Doug Kwan  <dougkwan@google.com>
 
 	PR gold/13362
