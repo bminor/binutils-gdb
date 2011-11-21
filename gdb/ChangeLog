@@ -1,3 +1,9 @@
+2011-11-21  Keith Seitz  <keiths@redhat.com>
+
+	* gdb.mi/mi-var-display.exp: Remove XFAIL for c_variable-7.51,
+	-var-evaluate-expression of an enumeration and fix expected result.
+	* gdb.mi/mi2-varvdisplay.exp: Likewise.
+
 2011-11-21  Kwok Cheung Yeung  <kcy@codesourcery.com>
 
 	* osdata.c (info_osdata_command): Rename nprocs to nrows.  Handle

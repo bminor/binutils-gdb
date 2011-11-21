@@ -529,13 +529,11 @@ mi_list_varobj_children anons {
 # Desc: create enum e
 mi_create_varobj e e "create local variable e"
 
-setup_xfail "*-*-*"
 # Test: c_variable-7.51
 # Desc: value of e
 mi_gdb_test "-var-evaluate-expression e" \
-	"\\^done,value=\"FIXME\"" \
+	"\\^done,value=\"bar\"" \
 	"eval variable e"
-clear_xfail "*-*-*"
 
 # Test: c_variable-7.52
 # Desc: type of e
