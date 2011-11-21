@@ -2507,18 +2507,24 @@ pr12826_2.o: pr12826_2.s
 	$(TEST_AS) -o $@ $<
 
 check_SCRIPTS += arm_unaligned_reloc.sh
-check_DATA += arm_unaligned_reloc.stdout
+check_DATA += arm_unaligned_reloc.stdout arm_unaligned_reloc_r.stdout
 
 arm_unaligned_reloc.stdout: arm_unaligned_reloc
 	$(TEST_OBJDUMP) -D $< > $@
 
+arm_unaligned_reloc_r.stdout: arm_unaligned_reloc_r
+	$(TEST_OBJDUMP) -Dr $< > $@
+
 arm_unaligned_reloc: arm_unaligned_reloc.o ../ld-new
 	../ld-new -o $@ $<
+
+arm_unaligned_reloc_r: arm_unaligned_reloc.o ../ld-new
+	../ld-new -r -o $@ $<
 
 arm_unaligned_reloc.o: arm_unaligned_reloc.s
 	$(TEST_AS) -o $@ $<
 
-MOSTLYCLEANFILES += arm_unaligned_reloc
+MOSTLYCLEANFILES += arm_unaligned_reloc arm_unaligned_reloc_r
 
 # Check ARM to ARM farcall veneers
 

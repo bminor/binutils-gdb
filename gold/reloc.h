@@ -247,6 +247,8 @@ class Relocatable_relocs
     RELOC_ADJUST_FOR_SECTION_2,
     RELOC_ADJUST_FOR_SECTION_4,
     RELOC_ADJUST_FOR_SECTION_8,
+    // Like RELOC_ADJUST_FOR_SECTION_4 but for unaligned relocs.
+    RELOC_ADJUST_FOR_SECTION_4_UNALIGNED,
     // Discard the input reloc--process it completely when relocating
     // the data section contents.
     RELOC_DISCARD,
@@ -345,6 +347,20 @@ private:
     Valtype x = elfcpp::Swap<valsize, big_endian>::readval(wv);
     x = psymval->value(object, x);
     elfcpp::Swap<valsize, big_endian>::writeval(wv, x);
+  }
+
+  // Like the above but for relocs at unaligned addresses.
+  template<int valsize>
+  static inline void
+  rel_unaligned(unsigned char* view,
+                const Sized_relobj_file<size, big_endian>* object,
+                const Symbol_value<size>* psymval)
+  {
+    typedef typename elfcpp::Swap_unaligned<valsize, big_endian>::Valtype
+        Valtype;
+    Valtype x = elfcpp::Swap_unaligned<valsize, big_endian>::readval(view);
+    x = psymval->value(object, x);
+    elfcpp::Swap_unaligned<valsize, big_endian>::writeval(view, x);
   }
 
   // Do a simple relocation with the addend in the relocation.
@@ -557,6 +573,13 @@ public:
 	const Sized_relobj_file<size, big_endian>* object,
 	const Symbol_value<size>* psymval)
   { This::template rel<32>(view, object, psymval); }
+
+  // Like above but for relocs at unaligned addresses.
+  static inline void
+  rel32_unaligned(unsigned char* view,
+	          const Sized_relobj_file<size, big_endian>* object,
+	          const Symbol_value<size>* psymval)
+  { This::template rel_unaligned<32>(view, object, psymval); }
 
   // Do an 32-bit RELA relocation with the addend in the relocation.
   static inline void
