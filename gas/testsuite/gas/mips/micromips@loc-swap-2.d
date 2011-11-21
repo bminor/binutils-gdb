@@ -39,11 +39,11 @@ Raw dump of debug contents of section .debug_line:
  Line Number Statements:
   Extended opcode 2: set Address to 0x1
   Special opcode 11: advance Address by 0 to 0x1 and Line by 6 to 7
-  Special opcode 35: advance Address by 2 to 0x3 and Line by 2 to 9
-  Special opcode 6: advance Address by 0 to 0x3 and Line by 1 to 10
-  Special opcode 64: advance Address by 4 to 0x7 and Line by 3 to 13
-  Special opcode 34: advance Address by 2 to 0x9 and Line by 1 to 14
-  Special opcode 6: advance Address by 0 to 0x9 and Line by 1 to 15
-  Special opcode 63: advance Address by 4 to 0xd and Line by 2 to 17
-  Advance PC by 1 to 0xe
+  Special opcode 7: advance Address by 0 to 0x1 and Line by 2 to 9
+  Special opcode 6: advance Address by 0 to 0x1 and Line by 1 to 10
+  Special opcode 64: advance Address by 4 to 0x5 and Line by 3 to 13
+  Special opcode 34: advance Address by 2 to 0x7 and Line by 1 to 14
+  Special opcode 6: advance Address by 0 to 0x7 and Line by 1 to 15
+  Special opcode 63: advance Address by 4 to 0xb and Line by 2 to 17
+  Advance PC by 1 to 0xc
   Extended opcode 1: End of Sequence
