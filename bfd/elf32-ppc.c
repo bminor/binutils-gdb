@@ -9129,6 +9129,24 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 
 #include "elf32-target.h"
 
+/* FreeBSD Target */
+
+#undef  TARGET_LITTLE_SYM
+#undef  TARGET_LITTLE_NAME
+
+#undef  TARGET_BIG_SYM
+#define TARGET_BIG_SYM  bfd_elf32_powerpc_freebsd_vec
+#undef  TARGET_BIG_NAME
+#define TARGET_BIG_NAME "elf32-powerpc-freebsd"
+
+#undef  ELF_OSABI
+#define ELF_OSABI	ELFOSABI_FREEBSD
+
+#undef  elf32_bed
+#define elf32_bed	elf32_powerpc_fbsd_bed
+
+#include "elf32-target.h"
+
 /* VxWorks Target */
 
 #undef TARGET_LITTLE_SYM
@@ -9138,6 +9156,8 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 #define TARGET_BIG_SYM		bfd_elf32_powerpc_vxworks_vec
 #undef TARGET_BIG_NAME
 #define TARGET_BIG_NAME		"elf32-powerpc-vxworks"
+
+#undef  ELF_OSABI
 
 /* VxWorks uses the elf default section flags for .plt.  */
 static const struct bfd_elf_special_section *

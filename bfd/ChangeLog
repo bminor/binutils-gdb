@@ -1,3 +1,12 @@
+2011-11-21  Andreas Tobler  <andreast@fgznet.ch>
+
+	* config.bfd: Add vectors for powerpc and powerpc64-freebsd.
+	* configure.in (TDEFINES): Add rules for powerpc*-freebsd.
+	* configure: Regenerate.
+	* elf32-ppc.c: Add powerpc-freebsd definitions.
+	* elf64-ppc.c: Add powerpc64-freebsd definitions.
+	* targets.c: Add bits for powerpc and powerpc64-freebsd.
+
 2011-11-17  Philipp Thomas  <philipp@thogro.org>
 
 	* elf32-arm.c (elf32_thumb_to_arm_stub): Sync message so that it

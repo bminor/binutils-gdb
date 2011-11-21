@@ -13899,3 +13899,22 @@ ppc64_elf_finish_dynamic_sections (bfd *output_bfd,
 }
 
 #include "elf64-target.h"
+
+/* FreeBSD support */
+
+#undef  TARGET_LITTLE_SYM
+#undef  TARGET_LITTLE_NAME
+
+#undef  TARGET_BIG_SYM
+#define TARGET_BIG_SYM	bfd_elf64_powerpc_freebsd_vec
+#undef  TARGET_BIG_NAME
+#define TARGET_BIG_NAME "elf64-powerpc-freebsd"
+
+#undef  ELF_OSABI
+#define	ELF_OSABI       ELFOSABI_FREEBSD
+
+#undef  elf64_bed
+#define elf64_bed	elf64_powerpc_fbsd_bed
+
+#include "elf64-target.h"
+
