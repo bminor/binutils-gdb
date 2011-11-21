@@ -9348,7 +9348,7 @@ Target_arm<big_endian>::Relocate::relocate_tls(
 	      
               // Relocate the field with the PC relative offset of the pair of
               // GOT entries.
-	      RelocFuncs::pcrel32(view, got_entry, address);
+	      RelocFuncs::pcrel32_unaligned(view, got_entry, address);
               return ArmRelocFuncs::STATUS_OKAY;
             }
         }
@@ -9367,13 +9367,13 @@ Target_arm<big_endian>::Relocate::relocate_tls(
 
           // Relocate the field with the PC relative offset of the pair of
           // GOT entries.
-          RelocFuncs::pcrel32(view, got_entry, address);
+          RelocFuncs::pcrel32_unaligned(view, got_entry, address);
 	  return ArmRelocFuncs::STATUS_OKAY;
         }
       break;
 
     case elfcpp::R_ARM_TLS_LDO32:	// Alternate local-dynamic
-      RelocFuncs::rel32(view, value);
+      RelocFuncs::rel32_unaligned(view, value);
       return ArmRelocFuncs::STATUS_OKAY;
 
     case elfcpp::R_ARM_TLS_IE32:	// Initial-exec
@@ -9402,7 +9402,7 @@ Target_arm<big_endian>::Relocate::relocate_tls(
 	    target->got_plt_section()->address() + got_offset;
 
           // Relocate the field with the PC relative offset of the GOT entry.
-	  RelocFuncs::pcrel32(view, got_entry, address);
+	  RelocFuncs::pcrel32_unaligned(view, got_entry, address);
 	  return ArmRelocFuncs::STATUS_OKAY;
         }
       break;
@@ -9418,7 +9418,7 @@ Target_arm<big_endian>::Relocate::relocate_tls(
 	  // need to add TCB size to the offset.
 	  Arm_address aligned_tcb_size =
 	    align_address(ARM_TCB_SIZE, tls_segment->maximum_alignment());
-          RelocFuncs::rel32(view, value + aligned_tcb_size);
+          RelocFuncs::rel32_unaligned(view, value + aligned_tcb_size);
 
         }
       return ArmRelocFuncs::STATUS_OKAY;

@@ -1,3 +1,13 @@
+2011-11-10  Doug Kwan  <dougkwan@google.com>
+
+	PR gold/13362
+	* arm.cc (Target_arm::Relocate::relocate_tls): Do unaligned accesses
+	when processing data relocs.
+	* reloc.h (Relocate_functions::rel_unaligned): New method.
+	(Relocate_functions::pcrel_unaligned): Ditto.
+	(Relocate_functions::rel32_unaligned): Ditto.
+	(Relocate_functions::pcrel32_unaligned): Ditto.
+
 2011-11-15  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	Apply mainline patches.
