@@ -1995,16 +1995,20 @@ trace_status_command (char *args, int from_tty)
 
 	  /* Reporting a run time is more readable than two long numbers.  */
 	  printf_filtered (_("Trace started at %ld.%06ld secs, stopped %ld.%06ld secs later.\n"),
-			   ts->start_time / 1000000, ts->start_time % 1000000,
-			   run_time / 1000000, run_time % 1000000);
+			   (long int) ts->start_time / 1000000,
+			   (long int) ts->start_time % 1000000,
+			   (long int) run_time / 1000000,
+			   (long int) run_time % 1000000);
 	}
       else
 	printf_filtered (_("Trace started at %ld.%06ld secs.\n"),
-			 ts->start_time / 1000000, ts->start_time % 1000000);
+			 (long int) ts->start_time / 1000000,
+			 (long int) ts->start_time % 1000000);
     }
   else if (ts->stop_time)
     printf_filtered (_("Trace stopped at %ld.%06ld secs.\n"),
-		     ts->stop_time / 1000000, ts->stop_time % 1000000);
+		     (long int) ts->stop_time / 1000000,
+		     (long int) ts->stop_time % 1000000);
 
   /* Now report any per-tracepoint status available.  */
   tp_vec = all_tracepoints ();
@@ -2119,10 +2123,12 @@ trace_status_mi (int on_stop)
     char buf[100];
 
     xsnprintf (buf, sizeof buf, "%ld.%06ld",
-	       ts->start_time / 1000000, ts->start_time % 1000000);
+	       (long int) ts->start_time / 1000000,
+	       (long int) ts->start_time % 1000000);
     ui_out_field_string (uiout, "start-time", buf);
     xsnprintf (buf, sizeof buf, "%ld.%06ld",
-	       ts->stop_time / 1000000, ts->stop_time % 1000000);
+	       (long int) ts->stop_time / 1000000,
+	       (long int) ts->stop_time % 1000000);
     ui_out_field_string (uiout, "stop-time", buf);
   }
 }
