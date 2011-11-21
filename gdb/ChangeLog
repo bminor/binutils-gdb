@@ -1,3 +1,9 @@
+2011-11-21  Kwok Cheung Yeung  <kcy@codesourcery.com>
+
+	* osdata.c (info_osdata_command): Rename nprocs to nrows.  Handle
+	the case where osdata->items is empty.  Rename column names to a
+	canonical form to avoid problems with unusual column names.
+
 2011-11-21  Yao Qi  <yao@codesourcery.com>
 
 	* MAINTAINERS (Write After Approval): Keep list in alphabetical order.
