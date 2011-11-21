@@ -1363,14 +1363,16 @@ ppc_target_format (void)
   return "xcoff-powermac";
 #else
 #  ifdef TE_AIX5
-    return (ppc_obj64 ? "aix5coff64-rs6000" : "aixcoff-rs6000");
+  return (ppc_obj64 ? "aix5coff64-rs6000" : "aixcoff-rs6000");
 #  else
-    return (ppc_obj64 ? "aixcoff64-rs6000" : "aixcoff-rs6000");
+  return (ppc_obj64 ? "aixcoff64-rs6000" : "aixcoff-rs6000");
 #  endif
 #endif
 #endif
 #ifdef OBJ_ELF
-# ifdef TE_VXWORKS
+# ifdef TE_FreeBSD
+  return (ppc_obj64 ? "elf64-powerpc-freebsd" : "elf32-powerpc-freebsd");
+# elif defined (TE_VXWORKS)
   return "elf32-powerpc-vxworks";
 # else
   return (target_big_endian

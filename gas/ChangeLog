@@ -1,3 +1,7 @@
+2011-11-21  Andreas Tobler  <andreast@fgznet.ch>
+
+	* config/tc-ppc.c (ppc_target_format): Add format for powerpc*-freebsd.
+
 2011-11-16  David S. Miller  <davem@davemloft.net>
 
 	* config/tc-sparc.c (md_apply_fix): Handle BFD_RELOC_8.
