@@ -1,3 +1,8 @@
+2011-11-21  DJ Delorie  <dj@redhat.com>
+
+	* config/rl78-defs.h (rl78_error): Add "const".
+	* config/rl78-parse.y (rl78_error): Likewise.
+
 2011-11-21  Andreas Tobler  <andreast@fgznet.ch>
 
 	* config/tc-ppc.c (ppc_target_format): Add format for powerpc*-freebsd.

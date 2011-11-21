@@ -1430,7 +1430,7 @@ rl78_lex (void)
 }
 
 int
-rl78_error (char * str)
+rl78_error (const char * str)
 {
   int len;
 

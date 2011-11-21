@@ -26,7 +26,7 @@
 #define RL78REL_DATA		0
 #define RL78REL_PCREL		1
 
-extern int    rl78_error (char *);
+extern int    rl78_error (const char *);
 extern void   rl78_lex_init (char *, char *);
 extern void   rl78_prefix (int);
 extern int    rl78_has_prefix (void);
