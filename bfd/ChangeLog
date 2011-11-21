@@ -1,3 +1,9 @@
+2011-11-21  Tristan Gingold  <gingold@adacore.com>
+
+	* configure.in: Bump version to 2.22
+	* Makefile.am (RELEASE): Set.
+	* configure, Makefile.in: Regenerate.
+
 2011-11-15  Maxim Kuvyrkov  <maxim@codesourcery.com>
 
 	Backport from mainline:
