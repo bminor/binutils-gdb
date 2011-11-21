@@ -43,6 +43,11 @@ if ![runto_main] then {
 # See whether we have the needed unwinder hooks.
 set ok 1
 gdb_test_multiple "print _Unwind_DebugHook" "check for unwinder hook" {
+    -re "= .*no debug info.*_Unwind_DebugHook.*\r\n$gdb_prompt $" {
+	# Pass the test so we don't get bogus fails in the results.
+	pass "check for unwinder hook"
+	set ok 0
+    }
     -re "= .*_Unwind_DebugHook.*\r\n$gdb_prompt $" {
 	pass "check for unwinder hook"
     }
