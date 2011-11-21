@@ -1,5 +1,6 @@
 # Check for range
 
+foo:
 	sb      $2,0($sp)
 	sb      $3,10($sp)
 	sb      $4,31($sp)

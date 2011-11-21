@@ -1,5 +1,6 @@
 	# Range check for safe case after alignment its range >= 32.
-	
+
+foo:
 	sb       $s3,10($t0)
 	sh       $s3,1($t0)
 	sb       $s3,32($t0)

@@ -1,5 +1,33 @@
 2011-11-21  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* gas/mips/micromips@24k-branch-delay-1.d: New test.
+	* gas/mips/micromips@24k-triple-stores-1.d: New test.
+	* gas/mips/micromips@24k-triple-stores-2.d: New test.
+	* gas/mips/micromips@24k-triple-stores-3.d: New test.
+	* gas/mips/micromips@24k-triple-stores-4.d: New test.
+	* gas/mips/micromips@24k-triple-stores-5.d: New test.
+	* gas/mips/micromips@24k-triple-stores-6.d: New test.
+	* gas/mips/micromips@24k-triple-stores-7.d: New test.
+	* gas/mips/micromips@24k-triple-stores-8.d: New test.
+	* gas/mips/micromips@24k-triple-stores-9.d: New test.
+	* gas/mips/micromips@24k-triple-stores-10.d: New test.
+	* gas/mips/micromips@24k-triple-stores-11.d: New test.
+	* gas/mips/24k-triple-stores-1.s: Adjust for microMIPS
+	disassembly.
+	* gas/mips/24k-triple-stores-2.s: Likewise.
+	* gas/mips/24k-triple-stores-3.s: Likewise.
+	* gas/mips/24k-triple-stores-4.s: Likewise.
+	* gas/mips/24k-triple-stores-5.s: Likewise.
+	* gas/mips/24k-triple-stores-6.s: Likewise.
+	* gas/mips/24k-triple-stores-7.s: Likewise.
+	* gas/mips/24k-triple-stores-8.s: Likewise.
+	* gas/mips/24k-triple-stores-9.s: Likewise.
+	* gas/mips/24k-triple-stores-10.s: Likewise.
+	* gas/mips/24k-triple-stores-11.s: Likewise.
+	* gas/mips/mips.exp: Run the new tests.
+
+2011-11-21  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* gas/mips/micromips@loc-swap-2.d: Correct test case.
 
 2011-11-16  Maciej W. Rozycki  <macro@codesourcery.com>

@@ -1,6 +1,7 @@
 # Assume to be on the same line (within 32bytes)
 # Check for individual different double words
 
+foo:
 	# safe
 	sb      $2,11($sp)
 	sb      $3,11($sp)

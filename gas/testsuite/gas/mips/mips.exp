@@ -494,30 +494,30 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "eret-2"
     run_dump_test "eret-3"
     run_dump_test_arches "24k-branch-delay-1" \
-	[mips_arch_list_matching mips1 !micromips]
+					[mips_arch_list_matching mips1]
     run_dump_test_arches "24k-triple-stores-1" \
-	[mips_arch_list_matching fpisa5 !octeon !micromips]
+				[mips_arch_list_matching fpisa5 !octeon]
     run_dump_test_arches "24k-triple-stores-2" \
-	[mips_arch_list_matching mips2 !micromips]
+					[mips_arch_list_matching mips2]
     run_dump_test_arches "24k-triple-stores-3" \
-	[mips_arch_list_matching mips2 !micromips]
+					[mips_arch_list_matching mips2]
     run_dump_test_arches "24k-triple-stores-4" \
-	[mips_arch_list_matching mips2 !micromips]
+					[mips_arch_list_matching mips2]
     run_dump_test_arches "24k-triple-stores-5" \
-	[mips_arch_list_matching mips1 !micromips]
+					[mips_arch_list_matching mips1]
     run_dump_test_arches "24k-triple-stores-6" \
-	[mips_arch_list_matching mips2 !micromips]
+					[mips_arch_list_matching mips2]
     run_dump_test_arches "24k-triple-stores-7" \
-	[mips_arch_list_matching mips2 !micromips]
+					[mips_arch_list_matching mips2]
     run_dump_test_arches "24k-triple-stores-8" \
-	[mips_arch_list_matching mips1 !micromips]
+					[mips_arch_list_matching mips1]
     run_dump_test_arches "24k-triple-stores-9" \
-	[mips_arch_list_matching mips1 !micromips]
+					[mips_arch_list_matching mips1]
     run_dump_test_arches "24k-triple-stores-10" \
-	[mips_arch_list_matching mips1 !micromips]
+					[mips_arch_list_matching mips1]
     if $elf {
 	run_dump_test_arches "24k-triple-stores-11" \
-	    [mips_arch_list_matching mips1 !micromips]
+	    				[mips_arch_list_matching mips1]
     }
 
     if $elf {

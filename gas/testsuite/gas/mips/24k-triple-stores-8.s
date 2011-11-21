@@ -1,5 +1,6 @@
 	# Range check after alignment between adjacent offsets >= 24 ??
-	
+
+foo:
 	sb       $s3,0($t0)
 	sb       $s3,1($t0)
 	sb       $s3,24($t0)

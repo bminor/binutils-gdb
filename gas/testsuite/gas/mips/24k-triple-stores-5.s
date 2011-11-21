@@ -1,5 +1,6 @@
 # Mix byte/half/word sizes with arbitary base register.
 
+foo:
 	# safe
 	sh      $2,7($8)
 	sb      $3,0($8)

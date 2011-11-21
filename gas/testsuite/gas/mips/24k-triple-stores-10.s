@@ -1,4 +1,5 @@
 	.text
+foo:
 	sb $2,0($8)
 	sb $3,8($8)
 	.data

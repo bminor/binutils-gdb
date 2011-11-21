@@ -1,5 +1,6 @@
 # integer stores
 
+foo:
 	sb      $2,0($sp)
 	sb      $3,8($sp)
 	sb      $4,16($sp)
