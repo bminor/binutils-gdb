@@ -1,3 +1,17 @@
+2011-11-21  Andreas Tobler  <andreast@fgznet.ch>
+
+	* Makefile.am (ALL_64_EMULATION_SOURCES): Add powerpc64-*-freebsd
+	source.
+	(eelf64ppc_fbsd.c): Add rules to build this file.
+	* Makefile.in: Regenerate.
+	* configure.tgt: Add target definition for powerpc64-*-freebsd*.
+	Adjust powerpc-*-freebsd*.
+	* emultempl/ppc64elf.em: Add a mechanism to override the default
+	value of 0 for plt_static_chain.
+	* emulparams/elf32ppc_fbsd.sh (OUTPUT_FORMAT): Override the default.
+	* emulparams/elf64ppc_fbsd.sh (OUTPUT_FORMAT): Likewise.
+	(DEFAULT_PLT_STATIC_CHAIN): Define to 1.
+
 2011-11-15  Andreas Schwab  <schwab@linux-m68k.org>
 
 	* ldlang.c (insert_pad): Change alignment_needed argument to

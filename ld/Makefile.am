@@ -480,6 +480,7 @@ ALL_64_EMULATION_SOURCES = \
 	eelf64ltsmip_fbsd.c \
 	eelf64mmix.c \
 	eelf64ppc.c \
+	eelf64ppc_fbsd.c \
 	eelf64tilegx.c \
 	eelf_l1om.c \
 	eelf_l1om_fbsd.c \
@@ -1980,6 +1981,10 @@ eelf64ppc.c: $(srcdir)/emulparams/elf64ppc.sh $(srcdir)/emultempl/ppc64elf.em \
   ldemul-list.h \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf64ppc "$(tdir_elf64ppc)"
+eelf64ppc_fbsd.c: $(srcdir)/emulparams/elf64ppc_fbsd.sh \
+  $(srcdir)/emultempl/ppc64elf.em ldemul-list.h \
+  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf64ppc_fbsd "$(tdir_elf64ppc_fbsd)"
 eelf64tilegx.c: $(srcdir)/emulparams/elf64tilegx.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/emultempl/needrelax.em \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}

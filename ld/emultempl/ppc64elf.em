@@ -62,7 +62,7 @@ static int no_multi_toc = 0;
 static int no_toc_sort = 0;
 
 /* Set if PLT call stubs should load r11.  */
-static int plt_static_chain = 0;
+static int plt_static_chain = ${DEFAULT_PLT_STATIC_CHAIN-0};
 
 /* Whether to emit symbols for stubs.  */
 static int emit_stub_syms = -1;
