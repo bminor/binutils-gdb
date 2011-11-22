@@ -429,6 +429,7 @@ mi_on_normal_stop (struct bpstats *bs, int print_frame)
 	  struct ui_out *saved_uiout = current_uiout;
 
 	  current_uiout = mi_uiout;
+	  bpstat_print (bs);
 	  print_stack_frame (get_selected_frame (NULL), 0, SRC_AND_LOC);
 	  current_uiout = saved_uiout;
 	}

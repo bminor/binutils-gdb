@@ -1,5 +1,9 @@
 2011-11-22  Tom Tromey  <tromey@redhat.com>
 
+	* mi/mi-interp.c (mi_on_normal_stop): Call bpstat_print.
+
+2011-11-22  Tom Tromey  <tromey@redhat.com>
+
 	* mi/mi-common.c (_initialize_gdb_mi_common): Remove.
 	Use static_assert to check the size of
 	async_reason_string_lookup.
