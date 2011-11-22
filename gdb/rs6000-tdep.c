@@ -1116,8 +1116,8 @@ ppc_deal_with_atomic_sequence (struct frame_info *frame)
          its destination address.  */
       if ((insn & BRANCH_MASK) == BC_INSN)
         {
-          int immediate = ((insn & ~3) << 16) >> 16;
-          int absolute = ((insn >> 1) & 1);
+          int immediate = ((insn & 0xfffc) ^ 0x8000) - 0x8000;
+          int absolute = insn & 2;
 
           if (bc_insn_count >= 1)
             return 0; /* More than one conditional branch found, fallback 
@@ -1126,7 +1126,7 @@ ppc_deal_with_atomic_sequence (struct frame_info *frame)
 	  if (absolute)
 	    breaks[1] = immediate;
 	  else
-	    breaks[1] = pc + immediate;
+	    breaks[1] = loc + immediate;
 
 	  bc_insn_count++;
 	  last_breakpoint++;
@@ -1150,11 +1150,10 @@ ppc_deal_with_atomic_sequence (struct frame_info *frame)
   breaks[0] = loc;
 
   /* Check for duplicated breakpoints.  Check also for a breakpoint
-     placed (branch instruction's destination) at the stwcx/stdcx 
-     instruction, this resets the reservation and take us back to the 
-     lwarx/ldarx instruction at the beginning of the atomic sequence.  */
-  if (last_breakpoint && ((breaks[1] == breaks[0]) 
-      || (breaks[1] == closing_insn)))
+     placed (branch instruction's destination) anywhere in sequence.  */
+  if (last_breakpoint
+      && (breaks[1] == breaks[0]
+	  || (breaks[1] >= pc && breaks[1] <= closing_insn)))
     last_breakpoint = 0;
 
   /* Effectively inserts the breakpoints.  */

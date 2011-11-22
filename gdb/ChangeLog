@@ -1,3 +1,9 @@
+2011-11-22  Alan Modra  <amodra@gmail.com>
+
+	* rs6000-tdep.c (ppc_deal_with_atomic_sequence): Correct branch
+	destination calculation.  Don't expect >> to sign extend.  Don't
+	add a break if branch lands inside the sequence anywhere.
+
 2011-11-21  Keith Seitz  <keiths@redhat.com>
 
 	* gdb.mi/mi-var-display.exp: Remove XFAIL for c_variable-7.51,
