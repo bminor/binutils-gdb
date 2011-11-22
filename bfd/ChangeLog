@@ -1,3 +1,8 @@
+2011-11-22  Tristan Gingold  <gingold@adacore.com>
+
+	* mach-o.c (bfd_mach_o_print_symbol): Display COM for common
+	symbols.  Print section name in brackets.
+
 2011-11-21  Andreas Tobler  <andreast@fgznet.ch>
 
 	* config.bfd: Add vectors for powerpc and powerpc64-freebsd.

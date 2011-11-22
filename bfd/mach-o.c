@@ -547,7 +547,10 @@ bfd_mach_o_print_symbol (bfd *abfd,
 	switch (asym->n_type & BFD_MACH_O_N_TYPE)
 	  {
 	  case BFD_MACH_O_N_UNDF:
-	    name = "UND";
+            if (symbol->value == 0)
+              name = "UND";
+            else
+              name = "COM";
 	    break;
 	  case BFD_MACH_O_N_ABS:
 	    name = "ABS";
@@ -571,7 +574,7 @@ bfd_mach_o_print_symbol (bfd *abfd,
                asym->n_type, name, asym->n_sect, asym->n_desc);
       if ((asym->n_type & BFD_MACH_O_N_STAB) == 0
 	  && (asym->n_type & BFD_MACH_O_N_TYPE) == BFD_MACH_O_N_SECT)
-	fprintf (file, " %-5s", symbol->section->name);
+	fprintf (file, " [%s]", symbol->section->name);
       fprintf (file, " %s", symbol->name);
     }
 }
