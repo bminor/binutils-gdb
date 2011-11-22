@@ -1,3 +1,10 @@
+2011-11-22  Tom Tromey  <tromey@redhat.com>
+
+	* mi/mi-common.c (_initialize_gdb_mi_common): Remove.
+	Use static_assert to check the size of
+	async_reason_string_lookup.
+	* common/gdb_assert.h (static_assert): New macro.
+
 2011-11-22  Alan Modra  <amodra@gmail.com>
 
 	* rs6000-tdep.c (ppc_deal_with_atomic_sequence): Correct branch

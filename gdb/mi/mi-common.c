@@ -18,6 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+#include "gdb_assert.h"
 #include "mi-common.h"
 
 static const char * const async_reason_string_lookup[] =
@@ -37,19 +38,10 @@ static const char * const async_reason_string_lookup[] =
   NULL
 };
 
+static_assert (ARRAY_SIZE (async_reason_string_lookup) == EXEC_ASYNC_LAST + 1);
+
 const char *
 async_reason_lookup (enum async_reply_reason reason)
 {
   return async_reason_string_lookup[reason];
-}
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_gdb_mi_common;
-
-void
-_initialize_gdb_mi_common (void)
-{
-  if (ARRAY_SIZE (async_reason_string_lookup) != EXEC_ASYNC_LAST + 1)
-    internal_error (__FILE__, __LINE__,
-		    _("async_reason_string_lookup is inconsistent"));
 }

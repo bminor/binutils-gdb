@@ -20,6 +20,12 @@
 #ifndef GDB_ASSERT_H
 #define GDB_ASSERT_H
 
+/* A static assertion.  This will cause a compile-time error if EXPR,
+   which must be a compile-time constant, is false.  */
+
+#define static_assert(expr) \
+  extern int never_defined_just_used_for_checking[(expr) ? 1 : -1]
+
 /* PRAGMATICS: "gdb_assert.h":gdb_assert() is a lower case (rather
    than upper case) macro since that provides the closest fit to the
    existing lower case macro <assert.h>:assert() that it is
