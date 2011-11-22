@@ -3073,7 +3073,7 @@ rx_elf_object_p (bfd * abfd)
       bsec = abfd->sections;
       while (bsec)
 	{
-	  if (phdr[i].p_vaddr <= bsec->lma
+	  if (phdr[i].p_vaddr <= bsec->vma
 	      && bsec->vma <= phdr[i].p_vaddr + (phdr[i].p_filesz - 1))
 	    {
 	      bsec->lma = phdr[i].p_paddr + (bsec->vma - phdr[i].p_vaddr);
