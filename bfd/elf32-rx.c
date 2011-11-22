@@ -32,6 +32,7 @@
    endian-swap we would otherwise get.  We check for this in
    rx_elf_object_p().  */
 const bfd_target bfd_elf32_rx_be_ns_vec;
+const bfd_target bfd_elf32_rx_be_vec;
 
 #ifdef DEBUG
 char * rx_get_reloc (long);
@@ -3028,6 +3029,7 @@ rx_elf_object_p (bfd * abfd)
   Elf_Internal_Phdr *phdr = elf_tdata (abfd)->phdr;
   int nphdrs = elf_elfheader (abfd)->e_phnum;
   sec_ptr bsec;
+  static int saw_be = FALSE;
 
   /* We never want to automatically choose the non-swapping big-endian
      target.  The user can only get that explicitly, such as with -I
@@ -3035,6 +3037,15 @@ rx_elf_object_p (bfd * abfd)
   if (abfd->xvec == &bfd_elf32_rx_be_ns_vec
       && abfd->target_defaulted)
     return FALSE;
+
+  /* BFD->target_defaulted is not set to TRUE when a target is chosen
+     as a fallback, so we check for "scanning" to know when to stop
+     using the non-swapping target.  */
+  if (abfd->xvec == &bfd_elf32_rx_be_ns_vec
+      && saw_be)
+    return FALSE;
+  if (abfd->xvec == &bfd_elf32_rx_be_vec)
+    saw_be = TRUE;
 
   bfd_default_set_arch_mach (abfd, bfd_arch_rx,
 			     elf32_rx_machine (abfd));

@@ -1,3 +1,9 @@
+2011-11-22  DJ Delorie  <dj@redhat.com>
+
+	* elf32-rx.c (rx_elf_object_p): Add more checks for "scanning" to
+	avoid using the special non-swapping target when not explicitly
+	requested.
+
 2011-11-22  Daniel Calcoen  <Daniel.Calcoen@cern.ch>
 
 	* elf32-rx.c (rx_elf_object_p): Correct typo: lma->vma.
