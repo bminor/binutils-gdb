@@ -427,9 +427,14 @@ mi_on_normal_stop (struct bpstats *bs, int print_frame)
 	     the frame again.  In practice, this can only happen when running
 	     a CLI command in MI.  */
 	  struct ui_out *saved_uiout = current_uiout;
+	  struct target_waitstatus last;
+	  ptid_t last_ptid;
 
 	  current_uiout = mi_uiout;
-	  bpstat_print (bs);
+
+	  get_last_target_status (&last_ptid, &last);
+	  bpstat_print (bs, last.kind);
+
 	  print_stack_frame (get_selected_frame (NULL), 0, SRC_AND_LOC);
 	  current_uiout = saved_uiout;
 	}

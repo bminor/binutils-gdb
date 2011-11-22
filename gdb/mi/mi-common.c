@@ -35,6 +35,12 @@ static const char * const async_reason_string_lookup[] =
   "exited",
   "exited-normally",
   "signal-received",
+  "solib-event",
+  "fork",
+  "vfork",
+  "syscall-entry",
+  "syscall-return",
+  "exec",
   NULL
 };
 

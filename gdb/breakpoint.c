@@ -3446,7 +3446,8 @@ print_bp_stop_message (bpstat bs)
 
 /* Print a message indicating what happened.  This is called from
    normal_stop().  The input to this routine is the head of the bpstat
-   list - a list of the eventpoints that caused this stop.  This
+   list - a list of the eventpoints that caused this stop.  KIND is
+   the target_waitkind for the stopping event.  This
    routine calls the generic print routine for printing a message
    about reasons for stopping.  This will print (for example) the
    "Breakpoint n," part of the output.  The return value of this
@@ -3465,7 +3466,7 @@ print_bp_stop_message (bpstat bs)
    further info to be printed.  */
 
 enum print_stop_action
-bpstat_print (bpstat bs)
+bpstat_print (bpstat bs, int kind)
 {
   int val;
 
@@ -3480,6 +3481,18 @@ bpstat_print (bpstat bs)
 	  || val == PRINT_SRC_AND_LOC 
 	  || val == PRINT_NOTHING)
 	return val;
+    }
+
+  /* If we had hit a shared library event breakpoint,
+     print_bp_stop_message would print out this message.  If we hit an
+     OS-level shared library event, do the same thing.  */
+  if (kind == TARGET_WAITKIND_LOADED)
+    {
+      ui_out_text (current_uiout, _("Stopped due to shared library event\n"));
+      if (ui_out_is_mi_like_p (current_uiout))
+	ui_out_field_string (current_uiout, "reason",
+			     async_reason_lookup (EXEC_ASYNC_SOLIB_EVENT));
+      return PRINT_NOTHING;
     }
 
   /* We reached the end of the chain, or we got a null BS to start
@@ -6190,12 +6203,25 @@ breakpoint_hit_catch_fork (const struct bp_location *bl,
 static enum print_stop_action
 print_it_catch_fork (bpstat bs)
 {
+  struct ui_out *uiout = current_uiout;
   struct breakpoint *b = bs->breakpoint_at;
   struct fork_catchpoint *c = (struct fork_catchpoint *) bs->breakpoint_at;
 
   annotate_catchpoint (b->number);
-  printf_filtered (_("\nCatchpoint %d (forked process %d), "),
-		   b->number, ptid_get_pid (c->forked_inferior_pid));
+  if (b->disposition == disp_del)
+    ui_out_text (uiout, "\nTemporary catchpoint ");
+  else
+    ui_out_text (uiout, "\nCatchpoint ");
+  if (ui_out_is_mi_like_p (uiout))
+    {
+      ui_out_field_string (uiout, "reason",
+			   async_reason_lookup (EXEC_ASYNC_FORK));
+      ui_out_field_string (uiout, "disp", bpdisp_text (b->disposition));
+    }
+  ui_out_field_int (uiout, "bkptno", b->number);
+  ui_out_text (uiout, " (forked process ");
+  ui_out_field_int (uiout, "newpid", ptid_get_pid (c->forked_inferior_pid));
+  ui_out_text (uiout, "), ");
   return PRINT_SRC_AND_LOC;
 }
 
@@ -6286,12 +6312,25 @@ breakpoint_hit_catch_vfork (const struct bp_location *bl,
 static enum print_stop_action
 print_it_catch_vfork (bpstat bs)
 {
+  struct ui_out *uiout = current_uiout;
   struct breakpoint *b = bs->breakpoint_at;
   struct fork_catchpoint *c = (struct fork_catchpoint *) b;
 
   annotate_catchpoint (b->number);
-  printf_filtered (_("\nCatchpoint %d (vforked process %d), "),
-		   b->number, ptid_get_pid (c->forked_inferior_pid));
+  if (b->disposition == disp_del)
+    ui_out_text (uiout, "\nTemporary catchpoint ");
+  else
+    ui_out_text (uiout, "\nCatchpoint ");
+  if (ui_out_is_mi_like_p (uiout))
+    {
+      ui_out_field_string (uiout, "reason",
+			   async_reason_lookup (EXEC_ASYNC_VFORK));
+      ui_out_field_string (uiout, "disp", bpdisp_text (b->disposition));
+    }
+  ui_out_field_int (uiout, "bkptno", b->number);
+  ui_out_text (uiout, " (vforked process ");
+  ui_out_field_int (uiout, "newpid", ptid_get_pid (c->forked_inferior_pid));
+  ui_out_text (uiout, "), ");
   return PRINT_SRC_AND_LOC;
 }
 
@@ -6500,6 +6539,7 @@ breakpoint_hit_catch_syscall (const struct bp_location *bl,
 static enum print_stop_action
 print_it_catch_syscall (bpstat bs)
 {
+  struct ui_out *uiout = current_uiout;
   struct breakpoint *b = bs->breakpoint_at;
   /* These are needed because we want to know in which state a
      syscall is.  It can be in the TARGET_WAITKIND_SYSCALL_ENTRY
@@ -6508,7 +6548,6 @@ print_it_catch_syscall (bpstat bs)
   ptid_t ptid;
   struct target_waitstatus last;
   struct syscall s;
-  struct cleanup *old_chain;
   char *syscall_id;
 
   get_last_target_status (&ptid, &last);
@@ -6517,21 +6556,31 @@ print_it_catch_syscall (bpstat bs)
 
   annotate_catchpoint (b->number);
 
-  if (s.name == NULL)
-    syscall_id = xstrprintf ("%d", last.value.syscall_number);
+  if (b->disposition == disp_del)
+    ui_out_text (uiout, "\nTemporary catchpoint ");
   else
-    syscall_id = xstrprintf ("'%s'", s.name);
-
-  old_chain = make_cleanup (xfree, syscall_id);
+    ui_out_text (uiout, "\nCatchpoint ");
+  if (ui_out_is_mi_like_p (uiout))
+    {
+      ui_out_field_string (uiout, "reason",
+			   async_reason_lookup (last.kind == TARGET_WAITKIND_SYSCALL_ENTRY
+						? EXEC_ASYNC_SYSCALL_ENTRY
+						: EXEC_ASYNC_SYSCALL_RETURN));
+      ui_out_field_string (uiout, "disp", bpdisp_text (b->disposition));
+    }
+  ui_out_field_int (uiout, "bkptno", b->number);
 
   if (last.kind == TARGET_WAITKIND_SYSCALL_ENTRY)
-    printf_filtered (_("\nCatchpoint %d (call to syscall %s), "),
-                     b->number, syscall_id);
-  else if (last.kind == TARGET_WAITKIND_SYSCALL_RETURN)
-    printf_filtered (_("\nCatchpoint %d (returned from syscall %s), "),
-                     b->number, syscall_id);
+    ui_out_text (uiout, " (call to syscall ");
+  else
+    ui_out_text (uiout, " (returned from syscall ");
 
-  do_cleanups (old_chain);
+  if (s.name == NULL || ui_out_is_mi_like_p (uiout))
+    ui_out_field_int (uiout, "syscall-number", last.value.syscall_number);
+  if (s.name != NULL)
+    ui_out_field_string (uiout, "syscall-name", s.name);
+
+  ui_out_text (uiout, "), ");
 
   return PRINT_SRC_AND_LOC;
 }
@@ -6776,12 +6825,26 @@ breakpoint_hit_catch_exec (const struct bp_location *bl,
 static enum print_stop_action
 print_it_catch_exec (bpstat bs)
 {
+  struct ui_out *uiout = current_uiout;
   struct breakpoint *b = bs->breakpoint_at;
   struct exec_catchpoint *c = (struct exec_catchpoint *) b;
 
   annotate_catchpoint (b->number);
-  printf_filtered (_("\nCatchpoint %d (exec'd %s), "), b->number,
-		   c->exec_pathname);
+  if (b->disposition == disp_del)
+    ui_out_text (uiout, "\nTemporary catchpoint ");
+  else
+    ui_out_text (uiout, "\nCatchpoint ");
+  if (ui_out_is_mi_like_p (uiout))
+    {
+      ui_out_field_string (uiout, "reason",
+			   async_reason_lookup (EXEC_ASYNC_EXEC));
+      ui_out_field_string (uiout, "disp", bpdisp_text (b->disposition));
+    }
+  ui_out_field_int (uiout, "bkptno", b->number);
+  ui_out_text (uiout, " (exec'd ");
+  ui_out_field_string (uiout, "new-exec", c->exec_pathname);
+  ui_out_text (uiout, "), ");
+
   return PRINT_SRC_AND_LOC;
 }
 
@@ -11153,6 +11216,7 @@ internal_bkpt_check_status (bpstat bs)
 static enum print_stop_action
 internal_bkpt_print_it (bpstat bs)
 {
+  struct ui_out *uiout = current_uiout;
   struct breakpoint *b;
 
   b = bs->breakpoint_at;
@@ -11163,7 +11227,10 @@ internal_bkpt_print_it (bpstat bs)
       /* Did we stop because the user set the stop_on_solib_events
 	 variable?  (If so, we report this as a generic, "Stopped due
 	 to shlib event" message.) */
-      printf_filtered (_("Stopped due to shared library event\n"));
+      ui_out_text (uiout, _("Stopped due to shared library event\n"));
+      if (ui_out_is_mi_like_p (uiout))
+	ui_out_field_string (uiout, "reason",
+			     async_reason_lookup (EXEC_ASYNC_SOLIB_EVENT));
       break;
 
     case bp_thread_event:

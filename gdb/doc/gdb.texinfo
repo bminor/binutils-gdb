@@ -26172,6 +26172,25 @@ The inferior exited.
 The inferior exited normally.
 @item signal-received 
 A signal was received by the inferior.
+@item solib-event
+The inferior has stopped due to a library being loaded or unloaded.
+This can only happen when @code{stop-on-solib-events} (@pxref{Files})
+is set.
+@item fork
+The inferior has forked.  This is reported when @code{catch fork}
+(@pxref{Set Catchpoints}) has been used.
+@item vfork
+The inferior has vforked.  This is reported in when @code{catch vfork}
+(@pxref{Set Catchpoints}) has been used.
+@item syscall-entry
+The inferior entered a system call.  This is reported when @code{catch
+syscall} (@pxref{Set Catchpoints}) has been used.
+@item syscall-entry
+The inferior returned from a system call.  This is reported when
+@code{catch syscall} (@pxref{Set Catchpoints}) has been used.
+@item exec
+The inferior called @code{exec}.  This is reported when @code{catch exec}
+(@pxref{Set Catchpoints}) has been used.
 @end table
 
 The @var{id} field identifies the thread that directly caused the stop

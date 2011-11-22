@@ -1,3 +1,8 @@
+2011-11-22  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.texinfo (GDB/MI Async Records): Document new *stopped
+	reasons.
+
 2011-11-20  Stan Shebs  <stan@codesourcery.com>
 
 	* gdb.texinfo (Starting and Stopping Trace Experiments): Document

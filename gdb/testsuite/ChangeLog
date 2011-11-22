@@ -1,3 +1,12 @@
+2011-11-22  Tom Tromey  <tromey@redhat.com>
+
+	* lib/mi-support.exp (mi_run_cmd_full): Rename from mi_run_cmd.
+	Add "use_mi_command" argument.
+	(mi_run_cmd, mi_run_with_cli): New procs.
+	* gdb.mi/solib-lib.c: New file.
+	* gdb.mi/solib-main.c: New file.
+	* gdb.mi/mi-solib.exp: New file.
+
 2011-11-21  Doug Evans  <dje@google.com>
 
 	* gdb.cp/nextoverthrow.exp: Skip test if debug info for

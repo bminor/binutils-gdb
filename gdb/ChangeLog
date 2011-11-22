@@ -1,5 +1,21 @@
 2011-11-22  Tom Tromey  <tromey@redhat.com>
 
+	PR mi/8444:
+	* mi/mi-common.h (EXEC_ASYNC_SOLIB_EVENT, EXEC_ASYNC_FORK)
+	(EXEC_ASYNC_VFORK, EXEC_ASYNC_SYSCALL_ENTRY)
+	(EXEC_ASYNC_SYSCALL_RETURN, EXEC_ASYNC_EXEC): New constants.
+	* mi/mi-common.c (async_reason_string_lookup): Add new reasons.
+	* breakpoint.c (print_it_catch_fork, print_it_catch_vfork)
+	(print_it_catch_syscall, print_it_catch_exec)
+	(internal_bkpt_print_it): Use ui_out.  Emit stop reason.
+	(bpstat_print): Add 'kind' argument.  Handle
+	TARGET_WAITKIND_LOADED.
+	* infrun.c (normal_stop): Update for bpstat_print change.  Don't
+	handle TARGET_WAITKIND_LOADED here.
+	* breakpoint.h (bpstat_print): Update.
+
+2011-11-22  Tom Tromey  <tromey@redhat.com>
+
 	* mi/mi-interp.c (mi_on_normal_stop): Call bpstat_print.
 
 2011-11-22  Tom Tromey  <tromey@redhat.com>

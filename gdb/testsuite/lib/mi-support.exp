@@ -788,7 +788,7 @@ proc mi_gdb_test { args } {
 # In patterns, the newline sequence ``\r\n'' is matched explicitly as
 # ``.*$'' could swallow up output that we attempt to match elsewhere.
 
-proc mi_run_cmd {args} {
+proc mi_run_cmd_full {use_mi_command args} {
     global suppress_flag
     if { $suppress_flag } {
 	return -1
@@ -796,6 +796,14 @@ proc mi_run_cmd {args} {
     global mi_gdb_prompt
     global thread_selected_re
     global library_loaded_re
+
+    if {$use_mi_command} {
+	set run_prefix "220-exec-"
+	set run_match "220"
+    } else {
+	set run_prefix ""
+	set run_match ""
+    }
 
     if [target_info exists gdb_init_command] {
 	send_gdb "[target_info gdb_init_command]\n";
@@ -814,9 +822,9 @@ proc mi_run_cmd {args} {
 
     if [target_info exists use_gdb_stub] {
 	if [target_info exists gdb,do_reload_on_run] {
-	    send_gdb "220-exec-continue\n";
+	    send_gdb "${run_prefix}continue\n";
 	    gdb_expect 60 {
-		-re "220\\^running\[\r\n\]+\\*running,thread-id=\"\[^\"\]+\"\r\n$mi_gdb_prompt" {}
+		-re "${run_match}\\^running\[\r\n\]+\\*running,thread-id=\"\[^\"\]+\"\r\n$mi_gdb_prompt" {}
 		default {}
 	    }
 	    return 0;
@@ -835,9 +843,9 @@ proc mi_run_cmd {args} {
 	return 0
     }
 
-    send_gdb "220-exec-run $args\n"
+    send_gdb "${run_prefix}run $args\n"
     gdb_expect {
-	-re "220\\^running\r\n(\\*running,thread-id=\"\[^\"\]+\"\r\n|=thread-created,id=\"1\",group-id=\"\[0-9\]+\"\r\n)*(${library_loaded_re})*(${thread_selected_re})?${mi_gdb_prompt}" {
+	-re "${run_match}\\^running\r\n(\\*running,thread-id=\"\[^\"\]+\"\r\n|=thread-created,id=\"1\",group-id=\"\[0-9\]+\"\r\n)*(${library_loaded_re})*(${thread_selected_re})?${mi_gdb_prompt}" {
 	}
 	-re "\\^error,msg=\"The target does not support running in non-stop mode.\"" {
 	    unsupported "Non-stop mode not supported"
@@ -851,6 +859,20 @@ proc mi_run_cmd {args} {
     # NOTE: Shortly after this there will be a ``000*stopped,...(gdb)''
 
     return 0
+}
+
+# A wrapper for mi_run_cmd_full which uses -exec-run and
+# -exec-continue, as appropriate.  ARGS are passed verbatim to
+# mi_run_cmd_full.
+proc mi_run_cmd {args} {
+    return [eval mi_run_cmd_full 1 $args]
+}
+
+# A wrapper for mi_run_cmd_full which uses the CLI commands 'run' and
+# 'continue', as appropriate.  ARGS are passed verbatim to
+# mi_run_cmd_full.
+proc mi_run_with_cli {args} {
+    return [eval mi_run_cmd_full 0 $args]
 }
 
 #
