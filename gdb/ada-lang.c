@@ -8665,8 +8665,6 @@ assign_aggregate (struct value *container,
   *pos += 3;
   if (noside != EVAL_NORMAL)
     {
-      int i;
-
       for (i = 0; i < n; i += 1)
 	ada_evaluate_subexp (NULL, exp, pos, noside);
       return container;
