@@ -1542,18 +1542,24 @@ get_idxlen (struct lib_index *idx, bfd_boolean is_elfidx)
 {
   if (is_elfidx)
     {
+      /* 9 is the size of struct vms_elfidx without keyname.  */
       if (idx->namlen > MAX_KEYLEN)
-        return 9 + sizeof (struct vms_rfa);
+        return 9 + sizeof (struct vms_kbn);
       else
         return 9 + idx->namlen;
     }
   else
-    return 7 + idx->namlen;
+    {
+      /* 7 is the size of struct vms_idx without keyname.  */
+      return 7 + idx->namlen;
+    }
 }
 
-/* Write the index.  VBN is the first vbn to be used, and will contain
-   on return the last vbn.
+/* Write the index composed by NBR symbols contained in IDX.
+   VBN is the first vbn to be used, and will contain on return the last vbn.
    Can be called with ABFD set to NULL just to size the index.
+   If not null, TOPVBN will be assigned to the vbn of the root index tree.
+   IS_ELFIDX is true for elfidx (ie ia64) indexes layout.
    Return TRUE on success.  */
 
 static bfd_boolean
@@ -1637,9 +1643,11 @@ vms_write_index (bfd *abfd,
                         }
                       *(unsigned short *)kbn_blk = 0;
                     }
+                  /* Allocate a new block for the keys.  */
                   kbn_vbn = (*vbn)++;
                   kbn_sz = VMS_BLOCK_SIZE - 2;
                 }
+              /* Size of the chunk written to the current key block.  */
               if (kl + sizeof (struct vms_kbn) > kbn_sz)
                 kl_chunk = kbn_sz - sizeof (struct vms_kbn);
               else

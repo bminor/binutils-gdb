@@ -1,3 +1,8 @@
+2011-11-23  Tristan Gingold  <gingold@adacore.com>
+
+	* vms-lib.c (get_idxlen): Add comments.  Fix type in sizeof.
+	(vms_write_index): Add comments.
+
 2011-11-22  DJ Delorie  <dj@redhat.com>
 
 	* elf32-rx.c (rx_elf_object_p): Add more checks for "scanning" to
