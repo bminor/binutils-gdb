@@ -1,3 +1,9 @@
+2011-11-23  Thomas Klein  <th.r.klein@web.de>
+
+	* config/tc-arm.c (do_t_mov_cmp): Prevent emitting code for MOV
+	with two low register at arch v4t or v5t when assember using
+	unified syntax.
+
 2011-11-21  DJ Delorie  <dj@redhat.com>
 
 	* config/rl78-defs.h (rl78_error): Add "const".

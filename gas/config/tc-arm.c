@@ -10913,6 +10913,11 @@ do_t_mov_cmp (void)
 	switch (inst.instruction)
 	  {
 	  case T_MNEM_mov:
+	    /* In v4t or v5t a move of two lowregs produces unpredictable
+	       results. Don't allow this.*/
+	    constraint (low_regs && !ARM_CPU_HAS_FEATURE (selected_cpu,
+			arm_ext_v6),"MOV Rd, Rs with two low registers is not "
+			"permitted on this architecture");
 	    inst.instruction = T_OPCODE_MOV_HR;
 	    inst.instruction |= (Rn & 0x8) << 4;
 	    inst.instruction |= (Rn & 0x7);
