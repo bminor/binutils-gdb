@@ -4435,6 +4435,7 @@ static void
 s_alpha_frame (int ignore ATTRIBUTE_UNUSED)
 {
   long val;
+  int ra;
 
   alpha_evax_proc->framereg = tc_get_register (1);
 
@@ -4450,7 +4451,10 @@ s_alpha_frame (int ignore ATTRIBUTE_UNUSED)
 
   alpha_evax_proc->framesize = val;
 
-  (void) tc_get_register (1);
+  ra = tc_get_register (1);
+  if (ra != AXP_REG_RA)
+    as_warn (_("Bad RA (%d) register for .frame"), ra);
+
   SKIP_WHITESPACE ();
   if (*input_line_pointer++ != ',')
     {
@@ -4473,7 +4477,7 @@ s_alpha_prologue (int ignore ATTRIBUTE_UNUSED)
     (FAKE_LABEL_NAME, now_seg, (valueT) frag_now_fix (), frag_now);
 }
 
-/* Parse .pdesc <entry_name>.
+/* Parse .pdesc <entry_name>,{null|stack|reg}
    Insert a procedure descriptor.  */
 
 static void
