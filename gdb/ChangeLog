@@ -1,5 +1,10 @@
 2011-11-23  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (get_base_type): Renames base_type.  Adjust all
+	calls throughout this file.
+
+2011-11-23  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb-dlfcn.c (gdb_dlopen): Add missing coma in call to
 	FormatMessage.
 
