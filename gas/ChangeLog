@@ -1,5 +1,9 @@
 2011-11-23  Tristan Gingold  <gingold@adacore.com>
 
+	* config/tc-alpha.c (s_alpha_prologue): Requires empty line.
+
+2011-11-23  Tristan Gingold  <gingold@adacore.com>
+
 	* config/tc-alpha.c (s_alpha_frame): Emit a warning if bad value
 	of RA.
 	(s_alpha_pdesc): Adjust comment.

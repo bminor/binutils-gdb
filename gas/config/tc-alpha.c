@@ -4471,7 +4471,6 @@ s_alpha_frame (int ignore ATTRIBUTE_UNUSED)
 static void
 s_alpha_prologue (int ignore ATTRIBUTE_UNUSED)
 {
-  get_absolute_expression ();
   demand_empty_rest_of_line ();
   alpha_prologue_label = symbol_new
     (FAKE_LABEL_NAME, now_seg, (valueT) frag_now_fix (), frag_now);
