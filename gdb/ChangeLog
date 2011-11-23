@@ -1,3 +1,8 @@
+2011-11-23  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb-dlfcn.c (gdb_dlopen): Add missing coma in call to
+	FormatMessage.
+
 2011-11-22  Tom Tromey  <tromey@redhat.com>
 
 	PR mi/8444:
