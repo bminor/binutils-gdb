@@ -1,3 +1,10 @@
+2011-11-23  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (dw2_lookup_symtab): Add comment.
+	(dw2_expand_symtabs_with_filename): Ditto.
+	(dw2_expand_symtabs_matching): Ditto.
+	(dw2_map_symbol_filenames): Ditto.
+
 2011-11-23  Andrey Smirnov  <andrew.smirnov@gmail.com>
 
 	* ada-lang.c (assign_aggregate): Minor reformatting.

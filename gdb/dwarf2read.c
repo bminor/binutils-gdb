@@ -2458,6 +2458,7 @@ dw2_lookup_symtab (struct objfile *objfile, const char *name,
       struct dwarf2_per_cu_data *per_cu = dw2_get_cu (i);
       struct quick_file_names *file_data;
 
+      /* We only need to look at symtabs not already expanded.  */
       if (per_cu->v.quick->symtab)
 	continue;
 
@@ -2640,6 +2641,7 @@ dw2_expand_symtabs_with_filename (struct objfile *objfile,
       struct dwarf2_per_cu_data *per_cu = dw2_get_cu (i);
       struct quick_file_names *file_data;
 
+      /* We only need to look at symtabs not already expanded.  */
       if (per_cu->v.quick->symtab)
 	continue;
 
@@ -2744,6 +2746,8 @@ dw2_expand_symtabs_matching (struct objfile *objfile,
 	struct quick_file_names *file_data;
 
 	per_cu->v.quick->mark = 0;
+
+	/* We only need to look at symtabs not already expanded.  */
 	if (per_cu->v.quick->symtab)
 	  continue;
 
@@ -2831,6 +2835,7 @@ dw2_map_symbol_filenames (struct objfile *objfile, symbol_filename_ftype *fun,
       struct dwarf2_per_cu_data *per_cu = dw2_get_cu (i);
       struct quick_file_names *file_data;
 
+      /* We only need to look at symtabs not already expanded.  */
       if (per_cu->v.quick->symtab)
 	continue;
 
