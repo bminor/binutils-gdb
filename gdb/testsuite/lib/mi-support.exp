@@ -1944,3 +1944,313 @@ proc mi_get_features {} {
 	}
     }
 }
+
+# Variable Object Trees
+#
+# Yet another way to check varobjs. Pass mi_walk_varobj_tree a "list" of
+# variables (not unlike the actual source code definition), and it will
+# automagically test the children for you (by default).
+#
+# Example:
+#
+# source code:
+# struct bar {
+#   union {
+#     int integer;
+#     void *ptr;
+#   };
+#   const int *iPtr;
+# };
+#
+# class foo {
+# public:
+#   int a;
+#   struct {
+#     int b;
+#     struct bar *c;
+#   };
+# };
+#
+# foo *f = new foo (); <-- break here
+#
+# We want to check all the children of "f".
+#
+# Translate the above structures into the following tree:
+#
+# set tree {
+#   foo f {
+#     {} public {
+#       int a {}
+#       anonymous struct {
+#         {} public {
+#           int b {}
+#           {bar *} c {
+#             {} public {
+#               anonymous union {
+#                 {} public {
+#                   int integer {}
+#                   {void *} ptr {}
+#                 }
+#               }
+#               {const int *} iPtr {
+#                 {const int} {*iPtr} {}
+#               }
+#             }
+#           }
+#         }
+#       }
+#     }
+#   }
+# }
+#
+# mi_walk_varobj_tree $tree
+#
+# If you'd prefer to walk the tree using your own callback,
+# simply pass the name of the callback to mi_walk_varobj_tree.
+#
+# This callback should take one argument, the name of the variable
+# to process.  This name is the name of a global array holding the
+# variable's properties (object name, type, etc).
+#
+# An example callback:
+#
+# proc my_callback {var} {
+#   upvar #0 $var varobj
+#
+#   puts "my_callback: called on varobj $varobj(obj_name)"
+# }
+#
+# The arrays created for each variable object contain the following
+# members:
+#
+# obj_name     - the object name for accessing this variable via MI
+# display_name - the display name for this variable (exp="display_name" in
+#                the output of -var-list-children)
+# type         - the type of this variable (type="type" in the output
+#                of -var-list-children, or the special tag "anonymous"
+# path_expr    - the "-var-info-path-expression" for this variable
+# parent       - the variable name of the parent varobj
+# children     - a list of children variable names (which are the
+#                names Tcl arrays, not object names)
+#
+# For each variable object, an array containing the above fields will
+# be created under the root node (conveniently called, "root").  For example,
+# a variable object with handle "OBJ.public.0_anonymous.a" will have
+# a corresponding global Tcl variable named "root.OBJ.public.0_anonymous.a".
+#
+# Note that right now, this mechanism cannot be used for recursive data
+# structures like linked lists.
+
+namespace eval ::varobj_tree {
+  # An index which is appended to root varobjs to ensure uniqueness.
+  variable _root_idx 0
+
+  # A procedure to help with debuggging varobj trees.
+  # VARIABLE_NAME is the name of the variable to dump.
+  # CMD, if present, is the name of the callback to output the contstructed
+  #   strings. By default, it uses expect's "send_log" command.
+  # TERM, if present, is a terminating character. By default it is the newline.
+  #
+  # To output to the terminal (not the expect log), use
+  # mi_varobj_tree_dump_variable my_variable puts ""
+
+  proc mi_varobj_tree_dump_variable {variable_name {cmd send_log} {term "\n"}} {
+    upvar #0 $variable_name varobj
+
+    eval "$cmd \"VAR = $variable_name$term\""
+
+    # Explicitly encode the array indices, since outputting them
+    # in some logical order is better than what "array names" might
+    # return.
+    foreach idx {obj_name parent display_name type path_expr} {
+      eval "$cmd \"\t$idx = $varobj($idx)$term\""
+    }
+
+    # Output children
+    set num [llength $varobj(children)]
+    eval "$cmd \"\tnum_children = $num$term\""
+    if {$num > 0} {
+      eval "$cmd \"\tchildren = $varobj(children)$term\""
+    }
+  }
+
+  # The default callback used by mi_walk_varobj_tree.  This callback
+  # simply checks all of VAR's children.
+  #
+  # This procedure may be used in custom callbacks.
+  proc test_children_callback {variable_name} {
+    upvar #0 $variable_name varobj
+
+    if {[llength $varobj(children)] > 0} {
+      # Construct the list of children the way mi_list_varobj_children
+      # expects to get it:
+      # { {obj_name display_name num_children type} ... }
+      set children_list {}
+      foreach child $varobj(children) {
+	upvar #0 $child c
+	set clist [list [string_to_regexp $c(obj_name)] \
+		       [string_to_regexp $c(display_name)] \
+		       [llength $c(children)]]
+	if {[string length $c(type)] > 0} {
+	  lappend clist [string_to_regexp $c(type)]
+	}
+	lappend children_list $clist
+      }
+
+      mi_list_varobj_children $varobj(obj_name) $children_list \
+	  "VT: list children of $varobj(obj_name)"
+    }
+  }
+
+  # Set the properties of the varobj represented by
+  # PARENT_VARIABLE - the name of the parent's variable
+  # OBJNAME         - the MI object name of this variable
+  # DISP_NAME       - the display name of this variable
+  # TYPE            - the type of this variable
+  # PATH            - the path expression for this variable
+  # CHILDREN        - a list of the variable's children
+  proc create_varobj {parent_variable objname disp_name \
+			  type path children} {
+    upvar #0 $parent_variable parent
+
+    set var_name "root.$objname"
+    global $var_name
+    array set $var_name [list obj_name $objname]
+    array set $var_name [list display_name $disp_name]
+    array set $var_name [list type $type]
+    array set $var_name [list path_expr $path]
+    array set $var_name [list parent "$parent_variable"]
+    array set $var_name [list children \
+			     [get_tree_children $var_name $children]]
+    return $var_name
+  }
+
+  # Should VARIABLE be used in path expressions?  The CPLUS_FAKE_CHILD
+  # varobjs and anonymous structs/unions are not used for path expressions.
+  proc is_path_expr_parent {variable} {
+    upvar #0 $variable varobj
+
+    # If the varobj's type is "", it is a CPLUS_FAKE_CHILD.
+    # If the tail of the varobj's object name is "%d_anonymous",
+    # then it represents an anonymous struct or union.
+    if {[string length $varobj(type)] == 0 \
+	    || [regexp {[0-9]+_anonymous$} $varobj(obj_name)]} {
+      return false
+    }
+
+    return true
+  }
+
+  # Return the path expression for the variable named NAME in
+  # parent varobj whose variable name is given by PARENT_VARIABLE.
+  proc get_path_expr {parent_variable name type} {
+    upvar #0 $parent_variable parent
+
+    # If TYPE is "", this is one of the CPLUS_FAKE_CHILD varobjs,
+    # which has no path expression
+    if {[string length $type] == 0} {
+      return ""
+    }
+
+    # Find the path parent variable.
+    while {![is_path_expr_parent $parent_variable]} {
+      set parent_variable $parent(parent)
+      upvar #0 $parent_variable parent
+    }
+
+    return "(($parent(path_expr)).$name)"
+  }
+
+  # Process the CHILDREN (a list of varobj_tree elements) of the variable
+  # given by PARENT_VARIABLE.  Returns a list of children variables.
+  proc get_tree_children {parent_variable children} {
+    upvar #0 $parent_variable parent
+
+    set field_idx 0
+    set children_list {}
+    foreach {type name children} $children {
+      if {[string compare $parent_variable "root"] == 0} {
+	# Root variable
+	variable _root_idx
+	incr _root_idx
+	set objname "$name$_root_idx"
+	set disp_name "$name"
+	set path_expr "$name"
+      } elseif {[string compare $type "anonymous"] == 0} {
+	# Special case: anonymous types.  In this case, NAME will either be
+	# "struct" or "union".
+	set objname "$parent(obj_name).${field_idx}_anonymous"
+	set disp_name "<anonymous $name>"
+	set path_expr ""
+	set type "$name {...}"
+      } else {
+	set objname "$parent(obj_name).$name"
+	set disp_name $name
+	set path_expr [get_path_expr $parent_variable $name $type]
+      }
+
+      lappend children_list [create_varobj $parent_variable $objname \
+				 $disp_name $type $path_expr $children]
+      incr field_idx
+    }
+
+    return $children_list
+  }
+
+  # The main procedure to call the given CALLBACK on the elements of the
+  # given varobj TREE.  See detailed explanation above.
+  proc walk_tree {tree callback} {
+    global root
+
+    if {[llength $tree] < 3} {
+      error "tree does not contain enough elements"
+    }
+
+    # Create root node and process the tree.
+    array set root [list obj_name "root"]
+    array set root [list display_name "root"]
+    array set root [list type "root"]
+    array set root [list path_expr "root"]
+    array set root [list parent "root"]
+    array set root [list children [get_tree_children root $tree]]
+
+    # Walk the tree
+    set all_nodes $root(children); # a stack of nodes
+    while {[llength $all_nodes] > 0} {
+      # "Pop" the name of the global variable containing this varobj's
+      # information from the stack of nodes.
+      set var_name [lindex $all_nodes 0]
+      set all_nodes [lreplace $all_nodes 0 0]
+
+      # Bring the global named in VAR_NAME into scope as the local variable
+      # VAROBJ.
+      upvar #0 $var_name varobj
+
+      # Append any children of VAROBJ to the list of nodes to walk.
+      if {[llength $varobj(children)] > 0} {
+	set all_nodes [concat $all_nodes $varobj(children)]
+      }
+
+      # If this is a root variable, create the variable object for it.
+      if {[string compare $varobj(parent) "root"] == 0} {
+	mi_create_varobj $varobj(obj_name) $varobj(display_name) \
+	    "VT: create root varobj for $varobj(display_name)"
+      }
+
+      # Now call the callback for VAROBJ.
+      uplevel #0 $callback $var_name
+    }
+  }
+}
+
+# The default varobj tree callback, which simply tests -var-list-children.
+proc mi_varobj_tree_test_children_callback {variable} {
+  ::varobj_tree::test_children_callback $variable
+}
+
+# Walk the variable object tree given by TREE, calling the specified
+# CALLBACK.  By default this uses mi_varobj_tree_test_children_callback.
+proc mi_walk_varobj_tree {tree {callback \
+				    mi_varobj_tree_test_children_callback}} {
+  ::varobj_tree::walk_tree $tree $callback
+}

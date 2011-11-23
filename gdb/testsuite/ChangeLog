@@ -1,3 +1,9 @@
+2011-11-23  Keith Seitz  <keiths@redhat.com>
+
+	* lib/mi-support.exp (varobj_tree): New namespace and procs.
+	(mi_varobj_tree_test_children_callback): New proc.
+	(mi_walk_varobj_tree): New proc.
+
 2011-11-22  Tom Tromey  <tromey@redhat.com>
 
 	* lib/mi-support.exp (mi_run_cmd_full): Rename from mi_run_cmd.
