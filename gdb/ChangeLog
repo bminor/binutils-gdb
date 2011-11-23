@@ -1,5 +1,9 @@
 2011-11-23  Andrey Smirnov  <andrew.smirnov@gmail.com>
 
+	* ada-lang.c (assign_aggregate): Minor reformatting.
+
+2011-11-23  Andrey Smirnov  <andrew.smirnov@gmail.com>
+
 	* ada-lang.c (assign_aggregate): Remove declaration of local
 	variable `i' which is shadowing another variable with the same
 	name declared in the outer scope.

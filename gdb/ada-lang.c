@@ -8706,24 +8706,24 @@ assign_aggregate (struct value *container,
     {
       switch (exp->elts[*pos].opcode)
 	{
-	case OP_CHOICES:
-	  aggregate_assign_from_choices (container, lhs, exp, pos, indices, 
+	  case OP_CHOICES:
+	    aggregate_assign_from_choices (container, lhs, exp, pos, indices, 
+					   &num_indices, max_indices,
+					   low_index, high_index);
+	    break;
+	  case OP_POSITIONAL:
+	    aggregate_assign_positional (container, lhs, exp, pos, indices,
 					 &num_indices, max_indices,
 					 low_index, high_index);
-	  break;
-	case OP_POSITIONAL:
-	  aggregate_assign_positional (container, lhs, exp, pos, indices,
-				       &num_indices, max_indices,
-				       low_index, high_index);
-	  break;
-	case OP_OTHERS:
-	  if (i != n-1)
-	    error (_("Misplaced 'others' clause"));
-	  aggregate_assign_others (container, lhs, exp, pos, indices, 
-				   num_indices, low_index, high_index);
-	  break;
-	default:
-	  error (_("Internal error: bad aggregate clause"));
+	    break;
+	  case OP_OTHERS:
+	    if (i != n-1)
+	      error (_("Misplaced 'others' clause"));
+	    aggregate_assign_others (container, lhs, exp, pos, indices, 
+				     num_indices, low_index, high_index);
+	    break;
+	  default:
+	    error (_("Internal error: bad aggregate clause"));
 	}
     }
 
