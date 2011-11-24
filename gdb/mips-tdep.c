@@ -1321,11 +1321,13 @@ static CORE_ADDR
 extended_offset (unsigned int extension)
 {
   CORE_ADDR value;
-  value = (extension >> 21) & 0x3f;	/* * extract 15:11 */
+
+  value = (extension >> 21) & 0x3f;	/* Extract 15:11.  */
   value = value << 6;
-  value |= (extension >> 16) & 0x1f;	/* extract 10:5 */
+  value |= (extension >> 16) & 0x1f;	/* Extract 10:5.  */
   value = value << 5;
-  value |= extension & 0x01f;	/* extract 4:0 */
+  value |= extension & 0x1f;		/* Extract 4:0.  */
+
   return value;
 }
 

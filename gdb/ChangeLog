@@ -1,3 +1,7 @@
+2011-11-24  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* mips-tdep.c (extended_offset): Fix formatting.
+
 2011-11-23  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (dw2_lookup_symtab): Add comment.
