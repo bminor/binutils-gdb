@@ -1,3 +1,22 @@
+2011-11-24  Tristan Gingold  <gingold@adacore.com>
+
+	* machoread.c (oso_el): Remove num_Sections, symbols, offsets
+	fields.  Add oso_sym, end_sym and nbr_syms.
+	(macho_register_oso): Change interface.
+	(macho_symtab_add_minsym): New function.
+	(macho_symtab_read): Rewritten.
+	(get_archive_prefix_len): Remove trailing blanks.
+	(oso_el_compare_name): Add comment.
+	(struct macho_sym_hash_entry): New structure.
+	(macho_relocate_common_syms): Remove.
+	(macho_sym_hash_newfunc): New function.
+	(macho_resolve_oso_sym_with_minsym): Likewise.
+	(macho_add_oso_symfile): Rewritten.
+	(macho_symfile_read_all_oso): Remove trailing blanks.
+	Adjust code to free oso vector.
+	(macho_symfile_read): Likewise.
+	Move code to initialize minimal symbol
+
 2011-11-24  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* mips-tdep.c (extended_offset): Fix formatting.
