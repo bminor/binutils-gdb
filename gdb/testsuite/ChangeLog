@@ -1,5 +1,11 @@
 2011-11-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	PR testsuite/12649
+	* gdb.reverse/i386-sse-reverse.exp (continue to end of sse_test #2):
+	Wrap send_gdb into a new gdb_test.
+
+2011-11-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdb.base/jit-so.exp (one_jit_test): Add testcase name to log message.
 
 2011-11-23  Keith Seitz  <keiths@redhat.com>

@@ -624,7 +624,9 @@ gdb_test "info register xmm2" \
 
 #sse4_test
 
-send_gdb "continue\n"
+gdb_test "continue" \
+    " end sse_test .*" \
+    "continue to end of sse_test #2"
 
 gdb_test "break $end_sse4_test" \
     "Breakpoint $decimal at .* line $end_sse4_test\." \
