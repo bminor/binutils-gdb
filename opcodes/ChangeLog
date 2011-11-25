@@ -1,3 +1,7 @@
+2011-11-25  Nick Clifton  <nickc@redhat.com>
+
+	* po/it.po: Updated Italian translation.
+
 2011-11-16  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* micromips-opc.c (micromips_opcodes): Use NODS rather than TRAP

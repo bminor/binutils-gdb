@@ -3,7 +3,6 @@
 # This file is distributed under the same license as the binutils package.
 # Sergio Zanchetta <primes2h@ubuntu.com>, 2011.
 #
-#
 msgid ""
 msgstr ""
 "Project-Id-Version: opcodes-2.21.53\n"
@@ -588,12 +587,12 @@ msgstr "IC:%s non ha terminali o sottoclassi\n"
 #: ia64-gen.c:1529
 #, c-format
 msgid "no insns mapped directly to terminal IC %s [%s]"
-msgstr "nessun insns mappato direttamente sull'IC terminale %s [%s]"
+msgstr "nessun insn mappato direttamente sull'IC terminale %s [%s]"
 
 #: ia64-gen.c:1532
 #, c-format
 msgid "no insns mapped directly to terminal IC %s\n"
-msgstr "nessun insns mappato direttamente sull'IC terminale %s\n"
+msgstr "nessun insn mappato direttamente sull'IC terminale %s\n"
 
 #: ia64-gen.c:1543
 #, c-format
@@ -1241,9 +1240,3 @@ msgstr "L'operando non è un simbolo"
 #: xstormy16-asm.c:165
 msgid "Syntax error: No trailing ')'"
 msgstr "Errore di sintassi: nessun \")\" di chiusura"
-
-#~ msgid "immediate value not in range and not even"
-#~ msgstr "Il valore dell'immediato non è nell'intervallo e non è pari"
-
-#~ msgid "immediate value must be even"
-#~ msgstr "il valore dell'immediato deve essere pari"
