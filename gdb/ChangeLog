@@ -1,3 +1,11 @@
+2011-11-25  Uros Bizjak  <ubizjak@gmail.com>
+
+	* alpha-tdep.c (br_opcode): New.
+	(ldl_l_opcode, ldq_l_opcode, stl_c_opcode, stq_c_opcode): Ditto.
+	(alpha_deal_with_atomic_sequence): New function.
+	(alpha_gdbarch_init): Handle single stepping of atomic sequences
+	with alpha_deal_with_atomic_sequence.
+
 2011-11-24  Tristan Gingold  <gingold@adacore.com>
 
 	* machoread.c (oso_el): Remove num_Sections, symbols, offsets

@@ -65,6 +65,7 @@ static const int stq_opcode = 0x2d;
 /* Branch instruction format */
 #define BR_RA(insn) MEM_RA(insn)
 
+static const int br_opcode = 0x30;
 static const int bne_opcode = 0x3d;
 
 /* Operate instruction format */
@@ -759,6 +760,94 @@ alpha_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
       break;
     }
   return pc + offset;
+}
+
+
+static const int ldl_l_opcode = 0x2a;
+static const int ldq_l_opcode = 0x2b;
+static const int stl_c_opcode = 0x2e;
+static const int stq_c_opcode = 0x2f;
+
+/* Checks for an atomic sequence of instructions beginning with a LDL_L/LDQ_L
+   instruction and ending with a STL_C/STQ_C instruction.  If such a sequence
+   is found, attempt to step through it.  A breakpoint is placed at the end of 
+   the sequence.  */
+
+int 
+alpha_deal_with_atomic_sequence (struct frame_info *frame)
+{
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+  struct address_space *aspace = get_frame_address_space (frame);
+  CORE_ADDR pc = get_frame_pc (frame);
+  CORE_ADDR breaks[2] = {-1, -1};
+  CORE_ADDR loc = pc;
+  CORE_ADDR closing_insn; /* Instruction that closes the atomic sequence.  */
+  unsigned int insn = alpha_read_insn (gdbarch, loc);
+  int insn_count;
+  int index;
+  int last_breakpoint = 0; /* Defaults to 0 (no breakpoints placed).  */  
+  const int atomic_sequence_length = 16; /* Instruction sequence length.  */
+  int bc_insn_count = 0; /* Conditional branch instruction count.  */
+
+  /* Assume all atomic sequences start with a LDL_L/LDQ_L instruction.  */
+  if (INSN_OPCODE (insn) != ldl_l_opcode
+      && INSN_OPCODE (insn) != ldq_l_opcode)
+    return 0;
+
+  /* Assume that no atomic sequence is longer than "atomic_sequence_length" 
+     instructions.  */
+  for (insn_count = 0; insn_count < atomic_sequence_length; ++insn_count)
+    {
+      loc += ALPHA_INSN_SIZE;
+      insn = alpha_read_insn (gdbarch, loc);
+
+      /* Assume that there is at most one branch in the atomic
+	 sequence.  If a branch is found, put a breakpoint in 
+	 its destination address.  */
+      if (INSN_OPCODE (insn) >= br_opcode)
+	{
+	  int immediate = (insn & 0x001fffff) << 2;
+
+	  immediate = (immediate ^ 0x400000) - 0x400000;
+
+	  if (bc_insn_count >= 1)
+	    return 0; /* More than one branch found, fallback 
+			 to the standard single-step code.  */
+
+	  breaks[1] = loc + ALPHA_INSN_SIZE + immediate;
+
+	  bc_insn_count++;
+	  last_breakpoint++;
+	}
+
+      if (INSN_OPCODE (insn) == stl_c_opcode
+	  || INSN_OPCODE (insn) == stq_c_opcode)
+	break;
+    }
+
+  /* Assume that the atomic sequence ends with a STL_C/STQ_C instruction.  */
+  if (INSN_OPCODE (insn) != stl_c_opcode
+      && INSN_OPCODE (insn) != stq_c_opcode)
+    return 0;
+
+  closing_insn = loc;
+  loc += ALPHA_INSN_SIZE;
+
+  /* Insert a breakpoint right after the end of the atomic sequence.  */
+  breaks[0] = loc;
+
+  /* Check for duplicated breakpoints.  Check also for a breakpoint
+     placed (branch instruction's destination) anywhere in sequence.  */ 
+  if (last_breakpoint
+      && (breaks[1] == breaks[0]
+	  || (breaks[1] >= pc && breaks[1] <= closing_insn)))
+    last_breakpoint = 0;
+
+  /* Effectively inserts the breakpoints.  */
+  for (index = 0; index <= last_breakpoint; index++)
+    insert_single_step_breakpoint (gdbarch, aspace, breaks[index]);
+
+  return 1;
 }
 
 
@@ -1748,6 +1837,9 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_breakpoint_from_pc (gdbarch, alpha_breakpoint_from_pc);
   set_gdbarch_decr_pc_after_break (gdbarch, ALPHA_INSN_SIZE);
   set_gdbarch_cannot_step_breakpoint (gdbarch, 1);
+
+  /* Handles single stepping of atomic sequences.  */
+  set_gdbarch_software_single_step (gdbarch, alpha_deal_with_atomic_sequence);
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);
