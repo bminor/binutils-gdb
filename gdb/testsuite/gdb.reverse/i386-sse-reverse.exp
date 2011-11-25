@@ -632,12 +632,12 @@ gdb_test "break $end_sse4_test" \
     "Breakpoint $decimal at .* line $end_sse4_test\." \
     "set breakpoint at end of sse4_test"
 
-send_gdb "continue\n"
-gdb_expect {
-    -re " end sse4_test .*" {
-	pass "continue to end of sse4_test"
+set test "continue to end of sse4_test"
+gdb_test_multiple "continue" $test {
+    -re " end sse4_test .*\r\n$gdb_prompt $" {
+	pass $test
     }
-    -re " Illegal instruction.*" {
+    -re " Illegal instruction.*\r\n$gdb_prompt $" {
 	untested i386-sse4-reverse
         return -1
     }
