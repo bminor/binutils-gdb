@@ -10914,10 +10914,16 @@ do_t_mov_cmp (void)
 	  {
 	  case T_MNEM_mov:
 	    /* In v4t or v5t a move of two lowregs produces unpredictable
-	       results. Don't allow this.*/
-	    constraint (low_regs && !ARM_CPU_HAS_FEATURE (selected_cpu,
-			arm_ext_v6),"MOV Rd, Rs with two low registers is not "
-			"permitted on this architecture");
+	       results. Don't allow this.  */
+	    if (low_regs)
+	      {
+		constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v6),
+			    "MOV Rd, Rs with two low registers is not "
+			    "permitted on this architecture");
+		ARM_MERGE_FEATURE_SETS (thumb_arch_used, thumb_arch_used, 
+					arm_ext_v6);
+	      }
+
 	    inst.instruction = T_OPCODE_MOV_HR;
 	    inst.instruction |= (Rn & 0x8) << 4;
 	    inst.instruction |= (Rn & 0x7);

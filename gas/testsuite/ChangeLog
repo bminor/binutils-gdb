@@ -1,3 +1,10 @@
+2011-11-25  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
+	* gas/arm/mov-highregs-any.d: New testcase.
+	* gas/arm/mov-highregs-any.s: Likewise.
+	* gas/arm/mov-lowregs-any.d: Likewise.
+	* gas/arm/mov-lowregs-any.s: Likewise.
+
 2011-11-21  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* gas/mips/micromips@24k-branch-delay-1.d: New test.

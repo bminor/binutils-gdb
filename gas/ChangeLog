@@ -1,3 +1,8 @@
+2011-11-25  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
+	* config/tc-arm.c (do_t_mov_cmp): Allow MOV lowreg, lowreg when no CPU
+	is specified.
+
 2011-11-23  Tristan Gingold  <gingold@adacore.com>
 
 	* config/tc-alpha.c (s_alpha_prologue): Requires empty line.
