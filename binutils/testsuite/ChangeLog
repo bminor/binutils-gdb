@@ -1,3 +1,12 @@
+2011-11-25  Nick Clifton  <nickc@redhat.com>
+
+	* binutils-all/objdump.exp (cpus): Add MicroBlaze.
+	(objdump -WL): Skip this test on MCore, Moxie and OpenRisc
+	targets.
+
+	* binutils-all/objcopy.exp (localize-hidden-1): Expect this test
+	to fail on MIPS based targets.
+
 2011-10-25  Kai Tietz  <ktietz@redhat.com>
 
 	* binutils-all/windres/strtab4.rc: New test.

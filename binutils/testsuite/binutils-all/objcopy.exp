@@ -980,6 +980,9 @@ if [is_elf_format] {
 	}
     }
 
+    # The symbol table for MIPS targets is not sorted by ascending value,
+    # so the regexps in localize-hidden-1.d fail to match.
+    setup_xfail "mips-*-*"
     run_dump_test "localize-hidden-1"
     run_dump_test "testranges"
     run_dump_test "testranges-ia64"
