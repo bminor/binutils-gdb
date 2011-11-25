@@ -3448,7 +3448,7 @@ cmd_qtstatus (char *packet)
 	   "tfree:%x;tsize:%s;"
 	   "circular:%d;"
 	   "disconn:%d;"
-	   "starttime:%llx;stoptime:%llx;"
+	   "starttime:%s;stoptime:%s;"
 	   "username:%s:;notes:%s:",
 	   tracing ? 1 : 0,
 	   stop_reason_rsp, tracing_stop_tpnum,
@@ -3456,7 +3456,7 @@ cmd_qtstatus (char *packet)
 	   free_space (), phex_nz (trace_buffer_hi - trace_buffer_lo, 0),
 	   circular_trace_buffer,
 	   disconnected_tracing,
-	   tracing_start_time, tracing_stop_time,
+	   plongest (tracing_start_time), plongest (tracing_stop_time),
 	   buf1, buf2);
 }
 
