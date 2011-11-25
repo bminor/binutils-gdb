@@ -71,7 +71,7 @@ proc one_jit_test {count match_str} {
     global verbose testfile srcfile2 binfile2 binfile2_dlopen solib_binfile_target solib_binfile_test_msg pf_prefix
 
     set old_pf_prefix $pf_prefix
-    set pf_prefix "one_jit_test-$count"
+    lappend pf_prefix "one_jit_test-$count:"
 
     clean_restart $testfile
     gdb_load_shlibs $binfile2
