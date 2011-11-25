@@ -1,6 +1,6 @@
 # This shell script emits a C file. -*- C -*-
 #   Copyright 1991, 1993, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-#   2004, 2005, 2006, 2007, 2008, 2009
+#   2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011
 #   Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
@@ -571,18 +571,18 @@ PARSE_AND_LIST_OPTIONS='
   fprintf (file, _("  --vfp11-denorm-fix          Specify how to fix VFP11 denorm erratum\n"));
   fprintf (file, _("  --no-enum-size-warning      Don'\''t warn about objects with incompatible\n"
 		   "                                enum sizes\n"));
-  fprintf (file, _("  --no-wchar-size-warning     Don'\''t warn about objects with incompatible"
+  fprintf (file, _("  --no-wchar-size-warning     Don'\''t warn about objects with incompatible\n"
 		   "                                wchar_t sizes\n"));
   fprintf (file, _("  --pic-veneer                Always generate PIC interworking veneers\n"));
   fprintf (file, _("\
-   --stub-group-size=N   Maximum size of a group of input sections that can be\n\
-                           handled by one stub section.  A negative value\n\
-                           locates all stubs after their branches (with a\n\
-                           group size of -N), while a positive value allows\n\
-                           two groups of input sections, one before, and one\n\
-                           after each stub section.  Values of +/-1 indicate\n\
-                           the linker should choose suitable defaults.\n"
- 		   ));
+  --stub-group-size=N         Maximum size of a group of input sections that\n\
+                               can be handled by one stub section.  A negative\n\
+                               value locates all stubs after their branches\n\
+                               (with a group size of -N), while a positive\n\
+                               value allows two groups of input sections, one\n\
+                               before, and one after each stub section.\n\
+                               Values of +/-1 indicate the linker should\n\
+                               choose suitable defaults.\n"));
   fprintf (file, _("  --[no-]fix-cortex-a8        Disable/enable Cortex-A8 Thumb-2 branch erratum fix\n"));
   fprintf (file, _("  --no-merge-exidx-entries    Disable merging exidx entries\n"));
   fprintf (file, _("  --[no-]fix-arm1176          Disable/enable ARM1176 BLX immediate erratum fix\n"));

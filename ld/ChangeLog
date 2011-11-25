@@ -1,3 +1,8 @@
+2011-11-25  John Tytgat  <john@bass-software.com>
+
+	* emultempl/armelf.em: Update copyright to 2010 and 2011.
+	(PARSE_AND_LIST_OPTIONS): Fix formatting.
+
 2011-11-21  Andreas Tobler  <andreast@fgznet.ch>
 
 	* Makefile.am (ALL_64_EMULATION_SOURCES): Add powerpc64-*-freebsd
