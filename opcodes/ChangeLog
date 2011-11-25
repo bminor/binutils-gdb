@@ -1,3 +1,8 @@
+2011-11-25  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* mips-dis.c (print_insn_micromips): Rename local variable iprintf
+	to infprintf to avoid shadow warning.
+
 2011-11-25  Nick Clifton  <nickc@redhat.com>
 
 	* po/it.po: Updated Italian translation.
