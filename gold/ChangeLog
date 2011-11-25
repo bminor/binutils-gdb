@@ -1,3 +1,7 @@
+2011-11-25  Nick Clifton  <nickc@redhat.com>
+
+	* po/it.po: New Italian translation.
+
 2011-11-17  Sterling Augustine  <saugustine@google.com>
 
 	* script.cc (script_include_directive): Implement.
