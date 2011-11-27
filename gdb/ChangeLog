@@ -1,3 +1,10 @@
+2011-11-27  Sanjoy Das  <sdas@igalia.com>
+
+	Fix regression in jit.exp.
+	* jit.c (jit_reader_try_read_symtab, jit_bfd_try_read_symtab)
+	(jit_register_code): Set the jit_objfile_data field to the correct
+	value.
+
 2011-11-25  Uros Bizjak  <ubizjak@gmail.com>
 
 	* alpha-tdep.c (br_opcode): New.

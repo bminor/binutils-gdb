@@ -710,10 +710,13 @@ jit_object_close_impl (struct gdb_symbol_callbacks *cb,
   xfree (obj);
 }
 
-/* Try to read CODE_ENTRY using the loaded jit reader (if any).  */
+/* Try to read CODE_ENTRY using the loaded jit reader (if any).
+   ENTRY_ADDR is the address of the object file (in the target's
+   address space) being read.  */
 
 static int
-jit_reader_try_read_symtab (struct jit_code_entry *code_entry)
+jit_reader_try_read_symtab (struct jit_code_entry *code_entry,
+                            CORE_ADDR entry_addr)
 {
   void *gdb_mem;
   int status;
@@ -735,7 +738,7 @@ jit_reader_try_read_symtab (struct jit_code_entry *code_entry)
       &priv_data
     };
 
-  priv_data = code_entry->symfile_addr;
+  priv_data = entry_addr;
 
   if (!loaded_jit_reader)
     return 0;
@@ -765,10 +768,12 @@ jit_reader_try_read_symtab (struct jit_code_entry *code_entry)
   return status;
 }
 
-/* Try to read CODE_ENTRY using BFD.  */
+/* Try to read CODE_ENTRY using BFD.  ENTRY_ADDR is the address of the
+   object file (in the target's address space) being read.  */
 
 static void
 jit_bfd_try_read_symtab (struct jit_code_entry *code_entry,
+                         CORE_ADDR entry_addr,
                          struct gdbarch *gdbarch)
 {
   bfd *nbfd;
@@ -832,7 +837,7 @@ JITed symbol file is not an object file, ignoring it.\n"));
   objfile = symbol_file_add_from_bfd (nbfd, 0, sai, OBJF_SHARED, NULL);
 
   do_cleanups (old_cleanups);
-  add_objfile_entry (objfile, code_entry->symfile_addr);
+  add_objfile_entry (objfile, entry_addr);
 }
 
 /* This function registers code associated with a JIT code entry.  It uses the
@@ -855,10 +860,10 @@ jit_register_code (struct gdbarch *gdbarch,
                         paddress (gdbarch, code_entry->symfile_addr),
                         pulongest (code_entry->symfile_size));
 
-  success = jit_reader_try_read_symtab (code_entry);
+  success = jit_reader_try_read_symtab (code_entry, entry_addr);
 
   if (!success)
-    jit_bfd_try_read_symtab (code_entry, gdbarch);
+    jit_bfd_try_read_symtab (code_entry, entry_addr, gdbarch);
 }
 
 /* This function unregisters JITed code and frees the corresponding
