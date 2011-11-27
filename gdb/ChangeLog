@@ -1,3 +1,8 @@
+2011-11-27  Joel Brobecker  <brobecker@acacore.com>
+
+	* remote.c (remote_get_tracepoint_status): Delete addrbuf
+	local variable.  Avoid use of sprintf_vma.
+
 2011-11-27  Sanjoy Das  <sdas@igalia.com>
 
 	Fix regression in jit.exp.

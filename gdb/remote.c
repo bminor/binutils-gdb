@@ -10219,7 +10219,6 @@ remote_get_tracepoint_status (struct breakpoint *bp,
 			      struct uploaded_tp *utp)
 {
   struct remote_state *rs = get_remote_state ();
-  char addrbuf[40];
   char *reply;
   struct bp_location *loc;
   struct tracepoint *tp = (struct tracepoint *) bp;
@@ -10234,8 +10233,8 @@ remote_get_tracepoint_status (struct breakpoint *bp,
 	     any status.  */
 	  if (tp->number_on_target == 0)
 	    continue;
-	  sprintf_vma (addrbuf, loc->address);
-	  sprintf (rs->buf, "qTP:%x:%s", tp->number_on_target, addrbuf);
+	  sprintf (rs->buf, "qTP:%x:%s", tp->number_on_target,
+		   phex_nz (loc->address, 0));
 	  putpkt (rs->buf);
 	  reply = remote_get_noisy_reply (&target_buf, &target_buf_size);
 	  if (reply && *reply)
@@ -10249,8 +10248,7 @@ remote_get_tracepoint_status (struct breakpoint *bp,
     {
       utp->hit_count = 0;
       utp->traceframe_usage = 0;
-      sprintf_vma (addrbuf, (long unsigned int) utp->addr);
-      sprintf (rs->buf, "qTP:%x:%s", utp->number, addrbuf);
+      sprintf (rs->buf, "qTP:%x:%s", utp->number, phex_nz (utp->addr, 0));
       putpkt (rs->buf);
       reply = remote_get_noisy_reply (&target_buf, &target_buf_size);
       if (reply && *reply)
