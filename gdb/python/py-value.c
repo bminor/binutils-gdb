@@ -880,10 +880,10 @@ valpy_nonzero (PyObject *self)
   struct type *type;
   int nonzero = 0; /* Appease GCC warning.  */
 
-  type = check_typedef (value_type (self_value->value));
-
   TRY_CATCH (except, RETURN_MASK_ALL)
     {
+      type = check_typedef (value_type (self_value->value));
+
       if (is_integral_type (type) || TYPE_CODE (type) == TYPE_CODE_PTR)
 	nonzero = !!value_as_long (self_value->value);
       else if (TYPE_CODE (type) == TYPE_CODE_FLT)

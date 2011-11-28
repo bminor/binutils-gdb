@@ -371,14 +371,20 @@ gdbpy_block_for_pc (PyObject *self, PyObject *args)
 {
   gdb_py_ulongest pc;
   struct block *block;
-  struct obj_section *section;
-  struct symtab *symtab;
+  struct obj_section *section = NULL;
+  struct symtab *symtab = NULL;
+  volatile struct gdb_exception except;
 
   if (!PyArg_ParseTuple (args, GDB_PY_LLU_ARG, &pc))
     return NULL;
 
-  section = find_pc_mapped_section (pc);
-  symtab = find_pc_sect_symtab (pc, section);
+  TRY_CATCH (except, RETURN_MASK_ALL)
+    {
+      section = find_pc_mapped_section (pc);
+      symtab = find_pc_sect_symtab (pc, section);
+    }
+  GDB_PY_HANDLE_EXCEPTION (except);
+
   if (!symtab || symtab->objfile == NULL)
     {
       PyErr_SetString (PyExc_RuntimeError,

@@ -395,6 +395,13 @@ static PyObject *
 typy_strip_typedefs (PyObject *self, PyObject *args)
 {
   struct type *type = ((type_object *) self)->type;
+  volatile struct gdb_exception except;
+
+  TRY_CATCH (except, RETURN_MASK_ALL)
+    {
+      type = check_typedef (type);
+    }
+  GDB_PY_HANDLE_EXCEPTION (except);
 
   return type_to_type_object (check_typedef (type));
 }
@@ -768,10 +775,11 @@ typy_legacy_template_argument (struct type *type, const struct block *block,
 {
   int i;
   struct demangle_component *demangled;
-  struct demangle_parse_info *info;
+  struct demangle_parse_info *info = NULL;
   const char *err;
   struct type *argtype;
   struct cleanup *cleanup;
+  volatile struct gdb_exception except;
 
   if (TYPE_NAME (type) == NULL)
     {
@@ -779,8 +787,13 @@ typy_legacy_template_argument (struct type *type, const struct block *block,
       return NULL;
     }
 
-  /* Note -- this is not thread-safe.  */
-  info = cp_demangled_name_to_comp (TYPE_NAME (type), &err);
+  TRY_CATCH (except, RETURN_MASK_ALL)
+    {
+      /* Note -- this is not thread-safe.  */
+      info = cp_demangled_name_to_comp (TYPE_NAME (type), &err);
+    }
+  GDB_PY_HANDLE_EXCEPTION (except);
+
   if (! info)
     {
       PyErr_SetString (PyExc_RuntimeError, err);

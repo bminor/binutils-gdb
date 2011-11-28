@@ -334,6 +334,7 @@ bppy_set_ignore_count (PyObject *self, PyObject *newvalue, void *closure)
 {
   breakpoint_object *self_bp = (breakpoint_object *) self;
   long value;
+  volatile struct gdb_exception except;
 
   BPPY_SET_REQUIRE_VALID (self_bp);
 
@@ -355,7 +356,12 @@ bppy_set_ignore_count (PyObject *self, PyObject *newvalue, void *closure)
 
   if (value < 0)
     value = 0;
-  set_ignore_count (self_bp->number, (int) value, 0);
+
+  TRY_CATCH (except, RETURN_MASK_ALL)
+    {
+      set_ignore_count (self_bp->number, (int) value, 0);
+    }
+  GDB_PY_SET_HANDLE_EXCEPTION (except);
 
   return 0;
 }

@@ -1,3 +1,17 @@
+2011-11-28  Phil Muldoon  <pmuldoon@redhat.com>
+
+	PR python/13369
+	PR python/13374
+
+	* python/python.c (gdbpy_decode_line): Do not acquire GIL.
+	* python/py-inferior.c (inferior_to_inferior_object): Ditto.
+	* python/py-value.c (valpy_nonzero): Use TRY_CATCH to catch GDB
+	exceptions.
+	* python/py-type.c (typy_strip_typedefs): Ditto.
+	(typy_legacy_template_argument): Ditto.
+	* python/py-inferior.c (inferior_to_inferior_object): Ditto.
+	* python/py-breakpoint.c (bppy_set_ignore_count): Ditto.
+
 2011-11-27  Joel Brobecker  <brobecker@acacore.com>
 
 	* remote.c (remote_get_tracepoint_status): Delete addrbuf

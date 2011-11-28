@@ -157,15 +157,9 @@ inferior_to_inferior_object (struct inferior *inferior)
   inf_obj = inferior_data (inferior, infpy_inf_data_key);
   if (!inf_obj)
     {
-      struct cleanup *cleanup;
-      cleanup = ensure_python_env (python_gdbarch, python_language);
-
       inf_obj = PyObject_New (inferior_object, &inferior_object_type);
       if (!inf_obj)
-	{
-	  do_cleanups (cleanup);
 	  return NULL;
-	}
 
       inf_obj->inferior = inferior;
       inf_obj->threads = NULL;
@@ -173,7 +167,6 @@ inferior_to_inferior_object (struct inferior *inferior)
 
       set_inferior_data (inferior, infpy_inf_data_key, inf_obj);
 
-      do_cleanups (cleanup);
     }
   else
     Py_INCREF ((PyObject *)inf_obj);
@@ -266,10 +259,15 @@ delete_thread_object (struct thread_info *tp, int ignore)
   inferior_object *inf_obj;
   thread_object *thread_obj;
   struct threadlist_entry **entry, *tmp;
+  
+  cleanup = ensure_python_env (python_gdbarch, python_language);
 
   inf_obj = (inferior_object *) find_inferior_object (PIDGET(tp->ptid));
   if (!inf_obj)
-    return;
+    {
+      do_cleanups (cleanup);
+      return;
+    }
 
   /* Find thread entry in its inferior's thread_list.  */
   for (entry = &inf_obj->threads; *entry != NULL; entry =
@@ -280,10 +278,9 @@ delete_thread_object (struct thread_info *tp, int ignore)
   if (!*entry)
     {
       Py_DECREF (inf_obj);
+      do_cleanups (cleanup);
       return;
     }
-
-  cleanup = ensure_python_env (python_gdbarch, python_language);
 
   tmp = *entry;
   tmp->thread_obj->thread = NULL;
