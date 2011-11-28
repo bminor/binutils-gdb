@@ -6255,24 +6255,21 @@ hppa_process_unwind (FILE * file)
 
 struct arm_section
 {
-  unsigned char *data;
-
-  Elf_Internal_Shdr *sec;
-  Elf_Internal_Rela *rela;
-  unsigned long nrelas;
-  unsigned int rel_type;
-
-  Elf_Internal_Rela *next_rela;
+  unsigned char *      data;		/* The unwind data.  */
+  Elf_Internal_Shdr *  sec;		/* The cached unwind section header.  */
+  Elf_Internal_Rela *  rela;		/* The cached relocations for this section.  */
+  unsigned long        nrelas;		/* The number of relocations.  */
+  unsigned int         rel_type;	/* REL or RELA ?  */
+  Elf_Internal_Rela *  next_rela;	/* Cyclic pointer to the next reloc to process.  */
 };
 
 struct arm_unw_aux_info
 {
-  FILE *file;
-
-  Elf_Internal_Sym *symtab;	/* The symbol table.  */
-  unsigned long nsyms;		/* Number of symbols.  */
-  char *strtab;			/* The string table.  */
-  unsigned long strtab_size;	/* Size of string table.  */
+  FILE *              file;		/* The file containing the unwind sections.  */
+  Elf_Internal_Sym *  symtab;		/* The file's symbol table.  */
+  unsigned long       nsyms;		/* Number of symbols.  */
+  char *              strtab;		/* The file's string table.  */
+  unsigned long       strtab_size;	/* Size of string table.  */
 };
 
 static const char *
@@ -6314,11 +6311,21 @@ arm_free_section (struct arm_section *arm_sec)
     free (arm_sec->rela);
 }
 
-static int
-arm_section_get_word (struct arm_unw_aux_info *aux,
-		      struct arm_section *arm_sec,
-		      Elf_Internal_Shdr *sec, bfd_vma word_offset,
-		      unsigned int *wordp, struct absaddr *addr)
+/* 1) If SEC does not match the one cached in ARM_SEC, then free the current
+      cached section and install SEC instead.
+   2) Locate the 32-bit word at WORD_OFFSET in unwind section SEC
+      and return its valued in * WORDP, relocating if necessary.
+   3) Update the NEXT_RELA field in ARM_SEC and stores the section index and
+      relocation's offset in ADDR.
+   4) Return TRUE upon success, FALSE otherwise.  */
+
+static bfd_boolean
+arm_section_get_word (struct arm_unw_aux_info *  aux,
+		      struct arm_section *       arm_sec,
+		      Elf_Internal_Shdr *        sec,
+		      bfd_vma 			 word_offset,
+		      unsigned int *             wordp,
+		      struct absaddr *           addr)
 {
   Elf_Internal_Rela *rp;
   Elf_Internal_Sym *sym;
@@ -6329,6 +6336,7 @@ arm_section_get_word (struct arm_unw_aux_info *aux,
   addr->section = SHN_UNDEF;
   addr->offset = 0;
 
+  /* If necessary, update the section cache.  */
   if (sec != arm_sec->sec)
     {
       Elf_Internal_Shdr *relsec;
@@ -6349,12 +6357,13 @@ arm_section_get_word (struct arm_unw_aux_info *aux,
 	      || section_headers + relsec->sh_info != sec)
 	    continue;
 
+	  arm_sec->rel_type = relsec->sh_type;
 	  if (relsec->sh_type == SHT_REL)
 	    {
 	      if (!slurp_rel_relocs (aux->file, relsec->sh_offset,
 				     relsec->sh_size,
 				     & arm_sec->rela, & arm_sec->nrelas))
-		return 0;
+		return FALSE;
 	      break;
 	    }
 	  else if (relsec->sh_type == SHT_RELA)
@@ -6362,19 +6371,25 @@ arm_section_get_word (struct arm_unw_aux_info *aux,
 	      if (!slurp_rela_relocs (aux->file, relsec->sh_offset,
 				      relsec->sh_size,
 				      & arm_sec->rela, & arm_sec->nrelas))
-		return 0;
+		return FALSE;
 	      break;
 	    }
+	  else
+	    warn (_("unexpected relocation type (%d) for section %d"),
+		  relsec->sh_type, relsec->sh_info);
 	}
 
       arm_sec->next_rela = arm_sec->rela;
     }
 
+  /* If there is no unwind data we can do nothing.  */
   if (arm_sec->data == NULL)
-    return 0;
+    return FALSE;
 
+  /* Get the word at the required offset.  */
   word = byte_get (arm_sec->data + word_offset, 4);
 
+  /* Look through the relocs to find the one that applies to the provided offset.  */
   wrapped = FALSE;
   for (rp = arm_sec->next_rela; rp != arm_sec->rela + arm_sec->nrelas; rp++)
     {
@@ -6398,31 +6413,6 @@ arm_section_get_word (struct arm_unw_aux_info *aux,
       if (rp->r_offset < word_offset)
 	continue;
 
-      switch (elf_header.e_machine)
-	{
-	case EM_ARM:
-	  relname = elf_arm_reloc_type (ELF32_R_TYPE (rp->r_info));
-	  break;
-
-	case EM_TI_C6000:
-	  relname = elf_tic6x_reloc_type (ELF32_R_TYPE (rp->r_info));
-	  break;
-
-	default:
-	    abort();
-	}
-
-      if (streq (relname, "R_ARM_NONE")
-	  || streq (relname, "R_C6000_NONE"))
-	continue;
-
-      if (!(streq (relname, "R_ARM_PREL31")
-	    || streq (relname, "R_C6000_PREL31")))
-	{
-	  warn (_("Skipping unexpected relocation type %s\n"), relname);
-	  continue;
-	}
-
       sym = aux->symtab + ELF32_R_SYM (rp->r_info);
 
       if (arm_sec->rel_type == SHT_REL)
@@ -6431,14 +6421,46 @@ arm_section_get_word (struct arm_unw_aux_info *aux,
 	  if (offset & 0x40000000)
 	    offset |= ~ (bfd_vma) 0x7fffffff;
 	}
-      else
+      else if (arm_sec->rel_type == SHT_RELA)
 	offset = rp->r_addend;
+      else
+	abort ();
 
       offset += sym->st_value;
       prelval = offset - (arm_sec->sec->sh_addr + rp->r_offset);
 
-      if (streq (relname, "R_C6000_PREL31"))
-	prelval >>= 1;
+      /* Check that we are processing the expected reloc type.  */
+      if (elf_header.e_machine == EM_ARM)
+	{
+	  relname = elf_arm_reloc_type (ELF32_R_TYPE (rp->r_info));
+
+	  if (streq (relname, "R_ARM_NONE"))
+	      continue;
+	  
+	  if (! streq (relname, "R_ARM_PREL31"))
+	    {
+	      warn (_("Skipping unexpected relocation type %s\n"), relname);
+	      continue;
+	    }
+	}
+      else if (elf_header.e_machine == EM_TI_C6000)
+	{
+	  relname = elf_tic6x_reloc_type (ELF32_R_TYPE (rp->r_info));
+	  
+	  if (streq (relname, "R_C6000_NONE"))
+	    continue;
+
+	  if (! streq (relname, "R_C6000_PREL31"))
+	    {
+	      warn (_("Skipping unexpected relocation type %s\n"), relname);
+	      continue;
+	    }
+
+	  prelval >>= 1;
+	}
+      else
+	/* This function currently only supports ARM and TI unwinders.  */
+	abort ();
 
       word = (word & ~ (bfd_vma) 0x7fffffff) | (prelval & 0x7fffffff);
       addr->section = sym->st_shndx;
@@ -6449,13 +6471,15 @@ arm_section_get_word (struct arm_unw_aux_info *aux,
   *wordp = word;
   arm_sec->next_rela = rp;
 
-  return 1;
+  return TRUE;
 }
 
-static const char *tic6x_unwind_regnames[16] = {
-    "A15", "B15", "B14", "B13", "B12", "B11", "B10", "B3", 
-    "A14", "A13", "A12", "A11", "A10", 
-    "[invalid reg 13]", "[invalid reg 14]", "[invalid reg 15]"};
+static const char *tic6x_unwind_regnames[16] =
+{
+  "A15", "B15", "B14", "B13", "B12", "B11", "B10", "B3", 
+  "A14", "A13", "A12", "A11", "A10", 
+  "[invalid reg 13]", "[invalid reg 14]", "[invalid reg 15]"
+};
 
 static void
 decode_tic6x_unwind_regmask (unsigned int mask)
@@ -6757,7 +6781,8 @@ decode_tic6x_unwind_bytecode (struct arm_unw_aux_info *aux,
 	  unsigned int nregs;
 	  unsigned int i;
 	  const char *name;
-	  struct {
+	  struct
+	  {
 	      unsigned int offset;
 	      unsigned int reg;
 	  } regpos[16];
@@ -6814,6 +6839,7 @@ decode_tic6x_unwind_bytecode (struct arm_unw_aux_info *aux,
 	  unsigned char buf[9];
 	  unsigned int i, len;
 	  unsigned long offset;
+
 	  for (i = 0; i < sizeof (buf); i++)
 	    {
 	      GET_OP (buf[i]);
@@ -6842,7 +6868,7 @@ decode_tic6x_unwind_bytecode (struct arm_unw_aux_info *aux,
 }
 
 static bfd_vma
-expand_prel31 (bfd_vma word, bfd_vma where)
+arm_expand_prel31 (bfd_vma word, bfd_vma where)
 {
   bfd_vma offset;
 
@@ -6881,7 +6907,7 @@ decode_arm_unwind (struct arm_unw_aux_info *aux,
       bfd_vma fn;
       const char *procname;
 
-      fn = expand_prel31 (word, data_sec->sh_addr + data_offset);
+      fn = arm_expand_prel31 (word, data_sec->sh_addr + data_offset);
       printf (_("  Personality routine: "));
       procname = arm_print_vma_and_name (aux, fn, addr);
       fputc ('\n', stdout);
@@ -7001,9 +7027,9 @@ dump_arm_unwind (struct arm_unw_aux_info *aux, Elf_Internal_Shdr *exidx_sec)
 	  return;
 	}
 
-      fn = expand_prel31 (exidx_fn, exidx_sec->sh_addr + 8 * i);
+      fn = arm_expand_prel31 (exidx_fn, exidx_sec->sh_addr + 8 * i);
 
-      arm_print_vma_and_name (aux, fn, entry_addr);
+      arm_print_vma_and_name (aux, fn, fn_addr);
       fputs (": ", stdout);
 
       if (exidx_entry == 1)
@@ -7023,7 +7049,7 @@ dump_arm_unwind (struct arm_unw_aux_info *aux, Elf_Internal_Shdr *exidx_sec)
 	  Elf_Internal_Shdr *table_sec;
 
 	  fputs ("@", stdout);
-	  table = expand_prel31 (exidx_entry, exidx_sec->sh_addr + 8 * i + 4);
+	  table = arm_expand_prel31 (exidx_entry, exidx_sec->sh_addr + 8 * i + 4);
 	  print_vma (table, PREFIX_HEX);
 	  printf ("\n");
 

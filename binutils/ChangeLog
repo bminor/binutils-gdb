@@ -1,3 +1,12 @@
+2011-11-28  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/13421
+	* readelf.c (arm_section_get_word): Add descriptive comments.
+	Initliase the rel_type field of the arm_sec structure.
+	(expand_prel31): Rename to arm_expand_prel31.
+	(dump_arm_unwind): Use new name.
+	Print the function name based on the function address entry.
+
 2011-11-11  Andreas Schwab  <schwab@linux-m68k.org>
 
 	* readelf.c (process_program_headers): Fix typo printing p_memsz
