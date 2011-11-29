@@ -228,7 +228,7 @@ struct quick_symbol_functions
 
   /* Find global or static symbols in all tables that are in NAMESPACE 
      and for which MATCH (symbol name, NAME) == 0, passing each to 
-     CALLBACK, reading in partial symbol symbol tables as needed.  Look
+     CALLBACK, reading in partial symbol tables as needed.  Look
      through global symbols if GLOBAL and otherwise static symbols.
      Passes NAME, NAMESPACE, and DATA to CALLBACK with each symbol
      found.  After each block is processed, passes NULL to CALLBACK.
@@ -236,10 +236,10 @@ struct quick_symbol_functions
      strcmp_iw(x,y) == 0 --> MATCH(x,y) == 0.  ORDERED_COMPARE, if
      non-null, must be an ordering relation compatible with strcmp_iw
      in the sense that  
-            strcmp(x,y) == 0 --> ORDERED_COMPARE(x,y) == 0 
+            strcmp_iw(x,y) == 0 --> ORDERED_COMPARE(x,y) == 0
      and 
-            strcmp(x,y) <= 0 --> ORDERED_COMPARE(x,y) <= 0
-     (allowing strcmp(x,y) < 0 while ORDERED_COMPARE(x, y) == 0).
+            strcmp_iw(x,y) <= 0 --> ORDERED_COMPARE(x,y) <= 0
+     (allowing strcmp_iw(x,y) < 0 while ORDERED_COMPARE(x, y) == 0).
      CALLBACK returns 0 to indicate that the scan should continue, or
      non-zero to indicate that the scan should be terminated.  */
 
