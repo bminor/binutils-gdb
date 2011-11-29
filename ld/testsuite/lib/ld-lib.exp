@@ -964,11 +964,12 @@ proc run_ld_link_tests { ldtests } {
 
 	# Assemble each file in the test.
 	foreach src_file $src_files {
-	    set objfile "tmpdir/[file rootname $src_file].o"
+	    set fileroot "[file rootname [file tail $src_file]]"
+	    set objfile "tmpdir/$fileroot.o"
 	    lappend objfiles $objfile
 
 	    if { [file extension $src_file] == ".c" } {
-		set as_file "tmpdir/[file rootname $src_file].s"
+		set as_file "tmpdir/$fileroot.s"
 		if ![ld_compile "$CC -S $CFLAGS $cflags" $srcdir/$subdir/$src_file $as_file] {
 		    set is_unresolved 1
 		    break
@@ -1162,7 +1163,8 @@ proc run_ld_link_exec_tests { targets_to_xfail ldtests } {
 
 	# Assemble each file in the test.
 	foreach src_file $src_files {
-	    set objfile "tmpdir/[file rootname $src_file].o"
+	    set fileroot "[file rootname [file tail $src_file]]"
+	    set objfile "tmpdir/$fileroot.o"
 	    lappend objfiles $objfile
 
 	    # We ignore warnings since some compilers may generate
@@ -1284,7 +1286,8 @@ proc run_cc_link_tests { ldtests } {
 
 	# Compile each file in the test.
 	foreach src_file $src_files {
-	    set objfile "tmpdir/[file rootname $src_file].o"
+	    set fileroot "[file rootname [file tail $src_file]]"
+	    set objfile "tmpdir/$fileroot.o"
 	    lappend objfiles $objfile
 
 	    # We ignore warnings since some compilers may generate

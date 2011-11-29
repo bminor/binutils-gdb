@@ -1,3 +1,19 @@
+2011-11-29  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	PR ld/10144
+	* lib/ld-lib.exp (run_ld_link_tests): Handle sources from other
+	directories.
+	(run_ld_link_exec_tests): Likewise.
+	(run_cc_link_tests): Likewise.
+	* ld-elf/comm-data1.sd: New test.
+	* ld-elf/comm-data1.s: Source for the new test.
+	* ld-elf/comm-data2.sd: New test.
+	* ld-elf/comm-data2.rd: Likewise.
+	* ld-elf/comm-data2.xd: Likewise.
+	* ld-elf/comm-data2.s: Source for the new tests.
+	* ld-elf/comm-data.exp: New file.
+	* ld-mips-elf/comm-data.exp: Likewise.
+
 2011-11-09  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	* ld-arm/jump-reloc-veneers.s: Update for changes to assembler output.
