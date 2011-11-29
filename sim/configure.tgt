@@ -86,6 +86,9 @@ case "${target}" in
        SIM_ARCH(moxie)
        sim_testsuite=yes
        ;;
+   rl78-*-*)
+       SIM_ARCH(rl78)
+       ;;
    rx-*-*)
        SIM_ARCH(rx)
        ;;

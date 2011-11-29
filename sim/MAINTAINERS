@@ -15,6 +15,7 @@ cr16	        M R Swami Reddy <MR.Swami.Reddy@nsc.com>
 frv		Dave Brolley <brolley@redhat.com>
 igen		(igen simulators)
 lm32		Jon Beniston <jon@beniston.com>
+rl78		DJ Delorie <dj@redhat.com>
 m32c		DJ Delorie <dj@redhat.com>
 m32r		Doug Evans <dje@sebabeach.org>
 m68hc11		Stephane Carrez <stcarrez@nerim.fr>

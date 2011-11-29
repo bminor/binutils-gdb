@@ -1,3 +1,7 @@
+2011-11-28  DJ Delorie  <dj@redhat.com>
+
+	* NEWS: Mention RL78 simulator.
+
 2011-11-28  Joel Brobecker  <brobecker@adacore.com>
 
 	* symfile.h (struct quick_symbol_functions): Fix the documentation

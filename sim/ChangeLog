@@ -1,3 +1,10 @@
+2011-11-28  DJ Delorie  <dj@redhat.com>
+
+	* configure.tgt: Add rl78 support.
+	* configure: Regenerate.
+	* rl78: New directory.
+	* MAINTAINERS: Add myself as RL78 maintainer.
+
 2011-07-08  Hans-Peter Nilsson  <hp@axis.com>
 
 	* MAINTAINERS: Remove Thiemo Seufer.

@@ -233,6 +233,10 @@ qTMinFTPILen
 
 Texas Instruments TMS320C6x		tic6x-*-*
 
+* New Simulators
+
+Renesas RL78				rl78-*-elf
+
 *** Changes in GDB 7.3.1
 
 * The build failure for NetBSD and OpenBSD targets have now been fixed.
