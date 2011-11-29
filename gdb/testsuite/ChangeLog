@@ -1,3 +1,7 @@
+2011-11-29  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.base/infoline.c, gdb.base/infoline.exp: New files.
+
 2011-11-28  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/fullname_bp: New testcase.
