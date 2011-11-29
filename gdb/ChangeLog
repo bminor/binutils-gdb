@@ -1,3 +1,9 @@
+2011-11-28  Joel Brobecker  <brobecker@adacore.com>
+
+	* symfile.h (struct quick_symbol_functions): Fix the documentation
+	of field map_matching_symbols, as symbols are sorted using
+	strcmp_iw_ordered, not strcmp_iw.
+
 2011-11-28  Paul Hilfinger  <hilfinger@adacore.com>
 
 	* symfile.h (struct quick_symbol_functions): Update the
