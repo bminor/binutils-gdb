@@ -1,3 +1,13 @@
+2011-11-29  Andrew Pinski  <apinski@cavium.com>
+
+	* config/tc-mips.c (CPU_IS_OCTEON): New macro function.
+	(CPU_HAS_SEQ): Change to use CPU_IS_OCTEON.
+	(NO_ISA_COP): Likewise.
+	(macro) <ld_st>: Add support when off0 is true.
+	Add support for M_SAA_AB, M_SAA_OB, M_SAAD_OB and M_SAAD_AB.
+	(mips_cpu_info_table): Add octeon+.
+	* doc/c-mips.texi: Document octeon+ as an acceptable value for -march=.
+
 2011-11-25  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	* config/tc-arm.c (do_t_mov_cmp): Allow MOV lowreg, lowreg when no CPU

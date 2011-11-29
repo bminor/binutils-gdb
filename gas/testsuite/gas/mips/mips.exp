@@ -308,7 +308,13 @@ proc run_dump_test_arch { name arch } {
 
     set format [expr { $elf ? "elf" : $ecoff ? "ecoff" : "aout" }]
     set proparch [lindex [mips_arch_properties $arch 0] 0]
-    foreach prefix [list ${proparch}@${format}@ ${proparch}@ ${format}@] {
+    set prefixes [list ${proparch}@${format}@ ${proparch}@ ]
+    if { [ string match "octeon*" $proparch ] && $proparch != "octeon" } {
+      lappend prefixes octeon@
+      lappend prefixes octeon@${format}@
+    }
+    lappend prefixes ${format}@
+    foreach prefix ${prefixes} {
 	set archname ${prefix}${name}
 	if { [file exists "$srcdir/$subdir/${archname}.d"] } {
 	    set name $archname
@@ -412,6 +418,9 @@ mips_arch_create sb1 	64	mips64	{ mips3d } \
 mips_arch_create octeon 64	mips64r2 {} \
 			{ -march=octeon -mtune=octeon } { -mmips:octeon } \
 			{ mips64octeon*-*-* }
+mips_arch_create octeonp 64	octeon {} \
+			{ -march=octeon+ -mtune=octeon+ } { -mmips:octeon+ } \
+			{ }
 mips_arch_create xlr 	64	mips64	{} \
 			{ -march=xlr -mtune=xlr } { -mmips:xlr }
 
@@ -981,6 +990,7 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "loongson-3a-3"
 
     run_dump_test_arches "octeon"	[mips_arch_list_matching octeon]
+    run_dump_test_arches "octeon-saa-saad" [mips_arch_list_matching octeonp]
     run_list_test_arches "octeon-ill" "" \
 					[mips_arch_list_matching octeon]
     run_dump_test_arches "octeon-pref"	[mips_arch_list_matching octeon]

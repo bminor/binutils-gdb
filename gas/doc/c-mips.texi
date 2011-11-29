@@ -323,6 +323,7 @@ loongson2e,
 loongson2f,
 loongson3a,
 octeon,
+octeon+,
 xlr
 @end quotation
 

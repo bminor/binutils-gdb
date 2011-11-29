@@ -121,7 +121,8 @@
 #define N5	(INSN_5400 | INSN_5500)
 #define N54	INSN_5400
 #define N55	INSN_5500
-#define IOCT	INSN_OCTEON
+#define IOCT	(INSN_OCTEON | INSN_OCTEONP)
+#define IOCTP	INSN_OCTEONP
 #define XLR     INSN_XLR
 
 #define G1      (T3             \
@@ -1247,6 +1248,12 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"rzu.ob",  "X,Q",	0x78000020, 0xfc20f83f,	WR_D|RD_T|FP_D,		RD_MACC,	MX|SB1	},
 {"rzu.ob",  "D,k",	0x4bc00020, 0xffe0f83f,	WR_D|RD_S|RD_T,		0,		N54	},
 {"rzu.qh",  "X,Q",	0x78200020, 0xfc20f83f,	WR_D|RD_T|FP_D,		RD_MACC,	MX	},
+{"saa",	    "t,o(b)",	0,    (int) M_SAA_OB,	INSN_MACRO,		0,		IOCTP	},
+{"saa",	    "t,A(b)",	0,    (int) M_SAA_AB,	INSN_MACRO,		0,		IOCTP	},
+{"saa",	    "t,(b)",	0x70000018, 0xfc00ffff, SM|RD_t|RD_b,		0,		IOCTP	},
+{"saad",    "t,o(b)",	0,    (int) M_SAAD_OB,	INSN_MACRO,		0,		IOCTP	},
+{"saad",    "t,A(b)",	0,    (int) M_SAAD_AB,	INSN_MACRO,		0,		IOCTP	},
+{"saad",    "t,(b)",	0x70000019, 0xfc00ffff,	SM|RD_t|RD_b,		0,		IOCTP	},
 {"sb",      "t,o(b)",	0xa0000000, 0xfc000000,	SM|RD_t|RD_b,		0,		I1	},
 {"sb",      "t,A(b)",	0,    (int) M_SB_AB,	INSN_MACRO,		0,		I1	},
 {"sc",	    "t,o(b)",	0xe0000000, 0xfc000000, SM|RD_t|WR_t|RD_b,	0,		I2	},

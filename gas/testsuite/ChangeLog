@@ -1,3 +1,13 @@
+2011-11-29  Andrew Pinski  <apinski@cavium.com>
+
+	* gas/mips/mips.exp: Add octeon+ for an architecture.
+	Run octeon-saa-saad test.
+	(run_dump_test_arch): For Octeon architectures, also try octeon@.
+	* gas/mips/octeon-pref.d: Remove -march=octeon from command line.
+	* gas/mips/octeon.d: Likewise.
+	* gas/mips/octeon-saa-saad.d: New file.
+	* gas/mips/octeon-saa-saad.s: New file
+
 2011-11-25  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	* gas/arm/mov-highregs-any.d: New testcase.

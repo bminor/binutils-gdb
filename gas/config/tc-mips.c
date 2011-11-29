@@ -497,13 +497,16 @@ static int mips_32bitmode = 0;
 /* True if CPU has a ror instruction.  */
 #define CPU_HAS_ROR(CPU)	CPU_HAS_DROR (CPU)
 
+/* True if CPU is in the Octeon family */
+#define CPU_IS_OCTEON(CPU) ((CPU) == CPU_OCTEON || (CPU) == CPU_OCTEONP)
+
 /* True if CPU has seq/sne and seqi/snei instructions.  */
-#define CPU_HAS_SEQ(CPU)	((CPU) == CPU_OCTEON)
+#define CPU_HAS_SEQ(CPU)	(CPU_IS_OCTEON (CPU))
 
 /* True if CPU does not implement the all the coprocessor insns.  For these
    CPUs only those COP insns are accepted that are explicitly marked to be
    available on the CPU.  ISA membership for COP insns is ignored.  */
-#define NO_ISA_COP(CPU)		((CPU) == CPU_OCTEON)
+#define NO_ISA_COP(CPU)		(CPU_IS_OCTEON (CPU))
 
 /* True if mflo and mfhi can be immediately followed by instructions
    which write to the HI and LO registers.
@@ -6261,6 +6264,7 @@ macro (struct mips_cl_insn *ip)
   int ust = 0;
   int lp = 0;
   int ab = 0;
+  int off0 = 0;
   int off;
   offsetT maxnum;
   bfd_reloc_code_real_type r;
@@ -8295,20 +8299,29 @@ macro (struct mips_cl_insn *ip)
 			     tempreg, tempreg, breg);
 	      breg = tempreg;
 	    }
-	  if (!off12)
+	  if (off0)
+	    {
+	      if (offset_expr.X_add_number == 0)
+		tempreg = breg;
+	      else
+		macro_build (&offset_expr, ADDRESS_ADDI_INSN,
+			     "t,r,j", tempreg, breg, BFD_RELOC_LO16);
+	      macro_build (NULL, s, fmt, treg, tempreg);
+	    }
+	  else if (!off12)
 	    macro_build (&offset_expr, s, fmt, treg, BFD_RELOC_LO16, breg);
 	  else
 	    macro_build (NULL, s, fmt,
 			 treg, (unsigned long) offset_expr.X_add_number, breg);
 	}
-      else if (off12)
+      else if (off12 || off0)
 	{
-	  /* A 12-bit offset field is too narrow to be used for a low-part
-	     relocation, so load the whole address into the auxillary
-	     register.  In the case of "A(b)" addresses, we first load
-	     absolute address "A" into the register and then add base
-	     register "b".  In the case of "o(b)" addresses, we simply
-	     need to add 16-bit offset "o" to base register "b", and
+	  /* A 12-bit or 0-bit offset field is too narrow to be used
+	     for a low-part relocation, so load the whole address into
+	     the auxillary register.  In the case of "A(b)" addresses,
+	     we first load absolute address "A" into the register and
+	     then add base register "b".  In the case of "o(b)" addresses,
+	     we simply need to add 16-bit offset "o" to base register "b", and
 	     offset_reloc already contains the relocations associated
 	     with "o".  */
 	  if (ab)
@@ -8323,8 +8336,11 @@ macro (struct mips_cl_insn *ip)
 			 tempreg, breg, -1,
 			 offset_reloc[0], offset_reloc[1], offset_reloc[2]);
 	  expr1.X_add_number = 0;
-	  macro_build (NULL, s, fmt,
-		       treg, (unsigned long) expr1.X_add_number, tempreg);
+	  if (off0)
+	    macro_build (NULL, s, fmt, treg, tempreg);
+	  else
+	    macro_build (NULL, s, fmt,
+		         treg, (unsigned long) expr1.X_add_number, tempreg);
 	}
       else if (mips_pic == NO_PIC)
 	{
@@ -9117,6 +9133,22 @@ macro (struct mips_cl_insn *ip)
 		       breg);
 	}
       break;
+
+	
+    case M_SAA_AB:
+      ab = 1;
+    case M_SAA_OB:
+      s = "saa";
+      off0 = 1;
+      fmt = "t,(b)";
+      goto ld_st;
+    case M_SAAD_AB:
+      ab = 1;
+    case M_SAAD_OB:
+      s = "saad";
+      off0 = 1;
+      fmt = "t,(b)";
+      goto ld_st;
 
    /* New code added to support COPZ instructions.
       This code builds table entries out of the macros in mip_opcodes.
@@ -19042,6 +19074,7 @@ static const struct mips_cpu_info mips_cpu_info_table[] =
 
   /* Cavium Networks Octeon CPU core */
   { "octeon",	      0,      ISA_MIPS64R2,   CPU_OCTEON },
+  { "octeon+",	      0,      ISA_MIPS64R2,   CPU_OCTEONP },
 
   /* RMI Xlr */
   { "xlr",	      0,      ISA_MIPS64,     CPU_XLR },

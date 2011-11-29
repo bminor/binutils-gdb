@@ -10885,6 +10885,7 @@ mips_set_isa_flags (bfd *abfd)
       break;
 
     case bfd_mach_mips_octeon:
+    case bfd_mach_mips_octeonp:
       val = E_MIPS_ARCH_64R2 | E_MIPS_MACH_OCTEON;
       break;
 
@@ -13491,6 +13492,7 @@ struct mips_mach_extension {
 
 static const struct mips_mach_extension mips_mach_extensions[] = {
   /* MIPS64r2 extensions.  */
+  { bfd_mach_mips_octeonp, bfd_mach_mips_octeon },
   { bfd_mach_mips_octeon, bfd_mach_mipsisa64r2 },
 
   /* MIPS64 extensions.  */

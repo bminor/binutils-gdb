@@ -1,3 +1,12 @@
+2011-11-29  Andrew Pinski  <apinski@cavium.com>
+
+	* archures.c (bfd_mach_mips_octeonp): New macro.
+	* bfd-in2.h: Regenerate.
+	* bfd/cpu-mips.c (I_mipsocteonp): New enum value.
+	(arch_info_struct): Add bfd_mach_mips_octeonp.
+	* elfxx-mips.c (mips_set_isa_flags): Add bfd_mach_mips_octeonp.
+	(mips_mach_extensions): Add bfd_mach_mips_octeonp.
+
 2011-11-23  Tristan Gingold  <gingold@adacore.com>
 
 	* vms-lib.c (get_idxlen): Add comments.  Fix type in sizeof.

@@ -605,6 +605,10 @@ const struct mips_arch_choice mips_arch_choices[] =
     ISA_MIPS64R2 | INSN_OCTEON, mips_cp0_names_numeric, NULL, 0,
     mips_hwr_names_numeric },
 
+  { "octeon+",   1, bfd_mach_mips_octeonp, CPU_OCTEONP,
+    ISA_MIPS64R2 | INSN_OCTEON | INSN_OCTEONP, mips_cp0_names_numeric,
+    NULL, 0, mips_hwr_names_numeric },
+
   { "xlr", 1, bfd_mach_mips_xlr, CPU_XLR,
     ISA_MIPS64 | INSN_XLR,
     mips_cp0_names_xlr,

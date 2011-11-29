@@ -1,3 +1,10 @@
+2011-11-29  Andrew Pinski  <apinski@cavium.com>
+
+	* mips-dis.c (mips_arch_choices): Add Octeon+.
+	* mips-opc.c (IOCT): Include Octeon+.
+	(IOCTP): New macro.
+	(mips_builtin_opcodes): Add "saa" and "saad".
+
 2011-11-25  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* mips-dis.c (print_insn_micromips): Rename local variable iprintf
