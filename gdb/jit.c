@@ -239,7 +239,8 @@ struct jit_inferior_data
   CORE_ADDR descriptor_addr;  /* &__jit_debug_descriptor  */
 };
 
-/* Remember a mapping from entry_addr to objfile.  */
+/* Remember OBJFILE has been created for struct jit_code_entry located
+   at inferior address ENTRY.  */
 
 static void
 add_objfile_entry (struct objfile *objfile, CORE_ADDR entry)
@@ -711,8 +712,8 @@ jit_object_close_impl (struct gdb_symbol_callbacks *cb,
 }
 
 /* Try to read CODE_ENTRY using the loaded jit reader (if any).
-   ENTRY_ADDR is the address of the object file (in the target's
-   address space) being read.  */
+   ENTRY_ADDR is the address of the struct jit_code_entry in the
+   inferior address space.  */
 
 static int
 jit_reader_try_read_symtab (struct jit_code_entry *code_entry,
@@ -769,7 +770,7 @@ jit_reader_try_read_symtab (struct jit_code_entry *code_entry,
 }
 
 /* Try to read CODE_ENTRY using BFD.  ENTRY_ADDR is the address of the
-   object file (in the target's address space) being read.  */
+   struct jit_code_entry in the inferior address space.  */
 
 static void
 jit_bfd_try_read_symtab (struct jit_code_entry *code_entry,
