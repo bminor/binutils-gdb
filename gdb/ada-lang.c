@@ -4894,7 +4894,7 @@ compare_names (const char *string1, const char *string2)
 	  if (is_name_suffix (string1))
 	    return 0;
 	  else
-	    return -1;
+	    return 1;
 	}
       /* FALLTHROUGH */
     default:

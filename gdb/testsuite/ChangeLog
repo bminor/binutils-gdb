@@ -1,3 +1,7 @@
+2011-11-28  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/fullname_bp: New testcase.
+
 2011-11-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	PR testsuite/12649

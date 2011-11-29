@@ -1,3 +1,9 @@
+2011-11-28  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (compare_names): Fix wrong return value in case
+	string1 starts with the same contents as string2, followed
+	by an underscore that do not start a symbol name suffix.
+
 2011-11-28  Phil Muldoon  <pmuldoon@redhat.com>
 
 	PR python/13369
