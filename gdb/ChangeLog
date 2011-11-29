@@ -1,3 +1,7 @@
+2011-11-29  Andrey Smirnov  <andrew.smirnov@gmail.com>
+
+	* MAINTAINERS (Write After Approval): Add myself to the list.
+
 2011-11-29  Sanjoy Das  <sdas@igalia.com>
 
 	* jit.c (add_objfile_entry, jit_reader_try_read_symtab)
