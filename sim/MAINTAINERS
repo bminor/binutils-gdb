@@ -6,6 +6,10 @@ gdb/MAINTAINERS for general information about maintaining these files.
 If you are considering contributing a patch, please see the file
 gdb/CONTRIBUTE.  Patches to these files should be posted to:
 gdb-patches@sources.redhat.com 
+
+        Global Maintainers
+
+Mike Frysinger			vapier@gentoo.org
 	
 	Maintainers for particular sims:
 

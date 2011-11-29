@@ -1,3 +1,8 @@
+2011-11-29  Joel Brobecker  <brobecker@adacore.com>
+
+	* MAINTAINERS (Global Maintainers): New section.  Add Mike
+	Frysinger.
+
 2011-11-28  DJ Delorie  <dj@redhat.com>
 
 	* configure.tgt: Add rl78 support.
