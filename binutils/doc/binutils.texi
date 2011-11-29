@@ -176,7 +176,7 @@ in the section entitled ``GNU Free Documentation License''.
 @c man title ar create, modify, and extract from archives
 
 @smallexample
-ar [@option{--plugin} @var{name}] [-]@var{p}[@var{mod} [@var{relpos}] [@var{count}]] [@option{--target} @var{bfdname}] @var{archive} [@var{member}@dots{}] 
+ar [@option{--plugin} @var{name}] [-]@var{p}[@var{mod} [@var{relpos}] [@var{count}]] [@option{--target} @var{bfdname}] @var{archive} [@var{member}@dots{}]
 ar -M [ <mri-script ]
 @end smallexample
 
@@ -1436,7 +1436,7 @@ the use of long section names in the output object; when @samp{disable}
 is in effect, any long section names in the input object will be truncated.
 The @samp{enable} option will only emit long section names if any are
 present in the inputs; this is mostly the same as @samp{keep}, but it
-is left undefined whether the @samp{enable} option might force the 
+is left undefined whether the @samp{enable} option might force the
 creation of an empty string table in the output file.
 
 @item --change-leading-char
@@ -2125,7 +2125,7 @@ Display source code intermixed with disassembly, if possible.  Implies
 @item --prefix=@var{prefix}
 @cindex Add prefix to absolute paths
 Specify @var{prefix} to add to the absolute paths when used with
-@option{-S}. 
+@option{-S}.
 
 @item --prefix-strip=@var{level}
 @cindex Strip absolute paths
@@ -2142,7 +2142,7 @@ When disassembling instructions, do not print the instruction bytes.
 This is the default when @option{--prefix-addresses} is used.
 
 @item --insn-width=@var{width}
-@cindex Instruction width 
+@cindex Instruction width
 Display @var{width} bytes on a single line when disassembling
 instructions.
 
@@ -2349,7 +2349,7 @@ nm(1), readelf(1), and the Info entries for @file{binutils}.
 
 @smallexample
 @c man begin SYNOPSIS ranlib
-ranlib [@option{-vVt}] @var{archive}
+ranlib [@option{-DhHvVt}] @var{archive}
 @c man end
 @end smallexample
 
@@ -2374,10 +2374,21 @@ The @sc{gnu} @command{ranlib} program is another form of @sc{gnu} @command{ar}; 
 @c man begin OPTIONS ranlib
 
 @table @env
+@item -h
+@itemx -H
+@itemx --help
+Show usage information for @command{ranlib}.
+
 @item -v
 @itemx -V
 @itemx --version
 Show the version number of @command{ranlib}.
+
+@item -D
+@cindex deterministic archives
+Operate in @emph{deterministic} mode.  The symbol map archive member's
+header will show zero for the UID, GID, and timestamp.  When this
+option is used, multiple runs will produce identical output files.
 
 @item -t
 Update the timestamp of the symbol map of an archive.
@@ -3724,9 +3735,9 @@ that uses that DLL:
 
 
 @command{dlltool} may also be used to query an existing import library
-to determine the name of the DLL to which it is associated.  See the 
+to determine the name of the DLL to which it is associated.  See the
 description of the @option{-I} or @option{--identify} option.
- 
+
 @c man end
 
 @c man begin OPTIONS dlltool
@@ -4716,7 +4727,7 @@ things without first using the debugger to find the facts.
 
 @node GNU Free Documentation License
 @appendix GNU Free Documentation License
- 
+
 @include fdl.texi
 
 @node Binutils Index

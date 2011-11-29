@@ -324,6 +324,7 @@ ranlib_usage (int help)
 #endif
   fprintf (s, _("\
   -t                           Update the archive's symbol map timestamp\n\
+  -D                           Use zero for the symbol map timestamp\n\
   -h --help                    Print this help message\n\
   -v --version                 Print version information\n"));
 
@@ -559,10 +560,13 @@ ranlib_main (int argc, char **argv)
   bfd_boolean touch = FALSE;
   int c;
 
-  while ((c = getopt_long (argc, argv, "hHvVt", long_options, NULL)) != EOF)
+  while ((c = getopt_long (argc, argv, "DhHvVt", long_options, NULL)) != EOF)
     {
       switch (c)
         {
+	case 'D':
+	  deterministic = TRUE;
+	  break;
 	case 'h':
 	case 'H':
 	  show_help = 1;
@@ -581,7 +585,7 @@ ranlib_main (int argc, char **argv)
     ranlib_usage (0);
 
   if (show_help)
-    usage (1);
+    ranlib_usage (1);
 
   if (show_version)
     print_version ("ranlib");
@@ -1364,6 +1368,9 @@ ranlib_touch (const char *archname)
   if (! bfd_has_map (arch))
     /* xgettext:c-format */
     fatal (_("%s: no archive map to update"), archname);
+
+  if (deterministic)
+    arch->flags |= BFD_DETERMINISTIC_OUTPUT;
 
   bfd_update_armap_timestamp (arch);
 

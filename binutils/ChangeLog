@@ -1,3 +1,10 @@
+2011-11-29  Roland McGrath  <mcgrathr@google.com>
+
+	* ar.c (ranlib_usage): Describe -D.
+	(ranlib_main): Parse -D.
+	(ranlib_touch): Set BFD_DETERMINISTIC_OUTPUT under -D.
+	* doc/binutils.texi (ranlib): Describe -D, and also --help/-h/-H.
+
 2011-11-28  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/13421
