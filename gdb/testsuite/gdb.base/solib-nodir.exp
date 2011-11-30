@@ -14,7 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 # are we on a target board
-if {![isnative] || [skip_shlib_tests]} {
+if {[is_remote target] || [skip_shlib_tests]} {
     return
 }
 

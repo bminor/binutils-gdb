@@ -34,12 +34,14 @@ if  { [gdb_compile_shlib "${srcdir}/${subdir}/${srclibfile}" $objdir/$subdir/$li
 # just for the linking phase (and not the source compilation phase).  And any
 # warnings on ignored $libfile abort the process.
 
-if  { [gdb_compile [list $srcdir/$subdir/$srcfile $objdir/$subdir/$libfile] $objdir/$subdir/$binfile executable {debug f90}] != "" } {
+if  { [gdb_compile $srcdir/$subdir/$srcfile $objdir/$subdir/$binfile executable [list debug f90 shlib=$objdir/$subdir/$libfile]] != "" } {
     untested "Couldn't compile ${srcfile}"
     return -1
 }
 
 clean_restart $binfile
+
+gdb_load_shlibs $objdir/$subdir/$libfile
 
 if ![runto MAIN__] then {
     perror "couldn't run to breakpoint MAIN__"

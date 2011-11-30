@@ -51,7 +51,7 @@ mi_gdb_reinitialize_dir $srcdir/$subdir
 mi_gdb_reinitialize_dir $srcdir/$subdir
 mi_gdb_load ${binfile}
 
-gdb_load_shlibs $binfile_lib
+mi_load_shlibs $binfile_lib
 
 mi_gdb_test "777-gdb-set stop-on-solib-events 1" "777\\^done" \
     "set stop-on-solib-events"

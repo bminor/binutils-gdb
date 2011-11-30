@@ -1,3 +1,10 @@
+2011-11-30  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdb.base/solib-nodir.exp: Skip if remote target.
+	* gdb.base/gdb.fortran.exp: Use shlib= flag when linking main
+	application.  Call gdb_load_shlibs.
+	* gdb.mi/mi-solib.exp: Use mi_load_shlibs instead of gdb_load_shlibs.
+
 2011-11-29  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.base/infoline.c, gdb.base/infoline.exp: New files.
