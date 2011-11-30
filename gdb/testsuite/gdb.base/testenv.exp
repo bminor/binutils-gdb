@@ -22,6 +22,10 @@ if $tracelevel then {
 	strace $tracelevel
 }
 
+# There's no support for passing environment variables in the remote protocol.
+if { [is_remote target] } {
+    return 0
+}
 
 set testfile "testenv"
 set srcfile ${testfile}.c
@@ -119,3 +123,7 @@ gdb_test "continue" \
   "Test with TEST_GDB_GLOBAL unset"
 
 gdb_exit
+
+# Clear environment in case we're doing multiple runs
+unset env(TEST_GDB_GLOBAL)
+

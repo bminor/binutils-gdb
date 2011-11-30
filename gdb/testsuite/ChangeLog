@@ -1,5 +1,10 @@
 2011-11-30  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* gdb.base/testenv.exp: Skip on remote targets.  Unset global
+	environment variable after test completed.
+
+2011-11-30  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* gdb.base/solib-nodir.exp: Skip if remote target.
 	* gdb.base/gdb.fortran.exp: Use shlib= flag when linking main
 	application.  Call gdb_load_shlibs.
