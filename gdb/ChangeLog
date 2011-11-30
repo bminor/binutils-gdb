@@ -1,5 +1,9 @@
 2011-11-30  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* s390-tdep.c (s390_gdbarch_init): Call set_gdbarch_get_siginfo_type.
+
+2011-11-30  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* s390-tdep.c (s390_displaced_step_fixup): Fix processing of LARL
 	instruction.  Add more diagnostic output.
 
