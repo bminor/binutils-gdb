@@ -1,3 +1,8 @@
+2011-11-30  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* s390-tdep.c (s390_displaced_step_fixup): Fix processing of LARL
+	instruction.  Add more diagnostic output.
+
 2011-11-29  Andrey Smirnov  <andrew.smirnov@gmail.com>
 
 	* MAINTAINERS (Write After Approval): Add myself to the list.

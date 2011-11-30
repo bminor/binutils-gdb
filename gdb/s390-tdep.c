@@ -1370,9 +1370,9 @@ s390_displaced_step_fixup (struct gdbarch *gdbarch,
 
   if (debug_displaced)
     fprintf_unfiltered (gdb_stdlog,
-			"displaced: (s390) fixup (%s, %s) pc %s amode 0x%x\n",
+			"displaced: (s390) fixup (%s, %s) pc %s len %d amode 0x%x\n",
 			paddress (gdbarch, from), paddress (gdbarch, to),
-			paddress (gdbarch, pc), (int) amode);
+			paddress (gdbarch, pc), insnlen, (int) amode);
 
   /* Handle absolute branch and save instructions.  */
   if (is_rr (insn, op_basr, &r1, &r2)
@@ -1428,9 +1428,11 @@ s390_displaced_step_fixup (struct gdbarch *gdbarch,
   /* Handle LOAD ADDRESS RELATIVE LONG.  */
   else if (is_ril (insn, op1_larl, op2_larl, &r1, &i2))
     {
+      /* Update PC.  */
+      regcache_write_pc (regs, from + insnlen);
       /* Recompute output address in R1.  */ 
       regcache_cooked_write_unsigned (regs, S390_R0_REGNUM + r1,
-				      amode | (from + insnlen + i2*2));
+				      amode | (from + i2 * 2));
     }
 
   /* If we executed a breakpoint instruction, point PC right back at it.  */
@@ -1440,6 +1442,11 @@ s390_displaced_step_fixup (struct gdbarch *gdbarch,
   /* For any other insn, PC points right after the original instruction.  */
   else
     regcache_write_pc (regs, from + insnlen);
+
+  if (debug_displaced)
+    fprintf_unfiltered (gdb_stdlog,
+			"displaced: (s390) pc is now %s\n",
+			paddress (gdbarch, regcache_read_pc (regs)));
 }
 
 /* Normal stack frames.  */
