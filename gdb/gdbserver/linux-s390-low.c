@@ -126,16 +126,27 @@ s390_collect_ptrace_register (struct regcache *regcache, int regno, char *buf)
 	  collect_register (regcache, (regno & ~1) + 1,
 			    buf + sizeof (long) - size);
 	}
-      else if (regaddr == PT_PSWADDR
-	       || (regaddr >= PT_GPR0 && regaddr <= PT_GPR15))
+      else if (regaddr == PT_PSWMASK)
+	{
+	  /* Convert 4-byte PSW mask to 8 bytes by clearing bit 12 and copying
+	     the basic addressing mode bit from the PSW address.  */
+	  char *addr = alloca (register_size (regno ^ 1));
+	  collect_register (regcache, regno, buf);
+	  collect_register (regcache, regno ^ 1, addr);
+	  buf[1] &= ~0x8;
+	  buf[size] |= (addr[0] & 0x80);
+	}
+      else if (regaddr == PT_PSWADDR)
+	{
+	  /* Convert 4-byte PSW address to 8 bytes by clearing the addressing
+	     mode bit (which gets copied to the PSW mask instead).  */
+	  collect_register (regcache, regno, buf + sizeof (long) - size);
+	  buf[sizeof (long) - size] &= ~0x80;
+	}
+      else if (regaddr >= PT_GPR0 && regaddr <= PT_GPR15)
 	collect_register (regcache, regno, buf + sizeof (long) - size);
       else
 	collect_register (regcache, regno, buf);
-
-      /* When debugging a 32-bit inferior on a 64-bit host, make sure
-	 the 31-bit addressing mode bit is set in the PSW mask.  */
-      if (regaddr == PT_PSWMASK)
-	buf[size] |= 0x80;
     }
   else
     collect_register (regcache, regno, buf);
@@ -157,8 +168,35 @@ s390_supply_ptrace_register (struct regcache *regcache,
 	  supply_register (regcache, (regno & ~1) + 1,
 			   buf + sizeof (long) - size);
 	}
-      else if (regaddr == PT_PSWADDR
-	       || (regaddr >= PT_GPR0 && regaddr <= PT_GPR15))
+      else if (regaddr == PT_PSWMASK)
+	{
+	  /* Convert 8-byte PSW mask to 4 bytes by setting bit 12 and copying
+	     the basic addressing mode into the PSW address.  */
+	  char *mask = alloca (size);
+	  char *addr = alloca (register_size (regno ^ 1));
+	  memcpy (mask, buf, size);
+	  mask[1] |= 0x8;
+	  supply_register (regcache, regno, mask);
+
+	  collect_register (regcache, regno ^ 1, addr);
+	  addr[0] &= ~0x80;
+	  addr[0] |= (buf[size] & 0x80);
+	  supply_register (regcache, regno ^ 1, addr);
+	}
+      else if (regaddr == PT_PSWADDR)
+	{
+	  /* Convert 8-byte PSW address to 4 bytes by truncating, but
+	     keeping the addressing mode bit (which was set from the mask).  */
+	  char *addr = alloca (size);
+	  char amode;
+	  collect_register (regcache, regno, addr);
+	  amode = addr[0] & 0x80;
+	  memcpy (addr, buf + sizeof (long) - size, size);
+	  addr[0] &= ~0x80;
+	  addr[0] |= amode;
+	  supply_register (regcache, regno, addr);
+	}
+      else if (regaddr >= PT_GPR0 && regaddr <= PT_GPR15)
 	supply_register (regcache, regno, buf + sizeof (long) - size);
       else
 	supply_register (regcache, regno, buf);
@@ -199,12 +237,9 @@ s390_get_pc (struct regcache *regcache)
 {
   if (register_size (0) == 4)
     {
-      unsigned int pc;
-      collect_register_by_name (regcache, "pswa", &pc);
-#ifndef __s390x__
-      pc &= 0x7fffffff;
-#endif
-      return pc;
+      unsigned int pswa;
+      collect_register_by_name (regcache, "pswa", &pswa);
+      return pswa & 0x7fffffff;
     }
   else
     {
@@ -219,11 +254,10 @@ s390_set_pc (struct regcache *regcache, CORE_ADDR newpc)
 {
   if (register_size (0) == 4)
     {
-      unsigned int pc = newpc;
-#ifndef __s390x__
-      pc |= 0x80000000;
-#endif
-      supply_register_by_name (regcache, "pswa", &pc);
+      unsigned int pswa;
+      collect_register_by_name (regcache, "pswa", &pswa);
+      pswa = (pswa & 0x80000000) | (newpc & 0x7fffffff);
+      supply_register_by_name (regcache, "pswa", &pswa);
     }
   else
     {

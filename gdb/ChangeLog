@@ -1,5 +1,33 @@
 2011-11-30  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* s390-nat.c (SUBOFF): Remove.
+	(s390_native_supply, s390_native_collect): New functions.
+	(supply_gregset, supply_fpregset): Use s390_native_supply.
+	(fill_gregset, fill_fpregset): Use s390_native_collect.
+
+	* s390-tdep.c (s390_pseudo_register_reggroup_p): Update comment.
+	(s390_unwind_pseudo_register): New function.
+	(s390_prologue_frame_unwind_cache): Unwind PSW address and mask
+	registers instead of PC and CC.
+	(s390_backchain_frame_unwind_cache): Likewise.
+	(s390_sigtramp_frame_unwind_cache): Do not unwind PC, CC, or
+	full GPR pseudos.
+	(s390_trad_frame_prev_register): New function.
+	(s390_frame_prev_register): Use it.
+	(s390_sigtramp_frame_prev_register): Likewise.
+	(s390_dwarf2_prev_register): Use s390_unwind_pseudo_register.
+	(s390_dwarf2_frame_init_reg): Unwind PSW address and mask.  Use
+	special callback to unwind any pseudo.
+
+	* features/s390-core32.xml: Add pswm/pswa to save/restore group.
+	* features/s390-core64.xml: Likewise.
+	* features/s390x-core64.xml: Likewise.
+	* features/s390-linux32.c: Regenerate.
+	* features/s390-linux64.c: Likewise.
+	* features/s390x-linux64.c: Likewise.
+
+2011-11-30  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* s390-tdep.c (s390_gdbarch_init): Call set_gdbarch_get_siginfo_type.
 
 2011-11-30  Ulrich Weigand  <uweigand@de.ibm.com>

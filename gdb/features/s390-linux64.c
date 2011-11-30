@@ -1,6 +1,7 @@
 /* THIS FILE IS GENERATED.  Original: s390-linux64.xml */
 
 #include "defs.h"
+#include "osabi.h"
 #include "target-descriptions.h"
 
 struct target_desc *tdesc_s390_linux64;
@@ -14,8 +15,8 @@ initialize_tdesc_s390_linux64 (void)
   set_tdesc_architecture (result, bfd_scan_arch ("s390:31-bit"));
 
   feature = tdesc_create_feature (result, "org.gnu.gdb.s390.core");
-  tdesc_create_reg (feature, "pswm", 0, 0, "psw", 32, "uint32");
-  tdesc_create_reg (feature, "pswa", 1, 0, "psw", 32, "uint32");
+  tdesc_create_reg (feature, "pswm", 0, 1, "psw", 32, "uint32");
+  tdesc_create_reg (feature, "pswa", 1, 1, "psw", 32, "uint32");
   tdesc_create_reg (feature, "r0h", 2, 1, "upper", 32, "uint32");
   tdesc_create_reg (feature, "r0l", 3, 1, "lower", 32, "uint32");
   tdesc_create_reg (feature, "r1h", 4, 1, "upper", 32, "uint32");

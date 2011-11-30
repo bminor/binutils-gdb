@@ -7,8 +7,8 @@
 
 <!DOCTYPE feature SYSTEM "gdb-target.dtd">
 <feature name="org.gnu.gdb.s390.core">
-  <reg name="pswm" bitsize="32" type="uint32" group="psw" save-restore="no"/>
-  <reg name="pswa" bitsize="32" type="uint32" group="psw" save-restore="no"/>
+  <reg name="pswm" bitsize="32" type="uint32" group="psw"/>
+  <reg name="pswa" bitsize="32" type="uint32" group="psw"/>
   <reg name="r0h" bitsize="32" type="uint32" group="upper"/>
   <reg name="r0l" bitsize="32" type="uint32" group="lower"/>
   <reg name="r1h" bitsize="32" type="uint32" group="upper"/>

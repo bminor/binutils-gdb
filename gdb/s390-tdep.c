@@ -352,8 +352,14 @@ s390_pseudo_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  /* PC and CC pseudo registers need to be saved/restored in order to
-     push or pop frames.  */
+  /* We usually save/restore the whole PSW, which includes PC and CC.
+     However, some older gdbservers may not support saving/restoring
+     the whole PSW yet, and will return an XML register description
+     excluding those from the save/restore register groups.  In those
+     cases, we still need to explicitly save/restore PC and CC in order
+     to push or pop frames.  Since this doesn't hurt anything if we
+     already save/restore the whole PSW (it's just redundant), we add
+     PC and CC at this point unconditionally.  */
   if (group == save_reggroup || group == restore_reggroup)
     return regnum == tdep->pc_regnum || regnum == tdep->cc_regnum;
 
@@ -1449,6 +1455,79 @@ s390_displaced_step_fixup (struct gdbarch *gdbarch,
 			paddress (gdbarch, regcache_read_pc (regs)));
 }
 
+
+/* Helper routine to unwind pseudo registers.  */
+
+static struct value *
+s390_unwind_pseudo_register (struct frame_info *this_frame, int regnum)
+{
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  struct type *type = register_type (gdbarch, regnum);
+
+  /* Unwind PC via PSW address.  */
+  if (regnum == tdep->pc_regnum)
+    {
+      struct value *val;
+
+      val = frame_unwind_register_value (this_frame, S390_PSWA_REGNUM);
+      if (!value_optimized_out (val))
+	{
+	  LONGEST pswa = value_as_long (val);
+
+	  if (TYPE_LENGTH (type) == 4)
+	    return value_from_pointer (type, pswa & 0x7fffffff);
+	  else
+	    return value_from_pointer (type, pswa);
+	}
+    }
+
+  /* Unwind CC via PSW mask.  */
+  if (regnum == tdep->cc_regnum)
+    {
+      struct value *val;
+
+      val = frame_unwind_register_value (this_frame, S390_PSWM_REGNUM);
+      if (!value_optimized_out (val))
+	{
+	  LONGEST pswm = value_as_long (val);
+
+	  if (TYPE_LENGTH (type) == 4)
+	    return value_from_longest (type, (pswm >> 12) & 3);
+	  else
+	    return value_from_longest (type, (pswm >> 44) & 3);
+	}
+    }
+
+  /* Unwind full GPRs to show at least the lower halves (as the
+     upper halves are undefined).  */
+  if (tdep->gpr_full_regnum != -1
+      && regnum >= tdep->gpr_full_regnum
+      && regnum < tdep->gpr_full_regnum + 16)
+    {
+      int reg = regnum - tdep->gpr_full_regnum;
+      struct value *val;
+
+      val = frame_unwind_register_value (this_frame, S390_R0_REGNUM + reg);
+      if (!value_optimized_out (val))
+	return value_cast (type, val);
+    }
+
+  return allocate_optimized_out_value (type);
+}
+
+static struct value *
+s390_trad_frame_prev_register (struct frame_info *this_frame,
+			       struct trad_frame_saved_reg saved_regs[],
+			       int regnum)
+{
+  if (regnum < S390_NUM_REGS)
+    return trad_frame_get_prev_register (this_frame, saved_regs, regnum);
+  else
+    return s390_unwind_pseudo_register (this_frame, regnum);
+}
+
+
 /* Normal stack frames.  */
 
 struct s390_unwind_cache {
@@ -1465,7 +1544,6 @@ s390_prologue_frame_unwind_cache (struct frame_info *this_frame,
 				  struct s390_unwind_cache *info)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   int word_size = gdbarch_ptr_bit (gdbarch) / 8;
   struct s390_prologue_data data;
   pv_t *fp = &data.gpr[S390_FRAME_REGNUM - S390_R0_REGNUM];
@@ -1591,7 +1669,7 @@ s390_prologue_frame_unwind_cache (struct frame_info *this_frame,
       trad_frame_set_unknown (info->saved_regs, i);
 
   /* CC is always call-clobbered.  */
-  trad_frame_set_unknown (info->saved_regs, tdep->cc_regnum);
+  trad_frame_set_unknown (info->saved_regs, S390_PSWM_REGNUM);
 
   /* Record the addresses of all register spill slots the prologue parser
      has recognized.  Consider only registers defined as call-saved by the
@@ -1609,16 +1687,16 @@ s390_prologue_frame_unwind_cache (struct frame_info *this_frame,
       info->saved_regs[S390_F0_REGNUM + i].addr = cfa - data.fpr_slot[i];
 
   /* Function return will set PC to %r14.  */
-  info->saved_regs[tdep->pc_regnum] = info->saved_regs[S390_RETADDR_REGNUM];
+  info->saved_regs[S390_PSWA_REGNUM] = info->saved_regs[S390_RETADDR_REGNUM];
 
   /* In frameless functions, we unwind simply by moving the return
      address to the PC.  However, if we actually stored to the
      save area, use that -- we might only think the function frameless
      because we're in the middle of the prologue ...  */
   if (size == 0
-      && !trad_frame_addr_p (info->saved_regs, tdep->pc_regnum))
+      && !trad_frame_addr_p (info->saved_regs, S390_PSWA_REGNUM))
     {
-      info->saved_regs[tdep->pc_regnum].realreg = S390_RETADDR_REGNUM;
+      info->saved_regs[S390_PSWA_REGNUM].realreg = S390_RETADDR_REGNUM;
     }
 
   /* Another sanity check: unless this is a frameless function,
@@ -1628,7 +1706,7 @@ s390_prologue_frame_unwind_cache (struct frame_info *this_frame,
   if (size > 0)
     {
       if (!trad_frame_addr_p (info->saved_regs, S390_SP_REGNUM)
-	  || !trad_frame_addr_p (info->saved_regs, tdep->pc_regnum))
+	  || !trad_frame_addr_p (info->saved_regs, S390_PSWA_REGNUM))
 	prev_sp = -1;
     }
 
@@ -1649,7 +1727,6 @@ s390_backchain_frame_unwind_cache (struct frame_info *this_frame,
 				   struct s390_unwind_cache *info)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   int word_size = gdbarch_ptr_bit (gdbarch) / 8;
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR backchain;
@@ -1663,7 +1740,7 @@ s390_backchain_frame_unwind_cache (struct frame_info *this_frame,
       trad_frame_set_unknown (info->saved_regs, i);
 
   /* CC is always call-clobbered.  */
-  trad_frame_set_unknown (info->saved_regs, tdep->cc_regnum);
+  trad_frame_set_unknown (info->saved_regs, S390_PSWM_REGNUM);
 
   /* Get the backchain.  */
   reg = get_frame_register_unsigned (this_frame, S390_SP_REGNUM);
@@ -1685,7 +1762,7 @@ s390_backchain_frame_unwind_cache (struct frame_info *this_frame,
       info->saved_regs[S390_RETADDR_REGNUM].addr = backchain + 14*word_size;
 
       /* Function return will set PC to %r14.  */
-      info->saved_regs[tdep->pc_regnum]
+      info->saved_regs[S390_PSWA_REGNUM]
 	= info->saved_regs[S390_RETADDR_REGNUM];
 
       /* We use the current value of the frame register as local_base,
@@ -1739,28 +1816,10 @@ s390_frame_prev_register (struct frame_info *this_frame,
 			  void **this_prologue_cache, int regnum)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   struct s390_unwind_cache *info
     = s390_frame_unwind_cache (this_frame, this_prologue_cache);
 
-  /* Unwind full GPRs to show at least the lower halves (as the
-     upper halves are undefined).  */
-  if (tdep->gpr_full_regnum != -1
-      && regnum >= tdep->gpr_full_regnum
-      && regnum < tdep->gpr_full_regnum + 16)
-    {
-      int reg = regnum - tdep->gpr_full_regnum + S390_R0_REGNUM;
-      struct value *val, *newval;
-
-      val = trad_frame_get_prev_register (this_frame, info->saved_regs, reg);
-      newval = value_cast (register_type (gdbarch, regnum), val);
-      if (value_optimized_out (val))
-	set_value_optimized_out (newval, 1);
-
-      return newval;
-    }
-
-  return trad_frame_get_prev_register (this_frame, info->saved_regs, regnum);
+  return s390_trad_frame_prev_register (this_frame, info->saved_regs, regnum);
 }
 
 static const struct frame_unwind s390_frame_unwind = {
@@ -1788,7 +1847,6 @@ s390_stub_frame_unwind_cache (struct frame_info *this_frame,
 			      void **this_prologue_cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   int word_size = gdbarch_ptr_bit (gdbarch) / 8;
   struct s390_stub_unwind_cache *info;
   ULONGEST reg;
@@ -1801,7 +1859,7 @@ s390_stub_frame_unwind_cache (struct frame_info *this_frame,
   info->saved_regs = trad_frame_alloc_saved_regs (this_frame);
 
   /* The return address is in register %r14.  */
-  info->saved_regs[tdep->pc_regnum].realreg = S390_RETADDR_REGNUM;
+  info->saved_regs[S390_PSWA_REGNUM].realreg = S390_RETADDR_REGNUM;
 
   /* Retrieve stack pointer and determine our frame base.  */
   reg = get_frame_register_unsigned (this_frame, S390_SP_REGNUM);
@@ -1826,7 +1884,7 @@ s390_stub_frame_prev_register (struct frame_info *this_frame,
 {
   struct s390_stub_unwind_cache *info
     = s390_stub_frame_unwind_cache (this_frame, this_prologue_cache);
-  return trad_frame_get_prev_register (this_frame, info->saved_regs, regnum);
+  return s390_trad_frame_prev_register (this_frame, info->saved_regs, regnum);
 }
 
 static int
@@ -1875,7 +1933,6 @@ s390_sigtramp_frame_unwind_cache (struct frame_info *this_frame,
   struct s390_sigtramp_unwind_cache *info;
   ULONGEST this_sp, prev_sp;
   CORE_ADDR next_ra, next_cfa, sigreg_ptr, sigreg_high_off;
-  ULONGEST pswm;
   int i;
 
   if (*this_prologue_cache)
@@ -1928,16 +1985,6 @@ s390_sigtramp_frame_unwind_cache (struct frame_info *this_frame,
   info->saved_regs[S390_PSWA_REGNUM].addr = sigreg_ptr;
   sigreg_ptr += word_size;
 
-  /* Point PC to PSWA as well.  */
-  info->saved_regs[tdep->pc_regnum] = info->saved_regs[S390_PSWA_REGNUM];
-
-  /* Extract CC from PSWM.  */
-  pswm = read_memory_unsigned_integer (
-			info->saved_regs[S390_PSWM_REGNUM].addr,
-			word_size, byte_order);
-  trad_frame_set_value (info->saved_regs, tdep->cc_regnum,
-			(pswm >> (8 * word_size - 20)) & 3);
-
   /* Then the GPRs.  */
   for (i = 0; i < 16; i++)
     {
@@ -1972,22 +2019,6 @@ s390_sigtramp_frame_unwind_cache (struct frame_info *this_frame,
 	sigreg_ptr += 4;
       }
 
-  /* Provide read-only copies of the full registers.  */
-  if (tdep->gpr_full_regnum != -1)
-    for (i = 0; i < 16; i++)
-      {
-	ULONGEST low, high;
-	low = read_memory_unsigned_integer (
-			info->saved_regs[S390_R0_REGNUM + i].addr,
-			4, byte_order);
-	high = read_memory_unsigned_integer (
-			info->saved_regs[S390_R0_UPPER_REGNUM + i].addr,
-			4, byte_order);
-	
-	trad_frame_set_value (info->saved_regs, tdep->gpr_full_regnum + i,
-			      (high << 32) | low);
-      }
-
   /* Restore the previous frame's SP.  */
   prev_sp = read_memory_unsigned_integer (
 			info->saved_regs[S390_SP_REGNUM].addr,
@@ -2015,7 +2046,7 @@ s390_sigtramp_frame_prev_register (struct frame_info *this_frame,
 {
   struct s390_sigtramp_unwind_cache *info
     = s390_sigtramp_frame_unwind_cache (this_frame, this_prologue_cache);
-  return trad_frame_get_prev_register (this_frame, info->saved_regs, regnum);
+  return s390_trad_frame_prev_register (this_frame, info->saved_regs, regnum);
 }
 
 static int
@@ -2098,17 +2129,7 @@ static struct value *
 s390_dwarf2_prev_register (struct frame_info *this_frame, void **this_cache,
 			   int regnum)
 {
-  struct gdbarch *gdbarch = get_frame_arch (this_frame);
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-  int reg = regnum - tdep->gpr_full_regnum;
-  struct value *val, *newval;
-
-  val = frame_unwind_register_value (this_frame, S390_R0_REGNUM + reg);
-  newval = value_cast (register_type (gdbarch, regnum), val);
-  if (value_optimized_out (val))
-    set_value_optimized_out (newval, 1);
-
-  return newval;
+  return s390_unwind_pseudo_register (this_frame, regnum);
 }
 
 static void
@@ -2118,9 +2139,17 @@ s390_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
+  /* The condition code (and thus PSW mask) is call-clobbered.  */
+  if (regnum == S390_PSWM_REGNUM)
+    reg->how = DWARF2_FRAME_REG_UNDEFINED;
+
+  /* The PSW address unwinds to the return address.  */
+  else if (regnum == S390_PSWA_REGNUM)
+    reg->how = DWARF2_FRAME_REG_RA;
+
   /* Fixed registers are call-saved or call-clobbered
      depending on the ABI in use.  */
-  if (regnum >= 0 && regnum < S390_NUM_REGS)
+  else if (regnum < S390_NUM_REGS)
     {
       if (s390_register_call_saved (gdbarch, regnum))
 	reg->how = DWARF2_FRAME_REG_SAME_VALUE;
@@ -2128,19 +2157,8 @@ s390_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
 	reg->how = DWARF2_FRAME_REG_UNDEFINED;
     }
 
-  /* The CC pseudo register is call-clobbered.  */
-  else if (regnum == tdep->cc_regnum)
-    reg->how = DWARF2_FRAME_REG_UNDEFINED;
-
-  /* The PC register unwinds to the return address.  */
-  else if (regnum == tdep->pc_regnum)
-    reg->how = DWARF2_FRAME_REG_RA;
-
-  /* We install a special function to unwind full GPRs to show at
-     least the lower halves (as the upper halves are undefined).  */
-  else if (tdep->gpr_full_regnum != -1
-	   && regnum >= tdep->gpr_full_regnum
-	   && regnum < tdep->gpr_full_regnum + 16)
+  /* We install a special function to unwind pseudos.  */
+  else
     {
       reg->how = DWARF2_FRAME_REG_FN;
       reg->loc.fn = s390_dwarf2_prev_register;
