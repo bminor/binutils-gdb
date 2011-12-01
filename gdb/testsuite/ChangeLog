@@ -1,3 +1,9 @@
+2011-12-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/homonym/pck.ads, gdb.ada/homonym/pck.adb: New files.
+	* gdb.ada/homonym/homonym.adb: For use of all types defined
+	locally inside both Get_Value subprograms.
+
 2011-12-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix racy FAILs.

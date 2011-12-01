@@ -13,6 +13,8 @@
 --  You should have received a copy of the GNU General Public License
 --  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+with Pck; use Pck;
+
 package body Homonym is
 
    type Integer_Range is new Integer range -100 .. 100;
@@ -28,7 +30,11 @@ package body Homonym is
       subtype Local_Type_Subtype is Local_Type;
       subtype Int_Type   is Integer_Range;
       Lcl : Local_Type := 29;
+      Some_Local_Type_Subtype : Local_Type_Subtype := Lcl;
+      I : Int_Type := 1;
    begin
+      Do_Nothing (Some_Local_Type_Subtype'Address);
+      Do_Nothing (I'Address);
       return Lcl;  --  BREAK_1
    end Get_Value;
 
@@ -42,7 +48,11 @@ package body Homonym is
       subtype Local_Type_Subtype is Local_Type;
       subtype Pos_Type is Positive_Range;
       Lcl : Local_Type := 17;
+      Some_Local_Type_Subtype : Local_Type_Subtype := Lcl;
+      P : Pos_Type := 2;
    begin
+      Do_Nothing (Some_Local_Type_Subtype'Address);
+      Do_Nothing (P'Address);
       return Lcl;  --  BREAK_2
    end Get_Value;
 
