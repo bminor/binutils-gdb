@@ -1,3 +1,8 @@
+2011-12-01  Hans-Peter Nilsson  <hp@axis.com>
+
+	* ld-cris/pic-gc-72.d: Revert last change to adjust for reverted
+	cause for last change.
+
 2011-11-10  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	Apply mainline patches.
