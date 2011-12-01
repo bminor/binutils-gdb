@@ -1,3 +1,8 @@
+2011-12-01  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.texinfo (Writing a Pretty-Printer): Use append method, not
+	add.
+
 2011-11-22  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (GDB/MI Async Records): Document new *stopped

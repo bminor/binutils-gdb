@@ -22591,7 +22591,7 @@ this code might appear in @code{gdb.libstdcxx.v6}:
 
 @smallexample
 def register_printers(objfile):
-    objfile.pretty_printers.add(str_lookup_function)
+    objfile.pretty_printers.append(str_lookup_function)
 @end smallexample
 
 @noindent
