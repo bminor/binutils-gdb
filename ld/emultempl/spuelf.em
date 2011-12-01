@@ -384,9 +384,13 @@ spu_elf_open_overlay_script (void)
   return script;
 }
 
+#include <errno.h>
+
 static void
 spu_elf_relink (void)
 {
+  const char *pex_return;
+  int status;
   char **argv = xmalloc ((my_argc + 4) * sizeof (*argv));
 
   memcpy (argv, my_argv, my_argc * sizeof (*argv));
@@ -397,9 +401,16 @@ spu_elf_relink (void)
   argv[my_argc++] = "-T";
   argv[my_argc++] = auto_overlay_file;
   argv[my_argc] = 0;
-  execvp (argv[0], (char *const *) argv);
-  perror (argv[0]);
-  _exit (127);
+
+  pex_return = pex_one (PEX_SEARCH | PEX_LAST, (const char *) argv[0],
+			(char * const *) argv, (const char *) argv[0],
+			NULL, NULL, & status, & errno);
+  if (pex_return != NULL)
+    {
+      perror (pex_return);
+      _exit (127);
+    }
+  exit (status);
 }
 
 /* Final emulation specific call.  */

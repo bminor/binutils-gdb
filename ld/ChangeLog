@@ -1,3 +1,8 @@
+2011-12-01  Nick Clifton  <nickc@redhat.com>
+
+	* emultempl/spuelf.em (spu_elf_relink): Use pex_one in place
+	of execvp.
+
 2011-11-25  John Tytgat  <john@bass-software.com>
 
 	* emultempl/armelf.em: Update copyright to 2010 and 2011.
