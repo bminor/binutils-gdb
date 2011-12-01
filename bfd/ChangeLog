@@ -1,3 +1,9 @@
+2011-12-01  Hans-Peter Nilsson  <hp@axis.com>
+
+	* elf32-cris.c (cris_elf_check_relocs) <plt accounting for
+	R_CRIS_8, R_CRIS_16, and R_CRIS_32>: Move early break for
+	non-SEC_ALLOC sections before GOT and PLT accounting.
+
 2011-11-29  Andrew Pinski  <apinski@cavium.com>
 
 	* archures.c (bfd_mach_mips_octeonp): New macro.
