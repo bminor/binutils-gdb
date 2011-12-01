@@ -1,3 +1,9 @@
+2011-12-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix racy FAILs.
+	* gdb.base/foll-exec.exp (zap_session): Use gdb_test_no_output instead
+	of send_gdb.
+
 2011-11-30  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* gdb.base/testenv.exp: Skip on remote targets.  Unset global
