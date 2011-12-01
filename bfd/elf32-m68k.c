@@ -2816,6 +2816,11 @@ elf_m68k_check_relocs (abfd, info, sec, relocs)
 	case R_68K_8:
 	case R_68K_16:
 	case R_68K_32:
+	  /* We don't need to handle relocs into sections not going into
+	     the "real" output.  */
+	  if ((sec->flags & SEC_ALLOC) == 0)
+	      break;
+
 	  if (h != NULL)
 	    {
 	      /* Make sure a plt entry is created for this symbol if it
@@ -2829,8 +2834,7 @@ elf_m68k_check_relocs (abfd, info, sec, relocs)
 
 	  /* If we are creating a shared library, we need to copy the
 	     reloc into the shared library.  */
-	  if (info->shared
-	      && (sec->flags & SEC_ALLOC) != 0)
+	  if (info->shared)
 	    {
 	      /* When creating a shared object, we must copy these
 		 reloc types into the output file.  We create a reloc
