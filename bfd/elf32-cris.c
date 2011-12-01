@@ -3579,6 +3579,12 @@ cris_elf_check_relocs (bfd *abfd,
 		 sec,
 		 cris_elf_howto_table[r_type].name);
 	    }
+
+	  /* We don't need to handle relocs into sections not going into
+	     the "real" output.  */
+	  if ((sec->flags & SEC_ALLOC) == 0)
+	    break;
+
 	  if (h != NULL)
 	    {
 	      h->non_got_ref = 1;
@@ -3606,11 +3612,6 @@ cris_elf_check_relocs (bfd *abfd,
 
 	  /* No need to do anything if we're not creating a shared object.  */
 	  if (! info->shared)
-	    break;
-
-	  /* We don't need to handle relocs into sections not going into
-	     the "real" output.  */
-	  if ((sec->flags & SEC_ALLOC) == 0)
 	    break;
 
 	  /* We may need to create a reloc section in the dynobj and made room

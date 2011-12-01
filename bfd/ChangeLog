@@ -1,3 +1,10 @@
+2011-12-01  Hans-Peter Nilsson  <hp@axis.com>
+
+	Apply mainline patches
+	* elf32-cris.c (cris_elf_check_relocs) <plt accounting for
+	R_CRIS_8, R_CRIS_16, and R_CRIS_32>: Move early break for
+	non-SEC_ALLOC sections before GOT and PLT accounting.
+
 2011-11-21  Tristan Gingold  <gingold@adacore.com>
 
 	* configure.in: Bump version to 2.22.0
