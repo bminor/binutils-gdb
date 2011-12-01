@@ -1,3 +1,8 @@
+2011-12-01  Andrew Burgess  <aburgess@broadcom.com>
+
+	* source.c (print_source_lines_base): Fix missing braces on else
+	clause leading to additional output.
+
 2011-11-30  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* s390-nat.c (SUBOFF): Remove.

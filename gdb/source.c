@@ -1322,10 +1322,12 @@ print_source_lines_base (struct symtab *s, int line, int stopline, int noerror)
 	  print_sys_errmsg (name, errno);
 	}
       else
-	ui_out_field_int (uiout, "line", line);
-      ui_out_text (uiout, "\tin ");
-      ui_out_field_string (uiout, "file", s->filename);
-      ui_out_text (uiout, "\n");
+	{
+	  ui_out_field_int (uiout, "line", line);
+	  ui_out_text (uiout, "\tin ");
+	  ui_out_field_string (uiout, "file", s->filename);
+	  ui_out_text (uiout, "\n");
+	}
 
       return;
     }
