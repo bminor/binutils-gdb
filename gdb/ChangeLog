@@ -1,5 +1,11 @@
 2011-12-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	PR threads/13448
+	* dwarf2read.c (decode_locdesc): Handle DW_OP_const8u.
+	For DW_OP_GNU_push_tls_address increment the value, new comment for it.
+
+2011-12-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	PR breakpoints/13346
 	* dwarf2read.c (process_psymtab_comp_unit): Set
 	PSYMTABS_ADDRMAP_SUPPORTED.

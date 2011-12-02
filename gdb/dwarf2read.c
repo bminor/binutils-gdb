@@ -14668,6 +14668,11 @@ decode_locdesc (struct dwarf_block *blk, struct dwarf2_cu *cu)
 	  i += 4;
 	  break;
 
+	case DW_OP_const8u:
+	  stack[++stacki] = read_8_bytes (objfile->obfd, &data[i]);
+	  i += 8;
+	  break;
+
 	case DW_OP_constu:
 	  stack[++stacki] = read_unsigned_leb128 (NULL, (data + i),
 						  &bytes_read);
@@ -14715,9 +14720,12 @@ decode_locdesc (struct dwarf_block *blk, struct dwarf2_cu *cu)
 	  /* Nothing should follow this operator, so the top of stack would
 	     be returned.  */
 	  /* This is valid for partial global symbols, but the variable's
-	     address will be bogus in the psymtab.  */
+	     address will be bogus in the psymtab.  Make it always at least
+	     non-zero to not look as a variable garbage collected by linker
+	     which have DW_OP_addr 0.  */
 	  if (i < size)
 	    dwarf2_complex_location_expr_complaint ();
+	  stack[stacki]++;
           break;
 
 	case DW_OP_GNU_uninit:

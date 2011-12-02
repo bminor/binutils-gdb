@@ -1,5 +1,14 @@
 2011-12-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	PR threads/13448
+	* gdb.dwarf2/dw2-var-zero-addr.S: New file.
+	* gdb.dwarf2/dw2-var-zero-addr.exp: New file.
+	* gdb.threads/tls-var-main.c: New file.
+	* gdb.threads/tls-var.c: New file.
+	* gdb.threads/tls-var.exp: New file.
+
+2011-12-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	PR testsuite/12649
 	* gdb.trace/collection.exp (gdb_collect_return_test): Import gdb_prompt.
 	Protect gdb_test_multiple by final $gdb_prompt match.
