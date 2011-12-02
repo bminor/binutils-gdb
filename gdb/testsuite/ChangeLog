@@ -1,5 +1,10 @@
 2011-12-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* gdb.base/solib-corrupted.exp: Suppress test on is_remote target.
+	(corrupted list): Adjust the expectation.
+
+2011-12-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	PR threads/13448
 	* gdb.dwarf2/dw2-var-zero-addr.S: New file.
 	* gdb.dwarf2/dw2-var-zero-addr.exp: New file.

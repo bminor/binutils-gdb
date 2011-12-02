@@ -1,3 +1,10 @@
+2011-12-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.texinfo (Requirements, Remote Protocol): Reference also `Library
+	List Format for SVR4 Targets'.
+	(General Query Packets): New item qXfer:libraries-svr4:read.
+	(Library List Format for SVR4 Targets): New node.
+
 2011-12-01  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (Writing a Pretty-Printer): Use append method, not

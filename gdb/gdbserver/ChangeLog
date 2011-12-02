@@ -1,3 +1,20 @@
+2011-12-02  Paul Pluzhnikov  <ppluzhnikov@google.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* linux-low.c (get_phdr_phnum_from_proc_auxv, get_dynamic, get_r_debug)
+	(read_one_ptr, struct link_map_offsets, linux_qxfer_libraries_svr4):
+	New.
+	(struct linux_target_ops): Install linux_qxfer_libraries_svr4.
+	* linux-low.h (struct process_info_private): New member r_debug.
+	* server.c (handle_qxfer_libraries): Call
+	the_target->qxfer_libraries_svr4.
+	(handle_qxfer_libraries_svr4): New function.
+	(qxfer_packets): New entry "libraries-svr4".
+	(handle_query): Check QXFER_LIBRARIES_SVR4 and report libraries-svr4.
+	* target.h (struct target_ops): New member qxfer_libraries_svr4.
+	* remote.c (remote_xfer_partial): Call add_packet_config_cmd for
+	PACKET_qXfer_libraries_svr4.
+
 2011-11-30  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* linux-s390-low.c (s390_collect_ptrace_register): Fully convert

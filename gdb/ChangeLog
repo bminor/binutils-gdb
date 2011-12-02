@@ -1,3 +1,25 @@
+2011-12-02  Paul Pluzhnikov  <ppluzhnikov@google.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* Makefile.in (XMLFILES): Add library-list-svr4.dtd.
+	* features/library-list-svr4.dtd: New file.
+	* remote.c (PACKET_qXfer_libraries_svr4): New.
+	(remote_protocol_features): new entry for PACKET_qXfer_libraries_svr4.
+	(remote_xfer_partial): Handle TARGET_OBJECT_LIBRARIES_SVR4.
+	* solib-svr4.c (struct svr4_library_list): New.
+	[HAVE_LIBEXPAT]: Include xml-support.h.
+	[HAVE_LIBEXPAT] (svr4_library_list_start_library)
+	[HAVE_LIBEXPAT] (svr4_library_list_start_list, svr4_library_attributes)
+	[HAVE_LIBEXPAT] (svr4_library_list_children)
+	[HAVE_LIBEXPAT] (svr4_library_list_attributes)
+	[HAVE_LIBEXPAT] (svr4_library_list_elements, svr4_parse_libraries)
+	[HAVE_LIBEXPAT] (svr4_current_sos_via_xfer_libraries)
+	[!HAVE_LIBEXPAT] (svr4_current_sos_via_xfer_libraries): New.
+	(svr4_read_so_list): Extend the corruption message by addresses.
+	(svr4_current_sos): New variable library_list, call
+	svr4_current_sos_via_xfer_libraries.
+	* target.h (enum target_object): New TARGET_OBJECT_LIBRARIES_SVR4.
+
 2011-12-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	PR threads/13448

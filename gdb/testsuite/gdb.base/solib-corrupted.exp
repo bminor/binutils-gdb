@@ -17,6 +17,12 @@ if {[skip_shlib_tests]} {
     return 0
 }
 
+if {[is_remote target]} {
+    # gdbserver prints the warning message but expect is parsing only the GDB
+    # output, not the gdbserver output.
+    return 0
+}
+
 set testfile "solib-corrupted"
 set srcfile start.c
 
@@ -47,4 +53,4 @@ gdb_test_multiple "p/x _r_debug->r_map->l_next = _r_debug->r_map" $test {
 	pass $test
     }
 }
-gdb_test "info sharedlibrary" "warning: Corrupted shared library list\r\n.*" "corrupted list"
+gdb_test "info sharedlibrary" "warning: Corrupted shared library list: .*" "corrupted list"

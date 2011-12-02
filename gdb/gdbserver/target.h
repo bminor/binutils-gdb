@@ -390,6 +390,11 @@ struct target_ops
   /* Return the minimum length of an instruction that can be safely overwritten
      for use as a fast tracepoint.  */
   int (*get_min_fast_tracepoint_insn_len) (void);
+
+  /* Read solib info on SVR4 platforms.  */
+  int (*qxfer_libraries_svr4) (const char *annex, unsigned char *readbuf,
+			       unsigned const char *writebuf,
+			       CORE_ADDR offset, int len);
 };
 
 extern struct target_ops *the_target;

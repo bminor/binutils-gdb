@@ -32448,7 +32448,8 @@ Remote protocol memory maps (@pxref{Memory Map Format})
 @item
 Target descriptions (@pxref{Target Descriptions})
 @item
-Remote shared library lists (@pxref{Library List Format})
+Remote shared library lists (@xref{Library List Format},
+or alternatively @pxref{Library List Format for SVR4 Targets})
 @item
 MS-Windows shared libraries (@pxref{Shared Libraries})
 @item
@@ -33285,6 +33286,7 @@ Show the current setting of the target wait timeout.
 * Examples::
 * File-I/O Remote Protocol Extension::
 * Library List Format::
+* Library List Format for SVR4 Targets::
 * Memory Map Format::
 * Thread List Format::
 * Traceframe Info Format::
@@ -34986,6 +34988,10 @@ The remote stub understands the @samp{qXfer:features:read} packet
 The remote stub understands the @samp{qXfer:libraries:read} packet
 (@pxref{qXfer library list read}).
 
+@item qXfer:libraries-svr4:read
+The remote stub understands the @samp{qXfer:libraries-svr4:read} packet
+(@pxref{qXfer svr4 library list read}).
+
 @item qXfer:memory-map:read
 The remote stub understands the @samp{qXfer:memory-map:read} packet
 (@pxref{qXfer memory map read}).
@@ -35227,6 +35233,18 @@ The annex part of the generic @samp{qXfer} packet must be empty
 Targets which maintain a list of libraries in the program's memory do
 not need to implement this packet; it is designed for platforms where
 the operating system manages the list of loaded libraries.
+
+This packet is not probed by default; the remote stub must request it,
+by supplying an appropriate @samp{qSupported} response (@pxref{qSupported}).
+
+@item qXfer:libraries-svr4:read:@var{annex}:@var{offset},@var{length}
+@anchor{qXfer svr4 library list read}
+Access the target's list of loaded libraries when the target is an SVR4
+platform.  @xref{Library List Format for SVR4 Targets}.  The annex part
+of the generic @samp{qXfer} packet must be empty (@pxref{qXfer read}).
+
+This packet is optional for better performance on SVR4 targets.  
+@value{GDBN} uses memory read packets to read the SVR4 library list otherwise.
 
 This packet is not probed by default; the remote stub must request it,
 by supplying an appropriate @samp{qSupported} response (@pxref{qSupported}).
@@ -37541,6 +37559,68 @@ The format of a library list is described by this DTD:
 In addition, segments and section descriptors cannot be mixed within a
 single library element, and you must supply at least one segment or
 section for each library.
+
+@node Library List Format for SVR4 Targets
+@section Library List Format for SVR4 Targets
+@cindex library list format, remote protocol
+
+On SVR4 platforms @value{GDBN} can use the symbol table of a dynamic loader
+(e.g.@: @file{ld.so}) and normal memory operations to maintain a list of
+shared libraries.  Still a special library list provided by this packet is
+more efficient for the @value{GDBN} remote protocol.
+
+The @samp{qXfer:libraries-svr4:read} packet returns an XML document which lists
+loaded libraries and their SVR4 linker parameters.  For each library on SVR4
+target, the following parameters are reported:
+
+@itemize @minus
+@item
+@code{name}, the absolute file name from the @code{l_name} field of
+@code{struct link_map}.
+@item
+@code{lm} with address of @code{struct link_map} used for TLS
+(Thread Local Storage) access.
+@item
+@code{l_addr}, the displacement as read from the field @code{l_addr} of
+@code{struct link_map}.  For prelinked libraries this is not an absolute
+memory address.  It is a displacement of absolute memory address against
+address the file was prelinked to during the library load.
+@item
+@code{l_ld}, which is memory address of the @code{PT_DYNAMIC} segment
+@end itemize
+
+Additionally the single @code{main-lm} attribute specifies address of
+@code{struct link_map} used for the main executable.  This parameter is used
+for TLS access and its presence is optional.
+
+@value{GDBN} must be linked with the Expat library to support XML
+SVR4 library lists.  @xref{Expat}.
+
+A simple memory map, with two loaded libraries (which do not use prelink),
+looks like this:
+
+@smallexample
+<library-list-svr4 version="1.0" main-lm="0xe4f8f8">
+  <library name="/lib/ld-linux.so.2" lm="0xe4f51c" l_addr="0xe2d000"
+           l_ld="0xe4eefc"/>
+  <library name="/lib/libc.so.6" lm="0xe4fbe8" l_addr="0x154000"
+           l_ld="0x152350"/>
+</library-list-svr>
+@end smallexample
+
+The format of an SVR4 library list is described by this DTD:
+
+@smallexample
+<!-- library-list-svr4: Root element with versioning -->
+<!ELEMENT library-list-svr4  (library)*>
+<!ATTLIST library-list-svr4  version CDATA   #FIXED  "1.0">
+<!ATTLIST library-list-svr4  main-lm CDATA   #IMPLIED>
+<!ELEMENT library            EMPTY>
+<!ATTLIST library            name    CDATA   #REQUIRED>
+<!ATTLIST library            lm      CDATA   #REQUIRED>
+<!ATTLIST library            l_addr  CDATA   #REQUIRED>
+<!ATTLIST library            l_ld    CDATA   #REQUIRED>
+@end smallexample
 
 @node Memory Map Format
 @section Memory Map Format

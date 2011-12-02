@@ -56,6 +56,9 @@ struct process_info_private
   /* libthread_db-specific additions.  Not NULL if this process has loaded
      thread_db, and it is active.  */
   struct thread_db *thread_db;
+
+  /* &_r_debug.  0 if not yet determined.  -1 if no PT_DYNAMIC in Phdrs.  */
+  CORE_ADDR r_debug;
 };
 
 struct lwp_info;

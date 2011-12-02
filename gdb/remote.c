@@ -1243,6 +1243,7 @@ enum {
   PACKET_qXfer_auxv,
   PACKET_qXfer_features,
   PACKET_qXfer_libraries,
+  PACKET_qXfer_libraries_svr4,
   PACKET_qXfer_memory_map,
   PACKET_qXfer_spu_read,
   PACKET_qXfer_spu_write,
@@ -3748,6 +3749,8 @@ static struct protocol_feature remote_protocol_features[] = {
     PACKET_qXfer_features },
   { "qXfer:libraries:read", PACKET_DISABLE, remote_supported_packet,
     PACKET_qXfer_libraries },
+  { "qXfer:libraries-svr4:read", PACKET_DISABLE, remote_supported_packet,
+    PACKET_qXfer_libraries_svr4 },
   { "qXfer:memory-map:read", PACKET_DISABLE, remote_supported_packet,
     PACKET_qXfer_memory_map },
   { "qXfer:spu:read", PACKET_DISABLE, remote_supported_packet,
@@ -8356,6 +8359,11 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
 	(ops, "libraries", annex, readbuf, offset, len,
 	 &remote_protocol_packets[PACKET_qXfer_libraries]);
 
+    case TARGET_OBJECT_LIBRARIES_SVR4:
+      return remote_read_qxfer
+	(ops, "libraries-svr4", annex, readbuf, offset, len,
+	 &remote_protocol_packets[PACKET_qXfer_libraries_svr4]);
+
     case TARGET_OBJECT_MEMORY_MAP:
       gdb_assert (annex == NULL);
       return remote_read_qxfer (ops, "memory-map", annex, readbuf, offset, len,
@@ -11077,6 +11085,9 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qXfer_libraries],
 			 "qXfer:libraries:read", "library-info", 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_qXfer_libraries_svr4],
+			 "qXfer:libraries-svr4:read", "library-info-svr4", 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qXfer_memory_map],
 			 "qXfer:memory-map:read", "memory-map", 0);

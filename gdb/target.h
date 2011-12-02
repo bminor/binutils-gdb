@@ -255,6 +255,8 @@ enum target_object
   TARGET_OBJECT_AVAILABLE_FEATURES,
   /* Currently loaded libraries, in XML format.  */
   TARGET_OBJECT_LIBRARIES,
+  /* Currently loaded libraries specific for SVR4 systems, in XML format.  */
+  TARGET_OBJECT_LIBRARIES_SVR4,
   /* Get OS specific data.  The ANNEX specifies the type (running
      processes, etc.).  The data being transfered is expected to follow
      the DTD specified in features/osdata.dtd.  */

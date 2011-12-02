@@ -949,6 +949,107 @@ open_symbol_file_object (void *from_ttyp)
   return 1;
 }
 
+/* Data exchange structure for the XML parser as returned by
+   svr4_current_sos_via_xfer_libraries.  */
+
+struct svr4_library_list
+{
+  struct so_list *head, **tailp;
+
+  /* Inferior address of struct link_map used for the main executable.  It is
+     NULL if not known.  */
+  CORE_ADDR main_lm;
+};
+
+#ifdef HAVE_LIBEXPAT
+
+#include "xml-support.h"
+
+/* Handle the start of a <library> element.  Note: new elements are added
+   at the tail of the list, keeping the list in order.  */
+
+static void
+library_list_start_library (struct gdb_xml_parser *parser,
+			    const struct gdb_xml_element *element,
+			    void *user_data, VEC(gdb_xml_value_s) *attributes)
+{
+  struct svr4_library_list *list = user_data;
+  const char *name = xml_find_attribute (attributes, "name")->value;
+  ULONGEST *lmp = xml_find_attribute (attributes, "lm")->value;
+  ULONGEST *l_addrp = xml_find_attribute (attributes, "l_addr")->value;
+  ULONGEST *l_ldp = xml_find_attribute (attributes, "l_ld")->value;
+  struct so_list *new_elem;
+
+  new_elem = XZALLOC (struct so_list);
+  new_elem->lm_info = XZALLOC (struct lm_info);
+  new_elem->lm_info->lm_addr = *lmp;
+  new_elem->lm_info->l_addr_inferior = *l_addrp;
+  new_elem->lm_info->l_ld = *l_ldp;
+
+  strncpy (new_elem->so_name, name, sizeof (new_elem->so_name) - 1);
+  new_elem->so_name[sizeof (new_elem->so_name) - 1] = 0;
+  strcpy (new_elem->so_original_name, new_elem->so_name);
+
+  *list->tailp = new_elem;
+  list->tailp = &new_elem->next;
+}
+
+/* Handle the start of a <library-list-svr4> element.  */
+
+static void
+svr4_library_list_start_list (struct gdb_xml_parser *parser,
+			      const struct gdb_xml_element *element,
+			      void *user_data, VEC(gdb_xml_value_s) *attributes)
+{
+  struct svr4_library_list *list = user_data;
+  const char *version = xml_find_attribute (attributes, "version")->value;
+  struct gdb_xml_value *main_lm = xml_find_attribute (attributes, "main-lm");
+
+  if (strcmp (version, "1.0") != 0)
+    gdb_xml_error (parser,
+		   _("SVR4 Library list has unsupported version \"%s\""),
+		   version);
+
+  if (main_lm)
+    list->main_lm = *(ULONGEST *) main_lm->value;
+}
+
+/* The allowed elements and attributes for an XML library list.
+   The root element is a <library-list>.  */
+
+static const struct gdb_xml_attribute svr4_library_attributes[] =
+{
+  { "name", GDB_XML_AF_NONE, NULL, NULL },
+  { "lm", GDB_XML_AF_NONE, gdb_xml_parse_attr_ulongest, NULL },
+  { "l_addr", GDB_XML_AF_NONE, gdb_xml_parse_attr_ulongest, NULL },
+  { "l_ld", GDB_XML_AF_NONE, gdb_xml_parse_attr_ulongest, NULL },
+  { NULL, GDB_XML_AF_NONE, NULL, NULL }
+};
+
+static const struct gdb_xml_element svr4_library_list_children[] =
+{
+  {
+    "library", svr4_library_attributes, NULL,
+    GDB_XML_EF_REPEATABLE | GDB_XML_EF_OPTIONAL,
+    library_list_start_library, NULL
+  },
+  { NULL, NULL, NULL, GDB_XML_EF_NONE, NULL, NULL }
+};
+
+static const struct gdb_xml_attribute svr4_library_list_attributes[] =
+{
+  { "version", GDB_XML_AF_NONE, NULL, NULL },
+  { "main-lm", GDB_XML_AF_OPTIONAL, gdb_xml_parse_attr_ulongest, NULL },
+  { NULL, GDB_XML_AF_NONE, NULL, NULL }
+};
+
+static const struct gdb_xml_element svr4_library_list_elements[] =
+{
+  { "library-list-svr4", svr4_library_list_attributes, svr4_library_list_children,
+    GDB_XML_EF_NONE, svr4_library_list_start_list, NULL },
+  { NULL, NULL, NULL, GDB_XML_EF_NONE, NULL, NULL }
+};
+
 /* Implementation for target_so_ops.free_so.  */
 
 static void
@@ -972,6 +1073,69 @@ svr4_free_library_list (void *p_list)
       list = next;
     }
 }
+
+/* Parse qXfer:libraries:read packet into *SO_LIST_RETURN.  Return 1 if
+
+   Return 0 if packet not supported, *SO_LIST_RETURN is not modified in such
+   case.  Return 1 if *SO_LIST_RETURN contains the library list, it may be
+   empty, caller is responsible for freeing all its entries.  */
+
+static int
+svr4_parse_libraries (const char *document, struct svr4_library_list *list)
+{
+  struct cleanup *back_to = make_cleanup (svr4_free_library_list,
+					  &list->head);
+
+  memset (list, 0, sizeof (*list));
+  list->tailp = &list->head;
+  if (gdb_xml_parse_quick (_("target library list"), "library-list.dtd",
+			   svr4_library_list_elements, document, list) == 0)
+    {
+      /* Parsed successfully, keep the result.  */
+      discard_cleanups (back_to);
+      return 1;
+    }
+
+  do_cleanups (back_to);
+  return 0;
+}
+
+/* Attempt to get so_list from target via qXfer:libraries:read packet.
+
+   Return 0 if packet not supported, *SO_LIST_RETURN is not modified in such
+   case.  Return 1 if *SO_LIST_RETURN contains the library list, it may be
+   empty, caller is responsible for freeing all its entries.  */
+
+static int
+svr4_current_sos_via_xfer_libraries (struct svr4_library_list *list)
+{
+  char *svr4_library_document;
+  int result;
+  struct cleanup *back_to;
+
+  /* Fetch the list of shared libraries.  */
+  svr4_library_document = target_read_stralloc (&current_target,
+						TARGET_OBJECT_LIBRARIES_SVR4,
+						NULL);
+  if (svr4_library_document == NULL)
+    return 0;
+
+  back_to = make_cleanup (xfree, svr4_library_document);
+  result = svr4_parse_libraries (svr4_library_document, list);
+  do_cleanups (back_to);
+
+  return result;
+}
+
+#else
+
+static int
+svr4_current_sos_via_xfer_libraries (struct svr4_library_list *list)
+{
+  return 0;
+}
+
+#endif
 
 /* If no shared library information is available from the dynamic
    linker, build a fallback list from other sources.  */
@@ -1032,7 +1196,9 @@ svr4_read_so_list (CORE_ADDR lm, struct so_list ***link_ptr_ptr,
 
       if (new->lm_info->l_prev != prev_lm)
 	{
-	  warning (_("Corrupted shared library list"));
+	  warning (_("Corrupted shared library list: %s != %s"),
+		   paddress (target_gdbarch, prev_lm),
+		   paddress (target_gdbarch, new->lm_info->l_prev));
 	  do_cleanups (old_chain);
 	  break;
 	}
@@ -1093,6 +1259,18 @@ svr4_current_sos (void)
   struct svr4_info *info;
   struct cleanup *back_to;
   int ignore_first;
+  struct svr4_library_list library_list;
+
+  if (svr4_current_sos_via_xfer_libraries (&library_list))
+    {
+      if (library_list.main_lm)
+	{
+	  info = get_svr4_info ();
+	  info->main_lm_addr = library_list.main_lm;
+	}
+
+      return library_list.head ? library_list.head : svr4_default_sos ();
+    }
 
   info = get_svr4_info ();
 
