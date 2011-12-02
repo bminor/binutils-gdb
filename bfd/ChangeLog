@@ -1,3 +1,9 @@
+2011-12-01  Mikael Pettersson  <mikpe@it.uu.se>
+
+	Apply mainline patches
+	* elf32-m68k.c (elf_m68k_check_relocs) <R_68K_8, R68K_16, R_68K_32>: For
+	non-SEC_ALLOC sections break before GOT and PLT accounting.
+
 2011-12-01  Hans-Peter Nilsson  <hp@axis.com>
 
 	Apply mainline patches
