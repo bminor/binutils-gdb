@@ -1,3 +1,9 @@
+2011-12-02  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* lib/gdb.exp (gdb_expect): Pass all the exception conditions up
+	to the caller.
+	(gdb_test_multiple): Likewise.
+
 2011-12-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix gdb.mi/mi-solib.exp without system debug info installed.

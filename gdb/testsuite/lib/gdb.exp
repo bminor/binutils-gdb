@@ -844,11 +844,7 @@ proc gdb_test_multiple { command message user_code } {
     if {$code == 1} {
 	global errorInfo errorCode;
 	return -code error -errorinfo $errorInfo -errorcode $errorCode $string
-    } elseif {$code == 2} {
-	return -code return $string
-    } elseif {$code == 3} {
-	return
-    } elseif {$code > 4} {
+    } elseif {$code > 1} {
 	return -code $code $string
     }
     return $result
@@ -2640,11 +2636,7 @@ proc gdb_expect { args } {
         global errorInfo errorCode;
 
 	return -code error -errorinfo $errorInfo -errorcode $errorCode $string
-    } elseif {$code == 2} {
-	return -code return $string
-    } elseif {$code == 3} {
-	return
-    } elseif {$code > 4} {
+    } else {
 	return -code $code $string
     }
 }
