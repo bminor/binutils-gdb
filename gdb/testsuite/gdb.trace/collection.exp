@@ -589,6 +589,7 @@ proc gdb_collect_global_in_pieces_test { } {
 }
 
 proc gdb_collect_return_test { } {
+    global gdb_prompt
 
     prepare_for_trace_test
 
@@ -606,10 +607,10 @@ proc gdb_collect_return_test { } {
     # Since we can't guarantee that $_ret will give us the caller,
     # pass either way, but giving different messages.
     gdb_test_multiple "backtrace" "" {
-	-re ".*#1 .* in main .*" {
+	-re ".*#1 .* in main .*\r\n$gdb_prompt $" {
 	    pass "collect \$_ret: backtrace lists main"
 	}
-	-re ".*#1 .* in ?? .*" {
+	-re ".*#1 .* in ?? .*\r\n$gdb_prompt $" {
 	    pass "collect \$_ret: backtrace not listing main"
 	}
     }

@@ -1,5 +1,14 @@
 2011-12-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	PR testsuite/12649
+	* gdb.trace/collection.exp (gdb_collect_return_test): Import gdb_prompt.
+	Protect gdb_test_multiple by final $gdb_prompt match.
+	* gdb.trace/tspeed.exp (gdb_fast_trace_speed_test): Likewise.
+	* gdb.trace/tstatus.exp (run_trace_experiment): Likewise.
+	(test_tracepoints): Likewise.
+
+2011-12-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	PR breakpoints/13346
 	* gdb.dwarf2/dw2-objfile-overlap-inner.S: New file.
 	* gdb.dwarf2/dw2-objfile-overlap-outer.S: New file.

@@ -56,6 +56,7 @@ if ![runto_main] {
 }
 
 proc run_trace_experiment {} {
+    global gdb_prompt
 
 #    gdb_test_no_output "set debug remote 1" ""
 
@@ -74,10 +75,10 @@ proc run_trace_experiment {} {
     # cases.
 
     gdb_test_multiple "tstatus" "check on trace status" {
-	-re "Trace is running.*Trace will stop if GDB disconnects\.\[\r\n\]+Trace notes: my tracing note\.\[\r\n\]+Not looking at any trace frame\..*" {
+	-re "Trace is running.*Trace will stop if GDB disconnects\.\[\r\n\]+Trace notes: my tracing note\.\[\r\n\]+Not looking at any trace frame\..*\r\n$gdb_prompt $" {
 	    pass "tstatus reports trace note"
 	}
-	-re "Trace is running.*Trace will stop if GDB disconnects\.\[\r\n\]+Not looking at any trace frame.*" {
+	-re "Trace is running.*Trace will stop if GDB disconnects\.\[\r\n\]+Not looking at any trace frame.*\r\n$gdb_prompt $" {
 	    pass "tstatus does not report any trace note"
 	}
     }
@@ -85,10 +86,10 @@ proc run_trace_experiment {} {
     gdb_test "set trace-notes different note" "" "change tracing note"
 
     gdb_test_multiple "tstatus" "check on trace status with diff note" {
-	-re "Trace is running.*Trace will stop if GDB disconnects\.\[\r\n\]+Trace notes: different note\.\[\r\n\]+Not looking at any trace frame\..*" {
+	-re "Trace is running.*Trace will stop if GDB disconnects\.\[\r\n\]+Trace notes: different note\.\[\r\n\]+Not looking at any trace frame\..*\r\n$gdb_prompt $" {
 	    pass "tstatus reports different trace note"
 	}
-	-re "Trace is running.*Trace will stop if GDB disconnects\.\[\r\n\]+Not looking at any trace frame.*" {
+	-re "Trace is running.*Trace will stop if GDB disconnects\.\[\r\n\]+Not looking at any trace frame.*\r\n$gdb_prompt $" {
 	    pass "tstatus does not report any different trace note"
 	}
     }
@@ -96,10 +97,10 @@ proc run_trace_experiment {} {
     gdb_test "set trace-user me me me" "" "change tracing user"
 
     gdb_test_multiple "tstatus" "check on trace status with diff note" {
-	-re "Trace is running.*Trace will stop if GDB disconnects\.\[\r\n\]+Trace user is me me me\.\[\r\n\]+Trace notes: different note\.\[\r\n\]+Not looking at any trace frame\..*" {
+	-re "Trace is running.*Trace will stop if GDB disconnects\.\[\r\n\]+Trace user is me me me\.\[\r\n\]+Trace notes: different note\.\[\r\n\]+Not looking at any trace frame\..*\r\n$gdb_prompt $" {
 	    pass "tstatus reports trace user"
 	}
-	-re "Trace is running.*Trace will stop if GDB disconnects\.\[\r\n\]+Not looking at any trace frame.*" {
+	-re "Trace is running.*Trace will stop if GDB disconnects\.\[\r\n\]+Not looking at any trace frame.*\r\n$gdb_prompt $" {
 	    pass "tstatus does not report trace user"
 	}
     }
@@ -107,10 +108,10 @@ proc run_trace_experiment {} {
     gdb_test_no_output "tstop because I can" "trace stopped with note"
 
     gdb_test_multiple "tstatus" "check on trace status after stop" {
-	-re "Trace stopped by a tstop command (because I can)\..*Trace will stop if GDB disconnects\.\[\r\n\]+Trace user is me me me\.\[\r\n\]+Trace notes: different note\.\[\r\n\]+Not looking at any trace frame\..*" {
+	-re "Trace stopped by a tstop command (because I can)\..*Trace will stop if GDB disconnects\.\[\r\n\]+Trace user is me me me\.\[\r\n\]+Trace notes: different note\.\[\r\n\]+Not looking at any trace frame\..*\r\n$gdb_prompt $" {
 	    pass "tstatus reports trace stop reason"
 	}
-	-re "Trace stopped by a tstop command\..*" {
+	-re "Trace stopped by a tstop command\..*\r\n$gdb_prompt $" {
 	    pass "tstatus does not report trace stop reason"
 	}
     }
@@ -118,16 +119,17 @@ proc run_trace_experiment {} {
     # Tracepoint hit count is optional, so pass it either way.
 
     gdb_test_multiple "info trace" "show tracepoint state" {
-	-re "actions\.c:\[0-9\]+\[\r\n\]+\[\t ]+tracepoint already hit 1 time\[\r\n\]+\[\t ]+collect parm" {
+	-re "actions\.c:\[0-9\]+\[\r\n\]+\[\t ]+tracepoint already hit 1 time\[\r\n\]+\[\t ]+collect parm.*\r\n$gdb_prompt $" {
 	    pass "info trace reports tracepoint hit count"
 	}
-	-re "actions\.c:\[0-9\]+\[\r\n\]+\[\t ]+collect parm" {
+	-re "actions\.c:\[0-9\]+\[\r\n\]+\[\t ]+collect parm.*\r\n$gdb_prompt $" {
 	    pass "info trace does not report tracepoint hit count"
 	}
     }
 }
 
 proc test_tracepoints {} {
+    global gdb_prompt
 
     gdb_test "break begin" ".*" ""
 
@@ -142,10 +144,10 @@ proc test_tracepoints {} {
     set fastgood 0
 
     gdb_test_multiple "ftrace gdb_recursion_test" "set fast tracepoint" {
-	-re "May not have a fast tracepoint at .*" {
+	-re "May not have a fast tracepoint at .*\r\n$gdb_prompt $" {
 	    pass "4-byte fast tracepoint could not be set"
 	}
-	-re "Fast tracepoint .*" {
+	-re "Fast tracepoint .*\r\n$gdb_prompt $" {
 	    pass "4-byte fast tracepoint is set"
 	    set fastgood 1
 	}
