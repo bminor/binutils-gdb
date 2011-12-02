@@ -1,3 +1,22 @@
+2011-12-02  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (ia64_process_unwind): Turn into a void funtion.
+	(hppa_process_unwind): Likewise.
+	(arm_process_unwind): Likewise.
+	(process_unwind): Likewise.
+	(arm_get_section_word): Rename to get_unwind_section_word.
+	Add sym_name parameter to return the offset into the string table
+	of the symbol associated with the reloc applied to the word.
+	(decode_tic6x_unwind_regmask): Add NULL argument to invocation of
+	get_unwind_section_word.
+	(dump_arm_unwind): Likewise.
+	(decode_arm_unwind_bytecode): Prepend a comma when *not* the first
+	register in a list.
+	(decode_arm_unwind): If the returned function address is 0 and a
+	valid symname offset is provided use that to compute the name
+	associated with the entry.
+	Add extra checks of the compact model index entry.
+
 2011-11-29  Roland McGrath  <mcgrathr@google.com>
 
 	* ar.c (ranlib_usage): Describe -D.

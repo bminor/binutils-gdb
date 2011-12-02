@@ -3187,7 +3187,7 @@ usage (FILE * stream)
   -u --unwind            Display the unwind info (if present)\n\
   -d --dynamic           Display the dynamic section (if present)\n\
   -V --version-info      Display the version sections (if present)\n\
-  -A --arch-specific     Display architecture specific information (if any).\n\
+  -A --arch-specific     Display architecture specific information (if any)\n\
   -c --archive-index     Display the symbol/file index in an archive\n\
   -D --use-dynamic       Use the dynamic section info when displaying symbols\n\
   -x --hex-dump=<number|name>\n\
@@ -5595,6 +5595,7 @@ find_symbol_for_address (Elf_Internal_Sym * symtab,
 	    break;
 	}
     }
+
   if (best)
     {
       *symname = (best->st_name >= strtab_size
@@ -5602,6 +5603,7 @@ find_symbol_for_address (Elf_Internal_Sym * symtab,
       *offset = dist;
       return;
     }
+
   *symname = NULL;
   *offset = addr.offset;
 }
@@ -5779,7 +5781,7 @@ slurp_ia64_unwind_table (FILE * file,
   return 1;
 }
 
-static int
+static void
 ia64_process_unwind (FILE * file)
 {
   Elf_Internal_Shdr * sec;
@@ -5916,8 +5918,6 @@ ia64_process_unwind (FILE * file)
     free (aux.symtab);
   if (aux.strtab)
     free ((char *) aux.strtab);
-
-  return 1;
 }
 
 struct hppa_unw_table_entry
@@ -6189,7 +6189,7 @@ slurp_hppa_unwind_table (FILE * file,
   return 1;
 }
 
-static int
+static void
 hppa_process_unwind (FILE * file)
 {
   struct hppa_unw_aux_info aux;
@@ -6198,10 +6198,10 @@ hppa_process_unwind (FILE * file)
   Elf_Internal_Shdr * sec;
   unsigned long i;
 
-  memset (& aux, 0, sizeof (aux));
-
   if (string_table == NULL)
-    return 1;
+    return;
+
+  memset (& aux, 0, sizeof (aux));
 
   for (i = 0, sec = section_headers; i < elf_header.e_shnum; ++i, ++sec)
     {
@@ -6249,8 +6249,6 @@ hppa_process_unwind (FILE * file)
     free (aux.symtab);
   if (aux.strtab)
     free ((char *) aux.strtab);
-
-  return 1;
 }
 
 struct arm_section
@@ -6315,17 +6313,21 @@ arm_free_section (struct arm_section *arm_sec)
       cached section and install SEC instead.
    2) Locate the 32-bit word at WORD_OFFSET in unwind section SEC
       and return its valued in * WORDP, relocating if necessary.
-   3) Update the NEXT_RELA field in ARM_SEC and stores the section index and
+   3) Update the NEXT_RELA field in ARM_SEC and store the section index and
       relocation's offset in ADDR.
-   4) Return TRUE upon success, FALSE otherwise.  */
+   4) If SYM_NAME is non-NULL and a relocation was applied, record the offset
+      into the string table of the symbol associated with the reloc.  If no
+      reloc was applied store -1 there.
+   5) Return TRUE upon success, FALSE otherwise.  */
 
 static bfd_boolean
-arm_section_get_word (struct arm_unw_aux_info *  aux,
-		      struct arm_section *       arm_sec,
-		      Elf_Internal_Shdr *        sec,
-		      bfd_vma 			 word_offset,
-		      unsigned int *             wordp,
-		      struct absaddr *           addr)
+get_unwind_section_word (struct arm_unw_aux_info *  aux,
+			 struct arm_section *       arm_sec,
+			 Elf_Internal_Shdr *        sec,
+			 bfd_vma 		    word_offset,
+			 unsigned int *             wordp,
+			 struct absaddr *           addr,
+			 bfd_vma *		    sym_name)
 {
   Elf_Internal_Rela *rp;
   Elf_Internal_Sym *sym;
@@ -6335,6 +6337,9 @@ arm_section_get_word (struct arm_unw_aux_info *  aux,
 
   addr->section = SHN_UNDEF;
   addr->offset = 0;
+
+  if (sym_name != NULL)
+    *sym_name = (bfd_vma) -1;
 
   /* If necessary, update the section cache.  */
   if (sec != arm_sec->sec)
@@ -6465,6 +6470,8 @@ arm_section_get_word (struct arm_unw_aux_info *  aux,
       word = (word & ~ (bfd_vma) 0x7fffffff) | (prelval & 0x7fffffff);
       addr->section = sym->st_shndx;
       addr->offset = offset;
+      if (sym_name)
+	* sym_name = sym->st_name;
       break;
     }
 
@@ -6501,8 +6508,8 @@ decode_tic6x_unwind_regmask (unsigned int mask)
   if (remaining == 0 && more_words)				\
     {								\
       data_offset += 4;						\
-      if (!arm_section_get_word (aux, data_arm_sec, data_sec,	\
-				 data_offset, &word, &addr))	\
+      if (! get_unwind_section_word (aux, data_arm_sec, data_sec,	\
+				     data_offset, & word, & addr, NULL))	\
 	return;							\
       remaining = 4;						\
       more_words--;						\
@@ -6606,7 +6613,7 @@ decode_arm_unwind_bytecode (struct arm_unw_aux_info *aux,
 	    }
 	  if (op & 0x08)
 	    {
-	      if (first)
+	      if (!first)
 		printf (", ");
 	      printf ("r14");
 	    }
@@ -6883,21 +6890,29 @@ arm_expand_prel31 (bfd_vma word, bfd_vma where)
 }
 
 static void
-decode_arm_unwind (struct arm_unw_aux_info *aux,
-		   unsigned int word, unsigned int remaining,
-		   bfd_vma data_offset, Elf_Internal_Shdr *data_sec,
-		   struct arm_section *data_arm_sec)
+decode_arm_unwind (struct arm_unw_aux_info *  aux,
+		   unsigned int               word,
+		   unsigned int               remaining,
+		   bfd_vma                    data_offset,
+		   Elf_Internal_Shdr *        data_sec,
+		   struct arm_section *       data_arm_sec)
 {
   int per_index;
   unsigned int more_words = 0;
   struct absaddr addr;
+  bfd_vma sym_name = (bfd_vma) -1;
 
   if (remaining == 0)
     {
-      /* Fetch the first word.  */
-      if (!arm_section_get_word (aux, data_arm_sec, data_sec, data_offset,
-				 &word, &addr))
+      /* Fetch the first word.
+	 Note - when decoding an object file the address extracted
+	 here will always be 0.  So we also pass in the sym_name
+	 parameter so that we can find the symbol associated with
+	 the personality routine.  */
+      if (! get_unwind_section_word (aux, data_arm_sec, data_sec, data_offset,
+				     & word, & addr, & sym_name))
 	return;
+
       remaining = 4;
     }
 
@@ -6909,7 +6924,21 @@ decode_arm_unwind (struct arm_unw_aux_info *aux,
 
       fn = arm_expand_prel31 (word, data_sec->sh_addr + data_offset);
       printf (_("  Personality routine: "));
-      procname = arm_print_vma_and_name (aux, fn, addr);
+      if (fn == 0
+	  && addr.section == SHN_UNDEF && addr.offset == 0
+	  && sym_name != (bfd_vma) -1 && sym_name < aux->strtab_size)
+	{
+	  procname = aux->strtab + sym_name;
+	  print_vma (fn, PREFIX_HEX);
+	  if (procname)
+	    {
+	      fputs (" <", stdout);
+	      fputs (procname, stdout);
+	      fputc ('>', stdout);
+	    }
+	}
+      else
+	procname = arm_print_vma_and_name (aux, fn, addr);
       fputc ('\n', stdout);
 
       /* The GCC personality routines use the standard compact
@@ -6939,9 +6968,20 @@ decode_arm_unwind (struct arm_unw_aux_info *aux,
     }
   else
     {
-      
+      /* ARM EHABI Section 6.3:
+	 
+	 An exception-handling table entry for the compact model looks like:
+	 
+           31 30-28 27-24 23-0
+	   -- ----- ----- ----
+            1   0   index Data for personalityRoutine[index]    */
+
+      if (elf_header.e_machine == EM_ARM
+	  && (word & 0x70000000))
+	warn (_("Corrupt ARM compact model table entry (%08x)\n"), word);
+
       per_index = (word >> 24) & 0x7f;
-      printf (_("  Compact model %d\n"), per_index);
+      printf (_("  Compact model index: %d\n"), per_index);
       if (per_index == 0)
 	{
 	  more_words = 0;
@@ -6965,14 +7005,17 @@ decode_arm_unwind (struct arm_unw_aux_info *aux,
 				      data_offset, data_sec, data_arm_sec);
 	}
       else
-	printf ("  [reserved]\n");
+	{
+	  warn (_("Unknown ARM compact model index encountered\n"));
+	  printf (_("  [reserved]\n"));
+	}
       break;
 
     case EM_TI_C6000:
       if (per_index < 3)
 	{
 	  decode_tic6x_unwind_bytecode (aux, word, remaining, more_words,
-				      data_offset, data_sec, data_arm_sec);
+					data_offset, data_sec, data_arm_sec);
 	}
       else if (per_index < 5)
 	{
@@ -6989,11 +7032,12 @@ decode_arm_unwind (struct arm_unw_aux_info *aux,
 		  tic6x_unwind_regnames[word & 0xf]);
 	}
       else
-	printf ("  [reserved]\n");
+	printf (_("  [reserved (%d)]\n"), per_index);
       break;
 
     default:
-      abort ();
+      error (_("Unsupported architecture type %d encountered when decoding unwind table"),
+	     elf_header.e_machine);
     }
 
   /* Decode the descriptors.  Not implemented.  */
@@ -7017,13 +7061,13 @@ dump_arm_unwind (struct arm_unw_aux_info *aux, Elf_Internal_Shdr *exidx_sec)
 
       fputc ('\n', stdout);
 
-      if (!arm_section_get_word (aux, &exidx_arm_sec, exidx_sec,
-				 8 * i, &exidx_fn, &fn_addr)
-	  || !arm_section_get_word (aux, &exidx_arm_sec, exidx_sec,
-				    8 * i + 4, &exidx_entry, &entry_addr))
+      if (! get_unwind_section_word (aux, & exidx_arm_sec, exidx_sec,
+				     8 * i, & exidx_fn, & fn_addr, NULL)
+	  || ! get_unwind_section_word (aux, & exidx_arm_sec, exidx_sec,
+					8 * i + 4, & exidx_entry, & entry_addr, NULL))
 	{
-	  arm_free_section (&exidx_arm_sec);
-	  arm_free_section (&extab_arm_sec);
+	  arm_free_section (& exidx_arm_sec);
+	  arm_free_section (& extab_arm_sec);
 	  return;
 	}
 
@@ -7084,7 +7128,8 @@ dump_arm_unwind (struct arm_unw_aux_info *aux, Elf_Internal_Shdr *exidx_sec)
 }
 
 /* Used for both ARM and C6X unwinding tables.  */
-static int
+
+static void
 arm_process_unwind (FILE *file)
 {
   struct arm_unw_aux_info aux;
@@ -7093,9 +7138,6 @@ arm_process_unwind (FILE *file)
   Elf_Internal_Shdr *sec;
   unsigned long i;
   unsigned int sec_type;
-
-  memset (& aux, 0, sizeof (aux));
-  aux.file = file;
 
   switch (elf_header.e_machine)
     {
@@ -7107,12 +7149,17 @@ arm_process_unwind (FILE *file)
       sec_type = SHT_C6000_UNWIND;
       break;
 
-    default:
-	abort();
+    default: 
+      error (_("Unsupported architecture type %d encountered when processing unwind table"),
+	     elf_header.e_machine);
+      return;
     }
 
   if (string_table == NULL)
-    return 1;
+    return;
+
+  memset (& aux, 0, sizeof (aux));
+  aux.file = file;
 
   for (i = 0, sec = section_headers; i < elf_header.e_shnum; ++i, ++sec)
     {
@@ -7130,37 +7177,35 @@ arm_process_unwind (FILE *file)
 	unwsec = sec;
     }
 
-  if (!unwsec)
+  if (unwsec == NULL)
     printf (_("\nThere are no unwind sections in this file.\n"));
+  else
+    for (i = 0, sec = section_headers; i < elf_header.e_shnum; ++i, ++sec)
+      {
+	if (sec->sh_type == sec_type)
+	  {
+	    printf (_("\nUnwind table index '%s' at offset 0x%lx contains %lu entries:\n"),
+		    SECTION_NAME (sec),
+		    (unsigned long) sec->sh_offset,
+		    (unsigned long) (sec->sh_size / (2 * eh_addr_size)));
 
-  for (i = 0, sec = section_headers; i < elf_header.e_shnum; ++i, ++sec)
-    {
-      if (sec->sh_type == sec_type)
-	{
-	  printf (_("\nUnwind table index '%s' at offset 0x%lx contains %lu entries:\n"),
-		  SECTION_NAME (sec),
-		  (unsigned long) sec->sh_offset,
-		  (unsigned long) (sec->sh_size / (2 * eh_addr_size)));
-
-	  dump_arm_unwind (&aux, sec);
-	}
-    }
+	    dump_arm_unwind (&aux, sec);
+	  }
+      }
 
   if (aux.symtab)
     free (aux.symtab);
   if (aux.strtab)
     free ((char *) aux.strtab);
-
-  return 1;
 }
 
-static int
+static void
 process_unwind (FILE * file)
 {
   struct unwind_handler
   {
     int machtype;
-    int (* handler)(FILE *);
+    void (* handler)(FILE *);
   } handlers[] =
   {
     { EM_ARM, arm_process_unwind },
@@ -7172,14 +7217,14 @@ process_unwind (FILE * file)
   int i;
 
   if (!do_unwind)
-    return 1;
+    return;
 
   for (i = 0; handlers[i].handler != NULL; i++)
     if (elf_header.e_machine == handlers[i].machtype)
       return handlers[i].handler (file);
 
-  printf (_("\nThere are no unwind sections in this file.\n"));
-  return 1;
+  printf (_("\nThe decoding of unwind sections for machine type %s is not currently supported.\n"),
+	  get_machine_name (elf_header.e_machine));
 }
 
 static void
