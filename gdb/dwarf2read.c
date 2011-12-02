@@ -3462,6 +3462,7 @@ process_psymtab_comp_unit (struct objfile *objfile,
 			      0,
 			      objfile->global_psymbols.next,
 			      objfile->static_psymbols.next);
+  pst->psymtabs_addrmap_supported = 1;
 
   attr = dwarf2_attr (comp_unit_die, DW_AT_comp_dir, &cu);
   if (attr != NULL)

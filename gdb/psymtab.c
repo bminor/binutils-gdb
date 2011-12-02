@@ -221,6 +221,8 @@ find_pc_sect_psymtab_closer (CORE_ADDR pc, struct obj_section *section,
   struct partial_symtab *best_pst = pst;
   CORE_ADDR best_addr = pst->textlow;
 
+  gdb_assert (!pst->psymtabs_addrmap_supported);
+
   /* An objfile that has its functions reordered might have
      many partial symbol tables containing the PC, but
      we want the partial symbol table that contains the
@@ -344,7 +346,8 @@ find_pc_sect_psymtab (struct objfile *objfile, CORE_ADDR pc,
      debug info type in single OBJFILE.  */
 
   ALL_OBJFILE_PSYMTABS_REQUIRED (objfile, pst)
-    if (pc >= pst->textlow && pc < pst->texthigh)
+    if (!pst->psymtabs_addrmap_supported
+	&& pc >= pst->textlow && pc < pst->texthigh)
       {
 	struct partial_symtab *best_pst;
 
@@ -976,6 +979,8 @@ dump_psymtab (struct objfile *objfile, struct partial_symtab *psymtab,
   fprintf_filtered (outfile, "-");
   fputs_filtered (paddress (gdbarch, psymtab->texthigh), outfile);
   fprintf_filtered (outfile, "\n");
+  fprintf_filtered (outfile, "  Address map supported - %s.\n",
+		    psymtab->psymtabs_addrmap_supported ? "yes" : "no");
   fprintf_filtered (outfile, "  Depends on %d other partial symtabs.\n",
 		    psymtab->number_of_dependencies);
   for (i = 0; i < psymtab->number_of_dependencies; i++)
@@ -1781,6 +1786,9 @@ maintenance_info_psymtabs (char *regexp, int from_tty)
 	      fputs_filtered (paddress (gdbarch, psymtab->texthigh),
 			      gdb_stdout);
 	      printf_filtered ("\n");
+	      printf_filtered ("    psymtabs_addrmap_supported %s\n",
+			       (psymtab->psymtabs_addrmap_supported
+				? "yes" : "no"));
 	      printf_filtered ("    globals ");
 	      if (psymtab->n_global_syms)
 		{

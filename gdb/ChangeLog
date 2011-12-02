@@ -1,3 +1,17 @@
+2011-12-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR breakpoints/13346
+	* dwarf2read.c (process_psymtab_comp_unit): Set
+	PSYMTABS_ADDRMAP_SUPPORTED.
+	* psympriv.h (struct partial_symtab): Comment textlow and texthigh
+	validity.  New field psymtabs_addrmap_supported.
+	* psymtab.c (find_pc_sect_psymtab_closer): New gdb_assert on
+	psymtabs_addrmap_supported.
+	(find_pc_sect_psymtab): Do not fallback to TEXTLOW and TEXTHIGH for
+	!PSYMTABS_ADDRMAP_SUPPORTED.
+	(dump_psymtab, maintenance_info_psymtabs): Print also
+	psymtabs_addrmap_supported.
+
 2011-12-01  Doug Evans  <dje@google.com>
 
 	* python/py-type.c (type_object_methods): Fix "array" doc string.

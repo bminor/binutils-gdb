@@ -1,3 +1,10 @@
+2011-12-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR breakpoints/13346
+	* gdb.dwarf2/dw2-objfile-overlap-inner.S: New file.
+	* gdb.dwarf2/dw2-objfile-overlap-outer.S: New file.
+	* gdb.dwarf2/dw2-objfile-overlap.exp: New file.
+
 2011-12-01  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/homonym/pck.ads, gdb.ada/homonym/pck.adb: New files.
