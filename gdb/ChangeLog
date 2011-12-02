@@ -1,3 +1,7 @@
+2011-12-01  Doug Evans  <dje@google.com>
+
+	* python/py-type.c (type_object_methods): Fix "array" doc string.
+
 2011-12-01  Andrew Burgess  <aburgess@broadcom.com>
 
 	* source.c (print_source_lines_base): Fix missing braces on else

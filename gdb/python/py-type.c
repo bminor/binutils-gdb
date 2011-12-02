@@ -1540,8 +1540,10 @@ static PyGetSetDef type_object_getset[] =
 static PyMethodDef type_object_methods[] =
 {
   { "array", typy_array, METH_VARARGS,
-    "array (N) -> Type\n\
-Return a type which represents an array of N objects of this type." },
+    "array ([LOW_BOUND,] HIGH_BOUND) -> Type\n\
+Return a type which represents an array of objects of this type.\n\
+The bounds of the array are [LOW_BOUND, HIGH_BOUND] inclusive.\n\
+If LOW_BOUND is omitted, a value of zero is used." },
    { "__contains__", typy_has_key, METH_VARARGS,
      "T.__contains__(k) -> True if T has a field named k, else False" },
   { "const", typy_const, METH_NOARGS,
