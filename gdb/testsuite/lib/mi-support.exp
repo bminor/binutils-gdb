@@ -981,9 +981,10 @@ proc mi_detect_async {} {
 
 # Wait for MI *stopped notification to appear.
 # The REASON, FUNC, ARGS, FILE and LINE are regular expressions
-# to match against whatever is output in *stopped.  ARGS should
-# not include [] the list of argument is enclosed in, and other
-# regular expressions should not include quotes.
+# to match against whatever is output in *stopped.  FILE may also match
+# filename of a file without debug info.  ARGS should not include [] the
+# list of argument is enclosed in, and other regular expressions should
+# not include quotes.
 # If EXTRA is a list of one element, it's the regular expression
 # for output expected right after *stopped, and before GDB prompt.
 # If EXTRA is a list of two elements, the first element is for
@@ -991,9 +992,10 @@ proc mi_detect_async {} {
 # right after reason field.  The regex after reason should not include
 # the comma separating it from the following fields.
 # 
-# When we fail to match output at all, -1 is returned.  Otherwise,
-# the line at which we stop is returned.  This is useful when exact
-# line is not possible to specify for some reason -- one can pass
+# When we fail to match output at all, -1 is returned.  If FILE does
+# match and the target system has no debug info for FILE return 0.
+# Otherwise, the line at which we stop is returned.  This is useful when
+# exact line is not possible to specify for some reason -- one can pass
 # the .* or "\[0-9\]*" regexps for line, and then check the line
 # programmatically.
 #
@@ -1067,11 +1069,15 @@ proc mi_expect_stop { reason func args file line extra test } {
 
     set any "\[^\n\]*"
 
-    verbose -log "mi_expect_stop: expecting: \\*stopped,${r}${a}${bn}frame=\{addr=\"$hex\",func=\"$func\",args=$args,file=\"$any$file\",fullname=\"${fullname_syntax}$file\",line=\"$line\"\}$after_stopped,thread-id=\"$decimal\",stopped-threads=$any\r\n($thread_selected_re|$breakpoint_re)*$prompt_re"
+    verbose -log "mi_expect_stop: expecting: \\*stopped,${r}${a}${bn}frame=\{addr=\"$hex\",func=\"$func\",args=$args,(?:file=\"$any$file\",fullname=\"${fullname_syntax}$file\",line=\"$line\"|from=\"$file\")\}$after_stopped,thread-id=\"$decimal\",stopped-threads=$any\r\n($thread_selected_re|$breakpoint_re)*$prompt_re"
     gdb_expect {
-	-re "\\*stopped,${r}${a}${bn}frame=\{addr=\"$hex\",func=\"$func\",args=$args,file=\"$any$file\",fullname=\"${fullname_syntax}$file\",line=\"($line)\"\}$after_stopped,thread-id=\"$decimal\",stopped-threads=$any\r\n($thread_selected_re|$breakpoint_re)*$prompt_re" {
+	-re "\\*stopped,${r}${a}${bn}frame=\{addr=\"$hex\",func=\"$func\",args=$args,(?:file=\"$any$file\",fullname=\"${fullname_syntax}$file\",line=\"($line)\"|from=\"$file\")\}$after_stopped,thread-id=\"$decimal\",stopped-threads=$any\r\n($thread_selected_re|$breakpoint_re)*$prompt_re" {
 	    pass "$test"
-            return $expect_out(2,string)
+	    if {[array names expect_out "2,string"] != ""} {
+		return $expect_out(2,string)
+	    }
+	    # No debug info available but $file does match.
+	    return 0
 	}
 	-re "\\*stopped,${r}${a}${bn}frame=\{addr=\"$hex\",func=\"$any\",args=\[\\\[\{\]$any\[\\\]\}\],file=\"$any\",fullname=\"${fullname_syntax}$any\",line=\"\[0-9\]*\"\}$after_stopped,thread-id=\"$decimal\",stopped-threads=$any\r\n($thread_selected_re|$breakpoint_re)*$prompt_re" {
             verbose -log "got $expect_out(buffer)"
