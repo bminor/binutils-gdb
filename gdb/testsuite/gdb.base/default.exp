@@ -39,7 +39,7 @@ gdb_test "append value"  "Missing filename\."
 gdb_test "append binary memory" "Missing filename\." 
 gdb_test "append binary value"  "Missing filename\." 
 
-if ![target_info exists use_gdb_stub] {
+if !$use_gdb_stub {
     setup_xfail "mips-idt-*"
     gdb_test_multiple "attach" "attach" {
 	-re "Argument required .(process-id|program) to attach.*$gdb_prompt $"\
@@ -420,7 +420,7 @@ gdb_test "ptype" "The history is empty." "ptype"
 gdb_test "pwd" "Working directory .*" "pwd"
 
 #test run "r" abbreviation
-if [target_info exists use_gdb_stub] {
+if $use_gdb_stub {
     # Only extended-remote supports "run".
 } elseif [istarget "*-*-vxworks*"] then {
     gdb_test "set args" ".*" "" 
@@ -448,7 +448,7 @@ You must specify a function name to run, and arguments if any"\
 }
 
 #test run
-if [target_info exists use_gdb_stub] {
+if $use_gdb_stub {
     # Only extended-remote supports "run".
 } elseif [istarget "*-*-vxworks*"] then {
     gdb_test "set args" ".*" "" 

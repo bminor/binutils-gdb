@@ -51,7 +51,7 @@ gdb_load ${binfile}
 
 # Some coverage stuff
 #
-if ![target_info exists use_gdb_stub] {
+if !$use_gdb_stub {
     gdb_test "kill" ".*The program is not being run.*"
     gdb_test "detach" ".*"
     gdb_test "run" ".*"

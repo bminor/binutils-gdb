@@ -97,7 +97,7 @@ gdb_test_no_output "set args foo bar blup baz bubble" "set args"
 gdb_test "show args" "Argument list to give program being debugged when it is started is \"foo bar blup baz bubble\"..*" "show args"
 
 # Don't test if we can't pass args or if we're using a stub.
-if { ![target_info exists use_gdb_stub] && ![target_info exists noargs] } {
+if { !$use_gdb_stub && ![target_info exists noargs] } {
     #test passing args
     gdb_test "cont" "Continuing.*" "continuing"
     delete_breakpoints

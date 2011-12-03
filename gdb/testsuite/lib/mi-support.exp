@@ -96,7 +96,7 @@ proc mi_uncatched_gdb_exit {} {
 # get really slow.  Give gdb at least 3 minutes to start up.
 #
 proc default_mi_gdb_start { args } {
-    global verbose
+    global verbose use_gdb_stub
     global GDB
     global INTERNAL_GDBFLAGS GDBFLAGS
     global gdb_prompt
@@ -107,6 +107,9 @@ proc default_mi_gdb_start { args } {
 
     gdb_stop_suppressing_tests;
     set inferior_pty no-tty
+
+    # Set the default value, it may be overriden later by specific testfile.
+    set use_gdb_stub [target_info exists use_gdb_stub]
 
     if { [llength $args] == 1} {
 	set inferior_pty [lindex $args 0]
@@ -793,7 +796,7 @@ proc mi_run_cmd_full {use_mi_command args} {
     if { $suppress_flag } {
 	return -1
     }
-    global mi_gdb_prompt
+    global mi_gdb_prompt use_gdb_stub
     global thread_selected_re
     global library_loaded_re
 
@@ -820,7 +823,7 @@ proc mi_run_cmd_full {use_mi_command args} {
 	return -1
     }
 
-    if [target_info exists use_gdb_stub] {
+    if $use_gdb_stub {
 	if [target_info exists gdb,do_reload_on_run] {
 	    send_gdb "${run_prefix}continue\n";
 	    gdb_expect 60 {

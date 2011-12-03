@@ -81,7 +81,7 @@ proc set_listsize { arg } {
 #
 
 proc test_listsize {} {
-    global gdb_prompt
+    global gdb_prompt use_gdb_stub
     global hp_cc_compiler
     global hp_aCC_compiler
 
@@ -94,7 +94,7 @@ proc test_listsize {} {
     # list the lines there instead of main, so we skip this test for remote targets.
     # The second case is for optimized code, it is still correct.
     
-    if [target_info exists use_gdb_stub] {
+    if $use_gdb_stub {
 	runto_main;
 	unsupported "list default lines around main";
     } else {

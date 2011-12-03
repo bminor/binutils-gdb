@@ -208,7 +208,7 @@ gdb_test_multiple "next" "step out of main" {
 set program_exited_normally 0
 set program_not_exited 0
 set program_in_exit 0
-if {! [target_info exists use_gdb_stub]
+if {!$use_gdb_stub
     && (! [target_info exists use_cygmon] || ! [target_info use_cygmon])} {
     global program_exited;
     if {[eval expr $program_exited == 0]} {

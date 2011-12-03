@@ -1,3 +1,30 @@
+2011-12-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.base/break-entry.exp: Move the target use_gdb_stub test before
+	starting GDB.
+	* gdb.base/default.exp: Replace target use_gdb_stub checks by global
+	$use_gdb_stub.
+	* gdb.base/display.exp: Likewise.
+	* gdb.base/ending-run.exp: Likewise.
+	* gdb.base/list.exp (test_listsize): Likewise.
+	* gdb.base/setshow.exp: Likewise.
+	* gdb.base/valgrind-db-attach.exp: Set global use_gdb_stub to 1.
+	* lib/gdb.exp (gdb_run_cmd, gdb_start_cmd): Replace target use_gdb_stub
+	check by global $use_gdb_stub.
+	(gdb_test_multiple): Forbid run, start or attach for !$use_gdb_stub.
+	(default_gdb_start): Set global use_gdb_stub from target use_gdb_stub.
+	(default_gdb_init): Unset global $use_gdb_stub.
+	(gdb_continue_to_end, rerun_to_main): Replace target use_gdb_stub check
+	by global $use_gdb_stub.
+	* lib/gdbserver-support.exp: Extend comments for set_board_info
+	gdb_protocol and gdb,socketport.
+	(gdbserver_start_extended): Set global gdbserver_protocol and
+	gdbserver_gdbport.  Clear global use_gdb_stub.
+	* lib/mi-support.exp (default_mi_gdb_start): Set global use_gdb_stub
+	from target use_gdb_stub.
+	(mi_run_cmd): Replace target use_gdb_stub check by global $use_gdb_stub.
+
 2011-12-03  Doug Evans  <dje@google.com>
 
 	* lib/gdb.exp (gdb_run_cmd, gdb_start_cmd, run_to_main): Add comments.

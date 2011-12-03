@@ -197,7 +197,7 @@ proc delete_breakpoints {} {
 # that is the caller's responsibility.
 
 proc gdb_run_cmd {args} {
-    global gdb_prompt
+    global gdb_prompt use_gdb_stub
 
     if [target_info exists gdb_init_command] {
 	send_gdb "[target_info gdb_init_command]\n";
@@ -210,7 +210,7 @@ proc gdb_run_cmd {args} {
 	}
     }
 
-    if [target_info exists use_gdb_stub] {
+    if $use_gdb_stub {
 	if [target_info exists gdb,do_reload_on_run] {
 	    if { [gdb_reload] != 0 } {
 		return;
@@ -306,7 +306,7 @@ proc gdb_run_cmd {args} {
 # that is the caller's responsibility.
 
 proc gdb_start_cmd {args} {
-    global gdb_prompt
+    global gdb_prompt use_gdb_stub
 
     if [target_info exists gdb_init_command] {
 	send_gdb "[target_info gdb_init_command]\n";
@@ -319,7 +319,7 @@ proc gdb_start_cmd {args} {
 	}
     }
 
-    if [target_info exists use_gdb_stub] {
+    if $use_gdb_stub {
 	return -1
     }
 
@@ -587,7 +587,7 @@ proc gdb_internal_error_resync {} {
 # ...", all being implicitly appended to that list.
 #
 proc gdb_test_multiple { command message user_code } {
-    global verbose
+    global verbose use_gdb_stub
     global gdb_prompt
     global GDB
     global inferior_exited_re
@@ -604,6 +604,12 @@ proc gdb_test_multiple { command message user_code } {
 
     if [string match "*\[\r\n\]*" $message] {
 	error "Invalid newline in \"$message\" test"
+    }
+
+    if {$use_gdb_stub
+        && [regexp -nocase {^\s*(r|run|star|start|at|att|atta|attac|attach)\M} \
+	    $command]} {
+	error "gdbserver does not support $command without extended-remote"
     }
 
     # TCL/EXPECT WART ALERT
@@ -1317,7 +1323,7 @@ proc gdb_file_cmd { arg } {
 # get really slow.  Give gdb at least 3 minutes to start up.
 #
 proc default_gdb_start { } {
-    global verbose
+    global verbose use_gdb_stub
     global GDB
     global INTERNAL_GDBFLAGS GDBFLAGS
     global gdb_prompt
@@ -1325,6 +1331,15 @@ proc default_gdb_start { } {
     global gdb_spawn_id;
 
     gdb_stop_suppressing_tests;
+
+    # Set the default value, it may be overriden later by specific testfile.
+    #
+    # Use `set_board_info use_gdb_stub' for the board file to flag the inferior
+    # is already started after connecting and run/attach are not supported.
+    # This is used for the "remote" protocol.  After GDB starts you should
+    # check global $use_gdb_stub instead of the board as the testfile may force
+    # a specific different target protocol itself.
+    set use_gdb_stub [target_info exists use_gdb_stub]
 
     verbose "Spawning $GDB $INTERNAL_GDBFLAGS $GDBFLAGS"
 
@@ -2978,6 +2993,10 @@ proc default_gdb_init { args } {
     } else {
 	set gdb_prompt "\\(gdb\\)"
     }
+    global use_gdb_stub
+    if [info exists use_gdb_stub] {
+	unset use_gdb_stub
+    }
 }
 
 # The default timeout used when testing GDB commands.  We want to use
@@ -3350,7 +3369,7 @@ proc gdb_get_line_number { text { file "" } } {
 #	is accepted.
 
 proc gdb_continue_to_end {{mssg ""} {command continue} {allow_extra 0}} {
-  global inferior_exited_re
+  global inferior_exited_re use_gdb_stub
 
   if {$mssg == ""} {
       set text "continue until exit"
@@ -3362,7 +3381,7 @@ proc gdb_continue_to_end {{mssg ""} {command continue} {allow_extra 0}} {
   } else {
       set extra ""
   }
-  if [target_info exists use_gdb_stub] {
+  if $use_gdb_stub {
     if {![gdb_breakpoint "exit"]} {
       return 0
     }
@@ -3379,9 +3398,9 @@ proc gdb_continue_to_end {{mssg ""} {command continue} {allow_extra 0}} {
 }
 
 proc rerun_to_main {} {
-  global gdb_prompt
+  global gdb_prompt use_gdb_stub
 
-  if [target_info exists use_gdb_stub] {
+  if $use_gdb_stub {
     gdb_run_cmd
     gdb_expect {
       -re ".*Breakpoint .*main .*$gdb_prompt $"\
