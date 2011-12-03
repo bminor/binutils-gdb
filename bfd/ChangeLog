@@ -1,5 +1,11 @@
 2011-12-03  Alan Modra  <amodra@gmail.com>
 
+	PR ld/13468
+	* elflink.c (bfd_elf_final_link): Don't segfault when checking
+	for DT_TEXTREL and .dynamic does not exist.
+
+2011-12-03  Alan Modra  <amodra@gmail.com>
+
 	PR ld/13470
 	* elf32-ppc.c (ppc_elf_copy_indirect_symbol): Revert substantive
 	change in 2011-07-01 commit.  Comment.
