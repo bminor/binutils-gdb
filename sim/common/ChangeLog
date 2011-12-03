@@ -1,3 +1,16 @@
+2011-12-03  Mike Frysinger  <vapier@gentoo.org>
+
+	* Make-common.in (VPATH): Add $(srccom).
+	(DEP): Delete.
+	(DEPMODE, DEPDIR, depcomp, COMPILE.pre, COMPILE.post, COMPILE,
+	POSTCOMPILE): New variables.
+	(.c.o): Replace recipe with call to $(COMPILE) and $(POSTCOMPILE).
+	Include dependency files, when using GNU Make.  Delete all
+	dependency-only rules.
+	* aclocal.m4: Include ../../config/depstand.m4.  Call
+	ZW_CREATE_DEPDIR and ZW_PROG_COMPILER_DEPENDENCIES.
+	(MAKE, GMAKE): New substs.
+
 2011-11-07  Mike Frysinger  <vapier@gentoo.org>
 
 	PR sim/13161

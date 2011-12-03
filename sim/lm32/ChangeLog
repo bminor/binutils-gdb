@@ -1,3 +1,8 @@
+2011-12-03  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4: New file.
+	* configure: Regenerate.
+
 2011-10-19  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure: Regenerate after common/acinclude.m4 update.
