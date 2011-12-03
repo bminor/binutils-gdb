@@ -1,5 +1,13 @@
 2011-12-03  Mike Frysinger  <vapier@gentoo.org>
 
+	* interp.c (bfin_syscall): Increase _tbuf storage.  Declare new local
+	tstr buffer.  Call cb_get_string on tstr when handling CB_SYS_stat64,
+	CB_SYS_lstat64, CB_SYS_open, CB_SYS_write, CB_SYS_unlink,
+	CB_SYS_truncate, CB_SYS_rename, CB_SYS_stat, CB_SYS_lstat.  Include
+	tstr in the tbuf output.
+
+2011-12-03  Mike Frysinger  <vapier@gentoo.org>
+
 	* Makefile.in: Delete all dependency rules.
 	* aclocal.m4, configure: Regenerate.
 
