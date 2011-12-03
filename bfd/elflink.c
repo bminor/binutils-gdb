@@ -11188,14 +11188,11 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	goto error_return;
 
       /* Check for DT_TEXTREL (late, in case the backend removes it).  */
-      if ((info->warn_shared_textrel && info->shared)
-	  || info->error_textrel)
+      if (((info->warn_shared_textrel && info->shared)
+	   || info->error_textrel)
+	  && (o = bfd_get_section_by_name (dynobj, ".dynamic")) != NULL)
 	{
 	  bfd_byte *dyncon, *dynconend;
-
-	  /* Fix up .dynamic entries.  */
-	  o = bfd_get_section_by_name (dynobj, ".dynamic");
-	  BFD_ASSERT (o != NULL);
 
 	  dyncon = o->contents;
 	  dynconend = o->contents + o->size;
