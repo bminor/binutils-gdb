@@ -76,8 +76,8 @@ char *simulator_sysroot = "";
 /* Utility of cb_syscall to fetch a path name or other string from the target.
    The result is 0 for success or a host errno value.  */
 
-static int
-get_string (cb, sc, buf, buflen, addr)
+int
+cb_get_string (cb, sc, buf, buflen, addr)
      host_callback *cb;
      CB_SYSCALL *sc;
      char *buf;
@@ -121,7 +121,7 @@ get_path (cb, sc, addr, bufp)
   int result;
   int sysroot_len = strlen (simulator_sysroot);
 
-  result = get_string (cb, sc, buf, MAX_PATH_LEN - sysroot_len, addr);
+  result = cb_get_string (cb, sc, buf, MAX_PATH_LEN - sysroot_len, addr);
   if (result == 0)
     {
       /* Prepend absolute paths with simulator_sysroot.  Relative paths
