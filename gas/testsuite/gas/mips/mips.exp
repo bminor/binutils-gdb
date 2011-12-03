@@ -286,10 +286,11 @@ proc mips_arch_list_matching {args} {
 
 # The functions below facilitate running various types of tests.
 
-# run_dump_test_arch NAME ARCH
+# run_dump_test_arch NAME OPTS ARCH
 #
-# Invoke "run_dump_test" for test NAME, with extra assembler and
-# disassembler flags to test architecture ARCH.
+# Invoke "run_dump_test" for test NAME with additional assembler options OPTS.
+# Add the assembler and disassembler flags that are associated with
+# architecture ARCH.
 #
 # You can override the expected output for particular architectures
 # and file formats.  The possible test names are, in order of preference:
@@ -302,7 +303,7 @@ proc mips_arch_list_matching {args} {
 # where CARCH is the "canonical" name of architecture ARCH as recorded
 # in its associated property list, and where FORMAT is the target's
 # file format (one of "elf", "ecoff" or "aout").
-proc run_dump_test_arch { name arch } {
+proc run_dump_test_arch { name opts arch } {
     upvar elf elf ecoff ecoff aout aout
     global subdir srcdir
 
@@ -323,45 +324,61 @@ proc run_dump_test_arch { name arch } {
     }
 
     if [catch {run_dump_test $name \
-			     "{name    {([mips_arch_displayname $arch])}}
-			      {objdump {[mips_arch_objdump_flags $arch]}}
-			      {as      {[mips_arch_as_flags $arch]}}"} rv] {
+		   "{name    {([concat $opts [mips_arch_displayname $arch]])}}
+		    {objdump {[mips_arch_objdump_flags $arch]}}
+		    {as      {[concat $opts [mips_arch_as_flags $arch]]}}"} rv] {
         perror "$rv"
         untested "$subdir/$name ($arch)"
     }
 }
 
-# run_dump_test_arches NAME ARCH_LIST
+# run_dump_test_arches NAME [OPTS] ARCH_LIST
 #
 # Invoke "run_dump_test_arch" for test NAME, for each architecture
-# listed in ARCH_LIST.
-proc run_dump_test_arches { name arch_list } {
+# listed in ARCH_LIST.  OPTS, if specified, is a list of additional
+# assembler options that should be used for all architectures.
+proc run_dump_test_arches { name args } {
     upvar elf elf ecoff ecoff aout aout
+    set opts ""
+    if { [llength $args] > 1 } {
+	set opts [lindex $args 0]
+	set args [lrange $args 1 end]
+    }
+    set arch_list [lindex $args 0]
     foreach arch $arch_list {
-	run_dump_test_arch "$name" "$arch"
+	run_dump_test_arch $name $opts $arch
     }
 }
 
 # run_list_test_arch NAME OPTS ARCH
 #
-# Invoke "run_list_test" for test NAME with options OPTS, with extra
-# assembler flags to test architecture ARCH.
+# Invoke "run_list_test" for test NAME with additional assembler options OPTS.
+# Add the assembler flags that are associated with architecture ARCH.
 proc run_list_test_arch { name opts arch } {
     global subdir
 
-    set testname "MIPS $name ([mips_arch_displayname $arch])"
-    if [catch {run_list_test "$name" "$opts [mips_arch_as_flags $arch]" \
-			     "$testname"} rv] {
+    set testname "MIPS $name ([concat $opts [mips_arch_displayname $arch]])"
+    if [catch {run_list_test \
+		   $name \
+		   [concat $opts [mips_arch_as_flags $arch]] \
+		   $testname} rv] {
         perror "$rv"
         untested "$testname"
     }
 }
 
-# run_list_test_arches NAME OPTS ARCH_LIST
+# run_list_test_arches NAME [OPTS] ARCH_LIST
 #
-# Invoke "run_list_test_arch" for test NAME with options OPTS, for each
-# architecture listed in ARCH_LIST.
-proc run_list_test_arches { name opts arch_list } {
+# Invoke "run_list_test_arch" for test NAME, for each architecture listed
+# in ARCH_LIST.  OPTS, if specified, is a list of additional assembler
+# options that should be used for all architectures.
+proc run_list_test_arches { name args } {
+    set opts ""
+    if { [llength $args] > 1 } {
+	set opts [lindex $args 0]
+	set args [lrange $args 1 end]
+    }
+    set arch_list [lindex $args 0]
     foreach arch $arch_list {
 	run_list_test_arch "$name" "$opts" "$arch"
     }
@@ -636,14 +653,20 @@ if { [istarget mips*-*-vxworks*] } {
     if $elf { run_dump_test "lif-svr4pic" }
     if $elf { run_dump_test "lif-xgot" }
     run_dump_test_arches "mips4"	[mips_arch_list_matching mips4]
-    run_dump_test_arches "mips4-fp"	[mips_arch_list_matching fpisa4]
+    run_dump_test_arches "mips4-fp" "-32" \
+					[mips_arch_list_matching fpisa4]
+    run_dump_test_arches "mips4-fp" "-mabi=o64" \
+					[mips_arch_list_matching fpisa4 gpr64]
     run_list_test_arches "mips4-fp" "-32 -msoft-float" \
 					[mips_arch_list_matching fpisa4]
     run_dump_test_arches "mips4-branch-likely" \
 					[mips_arch_list_matching mips4]
     run_list_test_arches "mips4-branch-likely" "-32 -msoft-float" \
 					[mips_arch_list_matching mips4]
-    run_dump_test_arches "mips5-fp"	[mips_arch_list_matching fpisa5]
+    run_dump_test_arches "mips5-fp" "-32" \
+					[mips_arch_list_matching fpisa5]
+    run_dump_test_arches "mips5-fp" "-mabi=o64" \
+					[mips_arch_list_matching fpisa5 gpr64]
     run_dump_test "mul"
 
     run_dump_test_arches "rol"		[mips_arch_list_matching mips1 !ror]
@@ -739,7 +762,7 @@ if { [istarget mips*-*-vxworks*] } {
 					    !octeon]
 
     run_dump_test_arches "mips64r2"	[mips_arch_list_matching mips64r2]
-    run_list_test_arches "mips64r2-ill" "" [mips_arch_list_matching mips64r2]
+    run_list_test_arches "mips64r2-ill"	[mips_arch_list_matching mips64r2]
 
     run_dump_test "set-arch"
 
@@ -991,8 +1014,7 @@ if { [istarget mips*-*-vxworks*] } {
 
     run_dump_test_arches "octeon"	[mips_arch_list_matching octeon]
     run_dump_test_arches "octeon-saa-saad" [mips_arch_list_matching octeonp]
-    run_list_test_arches "octeon-ill" "" \
-					[mips_arch_list_matching octeon]
+    run_list_test_arches "octeon-ill"	[mips_arch_list_matching octeon]
     run_dump_test_arches "octeon-pref"	[mips_arch_list_matching octeon]
 
     run_dump_test "smartmips"

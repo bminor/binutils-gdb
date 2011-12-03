@@ -1,3 +1,12 @@
+2011-12-03  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* gas/mips/mips.exp (run_dump_test_arch): Add an opts parameter.
+	(run_dump_test_arches): Allow additional options to be passed.
+	(run_list_test_arch): Add opts to the name.
+	(run_list_test_arches): Allow the options to be elided.
+	(mips4-fp, mips5-fp): Run twice, one with -32 and once with -mabi=o64.
+	(mips64r2-ill, octeon-ill): Remove empty options string.
+
 2011-11-29  Andrew Pinski  <apinski@cavium.com>
 
 	* gas/mips/mips.exp: Add octeon+ for an architecture.
