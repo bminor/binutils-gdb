@@ -1,3 +1,10 @@
+2011-12-03  Alan Modra  <amodra@gmail.com>
+
+	PR ld/13470
+	* elf32-ppc.c (ppc_elf_copy_indirect_symbol): Revert substantive
+	change in 2011-07-01 commit.  Comment.
+	* elf64-ppc.c (ppc64_elf_copy_indirect_symbol): Likewise.
+
 2011-12-01  Mikael Pettersson  <mikpe@it.uu.se>
 
 	Apply mainline patches

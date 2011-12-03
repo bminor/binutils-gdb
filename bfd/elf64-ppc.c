@@ -4435,10 +4435,6 @@ ppc64_elf_copy_indirect_symbol (struct bfd_link_info *info,
   edir->elf.ref_regular_nonweak |= eind->elf.ref_regular_nonweak;
   edir->elf.needs_plt |= eind->elf.needs_plt;
 
-  /* If we were called to copy over info for a weak sym, that's all.  */
-  if (eind->elf.root.type != bfd_link_hash_indirect)
-    return;
-
   /* Copy over any dynamic relocs we may have on the indirect sym.  */
   if (eind->dyn_relocs != NULL)
     {
@@ -4470,6 +4466,16 @@ ppc64_elf_copy_indirect_symbol (struct bfd_link_info *info,
       edir->dyn_relocs = eind->dyn_relocs;
       eind->dyn_relocs = NULL;
     }
+
+  /* If we were called to copy over info for a weak sym, that's all.
+     You might think dyn_relocs need not be copied over;  After all,
+     both syms will be dynamic or both non-dynamic so we're just
+     moving reloc accounting around.  However, ELIMINATE_COPY_RELOCS 
+     code in ppc64_elf_adjust_dynamic_symbol needs to check for
+     dyn_relocs in read-only sections, and it does so on what is the
+     DIR sym here.  */
+  if (eind->elf.root.type != bfd_link_hash_indirect)
+    return;
 
   /* Copy over got entries that we may have already seen to the
      symbol which just became indirect.  */
