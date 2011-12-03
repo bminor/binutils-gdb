@@ -187,14 +187,15 @@ proc delete_breakpoints {} {
     }
 }
 
-
-#
 # Generic run command.
 #
 # The second pattern below matches up to the first newline *only*.
 # Using ``.*$'' could swallow up output that we attempt to match
 # elsewhere.
 #
+# N.B. This function does not wait for gdb to return to the prompt,
+# that is the caller's responsibility.
+
 proc gdb_run_cmd {args} {
     global gdb_prompt
 
@@ -300,6 +301,9 @@ proc gdb_run_cmd {args} {
 
 # Generic start command.  Return 0 if we could start the program, -1
 # if we could not.
+#
+# N.B. This function does not wait for gdb to return to the prompt,
+# that is the caller's responsibility.
 
 proc gdb_start_cmd {args} {
     global gdb_prompt
@@ -451,12 +455,14 @@ proc runto { function args } {
     return 1
 }
 
+# Ask gdb to run until we hit a breakpoint at main.
+# The case where the target uses stubs has to be handled
+# specially--if it uses stubs, assuming we hit
+# breakpoint() and just step out of the function.
 #
-# runto_main -- ask gdb to run until we hit a breakpoint at main.
-#		The case where the target uses stubs has to be handled
-#		specially--if it uses stubs, assuming we hit
-#		breakpoint() and just step out of the function.
-#
+# N.B. This function deletes all existing breakpoints.
+# If you don't want that, use gdb_start_cmd.
+
 proc runto_main { } {
     global gdb_prompt
     global decimal
@@ -471,7 +477,6 @@ proc runto_main { } {
 
     return 1
 }
-
 
 ### Continue, and expect to hit a breakpoint.
 ### Report a pass or fail, depending on whether it seems to have
@@ -3141,6 +3146,32 @@ proc setup_kfail_for_target { PR target } {
 	setup_kfail $PR $target
     }
 }
+
+# Test programs for embedded (often "bare board") systems sometimes use a
+# "stub" either embedded in the test program itself or in the boot rom.
+# The job of the stub is to implement the remote protocol to communicate
+# with gdb and control the inferior.  To initiate the remote protocol
+# session with gdb the stub needs to be given control by the inferior.
+# They do this by calling a function that typically triggers a trap
+# from main that transfers control to the stub.
+# The purpose of this function, gdb_step_for_stub, is to step out of
+# that function ("breakpoint" in the example below) and back into main.
+#
+# Example:
+#
+# int
+# main ()
+# {
+# #ifdef usestubs
+#  set_debug_traps (); /* install trap handlers for stub */
+#  breakpoint (); /* trigger a trap to give the stub control */
+# #endif
+#  /* test program begins here */
+# }
+#
+# Note that one consequence of this design is that a breakpoint on "main"
+# does not Just Work (because if the target could stop there you still have
+# to step past the calls to set_debug_traps,breakpoint).
 
 proc gdb_step_for_stub { } {
     global gdb_prompt;

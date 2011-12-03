@@ -1,3 +1,8 @@
+2011-12-03  Doug Evans  <dje@google.com>
+
+	* lib/gdb.exp (gdb_run_cmd, gdb_start_cmd, run_to_main): Add comments.
+	(gdb_step_for_stub): Add comments.
+
 2011-12-02  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* lib/gdb.exp (gdb_expect): Pass all the exception conditions up
