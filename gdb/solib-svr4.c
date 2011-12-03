@@ -961,6 +961,30 @@ struct svr4_library_list
   CORE_ADDR main_lm;
 };
 
+/* Implementation for target_so_ops.free_so.  */
+
+static void
+svr4_free_so (struct so_list *so)
+{
+  xfree (so->lm_info);
+}
+
+/* Free so_list built so far (called via cleanup).  */
+
+static void
+svr4_free_library_list (void *p_list)
+{
+  struct so_list *list = *(struct so_list **) p_list;
+
+  while (list != NULL)
+    {
+      struct so_list *next = list->next;
+
+      svr4_free_so (list);
+      list = next;
+    }
+}
+
 #ifdef HAVE_LIBEXPAT
 
 #include "xml-support.h"
@@ -1049,30 +1073,6 @@ static const struct gdb_xml_element svr4_library_list_elements[] =
     GDB_XML_EF_NONE, svr4_library_list_start_list, NULL },
   { NULL, NULL, NULL, GDB_XML_EF_NONE, NULL, NULL }
 };
-
-/* Implementation for target_so_ops.free_so.  */
-
-static void
-svr4_free_so (struct so_list *so)
-{
-  xfree (so->lm_info);
-}
-
-/* Free so_list built so far (called via cleanup).  */
-
-static void
-svr4_free_library_list (void *p_list)
-{
-  struct so_list *list = *(struct so_list **) p_list;
-
-  while (list != NULL)
-    {
-      struct so_list *next = list->next;
-
-      svr4_free_so (list);
-      list = next;
-    }
-}
 
 /* Parse qXfer:libraries:read packet into *SO_LIST_RETURN.  Return 1 if
 

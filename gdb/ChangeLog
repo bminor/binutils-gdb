@@ -1,3 +1,10 @@
+2011-12-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix compilation --without-expat.
+	* solib-svr4.c (svr4_free_so, svr4_free_library_list): Move them here
+	from ...
+	[HAVE_LIBEXPAT] (svr4_free_so, svr4_free_library_list): ... here.
+
 2011-12-02  Paul Pluzhnikov  <ppluzhnikov@google.com>
 	    Jan Kratochvil  <jan.kratochvil@redhat.com>
 
