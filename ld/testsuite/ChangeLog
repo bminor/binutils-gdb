@@ -1,3 +1,8 @@
+2011-12-03 David Daney <david.daney@cavium.com>
+
+	* ld-bootstrap/bootstrap.exp: Use consistent flags for final link
+	in ia64 and mips cases.
+
 2011-11-29  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	PR ld/10144
