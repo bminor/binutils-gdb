@@ -312,18 +312,9 @@ i386bsd_dr_get_status (void)
 {
   struct dbreg dbregs;
 
-  /* FIXME: kettenis/2001-03-31: Calling perror_with_name if the
-     ptrace call fails breaks debugging remote targets.  The correct
-     way to fix this is to add the hardware breakpoint and watchpoint
-     stuff to the target vector.  For now, just return zero if the
-     ptrace call fails.  */
   if (ptrace (PT_GETDBREGS, PIDGET (inferior_ptid),
 	      (PTRACE_TYPE_ARG3) &dbregs, 0) == -1)
-#if 0
     perror_with_name (_("Couldn't read debug registers"));
-#else
-    return 0;
-#endif
 
   return DBREG_DRX ((&dbregs), 6);
 }
