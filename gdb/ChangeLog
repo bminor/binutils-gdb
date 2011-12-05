@@ -1,5 +1,10 @@
 2011-12-05  Pedro Alves  <pedro@codesourcery.com>
 
+	* linux-nat.c (resume_stopped_resumed_lwps): Call
+	registers_changed.
+
+2011-12-05  Pedro Alves  <pedro@codesourcery.com>
+
 	* breakpoint.c: Include record.h.
 	(breakpoints_always_inserted_mode): Return false when the record
 	target is in use.
