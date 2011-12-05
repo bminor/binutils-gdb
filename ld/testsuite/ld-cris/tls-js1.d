@@ -28,5 +28,5 @@ Relocation section '\.rela\.plt' at offset 0x224 contains 2 entries:
 0000235c  0000030b R_CRIS_JUMP_SLOT  00000296   dsofn4 \+ 0
 00002360  00000c0b R_CRIS_JUMP_SLOT  000002ae   dsofn \+ 0
 
-There are no unwind sections in this file.
+The decoding of unwind sections for machine type Axis Communications 32-bit embedded processor is not currently supported.
 #pass

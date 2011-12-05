@@ -1,3 +1,17 @@
+2011-12-05  Nick Clifton  <nickc@redhat.com>
+
+	* ld-cris/weakref4.d: Updated pattern match for the message from
+	readelf stating that there are no decoded unwind sections.
+	* tls-js1.d: Likewise.
+	* tls-local-63.d: Likewise.
+	* tls-local-64.d: Likewise.
+	* tls-und-38.d: Likewise.
+	* tls-und-42.d: Likewise.
+	* tls-und-46.d: Likewise.
+	* tls-und-50.d: Likewise.
+	* weakref3.d: Likewise.
+	* weakref4.d: Likewise.
+
 2011-12-03 David Daney <david.daney@cavium.com>
 
 	* ld-bootstrap/bootstrap.exp: Use consistent flags for final link

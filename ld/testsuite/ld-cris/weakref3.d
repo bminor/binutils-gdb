@@ -22,7 +22,7 @@ Relocation section '.rela.plt' at offset 0x... contains 1 entries:
  Offset +Info +Type +Sym.Value +Sym. Name \+ Addend
 00082320 +0000030b R_CRIS_JUMP_SLOT +00080238 +expfn2 \+ 0
 
-There are no unwind sections in this file.
+The decoding of unwind sections for machine type Axis Communications 32-bit embedded processor is not currently supported.
 
 Symbol table '.dynsym' contains . entries:
 #...

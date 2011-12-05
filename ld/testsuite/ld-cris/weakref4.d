@@ -19,7 +19,7 @@ Relocation section '.rela.dyn' at offset 0x... contains 1 entries:
 #...
 000822a8 +00000109 R_CRIS_COPY +000822a8 +__expobj2 \+ 0
 
-There are no unwind sections in this file.
+The decoding of unwind sections for machine type Axis Communications 32-bit embedded processor is not currently supported.
 
 Symbol table '.dynsym' contains . entries:
 #...
