@@ -109,7 +109,7 @@ if { $return_me == 1 } then {
 gdb_test "tstatus" "\[Tt\]race is running.*" "test tstatus on"
 
 # 6.2 test help tstart
-gdb_test "help tstart" "Start trace data collection." "6.2: help tstart"
+gdb_test "help tstart" "Start trace data collection\.\[\r\n\]+Usage: tstart \\\[ <notes> \.\.\. \\\]\[\r\n\]+Any arguments supplied are recorded with the trace as a note and\[\r\n\]+reported by tstatus \\(if the target supports trace notes\\)\." "6.2: help tstart"
 
 gdb_test "break end" ".*" ""
 gdb_test "continue" \
@@ -140,7 +140,7 @@ if { $return_me == 1 } then {
 }
 
 # 7.2 test help tstop
-gdb_test "help tstop" "Stop trace data collection." "7.2: help tstop"
+gdb_test "help tstop" "Stop trace data collection\.\[\r\n\]+Usage: tstop \\\[ <notes> \.\.\. \\\]\[\r\n\]+Any arguments supplied are recorded with the trace as a stop reason and\[\r\n\]+reported by tstatus \\(if the target supports trace notes\\)\." "7.2: help tstop"
 
 # test tstatus (when trace off)
 gdb_test "tstatus" "Trace stopped by a tstop command.*" \

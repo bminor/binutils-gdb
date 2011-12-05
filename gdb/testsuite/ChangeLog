@@ -1,3 +1,7 @@
+2011-12-05  Stan Shebs  <stan@codesourcery.com>
+
+	* gdb.trace/tfind.exp: Update help string matches.
+
 2011-12-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.server/ext-run.exp (get process list): Accept also systemd
