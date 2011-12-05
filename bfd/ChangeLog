@@ -1,5 +1,12 @@
 2011-12-05  Tristan Gingold  <gingold@adacore.com>
 
+	* mach-o.c (bfd_mach_o_write_contents): Handle LC_LOAD_UPWARD_DYLIB.
+	(bfd_mach_o_read_dylib): Likewise.
+	(bfd_mach_o_read_command): Likewise.
+	(bfd_mach_o_bfd_print_private_bfd_data): Likewise.
+
+2011-12-05  Tristan Gingold  <gingold@adacore.com>
+
 	* mach-o.c (bfd_mach_o_read_command): Add the bfd in the error
 	message.
 	(bfd_mach_o_openr_next_archived_file): Use arch name as member name.

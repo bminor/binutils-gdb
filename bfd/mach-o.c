@@ -1294,6 +1294,7 @@ bfd_mach_o_write_contents (bfd *abfd)
 	case BFD_MACH_O_LC_LOAD_WEAK_DYLIB:
 	case BFD_MACH_O_LC_ID_DYLIB:
 	case BFD_MACH_O_LC_REEXPORT_DYLIB:
+        case BFD_MACH_O_LC_LOAD_UPWARD_DYLIB:
 	case BFD_MACH_O_LC_LOAD_DYLINKER:
 	case BFD_MACH_O_LC_ID_DYLINKER:
 	case BFD_MACH_O_LC_PREBOUND_DYLIB:
@@ -2100,6 +2101,7 @@ bfd_mach_o_read_dylib (bfd *abfd, bfd_mach_o_load_command *command)
     case BFD_MACH_O_LC_LOAD_WEAK_DYLIB:
     case BFD_MACH_O_LC_ID_DYLIB:
     case BFD_MACH_O_LC_REEXPORT_DYLIB:
+    case BFD_MACH_O_LC_LOAD_UPWARD_DYLIB:
       break;
     default:
       BFD_FAIL ();
@@ -2684,6 +2686,7 @@ bfd_mach_o_read_command (bfd *abfd, bfd_mach_o_load_command *command)
     case BFD_MACH_O_LC_ID_DYLIB:
     case BFD_MACH_O_LC_LOAD_WEAK_DYLIB:
     case BFD_MACH_O_LC_REEXPORT_DYLIB:
+    case BFD_MACH_O_LC_LOAD_UPWARD_DYLIB:
       if (bfd_mach_o_read_dylib (abfd, command) != 0)
 	return -1;
       break;
@@ -3951,6 +3954,7 @@ bfd_mach_o_bfd_print_private_bfd_data (bfd *abfd, void * ptr)
 	case BFD_MACH_O_LC_LOAD_DYLIB:
 	case BFD_MACH_O_LC_LOAD_WEAK_DYLIB:
 	case BFD_MACH_O_LC_REEXPORT_DYLIB:
+        case BFD_MACH_O_LC_LOAD_UPWARD_DYLIB:
 	case BFD_MACH_O_LC_ID_DYLIB:
 	  {
 	    bfd_mach_o_dylib_command *dylib = &cmd->command.dylib;
