@@ -2734,8 +2734,8 @@ bfd_mach_o_read_command (bfd *abfd, bfd_mach_o_load_command *command)
 	return -1;
       break;
     default:
-      (*_bfd_error_handler) (_("unable to read unknown load command 0x%lx"),
-			     (unsigned long) command->type);
+      (*_bfd_error_handler)(_("%B: unable to read unknown load command 0x%lx"),
+         abfd, (unsigned long) command->type);
       break;
     }
 
@@ -3209,22 +3209,9 @@ bfd_mach_o_openr_next_archived_file (bfd *archive, bfd *prev)
 
   bfd_mach_o_convert_architecture (entry->cputype, entry->cpusubtype,
 				   &arch_type, &arch_subtype);
-  /* Create the member filename.
-     Use FILENAME:ARCH_NAME.  */
-  {
-    char *s = NULL;
-    const char *arch_name;
-    size_t arch_file_len = strlen (bfd_get_filename (archive));
 
-    arch_name = bfd_printable_arch_mach (arch_type, arch_subtype);
-    s = bfd_malloc (arch_file_len + 1 + strlen (arch_name) + 1);
-    if (s == NULL)
-      return NULL;
-    memcpy (s, bfd_get_filename (archive), arch_file_len);
-    s[arch_file_len] = ':';
-    strcpy (s + arch_file_len + 1, arch_name);
-    nbfd->filename = s;
-  }
+  /* Create the member filename. Use ARCH_NAME.  */
+  nbfd->filename = bfd_printable_arch_mach (arch_type, arch_subtype);
   nbfd->iostream = NULL;
   bfd_set_arch_mach (nbfd, arch_type, arch_subtype);
 
@@ -3277,7 +3264,7 @@ bfd_mach_o_fat_extract (bfd *abfd,
 
       res->origin = e->offset;
 
-      res->filename = strdup (abfd->filename);
+      res->filename = bfd_printable_arch_mach (cpu_type, cpu_subtype);
       res->iostream = NULL;
 
       if (bfd_check_format (res, format))

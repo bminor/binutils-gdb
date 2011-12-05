@@ -1,3 +1,10 @@
+2011-12-05  Tristan Gingold  <gingold@adacore.com>
+
+	* mach-o.c (bfd_mach_o_read_command): Add the bfd in the error
+	message.
+	(bfd_mach_o_openr_next_archived_file): Use arch name as member name.
+	(bfd_mach_o_fat_extract): Ditto.
+
 2011-12-03  Alan Modra  <amodra@gmail.com>
 
 	PR ld/13468
