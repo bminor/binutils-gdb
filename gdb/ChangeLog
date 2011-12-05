@@ -1,5 +1,11 @@
 2011-12-05  Pedro Alves  <pedro@codesourcery.com>
 
+	* breakpoint.c: Include record.h.
+	(breakpoints_always_inserted_mode): Return false when the record
+	target is in use.
+
+2011-12-05  Pedro Alves  <pedro@codesourcery.com>
+
 	* amd64-linux-nat.c (amd64_linux_dr_get): Remove FIXME comment.
 	Reinstate perror_with_name call on ptrace error.  Remove #if 0.
 	* i386-linux-nat.c (i386_linux_dr_get): Likewise.

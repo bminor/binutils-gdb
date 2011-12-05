@@ -67,6 +67,7 @@
 #include "continuations.h"
 #include "stack.h"
 #include "skip.h"
+#include "record.h"
 
 /* readline include files */
 #include "readline/readline.h"
@@ -377,8 +378,9 @@ show_always_inserted_mode (struct ui_file *file, int from_tty,
 int
 breakpoints_always_inserted_mode (void)
 {
-  return (always_inserted_mode == always_inserted_on
-	  || (always_inserted_mode == always_inserted_auto && non_stop));
+  return ((always_inserted_mode == always_inserted_on
+	   || (always_inserted_mode == always_inserted_auto && non_stop))
+	  && !RECORD_IS_USED);
 }
 
 void _initialize_breakpoint (void);
