@@ -1901,10 +1901,12 @@ bfd_mach_o_read_symtab_symbol (bfd *abfd,
 	    }
 	  break;
 	case BFD_MACH_O_N_INDR:
-	  (*_bfd_error_handler) (_("bfd_mach_o_read_symtab_symbol: "
-				   "symbol \"%s\" is unsupported 'indirect' reference: setting to undefined"),
-				 s->symbol.name);
-	  s->symbol.section = bfd_und_section_ptr;
+	  /* FIXME: we don't follow the BFD convention as this indirect symbol
+	     won't be followed by the referenced one.  This looks harmless
+	     unless we start using the linker.	*/
+	  s->symbol.flags |= BSF_INDIRECT;
+	  s->symbol.section = bfd_ind_section_ptr;
+	  s->symbol.value = 0;
 	  break;
 	default:
 	  (*_bfd_error_handler) (_("bfd_mach_o_read_symtab_symbol: "

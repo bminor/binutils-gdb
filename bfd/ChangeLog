@@ -1,5 +1,9 @@
 2011-12-05  Tristan Gingold  <gingold@adacore.com>
 
+	* mach-o.c (bfd_mach_o_read_symtab_symbol): Accept indirect symbols.
+
+2011-12-05  Tristan Gingold  <gingold@adacore.com>
+
 	* mach-o.c (bfd_mach_o_write_contents): Handle LC_LOAD_UPWARD_DYLIB.
 	(bfd_mach_o_read_dylib): Likewise.
 	(bfd_mach_o_read_command): Likewise.
