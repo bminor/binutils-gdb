@@ -1,3 +1,8 @@
+2011-11-30  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
+	* gas/arm/cmdline-bad-arch.d: New test case.
+	* gas/arm/cmdline-bad-cpu.d: Likewise.
+
 2011-12-03  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* gas/mips/mips.exp (run_dump_test_arch): Add an opts parameter.

@@ -1,3 +1,19 @@
+2011-11-30  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
+	* config/tc-arm.c (arm_cpu_option_table): Add name_len field.
+	(arm_arch_option_table): Likewise.
+	(arm_option_extension_value_table): Likewise.
+	(ARM_CPU_OPT): New define.
+	(ARM_ARCH_OPT): Likewise.
+	(ARM_EXT_OPT): Likewise.
+	(arm_cpus): Use ARM_CPU_OPT to initialize.
+	(arm_archs): Use ARM_ARCH_OPT to initialize.
+	(arm_extensions): Use ARM_EXT_OPT to initialize.
+	(arm_parse_extension): Ensure option string matching matches
+	the whole string.
+	(arm_parse_cpu): Likewise.
+	(arm_parse_arch): Likewise.
+
 2011-11-29  Andrew Pinski  <apinski@cavium.com>
 
 	* config/tc-mips.c (CPU_IS_OCTEON): New macro function.
