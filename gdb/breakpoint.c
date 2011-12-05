@@ -7265,9 +7265,11 @@ init_breakpoint_sal (struct breakpoint *b, struct gdbarch *gdbarch,
 
   if (type == bp_hardware_breakpoint)
     {
-      int i = hw_breakpoint_used_count ();
-      int target_resources_ok = 
-	target_can_use_hardware_watchpoint (bp_hardware_breakpoint, 
+      int target_resources_ok;
+
+      i = hw_breakpoint_used_count ();
+      target_resources_ok =
+	target_can_use_hardware_watchpoint (bp_hardware_breakpoint,
 					    i + 1, 0);
       if (target_resources_ok == 0)
 	error (_("No hardware breakpoint support in the target."));
@@ -7316,7 +7318,6 @@ init_breakpoint_sal (struct breakpoint *b, struct gdbarch *gdbarch,
 		  char *p = &addr_string[3];
 		  char *endp;
 		  char *marker_str;
-		  int i;
 
 		  p = skip_spaces (p);
 

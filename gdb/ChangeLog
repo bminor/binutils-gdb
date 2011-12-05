@@ -1,5 +1,10 @@
 2011-12-05  Andrey Smirnov  <andrew.smirnov@gmail.com>
 
+	* breakpoint.c (init_breakpoint_sal): Remove nested definitions of
+	`i'(-Wshadow).
+
+2011-12-05  Andrey Smirnov  <andrew.smirnov@gmail.com>
+
 	* bcache.c (bcache): Rename `bcache' to `cache'(-Wshadow).
 
 2011-12-05  Andrey Smirnov  <andrew.smirnov@gmail.com>
