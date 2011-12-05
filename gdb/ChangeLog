@@ -1,4 +1,4 @@
-2012-12-05  Pedro Alves  <pedro@codesourcery.com>
+2011-12-05  Pedro Alves  <pedro@codesourcery.com>
 
 	* amd64-linux-nat.c (amd64_linux_dr_get): Remove FIXME comment.
 	Reinstate perror_with_name call on ptrace error.  Remove #if 0.
