@@ -1,3 +1,8 @@
+2011-12-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.server/ext-run.exp (get process list): Accept also systemd
+	as PID 1.
+
 2011-12-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Pedro Alves  <pedro@codesourcery.com>
 
