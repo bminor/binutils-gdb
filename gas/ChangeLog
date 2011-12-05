@@ -1,3 +1,8 @@
+2011-12-05  Richard Earnshaw  <rearnsha@arm.com>
+
+	* tc-arm.c (aeabi_set_public_attributes): Correctly set
+	Tag_ARM_ISA_use and Tag_Thumb_ISA_use.
+
 2011-11-30  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	* config/tc-arm.c (arm_cpu_option_table): Add name_len field.

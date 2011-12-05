@@ -1,3 +1,10 @@
+2011-12-05  Richard Earnshaw  <rearnsha@arm.com>
+
+	* gas/arm/attr-any-armv4t.d: New test.
+	* gas/arm/attr-any-armv4t.s: New file.
+	* gas/arm/attr-any-thumbv6.d: New test.
+	* gas/arm/attr-any-thumbv6.s: New file.
+
 2011-11-30  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	* gas/arm/cmdline-bad-arch.d: New test case.

@@ -23666,7 +23666,14 @@ aeabi_set_public_attributes (void)
   ARM_MERGE_FEATURE_SETS (flags, arm_arch_used, thumb_arch_used);
   ARM_MERGE_FEATURE_SETS (flags, flags, *mfpu_opt);
   ARM_MERGE_FEATURE_SETS (flags, flags, selected_cpu);
-  /*Allow the user to override the reported architecture.  */
+
+  if (ARM_CPU_HAS_FEATURE (arm_arch_used, arm_arch_any))
+    ARM_MERGE_FEATURE_SETS (flags, flags, arm_ext_v1);
+
+  if (ARM_CPU_HAS_FEATURE (thumb_arch_used, arm_arch_any))
+    ARM_MERGE_FEATURE_SETS (flags, flags, arm_ext_v4t);
+
+  /* Allow the user to override the reported architecture.  */
   if (object_arch)
     {
       ARM_CLEAR_FEATURE (flags, flags, arm_arch_any);
