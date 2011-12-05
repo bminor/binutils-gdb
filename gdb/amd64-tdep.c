@@ -878,7 +878,6 @@ amd64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   /* Pass "hidden" argument".  */
   if (struct_return)
     {
-      struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
       /* The "hidden" argument is passed throught the first argument
          register.  */
       const int arg_regnum = tdep->call_dummy_integer_regs[0];
