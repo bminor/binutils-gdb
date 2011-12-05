@@ -1,4 +1,9 @@
 2011-12-05  Andrey Smirnov  <andrew.smirnov@gmail.com>
+
+	* bcache.c (bcache): Rename `bcache' to `cache'(-Wshadow).
+
+2011-12-05  Andrey Smirnov  <andrew.smirnov@gmail.com>
+
 	* amd64-tdep.c (amd64_push_dummy_call): Remove nested definition
 	of `tdep'(-Wshadow).
 
