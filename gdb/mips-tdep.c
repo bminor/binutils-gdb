@@ -1144,7 +1144,7 @@ mips32_next_pc (struct frame_info *frame, CORE_ADDR pc)
 	    get_frame_register_signed (frame,
 				       mips_regnum (get_frame_arch (frame))->
 						fp_control_status);
-	  int cond = ((fcrcs >> 24) & 0x0e) | ((fcrcs >> 23) & 0x01);
+	  int cond = ((fcrcs >> 24) & 0xfe) | ((fcrcs >> 23) & 0x01);
 
 	  if (((cond >> cnum) & 0x01) == tf)
 	    pc += mips32_relative_offset (inst) + 4;

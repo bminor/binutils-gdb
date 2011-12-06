@@ -1,5 +1,10 @@
 2011-12-06  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* mips-tdep.c (mips32_next_pc): Fix floating point condition
+	code mask.
+
+2011-12-06  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* mips-tdep.c (deal_with_atomic_sequence): Fix the handling
 	of BLTZ* and BGEZ* instructions.
 
