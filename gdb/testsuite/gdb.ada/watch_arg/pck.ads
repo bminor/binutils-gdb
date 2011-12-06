@@ -1,5 +1,4 @@
---  Copyright 2006, 2007, 2008, 2009, 2010, 2011
---  Free Software Foundation, Inc.
+--  Copyright 2011 Free Software Foundation, Inc.
 --
 --  This program is free software; you can redistribute it and/or modify
 --  it under the terms of the GNU General Public License as published by
@@ -14,20 +13,7 @@
 --  You should have received a copy of the GNU General Public License
 --  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-with Pck; use Pck;
-
-procedure Watch is
-
-   procedure Foo (X : in out Integer) is
-   begin
-      --  Reference X in a way that does not change its value.
-      Do_Nothing (X'Address);  -- BREAK1
-   end Foo;
-
-   X : Integer := 1;
-
-begin
-   Foo (X);
-   X := 2;  -- BREAK2
-end Watch;
-
+with System;
+package Pck is
+   procedure Do_Nothing (A : System.Address);
+end Pck;

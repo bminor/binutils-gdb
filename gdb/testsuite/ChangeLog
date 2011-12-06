@@ -1,3 +1,9 @@
+2011-12-06  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/watch_arg/pck.ads, gdb.ada/watch_arg/pck.adb: New files.
+	* gdb.ada/watch_arg/watch.adb: Adjust code to avoid modification
+	of parameter X in procedure Foo.
+
 2011-12-05  Stan Shebs  <stan@codesourcery.com>
 
 	* gdb.trace/tfind.exp: Update help string matches.
