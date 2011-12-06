@@ -1,3 +1,19 @@
+2011-12-06  Pedro Alves  <pedro@codesourcery.com>
+
+	* breakpoint.c (breakpoint_restore_shadows): Rename to ...
+	(breakpoint_xfer_memory): ... this.  Change prototype.  Handle
+	memory writes too.
+	* breakpoint.h (breakpoint_restore_shadows): Delete.
+	(breakpoint_xfer_memory): Declare.
+	* mem-break.c (default_memory_insert_breakpoint)
+	(default_memory_remove_breakpoint): Use target_write_raw_memory.
+	(memory_xfer_partial): Rename to ...
+	(memory_xfer_partial_1): ... this.  Don't mask out breakpoints
+	here.
+	(memory_xfer_partial): New.
+	(target_write_raw_memory): New.
+	* target.h (target_write_raw_memory): New.
+
 2011-12-06  Doug Evans  <dje@google.com>
 
 	* linespec.c (decode_dollar): Avoid "may be used uninitialized" warning.

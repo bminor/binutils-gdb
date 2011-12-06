@@ -60,8 +60,8 @@ default_memory_insert_breakpoint (struct gdbarch *gdbarch,
 
   /* Write the breakpoint.  */
   if (val == 0)
-    val = target_write_memory (bp_tgt->placed_address, bp,
-			       bp_tgt->placed_size);
+    val = target_write_raw_memory (bp_tgt->placed_address, bp,
+				   bp_tgt->placed_size);
 
   return val;
 }
@@ -71,8 +71,8 @@ int
 default_memory_remove_breakpoint (struct gdbarch *gdbarch,
 				  struct bp_target_info *bp_tgt)
 {
-  return target_write_memory (bp_tgt->placed_address, bp_tgt->shadow_contents,
-			      bp_tgt->placed_size);
+  return target_write_raw_memory (bp_tgt->placed_address, bp_tgt->shadow_contents,
+				  bp_tgt->placed_size);
 }
 
 

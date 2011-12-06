@@ -1296,10 +1296,17 @@ extern int deprecated_remove_raw_breakpoint (struct gdbarch *, void *);
    target.  */
 int watchpoints_triggered (struct target_waitstatus *);
 
-/* Update BUF, which is LEN bytes read from the target address MEMADDR,
-   by replacing any memory breakpoints with their shadowed contents.  */
-void breakpoint_restore_shadows (gdb_byte *buf, ULONGEST memaddr, 
-				 LONGEST len);
+/* Helper for transparent breakpoint hiding for memory read and write
+   routines.
+
+   Update one of READBUF or WRITEBUF with either the shadows
+   (READBUF), or the breakpoint instructions (WRITEBUF) of inserted
+   breakpoints at the memory range defined by MEMADDR and extending
+   for LEN bytes.  If writing, then WRITEBUF is a copy of WRITEBUF_ORG
+   on entry.*/
+extern void breakpoint_xfer_memory (gdb_byte *readbuf, gdb_byte *writebuf,
+				    const gdb_byte *writebuf_org,
+				    ULONGEST memaddr, LONGEST len);
 
 extern int breakpoints_always_inserted_mode (void);
 

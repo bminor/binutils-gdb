@@ -1,3 +1,8 @@
+2011-12-06  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.base/break-always.exp: Test changing memory at addresses
+	with breakpoints inserted.
+
 2011-12-06  Joel Brobecker  <brobecker@acacore.com>
 
         * gdb.ada/fullname_bp.exp: Add tests for other valid linespecs

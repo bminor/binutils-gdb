@@ -1049,7 +1049,9 @@ bp_location_has_shadow (struct bp_location *bl)
      bl->address + bp_location_shadow_len_after_address_max <= memaddr  */
 
 void
-breakpoint_restore_shadows (gdb_byte *buf, ULONGEST memaddr, LONGEST len)
+breakpoint_xfer_memory (gdb_byte *readbuf, gdb_byte *writebuf,
+			const gdb_byte *writebuf_org,
+			ULONGEST memaddr, LONGEST len)
 {
   /* Left boundary, right boundary and median element of our binary
      search.  */
@@ -1161,8 +1163,32 @@ breakpoint_restore_shadows (gdb_byte *buf, ULONGEST memaddr, LONGEST len)
 	bp_size -= (bp_addr + bp_size) - (memaddr + len);
       }
 
-    memcpy (buf + bp_addr - memaddr,
-	    bl->target_info.shadow_contents + bptoffset, bp_size);
+    if (readbuf != NULL)
+      {
+	/* Update the read buffer with this inserted breakpoint's
+	   shadow.  */
+	memcpy (readbuf + bp_addr - memaddr,
+		bl->target_info.shadow_contents + bptoffset, bp_size);
+      }
+    else
+      {
+	struct gdbarch *gdbarch = bl->gdbarch;
+	const unsigned char *bp;
+	CORE_ADDR placed_address = bl->target_info.placed_address;
+	unsigned placed_size = bl->target_info.placed_size;
+
+	/* Update the shadow with what we want to write to memory.  */
+	memcpy (bl->target_info.shadow_contents + bptoffset,
+		writebuf_org + bp_addr - memaddr, bp_size);
+
+	/* Determine appropriate breakpoint contents and size for this
+	   address.  */
+	bp = gdbarch_breakpoint_from_pc (gdbarch, &placed_address, &placed_size);
+
+	/* Update the final write buffer with this inserted
+	   breakpoint's INSN.  */
+	memcpy (writebuf + bp_addr - memaddr, bp + bptoffset, bp_size);
+      }
   }
 }
 
