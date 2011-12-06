@@ -2237,6 +2237,10 @@ extern char *elfcore_write_s390_ctrs
   (bfd *, char *, int *, const void *, int);
 extern char *elfcore_write_s390_prefix
   (bfd *, char *, int *, const void *, int);
+extern char *elfcore_write_s390_last_break
+  (bfd *, char *, int *, const void *, int);
+extern char *elfcore_write_s390_system_call
+  (bfd *, char *, int *, const void *, int);
 extern char *elfcore_write_arm_vfp
   (bfd *, char *, int *, const void *, int);
 extern char *elfcore_write_lwpstatus

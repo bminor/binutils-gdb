@@ -1,3 +1,14 @@
+2011-12-06  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* elf-bfd.h (elfcore_write_s390_last_break): Add prototype.
+	(elfcore_write_s390_system_call): Likewise.
+	* elf.c (elfcore_write_s390_last_break): New function.
+	(elfcore_write_s390_system_call): Likewise.
+	(elfcore_write_register_note): Call them.
+	(elfcore_grok_s390_last_break): New function.
+	(elfcore_grok_s390_system_call): Likewise.
+	(elfcore_grok_note): Call them.
+
 2011-12-05  Tristan Gingold  <gingold@adacore.com>
 
 	* mach-o.c (bfd_mach_o_read_symtab_symbol): Accept indirect symbols.
