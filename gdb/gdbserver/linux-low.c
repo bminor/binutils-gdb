@@ -3768,6 +3768,60 @@ fetch_register (struct regcache *regcache, int regno)
     supply_register (regcache, regno, buf);
 }
 
+/* Store one register.  */
+static void
+store_register (struct regcache *regcache, int regno)
+{
+  CORE_ADDR regaddr;
+  int i, size;
+  char *buf;
+  int pid;
+
+  if (regno >= the_low_target.num_regs)
+    return;
+
+  if ((*the_low_target.cannot_store_register) (regno) == 1)
+    return;
+
+  regaddr = register_addr (regno);
+  if (regaddr == -1)
+    return;
+  errno = 0;
+  size = (register_size (regno) + sizeof (PTRACE_XFER_TYPE) - 1)
+	 & - sizeof (PTRACE_XFER_TYPE);
+  buf = alloca (size);
+  memset (buf, 0, size);
+
+  if (the_low_target.collect_ptrace_register)
+    the_low_target.collect_ptrace_register (regcache, regno, buf);
+  else
+    collect_register (regcache, regno, buf);
+
+  pid = lwpid_of (get_thread_lwp (current_inferior));
+  for (i = 0; i < size; i += sizeof (PTRACE_XFER_TYPE))
+    {
+      errno = 0;
+      ptrace (PTRACE_POKEUSER, pid,
+	    /* Coerce to a uintptr_t first to avoid potential gcc warning
+	       about coercing an 8 byte integer to a 4 byte pointer.  */
+	      (PTRACE_ARG3_TYPE) (uintptr_t) regaddr,
+	      (PTRACE_ARG4_TYPE) *(PTRACE_XFER_TYPE *) (buf + i));
+      if (errno != 0)
+	{
+	  /* At this point, ESRCH should mean the process is
+	     already gone, in which case we simply ignore attempts
+	     to change its registers.  See also the related
+	     comment in linux_resume_one_lwp.  */
+	  if (errno == ESRCH)
+	    return;
+
+	  if ((*the_low_target.cannot_store_register) (regno) == 0)
+	    error ("writing register %d: %s", regno, strerror (errno));
+	}
+      regaddr += sizeof (PTRACE_XFER_TYPE);
+    }
+}
+
 /* Fetch all registers, or just one, from the child process.  */
 static void
 usr_fetch_inferior_registers (struct regcache *regcache, int regno)
@@ -3785,60 +3839,11 @@ usr_fetch_inferior_registers (struct regcache *regcache, int regno)
 static void
 usr_store_inferior_registers (struct regcache *regcache, int regno)
 {
-  CORE_ADDR regaddr;
-  int i, size;
-  char *buf;
-  int pid;
-
-  if (regno >= 0)
-    {
-      if (regno >= the_low_target.num_regs)
-	return;
-
-      if ((*the_low_target.cannot_store_register) (regno) == 1)
-	return;
-
-      regaddr = register_addr (regno);
-      if (regaddr == -1)
-	return;
-      errno = 0;
-      size = (register_size (regno) + sizeof (PTRACE_XFER_TYPE) - 1)
-	     & - sizeof (PTRACE_XFER_TYPE);
-      buf = alloca (size);
-      memset (buf, 0, size);
-
-      if (the_low_target.collect_ptrace_register)
-	the_low_target.collect_ptrace_register (regcache, regno, buf);
-      else
-	collect_register (regcache, regno, buf);
-
-      pid = lwpid_of (get_thread_lwp (current_inferior));
-      for (i = 0; i < size; i += sizeof (PTRACE_XFER_TYPE))
-	{
-	  errno = 0;
-	  ptrace (PTRACE_POKEUSER, pid,
-		/* Coerce to a uintptr_t first to avoid potential gcc warning
-		   about coercing an 8 byte integer to a 4 byte pointer.  */
-		  (PTRACE_ARG3_TYPE) (uintptr_t) regaddr,
-		  (PTRACE_ARG4_TYPE) *(PTRACE_XFER_TYPE *) (buf + i));
-	  if (errno != 0)
-	    {
-	      /* At this point, ESRCH should mean the process is
-		 already gone, in which case we simply ignore attempts
-		 to change its registers.  See also the related
-		 comment in linux_resume_one_lwp.  */
-	      if (errno == ESRCH)
-		return;
-
-	      if ((*the_low_target.cannot_store_register) (regno) == 0)
-		error ("writing register %d: %s", regno, strerror (errno));
-	    }
-	  regaddr += sizeof (PTRACE_XFER_TYPE);
-	}
-    }
-  else
+  if (regno == -1)
     for (regno = 0; regno < the_low_target.num_regs; regno++)
-      usr_store_inferior_registers (regcache, regno);
+      store_register (regcache, regno);
+  else
+    store_register (regcache, regno);
 }
 #endif /* HAVE_LINUX_USRREGS */
 

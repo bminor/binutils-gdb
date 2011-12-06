@@ -1,3 +1,9 @@
+2011-12-06  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* linux-low.c (usr_store_inferior_registers): Factor out code
+	to handle individual registers into...
+	(store_register): ... this new function.
+
 2011-12-06  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* Makefile.in (s390-linux32v1.o, s390-linux32v1.c): New rules.
