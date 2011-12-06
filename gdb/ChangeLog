@@ -1,3 +1,7 @@
+2011-12-06  Tom Tromey  <tromey@redhat.com>
+
+	* NEWS: Add MI news.
+
 2011-12-06  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* s390-tdep.h (S390_ORIG_R2_REGNUM): Define.

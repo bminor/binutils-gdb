@@ -65,6 +65,16 @@
      the standard Python "iteritems" method, it will recursively traverse
      any anonymous fields.
 
+* MI changes
+
+  ** "*stopped" events can report several new "reason"s, such as
+     "solib-event".
+
+  ** Breakpoint changes are now notified using new async records, like
+     "=breakpoint-modified".
+
+  ** New command -ada-task-info.
+
 * libthread-db-search-path now supports two special values: $sdir and $pdir.
   $sdir specifies the default system locations of shared libraries.
   $pdir specifies the directory where the libpthread used by the application
