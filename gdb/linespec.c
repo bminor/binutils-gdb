@@ -2494,6 +2494,10 @@ decode_dollar (struct linespec_state *self, char *copy)
 
       volatile struct gdb_exception exc;
 
+      /* Avoid "may be used uninitialized" warning.  */
+      values.sals = NULL;
+      values.nelts = 0;
+
       TRY_CATCH (exc, RETURN_MASK_ERROR)
 	{
 	  values = decode_variable (self, copy);

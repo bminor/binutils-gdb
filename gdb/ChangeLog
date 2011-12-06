@@ -1,3 +1,7 @@
+2011-12-06  Doug Evans  <dje@google.com>
+
+	* linespec.c (decode_dollar): Avoid "may be used uninitialized" warning.
+
 2011-12-06  Joel Brobecker  <brobecker@acacore.com>
 
         * language.h (struct language_defn): Add new component
