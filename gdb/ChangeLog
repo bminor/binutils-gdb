@@ -1,3 +1,11 @@
+2011-12-06  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* mips-tdep.c (mips_pc_is_mips16): Reverse the order of checks
+	performed to determine whether an address refers to standard
+	MIPS or MIPS16 code.
+	(mips16_next_pc): Use mips_pc_is_mips16 instead of
+	is_mips16_addr.
+
 2011-12-06  Pedro Alves  <pedro@codesourcery.com>
 
 	* breakpoint.c (breakpoint_restore_shadows): Rename to ...

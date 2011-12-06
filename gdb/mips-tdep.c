@@ -989,18 +989,15 @@ mips_pc_is_mips16 (CORE_ADDR memaddr)
 {
   struct minimal_symbol *sym;
 
-  /* If bit 0 of the address is set, assume this is a MIPS16 address.  */
-  if (is_mips16_addr (memaddr))
-    return 1;
-
-  /* A flag indicating that this is a MIPS16 function is stored by elfread.c in
-     the high bit of the info field.  Use this to decide if the function is
-     MIPS16 or normal MIPS.  */
+  /* A flag indicating that this is a MIPS16 function is stored by
+     elfread.c in the high bit of the info field.  Use this to decide
+     if the function is MIPS16 or normal MIPS.  Otherwise if bit 0 of
+     the address is set, assume this is a MIPS16 address.  */
   sym = lookup_minimal_symbol_by_pc (memaddr);
   if (sym)
     return msymbol_is_special (sym);
   else
-    return 0;
+    return is_mips16_addr (memaddr);
 }
 
 /* MIPS believes that the PC has a sign extended value.  Perhaps the
@@ -1579,7 +1576,7 @@ mips16_next_pc (struct frame_info *frame, CORE_ADDR pc)
 static CORE_ADDR
 mips_next_pc (struct frame_info *frame, CORE_ADDR pc)
 {
-  if (is_mips16_addr (pc))
+  if (mips_pc_is_mips16 (pc))
     return mips16_next_pc (frame, pc);
   else
     return mips32_next_pc (frame, pc);
