@@ -3745,10 +3745,11 @@ fetch_register (struct regcache *regcache, int regno)
   if (regaddr == -1)
     return;
 
-  pid = lwpid_of (get_thread_lwp (current_inferior));
   size = ((register_size (regno) + sizeof (PTRACE_XFER_TYPE) - 1)
-	  & - sizeof (PTRACE_XFER_TYPE));
+	  & -sizeof (PTRACE_XFER_TYPE));
   buf = alloca (size);
+
+  pid = lwpid_of (get_thread_lwp (current_inferior));
   for (i = 0; i < size; i += sizeof (PTRACE_XFER_TYPE))
     {
       errno = 0;
@@ -3779,16 +3780,15 @@ store_register (struct regcache *regcache, int regno)
 
   if (regno >= the_low_target.num_regs)
     return;
-
-  if ((*the_low_target.cannot_store_register) (regno) == 1)
+  if ((*the_low_target.cannot_store_register) (regno))
     return;
 
   regaddr = register_addr (regno);
   if (regaddr == -1)
     return;
-  errno = 0;
-  size = (register_size (regno) + sizeof (PTRACE_XFER_TYPE) - 1)
-	 & - sizeof (PTRACE_XFER_TYPE);
+
+  size = ((register_size (regno) + sizeof (PTRACE_XFER_TYPE) - 1)
+	  & -sizeof (PTRACE_XFER_TYPE));
   buf = alloca (size);
   memset (buf, 0, size);
 

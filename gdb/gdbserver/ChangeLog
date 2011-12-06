@@ -1,5 +1,10 @@
 2011-12-06  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* linux-low.c (fetch_register, store_register): Make code
+	consistent, fix formatting.
+
+2011-12-06  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* linux-low.c (usr_store_inferior_registers): Factor out code
 	to handle individual registers into...
 	(store_register): ... this new function.
