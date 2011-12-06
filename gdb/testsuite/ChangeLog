@@ -1,3 +1,8 @@
+2011-12-06  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdb.base/callfuncs.exp (fetch_all_registers): Filter out read-only
+	last_break register on s390*-*-* targets.
+
 2011-12-06  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/watch_arg/pck.ads, gdb.ada/watch_arg/pck.adb: New files.

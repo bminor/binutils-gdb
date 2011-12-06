@@ -1,6 +1,6 @@
-# DO NOT EDIT: generated from s390-linux64.xml
-name:s390_linux64
-xmltarget:s390-linux64.xml
+# DO NOT EDIT: generated from s390-linux64v1.xml
+name:s390_linux64v1
+xmltarget:s390-linux64v1.xml
 expedite:r14l,r15l,pswa
 32:pswm
 32:pswa
@@ -70,3 +70,4 @@ expedite:r14l,r15l,pswa
 64:f14
 64:f15
 32:orig_r2
+32:last_break

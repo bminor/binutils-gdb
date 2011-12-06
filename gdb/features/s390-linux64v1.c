@@ -1,12 +1,12 @@
-/* THIS FILE IS GENERATED.  Original: s390-linux64.xml */
+/* THIS FILE IS GENERATED.  Original: s390-linux64v1.xml */
 
 #include "defs.h"
 #include "osabi.h"
 #include "target-descriptions.h"
 
-struct target_desc *tdesc_s390_linux64;
+struct target_desc *tdesc_s390_linux64v1;
 static void
-initialize_tdesc_s390_linux64 (void)
+initialize_tdesc_s390_linux64v1 (void)
 {
   struct target_desc *result = allocate_target_description ();
   struct tdesc_feature *feature;
@@ -89,6 +89,7 @@ initialize_tdesc_s390_linux64 (void)
 
   feature = tdesc_create_feature (result, "org.gnu.gdb.s390.linux");
   tdesc_create_reg (feature, "orig_r2", 67, 1, "system", 32, "uint32");
+  tdesc_create_reg (feature, "last_break", 68, 0, "system", 32, "code_ptr");
 
-  tdesc_s390_linux64 = result;
+  tdesc_s390_linux64v1 = result;
 }

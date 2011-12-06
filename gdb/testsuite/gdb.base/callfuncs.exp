@@ -294,6 +294,15 @@ proc fetch_all_registers {test} {
 	    }
 	    exp_continue
 	}
+	-re "^last_break\[ \t\]+\[^\r\n\]+\r\n" {
+	    if [istarget "s390*-*-*"] {
+		# Filter out last_break which is read-only,
+		# giving spurious differences.
+	    } else {
+		lappend all_registers_lines $expect_out(0,string)
+	    }
+	    exp_continue
+	}
 	-re "^\[^ \t\]+\[ \t\]+\[^\r\n\]+\r\n" {
 	    lappend all_registers_lines $expect_out(0,string)
 	    exp_continue

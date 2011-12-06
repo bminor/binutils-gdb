@@ -1,38 +1,38 @@
-/* THIS FILE IS GENERATED.  Original: s390-linux32.xml */
+/* THIS FILE IS GENERATED.  Original: s390x-linux64v1.xml */
 
 #include "defs.h"
 #include "osabi.h"
 #include "target-descriptions.h"
 
-struct target_desc *tdesc_s390_linux32;
+struct target_desc *tdesc_s390x_linux64v1;
 static void
-initialize_tdesc_s390_linux32 (void)
+initialize_tdesc_s390x_linux64v1 (void)
 {
   struct target_desc *result = allocate_target_description ();
   struct tdesc_feature *feature;
   struct tdesc_type *field_type, *type;
 
-  set_tdesc_architecture (result, bfd_scan_arch ("s390:31-bit"));
+  set_tdesc_architecture (result, bfd_scan_arch ("s390:64-bit"));
 
   feature = tdesc_create_feature (result, "org.gnu.gdb.s390.core");
-  tdesc_create_reg (feature, "pswm", 0, 1, "psw", 32, "uint32");
-  tdesc_create_reg (feature, "pswa", 1, 1, "psw", 32, "uint32");
-  tdesc_create_reg (feature, "r0", 2, 1, "general", 32, "uint32");
-  tdesc_create_reg (feature, "r1", 3, 1, "general", 32, "uint32");
-  tdesc_create_reg (feature, "r2", 4, 1, "general", 32, "uint32");
-  tdesc_create_reg (feature, "r3", 5, 1, "general", 32, "uint32");
-  tdesc_create_reg (feature, "r4", 6, 1, "general", 32, "uint32");
-  tdesc_create_reg (feature, "r5", 7, 1, "general", 32, "uint32");
-  tdesc_create_reg (feature, "r6", 8, 1, "general", 32, "uint32");
-  tdesc_create_reg (feature, "r7", 9, 1, "general", 32, "uint32");
-  tdesc_create_reg (feature, "r8", 10, 1, "general", 32, "uint32");
-  tdesc_create_reg (feature, "r9", 11, 1, "general", 32, "uint32");
-  tdesc_create_reg (feature, "r10", 12, 1, "general", 32, "uint32");
-  tdesc_create_reg (feature, "r11", 13, 1, "general", 32, "uint32");
-  tdesc_create_reg (feature, "r12", 14, 1, "general", 32, "uint32");
-  tdesc_create_reg (feature, "r13", 15, 1, "general", 32, "uint32");
-  tdesc_create_reg (feature, "r14", 16, 1, "general", 32, "uint32");
-  tdesc_create_reg (feature, "r15", 17, 1, "general", 32, "uint32");
+  tdesc_create_reg (feature, "pswm", 0, 1, "psw", 64, "uint64");
+  tdesc_create_reg (feature, "pswa", 1, 1, "psw", 64, "uint64");
+  tdesc_create_reg (feature, "r0", 2, 1, "general", 64, "uint64");
+  tdesc_create_reg (feature, "r1", 3, 1, "general", 64, "uint64");
+  tdesc_create_reg (feature, "r2", 4, 1, "general", 64, "uint64");
+  tdesc_create_reg (feature, "r3", 5, 1, "general", 64, "uint64");
+  tdesc_create_reg (feature, "r4", 6, 1, "general", 64, "uint64");
+  tdesc_create_reg (feature, "r5", 7, 1, "general", 64, "uint64");
+  tdesc_create_reg (feature, "r6", 8, 1, "general", 64, "uint64");
+  tdesc_create_reg (feature, "r7", 9, 1, "general", 64, "uint64");
+  tdesc_create_reg (feature, "r8", 10, 1, "general", 64, "uint64");
+  tdesc_create_reg (feature, "r9", 11, 1, "general", 64, "uint64");
+  tdesc_create_reg (feature, "r10", 12, 1, "general", 64, "uint64");
+  tdesc_create_reg (feature, "r11", 13, 1, "general", 64, "uint64");
+  tdesc_create_reg (feature, "r12", 14, 1, "general", 64, "uint64");
+  tdesc_create_reg (feature, "r13", 15, 1, "general", 64, "uint64");
+  tdesc_create_reg (feature, "r14", 16, 1, "general", 64, "uint64");
+  tdesc_create_reg (feature, "r15", 17, 1, "general", 64, "uint64");
 
   feature = tdesc_create_feature (result, "org.gnu.gdb.s390.acr");
   tdesc_create_reg (feature, "acr0", 18, 1, "access", 32, "uint32");
@@ -72,7 +72,8 @@ initialize_tdesc_s390_linux32 (void)
   tdesc_create_reg (feature, "f15", 50, 1, "float", 64, "ieee_double");
 
   feature = tdesc_create_feature (result, "org.gnu.gdb.s390.linux");
-  tdesc_create_reg (feature, "orig_r2", 51, 1, "system", 32, "uint32");
+  tdesc_create_reg (feature, "orig_r2", 51, 1, "system", 64, "uint64");
+  tdesc_create_reg (feature, "last_break", 52, 0, "system", 64, "code_ptr");
 
-  tdesc_s390_linux32 = result;
+  tdesc_s390x_linux64v1 = result;
 }

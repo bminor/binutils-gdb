@@ -594,12 +594,30 @@ powerpc-isa205-vsx64l.c : $(srcdir)/../regformats/rs6000/powerpc-isa205-vsx64l.d
 s390-linux32.o : s390-linux32.c $(regdef_h)
 s390-linux32.c : $(srcdir)/../regformats/s390-linux32.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/s390-linux32.dat s390-linux32.c
+s390-linux32v1.o : s390-linux32v1.c $(regdef_h)
+s390-linux32v1.c : $(srcdir)/../regformats/s390-linux32v1.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/s390-linux32v1.dat s390-linux32v1.c
+s390-linux32v2.o : s390-linux32v2.c $(regdef_h)
+s390-linux32v2.c : $(srcdir)/../regformats/s390-linux32v2.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/s390-linux32v2.dat s390-linux32v2.c
 s390-linux64.o : s390-linux64.c $(regdef_h)
 s390-linux64.c : $(srcdir)/../regformats/s390-linux64.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/s390-linux64.dat s390-linux64.c
+s390-linux64v1.o : s390-linux64v1.c $(regdef_h)
+s390-linux64v1.c : $(srcdir)/../regformats/s390-linux64v1.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/s390-linux64v1.dat s390-linux64v1.c
+s390-linux64v2.o : s390-linux64v2.c $(regdef_h)
+s390-linux64v2.c : $(srcdir)/../regformats/s390-linux64v2.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/s390-linux64v2.dat s390-linux64v2.c
 s390x-linux64.o : s390x-linux64.c $(regdef_h)
 s390x-linux64.c : $(srcdir)/../regformats/s390x-linux64.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/s390x-linux64.dat s390x-linux64.c
+s390x-linux64v1.o : s390x-linux64v1.c $(regdef_h)
+s390x-linux64v1.c : $(srcdir)/../regformats/s390x-linux64v1.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/s390x-linux64v1.dat s390x-linux64v1.c
+s390x-linux64v2.o : s390x-linux64v2.c $(regdef_h)
+s390x-linux64v2.c : $(srcdir)/../regformats/s390x-linux64v2.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/s390x-linux64v2.dat s390x-linux64v2.c
 
 tic6x-c64xp-linux.o : tic6x-c64xp-linux.c $(regdef_h)
 tic6x-c64xp-linux.c : $(srcdir)/../regformats/tic6x-c64xp-linux.dat $(regdat_sh)

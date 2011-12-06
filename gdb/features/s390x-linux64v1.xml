@@ -16,5 +16,6 @@
 
   <feature name="org.gnu.gdb.s390.linux">
     <reg name="orig_r2" bitsize="64" type="uint64" group="system"/>
+    <reg name="last_break" bitsize="64" type="code_ptr" group="system" save-restore="no"/>
   </feature>
 </target>

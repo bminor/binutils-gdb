@@ -22,22 +22,45 @@
 
 #include "server.h"
 #include "linux-low.h"
+#include "elf/common.h"
 
 #include <asm/ptrace.h>
+#include <sys/ptrace.h>
+#include <sys/uio.h>
 #include <elf.h>
 
 #ifndef HWCAP_S390_HIGH_GPRS
 #define HWCAP_S390_HIGH_GPRS 512
 #endif
 
+#ifndef PTRACE_GETREGSET
+#define PTRACE_GETREGSET 0x4204
+#endif
+
+#ifndef PTRACE_SETREGSET
+#define PTRACE_SETREGSET 0x4205
+#endif
+
 /* Defined in auto-generated file s390-linux32.c.  */
 void init_registers_s390_linux32 (void);
+/* Defined in auto-generated file s390-linux32v1.c.  */
+void init_registers_s390_linux32v1 (void);
+/* Defined in auto-generated file s390-linux32v2.c.  */
+void init_registers_s390_linux32v2 (void);
 /* Defined in auto-generated file s390-linux64.c.  */
 void init_registers_s390_linux64 (void);
+/* Defined in auto-generated file s390-linux64v1.c.  */
+void init_registers_s390_linux64v1 (void);
+/* Defined in auto-generated file s390-linux64v2.c.  */
+void init_registers_s390_linux64v2 (void);
 /* Defined in auto-generated file s390x-linux64.c.  */
 void init_registers_s390x_linux64 (void);
+/* Defined in auto-generated file s390x-linux64v1.c.  */
+void init_registers_s390x_linux64v1 (void);
+/* Defined in auto-generated file s390x-linux64v2.c.  */
+void init_registers_s390x_linux64v2 (void);
 
-#define s390_num_regs 51
+#define s390_num_regs 52
 
 static int s390_regmap[] = {
   PT_PSWMASK, PT_PSWADDR,
@@ -65,10 +88,12 @@ static int s390_regmap[] = {
   PT_FPR8, PT_FPR9, PT_FPR10, PT_FPR11,
   PT_FPR12, PT_FPR13, PT_FPR14, PT_FPR15,
 #endif
+
+  PT_ORIGGPR2,
 };
 
 #ifdef __s390x__
-#define s390_num_regs_3264 67
+#define s390_num_regs_3264 68
 
 static int s390_regmap_3264[] = {
   PT_PSWMASK, PT_PSWADDR,
@@ -93,6 +118,8 @@ static int s390_regmap_3264[] = {
   PT_FPR4, PT_FPR5, PT_FPR6, PT_FPR7,
   PT_FPR8, PT_FPR9, PT_FPR10, PT_FPR11,
   PT_FPR12, PT_FPR13, PT_FPR14, PT_FPR15,
+
+  PT_ORIGGPR2,
 };
 #endif
 
@@ -143,7 +170,8 @@ s390_collect_ptrace_register (struct regcache *regcache, int regno, char *buf)
 	  collect_register (regcache, regno, buf + sizeof (long) - size);
 	  buf[sizeof (long) - size] &= ~0x80;
 	}
-      else if (regaddr >= PT_GPR0 && regaddr <= PT_GPR15)
+      else if ((regaddr >= PT_GPR0 && regaddr <= PT_GPR15)
+	       || regaddr == PT_ORIGGPR2)
 	collect_register (regcache, regno, buf + sizeof (long) - size);
       else
 	collect_register (regcache, regno, buf);
@@ -196,7 +224,8 @@ s390_supply_ptrace_register (struct regcache *regcache,
 	  addr[0] |= amode;
 	  supply_register (regcache, regno, addr);
 	}
-      else if (regaddr >= PT_GPR0 && regaddr <= PT_GPR15)
+      else if ((regaddr >= PT_GPR0 && regaddr <= PT_GPR15)
+	       || regaddr == PT_ORIGGPR2)
 	supply_register (regcache, regno, buf + sizeof (long) - size);
       else
 	supply_register (regcache, regno, buf);
@@ -223,8 +252,40 @@ static void s390_fill_gregset (struct regcache *regcache, void *buf)
     }
 }
 
+/* Fill and store functions for extended register sets.  */
+
+static void
+s390_fill_last_break (struct regcache *regcache, void *buf)
+{
+  /* Last break address is read-only.  */
+}
+
+static void
+s390_store_last_break (struct regcache *regcache, const void *buf)
+{
+  supply_register_by_name (regcache, "last_break",
+			   (const char *)buf + 8 - register_size (0));
+}
+
+static void
+s390_fill_system_call (struct regcache *regcache, void *buf)
+{
+  collect_register_by_name (regcache, "system_call", buf);
+}
+
+static void
+s390_store_system_call (struct regcache *regcache, const void *buf)
+{
+  supply_register_by_name (regcache, "system_call", buf);
+}
+
 struct regset_info target_regsets[] = {
   { 0, 0, 0, 0, GENERAL_REGS, s390_fill_gregset, NULL },
+  /* Last break address is read-only; do not attempt PTRACE_SETREGSET.  */
+  { PTRACE_GETREGSET, PTRACE_GETREGSET, NT_S390_LAST_BREAK, 0,
+    EXTENDED_REGS, s390_fill_last_break, s390_store_last_break },
+  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_S390_SYSTEM_CALL, 0,
+    EXTENDED_REGS, s390_fill_system_call, s390_store_system_call },
   { 0, 0, 0, -1, -1, NULL, NULL }
 };
 
@@ -296,11 +357,56 @@ s390_get_hwcap (void)
 }
 #endif
 
+static int
+s390_check_regset (int pid, int regset, int regsize)
+{
+  gdb_byte *buf = alloca (regsize);
+  struct iovec iov;
+
+  iov.iov_base = buf;
+  iov.iov_len = regsize;
+
+  if (ptrace (PTRACE_GETREGSET, pid, (long) regset, (long) &iov) < 0)
+    return 0;
+  else
+    return 1;
+}
+
 static void
 s390_arch_setup (void)
 {
+  struct regset_info *regset;
+
+  /* Check whether the kernel supports extra register sets.  */
+  int pid = pid_of (get_thread_lwp (current_inferior));
+  int have_regset_last_break
+    = s390_check_regset (pid, NT_S390_LAST_BREAK, 8);
+  int have_regset_system_call
+    = s390_check_regset (pid, NT_S390_SYSTEM_CALL, 4);
+
+  /* Update target_regsets according to available register sets.  */
+  for (regset = target_regsets; regset->fill_function != NULL; regset++)
+    if (regset->get_request == PTRACE_GETREGSET)
+      switch (regset->nt_type)
+	{
+	case NT_S390_LAST_BREAK:
+	  regset->size = have_regset_last_break? 8 : 0;
+	  break;
+	case NT_S390_SYSTEM_CALL:
+	  regset->size = have_regset_system_call? 4 : 0;
+	  break;
+	default:
+	  break;
+	}
+
   /* Assume 31-bit inferior process.  */
-  init_registers_s390_linux32 ();
+  if (have_regset_system_call)
+    init_registers_s390_linux32v2 ();
+  else if (have_regset_last_break)
+    init_registers_s390_linux32v1 ();
+  else
+    init_registers_s390_linux32 ();
+
   the_low_target.num_regs = s390_num_regs;
   the_low_target.regmap = s390_regmap;
 
@@ -315,13 +421,26 @@ s390_arch_setup (void)
     free_register_cache (regcache);
 
     if (pswm & 1)
-      init_registers_s390x_linux64 ();
+      {
+	if (have_regset_system_call)
+	  init_registers_s390x_linux64v2 ();
+	else if (have_regset_last_break)
+	  init_registers_s390x_linux64v1 ();
+	else
+	  init_registers_s390x_linux64 ();
+      }
 
     /* For a 31-bit inferior, check whether the kernel supports
        using the full 64-bit GPRs.  */
     else if (s390_get_hwcap () & HWCAP_S390_HIGH_GPRS)
       {
-        init_registers_s390_linux64 ();
+	if (have_regset_system_call)
+	  init_registers_s390_linux64v2 ();
+	else if (have_regset_last_break)
+	  init_registers_s390_linux64v1 ();
+	else
+	  init_registers_s390_linux64 ();
+
 	the_low_target.num_regs = s390_num_regs_3264;
 	the_low_target.regmap = s390_regmap_3264;
       }

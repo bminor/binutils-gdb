@@ -28,6 +28,7 @@
 #include "auxv.h"
 
 #include "s390-tdep.h"
+#include "elf/common.h"
 
 #include <asm/ptrace.h>
 #include <sys/ptrace.h>
@@ -40,6 +41,16 @@
 #define HWCAP_S390_HIGH_GPRS 512
 #endif
 
+#ifndef PTRACE_GETREGSET
+#define PTRACE_GETREGSET 0x4204
+#endif
+
+#ifndef PTRACE_SETREGSET
+#define PTRACE_SETREGSET 0x4205
+#endif
+
+static int have_regset_last_break = 0;
+static int have_regset_system_call = 0;
 
 /* Map registers to gregset/ptrace offsets.
    These arrays are defined in s390-tdep.c.  */
@@ -97,7 +108,8 @@ s390_native_supply (struct regcache *regcache, int regno,
 	  return;
 	}
 
-      if (regno >= S390_R0_REGNUM && regno <= S390_R15_REGNUM)
+      if ((regno >= S390_R0_REGNUM && regno <= S390_R15_REGNUM)
+	  || regno == S390_ORIG_R2_REGNUM)
 	offset += 4;
     }
 #endif
@@ -151,7 +163,8 @@ s390_native_collect (const struct regcache *regcache, int regno,
 	  return;
 	}
 
-      if (regno >= S390_R0_REGNUM && regno <= S390_R15_REGNUM)
+      if ((regno >= S390_R0_REGNUM && regno <= S390_R15_REGNUM)
+	  || regno == S390_ORIG_R2_REGNUM)
 	{
 	  memset (regp + offset, 0, 4);
 	  offset += 4;
@@ -293,6 +306,70 @@ store_fpregs (const struct regcache *regcache, int tid, int regnum)
     perror_with_name (_("Couldn't write floating point status"));
 }
 
+/* Fetch all registers in the kernel's register set whose number is REGSET,
+   whose size is REGSIZE, and whose layout is described by REGMAP, from
+   process/thread TID and store their values in GDB's register cache.  */
+static void
+fetch_regset (struct regcache *regcache, int tid,
+	      int regset, int regsize, int *regmap)
+{
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  gdb_byte *buf = alloca (regsize);
+  struct iovec iov;
+  int i;
+
+  iov.iov_base = buf;
+  iov.iov_len = regsize;
+
+  if (ptrace (PTRACE_GETREGSET, tid, (long) regset, (long) &iov) < 0)
+    perror_with_name (_("Couldn't get register set"));
+
+  for (i = 0; i < S390_NUM_REGS; i++)
+    s390_native_supply (regcache, i, buf, regmap);
+}
+
+/* Store all registers in the kernel's register set whose number is REGSET,
+   whose size is REGSIZE, and whose layout is described by REGMAP, from
+   GDB's register cache back to process/thread TID.  */
+static void
+store_regset (struct regcache *regcache, int tid,
+	      int regset, int regsize, int *regmap)
+{
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  gdb_byte *buf = alloca (regsize);
+  struct iovec iov;
+  int i;
+
+  iov.iov_base = buf;
+  iov.iov_len = regsize;
+
+  if (ptrace (PTRACE_GETREGSET, tid, (long) regset, (long) &iov) < 0)
+    perror_with_name (_("Couldn't get register set"));
+
+  for (i = 0; i < S390_NUM_REGS; i++)
+    s390_native_collect (regcache, i, buf, regmap);
+
+  if (ptrace (PTRACE_SETREGSET, tid, (long) regset, (long) &iov) < 0)
+    perror_with_name (_("Couldn't set register set"));
+}
+
+/* Check whether the kernel provides a register set with number REGSET
+   of size REGSIZE for process/thread TID.  */
+static int
+check_regset (int tid, int regset, int regsize)
+{
+  gdb_byte *buf = alloca (regsize);
+  struct iovec iov;
+
+  iov.iov_base = buf;
+  iov.iov_len = regsize;
+
+  if (ptrace (PTRACE_GETREGSET, tid, (long) regset, (long) &iov) < 0)
+    return 0;
+  else
+    return 1;
+}
+
 /* Fetch register REGNUM from the child process.  If REGNUM is -1, do
    this for all registers.  */
 static void
@@ -308,6 +385,17 @@ s390_linux_fetch_inferior_registers (struct target_ops *ops,
   if (regnum == -1 
       || (regnum < S390_NUM_REGS && regmap_fpregset[regnum] != -1))
     fetch_fpregs (regcache, tid);
+
+  if (have_regset_last_break)
+    if (regnum == -1 || regnum == S390_LAST_BREAK_REGNUM)
+      fetch_regset (regcache, tid, NT_S390_LAST_BREAK, 8,
+		    (gdbarch_ptr_bit (get_regcache_arch (regcache)) == 32
+		     ? s390_regmap_last_break : s390x_regmap_last_break));
+
+  if (have_regset_system_call)
+    if (regnum == -1 || regnum == S390_SYSTEM_CALL_REGNUM)
+      fetch_regset (regcache, tid, NT_S390_SYSTEM_CALL, 4,
+		    s390_regmap_system_call);
 }
 
 /* Store register REGNUM back into the child process.  If REGNUM is
@@ -325,6 +413,13 @@ s390_linux_store_inferior_registers (struct target_ops *ops,
   if (regnum == -1 
       || (regnum < S390_NUM_REGS && regmap_fpregset[regnum] != -1))
     store_fpregs (regcache, tid, regnum);
+
+  /* S390_LAST_BREAK_REGNUM is read-only.  */
+
+  if (have_regset_system_call)
+    if (regnum == -1 || regnum == S390_SYSTEM_CALL_REGNUM)
+      store_regset (regcache, tid, NT_S390_SYSTEM_CALL, 4,
+		    s390_regmap_system_call);
 }
 
 
@@ -539,6 +634,13 @@ s390_get_hwcap (void)
 static const struct target_desc *
 s390_read_description (struct target_ops *ops)
 {
+  int tid = s390_inferior_tid ();
+
+  have_regset_last_break
+    = check_regset (tid, NT_S390_LAST_BREAK, 8);
+  have_regset_system_call
+    = check_regset (tid, NT_S390_SYSTEM_CALL, 4);
+
 #ifdef __s390x__
   /* If GDB itself is compiled as 64-bit, we are running on a machine in
      z/Architecture mode.  If the target is running in 64-bit addressing
@@ -547,16 +649,22 @@ s390_read_description (struct target_ops *ops)
      that mode, report s390 architecture with 64-bit GPRs.  */
 
   if (s390_target_wordsize () == 8)
-    return tdesc_s390x_linux64;
+    return (have_regset_system_call? tdesc_s390x_linux64v2 :
+	    have_regset_last_break? tdesc_s390x_linux64v1 :
+	    tdesc_s390x_linux64);
 
   if (s390_get_hwcap () & HWCAP_S390_HIGH_GPRS)
-    return tdesc_s390_linux64;
+    return (have_regset_system_call? tdesc_s390_linux64v2 :
+	    have_regset_last_break? tdesc_s390_linux64v1 :
+	    tdesc_s390_linux64);
 #endif
 
   /* If GDB itself is compiled as 31-bit, or if we're running a 31-bit inferior
      on a 64-bit kernel that does not support using 64-bit registers in 31-bit
      mode, report s390 architecture with 32-bit GPRs.  */
-  return tdesc_s390_linux32;
+  return (have_regset_system_call? tdesc_s390_linux32v2 :
+	  have_regset_last_break? tdesc_s390_linux32v1 :
+	  tdesc_s390_linux32);
 }
 
 void _initialize_s390_nat (void);

@@ -1,3 +1,111 @@
+2011-12-06  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* s390-tdep.h (S390_ORIG_R2_REGNUM): Define.
+	(S390_LAST_BREAK_REGNUM): Likewise.
+	(S390_SYSTEM_CALL_REGNUM): Likewise.
+	(S390_NUM_REGS): Update.
+
+	(s390_regmap_last_break): Add declaration.
+	(s390x_regmap_last_break): Likewise.
+	(s390_regmap_system_call): Likewise.
+
+	(tdesc_s390_linux32v1): Add declaration.
+	(tdesc_s390_linux32v2): Likewise.
+	(tdesc_s390_linux64v1): Likewise.
+	(tdesc_s390_linux64v2): Likewise.
+	(tdesc_s390x_linux64v1): Likewise.
+	(tdesc_s390x_linux64v2): Likewise.
+
+	* s390-tdep.c: Include new target description files
+	"features/s390-linux32v1.c", "features/s390-linux32v2.c",
+	"features/s390-linux64v1.c", "features/s390-linux64v2.c",
+	"features/s390x-linux64v1.c", and "features/s390x-linux64v2.c".
+	(s390_cannot_store_register): New function.
+	(s390_write_pc): Likewise.
+	(s390_dwarf_regmap): Add fields for new registers.
+	(s390_regmap_gregset): Likewise.
+	(s390x_regmap_gregset): Likewise.
+	(s390_regmap_fpregset): Likewise.
+	(s390_regmap_upper): Likewise.
+	(s390_regmap_last_break): New variable.
+	(s390x_regmap_last_break): Likewise.
+	(s390_regmap_system_call): Likewise.
+	(s390_last_break_regset): Likewise.
+	(s390x_last_break_regset): Likewise.
+	(s390_system_call_regset): Likewise.
+	(s390_upper_regset_sections): Rename to ...
+	(s390_linux64_regset_sections): ... this.
+	(s390_linux32_regset_sections): New variable.
+	(s390x_linux64_regset_sections): Likewise.
+	(s390_linux32v1_regset_sections): Likewise.
+	(s390_linux32v2_regset_sections): Likewise.
+	(s390_linux64v1_regset_sections): Likewise.
+	(s390_linux64v2_regset_sections): Likewise.
+	(s390x_linux64v1_regset_sections): Likewise.
+	(s390x_linux64v2_regset_sections): Likewise.
+	(s390_regset_from_core_section): Handle .reg-s390-last-break and
+	.reg-s390-system-call core file sections.
+	(s390_core_read_description): Check for presence of
+	.reg-s390-last-break and .reg-s390-system-call core file
+	sections and return appropriate target description.
+	(s390_gdbarch_init): Detect Linux-specific registers "orig_r2",
+	"last_break" and "system_call" in target description.  Install
+	appropriate gdbarch_core_regset_sections array.
+	Call set_gdbarch_cannot_store_register and set_gdbarch_write_pc.
+	(_initialize_s390_tdep): Initialize additional target descriptions.
+
+	* s390-nat.c: Include "elf/common.h".
+	(PTRACE_GETREGSET, PTRACE_SETREGSET): Define if undefined.
+	(have_regset_last_break): New static variable.
+	(have_regset_system_call): Likewise.
+	(s390_native_supply): Handle S390_ORIG_R2_REGNUM.
+	(s390_native_collect): Likewise.
+	(fetch_regset, store_regset, check_regset): New functions.
+	(s390_linux_fetch_inferior_registers): Handle S390_LAST_BREAK_REGNUM
+	and S390_SYSTEM_CALL_REGNUM.
+	(s390_linux_store_inferior_registers): Likewise.
+	(s390_read_description): Check for presence of NT_S390_LAST_BREAK
+	and NT_S390_SYSTEM_CALL regsets and use appropriate description.
+
+	* features/Makefile (WHICH): Add s390-linux32v1, s390-linux64v1,
+	s390x-linux64v1, s390-linux32v2, s390-linux64v2, and s390x-linux64v2.
+	(s390-linux32v1-expedite): Define.
+	(s390-linux32v2-expedite): Likewise.
+	(s390-linux64v1-expedite): Likewise.
+	(s390-linux64v2-expedite): Likewise.
+	(s390x-linux64v1-expedite): Likewise.
+	(s390x-linux64v2-expedite): Likewise.
+
+	* features/s390-linux32.xml: Add orig_r2 register.
+	* features/s390-linux64.xml: Likewise.
+	* features/s390x-linux64.xml: Likewise.
+	* features/s390-linux32v1.xml: New file.
+	* features/s390-linux32v2.xml: Likewise.
+	* features/s390-linux64v1.xml: Likewise.
+	* features/s390-linux64v2.xml: Likewise.
+	* features/s390x-linux64v1.xml: Likewise.
+	* features/s390x-linux64v2.xml: Likewise.
+
+	* features/s390-linux32.c: Regenerate.
+	* features/s390-linux64.c: Likewise.
+	* features/s390x-linux64.c: Likewise.
+	* features/s390-linux32v1.c: New generated file.
+	* features/s390-linux32v2.c: Likewise.
+	* features/s390-linux64v1.c: Likewise.
+	* features/s390-linux64v2.c: Likewise.
+	* features/s390x-linux64v1.c: Likewise.
+	* features/s390x-linux64v2.c: Likewise.
+
+	* regformats/s390-linux32.dat: Regenerate.
+	* regformats/s390-linux64.dat: Regenerate.
+	* regformats/s390x-linux64.dat: Regenerate.
+	* regformats/s390-linux32v1.dat: New generated file.
+	* regformats/s390-linux32v2.dat: Likewise.
+	* regformats/s390-linux64v1.dat: Likewise.
+	* regformats/s390-linux64v2.dat: Likewise.
+	* regformats/s390x-linux64v1.dat: Likewise.
+	* regformats/s390x-linux64v2.dat: Likewise.
+
 2011-12-05  Pedro Alves  <pedro@codesourcery.com>
 
 	* linux-nat.c (resume_stopped_resumed_lwps): Call

@@ -1,3 +1,40 @@
+2011-12-06  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* Makefile.in (s390-linux32v1.o, s390-linux32v1.c): New rules.
+	(s390-linux32v2.o, s390-linux32v2.c): Likewise.
+	(s390-linux64v1.o, s390-linux64v1.c): Likewise.
+	(s390-linux64v2.o, s390-linux64v2.c): Likewise.
+	(s390x-linux64v1.o, s390x-linux64v1.c): Likewise.
+	(s390x-linux64v2.o, s390x-linux64v2.c): Likewise.
+	* configure.srv [s390*-*-linux*] (srv_regobj): Add new objects.
+	(srv_xmlfiles): Add new XML files.
+
+	* linux-s390-low.c: Include "elf/common.h", <sys/ptrace.h>,
+	and <sys/uio.h>.
+	(PTRACE_GETREGSET, PTRACE_SETREGSET): Define if undefined.
+	(init_registers_s390_linux32v1): Add prototype.
+	(init_registers_s390_linux32v2): Likewise.
+	(init_registers_s390_linux64v1): Likewise.
+	(init_registers_s390_linux64v2): Likewise.
+	(init_registers_s390x_linux64v1): Likewise.
+	(init_registers_s390x_linux64v2): Likewise.
+	(s390_num_regs): Increment to 52.
+	(s390_regmap): Add orig_r2 register.
+	(s390_num_regs_3264): Increment to 68.
+	(s390_regmap_3264): Add orig_r2 register.
+	(s390_collect_ptrace_register): Handle orig_r2 register.
+	(s390_supply_ptrace_register): Likewise.
+	(s390_fill_last_break): New function.
+	(s390_store_last_break): Likewise.
+	(s390_fill_system_call): New function.
+	(s390_store_system_call): Likewise.
+	(target_regsets): Handle NT_S390_LAST_BREAK and NT_S390_SYSTEM_CALL
+	register sets.
+	(s390_check_regset): New function.
+	(s390_arch_setup): Check for presence of NT_S390_LAST_BREAK and
+	NT_S390_SYSTEM_CALL regsets and use appropriate description.
+	Update target_regsets for available register sets.
+
 2011-12-02  Paul Pluzhnikov  <ppluzhnikov@google.com>
 	    Jan Kratochvil  <jan.kratochvil@redhat.com>
 
