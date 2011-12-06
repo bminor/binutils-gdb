@@ -50,13 +50,13 @@ if ![runto_main] then {
 # and a condition.
 
 gdb_test "break 'Derived::Derived(int)'" \
-    "Breakpoint.*at.* file .*$srcfile, line.*\\(2 locations\\).*" \
+    "Breakpoint.*at.*: Derived::Derived.int.. \\(2 locations\\).*" \
     "set-breakpoint at ctor"
 
 gdb_breakpoint [gdb_get_line_number "set breakpoint here"]
 
 gdb_test "break 'Derived::~Derived()'" \
-    "Breakpoint.*at.* file .*$srcfile, line.*\\(2 locations\\).*" \
+    "Breakpoint.*at.*: Derived::~Derived... \\(2 locations\\).*" \
     "set-breakpoint at dtor"
 
 gdb_test "continue" \

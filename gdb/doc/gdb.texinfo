@@ -3522,6 +3522,9 @@ in your program.  Examples of this situation are:
 
 @itemize @bullet
 @item
+Multiple functions in the program may have the same name.
+
+@item
 For a C@t{++} constructor, the @value{NGCC} compiler generates several
 instances of the function body, used in different cases.
 
@@ -3535,11 +3538,7 @@ several places where that function is inlined.
 @end itemize
 
 In all those cases, @value{GDBN} will insert a breakpoint at all
-the relevant locations@footnote{
-As of this writing, multiple-location breakpoints work only if there's
-line number information for all the locations.  This means that they
-will generally not work in system libraries, unless you have debug
-info with line numbers for them.}.
+the relevant locations.
 
 A breakpoint with multiple locations is displayed in the breakpoint
 table using several rows---one header row, followed by one row for

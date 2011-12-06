@@ -947,7 +947,7 @@ DEF_VEC_O (type_equality_entry_d);
    the same, 0 otherwise.  Handles NULLs properly.  */
 
 static int
-compare_strings (const char *s, const char *t)
+compare_maybe_null_strings (const char *s, const char *t)
 {
   if (s == NULL && t != NULL)
     return 0;
@@ -983,9 +983,10 @@ check_types_equal (struct type *type1, struct type *type2,
       || TYPE_NFIELDS (type1) != TYPE_NFIELDS (type2))
     return Py_NE;
 
-  if (!compare_strings (TYPE_TAG_NAME (type1), TYPE_TAG_NAME (type2)))
+  if (!compare_maybe_null_strings (TYPE_TAG_NAME (type1),
+				   TYPE_TAG_NAME (type2)))
     return Py_NE;
-  if (!compare_strings (TYPE_NAME (type1), TYPE_NAME (type2)))
+  if (!compare_maybe_null_strings (TYPE_NAME (type1), TYPE_NAME (type2)))
     return Py_NE;
 
   if (TYPE_CODE (type1) == TYPE_CODE_RANGE)
@@ -1008,7 +1009,8 @@ check_types_equal (struct type *type1, struct type *type2,
 	      || FIELD_BITSIZE (*field1) != FIELD_BITSIZE (*field2)
 	      || FIELD_LOC_KIND (*field1) != FIELD_LOC_KIND (*field2))
 	    return Py_NE;
-	  if (!compare_strings (FIELD_NAME (*field1), FIELD_NAME (*field2)))
+	  if (!compare_maybe_null_strings (FIELD_NAME (*field1),
+					   FIELD_NAME (*field2)))
 	    return Py_NE;
 	  switch (FIELD_LOC_KIND (*field1))
 	    {
@@ -1022,8 +1024,8 @@ check_types_equal (struct type *type1, struct type *type2,
 		return Py_NE;
 	      break;
 	    case FIELD_LOC_KIND_PHYSNAME:
-	      if (!compare_strings (FIELD_STATIC_PHYSNAME (*field1),
-				    FIELD_STATIC_PHYSNAME (*field2)))
+	      if (!compare_maybe_null_strings (FIELD_STATIC_PHYSNAME (*field1),
+					       FIELD_STATIC_PHYSNAME (*field2)))
 		return Py_NE;
 	      break;
 	    case FIELD_LOC_KIND_DWARF_BLOCK:

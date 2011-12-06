@@ -46,7 +46,6 @@ gdb_test_no_output {set variable $brk = $bpnum}
 # runto or runto_main would call delete_breakpoints.
 gdb_breakpoint "main"
 gdb_run_cmd
-setup_kfail breakpoints/11657 *-*-* 
 gdb_test "" ".*" "start"
 
 set test "breakpoint resolved"

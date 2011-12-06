@@ -2439,10 +2439,38 @@ dw2_forget_cached_source_info (struct objfile *objfile)
 			  dw2_free_cached_file_names, NULL);
 }
 
+/* Helper function for dw2_map_symtabs_matching_filename that expands
+   the symtabs and calls the iterator.  */
+
 static int
-dw2_lookup_symtab (struct objfile *objfile, const char *name,
-		   const char *full_path, const char *real_path,
-		   struct symtab **result)
+dw2_map_expand_apply (struct objfile *objfile,
+		      struct dwarf2_per_cu_data *per_cu,
+		      const char *name,
+		      const char *full_path, const char *real_path,
+		      int (*callback) (struct symtab *, void *),
+		      void *data)
+{
+  struct symtab *last_made = objfile->symtabs;
+
+  /* Don't visit already-expanded CUs.  */
+  if (per_cu->v.quick->symtab)
+    return 0;
+
+  /* This may expand more than one symtab, and we want to iterate over
+     all of them.  */
+  dw2_instantiate_symtab (objfile, per_cu);
+
+  return iterate_over_some_symtabs (name, full_path, real_path, callback, data,
+				    objfile->symtabs, last_made);
+}
+
+/* Implementation of the map_symtabs_matching_filename method.  */
+
+static int
+dw2_map_symtabs_matching_filename (struct objfile *objfile, const char *name,
+				   const char *full_path, const char *real_path,
+				   int (*callback) (struct symtab *, void *),
+				   void *data)
 {
   int i;
   const char *name_basename = lbasename (name);
@@ -2472,8 +2500,10 @@ dw2_lookup_symtab (struct objfile *objfile, const char *name,
 
 	  if (FILENAME_CMP (name, this_name) == 0)
 	    {
-	      *result = dw2_instantiate_symtab (objfile, per_cu);
-	      return 1;
+	      if (dw2_map_expand_apply (objfile, per_cu,
+					name, full_path, real_path,
+					callback, data))
+		return 1;
 	    }
 
 	  if (check_basename && ! base_cu
@@ -2494,8 +2524,10 @@ dw2_lookup_symtab (struct objfile *objfile, const char *name,
 	      if (this_real_name != NULL
 		  && FILENAME_CMP (full_path, this_real_name) == 0)
 		{
-		  *result = dw2_instantiate_symtab (objfile, per_cu);
-		  return 1;
+		  if (dw2_map_expand_apply (objfile, per_cu,
+					    name, full_path, real_path,
+					    callback, data))
+		    return 1;
 		}
 	    }
 
@@ -2507,8 +2539,10 @@ dw2_lookup_symtab (struct objfile *objfile, const char *name,
 	      if (this_real_name != NULL
 		  && FILENAME_CMP (real_path, this_real_name) == 0)
 		{
-		  *result = dw2_instantiate_symtab (objfile, per_cu);
-		  return 1;
+		  if (dw2_map_expand_apply (objfile, per_cu,
+					    name, full_path, real_path,
+					    callback, data))
+		    return 1;
 		}
 	    }
 	}
@@ -2516,8 +2550,10 @@ dw2_lookup_symtab (struct objfile *objfile, const char *name,
 
   if (base_cu)
     {
-      *result = dw2_instantiate_symtab (objfile, base_cu);
-      return 1;
+      if (dw2_map_expand_apply (objfile, base_cu,
+				name, full_path, real_path,
+				callback, data))
+	return 1;
     }
 
   return 0;
@@ -2720,11 +2756,12 @@ dw2_map_matching_symbols (const char * name, domain_enum namespace,
 }
 
 static void
-dw2_expand_symtabs_matching (struct objfile *objfile,
-			     int (*file_matcher) (const char *, void *),
-			     int (*name_matcher) (const char *, void *),
-			     enum search_domain kind,
-			     void *data)
+dw2_expand_symtabs_matching
+  (struct objfile *objfile,
+   int (*file_matcher) (const char *, void *),
+   int (*name_matcher) (const struct language_defn *, const char *, void *),
+   enum search_domain kind,
+   void *data)
 {
   int i;
   offset_type iter;
@@ -2776,7 +2813,7 @@ dw2_expand_symtabs_matching (struct objfile *objfile,
 
       name = index->constant_pool + MAYBE_SWAP (index->symbol_table[idx]);
 
-      if (! (*name_matcher) (name, data))
+      if (! (*name_matcher) (current_language, name, data))
 	continue;
 
       /* The name was matched, now expand corresponding CUs that were
@@ -2867,7 +2904,7 @@ const struct quick_symbol_functions dwarf2_gdb_index_functions =
   dw2_has_symbols,
   dw2_find_last_source_symtab,
   dw2_forget_cached_source_info,
-  dw2_lookup_symtab,
+  dw2_map_symtabs_matching_filename,
   dw2_lookup_symbol,
   dw2_pre_expand_symtabs_matching,
   dw2_print_stats,

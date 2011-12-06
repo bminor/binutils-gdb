@@ -18,11 +18,21 @@
 #include "ovsrch.h"
 
 void
-A::outer::foo (char *a) const
+A::outer::foo (char *a_param) const
 {
 }
 
 void
-A::B::inner::foo (char *a) const
+A::B::inner::foo (char *a_param) const
+{
+}
+
+void
+A::outer::hibob (char *a_param) const
+{
+}
+
+void
+A::B::inner::hibob (char *a_param) const
 {
 }

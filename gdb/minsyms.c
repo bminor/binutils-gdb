@@ -310,6 +310,46 @@ lookup_minimal_symbol (const char *name, const char *sfile,
   return NULL;
 }
 
+/* Iterate over all the minimal symbols in the objfile OBJF which
+   match NAME.  Both the ordinary and demangled names of each symbol
+   are considered.  The caller is responsible for canonicalizing NAME,
+   should that need to be done.
+   
+   For each matching symbol, CALLBACK is called with the symbol and
+   USER_DATA as arguments.  */
+
+void
+iterate_over_minimal_symbols (struct objfile *objf, const char *name,
+			      void (*callback) (struct minimal_symbol *,
+						void *),
+			      void *user_data)
+{
+  unsigned int hash;
+  struct minimal_symbol *iter;
+  int (*cmp) (const char *, const char *);
+
+  /* The first pass is over the ordinary hash table.  */
+  hash = msymbol_hash (name) % MINIMAL_SYMBOL_HASH_SIZE;
+  iter = objf->msymbol_hash[hash];
+  cmp = (case_sensitivity == case_sensitive_on ? strcmp : strcasecmp);
+  while (iter)
+    {
+      if (cmp (SYMBOL_LINKAGE_NAME (iter), name) == 0)
+	(*callback) (iter, user_data);
+      iter = iter->hash_next;
+    }
+
+  /* The second pass is over the demangled table.  */
+  hash = msymbol_hash_iw (name) % MINIMAL_SYMBOL_HASH_SIZE;
+  iter = objf->msymbol_demangled_hash[hash];
+  while (iter)
+    {
+      if (SYMBOL_MATCHES_SEARCH_NAME (iter, name))
+	(*callback) (iter, user_data);
+      iter = iter->demangled_hash_next;
+    }
+}
+
 /* Look through all the current minimal symbol tables and find the
    first minimal symbol that matches NAME and has text type.  If OBJF
    is non-NULL, limit the search to that objfile.  Returns a pointer

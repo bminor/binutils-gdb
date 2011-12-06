@@ -318,6 +318,40 @@ struct language_defn
     void (*la_get_string) (struct value *value, gdb_byte **buffer, int *length,
 			   struct type **chartype, const char **charset);
 
+    /* Compare two symbol names according to language rules.  For
+       instance, in C++, we might want to ignore whitespaces in
+       the symbol name.  Or some case-insensitive language might
+       want to ignore casing during the match.
+
+       Both STR1 and STR2 are expected to be demangled name, except
+       for Ada, where STR1 and STR2 are expected to be encoded names.
+       The latter is because searches are performed using the encoded
+       name in Ada.
+
+       The return value follows the same spirit as strcmp.  */
+
+    int (*la_symbol_name_compare) (const char *str1, const char *str2);
+
+    /* Find all symbols in the current program space matching NAME in
+       DOMAIN, according to this language's rules.
+
+       The search starts with BLOCK.  This function iterates upward
+       through blocks.  When the outermost block has been finished,
+       the function returns.
+
+       For each one, call CALLBACK with the symbol and the DATA
+       argument.  If CALLBACK returns zero, the iteration ends at that
+       point.
+
+       This field can be NULL, meaning that this language doesn't need
+       any special code aside from ordinary searches of the symbol
+       table.  */
+    void (*la_iterate_over_symbols) (const struct block *block,
+				     const char *name,
+				     domain_enum domain,
+				     int (*callback) (struct symbol *, void *),
+				     void *data);
+
     /* Add fields above this point, so the magic number is always last.  */
     /* Magic number for compat checking.  */
 
@@ -421,6 +455,10 @@ extern enum language set_language (enum language);
 
 #define LA_PRINT_ARRAY_INDEX(index_value, stream, options) \
   (current_language->la_print_array_index(index_value, stream, options))
+
+#define LA_ITERATE_OVER_SYMBOLS(BLOCK, NAME, DOMAIN, CALLBACK, DATA) \
+  (current_language->la_iterate_over_symbols (BLOCK, NAME, DOMAIN, CALLBACK, \
+					      DATA))
 
 /* Test a character to decide whether it can be printed in literal form
    or needs to be printed in another representation.  For example,

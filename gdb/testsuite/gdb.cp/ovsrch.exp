@@ -49,7 +49,7 @@ proc test_class {class} {
 
     # Test whether open parentheses are correctly identified as overload
     # information or conditional.
-    gdb_test "break ${class}::foo if (a == 3)" "Breakpoint (\[0-9\]).*"
+    gdb_test "break ${class}::hibob if (a_param == 3)" "Breakpoint (\[0-9\]).*"
 }
 
 if { [skip_cplus_tests] } { continue }
@@ -73,28 +73,28 @@ if {![runto_main]} {
 }
 
 # Break in A::stop_here and run tests.
-if {[gdb_breakpoint "stop_here"]} {
-    pass "break stop_here"
+if {[gdb_breakpoint "A::stop_here"]} {
+    pass "break A::stop_here"
 }
 
-if {[gdb_breakpoint "'stop_here'"]} {
-    pass "break 'stop_here'"
+if {[gdb_breakpoint "'A::stop_here'"]} {
+    pass "break 'A::stop_here'"
 }
 
 gdb_continue_to_breakpoint "stop_here"
-test_class outer
+test_class A::outer
 
 # Break in A::B::stop_here_too and run tests.
-if {[gdb_breakpoint "B::stop_here_too"]} {
-    pass "break B::stop_here_too"
+if {[gdb_breakpoint "A::B::stop_here_too"]} {
+    pass "break A::B::stop_here_too"
 }
 
-if {[gdb_breakpoint "'B::stop_here_too'"]} {
-    pass "break 'B::stop_here_too'"
+if {[gdb_breakpoint "'A::B::stop_here_too'"]} {
+    pass "break 'A::B::stop_here_too'"
 }
 
 gdb_continue_to_breakpoint "stop_here_too"
-test_class inner
+test_class A::B::inner
 
 gdb_exit
 return 0

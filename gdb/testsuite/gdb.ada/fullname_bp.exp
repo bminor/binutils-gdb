@@ -25,6 +25,9 @@ if {[gdb_compile_ada "${srcfile}" "${binfile}" executable [list debug ]] != "" }
   return -1
 }
 
+# Note: We restart the debugger before setting each breakpoint, because
+# we want to test the situation where the symtab for our breakpoint
+# has not been created yet.
 clean_restart ${testfile}
 
 # Break on "pck.hello" rather than just "hello" to make sure we trigger
@@ -32,3 +35,23 @@ clean_restart ${testfile}
 gdb_test "break pck.hello" \
          "Breakpoint \[0-9\]+ at 0x\[0-9a-f\]+: file .*pck.adb, line \[0-9\]+."
 
+# Do the same, but this time using a linespec where the user also
+# provided a filename.
+
+clean_restart ${testfile}
+
+gdb_test "break pck.adb:pck.hello" \
+         "Breakpoint \[0-9\]+ at 0x\[0-9a-f\]+: file .*pck.adb, line \[0-9\]+."
+
+# Same scenarios as above, but with a function name that is spelled
+# with upper-case letters.
+
+clean_restart ${testfile}
+
+gdb_test "break Pck.Hello" \
+         "Breakpoint \[0-9\]+ at 0x\[0-9a-f\]+: file .*pck.adb, line \[0-9\]+."
+
+clean_restart ${testfile}
+
+gdb_test "break pck.adb:Pck.Hello" \
+         "Breakpoint \[0-9\]+ at 0x\[0-9a-f\]+: file .*pck.adb, line \[0-9\]+."

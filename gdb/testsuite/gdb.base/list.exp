@@ -489,7 +489,7 @@ proc test_list_filename_and_function {} {
 
     gdb_test "list foobar.c:main" "No source file named foobar.c.|Location not found" "list filename:function; nonexistant file"
 
-    gdb_test "list list0.h:foobar" "Function \"foobar\" not defined.|Location not found" "list filename:function; nonexistant function"
+    gdb_test "list list0.h:foobar" "Function \"foobar\" not defined in \"list0.h\"." "list filename:function; nonexistant function"
 
 }
 

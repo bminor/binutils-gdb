@@ -28,8 +28,6 @@
 
 #include "gdb_string.h"
 
-DEF_VEC_I(CORE_ADDR);
-
 /* Private data for each loaded library.  */
 struct lm_info
 {

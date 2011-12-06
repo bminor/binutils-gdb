@@ -131,6 +131,8 @@ struct blockvector
 
 extern struct symbol *block_linkage_function (const struct block *);
 
+extern struct symbol *block_containing_function (const struct block *);
+
 extern int block_inlined_p (const struct block *block);
 
 extern int contained_in (const struct block *, const struct block *);

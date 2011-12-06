@@ -1,3 +1,258 @@
+2011-12-06  Joel Brobecker  <brobecker@acacore.com>
+
+        * language.h (struct language_defn): Add new component
+        la_symbol_name_compare.
+        * symfile.h (struct quick_symbol_functions): Update the profile
+        of parameter "name_matcher" for the expand_symtabs_matching
+        method.  Update the documentation accordingly.
+        * ada-lang.h (ada_name_for_lookup): Add declaration.
+        * ada-lang.c (ada_name_for_lookup): New function, extracted out
+        from ada_iterate_over_symbols.
+        (ada_iterate_over_symbols): Do not encode symbol name anymore.
+        (ada_expand_partial_symbol_name): Adjust profile.
+        (ada_language_defn): Add value for la_symbol_name_compare field.
+        * linespec.c: #include "ada-lang.h".
+        (iterate_name_matcher): Add language parameter. Replace call
+        to strcmp_iw by call to language->la_symbol_name_compare.
+        (decode_variable): Encode COPY if current language is Ada.
+        * dwarf2read.c (dw2_expand_symtabs_matching): Adjust profile
+        of name_matcher parameter.  Adjust call to name_matcher.
+        * psymtab.c (expand_symtabs_matching_via_partial): Likewise.
+        (expand_partial_symbol_names): Update profile of parameter "fun".
+        * psymtab.h (expand_partial_symbol_names): Update profile of
+        parameter "fun".
+        * symtab.c (demangle_for_lookup): Update function documentation.
+        (search_symbols_name_matches): Add language parameter.
+        (expand_partial_symbol_name): Likewise.
+        * c-lang.c (c_language_defn, cplus_language_defn)
+        (asm_language_defn, minimal_language_defn): Add value for
+        la_symbol_name_compare field.
+        * d-lang.c (d_language_defn): Likewise.
+        * f-lang.c (f_language_defn): Ditto.
+        * jv-lang.c (java_language_defn): Ditto.
+        * m2-lang.c (m2_language_defn): Ditto.
+        * objc-lang.c (objc_language_defn): Ditto.
+        * opencl-lang.c (opencl_language_defn): Ditto.
+        * p-lang.c (pascal_language_defn): Ditto.
+        * language.c (unknown_language_defn, auto_language_defn)
+        (local_language_defn): Ditto.
+
+2011-12-06  Tom Tromey  <tromey@redhat.com>
+
+	* linespec.c (iterate_over_all_matching_symtabs): Use
+	LA_ITERATE_OVER_SYMBOLS.
+	(lookup_prefix_sym, add_matching_symbols_to_info): Likewise.
+	(find_function_symbols, decode_variable): Remove Ada special
+	case.
+	* language.h (struct language_defn) <la_iterate_over_symbols>: New
+	field.
+	(LA_ITERATE_OVER_SYMBOLS): New macro.
+	* language.c (unknown_language_defn, auto_language_defn)
+	(local_language_defn): Update.
+	* c-lang.c (c_language_defn, cplus_language_defn)
+	(asm_language_defn, minimal_language_defn): Update.
+	* d-lang.c (d_language_defn): Update.
+	* f-lang.c (f_language_defn): Update.
+	* jv-lang.c (java_language_defn): Update.
+	* m2-lang.c (m2_language_defn): Update.
+	* objc-lang.c (objc_language_defn): Update.
+	* opencl-lang.c (opencl_language_defn): Update.
+	* p-lang.c (pascal_language_defn): Update.
+	* ada-lang.c (ada_iterate_over_symbols): New function.
+	(ada_language_defn): Update.
+
+2011-12-06  Tom Tromey  <tromey@redhat.com>
+	    Joel Brobecker  <brobecker@acacore.com>
+
+	PR breakpoints/13105, PR objc/8341, PR objc/8343, PR objc/8366,
+	PR objc/8535, PR breakpoints/11657, PR breakpoints/11970,
+	PR breakpoints/12023, PR breakpoints/12334, PR breakpoints/12856,
+	PR shlibs/8929, PR shlibs/7393:
+	* python/py-type.c (compare_maybe_null_strings): Rename from
+	compare_strings.
+	(check_types_equal): Update.
+	* utils.c (compare_strings): New function.
+	* tui/tui-winsource.c (tui_update_breakpoint_info): Update for
+	location changes.
+	* tracepoint.c (scope_info): Update.
+	(trace_find_line_command): Use DECODE_LINE_FUNFIRSTLINE.
+	* symtab.h (iterate_over_minimal_symbols)
+	(iterate_over_some_symtabs, iterate_over_symtabs)
+	(find_pcs_for_symtab_line, iterate_over_symbols)
+	(demangle_for_lookup): Declare.
+	(expand_line_sal): Remove.
+	* symtab.c (iterate_over_some_symtabs, iterate_over_symtabs)
+	(lookup_symtab_callback): New functions.
+	(lookup_symtab): Rewrite.
+	(demangle_for_lookup): New function, extract from
+	lookup_symbol_in_language.
+	(lookup_symbol_in_language): Use it.
+	(iterate_over_symbols): New function.
+	(find_line_symtab): Update.
+	(find_pcs_for_symtab_line): New functions.
+	(find_line_common): Add 'start' argument.
+	(decode_line_spec): Update.  Change argument to 'flags', change
+	interpretation.
+	(append_expanded_sal): Remove.
+	(append_exact_match_to_sals): Remove.
+	(expand_line_sal): Remove.
+	* symfile.h (struct quick_symbol_functions) <lookup_symtab>:
+	Remove.
+	<map_symtabs_matching_filename>: New field.
+	* stack.c (func_command): Only look in the current program space.
+	Use DECODE_LINE_FUNFIRSTLINE.
+	* source.c (line_info): Set pspace on sal.  Check program space in
+	the loop.  Use DECODE_LINE_LIST_MODE.
+	(select_source_symtab): Use DECODE_LINE_FUNFIRSTLINE.
+	* solib-target.c: Remove DEF_VEC_I(CORE_ADDR).
+	* python/python.c (gdbpy_decode_line): Update.
+	* psymtab.c (partial_map_expand_apply): New function.
+	(partial_map_symtabs_matching_filename): Rename from
+	lookup_partial_symbol.  Update arguments.
+	(lookup_symtab_via_partial_symtab): Remove.
+	(psym_functions): Update.
+	* objc-lang.h (parse_selector, parse_method): Don't declare.
+	(find_imps): Update.
+	* objc-lang.c (parse_selector, parse_method): Now static.
+	(find_methods): Change arguments.  Fill in a vector of symbol
+	names.
+	(uniquify_strings): New function.
+	(find_imps): Change arguments.
+	* minsyms.c (iterate_over_minimal_symbols): New function.
+	* linespec.h (enum decode_line_flags): New.
+	(struct linespec_sals): New.
+	(struct linespec_result) <canonical>: Remove.
+	<pre_expanded, addr_string, sals>: New fields.
+	(destroy_linespec_result, make_cleanup_destroy_linespec_result)
+	(decode_line_full): Declare.
+	(decode_line_1): Update.
+	* linespec.c (struct address_entry, struct linespec_state, struct
+	collect_info): New types.
+	(add_sal_to_sals_basic, add_sal_to_sals, hash_address_entry)
+	(eq_address_entry, maybe_add_address): New functions.
+	(total_number_of_methods): Remove.
+	(iterate_name_matcher, iterate_over_all_matching_symtabs): New
+	functions.
+	(find_methods): Change arguments.  Don't canonicalize input.
+	Simplify logic.
+	(add_matching_methods, add_constructors)
+	(build_canonical_line_spec): Remove.
+	(filter_results, convert_results_to_lsals): New functions.
+	(decode_line_2): Change arguments.  Rewrite for new data
+	structures.
+	(decode_line_internal): Rename from decode_line_1.  Change
+	arguments.  Add cleanups.  Update for new data structures.
+	(linespec_state_constructor, linespec_state_destructor)
+	(decode_line_full, decode_line_1): New functions.
+	(decode_indirect): Change arguments.  Update.
+	(locate_first_half): Use skip_spaces.
+	(decode_objc): Change arguments.  Update for new data structures.
+	Simplify logic.
+	(decode_compound): Change arguments.  Add cleanups.  Remove
+	fallback code, replace with error.
+	(struct decode_compound_collector): New type.
+	(collect_one_symbol): New function.
+	(lookup_prefix_sym): Change arguments.  Update.
+	(compare_symbol_name, add_all_symbol_names_from_pspace)
+	(find_superclass_methods ): New functions.
+	(find_method): Rewrite.
+	(struct symtab_collector): New type.
+	(add_symtabs_to_list, collect_symtabs_from_filename): New
+	functions.
+	(symtabs_from_filename): Change API.  Rename from
+	symtab_from_filename.
+	(collect_function_symbols): New function.
+	(find_function_symbols): Change API.  Rename from
+	find_function_symbol.  Rewrite.
+	(decode_all_digits): Change arguments.  Rewrite.
+	(decode_dollar): Change arguments.  Use decode_variable.
+	(decode_label): Change arguments.  Rewrite.
+	(collect_symbols): New function.
+	(minsym_found): Change arguments.  Rewrite.
+	(check_minsym, search_minsyms_for_name)
+	(add_matching_symbols_to_info): New function.
+	(decode_variable): Change arguments.  Iterate over all symbols.
+	(symbol_found): Remove.
+	(symbol_to_sal): New function.
+	(init_linespec_result, destroy_linespec_result)
+	(cleanup_linespec_result, make_cleanup_destroy_linespec_result):
+	New functions.
+	(decode_digits_list_mode, decode_digits_ordinary): New functions.
+	* dwarf2read.c (dw2_map_expand_apply): New function.
+	(dw2_map_symtabs_matching_filename): Rename from
+	dw2_lookup_symtab.  Change arguments.
+	(dwarf2_gdb_index_functions): Update.
+	* dwarf2loc.c: Remove DEF_VEC_I(CORE_ADDR).
+	* defs.h (compare_strings): Declare.
+	* cli/cli-cmds.c (compare_strings): Move to utils.c.
+	(edit_command, list_command): Use DECODE_LINE_LIST_MODE.  Call
+	filter_sals.
+	(compare_symtabs, filter_sals): New functions.
+	* breakpoint.h (struct bp_location) <line_number, source_file>:
+	New fields.
+	(struct breakpoint) <line_number, source_file>: Remove.
+	<filter>: New field.
+	* breakpoint.c (print_breakpoint_location, init_raw_breakpoint)
+	(momentary_breakpoint_from_master, add_location_to_breakpoint):
+	Update for changes to locations.
+	(init_breakpoint_sal): Add 'filter' argument.  Set 'filter' on
+	breakpoint.
+	(create_breakpoint_sal): Add 'filter' argument.
+	(remove_sal, expand_line_sal_maybe): Remove.
+	(create_breakpoints_sal): Remove 'sals' argument.  Handle
+	pre-expanded sals and the filter.
+	(parse_breakpoint_sals): Use decode_line_full.
+	(check_fast_tracepoint_sals): Use get_sal_arch.
+	(create_breakpoint): Create a linespec_sals.  Update.
+	(break_range_command): Use decode_line_full.  Update.
+	(until_break_command): Update.
+	(clear_command): Update match conditions for linespec.c changes.
+	Use DECODE_LINE_LIST_MODE.
+	(say_where): Update for changes to locations.
+	(bp_location_dtor): Free 'source_file'.
+	(base_breakpoint_dtor): Free 'filter'.  Don't free 'source_file'.
+	(update_static_tracepoint): Update for changes to locations.
+	(update_breakpoint_locations): Disable ranged breakpoint if too
+	many locations match.  Update.
+	(addr_string_to_sals): Use decode_line_full.  Resolve all sal
+	PCs.
+	(breakpoint_re_set_default): Don't call expand_line_sal_maybe.
+	(decode_line_spec_1): Update.  Change argument name to 'flags',
+	change interpretation.
+	* block.h (block_containing_function): Declare.
+	* block.c (block_containing_function): New function.
+	* skip.c (skip_function_command): Update.
+	(skip_re_set): Update.
+	* infcmd.c (jump_command): Use DECODE_LINE_FUNFIRSTLINE.
+	* mi/mi-main.c (mi_cmd_trace_find): Use DECODE_LINE_FUNFIRSTLINE.
+	* NEWS: Add entry.
+
+2011-12-06  Tom Tromey  <tromey@redhat.com>
+
+	* elfread.c (elf_gnu_ifunc_resolver_return_stop): Allow
+	breakpoint's pspace to be NULL.
+	* breakpoint.h (struct breakpoint) <pspace>: Update comment.
+	* breakpoint.c (init_raw_breakpoint): Conditionally set
+	breakpoint's pspace.
+	(init_breakpoint_sal): Don't set breakpoint's pspace.
+	(prepare_re_set_context): Conditionally switch program space.
+	(addr_string_to_sals): Check executing_startup on location's
+	program space.
+
+2011-12-06  Tom Tromey  <tromey@redhat.com>
+
+	* breakpoint.h (enum enable_state) <bp_startup_disabled>: Remove.
+	* breakpoint.c (should_be_inserted): Explicitly check if program
+	space is executing startup.
+	(describe_other_breakpoints): Update.
+	(disable_breakpoints_before_startup): Change executing_startup
+	earlier.  Remove loop.
+	(enable_breakpoints_after_startup): Likewise.
+	(init_breakpoint_sal): Don't use bp_startup_disabled.
+	(create_breakpoint): Don't use bp_startup_disabled.
+	(update_global_location_list): Use should_be_inserted.
+	(bkpt_re_set): Update.
+
 2011-12-06  Tom Tromey  <tromey@redhat.com>
 
 	* python/lib/gdb/command/pretty_printers.py

@@ -512,7 +512,7 @@ gdbpy_decode_line (PyObject *self, PyObject *args)
 	{
 	  copy = xstrdup (arg);
 	  make_cleanup (xfree, copy);
-	  sals = decode_line_1 (&copy, 0, 0, 0, 0);
+	  sals = decode_line_1 (&copy, 0, 0, 0);
 	  make_cleanup (xfree, sals.sals);
 	}
       else

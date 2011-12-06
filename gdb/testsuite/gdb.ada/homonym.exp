@@ -31,6 +31,24 @@ if {[gdb_compile_ada "${srcfile}" "${binfile}" executable [list debug]] != "" } 
 
 clean_restart ${testfile}
 
+
+# Do these tests before running, so we are operating in a known
+# environment.
+
+gdb_test "break Get_Value" \
+    "Breakpoint \[0-9\]+ at $hex: Get_Value. .2 locations." \
+    "set breakpoint at Get_Value"
+
+gdb_test "break homonym.adb:Get_Value" \
+    "Breakpoint \[0-9\]+ at $hex: homonym.adb:Get_Value. .2 locations." \
+    "set breakpoint at homonym.adb:Get_Value"
+
+gdb_test "break <homonym__get_value>" \
+    "Breakpoint \[0-9\]+ at $hex: <homonym__get_value>. .2 locations." \
+    "set breakpoint at <homonym__get_value>"
+
+delete_breakpoints
+
 set bp_location [gdb_get_line_number "BREAK_1" ${testdir}/homonym.adb]
 runto "homonym.adb:$bp_location"
 
@@ -86,6 +104,3 @@ gdb_test "ptype lcl" \
 gdb_test "print lcl" \
          "= 17" \
          "print lcl at BREAK_2"
-
-
-

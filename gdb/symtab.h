@@ -22,6 +22,8 @@
 #if !defined (SYMTAB_H)
 #define SYMTAB_H 1
 
+#include "vec.h"
+
 /* Opaque declarations.  */
 struct ui_file;
 struct frame_info;
@@ -1056,6 +1058,12 @@ extern struct minimal_symbol *lookup_minimal_symbol_by_pc_name
 
 extern struct minimal_symbol *lookup_minimal_symbol_by_pc (CORE_ADDR);
 
+extern void iterate_over_minimal_symbols (struct objfile *objf,
+					  const char *name,
+					  void (*callback) (struct minimal_symbol *,
+							    void *),
+					  void *user_data);
+
 extern int in_gnu_ifunc_stub (CORE_ADDR pc);
 
 /* Functions for resolving STT_GNU_IFUNC symbols which are implemented only
@@ -1295,8 +1303,6 @@ struct symbol *lookup_global_symbol_from_objfile (const struct objfile *,
 						  const char *name,
 						  const domain_enum domain);
 
-extern struct symtabs_and_lines expand_line_sal (struct symtab_and_line sal);
-
 /* Return 1 if the supplied producer string matches the ARM RealView
    compiler (armcc).  */
 int producer_is_realview (const char *producer);
@@ -1307,5 +1313,32 @@ void fixup_section (struct general_symbol_info *ginfo,
 struct objfile *lookup_objfile_from_block (const struct block *block);
 
 extern int basenames_may_differ;
+
+int iterate_over_some_symtabs (const char *name,
+			       const char *full_path,
+			       const char *real_path,
+			       int (*callback) (struct symtab *symtab,
+						void *data),
+			       void *data,
+			       struct symtab *first,
+			       struct symtab *after_last);
+
+void iterate_over_symtabs (const char *name,
+			   int (*callback) (struct symtab *symtab,
+					    void *data),
+			   void *data);
+
+DEF_VEC_I (CORE_ADDR);
+
+VEC (CORE_ADDR) *find_pcs_for_symtab_line (struct symtab *symtab, int line,
+					   struct linetable_entry **best_entry);
+
+void iterate_over_symbols (const struct block *block, const char *name,
+			   const domain_enum domain,
+			   int (*callback) (struct symbol *, void *),
+			   void *data);
+
+struct cleanup *demangle_for_lookup (const char *name, enum language lang,
+				     const char **result_name);
 
 #endif /* !defined(SYMTAB_H) */

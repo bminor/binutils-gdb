@@ -46,17 +46,17 @@ gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 gdb_load_shlibs $binfile_lib
 
-if ![runto_main] then {
-  fail "Can't run to main"
-  return 0
-}
-
 # Set a breakpoint in the binary.
 gdb_test "br foo2" \
 	 "Breakpoint.*file.*${testfile}\\.c.*" \
 	 "foo2 in main"
 
 delete_breakpoints
+
+if ![runto_main] then {
+  fail "Can't run to main"
+  return 0
+}
 
 # Break in the library.
 gdb_test "br foo" \
@@ -67,9 +67,9 @@ gdb_test "continue" \
 	 "Continuing.*" \
 	 "continue"
 
-# This symbol is now looked up in the ELF library.
+# This symbol is now looked up in the ELF library and the binary.
 gdb_test "br foo2" \
-	 "Breakpoint.*file.*${libname}\\.c.*" \
+	 "Breakpoint.*: foo2. .2 locations..*" \
 	 "foo2 in mdlib"
 
 gdb_exit

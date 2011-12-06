@@ -82,6 +82,20 @@ block_linkage_function (const struct block *bl)
   return BLOCK_FUNCTION (bl);
 }
 
+/* Return the symbol for the function which contains a specified
+   block, described by a struct block BL.  The return value will be
+   the closest enclosing function, which might be an inline
+   function.  */
+
+struct symbol *
+block_containing_function (const struct block *bl)
+{
+  while (BLOCK_FUNCTION (bl) == NULL && BLOCK_SUPERBLOCK (bl) != NULL)
+    bl = BLOCK_SUPERBLOCK (bl);
+
+  return BLOCK_FUNCTION (bl);
+}
+
 /* Return one if BL represents an inlined function.  */
 
 int

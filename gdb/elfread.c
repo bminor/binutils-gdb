@@ -1032,7 +1032,7 @@ elf_gnu_ifunc_resolver_return_stop (struct breakpoint *b)
     }
   gdb_assert (b->type == bp_gnu_ifunc_resolver);
 
-  gdb_assert (current_program_space == b->pspace);
+  gdb_assert (current_program_space == b->pspace || b->pspace == NULL);
   elf_gnu_ifunc_record_cache (b->addr_string, resolved_pc);
 
   sal = find_pc_line (resolved_pc, 0);

@@ -2456,7 +2456,7 @@ trace_find_line_command (char *args, int from_tty)
     }
   else
     {
-      sals = decode_line_spec (args, 1);
+      sals = decode_line_spec (args, DECODE_LINE_FUNFIRSTLINE);
       sal = sals.sals[0];
     }
   
@@ -2584,7 +2584,7 @@ scope_info (char *args, int from_tty)
     error (_("requires an argument (function, "
 	     "line or *addr) to define a scope"));
 
-  sals = decode_line_1 (&args, 1, NULL, 0, NULL);
+  sals = decode_line_1 (&args, DECODE_LINE_FUNFIRSTLINE, NULL, 0);
   if (sals.nelts == 0)
     return;		/* Presumably decode_line_1 has already warned.  */
 

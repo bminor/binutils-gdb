@@ -1,3 +1,46 @@
+2011-12-06  Joel Brobecker  <brobecker@acacore.com>
+
+        * gdb.ada/fullname_bp.exp: Add tests for other valid linespecs
+        involving a fully qualified function name.
+
+2011-12-06  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.ada/homonym.exp: Add three breakpoint tests.
+
+2011-12-06  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.base/solib-weak.exp (do_test): Remove kfail.
+	* gdb.trace/tracecmd.exp: Disable pending breakpoints earlier.
+	* gdb.objc/objcdecode.exp: Update for output changes.
+	* gdb.linespec/linespec.exp: New file.
+	* gdb.linespec/lspec.cc: New file.
+	* gdb.linespec/lspec.h: New file.
+	* gdb.linespec/body.h: New file.
+	* gdb.linespec/base/two/thefile.cc: New file.
+	* gdb.linespec/base/one/thefile.cc: New file.
+	* gdb.linespec/Makefile.in: New file.
+	* gdb.cp/templates.exp (test_template_breakpoints): Update for
+	output changes.
+	* gdb.cp/re-set-overloaded.exp: Remove kfail.
+	* gdb.cp/ovldbreak.exp: Update for output changes.  "all" test now
+	makes one breakpoint.
+	* gdb.cp/method2.exp (test_break): Update for output changes.
+	* gdb.cp/mb-templates.exp: Update for output changes.
+	* gdb.cp/mb-inline.exp: Update for output changes.
+	* gdb.cp/mb-ctor.exp: Update for output changes.
+	* gdb.cp/ovsrch.exp: Use fully-qualified names.
+	* gdb.base/solib-symbol.exp: Run to main later.  Breakpoint now
+	has multiple matches.
+	* gdb.base/sepdebug.exp: Disable pending breakpoints.  Update for
+	error message change.
+	* gdb.base/list.exp (test_list_filename_and_number): Update for
+	error message change.
+	* gdb.base/break.exp: Disable pending breakpoints.  Update for
+	output changes.
+	* configure.ac: Add gdb.linespec.
+	* configure: Rebuild.
+	* Makefile.in (ALL_SUBDIRS): Add gdb.linespec.
+
 2011-12-06  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* gdb.base/callfuncs.exp (fetch_all_registers): Filter out read-only

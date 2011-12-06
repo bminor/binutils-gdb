@@ -52,7 +52,7 @@ set bp_location [gdb_get_line_number "set breakpoint here"]
 # and a condition.
 
 gdb_test "break $srcfile:$bp_location if i==1" \
-    "Breakpoint.*at.* file .*$srcfile, line.*\\(2 locations\\).*" \
+    "Breakpoint.*at.*: $srcfile:$bp_location. \\(2 locations\\).*" \
     "initial condition: set breakpoint"
 
 gdb_run_cmd
@@ -80,7 +80,7 @@ gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 
 gdb_test "break $srcfile:$bp_location" \
-    "Breakpoint.*at.* file .*$srcfile, line.*\\(2 locations\\).*" \
+    "Breakpoint.*at.*: $srcfile:$bp_location. \\(2 locations\\).*" \
     "separate condition: set breakpoint"
 
 gdb_test_no_output "condition 1 i==1" \
@@ -177,7 +177,7 @@ if { ![runto_main] } {
 }
 
 gdb_test "break $srcfile:$bp_location" \
-    "Breakpoint.*at.* file .*$srcfile, line.*\\(2 locations\\).*" \
+    "Breakpoint.*at.*: $srcfile:$bp_location. \\(2 locations\\).*" \
     "set multi_line_foo breakpoint"
 gdb_test "continue" \
     ".*Breakpoint.*multi_line_foo<int> \\(i=0\\).*" \

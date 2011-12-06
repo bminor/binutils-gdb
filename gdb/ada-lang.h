@@ -365,6 +365,8 @@ extern char *ada_breakpoint_rewrite (char *, int *);
 
 extern char *ada_main_name (void);
 
+extern char *ada_name_for_lookup (const char *name);
+
 /* Tasking-related: ada-tasks.c */
 
 extern int valid_task_id (int);

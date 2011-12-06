@@ -24,6 +24,8 @@ namespace A
     void foo (int) const;
     void foo (char *) const;
     bool func (void) { return true; }
+    void hibob (int) const;
+    void hibob (char *) const;
   };
 
   namespace B
@@ -34,6 +36,8 @@ namespace A
       void foo (void) const;
       void foo (int) const;
       void foo (char *) const;
+      void hibob (int) const;
+      void hibob (char *) const;
     };
   }
 }

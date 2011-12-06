@@ -109,12 +109,7 @@ proc test_template_breakpoints {} {
     global hp_aCC_compiler
 
     gdb_test_multiple "break T5<int>::T5" "constructor breakpoint" {
-	-re "0. cancel.*\[\r\n\]*.1. all.*\[\r\n\]*.2. T5<int>::T5\\(int\\) at .*\[\r\n\]*.3. T5<int>::T5\\((T5<int> const|const T5<int>) ?&\\) at .*\[\r\n\]*> $" {
-	    gdb_test "0" \
-		"canceled" \
-		"constructor breakpoint (obsolete format!)"
-	}
-	-re ".0. cancel\[\r\n\]*.1. all\[\r\n\]*.2. T5<int>::T5\\((T5<int> const|const T5<int>) ?&\\) at .*templates.cc:.*\[\r\n\]*.3. T5<int>::T5\\(int\\) at .*templates.cc:.*\[\r\n\]*> $" {
+	-re "0. cancel.*\[\r\n\]*.1. all.*\[\r\n\]*.2.*templates.cc:T5<int>::T5\\((T5<int> const|const T5<int>) ?&\\)\[\r\n\]*.3.*templates.cc:T5<int>::T5\\(int\\)\[\r\n\]*> $" {
 	    gdb_test "0" \
 		"canceled" \
 		"constructor breakpoint"
@@ -152,9 +147,26 @@ proc test_template_breakpoints {} {
 
     set bp_location [gdb_get_line_number \
                          "set breakpoint on a line with no real code"]
-    gdb_test "break ${testfile}.cc:${bp_location}" \
-        "Breakpoint.*at.* file .*${testfile}.cc, line.*(2 locations).*" \
-        "breakpoint on a line with no real code"
+
+    gdb_test_multiple "break ${testfile}.cc:${bp_location}" \
+	"breakpoint on a line with no real code" {
+	    -re "0. cancel.*\[\r\n\]*.1. all.*\[\r\n\]*.2.*templates.cc:GetMax<int>\\(int, int\\)\[\r\n\]*.3.*templates.cc:GetMax<long>\\(long, long\\)\[\r\n\]*> $" {
+		gdb_test "0" \
+		    "canceled" \
+		    "breakpoint on a line with no real code"
+	    }
+	    -re "0. cancel.*\[\r\n\]*.1. all.*\[\r\n\]*.2.*\[\r\n\]*.3.*\[\r\n\]*> $" {
+		gdb_test "0" \
+		    "nonsense intended to insure that this test fails" \
+		    "breakpoint on a line with no real code"
+	    }
+	    -re ".*\n> $" {
+		gdb_test "0" \
+		    "nonsense intended to insure that this test fails" \
+		    "breakpoint on a line with no real code"
+	    }
+	}
+
     delete_breakpoints
 }
 

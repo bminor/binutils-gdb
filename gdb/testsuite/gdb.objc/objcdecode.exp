@@ -52,17 +52,19 @@ proc do_objc_tests {} {
 
 do_objc_tests
 
+gdb_test_no_output "set multiple-symbols ask"
+
 #
 # Break on multiply defined method (PR objc/1236)
 #
 set name "break on multiply defined method"
 gdb_test_multiple "break multipleDef" $name \
 {
-    -re "\\\[0\\\] cancel\r\n\\\[1\\\] all\r\n\\\[2\\\] -.Decode multipleDef. at .*\r\n\\\[3\\\] multipleDef at .*\r\n> $" {
+    -re "\\\[0\\\] cancel\r\n\\\[1\\\] all\r\n\\\[2\\\] .*${srcfile}:-.Decode multipleDef.\r\n\\\[3\\\] .*${srcfile}:multipleDef\r\n> $" {
 	send_gdb "3\n"
 	exp_continue
     }
-    -re "Breakpoint \[0-9\]+ at 0x\[0-9a-f\]+: file .*\r\n$gdb_prompt $" { pass $name }
+    -re "Breakpoint \[0-9\]+ at 0x\[0-9a-f\]+: .*\r\n$gdb_prompt $" { pass $name }
     -re ".*$gdb_prompt $"   { kfail "gdb/1236" $name }
 }
 

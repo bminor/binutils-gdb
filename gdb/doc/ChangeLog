@@ -1,3 +1,7 @@
+2011-12-06  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.texinfo (Set Breaks): Update for new behavior.
+
 2011-12-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.texinfo (Requirements, Remote Protocol): Reference also `Library

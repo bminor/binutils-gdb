@@ -186,14 +186,6 @@ enum enable_state
 			    automatically enabled and reset when the
 			    call "lands" (either completes, or stops
 			    at another eventpoint).  */
-    bp_startup_disabled, /* The eventpoint has been disabled during
-			    inferior startup.  This is necessary on
-			    some targets where the main executable
-			    will get relocated during startup, making
-			    breakpoint addresses invalid.  The
-			    eventpoint will be automatically enabled
-			    and reset once inferior startup is
-			    complete.  */
     bp_permanent	 /* There is a breakpoint instruction
 			    hard-wired into the target's code.  Don't
 			    try to write another breakpoint
@@ -405,6 +397,14 @@ struct bp_location
      This variable keeps a number of events still to go, when
      it becomes 0 this location is retired.  */
   int events_till_retirement;
+
+  /* Line number of this address.  */
+
+  int line_number;
+
+  /* Source file name of this address.  */
+
+  char *source_file;
 };
 
 /* This structure is a collection of function pointers that, if available,
@@ -552,14 +552,6 @@ struct breakpoint
     /* Location(s) associated with this high-level breakpoint.  */
     struct bp_location *loc;
 
-    /* Line number of this address.  */
-
-    int line_number;
-
-    /* Source file name of this address.  */
-
-    char *source_file;
-
     /* Non-zero means a silent breakpoint (don't print frame info
        if we stop here).  */
     unsigned char silent;
@@ -575,11 +567,18 @@ struct breakpoint
        equals this.  */
     struct frame_id frame_id;
 
-    /* The program space used to set the breakpoint.  */
+    /* The program space used to set the breakpoint.  This is only set
+       for breakpoints which are specific to a program space; for
+       ordinary breakpoints this is NULL.  */
     struct program_space *pspace;
 
     /* String we used to set the breakpoint (malloc'd).  */
     char *addr_string;
+
+    /* The filter that should be passed to decode_line_full when
+       re-setting this breakpoint.  This may be NULL, but otherwise is
+       allocated with xmalloc.  */
+    char *filter;
 
     /* For a ranged breakpoint, the string we used to find
        the end of the range (malloc'd).  */

@@ -5052,6 +5052,50 @@ done:
   return ndefns;
 }
 
+/* If NAME is the name of an entity, return a string that should
+   be used to look that entity up in Ada units.  This string should
+   be deallocated after use using xfree.
+
+   NAME can have any form that the "break" or "print" commands might
+   recognize.  In other words, it does not have to be the "natural"
+   name, or the "encoded" name.  */
+
+char *
+ada_name_for_lookup (const char *name)
+{
+  char *canon;
+  int nlen = strlen (name);
+
+  if (name[0] == '<' && name[nlen - 1] == '>')
+    {
+      canon = xmalloc (nlen - 1);
+      memcpy (canon, name + 1, nlen - 2);
+      canon[nlen - 2] = '\0';
+    }
+  else
+    canon = xstrdup (ada_encode (ada_fold_name (name)));
+  return canon;
+}
+
+/* Implementation of the la_iterate_over_symbols method.  */
+
+static void
+ada_iterate_over_symbols (const struct block *block,
+			  const char *name, domain_enum domain,
+			  int (*callback) (struct symbol *, void *),
+			  void *data)
+{
+  int ndefs, i;
+  struct ada_symbol_info *results;
+
+  ndefs = ada_lookup_symbol_list (name, block, domain, &results);
+  for (i = 0; i < ndefs; ++i)
+    {
+      if (! (*callback) (results[i].sym, data))
+	break;
+    }
+}
+
 struct symbol *
 ada_lookup_encoded_symbol (const char *name, const struct block *block0,
 			   domain_enum namespace, struct block **block_found)
@@ -5633,7 +5677,8 @@ struct add_partial_datum
 
 /* A callback for expand_partial_symbol_names.  */
 static int
-ada_expand_partial_symbol_name (const char *name, void *user_data)
+ada_expand_partial_symbol_name (const struct language_defn *language,
+				const char *name, void *user_data)
 {
   struct add_partial_datum *data = user_data;
   
@@ -12282,6 +12327,8 @@ const struct language_defn ada_language_defn = {
   ada_print_array_index,
   default_pass_by_reference,
   c_get_string,
+  compare_names,
+  ada_iterate_over_symbols,
   LANG_MAGIC
 };
 

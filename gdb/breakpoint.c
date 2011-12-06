@@ -1576,6 +1576,9 @@ should_be_inserted (struct bp_location *bl)
   if (!bl->enabled || bl->shlib_disabled || bl->duplicate)
     return 0;
 
+  if (user_breakpoint_p (bl->owner) && bl->pspace->executing_startup)
+    return 0;
+
   /* This is set for example, when we're attached to the parent of a
      vfork, and have detached from the child.  The child is running
      free, and we expect it to do an exec or exit, at which point the
@@ -4562,7 +4565,7 @@ print_breakpoint_location (struct breakpoint *b,
 
   if (b->display_canonical)
     ui_out_field_string (uiout, "what", b->addr_string);
-  else if (b->source_file && loc)
+  else if (loc && loc->source_file)
     {
       struct symbol *sym 
 	= find_pc_sect_function (loc->address, loc->section);
@@ -4575,7 +4578,7 @@ print_breakpoint_location (struct breakpoint *b,
 	  ui_out_wrap_hint (uiout, wrap_indent_at_field (uiout, "what"));
 	  ui_out_text (uiout, "at ");
 	}
-      ui_out_field_string (uiout, "file", b->source_file);
+      ui_out_field_string (uiout, "file", loc->source_file);
       ui_out_text (uiout, ":");
       
       if (ui_out_is_mi_like_p (uiout))
@@ -4587,7 +4590,7 @@ print_breakpoint_location (struct breakpoint *b,
 	    ui_out_field_string (uiout, "fullname", fullname);
 	}
       
-      ui_out_field_int (uiout, "line", b->line_number);
+      ui_out_field_int (uiout, "line", loc->line_number);
     }
   else if (loc)
     {
@@ -5343,8 +5346,7 @@ describe_other_breakpoints (struct gdbarch *gdbarch,
 	      printf_filtered (" (thread %d)", b->thread);
 	    printf_filtered ("%s%s ",
 			     ((b->enable_state == bp_disabled
-			       || b->enable_state == bp_call_disabled
-			       || b->enable_state == bp_startup_disabled)
+			       || b->enable_state == bp_call_disabled)
 			      ? " (disabled)"
 			      : b->enable_state == bp_permanent 
 			      ? " (permanent)"
@@ -5819,15 +5821,11 @@ init_raw_breakpoint (struct breakpoint *b, struct gdbarch *gdbarch,
   if (bptype != bp_catchpoint)
     gdb_assert (sal.pspace != NULL);
 
-  /* Store the program space that was used to set the breakpoint, for
-     breakpoint resetting.  */
-  b->pspace = sal.pspace;
-
-  if (sal.symtab == NULL)
-    b->source_file = NULL;
-  else
-    b->source_file = xstrdup (sal.symtab->filename);
-  b->line_number = sal.line;
+  /* Store the program space that was used to set the breakpoint,
+     except for ordinary breakpoints, which are independent of the
+     program space.  */
+  if (bptype != bp_breakpoint && bptype != bp_hardware_breakpoint)
+    b->pspace = sal.pspace;
 
   breakpoints_changed ();
 }
@@ -7011,53 +7009,15 @@ enable_watchpoints_after_interactive_call_stop (void)
 void
 disable_breakpoints_before_startup (void)
 {
-  struct breakpoint *b;
-  int found = 0;
-
-  ALL_BREAKPOINTS (b)
-    {
-      if (b->pspace != current_program_space)
-	continue;
-
-      if ((b->type == bp_breakpoint
-	   || b->type == bp_hardware_breakpoint)
-	  && breakpoint_enabled (b))
-	{
-	  b->enable_state = bp_startup_disabled;
-	  found = 1;
-	}
-    }
-
-  if (found)
-    update_global_location_list (0);
-
   current_program_space->executing_startup = 1;
+  update_global_location_list (0);
 }
 
 void
 enable_breakpoints_after_startup (void)
 {
-  struct breakpoint *b;
-  int found = 0;
-
   current_program_space->executing_startup = 0;
-
-  ALL_BREAKPOINTS (b)
-    {
-      if (b->pspace != current_program_space)
-	continue;
-
-      if ((b->type == bp_breakpoint
-	   || b->type == bp_hardware_breakpoint)
-	  && b->enable_state == bp_startup_disabled)
-	{
-	  b->enable_state = bp_enabled;
-	  found = 1;
-	}
-    }
-
-  if (found)
-    breakpoint_re_set ();
+  breakpoint_re_set ();
 }
 
 
@@ -7112,12 +7072,10 @@ momentary_breakpoint_from_master (struct breakpoint *orig,
   copy->loc->section = orig->loc->section;
   copy->loc->pspace = orig->loc->pspace;
 
-  if (orig->source_file == NULL)
-    copy->source_file = NULL;
-  else
-    copy->source_file = xstrdup (orig->source_file);
+  if (orig->loc->source_file != NULL)
+    copy->loc->source_file = xstrdup (orig->loc->source_file);
 
-  copy->line_number = orig->line_number;
+  copy->loc->line_number = orig->loc->line_number;
   copy->frame_id = orig->frame_id;
   copy->thread = orig->thread;
   copy->pspace = orig->pspace;
@@ -7201,6 +7159,11 @@ add_location_to_breakpoint (struct breakpoint *b,
   gdb_assert (loc->pspace != NULL);
   loc->section = sal->section;
   loc->gdbarch = loc_gdbarch;
+
+  if (sal->symtab != NULL)
+    loc->source_file = xstrdup (sal->symtab->filename);
+  loc->line_number = sal->line;
+
   set_breakpoint_location_function (loc,
 				    sal->explicit_pc || sal->explicit_line);
   return loc;
@@ -7257,7 +7220,7 @@ bp_loc_is_permanent (struct bp_location *loc)
 static void
 init_breakpoint_sal (struct breakpoint *b, struct gdbarch *gdbarch,
 		     struct symtabs_and_lines sals, char *addr_string,
-		     char *cond_string,
+		     char *filter, char *cond_string,
 		     enum bptype type, enum bpdisp disposition,
 		     int thread, int task, int ignore_count,
 		     const struct breakpoint_ops *ops, int from_tty,
@@ -7306,7 +7269,6 @@ init_breakpoint_sal (struct breakpoint *b, struct gdbarch *gdbarch,
 	  b->ignore_count = ignore_count;
 	  b->enable_state = enabled ? bp_enabled : bp_disabled;
 	  b->disposition = disposition;
-	  b->pspace = sals.sals[0].pspace;
 
 	  if (type == bp_static_tracepoint)
 	    {
@@ -7346,11 +7308,6 @@ init_breakpoint_sal (struct breakpoint *b, struct gdbarch *gdbarch,
 			   "tracepoint marker to probe"));
 	    }
 
-	  if (enabled && b->pspace->executing_startup
-	      && (b->type == bp_breakpoint
-		  || b->type == bp_hardware_breakpoint))
-	    b->enable_state = bp_startup_disabled;
-
 	  loc = b->loc;
 	}
       else
@@ -7378,12 +7335,13 @@ init_breakpoint_sal (struct breakpoint *b, struct gdbarch *gdbarch,
        me.  */
     b->addr_string
       = xstrprintf ("*%s", paddress (b->loc->gdbarch, b->loc->address));
+  b->filter = filter;
 }
 
 static void
 create_breakpoint_sal (struct gdbarch *gdbarch,
 		       struct symtabs_and_lines sals, char *addr_string,
-		       char *cond_string,
+		       char *filter, char *cond_string,
 		       enum bptype type, enum bpdisp disposition,
 		       int thread, int task, int ignore_count,
 		       const struct breakpoint_ops *ops, int from_tty,
@@ -7406,7 +7364,7 @@ create_breakpoint_sal (struct gdbarch *gdbarch,
 
   init_breakpoint_sal (b, gdbarch,
 		       sals, addr_string,
-		       cond_string,
+		       filter, cond_string,
 		       type, disposition,
 		       thread, task, ignore_count,
 		       ops, from_tty,
@@ -7414,138 +7372,6 @@ create_breakpoint_sal (struct gdbarch *gdbarch,
   discard_cleanups (old_chain);
 
   install_breakpoint (internal, b, 0);
-}
-
-/* Remove element at INDEX_TO_REMOVE from SAL, shifting other
-   elements to fill the void space.  */
-static void
-remove_sal (struct symtabs_and_lines *sal, int index_to_remove)
-{
-  int i = index_to_remove+1;
-  int last_index = sal->nelts-1;
-
-  for (;i <= last_index; ++i)
-    sal->sals[i-1] = sal->sals[i];
-
-  --(sal->nelts);
-}
-
-/* If appropriate, obtains all sals that correspond to the same file
-   and line as SAL, in all program spaces.  Users debugging with IDEs,
-   will want to set a breakpoint at foo.c:line, and not really care
-   about program spaces.  This is done only if SAL does not have
-   explicit PC and has line and file information.  If we got just a
-   single expanded sal, return the original.
-
-   Otherwise, if SAL.explicit_line is not set, filter out all sals for
-   which the name of enclosing function is different from SAL.  This
-   makes sure that if we have breakpoint originally set in template
-   instantiation, say foo<int>(), we won't expand SAL to locations at
-   the same line in all existing instantiations of 'foo'.  */
-
-static struct symtabs_and_lines
-expand_line_sal_maybe (struct symtab_and_line sal)
-{
-  struct symtabs_and_lines expanded;
-  CORE_ADDR original_pc = sal.pc;
-  char *original_function = NULL;
-  int found;
-  int i;
-  struct cleanup *old_chain;
-
-  /* If we have explicit pc, don't expand.
-     If we have no line number, we can't expand.  */
-  if (sal.explicit_pc || sal.line == 0 || sal.symtab == NULL)
-    {
-      expanded.nelts = 1;
-      expanded.sals = xmalloc (sizeof (struct symtab_and_line));
-      expanded.sals[0] = sal;
-      return expanded;
-    }
-
-  sal.pc = 0;
-
-  old_chain = save_current_space_and_thread ();
-
-  switch_to_program_space_and_thread (sal.pspace);
-
-  find_pc_partial_function (original_pc, &original_function, NULL, NULL);
-
-  /* Note that expand_line_sal visits *all* program spaces.  */
-  expanded = expand_line_sal (sal);
-
-  if (expanded.nelts == 1)
-    {
-      /* We had one sal, we got one sal.  Return that sal, adjusting it
-         past the function prologue if necessary.  */
-      xfree (expanded.sals);
-      expanded.nelts = 1;
-      expanded.sals = xmalloc (sizeof (struct symtab_and_line));
-      sal.pc = original_pc;
-      expanded.sals[0] = sal;
-      skip_prologue_sal (&expanded.sals[0]);
-      do_cleanups (old_chain);
-      return expanded;      
-    }
-
-  if (!sal.explicit_line)
-    {
-      CORE_ADDR func_addr, func_end;
-      for (i = 0; i < expanded.nelts; ++i)
-	{
-	  CORE_ADDR pc = expanded.sals[i].pc;
-	  char *this_function;
-
-	  /* We need to switch threads as well since we're about to
-	     read memory.  */
-	  switch_to_program_space_and_thread (expanded.sals[i].pspace);
-
-	  if (find_pc_partial_function (pc, &this_function, 
-					&func_addr, &func_end))
-	    {
-	      if (this_function
-		  && strcmp (this_function, original_function) != 0)
-		{
-		  remove_sal (&expanded, i);
-		  --i;
-		}
-	    }
-	}
-    }
-
-  /* Skip the function prologue if necessary.  */
-  for (i = 0; i < expanded.nelts; ++i)
-    skip_prologue_sal (&expanded.sals[i]);
-
-  do_cleanups (old_chain);
-
-  if (expanded.nelts <= 1)
-    {
-      /* This is an ugly workaround.  If we get zero expanded sals
-         then something is really wrong.  Fix that by returning the
-         original sal.  */
-
-      xfree (expanded.sals);
-      expanded.nelts = 1;
-      expanded.sals = xmalloc (sizeof (struct symtab_and_line));
-      sal.pc = original_pc;
-      expanded.sals[0] = sal;
-      return expanded;      
-    }
-
-  if (original_pc)
-    {
-      found = 0;
-      for (i = 0; i < expanded.nelts; ++i)
-	if (expanded.sals[i].pc == original_pc)
-	  {
-	    found = 1;
-	    break;
-	  }
-      gdb_assert (found);
-    }
-
-  return expanded;
 }
 
 /* Add SALS.nelts breakpoints to the breakpoint table.  For each
@@ -7565,7 +7391,6 @@ expand_line_sal_maybe (struct symtab_and_line sal)
 
 static void
 create_breakpoints_sal (struct gdbarch *gdbarch,
-			struct symtabs_and_lines sals,
 			struct linespec_result *canonical,
 			char *cond_string,
 			enum bptype type, enum bpdisp disposition,
@@ -7574,17 +7399,30 @@ create_breakpoints_sal (struct gdbarch *gdbarch,
 			int enabled, int internal)
 {
   int i;
+  struct linespec_sals *lsal;
 
-  for (i = 0; i < sals.nelts; ++i)
+  if (canonical->pre_expanded)
+    gdb_assert (VEC_length (linespec_sals, canonical->sals) == 1);
+
+  for (i = 0; VEC_iterate (linespec_sals, canonical->sals, i, lsal); ++i)
     {
-      struct symtabs_and_lines expanded = 
-	expand_line_sal_maybe (sals.sals[i]);
+      /* Note that 'addr_string' can be NULL in the case of a plain
+	 'break', without arguments.  */
+      char *addr_string = (canonical->addr_string
+			   ? xstrdup (canonical->addr_string)
+			   : NULL);
+      char *filter_string = lsal->canonical ? xstrdup (lsal->canonical) : NULL;
+      struct cleanup *inner = make_cleanup (xfree, addr_string);
 
-      create_breakpoint_sal (gdbarch, expanded, canonical->canonical[i],
+      make_cleanup (xfree, filter_string);
+      create_breakpoint_sal (gdbarch, lsal->sals,
+			     addr_string,
+			     filter_string,
 			     cond_string, type, disposition,
 			     thread, task, ignore_count, ops,
 			     from_tty, enabled, internal,
 			     canonical->special_display);
+      discard_cleanups (inner);
     }
 }
 
@@ -7598,7 +7436,6 @@ create_breakpoints_sal (struct gdbarch *gdbarch,
 
 static void
 parse_breakpoint_sals (char **address,
-		       struct symtabs_and_lines *sals,
 		       struct linespec_result *canonical)
 {
   char *addr_start = *address;
@@ -7612,10 +7449,11 @@ parse_breakpoint_sals (char **address,
          address.  */
       if (last_displayed_sal_is_valid ())
 	{
+	  struct linespec_sals lsal;
 	  struct symtab_and_line sal;
 
 	  init_sal (&sal);		/* Initialize to zeroes.  */
-	  sals->sals = (struct symtab_and_line *)
+	  lsal.sals.sals = (struct symtab_and_line *)
 	    xmalloc (sizeof (struct symtab_and_line));
 
 	  /* Set sal's pspace, pc, symtab, and line to the values
@@ -7630,8 +7468,11 @@ parse_breakpoint_sals (char **address,
 	     instances with the same symtab and line.  */
 	  sal.explicit_pc = 1;
 
-	  sals->sals[0] = sal;
-	  sals->nelts = 1;
+	  lsal.sals.sals[0] = sal;
+	  lsal.sals.nelts = 1;
+	  lsal.canonical = NULL;
+
+	  VEC_safe_push (linespec_sals, canonical->sals, &lsal);
 	}
       else
 	error (_("No default breakpoint address now."));
@@ -7641,40 +7482,16 @@ parse_breakpoint_sals (char **address,
       /* Force almost all breakpoints to be in terms of the
          current_source_symtab (which is decode_line_1's default).
          This should produce the results we want almost all of the
-	 time while leaving the last displayed codepoint pointers
-	 alone.
-
-         ObjC: However, don't match an Objective-C method name which
-         may have a '+' or '-' succeeded by a '[' */
-	 
-      struct symtab_and_line cursal = get_current_source_symtab_and_line ();
-			
-      if (last_displayed_sal_is_valid ()
-	  && (!cursal.symtab
- 	      || ((strchr ("+-", (*address)[0]) != NULL)
- 		  && ((*address)[1] != '['))))
-	*sals = decode_line_1 (address, 1,
-			       get_last_displayed_symtab (),
-			       get_last_displayed_line (),
-			       canonical);
+         time while leaving default_breakpoint_* alone.  */
+      if (last_displayed_sal_is_valid ())
+	decode_line_full (address, DECODE_LINE_FUNFIRSTLINE,
+			  get_last_displayed_symtab (),
+			  get_last_displayed_line (),
+			  canonical, NULL, NULL);
       else
-	*sals = decode_line_1 (address, 1, (struct symtab *) NULL, 0,
-		               canonical);
-    }
-  /* For any SAL that didn't have a canonical string, fill one in.  */
-  if (sals->nelts > 0 && canonical->canonical == NULL)
-    canonical->canonical = xcalloc (sals->nelts, sizeof (char *));
-  if (addr_start != (*address))
-    {
-      int i;
-
-      for (i = 0; i < sals->nelts; i++)
-	{
-	  /* Add the string if not present.  */
-	  if (canonical->canonical[i] == NULL)
-	    canonical->canonical[i] = savestring (addr_start, 
-						  (*address) - addr_start);
-	}
+	decode_line_full (address, DECODE_LINE_FUNFIRSTLINE,
+			  (struct symtab *) NULL, 0,
+			  canonical, NULL, NULL);
     }
 }
 
@@ -7709,15 +7526,22 @@ check_fast_tracepoint_sals (struct gdbarch *gdbarch,
 
   for (i = 0; i < sals->nelts; i++)
     {
+      struct gdbarch *sarch;
+
       sal = &sals->sals[i];
 
-      rslt = gdbarch_fast_tracepoint_valid_at (gdbarch, sal->pc,
+      sarch = get_sal_arch (*sal);
+      /* We fall back to GDBARCH if there is no architecture
+	 associated with SAL.  */
+      if (sarch == NULL)
+	sarch = gdbarch;
+      rslt = gdbarch_fast_tracepoint_valid_at (sarch, sal->pc,
 					       NULL, &msg);
       old_chain = make_cleanup (xfree, msg);
 
       if (!rslt)
 	error (_("May not have a fast tracepoint at 0x%s%s"),
-	       paddress (gdbarch, sal->pc), (msg ? msg : ""));
+	       paddress (sarch, sal->pc), (msg ? msg : ""));
 
       do_cleanups (old_chain);
     }
@@ -7859,9 +7683,7 @@ create_breakpoint (struct gdbarch *gdbarch,
 		   int from_tty, int enabled, int internal)
 {
   volatile struct gdb_exception e;
-  struct symtabs_and_lines sals;
-  struct symtab_and_line pending_sal;
-  char *copy_arg;
+  char *copy_arg = NULL;
   char *addr_start = arg;
   struct linespec_result canonical;
   struct cleanup *old_chain;
@@ -7873,26 +7695,26 @@ create_breakpoint (struct gdbarch *gdbarch,
 
   gdb_assert (ops != NULL);
 
-  sals.sals = NULL;
-  sals.nelts = 0;
   init_linespec_result (&canonical);
 
   if (type_wanted == bp_static_tracepoint && is_marker_spec (arg))
     {
       int i;
+      struct linespec_sals lsal;
 
-      sals = decode_static_tracepoint_spec (&arg);
+      lsal.sals = decode_static_tracepoint_spec (&arg);
 
       copy_arg = savestring (addr_start, arg - addr_start);
-      canonical.canonical = xcalloc (sals.nelts, sizeof (char *));
-      for (i = 0; i < sals.nelts; i++)
-	canonical.canonical[i] = xstrdup (copy_arg);
+
+      lsal.canonical = xstrdup (copy_arg);
+      VEC_safe_push (linespec_sals, canonical.sals, &lsal);
+
       goto done;
     }
 
   TRY_CATCH (e, RETURN_MASK_ALL)
     {
-      parse_breakpoint_sals (&arg, &sals, &canonical);
+      parse_breakpoint_sals (&arg, &canonical);
     }
 
   /* If caller is interested in rc value from parse, set value.  */
@@ -7924,35 +7746,31 @@ create_breakpoint (struct gdbarch *gdbarch,
 	     a pending breakpoint and selected yes, or pending
 	     breakpoint behavior is on and thus a pending breakpoint
 	     is defaulted on behalf of the user.  */
-	  copy_arg = xstrdup (addr_start);
-	  canonical.canonical = &copy_arg;
-	  sals.nelts = 1;
-	  sals.sals = &pending_sal;
-	  pending_sal.pc = 0;
-	  pending = 1;
+	  {
+	    struct linespec_sals lsal;
+
+	    copy_arg = xstrdup (addr_start);
+	    lsal.canonical = xstrdup (copy_arg);
+	    lsal.sals.nelts = 1;
+	    lsal.sals.sals = XNEW (struct symtab_and_line);
+	    init_sal (&lsal.sals.sals[0]);
+	    pending = 1;
+	    VEC_safe_push (linespec_sals, canonical.sals, &lsal);
+	  }
 	  break;
 	default:
 	  throw_exception (e);
 	}
       break;
     default:
-      if (!sals.nelts)
+      if (VEC_empty (linespec_sals, canonical.sals))
 	return 0;
     }
 
   done:
 
   /* Create a chain of things that always need to be cleaned up.  */
-  old_chain = make_cleanup (null_cleanup, 0);
-
-  if (!pending)
-    {
-      /* Make sure that all storage allocated to SALS gets freed.  */
-      make_cleanup (xfree, sals.sals);
-      
-      /* Cleanup the canonical array but not its contents.  */
-      make_cleanup (xfree, canonical.canonical);
-    }
+  old_chain = make_cleanup_destroy_linespec_result (&canonical);
 
   /* ----------------------------- SNIP -----------------------------
      Anything added to the cleanup chain beyond this point is assumed
@@ -7960,28 +7778,36 @@ create_breakpoint (struct gdbarch *gdbarch,
      then the memory is not reclaimed.  */
   bkpt_chain = make_cleanup (null_cleanup, 0);
 
-  /* Mark the contents of the canonical for cleanup.  These go on
-     the bkpt_chain and only occur if the breakpoint create fails.  */
-  for (i = 0; i < sals.nelts; i++)
-    {
-      if (canonical.canonical[i] != NULL)
-	make_cleanup (xfree, canonical.canonical[i]);
-    }
-
   /* Resolve all line numbers to PC's and verify that the addresses
      are ok for the target.  */
   if (!pending)
-    breakpoint_sals_to_pc (&sals);
+    {
+      int ix;
+      struct linespec_sals *iter;
+
+      for (ix = 0; VEC_iterate (linespec_sals, canonical.sals, ix, iter); ++ix)
+	breakpoint_sals_to_pc (&iter->sals);
+    }
 
   /* Fast tracepoints may have additional restrictions on location.  */
   if (!pending && type_wanted == bp_fast_tracepoint)
-    check_fast_tracepoint_sals (gdbarch, &sals);
+    {
+      int ix;
+      struct linespec_sals *iter;
+
+      for (ix = 0; VEC_iterate (linespec_sals, canonical.sals, ix, iter); ++ix)
+	check_fast_tracepoint_sals (gdbarch, &iter->sals);
+    }
 
   /* Verify that condition can be parsed, before setting any
      breakpoints.  Allocate a separate condition expression for each
      breakpoint.  */
   if (!pending)
     {
+      struct linespec_sals *lsal;
+
+      lsal = VEC_index (linespec_sals, canonical.sals, 0);
+
       if (parse_condition_and_thread)
         {
             /* Here we only parse 'arg' to separate condition
@@ -7990,7 +7816,7 @@ create_breakpoint (struct gdbarch *gdbarch,
                re-parse it in context of each sal.  */
             cond_string = NULL;
             thread = -1;
-            find_condition_and_thread (arg, sals.sals[0].pc, &cond_string,
+            find_condition_and_thread (arg, lsal->sals.sals[0].pc, &cond_string,
                                        &thread, &task);
             if (cond_string)
                 make_cleanup (xfree, cond_string);
@@ -8012,24 +7838,26 @@ create_breakpoint (struct gdbarch *gdbarch,
 	 expand multiple locations for each sal, given than SALS
 	 already should contain all sals for MARKER_ID.  */
       if (type_wanted == bp_static_tracepoint
-	  && is_marker_spec (canonical.canonical[0]))
+	  && is_marker_spec (copy_arg))
 	{
 	  int i;
 
-	  for (i = 0; i < sals.nelts; ++i)
+	  for (i = 0; i < lsal->sals.nelts; ++i)
 	    {
 	      struct symtabs_and_lines expanded;
 	      struct tracepoint *tp;
 	      struct cleanup *old_chain;
+	      char *addr_string;
 
 	      expanded.nelts = 1;
-	      expanded.sals = xmalloc (sizeof (struct symtab_and_line));
-	      expanded.sals[0] = sals.sals[i];
-	      old_chain = make_cleanup (xfree, expanded.sals);
+	      expanded.sals = &lsal->sals.sals[i];
+
+	      addr_string = xstrdup (canonical.addr_string);
+	      old_chain = make_cleanup (xfree, addr_string);
 
 	      tp = XCNEW (struct tracepoint);
 	      init_breakpoint_sal (&tp->base, gdbarch, expanded,
-				   canonical.canonical[i],
+				   addr_string, NULL,
 				   cond_string, type_wanted,
 				   tempflag ? disp_del : disp_donttouch,
 				   thread, task, ignore_count, ops,
@@ -8045,11 +7873,11 @@ create_breakpoint (struct gdbarch *gdbarch,
 
 	      install_breakpoint (internal, &tp->base, 0);
 
-	      do_cleanups (old_chain);
+	      discard_cleanups (old_chain);
 	    }
 	}
       else
-	create_breakpoints_sal (gdbarch, sals, &canonical, cond_string,
+	create_breakpoints_sal (gdbarch, &canonical, cond_string,
 				type_wanted,
 				tempflag ? disp_del : disp_donttouch,
 				thread, task, ignore_count, ops, from_tty,
@@ -8073,23 +7901,19 @@ create_breakpoint (struct gdbarch *gdbarch,
 
       init_raw_breakpoint_without_location (b, gdbarch, type_wanted, ops);
 
-      b->addr_string = canonical.canonical[0];
+      b->addr_string = copy_arg;
       b->cond_string = NULL;
       b->ignore_count = ignore_count;
       b->disposition = tempflag ? disp_del : disp_donttouch;
       b->condition_not_parsed = 1;
       b->enable_state = enabled ? bp_enabled : bp_disabled;
-      b->pspace = current_program_space;
-
-      if (enabled && b->pspace->executing_startup
-	  && (b->type == bp_breakpoint
-	      || b->type == bp_hardware_breakpoint))
-	b->enable_state = bp_startup_disabled;
+      if (type_wanted != bp_breakpoint && type_wanted != bp_hardware_breakpoint)
+	b->pspace = current_program_space;
 
       install_breakpoint (internal, b, 0);
     }
   
-  if (sals.nelts > 1)
+  if (VEC_length (linespec_sals, canonical.sals) > 1)
     {
       warning (_("Multiple breakpoints were set.\nUse the "
 		 "\"delete\" command to delete unwanted breakpoints."));
@@ -8470,8 +8294,8 @@ break_range_command (char *arg, int from_tty)
   CORE_ADDR end;
   struct breakpoint *b;
   struct symtab_and_line sal_start, sal_end;
-  struct symtabs_and_lines sals_start, sals_end;
   struct cleanup *cleanup_bkpt;
+  struct linespec_sals *lsal_start, *lsal_end;
 
   /* We don't support software ranged breakpoints.  */
   if (target_ranged_break_num_registers () < 0)
@@ -8484,71 +8308,62 @@ break_range_command (char *arg, int from_tty)
   if (can_use_bp < 0)
     error (_("Hardware breakpoints used exceeds limit."));
 
+  arg = skip_spaces (arg);
   if (arg == NULL || arg[0] == '\0')
     error(_("No address range specified."));
 
-  sals_start.sals = NULL;
-  sals_start.nelts = 0;
   init_linespec_result (&canonical_start);
 
-  while (*arg == ' ' || *arg == '\t')
-    arg++;
+  arg_start = arg;
+  parse_breakpoint_sals (&arg, &canonical_start);
 
-  parse_breakpoint_sals (&arg, &sals_start, &canonical_start);
-
-  sal_start = sals_start.sals[0];
-  addr_string_start = canonical_start.canonical[0];
-  cleanup_bkpt = make_cleanup (xfree, addr_string_start);
-  xfree (sals_start.sals);
-  xfree (canonical_start.canonical);
+  cleanup_bkpt = make_cleanup_destroy_linespec_result (&canonical_start);
 
   if (arg[0] != ',')
     error (_("Too few arguments."));
-  else if (sals_start.nelts == 0)
+  else if (VEC_empty (linespec_sals, canonical_start.sals))
     error (_("Could not find location of the beginning of the range."));
-  else if (sals_start.nelts != 1)
+
+  lsal_start = VEC_index (linespec_sals, canonical_start.sals, 0);
+
+  if (VEC_length (linespec_sals, canonical_start.sals) > 1
+      || lsal_start->sals.nelts != 1)
     error (_("Cannot create a ranged breakpoint with multiple locations."));
 
-  resolve_sal_pc (&sal_start);
+  sal_start = lsal_start->sals.sals[0];
+  addr_string_start = savestring (arg_start, arg - arg_start);
+  make_cleanup (xfree, addr_string_start);
 
   arg++;	/* Skip the comma.  */
-  while (*arg == ' ' || *arg == '\t')
-    arg++;
+  arg = skip_spaces (arg);
 
   /* Parse the end location.  */
 
-  sals_end.sals = NULL;
-  sals_end.nelts = 0;
   init_linespec_result (&canonical_end);
   arg_start = arg;
 
-  /* We call decode_line_1 directly here instead of using
+  /* We call decode_line_full directly here instead of using
      parse_breakpoint_sals because we need to specify the start location's
      symtab and line as the default symtab and line for the end of the
      range.  This makes it possible to have ranges like "foo.c:27, +14",
      where +14 means 14 lines from the start location.  */
-  sals_end = decode_line_1 (&arg, 1, sal_start.symtab, sal_start.line,
-			    &canonical_end);
+  decode_line_full (&arg, DECODE_LINE_FUNFIRSTLINE,
+		    sal_start.symtab, sal_start.line,
+		    &canonical_end, NULL, NULL);
 
-  /* canonical_end can be NULL if it was of the form "*0xdeadbeef".  */
-  if (canonical_end.canonical == NULL)
-    canonical_end.canonical = xcalloc (1, sizeof (char *));
-  /* Add the string if not present.  */
-  if (arg_start != arg && canonical_end.canonical[0] == NULL)
-    canonical_end.canonical[0] = savestring (arg_start, arg - arg_start);
+  make_cleanup_destroy_linespec_result (&canonical_end);
 
-  sal_end = sals_end.sals[0];
-  addr_string_end = canonical_end.canonical[0];
-  make_cleanup (xfree, addr_string_end);
-  xfree (sals_end.sals);
-  xfree (canonical_end.canonical);
-
-  if (sals_end.nelts == 0)
+  if (VEC_empty (linespec_sals, canonical_end.sals))
     error (_("Could not find location of the end of the range."));
-  else if (sals_end.nelts != 1)
+
+  lsal_end = VEC_index (linespec_sals, canonical_end.sals, 0);
+  if (VEC_length (linespec_sals, canonical_end.sals) > 1
+      || lsal_end->sals.nelts != 1)
     error (_("Cannot create a ranged breakpoint with multiple locations."));
 
-  resolve_sal_pc (&sal_end);
+  sal_end = lsal_end->sals.sals[0];
+  addr_string_end = savestring (arg_start, arg - arg_start);
+  make_cleanup (xfree, addr_string_end);
 
   end = find_breakpoint_range_end (sal_end);
   if (sal_start.pc > end)
@@ -8575,11 +8390,11 @@ break_range_command (char *arg, int from_tty)
   set_breakpoint_count (breakpoint_count + 1);
   b->number = breakpoint_count;
   b->disposition = disp_donttouch;
-  b->addr_string = addr_string_start;
-  b->addr_string_range_end = addr_string_end;
+  b->addr_string = xstrdup (addr_string_start);
+  b->addr_string_range_end = xstrdup (addr_string_end);
   b->loc->length = length;
 
-  discard_cleanups (cleanup_bkpt);
+  do_cleanups (cleanup_bkpt);
 
   mention (b);
   observer_notify_breakpoint_created (b);
@@ -9686,12 +9501,12 @@ until_break_command (char *arg, int from_tty, int anywhere)
      this function.  */
 
   if (last_displayed_sal_is_valid ())
-    sals = decode_line_1 (&arg, 1,
+    sals = decode_line_1 (&arg, DECODE_LINE_FUNFIRSTLINE,
 			  get_last_displayed_symtab (),
-			  get_last_displayed_line (),
-			  NULL);
+			  get_last_displayed_line ());
   else
-    sals = decode_line_1 (&arg, 1, (struct symtab *) NULL, 0, NULL);
+    sals = decode_line_1 (&arg, DECODE_LINE_FUNFIRSTLINE,
+			  (struct symtab *) NULL, 0);
 
   if (sals.nelts != 1)
     error (_("Couldn't get information on specified line."));
@@ -10202,7 +10017,8 @@ clear_command (char *arg, int from_tty)
 
   if (arg)
     {
-      sals = decode_line_spec (arg, 1);
+      sals = decode_line_spec (arg, (DECODE_LINE_FUNFIRSTLINE
+				     | DECODE_LINE_LIST_MODE));
       default_match = 0;
     }
   else
@@ -10274,18 +10090,21 @@ clear_command (char *arg, int from_tty)
 	      struct bp_location *loc = b->loc;
 	      for (; loc; loc = loc->next)
 		{
-		  int pc_match = sal.pc
-		    && (loc->pspace == sal.pspace)
-		    && (loc->address == sal.pc)
-		    && (!section_is_overlay (loc->section)
-			|| loc->section == sal.section);
-		  int line_match = ((default_match || (0 == sal.pc))
-				    && b->source_file != NULL
+		  /* If the user specified file:line, don't allow a PC
+		     match.  This matches historical gdb behavior.  */
+		  int pc_match = (!sal.explicit_line
+				  && sal.pc
+				  && (loc->pspace == sal.pspace)
+				  && (loc->address == sal.pc)
+				  && (!section_is_overlay (loc->section)
+				      || loc->section == sal.section));
+		  int line_match = ((default_match || sal.explicit_line)
+				    && loc->source_file != NULL
 				    && sal.symtab != NULL
 				    && sal.pspace == loc->pspace
-				    && filename_cmp (b->source_file,
+				    && filename_cmp (loc->source_file,
 						     sal.symtab->filename) == 0
-				    && b->line_number == sal.line);
+				    && loc->line_number == sal.line);
 		  if (pc_match || line_match)
 		    {
 		      match = 1;
@@ -10750,11 +10569,7 @@ update_global_location_list (int should_insert)
       struct breakpoint *b = loc->owner;
       struct bp_location **loc_first_p;
 
-      if (b->enable_state == bp_disabled
-	  || b->enable_state == bp_call_disabled
-	  || b->enable_state == bp_startup_disabled
-	  || !loc->enabled
-	  || loc->shlib_disabled
+      if (!should_be_inserted (loc)
 	  || !breakpoint_address_is_meaningful (b)
 	  /* Don't detect duplicate for tracepoint locations because they are
 	   never duplicated.  See the comments in field `duplicate' of
@@ -10881,15 +10696,25 @@ say_where (struct breakpoint *b)
     }
   else
     {
-      if (opts.addressprint || b->source_file == NULL)
+      if (opts.addressprint || b->loc->source_file == NULL)
 	{
 	  printf_filtered (" at ");
 	  fputs_filtered (paddress (b->loc->gdbarch, b->loc->address),
 			  gdb_stdout);
 	}
-      if (b->source_file)
-	printf_filtered (": file %s, line %d.",
-			 b->source_file, b->line_number);
+      if (b->loc->source_file)
+	{
+	  /* If there is a single location, we can print the location
+	     more nicely.  */
+	  if (b->loc->next == NULL)
+	    printf_filtered (": file %s, line %d.",
+			     b->loc->source_file, b->loc->line_number);
+	  else
+	    /* This is not ideal, but each location may have a
+	       different file name, and this at least reflects the
+	       real situation somewhat.  */
+	    printf_filtered (": %s.", b->addr_string);
+	}
 
       if (b->loc->next)
 	{
@@ -10909,6 +10734,7 @@ bp_location_dtor (struct bp_location *self)
 {
   xfree (self->cond);
   xfree (self->function_name);
+  xfree (self->source_file);
 }
 
 static const struct bp_location_ops bp_location_ops =
@@ -10925,8 +10751,8 @@ base_breakpoint_dtor (struct breakpoint *self)
   decref_counted_command_line (&self->commands);
   xfree (self->cond_string);
   xfree (self->addr_string);
+  xfree (self->filter);
   xfree (self->addr_string_range_end);
-  xfree (self->source_file);
 }
 
 static struct bp_location *
@@ -11040,10 +10866,6 @@ static struct breakpoint_ops base_breakpoint_ops =
 static void
 bkpt_re_set (struct breakpoint *b)
 {
-  /* Do not attempt to re-set breakpoints disabled during startup.  */
-  if (b->enable_state == bp_startup_disabled)
-    return;
-
   /* FIXME: is this still reachable?  */
   if (b->addr_string == NULL)
     {
@@ -11765,17 +11587,18 @@ update_static_tracepoint (struct breakpoint *b, struct symtab_and_line sal)
 	  ui_out_field_int (uiout, "line", sal.line);
 	  ui_out_text (uiout, "\n");
 
-	  b->line_number = sal.line;
+	  b->loc->line_number = sal.line;
 
-	  xfree (b->source_file);
+	  xfree (b->loc->source_file);
 	  if (sym)
-	    b->source_file = xstrdup (sal.symtab->filename);
+	    b->loc->source_file = xstrdup (sal.symtab->filename);
 	  else
-	    b->source_file = NULL;
+	    b->loc->source_file = NULL;
 
 	  xfree (b->addr_string);
 	  b->addr_string = xstrprintf ("%s:%d",
-				       sal.symtab->filename, b->line_number);
+				       sal.symtab->filename,
+				       b->loc->line_number);
 
 	  /* Might be nice to check if function changed, and warn if
 	     so.  */
@@ -11825,8 +11648,17 @@ update_breakpoint_locations (struct breakpoint *b,
   int i;
   struct bp_location *existing_locations = b->loc;
 
-  /* Ranged breakpoints have only one start location and one end location.  */
-  gdb_assert (sals_end.nelts == 0 || (sals.nelts == 1 && sals_end.nelts == 1));
+  if (sals_end.nelts != 0 && (sals.nelts != 1 || sals_end.nelts != 1))
+    {
+      /* Ranged breakpoints have only one start location and one end
+	 location.  */
+      b->enable_state = bp_disabled;
+      update_global_location_list (1);
+      printf_unfiltered (_("Could not reset ranged breakpoint %d: "
+			   "multiple locations found\n"),
+			 b->number);
+      return;
+    }
 
   /* If there's no new locations, and all existing locations are
      pending, don't do anything.  This optimizes the common case where
@@ -11841,8 +11673,11 @@ update_breakpoint_locations (struct breakpoint *b,
 
   for (i = 0; i < sals.nelts; ++i)
     {
-      struct bp_location *new_loc = 
-	add_location_to_breakpoint (b, &(sals.sals[i]));
+      struct bp_location *new_loc;
+
+      switch_to_program_space_and_thread (sals.sals[i].pspace);
+
+      new_loc = add_location_to_breakpoint (b, &(sals.sals[i]));
 
       /* Reparse conditions, they might contain references to the
 	 old symtab.  */
@@ -11865,16 +11700,6 @@ update_breakpoint_locations (struct breakpoint *b,
 	      new_loc->enabled = 0;
 	    }
 	}
-
-      if (b->source_file != NULL)
-	xfree (b->source_file);
-      if (sals.sals[i].symtab == NULL)
-	b->source_file = NULL;
-      else
-	b->source_file = xstrdup (sals.sals[i].symtab->filename);
-
-      if (b->line_number == 0)
-	b->line_number = sals.sals[i].line;
 
       if (sals_end.nelts)
 	{
@@ -11942,7 +11767,7 @@ addr_string_to_sals (struct breakpoint *b, char *addr_string, int *found)
   char *s;
   int marker_spec;
   struct symtabs_and_lines sals = {0};
-  struct gdb_exception e;
+  volatile struct gdb_exception e;
 
   s = addr_string;
   marker_spec = b->type == bp_static_tracepoint && is_marker_spec (s);
@@ -11963,7 +11788,31 @@ addr_string_to_sals (struct breakpoint *b, char *addr_string, int *found)
 	    error (_("marker %s not found"), tp->static_trace_marker_id);
 	}
       else
-	sals = decode_line_1 (&s, 1, (struct symtab *) NULL, 0, NULL);
+	{
+	  struct linespec_result canonical;
+
+	  init_linespec_result (&canonical);
+	  decode_line_full (&s, DECODE_LINE_FUNFIRSTLINE,
+			    (struct symtab *) NULL, 0,
+			    &canonical, multiple_symbols_all,
+			    b->filter);
+
+	  /* We should get 0 or 1 resulting SALs.  */
+	  gdb_assert (VEC_length (linespec_sals, canonical.sals) < 2);
+
+	  if (VEC_length (linespec_sals, canonical.sals) > 0)
+	    {
+	      struct linespec_sals *lsal;
+
+	      lsal = VEC_index (linespec_sals, canonical.sals, 0);
+	      sals = lsal->sals;
+	      /* Arrange it so the destructor does not free the
+		 contents.  */
+	      lsal->sals.sals = NULL;
+	    }
+
+	  destroy_linespec_result (&canonical);
+	}
     }
   if (e.reason < 0)
     {
@@ -11978,6 +11827,7 @@ addr_string_to_sals (struct breakpoint *b, char *addr_string, int *found)
       if (e.error == NOT_FOUND_ERROR
 	  && (b->condition_not_parsed 
 	      || (b->loc && b->loc->shlib_disabled)
+	      || (b->loc && b->loc->pspace->executing_startup)
 	      || b->enable_state == bp_disabled))
 	not_found_and_ok = 1;
 
@@ -11996,9 +11846,10 @@ addr_string_to_sals (struct breakpoint *b, char *addr_string, int *found)
 
   if (e.reason == 0 || e.error != NOT_FOUND_ERROR)
     {
-      gdb_assert (sals.nelts == 1);
+      int i;
 
-      resolve_sal_pc (&sals.sals[0]);
+      for (i = 0; i < sals.nelts; ++i)
+	resolve_sal_pc (&sals.sals[i]);
       if (b->condition_not_parsed && s && s[0])
 	{
 	  char *cond_string = 0;
@@ -12041,7 +11892,7 @@ breakpoint_re_set_default (struct breakpoint *b)
   if (found)
     {
       make_cleanup (xfree, sals.sals);
-      expanded = expand_line_sal_maybe (sals.sals[0]);
+      expanded = sals;
     }
 
   if (b->addr_string_range_end)
@@ -12050,7 +11901,7 @@ breakpoint_re_set_default (struct breakpoint *b)
       if (found)
 	{
 	  make_cleanup (xfree, sals_end.sals);
-	  expanded_end = expand_line_sal_maybe (sals_end.sals[0]);
+	  expanded_end = sals_end;
 	}
     }
 
@@ -12066,7 +11917,8 @@ prepare_re_set_context (struct breakpoint *b)
 
   input_radix = b->input_radix;
   cleanups = save_current_space_and_thread ();
-  switch_to_program_space_and_thread (b->pspace);
+  if (b->pspace != NULL)
+    switch_to_program_space_and_thread (b->pspace);
   set_language (b->language);
 
   return cleanups;
@@ -12578,20 +12430,18 @@ invalidate_bp_value_on_memory_change (CORE_ADDR addr, int len,
    if they aren't valid.  */
 
 struct symtabs_and_lines
-decode_line_spec_1 (char *string, int funfirstline)
+decode_line_spec_1 (char *string, int flags)
 {
   struct symtabs_and_lines sals;
 
   if (string == 0)
     error (_("Empty line specification."));
   if (last_displayed_sal_is_valid ())
-    sals = decode_line_1 (&string, funfirstline,
+    sals = decode_line_1 (&string, flags,
 			  get_last_displayed_symtab (),
-			  get_last_displayed_line (),
-			  NULL);
+			  get_last_displayed_line ());
   else
-    sals = decode_line_1 (&string, funfirstline,
-			  (struct symtab *) NULL, 0, NULL);
+    sals = decode_line_1 (&string, flags, (struct symtab *) NULL, 0);
   if (*string)
     error (_("Junk at end of line specification: %s"), string);
   return sals;

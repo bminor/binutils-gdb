@@ -74,6 +74,7 @@ gdb_test "info trace" "in gdb_recursion_test.*$srcfile:$testline2" \
 
 # 1.2 trace invalid source line
 gdb_delete_tracepoints
+gdb_test_no_output "set breakpoint pending off"
 gdb_test "trace $srcfile:99999" "No line 99999 in file \".*$srcfile\"." \
 	"1.2a: trace invalid line in sourcefile"
 gdb_test "info trace" "No tracepoints.*" \
@@ -81,7 +82,6 @@ gdb_test "info trace" "No tracepoints.*" \
 
 # 1.3 trace line in invalid source file
 gdb_delete_tracepoints
-gdb_test_no_output "set breakpoint pending off"
 gdb_test "trace NoSuChFiLe.c:1" "No source file named NoSuChFiLe.c." \
 	"1.3a: trace invalid source file"
 gdb_test "info trace" "No tracepoints.*" \

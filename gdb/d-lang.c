@@ -273,6 +273,8 @@ static const struct language_defn d_language_defn =
   default_print_array_index,
   default_pass_by_reference,
   c_get_string,
+  strcmp_iw_ordered,
+  NULL,
   LANG_MAGIC
 };
 

@@ -337,7 +337,8 @@ gdb_test_multiple "catch exec" $name {
 # on a nonexistent source line.
 #
 
-gdb_test "break 999" "No line 999 in file .*" \
+gdb_test_no_output "set breakpoint pending off"
+gdb_test "break 999" "No line 999 in the current file." \
     "break on non-existent source line"
 
 # Run to the desired default location. If not positioned here, the

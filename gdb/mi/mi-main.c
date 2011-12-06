@@ -53,6 +53,7 @@
 #include "splay-tree.h"
 #include "tracepoint.h"
 #include "ada-lang.h"
+#include "linespec.h"
 
 #include <ctype.h>
 #include <sys/time.h>
@@ -2437,7 +2438,7 @@ mi_cmd_trace_find (char *command, char **argv, int argc)
       if (argc != 2)
 	error (_("Line is required"));
 
-      sals = decode_line_spec (argv[1], 1);
+      sals = decode_line_spec (argv[1], DECODE_LINE_FUNFIRSTLINE);
       back_to = make_cleanup (xfree, sals.sals);
 
       sal = sals.sals[0];

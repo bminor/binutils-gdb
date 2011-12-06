@@ -443,9 +443,6 @@ func_addr_to_tail_call_list (struct gdbarch *gdbarch, CORE_ADDR addr)
   return sym;
 }
 
-/* Define VEC (CORE_ADDR) functions.  */
-DEF_VEC_I (CORE_ADDR);
-
 /* Verify function with entry point exact address ADDR can never call itself
    via its tail calls (incl. transitively).  Throw NO_ENTRY_VALUE_ERROR if it
    can call itself via tail calls.

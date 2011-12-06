@@ -455,29 +455,34 @@ tui_update_breakpoint_info (struct tui_win_info *win,
            bp != (struct breakpoint *) NULL;
            bp = bp->next)
         {
+	  struct bp_location *loc;
+
 	  gdb_assert (line->line_or_addr.loa == LOA_LINE
 		      || line->line_or_addr.loa == LOA_ADDRESS);
-          if ((win == TUI_SRC_WIN
-               && bp->source_file
-               && (filename_cmp (src->filename, bp->source_file) == 0)
-	       && line->line_or_addr.loa == LOA_LINE
-               && bp->line_number == line->line_or_addr.u.line_no)
-              || (win == TUI_DISASM_WIN
-		  && line->line_or_addr.loa == LOA_ADDRESS
-		  && bp->loc != NULL
-                  && bp->loc->address == line->line_or_addr.u.addr))
-            {
-              if (bp->enable_state == bp_disabled)
-                mode |= TUI_BP_DISABLED;
-              else
-                mode |= TUI_BP_ENABLED;
-              if (bp->hit_count)
-                mode |= TUI_BP_HIT;
-              if (bp->loc->cond)
-                mode |= TUI_BP_CONDITIONAL;
-              if (bp->type == bp_hardware_breakpoint)
-                mode |= TUI_BP_HARDWARE;
-            }
+
+	  for (loc = bp->loc; loc != NULL; loc = loc->next)
+	    {
+	      if ((win == TUI_SRC_WIN
+		   && loc->source_file
+		   && (filename_cmp (src->filename, loc->source_file) == 0)
+		   && line->line_or_addr.loa == LOA_LINE
+		   && loc->line_number == line->line_or_addr.u.line_no)
+		  || (win == TUI_DISASM_WIN
+		      && line->line_or_addr.loa == LOA_ADDRESS
+		      && loc->address == line->line_or_addr.u.addr))
+		{
+		  if (bp->enable_state == bp_disabled)
+		    mode |= TUI_BP_DISABLED;
+		  else
+		    mode |= TUI_BP_ENABLED;
+		  if (bp->hit_count)
+		    mode |= TUI_BP_HIT;
+		  if (bp->loc->cond)
+		    mode |= TUI_BP_CONDITIONAL;
+		  if (bp->type == bp_hardware_breakpoint)
+		    mode |= TUI_BP_HARDWARE;
+		}
+	    }
         }
       if (line->has_break != mode)
         {

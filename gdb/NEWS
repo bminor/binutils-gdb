@@ -3,6 +3,12 @@
 
 *** Changes since GDB 7.3.1
 
+* GDB now handles ambiguous linespecs more consistently; the existing
+  FILE:LINE support has been expanded to other types of linespecs.  A
+  breakpoint will now be set on all matching locations in all
+  inferiors, and locations will be added or removed according to
+  inferior changes.
+
 * GDB now allows you to skip uninteresting functions and files when
   stepping with the "skip function" and "skip file" commands.
 

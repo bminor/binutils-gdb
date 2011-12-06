@@ -57,6 +57,7 @@
 #include "tracepoint.h"
 #include "inf-loop.h"
 #include "continuations.h"
+#include "linespec.h"
 
 /* Functions exported for general use, in inferior.h: */
 
@@ -1116,7 +1117,7 @@ jump_command (char *arg, int from_tty)
   if (!arg)
     error_no_arg (_("starting address"));
 
-  sals = decode_line_spec_1 (arg, 1);
+  sals = decode_line_spec_1 (arg, DECODE_LINE_FUNFIRSTLINE);
   if (sals.nelts != 1)
     {
       error (_("Unreasonable jump request"));
