@@ -1,5 +1,10 @@
 2011-12-06  Tom Tromey  <tromey@redhat.com>
 
+	* python/lib/gdb/command/pretty_printers.py
+	(InfoPrettyPrinter.invoke1): Remove extra double quote.
+
+2011-12-06  Tom Tromey  <tromey@redhat.com>
+
 	* NEWS: Add MI news.
 
 2011-12-06  Ulrich Weigand  <uweigand@de.ibm.com>

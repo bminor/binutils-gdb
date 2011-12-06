@@ -148,7 +148,7 @@ class InfoPrettyPrinter(gdb.Command):
 
     def invoke1(self, title, printer_list,
                 obj_name_to_match, object_re, name_re, subname_re):
-        """"Subroutine of invoke to simplify it."""
+        """Subroutine of invoke to simplify it."""
         if printer_list and object_re.match(obj_name_to_match):
             print title
             self.list_pretty_printers(printer_list, name_re, subname_re)
