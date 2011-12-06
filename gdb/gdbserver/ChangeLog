@@ -1,3 +1,18 @@
+2011-12-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix overlapping memcpy.
+	* mem-break.c (set_raw_breakpoint_at): New variable buf.  Use it for
+	the read_inferior_memory transfer.
+	(delete_fast_tracepoint_jump): New variable buf.  Use it for the
+	write_inferior_memory transfer.
+	(set_fast_tracepoint_jump): New variable buf.  Use it for the
+	read_inferior_memory and write_inferior_memory transfers.
+	(uninsert_fast_tracepoint_jumps_at, reinsert_fast_tracepoint_jumps_at)
+	(delete_raw_breakpoint, uninsert_raw_breakpoint): New variable buf.
+	Use it for the write_inferior_memory transfer.
+	(check_mem_read, check_mem_write): New gdb_asserts for overlapping
+	buffers.
+
 2011-12-06  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* linux-low.c (fetch_register, store_register): Make code
