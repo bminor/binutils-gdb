@@ -2620,7 +2620,7 @@ deal_with_atomic_sequence (struct gdbarch *gdbarch,
 	    return 0; /* fallback to the standard single-step code.  */
 	  break;
 	case 1: /* REGIMM */
-	  is_branch = ((itype_rt (insn) & 0xc0) == 0); /* B{LT,GE}Z* */
+	  is_branch = ((itype_rt (insn) & 0xc) == 0); /* B{LT,GE}Z* */
 	  break;
 	case 2: /* J */
 	case 3: /* JAL */

@@ -1,5 +1,10 @@
 2011-12-06  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* mips-tdep.c (deal_with_atomic_sequence): Fix the handling
+	of BLTZ* and BGEZ* instructions.
+
+2011-12-06  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* mips-tdep.c (mips_pc_is_mips16): Reverse the order of checks
 	performed to determine whether an address refers to standard
 	MIPS or MIPS16 code.
