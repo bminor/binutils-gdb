@@ -1,3 +1,8 @@
+2011-11-07  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
+	* gas/arm/neon-suffix-bad.l: Add testcase.
+	* gas/arm/neon-suffix-bad.s: Likewise.
+
 2011-12-05  Richard Earnshaw  <rearnsha@arm.com>
 
 	* gas/arm/attr-any-armv4t.d: New test.

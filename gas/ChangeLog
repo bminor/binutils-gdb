@@ -1,5 +1,11 @@
 2011-11-07  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
+	* config/tc-arm.c (ARM_IT_MAX_OPERANDS): New define.
+	(arm_it): Use ARM_IT_MAX_OPERANDS.
+	(neon_select_shape): Ensure we have matched all	operands.
+
+2011-11-07  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
 	* config/tc-arm.c (parse_neon_mov): Update which_operand
 	correctly.
 

@@ -351,6 +351,9 @@ enum it_instruction_type
    IT_INSN                 /* The IT insn has been parsed.  */
 };
 
+/* The maximum number of operands we need.  */
+#define ARM_IT_MAX_OPERANDS 6
+
 struct arm_it
 {
   const char *	error;
@@ -402,7 +405,7 @@ struct arm_it
     unsigned negative	: 1;  /* Index register was negated.  */
     unsigned shifted	: 1;  /* Shift applied to operation.  */
     unsigned shift_kind : 3;  /* Shift operation (enum shift_kind).  */
-  } operands[6];
+  } operands[ARM_IT_MAX_OPERANDS];
 };
 
 static struct arm_it inst;
@@ -12415,7 +12418,9 @@ neon_select_shape (enum neon_shape shape, ...)
 	  if (!matches)
 	    break;
         }
-      if (matches)
+      if (matches && (j >= ARM_IT_MAX_OPERANDS || !inst.operands[j].present))
+	/* We've matched all the entries in the shape table, and we don't
+	   have any left over operands which have not been matched.  */
         break;
     }
 
