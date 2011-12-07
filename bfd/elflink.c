@@ -11725,7 +11725,8 @@ elf_gc_sweep_symbol (struct elf_link_hash_entry *h, void *data)
   if (!h->mark
       && (((h->root.type == bfd_link_hash_defined
 	    || h->root.type == bfd_link_hash_defweak)
-	   && !h->root.u.def.section->gc_mark)
+	   && !(h->def_regular
+		&& h->root.u.def.section->gc_mark))
 	  || h->root.type == bfd_link_hash_undefined
 	  || h->root.type == bfd_link_hash_undefweak))
     {

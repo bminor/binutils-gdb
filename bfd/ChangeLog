@@ -1,3 +1,9 @@
+2011-12-07  Alan Modra  <amodra@gmail.com>
+
+	PR ld/12772
+	* elflink.c (elf_gc_sweep_symbol): Discard unmarked symbols
+	defined in shared libraries.
+
 2011-12-07  Tristan Gingold  <gingold@adacore.com>
 
 	* mach-o.c (bfd_mach_o_canonicalize_symtab): Fix indentation.
