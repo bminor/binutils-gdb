@@ -333,10 +333,10 @@ gdb_test "disassemble gdb_c_test" \
     "8.36: trace disassembly"
 
 gdb_test "tfind line 0" \
-	"out of range.*|failed to find.*" \
+	"out of range.*|failed to find.*|No line 0 in .*" \
 	"8.18: tfind line 0";
 gdb_test "tfind line 32767" \
-	"out of range.*|failed to find.*" \
+	"out of range.*|failed to find.*|No line 32767 in .*" \
 	"8.27: tfind line 32767";
 gdb_test "tfind line NoSuChFiLe.c:$baseline" \
 	"No source file named.*" \
