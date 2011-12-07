@@ -1,3 +1,9 @@
+2011-12-07  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.ada/catch_ex.exp: Skip as unsupported if "catch exception"
+	throws "Cannot insert catchpoints in this configuration".
+	* gdb.ada/mi_catch_ex.exp: Likewise.
+
 2011-12-06  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.base/break-always.exp: Test changing memory at addresses
