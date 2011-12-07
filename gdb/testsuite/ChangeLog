@@ -302,7 +302,7 @@
 	(switch_stack_to_other): New test function.
 	* gdb.arch/thumb-prologue.exp: New test cases.
 
-2010-11-08  Maciej W. Rozycki  <macro@codesourcery.com>
+2011-11-08  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* lib/mi-support.exp (mi_send_resuming_command_raw): Fix a typo.
 
