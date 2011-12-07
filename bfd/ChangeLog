@@ -1,3 +1,27 @@
+2011-12-07  Tristan Gingold  <gingold@adacore.com>
+
+	* mach-o.c (bfd_mach_o_canonicalize_symtab): Fix indentation.
+	Adjust the condition.
+	(bfd_mach_o_read_symtab_symbol): Now returns a bfd_boolean.
+	Adjust return statements.
+	(bfd_mach_o_read_symtab_strtab): Likewise.
+	(bfd_mach_o_read_symtab_symbols): Likewise.
+	(bfd_mach_o_scan_start_address): Likewise.  Make it static.
+	(bfd_mach_o_scan): Likewise.
+	(bfd_mach_o_read_dysymtab_symbol): Remove unused function.
+	(bfd_mach_o_header_p): Adjust call.
+	(bfd_mach_o_cpu_name): Make it const.
+	(bfd_mach_o_filetype_name): Likewise.
+	(bfd_mach_o_header_flags_name): Likewise.
+	(bfd_mach_o_section_type_name): Likewise.
+	(bfd_mach_o_section_attribute_name): Likewise.
+	(bfd_mach_o_load_command_name): Likewise.
+	(bfd_mach_o_get_section_type_from_name): Add a const qualifier
+	after above change.
+	(bfd_mach_o_get_section_attribute_from_name): Likewise.
+	* mach-o.h (bfd_mach_o_read_dysymtab_symbol)
+	(bfd_mach_o_scan_start_address, bfd_mach_o_scan): Remove.
+
 2011-12-06  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* elf-bfd.h (elfcore_write_s390_last_break): Add prototype.

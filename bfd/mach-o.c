@@ -402,9 +402,10 @@ bfd_mach_o_canonicalize_symtab (bfd *abfd, asymbol **alocation)
       return 0;
     }
 
-  if (bfd_mach_o_read_symtab_symbols (abfd) != 0)
+  if (!bfd_mach_o_read_symtab_symbols (abfd))
     {
-      (*_bfd_error_handler) (_("bfd_mach_o_canonicalize_symtab: unable to load symbols"));
+      (*_bfd_error_handler)
+        (_("bfd_mach_o_canonicalize_symtab: unable to load symbols"));
       return 0;
     }
 
@@ -1765,7 +1766,7 @@ bfd_mach_o_read_section (bfd *abfd,
     return bfd_mach_o_read_section_32 (abfd, offset, prot);
 }
 
-static int
+static bfd_boolean
 bfd_mach_o_read_symtab_symbol (bfd *abfd,
                                bfd_mach_o_symtab_command *sym,
                                bfd_mach_o_asymbol *s,
@@ -1792,7 +1793,7 @@ bfd_mach_o_read_symtab_symbol (bfd *abfd,
       (*_bfd_error_handler)
         (_("bfd_mach_o_read_symtab_symbol: unable to read %d bytes at %lu"),
          symwidth, (unsigned long) symoff);
-      return -1;
+      return FALSE;
     }
 
   stroff = bfd_h_get_32 (abfd, raw.n_strx);
@@ -1811,7 +1812,7 @@ bfd_mach_o_read_symtab_symbol (bfd *abfd,
         (_("bfd_mach_o_read_symtab_symbol: name out of range (%lu >= %lu)"),
          (unsigned long) stroff,
          (unsigned long) sym->strsize);
-      return -1;
+      return FALSE;
     }
 
   s->symbol.the_bfd = abfd;
@@ -1917,10 +1918,10 @@ bfd_mach_o_read_symtab_symbol (bfd *abfd,
 	}
     }
 
-  return 0;
+  return TRUE;
 }
 
-static int
+static bfd_boolean
 bfd_mach_o_read_symtab_strtab (bfd *abfd)
 {
   bfd_mach_o_data_struct *mdata = bfd_mach_o_get_data (abfd);
@@ -1928,11 +1929,11 @@ bfd_mach_o_read_symtab_strtab (bfd *abfd)
 
   /* Fail if there is no symtab.  */
   if (sym == NULL)
-    return -1;
+    return FALSE;
 
   /* Success if already loaded.  */
   if (sym->strtab)
-    return 0;
+    return TRUE;
 
   if (abfd->flags & BFD_IN_MEMORY)
     {
@@ -1943,7 +1944,7 @@ bfd_mach_o_read_symtab_strtab (bfd *abfd)
       if ((sym->stroff + sym->strsize) > b->size)
 	{
 	  bfd_set_error (bfd_error_file_truncated);
-	  return -1;
+	  return FALSE;
 	}
       sym->strtab = (char *) b->buffer + sym->stroff;
     }
@@ -1951,31 +1952,30 @@ bfd_mach_o_read_symtab_strtab (bfd *abfd)
     {
       sym->strtab = bfd_alloc (abfd, sym->strsize);
       if (sym->strtab == NULL)
-        return -1;
+        return FALSE;
 
       if (bfd_seek (abfd, sym->stroff, SEEK_SET) != 0
-          || bfd_bread ((void *) sym->strtab, sym->strsize, abfd) != sym->strsize)
+          || bfd_bread (sym->strtab, sym->strsize, abfd) != sym->strsize)
         {
           bfd_set_error (bfd_error_file_truncated);
-          return -1;
+          return FALSE;
         }
     }
 
-  return 0;
+  return TRUE;
 }
 
-static int
+static bfd_boolean
 bfd_mach_o_read_symtab_symbols (bfd *abfd)
 {
   bfd_mach_o_data_struct *mdata = bfd_mach_o_get_data (abfd);
   bfd_mach_o_symtab_command *sym = mdata->symtab;
   unsigned long i;
-  int ret;
 
   if (sym == NULL || sym->symbols)
     {
       /* Return now if there are no symbols or if already loaded.  */
-      return 0;
+      return TRUE;
     }
 
   sym->symbols = bfd_alloc (abfd, sym->nsyms * sizeof (bfd_mach_o_asymbol));
@@ -1983,47 +1983,19 @@ bfd_mach_o_read_symtab_symbols (bfd *abfd)
   if (sym->symbols == NULL)
     {
       (*_bfd_error_handler) (_("bfd_mach_o_read_symtab_symbols: unable to allocate memory for symbols"));
-      return -1;
+      return FALSE;
     }
 
-  ret = bfd_mach_o_read_symtab_strtab (abfd);
-  if (ret != 0)
-    return ret;
+  if (!bfd_mach_o_read_symtab_strtab (abfd))
+    return FALSE;
 
   for (i = 0; i < sym->nsyms; i++)
     {
-      ret = bfd_mach_o_read_symtab_symbol (abfd, sym, &sym->symbols[i], i);
-      if (ret != 0)
-	return ret;
+      if (!bfd_mach_o_read_symtab_symbol (abfd, sym, &sym->symbols[i], i))
+	return FALSE;
     }
 
-  return 0;
-}
-
-int
-bfd_mach_o_read_dysymtab_symbol (bfd *abfd,
-                                 bfd_mach_o_dysymtab_command *dysym,
-                                 bfd_mach_o_symtab_command *sym,
-                                 bfd_mach_o_asymbol *s,
-                                 unsigned long i)
-{
-  unsigned long isymoff = dysym->indirectsymoff + (i * 4);
-  unsigned long sym_index;
-  unsigned char raw[4];
-
-  BFD_ASSERT (i < dysym->nindirectsyms);
-
-  if (bfd_seek (abfd, isymoff, SEEK_SET) != 0
-      || bfd_bread (raw, sizeof (raw), abfd) != sizeof (raw))
-    {
-      (*_bfd_error_handler)
-        (_("bfd_mach_o_read_dysymtab_symbol: unable to read %lu bytes at %lu"),
-         (unsigned long) sizeof (raw), isymoff);
-      return -1;
-    }
-  sym_index = bfd_h_get_32 (abfd, raw);
-
-  return bfd_mach_o_read_symtab_symbol (abfd, sym, s, sym_index);
+  return TRUE;
 }
 
 static const char *
@@ -2336,7 +2308,7 @@ bfd_mach_o_read_dysymtab (bfd *abfd, bfd_mach_o_load_command *command)
             }
         }
     }
-  
+
   if (cmd->ntoc != 0)
     {
       unsigned int i;
@@ -2793,7 +2765,7 @@ bfd_mach_o_flatten_sections (bfd *abfd)
     }
 }
 
-int
+static bfd_boolean
 bfd_mach_o_scan_start_address (bfd *abfd)
 {
   bfd_mach_o_data_struct *mdata = bfd_mach_o_get_data (abfd);
@@ -2801,20 +2773,17 @@ bfd_mach_o_scan_start_address (bfd *abfd)
   unsigned long i;
 
   for (i = 0; i < mdata->header.ncmds; i++)
-    {
-      if ((mdata->commands[i].type == BFD_MACH_O_LC_THREAD) ||
-	  (mdata->commands[i].type == BFD_MACH_O_LC_UNIXTHREAD))
-	{
-	  if (cmd == NULL)
-	    cmd = &mdata->commands[i].command.thread;
-	  else
-	    return 0;
-	}
-    }
+    if ((mdata->commands[i].type == BFD_MACH_O_LC_THREAD) ||
+        (mdata->commands[i].type == BFD_MACH_O_LC_UNIXTHREAD))
+      {
+        cmd = &mdata->commands[i].command.thread;
+        break;
+      }
 
   if (cmd == NULL)
-    return 0;
+    return FALSE;
 
+  /* FIXME: create a subtarget hook ?  */
   for (i = 0; i < cmd->nflavours; i++)
     {
       if ((mdata->header.cputype == BFD_MACH_O_CPU_TYPE_I386)
@@ -2825,7 +2794,7 @@ bfd_mach_o_scan_start_address (bfd *abfd)
 
 	  if (bfd_seek (abfd, cmd->flavours[i].offset + 40, SEEK_SET) != 0
               || bfd_bread (buf, 4, abfd) != 4)
-	    return -1;
+	    return FALSE;
 
 	  abfd->start_address = bfd_h_get_32 (abfd, buf);
 	}
@@ -2836,7 +2805,7 @@ bfd_mach_o_scan_start_address (bfd *abfd)
 
 	  if (bfd_seek (abfd, cmd->flavours[i].offset + 0, SEEK_SET) != 0
               || bfd_bread (buf, 4, abfd) != 4)
-	    return -1;
+	    return FALSE;
 
 	  abfd->start_address = bfd_h_get_32 (abfd, buf);
 	}
@@ -2847,7 +2816,7 @@ bfd_mach_o_scan_start_address (bfd *abfd)
 
           if (bfd_seek (abfd, cmd->flavours[i].offset + 0, SEEK_SET) != 0
               || bfd_bread (buf, 8, abfd) != 8)
-            return -1;
+            return FALSE;
 
           abfd->start_address = bfd_h_get_64 (abfd, buf);
         }
@@ -2858,13 +2827,13 @@ bfd_mach_o_scan_start_address (bfd *abfd)
 
           if (bfd_seek (abfd, cmd->flavours[i].offset + (16 * 8), SEEK_SET) != 0
               || bfd_bread (buf, 8, abfd) != 8)
-            return -1;
+            return FALSE;
 
           abfd->start_address = bfd_h_get_64 (abfd, buf);
         }
     }
 
-  return 0;
+  return TRUE;
 }
 
 bfd_boolean
@@ -2884,7 +2853,7 @@ bfd_mach_o_set_arch_mach (bfd *abfd,
   return bfd_default_set_arch_mach (abfd, arch, machine);
 }
 
-int
+static bfd_boolean
 bfd_mach_o_scan (bfd *abfd,
 		 bfd_mach_o_header *header,
 		 bfd_mach_o_data_struct *mdata)
@@ -2920,9 +2889,10 @@ bfd_mach_o_scan (bfd *abfd,
 				   &cputype, &cpusubtype);
   if (cputype == bfd_arch_unknown)
     {
-      (*_bfd_error_handler) (_("bfd_mach_o_scan: unknown architecture 0x%lx/0x%lx"),
-			     header->cputype, header->cpusubtype);
-      return -1;
+      (*_bfd_error_handler)
+        (_("bfd_mach_o_scan: unknown architecture 0x%lx/0x%lx"),
+         header->cputype, header->cpusubtype);
+      return FALSE;
     }
 
   bfd_set_arch_mach (abfd, cputype, cpusubtype);
@@ -2932,7 +2902,7 @@ bfd_mach_o_scan (bfd *abfd,
       mdata->commands = bfd_alloc
         (abfd, header->ncmds * sizeof (bfd_mach_o_load_command));
       if (mdata->commands == NULL)
-	return -1;
+	return FALSE;
 
       for (i = 0; i < header->ncmds; i++)
 	{
@@ -2947,15 +2917,15 @@ bfd_mach_o_scan (bfd *abfd,
 	    }
 
 	  if (bfd_mach_o_read_command (abfd, cur) < 0)
-	    return -1;
+	    return FALSE;
 	}
     }
 
   if (bfd_mach_o_scan_start_address (abfd) < 0)
-    return -1;
+    return FALSE;
 
   bfd_mach_o_flatten_sections (abfd);
-  return 0;
+  return TRUE;
 }
 
 bfd_boolean
@@ -3070,8 +3040,8 @@ bfd_mach_o_header_p (bfd *abfd,
       || !bfd_preserve_save (abfd, &preserve))
     goto fail;
 
-  if (bfd_mach_o_scan (abfd, &header,
-		       (bfd_mach_o_data_struct *) preserve.marker) != 0)
+  if (!bfd_mach_o_scan (abfd, &header,
+                        (bfd_mach_o_data_struct *) preserve.marker))
     goto wrong;
 
   bfd_preserve_finish (abfd, &preserve);
@@ -3394,7 +3364,7 @@ bfd_mach_o_get_name (const bfd_mach_o_xlat_name *table, unsigned long val)
     return res;
 }
 
-static bfd_mach_o_xlat_name bfd_mach_o_cpu_name[] =
+static const bfd_mach_o_xlat_name bfd_mach_o_cpu_name[] =
 {
   { "vax", BFD_MACH_O_CPU_TYPE_VAX },
   { "mc680x0", BFD_MACH_O_CPU_TYPE_MC680x0 },
@@ -3413,7 +3383,7 @@ static bfd_mach_o_xlat_name bfd_mach_o_cpu_name[] =
   { NULL, 0}
 };
 
-static bfd_mach_o_xlat_name bfd_mach_o_filetype_name[] = 
+static const bfd_mach_o_xlat_name bfd_mach_o_filetype_name[] =
 {
   { "object", BFD_MACH_O_MH_OBJECT },
   { "execute", BFD_MACH_O_MH_EXECUTE },
@@ -3429,7 +3399,7 @@ static bfd_mach_o_xlat_name bfd_mach_o_filetype_name[] =
   { NULL, 0}
 };
 
-static bfd_mach_o_xlat_name bfd_mach_o_header_flags_name[] = 
+static const bfd_mach_o_xlat_name bfd_mach_o_header_flags_name[] =
 {
   { "noundefs", BFD_MACH_O_MH_NOUNDEFS },
   { "incrlink", BFD_MACH_O_MH_INCRLINK },
@@ -3456,7 +3426,7 @@ static bfd_mach_o_xlat_name bfd_mach_o_header_flags_name[] =
   { NULL, 0}
 };
 
-static bfd_mach_o_xlat_name bfd_mach_o_section_type_name[] = 
+static const bfd_mach_o_xlat_name bfd_mach_o_section_type_name[] =
 {
   { "regular", BFD_MACH_O_S_REGULAR},
   { "zerofill", BFD_MACH_O_S_ZEROFILL},
@@ -3478,7 +3448,7 @@ static bfd_mach_o_xlat_name bfd_mach_o_section_type_name[] =
   { NULL, 0}
 };
 
-static bfd_mach_o_xlat_name bfd_mach_o_section_attribute_name[] = 
+static const bfd_mach_o_xlat_name bfd_mach_o_section_attribute_name[] =
 {
   { "loc_reloc", BFD_MACH_O_S_ATTR_LOC_RELOC },
   { "ext_reloc", BFD_MACH_O_S_ATTR_EXT_RELOC },
@@ -3493,7 +3463,7 @@ static bfd_mach_o_xlat_name bfd_mach_o_section_attribute_name[] =
   { NULL, 0}
 };
 
-static bfd_mach_o_xlat_name bfd_mach_o_load_command_name[] = 
+static const bfd_mach_o_xlat_name bfd_mach_o_load_command_name[] =
 {
   { "segment", BFD_MACH_O_LC_SEGMENT},
   { "symtab", BFD_MACH_O_LC_SYMTAB},
@@ -3542,7 +3512,7 @@ static bfd_mach_o_xlat_name bfd_mach_o_load_command_name[] =
 unsigned int
 bfd_mach_o_get_section_type_from_name (const char *name)
 {
-  bfd_mach_o_xlat_name *x;
+  const bfd_mach_o_xlat_name *x;
 
   for (x = bfd_mach_o_section_type_name; x->name; x++)
     if (strcmp (x->name, name) == 0)
@@ -3555,7 +3525,7 @@ bfd_mach_o_get_section_type_from_name (const char *name)
 unsigned int
 bfd_mach_o_get_section_attribute_from_name (const char *name)
 {
-  bfd_mach_o_xlat_name *x;
+  const bfd_mach_o_xlat_name *x;
 
   for (x = bfd_mach_o_section_attribute_name; x->name; x++)
     if (strcmp (x->name, name) == 0)
