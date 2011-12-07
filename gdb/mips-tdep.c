@@ -2246,7 +2246,8 @@ restart:
                    || high_word == 0x3408 /* ori $t0,$zero,n */
                   ))
        {
-          load_immediate_bytes += MIPS_INSN32_SIZE;     	/* FIXME!  */
+	 if (end_prologue_addr == 0)
+	   load_immediate_bytes += MIPS_INSN32_SIZE;		/* FIXME!  */
        }
       else
        {

@@ -1,3 +1,8 @@
+2011-12-07  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* mips-tdep.c (mips32_scan_prologue): Only update the immediate
+	load adjustment if still within the prologue.
+
 2011-12-06  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* mips-tdep.c (mips32_next_pc): Fix floating point condition
