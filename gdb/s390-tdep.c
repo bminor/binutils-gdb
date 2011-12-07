@@ -170,7 +170,7 @@ static int s390_dwarf_regmap[] =
   S390_R8_REGNUM, S390_R9_REGNUM, S390_R10_REGNUM, S390_R11_REGNUM,
   S390_R12_REGNUM, S390_R13_REGNUM, S390_R14_REGNUM, S390_R15_REGNUM,
 
-  /* Linux-specific registers (not mapped).  */
+  /* GNU/Linux-specific registers (not mapped).  */
   -1, -1, -1,
 };
 
@@ -426,7 +426,7 @@ int s390_regmap_gregset[S390_NUM_REGS] =
   /* GPR Uppper Halves.  */
   -1, -1, -1, -1, -1, -1, -1, -1,
   -1, -1, -1, -1, -1, -1, -1, -1,
-  /* Linux-specific optional "registers".  */
+  /* GNU/Linux-specific optional "registers".  */
   0x88, -1, -1,
 };
 
@@ -454,7 +454,7 @@ int s390x_regmap_gregset[S390_NUM_REGS] =
   0x30, 0x38, 0x40, 0x48,
   0x50, 0x58, 0x60, 0x68,
   0x70, 0x78, 0x80, 0x88,
-  /* Linux-specific optional "registers".  */
+  /* GNU/Linux-specific optional "registers".  */
   0xd0, -1, -1,
 };
 
@@ -478,7 +478,7 @@ int s390_regmap_fpregset[S390_NUM_REGS] =
   /* GPR Uppper Halves.  */
   -1, -1, -1, -1, -1, -1, -1, -1,
   -1, -1, -1, -1, -1, -1, -1, -1,
-  /* Linux-specific optional "registers".  */
+  /* GNU/Linux-specific optional "registers".  */
   -1, -1, -1,
 };
 
@@ -502,7 +502,7 @@ int s390_regmap_upper[S390_NUM_REGS] =
   0x10, 0x14, 0x18, 0x1c,
   0x20, 0x24, 0x28, 0x2c,
   0x30, 0x34, 0x38, 0x3c,
-  /* Linux-specific optional "registers".  */
+  /* GNU/Linux-specific optional "registers".  */
   -1, -1, -1,
 };
 
@@ -524,7 +524,7 @@ int s390_regmap_last_break[S390_NUM_REGS] =
   /* GPR Uppper Halves.  */
   -1, -1, -1, -1, -1, -1, -1, -1,
   -1, -1, -1, -1, -1, -1, -1, -1,
-  /* Linux-specific optional "registers".  */
+  /* GNU/Linux-specific optional "registers".  */
   -1, 4, -1,
 };
 
@@ -546,7 +546,7 @@ int s390x_regmap_last_break[S390_NUM_REGS] =
   /* GPR Uppper Halves.  */
   -1, -1, -1, -1, -1, -1, -1, -1,
   -1, -1, -1, -1, -1, -1, -1, -1,
-  /* Linux-specific optional "registers".  */
+  /* GNU/Linux-specific optional "registers".  */
   -1, 0, -1,
 };
 
@@ -568,7 +568,7 @@ int s390_regmap_system_call[S390_NUM_REGS] =
   /* GPR Uppper Halves.  */
   -1, -1, -1, -1, -1, -1, -1, -1,
   -1, -1, -1, -1, -1, -1, -1, -1,
-  /* Linux-specific optional "registers".  */
+  /* GNU/Linux-specific optional "registers".  */
   -1, -1, 0,
 };
 
@@ -3068,7 +3068,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	valid_p &= tdesc_numbered_register (feature, tdesc_data,
 					    S390_A0_REGNUM + i, acrs[i]);
 
-      /* Optional Linux-specific "registers".  */
+      /* Optional GNU/Linux-specific "registers".  */
       feature = tdesc_find_feature (tdesc, "org.gnu.gdb.s390.linux");
       if (feature)
 	{
@@ -3290,7 +3290,7 @@ _initialize_s390_tdep (void)
   /* Hook us into the gdbarch mechanism.  */
   register_gdbarch_init (bfd_arch_s390, s390_gdbarch_init);
 
-  /* Initialize the Linux target descriptions.  */
+  /* Initialize the GNU/Linux target descriptions.  */
   initialize_tdesc_s390_linux32 ();
   initialize_tdesc_s390_linux32v1 ();
   initialize_tdesc_s390_linux32v2 ();

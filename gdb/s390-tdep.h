@@ -95,7 +95,7 @@
 #define S390_R13_UPPER_REGNUM 64
 #define S390_R14_UPPER_REGNUM 65
 #define S390_R15_UPPER_REGNUM 66
-/* Linux-specific optional registers.  */
+/* GNU/Linux-specific optional registers.  */
 #define S390_ORIG_R2_REGNUM 67
 #define S390_LAST_BREAK_REGNUM 68
 #define S390_SYSTEM_CALL_REGNUM 69
@@ -118,7 +118,7 @@ extern int s390_regmap_last_break[S390_NUM_REGS];
 extern int s390x_regmap_last_break[S390_NUM_REGS];
 extern int s390_regmap_system_call[S390_NUM_REGS];
 
-/* Linux target descriptions.  */
+/* GNU/Linux target descriptions.  */
 extern struct target_desc *tdesc_s390_linux32;
 extern struct target_desc *tdesc_s390_linux32v1;
 extern struct target_desc *tdesc_s390_linux32v2;

@@ -1,3 +1,9 @@
+2011-12-07  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* s390-tdep.c: Replace "Linux" by "GNU/Linux" in comments
+	where appropriate.
+	* s390-tdep.h: Likewise.
+
 2011-12-07  Tristan Gingold  <gingold@adacore.com>
 
 	* machoread.c (macho_symtab_read): Do not consider N_OPT as
