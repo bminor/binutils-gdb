@@ -5931,7 +5931,7 @@ parse_neon_mov (char **str, int *which_operand)
 
               inst.operands[i].reg = val;
               inst.operands[i].isreg = 1;
-              inst.operands[i++].present = 1;
+              inst.operands[i].present = 1;
             }
         }
       else if (parse_qfloat_immediate (&ptr, &inst.operands[i].imm) == SUCCESS)
@@ -6021,7 +6021,7 @@ parse_neon_mov (char **str, int *which_operand)
           inst.operands[i].isvec = 1;
           inst.operands[i].issingle = 1;
           inst.operands[i].vectype = optype;
-          inst.operands[i++].present = 1;
+          inst.operands[i].present = 1;
         }
     }
   else
