@@ -4879,6 +4879,226 @@ arm_insert_single_step_breakpoint (struct gdbarch *gdbarch,
   do_cleanups (old_chain);
 }
 
+/* Checks for an atomic sequence of instructions beginning with a LDREX{,B,H,D}
+   instruction and ending with a STREX{,B,H,D} instruction.  If such a sequence
+   is found, attempt to step through it.  A breakpoint is placed at the end of
+   the sequence.  */
+
+static int
+thumb_deal_with_atomic_sequence_raw (struct frame_info *frame)
+{
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+  struct address_space *aspace = get_frame_address_space (frame);
+  enum bfd_endian byte_order_for_code = gdbarch_byte_order_for_code (gdbarch);
+  CORE_ADDR pc = get_frame_pc (frame);
+  CORE_ADDR breaks[2] = {-1, -1};
+  CORE_ADDR loc = pc;
+  unsigned short insn1, insn2;
+  int insn_count;
+  int index;
+  int last_breakpoint = 0; /* Defaults to 0 (no breakpoints placed).  */
+  const int atomic_sequence_length = 16; /* Instruction sequence length.  */
+  ULONGEST status, itstate;
+
+  /* We currently do not support atomic sequences within an IT block.  */
+  status = get_frame_register_unsigned (frame, ARM_PS_REGNUM);
+  itstate = ((status >> 8) & 0xfc) | ((status >> 25) & 0x3);
+  if (itstate & 0x0f)
+    return 0;
+
+  /* Assume all atomic sequences start with a ldrex{,b,h,d} instruction.  */
+  insn1 = read_memory_unsigned_integer (loc, 2, byte_order_for_code);
+  loc += 2;
+  if (thumb_insn_size (insn1) != 4)
+    return 0;
+
+  insn2 = read_memory_unsigned_integer (loc, 2, byte_order_for_code);
+  loc += 2;
+  if (!((insn1 & 0xfff0) == 0xe850
+        || ((insn1 & 0xfff0) == 0xe8d0 && (insn2 & 0x00c0) == 0x0040)))
+    return 0;
+
+  /* Assume that no atomic sequence is longer than "atomic_sequence_length"
+     instructions.  */
+  for (insn_count = 0; insn_count < atomic_sequence_length; ++insn_count)
+    {
+      insn1 = read_memory_unsigned_integer (loc, 2, byte_order_for_code);
+      loc += 2;
+
+      if (thumb_insn_size (insn1) != 4)
+	{
+	  /* Assume that there is at most one conditional branch in the
+	     atomic sequence.  If a conditional branch is found, put a
+	     breakpoint in its destination address.  */
+	  if ((insn1 & 0xf000) == 0xd000 && bits (insn1, 8, 11) != 0x0f)
+	    {
+	      if (last_breakpoint > 0)
+		return 0; /* More than one conditional branch found,
+			     fallback to the standard code.  */
+
+	      breaks[1] = loc + 2 + (sbits (insn1, 0, 7) << 1);
+	      last_breakpoint++;
+	    }
+
+	  /* We do not support atomic sequences that use any *other*
+	     instructions but conditional branches to change the PC.
+	     Fall back to standard code to avoid losing control of
+	     execution.  */
+	  else if (thumb_instruction_changes_pc (insn1))
+	    return 0;
+	}
+      else
+	{
+	  insn2 = read_memory_unsigned_integer (loc, 2, byte_order_for_code);
+	  loc += 2;
+
+	  /* Assume that there is at most one conditional branch in the
+	     atomic sequence.  If a conditional branch is found, put a
+	     breakpoint in its destination address.  */
+	  if ((insn1 & 0xf800) == 0xf000
+	      && (insn2 & 0xd000) == 0x8000
+	      && (insn1 & 0x0380) != 0x0380)
+	    {
+	      int sign, j1, j2, imm1, imm2;
+	      unsigned int offset;
+
+	      sign = sbits (insn1, 10, 10);
+	      imm1 = bits (insn1, 0, 5);
+	      imm2 = bits (insn2, 0, 10);
+	      j1 = bit (insn2, 13);
+	      j2 = bit (insn2, 11);
+
+	      offset = (sign << 20) + (j2 << 19) + (j1 << 18);
+	      offset += (imm1 << 12) + (imm2 << 1);
+
+	      if (last_breakpoint > 0)
+		return 0; /* More than one conditional branch found,
+			     fallback to the standard code.  */
+
+	      breaks[1] = loc + offset;
+	      last_breakpoint++;
+	    }
+
+	  /* We do not support atomic sequences that use any *other*
+	     instructions but conditional branches to change the PC.
+	     Fall back to standard code to avoid losing control of
+	     execution.  */
+	  else if (thumb2_instruction_changes_pc (insn1, insn2))
+	    return 0;
+
+	  /* If we find a strex{,b,h,d}, we're done.  */
+	  if ((insn1 & 0xfff0) == 0xe840
+	      || ((insn1 & 0xfff0) == 0xe8c0 && (insn2 & 0x00c0) == 0x0040))
+	    break;
+	}
+    }
+
+  /* If we didn't find the strex{,b,h,d}, we cannot handle the sequence.  */
+  if (insn_count == atomic_sequence_length)
+    return 0;
+
+  /* Insert a breakpoint right after the end of the atomic sequence.  */
+  breaks[0] = loc;
+
+  /* Check for duplicated breakpoints.  Check also for a breakpoint
+     placed (branch instruction's destination) anywhere in sequence.  */
+  if (last_breakpoint
+      && (breaks[1] == breaks[0]
+	  || (breaks[1] >= pc && breaks[1] < loc)))
+    last_breakpoint = 0;
+
+  /* Effectively inserts the breakpoints.  */
+  for (index = 0; index <= last_breakpoint; index++)
+    arm_insert_single_step_breakpoint (gdbarch, aspace,
+				       MAKE_THUMB_ADDR (breaks[index]));
+
+  return 1;
+}
+
+static int
+arm_deal_with_atomic_sequence_raw (struct frame_info *frame)
+{
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+  struct address_space *aspace = get_frame_address_space (frame);
+  enum bfd_endian byte_order_for_code = gdbarch_byte_order_for_code (gdbarch);
+  CORE_ADDR pc = get_frame_pc (frame);
+  CORE_ADDR breaks[2] = {-1, -1};
+  CORE_ADDR loc = pc;
+  unsigned int insn;
+  int insn_count;
+  int index;
+  int last_breakpoint = 0; /* Defaults to 0 (no breakpoints placed).  */
+  const int atomic_sequence_length = 16; /* Instruction sequence length.  */
+
+  /* Assume all atomic sequences start with a ldrex{,b,h,d} instruction.
+     Note that we do not currently support conditionally executed atomic
+     instructions.  */
+  insn = read_memory_unsigned_integer (loc, 4, byte_order_for_code);
+  loc += 4;
+  if ((insn & 0xff9000f0) != 0xe1900090)
+    return 0;
+
+  /* Assume that no atomic sequence is longer than "atomic_sequence_length"
+     instructions.  */
+  for (insn_count = 0; insn_count < atomic_sequence_length; ++insn_count)
+    {
+      insn = read_memory_unsigned_integer (loc, 4, byte_order_for_code);
+      loc += 4;
+
+      /* Assume that there is at most one conditional branch in the atomic
+         sequence.  If a conditional branch is found, put a breakpoint in
+         its destination address.  */
+      if (bits (insn, 24, 27) == 0xa)
+	{
+          if (last_breakpoint > 0)
+            return 0; /* More than one conditional branch found, fallback
+                         to the standard single-step code.  */
+
+	  breaks[1] = BranchDest (loc - 4, insn);
+	  last_breakpoint++;
+        }
+
+      /* We do not support atomic sequences that use any *other* instructions
+         but conditional branches to change the PC.  Fall back to standard
+	 code to avoid losing control of execution.  */
+      else if (arm_instruction_changes_pc (insn))
+	return 0;
+
+      /* If we find a strex{,b,h,d}, we're done.  */
+      if ((insn & 0xff9000f0) == 0xe1800090)
+	break;
+    }
+
+  /* If we didn't find the strex{,b,h,d}, we cannot handle the sequence.  */
+  if (insn_count == atomic_sequence_length)
+    return 0;
+
+  /* Insert a breakpoint right after the end of the atomic sequence.  */
+  breaks[0] = loc;
+
+  /* Check for duplicated breakpoints.  Check also for a breakpoint
+     placed (branch instruction's destination) anywhere in sequence.  */
+  if (last_breakpoint
+      && (breaks[1] == breaks[0]
+	  || (breaks[1] >= pc && breaks[1] < loc)))
+    last_breakpoint = 0;
+
+  /* Effectively inserts the breakpoints.  */
+  for (index = 0; index <= last_breakpoint; index++)
+    arm_insert_single_step_breakpoint (gdbarch, aspace, breaks[index]);
+
+  return 1;
+}
+
+int
+arm_deal_with_atomic_sequence (struct frame_info *frame)
+{
+  if (arm_frame_is_thumb (frame))
+    return thumb_deal_with_atomic_sequence_raw (frame);
+  else
+    return arm_deal_with_atomic_sequence_raw (frame);
+}
+
 /* single_step() is called just before we want to resume the inferior,
    if we want to single-step it but there is no hardware or kernel
    single-step support.  We find the target of the coming instruction
@@ -4889,8 +5109,12 @@ arm_software_single_step (struct frame_info *frame)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
   struct address_space *aspace = get_frame_address_space (frame);
-  CORE_ADDR next_pc = arm_get_next_pc (frame, get_frame_pc (frame));
+  CORE_ADDR next_pc;
 
+  if (arm_deal_with_atomic_sequence (frame))
+    return 1;
+
+  next_pc = arm_get_next_pc (frame, get_frame_pc (frame));
   arm_insert_single_step_breakpoint (gdbarch, aspace, next_pc);
 
   return 1;

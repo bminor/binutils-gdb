@@ -1,3 +1,12 @@
+2011-12-07  Ulrich Weigand  <ulrich.weigand@linaro.org>
+
+	* arm-tdep.h (arm_deal_with_atomic_sequence): Add prototype.
+	* arm-tdep.c (thumb_deal_with_atomic_sequence_raw): New function.
+	(arm_deal_with_atomic_sequence_raw): Likewise.
+	(arm_deal_with_atomic_sequence): Likewise.
+	(arm_software_single_step): Call it.
+	* arm-linux-tdep.c (arm_linux_software_single_step): Likewise.
+
 2011-12-07  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* s390-tdep.c: Replace "Linux" by "GNU/Linux" in comments
