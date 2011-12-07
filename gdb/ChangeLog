@@ -1,3 +1,8 @@
+2011-12-07  Tristan Gingold  <gingold@adacore.com>
+
+	* machoread.c (macho_symtab_read): Do not consider N_OPT as
+	a debugging stab.  Improve complaint message.
+
 2011-12-07  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* mips-tdep.c (mips32_scan_prologue): Only update the immediate

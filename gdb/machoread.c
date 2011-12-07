@@ -229,9 +229,16 @@ macho_symtab_read (struct objfile *objfile,
             }
           else if (sym->flags & BSF_DEBUGGING)
             {
+              if (mach_o_sym->n_type == N_OPT)
+                {
+                  /* No complaint for OPT.  */
+                  break;
+                }
+
               /* Debugging symbols are not expected here.  */
               complaint (&symfile_complaints,
-                         _("Unexpected debug stab outside SO markers"));
+                         _("%s: Unexpected debug stab outside SO markers"),
+                         objfile->name);
             }
           else
             {
