@@ -7234,7 +7234,7 @@ dynamic_section_mips_val (Elf_Internal_Dyn * entry)
     {
     case DT_MIPS_FLAGS:
       if (entry->d_un.d_val == 0)
-	printf (_("NONE\n"));
+	printf (_("NONE"));
       else
 	{
 	  static const char * opts[] =
@@ -7254,15 +7254,14 @@ dynamic_section_mips_val (Elf_Internal_Dyn * entry)
 		printf ("%s%s", first ? "" : " ", opts[cnt]);
 		first = 0;
 	      }
-	  puts ("");
 	}
       break;
 
     case DT_MIPS_IVERSION:
       if (VALID_DYNAMIC_NAME (entry->d_un.d_val))
-	printf (_("Interface Version: %s\n"), GET_DYNAMIC_NAME (entry->d_un.d_val));
+	printf (_("Interface Version: %s"), GET_DYNAMIC_NAME (entry->d_un.d_val));
       else
-	printf (_("<corrupt: %ld>\n"), (long) entry->d_un.d_ptr);
+	printf (_("<corrupt: %" BFD_VMA_FMT "d>"), entry->d_un.d_ptr);
       break;
 
     case DT_MIPS_TIME_STAMP:
@@ -7275,7 +7274,7 @@ dynamic_section_mips_val (Elf_Internal_Dyn * entry)
 	snprintf (timebuf, sizeof (timebuf), "%04u-%02u-%02uT%02u:%02u:%02u",
 		  tmp->tm_year + 1900, tmp->tm_mon + 1, tmp->tm_mday,
 		  tmp->tm_hour, tmp->tm_min, tmp->tm_sec);
-	printf (_("Time Stamp: %s\n"), timebuf);
+	printf (_("Time Stamp: %s"), timebuf);
       }
       break;
 
@@ -7292,12 +7291,13 @@ dynamic_section_mips_val (Elf_Internal_Dyn * entry)
     case DT_MIPS_DELTA_SYM_NO:
     case DT_MIPS_DELTA_CLASSSYM_NO:
     case DT_MIPS_COMPACT_SIZE:
-      printf ("%ld\n", (long) entry->d_un.d_ptr);
+      print_vma (entry->d_un.d_ptr, DEC);
       break;
 
     default:
-      printf ("%#lx\n", (unsigned long) entry->d_un.d_ptr);
+      print_vma (entry->d_un.d_ptr, PREFIX_HEX);
     }
+    putchar ('\n');
 }
 
 static void

@@ -1,3 +1,10 @@
+2011-12-06 David Daney <david.daney@cavium.com>
+
+	* readelf.c (dynamic_section_mips_val): Factor out trailing '\n'
+	from printed strings and move it to the end of the function.
+	Use BFD_VMA_FMT for printf format specifier for dynamic tag value.
+	Use print_vma() to print dynamic tag values.
+
 2011-12-02  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (ia64_process_unwind): Turn into a void funtion.
