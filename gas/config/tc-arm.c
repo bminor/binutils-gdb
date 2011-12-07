@@ -563,6 +563,7 @@ const char * const reg_expected_msgs[] =
 };
 
 /* Some well known registers that we refer to directly elsewhere.  */
+#define REG_R12	12
 #define REG_SP	13
 #define REG_LR	14
 #define REG_PC	15
@@ -10654,7 +10655,16 @@ do_t_ldstd (void)
       inst.operands[1].reg = inst.operands[0].reg + 1;
       constraint (inst.operands[0].reg == REG_LR,
 		  _("r14 not allowed here"));
+      constraint (inst.operands[0].reg == REG_R12,
+                  _("r12 not allowed here"));
     }
+
+  if (inst.operands[2].writeback
+      && (inst.operands[0].reg == inst.operands[2].reg
+      || inst.operands[1].reg == inst.operands[2].reg))
+    as_warn (_("base register written back, and overlaps "
+               "one of transfer registers"));
+
   inst.instruction |= inst.operands[0].reg << 12;
   inst.instruction |= inst.operands[1].reg << 8;
   encode_thumb32_addr_mode (2, /*is_t=*/FALSE, /*is_d=*/TRUE);

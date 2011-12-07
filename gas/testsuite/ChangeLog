@@ -1,3 +1,12 @@
+2011-12-07  Sameera Deshpande  <sameera.deshpande@arm.com>
+
+	* gas/arm/thumb2_ldstd_unpredictable.d: New testcase.
+	* gas/arm/thumb2_ldstd_unpredictable.l: Likewise.
+	* gas/arm/thumb2_ldstd_unpredictable.s: Likewise.
+	* gas/testsuite/gas/arm/sp-pc-validations-bad-t.l: Update
+	testcase.
+	* gas/testsuite/gas/arm/sp-pc-validations-bad-t.s: Likewise.
+
 2011-11-07  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	* gas/arm/neon-suffix-bad.l: Add testcase.
