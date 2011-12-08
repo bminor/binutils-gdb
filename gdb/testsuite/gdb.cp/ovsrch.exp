@@ -30,7 +30,7 @@ proc test_class {class} {
     }
 
     # Test each overload instance twice: once quoted, once unquoted
-    set conditional1 "if (a == 3)"
+    set conditional1 "if (a_param == 3)"
     set conditional2 "if (A::outer::func ())"
     foreach ovld [array names tests] {
 	set method "${class}::foo  ($ovld)  const"
