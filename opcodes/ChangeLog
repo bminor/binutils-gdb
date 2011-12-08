@@ -1,3 +1,20 @@
+2011-12-08  Andrew Pinski  <apinski@cavium.com>
+            Adam Nemet  <anemet@caviumnetworks.com>
+
+	* mips-dis.c (mips_arch_choices): Add Octeon2.
+	For "octeon+", just include OcteonP for the insn.
+	* mips-opc.c (IOCT): Include Octeon2.
+	(IOCTP): Include Octeon2.
+	(IOCT2): New macro.
+	(mips_builtin_opcodes): Add "laa", "laad", "lac", "lacd", "lad",
+	"ladd", "lai", "laid", "las", "lasd", "law", "lawd".
+	Move "lbux", "ldx", "lhx", "lwx", and "lwux" up to where the standard
+	loads are, and add IOCT2 to them.
+	Add "lbx" and "lhux".
+	Add "qmac.00", "qmac.01", "qmac.02", "qmac.03", "qmacs.00",
+	"qmacs.01", "qmacs.01", "qmacs.02" and "qmacs.03".
+	Add "zcb" and "zcbt".
+
 2011-11-29  Andrew Pinski  <apinski@cavium.com>
 
 	* mips-dis.c (mips_arch_choices): Add Octeon+.

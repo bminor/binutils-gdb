@@ -498,7 +498,7 @@ static int mips_32bitmode = 0;
 #define CPU_HAS_ROR(CPU)	CPU_HAS_DROR (CPU)
 
 /* True if CPU is in the Octeon family */
-#define CPU_IS_OCTEON(CPU) ((CPU) == CPU_OCTEON || (CPU) == CPU_OCTEONP)
+#define CPU_IS_OCTEON(CPU) ((CPU) == CPU_OCTEON || (CPU) == CPU_OCTEONP || (CPU) == CPU_OCTEON2)
 
 /* True if CPU has seq/sne and seqi/snei instructions.  */
 #define CPU_HAS_SEQ(CPU)	(CPU_IS_OCTEON (CPU))
@@ -19075,6 +19075,7 @@ static const struct mips_cpu_info mips_cpu_info_table[] =
   /* Cavium Networks Octeon CPU core */
   { "octeon",	      0,      ISA_MIPS64R2,   CPU_OCTEON },
   { "octeon+",	      0,      ISA_MIPS64R2,   CPU_OCTEONP },
+  { "octeon2",	      0,      ISA_MIPS64R2,   CPU_OCTEON2 },
 
   /* RMI Xlr */
   { "xlr",	      0,      ISA_MIPS64,     CPU_XLR },

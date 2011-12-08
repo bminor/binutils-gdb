@@ -1,3 +1,14 @@
+2011-12-08  Andrew Pinski  <apinski@cavium.com>
+            Adam Nemet  <anemet@caviumnetworks.com>
+
+	* archures.c (bfd_mach_mips_octeon2): New macro
+	* bfd-in2.h: Regenerate.
+	* cpu-mips.c (I_mipsocteon2): New enum value.
+	(arch_info_struct): Add bfd_mach_mips_octeon2.
+	* elfxx-mips.c (_bfd_elf_mips_mach): Support E_MIPS_MACH_OCTEON2.
+	(mips_set_isa_flags): Add bfd_mach_mips_octeon2.
+	(mips_mach_extensions): Add bfd_mach_mips_octeon2.
+
 2011-12-07  Alan Modra  <amodra@gmail.com>
 
 	PR ld/12772

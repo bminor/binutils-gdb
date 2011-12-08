@@ -1,3 +1,10 @@
+2011-12-08  Andrew Pinski  <apinski@cavium.com>
+            Adam Nemet  <anemet@caviumnetworks.com>
+
+	* tc-mips.c (CPU_IS_OCTEON): Add Octeon2.
+	(mips_cpu_info_table): Add Octeon2.
+	* doc/c-mips.texi: Document octeon2 as an acceptable value for -march=.
+
 2011-12-07  Sameera Deshpande  <sameera.deshpande@arm.com>
 
 	* config/tc-arm.c (do_t_ldstd): Warn for unpredictable cases.

@@ -94,6 +94,7 @@ enum
   I_loongson_3a,
   I_mipsocteon,
   I_mipsocteonp,
+  I_mipsocteon2,
   I_xlr,
   I_micromips
 };
@@ -136,6 +137,7 @@ static const bfd_arch_info_type arch_info_struct[] =
   N (64, 64, bfd_mach_mips_loongson_3a, "mips:loongson_3a",       FALSE, NN(I_loongson_3a)),
   N (64, 64, bfd_mach_mips_octeon,"mips:octeon",  FALSE, NN(I_mipsocteon)),
   N (64, 64, bfd_mach_mips_octeonp,"mips:octeon+",  FALSE, NN(I_mipsocteonp)),
+  N (64, 64, bfd_mach_mips_octeon2,"mips:octeon2",  FALSE, NN(I_mipsocteon2)),
   N (64, 64, bfd_mach_mips_xlr, "mips:xlr",       FALSE, NN(I_xlr)),
   N (64, 64, bfd_mach_mips_micromips,"mips:micromips",FALSE,0)
 };

@@ -1,3 +1,11 @@
+2011-12-08  Andrew Pinski  <apinski@cavium.com>
+            Adam Nemet  <anemet@caviumnetworks.com>
+
+	* gas/mips/mips.exp: Add Octeon2 for an architecture.
+	Run octeon2 test.
+	* gas/mips/octeon2.d: New file.
+	* gas/mips/octeon2.s: New file.
+
 2011-12-07  Sameera Deshpande  <sameera.deshpande@arm.com>
 
 	* gas/arm/thumb2_ldstd_unpredictable.d: New testcase.
