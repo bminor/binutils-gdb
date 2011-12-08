@@ -1,3 +1,12 @@
+2011-12-08  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* mips-tdep.c (extended_offset): Correct calculation.
+	(unpack_mips16): Correct bitfield positions used for extraction
+	of the immediate argument; fix sign-extension of same.
+	(extended_mips16_next_pc): Correct B instruction's offset
+	calculation.  Correct register decoding of the BEQZ and BNEZ
+	as well as jump-register instructions.  Handle compact jumps.
+
 2011-12-08  Tom Tromey  <tromey@redhat.com>
 
 	* objfiles.h (struct objfile): Remove obsolete comment.
