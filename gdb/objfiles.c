@@ -162,12 +162,6 @@ add_to_objfile_sections (struct bfd *abfd, struct bfd_section *asect,
 int
 build_objfile_section_table (struct objfile *objfile)
 {
-  /* objfile->sections can be already set when reading a mapped symbol
-     file.  I believe that we do need to rebuild the section table in
-     this case (we rebuild other things derived from the bfd), but we
-     can't free the old one (it's in the objfile_obstack).  So we just
-     waste some memory.  */
-
   objfile->sections_end = 0;
   bfd_map_over_sections (objfile->obfd,
 			 add_to_objfile_sections, (void *) objfile);

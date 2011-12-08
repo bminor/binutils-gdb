@@ -173,19 +173,9 @@ struct objfile
   {
 
     /* All struct objfile's are chained together by their next pointers.
-       The global variable "object_files" points to the first link in this
-       chain.
-
-       FIXME:  There is a problem here if the objfile is reusable, and if
-       multiple users are to be supported.  The problem is that the objfile
-       list is linked through a member of the objfile struct itself, which
-       is only valid for one gdb process.  The list implementation needs to
-       be changed to something like:
-
-       struct list {struct list *next; struct objfile *objfile};
-
-       where the list structure is completely maintained separately within
-       each gdb process.  */
+       The program space field "objfiles"  (frequently referenced via
+       the macro "object_files") points to the first link in this
+       chain.  */
 
     struct objfile *next;
 
