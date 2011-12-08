@@ -862,17 +862,26 @@ linux_kill (int pid)
      thread in the list, so do so now.  */
   lwp = find_lwp_pid (pid_to_ptid (pid));
 
-  if (debug_threads)
-    fprintf (stderr, "lk_1: killing lwp %ld, for pid: %d\n",
-	     lwpid_of (lwp), pid);
-
-  do
+  if (lwp == NULL)
     {
-      ptrace (PTRACE_KILL, lwpid_of (lwp), 0, 0);
+      if (debug_threads)
+	fprintf (stderr, "lk_1: cannot find lwp %ld, for pid: %d\n",
+		 lwpid_of (lwp), pid);
+    }
+  else
+    {
+      if (debug_threads)
+	fprintf (stderr, "lk_1: killing lwp %ld, for pid: %d\n",
+		 lwpid_of (lwp), pid);
 
-      /* Make sure it died.  The loop is most likely unnecessary.  */
-      lwpid = linux_wait_for_event (lwp->head.id, &wstat, __WALL);
-    } while (lwpid > 0 && WIFSTOPPED (wstat));
+      do
+	{
+	  ptrace (PTRACE_KILL, lwpid_of (lwp), 0, 0);
+
+	  /* Make sure it died.  The loop is most likely unnecessary.  */
+	  lwpid = linux_wait_for_event (lwp->head.id, &wstat, __WALL);
+	} while (lwpid > 0 && WIFSTOPPED (wstat));
+    }
 
   the_target->mourn (process);
 

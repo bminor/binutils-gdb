@@ -1,3 +1,8 @@
+2011-12-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* linux-low.c (linux_kill): Skip PTRACE_KILL if LWP does not exist.
+	Print new debug message for such case.
+
 2011-12-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix overlapping memcpy.
