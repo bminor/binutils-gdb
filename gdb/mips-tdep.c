@@ -5356,7 +5356,6 @@ mips_skip_mips16_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 	         address from those two instructions.  */
 
 	      CORE_ADDR target_pc = get_frame_register_signed (frame, 2);
-	      ULONGEST inst;
 	      int i;
 
 	      /* See if the name of the target function is  __fn_stub_*.  */
@@ -5373,11 +5372,15 @@ mips_skip_mips16_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 	         instructions.  FIXME.  */
 	      for (i = 0, pc = 0; i < 20; i++, target_pc += MIPS_INSN32_SIZE)
 		{
-		  inst = mips_fetch_instruction (gdbarch, target_pc);
+		  ULONGEST inst = mips_fetch_instruction (gdbarch, target_pc);
+		  CORE_ADDR addr = inst;
+
 		  if ((inst & 0xffff0000) == 0x3c010000)	/* lui $at */
-		    pc = (inst << 16) & 0xffff0000;		/* high word */
+		    pc = (((addr & 0xffff) ^ 0x8000) - 0x8000) << 16;
+								/* high word */
 		  else if ((inst & 0xffff0000) == 0x24210000)	/* addiu $at */
-		    return pc | (inst & 0xffff);		/* low word */
+		    return pc + ((addr & 0xffff) ^ 0x8000) - 0x8000;
+								/* low word */
 		}
 
 	      /* Couldn't find the lui/addui pair, so return stub address.  */

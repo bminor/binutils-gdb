@@ -1,3 +1,9 @@
+2011-12-08  Maciej W. Rozycki  <macro@mips.com>
+            Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* mips-tdep.c (mips_skip_mips16_trampoline_code): Sign-extend
+	address chunks retrieved from decoded lui/addiu pairs.
+
 2011-12-08  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* mips-tdep.c (extended_offset): Correct calculation.
