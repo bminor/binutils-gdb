@@ -1189,6 +1189,7 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"ori",     "t,r,i",	0x34000000, 0xfc000000,	WR_t|RD_s,		0,		I1	},
 {"pabsdiff.ob", "X,Y,Q",0x78000009, 0xfc20003f,	WR_D|RD_S|RD_T|FP_D,	0,		SB1	},
 {"pabsdiffc.ob", "Y,Q",	0x78000035, 0xfc2007ff,	RD_S|RD_T|FP_D,		WR_MACC,	SB1	},
+{"pause",   "",		0x00000140, 0xffffffff, TRAP,			0,		I33	},
 {"pavg.ob", "X,Y,Q",	0x78000008, 0xfc20003f,	WR_D|RD_S|RD_T|FP_D,	0,		SB1	},
 {"pickf.ob", "X,Y,Q",	0x78000002, 0xfc20003f,	WR_D|RD_S|RD_T|FP_D,	0,		MX|SB1	},
 {"pickf.ob", "D,S,T",	0x4ac00002, 0xffe0003f,	WR_D|RD_S|RD_T,		0,		N54	},

@@ -41,4 +41,5 @@ Disassembly of section \.text:
 [0-9a-f]+ <[^>]*> 000a 577c 	ei	\$10
 [0-9a-f]+ <[^>]*> 0159 e17c 	rdpgpr	\$10,\$25
 [0-9a-f]+ <[^>]*> 0159 f17c 	wrpgpr	\$10,\$25
+[0-9a-f]+ <[^>]*> 0000 2800 	pause
 	\.\.\.

@@ -1,4 +1,12 @@
 2011-12-08  Andrew Pinski  <apinski@cavium.com>
+
+	* gas/mips/mips32-mt.d: Add pause instruction encoding to the end.
+	* gas/mips/micromips@mips32r2.d: Likewise.
+	* gas/mips/mips32r2.d: Likewise.
+	* gas/mips/mips32-mt.s: Add pause instruction to the end.
+	* gas/mips/mips32r2.s: Likewise.
+
+2011-12-08  Andrew Pinski  <apinski@cavium.com>
             Adam Nemet  <anemet@caviumnetworks.com>
 
 	* gas/mips/mips.exp: Add Octeon2 for an architecture.

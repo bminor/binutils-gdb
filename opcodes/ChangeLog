@@ -1,4 +1,8 @@
 2011-12-08  Andrew Pinski  <apinski@cavium.com>
+
+	* mips-opc.c (mips_builtin_opcodes): Add "pause".
+
+2011-12-08  Andrew Pinski  <apinski@cavium.com>
             Adam Nemet  <anemet@caviumnetworks.com>
 
 	* mips-dis.c (mips_arch_choices): Add Octeon2.
