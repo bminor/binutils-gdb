@@ -48,7 +48,11 @@ gdb_test "break $end_of_main" \
     "Breakpoint $decimal at .*/$srcfile, line $end_of_main\." \
     "BP at end of main"
 
+# This can take awhile.
+set oldtimeout $timeout
+set timeout [expr $oldtimeout + 120]
 gdb_test "continue" "Breakpoint .* set breakpoint 10a here .*" "run to end of main"
+set timeout $oldtimeout
 
 gdb_test "record save until.precsave" \
     "Saved core file until.precsave with execution log\."  \
