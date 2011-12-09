@@ -1,3 +1,8 @@
+2011-12-09  Andrew Pinski  <apinski@cavium.com>
+
+	* linespec.c (hash_address_entry): Use iterative_hash_object on each
+	field rather than the struct itself.
+
 2011-12-09  Tom Tromey  <tromey@redhat.com>
 
 	* breakpoint.c (compare_breakpoints): New function.

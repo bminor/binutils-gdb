@@ -253,8 +253,10 @@ static hashval_t
 hash_address_entry (const void *p)
 {
   const struct address_entry *aep = p;
+  hashval_t hash;
 
-  return iterative_hash_object (*aep, 0);
+  hash = iterative_hash_object (aep->pspace, 0);
+  return iterative_hash_object (aep->addr, hash);
 }
 
 /* An equality function for address_entry.  */
