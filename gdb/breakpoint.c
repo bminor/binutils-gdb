@@ -10028,18 +10028,41 @@ tcatch_command (char *arg, int from_tty)
   error (_("Catch requires an event name."));
 }
 
+/* A qsort comparison function that sorts breakpoints in order.  */
+
+static int
+compare_breakpoints (const void *a, const void *b)
+{
+  const breakpoint_p *ba = a;
+  uintptr_t ua = (uintptr_t) *ba;
+  const breakpoint_p *bb = b;
+  uintptr_t ub = (uintptr_t) *bb;
+
+  if ((*ba)->number < (*bb)->number)
+    return -1;
+  else if ((*ba)->number > (*bb)->number)
+    return 1;
+
+  /* Now sort by address, in case we see, e..g, two breakpoints with
+     the number 0.  */
+  if (ua < ub)
+    return -1;
+  return ub > ub ? 1 : 0;
+}
+
 /* Delete breakpoints by address or line.  */
 
 static void
 clear_command (char *arg, int from_tty)
 {
-  struct breakpoint *b;
+  struct breakpoint *b, *prev;
   VEC(breakpoint_p) *found = 0;
   int ix;
   int default_match;
   struct symtabs_and_lines sals;
   struct symtab_and_line sal;
   int i;
+  struct cleanup *cleanups = make_cleanup (null_cleanup, NULL);
 
   if (arg)
     {
@@ -10090,6 +10113,7 @@ clear_command (char *arg, int from_tty)
      breakpoint.  */
 
   found = NULL;
+  make_cleanup (VEC_cleanup (breakpoint_p), &found);
   for (i = 0; i < sals.nelts; i++)
     {
       /* If exact pc given, clear bpts at that pc.
@@ -10143,6 +10167,7 @@ clear_command (char *arg, int from_tty)
 	    VEC_safe_push(breakpoint_p, found, b);
 	}
     }
+
   /* Now go thru the 'found' chain and delete them.  */
   if (VEC_empty(breakpoint_p, found))
     {
@@ -10150,6 +10175,21 @@ clear_command (char *arg, int from_tty)
 	error (_("No breakpoint at %s."), arg);
       else
 	error (_("No breakpoint at this line."));
+    }
+
+  /* Remove duplicates from the vec.  */
+  qsort (VEC_address (breakpoint_p, found),
+	 VEC_length (breakpoint_p, found),
+	 sizeof (breakpoint_p),
+	 compare_breakpoints);
+  prev = VEC_index (breakpoint_p, found, 0);
+  for (ix = 1; VEC_iterate (breakpoint_p, found, ix, b); ++ix)
+    {
+      if (b == prev)
+	{
+	  VEC_ordered_remove (breakpoint_p, found, ix);
+	  --ix;
+	}
     }
 
   if (VEC_length(breakpoint_p, found) > 1)
@@ -10171,6 +10211,8 @@ clear_command (char *arg, int from_tty)
     }
   if (from_tty)
     putchar_unfiltered ('\n');
+
+  do_cleanups (cleanups);
 }
 
 /* Delete breakpoint in BS if they are `delete' breakpoints and

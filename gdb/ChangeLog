@@ -1,3 +1,9 @@
+2011-12-09  Tom Tromey  <tromey@redhat.com>
+
+	* breakpoint.c (compare_breakpoints): New function.
+	(clear_command): Remove duplicate breakpoints.  Properly clean
+	up.
+
 2011-12-08  Maciej W. Rozycki  <macro@mips.com>
             Maciej W. Rozycki  <macro@codesourcery.com>
 
