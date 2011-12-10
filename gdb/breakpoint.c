@@ -11614,26 +11614,26 @@ update_static_tracepoint (struct breakpoint *b, struct symtab_and_line sal)
 
       if (!VEC_empty(static_tracepoint_marker_p, markers))
 	{
-	  struct symtab_and_line sal;
+	  struct symtab_and_line sal2;
 	  struct symbol *sym;
-	  struct static_tracepoint_marker *marker;
+	  struct static_tracepoint_marker *tpmarker;
 	  struct ui_out *uiout = current_uiout;
 
-	  marker = VEC_index (static_tracepoint_marker_p, markers, 0);
+	  tpmarker = VEC_index (static_tracepoint_marker_p, markers, 0);
 
 	  xfree (tp->static_trace_marker_id);
-	  tp->static_trace_marker_id = xstrdup (marker->str_id);
+	  tp->static_trace_marker_id = xstrdup (tpmarker->str_id);
 
 	  warning (_("marker for static tracepoint %d (%s) not "
 		     "found at previous line number"),
 		   b->number, tp->static_trace_marker_id);
 
-	  init_sal (&sal);
+	  init_sal (&sal2);
 
-	  sal.pc = marker->address;
+	  sal2.pc = tpmarker->address;
 
-	  sal = find_pc_line (marker->address, 0);
-	  sym = find_pc_sect_function (marker->address, NULL);
+	  sal2 = find_pc_line (tpmarker->address, 0);
+	  sym = find_pc_sect_function (tpmarker->address, NULL);
 	  ui_out_text (uiout, "Now in ");
 	  if (sym)
 	    {
@@ -11641,37 +11641,37 @@ update_static_tracepoint (struct breakpoint *b, struct symtab_and_line sal)
 				   SYMBOL_PRINT_NAME (sym));
 	      ui_out_text (uiout, " at ");
 	    }
-	  ui_out_field_string (uiout, "file", sal.symtab->filename);
+	  ui_out_field_string (uiout, "file", sal2.symtab->filename);
 	  ui_out_text (uiout, ":");
 
 	  if (ui_out_is_mi_like_p (uiout))
 	    {
-	      char *fullname = symtab_to_fullname (sal.symtab);
+	      char *fullname = symtab_to_fullname (sal2.symtab);
 
 	      if (fullname)
 		ui_out_field_string (uiout, "fullname", fullname);
 	    }
 
-	  ui_out_field_int (uiout, "line", sal.line);
+	  ui_out_field_int (uiout, "line", sal2.line);
 	  ui_out_text (uiout, "\n");
 
-	  b->loc->line_number = sal.line;
+	  b->loc->line_number = sal2.line;
 
 	  xfree (b->loc->source_file);
 	  if (sym)
-	    b->loc->source_file = xstrdup (sal.symtab->filename);
+	    b->loc->source_file = xstrdup (sal2.symtab->filename);
 	  else
 	    b->loc->source_file = NULL;
 
 	  xfree (b->addr_string);
 	  b->addr_string = xstrprintf ("%s:%d",
-				       sal.symtab->filename,
+				       sal2.symtab->filename,
 				       b->loc->line_number);
 
 	  /* Might be nice to check if function changed, and warn if
 	     so.  */
 
-	  release_static_tracepoint_marker (marker);
+	  release_static_tracepoint_marker (tpmarker);
 	}
     }
   return sal;

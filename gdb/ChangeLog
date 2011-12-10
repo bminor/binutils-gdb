@@ -1,3 +1,9 @@
+2011-12-09  Andrey Smirnov  <andrew.smirnov@gmail.com>
+
+	* breakpoint.c (update_static_tracepoint): Rename nested `sal' and
+	`marker' variables to `sal2' and `tpmarker' respectively
+	(-Wshadow).
+
 2011-12-09  Andrew Pinski  <apinski@cavium.com>
 
 	* linespec.c (hash_address_entry): Use iterative_hash_object on each
