@@ -1,5 +1,11 @@
 2011-12-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	PR testsuite/12649
+	* gdb.trace/ftrace.exp (test_fast_tracepoints): Import gdb_prompt.
+	Protect gdb_test_multiple by final $gdb_prompt match.
+
+2011-12-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdb.cp/static-method.exp (have_gcc_45682_fixed, info addr A::func()):
 	New variable, new test.
 	(list static-method.cc:xxx::(anonymous namespace)::A::func)

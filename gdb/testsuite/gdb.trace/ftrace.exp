@@ -76,6 +76,7 @@ proc run_trace_experiment {} {
 }
 
 proc test_fast_tracepoints {} {
+    global gdb_prompt
 
     set fourgood 0
 
@@ -111,10 +112,10 @@ proc test_fast_tracepoints {} {
 	    }
 
 	    gdb_test_multiple "ftrace four_byter" "set 4-byte fast tracepoint" {
-		-re "May not have a fast tracepoint at .*" {
+		-re "May not have a fast tracepoint at .*\r\n$gdb_prompt $" {
 		    pass "4-byte fast tracepoint could not be set"
 		}
-		-re "Fast tracepoint .*" {
+		-re "Fast tracepoint .*\r\n$gdb_prompt $" {
 		    pass "4-byte fast tracepoint is set"
 		    set fourgood 1
 		}
