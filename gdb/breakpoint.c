@@ -7204,7 +7204,7 @@ bp_loc_is_permanent (struct bp_location *loc)
 {
   int len;
   CORE_ADDR addr;
-  const gdb_byte *brk;
+  const gdb_byte *bpoint;
   gdb_byte *target_mem;
   struct cleanup *cleanup;
   int retval = 0;
@@ -7212,10 +7212,10 @@ bp_loc_is_permanent (struct bp_location *loc)
   gdb_assert (loc != NULL);
 
   addr = loc->address;
-  brk = gdbarch_breakpoint_from_pc (loc->gdbarch, &addr, &len);
+  bpoint = gdbarch_breakpoint_from_pc (loc->gdbarch, &addr, &len);
 
   /* Software breakpoints unsupported?  */
-  if (brk == NULL)
+  if (bpoint == NULL)
     return 0;
 
   target_mem = alloca (len);
@@ -7229,7 +7229,7 @@ bp_loc_is_permanent (struct bp_location *loc)
   make_show_memory_breakpoints_cleanup (0);
 
   if (target_read_memory (loc->address, target_mem, len) == 0
-      && memcmp (target_mem, brk, len) == 0)
+      && memcmp (target_mem, bpoint, len) == 0)
     retval = 1;
 
   do_cleanups (cleanup);

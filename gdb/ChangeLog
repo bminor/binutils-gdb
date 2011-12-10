@@ -1,5 +1,10 @@
 2011-12-09  Andrey Smirnov  <andrew.smirnov@gmail.com>
 
+	* breakpoint.c (bp_loc_is_permanent): Rename `brk' to
+	`bpoint'(-Wshadow).
+
+2011-12-09  Andrey Smirnov  <andrew.smirnov@gmail.com>
+
 	* breakpoint.c (update_static_tracepoint): Rename nested `sal' and
 	`marker' variables to `sal2' and `tpmarker' respectively
 	(-Wshadow).
