@@ -314,7 +314,7 @@ Use `info auto-load-scripts [REGEXP]' to list them."),
 	  if (! in_hash_table)
 	    source_python_script_for_objfile (objfile, full_path);
 	  fclose (stream);
-	  free (full_path);
+	  xfree (full_path);
 	}
     }
 }

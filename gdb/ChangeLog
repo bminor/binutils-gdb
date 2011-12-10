@@ -1,3 +1,8 @@
+2011-12-10  Doug Evans  <dje@google.com>
+
+	* python/py-auto-load.c (source_section_scripts): Call xfree
+	instead of free.
+
 2011-12-10  Hui Zhu  <teawater@gmail.com>
 	    Yao Qi  <yao@codesourcery.com>
 
