@@ -1,3 +1,10 @@
+2011-12-09 David Daney <david.daney@cavium.com>
+
+	* ld-mips-elf/tls-multi-got-1.r: Add "0x" to match value for
+	MIPS_BASE_ADDRESS.
+	* ld-mips-elf/textrel-1.d: Same.
+	* ld-mips-elf/multi-got-1.d: Same.
+
 2011-12-05  Nick Clifton  <nickc@redhat.com>
 
 	* ld-cris/weakref4.d: Updated pattern match for the message from
