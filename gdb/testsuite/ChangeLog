@@ -1,3 +1,13 @@
+2011-12-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.cp/static-method.exp (have_gcc_45682_fixed, info addr A::func()):
+	New variable, new test.
+	(list static-method.cc:xxx::(anonymous namespace)::A::func)
+	(list 'static-method.cc:xxx::(anonymous namespace)::A::func')
+	(list 'static-method.cc':'xxx::(anonymous namespace)::A::func')
+	(list static-method.cc:'xxx::(anonymous namespace)::A::func'): KFAIL
+	them if HAVE_GCC_45682_FIXED is not set.
+
 2011-12-10  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.trace/status-stop.exp: New.
