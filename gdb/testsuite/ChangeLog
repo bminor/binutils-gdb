@@ -1,3 +1,8 @@
+2011-12-10  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.trace/status-stop.exp: New.
+	* gdb.trace/status-stop.c: New.
+
 2011-12-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.reverse/until-precsave.exp (run to end of main) Extend the

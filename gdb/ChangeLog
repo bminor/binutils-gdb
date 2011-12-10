@@ -1,4 +1,9 @@
 2011-12-10  Hui Zhu  <teawater@gmail.com>
+	    Yao Qi  <yao@codesourcery.com>
+
+	* tracepoint.c (start_tracing): Clear `inserted' flag.
+
+2011-12-10  Hui Zhu  <teawater@gmail.com>
 
 	* tracepoint.c (create_tsv_from_upload): Change sprintf to xstrprintf.
 

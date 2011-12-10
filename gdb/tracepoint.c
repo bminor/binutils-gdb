@@ -1756,6 +1756,10 @@ start_tracing (char *notes)
       struct tracepoint *t = (struct tracepoint *) b;
       struct bp_location *loc;
 
+      /* Clear `inserted' flag.  */
+      for (loc = b->loc; loc; loc = loc->next)
+	loc->inserted = 0;
+
       if ((b->type == bp_fast_tracepoint
 	   ? !may_insert_fast_tracepoints
 	   : !may_insert_tracepoints))
