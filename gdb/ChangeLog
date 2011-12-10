@@ -1,5 +1,10 @@
 2011-12-10  Doug Evans  <dje@google.com>
 
+	* dwarf2read.c (dwarf2_per_cu_data): Rename debug_type_section to
+	debug_types_section.  All uses updated.
+	(partial_read_comp_unit_head): Rename parameter is_debug_type_section
+	to is_debug_types_section.
+
 	* python/py-auto-load.c (source_section_scripts): Call xfree
 	instead of free.
 

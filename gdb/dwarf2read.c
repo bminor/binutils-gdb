@@ -460,7 +460,7 @@ struct dwarf2_per_cu_data
 
   /* Non-null if this CU is from .debug_types; in which case it points
      to the section.  Otherwise it's from .debug_info.  */
-  struct dwarf2_section_info *debug_type_section;
+  struct dwarf2_section_info *debug_types_section;
 
   /* Set to non-NULL iff this CU is currently loaded.  When it gets freed out
      of the CU cache it gets reset to NULL again.  */
@@ -1338,7 +1338,7 @@ static gdb_byte *partial_read_comp_unit_head (struct comp_unit_head *header,
 					      gdb_byte *buffer,
 					      unsigned int buffer_size,
 					      bfd *abfd,
-					      int is_debug_type_section);
+					      int is_debug_types_section);
 
 static void init_cu_die_reader (struct die_reader_specs *reader,
 				struct dwarf2_cu *cu);
@@ -1836,9 +1836,9 @@ create_quick_file_names_table (unsigned int nr_initial_entries)
 static void
 load_cu (struct dwarf2_per_cu_data *per_cu)
 {
-  if (per_cu->debug_type_section)
+  if (per_cu->debug_types_section)
     read_signatured_type_at_offset (per_cu->objfile,
-				    per_cu->debug_type_section,
+				    per_cu->debug_types_section,
 				    per_cu->offset);
   else
     load_full_comp_unit (per_cu, per_cu->objfile);
@@ -2000,7 +2000,7 @@ create_signatured_type_table_from_index (struct objfile *objfile,
 				 struct signatured_type);
       type_sig->signature = signature;
       type_sig->type_offset = type_offset;
-      type_sig->per_cu.debug_type_section = section;
+      type_sig->per_cu.debug_types_section = section;
       type_sig->per_cu.offset = offset;
       type_sig->per_cu.objfile = objfile;
       type_sig->per_cu.v.quick
@@ -2298,8 +2298,8 @@ dw2_get_file_names (struct objfile *objfile,
   init_one_comp_unit (&cu, objfile);
   cleanups = make_cleanup (free_stack_comp_unit, &cu);
 
-  if (this_cu->debug_type_section)
-    sec = this_cu->debug_type_section;
+  if (this_cu->debug_types_section)
+    sec = this_cu->debug_types_section;
   else
     sec = &dwarf2_per_objfile->info;
   dwarf2_read_section (objfile, sec);
@@ -2310,7 +2310,7 @@ dw2_get_file_names (struct objfile *objfile,
   info_ptr = partial_read_comp_unit_head (&cu.header, info_ptr,
 					  buffer, buffer_size,
 					  abfd,
-					  this_cu->debug_type_section != NULL);
+					  this_cu->debug_types_section != NULL);
 
   /* Skip dummy compilation units.  */
   if (info_ptr >= buffer + buffer_size
@@ -3025,7 +3025,7 @@ read_comp_unit_head (struct comp_unit_head *cu_header,
 static gdb_byte *
 partial_read_comp_unit_head (struct comp_unit_head *header, gdb_byte *info_ptr,
 			     gdb_byte *buffer, unsigned int buffer_size,
-			     bfd *abfd, int is_debug_type_section)
+			     bfd *abfd, int is_debug_types_section)
 {
   gdb_byte *beg_of_comp_unit = info_ptr;
 
@@ -3035,7 +3035,7 @@ partial_read_comp_unit_head (struct comp_unit_head *header, gdb_byte *info_ptr,
 
   /* If we're reading a type unit, skip over the signature and
      type_offset fields.  */
-  if (is_debug_type_section)
+  if (is_debug_types_section)
     info_ptr += 8 /*signature*/ + header->offset_size;
 
   header->first_die_offset = info_ptr - beg_of_comp_unit;
@@ -3287,7 +3287,7 @@ create_debug_types_hash_table (struct objfile *objfile)
 	  type_sig->signature = signature;
 	  type_sig->type_offset = type_offset;
 	  type_sig->per_cu.objfile = objfile;
-	  type_sig->per_cu.debug_type_section = section;
+	  type_sig->per_cu.debug_types_section = section;
 	  type_sig->per_cu.offset = offset;
 
 	  slot = htab_find_slot (types_htab, type_sig, INSERT);
@@ -3356,10 +3356,10 @@ init_cu_die_reader (struct die_reader_specs *reader,
 {
   reader->abfd = cu->objfile->obfd;
   reader->cu = cu;
-  if (cu->per_cu->debug_type_section)
+  if (cu->per_cu->debug_types_section)
     {
-      gdb_assert (cu->per_cu->debug_type_section->readin);
-      reader->buffer = cu->per_cu->debug_type_section->buffer;
+      gdb_assert (cu->per_cu->debug_types_section->readin);
+      reader->buffer = cu->per_cu->debug_types_section->buffer;
     }
   else
     {
@@ -3432,7 +3432,7 @@ process_psymtab_comp_unit (struct objfile *objfile,
   info_ptr = partial_read_comp_unit_head (&cu.header, info_ptr,
 					  buffer, buffer_size,
 					  abfd,
-					  this_cu->debug_type_section != NULL);
+					  this_cu->debug_types_section != NULL);
 
   /* Skip dummy compilation units.  */
   if (info_ptr >= buffer + buffer_size
@@ -3471,7 +3471,7 @@ process_psymtab_comp_unit (struct objfile *objfile,
   info_ptr = read_full_die (&reader_specs, &comp_unit_die, info_ptr,
 			    &has_children);
 
-  if (this_cu->debug_type_section)
+  if (this_cu->debug_types_section)
     {
       /* LENGTH has not been set yet for type units.  */
       gdb_assert (this_cu->offset == cu.header.offset);
@@ -3568,7 +3568,7 @@ process_psymtab_comp_unit (struct objfile *objfile,
   info_ptr = (beg_of_comp_unit + cu.header.length
 	      + cu.header.initial_length_size);
 
-  if (this_cu->debug_type_section)
+  if (this_cu->debug_types_section)
     {
       /* It's not clear we want to do anything with stmt lists here.
 	 Waiting to see what gcc ultimately does.  */
@@ -3597,12 +3597,12 @@ process_type_comp_unit (void **slot, void *info)
 
   this_cu = &entry->per_cu;
 
-  gdb_assert (this_cu->debug_type_section->readin);
+  gdb_assert (this_cu->debug_types_section->readin);
   process_psymtab_comp_unit (objfile, this_cu,
-			     this_cu->debug_type_section->buffer,
-			     (this_cu->debug_type_section->buffer
+			     this_cu->debug_types_section->buffer,
+			     (this_cu->debug_types_section->buffer
 			      + this_cu->offset),
-			     this_cu->debug_type_section->size);
+			     this_cu->debug_types_section->size);
 
   return 1;
 }
@@ -3711,7 +3711,7 @@ load_partial_comp_unit (struct dwarf2_per_cu_data *this_cu,
   struct die_reader_specs reader_specs;
   int read_cu = 0;
 
-  gdb_assert (! this_cu->debug_type_section);
+  gdb_assert (! this_cu->debug_types_section);
 
   gdb_assert (dwarf2_per_objfile->info.readin);
   info_ptr = dwarf2_per_objfile->info.buffer + this_cu->offset;
@@ -4724,7 +4724,7 @@ load_full_comp_unit (struct dwarf2_per_cu_data *per_cu,
   struct attribute *attr;
   int read_cu = 0;
 
-  gdb_assert (! per_cu->debug_type_section);
+  gdb_assert (! per_cu->debug_types_section);
 
   /* Set local variables from the partial symbol table info.  */
   offset = per_cu->offset;
@@ -8111,14 +8111,14 @@ process_enumeration_scope (struct die_info *die, struct dwarf2_cu *cu)
      actually available.  Note that we do not want to do this for all
      enums which are just declarations, because C++0x allows forward
      enum declarations.  */
-  if (cu->per_cu->debug_type_section
+  if (cu->per_cu->debug_types_section
       && die_is_declaration (die, cu))
     {
       struct signatured_type *type_sig;
 
       type_sig
 	= lookup_signatured_type_at_offset (dwarf2_per_objfile->objfile,
-					    cu->per_cu->debug_type_section,
+					    cu->per_cu->debug_types_section,
 					    cu->per_cu->offset);
       if (type_sig->type_offset != die->offset)
 	return;
@@ -9225,7 +9225,7 @@ read_die_and_children (const struct die_reader_specs *reader,
     {
       fprintf_unfiltered (gdb_stdlog,
 			  "\nRead die from %s of %s:\n",
-			  (reader->cu->per_cu->debug_type_section
+			  (reader->cu->per_cu->debug_types_section
 			   ? ".debug_types"
 			   : ".debug_info"),
 			  reader->abfd->filename);
@@ -10013,7 +10013,7 @@ find_partial_die (unsigned int offset, struct dwarf2_cu *cu)
   struct dwarf2_per_cu_data *per_cu = NULL;
   struct partial_die_info *pd = NULL;
 
-  if (cu->per_cu->debug_type_section)
+  if (cu->per_cu->debug_types_section)
     {
       pd = find_partial_die_in_comp_unit (offset, cu);
       if (pd != NULL)
@@ -12356,7 +12356,7 @@ lookup_die_type (struct die_info *die, struct attribute *attr,
 		 "at 0x%x [in module %s]"),
 	       die->offset, cu->objfile->name);
 
-      gdb_assert (sig_type->per_cu.debug_type_section);
+      gdb_assert (sig_type->per_cu.debug_types_section);
       offset = sig_type->per_cu.offset + sig_type->type_offset;
       this_type = get_die_type_at_offset (offset, &sig_type->per_cu);
     }
@@ -14262,7 +14262,7 @@ follow_die_offset (unsigned int offset, struct dwarf2_cu **ref_cu)
 
   target_cu = cu;
 
-  if (cu->per_cu->debug_type_section)
+  if (cu->per_cu->debug_types_section)
     {
       /* .debug_types CUs cannot reference anything outside their CU.
 	 If they need to, they have to reference a signatured type via
@@ -14493,7 +14493,7 @@ read_signatured_type (struct objfile *objfile,
   struct dwarf2_cu *cu;
   ULONGEST signature;
   struct cleanup *back_to, *free_cu_cleanup;
-  struct dwarf2_section_info *section = type_sig->per_cu.debug_type_section;
+  struct dwarf2_section_info *section = type_sig->per_cu.debug_types_section;
 
   dwarf2_read_section (objfile, section);
   types_ptr = section->buffer + type_sig->per_cu.offset;
@@ -16190,7 +16190,7 @@ set_die_type (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
       && !HAVE_GNAT_AUX_INFO (type))
     INIT_GNAT_SPECIFIC (type);
 
-  if (cu->per_cu->debug_type_section)
+  if (cu->per_cu->debug_types_section)
     type_hash_ptr = &dwarf2_per_objfile->debug_types_type_hash;
   else
     type_hash_ptr = &dwarf2_per_objfile->debug_info_type_hash;
@@ -16230,7 +16230,7 @@ get_die_type_at_offset (unsigned int offset,
   struct dwarf2_offset_and_type *slot, ofs;
   htab_t type_hash;
 
-  if (per_cu->debug_type_section)
+  if (per_cu->debug_types_section)
     type_hash = dwarf2_per_objfile->debug_types_type_hash;
   else
     type_hash = dwarf2_per_objfile->debug_info_type_hash;
