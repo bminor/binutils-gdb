@@ -3482,30 +3482,38 @@ struct trace_state_variable *
 create_tsv_from_upload (struct uploaded_tsv *utsv)
 {
   const char *namebase;
-  char buf[20];
+  char *buf;
   int try_num = 0;
   struct trace_state_variable *tsv;
+  struct cleanup *old_chain;
 
   if (utsv->name)
     {
       namebase = utsv->name;
-      sprintf (buf, "%s", namebase);
+      buf = xstrprintf ("%s", namebase);
     }
   else
     {
       namebase = "__tsv";
-      sprintf (buf, "%s_%d", namebase, try_num++);
+      buf = xstrprintf ("%s_%d", namebase, try_num++);
     }
 
   /* Fish for a name that is not in use.  */
   /* (should check against all internal vars?)  */
   while (find_trace_state_variable (buf))
-    sprintf (buf, "%s_%d", namebase, try_num++);
+    {
+      xfree (buf);
+      buf = xstrprintf ("%s_%d", namebase, try_num++);
+    }
+
+  old_chain = make_cleanup (xfree, buf);
 
   /* We have an available name, create the variable.  */
   tsv = create_trace_state_variable (buf);
   tsv->initial_value = utsv->initial_value;
   tsv->builtin = utsv->builtin;
+
+  do_cleanups (old_chain);
 
   return tsv;
 }

@@ -1,3 +1,7 @@
+2011-12-10  Hui Zhu  <teawater@gmail.com>
+
+	* tracepoint.c (create_tsv_from_upload): Change sprintf to xstrprintf.
+
 2011-12-09  Andrey Smirnov  <andrew.smirnov@gmail.com>
 
 	* breakpoint.c (bp_loc_is_permanent): Rename `brk' to
