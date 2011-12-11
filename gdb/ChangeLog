@@ -1,5 +1,10 @@
 2011-12-11  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (ada_exception_support_info_sniffer): Improve
+	error message.
+
+2011-12-11  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c (struct ada_inferior_data) [exception_info]:
 	New field.
 	(exception_info): Delete.

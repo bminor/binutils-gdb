@@ -10750,7 +10750,7 @@ ada_exception_support_info_sniffer (void)
      out by the linker...  In any case, at this point it is not worth
      supporting this feature.  */
 
-  error (_("Cannot insert catchpoints in this configuration."));
+  error (_("Cannot insert Ada exception catchpoints in this configuration."));
 }
 
 /* True iff FRAME is very likely to be that of a function that is
