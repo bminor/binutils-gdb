@@ -1,3 +1,8 @@
+2011-12-11  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/catch_ex.exp, gdb.ada/mi_catch_ex.exp: Adjust
+	expected output for unsupported case.
+
 2011-12-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	PR testsuite/12649

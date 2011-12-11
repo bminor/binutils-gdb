@@ -56,7 +56,7 @@ gdb_test_multiple "catch exception" $msg {
     -re "Catchpoint $any_nb: all Ada exceptions$eol$gdb_prompt $" {
 	pass $msg
     }
-    -re "Cannot (insert catchpoints|break on __gnat_raise_nodefer_with_msg) in this configuration\.$eol$gdb_prompt $" {
+    -re "Your Ada runtime appears to be missing some debugging information.*$eol$gdb_prompt $" {
 	# If the runtime was not built with enough debug information,
 	# or if it was stripped, we can not test exception
 	# catchpoints.

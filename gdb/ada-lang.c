@@ -10659,7 +10659,28 @@ ada_has_this_exception_support (const struct exception_support_info *einfo)
 
   sym = standard_lookup (einfo->catch_exception_sym, NULL, VAR_DOMAIN);
   if (sym == NULL)
-    return 0;
+    {
+      /* Perhaps we did not find our symbol because the Ada runtime was
+	 compiled without debugging info, or simply stripped of it.
+	 It happens on some GNU/Linux distributions for instance, where
+	 users have to install a separate debug package in order to get
+	 the runtime's debugging info.  In that situation, let the user
+	 know why we cannot insert an Ada exception catchpoint.
+
+	 Note: Just for the purpose of inserting our Ada exception
+	 catchpoint, we could rely purely on the associated minimal symbol.
+	 But we would be operating in degraded mode anyway, since we are
+	 still lacking the debugging info needed later on to extract
+	 the name of the exception being raised (this name is printed in
+	 the catchpoint message, and is also used when trying to catch
+	 a specific exception).  We do not handle this case for now.  */
+      if (lookup_minimal_symbol (einfo->catch_exception_sym, NULL, NULL))
+	error (_("Your Ada runtime appears to be missing some debugging "
+		 "information.\nCannot insert Ada exception catchpoint "
+		 "in this configuration."));
+
+      return 0;
+    }
 
   /* Make sure that the symbol we found corresponds to a function.  */
 
