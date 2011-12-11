@@ -1287,12 +1287,12 @@ write_var_or_type (struct block *block, struct stoken name0)
 	     FIXME pnh 7/20/2007. */
 	  if (nsyms == 1)
 	    {
-	      struct symbol *renaming =
+	      struct symbol *ren_sym =
 		ada_find_renaming_symbol (SYMBOL_LINKAGE_NAME (syms[0].sym), 
 					  syms[0].block);
 
-	      if (renaming != NULL)
-		syms[0].sym = renaming;
+	      if (ren_sym != NULL)
+		syms[0].sym = ren_sym;
 	    }
 
 	  type_sym = select_possible_type_sym (syms, nsyms);

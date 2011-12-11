@@ -1,3 +1,8 @@
+2011-12-10  Andrey Smirnov  <andrew.smirnov@gmail.com>
+
+	* ada-exp.y (write_var_or_type): Rename nested `renaming' to
+	`ren_sym'(-Wshadow).
+
 2011-12-10  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (dwarf2_per_cu_data): Rename debug_type_section to
