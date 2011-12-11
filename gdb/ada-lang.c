@@ -10641,6 +10641,35 @@ static const struct exception_support_info exception_support_info_fallback =
   ada_unhandled_exception_name_addr_from_raise
 };
 
+/* Return nonzero if we can detect the exception support routines
+   described in EINFO.
+
+   This function errors out if an abnormal situation is detected
+   (for instance, if we find the exception support routines, but
+   that support is found to be incomplete).  */
+
+static int
+ada_has_this_exception_support (const struct exception_support_info *einfo)
+{
+  struct symbol *sym;
+
+  /* The symbol we're looking up is provided by a unit in the GNAT runtime
+     that should be compiled with debugging information.  As a result, we
+     expect to find that symbol in the symtabs.  */
+
+  sym = standard_lookup (einfo->catch_exception_sym, NULL, VAR_DOMAIN);
+  if (sym == NULL)
+    return 0;
+
+  /* Make sure that the symbol we found corresponds to a function.  */
+
+  if (SYMBOL_CLASS (sym) != LOC_BLOCK)
+    error (_("Symbol \"%s\" is not a function (class = %d)"),
+           SYMBOL_LINKAGE_NAME (sym), SYMBOL_CLASS (sym));
+
+  return 1;
+}
+
 /* For each executable, we sniff which exception info structure to use
    and cache it in the following global variable.  */
 
@@ -10661,18 +10690,14 @@ ada_exception_support_info_sniffer (void)
     return;
 
   /* Check the latest (default) exception support info.  */
-  sym = standard_lookup (default_exception_support_info.catch_exception_sym,
-                         NULL, VAR_DOMAIN);
-  if (sym != NULL)
+  if (ada_has_this_exception_support (&default_exception_support_info))
     {
       exception_info = &default_exception_support_info;
       return;
     }
 
   /* Try our fallback exception suport info.  */
-  sym = standard_lookup (exception_support_info_fallback.catch_exception_sym,
-                         NULL, VAR_DOMAIN);
-  if (sym != NULL)
+  if (ada_has_this_exception_support (&exception_support_info_fallback))
     {
       exception_info = &exception_support_info_fallback;
       return;
@@ -11663,52 +11688,31 @@ ada_exception_sal (enum exception_catchpoint_kind ex, char *excep_string,
 {
   const char *sym_name;
   struct symbol *sym;
-  struct symtab_and_line sal;
 
   /* First, find out which exception support info to use.  */
   ada_exception_support_info_sniffer ();
 
   /* Then lookup the function on which we will break in order to catch
      the Ada exceptions requested by the user.  */
-
   sym_name = ada_exception_sym_name (ex);
   sym = standard_lookup (sym_name, NULL, VAR_DOMAIN);
 
-  /* The symbol we're looking up is provided by a unit in the GNAT runtime
-     that should be compiled with debugging information.  As a result, we
-     expect to find that symbol in the symtabs.  If we don't find it, then
-     the target most likely does not support Ada exceptions, or we cannot
-     insert exception breakpoints yet, because the GNAT runtime hasn't been
-     loaded yet.  */
+  /* We can assume that SYM is not NULL at this stage.  If the symbol
+     did not exist, ada_exception_support_info_sniffer would have
+     raised an exception.
 
-  /* brobecker/2006-12-26: It is conceivable that the runtime was compiled
-     in such a way that no debugging information is produced for the symbol
-     we are looking for.  In this case, we could search the minimal symbols
-     as a fall-back mechanism.  This would still be operating in degraded
-     mode, however, as we would still be missing the debugging information
-     that is needed in order to extract the name of the exception being
-     raised (this name is printed in the catchpoint message, and is also
-     used when trying to catch a specific exception).  We do not handle
-     this case for now.  */
-
-  if (sym == NULL)
-    error (_("Unable to break on '%s' in this configuration."), sym_name);
-
-  /* Make sure that the symbol we found corresponds to a function.  */
-  if (SYMBOL_CLASS (sym) != LOC_BLOCK)
-    error (_("Symbol \"%s\" is not a function (class = %d)"),
-           sym_name, SYMBOL_CLASS (sym));
-
-  sal = find_function_start_sal (sym, 1);
+     Also, ada_exception_support_info_sniffer should have already
+     verified that SYM is a function symbol.  */
+  gdb_assert (sym != NULL);
+  gdb_assert (SYMBOL_CLASS (sym) == LOC_BLOCK);
 
   /* Set ADDR_STRING.  */
-
   *addr_string = xstrdup (sym_name);
 
   /* Set OPS.  */
   *ops = ada_exception_breakpoint_ops (ex);
 
-  return sal;
+  return find_function_start_sal (sym, 1);
 }
 
 /* Parse the arguments (ARGS) of the "catch exception" command.

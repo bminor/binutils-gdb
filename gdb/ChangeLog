@@ -1,3 +1,12 @@
+2011-12-11  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_has_this_exception_support): New function,
+	extracted out of ada_exception_sal and ada_exception_sal.
+	(ada_exception_support_info_sniffer): Simplify by using
+	ada_has_this_exception_support.
+	(ada_exception_sal): Replace unnecessary checks by assertions.
+	Minor simplifications.
+
 2011-12-10  Andrey Smirnov  <andrew.smirnov@gmail.com>
 
 	* breakpoint.c (update_global_location_list): Remove nested
