@@ -522,11 +522,11 @@ annotate_frame_end (void)
 }
 
 void
-annotate_array_section_begin (int index, struct type *elttype)
+annotate_array_section_begin (int idx, struct type *elttype)
 {
   if (annotation_level == 2)
     {
-      printf_filtered (("\n\032\032array-section-begin %d "), index);
+      printf_filtered (("\n\032\032array-section-begin %d "), idx);
       print_value_flags (elttype);
       printf_filtered (("\n"));
     }

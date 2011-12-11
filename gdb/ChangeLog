@@ -1,5 +1,10 @@
 2011-12-10  Andrey Smirnov  <andrew.smirnov@gmail.com>
 
+	* annotate.c (annotate_array_section_begin): Rename `index' to
+	`idx'(-Wshadow).
+
+2011-12-10  Andrey Smirnov  <andrew.smirnov@gmail.com>
+
 	* amd64-tdep.c (amd64_get_unused_input_int_reg): Rename `index' to
 	`idx'(-Wshadow).
 
