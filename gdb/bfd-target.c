@@ -78,14 +78,14 @@ target_bfd_xclose (struct target_ops *t, int quitting)
 }
 
 struct target_ops *
-target_bfd_reopen (struct bfd *bfd)
+target_bfd_reopen (struct bfd *abfd)
 {
   struct target_ops *t;
   struct target_bfd_data *data;
 
   data = XZALLOC (struct target_bfd_data);
-  data->bfd = bfd;
-  build_section_table (bfd, &data->table.sections, &data->table.sections_end);
+  data->bfd = abfd;
+  build_section_table (abfd, &data->table.sections, &data->table.sections_end);
 
   t = XZALLOC (struct target_ops);
   t->to_shortname = "bfd";

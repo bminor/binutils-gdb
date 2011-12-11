@@ -1,5 +1,10 @@
 2011-12-10  Andrey Smirnov  <andrew.smirnov@gmail.com>
 
+	* bfd-target.c (target_bfd_reopen): Rename `bfd' to
+	`abfd'(-Wshadow).
+
+2011-12-10  Andrey Smirnov  <andrew.smirnov@gmail.com>
+
 	* annotate.c (annotate_array_section_begin): Rename `index' to
 	`idx'(-Wshadow).
 
