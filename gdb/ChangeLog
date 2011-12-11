@@ -1,5 +1,10 @@
 2011-12-10  Andrey Smirnov  <andrew.smirnov@gmail.com>
 
+	* amd64-linux-tdep.c (amd64_canonicalize_syscall): Rename
+	`syscall' to `syscall_number'(-Wshadow).
+
+2011-12-10  Andrey Smirnov  <andrew.smirnov@gmail.com>
+
 	* ada-lang.c (remove_extra_symbols): Rename `remove' to
 	`remove_p'(-Wshadow).
 

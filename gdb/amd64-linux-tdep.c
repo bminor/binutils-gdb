@@ -339,9 +339,9 @@ amd64_all_but_ip_registers_record (struct regcache *regcache)
    process record.  */
 
 static enum gdb_syscall
-amd64_canonicalize_syscall (enum amd64_syscall syscall)
+amd64_canonicalize_syscall (enum amd64_syscall syscall_number)
 {
-  switch (syscall) {
+  switch (syscall_number) {
   case amd64_sys_read:
     return gdb_sys_read;
 
