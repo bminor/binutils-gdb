@@ -4488,7 +4488,7 @@ remove_extra_symbols (struct ada_symbol_info *syms, int nsyms)
   i = 0;
   while (i < nsyms)
     {
-      int remove = 0;
+      int remove_p = 0;
 
       /* If two symbols have the same name and one of them is a stub type,
          the get rid of the stub.  */
@@ -4503,7 +4503,7 @@ remove_extra_symbols (struct ada_symbol_info *syms, int nsyms)
                   && SYMBOL_LINKAGE_NAME (syms[j].sym) != NULL
                   && strcmp (SYMBOL_LINKAGE_NAME (syms[i].sym),
                              SYMBOL_LINKAGE_NAME (syms[j].sym)) == 0)
-                remove = 1;
+                remove_p = 1;
             }
         }
 
@@ -4523,11 +4523,11 @@ remove_extra_symbols (struct ada_symbol_info *syms, int nsyms)
                   && SYMBOL_CLASS (syms[i].sym) == SYMBOL_CLASS (syms[j].sym)
                   && SYMBOL_VALUE_ADDRESS (syms[i].sym)
                   == SYMBOL_VALUE_ADDRESS (syms[j].sym))
-                remove = 1;
+                remove_p = 1;
             }
         }
       
-      if (remove)
+      if (remove_p)
         {
           for (j = i + 1; j < nsyms; j += 1)
             syms[j - 1] = syms[j];

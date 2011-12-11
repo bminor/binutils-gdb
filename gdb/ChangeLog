@@ -1,5 +1,10 @@
 2011-12-10  Andrey Smirnov  <andrew.smirnov@gmail.com>
 
+	* ada-lang.c (remove_extra_symbols): Rename `remove' to
+	`remove_p'(-Wshadow).
+
+2011-12-10  Andrey Smirnov  <andrew.smirnov@gmail.com>
+
 	* ada-exp.y (write_var_or_type): Rename nested `renaming' to
 	`ren_sym'(-Wshadow).
 
