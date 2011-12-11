@@ -1,3 +1,23 @@
+2011-12-10  David Daney  <david.daney@cavium.com>
+
+	Backport from mainline:
+
+	2011-12-10  David Daney  <david.daney@cavium.com>
+
+	* elfxx-mips.c (mips_elf_link_hash_table.rld_value): Remove.
+	(mips_elf_link_hash_table.rld_symbol): New field;
+	(MIPS_ELF_RLD_MAP_SIZE): New macro.
+	(_bfd_mips_elf_add_symbol_hook): Remember __rld_obj_head symbol
+	in rld_symbol.
+	(_bfd_mips_elf_create_dynamic_sections): Remember __rld_map symbol
+	in rld_symbol.
+	(_bfd_mips_elf_size_dynamic_sections): Set correct size for .rld_map.
+	(_bfd_mips_elf_finish_dynamic_symbol): Remove .rld_map handling.
+	(_bfd_mips_elf_finish_dynamic_sections): Use rld_symbol to
+	calculate DT_MIPS_RLD_MAP value.
+	(_bfd_mips_elf_link_hash_table_create): Initialize rld_symbol,
+	quit initializing rld_value.
+
 2011-12-03  Alan Modra  <amodra@gmail.com>
 
 	PR ld/13468
