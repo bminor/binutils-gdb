@@ -317,6 +317,11 @@ struct ada_inferior_data
      accessible through a component ("tsd") in the object tag.  But this
      is no longer the case, so we cache it for each inferior.  */
   struct type *tsd_type;
+
+  /* The exception_support_info data.  This data is used to determine
+     how to implement support for Ada exception catchpoints in a given
+     inferior.  */
+  const struct exception_support_info *exception_info;
 };
 
 /* Our key to this module's inferior data.  */
@@ -10691,36 +10696,33 @@ ada_has_this_exception_support (const struct exception_support_info *einfo)
   return 1;
 }
 
-/* For each executable, we sniff which exception info structure to use
-   and cache it in the following global variable.  */
-
-static const struct exception_support_info *exception_info = NULL;
-
 /* Inspect the Ada runtime and determine which exception info structure
    should be used to provide support for exception catchpoints.
 
-   This function will always set exception_info, or raise an error.  */
+   This function will always set the per-inferior exception_info,
+   or raise an error.  */
 
 static void
 ada_exception_support_info_sniffer (void)
 {
+  struct ada_inferior_data *data = get_ada_inferior_data (current_inferior ());
   struct symbol *sym;
 
   /* If the exception info is already known, then no need to recompute it.  */
-  if (exception_info != NULL)
+  if (data->exception_info != NULL)
     return;
 
   /* Check the latest (default) exception support info.  */
   if (ada_has_this_exception_support (&default_exception_support_info))
     {
-      exception_info = &default_exception_support_info;
+      data->exception_info = &default_exception_support_info;
       return;
     }
 
   /* Try our fallback exception suport info.  */
   if (ada_has_this_exception_support (&exception_support_info_fallback))
     {
-      exception_info = &exception_support_info_fallback;
+      data->exception_info = &exception_support_info_fallback;
       return;
     }
 
@@ -10749,19 +10751,6 @@ ada_exception_support_info_sniffer (void)
      supporting this feature.  */
 
   error (_("Cannot insert catchpoints in this configuration."));
-}
-
-/* An observer of "executable_changed" events.
-   Its role is to clear certain cached values that need to be recomputed
-   each time a new executable is loaded by GDB.  */
-
-static void
-ada_executable_changed_observer (void)
-{
-  /* If the executable changed, then it is possible that the Ada runtime
-     is different.  So we need to invalidate the exception support info
-     cache.  */
-  exception_info = NULL;
 }
 
 /* True iff FRAME is very likely to be that of a function that is
@@ -10863,6 +10852,7 @@ ada_unhandled_exception_name_addr_from_raise (void)
 {
   int frame_level;
   struct frame_info *fi;
+  struct ada_inferior_data *data = get_ada_inferior_data (current_inferior ());
 
   /* To determine the name of this exception, we need to select
      the frame corresponding to RAISE_SYM_NAME.  This frame is
@@ -10880,7 +10870,7 @@ ada_unhandled_exception_name_addr_from_raise (void)
 
       find_frame_funname (fi, &func_name, &func_lang, NULL);
       if (func_name != NULL
-          && strcmp (func_name, exception_info->catch_exception_sym) == 0)
+          && strcmp (func_name, data->exception_info->catch_exception_sym) == 0)
         break; /* We found the frame we were looking for...  */
       fi = get_prev_frame (fi);
     }
@@ -10902,6 +10892,8 @@ static CORE_ADDR
 ada_exception_name_addr_1 (enum exception_catchpoint_kind ex,
                            struct breakpoint *b)
 {
+  struct ada_inferior_data *data = get_ada_inferior_data (current_inferior ());
+
   switch (ex)
     {
       case ex_catch_exception:
@@ -10909,7 +10901,7 @@ ada_exception_name_addr_1 (enum exception_catchpoint_kind ex,
         break;
 
       case ex_catch_exception_unhandled:
-        return exception_info->unhandled_exception_name_addr ();
+        return data->exception_info->unhandled_exception_name_addr ();
         break;
       
       case ex_catch_assert:
@@ -11608,18 +11600,20 @@ catch_ada_exception_command_split (char *args,
 static const char *
 ada_exception_sym_name (enum exception_catchpoint_kind ex)
 {
-  gdb_assert (exception_info != NULL);
+  struct ada_inferior_data *data = get_ada_inferior_data (current_inferior ());
+
+  gdb_assert (data->exception_info != NULL);
 
   switch (ex)
     {
       case ex_catch_exception:
-        return (exception_info->catch_exception_sym);
+        return (data->exception_info->catch_exception_sym);
         break;
       case ex_catch_exception_unhandled:
-        return (exception_info->catch_exception_unhandled_sym);
+        return (data->exception_info->catch_exception_unhandled_sym);
         break;
       case ex_catch_assert:
-        return (exception_info->catch_assert_sym);
+        return (data->exception_info->catch_assert_sym);
         break;
       default:
         internal_error (__FILE__, __LINE__,
@@ -12474,8 +12468,6 @@ With an argument, catch only exceptions with the given name."),
   decoded_names_store = htab_create_alloc
     (256, htab_hash_string, (int (*)(const void *, const void *)) streq,
      NULL, xcalloc, xfree);
-
-  observer_attach_executable_changed (ada_executable_changed_observer);
 
   /* Setup per-inferior data.  */
   observer_attach_inferior_exit (ada_inferior_exit);

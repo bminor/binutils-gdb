@@ -1,5 +1,18 @@
 2011-12-11  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (struct ada_inferior_data) [exception_info]:
+	New field.
+	(exception_info): Delete.
+	(ada_exception_support_info_sniffer): Get exception_support_info
+	data from our per-inferior data.  Adjust code accordingly.
+	(ada_unhandled_exception_name_addr_from_raise): Likewise.
+	(ada_exception_name_addr_1, ada_exception_sym_name): Ditto.
+	(ada_executable_changed_observer): Delete.
+	(_initialize_ada_language): Remove call to
+	observer_attach_executable_changed.
+
+2011-12-11  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c (ada_has_this_exception_support): Raise an error
 	if we could find the Ada exception hook in the Ada runtime,
 	but no debugging info for that hook.
