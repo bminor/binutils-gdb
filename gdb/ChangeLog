@@ -1,5 +1,10 @@
 2011-12-10  Andrey Smirnov  <andrew.smirnov@gmail.com>
 
+	* amd64-tdep.c (amd64_get_unused_input_int_reg): Rename `index' to
+	`idx'(-Wshadow).
+
+2011-12-10  Andrey Smirnov  <andrew.smirnov@gmail.com>
+
 	* amd64-linux-tdep.c (amd64_canonicalize_syscall): Rename
 	`syscall' to `syscall_number'(-Wshadow).
 

@@ -1081,9 +1081,9 @@ amd64_get_unused_input_int_reg (const struct amd64_insn *details)
       if (have_sib)
 	{
 	  int base = SIB_BASE_FIELD (details->raw_insn[details->modrm_offset + 1]);
-	  int index = SIB_INDEX_FIELD (details->raw_insn[details->modrm_offset + 1]);
+	  int idx = SIB_INDEX_FIELD (details->raw_insn[details->modrm_offset + 1]);
 	  used_regs_mask |= 1 << base;
-	  used_regs_mask |= 1 << index;
+	  used_regs_mask |= 1 << idx;
 	}
       else
 	{
