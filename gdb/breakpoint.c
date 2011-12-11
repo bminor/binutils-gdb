@@ -1974,7 +1974,7 @@ insert_breakpoint_locations (void)
 {
   struct breakpoint *bpt;
   struct bp_location *bl, **blp_tmp;
-  int error = 0;
+  int error_flag = 0;
   int val = 0;
   int disabled_breaks = 0;
   int hw_breakpoint_error = 0;
@@ -2013,7 +2013,7 @@ insert_breakpoint_locations (void)
       val = insert_bp_location (bl, tmp_error_stream, &disabled_breaks,
 				    &hw_breakpoint_error);
       if (val)
-	error = val;
+	error_flag = val;
     }
 
   /* If we failed to insert all locations of a watchpoint, remove
@@ -2048,11 +2048,11 @@ insert_breakpoint_locations (void)
 	  fprintf_unfiltered (tmp_error_stream,
 			      "Could not insert hardware watchpoint %d.\n", 
 			      bpt->number);
-	  error = -1;
+	  error_flag = -1;
 	}
     }
 
-  if (error)
+  if (error_flag)
     {
       /* If a hardware breakpoint or watchpoint was inserted, add a
          message about possibly exhausted resources.  */

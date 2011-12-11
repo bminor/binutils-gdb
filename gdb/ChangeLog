@@ -1,5 +1,10 @@
 2011-12-10  Andrey Smirnov  <andrew.smirnov@gmail.com>
 
+	* breakpoint.c (insert_breakpoint_locations): Rename `error' to
+	`error_flag'(-Wshadow).
+
+2011-12-10  Andrey Smirnov  <andrew.smirnov@gmail.com>
+
 	* bfd-target.c (target_bfd_reopen): Rename `bfd' to
 	`abfd'(-Wshadow).
 
