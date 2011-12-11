@@ -436,8 +436,8 @@ struct mips_elf_link_hash_table
      entry is set to the address of __rld_obj_head as in IRIX5.  */
   bfd_boolean use_rld_obj_head;
 
-  /* This is the value of the __rld_map or __rld_obj_head symbol.  */
-  bfd_vma rld_value;
+  /* The  __rld_map or __rld_obj_head symbol. */
+  struct elf_link_hash_entry *rld_symbol;
 
   /* This is set if we see any mips16 stub sections.  */
   bfd_boolean mips16_stubs_seen;
@@ -766,6 +766,10 @@ static bfd *reldyn_sorting_bfd;
 
 /* The size of a GOT entry.  */
 #define MIPS_ELF_GOT_SIZE(abfd) \
+  (get_elf_backend_data (abfd)->s->arch_size / 8)
+
+/* The size of the .rld_map section. */
+#define MIPS_ELF_RLD_MAP_SIZE(abfd) \
   (get_elf_backend_data (abfd)->s->arch_size / 8)
 
 /* The size of a symbol-table entry.  */
@@ -7082,6 +7086,7 @@ _bfd_mips_elf_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
 	return FALSE;
 
       mips_elf_hash_table (info)->use_rld_obj_head = TRUE;
+      mips_elf_hash_table (info)->rld_symbol = h;
     }
 
   /* If this is a mips16 text symbol, add 1 to the value to make it
@@ -7267,6 +7272,7 @@ _bfd_mips_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 
 	  if (! bfd_elf_link_record_dynamic_symbol (info, h))
 	    return FALSE;
+	  mips_elf_hash_table (info)->rld_symbol = h;
 	}
     }
 
@@ -9028,7 +9034,7 @@ _bfd_mips_elf_size_dynamic_sections (bfd *output_bfd,
 	{
 	  /* We add a room for __rld_map.  It will be filled in by the
 	     rtld to contain a pointer to the _r_debug structure.  */
-	  s->size += 4;
+	  s->size += MIPS_ELF_RLD_MAP_SIZE (output_bfd);
 	}
       else if (SGI_COMPAT (output_bfd)
 	       && CONST_STRNEQ (name, ".compact_rel"))
@@ -10031,31 +10037,6 @@ _bfd_mips_elf_finish_dynamic_symbol (bfd *output_bfd,
   if (IRIX_COMPAT (output_bfd) == ict_irix6)
     mips_elf_irix6_finish_dynamic_symbol (output_bfd, name, sym);
 
-  if (! info->shared)
-    {
-      if (! mips_elf_hash_table (info)->use_rld_obj_head
-	  && (strcmp (name, "__rld_map") == 0
-	      || strcmp (name, "__RLD_MAP") == 0))
-	{
-	  asection *s = bfd_get_section_by_name (dynobj, ".rld_map");
-	  BFD_ASSERT (s != NULL);
-	  sym->st_value = s->output_section->vma + s->output_offset;
-	  bfd_put_32 (output_bfd, 0, s->contents);
-	  if (mips_elf_hash_table (info)->rld_value == 0)
-	    mips_elf_hash_table (info)->rld_value = sym->st_value;
-	}
-      else if (mips_elf_hash_table (info)->use_rld_obj_head
-	       && strcmp (name, "__rld_obj_head") == 0)
-	{
-	  /* IRIX6 does not use a .rld_map section.  */
-	  if (IRIX_COMPAT (output_bfd) == ict_irix5
-              || IRIX_COMPAT (output_bfd) == ict_none)
-	    BFD_ASSERT (bfd_get_section_by_name (dynobj, ".rld_map")
-			!= NULL);
-	  mips_elf_hash_table (info)->rld_value = sym->st_value;
-	}
-    }
-
   /* Keep dynamic MIPS16 symbols odd.  This allows the dynamic linker to
      treat MIPS16 symbols like any other.  */
   if (ELF_ST_IS_MIPS16 (sym->st_other))
@@ -10518,7 +10499,19 @@ _bfd_mips_elf_finish_dynamic_sections (bfd *output_bfd,
 	      break;
 
 	    case DT_MIPS_RLD_MAP:
-	      dyn.d_un.d_ptr = mips_elf_hash_table (info)->rld_value;
+	      {
+		struct elf_link_hash_entry *h;
+		h = mips_elf_hash_table (info)->rld_symbol;
+		if (!h)
+		  {
+		    dyn_to_skip = MIPS_ELF_DYN_SIZE (dynobj);
+		    swap_out_p = FALSE;
+		    break;
+		  }
+		s = h->root.u.def.section;
+		dyn.d_un.d_ptr = (s->output_section->vma + s->output_offset
+				  + h->root.u.def.value);
+	      }
 	      break;
 
 	    case DT_MIPS_OPTIONS:
@@ -12801,7 +12794,7 @@ _bfd_mips_elf_link_hash_table_create (bfd *abfd)
   ret->procedure_count = 0;
   ret->compact_rel_size = 0;
   ret->use_rld_obj_head = FALSE;
-  ret->rld_value = 0;
+  ret->rld_symbol = NULL;
   ret->mips16_stubs_seen = FALSE;
   ret->use_plts_and_copy_relocs = FALSE;
   ret->is_vxworks = FALSE;
