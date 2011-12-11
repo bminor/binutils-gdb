@@ -10634,8 +10634,8 @@ update_global_location_list (int should_insert)
     {
       /* ALL_BP_LOCATIONS bp_location has LOC->OWNER always
 	 non-NULL.  */
-      struct breakpoint *b = loc->owner;
       struct bp_location **loc_first_p;
+      b = loc->owner;
 
       if (!should_be_inserted (loc)
 	  || !breakpoint_address_is_meaningful (b)

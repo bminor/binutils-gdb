@@ -1,5 +1,10 @@
 2011-12-10  Andrey Smirnov  <andrew.smirnov@gmail.com>
 
+	* breakpoint.c (update_global_location_list): Remove nested
+	definition of `b'(-Wshadow).
+
+2011-12-10  Andrey Smirnov  <andrew.smirnov@gmail.com>
+
 	* breakpoint.c (insert_breakpoint_locations): Rename `error' to
 	`error_flag'(-Wshadow).
 
