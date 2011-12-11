@@ -1,3 +1,8 @@
+2011-12-10 David Daney <david.daney@cavium.com>
+
+	* ld-mips-elf/pic-and-nonpic-6-n64.dd: Use correct encoding for
+	64-bit MOVE instruction.
+
 2011-12-09 David Daney <david.daney@cavium.com>
 
 	* ld-mips-elf/tls-multi-got-1.r: Add "0x" to match value for
