@@ -1,3 +1,7 @@
+2011-12-11  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.trace/status-stop.exp: Skip it if target doesn't support trace.
+
 2011-12-11  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/catch_ex.exp, gdb.ada/mi_catch_ex.exp: Adjust

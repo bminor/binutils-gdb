@@ -27,6 +27,16 @@ if [prepare_for_testing $expfile $executable $srcfile \
     return -1
 }
 
+if ![runto_main] {
+    fail "Can't run to main to check for trace support"
+    return -1
+}
+
+if ![gdb_target_supports_trace] {
+    unsupported "target does not support trace"
+    return -1; 
+}
+
 # Verify that the sequence of commands "tstart tstop tstart" works well.
 
 proc test_tstart_tstop_tstart { } {
