@@ -1,3 +1,8 @@
+2011-12-12  Iain Sandoe  <iains@gcc.gnu.org>
+
+	* mach-o.c (bfd_mach_o_read_section_32): Null-terminate sectname.
+	(bfd_mach_o_read_section_64): Likewise.
+
 2011-12-11  John Davis Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	PR binutils/13476

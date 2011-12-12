@@ -1698,7 +1698,7 @@ bfd_mach_o_read_section_32 (bfd *abfd,
   memcpy (section->segname, raw.segname, sizeof (raw.segname));
   section->segname[BFD_MACH_O_SEGNAME_SIZE] = 0;
   memcpy (section->sectname, raw.sectname, sizeof (raw.sectname));
-  section->segname[BFD_MACH_O_SECTNAME_SIZE] = 0;
+  section->sectname[BFD_MACH_O_SECTNAME_SIZE] = 0;
   section->addr = bfd_h_get_32 (abfd, raw.addr);
   section->size = bfd_h_get_32 (abfd, raw.size);
   section->offset = bfd_h_get_32 (abfd, raw.offset);
@@ -1737,7 +1737,7 @@ bfd_mach_o_read_section_64 (bfd *abfd,
   memcpy (section->segname, raw.segname, sizeof (raw.segname));
   section->segname[BFD_MACH_O_SEGNAME_SIZE] = 0;
   memcpy (section->sectname, raw.sectname, sizeof (raw.sectname));
-  section->segname[BFD_MACH_O_SECTNAME_SIZE] = 0;
+  section->sectname[BFD_MACH_O_SECTNAME_SIZE] = 0;
   section->addr = bfd_h_get_64 (abfd, raw.addr);
   section->size = bfd_h_get_64 (abfd, raw.size);
   section->offset = bfd_h_get_32 (abfd, raw.offset);
