@@ -5531,10 +5531,11 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 	       12: addu    $v0,$v1
 	       14: move    $gp,$v0
 	     So the offsets of hi and lo relocs are the same, but the
-	     $pc is four higher than $t9 would be, so reduce
-	     both reloc addends by 4. */
+	     base $pc is that used by the ADDIUPC instruction at $t9 + 4.
+	     ADDIUPC clears the low two bits of the instruction address,
+	     so the base is ($t9 + 4) & ~3.  */
 	  if (r_type == R_MIPS16_HI16)
-	    value = mips_elf_high (addend + gp - p - 4);
+	    value = mips_elf_high (addend + gp - ((p + 4) & ~(bfd_vma) 0x3));
 	  /* The microMIPS .cpload sequence uses the same assembly
 	     instructions as the traditional psABI version, but the
 	     incoming $t9 has the low bit set.  */
@@ -5557,7 +5558,7 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 	  /* See the comment for R_MIPS16_HI16 above for the reason
 	     for this conditional.  */
 	  if (r_type == R_MIPS16_LO16)
-	    value = addend + gp - p;
+	    value = addend + gp - (p & ~(bfd_vma) 0x3);
 	  else if (r_type == R_MICROMIPS_LO16
 		   || r_type == R_MICROMIPS_HI0_LO16)
 	    value = addend + gp - p + 3;
