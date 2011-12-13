@@ -3,6 +3,12 @@
 	GDB 7.4 branch created (branch timestamp: 2011-12-13 13:00 UTC)
 	* version.in: Bump version to 7.4.50.20111213-cvs.
 
+2011-12-13  Joel Brobecker  <brobecker@adacore.com>
+
+	* NEWS: Create a new section for the next release branch.
+	Rename the section of the current branch, now that it has
+	been cut.
+
 2011-12-11  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (ada_exception_support_info_sniffer): Improve

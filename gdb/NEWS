@@ -3,6 +3,8 @@
 
 *** Changes since GDB 7.3.1
 
+*** Changes in GDB 7.4
+
 * GDB now handles ambiguous linespecs more consistently; the existing
   FILE:LINE support has been expanded to other types of linespecs.  A
   breakpoint will now be set on all matching locations in all
