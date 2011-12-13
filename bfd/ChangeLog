@@ -1,3 +1,23 @@
+2011-12-13  Shinichiro Hamaji  <shinichiro.hamaji@gmail.com>
+
+	* dwarf2.c (bfd_dwarf2_cleanup_debug_info): Accept stash as an
+	argument like other functions to support formats other than ELF.
+	* elf-bfd.h (bfd_dwarf2_cleanup_debug_info): Move to bfd-in.h.
+	* elf.c (_bfd_elf_close_and_cleanup): Pass dwarf2_find_line_info
+	in tdata as a parameter.
+	* libbfd-in.h (bfd_dwarf2_cleanup_debug_info): Move from
+	elf-bfd.h.
+	* libbfd.h (bfd_dwarf2_cleanup_debug_info): Regenerate.
+	* mach-o-target.c (bfd_mach_o_close_and_cleanup): Remove the
+	fallback macro.
+	(bfd_mach_o_find_nearest_line): Likewise.
+	* mach-o.c (bfd_mach_o_find_nearest_line): Add the definition
+	which calls _bfd_dwarf2_find_nearest_line.
+	(bfd_mach_o_close_and_cleanup): Likewise.
+	* mach-o.h (mach_o_data_struct): Add dwarf2_find_line_info.
+	(bfd_mach_o_find_nearest_line): Add declaration.
+	(bfd_mach_o_close_and_cleanup): Add declaration.
+
 2011-12-13  Tristan Gingold  <gingold@adacore.com>
 
 	* mach-o.c (bfd_mach_o_read_symtab_symbols): Make global.  Remove

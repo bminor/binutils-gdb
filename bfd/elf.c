@@ -7698,11 +7698,12 @@ _bfd_elf_validate_reloc (bfd *abfd, arelent *areloc)
 bfd_boolean
 _bfd_elf_close_and_cleanup (bfd *abfd)
 {
-  if (bfd_get_format (abfd) == bfd_object)
+  struct elf_obj_tdata *tdata = elf_tdata (abfd);
+  if (bfd_get_format (abfd) == bfd_object && tdata != NULL)
     {
-      if (elf_tdata (abfd) != NULL && elf_shstrtab (abfd) != NULL)
+      if (elf_shstrtab (abfd) != NULL)
 	_bfd_elf_strtab_free (elf_shstrtab (abfd));
-      _bfd_dwarf2_cleanup_debug_info (abfd);
+      _bfd_dwarf2_cleanup_debug_info (abfd, &tdata->dwarf2_find_line_info);
     }
 
   return _bfd_generic_close_and_cleanup (abfd);

@@ -3527,17 +3527,12 @@ _bfd_dwarf2_find_inliner_info (bfd *abfd ATTRIBUTE_UNUSED,
 }
 
 void
-_bfd_dwarf2_cleanup_debug_info (bfd *abfd)
+_bfd_dwarf2_cleanup_debug_info (bfd *abfd, void **pinfo)
 {
+  struct dwarf2_debug *stash = (struct dwarf2_debug *) *pinfo;;
   struct comp_unit *each;
-  struct dwarf2_debug *stash;
 
-  if (abfd == NULL || elf_tdata (abfd) == NULL)
-    return;
-
-  stash = (struct dwarf2_debug *) elf_tdata (abfd)->dwarf2_find_line_info;
-
-  if (stash == NULL)
+  if (abfd == NULL || stash == NULL)
     return;
 
   for (each = stash->all_comp_units; each; each = each->next_unit)

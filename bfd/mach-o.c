@@ -3480,6 +3480,38 @@ bfd_mach_o_core_file_failing_signal (bfd *abfd ATTRIBUTE_UNUSED)
   return 0;
 }
 
+bfd_boolean
+bfd_mach_o_find_nearest_line (bfd *abfd,
+			      asection *section,
+			      asymbol **symbols,
+			      bfd_vma offset,
+			      const char **filename_ptr,
+			      const char **functionname_ptr,
+			      unsigned int *line_ptr)
+{
+  bfd_mach_o_data_struct *mdata = bfd_mach_o_get_data (abfd);
+  /* TODO: Handle executables and dylibs by using dSYMs. */
+  if (mdata->header.filetype != BFD_MACH_O_MH_OBJECT)
+    return FALSE;
+  if (_bfd_dwarf2_find_nearest_line (abfd, dwarf_debug_sections,
+				     section, symbols, offset,
+				     filename_ptr, functionname_ptr,
+				     line_ptr, 0,
+				     &mdata->dwarf2_find_line_info))
+    return TRUE;
+  return FALSE;
+}
+
+bfd_boolean
+bfd_mach_o_close_and_cleanup (bfd *abfd)
+{
+  bfd_mach_o_data_struct *mdata = bfd_mach_o_get_data (abfd);
+  if (bfd_get_format (abfd) == bfd_object && mdata != NULL)
+    _bfd_dwarf2_cleanup_debug_info (abfd, &mdata->dwarf2_find_line_info);
+
+  return _bfd_generic_close_and_cleanup (abfd);
+}
+
 #define bfd_mach_o_bfd_reloc_type_lookup _bfd_norelocs_bfd_reloc_type_lookup 
 #define bfd_mach_o_bfd_reloc_name_lookup _bfd_norelocs_bfd_reloc_name_lookup
 

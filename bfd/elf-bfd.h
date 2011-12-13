@@ -2132,9 +2132,6 @@ extern unsigned int _bfd_elf_common_section_index
 extern asection *_bfd_elf_common_section
   (asection *);
 
-extern void _bfd_dwarf2_cleanup_debug_info
-  (bfd *);
-
 extern bfd_vma _bfd_elf_default_got_elt_size
 (bfd *, struct bfd_link_info *, struct elf_link_hash_entry *, bfd *,
  unsigned long);
