@@ -11188,11 +11188,14 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	goto error_return;
 
       /* Check for DT_TEXTREL (late, in case the backend removes it).  */
-      if (((info->warn_shared_textrel && info->shared)
-	   || info->error_textrel)
-	  && (o = bfd_get_section_by_name (dynobj, ".dynamic")) != NULL)
+      if ((info->warn_shared_textrel && info->shared)
+	  || info->error_textrel)
 	{
 	  bfd_byte *dyncon, *dynconend;
+
+	  /* Fix up .dynamic entries.  */
+	  o = bfd_get_section_by_name (dynobj, ".dynamic");
+	  BFD_ASSERT (o != NULL);
 
 	  dyncon = o->contents;
 	  dynconend = o->contents + o->size;
@@ -11725,8 +11728,7 @@ elf_gc_sweep_symbol (struct elf_link_hash_entry *h, void *data)
   if (!h->mark
       && (((h->root.type == bfd_link_hash_defined
 	    || h->root.type == bfd_link_hash_defweak)
-	   && !(h->def_regular
-		&& h->root.u.def.section->gc_mark))
+	   && !h->root.u.def.section->gc_mark)
 	  || h->root.type == bfd_link_hash_undefined
 	  || h->root.type == bfd_link_hash_undefweak))
     {
