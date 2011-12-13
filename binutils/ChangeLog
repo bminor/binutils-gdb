@@ -1,3 +1,12 @@
+2011-12-13  Tristan Gingold  <gingold@adacore.com>
+
+	* od-macho.c: New file.
+	* objdump.h (objdump_private_desc_mach_o): Add.
+	* configure.in: Add Mach-O od_vectors.
+	* Makefile.am (CFILES): Add od-macho.c
+	* configure: Regenerate.
+	* Makefile.in: Regenerate.
+
 2011-12-06 David Daney <david.daney@cavium.com>
 
 	* readelf.c (dynamic_section_mips_val): Factor out trailing '\n'

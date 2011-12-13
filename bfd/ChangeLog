@@ -1,3 +1,32 @@
+2011-12-13  Tristan Gingold  <gingold@adacore.com>
+
+	* mach-o.c (bfd_mach_o_read_symtab_symbols): Make global.  Remove
+	prototype.
+	(bfd_mach_o_section_get_entry_size): Make global.
+	(bfd_mach_o_section_get_nbr_indirect): Likewise.
+	(bfd_mach_o_read_symtab_strtab): Likewise.
+	(struct bfd_mach_o_xlat_name): Move to mach-o.h
+	(bfd_mach_o_print_flags): Move to binutils/od-macho.c
+	(bfd_mach_o_get_name_of_null, bfd_mach_o_get_name): Likewise.
+	(bfd_mach_o_cpu_name, bfd_mach_o_filetype_name): Likewise.
+	(bfd_mach_o_header_flags_name): Likewise.
+	(bfd_mach_o_load_command_name): Likewise.
+	(bfd_mach_o_print_private_header): Likewise.
+	(bfd_mach_o_print_section_map, bfd_mach_o_print_section): Likwise.
+	(bfd_mach_o_print_segment, bfd_mach_o_print_dysymtab): Likewise.
+	(bfd_mach_o_print_dyld_info): Likewise.
+	(bfd_mach_o_print_private_bfd_data): Remove.
+	(bfd_mach_o_type_name): Make global.
+	(bfd_mach_o_section_attribute_name): Likewise.
+	* mach-o.h (bfd_mach_o_xlat_name): Added.
+	(bfd_mach_o_section_get_nbr_indirect)
+	(bfd_mach_o_section_get_entry_size)
+	(bfd_mach_o_read_symtab_symbols)
+	(bfd_mach_o_read_symtab_strtab)
+	(bfd_mach_o_section_attribute_name)
+	(bfd_mach_o_section_type_name): Likewise.
+	* mach-o-target.c (bfd_mach_o_bfd_print_private_bfd_data): Define.
+
 2011-12-13  Chung-Lin Tang  <cltang@codesourcery.com>
 
 	* elfxx-mips.c (mips_elf_calculate_relocation): Correct

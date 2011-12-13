@@ -48,3 +48,6 @@ struct objdump_private_desc
 
 /* XCOFF specific target.  */
 extern const struct objdump_private_desc objdump_private_desc_xcoff;
+
+/* Mach-O specific target.  */
+extern const struct objdump_private_desc objdump_private_desc_mach_o;

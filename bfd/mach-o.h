@@ -519,6 +519,13 @@ typedef struct mach_o_data_struct
 }
 bfd_mach_o_data_struct;
 
+typedef struct bfd_mach_o_xlat_name
+{
+  const char *name;
+  unsigned long val;
+}
+bfd_mach_o_xlat_name;
+
 /* Target specific routines.  */
 typedef struct bfd_mach_o_backend_data
 {
@@ -565,7 +572,6 @@ long bfd_mach_o_canonicalize_dynamic_reloc (bfd *, arelent **, asymbol **);
 asymbol *bfd_mach_o_make_empty_symbol (bfd *);
 void bfd_mach_o_get_symbol_info (bfd *, asymbol *, symbol_info *);
 void bfd_mach_o_print_symbol (bfd *, PTR, asymbol *, bfd_print_symbol_type);
-bfd_boolean bfd_mach_o_bfd_print_private_bfd_data (bfd *, PTR);
 int bfd_mach_o_sizeof_headers (bfd *, struct bfd_link_info *);
 unsigned long bfd_mach_o_stack_addr (enum bfd_mach_o_cpu_type);
 int bfd_mach_o_core_fetch_environment (bfd *, unsigned char **, unsigned int *);
@@ -584,6 +590,14 @@ unsigned int bfd_mach_o_get_section_type_from_name (const char *);
 unsigned int bfd_mach_o_get_section_attribute_from_name (const char *);
 void bfd_mach_o_normalize_section_name (const char *, const char *,
                                         const char **, flagword *);
+
+unsigned int bfd_mach_o_section_get_nbr_indirect (bfd *, bfd_mach_o_section *);
+unsigned int bfd_mach_o_section_get_entry_size (bfd *, bfd_mach_o_section *);
+bfd_boolean bfd_mach_o_read_symtab_symbols (bfd *);
+bfd_boolean bfd_mach_o_read_symtab_strtab (bfd *abfd);
+
+extern const bfd_mach_o_xlat_name bfd_mach_o_section_attribute_name[];
+extern const bfd_mach_o_xlat_name bfd_mach_o_section_type_name[];
 
 extern const bfd_target mach_o_fat_vec;
 
