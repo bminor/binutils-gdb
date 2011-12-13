@@ -78,10 +78,6 @@ int main ()
   /* For each member, set that member to 1, allow gdb to verify that the
      member (and only that member) is 1, and then reset it back to 0. */
 
-#ifdef usestubs
-  set_debug_traps();
-  breakpoint();
-#endif
   flags.uc = 1;
   break1 ();
   flags.uc = 0;

@@ -319,7 +319,7 @@ proc watchpoint_command_test {} {
 	    # scope.
 	    fail $test
 	}
- 	-re "Continuing.*\[Ww\]atchpoint $wp_id deleted because the program has left the block in.*which its expression is valid.*run.c:(57|82).*$gdb_prompt $" {
+	-re "Continuing.*\[Ww\]atchpoint $wp_id deleted because the program has left the block in.*which its expression is valid.*run.c:(53|77).*$gdb_prompt $" {
 	    pass $test
 	}
    }

@@ -182,19 +182,9 @@ void test_calls()
         TEST(pEe->D::vg(), 102);
 	printf("Did %d tests, of which %d failed.\n", all_count, failed_count);
 }
-#ifdef usestubs
-extern "C" {
-  void set_debug_traps();
-  void breakpoint();
-};
-#endif
 
 int main()
 {
-#ifdef usestubs
-   set_debug_traps();
-   breakpoint();
-#endif
     init();
 
     e.w = 7;

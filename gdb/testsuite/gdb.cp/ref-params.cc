@@ -61,11 +61,6 @@ int main(void)
   Child Q(42);
   Child& QR = Q;
 
-  #ifdef usestubs
-     set_debug_traps();
-     breakpoint();
-  #endif
-
   /* Set breakpoint marker1 here.  */
 
   f2(Q);

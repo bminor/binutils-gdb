@@ -31,9 +31,6 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
     untested display.exp
     return -1
 }
-if [target_info exists gdb_stub] {
-    gdb_step_for_stub;
-}
 
 # Preserve the old timeout, and set a new one that should be
 # sufficient to avoid timing out during this test.

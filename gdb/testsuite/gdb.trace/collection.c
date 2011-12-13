@@ -225,11 +225,6 @@ main (argc, argv, envp)
   test_struct mystruct;
   int         myarray[4];
 
-#ifdef usestubs
-  set_debug_traps ();
-  breakpoint ();
-#endif
-
   begin ();
   /* Assign collectable values to global variables. */
   l0  = s0  = c0  = 0;     l1  = s1  = c1  = 1;

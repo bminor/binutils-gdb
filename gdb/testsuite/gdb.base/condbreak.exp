@@ -22,8 +22,6 @@ if $tracelevel then {
 	strace $tracelevel
 	}
 
-global usestubs
-
 #
 # test running programs
 #
@@ -57,10 +55,6 @@ gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 
-
-if [target_info exists gdb_stub] {
-    gdb_step_for_stub;
-}
 
 set bp_location1  [gdb_get_line_number "set breakpoint 1 here"]
 set bp_location6  [gdb_get_line_number "set breakpoint 6 here"]

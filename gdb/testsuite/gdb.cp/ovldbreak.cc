@@ -89,10 +89,6 @@ int main ()
     foo_instance1.overloadargs(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11);
    
 
-    #ifdef usestubs
-       set_debug_traps();
-       breakpoint();
-    #endif
 
 
     marker1();

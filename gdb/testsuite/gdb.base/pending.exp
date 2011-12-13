@@ -85,9 +85,6 @@ gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 gdb_load_shlibs $lib_sl
 
-if [target_info exists gdb_stub] {
-    gdb_step_for_stub;
-}
 #
 # Test setting, querying, and modifying pending breakpoints
 #

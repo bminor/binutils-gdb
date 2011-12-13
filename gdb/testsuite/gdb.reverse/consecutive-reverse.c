@@ -29,10 +29,6 @@ int foo ()
 
 main()
 {
-#ifdef usestubs
-    set_debug_traps ();
-    breakpoint ();
-#endif
   foo ();
 } /* end of main */
 

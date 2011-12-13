@@ -268,13 +268,6 @@ proc gdb_run_cmd {args} {
 		}
 	    }
 	}
-	if [target_info exists gdb_stub] {
-	    gdb_expect 60 {
-		-re "$gdb_prompt $" {
-		    send_gdb "continue\n"
-		}
-	    }
-	}
 	return
     }
 
@@ -456,26 +449,12 @@ proc runto { function args } {
 }
 
 # Ask gdb to run until we hit a breakpoint at main.
-# The case where the target uses stubs has to be handled
-# specially--if it uses stubs, assuming we hit
-# breakpoint() and just step out of the function.
 #
 # N.B. This function deletes all existing breakpoints.
 # If you don't want that, use gdb_start_cmd.
 
 proc runto_main { } {
-    global gdb_prompt
-    global decimal
-
-    if ![target_info exists gdb_stub] {
-	return [runto main]
-    }			
-
-    delete_breakpoints
-
-    gdb_step_for_stub;
-
-    return 1
+    return [runto main]
 }
 
 ### Continue, and expect to hit a breakpoint.
@@ -2294,14 +2273,8 @@ proc gdb_compile {source dest type options} {
     }
     set options $new_options
 
-    if [target_info exists gdb_stub] {
-	set options2 { "additional_flags=-Dusestubs" }
-	lappend options "libs=[target_info gdb_stub]";
-	set options [concat $options2 $options]
-    }
     if [target_info exists is_vxworks] {
 	set options2 { "additional_flags=-Dvxworks" }
-	lappend options "libs=[target_info gdb_stub]";
 	set options [concat $options2 $options]
     }
     if [info exists GDB_TESTCASE_OPTIONS] {
@@ -3166,91 +3139,6 @@ proc setup_kfail_for_target { PR target } {
     }
 }
 
-# Test programs for embedded (often "bare board") systems sometimes use a
-# "stub" either embedded in the test program itself or in the boot rom.
-# The job of the stub is to implement the remote protocol to communicate
-# with gdb and control the inferior.  To initiate the remote protocol
-# session with gdb the stub needs to be given control by the inferior.
-# They do this by calling a function that typically triggers a trap
-# from main that transfers control to the stub.
-# The purpose of this function, gdb_step_for_stub, is to step out of
-# that function ("breakpoint" in the example below) and back into main.
-#
-# Example:
-#
-# int
-# main ()
-# {
-# #ifdef usestubs
-#  set_debug_traps (); /* install trap handlers for stub */
-#  breakpoint (); /* trigger a trap to give the stub control */
-# #endif
-#  /* test program begins here */
-# }
-#
-# Note that one consequence of this design is that a breakpoint on "main"
-# does not Just Work (because if the target could stop there you still have
-# to step past the calls to set_debug_traps,breakpoint).
-
-proc gdb_step_for_stub { } {
-    global gdb_prompt;
-
-    if ![target_info exists gdb,use_breakpoint_for_stub] {
-	if [target_info exists gdb_stub_step_command] {
-	    set command [target_info gdb_stub_step_command];
-	} else {
-	    set command "step";
-	}
-	send_gdb "${command}\n";
-	set tries 0;
-	gdb_expect 60 {
-	    -re "(main.* at |.*in .*start).*$gdb_prompt" {
-		return;
-	    }
-	    -re ".*$gdb_prompt" {
-		incr tries;
-		if { $tries == 5 } {
-		    fail "stepping out of breakpoint function";
-		    return;
-		}
-		send_gdb "${command}\n";
-		exp_continue;
-	    }
-	    default {
-		fail "stepping out of breakpoint function";
-		return;
-	    }
-	}
-    }
-    send_gdb "where\n";
-    gdb_expect {
-	-re "main\[^\r\n\]*at \(\[^:]+\):\(\[0-9\]+\)" {
-	    set file $expect_out(1,string);
-	    set linenum [expr $expect_out(2,string) + 1];
-	    set breakplace "${file}:${linenum}";
-	}
-	default {}
-    }
-    send_gdb "break ${breakplace}\n";
-    gdb_expect 60 {
-	-re "Breakpoint (\[0-9\]+) at.*$gdb_prompt" {
-	    set breakpoint $expect_out(1,string);
-	}
-	-re "Breakpoint (\[0-9\]+): file.*$gdb_prompt" {
-	    set breakpoint $expect_out(1,string);
-	}
-	default {}
-    }
-    send_gdb "continue\n";
-    gdb_expect 60 {
-	-re "Breakpoint ${breakpoint},.*$gdb_prompt" {
-	    gdb_test "delete $breakpoint" ".*" "";
-	    return;
-	}
-	default {}
-    }
-}
-
 # gdb_get_line_number TEXT [FILE]
 #
 # Search the source file FILE, and return the line number of the
@@ -3709,10 +3597,6 @@ proc clean_restart { executable } {
     gdb_start
     gdb_reinitialize_dir $srcdir/$subdir
     gdb_load ${binfile}
-
-    if [target_info exists gdb_stub] {
-        gdb_step_for_stub;
-    }    
 }
 
 # Prepares for testing, by calling build_executable, and then clean_restart.

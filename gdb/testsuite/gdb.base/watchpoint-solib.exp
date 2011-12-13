@@ -58,10 +58,6 @@ gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 gdb_load_shlibs $lib_sl
 
-if [target_info exists gdb_stub] {
-    gdb_step_for_stub;
-}
-
 runto_main
 
 # Disable hardware watchpoints if necessary.

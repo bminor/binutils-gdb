@@ -49,9 +49,6 @@ if {$result != 0} {
 }
 
 gdb_load ${binfile}
-if [target_info exists gdb_stub] {
-    gdb_step_for_stub;
-}    
 
 if ![runto "*${break_at}"] {
     return -1

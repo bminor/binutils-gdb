@@ -42,10 +42,6 @@ stop_here ()
 int
 main ()
 {
-#ifdef usestubs
-  set_debug_traps ();
-  breakpoint ();
-#endif
 
 #ifdef SIG_SETMASK
   /* Ensure all the signals aren't blocked.

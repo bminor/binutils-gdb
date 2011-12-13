@@ -248,10 +248,6 @@ enum cars {chevy, ford, porsche} clunker;
 
 int main ()
 {
-#ifdef usestubs
-  set_debug_traps();
-  breakpoint();
-#endif
   /* Some linkers (e.g. on AIX) remove unreferenced variables,
      so make sure to reference them. */
   v_char = 0;

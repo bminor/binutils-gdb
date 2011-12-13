@@ -1168,11 +1168,6 @@ return 0;
 int
 main ()
 {
-#ifdef usestubs
-  set_debug_traps ();
-  breakpoint ();
-#endif
-
 #ifdef SIG_SETMASK
   /* Ensure all the signals aren't blocked.
      The environment in which the testsuite is run may have blocked some

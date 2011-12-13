@@ -38,10 +38,6 @@ func2 ()
 int
 main ()
 {
-#ifdef usestubs
-  set_debug_traps();
-  breakpoint();
-#endif
 #ifdef SIGALRM
   signal (SIGALRM, handler);
 #endif

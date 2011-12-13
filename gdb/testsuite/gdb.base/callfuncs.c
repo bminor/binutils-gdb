@@ -646,10 +646,6 @@ struct struct_with_fnptr *function_struct_ptr = &function_struct;
 
 int main ()
 {
-#ifdef usestubs
-  set_debug_traps();
-  breakpoint();
-#endif
   malloc(1);
   t_double_values(double_val1, double_val2);
   t_structs_c(struct_val1);

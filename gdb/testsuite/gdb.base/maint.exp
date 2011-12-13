@@ -52,8 +52,6 @@ if $tracelevel then {
         strace $tracelevel
         }
 
-global usestubs
-
 set testfile "break"
 set srcfile ${testfile}.c
 set srcfile1 ${testfile}1.c

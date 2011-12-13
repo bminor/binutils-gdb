@@ -69,10 +69,6 @@ gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 gdb_load_shlibs $lib_sl $lib_sl2
 
-if [target_info exists gdb_stub] {
-    gdb_step_for_stub;
-}
-
 #
 # Test setting a breakpoint in a dynamically loaded library which is
 # manually loaded and unloaded

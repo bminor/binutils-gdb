@@ -51,8 +51,6 @@ if $tracelevel then {
         }
 
 
-global usestubs
-
 #
 # test running programs
 #

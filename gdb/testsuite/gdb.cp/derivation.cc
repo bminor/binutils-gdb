@@ -208,12 +208,6 @@ int main(void)
     F f_instance;
     G g_instance;
     
-    #ifdef usestubs
-       set_debug_traps();
-       breakpoint();
-    #endif
-    
-
     marker1(); // marker1-returns-here
     
     a_instance.a = 20; // marker1-returns-here

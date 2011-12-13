@@ -51,10 +51,6 @@ gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 
-if [target_info exists gdb_stub] {
-    gdb_step_for_stub;
-}
-
 #
 # line number where we need to stop in main
 #

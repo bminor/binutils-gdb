@@ -127,20 +127,17 @@ gdb_test "info sym $expect_out(1,string)" "gnu_ifunc in section .*" "info sym <g
 # Test statically linked ifunc resolving during inferior start.
 # https://bugzilla.redhat.com/show_bug.cgi?id=624967
 
-if ![target_info exists gdb_stub] {
+# Compile $staticbinfile separately as it may exit on error (ld/12595).
 
-    # Compile $staticbinfile separately as it may exit on error (ld/12595).
-
-    if { [gdb_compile ${srcdir}/${subdir}/$libsrc $lib_o object {}] != ""
-	 || [gdb_compile "${srcdir}/${subdir}/$srcfile $lib_o" $staticbinfile executable {debug}] != "" } {
-	untested "Could not compile static executable $staticbinfile."
-	return -1
-    }
-
-    clean_restart $staticexecutable
-
-    gdb_breakpoint "gnu_ifunc"
-    gdb_breakpoint "main"
-    gdb_run_cmd
-    gdb_test "" "Breakpoint \[0-9\]*, main .*" "static gnu_ifunc"
+if { [gdb_compile ${srcdir}/${subdir}/$libsrc $lib_o object {}] != ""
+     || [gdb_compile "${srcdir}/${subdir}/$srcfile $lib_o" $staticbinfile executable {debug}] != "" } {
+    untested "Could not compile static executable $staticbinfile."
+    return -1
 }
+
+clean_restart $staticexecutable
+
+gdb_breakpoint "gnu_ifunc"
+gdb_breakpoint "main"
+gdb_run_cmd
+gdb_test "" "Breakpoint \[0-9\]*, main .*" "static gnu_ifunc"

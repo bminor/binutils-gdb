@@ -22,8 +22,6 @@ if $tracelevel then {
 
 if { [skip_hp_tests] } then { continue }
 
-global usestubs
-
 #
 # test running programs
 #

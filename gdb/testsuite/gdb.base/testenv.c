@@ -27,10 +27,6 @@ int main (int argc, char **argv, char **envp)
 
 {
     int i, j;
-#ifdef usestubs
-    set_debug_traps();
-    breakpoint();
-#endif
 
     j = 0;
     for (i = 0; envp[i]; i++)

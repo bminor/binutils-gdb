@@ -64,9 +64,6 @@ if { $gdb_file_cmd_debug_info != "debug" } then {
     fail "No debug information found."
 }
 
-if [target_info exists gdb_stub] {
-    gdb_step_for_stub;
-}
 #
 # test simple breakpoint setting commands
 #
@@ -144,14 +141,7 @@ gdb_test "break multi_line_while_conditional" \
 set bp_location5 [gdb_get_line_number "set breakpoint 5 here"]
 set bp_location6 [gdb_get_line_number "set breakpoint 6 here"]
 
-#
-# check to see what breakpoints are set
-#
-if [target_info exists gdb_stub] {
-    set main_line $bp_location5
-} else {
-    set main_line $bp_location6
-}
+set main_line $bp_location6
 
 set bp_location7 [gdb_get_line_number "set breakpoint 7 here"]
 set bp_location8 [gdb_get_line_number "set breakpoint 8 here"]
@@ -672,10 +662,6 @@ proc test_different_dir {type test_different_dir xfail} {
     gdb_test_no_output "set debug-file-directory ${test_different_dir}" \
 	"set separate debug location"
     gdb_load ${binfile}
-
-    if [target_info exists gdb_stub] {
-	gdb_step_for_stub;
-    }
 
     #
     # test break at function

@@ -86,10 +86,6 @@ int argc;
 char *argv[], **envp;
 #endif
 {
-#ifdef usestubs
-    set_debug_traps();  /* set breakpoint 5 here */
-    breakpoint();
-#endif
     if (argc == 12345) {  /* an unlikely value < 2^16, in case uninited */ /* set breakpoint 6 here */
 	fprintf (stderr, "usage:  factorial <number>\n");
 	return 1;

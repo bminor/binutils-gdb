@@ -8,10 +8,6 @@ main (argc, argv, envp)
 #endif
 {
     extern void dummy();
-#ifdef usestubs
-    set_debug_traps();
-    breakpoint();
-#endif
     dummy();
     return 0;
     

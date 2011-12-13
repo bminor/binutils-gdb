@@ -56,10 +56,6 @@ mi_gdb_reinitialize_dir $srcdir/$subdir
 mi_gdb_load ${binfile}
 mi_load_shlibs $lib_sl
 
-if [target_info exists gdb_stub] {
-    gdb_step_for_stub;
-}
-
 # Set pending breakpoint via MI
 mi_gdb_test "-break-insert -f pendfunc1" \
     ".*\\^done,bkpt=\{number=\"1\",type=\"breakpoint\",disp=\"keep\",enabled=\"y\",addr=\"<PENDING>\",pending=\"pendfunc1\",times=\"0\",original-location=\"pendfunc1\"\}"\
