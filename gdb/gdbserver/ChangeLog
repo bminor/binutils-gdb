@@ -1,3 +1,9 @@
+2011-12-13  Yao Qi  <yao@codesourcery.com>
+
+	* tracepoint.c (trace_buffer_alloc): Replace magic numbers with
+	macros.
+	(upload_fast_traceframes, upload_fast_traceframes): Likewise.
+
 2011-12-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* linux-low.c (linux_kill): Skip PTRACE_KILL if LWP does not exist.

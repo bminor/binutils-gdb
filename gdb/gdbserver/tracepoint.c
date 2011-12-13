@@ -1588,8 +1588,9 @@ trace_buffer_alloc (size_t amt)
 
 #ifdef IN_PROCESS_AGENT
   /* Build the tentative token.  */
-  commit_count = (((prev & 0x0007ff00) + 0x100) & 0x0007ff00);
-  commit = (((prev & 0x0007ff00) << 12)
+  commit_count = (((prev & GDBSERVER_FLUSH_COUNT_MASK_CURR) + 0x100)
+		  & GDBSERVER_FLUSH_COUNT_MASK_CURR);
+  commit = (((prev & GDBSERVER_FLUSH_COUNT_MASK_CURR) << 12)
 	    | commit_count
 	    | curr);
 
@@ -1621,8 +1622,8 @@ trace_buffer_alloc (size_t amt)
 
     refetch = trace_buffer_ctrl_curr;
 
-    if ((refetch == commit
-	 || ((refetch & 0x7ff00000) >> 12) == commit_count))
+    if (refetch == commit
+	|| ((refetch & GDBSERVER_FLUSH_COUNT_MASK_PREV) >> 12) == commit_count)
       {
 	/* effective */
 	trace_debug ("change is effective: (prev=%08x, commit=%08x, "
@@ -7080,10 +7081,10 @@ upload_fast_traceframes (void)
 
     /* Update the token, with new counters, and the GDBserver stamp
        bit.  Alway reuse the current TBC index.  */
-    prev = ipa_trace_buffer_ctrl_curr & 0x0007ff00;
-    counter = (prev + 0x100) & 0x0007ff00;
+    prev = ipa_trace_buffer_ctrl_curr & GDBSERVER_FLUSH_COUNT_MASK_CURR;
+    counter = (prev + 0x100) & GDBSERVER_FLUSH_COUNT_MASK_CURR;
 
-    ipa_trace_buffer_ctrl_curr = (0x80000000
+    ipa_trace_buffer_ctrl_curr = (GDBSERVER_UPDATED_FLUSH_COUNT_BIT
 				  | (prev << 12)
 				  | counter
 				  | curr_tbctrl_idx);
