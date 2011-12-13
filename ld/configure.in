@@ -140,7 +140,7 @@ AC_PROG_INSTALL
 
 LT_INIT
 
-ALL_LINGUAS="fr sv tr es da vi zh_CN zh_TW ga fi id bg"
+ALL_LINGUAS="fr sv tr es da vi zh_CN zh_TW ga fi id bg it"
 ZW_GNU_GETTEXT_SISTER_DIR
 AM_PO_SUBDIRS
 

@@ -1,3 +1,9 @@
+2011-12-13  Nick Clifton  <nickc@redhat.com>
+
+	* po/it.po: New Italian translation.
+	* configure.in (ALL_LINGUAS): Add it.
+	* configure: Regenerate.
+
 2011-12-01  Nick Clifton  <nickc@redhat.com>
 
 	* emultempl/spuelf.em (spu_elf_relink): Use pex_one in place
