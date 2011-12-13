@@ -660,6 +660,68 @@ proc test_watch_location {} {
     gdb_test_no_output "delete \$bpnum" "delete watch -location"
 }
 
+# Tests watching areas larger than a word.
+
+proc test_wide_location_1 {} {
+    # This test watches two words on most 32-bit ABIs, and one word on
+    # most 64-bit ABIs.
+
+    # Platforms where the target can't watch such a large region
+    # should clear hw_expected below.
+    if [target_info exists gdb,no_hardware_watchpoints] {
+	set hw_expected 0
+    } else {
+	set hw_expected 1
+    }
+
+    gdb_breakpoint [gdb_get_line_number "func6 breakpoint here"]
+    gdb_continue_to_breakpoint "func6 breakpoint here"
+
+    if { $hw_expected } {
+	gdb_test "watch foo2" "Hardware watchpoint .*: .*" "watch foo2"
+	gdb_test "continue" \
+	    "Continuing.*Hardware watchpoint .*: .*New value = \\\{val = \\\{0, 11\\\}\\\}.*" \
+	    "continue with watch foo2"
+    } else {
+	gdb_test "watch foo2" "atchpoint .*: .*" "watch foo2"
+	gdb_test "continue" \
+	    "Continuing.*\[Ww\]atchpoint .*: .*New value = \\\{val = \\\{0, 11\\\}\\\}.*" \
+	    "continue with watch foo2"
+    }
+
+    gdb_test_no_output "delete \$bpnum" "delete watch foo2"
+}
+
+proc test_wide_location_2 {} {
+    # This test watches four words on most 32-bit ABIs, and two words
+    # on 64-bit ABIs.
+
+    # Platforms where the target can't watch such a large region
+    # should clear hw_expected below.
+    if [target_info exists gdb,no_hardware_watchpoints] {
+	set hw_expected 0
+    } else {
+	set hw_expected 1
+    }
+
+    gdb_breakpoint [gdb_get_line_number "func7 breakpoint here"]
+    gdb_continue_to_breakpoint "func7 breakpoint here"
+
+    if { $hw_expected } {
+	gdb_test "watch foo4" "Hardware watchpoint .*: .*" "watch foo4"
+	gdb_test "continue" \
+	    "Continuing.*Hardware watchpoint .*: .*New value = \\\{val = \\\{0, 0, 0, 33\\\}\\\}.*" \
+	    "continue with watch foo4"
+    } else {
+	gdb_test "watch foo4" "atchpoint .*: .*" "watch foo4"
+	gdb_test "continue" \
+	    "Continuing.*\[Ww\]atchpoint .*: .*New value = \\\{val = \\\{0, 0, 0, 33\\\}\\\}.*" \
+	    "continue with watch foo4"
+    }
+
+    gdb_test_no_output "delete \$bpnum" "delete watch foo4"
+}
+
 proc test_inaccessible_watchpoint {} {
     global gdb_prompt
 
@@ -923,6 +985,14 @@ if [initialize] then {
     test_disable_enable_software_watchpoint
 
     test_watch_location
+
+    # Re-enable hardware watchpoints if necessary.
+    if ![target_info exists gdb,no_hardware_watchpoints] {
+        gdb_test_no_output "set can-use-hw-watchpoints 1" ""
+    }
+
+    test_wide_location_1
+    test_wide_location_2
 }
 
 # Restore old timeout

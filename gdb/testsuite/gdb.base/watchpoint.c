@@ -42,6 +42,18 @@ int doread = 0;
 char *global_ptr;
 char **global_ptr_ptr;
 
+struct foo2
+{
+  int val[2];
+};
+struct foo2 foo2;
+
+struct foo4
+{
+  int val[4];
+};
+struct foo4 foo4;
+
 void marker1 ()
 {
 }
@@ -137,6 +149,22 @@ func5 ()
   val = 27;
 }
 
+void
+func6 (void)
+{
+  /* func6 breakpoint here */
+  foo2.val[1] = 0;
+  foo2.val[1] = 11;
+}
+
+void
+func7 (void)
+{
+  /* func7 breakpoint here */
+  foo4.val[3] = 0;
+  foo4.val[3] = 33;
+}
+
 int main ()
 {
 #ifdef usestubs
@@ -215,6 +243,10 @@ int main ()
   func4 ();
 
   func5 ();
+
+  func6 ();
+
+  func7 ();
 
   return 0;
 }

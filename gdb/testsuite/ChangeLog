@@ -1,3 +1,13 @@
+2011-12-13  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.base/watchpoint.c (struct foo2, foo2, struct foo4, foo4)
+	(func6, func7): New.
+	(main): Call func6 and func7.
+	* gdb.base/watchpoint.exp (test_wide_location_1)
+	(test_wide_location_2): New.
+	(top level): Re-enable hardware watchpoints if necessary.  Call
+	test_wide_location_1 and test_wide_location_2.
+
 2011-12-11  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.trace/status-stop.exp: Skip it if target doesn't support trace.
