@@ -1,3 +1,8 @@
+2011-12-13  Andrew Burgess  <aburgess@broadcom.com>
+
+	* doc/internals.texi (TC_FORCE_RELOCATION_SUB_SAME): Update
+	to match code.
+
 2011-12-08  Andrew Pinski  <apinski@cavium.com>
             Adam Nemet  <anemet@caviumnetworks.com>
 
