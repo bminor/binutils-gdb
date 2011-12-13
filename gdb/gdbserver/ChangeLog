@@ -1,3 +1,12 @@
+2011-12-13  Pedro Alves  <pedro@codesourcery.com>
+
+	PR remote/13492
+
+	* i386-low.c (i386_low_stopped_data_address): Avoid fetching
+	DR_CONTROL unless necessary.  Extend comments.
+	* linux-x86-low.c (x86_linux_prepare_to_resume): Don't write to
+	DR0-3 if not used.  If any watchpoint was set, clear DR_STATUS.
+
 2011-12-13  Yao Qi  <yao@codesourcery.com>
 
 	* tracepoint.c (trace_buffer_alloc): Replace magic numbers with

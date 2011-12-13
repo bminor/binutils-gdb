@@ -655,6 +655,7 @@ static void
 x86_linux_prepare_to_resume (struct lwp_info *lwp)
 {
   ptid_t ptid = ptid_of (lwp);
+  int clear_status = 0;
 
   if (lwp->arch_private->debug_registers_changed)
     {
@@ -665,14 +666,23 @@ x86_linux_prepare_to_resume (struct lwp_info *lwp)
 	= &proc->private->arch_private->debug_reg_state;
 
       for (i = DR_FIRSTADDR; i <= DR_LASTADDR; i++)
-	x86_linux_dr_set (ptid, i, state->dr_mirror[i]);
+	if (state->dr_ref_count[i] > 0)
+	  {
+	    x86_linux_dr_set (ptid, i, state->dr_mirror[i]);
+
+	    /* If we're setting a watchpoint, any change the inferior
+	       had done itself to the debug registers needs to be
+	       discarded, otherwise, i386_low_stopped_data_address can
+	       get confused.  */
+	    clear_status = 1;
+	  }
 
       x86_linux_dr_set (ptid, DR_CONTROL, state->dr_control_mirror);
 
       lwp->arch_private->debug_registers_changed = 0;
     }
 
-  if (lwp->stopped_by_watchpoint)
+  if (clear_status || lwp->stopped_by_watchpoint)
     x86_linux_dr_set (ptid, DR_STATUS, 0);
 }
 
