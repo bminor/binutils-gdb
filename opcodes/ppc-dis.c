@@ -347,7 +347,6 @@ print_insn_powerpc (bfd_vma memaddr,
   const struct powerpc_opcode *opcode;
   const struct powerpc_opcode *opcode_end;
   unsigned long op;
-  ppc_cpu_t dialect_orig = dialect;
 
   status = (*info->read_memory_func) (memaddr, buffer, 4, info);
   if (status != 0)
@@ -386,7 +385,8 @@ print_insn_powerpc (bfd_vma memaddr,
 
       if ((insn & opcode->mask) != opcode->opcode
 	  || (opcode->flags & dialect) == 0
-	  || (opcode->deprecated & dialect_orig) != 0)
+	  || (dialect != ~(ppc_cpu_t) PPC_OPCODE_ANY
+	      && (opcode->deprecated & dialect) != 0))
 	continue;
 
       /* Make two passes over the operands.  First see if any of them

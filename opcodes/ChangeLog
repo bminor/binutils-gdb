@@ -1,9 +1,20 @@
+2011-12-13  Alan Modra  <amodra@gmail.com>
+
+	* ppc-opc.c (ISA_V2): Define and use for relevant BO field tests.
+	(valid_bo_pre_v2, valid_bo_post_v2): New functions, extracted from..
+	(valid_bo): ..here.  When disassembling, accept either 'y' or 'at'
+	type encoding on second pass.
+	(powerpc_opcodes): Use ISA_V2 to enable branch insns rather than
+	POWER4.
+	* ppc-dis.c (print_insn_powerpc): Delete dialect_orig.  Instead
+	ignore deprecated on second pass.
+
 2011-12-08  Andrew Pinski  <apinski@cavium.com>
 
 	* mips-opc.c (mips_builtin_opcodes): Add "pause".
 
 2011-12-08  Andrew Pinski  <apinski@cavium.com>
-            Adam Nemet  <anemet@caviumnetworks.com>
+	    Adam Nemet  <anemet@caviumnetworks.com>
 
 	* mips-dis.c (mips_arch_choices): Add Octeon2.
 	For "octeon+", just include OcteonP for the insn.
@@ -64,7 +75,7 @@
 
 2011-10-27  Peter Bergner  <bergner@vnet.ibm.com>
 
-        * ppc-opc.c (powerpc_opcodes) <drrndq, drrndq., dtstexq, dctqpq,
+	* ppc-opc.c (powerpc_opcodes) <drrndq, drrndq., dtstexq, dctqpq,
 	dctqpq., dctfixq, dctfixq., dxexq, dxexq., dtstsfq, dcffixq, dcffixq.,
 	diexq, diexq.>: Use FRT, FRA, FRB and FRBp repsectively on DFP quad
 	instructions.
@@ -189,7 +200,7 @@
 	* Makefile.in: Regenerate.
 
 2011-08-09  Chao-ying Fu  <fu@mips.com>
-            Maciej W. Rozycki  <macro@codesourcery.com>
+	    Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* mips-dis.c (mips_arch_choices): Enable MCU for "mips32r2"
 	and "mips64r2".
@@ -241,7 +252,7 @@
 	* i386-tbl.h: Regenerated.
 
 2011-07-24  Chao-ying Fu  <fu@mips.com>
-            Maciej W. Rozycki  <macro@codesourcery.com>
+	    Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* micromips-opc.c: New file.
 	* mips-dis.c (micromips_to_32_reg_b_map): New array.
