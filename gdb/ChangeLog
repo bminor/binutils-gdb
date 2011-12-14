@@ -1,3 +1,8 @@
+2011-12-14  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (add_nonlocal_symbols): Initialize data to
+	all zeros.  Remove setting of data.arg_sym to NULL.
+
 2011-12-14  Pedro Alves  <pedro@codesourcery.com>
 
 	PR threads/10729

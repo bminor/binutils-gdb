@@ -4922,8 +4922,8 @@ add_nonlocal_symbols (struct obstack *obstackp, const char *name,
   struct objfile *objfile;
   struct match_data data;
 
+  memset (&data, 0, sizeof data);
   data.obstackp = obstackp;
-  data.arg_sym = NULL;
 
   ALL_OBJFILES (objfile)
     {
