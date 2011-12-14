@@ -1,5 +1,10 @@
 2011-12-14  Yao Qi  <yao@codesourcery.com>
 
+	* tracepoint.c (gdb_ust_thread): Don't ignore return value
+	of write.
+
+2011-12-14  Yao Qi  <yao@codesourcery.com>
+
 	* i386-low.c (i386_low_stopped_data_address): Initialize local
 	variable `control'.
 

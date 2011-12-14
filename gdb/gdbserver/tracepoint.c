@@ -8122,7 +8122,8 @@ gdb_ust_thread (void *arg)
 		strcpy (cmd_buf, "");
 	    }
 
-	  write (fd, buf, 1);
+	  /* Fix compiler's warning: ignoring return value of 'write'.  */
+	  ret = write (fd, buf, 1);
 	  close (fd);
 	}
     }
