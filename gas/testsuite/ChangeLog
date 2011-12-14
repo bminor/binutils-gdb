@@ -1,5 +1,15 @@
 2011-12-14  Iain Sandoe  <iains@gcc.gnu.org>
 
+	* gas/mach-o/comm-1.d: New.
+	* gas/mach-o/comm-1.s: New.
+	* gas/mach-o/lcomm-1.s: New.
+	* gas/mach-o/mach-o.exp: Update to use run_dump_tests[].
+	* gas/mach-o/sections-1.d: New.
+	* gas/mach-o/sections-1.s: New.
+	* gas/mach-o/warn-1.s: Add .comm alignment range warning.
+
+2011-12-14  Iain Sandoe  <iains@gcc.gnu.org>
+
 	* gas/mach-o: New.
 	* gas/mach-o/mach-o.exp: New.
 	* gas/mach-o/warn-1.s: New.
