@@ -22,6 +22,8 @@
 
 #include <signal.h>
 
+struct arch_lwp_info;
+
 /* Ways to "resume" a thread.  */
 
 enum resume_kind
@@ -109,6 +111,9 @@ struct lwp_info
   /* The processor core this LWP was last seen on.  */
   int core;
 
+  /* Arch-specific additions.  */
+  struct arch_lwp_info *arch_private;
+
   /* Next LWP in list.  */
   struct lwp_info *next;
 };
@@ -146,6 +151,8 @@ extern void linux_enable_event_reporting (ptid_t ptid);
 
 extern int lin_lwp_attach_lwp (ptid_t ptid);
 
+extern void linux_stop_lwp (struct lwp_info *lwp);
+
 /* Iterator function for lin-lwp's lwp list.  */
 struct lwp_info *iterate_over_lwps (ptid_t filter,
 				    int (*callback) (struct lwp_info *,
@@ -166,7 +173,7 @@ linux_trad_target (CORE_ADDR (*register_u_offset)(struct gdbarch *, int, int));
 void linux_nat_add_target (struct target_ops *);
 
 /* Register a method to call whenever a new thread is attached.  */
-void linux_nat_set_new_thread (struct target_ops *, void (*) (ptid_t));
+void linux_nat_set_new_thread (struct target_ops *, void (*) (struct lwp_info *));
 
 /* Register a method that converts a siginfo object between the layout
    that ptrace returns, and the layout in the architecture of the
@@ -175,6 +182,11 @@ void linux_nat_set_siginfo_fixup (struct target_ops *,
 				  int (*) (struct siginfo *,
 					   gdb_byte *,
 					   int));
+
+/* Register a method to call prior to resuming a thread.  */
+
+void linux_nat_set_prepare_to_resume (struct target_ops *,
+				      void (*) (struct lwp_info *));
 
 /* Update linux-nat internal state when changing from one fork
    to another.  */

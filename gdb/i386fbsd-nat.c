@@ -134,8 +134,9 @@ _initialize_i386fbsd_nat (void)
 
   i386_dr_low.set_control = i386bsd_dr_set_control;
   i386_dr_low.set_addr = i386bsd_dr_set_addr;
-  i386_dr_low.reset_addr = i386bsd_dr_reset_addr;
+  i386_dr_low.get_addr = i386bsd_dr_get_addr;
   i386_dr_low.get_status = i386bsd_dr_get_status;
+  i386_dr_low.get_control = i386bsd_dr_get_control;
   i386_set_debug_register_length (4);
 
 #endif /* HAVE_PT_GETDBREGS */

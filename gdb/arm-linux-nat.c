@@ -1178,9 +1178,9 @@ arm_linux_watchpoint_addr_within_range (struct target_ops *target,
 /* Handle thread creation.  We need to copy the breakpoints and watchpoints
    in the parent thread to the child thread.  */
 static void
-arm_linux_new_thread (ptid_t ptid)
+arm_linux_new_thread (struct lwp_info *lp)
 {
-  int tid = TIDGET (ptid);
+  int tid = TIDGET (lp->ptid);
   const struct arm_linux_hwbp_cap *info = arm_linux_get_hwbp_cap ();
 
   if (info != NULL)

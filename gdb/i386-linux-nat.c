@@ -47,22 +47,6 @@
 #include <sys/debugreg.h>
 #endif
 
-#ifndef DR_FIRSTADDR
-#define DR_FIRSTADDR 0
-#endif
-
-#ifndef DR_LASTADDR
-#define DR_LASTADDR 3
-#endif
-
-#ifndef DR_STATUS
-#define DR_STATUS 6
-#endif
-
-#ifndef DR_CONTROL
-#define DR_CONTROL 7
-#endif
-
 /* Prototypes for supply_gregset etc.  */
 #include "gregset.h"
 
@@ -82,6 +66,14 @@
 #ifndef PTRACE_SETREGSET
 #define PTRACE_SETREGSET	0x4205
 #endif
+
+/* Per-thread arch-specific data we want to keep.  */
+
+struct arch_lwp_info
+{
+  /* Non-zero if our copy differs from what's recorded in the thread.  */
+  int debug_registers_changed;
+};
 
 /* Does the current host support PTRACE_GETREGSET?  */
 static int have_ptrace_getregset = -1;
@@ -651,8 +643,6 @@ i386_linux_store_inferior_registers (struct target_ops *ops,
 
 /* Support for debug registers.  */
 
-static unsigned long i386_linux_dr[DR_CONTROL + 1];
-
 /* Get debug register REGNUM value from only the one LWP of PTID.  */
 
 static unsigned long
@@ -692,38 +682,23 @@ i386_linux_dr_set (ptid_t ptid, int regnum, unsigned long value)
     perror_with_name (_("Couldn't write debug register"));
 }
 
-/* Set DR_CONTROL to ADDR in all LWPs of LWP_LIST.  */
+/* Return the inferior's debug register REGNUM.  */
 
-static void
-i386_linux_dr_set_control (unsigned long control)
+static CORE_ADDR
+i386_linux_dr_get_addr (int regnum)
 {
-  struct lwp_info *lp;
+  /* DR6 and DR7 are retrieved with some other way.  */
+  gdb_assert (DR_FIRSTADDR <= regnum && regnum <= DR_LASTADDR);
 
-  i386_linux_dr[DR_CONTROL] = control;
-  ALL_LWPS (lp)
-    i386_linux_dr_set (lp->ptid, DR_CONTROL, control);
+  return i386_linux_dr_get (inferior_ptid, regnum);
 }
 
-/* Set address REGNUM (zero based) to ADDR in all LWPs of LWP_LIST.  */
+/* Return the inferior's DR7 debug control register.  */
 
-static void
-i386_linux_dr_set_addr (int regnum, CORE_ADDR addr)
+static unsigned long
+i386_linux_dr_get_control (void)
 {
-  struct lwp_info *lp;
-
-  gdb_assert (regnum >= 0 && regnum <= DR_LASTADDR - DR_FIRSTADDR);
-
-  i386_linux_dr[DR_FIRSTADDR + regnum] = addr;
-  ALL_LWPS (lp)
-    i386_linux_dr_set (lp->ptid, DR_FIRSTADDR + regnum, addr);
-}
-
-/* Set address REGNUM (zero based) to zero in all LWPs of LWP_LIST.  */
-
-static void
-i386_linux_dr_reset_addr (int regnum)
-{
-  i386_linux_dr_set_addr (regnum, 0);
+  return i386_linux_dr_get (inferior_ptid, DR_CONTROL);
 }
 
 /* Get DR_STATUS from only the one LWP of INFERIOR_PTID.  */
@@ -734,32 +709,89 @@ i386_linux_dr_get_status (void)
   return i386_linux_dr_get (inferior_ptid, DR_STATUS);
 }
 
-/* Unset MASK bits in DR_STATUS in all LWPs of LWP_LIST.  */
+/* Callback for iterate_over_lwps.  Update the debug registers of
+   LWP.  */
+
+static int
+update_debug_registers_callback (struct lwp_info *lwp, void *arg)
+{
+  /* The actual update is done later just before resuming the lwp, we
+     just mark that the registers need updating.  */
+  lwp->arch_private->debug_registers_changed = 1;
+
+  /* If the lwp isn't stopped, force it to momentarily pause, so we
+     can update its debug registers.  */
+  if (!lwp->stopped)
+    linux_stop_lwp (lwp);
+
+  return 0;
+}
+
+/* Set DR_CONTROL to ADDR in all LWPs of the current inferior.  */
 
 static void
-i386_linux_dr_unset_status (unsigned long mask)
+i386_linux_dr_set_control (unsigned long control)
 {
-  struct lwp_info *lp;
+  ptid_t pid_ptid = pid_to_ptid (ptid_get_pid (inferior_ptid));
 
-  ALL_LWPS (lp)
+  iterate_over_lwps (pid_ptid, update_debug_registers_callback, NULL);
+}
+
+/* Set address REGNUM (zero based) to ADDR in all LWPs of the current
+   inferior.  */
+
+static void
+i386_linux_dr_set_addr (int regnum, CORE_ADDR addr)
+{
+  ptid_t pid_ptid = pid_to_ptid (ptid_get_pid (inferior_ptid));
+
+  gdb_assert (regnum >= 0 && regnum <= DR_LASTADDR - DR_FIRSTADDR);
+
+  iterate_over_lwps (pid_ptid, update_debug_registers_callback, NULL);
+}
+
+/* Called when resuming a thread.
+   If the debug regs have changed, update the thread's copies.  */
+
+static void
+i386_linux_prepare_to_resume (struct lwp_info *lwp)
+{
+  int clear_status = 0;
+
+  if (lwp->arch_private->debug_registers_changed)
     {
-      unsigned long value;
+      struct i386_debug_reg_state *state = i386_debug_reg_state ();
+      int i;
 
-      value = i386_linux_dr_get (lp->ptid, DR_STATUS);
-      value &= ~mask;
-      i386_linux_dr_set (lp->ptid, DR_STATUS, value);
+      for (i = DR_FIRSTADDR; i <= DR_LASTADDR; i++)
+	if (state->dr_ref_count[i] > 0)
+	  {
+	    i386_linux_dr_set (lwp->ptid, i, state->dr_mirror[i]);
+
+	    /* If we're setting a watchpoint, any change the inferior
+	       had done itself to the debug registers needs to be
+	       discarded, otherwise, i386_stopped_data_address can get
+	       confused.  */
+	    clear_status = 1;
+	  }
+
+      i386_linux_dr_set (lwp->ptid, DR_CONTROL, state->dr_control_mirror);
+
+      lwp->arch_private->debug_registers_changed = 0;
     }
+
+  if (clear_status || lwp->stopped_by_watchpoint)
+    i386_linux_dr_set (lwp->ptid, DR_STATUS, 0);
 }
 
 static void
-i386_linux_new_thread (ptid_t ptid)
+i386_linux_new_thread (struct lwp_info *lp)
 {
-  int i;
+  struct arch_lwp_info *info = XCNEW (struct arch_lwp_info);
 
-  for (i = DR_FIRSTADDR; i <= DR_LASTADDR; i++)
-    i386_linux_dr_set (ptid, i, i386_linux_dr[i]);
+  info->debug_registers_changed = 1;
 
-  i386_linux_dr_set (ptid, DR_CONTROL, i386_linux_dr[DR_CONTROL]);
+  lp->arch_private = info;
 }
 
 
@@ -978,9 +1010,9 @@ _initialize_i386_linux_nat (void)
 
   i386_dr_low.set_control = i386_linux_dr_set_control;
   i386_dr_low.set_addr = i386_linux_dr_set_addr;
-  i386_dr_low.reset_addr = i386_linux_dr_reset_addr;
+  i386_dr_low.get_addr = i386_linux_dr_get_addr;
   i386_dr_low.get_status = i386_linux_dr_get_status;
-  i386_dr_low.unset_status = i386_linux_dr_unset_status;
+  i386_dr_low.get_control = i386_linux_dr_get_control;
   i386_set_debug_register_length (4);
 
   /* Override the default ptrace resume method.  */
@@ -999,4 +1031,5 @@ _initialize_i386_linux_nat (void)
   /* Register the target.  */
   linux_nat_add_target (t);
   linux_nat_set_new_thread (t, i386_linux_new_thread);
+  linux_nat_set_prepare_to_resume (t, i386_linux_prepare_to_resume);
 }

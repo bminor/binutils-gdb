@@ -472,7 +472,7 @@ s390_stopped_by_watchpoint (void)
 }
 
 static void
-s390_fix_watch_points (ptid_t ptid)
+s390_fix_watch_points (struct lwp_info *lp)
 {
   int tid;
 
@@ -482,9 +482,9 @@ s390_fix_watch_points (ptid_t ptid)
   CORE_ADDR watch_lo_addr = (CORE_ADDR)-1, watch_hi_addr = 0;
   struct watch_area *area;
 
-  tid = TIDGET (ptid);
+  tid = TIDGET (lp->ptid);
   if (tid == 0)
-    tid = PIDGET (ptid);
+    tid = PIDGET (lp->ptid);
 
   for (area = watch_base; area; area = area->next)
     {

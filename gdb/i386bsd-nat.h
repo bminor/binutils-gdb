@@ -32,8 +32,10 @@ extern void i386bsd_dr_set_control (unsigned long control);
 
 extern void i386bsd_dr_set_addr (int regnum, CORE_ADDR addr);
 
-extern void i386bsd_dr_reset_addr (int regnum);
+extern CORE_ADDR i386bsd_dr_get_addr (int regnum);
 
 extern unsigned long i386bsd_dr_get_status (void);
+
+extern unsigned long i386bsd_dr_get_control (void);
 
 #endif /* i386bsd-nat.h */

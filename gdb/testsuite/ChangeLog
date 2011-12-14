@@ -1,3 +1,10 @@
+2011-12-14  Pedro Alves  <pedro@codesourcery.com>
+
+	PR threads/10729
+
+	* gdb.mi/watch-nonstop.c: New file.
+ 	* gdb.mi/mi-watch-nonstop.exp: New file.
+
 2011-12-13  Pedro Alves  <pedro@codesourcery.com>
 	    Doug Evans  <dje@google.com>
 

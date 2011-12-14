@@ -801,6 +801,29 @@ go32_get_dr6 (void)
   return STATUS;
 }
 
+/* Get the value of the DR7 debug status register from the inferior.
+   Here we just return the value stored in D_REGS, as we've got it
+   from the last go32_wait call.  */
+
+static unsigned long
+go32_get_dr7 (void)
+{
+  return CONTROL;
+}
+
+/* Get the value of the DR debug register I from the inferior.  Here
+   we just return the value stored in D_REGS, as we've got it from the
+   last go32_wait call.  */
+
+static CORE_ADDR
+go32_get_dr (int i)
+{
+  if (i < 0 || i > 3)
+    internal_error (__FILE__, __LINE__,
+		    _("Invalid register %d in go32_get_dr.\n"), i);
+  return D_REGS[i];
+}
+
 /* Put the device open on handle FD into either raw or cooked
    mode, return 1 if it was in raw mode, zero otherwise.  */
 
@@ -984,8 +1007,9 @@ init_go32_ops (void)
 
   i386_dr_low.set_control = go32_set_dr7;
   i386_dr_low.set_addr = go32_set_dr;
-  i386_dr_low.reset_addr = NULL;
   i386_dr_low.get_status = go32_get_dr6;
+  i386_dr_low.get_control = go32_get_dr7;
+  i386_dr_low.get_addr = go32_get_dr;
   i386_set_debug_register_length (4);
 
   go32_ops.to_magic = OPS_MAGIC;

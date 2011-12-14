@@ -618,7 +618,7 @@ ia64_linux_remove_watchpoint (CORE_ADDR addr, int len, int type,
 }
 
 static void
-ia64_linux_new_thread (ptid_t ptid)
+ia64_linux_new_thread (struct lwp_info *lp)
 {
   int i, any;
 
@@ -627,11 +627,11 @@ ia64_linux_new_thread (ptid_t ptid)
     {
       if (debug_registers[i] != 0)
 	any = 1;
-      store_debug_register (ptid, i, debug_registers[i]);
+      store_debug_register (lp->ptid, i, debug_registers[i]);
     }
 
   if (any)
-    enable_watchpoints_in_psr (ptid);
+    enable_watchpoints_in_psr (lp->ptid);
 }
 
 static int

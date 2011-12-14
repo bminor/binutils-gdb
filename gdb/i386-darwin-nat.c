@@ -263,23 +263,6 @@ i386_darwin_store_inferior_registers (struct target_ops *ops,
 
 /* Support for debug registers, boosted mostly from i386-linux-nat.c.  */
 
-#ifndef DR_FIRSTADDR
-#define DR_FIRSTADDR 0
-#endif
-
-#ifndef DR_LASTADDR
-#define DR_LASTADDR 3
-#endif
-
-#ifndef DR_STATUS
-#define DR_STATUS 6
-#endif
-
-#ifndef DR_CONTROL
-#define DR_CONTROL 7
-#endif
-
-
 static void
 i386_darwin_dr_set (int regnum, uint32_t value)
 {
@@ -410,18 +393,22 @@ i386_darwin_dr_set_addr (int regnum, CORE_ADDR addr)
   i386_darwin_dr_set (DR_FIRSTADDR + regnum, addr);
 }
 
-void
-i386_darwin_dr_reset_addr (int regnum)
+CORE_ADDR
+i386_darwin_dr_get_addr (int regnum)
 {
-  gdb_assert (regnum >= 0 && regnum <= DR_LASTADDR - DR_FIRSTADDR);
-
-  i386_darwin_dr_set (DR_FIRSTADDR + regnum, 0L);
+  return i386_darwin_dr_get (regnum);
 }
 
 unsigned long
 i386_darwin_dr_get_status (void)
 {
   return i386_darwin_dr_get (DR_STATUS);
+}
+
+unsigned long
+i386_darwin_dr_get_control (void)
+{
+  return i386_darwin_dr_get (DR_CONTROL);
 }
 
 void

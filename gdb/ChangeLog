@@ -1,5 +1,117 @@
 2011-12-14  Pedro Alves  <pedro@codesourcery.com>
 
+	PR threads/10729
+
+	* linux-nat.c (linux_nat_new_thread): Change parameter to an lwp
+	pointer.
+	(linux_nat_prepare_to_resume): New global.
+	(lwp_free): New.
+	(purge_lwp_list): Use it.
+	(add_lwp): Call linux_nat_new_thread even on the first LWP.
+	Adjust to interface change.
+	(delete_lwp): Call lwp_free instead of xfree.
+	(detach_callback, linux_nat_detach, resume_lwp, linux_nat_resume)
+	(linux_handle_syscall_trap, linux_handle_extended_wait)
+	(linux_nat_filter_event, resume_stopped_resumed_lwps): Call
+	linux_nat_prepare_to_resume before resuming.
+	(linux_stop_lwp): New.
+	(linux_nat_set_new_thread): Adjust.
+	(linux_nat_set_prepare_to_resume): New.
+	* linux-nat.h (struct arch_lwp_info): Forward declare.
+	(struct lwp_info) <arch_private>: New field.
+	(linux_stop_lwp): Declare.
+	(linux_nat_set_new_thread): Adjust.
+	(linux_nat_set_prepare_to_resume): New.
+
+	* i386-nat.c (DR_NADDR, DR_STATUS, DR_CONTROL)
+	(struct i386_debug_reg_state): Move to i386-nat.h.
+	(dr_mirror): Comment.
+	(i386_debug_reg_state): New.
+	(i386_update_inferior_debug_regs): Simplify.
+	(i386_stopped_data_address): Use the debug register state from the
+	inferior, not from the local cache.
+	* i386-nat.h (struct i386_dr_low_type): Delete reset_addr and
+	unset_status fields.  New get_addr and get_control fields.
+	(DR_FIRSTADDR, DR_LASTADDR, DR_CONTROL): Moved from i386-nat.c.
+	(DR_NADDR, DR_STATUS): New.
+	(struct i386_debug_reg_state): Moved from i386-nat.c.
+
+	* amd64-linux-nat.c (struct arch_lwp_info): New.
+	(amd64_linux_dr): Delete global.
+	(amd64_linux_dr_get_addr): New.
+	(amd64_linux_dr_get_control): New.
+	(amd64_linux_dr_unset_status): Delete.
+	(amd64_linux_dr_set_addr): Reimplement.
+	(amd64_linux_dr_reset_addr): Delete.
+	(update_debug_registers_callback): New.
+	(amd64_linux_dr_set_control): Reimplement.
+	(amd64_linux_dr_set_addr): Reimplement.
+	(amd64_linux_prepare_to_resume): New.
+	(amd64_linux_new_thread): Change parameter to an lwp pointer.
+	Reimplement.
+	(_initialize_amd64_linux_nat): No longer install
+	i386_dr_low.reset_addr and i386_dr_low.unset_status.  Install
+	amd64_linux_dr_get_control as i386_dr_low.get_control.  Install
+	amd64_linux_dr_get_addr as i386_dr_low.get_addr.  Install
+	amd64_linux_prepare_to_resume.
+	* i386-linux-nat.c (DR_FIRSTADDR, DR_LASTADDR, DR_STATUS)
+	(DR_CONTROL): Delete.
+	(struct arch_lwp_info): New.
+	(i386_linux_dr): Delete global.
+	(i386_linux_dr_set_control): Reimplement.
+	(i386_linux_dr_get_addr): New.
+	(i386_linux_dr_set_addr): Reimplement.
+	(i386_linux_dr_get_control): New.
+	(update_debug_registers_callback): New.
+	(i386_linux_dr_unset_status): Delete.
+	(i386_linux_dr_set_addr): Reimplement.
+	(i386_linux_prepare_to_resume): New.
+	(i386_linux_new_thread): Change parameter to an lwp pointer.
+	Reimplement.
+	(_initialize_i386_linux_nat): No longer install
+	i386_dr_low.reset_addr and i386_dr_low.unset_status.  Install
+	i386_linux_dr_get_control as i386_dr_low.get_control.  Install
+	i386_linux_dr_get_addr as i386_dr_low.get_addr.  Install
+	i386_linux_prepare_to_resume.
+
+	* arm-linux-nat.c (arm_linux_new_thread): Change parameter to an
+	lwp pointer.  Adjust.
+	* ia64-linux-nat.c (ia64_linux_new_thread): Likewise.
+	* mips-linux-nat.c (mips_linux_new_thread): Likewise.
+	* ppc-linux-nat.c (ppc_linux_new_thread): Likewise.
+	* s390-nat.c (s390_fix_watch_points): Likewise.
+
+	* i386-darwin-nat.c (DR_FIRSTADDR, DR_LASTADDR, DR_STATUS)
+	(DR_CONTROL): Delete.
+	(i386_darwin_dr_reset_addr): Delete.
+	(i386_darwin_dr_get_addr): New.
+	(i386_darwin_dr_get_control): New.
+	* go32-nat.c
+	(go32_get_dr7, go32_get_dr): New.
+	(init_go32_ops): No longer install i386_dr_low.reset_addr.
+	Install go32_get_dr7 as i386_dr_low.get_control.  Install
+	go32_get_dr as i386_dr_low.get_addr.
+	* i386bsd-nat.c (i386bsd_dr_get): New.
+	(i386bsd_dr_reset_addr): Delete.
+	(i386bsd_dr_get_addr): New.
+	(i386bsd_dr_get_status): Use i386bsd_dr_get.
+	(i386bsd_dr_get_control): New.
+	* i386bsd-nat.h (i386bsd_dr_reset_addr): Delete.
+	(i386bsd_dr_get_addr): New.
+	(i386bsd_dr_get_control): New.
+	* i386fbsd-nat.c (_initialize_i386fbsd_nat): No longer install
+	i386_dr_low.reset_addr and i386_dr_low.unset_status.  Install
+	i386bsd_dr_get_control as i386_dr_low.get_control.  Install
+	i386bsd_dr_get_addr as i386_dr_low.get_addr.
+	* windows-nat.c (init_windows_ops): No longer install
+	i386_dr_low.reset_addr and i386_dr_low.unset_status.  Install
+	cygwin_get_dr7 as i386_dr_low.get_control.  Install cygwin_get_dr
+	as i386_dr_low.get_addr.
+	(cygwin_get_dr): New.
+	(cygwin_get_dr7): New.
+
+2011-12-14  Pedro Alves  <pedro@codesourcery.com>
+
 	* ia64-tdep.c (ia64_memory_remove_breakpoint): Use
 	target_write_raw_memory.
 	* m32r-tdep.c (m32r_memory_remove_breakpoint): Use

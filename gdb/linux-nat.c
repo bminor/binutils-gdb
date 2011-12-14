@@ -175,7 +175,10 @@ static struct target_ops *linux_ops;
 static struct target_ops linux_ops_saved;
 
 /* The method to call, if any, when a new thread is attached.  */
-static void (*linux_nat_new_thread) (ptid_t);
+static void (*linux_nat_new_thread) (struct lwp_info *);
+
+/* Hook to call prior to resuming a thread.  */
+static void (*linux_nat_prepare_to_resume) (struct lwp_info *);
 
 /* The method to call, if any, when the siginfo object needs to be
    converted between the layout returned by ptrace, and the layout in
@@ -1073,6 +1076,15 @@ status_to_str (int status)
   return buf;
 }
 
+/* Destroy and free LP.  */
+
+static void
+lwp_free (struct lwp_info *lp)
+{
+  xfree (lp->arch_private);
+  xfree (lp);
+}
+
 /* Remove all LWPs belong to PID from the lwp list.  */
 
 static void
@@ -1093,7 +1105,7 @@ purge_lwp_list (int pid)
 	  else
 	    lpprev->next = lp->next;
 
-	  xfree (lp);
+	  lwp_free (lp);
 	}
       else
 	lpprev = lp;
@@ -1139,8 +1151,8 @@ add_lwp (ptid_t ptid)
   lp->next = lwp_list;
   lwp_list = lp;
 
-  if (num_lwps (GET_PID (ptid)) > 1 && linux_nat_new_thread != NULL)
-    linux_nat_new_thread (ptid);
+  if (linux_nat_new_thread != NULL)
+    linux_nat_new_thread (lp);
 
   return lp;
 }
@@ -1166,7 +1178,7 @@ delete_lwp (ptid_t ptid)
   else
     lwp_list = lp->next;
 
-  xfree (lp);
+  lwp_free (lp);
 }
 
 /* Return a pointer to the structure describing the LWP corresponding
@@ -1724,6 +1736,8 @@ detach_callback (struct lwp_info *lp, void *data)
       /* Pass on any pending signal for this LWP.  */
       get_pending_status (lp, &status);
 
+      if (linux_nat_prepare_to_resume != NULL)
+	linux_nat_prepare_to_resume (lp);
       errno = 0;
       if (ptrace (PTRACE_DETACH, GET_LWP (lp->ptid), 0,
 		  WSTOPSIG (status)) < 0)
@@ -1784,6 +1798,8 @@ linux_nat_detach (struct target_ops *ops, char *args, int from_tty)
 			    target_pid_to_str (main_lwp->ptid));
     }
 
+  if (linux_nat_prepare_to_resume != NULL)
+    linux_nat_prepare_to_resume (main_lwp);
   delete_lwp (main_lwp->ptid);
 
   if (forks_exist_p ())
@@ -1825,6 +1841,8 @@ resume_lwp (struct lwp_info *lp, int step)
 				"RC:  PTRACE_CONT %s, 0, 0 (resuming sibling)\n",
 				target_pid_to_str (lp->ptid));
 
+	  if (linux_nat_prepare_to_resume != NULL)
+	    linux_nat_prepare_to_resume (lp);
 	  linux_ops->to_resume (linux_ops,
 				pid_to_ptid (GET_LWP (lp->ptid)),
 				step, TARGET_SIGNAL_0);
@@ -1969,6 +1987,8 @@ linux_nat_resume (struct target_ops *ops,
   /* Convert to something the lower layer understands.  */
   ptid = pid_to_ptid (GET_LWP (lp->ptid));
 
+  if (linux_nat_prepare_to_resume != NULL)
+    linux_nat_prepare_to_resume (lp);
   linux_ops->to_resume (linux_ops, ptid, step, signo);
   memset (&lp->siginfo, 0, sizeof (lp->siginfo));
   lp->stopped_by_watchpoint = 0;
@@ -2138,6 +2158,8 @@ linux_handle_syscall_trap (struct lwp_info *lp, int stopping)
   /* Note that gdbarch_get_syscall_number may access registers, hence
      fill a regcache.  */
   registers_changed ();
+  if (linux_nat_prepare_to_resume != NULL)
+    linux_nat_prepare_to_resume (lp);
   linux_ops->to_resume (linux_ops, pid_to_ptid (GET_LWP (lp->ptid)),
 			lp->step, TARGET_SIGNAL_0);
   return 1;
@@ -2325,6 +2347,8 @@ linux_handle_extended_wait (struct lwp_info *lp, int status,
 		    fprintf_unfiltered (gdb_stdlog,
 					"LHEW: resuming new LWP %ld\n",
 					GET_LWP (new_lp->ptid));
+		  if (linux_nat_prepare_to_resume != NULL)
+		    linux_nat_prepare_to_resume (new_lp);
 		  linux_ops->to_resume (linux_ops, pid_to_ptid (new_pid),
 					0, TARGET_SIGNAL_0);
 		  new_lp->stopped = 0;
@@ -2334,6 +2358,8 @@ linux_handle_extended_wait (struct lwp_info *lp, int status,
 	  if (debug_linux_nat)
 	    fprintf_unfiltered (gdb_stdlog,
 				"LHEW: resuming parent LWP %d\n", pid);
+	  if (linux_nat_prepare_to_resume != NULL)
+	    linux_nat_prepare_to_resume (lp);
 	  linux_ops->to_resume (linux_ops, pid_to_ptid (GET_LWP (lp->ptid)),
 				0, TARGET_SIGNAL_0);
 
@@ -2595,6 +2621,14 @@ stop_callback (struct lwp_info *lp, void *data)
     }
 
   return 0;
+}
+
+/* Request a stop on LWP.  */
+
+void
+linux_stop_lwp (struct lwp_info *lwp)
+{
+  stop_callback (lwp, NULL);
 }
 
 /* Return non-zero if LWP PID has a pending SIGINT.  */
@@ -3333,6 +3367,8 @@ linux_nat_filter_event (int lwpid, int status, int *new_pending_p)
 
 	  registers_changed ();
 
+	  if (linux_nat_prepare_to_resume != NULL)
+	    linux_nat_prepare_to_resume (lp);
 	  linux_ops->to_resume (linux_ops, pid_to_ptid (GET_LWP (lp->ptid)),
 			    lp->step, TARGET_SIGNAL_0);
 	  if (debug_linux_nat)
@@ -3364,6 +3400,8 @@ linux_nat_filter_event (int lwpid, int status, int *new_pending_p)
       lp->ignore_sigint = 0;
 
       registers_changed ();
+      if (linux_nat_prepare_to_resume != NULL)
+	linux_nat_prepare_to_resume (lp);
       linux_ops->to_resume (linux_ops, pid_to_ptid (GET_LWP (lp->ptid)),
 			    lp->step, TARGET_SIGNAL_0);
       if (debug_linux_nat)
@@ -3538,6 +3576,8 @@ retry:
       /* Resume the thread.  It should halt immediately returning the
          pending SIGSTOP.  */
       registers_changed ();
+      if (linux_nat_prepare_to_resume != NULL)
+	linux_nat_prepare_to_resume (lp);
       linux_ops->to_resume (linux_ops, pid_to_ptid (GET_LWP (lp->ptid)),
 			    lp->step, TARGET_SIGNAL_0);
       if (debug_linux_nat)
@@ -3787,6 +3827,8 @@ retry:
 	     newly attached threads may cause an unwanted delay in
 	     getting them running.  */
 	  registers_changed ();
+	  if (linux_nat_prepare_to_resume != NULL)
+	    linux_nat_prepare_to_resume (lp);
 	  linux_ops->to_resume (linux_ops, pid_to_ptid (GET_LWP (lp->ptid)),
 				lp->step, signo);
 	  if (debug_linux_nat)
@@ -3943,6 +3985,8 @@ resume_stopped_resumed_lwps (struct lwp_info *lp, void *data)
 			    lp->step);
 
       registers_changed ();
+      if (linux_nat_prepare_to_resume != NULL)
+	linux_nat_prepare_to_resume (lp);
       linux_ops->to_resume (linux_ops, pid_to_ptid (GET_LWP (lp->ptid)),
 			    lp->step, TARGET_SIGNAL_0);
       lp->stopped = 0;
@@ -5840,7 +5884,8 @@ linux_nat_add_target (struct target_ops *t)
 
 /* Register a method to call whenever a new thread is attached.  */
 void
-linux_nat_set_new_thread (struct target_ops *t, void (*new_thread) (ptid_t))
+linux_nat_set_new_thread (struct target_ops *t,
+			  void (*new_thread) (struct lwp_info *))
 {
   /* Save the pointer.  We only support a single registered instance
      of the GNU/Linux native target, so we do not need to map this to
@@ -5859,6 +5904,16 @@ linux_nat_set_siginfo_fixup (struct target_ops *t,
 {
   /* Save the pointer.  */
   linux_nat_siginfo_fixup = siginfo_fixup;
+}
+
+/* Register a method to call prior to resuming a thread.  */
+
+void
+linux_nat_set_prepare_to_resume (struct target_ops *t,
+				 void (*prepare_to_resume) (struct lwp_info *))
+{
+  /* Save the pointer.  */
+  linux_nat_prepare_to_resume = prepare_to_resume;
 }
 
 /* Return the saved siginfo associated with PTID.  */

@@ -2151,9 +2151,9 @@ ppc_linux_remove_watchpoint (CORE_ADDR addr, int len, int rw,
 }
 
 static void
-ppc_linux_new_thread (ptid_t ptid)
+ppc_linux_new_thread (struct lwp_info *lp)
 {
-  int tid = TIDGET (ptid);
+  int tid = TIDGET (lp->ptid);
 
   if (have_ptrace_booke_interface ())
     {

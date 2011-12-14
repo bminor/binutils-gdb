@@ -43,11 +43,6 @@ struct i386_dr_low_type i386_dr_low;
 /* Support for 8-byte wide hw watchpoints.  */
 #define TARGET_HAS_DR_LEN_8 (i386_dr_low.debug_register_length == 8)
 
-/* Debug registers' indices.  */
-#define DR_NADDR	4	/* The number of debug address registers.  */
-#define DR_STATUS	6	/* Index of debug status register (DR6).  */
-#define DR_CONTROL	7	/* Index of debug control register (DR7).  */
-
 /* DR7 Debug Control register fields.  */
 
 /* How many bits to skip in DR7 to get to R/W and LEN fields.  */
@@ -158,23 +153,6 @@ struct i386_dr_low_type i386_dr_low;
 /* A macro to loop over all debug registers.  */
 #define ALL_DEBUG_REGISTERS(i)	for (i = 0; i < DR_NADDR; i++)
 
-
-/* Global state needed to track h/w watchpoints.  */
-
-struct i386_debug_reg_state
-{
-  /* Mirror the inferior's DRi registers.  We keep the status and
-     control registers separated because they don't hold addresses.
-     Note that since we can change these mirrors while threads are
-     running, we never trust them to explain a cause of a trap.
-     For that, we need to peek directly in the inferior registers.  */
-  CORE_ADDR dr_mirror[DR_NADDR];
-  unsigned dr_status_mirror, dr_control_mirror;
-
-  /* Reference counts for each debug register.  */
-  int dr_ref_count[DR_NADDR];
-};
-
 /* Clear the reference counts and forget everything we knew about the
    debug registers.  */
 
@@ -192,7 +170,15 @@ i386_init_dregs (struct i386_debug_reg_state *state)
   state->dr_status_mirror  = 0;
 }
 
+/* The local mirror of the inferior's debug registers.  Currently this
+   is a global, but it should really be per-inferior.  */
 static struct i386_debug_reg_state dr_mirror;
+
+struct i386_debug_reg_state *
+i386_debug_reg_state (void)
+{
+  return &dr_mirror;
+}
 
 /* Whether or not to print the mirrored debug registers.  */
 static int maint_show_dr;
@@ -513,22 +499,7 @@ i386_update_inferior_debug_regs (struct i386_debug_reg_state *new_state)
   ALL_DEBUG_REGISTERS (i)
     {
       if (I386_DR_VACANT (new_state, i) != I386_DR_VACANT (&dr_mirror, i))
-	{
-	  if (!I386_DR_VACANT (new_state, i))
-	    {
-	      i386_dr_low.set_addr (i, new_state->dr_mirror[i]);
-
-	      /* Only a sanity check for leftover bits (set possibly only
-		 by inferior).  */
-	      if (i386_dr_low.unset_status)
-		i386_dr_low.unset_status (I386_DR_WATCH_MASK (i));
-	    }
-	  else
-	    {
-	      if (i386_dr_low.reset_addr)
-		i386_dr_low.reset_addr (i);
-	    }
-	}
+	i386_dr_low.set_addr (i, new_state->dr_mirror[i]);
       else
 	gdb_assert (new_state->dr_mirror[i] == dr_mirror.dr_mirror[i]);
     }
@@ -634,28 +605,62 @@ i386_stopped_data_address (struct target_ops *ops, CORE_ADDR *addr_p)
   CORE_ADDR addr = 0;
   int i;
   int rc = 0;
+  /* The current thread's DR_STATUS.  We always need to read this to
+     check whether some watchpoint caused the trap.  */
   unsigned status;
-  unsigned control;
-  struct i386_debug_reg_state *state = &dr_mirror;
+  /* We need DR_CONTROL as well, but only iff DR_STATUS indicates a
+     data breakpoint trap.  Only fetch it when necessary, to avoid an
+     unnecessary extra syscall when no watchpoint triggered.  */
+  int control_p = 0;
+  unsigned control = 0;
 
-  dr_mirror.dr_status_mirror = i386_dr_low.get_status ();
-  status = dr_mirror.dr_status_mirror;
-  control = dr_mirror.dr_control_mirror;
+  /* In non-stop/async, threads can be running while we change the
+     global dr_mirror (and friends).  Say, we set a watchpoint, and
+     let threads resume.  Now, say you delete the watchpoint, or
+     add/remove watchpoints such that dr_mirror changes while threads
+     are running.  On targets that support non-stop,
+     inserting/deleting watchpoints updates the global dr_mirror only.
+     It does not update the real thread's debug registers; that's only
+     done prior to resume.  Instead, if threads are running when the
+     mirror changes, a temporary and transparent stop on all threads
+     is forced so they can get their copy of the debug registers
+     updated on re-resume.  Now, say, a thread hit a watchpoint before
+     having been updated with the new dr_mirror contents, and we
+     haven't yet handled the corresponding SIGTRAP.  If we trusted
+     dr_mirror below, we'd mistake the real trapped address (from the
+     last time we had updated debug registers in the thread) with
+     whatever was currently in dr_mirror.  So to fix this, dr_mirror
+     always represents intention, what we _want_ threads to have in
+     debug registers.  To get at the address and cause of the trap, we
+     need to read the state the thread still has in its debug
+     registers.
+
+     In sum, always get the current debug register values the current
+     thread has, instead of trusting the global mirror.  If the thread
+     was running when we last changed watchpoints, the mirror no
+     longer represents what was set in this thread's debug
+     registers.  */
+  status = i386_dr_low.get_status ();
 
   ALL_DEBUG_REGISTERS(i)
     {
-      if (I386_DR_WATCH_HIT (status, i)
-	  /* This second condition makes sure DRi is set up for a data
-	     watchpoint, not a hardware breakpoint.  The reason is
-	     that GDB doesn't call the target_stopped_data_address
-	     method except for data watchpoints.  In other words, I'm
-	     being paranoiac.  */
-	  && I386_DR_GET_RW_LEN (control, i) != 0
-	  /* This third condition makes sure DRi is not vacant, this
-	     avoids false positives in windows-nat.c.  */
-	  && !I386_DR_VACANT (state, i))
+      if (!I386_DR_WATCH_HIT (status, i))
+	continue;
+
+      if (!control_p)
 	{
-	  addr = state->dr_mirror[i];
+	  control = i386_dr_low.get_control ();
+	  control_p = 1;
+	}
+
+      /* This second condition makes sure DRi is set up for a data
+	 watchpoint, not a hardware breakpoint.  The reason is that
+	 GDB doesn't call the target_stopped_data_address method
+	 except for data watchpoints.  In other words, I'm being
+	 paranoiac.  */
+      if (I386_DR_GET_RW_LEN (control, i) != 0)
+	{
+	  addr = i386_dr_low.get_addr (i);
 	  rc = 1;
 	  if (maint_show_dr)
 	    i386_show_dr (&dr_mirror, "watchpoint_hit", addr, -1, hw_write);

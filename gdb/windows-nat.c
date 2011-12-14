@@ -2494,8 +2494,9 @@ init_windows_ops (void)
 
   i386_dr_low.set_control = cygwin_set_dr7;
   i386_dr_low.set_addr = cygwin_set_dr;
-  i386_dr_low.reset_addr = NULL;
+  i386_dr_low.get_addr = cygwin_get_dr;
   i386_dr_low.get_status = cygwin_get_dr6;
+  i386_dr_low.get_control = cygwin_get_dr7;
 
   /* i386_dr_low.debug_register_length field is set by
      calling i386_set_debug_register_length function
@@ -2627,6 +2628,14 @@ cygwin_set_dr7 (unsigned long val)
   debug_registers_used = 1;
 }
 
+/* Get the value of debug register I from the inferior.  */
+
+static CORE_ADDR
+cygwin_get_dr (int i)
+{
+  return dr[i];
+}
+
 /* Get the value of the DR6 debug status register from the inferior.
    Here we just return the value stored in dr[6]
    by the last call to thread_rec for current_event.dwThreadId id.  */
@@ -2634,6 +2643,16 @@ static unsigned long
 cygwin_get_dr6 (void)
 {
   return (unsigned long) dr[6];
+}
+
+/* Get the value of the DR7 debug status register from the inferior.
+   Here we just return the value stored in dr[7] by the last call to
+   thread_rec for current_event.dwThreadId id.  */
+
+static unsigned long
+cygwin_get_dr7 (void)
+{
+  return (unsigned long) dr[7];
 }
 
 /* Determine if the thread referenced by "ptid" is alive
