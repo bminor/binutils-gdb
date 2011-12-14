@@ -815,7 +815,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT sec ATTRIBUTE_UNUSED,
 
   /* Used to check integrity of the relaxation.
      One of 2 = long, 1 = word, or 0 = byte.  */
-  int length_code;
+  int length_code ATTRIBUTE_UNUSED;
 
   /* Size in bytes of variable-sized part of frag.  */
   int var_part_size = 0;

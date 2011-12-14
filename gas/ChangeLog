@@ -1,3 +1,8 @@
+2011-12-14  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-cris.c (md_convert_frag): Mark the length_code local
+	variable as unused as it is only used when ENABLE_CHECKING is on.
+
 2011-12-14  Iain Sandoe  <iains@gcc.gnu.org>
 
 	* config/obj-macho.c: Add some more top-level comments.
