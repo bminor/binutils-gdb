@@ -7732,6 +7732,7 @@ create_breakpoint (struct gdbarch *gdbarch,
 
       copy_arg = savestring (addr_start, arg - addr_start);
 
+      canonical.addr_string = xstrdup (copy_arg);
       lsal.canonical = xstrdup (copy_arg);
       VEC_safe_push (linespec_sals, canonical.sals, &lsal);
 
