@@ -17536,8 +17536,8 @@ subroutines:
 @findex set_debug_traps
 @cindex remote serial stub, initialization
 This routine arranges for @code{handle_exception} to run when your
-program stops.  You must call this subroutine explicitly near the
-beginning of your program.
+program stops.  You must call this subroutine explicitly in your
+program's startup code.
 
 @item handle_exception
 @findex handle_exception
@@ -17683,12 +17683,21 @@ Make sure you have defined the supporting low-level routines
 @end display
 
 @item
-Insert these lines near the top of your program:
+Insert these lines in your program's startup code, before the main
+procedure is called:
 
 @smallexample
 set_debug_traps();
 breakpoint();
 @end smallexample
+
+On some machines, when a breakpoint trap is raised, the hardware
+automatically makes the PC point to the instruction after the
+breakpoint.  If your machine doesn't do that, you may need to adjust
+@code{handle_exception} to arrange for it to return to the instruction
+after the breakpoint on this first invocation, so that your program
+doesn't keep hitting the initial breakpoint instead of making
+progress.
 
 @item
 For the 680x0 stub only, you need to provide a variable called

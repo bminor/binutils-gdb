@@ -1,3 +1,9 @@
+2011-12-14  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.texinfo (Implementing a Remote Stub): Explain that you
+	should transfer control to the stub in the startup code instead of
+	in main.  Mention the need to get past the initial breakpoint.
+
 2011-12-06  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (Set Breaks): Update for new behavior.
