@@ -307,7 +307,7 @@ proc gdb_start_cmd {args} {
 	    -re "$gdb_prompt $" { }
 	    default {
 		perror "gdb_init_command for target failed";
-		return;
+		return -1;
 	    }
 	}
     }

@@ -1,3 +1,7 @@
+2011-12-14  Doug Evans  <dje@google.com>
+
+	* lib/gdb.exp (gdb_start_cmd): Fix error return value.
+
 2011-12-14  Pedro Alves  <pedro@codesourcery.com>
 
 	PR threads/10729
