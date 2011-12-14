@@ -1104,7 +1104,7 @@
 
 2011-11-14  Doug Evans  <dje@google.com>
 
-	Make "!" an alias for "shell".
+	PR gdb/7200 Make "!" an alias for "shell".
 	* NEWS: Add mention.
 	* cli/cli-cmds.c (init_cli_cmds): Remove xdb_commands condition on
 	adding "!" command, always add it.
