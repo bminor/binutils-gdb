@@ -1097,8 +1097,28 @@ elf_checksum_contents (bfd *abfd,
       elf_swap_shdr_out (abfd, &i_shdr, &x_shdr);
       (*process) (&x_shdr, sizeof x_shdr, arg);
 
+      /* PR ld/12451:
+	 Process the section's contents; reading them in if necessary.  */
       if (i_shdr.contents)
 	(*process) (i_shdr.contents, i_shdr.sh_size, arg);
+      else
+	{
+	  asection *sec;
+
+	  sec = bfd_section_from_elf_index (abfd, count);
+	  if (sec != NULL)
+	    {
+	      if (sec->contents == NULL)
+		{
+		  /* Force rereading from file.  */
+		  sec->flags &= ~SEC_IN_MEMORY;
+		  if (! bfd_malloc_and_get_section (abfd, sec, & sec->contents))
+		    continue;
+		}
+	      if (sec->contents != NULL)
+		(*process) (sec->contents, i_shdr.sh_size, arg);
+	    }
+	}
     }
 
   return TRUE;

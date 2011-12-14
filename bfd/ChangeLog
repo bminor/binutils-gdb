@@ -1,3 +1,12 @@
+2011-12-14  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/12451
+	* elfcode.h (elf_checksum_contents): Read in the section's
+	contents if they are not already available.
+	* compress.c (bfd_get_full_section_contents): Use zmalloc to
+	allocate the buffers so that excess bytes are guaranteed to be
+	zero.
+
 2011-12-14  Iain Sandoe  <iains@gcc.gnu.org>
 
 	* mach-o-i386.c (text_section_names_xlat): New table.
