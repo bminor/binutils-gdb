@@ -1,3 +1,44 @@
+2011-12-14  Iain Sandoe  <iains@gcc.gnu.org>
+
+	* mach-o-i386.c (text_section_names_xlat): New table.
+	(data_section_names_xlat): Likewise.
+	(import_section_names_xlat): Likewise.
+	(mach_o_i386_segsec_names_xlat): Likewise.
+	(bfd_mach_o_tgt_seg_table): Use new tables.
+	* mach-o-x86-64.c (bfd_mach_o_tgt_seg_table): Set NULL.
+	* mach-o.c (mach_o_section_name_xlat, mach_o_segment_name_xlat):
+	Move to mach-o.h as   typedefs.
+	(text_section_names_xlat): Update for current GCC usage.
+	(data_section_names_xlat): Likewise.
+	(dwarf_section_names_xlat): Likewise.
+	(objc_section_names_xlat): New table.
+	(segsec_names_xlat): Add objc table.
+	(bfd_mach_o_normalize_section_name):  Replace with...
+	(bfd_mach_o_section_data_for_mach_sect): New.
+	(bfd_mach_o_section_data_for_bfd_name): New.
+	(bfd_mach_o_section_data_for_bfd_name): Update to use additional data.
+	(bfd_mach_o_convert_section_name_to_mach_o): Likewise.
+	(bfd_mach_o_bfd_copy_private_section_data): Implement.
+	(bfd_mach_o_write_symtab): Write a zero-length string as the first entry
+	for compatibility with system tools.
+	(bfd_mach_o_build_commands): Update section alignment info.
+	(bfd_mach_o_new_section_hook): Use translation table data to define
+	default section flags, type, attributes and alignment, when available.
+	(bfd_mach_o_init_section_from_mach_o): Add TODO comment.
+	(bfd_mach_o_section_type_name): Add 'symbol_stubs'.
+	(bfd_mach_o_section_attribute_name): Add 'self_modifying_code'.
+	(bfd_mach_o_get_section_type_from_name): Change "not-found" return
+	value.
+	(bfd_mach_o_tgt_seg_table): Set default NULL.
+	* mach-o.h (bfd_mach_o_segment_command):  Use define for name length.
+	(bfd_mach_o_backend_data): Move until after contents are defined.
+	(bfd_mach_o_normalize_section_name): Remove.
+	(bfd_mach_o_convert_section_name_to_bfd): Declare.
+	(mach_o_section_name_xlat): Declare.
+	(mach_o_segment_name_xlat): Declare.
+	(bfd_mach_o_section_data_for_mach_sect): Declare.
+	(bfd_mach_o_section_data_for_bfd_name): Declare.
+
 2011-12-13  Shinichiro Hamaji  <shinichiro.hamaji@gmail.com>
 
 	* dwarf2.c (bfd_dwarf2_cleanup_debug_info): Accept stash as an

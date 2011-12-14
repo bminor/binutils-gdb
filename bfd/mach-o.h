@@ -1,5 +1,5 @@
 /* Mach-O support for BFD.
-   Copyright 1999, 2000, 2001, 2002, 2003, 2005, 2007, 2008, 2009
+   Copyright 1999, 2000, 2001, 2002, 2003, 2005, 2007, 2008, 2009, 2011
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -70,7 +70,7 @@ bfd_mach_o_section;
 
 typedef struct bfd_mach_o_segment_command
 {
-  char segname[16 + 1];
+  char segname[BFD_MACH_O_SEGNAME_SIZE + 1];
   bfd_vma vmaddr;
   bfd_vma vmsize;
   bfd_vma fileoff;
@@ -530,15 +530,6 @@ typedef struct bfd_mach_o_xlat_name
 bfd_mach_o_xlat_name;
 
 /* Target specific routines.  */
-typedef struct bfd_mach_o_backend_data
-{
-  enum bfd_architecture arch;
-  bfd_boolean (*_bfd_mach_o_swap_reloc_in)(arelent *, bfd_mach_o_reloc_info *);
-  bfd_boolean (*_bfd_mach_o_swap_reloc_out)(arelent *, bfd_mach_o_reloc_info *);
-  bfd_boolean (*_bfd_mach_o_print_thread)(bfd *, bfd_mach_o_thread_flavour *,
-                                          void *, char *);
-}
-bfd_mach_o_backend_data;
 
 #define bfd_mach_o_get_data(abfd) ((abfd)->tdata.mach_o_data)
 #define bfd_mach_o_get_backend_data(abfd) \
@@ -591,8 +582,9 @@ unsigned int bfd_mach_o_version (bfd *);
 
 unsigned int bfd_mach_o_get_section_type_from_name (const char *);
 unsigned int bfd_mach_o_get_section_attribute_from_name (const char *);
-void bfd_mach_o_normalize_section_name (const char *, const char *,
-                                        const char **, flagword *);
+
+void bfd_mach_o_convert_section_name_to_bfd (bfd *, const char *, const char *,
+					     const char **, flagword *);
 bfd_boolean bfd_mach_o_find_nearest_line (bfd *, asection *, asymbol **,
                                           bfd_vma, const char **,
                                           const char **, unsigned int *);
@@ -607,5 +599,39 @@ extern const bfd_mach_o_xlat_name bfd_mach_o_section_attribute_name[];
 extern const bfd_mach_o_xlat_name bfd_mach_o_section_type_name[];
 
 extern const bfd_target mach_o_fat_vec;
+
+/* Interfaces between BFD names and Mach-O names.  */
+
+typedef struct mach_o_section_name_xlat
+{
+  const char *bfd_name;
+  const char *mach_o_name;
+  flagword bfd_flags;
+  unsigned int macho_sectype;
+  unsigned int macho_secattr;
+  unsigned int sectalign;
+} mach_o_section_name_xlat;
+
+typedef struct mach_o_segment_name_xlat
+{
+  const char *segname;
+  const mach_o_section_name_xlat *sections;
+} mach_o_segment_name_xlat;
+
+const mach_o_section_name_xlat *
+bfd_mach_o_section_data_for_mach_sect (bfd *, const char *, const char *);
+const mach_o_section_name_xlat *
+bfd_mach_o_section_data_for_bfd_name (bfd *, const char *, const char **);
+
+typedef struct bfd_mach_o_backend_data
+{
+  enum bfd_architecture arch;
+  bfd_boolean (*_bfd_mach_o_swap_reloc_in)(arelent *, bfd_mach_o_reloc_info *);
+  bfd_boolean (*_bfd_mach_o_swap_reloc_out)(arelent *, bfd_mach_o_reloc_info *);
+  bfd_boolean (*_bfd_mach_o_print_thread)(bfd *, bfd_mach_o_thread_flavour *,
+                                          void *, char *);
+  const mach_o_segment_name_xlat *segsec_names_xlat;
+}
+bfd_mach_o_backend_data;
 
 #endif /* _BFD_MACH_O_H_ */

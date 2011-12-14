@@ -87,118 +87,312 @@ bfd_mach_o_wide_p (bfd *abfd)
    names.  Use of canonical names (such as .text or .debug_frame) is required
    by gdb.  */
 
-struct mach_o_section_name_xlat
-{
-  const char *bfd_name;
-  const char *mach_o_name;
-  flagword flags;
-};
-
-static const struct mach_o_section_name_xlat dwarf_section_names_xlat[] =
+/* __TEXT Segment.  */
+static const mach_o_section_name_xlat text_section_names_xlat[] =
   {
-    { ".debug_frame",    "__debug_frame",    SEC_DEBUGGING },
-    { ".debug_info",     "__debug_info",     SEC_DEBUGGING },
-    { ".debug_abbrev",   "__debug_abbrev",   SEC_DEBUGGING },
-    { ".debug_aranges",  "__debug_aranges",  SEC_DEBUGGING },
-    { ".debug_macinfo",  "__debug_macinfo",  SEC_DEBUGGING },
-    { ".debug_line",     "__debug_line",     SEC_DEBUGGING },
-    { ".debug_loc",      "__debug_loc",      SEC_DEBUGGING },
-    { ".debug_pubnames", "__debug_pubnames", SEC_DEBUGGING },
-    { ".debug_pubtypes", "__debug_pubtypes", SEC_DEBUGGING },
-    { ".debug_str",      "__debug_str",      SEC_DEBUGGING },
-    { ".debug_ranges",   "__debug_ranges",   SEC_DEBUGGING },
-    { NULL, NULL, 0}
+    {	".text",				"__text",	
+	SEC_CODE | SEC_LOAD,			BFD_MACH_O_S_REGULAR,
+	BFD_MACH_O_S_ATTR_PURE_INSTRUCTIONS,	0},
+    {	".const",				"__const",
+	SEC_READONLY | SEC_DATA | SEC_LOAD,	BFD_MACH_O_S_REGULAR,
+	BFD_MACH_O_S_ATTR_NONE,			0},
+    {	".static_const",			"__static_const",
+	SEC_READONLY | SEC_DATA | SEC_LOAD,	BFD_MACH_O_S_REGULAR,
+	BFD_MACH_O_S_ATTR_NONE,			0},
+    {	".cstring",				"__cstring",
+	SEC_READONLY | SEC_DATA | SEC_LOAD | SEC_MERGE | SEC_STRINGS,
+						BFD_MACH_O_S_CSTRING_LITERALS,
+	BFD_MACH_O_S_ATTR_NONE,			0},
+    {	".literal4",				"__literal4",
+	SEC_READONLY | SEC_DATA | SEC_LOAD,	BFD_MACH_O_S_4BYTE_LITERALS,
+	BFD_MACH_O_S_ATTR_NONE,			2},
+    {	".literal8",				"__literal8",
+	SEC_READONLY | SEC_DATA | SEC_LOAD,	BFD_MACH_O_S_8BYTE_LITERALS,
+	BFD_MACH_O_S_ATTR_NONE,			3},
+    {	".literal16",				"__literal16",
+	SEC_READONLY | SEC_DATA | SEC_LOAD,	BFD_MACH_O_S_16BYTE_LITERALS,
+	BFD_MACH_O_S_ATTR_NONE,			4},
+    {	".constructor",				"__constructor",
+	SEC_CODE | SEC_LOAD,			BFD_MACH_O_S_REGULAR,
+	BFD_MACH_O_S_ATTR_NONE,			0},
+    {	".destructor",				"__destructor",
+	SEC_CODE | SEC_LOAD,			BFD_MACH_O_S_REGULAR,
+	BFD_MACH_O_S_ATTR_NONE,			0},
+    {	".eh_frame",				"__eh_frame",
+	SEC_READONLY | SEC_LOAD,		BFD_MACH_O_S_COALESCED,
+	BFD_MACH_O_S_ATTR_LIVE_SUPPORT
+	| BFD_MACH_O_S_ATTR_STRIP_STATIC_SYMS
+	| BFD_MACH_O_S_ATTR_NO_TOC,		3},
+    { NULL, NULL, 0, 0, 0, 0}
   };
 
-static const struct mach_o_section_name_xlat text_section_names_xlat[] =
+/* __DATA Segment.  */
+static const mach_o_section_name_xlat data_section_names_xlat[] =
   {
-    { ".text",     "__text",      SEC_CODE | SEC_LOAD },
-    { ".const",    "__const",     SEC_READONLY | SEC_DATA | SEC_LOAD },
-    { ".cstring",  "__cstring",   SEC_READONLY | SEC_DATA | SEC_LOAD },
-    { ".eh_frame", "__eh_frame",  SEC_READONLY | SEC_LOAD },
-    { NULL, NULL, 0}
+    {	".data",			"__data",
+	SEC_DATA | SEC_LOAD,		BFD_MACH_O_S_REGULAR,
+	BFD_MACH_O_S_ATTR_NONE,		0},
+    {	".bss",				"__bss",
+	SEC_NO_FLAGS,			BFD_MACH_O_S_ZEROFILL,
+	BFD_MACH_O_S_ATTR_NONE,		0},
+    {	".const_data",			"__const",
+	SEC_DATA | SEC_LOAD,		BFD_MACH_O_S_REGULAR,
+	BFD_MACH_O_S_ATTR_NONE,		0},
+    {	".static_data",			"__static_data",
+	SEC_DATA | SEC_LOAD,		BFD_MACH_O_S_REGULAR,
+	BFD_MACH_O_S_ATTR_NONE,		0},
+    {	".mod_init_func",		"__mod_init_func",
+	SEC_DATA | SEC_LOAD,		BFD_MACH_O_S_MOD_INIT_FUNC_POINTERS,
+	BFD_MACH_O_S_ATTR_NONE,		2},
+    {	".mod_term_func",		"__mod_term_func",
+	SEC_DATA | SEC_LOAD,		BFD_MACH_O_S_MOD_FINI_FUNC_POINTERS,
+	BFD_MACH_O_S_ATTR_NONE,		2},
+    {	".dyld",			"__dyld",
+	SEC_DATA | SEC_LOAD,		BFD_MACH_O_S_REGULAR,
+	BFD_MACH_O_S_ATTR_NONE,		0},
+    {	".cfstring",			"__cfstring",
+	SEC_DATA | SEC_LOAD,		BFD_MACH_O_S_REGULAR,
+	BFD_MACH_O_S_ATTR_NONE,		2},
+    { NULL, NULL, 0, 0, 0, 0}
   };
 
-static const struct mach_o_section_name_xlat data_section_names_xlat[] =
+/* __DWARF Segment.  */
+static const mach_o_section_name_xlat dwarf_section_names_xlat[] =
   {
-    { ".data",                "__data",          SEC_DATA | SEC_LOAD },
-    { ".const_data",          "__const",         SEC_DATA | SEC_LOAD },
-    { ".dyld",                "__dyld",          SEC_DATA | SEC_LOAD },
-    { ".lazy_symbol_ptr",     "__la_symbol_ptr", SEC_DATA | SEC_LOAD },
-    { ".non_lazy_symbol_ptr", "__nl_symbol_ptr", SEC_DATA | SEC_LOAD },
-    { ".bss",                 "__bss",           SEC_NO_FLAGS },
-    { NULL, NULL, 0}
+    {	".debug_frame",			"__debug_frame",
+	SEC_DEBUGGING,			BFD_MACH_O_S_REGULAR,
+	BFD_MACH_O_S_ATTR_DEBUG,	0},
+    {	".debug_info",			"__debug_info",
+	SEC_DEBUGGING,			BFD_MACH_O_S_REGULAR,
+	BFD_MACH_O_S_ATTR_DEBUG,	0},
+    {	".debug_abbrev",		"__debug_abbrev",
+	SEC_DEBUGGING,			BFD_MACH_O_S_REGULAR,
+	BFD_MACH_O_S_ATTR_DEBUG,	0},
+    {	".debug_aranges",		"__debug_aranges",
+	SEC_DEBUGGING,			BFD_MACH_O_S_REGULAR,
+	BFD_MACH_O_S_ATTR_DEBUG,	0},
+    {	".debug_macinfo",		"__debug_macinfo",
+	SEC_DEBUGGING,			BFD_MACH_O_S_REGULAR,
+	BFD_MACH_O_S_ATTR_DEBUG,	0},
+    {	".debug_line",			"__debug_line",
+	SEC_DEBUGGING,			BFD_MACH_O_S_REGULAR,
+	BFD_MACH_O_S_ATTR_DEBUG,	0},
+    {	".debug_loc",			"__debug_loc",
+	SEC_DEBUGGING,			BFD_MACH_O_S_REGULAR,
+	BFD_MACH_O_S_ATTR_DEBUG,	0},
+    {	".debug_pubnames",		"__debug_pubnames",
+	SEC_DEBUGGING,			BFD_MACH_O_S_REGULAR,
+	BFD_MACH_O_S_ATTR_DEBUG,	0},
+    {	".debug_pubtypes",		"__debug_pubtypes",
+	SEC_DEBUGGING,			BFD_MACH_O_S_REGULAR,
+	BFD_MACH_O_S_ATTR_DEBUG,	0},
+    {	".debug_str",			"__debug_str",
+	SEC_DEBUGGING,			BFD_MACH_O_S_REGULAR,
+	BFD_MACH_O_S_ATTR_DEBUG,	0},
+    {	".debug_ranges",		"__debug_ranges",
+	SEC_DEBUGGING,			BFD_MACH_O_S_REGULAR,
+	BFD_MACH_O_S_ATTR_DEBUG,	0},
+    {	".debug_macro",			"__debug_macro",
+	SEC_DEBUGGING,			BFD_MACH_O_S_REGULAR,
+	BFD_MACH_O_S_ATTR_DEBUG,	0},
+    { NULL, NULL, 0, 0, 0, 0}
   };
 
-struct mach_o_segment_name_xlat
-{
-  /* Segment name.  */
-  const char *segname;
+/* __OBJC Segment.  */
+static const mach_o_section_name_xlat objc_section_names_xlat[] =
+  {
+    {	".objc_class",			"__class",
+	SEC_DATA | SEC_LOAD,		BFD_MACH_O_S_REGULAR,
+	BFD_MACH_O_S_ATTR_NO_DEAD_STRIP, 0},
+    {	".objc_meta_class",		"__meta_class",
+	SEC_DATA | SEC_LOAD,		BFD_MACH_O_S_REGULAR,
+	BFD_MACH_O_S_ATTR_NO_DEAD_STRIP, 0},
+    {	".objc_cat_cls_meth",		"__cat_cls_meth",
+	SEC_DATA | SEC_LOAD,		BFD_MACH_O_S_REGULAR,
+	BFD_MACH_O_S_ATTR_NO_DEAD_STRIP, 0},
+    {	".objc_cat_inst_meth",		"__cat_inst_meth",
+	SEC_DATA | SEC_LOAD,		BFD_MACH_O_S_REGULAR,
+	BFD_MACH_O_S_ATTR_NO_DEAD_STRIP, 0},
+    {	".objc_protocol",		"__protocol",
+	SEC_DATA | SEC_LOAD,		BFD_MACH_O_S_REGULAR,
+	BFD_MACH_O_S_ATTR_NO_DEAD_STRIP, 0},
+    {	".objc_string_object",		"__string_object",
+	SEC_DATA | SEC_LOAD,		BFD_MACH_O_S_REGULAR,
+	BFD_MACH_O_S_ATTR_NO_DEAD_STRIP, 0},
+    {	".objc_cls_meth",		"__cls_meth",
+	SEC_DATA | SEC_LOAD,		BFD_MACH_O_S_REGULAR,
+	BFD_MACH_O_S_ATTR_NO_DEAD_STRIP, 0},
+    {	".objc_inst_meth",		"__inst_meth",
+	SEC_DATA | SEC_LOAD,		BFD_MACH_O_S_REGULAR,
+	BFD_MACH_O_S_ATTR_NO_DEAD_STRIP, 0},
+    {	".objc_cls_refs",		"__cls_refs",
+	SEC_DATA | SEC_LOAD,		BFD_MACH_O_S_LITERAL_POINTERS,
+	BFD_MACH_O_S_ATTR_NO_DEAD_STRIP, 0},
+    {	".objc_message_refs",		"__message_refs",
+	SEC_DATA | SEC_LOAD,		BFD_MACH_O_S_LITERAL_POINTERS,
+	BFD_MACH_O_S_ATTR_NO_DEAD_STRIP, 0},
+    {	".objc_symbols",		"__symbols",
+	SEC_DATA | SEC_LOAD,		BFD_MACH_O_S_REGULAR,
+	BFD_MACH_O_S_ATTR_NO_DEAD_STRIP, 0},
+    {	".objc_category",		"__category",
+	SEC_DATA | SEC_LOAD,		BFD_MACH_O_S_REGULAR,
+	BFD_MACH_O_S_ATTR_NO_DEAD_STRIP, 0},
+    {	".objc_class_vars",		"__class_vars",
+	SEC_DATA | SEC_LOAD,		BFD_MACH_O_S_REGULAR,
+	BFD_MACH_O_S_ATTR_NO_DEAD_STRIP, 0},
+    {	".objc_instance_vars",		"__instance_vars",
+	SEC_DATA | SEC_LOAD,		BFD_MACH_O_S_REGULAR,
+	BFD_MACH_O_S_ATTR_NO_DEAD_STRIP, 0},
+    {	".objc_module_info",		"__module_info",
+	SEC_DATA | SEC_LOAD,		BFD_MACH_O_S_REGULAR,
+	BFD_MACH_O_S_ATTR_NO_DEAD_STRIP, 0},
+    {	".objc_selector_strs",		"__selector_strs",
+	SEC_DATA | SEC_LOAD,		BFD_MACH_O_S_CSTRING_LITERALS,
+	BFD_MACH_O_S_ATTR_NO_DEAD_STRIP, 0},
+    {	".objc_image_info",		"__image_info",
+	SEC_DATA | SEC_LOAD,		BFD_MACH_O_S_REGULAR,
+	BFD_MACH_O_S_ATTR_NO_DEAD_STRIP, 0},
+    {	".objc_selector_fixup",		"__sel_fixup",
+	SEC_DATA | SEC_LOAD,		BFD_MACH_O_S_REGULAR,
+	BFD_MACH_O_S_ATTR_NO_DEAD_STRIP, 0},
+    /* Objc V1 */
+    {	".objc1_class_ext",		"__class_ext",
+	SEC_DATA | SEC_LOAD,		BFD_MACH_O_S_REGULAR,
+	BFD_MACH_O_S_ATTR_NO_DEAD_STRIP, 0},
+    {	".objc1_property_list",		"__property",
+	SEC_DATA | SEC_LOAD,		BFD_MACH_O_S_REGULAR,
+	BFD_MACH_O_S_ATTR_NO_DEAD_STRIP, 0},
+    {	".objc1_protocol_ext",		"__protocol_ext",
+	SEC_DATA | SEC_LOAD,		BFD_MACH_O_S_REGULAR,
+	BFD_MACH_O_S_ATTR_NO_DEAD_STRIP, 0},
+    { NULL, NULL, 0, 0, 0, 0}
+  };
 
-  /* List of known sections for the segment.  */
-  const struct mach_o_section_name_xlat *sections;
-};
-
-/* List of known segment names.  */
-
-static const struct mach_o_segment_name_xlat segsec_names_xlat[] =
+static const mach_o_segment_name_xlat segsec_names_xlat[] =
   {
     { "__TEXT", text_section_names_xlat },
     { "__DATA", data_section_names_xlat },
     { "__DWARF", dwarf_section_names_xlat },
+    { "__OBJC", objc_section_names_xlat },
     { NULL, NULL }
   };
 
-/* Mach-O to bfd names.  */
+/* For both cases bfd-name => mach-o name and vice versa, the specific target
+   is checked before the generic.  This allows a target (e.g. ppc for cstring)
+   to override the generic definition with a more specific one.  */
 
-void
-bfd_mach_o_normalize_section_name (const char *segname, const char *sectname,
-                                   const char **name, flagword *flags)
+/* Fetch the translation from a Mach-O section designation (segment, section)
+   as a bfd short name, if one exists.  Otherwise return NULL.
+   
+   Allow the segment and section names to be unterminated 16 byte arrays.  */
+
+const mach_o_section_name_xlat *
+bfd_mach_o_section_data_for_mach_sect (bfd *abfd, const char *segname,
+				       const char *sectname)
 {
   const struct mach_o_segment_name_xlat *seg;
+  const mach_o_section_name_xlat *sec;
+  bfd_mach_o_backend_data *bed = bfd_mach_o_get_backend_data (abfd);
 
-  *name = NULL;
-  *flags = SEC_NO_FLAGS;
-
-  for (seg = segsec_names_xlat; seg->segname; seg++)
-    {
+  /* First try any target-specific translations defined...  */
+  if (bed->segsec_names_xlat)
+    for (seg = bed->segsec_names_xlat; seg->segname; seg++)
       if (strncmp (seg->segname, segname, BFD_MACH_O_SEGNAME_SIZE) == 0)
-        {
-          const struct mach_o_section_name_xlat *sec;
+	for (sec = seg->sections; sec->mach_o_name; sec++)
+	  if (strncmp (sec->mach_o_name, sectname,
+		       BFD_MACH_O_SECTNAME_SIZE) == 0)
+	    return sec;
 
-          for (sec = seg->sections; sec->mach_o_name; sec++)
-            {
-              if (strncmp (sec->mach_o_name, sectname,
-                           BFD_MACH_O_SECTNAME_SIZE) == 0)
-                {
-                  *name = sec->bfd_name;
-                  *flags = sec->flags;
-                  return;
-                }
-            }
-          return;
-        }
-    }
+  /* ... and then the Mach-O generic ones.  */
+  for (seg = segsec_names_xlat; seg->segname; seg++)
+    if (strncmp (seg->segname, segname, BFD_MACH_O_SEGNAME_SIZE) == 0)
+      for (sec = seg->sections; sec->mach_o_name; sec++)
+        if (strncmp (sec->mach_o_name, sectname,
+		     BFD_MACH_O_SECTNAME_SIZE) == 0)
+          return sec;
+
+  return NULL;  
 }
 
-/* Convert Mach-O section name to BFD.  Try to use standard names, otherwise
-   forge a new name.  SEGNAME and SECTNAME are 16 bytes strings.  */
+/* If the bfd_name for this section is a 'canonical' form for which we
+   know the Mach-O data, return the segment name and the data for the 
+   Mach-O equivalent.  Otherwise return NULL.  */
 
-static void
-bfd_mach_o_convert_section_name_to_bfd
-  (bfd *abfd, const char *segname, const char *sectname,
-   const char **name, flagword *flags)
+const mach_o_section_name_xlat *
+bfd_mach_o_section_data_for_bfd_name (bfd *abfd, const char *bfd_name,
+				      const char **segname)
 {
+  const struct mach_o_segment_name_xlat *seg;
+  const mach_o_section_name_xlat *sec;
+  bfd_mach_o_backend_data *bed = bfd_mach_o_get_backend_data (abfd);
+  *segname = NULL;
+
+  if (bfd_name[0] != '.')
+    return NULL;
+
+  /* First try any target-specific translations defined...  */
+  if (bed->segsec_names_xlat)
+    for (seg = bed->segsec_names_xlat; seg->segname; seg++)
+      for (sec = seg->sections; sec->bfd_name; sec++)
+	if (strcmp (bfd_name, sec->bfd_name) == 0)
+	  {
+	    *segname = seg->segname;
+	    return sec;
+	  }
+
+  /* ... and then the Mach-O generic ones.  */
+  for (seg = segsec_names_xlat; seg->segname; seg++)
+    for (sec = seg->sections; sec->bfd_name; sec++)
+      if (strcmp (bfd_name, sec->bfd_name) == 0)
+	{
+	  *segname = seg->segname;
+	  return sec;
+	}
+
+  return NULL;  
+}
+
+/* Convert Mach-O section name to BFD.
+
+   Try to use standard/canonical names, for which we have tables including 
+   default flag settings - which are returned.  Otherwise forge a new name
+   in the form "<segmentname>.<sectionname>" this will be prefixed with
+   LC_SEGMENT. if the segment name does not begin with an underscore.
+
+   SEGNAME and SECTNAME are 16 byte arrays (they do not need to be NUL-
+   terminated if the name length is exactly 16 bytes - but must be if the name
+   length is less than 16 characters).  */
+
+void
+bfd_mach_o_convert_section_name_to_bfd (bfd *abfd, const char *segname,
+					const char *secname, const char **name,
+					flagword *flags)
+{
+  const mach_o_section_name_xlat *xlat;
   char *res;
   unsigned int len;
   const char *pfx = "";
 
-  /* First search for a canonical name.  */
-  bfd_mach_o_normalize_section_name (segname, sectname, name, flags);
+  *name = NULL;
+  *flags = SEC_NO_FLAGS;
 
-  /* Return now if found.  */
-  if (*name)
-    return;
+  /* First search for a canonical name...  
+     xlat will be non-null if there is an entry for segname, secname.  */
+  xlat = bfd_mach_o_section_data_for_mach_sect (abfd, segname, secname);
+  if (xlat)
+    {
+      len = strlen (xlat->bfd_name);
+      res = bfd_alloc (abfd, len+1);
+      if (res == NULL)
+	return;
+      memcpy (res, xlat->bfd_name, len+1);
+      *name = res;
+      *flags = xlat->bfd_flags;
+      return;
+    }
+
+  /* ... else we make up a bfd name from the segment concatenated with the
+     section.  */
 
   len = 16 + 1 + 16 + 1;
 
@@ -215,43 +409,46 @@ bfd_mach_o_convert_section_name_to_bfd
   res = bfd_alloc (abfd, len);
   if (res == NULL)
     return;
-  snprintf (res, len, "%s%.16s.%.16s", pfx, segname, sectname);
+  snprintf (res, len, "%s%.16s.%.16s", pfx, segname, secname);
   *name = res;
-  *flags = SEC_NO_FLAGS;
 }
 
-/* Convert a bfd section name to a Mach-O segment + section name.  */
+/* Convert a bfd section name to a Mach-O segment + section name.
 
-static void
+   If the name is a canonical one for which we have a Darwin match
+   return the translation table - which contains defaults for flags,
+   type, attribute and default alignment data.
+
+   Otherwise, expand the bfd_name (assumed to be in the form 
+   "[LC_SEGMENT.]<segmentname>.<sectionname>") and return NULL.  */
+
+static const mach_o_section_name_xlat *
 bfd_mach_o_convert_section_name_to_mach_o (bfd *abfd ATTRIBUTE_UNUSED,
                                            asection *sect,
                                            bfd_mach_o_section *section)
 {
-  const struct mach_o_segment_name_xlat *seg;
+  const mach_o_section_name_xlat *xlat;
   const char *name = bfd_get_section_name (abfd, sect);
+  const char *segname;
   const char *dot;
   unsigned int len;
   unsigned int seglen;
   unsigned int seclen;
 
-  /* List of well known names.  They all start with a dot.  */
-  if (name[0] == '.')
-    for (seg = segsec_names_xlat; seg->segname; seg++)
-      {
-        const struct mach_o_section_name_xlat *sec;
+  memset (section->segname, 0, BFD_MACH_O_SEGNAME_SIZE + 1);
+  memset (section->sectname, 0, BFD_MACH_O_SECTNAME_SIZE + 1);
 
-        for (sec = seg->sections; sec->mach_o_name; sec++)
-          {
-            if (strcmp (sec->bfd_name, name) == 0)
-              {
-                strcpy (section->segname, seg->segname);
-                strcpy (section->sectname, sec->mach_o_name);
-                return;
-              }
-          }
-      }
+  /* See if is a canonical name ... */
+  xlat = bfd_mach_o_section_data_for_bfd_name (abfd, name, &segname);
+  if (xlat)
+    {
+      strcpy (section->segname, segname);
+      strcpy (section->sectname, xlat->mach_o_name);
+      return xlat;
+    }
 
-  /* Strip LC_SEGMENT. prefix.  */
+  /* .. else we convert our constructed one back to Mach-O.
+     Strip LC_SEGMENT. prefix, if present.  */
   if (strncmp (name, "LC_SEGMENT.", 11) == 0)
     name += 11;
 
@@ -271,16 +468,23 @@ bfd_mach_o_convert_section_name_to_mach_o (bfd *abfd ATTRIBUTE_UNUSED,
           section->segname[seglen] = 0;
           memcpy (section->sectname, dot + 1, seclen);
           section->sectname[seclen] = 0;
-          return;
+          return NULL;
         }
     }
 
+  /* The segment and section names are both missing - don't make them
+     into dots.  */
+  if (dot && dot == name)
+    return NULL;
+
+  /* Just duplicate the name into both segment and section.  */
   if (len > 16)
     len = 16;
   memcpy (section->segname, name, len);
   section->segname[len] = 0;
   memcpy (section->sectname, name, len);
   section->sectname[len] = 0;
+  return NULL;
 }
 
 /* Return the size of an entry for section SEC.
@@ -337,10 +541,20 @@ bfd_mach_o_bfd_copy_private_symbol_data (bfd *ibfd ATTRIBUTE_UNUSED,
 
 bfd_boolean
 bfd_mach_o_bfd_copy_private_section_data (bfd *ibfd ATTRIBUTE_UNUSED,
-					  asection *isection ATTRIBUTE_UNUSED,
+					  asection *isection,
 					  bfd *obfd ATTRIBUTE_UNUSED,
-					  asection *osection ATTRIBUTE_UNUSED)
+					  asection *osection)
 {
+  if (osection->used_by_bfd == NULL)
+    osection->used_by_bfd = isection->used_by_bfd;
+  else 
+    if (isection->used_by_bfd != NULL)
+      memcpy (osection->used_by_bfd, isection->used_by_bfd, 
+	      sizeof (bfd_mach_o_section));
+ 
+  if (osection->used_by_bfd != NULL)
+    ((bfd_mach_o_section *)osection->used_by_bfd)->bfdsection = osection;
+
   return TRUE;
 }
 
@@ -1099,6 +1313,12 @@ bfd_mach_o_write_symtab (bfd *abfd, bfd_mach_o_load_command *command)
   if (strtab == NULL)
     return FALSE;
 
+  if (sym->nsyms > 0)
+    /* Although we don't strictly need to do this, for compatibility with
+       Darwin system tools, actually output an empty string for the index
+       0 entry.  */
+    _bfd_stringtab_add (strtab, "", TRUE, FALSE);
+
   for (i = 0; i < sym->nsyms; i++)
     {
       bfd_size_type str_index;
@@ -1415,22 +1635,22 @@ bfd_mach_o_build_commands (bfd *abfd)
   seg->sect_head = NULL;
   seg->sect_tail = NULL;
 
-  /* Create Mach-O sections.  */
+  /* Create Mach-O sections.
+     Section type, attribute and align should have been set when the 
+     section was created - either read in or specified.  */
   target_index = 0;
   for (sec = abfd->sections; sec; sec = sec->next)
     {
+      unsigned bfd_align = bfd_get_section_alignment (abfd, sec);
       bfd_mach_o_section *msect = bfd_mach_o_get_mach_o_section (sec);
 
       bfd_mach_o_append_section_to_segment (seg, sec);
 
-      if (msect->flags == 0)
-        {
-          /* We suppose it hasn't been set.  Convert from BFD flags.  */
-          bfd_mach_o_set_section_flags_from_bfd (abfd, sec);
-        }
       msect->addr = bfd_get_section_vma (abfd, sec);
       msect->size = bfd_get_section_size (sec);
-      msect->align = bfd_get_section_alignment (abfd, sec);
+      /* Use the largest alignment set, in case it was bumped after the 
+	 section was created.  */
+      msect->align = msect->align > bfd_align ? msect->align : bfd_align;
 
       if (msect->size != 0)
         {
@@ -1572,11 +1792,13 @@ bfd_boolean
 bfd_mach_o_new_section_hook (bfd *abfd, asection *sec)
 {
   bfd_mach_o_section *s;
+  unsigned bfdalign = bfd_get_section_alignment (abfd, sec);
 
   s = bfd_mach_o_get_mach_o_section (sec);
   if (s == NULL)
     {
       flagword bfd_flags;
+      static const mach_o_section_name_xlat * xlat;
 
       s = (bfd_mach_o_section *) bfd_zalloc (abfd, sizeof (*s));
       if (s == NULL)
@@ -1584,21 +1806,24 @@ bfd_mach_o_new_section_hook (bfd *abfd, asection *sec)
       sec->used_by_bfd = s;
       s->bfdsection = sec;
 
-      /* Create default name.  */
-      bfd_mach_o_convert_section_name_to_mach_o (abfd, sec, s);
-
-      /* Create default flags.  */
-      bfd_flags = bfd_get_section_flags (abfd, sec);
-      if ((bfd_flags & SEC_CODE) == SEC_CODE)
-        s->flags = BFD_MACH_O_S_ATTR_PURE_INSTRUCTIONS
-          | BFD_MACH_O_S_ATTR_SOME_INSTRUCTIONS
-          | BFD_MACH_O_S_REGULAR;
-      else if ((bfd_flags & (SEC_ALLOC | SEC_LOAD)) == SEC_ALLOC)
-        s->flags = BFD_MACH_O_S_ZEROFILL;
-      else if (bfd_flags & SEC_DEBUGGING)
-        s->flags = BFD_MACH_O_S_REGULAR |  BFD_MACH_O_S_ATTR_DEBUG;
+      /* Create the Darwin seg/sect name pair from the bfd name.
+	 If this is a canonical name for which a specific paiting exists
+	 there will also be defined flags, type, attribute and alignment
+	 values.  */
+      xlat = bfd_mach_o_convert_section_name_to_mach_o (abfd, sec, s);
+      if (xlat != NULL)
+	{
+	  s->flags = xlat->macho_sectype | xlat->macho_secattr;
+	  s->align = xlat->sectalign > bfdalign ? xlat->sectalign 
+						: bfdalign;
+	  bfd_set_section_alignment (abfd, sec, s->align);
+	  bfd_flags = bfd_get_section_flags (abfd, sec);
+	  if (bfd_flags == SEC_NO_FLAGS)
+	    bfd_set_section_flags (abfd, sec, xlat->bfd_flags);
+	}
       else
-        s->flags = BFD_MACH_O_S_REGULAR;
+	/* Create default flags.  */
+	bfd_mach_o_set_section_flags_from_bfd (abfd, sec);
     }
 
   return _bfd_generic_new_section_hook (abfd, sec);
@@ -1613,6 +1838,9 @@ bfd_mach_o_init_section_from_mach_o (bfd *abfd, asection *sec,
 
   flags = bfd_get_section_flags (abfd, sec);
   section = bfd_mach_o_get_mach_o_section (sec);
+
+  /* TODO: see if we should use the xlat system for doing this by
+     preference and fall back to this for unknown sections.  */
 
   if (flags == SEC_NO_FLAGS)
     {
@@ -3323,6 +3551,7 @@ const bfd_mach_o_xlat_name bfd_mach_o_section_type_name[] =
   { "interposing", BFD_MACH_O_S_INTERPOSING},
   { "16byte_literals", BFD_MACH_O_S_16BYTE_LITERALS},
   { "dtrace_dof", BFD_MACH_O_S_DTRACE_DOF},
+  { "symbol_stubs", BFD_MACH_O_S_SYMBOL_STUBS},
   { "lazy_dylib_symbol_pointers", BFD_MACH_O_S_LAZY_DYLIB_SYMBOL_POINTERS},
   { NULL, 0}
 };
@@ -3339,10 +3568,11 @@ const bfd_mach_o_xlat_name bfd_mach_o_section_attribute_name[] =
   { "strip_static_syms", BFD_MACH_O_S_ATTR_STRIP_STATIC_SYMS },
   { "no_toc", BFD_MACH_O_S_ATTR_NO_TOC },
   { "pure_instructions", BFD_MACH_O_S_ATTR_PURE_INSTRUCTIONS },
+  { "self_modifying_code", BFD_MACH_O_S_SELF_MODIFYING_CODE },
   { NULL, 0}
 };
 
-/* Get the section type from NAME.  Return -1 if NAME is unknown.  */
+/* Get the section type from NAME.  Return 256 if NAME is unknown.  */
 
 unsigned int
 bfd_mach_o_get_section_type_from_name (const char *name)
@@ -3352,7 +3582,8 @@ bfd_mach_o_get_section_type_from_name (const char *name)
   for (x = bfd_mach_o_section_type_name; x->name; x++)
     if (strcmp (x->name, name) == 0)
       return x->val;
-  return (unsigned int)-1;
+  /* Maximum section ID = 0xff.  */
+  return 256;
 }
 
 /* Get the section attribute from NAME.  Return -1 if NAME is unknown.  */
@@ -3518,6 +3749,7 @@ bfd_mach_o_close_and_cleanup (bfd *abfd)
 #define bfd_mach_o_swap_reloc_in NULL
 #define bfd_mach_o_swap_reloc_out NULL
 #define bfd_mach_o_print_thread NULL
+#define bfd_mach_o_tgt_seg_table NULL
 
 #define TARGET_NAME 		mach_o_be_vec
 #define TARGET_STRING     	"mach-o-be"

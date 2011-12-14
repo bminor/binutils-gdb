@@ -1,3 +1,28 @@
+2011-12-14  Iain Sandoe  <iains@gcc.gnu.org>
+
+	* config/obj-macho.c: Add some more top-level comments.
+	(collect_16char_name): New.
+	(obj_mach_o_section): Amend to allow syntax compatible with
+	existing system tools.  Use section translation data when available.
+	(obj_mach_o_segT_from_bfd_name): New.
+	(known_sections): Update.
+	(obj_mach_o_known_section): Use obj_mach_o_segT_from_bfd_name.
+	(objc_sections): New.
+	(obj_mach_o_objc_section): New.
+	(debug_sections): New.
+	(obj_mach_o_debug_section): New.
+	(tgt_sections): New.
+	(obj_mach_o_opt_tgt_section): New.
+	(obj_mach_o_base_section): New.
+	(obj_mach_o_common_parse): Update to create BSS on demand and to handle
+	lcomm optional alignment param.
+	(obj_mach_o_comm): Update parameter name.
+	(obj_mach_o_placeholder): New.
+	(mach_o_pseudo_table): Update for GCC section directives.
+	* config/obj-macho.h (_OBJ_MACH_O_H): New.
+	(USE_ALIGN_PTWO): Define.
+	(S_SET_ALIGN) Define.
+
 2011-12-13  Andrew Burgess  <aburgess@broadcom.com>
 
 	* doc/internals.texi (TC_FORCE_RELOCATION_SUB_SAME): Update

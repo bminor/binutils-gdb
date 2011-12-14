@@ -280,9 +280,64 @@ bfd_mach_o_i386_print_thread (bfd *abfd, bfd_mach_o_thread_flavour *thread,
   return FALSE;
 }
 
+static const mach_o_section_name_xlat text_section_names_xlat[] =
+  {
+    {	".symbol_stub",			"__symbol_stub",
+	SEC_DATA | SEC_LOAD,		BFD_MACH_O_S_SYMBOL_STUBS,
+	BFD_MACH_O_S_ATTR_PURE_INSTRUCTIONS,
+					0},
+    {	".picsymbol_stub",		"__picsymbol_stub",
+	SEC_DATA | SEC_LOAD,		BFD_MACH_O_S_SYMBOL_STUBS,
+	BFD_MACH_O_S_ATTR_PURE_INSTRUCTIONS,
+					0},
+    { NULL, NULL, 0, 0, 0, 0}
+  };
+
+static const mach_o_section_name_xlat data_section_names_xlat[] =
+  {
+    /* The first two are recognized by i386, but not emitted for x86 by
+       modern GCC.  */
+    {	".non_lazy_symbol_pointer",	"__nl_symbol_ptr",
+	SEC_DATA | SEC_LOAD,		BFD_MACH_O_S_NON_LAZY_SYMBOL_POINTERS,
+	BFD_MACH_O_S_ATTR_NONE,		2},
+    {	".lazy_symbol_pointer",		"__la_symbol_ptr",
+	SEC_DATA | SEC_LOAD,		BFD_MACH_O_S_LAZY_SYMBOL_POINTERS,
+	BFD_MACH_O_S_ATTR_NONE,		2},
+    {	".lazy_symbol_pointer2",	"__la_sym_ptr2",
+	SEC_DATA | SEC_LOAD,		BFD_MACH_O_S_LAZY_SYMBOL_POINTERS,
+	BFD_MACH_O_S_ATTR_NONE,		2},
+    {	".lazy_symbol_pointer3",	"__la_sym_ptr3",
+	SEC_DATA | SEC_LOAD,		BFD_MACH_O_S_LAZY_SYMBOL_POINTERS,
+	BFD_MACH_O_S_ATTR_NONE,		2},
+    { NULL, NULL, 0, 0, 0, 0}
+  };
+
+static const mach_o_section_name_xlat import_section_names_xlat[] =
+  {
+    {	".picsymbol_stub3",		"__jump_table",
+	SEC_DATA | SEC_LOAD,		BFD_MACH_O_S_SYMBOL_STUBS,
+	BFD_MACH_O_S_ATTR_PURE_INSTRUCTIONS 
+	| BFD_MACH_O_S_SELF_MODIFYING_CODE,
+					6},
+    {	".non_lazy_symbol_pointer_x86",	"__pointers",
+	SEC_DATA | SEC_LOAD,		BFD_MACH_O_S_NON_LAZY_SYMBOL_POINTERS,
+	BFD_MACH_O_S_ATTR_NONE,		2},
+    { NULL, NULL, 0, 0, 0, 0}
+  };
+
+const mach_o_segment_name_xlat mach_o_i386_segsec_names_xlat[] =
+  {
+    { "__TEXT", text_section_names_xlat },
+    { "__DATA", data_section_names_xlat },
+    { "__IMPORT", import_section_names_xlat },
+    { NULL, NULL }
+  };
+
 #define bfd_mach_o_swap_reloc_in bfd_mach_o_i386_swap_reloc_in
 #define bfd_mach_o_swap_reloc_out bfd_mach_o_i386_swap_reloc_out
 #define bfd_mach_o_print_thread bfd_mach_o_i386_print_thread
+
+#define bfd_mach_o_tgt_seg_table mach_o_i386_segsec_names_xlat
 
 #define bfd_mach_o_bfd_reloc_type_lookup bfd_mach_o_i386_bfd_reloc_type_lookup 
 #define bfd_mach_o_bfd_reloc_name_lookup bfd_mach_o_i386_bfd_reloc_name_lookup

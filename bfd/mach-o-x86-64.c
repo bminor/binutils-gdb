@@ -287,6 +287,7 @@ bfd_mach_o_x86_64_bfd_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 #define bfd_mach_o_bfd_reloc_type_lookup bfd_mach_o_x86_64_bfd_reloc_type_lookup
 #define bfd_mach_o_bfd_reloc_name_lookup bfd_mach_o_x86_64_bfd_reloc_name_lookup
 #define bfd_mach_o_print_thread NULL
+#define bfd_mach_o_tgt_seg_table NULL
 
 #define TARGET_NAME 		mach_o_x86_64_vec
 #define TARGET_STRING 		"mach-o-x86-64"

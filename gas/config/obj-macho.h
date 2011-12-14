@@ -1,5 +1,5 @@
 /* Mach-O object file format for gas, the assembler.
-   Copyright 2009 Free Software Foundation, Inc.
+   Copyright 2009, 2011 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -18,12 +18,28 @@
    Software Foundation, 51 Franklin Street - Fifth Floor, Boston, MA
    02110-1301, USA.  */
 
+#ifndef _OBJ_MACH_O_H
+#define _OBJ_MACH_O_H
+
 /* Tag to validate Mach-O object file format processing */
 #define OBJ_MACH_O 1
+
+#include "bfd/mach-o.h"
 
 #include "targ-cpu.h"
 
 #define OUTPUT_FLAVOR bfd_target_mach_o_flavour
+
+/* All our align expressions are power of two.  */
+#define USE_ALIGN_PTWO
+
+/* Common symbols can carry alignment information.  */
+#ifndef S_SET_ALIGN
+#define S_SET_ALIGN(S,V) do {\
+  bfd_mach_o_asymbol *s = (bfd_mach_o_asymbol *) symbol_get_bfdsym (S);\
+  s->n_desc = (s->n_desc & 0xf0ff) | (((V) & 0x0f) << 8);\
+} while (0)
+#endif
 
 extern const pseudo_typeS mach_o_pseudo_table[];
 
@@ -37,3 +53,5 @@ extern const pseudo_typeS mach_o_pseudo_table[];
 #define obj_symbol_new_hook(s)	{;}
 
 #define EMIT_SECTION_SYMBOLS		0
+
+#endif /* _OBJ_MACH_O_H */
