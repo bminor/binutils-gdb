@@ -1,3 +1,15 @@
+2011-12-14  Pedro Alves  <pedro@codesourcery.com>
+
+	* ia64-tdep.c (ia64_memory_remove_breakpoint): Use
+	target_write_raw_memory.
+	* m32r-tdep.c (m32r_memory_remove_breakpoint): Use
+	target_write_raw_memory.
+	* microblaze-linux-tdep.c
+	(microblaze_linux_memory_remove_breakpoint): Use
+	target_write_raw_memory.
+	* ppc-linux-tdep.c (ppc_linux_memory_remove_breakpoint): Use
+	target_write_raw_memory.
+
 2011-12-14  Joel Brobecker  <brobecker@adacore.com>
 
 	* linespec.c (decode_line_internal): Make static.
