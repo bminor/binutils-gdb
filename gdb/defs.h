@@ -440,6 +440,10 @@ extern struct cleanup *make_bpstat_clear_actions_cleanup (void);
 
 extern int producer_is_gcc_ge_4 (const char *producer);
 
+#ifdef HAVE_WAITPID
+extern pid_t wait_to_die_with_timeout (pid_t pid, int *status, int timeout);
+#endif
+
 
 /* Annotation stuff.  */
 
