@@ -1,3 +1,11 @@
+2011-12-14  Iain Sandoe  <iains@gcc.gnu.org>
+
+	* gas/mach-o: New.
+	* gas/mach-o/mach-o.exp: New.
+	* gas/mach-o/warn-1.s: New.
+	* gas/mach-o/lcomm-1.s: New.
+	* gas/mach-o/lcomm-1.d: New.
+
 2011-12-08  Andrew Pinski  <apinski@cavium.com>
 
 	* gas/mips/mips32-mt.d: Add pause instruction encoding to the end.
