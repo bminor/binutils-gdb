@@ -811,7 +811,7 @@ ia64_memory_remove_breakpoint (struct gdbarch *gdbarch,
   /* In BUNDLE_MEM, be careful to modify only the bits belonging to SLOTNUM
      and not any of the other ones that are stored in SHADOW_CONTENTS.  */
   replace_slotN_contents (bundle_mem, instr_saved, slotnum);
-  val = target_write_memory (addr, bundle_mem, BUNDLE_LEN);
+  val = target_write_raw_memory (addr, bundle_mem, BUNDLE_LEN);
 
   do_cleanups (cleanup);
   return val;

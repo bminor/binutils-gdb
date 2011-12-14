@@ -163,7 +163,7 @@ m32r_memory_remove_breakpoint (struct gdbarch *gdbarch,
     }
 
   /* Write contents.  */
-  val = target_write_memory (addr & 0xfffffffc, buf, 4);
+  val = target_write_raw_memory (addr & 0xfffffffc, buf, 4);
   return val;
 }
 
