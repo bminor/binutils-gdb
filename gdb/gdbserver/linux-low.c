@@ -918,6 +918,8 @@ linux_detach_one_lwp (struct inferior_list_entry *entry, void *args)
 			   get_lwp_thread (lwp));
 
   /* Finally, let it resume.  */
+  if (the_low_target.prepare_to_resume != NULL)
+    the_low_target.prepare_to_resume (lwp);
   ptrace (PTRACE_DETACH, lwpid_of (lwp), 0, 0);
 
   delete_lwp (lwp);
