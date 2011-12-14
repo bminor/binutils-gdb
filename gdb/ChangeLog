@@ -1070,6 +1070,7 @@
 
 2011-11-15  Doug Evans  <dje@google.com>
 
+	PR gdb/8367
 	* NEWS: Mention new parameter basenames-may-differ.
 	* dwarf2read.c (dw2_lookup_symtab): Avoid calling gdb_realpath if
 	! basenames_may_differ.
