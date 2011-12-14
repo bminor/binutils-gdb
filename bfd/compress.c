@@ -181,7 +181,7 @@ bfd_get_full_section_contents (bfd *abfd, sec_ptr sec, bfd_byte **ptr)
     case COMPRESS_SECTION_NONE:
       if (p == NULL)
 	{
-	  p = (bfd_byte *) bfd_zmalloc (sz);
+	  p = (bfd_byte *) bfd_malloc (sz);
 	  if (p == NULL)
 	    return FALSE;
 	}
@@ -221,7 +221,7 @@ bfd_get_full_section_contents (bfd *abfd, sec_ptr sec, bfd_byte **ptr)
       if (!ret)
 	goto fail_compressed;
 
-      uncompressed_buffer = (bfd_byte *) bfd_zmalloc (uncompressed_size);
+      uncompressed_buffer = (bfd_byte *) bfd_malloc (uncompressed_size);
       if (uncompressed_buffer == NULL)
 	goto fail_compressed;
 

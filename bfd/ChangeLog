@@ -2,7 +2,9 @@
 
 	PR ld/12451
 	* elfcode.h (elf_checksum_contents): Read in the section's
-	contents if they are not already available.
+	contents if they are not already available, and the section
+	actually has some contents.
+
 	* compress.c (bfd_get_full_section_contents): Use zmalloc to
 	allocate the buffers so that excess bytes are guaranteed to be
 	zero.

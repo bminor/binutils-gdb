@@ -1098,10 +1098,10 @@ elf_checksum_contents (bfd *abfd,
       (*process) (&x_shdr, sizeof x_shdr, arg);
 
       /* PR ld/12451:
-	 Process the section's contents; reading them in if necessary.  */
+	 Process the section's contents, if it has some.  Read them in if necessary.  */
       if (i_shdr.contents)
 	(*process) (i_shdr.contents, i_shdr.sh_size, arg);
-      else
+      else if (i_shdr.sh_type != SHT_NOBITS)
 	{
 	  asection *sec;
 
