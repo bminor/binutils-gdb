@@ -566,7 +566,7 @@ i386_low_stopped_data_address (struct i386_debug_reg_state *state,
      data breakpoint trap.  Only fetch it when necessary, to avoid an
      unnecessary extra syscall when no watchpoint triggered.  */
   int control_p = 0;
-  unsigned control;
+  unsigned control = 0;
 
   /* In non-stop/async, threads can be running while we change the
      global dr_mirror (and friends).  Say, we set a watchpoint, and
