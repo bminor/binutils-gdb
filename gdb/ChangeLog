@@ -1,3 +1,7 @@
+2011-12-14  Joel Brobecker  <brobecker@adacore.com>
+
+	* linespec.c (decode_line_internal): Make static.
+
 2011-12-14  Yao Qi  <yao@codesourcery.com>
 
 	* breakpoint.c (create_breakpoint): Set canonical.addr_string

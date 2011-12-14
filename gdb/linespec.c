@@ -835,7 +835,7 @@ keep_name_info (char *p, int on_boundary)
    lack of single quotes.  FIXME: write a linespec_completer which we
    can use as appropriate instead of make_symbol_completion_list.  */
 
-struct symtabs_and_lines
+static struct symtabs_and_lines
 decode_line_internal (struct linespec_state *self, char **argptr)
 {
   char *p;
