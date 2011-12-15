@@ -513,7 +513,7 @@ elf_x86_64_write_core_note (bfd *abfd, char *buf, int *bufsiz,
    section.  */
 
 #define ELF64_DYNAMIC_INTERPRETER "/lib/ld64.so.1"
-#define ELF32_DYNAMIC_INTERPRETER "/lib/ld32.so.1"
+#define ELF32_DYNAMIC_INTERPRETER "/lib/ldx32.so.1"
 
 /* If ELIMINATE_COPY_RELOCS is non-zero, the linker will try to avoid
    copying dynamic variables from a shared lib into an app's dynbss
