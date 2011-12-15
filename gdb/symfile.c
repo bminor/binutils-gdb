@@ -1165,8 +1165,6 @@ symbol_file_add_with_addrs_or_offsets (bfd *abfd,
      time.  */
   gdb_flush (gdb_stdout);
 
-  do_cleanups (my_cleanups);
-
   if (objfile->sf == NULL)
     {
       observer_notify_new_objfile (objfile);
