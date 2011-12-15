@@ -1,3 +1,9 @@
+2011-12-15  Iain Sandoe  <iains@gcc.gnu.org>
+
+	* mach-o.c (bfd_mach_o_mkobject_init): Initialize dyn_reloc_cache.
+	(bfd_mach_o_close_and_cleanup): Only cleanup Mach-O private data
+	for object files.
+
 2011-12-15  Shinichiro Hamaji  <shinichiro.hamaji@gmail.com>
 
 	* mach-o.c (bfd_mach_o_canonicalize_reloc): Update relocation

@@ -3202,6 +3202,7 @@ bfd_mach_o_mkobject_init (bfd *abfd)
   mdata->commands = NULL;
   mdata->nsects = 0;
   mdata->sections = NULL;
+  mdata->dyn_reloc_cache = NULL;
 
   return TRUE;
 }
@@ -3765,9 +3766,10 @@ bfd_mach_o_close_and_cleanup (bfd *abfd)
 {
   bfd_mach_o_data_struct *mdata = bfd_mach_o_get_data (abfd);
   if (bfd_get_format (abfd) == bfd_object && mdata != NULL)
-    _bfd_dwarf2_cleanup_debug_info (abfd, &mdata->dwarf2_find_line_info);
-
-  bfd_mach_o_free_cached_info (abfd);
+    {
+      _bfd_dwarf2_cleanup_debug_info (abfd, &mdata->dwarf2_find_line_info);
+      bfd_mach_o_free_cached_info (abfd);
+    }
 
   return _bfd_generic_close_and_cleanup (abfd);
 }
