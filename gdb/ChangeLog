@@ -1,3 +1,10 @@
+2011-12-15  Doug Evans  <dje@google.com>
+
+	* exceptions.c (catcher_list_size): New function.
+	(last_message): Delete.
+	(exception_messages, exception_messages_size): New static globals.
+	(throw_it): Use exception_messages array to handle nested calls.
+
 2011-12-15  Tom Tromey  <tromey@redhat.com>
 
 	* symfile.c (symbol_file_add_with_addrs_or_offsets): Remove bad
