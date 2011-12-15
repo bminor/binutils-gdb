@@ -1,3 +1,16 @@
+2011-12-15  Shinichiro Hamaji  <shinichiro.hamaji@gmail.com>
+
+	* mach-o.c (bfd_mach_o_canonicalize_reloc): Update relocation
+	table only when there isn't the cahce.
+	(bfd_mach_o_get_dynamic_reloc_upper_bound): Need one more space
+	for a pointer for the watchdog.
+	(bfd_mach_o_canonicalize_dynamic_reloc): Utilize cache like
+	bfd_mach_o_canonicalize_reloc.
+	(bfd_mach_o_close_and_cleanup): Call bfd_mach_o_free_cached_info.
+	(bfd_mach_o_free_cached_info): Free up cache data.
+	* mach-o.h (reloc_cache): A place to store cache of dynamic relocs.
+	(bfd_mach_o_free_cached_info): Add declaration.
+
 2011-12-15  Iain Sandoe  <iains@gcc.gnu.org>
 
 	* mach-o-target.c (bfd_mach_o_bfd_set_private_flags): Use

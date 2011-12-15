@@ -1040,21 +1040,25 @@ bfd_mach_o_canonicalize_reloc (bfd *abfd, asection *asect,
   if (bed->_bfd_mach_o_swap_reloc_in == NULL)
     return 0;
 
-  res = bfd_malloc (asect->reloc_count * sizeof (arelent));
-  if (res == NULL)
-    return -1;
-
-  if (bfd_mach_o_canonicalize_relocs (abfd, asect->rel_filepos,
-                                      asect->reloc_count, res, syms) < 0)
+  if (asect->relocation == NULL)
     {
-      free (res);
-      return -1;
+      res = bfd_malloc (asect->reloc_count * sizeof (arelent));
+      if (res == NULL)
+        return -1;
+
+      if (bfd_mach_o_canonicalize_relocs (abfd, asect->rel_filepos,
+                                          asect->reloc_count, res, syms) < 0)
+        {
+          free (res);
+          return -1;
+        }
+      asect->relocation = res;
     }
 
+  res = asect->relocation;
   for (i = 0; i < asect->reloc_count; i++)
     rels[i] = &res[i];
   rels[i] = NULL;
-  asect->relocation = res;
 
   return i;
 }
@@ -1066,7 +1070,7 @@ bfd_mach_o_get_dynamic_reloc_upper_bound (bfd *abfd)
 
   if (mdata->dysymtab == NULL)
     return 1;
-  return (mdata->dysymtab->nextrel + mdata->dysymtab->nlocrel)
+  return (mdata->dysymtab->nextrel + mdata->dysymtab->nlocrel + 1)
     * sizeof (arelent *);
 }
 
@@ -1089,25 +1093,32 @@ bfd_mach_o_canonicalize_dynamic_reloc (bfd *abfd, arelent **rels,
   if (bed->_bfd_mach_o_swap_reloc_in == NULL)
     return 0;
 
-  res = bfd_malloc ((dysymtab->nextrel + dysymtab->nlocrel) * sizeof (arelent));
-  if (res == NULL)
-    return -1;
-
-  if (bfd_mach_o_canonicalize_relocs (abfd, dysymtab->extreloff,
-                                      dysymtab->nextrel, res, syms) < 0)
+  if (mdata->dyn_reloc_cache == NULL)
     {
-      free (res);
-      return -1;
+      res = bfd_malloc ((dysymtab->nextrel + dysymtab->nlocrel)
+                        * sizeof (arelent));
+      if (res == NULL)
+        return -1;
+
+      if (bfd_mach_o_canonicalize_relocs (abfd, dysymtab->extreloff,
+                                          dysymtab->nextrel, res, syms) < 0)
+        {
+          free (res);
+          return -1;
+        }
+
+      if (bfd_mach_o_canonicalize_relocs (abfd, dysymtab->locreloff,
+                                          dysymtab->nlocrel,
+                                          res + dysymtab->nextrel, syms) < 0)
+        {
+          free (res);
+          return -1;
+        }
+
+      mdata->dyn_reloc_cache = res;
     }
 
-  if (bfd_mach_o_canonicalize_relocs (abfd, dysymtab->locreloff,
-                                      dysymtab->nlocrel,
-                                      res + dysymtab->nextrel, syms) < 0)
-    {
-      free (res);
-      return -1;
-    }
-
+  res = mdata->dyn_reloc_cache;
   for (i = 0; i < dysymtab->nextrel + dysymtab->nlocrel; i++)
     rels[i] = &res[i];
   rels[i] = NULL;
@@ -3756,7 +3767,24 @@ bfd_mach_o_close_and_cleanup (bfd *abfd)
   if (bfd_get_format (abfd) == bfd_object && mdata != NULL)
     _bfd_dwarf2_cleanup_debug_info (abfd, &mdata->dwarf2_find_line_info);
 
+  bfd_mach_o_free_cached_info (abfd);
+
   return _bfd_generic_close_and_cleanup (abfd);
+}
+
+bfd_boolean bfd_mach_o_free_cached_info (bfd *abfd)
+{
+  bfd_mach_o_data_struct *mdata = bfd_mach_o_get_data (abfd);
+  asection *asect;
+  free (mdata->dyn_reloc_cache);
+  mdata->dyn_reloc_cache = NULL;
+  for (asect = abfd->sections; asect != NULL; asect = asect->next)
+    {
+      free (asect->relocation);
+      asect->relocation = NULL;
+    }
+
+  return TRUE;
 }
 
 #define bfd_mach_o_bfd_reloc_type_lookup _bfd_norelocs_bfd_reloc_type_lookup 
