@@ -8029,6 +8029,8 @@ cmd_qtstmat (char *packet)
   return -1;
 }
 
+#include <sys/syscall.h>
+
 static void *
 gdb_ust_thread (void *arg)
 {
@@ -8038,10 +8040,8 @@ gdb_ust_thread (void *arg)
     {
       listen_fd = gdb_ust_socket_init ();
 
-#ifdef SYS_gettid
       if (helper_thread_id == 0)
 	helper_thread_id = syscall (SYS_gettid);
-#endif
 
       if (listen_fd == -1)
 	{
