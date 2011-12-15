@@ -1,3 +1,8 @@
+2011-12-15  Andreas Tobler  <andreast@fgznet.ch>
+
+	* readelf.c (get_symbol_type): Add ELFOSABI_FREEBSD to the
+	supported abi's.
+
 2011-12-13  Tristan Gingold  <gingold@adacore.com>
 
 	* od-macho.c: New file.

@@ -1702,9 +1702,10 @@ obj_elf_type (int ignore ATTRIBUTE_UNUSED)
 
       bed = get_elf_backend_data (stdoutput);
       if (!(bed->elf_osabi == ELFOSABI_GNU
+	    || bed->elf_osabi == ELFOSABI_FREEBSD
 	    /* GNU is still using the default value 0.  */
 	    || bed->elf_osabi == ELFOSABI_NONE))
-	as_bad (_("symbol type \"%s\" is supported only by GNU targets"),
+	as_bad (_("symbol type \"%s\" is supported only by GNU and FreeBSD targets"),
 		type_name);
       type = BSF_FUNCTION | BSF_GNU_INDIRECT_FUNCTION;
     }

@@ -6978,7 +6978,7 @@ decode_arm_unwind (struct arm_unw_aux_info *  aux,
 
       if (elf_header.e_machine == EM_ARM
 	  && (word & 0x70000000))
-	warn (_("Corrupt ARM compact model table entry (%08x)\n"), word);
+	warn (_("Corrupt ARM compact model table entry: %x \n"), word);
 
       per_index = (word >> 24) & 0x7f;
       printf (_("  Compact model index: %d\n"), per_index);
@@ -7070,6 +7070,12 @@ dump_arm_unwind (struct arm_unw_aux_info *aux, Elf_Internal_Shdr *exidx_sec)
 	  arm_free_section (& extab_arm_sec);
 	  return;
 	}
+
+      /* ARM EHABI, Section 5:
+	 An index table entry consists of 2 words.
+         The first word contains a prel31 offset to the start of a function, with bit 31 clear.  */
+      if (exidx_fn & 0x80000000)
+	warn (_("corrupt index table entry: %x\n"), exidx_fn);
 
       fn = arm_expand_prel31 (exidx_fn, exidx_sec->sh_addr + 8 * i);
 
@@ -8750,6 +8756,7 @@ get_symbol_type (unsigned int type)
 
 	  if (type == STT_GNU_IFUNC
 	      && (elf_header.e_ident[EI_OSABI] == ELFOSABI_GNU
+		  || elf_header.e_ident[EI_OSABI] == ELFOSABI_FREEBSD
 		  /* GNU is still using the default value 0.  */
 		  || elf_header.e_ident[EI_OSABI] == ELFOSABI_NONE))
 	    return "IFUNC";

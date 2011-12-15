@@ -1,3 +1,8 @@
+2011-12-15  Konstantin Belousov  <kib@FreeBSD.org>
+
+	* config/obj-elf.c (obj_elf_type): Add ELFOSABI_FREEBSD to the
+	supported abi's.
+
 2011-12-15  Iain Sandoe  <iains@gcc.gnu.org>
 
 	* config/obj-macho.c (obj_mach_o_subsections_by_symbols): New global.
