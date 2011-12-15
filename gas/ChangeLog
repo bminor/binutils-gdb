@@ -1,3 +1,7 @@
+2011-12-15  Tristan Gingold  <gingold@adacore.com>
+
+	* config/obj-macho.c (obj_mach_o_fileprop): Fix typo.
+
 2011-12-15  Konstantin Belousov  <kib@FreeBSD.org>
 
 	* config/obj-elf.c (obj_elf_type): Add ELFOSABI_FREEBSD to the

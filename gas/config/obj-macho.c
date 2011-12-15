@@ -696,7 +696,7 @@ obj_mach_o_fileprop (int prop)
   switch ((obj_mach_o_file_properties) prop)
     {
       case OBJ_MACH_O_FILE_PROP_SUBSECTS_VIA_SYMS:
-        subsections_by_symbols = 1;
+        obj_mach_o_subsections_by_symbols = 1;
 	if (!bfd_set_private_flags (stdoutput, 
 				    BFD_MACH_O_MH_SUBSECTIONS_VIA_SYMBOLS))
 	  as_bad (_("failed to set subsections by symbols"));
