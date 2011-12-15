@@ -53,6 +53,10 @@ static int obj_mach_o_is_static;
 
 static int seen_objc_section;
 
+/* Remember the subsections_by_symbols state in case we need to reset
+   the file flags.  */
+static int obj_mach_o_subsections_by_symbols;
+
 static void
 obj_mach_o_weak (int ignore ATTRIBUTE_UNUSED)
 {
@@ -674,11 +678,33 @@ obj_mach_o_comm (int is_local)
   s_comm_internal (is_local, obj_mach_o_common_parse);
 }
 
-static void
-obj_mach_o_subsections_via_symbols (int arg ATTRIBUTE_UNUSED)
+/* Set properties that apply to the whole file.  At present, the only
+   one defined, is subsections_via_symbols.  */
+
+typedef enum obj_mach_o_file_properties {
+  OBJ_MACH_O_FILE_PROP_NONE = 0,
+  OBJ_MACH_O_FILE_PROP_SUBSECTS_VIA_SYMS,
+  OBJ_MACH_O_FILE_PROP_MAX
+} obj_mach_o_file_properties;
+
+static void 
+obj_mach_o_fileprop (int prop)
 {
-  /* Currently ignore it.  */
-  demand_empty_rest_of_line ();
+  if (prop < 0 || prop >= OBJ_MACH_O_FILE_PROP_MAX)
+    as_fatal (_("internal error: bad file property ID %d"), prop);
+    
+  switch ((obj_mach_o_file_properties) prop)
+    {
+      case OBJ_MACH_O_FILE_PROP_SUBSECTS_VIA_SYMS:
+        subsections_by_symbols = 1;
+	if (!bfd_set_private_flags (stdoutput, 
+				    BFD_MACH_O_MH_SUBSECTIONS_VIA_SYMBOLS))
+	  as_bad (_("failed to set subsections by symbols"));
+	demand_empty_rest_of_line ();
+	break;
+      default:
+	break;
+    }
 }
 
 /* Dummy function to allow test-code to work while we are working
@@ -776,7 +802,8 @@ const pseudo_typeS mach_o_pseudo_table[] =
   { "weak", obj_mach_o_weak, 0},   /* extension */
 
   /* File flags.  */
-  { "subsections_via_symbols", obj_mach_o_subsections_via_symbols, 0 },
+  { "subsections_via_symbols", obj_mach_o_fileprop, 
+			       OBJ_MACH_O_FILE_PROP_SUBSECTS_VIA_SYMS},
 
   {NULL, NULL, 0}
 };

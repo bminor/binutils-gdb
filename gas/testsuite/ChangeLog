@@ -1,3 +1,9 @@
+2011-12-15  Iain Sandoe  <iains@gcc.gnu.org>
+
+	* gas/mach-o/subsect-via-symbols-0.d: New.
+	* gas/mach-o/subsect-via-symbols-1.d: New.
+	* gas/mach-o/subsect-via-symbols.s: New.
+
 2011-12-15  Nick Clifton  <nickc@redhat.com>
 
 	* gas/frv/immediates.s: New test file - checks assembly of

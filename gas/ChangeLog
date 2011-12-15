@@ -1,3 +1,10 @@
+2011-12-15  Iain Sandoe  <iains@gcc.gnu.org>
+
+	* config/obj-macho.c (obj_mach_o_subsections_by_symbols): New global.
+	(obj_mach_o_file_properties): New enum.
+	(obj_mach_o_subsections_via_symbols):  Generalize name to...
+	... (obj_mach_o_fileprop) and use to set subsections_via_symbols.
+
 2011-12-14  Stuart Henderson  <shenders@gcc.gnu.org>
 
 	* config/bfin-parse.y (asm_1): set SRCx fields to all 1s for

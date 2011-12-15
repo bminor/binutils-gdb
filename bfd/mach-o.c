@@ -576,6 +576,22 @@ bfd_mach_o_bfd_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
   return TRUE;
 }
 
+/* This allows us to set up to 32 bits of flags (unless we invent some
+   fiendish scheme to subdivide).  For now, we'll just set the file flags
+   without error checking - just overwrite.  */
+   
+bfd_boolean
+bfd_mach_o_bfd_set_private_flags (bfd *abfd, flagword flags)
+{
+  bfd_mach_o_data_struct *mdata = bfd_mach_o_get_data (abfd);
+
+  if (!mdata)
+    return FALSE;
+
+  mdata->header.flags = flags;
+  return TRUE;
+}
+
 /* Count the total number of symbols.  */
 
 static long

@@ -1,3 +1,10 @@
+2011-12-15  Iain Sandoe  <iains@gcc.gnu.org>
+
+	* mach-o-target.c (bfd_mach_o_bfd_set_private_flags): Use
+	bfd_mach_o_bfd_set_private_flags.
+	* mach-o.c (bfd_mach_o_bfd_set_private_flags): New.
+	* mach-o.h (bfd_mach_o_bfd_set_private_flags): Declare.
+
 2011-12-14  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/12451

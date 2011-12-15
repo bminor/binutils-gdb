@@ -46,7 +46,7 @@
 #define bfd_mach_o_bfd_final_link                     _bfd_generic_final_link
 #define bfd_mach_o_bfd_link_split_section             _bfd_generic_link_split_section
 #define bfd_mach_o_bfd_merge_private_bfd_data         _bfd_generic_bfd_merge_private_bfd_data
-#define bfd_mach_o_bfd_set_private_flags              _bfd_generic_bfd_set_private_flags
+#define bfd_mach_o_bfd_set_private_flags              bfd_mach_o_bfd_set_private_flags
 #define bfd_mach_o_get_section_contents               _bfd_generic_get_section_contents
 #define bfd_mach_o_bfd_gc_sections                    bfd_generic_gc_sections
 #define bfd_mach_o_bfd_lookup_section_flags           bfd_generic_lookup_section_flags
