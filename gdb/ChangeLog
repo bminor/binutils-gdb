@@ -1,3 +1,8 @@
+2011-12-15  Tom Tromey  <tromey@redhat.com>
+
+	* symfile.c (symbol_file_add_with_addrs_or_offsets): Remove bad
+	do_cleanups call.
+
 2011-12-14  Pedro Alves  <pedro@codesourcery.com>
 
 	* ia64-tdep.c (ia64_memory_remove_breakpoint): Use
