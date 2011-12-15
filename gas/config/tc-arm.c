@@ -3540,6 +3540,7 @@ s_arm_unwind_fnend (int ignored ATTRIBUTE_UNUSED)
   record_alignment (now_seg, 2);
 
   ptr = frag_more (8);
+  memset (ptr, 0, 8);
   where = frag_now_fix () - 8;
 
   /* Self relative offset of the function start.  */
@@ -19926,8 +19927,12 @@ create_unwind_entry (int have_data)
 	size = unwind.opcode_count - 2;
     }
   else
-    /* An extra byte is required for the opcode count.	*/
-    size = unwind.opcode_count + 1;
+    {
+      gas_assert (unwind.personality_index == -1);
+
+      /* An extra byte is required for the opcode count.	*/
+      size = unwind.opcode_count + 1;
+    }
 
   size = (size + 3) >> 2;
   if (size > 0xff)
@@ -19953,7 +19958,7 @@ create_unwind_entry (int have_data)
       ptr += 4;
 
       /* Set the first byte to the number of additional words.	*/
-      data = size - 1;
+      data = size > 0 ? size - 1 : 0;
       n = 3;
       break;
 

@@ -1,3 +1,9 @@
+2011-12-15  Nick Clifton  <nickc@redhat.com>
+
+	* cgen-asm.c (cgen_parse_signed_integer): Add code to handle the
+	sign extension of negative values on a 64-bit host.
+	* frv-asm.c: Regenerate.
+
 2011-12-13  Alan Modra  <amodra@gmail.com>
 
 	* ppc-opc.c (ISA_V2): Define and use for relevant BO field tests.
