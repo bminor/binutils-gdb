@@ -50,10 +50,10 @@ Disassembly of section .text:
 [ 0-9a-f]+:	37 c4 10 0a 	R5 = BYTEOP3P \(R3:2, R1:0\) \(HI\);
 [ 0-9a-f]+:	17 c4 10 2c 	R6 = BYTEOP3P \(R3:2, R1:0\) \(LO, R\);
 [ 0-9a-f]+:	37 c4 10 2e 	R7 = BYTEOP3P \(R3:2, R1:0\) \(HI, R\);
-[ 0-9a-f]+:	0c c4 00 42 	R0 = A1.L \+ A1.H, R1 = A0.L \+ A0.H;
-[ 0-9a-f]+:	0c c4 80 46 	R2 = A1.L \+ A1.H, R3 = A0.L \+ A0.H;
-[ 0-9a-f]+:	0c c4 00 4b 	R4 = A1.L \+ A1.H, R5 = A0.L \+ A0.H;
-[ 0-9a-f]+:	0c c4 80 4f 	R6 = A1.L \+ A1.H, R7 = A0.L \+ A0.H;
+[ 0-9a-f]+:	0c c4 3f 42 	R0 = A1.L \+ A1.H, R1 = A0.L \+ A0.H;
+[ 0-9a-f]+:	0c c4 bf 46 	R2 = A1.L \+ A1.H, R3 = A0.L \+ A0.H;
+[ 0-9a-f]+:	0c c4 3f 4b 	R4 = A1.L \+ A1.H, R5 = A0.L \+ A0.H;
+[ 0-9a-f]+:	0c c4 bf 4f 	R6 = A1.L \+ A1.H, R7 = A0.L \+ A0.H;
 [ 0-9a-f]+:	15 c4 d0 01 	\(R7, R0\) = BYTEOP16P \(R3:2, R1:0\);
 [ 0-9a-f]+:	15 c4 50 04 	\(R1, R2\) = BYTEOP16P \(R3:2, R1:0\);
 [ 0-9a-f]+:	15 c4 10 02 	\(R0, R1\) = BYTEOP16P \(R3:2, R1:0\);

@@ -47,9 +47,9 @@ Disassembly of section .text:
   9c:	58 93 00 00 
   a0:	04 cc 39 a6 	R0 = R7 \+ R1, R3 = R7 - R1 \(S\) \|\| \[P3\+\+\] = P0 \|\| NOP;
   a4:	58 92 00 00 
-  a8:	11 cc c0 0b 	R7 = A1 \+ A0, R5 = A1 - A0 \(NS\) \|\| \[P3--\] = P0 \|\| NOP;
+  a8:	11 cc ff 0b 	R7 = A1 \+ A0, R5 = A1 - A0 \(NS\) \|\| \[P3--\] = P0 \|\| NOP;
   ac:	d8 92 00 00 
-  b0:	11 cc c0 6c 	R3 = A0 \+ A1, R6 = A0 - A1 \(S\) \|\| \[P3 \+ 0x1c\] = P0 \|\| NOP;
+  b0:	11 cc ff 6c 	R3 = A0 \+ A1, R6 = A0 - A1 \(S\) \|\| \[P3 \+ 0x1c\] = P0 \|\| NOP;
   b4:	d8 bd 00 00 
   b8:	81 ce 8b 03 	R1 = R3 >>> 0xf \(V\) \|\| \[P3 \+ 0x18\] = P0 \|\| NOP;
   bc:	98 bd 00 00 

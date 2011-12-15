@@ -18,7 +18,7 @@ Disassembly of section .text:
 [ 0-9a-f]+:	37 c4 02 24 	R2 = BYTEOP3P \(R1:0, R3:2\) \(HI, R\);
 
 [0-9a-f]+ <dual16>:
-[ 0-9a-f]+:	0c c4 40 45 	R5 = A1.L \+ A1.H, R2 = A0.L \+ A0.H;
+[ 0-9a-f]+:	0c c4 7f 45 	R5 = A1.L \+ A1.H, R2 = A0.L \+ A0.H;
 
 [0-9a-f]+ <byteop16p>:
 [ 0-9a-f]+:	15 c4 82 06 	\(R2, R3\) = BYTEOP16P \(R1:0, R3:2\);
