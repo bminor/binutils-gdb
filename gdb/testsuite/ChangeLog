@@ -1,3 +1,8 @@
+2011-12-15  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.trace/strace.c: New
+	* gdb.trace/strace.exp: New.
+
 2011-12-14  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.dwarf2/dw2-inline-param.exp: Log the objcopy command.
