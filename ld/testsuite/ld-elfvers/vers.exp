@@ -72,7 +72,9 @@ set SOBJDUMP_FLAGS --syms
 set shared "--shared --no-undefined-version"
 set script --version-script
 
-if [istarget mips*-*-*] {
+# Old version of GCC for MIPS default to enabling -fpic
+# and get confused if it is used on the command line.
+if { [istarget mips*-*-*] && ! [at_least_gcc_version 4 3] } then {
     set picflag ""
 } else {
     # Unfortunately, the gcc argument is -fpic and the cc argument is
@@ -768,8 +770,9 @@ proc build_exec { test source execname flags solibname verexp versymexp symexp }
     pass $test
 }
 
-if [istarget x86_64-*-linux*] {
-    # x86_64 doesn't like non-pic shared libraries
+if { [istarget x86_64-*-linux*] \
+     || ( [istarget mips*-*-linux*] && [at_least_gcc_version 4 3] ) } {
+    # x86_64 and newer MIPS toolchains do not like non-pic shared libraries
     set pic "yes"
 } else {
     set pic "no"

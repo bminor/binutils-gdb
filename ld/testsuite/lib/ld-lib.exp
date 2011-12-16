@@ -27,6 +27,31 @@ proc load_common_lib { name } {
 
 load_common_lib binutils-common.exp
 
+# Returns 1 if the gcc for the target is at least version MAJOR.MINOR
+# Returns 0 otherwise.
+#
+proc at_least_gcc_version { major minor } {
+    
+    if {![info exists CC]} {
+	set CC [find_gcc]
+    }
+    if { $CC == "" } {
+      return 0
+    }
+    set state [remote_exec host $CC --version]
+    set tmp "[lindex $state 1]\n"
+    # Look for (eg) 4.6.1 in the version output.
+    regexp " .* (\[1-9\])\\.(\[0-9\])\\.\[0-9\]* .*" "$tmp" fred maj min
+    verbose "gcc version: $tmp"
+    verbose "major gcc version is $maj, want at least $major"
+    if { $maj == $major } then {
+	verbose "minor gcc version is $min, want at least $minor"
+	return [expr  $min >= $minor ]
+    } else {
+	return [expr $maj > $major ]
+    }
+}
+
 # Extract and print the version number of ld.
 #
 proc default_ld_version { ld } {

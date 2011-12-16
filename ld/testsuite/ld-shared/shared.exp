@@ -181,7 +181,9 @@ proc shared_test { progname testname main sh1 sh2 dat args } {
     pass "$testname"
 }
 
-if [istarget mips*-*-*] {
+# Old version of GCC for MIPS default to enabling -fpic
+# and get confused if it is used on the command line.
+if { [istarget mips*-*-*] && ! [at_least_gcc_version 4 3] } then {
     set picflag ""
 } else {
     # Unfortunately, the gcc argument is -fpic and the cc argument is

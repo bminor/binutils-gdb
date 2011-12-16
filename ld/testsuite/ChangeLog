@@ -1,3 +1,17 @@
+2011-12-15  David Daney  <david.daney@cavium.com>
+	    Nick Clifton <nickc@redhat.com>
+
+	* ld-elfvers/vers.exp (picflag): Set to -fpic for mips*-*-* when
+	using GCC-4.3 or later.
+	(pic): Set to "yes" for mips*-*-linux*.
+	* ld-elfvsb/elfvsb.exp: Don't test non-PIC shared libraried on
+	mips*-*-linux*.
+	(picflag): Set to -fpic for mips*-*-* when using GCC-4.3 or later.
+	* ld-elfweak/elfweak.exp (picflag): Set to -fpic for mips*-*-*
+	when using GCC-4.3 or later.
+	* ld-shared/shared.exp (picflag): Same.
+	* lib/ld-lib.exp (at_least_gcc_version): New proc.
+
 2011-12-10 David Daney <david.daney@cavium.com>
 
 	* ld-mips-elf/pic-and-nonpic-6-n64.dd: Use correct encoding for
