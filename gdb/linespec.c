@@ -121,9 +121,6 @@ struct collect_info
 
   /* The result being accumulated.  */
   struct symtabs_and_lines result;
-
-  /* The current objfile; used only by the minimal symbol code.  */
-  struct objfile *objfile;
 };
 
 /* Prototypes for local functions.  */
@@ -1462,7 +1459,6 @@ decode_objc (struct linespec_state *self, char **argptr)
   info.state = self;
   info.result.sals = NULL;
   info.result.nelts = 0;
-  info.objfile = NULL;
 
   new_argptr = find_imps (*argptr, &symbol_names); 
   if (VEC_empty (const_char_ptr, symbol_names))
@@ -1966,7 +1962,6 @@ find_method (struct linespec_state *self, char *saved_arg,
   info.state = self;
   info.result.sals = NULL;
   info.result.nelts = 0;
-  info.objfile = NULL;
 
   /* Iterate over all the types, looking for the names of existing
      methods matching COPY.  If we cannot find a direct method in a
@@ -2711,30 +2706,81 @@ minsym_found (struct linespec_state *self, struct objfile *objfile,
   add_sal_to_sals (self, result, &sal, SYMBOL_NATURAL_NAME (msymbol));
 }
 
-/* Callback for iterate_over_minimal_symbols that may add the symbol
-   to the result.  */
+/* A helper struct which just holds a minimal symbol and the object
+   file from which it came.  */
+
+typedef struct minsym_and_objfile
+{
+  struct minimal_symbol *minsym;
+  struct objfile *objfile;
+} minsym_and_objfile_d;
+
+DEF_VEC_O (minsym_and_objfile_d);
+
+/* A helper struct to pass some data through
+   iterate_over_minimal_symbols.  */
+
+struct collect_minsyms
+{
+  /* The objfile we're examining.  */
+  struct objfile *objfile;
+
+  /* The funfirstline setting from the initial call.  */
+  int funfirstline;
+
+  /* The resulting symbols.  */
+  VEC (minsym_and_objfile_d) *msyms;
+};
+
+/* A helper function to classify a minimal_symbol_type according to
+   priority.  */
+
+static int
+classify_mtype (enum minimal_symbol_type t)
+{
+  switch (t)
+    {
+    case mst_file_text:
+    case mst_file_data:
+    case mst_file_bss:
+      /* Intermediate priority.  */
+      return 1;
+
+    case mst_solib_trampoline:
+      /* Lowest priority.  */
+      return 2;
+
+    default:
+      /* Highest priority.  */
+      return 0;
+    }
+}
+
+/* Callback for qsort that sorts symbols by priority.  */
+
+static int
+compare_msyms (const void *a, const void *b)
+{
+  const minsym_and_objfile_d *moa = a;
+  const minsym_and_objfile_d *mob = b;
+  enum minimal_symbol_type ta = MSYMBOL_TYPE (moa->minsym);
+  enum minimal_symbol_type tb = MSYMBOL_TYPE (mob->minsym);
+
+  return classify_mtype (ta) - classify_mtype (tb);
+}
+
+/* Callback for iterate_over_minimal_symbols that adds the symbol to
+   the result.  */
 
 static void
-check_minsym (struct minimal_symbol *minsym, void *d)
+add_minsym (struct minimal_symbol *minsym, void *d)
 {
-  struct collect_info *info = d;
+  struct collect_minsyms *info = d;
+  minsym_and_objfile_d mo;
 
-  if (MSYMBOL_TYPE (minsym) == mst_unknown
-      || MSYMBOL_TYPE (minsym) == mst_slot_got_plt
-      || MSYMBOL_TYPE (minsym) == mst_solib_trampoline)
-    {
-      /* Reject some odd ones.  */
-    }
-  else if (info->state->funfirstline
-	   && MSYMBOL_TYPE (minsym) != mst_text
-	   && MSYMBOL_TYPE (minsym) != mst_text_gnu_ifunc
-	   && MSYMBOL_TYPE (minsym) != mst_file_text)
-    {
-      /* When FUNFIRSTLINE, only allow text symbols.  */
-    }
-  else if (maybe_add_address (info->state->addr_set, info->objfile->pspace,
-			      SYMBOL_VALUE_ADDRESS (minsym)))
-    minsym_found (info->state, info->objfile, minsym, &info->result);
+  mo.minsym = minsym;
+  mo.objfile = info->objfile;
+  VEC_safe_push (minsym_and_objfile_d, info->msyms, &mo);
 }
 
 /* Search minimal symbols in all objfiles for NAME.  If SEARCH_PSPACE
@@ -2750,6 +2796,9 @@ search_minsyms_for_name (struct collect_info *info, const char *name,
 
   ALL_PSPACES (pspace)
   {
+    struct collect_minsyms local;
+    struct cleanup *cleanup;
+
     if (search_pspace != NULL && search_pspace != pspace)
       continue;
     if (pspace->executing_startup)
@@ -2757,11 +2806,51 @@ search_minsyms_for_name (struct collect_info *info, const char *name,
 
     set_current_program_space (pspace);
 
+    memset (&local, 0, sizeof (local));
+    local.funfirstline = info->state->funfirstline;
+
+    cleanup = make_cleanup (VEC_cleanup (minsym_and_objfile_d),
+			    &local.msyms);
+
     ALL_OBJFILES (objfile)
     {
-      info->objfile = objfile;
-      iterate_over_minimal_symbols (objfile, name, check_minsym, info);
+      local.objfile = objfile;
+      iterate_over_minimal_symbols (objfile, name, add_minsym, &local);
     }
+
+    if (!VEC_empty (minsym_and_objfile_d, local.msyms))
+      {
+	int classification;
+	int ix;
+	minsym_and_objfile_d *item;
+
+	qsort (VEC_address (minsym_and_objfile_d, local.msyms),
+	       VEC_length (minsym_and_objfile_d, local.msyms),
+	       sizeof (minsym_and_objfile_d),
+	       compare_msyms);
+
+	/* Now the minsyms are in classification order.  So, we walk
+	   over them and process just the minsyms with the same
+	   classification as the very first minsym in the list.  */
+	item = VEC_index (minsym_and_objfile_d, local.msyms, 0);
+	classification = classify_mtype (MSYMBOL_TYPE (item->minsym));
+
+	for (ix = 0;
+	     VEC_iterate (minsym_and_objfile_d, local.msyms, ix, item);
+	     ++ix)
+	  {
+	    if (classify_mtype (MSYMBOL_TYPE (item->minsym)) != classification)
+	      break;
+
+	    if (maybe_add_address (info->state->addr_set, 
+				   item->objfile->pspace,
+				   SYMBOL_VALUE_ADDRESS (item->minsym)))
+	      minsym_found (info->state, item->objfile, item->minsym,
+			    &info->result);
+	  }
+      }
+
+    do_cleanups (cleanup);
   }
 }
 
@@ -2815,7 +2904,6 @@ decode_variable (struct linespec_state *self, char *copy)
   info.state = self;
   info.result.sals = NULL;
   info.result.nelts = 0;
-  info.objfile = NULL;
 
   cleanup = demangle_for_lookup (copy, current_language->la_language,
 				 &lookup_name);
