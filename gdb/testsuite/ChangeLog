@@ -1,3 +1,9 @@
+2011-12-16  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* testsuite/gdb.python/py-function.exp: Change "on" to "full" for
+	python print-stack.  Add set/show python print-stack
+	off|full|message tests.
+
 2011-12-15  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.trace/strace.c: New

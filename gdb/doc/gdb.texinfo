@@ -21447,18 +21447,14 @@ End with a line saying just "end".
 23
 @end smallexample
 
-@kindex maint set python print-stack
-@item maint set python print-stack
-This command is now deprecated.  Instead use @code{set python
-print-stack} 
-
 @kindex set python print-stack
 @item set python print-stack
-By default, @value{GDBN} will not print a stack trace when an error
-occurs in a Python script.  This can be controlled using @code{set
-python print-stack}: if @code{on}, then Python stack printing is
-enabled; if @code{off}, the default, then Python stack printing is
-disabled.
+By default, @value{GDBN} will print only the message component of a
+Python exception when an error occurs in a Python script.  This can be
+controlled using @code{set python print-stack}: if @code{full}, then
+full Python stack printing is enabled; if @code{none}, then Python stack
+and message printing is disabled; if @code{message}, the default, only
+the message component of the error is printed.
 @end table
 
 It is also possible to execute a Python script from the @value{GDBN}

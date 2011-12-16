@@ -195,20 +195,15 @@ gdb_test "python gdb.write(\"Error stream\\n\", stream=gdb.STDERR)" "Error strea
 gdb_test "python gdb.write(\"Normal stream\\n\", stream=gdb.STDOUT)" "Normal stream" "Test stdout write"
 gdb_test "python gdb.write(\"Log stream\\n\", stream=gdb.STDLOG)" "Log stream" "Test stdlog write"
 
-# Deprecate maint set/show python print-stack
-gdb_test "maint show python print-stack" \
-    "Warning: command 'maintenance show python print-stack' is deprecated.*Use 'show python print-stack'.*" \
-    "Test deprecation maint show warning."
-gdb_test "maint set python print-stack off" \
-    "Warning: command 'maintenance set python print-stack' is deprecated.*Use 'set python print-stack'.*" \
-    "Test deprecation maint set warning."
+# print-stack
 gdb_test "show python print-stack" \
-    "Whether Python stack will be printed on error is off.*" \
-    "Test print-backtrace show setting. Default off."
-gdb_py_test_silent_cmd "set python print-stack on" \
+    "The mode of Python stack printing on error is \"message\".*" \
+    "Test print-backtrace show setting. Default is message."
+gdb_py_test_silent_cmd "set python print-stack full" \
     "Test print-backtrace set setting" 1
 gdb_test "show python print-stack" \
-    "Whether Python stack will be printed on error is on.*" \
+    "The mode of Python stack printing on error is \"full\".*" \
+    "Test print-backtrace show setting to full."
 
 # Test prompt substituion
 
@@ -313,7 +308,63 @@ gdb_test_multiple "set extended-prompt \\w " \
 
 gdb_test_multiple "set extended-prompt some param \\p{python print-stack} " \
     "set extended prompt parameter" {
-    -re "\[\r\n\]some param True $" {
+    -re "\[\r\n\]some param full $" {
 	pass "set extended prompt parameter"
     }
 }
+
+# Start with a fresh gdb.
+clean_restart ${testfile}
+
+# The following tests require execution.
+
+if ![runto_main] then {
+    fail "Can't run to main"
+    return 0
+}
+
+# print-stack settings
+gdb_test "show python print-stack" \
+    "The mode of Python stack printing on error is \"message\".*" \
+    "Test print-backtrace show setting. Default is message."
+gdb_py_test_silent_cmd "set python print-stack full" \
+    "Test print-backtrace set setting" 1
+gdb_test "show python print-stack" \
+    "The mode of Python stack printing on error is \"full\".*" \
+    "Test print-backtrace show setting to full."
+gdb_py_test_silent_cmd "set python print-stack none" \
+    "Test print-backtrace set setting" 1
+gdb_test "show python print-stack" \
+    "The mode of Python stack printing on error is \"none\".*" \
+    "Test print-backtrace show setting to none."
+
+gdb_py_test_silent_cmd "set python print-stack message" \
+    "Test print-backtrace set setting" 1
+
+gdb_py_test_multiple "prompt substitution readline" \
+  "python" "" \
+  "pCounter = 0" "" \
+  "def error_prompt(current):" "" \
+  "   raise RuntimeError(\"Python exception called\")" "" \
+  "end" ""
+
+gdb_test_multiple "python gdb.prompt_hook = error_prompt" "set the hook" {
+    -re "Python Exception <type 'exceptions.RuntimeError'> Python exception called.*" {
+	pass "set hook"
+    }
+}
+
+gdb_py_test_silent_cmd "python gdb.prompt_hook = None" \
+    "set the hook to default" 1
+
+gdb_py_test_silent_cmd "set python print-stack full" \
+    "Test print-backtrace set setting" 1
+
+gdb_test_multiple "python gdb.prompt_hook = error_prompt" "set the hook" {
+    -re "Traceback.*File.*line.*RuntimeError.*Python exception called.*" {
+	pass "set hook"
+    }
+}
+
+gdb_py_test_silent_cmd "python gdb.prompt_hook = None" \
+    "set the hook to default" 1

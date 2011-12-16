@@ -1,3 +1,16 @@
+2011-12-16  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* python/python.c: Define python_excp_enums.
+	(eval_python_from_control_command): Do not call gdbpy_print_stack.
+	(python_command): Ditto.
+	(gdbpy_print_stack): Rewrite to use new enum constants.
+	(maint_set_python): Remove function.
+	(maint_show_python): Ditto.
+	(_initialize_python): Do not add "maint" commands.  Add "set/show
+	python print-stack commands".
+	* NEWS: Update to reflect removal for "maint set/show
+	print-stack"
+
 2011-12-15  Doug Evans  <dje@google.com>
 
 	* exceptions.c (catcher_list_size): New function.

@@ -97,7 +97,7 @@ proc run_lang_tests {exefile lang} {
     gdb_test_no_output "python pp_ls_encoding = 'UTF-8'"
     gdb_test "print estring2" "\"embedded \", <incomplete sequence \\\\302>"
 
-    gdb_test_no_output "set python print-stack on"
+    gdb_test_no_output "set python print-stack full"
     gdb_test "print hint_error" "Exception: hint failed\r\nhint_error_val"
 
     gdb_test "print c" " = container \"container\" with 2 elements = {$nl *.0. = 23,$nl *.1. = 72$nl}"
