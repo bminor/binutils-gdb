@@ -173,7 +173,9 @@ static void windows_kill_inferior (struct target_ops *);
 
 static void cygwin_set_dr (int i, CORE_ADDR addr);
 static void cygwin_set_dr7 (unsigned long val);
+static CORE_ADDR cygwin_get_dr (int i);
 static unsigned long cygwin_get_dr6 (void);
+static unsigned long cygwin_get_dr7 (void);
 
 static enum target_signal last_sig = TARGET_SIGNAL_0;
 /* Set if a signal was received from the debugged process.  */

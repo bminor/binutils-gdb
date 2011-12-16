@@ -1,3 +1,8 @@
+2011-12-16  asmwarrior  <asmwarrior@gmail.com>	(obvious fix)
+
+	* windows-nat.c (cygwin_get_dr, cygwin_get_dr7): Add missing
+	prototypes.
+
 2011-12-16  Doug Evans  <dje@google.com>
 
 	* NEWS: Add entry for stdio gdbserver.
