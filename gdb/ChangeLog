@@ -1,5 +1,12 @@
 2011-12-16  Tom Tromey  <tromey@redhat.com>
 
+	* linespec.c (collect_symbols): Call maybe_add_address after
+	calling symbol_to_sal.
+	(minsym_found): Call maybe_add_address here.
+	(search_minsyms_for_name): Don't call maybe_add_address.
+
+2011-12-16  Tom Tromey  <tromey@redhat.com>
+
 	* linespec.c (struct collect_info) <objfile>: Remove field.
 	(decode_objc): Update.
 	(find_method): Update.
