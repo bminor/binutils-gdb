@@ -1,6 +1,6 @@
 2011-12-16  Phil Muldoon  <pmuldoon@redhat.com>
 
-	* doc/gdb.texinfo (Python Commands): Remove "maint set/show print
+	* gdb.texinfo (Python Commands): Remove "maint set/show print
 	stack".  Add documentation for "set/show python print-stack".
 
 2011-12-14  Pedro Alves  <pedro@codesourcery.com>

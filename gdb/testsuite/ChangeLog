@@ -1,6 +1,6 @@
 2011-12-16  Phil Muldoon  <pmuldoon@redhat.com>
 
-	* testsuite/gdb.python/py-function.exp: Change "on" to "full" for
+	* gdb.python/py-function.exp: Change "on" to "full" for
 	python print-stack.  Add set/show python print-stack
 	off|full|message tests.
 
