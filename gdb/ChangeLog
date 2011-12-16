@@ -1,5 +1,20 @@
 2011-12-16  Tom Tromey  <tromey@redhat.com>
 
+	* linespec.c (struct collect_info) <objfile>: Remove field.
+	(decode_objc): Update.
+	(find_method): Update.
+	(decode_variable): Update.
+	(struct minsym_and_objfile): New.
+	(struct collect_minsyms): New.
+	(classify_mtype): New function.
+	(compare_msyms): Likewise.
+	(add_minsym): Likewise.
+	(check_minsym): Remove.
+	(search_minsyms_for_name): Sort minsyms and apply only those with
+	top priority.
+
+2011-12-16  Tom Tromey  <tromey@redhat.com>
+
 	* cli/cli-cmds.c (filter_sals): Filter out sals with NULL symtab.
 
 2011-12-16  Pedro Alves  <pedro@codesourcery.com>
