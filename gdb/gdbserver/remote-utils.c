@@ -1252,7 +1252,7 @@ prepare_resume_reply (char *buf, ptid_t ptid,
 		      struct target_waitstatus *status)
 {
   if (debug_threads)
-    fprintf (stderr, "Writing resume reply for %s:%d\n\n",
+    fprintf (stderr, "Writing resume reply for %s:%d\n",
 	     target_pid_to_str (ptid), status->kind);
 
   switch (status->kind)
