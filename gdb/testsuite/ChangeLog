@@ -1,5 +1,6 @@
 2011-12-16  Doug Evans  <dje@google.com>
 
+	* boards/native-stdiogdbserver.exp: New file.
 	* boards/native-gdbserver.exp: New file.
 
 	* lib/gdbserver-support.exp (gdb_target_cmd): Recognize stdio
