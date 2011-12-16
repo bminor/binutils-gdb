@@ -1516,7 +1516,7 @@ filter_sals (struct symtabs_and_lines *sals)
   for (i = 0; i < sals->nelts; ++i)
     {
       if (sals->sals[i].pspace == current_program_space
-	  || sals->sals[i].symtab == NULL)
+	  && sals->sals[i].symtab != NULL)
 	{
 	  sals->sals[out] = sals->sals[i];
 	  ++out;
