@@ -342,6 +342,9 @@ extern int transport_is_reliable;
 
 int gdb_connected (void);
 
+#define STDIO_CONNECTION_NAME "stdio"
+int remote_connection_is_stdio (void);
+
 ptid_t read_ptid (char *buf, char **obuf);
 char *write_ptid (char *buf, ptid_t ptid);
 

@@ -1,3 +1,11 @@
+2011-12-16  Doug Evans  <dje@google.com>
+
+	* lib/gdbserver-support.exp (gdb_target_cmd): Recognize stdio
+	gdbserver output.
+	(gdbserver_default_get_remote_address): New function.
+	(gdbserver_start): Call gdb,get_remote_address to compute argument
+	to "target remote" command.
+
 2011-12-16  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* gdb.python/py-function.exp: Change "on" to "full" for

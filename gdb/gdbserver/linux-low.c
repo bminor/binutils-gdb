@@ -569,6 +569,18 @@ linux_create_inferior (char *program, char **allargs)
 
       setpgid (0, 0);
 
+      /* If gdbserver is connected to gdb via stdio, redirect the inferior's
+	 stdout to stderr so that inferior i/o doesn't corrupt the connection.
+	 Also, redirect stdin to /dev/null.  */
+      if (remote_connection_is_stdio ())
+	{
+	  close (0);
+	  open ("/dev/null", O_RDONLY);
+	  dup2 (2, 1);
+	  write (2, "stdin/stdout redirected\n",
+		 sizeof ("stdin/stdout redirected\n") - 1);
+	}
+
       execv (program, allargs);
       if (errno == ENOENT)
 	execvp (program, allargs);

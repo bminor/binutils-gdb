@@ -16766,8 +16766,10 @@ syntax is:
 target> gdbserver @var{comm} @var{program} [ @var{args} @dots{} ]
 @end smallexample
 
-@var{comm} is either a device name (to use a serial line) or a TCP
-hostname and portnumber.  For example, to debug Emacs with the argument
+@var{comm} is either a device name (to use a serial line), or a TCP
+hostname and portnumber, or @code{-} or @code{stdio} to use
+stdin/stdout of @code{gdbserver}.
+For example, to debug Emacs with the argument
 @samp{foo.txt} and communicate with @value{GDBN} over the serial port
 @file{/dev/com1}:
 
@@ -16795,6 +16797,23 @@ reserved for @code{telnet}).@footnote{If you choose a port number that
 conflicts with another service, @code{gdbserver} prints an error message
 and exits.}  You must use the same port number with the host @value{GDBN}
 @code{target remote} command.
+
+The @code{stdio} connection is useful when starting @code{gdbserver}
+with ssh:
+
+@smallexample
+(gdb) target remote | ssh -T hostname gdbserver - hello
+@end smallexample
+
+The @samp{-T} option to ssh is provided because we don't need a remote pty,
+and we don't want escape-character handling.  Ssh does this by default when
+a command is provided, the flag is provided to make it explicit.
+You could elide it if you want to.
+
+Programs started with stdio-connected gdbserver have @file{/dev/null} for
+@code{stdin}, and @code{stdout},@code{stderr} are sent back to gdb for
+display through a pipe connected to gdbserver.
+Both @code{stdout} and @code{stderr} use the same pipe.
 
 @subsubsection Attaching to a Running Program
 @cindex attach to a program, @code{gdbserver}

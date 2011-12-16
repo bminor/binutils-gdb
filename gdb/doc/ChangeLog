@@ -1,3 +1,7 @@
+2011-12-16  Doug Evans  <dje@google.com>
+
+	* gdb.texinfo (Server): Document -/stdio argument to gdbserver.
+
 2011-12-16  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* gdb.texinfo (Python Commands): Remove "maint set/show print

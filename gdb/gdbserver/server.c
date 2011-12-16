@@ -2606,6 +2606,13 @@ main (int argc, char *argv[])
 		}
 	    }
 	}
+      else if (strcmp (*next_arg, "-") == 0)
+	{
+	  /* "-" specifies a stdio connection and is a form of port
+	     specification.  */
+	  *next_arg = STDIO_CONNECTION_NAME;
+	  break;
+	}
       else if (strcmp (*next_arg, "--disable-randomization") == 0)
 	disable_randomization = 1;
       else if (strcmp (*next_arg, "--no-disable-randomization") == 0)
@@ -2635,6 +2642,12 @@ main (int argc, char *argv[])
       gdbserver_usage (stderr);
       exit (1);
     }
+
+  /* We need to know whether the remote connection is stdio before
+     starting the inferior.  Inferiors created in this scenario have
+     stdin,stdout redirected.  So do this here before we call
+     start_inferior.  */
+  remote_prepare (port);
 
   bad_attach = 0;
   pid = 0;
@@ -2722,8 +2735,6 @@ main (int argc, char *argv[])
       fprintf (stderr, "No program to debug.  GDBserver exiting.\n");
       exit (1);
     }
-
-  remote_prepare (port);
 
   while (1)
     {

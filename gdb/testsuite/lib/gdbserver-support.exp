@@ -70,6 +70,10 @@ proc gdb_target_cmd { targetname serialport } {
 		verbose "Set target to $targetname"
 		return 0
 	    }
+	    -re "Remote debugging using stdio.*$gdb_prompt $" {
+		verbose "Set target to $targetname"
+		return 0
+	    }
 	    -re "Remote target $targetname connected to.*$gdb_prompt $" {
 		verbose "Set target to $targetname"
 		return 0
@@ -183,6 +187,12 @@ proc gdbserver_download_current_prog { } {
     return $gdbserver_server_exec
 }
 
+# Default routine to compute the argument to "target remote".
+
+proc gdbserver_default_get_remote_address { host port } {
+    return "$host$port"
+}
+
 # Start a gdbserver process with initial OPTIONS and trailing ARGUMENTS.
 # The port will be filled in between them automatically.
 #
@@ -206,6 +216,15 @@ proc gdbserver_start { options arguments } {
 	set debughost "localhost:"
     }
 
+    # Some boards use a different value for the port that is passed to
+    # gdbserver and the port that is passed to the "target remote" command.
+    # One example is the stdio gdbserver support.
+    if [target_info exists gdb,get_remote_address] {
+	set get_remote_address [target_info gdb,get_remote_address]
+    } else {
+	set get_remote_address gdbserver_default_get_remote_address
+    }
+
     # Extract the protocol
     if [target_info exists gdb_protocol] {
 	set protocol [target_info gdb_protocol]
@@ -217,9 +236,6 @@ proc gdbserver_start { options arguments } {
 
     # Loop till we find a free port.
     while 1 {
-	# Export the host:port pair.
-	set gdbport $debughost$portnum
-
 	# Fire off the debug agent.
 	set gdbserver_command "$gdbserver"
 
@@ -235,9 +251,9 @@ proc gdbserver_start { options arguments } {
 	if { $options != "" } {
 	    append gdbserver_command " $options"
 	}
-
-	append gdbserver_command " :$portnum"
-
+	if { $portnum != "" } {
+	    append gdbserver_command " :$portnum"
+	}
 	if { $arguments != "" } {
 	    append gdbserver_command " $arguments"
 	}
@@ -275,7 +291,7 @@ proc gdbserver_start { options arguments } {
 	}
     }
 
-    return [list $protocol $gdbport]
+    return [list $protocol [$get_remote_address $debughost $portnum]]
 }
 
 # Start a gdbserver process running SERVER_EXEC, and connect GDB

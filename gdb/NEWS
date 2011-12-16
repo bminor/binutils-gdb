@@ -3,6 +3,9 @@
 
 *** Changes since GDB 7.4
 
+* GDBserver now supports stdio connections.
+  E.g. (gdb) target remote | ssh myhost gdbserver - hello
+
 *** Changes in GDB 7.4
 
 * GDB now handles ambiguous linespecs more consistently; the existing
