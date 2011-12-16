@@ -2659,19 +2659,10 @@ collect_symbols (struct symbol *sym, void *data)
   struct collect_info *info = data;
   struct symtab_and_line sal;
 
-  if ((SYMBOL_CLASS (sym) == LOC_STATIC
-       && !info->state->funfirstline
-       && !maybe_add_address (info->state->addr_set,
-			      SYMTAB_PSPACE (SYMBOL_SYMTAB (sym)),
-			      SYMBOL_VALUE_ADDRESS (sym)))
-      || (SYMBOL_CLASS (sym) == LOC_BLOCK
-	  && !maybe_add_address (info->state->addr_set,
-				 SYMTAB_PSPACE (SYMBOL_SYMTAB (sym)),
-				 BLOCK_START (SYMBOL_BLOCK_VALUE (sym)))))
-    {
-      /* Nothing.  */
-    }
-  else if (symbol_to_sal (&sal, info->state->funfirstline, sym))
+  if (symbol_to_sal (&sal, info->state->funfirstline, sym)
+      && maybe_add_address (info->state->addr_set,
+			    SYMTAB_PSPACE (SYMBOL_SYMTAB (sym)),
+			    sal.pc))
     add_sal_to_sals (info->state, &info->result, &sal,
 		     SYMBOL_NATURAL_NAME (sym));
 
@@ -2703,7 +2694,8 @@ minsym_found (struct linespec_state *self, struct objfile *objfile,
   if (self->funfirstline)
     skip_prologue_sal (&sal);
 
-  add_sal_to_sals (self, result, &sal, SYMBOL_NATURAL_NAME (msymbol));
+  if (maybe_add_address (self->addr_set, objfile->pspace, sal.pc))
+    add_sal_to_sals (self, result, &sal, SYMBOL_NATURAL_NAME (msymbol));
 }
 
 /* A helper struct which just holds a minimal symbol and the object
@@ -2842,11 +2834,8 @@ search_minsyms_for_name (struct collect_info *info, const char *name,
 	    if (classify_mtype (MSYMBOL_TYPE (item->minsym)) != classification)
 	      break;
 
-	    if (maybe_add_address (info->state->addr_set, 
-				   item->objfile->pspace,
-				   SYMBOL_VALUE_ADDRESS (item->minsym)))
-	      minsym_found (info->state, item->objfile, item->minsym,
-			    &info->result);
+	    minsym_found (info->state, item->objfile, item->minsym,
+			  &info->result);
 	  }
       }
 
