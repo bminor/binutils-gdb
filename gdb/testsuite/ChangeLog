@@ -1,5 +1,7 @@
 2011-12-16  Doug Evans  <dje@google.com>
 
+	* boards/native-gdbserver.exp: New file.
+
 	* lib/gdbserver-support.exp (gdb_target_cmd): Recognize stdio
 	gdbserver output.
 	(gdbserver_default_get_remote_address): New function.
