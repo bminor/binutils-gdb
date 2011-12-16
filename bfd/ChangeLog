@@ -1,3 +1,8 @@
+2011-12-15  Kevin Buettner  <kevinb@redhat.com>
+
+	* elf32-am33lin.c (elf32_am33lin_grok_prstatus): Add case
+	to correspond to a smaller ELF_NGREG defined by the kernel.
+
 2011-12-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf64-x86-64.c (ELF32_DYNAMIC_INTERPRETER): Set to
