@@ -1,5 +1,19 @@
 2011-12-16  Doug Evans  <dje@google.com>
 
+	* linux-low.c (linux_create_inferior): If stdio connection,
+	redirect stdin from /dev/null, stdout to stderr.
+	* remote-utils.c (remote_is_stdio): New static global.
+	(remote_connection_is_stdio): New function.
+	(remote_prepare): Handle stdio connection.
+	(remote_open): Ditto.
+	(remote_close): Don't close stdin for stdio connections.
+	(read_prim,write_prim): New functions.  Replace all calls to
+	read/write to these.
+	* server.c (main): Watch for "-" argument.  Move call to
+	remote_prepare before start_inferior.
+	* server.h (STDIO_CONNECTION_NAME): New macro.
+	(remote_connection_is_stdio): Declare.
+
 	* remote-utils.c (prepare_resume_reply): Remove extraneous \n
 	in debugging output.
 
