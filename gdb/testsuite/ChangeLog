@@ -1,3 +1,9 @@
+2011-12-16  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* gdb.python/py-function.exp: Change "on" to "full" for
+	python print-stack.  Add set/show python print-stack
+	off|full|message tests.
+
 2011-12-11  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.trace/status-stop.exp: Skip it if target doesn't support trace.
