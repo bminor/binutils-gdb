@@ -1,3 +1,11 @@
+2011-12-16  Pedro Alves  <pedro@codesourcery.com>
+
+	* inf-loop.c: Include top.h.
+	(inferior_event_handler): Call check_frame_language.
+	* top.c (check_frame_language_change): New, factored out from ...
+	(execute_command): ... this.  Use check_frame_language_change.
+	* top.h (check_frame_language_change): Declare.
+
 2011-12-16  asmwarrior  <asmwarrior@gmail.com>	(obvious fix)
 
 	* windows-nat.c (cygwin_get_dr, cygwin_get_dr7): Add missing

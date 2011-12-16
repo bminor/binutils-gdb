@@ -44,6 +44,8 @@ extern void quit_command (char *, int);
 extern void quit_cover (void);
 extern void execute_command (char *, int);
 
+extern void check_frame_language_change (void);
+
 /* Prepare for execution of a command.
    Call this before every command, CLI or MI.
    Returns a cleanup to be run after the command is completed.  */

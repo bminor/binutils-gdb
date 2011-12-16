@@ -362,6 +362,47 @@ prepare_execute_command (void)
   return cleanup;
 }
 
+/* Tell the user if the language has changed (except first time) after
+   executing a command.  */
+
+void
+check_frame_language_change (void)
+{
+  static int warned = 0;
+
+  /* First make sure that a new frame has been selected, in case the
+     command or the hooks changed the program state.  */
+  deprecated_safe_get_selected_frame ();
+  if (current_language != expected_language)
+    {
+      if (language_mode == language_mode_auto && info_verbose)
+	{
+	  language_info (1);	/* Print what changed.  */
+	}
+      warned = 0;
+    }
+
+  /* Warn the user if the working language does not match the language
+     of the current frame.  Only warn the user if we are actually
+     running the program, i.e. there is a stack.  */
+  /* FIXME: This should be cacheing the frame and only running when
+     the frame changes.  */
+
+  if (has_stack_frames ())
+    {
+      enum language flang;
+
+      flang = get_frame_language ();
+      if (!warned
+	  && flang != language_unknown
+	  && flang != current_language->la_language)
+	{
+	  printf_filtered ("%s\n", lang_frame_mismatch_warn);
+	  warned = 1;
+	}
+    }
+}
+
 /* Execute the line P as a command, in the current user context.
    Pass FROM_TTY as second argument to the defining function.  */
 
@@ -370,8 +411,6 @@ execute_command (char *p, int from_tty)
 {
   struct cleanup *cleanup_if_error, *cleanup;
   struct cmd_list_element *c;
-  enum language flang;
-  static int warned = 0;
   char *line;
 
   cleanup_if_error = make_bpstat_clear_actions_cleanup ();
@@ -458,36 +497,7 @@ execute_command (char *p, int from_tty)
 
     }
 
-  /* Tell the user if the language has changed (except first time).
-     First make sure that a new frame has been selected, in case this
-     command or the hooks changed the program state.  */
-  deprecated_safe_get_selected_frame ();
-  if (current_language != expected_language)
-    {
-      if (language_mode == language_mode_auto && info_verbose)
-	{
-	  language_info (1);	/* Print what changed.  */
-	}
-      warned = 0;
-    }
-
-  /* Warn the user if the working language does not match the
-     language of the current frame.  Only warn the user if we are
-     actually running the program, i.e. there is a stack.  */
-  /* FIXME:  This should be cacheing the frame and only running when
-     the frame changes.  */
-
-  if (has_stack_frames ())
-    {
-      flang = get_frame_language ();
-      if (!warned
-	  && flang != language_unknown
-	  && flang != current_language->la_language)
-	{
-	  printf_filtered ("%s\n", lang_frame_mismatch_warn);
-	  warned = 1;
-	}
-    }
+  check_frame_language_change ();
 
   do_cleanups (cleanup);
   discard_cleanups (cleanup_if_error);
