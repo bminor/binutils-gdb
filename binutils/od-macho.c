@@ -29,6 +29,7 @@
 #include "bfdlink.h"
 #include "mach-o.h"
 #include "mach-o/external.h"
+#include "mach-o/codesign.h"
 
 /* Index of the options in the options[] array.  */
 #define OPT_HEADER 0
@@ -36,6 +37,7 @@
 #define OPT_MAP 2
 #define OPT_LOAD 3
 #define OPT_DYSYMTAB 4
+#define OPT_CODESIGN 5
 
 /* List of actions.  */
 static struct objdump_private_option options[] =
@@ -45,6 +47,7 @@ static struct objdump_private_option options[] =
     { "map", 0 },
     { "load", 0 },
     { "dysymtab", 0 },
+    { "codesign", 0 },
     { NULL, 0 }
   };
 
@@ -60,6 +63,7 @@ For Mach-O files:\n\
   map         Display the section map\n\
   load        Display the load commands\n\
   dysymtab    Display the dynamic symbol table\n\
+  codesign    Display code signature section\n\
 "));
 }
 
@@ -253,11 +257,11 @@ dump_header (bfd *abfd)
   fputs (_("Mach-O header:\n"), stdout);
   printf (_(" magic     : %08lx\n"), h->magic);
   printf (_(" cputype   : %08lx (%s)\n"), h->cputype,
-           bfd_mach_o_get_name (bfd_mach_o_cpu_name, h->cputype));
+          bfd_mach_o_get_name (bfd_mach_o_cpu_name, h->cputype));
   printf (_(" cpusubtype: %08lx\n"), h->cpusubtype);
   printf (_(" filetype  : %08lx (%s)\n"),
-           h->filetype,
-           bfd_mach_o_get_name (bfd_mach_o_filetype_name, h->filetype));
+          h->filetype,
+          bfd_mach_o_get_name (bfd_mach_o_filetype_name, h->filetype));
   printf (_(" ncmds     : %08lx (%lu)\n"), h->ncmds, h->ncmds);
   printf (_(" sizeofcmds: %08lx\n"), h->sizeofcmds);
   printf (_(" flags     : %08lx ("), h->flags);
@@ -627,14 +631,224 @@ dump_thread (bfd *abfd, bfd_mach_o_load_command *cmd)
         {
           char *buf = xmalloc (flavour->size);
 
-          if (buf
-              && bfd_seek (abfd, flavour->offset, SEEK_SET) == 0
-              && (bfd_bread (buf, flavour->size, abfd)
-                  == flavour->size))
+          if (bfd_seek (abfd, flavour->offset, SEEK_SET) == 0
+              && bfd_bread (buf, flavour->size, abfd) == flavour->size)
             (*bed->_bfd_mach_o_print_thread)(abfd, flavour, stdout, buf);
+
           free (buf);
         }
     }
+}
+
+static const bfd_mach_o_xlat_name bfd_mach_o_cs_magic[] =
+{
+  { "embedded signature", BFD_MACH_O_CS_MAGIC_EMBEDDED_SIGNATURE },
+  { "requirement", BFD_MACH_O_CS_MAGIC_REQUIREMENT },
+  { "requirements", BFD_MACH_O_CS_MAGIC_REQUIREMENTS },
+  { "code directory", BFD_MACH_O_CS_MAGIC_CODEDIRECTORY },
+  { "embedded entitlements", BFD_MACH_O_CS_MAGIC_EMBEDDED_ENTITLEMENTS },
+  { "blob wrapper", BFD_MACH_O_CS_MAGIC_BLOB_WRAPPER },
+  { NULL, 0 }
+};
+
+static const bfd_mach_o_xlat_name bfd_mach_o_cs_hash_type[] =
+{
+  { "no-hash", BFD_MACH_O_CS_NO_HASH },
+  { "sha1", BFD_MACH_O_CS_HASH_SHA1 },
+  { "sha256", BFD_MACH_O_CS_HASH_SHA256 },
+  { "skein 160", BFD_MACH_O_CS_HASH_PRESTANDARD_SKEIN_160x256 },
+  { "skein 256", BFD_MACH_O_CS_HASH_PRESTANDARD_SKEIN_256x512 },
+  { NULL, 0 }
+};
+
+static unsigned int
+dump_code_signature_blob (bfd *abfd, const unsigned char *buf, unsigned int len);
+
+static void
+dump_code_signature_superblob (bfd *abfd ATTRIBUTE_UNUSED,
+                               const unsigned char *buf, unsigned int len)
+{
+  unsigned int count;
+  unsigned int i;
+
+  if (len < 12)
+    {
+      printf (_("  [bad block length]\n"));
+      return;
+    }
+  count = bfd_getb32 (buf + 8);
+  printf (_("  %u index entries:\n"), count);
+  if (len < 12 + 8 * count)
+    {
+      printf (_("  [bad block length]\n"));
+      return;
+    }
+  for (i = 0; i < count; i++)
+    {
+      unsigned int type;
+      unsigned int off;
+
+      type = bfd_getb32 (buf + 12 + 8 * i);
+      off = bfd_getb32 (buf + 12 + 8 * i + 4);
+      printf (_("  index entry %u: type: %08x, offset: %08x\n"),
+              i, type, off);
+
+      dump_code_signature_blob (abfd, buf + off, len - off);
+    }
+}
+
+static void
+swap_code_codedirectory_v1_in
+  (const struct mach_o_codesign_codedirectory_external_v1 *src,
+   struct mach_o_codesign_codedirectory_v1 *dst)
+{
+  dst->version = bfd_getb32 (src->version);
+  dst->flags = bfd_getb32 (src->flags);
+  dst->hash_offset = bfd_getb32 (src->hash_offset);
+  dst->ident_offset = bfd_getb32 (src->ident_offset);
+  dst->nbr_special_slots = bfd_getb32 (src->nbr_special_slots);
+  dst->nbr_code_slots = bfd_getb32 (src->nbr_code_slots);
+  dst->code_limit = bfd_getb32 (src->code_limit);
+  dst->hash_size = src->hash_size[0];
+  dst->hash_type = src->hash_type[0];
+  dst->spare1 = src->spare1[0];
+  dst->page_size = src->page_size[0];
+  dst->spare2 = bfd_getb32 (src->spare2);
+}
+
+static void
+hexdump (unsigned int start, unsigned int len,
+         const unsigned char *buf)
+{
+  unsigned int i, j;
+
+  for (i = 0; i < len; i += 16)
+    {
+      printf ("%08x:", start + i);
+      for (j = 0; j < 16; j++)
+        {
+          fputc (j == 8 ? '-' : ' ', stdout);
+          if (i + j < len)
+            printf ("%02x", buf[i + j]);
+          else
+            fputs ("  ", stdout);
+        }
+      fputc (' ', stdout);
+      for (j = 0; j < 16; j++)
+        {
+          if (i + j < len)
+            fputc (ISPRINT (buf[i + j]) ? buf[i + j] : '.', stdout);
+          else
+            fputc (' ', stdout);
+        }
+      fputc ('\n', stdout);
+    }
+}
+
+static void
+dump_code_signature_codedirectory (bfd *abfd ATTRIBUTE_UNUSED,
+                                   const unsigned char *buf, unsigned int len)
+{
+  struct mach_o_codesign_codedirectory_v1 cd;
+  const char *id;
+
+  if (len < sizeof (struct mach_o_codesign_codedirectory_external_v1))
+    {
+      printf (_("  [bad block length]\n"));
+      return;
+    }
+
+  swap_code_codedirectory_v1_in
+    ((const struct mach_o_codesign_codedirectory_external_v1 *) (buf + 8), &cd);
+
+  printf (_("  version:           %08x\n"), cd.version);
+  printf (_("  flags:             %08x\n"), cd.flags);
+  printf (_("  hash offset:       %08x\n"), cd.hash_offset);
+  id = (const char *) buf + cd.ident_offset;
+  printf (_("  ident offset:      %08x (- %08x)\n"),
+          cd.ident_offset, cd.ident_offset + (unsigned) strlen (id) + 1);
+  printf (_("   identity: %s\n"), id);
+  printf (_("  nbr special slots: %08x (at offset %08x)\n"),
+          cd.nbr_special_slots,
+          cd.hash_offset - cd.nbr_special_slots * cd.hash_size);
+  printf (_("  nbr code slots:    %08x\n"), cd.nbr_code_slots);
+  printf (_("  code limit:        %08x\n"), cd.code_limit);
+  printf (_("  hash size:         %02x\n"), cd.hash_size);
+  printf (_("  hash type:         %02x (%s)\n"),
+          cd.hash_type,
+          bfd_mach_o_get_name (bfd_mach_o_cs_hash_type, cd.hash_type));
+  printf (_("  spare1:            %02x\n"), cd.spare1);
+  printf (_("  page size:         %02x\n"), cd.page_size);
+  printf (_("  spare2:            %08x\n"), cd.spare2);
+  if (cd.version >= 0x20100)
+    printf (_("  scatter offset:    %08x\n"),
+            (unsigned) bfd_getb32 (buf + 44));
+}
+
+static unsigned int
+dump_code_signature_blob (bfd *abfd, const unsigned char *buf, unsigned int len)
+{
+  unsigned int magic;
+  unsigned int length;
+
+  if (len < 8)
+    {
+      printf (_("  [truncated block]\n"));
+      return 0;
+    }
+  magic = bfd_getb32 (buf);
+  length = bfd_getb32 (buf + 4);
+  if (magic == 0 || length == 0)
+    return 0;
+
+  printf (_(" magic : %08x (%s)\n"), magic,
+          bfd_mach_o_get_name (bfd_mach_o_cs_magic, magic));
+  printf (_(" length: %08x\n"), length);
+  if (length > len)
+    {
+      printf (_("  [bad block length]\n"));
+      return 0;
+    }
+
+  switch (magic)
+    {
+    case BFD_MACH_O_CS_MAGIC_EMBEDDED_SIGNATURE:
+      dump_code_signature_superblob (abfd, buf, length);
+      break;
+    case BFD_MACH_O_CS_MAGIC_CODEDIRECTORY:
+      dump_code_signature_codedirectory (abfd, buf, length);
+      break;
+    default:
+      hexdump (0, length - 8, buf + 8);
+      break;
+    }
+  return length;
+}
+
+static void
+dump_code_signature (bfd *abfd, bfd_mach_o_linkedit_command *cmd)
+{
+  unsigned char *buf = xmalloc (cmd->datasize);
+  unsigned int off;
+
+  if (bfd_seek (abfd, cmd->dataoff, SEEK_SET) != 0
+      || bfd_bread (buf, cmd->datasize, abfd) != cmd->datasize)
+    {
+      non_fatal (_("cannot read code signature data"));
+      free (buf);
+      return;
+    }
+  for (off = 0; off < cmd->datasize;)
+    {
+      unsigned int len;
+
+      len = dump_code_signature_blob (abfd, buf + off, cmd->datasize - off);
+
+      if (len == 0)
+        break;
+      off += len;
+    }
+  free (buf);
 }
 
 static void
@@ -716,6 +930,9 @@ dump_load_command (bfd *abfd, bfd_mach_o_load_command *cmd,
            "  dataoff: 0x%08lx  datasize: 0x%08lx  (endoff: 0x%08lx)\n",
            linkedit->dataoff, linkedit->datasize,
            linkedit->dataoff + linkedit->datasize);
+
+        if (verbose && cmd->type == BFD_MACH_O_LC_CODE_SIGNATURE)
+          dump_code_signature (abfd, linkedit);
         break;
       }
     case BFD_MACH_O_LC_SUB_FRAMEWORK:
@@ -785,6 +1002,8 @@ mach_o_dump (bfd *abfd)
     dump_load_commands (abfd, 0, 0);
   if (options[OPT_DYSYMTAB].selected)
     dump_load_commands (abfd, BFD_MACH_O_LC_DYSYMTAB, 0);
+  if (options[OPT_CODESIGN].selected)
+    dump_load_commands (abfd, BFD_MACH_O_LC_CODE_SIGNATURE, 0);
 }
 
 /* Vector for Mach-O.  */

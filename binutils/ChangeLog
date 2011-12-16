@@ -1,3 +1,20 @@
+2011-12-16  Tristan Gingold  <gingold@adacore.com>
+
+	* od-macho.c: Include mach-o/codesign.h
+	(OPT_CODESIGN): Define.
+	(options): Add an entry for codesign.
+	(mach_o_help): Likewise.
+	(dump_header): Fix indentation.
+	(dump_thread): Do not test result of xmalloc.
+	(bfd_mach_o_cs_magic, bfd_mach_o_cs_hash_type): New.
+	(dump_code_signature_superblob): New function.
+	(swap_code_codedirectory_v1_in): Likewise.
+	(hexdump): Likewise.
+	(dump_code_signature_codedirectory): Likewise.
+	(dump_code_signature_blob, dump_code_signature): Likewise.
+	(dump_load_command): Dump code signature.
+	(mach_o_dump): Likewise.
+
 2011-12-15  Andreas Tobler  <andreast@fgznet.ch>
 
 	* readelf.c (get_symbol_type): Add ELFOSABI_FREEBSD to the
