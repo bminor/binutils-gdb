@@ -1,3 +1,8 @@
+2011-12-16  Ian Lance Taylor  <iant@google.com>
+
+	* output.h (Output_data_reloc_generic::add): Only call
+	add_dynamic_reloc if this is a dynamic reloc section.
+
 2011-12-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gold/13505

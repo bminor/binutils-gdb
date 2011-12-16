@@ -1458,7 +1458,8 @@ class Output_data_reloc_base : public Output_data_reloc_generic
   {
     this->relocs_.push_back(reloc);
     this->set_current_data_size(this->relocs_.size() * reloc_size);
-    od->add_dynamic_reloc();
+    if (dynamic)
+      od->add_dynamic_reloc();
     if (reloc.is_relative())
       this->bump_relative_reloc_count();
     Sized_relobj<size, big_endian>* relobj = reloc.get_relobj();
