@@ -1,3 +1,13 @@
+2011-12-16  Shinichiro Hamaji  <shinichiro.hamaji@gmail.com>
+
+	* mach-o-i386.c (TARGET_PRIORITY): Define as 0 (top priority)
+	* mach-o-target.c (TARGET_NAME): Use TARGET_PRIORITY
+	* mach-o-x86-64.c (TARGET_PRIORITY): Define as 0 (top priority)
+	* mach-o.c (bfd_mach_o_header_p): Remove special handling for
+	mach-o-i386.
+	(TARGET_PRIORITY) Set 1 for mach-o-be and mach-o-le, and set 0 for
+	mach-o-fat.
+
 2011-12-15  Kevin Buettner  <kevinb@redhat.com>
 
 	* elf32-am33lin.c (elf32_am33lin_grok_prstatus): Add case

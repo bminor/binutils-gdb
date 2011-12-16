@@ -3261,17 +3261,6 @@ bfd_mach_o_header_p (bfd *abfd,
       if (header.cputype != cputype)
         goto wrong;
     }
-  else
-    {
-      switch (header.cputype)
-        {
-        case BFD_MACH_O_CPU_TYPE_I386:
-          /* Handled by mach-o-i386 */
-          goto wrong;
-        default:
-          break;
-        }
-    }
   if (filetype)
     {
       if (header.filetype != filetype)
@@ -3802,6 +3791,7 @@ bfd_boolean bfd_mach_o_free_cached_info (bfd *abfd)
 #define TARGET_ARCHITECTURE	bfd_arch_unknown
 #define TARGET_BIG_ENDIAN 	1
 #define TARGET_ARCHIVE 		0
+#define TARGET_PRIORITY		1
 #include "mach-o-target.c"
 
 #undef TARGET_NAME
@@ -3809,12 +3799,14 @@ bfd_boolean bfd_mach_o_free_cached_info (bfd *abfd)
 #undef TARGET_ARCHITECTURE
 #undef TARGET_BIG_ENDIAN
 #undef TARGET_ARCHIVE
+#undef TARGET_PRIORITY
 
 #define TARGET_NAME 		mach_o_le_vec
 #define TARGET_STRING 		"mach-o-le"
 #define TARGET_ARCHITECTURE	bfd_arch_unknown
 #define TARGET_BIG_ENDIAN 	0
 #define TARGET_ARCHIVE 		0
+#define TARGET_PRIORITY		1
 
 #include "mach-o-target.c"
 
@@ -3823,6 +3815,7 @@ bfd_boolean bfd_mach_o_free_cached_info (bfd *abfd)
 #undef TARGET_ARCHITECTURE
 #undef TARGET_BIG_ENDIAN
 #undef TARGET_ARCHIVE
+#undef TARGET_PRIORITY
 
 /* Not yet handled: creating an archive.  */
 #define bfd_mach_o_mkarchive                      _bfd_noarchive_mkarchive
@@ -3844,6 +3837,7 @@ bfd_boolean bfd_mach_o_free_cached_info (bfd *abfd)
 #define TARGET_ARCHITECTURE	bfd_arch_unknown
 #define TARGET_BIG_ENDIAN 	1
 #define TARGET_ARCHIVE 		1
+#define TARGET_PRIORITY		0
 
 #include "mach-o-target.c"
 
@@ -3852,3 +3846,4 @@ bfd_boolean bfd_mach_o_free_cached_info (bfd *abfd)
 #undef TARGET_ARCHITECTURE
 #undef TARGET_BIG_ENDIAN
 #undef TARGET_ARCHIVE
+#undef TARGET_PRIORITY

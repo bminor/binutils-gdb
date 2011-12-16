@@ -294,4 +294,5 @@ bfd_mach_o_x86_64_bfd_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 #define TARGET_ARCHITECTURE	bfd_arch_i386
 #define TARGET_BIG_ENDIAN 	0
 #define TARGET_ARCHIVE 		0
+#define TARGET_PRIORITY		0
 #include "mach-o-target.c"

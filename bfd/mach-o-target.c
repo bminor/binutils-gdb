@@ -118,7 +118,7 @@ const bfd_target TARGET_NAME =
   '_',				/* symbol_leading_char.  */
   ' ',				/* ar_pad_char.  */
   16,				/* ar_max_namelen.  */
-  0,				/* match priority.  */
+  TARGET_PRIORITY,	/* match priority.  */
 
 #if TARGET_BIG_ENDIAN
   bfd_getb64, bfd_getb_signed_64, bfd_putb64,
