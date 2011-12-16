@@ -1,3 +1,7 @@
+2011-12-16  Tom Tromey  <tromey@redhat.com>
+
+	* cli/cli-cmds.c (filter_sals): Filter out sals with NULL symtab.
+
 2011-12-16  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* python/python.c: Define python_excp_enums.
