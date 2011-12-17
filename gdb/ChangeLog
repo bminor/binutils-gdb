@@ -1,3 +1,8 @@
+2011-12-17  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* cp-name-parser.y (cp_merge_demangle_parse_infos): Don't use
+	obstack_empty_p.
+
 2011-12-17  Mark Kettenis  <kettenis@gnu.org>
 
 	* amd64obsd-tdep.c (amd64obsd_init_abi): Don't set
