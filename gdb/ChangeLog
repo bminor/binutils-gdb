@@ -1,5 +1,11 @@
 2011-12-16  Andrey Smirnov  <andrew.smirnov@gmail.com>
 
+	* mi/mi-getopt.c (mi_getopt): Rename `optind' and `optarg' to
+	`oind' and `oarg', respectively(-Wshadow).
+	(mi_valid_noargs): Ditto.
+
+2011-12-16  Andrey Smirnov  <andrew.smirnov@gmail.com>
+
 	* mi/mi-cmd-var.c (print_varobj): Rename `optind' and `optarg' to
 	`oind' and `oarg', respectively(-Wshadow).
 
