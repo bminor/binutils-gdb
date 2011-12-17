@@ -1,7 +1,13 @@
-2011-12-16  Andrey Smirnov  <andrew.smirnov@gmail.com
+2011-12-16  Andrey Smirnov  <andrew.smirnov@gmail.com>
 
-	* mi/mi-cmd-disas.c (mi_cmd_disassemble):  Rename `optind' and `optarg'
-	to `oind' and `oarg', respectively(-Wshadow).
+	* mi/mi-cmd-env.c (mi_cmd_env_path): Rename `optind' and
+	`optarg' to `oind' and `oarg', respectively(-Wshadow).
+	(mi_cmd_env_dir): Ditto.
+
+2011-12-16  Andrey Smirnov  <andrew.smirnov@gmail.com>
+
+	* mi/mi-cmd-disas.c (mi_cmd_disassemble): Rename `optind' and
+	`optarg' to `oind' and `oarg', respectively(-Wshadow).
 
 2011-12-16  Andrey Smirnov  <andrew.smirnov@gmail.com>
 
