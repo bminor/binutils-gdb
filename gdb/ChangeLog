@@ -1,3 +1,8 @@
+2011-12-17  Mark Kettenis  <kettenis@gnu.org>
+
+	* amd64obsd-tdep.c (amd64obsd_sigtramp_p): Detect new signal
+	trampoline to be introduced in OpenBSD 5.0.
+
 2011-12-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix build regression from the PR threads/10729 fix.
