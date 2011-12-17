@@ -1,3 +1,17 @@
+2011-12-17  Mark Kettenis  <kettenis@gnu.org>
+
+	* amd64obsd-tdep.c (amd64obsd_init_abi): Don't set
+	regset_from_core_section.
+	(amd64obsd_core_init_abi): New function that sets
+	regset_from_core_section.
+	(_initialize_amd64obsd_tdep): Use amd64obsd_core_init_abi for
+	traditional core dumps.
+
+2011-12-17  Mark Kettenis  <kettenis@gnu.org>
+
+	* amd64obsd-tdep.c (amd64obsd_sigtramp_p): Detect new signal
+	trampoline to be introduced in OpenBSD 5.0.
+
 2011-12-16  Tom Tromey  <tromey@redhat.com>
 
 	* linespec.c (collect_symbols): Call maybe_add_address after
