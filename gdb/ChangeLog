@@ -1,3 +1,9 @@
+2011-12-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix build regression from the PR threads/10729 fix.
+	* s390-nat.c (s390_insert_watchpoint, s390_remove_watchpoint): Use LP,
+	not LP->PTID.
+
 2011-12-16  Andrey Smirnov  <andrew.smirnov@gmail.com>
 
 	* mi/mi-main.c (mi_cmd_list_thread_groups): Rename `optind' and

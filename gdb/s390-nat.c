@@ -532,7 +532,7 @@ s390_insert_watchpoint (CORE_ADDR addr, int len, int type,
   watch_base = area;
 
   ALL_LWPS (lp)
-    s390_fix_watch_points (lp->ptid);
+    s390_fix_watch_points (lp);
   return 0;
 }
 
@@ -560,7 +560,7 @@ s390_remove_watchpoint (CORE_ADDR addr, int len, int type,
   xfree (area);
 
   ALL_LWPS (lp)
-    s390_fix_watch_points (lp->ptid);
+    s390_fix_watch_points (lp);
   return 0;
 }
 
