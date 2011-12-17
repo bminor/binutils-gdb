@@ -1,5 +1,12 @@
 2011-12-16  Andrey Smirnov  <andrew.smirnov@gmail.com>
 
+	* mi/mi-cmd-target.c (mi_cmd_target_file_get): Rename `optind' and
+	`optarg' to `oind' and `oarg', respectively(-Wshadow).
+	(mi_cmd_target_file_put): Ditto.
+	(mi_cmd_target_file_delete): Ditto.
+
+2011-12-16  Andrey Smirnov  <andrew.smirnov@gmail.com>
+
 	* mi/mi-cmd-env.c (mi_cmd_env_path): Rename `optind' and
 	`optarg' to `oind' and `oarg', respectively(-Wshadow).
 	(mi_cmd_env_dir): Ditto.
