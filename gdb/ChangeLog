@@ -1,7 +1,12 @@
+2011-12-16  Andrey Smirnov  <andrew.smirnov@gmail.com
+
+	* mi/mi-cmd-disas.c (mi_cmd_disassemble):  Rename `optind' and `optarg'
+	to `oind' and `oarg', respectively(-Wshadow).
+
 2011-12-16  Andrey Smirnov  <andrew.smirnov@gmail.com>
 
 	* mi/mi-cmd-break.c (mi_cmd_break_insert): Rename `optind' and
-	`optparg' to `oind' and `oparg', respectively(-Wshadow).
+	`optparg' to `oind' and `oarg', respectively(-Wshadow).
 	(mi_cmd_break_watch): Ditto.
 
 2011-12-16  Tom Tromey  <tromey@redhat.com>

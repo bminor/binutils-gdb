@@ -77,8 +77,8 @@ mi_cmd_disassemble (char *command, char **argv, int argc)
   struct cleanup *cleanups = make_cleanup (null_cleanup, NULL);
 
   /* Options processing stuff. */
-  int optind = 0;
-  char *optarg;
+  int oind = 0;
+  char *oarg;
   enum opt
   {
     FILE_OPT, LINE_OPT, NUM_OPT, START_OPT, END_OPT
@@ -97,36 +97,36 @@ mi_cmd_disassemble (char *command, char **argv, int argc)
   while (1)
     {
       int opt = mi_getopt ("-data-disassemble", argc, argv, opts,
-			   &optind, &optarg);
+			   &oind, &oarg);
       if (opt < 0)
 	break;
       switch ((enum opt) opt)
 	{
 	case FILE_OPT:
-	  file_string = xstrdup (optarg);
+	  file_string = xstrdup (oarg);
 	  file_seen = 1;
 	  make_cleanup (xfree, file_string);
 	  break;
 	case LINE_OPT:
-	  line_num = atoi (optarg);
+	  line_num = atoi (oarg);
 	  line_seen = 1;
 	  break;
 	case NUM_OPT:
-	  how_many = atoi (optarg);
+	  how_many = atoi (oarg);
 	  num_seen = 1;
 	  break;
 	case START_OPT:
-	  low = parse_and_eval_address (optarg);
+	  low = parse_and_eval_address (oarg);
 	  start_seen = 1;
 	  break;
 	case END_OPT:
-	  high = parse_and_eval_address (optarg);
+	  high = parse_and_eval_address (oarg);
 	  end_seen = 1;
 	  break;
 	}
     }
-  argv += optind;
-  argc -= optind;
+  argv += oind;
+  argc -= oind;
 
   /* Allow only filename + linenum (with how_many which is not
      required) OR start_addr + and_addr */
