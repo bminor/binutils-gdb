@@ -491,8 +491,10 @@ Sized_dwarf_line_info<size, big_endian>::read_lines(unsigned const char* lineptr
               && (shndx == -1U || lsm.shndx == -1U || shndx == lsm.shndx))
             {
               Offset_to_lineno_entry entry
-                  = { lsm.address, this->current_header_index_,
-                      lsm.file_num, true, lsm.line_num };
+                  = { static_cast<off_t>(lsm.address),
+		      this->current_header_index_,
+		      static_cast<unsigned int>(lsm.file_num),
+		      true, lsm.line_num };
 	      std::vector<Offset_to_lineno_entry>&
 		map(this->line_number_map_[lsm.shndx]);
 	      // If we see two consecutive entries with the same

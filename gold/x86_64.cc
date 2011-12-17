@@ -3861,42 +3861,51 @@ Target_x86_64::do_code_fill(section_size_type length) const
     }
 
   // Nop sequences of various lengths.
-  const char nop1[1] = { 0x90 };                   // nop
-  const char nop2[2] = { 0x66, 0x90 };             // xchg %ax %ax
-  const char nop3[3] = { 0x0f, 0x1f, 0x00 };       // nop (%rax)
-  const char nop4[4] = { 0x0f, 0x1f, 0x40, 0x00};  // nop 0(%rax)
-  const char nop5[5] = { 0x0f, 0x1f, 0x44, 0x00,   // nop 0(%rax,%rax,1)
-                         0x00 };
-  const char nop6[6] = { 0x66, 0x0f, 0x1f, 0x44,   // nopw 0(%rax,%rax,1)
-                         0x00, 0x00 };
-  const char nop7[7] = { 0x0f, 0x1f, 0x80, 0x00,   // nopl 0L(%rax)
-                         0x00, 0x00, 0x00 };
-  const char nop8[8] = { 0x0f, 0x1f, 0x84, 0x00,   // nopl 0L(%rax,%rax,1)
-                         0x00, 0x00, 0x00, 0x00 };
-  const char nop9[9] = { 0x66, 0x0f, 0x1f, 0x84,   // nopw 0L(%rax,%rax,1)
-                         0x00, 0x00, 0x00, 0x00,
-                         0x00 };
-  const char nop10[10] = { 0x66, 0x2e, 0x0f, 0x1f, // nopw %cs:0L(%rax,%rax,1)
-                           0x84, 0x00, 0x00, 0x00,
-                           0x00, 0x00 };
-  const char nop11[11] = { 0x66, 0x66, 0x2e, 0x0f, // data16
-                           0x1f, 0x84, 0x00, 0x00, // nopw %cs:0L(%rax,%rax,1)
-                           0x00, 0x00, 0x00 };
-  const char nop12[12] = { 0x66, 0x66, 0x66, 0x2e, // data16; data16
-                           0x0f, 0x1f, 0x84, 0x00, // nopw %cs:0L(%rax,%rax,1)
-                           0x00, 0x00, 0x00, 0x00 };
-  const char nop13[13] = { 0x66, 0x66, 0x66, 0x66, // data16; data16; data16
-                           0x2e, 0x0f, 0x1f, 0x84, // nopw %cs:0L(%rax,%rax,1)
-                           0x00, 0x00, 0x00, 0x00,
-                           0x00 };
-  const char nop14[14] = { 0x66, 0x66, 0x66, 0x66, // data16; data16; data16
-                           0x66, 0x2e, 0x0f, 0x1f, // data16
-                           0x84, 0x00, 0x00, 0x00, // nopw %cs:0L(%rax,%rax,1)
-                           0x00, 0x00 };
-  const char nop15[15] = { 0x66, 0x66, 0x66, 0x66, // data16; data16; data16
-                           0x66, 0x66, 0x2e, 0x0f, // data16; data16
-                           0x1f, 0x84, 0x00, 0x00, // nopw %cs:0L(%rax,%rax,1)
-                           0x00, 0x00, 0x00 };
+  const char nop1[1] = { '\x90' };                 // nop
+  const char nop2[2] = { '\x66', '\x90' };         // xchg %ax %ax
+  const char nop3[3] = { '\x0f', '\x1f', '\x00' }; // nop (%rax)
+  const char nop4[4] = { '\x0f', '\x1f', '\x40',   // nop 0(%rax)
+  			 '\x00'};
+  const char nop5[5] = { '\x0f', '\x1f', '\x44',   // nop 0(%rax,%rax,1)
+			 '\x00', '\x00' };
+  const char nop6[6] = { '\x66', '\x0f', '\x1f',   // nopw 0(%rax,%rax,1)
+  			 '\x44', '\x00', '\x00' };
+  const char nop7[7] = { '\x0f', '\x1f', '\x80',   // nopl 0L(%rax)
+  			 '\x00', '\x00', '\x00',
+			 '\x00' };
+  const char nop8[8] = { '\x0f', '\x1f', '\x84',   // nopl 0L(%rax,%rax,1)
+  			 '\x00', '\x00', '\x00',
+			 '\x00', '\x00' };
+  const char nop9[9] = { '\x66', '\x0f', '\x1f',   // nopw 0L(%rax,%rax,1)
+  			 '\x84', '\x00', '\x00',
+			 '\x00', '\x00', '\x00' };
+  const char nop10[10] = { '\x66', '\x2e', '\x0f', // nopw %cs:0L(%rax,%rax,1)
+  			   '\x1f', '\x84', '\x00',
+			   '\x00', '\x00', '\x00',
+			   '\x00' };
+  const char nop11[11] = { '\x66', '\x66', '\x2e', // data16
+  			   '\x0f', '\x1f', '\x84', // nopw %cs:0L(%rax,%rax,1)
+			   '\x00', '\x00', '\x00',
+			   '\x00', '\x00' };
+  const char nop12[12] = { '\x66', '\x66', '\x66', // data16; data16
+  			   '\x2e', '\x0f', '\x1f', // nopw %cs:0L(%rax,%rax,1)
+			   '\x84', '\x00', '\x00',
+			   '\x00', '\x00', '\x00' };
+  const char nop13[13] = { '\x66', '\x66', '\x66', // data16; data16; data16
+  			   '\x66', '\x2e', '\x0f', // nopw %cs:0L(%rax,%rax,1)
+			   '\x1f', '\x84', '\x00',
+			   '\x00', '\x00', '\x00',
+                           '\x00' };
+  const char nop14[14] = { '\x66', '\x66', '\x66', // data16; data16; data16
+  			   '\x66', '\x66', '\x2e', // data16
+			   '\x0f', '\x1f', '\x84', // nopw %cs:0L(%rax,%rax,1)
+			   '\x00', '\x00', '\x00',
+                           '\x00', '\x00' };
+  const char nop15[15] = { '\x66', '\x66', '\x66', // data16; data16; data16
+  			   '\x66', '\x66', '\x66', // data16; data16
+			   '\x2e', '\x0f', '\x1f', // nopw %cs:0L(%rax,%rax,1)
+			   '\x84', '\x00', '\x00',
+                           '\x00', '\x00', '\x00' };
 
   const char* nops[16] = {
     NULL,

@@ -1,3 +1,11 @@
+2011-12-17  Cary Coutant  <ccoutant@google.com>
+
+	* dwarf_reader.cc (Sized_dwarf_line_info::read_lines): Add casts.
+	* resolve.cc (Symbol_table::resolve): Likewise.
+	* i386.cc (Target_i386::do_code_fill): Use char constants for nop
+	arrays.
+	* x86_64.cc (Target_x86_64::do_code_fill): Likewise.
+
 2011-12-16  Ian Lance Taylor  <iant@google.com>
 
 	* output.h (Output_data_reloc_generic::add): Only call

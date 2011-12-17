@@ -336,9 +336,9 @@ Symbol_table::resolve(Sized_symbol<size>* to,
       && to->name()[0] == '_' && to->name()[1] == 'Z')
     {
       Symbol_location fromloc
-          = { object, orig_st_shndx, sym.get_st_value() };
+          = { object, orig_st_shndx, static_cast<off_t>(sym.get_st_value()) };
       Symbol_location toloc = { to->object(), to->shndx(&to_is_ordinary),
-				to->value() };
+				static_cast<off_t>(to->value()) };
       this->candidate_odr_violations_[to->name()].insert(fromloc);
       this->candidate_odr_violations_[to->name()].insert(toloc);
     }
