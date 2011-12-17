@@ -1,5 +1,13 @@
 2011-12-16  Andrey Smirnov  <andrew.smirnov@gmail.com>
 
+	* mi/mi-main.c (mi_cmd_list_thread_groups): Rename `optind' and
+	`optarg' to `oind' and `oarg', respectively(-Wshadow).
+	(mi_cmd_data_read_memory): Ditto.
+	(mi_cmd_data_read_memory_bytes): Ditto.
+	(mi_cmd_data_write_memory): Ditto.
+
+2011-12-16  Andrey Smirnov  <andrew.smirnov@gmail.com>
+
 	* mi/mi-getopt.c (mi_getopt): Rename `optind' and `optarg' to
 	`oind' and `oarg', respectively(-Wshadow).
 	(mi_valid_noargs): Ditto.
