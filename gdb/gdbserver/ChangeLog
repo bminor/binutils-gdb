@@ -1,3 +1,7 @@
+2011-12-18  Hui Zhu  <teawater@gmail.com>
+
+	* linux-low.c (linux_create_inferior): Save return value to ret.
+
 2011-12-16  Doug Evans  <dje@google.com>
 
 	* linux-low.c (linux_create_inferior): If stdio connection,
