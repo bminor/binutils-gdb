@@ -1,3 +1,11 @@
+2011-12-18  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* linux-low.c (linux_create_inferior): Put empty if clause for write.
+
+	Revert:
+	2011-12-18  Hui Zhu  <teawater@gmail.com>
+	* linux-low.c (linux_create_inferior): Save return value to ret.
+
 2011-12-18  Hui Zhu  <teawater@gmail.com>
 
 	* linux-low.c (linux_create_inferior): Save return value to ret.
