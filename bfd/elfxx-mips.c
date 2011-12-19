@@ -1575,9 +1575,10 @@ _bfd_mips_elf_init_stubs (struct bfd_link_info *info,
 }
 
 /* Return true if H is a locally-defined PIC function, in the sense
-   that it might need $25 to be valid on entry.  Note that MIPS16
-   functions never need $25 to be valid on entry; they set up $gp
-   using PC-relative instructions instead.  */
+   that it or its fn_stub might need $25 to be valid on entry.
+   Note that MIPS16 functions set up $gp using PC-relative instructions,
+   so they themselves never need $25 to be valid.  Only non-MIPS16
+   entry points are of interest here.  */
 
 static bfd_boolean
 mips_elf_local_pic_function_p (struct mips_elf_link_hash_entry *h)
@@ -1586,9 +1587,30 @@ mips_elf_local_pic_function_p (struct mips_elf_link_hash_entry *h)
 	   || h->root.root.type == bfd_link_hash_defweak)
 	  && h->root.def_regular
 	  && !bfd_is_abs_section (h->root.root.u.def.section)
-	  && !ELF_ST_IS_MIPS16 (h->root.other)
+	  && (!ELF_ST_IS_MIPS16 (h->root.other)
+	      || (h->fn_stub && h->need_fn_stub))
 	  && (PIC_OBJECT_P (h->root.root.u.def.section->owner)
 	      || ELF_ST_IS_MIPS_PIC (h->root.other)));
+}
+
+/* Set *SEC to the input section that contains the target of STUB.
+   Return the offset of the target from the start of that section.  */
+
+static bfd_vma
+mips_elf_get_la25_target (struct mips_elf_la25_stub *stub,
+			  asection **sec)
+{
+  if (ELF_ST_IS_MIPS16 (stub->h->root.other))
+    {
+      BFD_ASSERT (stub->h->need_fn_stub);
+      *sec = stub->h->fn_stub;
+      return 0;
+    }
+  else
+    {
+      *sec = stub->h->root.root.u.def.section;
+      return stub->h->root.root.u.def.value;
+    }
 }
 
 /* STUB describes an la25 stub that we have decided to implement
@@ -1615,7 +1637,7 @@ mips_elf_add_la25_intro (struct mips_elf_la25_stub *stub,
   sprintf (name, ".text.stub.%d", (int) htab_elements (htab->la25_stubs));
 
   /* Create the section.  */
-  input_section = stub->h->root.root.u.def.section;
+  mips_elf_get_la25_target (stub, &input_section);
   s = htab->add_stub_section (name, input_section,
 			      input_section->output_section);
   if (s == NULL)
@@ -1689,12 +1711,6 @@ mips_elf_add_la25_stub (struct bfd_link_info *info,
   bfd_vma value;
   void **slot;
 
-  /* Prefer to use LUI/ADDIU stubs if the function is at the beginning
-     of the section and if we would need no more than 2 nops.  */
-  s = h->root.root.u.def.section;
-  value = h->root.root.u.def.value;
-  use_trampoline_p = (value != 0 || s->alignment_power > 4);
-
   /* Describe the stub we want.  */
   search.stub_section = NULL;
   search.offset = 0;
@@ -1723,6 +1739,11 @@ mips_elf_add_la25_stub (struct bfd_link_info *info,
     return FALSE;
   *stub = search;
   *slot = stub;
+
+  /* Prefer to use LUI/ADDIU stubs if the function is at the beginning
+     of the section and if we would need no more than 2 nops.  */
+  value = mips_elf_get_la25_target (stub, &s);
+  use_trampoline_p = (value != 0 || s->alignment_power > 4);
 
   h->la25_stub = stub;
   return (use_trampoline_p
@@ -4911,7 +4932,8 @@ is_gott_symbol (struct bfd_link_info *info, struct elf_link_hash_entry *h)
    stub.  */
 
 static bfd_boolean
-mips_elf_relocation_needs_la25_stub (bfd *input_bfd, int r_type)
+mips_elf_relocation_needs_la25_stub (bfd *input_bfd, int r_type,
+				     bfd_boolean target_is_16_bit_code_p)
 {
   /* We specifically ignore branches and jumps from EF_PIC objects,
      where the onus is on the compiler or programmer to perform any
@@ -4925,13 +4947,15 @@ mips_elf_relocation_needs_la25_stub (bfd *input_bfd, int r_type)
     {
     case R_MIPS_26:
     case R_MIPS_PC16:
-    case R_MIPS16_26:
     case R_MICROMIPS_26_S1:
     case R_MICROMIPS_PC7_S1:
     case R_MICROMIPS_PC10_S1:
     case R_MICROMIPS_PC16_S1:
     case R_MICROMIPS_PC23_S2:
       return TRUE;
+
+    case R_MIPS16_26:
+      return !target_is_16_bit_code_p;
 
     default:
       return FALSE;
@@ -5193,14 +5217,28 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 	 have already noticed that we were going to need the
 	 stub.  */
       if (local_p)
-	sec = elf_tdata (input_bfd)->local_stubs[r_symndx];
+	{
+	  sec = elf_tdata (input_bfd)->local_stubs[r_symndx];
+	  value = 0;
+	}
       else
 	{
 	  BFD_ASSERT (h->need_fn_stub);
-	  sec = h->fn_stub;
+	  if (h->la25_stub)
+	    {
+	      /* If a LA25 header for the stub itself exists, point to the
+		 prepended LUI/ADDIU sequence.  */
+	      sec = h->la25_stub->stub_section;
+	      value = h->la25_stub->offset;
+	    }
+	  else
+	    {
+	      sec = h->fn_stub;
+	      value = 0;
+	    }
 	}
 
-      symbol = sec->output_section->vma + sec->output_offset;
+      symbol = sec->output_section->vma + sec->output_offset + value;
       /* The target is 16-bit, but the stub isn't.  */
       target_is_16_bit_code_p = FALSE;
     }
@@ -5250,7 +5288,8 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
   /* If this is a direct call to a PIC function, redirect to the
      non-PIC stub.  */
   else if (h != NULL && h->la25_stub
-	   && mips_elf_relocation_needs_la25_stub (input_bfd, r_type))
+	   && mips_elf_relocation_needs_la25_stub (input_bfd, r_type,
+						   target_is_16_bit_code_p))
     symbol = (h->la25_stub->stub_section->output_section->vma
 	      + h->la25_stub->stub_section->output_offset
 	      + h->la25_stub->offset);
@@ -7926,7 +7965,9 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    return FALSE;
 	}
 
-      if (h != NULL && mips_elf_relocation_needs_la25_stub (abfd, r_type))
+      if (h != NULL
+	  && mips_elf_relocation_needs_la25_stub (abfd, r_type,
+						  ELF_ST_IS_MIPS16 (h->other)))
 	((struct mips_elf_link_hash_entry *) h)->has_nonpic_branches = TRUE;
 
       switch (r_type)
@@ -9623,9 +9664,9 @@ mips_elf_create_la25_stub (void **slot, void *data)
   offset = stub->offset;
 
   /* Work out the target address.  */
-  target = (stub->h->root.root.u.def.section->output_section->vma
-	    + stub->h->root.root.u.def.section->output_offset
-	    + stub->h->root.root.u.def.value);
+  target = mips_elf_get_la25_target (stub, &s);
+  target += s->output_section->vma + s->output_offset;
+
   target_high = ((target + 0x8000) >> 16) & 0xffff;
   target_low = (target & 0xffff);
 
