@@ -680,7 +680,7 @@ class Sections_element_assignment : public Sections_element
   set_section_addresses(Symbol_table* symtab, Layout* layout,
 			uint64_t* dot_value, uint64_t*, uint64_t*)
   {
-    this->assignment_.set_if_absolute(symtab, layout, true, *dot_value);
+    this->assignment_.set_if_absolute(symtab, layout, true, *dot_value, NULL);
   }
 
   // Print for debugging.
@@ -714,7 +714,7 @@ class Sections_element_dot_assignment : public Sections_element
     // output section definition the dot symbol is always considered
     // to be absolute.
     *dot_value = this->val_->eval_with_dot(symtab, layout, true, *dot_value,
-					   NULL, NULL, NULL);
+					   NULL, NULL, NULL, false);
   }
 
   // Update the dot symbol while setting section addresses.
@@ -724,7 +724,7 @@ class Sections_element_dot_assignment : public Sections_element
 			uint64_t* load_address)
   {
     *dot_value = this->val_->eval_with_dot(symtab, layout, false, *dot_value,
-					   NULL, NULL, dot_alignment);
+					   NULL, NULL, dot_alignment, false);
     *load_address = *dot_value;
   }
 
@@ -866,9 +866,11 @@ class Output_section_element_assignment : public Output_section_element
   void
   set_section_addresses(Symbol_table* symtab, Layout* layout, Output_section*,
 			uint64_t, uint64_t* dot_value, uint64_t*,
-			Output_section**, std::string*, Input_section_list*)
+			Output_section** dot_section, std::string*,
+			Input_section_list*)
   {
-    this->assignment_.set_if_absolute(symtab, layout, true, *dot_value);
+    this->assignment_.set_if_absolute(symtab, layout, true, *dot_value,
+				      *dot_section);
   }
 
   // Print for debugging.
@@ -892,20 +894,28 @@ class Output_section_element_dot_assignment : public Output_section_element
     : val_(val)
   { }
 
+  // An assignment to dot within an output section is enough to force
+  // the output section to exist.
+  bool
+  needs_output_section() const
+  { return true; }
+
   // Finalize the symbol.
   void
   finalize_symbols(Symbol_table* symtab, const Layout* layout,
 		   uint64_t* dot_value, Output_section** dot_section)
   {
     *dot_value = this->val_->eval_with_dot(symtab, layout, true, *dot_value,
-					   *dot_section, dot_section, NULL);
+					   *dot_section, dot_section, NULL,
+					   true);
   }
 
   // Update the dot symbol while setting section addresses.
   void
   set_section_addresses(Symbol_table* symtab, Layout* layout, Output_section*,
 			uint64_t, uint64_t* dot_value, uint64_t*,
-			Output_section**, std::string*, Input_section_list*);
+			Output_section** dot_section, std::string*,
+			Input_section_list*);
 
   // Print for debugging.
   void
@@ -936,7 +946,8 @@ Output_section_element_dot_assignment::set_section_addresses(
 {
   uint64_t next_dot = this->val_->eval_with_dot(symtab, layout, false,
 						*dot_value, *dot_section,
-						dot_section, dot_alignment);
+						dot_section, dot_alignment,
+						true);
   if (next_dot < *dot_value)
     gold_error(_("dot may not move backward"));
   if (next_dot > *dot_value && output_section != NULL)
@@ -1037,7 +1048,8 @@ Output_data_expression::do_write_to_buffer(unsigned char* buf)
 {
   uint64_t val = this->val_->eval_with_dot(this->symtab_, this->layout_,
 					   true, this->dot_value_,
-					   this->dot_section_, NULL, NULL);
+					   this->dot_section_, NULL, NULL,
+					   false);
 
   if (parameters->target().is_big_endian())
     this->endian_write_to_buffer<true>(val, buf);
@@ -1187,7 +1199,7 @@ class Output_section_element_fill : public Output_section_element
     Output_section* fill_section;
     uint64_t fill_val = this->val_->eval_with_dot(symtab, layout, false,
 						  *dot_value, *dot_section,
-						  &fill_section, NULL);
+						  &fill_section, NULL, false);
     if (fill_section != NULL)
       gold_warning(_("fill value is not absolute"));
     // FIXME: The GNU linker supports fill values of arbitrary length.
@@ -2108,13 +2120,13 @@ Output_section_definition::finalize_symbols(Symbol_table* symtab,
 	{
 	  address = this->address_->eval_with_dot(symtab, layout, true,
 						  *dot_value, NULL,
-						  NULL, NULL);
+						  NULL, NULL, false);
 	}
       if (this->align_ != NULL)
 	{
 	  uint64_t align = this->align_->eval_with_dot(symtab, layout, true,
 						       *dot_value, NULL,
-						       NULL, NULL);
+						       NULL, NULL, false);
 	  address = align_address(address, align);
 	}
       *dot_value = address;
@@ -2303,7 +2315,7 @@ Output_section_definition::set_section_addresses(Symbol_table* symtab,
   else
     address = this->address_->eval_with_dot(symtab, layout, true,
 					    *dot_value, NULL, NULL,
-					    dot_alignment);
+					    dot_alignment, false);
   uint64_t align;
   if (this->align_ == NULL)
     {
@@ -2316,7 +2328,7 @@ Output_section_definition::set_section_addresses(Symbol_table* symtab,
     {
       Output_section* align_section;
       align = this->align_->eval_with_dot(symtab, layout, true, *dot_value,
-					  NULL, &align_section, NULL);
+					  NULL, &align_section, NULL, false);
       if (align_section != NULL)
 	gold_warning(_("alignment of section %s is not absolute"),
 		     this->name_.c_str());
@@ -2401,7 +2413,7 @@ Output_section_definition::set_section_addresses(Symbol_table* symtab,
       laddr = this->load_address_->eval_with_dot(symtab, layout, true,
 						 *dot_value,
 						 this->output_section_,
-						 NULL, NULL);
+						 NULL, NULL, false);
       if (this->output_section_ != NULL)
         this->output_section_->set_load_address(laddr);
     }
@@ -2416,7 +2428,8 @@ Output_section_definition::set_section_addresses(Symbol_table* symtab,
       Output_section* subalign_section;
       subalign = this->subalign_->eval_with_dot(symtab, layout, true,
 						*dot_value, NULL,
-						&subalign_section, NULL);
+						&subalign_section, NULL,
+						false);
       if (subalign_section != NULL)
 	gold_warning(_("subalign of section %s is not absolute"),
 		     this->name_.c_str());
@@ -2431,7 +2444,7 @@ Output_section_definition::set_section_addresses(Symbol_table* symtab,
       uint64_t fill_val = this->fill_->eval_with_dot(symtab, layout, true,
 						     *dot_value,
 						     NULL, &fill_section,
-						     NULL);
+						     NULL, false);
       if (fill_section != NULL)
 	gold_warning(_("fill of section %s is not absolute"),
 		     this->name_.c_str());

@@ -818,7 +818,9 @@ Pluginobj::Pluginobj(const std::string& name, Input_file* input_file,
 }
 
 // Return TRUE if a defined symbol is referenced from outside the
-// universe of claimed objects.
+// universe of claimed objects.  Only references from relocatable,
+// non-IR (unclaimed) objects count as a reference.  References from
+// dynamic objects count only as "visible".
 
 static inline bool
 is_referenced_from_outside(Symbol* lsym)
@@ -838,6 +840,8 @@ is_referenced_from_outside(Symbol* lsym)
 static inline bool
 is_visible_from_outside(Symbol* lsym)
 {
+  if (lsym->in_dyn())
+    return true;
   if (parameters->options().export_dynamic() || parameters->options().shared())
     return lsym->is_externally_visible();
   return false;
@@ -1244,14 +1248,18 @@ Sized_pluginobj<size, big_endian>::do_initialize_xindex()
   return NULL;
 }
 
-// Get symbol counts.  Not used for plugin objects.
+// Get symbol counts.  Don't count plugin objects; the replacement
+// files will provide the counts.
 
 template<int size, bool big_endian>
 void
-Sized_pluginobj<size, big_endian>::do_get_global_symbol_counts(const Symbol_table*,
-                                                   size_t*, size_t*) const
+Sized_pluginobj<size, big_endian>::do_get_global_symbol_counts(
+    const Symbol_table*,
+    size_t* defined,
+    size_t* used) const
 {
-  gold_unreachable();
+  *defined = 0;
+  *used = 0;
 }
 
 // Get symbols.  Not used for plugin objects.

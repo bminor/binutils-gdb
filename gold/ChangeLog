@@ -1,3 +1,166 @@
+2011-12-19  Ian Lance Taylor  <iant@google.com>
+
+	Copy from mainline to binutils 2.22 branch:
+
+	2011-12-17  Cary Coutant  <ccoutant@google.com>
+
+	* dwarf_reader.cc (Sized_dwarf_line_info::read_lines): Add casts.
+	* resolve.cc (Symbol_table::resolve): Likewise.
+	* i386.cc (Target_i386::do_code_fill): Use char constants for nop
+	arrays.
+	* x86_64.cc (Target_x86_64::do_code_fill): Likewise.
+
+	2011-10-31  Cary Coutant  <ccoutant@google.com>
+
+	PR gold/13023
+	* expression.cc (Expression::eval_with_dot): Add
+	is_section_dot_assignment parameter.
+	(Expression::eval_maybe_dot): Likewise.  Adjust value when rhs is
+	absolute and assigning to dot within a section.
+	* script-sections.cc
+	(Output_section_element_assignment::set_section_addresses): Pass
+	dot_section to set_if_absolute.
+	(Output_section_element_dot_assignment::finalize_symbols): Pass TRUE
+	as is_section_dot_assignment flag to eval_with_dot.
+	(Output_section_element_dot_assignment::set_section_addresses):
+	Likewise.
+	* script.cc (Symbol_assignment::set_if_absolute): Add dot_section
+	parameter.  Also set value if relative to dot_section; set the
+	symbol's output_section.
+	* script.h (Expression::eval_with_dot): Add is_section_dot_assignment
+	parameter.  Adjust all callers.
+	(Expression::eval_maybe_dot): Likewise.
+	(Symbol_assignment::set_if_absolute): Add dot_section parameter.
+	Adjust all callers.
+	* testsuite/script_test_2.t: Test assignment of an absolute value
+	to dot within an output section element.
+
+	2011-10-31  Cary Coutant  <ccoutant@google.com>
+
+	* options.h (class General_options): Add --[no-]gnu-unique options.
+	* symtab.cc (Symbol_table::sized_write_globals): Convert
+	STB_GNU_UNIQUE to STB_GLOBAL if --no-gnu-unique.
+
+	2011-10-31  Cary Coutant  <ccoutant@google.com>
+
+	PR gold/13359
+	* i386.cc (Target_i386::Relocate::relocate_tls): Remove
+	unnecessary assertion.
+	* x86_64.cc (Target_x86_64::Relocate::relocate_tls): Likewise.
+
+	2011-10-31 Sriraman Tallam  <tmsriram@google.com>
+
+	* symtab.h (Symbol_table::gc_mark_symbol_for_shlib): Rename to
+	gc_mark_symbol.
+	* symtab.cc (Symbol_table::gc_mark_symbol_for_shlib): Rename to
+	gc_mark_symbol.
+	Change to just keep the section associated with symbol.
+	(Symbol_table::add_from_relobj): Mark symbols as not garbage when
+	they are externally visible and --export-dynamic is turned on.
+	(Symbol_table::gc_mark_dyn_syms): Call gc_mark_symbol.
+
+	2011-10-19  Ian Lance Taylor  <iant@google.com>
+
+	PR gold/13163
+	* script-sections.cc
+	(Output_section_element_dot_assignment::needs_output_section): New
+	function.
+
+	2011-10-19  Ian Lance Taylor  <iant@google.com>
+
+	PR gold/13204
+	* layout.cc (Layout::segment_precedes): Don't assert failure if a
+	--section-start option was seen.
+	* options.h (General_options::any_section_start): New function.
+
+	2011-10-18  Cary Coutant  <ccoutant@google.com>
+
+	* output.cc (posix_fallocate): Return 0 on success, errno on failure.
+	(Output_file::map_no_anonymous): Check for non-zero
+	return code from posix_fallocate.
+
+	2011-10-17  Cary Coutant  <ccoutant@google.com>
+
+	PR gold/13245
+	* plugin.cc (is_visible_from_outside): Check for symbols
+	referenced from dynamic objects.
+	* resolve.cc (Symbol_table::resolve): Don't count references
+	from dynamic objects as references from real ELF files.
+	* testsuite/plugin_test_2.sh: Adjust expected result.
+
+	2011-10-17  Cary Coutant  <ccoutant@google.com>
+
+	* readsyms.cc (Read_symbols::run): Don't queue an unblocker
+	task for members of lib groups.
+
+	2011-10-17  Cary Coutant  <ccoutant@google.com>
+
+	PR gold/13288
+	* fileread.cc (File_read::find_view): Add assert.
+	(File_read::make_view): Move bounds check (replace with assert)...
+	(File_read::find_or_make_view): ... to here.
+
+	2011-10-12  Cary Coutant  <ccoutant@google.com>
+
+	* output.cc (Output_file::open_base_file): Handle case where
+	::read returns less than requested size.
+
+	2011-10-10  Cary Coutant  <ccoutant@google.com>
+
+	* incremental.cc (Sized_relobj_incr::Sized_relobj_incr):
+	Initialize defined_count_.
+	(Sized_relobj_incr::do_add_symbols): Count defined symbols.
+	(Sized_relobj_incr::do_get_global_symbol_counts): Rewrite.
+	(Sized_incr_dynobj::Sized_incr_dynobj): Initialize defined_count_.
+	(Sized_incr_dynobj::do_add_symbols): Count defined symbols.
+	(Sized_incr_dynobj::do_get_global_symbol_counts): Rewrite.
+	* incremental.h (Sized_relobj_incr::defined_count_): New data
+	member.
+	(Sized_incr_dynobj::defined_count_): New data member.
+	* plugin.cc (Sized_pluginobj::do_get_global_symbol_counts):
+	Return zeroes instead of internal error.
+
+	2011-10-10  Cary Coutant  <ccoutant@google.com>
+
+	PR gold/13249
+	* output.cc (Output_reloc::Output_reloc): Add use_plt_offset flag.
+	(Output_reloc::symbol_value): Return PLT offset if flag is set.
+	* output.h (class Output_reloc): Add use_plt_offset flag.
+	(Output_reloc::type_): Adjust size of bit field.
+	(Output_reloc::use_plt_offset_): New bit field.
+	(class Output_data_reloc): Adjust all calls to Output_reloc_type.
+	(Output_data_reloc::add_local_relative): (RELA only) Add use_plt_offset
+	flag.  Adjust all callers.
+	* x86_64.cc (Target_x86_64::Scan::local): Check for IFUNC when
+	creating RELATIVE relocations.
+
+	2011-10-03   Diego Novillo  <dnovillo@google.com>
+
+	* options.cc (parse_uint): Fix dereference of RETVAL.
+
+	2011-09-29  Cary Coutant  <ccoutant@google.com>
+
+	* incremental.cc (Sized_incremental_binary::do_process_got_plt):
+	Check for NULL.
+	* symtab.cc (Symbol_table::add_from_relobj): Ignore version
+	symbols during incremental update.
+	(Symbol_table::add_from_dynobj): Likewise.
+
+	2011-09-26  Cary Coutant  <ccoutant@google.com>
+
+	* gold.cc (queue_initial_tasks): Move option checks ...
+	* options.cc (General_options::finalize): ... to here. Disable
+	some options; make others fatal.
+
+	2011-09-23  Simon Baldwin  <simonb@google.com>
+
+	* configure.ac: Add new --with-gold-ldadd and --with-gold-ldflags
+	configuration options.
+	* configure: Regenerate.
+	* Makefile.am: Handle GOLD_LDADD and GOLD_LDFLAGS.
+	* Makefile.in: Regenerate.
+	* testsuite/Makefile.in: Regenerate.
+
 2011-11-11  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc (Target_arm::do_make_elf_object): Allow executable also

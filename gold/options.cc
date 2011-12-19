@@ -198,7 +198,7 @@ parse_uint(const char* option_name, const char* arg, int* retval)
 {
   char* endptr;
   *retval = strtol(arg, &endptr, 0);
-  if (*endptr != '\0' || retval < 0)
+  if (*endptr != '\0' || *retval < 0)
     gold_fatal(_("%s: invalid option value (expected an integer): %s"),
                option_name, arg);
 }
@@ -1223,6 +1223,37 @@ General_options::finalize()
   if (this->implicit_incremental_ && this->incremental_mode_ == INCREMENTAL_OFF)
     gold_fatal(_("Options --incremental-changed, --incremental-unchanged, "
                  "--incremental-unknown require the use of --incremental"));
+
+  // Check for options that are not compatible with incremental linking.
+  // Where an option can be disabled without seriously changing the semantics
+  // of the link, we turn the option off; otherwise, we issue a fatal error.
+
+  if (this->incremental_mode_ != INCREMENTAL_OFF)
+    {
+      if (this->relocatable())
+	gold_fatal(_("incremental linking is not compatible with -r"));
+      if (this->emit_relocs())
+	gold_fatal(_("incremental linking is not compatible with "
+		     "--emit-relocs"));
+      if (this->has_plugins())
+	gold_fatal(_("incremental linking is not compatible with --plugin"));
+      if (this->gc_sections())
+	{
+	  gold_warning(_("ignoring --gc-sections for an incremental link"));
+	  this->set_gc_sections(false);
+	}
+      if (this->icf_enabled())
+	{
+	  gold_warning(_("ignoring --icf for an incremental link"));
+	  this->set_icf_status(ICF_NONE);
+	}
+      if (strcmp(this->compress_debug_sections(), "none") != 0)
+	{
+	  gold_warning(_("ignoring --compress-debug-sections for an "
+			 "incremental link"));
+	  this->set_compress_debug_sections("none");
+	}
+    }
 
   // FIXME: we can/should be doing a lot more sanity checking here.
 }

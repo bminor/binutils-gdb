@@ -119,7 +119,9 @@ extern "C" void *gold_mremap(void *, size_t, size_t, int);
 static int
 posix_fallocate(int o, off_t offset, off_t len)
 {
-  return ftruncate(o, offset + len);
+  if (ftruncate(o, offset + len) < 0)
+    return errno;
+  return 0;
 }
 #endif // !defined(HAVE_POSIX_FALLOCATE)
 
@@ -706,7 +708,7 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::Output_reloc(
     bool is_symbolless)
   : address_(address), local_sym_index_(GSYM_CODE), type_(type),
     is_relative_(is_relative), is_symbolless_(is_symbolless),
-    is_section_symbol_(false), shndx_(INVALID_CODE)
+    is_section_symbol_(false), use_plt_offset_(false), shndx_(INVALID_CODE)
 {
   // this->type_ is a bitfield; make sure TYPE fits.
   gold_assert(this->type_ == type);
@@ -727,7 +729,7 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::Output_reloc(
     bool is_symbolless)
   : address_(address), local_sym_index_(GSYM_CODE), type_(type),
     is_relative_(is_relative), is_symbolless_(is_symbolless),
-    is_section_symbol_(false), shndx_(shndx)
+    is_section_symbol_(false), use_plt_offset_(false), shndx_(shndx)
 {
   gold_assert(shndx != INVALID_CODE);
   // this->type_ is a bitfield; make sure TYPE fits.
@@ -749,10 +751,12 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::Output_reloc(
     Address address,
     bool is_relative,
     bool is_symbolless,
-    bool is_section_symbol)
+    bool is_section_symbol,
+    bool use_plt_offset)
   : address_(address), local_sym_index_(local_sym_index), type_(type),
     is_relative_(is_relative), is_symbolless_(is_symbolless),
-    is_section_symbol_(is_section_symbol), shndx_(INVALID_CODE)
+    is_section_symbol_(is_section_symbol), use_plt_offset_(use_plt_offset),
+    shndx_(INVALID_CODE)
 {
   gold_assert(local_sym_index != GSYM_CODE
               && local_sym_index != INVALID_CODE);
@@ -773,10 +777,12 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::Output_reloc(
     Address address,
     bool is_relative,
     bool is_symbolless,
-    bool is_section_symbol)
+    bool is_section_symbol,
+    bool use_plt_offset)
   : address_(address), local_sym_index_(local_sym_index), type_(type),
     is_relative_(is_relative), is_symbolless_(is_symbolless),
-    is_section_symbol_(is_section_symbol), shndx_(shndx)
+    is_section_symbol_(is_section_symbol), use_plt_offset_(use_plt_offset),
+    shndx_(shndx)
 {
   gold_assert(local_sym_index != GSYM_CODE
               && local_sym_index != INVALID_CODE);
@@ -799,7 +805,7 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::Output_reloc(
     Address address)
   : address_(address), local_sym_index_(SECTION_CODE), type_(type),
     is_relative_(false), is_symbolless_(false),
-    is_section_symbol_(true), shndx_(INVALID_CODE)
+    is_section_symbol_(true), use_plt_offset_(false), shndx_(INVALID_CODE)
 {
   // this->type_ is a bitfield; make sure TYPE fits.
   gold_assert(this->type_ == type);
@@ -820,7 +826,7 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::Output_reloc(
     Address address)
   : address_(address), local_sym_index_(SECTION_CODE), type_(type),
     is_relative_(false), is_symbolless_(false),
-    is_section_symbol_(true), shndx_(shndx)
+    is_section_symbol_(true), use_plt_offset_(false), shndx_(shndx)
 {
   gold_assert(shndx != INVALID_CODE);
   // this->type_ is a bitfield; make sure TYPE fits.
@@ -842,7 +848,7 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::Output_reloc(
     Address address)
   : address_(address), local_sym_index_(0), type_(type),
     is_relative_(false), is_symbolless_(false),
-    is_section_symbol_(false), shndx_(INVALID_CODE)
+    is_section_symbol_(false), use_plt_offset_(false), shndx_(INVALID_CODE)
 {
   // this->type_ is a bitfield; make sure TYPE fits.
   gold_assert(this->type_ == type);
@@ -858,7 +864,7 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::Output_reloc(
     Address address)
   : address_(address), local_sym_index_(0), type_(type),
     is_relative_(false), is_symbolless_(false),
-    is_section_symbol_(false), shndx_(shndx)
+    is_section_symbol_(false), use_plt_offset_(false), shndx_(shndx)
 {
   gold_assert(shndx != INVALID_CODE);
   // this->type_ is a bitfield; make sure TYPE fits.
@@ -877,7 +883,7 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::Output_reloc(
     Address address)
   : address_(address), local_sym_index_(TARGET_CODE), type_(type),
     is_relative_(false), is_symbolless_(false),
-    is_section_symbol_(false), shndx_(INVALID_CODE)
+    is_section_symbol_(false), use_plt_offset_(false), shndx_(INVALID_CODE)
 {
   // this->type_ is a bitfield; make sure TYPE fits.
   gold_assert(this->type_ == type);
@@ -894,7 +900,7 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::Output_reloc(
     Address address)
   : address_(address), local_sym_index_(TARGET_CODE), type_(type),
     is_relative_(false), is_symbolless_(false),
-    is_section_symbol_(false), shndx_(shndx)
+    is_section_symbol_(false), use_plt_offset_(false), shndx_(shndx)
 {
   gold_assert(shndx != INVALID_CODE);
   // this->type_ is a bitfield; make sure TYPE fits.
@@ -1121,6 +1127,12 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::symbol_value(
   Sized_relobj_file<size, big_endian>* relobj =
       this->u1_.relobj->sized_relobj();
   gold_assert(relobj != NULL);
+  if (this->use_plt_offset_)
+    {
+      uint64_t plt_address =
+	  parameters->target().plt_address_for_local(relobj, lsi);
+      return plt_address + relobj->local_plt_offset(lsi);
+    }
   const Symbol_value<size>* symval = relobj->local_symbol(lsi);
   return symval->value(relobj, addend);
 }
@@ -4880,17 +4892,27 @@ Output_file::open_base_file(const char* base_name, bool writable)
   if (use_base_file)
     {
       this->open(s.st_size);
-      ssize_t len = ::read(o, this->base_, s.st_size);
-      if (len < 0)
-        {
-	  gold_info(_("%s: read failed: %s"), base_name, strerror(errno));
-	  return false;
-        }
-      if (len < s.st_size)
-        {
-	  gold_info(_("%s: file too short"), base_name);
-	  return false;
-        }
+      ssize_t bytes_to_read = s.st_size;
+      unsigned char* p = this->base_;
+      while (bytes_to_read > 0)
+	{
+	  ssize_t len = ::read(o, p, bytes_to_read);
+	  if (len < 0)
+	    {
+	      gold_info(_("%s: read failed: %s"), base_name, strerror(errno));
+	      return false;
+	    }
+	  if (len == 0)
+	    {
+	      gold_info(_("%s: file too short: read only %lld of %lld bytes"),
+			base_name,
+			static_cast<long long>(s.st_size - bytes_to_read),
+			static_cast<long long>(s.st_size));
+	      return false;
+	    }
+	  p += len;
+	  bytes_to_read -= len;
+	}
       ::close(o);
       return true;
     }
@@ -5052,8 +5074,12 @@ Output_file::map_no_anonymous(bool writable)
   // output file will wind up incomplete, but we will have already
   // exited.  The alternative to fallocate would be to use fdatasync,
   // but that would be a more significant performance hit.
-  if (writable && ::posix_fallocate(o, 0, this->file_size_) < 0)
-    gold_fatal(_("%s: %s"), this->name_, strerror(errno));
+  if (writable)
+    {
+      int err = ::posix_fallocate(o, 0, this->file_size_);
+      if (err != 0)
+       gold_fatal(_("%s: %s"), this->name_, strerror(err));
+    }
 
   // Map the file into memory.
   int prot = PROT_READ;

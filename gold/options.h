@@ -791,6 +791,10 @@ class General_options
   DEFINE_bool(g, options::EXACTLY_ONE_DASH, '\0', false,
 	      N_("Ignored"), NULL);
 
+  DEFINE_bool(gnu_unique, options::TWO_DASHES, '\0', true,
+	      N_("Enable STB_GNU_UNIQUE symbol binding (default)"),
+	      N_("Disable STB_GNU_UNIQUE symbol binding"));
+
   DEFINE_string(soname, options::ONE_DASH, 'h', NULL,
                 N_("Set shared library name"), N_("FILENAME"));
 
@@ -1384,6 +1388,11 @@ class General_options
   // address.  Otherwise return false.
   bool
   section_start(const char* secname, uint64_t* paddr) const;
+
+  // Return whether any --section-start option was used.
+  bool
+  any_section_start() const
+  { return !this->section_starts_.empty(); }
 
   enum Fix_v4bx
   {
