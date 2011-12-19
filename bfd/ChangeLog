@@ -1,4 +1,32 @@
 2011-12-19  Chung-Lin Tang  <cltang@codesourcery.com>
+
+	* reloc.c (BFD_RELOC_MIPS16_TLS_GD,BFD_RELOC_MIPS16_TLS_LDM,
+	BFD_RELOC_MIPS16_TLS_DTPREL_HI16,BFD_RELOC_MIPS16_TLS_DTPREL_LO16,
+	BFD_RELOC_MIPS16_TLS_GOTTPREL,BFD_RELOC_MIPS16_TLS_TPREL_HI16,
+	BFD_RELOC_MIPS16_TLS_TPREL_LO16): New relocations for MIPS16 TLS.
+	* bfd-in2.h (bfd_reloc_code_real): Regenerate.
+	* libbfd.h (bfd_reloc_code_real_names): Regenerate.
+	* elf32-mips.c (elf_mips16_howto_table_rel): Add R_MIPS16_TLS_*
+	entries.
+	(mips16_reloc_map): Add BFD_RELOC_MIPS16_TLS_* to R_MIPS16_TLS_*
+	mappings.
+	* elfn32-mips.c (elf_mips16_howto_table_rel,
+	elf_mips16_howto_table_rela): Add R_MIPS16_TLS_* entries.
+	(mips16_reloc_map): Add BFD_RELOC_MIPS16_TLS_* to R_MIPS16_TLS_*
+	mappings.
+	* elf64-mips.c (mips16_elf64_howto_table_rel,
+	mips16_elf64_howto_table_rela): Add R_MIPS16_TLS_* entries.
+	(mips16_reloc_map): Add BFD_RELOC_MIPS16_TLS_* to R_MIPS16_TLS_*
+	mappings.
+	* elfxx-mips.c (TLS_RELOC_P,mips16_reloc_p,
+	_bfd_mips_elf_check_relocs): Add cases for R_MIPS16_TLS_* relocations.
+	(tls_gd_reloc_p): Add R_MIPS16_TLS_GD case.
+	(tls_ldm_reloc_p): Add R_MIPS16_TLS_LDM case.
+	(tls_gottprel_reloc_p): Add R_MIPS16_TLS_GOTTPREL case.
+	(mips_elf_calculate_relocation): Add cases for R_MIPS16_TLS_*,
+	R_MIPS_TLS_DTPREL32/64, and R_MIPS_TLS_TPREL32/64 relocations.
+
+2011-12-19  Chung-Lin Tang  <cltang@codesourcery.com>
 	    Catherine Moore  <clm@codesourcery.com>
 	    Sandra Loosemore  <sandra@codesourcery.com>
 	    Richard Sandiford  <rdsandiford@googlemail.com>

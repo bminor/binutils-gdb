@@ -1,3 +1,15 @@
+2011-12-19  Chung-Lin Tang  <cltang@codesourcery.com>
+
+	* config/tc-mips.c (mips_pseudo_table): Add tprelword/tpreldword
+	entries.
+	(mips16_percent_op): Add MIPS16 TLS relocation ops.
+	(md_apply_fix): Add BFD_RELOC_MIPS16_TLS_* switch cases.
+	(s_tls_rel_directive): Rename from s_dtprel_internal(). Abstract out
+	directive string and reloc type as function parameters. Update
+	comments.
+	(s_dtprelword,s_dtpreldword): Change to use s_tls_rel_directive().
+	(s_tprelword,s_tpreldword): New functions.
+
 2011-12-15  Tristan Gingold  <gingold@adacore.com>
 
 	* config/obj-macho.c (obj_mach_o_fileprop): Fix typo.
