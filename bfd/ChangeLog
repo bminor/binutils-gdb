@@ -2,6 +2,31 @@
 
 	Backport from mainline:
 
+	2011-12-19  Chung-Lin Tang  <cltang@codesourcery.com>
+		    Catherine Moore  <clm@codesourcery.com>
+		    Sandra Loosemore  <sandra@codesourcery.com>
+		    Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* elfxx-mips.c (mips_elf_local_pic_function_p): Return true when
+	H is a MIPS16 function with a kept 32-bit stub. Update comments.
+	(mips_elf_get_la25_target): New function.
+	(mips_elf_add_la25_intro): Change to use mips_elf_get_la25_target().
+	(mips_elf_add_la25_stub): Move compute of use_trampoline_p down,
+	change to use mips_elf_get_la25_target().
+	(mips_elf_relocation_needs_la25_stub): Add target_is_16_bit_code_p
+	parameter, add switch case for R_MIPS16_26.
+	(mips_elf_calculate_relocation): Redirect relocation to point to the
+	LA25 stub if it exists, instead of the MIPS16 stub. Update arguments
+	of call to mips_elf_relocation_needs_la25_stub(), don't use la25 stub
+	for mips16->mips16 calls.
+	(_bfd_mips_elf_check_relocs): Update arguments of call to
+	mips_elf_relocation_needs_la25_stub().
+	(mips_elf_create_la25_stub): Change to use mips_elf_get_la25_target().
+
+2011-12-19  Chung-Lin Tang  <cltang@codesourcery.com>
+
+	Backport from mainline:
+
 	2011-12-13  Chung-Lin Tang  <cltang@codesourcery.com>
 
 	* elfxx-mips.c (mips_elf_calculate_relocation): Correct
