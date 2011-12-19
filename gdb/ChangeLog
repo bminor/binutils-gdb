@@ -1,3 +1,10 @@
+2011-12-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* symfile.c (reread_symbols): Move free_objfile_separate_debug,
+	preserve_values, sym_finish and clear_objfile_data calls before BFD
+	close.  Move free_objfile_separate_debug as the very first call.  New
+	comment on the ordering.
+
 2011-12-19  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* s390-tdep.c (s390_push_dummy_call): Set addressing mode bit
