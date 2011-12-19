@@ -1,3 +1,13 @@
+2011-12-19  Chung-Lin Tang  <cltang@codesourcery.com>
+
+	Backport from mainline:
+
+	2011-12-13  Chung-Lin Tang  <cltang@codesourcery.com>
+
+	* elfxx-mips.c (mips_elf_calculate_relocation): Correct
+	R_MIPS16_HI16/R_MIPS16_LO16 handling of two cleared lower bits,
+	update comments.
+
 2011-12-10  David Daney  <david.daney@cavium.com>
 
 	Backport from mainline:
