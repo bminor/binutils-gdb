@@ -1,5 +1,19 @@
 2011-12-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* gdb.cp/ptype-cv-cp.exp (ptype v_volatile_const_my_int): Replace KFAIL
+	by XFAIL.
+	* gdb.cp/static-method.exp (info addr A::func())
+	(list static-method.cc:xxx::(anonymous namespace)::A::func)
+	(list 'static-method.cc:xxx::(anonymous namespace)::A::func')
+	(list 'static-method.cc':'xxx::(anonymous namespace)::A::func')
+	(list static-method.cc:'xxx::(anonymous namespace)::A::func'): Likewise.
+	* gdb.cp/temargs.exp (test value of F in k2_m, test type of F in k3_m)
+	(test value of F in k3_m): Likewise.
+	* gdb.python/py-type.exp (python print ttype.template_argument(2)):
+	Likewise.
+
+2011-12-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdb.threads/attach-stopped.exp (continue (*: attach2 continue))
 	(*: attach2 stop interrupt, *: attach2, exit leaves process sleeping):
 	Remove.

@@ -7846,6 +7846,45 @@ instance, some @value{GDBN} bugs involving the display of source lines would
 never manifest themselves if the programs used GNU coding style
 uniformly.
 
+Some testcase results need more detailed explanation:
+
+@table @code
+@item KFAIL
+Known problem of @value{GDBN} itself.  You must specify the @value{GDBN} bug
+report number like in these sample tests:
+@smallexample
+kfail "gdb/13392" "continue to marker 2"
+@end smallexample
+or
+@smallexample
+setup_kfail gdb/13392 "*-*-*"
+kfail "continue to marker 2"
+@end smallexample
+
+@item XFAIL
+Known problem of environment.  This typically includes @value{NGCC} but it
+includes also many other system components which cannot be fixed in the
+@value{GDBN} project.  Sample test with sanity check not knowing the specific
+cause of the problem:
+@smallexample
+# On x86_64 it is commonly about 4MB.
+if @{$stub_size > 25000000@} @{
+    xfail "stub size $stub_size is too large"
+    return
+@}
+@end smallexample
+
+You should provide bug report number for the failing component of the
+environment, if such bug report is available:
+@smallexample
+if @{[test_compiler_info @{gcc-[0-3]-*@}]
+   || [test_compiler_info @{gcc-4-[0-5]-*@}]@} @{
+   setup_xfail "gcc/46955" *-*-*
+@}
+gdb_test "python print ttype.template_argument(2)" "&C::c"
+@end smallexample
+@end table
+
 @node Hints
 
 @chapter Hints

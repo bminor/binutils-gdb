@@ -1,3 +1,8 @@
+2011-12-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdbint.texinfo (Testsuite): Describe KFAIL and XFAIL in Writing
+	tests.
+
 2011-12-16  Doug Evans  <dje@google.com>
 
 	* gdb.texinfo (Server): Document -/stdio argument to gdbserver.
