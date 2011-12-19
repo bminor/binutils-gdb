@@ -1,3 +1,8 @@
+2011-12-19  Joel Brobecker  <brobecker@adacore.com>
+
+	* Make-common.in (hw-config.h): Work around bug in Solaris 2.8
+	system bourne shell.
+
 2011-12-03  Mike Frysinger  <vapier@gentoo.org>
 
 	* syscall.c (cb_get_string): Rename from "get_string".
