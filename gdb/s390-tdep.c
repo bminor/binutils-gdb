@@ -2749,9 +2749,15 @@ s390_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       }
   }
 
-  /* Store return address.  */
+  /* Store return PSWA.  In 31-bit mode, keep addressing mode bit.  */
+  if (word_size == 4)
+    {
+      ULONGEST pswa;
+      regcache_cooked_read_unsigned (regcache, S390_PSWA_REGNUM, &pswa);
+      bp_addr = (bp_addr & 0x7fffffff) | (pswa & 0x80000000);
+    }
   regcache_cooked_write_unsigned (regcache, S390_RETADDR_REGNUM, bp_addr);
-  
+
   /* Store updated stack pointer.  */
   regcache_cooked_write_unsigned (regcache, S390_SP_REGNUM, sp);
 
