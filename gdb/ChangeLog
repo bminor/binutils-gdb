@@ -1,3 +1,8 @@
+2011-12-19  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* s390-tdep.c (s390_push_dummy_call): Set addressing mode bit
+	in return PSWA.
+
 2011-12-17  Mark Kettenis  <kettenis@gnu.org>
 
 	* amd64obsd-tdep.c (amd64obsd_init_abi): Don't set
