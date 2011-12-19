@@ -1,5 +1,11 @@
 2011-12-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* gdb.base/reread.exp: If srcfile2 fails to build retry it with
+	-DNO_SECTIONS.
+	* gdb.base/reread2.c <!NO_SECTIONS>: New sections block.
+
+2011-12-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdb.cp/ptype-cv-cp.exp (ptype v_volatile_const_my_int): Make
 	PR gcc/45997 XFAIL conditional for gcc <= 4.5.
 	* gdb.python/py-type.exp (python print ttype.template_argument(2)):

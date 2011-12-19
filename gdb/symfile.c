@@ -2446,6 +2446,29 @@ reread_symbols (void)
 	      exec_file_attach (bfd_get_filename (objfile->obfd), 0);
 	    }
 
+	  /* Keep the calls order approx. the same as in free_objfile.  */
+
+	  /* Free the separate debug objfiles.  It will be
+	     automatically recreated by sym_read.  */
+	  free_objfile_separate_debug (objfile);
+
+	  /* Remove any references to this objfile in the global
+	     value lists.  */
+	  preserve_values (objfile);
+
+	  /* Nuke all the state that we will re-read.  Much of the following
+	     code which sets things to NULL really is necessary to tell
+	     other parts of GDB that there is nothing currently there.
+
+	     Try to keep the freeing order compatible with free_objfile.  */
+
+	  if (objfile->sf != NULL)
+	    {
+	      (*objfile->sf->sym_finish) (objfile);
+	    }
+
+	  clear_objfile_data (objfile);
+
 	  /* Clean up any state BFD has sitting around.  We don't need
 	     to close the descriptor but BFD lacks a way of closing the
 	     BFD without closing the descriptor.  */
@@ -2470,27 +2493,6 @@ reread_symbols (void)
 		     alloca (SIZEOF_N_SECTION_OFFSETS (num_offsets)));
 	  memcpy (offsets, objfile->section_offsets,
 		  SIZEOF_N_SECTION_OFFSETS (num_offsets));
-
-	  /* Remove any references to this objfile in the global
-	     value lists.  */
-	  preserve_values (objfile);
-
-	  /* Nuke all the state that we will re-read.  Much of the following
-	     code which sets things to NULL really is necessary to tell
-	     other parts of GDB that there is nothing currently there.
-
-	     Try to keep the freeing order compatible with free_objfile.  */
-
-	  if (objfile->sf != NULL)
-	    {
-	      (*objfile->sf->sym_finish) (objfile);
-	    }
-
-	  clear_objfile_data (objfile);
-
-	  /* Free the separate debug objfiles.  It will be
-	     automatically recreated by sym_read.  */
-          free_objfile_separate_debug (objfile);
 
 	  /* FIXME: Do we have to free a whole linked list, or is this
 	     enough?  */
