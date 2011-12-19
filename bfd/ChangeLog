@@ -1,3 +1,18 @@
+2011-12-19  Iain Sandoe  <idsandoe@googlemail.com>
+
+	* mach-o-i386.c (bfd_mach_o_section_type_valid_for_tgt): Define NULL.
+	* mach-o-target.c (bfd_mach_o_backend_data): Initialize 
+	bfd_mach_o_section_type_valid_for_tgt
+	* mach-o-x86-64.c (bfd_mach_o_section_type_valid_for_x86_64): New.
+	(bfd_mach_o_section_type_valid_for_tgt): Set to 
+	bfd_mach_o_section_type_valid_for_x86_64.
+	* mach-o.c (bfd_mach_o_section_type_name): Reorder and eliminate dup.
+	(bfd_mach_o_section_attribute_name): Reorder.
+	(bfd_mach_o_get_section_type_from_name): If the target has defined a
+	validator for section types, then use it.
+	* mach-o.h (bfd_mach_o_get_section_type_from_name): Alter declaration
+	to include the bfd.
+
 2011-12-19  Chung-Lin Tang  <cltang@codesourcery.com>
 
 	* reloc.c (BFD_RELOC_MIPS16_TLS_GD,BFD_RELOC_MIPS16_TLS_LDM,

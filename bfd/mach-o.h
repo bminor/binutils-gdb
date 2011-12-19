@@ -584,7 +584,7 @@ bfd_boolean bfd_mach_o_set_section_contents (bfd *, asection *, const void *,
                                              file_ptr, bfd_size_type);
 unsigned int bfd_mach_o_version (bfd *);
 
-unsigned int bfd_mach_o_get_section_type_from_name (const char *);
+unsigned int bfd_mach_o_get_section_type_from_name (bfd *, const char *);
 unsigned int bfd_mach_o_get_section_attribute_from_name (const char *);
 
 void bfd_mach_o_convert_section_name_to_bfd (bfd *, const char *, const char *,
@@ -636,6 +636,7 @@ typedef struct bfd_mach_o_backend_data
   bfd_boolean (*_bfd_mach_o_print_thread)(bfd *, bfd_mach_o_thread_flavour *,
                                           void *, char *);
   const mach_o_segment_name_xlat *segsec_names_xlat;
+  bfd_boolean (*bfd_mach_o_section_type_valid_for_target) (unsigned long);
 }
 bfd_mach_o_backend_data;
 

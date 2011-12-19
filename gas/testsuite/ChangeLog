@@ -1,3 +1,10 @@
+2011-12-19  Iain Sandoe  <idsandoe@googlemail.com>
+
+	* gas/mach-o/err-sections-1.s: New.
+	* gas/mach-o/err-sections-2.s: New.
+	* gas/mach-o/sections-3.d: New.
+	* gas/mach-o/sections-3.s: New.
+
 2011-12-15  Iain Sandoe  <iains@gcc.gnu.org>
 
 	* gas/mach-o/subsect-via-symbols-0.d: New.

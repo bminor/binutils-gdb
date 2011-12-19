@@ -169,6 +169,10 @@ obj_mach_o_section (int ignore ATTRIBUTE_UNUSED)
   char segname[17];
   char sectname[17];
 
+#ifdef md_flush_pending_output
+  md_flush_pending_output ();
+#endif
+
   /* Zero-length segment and section names are allowed.  */
   /* Parse segment name.  */
   memset (segname, 0, sizeof(segname));
@@ -203,16 +207,18 @@ obj_mach_o_section (int ignore ATTRIBUTE_UNUSED)
 
       /* Temporarily make a string from the token.  */
       p[len] = 0;
-      sectype = bfd_mach_o_get_section_type_from_name (p);
+      sectype = bfd_mach_o_get_section_type_from_name (stdoutput, p);
       if (sectype > 255) /* Max Section ID == 255.  */
         {
           as_bad (_("unknown or invalid section type '%s'"), p);
-          sectype = BFD_MACH_O_S_REGULAR;
+	  p[len] = tmpc;
+	  ignore_rest_of_line ();
+	  return;
         }
       else
 	sectype_given = 1;
       /* Restore.  */
-      tmpc = p[len];
+      p[len] = tmpc;
 
       /* Parse attributes.
 	 TODO: check validity of attributes for section type.  */
@@ -241,7 +247,12 @@ obj_mach_o_section (int ignore ATTRIBUTE_UNUSED)
 	      p[len] ='\0';
               attr = bfd_mach_o_get_section_attribute_from_name (p);
 	      if (attr == -1)
-                as_bad (_("unknown or invalid section attribute '%s'"), p);
+		{
+                  as_bad (_("unknown or invalid section attribute '%s'"), p);
+		  p[len] = tmpc;
+		  ignore_rest_of_line ();
+		  return;
+                }
               else
 		{
 		  secattr_given = 1;
@@ -253,19 +264,26 @@ obj_mach_o_section (int ignore ATTRIBUTE_UNUSED)
           while (*input_line_pointer == '+');
 
           /* Parse sizeof_stub.  */
-          if (*input_line_pointer == ',')
+          if (secattr_given && *input_line_pointer == ',')
             {
               if (sectype != BFD_MACH_O_S_SYMBOL_STUBS)
-                as_bad (_("unexpected sizeof_stub expression"));
+                {
+		  as_bad (_("unexpected section size information"));
+		  ignore_rest_of_line ();
+		  return;
+		}
 
 	      input_line_pointer++;
               sizeof_stub = get_absolute_expression ();
             }
-          else if (sectype == BFD_MACH_O_S_SYMBOL_STUBS)
-            as_bad (_("missing sizeof_stub expression"));
+          else if (secattr_given && sectype == BFD_MACH_O_S_SYMBOL_STUBS)
+            {
+              as_bad (_("missing sizeof_stub expression"));
+	      ignore_rest_of_line ();
+	      return;
+            }
         }
     }
-  demand_empty_rest_of_line ();
 
   flags = SEC_NO_FLAGS;
   /* This provides default bfd flags and default mach-o section type and
@@ -295,10 +313,6 @@ obj_mach_o_section (int ignore ATTRIBUTE_UNUSED)
       n[seglen + 1 + sectlen] = 0;
       name = n;
     }
-
-#ifdef md_flush_pending_output
-  md_flush_pending_output ();
-#endif
 
   /* Sub-segments don't exists as is on Mach-O.  */
   sec = subseg_new (name, 0);
@@ -334,6 +348,7 @@ obj_mach_o_section (int ignore ATTRIBUTE_UNUSED)
 	  || msect->flags != (secattr | sectype))
 	as_warn (_("Ignoring changed section attributes for %s"), name);
     }
+  demand_empty_rest_of_line ();
 }
 
 static segT 

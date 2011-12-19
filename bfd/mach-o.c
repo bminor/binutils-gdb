@@ -3550,24 +3550,26 @@ bfd_mach_o_stack_addr (enum bfd_mach_o_cpu_type type)
     }
 }
 
+/* The following two tables should be kept, as far as possible, in order of
+   most frequently used entries to optimize their use from gas.  */
+
 const bfd_mach_o_xlat_name bfd_mach_o_section_type_name[] =
 {
   { "regular", BFD_MACH_O_S_REGULAR},
+  { "coalesced", BFD_MACH_O_S_COALESCED},
   { "zerofill", BFD_MACH_O_S_ZEROFILL},
   { "cstring_literals", BFD_MACH_O_S_CSTRING_LITERALS},
   { "4byte_literals", BFD_MACH_O_S_4BYTE_LITERALS},
   { "8byte_literals", BFD_MACH_O_S_8BYTE_LITERALS},
+  { "16byte_literals", BFD_MACH_O_S_16BYTE_LITERALS},
   { "literal_pointers", BFD_MACH_O_S_LITERAL_POINTERS},
-  { "non_lazy_symbol_pointers", BFD_MACH_O_S_NON_LAZY_SYMBOL_POINTERS},
-  { "lazy_symbol_pointers", BFD_MACH_O_S_LAZY_SYMBOL_POINTERS},
-  { "symbol_stubs", BFD_MACH_O_S_SYMBOL_STUBS},
   { "mod_init_func_pointers", BFD_MACH_O_S_MOD_INIT_FUNC_POINTERS},
   { "mod_fini_func_pointers", BFD_MACH_O_S_MOD_FINI_FUNC_POINTERS},
-  { "coalesced", BFD_MACH_O_S_COALESCED},
   { "gb_zerofill", BFD_MACH_O_S_GB_ZEROFILL},
   { "interposing", BFD_MACH_O_S_INTERPOSING},
-  { "16byte_literals", BFD_MACH_O_S_16BYTE_LITERALS},
   { "dtrace_dof", BFD_MACH_O_S_DTRACE_DOF},
+  { "non_lazy_symbol_pointers", BFD_MACH_O_S_NON_LAZY_SYMBOL_POINTERS},
+  { "lazy_symbol_pointers", BFD_MACH_O_S_LAZY_SYMBOL_POINTERS},
   { "symbol_stubs", BFD_MACH_O_S_SYMBOL_STUBS},
   { "lazy_dylib_symbol_pointers", BFD_MACH_O_S_LAZY_DYLIB_SYMBOL_POINTERS},
   { NULL, 0}
@@ -3575,30 +3577,38 @@ const bfd_mach_o_xlat_name bfd_mach_o_section_type_name[] =
 
 const bfd_mach_o_xlat_name bfd_mach_o_section_attribute_name[] =
 {
+  { "pure_instructions", BFD_MACH_O_S_ATTR_PURE_INSTRUCTIONS },
+  { "some_instructions", BFD_MACH_O_S_ATTR_SOME_INSTRUCTIONS },
   { "loc_reloc", BFD_MACH_O_S_ATTR_LOC_RELOC },
   { "ext_reloc", BFD_MACH_O_S_ATTR_EXT_RELOC },
-  { "some_instructions", BFD_MACH_O_S_ATTR_SOME_INSTRUCTIONS },
   { "debug", BFD_MACH_O_S_ATTR_DEBUG },
-  { "modifying_code", BFD_MACH_O_S_SELF_MODIFYING_CODE },
   { "live_support", BFD_MACH_O_S_ATTR_LIVE_SUPPORT },
   { "no_dead_strip", BFD_MACH_O_S_ATTR_NO_DEAD_STRIP },
   { "strip_static_syms", BFD_MACH_O_S_ATTR_STRIP_STATIC_SYMS },
   { "no_toc", BFD_MACH_O_S_ATTR_NO_TOC },
-  { "pure_instructions", BFD_MACH_O_S_ATTR_PURE_INSTRUCTIONS },
   { "self_modifying_code", BFD_MACH_O_S_SELF_MODIFYING_CODE },
+  { "modifying_code", BFD_MACH_O_S_SELF_MODIFYING_CODE },
   { NULL, 0}
 };
 
 /* Get the section type from NAME.  Return 256 if NAME is unknown.  */
 
 unsigned int
-bfd_mach_o_get_section_type_from_name (const char *name)
+bfd_mach_o_get_section_type_from_name (bfd *abfd, const char *name)
 {
   const bfd_mach_o_xlat_name *x;
+  bfd_mach_o_backend_data *bed = bfd_mach_o_get_backend_data (abfd);
 
   for (x = bfd_mach_o_section_type_name; x->name; x++)
     if (strcmp (x->name, name) == 0)
-      return x->val;
+      {
+	/* We found it... does the target support it?  */
+	if (bed->bfd_mach_o_section_type_valid_for_target == NULL
+	    || bed->bfd_mach_o_section_type_valid_for_target (x->val))
+	  return x->val; /* OK.  */
+	else
+	  break; /* Not supported.  */
+      }
   /* Maximum section ID = 0xff.  */
   return 256;
 }
@@ -3785,6 +3795,7 @@ bfd_boolean bfd_mach_o_free_cached_info (bfd *abfd)
 #define bfd_mach_o_swap_reloc_out NULL
 #define bfd_mach_o_print_thread NULL
 #define bfd_mach_o_tgt_seg_table NULL
+#define bfd_mach_o_section_type_valid_for_tgt NULL
 
 #define TARGET_NAME 		mach_o_be_vec
 #define TARGET_STRING     	"mach-o-be"

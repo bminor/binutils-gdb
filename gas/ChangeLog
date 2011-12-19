@@ -1,3 +1,9 @@
+2011-12-19  Iain Sandoe  <idsandoe@googlemail.com>
+
+	* config/obj-macho.c (obj_mach_o_section): Account for target-
+	dependent section types.  Improve error handling when wrong section
+	types/attributes are specified.
+
 2011-12-19  Chung-Lin Tang  <cltang@codesourcery.com>
 
 	* config/tc-mips.c (mips_pseudo_table): Add tprelword/tpreldword

@@ -96,7 +96,8 @@ static const bfd_mach_o_backend_data TARGET_NAME_BACKEND =
   bfd_mach_o_swap_reloc_in,
   bfd_mach_o_swap_reloc_out,
   bfd_mach_o_print_thread,
-  bfd_mach_o_tgt_seg_table
+  bfd_mach_o_tgt_seg_table,
+  bfd_mach_o_section_type_valid_for_tgt
 };
 
 const bfd_target TARGET_NAME =

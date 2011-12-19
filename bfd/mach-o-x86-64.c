@@ -281,6 +281,16 @@ bfd_mach_o_x86_64_bfd_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
   return NULL;
 }
 
+static bfd_boolean
+bfd_mach_o_section_type_valid_for_x86_64 (unsigned long val)
+{
+  if (val == BFD_MACH_O_S_NON_LAZY_SYMBOL_POINTERS
+      || val == BFD_MACH_O_S_LAZY_SYMBOL_POINTERS
+      || val == BFD_MACH_O_S_SYMBOL_STUBS)
+    return FALSE;
+  return TRUE;
+}
+
 #define bfd_mach_o_swap_reloc_in bfd_mach_o_x86_64_swap_reloc_in
 #define bfd_mach_o_swap_reloc_out bfd_mach_o_x86_64_swap_reloc_out
 
@@ -288,6 +298,7 @@ bfd_mach_o_x86_64_bfd_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 #define bfd_mach_o_bfd_reloc_name_lookup bfd_mach_o_x86_64_bfd_reloc_name_lookup
 #define bfd_mach_o_print_thread NULL
 #define bfd_mach_o_tgt_seg_table NULL
+#define bfd_mach_o_section_type_valid_for_tgt bfd_mach_o_section_type_valid_for_x86_64
 
 #define TARGET_NAME 		mach_o_x86_64_vec
 #define TARGET_STRING 		"mach-o-x86-64"
