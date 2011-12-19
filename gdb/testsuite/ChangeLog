@@ -1,3 +1,11 @@
+2011-12-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.threads/attach-stopped.exp (continue (*: attach2 continue))
+	(*: attach2 stop interrupt, *: attach2, exit leaves process sleeping):
+	Remove.
+	* gdb.threads/attachstop-mt.c: Remove.
+	* gdb.threads/attachstop-mt.exp: Remove.
+
 2011-12-17  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdb.arch/amd64-i386-address.exp: Skip on *-*-openbsd*.
