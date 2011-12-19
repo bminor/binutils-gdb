@@ -2137,11 +2137,11 @@ Target_x86_64::Scan::local(Symbol_table* symtab,
 		  object->error(_("local symbol %u has bad shndx %u"),
 			      r_sym, shndx);
                 else
-		  got->add_local_pair_with_rela(object, r_sym,
-						shndx,
-						GOT_TYPE_TLS_PAIR,
-						target->rela_dyn_section(layout),
-						elfcpp::R_X86_64_DTPMOD64, 0);
+		  got->add_local_pair_with_rel(object, r_sym,
+					       shndx,
+					       GOT_TYPE_TLS_PAIR,
+					       target->rela_dyn_section(layout),
+					       elfcpp::R_X86_64_DTPMOD64, 0);
               }
             else if (optimized_type != tls::TLSOPT_TO_LE)
 	      unsupported_reloc_local(object, r_type);
@@ -2207,9 +2207,9 @@ Target_x86_64::Scan::local(Symbol_table* symtab,
 	        Output_data_got<64, false>* got
 	            = target->got_section(symtab, layout);
 	        unsigned int r_sym = elfcpp::elf_r_sym<64>(reloc.get_r_info());
-	        got->add_local_with_rela(object, r_sym, GOT_TYPE_TLS_OFFSET,
-	                                 target->rela_dyn_section(layout),
-	                                 elfcpp::R_X86_64_TPOFF64);
+	        got->add_local_with_rel(object, r_sym, GOT_TYPE_TLS_OFFSET,
+					target->rela_dyn_section(layout),
+					elfcpp::R_X86_64_TPOFF64);
               }
             else if (optimized_type != tls::TLSOPT_TO_LE)
               unsupported_reloc_local(object, r_type);
@@ -2481,8 +2481,8 @@ Target_x86_64::Scan::global(Symbol_table* symtab,
 		    && parameters->options().shared())
 		|| (gsym->type() == elfcpp::STT_GNU_IFUNC
 		    && parameters->options().output_is_position_independent()))
-              got->add_global_with_rela(gsym, GOT_TYPE_STANDARD, rela_dyn,
-                                        elfcpp::R_X86_64_GLOB_DAT);
+              got->add_global_with_rel(gsym, GOT_TYPE_STANDARD, rela_dyn,
+				       elfcpp::R_X86_64_GLOB_DAT);
             else
               {
 		// For a STT_GNU_IFUNC symbol we want to write the PLT
@@ -2580,19 +2580,19 @@ Target_x86_64::Scan::global(Symbol_table* symtab,
                 // dtv-relative offset.
                 Output_data_got<64, false>* got
                     = target->got_section(symtab, layout);
-                got->add_global_pair_with_rela(gsym, GOT_TYPE_TLS_PAIR,
-                                               target->rela_dyn_section(layout),
-                                               elfcpp::R_X86_64_DTPMOD64,
-                                               elfcpp::R_X86_64_DTPOFF64);
+                got->add_global_pair_with_rel(gsym, GOT_TYPE_TLS_PAIR,
+					      target->rela_dyn_section(layout),
+					      elfcpp::R_X86_64_DTPMOD64,
+					      elfcpp::R_X86_64_DTPOFF64);
 	      }
 	    else if (optimized_type == tls::TLSOPT_TO_IE)
 	      {
                 // Create a GOT entry for the tp-relative offset.
                 Output_data_got<64, false>* got
                     = target->got_section(symtab, layout);
-                got->add_global_with_rela(gsym, GOT_TYPE_TLS_OFFSET,
-                                          target->rela_dyn_section(layout),
-                                          elfcpp::R_X86_64_TPOFF64);
+                got->add_global_with_rel(gsym, GOT_TYPE_TLS_OFFSET,
+					 target->rela_dyn_section(layout),
+					 elfcpp::R_X86_64_TPOFF64);
 	      }
 	    else if (optimized_type != tls::TLSOPT_TO_LE)
 	      unsupported_reloc_global(object, r_type, gsym);
@@ -2613,17 +2613,17 @@ Target_x86_64::Scan::global(Symbol_table* symtab,
 		target->got_section(symtab, layout);
                 Output_data_got<64, false>* got = target->got_tlsdesc_section();
 		Reloc_section* rt = target->rela_tlsdesc_section(layout);
-                got->add_global_pair_with_rela(gsym, GOT_TYPE_TLS_DESC, rt,
-                                               elfcpp::R_X86_64_TLSDESC, 0);
+                got->add_global_pair_with_rel(gsym, GOT_TYPE_TLS_DESC, rt,
+					      elfcpp::R_X86_64_TLSDESC, 0);
 	      }
 	    else if (optimized_type == tls::TLSOPT_TO_IE)
 	      {
 	        // Create a GOT entry for the tp-relative offset.
                 Output_data_got<64, false>* got
                     = target->got_section(symtab, layout);
-                got->add_global_with_rela(gsym, GOT_TYPE_TLS_OFFSET,
-                                          target->rela_dyn_section(layout),
-                                          elfcpp::R_X86_64_TPOFF64);
+                got->add_global_with_rel(gsym, GOT_TYPE_TLS_OFFSET,
+					 target->rela_dyn_section(layout),
+					 elfcpp::R_X86_64_TPOFF64);
 	      }
 	    else if (optimized_type != tls::TLSOPT_TO_LE)
 	      unsupported_reloc_global(object, r_type, gsym);
@@ -2653,9 +2653,9 @@ Target_x86_64::Scan::global(Symbol_table* symtab,
 	        // Create a GOT entry for the tp-relative offset.
 	        Output_data_got<64, false>* got
 	            = target->got_section(symtab, layout);
-	        got->add_global_with_rela(gsym, GOT_TYPE_TLS_OFFSET,
-	                                  target->rela_dyn_section(layout),
-	                                  elfcpp::R_X86_64_TPOFF64);
+	        got->add_global_with_rel(gsym, GOT_TYPE_TLS_OFFSET,
+					 target->rela_dyn_section(layout),
+					 elfcpp::R_X86_64_TPOFF64);
               }
             else if (optimized_type != tls::TLSOPT_TO_LE)
               unsupported_reloc_global(object, r_type, gsym);

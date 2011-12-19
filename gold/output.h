@@ -1397,6 +1397,55 @@ class Output_data_reloc_generic : public Output_section_data_build
   sort_relocs() const
   { return this->sort_relocs_; }
 
+  // Add a reloc of type TYPE against the global symbol GSYM.  The
+  // relocation applies to the data at offset ADDRESS within OD.
+  virtual void
+  add_global_generic(Symbol* gsym, unsigned int type, Output_data* od,
+		     uint64_t address, uint64_t addend) = 0;
+
+  // Add a reloc of type TYPE against the global symbol GSYM.  The
+  // relocation applies to data at offset ADDRESS within section SHNDX
+  // of object file RELOBJ.  OD is the associated output section.
+  virtual void
+  add_global_generic(Symbol* gsym, unsigned int type, Output_data* od,
+		     Relobj* relobj, unsigned int shndx, uint64_t address,
+		     uint64_t addend) = 0;
+
+  // Add a reloc of type TYPE against the local symbol LOCAL_SYM_INDEX
+  // in RELOBJ.  The relocation applies to the data at offset ADDRESS
+  // within OD.
+  virtual void
+  add_local_generic(Relobj* relobj, unsigned int local_sym_index,
+		    unsigned int type, Output_data* od, uint64_t address,
+		    uint64_t addend) = 0;
+
+  // Add a reloc of type TYPE against the local symbol LOCAL_SYM_INDEX
+  // in RELOBJ.  The relocation applies to the data at offset ADDRESS
+  // within section SHNDX of RELOBJ.  OD is the associated output
+  // section.
+  virtual void
+  add_local_generic(Relobj* relobj, unsigned int local_sym_index,
+		    unsigned int type, Output_data* od, unsigned int shndx,
+		    uint64_t address, uint64_t addend) = 0;
+
+  // Add a reloc of type TYPE against the STT_SECTION symbol of the
+  // output section OS.  The relocation applies to the data at offset
+  // ADDRESS within OD.
+  virtual void
+  add_output_section_generic(Output_section *os, unsigned int type,
+			     Output_data* od, uint64_t address,
+			     uint64_t addend) = 0;
+
+  // Add a reloc of type TYPE against the STT_SECTION symbol of the
+  // output section OS.  The relocation applies to the data at offset
+  // ADDRESS within section SHNDX of RELOBJ.  OD is the associated
+  // output section.
+  virtual void
+  add_output_section_generic(Output_section* os, unsigned int type,
+			     Output_data* od, Relobj* relobj,
+			     unsigned int shndx, uint64_t address,
+			     uint64_t addend) = 0;
+
  protected:
   // Note that we've added another relative reloc.
   void
@@ -1518,23 +1567,27 @@ class Output_data_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>
   { this->add(od, Output_reloc_type(gsym, type, relobj, shndx, address,
                                     false, false)); }
 
-  // These are to simplify the Copy_relocs class.
-
   void
-  add_global(Symbol* gsym, unsigned int type, Output_data* od, Address address,
-	     Address addend)
+  add_global_generic(Symbol* gsym, unsigned int type, Output_data* od,
+		     uint64_t address, uint64_t addend)
   {
     gold_assert(addend == 0);
-    this->add_global(gsym, type, od, address);
+    this->add(od, Output_reloc_type(gsym, type, od,
+				    convert_types<Address, uint64_t>(address),
+				    false, false));
   }
 
   void
-  add_global(Symbol* gsym, unsigned int type, Output_data* od,
-             Sized_relobj<size, big_endian>* relobj,
-	     unsigned int shndx, Address address, Address addend)
+  add_global_generic(Symbol* gsym, unsigned int type, Output_data* od,
+		     Relobj* relobj, unsigned int shndx, uint64_t address,
+		     uint64_t addend)
   {
     gold_assert(addend == 0);
-    this->add_global(gsym, type, od, relobj, shndx, address);
+    Sized_relobj<size, big_endian>* sized_relobj =
+      static_cast<Sized_relobj<size, big_endian>*>(relobj);
+    this->add(od, Output_reloc_type(gsym, type, sized_relobj, shndx,
+				    convert_types<Address, uint64_t>(address),
+				    false, false));
   }
 
   // Add a RELATIVE reloc against a global symbol.  The final relocation
@@ -1590,6 +1643,32 @@ class Output_data_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>
   {
     this->add(od, Output_reloc_type(relobj, local_sym_index, type, shndx,
 				    address, false, false, false, false));
+  }
+
+  void
+  add_local_generic(Relobj* relobj, unsigned int local_sym_index,
+		    unsigned int type, Output_data* od, uint64_t address,
+		    uint64_t addend)
+  {
+    gold_assert(addend == 0);
+    Sized_relobj<size, big_endian>* sized_relobj =
+      static_cast<Sized_relobj<size, big_endian> *>(relobj);
+    this->add(od, Output_reloc_type(sized_relobj, local_sym_index, type, od,
+				    convert_types<Address, uint64_t>(address),
+				    false, false, false, false));
+  }
+
+  void
+  add_local_generic(Relobj* relobj, unsigned int local_sym_index,
+		    unsigned int type, Output_data* od, unsigned int shndx,
+		    uint64_t address, uint64_t addend)
+  {
+    gold_assert(addend == 0);
+    Sized_relobj<size, big_endian>* sized_relobj =
+      static_cast<Sized_relobj<size, big_endian>*>(relobj);
+    this->add(od, Output_reloc_type(sized_relobj, local_sym_index, type, shndx,
+				    convert_types<Address, uint64_t>(address),
+				    false, false, false, false));
   }
 
   // Add a RELATIVE reloc against a local symbol.
@@ -1671,6 +1750,29 @@ class Output_data_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>
                      unsigned int shndx, Address address)
   { this->add(od, Output_reloc_type(os, type, relobj, shndx, address)); }
 
+  void
+  add_output_section_generic(Output_section* os, unsigned int type,
+			     Output_data* od, uint64_t address,
+			     uint64_t addend)
+  {
+    gold_assert(addend == 0);
+    this->add(od, Output_reloc_type(os, type, od,
+				    convert_types<Address, uint64_t>(address)));
+  }
+
+  void
+  add_output_section_generic(Output_section* os, unsigned int type,
+			     Output_data* od, Relobj* relobj,
+			     unsigned int shndx, uint64_t address,
+			     uint64_t addend)
+  {
+    gold_assert(addend == 0);
+    Sized_relobj<size, big_endian>* sized_relobj =
+      static_cast<Sized_relobj<size, big_endian>*>(relobj);
+    this->add(od, Output_reloc_type(os, type, sized_relobj, shndx,
+				    convert_types<Address, uint64_t>(address)));
+  }
+
   // Add an absolute relocation.
 
   void
@@ -1733,6 +1835,29 @@ class Output_data_reloc<elfcpp::SHT_RELA, dynamic, size, big_endian>
   { this->add(od, Output_reloc_type(gsym, type, relobj, shndx, address,
                                     addend, false, false)); }
 
+  void
+  add_global_generic(Symbol* gsym, unsigned int type, Output_data* od,
+		     uint64_t address, uint64_t addend)
+  {
+    this->add(od, Output_reloc_type(gsym, type, od,
+				    convert_types<Address, uint64_t>(address),
+				    convert_types<Addend, uint64_t>(addend),
+				    false, false));
+  }
+
+  void
+  add_global_generic(Symbol* gsym, unsigned int type, Output_data* od,
+		     Relobj* relobj, unsigned int shndx, uint64_t address,
+		     uint64_t addend)
+  {
+    Sized_relobj<size, big_endian>* sized_relobj =
+      static_cast<Sized_relobj<size, big_endian>*>(relobj);
+    this->add(od, Output_reloc_type(gsym, type, sized_relobj, shndx,
+				    convert_types<Address, uint64_t>(address),
+				    convert_types<Addend, uint64_t>(addend),
+				    false, false));
+  }
+
   // Add a RELATIVE reloc against a global symbol.  The final output
   // relocation will not reference the symbol, but we must keep the symbol
   // information long enough to set the addend of the relocation correctly
@@ -1788,6 +1913,32 @@ class Output_data_reloc<elfcpp::SHT_RELA, dynamic, size, big_endian>
     this->add(od, Output_reloc_type(relobj, local_sym_index, type, shndx,
                                     address, addend, false, false, false,
                                     false));
+  }
+
+  void
+  add_local_generic(Relobj* relobj, unsigned int local_sym_index,
+		    unsigned int type, Output_data* od, uint64_t address,
+		    uint64_t addend)
+  {
+    Sized_relobj<size, big_endian>* sized_relobj =
+      static_cast<Sized_relobj<size, big_endian> *>(relobj);
+    this->add(od, Output_reloc_type(sized_relobj, local_sym_index, type, od,
+				    convert_types<Address, uint64_t>(address),
+				    convert_types<Addend, uint64_t>(addend),
+				    false, false, false, false));
+  }
+
+  void
+  add_local_generic(Relobj* relobj, unsigned int local_sym_index,
+		    unsigned int type, Output_data* od, unsigned int shndx,
+		    uint64_t address, uint64_t addend)
+  {
+    Sized_relobj<size, big_endian>* sized_relobj =
+      static_cast<Sized_relobj<size, big_endian>*>(relobj);
+    this->add(od, Output_reloc_type(sized_relobj, local_sym_index, type, shndx,
+				    convert_types<Address, uint64_t>(address),
+				    convert_types<Addend, uint64_t>(addend),
+				    false, false, false, false));
   }
 
   // Add a RELATIVE reloc against a local symbol.
@@ -1874,6 +2025,29 @@ class Output_data_reloc<elfcpp::SHT_RELA, dynamic, size, big_endian>
 		     unsigned int shndx, Address address, Addend addend)
   { this->add(od, Output_reloc_type(os, type, relobj, shndx, address,
                                     addend)); }
+
+  void
+  add_output_section_generic(Output_section* os, unsigned int type,
+			     Output_data* od, uint64_t address,
+			     uint64_t addend)
+  {
+    this->add(od, Output_reloc_type(os, type, od,
+				    convert_types<Address, uint64_t>(address),
+				    convert_types<Addend, uint64_t>(addend)));
+  }
+
+  void
+  add_output_section_generic(Output_section* os, unsigned int type,
+			     Output_data* od, Relobj* relobj,
+			     unsigned int shndx, uint64_t address,
+			     uint64_t addend)
+  {
+    Sized_relobj<size, big_endian>* sized_relobj =
+      static_cast<Sized_relobj<size, big_endian>*>(relobj);
+    this->add(od, Output_reloc_type(os, type, sized_relobj, shndx,
+				    convert_types<Address, uint64_t>(address),
+				    convert_types<Addend, uint64_t>(addend)));
+  }
 
   // Add an absolute relocation.
 
@@ -1974,29 +2148,28 @@ class Output_data_group : public Output_section_data
 // Output_data_got is used to manage a GOT.  Each entry in the GOT is
 // for one symbol--either a global symbol or a local symbol in an
 // object.  The target specific code adds entries to the GOT as
-// needed.
+// needed.  The GOT_SIZE template parameter is the size in bits of a
+// GOT entry, typically 32 or 64.
 
-template<int size, bool big_endian>
+template<int got_size, bool big_endian>
 class Output_data_got : public Output_section_data_build
 {
  public:
-  typedef typename elfcpp::Elf_types<size>::Elf_Addr Valtype;
-  typedef Output_data_reloc<elfcpp::SHT_REL, true, size, big_endian> Rel_dyn;
-  typedef Output_data_reloc<elfcpp::SHT_RELA, true, size, big_endian> Rela_dyn;
+  typedef typename elfcpp::Elf_types<got_size>::Elf_Addr Valtype;
 
   Output_data_got()
-    : Output_section_data_build(Output_data::default_alignment_for_size(size)),
+    : Output_section_data_build(Output_data::default_alignment_for_size(got_size)),
       entries_(), free_list_()
   { }
 
   Output_data_got(off_t data_size)
     : Output_section_data_build(data_size,
-				Output_data::default_alignment_for_size(size)),
+				Output_data::default_alignment_for_size(got_size)),
       entries_(), free_list_()
   {
     // For an incremental update, we have an existing GOT section.
     // Initialize the list of entries and the free list.
-    this->entries_.resize(data_size / (size / 8));
+    this->entries_.resize(data_size / (got_size / 8));
     this->free_list_.init(data_size, false);
   }
 
@@ -2014,62 +2187,39 @@ class Output_data_got : public Output_section_data_build
   // relocation of type R_TYPE for the GOT entry.
   void
   add_global_with_rel(Symbol* gsym, unsigned int got_type,
-                      Rel_dyn* rel_dyn, unsigned int r_type);
-
-  void
-  add_global_with_rela(Symbol* gsym, unsigned int got_type,
-                       Rela_dyn* rela_dyn, unsigned int r_type);
+                      Output_data_reloc_generic* rel_dyn, unsigned int r_type);
 
   // Add a pair of entries for a global symbol to the GOT, and add
   // dynamic relocations of type R_TYPE_1 and R_TYPE_2, respectively.
   void
   add_global_pair_with_rel(Symbol* gsym, unsigned int got_type,
-                           Rel_dyn* rel_dyn, unsigned int r_type_1,
-                           unsigned int r_type_2);
-
-  void
-  add_global_pair_with_rela(Symbol* gsym, unsigned int got_type,
-                            Rela_dyn* rela_dyn, unsigned int r_type_1,
-                            unsigned int r_type_2);
+                           Output_data_reloc_generic* rel_dyn,
+			   unsigned int r_type_1, unsigned int r_type_2);
 
   // Add an entry for a local symbol to the GOT.  This returns true if
   // this is a new GOT entry, false if the symbol already has a GOT
   // entry.
   bool
-  add_local(Sized_relobj_file<size, big_endian>* object, unsigned int sym_index,
-            unsigned int got_type);
+  add_local(Relobj* object, unsigned int sym_index, unsigned int got_type);
 
   // Like add_local, but use the PLT offset of the local symbol if it
   // has one.
   bool
-  add_local_plt(Sized_relobj_file<size, big_endian>* object,
-		unsigned int sym_index,
-		unsigned int got_type);
+  add_local_plt(Relobj* object, unsigned int sym_index, unsigned int got_type);
 
   // Add an entry for a local symbol to the GOT, and add a dynamic
   // relocation of type R_TYPE for the GOT entry.
   void
-  add_local_with_rel(Sized_relobj_file<size, big_endian>* object,
-                     unsigned int sym_index, unsigned int got_type,
-                     Rel_dyn* rel_dyn, unsigned int r_type);
-
-  void
-  add_local_with_rela(Sized_relobj_file<size, big_endian>* object,
-                      unsigned int sym_index, unsigned int got_type,
-                      Rela_dyn* rela_dyn, unsigned int r_type);
+  add_local_with_rel(Relobj* object, unsigned int sym_index,
+		     unsigned int got_type, Output_data_reloc_generic* rel_dyn,
+		     unsigned int r_type);
 
   // Add a pair of entries for a local symbol to the GOT, and add
   // dynamic relocations of type R_TYPE_1 and R_TYPE_2, respectively.
   void
-  add_local_pair_with_rel(Sized_relobj_file<size, big_endian>* object,
-                          unsigned int sym_index, unsigned int shndx,
-                          unsigned int got_type, Rel_dyn* rel_dyn,
-                          unsigned int r_type_1, unsigned int r_type_2);
-
-  void
-  add_local_pair_with_rela(Sized_relobj_file<size, big_endian>* object,
-                          unsigned int sym_index, unsigned int shndx,
-                          unsigned int got_type, Rela_dyn* rela_dyn,
+  add_local_pair_with_rel(Relobj* object, unsigned int sym_index,
+			  unsigned int shndx, unsigned int got_type,
+			  Output_data_reloc_generic* rel_dyn,
                           unsigned int r_type_1, unsigned int r_type_2);
 
   // Add a constant to the GOT.  This returns the offset of the new
@@ -2084,12 +2234,12 @@ class Output_data_got : public Output_section_data_build
   // Reserve a slot in the GOT.
   void
   reserve_slot(unsigned int i)
-  { this->free_list_.remove(i * size / 8, (i + 1) * size / 8); }
+  { this->free_list_.remove(i * got_size / 8, (i + 1) * got_size / 8); }
 
   // Reserve a slot in the GOT for a local symbol.
   void
-  reserve_local(unsigned int i, Sized_relobj<size, big_endian>* object,
-		unsigned int sym_index, unsigned int got_type);
+  reserve_local(unsigned int i, Relobj* object, unsigned int sym_index,
+		unsigned int got_type);
 
   // Reserve a slot in the GOT for a global symbol.
   void
@@ -2121,8 +2271,8 @@ class Output_data_got : public Output_section_data_build
     { this->u_.gsym = gsym; }
 
     // Create a local symbol entry.
-    Got_entry(Sized_relobj_file<size, big_endian>* object,
-              unsigned int local_sym_index, bool use_plt_offset)
+    Got_entry(Relobj* object, unsigned int local_sym_index,
+	      bool use_plt_offset)
       : local_sym_index_(local_sym_index), use_plt_offset_(use_plt_offset)
     {
       gold_assert(local_sym_index != GSYM_CODE
@@ -2153,7 +2303,7 @@ class Output_data_got : public Output_section_data_build
     union
     {
       // For a local symbol, the object.
-      Sized_relobj_file<size, big_endian>* object;
+      Relobj* object;
       // For a global symbol, the symbol.
       Symbol* gsym;
       // For a constant, the constant.
@@ -2179,7 +2329,7 @@ class Output_data_got : public Output_section_data_build
   // Return the offset into the GOT of GOT entry I.
   unsigned int
   got_offset(unsigned int i) const
-  { return i * (size / 8); }
+  { return i * (got_size / 8); }
 
   // Return the offset into the GOT of the last entry added.
   unsigned int

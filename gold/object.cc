@@ -1819,7 +1819,8 @@ Sized_relobj_file<size, big_endian>::local_has_plt_offset(
 
 template<int size, bool big_endian>
 unsigned int
-Sized_relobj_file<size, big_endian>::local_plt_offset(unsigned int symndx) const
+Sized_relobj_file<size, big_endian>::do_local_plt_offset(
+    unsigned int symndx) const
 {
   typename Local_plt_offsets::const_iterator p =
     this->local_plt_offsets_.find(symndx);

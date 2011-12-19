@@ -1566,8 +1566,8 @@ Target_powerpc<size, big_endian>::Scan::global(
             if (gsym->is_from_dynobj()
                 || gsym->is_undefined()
                 || gsym->is_preemptible())
-              got->add_global_with_rela(gsym, GOT_TYPE_STANDARD, rela_dyn,
-                                        elfcpp::R_POWERPC_GLOB_DAT);
+              got->add_global_with_rel(gsym, GOT_TYPE_STANDARD, rela_dyn,
+				       elfcpp::R_POWERPC_GLOB_DAT);
             else if (!gsym->has_got_offset(GOT_TYPE_STANDARD))
               {
 		unsigned int off = got->add_constant(0);

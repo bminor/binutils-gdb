@@ -1009,6 +1009,39 @@ class Relobj : public Object
   scan_relocs(Symbol_table* symtab, Layout* layout, Read_relocs_data* rd)
   { return this->do_scan_relocs(symtab, layout, rd); }
 
+  // Return the value of the local symbol whose index is SYMNDX, plus
+  // ADDEND.  ADDEND is passed in so that we can correctly handle the
+  // section symbol for a merge section.
+  uint64_t
+  local_symbol_value(unsigned int symndx, uint64_t addend) const
+  { return this->do_local_symbol_value(symndx, addend); }
+
+  // Return the PLT offset for a local symbol.  It is an error to call
+  // this if it doesn't have one.
+  unsigned int
+  local_plt_offset(unsigned int symndx) const
+  { return this->do_local_plt_offset(symndx); }
+
+  // Return whether the local symbol SYMNDX has a GOT offset of type
+  // GOT_TYPE.
+  bool
+  local_has_got_offset(unsigned int symndx, unsigned int got_type) const
+  { return this->do_local_has_got_offset(symndx, got_type); }
+
+  // Return the GOT offset of type GOT_TYPE of the local symbol
+  // SYMNDX.  It is an error to call this if the symbol does not have
+  // a GOT offset of the specified type.
+  unsigned int
+  local_got_offset(unsigned int symndx, unsigned int got_type) const
+  { return this->do_local_got_offset(symndx, got_type); }
+
+  // Set the GOT offset with type GOT_TYPE of the local symbol SYMNDX
+  // to GOT_OFFSET.
+  void
+  set_local_got_offset(unsigned int symndx, unsigned int got_type,
+		       unsigned int got_offset)
+  { this->do_set_local_got_offset(symndx, got_type, got_offset); }
+
   // The number of local symbols in the input symbol table.
   virtual unsigned int
   local_symbol_count() const
@@ -1166,6 +1199,28 @@ class Relobj : public Object
   // Scan the relocs--implemented by child class.
   virtual void
   do_scan_relocs(Symbol_table*, Layout*, Read_relocs_data*) = 0;
+
+  // Return the value of a local symbol.
+  virtual uint64_t
+  do_local_symbol_value(unsigned int symndx, uint64_t addend) const = 0;
+
+  // Return the PLT offset of a local symbol.
+  virtual unsigned int
+  do_local_plt_offset(unsigned int symndx) const = 0;
+
+  // Return whether a local symbol has a GOT offset of a given type.
+  virtual bool
+  do_local_has_got_offset(unsigned int symndx,
+			  unsigned int got_type) const = 0;
+
+  // Return the GOT offset of a given type of a local symbol.
+  virtual unsigned int
+  do_local_got_offset(unsigned int symndx, unsigned int got_type) const = 0;
+
+  // Set the GOT offset with a given type for a local symbol.
+  virtual void
+  do_set_local_got_offset(unsigned int symndx, unsigned int got_type,
+			  unsigned int got_offset) = 0;
 
   // Return the number of local symbols--implemented by child class.
   virtual unsigned int
@@ -1775,47 +1830,6 @@ class Sized_relobj : public Relobj
     return this->section_offsets_[shndx];
   }
 
-  // Return whether the local symbol SYMNDX has a GOT offset.
-  // For TLS symbols, the GOT entry will hold its tp-relative offset.
-  bool
-  local_has_got_offset(unsigned int symndx, unsigned int got_type) const
-  {
-    Local_got_offsets::const_iterator p =
-        this->local_got_offsets_.find(symndx);
-    return (p != this->local_got_offsets_.end()
-            && p->second->get_offset(got_type) != -1U);
-  }
-
-  // Return the GOT offset of the local symbol SYMNDX.
-  unsigned int
-  local_got_offset(unsigned int symndx, unsigned int got_type) const
-  {
-    Local_got_offsets::const_iterator p =
-        this->local_got_offsets_.find(symndx);
-    gold_assert(p != this->local_got_offsets_.end());
-    unsigned int off = p->second->get_offset(got_type);
-    gold_assert(off != -1U);
-    return off;
-  }
-
-  // Set the GOT offset of the local symbol SYMNDX to GOT_OFFSET.
-  void
-  set_local_got_offset(unsigned int symndx, unsigned int got_type,
-                       unsigned int got_offset)
-  {
-    Local_got_offsets::const_iterator p =
-        this->local_got_offsets_.find(symndx);
-    if (p != this->local_got_offsets_.end())
-      p->second->set_offset(got_type, got_offset);
-    else
-      {
-        Got_offset_list* g = new Got_offset_list(got_type, got_offset);
-        std::pair<Local_got_offsets::iterator, bool> ins =
-            this->local_got_offsets_.insert(std::make_pair(symndx, g));
-        gold_assert(ins.second);
-      }
-  }
-
   // Iterate over local symbols, calling a visitor class V for each GOT offset
   // associated with a local symbol.
   void
@@ -1853,6 +1867,49 @@ class Sized_relobj : public Relobj
       (off == static_cast<uint64_t>(-1)
        ? invalid_address
        : convert_types<Address, uint64_t>(off));
+  }
+
+  // Return whether the local symbol SYMNDX has a GOT offset of type
+  // GOT_TYPE.
+  bool
+  do_local_has_got_offset(unsigned int symndx, unsigned int got_type) const
+  {
+    Local_got_offsets::const_iterator p =
+        this->local_got_offsets_.find(symndx);
+    return (p != this->local_got_offsets_.end()
+            && p->second->get_offset(got_type) != -1U);
+  }
+
+  // Return the GOT offset of type GOT_TYPE of the local symbol
+  // SYMNDX.
+  unsigned int
+  do_local_got_offset(unsigned int symndx, unsigned int got_type) const
+  {
+    Local_got_offsets::const_iterator p =
+        this->local_got_offsets_.find(symndx);
+    gold_assert(p != this->local_got_offsets_.end());
+    unsigned int off = p->second->get_offset(got_type);
+    gold_assert(off != -1U);
+    return off;
+  }
+
+  // Set the GOT offset with type GOT_TYPE of the local symbol SYMNDX
+  // to GOT_OFFSET.
+  void
+  do_set_local_got_offset(unsigned int symndx, unsigned int got_type,
+			  unsigned int got_offset)
+  {
+    Local_got_offsets::const_iterator p =
+        this->local_got_offsets_.find(symndx);
+    if (p != this->local_got_offsets_.end())
+      p->second->set_offset(got_type, got_offset);
+    else
+      {
+        Got_offset_list* g = new Got_offset_list(got_type, got_offset);
+        std::pair<Local_got_offsets::iterator, bool> ins =
+            this->local_got_offsets_.insert(std::make_pair(symndx, g));
+        gold_assert(ins.second);
+      }
   }
 
  private:
@@ -2000,11 +2057,6 @@ class Sized_relobj_file : public Sized_relobj<size, big_endian>
   bool
   local_has_plt_offset(unsigned int symndx) const;
 
-  // Return the PLT offset for a local symbol.  It is an error to call
-  // this if it doesn't have one.
-  unsigned int
-  local_plt_offset(unsigned int symndx) const;
-
   // Set the PLT offset of the local symbol SYMNDX.
   void
   set_local_plt_offset(unsigned int symndx, unsigned int plt_offset);
@@ -2049,6 +2101,19 @@ class Sized_relobj_file : public Sized_relobj<size, big_endian>
   // Read the symbols.
   void
   do_read_symbols(Read_symbols_data*);
+
+  // Return the value of a local symbol.
+  uint64_t
+  do_local_symbol_value(unsigned int symndx, uint64_t addend) const
+  {
+    const Symbol_value<size>* symval = this->local_symbol(symndx);
+    return symval->value(this, addend);
+  }
+
+  // Return the PLT offset for a local symbol.  It is an error to call
+  // this if it doesn't have one.
+  unsigned int
+  do_local_plt_offset(unsigned int symndx) const;
 
   // Return the number of local symbols.
   unsigned int

@@ -1,6 +1,6 @@
 // copy-relocs.cc -- handle COPY relocations for gold.
 
-// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -41,10 +41,10 @@ Copy_relocs<sh_type, size, big_endian>::Copy_reloc_entry::emit(
   // emitted a COPY relocation, and we do not want to emit this
   // dynamic relocation.
   if (this->sym_->is_from_dynobj())
-    reloc_section->add_global(this->sym_, this->reloc_type_,
-			      this->output_section_, this->relobj_,
-			      this->shndx_, this->address_,
-			      this->addend_);
+    reloc_section->add_global_generic(this->sym_, this->reloc_type_,
+				      this->output_section_, this->relobj_,
+				      this->shndx_, this->address_,
+				      this->addend_);
 }
 
 // Copy_relocs methods.
@@ -115,7 +115,8 @@ Copy_relocs<sh_type, size, big_endian>::emit_copy_reloc(
   symtab->define_with_copy_reloc(sym, posd, offset);
 
   // Add the COPY relocation to the dynamic reloc section.
-  reloc_section->add_global(sym, this->copy_reloc_type_, posd, offset, 0);
+  reloc_section->add_global_generic(sym, this->copy_reloc_type_, posd,
+				    offset, 0);
 }
 
 // Make a COPY relocation for SYM and emit it.

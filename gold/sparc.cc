@@ -1998,14 +1998,14 @@ Target_sparc<size, big_endian>::Scan::local(
 		  object->error(_("local symbol %u has bad shndx %u"),
 				r_sym, shndx);
 		else
-		  got->add_local_pair_with_rela(object, r_sym, 
-						lsym.get_st_shndx(),
-						GOT_TYPE_TLS_PAIR,
-						target->rela_dyn_section(layout),
-						(size == 64
-						 ? elfcpp::R_SPARC_TLS_DTPMOD64
-						 : elfcpp::R_SPARC_TLS_DTPMOD32),
-						 0);
+		  got->add_local_pair_with_rel(object, r_sym, 
+					       lsym.get_st_shndx(),
+					       GOT_TYPE_TLS_PAIR,
+					       target->rela_dyn_section(layout),
+					       (size == 64
+						? elfcpp::R_SPARC_TLS_DTPMOD64
+						: elfcpp::R_SPARC_TLS_DTPMOD32),
+					       0);
 		if (r_type == elfcpp::R_SPARC_TLS_GD_CALL)
 		  generate_tls_call(symtab, layout, target);
 	      }
@@ -2339,8 +2339,8 @@ Target_sparc<size, big_endian>::Scan::global(
             if (gsym->is_from_dynobj()
                 || gsym->is_undefined()
                 || gsym->is_preemptible())
-              got->add_global_with_rela(gsym, GOT_TYPE_STANDARD, rela_dyn,
-                                        elfcpp::R_SPARC_GLOB_DAT);
+              got->add_global_with_rel(gsym, GOT_TYPE_STANDARD, rela_dyn,
+				       elfcpp::R_SPARC_GLOB_DAT);
             else if (!gsym->has_got_offset(GOT_TYPE_STANDARD))
               {
 		unsigned int off = got->add_constant(0);
@@ -2389,14 +2389,14 @@ Target_sparc<size, big_endian>::Scan::global(
                 // dtv-relative offset.
                 Output_data_got<size, big_endian>* got
                     = target->got_section(symtab, layout);
-                got->add_global_pair_with_rela(gsym, GOT_TYPE_TLS_PAIR,
-                                               target->rela_dyn_section(layout),
-					       (size == 64 ?
-						elfcpp::R_SPARC_TLS_DTPMOD64 :
-						elfcpp::R_SPARC_TLS_DTPMOD32),
-					       (size == 64 ?
-						elfcpp::R_SPARC_TLS_DTPOFF64 :
-						elfcpp::R_SPARC_TLS_DTPOFF32));
+                got->add_global_pair_with_rel(gsym, GOT_TYPE_TLS_PAIR,
+					      target->rela_dyn_section(layout),
+					      (size == 64
+					       ? elfcpp::R_SPARC_TLS_DTPMOD64
+					       : elfcpp::R_SPARC_TLS_DTPMOD32),
+					      (size == 64
+					       ? elfcpp::R_SPARC_TLS_DTPOFF64
+					       : elfcpp::R_SPARC_TLS_DTPOFF32));
 
 		// Emit R_SPARC_WPLT30 against "__tls_get_addr"
 		if (r_type == elfcpp::R_SPARC_TLS_GD_CALL)
@@ -2407,11 +2407,11 @@ Target_sparc<size, big_endian>::Scan::global(
                 // Create a GOT entry for the tp-relative offset.
                 Output_data_got<size, big_endian>* got
                     = target->got_section(symtab, layout);
-                got->add_global_with_rela(gsym, GOT_TYPE_TLS_OFFSET,
-                                          target->rela_dyn_section(layout),
-					  (size == 64 ?
-					   elfcpp::R_SPARC_TLS_TPOFF64 :
-					   elfcpp::R_SPARC_TLS_TPOFF32));
+                got->add_global_with_rel(gsym, GOT_TYPE_TLS_OFFSET,
+					 target->rela_dyn_section(layout),
+					 (size == 64 ?
+					  elfcpp::R_SPARC_TLS_TPOFF64 :
+					  elfcpp::R_SPARC_TLS_TPOFF32));
 	      }
 	    else if (optimized_type != tls::TLSOPT_TO_LE)
 	      unsupported_reloc_global(object, r_type, gsym);
@@ -2462,11 +2462,11 @@ Target_sparc<size, big_endian>::Scan::global(
 		// Create a GOT entry for the tp-relative offset.
 		Output_data_got<size, big_endian>* got
 		  = target->got_section(symtab, layout);
-		got->add_global_with_rela(gsym, GOT_TYPE_TLS_OFFSET,
-					  target->rela_dyn_section(layout),
-					  (size == 64 ?
-					   elfcpp::R_SPARC_TLS_TPOFF64 :
-					   elfcpp::R_SPARC_TLS_TPOFF32));
+		got->add_global_with_rel(gsym, GOT_TYPE_TLS_OFFSET,
+					 target->rela_dyn_section(layout),
+					 (size == 64
+					  ? elfcpp::R_SPARC_TLS_TPOFF64
+					  : elfcpp::R_SPARC_TLS_TPOFF32));
 	      }
 	    else if (optimized_type != tls::TLSOPT_TO_LE)
 	      unsupported_reloc_global(object, r_type, gsym);

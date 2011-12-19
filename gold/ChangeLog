@@ -1,3 +1,62 @@
+2011-12-18  Ian Lance Taylor  <iant@google.com>
+
+	* object.h (Relobj::local_symbol_value): New function.
+	(Relobj::local_plt_offset): New function.
+	(Relobj::local_has_got_offset): New function.
+	(Relobj::local_got_offset): New function.
+	(Relobj::set_local_got_offset): New function.
+	(Relobj::do_local_symbol_value): New pure virtual function.
+	(Relobj::do_local_plt_offset): Likewise.
+	(Relobj::do_local_has_got_offset): Likewise.
+	(Relobj::do_local_got_offset): Likewise.
+	(Relobj::do_set_local_got_offset): Likewise.
+	(Sized_relobj::do_local_has_got_offset): Rename from
+	local_has_got_offset.
+	(Sized_relobj::do_local_got_offset): Rename from local_got_offset.
+	(Sized_relobj::do_set_local_got_offset): Rename from
+	set_local_got_offset.
+	(Sized_relobj_file::do_local_plt_offset): Rename from
+	local_plt_offset.
+	(Sized_relobj_file::do_local_symbol_value): New function.
+	* object.cc (Sized_relobj_file::do_local_plt_offset): Rename from
+	local_plt_offset.
+	* output.cc (Output_data_got::Got_entry::write): Change object to
+	Relobj.  Use local_symbol_value.
+	(Output_data_got::add_global_with_rel): Change rel_dyn to
+	Output_data_reloc_generic*.  Use add_global_generic.
+	(Output_data_got::add_global_with_rela): Remove.  Change all
+	callers to use add_global_with_rel.
+	(Output_data_got::add_global_pair_with_rel): Change rel_dyn to
+	Output_data_reloc_generic*.  Use add_global_generic.
+	(Output_data_got::add_global_pair_with_rela): Remove.  Change all
+	callers to use add_global_pair_with_rel.
+	(Output_data_got::add_local): Change object to Relobj*.
+	(Output_data_got::add_local_plt): Likewise.
+	(Output_data_got::add_local_with_rel): Change object to Relobj*,
+	change rel_dyn to Output_data_reloc_generic*.  Use
+	add_local_generic.
+	(Output_data_got::add_local_with_rela): Remove.  Change all
+	callers to use all_local_with_rel.
+	(Output_data_got::add_local_pair_with_rel): Change object to
+	Relobj*, change rel_dyn to Output_data_reloc_generic*.  Use
+	add_output_section_generic.
+	(Output_data_got::add_local_pair_with_rela): Remove.  Change all
+	callers to use add_local_pair_with_rel.
+	(Output_data_got::reserve_local): Change object to Relobj*.
+	* output.h: (class Output_data_reloc_generic): Add pure virtual
+	declarations for add_global_generic, add_local_generic,
+	add_output_section_generic.
+	(class Output_data_reloc) [SHT_REL, SHT_RELA]: Implement new
+	functions for Output_data_reloc_generic.  Update declarations for
+	changes listed in output.cc.
+	(class Output_data_got): Change template parameter to got_size.
+	Don't define Rel_dyn or Rela_dyn.  Update declarations per above.
+	* incremental.h (Sized_relobj_incr::do_local_symbol_value): New
+	function.
+	(Sized_relobj_incr::do_local_plt_offset): New function.
+	* copy-relocs.cc (Copy_relocs::Copy_reloc_entry::emit): Call
+	add_global_generic.
+
 2011-12-17  Cary Coutant  <ccoutant@google.com>
 
 	* dwarf_reader.cc (Sized_dwarf_line_info::read_lines): Add casts.

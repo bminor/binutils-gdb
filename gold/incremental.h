@@ -1,6 +1,6 @@
 // inremental.h -- incremental linking support for gold   -*- C++ -*-
 
-// Copyright 2009, 2010 Free Software Foundation, Inc.
+// Copyright 2009, 2010, 2011 Free Software Foundation, Inc.
 // Written by Mikolaj Zalewski <mikolajz@google.com>.
 
 // This file is part of gold.
@@ -1923,6 +1923,15 @@ class Sized_relobj_incr : public Sized_relobj<size, big_endian>
   const Symbols*
   do_get_global_symbols() const
   { return &this->symbols_; }
+
+  // Return the value of a local symbol.
+  uint64_t
+  do_local_symbol_value(unsigned int, uint64_t) const
+  { gold_unreachable(); }
+
+  unsigned int
+  do_local_plt_offset(unsigned int) const
+  { gold_unreachable(); }
 
   // Return the number of local symbols.
   unsigned int
