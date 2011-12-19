@@ -1,5 +1,13 @@
 2011-12-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* gdb.cp/ptype-cv-cp.exp (ptype v_volatile_const_my_int): Make
+	PR gcc/45997 XFAIL conditional for gcc <= 4.5.
+	* gdb.python/py-type.exp (python print ttype.template_argument(2)):
+	Change PR gcc/41736 to the more specific PR gcc/46955.  Make it
+	conditional for gcc <= 4.5.
+
+2011-12-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdb.cp/ptype-cv-cp.exp (ptype v_volatile_const_my_int): Replace KFAIL
 	by XFAIL.
 	* gdb.cp/static-method.exp (info addr A::func())

@@ -37,5 +37,8 @@ gdb_test "whatis v_const_volatile_my_int" "type = const_volatile_my_int"
 gdb_test "ptype v_const_volatile_my_int" "type = const volatile int"
 
 gdb_test "whatis v_volatile_const_my_int" "type = volatile_const_my_int"
-setup_xfail "gcc/45997" "*-*-*"
+if {[test_compiler_info {gcc-[0-3]-*}]
+    || [test_compiler_info {gcc-4-[0-5]-*}]} {
+    setup_xfail "gcc/45997" "*-*-*"
+}
 gdb_test "ptype v_volatile_const_my_int" "type = const volatile int"

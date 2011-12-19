@@ -193,7 +193,10 @@ proc test_template {} {
     gdb_test "python print isinstance(ttype.template_argument(1), gdb.Value)" \
 	"True"
 
-    setup_xfail "gcc/41736" *-*-*
+    if {[test_compiler_info {gcc-[0-3]-*}]
+	|| [test_compiler_info {gcc-4-[0-5]-*}]} {
+	setup_xfail "gcc/46955" *-*-*
+    }
     gdb_test "python print ttype.template_argument(2)" "&C::c"
 }
 
