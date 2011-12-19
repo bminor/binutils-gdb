@@ -1,3 +1,8 @@
+2011-12-19  Tom Tromey  <tromey@redhat.com>
+
+	* symtab.h (add_minsym_to_hash_table): Don't declare.
+	* minsyms.c (add_minsym_to_hash_table): Now static.
+
 2011-12-19  Joel Brobecker  <brobecker@adacore.com>
 
 	* elfread.c (elf_symtab_read): Ignore undefined symbols with

@@ -111,7 +111,7 @@ msymbol_hash (const char *string)
 }
 
 /* Add the minimal symbol SYM to an objfile's minsym hash table, TABLE.  */
-void
+static void
 add_minsym_to_hash_table (struct minimal_symbol *sym,
 			  struct minimal_symbol **table)
 {

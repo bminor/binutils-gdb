@@ -1038,10 +1038,6 @@ extern unsigned int msymbol_hash (const char *);
 
 extern struct objfile * msymbol_objfile (struct minimal_symbol *sym);
 
-extern void
-add_minsym_to_hash_table (struct minimal_symbol *sym,
-			  struct minimal_symbol **table);
-
 extern struct minimal_symbol *lookup_minimal_symbol (const char *,
 						     const char *,
 						     struct objfile *);
