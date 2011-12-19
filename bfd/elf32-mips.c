@@ -830,6 +830,111 @@ static reloc_howto_type elf_mips16_howto_table_rel[] =
 	 0x0000ffff,		/* src_mask */
 	 0x0000ffff,	        /* dst_mask */
 	 FALSE),		/* pcrel_offset */
+
+  /* MIPS16 TLS general dynamic variable reference.  */
+  HOWTO (R_MIPS16_TLS_GD,	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_signed, /* complain_on_overflow */
+	 _bfd_mips_elf_generic_reloc, /* special_function */
+	 "R_MIPS16_TLS_GD",	/* name */
+	 TRUE,			/* partial_inplace */
+	 0x0000ffff,		/* src_mask */
+	 0x0000ffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  /* MIPS16 TLS local dynamic variable reference.  */
+  HOWTO (R_MIPS16_TLS_LDM,	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_signed, /* complain_on_overflow */
+	 _bfd_mips_elf_generic_reloc, /* special_function */
+	 "R_MIPS16_TLS_LDM",	/* name */
+	 TRUE,			/* partial_inplace */
+	 0x0000ffff,		/* src_mask */
+	 0x0000ffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  /* MIPS16 TLS local dynamic offset.  */
+  HOWTO (R_MIPS16_TLS_DTPREL_HI16,	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_signed, /* complain_on_overflow */
+	 _bfd_mips_elf_generic_reloc, /* special_function */
+	 "R_MIPS16_TLS_DTPREL_HI16",	/* name */
+	 TRUE,			/* partial_inplace */
+	 0x0000ffff,		/* src_mask */
+	 0x0000ffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  /* MIPS16 TLS local dynamic offset.  */
+  HOWTO (R_MIPS16_TLS_DTPREL_LO16,	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_signed, /* complain_on_overflow */
+	 _bfd_mips_elf_generic_reloc, /* special_function */
+	 "R_MIPS16_TLS_DTPREL_LO16",	/* name */
+	 TRUE,			/* partial_inplace */
+	 0x0000ffff,		/* src_mask */
+	 0x0000ffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  /* MIPS16 TLS thread pointer offset.  */
+  HOWTO (R_MIPS16_TLS_GOTTPREL,	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_signed, /* complain_on_overflow */
+	 _bfd_mips_elf_generic_reloc, /* special_function */
+	 "R_MIPS16_TLS_GOTTPREL",	/* name */
+	 TRUE,			/* partial_inplace */
+	 0x0000ffff,		/* src_mask */
+	 0x0000ffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  /* MIPS16 TLS thread pointer offset.  */
+  HOWTO (R_MIPS16_TLS_TPREL_HI16,	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_signed, /* complain_on_overflow */
+	 _bfd_mips_elf_generic_reloc, /* special_function */
+	 "R_MIPS16_TLS_TPREL_HI16", /* name */
+	 TRUE,			/* partial_inplace */
+	 0x0000ffff,		/* src_mask */
+	 0x0000ffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  /* MIPS16 TLS thread pointer offset.  */
+  HOWTO (R_MIPS16_TLS_TPREL_LO16,	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_signed, /* complain_on_overflow */
+	 _bfd_mips_elf_generic_reloc, /* special_function */
+	 "R_MIPS16_TLS_TPREL_LO16", /* name */
+	 TRUE,			/* partial_inplace */
+	 0x0000ffff,		/* src_mask */
+	 0x0000ffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
 };
 
 static reloc_howto_type elf_micromips_howto_table_rel[] =
@@ -1796,6 +1901,15 @@ static const struct elf_reloc_map mips16_reloc_map[] =
   { BFD_RELOC_MIPS16_CALL16, R_MIPS16_CALL16 - R_MIPS16_min },
   { BFD_RELOC_MIPS16_HI16_S, R_MIPS16_HI16 - R_MIPS16_min },
   { BFD_RELOC_MIPS16_LO16, R_MIPS16_LO16 - R_MIPS16_min },
+  { BFD_RELOC_MIPS16_TLS_GD, R_MIPS16_TLS_GD - R_MIPS16_min },
+  { BFD_RELOC_MIPS16_TLS_LDM, R_MIPS16_TLS_LDM - R_MIPS16_min },
+  { BFD_RELOC_MIPS16_TLS_DTPREL_HI16,
+    R_MIPS16_TLS_DTPREL_HI16 - R_MIPS16_min },
+  { BFD_RELOC_MIPS16_TLS_DTPREL_LO16,
+    R_MIPS16_TLS_DTPREL_LO16 - R_MIPS16_min },
+  { BFD_RELOC_MIPS16_TLS_GOTTPREL, R_MIPS16_TLS_GOTTPREL - R_MIPS16_min },
+  { BFD_RELOC_MIPS16_TLS_TPREL_HI16, R_MIPS16_TLS_TPREL_HI16 - R_MIPS16_min },
+  { BFD_RELOC_MIPS16_TLS_TPREL_LO16, R_MIPS16_TLS_TPREL_LO16 - R_MIPS16_min }
 };
 
 static const struct elf_reloc_map micromips_reloc_map[] =

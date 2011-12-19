@@ -529,6 +529,13 @@ struct mips_htab_traverse_info
    || r_type == R_MIPS_TLS_TPREL64		\
    || r_type == R_MIPS_TLS_TPREL_HI16		\
    || r_type == R_MIPS_TLS_TPREL_LO16		\
+   || r_type == R_MIPS16_TLS_GD			\
+   || r_type == R_MIPS16_TLS_LDM		\
+   || r_type == R_MIPS16_TLS_DTPREL_HI16	\
+   || r_type == R_MIPS16_TLS_DTPREL_LO16	\
+   || r_type == R_MIPS16_TLS_GOTTPREL		\
+   || r_type == R_MIPS16_TLS_TPREL_HI16		\
+   || r_type == R_MIPS16_TLS_TPREL_LO16		\
    || r_type == R_MICROMIPS_TLS_GD		\
    || r_type == R_MICROMIPS_TLS_LDM		\
    || r_type == R_MICROMIPS_TLS_DTPREL_HI16	\
@@ -1885,6 +1892,13 @@ mips16_reloc_p (int r_type)
     case R_MIPS16_CALL16:
     case R_MIPS16_HI16:
     case R_MIPS16_LO16:
+    case R_MIPS16_TLS_GD:
+    case R_MIPS16_TLS_LDM:
+    case R_MIPS16_TLS_DTPREL_HI16:
+    case R_MIPS16_TLS_DTPREL_LO16:
+    case R_MIPS16_TLS_GOTTPREL:
+    case R_MIPS16_TLS_TPREL_HI16:
+    case R_MIPS16_TLS_TPREL_LO16:
       return TRUE;
 
     default:
@@ -2012,19 +2026,25 @@ micromips_branch_reloc_p (int r_type)
 static inline bfd_boolean
 tls_gd_reloc_p (unsigned int r_type)
 {
-  return r_type == R_MIPS_TLS_GD || r_type == R_MICROMIPS_TLS_GD;
+  return (r_type == R_MIPS_TLS_GD
+	  || r_type == R_MIPS16_TLS_GD
+	  || r_type == R_MICROMIPS_TLS_GD);
 }
 
 static inline bfd_boolean
 tls_ldm_reloc_p (unsigned int r_type)
 {
-  return r_type == R_MIPS_TLS_LDM || r_type == R_MICROMIPS_TLS_LDM;
+  return (r_type == R_MIPS_TLS_LDM
+	  || r_type == R_MIPS16_TLS_LDM
+	  || r_type == R_MICROMIPS_TLS_LDM);
 }
 
 static inline bfd_boolean
 tls_gottprel_reloc_p (unsigned int r_type)
 {
-  return r_type == R_MIPS_TLS_GOTTPREL || r_type == R_MICROMIPS_TLS_GOTTPREL;
+  return (r_type == R_MIPS_TLS_GOTTPREL
+	  || r_type == R_MIPS16_TLS_GOTTPREL
+	  || r_type == R_MICROMIPS_TLS_GOTTPREL);
 }
 
 void
@@ -5361,6 +5381,9 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
     case R_MIPS_TLS_GD:
     case R_MIPS_TLS_GOTTPREL:
     case R_MIPS_TLS_LDM:
+    case R_MIPS16_TLS_GD:
+    case R_MIPS16_TLS_GOTTPREL:
+    case R_MIPS16_TLS_LDM:
     case R_MICROMIPS_TLS_GD:
     case R_MICROMIPS_TLS_GOTTPREL:
     case R_MICROMIPS_TLS_LDM:
@@ -5530,6 +5553,7 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
       break;
 
     case R_MIPS_TLS_DTPREL_HI16:
+    case R_MIPS16_TLS_DTPREL_HI16:
     case R_MICROMIPS_TLS_DTPREL_HI16:
       value = (mips_elf_high (addend + symbol - dtprel_base (info))
 	       & howto->dst_mask);
@@ -5538,17 +5562,22 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
     case R_MIPS_TLS_DTPREL_LO16:
     case R_MIPS_TLS_DTPREL32:
     case R_MIPS_TLS_DTPREL64:
+    case R_MIPS16_TLS_DTPREL_LO16:
     case R_MICROMIPS_TLS_DTPREL_LO16:
       value = (symbol + addend - dtprel_base (info)) & howto->dst_mask;
       break;
 
     case R_MIPS_TLS_TPREL_HI16:
+    case R_MIPS16_TLS_TPREL_HI16:
     case R_MICROMIPS_TLS_TPREL_HI16:
       value = (mips_elf_high (addend + symbol - tprel_base (info))
 	       & howto->dst_mask);
       break;
 
     case R_MIPS_TLS_TPREL_LO16:
+    case R_MIPS_TLS_TPREL32:
+    case R_MIPS_TLS_TPREL64:
+    case R_MIPS16_TLS_TPREL_LO16:
     case R_MICROMIPS_TLS_TPREL_LO16:
       value = (symbol + addend - tprel_base (info)) & howto->dst_mask;
       break;
@@ -5681,6 +5710,9 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
     case R_MIPS_TLS_GOTTPREL:
     case R_MIPS_TLS_LDM:
     case R_MIPS_GOT_DISP:
+    case R_MIPS16_TLS_GD:
+    case R_MIPS16_TLS_GOTTPREL:
+    case R_MIPS16_TLS_LDM:
     case R_MICROMIPS_TLS_GD:
     case R_MICROMIPS_TLS_GOTTPREL:
     case R_MICROMIPS_TLS_LDM:
@@ -7813,8 +7845,6 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
       can_make_dynamic_p = FALSE;
       switch (r_type)
 	{
-	case R_MIPS16_GOT16:
-	case R_MIPS16_CALL16:
 	case R_MIPS_GOT16:
 	case R_MIPS_CALL16:
 	case R_MIPS_CALL_HI16:
@@ -7827,6 +7857,11 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_MIPS_TLS_GOTTPREL:
 	case R_MIPS_TLS_GD:
 	case R_MIPS_TLS_LDM:
+	case R_MIPS16_GOT16:
+	case R_MIPS16_CALL16:
+	case R_MIPS16_TLS_GOTTPREL:
+	case R_MIPS16_TLS_GD:
+	case R_MIPS16_TLS_LDM:
 	case R_MICROMIPS_GOT16:
 	case R_MICROMIPS_CALL16:
 	case R_MICROMIPS_CALL_HI16:
@@ -8063,12 +8098,14 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  break;
 
 	case R_MIPS_TLS_GOTTPREL:
+	case R_MIPS16_TLS_GOTTPREL:
 	case R_MICROMIPS_TLS_GOTTPREL:
 	  if (info->shared)
 	    info->flags |= DF_STATIC_TLS;
 	  /* Fall through */
 
 	case R_MIPS_TLS_LDM:
+	case R_MIPS16_TLS_LDM:
 	case R_MICROMIPS_TLS_LDM:
 	  if (tls_ldm_reloc_p (r_type))
 	    {
@@ -8078,6 +8115,7 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  /* Fall through */
 
 	case R_MIPS_TLS_GD:
+	case R_MIPS16_TLS_GD:
 	case R_MICROMIPS_TLS_GD:
 	  /* This symbol requires a global offset table entry, or two
 	     for TLS GD relocations.  */

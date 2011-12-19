@@ -1352,6 +1352,8 @@ static void s_cprestore (int);
 static void s_cpreturn (int);
 static void s_dtprelword (int);
 static void s_dtpreldword (int);
+static void s_tprelword (int);
+static void s_tpreldword (int);
 static void s_gpvalue (int);
 static void s_gpword (int);
 static void s_gpdword (int);
@@ -1431,6 +1433,8 @@ static const pseudo_typeS mips_pseudo_table[] =
   {"cpreturn", s_cpreturn, 0},
   {"dtprelword", s_dtprelword, 0},
   {"dtpreldword", s_dtpreldword, 0},
+  {"tprelword", s_tprelword, 0},
+  {"tpreldword", s_tpreldword, 0},
   {"gpvalue", s_gpvalue, 0},
   {"gpword", s_gpword, 0},
   {"gpdword", s_gpdword, 0},
@@ -14040,7 +14044,14 @@ static const struct percent_op_match mips16_percent_op[] =
   {"%gprel", BFD_RELOC_MIPS16_GPREL},
   {"%got", BFD_RELOC_MIPS16_GOT16},
   {"%call16", BFD_RELOC_MIPS16_CALL16},
-  {"%hi", BFD_RELOC_MIPS16_HI16_S}
+  {"%hi", BFD_RELOC_MIPS16_HI16_S},
+  {"%tlsgd", BFD_RELOC_MIPS16_TLS_GD},
+  {"%tlsldm", BFD_RELOC_MIPS16_TLS_LDM},
+  {"%dtprel_hi", BFD_RELOC_MIPS16_TLS_DTPREL_HI16},
+  {"%dtprel_lo", BFD_RELOC_MIPS16_TLS_DTPREL_LO16},
+  {"%tprel_hi", BFD_RELOC_MIPS16_TLS_TPREL_HI16},
+  {"%tprel_lo", BFD_RELOC_MIPS16_TLS_TPREL_LO16},
+  {"%gottprel", BFD_RELOC_MIPS16_TLS_GOTTPREL}
 };
 
 
@@ -15369,6 +15380,8 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
     case BFD_RELOC_MIPS_TLS_DTPREL_HI16:
     case BFD_RELOC_MIPS_TLS_DTPREL_LO16:
     case BFD_RELOC_MIPS_TLS_GOTTPREL:
+    case BFD_RELOC_MIPS_TLS_TPREL32:
+    case BFD_RELOC_MIPS_TLS_TPREL64:
     case BFD_RELOC_MIPS_TLS_TPREL_HI16:
     case BFD_RELOC_MIPS_TLS_TPREL_LO16:
     case BFD_RELOC_MICROMIPS_TLS_GD:
@@ -15378,6 +15391,13 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
     case BFD_RELOC_MICROMIPS_TLS_GOTTPREL:
     case BFD_RELOC_MICROMIPS_TLS_TPREL_HI16:
     case BFD_RELOC_MICROMIPS_TLS_TPREL_LO16:
+    case BFD_RELOC_MIPS16_TLS_GD:
+    case BFD_RELOC_MIPS16_TLS_LDM:
+    case BFD_RELOC_MIPS16_TLS_DTPREL_HI16:
+    case BFD_RELOC_MIPS16_TLS_DTPREL_LO16:
+    case BFD_RELOC_MIPS16_TLS_GOTTPREL:
+    case BFD_RELOC_MIPS16_TLS_TPREL_HI16:
+    case BFD_RELOC_MIPS16_TLS_TPREL_LO16:
       S_SET_THREAD_LOCAL (fixP->fx_addsy);
       /* fall through */
 
@@ -16547,12 +16567,14 @@ s_cpreturn (int ignore ATTRIBUTE_UNUSED)
   demand_empty_rest_of_line ();
 }
 
-/* Handle the .dtprelword and .dtpreldword pseudo-ops.  They generate
-   a 32-bit or 64-bit DTP-relative relocation (BYTES says which) for
-   use in DWARF debug information.  */
+/* Handle a .dtprelword, .dtpreldword, .tprelword, or .tpreldword
+   pseudo-op; DIRSTR says which. The pseudo-op generates a BYTES-size
+   DTP- or TP-relative relocation of type RTYPE, for use in either DWARF
+   debug information or MIPS16 TLS.  */
 
 static void
-s_dtprel_internal (size_t bytes)
+s_tls_rel_directive (const size_t bytes, const char *dirstr,
+		     bfd_reloc_code_real_type rtype)
 {
   expressionS ex;
   char *p;
@@ -16561,19 +16583,13 @@ s_dtprel_internal (size_t bytes)
 
   if (ex.X_op != O_symbol)
     {
-      as_bad (_("Unsupported use of %s"), (bytes == 8
-					   ? ".dtpreldword"
-					   : ".dtprelword"));
+      as_bad (_("Unsupported use of %s"), dirstr);
       ignore_rest_of_line ();
     }
 
   p = frag_more (bytes);
   md_number_to_chars (p, 0, bytes);
-  fix_new_exp (frag_now, p - frag_now->fr_literal, bytes, &ex, FALSE,
-	       (bytes == 8
-		? BFD_RELOC_MIPS_TLS_DTPREL64
-		: BFD_RELOC_MIPS_TLS_DTPREL32));
-
+  fix_new_exp (frag_now, p - frag_now->fr_literal, bytes, &ex, FALSE, rtype);
   demand_empty_rest_of_line ();
 }
 
@@ -16582,7 +16598,7 @@ s_dtprel_internal (size_t bytes)
 static void
 s_dtprelword (int ignore ATTRIBUTE_UNUSED)
 {
-  s_dtprel_internal (4);
+  s_tls_rel_directive (4, ".dtprelword", BFD_RELOC_MIPS_TLS_DTPREL32);
 }
 
 /* Handle .dtpreldword.  */
@@ -16590,7 +16606,23 @@ s_dtprelword (int ignore ATTRIBUTE_UNUSED)
 static void
 s_dtpreldword (int ignore ATTRIBUTE_UNUSED)
 {
-  s_dtprel_internal (8);
+  s_tls_rel_directive (8, ".dtpreldword", BFD_RELOC_MIPS_TLS_DTPREL64);
+}
+
+/* Handle .tprelword.  */
+
+static void
+s_tprelword (int ignore ATTRIBUTE_UNUSED)
+{
+  s_tls_rel_directive (4, ".tprelword", BFD_RELOC_MIPS_TLS_TPREL32);
+}
+
+/* Handle .tpreldword.  */
+
+static void
+s_tpreldword (int ignore ATTRIBUTE_UNUSED)
+{
+  s_tls_rel_directive (8, ".tpreldword", BFD_RELOC_MIPS_TLS_TPREL64);
 }
 
 /* Handle the .gpvalue pseudo-op.  This is used when generating NewABI PIC
