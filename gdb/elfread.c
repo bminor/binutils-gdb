@@ -303,6 +303,23 @@ elf_symtab_read (struct objfile *objfile, int type,
 	  if (!sect)
 	    continue;
 
+	  /* On ia64-hpux, we have discovered that the system linker
+	     adds undefined symbols with nonzero addresses that cannot
+	     be right (their address points inside the code of another
+	     function in the .text section).  This creates problems
+	     when trying to determine which symbol corresponds to
+	     a given address.
+
+	     We try to detect those buggy symbols by checking which
+	     section we think they correspond to.  Normally, PLT symbols
+	     are stored inside their own section, and the typical name
+	     for that section is ".plt".  So, if there is a ".plt"
+	     section, and yet the section name of our symbol does not
+	     start with ".plt", we ignore that symbol.  */
+	  if (strncmp (sect->name, ".plt", 4) != 0
+	      && bfd_get_section_by_name (abfd, ".plt") != NULL)
+	    continue;
+
 	  symaddr += ANOFFSET (objfile->section_offsets, sect->index);
 
 	  msym = record_minimal_symbol

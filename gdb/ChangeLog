@@ -1,3 +1,9 @@
+2011-12-19  Joel Brobecker  <brobecker@adacore.com>
+
+	* elfread.c (elf_symtab_read): Ignore undefined symbols with
+	nonzero addresses if they do not correspond to a .plt section
+	when one is available in the objfile.
+
 2011-12-17  Andreas Schwab  <schwab@linux-m68k.org>
 
 	* cp-name-parser.y (cp_merge_demangle_parse_infos): Don't use
