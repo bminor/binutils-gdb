@@ -1,3 +1,17 @@
+2011-12-20  Pedro Alves  <alves.ped@gmail.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+        * linux-nat.c (add_lwp): Don't call linux_nat_new_thread on the
+	first LWP.
+	* amd64-linux-nat.c (update_debug_registers_callback): Instantiate
+	`lwp->arch_private' if NULL.
+	(amd64_linux_prepare_to_resume): Do nothing if `lwp->arch_private'
+	is NULL.
+	* i386-linux-nat.c (update_debug_registers_callback): Instantiate
+	`lwp->arch_private' if NULL.
+	(i386_linux_prepare_to_resume): Do nothing if `lwp->arch_private'
+	is NULL.
+
 2011-12-19  Doug Evans  <dje@google.com>
 
 	* python/py-auto-load.c (info_auto_load_scripts): Pass address of

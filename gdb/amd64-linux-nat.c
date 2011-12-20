@@ -343,6 +343,9 @@ amd64_linux_dr_get_status (void)
 static int
 update_debug_registers_callback (struct lwp_info *lwp, void *arg)
 {
+  if (lwp->arch_private == NULL)
+    lwp->arch_private = XCNEW (struct arch_lwp_info);
+
   /* The actual update is done later just before resuming the lwp, we
      just mark that the registers need updating.  */
   lwp->arch_private->debug_registers_changed = 1;
@@ -385,6 +388,12 @@ static void
 amd64_linux_prepare_to_resume (struct lwp_info *lwp)
 {
   int clear_status = 0;
+
+  /* NULL means this is the main thread still going through the shell,
+     or, no watchpoint has been set yet.  In that case, there's
+     nothing to do.  */
+  if (lwp->arch_private == NULL)
+    return;
 
   if (lwp->arch_private->debug_registers_changed)
     {

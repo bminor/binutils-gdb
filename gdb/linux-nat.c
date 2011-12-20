@@ -1151,7 +1151,15 @@ add_lwp (ptid_t ptid)
   lp->next = lwp_list;
   lwp_list = lp;
 
-  if (linux_nat_new_thread != NULL)
+  /* Let the arch specific bits know about this new thread.  Current
+     clients of this callback take the opportunity to install
+     watchpoints in the new thread.  Don't do this for the first
+     thread though.  If we're spawning a child ("run"), the thread
+     executes the shell wrapper first, and we shouldn't touch it until
+     it execs the program we want to debug.  For "attach", it'd be
+     okay to call the callback, but it's not necessary, because
+     watchpoints can't yet have been inserted into the inferior.  */
+  if (num_lwps (GET_PID (ptid)) > 1 && linux_nat_new_thread != NULL)
     linux_nat_new_thread (lp);
 
   return lp;
