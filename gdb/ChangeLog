@@ -1,3 +1,9 @@
+2011-12-19  Doug Evans  <dje@google.com>
+
+	* python/py-auto-load.c (info_auto_load_scripts): Pass address of
+	scripts vector to collect_matching_scripts.
+	(collect_matching_scripts): Update.
+
 2011-12-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* symfile.c (reread_symbols): Move free_objfile_separate_debug,
