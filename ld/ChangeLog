@@ -1,3 +1,8 @@
+2011-12-20  Joseph Myers  <joseph@codesourcery.com>
+
+	* emulparams/elf32bmip.sh (OTHER_SECTIONS): Put .mdebug.* and
+	.gcc_compiled_long* sections at address 0.
+
 2011-12-13  Nick Clifton  <nickc@redhat.com>
 
 	* po/it.po: New Italian translation.
