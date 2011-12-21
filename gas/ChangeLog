@@ -1,3 +1,9 @@
+2011-12-21  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/13449
+	* config/tc-arm.c (create_unwind_entry): Zero allocated table
+	entries.
+
 2011-12-19  Iain Sandoe  <idsandoe@googlemail.com>
 
 	* config/obj-macho.c (obj_mach_o_section): Account for target-

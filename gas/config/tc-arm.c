@@ -19944,6 +19944,8 @@ create_unwind_entry (int have_data)
 
   /* Allocate the table entry.	*/
   ptr = frag_more ((size << 2) + 4);
+  /* PR 13449: Zero the table entries in case some of them are not used.  */
+  memset (ptr, 0, (size << 2) + 4);
   where = frag_now_fix () - ((size << 2) + 4);
 
   switch (unwind.personality_index)
