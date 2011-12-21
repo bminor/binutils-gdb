@@ -1,5 +1,25 @@
 2011-12-21  Tom Tromey  <tromey@redhat.com>
 
+	* symtab.h: Include minsyms.h.
+	(prim_record_minimal_symbol, prim_record_minimal_symbol_full)
+	(prim_record_minimal_symbol_and_info, msymbol_hash_iw)
+	(msymbol_hash, SYMBOL_HASH_NEXT, msymbol_objfile)
+	(lookup_minimal_symbol, lookup_minimal_symbol_text)
+	(lookup_minimal_symbol_solib_trampoline)
+	(lookup_minimal_symbol_by_pc_name, lookup_minimal_symbol_by_pc)
+	(iterate_over_minimal_symbols, lookup_minimal_symbol_and_objfile)
+	(lookup_minimal_symbol_by_pc_section)
+	(lookup_solib_trampoline_symbol_by_pc)
+	(init_minimal_symbol_collection)
+	(make_cleanup_discard_minimal_symbols, install_minimal_symbols)
+	(msymbols_sort): Move to minsyms.h.
+	* objfiles.c (terminate_minimal_symbol_table): Move to minsyms.c.
+	* minsyms.c (terminate_minimal_symbol_table): Move from
+	objfiles.c.
+	* minsyms.h: New file.
+
+2011-12-21  Tom Tromey  <tromey@redhat.com>
+
 	* hppa-hpux-tdep.c (hppa64_hpux_search_dummy_call_sequence): Use
 	ALL_OBJFILE_MSYMBOLS.
 	(hppa_hpux_find_dummy_bpaddr): Likewise.

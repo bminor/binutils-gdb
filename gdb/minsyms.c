@@ -1291,6 +1291,27 @@ install_minimal_symbols (struct objfile *objfile)
     }
 }
 
+/* See minsyms.h.  */
+
+void
+terminate_minimal_symbol_table (struct objfile *objfile)
+{
+  if (! objfile->msymbols)
+    objfile->msymbols = ((struct minimal_symbol *)
+                         obstack_alloc (&objfile->objfile_obstack,
+                                        sizeof (objfile->msymbols[0])));
+
+  {
+    struct minimal_symbol *m
+      = &objfile->msymbols[objfile->minimal_symbol_count];
+
+    memset (m, 0, sizeof (*m));
+    /* Don't rely on these enumeration values being 0's.  */
+    MSYMBOL_TYPE (m) = mst_unknown;
+    SYMBOL_SET_LANGUAGE (m, language_unknown);
+  }
+}
+
 /* Sort all the minimal symbols in OBJFILE.  */
 
 void
