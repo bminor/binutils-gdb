@@ -97,7 +97,7 @@ int write_armap = 0;
 /* Operate in deterministic mode: write zero for timestamps, uids,
    and gids for archive members and the archive symbol table, and write
    consistent file modes.  */
-int deterministic = 0;
+int deterministic = -1;			/* Determinism indeterminate.  */
 
 /* Nonzero means it's the name of an existing member; position new or moved
    files with respect to this one.  */
@@ -276,7 +276,20 @@ usage (int help)
   fprintf (s, _(" command specific modifiers:\n"));
   fprintf (s, _("  [a]          - put file(s) after [member-name]\n"));
   fprintf (s, _("  [b]          - put file(s) before [member-name] (same as [i])\n"));
-  fprintf (s, _("  [D]          - use zero for timestamps and uids/gids\n"));
+  if (DEFAULT_AR_DETERMINISTIC)
+    {
+      fprintf (s, _("\
+  [D]          - use zero for timestamps and uids/gids (default)\n"));
+      fprintf (s, _("\
+  [U]          - use actual timestamps and uids/gids\n"));
+    }
+  else
+    {
+      fprintf (s, _("\
+  [D]          - use zero for timestamps and uids/gids\n"));
+      fprintf (s, _("\
+  [U]          - use actual timestamps and uids/gids (default)\n"));
+    }
   fprintf (s, _("  [N]          - use instance [count] of name\n"));
   fprintf (s, _("  [f]          - truncate inserted file names\n"));
   fprintf (s, _("  [P]          - use full path names when matching\n"));
@@ -322,9 +335,16 @@ ranlib_usage (int help)
   fprintf (s, _("\
   --plugin <name>              Load the specified plugin\n"));
 #endif
+  if (DEFAULT_AR_DETERMINISTIC)
+    fprintf (s, _("\
+  -D                           Use zero for symbol map timestamp (default)\n\
+  -U                           Use an actual symbol map timestamp\n"));
+  else
+    fprintf (s, _("\
+  -D                           Use zero for symbol map timestamp\n\
+  -U                           Use actual symbol map timestamp (default)\n"));
   fprintf (s, _("\
   -t                           Update the archive's symbol map timestamp\n\
-  -D                           Use zero for the symbol map timestamp\n\
   -h --help                    Print this help message\n\
   -v --version                 Print version information\n"));
 
@@ -434,7 +454,7 @@ decode_options (int argc, char **argv)
       argv = new_argv;
     }
 
-  while ((c = getopt_long (argc, argv, "hdmpqrtxlcoVsSuvabiMNfPTD",
+  while ((c = getopt_long (argc, argv, "hdmpqrtxlcoVsSuvabiMNfPTDU",
 			   long_options, NULL)) != EOF)
     {
       switch (c)
@@ -531,6 +551,9 @@ decode_options (int argc, char **argv)
         case 'D':
           deterministic = TRUE;
           break;
+        case 'U':
+          deterministic = FALSE;
+          break;
 	case OPTION_PLUGIN:
 #if BFD_SUPPORTS_PLUGINS
 	  plugin_target = "plugin";
@@ -553,6 +576,15 @@ decode_options (int argc, char **argv)
   return &argv[optind];
 }
 
+/* If neither -D nor -U was not specified explicitly,
+   then use the configured default.  */
+static void
+default_deterministic (void)
+{
+  if (deterministic < 0)
+    deterministic = DEFAULT_AR_DETERMINISTIC;
+}
+
 static void
 ranlib_main (int argc, char **argv)
 {
@@ -560,13 +592,16 @@ ranlib_main (int argc, char **argv)
   bfd_boolean touch = FALSE;
   int c;
 
-  while ((c = getopt_long (argc, argv, "DhHvVt", long_options, NULL)) != EOF)
+  while ((c = getopt_long (argc, argv, "DhHUvVt", long_options, NULL)) != EOF)
     {
       switch (c)
         {
 	case 'D':
 	  deterministic = TRUE;
 	  break;
+        case 'U':
+          deterministic = FALSE;
+          break;
 	case 'h':
 	case 'H':
 	  show_help = 1;
@@ -589,6 +624,8 @@ ranlib_main (int argc, char **argv)
 
   if (show_version)
     print_version ("ranlib");
+
+  default_deterministic ();
 
   arg_index = optind;
 
@@ -699,8 +736,14 @@ main (int argc, char **argv)
       if (newer_only && operation != replace)
 	fatal (_("`u' is only meaningful with the `r' option."));
 
-      if (newer_only && deterministic)
-	fatal (_("`u' is not meaningful with the `D' option."));
+      if (newer_only && deterministic > 0)
+        fatal (_("`u' is not meaningful with the `D' option."));
+
+      if (newer_only && deterministic < 0 && DEFAULT_AR_DETERMINISTIC)
+        non_fatal (_("\
+`u' modifier ignored since `D' is the default (see `U')"));
+
+      default_deterministic ();
 
       if (postype != pos_default)
 	posname = argv[arg_index++];

@@ -418,12 +418,17 @@ using this modifier.
 
 @item D
 @cindex deterministic archives
+@kindex --enable-deterministic-archives
 Operate in @emph{deterministic} mode.  When adding files and the archive
 index use zero for UIDs, GIDs, timestamps, and use consistent file modes
 for all files.  When this option is used, if @command{ar} is used with
 identical options and identical input files, multiple runs will create
 identical output files regardless of the input files' owners, groups,
 file modes, or modification times.
+
+If @file{binutils} was configured with
+@option{--enable-deterministic-archives}, then this mode is on by default.
+It can be disabled with the @samp{U} modifier, below.
 
 @item f
 Truncate names in the archive.  @sc{gnu} @command{ar} will normally permit file
@@ -492,6 +497,16 @@ names, use this modifier.  The @samp{u} modifier is allowed only for the
 operation @samp{r} (replace).  In particular, the combination @samp{qu} is
 not allowed, since checking the timestamps would lose any speed
 advantage from the operation @samp{q}.
+
+@item U
+@cindex deterministic archives
+@kindex --enable-deterministic-archives
+Do @emph{not} operate in @emph{deterministic} mode.  This is the inverse
+of the @samp{D} modifier, above: added files and the archive index will
+get their actual UID, GID, timestamp, and file mode values.
+
+This is the default unless @file{binutils} was configured with
+@option{--enable-deterministic-archives}.
 
 @item v
 This modifier requests the @emph{verbose} version of an operation.  Many
@@ -2386,12 +2401,26 @@ Show the version number of @command{ranlib}.
 
 @item -D
 @cindex deterministic archives
+@kindex --enable-deterministic-archives
 Operate in @emph{deterministic} mode.  The symbol map archive member's
 header will show zero for the UID, GID, and timestamp.  When this
 option is used, multiple runs will produce identical output files.
 
+This is the default unless @file{binutils} was configured with
+@option{--enable-deterministic-archives}.
+
 @item -t
 Update the timestamp of the symbol map of an archive.
+
+@item -U
+@cindex deterministic archives
+@kindex --enable-deterministic-archives
+Do @emph{not} operate in @emph{deterministic} mode.  This is the
+inverse of the @samp{-D} option, above: the archive index will get
+actual UID, GID, timestamp, and file mode values.
+
+This is the default unless @file{binutils} was configured with
+@option{--enable-deterministic-archives}.
 @end table
 
 @c man end

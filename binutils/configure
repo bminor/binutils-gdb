@@ -771,6 +771,7 @@ enable_fast_install
 with_gnu_ld
 enable_libtool_lock
 enable_targets
+enable_deterministic_archives
 enable_werror
 enable_build_warnings
 enable_nls
@@ -1417,6 +1418,8 @@ Optional Features:
                           optimize for fast installation [default=yes]
   --disable-libtool-lock  avoid locking (might break parallel builds)
   --enable-targets        alternative target configurations
+  --enable-deterministic-archives
+                          ar and ranlib default to -D behavior
   --enable-werror         treat compile warnings as errors
   --enable-build-warnings enable build-time compiler warnings
   --disable-nls           do not use Native Language Support
@@ -11199,7 +11202,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11202 "configure"
+#line 11205 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11305,7 +11308,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11308 "configure"
+#line 11311 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11552,6 +11555,25 @@ if test "${enable_targets+set}" = set; then :
   *)        enable_targets=$enableval ;;
 esac
 fi
+
+# Check whether --enable-deterministic-archives was given.
+if test "${enable_deterministic_archives+set}" = set; then :
+  enableval=$enable_deterministic_archives;
+if test "${enableval}" = no; then
+  default_ar_deterministic=0
+else
+  default_ar_deterministic=1
+fi
+else
+  default_ar_deterministic=0
+fi
+
+
+
+cat >>confdefs.h <<_ACEOF
+#define DEFAULT_AR_DETERMINISTIC $default_ar_deterministic
+_ACEOF
+
 
 
 GCC_WARN_CFLAGS="-W -Wall -Wstrict-prototypes -Wmissing-prototypes"

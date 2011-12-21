@@ -8,6 +8,9 @@
 /* Define to 1 if using `alloca.c'. */
 #undef C_ALLOCA
 
+/* Should ar and ranlib use -D behavior by default? */
+#undef DEFAULT_AR_DETERMINISTIC
+
 /* Define to 1 if translation of program messages to the user's native
    language is requested. */
 #undef ENABLE_NLS
