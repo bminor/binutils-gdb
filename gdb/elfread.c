@@ -43,6 +43,7 @@
 #include "infcall.h"
 #include "gdbthread.h"
 #include "regcache.h"
+#include "bcache.h"
 
 extern void _initialize_elfread (void);
 
@@ -240,8 +241,8 @@ elf_symtab_read (struct objfile *objfile, int type,
      seen any section info for it yet.  */
   asymbol *filesym = 0;
   /* Name of filesym.  This is either a constant string or is saved on
-     the objfile's obstack.  */
-  char *filesymname = "";
+     the objfile's filename cache.  */
+  const char *filesymname = "";
   struct dbx_symfile_info *dbx = objfile->deprecated_sym_stab_info;
   int stripped = (bfd_get_symcount (objfile->obfd) == 0);
 
@@ -346,9 +347,8 @@ elf_symtab_read (struct objfile *objfile, int type,
 	      sectinfo = NULL;
 	    }
 	  filesym = sym;
-	  filesymname =
-	    obsavestring ((char *) filesym->name, strlen (filesym->name),
-			  &objfile->objfile_obstack);
+	  filesymname = bcache (filesym->name, strlen (filesym->name) + 1,
+				objfile->filename_cache);
 	}
       else if (sym->flags & BSF_SECTION_SYM)
 	continue;
