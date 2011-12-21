@@ -1,5 +1,13 @@
 2011-12-21  Tom Tromey  <tromey@redhat.com>
 
+	* hppa-hpux-tdep.c (hppa64_hpux_search_dummy_call_sequence): Use
+	ALL_OBJFILE_MSYMBOLS.
+	(hppa_hpux_find_dummy_bpaddr): Likewise.
+	* jit.c (jit_object_close_impl): Use
+	terminate_minimal_symbol_table.
+
+2011-12-21  Tom Tromey  <tromey@redhat.com>
+
 	* elfread.c (elf_symtab_read): Put the filename in the filename
 	bcache.
 
