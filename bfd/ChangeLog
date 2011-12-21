@@ -1,3 +1,7 @@
+2011-12-21  Ulrich Weigand  <ulrich.weigand@linaro.org>
+
+	* elf32-arm.c (elf32_arm_nabi_grok_psinfo): Fill in core_pid.
+
 2011-12-19  Iain Sandoe  <idsandoe@googlemail.com>
 
 	* mach-o-i386.c (bfd_mach_o_section_type_valid_for_tgt): Define NULL.
