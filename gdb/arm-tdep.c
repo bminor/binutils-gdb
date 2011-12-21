@@ -9061,6 +9061,12 @@ arm_return_value (struct gdbarch *gdbarch, struct type *func_type,
 	return RETURN_VALUE_STRUCT_CONVENTION;
     }
 
+  /* AAPCS returns complex types longer than a register in memory.  */
+  if (tdep->arm_abi != ARM_ABI_APCS
+      && TYPE_CODE (valtype) == TYPE_CODE_COMPLEX
+      && TYPE_LENGTH (valtype) > INT_REGISTER_SIZE)
+    return RETURN_VALUE_STRUCT_CONVENTION;
+
   if (writebuf)
     arm_store_return_value (valtype, regcache, writebuf);
 
