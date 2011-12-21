@@ -1,5 +1,10 @@
 2011-12-21  Joel Brobecker  <brobecker@adacore.com>
 
+	* linespec.c (locate_first_half): Add handling of Ada operators
+	when the current language is Ada.
+
+2011-12-21  Joel Brobecker  <brobecker@adacore.com>
+
 	* objfiles.c (insert_section_p): Do not detect overlay sections
 	if overlay debugging is off.
 

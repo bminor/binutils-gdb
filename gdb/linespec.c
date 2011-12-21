@@ -1331,6 +1331,24 @@ locate_first_half (char **argptr, int *is_quote_enclosed)
   char *p, *p1;
   int has_comma;
 
+  /* Check if the linespec starts with an Ada operator (such as "+",
+     or ">", for instance).  */
+  p = *argptr;
+  if (p[0] == '"'
+      && current_language->la_language == language_ada)
+    {
+      const struct ada_opname_map *op;
+
+      for (op = ada_opname_table; op->encoded != NULL; op++)
+        if (strncmp (op->decoded, p, strlen (op->decoded)) == 0)
+	  break;
+      if (op->encoded != NULL)
+	{
+	  *is_quote_enclosed = 0;
+	  return p + strlen (op->decoded);
+	}
+    }
+
   /* Maybe we were called with a line range FILENAME:LINENUM,FILENAME:LINENUM
      and we must isolate the first half.  Outer layers will call again later
      for the second half.
