@@ -1,5 +1,14 @@
 2011-12-21  Joel Brobecker  <brobecker@adacore.com>
 
+	* psymtab.c (expand_symtabs_matching_via_partial): Match
+	the partial symbols using their SYMBOL_SEARCH_NAME.
+	* symfile.h (struct quick_symbol_functions): Udate the
+	documentation of expand_symtabs_matching.
+	* dwarf2read.c (write_psymbols): Use SYMBOL_SEARCH_NAME instead
+	of SYMBOL_NATURAL_NAME in index entry.
+
+2011-12-21  Joel Brobecker  <brobecker@adacore.com>
+
 	* linespec.c (locate_first_half): Add handling of Ada operators
 	when the current language is Ada.
 

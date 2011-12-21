@@ -263,10 +263,9 @@ struct quick_symbol_functions
      
      If even KIND matches, then NAME_MATCHER is called for each symbol
      defined in the file.  The current language, the symbol name and
-     DATA are passed to NAME_MATCHER.  The symbol "natural" name should
-     be passed to NAME_MATCHER for all languages except Ada, where
-     the encoded name is passed instead (see la_symbol_name_compare in
-     struct language_defn for more details on this).
+     DATA are passed to NAME_MATCHER.  The symbol "search" name should
+     be passed to NAME_MATCHER (see la_symbol_name_compare in struct
+     language_defn for more details on this).
 
      If NAME_MATCHER returns zero, then this symbol is skipped.
 

@@ -16890,7 +16890,7 @@ write_psymbols (struct mapped_symtab *symtab,
       if (!*slot)
 	{
 	  *slot = lookup;
-	  add_index_entry (symtab, SYMBOL_NATURAL_NAME (*psymp), cu_index);
+	  add_index_entry (symtab, SYMBOL_SEARCH_NAME (*psymp), cu_index);
 	}
     }
 }

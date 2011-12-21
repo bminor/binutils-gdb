@@ -1305,7 +1305,7 @@ expand_symtabs_matching_via_partial
 		   || (kind == TYPES_DOMAIN
 		       && SYMBOL_CLASS (*psym) == LOC_TYPEDEF))
 		  && (*name_matcher) (current_language,
-				      SYMBOL_NATURAL_NAME (*psym), data))
+				      SYMBOL_SEARCH_NAME (*psym), data))
 		{
 		  PSYMTAB_TO_SYMTAB (ps);
 		  keep_going = 0;
