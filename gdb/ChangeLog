@@ -1,3 +1,8 @@
+2011-12-21  Ulrich Weigand  <ulrich.weigand@linaro.org>
+
+	PR tdep/12797
+	* arm-tdep.c (arm_return_value): Handle complex types.
+
 2011-12-19  Doug Evans  <dje@google.com>
 
 	* python/py-auto-load.c (info_auto_load_scripts): Pass address of
