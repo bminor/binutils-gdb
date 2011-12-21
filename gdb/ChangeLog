@@ -1,3 +1,10 @@
+2011-12-21  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (is_name_suffix): Add handling of "TKB" suffixes.
+	Update function documentation.
+	* dictionary.c (dict_hash): Ignore "TKB" suffixes in hash
+	computation.
+
 2011-12-20  Pedro Alves  <alves.ped@gmail.com>
 	    Jan Kratochvil  <jan.kratochvil@redhat.com>
 

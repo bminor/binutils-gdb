@@ -1,3 +1,7 @@
+2011-12-21  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/task_bp: New testcase.
+
 2011-12-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/reread.exp: If srcfile2 fails to build retry it with

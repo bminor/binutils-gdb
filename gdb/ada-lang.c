@@ -5154,6 +5154,7 @@ ada_lookup_symbol_nonlocal (const char *name,
 
    [.$][0-9]+       [nested subprogram suffix, on platforms such as GNU/Linux]
    ___[0-9]+        [nested subprogram suffix, on platforms such as HP/UX]
+   TKB              [subprogram suffix for task bodies]
    _E[0-9]+[bs]$    [protected object entry suffixes]
    (X[nb]*)?((\$|__)[0-9](_?[0-9]+)|___(JM|LJM|X([FDBUP].*|R[^T]?)))?$
 
@@ -5198,6 +5199,11 @@ is_name_suffix (const char *str)
       if (matching[0] == '\0')
         return 1;
     }
+
+  /* "TKB" suffixes are used for subprograms implementing task bodies.  */
+
+  if (strcmp (str, "TKB") == 0)
+    return 1;
 
 #if 0
   /* FIXME: brobecker/2005-09-23: Protected Object subprograms end
