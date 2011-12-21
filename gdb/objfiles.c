@@ -1117,7 +1117,7 @@ insert_section_p (const struct bfd *abfd,
 {
   const bfd_vma lma = bfd_section_lma (abfd, section);
 
-  if (lma != 0 && lma != bfd_section_vma (abfd, section)
+  if (overlay_debugging && lma != 0 && lma != bfd_section_vma (abfd, section)
       && (bfd_get_file_flags (abfd) & BFD_IN_MEMORY) == 0)
     /* This is an overlay section.  IN_MEMORY check is needed to avoid
        discarding sections from the "system supplied DSO" (aka vdso)

@@ -1,5 +1,10 @@
 2011-12-21  Joel Brobecker  <brobecker@adacore.com>
 
+	* objfiles.c (insert_section_p): Do not detect overlay sections
+	if overlay debugging is off.
+
+2011-12-21  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c (is_name_suffix): Add handling of "TKB" suffixes.
 	Update function documentation.
 	* dictionary.c (dict_hash): Ignore "TKB" suffixes in hash
