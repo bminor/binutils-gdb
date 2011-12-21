@@ -1,3 +1,7 @@
+2011-12-21  Tom Tromey  <tromey@redhat.com>
+
+	* symtab.h (struct minimal_symbol) <filename>: Now const.
+
 2011-12-21  Ulrich Weigand  <ulrich.weigand@linaro.org>
 
 	PR tdep/12797

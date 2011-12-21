@@ -347,7 +347,7 @@ struct minimal_symbol
   unsigned long size;
 
   /* Which source file is this symbol in?  Only relevant for mst_file_*.  */
-  char *filename;
+  const char *filename;
 
   /* Classification type for this minimal symbol.  */
 
