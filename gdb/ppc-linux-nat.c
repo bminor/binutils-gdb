@@ -2010,7 +2010,8 @@ create_watchpoint_request (struct ppc_hw_breakpoint *p, CORE_ADDR addr,
 			   int len, int rw, struct expression *cond,
 			   int insert)
 {
-  if (len == 1)
+  if (len == 1
+      || !(booke_debug_info.features & PPC_DEBUG_FEATURE_DATA_BP_RANGE))
     {
       int use_condition;
       CORE_ADDR data_value;
