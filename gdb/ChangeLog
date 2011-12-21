@@ -1,3 +1,11 @@
+2011-12-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* symfile.c (objfilep): New typedef and new DEF_VEC_P.
+	(reread_symbols): Remove variable reread_one, new variables
+	new_objfiles, all_cleanups and ix.  Use new_objfiles instead of
+	reread_one.  Push changed objfiles to new_objfiles, call
+	observer_notify_new_objfile for them later.
+
 2011-12-21  Joel Brobecker  <brobecker@adacore.com>
 
 	* psymtab.c (expand_symtabs_matching_via_partial): Match

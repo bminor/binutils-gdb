@@ -2371,15 +2371,22 @@ add_symbol_file_command (char *args, int from_tty)
 }
 
 
+typedef struct objfile *objfilep;
+
+DEF_VEC_P (objfilep);
+
 /* Re-read symbols if a symbol-file has changed.  */
 void
 reread_symbols (void)
 {
   struct objfile *objfile;
   long new_modtime;
-  int reread_one = 0;
   struct stat new_statbuf;
   int res;
+  VEC (objfilep) *new_objfiles = NULL;
+  struct cleanup *all_cleanups;
+
+  all_cleanups = make_cleanup (VEC_cleanup (objfilep), &new_objfiles);
 
   /* With the addition of shared libraries, this should be modified,
      the load time should be saved in the partial symbol tables, since
@@ -2594,21 +2601,33 @@ reread_symbols (void)
 	     and now, we *want* this to be out of date, so don't call stat
 	     again now.  */
 	  objfile->mtime = new_modtime;
-	  reread_one = 1;
 	  init_entry_point_info (objfile);
+
+	  VEC_safe_push (objfilep, new_objfiles, objfile);
 	}
     }
 
-  if (reread_one)
+  if (new_objfiles)
     {
+      int ix;
+
       /* Notify objfiles that we've modified objfile sections.  */
       objfiles_changed ();
 
       clear_symtab_users (0);
+
+      /* clear_objfile_data for each objfile was called before freeing it and
+	 observer_notify_new_objfile (NULL) has been called by
+	 clear_symtab_users above.  Notify the new files now.  */
+      for (ix = 0; VEC_iterate (objfilep, new_objfiles, ix, objfile); ix++)
+	observer_notify_new_objfile (objfile);
+
       /* At least one objfile has changed, so we can consider that
          the executable we're debugging has changed too.  */
       observer_notify_executable_changed ();
     }
+
+  do_cleanups (all_cleanups);
 }
 
 
