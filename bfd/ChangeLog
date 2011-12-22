@@ -1,3 +1,10 @@
+2011-12-22  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+
+	* elf32-s390.c (elf_s390_relocate_section): Add check for debugging
+	section in LD to LE linker relaxation for R_390_TLS_LDO32.
+	* elf64-s390.c (elf_s390_relocate_section): Likewise for
+	R_390_TLS_LDO64.
+
 2011-12-21  Ulrich Weigand  <ulrich.weigand@linaro.org>
 
 	* elf32-arm.c (elf32_arm_nabi_grok_psinfo): Fill in core_pid.
