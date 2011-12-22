@@ -150,7 +150,7 @@ valpy_new (PyTypeObject *subtype, PyObject *args, PyObject *keywords)
     }
 
   value_obj->value = value;
-  value_incref (value);
+  release_value_or_incref (value);
   value_obj->address = NULL;
   value_obj->type = NULL;
   value_obj->dynamic_type = NULL;
@@ -1123,7 +1123,7 @@ value_to_value_object (struct value *val)
   if (val_obj != NULL)
     {
       val_obj->value = val;
-      value_incref (val);
+      release_value_or_incref (val);
       val_obj->address = NULL;
       val_obj->type = NULL;
       val_obj->dynamic_type = NULL;

@@ -208,6 +208,9 @@ struct value
      used instead of read_memory to enable extra caching.  */
   unsigned int stack : 1;
 
+  /* If the value has been released.  */
+  unsigned int released : 1;
+
   /* Location of value (if lval).  */
   union
   {
@@ -1210,6 +1213,7 @@ value_free_to_mark (struct value *mark)
   for (val = all_values; val && val != mark; val = next)
     {
       next = val->next;
+      val->released = 1;
       value_free (val);
     }
   all_values = val;
@@ -1228,6 +1232,7 @@ free_all_values (void)
   for (val = all_values; val; val = next)
     {
       next = val->next;
+      val->released = 1;
       value_free (val);
     }
 
@@ -1260,6 +1265,7 @@ release_value (struct value *val)
     {
       all_values = val->next;
       val->next = NULL;
+      val->released = 1;
       return;
     }
 
@@ -1269,9 +1275,24 @@ release_value (struct value *val)
 	{
 	  v->next = val->next;
 	  val->next = NULL;
+	  val->released = 1;
 	  break;
 	}
     }
+}
+
+/* If the value is not already released, release it.
+   If the value is already released, increment its reference count.
+   That is, this function ensures that the value is released from the
+   value chain and that the caller owns a reference to it.  */
+
+void
+release_value_or_incref (struct value *val)
+{
+  if (val->released)
+    value_incref (val);
+  else
+    release_value (val);
 }
 
 /* Release all values up to mark  */
@@ -1282,12 +1303,15 @@ value_release_to_mark (struct value *mark)
   struct value *next;
 
   for (val = next = all_values; next; next = next->next)
-    if (next->next == mark)
-      {
-	all_values = next->next;
-	next->next = NULL;
-	return val;
-      }
+    {
+      if (next->next == mark)
+	{
+	  all_values = next->next;
+	  next->next = NULL;
+	  return val;
+	}
+      next->released = 1;
+    }
   all_values = 0;
   return val;
 }

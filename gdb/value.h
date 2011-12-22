@@ -772,6 +772,8 @@ extern void free_value_chain (struct value *v);
 
 extern void release_value (struct value *val);
 
+extern void release_value_or_incref (struct value *val);
+
 extern int record_latest_value (struct value *val);
 
 extern void modify_field (struct type *type, gdb_byte *addr,

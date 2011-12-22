@@ -1,5 +1,17 @@
 2011-12-22  Tom Tromey  <tromey@redhat.com>
 
+	PR python/12533:
+	* value.h (release_value_or_incref): Declare.
+	* value.c (struct value) <released>: New field.
+	(free_all_values, release_value, value_release_to_mark): Update
+	'released'.
+	(release_value_or_incref): New function.
+	* python/py-value.c (valpy_new): Use release_value_or_incref.
+	(value_to_value_object): Likewise.
+	* varobj.c (install_new_value): Move value_incref earlier.
+
+2011-12-22  Tom Tromey  <tromey@redhat.com>
+
 	* value.c (struct value) <modifiable, lazy, optimized_out,
 	initialized, stack>: Now bitfields.  Move to top.
 	<reference_count>: Move earlier.

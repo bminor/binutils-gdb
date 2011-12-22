@@ -1604,6 +1604,10 @@ install_new_value (struct varobj *var, struct value *value, int initial)
 	}
     }
 
+  /* Get a reference now, before possibly passing it to any Python
+     code that might release it.  */
+  if (value != NULL)
+    value_incref (value);
 
   /* Below, we'll be comparing string rendering of old and new
      values.  Don't get string rendering if the value is
@@ -1671,8 +1675,6 @@ install_new_value (struct varobj *var, struct value *value, int initial)
   if (var->value != NULL && var->value != value)
     value_free (var->value);
   var->value = value;
-  if (value != NULL)
-    value_incref (value);
   if (value && value_lazy (value) && intentionally_not_fetched)
     var->not_fetched = 1;
   else
