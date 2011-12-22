@@ -1,3 +1,9 @@
+2011-12-22  Tom Tromey  <tromey@redhat.com>
+
+	* value.c (struct value) <modifiable, lazy, optimized_out,
+	initialized, stack>: Now bitfields.  Move to top.
+	<reference_count>: Move earlier.
+
 2011-12-21  Tom Tromey  <tromey@redhat.com>
 
 	* minsyms.h: Rearrange.  Document header and all functions.
