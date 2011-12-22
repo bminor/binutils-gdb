@@ -2029,9 +2029,6 @@ cp_merge_demangle_parse_infos (struct demangle_parse_info *dest,
      cp_demangled_parse_info_free is called.  */
   src->info = NULL;
 
-  /* Assert if the SRC obstack is not empty.  */
-  gdb_assert (obstack_empty_p (&src->obstack));
-
   /* Free SRC.  */
   cp_demangled_name_parse_free (src);
 }
