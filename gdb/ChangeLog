@@ -1,5 +1,8 @@
 2011-12-22  Andreas Schwab  <schwab@linux-m68k.org>
 
+	* ppc-linux-nat.c (create_watchpoint_request): Only use ranged
+	watchpoints when supported.
+
 	* cp-name-parser.y (cp_merge_demangle_parse_infos): Don't use
 	obstack_empty_p.
 
