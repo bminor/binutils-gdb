@@ -1,5 +1,10 @@
 2011-12-21  Tom Tromey  <tromey@redhat.com>
 
+	* minsyms.h: Rearrange.  Document header and all functions.
+	* minsyms.c: Move some comments to minsyms.h.
+
+2011-12-21  Tom Tromey  <tromey@redhat.com>
+
 	* symtab.h: Include minsyms.h.
 	(prim_record_minimal_symbol, prim_record_minimal_symbol_full)
 	(prim_record_minimal_symbol_and_info, msymbol_hash_iw)
