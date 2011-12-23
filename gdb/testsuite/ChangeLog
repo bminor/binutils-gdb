@@ -5,6 +5,9 @@
 	into XFAIL "new without size_t".  Permit size_t for the KFAIL case.
 	Add comment to add a PASS case in the future.
 
+	Fix compatibility with gcc-4.7.
+	* gdb.python/py-frame-inline.c (f): Use inline for __always_inline__.
+
 2011-12-21  Ulrich Weigand  <ulrich.weigand@linaro.org>
 
 	PR tdep/12797
