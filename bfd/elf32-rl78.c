@@ -2010,14 +2010,12 @@ rl78_elf_relax_section
   Elf_Internal_Rela * srel;
   Elf_Internal_Rela * irelend;
   Elf_Internal_Rela * next_alignment;
-  Elf_Internal_Rela * prev_alignment;
   bfd_byte *          contents = NULL;
   bfd_byte *          free_contents = NULL;
   Elf_Internal_Sym *  intsyms = NULL;
   Elf_Internal_Sym *  free_intsyms = NULL;
   Elf_External_Sym_Shndx * shndx_buf = NULL;
   bfd_vma pc;
-  bfd_vma sec_start;
   bfd_vma symval ATTRIBUTE_UNUSED = 0;
   int pcrel ATTRIBUTE_UNUSED = 0;
   int code ATTRIBUTE_UNUSED = 0;
@@ -2042,8 +2040,6 @@ rl78_elf_relax_section
 
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
   shndx_hdr = &elf_tdata (abfd)->symtab_shndx_hdr;
-
-  sec_start = sec->output_section->vma + sec->output_offset;
 
   /* Get the section contents.  */
   if (elf_section_data (sec)->this_hdr.contents != NULL)
@@ -2103,9 +2099,6 @@ rl78_elf_relax_section
   /* This will either be NULL or a pointer to the next alignment
      relocation.  */
   next_alignment = internal_relocs;
-  /* This will be the previous alignment, although at first it points
-     to the first real relocation.  */
-  prev_alignment = internal_relocs;
 
   /* We calculate worst case shrinkage caused by alignment directives.
      No fool-proof, but better than either ignoring the problem or
@@ -2144,7 +2137,6 @@ rl78_elf_relax_section
 	     displacements across an alignment boundary, just in case.
 	     Note that this only affects relocations to the same
 	     section.  */
-	  prev_alignment = next_alignment;
 	  next_alignment += 2;
 	  while (next_alignment < irelend
 		 && (ELF32_R_TYPE (next_alignment->r_info) != R_RL78_RH_RELAX
