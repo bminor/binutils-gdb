@@ -277,6 +277,9 @@ vms_traverse_index (bfd *abfd, unsigned int vbn, struct carsym_mem *cs)
       if (idx_vbn == 0)
         return FALSE;
 
+      /* Point to the next index entry.  */
+      p = keyname + keylen;
+
       if (idx_off == RFADEF__C_INDEX)
         {
           /* Indirect entry.  Recurse.  */
@@ -368,9 +371,6 @@ vms_traverse_index (bfd *abfd, unsigned int vbn, struct carsym_mem *cs)
                 return FALSE;
             }
         }
-
-      /* Point to the next index entry.  */
-      p = keyname + keylen;
     }
 
   return TRUE;

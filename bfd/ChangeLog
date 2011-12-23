@@ -1,3 +1,7 @@
+2011-12-23  Tristan Gingold  <gingold@adacore.com>
+
+	* vms-lib.c (vms_traverse_index): Move pointer update code.
+
 2011-12-22  DJ Delorie  <dj@redhat.com>
 
 	* elf32-rl78.c (rl78_elf_howto_table): Add R_RL78_RH_RELAX.
@@ -28,10 +32,10 @@
 2011-12-19  Iain Sandoe  <idsandoe@googlemail.com>
 
 	* mach-o-i386.c (bfd_mach_o_section_type_valid_for_tgt): Define NULL.
-	* mach-o-target.c (bfd_mach_o_backend_data): Initialize 
+	* mach-o-target.c (bfd_mach_o_backend_data): Initialize
 	bfd_mach_o_section_type_valid_for_tgt
 	* mach-o-x86-64.c (bfd_mach_o_section_type_valid_for_x86_64): New.
-	(bfd_mach_o_section_type_valid_for_tgt): Set to 
+	(bfd_mach_o_section_type_valid_for_tgt): Set to
 	bfd_mach_o_section_type_valid_for_x86_64.
 	* mach-o.c (bfd_mach_o_section_type_name): Reorder and eliminate dup.
 	(bfd_mach_o_section_attribute_name): Reorder.
