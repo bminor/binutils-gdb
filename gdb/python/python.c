@@ -1243,6 +1243,7 @@ message == an error message without a stack will be printed."),
   gdbpy_initialize_pspace ();
   gdbpy_initialize_objfile ();
   gdbpy_initialize_breakpoints ();
+  gdbpy_initialize_finishbreakpoints ();
   gdbpy_initialize_lazy_string ();
   gdbpy_initialize_thread ();
   gdbpy_initialize_inferior ();

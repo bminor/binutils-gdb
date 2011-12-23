@@ -21497,6 +21497,8 @@ situation, a Python @code{KeyboardInterrupt} exception is thrown.
 * Symbol Tables In Python::     Python representation of symbol tables.
 * Lazy Strings In Python::      Python representation of lazy strings.
 * Breakpoints In Python::       Manipulating breakpoints using Python.
+* Finish Breakpoints in Python:: Setting Breakpoints on function return
+                                using Python.
 @end menu
 
 @node Basic Python
@@ -24329,6 +24331,57 @@ This attribute holds the commands attached to the breakpoint.  If
 there are commands, this attribute's value is a string holding all the
 commands, separated by newlines.  If there are no commands, this
 attribute is @code{None}.  This attribute is not writable.
+@end defvar
+
+@node Finish Breakpoints in Python
+@subsubsection Finish Breakpoints
+
+@cindex python finish breakpoints
+@tindex gdb.FinishBreakpoint
+
+A finish breakpoint is a temporary breakpoint set at the return address of
+a frame, based on the @code{finish} command.  @code{gdb.FinishBreakpoint}
+extends @code{gdb.Breakpoint}.  The underlying breakpoint will be disabled 
+and deleted when the execution will run out of the breakpoint scope (i.e.@: 
+@code{Breakpoint.stop} or @code{FinishBreakpoint.out_of_scope} triggered).
+Finish breakpoints are thread specific and must be create with the right 
+thread selected.  
+ 
+@defun FinishBreakpoint.__init__ (@r{[}frame@r{]} @r{[}, internal@r{]})
+Create a finish breakpoint at the return address of the @code{gdb.Frame}
+object @var{frame}.  If @var{frame} is not provided, this defaults to the
+newest frame.  The optional @var{internal} argument allows the breakpoint to
+become invisible to the user.  @xref{Breakpoints In Python}, for further 
+details about this argument.
+@end defun
+
+@defun FinishBreakpoint.out_of_scope (self)
+In some circumstances (e.g.@: @code{longjmp}, C@t{++} exceptions, @value{GDBN} 
+@code{return} command, @dots{}), a function may not properly terminate, and
+thus never hit the finish breakpoint.  When @value{GDBN} notices such a
+situation, the @code{out_of_scope} callback will be triggered.
+
+You may want to sub-class @code{gdb.FinishBreakpoint} and override this
+method:
+
+@smallexample
+class MyFinishBreakpoint (gdb.FinishBreakpoint)
+    def stop (self):
+        print "normal finish"
+        return True
+    
+    def out_of_scope ():
+        print "abnormal finish"
+@end smallexample 
+@end defun
+
+@defvar FinishBreakpoint.return_value
+When @value{GDBN} is stopped at a finish breakpoint and the frame 
+used to build the @code{gdb.FinishBreakpoint} object had debug symbols, this
+attribute will contain a @code{gdb.Value} object corresponding to the return
+value of the function.  The value will be @code{None} if the function return 
+type is @code{void} or if the return value was not computable.  This attribute
+is not writable.
 @end defvar
 
 @node Lazy Strings In Python

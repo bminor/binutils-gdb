@@ -1,3 +1,9 @@
+2011-12-23  Kevin Pouget  <kevin.pouget@st.com>
+
+	Introduce gdb.FinishBreakpoint in Python
+	* gdb.texinfo (Finish Breakpoints in Python): New subsection.
+	(Python API): Add menu entry for Finish Breakpoints.
+
 2011-12-16  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* gdb.texinfo (Python Commands): Remove "maint set/show print

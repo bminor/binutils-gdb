@@ -120,9 +120,50 @@ extern PyTypeObject symbol_object_type;
 extern PyTypeObject event_object_type;
 extern PyTypeObject events_object_type;
 extern PyTypeObject stop_event_object_type;
+extern PyTypeObject breakpoint_object_type;
 
-/* Defined in py-breakpoint.c */
-typedef struct breakpoint_object breakpoint_object;
+typedef struct breakpoint_object
+{
+  PyObject_HEAD
+
+  /* The breakpoint number according to gdb.  */
+  int number;
+
+  /* The gdb breakpoint object, or NULL if the breakpoint has been
+     deleted.  */
+  struct breakpoint *bp;
+
+  /* 1 is this is a FinishBreakpoint object, 0 otherwise.  */
+  int is_finish_bp;
+} breakpoint_object;
+
+/* Require that BREAKPOINT be a valid breakpoint ID; throw a Python
+   exception if it is invalid.  */
+#define BPPY_REQUIRE_VALID(Breakpoint)                                  \
+    do {                                                                \
+      if ((Breakpoint)->bp == NULL)                                     \
+        return PyErr_Format (PyExc_RuntimeError,                        \
+                             _("Breakpoint %d is invalid."),            \
+                             (Breakpoint)->number);                     \
+    } while (0)
+
+/* Require that BREAKPOINT be a valid breakpoint ID; throw a Python
+   exception if it is invalid.  This macro is for use in setter functions.  */
+#define BPPY_SET_REQUIRE_VALID(Breakpoint)                              \
+    do {                                                                \
+      if ((Breakpoint)->bp == NULL)                                     \
+        {                                                               \
+          PyErr_Format (PyExc_RuntimeError, _("Breakpoint %d is invalid."), \
+                        (Breakpoint)->number);                          \
+          return -1;                                                    \
+        }                                                               \
+    } while (0)
+
+
+/* Variables used to pass information between the Breakpoint
+   constructor and the breakpoint-created hook function.  */
+extern breakpoint_object *bppy_pending_object;
+
 
 typedef struct
 {
@@ -188,6 +229,7 @@ struct value *convert_value_from_python (PyObject *obj);
 struct type *type_object_to_type (PyObject *obj);
 struct symtab *symtab_object_to_symtab (PyObject *obj);
 struct symtab_and_line *sal_object_to_symtab_and_line (PyObject *obj);
+struct frame_info *frame_object_to_frame_info (PyObject *frame_obj);
 
 void gdbpy_initialize_auto_load (void);
 void gdbpy_initialize_values (void);
@@ -202,6 +244,7 @@ void gdbpy_initialize_functions (void);
 void gdbpy_initialize_pspace (void);
 void gdbpy_initialize_objfile (void);
 void gdbpy_initialize_breakpoints (void);
+void gdbpy_initialize_finishbreakpoints (void);
 void gdbpy_initialize_lazy_string (void);
 void gdbpy_initialize_parameters (void);
 void gdbpy_initialize_thread (void);
@@ -274,6 +317,9 @@ PyObject *apply_varobj_pretty_printer (PyObject *print_obj,
 PyObject *gdbpy_get_varobj_pretty_printer (struct value *value);
 char *gdbpy_get_display_hint (PyObject *printer);
 PyObject *gdbpy_default_visualizer (PyObject *self, PyObject *args);
+
+void bpfinishpy_pre_stop_hook (struct breakpoint_object *bp_obj);
+void bpfinishpy_post_stop_hook (struct breakpoint_object *bp_obj);
 
 extern PyObject *gdbpy_doc_cst;
 extern PyObject *gdbpy_children_cst;

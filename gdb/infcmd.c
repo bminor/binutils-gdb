@@ -1414,16 +1414,26 @@ advance_command (char *arg, int from_tty)
   until_break_command (arg, from_tty, 1);
 }
 
-/* Print the result of a function at the end of a 'finish' command.  */
+/* Return the value of the result of a function at the end of a 'finish'
+   command/BP.  */
 
-static void
-print_return_value (struct type *func_type, struct type *value_type)
+struct value *
+get_return_value (struct type *func_type, struct type *value_type)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (stop_registers);
-  struct cleanup *old_chain;
-  struct ui_stream *stb;
+  struct regcache *stop_regs = stop_registers;
+  struct gdbarch *gdbarch;
   struct value *value;
   struct ui_out *uiout = current_uiout;
+  struct cleanup *cleanup = make_cleanup (null_cleanup, NULL);
+
+  /* If stop_registers were not saved, use the current registers.  */
+  if (!stop_regs)
+    {
+      stop_regs = regcache_dup (get_current_regcache ());
+      cleanup = make_cleanup_regcache_xfree (stop_regs);
+    }
+
+  gdbarch = get_regcache_arch (stop_regs);
 
   CHECK_TYPEDEF (value_type);
   gdb_assert (TYPE_CODE (value_type) != TYPE_CODE_VOID);
@@ -1442,7 +1452,7 @@ print_return_value (struct type *func_type, struct type *value_type)
     case RETURN_VALUE_ABI_RETURNS_ADDRESS:
     case RETURN_VALUE_ABI_PRESERVES_ADDRESS:
       value = allocate_value (value_type);
-      gdbarch_return_value (gdbarch, func_type, value_type, stop_registers,
+      gdbarch_return_value (gdbarch, func_type, value_type, stop_regs,
 			    value_contents_raw (value), NULL);
       break;
     case RETURN_VALUE_STRUCT_CONVENTION:
@@ -1451,6 +1461,21 @@ print_return_value (struct type *func_type, struct type *value_type)
     default:
       internal_error (__FILE__, __LINE__, _("bad switch"));
     }
+
+  do_cleanups (cleanup);
+
+  return value;
+}
+
+/* Print the result of a function at the end of a 'finish' command.  */
+
+static void
+print_return_value (struct type *func_type, struct type *value_type)
+{
+  struct value *value = get_return_value (func_type, value_type);
+  struct cleanup *old_chain;
+  struct ui_stream *stb;
+  struct ui_out *uiout = current_uiout;
 
   if (value)
     {

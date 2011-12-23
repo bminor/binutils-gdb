@@ -287,6 +287,7 @@ SUBDIR_PYTHON_OBS = \
 	py-evtregistry.o \
 	py-evts.o \
 	py-exitedevent.o \
+	py-finishbreakpoint.o \
 	py-frame.o \
 	py-function.o \
 	py-inferior.o \
@@ -318,6 +319,7 @@ SUBDIR_PYTHON_SRCS = \
 	python/py-evtregistry.c \
 	python/py-evts.c \
 	python/py-exitedevent.c \
+	python/py-finishbreakpoint.c \
 	python/py-frame.c \
 	python/py-function.c \
 	python/py-inferior.c \
@@ -2107,6 +2109,10 @@ py-evts.o: $(srcdir)/python/py-evts.c
 
 py-exitedevent.o: $(srcdir)/python/py-exitedevent.c
 	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/py-exitedevent.c
+	$(POSTCOMPILE)
+
+py-finishbreakpoint.o: $(srcdir)/python/py-finishbreakpoint.c
+	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/py-finishbreakpoint.c
 	$(POSTCOMPILE)
 
 py-frame.o: $(srcdir)/python/py-frame.c

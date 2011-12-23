@@ -31,51 +31,15 @@
 #include "arch-utils.h"
 #include "language.h"
 
-static PyTypeObject breakpoint_object_type;
-
 /* Number of live breakpoints.  */
 static int bppy_live;
 
 /* Variables used to pass information between the Breakpoint
    constructor and the breakpoint-created hook function.  */
-static breakpoint_object *bppy_pending_object;
+breakpoint_object *bppy_pending_object;
 
 /* Function that is called when a Python condition is evaluated.  */
 static char * const stop_func = "stop";
-
-struct breakpoint_object
-{
-  PyObject_HEAD
-
-  /* The breakpoint number according to gdb.  */
-  int number;
-
-  /* The gdb breakpoint object, or NULL if the breakpoint has been
-     deleted.  */
-  struct breakpoint *bp;
-};
-
-/* Require that BREAKPOINT be a valid breakpoint ID; throw a Python
-   exception if it is invalid.  */
-#define BPPY_REQUIRE_VALID(Breakpoint)					\
-    do {								\
-      if ((Breakpoint)->bp == NULL)					\
-	return PyErr_Format (PyExc_RuntimeError,                        \
-			     _("Breakpoint %d is invalid."),		\
-			     (Breakpoint)->number);			\
-    } while (0)
-
-/* Require that BREAKPOINT be a valid breakpoint ID; throw a Python
-   exception if it is invalid.  This macro is for use in setter functions.  */
-#define BPPY_SET_REQUIRE_VALID(Breakpoint)				\
-    do {								\
-      if ((Breakpoint)->bp == NULL)					\
-        {								\
-	  PyErr_Format (PyExc_RuntimeError, _("Breakpoint %d is invalid."), \
-			(Breakpoint)->number);				\
-	  return -1;							\
-	}								\
-    } while (0)
 
 /* This is used to initialize various gdb.bp_* constants.  */
 struct pybp_code
@@ -762,6 +726,9 @@ gdbpy_should_stop (struct breakpoint_object *bp_obj)
   struct gdbarch *garch = b->gdbarch ? b->gdbarch : get_current_arch ();
   struct cleanup *cleanup = ensure_python_env (garch, current_language);
 
+  if (bp_obj->is_finish_bp)
+    bpfinishpy_pre_stop_hook (bp_obj);
+
   if (PyObject_HasAttrString (py_bp, stop_func))
     {
       PyObject *result = PyObject_CallMethod (py_bp, stop_func, NULL);
@@ -783,6 +750,10 @@ gdbpy_should_stop (struct breakpoint_object *bp_obj)
       else
 	gdbpy_print_stack ();
     }
+
+  if (bp_obj->is_finish_bp)
+    bpfinishpy_post_stop_hook (bp_obj);
+
   do_cleanups (cleanup);
 
   return stop;
@@ -845,6 +816,7 @@ gdbpy_breakpoint_created (struct breakpoint *bp)
       newbp->number = bp->number;
       newbp->bp = bp;
       newbp->bp->py_bp_object = newbp;
+      newbp->is_finish_bp = 0;
       Py_INCREF (newbp);
       ++bppy_live;
     }
@@ -1006,7 +978,7 @@ static PyMethodDef breakpoint_object_methods[] =
   { NULL } /* Sentinel.  */
 };
 
-static PyTypeObject breakpoint_object_type =
+PyTypeObject breakpoint_object_type =
 {
   PyObject_HEAD_INIT (NULL)
   0,				  /*ob_size*/

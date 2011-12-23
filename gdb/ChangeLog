@@ -1,3 +1,53 @@
+2011-12-23  Kevin Pouget  <kevin.pouget@st.com>
+
+	Introduce gdb.FinishBreakpoint in Python
+	* Makefile.in (SUBDIR_PYTHON_OBS): Add py-finishbreakpoint.o.
+	(SUBDIR_PYTHON_SRCS): Add python/py-finishbreakpoint.c.
+	Add build rule for this file.
+	* infcmd.c (print_return_value): Split to create get_return_value.
+	(get_return_value): New function based on print_return_value. Handle
+	case where stop_registers are not set.
+	* inferior.h (get_return_value): New prototype.
+	* python/py-breakpoint.c (bppy_pending_object): Make non-static.
+	(gdbpy_breakpoint_created): Set is_py_finish_bp is necessary.
+	(struct breakpoint_object): Move to python-internal.h
+	(BPPY_REQUIRE_VALID): Likewise.
+	(BPPY_SET_REQUIRE_VALID): Likewise.
+	(gdbpy_breakpoint_created): Initialize is_finish_bp.
+	(gdbpy_should_stop): Add  pre/post hooks before/after calling stop
+	method.
+	* python/python-internal.h (breakpoint_object_type): Add as extern.
+	(bppy_pending_object): Likewise.
+	(typedef struct breakpoint_object) Removed.
+	(struct breakpoint_object): Moved from py-breakpoint.c.
+	Add field is_finish_bp.
+	(BPPY_REQUIRE_VALID): Moved from py-breakpoint.c.
+	(BPPY_SET_REQUIRE_VALID): Likewise.
+	(frame_object_to_frame_info): New prototype.
+	(gdbpy_initialize_finishbreakpoints): New prototype.
+	(bpfinishpy_is_finish_bp): Likewise.
+	(bpfinishpy_pre_stop_hook): Likewise.
+	(bpfinishpy_post_stop_hook): Likewise.
+	* python/py-finishbreakpoint.c: New file.
+	* python/py-frame.c(frame_object_to_frame_info): Make non-static and
+	accept PyObject instead of frame_object.
+	(frapy_is_valid): Don't cast to frame_object.
+	(frapy_name): Likewise.
+	(frapy_type): Likewise.
+	(frapy_unwind_stop_reason): Likewise.
+	(frapy_pc): Likewise.
+	(frapy_block): Likewise.
+	(frapy_function): Likewise.
+	(frapy_older): Likewise.
+	(frapy_newer): Likewise.
+	(frapy_find_sal): Likewise.
+	(frapy_read_var): Likewise.
+	(frapy_select): Likewise.
+	* python/python.c (gdbpy_is_stopped_at_finish_bp): New noop function.
+	(_initialize_python): Add gdbpy_initialize_finishbreakpoints.
+	* python/python.h: Include breakpoint.h
+	(gdbpy_is_stopped_at_finish_bp): New prototype.
+
 2011-12-22  Andreas Schwab  <schwab@linux-m68k.org>
 
 	* ppc-linux-nat.c (create_watchpoint_request): Only use ranged
