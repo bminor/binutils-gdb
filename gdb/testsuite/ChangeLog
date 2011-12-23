@@ -1,3 +1,9 @@
+2011-12-23  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.cp/templates.exp (test_template_typedef): Import gdb_prompt.
+	(print destructor of template typedef): Extend it for gcc/51668 XFAIL.
+	(verify GCC PR debug/51668): New test.
+
 2011-12-23  Kevin Pouget  <kevin.pouget@st.com>
 
 	Introduce gdb.FinishBreakpoint in Python.

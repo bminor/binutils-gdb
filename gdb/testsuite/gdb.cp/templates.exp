@@ -202,12 +202,32 @@ proc test_template_calls {} {
 }
 
 proc test_template_typedef {} {
+    global gdb_prompt
 
     gdb_test "print intBazOne::baz" ".*baz\\(int, int\\)>" \
 	"print method of template typedef"
 
-    gdb_test "print intBazOne::~Baz" ".*~Baz(\\(\\))?>" \
-	"print destructor of template typedef"
+    set test "print destructor of template typedef"
+    gdb_test_multiple "print intBazOne::~Baz" $test {
+	-re "~Baz(\\(\\))?>\r\n$gdb_prompt $" {
+	    pass $test
+	}
+	-re "There is no field named ~Baz\r\n$gdb_prompt $" {
+	    set test2 "verify GCC PR debug/51668"
+	    gdb_test_multiple "whatis intBazOne" $test2 {
+		-re "type = Baz<int, \\(char\\)'\\\\001'>\r\n$gdb_prompt $" {
+		    setup_xfail gcc/51668 "*-*-*"
+		    xfail $test
+		    pass $test2
+		}
+		-re "\r\n$gdb_prompt $" {
+		    # Some unexpected response.
+		    fail $test
+		    fail $test2
+		}
+	    }
+	}
+    }
 }
 
 proc test_template_args {} {
