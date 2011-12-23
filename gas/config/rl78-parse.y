@@ -89,6 +89,7 @@ static int    rl78_in_brackets = 0;
 static int    rl78_last_token = 0;
 static char * rl78_init_start;
 static char * rl78_last_exp_start = 0;
+static int    rl78_bit_insn = 0;
 
 #define YYDEBUG 1
 #define YYERROR_VERBOSE 1
@@ -218,7 +219,7 @@ statement :
 	  { B1 (0x0b|$1); O1 ($4); }
 
 	| addsub A ',' opt_es '!' EXPR
-	  { B1 (0x0f|$1); O2 ($6); }
+	  { B1 (0x0f|$1); O2 ($6); rl78_linkrelax_addr16 (); }
 
 	| addsub A ',' opt_es '[' HL ']'
 	  { B1 (0x0d|$1); }
@@ -238,7 +239,7 @@ statement :
 	  { if ($1 != 0x40)
 	      { rl78_error ("Only CMP takes these operands"); }
 	    else
-	      { B1 (0x00|$1); O2 ($4); O1 ($7); }
+	      { B1 (0x00|$1); O2 ($4); O1 ($7); rl78_linkrelax_addr16 (); }
 	  }
 
 /* ---------------------------------------------------------------------- */
@@ -253,7 +254,7 @@ statement :
 	  { B1 (0x06|$1); O1 ($4); }
 
 	| addsubw AX ',' opt_es '!' EXPR
-	  { B1 (0x02|$1); O2 ($6); }
+	  { B1 (0x02|$1); O2 ($6); rl78_linkrelax_addr16 (); }
 
 	| addsubw AX ',' opt_es '[' HL '+' EXPR ']'
 	  { B2 (0x61, 0x09|$1); O1 ($8); }
@@ -336,13 +337,13 @@ statement :
 	  { B1 (0xef); PC1 ($3); }
 
 	| BR '$' '!' EXPR
-	  { B1 (0xee); PC2 ($4); }
+	  { B1 (0xee); PC2 ($4); rl78_linkrelax_branch (); }
 
 	| BR '!' EXPR
-	  { B1 (0xed); O2 ($3); }
+	  { B1 (0xed); O2 ($3); rl78_linkrelax_branch (); }
 
 	| BR '!' '!' EXPR
-	  { B1 (0xec); O3 ($4); }
+	  { B1 (0xec); O3 ($4); rl78_linkrelax_branch (); }
 
 /* ---------------------------------------------------------------------- */
 
@@ -364,7 +365,7 @@ statement :
 	  { B1 (0xfd); O2 ($3); }
 
 	| CALL '!' '!' EXPR
-	  { B1 (0xfc); O3 ($4); }
+	  { B1 (0xfc); O3 ($4); rl78_linkrelax_branch (); }
 
 	| CALLT '[' EXPR ']'
 	  { if ($3.X_op != O_constant)
@@ -406,7 +407,7 @@ statement :
 	  { B2 (0x71, 0x8a|$1);  FE ($4, 9, 3); }
 
 	| setclr1 opt_es '!' EXPR '.' EXPR
-	  { B2 (0x71, 0x00+$1*0x08); FE ($6, 9, 3); O2 ($4); }
+	  { B2 (0x71, 0x00+$1*0x08); FE ($6, 9, 3); O2 ($4); rl78_linkrelax_addr16 (); }
 
 	| setclr1 opt_es '[' HL ']' '.' EXPR
 	  { B2 (0x71, 0x82|$1); FE ($7, 9, 3); }
@@ -426,7 +427,7 @@ statement :
 	  { B1 (0xe4|$1); O1 ($2); }
 
 	| oneclrb opt_es '!' EXPR
-	  { B1 (0xe5|$1); O2 ($4); }
+	  { B1 (0xe5|$1); O2 ($4); rl78_linkrelax_addr16 (); }
 
 /* ---------------------------------------------------------------------- */
 
@@ -453,7 +454,7 @@ statement :
 	  { B1 (0xd4); O1 ($2); }
 
 	| CMP0 opt_es '!' EXPR
-	  { B1 (0xd5); O2 ($4); }
+	  { B1 (0xd5); O2 ($4); rl78_linkrelax_addr16 (); }
 
 /* ---------------------------------------------------------------------- */
 
@@ -468,7 +469,7 @@ statement :
 	| incdec EXPR {SA($2)}
 	  { B1 (0xa4|$1); O1 ($2); }
 	| incdec '!' EXPR
-	  { B1 (0xa0|$1); O2 ($3); }
+	  { B1 (0xa0|$1); O2 ($3); rl78_linkrelax_addr16 (); }
 	| incdec ES ':' '!' EXPR
 	  { B2 (0x11, 0xa0|$1); O2 ($5); }
 	| incdec '[' HL '+' EXPR ']'
@@ -485,7 +486,7 @@ statement :
 	  { B1 (0xa6|$1); O1 ($2); }
 
 	| incdecw opt_es '!' EXPR
-	  { B1 (0xa2|$1); O2 ($4); }
+	  { B1 (0xa2|$1); O2 ($4); rl78_linkrelax_addr16 (); }
 
 	| incdecw opt_es '[' HL '+' EXPR ']'
 	  { B2 (0x61, 0x79+$1); O1 ($6); }
@@ -553,7 +554,7 @@ statement :
 	  }
 
 	| MOV '!' EXPR ',' '#' EXPR
-	  { B1 (0xcf); O2 ($3); O1 ($6); }
+	  { B1 (0xcf); O2 ($3); O1 ($6); rl78_linkrelax_addr16 (); }
 
 	| MOV ES ':' '!' EXPR ',' '#' EXPR
 	  { B2 (0x11, 0xcf); O2 ($5); O1 ($8); }
@@ -574,16 +575,16 @@ statement :
 	  }
 
 	| MOV A ',' opt_es '!' EXPR
-	  { B1 (0x8f); O2 ($6); }
+	  { B1 (0x8f); O2 ($6); rl78_linkrelax_addr16 (); }
 
 	| MOV '!' EXPR ',' A
-	  { B1 (0x9f); O2 ($3); }
+	  { B1 (0x9f); O2 ($3); rl78_linkrelax_addr16 (); }
 
 	| MOV ES ':' '!' EXPR ',' A
 	  { B2 (0x11, 0x9f); O2 ($5); }
 
 	| MOV regb_na ',' opt_es '!' EXPR
-	  { B1 (0xc9|reg_xbc($2)); O2 ($6); }
+	  { B1 (0xc9|reg_xbc($2)); O2 ($6); rl78_linkrelax_addr16 (); }
 
 	| MOV A ',' opt_es EXPR  {NOT_ES}
 	  { if (expr_is_saddr ($5))
@@ -712,7 +713,7 @@ statement :
 
 /* ---------------------------------------------------------------------- */
 
-	| MOV1 CY ',' EXPR '.' EXPR
+	| mov1 CY ',' EXPR '.' EXPR
 	  { if (expr_is_saddr ($4))
 	      { B2 (0x71, 0x04); FE ($6, 9, 3); O1 ($4); }
 	    else if (expr_is_sfr ($4))
@@ -721,16 +722,16 @@ statement :
 	      NOT_SFR_OR_SADDR;
 	  }
 
-	| MOV1 CY ',' A '.' EXPR
+	| mov1 CY ',' A '.' EXPR
 	  { B2 (0x71, 0x8c); FE ($6, 9, 3); }
 
-	| MOV1 CY ',' sfr '.' EXPR
+	| mov1 CY ',' sfr '.' EXPR
 	  { B3 (0x71, 0x0c, $4); FE ($6, 9, 3); }
 
-	| MOV1 CY ',' opt_es '[' HL ']' '.' EXPR
+	| mov1 CY ',' opt_es '[' HL ']' '.' EXPR
 	  { B2 (0x71, 0x84); FE ($9, 9, 3); }
 
-	| MOV1 EXPR '.' EXPR ',' CY
+	| mov1 EXPR '.' EXPR ',' CY
 	  { if (expr_is_saddr ($2))
 	      { B2 (0x71, 0x01); FE ($4, 9, 3); O1 ($2); }
 	    else if (expr_is_sfr ($2))
@@ -739,13 +740,13 @@ statement :
 	      NOT_SFR_OR_SADDR;
 	  }
 
-	| MOV1 A '.' EXPR ',' CY
+	| mov1 A '.' EXPR ',' CY
 	  { B2 (0x71, 0x89); FE ($4, 9, 3); }
 
-	| MOV1 sfr '.' EXPR ',' CY
+	| mov1 sfr '.' EXPR ',' CY
 	  { B3 (0x71, 0x09, $2); FE ($4, 9, 3); }
 
-	| MOV1 opt_es '[' HL ']' '.' EXPR ',' CY
+	| mov1 opt_es '[' HL ']' '.' EXPR ',' CY
 	  { B2 (0x71, 0x81); FE ($7, 9, 3); }
 
 /* ---------------------------------------------------------------------- */
@@ -795,10 +796,10 @@ statement :
 	  { B1 (0x10); F ($2, 5, 2); }
 
 	| MOVW AX ',' opt_es '!' EXPR
-	  { B1 (0xaf); O2 ($6); WA($6); }
+	  { B1 (0xaf); O2 ($6); WA($6); rl78_linkrelax_addr16 (); }
 
 	| MOVW opt_es '!' EXPR ',' AX
-	  { B1 (0xbf); O2 ($4); WA($4); }
+	  { B1 (0xbf); O2 ($4); WA($4); rl78_linkrelax_addr16 (); }
 
 	| MOVW AX ',' opt_es '[' DE ']'
 	  { B1 (0xa9); }
@@ -864,7 +865,7 @@ statement :
 	  { B1 (0xca); F ($2, 2, 2); O1 ($4); WA($4); }
 
 	| MOVW regw_na ',' opt_es '!' EXPR
-	  { B1 (0xcb); F ($2, 2, 2); O2 ($6); WA($6); }
+	  { B1 (0xcb); F ($2, 2, 2); O2 ($6); WA($6); rl78_linkrelax_addr16 (); }
 
 	| MOVW SP ',' '#' EXPR
 	  { B2 (0xcb, 0xf8); O2 ($5); }
@@ -1008,22 +1009,22 @@ statement :
 /* ---------------------------------------------------------------------- */
 
 	| SKC
-	  { B2 (0x61, 0xc8); }
+	  { B2 (0x61, 0xc8); rl78_linkrelax_branch (); }
 
 	| SKH
-	  { B2 (0x61, 0xe3); }
+	  { B2 (0x61, 0xe3); rl78_linkrelax_branch (); }
 
 	| SKNC
-	  { B2 (0x61, 0xd8); }
+	  { B2 (0x61, 0xd8); rl78_linkrelax_branch (); }
 
 	| SKNH
-	  { B2 (0x61, 0xf3); }
+	  { B2 (0x61, 0xf3); rl78_linkrelax_branch (); }
 
 	| SKNZ
-	  { B2 (0x61, 0xf8); }
+	  { B2 (0x61, 0xf8); rl78_linkrelax_branch (); }
 
 	| SKZ
-	  { B2 (0x61, 0xe8); }
+	  { B2 (0x61, 0xe8); rl78_linkrelax_branch (); }
 
 /* ---------------------------------------------------------------------- */
 
@@ -1040,7 +1041,7 @@ statement :
 	  }
 
 	| XCH A ',' opt_es '!' EXPR
-	  { B2 (0x61, 0xaa); O2 ($6); }
+	  { B2 (0x61, 0xaa); O2 ($6); rl78_linkrelax_addr16 (); }
 
 	| XCH A ',' opt_es '[' DE ']'
 	  { B2 (0x61, 0xae); }
@@ -1142,18 +1143,18 @@ addsubw	: ADDW  { $$ = 0x00; }
 	| CMPW  { $$ = 0x40; }
 	;
 
-andor1	: AND1 { $$ = 0x05; }
-	| OR1  { $$ = 0x06; }
-	| XOR1 { $$ = 0x07; }
+andor1	: AND1 { $$ = 0x05; rl78_bit_insn = 1; }
+	| OR1  { $$ = 0x06; rl78_bit_insn = 1;}
+	| XOR1 { $$ = 0x07; rl78_bit_insn = 1; }
 	;
 
-bt_bf	: BT { $$ = 0x02; }
-	| BF { $$ = 0x04; }
-	| BTCLR { $$ = 0x00; }
+bt_bf	: BT { $$ = 0x02;    rl78_bit_insn = 1;}
+	| BF { $$ = 0x04;    rl78_bit_insn = 1; }
+	| BTCLR { $$ = 0x00; rl78_bit_insn = 1; }
 	;
 
-setclr1	: SET1 { $$ = 0; }
-	| CLR1 { $$ = 1; }
+setclr1	: SET1 { $$ = 0; rl78_bit_insn = 1; }
+	| CLR1 { $$ = 1; rl78_bit_insn = 1; }
 	;
 
 oneclrb	: ONEB { $$ = 0x00; }
@@ -1170,6 +1171,9 @@ incdec	: INC { $$ = 0x00; }
 
 incdecw	: INCW { $$ = 0x00; }
 	| DECW { $$ = 0x10; }
+	;
+
+mov1	: MOV1 { rl78_bit_insn = 1; }
 	;
 
 %%
@@ -1336,7 +1340,46 @@ rl78_lex_init (char * beginning, char * ending)
   rl78_in_brackets = 0;
   rl78_last_token = 0;
 
+  rl78_bit_insn = 0;
+
   setbuf (stdout, 0);
+}
+
+/* Return a pointer to the '.' in a bit index expression (like
+   foo.5), or NULL if none is found.  */
+static char *
+find_bit_index (char *tok)
+{
+  char *last_dot = NULL;
+  char *last_digit = NULL;
+  while (*tok && *tok != ',')
+    {
+      if (*tok == '.')
+	{
+	  last_dot = tok;
+	  last_digit = NULL;
+	}
+      else if (*tok >= '0' && *tok <= '7'
+	       && last_dot != NULL
+	       && last_digit == NULL)
+	{
+	  last_digit = tok;
+	}
+      else if (ISSPACE (*tok))
+	{
+	  /* skip */
+	}
+      else
+	{
+	  last_dot = NULL;
+	  last_digit = NULL;
+	}
+      tok ++;
+    }
+  if (last_dot != NULL
+      && last_digit != NULL)
+    return last_dot;
+  return NULL;
 }
 
 static int
@@ -1344,6 +1387,7 @@ rl78_lex (void)
 {
   /*unsigned int ci;*/
   char * save_input_pointer;
+  char * bit = NULL;
 
   while (ISSPACE (*rl78_lex_start)
 	 && rl78_lex_start != rl78_lex_end)
@@ -1400,12 +1444,9 @@ rl78_lex (void)
       bitfields.  We check for it specially so we can allow labels
       with '.' in them.  */
 
-  if (*rl78_lex_start == '.'
-      && ISDIGIT (rl78_lex_start[1])
-      && (rl78_last_token == ']'
-	  || rl78_last_token == A
-	  || rl78_last_token == PSW
-	  || rl78_last_token == EXPR))
+  if (rl78_bit_insn
+      && *rl78_lex_start == '.'
+      && find_bit_index (rl78_lex_start) == rl78_lex_start)
     {
       rl78_last_token = *rl78_lex_start;
       return *rl78_lex_start ++;
@@ -1418,10 +1459,25 @@ rl78_lex (void)
       return *rl78_lex_start ++;
     }
 
+  /* Again, '.' is funny.  Look for '.<digit>' at the end of the line
+     or before a comma, which is a bitfield, not an expression.  */
+
+  if (rl78_bit_insn)
+    {
+      bit = find_bit_index (rl78_lex_start);
+      if (bit)
+	*bit = 0;
+      else
+	bit = NULL;
+    }
+
   save_input_pointer = input_line_pointer;
   input_line_pointer = rl78_lex_start;
   rl78_lval.exp.X_md = 0;
   expression (&rl78_lval.exp);
+
+  if (bit)
+    *bit = '.';
 
   rl78_lex_start = input_line_pointer;
   input_line_pointer = save_input_pointer;

@@ -81,6 +81,18 @@ typedef struct rl78_bytesT
 
 static rl78_bytesT rl78_bytes;
 
+void
+rl78_linkrelax_addr16 (void)
+{
+  rl78_bytes.link_relax |= RL78_RELAXA_ADDR16;
+}
+
+void
+rl78_linkrelax_branch (void)
+{
+  rl78_bytes.link_relax |= RL78_RELAXA_BRA;
+}
+
 static void
 rl78_fixup (expressionS exp, int offsetbits, int nbits, int type)
 {
@@ -240,19 +252,32 @@ rl78_field (int val, int pos, int sz)
 
 /*------------------------------------------------------------------*/
 
+enum options
+{
+  OPTION_RELAX = OPTION_MD_BASE,
+};
+
 #define RL78_SHORTOPTS ""
 const char * md_shortopts = RL78_SHORTOPTS;
 
 /* Assembler options.  */
 struct option md_longopts[] =
 {
+  {"relax", no_argument, NULL, OPTION_RELAX},
   {NULL, no_argument, NULL, 0}
 };
 size_t md_longopts_size = sizeof (md_longopts);
 
 int
-md_parse_option (int c ATTRIBUTE_UNUSED, char * arg ATTRIBUTE_UNUSED)
+md_parse_option (int c, char * arg ATTRIBUTE_UNUSED)
 {
+  switch (c)
+    {
+    case OPTION_RELAX:
+      linkrelax = 1;
+      return 1;
+
+    }
   return 0;
 }
 
@@ -348,7 +373,37 @@ md_operand (expressionS * exp ATTRIBUTE_UNUSED)
 void
 rl78_frag_init (fragS * fragP)
 {
-  fragP->tc_frag_data = 0;
+  if (rl78_bytes.n_relax || rl78_bytes.link_relax)
+    {
+      fragP->tc_frag_data = malloc (sizeof (rl78_bytesT));
+      memcpy (fragP->tc_frag_data, & rl78_bytes, sizeof (rl78_bytesT));
+    }
+  else
+    fragP->tc_frag_data = 0;
+}
+
+/* When relaxing, we need to output a reloc for any .align directive
+   so that we can retain this alignment as we adjust opcode sizes.  */
+void
+rl78_handle_align (fragS * frag)
+{
+  if (linkrelax
+      && (frag->fr_type == rs_align
+	  || frag->fr_type == rs_align_code)
+      && frag->fr_address + frag->fr_fix > 0
+      && frag->fr_offset > 0
+      && now_seg != bss_section)
+    {
+      fix_new (frag, frag->fr_fix, 0,
+	       &abs_symbol, RL78_RELAXA_ALIGN + frag->fr_offset,
+	       0, BFD_RELOC_RL78_RELAX);
+      /* For the purposes of relaxation, this relocation is attached
+	 to the byte *after* the alignment - i.e. the byte that must
+	 remain aligned.  */
+      fix_new (frag->fr_next, 0, 0,
+	       &abs_symbol, RL78_RELAXA_ELIGN + frag->fr_offset,
+	       0, BFD_RELOC_RL78_RELAX);
+    }
 }
 
 char *
@@ -391,12 +446,49 @@ md_assemble (char * str)
 
   rl78_parse ();
 
-  bytes = frag_more (rl78_bytes.n_prefix + rl78_bytes.n_base + rl78_bytes.n_ops);
-  frag_then = frag_now;
+  /* This simplifies the relaxation code.  */
+  if (rl78_bytes.link_relax)
+    {
+      int olen = rl78_bytes.n_prefix + rl78_bytes.n_base + rl78_bytes.n_ops;
+      /* We do it this way because we want the frag to have the
+	 rl78_bytes in it, which we initialize above.  */
+      bytes = frag_more (olen);
+      frag_then = frag_now;
+      frag_variant (rs_machine_dependent,
+		    olen /* max_chars */,
+		    0 /* var */,
+		    olen /* subtype */,
+		    0 /* symbol */,
+		    0 /* offset */,
+		    0 /* opcode */);
+      frag_then->fr_opcode = bytes;
+      frag_then->fr_fix = olen + (bytes - frag_then->fr_literal);
+      frag_then->fr_subtype = olen;
+      frag_then->fr_var = 0;
+    }
+  else
+    {
+      bytes = frag_more (rl78_bytes.n_prefix + rl78_bytes.n_base + rl78_bytes.n_ops);
+      frag_then = frag_now;
+    }
 
   APPEND (prefix, n_prefix);
   APPEND (base, n_base);
   APPEND (ops, n_ops);
+
+  if (rl78_bytes.link_relax)
+    {
+      fixS * f;
+
+      f = fix_new (frag_then,
+		   (char *) bytes - frag_then->fr_literal,
+		   0,
+		   abs_section_sym,
+		   rl78_bytes.link_relax | rl78_bytes.n_fixups,
+		   0,
+		   BFD_RELOC_RL78_RELAX);
+      frag_then->tc_frag_data->link_relax_fixP = f;
+    }
 
   for (i = 0; i < rl78_bytes.n_fixups; i ++)
     {
@@ -477,6 +569,7 @@ md_estimate_size_before_relax (fragS * fragP ATTRIBUTE_UNUSED, segT segment ATTR
 {
   return 0;
 }
+
 arelent **
 tc_gen_reloc (asection * seg ATTRIBUTE_UNUSED, fixS * fixp)
 {
@@ -648,6 +741,10 @@ md_apply_fix (struct fix * f ATTRIBUTE_UNUSED,
     case BFD_RELOC_NONE:
       break;
 
+    case BFD_RELOC_RL78_RELAX:
+      f->fx_done = 1;
+      break;
+
     case BFD_RELOC_8:
     case BFD_RELOC_8_PCREL:
       op[0] = val;
@@ -696,4 +793,5 @@ md_convert_frag (bfd *   abfd ATTRIBUTE_UNUSED,
 		 fragS * fragP ATTRIBUTE_UNUSED)
 {
   /* No relaxation yet */
+  fragP->fr_var = 0;
 }

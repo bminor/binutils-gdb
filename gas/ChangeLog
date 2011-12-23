@@ -1,3 +1,29 @@
+2011-12-22  DJ Delorie  <dj@redhat.com>
+
+	* config/rl78-defs.h (rl78_linkrelax_addr16): Add.
+	(rl78_linkrelax_dsp, rl78_linkrelax_imm): Remove.
+	* config/rl78-parse.y: Tag all addr16 and branch patterns with
+	relaxation markers.
+	* config/tc-rl78.c (rl78_linkrelax_addr16): New.
+	(rl78_linkrelax_branch): New.
+	(OPTION_RELAX): New.
+	(md_longopts): Add relax option.
+	(md_parse_option): Add OPTION_RELAX.
+	(rl78_frag_init): Support relaxation.
+	(rl78_handle_align): New.
+	(md_assemble): Support relaxation.
+	(md_apply_fix): Likewise.
+	(md_convert_frag): Likewise.
+	* config/tc-rl78.h (MAX_MEM_FOR_RS_ALIGN_CODE): New.
+	(HANDLE_ALIGN): New.
+	(rl78_handle_align): Declare.
+
+	* config/rl78-parse.y (rl78_bit_insn): New.  Set it for all bit
+	insn patterns.
+	(find_bit_index): New.  Strip .BIT suffix off relevent
+	expressions for bit insns.
+	(rl78_lex): Exclude bit suffixes from expression parsing.
+
 2011-12-21  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/13449

@@ -1,3 +1,19 @@
+2011-12-22  DJ Delorie  <dj@redhat.com>
+
+	* elf32-rl78.c (rl78_elf_howto_table): Add R_RL78_RH_RELAX.
+	(rl78_reloc_map): Add BFD_RELOC_RL78_RELAX.
+	(rl78_elf_relocate_section): Add R_RL78_RH_RELAX, R_RL78_RH_SFR,
+	and R_RL78_RH_SADDR.
+	(rl78_elf_finish_dynamic_sections): Only validate PLT section if
+	we didn't relax anything, as relaxing might remove a PLT reference
+	after we've set up the table.
+	(elf32_rl78_relax_delete_bytes): New.
+	(reloc_bubblesort): New.
+	(rl78_offset_for_reloc): New.
+	(relax_addr16): New.
+	(rl78_elf_relax_section): Add support for relaxing long
+	instructions into short ones.
+
 2011-12-22  Martin Schwidefsky  <schwidefsky@de.ibm.com>
 
 	* elf32-s390.c (elf_s390_relocate_section): Add check for debugging

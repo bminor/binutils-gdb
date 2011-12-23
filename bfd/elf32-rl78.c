@@ -85,7 +85,7 @@ static reloc_howto_type rl78_elf_howto_table [] =
   EMPTY_HOWTO (0x2a),
   EMPTY_HOWTO (0x2b),
   EMPTY_HOWTO (0x2c),
-  EMPTY_HOWTO (0x2d),
+  RL78REL (RH_RELAX, 0,  0, 0, dont,     FALSE),
 
   EMPTY_HOWTO (0x2e),
   EMPTY_HOWTO (0x2f),
@@ -234,7 +234,8 @@ static const struct rl78_reloc_map rl78_reloc_map [] =
   { BFD_RELOC_RL78_ABS32_REV,	R_RL78_ABS32_REV },
   { BFD_RELOC_RL78_ABS16UL,	R_RL78_ABS16UL },
   { BFD_RELOC_RL78_ABS16UW,	R_RL78_ABS16UW },
-  { BFD_RELOC_RL78_ABS16U,	R_RL78_ABS16U }
+  { BFD_RELOC_RL78_ABS16U,	R_RL78_ABS16U },
+  { BFD_RELOC_RL78_RELAX,	R_RL78_RH_RELAX }
 };
 
 static reloc_howto_type *
@@ -498,18 +499,8 @@ rl78_elf_relocate_section
 
 	    /*	    printf("%s: rel %x plt %d\n", h ? h->root.root.string : "(none)",
 		    relocation, *plt_offset);*/
-	    if (valid_16bit_address (relocation))
+	    if (! valid_16bit_address (relocation))
 	      {
-	        /* If the symbol is in range for a 16-bit address, we should
-		   have deallocated the plt entry in relax_section.  */
-	        BFD_ASSERT (*plt_offset == (bfd_vma) -1);
-	      }
-	    else
-	      {
-		/* If the symbol is out of range for a 16-bit address,
-		   we must have allocated a plt entry.  */
-		BFD_ASSERT (*plt_offset != (bfd_vma) -1);
-
 		/* If this is the first time we've processed this symbol,
 		   fill in the plt entry with the correct symbol address.  */
 		if ((*plt_offset & 1) == 0)
@@ -573,6 +564,9 @@ rl78_elf_relocate_section
       switch (r_type)
 	{
 	case R_RL78_NONE:
+	  break;
+
+	case R_RL78_RH_RELAX:
 	  break;
 
 	case R_RL78_DIR8S_PCREL:
@@ -654,6 +648,19 @@ rl78_elf_relocate_section
 	  OP (2) = relocation >> 8;
 	  OP (1) = relocation >> 16;
 	  OP (0) = relocation >> 24;
+	  break;
+
+	case R_RL78_RH_SFR:
+	  printf("SFR 0x%lx\n", relocation);
+	  RANGE (0xfff00, 0xfffff);
+	  OP (0) = relocation & 0xff;
+	  break;
+
+	case R_RL78_RH_SADDR:
+	  printf("SADDR 0x%lx\n", relocation);
+	  RANGE (0xffe20, 0xfff1f);
+	  OP (0) = relocation & 0xff;
+	  printf(" - in\n");
 	  break;
 
 	  /* Complex reloc handling:  */
@@ -1273,18 +1280,24 @@ rl78_elf_finish_dynamic_sections (bfd *abfd ATTRIBUTE_UNUSED,
   bfd *dynobj;
   asection *splt;
 
-  /* As an extra sanity check, verify that all plt entries have
-     been filled in.  */
+  /* As an extra sanity check, verify that all plt entries have been
+     filled in.  However, relaxing might have changed the relocs so
+     that some plt entries don't get filled in, so we have to skip
+     this check if we're relaxing.  Unfortunately, check_relocs is
+     called before relaxation.  */
 
-  if ((dynobj = elf_hash_table (info)->dynobj) != NULL
-      && (splt = bfd_get_section_by_name (dynobj, ".plt")) != NULL)
+  if (info->relax_trip > 0)
     {
-      bfd_byte *contents = splt->contents;
-      unsigned int i, size = splt->size;
-      for (i = 0; i < size; i += 4)
+      if ((dynobj = elf_hash_table (info)->dynobj) != NULL
+	  && (splt = bfd_get_section_by_name (dynobj, ".plt")) != NULL)
 	{
-	  unsigned int x = bfd_get_32 (dynobj, contents + i);
-	  BFD_ASSERT (x != 0);
+	  bfd_byte *contents = splt->contents;
+	  unsigned int i, size = splt->size;
+	  for (i = 0; i < size; i += 4)
+	    {
+	      unsigned int x = bfd_get_32 (dynobj, contents + i);
+	      BFD_ASSERT (x != 0);
+	    }
 	}
     }
 
@@ -1503,6 +1516,485 @@ rl78_elf_relax_plt_section (bfd *dynobj,
   return TRUE;
 }
 
+/* Delete some bytes from a section while relaxing.  */
+
+static bfd_boolean
+elf32_rl78_relax_delete_bytes (bfd *abfd, asection *sec, bfd_vma addr, int count,
+			     Elf_Internal_Rela *alignment_rel, int force_snip)
+{
+  Elf_Internal_Shdr * symtab_hdr;
+  unsigned int        sec_shndx;
+  bfd_byte *          contents;
+  Elf_Internal_Rela * irel;
+  Elf_Internal_Rela * irelend;
+  Elf_Internal_Sym *  isym;
+  Elf_Internal_Sym *  isymend;
+  bfd_vma             toaddr;
+  unsigned int        symcount;
+  struct elf_link_hash_entry ** sym_hashes;
+  struct elf_link_hash_entry ** end_hashes;
+
+  if (!alignment_rel)
+    force_snip = 1;
+
+  sec_shndx = _bfd_elf_section_from_bfd_section (abfd, sec);
+
+  contents = elf_section_data (sec)->this_hdr.contents;
+
+  /* The deletion must stop at the next alignment boundary, if
+     ALIGNMENT_REL is non-NULL.  */
+  toaddr = sec->size;
+  if (alignment_rel)
+    toaddr = alignment_rel->r_offset;
+
+  irel = elf_section_data (sec)->relocs;
+  irelend = irel + sec->reloc_count;
+
+  /* Actually delete the bytes.  */
+  memmove (contents + addr, contents + addr + count,
+	   (size_t) (toaddr - addr - count));
+
+  /* If we don't have an alignment marker to worry about, we can just
+     shrink the section.  Otherwise, we have to fill in the newly
+     created gap with NOP insns (0x03).  */
+  if (force_snip)
+    sec->size -= count;
+  else
+    memset (contents + toaddr - count, 0x03, count);
+
+  /* Adjust all the relocs.  */
+  for (irel = elf_section_data (sec)->relocs; irel < irelend; irel++)
+    {
+      /* Get the new reloc address.  */
+      if (irel->r_offset > addr
+	  && (irel->r_offset < toaddr
+	      || (force_snip && irel->r_offset == toaddr)))
+	irel->r_offset -= count;
+
+      /* If we see an ALIGN marker at the end of the gap, we move it
+	 to the beginning of the gap, since marking these gaps is what
+	 they're for.  */
+      if (irel->r_offset == toaddr
+	  && ELF32_R_TYPE (irel->r_info) == R_RL78_RH_RELAX
+	  && irel->r_addend & RL78_RELAXA_ALIGN)
+	irel->r_offset -= count;
+    }
+
+  /* Adjust the local symbols defined in this section.  */
+  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
+  isym = (Elf_Internal_Sym *) symtab_hdr->contents;
+  isymend = isym + symtab_hdr->sh_info;
+
+  for (; isym < isymend; isym++)
+    {
+      /* If the symbol is in the range of memory we just moved, we
+	 have to adjust its value.  */
+      if (isym->st_shndx == sec_shndx
+	  && isym->st_value > addr
+	  && isym->st_value < toaddr)
+	isym->st_value -= count;
+
+      /* If the symbol *spans* the bytes we just deleted (i.e. it's
+	 *end* is in the moved bytes but it's *start* isn't), then we
+	 must adjust its size.  */
+      if (isym->st_shndx == sec_shndx
+	  && isym->st_value < addr
+	  && isym->st_value + isym->st_size > addr
+	  && isym->st_value + isym->st_size < toaddr)
+	isym->st_size -= count;
+    }
+
+  /* Now adjust the global symbols defined in this section.  */
+  symcount = (symtab_hdr->sh_size / sizeof (Elf32_External_Sym)
+	      - symtab_hdr->sh_info);
+  sym_hashes = elf_sym_hashes (abfd);
+  end_hashes = sym_hashes + symcount;
+
+  for (; sym_hashes < end_hashes; sym_hashes++)
+    {
+      struct elf_link_hash_entry *sym_hash = *sym_hashes;
+
+      if ((sym_hash->root.type == bfd_link_hash_defined
+	   || sym_hash->root.type == bfd_link_hash_defweak)
+	  && sym_hash->root.u.def.section == sec)
+	{
+	  /* As above, adjust the value if needed.  */
+	  if (sym_hash->root.u.def.value > addr
+	      && sym_hash->root.u.def.value < toaddr)
+	    sym_hash->root.u.def.value -= count;
+
+	  /* As above, adjust the size if needed.  */
+	  if (sym_hash->root.u.def.value < addr
+	      && sym_hash->root.u.def.value + sym_hash->size > addr
+	      && sym_hash->root.u.def.value + sym_hash->size < toaddr)
+	    sym_hash->size -= count;
+	}
+    }
+
+  return TRUE;
+}
+
+/* Used to sort relocs by address.  If relocs have the same address,
+   we maintain their relative order, except that R_RL78_RH_RELAX
+   alignment relocs must be the first reloc for any given address.  */
+
+static void
+reloc_bubblesort (Elf_Internal_Rela * r, int count)
+{
+  int i;
+  bfd_boolean again;
+  bfd_boolean swappit;
+
+  /* This is almost a classic bubblesort.  It's the slowest sort, but
+     we're taking advantage of the fact that the relocations are
+     mostly in order already (the assembler emits them that way) and
+     we need relocs with the same address to remain in the same
+     relative order.  */
+  again = TRUE;
+  while (again)
+    {
+      again = FALSE;
+      for (i = 0; i < count - 1; i ++)
+	{
+	  if (r[i].r_offset > r[i + 1].r_offset)
+	    swappit = TRUE;
+	  else if (r[i].r_offset < r[i + 1].r_offset)
+	    swappit = FALSE;
+	  else if (ELF32_R_TYPE (r[i + 1].r_info) == R_RL78_RH_RELAX
+		   && (r[i + 1].r_addend & RL78_RELAXA_ALIGN))
+	    swappit = TRUE;
+	  else if (ELF32_R_TYPE (r[i + 1].r_info) == R_RL78_RH_RELAX
+		   && (r[i + 1].r_addend & RL78_RELAXA_ELIGN)
+		   && !(ELF32_R_TYPE (r[i].r_info) == R_RL78_RH_RELAX
+			&& (r[i].r_addend & RL78_RELAXA_ALIGN)))
+	    swappit = TRUE;
+	  else
+	    swappit = FALSE;
+
+	  if (swappit)
+	    {
+	      Elf_Internal_Rela tmp;
+
+	      tmp = r[i];
+	      r[i] = r[i + 1];
+	      r[i + 1] = tmp;
+	      /* If we do move a reloc back, re-scan to see if it
+		 needs to be moved even further back.  This avoids
+		 most of the O(n^2) behavior for our cases.  */
+	      if (i > 0)
+		i -= 2;
+	      again = TRUE;
+	    }
+	}
+    }
+}
+
+
+#define OFFSET_FOR_RELOC(rel, lrel, scale) \
+  rl78_offset_for_reloc (abfd, rel + 1, symtab_hdr, shndx_buf, intsyms, \
+		       lrel, abfd, sec, link_info, scale)
+
+static bfd_vma
+rl78_offset_for_reloc (bfd *                    abfd,
+		     Elf_Internal_Rela *      rel,
+		     Elf_Internal_Shdr *      symtab_hdr,
+		     Elf_External_Sym_Shndx * shndx_buf ATTRIBUTE_UNUSED,
+		     Elf_Internal_Sym *       intsyms,
+		     Elf_Internal_Rela **     lrel,
+		     bfd *                    input_bfd,
+		     asection *               input_section,
+		     struct bfd_link_info *   info,
+		     int *                    scale)
+{
+  bfd_vma symval;
+  bfd_reloc_status_type r;
+
+  *scale = 1;
+
+  /* REL is the first of 1..N relocations.  We compute the symbol
+     value for each relocation, then combine them if needed.  LREL
+     gets a pointer to the last relocation used.  */
+  while (1)
+    {
+      int32_t tmp1, tmp2;
+
+      /* Get the value of the symbol referred to by the reloc.  */
+      if (ELF32_R_SYM (rel->r_info) < symtab_hdr->sh_info)
+	{
+	  /* A local symbol.  */
+	  Elf_Internal_Sym *isym;
+	  asection *ssec;
+
+	  isym = intsyms + ELF32_R_SYM (rel->r_info);
+
+	  if (isym->st_shndx == SHN_UNDEF)
+	    ssec = bfd_und_section_ptr;
+	  else if (isym->st_shndx == SHN_ABS)
+	    ssec = bfd_abs_section_ptr;
+	  else if (isym->st_shndx == SHN_COMMON)
+	    ssec = bfd_com_section_ptr;
+	  else
+	    ssec = bfd_section_from_elf_index (abfd,
+					       isym->st_shndx);
+
+	  /* Initial symbol value.  */
+	  symval = isym->st_value;
+
+	  /* GAS may have made this symbol relative to a section, in
+	     which case, we have to add the addend to find the
+	     symbol.  */
+	  if (ELF_ST_TYPE (isym->st_info) == STT_SECTION)
+	    symval += rel->r_addend;
+
+	  if (ssec)
+	    {
+	      if ((ssec->flags & SEC_MERGE)
+		  && ssec->sec_info_type == ELF_INFO_TYPE_MERGE)
+		symval = _bfd_merged_section_offset (abfd, & ssec,
+						     elf_section_data (ssec)->sec_info,
+						     symval);
+	    }
+
+	  /* Now make the offset relative to where the linker is putting it.  */
+	  if (ssec)
+	    symval +=
+	      ssec->output_section->vma + ssec->output_offset;
+
+	  symval += rel->r_addend;
+	}
+      else
+	{
+	  unsigned long indx;
+	  struct elf_link_hash_entry * h;
+
+	  /* An external symbol.  */
+	  indx = ELF32_R_SYM (rel->r_info) - symtab_hdr->sh_info;
+	  h = elf_sym_hashes (abfd)[indx];
+	  BFD_ASSERT (h != NULL);
+
+	  if (h->root.type != bfd_link_hash_defined
+	      && h->root.type != bfd_link_hash_defweak)
+	    {
+	      /* This appears to be a reference to an undefined
+		 symbol.  Just ignore it--it will be caught by the
+		 regular reloc processing.  */
+	      if (lrel)
+		*lrel = rel;
+	      return 0;
+	    }
+
+	  symval = (h->root.u.def.value
+		    + h->root.u.def.section->output_section->vma
+		    + h->root.u.def.section->output_offset);
+
+	  symval += rel->r_addend;
+	}
+
+      switch (ELF32_R_TYPE (rel->r_info))
+	{
+	case R_RL78_SYM:
+	  RL78_STACK_PUSH (symval);
+	  break;
+
+	case R_RL78_OPneg:
+	  RL78_STACK_POP (tmp1);
+	  tmp1 = - tmp1;
+	  RL78_STACK_PUSH (tmp1);
+	  break;
+
+	case R_RL78_OPadd:
+	  RL78_STACK_POP (tmp1);
+	  RL78_STACK_POP (tmp2);
+	  tmp1 += tmp2;
+	  RL78_STACK_PUSH (tmp1);
+	  break;
+
+	case R_RL78_OPsub:
+	  RL78_STACK_POP (tmp1);
+	  RL78_STACK_POP (tmp2);
+	  tmp2 -= tmp1;
+	  RL78_STACK_PUSH (tmp2);
+	  break;
+
+	case R_RL78_OPmul:
+	  RL78_STACK_POP (tmp1);
+	  RL78_STACK_POP (tmp2);
+	  tmp1 *= tmp2;
+	  RL78_STACK_PUSH (tmp1);
+	  break;
+
+	case R_RL78_OPdiv:
+	  RL78_STACK_POP (tmp1);
+	  RL78_STACK_POP (tmp2);
+	  tmp1 /= tmp2;
+	  RL78_STACK_PUSH (tmp1);
+	  break;
+
+	case R_RL78_OPshla:
+	  RL78_STACK_POP (tmp1);
+	  RL78_STACK_POP (tmp2);
+	  tmp1 <<= tmp2;
+	  RL78_STACK_PUSH (tmp1);
+	  break;
+
+	case R_RL78_OPshra:
+	  RL78_STACK_POP (tmp1);
+	  RL78_STACK_POP (tmp2);
+	  tmp1 >>= tmp2;
+	  RL78_STACK_PUSH (tmp1);
+	  break;
+
+	case R_RL78_OPsctsize:
+	  RL78_STACK_PUSH (input_section->size);
+	  break;
+
+	case R_RL78_OPscttop:
+	  RL78_STACK_PUSH (input_section->output_section->vma);
+	  break;
+
+	case R_RL78_OPand:
+	  RL78_STACK_POP (tmp1);
+	  RL78_STACK_POP (tmp2);
+	  tmp1 &= tmp2;
+	  RL78_STACK_PUSH (tmp1);
+	  break;
+
+	case R_RL78_OPor:
+	  RL78_STACK_POP (tmp1);
+	  RL78_STACK_POP (tmp2);
+	  tmp1 |= tmp2;
+	  RL78_STACK_PUSH (tmp1);
+	  break;
+
+	case R_RL78_OPxor:
+	  RL78_STACK_POP (tmp1);
+	  RL78_STACK_POP (tmp2);
+	  tmp1 ^= tmp2;
+	  RL78_STACK_PUSH (tmp1);
+	  break;
+
+	case R_RL78_OPnot:
+	  RL78_STACK_POP (tmp1);
+	  tmp1 = ~ tmp1;
+	  RL78_STACK_PUSH (tmp1);
+	  break;
+
+	case R_RL78_OPmod:
+	  RL78_STACK_POP (tmp1);
+	  RL78_STACK_POP (tmp2);
+	  tmp1 %= tmp2;
+	  RL78_STACK_PUSH (tmp1);
+	  break;
+
+	case R_RL78_OPromtop:
+	  RL78_STACK_PUSH (get_romstart (&r, info, input_bfd, input_section, rel->r_offset));
+	  break;
+
+	case R_RL78_OPramtop:
+	  RL78_STACK_PUSH (get_ramstart (&r, info, input_bfd, input_section, rel->r_offset));
+	  break;
+
+	case R_RL78_DIR16UL:
+	case R_RL78_DIR8UL:
+	case R_RL78_ABS16UL:
+	case R_RL78_ABS8UL:
+	  if (rl78_stack_top)
+	    RL78_STACK_POP (symval);
+	  if (lrel)
+	    *lrel = rel;
+	  *scale = 4;
+	  return symval;
+
+	case R_RL78_DIR16UW:
+	case R_RL78_DIR8UW:
+	case R_RL78_ABS16UW:
+	case R_RL78_ABS8UW:
+	  if (rl78_stack_top)
+	    RL78_STACK_POP (symval);
+	  if (lrel)
+	    *lrel = rel;
+	  *scale = 2;
+	  return symval;
+
+	default:
+	  if (rl78_stack_top)
+	    RL78_STACK_POP (symval);
+	  if (lrel)
+	    *lrel = rel;
+	  return symval;
+	}
+
+      rel ++;
+    }
+}
+
+struct {
+  int prefix;		/* or -1 for "no prefix" */
+  int insn;		/* or -1 for "end of list" */
+  int insn_for_saddr;	/* or -1 for "no alternative" */
+  int insn_for_sfr;	/* or -1 for "no alternative" */
+} relax_addr16[] = {
+  { -1, 0x02, 0x06, -1 },	/* ADDW	AX, !addr16 */
+  { -1, 0x22, 0x26, -1 },	/* SUBW	AX, !addr16 */
+  { -1, 0x42, 0x46, -1 },	/* CMPW	AX, !addr16 */
+  { -1, 0x40, 0x4a, -1 },	/* CMP	!addr16, #byte */
+
+  { -1, 0x0f, 0x0b, -1 },	/* ADD	A, !addr16 */
+  { -1, 0x1f, 0x1b, -1 },	/* ADDC	A, !addr16 */
+  { -1, 0x2f, 0x2b, -1 },	/* SUB	A, !addr16 */
+  { -1, 0x3f, 0x3b, -1 },	/* SUBC	A, !addr16 */
+  { -1, 0x4f, 0x4b, -1 },	/* CMP	A, !addr16 */
+  { -1, 0x5f, 0x5b, -1 },	/* AND	A, !addr16 */
+  { -1, 0x6f, 0x6b, -1 },	/* OR	A, !addr16 */
+  { -1, 0x7f, 0x7b, -1 },	/* XOR	A, !addr16 */
+
+  { -1, 0x8f, 0x8d, 0x8e },	/* MOV	A, !addr16 */
+  { -1, 0x9f, 0x9d, 0x9e },	/* MOV	!addr16, A */
+  { -1, 0xaf, 0xad, 0xae },	/* MOVW	AX, !addr16 */
+  { -1, 0xbf, 0xbd, 0xbe },	/* MOVW	!addr16, AX */
+  { -1, 0xcf, 0xcd, 0xce },	/* MOVW	!addr16, #word */
+
+  { -1, 0xa0, 0xa4, -1 },	/* INC	!addr16 */
+  { -1, 0xa2, 0xa6, -1 },	/* INCW	!addr16 */
+  { -1, 0xb0, 0xb4, -1 },	/* DEC	!addr16 */
+  { -1, 0xb2, 0xb6, -1 },	/* DECW	!addr16 */
+
+  { -1, 0xd5, 0xd4, -1 },	/* CMP0	!addr16 */
+  { -1, 0xe5, 0xe4, -1 },	/* ONEB	!addr16 */
+  { -1, 0xf5, 0xf4, -1 },	/* CLRB	!addr16 */
+
+  { -1, 0xd9, 0xd8, -1 },	/* MOV	X, !addr16 */
+  { -1, 0xe9, 0xe8, -1 },	/* MOV	B, !addr16 */
+  { -1, 0xf9, 0xf8, -1 },	/* MOV	C, !addr16 */
+  { -1, 0xdb, 0xda, -1 },	/* MOVW	BC, !addr16 */
+  { -1, 0xeb, 0xea, -1 },	/* MOVW	DE, !addr16 */
+  { -1, 0xfb, 0xfa, -1 },	/* MOVW	HL, !addr16 */
+
+  { 0x61, 0xaa, 0xa8, -1 },	/* XCH	A, !addr16 */
+
+  { 0x71, 0x00, 0x02, 0x0a },	/* SET1	!addr16.0 */
+  { 0x71, 0x10, 0x12, 0x1a },	/* SET1	!addr16.0 */
+  { 0x71, 0x20, 0x22, 0x2a },	/* SET1	!addr16.0 */
+  { 0x71, 0x30, 0x32, 0x3a },	/* SET1	!addr16.0 */
+  { 0x71, 0x40, 0x42, 0x4a },	/* SET1	!addr16.0 */
+  { 0x71, 0x50, 0x52, 0x5a },	/* SET1	!addr16.0 */
+  { 0x71, 0x60, 0x62, 0x6a },	/* SET1	!addr16.0 */
+  { 0x71, 0x70, 0x72, 0x7a },	/* SET1	!addr16.0 */
+
+  { 0x71, 0x08, 0x03, 0x0b },	/* CLR1	!addr16.0 */
+  { 0x71, 0x18, 0x13, 0x1b },	/* CLR1	!addr16.0 */
+  { 0x71, 0x28, 0x23, 0x2b },	/* CLR1	!addr16.0 */
+  { 0x71, 0x38, 0x33, 0x3b },	/* CLR1	!addr16.0 */
+  { 0x71, 0x48, 0x43, 0x4b },	/* CLR1	!addr16.0 */
+  { 0x71, 0x58, 0x53, 0x5b },	/* CLR1	!addr16.0 */
+  { 0x71, 0x68, 0x63, 0x6b },	/* CLR1	!addr16.0 */
+  { 0x71, 0x78, 0x73, 0x7b },	/* CLR1	!addr16.0 */
+  
+  { -1, -1, -1, -1 }
+};
+
+/* Relax one section.  */
+
 static bfd_boolean
 rl78_elf_relax_section
     (bfd *                  abfd,
@@ -1510,12 +2002,475 @@ rl78_elf_relax_section
      struct bfd_link_info * link_info,
      bfd_boolean *          again)
 {
+  Elf_Internal_Shdr * symtab_hdr;
+  Elf_Internal_Shdr * shndx_hdr;
+  Elf_Internal_Rela * internal_relocs;
+  Elf_Internal_Rela * free_relocs = NULL;
+  Elf_Internal_Rela * irel;
+  Elf_Internal_Rela * srel;
+  Elf_Internal_Rela * irelend;
+  Elf_Internal_Rela * next_alignment;
+  Elf_Internal_Rela * prev_alignment;
+  bfd_byte *          contents = NULL;
+  bfd_byte *          free_contents = NULL;
+  Elf_Internal_Sym *  intsyms = NULL;
+  Elf_Internal_Sym *  free_intsyms = NULL;
+  Elf_External_Sym_Shndx * shndx_buf = NULL;
+  bfd_vma pc;
+  bfd_vma sec_start;
+  bfd_vma symval ATTRIBUTE_UNUSED = 0;
+  int pcrel ATTRIBUTE_UNUSED = 0;
+  int code ATTRIBUTE_UNUSED = 0;
+  int section_alignment_glue;
+  int scale;
+
   if (abfd == elf_hash_table (link_info)->dynobj
       && strcmp (sec->name, ".plt") == 0)
     return rl78_elf_relax_plt_section (abfd, sec, link_info, again);
 
   /* Assume nothing changes.  */
   *again = FALSE;
+
+  /* We don't have to do anything for a relocatable link, if
+     this section does not have relocs, or if this is not a
+     code section.  */
+  if (link_info->relocatable
+      || (sec->flags & SEC_RELOC) == 0
+      || sec->reloc_count == 0
+      || (sec->flags & SEC_CODE) == 0)
+    return TRUE;
+
+  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
+  shndx_hdr = &elf_tdata (abfd)->symtab_shndx_hdr;
+
+  sec_start = sec->output_section->vma + sec->output_offset;
+
+  /* Get the section contents.  */
+  if (elf_section_data (sec)->this_hdr.contents != NULL)
+    contents = elf_section_data (sec)->this_hdr.contents;
+  /* Go get them off disk.  */
+  else
+    {
+      if (! bfd_malloc_and_get_section (abfd, sec, &contents))
+	goto error_return;
+      elf_section_data (sec)->this_hdr.contents = contents;
+    }
+
+  /* Read this BFD's symbols.  */
+  /* Get cached copy if it exists.  */
+  if (symtab_hdr->contents != NULL)
+    intsyms = (Elf_Internal_Sym *) symtab_hdr->contents;
+  else
+    {
+      intsyms = bfd_elf_get_elf_syms (abfd, symtab_hdr, symtab_hdr->sh_info, 0, NULL, NULL, NULL);
+      symtab_hdr->contents = (bfd_byte *) intsyms;
+    }
+
+  if (shndx_hdr->sh_size != 0)
+    {
+      bfd_size_type amt;
+
+      amt = symtab_hdr->sh_info;
+      amt *= sizeof (Elf_External_Sym_Shndx);
+      shndx_buf = (Elf_External_Sym_Shndx *) bfd_malloc (amt);
+      if (shndx_buf == NULL)
+	goto error_return;
+      if (bfd_seek (abfd, shndx_hdr->sh_offset, SEEK_SET) != 0
+	  || bfd_bread ((PTR) shndx_buf, amt, abfd) != amt)
+	goto error_return;
+      shndx_hdr->contents = (bfd_byte *) shndx_buf;
+    }
+
+  /* Get a copy of the native relocations.  */
+  internal_relocs = (_bfd_elf_link_read_relocs
+		     (abfd, sec, (PTR) NULL, (Elf_Internal_Rela *) NULL,
+		      link_info->keep_memory));
+  if (internal_relocs == NULL)
+    goto error_return;
+  if (! link_info->keep_memory)
+    free_relocs = internal_relocs;
+
+  /* The RL_ relocs must be just before the operand relocs they go
+     with, so we must sort them to guarantee this.  We use bubblesort
+     instead of qsort so we can guarantee that relocs with the same
+     address remain in the same relative order.  */
+  reloc_bubblesort (internal_relocs, sec->reloc_count);
+
+  /* Walk through them looking for relaxing opportunities.  */
+  irelend = internal_relocs + sec->reloc_count;
+
+
+  /* This will either be NULL or a pointer to the next alignment
+     relocation.  */
+  next_alignment = internal_relocs;
+  /* This will be the previous alignment, although at first it points
+     to the first real relocation.  */
+  prev_alignment = internal_relocs;
+
+  /* We calculate worst case shrinkage caused by alignment directives.
+     No fool-proof, but better than either ignoring the problem or
+     doing heavy duty analysis of all the alignment markers in all
+     input sections.  */
+  section_alignment_glue = 0;
+  for (irel = internal_relocs; irel < irelend; irel++)
+      if (ELF32_R_TYPE (irel->r_info) == R_RL78_RH_RELAX
+	  && irel->r_addend & RL78_RELAXA_ALIGN)
+	{
+	  int this_glue = 1 << (irel->r_addend & RL78_RELAXA_ANUM);
+
+	  if (section_alignment_glue < this_glue)
+	    section_alignment_glue = this_glue;
+	}
+  /* Worst case is all 0..N alignments, in order, causing 2*N-1 byte
+     shrinkage.  */
+  section_alignment_glue *= 2;
+
+  for (irel = internal_relocs; irel < irelend; irel++)
+    {
+      unsigned char *insn;
+      int nrelocs;
+
+      /* The insns we care about are all marked with one of these.  */
+      if (ELF32_R_TYPE (irel->r_info) != R_RL78_RH_RELAX)
+	continue;
+
+      if (irel->r_addend & RL78_RELAXA_ALIGN
+	  || next_alignment == internal_relocs)
+	{
+	  /* When we delete bytes, we need to maintain all the alignments
+	     indicated.  In addition, we need to be careful about relaxing
+	     jumps across alignment boundaries - these displacements
+	     *grow* when we delete bytes.  For now, don't shrink
+	     displacements across an alignment boundary, just in case.
+	     Note that this only affects relocations to the same
+	     section.  */
+	  prev_alignment = next_alignment;
+	  next_alignment += 2;
+	  while (next_alignment < irelend
+		 && (ELF32_R_TYPE (next_alignment->r_info) != R_RL78_RH_RELAX
+		     || !(next_alignment->r_addend & RL78_RELAXA_ELIGN)))
+	    next_alignment ++;
+	  if (next_alignment >= irelend || next_alignment->r_offset == 0)
+	    next_alignment = NULL;
+	}
+
+      /* When we hit alignment markers, see if we've shrunk enough
+	 before them to reduce the gap without violating the alignment
+	 requirements.  */
+      if (irel->r_addend & RL78_RELAXA_ALIGN)
+	{
+	  /* At this point, the next relocation *should* be the ELIGN
+	     end marker.  */
+	  Elf_Internal_Rela *erel = irel + 1;
+	  unsigned int alignment, nbytes;
+
+	  if (ELF32_R_TYPE (erel->r_info) != R_RL78_RH_RELAX)
+	    continue;
+	  if (!(erel->r_addend & RL78_RELAXA_ELIGN))
+	    continue;
+
+	  alignment = 1 << (irel->r_addend & RL78_RELAXA_ANUM);
+
+	  if (erel->r_offset - irel->r_offset < alignment)
+	    continue;
+
+	  nbytes = erel->r_offset - irel->r_offset;
+	  nbytes /= alignment;
+	  nbytes *= alignment;
+
+	  elf32_rl78_relax_delete_bytes (abfd, sec, erel->r_offset-nbytes, nbytes, next_alignment,
+				       erel->r_offset == sec->size);
+	  *again = TRUE;
+
+	  continue;
+	}
+
+      if (irel->r_addend & RL78_RELAXA_ELIGN)
+	  continue;
+
+      insn = contents + irel->r_offset;
+
+      nrelocs = irel->r_addend & RL78_RELAXA_RNUM;
+
+      /* At this point, we have an insn that is a candidate for linker
+	 relaxation.  There are NRELOCS relocs following that may be
+	 relaxed, although each reloc may be made of more than one
+	 reloc entry (such as gp-rel symbols).  */
+
+      /* Get the value of the symbol referred to by the reloc.  Just
+         in case this is the last reloc in the list, use the RL's
+         addend to choose between this reloc (no addend) or the next
+         (yes addend, which means at least one following reloc).  */
+
+      /* srel points to the "current" reloction for this insn -
+	 actually the last reloc for a given operand, which is the one
+	 we need to update.  We check the relaxations in the same
+	 order that the relocations happen, so we'll just push it
+	 along as we go.  */
+      srel = irel;
+
+      pc = sec->output_section->vma + sec->output_offset
+	+ srel->r_offset;
+
+#define GET_RELOC \
+      symval = OFFSET_FOR_RELOC (srel, &srel, &scale); \
+      pcrel = symval - pc + srel->r_addend; \
+      nrelocs --;
+
+#define SNIPNR(offset, nbytes) \
+	elf32_rl78_relax_delete_bytes (abfd, sec, (insn - contents) + offset, nbytes, next_alignment, 0);
+#define SNIP(offset, nbytes, newtype) \
+        SNIPNR (offset, nbytes);						\
+	srel->r_info = ELF32_R_INFO (ELF32_R_SYM (srel->r_info), newtype)
+
+      /* The order of these bit tests must match the order that the
+	 relocs appear in.  Since we sorted those by offset, we can
+	 predict them.  */
+
+      /*----------------------------------------------------------------------*/
+      /* EF ad		BR $rel8	pcrel
+	 ED al ah	BR !abs16	abs
+	 EE al ah	BR $!rel16	pcrel
+	 EC al ah as	BR !!abs20	abs
+
+	 FD al ah	CALL !abs16	abs
+	 FE al ah	CALL $!rel16	pcrel
+	 FC al ah as	CALL !!abs20	abs
+
+	 DC ad		BC  $rel8
+	 DE ad		BNC $rel8
+	 DD ad		BZ  $rel8
+	 DF ad		BNZ $rel8
+	 61 C3 ad	BH  $rel8
+	 61 D3 ad	BNH $rel8
+	 61 C8 EF ad	SKC  ; BR $rel8
+	 61 D8 EF ad	SKNC ; BR $rel8
+	 61 E8 EF ad	SKZ  ; BR $rel8
+	 61 F8 EF ad	SKNZ ; BR $rel8
+	 61 E3 EF ad	SKH  ; BR $rel8
+	 61 F3 EF ad	SKNH ; BR $rel8
+       */
+
+      if (irel->r_addend & RL78_RELAXA_BRA)
+	{
+	  GET_RELOC;
+
+	  switch (insn[0])
+	    {
+	    case 0xec: /* BR !!abs20 */
+
+	      if (pcrel < 127
+		  && pcrel > -127)
+		{
+		  insn[0] = 0xef;
+		  insn[1] = pcrel;
+		  SNIP (2, 2, R_RL78_DIR8S_PCREL);
+		  *again = TRUE;
+		}
+	      else if (symval < 65536)
+		{
+		  insn[0] = 0xed;
+		  insn[1] = symval & 0xff;
+		  insn[2] = symval >> 8;
+		  SNIP (2, 1, R_RL78_DIR16S);
+		  *again = TRUE;
+		}
+	      else if (pcrel < 32767
+		       && pcrel > -32767)
+		{
+		  insn[0] = 0xee;
+		  insn[1] = pcrel & 0xff;
+		  insn[2] = pcrel >> 8;
+		  SNIP (2, 1, R_RL78_DIR16S_PCREL);
+		  *again = TRUE;
+		}
+	      break;
+
+	    case 0xee: /* BR $!pcrel16 */
+	    case 0xed: /* BR $!abs16 */
+	      if (pcrel < 127
+		  && pcrel > -127)
+		{
+		  insn[0] = 0xef;
+		  insn[1] = pcrel;
+		  SNIP (2, 1, R_RL78_DIR8S_PCREL);
+		  *again = TRUE;
+		}
+	      break;
+
+	    case 0xfc: /* CALL !!abs20 */
+	      if (symval < 65536)
+		{
+		  insn[0] = 0xfd;
+		  insn[1] = symval & 0xff;
+		  insn[2] = symval >> 8;
+		  SNIP (2, 1, R_RL78_DIR16S);
+		  *again = TRUE;
+		}
+	      else if (pcrel < 32767
+		       && pcrel > -32767)
+		{
+		  insn[0] = 0xfe;
+		  insn[1] = pcrel & 0xff;
+		  insn[2] = pcrel >> 8;
+		  SNIP (2, 1, R_RL78_DIR16S_PCREL);
+		  *again = TRUE;
+		}
+	      break;
+
+	    case 0x61: /* PREFIX */
+	      /* For SKIP/BR, we change the BR opcode and delete the
+		 SKIP.  That way, we don't have to find and change the
+		 relocation for the BR.  */
+	      switch (insn[1])
+		{
+		case 0xc8: /* SKC */
+		  if (insn[2] == 0xef)
+		    {
+		      insn[2] = 0xde; /* BNC */
+		      SNIPNR (0, 2);
+		    }
+		  break;
+
+		case 0xd8: /* SKNC */
+		  if (insn[2] == 0xef)
+		    {
+		      insn[2] = 0xdc; /* BC */
+		      SNIPNR (0, 2);
+		    }
+		  break;
+
+		case 0xe8: /* SKZ */
+		  if (insn[2] == 0xef)
+		    {
+		      insn[2] = 0xdf; /* BNZ */
+		      SNIPNR (0, 2);
+		    }
+		  break;
+
+		case 0xf8: /* SKNZ */
+		  if (insn[2] == 0xef)
+		    {
+		      insn[2] = 0xdd; /* BZ */
+		      SNIPNR (0, 2);
+		    }
+		  break;
+
+		case 0xe3: /* SKH */
+		  if (insn[2] == 0xef)
+		    {
+		      insn[2] = 0xd3; /* BNH */
+		      SNIPNR (1, 1); /* we reuse the 0x61 prefix from the SKH */
+		    }
+		  break;
+
+		case 0xf3: /* SKNH */
+		  if (insn[2] == 0xef)
+		    {
+		      insn[2] = 0xc3; /* BH */
+		      SNIPNR (1, 1); /* we reuse the 0x61 prefix from the SKH */
+		    }
+		  break;
+		}
+	      break;
+	    }
+	  
+	}
+
+      if (irel->r_addend & RL78_RELAXA_ADDR16)
+	{
+	  /*----------------------------------------------------------------------*/
+	  /* Some insns have both a 16-bit address operand and an 8-bit
+	     variant if the address is within a special range:
+
+	     Address		16-bit operand	SADDR range	SFR range
+	     FFF00-FFFFF	0xff00-0xffff	0x00-0xff
+	     FFE20-FFF1F	0xfe20-0xff1f	 		0x00-0xff
+
+	     The RELAX_ADDR16[] array has the insn encodings for the
+	     16-bit operand version, as well as the SFR and SADDR
+	     variants.  We only need to replace the encodings and
+	     adjust the operand.
+
+	     Note: we intentionally do not attempt to decode and skip
+	     any ES: prefix, as adding ES: means the addr16 (likely)
+	     no longer points to saddr/sfr space.
+	  */
+
+	  int is_sfr;
+	  int is_saddr;
+	  int idx;
+	  int poff;
+
+	  GET_RELOC;
+
+	  printf("relax_addr16 detected, symval 0x%lx %02x %02x\n", symval, insn[0], insn[1]);
+
+	  if (0xffe20 <= symval && symval <= 0xfffff)
+	    {
+
+	      is_saddr = (0xffe20 <= symval && symval <= 0xfff1f);
+	      is_sfr   = (0xfff00 <= symval && symval <= 0xfffff);
+
+	      for (idx = 0; relax_addr16[idx].insn != -1; idx ++)
+		{
+		  if (relax_addr16[idx].prefix != -1
+		      && insn[0] == relax_addr16[idx].prefix
+		      && insn[1] == relax_addr16[idx].insn)
+		    {
+		      poff = 1;
+		    }
+		  else if (relax_addr16[idx].prefix == -1
+			   && insn[0] == relax_addr16[idx].insn)
+		    {
+		      poff = 0;
+		    }
+		  else
+		    continue;
+
+		  /* We have a matched insn, and poff is 0 or 1 depending
+		     on the base pattern size.  */
+
+		  if (is_sfr && relax_addr16[idx].insn_for_sfr != -1)
+		    {
+		      insn[poff] = relax_addr16[idx].insn_for_sfr;
+		      SNIP (poff+2, 1, R_RL78_RH_SFR);
+		      printf(" - replaced by SFR\n");
+		    }
+
+		  else if  (is_saddr && relax_addr16[idx].insn_for_saddr != -1)
+		    {
+		      insn[poff] = relax_addr16[idx].insn_for_saddr;
+		      SNIP (poff+2, 1, R_RL78_RH_SADDR);
+		      printf(" - replaced by SADDR\n");
+		    }
+		
+		}
+	    }
+	}
+
+      /*----------------------------------------------------------------------*/
+
+    }
+
+  return TRUE;
+
+ error_return:
+  if (free_relocs != NULL)
+    free (free_relocs);
+
+  if (free_contents != NULL)
+    free (free_contents);
+
+  if (shndx_buf != NULL)
+    {
+      shndx_hdr->contents = NULL;
+      free (shndx_buf);
+    }
+
+  if (free_intsyms != NULL)
+    free (free_intsyms);
+
   return TRUE;
 }
 
