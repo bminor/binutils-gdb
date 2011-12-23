@@ -269,6 +269,9 @@ extern void detach_command (char *, int);
 
 extern void notice_new_inferior (ptid_t, int, int);
 
+extern struct value *get_return_value (struct type *func_type,
+                                       struct type *value_type);
+
 /* Address at which inferior stopped.  */
 
 extern CORE_ADDR stop_pc;

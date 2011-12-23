@@ -1,3 +1,18 @@
+2011-12-23  Kevin Pouget  <kevin.pouget@st.com>
+
+	Introduce gdb.FinishBreakpoint in Python.
+	* Makefile.in (EXECUTABLES): Add py-finish-breakpoint and
+	py-finish-breakpoint2
+	(MISCALLANEOUS): Add py-events-shlib.so and py-events-shlib-nodebug.so
+	* gdb.python/py-breakpoint.exp (mult_line): Define and use variable
+	instead of line number.
+	* gdb.python/py-finish-breakpoint.c: New file.
+	* gdb.python/py-finish-breakpoint.exp: New file.
+	* gdb.python/py-finish-breakpoint.py: New file.
+	* gdb.python/py-finish-breakpoint2.cc: New file.
+	* gdb.python/py-finish-breakpoint2.exp: New file.
+	* gdb.python/py-finish-breakpoint2.py: New file.
+
 2011-12-23  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Partial fix of compatibility with gcc-4.7.

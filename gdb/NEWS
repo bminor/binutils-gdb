@@ -63,6 +63,10 @@
   ** The "gdb.breakpoint" function has been deprecated in favor of
      "gdb.breakpoints".
 
+  ** A new class "gdb.FinishBreakpoint" is provided to catch the return
+     of a function.  This class is based on the "finish" command
+     available in the CLI. 
+
   ** Type objects for struct and union types now allow access to
      the fields using standard Python dictionary (mapping) methods.
      For example, "some_type['myfield']" now works, as does

@@ -44,7 +44,8 @@ gdb_py_test_silent_cmd "python blist = gdb.breakpoints()" "Get Breakpoint List" 
 gdb_test "python print blist\[0\]" "<gdb.Breakpoint object at $hex>" "Check obj exists"
 gdb_test "python print blist\[0\].location" "main." "Check breakpoint location"
 
-gdb_breakpoint [gdb_get_line_number "Break at multiply."]
+set mult_line [gdb_get_line_number "Break at multiply."]
+gdb_breakpoint ${mult_line}
 gdb_continue_to_breakpoint "Break at multiply."
 
 # Check that the Python breakpoint code noted the addition of a
@@ -54,7 +55,9 @@ gdb_test "python print len(blist)" "2" "Check for two breakpoints"
 gdb_test "python print blist\[0\]" "<gdb.Breakpoint object at $hex>" "Check obj exists"
 gdb_test "python print blist\[0\].location" "main." "Check breakpoint location"
 gdb_test "python print blist\[1\]" "<gdb.Breakpoint object at $hex>" "Check obj exists"
-gdb_test "python print blist\[1\].location" "py-breakpoint\.c:41*" "Check breakpoint location"
+
+gdb_test "python print blist\[1\].location" "py-breakpoint\.c:${mult_line}*" \
+         "Check breakpoint location"
 
 # Check hit and ignore counts. 
 gdb_test "python print blist\[1\].hit_count" "1" "Check breakpoint hit count"

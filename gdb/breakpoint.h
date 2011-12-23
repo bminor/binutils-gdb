@@ -569,7 +569,7 @@ struct breakpoint
 
     /* The program space used to set the breakpoint.  This is only set
        for breakpoints which are specific to a program space; for
-       ordinary breakpoints this is NULL.  */
+       non-thread-specific ordinary breakpoints this is NULL.  */
     struct program_space *pspace;
 
     /* String we used to set the breakpoint (malloc'd).  */
