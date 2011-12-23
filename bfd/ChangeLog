@@ -1,5 +1,10 @@
 2011-12-23  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* elf32-rl78.c (rl78_elf_relocate_section, rl78_elf_relax_section): Use
+	BFD_VMA_FMT.
+
+2011-12-23  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* elf32-rl78.c (prev_alignment, sec_start): Remove unused variables.
 
 2011-12-23  Tristan Gingold  <gingold@adacore.com>

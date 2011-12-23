@@ -651,13 +651,13 @@ rl78_elf_relocate_section
 	  break;
 
 	case R_RL78_RH_SFR:
-	  printf("SFR 0x%lx\n", relocation);
+	  printf("SFR 0x%" BFD_VMA_FMT "x\n", relocation);
 	  RANGE (0xfff00, 0xfffff);
 	  OP (0) = relocation & 0xff;
 	  break;
 
 	case R_RL78_RH_SADDR:
-	  printf("SADDR 0x%lx\n", relocation);
+	  printf("SADDR 0x%" BFD_VMA_FMT "x\n", relocation);
 	  RANGE (0xffe20, 0xfff1f);
 	  OP (0) = relocation & 0xff;
 	  printf(" - in\n");
@@ -2396,7 +2396,9 @@ rl78_elf_relax_section
 
 	  GET_RELOC;
 
-	  printf("relax_addr16 detected, symval 0x%lx %02x %02x\n", symval, insn[0], insn[1]);
+	  printf ("relax_addr16 detected, "
+		  "symval 0x%" BFD_VMA_FMT "x %02x %02x\n",
+		  symval, insn[0], insn[1]);
 
 	  if (0xffe20 <= symval && symval <= 0xfffff)
 	    {
