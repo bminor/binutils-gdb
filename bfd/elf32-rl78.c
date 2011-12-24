@@ -497,8 +497,6 @@ rl78_elf_relocate_section
 	    else
 	      plt_offset = elf_local_got_offsets (input_bfd) + r_symndx;
 
-	    /*	    printf("%s: rel %x plt %d\n", h ? h->root.root.string : "(none)",
-		    relocation, *plt_offset);*/
 	    if (! valid_16bit_address (relocation))
 	      {
 		/* If this is the first time we've processed this symbol,
@@ -651,16 +649,13 @@ rl78_elf_relocate_section
 	  break;
 
 	case R_RL78_RH_SFR:
-	  printf("SFR 0x%" BFD_VMA_FMT "x\n", relocation);
 	  RANGE (0xfff00, 0xfffff);
 	  OP (0) = relocation & 0xff;
 	  break;
 
 	case R_RL78_RH_SADDR:
-	  printf("SADDR 0x%" BFD_VMA_FMT "x\n", relocation);
 	  RANGE (0xffe20, 0xfff1f);
 	  OP (0) = relocation & 0xff;
-	  printf(" - in\n");
 	  break;
 
 	  /* Complex reloc handling:  */
@@ -1139,18 +1134,6 @@ rl78_dump_symtab (bfd * abfd, void * internal_syms, void * external_syms)
 	case SHN_UNDEF: st_shndx_str = "SHN_UNDEF";
 	default: st_shndx_str = "";
 	}
-
-      printf ("isym = %p st_value = %lx st_size = %lx st_name = (%lu) %s "
-	      "st_info = (%d) %s %s st_other = (%d) %s st_shndx = (%d) %s\n",
-	      isym,
-	      (unsigned long) isym->st_value,
-	      (unsigned long) isym->st_size,
-	      isym->st_name,
-	      bfd_elf_string_from_elf_section (abfd, symtab_hdr->sh_link,
-					       isym->st_name),
-	      isym->st_info, st_info_str, st_info_stb_str,
-	      isym->st_other, st_other_str,
-	      isym->st_shndx, st_shndx_str);
     }
   if (free_internal)
     free (internal_syms);
@@ -2396,10 +2379,6 @@ rl78_elf_relax_section
 
 	  GET_RELOC;
 
-	  printf ("relax_addr16 detected, "
-		  "symval 0x%" BFD_VMA_FMT "x %02x %02x\n",
-		  symval, insn[0], insn[1]);
-
 	  if (0xffe20 <= symval && symval <= 0xfffff)
 	    {
 
@@ -2429,14 +2408,12 @@ rl78_elf_relax_section
 		    {
 		      insn[poff] = relax_addr16[idx].insn_for_sfr;
 		      SNIP (poff+2, 1, R_RL78_RH_SFR);
-		      printf(" - replaced by SFR\n");
 		    }
 
 		  else if  (is_saddr && relax_addr16[idx].insn_for_saddr != -1)
 		    {
 		      insn[poff] = relax_addr16[idx].insn_for_saddr;
 		      SNIP (poff+2, 1, R_RL78_RH_SADDR);
-		      printf(" - replaced by SADDR\n");
 		    }
 		
 		}
