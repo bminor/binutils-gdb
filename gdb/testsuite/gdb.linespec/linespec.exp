@@ -30,7 +30,7 @@ if {[skip_cplus_tests]} {
 
 if {[prepare_for_testing ${testfile}.exp $exefile \
 	 [list lspec.cc $baseone $basetwo] \
-	 {debug nowarnings}]} {
+	 {debug nowarnings c++}]} {
     return -1
 }
 
