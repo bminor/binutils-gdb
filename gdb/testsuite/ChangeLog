@@ -1,5 +1,12 @@
 2011-12-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Fix racy FAILs.
+	* gdb.threads/fork-thread-pending.c (barrier): New variable.
+	(thread_function, thread_forker): Call pthread_barrier_wait for it.
+	(main): Call pthread_barrier_init for it.
+
+2011-12-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Fix double send_gdb leading to racy FAILs.
 	* gdb.base/break.exp (set silent break bp_location1): Replace
 	3x send_gdb and gdb_expect by gdb_test.
