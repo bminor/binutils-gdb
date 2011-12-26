@@ -1,3 +1,16 @@
+2011-12-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix double send_gdb leading to racy FAILs.
+	* gdb.base/break.exp (set silent break bp_location1): Replace
+	3x send_gdb and gdb_expect by gdb_test.
+	* gdb.base/fileio.exp: Replace 2x send_gdb by gdb_exit and sleep.
+	* gdb.base/foll-vfork.exp (vfork_and_exec_child_follow_to_main_bp)
+	(vfork_and_exec_child_follow_through_step): Use gdb_test_no_output
+	instead of send_gdb.  Twice.
+	* gdb.base/sepdebug.exp (set silent break bp_location1): Replace
+	3x send_gdb and gdb_expect by gdb_test.
+	* gdb.mi/mi-nsmoribund.exp: Replace 3x send_gdb by mi_gdb_test.
+
 2011-12-23  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.linespec/linespec.exp: Compile using {c++}.

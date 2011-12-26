@@ -576,14 +576,7 @@ gdb_test_multiple "break $bp_location1" \
 	}
     }
 
-send_gdb "commands $expect_out(1,string)\n"
-send_gdb "silent\n"
-send_gdb "end\n"
-gdb_expect {
-  -re ".*$gdb_prompt $"\
-          {pass "set silent break bp_location1"}
-  timeout {fail "(timeout) set silent break bp_location1"}
-}
+gdb_test "commands $expect_out(1,string)\nsilent\nend" ">end" "set silent break bp_location1"
 
 gdb_test "info break $expect_out(1,string)" \
     "\[0-9\]*\[ \t\]*breakpoint.*:$bp_location1\r\n\[ \t\]*silent.*" \

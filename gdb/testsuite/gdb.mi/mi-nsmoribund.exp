@@ -118,9 +118,9 @@ mi_check_thread_states \
 # we are interested in, so we can't use mi_gdb_test or
 # gdb_test_multiple (or an MI equivalent)
 
-send_gdb "102-break-delete\n"
-send_gdb "print done = 1\n"
-send_gdb "103-exec-continue --all\n"
+mi_gdb_test "102-break-delete" "102\\^done.*"
+mi_gdb_test "print done = 1" { = 1"}
+mi_gdb_test "103-exec-continue --all" "\[^\n\]*\r\n$running_re"
 
 gdb_expect {
     -re "\\*stopped,reason=\"exited-normally\"" {

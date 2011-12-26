@@ -166,7 +166,7 @@ proc vfork_and_exec_child_follow_to_main_bp {} {
    send_gdb "kill\n"
    gdb_expect {
       -re ".*Kill the program being debugged.*y or n. $" {
-         send_gdb "y\n"
+         gdb_test_no_output "y" ""
          send_gdb "file $binfile\n"
          gdb_expect {
             -re ".*Load new symbol table from.*y or n. $" {
@@ -224,7 +224,7 @@ proc vfork_and_exec_child_follow_through_step {} {
    send_gdb "kill\n"
    gdb_expect {
       -re ".*Kill the program being debugged.*y or n. $" {
-         send_gdb "y\n"
+         gdb_test_no_output "y" ""
          send_gdb "file $binfile\n"
          gdb_expect {
             -re ".*Load new symbol table from.*y or n. $" {

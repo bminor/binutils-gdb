@@ -247,8 +247,9 @@ gdb_test continue \
 "Continuing\\..*time 2:.*OK$stop_msg" \
 "Time(2) returns feasible values"
 
-send_gdb "quit\n"
-send_gdb "y\n"
+gdb_exit
+# Wait till GDB really exits.
+sleep 1
 
 remote_exec build {sh -xc test\ -r\ dir2.fileio.test\ &&\ chmod\ -f\ +w\ dir2.fileio.test}
 remote_exec build {sh -xc rm\ -rf\ *.fileio.test}
