@@ -3341,6 +3341,25 @@ gdb_realpath (const char *filename)
   }
 #endif
 
+  /* The MS Windows method.  If we don't have realpath, we assume we
+     don't have symlinks and just canonicalize to a Windows absolute
+     path.  GetFullPath converts ../ and ./ in relative paths to
+     absolute paths, filling in current drive if one is not given
+     or using the current directory of a specified drive (eg, "E:foo").
+     It also converts all forward slashes to back slashes.  */
+  /* The file system is case-insensitive but case-preserving.
+     So we do not lowercase the path.  Otherwise, we might not
+     be able to display the original casing in a given path.  */
+#if defined (_WIN32)
+  {
+    char buf[MAX_PATH];
+    DWORD len = GetFullPathName (filename, MAX_PATH, buf, NULL);
+
+    if (len > 0 && len < MAX_PATH)
+      return xstrdup (buf);
+  }
+#endif
+
   /* This system is a lost cause, just dup the buffer.  */
   return xstrdup (filename);
 }
