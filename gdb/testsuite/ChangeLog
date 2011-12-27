@@ -1,3 +1,8 @@
+2011-12-27  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.base/dmsym.c, gdb.base/dmsym_main.c, gdb.base/dmsym.exp:
+	New files.
+
 2011-12-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix racy FAILs.
