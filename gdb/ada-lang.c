@@ -4161,6 +4161,18 @@ cache_symbol (const char *name, domain_enum namespace, struct symbol *sym,
 
                                 /* Symbol Lookup */
 
+/* Return nonzero if wild matching should be used when searching for
+   all symbols matching LOOKUP_NAME.
+
+   LOOKUP_NAME is expected to be a symbol name after transformation
+   for Ada lookups (see ada_name_for_lookup).  */
+
+static int
+should_use_wild_match (const char *lookup_name)
+{
+  return (strstr (lookup_name, "__") == NULL);
+}
+
 /* Return the result of a standard (literal, C-like) lookup of NAME in
    given DOMAIN, visible from lexical block BLOCK.  */
 
@@ -4326,15 +4338,17 @@ ada_lookup_simple_minsym (const char *name)
 {
   struct objfile *objfile;
   struct minimal_symbol *msymbol;
-  int wild_match;
+  const int wild_match = should_use_wild_match (name);
 
+  /* Special case: If the user specifies a symbol name inside package
+     Standard, do a non-wild matching of the symbol name without
+     the "standard__" prefix.  This was primarily introduced in order
+     to allow the user to specifically access the standard exceptions
+     using, for instance, Standard.Constraint_Error when Constraint_Error
+     is ambiguous (due to the user defining its own Constraint_Error
+     entity inside its program).  */
   if (strncmp (name, "standard__", sizeof ("standard__") - 1) == 0)
-    {
-      name += sizeof ("standard__") - 1;
-      wild_match = 0;
-    }
-  else
-    wild_match = (strstr (name, "__") == NULL);
+    name += sizeof ("standard__") - 1;
 
   ALL_MSYMBOLS (objfile, msymbol)
   {
@@ -4978,7 +4992,7 @@ ada_lookup_symbol_list (const char *name0, const struct block *block0,
   struct symbol *sym;
   struct block *block;
   const char *name;
-  int wild_match;
+  const int wild_match = should_use_wild_match (name0);
   int cacheIfUnique;
   int ndefns;
 
@@ -4989,7 +5003,6 @@ ada_lookup_symbol_list (const char *name0, const struct block *block0,
 
   /* Search specified block and its superiors.  */
 
-  wild_match = (strstr (name0, "__") == NULL);
   name = name0;
   block = (struct block *) block0;      /* FIXME: No cast ought to be
                                            needed, but adding const will
@@ -5004,7 +5017,6 @@ ada_lookup_symbol_list (const char *name0, const struct block *block0,
      entity inside its program).  */
   if (strncmp (name0, "standard__", sizeof ("standard__") - 1) == 0)
     {
-      wild_match = 0;
       block = NULL;
       name = name0 + sizeof ("standard__") - 1;
     }

@@ -1,5 +1,13 @@
 2011-12-27  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (should_use_wild_match): New function.
+	(ada_lookup_simple_minsym): Use should_use_wild_match.
+	Minor simplification.  Add comment.
+	(ada_lookup_symbol_list): Use should_use_wild_match.
+	Minor simplification.
+
+2011-12-27  Joel Brobecker  <brobecker@adacore.com>
+
 	* py-finishbreakpoint.c (bpfinishpy_init): Replace call to
 	sprintf by call to xsnprintf.
 
