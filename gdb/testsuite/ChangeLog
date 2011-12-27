@@ -1,3 +1,12 @@
+2011-12-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.python/py-finish-breakpoint.c (test_exec_exit): Change the
+	parameter to self_exec, adjust the function.
+	(main): Check for argv[1] "exit".  Use argv[0] for test_exec_exit.
+	* gdb.python/py-finish-breakpoint.exp (set var self_exec = 0): New test.
+	(set var do_exit = 0): Remove test.
+	(newline at end of file): Add one.
+
 2011-12-27  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.base/dmsym.c, gdb.base/dmsym_main.c, gdb.base/dmsym.exp:
