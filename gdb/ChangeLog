@@ -1,3 +1,12 @@
+2011-12-27  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (struct dwarf2_cu): Delete members first_fn, last_fn,
+	cached_fn.
+	(struct function_range): Delete.
+	(initialize_cu_func_list, add_to_cu_func_list): Delete.  All callers
+	updated.
+	(check_cu_functions): Ditto.
+
 2011-12-27  Mark Kettenis  <kettenis@gnu.org>
 
 	* inf-ptrace.c [PT_IO && PIOD_READ_AUXV]

@@ -346,8 +346,6 @@ struct dwarf2_cu
   /* Non-zero if base_address has been set.  */
   int base_known;
 
-  struct function_range *first_fn, *last_fn, *cached_fn;
-
   /* The language we are debugging.  */
   enum language language;
   const struct language_defn *language_defn;
@@ -700,14 +698,6 @@ struct die_info
        sufficiently portable C.  */
     struct attribute attrs[1];
   };
-
-struct function_range
-{
-  const char *name;
-  CORE_ADDR lowpc, highpc;
-  int seen_line;
-  struct function_range *next;
-};
 
 /* Get at parts of an attribute structure.  */
 
@@ -1240,11 +1230,6 @@ static struct dwarf_block *dwarf_alloc_block (struct dwarf2_cu *);
 static struct abbrev_info *dwarf_alloc_abbrev (struct dwarf2_cu *);
 
 static struct die_info *dwarf_alloc_die (struct dwarf2_cu *, int);
-
-static void initialize_cu_func_list (struct dwarf2_cu *);
-
-static void add_to_cu_func_list (const char *, CORE_ADDR, CORE_ADDR,
-				 struct dwarf2_cu *);
 
 static void dwarf_decode_macros (struct line_header *, unsigned int,
                                  char *, bfd *, struct dwarf2_cu *,
@@ -5582,12 +5567,6 @@ read_import_statement (struct die_info *die, struct dwarf2_cu *cu)
   do_cleanups (cleanups);
 }
 
-static void
-initialize_cu_func_list (struct dwarf2_cu *cu)
-{
-  cu->first_fn = cu->last_fn = cu->cached_fn = NULL;
-}
-
 /* Cleanup function for read_file_scope.  */
 
 static void
@@ -5722,8 +5701,6 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
   record_debugformat ("DWARF 2");
   record_producer (cu->producer);
 
-  initialize_cu_func_list (cu);
-
   handle_DW_AT_stmt_list (die, cu, comp_dir);
 
   /* Process all dies in compilation unit.  */
@@ -5846,28 +5823,6 @@ read_type_unit_scope (struct die_info *die, struct dwarf2_cu *cu)
     }
 
   do_cleanups (back_to);
-}
-
-static void
-add_to_cu_func_list (const char *name, CORE_ADDR lowpc, CORE_ADDR highpc,
-		     struct dwarf2_cu *cu)
-{
-  struct function_range *thisfn;
-
-  thisfn = (struct function_range *)
-    obstack_alloc (&cu->comp_unit_obstack, sizeof (struct function_range));
-  thisfn->name = name;
-  thisfn->lowpc = lowpc;
-  thisfn->highpc = highpc;
-  thisfn->seen_line = 0;
-  thisfn->next = NULL;
-
-  if (cu->last_fn == NULL)
-      cu->first_fn = thisfn;
-  else
-      cu->last_fn->next = thisfn;
-
-  cu->last_fn = thisfn;
 }
 
 /* qsort helper for inherit_abstract_dies.  */
@@ -6063,9 +6018,6 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
 
   lowpc += baseaddr;
   highpc += baseaddr;
-
-  /* Record the function range for dwarf_decode_lines.  */
-  add_to_cu_func_list (name, lowpc, highpc, cu);
 
   /* If we have any template arguments, then we must allocate a
      different sort of symbol.  */
@@ -11090,52 +11042,6 @@ dwarf_decode_line_header (unsigned int offset, bfd *abfd,
   return lh;
 }
 
-/* This function exists to work around a bug in certain compilers
-   (particularly GCC 2.95), in which the first line number marker of a
-   function does not show up until after the prologue, right before
-   the second line number marker.  This function shifts ADDRESS down
-   to the beginning of the function if necessary, and is called on
-   addresses passed to record_line.  */
-
-static CORE_ADDR
-check_cu_functions (CORE_ADDR address, struct dwarf2_cu *cu)
-{
-  struct function_range *fn;
-
-  /* Find the function_range containing address.  */
-  if (!cu->first_fn)
-    return address;
-
-  if (!cu->cached_fn)
-    cu->cached_fn = cu->first_fn;
-
-  fn = cu->cached_fn;
-  while (fn)
-    if (fn->lowpc <= address && fn->highpc > address)
-      goto found;
-    else
-      fn = fn->next;
-
-  fn = cu->first_fn;
-  while (fn && fn != cu->cached_fn)
-    if (fn->lowpc <= address && fn->highpc > address)
-      goto found;
-    else
-      fn = fn->next;
-
-  return address;
-
- found:
-  if (fn->seen_line)
-    return address;
-  if (address != fn->lowpc)
-    complaint (&symfile_complaints,
-	       _("misplaced first line number at 0x%lx for '%s'"),
-	       (unsigned long) address, fn->name);
-  fn->seen_line = 1;
-  return fn->lowpc;
-}
-
 /* Subroutine of dwarf_decode_lines to simplify it.
    Return the file name of the psymtab for included file FILE_INDEX
    in line header LH of PST.
@@ -11333,8 +11239,7 @@ dwarf_decode_lines (struct line_header *lh, const char *comp_dir, bfd *abfd,
 			  last_subfile = current_subfile;
 			}
 		      /* Append row to matrix using current values.  */
-		      addr = check_cu_functions (address, cu);
-		      addr = gdbarch_addr_bits_remove (gdbarch, addr);
+		      addr = gdbarch_addr_bits_remove (gdbarch, address);
 		      (*p_record_line) (current_subfile, line, addr);
 		    }
 		}
@@ -11432,8 +11337,7 @@ dwarf_decode_lines (struct line_header *lh, const char *comp_dir, bfd *abfd,
 			    (*p_record_line) (last_subfile, 0, addr);
 			  last_subfile = current_subfile;
 			}
-		      addr = check_cu_functions (address, cu);
-		      addr = gdbarch_addr_bits_remove (gdbarch, addr);
+		      addr = gdbarch_addr_bits_remove (gdbarch, address);
 		      (*p_record_line) (current_subfile, line, addr);
 		    }
 		}
