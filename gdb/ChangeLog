@@ -1,3 +1,10 @@
+2011-12-27  Mark Kettenis  <kettenis@gnu.org>
+
+	* inf-ptrace.c [PT_IO && PIOD_READ_AUXV]
+	(inf_ptrace_xfer_partial): Implement TARGET_OBJECT_AUXV.
+	(inf_ptrace_auxv_parse): New function.
+	(inf_ptrace_target): Initialize to_auxv_parse field.
+
 2011-12-27  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (should_use_wild_match): New function.
