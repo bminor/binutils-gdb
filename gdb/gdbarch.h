@@ -754,7 +754,7 @@ typedef void (gdbarch_skip_permanent_breakpoint_ftype) (struct regcache *regcach
 extern void gdbarch_skip_permanent_breakpoint (struct gdbarch *gdbarch, struct regcache *regcache);
 extern void set_gdbarch_skip_permanent_breakpoint (struct gdbarch *gdbarch, gdbarch_skip_permanent_breakpoint_ftype *skip_permanent_breakpoint);
 
-/* The maximum length of an instruction on this architecture. */
+/* The maximum length of an instruction on this architecture in bytes. */
 
 extern int gdbarch_max_insn_length_p (struct gdbarch *gdbarch);
 
