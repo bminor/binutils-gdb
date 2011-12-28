@@ -1,3 +1,8 @@
+2011-12-28  Joel Brobecker  <brobecker@adacore.com>
+
+	* varobj.c (varobj_update): Minor reformatting, putting the function
+	name at the start of the next line.
+
 2011-12-27  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (struct dwarf2_cu): Delete members first_fn, last_fn,

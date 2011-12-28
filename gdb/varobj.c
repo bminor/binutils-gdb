@@ -1775,7 +1775,8 @@ varobj_set_visualizer (struct varobj *var, const char *visualizer)
    returns TYPE_CHANGED, then it has done this and VARP will be modified
    to point to the new varobj.  */
 
-VEC(varobj_update_result) *varobj_update (struct varobj **varp, int explicit)
+VEC(varobj_update_result) *
+varobj_update (struct varobj **varp, int explicit)
 {
   int changed = 0;
   int type_changed = 0;
