@@ -1,3 +1,7 @@
+2011-12-28  Ian Lance Taylor  <iant@google.com>
+
+	* dwarf.c (read_and_display_attr_value): Handle DW_LANG_Go.
+
 2011-12-20  Roland McGrath  <mcgrathr@google.com>
 
 	* configure.in (--enable-deterministic-archives): Grok new
