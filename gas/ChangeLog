@@ -1,3 +1,11 @@
+2011-12-29  Iain Sandoe  <idsandoe@googlemail.com>
+
+	* as.c (perform_an_assembly_pass): Do not create text, data and bss
+	sections for MACH-O.  Do not switch to the text section.
+	* config/obj-macho.c (obj_mach_o_segT_from_bfd_name): Forward decl.
+	(mach_o_begin): Startup with only text section unless suppressed.
+	* config/obj-macho.h (obj_begin): define to mach_o_begin ().
+
 2011-12-22  DJ Delorie  <dj@redhat.com>
 
 	* config/rl78-defs.h (rl78_linkrelax_addr16): Add.

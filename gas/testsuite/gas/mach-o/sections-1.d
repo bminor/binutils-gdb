@@ -11,11 +11,6 @@
   align: 0  nreloc: 0  reloff: (00000000)?00000000
   flags: 00000000 \(type: regular attr: -\)
   reserved1: 0x0  reserved2: 0x0  reserved3: 0x0
- Section: __bss            __DATA           \(bfdname: .bss\)
-  addr: (00000000)?00000000 size: (00000000)?00000000 offset: (00000000)?00000000
-  align: 0  nreloc: 0  reloff: (00000000)?00000000
-  flags: 00000001 \(type: zerofill attr: -\)
-  reserved1: 0x0  reserved2: 0x0  reserved3: 0x0
  Section: __textcoal_nt    __TEXT           \(bfdname: __TEXT.__textcoal_nt\)
   addr: (00000000)?00000000 size: (00000000)?00000000 offset: (00000000)?00000000
   align: 0  nreloc: 0  reloff: (00000000)?00000000

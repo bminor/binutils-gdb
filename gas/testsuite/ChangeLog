@@ -1,3 +1,9 @@
+2011-12-29  Iain Sandoe  <idsandoe@googlemail.com>
+
+	* gas/mach-o/sections-1.d: Amend to recognize that bss is not emitted
+	by default.
+	* gas/mach-o/sections-2.d: New.
+
 2011-12-19  Iain Sandoe  <idsandoe@googlemail.com>
 
 	* gas/mach-o/err-sections-1.s: New.

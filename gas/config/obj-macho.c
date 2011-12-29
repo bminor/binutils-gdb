@@ -45,13 +45,40 @@
 #include "mach-o/loader.h"
 #include "obj-macho.h"
 
+/* Forward decl.  */
+static segT obj_mach_o_segT_from_bfd_name (const char *nam, int must_succeed);
+
 /* TODO: Implement "-dynamic"/"-static" command line options.  */
 
 static int obj_mach_o_is_static;
 
+/* TODO: Implement the "-n" command line option to suppress the initial
+   switch to the text segment.  */
+static int obj_mach_o_start_with_text_section = 1;
+
 /* Allow for special re-ordering on output.  */
 
-static int seen_objc_section;
+static int obj_mach_o_seen_objc_section;
+
+/* Start-up: At present, just create the sections we want.  */
+void
+mach_o_begin (void)
+{
+  /* Mach-O only defines the .text section by default, and even this can
+     be suppressed by a flag.  In the latter event, the first code MUST
+     be a section definition.  */
+  if (obj_mach_o_start_with_text_section)
+    {
+      text_section = obj_mach_o_segT_from_bfd_name (TEXT_SECTION_NAME, 1);
+      subseg_set (text_section, 0);
+      if (obj_mach_o_is_static)
+	{
+	  bfd_mach_o_section *mo_sec 
+			= bfd_mach_o_get_mach_o_section (text_section);
+	  mo_sec->flags &= ~BFD_MACH_O_S_ATTR_PURE_INSTRUCTIONS;
+	}
+    }
+}
 
 /* Remember the subsections_by_symbols state in case we need to reset
    the file flags.  */
@@ -473,8 +500,9 @@ obj_mach_o_objc_section (int sect_index)
   section = obj_mach_o_segT_from_bfd_name (objc_sections[sect_index], 1);
   if (section != NULL)
     {
-      seen_objc_section = 1; /* We need to ensure that certain sections are
-				present and in the right order.  */
+      obj_mach_o_seen_objc_section = 1; /* We need to ensure that certain
+					   sections are present and in the
+					   right order.  */
       subseg_set (section, 0);
     }
 

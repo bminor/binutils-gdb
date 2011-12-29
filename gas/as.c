@@ -1037,10 +1037,13 @@ static void
 perform_an_assembly_pass (int argc, char ** argv)
 {
   int saw_a_file = 0;
+#ifndef OBJ_MACH_O
   flagword applicable;
+#endif
 
   need_pass_2 = 0;
 
+#ifndef OBJ_MACH_O
   /* Create the standard sections, and those the assembler uses
      internally.  */
   text_section = subseg_new (TEXT_SECTION_NAME, 0);
@@ -1057,12 +1060,15 @@ perform_an_assembly_pass (int argc, char ** argv)
 				       | SEC_DATA));
   bfd_set_section_flags (stdoutput, bss_section, applicable & SEC_ALLOC);
   seg_info (bss_section)->bss = 1;
+#endif
   subseg_new (BFD_ABS_SECTION_NAME, 0);
   subseg_new (BFD_UND_SECTION_NAME, 0);
   reg_section = subseg_new ("*GAS `reg' section*", 0);
   expr_section = subseg_new ("*GAS `expr' section*", 0);
 
+#ifndef OBJ_MACH_O
   subseg_set (text_section, 0);
+#endif
 
   /* This may add symbol table entries, which requires having an open BFD,
      and sections already created.  */

@@ -30,6 +30,10 @@
 
 #define OUTPUT_FLAVOR bfd_target_mach_o_flavour
 
+/* We want to control how the sections are pre-defined on startup.  */
+#define obj_begin() mach_o_begin ()
+extern void mach_o_begin (void);
+
 /* All our align expressions are power of two.  */
 #define USE_ALIGN_PTWO
 
