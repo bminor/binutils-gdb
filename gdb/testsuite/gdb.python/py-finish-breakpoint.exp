@@ -118,7 +118,8 @@ if ![runto_main] then {
 
 gdb_test "print do_nothing" "no debug info.*" "ensure that shared lib has no debug info"
 gdb_breakpoint "do_nothing" {temporary}
-gdb_test "continue" "Temporary breakpoint .*in do_nothing.*" "continue to do_nothing"
+gdb_test "continue" "Temporary breakpoint .*in \\.?do_nothing.*" \
+         "continue to do_nothing"
 
 gdb_test "python finishBP = SimpleFinishBreakpoint(gdb.newest_frame())" \
          "SimpleFinishBreakpoint init" \
