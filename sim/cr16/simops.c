@@ -5131,11 +5131,13 @@ OP_C_C ()
 	switch (FUNC)
 	  {
 #if !defined(__GO32__) && !defined(_WIN32)
+#ifdef TARGET_SYS_fork
 	  case TARGET_SYS_fork:
 	    trace_input ("<fork>", OP_VOID, OP_VOID, OP_VOID);
 	    RETVAL (fork ());
 	    trace_output_16 (result);
 	    break;
+#endif
 
 #define getpid() 47
 	  case TARGET_SYS_getpid:
@@ -5272,12 +5274,14 @@ OP_C_C ()
 	      }
 	    break;
 
+#ifdef TARGET_SYS_execve
 	  case TARGET_SYS_execve:
 	    trace_input ("<execve>", OP_VOID, OP_VOID, OP_VOID);
 	    RETVAL (execve (MEMPTR (PARM1), (char **) MEMPTR (PARM2<<16|PARM3),
 			     (char **)MEMPTR (PARM4)));
 	    trace_output_16 (result);
 	    break;
+#endif
 
 #ifdef TARGET_SYS_execv
 	  case TARGET_SYS_execv:
@@ -5287,6 +5291,7 @@ OP_C_C ()
 	    break;
 #endif
 
+#ifdef TARGET_SYS_pipe
 	  case TARGET_SYS_pipe:
 	    {
 	      reg_t buf;
@@ -5301,6 +5306,7 @@ OP_C_C ()
 	      trace_output_16 (result);
 	    }
 	  break;
+#endif
 
 #ifdef TARGET_SYS_wait
 	  case TARGET_SYS_wait:
@@ -5365,6 +5371,7 @@ OP_C_C ()
 	    trace_output_32 (result);
 	    break;
 
+#ifdef TARGET_SYS_rename
 	  case TARGET_SYS_rename:
 	    trace_input ("<rename>", OP_MEMREF, OP_MEMREF, OP_VOID);
 	    RETVAL (cr16_callback->rename (cr16_callback, 
@@ -5372,6 +5379,7 @@ OP_C_C ()
 				   MEMPTR ((((unsigned long)PARM4)<<16) |PARM3)));
 	    trace_output_16 (result);
 	    break;
+#endif
 
 	  case 0x408: /* REVISIT: Added a dummy getenv call. */
 	    trace_input ("<getenv>", OP_MEMREF, OP_MEMREF, OP_VOID);
@@ -5424,11 +5432,13 @@ OP_C_C ()
 	    break;
 #endif
 
+#ifdef TARGET_SYS_chown
 	  case TARGET_SYS_chown:
 	    trace_input ("<chown>", OP_VOID, OP_VOID, OP_VOID);
 	    RETVAL (chown (MEMPTR (PARM1), PARM2, PARM3));
 	    trace_output_16 (result);
 	    break;
+#endif
 
 	  case TARGET_SYS_chmod:
 	    trace_input ("<chmod>", OP_VOID, OP_VOID, OP_VOID);

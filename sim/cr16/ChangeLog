@@ -1,3 +1,10 @@
+2011-12-30  Mike Frysinger  <vapier@gentoo.org>
+
+	PR sim/12862
+	* simops.c (OP_C_C): Only handle TARGET_SYS_fork, TARGET_SYS_execve,
+	TARGET_SYS_pipe, TARGET_SYS_rename, and TARGET_SYS_chown when they
+	are defined.
+
 2011-12-03  Mike Frysinger  <vapier@gentoo.org>
 
 	* aclocal.m4: New file.
