@@ -1,3 +1,9 @@
+2011-12-31  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Change AC_CHECK_LIB to AC_SEARCH_LIBS to match
+	the code in gdb's configure.ac with $TERMCAP.
+	* configure: Regenerated.
+
 2011-12-03  Mike Frysinger  <vapier@gentoo.org>
 
 	* aclocal.m4: New file.

@@ -17,7 +17,9 @@ lose
 if test x$sim_cv_os_cygwin = xyes; then
   TERMCAP='`if test -r ../../libtermcap/libtermcap.a; then echo ../../libtermcap/libtermcap.a; else echo -ltermcap; fi` -luser32'
 else
-  AC_CHECK_LIB(termcap, main, TERMCAP=-ltermcap, TERMCAP="")
+  # Keep in sync with gdb's configure.ac list.
+  AC_SEARCH_LIBS(tgetent, [termcap tinfo curses ncurses],
+    [TERMCAP=$ac_cv_search_tgetent], [TERMCAP=""])
 fi
 AC_SUBST(TERMCAP)
 

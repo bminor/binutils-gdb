@@ -2434,9 +2434,9 @@ sim_inline="-DDEFAULT_INLINE=0"
 # AC_PROG_CPP_WERROR
 
 # Test for GNAT.
-# We require the gnatbind program, and a compiler driver that
-# understands Ada.  We use the user's CC setting, already found,
-# and possibly add $1 to the command-line parameters.
+# We require the gnatbind & gnatmake programs, as well as a compiler driver
+# that understands Ada.  We use the user's CC setting, already found, and
+# possibly add $1 to the command-line parameters.
 #
 # Sets the shell variable have_gnat to yes or no as appropriate, and
 # substitutes GNATBIND and GNATMAKE.
@@ -4765,38 +4765,61 @@ $as_echo "$sim_cv_os_cygwin" >&6; }
 if test x$sim_cv_os_cygwin = xyes; then
   TERMCAP='`if test -r ../../libtermcap/libtermcap.a; then echo ../../libtermcap/libtermcap.a; else echo -ltermcap; fi` -luser32'
 else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -ltermcap" >&5
-$as_echo_n "checking for main in -ltermcap... " >&6; }
-if test "${ac_cv_lib_termcap_main+set}" = set; then :
+  # Keep in sync with gdb's configure.ac list.
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing tgetent" >&5
+$as_echo_n "checking for library containing tgetent... " >&6; }
+if test "${ac_cv_search_tgetent+set}" = set; then :
   $as_echo_n "(cached) " >&6
 else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-ltermcap  $LIBS"
+  ac_func_search_save_LIBS=$LIBS
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
-
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char tgetent ();
 int
 main ()
 {
-return main ();
+return tgetent ();
   ;
   return 0;
 }
 _ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_termcap_main=yes
-else
-  ac_cv_lib_termcap_main=no
+for ac_lib in '' termcap tinfo curses ncurses; do
+  if test -z "$ac_lib"; then
+    ac_res="none required"
+  else
+    ac_res=-l$ac_lib
+    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
+  fi
+  if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_search_tgetent=$ac_res
 fi
 rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
+    conftest$ac_exeext
+  if test "${ac_cv_search_tgetent+set}" = set; then :
+  break
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_termcap_main" >&5
-$as_echo "$ac_cv_lib_termcap_main" >&6; }
-if test "x$ac_cv_lib_termcap_main" = x""yes; then :
-  TERMCAP=-ltermcap
+done
+if test "${ac_cv_search_tgetent+set}" = set; then :
+
+else
+  ac_cv_search_tgetent=no
+fi
+rm conftest.$ac_ext
+LIBS=$ac_func_search_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_tgetent" >&5
+$as_echo "$ac_cv_search_tgetent" >&6; }
+ac_res=$ac_cv_search_tgetent
+if test "$ac_res" != no; then :
+  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
+  TERMCAP=$ac_cv_search_tgetent
 else
   TERMCAP=""
 fi
