@@ -8836,14 +8836,26 @@ read_typedef (struct die_info *die, struct dwarf2_cu *cu)
 {
   struct objfile *objfile = cu->objfile;
   const char *name = NULL;
-  struct type *this_type;
+  struct type *this_type, *target_type;
 
   name = dwarf2_full_name (NULL, die, cu);
   this_type = init_type (TYPE_CODE_TYPEDEF, 0,
 			 TYPE_FLAG_TARGET_STUB, NULL, objfile);
   TYPE_NAME (this_type) = (char *) name;
   set_die_type (die, this_type, cu);
-  TYPE_TARGET_TYPE (this_type) = die_type (die, cu);
+  target_type = die_type (die, cu);
+  if (target_type != this_type)
+    TYPE_TARGET_TYPE (this_type) = target_type;
+  else
+    {
+      /* Self-referential typedefs are, it seems, not allowed by the DWARF
+	 spec and cause infinite loops in GDB.  */
+      complaint (&symfile_complaints,
+		 _("Self-referential DW_TAG_typedef "
+		   "- DIE at 0x%x [in module %s]"),
+		 die->offset, cu->objfile->name);
+      TYPE_TARGET_TYPE (this_type) = NULL;
+    }
   return this_type;
 }
 
