@@ -1,3 +1,8 @@
+2012-01-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* NEWS (Changes in GDB 7.4): Add gdbtui deprecation note.
+	* tui/tui-main.c: Likewise.
+
 2011-12-23  Kevin Pouget  <kevin.pouget@st.com>
 
 	Introduce gdb.FinishBreakpoint in Python

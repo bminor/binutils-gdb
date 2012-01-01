@@ -18,6 +18,11 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+/* The binary "gdbtui" is deprecated.
+
+   The binary will be no longer built or installed in GDB 7.5.
+   Use "gdb -tui" instead.  */
+
 #include "defs.h"
 #include "main.h"
 #include "gdb_string.h"
