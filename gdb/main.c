@@ -380,7 +380,7 @@ captured_main (void *data)
      this captured main, or one specified by the user at start up, or
      the console.  Initialize the interpreter to the one requested by 
      the application.  */
-  interpreter_p = xstrdup (INTERP_CONSOLE);
+  interpreter_p = xstrdup (context->interpreter_p);
 
   /* Parse arguments and options.  */
   {

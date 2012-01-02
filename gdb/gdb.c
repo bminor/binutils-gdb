@@ -31,5 +31,6 @@ main (int argc, char **argv)
   args.argc = argc;
   args.argv = argv;
   args.use_windows = 0;
+  args.interpreter_p = INTERP_CONSOLE;
   return gdb_main (&args);
 }
