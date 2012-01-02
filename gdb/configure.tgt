@@ -71,8 +71,7 @@ am33_2.0*-*-linux*)
 
 arm*-wince-pe | arm*-*-mingw32ce*)
 	# Target: ARM based machine running Windows CE (win32)
-	gdb_target_obs="arm-tdep.o arm-wince-tdep.o corelow.o \
-			solib-target.o"
+	gdb_target_obs="arm-tdep.o arm-wince-tdep.o corelow.o"
 	build_gdbserver=yes
 	;;
 arm*-*-linux*)
@@ -92,7 +91,7 @@ arm*-*-openbsd*)
 	;;
 arm*-*-symbianelf*)
 	# Target: SymbianOS/arm
-	gdb_target_obs="arm-tdep.o solib-target.o arm-symbian-tdep.o"
+	gdb_target_obs="arm-tdep.o arm-symbian-tdep.o"
 	;;
 arm*-*-*)
 	# Target: ARM embedded system
@@ -179,7 +178,7 @@ i[34567]86-*-dicos*)
 	# Target: DICOS/i386
 	gdb_target_obs="i386-tdep.o i387-tdep.o \
 			dicos-tdep.o i386-dicos-tdep.o \
-			corelow.o solib-target.o"
+			corelow.o"
 	;;
 i[34567]86-*-freebsd* | i[34567]86-*-kfreebsd*-gnu)
 	# Target: FreeBSD/i386
@@ -231,13 +230,13 @@ i[34567]86-*-gnu*)
 i[34567]86-*-cygwin*)
 	# Target: Intel 386 running win32
 	gdb_target_obs="i386-tdep.o i386-cygwin-tdep.o i387-tdep.o \
-			solib-target.o corelow.o windows-tdep.o"
+			corelow.o windows-tdep.o"
 	build_gdbserver=yes
 	;;
 i[34567]86-*-mingw32*)
 	# Target: Intel 386 running win32
 	gdb_target_obs="i386-tdep.o i386-cygwin-tdep.o i387-tdep.o \
-			solib-target.o corelow.o windows-tdep.o"
+			corelow.o windows-tdep.o"
 	build_gdbserver=yes
 	;;
 i[34567]86-*-*)
@@ -598,7 +597,7 @@ x86_64-*-dicos*)
 	# Target: DICOS/x86-64
 	gdb_target_obs="amd64-tdep.o i386-tdep.o i387-tdep.o \
 			dicos-tdep.o i386-dicos-tdep.o amd64-dicos-tdep.o \
-			corelow.o solib-target.o"
+			corelow.o"
 	;;
 x86_64-*-linux*)
 	# Target: GNU/Linux x86-64
@@ -618,7 +617,7 @@ x86_64-*-mingw*)
         # Target: MingW/amd64
 	gdb_target_obs="amd64-tdep.o amd64-windows-tdep.o \
                         i386-tdep.o i386-cygwin-tdep.o i387-tdep.o \
-                        solib-target.o windows-tdep.o"
+                        windows-tdep.o"
 	build_gdbserver=yes
         ;;
 x86_64-*-netbsd* | x86_64-*-knetbsd*-gnu)

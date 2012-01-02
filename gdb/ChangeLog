@@ -1,3 +1,14 @@
+2012-01-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* Makefile.in (ALL_TARGET_OBS): Remove solib-target.o.
+	* configure.tgt (arm*-wince-pe, arm*-*-mingw32ce*, arm*-*-symbianelf*)
+	(i[34567]86-*-dicos*, i[34567]86-*-cygwin*, i[34567]86-*-mingw32*)
+	(x86_64-*-dicos*, x86_64-*-mingw*): Remove solib-target.o.
+	Revert this part of:
+	2012-01-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	Build gdb directly from *.o files not using libgdb.a.
+	* Makefile.in (COMMON_OBS): Remove solib-target.o.
+
 2012-01-02  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb/common/gdb_thread_db.h, gdb/dbxread.c, gdb/environ.c,
