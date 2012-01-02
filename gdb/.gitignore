@@ -7,7 +7,6 @@
 /cp-name-parser.c
 /f-exp.c
 /gdb
-/gdbtui
 /init.c
 /jv-exp.c
 /m2-exp.c

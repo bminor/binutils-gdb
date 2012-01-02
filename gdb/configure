@@ -9770,10 +9770,6 @@ if test x"$enable_tui" != xno; then
       CONFIG_DEPS="$CONFIG_DEPS \$(SUBDIR_TUI_DEPS)"
       CONFIG_SRCS="$CONFIG_SRCS \$(SUBDIR_TUI_SRCS)"
       ENABLE_CFLAGS="$ENABLE_CFLAGS \$(SUBDIR_TUI_CFLAGS)"
-      CONFIG_ALL="${CONFIG_ALL} all-tui"
-      CONFIG_CLEAN="${CONFIG_CLEAN} clean-tui"
-      CONFIG_INSTALL="${CONFIG_INSTALL} install-tui"
-      CONFIG_UNINSTALL="${CONFIG_UNINSTALL} uninstall-tui"
     else
       if test x"$enable_tui" = xyes; then
 	as_fn_error "no enhanced curses library found; disable TUI" "$LINENO" 5

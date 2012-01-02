@@ -6,6 +6,9 @@
 * GDBserver now supports stdio connections.
   E.g. (gdb) target remote | ssh myhost gdbserver - hello
 
+* The binary "gdbtui" can no longer be built or installed.
+  Use "gdb -tui" instead.
+
 *** Changes in GDB 7.4
 
 * GDB now handles ambiguous linespecs more consistently; the existing

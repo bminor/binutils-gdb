@@ -31,9 +31,6 @@
 @c Name of GDB program.  Used also for (gdb) prompt string.
 @set GDBP gdb
 @c 
-@c Name of GDBTUI program.
-@set GDBTUI gdbtui
-@c 
 @c Name of GDB product.  Used in running text.
 @set GDBN @sc{gdb}
 @c

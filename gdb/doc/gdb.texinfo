@@ -1181,10 +1181,9 @@ Run using @var{device} for your program's standard input and output.
 Activate the @dfn{Text User Interface} when starting.  The Text User
 Interface manages several text windows on the terminal, showing
 source, assembly, registers and @value{GDBN} command outputs
-(@pxref{TUI, ,@value{GDBN} Text User Interface}).  Alternatively, the
-Text User Interface can be enabled by invoking the program
-@samp{@value{GDBTUI}}.  Do not use this option if you run @value{GDBN} from
-Emacs (@pxref{Emacs, ,Using @value{GDBN} under @sc{gnu} Emacs}).
+(@pxref{TUI, ,@value{GDBN} Text User Interface}).  Do not use this
+option if you run @value{GDBN} from Emacs (@pxref{Emacs, ,
+Using @value{GDBN} under @sc{gnu} Emacs}).
 
 @c @item -xdb
 @c @cindex @code{--xdb}
@@ -24985,9 +24984,8 @@ commands in separate text windows.  The TUI mode is supported only
 on platforms where a suitable version of the @code{curses} library
 is available.
 
-@pindex @value{GDBTUI}
 The TUI mode is enabled by default when you invoke @value{GDBN} as
-either @samp{@value{GDBTUI}} or @samp{@value{GDBP} -tui}.
+@samp{@value{GDBP} -tui}.
 You can also switch in and out of TUI mode while @value{GDBN} runs by
 using various TUI commands and key bindings, such as @kbd{C-x C-a}. 
 @xref{TUI Keys, ,TUI Key Bindings}.

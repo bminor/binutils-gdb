@@ -224,9 +224,6 @@ SUBDIR_MI_CFLAGS=
 # TUI sub directory definitions
 #
 
-# Name of the TUI program
-TUI=gdbtui
-
 SUBDIR_TUI_OBS = \
 	tui-command.o \
 	tui-data.o \
@@ -237,7 +234,6 @@ SUBDIR_TUI_OBS = \
 	tui-io.o \
 	tui-layout.o \
 	tui-out.o \
-	tui-main.o \
 	tui-regs.o \
 	tui-source.o \
 	tui-stack.o \
@@ -256,7 +252,6 @@ SUBDIR_TUI_SRCS = \
 	tui/tui-interp.c \
 	tui/tui-io.c \
 	tui/tui-layout.c \
-	tui/tui-main.c \
 	tui/tui-out.c \
 	tui/tui-regs.c \
 	tui/tui-source.c \
@@ -962,8 +957,6 @@ generated_files = config.h observer.h observer.inc ada-lex.c jit-reader.h \
 
 all: gdb$(EXEEXT) $(CONFIG_ALL)
 	@$(MAKE) $(FLAGS_TO_PASS) DO=all "DODIRS=`echo $(SUBDIRS) | sed 's/testsuite//'`" subdir_do
-.PHONY: all-tui
-all-tui: $(TUI)$(EXEEXT)
 
 installcheck:
 
@@ -1042,22 +1035,6 @@ install-only: $(CONFIG_INSTALL)
 		$(SHELL) $(srcdir)/../mkinstalldirs $(DESTDIR)$(includedir)/gdb ; \
 		$(INSTALL_DATA) jit-reader.h $(DESTDIR)$(includedir)/gdb/jit-reader.h
 	@$(MAKE) DO=install "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS) subdir_do
-.PHONY: install-tui
-install-tui:
-	transformed_name=`t='$(program_transform_name)'; \
-			  echo $(TUI) | sed -e "$$t"` ; \
-		if test "x$$transformed_name" = x; then \
-		  transformed_name=$(TUI) ; \
-		else \
-		  true ; \
-		fi ; \
-		$(SHELL) $(srcdir)/../mkinstalldirs $(DESTDIR)$(bindir) ; \
-		$(INSTALL_PROGRAM) $(TUI)$(EXEEXT) \
-			$(DESTDIR)$(bindir)/$$transformed_name$(EXEEXT) ; \
-		$(SHELL) $(srcdir)/../mkinstalldirs \
-			$(DESTDIR)$(man1dir) ; \
-		$(INSTALL_DATA) $(srcdir)/gdb.1 \
-			$(DESTDIR)$(man1dir)/$$transformed_name.1
 
 install-python:
 	$(SHELL) $(srcdir)/../mkinstalldirs $(DESTDIR)$(GDB_DATADIR)/python/gdb
@@ -1073,17 +1050,6 @@ uninstall: force $(CONFIG_UNINSTALL)
 		rm -f $(DESTDIR)$(bindir)/$$transformed_name$(EXEEXT) \
 		      $(DESTDIR)$(man1dir)/$$transformed_name.1
 	@$(MAKE) DO=uninstall "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS) subdir_do
-.PHONY: uninstall-tui
-uninstall-tui:
-	transformed_name=`t='$(program_transform_name)'; \
-			  echo $(TUI) | sed -e $$t` ; \
-		if test "x$$transformed_name" = x; then \
-		  transformed_name=$(TUI) ; \
-		else \
-		  true ; \
-		fi ; \
-		rm -f $(DESTDIR)$(bindir)/$$transformed_name$(EXEEXT) \
-		      $(DESTDIR)$(man1dir)/$$transformed_name.1
 
 # The C++ name parser can be built standalone for testing.
 test-cp-name-parser.o: cp-name-parser.c
@@ -1187,12 +1153,6 @@ gdb$(EXEEXT): gdb.o libgdb.a $(ADD_DEPS) $(CDEPS) $(TDEPLIBS)
 		-o gdb$(EXEEXT) gdb.o libgdb.a \
 		$(TDEPLIBS) $(TUI_LIBRARY) $(CLIBS) $(LOADLIBES)
 
-$(TUI)$(EXEEXT): tui-main.o libgdb.a $(ADD_DEPS) $(CDEPS) $(TDEPLIBS)
-	rm -f $(TUI)$(EXEEXT)
-	$(CC_LD) $(INTERNAL_LDFLAGS) $(WIN32LDAPP) \
-		-o $(TUI)$(EXEEXT) tui-main.o libgdb.a \
-		$(TDEPLIBS) $(TUI_LIBRARY) $(CLIBS) $(LOADLIBES)
-
 # Convenience rule to handle recursion.
 $(LIBGNU) $(GNULIB_H): all-lib
 all-lib: gnulib/Makefile
@@ -1252,10 +1212,6 @@ clean mostlyclean: $(CONFIG_CLEAN)
 	rm -f test-cp-name-parser$(EXEEXT)
 	rm -f xml-builtin.c stamp-xml
 	rm -f $(DEPDIR)/*
-
-.PHONY: clean-tui
-clean-tui:
-	rm -f $(TUI)$(EXEEXT)
 
 # This used to depend on c-exp.c m2-exp.c TAGS
 # I believe this is wrong; the makefile standards for distclean just
@@ -2022,10 +1978,6 @@ tui-layout.o: $(srcdir)/tui/tui-layout.c
 	$(COMPILE) $(srcdir)/tui/tui-layout.c
 	$(POSTCOMPILE)
 
-tui-main.o: $(srcdir)/tui/tui-main.c
-	$(COMPILE) $(srcdir)/tui/tui-main.c
-	$(POSTCOMPILE)
-
 tui-out.o: $(srcdir)/tui/tui-out.c
 	$(COMPILE) $(srcdir)/tui/tui-out.c
 	$(POSTCOMPILE)
@@ -2211,7 +2163,7 @@ py-value.o: $(srcdir)/python/py-value.c
 
 # A list of all the objects we might care about in this build, for
 # dependency tracking.
-all_object_files = gdb.o tui-main.o $(LIBGDB_OBS) gdbtk-main.o \
+all_object_files = gdb.o $(LIBGDB_OBS) gdbtk-main.o \
 	test-cp-name-parser.o
 
 # Ensure that generated files are created early.  Use order-only

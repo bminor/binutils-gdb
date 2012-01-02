@@ -1,3 +1,11 @@
+2012-01-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Remove the gdbtui binary.
+	* all-cfg.texi (GDBTUI): Remove.
+	* gdb.texinfo (Mode Options): Remove the GDBTUI reference.
+	(TUI): Remove GDBTUI pindex.  Remove the GDBTUI reference.
+	* gdbint.texinfo (Testsuite): Replace `gdbtui' by `gdb -tui'.
+
 2011-12-23  Kevin Pouget  <kevin.pouget@st.com>
 
 	Introduce gdb.FinishBreakpoint in Python.

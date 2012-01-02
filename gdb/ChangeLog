@@ -1,3 +1,23 @@
+2012-01-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Remove the gdbtui binary.
+	* .gitignore (/gdbtui): Remove.
+	* Makefile.in (TUI): Remove.
+	(SUBDIR_TUI_OBS): Remove tui-main.o.
+	(SUBDIR_TUI_SRCS): Remove tui/tui-main.c.
+	(all-tui, install-tui, uninstall-tui, $(TUI)$(EXEEXT), clean-tui)
+	(tui-main.o): Remove.
+	(all_object_files): Remove tui-main.o.
+	* NEWS: New note for the gdbtui removal.
+	* configure: Rebuilt.
+	* configure.ac: No longer add all-tui, clean-tui, install-tui and
+	uninstall-tui to CONFIG_ALL, CONFIG_CLEAN, CONFIG_INSTALL and
+	CONFIG_UNINSTALL respectively.
+	* gdb.c (main): Remove args.interpreter_p initialization.
+	* main.c (captured_main): Set INTERPRETER_P directly by INTERP_CONSOLE.
+	* main.h (struct captured_main_args): Remove interpreter_p.
+	* tui/tui-main.c: Remove.
+
 2012-01-01  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (dwarf2_compute_name): Simplify objfile references.

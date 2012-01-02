@@ -7690,7 +7690,7 @@ make check RUNTESTFLAGS="GDB=/usr/bin/gdb GDBSERVER=/usr/bin/gdbserver"
 When running the testsuite normally one doesn't want whatever is in
 @file{~/.gdbinit} to interfere with the tests, therefore the test harness
 passes @option{-nx} to @value{GDBN}.  One also doesn't want any windowed
-version of @value{GDBN}, e.g., @command{gdbtui}, to run.
+version of @value{GDBN}, e.g., @samp{gdb -tui}, to run.
 This is achieved via @code{INTERNAL_GDBFLAGS}.  
 
 @smallexample
