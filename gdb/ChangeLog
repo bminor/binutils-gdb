@@ -1,5 +1,11 @@
 2012-01-01  Doug Evans  <dje@google.com>
 
+	* dwarf2read.c (read_signatured_type): Delete `objfile' arg.
+	All callers updated.
+	(load_full_comp_unit, queue_comp_unit, process_queue): Ditto.
+	(dw2_do_instantiate_symtab, dw2_instantiate_symtab): Ditto.
+	(process_psymtab_comp_unit, load_partial_comp_unit): Ditto.
+
 	* dwarf2read.c (load_cu): Move assert to more useful location.
 
 	* dwarf2read.c (free_heap_comp_unit): Renamed from free_one_comp_unit.
