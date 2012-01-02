@@ -181,6 +181,9 @@ struct mapped_index
   const char *constant_pool;
 };
 
+/* Collection of data recorded per objfile.
+   This hangs off of dwarf2_objfile_data_key.  */
+
 struct dwarf2_per_objfile
 {
   struct dwarf2_section_info info;
@@ -260,7 +263,8 @@ static struct dwarf2_per_objfile *dwarf2_per_objfile;
 /* Note that if the debugging section has been compressed, it might
    have a name like .zdebug_info.  */
 
-static const struct dwarf2_debug_sections dwarf2_elf_names = {
+static const struct dwarf2_debug_sections dwarf2_elf_names =
+{
   { ".debug_info", ".zdebug_info" },
   { ".debug_abbrev", ".zdebug_abbrev" },
   { ".debug_line", ".zdebug_line" },
@@ -426,7 +430,6 @@ struct dwarf2_cu
      This test is imperfect as there may exist optimized debug code not using
      any location list and still facing inlining issues if handled as
      unoptimized code.  For a future better test see GCC PR other/32998.  */
-
   unsigned int has_loclist : 1;
 };
 
@@ -464,7 +467,9 @@ struct dwarf2_per_cu_data
      of the CU cache it gets reset to NULL again.  */
   struct dwarf2_cu *cu;
 
-  /* The corresponding objfile.  */
+  /* The corresponding objfile.
+     Normally we can get the objfile from dwarf2_per_objfile.
+     However we can enter this file with just a "per_cu" handle.  */
   struct objfile *objfile;
 
   /* When using partial symbol tables, the 'psymtab' field is active.
@@ -1579,7 +1584,7 @@ dwarf2_section_empty_p (struct dwarf2_section_info *info)
   return info->asection == NULL || info->size == 0;
 }
 
-/* Read the contents of the section SECTP from object file specified by
+/* Read the contents of the section INFO from object file specified by
    OBJFILE, store info about the section into INFO.
    If the section is compressed, uncompress it before returning.  */
 
@@ -3767,10 +3772,8 @@ load_partial_comp_unit (struct dwarf2_per_cu_data *this_cu,
     }
 }
 
-/* Create a list of all compilation units in OBJFILE.  We do this only
-   if an inter-comp-unit reference is found; presumably if there is one,
-   there will be many, and one will occur early in the .debug_info section.
-   So there's no point in building this list incrementally.  */
+/* Create a list of all compilation units in OBJFILE.
+   This is only done for -readnow and building partial symtabs.  */
 
 static void
 create_all_comp_units (struct objfile *objfile)
@@ -4581,6 +4584,8 @@ dwarf2_psymtab_to_symtab (struct partial_symtab *pst)
 	}
     }
 }
+
+/* Reading in full CUs.  */
 
 /* Add PER_CU to the queue.  */
 
@@ -4765,7 +4770,7 @@ load_full_comp_unit (struct dwarf2_per_cu_data *per_cu,
   cu->dies = read_comp_unit (info_ptr, cu);
 
   /* We try not to read any attributes in this function, because not
-     all objfiles needed for references have been loaded yet, and symbol
+     all CUs needed for references have been loaded yet, and symbol
      table processing isn't initialized.  But we have to set the CU language,
      or we won't be able to build types correctly.  */
   prepare_one_comp_unit (cu, cu->dies);
@@ -4836,7 +4841,7 @@ compute_delayed_physnames (struct dwarf2_cu *cu)
     }
 }
 
-/* Generate full symbol information for PST and CU, whose DIEs have
+/* Generate full symbol information for PER_CU, whose DIEs have
    already been loaded into memory.  */
 
 static void
@@ -5741,6 +5746,7 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
 			       &dwarf2_per_objfile->macinfo, 0);
 	}
     }
+
   do_cleanups (back_to);
 }
 
@@ -14447,7 +14453,7 @@ read_signatured_type (struct objfile *objfile,
 				    NULL /*parent*/);
 
   /* We try not to read any attributes in this function, because not
-     all objfiles needed for references have been loaded yet, and symbol
+     all CUs needed for references have been loaded yet, and symbol
      table processing isn't initialized.  But we have to set the CU language,
      or we won't be able to build types correctly.  */
   prepare_one_comp_unit (cu, cu->dies);

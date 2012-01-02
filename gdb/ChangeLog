@@ -1,3 +1,14 @@
+2012-01-01  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (dwarf2_per_objfile): Add comment.
+	(dwarf2_elf_names): Minor reformat.
+	(dwarf2_per_cu_data): Tweak comment.
+	(dwarf2_read_section): Fix comment.
+	(create_all_comp_units): Fix comment.
+	(load_full_comp_unit): Fix comment.
+	(process_full_comp_unit): Fix comment.
+	(read_signatured_type): Fix comment.
+
 2011-12-30  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (read_typedef): Guard against self-referential typedefs.
