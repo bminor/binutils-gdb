@@ -1,5 +1,41 @@
 2012-01-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Build gdb directly from *.o files not using libgdb.a.
+	* Makefile.in (SUBDIR_TUI_OBS): Remove duplicate tui.o.
+	(COMMON_OBS): Remove solib-target.o.
+	(LIBGDB_OBS, libgdb.a): Move it before the gdb$(EXEEXT) rule.
+	(gdb$(EXEEXT)): Replace libgdb.a with $(LIBGDB_OBS).
+	(LIBGDB_OBS, libgdb.a): Move it above.
+	* configure.tgt (alpha*-*-linux*, alpha*-*-freebsd*)
+	(alpha*-*-kfreebsd*-gnu, alpha*-*-netbsd*, alpha*-*-knetbsd*-gnu)
+	(alpha*-*-openbsd*, am33_2.0*-*-linux*, arm*-wince-pe)
+	(arm*-*-mingw32ce*, arm*-*-linux*, arm*-*-netbsd*, arm*-*-knetbsd*-gnu)
+	(arm*-*-openbsd*, cris*, frv-*-*, hppa*-*-hpux*, hppa*-*-linux*)
+	(hppa*-*-netbsd*, hppa*-*-openbsd*, i[34567]86-*-darwin*)
+	(i[34567]86-*-dicos*, i[34567]86-*-freebsd*, i[34567]86-*-kfreebsd*-gnu)
+	(i[34567]86-*-netbsd*, i[34567]86-*-knetbsd*-gnu, i[34567]86-*-openbsd*)
+	(i[34567]86-*-nto*, i[34567]86-*-solaris2.1[0-9]*)
+	(x86_64-*-solaris2.1[0-9]*, i[34567]86-*-solaris*, i[34567]86-*-linux*)
+	(i[34567]86-*-gnu*, ia64-*-linux*, m32r*-*-linux*, m68*-*-linux*)
+	(m68*-*-netbsd*, m68*-*-knetbsd*-gnu, m68*-*-openbsd*)
+	(microblaze*-linux-*, microblaze*-*-linux*, mips*-sgi-irix5*)
+	(mips*-sgi-irix6*, mips*-*-linux*, mips*-*-netbsd*)
+	(mips*-*-knetbsd*-gnu, mips64*-*-openbsd*, powerpc-*-netbsd*)
+	(powerpc-*-knetbsd*-gnu, powerpc-*-openbsd*, powerpc-*-aix*, rs6000-*-*)
+	(powerpc-*-linux*, powerpc64-*-linux*, powerpc*-*-*, s390*-*-*)
+	(sh*-*-linux*, sh*-*-netbsdelf*, sh*-*-knetbsd*-gnu, sh*-*-openbsd*)
+	(sparc-*-linux*, sparc64-*-linux*, sparc*-*-freebsd*)
+	(sparc*-*-kfreebsd*-gnu, sparc-*-netbsd*, sparc-*-knetbsd*-gnu)
+	(sparc64-*-netbsd*, sparc64-*-knetbsd*-gnu, sparc-*-openbsd*)
+	(sparc64-*-openbsd*, sparc-*-solaris2.[0-6], sparc-*-solaris2.[0-6].*)
+	(sparc-*-solaris2*, sparcv9-*-solaris2*, sparc64-*-solaris2*)
+	(vax-*-netbsd*, vax-*-knetbsd*-gnu, x86_64-*-darwin*, x86_64-*-dicos*)
+	(x86_64-*-linux*, x86_64-*-freebsd*, x86_64-*-kfreebsd*-gnu)
+	(x86_64-*-netbsd*, x86_64-*-knetbsd*-gnu, x86_64-*-openbsd*)
+	(xtensa*-*-linux*, xtensa*): Remove solib.o from gdb_target_obs.
+
+2012-01-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Remove the gdbtui binary.
 	* .gitignore (/gdbtui): Remove.
 	* Makefile.in (TUI): Remove.

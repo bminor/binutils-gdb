@@ -228,7 +228,7 @@ SUBDIR_TUI_OBS = \
 	tui-command.o \
 	tui-data.o \
 	tui-disasm.o \
-	tui-file.o tui.o \
+	tui-file.o \
 	tui-hooks.o \
 	tui-interp.o \
 	tui-io.o \
@@ -908,7 +908,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	reggroups.o regset.o \
 	trad-frame.o \
 	tramp-frame.o \
-	solib.o solib-target.o \
+	solib.o \
 	prologue-value.o memory-map.o memrange.o \
 	xml-support.o xml-syscall.o xml-utils.o \
 	target-descriptions.o target-memory.o xml-tdesc.o xml-builtin.o \
@@ -1146,11 +1146,21 @@ init.c: $(INIT_FILES)
 
 .PRECIOUS: init.c
 
+# Create a library of the gdb object files and build GDB by linking
+# against that.
+#
+# init.o is very important.  It pulls in the rest of GDB.
+LIBGDB_OBS= $(COMMON_OBS) $(TSOBS) $(ADD_FILES) init.o
+libgdb.a: $(LIBGDB_OBS)
+	-rm -f libgdb.a
+	$(AR) q libgdb.a $(LIBGDB_OBS)
+	$(RANLIB) libgdb.a
+
 # Removing the old gdb first works better if it is running, at least on SunOS.
-gdb$(EXEEXT): gdb.o libgdb.a $(ADD_DEPS) $(CDEPS) $(TDEPLIBS)
+gdb$(EXEEXT): gdb.o $(LIBGDB_OBS) $(ADD_DEPS) $(CDEPS) $(TDEPLIBS)
 	rm -f gdb$(EXEEXT)
 	$(CC_LD) $(INTERNAL_LDFLAGS) $(WIN32LDAPP) \
-		-o gdb$(EXEEXT) gdb.o libgdb.a \
+		-o gdb$(EXEEXT) gdb.o $(LIBGDB_OBS) \
 		$(TDEPLIBS) $(TUI_LIBRARY) $(CLIBS) $(LOADLIBES)
 
 # Convenience rule to handle recursion.
@@ -1163,16 +1173,6 @@ all-lib: gnulib/Makefile
 .PHONY: all-data-directory
 all-data-directory: data-directory/Makefile
 	@$(MAKE) $(FLAGS_TO_PASS) DO=all DODIRS=data-directory subdir_do
-
-# Create a library of the gdb object files and build GDB by linking
-# against that.
-#
-# init.o is very important.  It pulls in the rest of GDB.
-LIBGDB_OBS= $(COMMON_OBS) $(TSOBS) $(ADD_FILES) init.o
-libgdb.a: $(LIBGDB_OBS)
-	-rm -f libgdb.a
-	$(AR) q libgdb.a $(LIBGDB_OBS)
-	$(RANLIB) libgdb.a
 
 # This is useful when debugging GDB, because some Unix's don't let you run GDB
 # on itself without copying the executable.  So "make gdb1" will make
