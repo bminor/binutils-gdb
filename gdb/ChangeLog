@@ -1,5 +1,14 @@
 2012-01-01  Doug Evans  <dje@google.com>
 
+	* dwarf2read.c (dwarf2_compute_name): Simplify objfile references.
+	(dwarf2_physname, read_import_statement): Ditto.
+	(read_call_site_scope, dwarf2_record_block_ranges): Ditto.
+	(process_structure_scope read_subroutine_type): Ditto.
+	(read_typedef, load_partial_dies, read_partial_die): Ditto.
+	(find_partial_die, dwarf_decode_lines, lookup_die_type): Ditto.
+	(dwarf2_fetch_die_location_block): Ditto.
+	(dwarf_decode_macros, dwarf2_symbol_mark_computed): Ditto.
+
 	* dwarf2read.c (read_signatured_type): Delete `objfile' arg.
 	All callers updated.
 	(load_full_comp_unit, queue_comp_unit, process_queue): Ditto.
