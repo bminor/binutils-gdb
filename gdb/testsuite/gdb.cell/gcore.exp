@@ -65,6 +65,8 @@ if ![runto_main] then {
   return 0
 }
 
+delete_breakpoints
+
 gdb_test "continue" ".*Aborted.*"
 
 set escapedfilename [string_to_regexp ${objdir}/${subdir}/gcore.test]

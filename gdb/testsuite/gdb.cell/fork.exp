@@ -61,6 +61,8 @@ if ![runto_main] then {
   return 0
 }
 
+delete_breakpoints
+
 gdb_test_no_output "set spu stop-on-load" "set spu stop-on-load"
 
 gdb_test "continue" "Continuing\\..*Temporary breakpoint \[0-9\]+, main \\(speid=.*, argp=.*, envp=.*\\) at .*$spu_file\\.c:.*spu_write_out_intr_mbox.*" \

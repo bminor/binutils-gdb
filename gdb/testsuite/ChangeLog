@@ -1,3 +1,10 @@
+2012-01-02  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdb.cell/fork.exp: Delete breakpoints after reaching main.
+	* gdb.cell/gcore.exp: Likewise.
+	* gdb.cell/solib-symbol.exp: Use "info symbol" instead of "break"
+	to verify the correct instance of main is selected.
+
 2011-12-23  Kevin Pouget  <kevin.pouget@st.com>
 
 	Introduce gdb.FinishBreakpoint in Python
