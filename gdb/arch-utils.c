@@ -86,7 +86,7 @@ displaced_step_at_entry_point (struct gdbarch *gdbarch)
      We don't want displaced stepping to interfere with those
      breakpoints, so leave space.  */
   gdbarch_breakpoint_from_pc (gdbarch, &addr, &bp_len);
-  addr += bp_len * 2;
+  addr += bp_len * 3;
 
   return addr;
 }
