@@ -1277,7 +1277,7 @@ static void init_one_comp_unit (struct dwarf2_cu *cu,
 static void prepare_one_comp_unit (struct dwarf2_cu *cu,
 				   struct die_info *comp_unit_die);
 
-static void free_one_comp_unit (void *);
+static void free_heap_comp_unit (void *);
 
 static void free_cached_comp_units (void *);
 
@@ -3714,7 +3714,7 @@ load_partial_comp_unit (struct dwarf2_per_cu_data *this_cu,
       read_cu = 1;
 
       /* If an error occurs while loading, release our storage.  */
-      free_cu_cleanup = make_cleanup (free_one_comp_unit, cu);
+      free_cu_cleanup = make_cleanup (free_heap_comp_unit, cu);
 
       info_ptr = partial_read_comp_unit_head (&cu->header, info_ptr,
 					      dwarf2_per_objfile->info.buffer,
@@ -4731,7 +4731,7 @@ load_full_comp_unit (struct dwarf2_per_cu_data *per_cu,
       read_cu = 1;
 
       /* If an error occurs while loading, release our storage.  */
-      free_cu_cleanup = make_cleanup (free_one_comp_unit, cu);
+      free_cu_cleanup = make_cleanup (free_heap_comp_unit, cu);
 
       /* Read in the comp_unit header.  */
       info_ptr = read_comp_unit_head (&cu->header, info_ptr, abfd);
@@ -14429,7 +14429,7 @@ read_signatured_type (struct objfile *objfile,
   cu->per_cu = &type_sig->per_cu;
 
   /* If an error occurs while loading, release our storage.  */
-  free_cu_cleanup = make_cleanup (free_one_comp_unit, cu);
+  free_cu_cleanup = make_cleanup (free_heap_comp_unit, cu);
 
   types_ptr = read_type_comp_unit_head (&cu->header, section, &signature,
 					types_ptr, objfile->obfd);
@@ -15895,7 +15895,7 @@ prepare_one_comp_unit (struct dwarf2_cu *cu, struct die_info *comp_unit_die)
    cleanup routine.  */
 
 static void
-free_one_comp_unit (void *data)
+free_heap_comp_unit (void *data)
 {
   struct dwarf2_cu *cu = data;
 
@@ -15951,7 +15951,7 @@ free_cached_comp_units (void *data)
 
       next_cu = per_cu->cu->read_in_chain;
 
-      free_one_comp_unit (per_cu->cu);
+      free_heap_comp_unit (per_cu->cu);
       *last_chain = next_cu;
 
       per_cu = next_cu;
@@ -15986,7 +15986,7 @@ age_cached_comp_units (void)
 
       if (!per_cu->cu->mark)
 	{
-	  free_one_comp_unit (per_cu->cu);
+	  free_heap_comp_unit (per_cu->cu);
 	  *last_chain = next_cu;
 	}
       else
@@ -16013,7 +16013,7 @@ free_one_cached_comp_unit (void *target_cu)
 
       if (per_cu->cu == target_cu)
 	{
-	  free_one_comp_unit (per_cu->cu);
+	  free_heap_comp_unit (per_cu->cu);
 	  *last_chain = next_cu;
 	  break;
 	}
