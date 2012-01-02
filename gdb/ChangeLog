@@ -1,3 +1,7 @@
+2012-01-02  Joel Brobecker  <brobecker@adacore.com>
+
+	* top.c (print_gdb_version): Update copyright year.
+
 2012-01-02  Yao Qi  <yao@codesourcery.com>
 
 	* inf-ptrace.c (inf_ptrace_xfer_partial): Reindent.
