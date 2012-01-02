@@ -1,5 +1,9 @@
 2012-01-02  Joel Brobecker  <brobecker@adacore.com>
 
+	* config/djgpp/fnchange.lst: Add entry for ChangeLog-2011.
+
+2012-01-02  Joel Brobecker  <brobecker@adacore.com>
+
 	* top.c (print_gdb_version): Update copyright year.
 
 2012-01-02  Yao Qi  <yao@codesourcery.com>
