@@ -1,5 +1,9 @@
 2012-01-02  Joel Brobecker  <brobecker@adacore.com>
 
+	* terminal.h: Reformat copyright header.
+
+2012-01-02  Joel Brobecker  <brobecker@adacore.com>
+
 	* server.c (gdbserver_version): Update copyright year.
 	* gdbreplay.c (gdbreplay_version): Likewise.
 

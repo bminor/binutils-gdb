@@ -1,6 +1,6 @@
 /* This test script is part of GDB, the GNU debugger.
 
-   Copyright 1993, 1994, 1997, 1998, 1999, 2003, 2004,
+   Copyright 1993, 1994, 1997, 1998, 1999, 2003, 2004
    Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify

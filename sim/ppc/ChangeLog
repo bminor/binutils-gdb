@@ -1,3 +1,7 @@
+2012-01-02  Joel Brobecker  <brobecker@adacore.com>
+
+	* dp-bit.c: Reformat copyright header.
+
 2011-02-11  Ben Golding  <ben_golding@yahoo.co.uk>
 
 	* events.c: add #include <stdlib.h> for free(). Fix PR build/13372.

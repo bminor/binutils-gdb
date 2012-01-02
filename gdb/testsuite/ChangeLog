@@ -1,3 +1,17 @@
+2012-01-02  Joel Brobecker  <brobecker@adacore.com>
+
+	* dg-extract-results.sh, gdb.arch/gcore.c, gdb.arch/gdb1558.c,
+	gdb.arch/i386-gnu-cfi.c, gdb.base/complex.c, gdb.base/cvexpr.c,
+	gdb.base/gcore.c, gdb.base/gdb1555-main.c, gdb.base/gdb1555.c,
+	gdb.base/gdb1821.c, gdb.base/long_long.c, gdb.base/restore.c,
+	gdb.base/sepdebug.c, gdb.base/type-opaque-lib.c,
+	gdb.base/type-opaque-main.c, gdb.cp/maint.exp, gdb.cp/namespace1.cc,
+	gdb.cp/pr9631.cc, gdb.cp/psmang1.cc, gdb.cp/psmang2.cc,
+	gdb.cp/try_catch.cc, gdb.cp/virtfunc.cc, gdb.hp/gdb.base-hp/reg.exp,
+	gdb.mi/basics.c, gdb.mi/mi-stack.c, gdb.mi/mi-var-child.c,
+	gdb.mi/mi2-var-child.exp, gdb.mi/var-cmd.c,
+	gdb.threads/thread_check.c: Reformat copyright header.
+
 2011-12-30  Edjunior Machado  <emachado@linux.vnet.ibm.com>
 
 	* gdb.python/py-finish-breakpoint.exp: Add `.' prefix for ppc64.
