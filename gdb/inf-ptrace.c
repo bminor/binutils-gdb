@@ -590,7 +590,7 @@ inf_ptrace_xfer_partial (struct target_ops *ops, enum target_object object,
 	struct ptrace_io_desc piod;
 
 	if (writebuf)
-		return -1;
+	  return -1;
 	piod.piod_op = PIOD_READ_AUXV;
 	piod.piod_addr = readbuf;
 	piod.piod_offs = (void *) (long) offset;
