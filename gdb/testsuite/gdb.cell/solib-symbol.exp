@@ -61,20 +61,19 @@ if ![runto_main] then {
   return 0
 }
 
-# Breakpoint resolved in PPU thread.
-gdb_test "break foo" \
-	 "Breakpoint.*file.*$ppu_file.c.*" \
-	 "br foo in break"
+# Symbol resolved in PPU thread.
+gdb_test "info symbol foo" \
+	 "foo in section \.text of .*$ppu_file\[\r\n\]+.*" \
+	 "info symbol foo in break"
 
 # Continue to SPU
 cont_spu_main
 check_spu_arch ""
 
-# Breakpoint resolved in SPU thread.
-delete_breakpoints
-gdb_test "break foo" \
-	 "Breakpoint.*file.*$spu_file.c.*" \
-	 "br foo in $spu_file.c"
+# Symbol resolved in SPU thread.
+gdb_test "info symbol foo" \
+	 "foo in section \.text of .*$spu_file@.*" \
+	 "info symbol foo in break-spu"
 
 gdb_exit
 return 0

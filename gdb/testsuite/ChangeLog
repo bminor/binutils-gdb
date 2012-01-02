@@ -1,3 +1,10 @@
+2011-01-02  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdb.cell/fork.exp: Delete breakpoints after reaching main.
+	* gdb.cell/gcore.exp: Likewise.
+	* gdb.cell/solib-symbol.exp: Use "info symbol" instead of "break"
+	to verify the correct instance of main is selected.
+
 2012-01-02  Joel Brobecker  <brobecker@adacore.com>
 
 	* dg-extract-results.sh, gdb.arch/gcore.c, gdb.arch/gdb1558.c,
