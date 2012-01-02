@@ -1833,9 +1833,9 @@ load_cu (struct dwarf2_per_cu_data *per_cu)
   else
     load_full_comp_unit (per_cu, per_cu->objfile);
 
-  dwarf2_find_base_address (per_cu->cu->dies, per_cu->cu);
-
   gdb_assert (per_cu->cu != NULL);
+
+  dwarf2_find_base_address (per_cu->cu->dies, per_cu->cu);
 }
 
 /* Read in the symbols for PER_CU.  OBJFILE is the objfile from which

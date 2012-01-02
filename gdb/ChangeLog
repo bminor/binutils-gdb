@@ -1,5 +1,7 @@
 2012-01-01  Doug Evans  <dje@google.com>
 
+	* dwarf2read.c (load_cu): Move assert to more useful location.
+
 	* dwarf2read.c (free_heap_comp_unit): Renamed from free_one_comp_unit.
 	All callers updated.
 
