@@ -355,6 +355,7 @@ update_debug_registers_callback (struct lwp_info *lwp, void *arg)
   if (!lwp->stopped)
     linux_stop_lwp (lwp);
 
+  /* Continue the iteration.  */
   return 0;
 }
 

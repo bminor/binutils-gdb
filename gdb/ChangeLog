@@ -1,5 +1,11 @@
 2012-01-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* amd64-linux-nat.c (update_debug_registers_callback): New comment on
+	the return value.
+	* i386-linux-nat.c (update_debug_registers_callback): Likewise.
+
+2012-01-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Build gdb directly from *.o files not using libgdb.a.
 	* Makefile.in (SUBDIR_TUI_OBS): Remove duplicate tui.o.
 	(COMMON_OBS): Remove solib-target.o.
