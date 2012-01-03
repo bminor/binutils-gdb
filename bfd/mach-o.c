@@ -1789,7 +1789,7 @@ bfd_mach_o_mangle_symbols (bfd *abfd, bfd_mach_o_data_struct *mdata)
 
       /* Unless we're looking at an indirect sym, note the input ordering.
 	 We use this to keep local symbols ordered as per the input.  */
-      if (IS_MACHO_INDIRECT (s->n_type))
+      if (! IS_MACHO_INDIRECT (s->n_type))
 	s->symbol.udata.i = i;
     }
 

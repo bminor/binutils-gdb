@@ -1,5 +1,9 @@
 2012-01-03  Iain Sandoe  <idsandoe@googlemail.com>
 
+	* mach-o.c (bfd_mach_o_mangle_symbols): Correct typo.
+
+2012-01-03  Iain Sandoe  <idsandoe@googlemail.com>
+
 	* mach-o.c (bfd_mach_o_write_symtab): Fill in the string table index
 	as the value of an indirect symbol.  Keep the string table index in
 	non-indirect syms for reference.
