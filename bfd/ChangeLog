@@ -1,5 +1,12 @@
 2012-01-03  Iain Sandoe  <idsandoe@googlemail.com>
 
+	* mach-o.c (bfd_mach_o_mangle_symbols): Put in the section index
+	for stabd symbols.
+	(bfd_mach_o_primary_symbol_sort_key): Adjust for stabs.
+	(bfd_mach_o_cf_symbols): Likewise.
+
+2012-01-03  Iain Sandoe  <idsandoe@googlemail.com>
+
 	* mach-o.c (bfd_mach_o_mangle_symbols): Correct typo.
 
 2012-01-03  Iain Sandoe  <idsandoe@googlemail.com>

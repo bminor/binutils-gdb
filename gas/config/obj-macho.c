@@ -1,5 +1,5 @@
 /* Mach-O object file format
-   Copyright 2009, 2011 Free Software Foundation, Inc.
+   Copyright 2009, 2011, 2012 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -850,3 +850,43 @@ const pseudo_typeS mach_o_pseudo_table[] =
 
   {NULL, NULL, 0}
 };
+
+/* Support stabs for mach-o.  */
+
+void
+obj_mach_o_process_stab (int what, const char *string,
+			 int type, int other, int desc)
+{
+  symbolS *symbolP;
+  bfd_mach_o_asymbol *s;
+
+  switch (what)
+    {
+      case 'd':
+	symbolP = symbol_new ("", now_seg, frag_now_fix (), frag_now);
+	/* Special stabd NULL name indicator.  */
+	S_SET_NAME (symbolP, NULL);
+	break;
+
+      case 'n':
+      case 's':
+	symbolP = symbol_new (string, undefined_section, (valueT) 0,
+			      &zero_address_frag);
+	pseudo_set (symbolP);
+	break;
+
+      default:
+	as_bad(_("unrecognized stab type '%c'"), (char)what);
+	abort ();
+	break;
+    }
+
+  s = (bfd_mach_o_asymbol *) symbol_get_bfdsym (symbolP);
+  s->n_type = type;
+  s->n_desc = desc;
+  /* For stabd, this will eventually get overwritten by the section number.  */
+  s->n_sect = other;
+
+  /* It's a debug symbol.  */
+  s->symbol.flags |= BSF_DEBUGGING;
+}

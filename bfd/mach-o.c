@@ -1625,19 +1625,25 @@ bfd_mach_o_write_dysymtab (bfd *abfd, bfd_mach_o_load_command *command)
 }
 
 static unsigned
-bfd_mach_o_primary_symbol_sort_key (unsigned type, unsigned ext)
+bfd_mach_o_primary_symbol_sort_key (unsigned type)
 {
-  /* TODO: Determine the correct ordering of stabs symbols.  */
-  /* We make indirect symbols a local/synthetic.  */
-  if (type == BFD_MACH_O_N_INDR)
+  unsigned mtyp = type & BFD_MACH_O_N_TYPE;
+
+  /* Just leave debug symbols where they are (pretend they are local, and
+     then they will just be sorted on position).  */
+  if (type & BFD_MACH_O_N_STAB)
+    return 0;
+
+  /* Sort indirects to last.  */
+  if (mtyp == BFD_MACH_O_N_INDR)
     return 3;
 
   /* Local (we should never see an undefined local AFAICT).  */
-  if (! ext)
+  if (! (type & (BFD_MACH_O_N_EXT | BFD_MACH_O_N_PEXT)))
     return 0;
 
   /* Common symbols look like undefined externs.  */
-  if (type == BFD_MACH_O_N_UNDF)
+  if (mtyp == BFD_MACH_O_N_UNDF)
     return 2;
 
   /* A defined symbol that's not indirect or extern.  */
@@ -1651,19 +1657,15 @@ bfd_mach_o_cf_symbols (const void *a, const void *b)
   bfd_mach_o_asymbol *sb = *(bfd_mach_o_asymbol **) b;
   unsigned int soa, sob;
 
-  soa = bfd_mach_o_primary_symbol_sort_key 
-  			(sa->n_type & BFD_MACH_O_N_TYPE,
-			 sa->n_type & (BFD_MACH_O_N_PEXT | BFD_MACH_O_N_EXT));
-  sob = bfd_mach_o_primary_symbol_sort_key
-  			(sb->n_type & BFD_MACH_O_N_TYPE,
-			 sb->n_type & (BFD_MACH_O_N_PEXT | BFD_MACH_O_N_EXT));
+  soa = bfd_mach_o_primary_symbol_sort_key (sa->n_type);
+  sob = bfd_mach_o_primary_symbol_sort_key (sb->n_type);
   if (soa < sob)
     return -1;
 
   if (soa > sob)
     return 1;
 
-  /* If it's local, just preserve the input order.  */
+  /* If it's local or stab, just preserve the input order.  */
   if (soa == 0)
     {
       if (sa->symbol.udata.i < sb->symbol.udata.i)
@@ -1782,10 +1784,12 @@ bfd_mach_o_mangle_symbols (bfd *abfd, bfd_mach_o_data_struct *mdata)
         }
 
       /* Put the section index in, where required.  */
-      if (s->symbol.section != bfd_abs_section_ptr
+      if ((s->symbol.section != bfd_abs_section_ptr
           && s->symbol.section != bfd_und_section_ptr
           && s->symbol.section != bfd_com_section_ptr)
-        s->n_sect = s->symbol.section->target_index;
+          || ((s->n_type & BFD_MACH_O_N_STAB) != 0
+               && s->symbol.name == NULL))
+	s->n_sect = s->symbol.section->target_index;
 
       /* Unless we're looking at an indirect sym, note the input ordering.
 	 We use this to keep local symbols ordered as per the input.  */

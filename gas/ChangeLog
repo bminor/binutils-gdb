@@ -1,3 +1,9 @@
+2012-01-03  Iain Sandoe  <idsandoe@googlemail.com>
+
+	* config/obj-macho.c (obj_macho_process_stab): New.
+	* config/obj-macho.h (OBJ_PROCESS_STAB): Define.
+	(obj_macho_process_stab): Declare.
+
 2011-12-29  Iain Sandoe  <idsandoe@googlemail.com>
 
 	* as.c (perform_an_assembly_pass): Do not create text, data and bss

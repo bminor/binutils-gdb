@@ -1,5 +1,5 @@
 /* Mach-O object file format for gas, the assembler.
-   Copyright 2009, 2011 Free Software Foundation, Inc.
+   Copyright 2009, 2011, 2012 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -57,5 +57,8 @@ extern const pseudo_typeS mach_o_pseudo_table[];
 #define obj_symbol_new_hook(s)	{;}
 
 #define EMIT_SECTION_SYMBOLS		0
+
+#define OBJ_PROCESS_STAB(SEG,W,S,T,O,D)	obj_mach_o_process_stab(W,S,T,O,D)
+extern void obj_mach_o_process_stab (int, const char *,int, int, int);
 
 #endif /* _OBJ_MACH_O_H */
