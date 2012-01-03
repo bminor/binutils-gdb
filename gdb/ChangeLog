@@ -1,3 +1,11 @@
+2012-01-03  Tom Tromey  <tromey@redhat.com>
+
+	PR python/12533:
+	* python/py-value.c (valpy_dereference, valpy_get_address
+	valpy_get_dynamic_type, valpy_lazy_string, valpy_do_cast)
+	(valpy_getitem, valpy_call, valpy_binop, valpy_negative)
+	(valpy_absolute, valpy_richcompare): Free intermediate values.
+
 2011-01-03  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c: Reformat the copyright notice.
