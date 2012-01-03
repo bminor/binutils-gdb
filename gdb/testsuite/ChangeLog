@@ -1,3 +1,7 @@
+2012-01-03  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.base/auxv.exp: Reformat the copyright notice.
+
 2012-01-03  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.trace/strace.exp (strace_trace_on_same_addr): New.

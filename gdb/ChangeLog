@@ -1,3 +1,7 @@
+2011-01-03  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c: Reformat the copyright notice.
+
 2012-01-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* Makefile.in (ALL_TARGET_OBS): Remove solib-target.o.
