@@ -1,3 +1,31 @@
+2012-01-03  Iain Sandoe  <idsandoe@googlemail.com>
+
+	* mach-o.c (bfd_mach_o_write_symtab): Fill in the string table index
+	as the value of an indirect symbol.  Keep the string table index in
+	non-indirect syms for reference.
+	(bfd_mach_o_write_dysymtab): New.
+	(bfd_mach_o_primary_symbol_sort_key): New.
+	(bfd_mach_o_cf_symbols): New.
+	(bfd_mach_o_sort_symbol_table): New.
+	(bfd_mach_o_mangle_symbols): Return early if no symbols.  Sort symbols.
+	If we are emitting a dysymtab, process indirect symbols and count the
+	number of each other kind.
+	(bfd_mach_o_mangle_sections): New.
+	(bfd_mach_o_write_contents): Split out some pre-requisite code into
+	the command builder. Write dysymtab if the command is present.
+	(bfd_mach_o_count_sections_for_seg): New.
+	(bfd_mach_o_build_seg_command): New.
+	(bfd_mach_o_build_dysymtab_command): New.
+	(bfd_mach_o_build_commands): Reorganize to support the fact that some
+	commands are optional and should not be emitted if there are no
+	sections or symbols.
+	(bfd_mach_o_set_section_contents): Amend comment.
+	* mach-o.h: Amend and add to comments. 
+	(mach_o_data_struct): Add fields for dysymtab symbols counts and a
+	pointer to the indirects, when present.
+	(bfd_mach_o_should_emit_dysymtab): New macro.
+	(IS_MACHO_INDIRECT): Likewise.
+
 2011-12-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* elf32-rl78.c (rl78_elf_relocate_section, rl78_dump_symtab)

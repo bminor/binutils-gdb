@@ -1,6 +1,6 @@
 /* Mach-O support for BFD.
    Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008,
-   2009, 2010, 2011
+   2009, 2010, 2011, 2012
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -29,6 +29,8 @@
 #include "mach-o/reloc.h"
 #include "mach-o/external.h"
 #include <ctype.h>
+#include <stdlib.h>
+#include <string.h>
 
 #define bfd_mach_o_object_p bfd_mach_o_gen_object_p
 #define bfd_mach_o_core_p bfd_mach_o_gen_core_p
@@ -1351,13 +1353,34 @@ bfd_mach_o_write_symtab (bfd *abfd, bfd_mach_o_load_command *command)
       bfd_size_type str_index;
       bfd_mach_o_asymbol *s = (bfd_mach_o_asymbol *)symbols[i];
 
-      /* Compute name index.  */
-      /* An index of 0 always means the empty string.  */
+      /* For a bare indirect symbol, the system tools expect that the symbol
+	 value will be the string table offset for its referenced counterpart.
+	 
+	 Normally, indirect syms will not be written this way, but rather as
+	 part of the dysymtab command.
+	 
+	 In either case, correct operation depends on the symbol table being
+	 sorted such that the indirect symbols are at the end (since the 
+	 string table index is filled in below).  */
+
+      if (IS_MACHO_INDIRECT (s->n_type))
+	/* A pointer to the referenced symbol will be stored in the udata
+	   field.  Use that to find the string index.  */
+	s->symbol.value = 
+	    ((bfd_mach_o_asymbol *)s->symbol.udata.p)->symbol.udata.i;
+     
       if (s->symbol.name == 0 || s->symbol.name[0] == '\0')
+	/* An index of 0 always means the empty string.  */
         str_index = 0;
       else
         {
           str_index = _bfd_stringtab_add (strtab, s->symbol.name, TRUE, FALSE);
+          /* Record the string index.  This can be looked up by an indirect sym
+	     which retains a pointer to its referenced counterpart, until it is
+	     actually output.  */
+	  if (IS_MACHO_INDIRECT (s->n_type))
+	    s->symbol.udata.i = str_index;
+
           if (str_index == (bfd_size_type) -1)
             goto err;
         }
@@ -1420,14 +1443,315 @@ bfd_mach_o_write_symtab (bfd *abfd, bfd_mach_o_load_command *command)
   return FALSE;
 }
 
-/* Process the symbols and generate Mach-O specific fields.
-   Number them.  */
+/* Write a dysymtab command.
+   TODO: Possibly coalesce writes of smaller objects.  */
 
 static bfd_boolean
-bfd_mach_o_mangle_symbols (bfd *abfd)
+bfd_mach_o_write_dysymtab (bfd *abfd, bfd_mach_o_load_command *command)
+{
+  bfd_mach_o_dysymtab_command *cmd = &command->command.dysymtab;
+
+  BFD_ASSERT (command->type == BFD_MACH_O_LC_DYSYMTAB);
+
+  if (cmd->nmodtab != 0)
+    {
+      unsigned int i;
+
+      if (bfd_seek (abfd, cmd->modtaboff, SEEK_SET) != 0)
+	return FALSE;
+
+      for (i = 0; i < cmd->nmodtab; i++)
+	{
+	  bfd_mach_o_dylib_module *module = &cmd->dylib_module[i];
+	  unsigned int iinit;
+	  unsigned int ninit;
+
+	  iinit = module->iinit & 0xffff;
+	  iinit |= ((module->iterm & 0xffff) << 16);
+
+	  ninit = module->ninit & 0xffff;
+	  ninit |= ((module->nterm & 0xffff) << 16);
+
+	  if (bfd_mach_o_wide_p (abfd))
+	    {
+	      struct mach_o_dylib_module_64_external w;
+
+	      bfd_h_put_32 (abfd, module->module_name_idx, &w.module_name);
+	      bfd_h_put_32 (abfd, module->iextdefsym, &w.iextdefsym);
+	      bfd_h_put_32 (abfd, module->nextdefsym, &w.nextdefsym);
+	      bfd_h_put_32 (abfd, module->irefsym, &w.irefsym);
+	      bfd_h_put_32 (abfd, module->nrefsym, &w.nrefsym);
+	      bfd_h_put_32 (abfd, module->ilocalsym, &w.ilocalsym);
+	      bfd_h_put_32 (abfd, module->nlocalsym, &w.nlocalsym);
+	      bfd_h_put_32 (abfd, module->iextrel, &w.iextrel);
+	      bfd_h_put_32 (abfd, module->nextrel, &w.nextrel);
+	      bfd_h_put_32 (abfd, iinit, &w.iinit_iterm);
+	      bfd_h_put_32 (abfd, ninit, &w.ninit_nterm);
+	      bfd_h_put_64 (abfd, module->objc_module_info_addr,
+			    &w.objc_module_info_addr);
+	      bfd_h_put_32 (abfd, module->objc_module_info_size,
+			    &w.objc_module_info_size);
+
+	      if (bfd_bwrite ((void *) &w, sizeof (w), abfd) != sizeof (w))
+		return FALSE;
+	    }
+	  else
+	    {
+	      struct mach_o_dylib_module_external n;
+
+	      bfd_h_put_32 (abfd, module->module_name_idx, &n.module_name);
+	      bfd_h_put_32 (abfd, module->iextdefsym, &n.iextdefsym);
+	      bfd_h_put_32 (abfd, module->nextdefsym, &n.nextdefsym);
+	      bfd_h_put_32 (abfd, module->irefsym, &n.irefsym);
+	      bfd_h_put_32 (abfd, module->nrefsym, &n.nrefsym);
+	      bfd_h_put_32 (abfd, module->ilocalsym, &n.ilocalsym);
+	      bfd_h_put_32 (abfd, module->nlocalsym, &n.nlocalsym);
+	      bfd_h_put_32 (abfd, module->iextrel, &n.iextrel);
+	      bfd_h_put_32 (abfd, module->nextrel, &n.nextrel);
+	      bfd_h_put_32 (abfd, iinit, &n.iinit_iterm);
+	      bfd_h_put_32 (abfd, ninit, &n.ninit_nterm);
+	      bfd_h_put_32 (abfd, module->objc_module_info_addr,
+			    &n.objc_module_info_addr);
+	      bfd_h_put_32 (abfd, module->objc_module_info_size,
+			    &n.objc_module_info_size);
+
+	      if (bfd_bwrite ((void *) &n, sizeof (n), abfd) != sizeof (n))
+		return FALSE;
+	    }
+	}
+    }
+
+  if (cmd->ntoc != 0)
+    {
+      unsigned int i;
+
+      if (bfd_seek (abfd, cmd->tocoff, SEEK_SET) != 0)
+	return FALSE;
+
+      for (i = 0; i < cmd->ntoc; i++)
+	{
+	  struct mach_o_dylib_table_of_contents_external raw;
+	  bfd_mach_o_dylib_table_of_content *toc = &cmd->dylib_toc[i];
+
+	  bfd_h_put_32 (abfd, toc->symbol_index, &raw.symbol_index);
+	  bfd_h_put_32 (abfd, toc->module_index, &raw.module_index);
+
+	  if (bfd_bwrite (&raw, sizeof (raw), abfd) != sizeof (raw))
+	    return FALSE;
+	}
+    }
+  
+  if (cmd->nindirectsyms > 0)
+    {
+      unsigned int i;
+
+      if (bfd_seek (abfd, cmd->indirectsymoff, SEEK_SET) != 0)
+	return FALSE;
+
+      for (i = 0; i < cmd->nindirectsyms; ++i)
+	{
+	  unsigned char raw[4];
+
+	  bfd_h_put_32 (abfd, cmd->indirect_syms[i], &raw);
+	  if (bfd_bwrite (raw, sizeof (raw), abfd) != sizeof (raw))
+	    return FALSE;
+	}    
+    }
+
+  if (cmd->nextrefsyms != 0)
+    {
+      unsigned int i;
+
+      if (bfd_seek (abfd, cmd->extrefsymoff, SEEK_SET) != 0)
+	return FALSE;
+
+      for (i = 0; i < cmd->nextrefsyms; i++)
+	{
+	  unsigned long v;
+	  unsigned char raw[4];
+	  bfd_mach_o_dylib_reference *ref = &cmd->ext_refs[i];
+
+	  /* Fields isym and flags are written as bit-fields, thus we need
+	     a specific processing for endianness.  */
+
+	  if (bfd_big_endian (abfd))
+	    {
+	      v = ((ref->isym & 0xffffff) << 8);
+	      v |= ref->flags & 0xff;
+	    }
+	  else
+	    {
+	      v = ref->isym  & 0xffffff;
+	      v |= ((ref->flags & 0xff) << 24);
+	    }
+
+	  bfd_h_put_32 (abfd, v, raw);
+	  if (bfd_bwrite (raw, sizeof (raw), abfd) != sizeof (raw))
+	    return FALSE;
+	}
+    }
+
+  /* The command.  */
+  if (bfd_seek (abfd, command->offset + BFD_MACH_O_LC_SIZE, SEEK_SET) != 0)
+    return FALSE;
+  else
+    {
+      struct mach_o_dysymtab_command_external raw;
+
+      bfd_h_put_32 (abfd, cmd->ilocalsym, &raw.ilocalsym);
+      bfd_h_put_32 (abfd, cmd->nlocalsym, &raw.nlocalsym);
+      bfd_h_put_32 (abfd, cmd->iextdefsym, &raw.iextdefsym);
+      bfd_h_put_32 (abfd, cmd->nextdefsym, &raw.nextdefsym);
+      bfd_h_put_32 (abfd, cmd->iundefsym, &raw.iundefsym);
+      bfd_h_put_32 (abfd, cmd->nundefsym, &raw.nundefsym);
+      bfd_h_put_32 (abfd, cmd->tocoff, &raw.tocoff);
+      bfd_h_put_32 (abfd, cmd->ntoc, &raw.ntoc);
+      bfd_h_put_32 (abfd, cmd->modtaboff, &raw.modtaboff);
+      bfd_h_put_32 (abfd, cmd->nmodtab, &raw.nmodtab);
+      bfd_h_put_32 (abfd, cmd->extrefsymoff, &raw.extrefsymoff);
+      bfd_h_put_32 (abfd, cmd->nextrefsyms, &raw.nextrefsyms);
+      bfd_h_put_32 (abfd, cmd->indirectsymoff, &raw.indirectsymoff);
+      bfd_h_put_32 (abfd, cmd->nindirectsyms, &raw.nindirectsyms);
+      bfd_h_put_32 (abfd, cmd->extreloff, &raw.extreloff);
+      bfd_h_put_32 (abfd, cmd->nextrel, &raw.nextrel);
+      bfd_h_put_32 (abfd, cmd->locreloff, &raw.locreloff);
+      bfd_h_put_32 (abfd, cmd->nlocrel, &raw.nlocrel);
+
+      if (bfd_bwrite (&raw, sizeof (raw), abfd) != sizeof (raw))
+	return FALSE;
+    }
+
+  return TRUE;
+}
+
+static unsigned
+bfd_mach_o_primary_symbol_sort_key (unsigned type, unsigned ext)
+{
+  /* TODO: Determine the correct ordering of stabs symbols.  */
+  /* We make indirect symbols a local/synthetic.  */
+  if (type == BFD_MACH_O_N_INDR)
+    return 3;
+
+  /* Local (we should never see an undefined local AFAICT).  */
+  if (! ext)
+    return 0;
+
+  /* Common symbols look like undefined externs.  */
+  if (type == BFD_MACH_O_N_UNDF)
+    return 2;
+
+  /* A defined symbol that's not indirect or extern.  */
+  return 1;
+}
+
+static int
+bfd_mach_o_cf_symbols (const void *a, const void *b)
+{
+  bfd_mach_o_asymbol *sa = *(bfd_mach_o_asymbol **) a;
+  bfd_mach_o_asymbol *sb = *(bfd_mach_o_asymbol **) b;
+  unsigned int soa, sob;
+
+  soa = bfd_mach_o_primary_symbol_sort_key 
+  			(sa->n_type & BFD_MACH_O_N_TYPE,
+			 sa->n_type & (BFD_MACH_O_N_PEXT | BFD_MACH_O_N_EXT));
+  sob = bfd_mach_o_primary_symbol_sort_key
+  			(sb->n_type & BFD_MACH_O_N_TYPE,
+			 sb->n_type & (BFD_MACH_O_N_PEXT | BFD_MACH_O_N_EXT));
+  if (soa < sob)
+    return -1;
+
+  if (soa > sob)
+    return 1;
+
+  /* If it's local, just preserve the input order.  */
+  if (soa == 0)
+    {
+      if (sa->symbol.udata.i < sb->symbol.udata.i)
+        return -1;
+      if (sa->symbol.udata.i > sb->symbol.udata.i)
+        return  1;
+      return 0;
+    }
+
+  /* Unless it's an indirect the second sort key is name.  */
+  if (soa < 3)
+    return strcmp (sa->symbol.name, sb->symbol.name);
+
+  /* Here be indirect symbols, which have different sort rules.  */
+
+  /* Next sort key for indirect, is the section index.  */
+  if (sa->n_sect < sb->n_sect)
+    return -1;
+
+  if (sa->n_sect > sb->n_sect)
+    return  1;
+
+  /* Last sort key is the order of definition - which should be in line with
+     the value, since a stub size of 0 is meaninglesss.  */
+
+  if (sa->symbol.value < sb->symbol.value)
+    return -1;
+
+  if (sa->symbol.value > sb->symbol.value)
+    return 1;
+
+  /* In the final analysis, this is probably an error ... but leave it alone
+     for now.  */
+  return 0;
+}
+
+/* When this is finished, return the number of non-indirect symbols.  */
+
+static unsigned int
+bfd_mach_o_sort_symbol_table (asymbol **symbols, unsigned int nin)
+{
+  qsort (symbols, (size_t) nin, sizeof (void *), bfd_mach_o_cf_symbols);
+  
+  /* Find the last non-indirect symbol.  
+     There must be at least one non-indirect symbol otherwise there's
+     nothing for the indirect(s) to refer to.  */
+  do
+    { 
+      bfd_mach_o_asymbol *s = (bfd_mach_o_asymbol *)symbols[nin - 1];
+      if (IS_MACHO_INDIRECT (s->n_type))
+	nin--;
+      else
+	break;
+    } while (nin - 1 > 0);
+  return nin;
+}
+
+/* Process the symbols.
+
+   This should be OK for single-module files - but it is not likely to work
+   for multi-module shared libraries.
+
+   (a) If the application has not filled in the relevant mach-o fields, make
+       an estimate.
+
+   (b) Order them, like this:
+	(  i) local.
+		(unsorted)
+	( ii) external defined
+		(by name)
+	(iii) external undefined
+		(by name)
+	( iv) common
+		(by name)
+	(  v) indirect 
+		(by section)
+			(by position within section).
+
+   (c) Indirect symbols are moved to the end of the list.  */
+
+static bfd_boolean
+bfd_mach_o_mangle_symbols (bfd *abfd, bfd_mach_o_data_struct *mdata)
 {
   unsigned long i;
   asymbol **symbols = bfd_get_outsymbols (abfd);
+
+  if (symbols == NULL || bfd_get_symcount (abfd) == 0)
+    return TRUE;
 
   for (i = 0; i < bfd_get_symcount (abfd); i++)
     {
@@ -1445,6 +1769,8 @@ bfd_mach_o_mangle_symbols (bfd *abfd)
               s->n_type = BFD_MACH_O_N_UNDF;
               if (s->symbol.flags & BSF_WEAK)
                 s->n_desc |= BFD_MACH_O_N_WEAK_REF;
+              /* mach-o automatically makes undefined symbols extern.  */
+	      s->n_type |= BFD_MACH_O_N_EXT;
             }
           else if (s->symbol.section == bfd_com_section_ptr)
             s->n_type = BFD_MACH_O_N_UNDF | BFD_MACH_O_N_EXT;
@@ -1455,15 +1781,116 @@ bfd_mach_o_mangle_symbols (bfd *abfd)
             s->n_type |= BFD_MACH_O_N_EXT;
         }
 
-      /* Compute section index.  */
+      /* Put the section index in, where required.  */
       if (s->symbol.section != bfd_abs_section_ptr
           && s->symbol.section != bfd_und_section_ptr
           && s->symbol.section != bfd_com_section_ptr)
         s->n_sect = s->symbol.section->target_index;
 
-      /* Number symbols.  */
-      s->symbol.udata.i = i;
+      /* Unless we're looking at an indirect sym, note the input ordering.
+	 We use this to keep local symbols ordered as per the input.  */
+      if (IS_MACHO_INDIRECT (s->n_type))
+	s->symbol.udata.i = i;
     }
+
+  /* Sort the symbols and determine how many will remain in the main symbol
+     table, and how many will be emitted as indirect (assuming that we will
+     be emitting a dysymtab).  Renumber the sorted symbols so that the right
+     index will be found during indirection.  */
+  i = bfd_mach_o_sort_symbol_table (symbols, bfd_get_symcount (abfd));
+  if (bfd_mach_o_should_emit_dysymtab ())
+    {
+      /* Point at the first indirect symbol.  */
+      if (i < bfd_get_symcount (abfd))
+	{
+	  mdata->indirect_syms = &symbols[i];
+	  mdata->nindirect = bfd_get_symcount (abfd) - i;
+	  /* This is, essentially, local to the output section of mach-o,
+	     and therefore should be safe.  */
+	  abfd->symcount = i;
+	}
+
+      /* Now setup the counts for each type of symbol.  */
+      for (i = 0; i < bfd_get_symcount (abfd); ++i)
+	{
+	  bfd_mach_o_asymbol *s = (bfd_mach_o_asymbol *)symbols[i];
+	  s->symbol.udata.i = i;  /* renumber.  */
+	  if (s->n_type & (BFD_MACH_O_N_EXT | BFD_MACH_O_N_PEXT))
+	    break;
+	}
+      mdata->nlocal = i;
+      for (; i < bfd_get_symcount (abfd); ++i)
+	{
+	  bfd_mach_o_asymbol *s = (bfd_mach_o_asymbol *)symbols[i];
+	  s->symbol.udata.i = i;  /* renumber.  */
+	  if ((s->n_type & BFD_MACH_O_N_TYPE) == BFD_MACH_O_N_UNDF)
+	    break;
+	}
+      mdata->ndefext = i - mdata->nlocal;
+      mdata->nundefext = bfd_get_symcount (abfd) 
+			 - mdata->ndefext 
+			 - mdata->nlocal;
+      for (; i < bfd_get_symcount (abfd); ++i)
+	{
+	  bfd_mach_o_asymbol *s = (bfd_mach_o_asymbol *)symbols[i];
+	  s->symbol.udata.i = i;  /* renumber.  */
+	}
+    }
+
+  return TRUE;
+}
+
+/* We build a flat table of sections, which can be re-ordered if necessary.
+   Fill in the section number and other mach-o-specific data.  */
+
+static bfd_boolean
+bfd_mach_o_mangle_sections (bfd *abfd, bfd_mach_o_data_struct *mdata)
+{
+  asection *sec;
+  unsigned target_index;
+  unsigned nsect;
+
+  nsect = bfd_count_sections (abfd);
+  
+  /* Don't do it if it's already set - assume the application knows what it's
+     doing.  */
+  if (mdata->nsects == nsect
+      && (mdata->nsects == 0 || mdata->sections != NULL))
+    return TRUE;
+
+  mdata->nsects = nsect;
+  mdata->sections = bfd_alloc (abfd, 
+			       mdata->nsects * sizeof (bfd_mach_o_section *));
+  if (mdata->sections == NULL)
+    return FALSE;
+
+  /* We need to check that this can be done...  */
+  if (nsect > 255)
+    (*_bfd_error_handler) (_("mach-o: there are too many sections (%d)"
+			     " maximum is 255,\n"), nsect);
+
+  /* Create Mach-O sections.
+     Section type, attribute and align should have been set when the 
+     section was created - either read in or specified.  */
+  target_index = 0;
+  for (sec = abfd->sections; sec; sec = sec->next)
+    {
+      unsigned bfd_align = bfd_get_section_alignment (abfd, sec);
+      bfd_mach_o_section *msect = bfd_mach_o_get_mach_o_section (sec);
+
+      mdata->sections[target_index] = msect;
+
+      msect->addr = bfd_get_section_vma (abfd, sec);
+      msect->size = bfd_get_section_size (sec);
+
+      /* Use the largest alignment set, in case it was bumped after the 
+	 section was created.  */
+      msect->align = msect->align > bfd_align ? msect->align : bfd_align;
+
+      msect->offset = 0;
+      sec->target_index = ++target_index;
+    }
+
   return TRUE;
 }
 
@@ -1473,25 +1900,12 @@ bfd_mach_o_write_contents (bfd *abfd)
   unsigned int i;
   bfd_mach_o_data_struct *mdata = bfd_mach_o_get_data (abfd);
 
+  /* Make the commands, if not already present.  */
   if (mdata->header.ncmds == 0)
     if (!bfd_mach_o_build_commands (abfd))
       return FALSE;
 
-  /* Now write header information.  */
-  if (mdata->header.filetype == 0)
-    {
-      if (abfd->flags & EXEC_P)
-        mdata->header.filetype = BFD_MACH_O_MH_EXECUTE;
-      else if (abfd->flags & DYNAMIC)
-        mdata->header.filetype = BFD_MACH_O_MH_DYLIB;
-      else
-        mdata->header.filetype = BFD_MACH_O_MH_OBJECT;
-    }
   if (!bfd_mach_o_write_header (abfd, &mdata->header))
-    return FALSE;
-
-  /* Assign a number to each symbols.  */
-  if (!bfd_mach_o_mangle_symbols (abfd))
     return FALSE;
 
   for (i = 0; i < mdata->header.ncmds; i++)
@@ -1523,6 +1937,10 @@ bfd_mach_o_write_contents (bfd *abfd)
 	  if (!bfd_mach_o_write_symtab (abfd, cur))
 	    return FALSE;
 	  break;
+	case BFD_MACH_O_LC_DYSYMTAB:
+	  if (!bfd_mach_o_write_dysymtab (abfd, cur))
+	    return FALSE;
+	  break;
 	case BFD_MACH_O_LC_SYMSEG:
 	  break;
 	case BFD_MACH_O_LC_THREAD:
@@ -1535,7 +1953,6 @@ bfd_mach_o_write_contents (bfd *abfd)
 	case BFD_MACH_O_LC_IDENT:
 	case BFD_MACH_O_LC_FVMFILE:
 	case BFD_MACH_O_LC_PREPAGE:
-	case BFD_MACH_O_LC_DYSYMTAB:
 	case BFD_MACH_O_LC_LOAD_DYLIB:
 	case BFD_MACH_O_LC_LOAD_WEAK_DYLIB:
 	case BFD_MACH_O_LC_ID_DYLIB:
@@ -1591,7 +2008,171 @@ bfd_mach_o_set_section_flags_from_bfd (bfd *abfd ATTRIBUTE_UNUSED, asection *sec
     s->flags = BFD_MACH_O_S_REGULAR;
 }
 
-/* Build Mach-O load commands from the sections.  */
+/* Count the number of sections in the list for the segment named.
+
+   The special case of NULL or "" for the segment name is valid for
+   an MH_OBJECT file and means 'all sections available'.  
+   
+   Requires that the sections table in mdata be filled in.  
+
+   Returns the number of sections (0 is valid).
+   Any number > 255 signals an invalid section count, although we will,
+   perhaps, allow the file to be written (in line with Darwin tools up
+   to XCode 4). 
+   
+   A section count of (unsigned long) -1 signals a definite error.  */
+
+static unsigned long
+bfd_mach_o_count_sections_for_seg (const char *segment,
+				   bfd_mach_o_data_struct *mdata)
+{
+  unsigned i,j;
+  if (mdata == NULL || mdata->sections == NULL)
+    return (unsigned long) -1;
+
+  /* The MH_OBJECT case, all sections are considered; Although nsects is
+     is an unsigned long, the maximum valid section count is 255 and this
+     will have been checked already by mangle_sections.  */
+  if (segment == NULL || segment[0] == '\0')
+    return mdata->nsects;
+
+  /* Count the number of sections we see in this segment.  */
+  j = 0;
+  for (i = 0; i < mdata->nsects; ++i)
+    {
+      bfd_mach_o_section *s = mdata->sections[i];
+      if (strncmp (segment, s->segname, BFD_MACH_O_SEGNAME_SIZE) == 0)
+        j++;
+    }
+  return j;
+}
+
+static bfd_boolean
+bfd_mach_o_build_seg_command (const char *segment,
+			      bfd_mach_o_data_struct *mdata,
+			      bfd_mach_o_segment_command *seg)
+{
+  unsigned i;
+  int is_mho = (segment == NULL || segment[0] == '\0');
+
+  /* Fill segment command.  */
+  if (is_mho)
+    memset (seg->segname, 0, sizeof (seg->segname));
+  else
+    strncpy (seg->segname, segment, sizeof (seg->segname));
+
+  /* TODO: fix this up for non-MH_OBJECT cases.  */
+  seg->vmaddr = 0;
+
+  seg->fileoff = mdata->filelen;
+  seg->filesize = 0;
+  seg->maxprot = BFD_MACH_O_PROT_READ | BFD_MACH_O_PROT_WRITE
+		 | BFD_MACH_O_PROT_EXECUTE;
+  seg->initprot = seg->maxprot;
+  seg->flags = 0;
+  seg->sect_head = NULL;
+  seg->sect_tail = NULL;
+
+  /*  Append sections to the segment.  */
+
+  for (i = 0; i < mdata->nsects; ++i)
+    {
+      bfd_mach_o_section *s = mdata->sections[i];
+      asection *sec = s->bfdsection;
+
+      /* If we're not making an MH_OBJECT, check whether this section is from
+	 our segment, and skip if not.  Otherwise, just add all sections.  */
+      if (! is_mho 
+	  && strncmp (segment, s->segname, BFD_MACH_O_SEGNAME_SIZE) != 0)
+	continue;
+
+      bfd_mach_o_append_section_to_segment (seg, sec);
+
+      if (s->size == 0)
+         s->offset = 0;
+      else
+       {
+          mdata->filelen = FILE_ALIGN (mdata->filelen, s->align);
+          s->offset = mdata->filelen;
+        }
+
+      sec->filepos = s->offset;
+
+      mdata->filelen += s->size;
+    }
+
+  seg->filesize = mdata->filelen - seg->fileoff;
+  seg->vmsize = seg->filesize;
+
+  return TRUE;
+}
+
+static bfd_boolean
+bfd_mach_o_build_dysymtab_command (bfd *abfd,
+				   bfd_mach_o_data_struct *mdata,
+				   bfd_mach_o_load_command *cmd)
+{
+  bfd_mach_o_dysymtab_command *dsym = &cmd->command.dysymtab;
+
+  /* TODO:
+     We are not going to try and fill these in yet and, moreover, we are
+     going to bail if they are already set.  */
+  if (dsym->nmodtab != 0
+      || dsym->ntoc != 0
+      || dsym->nextrefsyms != 0)
+    {
+      (*_bfd_error_handler) (_("sorry: modtab, toc and extrefsyms are not yet"
+				" implemented for dysymtab commands."));
+      return FALSE;
+    }
+
+  dsym->ilocalsym = 0;
+  dsym->nlocalsym = mdata->nlocal;
+  dsym->iextdefsym = dsym->nlocalsym;
+  dsym->nextdefsym = mdata->ndefext;
+  dsym->iundefsym = dsym->nextdefsym + dsym->iextdefsym;
+  dsym->nundefsym = mdata->nundefext;
+
+  if (mdata->nindirect > 0)
+    {
+      unsigned i, sect;
+
+      mdata->filelen = FILE_ALIGN (mdata->filelen, 2);
+      dsym->indirectsymoff = mdata->filelen;
+      mdata->filelen += mdata->nindirect * 4;
+      
+      dsym->indirect_syms = bfd_zalloc (abfd, mdata->nindirect * 4);
+      if (dsym->indirect_syms == NULL)
+        return FALSE;
+      dsym->nindirectsyms = mdata->nindirect;
+      
+      /* So fill in the indices, and point the section reserved1 fields
+	 at the right one.  */
+      sect = (unsigned) -1;
+      for (i = 0; i < mdata->nindirect; ++i)
+	{
+	  bfd_mach_o_asymbol *s = 
+			(bfd_mach_o_asymbol *) mdata->indirect_syms[i];
+	  /* Lookup the index of the referenced symbol.  */
+	  dsym->indirect_syms[i] = 
+		((bfd_mach_o_asymbol *) s->symbol.udata.p)->symbol.udata.i;
+	  if (s->n_sect != sect)
+	    {
+	      /* Mach-o sections are 1-based, but the section table
+		 is 0-based.  */
+	      bfd_mach_o_section *sc = mdata->sections[s->n_sect-1];
+	      sc->reserved1 = i;
+	      sect = s->n_sect;
+	    }
+	}
+    }
+
+  return TRUE;
+}
+
+/* Build Mach-O load commands (currently assuming an MH_OBJECT file).
+   TODO: Other file formats, rebuilding symtab/dysymtab commands for strip
+   and copy functionality.  */
 
 bfd_boolean
 bfd_mach_o_build_commands (bfd *abfd)
@@ -1599,102 +2180,148 @@ bfd_mach_o_build_commands (bfd *abfd)
   bfd_mach_o_data_struct *mdata = bfd_mach_o_get_data (abfd);
   unsigned int wide = mach_o_wide_p (&mdata->header);
   bfd_mach_o_segment_command *seg;
-  asection *sec;
   bfd_mach_o_load_command *cmd;
   bfd_mach_o_load_command *symtab_cmd;
-  int target_index;
+  unsigned symcind;
 
-  /* Return now if commands are already built.  */
+  /* Return now if commands are already present.  */
   if (mdata->header.ncmds)
     return FALSE;
 
-  /* Very simple version: a command (segment) to contain all the sections and
-     a command for the symbol table.  */
-  mdata->header.ncmds = 2;
-  mdata->commands = bfd_alloc (abfd, mdata->header.ncmds
-                               * sizeof (bfd_mach_o_load_command));
-  if (mdata->commands == NULL)
-    return FALSE;
-  cmd = &mdata->commands[0];
-  seg = &cmd->command.segment;
+  /* Fill in the file type, if not already set.  */
 
-  seg->nsects = bfd_count_sections (abfd);
-
-  /* Set segment command.  */
-  if (wide)
+  if (mdata->header.filetype == 0)
     {
-      cmd->type = BFD_MACH_O_LC_SEGMENT_64;
-      cmd->offset = BFD_MACH_O_HEADER_64_SIZE;
-      cmd->len = BFD_MACH_O_LC_SEGMENT_64_SIZE
-        + BFD_MACH_O_SECTION_64_SIZE * seg->nsects;
+      if (abfd->flags & EXEC_P)
+        mdata->header.filetype = BFD_MACH_O_MH_EXECUTE;
+      else if (abfd->flags & DYNAMIC)
+        mdata->header.filetype = BFD_MACH_O_MH_DYLIB;
+      else
+        mdata->header.filetype = BFD_MACH_O_MH_OBJECT;
+    }
+
+  /* If hasn't already been done, flatten sections list, and sort
+     if/when required.  Must be done before the symbol table is adjusted,
+     since that depends on properly numbered sections.  */
+  if (mdata->nsects == 0 || mdata->sections == NULL)
+    if (! bfd_mach_o_mangle_sections (abfd, mdata))
+      return FALSE;
+
+  /* Order the symbol table, fill-in/check mach-o specific fields and
+     partition out any indirect symbols.  */
+  if (!bfd_mach_o_mangle_symbols (abfd, mdata))
+    return FALSE;
+
+  /* It's valid to have a file with only absolute symbols...  */
+  if (mdata->nsects > 0)
+    {
+      mdata->header.ncmds = 1;
+      symcind = 1;
     }
   else
-    {
-      cmd->type = BFD_MACH_O_LC_SEGMENT;
-      cmd->offset = BFD_MACH_O_HEADER_SIZE;
-      cmd->len = BFD_MACH_O_LC_SEGMENT_SIZE
-        + BFD_MACH_O_SECTION_SIZE * seg->nsects;
-    }
-  cmd->type_required = FALSE;
-  mdata->header.sizeofcmds = cmd->len;
-  mdata->filelen = cmd->offset + cmd->len;
+    symcind = 0;
 
-  /* Set symtab command.  */
-  symtab_cmd = &mdata->commands[1];
-  
-  symtab_cmd->type = BFD_MACH_O_LC_SYMTAB;
-  symtab_cmd->offset = cmd->offset + cmd->len;
-  symtab_cmd->len = 6 * 4;
-  symtab_cmd->type_required = FALSE;
-  
-  mdata->header.sizeofcmds += symtab_cmd->len;
-  mdata->filelen += symtab_cmd->len;
+  /* It's OK to have a file with only section statements.  */
+  if (bfd_get_symcount (abfd) > 0)
+    mdata->header.ncmds += 1;
 
-  /* Fill segment command.  */
-  memset (seg->segname, 0, sizeof (seg->segname));
-  seg->vmaddr = 0;
-  seg->fileoff = mdata->filelen;
-  seg->filesize = 0;
-  seg->maxprot = BFD_MACH_O_PROT_READ | BFD_MACH_O_PROT_WRITE
-    | BFD_MACH_O_PROT_EXECUTE;
-  seg->initprot = seg->maxprot;
-  seg->flags = 0;
-  seg->sect_head = NULL;
-  seg->sect_tail = NULL;
+  /* Very simple version (only really applicable to MH_OBJECTs):
+	a command (segment) to contain all the sections,
+	a command for the symbol table
+	a n (optional) command for the dysymtab.  
 
-  /* Create Mach-O sections.
-     Section type, attribute and align should have been set when the 
-     section was created - either read in or specified.  */
-  target_index = 0;
-  for (sec = abfd->sections; sec; sec = sec->next)
-    {
-      unsigned bfd_align = bfd_get_section_alignment (abfd, sec);
-      bfd_mach_o_section *msect = bfd_mach_o_get_mach_o_section (sec);
+     ??? maybe we should assert that this is an MH_OBJECT?  */
 
-      bfd_mach_o_append_section_to_segment (seg, sec);
+  if (bfd_mach_o_should_emit_dysymtab ()
+      && bfd_get_symcount (abfd) > 0)
+    mdata->header.ncmds += 1;
 
-      msect->addr = bfd_get_section_vma (abfd, sec);
-      msect->size = bfd_get_section_size (sec);
-      /* Use the largest alignment set, in case it was bumped after the 
-	 section was created.  */
-      msect->align = msect->align > bfd_align ? msect->align : bfd_align;
+  /* A bit weird, but looks like no content;
+     as -n empty.s -o empty.o  */
+  if (mdata->header.ncmds == 0)
+    return TRUE;
 
-      if (msect->size != 0)
-        {
-          mdata->filelen = FILE_ALIGN (mdata->filelen, msect->align);
-          msect->offset = mdata->filelen;
-        }
+  mdata->commands = bfd_zalloc (abfd, mdata->header.ncmds
+                                * sizeof (bfd_mach_o_load_command));
+  if (mdata->commands == NULL)
+    return FALSE;
+
+  if (mdata->nsects > 0)
+    {  
+      cmd = &mdata->commands[0];
+      seg = &cmd->command.segment;
+
+      /* Count the segctions in the special blank segment used for MH_OBJECT.  */
+      seg->nsects = bfd_mach_o_count_sections_for_seg (NULL, mdata);
+      if (seg->nsects == (unsigned long) -1)
+	return FALSE;
+
+      /* Init segment command.  */
+      if (wide)
+	{
+	  cmd->type = BFD_MACH_O_LC_SEGMENT_64;
+	  cmd->offset = BFD_MACH_O_HEADER_64_SIZE;
+	  cmd->len = BFD_MACH_O_LC_SEGMENT_64_SIZE
+			+ BFD_MACH_O_SECTION_64_SIZE * seg->nsects;
+	}
       else
-        msect->offset = 0;
-
-      sec->filepos = msect->offset;
-      sec->target_index = ++target_index;
-
-      mdata->filelen += msect->size;
+	{
+	  cmd->type = BFD_MACH_O_LC_SEGMENT;
+	  cmd->offset = BFD_MACH_O_HEADER_SIZE;
+	  cmd->len = BFD_MACH_O_LC_SEGMENT_SIZE
+			+ BFD_MACH_O_SECTION_SIZE * seg->nsects;
+	}
+      cmd->type_required = FALSE;
+      mdata->header.sizeofcmds = cmd->len;
+      mdata->filelen = cmd->offset + cmd->len;
     }
-  seg->filesize = mdata->filelen - seg->fileoff;
-  seg->vmsize = seg->filesize;
 
+  if (bfd_get_symcount (abfd) > 0)
+    {
+      /* Init symtab command.  */
+      symtab_cmd = &mdata->commands[symcind];
+  
+      symtab_cmd->type = BFD_MACH_O_LC_SYMTAB;
+      if (symcind > 0)
+        symtab_cmd->offset = mdata->commands[0].offset 
+			     + mdata->commands[0].len;
+      else
+        symtab_cmd->offset = 0;
+      symtab_cmd->len = 6 * 4;
+      symtab_cmd->type_required = FALSE;
+  
+      mdata->header.sizeofcmds += symtab_cmd->len;
+      mdata->filelen += symtab_cmd->len;
+    }
+
+  /* If required, setup symtab command.  */
+  if (bfd_mach_o_should_emit_dysymtab ()
+      && bfd_get_symcount (abfd) > 0)
+    {
+      cmd = &mdata->commands[symcind+1];
+      cmd->type = BFD_MACH_O_LC_DYSYMTAB;
+      cmd->offset = symtab_cmd->offset + symtab_cmd->len;
+      cmd->type_required = FALSE;
+      cmd->len = 18 * 4 + BFD_MACH_O_LC_SIZE;
+
+      mdata->header.sizeofcmds += cmd->len;
+      mdata->filelen += cmd->len;
+    }
+
+  /* So, now we have sized the commands and the filelen set to that.
+     Now we can build the segment command and set the section file offsets.  */
+  if (mdata->nsects > 0
+      && ! bfd_mach_o_build_seg_command (NULL, mdata, seg))
+    return FALSE;
+
+  /* If we're doing a dysymtab, cmd points to its load command.  */
+  if (bfd_mach_o_should_emit_dysymtab ()
+      && bfd_get_symcount (abfd) > 0
+      && ! bfd_mach_o_build_dysymtab_command (abfd, mdata, 
+					      &mdata->commands[symcind+1]))
+    return FALSE;
+
+  /* The symtab command is filled in when the symtab is written.  */
   return TRUE;
 }
 
@@ -1709,8 +2336,8 @@ bfd_mach_o_set_section_contents (bfd *abfd,
 {
   file_ptr pos;
 
-  /* This must be done first, because bfd_set_section_contents is
-     going to set output_has_begun to TRUE.  */
+  /* Trying to write the first section contents will trigger the creation of
+     the load commands if they are not already present.  */
   if (! abfd->output_has_begun && ! bfd_mach_o_build_commands (abfd))
     return FALSE;
 

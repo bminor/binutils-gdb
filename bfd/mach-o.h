@@ -1,6 +1,6 @@
 /* Mach-O support for BFD.
-   Copyright 1999, 2000, 2001, 2002, 2003, 2005, 2007, 2008, 2009, 2011
-   Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002, 2003, 2005, 2007, 2008, 2009, 2011,
+   2012 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -109,12 +109,23 @@ typedef struct bfd_mach_o_asymbol
   /* The actual symbol which the rest of BFD works with.  */
   asymbol symbol;
 
-  /* Fields from Mach-O symbol.  */
+  /* Mach-O symbol fields.  */
   unsigned char n_type;
   unsigned char n_sect;
   unsigned short n_desc;
 }
 bfd_mach_o_asymbol;
+
+/* The symbol table is sorted like this:
+ (1) local.
+	(otherwise in order of generation)
+ (2) external defined
+	(sorted by name)
+ (3) external undefined
+	(sorted by name)
+ (4) common
+	(sorted by name)
+*/
 
 typedef struct bfd_mach_o_symtab_command
 {
@@ -507,7 +518,7 @@ typedef struct mach_o_data_struct
   unsigned long nsects;
   bfd_mach_o_section **sections;
 
-  /* Used while writting: current length of the output file.  This is used
+  /* Used while writing: current length of the output file.  This is used
      to allocate space in the file.  */
   ufile_ptr filelen;
 
@@ -516,6 +527,18 @@ typedef struct mach_o_data_struct
      is expected.  */
   bfd_mach_o_symtab_command *symtab;
   bfd_mach_o_dysymtab_command *dysymtab;
+
+  /* Base values used for building the dysymtab for a single-module object.  */  
+  unsigned long nlocal;
+  unsigned long ndefext;
+  unsigned long nundefext;
+
+  /* If this is non-zero, then the pointer below is populated.  */
+  unsigned long nindirect;
+  /* A set of synthetic symbols representing the 'indirect' ones in the file.
+     These should be sorted (a) by the section they represent and (b) by the
+     order that they appear within each section.  */
+  asymbol **indirect_syms;
 
   /* A place to stash dwarf2 info for this bfd.  */
   void *dwarf2_find_line_info;
@@ -600,6 +623,10 @@ unsigned int bfd_mach_o_section_get_entry_size (bfd *, bfd_mach_o_section *);
 bfd_boolean bfd_mach_o_read_symtab_symbols (bfd *);
 bfd_boolean bfd_mach_o_read_symtab_strtab (bfd *abfd);
 
+/* A placeholder in case we need to suppress emitting the dysymtab for some
+   reason (e.g. compatibility with older system versions).  */
+#define bfd_mach_o_should_emit_dysymtab(x) TRUE
+
 extern const bfd_mach_o_xlat_name bfd_mach_o_section_attribute_name[];
 extern const bfd_mach_o_xlat_name bfd_mach_o_section_type_name[];
 
@@ -639,5 +666,9 @@ typedef struct bfd_mach_o_backend_data
   bfd_boolean (*bfd_mach_o_section_type_valid_for_target) (unsigned long);
 }
 bfd_mach_o_backend_data;
+
+/* Symbol type tests.  */
+
+#define IS_MACHO_INDIRECT(x) (((x) & BFD_MACH_O_N_TYPE) == BFD_MACH_O_N_INDR)
 
 #endif /* _BFD_MACH_O_H_ */

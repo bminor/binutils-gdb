@@ -1,3 +1,12 @@
+2012-01-03  Iain Sandoe  <idsandoe@googlemail.com>
+
+	* gas/mach-o/dysymtab-1-64.d: New.
+	* gas/mach-o/dysymtab-1.d: New.
+	* gas/mach-o/symbols-1-64.d: New.
+	* gas/mach-o/symbols-1.d: New.
+	* gas/mach-o/symbols-base-64.s: New.
+	* gas/mach-o/symbols-base.s: New.
+
 2011-12-29  Iain Sandoe  <idsandoe@googlemail.com>
 
 	* gas/mach-o/sections-1.d: Amend to recognize that bss is not emitted
