@@ -1,3 +1,8 @@
+2012-01-03  Yao Qi  <yao@codesourcery.com>
+
+	* tracepoint.c (tracepoint_was_hit): Don't collect for
+	static tracepoint.
+
 2012-01-02  Joel Brobecker  <brobecker@adacore.com>
 
 	* terminal.h: Reformat copyright header.

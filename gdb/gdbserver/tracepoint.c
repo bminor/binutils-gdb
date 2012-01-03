@@ -4268,8 +4268,12 @@ tracepoint_was_hit (struct thread_info *tinfo, CORE_ADDR stop_pc)
     {
       /* Note that we collect fast tracepoints here as well.  We'll
 	 step over the fast tracepoint jump later, which avoids the
-	 double collect.  */
-      if (tpoint->enabled && stop_pc == tpoint->address)
+	 double collect.  However, we don't collect for static
+	 tracepoints here, because UST markers are compiled in program,
+	 and probes will be executed in program.  So static tracepoints
+	 are collected there.   */
+      if (tpoint->enabled && stop_pc == tpoint->address
+	  && tpoint->type != static_tracepoint)
 	{
 	  trace_debug ("Thread %s at address of tracepoint %d at 0x%s",
 		       target_pid_to_str (tinfo->entry.id),
