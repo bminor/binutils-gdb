@@ -1,3 +1,9 @@
+2012-01-03  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.trace/strace.exp (strace_trace_on_same_addr): New.
+	(strace_trace_on_diff_addr): New.
+	* gdb.trace/strace.c: (main): Add two local variables.
+
 2011-01-02  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* gdb.cell/fork.exp: Delete breakpoints after reaching main.

@@ -24,6 +24,11 @@ end (void)
 int
 main (void)
 {
+  /* Some code to make sure that breakpoints on `main' and `ust/bar' marker
+     are set at different addresses.  */
+  int a = 0;
+  int b = a;
+
   trace_mark(ust, bar, "str %s", "FOOBAZ");
   trace_mark(ust, bar2, "number1 %d number2 %d", 53, 9800);
 
