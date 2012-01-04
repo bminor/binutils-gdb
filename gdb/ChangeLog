@@ -1,5 +1,9 @@
 2012-01-04  Joel Brobecker  <brobecker@adacore.com>
 
+	* gnulib/extra/update-copyright: New file, imported from gnulib.
+
+2012-01-04  Joel Brobecker  <brobecker@adacore.com>
+
 	* README (Copyright and License Notices): New section.
 
 2012-01-03  Tom Tromey  <tromey@redhat.com>
