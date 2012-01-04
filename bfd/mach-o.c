@@ -3411,6 +3411,22 @@ bfd_mach_o_read_version_min (bfd *abfd, bfd_mach_o_load_command *command)
   return TRUE;
 }
 
+static bfd_boolean
+bfd_mach_o_read_encryption_info (bfd *abfd, bfd_mach_o_load_command *command)
+{
+  bfd_mach_o_encryption_info_command *cmd = &command->command.encryption_info;
+  struct mach_o_encryption_info_command_external raw;
+
+  if (bfd_seek (abfd, command->offset + BFD_MACH_O_LC_SIZE, SEEK_SET) != 0
+      || bfd_bread (&raw, sizeof (raw), abfd) != sizeof (raw))
+    return FALSE;
+
+  cmd->cryptoff = bfd_get_32 (abfd, raw.cryptoff);
+  cmd->cryptsize = bfd_get_32 (abfd, raw.cryptsize);
+  cmd->cryptid = bfd_get_32 (abfd, raw.cryptid);
+  return TRUE;
+}
+
 static int
 bfd_mach_o_read_segment (bfd *abfd,
                          bfd_mach_o_load_command *command,
@@ -3587,6 +3603,10 @@ bfd_mach_o_read_command (bfd *abfd, bfd_mach_o_load_command *command)
       if (bfd_mach_o_read_linkedit (abfd, command) != 0)
 	return -1;
       break;
+    case BFD_MACH_O_LC_ENCRYPTION_INFO:
+      if (!bfd_mach_o_read_encryption_info (abfd, command))
+	return -1;
+      break;
     case BFD_MACH_O_LC_DYLD_INFO:
       if (bfd_mach_o_read_dyld_info (abfd, command) != 0)
 	return -1;
@@ -3597,7 +3617,7 @@ bfd_mach_o_read_command (bfd *abfd, bfd_mach_o_load_command *command)
 	return -1;
       break;
     default:
-      (*_bfd_error_handler)(_("%B: unable to read unknown load command 0x%lx"),
+      (*_bfd_error_handler)(_("%B: unknown load command 0x%lx"),
          abfd, (unsigned long) command->type);
       break;
     }

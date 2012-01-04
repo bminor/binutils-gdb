@@ -1,6 +1,7 @@
 /* Mach-O support for BFD.
    Copyright 1999, 2000, 2001, 2002, 2003, 2005, 2007, 2008, 2009, 2011,
-   2012 Free Software Foundation, Inc.
+   2012
+   Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -482,6 +483,14 @@ typedef struct bfd_mach_o_version_min_command
 }
 bfd_mach_o_version_min_command;
 
+typedef struct bfd_mach_o_encryption_info_command
+{
+  unsigned int cryptoff;
+  unsigned int cryptsize;
+  unsigned int cryptid;
+}
+bfd_mach_o_encryption_info_command;
+
 typedef struct bfd_mach_o_load_command
 {
   bfd_mach_o_load_command_type type;
@@ -502,6 +511,7 @@ typedef struct bfd_mach_o_load_command
     bfd_mach_o_str_command str;
     bfd_mach_o_dyld_info_command dyld_info;
     bfd_mach_o_version_min_command version_min;
+    bfd_mach_o_encryption_info_command encryption_info;
   }
   command;
 }

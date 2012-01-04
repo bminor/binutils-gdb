@@ -1,3 +1,13 @@
+2012-01-04  Tristan Gingold  <gingold@adacore.com>
+
+	* mach-o.h: Reindent header.
+	(bfd_mach_o_encryption_info_command): New structure.
+	(bfd_mach_o_load_command): Add encryption_info field.
+
+	* mach-o.c (bfd_mach_o_read_encryption_info): New function.
+	(bfd_mach_o_read_command): Handle BFD_MACH_O_LC_ENCRYPTION_INFO.
+	(bfd_mach_o_read_command): Adjust error message.
+
 2012-01-04  Shinichiro Hamaji  <shinichiro.hamaji@gmail.com>
 
 	* dwarf2.c (_bfd_dwarf2_slurp_debug_info): Factor out the part

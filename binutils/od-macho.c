@@ -1,5 +1,5 @@
 /* od-macho.c -- dump information about an Mach-O object file.
-   Copyright 2011 Free Software Foundation, Inc.
+   Copyright 2011, 2012 Free Software Foundation, Inc.
    Written by Tristan Gingold, Adacore.
 
    This file is part of GNU Binutils.
@@ -948,6 +948,19 @@ dump_load_command (bfd *abfd, bfd_mach_o_load_command *cmd,
     case BFD_MACH_O_LC_THREAD:
     case BFD_MACH_O_LC_UNIXTHREAD:
       dump_thread (abfd, cmd);
+      break;
+    case BFD_MACH_O_LC_ENCRYPTION_INFO:
+      {
+        bfd_mach_o_encryption_info_command *cryp =
+          &cmd->command.encryption_info;
+        printf
+          ("\n"
+           "  cryptoff: 0x%08x  cryptsize: 0x%08x (endoff 0x%08x)"
+           " cryptid: %u\n",
+           cryp->cryptoff, cryp->cryptsize,
+           cryp->cryptoff + cryp->cryptsize,
+           cryp->cryptid);
+      }
       break;
     case BFD_MACH_O_LC_DYLD_INFO:
       putchar ('\n');
