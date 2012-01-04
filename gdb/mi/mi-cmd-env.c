@@ -1,7 +1,6 @@
 /* MI Command Set - environment commands.
 
-   Copyright (C) 2002, 2003, 2004, 2007, 2008, 2009, 2010, 2011
-   Free Software Foundation, Inc.
+   Copyright (C) 2002-2004, 2007-2012 Free Software Foundation, Inc.
 
    Contributed by Red Hat Inc.
 

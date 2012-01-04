@@ -1,7 +1,7 @@
 /* Low level interface for debugging AIX 4.3+ pthreads.
 
-   Copyright (C) 1999, 2000, 2002, 2007, 2008, 2009, 2010, 2011
-   Free Software Foundation, Inc.
+   Copyright (C) 1999-2000, 2002, 2007-2012 Free Software Foundation,
+   Inc.
    Written by Nick Duffek <nsd@redhat.com>.
 
    This file is part of GDB.

@@ -1,7 +1,7 @@
 /* Manages interpreters for GDB, the GNU debugger.
 
-   Copyright (C) 2000, 2002, 2003, 2007, 2008, 2009, 2010, 2011
-   Free Software Foundation, Inc.
+   Copyright (C) 2000, 2002-2003, 2007-2012 Free Software Foundation,
+   Inc.
 
    Written by Jim Ingham <jingham@apple.com> of Apple Computer, Inc.
 

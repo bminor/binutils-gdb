@@ -1,5 +1,9 @@
 2012-01-04  Joel Brobecker  <brobecker@adacore.com>
 
+	Copyright year update in most files of the GDB Project.
+
+2012-01-04  Joel Brobecker  <brobecker@adacore.com>
+
 	* copyright.sh: Delete.
 	* copyright.py: Rewrite.
 
