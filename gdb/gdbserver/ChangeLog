@@ -1,5 +1,10 @@
 2012-01-04  Yao Qi  <yao@codesourcery.com>
 
+	* tracepoint.c (cmd_qtdp): Print debug message
+	for static tracepoint.
+
+2012-01-04  Yao Qi  <yao@codesourcery.com>
+
 	* tracepoint.c (trace_vdebug): Differentiate debug message
 	between gdbserver and IPA.
 

@@ -2427,7 +2427,7 @@ cmd_qtdp (char *own_buf)
       trace_debug ("Defined %stracepoint %d at 0x%s, "
 		   "enabled %d step %ld pass %ld",
 		   tpoint->type == fast_tracepoint ? "fast "
-		   : "",
+		   : tpoint->type == static_tracepoint ? "static " : "",
 		   tpoint->number, paddress (tpoint->address), tpoint->enabled,
 		   tpoint->step_count, tpoint->pass_count);
     }
