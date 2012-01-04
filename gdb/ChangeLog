@@ -1,3 +1,7 @@
+2012-01-04  Joel Brobecker  <brobecker@adacore.com>
+
+	* README (Copyright and License Notices): New section.
+
 2012-01-03  Tom Tromey  <tromey@redhat.com>
 
 	PR python/12533:
