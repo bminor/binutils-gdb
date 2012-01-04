@@ -433,9 +433,7 @@ struct dwarf2_cu
 
 /* Persistent data held for a compilation unit, even when not
    processing it.  We put a pointer to this structure in the
-   read_symtab_private field of the psymtab.  If we encounter
-   inter-compilation-unit references, we also maintain a sorted
-   list of all compilation units.  */
+   read_symtab_private field of the psymtab.  */
 
 struct dwarf2_per_cu_data
 {

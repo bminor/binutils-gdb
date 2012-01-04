@@ -1,5 +1,7 @@
 2012-01-04  Doug Evans  <dje@google.com>
 
+	* dwarf2read.c (dwarf2_per_cu_data): Remove outdated comment.
+
 	* dwarf2read.c (init_one_comp_unit): Delete arg "objfile".
 	New arg "per_cu".  All callers updated.
 
