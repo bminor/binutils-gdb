@@ -543,6 +543,9 @@ typedef struct mach_o_data_struct
   /* A place to stash dwarf2 info for this bfd.  */
   void *dwarf2_find_line_info;
 
+  /* BFD of .dSYM file. */
+  bfd *dsym_bfd;
+
   /* Cache of dynamic relocs. */
   arelent *dyn_reloc_cache;
 }

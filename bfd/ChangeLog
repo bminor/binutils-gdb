@@ -1,3 +1,25 @@
+2012-01-04  Shinichiro Hamaji  <shinichiro.hamaji@gmail.com>
+
+	* dwarf2.c (_bfd_dwarf2_slurp_debug_info): Factor out the part
+	which reads DWARF2 and stores in stash from find_line.
+	(find_line) Call _bfd_dwarf2_slurp_debug_info.
+	* libbfd-in.h (_bfd_dwarf2_slurp_debug_info): Add declaration.
+	* libbfd.h (_bfd_dwarf2_slurp_debug_info): Regenerate.
+	* mach-o.c (dsym_subdir): The name of subdir where debug
+	information may be stored.
+	(bfd_mach_o_lookup_uuid_command): New. Lookup a load command whose
+	type is UUID.
+	(bfd_mach_o_dsym_for_uuid_p): New. Check if the specified BFD is
+	corresponding to the executable.
+	(bfd_mach_o_find_dsym): New. Find a debug information BFD in the
+	specified binary file.
+	(bfd_mach_o_follow_dsym): New. Find a debug information BFD for
+	the original BFD.
+	(bfd_mach_o_find_nearest_line): Check dSYM files for Mach-O
+	executables, dylibs, and bundles.
+	(bfd_mach_o_close_and_cleanup): Clean up BFDs for the dSYM file.
+	* mach-o.h (dsym_bfd): The BFD of the dSYM file.
+
 2012-01-03  Iain Sandoe  <idsandoe@googlemail.com>
 
 	* mach-o.c (bfd_mach_o_mangle_symbols): Put in the section index

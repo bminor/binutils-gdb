@@ -3117,6 +3117,122 @@ stash_find_line_fast (struct dwarf2_debug *stash,
 				   filename_ptr, linenumber_ptr);
 }
 
+/* Read debug information from DEBUG_BFD when DEBUG_BFD is specified.
+   If DEBUG_BFD is not specified, we read debug information from ABFD
+   or its gnu_debuglink. The results will be stored in PINFO.
+   The function returns TRUE iff debug information is ready.  */
+
+bfd_boolean
+_bfd_dwarf2_slurp_debug_info (bfd *abfd, bfd *debug_bfd,
+                              const struct dwarf_debug_section *debug_sections,
+                              asymbol **symbols,
+                              void **pinfo)
+{
+  bfd_size_type amt = sizeof (struct dwarf2_debug);
+  bfd_size_type total_size;
+  asection *msec;
+  struct dwarf2_debug *stash = (struct dwarf2_debug *) *pinfo;
+
+  if (stash != NULL)
+    return TRUE;
+
+  stash = (struct dwarf2_debug *) bfd_zalloc (abfd, amt);
+  if (! stash)
+    return FALSE;
+  stash->debug_sections = debug_sections;
+
+  *pinfo = stash;
+
+  if (debug_bfd == NULL)
+    debug_bfd = abfd;
+
+  msec = find_debug_info (debug_bfd, debug_sections, NULL);
+  if (msec == NULL && abfd == debug_bfd)
+    {
+      char * debug_filename = bfd_follow_gnu_debuglink (abfd, DEBUGDIR);
+
+      if (debug_filename == NULL)
+	/* No dwarf2 info, and no gnu_debuglink to follow.
+	   Note that at this point the stash has been allocated, but
+	   contains zeros.  This lets future calls to this function
+	   fail more quickly.  */
+	return FALSE;
+
+      if ((debug_bfd = bfd_openr (debug_filename, NULL)) == NULL
+	  || ! bfd_check_format (debug_bfd, bfd_object)
+	  || (msec = find_debug_info (debug_bfd,
+				      debug_sections, NULL)) == NULL)
+	{
+	  if (debug_bfd)
+	    bfd_close (debug_bfd);
+	  /* FIXME: Should we report our failure to follow the debuglink ?  */
+	  free (debug_filename);
+	  return FALSE;
+	}
+    }
+
+  /* There can be more than one DWARF2 info section in a BFD these
+     days.  First handle the easy case when there's only one.  If
+     there's more than one, try case two: none of the sections is
+     compressed.  In that case, read them all in and produce one
+     large stash.  We do this in two passes - in the first pass we
+     just accumulate the section sizes, and in the second pass we
+     read in the section's contents.  (The allows us to avoid
+     reallocing the data as we add sections to the stash.)  If
+     some or all sections are compressed, then do things the slow
+     way, with a bunch of reallocs.  */
+
+  if (! find_debug_info (debug_bfd, debug_sections, msec))
+    {
+      /* Case 1: only one info section.  */
+      total_size = msec->size;
+      if (! read_section (debug_bfd, &stash->debug_sections[debug_info],
+			  symbols, 0,
+			  &stash->info_ptr_memory, &total_size))
+	return FALSE;
+    }
+  else
+    {
+      /* Case 2: multiple sections.  */
+      for (total_size = 0;
+	   msec;
+	   msec = find_debug_info (debug_bfd, debug_sections, msec))
+	total_size += msec->size;
+
+      stash->info_ptr_memory = (bfd_byte *) bfd_malloc (total_size);
+      if (stash->info_ptr_memory == NULL)
+	return FALSE;
+
+      total_size = 0;
+      for (msec = find_debug_info (debug_bfd, debug_sections, NULL);
+	   msec;
+	   msec = find_debug_info (debug_bfd, debug_sections, msec))
+	{
+	  bfd_size_type size;
+
+	  size = msec->size;
+	  if (size == 0)
+	    continue;
+
+	  if (!(bfd_simple_get_relocated_section_contents
+		(debug_bfd, msec, stash->info_ptr_memory + total_size,
+		 symbols)))
+	    return FALSE;
+
+	  total_size += size;
+	}
+    }
+
+  stash->info_ptr = stash->info_ptr_memory;
+  stash->info_ptr_end = stash->info_ptr + total_size;
+  stash->sec = find_debug_info (debug_bfd, debug_sections, NULL);
+  stash->sec_info_ptr = stash->info_ptr;
+  stash->syms = symbols;
+  stash->bfd_ptr = debug_bfd;
+
+  return TRUE;
+}
+
 /* Find the source code location of SYMBOL.  If SYMBOL is NULL
    then find the nearest source code location corresponding to
    the address SECTION + OFFSET.
@@ -3157,17 +3273,16 @@ find_line (bfd *abfd,
   bfd_vma found = FALSE;
   bfd_boolean do_line;
 
+  *filename_ptr = NULL;
+  if (functionname_ptr != NULL)
+    *functionname_ptr = NULL;
+  *linenumber_ptr = 0;
+
+  if (! _bfd_dwarf2_slurp_debug_info (abfd, NULL,
+				      debug_sections, symbols, pinfo))
+    return FALSE;
+
   stash = (struct dwarf2_debug *) *pinfo;
-
-  if (! stash)
-    {
-      bfd_size_type amt = sizeof (struct dwarf2_debug);
-
-      stash = (struct dwarf2_debug *) bfd_zalloc (abfd, amt);
-      if (! stash)
-	return FALSE;
-      stash->debug_sections = debug_sections;
-    }
 
   /* In a relocatable file, 2 functions may have the same address.
      We change the section vma so that they won't overlap.  */
@@ -3197,110 +3312,11 @@ find_line (bfd *abfd,
     addr += section->output_section->vma + section->output_offset;
   else
     addr += section->vma;
-  *filename_ptr = NULL;
-  if (! do_line)
-    *functionname_ptr = NULL;
-  *linenumber_ptr = 0;
-
-  if (! *pinfo)
-    {
-      bfd *debug_bfd;
-      bfd_size_type total_size;
-      asection *msec;
-
-      *pinfo = stash;
-
-      msec = find_debug_info (abfd, debug_sections, NULL);
-      if (msec == NULL)
-	{
-	  char * debug_filename = bfd_follow_gnu_debuglink (abfd, DEBUGDIR);
-
-	  if (debug_filename == NULL)
-	    /* No dwarf2 info, and no gnu_debuglink to follow.
-	       Note that at this point the stash has been allocated, but
-	       contains zeros.  This lets future calls to this function
-	       fail more quickly.  */
-	    goto done;
-
-	  if ((debug_bfd = bfd_openr (debug_filename, NULL)) == NULL
-	      || ! bfd_check_format (debug_bfd, bfd_object)
-	      || (msec = find_debug_info (debug_bfd,
-                                          debug_sections, NULL)) == NULL)
-	    {
-	      if (debug_bfd)
-		bfd_close (debug_bfd);
-	      /* FIXME: Should we report our failure to follow the debuglink ?  */
-	      free (debug_filename);
-	      goto done;
-	    }
-	}
-      else
-	debug_bfd = abfd;
-
-      /* There can be more than one DWARF2 info section in a BFD these
-	 days.  First handle the easy case when there's only one.  If
-	 there's more than one, try case two: none of the sections is
-	 compressed.  In that case, read them all in and produce one
-	 large stash.  We do this in two passes - in the first pass we
-	 just accumulate the section sizes, and in the second pass we
-	 read in the section's contents.  (The allows us to avoid
-	 reallocing the data as we add sections to the stash.)  If
-	 some or all sections are compressed, then do things the slow
-	 way, with a bunch of reallocs.  */
-
-      if (! find_debug_info (debug_bfd, debug_sections, msec))
-	{
-	  /* Case 1: only one info section.  */
-	  total_size = msec->size;
-	  if (! read_section (debug_bfd, &stash->debug_sections[debug_info],
-                              symbols, 0,
-			      &stash->info_ptr_memory, &total_size))
-	    goto done;
-	}
-      else
-	{
-	  /* Case 2: multiple sections.  */
-	  for (total_size = 0;
-               msec;
-               msec = find_debug_info (debug_bfd, debug_sections, msec))
-	    total_size += msec->size;
-
-	  stash->info_ptr_memory = (bfd_byte *) bfd_malloc (total_size);
-	  if (stash->info_ptr_memory == NULL)
-	    goto done;
-
-	  total_size = 0;
-	  for (msec = find_debug_info (debug_bfd, debug_sections, NULL);
-	       msec;
-	       msec = find_debug_info (debug_bfd, debug_sections, msec))
-	    {
-	      bfd_size_type size;
-
-	      size = msec->size;
-	      if (size == 0)
-		continue;
-
-	      if (!(bfd_simple_get_relocated_section_contents
-		    (debug_bfd, msec, stash->info_ptr_memory + total_size,
-		     symbols)))
-		goto done;
-
-	      total_size += size;
-	    }
-	}
-
-      stash->info_ptr = stash->info_ptr_memory;
-      stash->info_ptr_end = stash->info_ptr + total_size;
-      stash->sec = find_debug_info (debug_bfd, debug_sections, NULL);
-      stash->sec_info_ptr = stash->info_ptr;
-      stash->syms = symbols;
-      stash->bfd_ptr = debug_bfd;
-    }
 
   /* A null info_ptr indicates that there is no dwarf2 info
      (or that an error occured while setting up the stash).  */
   if (! stash->info_ptr)
-    goto done;
+    return FALSE;
 
   stash->inliner_chain = NULL;
 

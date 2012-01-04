@@ -554,6 +554,10 @@ bfd_boolean _bfd_generic_find_line
 extern bfd_boolean _bfd_dwarf2_find_inliner_info
   (bfd *, const char **, const char **, unsigned int *, void **);
 
+/* Read DWARF 2 debugging information. */
+extern bfd_boolean _bfd_dwarf2_slurp_debug_info
+  (bfd *, bfd *, const struct dwarf_debug_section *, asymbol **, void **);
+
 /* Clean up the data used to handle DWARF 2 debugging information. */
 extern void _bfd_dwarf2_cleanup_debug_info
   (bfd *, void **);
