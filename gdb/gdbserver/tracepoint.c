@@ -63,7 +63,11 @@ trace_vdebug (const char *fmt, ...)
 
   va_start (ap, fmt);
   vsprintf (buf, fmt, ap);
+#ifdef IN_PROCESS_AGENT
+  fprintf (stderr, "ipa/tracepoint: %s\n", buf);
+#else
   fprintf (stderr, "gdbserver/tracepoint: %s\n", buf);
+#endif
   va_end (ap);
 }
 
