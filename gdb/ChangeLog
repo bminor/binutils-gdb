@@ -1,5 +1,10 @@
 2012-01-04  Joel Brobecker  <brobecker@adacore.com>
 
+	* copyright.sh: Delete.
+	* copyright.py: Rewrite.
+
+2012-01-04  Joel Brobecker  <brobecker@adacore.com>
+
 	* gnulib/extra/update-copyright: New file, imported from gnulib.
 
 2012-01-04  Joel Brobecker  <brobecker@adacore.com>
