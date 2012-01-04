@@ -4107,6 +4107,42 @@ bfd_mach_o_archive_p (bfd *abfd)
   return NULL;
 }
 
+/* Set the filename for a fat binary member ABFD, whose bfd architecture is
+   ARCH_TYPE/ARCH_SUBTYPE and corresponding entry in header is ENTRY.
+   Set arelt_data and origin fields too.  */
+
+static void
+bfd_mach_o_fat_member_init (bfd *abfd,
+                            enum bfd_architecture arch_type,
+                            unsigned long arch_subtype,
+                            mach_o_fat_archentry *entry)
+{
+  struct areltdata *areltdata;
+  /* Create the member filename. Use ARCH_NAME.  */
+  const bfd_arch_info_type *ap = bfd_lookup_arch (arch_type, arch_subtype);
+
+  if (ap)
+    {
+      /* Use the architecture name if known.  */
+      abfd->filename = ap->printable_name;
+    }
+  else
+    {
+      /* Forge a uniq id.  */
+      const size_t namelen = 2 + 8 + 1 + 2 + 8 + 1;
+      char *name = bfd_alloc (abfd, namelen);
+      snprintf (name, namelen, "0x%lx-0x%lx",
+                entry->cputype, entry->cpusubtype);
+      abfd->filename = name;
+    }
+
+  areltdata = bfd_zalloc (abfd, sizeof (struct areltdata));
+  areltdata->parsed_size = entry->size;
+  abfd->arelt_data = areltdata;
+  abfd->iostream = NULL;
+  abfd->origin = entry->offset;
+}
+
 bfd *
 bfd_mach_o_openr_next_archived_file (bfd *archive, bfd *prev)
 {
@@ -4122,9 +4158,13 @@ bfd_mach_o_openr_next_archived_file (bfd *archive, bfd *prev)
 
   /* Find index of previous entry.  */
   if (prev == NULL)
-    i = 0;	/* Start at first one.  */
+    {
+      /* Start at first one.  */
+      i = 0;
+    }
   else
     {
+      /* Find index of PREV.  */
       for (i = 0; i < adata->nfat_arch; i++)
 	{
 	  if (adata->archentries[i].offset == prev->origin)
@@ -4137,8 +4177,10 @@ bfd_mach_o_openr_next_archived_file (bfd *archive, bfd *prev)
 	  bfd_set_error (bfd_error_bad_value);
 	  return NULL;
 	}
-    i++;	/* Get next entry.  */
-  }
+
+      /* Get next entry.  */
+      i++;
+    }
 
   if (i >= adata->nfat_arch)
     {
@@ -4151,14 +4193,11 @@ bfd_mach_o_openr_next_archived_file (bfd *archive, bfd *prev)
   if (nbfd == NULL)
     return NULL;
 
-  nbfd->origin = entry->offset;
-
   bfd_mach_o_convert_architecture (entry->cputype, entry->cpusubtype,
 				   &arch_type, &arch_subtype);
 
-  /* Create the member filename. Use ARCH_NAME.  */
-  nbfd->filename = bfd_printable_arch_mach (arch_type, arch_subtype);
-  nbfd->iostream = NULL;
+  bfd_mach_o_fat_member_init (nbfd, arch_type, arch_subtype, entry);
+
   bfd_set_arch_mach (nbfd, arch_type, arch_subtype);
 
   return nbfd;
@@ -4169,6 +4208,7 @@ bfd_mach_o_openr_next_archived_file (bfd *archive, bfd *prev)
    and ARCH, returns it.
    In other case, returns NULL.
    This function allows transparent uses of fat images.  */
+
 bfd *
 bfd_mach_o_fat_extract (bfd *abfd,
 			bfd_format format,
@@ -4208,10 +4248,7 @@ bfd_mach_o_fat_extract (bfd *abfd,
       if (res == NULL)
 	return NULL;
 
-      res->origin = e->offset;
-
-      res->filename = bfd_printable_arch_mach (cpu_type, cpu_subtype);
-      res->iostream = NULL;
+      bfd_mach_o_fat_member_init (res, cpu_type, cpu_subtype, e);
 
       if (bfd_check_format (res, format))
 	{
