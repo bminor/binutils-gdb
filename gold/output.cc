@@ -1582,7 +1582,7 @@ Output_data_got<size, big_endian>::reserve_local(
     unsigned int sym_index,
     unsigned int got_type)
 {
-  this->reserve_slot(i);
+  this->do_reserve_slot(i);
   object->set_local_got_offset(sym_index, got_type, this->got_offset(i));
 }
 
@@ -1595,7 +1595,7 @@ Output_data_got<size, big_endian>::reserve_global(
     Symbol* gsym,
     unsigned int got_type)
 {
-  this->reserve_slot(i);
+  this->do_reserve_slot(i);
   gsym->set_got_offset(got_type, this->got_offset(i));
 }
 

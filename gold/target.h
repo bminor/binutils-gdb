@@ -56,8 +56,7 @@ template<int size>
 class Sized_symbol;
 class Symbol_table;
 class Output_data;
-template<int size, bool big_endian>
-class Output_data_got;
+class Output_data_got_base;
 class Output_section;
 class Input_objects;
 class Task;
@@ -845,7 +844,7 @@ class Sized_target : public Target
   // Create the GOT and PLT sections for an incremental update.
   // A target needs to implement this to support incremental linking.
 
-  virtual Output_data_got<size, big_endian>*
+  virtual Output_data_got_base*
   init_got_plt_for_update(Symbol_table*,
 			  Layout*,
 			  unsigned int /* got_count */,

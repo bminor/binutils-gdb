@@ -425,7 +425,7 @@ class Target_x86_64 : public Sized_target<64, false>
   plt_entry_size() const;
 
   // Create the GOT section for an incremental update.
-  Output_data_got<64, false>*
+  Output_data_got_base*
   init_got_plt_for_update(Symbol_table* symtab,
 			  Layout* layout,
 			  unsigned int got_count,
@@ -1463,7 +1463,7 @@ Target_x86_64::plt_entry_size() const
 
 // Create the GOT and PLT sections for an incremental update.
 
-Output_data_got<64, false>*
+Output_data_got_base*
 Target_x86_64::init_got_plt_for_update(Symbol_table* symtab,
 				       Layout* layout,
 				       unsigned int got_count,

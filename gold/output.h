@@ -2151,20 +2151,42 @@ class Output_data_group : public Output_section_data
 // needed.  The GOT_SIZE template parameter is the size in bits of a
 // GOT entry, typically 32 or 64.
 
+class Output_data_got_base : public Output_section_data_build
+{
+ public:
+  Output_data_got_base(uint64_t align)
+    : Output_section_data_build(align)
+  { }
+
+  Output_data_got_base(off_t data_size, uint64_t align)
+    : Output_section_data_build(data_size, align)
+  { }
+
+  // Reserve the slot at index I in the GOT.
+  void
+  reserve_slot(unsigned int i)
+  { this->do_reserve_slot(i); }
+
+ protected:
+  // Reserve the slot at index I in the GOT.
+  virtual void
+  do_reserve_slot(unsigned int i) = 0;
+};
+
 template<int got_size, bool big_endian>
-class Output_data_got : public Output_section_data_build
+class Output_data_got : public Output_data_got_base
 {
  public:
   typedef typename elfcpp::Elf_types<got_size>::Elf_Addr Valtype;
 
   Output_data_got()
-    : Output_section_data_build(Output_data::default_alignment_for_size(got_size)),
+    : Output_data_got_base(Output_data::default_alignment_for_size(got_size)),
       entries_(), free_list_()
   { }
 
   Output_data_got(off_t data_size)
-    : Output_section_data_build(data_size,
-				Output_data::default_alignment_for_size(got_size)),
+    : Output_data_got_base(data_size,
+			   Output_data::default_alignment_for_size(got_size)),
       entries_(), free_list_()
   {
     // For an incremental update, we have an existing GOT section.
@@ -2231,11 +2253,6 @@ class Output_data_got : public Output_section_data_build
     return got_offset;
   }
 
-  // Reserve a slot in the GOT.
-  void
-  reserve_slot(unsigned int i)
-  { this->free_list_.remove(i * got_size / 8, (i + 1) * got_size / 8); }
-
   // Reserve a slot in the GOT for a local symbol.
   void
   reserve_local(unsigned int i, Relobj* object, unsigned int sym_index,
@@ -2254,6 +2271,11 @@ class Output_data_got : public Output_section_data_build
   void
   do_print_to_mapfile(Mapfile* mapfile) const
   { mapfile->print_output_data(this, _("** GOT")); }
+
+  // Reserve the slot at index I in the GOT.
+  virtual void
+  do_reserve_slot(unsigned int i)
+  { this->free_list_.remove(i * got_size / 8, (i + 1) * got_size / 8); }
 
  private:
   // This POD class holds a single GOT entry.

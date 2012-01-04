@@ -632,7 +632,7 @@ Sized_incremental_binary<size, big_endian>::do_process_got_plt(
   // Tell the target how big the GOT and PLT sections are.
   unsigned int got_count = got_plt_reader.get_got_entry_count();
   unsigned int plt_count = got_plt_reader.get_plt_entry_count();
-  Output_data_got<size, big_endian>* got =
+  Output_data_got_base* got =
       target->init_got_plt_for_update(symtab, layout, got_count, plt_count);
 
   // Read the GOT entries from the base file and build the outgoing GOT.

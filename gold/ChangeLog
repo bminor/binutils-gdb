@@ -1,3 +1,15 @@
+2012-01-03  Cary Coutant  <ccoutant@google.com>
+
+	* gold/incremental.cc (Sized_incremental_binary::do_process_got_plt):
+	Use abstract base class for GOT.
+	* gold/output.h (class Output_data_got_base): New abstract base class.
+	(class Output_data_got): Derive from new base class, adjust ctors.
+	(Output_data_got::reserve_slot): Make virtual; rename to
+	do_reserve_slot; Adjust callers.
+	* gold/target.h (Sized_target::init_got_plt_for_update): Return
+	pointer to abstract base class.
+	* gold/x86_64.cc (Target_x86_64::init_got_plt_for_update): Likewise.
+
 2011-12-18  Ian Lance Taylor  <iant@google.com>
 
 	* object.h (Relobj::local_symbol_value): New function.
