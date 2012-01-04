@@ -1,3 +1,7 @@
+2012-01-04  Joel Brobecker  <brobecker@adacore.com>
+
+	* linespec.c (add_minsym): Preserve function descriptors.
+
 2012-01-04  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* breakpoint.c (all_locations_are_pending): Consider locations

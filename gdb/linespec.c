@@ -2799,7 +2799,17 @@ add_minsym (struct minimal_symbol *minsym, void *d)
 	case mst_abs:
 	case mst_file_data:
 	case mst_file_bss:
-	return;
+	  {
+	    /* Make sure this minsym is not a function descriptor
+	       before we decide to discard it.  */
+	    struct gdbarch *gdbarch = info->objfile->gdbarch;
+	    CORE_ADDR addr = gdbarch_convert_from_func_ptr_addr
+			       (gdbarch, SYMBOL_VALUE_ADDRESS (minsym),
+				&current_target);
+
+	    if (addr == SYMBOL_VALUE_ADDRESS (minsym))
+	      return;
+	  }
       }
 
   mo.minsym = minsym;
