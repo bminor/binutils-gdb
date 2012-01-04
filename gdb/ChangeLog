@@ -1,3 +1,8 @@
+2012-01-04  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* breakpoint.c (all_locations_are_pending): Consider locations
+	in program spaces executing during startup pending as well.
+
 2012-01-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Joel Brobecker  <brobecker@adacore.com>
 

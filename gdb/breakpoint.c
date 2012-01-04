@@ -11500,7 +11500,8 @@ static int
 all_locations_are_pending (struct bp_location *loc)
 {
   for (; loc; loc = loc->next)
-    if (!loc->shlib_disabled)
+    if (!loc->shlib_disabled
+	&& !loc->pspace->executing_startup)
       return 0;
   return 1;
 }
