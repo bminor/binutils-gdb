@@ -1,3 +1,9 @@
+2012-01-04  Joel Brobecker  <brobecker@adacore.com>
+
+	* linespec.c (decode_line_internal): Check for C++ or Java
+	compound constructs only if the current language is C, C++
+	or Java.
+
 2012-01-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Revert:

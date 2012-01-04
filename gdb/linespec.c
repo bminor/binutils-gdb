@@ -951,33 +951,44 @@ decode_line_internal (struct linespec_state *self, char **argptr)
 	
       if (p[0] == '.' || p[1] == ':')
 	{
-	  struct symtabs_and_lines values;
-	  volatile struct gdb_exception ex;
-	  char *saved_argptr = *argptr;
-
-	  if (is_quote_enclosed)
-	    ++saved_arg;
-
-	  /* Initialize it just to avoid a GCC false warning.  */
-	  memset (&values, 0, sizeof (values));
-
-	  TRY_CATCH (ex, RETURN_MASK_ERROR)
+	 /* We only perform this check for the languages where it might
+	    make sense.  For instance, Ada does not use this type of
+	    syntax, and trying to apply this logic on an Ada linespec
+	    may trigger a spurious error (for instance, decode_compound
+	    does not like expressions such as `ops."<"', which is a
+	    valid function name in Ada).  */
+	  if (current_language->la_language == language_c
+	      || current_language->la_language == language_cplus
+	      || current_language->la_language == language_java)
 	    {
-	      values = decode_compound (self, argptr, saved_arg, p);
+	      struct symtabs_and_lines values;
+	      volatile struct gdb_exception ex;
+	      char *saved_argptr = *argptr;
+
+	      if (is_quote_enclosed)
+		++saved_arg;
+
+	      /* Initialize it just to avoid a GCC false warning.  */
+	      memset (&values, 0, sizeof (values));
+
+	      TRY_CATCH (ex, RETURN_MASK_ERROR)
+		{
+		  values = decode_compound (self, argptr, saved_arg, p);
+		}
+	      if ((is_quoted || is_squote_enclosed) && **argptr == '\'')
+		*argptr = *argptr + 1;
+
+	      if (ex.reason >= 0)
+		{
+		  do_cleanups (cleanup);
+		  return values;
+		}
+
+	      if (ex.error != NOT_FOUND_ERROR)
+		throw_exception (ex);
+
+	      *argptr = saved_argptr;
 	    }
-	  if ((is_quoted || is_squote_enclosed) && **argptr == '\'')
-	    *argptr = *argptr + 1;
-
-	  if (ex.reason >= 0)
-	    {
-	      do_cleanups (cleanup);
-	      return values;
-	    }
-
-	  if (ex.error != NOT_FOUND_ERROR)
-	    throw_exception (ex);
-
-	  *argptr = saved_argptr;
 	}
       else
 	{
