@@ -651,6 +651,8 @@ bfd_mach_o_canonicalize_symtab (bfd *abfd, asymbol **alocation)
   return nsyms;
 }
 
+/* Create synthetic symbols for indirect symbols.  */
+
 long
 bfd_mach_o_get_synthetic_symtab (bfd *abfd,
                                  long symcount ATTRIBUTE_UNUSED,
@@ -670,19 +672,23 @@ bfd_mach_o_get_synthetic_symtab (bfd *abfd,
 
   *ret = NULL;
 
+  /* Stop now if no symbols or no indirect symbols.  */
   if (dysymtab == NULL || symtab == NULL || symtab->symbols == NULL)
     return 0;
 
   if (dysymtab->nindirectsyms == 0)
     return 0;
 
+  /* We need to allocate a bfd symbol for every indirect symbol and to
+     allocate the memory for its name.  */
   count = dysymtab->nindirectsyms;
   size = count * sizeof (asymbol) + 1;
 
   for (j = 0; j < count; j++)
     {
       unsigned int isym = dysymtab->indirect_syms[j];
-              
+
+      /* Some indirect symbols are anonymous.  */
       if (isym < symtab->nsyms && symtab->symbols[isym].symbol.name)
         size += strlen (symtab->symbols[isym].symbol.name) + sizeof ("$stub");
     }
@@ -707,6 +713,7 @@ bfd_mach_o_get_synthetic_symtab (bfd *abfd,
         case BFD_MACH_O_S_NON_LAZY_SYMBOL_POINTERS:
         case BFD_MACH_O_S_LAZY_SYMBOL_POINTERS:
         case BFD_MACH_O_S_SYMBOL_STUBS:
+          /* Only these sections have indirect symbols.  */
           first = sec->reserved1;
           last = first + bfd_mach_o_section_get_nbr_indirect (abfd, sec);
           addr = sec->addr;

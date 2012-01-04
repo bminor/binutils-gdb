@@ -1,5 +1,9 @@
 2012-01-04  Tristan Gingold  <gingold@adacore.com>
 
+	* mach-o.c (bfd_mach_o_get_synthetic_symtab): Add comments.
+
+2012-01-04  Tristan Gingold  <gingold@adacore.com>
+
 	* mach-o.h: Reindent header.
 	(bfd_mach_o_encryption_info_command): New structure.
 	(bfd_mach_o_load_command): Add encryption_info field.
