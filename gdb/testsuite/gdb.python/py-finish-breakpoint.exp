@@ -247,6 +247,7 @@ if ![runto "test_exec_exit"] then {
     return 0
 }
 
+gdb_test_no_output "set var self_exec = 0" "switch to exit() test"
 gdb_test "python SimpleFinishBreakpoint(gdb.newest_frame())" "SimpleFinishBreakpoint init" "set FinishBP after the exit()"
 gdb_test "continue" "SimpleFinishBreakpoint out of scope.*" "catch out of scope after exit"
 
@@ -259,7 +260,6 @@ if ![runto "test_exec_exit"] then {
     return 0
 }     
 
-gdb_test_no_output "set var do_exit = 0" "switch to execve() test"
 gdb_test "python SimpleFinishBreakpoint(gdb.newest_frame())" "SimpleFinishBreakpoint init" "set FinishBP after the exec"
 gdb_test "catch exec" "Catchpoint.*\(exec\).*" "catch exec"
 gdb_test "continue" "SimpleFinishBreakpoint out of scope.*" "catch out of scope after exec"

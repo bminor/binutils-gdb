@@ -59,12 +59,12 @@ call_longjmp (jmp_buf *buf)
 }
 
 void
-test_exec_exit (int do_exit)
+test_exec_exit (const char *self_exec)
 {
-  if (do_exit)
+  if (self_exec == NULL)
     exit (0);
   else
-    execl ("/bin/echo", "echo", "-1", (char *)0);
+    execl (self_exec, self_exec, "exit", (char *)0);
 }
 
 int main (int argc, char *argv[])
@@ -73,6 +73,9 @@ int main (int argc, char *argv[])
   int foo = 5;
   int bar = 42;
   int i, j;
+
+  if (argc == 2 && strcmp (argv[1], "exit") == 0)
+    return 0;
 
   do_nothing ();
 
@@ -94,7 +97,7 @@ int main (int argc, char *argv[])
   else
     j += 1; /* after longjmp.  */
 
-  test_exec_exit (1);
+  test_exec_exit (argv[0]);
 
   return j; /* Break at end.  */
 }
