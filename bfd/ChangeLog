@@ -1,5 +1,13 @@
 2012-01-04  Tristan Gingold  <gingold@adacore.com>
 
+	* mach-o.h (bfd_mach_o_fvmlib_command): New structure.
+	(bfd_mach_o_load_command): Add fvmlib field.
+
+	* mach-o.c (bfd_mach_o_read_fvmlib): New function.
+	(bfd_mach_o_read_command): Handle fvmlib.
+
+2012-01-04  Tristan Gingold  <gingold@adacore.com>
+
 	* mach-o.c (bfd_mach_o_convert_architecture): Reindent.
 	Decode msubtype for ARM.
 

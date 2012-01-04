@@ -450,6 +450,16 @@ typedef struct bfd_mach_o_str_command
 }
 bfd_mach_o_str_command;
 
+typedef struct bfd_mach_o_fvmlib_command
+{
+  unsigned int name_offset;
+  unsigned int name_len;
+  char *name_str;
+  unsigned int minor_version;
+  unsigned int header_addr;
+}
+bfd_mach_o_fvmlib_command;
+
 typedef struct bfd_mach_o_dyld_info_command
 {
   /* File offset and size to rebase info.  */
@@ -512,6 +522,7 @@ typedef struct bfd_mach_o_load_command
     bfd_mach_o_dyld_info_command dyld_info;
     bfd_mach_o_version_min_command version_min;
     bfd_mach_o_encryption_info_command encryption_info;
+    bfd_mach_o_fvmlib_command fvmlib;
   }
   command;
 }

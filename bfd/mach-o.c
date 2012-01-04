@@ -3045,6 +3045,32 @@ bfd_mach_o_read_prebound_dylib (bfd *abfd ATTRIBUTE_UNUSED,
 }
 
 static int
+bfd_mach_o_read_fvmlib (bfd *abfd, bfd_mach_o_load_command *command)
+{
+  bfd_mach_o_fvmlib_command *fvm = &command->command.fvmlib;
+  struct mach_o_fvmlib_command_external raw;
+  unsigned int nameoff;
+
+  if (bfd_seek (abfd, command->offset + BFD_MACH_O_LC_SIZE, SEEK_SET) != 0
+      || bfd_bread (&raw, sizeof (raw), abfd) != sizeof (raw))
+    return -1;
+
+  nameoff = bfd_h_get_32 (abfd, raw.name);
+  fvm->minor_version = bfd_h_get_32 (abfd, raw.minor_version);
+  fvm->header_addr = bfd_h_get_32 (abfd, raw.header_addr);
+
+  fvm->name_offset = command->offset + nameoff;
+  fvm->name_len = command->len - nameoff;
+  fvm->name_str = bfd_alloc (abfd, fvm->name_len);
+  if (fvm->name_str == NULL)
+    return -1;
+  if (bfd_seek (abfd, fvm->name_offset, SEEK_SET) != 0
+      || bfd_bread (fvm->name_str, fvm->name_len, abfd) != fvm->name_len)
+    return -1;
+  return 0;
+}
+
+static int
 bfd_mach_o_read_thread (bfd *abfd, bfd_mach_o_load_command *command)
 {
   bfd_mach_o_data_struct *mdata = bfd_mach_o_get_data (abfd);
@@ -3618,6 +3644,9 @@ bfd_mach_o_read_command (bfd *abfd, bfd_mach_o_load_command *command)
       break;
     case BFD_MACH_O_LC_LOADFVMLIB:
     case BFD_MACH_O_LC_IDFVMLIB:
+      if (bfd_mach_o_read_fvmlib (abfd, command) != 0)
+	return -1;
+      break;
     case BFD_MACH_O_LC_IDENT:
     case BFD_MACH_O_LC_FVMFILE:
     case BFD_MACH_O_LC_PREPAGE:

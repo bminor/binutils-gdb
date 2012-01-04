@@ -1,5 +1,9 @@
 2012-01-04  Tristan Gingold  <gingold@adacore.com>
 
+	* od-macho.c (dump_load_command): Handle fvmlib.
+
+2012-01-04  Tristan Gingold  <gingold@adacore.com>
+
 	* od-macho.c: Update copyright year.
 	(dump_load_command): Handle BFD_MACH_O_LC_ENCRYPTION_INFO.
 

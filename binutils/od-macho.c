@@ -896,8 +896,8 @@ dump_load_command (bfd *abfd, bfd_mach_o_load_command *cmd,
                 dylib->current_version);
         printf ("  comptibility version: 0x%08lx\n",
                 dylib->compatibility_version);
-        break;
       }
+      break;
     case BFD_MACH_O_LC_LOAD_DYLINKER:
     case BFD_MACH_O_LC_ID_DYLINKER:
       printf (" %s\n", cmd->command.dylinker.name_str);
@@ -919,6 +919,15 @@ dump_load_command (bfd *abfd, bfd_mach_o_load_command *cmd,
     case BFD_MACH_O_LC_DYSYMTAB:
       putchar ('\n');
       dump_dysymtab (abfd, cmd, verbose);
+      break;
+    case BFD_MACH_O_LC_LOADFVMLIB:
+    case BFD_MACH_O_LC_IDFVMLIB:
+      {
+        bfd_mach_o_fvmlib_command *fvmlib = &cmd->command.fvmlib;
+        printf (" %s\n", fvmlib->name_str);
+        printf ("         minor version: 0x%08x\n", fvmlib->minor_version);
+        printf ("        header address: 0x%08x\n", fvmlib->header_addr);
+      }
       break;
     case BFD_MACH_O_LC_CODE_SIGNATURE:
     case BFD_MACH_O_LC_SEGMENT_SPLIT_INFO:
