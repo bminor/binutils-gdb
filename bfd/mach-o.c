@@ -4203,6 +4203,26 @@ bfd_mach_o_openr_next_archived_file (bfd *archive, bfd *prev)
   return nbfd;
 }
 
+/* Analogous to stat call.  */
+
+static int
+bfd_mach_o_fat_stat_arch_elt (bfd *abfd, struct stat *buf)
+{
+  if (abfd->arelt_data == NULL)
+    {
+      bfd_set_error (bfd_error_invalid_operation);
+      return -1;
+    }
+
+  buf->st_mtime = 0;
+  buf->st_uid = 0;
+  buf->st_gid = 0;
+  buf->st_mode = 0644;
+  buf->st_size = arelt_size (abfd);
+
+  return 0;
+}
+
 /* If ABFD format is FORMAT and architecture is ARCH, return it.
    If ABFD is a fat image containing a member that corresponds to FORMAT
    and ARCH, returns it.
@@ -4756,7 +4776,7 @@ bfd_boolean bfd_mach_o_free_cached_info (bfd *abfd)
 #define bfd_mach_o_truncate_arname                _bfd_noarchive_truncate_arname
 #define bfd_mach_o_write_armap                    _bfd_noarchive_write_armap
 #define bfd_mach_o_get_elt_at_index               _bfd_noarchive_get_elt_at_index
-#define bfd_mach_o_generic_stat_arch_elt          _bfd_noarchive_generic_stat_arch_elt
+#define bfd_mach_o_generic_stat_arch_elt          bfd_mach_o_fat_stat_arch_elt
 #define bfd_mach_o_update_armap_timestamp         _bfd_noarchive_update_armap_timestamp
 
 #define TARGET_NAME 		mach_o_fat_vec

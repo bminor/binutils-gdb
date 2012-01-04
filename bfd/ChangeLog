@@ -1,5 +1,10 @@
 2012-01-04  Tristan Gingold  <gingold@adacore.com>
 
+	* mach-o.c (bfd_mach_o_fat_stat_arch_elt): New function.
+	(bfd_mach_o_generic_stat_arch_elt): Adjust.
+
+2012-01-04  Tristan Gingold  <gingold@adacore.com>
+
 	* mach-o.c (bfd_mach_o_fat_member_init): New function.
 	(bfd_mach_o_openr_next_archived_file): Reindent.
 	Adjust to call bfd_mach_o_fat_member_init.
