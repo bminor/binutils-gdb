@@ -1,3 +1,9 @@
+2012-01-04  Edjunior Machado  <emachado@linux.vnet.ibm.com>
+
+	* gdb.python/py-finish-breakpoint.exp: Add `.' prefix for ppc64.
+	* gdb.python/py-finish-breakpoint2.exp: Skip testcase if python support
+	is not enabled.
+
 2012-01-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.python/py-finish-breakpoint.c (test_exec_exit): Change the
