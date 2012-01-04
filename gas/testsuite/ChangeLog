@@ -1,4 +1,8 @@
-2012-01-03  Iain Sandoe  <idsandoe@googlemail.com>
+2012-01-04  Iain Sandoe  <idsandoe@googlemail.com>
+
+	* gas/mach-o/zerofill-2.d: New.
+
+2012-01-04  Iain Sandoe  <idsandoe@googlemail.com>
 
 	* gas/mach-o/zerofill-1.d: New.
 	* gas/mach-o/zerofill-1.s: New.
