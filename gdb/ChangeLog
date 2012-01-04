@@ -1,5 +1,8 @@
 2012-01-04  Doug Evans  <dje@google.com>
 
+	* dwarf2read.c (init_one_comp_unit): Delete arg "objfile".
+	New arg "per_cu".  All callers updated.
+
 	Delete #if 0'd out code.
 	* language.c (binop_result_type): Delete.
 	(simple_type, ordered_type, same_type, integral_type): Delete.

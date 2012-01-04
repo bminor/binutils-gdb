@@ -1269,7 +1269,7 @@ static struct dwarf2_per_cu_data *dwarf2_find_comp_unit
   (unsigned int offset, struct objfile *objfile);
 
 static void init_one_comp_unit (struct dwarf2_cu *cu,
-				struct objfile *objfile);
+				struct dwarf2_per_cu_data *per_cu);
 
 static void prepare_one_comp_unit (struct dwarf2_cu *cu,
 				   struct die_info *comp_unit_die);
@@ -2277,7 +2277,7 @@ dw2_get_file_names (struct objfile *objfile,
   if (this_cu->v.quick->no_file_data)
     return NULL;
 
-  init_one_comp_unit (&cu, objfile);
+  init_one_comp_unit (&cu, this_cu);
   cleanups = make_cleanup (free_stack_comp_unit, &cu);
 
   if (this_cu->debug_types_section)
@@ -2301,9 +2301,6 @@ dw2_get_file_names (struct objfile *objfile,
       do_cleanups (cleanups);
       return NULL;
     }
-
-  this_cu->cu = &cu;
-  cu.per_cu = this_cu;
 
   dwarf2_read_abbrevs (abfd, &cu);
   make_cleanup (dwarf2_free_abbrev_table, &cu);
@@ -3408,7 +3405,20 @@ process_psymtab_comp_unit (struct dwarf2_per_cu_data *this_cu,
   struct die_reader_specs reader_specs;
   const char *filename;
 
-  init_one_comp_unit (&cu, objfile);
+  /* If this compilation unit was already read in, free the
+     cached copy in order to read it in again.	This is
+     necessary because we skipped some symbols when we first
+     read in the compilation unit (see load_partial_dies).
+     This problem could be avoided, but the benefit is
+     unclear.  */
+  if (this_cu->cu != NULL)
+    free_one_cached_comp_unit (this_cu->cu);
+
+  /* Note that this is a pointer to our stack frame, being
+     added to a global data structure.	It will be cleaned up
+     in free_stack_comp_unit when we finish with this
+     compilation unit.	*/
+  init_one_comp_unit (&cu, this_cu);
   back_to_inner = make_cleanup (free_stack_comp_unit, &cu);
 
   info_ptr = partial_read_comp_unit_head (&cu.header, info_ptr,
@@ -3427,22 +3437,6 @@ process_psymtab_comp_unit (struct dwarf2_per_cu_data *this_cu,
     }
 
   cu.list_in_scope = &file_symbols;
-
-  /* If this compilation unit was already read in, free the
-     cached copy in order to read it in again.	This is
-     necessary because we skipped some symbols when we first
-     read in the compilation unit (see load_partial_dies).
-     This problem could be avoided, but the benefit is
-     unclear.  */
-  if (this_cu->cu != NULL)
-    free_one_cached_comp_unit (this_cu->cu);
-
-  /* Note that this is a pointer to our stack frame, being
-     added to a global data structure.	It will be cleaned up
-     in free_stack_comp_unit when we finish with this
-     compilation unit.	*/
-  this_cu->cu = &cu;
-  cu.per_cu = this_cu;
 
   /* Read the abbrevs for this compilation unit into a table.  */
   dwarf2_read_abbrevs (abfd, &cu);
@@ -3701,7 +3695,7 @@ load_partial_comp_unit (struct dwarf2_per_cu_data *this_cu)
   if (this_cu->cu == NULL)
     {
       cu = xmalloc (sizeof (*cu));
-      init_one_comp_unit (cu, objfile);
+      init_one_comp_unit (cu, this_cu);
 
       read_cu = 1;
 
@@ -3721,10 +3715,6 @@ load_partial_comp_unit (struct dwarf2_per_cu_data *this_cu)
 	  do_cleanups (free_cu_cleanup);
 	  return;
 	}
-
-      /* Link this compilation unit into the compilation unit tree.  */
-      this_cu->cu = cu;
-      cu->per_cu = this_cu;
 
       /* Link this CU into read_in_chain.  */
       this_cu->cu->read_in_chain = dwarf2_per_objfile->read_in_chain;
@@ -4718,7 +4708,7 @@ load_full_comp_unit (struct dwarf2_per_cu_data *per_cu)
   if (per_cu->cu == NULL)
     {
       cu = xmalloc (sizeof (*cu));
-      init_one_comp_unit (cu, objfile);
+      init_one_comp_unit (cu, per_cu);
 
       read_cu = 1;
 
@@ -4744,10 +4734,6 @@ load_full_comp_unit (struct dwarf2_per_cu_data *per_cu)
       /* Read the abbrevs for this compilation unit.  */
       dwarf2_read_abbrevs (abfd, cu);
       free_abbrevs_cleanup = make_cleanup (dwarf2_free_abbrev_table, cu);
-
-      /* Link this compilation unit into the compilation unit tree.  */
-      per_cu->cu = cu;
-      cu->per_cu = per_cu;
 
       /* Link this CU into read_in_chain.  */
       per_cu->cu->read_in_chain = dwarf2_per_objfile->read_in_chain;
@@ -14424,10 +14410,7 @@ read_signatured_type (struct signatured_type *type_sig)
   gdb_assert (type_sig->per_cu.cu == NULL);
 
   cu = xmalloc (sizeof (*cu));
-  init_one_comp_unit (cu, objfile);
-
-  type_sig->per_cu.cu = cu;
-  cu->per_cu = &type_sig->per_cu;
+  init_one_comp_unit (cu, &type_sig->per_cu);
 
   /* If an error occurs while loading, release our storage.  */
   free_cu_cleanup = make_cleanup (free_heap_comp_unit, cu);
@@ -15864,13 +15847,15 @@ dwarf2_find_comp_unit (unsigned int offset, struct objfile *objfile)
   return this_cu;
 }
 
-/* Initialize dwarf2_cu CU for OBJFILE in a pre-allocated space.  */
+/* Initialize dwarf2_cu CU, owned by PER_CU.  */
 
 static void
-init_one_comp_unit (struct dwarf2_cu *cu, struct objfile *objfile)
+init_one_comp_unit (struct dwarf2_cu *cu, struct dwarf2_per_cu_data *per_cu)
 {
   memset (cu, 0, sizeof (*cu));
-  cu->objfile = objfile;
+  per_cu->cu = cu;
+  cu->per_cu = per_cu;
+  cu->objfile = per_cu->objfile;
   obstack_init (&cu->comp_unit_obstack);
 }
 
@@ -15903,8 +15888,8 @@ free_heap_comp_unit (void *data)
 {
   struct dwarf2_cu *cu = data;
 
-  if (cu->per_cu != NULL)
-    cu->per_cu->cu = NULL;
+  gdb_assert (cu->per_cu != NULL);
+  cu->per_cu->cu = NULL;
   cu->per_cu = NULL;
 
   obstack_free (&cu->comp_unit_obstack, NULL);
@@ -15924,20 +15909,18 @@ free_stack_comp_unit (void *data)
 {
   struct dwarf2_cu *cu = data;
 
+  gdb_assert (cu->per_cu != NULL);
+  cu->per_cu->cu = NULL;
+  cu->per_cu = NULL;
+
   obstack_free (&cu->comp_unit_obstack, NULL);
   cu->partial_dies = NULL;
 
-  if (cu->per_cu != NULL)
-    {
-      /* This compilation unit is on the stack in our caller, so we
-	 should not xfree it.  Just unlink it.  */
-      cu->per_cu->cu = NULL;
-      cu->per_cu = NULL;
-
-      /* If we had a per-cu pointer, then we may have other compilation
-	 units loaded, so age them now.  */
-      age_cached_comp_units ();
-    }
+  /* The previous code only did this if per_cu != NULL.
+     But that would always succeed, so now we just unconditionally do
+     the aging.  This seems like the wrong place to do such aging,
+     but cleaning that up is left for later.  */
+  age_cached_comp_units ();
 }
 
 /* Free all cached compilation units.  */
