@@ -1,5 +1,10 @@
 2012-01-03  Iain Sandoe  <idsandoe@googlemail.com>
 
+	* gas/mach-o/zerofill-1.d: New.
+	* gas/mach-o/zerofill-1.s: New.
+
+2012-01-03  Iain Sandoe  <idsandoe@googlemail.com>
+
 	* gas/mach-o/dysymtab-1-64.d: New.
 	* gas/mach-o/dysymtab-1.d: New.
 	* gas/mach-o/symbols-1-64.d: New.

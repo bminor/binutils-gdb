@@ -45,8 +45,8 @@
 #include "mach-o/loader.h"
 #include "obj-macho.h"
 
-/* Forward decl.  */
-static segT obj_mach_o_segT_from_bfd_name (const char *nam, int must_succeed);
+/* Forward decls.  */
+static segT obj_mach_o_segT_from_bfd_name (const char *, int);
 
 /* TODO: Implement "-dynamic"/"-static" command line options.  */
 
@@ -156,6 +156,139 @@ collect_16char_name (char *dest, const char *msg, int require_comma)
   return 0;
 }
 
+static int
+obj_mach_o_get_section_names (char *seg, char *sec,
+			      unsigned segl, unsigned secl)
+{
+  /* Zero-length segment and section names are allowed.  */
+  /* Parse segment name.  */
+  memset (seg, 0, segl);
+  if (collect_16char_name (seg, "segment", 1))
+    {
+      ignore_rest_of_line ();
+      return 0;
+    }
+  input_line_pointer++; /* Skip the terminating ',' */
+
+  /* Parse section name, which can be empty.  */
+  memset (sec, 0, secl);
+  collect_16char_name (sec, "section", 0);
+  return 1;
+}
+
+/* Build (or get) a section from the mach-o description - which includes
+   optional definitions for type, attributes, alignment and stub size.
+   
+   BFD supplies default values for sections which have a canonical name.  */
+
+#define SECT_TYPE_SPECIFIED 0x0001
+#define SECT_ATTR_SPECIFIED 0x0002
+#define SECT_ALGN_SPECIFIED 0x0004
+
+static segT
+obj_mach_o_make_or_get_sect (char * segname, char * sectname,
+			     unsigned int specified_mask, 
+			     unsigned int usectype, unsigned int usecattr,
+			     unsigned int ualign, offsetT stub_size)
+{
+  unsigned int sectype, secattr, secalign;
+  flagword oldflags, flags;
+  const char *name;
+  segT sec;
+  bfd_mach_o_section *msect;
+  const mach_o_section_name_xlat *xlat;
+
+  /* This provides default bfd flags and default mach-o section type and
+     attributes along with the canonical name.  */
+  xlat = bfd_mach_o_section_data_for_mach_sect (stdoutput, segname, sectname);
+
+  /* TODO: more checking of whether overides are acually allowed.  */
+
+  if (xlat != NULL)
+    {
+      name = xstrdup (xlat->bfd_name);
+      sectype = xlat->macho_sectype;
+      if (specified_mask & SECT_TYPE_SPECIFIED)
+	{
+	  if ((sectype == BFD_MACH_O_S_ZEROFILL
+	       || sectype == BFD_MACH_O_S_GB_ZEROFILL)
+	      && sectype != usectype)
+	    as_bad (_("cannot overide zerofill section type for `%s,%s'"),
+		    segname, sectname);
+	  else
+	    sectype = usectype;
+	}
+      secattr = xlat->macho_secattr;
+      secalign = xlat->sectalign;
+      flags = xlat->bfd_flags;
+    }
+  else
+    {
+      /* There is no normal BFD section name for this section.  Create one.
+         The name created doesn't really matter as it will never be written
+         on disk.  */
+      size_t seglen = strlen (segname);
+      size_t sectlen = strlen (sectname);
+      char *n;
+
+      n = xmalloc (seglen + 1 + sectlen + 1);
+      memcpy (n, segname, seglen);
+      n[seglen] = '.';
+      memcpy (n + seglen + 1, sectname, sectlen);
+      n[seglen + 1 + sectlen] = 0;
+      name = n;
+      if (specified_mask & SECT_TYPE_SPECIFIED)
+	sectype = usectype;
+      else
+	sectype = BFD_MACH_O_S_REGULAR;
+      secattr = BFD_MACH_O_S_ATTR_NONE;
+      secalign = 0;
+      flags = SEC_NO_FLAGS;
+    }
+
+  /* For now, just use what the user provided.  */
+
+  if (specified_mask & SECT_ATTR_SPECIFIED)
+    secattr = usecattr;
+
+  if (specified_mask & SECT_ALGN_SPECIFIED)
+    secalign = ualign;
+
+  /* Sub-segments don't exists as is on Mach-O.  */
+  sec = subseg_new (name, 0);
+
+  oldflags = bfd_get_section_flags (stdoutput, sec);
+  msect = bfd_mach_o_get_mach_o_section (sec);
+
+  if (oldflags == SEC_NO_FLAGS)
+    {
+      /* New, so just use the defaults or what's specified.  */
+      if (! bfd_set_section_flags (stdoutput, sec, flags))
+	as_warn (_("failed to set flags for \"%s\": %s"),
+		 bfd_section_name (stdoutput, sec),
+		 bfd_errmsg (bfd_get_error ()));
+ 
+      strncpy (msect->segname, segname, sizeof (msect->segname));
+      strncpy (msect->sectname, sectname, sizeof (msect->sectname));
+
+      msect->align = secalign;
+      msect->flags = sectype | secattr;
+      msect->reserved2 = stub_size;
+      
+      if (sectype == BFD_MACH_O_S_ZEROFILL
+	  || sectype == BFD_MACH_O_S_GB_ZEROFILL)
+        seg_info (sec)->bss = 1;
+    }
+  else if (flags != SEC_NO_FLAGS)
+    {
+      if (flags != oldflags
+	  || msect->flags != (secattr | sectype))
+	as_warn (_("Ignoring changed section attributes for %s"), name);
+    }
+
+  return sec;
+}
+
 /* .section
 
    The '.section' specification syntax looks like:
@@ -178,21 +311,11 @@ collect_16char_name (char *dest, const char *msg, int require_comma)
 static void
 obj_mach_o_section (int ignore ATTRIBUTE_UNUSED)
 {
-  char *p;
-  char c;
   unsigned int sectype = BFD_MACH_O_S_REGULAR;
-  unsigned int defsectype = BFD_MACH_O_S_REGULAR;
-  unsigned int sectype_given = 0;
+  unsigned int specified_mask = 0;
   unsigned int secattr = 0;
-  unsigned int defsecattr = 0;
-  int secattr_given = 0;
-  unsigned int secalign = 0;
   offsetT sizeof_stub = 0;
-  const mach_o_section_name_xlat * xlat;
-  const char *name;
-  flagword oldflags, flags;
-  asection *sec;
-  bfd_mach_o_section *msect;
+  segT new_seg;
   char segname[17];
   char sectname[17];
 
@@ -200,23 +323,15 @@ obj_mach_o_section (int ignore ATTRIBUTE_UNUSED)
   md_flush_pending_output ();
 #endif
 
-  /* Zero-length segment and section names are allowed.  */
-  /* Parse segment name.  */
-  memset (segname, 0, sizeof(segname));
-  if (collect_16char_name (segname, "segment", 1))
-    {
-      ignore_rest_of_line ();
-      return;
-    }
-  input_line_pointer++; /* Skip the terminating ',' */
+  /* Get the User's segment annd section names.  */
+  if (! obj_mach_o_get_section_names (segname, sectname, 17, 17))
+    return;
 
-  /* Parse section name.  */
-  memset (sectname, 0, sizeof(sectname));
-  collect_16char_name (sectname, "section", 0);
-
-  /* Parse type.  */
+  /* Parse section type, if present.  */
   if (*input_line_pointer == ',')
     {
+      char *p;
+      char c;
       char tmpc;
       int len;
       input_line_pointer++;
@@ -243,13 +358,14 @@ obj_mach_o_section (int ignore ATTRIBUTE_UNUSED)
 	  return;
         }
       else
-	sectype_given = 1;
+	specified_mask |= SECT_TYPE_SPECIFIED;
       /* Restore.  */
       p[len] = tmpc;
 
       /* Parse attributes.
 	 TODO: check validity of attributes for section type.  */
-      if (sectype_given && c == ',')
+      if ((specified_mask & SECT_TYPE_SPECIFIED)
+	  && c == ',')
         {
           do
             {
@@ -282,7 +398,7 @@ obj_mach_o_section (int ignore ATTRIBUTE_UNUSED)
                 }
               else
 		{
-		  secattr_given = 1;
+		  specified_mask |= SECT_ATTR_SPECIFIED;
                   secattr |= attr;
 		}
 	      /* Restore.  */
@@ -291,7 +407,8 @@ obj_mach_o_section (int ignore ATTRIBUTE_UNUSED)
           while (*input_line_pointer == '+');
 
           /* Parse sizeof_stub.  */
-          if (secattr_given && *input_line_pointer == ',')
+          if ((specified_mask & SECT_ATTR_SPECIFIED) 
+	      && *input_line_pointer == ',')
             {
               if (sectype != BFD_MACH_O_S_SYMBOL_STUBS)
                 {
@@ -303,7 +420,8 @@ obj_mach_o_section (int ignore ATTRIBUTE_UNUSED)
 	      input_line_pointer++;
               sizeof_stub = get_absolute_expression ();
             }
-          else if (secattr_given && sectype == BFD_MACH_O_S_SYMBOL_STUBS)
+          else if ((specified_mask & SECT_ATTR_SPECIFIED) 
+		   && sectype == BFD_MACH_O_S_SYMBOL_STUBS)
             {
               as_bad (_("missing sizeof_stub expression"));
 	      ignore_rest_of_line ();
@@ -312,70 +430,179 @@ obj_mach_o_section (int ignore ATTRIBUTE_UNUSED)
         }
     }
 
-  flags = SEC_NO_FLAGS;
-  /* This provides default bfd flags and default mach-o section type and
-     attributes along with the canonical name.  */
-  xlat = bfd_mach_o_section_data_for_mach_sect (stdoutput, segname, sectname);
-  if (xlat != NULL)
+  new_seg = obj_mach_o_make_or_get_sect (segname, sectname, specified_mask, 
+					 sectype, secattr, 0 /*align */,
+					 sizeof_stub);
+  if (new_seg != NULL)
     {
-      name = xstrdup (xlat->bfd_name);
-      flags = xlat->bfd_flags;
-      defsectype = xlat->macho_sectype;
-      defsecattr = xlat->macho_secattr;
-      secalign = xlat->sectalign;
+      subseg_set (new_seg, 0);
+      demand_empty_rest_of_line ();
     }
-  else
+}
+
+/* .zerofill segname, sectname [, symbolname, size [, align]]
+
+   Zerofill switches, temporarily, to a sect of type 'zerofill'.
+
+   If a variable name is given, it defines that in the section.
+   Otherwise it just creates the section if it doesn't exist.  */
+
+static void
+obj_mach_o_zerofill (int ignore ATTRIBUTE_UNUSED)
+{
+  char segname[17];
+  char sectname[17];
+  segT old_seg = now_seg;
+  segT new_seg;
+  symbolS *sym = NULL;
+  unsigned int align = 0;
+  unsigned int specified_mask = 0;
+  offsetT size;
+
+#ifdef md_flush_pending_output
+  md_flush_pending_output ();
+#endif
+
+  /* Get the User's segment annd section names.  */
+  if (! obj_mach_o_get_section_names (segname, sectname, 17, 17))
+    return;
+
+  /* Parse variable definition, if present.  */
+  if (*input_line_pointer == ',')
     {
-      /* There is no normal BFD section name for this section.  Create one.
-         The name created doesn't really matter as it will never be written
-         on disk.  */
-      size_t seglen = strlen (segname);
-      size_t sectlen = strlen (sectname);
-      char *n;
+      /* Parse symbol, size [.align] 
+         We follow the method of s_common_internal, with the difference
+         that the symbol cannot be a duplicate-common.  */
+      char *name;
+      char c;
+      char *p;
+      expressionS exp;
+  
+      input_line_pointer++; /* Skip ',' */
+      SKIP_WHITESPACE ();
+      name = input_line_pointer;
+      c = get_symbol_end ();
+      /* Just after name is now '\0'.  */
+      p = input_line_pointer;
+      *p = c;
 
-      n = xmalloc (seglen + 1 + sectlen + 1);
-      memcpy (n, segname, seglen);
-      n[seglen] = '.';
-      memcpy (n + seglen + 1, sectname, sectlen);
-      n[seglen + 1 + sectlen] = 0;
-      name = n;
-    }
-
-  /* Sub-segments don't exists as is on Mach-O.  */
-  sec = subseg_new (name, 0);
-
-  oldflags = bfd_get_section_flags (stdoutput, sec);
-  msect = bfd_mach_o_get_mach_o_section (sec);
-   if (oldflags == SEC_NO_FLAGS)
-    {
-      if (! bfd_set_section_flags (stdoutput, sec, flags))
-	as_warn (_("error setting flags for \"%s\": %s"),
-		 bfd_section_name (stdoutput, sec),
-		 bfd_errmsg (bfd_get_error ()));
-      strncpy (msect->segname, segname, sizeof (msect->segname));
-      msect->segname[16] = 0;
-      strncpy (msect->sectname, sectname, sizeof (msect->sectname));
-      msect->sectname[16] = 0;
-      msect->align = secalign;
-      if (sectype_given)
+      if (name == p)
 	{
-	  msect->flags = sectype;
-	  if (secattr_given)
-	    msect->flags |= secattr;
-	  else
-	    msect->flags |= defsecattr;
+	  as_bad (_("expected symbol name"));
+	  ignore_rest_of_line ();
+	  goto done;
 	}
-      else
-        msect->flags = defsectype | defsecattr;
-      msect->reserved2 = sizeof_stub;
+
+      SKIP_WHITESPACE ();  
+      if (*input_line_pointer == ',')
+	input_line_pointer++;
+
+      expression_and_evaluate (&exp);
+      if (exp.X_op != O_constant
+	  && exp.X_op != O_absent)
+	{
+	    as_bad (_("bad or irreducible absolute expression"));
+	  ignore_rest_of_line ();
+	  goto done;
+	}
+      else if (exp.X_op == O_absent)
+	{
+	  as_bad (_("missing size expression"));
+	  ignore_rest_of_line ();
+	  goto done;
+	}
+
+      size = exp.X_add_number;
+      size &= ((offsetT) 2 << (stdoutput->arch_info->bits_per_address - 1)) - 1;
+      if (exp.X_add_number != size || !exp.X_unsigned)
+	{
+	  as_warn (_("size (%ld) out of range, ignored"),
+		   (long) exp.X_add_number);
+	  ignore_rest_of_line ();
+	  goto done;
+	}
+
+     *p = 0; /* Make the name into a c string for err messages.  */
+     sym = symbol_find_or_make (name);
+     if (S_IS_DEFINED (sym) || symbol_equated_p (sym))
+	{
+	  as_bad (_("symbol `%s' is already defined"), name);
+	  *p = c;
+	  ignore_rest_of_line ();
+	   goto done;
+	}
+
+      size = S_GET_VALUE (sym);
+      if (size == 0)
+	size = exp.X_add_number;
+      else if (size != exp.X_add_number)
+	as_warn (_("size of \"%s\" is already %ld; not changing to %ld"),
+		   name, (long) size, (long) exp.X_add_number);
+
+      *p = c;  /* Restore the termination char.  */
+      
+      SKIP_WHITESPACE ();  
+      if (*input_line_pointer == ',')
+	{
+	  align = (unsigned int) parse_align (0);
+	  if (align == (unsigned int) -1)
+	    {
+	      as_warn (_("align value not recognized, using size"));
+	      align = size;
+	    }
+	  if (align > 15)
+	    {
+	      as_warn (_("Alignment (%lu) too large: 15 assumed."),
+			(unsigned long)align);
+	      align = 15;
+	    }
+	  specified_mask |= SECT_ALGN_SPECIFIED;
+	}
     }
-  else if (flags != SEC_NO_FLAGS)
+ /* else just a section definition.  */
+
+  specified_mask |= SECT_TYPE_SPECIFIED;
+  new_seg = obj_mach_o_make_or_get_sect (segname, sectname, specified_mask, 
+					 BFD_MACH_O_S_ZEROFILL,
+					 BFD_MACH_O_S_ATTR_NONE,
+					 align, (offsetT) 0 /*stub size*/);
+  if (new_seg == NULL)
+    return;
+
+  /* In case the user specifies the bss section by mach-o name.
+     Create it on demand */
+  if (strcmp (new_seg->name, BSS_SECTION_NAME) == 0
+      && bss_section == NULL)
+    bss_section = new_seg;
+
+  subseg_set (new_seg, 0);
+
+  if (sym != NULL)
     {
-      if (flags != oldflags
-	  || msect->flags != (secattr | sectype))
-	as_warn (_("Ignoring changed section attributes for %s"), name);
+      char *pfrag;
+
+      if (align)
+	{
+	  record_alignment (new_seg, align);
+	  frag_align (align, 0, 0);
+	}
+
+      /* Detach from old frag.  */
+      if (S_GET_SEGMENT (sym) == new_seg)
+	symbol_get_frag (sym)->fr_symbol = NULL;
+
+      symbol_set_frag (sym, frag_now);
+      pfrag = frag_var (rs_org, 1, 1, 0, sym, size, NULL);
+      *pfrag = 0;
+
+      S_SET_SEGMENT (sym, new_seg);
+      if (new_seg == bss_section)
+	S_CLEAR_EXTERNAL (sym);
     }
-  demand_empty_rest_of_line ();
+
+done:
+  /* switch back to the section that was current before the .zerofill.  */
+  subseg_set (old_seg, 0);
 }
 
 static segT 
@@ -675,6 +902,8 @@ obj_mach_o_common_parse (int is_local, symbolS *symbolP,
 {
   addressT align = 0;
 
+  SKIP_WHITESPACE ();  
+
   /* Both comm and lcomm take an optional alignment, as a power
      of two between 1 and 15.  */
   if (*input_line_pointer == ',')
@@ -837,6 +1066,7 @@ const pseudo_typeS mach_o_pseudo_table[] =
   { "picsymbol_stub3", obj_mach_o_opt_tgt_section, 4}, /* extension.  */
 
   { "section", obj_mach_o_section, 0},
+  { "zerofill", obj_mach_o_zerofill, 0},
 
   /* Symbol-related.  */
   { "indirect_symbol", obj_mach_o_placeholder, 0},

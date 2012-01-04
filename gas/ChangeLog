@@ -1,3 +1,13 @@
+2012-01-04  Iain Sandoe  <idsandoe@googlemail.com>
+
+	* config/obj-macho.c (obj_mach_o_segT_from_bfd_name): Tidy definition.
+	(obj_mach_o_get_section_names): New (split from obj_mach_o_section).
+	(obj_mach_o_make_or_get_sect): Likewise.
+	(obj_mach_o_section): Split out the functionality shared with zerofill.
+	(obj_mach_o_zerofill): New.
+	(obj_mach_o_common_parse): Ensure whitespace is skipped.
+	(mach_o_pseudo_table): Add .zerofill.
+
 2012-01-03  Iain Sandoe  <idsandoe@googlemail.com>
 
 	* config/obj-macho.c (obj_macho_process_stab): New.
