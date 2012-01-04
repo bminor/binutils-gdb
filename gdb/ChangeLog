@@ -1,5 +1,13 @@
 2012-01-04  Joel Brobecker  <brobecker@adacore.com>
 
+	* corefile.c (close_exec_file): Delete.
+	(reopen_exec_file): Remove commented out code that seems related
+	to close_exec_file, which is being deleted here.
+	* inferior.h (close_exec_file): Delete.
+	* fork-child.c (fork_inferior): Remove call to fork_inferior.
+
+2012-01-04  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c: #include "cli/cli-utils.h".
 	(get_selections): Use skip_spaces.
 	(ada_get_next_arg): Use skip_spaces and skip_to_space.

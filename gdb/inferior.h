@@ -154,8 +154,6 @@ extern void fetch_inferior_event (void *);
 
 extern void init_wait_for_inferior (void);
 
-extern void close_exec_file (void);
-
 extern void reopen_exec_file (void);
 
 /* The `resume' routine should only be called in special circumstances.

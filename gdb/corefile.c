@@ -132,26 +132,9 @@ specify_exec_file_hook (void (*hook) (char *))
     deprecated_exec_file_display_hook = hook;
 }
 
-/* The exec file must be closed before running an inferior.
-   If it is needed again after the inferior dies, it must
-   be reopened.  */
-
-void
-close_exec_file (void)
-{
-#if 0				/* FIXME */
-  if (exec_bfd)
-    bfd_tempclose (exec_bfd);
-#endif
-}
-
 void
 reopen_exec_file (void)
 {
-#if 0				/* FIXME */
-  if (exec_bfd)
-    bfd_reopen (exec_bfd);
-#else
   char *filename;
   int res;
   struct stat st;
@@ -175,7 +158,6 @@ reopen_exec_file (void)
     bfd_cache_close_all ();
 
   do_cleanups (cleanups);
-#endif
 }
 
 /* If we have both a core file and an exec file,

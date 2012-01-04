@@ -272,9 +272,6 @@ fork_inferior (char *exec_file_arg, char *allargs, char **env,
       argv[3] = (char *) 0;
     }
 
-  /* On some systems an exec will fail if the executable is open.  */
-  close_exec_file ();
-
   /* Retain a copy of our environment variables, since the child will
      replace the value of environ and if we're vforked, we have to
      restore it.  */
