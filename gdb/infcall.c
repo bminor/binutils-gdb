@@ -631,6 +631,17 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 				args, nargs, target_values_type,
 				&real_pc, &bp_addr, get_current_regcache ());
       break;
+    case AT_ENTRY_POINT:
+      {
+	CORE_ADDR dummy_addr;
+
+	real_pc = funaddr;
+	dummy_addr = entry_point_address ();
+	/* A call dummy always consists of just a single breakpoint, so
+	   its address is the same as the address of the dummy.  */
+	bp_addr = dummy_addr;
+	break;
+      }
     case AT_SYMBOL:
       /* Some executables define a symbol __CALL_DUMMY_ADDRESS whose
 	 address is the location where the breakpoint should be
@@ -650,39 +661,11 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 	    dummy_addr = gdbarch_convert_from_func_ptr_addr (gdbarch,
 							     dummy_addr,
 							     &current_target);
-	    /* A call dummy always consists of just a single breakpoint,
-	       so its address is the same as the address of the dummy.  */
-	    bp_addr = dummy_addr;
-	    break;
 	  }
-      }
-      /* FALLTHROUGH */
-    case AT_ENTRY_POINT:
-      {
-	CORE_ADDR dummy_addr;
-	int bp_len;
-
-	real_pc = funaddr;
-	dummy_addr = entry_point_address ();
-
-	/* If the inferior call throws an uncaught C++ exception,
-	   the inferior unwinder tries to unwind all frames, including
-	   our dummy frame.  The unwinder determines the address of
-	   the calling instruction by subtracting 1 to the return
-	   address.  So, using the entry point's address as the return
-	   address would lead the unwinder to use the unwinding
-	   information of the code immediately preceding the entry
-	   point.  This information, if found, is invalid for the dummy
-	   frame, and can potentially crash the inferior's unwinder.
-	   Therefore, we adjust the return address by the length of
-	   a breakpoint, guaranteeing that the unwinder finds the
-	   correct function as the caller.  */
-
-	gdbarch_breakpoint_from_pc (gdbarch, &dummy_addr, &bp_len);
-	dummy_addr += bp_len;
-
-	/* A call dummy always consists of just a single breakpoint, so
-	   its address is the same as the address of the dummy.  */
+	else
+	  dummy_addr = entry_point_address ();
+	/* A call dummy always consists of just a single breakpoint,
+	   so it's address is the same as the address of the dummy.  */
 	bp_addr = dummy_addr;
 	break;
       }
