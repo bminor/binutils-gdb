@@ -821,7 +821,7 @@ bfd_mach_o_print_symbol (bfd *abfd,
 
 static void
 bfd_mach_o_convert_architecture (bfd_mach_o_cpu_type mtype,
-				 bfd_mach_o_cpu_subtype msubtype ATTRIBUTE_UNUSED,
+				 bfd_mach_o_cpu_subtype msubtype,
 				 enum bfd_architecture *type,
 				 unsigned long *subtype)
 {
@@ -829,8 +829,12 @@ bfd_mach_o_convert_architecture (bfd_mach_o_cpu_type mtype,
 
   switch (mtype)
     {
-    case BFD_MACH_O_CPU_TYPE_VAX: *type = bfd_arch_vax; break;
-    case BFD_MACH_O_CPU_TYPE_MC680x0: *type = bfd_arch_m68k; break;
+    case BFD_MACH_O_CPU_TYPE_VAX:
+      *type = bfd_arch_vax;
+      break;
+    case BFD_MACH_O_CPU_TYPE_MC680x0:
+      *type = bfd_arch_m68k;
+      break;
     case BFD_MACH_O_CPU_TYPE_I386:
       *type = bfd_arch_i386;
       *subtype = bfd_mach_i386_i386;
@@ -839,17 +843,52 @@ bfd_mach_o_convert_architecture (bfd_mach_o_cpu_type mtype,
       *type = bfd_arch_i386;
       *subtype = bfd_mach_x86_64;
       break;
-    case BFD_MACH_O_CPU_TYPE_MIPS: *type = bfd_arch_mips; break;
-    case BFD_MACH_O_CPU_TYPE_MC98000: *type = bfd_arch_m98k; break;
-    case BFD_MACH_O_CPU_TYPE_HPPA: *type = bfd_arch_hppa; break;
-    case BFD_MACH_O_CPU_TYPE_ARM: *type = bfd_arch_arm; break;
-    case BFD_MACH_O_CPU_TYPE_MC88000: *type = bfd_arch_m88k; break;
+    case BFD_MACH_O_CPU_TYPE_MIPS:
+      *type = bfd_arch_mips;
+      break;
+    case BFD_MACH_O_CPU_TYPE_MC98000:
+      *type = bfd_arch_m98k;
+      break;
+    case BFD_MACH_O_CPU_TYPE_HPPA:
+      *type = bfd_arch_hppa;
+      break;
+    case BFD_MACH_O_CPU_TYPE_ARM:
+      *type = bfd_arch_arm;
+      switch (msubtype)
+        {
+        case BFD_MACH_O_CPU_SUBTYPE_ARM_V4T:
+          *subtype = bfd_mach_arm_4T;
+          break;
+        case BFD_MACH_O_CPU_SUBTYPE_ARM_V6:
+          *subtype = bfd_mach_arm_4T;	/* Best fit ?  */
+          break;
+        case BFD_MACH_O_CPU_SUBTYPE_ARM_V5TEJ:
+          *subtype = bfd_mach_arm_5TE;
+          break;
+        case BFD_MACH_O_CPU_SUBTYPE_ARM_XSCALE:
+          *subtype = bfd_mach_arm_XScale;
+          break;
+        case BFD_MACH_O_CPU_SUBTYPE_ARM_V7:
+          *subtype = bfd_mach_arm_5TE;	/* Best fit ?  */
+          break;
+        case BFD_MACH_O_CPU_SUBTYPE_ARM_ALL:
+        default:
+          break;
+        }
+      break;
+    case BFD_MACH_O_CPU_TYPE_MC88000:
+      *type = bfd_arch_m88k;
+      break;
     case BFD_MACH_O_CPU_TYPE_SPARC:
       *type = bfd_arch_sparc;
       *subtype = bfd_mach_sparc;
       break;
-    case BFD_MACH_O_CPU_TYPE_I860: *type = bfd_arch_i860; break;
-    case BFD_MACH_O_CPU_TYPE_ALPHA: *type = bfd_arch_alpha; break;
+    case BFD_MACH_O_CPU_TYPE_I860:
+      *type = bfd_arch_i860;
+      break;
+    case BFD_MACH_O_CPU_TYPE_ALPHA:
+      *type = bfd_arch_alpha;
+      break;
     case BFD_MACH_O_CPU_TYPE_POWERPC:
       *type = bfd_arch_powerpc;
       *subtype = bfd_mach_ppc;
