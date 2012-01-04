@@ -1,3 +1,9 @@
+2012-01-04  Joel Brobecker  <brobecker@adacore.com>
+
+	* linespec.c (struct collect_minsyms) [list_mode]: New field.
+	(add_minsym): Ignore data symbols if not in list mode.
+	(search_minsyms_for_name): Set local.list_mode.
+
 2012-01-04  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* breakpoint.c (all_locations_are_pending): Consider locations
