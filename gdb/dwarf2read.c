@@ -924,7 +924,7 @@ static void dwarf2_psymtab_to_symtab (struct partial_symtab *);
 
 static void psymtab_to_symtab_1 (struct partial_symtab *);
 
-static void dwarf2_read_abbrevs (bfd *abfd, struct dwarf2_cu *cu);
+static void dwarf2_read_abbrevs (struct dwarf2_cu *cu);
 
 static void dwarf2_free_abbrev_table (void *);
 
@@ -1217,9 +1217,7 @@ static struct signatured_type *lookup_signatured_type_at_offset
      struct dwarf2_section_info *section,
      unsigned int offset);
 
-static void read_signatured_type_at_offset (struct objfile *objfile,
-					    struct dwarf2_section_info *sect,
-					    unsigned int offset);
+static void load_full_type_unit (struct dwarf2_per_cu_data *per_cu);
 
 static void read_signatured_type (struct signatured_type *type_sig);
 
@@ -1820,9 +1818,7 @@ static void
 load_cu (struct dwarf2_per_cu_data *per_cu)
 {
   if (per_cu->debug_types_section)
-    read_signatured_type_at_offset (per_cu->objfile,
-				    per_cu->debug_types_section,
-				    per_cu->offset);
+    load_full_type_unit (per_cu);
   else
     load_full_comp_unit (per_cu);
 
@@ -2300,7 +2296,7 @@ dw2_get_file_names (struct objfile *objfile,
       return NULL;
     }
 
-  dwarf2_read_abbrevs (abfd, &cu);
+  dwarf2_read_abbrevs (&cu);
   make_cleanup (dwarf2_free_abbrev_table, &cu);
 
   init_cu_die_reader (&reader_specs, &cu);
@@ -3437,7 +3433,7 @@ process_psymtab_comp_unit (struct dwarf2_per_cu_data *this_cu,
   cu.list_in_scope = &file_symbols;
 
   /* Read the abbrevs for this compilation unit into a table.  */
-  dwarf2_read_abbrevs (abfd, &cu);
+  dwarf2_read_abbrevs (&cu);
   make_cleanup (dwarf2_free_abbrev_table, &cu);
 
   /* Read the compilation unit die.  */
@@ -3726,7 +3722,7 @@ load_partial_comp_unit (struct dwarf2_per_cu_data *this_cu)
 
   /* Read the abbrevs for this compilation unit into a table.  */
   gdb_assert (cu->dwarf2_abbrevs == NULL);
-  dwarf2_read_abbrevs (abfd, cu);
+  dwarf2_read_abbrevs (cu);
   free_abbrevs_cleanup = make_cleanup (dwarf2_free_abbrev_table, cu);
 
   /* Read the compilation unit die.  */
@@ -4730,7 +4726,7 @@ load_full_comp_unit (struct dwarf2_per_cu_data *per_cu)
       cu->header.first_die_offset = info_ptr - beg_of_comp_unit;
 
       /* Read the abbrevs for this compilation unit.  */
-      dwarf2_read_abbrevs (abfd, cu);
+      dwarf2_read_abbrevs (cu);
       free_abbrevs_cleanup = make_cleanup (dwarf2_free_abbrev_table, cu);
 
       /* Link this CU into read_in_chain.  */
@@ -9135,7 +9131,7 @@ read_comp_unit (gdb_byte *info_ptr, struct dwarf2_cu *cu)
 
   if (cu->dwarf2_abbrevs == NULL)
     {
-      dwarf2_read_abbrevs (cu->objfile->obfd, cu);
+      dwarf2_read_abbrevs (cu);
       back_to = make_cleanup (dwarf2_free_abbrev_table, cu);
       read_abbrevs = 1;
     }
@@ -9314,8 +9310,9 @@ read_full_die (const struct die_reader_specs *reader,
    the data found in the abbrev table.  */
 
 static void
-dwarf2_read_abbrevs (bfd *abfd, struct dwarf2_cu *cu)
+dwarf2_read_abbrevs (struct dwarf2_cu *cu)
 {
+  bfd *abfd = cu->objfile->obfd;
   struct comp_unit_head *cu_header = &cu->header;
   gdb_byte *abbrev_ptr;
   struct abbrev_info *cur_abbrev;
@@ -10004,7 +10001,7 @@ find_partial_die (unsigned int offset, struct dwarf2_cu *cu)
       back_to = make_cleanup (null_cleanup, 0);
       if (per_cu->cu->dwarf2_abbrevs == NULL)
 	{
-	  dwarf2_read_abbrevs (objfile->obfd, per_cu->cu);
+	  dwarf2_read_abbrevs (per_cu->cu);
 	  make_cleanup (dwarf2_free_abbrev_table, per_cu->cu);
 	}
       info_ptr = (dwarf2_per_objfile->info.buffer
@@ -14367,19 +14364,24 @@ lookup_signatured_type_at_offset (struct objfile *objfile,
   return type_sig;
 }
 
-/* Read in signatured type at OFFSET and build its CU and die(s).  */
+/* Load the DIEs associated with type unit PER_CU into memory.  */
 
 static void
-read_signatured_type_at_offset (struct objfile *objfile,
-				struct dwarf2_section_info *sect,
-				unsigned int offset)
+load_full_type_unit (struct dwarf2_per_cu_data *per_cu)
 {
+  struct objfile *objfile = per_cu->objfile;
+  struct dwarf2_section_info *sect = per_cu->debug_types_section;
+  unsigned int offset = per_cu->offset;
   struct signatured_type *type_sig;
 
   dwarf2_read_section (objfile, sect);
 
   /* We have the section offset, but we need the signature to do the
-     hash table lookup.	 */
+     hash table lookup.  */
+  /* FIXME: This is sorta unnecessary, read_signatured_type only uses
+     the signature to assert we found the right one.
+     Ok, but it's a lot of work.  We should simplify things so any needed
+     assert doesn't require all this clumsiness.  */
   type_sig = lookup_signatured_type_at_offset (objfile, sect, offset);
 
   gdb_assert (type_sig->per_cu.cu == NULL);
@@ -14426,7 +14428,7 @@ read_signatured_type (struct signatured_type *type_sig)
 			    hashtab_obstack_allocate,
 			    dummy_obstack_deallocate);
 
-  dwarf2_read_abbrevs (objfile->obfd, cu);
+  dwarf2_read_abbrevs (cu);
   back_to = make_cleanup (dwarf2_free_abbrev_table, cu);
 
   init_cu_die_reader (&reader_specs, cu);
