@@ -725,7 +725,7 @@ valpy_binop (enum valpy_opcode opcode, PyObject *self, PyObject *other)
     {
       struct value *arg1, *arg2;
       struct cleanup *cleanup = make_cleanup_value_free_to_mark (value_mark ());
-      struct value *res_val;
+      struct value *res_val = NULL;
 
       /* If the gdb.Value object is the second operand, then it will be passed
 	 to us as the OTHER argument, and SELF will be an entirely different

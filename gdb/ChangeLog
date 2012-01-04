@@ -1,3 +1,7 @@
+2012-01-04  Tom Tromey  <tromey@redhat.com>
+
+	* python/py-value.c (valpy_binop): Initialize 'res_val'.
+
 2012-01-04  Joel Brobecker  <brobecker@adacore.com>
 
 	* corefile.c (close_exec_file): Delete.
