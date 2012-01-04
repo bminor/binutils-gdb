@@ -63,6 +63,7 @@
 #include "mi/mi-common.h"
 #include "arch-utils.h"
 #include "exceptions.h"
+#include "cli/cli-utils.h"
 
 /* Define whether or not the C operator '/' truncates towards zero for
    differently signed operands (truncation direction is undefined in C).
@@ -3611,8 +3612,7 @@ get_selections (int *choices, int n_choices, int max_results,
       char *args2;
       int choice, j;
 
-      while (isspace (*args))
-        args += 1;
+      args = skip_spaces (args);
       if (*args == '\0' && n_chosen == 0)
         error_no_arg (_("one or more choice numbers"));
       else if (*args == '\0')
@@ -11538,19 +11538,13 @@ ada_get_next_arg (char **argsp)
   char *end;
   char *result;
 
-  /* Skip any leading white space.  */
-
-  while (isspace (*args))
-    args++;
-
+  args = skip_spaces (args);
   if (args[0] == '\0')
     return NULL; /* No more arguments.  */
   
   /* Find the end of the current argument.  */
 
-  end = args;
-  while (*end != '\0' && !isspace (*end))
-    end++;
+  end = skip_to_space (args);
 
   /* Adjust ARGSP to point to the start of the next argument.  */
 
@@ -11584,8 +11578,7 @@ catch_ada_exception_command_split (char *args,
   /* Check that we do not have any more arguments.  Anything else
      is unexpected.  */
 
-  while (isspace (*args))
-    args++;
+  args = skip_spaces (args);
 
   if (args[0] != '\0')
     error (_("Junk at end of expression"));
@@ -11818,8 +11811,7 @@ ada_decode_assert_location (char *args, char **addr_string,
 
   if (args != NULL)
     {
-      while (isspace (*args))
-        args++;
+      args = skip_spaces (args);
       if (*args != '\0')
         error (_("Junk at end of arguments."));
     }
