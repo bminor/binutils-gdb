@@ -1,3 +1,18 @@
+2012-01-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Revert:
+	2012-01-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+		    Joel Brobecker  <brobecker@adacore.com>
+	Fix regression for gdb.cp/gdb2495.exp with gcc-4.7.
+	* arch-utils.c (displaced_step_at_entry_point): Incrase BP_LEN skip to
+	3 times.
+	* infcall.c (call_function_by_hand) <AT_SYMBOL>: Move it upwards and
+	fall through into AT_ENTRY_POINT.
+	(call_function_by_hand) <AT_ENTRY_POINT>: New variable bp_len.  Adjust
+	DUMMY_ADDR with it.
+	* ppc-linux-tdep.c (ppc_linux_displaced_step_location): Increase
+	PPC_INSN_SIZE skip to 3 times.
+
 2012-01-04  Joel Brobecker  <brobecker@adacore.com>
 
 	* linespec.c (add_minsym): Preserve function descriptors.
