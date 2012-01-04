@@ -224,20 +224,55 @@ bfd_mach_o_x86_64_swap_reloc_out (arelent *rel, bfd_mach_o_reloc_info *rinfo)
   rinfo->r_scattered = 0;
   switch (rel->howto->type)
     {
+    case BFD_RELOC_32:
+      rinfo->r_type = BFD_MACH_O_X86_64_RELOC_UNSIGNED;
+      rinfo->r_pcrel = 0;
+      rinfo->r_length = 2;
+      break;
     case BFD_RELOC_64:
       rinfo->r_type = BFD_MACH_O_X86_64_RELOC_UNSIGNED;
       rinfo->r_pcrel = 0;
       rinfo->r_length = 3;
       break;
     case BFD_RELOC_32_PCREL:
+      rinfo->r_type = BFD_MACH_O_X86_64_RELOC_SIGNED;
+      rinfo->r_pcrel = 1;
+      rinfo->r_length = 2;
+      break;
+    case BFD_RELOC_MACH_O_X86_64_PCREL32_1:
+      rinfo->r_type = BFD_MACH_O_X86_64_RELOC_SIGNED_1;
+      rinfo->r_pcrel = 1;
+      rinfo->r_length = 2;
+      break;
+    case BFD_RELOC_MACH_O_X86_64_PCREL32_2:
+      rinfo->r_type = BFD_MACH_O_X86_64_RELOC_SIGNED_2;
+      rinfo->r_pcrel = 1;
+      rinfo->r_length = 2;
+      break;
+    case BFD_RELOC_MACH_O_X86_64_PCREL32_4:
+      rinfo->r_type = BFD_MACH_O_X86_64_RELOC_SIGNED_4;
+      rinfo->r_pcrel = 1;
+      rinfo->r_length = 2;
+      break;
+    case BFD_RELOC_MACH_O_X86_64_BRANCH32:
       rinfo->r_type = BFD_MACH_O_X86_64_RELOC_BRANCH;
       rinfo->r_pcrel = 1;
+      rinfo->r_length = 2;
+      break;
+    case BFD_RELOC_MACH_O_X86_64_SUBTRACTOR32:
+      rinfo->r_type = BFD_MACH_O_X86_64_RELOC_SUBTRACTOR;
+      rinfo->r_pcrel = 0;
       rinfo->r_length = 2;
       break;
     case BFD_RELOC_MACH_O_X86_64_SUBTRACTOR64:
       rinfo->r_type = BFD_MACH_O_X86_64_RELOC_SUBTRACTOR;
       rinfo->r_pcrel = 0;
       rinfo->r_length = 3;
+      break;
+    case BFD_RELOC_MACH_O_X86_64_GOT:
+      rinfo->r_type = BFD_MACH_O_X86_64_RELOC_GOT;
+      rinfo->r_pcrel = 1;
+      rinfo->r_length = 2;
       break;
     case BFD_RELOC_MACH_O_X86_64_GOT_LOAD:
       rinfo->r_type = BFD_MACH_O_X86_64_RELOC_GOT_LOAD;

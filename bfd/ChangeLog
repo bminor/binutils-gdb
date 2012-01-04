@@ -1,5 +1,15 @@
 2012-01-04  Tristan Gingold  <gingold@adacore.com>
 
+	* mach-o-x86-64.c (bfd_mach_o_x86_64_swap_reloc_out): Handle
+	BFD_RELOC_32, BFD_RELOC_MACH_O_X86_64_PCREL32_1,
+	BFD_RELOC_MACH_O_X86_64_PCREL32_2,
+	BFD_RELOC_MACH_O_X86_64_PCREL32_4,
+	BFD_RELOC_MACH_O_X86_64_BRANCH32,
+	BFD_RELOC_MACH_O_X86_64_SUBTRACTOR32,
+	BFD_RELOC_MACH_O_X86_64_GOT.
+
+2012-01-04  Tristan Gingold  <gingold@adacore.com>
+
 	* mach-o.h (bfd_mach_o_fvmlib_command): New structure.
 	(bfd_mach_o_load_command): Add fvmlib field.
 
