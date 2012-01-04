@@ -1,3 +1,12 @@
+2012-01-04  Doug Evans  <dje@google.com>
+
+	Delete #if 0'd out code.
+	* language.c (binop_result_type): Delete.
+	(simple_type, ordered_type, same_type, integral_type): Delete.
+	(numeric_type, character_type, string_type, boolean_type): Delete.
+	(float_type, structured_type): Delete.
+	* language.h: Update.
+
 2012-01-04  Tom Tromey  <tromey@redhat.com>
 
 	* python/py-value.c (valpy_binop): Initialize 'res_val'.

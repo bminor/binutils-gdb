@@ -473,25 +473,7 @@ extern enum language set_language (enum language);
 
 /* Type predicates */
 
-extern int simple_type (struct type *);
-
-extern int ordered_type (struct type *);
-
-extern int same_type (struct type *, struct type *);
-
-extern int integral_type (struct type *);
-
-extern int numeric_type (struct type *);
-
-extern int character_type (struct type *);
-
-extern int boolean_type (struct type *);
-
-extern int float_type (struct type *);
-
 extern int pointer_type (struct type *);
-
-extern int structured_type (struct type *);
 
 /* Checks Binary and Unary operations for semantic type correctness.  */
 /* FIXME:  Does not appear to be used.  */
