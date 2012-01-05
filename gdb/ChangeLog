@@ -1,5 +1,7 @@
 2012-01-05  Doug Evans  <dje@google.com>
 
+	* dwarf2read.c (statement_prologue): Delete, unused.
+
 	* dwarf2read.c (dwarf2_per_cu_addr_size): Make result type an int.
 	* dwarf2loc.h (dwarf2_per_cu_addr_size): Update.
 

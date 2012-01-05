@@ -75,29 +75,6 @@
 typedef struct symbol *symbolp;
 DEF_VEC_P (symbolp);
 
-/* .debug_line statement program prologue
-   Because of alignment constraints, this structure has padding and cannot
-   be mapped directly onto the beginning of the .debug_info section.  */
-typedef struct statement_prologue
-  {
-    unsigned int total_length;	/* byte length of the statement
-				   information */
-    unsigned short version;	/* version number -- 2 for DWARF
-				   version 2 */
-    unsigned int prologue_length;	/* # bytes between prologue &
-					   stmt program */
-    unsigned char minimum_instruction_length;	/* byte size of
-						   smallest instr */
-    unsigned char default_is_stmt;	/* initial value of is_stmt
-					   register */
-    char line_base;
-    unsigned char line_range;
-    unsigned char opcode_base;	/* number assigned to first special
-				   opcode */
-    unsigned char *standard_opcode_lengths;
-  }
-_STATEMENT_PROLOGUE;
-
 /* When non-zero, dump DIEs after they are read in.  */
 static int dwarf2_die_debug = 0;
 
