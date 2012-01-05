@@ -420,8 +420,6 @@ elf_x86_64_write_core_note (bfd *abfd, char *buf, int *bufsiz,
 			    int note_type, ...)
 {
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
-  const void *p;
-  int size;
   va_list ap;
   const char *fname, *psargs;
   long pid;
@@ -445,8 +443,8 @@ elf_x86_64_write_core_note (bfd *abfd, char *buf, int *bufsiz,
 	  memset (&data, 0, sizeof (data));
 	  strncpy (data.pr_fname, fname, sizeof (data.pr_fname));
 	  strncpy (data.pr_psargs, psargs, sizeof (data.pr_psargs));
-	  p = (const void *) &data;
-	  size = sizeof (data);
+	  return elfcore_write_note (abfd, buf, bufsiz, "CORE", note_type,
+				     &data, sizeof (data));
 	}
       else
 	{
@@ -454,10 +452,10 @@ elf_x86_64_write_core_note (bfd *abfd, char *buf, int *bufsiz,
 	  memset (&data, 0, sizeof (data));
 	  strncpy (data.pr_fname, fname, sizeof (data.pr_fname));
 	  strncpy (data.pr_psargs, psargs, sizeof (data.pr_psargs));
-	  p = (const void *) &data;
-	  size = sizeof (data);
+	  return elfcore_write_note (abfd, buf, bufsiz, "CORE", note_type,
+				     &data, sizeof (data));
 	}
-      break;
+      /* NOTREACHED */
 
     case NT_PRSTATUS:
       va_start (ap, note_type);
@@ -475,8 +473,8 @@ elf_x86_64_write_core_note (bfd *abfd, char *buf, int *bufsiz,
 	      prstat.pr_pid = pid;
 	      prstat.pr_cursig = cursig;
 	      memcpy (&prstat.pr_reg, gregs, sizeof (prstat.pr_reg));
-	      p = (const void *) &prstat;
-	      size = sizeof (prstat);
+	      return elfcore_write_note (abfd, buf, bufsiz, "CORE", note_type,
+					 &prstat, sizeof (prstat));
 	    }
 	  else
 	    {
@@ -485,8 +483,8 @@ elf_x86_64_write_core_note (bfd *abfd, char *buf, int *bufsiz,
 	      prstat.pr_pid = pid;
 	      prstat.pr_cursig = cursig;
 	      memcpy (&prstat.pr_reg, gregs, sizeof (prstat.pr_reg));
-	      p = (const void *) &prstat;
-	      size = sizeof (prstat);
+	      return elfcore_write_note (abfd, buf, bufsiz, "CORE", note_type,
+					 &prstat, sizeof (prstat));
 	    }
 	}
       else
@@ -496,14 +494,11 @@ elf_x86_64_write_core_note (bfd *abfd, char *buf, int *bufsiz,
 	  prstat.pr_pid = pid;
 	  prstat.pr_cursig = cursig;
 	  memcpy (&prstat.pr_reg, gregs, sizeof (prstat.pr_reg));
-	  p = (const void *) &prstat;
-	  size = sizeof (prstat);
+	  return elfcore_write_note (abfd, buf, bufsiz, "CORE", note_type,
+				     &prstat, sizeof (prstat));
 	}
-      break;
     }
-
-  return elfcore_write_note (abfd, buf, bufsiz, "CORE", note_type, p,
-			     size);
+  /* NOTREACHED */
 }
 #endif
 
