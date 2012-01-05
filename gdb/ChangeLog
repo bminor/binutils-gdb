@@ -1,3 +1,8 @@
+2012-01-05  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* configure.tgt [s390*-*-*] (gdb_target_obs): Add corelow.o.
+	* config/s390/s390.mh (NATDEPFILES): Remove corelow.o.
+
 2012-01-05  Khoo Yit Phang  <khooyp@cs.umd.edu>
 
 	* infrun.c (normal_stop): Don't skip calling the normal_stop
