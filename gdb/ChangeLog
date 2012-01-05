@@ -1,5 +1,8 @@
 2012-01-05  Doug Evans  <dje@google.com>
 
+	* dwarf2read.c (dwarf2_per_cu_addr_size): Make result type an int.
+	* dwarf2loc.h (dwarf2_per_cu_addr_size): Update.
+
 	* dwarf2read.c (comp_unit_header): Delete, unused.
 
 2012-01-05  Ulrich Weigand  <uweigand@de.ibm.com>

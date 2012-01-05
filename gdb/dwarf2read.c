@@ -15720,7 +15720,7 @@ per_cu_header_read_in (struct comp_unit_head *cu_headerp,
 
 /* Return the address size given in the compilation unit header for CU.  */
 
-CORE_ADDR
+int
 dwarf2_per_cu_addr_size (struct dwarf2_per_cu_data *per_cu)
 {
   struct comp_unit_head cu_header_local;
