@@ -1,3 +1,12 @@
+2012-01-05  Nick Clifton  <nickc@redhat.com>
+
+	* ld-x86-64/x86-64.exp: Add test of linking mixed 32-bit and
+	64-bit objects when the 32-bit object (loaded first) contains 32+
+	local symbols, all referenced by relocs and the 64-bit object
+	contains a reloc that uses a symbol in the 32-bit object.
+	* 32bit.s: New source file.
+	* 64bit.s: New source file.
+	* incompatible.l: New expected linker output file.
 
 For older changes see ChangeLog-2011
 

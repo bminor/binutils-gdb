@@ -111,6 +111,10 @@ set x86_64tests {
     {"TLS X32 LD->LE transition" "-melf32_x86_64"
      "--x32" {tlsld2.s}
      {{objdump -dwr tlsld2.dd}} "tlsld2"}
+ 
+     {"build 32-bit object with 33 locals" "-e 0" "--32" {32bit.s} {{ ld incompatible.l }} "dummy" }
+     {"build 64-bit object" "-e 0 --defsym foo=1" "--64" {64bit.s} {} "dummy" }
+     {"link mixed objects"  "-e 0 tmpdir/32bit.o tmpdir/64bit.o" "" {} { { ld incompatible.l } } "mixed"}
 }
 
 run_ld_link_tests $x86_64tests
