@@ -75,23 +75,6 @@
 typedef struct symbol *symbolp;
 DEF_VEC_P (symbolp);
 
-#if 0
-/* .debug_info header for a compilation unit
-   Because of alignment constraints, this structure has padding and cannot
-   be mapped directly onto the beginning of the .debug_info section.  */
-typedef struct comp_unit_header
-  {
-    unsigned int length;	/* length of the .debug_info
-				   contribution */
-    unsigned short version;	/* version number -- 2 for DWARF
-				   version 2 */
-    unsigned int abbrev_offset;	/* offset into .debug_abbrev section */
-    unsigned char addr_size;	/* byte size of an address -- 4 */
-  }
-_COMP_UNIT_HEADER;
-#define _ACTUAL_COMP_UNIT_HEADER_SIZE 11
-#endif
-
 /* .debug_line statement program prologue
    Because of alignment constraints, this structure has padding and cannot
    be mapped directly onto the beginning of the .debug_info section.  */
