@@ -6798,35 +6798,9 @@ Update the copyright year in:
 @end itemize
 
 @item
-Run the @file{copyright.sh} script to add the new year in the copyright
-notices of most source files.  This script requires Emacs 22 or later to
-be installed.
-
-@item
-The new year also needs to be added manually in all other files that
-are not already taken care of by the @file{copyright.sh} script:
-@itemize @bullet
-  @item
-  @file{*.s}
-  @item
-  @file{*.f}
-  @item
-  @file{*.f90}
-  @item
-  @file{*.igen}
-  @item
-  @file{*.ac}
-  @item
-  @file{*.texi}
-  @item
-  @file{*.texinfo}
-  @item
-  @file{*.tex}
-  @item
-  @file{*.defs}
-  @item
-  @file{*.1}
-@end itemize
+Run the @file{copyright.py} Python script to add the new year in the copyright
+notices of most source files.  This script has been tested with Python
+2.6 and 2.7.
 
 @end itemize
 
