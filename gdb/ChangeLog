@@ -1,3 +1,18 @@
+2012-01-05  Pedro Alves  <alves.ped@gmail.com>
+
+	* cli/cli-decode.h: Add comments.
+	(CMD_LIST_AMBIGUOUS): Moved to command.h
+	(add_cmd, add_alias_cmd, add_prefix_cmd, add_abbrev_prefix_cmd)
+	(set_cmd_cfunc, set_cmd_sfunc, set_cmd_completer, cmd_cfunc_eq)
+	(set_cmd_context, get_cmd_context, lookup_cmd, lookup_cmd_1)
+	(deprecate_cmd, deprecated_cmd_warning, lookup_cmd_composition)
+	(add_com, add_com_alias, add_info, add_info_alias)
+	(complete_on_cmdlist, complete_on_enum, help_list): Remove
+	declarations.
+	* command.h: Add and adjust comments.
+	(CMD_LIST_AMBIGUOUS): Moved here.
+	(help_cmd, help_cmd_list): Delete declarations.
+
 2012-01-04  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (dwarf2_read_abbrevs): Delete arg "abfd".

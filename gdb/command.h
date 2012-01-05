@@ -1,4 +1,4 @@
-/* Header file for command-reading library command.c.
+/* Header file for command creation.
 
    Copyright (C) 1986, 1989-1995, 1999-2000, 2002, 2004, 2007-2012 Free
    Software Foundation, Inc.
@@ -18,6 +18,9 @@
 
 #if !defined (COMMAND_H)
 #define COMMAND_H 1
+
+/* This file defines the public interface for any code wanting to
+   create commands.  */
 
 /* Command classes are top-level categories into which commands are
    broken down for "help" purposes.
@@ -106,6 +109,8 @@ struct cmd_list_element;
 
 /* Forward-declarations of the entry-points of cli/cli-decode.c.  */
 
+/* API to the manipulation of command lists.  */
+
 extern int valid_user_defined_cmd_name_p (const char *name);
 
 extern struct cmd_list_element *add_cmd (char *, enum command_class,
@@ -168,6 +173,8 @@ extern void execute_cmd_post_hook (struct cmd_list_element *cmd);
 /* Return the type of the command.  */
 extern enum cmd_types cmd_type (struct cmd_list_element *cmd);
 
+/* Flag for an ambiguous cmd_list result.  */
+#define CMD_LIST_AMBIGUOUS ((struct cmd_list_element *) -1)
 
 extern struct cmd_list_element *lookup_cmd (char **,
 					    struct cmd_list_element *, char *,
@@ -207,14 +214,10 @@ extern char **complete_on_cmdlist (struct cmd_list_element *,
 extern char **complete_on_enum (const char *enumlist[],
 				char *, char *);
 
-extern void help_cmd (char *, struct ui_file *);
+/* Functions that implement commands about CLI commands.  */
 
 extern void help_list (struct cmd_list_element *, char *,
 		       enum command_class, struct ui_file *);
-
-extern void help_cmd_list (struct cmd_list_element *,
-			   enum command_class,
-			   char *, int, struct ui_file *);
 
 /* Method for show a set/show variable's VALUE on FILE.  If this
    method isn't supplied deprecated_show_value_hack() is called (which

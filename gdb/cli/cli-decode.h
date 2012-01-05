@@ -18,6 +18,10 @@
 #if !defined (CLI_DECODE_H)
 #define CLI_DECODE_H 1
 
+/* This file defines the private interfaces for any code implementing
+   command internals.  */
+
+/* Include the public interfaces.  */
 #include "command.h"
 
 struct re_pattern_buffer;
@@ -209,103 +213,12 @@ struct cmd_list_element
     struct cmd_list_element *alias_chain;
   };
 
-/* Flag for an ambiguous cmd_list result.  */
-#define CMD_LIST_AMBIGUOUS ((struct cmd_list_element *) -1)
-
-/* API to the manipulation of command lists.  */
-
-extern struct cmd_list_element *add_cmd (char *, enum command_class,
-					 void (*fun) (char *, int), char *,
-					 struct cmd_list_element **);
-
-extern struct cmd_list_element *add_alias_cmd (char *, char *,
-					       enum command_class, int,
-					       struct cmd_list_element **);
-
-extern struct cmd_list_element *add_prefix_cmd (char *, enum command_class,
-						void (*fun) (char *, int),
-						char *,
-						struct cmd_list_element **,
-						char *, int,
-						struct cmd_list_element **);
-
-extern struct cmd_list_element *add_abbrev_prefix_cmd (char *,
-						       enum command_class,
-						       void (*fun) (char *,
-								    int),
-						       char *,
-						       struct cmd_list_element
-						       **, char *, int,
-						       struct cmd_list_element
-						       **);
-
-/* Set the commands corresponding callback.  */
-
-extern void set_cmd_cfunc (struct cmd_list_element *cmd,
-			   void (*cfunc) (char *args, int from_tty));
-
-extern void set_cmd_sfunc (struct cmd_list_element *cmd,
-			   void (*sfunc) (char *args, int from_tty,
-					  struct cmd_list_element * c));
-
-extern void set_cmd_completer (struct cmd_list_element *cmd,
-			       char **(*completer) (struct cmd_list_element *self,
-						    char *text, char *word));
-
-/* HACK: cagney/2002-02-23: Code, mostly in tracepoints.c, grubs
-   around in cmd objects to test the value of the commands sfunc().  */
-extern int cmd_cfunc_eq (struct cmd_list_element *cmd,
-			 void (*cfunc) (char *args, int from_tty));
-
-/* Access to the command's local context.  */
-extern void set_cmd_context (struct cmd_list_element *cmd, void *context);
-extern void *get_cmd_context (struct cmd_list_element *cmd);
-
-extern struct cmd_list_element *lookup_cmd (char **,
-					    struct cmd_list_element *, char *,
-					    int, int);
-
-extern struct cmd_list_element *lookup_cmd_1 (char **,
-					      struct cmd_list_element *,
-					      struct cmd_list_element **,
-					      int);
-
-extern struct cmd_list_element *
-  deprecate_cmd (struct cmd_list_element *, char * );
-
-extern void
-  deprecated_cmd_warning (char **);
-
-extern int
-  lookup_cmd_composition (char *text,
-                        struct cmd_list_element **alias,
-                        struct cmd_list_element **prefix_cmd,
-                        struct cmd_list_element **cmd);
-
-extern struct cmd_list_element *add_com (char *, enum command_class,
-					 void (*fun) (char *, int), char *);
-
-extern struct cmd_list_element *add_com_alias (char *, char *,
-					       enum command_class, int);
-
-extern struct cmd_list_element *add_info (char *, void (*fun) (char *, int),
-					  char *);
-
-extern struct cmd_list_element *add_info_alias (char *, char *, int);
-
-extern char **complete_on_cmdlist (struct cmd_list_element *, char *, char *);
-
-extern char **complete_on_enum (const char *enumlist[], char *, char *);
-
 extern void help_cmd_list (struct cmd_list_element *, enum command_class,
 			   char *, int, struct ui_file *);
 
 /* Functions that implement commands about CLI commands.  */
 
 extern void help_cmd (char *, struct ui_file *);
-
-extern void help_list (struct cmd_list_element *, char *,
-		       enum command_class, struct ui_file *);
 
 extern void apropos_cmd (struct ui_file *, struct cmd_list_element *,
                          struct re_pattern_buffer *, char *);
