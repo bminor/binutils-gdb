@@ -1,3 +1,9 @@
+2012-01-05  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/12161
+	* elf32-avr.c (elf32_avr_relax_delete_bytes): Read in relocs if
+	necessary.
+
 2012-01-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix zero registers core files when built by gcc-4.7.
