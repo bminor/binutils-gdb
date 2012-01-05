@@ -1,3 +1,10 @@
+2012-01-05  Pedro Alves  <alves.ped@gmail.com>
+
+	* gdb.mi/mi-stepn.c, gdb.mi/mi-stepn.exp: New files.
+	* gdb.python/py-events.c (first): Add bits for new "step N" test.
+	* gdb.python/py-events.exp: Test that "step N" tripping on a
+	breakpoint emits a breakpoint event.
+
 2012-01-03  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.base/auxv.exp: Reformat the copyright notice.

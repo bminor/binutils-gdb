@@ -6068,7 +6068,8 @@ done:
       || last.kind == TARGET_WAITKIND_SIGNALLED
       || last.kind == TARGET_WAITKIND_EXITED
       || last.kind == TARGET_WAITKIND_NO_RESUMED
-      || (!inferior_thread ()->step_multi
+      || (!(inferior_thread ()->step_multi
+	    && inferior_thread ()->control.stop_step)
 	  && !(inferior_thread ()->control.stop_bpstat
 	       && inferior_thread ()->control.proceed_to_finish)
 	  && !inferior_thread ()->control.in_infcall))

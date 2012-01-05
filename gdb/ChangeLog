@@ -1,3 +1,9 @@
+2012-01-05  Khoo Yit Phang  <khooyp@cs.umd.edu>
+
+	* infrun.c (normal_stop): Don't skip calling the normal_stop
+	observers if the thread was doing a multi-step, but stopped for
+	some reason other than stepping.
+
 2012-01-05  Pedro Alves  <alves.ped@gmail.com>
 
 	* cli/cli-decode.h: Add comments.

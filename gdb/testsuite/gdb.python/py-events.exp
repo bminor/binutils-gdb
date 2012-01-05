@@ -73,6 +73,18 @@ gdb_test "continue" ".*event type: continue.*
 .*breakpoint number: 3.*
 all threads stopped"
 
+# Test that when "step N" trips on a breakpoint, we get a stop event
+# with breakpoint stop reason.
+gdb_breakpoint "do_nothing"
+gdb_test "step 3" ".*event type: continue.*
+.*event type: stop.*
+.*stop reason: breakpoint.*
+.*first breakpoint number: 4.*
+.*breakpoint number: 4.*
+all threads stopped"
+
+delete_breakpoints
+
 #test exited event.
 gdb_test "continue" ".*event type: continue.*
 .*event type: exit.*
