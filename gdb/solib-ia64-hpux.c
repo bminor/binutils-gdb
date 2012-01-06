@@ -164,7 +164,7 @@ ia64_hpux_at_dld_breakpoint_1_p (ptid_t ptid)
 int
 ia64_hpux_at_dld_breakpoint_p (ptid_t ptid)
 {
-  struct gdb_exception e;
+  volatile struct gdb_exception e;
   ptid_t saved_ptid = inferior_ptid;
   int result = 0;
 
@@ -278,7 +278,7 @@ ia64_hpux_handle_dld_breakpoint_1 (ptid_t ptid)
 void
 ia64_hpux_handle_dld_breakpoint (ptid_t ptid)
 {
-  struct gdb_exception e;
+  volatile struct gdb_exception e;
   ptid_t saved_ptid = inferior_ptid;
 
   inferior_ptid = ptid;

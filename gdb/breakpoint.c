@@ -10713,7 +10713,7 @@ breakpoint_retire_moribund (void)
 static void
 update_global_location_list_nothrow (int inserting)
 {
-  struct gdb_exception e;
+  volatile struct gdb_exception e;
 
   TRY_CATCH (e, RETURN_MASK_ERROR)
     update_global_location_list (inserting);
@@ -11753,7 +11753,7 @@ update_breakpoint_locations (struct breakpoint *b,
       if (b->cond_string != NULL)
 	{
 	  char *s;
-	  struct gdb_exception e;
+	  volatile struct gdb_exception e;
 
 	  s = b->cond_string;
 	  TRY_CATCH (e, RETURN_MASK_ERROR)
@@ -12324,7 +12324,7 @@ enable_breakpoint_disp (struct breakpoint *bpt, enum bpdisp disposition)
     {
       /* Initialize it just to avoid a GCC false warning.  */
       enum enable_state orig_enable_state = 0;
-      struct gdb_exception e;
+      volatile struct gdb_exception e;
 
       TRY_CATCH (e, RETURN_MASK_ALL)
 	{

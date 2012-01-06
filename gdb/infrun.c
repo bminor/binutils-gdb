@@ -5494,7 +5494,7 @@ insert_exception_resume_breakpoint (struct thread_info *tp,
 				    struct frame_info *frame,
 				    struct symbol *sym)
 {
-  struct gdb_exception e;
+  volatile struct gdb_exception e;
 
   /* We want to ignore errors here.  */
   TRY_CATCH (e, RETURN_MASK_ERROR)
@@ -5532,7 +5532,7 @@ static void
 check_exception_resume (struct execution_control_state *ecs,
 			struct frame_info *frame, struct symbol *func)
 {
-  struct gdb_exception e;
+  volatile struct gdb_exception e;
 
   TRY_CATCH (e, RETURN_MASK_ERROR)
     {
@@ -5639,7 +5639,7 @@ keep_going (struct execution_control_state *ecs)
 	}
       else
 	{
-	  struct gdb_exception e;
+	  volatile struct gdb_exception e;
 
 	  /* Stop stepping when inserting breakpoints
 	     has failed.  */

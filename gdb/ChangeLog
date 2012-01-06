@@ -1,3 +1,20 @@
+2012-01-06  Sergio Durigan Junior  <sergiodj@redhat.com>
+	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* ada-lang.c (ada_exception_name_addr): Add `volatile' keyword
+	before `struct gdb_exception'.
+	* breakpoint.c (update_global_location_list_nothrow)
+	(update_breakpoint_locations, enable_breakpoint_disp): Likewise.
+	* cp-abi.c (value_rtti_type): Likewise.
+	* cp-support.c (cp_validate_operator): Likewise.
+	* infrun.c (insert_exception_resume_breakpoint)
+	(check_exception_resume, keep_going): Likewise.
+	* mi-interp.c (mi_breakpoint_created)
+	(mi_breakpoint_modified): Likewise.
+	* rs6000-aix-tdep.c (rs6000_convert_from_func_ptr_addr): Likewise.
+	* solib-ia64-hpux.c (ia64_hpux_at_dld_breakpoint_p)
+	(ia64_hpux_handle_dld_breakpoint_1): Likewise.
+
 2012-01-05  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (statement_prologue): Delete, unused.

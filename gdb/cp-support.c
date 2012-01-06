@@ -1470,7 +1470,7 @@ cp_validate_operator (const char *input)
   const char *p;
   struct expression *expr;
   struct value *val;
-  struct gdb_exception except;
+  volatile struct gdb_exception except;
 
   p = input;
 

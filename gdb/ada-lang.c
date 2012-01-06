@@ -10943,7 +10943,7 @@ static CORE_ADDR
 ada_exception_name_addr (enum exception_catchpoint_kind ex,
                          struct breakpoint *b)
 {
-  struct gdb_exception e;
+  volatile struct gdb_exception e;
   CORE_ADDR result = 0;
 
   TRY_CATCH (e, RETURN_MASK_ERROR)

@@ -111,7 +111,7 @@ value_rtti_type (struct value *v, int *full,
 		 int *top, int *using_enc)
 {
   struct type *ret = NULL;
-  struct gdb_exception e;
+  volatile struct gdb_exception e;
 
   if ((current_cp_abi.rtti_type) == NULL)
     return NULL;

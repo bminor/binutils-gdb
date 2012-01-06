@@ -583,7 +583,7 @@ rs6000_convert_from_func_ptr_addr (struct gdbarch *gdbarch,
     {
       CORE_ADDR pc = 0;
       struct obj_section *pc_section;
-      struct gdb_exception e;
+      volatile struct gdb_exception e;
 
       TRY_CATCH (e, RETURN_MASK_ERROR)
         {
