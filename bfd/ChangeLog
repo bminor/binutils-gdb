@@ -1,3 +1,9 @@
+2012-01-06  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/13121
+	* reloc.c (bfd_generic_lookup_section_flags): Rename 'finfo' to
+	'flaginfo' to avoid conflicts with AIX system headers.
+
 2012-01-06  Tristan Gingold  <gingold@adacore.com>
 
 	* bfdio.c (bfd_bread): Use arelt_size macro.

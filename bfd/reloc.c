@@ -6237,9 +6237,9 @@ DESCRIPTION
 
 void
 bfd_generic_lookup_section_flags (struct bfd_link_info *info ATTRIBUTE_UNUSED,
-				  struct flag_info *finfo) 
+				  struct flag_info *flaginfo) 
 {
-  if (finfo != NULL)
+  if (flaginfo != NULL)
     {
       (*_bfd_error_handler) (_("INPUT_SECTION_FLAGS are not supported.\n"));
       return;
