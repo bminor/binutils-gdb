@@ -24,6 +24,10 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+/* FIXME: Various die-reading functions need to be more careful with
+   reading off the end of the section.
+   E.g., load_partial_dies, read_partial_die.  */
+
 #include "defs.h"
 #include "bfd.h"
 #include "symtab.h"
@@ -1219,9 +1223,6 @@ static hashval_t partial_die_hash (const void *item);
 static int partial_die_eq (const void *item_lhs, const void *item_rhs);
 
 static struct dwarf2_per_cu_data *dwarf2_find_containing_comp_unit
-  (unsigned int offset, struct objfile *objfile);
-
-static struct dwarf2_per_cu_data *dwarf2_find_comp_unit
   (unsigned int offset, struct objfile *objfile);
 
 static void init_one_comp_unit (struct dwarf2_cu *cu,
@@ -3334,19 +3335,20 @@ dwarf2_find_base_address (struct die_info *die, struct dwarf2_cu *cu)
 
 /* Subroutine of process_type_comp_unit and dwarf2_build_psymtabs_hard
    to combine the common parts.
-   Process a compilation unit for a psymtab.
-   BUFFER is a pointer to the beginning of the dwarf section buffer,
-   either .debug_info or debug_types.
-   INFO_PTR is a pointer to the start of the CU.
-   Returns a pointer to the next CU.  */
+   Process compilation unit THIS_CU for a psymtab.
+   SECTION is the section the CU/TU comes from,
+   either .debug_info or .debug_types.  */
 
-static gdb_byte *
+void
 process_psymtab_comp_unit (struct dwarf2_per_cu_data *this_cu,
-			   gdb_byte *buffer, gdb_byte *info_ptr,
-			   unsigned int buffer_size)
+			   struct dwarf2_section_info *section,
+			   int is_debug_types_section)
 {
   struct objfile *objfile = this_cu->objfile;
   bfd *abfd = objfile->obfd;
+  gdb_byte *buffer = section->buffer;
+  gdb_byte *info_ptr = buffer + this_cu->offset;
+  unsigned int buffer_size = section->size;
   gdb_byte *beg_of_comp_unit = info_ptr;
   struct die_info *comp_unit_die;
   struct partial_symtab *pst;
@@ -3378,16 +3380,14 @@ process_psymtab_comp_unit (struct dwarf2_per_cu_data *this_cu,
   info_ptr = partial_read_comp_unit_head (&cu.header, info_ptr,
 					  buffer, buffer_size,
 					  abfd,
-					  this_cu->debug_types_section != NULL);
+					  is_debug_types_section);
 
   /* Skip dummy compilation units.  */
   if (info_ptr >= buffer + buffer_size
       || peek_abbrev_code (abfd, info_ptr) == 0)
     {
-      info_ptr = (beg_of_comp_unit + cu.header.length
-		  + cu.header.initial_length_size);
       do_cleanups (back_to_inner);
-      return info_ptr;
+      return;
     }
 
   cu.list_in_scope = &file_symbols;
@@ -3401,7 +3401,7 @@ process_psymtab_comp_unit (struct dwarf2_per_cu_data *this_cu,
   info_ptr = read_full_die (&reader_specs, &comp_unit_die, info_ptr,
 			    &has_children);
 
-  if (this_cu->debug_types_section)
+  if (is_debug_types_section)
     {
       /* LENGTH has not been set yet for type units.  */
       gdb_assert (this_cu->offset == cu.header.offset);
@@ -3409,10 +3409,8 @@ process_psymtab_comp_unit (struct dwarf2_per_cu_data *this_cu,
     }
   else if (comp_unit_die->tag == DW_TAG_partial_unit)
     {
-      info_ptr = (beg_of_comp_unit + cu.header.length
-		  + cu.header.initial_length_size);
       do_cleanups (back_to_inner);
-      return info_ptr;
+      return;
     }
 
   prepare_one_comp_unit (&cu, comp_unit_die);
@@ -3495,10 +3493,7 @@ process_psymtab_comp_unit (struct dwarf2_per_cu_data *this_cu,
     (objfile->static_psymbols.list + pst->statics_offset);
   sort_pst_symbols (pst);
 
-  info_ptr = (beg_of_comp_unit + cu.header.length
-	      + cu.header.initial_length_size);
-
-  if (this_cu->debug_types_section)
+  if (is_debug_types_section)
     {
       /* It's not clear we want to do anything with stmt lists here.
 	 Waiting to see what gcc ultimately does.  */
@@ -3511,8 +3506,6 @@ process_psymtab_comp_unit (struct dwarf2_per_cu_data *this_cu,
     }
 
   do_cleanups (back_to_inner);
-
-  return info_ptr;
 }
 
 /* Traversal function for htab_traverse_noresize.
@@ -3528,11 +3521,7 @@ process_type_comp_unit (void **slot, void *info)
   this_cu = &entry->per_cu;
 
   gdb_assert (this_cu->debug_types_section->readin);
-  process_psymtab_comp_unit (this_cu,
-			     this_cu->debug_types_section->buffer,
-			     (this_cu->debug_types_section->buffer
-			      + this_cu->offset),
-			     this_cu->debug_types_section->size);
+  process_psymtab_comp_unit (this_cu, this_cu->debug_types_section, 1);
 
   return 1;
 }
@@ -3566,14 +3555,13 @@ psymtabs_addrmap_cleanup (void *o)
 static void
 dwarf2_build_psymtabs_hard (struct objfile *objfile)
 {
-  gdb_byte *info_ptr;
   struct cleanup *back_to, *addrmap_cleanup;
   struct obstack temp_obstack;
+  int i;
 
   dwarf2_per_objfile->reading_partial_symbols = 1;
 
   dwarf2_read_section (objfile, &dwarf2_per_objfile->info);
-  info_ptr = dwarf2_per_objfile->info.buffer;
 
   /* Any cached compilation units will be linked by the per-objfile
      read_in_chain.  Make sure to free them when we're done.  */
@@ -3590,33 +3578,11 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile)
   objfile->psymtabs_addrmap = addrmap_create_mutable (&temp_obstack);
   addrmap_cleanup = make_cleanup (psymtabs_addrmap_cleanup, objfile);
 
-  /* Since the objects we're extracting from .debug_info vary in
-     length, only the individual functions to extract them (like
-     read_comp_unit_head and load_partial_die) can really know whether
-     the buffer is large enough to hold another complete object.
-
-     At the moment, they don't actually check that.  If .debug_info
-     holds just one extra byte after the last compilation unit's dies,
-     then read_comp_unit_head will happily read off the end of the
-     buffer.  read_partial_die is similarly casual.  Those functions
-     should be fixed.
-
-     For this loop condition, simply checking whether there's any data
-     left at all should be sufficient.  */
-
-  while (info_ptr < (dwarf2_per_objfile->info.buffer
-		     + dwarf2_per_objfile->info.size))
+  for (i = 0; i < dwarf2_per_objfile->n_comp_units; ++i)
     {
-      struct dwarf2_per_cu_data *this_cu;
+      struct dwarf2_per_cu_data *per_cu = dw2_get_cu (i);
 
-      this_cu = dwarf2_find_comp_unit (info_ptr
-				       - dwarf2_per_objfile->info.buffer,
-				       objfile);
-
-      info_ptr = process_psymtab_comp_unit (this_cu,
-					    dwarf2_per_objfile->info.buffer,
-					    info_ptr,
-					    dwarf2_per_objfile->info.size);
+      process_psymtab_comp_unit (per_cu, &dwarf2_per_objfile->info, 0);
     }
 
   objfile->psymtabs_addrmap = addrmap_create_fixed (objfile->psymtabs_addrmap,
@@ -15791,20 +15757,6 @@ dwarf2_find_containing_comp_unit (unsigned int offset,
       gdb_assert (offset < this_cu->offset + this_cu->length);
       return this_cu;
     }
-}
-
-/* Locate the compilation unit from OBJFILE which is located at exactly
-   OFFSET.  Raises an error on failure.  */
-
-static struct dwarf2_per_cu_data *
-dwarf2_find_comp_unit (unsigned int offset, struct objfile *objfile)
-{
-  struct dwarf2_per_cu_data *this_cu;
-
-  this_cu = dwarf2_find_containing_comp_unit (offset, objfile);
-  if (this_cu->offset != offset)
-    error (_("no compilation unit with offset %u."), offset);
-  return this_cu;
 }
 
 /* Initialize dwarf2_cu CU, owned by PER_CU.  */

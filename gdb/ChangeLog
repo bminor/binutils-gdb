@@ -1,3 +1,13 @@
+2012-01-06  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c: Move FIXME from dwarf2_build_psymtabs_hard
+	to top of file.
+	(dwarf2_find_comp_unit): Delete.
+	(process_psymtab_comp_unit): Make result "void".
+	Delete args buffer, info_ptr, buffer_size, and replace with
+	"section".  All callers updated.
+	(dwarf2_build_psymtabs_hard): Simplify.
+
 2012-01-06  Sergio Durigan Junior  <sergiodj@redhat.com>
 	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
