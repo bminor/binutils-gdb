@@ -1,3 +1,12 @@
+2012-01-06  Tristan Gingold  <gingold@adacore.com>
+
+	* config/tc-i386.c: Update copyright year.
+	(lex_got): Also defined for Mach-O.
+	Add a guard for non-ELF configuration.
+	(md_longopts): Also handle -64 for Mach-O.
+	(md_parse_option): Likewise.
+	(i386_target_format): Adjust for x86_64-darwin.
+
 2012-01-04  Iain Sandoe  <idsandoe@googlemail.com>
 
 	* config/obj-macho.c (obj_mach_o_segT_from_bfd_name): Tidy definition.

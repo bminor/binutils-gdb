@@ -1,6 +1,7 @@
 /* tc-i386.c -- Assemble code for the Intel 80386
    Copyright 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010
+   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011,
+   2012
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -6526,7 +6527,8 @@ x86_cons_fix_new (fragS *frag, unsigned int off, unsigned int len,
   fix_new_exp (frag, off, len, exp, 0, r);
 }
 
-#if (!defined (OBJ_ELF) && !defined (OBJ_MAYBE_ELF)) || defined (LEX_AT)
+#if !(defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF) || defined (OBJ_MACH_O)) \
+    || defined (LEX_AT)
 # define lex_got(reloc, adjust, types) NULL
 #else
 /* Parse operands of the form
@@ -6609,8 +6611,10 @@ lex_got (enum bfd_reloc_code_real *rel,
   char *cp;
   unsigned int j;
 
+#if defined (OBJ_MAYBE_ELF)
   if (!IS_ELF)
     return NULL;
+#endif
 
   for (cp = input_line_pointer; *cp != '@'; cp++)
     if (is_end_of_line[(unsigned char) *cp] || *cp == ',')
@@ -8283,7 +8287,7 @@ struct option md_longopts[] =
 {
   {"32", no_argument, NULL, OPTION_32},
 #if (defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF) \
-     || defined (TE_PE) || defined (TE_PEP))
+     || defined (TE_PE) || defined (TE_PEP) || defined (OBJ_MACH_O))
   {"64", no_argument, NULL, OPTION_64},
 #endif
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
@@ -8341,7 +8345,7 @@ md_parse_option (int c, char *arg)
       break;
 #endif
 #if (defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF) \
-     || defined (TE_PE) || defined (TE_PEP))
+     || defined (TE_PE) || defined (TE_PEP) || defined (OBJ_MACH_O))
     case OPTION_64:
       {
 	const char **list, **l;
@@ -8351,7 +8355,8 @@ md_parse_option (int c, char *arg)
 	  if (CONST_STRNEQ (*l, "elf64-x86-64")
 	      || strcmp (*l, "coff-x86-64") == 0
 	      || strcmp (*l, "pe-x86-64") == 0
-	      || strcmp (*l, "pei-x86-64") == 0)
+	      || strcmp (*l, "pei-x86-64") == 0
+	      || strcmp (*l, "mach-o-x86-64") == 0)
 	    {
 	      default_arch = "x86_64";
 	      break;
@@ -8773,7 +8778,14 @@ i386_target_format (void)
 #endif
 #if defined (OBJ_MACH_O)
     case bfd_target_mach_o_flavour:
-      return flag_code == CODE_64BIT ? "mach-o-x86-64" : "mach-o-i386";
+      if (flag_code == CODE_64BIT)
+	{
+	  use_rela_relocations = 1;
+	  object_64bit = 1;
+	  return "mach-o-x86-64";
+	}
+      else
+	return "mach-o-i386";
 #endif
     default:
       abort ();
