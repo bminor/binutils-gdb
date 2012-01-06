@@ -18,7 +18,8 @@ default: all
 
 VPATH = @srcdir@
 srcdir = @srcdir@
-srcroot = $(srcdir)/../..
+abs_srcdir = @abs_srcdir@
+srcroot = $(abs_srcdir)/../..
 
 prefix = @prefix@
 exec_prefix = @exec_prefix@
@@ -82,7 +83,7 @@ headers:
 	rootme=`pwd` ; \
 	cd $(srcdir) ; \
 	rm -f nltvals.new ; \
-	$(SHELL) $(srcdir)/gennltvals.sh $(SHELL) $(srcroot) "$(CPP_FOR_TARGET)" > nltvals.new ; \
+	$(SHELL) $(abs_srcdir)/gennltvals.sh $(SHELL) $(srcroot) "$(CPP_FOR_TARGET)" > nltvals.new ; \
 	$(SHELL) $(srcroot)/move-if-change nltvals.new nltvals.def
 
 .c.o:
