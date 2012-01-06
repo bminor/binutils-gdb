@@ -1,5 +1,9 @@
 2012-01-06  Joel Brobecker  <brobecker@adacore.com>
 
+	GDB 7.3.92 released.
+
+2012-01-06  Joel Brobecker  <brobecker@adacore.com>
+
 	* version.in: Update GDB version number to 7.3.92.
 
 2012-01-06  Joel Brobecker  <brobecker@adacore.com>
