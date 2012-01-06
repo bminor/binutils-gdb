@@ -1,3 +1,8 @@
+2012-01-02  Joel Brobecker  <brobecker@adacore.com>
+
+	* dv-sockser.h, sim-assert.h, sim-fpu.c: Reformat the copyright
+	header.
+
 2011-12-19  Joel Brobecker  <brobecker@adacore.com>
 
 	* Make-common.in (hw-config.h): Work around bug in Solaris 2.8
