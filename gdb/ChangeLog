@@ -1,5 +1,9 @@
 2012-01-06  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c: Reformat the copyright notice.
+
+2012-01-06  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb/common/gdb_thread_db.h, gdb/dbxread.c, gdb/environ.c,
 	gdb/gcore.h, gdb/rs6000-tdep.h, gdb/s390-nat.c, gdb/tic6x-tdep.c:
 	Reformat the copyright header.

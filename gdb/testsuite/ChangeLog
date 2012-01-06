@@ -1,4 +1,8 @@
-2012-01-02  Joel Brobecker  <brobecker@adacore.com>
+2012-01-06  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.base/auxv.exp: Reformat the copyright notice.
+
+2012-01-06  Joel Brobecker  <brobecker@adacore.com>
 
 	* dg-extract-results.sh, gdb.arch/gcore.c, gdb.arch/gdb1558.c,
 	gdb.arch/i386-gnu-cfi.c, gdb.base/complex.c, gdb.base/cvexpr.c,
