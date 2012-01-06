@@ -185,7 +185,7 @@ bfd_bread (void *ptr, bfd_size_type size, bfd *abfd)
      this element.  */
   if (abfd->arelt_data != NULL)
     {
-      size_t maxbytes = ((struct areltdata *) abfd->arelt_data)->parsed_size;
+      size_t maxbytes = arelt_size (abfd);
       if (abfd->where + size > maxbytes)
         {
           if (abfd->where >= maxbytes)
