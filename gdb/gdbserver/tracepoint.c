@@ -71,9 +71,13 @@ trace_vdebug (const char *fmt, ...)
   va_end (ap);
 }
 
+#ifdef IN_PROCESS_AGENT
+#define debug_threads debug_agent
+#endif
+
 #define trace_debug_1(level, fmt, args...)	\
   do {						\
-    if (level <= debug_threads)			\
+    if (level <= debug_threads)		\
       trace_vdebug ((fmt), ##args);		\
   } while (0)
 
@@ -370,7 +374,7 @@ tracepoint_look_up_symbols (void)
    GDBserver side.  */
 
 #ifdef IN_PROCESS_AGENT
-int debug_threads = 0;
+int debug_agent = 0;
 
 int
 read_inferior_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len)

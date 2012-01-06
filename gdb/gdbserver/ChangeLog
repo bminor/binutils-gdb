@@ -1,3 +1,9 @@
+2012-01-06  Yao Qi  <yao@codesourcery.com>
+
+	* tracepoint.c [IN_PROCESS_AGENT] (debug_threads): Macro
+	defined.
+	[IN_PROCESS_AGENT] (debug_agent): New global variable.
+
 2012-01-04  Yao Qi  <yao@codesourcery.com>
 
 	* tracepoint.c (cmd_qtdp): Print debug message
