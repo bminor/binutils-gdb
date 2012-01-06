@@ -1,5 +1,9 @@
 2012-01-06  Joel Brobecker  <brobecker@adacore.com>
 
+	* version.in: Update GDB version number to 7.3.92.
+
+2012-01-06  Joel Brobecker  <brobecker@adacore.com>
+
 	Copyright year update in most files of the GDB Project.
 
 2012-01-06  Joel Brobecker  <brobecker@adacore.com>
