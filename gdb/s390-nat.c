@@ -1,6 +1,6 @@
 /* S390 native-dependent code for GDB, the GNU debugger.
-   Copyright (C) 2001, 2003, 2004, 2005, 2006, 2007, 2009
-   Free Software Foundation, Inc.
+   Copyright (C) 2001, 2003-2007, 2009, 2012 Free Software Foundation,
+   Inc.
 
    Contributed by D.J. Barrow (djbarrow@de.ibm.com,barrow_dj@yahoo.com)
    for IBM Deutschland Entwicklung GmbH, IBM Corporation.

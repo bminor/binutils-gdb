@@ -1,5 +1,5 @@
 /* Basic C++ demangling support for GDB.
-   Copyright (c) 2011 Free Software Foundation, Inc.
+   Copyright (c) 2011-2012 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

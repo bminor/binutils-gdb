@@ -1,7 +1,7 @@
 /* Remote debugging interface for PPCbug (PowerPC) Rom monitor
    for GDB, the GNU debugger.
-   Copyright (C) 1995, 1998, 1999, 2000, 2001, 2007, 2008, 2009, 2010, 2011
-   Free Software Foundation, Inc.
+   Copyright (C) 1995, 1998-2001, 2007-2012 Free Software Foundation,
+   Inc.
 
    Written by Stu Grossman of Cygnus Support
 
