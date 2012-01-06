@@ -1,3 +1,7 @@
+2012-01-06  Tristan Gingold  <gingold@adacore.com>
+
+	* config.bfd (i[3-7]86-*-darwin*): Define targ64_selvecs.
+
 2012-01-05  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/12161
