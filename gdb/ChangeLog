@@ -1,5 +1,11 @@
 2012-01-08  Doug Evans  <dje@google.com>
 
+	* dwarf2read.c (dwarf2_per_objfile): Rename n_type_comp_units to
+	n_type_units.  Rename type_comp_units to all_type_units.
+	All uses updated.
+	(add_signatured_type_cu_to_table): Renamed from
+	add_signatured_type_cu_to_list.  All callers updated.
+
 	* gdbtypes.h (struct cplus_struct_type): Delete member
 	nfn_fields_total.  All uses removed.
 

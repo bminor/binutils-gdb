@@ -165,7 +165,7 @@ struct dwarf2_per_objfile
   /* Back link.  */
   struct objfile *objfile;
 
-  /* A list of all the compilation units.  This is used to locate
+  /* Table of all the compilation units.  This is used to locate
      the target compilation unit of a particular reference.  */
   struct dwarf2_per_cu_data **all_comp_units;
 
@@ -173,10 +173,10 @@ struct dwarf2_per_objfile
   int n_comp_units;
 
   /* The number of .debug_types-related CUs.  */
-  int n_type_comp_units;
+  int n_type_units;
 
-  /* The .debug_types-related CUs.  */
-  struct dwarf2_per_cu_data **type_comp_units;
+  /* The .debug_types-related CUs (TUs).  */
+  struct dwarf2_per_cu_data **all_type_units;
 
   /* A chain of compilation units that are currently read in, so that
      they can be freed later.  */
@@ -1835,7 +1835,7 @@ dw2_get_cu (int index)
   if (index >= dwarf2_per_objfile->n_comp_units)
     {
       index -= dwarf2_per_objfile->n_comp_units;
-      return dwarf2_per_objfile->type_comp_units[index];
+      return dwarf2_per_objfile->all_type_units[index];
     }
   return dwarf2_per_objfile->all_comp_units[index];
 }
@@ -1913,10 +1913,10 @@ create_signatured_type_table_from_index (struct objfile *objfile,
   offset_type i;
   htab_t sig_types_hash;
 
-  dwarf2_per_objfile->n_type_comp_units = elements / 3;
-  dwarf2_per_objfile->type_comp_units
+  dwarf2_per_objfile->n_type_units = elements / 3;
+  dwarf2_per_objfile->all_type_units
     = obstack_alloc (&objfile->objfile_obstack,
-		     dwarf2_per_objfile->n_type_comp_units
+		     dwarf2_per_objfile->n_type_units
 		     * sizeof (struct dwarf2_per_cu_data *));
 
   sig_types_hash = allocate_signatured_type_table (objfile);
@@ -1947,7 +1947,7 @@ create_signatured_type_table_from_index (struct objfile *objfile,
       slot = htab_find_slot (sig_types_hash, type_sig, INSERT);
       *slot = type_sig;
 
-      dwarf2_per_objfile->type_comp_units[i / 3] = &type_sig->per_cu;
+      dwarf2_per_objfile->all_type_units[i / 3] = &type_sig->per_cu;
     }
 
   dwarf2_per_objfile->signatured_types = sig_types_hash;
@@ -2414,7 +2414,7 @@ dw2_map_symtabs_matching_filename (struct objfile *objfile, const char *name,
   dw2_setup (objfile);
 
   for (i = 0; i < (dwarf2_per_objfile->n_comp_units
-		   + dwarf2_per_objfile->n_type_comp_units); ++i)
+		   + dwarf2_per_objfile->n_type_units); ++i)
     {
       int j;
       struct dwarf2_per_cu_data *per_cu = dw2_get_cu (i);
@@ -2546,7 +2546,7 @@ dw2_print_stats (struct objfile *objfile)
   dw2_setup (objfile);
   count = 0;
   for (i = 0; i < (dwarf2_per_objfile->n_comp_units
-		   + dwarf2_per_objfile->n_type_comp_units); ++i)
+		   + dwarf2_per_objfile->n_type_units); ++i)
     {
       struct dwarf2_per_cu_data *per_cu = dw2_get_cu (i);
 
@@ -2584,7 +2584,7 @@ dw2_expand_all_symtabs (struct objfile *objfile)
   dw2_setup (objfile);
 
   for (i = 0; i < (dwarf2_per_objfile->n_comp_units
-		   + dwarf2_per_objfile->n_type_comp_units); ++i)
+		   + dwarf2_per_objfile->n_type_units); ++i)
     {
       struct dwarf2_per_cu_data *per_cu = dw2_get_cu (i);
 
@@ -2710,7 +2710,7 @@ dw2_expand_symtabs_matching
 
   if (file_matcher != NULL)
     for (i = 0; i < (dwarf2_per_objfile->n_comp_units
-		     + dwarf2_per_objfile->n_type_comp_units); ++i)
+		     + dwarf2_per_objfile->n_type_units); ++i)
       {
 	int j;
 	struct dwarf2_per_cu_data *per_cu = dw2_get_cu (i);
@@ -2800,7 +2800,7 @@ dw2_map_symbol_filenames (struct objfile *objfile, symbol_filename_ftype *fun,
   dw2_setup (objfile);
 
   for (i = 0; i < (dwarf2_per_objfile->n_comp_units
-		   + dwarf2_per_objfile->n_type_comp_units); ++i)
+		   + dwarf2_per_objfile->n_type_units); ++i)
     {
       int j;
       struct dwarf2_per_cu_data *per_cu = dw2_get_cu (i);
@@ -2875,7 +2875,7 @@ dwarf2_initialize_objfile (struct objfile *objfile)
 	create_quick_file_names_table (dwarf2_per_objfile->n_comp_units);
 
       for (i = 0; i < (dwarf2_per_objfile->n_comp_units
-		       + dwarf2_per_objfile->n_type_comp_units); ++i)
+		       + dwarf2_per_objfile->n_type_units); ++i)
 	{
 	  struct dwarf2_per_cu_data *per_cu = dw2_get_cu (i);
 
@@ -3118,10 +3118,10 @@ allocate_signatured_type_table (struct objfile *objfile)
 			       dummy_obstack_deallocate);
 }
 
-/* A helper function to add a signatured type CU to a list.  */
+/* A helper function to add a signatured type CU to a table.  */
 
 static int
-add_signatured_type_cu_to_list (void **slot, void *datum)
+add_signatured_type_cu_to_table (void **slot, void *datum)
 {
   struct signatured_type *sigt = *slot;
   struct dwarf2_per_cu_data ***datap = datum;
@@ -3132,7 +3132,7 @@ add_signatured_type_cu_to_list (void **slot, void *datum)
   return 1;
 }
 
-/* Create the hash table of all entries in the .debug_types section.
+/* Create the hash table of all entries in the .debug_types section(s).
    The result is zero if there is an error (e.g. missing .debug_types section),
    otherwise non-zero.	*/
 
@@ -3249,15 +3249,15 @@ create_debug_types_hash_table (struct objfile *objfile)
 
   dwarf2_per_objfile->signatured_types = types_htab;
 
-  dwarf2_per_objfile->n_type_comp_units = htab_elements (types_htab);
-  dwarf2_per_objfile->type_comp_units
+  dwarf2_per_objfile->n_type_units = htab_elements (types_htab);
+  dwarf2_per_objfile->all_type_units
     = obstack_alloc (&objfile->objfile_obstack,
-		     dwarf2_per_objfile->n_type_comp_units
+		     dwarf2_per_objfile->n_type_units
 		     * sizeof (struct dwarf2_per_cu_data *));
-  iter = &dwarf2_per_objfile->type_comp_units[0];
-  htab_traverse_noresize (types_htab, add_signatured_type_cu_to_list, &iter);
-  gdb_assert (iter - &dwarf2_per_objfile->type_comp_units[0]
-	      == dwarf2_per_objfile->n_type_comp_units);
+  iter = &dwarf2_per_objfile->all_type_units[0];
+  htab_traverse_noresize (types_htab, add_signatured_type_cu_to_table, &iter);
+  gdb_assert (iter - &dwarf2_per_objfile->all_type_units[0]
+	      == dwarf2_per_objfile->n_type_units);
 
   return 1;
 }
