@@ -1,3 +1,7 @@
+2012-01-08  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* config/tc-mips.c (s_tls_rel_directive): Call mips_clear_insn_labels.
+
 2011-12-19  Chung-Lin Tang  <cltang@codesourcery.com>
 
 	Backport from mainline:

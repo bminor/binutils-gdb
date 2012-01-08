@@ -16591,6 +16591,7 @@ s_tls_rel_directive (const size_t bytes, const char *dirstr,
   md_number_to_chars (p, 0, bytes);
   fix_new_exp (frag_now, p - frag_now->fr_literal, bytes, &ex, FALSE, rtype);
   demand_empty_rest_of_line ();
+  mips_clear_insn_labels ();
 }
 
 /* Handle .dtprelword.  */
