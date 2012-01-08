@@ -1,5 +1,10 @@
 2012-01-08  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* gas/mips/tls-relw.s, gas/mips/tls-relw.d: New test.
+	* gas/mips/mips.exp: Run it.
+
+2012-01-08  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* gas/mips/align3.s, gas/mips/align3.d: New testcase.
 	* gas/mips/mips.exp: Run it.
 
