@@ -1,3 +1,19 @@
+2012-01-08  Andrew Pinski  <andrew.pinski@caviumnetworks.com>
+	    Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* config/tc-mips.c (mips_move_labels): Take the list of labels and
+	textness as parameters.
+	(mips_move_text_labels): New function.
+	(append_insn): Use it instead of mips_move_labels.
+	(mips_emit_delays, start_noreorder): Likewise.
+	(mips_align): Take the labels rather than just one label.
+	Move all labels to after the .align.
+	(s_align): Change the last argument to mips_align.
+	(s_cons): Likewise.
+	(s_float_cons): Likewise.
+	(s_gpword): Likewise.
+	(s_gpdword): Likewise.
+
 2012-01-06  Tristan Gingold  <gingold@adacore.com>
 
 	* config/tc-i386.c: Update copyright year.

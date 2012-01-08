@@ -2761,25 +2761,34 @@ reg_needs_delay (unsigned int reg)
   return 0;
 }
 
-/* Move all labels in insn_labels to the current insertion point.  */
+/* Move all labels in LABELS to the current insertion point.  TEXT_P
+   says whether the labels refer to text or data.  */
 
 static void
-mips_move_labels (void)
+mips_move_labels (struct insn_label_list *labels, bfd_boolean text_p)
 {
-  segment_info_type *si = seg_info (now_seg);
   struct insn_label_list *l;
   valueT val;
 
-  for (l = si->label_list; l != NULL; l = l->next)
+  for (l = labels; l != NULL; l = l->next)
     {
       gas_assert (S_GET_SEGMENT (l->label) == now_seg);
       symbol_set_frag (l->label, frag_now);
       val = (valueT) frag_now_fix ();
       /* MIPS16/microMIPS text labels are stored as odd.  */
-      if (HAVE_CODE_COMPRESSION)
+      if (text_p && HAVE_CODE_COMPRESSION)
 	++val;
       S_SET_VALUE (l->label, val);
     }
+}
+
+/* Move all labels in insn_labels to the current insertion point
+   and treat them as text labels.  */
+
+static void
+mips_move_text_labels (void)
+{
+  mips_move_labels (seg_info (now_seg)->label_list, TRUE);
 }
 
 static bfd_boolean
@@ -4149,7 +4158,7 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	      frag_grow (40);
 	    }
 
-	  mips_move_labels ();
+	  mips_move_text_labels ();
 
 #ifndef NO_ECOFF_DEBUGGING
 	  if (ECOFF_DEBUGGING)
@@ -4541,7 +4550,7 @@ mips_emit_delays (void)
 	{
 	  while (nops-- > 0)
 	    add_fixed_insn (NOP_INSN);
-	  mips_move_labels ();
+	  mips_move_text_labels ();
 	}
     }
   mips_no_prev_insn ();
@@ -4585,7 +4594,7 @@ start_noreorder (void)
 	     decrease the size of prev_nop_frag.  */
 	  frag_wane (frag_now);
 	  frag_new (0);
-	  mips_move_labels ();
+	  mips_move_text_labels ();
 	}
       mips_mark_labels ();
       mips_clear_insn_labels ();
@@ -15649,11 +15658,18 @@ get_symbol (void)
    fill byte should be used, FILL points to an integer that contains
    that byte, otherwise FILL is null.
 
-   The MIPS assembler also automatically adjusts any preceding
-   label.  */
+   This function used to have the comment:
+
+      The MIPS assembler also automatically adjusts any preceding label.
+
+   The implementation therefore applied the adjustment to a maximum of
+   one label.  However, other label adjustments are applied to batches
+   of labels, and adjusting just one caused problems when new labels
+   were added for the sake of debugging or unwind information.
+   We therefore adjust all preceding labels (given as LABELS) instead.  */
 
 static void
-mips_align (int to, int *fill, symbolS *label)
+mips_align (int to, int *fill, struct insn_label_list *labels)
 {
   mips_emit_delays ();
   mips_record_compressed_mode ();
@@ -15662,12 +15678,7 @@ mips_align (int to, int *fill, symbolS *label)
   else
     frag_align (to, fill ? *fill : 0, 0);
   record_alignment (now_seg, to);
-  if (label != NULL)
-    {
-      gas_assert (S_GET_SEGMENT (label) == now_seg);
-      symbol_set_frag (label, frag_now);
-      S_SET_VALUE (label, (valueT) frag_now_fix ());
-    }
+  mips_move_labels (labels, FALSE);
 }
 
 /* Align to a given power of two.  .align 0 turns off the automatic
@@ -15709,7 +15720,7 @@ s_align (int x ATTRIBUTE_UNUSED)
       struct insn_label_list *l = si->label_list;
       /* Auto alignment should be switched on by next section change.  */
       auto_align = 1;
-      mips_align (temp, fill_ptr, l != NULL ? l->label : NULL);
+      mips_align (temp, fill_ptr, l);
     }
   else
     {
@@ -15879,12 +15890,10 @@ s_cons (int log_size)
 {
   segment_info_type *si = seg_info (now_seg);
   struct insn_label_list *l = si->label_list;
-  symbolS *label;
 
-  label = l != NULL ? l->label : NULL;
   mips_emit_delays ();
   if (log_size > 0 && auto_align)
-    mips_align (log_size, 0, label);
+    mips_align (log_size, 0, l);
   cons (1 << log_size);
   mips_clear_insn_labels ();
 }
@@ -15894,18 +15903,15 @@ s_float_cons (int type)
 {
   segment_info_type *si = seg_info (now_seg);
   struct insn_label_list *l = si->label_list;
-  symbolS *label;
-
-  label = l != NULL ? l->label : NULL;
 
   mips_emit_delays ();
 
   if (auto_align)
     {
       if (type == 'd')
-	mips_align (3, 0, label);
+	mips_align (3, 0, l);
       else
-	mips_align (2, 0, label);
+	mips_align (2, 0, l);
     }
 
   float_cons (type);
@@ -16685,7 +16691,6 @@ s_gpword (int ignore ATTRIBUTE_UNUSED)
 {
   segment_info_type *si;
   struct insn_label_list *l;
-  symbolS *label;
   expressionS ex;
   char *p;
 
@@ -16698,10 +16703,9 @@ s_gpword (int ignore ATTRIBUTE_UNUSED)
 
   si = seg_info (now_seg);
   l = si->label_list;
-  label = l != NULL ? l->label : NULL;
   mips_emit_delays ();
   if (auto_align)
-    mips_align (2, 0, label);
+    mips_align (2, 0, l);
 
   expression (&ex);
   mips_clear_insn_labels ();
@@ -16725,7 +16729,6 @@ s_gpdword (int ignore ATTRIBUTE_UNUSED)
 {
   segment_info_type *si;
   struct insn_label_list *l;
-  symbolS *label;
   expressionS ex;
   char *p;
 
@@ -16738,10 +16741,9 @@ s_gpdword (int ignore ATTRIBUTE_UNUSED)
 
   si = seg_info (now_seg);
   l = si->label_list;
-  label = l != NULL ? l->label : NULL;
   mips_emit_delays ();
   if (auto_align)
-    mips_align (3, 0, label);
+    mips_align (3, 0, l);
 
   expression (&ex);
   mips_clear_insn_labels ();
