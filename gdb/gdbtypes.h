@@ -693,11 +693,6 @@ struct cplus_struct_type
 
     short nfn_fields;
 
-    /* Number of methods described for this type, not including the
-       methods that it derives from.  */
-
-    short nfn_fields_total;
-
     /* Number of template arguments.  */
     unsigned short n_template_arguments;
 
@@ -1050,7 +1045,6 @@ extern void allocate_gnat_aux_type (struct type *);
 #define TYPE_VPTR_FIELDNO(thistype) TYPE_MAIN_TYPE(thistype)->vptr_fieldno
 #define TYPE_FN_FIELDS(thistype) TYPE_CPLUS_SPECIFIC(thistype)->fn_fields
 #define TYPE_NFN_FIELDS(thistype) TYPE_CPLUS_SPECIFIC(thistype)->nfn_fields
-#define TYPE_NFN_FIELDS_TOTAL(thistype) TYPE_CPLUS_SPECIFIC(thistype)->nfn_fields_total
 #define TYPE_SPECIFIC_FIELD(thistype) \
   TYPE_MAIN_TYPE(thistype)->type_specific_field
 #define	TYPE_TYPE_SPECIFIC(thistype) TYPE_MAIN_TYPE(thistype)->type_specific

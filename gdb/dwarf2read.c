@@ -7408,7 +7408,6 @@ dwarf2_attach_fn_fields_to_type (struct field_info *fip, struct type *type,
 				 struct dwarf2_cu *cu)
 {
   struct fnfieldlist *flp;
-  int total_length = 0;
   int i;
 
   if (cu->language == language_ada)
@@ -7430,12 +7429,9 @@ dwarf2_attach_fn_fields_to_type (struct field_info *fip, struct type *type,
 	TYPE_ALLOC (type, sizeof (struct fn_field) * flp->length);
       for (k = flp->length; (k--, nfp); nfp = nfp->next)
 	fn_flp->fn_fields[k] = nfp->fnfield;
-
-      total_length += flp->length;
     }
 
   TYPE_NFN_FIELDS (type) = fip->nfnfields;
-  TYPE_NFN_FIELDS_TOTAL (type) = total_length;
 }
 
 /* Returns non-zero if NAME is the name of a vtable member in CU's

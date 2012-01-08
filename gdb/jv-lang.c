@@ -501,7 +501,6 @@ java_link_class_type (struct gdbarch *gdbarch,
   temp = clas;
   nmethods = value_as_long (value_struct_elt (&temp, NULL, "method_count",
 					      NULL, "structure"));
-  TYPE_NFN_FIELDS_TOTAL (type) = nmethods;
   j = nmethods * sizeof (struct fn_field);
   fn_fields = (struct fn_field *)
     obstack_alloc (&objfile->objfile_obstack, j);

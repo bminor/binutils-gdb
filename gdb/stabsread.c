@@ -2278,10 +2278,6 @@ read_member_functions (struct field_info *fip, char **pp, struct type *type,
 {
   int nfn_fields = 0;
   int length = 0;
-  /* Total number of member functions defined in this class.  If the class
-     defines two `f' functions, and one `g' function, then this will have
-     the value 3.  */
-  int total_length = 0;
   int i;
   struct next_fnfield
     {
@@ -2681,7 +2677,6 @@ read_member_functions (struct field_info *fip, char **pp, struct type *type,
 	      destr_fnlist->next = fip->fnlist;
 	      fip->fnlist = destr_fnlist;
 	      nfn_fields++;
-	      total_length += has_destructor;
 	      length -= has_destructor;
 	    }
 	  else if (is_v3)
@@ -2732,7 +2727,6 @@ read_member_functions (struct field_info *fip, char **pp, struct type *type,
 	  new_fnlist->next = fip->fnlist;
 	  fip->fnlist = new_fnlist;
 	  nfn_fields++;
-	  total_length += length;
 	}
     }
 
@@ -2744,7 +2738,6 @@ read_member_functions (struct field_info *fip, char **pp, struct type *type,
       memset (TYPE_FN_FIELDLISTS (type), 0,
 	      sizeof (struct fn_fieldlist) * nfn_fields);
       TYPE_NFN_FIELDS (type) = nfn_fields;
-      TYPE_NFN_FIELDS_TOTAL (type) = total_length;
     }
 
   return 1;
