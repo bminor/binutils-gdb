@@ -1,5 +1,15 @@
 2012-01-09  Doug Evans  <dje@google.com>
 
+	* dwarf2read.c (read_and_check_comp_unit_head): Renamed from
+	partial_read_comp_unit_head.  Replace "buffer", "buffer_size" and
+	"abfd" args with "section".  All callers updated.
+	Error checking code moved ...
+	(error_check_comp_unit_head): ... here.  New function.
+	(read_and_check_type_unit_head): Renamed from read_type_unit_head.
+	Delete arg "abfd".  New arg "type_offset".  All callers updated.
+	(create_debug_types_hash_table): Simplify by using
+	read_and_check_type_unit_head.
+
 	* parser-defs.h (namecopy): Delete.
 	* parse.c (namecopy, namecopy_size): Move into copy_name.
 
