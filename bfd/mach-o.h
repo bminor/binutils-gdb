@@ -549,18 +549,6 @@ typedef struct mach_o_data_struct
   bfd_mach_o_symtab_command *symtab;
   bfd_mach_o_dysymtab_command *dysymtab;
 
-  /* Base values used for building the dysymtab for a single-module object.  */  
-  unsigned long nlocal;
-  unsigned long ndefext;
-  unsigned long nundefext;
-
-  /* If this is non-zero, then the pointer below is populated.  */
-  unsigned long nindirect;
-  /* A set of synthetic symbols representing the 'indirect' ones in the file.
-     These should be sorted (a) by the section they represent and (b) by the
-     order that they appear within each section.  */
-  asymbol **indirect_syms;
-
   /* A place to stash dwarf2 info for this bfd.  */
   void *dwarf2_find_line_info;
 
@@ -691,8 +679,10 @@ typedef struct bfd_mach_o_backend_data
 }
 bfd_mach_o_backend_data;
 
-/* Symbol type tests.  */
+/* Values used in symbol.udata.i, to signal that the mach-o-specific data in the
+   symbol are not yet set, or need validation (where this is possible).  */
 
-#define IS_MACHO_INDIRECT(x) (((x) & BFD_MACH_O_N_TYPE) == BFD_MACH_O_N_INDR)
+#define SYM_MACHO_FIELDS_UNSET ((bfd_vma) -1)
+#define SYM_MACHO_FIELDS_NOT_VALIDATED ((bfd_vma) -2)
 
 #endif /* _BFD_MACH_O_H_ */

@@ -40,8 +40,8 @@ extern void mach_o_begin (void);
 /* Common symbols can carry alignment information.  */
 #ifndef S_SET_ALIGN
 #define S_SET_ALIGN(S,V) do {\
-  bfd_mach_o_asymbol *s = (bfd_mach_o_asymbol *) symbol_get_bfdsym (S);\
-  s->n_desc = (s->n_desc & 0xf0ff) | (((V) & 0x0f) << 8);\
+  bfd_mach_o_asymbol *___s = (bfd_mach_o_asymbol *) symbol_get_bfdsym (S);\
+  ___s->n_desc = (___s->n_desc & 0xf0ff) | (((V) & 0x0f) << 8);\
 } while (0)
 #endif
 
@@ -55,6 +55,12 @@ extern const pseudo_typeS mach_o_pseudo_table[];
 
 #define obj_read_begin_hook()	{;}
 #define obj_symbol_new_hook(s)	{;}
+
+#define obj_frob_label(s) obj_macho_frob_label(s)
+extern void obj_macho_frob_label (struct symbol *);
+
+#define obj_frob_symbol(s, punt) punt = obj_macho_frob_symbol(s)
+extern int obj_macho_frob_symbol (struct symbol *);
 
 #define EMIT_SECTION_SYMBOLS		0
 

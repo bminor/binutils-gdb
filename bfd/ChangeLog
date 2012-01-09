@@ -1,3 +1,23 @@
+2012-01-09  Iain Sandoe  <idsandoe@googlemail.com>
+
+	* mach-o.c (bfd_mach_o_bfd_copy_private_symbol_data): Implement.
+	(bfd_mach_o_write_symtab): Remove handling for indirect syms.
+	(bfd_mach_o_primary_symbol_sort_key): Likewise.
+	(bfd_mach_o_cf_symbols): Likewise.
+	(bfd_mach_o_sort_symbol_table): Remove.
+	(bfd_mach_o_mangle_symbols): Adjust arguments, remove handling
+	for indirect and dysymtab counts.  Do the symbol sorting here.
+	(bfd_mach_o_build_dysymtab_command): Count the symbol types here.
+	Make the indirect symbols a TODO.
+	(bfd_mach_o_build_commands): Adjust call to bfd_mach_o_mangle_symbols.
+	(bfd_mach_o_make_empty_symbol): Specifically flag unset symbols with
+	a non-zero value.
+	(bfd_mach_o_read_symtab_symbol): Record the symbol index.
+	(bfd_mach_o_read_symtab_symbol): Adjust recording of global status.
+	* mach-o.h (mach_o_data_struct): Remove indirect and dysymtab entries.
+	(IS_MACHO_INDIRECT): Remove.
+	(SYM_MACHO_FIELDS_UNSET, SYM_MACHO_FIELDS_NOT_VALIDATED): New.
+
 2012-01-06  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/13121

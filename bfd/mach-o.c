@@ -533,10 +533,17 @@ bfd_mach_o_section_get_nbr_indirect (bfd *abfd, bfd_mach_o_section *sec)
 
 bfd_boolean
 bfd_mach_o_bfd_copy_private_symbol_data (bfd *ibfd ATTRIBUTE_UNUSED,
-					 asymbol *isymbol ATTRIBUTE_UNUSED,
+					 asymbol *isymbol,
 					 bfd *obfd ATTRIBUTE_UNUSED,
-					 asymbol *osymbol ATTRIBUTE_UNUSED)
+					 asymbol *osymbol)
 {
+  bfd_mach_o_asymbol *os, *is;
+  os = (bfd_mach_o_asymbol *)osymbol;
+  is = (bfd_mach_o_asymbol *)isymbol;
+  os->n_type = is->n_type;
+  os->n_sect = is->n_sect;
+  os->n_desc = is->n_desc;
+  os->symbol.udata.i = is->symbol.udata.i;
   return TRUE;
 }
 
@@ -1400,22 +1407,6 @@ bfd_mach_o_write_symtab (bfd *abfd, bfd_mach_o_load_command *command)
     {
       bfd_size_type str_index;
       bfd_mach_o_asymbol *s = (bfd_mach_o_asymbol *)symbols[i];
-
-      /* For a bare indirect symbol, the system tools expect that the symbol
-	 value will be the string table offset for its referenced counterpart.
-	 
-	 Normally, indirect syms will not be written this way, but rather as
-	 part of the dysymtab command.
-	 
-	 In either case, correct operation depends on the symbol table being
-	 sorted such that the indirect symbols are at the end (since the 
-	 string table index is filled in below).  */
-
-      if (IS_MACHO_INDIRECT (s->n_type))
-	/* A pointer to the referenced symbol will be stored in the udata
-	   field.  Use that to find the string index.  */
-	s->symbol.value = 
-	    ((bfd_mach_o_asymbol *)s->symbol.udata.p)->symbol.udata.i;
      
       if (s->symbol.name == 0 || s->symbol.name[0] == '\0')
 	/* An index of 0 always means the empty string.  */
@@ -1423,11 +1414,6 @@ bfd_mach_o_write_symtab (bfd *abfd, bfd_mach_o_load_command *command)
       else
         {
           str_index = _bfd_stringtab_add (strtab, s->symbol.name, TRUE, FALSE);
-          /* Record the string index.  This can be looked up by an indirect sym
-	     which retains a pointer to its referenced counterpart, until it is
-	     actually output.  */
-	  if (IS_MACHO_INDIRECT (s->n_type))
-	    s->symbol.udata.i = str_index;
 
           if (str_index == (bfd_size_type) -1)
             goto err;
@@ -1673,28 +1659,24 @@ bfd_mach_o_write_dysymtab (bfd *abfd, bfd_mach_o_load_command *command)
 }
 
 static unsigned
-bfd_mach_o_primary_symbol_sort_key (unsigned type)
+bfd_mach_o_primary_symbol_sort_key (bfd_mach_o_asymbol *s)
 {
-  unsigned mtyp = type & BFD_MACH_O_N_TYPE;
+  unsigned mtyp = s->n_type & BFD_MACH_O_N_TYPE;
 
   /* Just leave debug symbols where they are (pretend they are local, and
      then they will just be sorted on position).  */
-  if (type & BFD_MACH_O_N_STAB)
+  if (s->n_type & BFD_MACH_O_N_STAB)
     return 0;
 
-  /* Sort indirects to last.  */
-  if (mtyp == BFD_MACH_O_N_INDR)
-    return 3;
-
   /* Local (we should never see an undefined local AFAICT).  */
-  if (! (type & (BFD_MACH_O_N_EXT | BFD_MACH_O_N_PEXT)))
+  if (! (s->n_type & (BFD_MACH_O_N_EXT | BFD_MACH_O_N_PEXT)))
     return 0;
 
   /* Common symbols look like undefined externs.  */
   if (mtyp == BFD_MACH_O_N_UNDF)
     return 2;
 
-  /* A defined symbol that's not indirect or extern.  */
+  /* A defined non-local, non-debug symbol.  */
   return 1;
 }
 
@@ -1705,8 +1687,8 @@ bfd_mach_o_cf_symbols (const void *a, const void *b)
   bfd_mach_o_asymbol *sb = *(bfd_mach_o_asymbol **) b;
   unsigned int soa, sob;
 
-  soa = bfd_mach_o_primary_symbol_sort_key (sa->n_type);
-  sob = bfd_mach_o_primary_symbol_sort_key (sb->n_type);
+  soa = bfd_mach_o_primary_symbol_sort_key (sa);
+  sob = bfd_mach_o_primary_symbol_sort_key (sb);
   if (soa < sob)
     return -1;
 
@@ -1720,55 +1702,13 @@ bfd_mach_o_cf_symbols (const void *a, const void *b)
         return -1;
       if (sa->symbol.udata.i > sb->symbol.udata.i)
         return  1;
+
+      /* This is probably an error.  */
       return 0;
     }
 
-  /* Unless it's an indirect the second sort key is name.  */
-  if (soa < 3)
-    return strcmp (sa->symbol.name, sb->symbol.name);
-
-  /* Here be indirect symbols, which have different sort rules.  */
-
-  /* Next sort key for indirect, is the section index.  */
-  if (sa->n_sect < sb->n_sect)
-    return -1;
-
-  if (sa->n_sect > sb->n_sect)
-    return  1;
-
-  /* Last sort key is the order of definition - which should be in line with
-     the value, since a stub size of 0 is meaninglesss.  */
-
-  if (sa->symbol.value < sb->symbol.value)
-    return -1;
-
-  if (sa->symbol.value > sb->symbol.value)
-    return 1;
-
-  /* In the final analysis, this is probably an error ... but leave it alone
-     for now.  */
-  return 0;
-}
-
-/* When this is finished, return the number of non-indirect symbols.  */
-
-static unsigned int
-bfd_mach_o_sort_symbol_table (asymbol **symbols, unsigned int nin)
-{
-  qsort (symbols, (size_t) nin, sizeof (void *), bfd_mach_o_cf_symbols);
-  
-  /* Find the last non-indirect symbol.  
-     There must be at least one non-indirect symbol otherwise there's
-     nothing for the indirect(s) to refer to.  */
-  do
-    { 
-      bfd_mach_o_asymbol *s = (bfd_mach_o_asymbol *)symbols[nin - 1];
-      if (IS_MACHO_INDIRECT (s->n_type))
-	nin--;
-      else
-	break;
-    } while (nin - 1 > 0);
-  return nin;
+  /* The second sort key is name.  */
+  return strcmp (sa->symbol.name, sb->symbol.name);
 }
 
 /* Process the symbols.
@@ -1784,18 +1724,14 @@ bfd_mach_o_sort_symbol_table (asymbol **symbols, unsigned int nin)
 		(unsorted)
 	( ii) external defined
 		(by name)
-	(iii) external undefined
+	(iii) external undefined/common
 		(by name)
 	( iv) common
 		(by name)
-	(  v) indirect 
-		(by section)
-			(by position within section).
-
-   (c) Indirect symbols are moved to the end of the list.  */
+*/
 
 static bfd_boolean
-bfd_mach_o_mangle_symbols (bfd *abfd, bfd_mach_o_data_struct *mdata)
+bfd_mach_o_mangle_symbols (bfd *abfd)
 {
   unsigned long i;
   asymbol **symbols = bfd_get_outsymbols (abfd);
@@ -1807,11 +1743,15 @@ bfd_mach_o_mangle_symbols (bfd *abfd, bfd_mach_o_data_struct *mdata)
     {
       bfd_mach_o_asymbol *s = (bfd_mach_o_asymbol *)symbols[i];
 
-      if (s->n_type == BFD_MACH_O_N_UNDF && !(s->symbol.flags & BSF_DEBUGGING))
+      /* We use this value, which is out-of-range as a symbol index, to signal
+	 that the mach-o-specific data are not filled in and need to be created
+	 from the bfd values.  It is much preferable for the application to do
+	 this, since more meaningful diagnostics can be made that way.  */
+
+      if (s->symbol.udata.i == SYM_MACHO_FIELDS_UNSET)
         {
-          /* As genuine Mach-O symbols type shouldn't be N_UNDF (undefined
-             symbols should be N_UNDEF | N_EXT), we suppose the back-end
-             values haven't been set.  */
+          /* No symbol information has been set - therefore determine
+             it from the bfd symbol flags/info.  */
           if (s->symbol.section == bfd_abs_section_ptr)
             s->n_type = BFD_MACH_O_N_ABS;
           else if (s->symbol.section == bfd_und_section_ptr)
@@ -1821,9 +1761,13 @@ bfd_mach_o_mangle_symbols (bfd *abfd, bfd_mach_o_data_struct *mdata)
                 s->n_desc |= BFD_MACH_O_N_WEAK_REF;
               /* mach-o automatically makes undefined symbols extern.  */
 	      s->n_type |= BFD_MACH_O_N_EXT;
+	      s->symbol.flags |= BSF_GLOBAL;
             }
           else if (s->symbol.section == bfd_com_section_ptr)
-            s->n_type = BFD_MACH_O_N_UNDF | BFD_MACH_O_N_EXT;
+	    {
+              s->n_type = BFD_MACH_O_N_UNDF | BFD_MACH_O_N_EXT;
+              s->symbol.flags |= BSF_GLOBAL;
+            }
           else
             s->n_type = BFD_MACH_O_N_SECT;
           
@@ -1839,54 +1783,18 @@ bfd_mach_o_mangle_symbols (bfd *abfd, bfd_mach_o_data_struct *mdata)
                && s->symbol.name == NULL))
 	s->n_sect = s->symbol.section->target_index;
 
-      /* Unless we're looking at an indirect sym, note the input ordering.
-	 We use this to keep local symbols ordered as per the input.  */
-      if (! IS_MACHO_INDIRECT (s->n_type))
-	s->symbol.udata.i = i;
+      /* Number to preserve order for local and debug syms.  */
+      s->symbol.udata.i = i;
     }
 
-  /* Sort the symbols and determine how many will remain in the main symbol
-     table, and how many will be emitted as indirect (assuming that we will
-     be emitting a dysymtab).  Renumber the sorted symbols so that the right
-     index will be found during indirection.  */
-  i = bfd_mach_o_sort_symbol_table (symbols, bfd_get_symcount (abfd));
-  if (bfd_mach_o_should_emit_dysymtab ())
-    {
-      /* Point at the first indirect symbol.  */
-      if (i < bfd_get_symcount (abfd))
-	{
-	  mdata->indirect_syms = &symbols[i];
-	  mdata->nindirect = bfd_get_symcount (abfd) - i;
-	  /* This is, essentially, local to the output section of mach-o,
-	     and therefore should be safe.  */
-	  abfd->symcount = i;
-	}
+  /* Sort the symbols.  */
+  qsort ((void *) symbols, (size_t) bfd_get_symcount (abfd),
+	 sizeof (asymbol *), bfd_mach_o_cf_symbols);
 
-      /* Now setup the counts for each type of symbol.  */
-      for (i = 0; i < bfd_get_symcount (abfd); ++i)
-	{
-	  bfd_mach_o_asymbol *s = (bfd_mach_o_asymbol *)symbols[i];
-	  s->symbol.udata.i = i;  /* renumber.  */
-	  if (s->n_type & (BFD_MACH_O_N_EXT | BFD_MACH_O_N_PEXT))
-	    break;
-	}
-      mdata->nlocal = i;
-      for (; i < bfd_get_symcount (abfd); ++i)
-	{
-	  bfd_mach_o_asymbol *s = (bfd_mach_o_asymbol *)symbols[i];
-	  s->symbol.udata.i = i;  /* renumber.  */
-	  if ((s->n_type & BFD_MACH_O_N_TYPE) == BFD_MACH_O_N_UNDF)
-	    break;
-	}
-      mdata->ndefext = i - mdata->nlocal;
-      mdata->nundefext = bfd_get_symcount (abfd) 
-			 - mdata->ndefext 
-			 - mdata->nlocal;
-      for (; i < bfd_get_symcount (abfd); ++i)
-	{
-	  bfd_mach_o_asymbol *s = (bfd_mach_o_asymbol *)symbols[i];
-	  s->symbol.udata.i = i;  /* renumber.  */
-	}
+  for (i = 0; i < bfd_get_symcount (abfd); ++i)
+    {
+      bfd_mach_o_asymbol *s = (bfd_mach_o_asymbol *)symbols[i];
+      s->symbol.udata.i = i;  /* renumber.  */
     }
 
   return TRUE;
@@ -2179,43 +2087,58 @@ bfd_mach_o_build_dysymtab_command (bfd *abfd,
     }
 
   dsym->ilocalsym = 0;
-  dsym->nlocalsym = mdata->nlocal;
-  dsym->iextdefsym = dsym->nlocalsym;
-  dsym->nextdefsym = mdata->ndefext;
-  dsym->iundefsym = dsym->nextdefsym + dsym->iextdefsym;
-  dsym->nundefsym = mdata->nundefext;
 
-  if (mdata->nindirect > 0)
+  if (bfd_get_symcount (abfd) > 0)
     {
-      unsigned i, sect;
+      asymbol **symbols = bfd_get_outsymbols (abfd);
+      unsigned long i;
+
+       /* Count the number of each kind of symbol.  */
+      for (i = 0; i < bfd_get_symcount (abfd); ++i)
+	{
+	  bfd_mach_o_asymbol *s = (bfd_mach_o_asymbol *)symbols[i];
+	  if (s->n_type & (BFD_MACH_O_N_EXT | BFD_MACH_O_N_PEXT))
+	    break;
+	}
+      dsym->nlocalsym = i;
+      dsym->iextdefsym = i;
+      for (; i < bfd_get_symcount (abfd); ++i)
+	{
+	  bfd_mach_o_asymbol *s = (bfd_mach_o_asymbol *)symbols[i];
+	  if ((s->n_type & BFD_MACH_O_N_TYPE) == BFD_MACH_O_N_UNDF)
+	    break;
+	}
+      dsym->nextdefsym = i - dsym->nlocalsym;
+      dsym->iundefsym = dsym->nextdefsym + dsym->iextdefsym;
+      dsym->nundefsym = bfd_get_symcount (abfd) 
+			- dsym->nlocalsym 
+			- dsym->nextdefsym;
+    }
+  else
+    {
+      dsym->nlocalsym = 0;
+      dsym->iextdefsym = 0;
+      dsym->nextdefsym = 0;
+      dsym->iundefsym = 0;
+      dsym->nundefsym = 0;
+    }
+
+  if (dsym->nindirectsyms > 0)
+    {
+      unsigned i;
 
       mdata->filelen = FILE_ALIGN (mdata->filelen, 2);
       dsym->indirectsymoff = mdata->filelen;
-      mdata->filelen += mdata->nindirect * 4;
+      mdata->filelen += dsym->nindirectsyms * 4;
       
-      dsym->indirect_syms = bfd_zalloc (abfd, mdata->nindirect * 4);
+      dsym->indirect_syms = bfd_zalloc (abfd, dsym->nindirectsyms * 4);
       if (dsym->indirect_syms == NULL)
         return FALSE;
-      dsym->nindirectsyms = mdata->nindirect;
       
-      /* So fill in the indices, and point the section reserved1 fields
-	 at the right one.  */
-      sect = (unsigned) -1;
-      for (i = 0; i < mdata->nindirect; ++i)
+      /* So fill in the indices.  */
+      for (i = 0; i < dsym->nindirectsyms; ++i)
 	{
-	  bfd_mach_o_asymbol *s = 
-			(bfd_mach_o_asymbol *) mdata->indirect_syms[i];
-	  /* Lookup the index of the referenced symbol.  */
-	  dsym->indirect_syms[i] = 
-		((bfd_mach_o_asymbol *) s->symbol.udata.p)->symbol.udata.i;
-	  if (s->n_sect != sect)
-	    {
-	      /* Mach-o sections are 1-based, but the section table
-		 is 0-based.  */
-	      bfd_mach_o_section *sc = mdata->sections[s->n_sect-1];
-	      sc->reserved1 = i;
-	      sect = s->n_sect;
-	    }
+	  /* TODO: fill in the table.  */
 	}
     }
 
@@ -2261,7 +2184,7 @@ bfd_mach_o_build_commands (bfd *abfd)
 
   /* Order the symbol table, fill-in/check mach-o specific fields and
      partition out any indirect symbols.  */
-  if (!bfd_mach_o_mangle_symbols (abfd, mdata))
+  if (!bfd_mach_o_mangle_symbols (abfd))
     return FALSE;
 
   /* It's valid to have a file with only absolute symbols...  */
@@ -2423,7 +2346,7 @@ bfd_mach_o_make_empty_symbol (bfd *abfd)
   if (new_symbol == NULL)
     return new_symbol;
   new_symbol->the_bfd = abfd;
-  new_symbol->udata.i = 0;
+  new_symbol->udata.i = SYM_MACHO_FIELDS_UNSET;
   return new_symbol;
 }
 
@@ -2751,7 +2674,7 @@ bfd_mach_o_read_symtab_symbol (bfd *abfd,
   s->symbol.name = sym->strtab + stroff;
   s->symbol.value = value;
   s->symbol.flags = 0x0;
-  s->symbol.udata.i = 0;
+  s->symbol.udata.i = i;
   s->n_type = type;
   s->n_sect = section;
   s->n_desc = desc;
@@ -2782,13 +2705,9 @@ bfd_mach_o_read_symtab_symbol (bfd *abfd,
     }
   else
     {
-      if (type & BFD_MACH_O_N_PEXT)
+      if (type & (BFD_MACH_O_N_PEXT | BFD_MACH_O_N_EXT))
 	s->symbol.flags |= BSF_GLOBAL;
-
-      if (type & BFD_MACH_O_N_EXT)
-	s->symbol.flags |= BSF_GLOBAL;
-
-      if (!(type & (BFD_MACH_O_N_PEXT | BFD_MACH_O_N_EXT)))
+      else
 	s->symbol.flags |= BSF_LOCAL;
 
       switch (symtype)
@@ -3989,6 +3908,7 @@ bfd_mach_o_header_p (bfd *abfd,
       if (header.cputype != cputype)
         goto wrong;
     }
+
   if (filetype)
     {
       if (header.filetype != filetype)

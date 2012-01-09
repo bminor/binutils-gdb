@@ -1,3 +1,20 @@
+2012-01-09  Iain Sandoe  <idsandoe@googlemail.com>
+
+	* config/obj-macho.c (obj_mach_o_weak): Remove.
+	(obj_mach_o_common_parse): Set symbol qualifiers.
+	(LAZY, REFE): New macros.
+	(obj_mach_o_symbol_type): New enum.
+	(obj_mach_o_set_symbol_qualifier): New.
+	(obj_mach_o_sym_qual): New.
+	(mach_o_pseudo_table): Add symbol qualifiers, set indirect_symbol to
+	a dummy function.
+	(obj_mach_o_type_for_symbol): New.
+	(obj_macho_frob_label): New.
+	(obj_macho_frob_symbol): New.
+	* config/obj-macho.h (S_SET_ALIGN): Amend temorary var name.
+	(obj_frob_label, obj_macho_frob_label): Declare.
+	(obj_frob_symbol, obj_macho_frob_symbol): Declare.
+
 2012-01-08  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* config/tc-mips.c (s_tls_rel_directive): Call mips_clear_insn_labels.

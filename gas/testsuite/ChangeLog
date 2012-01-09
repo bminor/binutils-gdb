@@ -1,3 +1,15 @@
+2012-01-09  Iain Sandoe  <idsandoe@googlemail.com>
+
+	* gas/mach-o/err-syms-1.s: New.
+	* gas/mach-o/err-syms-2.s: New.
+	* gas/mach-o/err-syms-3.s: New.
+	* gas/mach-o/symbols-2.d: New.
+	* gas/mach-o/symbols-2.s: New.
+	* gas/mach-o/symbols-3.s: New.
+	* gas/mach-o/symbols-4.s: New.
+	* gas/mach-o/symbols-5.d: New.
+	* gas/mach-o/symbols-5.s: New.
+
 2012-01-08  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* gas/mips/tls-relw.s, gas/mips/tls-relw.d: New test.

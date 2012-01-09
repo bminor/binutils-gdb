@@ -82,33 +82,8 @@ mach_o_begin (void)
 
 /* Remember the subsections_by_symbols state in case we need to reset
    the file flags.  */
+
 static int obj_mach_o_subsections_by_symbols;
-
-static void
-obj_mach_o_weak (int ignore ATTRIBUTE_UNUSED)
-{
-  char *name;
-  int c;
-  symbolS *symbolP;
-
-  do
-    {
-      /* Get symbol name.  */
-      name = input_line_pointer;
-      c = get_symbol_end ();
-      symbolP = symbol_find_or_make (name);
-      S_SET_WEAK (symbolP);
-      *input_line_pointer = c;
-      SKIP_WHITESPACE ();
-
-      if (c != ',')
-        break;
-      input_line_pointer++;
-      SKIP_WHITESPACE ();
-    }
-  while (*input_line_pointer != '\n');
-  demand_empty_rest_of_line ();
-}
 
 /* This will put at most 16 characters (terminated by a ',' or newline) from
    the input stream into dest.  If there are more than 16 chars before the
@@ -901,6 +876,7 @@ obj_mach_o_common_parse (int is_local, symbolS *symbolP,
 			 addressT size)
 {
   addressT align = 0;
+  bfd_mach_o_asymbol *s;
 
   SKIP_WHITESPACE ();  
 
@@ -920,6 +896,7 @@ obj_mach_o_common_parse (int is_local, symbolS *symbolP,
 	}
     }
 
+  s = (bfd_mach_o_asymbol *) symbol_get_bfdsym (symbolP);
   if (is_local)
     {
       /* Create the BSS section on demand.  */
@@ -929,6 +906,7 @@ obj_mach_o_common_parse (int is_local, symbolS *symbolP,
 	  seg_info (bss_section)->bss = 1;	  
 	}
       bss_alloc (symbolP, size, align);
+      s->n_type = BFD_MACH_O_N_SECT;
       S_CLEAR_EXTERNAL (symbolP);
     }
   else
@@ -937,9 +915,14 @@ obj_mach_o_common_parse (int is_local, symbolS *symbolP,
       S_SET_ALIGN (symbolP, align);
       S_SET_EXTERNAL (symbolP);
       S_SET_SEGMENT (symbolP, bfd_com_section_ptr);
+      s->n_type = BFD_MACH_O_N_UNDF | BFD_MACH_O_N_EXT;
     }
 
-  symbol_get_bfdsym (symbolP)->flags |= BSF_OBJECT;
+  /* This is a data object (whatever we choose that to mean).  */
+  s->symbol.flags |= BSF_OBJECT;
+
+  /* We've set symbol qualifiers, so validate if you can.  */
+  s->symbol.udata.i = SYM_MACHO_FIELDS_NOT_VALIDATED;
 
   return symbolP;
 }
@@ -977,6 +960,175 @@ obj_mach_o_fileprop (int prop)
       default:
 	break;
     }
+}
+
+/* Temporary markers for symbol reference data.  
+   Lazy will remain in place.  */
+#define LAZY 0x01
+#define REFE 0x02
+
+/* We have a bunch of qualifiers that may be applied to symbols.
+   .globl is handled here so that we might make sure that conflicting qualifiers
+   are caught where possible.  */
+
+typedef enum obj_mach_o_symbol_type {
+  OBJ_MACH_O_SYM_UNK = 0,
+  OBJ_MACH_O_SYM_LOCAL = 1,
+  OBJ_MACH_O_SYM_GLOBL = 2,
+  OBJ_MACH_O_SYM_REFERENCE = 3,
+  OBJ_MACH_O_SYM_WEAK_REF = 4,
+  OBJ_MACH_O_SYM_LAZY_REF = 5,
+  OBJ_MACH_O_SYM_WEAK_DEF = 6,
+  OBJ_MACH_O_SYM_PRIV_EXT = 7,
+  OBJ_MACH_O_SYM_NO_DEAD_STRIP = 8,
+  OBJ_MACH_O_SYM_WEAK = 9
+} obj_mach_o_symbol_type;
+
+/* Set Mach-O-specific symbol qualifiers. */
+
+static int
+obj_mach_o_set_symbol_qualifier (symbolS *sym, int type)
+{
+  int is_defined;
+  bfd_mach_o_asymbol *s = (bfd_mach_o_asymbol *) symbol_get_bfdsym (sym);
+  bfd_mach_o_section *sec;
+  int sectype = -1;
+  int err = 0;
+
+  /* If the symbol is defined, then we can do more rigorous checking on
+     the validity of the qualifiers.  Otherwise, we are stuck with waiting 
+     until it's defined - or until write the file.
+     
+     In certain cases (e.g. when a symbol qualifier is intended to introduce
+     an undefined symbol in a stubs section) we should check that the current
+     section is appropriate to the qualifier.  */
+
+  is_defined = s->symbol.section != bfd_und_section_ptr;
+  if (is_defined)
+    sec = bfd_mach_o_get_mach_o_section (s->symbol.section) ;
+  else
+    sec = bfd_mach_o_get_mach_o_section (now_seg) ;
+
+  if (sec != NULL)
+    sectype = sec->flags & BFD_MACH_O_SECTION_TYPE_MASK;
+
+  switch ((obj_mach_o_symbol_type) type)
+    {
+      case OBJ_MACH_O_SYM_LOCAL:
+	/* This is an extension over the system tools.  */
+        if (s->n_type & (BFD_MACH_O_N_PEXT | BFD_MACH_O_N_EXT))
+	  {
+	    as_bad (_("'%s' previously declared as '%s'."), s->symbol.name,
+		      (s->n_type & BFD_MACH_O_N_PEXT) ? "private extern"
+						      : "global" );
+	    err = 1;
+	  }
+	else
+	  {
+	    s->n_type &= ~BFD_MACH_O_N_EXT;
+	    S_CLEAR_EXTERNAL (sym);
+	  }
+	break;
+
+      case OBJ_MACH_O_SYM_PRIV_EXT:
+	s->n_type |= BFD_MACH_O_N_PEXT ;
+	/* We follow the system tools in marking PEXT as also global.  */
+	/* Fall through.  */
+
+      case OBJ_MACH_O_SYM_GLOBL:
+	/* It's not an error to define a symbol and then make it global.  */
+	s->n_type |= BFD_MACH_O_N_EXT;
+	S_SET_EXTERNAL (sym);
+	break;
+
+      case OBJ_MACH_O_SYM_REFERENCE:
+        if (is_defined)
+          s->n_desc |= BFD_MACH_O_N_NO_DEAD_STRIP;
+        else
+          s->n_desc |= (REFE | BFD_MACH_O_N_NO_DEAD_STRIP);
+	break;
+
+      case OBJ_MACH_O_SYM_LAZY_REF:
+        if (is_defined)
+          s->n_desc |= BFD_MACH_O_N_NO_DEAD_STRIP;
+        else
+          s->n_desc |= (REFE | LAZY | BFD_MACH_O_N_NO_DEAD_STRIP);
+	break;
+
+      /* Force ld to retain the symbol - even if it appears unused.  */
+      case OBJ_MACH_O_SYM_NO_DEAD_STRIP:
+	s->n_desc |= BFD_MACH_O_N_NO_DEAD_STRIP ;
+	break;
+
+      /* Mach-O's idea of weak ...  */
+      case OBJ_MACH_O_SYM_WEAK_REF:
+	s->n_desc |= BFD_MACH_O_N_WEAK_REF ;
+	break;
+
+      case OBJ_MACH_O_SYM_WEAK_DEF:
+	if (is_defined && sectype != BFD_MACH_O_S_COALESCED)
+	  {
+	    as_bad (_("'%s' can't be a weak_definition (currently only"
+		      " supported in sections of type coalesced)"),
+		      s->symbol.name);
+	    err = 1;
+	  }
+	else
+	  s->n_desc |= BFD_MACH_O_N_WEAK_DEF;
+	break;
+
+      case OBJ_MACH_O_SYM_WEAK:
+        /* A generic 'weak' - we try to figure out what it means at
+	   symbol frob time.  */
+	S_SET_WEAK (sym);
+	break;
+
+      default:
+	break;
+    }
+
+    /* We've seen some kind of qualifier - check validity if or when the entity
+     is defined.  */
+  s->symbol.udata.i = SYM_MACHO_FIELDS_NOT_VALIDATED;
+  return err;
+}
+
+/* Respond to symbol qualifiers.
+   All of the form:
+   .<qualifier> symbol [, symbol]*
+   a list of symbols is an extension over the Darwin system as.  */
+
+static void
+obj_mach_o_sym_qual (int ntype)
+{
+  char *name;
+  char c;
+  symbolS *symbolP;
+
+#ifdef md_flush_pending_output
+  md_flush_pending_output ();
+#endif
+
+  do
+    {
+      name = input_line_pointer;
+      c = get_symbol_end ();
+      symbolP = symbol_find_or_make (name);
+      obj_mach_o_set_symbol_qualifier (symbolP, ntype);
+      *input_line_pointer = c;
+      SKIP_WHITESPACE ();
+      c = *input_line_pointer;
+      if (c == ',')
+	{
+	  input_line_pointer++;
+	  SKIP_WHITESPACE ();
+	  if (is_end_of_line[(unsigned char) *input_line_pointer])
+	    c = '\n';
+	}
+    }
+  while (c == ',');
+
+  demand_empty_rest_of_line ();
 }
 
 /* Dummy function to allow test-code to work while we are working
@@ -1068,11 +1220,18 @@ const pseudo_typeS mach_o_pseudo_table[] =
   { "section", obj_mach_o_section, 0},
   { "zerofill", obj_mach_o_zerofill, 0},
 
-  /* Symbol-related.  */
-  { "indirect_symbol", obj_mach_o_placeholder, 0},
-  { "weak_definition", obj_mach_o_placeholder, 0},
-  { "private_extern", obj_mach_o_placeholder, 0},
-  { "weak", obj_mach_o_weak, 0},   /* extension */
+  /* Symbol qualifiers.  */
+  {"local",		obj_mach_o_sym_qual, OBJ_MACH_O_SYM_LOCAL},
+  {"globl",		obj_mach_o_sym_qual, OBJ_MACH_O_SYM_GLOBL},
+  {"reference",		obj_mach_o_sym_qual, OBJ_MACH_O_SYM_REFERENCE},
+  {"weak_reference",	obj_mach_o_sym_qual, OBJ_MACH_O_SYM_WEAK_REF},
+  {"lazy_reference",	obj_mach_o_sym_qual, OBJ_MACH_O_SYM_LAZY_REF},
+  {"weak_definition",	obj_mach_o_sym_qual, OBJ_MACH_O_SYM_WEAK_DEF},
+  {"private_extern",	obj_mach_o_sym_qual, OBJ_MACH_O_SYM_PRIV_EXT},
+  {"no_dead_strip",	obj_mach_o_sym_qual, OBJ_MACH_O_SYM_NO_DEAD_STRIP},
+  {"weak",		obj_mach_o_sym_qual, OBJ_MACH_O_SYM_WEAK}, /* ext */
+
+  {"indirect_symbol",	obj_mach_o_placeholder, 0},
 
   /* File flags.  */
   { "subsections_via_symbols", obj_mach_o_fileprop, 
@@ -1080,6 +1239,154 @@ const pseudo_typeS mach_o_pseudo_table[] =
 
   {NULL, NULL, 0}
 };
+
+/* Determine the default n_type value for a symbol from its section.  */
+
+static unsigned
+obj_mach_o_type_for_symbol (bfd_mach_o_asymbol *s)
+{
+  if (s->symbol.section == bfd_abs_section_ptr)
+    return BFD_MACH_O_N_ABS;
+  else if (s->symbol.section == bfd_com_section_ptr
+	   || s->symbol.section == bfd_und_section_ptr)
+    return BFD_MACH_O_N_UNDF;
+  else
+    return BFD_MACH_O_N_SECT;
+}
+
+/* We need to check the correspondence between some kinds of symbols and their
+   sections.  Common and BSS vars will seen via the obj_macho_comm() function.
+   
+   The earlier we can pick up a problem, the better the diagnostics will be.
+   
+   However, when symbol type information is attached, the symbol section will
+   quite possibly be unknown.  So we are stuck with checking (most of the)
+   validity at the time the file is written (unfortunately, then one doesn't
+   get line number information in the diagnostic).  */
+
+/* Here we pick up the case where symbol qualifiers have been applied that
+   are possibly incompatible with the section etc. that the symbol is defined
+   in.  */
+
+void obj_macho_frob_label (struct symbol *sp)
+{
+  bfd_mach_o_asymbol *s = (bfd_mach_o_asymbol *) symbol_get_bfdsym (sp);
+  /* This is the base symbol type, that we mask in.  */
+  unsigned base_type = obj_mach_o_type_for_symbol (s);
+  bfd_mach_o_section *sec = bfd_mach_o_get_mach_o_section (s->symbol.section);
+  int sectype = -1;
+
+  if ((s->n_type & BFD_MACH_O_N_STAB) != 0)
+    return; /* Leave alone.  */
+  
+  if (sec != NULL)
+    sectype = sec->flags & BFD_MACH_O_SECTION_TYPE_MASK;
+
+  /* If there is a pre-existing qualifier, we can make some checks about
+     validity now.  */
+
+  if(s->symbol.udata.i == SYM_MACHO_FIELDS_NOT_VALIDATED)
+    {
+      if ((s->n_desc & BFD_MACH_O_N_WEAK_DEF)
+	  && sectype != BFD_MACH_O_S_COALESCED)
+	as_bad (_("'%s' can't be a weak_definition (currently only supported"
+		  " in sections of type coalesced)"), s->symbol.name);
+
+      /* Have we changed from an undefined to defined ref? */
+      s->n_desc &= ~(REFE | LAZY);
+    }
+
+  s->n_type &= ~BFD_MACH_O_N_TYPE;
+  s->n_type |= base_type;
+}
+
+/* This is the fall-back, we come here when we get to the end of the file and
+   the symbol is not defined - or there are combinations of qualifiers required
+   (e.g. global + weak_def).  */
+
+int
+obj_macho_frob_symbol (struct symbol *sp)
+{
+  bfd_mach_o_asymbol *s = (bfd_mach_o_asymbol *) symbol_get_bfdsym (sp);
+  unsigned base_type = obj_mach_o_type_for_symbol (s);
+  bfd_mach_o_section *sec = bfd_mach_o_get_mach_o_section (s->symbol.section);
+  int sectype = -1;
+  
+  if (sec != NULL)
+    sectype = sec->flags & BFD_MACH_O_SECTION_TYPE_MASK;
+
+  if ((s->n_type & BFD_MACH_O_N_STAB) != 0)
+    return 0; /* Leave alone.  */
+  else if (s->symbol.section == bfd_und_section_ptr)
+    {
+      /* ??? Do we really gain much from implementing this as well as the
+	 mach-o specific ones?  */
+      if (s->symbol.flags & BSF_WEAK)
+	s->n_desc |= BFD_MACH_O_N_WEAK_REF;
+
+      /* Undefined references, become extern.  */
+      if (s->n_desc & REFE)
+	{
+	  s->n_desc &= ~REFE;
+	  s->n_type |= BFD_MACH_O_N_EXT;
+	}
+
+      /* So do undefined 'no_dead_strip's.  */
+      if (s->n_desc & BFD_MACH_O_N_NO_DEAD_STRIP)
+	s->n_type |= BFD_MACH_O_N_EXT;
+
+    }
+  else
+    {
+      if ((s->symbol.flags & BSF_WEAK)
+	   && (sectype == BFD_MACH_O_S_COALESCED)
+	   && (s->n_type & (BFD_MACH_O_N_PEXT | BFD_MACH_O_N_EXT)))
+	s->n_desc |= BFD_MACH_O_N_WEAK_DEF;
+/* ??? we should do this - but then that reveals that the semantics of weak
+       are different from what's supported in mach-o object files.
+      else
+	as_bad (_("'%s' can't be a weak_definition."),
+		s->symbol.name); */
+    }
+
+  if (s->symbol.udata.i == SYM_MACHO_FIELDS_UNSET)
+    {
+      /* Anything here that should be added that is non-standard.  */
+      s->n_desc &= ~BFD_MACH_O_REFERENCE_MASK;
+    }    
+  else if (s->symbol.udata.i == SYM_MACHO_FIELDS_NOT_VALIDATED)
+    {
+      /* Try to validate any combinations.  */
+      if (s->n_desc & BFD_MACH_O_N_WEAK_DEF)
+	{
+	  if (s->symbol.section == bfd_und_section_ptr)
+	    as_bad (_("'%s' can't be a weak_definition (since it is"
+		      " undefined)"), s->symbol.name);
+	  else if (sectype != BFD_MACH_O_S_COALESCED)
+	    as_bad (_("'%s' can't be a weak_definition (currently only supported"
+		      " in sections of type coalesced)"), s->symbol.name);
+	  else if (! (s->n_type & (BFD_MACH_O_N_PEXT | BFD_MACH_O_N_EXT)))
+	    as_bad (_("Non-global symbol: '%s' can't be a weak_definition."),
+		    s->symbol.name);
+	}
+
+    }
+  else
+    as_bad (_("internal error: [%s] unexpected code [%lx] in frob symbol"),
+	    s->symbol.name, (unsigned long)s->symbol.udata.i);
+
+  s->n_type &= ~BFD_MACH_O_N_TYPE;
+  s->n_type |= base_type;
+
+  if (s->symbol.flags & BSF_GLOBAL)
+    s->n_type |= BFD_MACH_O_N_EXT;
+
+  /* This cuts both ways - we promote some things to external above.  */
+  if (s->n_type & (BFD_MACH_O_N_PEXT | BFD_MACH_O_N_EXT))
+    S_SET_EXTERNAL (sp);
+
+  return 0;
+}
 
 /* Support stabs for mach-o.  */
 
