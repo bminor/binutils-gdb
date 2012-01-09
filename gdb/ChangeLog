@@ -1,3 +1,14 @@
+2012-01-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Partially fix duplicate .o files after omitting libbfd.a.
+	* config/alpha/alpha-osf3.mh (NATDEPFILES): Remove solib.o.
+	* config/i386/nbsdaout.mh (NATDEPFILES): Remove solib.o.
+	* config/i386/obsdaout.mh (NATDEPFILES): Remove solib.o.
+	* config/m68k/nbsdaout.mh (NATDEPFILES): Remove solib.o.
+	* config/m68k/obsd.mh (NATDEPFILES): Remove solib.o.
+	* config/powerpc/aix.mh (NATDEPFILES): Remove xcoffread.o.
+	* config/vax/nbsdaout.mh (NATDEPFILES): Remove solib.o.
+
 2012-01-09  Pedro Alves  <palves@redhat.com>
 
 	* MAINTAINERS: Update my email address.
