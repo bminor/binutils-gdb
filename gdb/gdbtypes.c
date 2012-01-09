@@ -33,11 +33,10 @@
 #include "demangle.h"
 #include "complaints.h"
 #include "gdbcmd.h"
-#include "wrapper.h"
 #include "cp-abi.h"
 #include "gdb_assert.h"
 #include "hashtab.h"
-
+#include "exceptions.h"
 
 /* Initialize BADNESS constants.  */
 
@@ -1676,13 +1675,19 @@ safe_parse_type (struct gdbarch *gdbarch, char *p, int length)
 {
   struct ui_file *saved_gdb_stderr;
   struct type *type;
+  volatile struct gdb_exception except;
 
   /* Suppress error messages.  */
   saved_gdb_stderr = gdb_stderr;
   gdb_stderr = ui_file_new ();
 
   /* Call parse_and_eval_type() without fear of longjmp()s.  */
-  if (!gdb_parse_and_eval_type (p, length, &type))
+  TRY_CATCH (except, RETURN_MASK_ERROR)
+    {
+      type = parse_and_eval_type (p, length);
+    }
+
+  if (except.reason < 0)
     type = builtin_type (gdbarch)->builtin_void;
 
   /* Stop suppressing error messages.  */

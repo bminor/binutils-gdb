@@ -21,7 +21,6 @@
 #include "expression.h"
 #include "frame.h"
 #include "language.h"
-#include "wrapper.h"
 #include "gdbcmd.h"
 #include "block.h"
 #include "valprint.h"
@@ -573,6 +572,7 @@ varobj_create (char *objname,
       char *p;
       enum varobj_languages lang;
       struct value *value = NULL;
+      volatile struct gdb_exception except;
 
       /* Parse and evaluate the expression, filling in as much of the
          variable's data as possible.  */
@@ -607,7 +607,12 @@ varobj_create (char *objname,
       innermost_block = NULL;
       /* Wrap the call to parse expression, so we can 
          return a sensible error.  */
-      if (!gdb_parse_exp_1 (&p, block, 0, &var->root->exp))
+      TRY_CATCH (except, RETURN_MASK_ERROR)
+	{
+	  var->root->exp = parse_exp_1 (&p, block, 0);
+	}
+
+      if (except.reason < 0)
 	{
 	  do_cleanups (old_chain);
 	  return NULL;
@@ -650,7 +655,12 @@ varobj_create (char *objname,
       /* We definitely need to catch errors here.
          If evaluate_expression succeeds we got the value we wanted.
          But if it fails, we still go on with a call to evaluate_type().  */
-      if (!gdb_evaluate_expression (var->root->exp, &value))
+      TRY_CATCH (except, RETURN_MASK_ERROR)
+	{
+	  value = evaluate_expression (var->root->exp);
+	}
+
+      if (except.reason < 0)
 	{
 	  /* Error getting the value.  Try to at least get the
 	     right type.  */
@@ -1358,12 +1368,18 @@ varobj_set_value (struct varobj *var, char *expression)
   struct value *value;
   int saved_input_radix = input_radix;
   char *s = expression;
+  volatile struct gdb_exception except;
 
   gdb_assert (varobj_editable_p (var));
 
   input_radix = 10;		/* ALWAYS reset to decimal temporarily.  */
   exp = parse_exp_1 (&s, 0, 0);
-  if (!gdb_evaluate_expression (exp, &value))
+  TRY_CATCH (except, RETURN_MASK_ERROR)
+    {
+      value = evaluate_expression (exp);
+    }
+
+  if (except.reason < 0)
     {
       /* We cannot proceed without a valid expression.  */
       xfree (exp);
@@ -1385,13 +1401,16 @@ varobj_set_value (struct varobj *var, char *expression)
      array's content.  */
   value = coerce_array (value);
 
-  /* The new value may be lazy.  gdb_value_assign, or 
-     rather value_contents, will take care of this.
-     If fetching of the new value will fail, gdb_value_assign
-     with catch the exception.  */
-  if (!gdb_value_assign (var->value, value, &val))
+  /* The new value may be lazy.  value_assign, or
+     rather value_contents, will take care of this.  */
+  TRY_CATCH (except, RETURN_MASK_ERROR)
+    {
+      val = value_assign (var->value, value);
+    }
+
+  if (except.reason < 0)
     return 0;
-     
+
   /* If the value has changed, record it, so that next -var-update can
      report this change.  If a variable had a value of '1', we've set it
      to '333' and then set again to '1', when -var-update will report this
@@ -1594,12 +1613,22 @@ install_new_value (struct varobj *var, struct value *value, int initial)
 	     explicitly asked to compare the new value with the old one.  */
 	  intentionally_not_fetched = 1;
 	}
-      else if (!gdb_value_fetch_lazy (value))
+      else
 	{
-	  /* Set the value to NULL, so that for the next -var-update,
-	     we don't try to compare the new value with this value,
-	     that we couldn't even read.  */
-	  value = NULL;
+	  volatile struct gdb_exception except;
+
+	  TRY_CATCH (except, RETURN_MASK_ERROR)
+	    {
+	      value_fetch_lazy (value);
+	    }
+
+	  if (except.reason < 0)
+	    {
+	      /* Set the value to NULL, so that for the next -var-update,
+		 we don't try to compare the new value with this value,
+		 that we couldn't even read.  */
+	      value = NULL;
+	    }
 	}
     }
 
@@ -2820,9 +2849,14 @@ adjust_value_for_child_access (struct value **value,
 	{
 	  if (value && *value)
 	    {
-	      int success = gdb_value_ind (*value, value);
+	      volatile struct gdb_exception except;
 
-	      if (!success)
+	      TRY_CATCH (except, RETURN_MASK_ERROR)
+		{
+		  *value = value_ind (*value);
+		}
+
+	      if (except.reason < 0)
 		*value = NULL;
 	    }
 	  *type = target_type;
@@ -2947,6 +2981,7 @@ c_describe_child (struct varobj *parent, int index,
   struct type *type = get_value_type (parent);
   char *parent_expression = NULL;
   int was_ptr;
+  volatile struct gdb_exception except;
 
   if (cname)
     *cname = NULL;
@@ -2974,7 +3009,10 @@ c_describe_child (struct varobj *parent, int index,
 	{
 	  int real_index = index + TYPE_LOW_BOUND (TYPE_INDEX_TYPE (type));
 
-	  gdb_value_subscript (value, real_index, cvalue);
+	  TRY_CATCH (except, RETURN_MASK_ERROR)
+	    {
+	      *cvalue = value_subscript (value, real_index);
+	    }
 	}
 
       if (ctype)
@@ -3020,9 +3058,12 @@ c_describe_child (struct varobj *parent, int index,
 
       if (cvalue && value)
 	{
-	  int success = gdb_value_ind (value, cvalue);
+	  TRY_CATCH (except, RETURN_MASK_ERROR)
+	    {
+	      *cvalue = value_ind (value);
+	    }
 
-	  if (!success)
+	  if (except.reason < 0)
 	    *cvalue = NULL;
 	}
 
@@ -3126,9 +3167,15 @@ c_value_of_root (struct varobj **var_handle)
 
   if (within_scope)
     {
+      volatile struct gdb_exception except;
+
       /* We need to catch errors here, because if evaluate
          expression fails we want to just return NULL.  */
-      gdb_evaluate_expression (var->root->exp, &new_val);
+      TRY_CATCH (except, RETURN_MASK_ERROR)
+	{
+	  new_val = evaluate_expression (var->root->exp);
+	}
+
       return new_val;
     }
 

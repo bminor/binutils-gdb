@@ -46,8 +46,6 @@
 #include "filenames.h"
 #include "progspace.h"
 #include "objfiles.h"
-#include "wrapper.h"
-
 
 #ifndef O_LARGEFILE
 #define O_LARGEFILE 0
@@ -290,6 +288,7 @@ core_open (char *filename, int from_tty)
   bfd *temp_bfd;
   int scratch_chan;
   int flags;
+  volatile struct gdb_exception except;
 
   target_preopen (from_tty);
   if (!filename)
@@ -428,7 +427,13 @@ core_open (char *filename, int from_tty)
      may be a thread_stratum target loaded on top of target core by
      now.  The layer above should claim threads found in the BFD
      sections.  */
-  gdb_target_find_new_threads ();
+  TRY_CATCH (except, RETURN_MASK_ERROR)
+    {
+      target_find_new_threads ();
+    }
+
+  if (except.reason < 0)
+    exception_print (gdb_stderr, except);
 
   p = bfd_core_file_failing_command (core_bfd);
   if (p)

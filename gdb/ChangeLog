@@ -1,3 +1,26 @@
+2012-01-09  Keith Seitz  <keiths@redhat.com>
+
+	* Makefile.in (SFILES): Remove wrapper.c.
+	(HFILES_NO_SRCDIR): Remove wrapper.h.
+	(COMMON_OBS): Remove wrapper.o.
+	* cli/cli-interp.c: Don't inlude wrapper.h.
+	* corelow.c: Likewise.
+	(core_open): Replace gdb_target_find_new_threads with
+	TRY_CATCH around target_find_new_threads.
+	* eval.c (fetch_subexp_value): Likewise for value_fetch_lazy.
+	* gdbtypes.c (safe_parse_type): Likewise for parse_and_eval_type.
+	* varobj.c (varobj_create): Likewise for parse_exp_1 and
+	evaluate_expression.
+	(varobj_set_value): Likewise for evaluate_expression and
+	value_assign.
+	(install_new_variable): Likewise for value_fetch_lazy.
+	(adjust_value_for_child_access): Likewise for value_ind.
+	(c_describe_child): Likewise for value_subscript and
+	value_ind.
+	(c_value_of_root): Likewise for evaluate_expression.
+	* wrapper.c: Remove.
+	* wrapper.h: Remove.
+
 2012-01-09  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (read_and_check_comp_unit_head): Renamed from
