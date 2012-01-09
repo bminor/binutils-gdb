@@ -1,5 +1,9 @@
 2012-01-09  Keith Seitz  <keiths@redhat.com>
 
+	* breakpoint.c (wrapper.h): Don't include.
+
+2012-01-09  Keith Seitz  <keiths@redhat.com>
+
 	* Makefile.in (SFILES): Remove wrapper.c.
 	(HFILES_NO_SRCDIR): Remove wrapper.h.
 	(COMMON_OBS): Remove wrapper.o.

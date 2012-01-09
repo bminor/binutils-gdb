@@ -56,7 +56,6 @@
 #include "memattr.h"
 #include "ada-lang.h"
 #include "top.h"
-#include "wrapper.h"
 #include "valprint.h"
 #include "jit.h"
 #include "xml-syscall.h"
