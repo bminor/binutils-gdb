@@ -90,16 +90,6 @@ int in_parse_field;
    '->'.  This is set when parsing and is only used when completing a
    field name.  It is -1 if no dereference operation was found.  */
 static int expout_last_struct = -1;
-
-/* A temporary buffer for identifiers, so we can null-terminate them.
-
-   We allocate this with xrealloc.  parse_exp_1 used to allocate with
-   alloca, using the size of the whole expression as a conservative
-   estimate of the space needed.  However, macro expansion can
-   introduce names longer than the original expression; there's no
-   practical way to know beforehand how large that might be.  */
-char *namecopy;
-size_t namecopy_size;
 
 static int expressiondebug = 0;
 static void
@@ -744,13 +734,28 @@ find_template_name_end (char *p)
 }
 
 
+/* Return a null-terminated temporary copy of the name of a string token.
 
-/* Return a null-terminated temporary copy of the name
-   of a string token.  */
+   Tokens that refer to names do so with explicit pointer and length,
+   so they can share the storage that lexptr is parsing.
+   When it is necessary to pass a name to a function that expects
+   a null-terminated string, the substring is copied out
+   into a separate block of storage.
+
+   N.B. A single buffer is reused on each call.  */
 
 char *
 copy_name (struct stoken token)
 {
+  /* A temporary buffer for identifiers, so we can null-terminate them.
+     We allocate this with xrealloc.  parse_exp_1 used to allocate with
+     alloca, using the size of the whole expression as a conservative
+     estimate of the space needed.  However, macro expansion can
+     introduce names longer than the original expression; there's no
+     practical way to know beforehand how large that might be.  */
+  static char *namecopy;
+  static size_t namecopy_size;
+
   /* Make sure there's enough space for the token.  */
   if (namecopy_size < token.length + 1)
     {

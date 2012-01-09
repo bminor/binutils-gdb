@@ -216,17 +216,6 @@ extern char *lexptr;
    Currently used only for error reporting.  */
 extern char *prev_lexptr;
 
-/* Tokens that refer to names do so with explicit pointer and length,
-   so they can share the storage that lexptr is parsing.
-
-   When it is necessary to pass a name to a function that expects
-   a null-terminated string, the substring is copied out
-   into a block of storage that namecopy points to.
-
-   namecopy is allocated once, guaranteed big enough, for each parsing.  */
-
-extern char *namecopy;
-
 /* Current depth in parentheses within the expression.  */
 
 extern int paren_depth;

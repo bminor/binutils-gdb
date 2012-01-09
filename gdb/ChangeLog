@@ -1,3 +1,8 @@
+2012-01-09  Doug Evans  <dje@google.com>
+
+	* parser-defs.h (namecopy): Delete.
+	* parse.c (namecopy, namecopy_size): Move into copy_name.
+
 2012-01-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Partially fix duplicate .o files after omitting libbfd.a.
