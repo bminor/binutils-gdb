@@ -284,7 +284,7 @@ start_inferior (char **argv)
       resume_info.kind = resume_continue;
       resume_info.sig = 0;
 
-      mywait (pid_to_ptid (signal_pid), &last_status, 0, 0);
+      last_ptid = mywait (pid_to_ptid (signal_pid), &last_status, 0, 0);
 
       if (last_status.kind != TARGET_WAITKIND_STOPPED)
 	return signal_pid;
@@ -293,7 +293,7 @@ start_inferior (char **argv)
 	{
 	  (*the_target->resume) (&resume_info, 1);
 
- 	  mywait (pid_to_ptid (signal_pid), &last_status, 0, 0);
+ 	  last_ptid = mywait (pid_to_ptid (signal_pid), &last_status, 0, 0);
 	  if (last_status.kind != TARGET_WAITKIND_STOPPED)
 	    return signal_pid;
 
