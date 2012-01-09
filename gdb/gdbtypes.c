@@ -1674,7 +1674,7 @@ static struct type *
 safe_parse_type (struct gdbarch *gdbarch, char *p, int length)
 {
   struct ui_file *saved_gdb_stderr;
-  struct type *type;
+  struct type *type = NULL; /* Initialize to keep gcc happy.  */
   volatile struct gdb_exception except;
 
   /* Suppress error messages.  */

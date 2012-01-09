@@ -1,3 +1,8 @@
+2012-01-09  Doug Evans  <dje@google.com>
+
+	* gdbtypes.c (safe_parse_type): Initialize type to keep gcc happy.
+	* varobj.c (varobj_set_value): Initialize val,value to keep gcc happy.
+
 2012-01-09  Keith Seitz  <keiths@redhat.com>
 
 	* breakpoint.c (wrapper.h): Don't include.

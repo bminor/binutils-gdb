@@ -1359,13 +1359,12 @@ varobj_get_value (struct varobj *var)
 int
 varobj_set_value (struct varobj *var, char *expression)
 {
-  struct value *val;
-
+  struct value *val = NULL; /* Initialize to keep gcc happy.  */
   /* The argument "expression" contains the variable's new value.
      We need to first construct a legal expression for this -- ugh!  */
   /* Does this cover all the bases?  */
   struct expression *exp;
-  struct value *value;
+  struct value *value = NULL; /* Initialize to keep gcc happy.  */
   int saved_input_radix = input_radix;
   char *s = expression;
   volatile struct gdb_exception except;
