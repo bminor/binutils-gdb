@@ -1,3 +1,7 @@
+2012-01-09  Pedro Alves  <palves@redhat.com>
+
+	* MAINTAINERS: Update my email address.
+
 2012-01-08  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (dwarf2_per_objfile): Rename n_type_comp_units to

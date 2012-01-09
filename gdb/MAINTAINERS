@@ -157,7 +157,7 @@ future, if there are, a reference to the list will be included here.
 
 The current global maintainers are (in alphabetical order):
 
-Pedro Alves                     pedro@codesourcery.com
+Pedro Alves                     palves@redhat.com
 Joel Brobecker			brobecker@adacore.com
 Kevin Buettner			kevinb@redhat.com
 Andrew Cagney			cagney@gnu.org
