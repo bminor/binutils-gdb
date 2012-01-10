@@ -1,6 +1,6 @@
 	.globl bar
 bar:
-	mov foo(%rip), %rax
+	mov foo@GOTPCREL(%rip), %rax
 
 	.data
 xxx:

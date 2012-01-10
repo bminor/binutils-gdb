@@ -1,3 +1,10 @@
+2012-01-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from mainline:
+	PR ld/13581
+	* elf64-x86-64.c (elf_x86_64_relocate_section): Remove ABI_64_P
+	check on R_X86_64_PCXX.
+
 2011-12-19  Chung-Lin Tang  <cltang@codesourcery.com>
 
 	Backport from mainline:

@@ -1,3 +1,17 @@
+2012-01-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from mainline:
+	PR ld/13581
+	* ld-x86-64/ilp32-4.s: New.
+	* ld-x86-64/ilp32-10.d: Likewise.
+	* ld-x86-64/ilp32-10.s: Likewise.
+
+	* ld-x86-64/ilp32-4.d: Adjusted.
+	* ld-x86-64/ilp32-5.d: Likewise.
+	* ld-x86-64/ilp32-5.s: Likewise.
+
+	* ld-x86-64/x86-64.exp: Run ilp32-10.
+
 2011-12-01  Hans-Peter Nilsson  <hp@axis.com>
 
 	* ld-cris/pic-gc-72.d: Revert last change to adjust for reverted
