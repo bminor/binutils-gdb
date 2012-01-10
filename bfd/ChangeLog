@@ -1,3 +1,9 @@
+2012-01-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/13581
+	* elf64-x86-64.c (elf_x86_64_relocate_section): Remove ABI_64_P
+	check on R_X86_64_PCXX.
+
 2012-01-10  Tristan Gingold  <gingold@adacore.com>
 
 	* mach-o.c (bfd_mach_o_build_commands): Avoid uninitialized false

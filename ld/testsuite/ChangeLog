@@ -1,3 +1,16 @@
+2012-01-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/13581
+	* ld-x86-64/ilp32-4.s: New.
+	* ld-x86-64/ilp32-10.d: Likewise.
+	* ld-x86-64/ilp32-10.s: Likewise.
+
+	* ld-x86-64/ilp32-4.d: Adjusted.
+	* ld-x86-64/ilp32-5.d: Likewise.
+	* ld-x86-64/ilp32-5.s: Likewise.
+
+	* ld-x86-64/x86-64.exp: Run ilp32-10.
+
 2012-01-05  Nick Clifton  <nickc@redhat.com>
 
 	* ld-x86-64/x86-64.exp: Add test of linking mixed 32-bit and
