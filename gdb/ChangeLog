@@ -1,5 +1,19 @@
 2012-01-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Fix regression after libiberty/ update for GCC PR 6057 and others.
+	* c-exp.y (operator) <OPERATOR DELETE>
+	(operator) <OPERATOR DELETE '[' ']'>: Add trailing space.
+	* cp-name-parser.y (fill_comp, make_operator, make_dtor)
+	(make_builtin_type, make_name): New variable i, add gdb_assert.
+	(operator) <OPERATOR NEW>: Update ARGS to 3.
+	(operator) <OPERATOR DELETE>: Add trailing space.
+	(operator) <OPERATOR NEW '[' ']'>: Update ARGS to 3.
+	(operator) <OPERATOR DELETE '[' ']'>: Add trailing space.
+	* cp-support.c (cp_canonicalize_string): Check NULL from
+	cp_comp_to_string, call warning and return.
+
+2012-01-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Fix duplicate .o files after omitting libbfd.a.
 	* Makefile.in (ALL_TARGET_OBS): Remove corelow.o.
 	(SFILES): Add corelow.c.

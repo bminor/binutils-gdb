@@ -528,6 +528,13 @@ cp_canonicalize_string (const char *string)
   ret = cp_comp_to_string (info->tree, estimated_len);
   cp_demangled_name_parse_free (info);
 
+  if (ret == NULL)
+    {
+      warning (_("internal error: string \"%s\" failed to be canonicalized"),
+	       string);
+      return NULL;
+    }
+
   if (strcmp (string, ret) == 0)
     {
       xfree (ret);

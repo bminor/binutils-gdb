@@ -188,7 +188,11 @@ fill_comp (enum demangle_component_type d_type, struct demangle_component *lhs,
 	   struct demangle_component *rhs)
 {
   struct demangle_component *ret = d_grab ();
-  cplus_demangle_fill_component (ret, d_type, lhs, rhs);
+  int i;
+
+  i = cplus_demangle_fill_component (ret, d_type, lhs, rhs);
+  gdb_assert (i);
+
   return ret;
 }
 
@@ -204,7 +208,11 @@ static struct demangle_component *
 make_operator (const char *name, int args)
 {
   struct demangle_component *ret = d_grab ();
-  cplus_demangle_fill_operator (ret, name, args);
+  int i;
+
+  i = cplus_demangle_fill_operator (ret, name, args);
+  gdb_assert (i);
+
   return ret;
 }
 
@@ -212,7 +220,11 @@ static struct demangle_component *
 make_dtor (enum gnu_v3_dtor_kinds kind, struct demangle_component *name)
 {
   struct demangle_component *ret = d_grab ();
-  cplus_demangle_fill_dtor (ret, kind, name);
+  int i;
+
+  i = cplus_demangle_fill_dtor (ret, kind, name);
+  gdb_assert (i);
+
   return ret;
 }
 
@@ -220,7 +232,11 @@ static struct demangle_component *
 make_builtin_type (const char *name)
 {
   struct demangle_component *ret = d_grab ();
-  cplus_demangle_fill_builtin_type (ret, name);
+  int i;
+
+  i = cplus_demangle_fill_builtin_type (ret, name);
+  gdb_assert (i);
+
   return ret;
 }
 
@@ -228,7 +244,11 @@ static struct demangle_component *
 make_name (const char *name, int len)
 {
   struct demangle_component *ret = d_grab ();
-  cplus_demangle_fill_name (ret, name, len);
+  int i;
+
+  i = cplus_demangle_fill_name (ret, name, len);
+  gdb_assert (i);
+
   return ret;
 }
 
@@ -420,13 +440,13 @@ demangler_special
 		;
 
 operator	:	OPERATOR NEW
-			{ $$ = make_operator ("new", 1); }
+			{ $$ = make_operator ("new", 3); }
 		|	OPERATOR DELETE
-			{ $$ = make_operator ("delete", 1); }
+			{ $$ = make_operator ("delete ", 1); }
 		|	OPERATOR NEW '[' ']'
-			{ $$ = make_operator ("new[]", 1); }
+			{ $$ = make_operator ("new[]", 3); }
 		|	OPERATOR DELETE '[' ']'
-			{ $$ = make_operator ("delete[]", 1); }
+			{ $$ = make_operator ("delete[] ", 1); }
 		|	OPERATOR '+'
 			{ $$ = make_operator ("+", 2); }
 		|	OPERATOR '-'
