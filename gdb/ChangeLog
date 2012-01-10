@@ -1,3 +1,8 @@
+2012-01-10  Tom Tromey  <tromey@redhat.com>
+
+	PR python/13199:
+	* python/python.c (finish_python_initialization): Set sys.argv.
+
 2012-01-10  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (dwarf_decode_lines): Remove arg "abfd".  New arg
