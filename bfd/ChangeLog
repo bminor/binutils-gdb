@@ -1,5 +1,10 @@
 2012-01-10  Tristan Gingold  <gingold@adacore.com>
 
+	* mach-o.c (bfd_mach_o_build_commands): Avoid uninitialized false
+	warning.
+
+2012-01-10  Tristan Gingold  <gingold@adacore.com>
+
 	* bfdio.c (bfd_tell): Handle nested archives.
 	(bfd_seek): Ditto.
 	* cache.c (bfd_cache_lookup_worker): Ditto.

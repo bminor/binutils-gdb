@@ -2154,7 +2154,7 @@ bfd_mach_o_build_commands (bfd *abfd)
 {
   bfd_mach_o_data_struct *mdata = bfd_mach_o_get_data (abfd);
   unsigned int wide = mach_o_wide_p (&mdata->header);
-  bfd_mach_o_segment_command *seg;
+  bfd_mach_o_segment_command *seg = NULL;
   bfd_mach_o_load_command *cmd;
   bfd_mach_o_load_command *symtab_cmd;
   unsigned symcind;
