@@ -1,3 +1,27 @@
+2012-01-10  Tristan Gingold  <gingold@adacore.com>
+
+	* struc-symbol.h (struct symbol_flags): New struct, created from...
+	(struct symbol): ... this one.  Add sy_flags field, remove flag fields.
+	(struct local_symbol): Replace lsy_marker field by lsy_flags.
+	Adjust comment.
+	(local_symbol_resolved_p): Adjust.
+	(local_symbol_mark_resolved): Likewise.
+	* symbols.c (LOCAL_SYMBOL_CHECK): Adjust.
+	(local_symbol_make, local_symbol_convert, colon)
+	(symbol_clone_if_forward_ref, verify_symbol_chain)
+	(resolve_symbol_value, snapshot_symbol, S_GET_VALUE)
+	(S_IS_WEAKREFR, S_IS_WEAKREFD, S_IS_VOLATILE, S_IS_FORWARD_REF)
+	(S_SET_WEAKREFR, S_CLEAR_WEAKREFR, S_SET_WEAKREFD)
+	(S_CLEAR_WEAKREFD, S_SET_VOLATILE, S_CLEAR_VOLATILE)
+	(S_SET_FORWARD_REF, symbol_same_p, symbol_mark_used)
+	(symbol_clear_used, symbol_used_p, symbol_mark_used_in_reloc)
+	(symbol_clear_used_in_reloc, symbol_used_in_reloc_p)
+	(symbol_mark_mri_common, symbol_clear_mri_common)
+	(symbol_mri_common_p, symbol_mark_written, symbol_clear_written)
+	(symbol_written_p, symbol_mark_resolved, symbol_resolved_p)
+	(symbol_equated_reloc_p, dot_symbol_init)
+	(print_symbol_value_1): Adjust.
+
 2012-01-09  Iain Sandoe  <idsandoe@googlemail.com>
 
 	* config/obj-macho.c (obj_mach_o_weak): Remove.
