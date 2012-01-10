@@ -1971,6 +1971,9 @@ Target_x86_64<size>::Scan::check_non_pic(Relobj* object, unsigned int r_type,
 	return;
       /* Fall through.  */
     case elfcpp::R_X86_64_32:
+      // R_X86_64_32 is OK for x32.
+      if (size == 32 && r_type == elfcpp::R_X86_64_32)
+	return;
       if (this->issued_non_pic_error_)
 	return;
       gold_assert(parameters->options().output_is_position_independent());
@@ -2079,6 +2082,19 @@ Target_x86_64<size>::Scan::local(Symbol_table* symtab,
       // because that is always a 64-bit relocation.
       if (parameters->options().output_is_position_independent())
         {
+	  // Use R_X86_64_RELATIVE relocation for R_X86_64_32 under x32.
+	  if (size == 32 && r_type == elfcpp::R_X86_64_32)
+	    {
+	      unsigned int r_sym = elfcpp::elf_r_sym<size>(reloc.get_r_info());
+	      Reloc_section* rela_dyn = target->rela_dyn_section(layout);
+	      rela_dyn->add_local_relative(object, r_sym,
+					   elfcpp::R_X86_64_RELATIVE,
+					   output_section, data_shndx,
+					   reloc.get_r_offset(),
+					   reloc.get_r_addend(), is_ifunc);
+	      break;
+	    }
+
           this->check_non_pic(object, r_type, NULL);
 
           Reloc_section* rela_dyn = target->rela_dyn_section(layout);

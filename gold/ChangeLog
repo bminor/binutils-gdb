@@ -1,3 +1,9 @@
+2012-01-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* x86_64.cc (Scan::check_non_pic): Allow R_X86_64_32 for x32.
+	(Scan::local): Use R_X86_64_RELATIVE relocation for R_X86_64_32
+	under x32.
+
 2012-01-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* x86_64.cc: Initial support for x32.
