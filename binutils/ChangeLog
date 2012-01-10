@@ -1,3 +1,8 @@
+2012-01-09  Roland McGrath  <mcgrathr@google.com>
+
+	* configure.in: Use AM_ZLIB.
+	* configure: Regenerated.
+
 2012-01-06  Nick Clifton  <nickc@redhat.com>
 
 	* po/ru.po: Updated Russian translation.

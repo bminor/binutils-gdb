@@ -1,3 +1,7 @@
+2012-01-09  Roland McGrath  <mcgrathr@google.com>
+
+	* configure.in: Use AM_ZLIB.
+	* configure: Regenerated.
 
 For older changes see ChangeLog-2011
 
