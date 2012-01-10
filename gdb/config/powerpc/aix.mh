@@ -3,7 +3,7 @@
 NAT_FILE= config/rs6000/nm-rs6000.h
 
 # aix-thread.o is not listed in NATDEPFILES as it is pulled in by configure.
-NATDEPFILES= fork-child.o inf-ptrace.o corelow.o rs6000-nat.o \
+NATDEPFILES= fork-child.o inf-ptrace.o rs6000-nat.o \
 	     xcoffsolib.o
 
 # When compiled with cc, for debugging, this argument should be passed.

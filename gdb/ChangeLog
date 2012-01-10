@@ -1,3 +1,59 @@
+2012-01-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix duplicate .o files after omitting libbfd.a.
+	* Makefile.in (ALL_TARGET_OBS): Remove corelow.o.
+	(SFILES): Add corelow.c.
+	(COMMON_OBS): Add corelow.o.
+	(ALLDEPFILES): Remove corelow.c.
+	* config/alpha/alpha-linux.mh (NATDEPFILES): Remove corelow.o.
+	* config/alpha/alpha-osf3.mh: Likewise.
+	* config/alpha/fbsd.mh: Likewise.
+	* config/arm/nbsdaout.mh: Likewise.
+	* config/arm/nbsdelf.mh: Likewise.
+	* config/i386/i386gnu.mh: Likewise.
+	* config/ia64/hpux.mh: Likewise.
+	* config/ia64/linux.mh: Likewise.
+	* config/m32r/linux.mh: Likewise.
+	* config/m68k/linux.mh: Likewise.
+	* config/mips/irix5.mh: Likewise.
+	* config/mips/irix6.mh: Likewise.
+	* config/pa/hpux.mh: Likewise.
+	* config/pa/linux.mh: Likewise.
+	* config/powerpc/aix.mh: Likewise.
+	* config/sparc/linux.mh: Likewise.
+	* config/sparc/linux64.mh: Likewise.
+	* config/sparc/sol2.mh: Likewise.
+	* config/vax/vax.mh: Likewise.
+	* configure.tgt (alpha*-*-freebsd* alpha*-*-kfreebsd*-gnu)
+	(alpha*-*-netbsd*, alpha*-*-knetbsd*-gnu, alpha*-*-openbsd*)
+	(am33_2.0*-*-linux*, arm*-wince-pe, arm*-*-mingw32ce*, arm*-*-linux*)
+	(arm*-*-openbsd*, cris*, frv-*-*, hppa*-*-hpux*, hppa*-*-netbsd*)
+	(hppa*-*-openbsd*, i[34567]86-*-dicos*, i[34567]86-*-freebsd*)
+	(i[34567]86-*-kfreebsd*-gnu, i[34567]86-*-netbsd*)
+	(i[34567]86-*-knetbsd*-gnu, i[34567]86-*-openbsd*, i[34567]86-*-nto*)
+	(i[34567]86-*-solaris2.1[0-9]*, x86_64-*-solaris2.1[0-9]*)
+	(i[34567]86-*-solaris*, i[34567]86-*-linux*, i[34567]86-*-cygwin*)
+	(i[34567]86-*-mingw32*, m68*-*-netbsd*, m68*-*-knetbsd*-gnu)
+	(m68*-*-openbsd*, m88*-*-openbsd*, microblaze*-linux-*)
+	(microblaze*-*-linux*, mips*-*-linux*, mips*-*-netbsd*)
+	(mips*-*-knetbsd*-gnu, mips64*-*-openbsd*, powerpc-*-netbsd*)
+	(powerpc-*-knetbsd*-gnu, powerpc-*-openbsd*, powerpc-*-linux*)
+	(powerpc64-*-linux*, s390*-*-*, score-*-*, sh*-*-linux*)
+	(sh*-*-netbsdelf*, sh*-*-knetbsd*-gnu, sh*-*-openbsd*)
+	(sparc*-*-freebsd*, sparc*-*-kfreebsd*-gnu, sparc-*-netbsd*)
+	(sparc-*-knetbsd*-gnu, sparc64-*-netbsd*, sparc64-*-knetbsd*-gnu)
+	(sparc-*-openbsd*, sparc64-*-openbsd*, tic6x-*-*linux, vax-*-netbsd*)
+	(vax-*-knetbsd*-gnu, vax-*-openbsd*, x86_64-*-dicos*, x86_64-*-linux*)
+	(x86_64-*-freebsd*, x86_64-*-kfreebsd*-gnu, x86_64-*-netbsd*)
+	(x86_64-*-knetbsd*-gnu, x86_64-*-openbsd*, xtensa*-*-linux*): Remove
+	corelow.o from gdb_target_obs.
+	* corefile.c (core_target): Update the comment on NULL value.
+	(core_file_command): Replace error by gdb_assert on CORE_TARGET.
+	* corelow.c (sniff_core_bfd): Call error instead of warning on zero
+	MATCHES.  Drop YUMMY set on NULL.
+	(core_close): Do not call exit_inferior_silent on zero PID.  Do not
+	reclaim CORE_DATA if it is already NULL.
+
 2012-01-09  Doug Evans  <dje@google.com>
 
 	* gdbtypes.c (safe_parse_type): Initialize type to keep gcc happy.

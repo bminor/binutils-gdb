@@ -60,7 +60,7 @@ static int exec_file_hook_count = 0;		/* Size of array.  */
 
 bfd *core_bfd = NULL;
 
-/* corelow.c target (if included for this gdb target).  */
+/* corelow.c target.  It is never NULL after GDB initialization.  */
 
 struct target_ops *core_target;
 
@@ -72,8 +72,7 @@ core_file_command (char *filename, int from_tty)
 {
   dont_repeat ();		/* Either way, seems bogus.  */
 
-  if (core_target == NULL)
-    error (_("GDB can't read core files on this machine."));
+  gdb_assert (core_target != NULL);
 
   if (!filename)
     (core_target->to_detach) (core_target, filename, from_tty);
