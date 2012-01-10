@@ -198,7 +198,7 @@ bfd_cache_lookup_worker (bfd *abfd, enum cache_flag flag)
   if ((abfd->flags & BFD_IN_MEMORY) != 0)
     abort ();
 
-  if (abfd->my_archive)
+  while (abfd->my_archive)
     abfd = abfd->my_archive;
 
   if (abfd->iostream != NULL)

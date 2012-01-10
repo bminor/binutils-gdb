@@ -581,12 +581,6 @@ _bfd_get_elt_at_filepos (bfd *archive, file_ptr filepos)
   bfd *n_nfd;
   char *filename;
 
-  if (archive->my_archive)
-    {
-      filepos += archive->origin;
-      archive = archive->my_archive;
-    }
-
   n_nfd = _bfd_look_for_bfd_in_cache (archive, filepos);
   if (n_nfd)
     return n_nfd;
@@ -732,8 +726,6 @@ bfd_generic_openr_next_archived_file (bfd *archive, bfd *last_file)
       filestart = last_file->proxy_origin;
       if (! bfd_is_thin_archive (archive))
         filestart += size;
-      if (archive->my_archive)
-	filestart -= archive->origin;
       /* Pad to an even boundary...
 	 Note that last_file->origin can be odd in the case of
 	 BSD-4.4-style element with a long odd size.  */

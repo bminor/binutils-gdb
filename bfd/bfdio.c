@@ -233,10 +233,14 @@ bfd_tell (bfd *abfd)
 
   if (abfd->iovec)
     {
+      bfd *parent_bfd = abfd;
       ptr = abfd->iovec->btell (abfd);
 
-      if (abfd->my_archive)
-	ptr -= abfd->origin;
+      while (parent_bfd->my_archive != NULL)
+	{
+	  ptr -= parent_bfd->origin;
+	  parent_bfd = parent_bfd->my_archive;
+	}
     }
   else
     ptr = 0;
@@ -308,8 +312,16 @@ bfd_seek (bfd *abfd, file_ptr position, int direction)
     }
 
   file_position = position;
-  if (direction == SEEK_SET && abfd->my_archive != NULL)
-    file_position += abfd->origin;
+  if (direction == SEEK_SET)
+    {
+      bfd *parent_bfd = abfd;
+
+      while (parent_bfd->my_archive != NULL)
+        {
+          file_position += parent_bfd->origin;
+          parent_bfd = parent_bfd->my_archive;
+        }
+    }
 
   if (abfd->iovec)
     result = abfd->iovec->bseek (abfd, file_position, direction);

@@ -1,3 +1,12 @@
+2012-01-10  Tristan Gingold  <gingold@adacore.com>
+
+	* bfdio.c (bfd_tell): Handle nested archives.
+	(bfd_seek): Ditto.
+	* cache.c (bfd_cache_lookup_worker): Ditto.
+	* archive.c (_bfd_get_elt_at_filepos): Remove code dealing with
+	nested archives.
+	(bfd_generic_openr_next_archived_file): Likewise.
+
 2012-01-09  Iain Sandoe  <idsandoe@googlemail.com>
 
 	* mach-o.c (bfd_mach_o_bfd_copy_private_symbol_data): Implement.
