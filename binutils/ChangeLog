@@ -1,3 +1,10 @@
+2012-01-10  Tristan Gingold  <gingold@adacore.com>
+
+	* objdump.c (display_object_bfd): Renamed from ...
+	(display_bfd): ... this.
+	(display_any_bfd): New function.
+	(display_file): Split.  Handle nested archives.
+
 2012-01-09  Roland McGrath  <mcgrathr@google.com>
 
 	* configure.in: Use AM_ZLIB.

@@ -3257,7 +3257,7 @@ dump_bfd (bfd *abfd)
 }
 
 static void
-display_bfd (bfd *abfd)
+display_object_bfd (bfd *abfd)
 {
   char **matching;
 
@@ -3297,10 +3297,53 @@ display_bfd (bfd *abfd)
 }
 
 static void
+display_any_bfd (bfd *file, int level)
+{
+  /* Decompress sections unless dumping the section contents.  */
+  if (!dump_section_contents)
+    file->flags |= BFD_DECOMPRESS;
+
+  /* If the file is an archive, process all of its elements.  */
+  if (bfd_check_format (file, bfd_archive))
+    {
+      bfd *arfile = NULL;
+      bfd *last_arfile = NULL;
+
+      if (level == 0)
+        printf (_("In archive %s:\n"), bfd_get_filename (file));
+      else
+        printf (_("In nested archive %s:\n"), bfd_get_filename (file));
+
+      for (;;)
+	{
+	  bfd_set_error (bfd_error_no_error);
+
+	  arfile = bfd_openr_next_archived_file (file, arfile);
+	  if (arfile == NULL)
+	    {
+	      if (bfd_get_error () != bfd_error_no_more_archived_files)
+		nonfatal (bfd_get_filename (file));
+	      break;
+	    }
+
+	  display_any_bfd (arfile, level + 1);
+
+	  if (last_arfile != NULL)
+	    bfd_close (last_arfile);
+	  last_arfile = arfile;
+	}
+
+      if (last_arfile != NULL)
+	bfd_close (last_arfile);
+    }
+  else
+    display_object_bfd (file);
+}
+
+static void
 display_file (char *filename, char *target)
 {
   bfd *file;
-  bfd *arfile = NULL;
 
   if (get_file_size (filename) < 1)
     {
@@ -3315,40 +3358,7 @@ display_file (char *filename, char *target)
       return;
     }
 
-  /* Decompress sections unless dumping the section contents.  */
-  if (!dump_section_contents)
-    file->flags |= BFD_DECOMPRESS;
-
-  /* If the file is an archive, process all of its elements.  */
-  if (bfd_check_format (file, bfd_archive))
-    {
-      bfd *last_arfile = NULL;
-
-      printf (_("In archive %s:\n"), bfd_get_filename (file));
-      for (;;)
-	{
-	  bfd_set_error (bfd_error_no_error);
-
-	  arfile = bfd_openr_next_archived_file (file, arfile);
-	  if (arfile == NULL)
-	    {
-	      if (bfd_get_error () != bfd_error_no_more_archived_files)
-		nonfatal (bfd_get_filename (file));
-	      break;
-	    }
-
-	  display_bfd (arfile);
-
-	  if (last_arfile != NULL)
-	    bfd_close (last_arfile);
-	  last_arfile = arfile;
-	}
-
-      if (last_arfile != NULL)
-	bfd_close (last_arfile);
-    }
-  else
-    display_bfd (file);
+  display_any_bfd (file, 0);
 
   bfd_close (file);
 }
