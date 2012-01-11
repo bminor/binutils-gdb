@@ -102,7 +102,7 @@ gdb_test "commands" "Argument required .one or more breakpoint numbers...*" "com
 gdb_test "condition" "Argument required .breakpoint number.*" "condition"
 
 #test core-file
-gdb_test "core-file" "No core file now.|GDB can't read core files on this machine." "core-file"
+gdb_test "core-file" "No core file now." "core-file"
 #test delete "d" abbreviation
 gdb_test_no_output "d" "delete \"d\" abbreviation"
 #test delete

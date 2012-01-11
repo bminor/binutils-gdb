@@ -1,3 +1,8 @@
+2012-01-11  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/default.exp (core-file): Don't expect "GDB can't read
+	core files on this machine" anymore.
+
 2012-01-11  Paul Hilfinger  <hilfingr@adacore.com>
 
 	* gdb.base/watchpoint.c (recurser): Initialize local_x.
