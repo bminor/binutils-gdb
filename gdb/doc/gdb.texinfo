@@ -7306,7 +7306,7 @@ scope is a single source file even if the current execution point is not
 in this file.  But it is possible to have more than one such variable or
 function with the same name (in different source files).  If that
 happens, referring to that name has unpredictable effects.  If you wish,
-you can specify a static variable in a particular function or file,
+you can specify a static variable in a particular function or file by
 using the colon-colon (@code{::}) notation:
 
 @cindex colon-colon, context for variables/functions
@@ -7329,8 +7329,49 @@ to print a global value of @code{x} defined in @file{f2.c}:
 (@value{GDBP}) p 'f2.c'::x
 @end smallexample
 
+The @code{::} notation is normally used for referring to
+static variables, since you typically disambiguate uses of local variables
+in functions by selecting the appropriate frame and using the
+simple name of the variable.  However, you may also use this notation
+to refer to local variables in frames enclosing the selected frame:
+
+@smallexample
+void
+foo (int a)
+@{
+  if (a < 10)
+    bar (a);
+  else
+    process (a);    /* Stop here */
+@}
+
+int
+bar (int a)
+@{
+  foo (a + 5);
+@}
+@end smallexample
+
+@noindent
+For example, if there is a breakpoint at the commented line,
+here is what you might see
+when the program stops after executing the call @code{bar(0)}:
+
+@smallexample
+(@value{GDBP}) p a
+$1 = 10
+(@value{GDBP}) p bar::a
+$2 = 5
+(@value{GDBP}) up 2
+#2  0x080483d0 in foo (a=5) at foobar.c:12
+(@value{GDBP}) p a
+$3 = 5
+(@value{GDBP}) p bar::a
+$4 = 0
+@end smallexample
+
 @cindex C@t{++} scope resolution
-This use of @samp{::} is very rarely in conflict with the very similar
+These uses of @samp{::} are very rarely in conflict with the very similar
 use of the same notation in C@t{++}.  @value{GDBN} also supports use of the C@t{++}
 scope resolution operator in @value{GDBN} expressions.
 @c FIXME: Um, so what happens in one of those rare cases where it's in

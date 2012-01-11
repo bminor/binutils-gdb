@@ -352,8 +352,9 @@ find_pc_partial_function (CORE_ADDR pc, char **name, CORE_ADDR *address,
   return find_pc_partial_function_gnu_ifunc (pc, name, address, endaddr, NULL);
 }
 
-/* Return the innermost stack frame executing inside of BLOCK, or NULL
-   if there is no such frame.  If BLOCK is NULL, just return NULL.  */
+/* Return the innermost stack frame that is executing inside of BLOCK and is
+   at least as old as the selected frame. Return NULL if there is no
+   such frame.  If BLOCK is NULL, just return NULL.  */
 
 struct frame_info *
 block_innermost_frame (const struct block *block)
@@ -368,7 +369,9 @@ block_innermost_frame (const struct block *block)
   start = BLOCK_START (block);
   end = BLOCK_END (block);
 
-  frame = get_current_frame ();
+  frame = get_selected_frame_if_set ();
+  if (frame == NULL)
+    frame = get_current_frame ();
   while (frame != NULL)
     {
       struct block *frame_block = get_frame_block (frame, NULL);

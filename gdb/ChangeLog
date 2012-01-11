@@ -1,3 +1,13 @@
+2012-01-11  Paul Hilfinger  <hilfingr@adacore.com>
+
+	* blockframe.c (block_innermost_frame): Start search from selected
+	frame, if present, or otherwise the current frame.
+
+	* c-exp.y (variable): Update innermost_block for
+	'block COLONCOLON NAME' clause.
+	* m2-exp.y (variable): Ditto.
+	* objc-exp.y (variable): Ditto.
+
 2012-01-10  Tom Tromey  <tromey@redhat.com>
 
 	PR python/13199:

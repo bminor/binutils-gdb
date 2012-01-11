@@ -1,3 +1,8 @@
+2012-01-11  Paul Hilfinger  <hilfingr@adacore.com>
+
+	* gdb.texinfo (Variables): Document use of :: for non-static
+	variables.
+
 2012-01-05  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdbint.texinfo (Start of New Year Procedure): Update
