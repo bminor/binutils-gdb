@@ -80,7 +80,7 @@ void recurser (int  x)
 void recurser (x) int  x;
 #endif
 {
-  int  local_x;
+  int  local_x = 0;
 
   if (x > 0)
     recurser (x-1);
@@ -228,6 +228,12 @@ int main ()
 
   /* This invocation is used for watches of a local variable
      when recursion happens.
+     */
+  marker6 ();
+  recurser (2);
+
+  /* This invocation is used for watches of a local variable with explicitly
+     specified scope when recursion happens.
      */
   marker6 ();
   recurser (2);

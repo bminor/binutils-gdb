@@ -580,12 +580,26 @@ proc test_complex_watchpoint {} {
         #
         gdb_test "tbreak recurser" ".*breakpoint.*"
         gdb_test "cont" "Continuing.*recurser.*"
+        gdb_test "next" "if \\(x > 0.*" "next past local_x initialization"
         gdb_test "watch local_x" ".*\[Ww\]atchpoint \[0-9\]*: local_x" \
                  "set local watch in recursive call"
         gdb_test "cont" "Continuing.*\[Ww\]atchpoint .*: local_x.*New value = 2.*" \
                  "trigger local watch in recursive call"
         gdb_test "cont" "Continuing.*\[Ww\]atchpoint .* deleted because the program has left the block in.*which its expression is valid.*" \
                  "self-delete local watch in recursive call"
+
+        # Repeat the preceding test, but this time use "recurser::local_x" as
+        # the variable to track.
+        gdb_test "cont" "Continuing.*marker6.*"
+        gdb_test "tbreak recurser" ".*breakpoint.*"
+        gdb_test "cont" "Continuing.*recurser.*"
+        gdb_test "next" "if \\(x > 0.*" "next past local_x initialization"
+        gdb_test "watch recurser::local_x" ".*\[Ww\]atchpoint \[0-9\]*: recurser::local_x" \
+                 "set local watch in recursive call with explicit scope"
+        gdb_test "cont" "Continuing.*\[Ww\]atchpoint .*: recurser::local_x.*New value = 2.*" \
+                 "trigger local watch with explicit scope in recursive call"
+        gdb_test "cont" "Continuing.*\[Ww\]atchpoint .* deleted because the program has left the block in.*which its expression is valid.*" \
+                 "self-delete local watch with explicit scope in recursive call (2)"
 
 	# Disable everything so we can finish the program at full speed
 	gdb_test_no_output "disable" "disable in test_complex_watchpoint"

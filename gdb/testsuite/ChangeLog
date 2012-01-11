@@ -1,4 +1,11 @@
 2012-01-11  Paul Hilfinger  <hilfingr@adacore.com>
+
+	* gdb.base/watchpoint.c (recurser): Initialize local_x.
+	(main): Repeat recurser call.
+	* gdb.base/watchpoint.exp: Check that 'watch recurser::local_x' is
+	equivalent to 'local_x'.
+
+2012-01-11  Paul Hilfinger  <hilfingr@adacore.com>
     	    Joel Brobecker <brobecker@adacore.com>
 
 	* gdb.base/recpar.c, gdb.base/recpar.exp: New files.
