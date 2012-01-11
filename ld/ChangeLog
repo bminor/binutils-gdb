@@ -1,3 +1,15 @@
+2012-01-11  Alan Modra  <amodra@gmail.com>
+
+	* emultempl/ppc64elf.em (PARSE_AND_LIST_PROLOGUE,
+	PARSE_AND_LIST_LONGOPTS, PARSE_AND_LIST_OPTIONS,
+	PARSE_AND_LIST_ARGS_CASES): Handle --{no-,}plt-thread-safe and
+	--{no-,}plt-align.
+	(plt_thread_safe, plt_stub_align): New vars.
+	(gld${EMULATION_NAME}_after_allocation): Pass them to
+	ppc64_elf_size_stubs.  Align stub sections according to plt_stub_align.
+	* ld.texinfo: Document new command line options, and an old
+	undocumented option.
+
 2012-01-09  Roland McGrath  <mcgrathr@google.com>
 
 	* configure.in: Use AM_ZLIB.

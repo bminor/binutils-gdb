@@ -1,3 +1,29 @@
+2012-01-11  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c: Define more insns used in plt call stubs.
+	(ppc64_elf_brtaken_reloc): Assume isa version 2 or above.
+	(ppc64_elf_relocate_section): Likewise.
+	(enum ppc_stub_type): Add ppc_stub_plt_call_r2save.
+	(struct ppc_link_hash_table): Increase size of stub_count array.
+	Add plt_stub_align and plt_thread_safe.
+	(ALWAYS_USE_FAKE_DEP, ALWAYS_EMIT_R2SAVE): Define.
+	(plt_stub_size, plt_stub_pad): New functions.
+	(build_plt_stub): Emit barriers for power7 thread safety.  Don't
+	emit needless save of r2.
+	(build_tls_get_addr_stub): Adjust params.
+	(ppc_build_one_stub): Handle ppc_stub_plt_call_r2save and aligning
+	plt stubs.  Adjust build_*plt_stub calls.
+	(ppc_size_one_stub): Similarly.
+	(ppc64_elf_size_stubs): Accept plt_thread_safe and plt_stub_align
+	params.  Choose default for plt_thread_safe based on existence of
+	calls to thread creation functions.  Modify plt_call to
+	plt_call_r2save when no tocsave reloc found.  Align tail of stub
+	sections.
+	(ppc64_elf_build_stubs): Align tail of stub sections.  Adjust
+	output of stub statistics.
+	(ppc64_elf_relocate_section): Handle ppc_stub_plt_call_r2save.
+	* elf64-ppc.h (ppc64_elf_size_stubs): Update prototype.
+
 2012-01-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/13581
