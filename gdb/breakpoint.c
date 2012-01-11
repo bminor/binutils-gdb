@@ -13849,15 +13849,13 @@ Set temporary catchpoints to catch events."),
 
   /* Add catch and tcatch sub-commands.  */
   add_catch_command ("catch", _("\
-Catch an exception, when caught.\n\
-With an argument, catch only exceptions with the given name."),
+Catch an exception, when caught."),
 		     catch_catch_command,
                      NULL,
 		     CATCH_PERMANENT,
 		     CATCH_TEMPORARY);
   add_catch_command ("throw", _("\
-Catch an exception, when thrown.\n\
-With an argument, catch only exceptions with the given name."),
+Catch an exception, when thrown."),
 		     catch_throw_command,
                      NULL,
 		     CATCH_PERMANENT,
