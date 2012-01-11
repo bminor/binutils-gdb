@@ -1029,8 +1029,9 @@ static struct line_header *(dwarf_decode_line_header
                             (unsigned int offset,
                              bfd *abfd, struct dwarf2_cu *cu));
 
-static void dwarf_decode_lines (struct line_header *, const char *, bfd *,
-				struct dwarf2_cu *, struct partial_symtab *);
+static void dwarf_decode_lines (struct line_header *, const char *,
+				struct dwarf2_cu *, struct partial_symtab *,
+				int);
 
 static void dwarf2_start_subfile (char *, const char *, const char *);
 
@@ -3145,7 +3146,7 @@ dwarf2_build_include_psymtabs (struct dwarf2_cu *cu,
     return;  /* No linetable, so no includes.  */
 
   /* NOTE: pst->dirname is DW_AT_comp_dir (if present).  */
-  dwarf_decode_lines (lh, pst->dirname, abfd, cu, pst);
+  dwarf_decode_lines (lh, pst->dirname, cu, pst, 1);
 
   free_line_header (lh);
 }
@@ -5637,19 +5638,19 @@ find_file_and_directory (struct die_info *die, struct dwarf2_cu *cu,
     *name = "<unknown>";
 }
 
-/* Handle DW_AT_stmt_list for a compilation unit.  */
+/* Handle DW_AT_stmt_list for a compilation unit or type unit.
+   DIE is the DW_TAG_compile_unit or DW_TAG_type_unit die for CU.
+   COMP_DIR is the compilation directory.
+   WANT_LINE_INFO is non-zero if the pc/line-number mapping is needed.  */
 
 static void
 handle_DW_AT_stmt_list (struct die_info *die, struct dwarf2_cu *cu,
-			const char *comp_dir)
+			const char *comp_dir, int want_line_info)
 {
   struct attribute *attr;
   struct objfile *objfile = cu->objfile;
   bfd *abfd = objfile->obfd;
 
-  /* Decode line number information if present.  We do this before
-     processing child DIEs, so that the line header table is available
-     for DW_AT_decl_file.  */
   attr = dwarf2_attr (die, DW_AT_stmt_list, cu);
   if (attr)
     {
@@ -5661,7 +5662,7 @@ handle_DW_AT_stmt_list (struct die_info *die, struct dwarf2_cu *cu,
         {
           cu->line_header = line_header;
           make_cleanup (free_cu_line_header, cu);
-          dwarf_decode_lines (line_header, comp_dir, abfd, cu, NULL);
+	  dwarf_decode_lines (line_header, comp_dir, cu, NULL, want_line_info);
         }
     }
 }
@@ -5722,7 +5723,10 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
 
   initialize_cu_func_list (cu);
 
-  handle_DW_AT_stmt_list (die, cu, comp_dir);
+  /* Decode line number information if present.  We do this before
+     processing child DIEs, so that the line header table is available
+     for DW_AT_decl_file.  */
+  handle_DW_AT_stmt_list (die, cu, comp_dir, 1);
 
   /* Process all dies in compilation unit.  */
   if (die->child != NULL)
@@ -5824,7 +5828,11 @@ read_type_unit_scope (struct die_info *die, struct dwarf2_cu *cu)
   record_debugformat ("DWARF 2");
   record_producer (cu->producer);
 
-  handle_DW_AT_stmt_list (die, cu, comp_dir);
+  /* Decode line number information if present.  We do this before
+     processing child DIEs, so that the line header table is available
+     for DW_AT_decl_file.
+     We don't need the pc/line-number mapping for type units.  */
+  handle_DW_AT_stmt_list (die, cu, comp_dir, 0);
 
   /* Process the dies in the type unit.  */
   if (die->child == NULL)
@@ -11221,31 +11229,12 @@ noop_record_line (struct subfile *subfile, int line, CORE_ADDR pc)
   return;
 }
 
-/* Decode the Line Number Program (LNP) for the given line_header
-   structure and CU.  The actual information extracted and the type
-   of structures created from the LNP depends on the value of PST.
-
-   1. If PST is NULL, then this procedure uses the data from the program
-      to create all necessary symbol tables, and their linetables.
-
-   2. If PST is not NULL, this procedure reads the program to determine
-      the list of files included by the unit represented by PST, and
-      builds all the associated partial symbol tables.
-
-   COMP_DIR is the compilation directory (DW_AT_comp_dir) or NULL if unknown.
-   It is used for relative paths in the line table.
-   NOTE: When processing partial symtabs (pst != NULL),
-   comp_dir == pst->dirname.
-
-   NOTE: It is important that psymtabs have the same file name (via strcmp)
-   as the corresponding symtab.  Since COMP_DIR is not used in the name of the
-   symtab we don't use it in the name of the psymtabs we create.
-   E.g. expand_line_sal requires this when finding psymtabs to expand.
-   A good testcase for this is mb-inline.exp.  */
+/* Subroutine of dwarf_decode_lines to simplify it.
+   Process the line number information in LH.  */
 
 static void
-dwarf_decode_lines (struct line_header *lh, const char *comp_dir, bfd *abfd,
-		    struct dwarf2_cu *cu, struct partial_symtab *pst)
+dwarf_decode_lines_1 (struct line_header *lh, const char *comp_dir,
+		      struct dwarf2_cu *cu, struct partial_symtab *pst)
 {
   gdb_byte *line_ptr, *extended_end;
   gdb_byte *line_end;
@@ -11253,9 +11242,10 @@ dwarf_decode_lines (struct line_header *lh, const char *comp_dir, bfd *abfd,
   unsigned char op_code, extended_op, adj_opcode;
   CORE_ADDR baseaddr;
   struct objfile *objfile = cu->objfile;
+  bfd *abfd = objfile->obfd;
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
   const int decode_for_pst_p = (pst != NULL);
-  struct subfile *last_subfile = NULL, *first_subfile = current_subfile;
+  struct subfile *last_subfile = NULL;
   void (*p_record_line) (struct subfile *subfile, int line, CORE_ADDR pc)
     = record_line;
 
@@ -11535,6 +11525,41 @@ dwarf_decode_lines (struct line_header *lh, const char *comp_dir, bfd *abfd,
 	    }
         }
     }
+}
+
+/* Decode the Line Number Program (LNP) for the given line_header
+   structure and CU.  The actual information extracted and the type
+   of structures created from the LNP depends on the value of PST.
+
+   1. If PST is NULL, then this procedure uses the data from the program
+      to create all necessary symbol tables, and their linetables.
+
+   2. If PST is not NULL, this procedure reads the program to determine
+      the list of files included by the unit represented by PST, and
+      builds all the associated partial symbol tables.
+
+   COMP_DIR is the compilation directory (DW_AT_comp_dir) or NULL if unknown.
+   It is used for relative paths in the line table.
+   NOTE: When processing partial symtabs (pst != NULL),
+   comp_dir == pst->dirname.
+
+   NOTE: It is important that psymtabs have the same file name (via strcmp)
+   as the corresponding symtab.  Since COMP_DIR is not used in the name of the
+   symtab we don't use it in the name of the psymtabs we create.
+   E.g. expand_line_sal requires this when finding psymtabs to expand.
+   A good testcase for this is mb-inline.exp.  */
+
+static void
+dwarf_decode_lines (struct line_header *lh, const char *comp_dir,
+		    struct dwarf2_cu *cu, struct partial_symtab *pst,
+		    int want_line_info)
+{
+  struct objfile *objfile = cu->objfile;
+  const int decode_for_pst_p = (pst != NULL);
+  struct subfile *first_subfile = current_subfile;
+
+  if (want_line_info)
+    dwarf_decode_lines_1 (lh, comp_dir, cu, pst);
 
   if (decode_for_pst_p)
     {
@@ -11556,13 +11581,12 @@ dwarf_decode_lines (struct line_header *lh, const char *comp_dir, bfd *abfd,
       /* Make sure a symtab is created for every file, even files
 	 which contain only variables (i.e. no code with associated
 	 line numbers).  */
-
       int i;
-      struct file_entry *fe;
 
       for (i = 0; i < lh->num_file_names; i++)
 	{
 	  char *dir = NULL;
+	  struct file_entry *fe;
 
 	  fe = &lh->file_names[i];
 	  if (fe->dir_index)

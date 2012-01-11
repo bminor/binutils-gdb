@@ -1,3 +1,13 @@
+2012-01-10  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (dwarf_decode_lines): Remove arg "abfd".  New arg
+	"want_line_info".  All callers updated.
+	(dwarf_decode_lines_1): New function.
+	(handle_DW_AT_stmt_list): Add function comment.
+	New arg "want_line_info".  All callers updated.
+	(read_file_scope,read_type_unit_scope): Move comment from
+	handle_DW_AT_stmt_list to here.
+
 2012-01-06  Joel Brobecker  <brobecker@adacore.com>
 
 	* version.in: Set version to 7.3.92.20120106-cvs.
