@@ -1,3 +1,8 @@
+2012-01-11  Paul Hilfinger  <hilfingr@adacore.com>
+    	    Joel Brobecker <brobecker@adacore.com>
+
+	* gdb.base/recpar.c, gdb.base/recpar.exp: New files.
+
 2012-01-05  Pedro Alves  <alves.ped@gmail.com>
 
 	* gdb.mi/mi-stepn.c, gdb.mi/mi-stepn.exp: New files.
