@@ -1,3 +1,9 @@
+2012-01-11  Andreas Tobler  <andreast@fgznet.ch>
+
+	* common/gdb_assert.h (gdb_static_assert): Rename static_assert to
+	an internal gdb_static_assert.
+	* mi/mi-common.c: Rename static_assert to gdb_static_assert.
+
 2012-01-11  Tom Tromey  <tromey@redhat.com>
 
 	PR gdb/9598:
