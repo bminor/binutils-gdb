@@ -2153,11 +2153,11 @@ bfd_boolean
 bfd_mach_o_build_commands (bfd *abfd)
 {
   bfd_mach_o_data_struct *mdata = bfd_mach_o_get_data (abfd);
-  unsigned int wide = mach_o_wide_p (&mdata->header);
-  bfd_mach_o_segment_command *seg = NULL;
-  bfd_mach_o_load_command *cmd;
-  bfd_mach_o_load_command *symtab_cmd;
-  unsigned symcind;
+  unsigned wide = mach_o_wide_p (&mdata->header);
+  int segcmd_idx = -1;
+  int symtab_idx = -1;
+  int dysymtab_idx = -1;
+  unsigned long base_offset = 0;
 
   /* Return now if commands are already present.  */
   if (mdata->header.ncmds)
@@ -2187,31 +2187,48 @@ bfd_mach_o_build_commands (bfd *abfd)
   if (!bfd_mach_o_mangle_symbols (abfd))
     return FALSE;
 
-  /* It's valid to have a file with only absolute symbols...  */
-  if (mdata->nsects > 0)
-    {
-      mdata->header.ncmds = 1;
-      symcind = 1;
-    }
-  else
-    symcind = 0;
+  /* Very simple command set (only really applicable to MH_OBJECTs):
+     All the commands are optional - present only when there is suitable data.
+     (i.e. it is valid to have an empty file)
 
-  /* It's OK to have a file with only section statements.  */
-  if (bfd_get_symcount (abfd) > 0)
-    mdata->header.ncmds += 1;
-
-  /* Very simple version (only really applicable to MH_OBJECTs):
 	a command (segment) to contain all the sections,
-	a command for the symbol table
-	a n (optional) command for the dysymtab.  
+	command for the symbol table,
+	a command for the dysymtab.  
 
      ??? maybe we should assert that this is an MH_OBJECT?  */
 
-  if (bfd_mach_o_should_emit_dysymtab ()
-      && bfd_get_symcount (abfd) > 0)
-    mdata->header.ncmds += 1;
+  if (mdata->nsects > 0)
+    {
+      segcmd_idx = 0;
+      mdata->header.ncmds = 1;
+    }
 
-  /* A bit weird, but looks like no content;
+  if (bfd_get_symcount (abfd) > 0)
+    {
+      mdata->header.ncmds++;
+      symtab_idx = segcmd_idx + 1; /* 0 if the seg command is absent.  */
+    }
+
+  /* FIXME:
+     This is a rather crude test for whether we should build a dysymtab.  */
+  if (bfd_mach_o_should_emit_dysymtab ()
+      && bfd_get_symcount (abfd))
+    {
+      mdata->header.ncmds++;
+      /* If there should be a case where a dysymtab could be emitted without
+	 a symtab (seems improbable), this would need amending.  */
+      dysymtab_idx = symtab_idx + 1;
+    }
+
+  if (wide)
+    base_offset = BFD_MACH_O_HEADER_64_SIZE;
+  else
+    base_offset = BFD_MACH_O_HEADER_SIZE;
+
+  /* Well, we must have a header, at least.  */
+  mdata->filelen = base_offset;
+
+  /* A bit unusual, but no content is valid;
      as -n empty.s -o empty.o  */
   if (mdata->header.ncmds == 0)
     return TRUE;
@@ -2221,10 +2238,10 @@ bfd_mach_o_build_commands (bfd *abfd)
   if (mdata->commands == NULL)
     return FALSE;
 
-  if (mdata->nsects > 0)
+  if (segcmd_idx >= 0)
     {  
-      cmd = &mdata->commands[0];
-      seg = &cmd->command.segment;
+      bfd_mach_o_load_command *cmd = &mdata->commands[segcmd_idx];
+      bfd_mach_o_segment_command *seg = &cmd->command.segment;
 
       /* Count the segctions in the special blank segment used for MH_OBJECT.  */
       seg->nsects = bfd_mach_o_count_sections_for_seg (NULL, mdata);
@@ -2232,52 +2249,61 @@ bfd_mach_o_build_commands (bfd *abfd)
 	return FALSE;
 
       /* Init segment command.  */
+      cmd->offset = base_offset;
       if (wide)
 	{
 	  cmd->type = BFD_MACH_O_LC_SEGMENT_64;
-	  cmd->offset = BFD_MACH_O_HEADER_64_SIZE;
 	  cmd->len = BFD_MACH_O_LC_SEGMENT_64_SIZE
 			+ BFD_MACH_O_SECTION_64_SIZE * seg->nsects;
 	}
       else
 	{
 	  cmd->type = BFD_MACH_O_LC_SEGMENT;
-	  cmd->offset = BFD_MACH_O_HEADER_SIZE;
 	  cmd->len = BFD_MACH_O_LC_SEGMENT_SIZE
 			+ BFD_MACH_O_SECTION_SIZE * seg->nsects;
 	}
+
       cmd->type_required = FALSE;
       mdata->header.sizeofcmds = cmd->len;
-      mdata->filelen = cmd->offset + cmd->len;
+      mdata->filelen += cmd->len;
     }
 
-  if (bfd_get_symcount (abfd) > 0)
+  if (symtab_idx >= 0)
     {
       /* Init symtab command.  */
-      symtab_cmd = &mdata->commands[symcind];
+      bfd_mach_o_load_command *cmd = &mdata->commands[symtab_idx];
   
-      symtab_cmd->type = BFD_MACH_O_LC_SYMTAB;
-      if (symcind > 0)
-        symtab_cmd->offset = mdata->commands[0].offset 
-			     + mdata->commands[0].len;
-      else
-        symtab_cmd->offset = 0;
-      symtab_cmd->len = 6 * 4;
-      symtab_cmd->type_required = FALSE;
-  
-      mdata->header.sizeofcmds += symtab_cmd->len;
-      mdata->filelen += symtab_cmd->len;
+      cmd->type = BFD_MACH_O_LC_SYMTAB;
+      cmd->offset = base_offset;
+      if (segcmd_idx >= 0)
+        cmd->offset += mdata->commands[segcmd_idx].len;
+
+      cmd->len = sizeof (struct mach_o_symtab_command_external)
+		 + BFD_MACH_O_LC_SIZE;
+      cmd->type_required = FALSE;
+      mdata->header.sizeofcmds += cmd->len;
+      mdata->filelen += cmd->len;
     }
 
-  /* If required, setup symtab command.  */
-  if (bfd_mach_o_should_emit_dysymtab ()
-      && bfd_get_symcount (abfd) > 0)
+  /* If required, setup symtab command, see comment above about the quality
+     of this test.  */
+  if (dysymtab_idx >= 0)
     {
-      cmd = &mdata->commands[symcind+1];
+      bfd_mach_o_load_command *cmd = &mdata->commands[dysymtab_idx];
+
       cmd->type = BFD_MACH_O_LC_DYSYMTAB;
-      cmd->offset = symtab_cmd->offset + symtab_cmd->len;
+      if (symtab_idx >= 0)
+        cmd->offset = mdata->commands[symtab_idx].offset 
+		    + mdata->commands[symtab_idx].len;
+      else if (segcmd_idx >= 0)
+        cmd->offset = mdata->commands[segcmd_idx].offset 
+		    + mdata->commands[segcmd_idx].len;
+      else
+	cmd->offset = base_offset;
+
       cmd->type_required = FALSE;
-      cmd->len = 18 * 4 + BFD_MACH_O_LC_SIZE;
+      cmd->len = sizeof (struct mach_o_dysymtab_command_external)
+		 + BFD_MACH_O_LC_SIZE;
 
       mdata->header.sizeofcmds += cmd->len;
       mdata->filelen += cmd->len;
@@ -2285,15 +2311,15 @@ bfd_mach_o_build_commands (bfd *abfd)
 
   /* So, now we have sized the commands and the filelen set to that.
      Now we can build the segment command and set the section file offsets.  */
-  if (mdata->nsects > 0
-      && ! bfd_mach_o_build_seg_command (NULL, mdata, seg))
+  if (segcmd_idx >= 0
+      && ! bfd_mach_o_build_seg_command 
+		(NULL, mdata, &mdata->commands[segcmd_idx].command.segment))
     return FALSE;
 
   /* If we're doing a dysymtab, cmd points to its load command.  */
-  if (bfd_mach_o_should_emit_dysymtab ()
-      && bfd_get_symcount (abfd) > 0
+  if (dysymtab_idx >= 0
       && ! bfd_mach_o_build_dysymtab_command (abfd, mdata, 
-					      &mdata->commands[symcind+1]))
+					      &mdata->commands[dysymtab_idx]))
     return FALSE;
 
   /* The symtab command is filled in when the symtab is written.  */
