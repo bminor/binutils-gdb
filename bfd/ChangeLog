@@ -1,5 +1,11 @@
 2012-01-11  Iain Sandoe  <idsandoe@googlemail.com>
 
+	* mach-o.c (bfd_mach_o_build_seg_command): Separate computation of
+	vmsize from filesize.  Don't compute offsets or file sizes for
+	zerofill sections.
+
+2012-01-11  Iain Sandoe  <idsandoe@googlemail.com>
+
 	* mach-o.c (bfd_mach_o_build_commands): Make the building of each
 	command type independent.
 

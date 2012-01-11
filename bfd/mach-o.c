@@ -2023,6 +2023,7 @@ bfd_mach_o_build_seg_command (const char *segment,
 
   /* TODO: fix this up for non-MH_OBJECT cases.  */
   seg->vmaddr = 0;
+  seg->vmsize = 0;
 
   seg->fileoff = mdata->filelen;
   seg->filesize = 0;
@@ -2048,9 +2049,21 @@ bfd_mach_o_build_seg_command (const char *segment,
 
       bfd_mach_o_append_section_to_segment (seg, sec);
 
-      if (s->size == 0)
-         s->offset = 0;
-      else
+      s->offset = 0;
+      if (s->size > 0)
+       {
+          seg->vmsize = FILE_ALIGN (seg->vmsize, s->align);
+	  seg->vmsize += s->size;
+        }
+      
+      /* Zerofill sections have zero file size & offset, 
+	 and are not written.  */
+      if ((s->flags & BFD_MACH_O_SECTION_TYPE_MASK) == BFD_MACH_O_S_ZEROFILL
+          || (s->flags & BFD_MACH_O_SECTION_TYPE_MASK) 
+	      == BFD_MACH_O_S_GB_ZEROFILL)
+        continue;
+
+      if (s->size > 0)
        {
           mdata->filelen = FILE_ALIGN (mdata->filelen, s->align);
           s->offset = mdata->filelen;
@@ -2062,7 +2075,6 @@ bfd_mach_o_build_seg_command (const char *segment,
     }
 
   seg->filesize = mdata->filelen - seg->fileoff;
-  seg->vmsize = seg->filesize;
 
   return TRUE;
 }
