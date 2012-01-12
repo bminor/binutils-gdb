@@ -1680,7 +1680,10 @@ i386_frame_cache_1 (struct frame_info *this_frame,
   get_frame_register (this_frame, I386_EBP_REGNUM, buf);
   cache->base = extract_unsigned_integer (buf, 4, byte_order);
   if (cache->base == 0)
-    return;
+    {
+      cache->base_p = 1;
+      return;
+    }
 
   /* For normal frames, %eip is stored at 4(%ebp).  */
   cache->saved_regs[I386_EIP_REGNUM] = 4;
