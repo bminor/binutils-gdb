@@ -1139,7 +1139,102 @@ mi_gdb_test "-var-update *" \
 	"update all vars psnp->next->next->long_ptr (and 2.long_ptr) changed"
 
 
+# Anonymous type tests
+proc verify_everything {variable_name} {
+  # Test -var-list-children
+  mi_varobj_tree_test_children_callback $variable_name
 
+  # Bring the variable named by VARIABLE_NAME into the current scope
+  # in VAROBJ.
+  upvar #0 $variable_name varobj
+
+  # Test -var-info-path-expression
+  mi_gdb_test "-var-info-path-expression $varobj(obj_name)" \
+      "\\^done,path_expr=\"[string_to_regexp $varobj(path_expr)]\"" \
+      "path expression for $varobj(obj_name)"
+
+  # Test -var-info-expression
+  mi_gdb_test "-var-info-expression $varobj(obj_name)" \
+      "\\^done,lang=\"C\",exp=\"[string_to_regexp $varobj(display_name)]\"" \
+      "expression for $varobj(obj_name)"
+}
+
+set lineno [gdb_get_line_number "anonymous type tests breakpoint"]
+mi_create_breakpoint \
+    "$srcfile:$lineno" {[0-9]+} keep {do_anonymous_type_tests} \
+    ".*var-cmd.c" $lineno $hex "break in do_anonymous_type_tests"
+mi_execute_to "exec-continue" "breakpoint-hit" "do_anonymous_type_tests" ""\
+    ".*" ".*" {"" "disp=\"keep\""} \
+    "continue to do_anonymous_type_tests breakpoint"
+
+# Run the varobj tree on variable "ptr".
+set tree {
+  {struct anonymous **} ptr {
+    {struct anonymous *} {*ptr} {
+      int a {}
+      anonymous struct {
+	int b {}
+	{char *} c {
+	  char {*c} {}
+	}
+	anonymous union {
+	  int d {}
+	  {void *} e {}
+	  char f {}
+	  anonymous struct {
+	    char g {}
+	    {const char **} h {
+	      {const char *} {*h} {
+		{const char} {**h} {}
+	      }
+	    }
+	    {simpleton ***} simple {
+	      {simpleton **} {*simple} {
+		{simpleton *} {**simple} {
+		  int integer {}
+		  {unsigned int} unsigned_integer {}
+		  char character {}
+		  {signed char} signed_character {}
+		  {char *} char_ptr {
+		    char {*char_ptr} {}
+		  }
+		  {int [10]} array_of_10 {
+		    int 0 {}
+		    int 1 {}
+		    int 2 {}
+		    int 3 {}
+		    int 4 {}
+		    int 5 {}
+		    int 6 {}
+		    int 7 {}
+		    int 8 {}
+		    int 9 {}
+		  }
+		}
+	      }
+	    }
+	  }
+	}
+      }
+    }
+  }
+}
+
+mi_walk_varobj_tree c $tree verify_everything
+
+set tree {
+  {struct {...}} v {
+    int x {}
+    anonymous struct {
+      int a {}
+    }
+    anonymous struct {
+      int b {}
+    }
+  }
+}
+
+mi_walk_varobj_tree c $tree verify_everything
 
 mi_gdb_exit
 return 0

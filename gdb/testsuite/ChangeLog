@@ -1,5 +1,19 @@
 2012-01-12  Keith Seitz  <keiths@redhat.com>
 
+	PR mi/10586
+	* gdb.mi/var-cmd.c (struct anonymous): New structure.
+	(do_anonymous_type_tests): New function.
+	(main): Call do_anonymous_type_tests.
+	* gdb.mi/mi2-var-child.exp: Add anonymous type tests.
+	(verify_everything): New procedure.
+	* gdb.mi/mi-var-cp.cc (class A): New class.
+	(anonymous_structs_and_unions): New function.
+	(main): Call anonymous_structs_and_unions.
+	* gdb.mi/mi-var-cp.exp: Add anonymous type tests.
+	(verify_everything): New procedure.
+
+2012-01-12  Keith Seitz  <keiths@redhat.com>
+
 	* lib/mi-support.exp: Expand comments about PATH_EXPR.
 	(varobj_tree::get_path_expr): Assume that all varobjs are
 	compound unless they are known simple types.
