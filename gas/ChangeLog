@@ -1,3 +1,8 @@
+2012-01-12  Tristan Gingold  <gingold@adacore.com>
+
+	PR gas/13591
+	* config/obj-coff.h (sy_obj): Rename macro to avoid a name conflict.
+
 2012-01-10  Tristan Gingold  <gingold@adacore.com>
 
 	* struc-symbol.h (struct symbol_flags): New struct, created from...
