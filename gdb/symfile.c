@@ -1500,7 +1500,7 @@ find_separate_debug_file_by_debuglink (struct objfile *objfile)
     goto cleanup_return_debugfile;
 
   /* Then try in the global debugfile directories.
- 
+
      Keep backward compatibility so that DEBUG_FILE_DIRECTORY being "" will
      cause "/..." lookups.  */
 
@@ -1545,7 +1545,7 @@ find_separate_debug_file_by_debuglink (struct objfile *objfile)
       debugdir = debugdir_end;
     }
   while (*debugdir != 0);
-  
+
   xfree (debugfile);
   debugfile = NULL;
 
@@ -1631,7 +1631,7 @@ set_initial_language (void)
   else
     {
       const char *filename;
-      
+
       filename = find_main_filename ();
       if (filename != NULL)
 	lang = deduce_language_from_filename (filename);
@@ -2942,7 +2942,7 @@ section_is_overlay (struct obj_section *section)
     {
       bfd *abfd = section->objfile->obfd;
       asection *bfd_section = section->the_bfd_section;
-  
+
       if (bfd_section_lma (abfd, bfd_section) != 0
 	  && bfd_section_lma (abfd, bfd_section)
 	     != bfd_section_vma (abfd, bfd_section))
