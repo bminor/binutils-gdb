@@ -2012,7 +2012,7 @@ proc mi_get_features {} {
 #   }
 # }
 #
-# mi_walk_varobj_tree $tree
+# mi_walk_varobj_tree c++ $tree
 #
 # If you'd prefer to walk the tree using your own callback,
 # simply pass the name of the callback to mi_walk_varobj_tree.
@@ -2038,6 +2038,9 @@ proc mi_get_features {} {
 # type         - the type of this variable (type="type" in the output
 #                of -var-list-children, or the special tag "anonymous"
 # path_expr    - the "-var-info-path-expression" for this variable
+#                NOTE: This member cannot be used reliably with typedefs.
+#                Use with caution!
+#                See notes inside get_path_expr for more.
 # parent       - the variable name of the parent varobj
 # children     - a list of children variable names (which are the
 #                names Tcl arrays, not object names)
@@ -2084,7 +2087,8 @@ namespace eval ::varobj_tree {
   }
 
   # The default callback used by mi_walk_varobj_tree.  This callback
-  # simply checks all of VAR's children.
+  # simply checks all of VAR's children.  It specifically does not test
+  # path expressions, since that is very problematic.
   #
   # This procedure may be used in custom callbacks.
   proc test_children_callback {variable_name} {
@@ -2154,20 +2158,59 @@ namespace eval ::varobj_tree {
   # parent varobj whose variable name is given by PARENT_VARIABLE.
   proc get_path_expr {parent_variable name type} {
     upvar #0 $parent_variable parent
+    upvar #0 $parent_variable path_parent
 
     # If TYPE is "", this is one of the CPLUS_FAKE_CHILD varobjs,
-    # which has no path expression
-    if {[string length $type] == 0} {
+    # which has no path expression.  Likewsise for anonymous structs
+    # and unions.
+    if {[string length $type] == 0 \
+	    || [string compare $type "anonymous"] == 0} {
       return ""
     }
 
     # Find the path parent variable.
     while {![is_path_expr_parent $parent_variable]} {
-      set parent_variable $parent(parent)
-      upvar #0 $parent_variable parent
+      set parent_variable $path_parent(parent)
+      upvar #0 $parent_variable path_parent
     }
 
-    return "(($parent(path_expr)).$name)"
+    # This is where things get difficult.  We do not actually know
+    # the real type for variables defined via typedefs, so we don't actually
+    # know whether the parent is a structure/union or not.
+    #
+    # So we assume everything that isn't a simple type is a compound type.
+    set stars ""
+    regexp {\*+} $parent(type) stars
+    set is_compound 1
+    if {[string index $name 0] == "*"} {
+      set is_compound 0
+    }
+
+    if {[string index $parent(type) end] == "\]"} {
+      # Parent is an array.
+      return "($path_parent(path_expr))\[$name\]"
+    } elseif {$is_compound} {
+      # Parent is a structure or union or a pointer to one.
+      if {[string length $stars]} {
+	set join "->"
+      } else {
+	set join "."
+      }
+
+      global root
+
+      # To make matters even more hideous, varobj.c has slightly different
+      # path expressions for C and C++.
+      set path_expr "($path_parent(path_expr))$join$name"
+      if {[string compare -nocase $root(language) "c"] == 0} {
+	return $path_expr
+      } else {
+	return "($path_expr)"
+      }
+    } else {
+      # Parent is a pointer.
+      return "*($path_parent(path_expr))"
+    }
   }
 
   # Process the CHILDREN (a list of varobj_tree elements) of the variable
@@ -2208,7 +2251,7 @@ namespace eval ::varobj_tree {
 
   # The main procedure to call the given CALLBACK on the elements of the
   # given varobj TREE.  See detailed explanation above.
-  proc walk_tree {tree callback} {
+  proc walk_tree {language tree callback} {
     global root
 
     if {[llength $tree] < 3} {
@@ -2216,6 +2259,7 @@ namespace eval ::varobj_tree {
     }
 
     # Create root node and process the tree.
+    array set root [list language $language]
     array set root [list obj_name "root"]
     array set root [list display_name "root"]
     array set root [list type "root"]
@@ -2259,7 +2303,8 @@ proc mi_varobj_tree_test_children_callback {variable} {
 
 # Walk the variable object tree given by TREE, calling the specified
 # CALLBACK.  By default this uses mi_varobj_tree_test_children_callback.
-proc mi_walk_varobj_tree {tree {callback \
-				    mi_varobj_tree_test_children_callback}} {
-  ::varobj_tree::walk_tree $tree $callback
+proc mi_walk_varobj_tree {language tree \
+			      {callback \
+				   mi_varobj_tree_test_children_callback}} {
+  ::varobj_tree::walk_tree $language $tree $callback
 }

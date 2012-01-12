@@ -1,3 +1,14 @@
+2012-01-12  Keith Seitz  <keiths@redhat.com>
+
+	* lib/mi-support.exp: Expand comments about PATH_EXPR.
+	(varobj_tree::get_path_expr): Assume that all varobjs are
+	compound unless they are known simple types.
+	Adjust path expressions based on parent type, path parent type,
+	and tree language.
+	(varobj_tree::walk_tree): Add LANGUAGE parameter and save it into
+	the root varobj.
+	(mi_walk_varobj_tree): Add LANGUAGE parameter.
+
 2012-01-11  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/default.exp (core-file): Don't expect "GDB can't read
