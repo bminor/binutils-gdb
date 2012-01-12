@@ -1,3 +1,8 @@
+2012-01-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* configure: Regenerate.
+	* config.in: Regenerate.
+
 2012-01-12  Keith Seitz  <keiths@redhat.com>
 
 	PR mi/10586
