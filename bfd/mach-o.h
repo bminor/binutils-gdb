@@ -42,6 +42,18 @@ typedef struct bfd_mach_o_header
 }
 bfd_mach_o_header;
 
+typedef struct bfd_mach_o_asymbol
+{
+  /* The actual symbol which the rest of BFD works with.  */
+  asymbol symbol;
+
+  /* Mach-O symbol fields.  */
+  unsigned char n_type;
+  unsigned char n_sect;
+  unsigned short n_desc;
+}
+bfd_mach_o_asymbol;
+
 #define BFD_MACH_O_SEGNAME_SIZE 16
 #define BFD_MACH_O_SECTNAME_SIZE 16
 
@@ -63,6 +75,12 @@ typedef struct bfd_mach_o_section
 
   /* Corresponding bfd section.  */
   asection *bfdsection;
+
+  /* An array holding the indirect symbols for this section.
+     NULL values indicate local symbols.
+     The number of symbols is determined from the section size and type.  */
+
+  bfd_mach_o_asymbol **indirect_syms;
 
   /* Simply linked list.  */
   struct bfd_mach_o_section *next;
@@ -105,26 +123,12 @@ typedef struct bfd_mach_o_reloc_info
 }
 bfd_mach_o_reloc_info;
 
-typedef struct bfd_mach_o_asymbol
-{
-  /* The actual symbol which the rest of BFD works with.  */
-  asymbol symbol;
-
-  /* Mach-O symbol fields.  */
-  unsigned char n_type;
-  unsigned char n_sect;
-  unsigned short n_desc;
-}
-bfd_mach_o_asymbol;
-
 /* The symbol table is sorted like this:
  (1) local.
 	(otherwise in order of generation)
  (2) external defined
 	(sorted by name)
- (3) external undefined
-	(sorted by name)
- (4) common
+ (3) external undefined / common
 	(sorted by name)
 */
 

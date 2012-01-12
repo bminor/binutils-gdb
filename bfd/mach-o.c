@@ -2079,6 +2079,33 @@ bfd_mach_o_build_seg_command (const char *segment,
   return TRUE;
 }
 
+/* Count the number of indirect symbols in the image.
+   Requires that the sections are in their final order.  */
+
+static unsigned int
+bfd_mach_o_count_indirect_symbols (bfd *abfd, bfd_mach_o_data_struct *mdata)
+{
+  unsigned int i;
+  unsigned int nisyms = 0;
+
+  for (i = 0; i < mdata->nsects; ++i)
+    {
+      bfd_mach_o_section *sec = mdata->sections[i];
+
+      switch (sec->flags & BFD_MACH_O_SECTION_TYPE_MASK)
+	{
+	  case BFD_MACH_O_S_NON_LAZY_SYMBOL_POINTERS:
+	  case BFD_MACH_O_S_LAZY_SYMBOL_POINTERS:
+	  case BFD_MACH_O_S_SYMBOL_STUBS:
+	    nisyms += bfd_mach_o_section_get_nbr_indirect (abfd, sec);
+	    break;
+	  default:
+	    break;
+	}
+    }
+  return nisyms;
+}
+
 static bfd_boolean
 bfd_mach_o_build_dysymtab_command (bfd *abfd,
 				   bfd_mach_o_data_struct *mdata,
@@ -2135,9 +2162,11 @@ bfd_mach_o_build_dysymtab_command (bfd *abfd,
       dsym->nundefsym = 0;
     }
 
+  dsym->nindirectsyms = bfd_mach_o_count_indirect_symbols (abfd, mdata);
   if (dsym->nindirectsyms > 0)
     {
       unsigned i;
+      unsigned n;
 
       mdata->filelen = FILE_ALIGN (mdata->filelen, 2);
       dsym->indirectsymoff = mdata->filelen;
@@ -2146,11 +2175,38 @@ bfd_mach_o_build_dysymtab_command (bfd *abfd,
       dsym->indirect_syms = bfd_zalloc (abfd, dsym->nindirectsyms * 4);
       if (dsym->indirect_syms == NULL)
         return FALSE;
-      
-      /* So fill in the indices.  */
-      for (i = 0; i < dsym->nindirectsyms; ++i)
+		  
+      n = 0;
+      for (i = 0; i < mdata->nsects; ++i)
 	{
-	  /* TODO: fill in the table.  */
+	  bfd_mach_o_section *sec = mdata->sections[i];
+
+	  switch (sec->flags & BFD_MACH_O_SECTION_TYPE_MASK)
+	    {
+	      case BFD_MACH_O_S_NON_LAZY_SYMBOL_POINTERS:
+	      case BFD_MACH_O_S_LAZY_SYMBOL_POINTERS:
+	      case BFD_MACH_O_S_SYMBOL_STUBS:
+		{
+		  unsigned j, num;
+		  bfd_mach_o_asymbol **isyms = sec->indirect_syms;
+		  
+		  num = bfd_mach_o_section_get_nbr_indirect (abfd, sec);
+		  if (isyms == NULL || num == 0)
+		    break;
+		  /* Record the starting index in the reserved1 field.  */
+		  sec->reserved1 = n;
+		  for (j = 0; j < num; j++, n++)
+		    {
+		      if (isyms[j] == NULL)
+		        dsym->indirect_syms[n] = BFD_MACH_O_INDIRECT_SYM_LOCAL;
+		      else
+		        dsym->indirect_syms[n] = isyms[j]->symbol.udata.i;
+		    }
+		}
+		break;
+	      default:
+		break;
+	    }
 	}
     }
 

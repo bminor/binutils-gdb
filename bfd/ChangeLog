@@ -1,3 +1,10 @@
+2012-01-12  Iain Sandoe  <idsandoe@googlemail.com>
+
+	* mach-o.c (bfd_mach_o_count_indirect_symbols): New.
+	(bfd_mach_o_build_dysymtab_command): Populate indirect symbol table.
+	* mach-o.h (bfd_mach_o_asymbol): Move declaration to start of the
+	file. (bfd_mach_o_section): Add indirect_syms field.
+
 2012-01-11  Iain Sandoe  <idsandoe@googlemail.com>
 
 	* mach-o.c (bfd_mach_o_build_seg_command): Separate computation of

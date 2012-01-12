@@ -1,3 +1,18 @@
+2012-01-12  Iain Sandoe  <idsandoe@googlemail.com>
+
+	* config/obj-macho.c (obj_mach_o_set_symbol_qualifier): Switch off
+	lazy when the symbol is private_extern.
+	(obj_mach_o_indirect_sym): New type.
+	(obj_mach_o_indirect_symbol): New.
+	(mach_o_pseudo_table): Use obj_mach_o_indirect_symbol.
+	(obj_macho_frob_label): Adjust to avoid adding bsyms for locals.
+	(obj_macho_frob_label): Likewise.  Adjust external and comm
+	symbol tests.
+	(obj_mach_o_set_indirect_symbols): New.
+	(obj_mach_o_frob_file_after_relocs): New.
+	*config/obj-macho.h (obj_frob_file_after_relocs): Define.
+	(obj_mach_o_frob_file_after_relocs): Declare.
+
 2012-01-12  Tristan Gingold  <gingold@adacore.com>
 
 	PR gas/13591

@@ -1032,6 +1032,7 @@ obj_mach_o_set_symbol_qualifier (symbolS *sym, int type)
 
       case OBJ_MACH_O_SYM_PRIV_EXT:
 	s->n_type |= BFD_MACH_O_N_PEXT ;
+	s->n_desc &= ~LAZY; /* The native tool switches this off too.  */
 	/* We follow the system tools in marking PEXT as also global.  */
 	/* Fall through.  */
 
@@ -1131,13 +1132,77 @@ obj_mach_o_sym_qual (int ntype)
   demand_empty_rest_of_line ();
 }
 
-/* Dummy function to allow test-code to work while we are working
-   on things.  */
+typedef struct obj_mach_o_indirect_sym
+{
+  symbolS *sym;
+  segT sect;
+  struct obj_mach_o_indirect_sym *next;
+} obj_mach_o_indirect_sym;
+
+/* We store in order an maintain a pointer to the last one - to save reversing
+   later.  */
+obj_mach_o_indirect_sym *indirect_syms;
+obj_mach_o_indirect_sym *indirect_syms_tail;
 
 static void
-obj_mach_o_placeholder (int arg ATTRIBUTE_UNUSED)
+obj_mach_o_indirect_symbol (int arg ATTRIBUTE_UNUSED)
 {
-  ignore_rest_of_line ();
+  bfd_mach_o_section *sec = bfd_mach_o_get_mach_o_section (now_seg);
+
+#ifdef md_flush_pending_output
+  md_flush_pending_output ();
+#endif
+
+  if (obj_mach_o_is_static)
+    as_bad (_("use of .indirect_symbols requires `-dynamic'"));
+
+  switch (sec->flags & BFD_MACH_O_SECTION_TYPE_MASK)
+    {
+      case BFD_MACH_O_S_SYMBOL_STUBS:
+      case BFD_MACH_O_S_LAZY_SYMBOL_POINTERS:
+      case BFD_MACH_O_S_NON_LAZY_SYMBOL_POINTERS:
+        {
+          obj_mach_o_indirect_sym *isym;
+	  char *name = input_line_pointer;
+	  char c = get_symbol_end ();
+	  symbolS *sym = symbol_find_or_make (name);
+	  unsigned int elsize =
+			bfd_mach_o_section_get_entry_size (stdoutput, sec);
+
+	  if (elsize == 0)
+	    {
+	      as_bad (_("attempt to add an indirect_symbol to a stub or"
+			" reference section with a zero-sized element at %s"),
+			name);
+	      *input_line_pointer = c;
+	      ignore_rest_of_line ();
+	      return;
+	  }
+	  *input_line_pointer = c;
+
+	  isym = (obj_mach_o_indirect_sym *)
+			xmalloc (sizeof (obj_mach_o_indirect_sym));
+
+	  /* Just record the data for now, we will validate it when we
+	     compute the output in obj_mach_o_set_indirect_symbols.  */
+	  isym->sym = sym;
+	  isym->sect = now_seg;
+	  isym->next = NULL;
+	  if (indirect_syms == NULL)
+	    indirect_syms = isym;
+	  else
+	    indirect_syms_tail->next = isym;
+	  indirect_syms_tail = isym;
+	}
+        break;
+
+      default:
+	as_bad (_("an .indirect_symbol must be in a symbol pointer"
+		  " or stub section."));
+	ignore_rest_of_line ();
+	return;
+    }
+  demand_empty_rest_of_line ();
 }
 
 const pseudo_typeS mach_o_pseudo_table[] =
@@ -1231,7 +1296,7 @@ const pseudo_typeS mach_o_pseudo_table[] =
   {"no_dead_strip",	obj_mach_o_sym_qual, OBJ_MACH_O_SYM_NO_DEAD_STRIP},
   {"weak",		obj_mach_o_sym_qual, OBJ_MACH_O_SYM_WEAK}, /* ext */
 
-  {"indirect_symbol",	obj_mach_o_placeholder, 0},
+  { "indirect_symbol",	obj_mach_o_indirect_symbol, 0},
 
   /* File flags.  */
   { "subsections_via_symbols", obj_mach_o_fileprop, 
@@ -1270,15 +1335,25 @@ obj_mach_o_type_for_symbol (bfd_mach_o_asymbol *s)
 
 void obj_macho_frob_label (struct symbol *sp)
 {
-  bfd_mach_o_asymbol *s = (bfd_mach_o_asymbol *) symbol_get_bfdsym (sp);
-  /* This is the base symbol type, that we mask in.  */
-  unsigned base_type = obj_mach_o_type_for_symbol (s);
-  bfd_mach_o_section *sec = bfd_mach_o_get_mach_o_section (s->symbol.section);
+  bfd_mach_o_asymbol *s;
+  unsigned base_type;
+  bfd_mach_o_section *sec;
   int sectype = -1;
 
+  /* Leave local symbols alone.  */
+
+  if (S_IS_LOCAL (sp))
+    return;
+
+  s = (bfd_mach_o_asymbol *) symbol_get_bfdsym (sp);
+  /* Leave debug symbols alone.  */
   if ((s->n_type & BFD_MACH_O_N_STAB) != 0)
-    return; /* Leave alone.  */
-  
+    return;
+
+  /* This is the base symbol type, that we mask in.  */
+  base_type = obj_mach_o_type_for_symbol (s);
+
+  sec = bfd_mach_o_get_mach_o_section (s->symbol.section);  
   if (sec != NULL)
     sectype = sec->flags & BFD_MACH_O_SECTION_TYPE_MASK;
 
@@ -1307,34 +1382,41 @@ void obj_macho_frob_label (struct symbol *sp)
 int
 obj_macho_frob_symbol (struct symbol *sp)
 {
-  bfd_mach_o_asymbol *s = (bfd_mach_o_asymbol *) symbol_get_bfdsym (sp);
-  unsigned base_type = obj_mach_o_type_for_symbol (s);
-  bfd_mach_o_section *sec = bfd_mach_o_get_mach_o_section (s->symbol.section);
+  bfd_mach_o_asymbol *s;
+  unsigned base_type;
+  bfd_mach_o_section *sec;
   int sectype = -1;
-  
+
+  /* Leave local symbols alone.  */
+  if (S_IS_LOCAL (sp))
+    return 0;
+
+  s = (bfd_mach_o_asymbol *) symbol_get_bfdsym (sp);
+  /* Leave debug symbols alone.  */
+  if ((s->n_type & BFD_MACH_O_N_STAB) != 0)
+    return 0;
+
+  base_type = obj_mach_o_type_for_symbol (s);
+  sec = bfd_mach_o_get_mach_o_section (s->symbol.section);  
   if (sec != NULL)
     sectype = sec->flags & BFD_MACH_O_SECTION_TYPE_MASK;
 
-  if ((s->n_type & BFD_MACH_O_N_STAB) != 0)
-    return 0; /* Leave alone.  */
-  else if (s->symbol.section == bfd_und_section_ptr)
+  if (s->symbol.section == bfd_und_section_ptr)
     {
       /* ??? Do we really gain much from implementing this as well as the
 	 mach-o specific ones?  */
       if (s->symbol.flags & BSF_WEAK)
 	s->n_desc |= BFD_MACH_O_N_WEAK_REF;
 
-      /* Undefined references, become extern.  */
-      if (s->n_desc & REFE)
-	{
-	  s->n_desc &= ~REFE;
-	  s->n_type |= BFD_MACH_O_N_EXT;
-	}
-
-      /* So do undefined 'no_dead_strip's.  */
-      if (s->n_desc & BFD_MACH_O_N_NO_DEAD_STRIP)
-	s->n_type |= BFD_MACH_O_N_EXT;
-
+      /* Undefined syms, become extern.  */
+      s->n_type |= BFD_MACH_O_N_EXT;
+      S_SET_EXTERNAL (sp);
+    }
+  else if (s->symbol.section == bfd_com_section_ptr)
+    {
+      /* ... so do comm.  */
+      s->n_type |= BFD_MACH_O_N_EXT;
+      S_SET_EXTERNAL (sp);
     }
   else
     {
@@ -1353,6 +1435,7 @@ obj_macho_frob_symbol (struct symbol *sp)
     {
       /* Anything here that should be added that is non-standard.  */
       s->n_desc &= ~BFD_MACH_O_REFERENCE_MASK;
+      s->symbol.udata.i = SYM_MACHO_FIELDS_NOT_VALIDATED;
     }    
   else if (s->symbol.udata.i == SYM_MACHO_FIELDS_NOT_VALIDATED)
     {
@@ -1386,6 +1469,125 @@ obj_macho_frob_symbol (struct symbol *sp)
     S_SET_EXTERNAL (sp);
 
   return 0;
+}
+
+static void
+obj_mach_o_set_indirect_symbols (bfd *abfd, asection *sec,
+				 void *xxx ATTRIBUTE_UNUSED)
+{
+  bfd_vma sect_size = bfd_section_size (abfd, sec);
+  bfd_mach_o_section *ms = bfd_mach_o_get_mach_o_section (sec);
+  unsigned lazy = 0;
+
+  /* See if we have any indirect syms to consider.  */
+  if (indirect_syms == NULL)
+    return;
+
+  /* Process indirect symbols.
+     Check for errors, if OK attach them as a flat array to the section
+     for which they are defined.  */
+
+  switch (ms->flags & BFD_MACH_O_SECTION_TYPE_MASK)
+    {
+      case BFD_MACH_O_S_SYMBOL_STUBS:
+      case BFD_MACH_O_S_LAZY_SYMBOL_POINTERS:
+	lazy = LAZY;
+	/* Fall through.  */
+      case BFD_MACH_O_S_NON_LAZY_SYMBOL_POINTERS:
+	{
+	  unsigned int nactual = 0;
+	  unsigned int ncalc;
+	  obj_mach_o_indirect_sym *isym;
+	  obj_mach_o_indirect_sym *list = NULL;
+	  obj_mach_o_indirect_sym *list_tail = NULL;
+	  unsigned long eltsiz = 
+			bfd_mach_o_section_get_entry_size (abfd, ms);
+
+	  for (isym = indirect_syms; isym != NULL; isym = isym->next)
+	    {
+	      if (isym->sect == sec)
+		{
+		  nactual++;
+		  if (list == NULL)
+		    list = isym;
+		  else
+		    list_tail->next = isym;
+		  list_tail = isym;
+		}
+	    }
+
+	  /* If none are in this section, stop here.  */
+	  if (nactual == 0)
+	    break;
+
+	  /* If we somehow added indirect symbols to a section with a zero
+	     entry size, we're dead ... */
+	  gas_assert (eltsiz != 0);
+
+	  ncalc = (unsigned int) (sect_size / eltsiz);
+	  if (nactual != ncalc)
+	    as_bad (_("the number of .indirect_symbols defined in section %s"
+		      " does not match the number expected (%d defined, %d"
+		      " expected)"), sec->name, nactual, ncalc);
+	  else
+	    {
+	      unsigned n;
+	      bfd_mach_o_asymbol *sym;
+	      ms->indirect_syms =
+			bfd_zalloc (abfd,
+				    nactual * sizeof (bfd_mach_o_asymbol *));
+
+	      if (ms->indirect_syms == NULL)
+		{
+		  as_fatal (_("internal error: failed to allocate %d indirect"
+			      "symbol pointers"), nactual);
+		}
+	      
+	      for (isym = list, n = 0; isym != NULL; isym = isym->next, n++)
+		{
+		  /* Array is init to NULL & NULL signals a local symbol
+		     If the section is lazy-bound, we need to keep the
+		     reference to the symbol, since dyld can override.  */
+		  if (S_IS_LOCAL (isym->sym) && ! lazy)
+		    ;
+		  else
+		    {
+		      sym = (bfd_mach_o_asymbol *)symbol_get_bfdsym (isym->sym);
+		      if (sym == NULL)
+		        ;
+		      /* If the symbols is external ...  */
+		      else if (S_IS_EXTERNAL (isym->sym)
+			       || (sym->n_type & BFD_MACH_O_N_EXT)
+			       || ! S_IS_DEFINED (isym->sym)
+			       || lazy)
+			{
+			  sym->n_desc &= ~LAZY;
+			  /* ... it can be lazy, if not defined or hidden.  */
+			  if ((sym->n_type & BFD_MACH_O_N_TYPE) 
+			       == BFD_MACH_O_N_UNDF 
+			      && ! (sym->n_type & BFD_MACH_O_N_PEXT)
+			      && (sym->n_type & BFD_MACH_O_N_EXT))
+			    sym->n_desc |= lazy;
+			  ms->indirect_syms[n] = sym;
+		        }
+		    }
+		}
+	    }
+	}
+	break;
+
+      default:
+	break;
+    }
+}
+
+/* The process of relocation could alter what's externally visible, thus we
+   leave setting the indirect symbols until last.  */
+
+void
+obj_mach_o_frob_file_after_relocs (void)
+{
+  bfd_map_over_sections (stdoutput, obj_mach_o_set_indirect_symbols, (char *) 0);
 }
 
 /* Support stabs for mach-o.  */
