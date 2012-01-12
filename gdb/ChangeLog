@@ -1,3 +1,19 @@
+2012-01-12  Keith Seitz  <keiths@redhat.com>
+
+	PR mi/10586
+	* varobj.c (ANONYMOUS_STRUCT_NAME): Define.
+	(ANONYMOUS_UNION_NAME): Define.
+	(is_path_expr_parent): New function.
+	(get_path_expr_parent): New function.
+	(is_anonymous_child): New function.
+	(create_child_with_value): If the child is anonymous and without
+	a name, assign an object name to it.
+	(c_describe_child): Use get_path_expr_parent to determine
+	the parent expression.
+	If there field represents an anonymous struct or union and
+	has no name, set an appropriate display name and expression.
+	(cplus_describe_child): Likewise.
+
 2012-01-12  Pedro Alves  <palves@redhat.com>
 
 	* i386-tdep.c (i386_frame_cache_1): Also mark the frame base as

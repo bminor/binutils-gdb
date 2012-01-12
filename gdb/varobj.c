@@ -41,6 +41,10 @@
 typedef int PyObject;
 #endif
 
+/* The names of varobjs representing anonymous structs or unions.  */
+#define ANONYMOUS_STRUCT_NAME _("<anonymous struct>")
+#define ANONYMOUS_UNION_NAME _("<anonymous union>")
+
 /* Non-zero if we want to see trace of varobj level stuff.  */
 
 int varobjdebug = 0;
@@ -1298,6 +1302,39 @@ varobj_get_gdb_type (struct varobj *var)
   return var->type;
 }
 
+/* Is VAR a path expression parent, i.e., can it be used to construct
+   a valid path expression?  */
+
+static int
+is_path_expr_parent (struct varobj *var)
+{
+  struct type *type;
+
+  /* "Fake" children are not path_expr parents.  */
+  if (CPLUS_FAKE_CHILD (var))
+    return 0;
+
+  type = get_value_type (var);
+
+  /* Anonymous unions and structs are also not path_expr parents.  */
+  return !((TYPE_CODE (type) == TYPE_CODE_STRUCT
+	    || TYPE_CODE (type) == TYPE_CODE_UNION)
+	   && TYPE_NAME (type) == NULL);
+}
+
+/* Return the path expression parent for VAR.  */
+
+static struct varobj *
+get_path_expr_parent (struct varobj *var)
+{
+  struct varobj *parent = var;
+
+  while (!is_root_p (parent) && !is_path_expr_parent (parent))
+    parent = parent->parent;
+
+  return parent;
+}
+
 /* Return a pointer to the full rooted expression of varobj VAR.
    If it has not been computed yet, compute it.  */
 char *
@@ -2200,6 +2237,20 @@ create_child (struct varobj *parent, int index, char *name)
 				  value_of_child (parent, index));
 }
 
+/* Does CHILD represent a child with no name?  This happens when
+   the child is an anonmous struct or union and it has no field name
+   in its parent variable.
+
+   This has already been determined by *_describe_child. The easiest
+   thing to do is to compare the child's name with ANONYMOUS_*_NAME.  */
+
+static int
+is_anonymous_child (struct varobj *child)
+{
+  return (strcmp (child->name, ANONYMOUS_STRUCT_NAME) == 0
+	  || strcmp (child->name, ANONYMOUS_UNION_NAME) == 0);
+}
+
 static struct varobj *
 create_child_with_value (struct varobj *parent, int index, const char *name,
 			 struct value *value)
@@ -2215,8 +2266,13 @@ create_child_with_value (struct varobj *parent, int index, const char *name,
   child->index = index;
   child->parent = parent;
   child->root = parent->root;
-  childs_name = xstrprintf ("%s.%s", parent->obj_name, name);
+
+  if (is_anonymous_child (child))
+    childs_name = xstrprintf ("%s.%d_anonymous", parent->obj_name, index);
+  else
+    childs_name = xstrprintf ("%s.%s", parent->obj_name, name);
   child->obj_name = childs_name;
+
   install_variable (child);
 
   /* Compute the type of the child.  Must do this before
@@ -2991,7 +3047,7 @@ c_describe_child (struct varobj *parent, int index,
   if (cfull_expression)
     {
       *cfull_expression = NULL;
-      parent_expression = varobj_get_path_expr (parent);
+      parent_expression = varobj_get_path_expr (get_path_expr_parent (parent));
     }
   adjust_value_for_child_access (&value, &type, &was_ptr);
       
@@ -3029,26 +3085,49 @@ c_describe_child (struct varobj *parent, int index,
 
     case TYPE_CODE_STRUCT:
     case TYPE_CODE_UNION:
-      if (cname)
-	*cname = xstrdup (TYPE_FIELD_NAME (type, index));
+      {
+	char *field_name;
 
-      if (cvalue && value)
-	{
-	  /* For C, varobj index is the same as type index.  */
-	  *cvalue = value_struct_element_index (value, index);
-	}
+	/* If the type is anonymous and the field has no name,
+	   set an appropriate name.  */
+	field_name = TYPE_FIELD_NAME (type, index);
+	if (field_name == NULL || *field_name == '\0')
+	  {
+	    if (cname)
+	      {
+		if (TYPE_CODE (TYPE_FIELD_TYPE (type, index))
+		    == TYPE_CODE_STRUCT)
+		  *cname = xstrdup (ANONYMOUS_STRUCT_NAME);
+		else
+		  *cname = xstrdup (ANONYMOUS_UNION_NAME);
+	      }
 
-      if (ctype)
-	*ctype = TYPE_FIELD_TYPE (type, index);
+	    if (cfull_expression)
+	      *cfull_expression = xstrdup ("");
+	  }
+	else
+	  {
+	    if (cname)
+	      *cname = xstrdup (field_name);
 
-      if (cfull_expression)
-	{
-	  char *join = was_ptr ? "->" : ".";
+	    if (cfull_expression)
+	      {
+		char *join = was_ptr ? "->" : ".";
 
-	  *cfull_expression = xstrprintf ("(%s)%s%s", parent_expression, join,
-					  TYPE_FIELD_NAME (type, index));
-	}
+		*cfull_expression = xstrprintf ("(%s)%s%s", parent_expression,
+						join, field_name);
+	      }
+	  }
 
+	if (cvalue && value)
+	  {
+	    /* For C, varobj index is the same as type index.  */
+	    *cvalue = value_struct_element_index (value, index);
+	  }
+
+	if (ctype)
+	  *ctype = TYPE_FIELD_TYPE (type, index);
+      }
       break;
 
     case TYPE_CODE_PTR:
@@ -3405,14 +3484,16 @@ cplus_describe_child (struct varobj *parent, int index,
       value = parent->parent->value;
       type = get_value_type (parent->parent);
       if (cfull_expression)
-	parent_expression = varobj_get_path_expr (parent->parent);
+	parent_expression
+	  = varobj_get_path_expr (get_path_expr_parent (parent->parent));
     }
   else
     {
       value = parent->value;
       type = get_value_type (parent);
       if (cfull_expression)
-	parent_expression = varobj_get_path_expr (parent);
+	parent_expression
+	  = varobj_get_path_expr (get_path_expr_parent (parent));
     }
 
   adjust_value_for_child_access (&value, &type, &was_ptr);
@@ -3434,6 +3515,7 @@ cplus_describe_child (struct varobj *parent, int index,
 	  enum accessibility acc = public_field;
 	  int vptr_fieldno;
 	  struct type *basetype = NULL;
+	  char *field_name;
 
 	  vptr_fieldno = get_vptr_fieldno (type, &basetype);
 	  if (strcmp (parent->name, "private") == 0)
@@ -3452,20 +3534,40 @@ cplus_describe_child (struct varobj *parent, int index,
 	    }
 	  --type_index;
 
-	  if (cname)
-	    *cname = xstrdup (TYPE_FIELD_NAME (type, type_index));
+	  /* If the type is anonymous and the field has no name,
+	     set an appopriate name.  */
+	  field_name = TYPE_FIELD_NAME (type, type_index);
+	  if (field_name == NULL || *field_name == '\0')
+	    {
+	      if (cname)
+		{
+		  if (TYPE_CODE (TYPE_FIELD_TYPE (type, type_index))
+		      == TYPE_CODE_STRUCT)
+		    *cname = xstrdup (ANONYMOUS_STRUCT_NAME);
+		  else if (TYPE_CODE (TYPE_FIELD_TYPE (type, type_index))
+			   == TYPE_CODE_UNION)
+		    *cname = xstrdup (ANONYMOUS_UNION_NAME);
+		}
+
+	      if (cfull_expression)
+		*cfull_expression = xstrdup ("");
+	    }
+	  else
+	    {
+	      if (cname)
+		*cname = xstrdup (TYPE_FIELD_NAME (type, type_index));
+
+	      if (cfull_expression)
+		*cfull_expression
+		  = xstrprintf ("((%s)%s%s)", parent_expression, join,
+				field_name);
+	    }
 
 	  if (cvalue && value)
 	    *cvalue = value_struct_element_index (value, type_index);
 
 	  if (ctype)
 	    *ctype = TYPE_FIELD_TYPE (type, type_index);
-
-	  if (cfull_expression)
-	    *cfull_expression
-	      = xstrprintf ("((%s)%s%s)", parent_expression,
-			    join, 
-			    TYPE_FIELD_NAME (type, type_index));
 	}
       else if (index < TYPE_N_BASECLASSES (type))
 	{
