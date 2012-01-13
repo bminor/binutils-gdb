@@ -1,3 +1,9 @@
+2012-01-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Eli Zaretskii  <eliz@gnu.org>
+
+	* gdbint.texinfo (Coding Standards): Require braces for two lines of
+	code.
+
 2012-01-11  Paul Hilfinger  <hilfingr@adacore.com>
 
 	* gdb.texinfo (Variables): Document use of :: for non-static

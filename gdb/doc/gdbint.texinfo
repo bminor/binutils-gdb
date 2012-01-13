@@ -5849,6 +5849,26 @@ the following guidelines:
 @tab (pointer dereference)
 @end multitable
 
+Any two or more lines in code should be wrapped in braces, even if
+they are comments, as they look like separate statements:
+
+@smallexample
+if (i)
+  @{
+    /* Return success.  */
+    return 0;
+  @}
+@end smallexample
+
+@noindent
+and not:
+
+@smallexample
+if (i)
+  /* Return success.  */
+  return 0;
+@end smallexample
+
 @subsection Comments
 
 @cindex comment formatting
