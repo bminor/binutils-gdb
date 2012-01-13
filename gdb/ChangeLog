@@ -1,3 +1,8 @@
+2012-01-13  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb_curses.h (MOUSE_MOVED) [__MINGW32__]: Undefine before
+	including curses.h.
+
 2012-01-12  Pedro Alves  <palves@redhat.com>
 
 	* i386-tdep.c (i386_frame_cache_1): Also mark the frame base as
