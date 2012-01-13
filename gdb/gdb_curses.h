@@ -27,6 +27,14 @@
 #elif defined (HAVE_CURSESX_H)
 #include <cursesX.h>
 #elif defined (HAVE_CURSES_H)
+#ifdef __MINGW32__
+/* Windows API headers, included e.g. by serial.h, define MOUSE_MOVED,
+   and so does PDCurses's curses.h, but for an entirely different
+   purpose.  Since we don't use the Windows semantics of MOUSE_MOVED
+   anywhere, avoid compiler warnings by undefining MOUSE_MOVED before
+   including curses.h.  */
+#undef MOUSE_MOVED
+#endif
 #include <curses.h>
 #endif
 
