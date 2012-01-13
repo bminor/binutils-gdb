@@ -1,5 +1,9 @@
 2012-01-13  Pedro Alves  <palves@redhat.com>
 
+	* server.c (attach_inferior): Clear `cont_thread'.
+
+2012-01-13  Pedro Alves  <palves@redhat.com>
+
 	* server.c (main): Avoid infinite loop while detaching/killing
 	after a longjmp.
 

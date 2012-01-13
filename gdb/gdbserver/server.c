@@ -338,6 +338,10 @@ attach_inferior (int pid)
      whichever we were told to attach to.  */
   signal_pid = pid;
 
+  /* Clear this so the backend doesn't get confused, thinking
+     CONT_THREAD died, and it needs to resume all threads.  */
+  cont_thread = null_ptid;
+
   if (!non_stop)
     {
       last_ptid = mywait (pid_to_ptid (pid), &last_status, 0, 0);
