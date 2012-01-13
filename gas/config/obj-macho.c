@@ -1679,6 +1679,23 @@ obj_mach_o_frob_file_after_relocs (void)
   bfd_map_over_sections (stdoutput, obj_mach_o_set_indirect_symbols, (char *) 0);
 }
 
+/* Reverse relocations order to make ld happy.  */
+
+void
+obj_mach_o_reorder_section_relocs (asection *sec, arelent **rels, unsigned int n)
+{
+  unsigned int i;
+  unsigned int max = n / 2;
+
+  for (i = 0; i < max; i++)
+    {
+      arelent *r = rels[i];
+      rels[i] = rels[n - i - 1];
+      rels[n - i - 1] = r;
+    }
+  bfd_set_reloc (stdoutput, sec, rels, n);
+}
+
 /* Support stabs for mach-o.  */
 
 void

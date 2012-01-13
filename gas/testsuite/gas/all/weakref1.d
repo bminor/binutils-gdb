@@ -2,8 +2,9 @@
 #name: weakref tests, relocations
 # ecoff (OSF/alpha) lacks .weak support
 # pdp11 lacks .long
+# darwin (mach-o) reverses the order of relocs.
 # the following must be present in all weakref1*.d
-#not-target: alpha*-*-osf* *-*-ecoff pdp11-*-aout
+#not-target: alpha*-*-osf* *-*-ecoff pdp11-*-aout *-*-darwin*
 
 #...
 RELOCATION RECORDS FOR \[(\.text|\$CODE\$)\]:

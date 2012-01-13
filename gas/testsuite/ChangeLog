@@ -1,5 +1,23 @@
 2012-01-13  Iain Sandoe  <idsandoe@googlemail.com>
 
+	* gas/all/redef2.d: Skip for Darwin.
+	* gas/all/redef3.d: Likewise.
+	* gas/all/weakref1.d: Likewise.
+	* gas/macros/irp.d: Likewise.
+	* gas/macros/repeat.d: Likewise.
+	* gas/macros/rept.d: Likewise.
+	* gas/macros/test2.d: Likewise.
+	* gas/macros/vararg.d: Likewise.
+	* gas/mach-o/macro-irp.d: New.
+	* gas/mach-o/macro-repeat.d: New.
+	* gas/mach-o/macro-rept.d: New.
+	* gas/mach-o/macro-test2.d: New.
+	* gas/mach-o/macro-vararg.d: New.
+	* gas/mach-o/redef2.d: New.
+	* gas/mach-o/redef3.d: New.
+
+2012-01-13  Iain Sandoe  <idsandoe@googlemail.com>
+
 	* gas/mach-o/dysymtab-3.d: New.
 	* gas/mach-o/symbols-7.s: New.
 

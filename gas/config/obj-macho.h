@@ -68,6 +68,11 @@ void obj_mach_o_post_relax_hook (void);
 #define obj_frob_file_after_relocs obj_mach_o_frob_file_after_relocs
 extern void obj_mach_o_frob_file_after_relocs (void);
 
+void obj_mach_o_reorder_section_relocs (asection *, arelent **, unsigned int);
+
+#define SET_SECTION_RELOCS(sec, relocs, n) \
+  obj_mach_o_reorder_section_relocs (sec, relocs, n)
+
 #define EMIT_SECTION_SYMBOLS		0
 
 #define OBJ_PROCESS_STAB(SEG,W,S,T,O,D)	obj_mach_o_process_stab(W,S,T,O,D)
