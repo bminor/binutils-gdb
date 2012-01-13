@@ -689,6 +689,8 @@ static const arch_entry cpu_arch[] =
     CPU_ANY_AVX_FLAGS, 0, 1 },
   { STRING_COMMA_LEN (".vmx"), PROCESSOR_UNKNOWN,
     CPU_VMX_FLAGS, 0, 0 },
+  { STRING_COMMA_LEN (".vmfunc"), PROCESSOR_UNKNOWN,
+    CPU_VMFUNC_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".smx"), PROCESSOR_UNKNOWN,
     CPU_SMX_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".xsave"), PROCESSOR_UNKNOWN,

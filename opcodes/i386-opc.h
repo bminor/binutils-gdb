@@ -136,6 +136,8 @@ enum
   CpuLZCNT,
   /* INVPCID Instructions required */
   CpuINVPCID,
+  /* VMFUNC Instruction required */
+  CpuVMFUNC,
   /* 64bit support available, used by -march= in assembler.  */
   CpuLM,
   /* 64bit support required  */
@@ -213,6 +215,7 @@ typedef union i386_cpu_flags
       unsigned int cpubmi2:1;
       unsigned int cpulzcnt:1;
       unsigned int cpuinvpcid:1;
+      unsigned int cpuvmfunc:1;
       unsigned int cpulm:1;
       unsigned int cpu64:1;
       unsigned int cpuno64:1;

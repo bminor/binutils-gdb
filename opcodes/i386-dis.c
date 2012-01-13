@@ -10470,6 +10470,9 @@ static const struct dis386 rm_table[][8] = {
     /* RM_0F01_REG_2 */
     { "xgetbv",		{ Skip_MODRM } },
     { "xsetbv",		{ Skip_MODRM } },
+    { Bad_Opcode },
+    { Bad_Opcode },
+    { "vmfunc",		{ Skip_MODRM } },
   },
   {
     /* RM_0F01_REG_3 */

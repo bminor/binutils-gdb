@@ -1,3 +1,16 @@
+2012-01-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (mod_table): Add vmfunc.
+
+	* i386-gen.c (cpu_flag_init): Add CPU_VMFUNC_FLAGS.
+	(cpu_flags): CpuVMFUNC.
+
+	* i386-opc.h (CpuVMFUNC): New.
+	(i386_cpu_flags): Add cpuvmfunc.
+
+	* i386-opc.tbl: Add vmfunc.
+	* i386-init.h: Regenerated.
+	* i386-tbl.h: Likewise.
 
 For older changes see ChangeLog-2011
 

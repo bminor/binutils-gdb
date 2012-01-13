@@ -1,3 +1,11 @@
+2012-01-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/i386.exp: Run vmfunc and x86-64-vmfunc.
+
+	* gas/i386/vmfunc.d: New.
+	* gas/i386/vmfunc.s: Likewise.
+	* gas/i386/x86-64-vmfunc.d: Likewise.
+
 2012-01-13  Iain Sandoe  <idsandoe@googlemail.com>
 
 	* gas/all/redef2.d: Skip for Darwin.

@@ -1561,6 +1561,10 @@ vmwrite, 2, 0xf79, None, 2, CpuVMX|Cpu64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|
 vmxoff, 0, 0xf01, 0xc4, 2, CpuVMX, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt, { 0 }
 vmxon, 1, 0xf30fc7, 0x6, 2, CpuVMX, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoRex64, { Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
 
+// VMFUNC instruction
+
+vmfunc, 0, 0xf01, 0xd4, 2, CpuVMFUNC, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt, { 0 }
+
 // SMX instructions.
 
 getsec, 0, 0xf37, None, 2, CpuSMX, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }

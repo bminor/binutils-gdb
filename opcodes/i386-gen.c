@@ -164,6 +164,8 @@ static initializer cpu_flag_init[] =
     "CpuLZCNT" },
   { "CPU_INVPCID_FLAGS",
     "CpuINVPCID" },
+  { "CPU_VMFUNC_FLAGS",
+    "CpuVMFUNC" },
   { "CPU_3DNOW_FLAGS",
     "CpuMMX|Cpu3dnow" },
   { "CPU_3DNOWA_FLAGS",
@@ -350,6 +352,7 @@ static bitfield cpu_flags[] =
   BITFIELD (CpuBMI2),
   BITFIELD (CpuLZCNT),
   BITFIELD (CpuINVPCID),
+  BITFIELD (CpuVMFUNC),
   BITFIELD (Cpu64),
   BITFIELD (CpuNo64),
 #ifdef CpuUnused
