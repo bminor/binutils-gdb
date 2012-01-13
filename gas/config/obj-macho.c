@@ -45,6 +45,8 @@
 #include "mach-o/loader.h"
 #include "obj-macho.h"
 
+#include <string.h>
+
 /* Forward decls.  */
 static segT obj_mach_o_segT_from_bfd_name (const char *, int);
 
@@ -1469,6 +1471,89 @@ obj_macho_frob_symbol (struct symbol *sp)
     S_SET_EXTERNAL (sp);
 
   return 0;
+}
+
+/* Zerofill and GB Zerofill sections must be sorted to follow all other
+   sections in their segments.
+
+   The native 'as' leaves the sections physically in the order they appear in
+   the source, and adjusts the section VMAs to meet the constraint.
+   
+   We follow this for now - if nothing else, it makes comparison easier.
+
+   An alternative implementation would be to sort the sections as ld requires.
+   It might be advantageous to implement such a scheme in the future (or even
+   to make the style of section ordering user-selectable).  */
+
+typedef struct obj_mach_o_set_vma_data
+{
+  bfd_vma vma;
+  unsigned vma_pass;
+  unsigned zerofill_seen;
+  unsigned gb_zerofill_seen;
+} obj_mach_o_set_vma_data;
+
+/* We do (possibly) three passes through to set the vma, so that:
+
+   zerofill sections get VMAs after all others in their segment
+   GB zerofill get VMAs last.
+   
+   As we go, we notice if we see any Zerofill or GB Zerofill sections, so that
+   we can skip the additional passes if there's nothing to do.  */
+
+static void
+obj_mach_o_set_section_vma (bfd *abfd ATTRIBUTE_UNUSED, asection *sec, void *v_p)
+{
+  bfd_mach_o_section *ms = bfd_mach_o_get_mach_o_section (sec);
+  unsigned bfd_align = bfd_get_section_alignment (abfd, sec);
+  obj_mach_o_set_vma_data *p = (struct obj_mach_o_set_vma_data *)v_p;
+  unsigned sectype = (ms->flags & BFD_MACH_O_SECTION_TYPE_MASK);
+  unsigned zf;
+
+  zf = 0;
+  if (sectype == BFD_MACH_O_S_ZEROFILL)
+    {
+      zf = 1;
+      p->zerofill_seen = zf;
+    }
+  else if (sectype == BFD_MACH_O_S_GB_ZEROFILL)
+    {
+      zf = 2;
+      p->gb_zerofill_seen = zf;
+    }
+
+  if (p->vma_pass != zf)
+    return;
+
+  /* We know the section size now - so make a vma for the section just
+     based on order.  */
+  ms->size = bfd_get_section_size (sec);
+  
+  /* Make sure that the align agrees, and set to the largest value chosen.  */
+  ms->align = ms->align > bfd_align ? ms->align : bfd_align;
+  bfd_set_section_alignment (abfd, sec, ms->align);
+  
+  p->vma += (1 << ms->align) - 1;
+  p->vma &= ~((1 << ms->align) - 1);
+  ms->addr = p->vma;
+  bfd_set_section_vma (abfd, sec, p->vma);
+  p->vma += ms->size;
+}
+
+/* (potentially) three passes over the sections, setting VMA.  We skip the 
+  {gb}zerofill passes if we didn't see any of the relevant sections.  */
+
+void obj_mach_o_post_relax_hook (void)
+{
+  obj_mach_o_set_vma_data d;
+
+  memset (&d, 0, sizeof (d));
+  
+  bfd_map_over_sections (stdoutput, obj_mach_o_set_section_vma, (char *) &d);
+  if ((d.vma_pass = d.zerofill_seen) != 0)
+    bfd_map_over_sections (stdoutput, obj_mach_o_set_section_vma, (char *) &d);
+  if ((d.vma_pass = d.gb_zerofill_seen) != 0)
+    bfd_map_over_sections (stdoutput, obj_mach_o_set_section_vma, (char *) &d);
 }
 
 static void
