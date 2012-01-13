@@ -1,3 +1,8 @@
+2012-01-13  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* gdb.base/attach-pie-misread.exp: Pass -pie only to the linker.
+	* gdb.base/pie-execl.exp: Likewise.
+
 2012-01-12  Keith Seitz  <keiths@redhat.com>
 
 	PR mi/10586
