@@ -1,5 +1,10 @@
 2012-01-13  Iain Sandoe  <idsandoe@googlemail.com>
 
+	* gas/mach-o/dysymtab-3.d: New.
+	* gas/mach-o/symbols-7.s: New.
+
+2012-01-13  Iain Sandoe  <idsandoe@googlemail.com>
+
 	* gas/mach-o/dysymtab-2.d: Update to include the set VMA.
 	* gas/mach-o/symbols-1-64.d: Likewise.
 	* gas/mach-o/symbols-1.d: Likewise.

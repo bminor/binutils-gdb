@@ -1,5 +1,10 @@
 2012-01-13  Iain Sandoe  <idsandoe@googlemail.com>
 
+	* config/obj-macho.c (obj_mach_o_set_indirect_symbols): Handle
+	absolute indirect symbols.
+
+2012-01-13  Iain Sandoe  <idsandoe@googlemail.com>
+
 	* config/obj-macho.c (obj_mach_o_set_vma_data): New type.
 	(obj_mach_o_set_section_vma): New.
 	(obj_mach_o_post_relax_hook): New.

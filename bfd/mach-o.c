@@ -2210,6 +2210,10 @@ bfd_mach_o_build_dysymtab_command (bfd *abfd,
 		    {
 		      if (isyms[j] == NULL)
 		        dsym->indirect_syms[n] = BFD_MACH_O_INDIRECT_SYM_LOCAL;
+		      else if (isyms[j]->symbol.section == bfd_abs_section_ptr
+			       && ! (isyms[j]->n_type & BFD_MACH_O_N_EXT))
+		        dsym->indirect_syms[n] = BFD_MACH_O_INDIRECT_SYM_LOCAL
+						 | BFD_MACH_O_INDIRECT_SYM_ABS;
 		      else
 		        dsym->indirect_syms[n] = isyms[j]->symbol.udata.i;
 		    }

@@ -1630,14 +1630,18 @@ obj_mach_o_set_indirect_symbols (bfd *abfd, asection *sec,
 	      
 	      for (isym = list, n = 0; isym != NULL; isym = isym->next, n++)
 		{
+		  sym = (bfd_mach_o_asymbol *)symbol_get_bfdsym (isym->sym);
 		  /* Array is init to NULL & NULL signals a local symbol
 		     If the section is lazy-bound, we need to keep the
-		     reference to the symbol, since dyld can override.  */
-		  if (S_IS_LOCAL (isym->sym) && ! lazy)
+		     reference to the symbol, since dyld can override.
+		     
+		     Absolute symbols are handled specially.  */
+		  if (sym->symbol.section == bfd_abs_section_ptr)
+		    ms->indirect_syms[n] = sym;
+		  else if (S_IS_LOCAL (isym->sym) && ! lazy)
 		    ;
 		  else
 		    {
-		      sym = (bfd_mach_o_asymbol *)symbol_get_bfdsym (isym->sym);
 		      if (sym == NULL)
 		        ;
 		      /* If the symbols is external ...  */
