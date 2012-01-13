@@ -1185,7 +1185,6 @@ bfd_mach_o_canonicalize_dynamic_reloc (bfd *abfd, arelent **rels,
 static bfd_boolean
 bfd_mach_o_write_relocs (bfd *abfd, bfd_mach_o_section *section)
 {
-  bfd_mach_o_data_struct *mdata = bfd_mach_o_get_data (abfd);
   unsigned int i;
   arelent **entries;
   asection *sec;
@@ -1197,13 +1196,6 @@ bfd_mach_o_write_relocs (bfd *abfd, bfd_mach_o_section *section)
 
   if (bed->_bfd_mach_o_swap_reloc_out == NULL)
     return TRUE;
-
-  /* Allocate relocation room.  */
-  mdata->filelen = FILE_ALIGN(mdata->filelen, 2);
-  section->nreloc = sec->reloc_count;
-  sec->rel_filepos = mdata->filelen;
-  section->reloff = sec->rel_filepos;
-  mdata->filelen += sec->reloc_count * BFD_MACH_O_RELENT_SIZE;
 
   if (bfd_seek (abfd, section->reloff, SEEK_SET) != 0)
     return FALSE;
@@ -2075,6 +2067,25 @@ bfd_mach_o_build_seg_command (const char *segment,
     }
 
   seg->filesize = mdata->filelen - seg->fileoff;
+  seg->filesize = FILE_ALIGN(seg->filesize, 2);
+
+  /* Allocate relocation room.  */
+  mdata->filelen = FILE_ALIGN(mdata->filelen, 2);
+
+  for (i = 0; i < mdata->nsects; ++i)
+    {
+      bfd_mach_o_section *ms = mdata->sections[i];
+      asection *sec = ms->bfdsection;
+        
+      if ((ms->nreloc = sec->reloc_count) == 0)
+        {
+	  ms->reloff = 0;
+	  continue;
+        }
+      sec->rel_filepos = mdata->filelen;
+      ms->reloff = sec->rel_filepos;
+      mdata->filelen += sec->reloc_count * BFD_MACH_O_RELENT_SIZE;
+    }
 
   return TRUE;
 }

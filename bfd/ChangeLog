@@ -1,3 +1,8 @@
+2012-01-13  Iain Sandoe  <idsandoe@googlemail.com>
+
+	* mach-o.c (bfd_mach_o_write_relocs): Move compuation of relocs file
+	position from here... to (bfd_mach_o_build_seg_command): Here.
+
 2012-01-12  Iain Sandoe  <idsandoe@googlemail.com>
 
 	* mach-o.c (bfd_mach_o_count_indirect_symbols): New.
