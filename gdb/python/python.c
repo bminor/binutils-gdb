@@ -1104,6 +1104,58 @@ gdbpy_breakpoint_has_py_cond (struct breakpoint_object *bp_obj)
 #endif /* HAVE_PYTHON */
 
 
+/* Support for "mt set python print-stack on|off" is present in gdb 7.4
+   to not break Eclipse.
+   ref: https://bugs.eclipse.org/bugs/show_bug.cgi?id=367788.  */
+
+/* Lists for 'maint set python' commands.  */
+
+static struct cmd_list_element *maint_set_python_list;
+static struct cmd_list_element *maint_show_python_list;
+
+/* Function for use by 'maint set python' prefix command.  */
+
+static void
+maint_set_python (char *args, int from_tty)
+{
+  help_list (maint_set_python_list, "maintenance set python ",
+	     class_deprecated, gdb_stdout);
+}
+
+/* Function for use by 'maint show python' prefix command.  */
+
+static void
+maint_show_python (char *args, int from_tty)
+{
+  cmd_show_list (maint_show_python_list, from_tty, "");
+}
+
+/* True if we should print the stack when catching a Python error,
+   false otherwise.  */
+static int gdbpy_should_print_stack_deprecated = 0;
+
+static void
+set_maint_python_print_stack (char *args, int from_tty,
+			      struct cmd_list_element *e)
+{
+  if (gdbpy_should_print_stack_deprecated)
+    gdbpy_should_print_stack = python_excp_full;
+  else
+    gdbpy_should_print_stack = python_excp_none;
+}
+
+static void
+show_maint_python_print_stack (struct ui_file *file, int from_tty,
+			       struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file,
+		    _("The mode of Python stack printing on error is"
+		      " \"%s\".\n"),
+		    gdbpy_should_print_stack == python_excp_full
+		    ? "on" : "off");
+}
+
+
 
 /* Lists for 'set python' commands.  */
 
@@ -1158,6 +1210,34 @@ Python scripting is not supported in this copy of GDB.\n\
 This command is only a placeholder.")
 #endif /* HAVE_PYTHON */
 	   );
+
+  add_prefix_cmd ("python", no_class, maint_show_python,
+		  _("Prefix command for python maintenance settings."),
+		  &maint_show_python_list, "maintenance show python ", 0,
+		  &maintenance_show_cmdlist);
+  add_prefix_cmd ("python", no_class, maint_set_python,
+		  _("Prefix command for python maintenance settings."),
+		  &maint_set_python_list, "maintenance set python ", 0,
+		  &maintenance_set_cmdlist);
+
+  add_setshow_boolean_cmd ("print-stack", class_maintenance,
+			   &gdbpy_should_print_stack_deprecated, _("\
+Enable or disable printing of Python stack dump on error."), _("\
+Show whether Python stack will be printed on error."), _("\
+Enables or disables printing of Python stack traces."),
+			   set_maint_python_print_stack,
+			   show_maint_python_print_stack,
+			   &maint_set_python_list,
+			   &maint_show_python_list);
+
+  /* Deprecate maint set/show python print-stack in favour of
+     non-maintenance alternatives.  */
+  cmd_name = "print-stack";
+  cmd = lookup_cmd (&cmd_name, maint_set_python_list, "", -1, 0);
+  deprecate_cmd (cmd, "set python print-stack");
+  cmd_name = "print-stack"; /* Reset name.  */
+  cmd = lookup_cmd (&cmd_name, maint_show_python_list, "", -1, 0);
+  deprecate_cmd (cmd, "show python print-stack");
 
   /* Add set/show python print-stack.  */
   add_prefix_cmd ("python", no_class, user_show_python,

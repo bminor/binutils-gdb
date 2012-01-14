@@ -29,10 +29,11 @@
      existing one.
 
   ** The "maint set python print-stack on|off" command has been
-     removed.  A new command: "set python print-stack
-     none|full|message" has replaced it.  Additionally, the default
-     for "print-stack" is now "message", which just prints the error
-     message without the stack trace.
+     deprecated and will be deleted in GDB 7.5.
+     A new command: "set python print-stack none|full|message" has
+     replaced it.  Additionally, the default for "print-stack" is
+     now "message", which just prints the error message without
+     the stack trace.
    
   ** A prompt substitution hook (prompt_hook) is now available to the
      Python API.

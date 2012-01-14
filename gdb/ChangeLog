@@ -1,3 +1,17 @@
+2012-01-14  Doug Evans  <dje@google.com>
+
+	Restore "mt set python print-stack on|off" for 7.4.
+	* NEWS: Update to indicate "mt set python print-stack" is deprecated,
+	but not deleted yet, and will be gone in gdb 7.5.
+	* python/python.c (maint_set_python_list, maint_show_python_list):
+	New global vars.
+	(maint_set_python, maint_show_python): New functions.
+	(gdbpy_should_print_stack_deprecated): New global var.
+	(set_maint_python_print_stack): New function.
+	(show_maint_python_print_stack): New function.
+	(_initialize_python): Define commands
+	"mt set python print-stack on|off" and ""mt show python print-stack".
+
 2012-01-13  Eli Zaretskii  <eliz@gnu.org>
 
 	* gdb_curses.h (MOUSE_MOVED) [__MINGW32__]: Undefine before
