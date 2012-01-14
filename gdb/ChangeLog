@@ -1,3 +1,8 @@
+2012-01-14  Doug Evans  <dje@google.com>
+
+	* NEWS: Update text for "maint set python print-stack".
+	It is deprecated in gdb 7.4 and deleted in 7.5.
+
 2012-01-13  Eli Zaretskii  <eliz@gnu.org>
 
 	* gdb_curses.h (MOUSE_MOVED) [__MINGW32__]: Undefine before
