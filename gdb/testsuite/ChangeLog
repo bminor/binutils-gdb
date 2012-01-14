@@ -1,3 +1,8 @@
+2012-01-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.dwarf2/dw2-namespaceless-anonymous.S: New file.
+	* gdb.dwarf2/dw2-namespaceless-anonymous.exp: New file.
+
 2012-01-13  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* gdb.base/attach-pie-misread.exp: Pass -pie only to the linker.
