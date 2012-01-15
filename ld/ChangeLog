@@ -1,3 +1,9 @@
+2012-01-15  Alan Modra  <amodra@gmail.com>
+
+	PR ld/12758
+	* ldlang.c (lang_process): Don't reopen all files, just those
+	newly added by plugin.
+
 2012-01-11  Alan Modra  <amodra@gmail.com>
 
 	* emultempl/ppc64elf.em (PARSE_AND_LIST_PROLOGUE,

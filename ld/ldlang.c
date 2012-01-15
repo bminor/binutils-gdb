@@ -1,6 +1,6 @@
 /* Linker command language support.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011
+   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012
    Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils.
@@ -6590,7 +6590,7 @@ lang_process (void)
 	       plugin_error_plugin ());
       /* Open any newly added files, updating the file chains.  */
       link_info.loading_lto_outputs = TRUE;
-      open_input_bfds (added.head, OPEN_BFD_NORMAL);
+      open_input_bfds (*added.tail, OPEN_BFD_NORMAL);
       /* Restore the global list pointer now they have all been added.  */
       lang_list_remove_tail (stat_ptr, &added);
       /* And detach the fresh ends of the file lists.  */
