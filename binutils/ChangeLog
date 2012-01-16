@@ -1,3 +1,11 @@
+2012-01-16  Alan Modra  <amodra@gmail.com>
+
+	PR binutils/13593
+	* nm.c (OPTION_SIZE_SORT): Define.
+	(long_options): Don't set no_sort, sort_numerically or
+	sort_by_size directly.
+	(main): Instead set the flags here, making them mutually exclusive.
+
 2012-01-10  Tristan Gingold  <gingold@adacore.com>
 
 	* objdump.c (display_object_bfd): Renamed from ...

@@ -1,6 +1,6 @@
 /* nm.c -- Describe symbol table of a rel file.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004, 2005, 2007, 2008, 2009, 2010
+   2001, 2002, 2003, 2004, 2005, 2007, 2008, 2009, 2010, 2011, 2012
    Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
@@ -184,7 +184,8 @@ static bfd *lineno_cache_bfd;
 static bfd *lineno_cache_rel_bfd;
 
 #define OPTION_TARGET 200
-#define OPTION_PLUGIN 201
+#define OPTION_PLUGIN (OPTION_TARGET + 1)
+#define OPTION_SIZE_SORT (OPTION_PLUGIN + 1)
 
 static struct option long_options[] =
 {
@@ -197,8 +198,8 @@ static struct option long_options[] =
   {"line-numbers", no_argument, 0, 'l'},
   {"no-cplus", no_argument, &do_demangle, 0},  /* Linux compatibility.  */
   {"no-demangle", no_argument, &do_demangle, 0},
-  {"no-sort", no_argument, &no_sort, 1},
-  {"numeric-sort", no_argument, &sort_numerically, 1},
+  {"no-sort", no_argument, 0, 'p'},
+  {"numeric-sort", no_argument, 0, 'n'},
   {"plugin", required_argument, 0, OPTION_PLUGIN},
   {"portability", no_argument, 0, 'P'},
   {"print-armap", no_argument, &print_armap, 1},
@@ -206,7 +207,7 @@ static struct option long_options[] =
   {"print-size", no_argument, 0, 'S'},
   {"radix", required_argument, 0, 't'},
   {"reverse-sort", no_argument, &reverse_sort, 1},
-  {"size-sort", no_argument, &sort_by_size, 1},
+  {"size-sort", no_argument, 0, OPTION_SIZE_SORT},
   {"special-syms", no_argument, &allow_special_symbols, 1},
   {"stats", no_argument, &show_stats, 1},
   {"synthetic", no_argument, &show_synthetic, 1},
@@ -1593,10 +1594,19 @@ main (int argc, char **argv)
 	  break;
 	case 'n':
 	case 'v':
+	  no_sort = 0;
 	  sort_numerically = 1;
+	  sort_by_size = 0;
 	  break;
 	case 'p':
 	  no_sort = 1;
+	  sort_numerically = 0;
+	  sort_by_size = 0;
+	  break;
+	case OPTION_SIZE_SORT:
+	  no_sort = 0;
+	  sort_numerically = 0;
+	  sort_by_size = 1;
 	  break;
 	case 'P':
 	  set_output_format ("posix");
