@@ -2721,7 +2721,7 @@ ppc64_elf_write_core_note (bfd *abfd, char *buf, int *bufsiz, int note_type,
 	va_list ap;
 
 	va_start (ap, note_type);
-	memset (data, 0, 40);
+	memset (data, 0, sizeof (data));
 	strncpy (data + 40, va_arg (ap, const char *), 16);
 	strncpy (data + 56, va_arg (ap, const char *), 80);
 	va_end (ap);
