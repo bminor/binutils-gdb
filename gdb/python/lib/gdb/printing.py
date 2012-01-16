@@ -206,3 +206,53 @@ class RegexpCollectionPrettyPrinter(PrettyPrinter):
 
         # Cannot find a pretty printer.  Return None.
         return None
+
+# A helper class for printing enum types.  This class is instantiated
+# with a list of enumerators to print a particular Value.
+class _EnumInstance:
+    def __init__(self, enumerators, val):
+        self.enumerators = enumerators
+        self.val = val
+
+    def to_string(self):
+        flag_list = []
+        v = long(self.val)
+        any_found = False
+        for (e_name, e_value) in self.enumerators:
+            if v & e_value != 0:
+                flag_list.append(e_name)
+                v = v & ~e_value
+                any_found = True
+        if not any_found or v != 0:
+            # Leftover value.
+            flag_list.append('<unknown: 0x%x>' % v)
+        return "0x%x [%s]" % (self.val, " | ".join(flag_list))
+
+class FlagEnumerationPrinter(PrettyPrinter):
+    """A pretty-printer which can be used to print a flag-style enumeration.
+    A flag-style enumeration is one where the enumerators are or'd
+    together to create values.  The new printer will print these
+    symbolically using '|' notation.  The printer must be registered
+    manually.  This printer is most useful when an enum is flag-like,
+    but has some overlap.  GDB's built-in printing will not handle
+    this case, but this printer will attempt to."""
+
+    def __init__(self, enum_type):
+        super(FlagEnumerationPrinter, self).__init__(enum_type)
+        self.initialized = False
+
+    def __call__(self, val):
+        if not self.initialized:
+            self.initialized = True
+            flags = gdb.lookup_type(self.name)
+            self.enumerators = []
+            for field in flags.fields():
+                self.enumerators.append((field.name, field.bitpos))
+            # Sorting the enumerators by value usually does the right
+            # thing.
+            self.enumerators.sort(key = lambda x: x.bitpos)
+
+        if self.enabled:
+            return _EnumInstance(self.enumerators, val)
+        else:
+            return None

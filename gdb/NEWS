@@ -13,6 +13,18 @@
 * The binary "gdbtui" can no longer be built or installed.
   Use "gdb -tui" instead.
 
+* GDB will now print "flag" enums specially.  A flag enum is one where
+  all the enumerator values have no bits in common when pairwise
+  "and"ed.  When printing a value whose type is a flag enum, GDB will
+  show all the constants, e.g., for enum E { ONE = 1, TWO = 2}:
+  (gdb) print (enum E) 3
+  $1 = (ONE | TWO)
+
+* Python scripting
+
+  ** A new class, gdb.printing.FlagEnumerationPrinter, can be used to
+     apply "flag enum"-style pretty-printing to any enum.
+
 *** Changes in GDB 7.4
 
 * GDB now handles ambiguous linespecs more consistently; the existing

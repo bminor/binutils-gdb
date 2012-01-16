@@ -7913,6 +7913,8 @@ process_enumeration_scope (struct die_info *die, struct dwarf2_cu *cu)
       int num_fields = 0;
       int unsigned_enum = 1;
       char *name;
+      int flag_enum = 1;
+      ULONGEST mask = 0;
 
       child_die = die->child;
       while (child_die && child_die->tag)
@@ -7928,7 +7930,14 @@ process_enumeration_scope (struct die_info *die, struct dwarf2_cu *cu)
 		{
 		  sym = new_symbol (child_die, this_type, cu);
 		  if (SYMBOL_VALUE (sym) < 0)
-		    unsigned_enum = 0;
+		    {
+		      unsigned_enum = 0;
+		      flag_enum = 0;
+		    }
+		  else if ((mask & SYMBOL_VALUE (sym)) != 0)
+		    flag_enum = 0;
+		  else
+		    mask |= SYMBOL_VALUE (sym);
 
 		  if ((num_fields % DW_FIELD_ALLOC_CHUNK) == 0)
 		    {
@@ -7961,6 +7970,8 @@ process_enumeration_scope (struct die_info *die, struct dwarf2_cu *cu)
 	}
       if (unsigned_enum)
 	TYPE_UNSIGNED (this_type) = 1;
+      if (flag_enum)
+	TYPE_FLAG_ENUM (this_type) = 1;
     }
 
   /* If we are reading an enum from a .debug_types unit, and the enum

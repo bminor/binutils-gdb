@@ -697,6 +697,8 @@ proc test_print_array_constants {} {
 proc test_print_enums {} {
     # Regression test for PR11827.
     gdb_test "print some_volatile_enum" "enumvolval1"
+
+    gdb_test "print three" " = \\\(ONE \\| TWO\\\)"
 }
 
 proc test_printf {} {

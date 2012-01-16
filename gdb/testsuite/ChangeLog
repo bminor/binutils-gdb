@@ -1,3 +1,15 @@
+2012-01-16  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.base/printcmds.c (enum flag_enum): New.
+	(three): New global.
+	* gdb.base/printcmds.exp (test_print_enums): Add test for flag
+	enum printing.
+	* gdb.python/py-pp-maint.py (build_pretty_printer): Instantiate
+	FlagEnumerationPrinter.
+	* gdb.python/py-pp-maint.exp: Add tests for FlagEnumerationPrinter.
+	* gdb.python/py-pp-maint.c (enum flag_enum): New.
+	(fval): New global.
+
 2012-01-16  Pedro Alves  <palves@redhat.com>
 
 	* lib/gdb.exp (banned_procedures): New variable.

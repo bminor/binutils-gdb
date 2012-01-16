@@ -17,6 +17,16 @@
 
 #include <string.h>
 
+enum flag_enum
+  {
+    FLAG_1 = 1,
+    FLAG_2 = 2,
+    FLAG_3 = 4,
+    ALL = FLAG_1 | FLAG_2 | FLAG_3
+  };
+
+enum flag_enum fval;
+
 struct function_lookup_test
 {
   int x,y;

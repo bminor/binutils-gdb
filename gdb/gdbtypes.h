@@ -290,6 +290,12 @@ enum type_instance_flag_value
 
 #define TYPE_DECLARED_CLASS(t) (TYPE_MAIN_TYPE (t)->flag_declared_class)
 
+/* True if this type is a "flag" enum.  A flag enum is one where all
+   the values are pairwise disjoint when "and"ed together.  This
+   affects how enum values are printed.  */
+
+#define TYPE_FLAG_ENUM(t) (TYPE_MAIN_TYPE (t)->flag_flag_enum)
+
 /* Constant type.  If this is set, the corresponding type has a
    const modifier.  */
 
@@ -399,6 +405,11 @@ struct main_type
   /* True if this type was declared with "class" rather than
      "struct".  */
   unsigned int flag_declared_class : 1;
+
+  /* True if this is an enum type with disjoint values.  This affects
+     how the enum is printed.  */
+
+  unsigned int flag_flag_enum : 1;
 
   /* A discriminant telling us which field of the type_specific union
      is being used for this type, if any.  */

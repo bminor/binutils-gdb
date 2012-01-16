@@ -1,3 +1,15 @@
+2012-01-16  Tom Tromey  <tromey@redhat.com>
+
+	PR python/13281:
+	* gdbtypes.h (TYPE_FLAG_ENUM): New macro.
+	(struct main_type) <flag_flag_enum>: New field.
+	* dwarf2read.c (process_enumeration_scope): Detect "flag" enums.
+	* NEWS: Add entries.
+	* c-valprint.c (c_val_print) <TYPE_CODE_ENUM>: Handle "flag"
+	enums.
+	* python/lib/gdb/printing.py (_EnumInstance): New class.
+	(FlagEnumerationPrinter): Likewise.
+
 2012-01-16  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* breakpoint.c (create_sals_from_address_default): New function.

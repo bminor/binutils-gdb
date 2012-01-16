@@ -24720,6 +24720,13 @@ Utility class for handling multiple printers, all recognized via
 regular expressions.
 @xref{Writing a Pretty-Printer}, for an example.
 
+@item FlagEnumerationPrinter (@var{name})
+A pretty-printer which handles printing of @code{enum} values.  Unlike
+@value{GDBN}'s built-in @code{enum} printing, this printer attempts to
+work properly when there is some overlap between the enumeration
+constants.  @var{name} is the name of the printer and also the name of
+the @code{enum} type to look up.
+
 @item register_pretty_printer (@var{obj}, @var{printer}, @var{replace}=False)
 Register @var{printer} with the pretty-printer list of @var{obj}.
 If @var{replace} is @code{True} then any existing copy of the printer

@@ -96,6 +96,10 @@ enum some_volatile_enum { enumvolval1, enumvolval2 };
    name.  See PR11827.  */
 volatile enum some_volatile_enum some_volatile_enum = enumvolval1;
 
+enum flag_enum { ONE = 1, TWO = 2 };
+
+enum flag_enum three = ONE | TWO;
+
 /* A structure with an embedded array at an offset > 0.  The array has
    all elements with the same repeating value, which must not be the
    same as the value of the preceding fields in the structure for the

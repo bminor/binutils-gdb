@@ -67,6 +67,9 @@ def build_pretty_printer():
     pp.add_printer('struct ss', '^struct ss$', lambda val: pp_ss(val))
     pp.add_printer('ss', '^ss$', lambda val: pp_ss(val))
 
+    pp.add_printer('enum flag_enum', '^flag_enum$',
+                   gdb.printing.FlagEnumerationPrinter('enum flag_enum'))
+
     return pp
 
 
