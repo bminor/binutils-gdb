@@ -99,6 +99,8 @@ if { [istarget m68*-*-*] || [istarget fido*-*-*] } then {
     }
 
     run_dump_test pr11676
+
+    run_dump_test pmove
 }
 if [info exists errorInfo] then {
     unset errorInfo

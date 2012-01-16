@@ -1850,11 +1850,11 @@ const struct m68k_opcode m68k_opcodes[] =
 {"pmove", 4,    two(0xf000,0x4200), two(0xffc0,0xe3ff), "28%s", m68851 },
 {"pmove", 4,    two(0xf000,0x4000), two(0xffc0,0xe3ff), "|sW8", m68030|m68851 },
 {"pmove", 4,    two(0xf000,0x4200), two(0xffc0,0xe3ff), "W8~s", m68030|m68851 },
-{"pmove", 4,    two(0xf000,0x6200), two(0xffc0,0xe3e3), "*wX3", m68851 },
-{"pmove", 4,    two(0xf000,0x6000), two(0xffc0,0xe3e3), "X3%s", m68851 },
 {"pmove", 4,    two(0xf000,0x6000), two(0xffc0,0xffff), "*wY8", m68030|m68851 },
 {"pmove", 4,    two(0xf000,0x6200), two(0xffc0,0xffff), "Y8%s", m68030|m68851 },
 {"pmove", 4,    two(0xf000,0x6600), two(0xffc0,0xffff), "Z8%s", m68851 },
+{"pmove", 4,    two(0xf000,0x6000), two(0xffc0,0xe3e3), "*wX3", m68851 },
+{"pmove", 4,    two(0xf000,0x6200), two(0xffc0,0xe3e3), "X3%s", m68851 },
 {"pmove", 4,    two(0xf000,0x0800), two(0xffc0,0xfbff), "*l38", m68030 },
 {"pmove", 4,    two(0xf000,0x0a00), two(0xffc0,0xfbff), "38%s", m68030 },
 
