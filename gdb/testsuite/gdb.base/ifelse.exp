@@ -16,10 +16,6 @@
 # This test checks that the if .. else .. end construct works and may
 # contain empty bodies without crashing.
 
-if $tracelevel then {
-    strace $tracelevel
-}
-
 gdb_exit
 gdb_start
 

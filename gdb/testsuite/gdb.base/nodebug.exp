@@ -16,10 +16,6 @@
 
 # Test that things still (sort of) work when compiled without -g.
 
-if $tracelevel then {
-	strace $tracelevel
-}
-
 
 set testfile nodebug
 set srcfile $srcdir/$subdir/$testfile.c

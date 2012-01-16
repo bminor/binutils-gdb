@@ -25,10 +25,6 @@
 
 global timeout
 set timeout 15
-if $tracelevel then {
-        strace $tracelevel
-        }
-
 #
 # test running programs
 #

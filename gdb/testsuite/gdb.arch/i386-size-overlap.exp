@@ -15,10 +15,6 @@
 
 # This file is part of the gdb testsuite.
 
-if $tracelevel {
-    strace $tracelevel
-}
-
 # Test that GDB can handle overlapping sizes of symbols.
 
 if {(![istarget "x86_64-*-*"] && ![istarget "i?86-*-*"]) || ![is_ilp32_target] } then {

@@ -20,10 +20,6 @@
 
 # Unwinding of DW_CFA_GNU_negative_offset_extended test program.
 
-if $tracelevel {
-    strace $tracelevel
-}
-
 # Test i386 unwinder.
 
 

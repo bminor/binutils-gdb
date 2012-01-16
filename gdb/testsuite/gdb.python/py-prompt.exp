@@ -16,10 +16,6 @@
 # This file is part of the GDB testsuite.  It tests the mechanism
 # for defining the prompt in Python.
 
-if $tracelevel then {
-    strace $tracelevel
-}
-
 set testfile "py-prompt"
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}

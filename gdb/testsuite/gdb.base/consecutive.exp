@@ -15,10 +15,6 @@
 
 # This file was written by Michael Snyder. (msnyder@redhat.com)
 
-if $tracelevel then {
-    strace $tracelevel
-}
-
 #
 # Test breakpoints at consecutive instruction addresses.
 #

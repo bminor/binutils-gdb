@@ -15,10 +15,6 @@
 #
 # This file was written by Kendra.
 
-if $tracelevel then {
-    strace $tracelevel
-}
-
 #
 # Test debugging assembly level programs.
 # This file uses asmsrc[12].s for input.

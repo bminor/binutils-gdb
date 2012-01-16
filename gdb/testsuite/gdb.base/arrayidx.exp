@@ -17,10 +17,6 @@
 # gdb can correctly print arrays with indexes for each element of the
 # array.
 
-if $tracelevel {
-    strace $tracelevel
-}
-
 set testfile "arrayidx"
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}

@@ -20,10 +20,6 @@ if [target_info exists gdb,nofileio] {
     continue
 }
 
-if $tracelevel then {
-        strace $tracelevel
-}
-
 
 set testfile "fileio"
 set srcfile ${testfile}.c

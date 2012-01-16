@@ -21,10 +21,6 @@
 # Tests for PR:1291.  Ensure that backtrace works properly for stack
 # frames greater than 256 bytes.
 
-if $tracelevel {
-    strace $tracelevel
-}
-
 # Test SH backtraces with >256 byte frame stack. (PR:1291)
 
 

@@ -15,10 +15,6 @@
 
 # This file was written by Kazu Hirata. (kazu@hxi.com)
 
-if $tracelevel then {
-	strace $tracelevel
-}
-
 if ![istarget "h8300*-*-*"] {
     verbose "Tests ignored for all but h8300s based targets."
     return

@@ -18,10 +18,6 @@
 # long_long.exp   Test printing of 64-bit things in 32-bit gdb.
 #                 Also test differnet kinds of formats.
 #
-if $tracelevel then {
-	strace $tracelevel
-}
-
 if [target_info exists no_long_long] {
     return 0
 }

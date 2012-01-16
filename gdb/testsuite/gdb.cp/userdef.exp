@@ -19,10 +19,6 @@
 # source file "userdef.cc"
 #
 
-if $tracelevel then {
-        strace $tracelevel
-}
-
 if { [skip_stl_tests] } { continue }
 
 # On SPU this test fails because the executable exceeds local storage size.

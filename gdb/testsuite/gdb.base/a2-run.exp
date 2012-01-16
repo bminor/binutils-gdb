@@ -21,10 +21,6 @@ if [gdb_skip_stdio_test "a2run.exp"] {
     return
 }
 
-if $tracelevel then {
-    strace $tracelevel
-}
-
 #
 # test running programs
 #

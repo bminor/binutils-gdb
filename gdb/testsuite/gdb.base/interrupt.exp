@@ -23,10 +23,6 @@ if [target_info exists gdb,noinferiorio] {
     return
 }
 
-if $tracelevel then {
-	strace $tracelevel
-}
-
 
 set testfile interrupt
 set srcfile ${testfile}.c

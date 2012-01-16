@@ -16,10 +16,6 @@
 # This file was written by Jeff Johnston. (jjohnstn@redhat.com)
 #
 
-if $tracelevel then {
-	strace $tracelevel
-}
-
 load_lib "java.exp"
 
 if { [skip_java_tests] } { continue }

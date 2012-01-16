@@ -33,10 +33,6 @@ if [target_info exists gdb,nosignals] {
     continue
 }
 
-if $tracelevel {
-    strace $tracelevel
-}
-
 
 set testfile "sigbpt"
 set srcfile ${testfile}.c

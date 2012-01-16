@@ -16,10 +16,6 @@
 # This file is part of the gdb testsuite.  It is intended to test that
 # gdb could correctly handle floating point constant with a suffix.
 
-if $tracelevel {
-    strace $tracelevel
-}
-
 set testfile "bfp-test"
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}

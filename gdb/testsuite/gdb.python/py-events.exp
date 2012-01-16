@@ -17,10 +17,6 @@ if [target_info exists use_gdb_stub] {
     return 0
 }
 
-if $tracelevel then {
-    strace $tracelevel
-}
-
 load_lib gdb-python.exp
 
 set libfile "py-events-shlib"

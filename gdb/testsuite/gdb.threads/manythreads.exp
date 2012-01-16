@@ -16,10 +16,6 @@
 
 # This file was written by Jeff Johnston. (jjohnstn@redhat.com)
 
-if $tracelevel then {
-	strace $tracelevel
-}
-
 
 set testfile "manythreads"
 set srcfile ${testfile}.c

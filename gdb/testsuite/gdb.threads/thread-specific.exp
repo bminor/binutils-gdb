@@ -17,10 +17,6 @@
 # It tests that the correct breakpoint is reported when we hit a
 # thread-specific breakpoint inserted for several threads.
 
-if $tracelevel then {
-	strace $tracelevel
-}
-
 
 set testfile "thread-specific"
 set srcfile ${testfile}.c

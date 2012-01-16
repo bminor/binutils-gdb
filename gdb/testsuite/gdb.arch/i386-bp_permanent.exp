@@ -16,10 +16,6 @@
 
 # This file is part of the gdb testsuite.
 
-if $tracelevel {
-    strace $tracelevel
-}
-
 # Test stepping over permanent breakpoints on i386.
 
 if {(![istarget "x86_64-*-*"] && ![istarget "i?86-*-*"]) || ![is_ilp32_target] } then {

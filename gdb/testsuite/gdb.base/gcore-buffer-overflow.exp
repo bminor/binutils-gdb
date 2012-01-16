@@ -15,10 +15,6 @@
 
 # Test GDB's internal buffers safety for the GCORE command.
 
-if $tracelevel then {
-	strace $tracelevel
-}
-
 
 set testfile "gcore-buffer-overflow"
 set srcfile  ${testfile}.c

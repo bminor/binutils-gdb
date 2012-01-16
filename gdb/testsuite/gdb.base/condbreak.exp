@@ -17,10 +17,6 @@
 # Purpose is to test conditional breakpoints.
 # Modeled after "break.exp".
 
-if $tracelevel then {
-	strace $tracelevel
-	}
-
 #
 # test running programs
 #

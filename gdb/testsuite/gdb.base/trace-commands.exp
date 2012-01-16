@@ -16,10 +16,6 @@
 # Test that the source command's verbose mode works, the 'set trace-commands'
 # command works, and that the nest depth is correct in various circumstances.
 
-if $tracelevel then {
-    strace $tracelevel
-}
-
 gdb_exit
 gdb_start
 

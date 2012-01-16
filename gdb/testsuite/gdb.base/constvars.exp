@@ -23,10 +23,6 @@
 #           const pointers to const vars
 # with mixed types
 
-if $tracelevel then {
-    strace $tracelevel
-}
-
 #
 # test running programs
 #

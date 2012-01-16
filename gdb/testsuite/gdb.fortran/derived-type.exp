@@ -18,10 +18,6 @@
 # This file is part of the gdb testsuite.  It contains tests for type-printing
 # and value-printing Fortran derived types.
 
-if $tracelevel then {
-	strace $tracelevel
-}
-
 if { [skip_fortran_tests] } { return -1 }
 
 set testfile "derived-type"

@@ -30,10 +30,6 @@ if [gdb_skip_stdio_test "siginfo-addr.exp"] {
     continue
 }
 
-if $tracelevel then {
-    strace $tracelevel
-}
-
 
 set testfile siginfo-addr
 set srcfile ${testfile}.c

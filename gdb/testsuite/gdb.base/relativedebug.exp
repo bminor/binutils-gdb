@@ -18,10 +18,6 @@ if [target_info exists gdb,nosignals] {
     continue
 }
 
-if $tracelevel then {
-    strace $tracelevel
-}
-
 set testfile relativedebug
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}

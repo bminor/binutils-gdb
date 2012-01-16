@@ -17,10 +17,6 @@
 # This file was adapted from old Chill tests by Stan Shebs
 # (shebs@cygnus.com).
 
-if $tracelevel then {
-	strace $tracelevel
-}
-
 load_lib "fortran.exp"
 
 if { [skip_fortran_tests] } { continue }

@@ -16,10 +16,6 @@
 # This file is part of the GDB testsuite.  It tests the mechanism
 # exposing values to Python.
 
-if $tracelevel then {
-    strace $tracelevel
-}
-
 if {[skip_shlib_tests]} {
 	untested py-finish-breakpoint.exp
     return 0

@@ -17,10 +17,6 @@
 #
 # Tests component access of OpenCL vectors.
 
-if $tracelevel {
-    strace $tracelevel
-}
-
 load_lib opencl.exp
 
 if { [skip_opencl_tests] } {

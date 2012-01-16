@@ -16,10 +16,6 @@
 # This file is part of the GDB testsuite.  It tests the program space
 # support in Python.
 
-if $tracelevel then {
-    strace $tracelevel
-}
-
 set testfile "py-progspace"
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}

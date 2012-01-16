@@ -16,10 +16,6 @@
 # This file was written by Michael Snyder (msnyder@redhat.com)
 # This is a test for the gdb command "info proc"
 
-if $tracelevel then {
-	strace $tracelevel
-}
-
 if { [is_remote target] } then {
   continue
 }

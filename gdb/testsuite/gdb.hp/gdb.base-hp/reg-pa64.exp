@@ -17,10 +17,6 @@
 # use this to debug:
 #log_user 1
 
-if $tracelevel {
-    strace $tracelevel
-}
-
 if { [skip_hp_tests] } { continue }
 
 if ![istarget "hppa*-*-*"] {

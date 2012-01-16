@@ -16,10 +16,6 @@
 # Test for PR gdb/1056.
 # 2003-10-18  Michael Chastain <mec@shout.net>
 
-if $tracelevel then {
-    strace $tracelevel
-}
-
 # test SIGFPE (such as division by 0) inside gdb itself
 
 

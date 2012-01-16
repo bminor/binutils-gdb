@@ -23,10 +23,6 @@
 # in bitfields.c, which considers only bit-fields that are <= 9 bits long.
 #
 
-if $tracelevel then {
-	strace $tracelevel
-}
-
 
 set testfile "bitfields2"
 set srcfile ${testfile}.c

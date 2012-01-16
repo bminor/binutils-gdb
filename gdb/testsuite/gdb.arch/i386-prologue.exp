@@ -18,10 +18,6 @@
 
 # This file is part of the gdb testsuite.
 
-if $tracelevel {
-    strace $tracelevel
-}
-
 # Test i386 prologue analyzer.
 
 

@@ -171,10 +171,6 @@
 # other ways this test could fail to do its job.  If you need to make
 # revisions, please be very careful.
 
-if $tracelevel then {
-    strace $tracelevel
-}
-
 #
 # test running programs
 #

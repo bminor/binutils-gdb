@@ -17,10 +17,6 @@
 
 # This file was written by Adam Fedor (fedor@gnu.org)
 
-if $tracelevel then {
-	strace $tracelevel
-}
-
 set testfile "objcdecode"
 set srcfile ${testfile}.m
 set binfile ${objdir}/${subdir}/${testfile}

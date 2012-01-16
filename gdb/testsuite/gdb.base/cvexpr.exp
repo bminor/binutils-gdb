@@ -18,10 +18,6 @@
 # This file is part of the gdb testsuite
 # Tests for type expressions using const and volatile keywords.
 
-if $tracelevel then {
-        strace $tracelevel
-        }
-
 #
 # test running programs
 #

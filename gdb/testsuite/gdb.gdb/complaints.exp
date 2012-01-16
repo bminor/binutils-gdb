@@ -17,10 +17,6 @@
 # derived from xfullpath.exp (written by Joel Brobecker), derived from
 # selftest.exp (written by Rob Savoye).
 
-if $tracelevel then {
-    strace $tracelevel
-}
-
 
 # are we on a target board
 if { [is_remote target] || ![isnative] } then {

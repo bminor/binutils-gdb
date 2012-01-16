@@ -24,10 +24,6 @@ if ![supports_process_record] {
     return
 }
 
-if $tracelevel {
-    strace $tracelevel
-}
-
 
 if ![istarget "i?86-*linux*"] then {
     verbose "Skipping i386 reverse tests."

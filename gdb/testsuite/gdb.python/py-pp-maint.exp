@@ -16,10 +16,6 @@
 # This file is part of the GDB testsuite.  It tests Python-based
 # pretty-printing for the CLI.
 
-if $tracelevel then {
-    strace $tracelevel
-}
-
 if [is_remote host] {
     untested "py-pp-maint.exp can only be run locally"
     return -1

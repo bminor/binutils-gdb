@@ -18,10 +18,6 @@
 # Test "return", "finish", and "call" of functions that a scalar (int,
 # float, enum) and/or take a single scalar parameter.
 
-if $tracelevel then {
-	strace $tracelevel
-}
-
 
 # Some targets can't call functions, so don't even bother with this
 # test.

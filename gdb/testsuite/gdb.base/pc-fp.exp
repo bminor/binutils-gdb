@@ -20,10 +20,6 @@
 # aliases.  If the ISA doesn't provide any equivalent registers, then
 # GDB will provide registers that map onto the frame's PC and FP.
 
-if $tracelevel then {
-    strace $tracelevel
-}
-
 #
 # test running programs
 #

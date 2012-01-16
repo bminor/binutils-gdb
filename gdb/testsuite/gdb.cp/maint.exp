@@ -18,10 +18,6 @@
 
 # Currently, no source file is used.
 
-if $tracelevel then {
-        strace $tracelevel
-        }
-
 # Test the help messages.
 
 proc test_help {} {

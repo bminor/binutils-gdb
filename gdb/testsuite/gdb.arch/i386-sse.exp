@@ -18,10 +18,6 @@
 
 # This file is part of the gdb testsuite.
 
-if $tracelevel {
-    strace $tracelevel
-}
-
 
 if { ![istarget i?86-*-*] && ![istarget x86_64-*-* ] } {
     verbose "Skipping x86 SSE tests."

@@ -17,10 +17,6 @@
 # Tests for Powerpc e500 ABI
 
 
-if $tracelevel then {
-    strace $tracelevel
-}
-
 #
 # This file uses e500-abi.c for input.
 #

@@ -18,10 +18,6 @@
 # This file is part of the gdb testsuite.  It contains tests for evaluating
 # Fortran subarray expression.
 
-if $tracelevel then {
-	strace $tracelevel
-}
-
 if { [skip_fortran_tests] } { return -1 }
 
 set testfile "subarray"

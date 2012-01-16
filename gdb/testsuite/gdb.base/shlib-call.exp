@@ -28,10 +28,6 @@
 #prop lib shr1.sl
 #prop lib shr2.sl
 
-if $tracelevel then {
-        strace $tracelevel
-}
-
 
 if {[skip_shlib_tests]} {
     return 0

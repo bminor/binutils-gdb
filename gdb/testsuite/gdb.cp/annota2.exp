@@ -15,10 +15,6 @@
 
 # This file was written by Elena Zannoni (ezannoni@cygnus.com)
 
-if $tracelevel then {
-    strace $tracelevel
-}
-
 
 #
 # test running programs

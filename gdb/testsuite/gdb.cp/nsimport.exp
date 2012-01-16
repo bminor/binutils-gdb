@@ -16,10 +16,6 @@
 # Test printing from multiple namespace
 # imported into the same scope.
 
-if $tracelevel then {
-    strace $tracelevel
-}
-
 
 set testfile nsimport
 set srcfile ${testfile}.cc

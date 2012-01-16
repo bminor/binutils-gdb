@@ -54,10 +54,6 @@
 # [7]+  Killed                  $D6/gdb/gdb -nw killed
 # $ 
 
-if $tracelevel then {
-	strace $tracelevel
-}
-
 
 set testfile "killed"
 set srcfile ${testfile}.c

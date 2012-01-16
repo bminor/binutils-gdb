@@ -19,10 +19,6 @@
 #
 # This test covers the various forms of "set scheduler-locking".
 
-if $tracelevel then {
-	strace $tracelevel
-}
-
 
 set testfile "schedlock"
 set srcfile ${testfile}.c

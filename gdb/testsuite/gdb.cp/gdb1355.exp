@@ -21,10 +21,6 @@
 set ws "\[\r\n\t \]*"
 set nl "\[\r\n\]+"
 
-if $tracelevel then {
-    strace $tracelevel
-    }
-
 if { [skip_cplus_tests] } { continue }
 
 #

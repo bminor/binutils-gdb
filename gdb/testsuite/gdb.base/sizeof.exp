@@ -20,10 +20,6 @@ if [target_info exists gdb,noinferiorio] {
     continue
 }
 
-if $tracelevel {
-    strace $tracelevel
-}
-
 #
 # test running programs
 #

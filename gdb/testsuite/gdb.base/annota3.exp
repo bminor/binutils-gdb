@@ -15,10 +15,6 @@
 
 # This file was written by Elena Zannoni (ezannoni@cygnus.com)
 
-if $tracelevel then {
-    strace $tracelevel
-}
-
 
 # are we on a target board? If so, don't run these tests.
 # note: this is necessary because we cannot use runto_main (which would

@@ -19,10 +19,6 @@
 #                        watch commands.
 #
 
-if $tracelevel then {
-	strace $tracelevel
-}
-
 # This test verifies that a watchpoint is detected in the proper thread
 # so the test is only meaningful on a system with hardware watchpoints.
 if {[skip_hw_watchpoint_tests]} {

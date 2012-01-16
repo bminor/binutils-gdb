@@ -17,10 +17,6 @@
 # a shared library (PR gdb/1555, was PR shlib/1280, shlib/1237).
 # Tested on ppc-yellowdog-linux (Yellow Dog Linux 3.0 3.2.2-2a)
 
-if $tracelevel then {
-    strace $tracelevel
-}
-
 if {[skip_shlib_tests]} {
     return 0
 }

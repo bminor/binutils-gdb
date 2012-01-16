@@ -16,10 +16,6 @@
 
 # This file was written by Fred Fish. (fnf@cygnus.com)
 
-if $tracelevel then {
-        strace $tracelevel
-        }
-
 if { [skip_hp_tests] } then { continue }
 
 #

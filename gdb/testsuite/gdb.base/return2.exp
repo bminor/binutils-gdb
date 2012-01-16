@@ -15,10 +15,6 @@
 
 # This file was written by Michael Snyder (msnyder@redhat.com)
 
-if $tracelevel then {
-	strace $tracelevel
-}
-
 
 set testfile "return2"
 set srcfile ${testfile}.c

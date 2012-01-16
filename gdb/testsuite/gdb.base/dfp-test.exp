@@ -18,10 +18,6 @@
 # This file is part of the gdb testsuite.  It is intended to test that
 # gdb could correctly handle decimal floating point introduced in IEEE 754R.
 
-if $tracelevel then {
-  strace $tracelevel
-}
-
 set testfile "dfp-test"
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}

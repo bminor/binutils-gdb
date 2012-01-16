@@ -22,10 +22,6 @@
 
 #debug strarg
 
-if $tracelevel then {
-        strace $tracelevel
-}
-
 
 set testfile "call-strs"
 set srcfile ${testfile}.c

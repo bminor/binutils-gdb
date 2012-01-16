@@ -26,10 +26,6 @@
 # ".debug-id/ab/cdef.debug" file.
 
 
-if $tracelevel then {
-    strace $tracelevel
-}
-
 #
 # test running programs
 #

@@ -15,10 +15,6 @@
 
 load_lib "trace-support.exp"
 
-if $tracelevel then {
-	strace $tracelevel
-}
-
 
 set testfile "collection"
 set srcfile ${testfile}.c

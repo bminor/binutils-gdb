@@ -16,10 +16,6 @@
 # This file was written by Michael Snyder (msnyder@redhat.com)
 # This is a test for the gdb command "dump".
 
-if $tracelevel then {
-	strace $tracelevel
-}
-
 
 set testfile "dump"
 

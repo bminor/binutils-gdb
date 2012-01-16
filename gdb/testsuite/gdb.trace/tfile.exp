@@ -27,10 +27,6 @@ if [target_info exists gdb,nofileio] {
     continue
 }
 
-if $tracelevel then {
-    strace $tracelevel
-}
-
 
 gdb_exit
 gdb_start

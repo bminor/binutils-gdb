@@ -14,10 +14,6 @@
 
 load_lib "trace-support.exp";
 
-if $tracelevel then {
-    strace $tracelevel
-}
-
 if {[skip_shlib_tests]} {
     return 0
 }

@@ -17,10 +17,6 @@
 
 # Test the memory attribute commands.
 
-if $tracelevel then {
-    strace $tracelevel
-}
-
 set testfile "memattr"
 set srcfile  ${testfile}.c
 

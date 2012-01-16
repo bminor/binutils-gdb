@@ -16,10 +16,6 @@
 # This file is part of the GDB testsuite.
 # It tests gdb.parameter and gdb.Parameter.
 
-if $tracelevel then {
-    strace $tracelevel
-}
-
 load_lib gdb-python.exp
 
 # Start with a fresh gdb.

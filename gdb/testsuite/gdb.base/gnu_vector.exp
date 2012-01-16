@@ -18,10 +18,6 @@
 # Tests GDBs support for GNU vectors.
 # http://gcc.gnu.org/onlinedocs/gcc/Vector-Extensions.html
 
-if $tracelevel {
-    strace $tracelevel
-}
-
 set testfile "gnu_vector"
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}

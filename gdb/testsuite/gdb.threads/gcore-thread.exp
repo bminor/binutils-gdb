@@ -16,10 +16,6 @@
 # This file was written by Michael Snyder (msnyder@redhat.com)
 # This is a test for the gdb command "generate-core-file".
 
-if $tracelevel then {
-	strace $tracelevel
-}
-
 # Single-threaded test case
 set testfile "gcore-thread"
 set srcfile  pthreads.c

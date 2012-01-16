@@ -22,10 +22,6 @@
 # This file was written by Satish Pai <pai@apollo.hp.com>
 # 1997-09-24
 
-if $tracelevel then {
-	strace $tracelevel
-	}
-
 #
 # test running programs
 #

@@ -17,10 +17,6 @@
 # Test that GDB properly ignores invalid stabs.
 # Also test that GDB can debug a .o file, and that it doesn't mind
 # a file that's more minimal than what a compiler normally puts out.
-if $tracelevel then {
-	strace $tracelevel
-}
-
 # If the test directory was not created by configure then skip
 # this test.
 if ![file isdirectory ${objdir}/${subdir}] then {

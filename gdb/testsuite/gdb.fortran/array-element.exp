@@ -18,10 +18,6 @@
 # This file is part of the gdb testsuite.  It contains test for printing
 # the elements of an array which is passed as pointer to a subroutine.
 
-if $tracelevel then {
-	strace $tracelevel
-}
-
 if { [skip_fortran_tests] } { return -1 }
 
 set testfile "array-element"

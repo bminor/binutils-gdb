@@ -16,10 +16,6 @@
 # This file was based on jmisc.exp which in turn was written by
 # Anthony Green. (green@redhat.com)
 
-if $tracelevel then {
-	strace $tracelevel
-}
-
 load_lib "java.exp"
 
 if { [skip_java_tests] } { continue }

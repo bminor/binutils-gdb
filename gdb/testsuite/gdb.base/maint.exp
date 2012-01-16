@@ -47,10 +47,6 @@
 
 
 
-if $tracelevel then {
-        strace $tracelevel
-        }
-
 set testfile "break"
 set srcfile ${testfile}.c
 set srcfile1 ${testfile}1.c

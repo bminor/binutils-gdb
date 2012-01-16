@@ -23,10 +23,6 @@
 set ws "\[\r\n\t \]+"
 set nl "\[\r\n\]+"
 
-if $tracelevel then {
-        strace $tracelevel
-        }
-
 #
 # test running programs
 #

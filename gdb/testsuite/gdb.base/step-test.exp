@@ -17,10 +17,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 # step-test.exp -- Expect script to test stepping in gdb
 
-if $tracelevel then {
-    strace $tracelevel
-}
-
 set testfile step-test
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}

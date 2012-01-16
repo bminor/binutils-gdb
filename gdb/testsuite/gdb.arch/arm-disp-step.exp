@@ -17,10 +17,6 @@
 
 # Test arm displaced stepping.
 
-if $tracelevel {
-    strace $tracelevel
-}
-
 if {![istarget "arm*-*-*"]} then {
     verbose "Skipping arm displaced stepping tests."
     return

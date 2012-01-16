@@ -18,10 +18,6 @@
 
 # This file is part of the gdb testsuite.
 
-if $tracelevel then {
-        strace $tracelevel
-        }
-
 if { [skip_cplus_tests] } { continue }
 
 #

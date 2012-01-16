@@ -16,10 +16,6 @@
 load_lib mi-support.exp
 set MIFLAGS "-i=mi"
 
-if $tracelevel then {
-    strace $tracelevel
-}
-
 #
 # test running programs
 #

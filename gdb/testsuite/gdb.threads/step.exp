@@ -33,10 +33,6 @@
 #	catch the fact it continued rather than stepped)
 
 
-if $tracelevel then {
-	strace $tracelevel
-}
-
 set program_exited 0
 
 proc set_bp { where } {

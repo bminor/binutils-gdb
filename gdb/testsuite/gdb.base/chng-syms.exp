@@ -18,10 +18,6 @@
 # Test that GDB cleans up properly after errors that result when a 
 # breakpoint is reset. 
 
-if $tracelevel then {
-	strace $tracelevel
-}
-
 
 # IDT/SIM apparently doesn't have enough file descriptors to allow the
 # problem checked by this test to occur.

@@ -24,10 +24,6 @@
 # work properly: condition expression using a reference object as one of its
 # operand.
 
-if $tracelevel then {
-	strace $tracelevel
-}
-
 load_lib "ada.exp"
 
 set testdir "formatted_ref"

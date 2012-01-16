@@ -22,10 +22,6 @@
 # and writing of registers in a real program, although some care
 # would be required in the writing of the tests.
 
-if $tracelevel then {
-	strace $tracelevel
-	}
-
 # These tests exercise IDT-specific MIPS registers for several
 # different processor models.
 

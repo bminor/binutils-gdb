@@ -26,10 +26,6 @@
 # (involving templates, in particular) where this problem triggers
 # because GDB and GCC have different ideas what a class is called.
 
-if $tracelevel then {
-        strace $tracelevel
-        }
-
 if { [skip_cplus_tests] } { continue }
 
 #

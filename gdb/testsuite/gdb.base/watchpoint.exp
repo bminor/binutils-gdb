@@ -15,10 +15,6 @@
 
 # This file was written by Fred Fish. (fnf@cygnus.com)
 
-if $tracelevel then {
-    strace $tracelevel
-}
-
 
 set testfile "watchpoint"
 set srcfile ${testfile}.c

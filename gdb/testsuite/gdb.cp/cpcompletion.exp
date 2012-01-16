@@ -49,10 +49,6 @@ proc test_class_complete {class expr name matches} {
     }
 }
 
-if $tracelevel then {
-	strace $tracelevel
-}
-
 if { [skip_cplus_tests] } { continue }
 
 set testfile pr9594

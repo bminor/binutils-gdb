@@ -16,10 +16,6 @@
 # Check that GDB is able to print unconstrained variables and discriminated
 # records before their initialization.
 
-if $tracelevel then {
-    strace $tracelevel
-}
-
 load_lib "ada.exp"
 
 set testdir "uninitialized_vars"

@@ -21,10 +21,6 @@
 # with integer type variables
 # 
 
-if $tracelevel then {
-	strace $tracelevel
-	}
-
 #
 # test running programs
 #

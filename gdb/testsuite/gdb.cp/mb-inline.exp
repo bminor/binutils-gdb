@@ -18,10 +18,6 @@
 # This test verifies that setting breakpoint on line in inline
 # function will fire in all instantiations of that function.
 
-if $tracelevel then {
-    strace $tracelevel
-}
-
 if { [skip_cplus_tests] } { continue }
 
 

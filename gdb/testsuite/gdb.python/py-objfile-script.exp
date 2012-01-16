@@ -16,10 +16,6 @@
 # This file is part of the GDB testsuite.  It tests automagic loading of
 # -gdb.py scripts.
 
-if $tracelevel then {
-    strace $tracelevel
-}
-
 set testfile "py-objfile-script"
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}

@@ -16,10 +16,6 @@
 # This file is part of the GDB testsuite.
 # It tests the types.py module.
 
-if $tracelevel then {
-    strace $tracelevel
-}
-
 load_lib gdb-python.exp
 
 set testfile "lib-types"

@@ -17,10 +17,6 @@
 # the elements of an unbounded array using the Modula-2 language mode of
 # gdb.
 
-if $tracelevel then {
-	strace $tracelevel
-}
-
 set testfile "unbounded1"
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}

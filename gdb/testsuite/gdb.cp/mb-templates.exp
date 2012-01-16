@@ -16,10 +16,6 @@
 # This test verifies that setting breakpoint on line in template
 # function will fire in all instantiations of that template.
 
-if $tracelevel then {
-    strace $tracelevel
-}
-
 if { [skip_stl_tests] } { continue }
 
 # On SPU this test fails because the executable exceeds local storage size.

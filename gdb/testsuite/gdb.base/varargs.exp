@@ -28,10 +28,6 @@
 #quit
 
 
-if $tracelevel then {
-        strace $tracelevel
-}
-
 
 set prototypes 0
 set testfile "varargs"

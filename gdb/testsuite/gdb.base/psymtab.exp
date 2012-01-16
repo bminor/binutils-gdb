@@ -19,10 +19,6 @@
 # are working properly.  If multiple tests are added, make sure that
 # you exit and restart GDB between tests.
 
-if $tracelevel then {
-    strace $tracelevel
-}
-
 #
 # test running programs
 #

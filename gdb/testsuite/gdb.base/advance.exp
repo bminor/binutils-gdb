@@ -15,10 +15,6 @@
 
 # advance.exp -- Expect script to test 'advance' in gdb
 
-if $tracelevel then {
-    strace $tracelevel
-}
-
 set testfile advance
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}

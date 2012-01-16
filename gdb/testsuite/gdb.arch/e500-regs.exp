@@ -16,10 +16,6 @@
 
 # Tests for Powerpc E500 register setting and fetching
 
-if $tracelevel then {
-    strace $tracelevel
-}
-
 #
 # Test the use of registers, especially E500 registers, for Powerpc.
 # This file uses e500-regs.c for input.

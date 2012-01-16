@@ -16,10 +16,6 @@
 # This file was written by Joel Brobecker (brobecker@gnat.com), derived
 # from xfullpath.exp.
 
-if $tracelevel then {
-    strace $tracelevel
-}
-
 
 # are we on a target board
 if { [is_remote target] || ![isnative] } then {

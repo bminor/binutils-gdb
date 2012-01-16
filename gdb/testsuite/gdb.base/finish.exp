@@ -15,10 +15,6 @@
 
 # This file was written by Michael Snyder (msnyder@redhat.com)
 
-if $tracelevel then {
-	strace $tracelevel
-}
-
 
 # re-use the program from the "return2" test.
 if { [prepare_for_testing finish.exp finish return2.c] } {

@@ -17,10 +17,6 @@
 # This file was written by Fred Fish. (fnf@cygnus.com)
 # Adapted for g++ 3.0 ABI by Michael Chastain. (chastain@redhat.com)
 
-if $tracelevel then {
-	strace $tracelevel
-}
-
 if { [skip_cplus_tests] } { continue }
 
 set testfile "cplusfuncs"

@@ -16,10 +16,6 @@
 # Please email any bugs, comments, and/or additions to this file to:
 # bug-gdb@gnu.org
 
-if $tracelevel {
-    strace $tracelevel
-}
-
 # If the test directory was not created by configure then skip
 # this test.
 if ![file isdirectory ${objdir}/${subdir}] then {

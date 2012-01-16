@@ -19,10 +19,6 @@
 # This file verifies that GDB is able to compute a backtrace for a thread
 # being blocked on a call to pthread_cond_wait(). 
 
-if $tracelevel then {
-	strace $tracelevel
-}
-
 set testfile "pthread_cond_wait"
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}

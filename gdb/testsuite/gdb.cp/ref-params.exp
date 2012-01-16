@@ -16,10 +16,6 @@
 
 # written by Paul N. Hilfinger (Hilfinger@adacore.com)
 
-if $tracelevel then {
-        strace $tracelevel
-        }
-
 #
 # test running programs
 #

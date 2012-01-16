@@ -16,10 +16,6 @@
 # The same tests as in jit.exp, but loading JITer itself from a shared
 # library.
 
-if $tracelevel {
-    strace $tracelevel
-}
-
 if {[skip_shlib_tests]} {
     untested jit-so.exp
     return -1

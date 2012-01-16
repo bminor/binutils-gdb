@@ -16,10 +16,6 @@
 # Test running a program from the GDB prompt and then detaching it.
 # NOTE: This test could be much more thorough.
 
-if $tracelevel then {
-	strace $tracelevel
-}
-
 
 # Only GNU/Linux is known to support this.
 if { ! [istarget "*-*-linux*"] } {

@@ -16,10 +16,6 @@
 
 # This file was written by Jeff Law. (law@cs.utah.edu)
 
-if $tracelevel then {
-    strace $tracelevel
-}
-
 
 set testfile "recurse"
 set srcfile ${testfile}.c

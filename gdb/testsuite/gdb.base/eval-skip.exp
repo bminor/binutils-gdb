@@ -28,10 +28,6 @@
 #
 
 
-if $tracelevel then {
-        strace $tracelevel
-}
-
 # Check to see if we have an executable to test.  If not, then either we
 # haven't tried to compile one, or the compilation failed for some reason.
 # In either case, just notify the user and skip the tests in this file.

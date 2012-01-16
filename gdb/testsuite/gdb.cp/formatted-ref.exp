@@ -27,10 +27,6 @@
 # work properly: condition expression using a reference object as one of its
 # operand.
 
-if $tracelevel then {
-	strace $tracelevel
-}
-
 
 if { [skip_cplus_tests] } { continue }
 

@@ -15,10 +15,6 @@
 
 # This file was created by Jeff Johnston. (jjohnstn@redhat.com)
 
-if $tracelevel then {
-    strace $tracelevel
-}
-
 #
 # test running programs
 #

@@ -17,10 +17,6 @@
 
 # Test GDB stabs problem with qualified parameter of forward types.
 
-if $tracelevel then {
-	strace $tracelevel
-}
-
 
 set testfile "gdb11479"
 

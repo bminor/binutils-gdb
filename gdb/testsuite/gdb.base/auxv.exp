@@ -24,10 +24,6 @@ if { ! [istarget "*-*-linux*"] && ! [istarget "*-*-solaris*"] } {
     return
 }
 
-if $tracelevel then {
-	strace $tracelevel
-}
-
 
 set testfile "auxv"
 set srcfile ${testfile}.c

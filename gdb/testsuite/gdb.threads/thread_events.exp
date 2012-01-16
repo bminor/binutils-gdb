@@ -33,10 +33,6 @@ if [is_remote target] then {
     return
 }
 
-if $tracelevel then {
-        strace $tracelevel
-}
-
 
 set testfile "thread_events"
 set srcfile ${testfile}.c

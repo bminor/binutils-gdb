@@ -21,10 +21,6 @@
 # Test printing of various values.
 # NOTE: The tests here intentionally do not require an objc compiler.
 
-if $tracelevel {
-    strace $tracelevel
-}
-
 load_lib "objc.exp"
 
 proc test_float_accepted {} {

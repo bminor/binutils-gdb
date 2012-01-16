@@ -16,10 +16,6 @@
 
 # Tests for Powerpc floating point register setting and fetching
 
-if $tracelevel then {
-    strace $tracelevel
-}
-
 if ![istarget "powerpc*"] then {
     verbose "Skipping powerpc floating point register tests."
     return

@@ -33,10 +33,6 @@ if { ! [istarget "i?86-*-linux*"]
     return
 }
 
-if $tracelevel then {
-    strace $tracelevel
-}
-
 
 set testfile siginfo-obj
 set srcfile ${testfile}.c

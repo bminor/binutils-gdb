@@ -16,10 +16,6 @@
 
 # This file was written by Fred Fish. (fnf@cygnus.com)
 
-if $tracelevel {
-    strace $tracelevel
-}
-
 
 set testfile "funcargs"
 set srcfile ${testfile}.c

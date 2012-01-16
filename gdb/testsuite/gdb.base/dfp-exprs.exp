@@ -18,10 +18,6 @@
 # This file is part of the gdb testsuite.  It contains test for evaluating
 # simple decimal floating point (DFP) expression.
 
-if $tracelevel then {
-	strace $tracelevel
-}
-
 proc test_dfp_literals_accepted {} {
 
     # Test various dfp values, covering 32-bit, 64-bit and 128-bit ones

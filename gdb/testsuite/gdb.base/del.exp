@@ -16,10 +16,6 @@
 # The intent of this testcase is to verify that various aliases and
 # shortcuts of the "delete" command never stop working.
 
-if $tracelevel then {
-    strace $tracelevel
-}
-
 
 set testfile del
 set srcfile ${testfile}.c

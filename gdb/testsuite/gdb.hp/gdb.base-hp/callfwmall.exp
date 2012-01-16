@@ -81,10 +81,6 @@
 # inferior function calls to evaluate array literals.  But many people
 # jump to other, incorrect conclusions about this.
 
-if $tracelevel then {
-	strace $tracelevel
-}
-
 
 if { [skip_hp_tests] } then { continue }
 

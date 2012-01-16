@@ -15,10 +15,6 @@
 
 # This file is part of the gdb testsuite.
 
-if $tracelevel {
-    strace $tracelevel
-}
-
 
 if ![istarget "i?86-*linux*"] then {
     verbose "Skipping i387 reverse float tests."

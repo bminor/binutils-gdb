@@ -15,10 +15,6 @@
 
 # Stress test the lookup of declarations
 
-if $tracelevel then {
-    strace $tracelevel
-}
-
 
 set testfile nsdecl
 set srcfile ${testfile}.cc

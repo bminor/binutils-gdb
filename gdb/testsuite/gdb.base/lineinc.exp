@@ -77,10 +77,6 @@
 # sorted in ascending order; GDB would get an internal error trying to
 # read the above debugging info.
 
-if $tracelevel then {
-    strace $tracelevel
-}
-
 
 set testfile "lineinc"
 set binfile ${objdir}/${subdir}/${testfile}

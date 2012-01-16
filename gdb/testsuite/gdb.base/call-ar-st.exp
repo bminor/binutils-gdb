@@ -16,10 +16,6 @@
 # This file was written by Elena Zannoni (ezannoni@cygnus.com)
 
 
-if $tracelevel then {
-        strace $tracelevel
-}
-
 
 set testfile "call-ar-st"
 set srcfile ${testfile}.c

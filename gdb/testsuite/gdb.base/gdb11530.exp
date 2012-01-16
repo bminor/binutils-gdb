@@ -18,10 +18,6 @@
 # Test GDB bug report 11530.
 # This is a problem related unnamed unions.
 
-if $tracelevel then {
-	strace $tracelevel
-}
-
 set testfile "gdb11530"
 set binfile ${testfile}${EXEEXT}
 

@@ -21,10 +21,6 @@
 # This file was written by Jim Blandy <jimb@cygnus.com>, with
 # fragments borrowed from return.exp.
 
-if $tracelevel then {
-    strace $tracelevel
-}
-
 
 set testfile "restore"
 set srcfile ${testfile}.c

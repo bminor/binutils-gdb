@@ -16,10 +16,6 @@
 #
 # This file is part of the gdb testsuite.
 
-if $tracelevel then {
-    strace $tracelevel
-}
-
 # It's possible to have a program that contains two compilation units
 # for the same source file name, that have code at different lines.
 # For example, in this test, we compile expand-psymtabs.c twice with

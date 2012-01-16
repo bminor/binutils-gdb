@@ -16,10 +16,6 @@
 # tls-shared.exp -- Expect script to test thread local storage in gdb, with
 # shared libraries.
 
-if $tracelevel then {
-    strace $tracelevel
-}
-
 set testfile tls-main
 set libfile tls-shared
 set srcfile ${testfile}.c

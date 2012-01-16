@@ -15,10 +15,6 @@
 #
 # This file is part of the gdb testsuite.
 
-if $tracelevel {
-    strace $tracelevel
-}
-
 # Test PowerPC E500 prologue analyzer.
 
 

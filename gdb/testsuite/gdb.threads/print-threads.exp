@@ -20,10 +20,6 @@
 # It tests miscellaneous actions with multiple threads, including
 # handling for thread exit.
 
-if $tracelevel then {
-	strace $tracelevel
-}
-
 
 set testfile "print-threads"
 set srcfile ${testfile}.c

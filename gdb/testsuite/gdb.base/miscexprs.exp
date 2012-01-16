@@ -22,10 +22,6 @@
 # with elementary types
 # 
 
-if $tracelevel then {
-        strace $tracelevel
-        }
-
 # By default, the datastructures are allocated on the stack.  For targets
 # with very small stack, that will not work.  In that case, just set
 # storage to `-DSTORAGE=static' which changes the datastructures to be

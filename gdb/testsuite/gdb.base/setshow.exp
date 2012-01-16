@@ -16,10 +16,6 @@
 
 # This file was written by Michael Snyder (msnyder@cygnus.com)
 
-if $tracelevel then {
-	strace $tracelevel
-}
-
 
 set testfile "setshow"
 set srcfile ${testfile}.c

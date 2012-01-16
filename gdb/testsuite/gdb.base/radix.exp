@@ -17,10 +17,6 @@
 # This file was written by Fred Fish. (fnf@cygnus.com)
 # And rewritten by Michael Chastain (mec.gnu@mindspring.com)
 
-if $tracelevel then {
-	strace $tracelevel
-}
-
 
 # Start with a fresh gdb.
 

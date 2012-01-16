@@ -20,10 +20,6 @@
 
 # Tests for overloaded member functions.
 
-if $tracelevel then {
-    strace $tracelevel
-}
-
 set ws "\[\r\n\t \]+"
 set nl "\[\r\n\]+"
 

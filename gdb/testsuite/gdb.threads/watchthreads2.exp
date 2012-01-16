@@ -21,10 +21,6 @@
 set NR_THREADS 4
 set X_INCR_COUNT 10
 
-if $tracelevel {
-    strace $tracelevel
-}
-
 
 # This test verifies that a watchpoint is detected in the proper thread
 # so the test is only meaningful on a system with hardware watchpoints.

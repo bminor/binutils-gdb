@@ -20,10 +20,6 @@
 
 # Testcase for ppc decimal128 pseudo-registers.
 
-if $tracelevel then {
-        strace $tracelevel
-}
-
 if ![istarget "powerpc64-*"] then {
     verbose "Skipping powerpc Decimal128 pseudo-registers testcase."
     return

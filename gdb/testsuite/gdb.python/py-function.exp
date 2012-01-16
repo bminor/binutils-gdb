@@ -16,10 +16,6 @@
 # This file is part of the GDB testsuite.  It tests the mechanism
 # exposing convenience functions to Python.
 
-if $tracelevel then {
-    strace $tracelevel
-}
-
 load_lib gdb-python.exp
 
 # Start with a fresh gdb.

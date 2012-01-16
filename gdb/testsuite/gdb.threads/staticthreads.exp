@@ -18,10 +18,6 @@
 # Based on manythreads written by Jeff Johnston, contributed by Red
 # Hat.
 
-if $tracelevel then {
-	strace $tracelevel
-}
-
 
 set testfile "staticthreads"
 set srcfile ${testfile}.c

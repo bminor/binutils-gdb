@@ -20,10 +20,6 @@
 # pxdb.exp   Test that gdb calls pxdb on an application
 #            built without it.
 #
-if $tracelevel then {
-	strace $tracelevel
-}
-
 
 if { [skip_hp_tests] } then { continue }
 

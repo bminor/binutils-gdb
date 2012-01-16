@@ -16,10 +16,6 @@
 # code_elim.exp -- tests that GDB can handle executables where some data/code
 #                  has been eliminated by the linker.
 
-if $tracelevel then {
-    strace $tracelevel
-}
-
 set testfile1 code_elim1
 set testfile2 code_elim2
 set srcfile1 ${testfile1}.c

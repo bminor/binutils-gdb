@@ -16,10 +16,6 @@
 # display.exp   Test display commands
 #               Also do some printing stuff for coverage's sake.
 #
-if $tracelevel then {
-	strace $tracelevel
-}
-
 set testfile display
 set srcfile  ${testfile}.c
 set binfile  ${objdir}/${subdir}/${testfile}

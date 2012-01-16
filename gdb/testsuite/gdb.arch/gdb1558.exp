@@ -21,10 +21,6 @@
 # Tests for PR:1558.  Hits breakpoint at main after function called
 # from main.
 
-if $tracelevel {
-    strace $tracelevel
-}
-
 
 if ![istarget "sh-*-*"] then {
     verbose "Skipping SH breakpoint test."

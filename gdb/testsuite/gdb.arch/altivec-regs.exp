@@ -17,10 +17,6 @@
 
 # Tests for Powerpc AltiVec register setting and fetching
 
-if $tracelevel then {
-    strace $tracelevel
-}
-
 #
 # Test the use of registers, especially AltiVec registers, for Powerpc.
 # This file uses altivec-regs.c for input.

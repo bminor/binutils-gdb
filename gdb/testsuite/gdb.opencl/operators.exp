@@ -17,10 +17,6 @@
 #
 # Tests GDBs support for OpenCL operators.
 
-if $tracelevel {
-    strace $tracelevel
-}
-
 load_lib opencl.exp
 
 if { [skip_opencl_tests] } {

@@ -16,10 +16,6 @@
 # This is a test that verifies that GDB is able to "run" when the name
 # of the executable file contains a '!'.
 
-if $tracelevel then {
-    strace $tracelevel
-}
-
 set testfile "args"
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/bang!

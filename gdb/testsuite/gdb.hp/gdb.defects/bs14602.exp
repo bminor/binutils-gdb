@@ -4,10 +4,6 @@
 #
 # Source file: bs14602.c
 
-if $tracelevel {
-    strace $tracelevel
-}
-
 if { [skip_hp_tests] } { continue }
 
 #

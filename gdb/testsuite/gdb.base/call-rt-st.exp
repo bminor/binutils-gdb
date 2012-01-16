@@ -20,10 +20,6 @@
 
 
 
-if $tracelevel then {
-        strace $tracelevel
-}
-
 
 set testfile "call-rt-st"
 set srcfile ${testfile}.c

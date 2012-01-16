@@ -23,10 +23,6 @@
 # command, which actually is behaving as currently defined.  What apparently
 # was expected was the behavior of the newer "advance" command.
 
-if $tracelevel {
-    strace $tracelevel
-}
-
 # Observe that the until command doesn't go all the way to sub2.
 
 

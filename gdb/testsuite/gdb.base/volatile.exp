@@ -30,10 +30,6 @@
 #           ... etc.  (you get the idea)
 # Mostly with char and unsigned char.                    
 
-if $tracelevel then {
-        strace $tracelevel
-        }
-
 #
 # test running programs
 #

@@ -31,10 +31,6 @@
 
 # This test is largely based of gdb.base/callfuncs.exp.
 
-if $tracelevel then {
-    strace $tracelevel
-}
-
 if { [skip_cplus_tests] } { continue }
 
 if [target_info exists gdb,nosignals] {

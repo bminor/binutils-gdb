@@ -24,10 +24,6 @@ global timeout
 #
 #log_user 1
 
-if $tracelevel then {
-    strace $tracelevel
-}
-
 if { [skip_hp_tests] } then { continue }
 
 set testfile optimize

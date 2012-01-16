@@ -18,10 +18,6 @@
 
 # This file is part of the gdb testsuite.
 
-if $tracelevel {
-    strace $tracelevel
-}
-
 
 if { ![istarget x86_64-*-* ] || ![is_lp64_target] } {
     verbose "Skipping amd64 word register tests."

@@ -1,3 +1,7 @@
+2012-01-16  Pedro Alves  <palves@redhat.com>
+
+	Remove all calls to strace.
+
 2012-01-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.dwarf2/dw2-namespaceless-anonymous.S: New file.

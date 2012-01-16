@@ -21,10 +21,6 @@
 
 # This file was written by Rob Savoye. (rob@cygnus.com)
 
-if $tracelevel then {
-	strace $tracelevel
-	}
-
 #
 # test running programs
 #

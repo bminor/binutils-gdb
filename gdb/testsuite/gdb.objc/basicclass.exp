@@ -15,10 +15,6 @@
 
 # This file was written by Adam Fedor (fedor@gnu.org)
 
-if $tracelevel then {
-	strace $tracelevel
-}
-
 set testfile "basicclass"
 set srcfile ${testfile}.m
 set binfile ${objdir}/${subdir}/${testfile}

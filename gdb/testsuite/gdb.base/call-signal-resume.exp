@@ -20,10 +20,6 @@
 # 2) Inferior is stopped at a signal.  Upon resumption it should continue
 #    with that signal, regardless of whatever the hand-called function did.
 
-if $tracelevel then {
-	strace $tracelevel
-}
-
 if [target_info exists gdb,noinferiorio] {
     verbose "Skipping call-signal-resume.exp because of no fileio capabilities."
     continue

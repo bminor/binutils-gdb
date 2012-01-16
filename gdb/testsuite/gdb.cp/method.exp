@@ -29,10 +29,6 @@
 # integrate FPARAM symbols in HP debug info into the local var list
 # for the function or method's block.)
 
-if $tracelevel then {
-        strace $tracelevel
-        }
-
 #
 # test running programs
 #

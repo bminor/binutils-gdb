@@ -17,10 +17,6 @@
 
 # This contains tests for breakpoints in C++.
 
-if $tracelevel then {
-        strace $tracelevel
-        }
-
 if { [skip_cplus_tests] } { continue }
 
 #

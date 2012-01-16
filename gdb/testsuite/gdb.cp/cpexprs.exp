@@ -663,10 +663,6 @@ add {policyd5::function} \
     {operation_1<T>::function}
 
 # Start the test
-if {$tracelevel} {
-    strace $tracelevel
-}
-
 if {[skip_cplus_tests]} { continue }
 
 # On SPU this test fails because the executable exceeds local storage size.
