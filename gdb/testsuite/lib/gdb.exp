@@ -2983,14 +2983,19 @@ if ![info exists gdb_test_timeout] {
 # an error when that happens.
 set banned_variables { bug_id prms_id }
 
+# A list of procedures that GDB testcases should not use.
+# We try to prevent their use by monitoring invocations and raising
+# an error when that happens.
+set banned_procedures { strace }
+
 # gdb_init is called by runtest at start, but also by several
 # tests directly; gdb_finish is only called from within runtest after
 # each test source execution.
 # Placing several traces by repetitive calls to gdb_init leads
 # to problems, as only one trace is removed in gdb_finish.
 # To overcome this possible problem, we add a variable that records
-# if the banned variables are traced.
-set banned_variables_traced 0
+# if the banned variables and procedures are already traced.
+set banned_traced 0
 
 proc gdb_init { args } {
     # Reset the timeout value to the default.  This way, any testcase
@@ -3000,15 +3005,21 @@ proc gdb_init { args } {
     global timeout
     set timeout $gdb_test_timeout
 
-    # Block writes to all banned variables...
+    # Block writes to all banned variables, and invocation of all
+    # banned procedures...
     global banned_variables
-    global banned_variables_traced
-    if (!$banned_variables_traced) {
+    global banned_procedures
+    global banned_traced
+    if (!$banned_traced) {
     	foreach banned_var $banned_variables {
             global "$banned_var"
             trace add variable "$banned_var" write error
 	}
-	set banned_variables_traced 1
+	foreach banned_proc $banned_procedures {
+	    global "$banned_proc"
+	    trace add execution "$banned_proc" enter error
+	}
+	set banned_traced 1
     }
 
     # We set LC_ALL, LC_CTYPE, and LANG to C so that we get the same
@@ -3057,13 +3068,18 @@ proc gdb_finish { } {
     # Unblock write access to the banned variables.  Dejagnu typically
     # resets some of them between testcases.
     global banned_variables
-    global banned_variables_traced
-    if ($banned_variables_traced) {
+    global banned_procedures
+    global banned_traced
+    if ($banned_traced) {
     	foreach banned_var $banned_variables {
             global "$banned_var"
             trace remove variable "$banned_var" write error
 	}
-	set banned_variables_traced 0
+	foreach banned_proc $banned_procedures {
+	    global "$banned_proc"
+	    trace remove execution "$banned_proc" enter error
+	}
+	set banned_traced 0
     }
 }
 

@@ -1,5 +1,13 @@
 2012-01-16  Pedro Alves  <palves@redhat.com>
 
+	* lib/gdb.exp (banned_procedures): New variable.
+	(banned_variables_traced): Rename to ...
+	(banned_traced): ... this.
+	(gdb_init): Also trace banned procedures.
+	(gdb_finish): Also untrace banned procedures.
+
+2012-01-16  Pedro Alves  <palves@redhat.com>
+
 	Remove all calls to strace.
 
 2012-01-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
