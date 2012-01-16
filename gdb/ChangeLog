@@ -1,3 +1,46 @@
+2012-01-16  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* breakpoint.c (create_sals_from_address_default): New function.
+	(create_breakpoints_sal_default): Likewise.
+	(decode_linespec_default): Likewise.
+	(is_marker_spec): Removed.
+	(strace_marker_p): New function.
+	(init_breakpoint_sal): Using `strace_marker_p' instead of
+	`is_marker_spec'.
+	(create_breakpoint): Call method `create_sals_from_address' from
+	breakpoint_ops, replacing code that created SALs conditionally
+	on the type of the breakpoint.  Call method `create_breakpoints_sal',
+	replacing code that created breakpoints conditionally on the type
+	wanted.
+	(base_breakpoint_create_sals_from_address): New function.
+	(base_breakpoint_create_breakpoints_sal): Likewise.
+	(base_breakpoint_decode_linespec): Likewise.
+	(base_breakpoint_ops): Add methods
+	`base_breakpoint_create_sals_from_address',
+	`base_breakpoint_create_breakpoints_sal' and
+	`base_breakpoint_decode_linespec'.
+	(bkpt_create_sals_from_address): New function.
+	(bkpt_create_breakpoints_sal): Likewise.
+	(bkpt_decode_linespec): Likewise.
+	(tracepoint_create_sals_from_address): Likewise.
+	(tracepoint_create_breakpoints_sal): Likewise.
+	(tracepoint_decode_linespec): Likewise.
+	(strace_marker_create_sals_from_address): Likewise.
+	(strace_marker_create_breakpoints_sal): Likewise.
+	(strace_marker_decode_linespec): Likewise.
+	(strace_marker_breakpoint_ops): New variable.
+	(addr_string_to_sals): Remove `marker_spec'.  Call method
+	`decode_linespec' from breakpoint_ops, replacing code that decoded
+	an address string into a SAL.  Use `strace_marker_p' instead of
+	`marker_spec'.
+	(strace_command): Decide whether we are dealing with a static
+	tracepoint with marker or not.  Use the appropriate breakpoint_ops.
+	(initialize_breakpoint_ops): Initialize new fields of breakpoint_ops.
+	* breakpoint.h (linespec_result, linespec_sals): New forward
+	declarations.
+	(breakpoint_ops) <create_sals_from_address>,
+	<create_breakpoints_sal>, <decode_linespec>: New methods.
+
 2012-01-14  Doug Evans  <dje@google.com>
 
 	* NEWS: Update text for "maint set python print-stack".

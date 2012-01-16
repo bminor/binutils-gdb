@@ -96,6 +96,23 @@ static int breakpoint_re_set_one (void *);
 
 static void breakpoint_re_set_default (struct breakpoint *);
 
+static void create_sals_from_address_default (char **,
+					      struct linespec_result *,
+					      enum bptype, char *,
+					      char **);
+
+static void create_breakpoints_sal_default (struct gdbarch *,
+					    struct linespec_result *,
+					    struct linespec_sals *,
+					    char *, enum bptype,
+					    enum bpdisp, int, int,
+					    int,
+					    const struct breakpoint_ops *,
+					    int, int, int);
+
+static void decode_linespec_default (struct breakpoint *, char **,
+				     struct symtabs_and_lines *);
+
 static void clear_command (char *, int);
 
 static void catch_command (char *, int);
@@ -237,10 +254,10 @@ static void trace_pass_command (char *, int);
 
 static int is_masked_watchpoint (const struct breakpoint *b);
 
-/* Assuming we're creating a static tracepoint, does S look like a
-   static tracepoint marker spec ("-m MARKER_ID")?  */
-#define is_marker_spec(s)						\
-  (s != NULL && strncmp (s, "-m", 2) == 0 && ((s)[2] == ' ' || (s)[2] == '\t'))
+/* Return 1 if B refers to a static tracepoint set by marker ("-m"), zero
+   otherwise.  */
+
+static int strace_marker_p (struct breakpoint *b);
 
 /* The abstract base class all breakpoint_ops structures inherit
    from.  */
@@ -7298,7 +7315,7 @@ init_breakpoint_sal (struct breakpoint *b, struct gdbarch *gdbarch,
 	      struct tracepoint *t = (struct tracepoint *) b;
 	      struct static_tracepoint_marker marker;
 
-	      if (is_marker_spec (addr_string))
+	      if (strace_marker_p (b))
 		{
 		  /* We already know the marker exists, otherwise, we
 		     wouldn't see a sal for it.  */
@@ -7720,32 +7737,19 @@ create_breakpoint (struct gdbarch *gdbarch,
 
   init_linespec_result (&canonical);
 
-  if (type_wanted == bp_static_tracepoint && is_marker_spec (arg))
-    {
-      int i;
-      struct linespec_sals lsal;
-
-      lsal.sals = decode_static_tracepoint_spec (&arg);
-
-      copy_arg = savestring (addr_start, arg - addr_start);
-
-      canonical.addr_string = xstrdup (copy_arg);
-      lsal.canonical = xstrdup (copy_arg);
-      VEC_safe_push (linespec_sals, canonical.sals, &lsal);
-
-      goto done;
-    }
-
   TRY_CATCH (e, RETURN_MASK_ALL)
     {
-      parse_breakpoint_sals (&arg, &canonical);
+      ops->create_sals_from_address (&arg, &canonical, type_wanted,
+				     addr_start, &copy_arg);
     }
 
   /* If caller is interested in rc value from parse, set value.  */
   switch (e.reason)
     {
-    case RETURN_QUIT:
-      throw_exception (e);
+    case GDB_NO_ERROR:
+      if (VEC_empty (linespec_sals, canonical.sals))
+	return 0;
+      break;
     case RETURN_ERROR:
       switch (e.error)
 	{
@@ -7787,11 +7791,8 @@ create_breakpoint (struct gdbarch *gdbarch,
 	}
       break;
     default:
-      if (VEC_empty (linespec_sals, canonical.sals))
-	return 0;
+      throw_exception (e);
     }
-
-  done:
 
   /* Create a chain of things that always need to be cleaned up.  */
   old_chain = make_cleanup_destroy_linespec_result (&canonical);
@@ -7855,57 +7856,11 @@ create_breakpoint (struct gdbarch *gdbarch,
             }
         }
 
-      /* If the user is creating a static tracepoint by marker id
-	 (strace -m MARKER_ID), then store the sals index, so that
-	 breakpoint_re_set can try to match up which of the newly
-	 found markers corresponds to this one, and, don't try to
-	 expand multiple locations for each sal, given than SALS
-	 already should contain all sals for MARKER_ID.  */
-      if (type_wanted == bp_static_tracepoint
-	  && is_marker_spec (copy_arg))
-	{
-	  int i;
-
-	  for (i = 0; i < lsal->sals.nelts; ++i)
-	    {
-	      struct symtabs_and_lines expanded;
-	      struct tracepoint *tp;
-	      struct cleanup *old_chain;
-	      char *addr_string;
-
-	      expanded.nelts = 1;
-	      expanded.sals = &lsal->sals.sals[i];
-
-	      addr_string = xstrdup (canonical.addr_string);
-	      old_chain = make_cleanup (xfree, addr_string);
-
-	      tp = XCNEW (struct tracepoint);
-	      init_breakpoint_sal (&tp->base, gdbarch, expanded,
-				   addr_string, NULL,
+      ops->create_breakpoints_sal (gdbarch, &canonical, lsal,
 				   cond_string, type_wanted,
 				   tempflag ? disp_del : disp_donttouch,
 				   thread, task, ignore_count, ops,
-				   from_tty, enabled, internal,
-				   canonical.special_display);
-	      /* Given that its possible to have multiple markers with
-		 the same string id, if the user is creating a static
-		 tracepoint by marker id ("strace -m MARKER_ID"), then
-		 store the sals index, so that breakpoint_re_set can
-		 try to match up which of the newly found markers
-		 corresponds to this one  */
-	      tp->static_trace_marker_id_idx = i;
-
-	      install_breakpoint (internal, &tp->base, 0);
-
-	      discard_cleanups (old_chain);
-	    }
-	}
-      else
-	create_breakpoints_sal (gdbarch, &canonical, cond_string,
-				type_wanted,
-				tempflag ? disp_del : disp_donttouch,
-				thread, task, ignore_count, ops, from_tty,
-				enabled, internal);
+				   from_tty, enabled, internal);
     }
   else
     {
@@ -10910,6 +10865,39 @@ base_breakpoint_print_recreate (struct breakpoint *b, struct ui_file *fp)
   internal_error_pure_virtual_called ();
 }
 
+static void
+base_breakpoint_create_sals_from_address (char **arg,
+					  struct linespec_result *canonical,
+					  enum bptype type_wanted,
+					  char *addr_start,
+					  char **copy_arg)
+{
+  internal_error_pure_virtual_called ();
+}
+
+static void
+base_breakpoint_create_breakpoints_sal (struct gdbarch *gdbarch,
+					struct linespec_result *c,
+					struct linespec_sals *lsal,
+					char *cond_string,
+					enum bptype type_wanted,
+					enum bpdisp disposition,
+					int thread,
+					int task, int ignore_count,
+					const struct breakpoint_ops *o,
+					int from_tty, int enabled,
+					int internal)
+{
+  internal_error_pure_virtual_called ();
+}
+
+static void
+base_breakpoint_decode_linespec (struct breakpoint *b, char **s,
+				 struct symtabs_and_lines *sals)
+{
+  internal_error_pure_virtual_called ();
+}
+
 static struct breakpoint_ops base_breakpoint_ops =
 {
   base_breakpoint_dtor,
@@ -10925,7 +10913,10 @@ static struct breakpoint_ops base_breakpoint_ops =
   NULL,
   base_breakpoint_print_one_detail,
   base_breakpoint_print_mention,
-  base_breakpoint_print_recreate
+  base_breakpoint_print_recreate,
+  base_breakpoint_create_sals_from_address,
+  base_breakpoint_create_breakpoints_sal,
+  base_breakpoint_decode_linespec,
 };
 
 /* Default breakpoint_ops methods.  */
@@ -11069,6 +11060,43 @@ bkpt_print_recreate (struct breakpoint *tp, struct ui_file *fp)
 
   fprintf_unfiltered (fp, " %s", tp->addr_string);
   print_recreate_thread (tp, fp);
+}
+
+static void
+bkpt_create_sals_from_address (char **arg,
+			       struct linespec_result *canonical,
+			       enum bptype type_wanted,
+			       char *addr_start, char **copy_arg)
+{
+  create_sals_from_address_default (arg, canonical, type_wanted,
+				    addr_start, copy_arg);
+}
+
+static void
+bkpt_create_breakpoints_sal (struct gdbarch *gdbarch,
+			     struct linespec_result *canonical,
+			     struct linespec_sals *lsal,
+			     char *cond_string,
+			     enum bptype type_wanted,
+			     enum bpdisp disposition,
+			     int thread,
+			     int task, int ignore_count,
+			     const struct breakpoint_ops *ops,
+			     int from_tty, int enabled,
+			     int internal)
+{
+  create_breakpoints_sal_default (gdbarch, canonical, lsal,
+				  cond_string, type_wanted,
+				  disposition, thread, task,
+				  ignore_count, ops, from_tty,
+				  enabled, internal);
+}
+
+static void
+bkpt_decode_linespec (struct breakpoint *b, char **s,
+		      struct symtabs_and_lines *sals)
+{
+  decode_linespec_default (b, s, sals);
 }
 
 /* Virtual table for internal breakpoints.  */
@@ -11297,7 +11325,144 @@ tracepoint_print_recreate (struct breakpoint *self, struct ui_file *fp)
     fprintf_unfiltered (fp, "  passcount %d\n", tp->pass_count);
 }
 
+static void
+tracepoint_create_sals_from_address (char **arg,
+				     struct linespec_result *canonical,
+				     enum bptype type_wanted,
+				     char *addr_start, char **copy_arg)
+{
+  create_sals_from_address_default (arg, canonical, type_wanted,
+				    addr_start, copy_arg);
+}
+
+static void
+tracepoint_create_breakpoints_sal (struct gdbarch *gdbarch,
+				   struct linespec_result *canonical,
+				   struct linespec_sals *lsal,
+				   char *cond_string,
+				   enum bptype type_wanted,
+				   enum bpdisp disposition,
+				   int thread,
+				   int task, int ignore_count,
+				   const struct breakpoint_ops *ops,
+				   int from_tty, int enabled,
+				   int internal)
+{
+  create_breakpoints_sal_default (gdbarch, canonical, lsal,
+				  cond_string, type_wanted,
+				  disposition, thread, task,
+				  ignore_count, ops, from_tty,
+				  enabled, internal);
+}
+
+static void
+tracepoint_decode_linespec (struct breakpoint *b, char **s,
+			    struct symtabs_and_lines *sals)
+{
+  decode_linespec_default (b, s, sals);
+}
+
 struct breakpoint_ops tracepoint_breakpoint_ops;
+
+/* The breakpoint_ops structure to be used on static tracepoints with
+   markers (`-m').  */
+
+static void
+strace_marker_create_sals_from_address (char **arg,
+					struct linespec_result *canonical,
+					enum bptype type_wanted,
+					char *addr_start, char **copy_arg)
+{
+  struct linespec_sals lsal;
+
+  lsal.sals = decode_static_tracepoint_spec (arg);
+
+  *copy_arg = savestring (addr_start, *arg - addr_start);
+
+  canonical->addr_string = xstrdup (*copy_arg);
+  lsal.canonical = xstrdup (*copy_arg);
+  VEC_safe_push (linespec_sals, canonical->sals, &lsal);
+}
+
+static void
+strace_marker_create_breakpoints_sal (struct gdbarch *gdbarch,
+				      struct linespec_result *canonical,
+				      struct linespec_sals *lsal,
+				      char *cond_string,
+				      enum bptype type_wanted,
+				      enum bpdisp disposition,
+				      int thread,
+				      int task, int ignore_count,
+				      const struct breakpoint_ops *ops,
+				      int from_tty, int enabled,
+				      int internal)
+{
+  int i;
+
+  /* If the user is creating a static tracepoint by marker id
+     (strace -m MARKER_ID), then store the sals index, so that
+     breakpoint_re_set can try to match up which of the newly
+     found markers corresponds to this one, and, don't try to
+     expand multiple locations for each sal, given than SALS
+     already should contain all sals for MARKER_ID.  */
+
+  for (i = 0; i < lsal->sals.nelts; ++i)
+    {
+      struct symtabs_and_lines expanded;
+      struct tracepoint *tp;
+      struct cleanup *old_chain;
+      char *addr_string;
+
+      expanded.nelts = 1;
+      expanded.sals = &lsal->sals.sals[i];
+
+      addr_string = xstrdup (canonical->addr_string);
+      old_chain = make_cleanup (xfree, addr_string);
+
+      tp = XCNEW (struct tracepoint);
+      init_breakpoint_sal (&tp->base, gdbarch, expanded,
+			   addr_string, NULL,
+			   cond_string, type_wanted, disposition,
+			   thread, task, ignore_count, ops,
+			   from_tty, enabled, internal,
+			   canonical->special_display);
+      /* Given that its possible to have multiple markers with
+	 the same string id, if the user is creating a static
+	 tracepoint by marker id ("strace -m MARKER_ID"), then
+	 store the sals index, so that breakpoint_re_set can
+	 try to match up which of the newly found markers
+	 corresponds to this one  */
+      tp->static_trace_marker_id_idx = i;
+
+      install_breakpoint (internal, &tp->base, 0);
+
+      discard_cleanups (old_chain);
+    }
+}
+
+static void
+strace_marker_decode_linespec (struct breakpoint *b, char **s,
+			       struct symtabs_and_lines *sals)
+{
+  struct tracepoint *tp = (struct tracepoint *) b;
+
+  *sals = decode_static_tracepoint_spec (s);
+  if (sals->nelts > tp->static_trace_marker_id_idx)
+    {
+      sals->sals[0] = sals->sals[tp->static_trace_marker_id_idx];
+      sals->nelts = 1;
+    }
+  else
+    error (_("marker %s not found"), tp->static_trace_marker_id);
+}
+
+static struct breakpoint_ops strace_marker_breakpoint_ops;
+
+static int
+strace_marker_p (struct breakpoint *b)
+{
+  return b->ops == &strace_marker_breakpoint_ops;
+}
 
 /* Delete a breakpoint and clean up all traces of it in the data
    structures.  */
@@ -11833,54 +11998,15 @@ static struct symtabs_and_lines
 addr_string_to_sals (struct breakpoint *b, char *addr_string, int *found)
 {
   char *s;
-  int marker_spec;
   struct symtabs_and_lines sals = {0};
   volatile struct gdb_exception e;
 
+  gdb_assert (b->ops != NULL);
   s = addr_string;
-  marker_spec = b->type == bp_static_tracepoint && is_marker_spec (s);
 
   TRY_CATCH (e, RETURN_MASK_ERROR)
     {
-      if (marker_spec)
-	{
-	  struct tracepoint *tp = (struct tracepoint *) b;
-
-	  sals = decode_static_tracepoint_spec (&s);
-	  if (sals.nelts > tp->static_trace_marker_id_idx)
-	    {
-	      sals.sals[0] = sals.sals[tp->static_trace_marker_id_idx];
-	      sals.nelts = 1;
-	    }
-	  else
-	    error (_("marker %s not found"), tp->static_trace_marker_id);
-	}
-      else
-	{
-	  struct linespec_result canonical;
-
-	  init_linespec_result (&canonical);
-	  decode_line_full (&s, DECODE_LINE_FUNFIRSTLINE,
-			    (struct symtab *) NULL, 0,
-			    &canonical, multiple_symbols_all,
-			    b->filter);
-
-	  /* We should get 0 or 1 resulting SALs.  */
-	  gdb_assert (VEC_length (linespec_sals, canonical.sals) < 2);
-
-	  if (VEC_length (linespec_sals, canonical.sals) > 0)
-	    {
-	      struct linespec_sals *lsal;
-
-	      lsal = VEC_index (linespec_sals, canonical.sals, 0);
-	      sals = lsal->sals;
-	      /* Arrange it so the destructor does not free the
-		 contents.  */
-	      lsal->sals.sals = NULL;
-	    }
-
-	  destroy_linespec_result (&canonical);
-	}
+      b->ops->decode_linespec (b, &s, &sals);
     }
   if (e.reason < 0)
     {
@@ -11933,7 +12059,7 @@ addr_string_to_sals (struct breakpoint *b, char *addr_string, int *found)
 	  b->condition_not_parsed = 0;
 	}
 
-      if (b->type == bp_static_tracepoint && !marker_spec)
+      if (b->type == bp_static_tracepoint && !strace_marker_p (b))
 	sals.sals[0] = update_static_tracepoint (b, sals.sals[0]);
 
       *found = 1;
@@ -11974,6 +12100,73 @@ breakpoint_re_set_default (struct breakpoint *b)
     }
 
   update_breakpoint_locations (b, expanded, expanded_end);
+}
+
+/* Default method for creating SALs from an address string.  It basically
+   calls parse_breakpoint_sals.  Return 1 for success, zero for failure.  */
+
+static void
+create_sals_from_address_default (char **arg,
+				  struct linespec_result *canonical,
+				  enum bptype type_wanted,
+				  char *addr_start, char **copy_arg)
+{
+  parse_breakpoint_sals (arg, canonical);
+}
+
+/* Call create_breakpoints_sal for the given arguments.  This is the default
+   function for the `create_breakpoints_sal' method of
+   breakpoint_ops.  */
+
+static void
+create_breakpoints_sal_default (struct gdbarch *gdbarch,
+				struct linespec_result *canonical,
+				struct linespec_sals *lsal,
+				char *cond_string,
+				enum bptype type_wanted,
+				enum bpdisp disposition,
+				int thread,
+				int task, int ignore_count,
+				const struct breakpoint_ops *ops,
+				int from_tty, int enabled,
+				int internal)
+{
+  create_breakpoints_sal (gdbarch, canonical, cond_string,
+			  type_wanted, disposition,
+			  thread, task, ignore_count, ops, from_tty,
+			  enabled, internal);
+}
+
+/* Decode the line represented by S by calling decode_line_full.  This is the
+   default function for the `decode_linespec' method of breakpoint_ops.  */
+
+static void
+decode_linespec_default (struct breakpoint *b, char **s,
+			 struct symtabs_and_lines *sals)
+{
+  struct linespec_result canonical;
+
+  init_linespec_result (&canonical);
+  decode_line_full (s, DECODE_LINE_FUNFIRSTLINE,
+		    (struct symtab *) NULL, 0,
+		    &canonical, multiple_symbols_all,
+		    b->filter);
+
+  /* We should get 0 or 1 resulting SALs.  */
+  gdb_assert (VEC_length (linespec_sals, canonical.sals) < 2);
+
+  if (VEC_length (linespec_sals, canonical.sals) > 0)
+    {
+      struct linespec_sals *lsal;
+
+      lsal = VEC_index (linespec_sals, canonical.sals, 0);
+      *sals = lsal->sals;
+      /* Arrange it so the destructor does not free the
+	 contents.  */
+      lsal->sals.sals = NULL;
+    }
+
+  destroy_linespec_result (&canonical);
 }
 
 /* Prepare the global context for a re-set of breakpoint B.  */
@@ -12794,6 +12987,15 @@ ftrace_command (char *arg, int from_tty)
 void
 strace_command (char *arg, int from_tty)
 {
+  struct breakpoint_ops *ops;
+
+  /* Decide if we are dealing with a static tracepoint marker (`-m'),
+     or with a normal static tracepoint.  */
+  if (arg && strncmp (arg, "-m", 2) == 0 && isspace (arg[2]))
+    ops = &strace_marker_breakpoint_ops;
+  else
+    ops = &tracepoint_breakpoint_ops;
+
   if (create_breakpoint (get_current_arch (),
 			 arg,
 			 NULL, 0, 1 /* parse arg */,
@@ -12801,7 +13003,7 @@ strace_command (char *arg, int from_tty)
 			 bp_static_tracepoint /* type_wanted */,
 			 0 /* Ignore count */,
 			 pending_break_support,
-			 &tracepoint_breakpoint_ops,
+			 ops,
 			 from_tty,
 			 1 /* enabled */,
 			 0 /* internal */))
@@ -13446,6 +13648,9 @@ initialize_breakpoint_ops (void)
   ops->insert_location = bkpt_insert_location;
   ops->remove_location = bkpt_remove_location;
   ops->breakpoint_hit = bkpt_breakpoint_hit;
+  ops->create_sals_from_address = bkpt_create_sals_from_address;
+  ops->create_breakpoints_sal = bkpt_create_breakpoints_sal;
+  ops->decode_linespec = bkpt_decode_linespec;
 
   /* The breakpoint_ops structure to be used in regular breakpoints.  */
   ops = &bkpt_breakpoint_ops;
@@ -13526,6 +13731,16 @@ initialize_breakpoint_ops (void)
   ops->print_one_detail = tracepoint_print_one_detail;
   ops->print_mention = tracepoint_print_mention;
   ops->print_recreate = tracepoint_print_recreate;
+  ops->create_sals_from_address = tracepoint_create_sals_from_address;
+  ops->create_breakpoints_sal = tracepoint_create_breakpoints_sal;
+  ops->decode_linespec = tracepoint_decode_linespec;
+
+  /* Static tracepoints with marker (`-m').  */
+  ops = &strace_marker_breakpoint_ops;
+  *ops = tracepoint_breakpoint_ops;
+  ops->create_sals_from_address = strace_marker_create_sals_from_address;
+  ops->create_breakpoints_sal = strace_marker_create_breakpoints_sal;
+  ops->decode_linespec = strace_marker_decode_linespec;
 
   /* Fork catchpoints.  */
   ops = &catch_fork_breakpoint_ops;

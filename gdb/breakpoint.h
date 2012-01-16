@@ -30,6 +30,8 @@ struct get_number_or_range_state;
 struct thread_info;
 struct bpstats;
 struct bp_location;
+struct linespec_result;
+struct linespec_sals;
 
 /* This is the maximum number of bytes a breakpoint instruction can
    take.  Feel free to increase it.  It's just used in a few places to
@@ -482,6 +484,37 @@ struct breakpoint_ops
 
   /* Print to FP the CLI command that recreates this breakpoint.  */
   void (*print_recreate) (struct breakpoint *, struct ui_file *fp);
+
+  /* Create SALs from address string, storing the result in linespec_result.
+
+     For an explanation about the arguments, see the function
+     `create_sals_from_address_default'.
+
+     This function is called inside `create_breakpoint'.  */
+  void (*create_sals_from_address) (char **, struct linespec_result *,
+				    enum bptype, char *, char **);
+
+  /* This method will be responsible for creating a breakpoint given its SALs.
+     Usually, it just calls `create_breakpoints_sal' (for ordinary
+     breakpoints).  However, there may be some special cases where we might
+     need to do some tweaks, e.g., see
+     `strace_marker_create_breakpoints_sal'.
+
+     This function is called inside `create_breakpoint'.  */
+  void (*create_breakpoints_sal) (struct gdbarch *,
+				  struct linespec_result *,
+				  struct linespec_sals *, char *,
+				  enum bptype, enum bpdisp, int, int,
+				  int, const struct breakpoint_ops *,
+				  int, int, int);
+
+  /* Given the address string (second parameter), this method decodes it
+     and provides the SAL locations related to it.  For ordinary breakpoints,
+     it calls `decode_line_full'.
+
+     This function is called inside `addr_string_to_sals'.  */
+  void (*decode_linespec) (struct breakpoint *, char **,
+			   struct symtabs_and_lines *);
 };
 
 /* Helper for breakpoint_ops->print_recreate implementations.  Prints
