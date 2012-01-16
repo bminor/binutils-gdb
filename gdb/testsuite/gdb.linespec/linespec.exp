@@ -44,19 +44,24 @@ if {$l1 != $l2} {
     error "somebody incompatibly modified the source files needed by linespec.exp"
 }
 
+gdb_test "break one/thefile.cc:$l1" \
+    "Breakpoint $decimal at $hex: file .*thefile.cc, line $l1." \
+    "single-location break using dir/file:line"
+
+gdb_test "clear one/thefile.cc:$l1" \
+    "Deleted breakpoint $decimal *" \
+    "clear breakpoint using dir/file:line"
+
 gdb_test "break thefile.cc:$l1" \
-    "Breakpoint 1 at $hex: thefile.cc:$l1. \[(\]2 locations\[)\]" \
+    "Breakpoint $decimal at $hex: thefile.cc:$l1. \[(\]2 locations\[)\]" \
     "multi-location break using file:line"
 
-# We'd like this to work, but it currently does not.
-# gdb_test "break one/thefile.cc:$l1"
-
 gdb_test "break dupname" \
-    "Breakpoint 2 at $hex: dupname. \[(\]2 locations\[)\]" \
+    "Breakpoint $decimal at $hex: dupname. \[(\]2 locations\[)\]" \
     "multi-location break using duplicate function name"
 
 gdb_test "break dupname:label" \
-    "Breakpoint 3 at $hex: dupname:label. \[(\]2 locations\[)\]" \
+    "Breakpoint $decimal at $hex: dupname:label. \[(\]2 locations\[)\]" \
     "multi-location break using duplicate function name and label"
 
 gdb_test_no_output "set breakpoint pending off" \

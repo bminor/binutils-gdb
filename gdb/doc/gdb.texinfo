@@ -6492,6 +6492,11 @@ linespec.
 
 @item @var{filename}:@var{linenum}
 Specifies the line @var{linenum} in the source file @var{filename}.
+If @var{filename} is a relative file name, then it will match any
+source file name with the same trailing components.  For example, if
+@var{filename} is @samp{gcc/expr.c}, then it will match source file
+name of @file{/build/trunk/gcc/expr.c}, but not
+@file{/build/trunk/libcpp/expr.c} or @file{/build/trunk/gcc/x-expr.c}.
 
 @item @var{function}
 Specifies the line that begins the body of the function @var{function}.

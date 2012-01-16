@@ -153,7 +153,7 @@ struct quick_symbol_functions
   /* Expand and iterate over each "partial" symbol table in OBJFILE
      where the source file is named NAME.
 
-     If there is no '/' in the name, a match after a '/' in the symbol
+     If NAME is not absolute, a match after a '/' in the symbol
      table's file name will also work.  FULL_PATH is the absolute file
      name, and REAL_PATH is the same, run through gdb_realpath.
 

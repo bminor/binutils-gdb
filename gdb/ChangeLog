@@ -1,5 +1,19 @@
 2012-01-16  Tom Tromey  <tromey@redhat.com>
 
+	* NEWS: Add item.
+	* symtab.h (compare_filenames_for_search): Declare.
+	* symtab.c (compare_filenames_for_search): New function.
+	(iterate_over_some_symtabs): Use it.
+	* symfile.h (struct quick_symbol_functions)
+	<map_symtabs_matching_filename>: Change spec.
+	* psymtab.c (partial_map_symtabs_matching_filename): Use
+	compare_filenames_for_search.  Update for new spec.
+	* dwarf2read.c (dw2_map_symtabs_matching_filename): Use
+	compare_filenames_for_search.  Update for new spec.
+	* breakpoint.c (clear_command): Use compare_filenames_for_search.
+
+2012-01-16  Tom Tromey  <tromey@redhat.com>
+
 	PR python/13281:
 	* gdbtypes.h (TYPE_FLAG_ENUM): New macro.
 	(struct main_type) <flag_flag_enum>: New field.

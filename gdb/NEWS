@@ -25,6 +25,11 @@
   ** A new class, gdb.printing.FlagEnumerationPrinter, can be used to
      apply "flag enum"-style pretty-printing to any enum.
 
+* The filename part of a linespec will now match trailing components
+  of a source file name.  For example, "break gcc/expr.c:1000" will
+  now set a breakpoint in build/gcc/expr.c, but not
+  build/libcpp/expr.c.
+
 *** Changes in GDB 7.4
 
 * GDB now handles ambiguous linespecs more consistently; the existing

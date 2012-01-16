@@ -1239,6 +1239,10 @@ struct objfile *lookup_objfile_from_block (const struct block *block);
 
 extern int basenames_may_differ;
 
+int compare_filenames_for_search (const char *filename,
+				  const char *search_name,
+				  int search_len);
+
 int iterate_over_some_symtabs (const char *name,
 			       const char *full_path,
 			       const char *real_path,

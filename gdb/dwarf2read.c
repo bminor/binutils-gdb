@@ -2403,8 +2403,8 @@ dw2_map_symtabs_matching_filename (struct objfile *objfile, const char *name,
 {
   int i;
   const char *name_basename = lbasename (name);
-  int check_basename = name_basename == name;
-  struct dwarf2_per_cu_data *base_cu = NULL;
+  int name_len = strlen (name);
+  int is_abs = IS_ABSOLUTE_PATH (name);
 
   dw2_setup (objfile);
 
@@ -2427,7 +2427,9 @@ dw2_map_symtabs_matching_filename (struct objfile *objfile, const char *name,
 	{
 	  const char *this_name = file_data->file_names[j];
 
-	  if (FILENAME_CMP (name, this_name) == 0)
+	  if (FILENAME_CMP (name, this_name) == 0
+	      || (!is_abs && compare_filenames_for_search (this_name,
+							   name, name_len)))
 	    {
 	      if (dw2_map_expand_apply (objfile, per_cu,
 					name, full_path, real_path,
@@ -2435,9 +2437,12 @@ dw2_map_symtabs_matching_filename (struct objfile *objfile, const char *name,
 		return 1;
 	    }
 
-	  if (check_basename && ! base_cu
-	      && FILENAME_CMP (lbasename (this_name), name) == 0)
-	    base_cu = per_cu;
+	    {
+	      if (dw2_map_expand_apply (objfile, per_cu,
+					name, full_path, real_path,
+					callback, data))
+		return 1;
+	    }
 
 	  /* Before we invoke realpath, which can get expensive when many
 	     files are involved, do a quick comparison of the basenames.  */
@@ -2451,7 +2456,10 @@ dw2_map_symtabs_matching_filename (struct objfile *objfile, const char *name,
 							      file_data, j);
 
 	      if (this_real_name != NULL
-		  && FILENAME_CMP (full_path, this_real_name) == 0)
+		  && (FILENAME_CMP (full_path, this_real_name) == 0
+		      || (!is_abs
+			  && compare_filenames_for_search (this_real_name,
+							   name, name_len))))
 		{
 		  if (dw2_map_expand_apply (objfile, per_cu,
 					    name, full_path, real_path,
@@ -2466,7 +2474,10 @@ dw2_map_symtabs_matching_filename (struct objfile *objfile, const char *name,
 							      file_data, j);
 
 	      if (this_real_name != NULL
-		  && FILENAME_CMP (real_path, this_real_name) == 0)
+		  && (FILENAME_CMP (real_path, this_real_name) == 0
+		      || (!is_abs
+			  && compare_filenames_for_search (this_real_name,
+							   name, name_len))))
 		{
 		  if (dw2_map_expand_apply (objfile, per_cu,
 					    name, full_path, real_path,
@@ -2475,14 +2486,6 @@ dw2_map_symtabs_matching_filename (struct objfile *objfile, const char *name,
 		}
 	    }
 	}
-    }
-
-  if (base_cu)
-    {
-      if (dw2_map_expand_apply (objfile, base_cu,
-				name, full_path, real_path,
-				callback, data))
-	return 1;
     }
 
   return 0;

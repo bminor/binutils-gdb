@@ -1,5 +1,10 @@
 2012-01-16  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.texinfo (Specify Location): Document relative file name
+	handling.
+
+2012-01-16  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.texinfo (gdb.printing): Document FlagEnumerationPrinter.
 
 2012-01-13  Jan Kratochvil  <jan.kratochvil@redhat.com>

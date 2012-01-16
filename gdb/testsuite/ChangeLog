@@ -1,5 +1,10 @@
 2012-01-16  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.linespec/linespec.exp: Change some tests to use $decimal.
+	Add tests for relative directory.
+
+2012-01-16  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.base/printcmds.c (enum flag_enum): New.
 	(three): New global.
 	* gdb.base/printcmds.exp (test_print_enums): Add test for flag
