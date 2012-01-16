@@ -992,11 +992,7 @@ name_not_typename :	NAME
 /*** Needs some error checking for the float case.  ***/
 
 static int
-parse_number (p, len, parsed_float, putithere)
-     char *p;
-     int len;
-     int parsed_float;
-     YYSTYPE *putithere;
+parse_number (char *p, int len, int parsed_float, YYSTYPE *putithere)
 {
   /* FIXME: Shouldn't these be unsigned?  We don't deal with negative
      values here, and we do kind of silly things like cast to
@@ -1419,9 +1415,6 @@ yylex (void)
     case '^':
     case '~':
     case '!':
-#if 0
-    case '@':		/* Moved out below.  */
-#endif
     case '<':
     case '>':
     case '[':
@@ -1783,8 +1776,7 @@ yylex (void)
 }
 
 void
-yyerror (msg)
-     char *msg;
+yyerror (char *msg)
 {
   if (*lexptr == '\0')
     error(_("A %s near end of expression."),  (msg ? msg : "error"));

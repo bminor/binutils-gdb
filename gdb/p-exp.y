@@ -1093,9 +1093,8 @@ static const struct token tokentab2[] =
 
 /* Allocate uppercased var: */
 /* make an uppercased copy of tokstart.  */
-static char * uptok (tokstart, namelen)
-  char *tokstart;
-  int namelen;
+static char *
+uptok (char *tokstart, int namelen)
 {
   int i;
   char *uptokstart = (char *)malloc(namelen+1);
@@ -1732,8 +1731,7 @@ yylex (void)
 }
 
 void
-yyerror (msg)
-     char *msg;
+yyerror (char *msg)
 {
   if (prev_lexptr)
     lexptr = prev_lexptr;

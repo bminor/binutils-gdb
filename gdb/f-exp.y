@@ -664,11 +664,7 @@ name_not_typename :	NAME
 /*** Needs some error checking for the float case ***/
 
 static int
-parse_number (p, len, parsed_float, putithere)
-     char *p;
-     int len;
-     int parsed_float;
-     YYSTYPE *putithere;
+parse_number (char *p, int len, int parsed_float, YYSTYPE *putithere)
 {
   LONGEST n = 0;
   LONGEST prevn = 0;
@@ -895,8 +891,7 @@ static int tempbufindex;	/* Current index into buffer */
    first one on demand.  */
 
 static void
-growbuf_by_size (count)
-     int count;
+growbuf_by_size (int count)
 {
   int growby;
 
@@ -1217,8 +1212,7 @@ yylex (void)
 }
 
 void
-yyerror (msg)
-     char *msg;
+yyerror (char *msg)
 {
   if (prev_lexptr)
     lexptr = prev_lexptr;

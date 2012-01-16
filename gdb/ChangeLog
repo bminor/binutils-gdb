@@ -1,3 +1,18 @@
+2012-01-16  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* f-exp.y (parse_number): Convert prototype from K&R to ANSI C.
+	(growbuf_by_size): Likewise.
+	(yyerror): Likewise.
+	* m2-exp.y (make_qualname): Remove function (was #if 0'ed).
+	(modblock): Remove variable (was #if 0'ed).
+	(parse_number): Convert prototype from K&R to ANSI C.
+	(yyerror): Likewise.
+	* objc-exp.y (parse_number): Likewise.
+	(yyerror): Likewise.
+	(yylex): Remove #if 0'ed code.
+	* p-exp.y (uptok): Convert prototype from K&R to ANSI C.
+	(yyerror): Likewise.
+
 2012-01-16  Tom Tromey  <tromey@redhat.com>
 
 	* NEWS: Add item.
