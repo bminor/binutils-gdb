@@ -528,8 +528,8 @@ coff_i386_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
     {
       bfd_vma osect_vma;
 
-      if (h && (h->type == bfd_link_hash_defined
-		|| h->type == bfd_link_hash_defweak))
+      if (h && (h->root.type == bfd_link_hash_defined
+		|| h->root.type == bfd_link_hash_defweak))
 	osect_vma = h->root.u.def.section->output_section->vma;
       else
 	{

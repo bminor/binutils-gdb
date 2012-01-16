@@ -1,7 +1,14 @@
+2012-01-16  Daniel Green  <venix1@gmail.com>
+
+	PR ld/13491
+	* coff-i386.c (coff_i386_rtype_to_howto <R_SECREL32>): Test
+	h->root.type not h->type.
+	* coff-x86_64.c (coff_amd64_rtype_to_howto <R_AMD64_SECREL>): Likewise.
+
 2012-01-13  Iain Sandoe  <idsandoe@googlemail.com>
 
-	* mach-o.c (bfd_mach_o_build_dysymtab_command): Handle absolute 
-	indirect symbols.  
+	* mach-o.c (bfd_mach_o_build_dysymtab_command): Handle absolute
+	indirect symbols.
 
 2012-01-13  Iain Sandoe  <idsandoe@googlemail.com>
 
