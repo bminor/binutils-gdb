@@ -67,6 +67,7 @@ set gcc_gas_flag "-B[pwd]/tmpdir/gas/"
 if {![file isdirectory tmpdir/ld]} then {
     catch "exec mkdir tmpdir/ld" status
     catch "exec ln -s ../../ld-new tmpdir/ld/ld" status
+    catch "exec ln -s ld tmpdir/ld/collect-ld" status
 }
 set gcc_ld_flag "-B[pwd]/tmpdir/ld/"
 
