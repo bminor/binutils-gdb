@@ -1,3 +1,8 @@
+2012-01-17  Doug Evans  <dje@google.com>
+
+	* linespec.c (decode_line_internal): Don't call symtabs_from_filename
+	if we know we don't have a file name to look for.
+
 2012-01-17  Pedro Alves  <palves@redhat.com>
 
 	* dwarf2-frame.c (dwarf2_frame_cfa): Throw NOT_AVAILABLE_ERROR, if

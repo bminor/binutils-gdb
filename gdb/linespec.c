@@ -894,30 +894,42 @@ decode_line_internal (struct linespec_state *self, char **argptr)
   first_half = p = locate_first_half (argptr, &is_quote_enclosed);
 
   /* First things first: if ARGPTR starts with a filename, get its
-     symtab and strip the filename from ARGPTR.  */
-  TRY_CATCH (file_exception, RETURN_MASK_ERROR)
-    {
-      self->file_symtabs = symtabs_from_filename (argptr, p, is_quote_enclosed,
-						  &self->user_filename);
-    }
+     symtab and strip the filename from ARGPTR.
+     Avoid calling symtab_from_filename if we know can,
+     it can be expensive.  */
 
-  if (VEC_empty (symtab_p, self->file_symtabs))
+  if (*p != '\0')
+    {
+      TRY_CATCH (file_exception, RETURN_MASK_ERROR)
+	{
+	  self->file_symtabs = symtabs_from_filename (argptr, p,
+						      is_quote_enclosed,
+						      &self->user_filename);
+	}
+
+      if (file_exception.reason >= 0)
+	{
+	  /* Check for single quotes on the non-filename part.  */
+	  is_quoted = (**argptr
+		       && strchr (get_gdb_completer_quote_characters (),
+				  **argptr) != NULL);
+	  if (is_quoted)
+	    end_quote = skip_quoted (*argptr);
+
+	  /* Locate the next "half" of the linespec.  */
+	  first_half = p = locate_first_half (argptr, &is_quote_enclosed);
+	}
+
+      if (VEC_empty (symtab_p, self->file_symtabs))
+	{
+	  /* A NULL entry means to use GLOBAL_DEFAULT_SYMTAB.  */
+	  VEC_safe_push (symtab_p, self->file_symtabs, NULL);
+	}
+    }
+  else
     {
       /* A NULL entry means to use GLOBAL_DEFAULT_SYMTAB.  */
       VEC_safe_push (symtab_p, self->file_symtabs, NULL);
-    }
-
-  if (file_exception.reason >= 0)
-    {
-      /* Check for single quotes on the non-filename part.  */
-      is_quoted = (**argptr
-		   && strchr (get_gdb_completer_quote_characters (),
-			      **argptr) != NULL);
-      if (is_quoted)
-	end_quote = skip_quoted (*argptr);
-
-      /* Locate the next "half" of the linespec.  */
-      first_half = p = locate_first_half (argptr, &is_quote_enclosed);
     }
 
   /* Check if this is an Objective-C method (anything that starts with
