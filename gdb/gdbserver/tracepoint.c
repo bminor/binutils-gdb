@@ -8251,23 +8251,35 @@ initialize_tracepoint (void)
 
 #ifdef IN_PROCESS_AGENT
   {
+    uintptr_t addr;
     int pagesize;
+
     pagesize = sysconf (_SC_PAGE_SIZE);
     if (pagesize == -1)
       fatal ("sysconf");
 
     gdb_tp_heap_buffer = xmalloc (5 * 1024 * 1024);
 
-    /* Allocate scratch buffer aligned on a page boundary.  */
-    gdb_jump_pad_buffer = memalign (pagesize, pagesize * 20);
-    gdb_jump_pad_buffer_end = gdb_jump_pad_buffer + pagesize * 20;
+#define SCRATCH_BUFFER_NPAGES 20
 
-    /* Make it writable and executable.  */
-    if (mprotect (gdb_jump_pad_buffer, pagesize * 20,
-		  PROT_READ | PROT_WRITE | PROT_EXEC) != 0)
+    /* Allocate scratch buffer aligned on a page boundary, at a low
+       address (close to the main executable's code).  */
+    for (addr = pagesize; addr != 0; addr += pagesize)
+      {
+	gdb_jump_pad_buffer = mmap ((void *) addr, pagesize * SCRATCH_BUFFER_NPAGES,
+				    PROT_READ | PROT_WRITE | PROT_EXEC,
+				    MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED,
+				    -1, 0);
+	if (gdb_jump_pad_buffer != MAP_FAILED)
+	  break;
+      }
+
+    if (addr == 0)
       fatal ("\
-initialize_tracepoint: mprotect(%p, %d, PROT_READ|PROT_EXEC) failed with %s",
-	     gdb_jump_pad_buffer, pagesize * 20, strerror (errno));
+initialize_tracepoint: mmap'ing jump pad buffer failed with %s",
+	     strerror (errno));
+
+    gdb_jump_pad_buffer_end = gdb_jump_pad_buffer + pagesize * SCRATCH_BUFFER_NPAGES;
   }
 
   gdb_trampoline_buffer = gdb_trampoline_buffer_end = 0;

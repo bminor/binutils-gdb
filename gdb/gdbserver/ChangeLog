@@ -1,3 +1,8 @@
+2012-01-17  Pedro Alves  <palves@redhat.com>
+
+	* tracepoint.c (initialize_tracepoint): Use mmap instead of
+	memalign plus mprotect to allocate the scratch buffer.
+
 2012-01-13  Pedro Alves  <palves@redhat.com>
 
 	* server.c (attach_inferior): Clear `cont_thread'.
