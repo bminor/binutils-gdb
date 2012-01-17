@@ -1,3 +1,7 @@
+2012-01-17  Alan Modra  <amodra@gmail.com>
+
+	* version.c (print_version): Update copyright message year.
+
 2012-01-16  Alan Modra  <amodra@gmail.com>
 
 	PR binutils/13593
