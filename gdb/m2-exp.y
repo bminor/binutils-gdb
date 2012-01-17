@@ -1067,7 +1067,6 @@ yylex (void)
 
 void
 yyerror (char *msg)
-     char *msg;
 {
   if (prev_lexptr)
     lexptr = prev_lexptr;

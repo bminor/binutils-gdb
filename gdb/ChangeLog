@@ -1,3 +1,8 @@
+2012-01-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix compilation error.
+	* m2-exp.y (yyerror): Use ANSI C prototype.
+
 2012-01-16  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* f-exp.y (parse_number): Convert prototype from K&R to ANSI C.
