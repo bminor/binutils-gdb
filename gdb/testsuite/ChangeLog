@@ -1,3 +1,8 @@
+2012-01-18  Pedro Alves  <palves@redhat.com>
+
+	* gdb.ada/mi_task_info.exp (-ada-task-info with no argument):
+	Allow output before ^done.
+
 2012-01-16  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.linespec/linespec.exp: Change some tests to use $decimal.

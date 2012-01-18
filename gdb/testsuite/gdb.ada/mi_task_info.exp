@@ -57,7 +57,7 @@ set task_3 \
 
 # Get the full list of tasks...
 mi_gdb_test "-ada-task-info" \
-  "\\^done,tasks={nr_rows=\"3\",nr_cols=\"8\",$ada_task_info_hdr,body=\\\[$task_1,$task_2,$task_3\\\]}" \
+  ".*\\^done,tasks={nr_rows=\"3\",nr_cols=\"8\",$ada_task_info_hdr,body=\\\[$task_1,$task_2,$task_3\\\]}" \
   "-ada-task-info with no argument"
 
 # Now, only get the info about task 3.
