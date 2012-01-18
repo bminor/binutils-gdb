@@ -1,3 +1,12 @@
+2012-01-18  Doug Evans  <dje@google.com>
+
+	* Makefile.in (TARGET_SYSTEM_ROOT, TARGET_SYSTEM_ROOT_DEFINE): Delete.
+	(main.o): Remove rule.
+	* configure.ac (BINDIR): Define with AC_DEFINE_DIR.
+	(--with-sysroot): Rewrite.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+
 2012-01-18  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* parse.c (initialize_expout): New function.

@@ -654,7 +654,6 @@ SER_HARDWIRE
 WERROR_CFLAGS
 WARN_CFLAGS
 SYSTEM_GDBINIT
-TARGET_SYSTEM_ROOT_DEFINE
 TARGET_SYSTEM_ROOT
 CONFIG_LDFLAGS
 RDYNAMIC
@@ -7900,6 +7899,24 @@ _ACEOF
 
 
 
+# We can't pass paths as command line arguments.
+# Mingw32 tries to be clever and will convert the paths for us.
+# For example -DBINDIR="/usr/local/bin" passed on the command line may get
+# converted to -DBINDIR="E:/msys/mingw32/msys/1.0/local/bin".
+# This breaks GDB's relocatable path conversions since paths passed in
+# config.h would not get so translated, the path prefixes no longer match.
+
+  test "x$prefix" = xNONE && prefix="$ac_default_prefix"
+  test "x$exec_prefix" = xNONE && exec_prefix='${prefix}'
+  ac_define_dir=`eval echo $bindir`
+  ac_define_dir=`eval echo $ac_define_dir`
+
+cat >>confdefs.h <<_ACEOF
+#define BINDIR "$ac_define_dir"
+_ACEOF
+
+
+
 # GDB's datadir relocation
 
 
@@ -15043,45 +15060,53 @@ $as_echo "#define HAVE_PERSONALITY 1" >>confdefs.h
 fi
 
 
-target_sysroot_reloc=0
+# Support for --with-sysroot is a copy of GDB_AC_WITH_DIR,
+# except that the argument to --with-sysroot is optional.
+# --with-sysroot (or --with-sysroot=yes) sets the default sysroot path.
+if test "x$with_sysroot" = xyes; then
+  with_sysroot="${exec_prefix}/${target_alias}/sys-root"
+fi
 
 # Check whether --with-sysroot was given.
 if test "${with_sysroot+set}" = set; then :
-  withval=$with_sysroot;
- case ${with_sysroot} in
- yes) TARGET_SYSTEM_ROOT='${exec_prefix}/${target_alias}/sys-root' ;;
- *) TARGET_SYSTEM_ROOT=$with_sysroot ;;
- esac
-
- TARGET_SYSTEM_ROOT_DEFINE='-DTARGET_SYSTEM_ROOT=\"$(TARGET_SYSTEM_ROOT)\"'
-
- if test "x$prefix" = xNONE; then
-  test_prefix=/usr/local
- else
-  test_prefix=$prefix
- fi
- if test "x$exec_prefix" = xNONE || test "x$exec_prefix" = 'x${prefix}'; then
-  test_exec_prefix=$test_prefix
- else
-  test_exec_prefix=$exec_prefix
- fi
- case ${TARGET_SYSTEM_ROOT} in
- "${test_prefix}"|"${test_prefix}/"*|\
- "${test_exec_prefix}"|"${test_exec_prefix}/"*|\
- '${prefix}'|'${prefix}/'*|\
- '${exec_prefix}'|'${exec_prefix}/'*)
-   target_sysroot_reloc=1
-   ;;
- esac
-
+  withval=$with_sysroot; TARGET_SYSTEM_ROOT=$withval
 else
-
- TARGET_SYSTEM_ROOT=
- TARGET_SYSTEM_ROOT_DEFINE='-DTARGET_SYSTEM_ROOT=\"\"'
-
+  TARGET_SYSTEM_ROOT=
 fi
 
-TARGET_SYSTEM_ROOT_DEFINE="$TARGET_SYSTEM_ROOT_DEFINE -DTARGET_SYSTEM_ROOT_RELOCATABLE=$target_sysroot_reloc"
+
+  test "x$prefix" = xNONE && prefix="$ac_default_prefix"
+  test "x$exec_prefix" = xNONE && exec_prefix='${prefix}'
+  ac_define_dir=`eval echo $TARGET_SYSTEM_ROOT`
+  ac_define_dir=`eval echo $ac_define_dir`
+
+cat >>confdefs.h <<_ACEOF
+#define TARGET_SYSTEM_ROOT "$ac_define_dir"
+_ACEOF
+
+
+
+
+  if test "x$exec_prefix" = xNONE || test "x$exec_prefix" = 'x${prefix}'; then
+     if test "x$prefix" = xNONE; then
+     	test_prefix=/usr/local
+     else
+	test_prefix=$prefix
+     fi
+  else
+     test_prefix=$exec_prefix
+  fi
+  value=0
+  case ${ac_define_dir} in
+     "${test_prefix}"|"${test_prefix}/"*|\
+	'${exec_prefix}'|'${exec_prefix}/'*)
+     value=1
+     ;;
+  esac
+
+cat >>confdefs.h <<_ACEOF
+#define TARGET_SYSTEM_ROOT_RELOCATABLE $value
+_ACEOF
 
 
 

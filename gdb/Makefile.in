@@ -166,10 +166,6 @@ INTL = @LIBINTL@
 INTL_DEPS = @LIBINTL_DEP@
 INTL_CFLAGS = @INCINTL@
 
-# Did the user give us a --with-sysroot option?
-TARGET_SYSTEM_ROOT = @TARGET_SYSTEM_ROOT@
-TARGET_SYSTEM_ROOT_DEFINE = @TARGET_SYSTEM_ROOT_DEFINE@
-
 # Did the user give us a --with-gdb-datadir option?
 GDB_DATADIR = @GDB_DATADIR@
 
@@ -1517,11 +1513,6 @@ ALLDEPFILES = \
 
 # Some files need explicit build rules (due to -Werror problems) or due
 # to sub-directory fun 'n' games.
-
-# main.o needs an explicit build rule to get TARGET_SYSTEM_ROOT and BINDIR.
-main.o: $(srcdir)/main.c
-	$(COMPILE) $(TARGET_SYSTEM_ROOT_DEFINE) -DBINDIR=\"$(bindir)\" $(srcdir)/main.c
-	$(POSTCOMPILE)
 
 # FIXME: cagney/2003-08-10: "monitor.c" gets -Wformat-nonliteral
 # errors.  It turns out that that is the least of monitor.c's

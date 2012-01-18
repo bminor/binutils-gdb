@@ -7,6 +7,9 @@
 /* Define if building universal (internal helper macro) */
 #undef AC_APPLE_UNIVERSAL_BUILD
 
+/* Directory of programs. */
+#undef BINDIR
+
 /* Define to the number of bits in type 'ptrdiff_t'. */
 #undef BITSIZEOF_PTRDIFF_T
 
@@ -853,6 +856,12 @@
 /* Define if the system-gdbinit directory should be relocated when GDB is
    moved. */
 #undef SYSTEM_GDBINIT_RELOCATABLE
+
+/* search for usr/lib et al within DIR */
+#undef TARGET_SYSTEM_ROOT
+
+/* Define if the sysroot directory should be relocated when GDB is moved. */
+#undef TARGET_SYSTEM_ROOT_RELOCATABLE
 
 /* Define if <thread_db.h> has the TD_NOTALLOC error code. */
 #undef THREAD_DB_HAS_TD_NOTALLOC
