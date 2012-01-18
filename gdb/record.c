@@ -1718,24 +1718,68 @@ record_xfer_partial (struct target_ops *ops, enum target_object object,
                                          offset, len);
 }
 
-/* Behavior is conditional on RECORD_IS_REPLAY.
-   We will not actually insert or remove breakpoints when replaying,
-   nor when recording.  */
+/* This structure represents a breakpoint inserted while the record
+   target is active.  We use this to know when to install/remove
+   breakpoints in/from the target beneath.  For example, a breakpoint
+   may be inserted while recording, but removed when not replaying nor
+   recording.  In that case, the breakpoint had not been inserted on
+   the target beneath, so we should not try to remove it there.  */
+
+struct record_breakpoint
+{
+  /* The address and address space the breakpoint was set at.  */
+  struct address_space *address_space;
+  CORE_ADDR addr;
+
+  /* True when the breakpoint has been also installed in the target
+     beneath.  This will be false for breakpoints set during replay or
+     when recording.  */
+  int in_target_beneath;
+};
+
+typedef struct record_breakpoint *record_breakpoint_p;
+DEF_VEC_P(record_breakpoint_p);
+
+/* The list of breakpoints inserted while the record target is
+   active.  */
+VEC(record_breakpoint_p) *record_breakpoints = NULL;
+
+/* Behavior is conditional on RECORD_IS_REPLAY.  We will not actually
+   insert or remove breakpoints in the real target when replaying, nor
+   when recording.  */
 
 static int
 record_insert_breakpoint (struct gdbarch *gdbarch,
 			  struct bp_target_info *bp_tgt)
 {
+  struct record_breakpoint *bp;
+  int in_target_beneath = 0;
+
   if (!RECORD_IS_REPLAY)
     {
-      struct cleanup *old_cleanups = record_gdb_operation_disable_set ();
-      int ret = record_beneath_to_insert_breakpoint (gdbarch, bp_tgt);
+      /* When recording, we currently always single-step, so we don't
+	 really need to install regular breakpoints in the inferior.
+	 However, we do have to insert software single-step
+	 breakpoints, in case the target can't hardware step.  To keep
+	 things single, we always insert.  */
+      struct cleanup *old_cleanups;
+      int ret;
 
+      old_cleanups = record_gdb_operation_disable_set ();
+      ret = record_beneath_to_insert_breakpoint (gdbarch, bp_tgt);
       do_cleanups (old_cleanups);
 
-      return ret;
+      if (ret != 0)
+	return ret;
+
+      in_target_beneath = 1;
     }
 
+  bp = XNEW (struct record_breakpoint);
+  bp->addr = bp_tgt->placed_address;
+  bp->address_space = bp_tgt->placed_address_space;
+  bp->in_target_beneath = in_target_beneath;
+  VEC_safe_push (record_breakpoint_p, record_breakpoints, bp);
   return 0;
 }
 
@@ -1745,17 +1789,35 @@ static int
 record_remove_breakpoint (struct gdbarch *gdbarch,
 			  struct bp_target_info *bp_tgt)
 {
-  if (!RECORD_IS_REPLAY)
+  struct record_breakpoint *bp;
+  int ix;
+
+  for (ix = 0;
+       VEC_iterate (record_breakpoint_p, record_breakpoints, ix, bp);
+       ++ix)
     {
-      struct cleanup *old_cleanups = record_gdb_operation_disable_set ();
-      int ret = record_beneath_to_remove_breakpoint (gdbarch, bp_tgt);
+      if (bp->addr == bp_tgt->placed_address
+	  && bp->address_space == bp_tgt->placed_address_space)
+	{
+	  if (bp->in_target_beneath)
+	    {
+	      struct cleanup *old_cleanups;
+	      int ret;
 
-      do_cleanups (old_cleanups);
+	      old_cleanups = record_gdb_operation_disable_set ();
+	      ret = record_beneath_to_remove_breakpoint (gdbarch, bp_tgt);
+	      do_cleanups (old_cleanups);
 
-      return ret;
+	      if (ret != 0)
+		return ret;
+	    }
+
+	  VEC_unordered_remove (record_breakpoint_p, record_breakpoints, ix);
+	  return 0;
+	}
     }
 
-  return 0;
+  gdb_assert_not_reached ("removing unknown breakpoint");
 }
 
 /* "to_can_execute_reverse" method for process record target.  */
