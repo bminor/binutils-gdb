@@ -1,3 +1,10 @@
+2012-01-18  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* parse.c (initialize_expout): New function.
+	(reallocate_expout): Likewise.
+	(parse_exp_in_context): Use `initialize_expout' and
+	`reallocate_expout' when appropriate.
+
 2012-01-18  Pedro Alves  <palves@redhat.com>
 
 	* record.c (struct record_breakpoint, record_breakpoint_p)
