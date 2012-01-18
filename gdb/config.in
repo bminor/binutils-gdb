@@ -263,6 +263,9 @@
 /* Define to 1 if the system has the type `long long int'. */
 #undef HAVE_LONG_LONG_INT
 
+/* Define to 1 if you have the `lstat' function. */
+#undef HAVE_LSTAT
+
 /* Define if <sys/procfs.h> has lwpid_t. */
 #undef HAVE_LWPID_T
 

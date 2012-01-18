@@ -1441,63 +1441,48 @@ show_debug_file_directory (struct ui_file *file, int from_tty,
 #define DEBUG_SUBDIRECTORY ".debug"
 #endif
 
-char *
-find_separate_debug_file_by_debuglink (struct objfile *objfile)
+/* Find a separate debuginfo file for OBJFILE, using DIR as the directory
+   where the original file resides (may not be the same as
+   dirname(objfile->name) due to symlinks), and DEBUGLINK as the file we are
+   looking for.  Returns the name of the debuginfo, of NULL.  */
+
+static char *
+find_separate_debug_file (const char *dir,
+			  const char *canon_dir,
+			  const char *debuglink,
+			  unsigned long crc32, struct objfile *objfile)
 {
-  char *basename, *debugdir;
-  char *dir = NULL;
-  char *debugfile = NULL;
-  char *canon_name = NULL;
-  unsigned long crc32;
+  char *debugdir;
+  char *debugfile;
   int i;
 
-  basename = get_debug_link_info (objfile, &crc32);
-
-  if (basename == NULL)
-    /* There's no separate debug info, hence there's no way we could
-       load it => no warning.  */
-    goto cleanup_return_debugfile;
-
-  dir = xstrdup (objfile->name);
-
-  /* Strip off the final filename part, leaving the directory name,
-     followed by a slash.  The directory can be relative or absolute.  */
-  for (i = strlen(dir) - 1; i >= 0; i--)
-    {
-      if (IS_DIR_SEPARATOR (dir[i]))
-	break;
-    }
-  /* If I is -1 then no directory is present there and DIR will be "".  */
-  dir[i+1] = '\0';
-
-  /* Set I to max (strlen (canon_name), strlen (dir)).  */
-  canon_name = lrealpath (dir);
+  /* Set I to max (strlen (canon_dir), strlen (dir)).  */
   i = strlen (dir);
-  if (canon_name && strlen (canon_name) > i)
-    i = strlen (canon_name);
+  if (canon_dir != NULL && strlen (canon_dir) > i)
+    i = strlen (canon_dir);
 
   debugfile = xmalloc (strlen (debug_file_directory) + 1
 		       + i
 		       + strlen (DEBUG_SUBDIRECTORY)
 		       + strlen ("/")
-		       + strlen (basename)
+		       + strlen (debuglink)
 		       + 1);
 
   /* First try in the same directory as the original file.  */
   strcpy (debugfile, dir);
-  strcat (debugfile, basename);
+  strcat (debugfile, debuglink);
 
   if (separate_debug_file_exists (debugfile, crc32, objfile))
-    goto cleanup_return_debugfile;
+    return debugfile;
 
   /* Then try in the subdirectory named DEBUG_SUBDIRECTORY.  */
   strcpy (debugfile, dir);
   strcat (debugfile, DEBUG_SUBDIRECTORY);
   strcat (debugfile, "/");
-  strcat (debugfile, basename);
+  strcat (debugfile, debuglink);
 
   if (separate_debug_file_exists (debugfile, crc32, objfile))
-    goto cleanup_return_debugfile;
+    return debugfile;
 
   /* Then try in the global debugfile directories.
 
@@ -1520,26 +1505,26 @@ find_separate_debug_file_by_debuglink (struct objfile *objfile)
       debugfile[debugdir_end - debugdir] = 0;
       strcat (debugfile, "/");
       strcat (debugfile, dir);
-      strcat (debugfile, basename);
+      strcat (debugfile, debuglink);
 
       if (separate_debug_file_exists (debugfile, crc32, objfile))
-	goto cleanup_return_debugfile;
+	return debugfile;
 
       /* If the file is in the sysroot, try using its base path in the
 	 global debugfile directory.  */
-      if (canon_name
-	  && filename_ncmp (canon_name, gdb_sysroot,
+      if (canon_dir != NULL
+	  && filename_ncmp (canon_dir, gdb_sysroot,
 			    strlen (gdb_sysroot)) == 0
-	  && IS_DIR_SEPARATOR (canon_name[strlen (gdb_sysroot)]))
+	  && IS_DIR_SEPARATOR (canon_dir[strlen (gdb_sysroot)]))
 	{
 	  memcpy (debugfile, debugdir, debugdir_end - debugdir);
 	  debugfile[debugdir_end - debugdir] = 0;
-	  strcat (debugfile, canon_name + strlen (gdb_sysroot));
+	  strcat (debugfile, canon_dir + strlen (gdb_sysroot));
 	  strcat (debugfile, "/");
-	  strcat (debugfile, basename);
+	  strcat (debugfile, debuglink);
 
 	  if (separate_debug_file_exists (debugfile, crc32, objfile))
-	    goto cleanup_return_debugfile;
+	    return debugfile;
 	}
 
       debugdir = debugdir_end;
@@ -1547,12 +1532,90 @@ find_separate_debug_file_by_debuglink (struct objfile *objfile)
   while (*debugdir != 0);
 
   xfree (debugfile);
-  debugfile = NULL;
+  return NULL;
+}
 
-cleanup_return_debugfile:
-  xfree (canon_name);
-  xfree (basename);
-  xfree (dir);
+/* Modify PATH to contain only "directory/" part of PATH.
+   If there were no directory separators in PATH, PATH will be empty
+   string on return.  */
+
+static void
+terminate_after_last_dir_separator (char *path)
+{
+  int i;
+
+  /* Strip off the final filename part, leaving the directory name,
+     followed by a slash.  The directory can be relative or absolute.  */
+  for (i = strlen(path) - 1; i >= 0; i--)
+    if (IS_DIR_SEPARATOR (path[i]))
+      break;
+
+  /* If I is -1 then no directory is present there and DIR will be "".  */
+  path[i + 1] = '\0';
+}
+
+/* Find separate debuginfo for OBJFILE (using .gnu_debuglink section).
+   Returns pathname, or NULL.  */
+
+char *
+find_separate_debug_file_by_debuglink (struct objfile *objfile)
+{
+  char *debuglink;
+  char *dir, *canon_dir;
+  char *debugfile;
+  unsigned long crc32;
+  struct cleanup *cleanups;
+
+  debuglink = get_debug_link_info (objfile, &crc32);
+
+  if (debuglink == NULL)
+    {
+      /* There's no separate debug info, hence there's no way we could
+	 load it => no warning.  */
+      return NULL;
+    }
+
+  dir = xstrdup (objfile->name);
+  cleanups = make_cleanup (xfree, dir);
+  terminate_after_last_dir_separator (dir);
+  canon_dir = lrealpath (dir);
+
+  debugfile = find_separate_debug_file (dir, canon_dir, debuglink,
+					crc32, objfile);
+  xfree (canon_dir);
+
+  if (debugfile == NULL)
+    {
+#ifdef HAVE_LSTAT
+      /* For PR gdb/9538, try again with realpath (if different from the
+	 original).  */
+
+      struct stat st_buf;
+
+      if (lstat (objfile->name, &st_buf) == 0 && S_ISLNK(st_buf.st_mode))
+	{
+	  char *symlink_dir;
+
+	  symlink_dir = lrealpath (objfile->name);
+	  if (symlink_dir != NULL)
+	    {
+	      make_cleanup (xfree, symlink_dir);
+	      terminate_after_last_dir_separator (symlink_dir);
+	      if (strcmp (dir, symlink_dir) != 0)
+		{
+		  /* Different directory, so try using it.  */
+		  debugfile = find_separate_debug_file (symlink_dir,
+							symlink_dir,
+							debuglink,
+							crc32,
+							objfile);
+		}
+	    }
+	}
+#endif  /* HAVE_LSTAT  */
+    }
+
+  do_cleanups (cleanups);
   return debugfile;
 }
 

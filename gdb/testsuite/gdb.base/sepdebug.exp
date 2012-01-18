@@ -41,7 +41,7 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
 
 # Note: the procedure gdb_gnu_strip_debug will produce an executable called
 # ${binfile}, which is just like the executable ($binfile) but without
-# the debuginfo. Instead $binfile has a .gnudebuglink section which contains
+# the debuginfo. Instead $binfile has a .gnu_debuglink section which contains
 # the name of a debuginfo only file. This file will be stored in the
 # gdb.base/ subdirectory.
 
@@ -51,10 +51,27 @@ if [gdb_gnu_strip_debug $binfile] {
     return -1
 }
 
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
+#
+# PR gdb/9538.  Verify that symlinked executable still finds the separate
+# debuginfo.
+#
+set old_subdir ${subdir}
+set subdir ${subdir}/pr9538
+
+# Cleanup any stale state.
+remote_exec build "rm -rf ${subdir}"
+
+remote_exec build "mkdir ${subdir}"
+remote_exec build "ln -s ${binfile} ${subdir}"
+clean_restart ${testfile}${EXEEXT}
+if { $gdb_file_cmd_debug_info != "debug" } then {
+    fail "No debug information found."
+}
+
+# Restore subdir
+set subdir ${old_subdir}
+
+clean_restart ${testfile}${EXEEXT}
 if { $gdb_file_cmd_debug_info != "debug" } then {
     fail "No debug information found."
 }
