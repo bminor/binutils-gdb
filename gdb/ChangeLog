@@ -1,3 +1,7 @@
+2012-01-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* target.h (target_close): Update comment on the target's unpush state.
+
 2012-01-19  Pedro Alves  <palves@redhat.com>
 
 	* linux-nat.c (linux_nat_close): Call linux_nat_is_async_p and

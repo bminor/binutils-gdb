@@ -820,10 +820,10 @@ extern struct target_ops current_target;
    longer going to be calling.  QUITTING indicates that GDB is exiting
    and should not get hung on an error (otherwise it is important to
    perform clean termination, even if it takes a while).  This routine
-   is automatically always called when popping the target off the
-   target stack (to_beneath is undefined).  Closing file descriptors
-   and freeing all memory allocated memory are typical things it
-   should do.  */
+   is automatically always called after popping the target off the
+   target stack - the target's own methods are no longer available
+   through the target vector.  Closing file descriptors and freeing all
+   memory allocated memory are typical things it should do.  */
 
 void target_close (struct target_ops *targ, int quitting);
 
