@@ -247,6 +247,7 @@ process_extended_line_op (unsigned char *data, int is_stmt)
   unsigned int len;
   unsigned char *name;
   dwarf_vma adr;
+  unsigned char *orig_data = data;
 
   len = read_leb128 (data, & bytes_read, 0);
   data += bytes_read;
@@ -277,7 +278,7 @@ process_extended_line_op (unsigned char *data, int is_stmt)
       break;
 
     case DW_LNE_define_file:
-      printf (_("  define new File Table entry\n"));
+      printf (_("define new File Table entry\n"));
       printf (_("  Entry\tDir\tTime\tSize\tName\n"));
 
       printf ("   %d\t", ++state_machine_regs.last_file_entry);
@@ -288,7 +289,11 @@ process_extended_line_op (unsigned char *data, int is_stmt)
       printf ("%s\t", dwarf_vmatoa ("u", read_leb128 (data, & bytes_read, 0)));
       data += bytes_read;
       printf ("%s\t", dwarf_vmatoa ("u", read_leb128 (data, & bytes_read, 0)));
-      printf ("%s\n\n", name);
+      data += bytes_read;
+      printf ("%s", name);
+      if (data - orig_data != len)
+        printf (_(" [Bad opcode length]"));
+      printf ("\n\n");
       break;
 
     case DW_LNE_set_discriminator:
@@ -2800,7 +2805,9 @@ display_debug_lines_decoded (struct dwarf_section *section,
       int offset_size;
       int i;
       File_Entry *file_table = NULL;
+      unsigned int n_files = 0;
       unsigned char **directory_table = NULL;
+      unsigned int n_directories = 0;
 
       hdrptr = data;
 
@@ -2885,7 +2892,6 @@ display_debug_lines_decoded (struct dwarf_section *section,
       data = standard_opcodes + linfo.li_opcode_base - 1;
       if (*data != 0)
         {
-          unsigned int n_directories = 0;
           unsigned char *ptr_directory_table = data;
 
 	  while (*data != 0)
@@ -2912,7 +2918,6 @@ display_debug_lines_decoded (struct dwarf_section *section,
       /* Traverse the File Name table just to count the entries.  */
       if (*data != 0)
         {
-          unsigned int n_files = 0;
           unsigned char *ptr_file_name_table = data;
 
           while (*data != 0)
@@ -3044,21 +3049,36 @@ display_debug_lines_decoded (struct dwarf_section *section,
                     break;
                   case DW_LNE_define_file:
                     {
-                      unsigned int dir_index = 0;
+                      file_table = (File_Entry *) xrealloc
+                        (file_table, (n_files + 1) * sizeof (File_Entry));
 
                       ++state_machine_regs.last_file_entry;
+                      /* Source file name.  */
+                      file_table[n_files].name = op_code_data;
                       op_code_data += strlen ((char *) op_code_data) + 1;
-                      dir_index = read_leb128 (op_code_data, & bytes_read, 0);
+                      /* Directory index.  */
+                      file_table[n_files].directory_index =
+                        read_leb128 (op_code_data, & bytes_read, 0);
                       op_code_data += bytes_read;
-                      read_leb128 (op_code_data, & bytes_read, 0);
+                      /* Last modification time.  */
+                      file_table[n_files].modification_date =
+                        read_leb128 (op_code_data, & bytes_read, 0);
                       op_code_data += bytes_read;
-                      read_leb128 (op_code_data, & bytes_read, 0);
+                      /* File length.  */
+                      file_table[n_files].length =
+                        read_leb128 (op_code_data, & bytes_read, 0);
 
-                      printf ("%s:\n", directory_table[dir_index]);
+                      n_files++;
                       break;
                     }
+                  case DW_LNE_set_discriminator:
+                  case DW_LNE_HP_set_sequence:
+                    /* Simply ignored.  */
+                    break;
+
                   default:
-                    printf (_("UNKNOWN: length %d\n"), ext_op_code_len - bytes_read);
+                    printf (_("UNKNOWN (%u): length %d\n"),
+                            ext_op_code, ext_op_code_len - bytes_read);
                     break;
                   }
                 data += ext_op_code_len;

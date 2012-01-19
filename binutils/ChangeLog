@@ -1,3 +1,12 @@
+2012-01-19  Tristan Gingold  <gingold@adacore.com>
+
+	* dwarf.c (process_extended_line_op): Reindent define_file output.
+	Detect define_file opcode length mismatch.
+	(display_debug_lines_decoded): Add an entry in file_table for each
+	define_file opcode.
+	Ignore DW_LNE_set_discriminator and DW_LNE_HP_set_sequence.
+	Display extended opcode for unhandle opcode.
+
 2012-01-17  Alan Modra  <amodra@gmail.com>
 
 	* version.c (print_version): Update copyright message year.
