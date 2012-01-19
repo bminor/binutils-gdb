@@ -5717,8 +5717,8 @@ static void
 linux_nat_close (int quitting)
 {
   /* Unregister from the event loop.  */
-  if (target_is_async_p ())
-    target_async (NULL, 0);
+  if (linux_nat_is_async_p ())
+    linux_nat_async (NULL, 0);
 
   if (linux_ops->to_close)
     linux_ops->to_close (quitting);

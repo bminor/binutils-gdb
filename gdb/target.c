@@ -1010,16 +1010,10 @@ unpush_target (struct target_ops *t)
 	break;
     }
 
+  /* If we don't find target_ops, quit.  Only open targets should be
+     closed.  */
   if ((*cur) == NULL)
-    return 0;			/* Didn't find target_ops, quit now.  */
-
-  /* NOTE: cagney/2003-12-06: In '94 the close call was made
-     unconditional by moving it to before the above check that the
-     target was in the target stack (something about "Change the way
-     pushing and popping of targets work to support target overlays
-     and inheritance").  This doesn't make much sense - only open
-     targets should be closed.  */
-  target_close (t, 0);
+    return 0;			
 
   /* Unchain the target.  */
   tmp = (*cur);
@@ -1027,6 +1021,11 @@ unpush_target (struct target_ops *t)
   tmp->beneath = NULL;
 
   update_current_target ();
+
+  /* Finally close the target.  Note we do this after unchaining, so
+     any target method calls from within the target_close
+     implementation don't end up in T anymore.  */
+  target_close (t, 0);
 
   return 1;
 }

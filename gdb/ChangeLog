@@ -1,3 +1,11 @@
+2012-01-19  Pedro Alves  <palves@redhat.com>
+
+	* linux-nat.c (linux_nat_close): Call linux_nat_is_async_p and
+	linux_nat_async directly instead of going through the target
+	vector.
+	* target.c (unpush_target): Close target after unpushing it, not
+	before.
+
 2012-01-19  Gary Benson  <gbenson@redhat.com>
 
 	* mdebugread.c (sort_blocks): Replace integer constants with ones
