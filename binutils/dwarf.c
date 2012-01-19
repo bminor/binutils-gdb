@@ -291,7 +291,7 @@ process_extended_line_op (unsigned char *data, int is_stmt)
       printf ("%s\t", dwarf_vmatoa ("u", read_leb128 (data, & bytes_read, 0)));
       data += bytes_read;
       printf ("%s", name);
-      if (data - orig_data != len)
+      if ((unsigned int) (data - orig_data) != len)
         printf (_(" [Bad opcode length]"));
       printf ("\n\n");
       break;
