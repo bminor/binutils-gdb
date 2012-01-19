@@ -27,9 +27,10 @@ class jvclass {
   static {
     k = 77;
   }
-  public static void addprint (int x, int y, int z) {
+  public static int addprint (int x, int y, int z) {
     int sum = x + y + z;
     System.out.println ("sum is " + sum);
+    return sum;
   }
 
   public int addk (int x) {
@@ -48,11 +49,13 @@ public class jprint extends jvclass {
     System.out.println ("new value is " + y);
     return y + 4;
   }
-  public static void print (int x) {
+  public static int print (int x) {
     System.out.println("x is " + x);
+    return x;
   }
-  public static void print (int x, int y) {
+  public static int print (int x, int y) {
     System.out.println("y is " + y);
+    return y;
   }
   public static void main(String[] args) {
     jprint x = new jprint ();

@@ -1,3 +1,10 @@
+2012-01-19  Pedro Alves  <palves@redhat.com>
+
+	* gdb.java/jprint.exp: Don't rely on inferior output, but instead
+	look at the funtions' returns.
+	* gdb.java/jprint.java (jvclass.addprint, jprint.print(int))
+	(jprint.print(int, int)): Change return type to int.  Adjust.
+
 2012-01-18  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	PR gdb/9538

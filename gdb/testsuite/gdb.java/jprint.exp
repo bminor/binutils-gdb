@@ -49,16 +49,16 @@ if [set_lang_java] then {
     gdb_breakpoint "${function}void" { allow-pending }
     gdb_continue_to_breakpoint $function
 
-    gdb_test "p jvclass.addprint(4,5,6)" "sum is 15\r\n.*" "unambiguous static call"
+    gdb_test "p jvclass.addprint(4,5,6)" " = 15" "unambiguous static call"
 
     gdb_test "next" ""
     gdb_test "next" ""
 
-    gdb_test "p x.print(44)" "x is 44\r\n.*" "single argument print call"
-    gdb_test "p x.print(22,33)" "y is 33\r\n.*" "double argument print call"
-    gdb_test "call x.dothat(55)" "new value is 58\r\n.*= 62.*" "virtual fn call"
-    gdb_test "p x.addprint(1,2,3)" "sum is 6\r\n.*" "inherited static call"
-    gdb_test "call x.addk(44)" "adding k gives 121\r\n.*= 121.*" "inherited virtual fn call"
+    gdb_test "p x.print(44)" " = 44" "single argument call"
+    gdb_test "p x.print(22,33)" " = 33" "double argument call"
+    gdb_test "p x.dothat(55)" " = 62.*" "virtual fn call"
+    gdb_test "p x.addprint(1,2,3)" "= 6" "inherited static call"
+    gdb_test "p x.addk(44)" " = 121" "inherited virtual fn call"
 
     # Regression test for a crasher.
     # GCC does not output location information for static class members,
