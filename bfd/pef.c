@@ -19,6 +19,10 @@
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
    MA 02110-1301, USA.  */
 
+/* PEF (Preferred Executable Format) is the binary file format for late
+   classic Mac OS versions (before Darwin).  It is supported by both m68k
+   and PowerPc.  It is also called CFM (Code Fragment Manager).  */
+
 #include "sysdep.h"
 #include "safe-ctype.h"
 #include "pef.h"

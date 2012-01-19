@@ -1,3 +1,8 @@
+2012-01-19  Tristan Gingold  <gingold@adacore.com>
+
+	* pef.c: Add a comment.
+	* xsym.c: Likewise.
+
 2012-01-17  Alan Modra  <amodra@gmail.com>
 
 	* elf32-ppc.c (ppc_elf_write_core_note <NT_PRPSINFO>): Don't leave

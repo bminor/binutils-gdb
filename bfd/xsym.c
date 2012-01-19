@@ -19,6 +19,8 @@
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
    MA 02110-1301, USA.  */
 
+/* xSYM is the debugging format used by CodeWarrior on Mac OS classic.  */
+
 #include "alloca-conf.h"
 #include "sysdep.h"
 #include "xsym.h"
