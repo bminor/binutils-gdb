@@ -1,3 +1,7 @@
+2012-01-19  Tom Tromey  <tromey@redhat.com>
+
+	* NEWS: Combine the two Python sections.
+
 2012-01-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* target.h (target_close): Update comment on the target's unpush state.

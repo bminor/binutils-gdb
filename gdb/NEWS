@@ -7,6 +7,9 @@
 
   ** The "maint set python print-stack on|off" is now deleted.
 
+  ** A new class, gdb.printing.FlagEnumerationPrinter, can be used to
+     apply "flag enum"-style pretty-printing to any enum.
+
 * GDBserver now supports stdio connections.
   E.g. (gdb) target remote | ssh myhost gdbserver - hello
 
@@ -19,11 +22,6 @@
   show all the constants, e.g., for enum E { ONE = 1, TWO = 2}:
   (gdb) print (enum E) 3
   $1 = (ONE | TWO)
-
-* Python scripting
-
-  ** A new class, gdb.printing.FlagEnumerationPrinter, can be used to
-     apply "flag enum"-style pretty-printing to any enum.
 
 * The filename part of a linespec will now match trailing components
   of a source file name.  For example, "break gcc/expr.c:1000" will
