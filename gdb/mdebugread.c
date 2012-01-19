@@ -4713,7 +4713,7 @@ sort_blocks (struct symtab *s)
 {
   struct blockvector *bv = BLOCKVECTOR (s);
 
-  if (BLOCKVECTOR_NBLOCKS (bv) <= 2)
+  if (BLOCKVECTOR_NBLOCKS (bv) <= FIRST_LOCAL_BLOCK)
     {
       /* Cosmetic */
       if (BLOCK_END (BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK)) == 0)
@@ -4728,7 +4728,7 @@ sort_blocks (struct symtab *s)
    * are very different.  It would be nice to find a reliable test
    * to detect -O3 images in advance.
    */
-  if (BLOCKVECTOR_NBLOCKS (bv) > 3)
+  if (BLOCKVECTOR_NBLOCKS (bv) > FIRST_LOCAL_BLOCK + 1)
     qsort (&BLOCKVECTOR_BLOCK (bv, FIRST_LOCAL_BLOCK),
 	   BLOCKVECTOR_NBLOCKS (bv) - FIRST_LOCAL_BLOCK,
 	   sizeof (struct block *),

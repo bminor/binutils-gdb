@@ -1,3 +1,8 @@
+2012-01-19  Gary Benson  <gbenson@redhat.com>
+
+	* mdebugread.c (sort_blocks): Replace integer constants with ones
+	derived from FIRST_LOCAL_BLOCK.
+
 2012-01-18  Paul Pluzhnikov  <ppluzhnikov@google.com>
 	    Jan Kratochvil  <jan.kratochvil@redhat.com>
 
