@@ -1578,8 +1578,7 @@ linux_wait_for_event_1 (ptid_t ptid, int *wstat, int options)
 
   /* Check for a lwp with a pending status.  */
 
-  if (ptid_equal (ptid, minus_one_ptid)
-      || ptid_equal (pid_to_ptid (ptid_get_pid (ptid)), ptid))
+  if (ptid_equal (ptid, minus_one_ptid) || ptid_is_pid (ptid))
     {
       event_child = (struct lwp_info *)
 	find_inferior (&all_lwps, status_pending_p_callback, &ptid);

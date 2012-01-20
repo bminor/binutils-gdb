@@ -1,3 +1,8 @@
+2012-01-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Code cleanup.
+	* linux-low.c (linux_wait_for_event_1): Use ptid_is_pid.
+
 2012-01-20  Ulrich Weigand  <ulrich.weigand@linaro.org>
 
 	* hostio.c (handle_readlink): New function.
