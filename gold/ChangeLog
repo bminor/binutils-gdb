@@ -1,3 +1,11 @@
+2012-01-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* x86_64.cc (gc_process_relocs): Add typename on types used in
+	template.
+	(scan_relocs): Likewise.
+	(relocate_section): Likewise.
+	(apply_relocation): Likewise.
+
 2012-01-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* x86_64.cc (Scan::check_non_pic): Allow R_X86_64_32 for x32.

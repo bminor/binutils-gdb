@@ -2809,8 +2809,8 @@ Target_x86_64<size>::gc_process_relocs(Symbol_table* symtab,
     }
 
    gold::gc_process_relocs<size, false, Target_x86_64<size>, elfcpp::SHT_RELA,
-                           Target_x86_64<size>::Scan,
-			   Target_x86_64<size>::Relocatable_size_for_reloc>(
+                           typename Target_x86_64<size>::Scan,
+			   typename Target_x86_64<size>::Relocatable_size_for_reloc>(
     symtab,
     layout,
     this,
@@ -2848,7 +2848,7 @@ Target_x86_64<size>::scan_relocs(Symbol_table* symtab,
     }
 
   gold::scan_relocs<size, false, Target_x86_64<size>, elfcpp::SHT_RELA,
-      Target_x86_64<size>::Scan>(
+      typename Target_x86_64<size>::Scan>(
     symtab,
     layout,
     this,
@@ -3780,7 +3780,7 @@ Target_x86_64<size>::relocate_section(
   gold_assert(sh_type == elfcpp::SHT_RELA);
 
   gold::relocate_section<size, false, Target_x86_64<size>, elfcpp::SHT_RELA,
-			 Target_x86_64<size>::Relocate>(
+			 typename Target_x86_64<size>::Relocate>(
     relinfo,
     this,
     prelocs,
@@ -3809,7 +3809,7 @@ Target_x86_64<size>::apply_relocation(
     section_size_type view_size)
 {
   gold::apply_relocation<size, false, Target_x86_64<size>,
-			 Target_x86_64<size>::Relocate>(
+			 typename Target_x86_64<size>::Relocate>(
     relinfo,
     this,
     r_offset,
