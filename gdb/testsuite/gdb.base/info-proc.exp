@@ -16,11 +16,6 @@
 # This file was written by Michael Snyder (msnyder@redhat.com)
 # This is a test for the gdb command "info proc"
 
-if { [is_remote target] } then {
-  continue
-}
-
-
 set ws "\[ \t\]+"
 
 set testfile "break"
@@ -50,17 +45,7 @@ gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 
-# Does this gdb support info proc?
-gdb_test_multiple "help info proc" "help info proc" {
-    -re "Undefined info command: .proc..  Try .help info.*$gdb_prompt $" {
-	# info proc command not supported -- nothing to test here.
-	unsupported "gdb does not support info proc on this target"
-	return -1;
-    }
-    -re "Show /proc process information about .*$gdb_prompt $" {
-	pass "help info proc"
-    }
-}
+gdb_test "help info proc" "Show /proc process information about .*"
 
 gdb_test "info proc" "No current process.*" "info proc without a process"
 
@@ -69,7 +54,17 @@ if { ! [ runto_main ] } then {
     return -1
 }
 
-gdb_test "info proc" "process ${decimal}.*" "info proc with process"
+# Does this gdb support info proc?
+gdb_test_multiple "info proc" "info proc" {
+    -re "Not supported on this target.*$gdb_prompt $" {
+	# info proc command not supported -- nothing to test here.
+	unsupported "gdb does not support info proc on this target"
+	return -1;
+    }
+    -re "process ${decimal}.*$gdb_prompt $" {
+	pass "info proc with process"
+    }
+}
 
 gdb_test "info proc mapping" \
 	".*Mapped address spaces:.*${hex}${ws}${hex}${ws}${hex}${ws}${hex}.*" \

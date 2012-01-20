@@ -1,5 +1,47 @@
 2012-01-20  Ulrich Weigand  <ulrich.weigand@linaro.org>
 
+	* defs.h (enum info_proc_what): Moved here from linux-nat.c
+	* infcmd.c: (info_proc_cmd_1): New function.
+	(info_proc_cmd): New function, moved here from equivalent routine
+	orignally in linux-nat.c.
+	(info_proc_cmd_mappings): Likewise.
+	(info_proc_cmd_stat): Likewise.
+	(info_proc_cmd_status): Likewise.
+	(info_proc_cmd_cwd): Likewise.
+	(info_proc_cmd_cmdline): Likewise.
+	(info_proc_cmd_exe): Likewise.
+	(info_proc_cmd_all): Likewise.
+	(_initialize_infcmd): Install "info proc" command and subcommands.
+
+	* target.h (struct target_ops): Add to_info_proc.
+	(target_info_proc): Add prototype.
+	* target.c (target_info_proc): New function.
+
+	* procfs.c (procfs_info_proc): Add prototype.
+	(info_proc_cmd): Rename into ...
+	(procfs_info_proc): ... this.  Update argument types as appropriate
+	for a to_info_proc implementation.  Handle "what" argument.
+	(procfs_target): Install procfs_info_proc.
+	(_initialize_procfs): No longer install "info proc" command.
+
+	* linux-nat.c: (enum info_proc_what): Remove.
+	(linux_nat_info_proc_cmd_1): Rename into ...
+	(linux_nat_info_proc): ... this.  Update argument types as appropriate
+	for a to_info_proc implementation.
+	(linux_nat_info_proc_cmd): Remove.
+	(linux_nat_info_proc_cmd_mappings): Likewise.
+	(linux_nat_info_proc_cmd_stat): Likewise.
+	(linux_nat_info_proc_cmd_status): Likewise.
+	(linux_nat_info_proc_cmd_cwd): Likewise.
+	(linux_nat_info_proc_cmd_cmdline): Likewise.
+	(linux_nat_info_proc_cmd_exe): Likewise.
+	(linux_nat_info_proc_cmd_all): Likewise.
+	(linux_target_install_ops): Install linux_nat_info_proc.
+	(_initialize_linux_nat): No longer install "info proc" command
+	and subcommands.
+
+2012-01-20  Ulrich Weigand  <ulrich.weigand@linaro.org>
+
 	* configure.ac [AC_CHECK_FUNCS]: Check for readlink.
 	* config.in, configure: Regenerate.
 

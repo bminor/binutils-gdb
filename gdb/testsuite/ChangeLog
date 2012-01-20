@@ -1,3 +1,10 @@
+2012-01-20  Ulrich Weigand  <ulrich.weigand@linaro.org>
+
+	* gdb.base/info-proc.exp: Also run on remote targets.  Main
+	"info proc" command is now always present; whether target supports
+	actual info proc operation is detected when attempting to issue
+	the command.
+
 2012-01-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* .gdbinit: Remove.

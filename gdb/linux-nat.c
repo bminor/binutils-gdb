@@ -4803,35 +4803,9 @@ linux_nat_make_corefile_notes (bfd *obfd, int *note_size)
 
 /* Implement the "info proc" command.  */
 
-enum info_proc_what
-  {
-    /* Display the default cmdline, cwd and exe outputs.  */
-    IP_MINIMAL,
-
-    /* Display `info proc mappings'.  */
-    IP_MAPPINGS,
-
-    /* Display `info proc status'.  */
-    IP_STATUS,
-
-    /* Display `info proc stat'.  */
-    IP_STAT,
-
-    /* Display `info proc cmdline'.  */
-    IP_CMDLINE,
-
-    /* Display `info proc exe'.  */
-    IP_EXE,
-
-    /* Display `info proc cwd'.  */
-    IP_CWD,
-
-    /* Display all of the above.  */
-    IP_ALL
-  };
-
 static void
-linux_nat_info_proc_cmd_1 (char *args, enum info_proc_what what, int from_tty)
+linux_nat_info_proc (struct target_ops *ops, char *args,
+		     enum info_proc_what what)
 {
   /* A long is used for pid instead of an int to avoid a loss of precision
      compiler warning from the output of strtoul.  */
@@ -5070,70 +5044,6 @@ linux_nat_info_proc_cmd_1 (char *args, enum info_proc_what what, int from_tty)
       else
 	warning (_("unable to open /proc file '%s'"), fname1);
     }
-}
-
-/* Implement `info proc' when given without any futher parameters.  */
-
-static void
-linux_nat_info_proc_cmd (char *args, int from_tty)
-{
-  linux_nat_info_proc_cmd_1 (args, IP_MINIMAL, from_tty);
-}
-
-/* Implement `info proc mappings'.  */
-
-static void
-linux_nat_info_proc_cmd_mappings (char *args, int from_tty)
-{
-  linux_nat_info_proc_cmd_1 (args, IP_MAPPINGS, from_tty);
-}
-
-/* Implement `info proc stat'.  */
-
-static void
-linux_nat_info_proc_cmd_stat (char *args, int from_tty)
-{
-  linux_nat_info_proc_cmd_1 (args, IP_STAT, from_tty);
-}
-
-/* Implement `info proc status'.  */
-
-static void
-linux_nat_info_proc_cmd_status (char *args, int from_tty)
-{
-  linux_nat_info_proc_cmd_1 (args, IP_STATUS, from_tty);
-}
-
-/* Implement `info proc cwd'.  */
-
-static void
-linux_nat_info_proc_cmd_cwd (char *args, int from_tty)
-{
-  linux_nat_info_proc_cmd_1 (args, IP_CWD, from_tty);
-}
-
-/* Implement `info proc cmdline'.  */
-
-static void
-linux_nat_info_proc_cmd_cmdline (char *args, int from_tty)
-{
-  linux_nat_info_proc_cmd_1 (args, IP_CMDLINE, from_tty);
-}
-
-/* Implement `info proc exe'.  */
-
-static void
-linux_nat_info_proc_cmd_exe (char *args, int from_tty)
-{
-  linux_nat_info_proc_cmd_1 (args, IP_EXE, from_tty);
-}
-
-/* Implement `info proc all'.  */
-
-static void
-linux_nat_info_proc_cmd_all (char *args, int from_tty)
-{
-  linux_nat_info_proc_cmd_1 (args, IP_ALL, from_tty);
 }
 
 /* Implement the to_xfer_partial interface for memory reads using the /proc
@@ -5430,6 +5340,7 @@ linux_target_install_ops (struct target_ops *t)
   t->to_follow_fork = linux_child_follow_fork;
   t->to_find_memory_regions = linux_nat_find_memory_regions;
   t->to_make_corefile_notes = linux_nat_make_corefile_notes;
+  t->to_info_proc = linux_nat_info_proc;
 
   super_xfer_partial = t->to_xfer_partial;
   t->to_xfer_partial = linux_xfer_partial;
@@ -5940,43 +5851,6 @@ extern initialize_file_ftype _initialize_linux_nat;
 void
 _initialize_linux_nat (void)
 {
-  static struct cmd_list_element *info_proc_cmdlist;
-
-  add_prefix_cmd ("proc", class_info, linux_nat_info_proc_cmd,
-		  _("\
-Show /proc process information about any running process.\n\
-Specify any process id, or use the program being debugged by default."),
-		  &info_proc_cmdlist, "info proc ",
-		  1/*allow-unknown*/, &infolist);
-
-  add_cmd ("mappings", class_info, linux_nat_info_proc_cmd_mappings, _("\
-List of mapped memory regions."),
-	   &info_proc_cmdlist);
-
-  add_cmd ("stat", class_info, linux_nat_info_proc_cmd_stat, _("\
-List process info from /proc/PID/stat."),
-	   &info_proc_cmdlist);
-
-  add_cmd ("status", class_info, linux_nat_info_proc_cmd_status, _("\
-List process info from /proc/PID/status."),
-	   &info_proc_cmdlist);
-
-  add_cmd ("cwd", class_info, linux_nat_info_proc_cmd_cwd, _("\
-List current working directory of the process."),
-	   &info_proc_cmdlist);
-
-  add_cmd ("cmdline", class_info, linux_nat_info_proc_cmd_cmdline, _("\
-List command line arguments of the process."),
-	   &info_proc_cmdlist);
-
-  add_cmd ("exe", class_info, linux_nat_info_proc_cmd_exe, _("\
-List absolute filename for executable of the process."),
-	   &info_proc_cmdlist);
-
-  add_cmd ("all", class_info, linux_nat_info_proc_cmd_all, _("\
-List all available /proc info."),
-	   &info_proc_cmdlist);
-
   add_setshow_zinteger_cmd ("lin-lwp", class_maintenance,
 			    &debug_linux_nat, _("\
 Set debugging of GNU/Linux lwp module."), _("\

@@ -151,6 +151,9 @@ static char * procfs_make_note_section (bfd *, int *);
 
 static int procfs_can_use_hw_breakpoint (int, int, int);
 
+static void procfs_info_proc (struct target_ops *, char *,
+			      enum info_proc_what);
+
 #if defined (PR_MODEL_NATIVE) && (PR_MODEL_NATIVE == PR_MODEL_LP64)
 /* When GDB is built as 64-bit application on Solaris, the auxv data
    is presented in 64-bit format.  We need to provide a custom parser
@@ -211,6 +214,7 @@ procfs_target (void)
   t->to_has_thread_control = tc_schedlock;
   t->to_find_memory_regions = proc_find_memory_regions;
   t->to_make_corefile_notes = procfs_make_note_section;
+  t->to_info_proc = procfs_info_proc;
 
 #if defined(PR_MODEL_NATIVE) && (PR_MODEL_NATIVE == PR_MODEL_LP64)
   t->to_auxv_parse = procfs_auxv_parse;
@@ -5390,7 +5394,8 @@ info_proc_mappings (procinfo *pi, int summary)
 /* Implement the "info proc" command.  */
 
 static void
-info_proc_cmd (char *args, int from_tty)
+procfs_info_proc (struct target_ops *ops, char *args,
+		  enum info_proc_what what)
 {
   struct cleanup *old_chain;
   procinfo *process  = NULL;
@@ -5400,6 +5405,20 @@ info_proc_cmd (char *args, int from_tty)
   int       pid      = 0;
   int       tid      = 0;
   int       mappings = 0;
+
+  switch (what)
+    {
+    case IP_MINIMAL:
+      break;
+
+    case IP_MAPPINGS:
+    case IP_ALL:
+      mappings = 1;
+      break;
+
+    default:
+      error (_("Not supported on this target."));
+    }
 
   old_chain = make_cleanup (null_cleanup, 0);
   if (args)
@@ -5418,14 +5437,6 @@ info_proc_cmd (char *args, int from_tty)
       else if (argv[0][0] == '/')
 	{
 	  tid = strtoul (argv[0] + 1, NULL, 10);
-	}
-      else if (strncmp (argv[0], "mappings", strlen (argv[0])) == 0)
-	{
-	  mappings = 1;
-	}
-      else
-	{
-	  /* [...] */
 	}
       argv++;
     }
@@ -5567,10 +5578,6 @@ _initialize_procfs (void)
 {
   observer_attach_inferior_created (procfs_inferior_created);
 
-  add_info ("proc", info_proc_cmd, _("\
-Show /proc process information about any running process.\n\
-Specify process id, or use the program being debugged by default.\n\
-Specify keyword 'mappings' for detailed info on memory mappings."));
   add_com ("proc-trace-entry", no_class, proc_trace_sysentry_cmd,
 	   _("Give a trace of entries into the syscall."));
   add_com ("proc-trace-exit", no_class, proc_trace_sysexit_cmd,

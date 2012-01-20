@@ -715,6 +715,9 @@ struct target_ops
     char *(*to_fileio_readlink) (const char *filename, int *target_errno);
 
 
+    /* Implement the "info proc" command.  */
+    void (*to_info_proc) (struct target_ops *, char *, enum info_proc_what);
+
     /* Tracepoint-related operations.  */
 
     /* Prepare the target for a tracing run.  */
@@ -941,6 +944,10 @@ extern void target_store_registers (struct regcache *regcache, int regs);
 /* Determine current address space of thread PTID.  */
 
 struct address_space *target_thread_address_space (ptid_t);
+
+/* Implement the "info proc" command.  */
+
+void target_info_proc (char *, enum info_proc_what);
 
 /* Returns true if this target can debug multiple processes
    simultaneously.  */

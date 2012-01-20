@@ -3087,6 +3087,38 @@ target_supports_non_stop (void)
   return 0;
 }
 
+/* Implement the "info proc" command.  */
+
+void
+target_info_proc (char *args, enum info_proc_what what)
+{
+  struct target_ops *t;
+
+  /* If we're already connected to something that can get us OS
+     related data, use it.  Otherwise, try using the native
+     target.  */
+  if (current_target.to_stratum >= process_stratum)
+    t = current_target.beneath;
+  else
+    t = find_default_run_target (NULL);
+
+  for (; t != NULL; t = t->beneath)
+    {
+      if (t->to_info_proc != NULL)
+	{
+	  t->to_info_proc (t, args, what);
+
+	  if (targetdebug)
+	    fprintf_unfiltered (gdb_stdlog,
+				"target_info_proc (\"%s\", %d)\n", args, what);
+
+	  return;
+	}
+    }
+
+  error (_("Not supported on this target."));
+}
+
 static int
 find_default_supports_disable_randomization (void)
 {

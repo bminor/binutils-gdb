@@ -2805,9 +2805,82 @@ unset_command (char *args, int from_tty)
   help_list (unsetlist, "unset ", -1, gdb_stdout);
 }
 
+/* Implement `info proc' family of commands.  */
+
+static void
+info_proc_cmd_1 (char *args, enum info_proc_what what, int from_tty)
+{
+  target_info_proc (args, what);
+}
+
+/* Implement `info proc' when given without any futher parameters.  */
+
+static void
+info_proc_cmd (char *args, int from_tty)
+{
+  info_proc_cmd_1 (args, IP_MINIMAL, from_tty);
+}
+
+/* Implement `info proc mappings'.  */
+
+static void
+info_proc_cmd_mappings (char *args, int from_tty)
+{
+  info_proc_cmd_1 (args, IP_MAPPINGS, from_tty);
+}
+
+/* Implement `info proc stat'.  */
+
+static void
+info_proc_cmd_stat (char *args, int from_tty)
+{
+  info_proc_cmd_1 (args, IP_STAT, from_tty);
+}
+
+/* Implement `info proc status'.  */
+
+static void
+info_proc_cmd_status (char *args, int from_tty)
+{
+  info_proc_cmd_1 (args, IP_STATUS, from_tty);
+}
+
+/* Implement `info proc cwd'.  */
+
+static void
+info_proc_cmd_cwd (char *args, int from_tty)
+{
+  info_proc_cmd_1 (args, IP_CWD, from_tty);
+}
+
+/* Implement `info proc cmdline'.  */
+
+static void
+info_proc_cmd_cmdline (char *args, int from_tty)
+{
+  info_proc_cmd_1 (args, IP_CMDLINE, from_tty);
+}
+
+/* Implement `info proc exe'.  */
+
+static void
+info_proc_cmd_exe (char *args, int from_tty)
+{
+  info_proc_cmd_1 (args, IP_EXE, from_tty);
+}
+
+/* Implement `info proc all'.  */
+
+static void
+info_proc_cmd_all (char *args, int from_tty)
+{
+  info_proc_cmd_1 (args, IP_ALL, from_tty);
+}
+
 void
 _initialize_infcmd (void)
 {
+  static struct cmd_list_element *info_proc_cmdlist;
   struct cmd_list_element *c = NULL;
 
   /* Add the filename of the terminal connected to inferior I/O.  */
@@ -3034,4 +3107,39 @@ Register name as argument means describe only that register."));
 
   add_info ("vector", vector_info,
 	    _("Print the status of the vector unit\n"));
+
+  add_prefix_cmd ("proc", class_info, info_proc_cmd,
+		  _("\
+Show /proc process information about any running process.\n\
+Specify any process id, or use the program being debugged by default."),
+		  &info_proc_cmdlist, "info proc ",
+		  1/*allow-unknown*/, &infolist);
+
+  add_cmd ("mappings", class_info, info_proc_cmd_mappings, _("\
+List of mapped memory regions."),
+	   &info_proc_cmdlist);
+
+  add_cmd ("stat", class_info, info_proc_cmd_stat, _("\
+List process info from /proc/PID/stat."),
+	   &info_proc_cmdlist);
+
+  add_cmd ("status", class_info, info_proc_cmd_status, _("\
+List process info from /proc/PID/status."),
+	   &info_proc_cmdlist);
+
+  add_cmd ("cwd", class_info, info_proc_cmd_cwd, _("\
+List current working directory of the process."),
+	   &info_proc_cmdlist);
+
+  add_cmd ("cmdline", class_info, info_proc_cmd_cmdline, _("\
+List command line arguments of the process."),
+	   &info_proc_cmdlist);
+
+  add_cmd ("exe", class_info, info_proc_cmd_exe, _("\
+List absolute filename for executable of the process."),
+	   &info_proc_cmdlist);
+
+  add_cmd ("all", class_info, info_proc_cmd_all, _("\
+List all available /proc info."),
+	   &info_proc_cmdlist);
 }
