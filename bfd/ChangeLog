@@ -1,3 +1,11 @@
+2012-01-20  Ulrich Weigand  <ulrich.weigand@linaro.org>
+
+	* elf.c (elfcore_write_prpsinfo): Provide unconditionally.
+	Return NULL if core file generation is unsupported.
+	(elfcore_write_prstatus): Likewise.
+	* elf32-arm.c (elf32_arm_nabi_write_core_note): New function.
+	(elf_backend_write_core_note): Define.
+
 2012-01-19  Tristan Gingold  <gingold@adacore.com>
 
 	* pef.c: Add a comment.

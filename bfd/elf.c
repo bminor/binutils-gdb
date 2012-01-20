@@ -8890,7 +8890,6 @@ elfcore_write_note (bfd *abfd,
   return buf;
 }
 
-#if defined (HAVE_PRPSINFO_T) || defined (HAVE_PSINFO_T)
 char *
 elfcore_write_prpsinfo (bfd  *abfd,
 			char *buf,
@@ -8898,7 +8897,6 @@ elfcore_write_prpsinfo (bfd  *abfd,
 			const char *fname,
 			const char *psargs)
 {
-  const char *note_name = "CORE";
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
 
   if (bed->elf_backend_write_core_note != NULL)
@@ -8910,6 +8908,7 @@ elfcore_write_prpsinfo (bfd  *abfd,
 	return ret;
     }
 
+#if defined (HAVE_PRPSINFO_T) || defined (HAVE_PSINFO_T)
 #if defined (HAVE_PRPSINFO32_T) || defined (HAVE_PSINFO32_T)
   if (bed->s->elfclass == ELFCLASS32)
     {
@@ -8925,7 +8924,7 @@ elfcore_write_prpsinfo (bfd  *abfd,
       strncpy (data.pr_fname, fname, sizeof (data.pr_fname));
       strncpy (data.pr_psargs, psargs, sizeof (data.pr_psargs));
       return elfcore_write_note (abfd, buf, bufsiz,
-				 note_name, note_type, &data, sizeof (data));
+				 "CORE", note_type, &data, sizeof (data));
     }
   else
 #endif
@@ -8942,12 +8941,14 @@ elfcore_write_prpsinfo (bfd  *abfd,
       strncpy (data.pr_fname, fname, sizeof (data.pr_fname));
       strncpy (data.pr_psargs, psargs, sizeof (data.pr_psargs));
       return elfcore_write_note (abfd, buf, bufsiz,
-				 note_name, note_type, &data, sizeof (data));
+				 "CORE", note_type, &data, sizeof (data));
     }
-}
 #endif	/* PSINFO_T or PRPSINFO_T */
 
-#if defined (HAVE_PRSTATUS_T)
+  free (buf);
+  return NULL;
+}
+
 char *
 elfcore_write_prstatus (bfd *abfd,
 			char *buf,
@@ -8956,7 +8957,6 @@ elfcore_write_prstatus (bfd *abfd,
 			int cursig,
 			const void *gregs)
 {
-  const char *note_name = "CORE";
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
 
   if (bed->elf_backend_write_core_note != NULL)
@@ -8969,6 +8969,7 @@ elfcore_write_prstatus (bfd *abfd,
 	return ret;
     }
 
+#if defined (HAVE_PRSTATUS_T)
 #if defined (HAVE_PRSTATUS32_T)
   if (bed->s->elfclass == ELFCLASS32)
     {
@@ -8978,7 +8979,7 @@ elfcore_write_prstatus (bfd *abfd,
       prstat.pr_pid = pid;
       prstat.pr_cursig = cursig;
       memcpy (&prstat.pr_reg, gregs, sizeof (prstat.pr_reg));
-      return elfcore_write_note (abfd, buf, bufsiz, note_name,
+      return elfcore_write_note (abfd, buf, bufsiz, "CORE",
 				 NT_PRSTATUS, &prstat, sizeof (prstat));
     }
   else
@@ -8990,11 +8991,14 @@ elfcore_write_prstatus (bfd *abfd,
       prstat.pr_pid = pid;
       prstat.pr_cursig = cursig;
       memcpy (&prstat.pr_reg, gregs, sizeof (prstat.pr_reg));
-      return elfcore_write_note (abfd, buf, bufsiz, note_name,
+      return elfcore_write_note (abfd, buf, bufsiz, "CORE",
 				 NT_PRSTATUS, &prstat, sizeof (prstat));
     }
-}
 #endif /* HAVE_PRSTATUS_T */
+
+  free (buf);
+  return NULL;
+}
 
 #if defined (HAVE_LWPSTATUS_T)
 char *
