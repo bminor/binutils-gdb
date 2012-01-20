@@ -1,3 +1,15 @@
+2012-01-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (_i386_insn): Replace disp32_encoding with
+	disp_encoding.
+	(md_assemble): Updated.
+	(output_branch): Likewise.
+	(parse_insn): Support .d8 suffix.
+	(build_modrm_byte): Fake zero displacement for .d8 and .d32
+	suffixes.
+
+	* doc/c-i386.texi: Document .d8 suffix.
+
 2012-01-17  Andrew Burgess  <aburgess@broadcom.com>
 
 	* write.c (fix_new_internal): Don't mark used parameter as unused.
