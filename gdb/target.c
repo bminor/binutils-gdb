@@ -3318,6 +3318,33 @@ target_fileio_unlink (const char *filename, int *target_errno)
   return -1;
 }
 
+/* Read value of symbolic link FILENAME on the target.  Return a
+   null-terminated string allocated via xmalloc, or NULL if an error
+   occurs (and set *TARGET_ERRNO).  */
+char *
+target_fileio_readlink (const char *filename, int *target_errno)
+{
+  struct target_ops *t;
+
+  for (t = default_fileio_target (); t != NULL; t = t->beneath)
+    {
+      if (t->to_fileio_readlink != NULL)
+	{
+	  char *ret = t->to_fileio_readlink (filename, target_errno);
+
+	  if (targetdebug)
+	    fprintf_unfiltered (gdb_stdlog,
+				"target_fileio_readlink (%s) = %s (%d)\n",
+				filename, ret? ret : "(nil)",
+				ret? 0 : *target_errno);
+	  return ret;
+	}
+    }
+
+  *target_errno = FILEIO_ENOSYS;
+  return NULL;
+}
+
 static void
 target_fileio_close_cleanup (void *opaque)
 {

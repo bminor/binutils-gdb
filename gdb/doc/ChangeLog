@@ -1,3 +1,9 @@
+2012-01-20  Ulrich Weigand  <ulrich.weigand@linaro.org>
+
+	* gdb.texinfo (Remote Configuration): Document
+	"set remote hostio-readlink-packet" command.
+	(General Query Packets): Document vFile:readlink packet.
+
 2012-01-16  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (Specify Location): Document relative file name

@@ -1064,7 +1064,7 @@ AC_FUNC_ALLOCA
 AC_FUNC_MMAP
 AC_FUNC_VFORK
 AC_CHECK_FUNCS([canonicalize_file_name realpath getrusage getuid getgid \
-		pipe poll pread pread64 pwrite resize_term \
+		pipe poll pread pread64 pwrite readlink resize_term \
 		sbrk setpgid setpgrp setsid \
 		sigaction sigprocmask sigsetmask socketpair syscall \
 		ttrace wborder wresize setlocale iconvlist libiconvlist btowc \

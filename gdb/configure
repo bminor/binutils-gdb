@@ -12932,7 +12932,7 @@ $as_echo "#define HAVE_WORKING_FORK 1" >>confdefs.h
 fi
 
 for ac_func in canonicalize_file_name realpath getrusage getuid getgid \
-		pipe poll pread pread64 pwrite resize_term \
+		pipe poll pread pread64 pwrite readlink resize_term \
 		sbrk setpgid setpgrp setsid \
 		sigaction sigprocmask sigsetmask socketpair syscall \
 		ttrace wborder wresize setlocale iconvlist libiconvlist btowc \

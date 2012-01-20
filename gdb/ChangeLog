@@ -1,3 +1,21 @@
+2012-01-20  Ulrich Weigand  <ulrich.weigand@linaro.org>
+
+	* configure.ac [AC_CHECK_FUNCS]: Check for readlink.
+	* config.in, configure: Regenerate.
+
+	* target.h (struct target_ops): Add to_fileio_readlink.
+	(target_fileio_readlink): Add prototype.
+	* target.c (target_fileio_readlink): New function.
+
+	* inf-child.c: Conditionally include <sys/param.h>.
+	(inf_child_fileio_readlink): New function.
+	(inf_child_target): Install it.
+
+	* remote.c (PACKET_vFile_readlink): New enum value.
+	(remote_hostio_readlink): New function.
+	(init_remote_ops): Install it.
+	(_initialize_remote): Handle vFile:readlink packet type.
+
 2012-01-20  Pedro Alves  <palves@redhat.com>
 	    Ulrich Weigand  <ulrich.weigand@linaro.org>
 

@@ -1,3 +1,8 @@
+2012-01-20  Ulrich Weigand  <ulrich.weigand@linaro.org>
+
+	* hostio.c (handle_readlink): New function.
+	(handle_vFile): Call it to handle "vFile:readlink" packets.
+
 2012-01-20  Pedro Alves  <palves@redhat.com>
 	    Ulrich Weigand  <ulrich.weigand@linaro.org>
 

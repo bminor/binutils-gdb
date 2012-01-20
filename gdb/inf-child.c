@@ -29,6 +29,9 @@
 #include "inf-child.h"
 #include "gdb/fileio.h"
 
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>		/* for MAXPATHLEN */
+#endif
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -299,6 +302,36 @@ inf_child_fileio_unlink (const char *filename, int *target_errno)
   return ret;
 }
 
+/* Read value of symbolic link FILENAME on the target.  Return a
+   null-terminated string allocated via xmalloc, or NULL if an error
+   occurs (and set *TARGET_ERRNO).  */
+static char *
+inf_child_fileio_readlink (const char *filename, int *target_errno)
+{
+  /* We support readlink only on systems that also provide a compile-time
+     maximum path length (MAXPATHLEN), at least for now.  */
+#if defined (HAVE_READLINK) && defined (MAXPATHLEN)
+  char buf[MAXPATHLEN];
+  int len;
+  char *ret;
+
+  len = readlink (filename, buf, sizeof buf);
+  if (len < 0)
+    {
+      *target_errno = inf_child_errno_to_fileio_error (errno);
+      return NULL;
+    }
+
+  ret = xmalloc (len + 1);
+  memcpy (ret, buf, len);
+  ret[len] = '\0';
+  return ret;
+#else
+  *target_errno = FILEIO_ENOSYS;
+  return NULL;
+#endif
+}
+
 
 struct target_ops *
 inf_child_target (void)
@@ -336,6 +369,7 @@ inf_child_target (void)
   t->to_fileio_pread = inf_child_fileio_pread;
   t->to_fileio_close = inf_child_fileio_close;
   t->to_fileio_unlink = inf_child_fileio_unlink;
+  t->to_fileio_readlink = inf_child_fileio_readlink;
   t->to_magic = OPS_MAGIC;
   return t;
 }

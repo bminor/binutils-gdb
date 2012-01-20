@@ -709,6 +709,11 @@ struct target_ops
        occurs (and set *TARGET_ERRNO).  */
     int (*to_fileio_unlink) (const char *filename, int *target_errno);
 
+    /* Read value of symbolic link FILENAME on the target.  Return a
+       null-terminated string allocated via xmalloc, or NULL if an error
+       occurs (and set *TARGET_ERRNO).  */
+    char *(*to_fileio_readlink) (const char *filename, int *target_errno);
+
 
     /* Tracepoint-related operations.  */
 
@@ -1545,6 +1550,11 @@ extern int target_fileio_close (int fd, int *target_errno);
 /* Unlink FILENAME on the target.  Return 0, or -1 if an error
    occurs (and set *TARGET_ERRNO).  */
 extern int target_fileio_unlink (const char *filename, int *target_errno);
+
+/* Read value of symbolic link FILENAME on the target.  Return a
+   null-terminated string allocated via xmalloc, or NULL if an error
+   occurs (and set *TARGET_ERRNO).  */
+extern char *target_fileio_readlink (const char *filename, int *target_errno);
 
 /* Read target file FILENAME.  The return value will be -1 if the transfer
    fails or is not supported; 0 if the object is empty; or the length

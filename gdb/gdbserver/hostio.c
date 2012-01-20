@@ -456,6 +456,37 @@ handle_unlink (char *own_buf)
   hostio_reply (own_buf, ret);
 }
 
+static void
+handle_readlink (char *own_buf, int *new_packet_len)
+{
+  char filename[PATH_MAX], linkname[PATH_MAX];
+  char *p;
+  int ret, bytes_sent;
+
+  p = own_buf + strlen ("vFile:readlink:");
+
+  if (require_filename (&p, filename)
+      || require_end (p))
+    {
+      hostio_packet_error (own_buf);
+      return;
+    }
+
+  ret = readlink (filename, linkname, sizeof linkname);
+  if (ret == -1)
+    {
+      hostio_error (own_buf);
+      return;
+    }
+
+  bytes_sent = hostio_reply_with_data (own_buf, linkname, ret, new_packet_len);
+
+  /* If the response does not fit into a single packet, do not attempt
+     to return a partial response, but simply fail.  */
+  if (bytes_sent < ret)
+    sprintf (own_buf, "F-1,%x", FILEIO_ENAMETOOLONG);
+}
+
 /* Handle all the 'F' file transfer packets.  */
 
 int
@@ -471,6 +502,8 @@ handle_vFile (char *own_buf, int packet_len, int *new_packet_len)
     handle_close (own_buf);
   else if (strncmp (own_buf, "vFile:unlink:", 13) == 0)
     handle_unlink (own_buf);
+  else if (strncmp (own_buf, "vFile:readlink:", 15) == 0)
+    handle_readlink (own_buf, new_packet_len);
   else
     return 0;
 

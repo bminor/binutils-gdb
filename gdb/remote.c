@@ -1238,6 +1238,7 @@ enum {
   PACKET_vFile_pwrite,
   PACKET_vFile_close,
   PACKET_vFile_unlink,
+  PACKET_vFile_readlink,
   PACKET_qXfer_auxv,
   PACKET_qXfer_features,
   PACKET_qXfer_libraries,
@@ -9358,6 +9359,44 @@ remote_hostio_unlink (const char *filename, int *remote_errno)
 				     remote_errno, NULL, NULL);
 }
 
+/* Read value of symbolic link FILENAME on the remote target.  Return
+   a null-terminated string allocated via xmalloc, or NULL if an error
+   occurs (and set *REMOTE_ERRNO).  */
+
+static char *
+remote_hostio_readlink (const char *filename, int *remote_errno)
+{
+  struct remote_state *rs = get_remote_state ();
+  char *p = rs->buf;
+  char *attachment;
+  int left = get_remote_packet_size ();
+  int len, attachment_len;
+  int read_len;
+  char *ret;
+
+  remote_buffer_add_string (&p, &left, "vFile:readlink:");
+
+  remote_buffer_add_bytes (&p, &left, (const gdb_byte *) filename,
+			   strlen (filename));
+
+  len = remote_hostio_send_command (p - rs->buf, PACKET_vFile_readlink,
+				    remote_errno, &attachment,
+				    &attachment_len);
+
+  if (len < 0)
+    return NULL;
+
+  ret = xmalloc (len + 1);
+
+  read_len = remote_unescape_input (attachment, attachment_len,
+				    ret, len);
+  if (read_len != len)
+    error (_("Readlink returned %d, but %d bytes."), len, read_len);
+
+  ret[len] = '\0';
+  return ret;
+}
+
 static int
 remote_fileio_errno_to_host (int errnum)
 {
@@ -10679,6 +10718,7 @@ Specify the serial device it is connected to\n\
   remote_ops.to_fileio_pread = remote_hostio_pread;
   remote_ops.to_fileio_close = remote_hostio_close;
   remote_ops.to_fileio_unlink = remote_hostio_unlink;
+  remote_ops.to_fileio_readlink = remote_hostio_readlink;
   remote_ops.to_supports_enable_disable_tracepoint = remote_supports_enable_disable_tracepoint;
   remote_ops.to_supports_string_tracing = remote_supports_string_tracing;
   remote_ops.to_trace_init = remote_trace_init;
@@ -11176,6 +11216,9 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_vFile_unlink],
 			 "vFile:unlink", "hostio-unlink", 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_vFile_readlink],
+			 "vFile:readlink", "hostio-readlink", 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_vAttach],
 			 "vAttach", "attach", 0);

@@ -17455,6 +17455,10 @@ are:
 @tab @code{vFile:unlink}
 @tab @code{remote delete}
 
+@item @code{hostio-readlink-packet}
+@tab @code{vFile:readlink}
+@tab Host I/O
+
 @item @code{noack-packet}
 @tab @code{QStartNoAckMode}
 @tab Packet acknowledgment
@@ -36204,6 +36208,16 @@ error occurred.
 @item vFile:unlink: @var{pathname}
 Delete the file at @var{pathname} on the target.  Return 0,
 or -1 if an error occurs.  @var{pathname} is a string.
+
+@item vFile:readlink: @var{filename}
+Read value of symbolic link @var{filename} on the target.  Return
+the number of bytes read, or -1 if an error occurs.
+
+The data read should be returned as a binary attachment on success.
+If zero bytes were read, the response should include an empty binary
+attachment (i.e.@: a trailing semicolon).  The return value is the
+number of target bytes read; the binary attachment may be longer if
+some characters were escaped.
 
 @end table
 
