@@ -28,6 +28,9 @@
   now set a breakpoint in build/gcc/expr.c, but not
   build/libcpp/expr.c.
 
+* The "info proc" and "generate-core-file" commands will now also
+  work on remote targets connected to GDBserver on Linux.
+
 *** Changes in GDB 7.4
 
 * GDB now handles ambiguous linespecs more consistently; the existing

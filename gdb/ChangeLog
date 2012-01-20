@@ -1,5 +1,9 @@
 2012-01-20  Ulrich Weigand  <ulrich.weigand@linaro.org>
 
+	* NEWS: Document remote "info proc" and "generate-core-file".
+
+2012-01-20  Ulrich Weigand  <ulrich.weigand@linaro.org>
+
 	* gdbarch.sh (find_memory_regions): New callback.
 	* gdbarch.c, gdbarch.h: Regenerate.
 
