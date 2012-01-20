@@ -58,6 +58,7 @@
 #include <sys/vfs.h>
 #include "solib.h"
 #include "linux-osdata.h"
+#include "linux-tdep.h"
 
 #ifndef SPUFS_MAGIC
 #define SPUFS_MAGIC 0x23c9b64e
@@ -4479,260 +4480,47 @@ linux_nat_find_memory_regions (find_memory_region_ftype func, void *obfd)
   return 0;
 }
 
-static int
-find_signalled_thread (struct thread_info *info, void *data)
-{
-  if (info->suspend.stop_signal != TARGET_SIGNAL_0
-      && ptid_get_pid (info->ptid) == ptid_get_pid (inferior_ptid))
-    return 1;
-
-  return 0;
-}
-
-static enum target_signal
-find_stop_signal (void)
-{
-  struct thread_info *info =
-    iterate_over_threads (find_signalled_thread, NULL);
-
-  if (info)
-    return info->suspend.stop_signal;
-  else
-    return TARGET_SIGNAL_0;
-}
-
 /* Records the thread's register state for the corefile note
    section.  */
 
 static char *
-linux_nat_do_thread_registers (bfd *obfd, ptid_t ptid,
-			       char *note_data, int *note_size,
-			       enum target_signal stop_signal)
+linux_nat_collect_thread_registers (const struct regcache *regcache,
+				    ptid_t ptid, bfd *obfd,
+				    char *note_data, int *note_size,
+				    enum target_signal stop_signal)
 {
-  unsigned long lwp = ptid_get_lwp (ptid);
-  struct gdbarch *gdbarch = target_gdbarch;
-  struct regcache *regcache = get_thread_arch_regcache (ptid, gdbarch);
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   const struct regset *regset;
   int core_regset_p;
-  struct cleanup *old_chain;
-  struct core_regset_section *sect_list;
-  char *gdb_regset;
-
-  old_chain = save_inferior_ptid ();
-  inferior_ptid = ptid;
-  target_fetch_registers (regcache, -1);
-  do_cleanups (old_chain);
+  gdb_gregset_t gregs;
+  gdb_fpregset_t fpregs;
 
   core_regset_p = gdbarch_regset_from_core_section_p (gdbarch);
-  sect_list = gdbarch_core_regset_sections (gdbarch);
 
-  /* The loop below uses the new struct core_regset_section, which stores
-     the supported section names and sizes for the core file.  Note that
-     note PRSTATUS needs to be treated specially.  But the other notes are
-     structurally the same, so they can benefit from the new struct.  */
-  if (core_regset_p && sect_list != NULL)
-    while (sect_list->sect_name != NULL)
-      {
-	regset = gdbarch_regset_from_core_section (gdbarch,
-						   sect_list->sect_name,
-						   sect_list->size);
-	gdb_assert (regset && regset->collect_regset);
-	gdb_regset = xmalloc (sect_list->size);
-	regset->collect_regset (regset, regcache, -1,
-				gdb_regset, sect_list->size);
-
-	if (strcmp (sect_list->sect_name, ".reg") == 0)
-	  note_data = (char *) elfcore_write_prstatus
-				(obfd, note_data, note_size,
-				 lwp, target_signal_to_host (stop_signal),
-				 gdb_regset);
-	else
-	  note_data = (char *) elfcore_write_register_note
-				(obfd, note_data, note_size,
-				 sect_list->sect_name, gdb_regset,
-				 sect_list->size);
-	xfree (gdb_regset);
-	sect_list++;
-      }
-
-  /* For architectures that does not have the struct core_regset_section
-     implemented, we use the old method.  When all the architectures have
-     the new support, the code below should be deleted.  */
+  if (core_regset_p
+      && (regset = gdbarch_regset_from_core_section (gdbarch, ".reg",
+						     sizeof (gregs)))
+	 != NULL && regset->collect_regset != NULL)
+    regset->collect_regset (regset, regcache, -1, &gregs, sizeof (gregs));
   else
-    {
-      gdb_gregset_t gregs;
-      gdb_fpregset_t fpregs;
+    fill_gregset (regcache, &gregs, -1);
 
-      if (core_regset_p
-	  && (regset = gdbarch_regset_from_core_section (gdbarch, ".reg",
-							 sizeof (gregs)))
+  note_data = (char *) elfcore_write_prstatus
+			 (obfd, note_data, note_size, ptid_get_lwp (ptid),
+			  target_signal_to_host (stop_signal), &gregs);
+
+  if (core_regset_p
+      && (regset = gdbarch_regset_from_core_section (gdbarch, ".reg2",
+						     sizeof (fpregs)))
 	  != NULL && regset->collect_regset != NULL)
-	regset->collect_regset (regset, regcache, -1,
-				&gregs, sizeof (gregs));
-      else
-	fill_gregset (regcache, &gregs, -1);
+    regset->collect_regset (regset, regcache, -1, &fpregs, sizeof (fpregs));
+  else
+    fill_fpregset (regcache, &fpregs, -1);
 
-      note_data = (char *) elfcore_write_prstatus
-	(obfd, note_data, note_size, lwp, target_signal_to_host (stop_signal),
-	 &gregs);
-
-      if (core_regset_p
-          && (regset = gdbarch_regset_from_core_section (gdbarch, ".reg2",
-							 sizeof (fpregs)))
-	  != NULL && regset->collect_regset != NULL)
-	regset->collect_regset (regset, regcache, -1,
-				&fpregs, sizeof (fpregs));
-      else
-	fill_fpregset (regcache, &fpregs, -1);
-
-      note_data = (char *) elfcore_write_prfpreg (obfd,
-						  note_data,
-						  note_size,
-						  &fpregs, sizeof (fpregs));
-    }
+  note_data = (char *) elfcore_write_prfpreg (obfd, note_data, note_size,
+					      &fpregs, sizeof (fpregs));
 
   return note_data;
-}
-
-struct linux_nat_corefile_thread_data
-{
-  bfd *obfd;
-  char *note_data;
-  int *note_size;
-  int num_notes;
-  enum target_signal stop_signal;
-};
-
-/* Called by gdbthread.c once per thread.  Records the thread's
-   register state for the corefile note section.  */
-
-static int
-linux_nat_corefile_thread_callback (struct lwp_info *ti, void *data)
-{
-  struct linux_nat_corefile_thread_data *args = data;
-
-  args->note_data = linux_nat_do_thread_registers (args->obfd,
-						   ti->ptid,
-						   args->note_data,
-						   args->note_size,
-						   args->stop_signal);
-  args->num_notes++;
-
-  return 0;
-}
-
-/* Enumerate spufs IDs for process PID.  */
-
-static void
-iterate_over_spus (int pid, void (*callback) (void *, int), void *data)
-{
-  char path[128];
-  DIR *dir;
-  struct dirent *entry;
-
-  xsnprintf (path, sizeof path, "/proc/%d/fd", pid);
-  dir = opendir (path);
-  if (!dir)
-    return;
-
-  rewinddir (dir);
-  while ((entry = readdir (dir)) != NULL)
-    {
-      struct stat st;
-      struct statfs stfs;
-      int fd;
-
-      fd = atoi (entry->d_name);
-      if (!fd)
-	continue;
-
-      xsnprintf (path, sizeof path, "/proc/%d/fd/%d", pid, fd);
-      if (stat (path, &st) != 0)
-	continue;
-      if (!S_ISDIR (st.st_mode))
-	continue;
-
-      if (statfs (path, &stfs) != 0)
-	continue;
-      if (stfs.f_type != SPUFS_MAGIC)
-	continue;
-
-      callback (data, fd);
-    }
-
-  closedir (dir);
-}
-
-/* Generate corefile notes for SPU contexts.  */
-
-struct linux_spu_corefile_data
-{
-  bfd *obfd;
-  char *note_data;
-  int *note_size;
-};
-
-static void
-linux_spu_corefile_callback (void *data, int fd)
-{
-  struct linux_spu_corefile_data *args = data;
-  int i;
-
-  static const char *spu_files[] =
-    {
-      "object-id",
-      "mem",
-      "regs",
-      "fpcr",
-      "lslr",
-      "decr",
-      "decr_status",
-      "signal1",
-      "signal1_type",
-      "signal2",
-      "signal2_type",
-      "event_mask",
-      "event_status",
-      "mbox_info",
-      "ibox_info",
-      "wbox_info",
-      "dma_info",
-      "proxydma_info",
-   };
-
-  for (i = 0; i < sizeof (spu_files) / sizeof (spu_files[0]); i++)
-    {
-      char annex[32], note_name[32];
-      gdb_byte *spu_data;
-      LONGEST spu_len;
-
-      xsnprintf (annex, sizeof annex, "%d/%s", fd, spu_files[i]);
-      spu_len = target_read_alloc (&current_target, TARGET_OBJECT_SPU,
-				   annex, &spu_data);
-      if (spu_len > 0)
-	{
-	  xsnprintf (note_name, sizeof note_name, "SPU/%s", annex);
-	  args->note_data = elfcore_write_note (args->obfd, args->note_data,
-						args->note_size, note_name,
-						NT_SPU, spu_data, spu_len);
-	  xfree (spu_data);
-	}
-    }
-}
-
-static char *
-linux_spu_make_corefile_notes (bfd *obfd, char *note_data, int *note_size)
-{
-  struct linux_spu_corefile_data args;
-
-  args.obfd = obfd;
-  args.note_data = note_data;
-  args.note_size = note_size;
-
-  iterate_over_spus (PIDGET (inferior_ptid),
-		     linux_spu_corefile_callback, &args);
-
-  return args.note_data;
 }
 
 /* Fills the "to_make_corefile_note" target vector.  Builds the note
@@ -4741,63 +4529,10 @@ linux_spu_make_corefile_notes (bfd *obfd, char *note_data, int *note_size)
 static char *
 linux_nat_make_corefile_notes (bfd *obfd, int *note_size)
 {
-  struct linux_nat_corefile_thread_data thread_args;
-  /* The variable size must be >= sizeof (prpsinfo_t.pr_fname).  */
-  char fname[16] = { '\0' };
-  /* The variable size must be >= sizeof (prpsinfo_t.pr_psargs).  */
-  char psargs[80] = { '\0' };
-  char *note_data = NULL;
-  ptid_t filter = pid_to_ptid (ptid_get_pid (inferior_ptid));
-  gdb_byte *auxv;
-  int auxv_len;
-
-  if (get_exec_file (0))
-    {
-      strncpy (fname, lbasename (get_exec_file (0)), sizeof (fname));
-      strncpy (psargs, get_exec_file (0), sizeof (psargs));
-      if (get_inferior_args ())
-	{
-	  char *string_end;
-	  char *psargs_end = psargs + sizeof (psargs);
-
-	  /* linux_elfcore_write_prpsinfo () handles zero unterminated
-	     strings fine.  */
-	  string_end = memchr (psargs, 0, sizeof (psargs));
-	  if (string_end != NULL)
-	    {
-	      *string_end++ = ' ';
-	      strncpy (string_end, get_inferior_args (),
-		       psargs_end - string_end);
-	    }
-	}
-      note_data = (char *) elfcore_write_prpsinfo (obfd,
-						   note_data,
-						   note_size, fname, psargs);
-    }
-
-  /* Dump information for threads.  */
-  thread_args.obfd = obfd;
-  thread_args.note_data = note_data;
-  thread_args.note_size = note_size;
-  thread_args.num_notes = 0;
-  thread_args.stop_signal = find_stop_signal ();
-  iterate_over_lwps (filter, linux_nat_corefile_thread_callback, &thread_args);
-  gdb_assert (thread_args.num_notes != 0);
-  note_data = thread_args.note_data;
-
-  auxv_len = target_read_alloc (&current_target, TARGET_OBJECT_AUXV,
-				NULL, &auxv);
-  if (auxv_len > 0)
-    {
-      note_data = elfcore_write_note (obfd, note_data, note_size,
-				      "CORE", NT_AUXV, auxv, auxv_len);
-      xfree (auxv);
-    }
-
-  note_data = linux_spu_make_corefile_notes (obfd, note_data, note_size);
-
-  make_cleanup (xfree, note_data);
-  return note_data;
+  /* FIXME: uweigand/2011-10-06: Once all GNU/Linux architectures have been
+     converted to gdbarch_core_regset_sections, this function can go away.  */
+  return linux_make_corefile_notes (target_gdbarch, obfd, note_size,
+				    linux_nat_collect_thread_registers);
 }
 
 /* Implement the to_xfer_partial interface for memory reads using the /proc

@@ -71,35 +71,37 @@ write_gcore_file (bfd *obfd)
   asection *note_sec = NULL;
 
   /* An external target method must build the notes section.  */
-  note_data = target_make_corefile_notes (obfd, &note_size);
+  /* FIXME: uweigand/2011-10-06: All architectures that support core file
+     generation should be converted to gdbarch_make_corefile_notes; at that
+     point, the target vector method can be removed.  */
+  if (!gdbarch_make_corefile_notes_p (target_gdbarch))
+    note_data = target_make_corefile_notes (obfd, &note_size);
+  else
+    note_data = gdbarch_make_corefile_notes (target_gdbarch, obfd, &note_size);
+
+  if (note_data == NULL || note_size == 0)
+    error (_("Target does not support core file generation."));
 
   /* Create the note section.  */
-  if (note_data != NULL && note_size != 0)
-    {
-      note_sec = bfd_make_section_anyway_with_flags (obfd, "note0",
-						     SEC_HAS_CONTENTS
-						     | SEC_READONLY
-						     | SEC_ALLOC);
-      if (note_sec == NULL)
-	error (_("Failed to create 'note' section for corefile: %s"),
-	       bfd_errmsg (bfd_get_error ()));
+  note_sec = bfd_make_section_anyway_with_flags (obfd, "note0",
+						 SEC_HAS_CONTENTS
+						 | SEC_READONLY
+						 | SEC_ALLOC);
+  if (note_sec == NULL)
+    error (_("Failed to create 'note' section for corefile: %s"),
+	   bfd_errmsg (bfd_get_error ()));
 
-      bfd_set_section_vma (obfd, note_sec, 0);
-      bfd_set_section_alignment (obfd, note_sec, 0);
-      bfd_set_section_size (obfd, note_sec, note_size);
-    }
+  bfd_set_section_vma (obfd, note_sec, 0);
+  bfd_set_section_alignment (obfd, note_sec, 0);
+  bfd_set_section_size (obfd, note_sec, note_size);
 
   /* Now create the memory/load sections.  */
   if (gcore_memory_sections (obfd) == 0)
     error (_("gcore: failed to get corefile memory sections from target."));
 
   /* Write out the contents of the note section.  */
-  if (note_data != NULL && note_size != 0)
-    {
-      if (!bfd_set_section_contents (obfd, note_sec, note_data, 0, note_size))
-	warning (_("writing note section (%s)"), 
-		 bfd_errmsg (bfd_get_error ()));
-    }
+  if (!bfd_set_section_contents (obfd, note_sec, note_data, 0, note_size))
+    warning (_("writing note section (%s)"), bfd_errmsg (bfd_get_error ()));
 }
 
 static void

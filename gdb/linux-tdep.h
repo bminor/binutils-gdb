@@ -20,6 +20,18 @@
 #ifndef LINUX_TDEP_H
 #define LINUX_TDEP_H
 
+#include "bfd.h"
+
+struct regcache;
+
+typedef char *(*linux_collect_thread_registers_ftype) (const struct regcache *,
+						       ptid_t,
+						       bfd *, char *, int *,
+						       enum target_signal);
+
+char *linux_make_corefile_notes (struct gdbarch *, bfd *, int *,
+                                 linux_collect_thread_registers_ftype);
+
 struct type *linux_get_siginfo_type (struct gdbarch *);
 
 extern void linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch);

@@ -709,6 +709,14 @@ extern void set_gdbarch_regset_from_core_section (struct gdbarch *gdbarch, gdbar
 extern struct core_regset_section * gdbarch_core_regset_sections (struct gdbarch *gdbarch);
 extern void set_gdbarch_core_regset_sections (struct gdbarch *gdbarch, struct core_regset_section * core_regset_sections);
 
+/* Create core file notes */
+
+extern int gdbarch_make_corefile_notes_p (struct gdbarch *gdbarch);
+
+typedef char * (gdbarch_make_corefile_notes_ftype) (struct gdbarch *gdbarch, bfd *obfd, int *note_size);
+extern char * gdbarch_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size);
+extern void set_gdbarch_make_corefile_notes (struct gdbarch *gdbarch, gdbarch_make_corefile_notes_ftype *make_corefile_notes);
+
 /* Read offset OFFSET of TARGET_OBJECT_LIBRARIES formatted shared libraries list from
    core file into buffer READBUF with length LEN. */
 

@@ -1,5 +1,44 @@
 2012-01-20  Ulrich Weigand  <ulrich.weigand@linaro.org>
 
+	* gdbarch.sh (make_corefile_notes): New architecture callback.
+	* gdbarch.c: Regenerate.
+	* gdbarch.h: Likewise.
+
+	* gcore.c (write_gcore_file): Try gdbarch_make_corefile_notes
+	before target_make_corefile_notes.  If NULL is returned, the
+	target does not support core file generation.
+
+	* linux-nat.c: Include "linux-tdep.h".
+	(find_signalled_thread, find_stop_signal): Remove.
+	(linux_nat_do_thread_registers): Likewise.
+	(struct linux_nat_corefile_thread_data): Likewise.
+	(linux_nat_corefile_thread_callback): Likewise.
+	(iterate_over_spus): Likewise.
+	(struct linux_spu_corefile_data): Likewise.
+	(linux_spu_corefile_callback): Likewise.
+	(linux_spu_make_corefile_notes): Likewise.
+	(linux_nat_collect_thread_registers): New function.
+	(linux_nat_make_corefile_notes): Replace contents by call to
+	linux_make_corefile_notes passing linux_nat_collect_thread_registers
+	as native-only callback.
+
+	* linux-tdep.h: Include "bfd.h".
+	(struct regcache): Add forward declaration.
+	(linux_collect_thread_registers_ftype): New typedef.
+	(linux_make_corefile_notes): Add prototype.
+	* linux-tdep.c: Include "gdbthread.h", "gdbcore.h", "regcache.h",
+	"regset.h", and "elf-bfd.h".
+	(find_signalled_thread, find_stop_signal): New functions.
+	(linux_spu_make_corefile_notes): Likewise.
+	(linux_collect_thread_registers): Likewise.
+	(struct linux_corefile_thread_data): New data structure.
+	(linux_corefile_thread_callback): New funcion.
+	(linux_make_corefile_notes): Likewise.
+	(linux_make_corefile_notes_1): Likewise.
+	(linux_init_abi): Install it.
+
+2012-01-20  Ulrich Weigand  <ulrich.weigand@linaro.org>
+
 	* gdbarch.sh (info_proc): New callback.
 	* gdbarch.c, gdbarch.h: Regenerate.
 

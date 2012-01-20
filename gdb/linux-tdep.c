@@ -22,7 +22,12 @@
 #include "linux-tdep.h"
 #include "auxv.h"
 #include "target.h"
+#include "gdbthread.h"
+#include "gdbcore.h"
+#include "regcache.h"
+#include "regset.h"
 #include "elf/common.h"
+#include "elf-bfd.h"            /* for elfcore_write_* */
 #include "inferior.h"
 #include "cli/cli-utils.h"
 
@@ -525,6 +530,275 @@ linux_info_proc (struct gdbarch *gdbarch, char *args,
     }
 }
 
+/* Determine which signal stopped execution.  */
+
+static int
+find_signalled_thread (struct thread_info *info, void *data)
+{
+  if (info->suspend.stop_signal != TARGET_SIGNAL_0
+      && ptid_get_pid (info->ptid) == ptid_get_pid (inferior_ptid))
+    return 1;
+
+  return 0;
+}
+
+static enum target_signal
+find_stop_signal (void)
+{
+  struct thread_info *info =
+    iterate_over_threads (find_signalled_thread, NULL);
+
+  if (info)
+    return info->suspend.stop_signal;
+  else
+    return TARGET_SIGNAL_0;
+}
+
+/* Generate corefile notes for SPU contexts.  */
+
+static char *
+linux_spu_make_corefile_notes (bfd *obfd, char *note_data, int *note_size)
+{
+  static const char *spu_files[] =
+    {
+      "object-id",
+      "mem",
+      "regs",
+      "fpcr",
+      "lslr",
+      "decr",
+      "decr_status",
+      "signal1",
+      "signal1_type",
+      "signal2",
+      "signal2_type",
+      "event_mask",
+      "event_status",
+      "mbox_info",
+      "ibox_info",
+      "wbox_info",
+      "dma_info",
+      "proxydma_info",
+   };
+
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
+  gdb_byte *spu_ids;
+  LONGEST i, j, size;
+
+  /* Determine list of SPU ids.  */
+  size = target_read_alloc (&current_target, TARGET_OBJECT_SPU,
+			    NULL, &spu_ids);
+
+  /* Generate corefile notes for each SPU file.  */
+  for (i = 0; i < size; i += 4)
+    {
+      int fd = extract_unsigned_integer (spu_ids + i, 4, byte_order);
+
+      for (j = 0; j < sizeof (spu_files) / sizeof (spu_files[0]); j++)
+	{
+	  char annex[32], note_name[32];
+	  gdb_byte *spu_data;
+	  LONGEST spu_len;
+
+	  xsnprintf (annex, sizeof annex, "%d/%s", fd, spu_files[j]);
+	  spu_len = target_read_alloc (&current_target, TARGET_OBJECT_SPU,
+				       annex, &spu_data);
+	  if (spu_len > 0)
+	    {
+	      xsnprintf (note_name, sizeof note_name, "SPU/%s", annex);
+	      note_data = elfcore_write_note (obfd, note_data, note_size,
+					      note_name, NT_SPU,
+					      spu_data, spu_len);
+	      xfree (spu_data);
+
+	      if (!note_data)
+		{
+		  xfree (spu_ids);
+		  return NULL;
+		}
+	    }
+	}
+    }
+
+  if (size > 0)
+    xfree (spu_ids);
+
+  return note_data;
+}
+
+/* Records the thread's register state for the corefile note
+   section.  */
+
+static char *
+linux_collect_thread_registers (const struct regcache *regcache,
+				ptid_t ptid, bfd *obfd,
+				char *note_data, int *note_size,
+				enum target_signal stop_signal)
+{
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct core_regset_section *sect_list;
+  unsigned long lwp;
+
+  sect_list = gdbarch_core_regset_sections (gdbarch);
+  gdb_assert (sect_list);
+
+  /* For remote targets the LWP may not be available, so use the TID.  */
+  lwp = ptid_get_lwp (ptid);
+  if (!lwp)
+    lwp = ptid_get_tid (ptid);
+
+  while (sect_list->sect_name != NULL)
+    {
+      const struct regset *regset;
+      char *buf;
+
+      regset = gdbarch_regset_from_core_section (gdbarch,
+						 sect_list->sect_name,
+						 sect_list->size);
+      gdb_assert (regset && regset->collect_regset);
+
+      buf = xmalloc (sect_list->size);
+      regset->collect_regset (regset, regcache, -1, buf, sect_list->size);
+
+      /* PRSTATUS still needs to be treated specially.  */
+      if (strcmp (sect_list->sect_name, ".reg") == 0)
+	note_data = (char *) elfcore_write_prstatus
+			       (obfd, note_data, note_size, lwp,
+				target_signal_to_host (stop_signal), buf);
+      else
+	note_data = (char *) elfcore_write_register_note
+			       (obfd, note_data, note_size,
+				sect_list->sect_name, buf, sect_list->size);
+      xfree (buf);
+      sect_list++;
+
+      if (!note_data)
+	return NULL;
+    }
+
+  return note_data;
+}
+
+struct linux_corefile_thread_data
+{
+  struct gdbarch *gdbarch;
+  int pid;
+  bfd *obfd;
+  char *note_data;
+  int *note_size;
+  int num_notes;
+  enum target_signal stop_signal;
+  linux_collect_thread_registers_ftype collect;
+};
+
+/* Called by gdbthread.c once per thread.  Records the thread's
+   register state for the corefile note section.  */
+
+static int
+linux_corefile_thread_callback (struct thread_info *info, void *data)
+{
+  struct linux_corefile_thread_data *args = data;
+
+  if (ptid_get_pid (info->ptid) == args->pid)
+    {
+      struct cleanup *old_chain;
+      struct regcache *regcache;
+      regcache = get_thread_arch_regcache (info->ptid, args->gdbarch);
+
+      old_chain = save_inferior_ptid ();
+      inferior_ptid = info->ptid;
+      target_fetch_registers (regcache, -1);
+      do_cleanups (old_chain);
+
+      args->note_data = args->collect (regcache, info->ptid, args->obfd,
+				       args->note_data, args->note_size,
+				       args->stop_signal);
+      args->num_notes++;
+    }
+
+  return !args->note_data;
+}
+
+/* Fills the "to_make_corefile_note" target vector.  Builds the note
+   section for a corefile, and returns it in a malloc buffer.  */
+
+char *
+linux_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size,
+			   linux_collect_thread_registers_ftype collect)
+{
+  struct linux_corefile_thread_data thread_args;
+  char *note_data = NULL;
+  gdb_byte *auxv;
+  int auxv_len;
+
+  /* Process information.  */
+  if (get_exec_file (0))
+    {
+      const char *fname = lbasename (get_exec_file (0));
+      char *psargs = xstrdup (fname);
+
+      if (get_inferior_args ())
+        psargs = reconcat (psargs, psargs, " ", get_inferior_args (),
+			   (char *) NULL);
+
+      note_data = elfcore_write_prpsinfo (obfd, note_data, note_size,
+                                          fname, psargs);
+      xfree (psargs);
+
+      if (!note_data)
+	return NULL;
+    }
+
+  /* Thread register information.  */
+  thread_args.gdbarch = gdbarch;
+  thread_args.pid = ptid_get_pid (inferior_ptid);
+  thread_args.obfd = obfd;
+  thread_args.note_data = note_data;
+  thread_args.note_size = note_size;
+  thread_args.num_notes = 0;
+  thread_args.stop_signal = find_stop_signal ();
+  thread_args.collect = collect;
+  iterate_over_threads (linux_corefile_thread_callback, &thread_args);
+  note_data = thread_args.note_data;
+  if (!note_data)
+    return NULL;
+
+  /* Auxillary vector.  */
+  auxv_len = target_read_alloc (&current_target, TARGET_OBJECT_AUXV,
+				NULL, &auxv);
+  if (auxv_len > 0)
+    {
+      note_data = elfcore_write_note (obfd, note_data, note_size,
+				      "CORE", NT_AUXV, auxv, auxv_len);
+      xfree (auxv);
+
+      if (!note_data)
+	return NULL;
+    }
+
+  /* SPU information.  */
+  note_data = linux_spu_make_corefile_notes (obfd, note_data, note_size);
+  if (!note_data)
+    return NULL;
+
+  make_cleanup (xfree, note_data);
+  return note_data;
+}
+
+static char *
+linux_make_corefile_notes_1 (struct gdbarch *gdbarch, bfd *obfd, int *note_size)
+{
+  /* FIXME: uweigand/2011-10-06: Once all GNU/Linux architectures have been
+     converted to gdbarch_core_regset_sections, we no longer need to fall back
+     to the target method at this point.  */
+
+  if (!gdbarch_core_regset_sections (gdbarch))
+    return target_make_corefile_notes (obfd, note_size);
+  else
+    return linux_make_corefile_notes (gdbarch, obfd, note_size,
+				      linux_collect_thread_registers);
+}
+
 /* To be called from the various GDB_OSABI_LINUX handlers for the
    various GNU/Linux architectures and machine types.  */
 
@@ -533,6 +807,7 @@ linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   set_gdbarch_core_pid_to_str (gdbarch, linux_core_pid_to_str);
   set_gdbarch_info_proc (gdbarch, linux_info_proc);
+  set_gdbarch_make_corefile_notes (gdbarch, linux_make_corefile_notes_1);
 }
 
 void

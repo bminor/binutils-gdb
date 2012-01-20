@@ -239,6 +239,7 @@ struct gdbarch
   gdbarch_fetch_pointer_argument_ftype *fetch_pointer_argument;
   gdbarch_regset_from_core_section_ftype *regset_from_core_section;
   struct core_regset_section * core_regset_sections;
+  gdbarch_make_corefile_notes_ftype *make_corefile_notes;
   gdbarch_core_xfer_shared_libraries_ftype *core_xfer_shared_libraries;
   gdbarch_core_pid_to_str_ftype *core_pid_to_str;
   const char * gcore_bfd_target;
@@ -395,6 +396,7 @@ struct gdbarch startup_gdbarch =
   0,  /* fetch_pointer_argument */
   0,  /* regset_from_core_section */
   0,  /* core_regset_sections */
+  0,  /* make_corefile_notes */
   0,  /* core_xfer_shared_libraries */
   0,  /* core_pid_to_str */
   0,  /* gcore_bfd_target */
@@ -683,6 +685,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of register_reggroup_p, invalid_p == 0 */
   /* Skip verify of fetch_pointer_argument, has predicate.  */
   /* Skip verify of regset_from_core_section, has predicate.  */
+  /* Skip verify of make_corefile_notes, has predicate.  */
   /* Skip verify of core_xfer_shared_libraries, has predicate.  */
   /* Skip verify of core_pid_to_str, has predicate.  */
   /* Skip verify of gcore_bfd_target, has predicate.  */
@@ -1038,6 +1041,12 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: long_long_bit = %s\n",
                       plongest (gdbarch->long_long_bit));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_make_corefile_notes_p() = %d\n",
+                      gdbarch_make_corefile_notes_p (gdbarch));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: make_corefile_notes = <%s>\n",
+                      host_address_to_string (gdbarch->make_corefile_notes));
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_max_insn_length_p() = %d\n",
                       gdbarch_max_insn_length_p (gdbarch));
@@ -3242,6 +3251,30 @@ set_gdbarch_core_regset_sections (struct gdbarch *gdbarch,
                                   struct core_regset_section * core_regset_sections)
 {
   gdbarch->core_regset_sections = core_regset_sections;
+}
+
+int
+gdbarch_make_corefile_notes_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->make_corefile_notes != NULL;
+}
+
+char *
+gdbarch_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->make_corefile_notes != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_make_corefile_notes called\n");
+  return gdbarch->make_corefile_notes (gdbarch, obfd, note_size);
+}
+
+void
+set_gdbarch_make_corefile_notes (struct gdbarch *gdbarch,
+                                 gdbarch_make_corefile_notes_ftype make_corefile_notes)
+{
+  gdbarch->make_corefile_notes = make_corefile_notes;
 }
 
 int

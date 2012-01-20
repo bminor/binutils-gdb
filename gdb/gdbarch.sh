@@ -631,6 +631,9 @@ M:const struct regset *:regset_from_core_section:const char *sect_name, size_t s
 # Supported register notes in a core file.
 v:struct core_regset_section *:core_regset_sections:const char *name, int len::::::host_address_to_string (gdbarch->core_regset_sections)
 
+# Create core file notes
+M:char *:make_corefile_notes:bfd *obfd, int *note_size:obfd, note_size
+
 # Read offset OFFSET of TARGET_OBJECT_LIBRARIES formatted shared libraries list from
 # core file into buffer READBUF with length LEN.
 M:LONGEST:core_xfer_shared_libraries:gdb_byte *readbuf, ULONGEST offset, LONGEST len:readbuf, offset, len
