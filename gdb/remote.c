@@ -3253,6 +3253,10 @@ remote_start_remote (int from_tty, struct target_ops *target, int extended_p)
 
   if (!non_stop)
     {
+      ptid_t ptid;
+      int fake_pid_p = 0;
+      struct inferior *inf;
+
       if (rs->buf[0] == 'W' || rs->buf[0] == 'X')
 	{
 	  if (!extended_p)
@@ -3272,19 +3276,37 @@ remote_start_remote (int from_tty, struct target_ops *target, int extended_p)
       /* Let the stub know that we want it to return the thread.  */
       set_continue_thread (minus_one_ptid);
 
-      /* Without this, some commands which require an active target
-	 (such as kill) won't work.  This variable serves (at least)
-	 double duty as both the pid of the target process (if it has
-	 such), and as a flag indicating that a target is active.
-	 These functions should be split out into seperate variables,
-	 especially since GDB will someday have a notion of debugging
-	 several processes.  */
-      inferior_ptid = magic_null_ptid;
+      inferior_ptid = minus_one_ptid;
 
       /* Now, if we have thread information, update inferior_ptid.  */
-      inferior_ptid = remote_current_thread (inferior_ptid);
+      ptid = remote_current_thread (inferior_ptid);
+      if (!ptid_equal (ptid, minus_one_ptid))
+	{
+	  if (ptid_get_pid (ptid) == -1)
+	    {
+	      ptid = ptid_build (ptid_get_pid (magic_null_ptid),
+				 ptid_get_lwp (ptid),
+				 ptid_get_tid (ptid));
+	      fake_pid_p = 1;
+	    }
 
-      remote_add_inferior (ptid_get_pid (inferior_ptid), -1);
+	  inferior_ptid = ptid;
+	}
+      else
+	{
+	  /* Without this, some commands which require an active
+	     target (such as kill) won't work.  This variable serves
+	     (at least) double duty as both the pid of the target
+	     process (if it has such), and as a flag indicating that a
+	     target is active.  These functions should be split out
+	     into seperate variables, especially since GDB will
+	     someday have a notion of debugging several processes.  */
+	  inferior_ptid = magic_null_ptid;
+	  fake_pid_p = 1;
+	}
+
+      inf = remote_add_inferior (ptid_get_pid (inferior_ptid), -1);
+      inf->fake_pid_p = fake_pid_p;
 
       /* Always add the main thread.  */
       add_thread_silent (inferior_ptid);

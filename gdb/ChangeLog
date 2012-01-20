@@ -1,3 +1,11 @@
+2012-01-20  Pedro Alves  <palves@redhat.com>
+	    Ulrich Weigand  <ulrich.weigand@linaro.org>
+
+	* inferior.h (struct inferior): Add fake_pid_p.
+	* inferior.c (exit_inferior_1): Clear fake_pid_p.
+	* remote.c (remote_start_remote): Set fake_pid_p if we have to use
+	magic_null_ptid since the remote side doesn't provide a real PID.
+
 2012-01-19  Tom Tromey  <tromey@redhat.com>
 
 	* NEWS: Combine the two Python sections.

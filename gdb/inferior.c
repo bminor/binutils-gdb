@@ -276,6 +276,7 @@ exit_inferior_1 (struct inferior *inftoex, int silent)
   observer_notify_inferior_exit (inf);
 
   inf->pid = 0;
+  inf->fake_pid_p = 0;
   if (inf->vfork_parent != NULL)
     {
       inf->vfork_parent->vfork_child = NULL;

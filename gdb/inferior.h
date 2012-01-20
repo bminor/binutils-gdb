@@ -421,6 +421,8 @@ struct inferior
   /* Actual target inferior id, usually, a process id.  This matches
      the ptid_t.pid member of threads of this inferior.  */
   int pid;
+  /* True if the PID was actually faked by GDB.  */
+  int fake_pid_p;
 
   /* State of GDB control of inferior process execution.
      See `struct inferior_control_state'.  */
