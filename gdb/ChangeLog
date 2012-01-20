@@ -1,6 +1,17 @@
 2012-01-20  Pedro Alves  <palves@redhat.com>
 	    Ulrich Weigand  <ulrich.weigand@linaro.org>
 
+	* remote.c (remote_multi_process_p): Only check for multi-process
+	protocol feature, do not check for extended protocol.
+	(remote_supports_multi_process): Check for extended protocol here.
+	(set_general_process): Likewise.
+	(extended_remote_kill): Likewise.
+	(remote_pid_to_str): Likewise.
+	(remote_query_supported): Always query multiprocess mode.
+
+2012-01-20  Pedro Alves  <palves@redhat.com>
+	    Ulrich Weigand  <ulrich.weigand@linaro.org>
+
 	* inferior.h (struct inferior): Add fake_pid_p.
 	* inferior.c (exit_inferior_1): Clear fake_pid_p.
 	* remote.c (remote_start_remote): Set fake_pid_p if we have to use

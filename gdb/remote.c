@@ -359,7 +359,7 @@ free_private_thread_info (struct private_thread_info *info)
 static int
 remote_multi_process_p (struct remote_state *rs)
 {
-  return rs->extended && rs->multi_process_aware;
+  return rs->multi_process_aware;
 }
 
 /* This data could be associated with a target, but we do not always
@@ -1713,7 +1713,7 @@ set_general_process (void)
   struct remote_state *rs = get_remote_state ();
 
   /* If the remote can't handle multiple processes, don't bother.  */
-  if (!remote_multi_process_p (rs))
+  if (!rs->extended || !remote_multi_process_p (rs))
     return;
 
   /* We only need to change the remote current thread if it's pointing
@@ -3885,8 +3885,7 @@ remote_query_supported (void)
       char *q = NULL;
       struct cleanup *old_chain = make_cleanup (free_current_contents, &q);
 
-      if (rs->extended)
-	q = remote_query_supported_append (q, "multiprocess+");
+      q = remote_query_supported_append (q, "multiprocess+");
 
       if (remote_support_xml)
 	q = remote_query_supported_append (q, remote_support_xml);
@@ -7440,7 +7439,7 @@ extended_remote_kill (struct target_ops *ops)
   struct remote_state *rs = get_remote_state ();
 
   res = remote_vkill (pid, rs);
-  if (res == -1 && !remote_multi_process_p (rs))
+  if (res == -1 && !(rs->extended && remote_multi_process_p (rs)))
     {
       /* Don't try 'k' on a multi-process aware stub -- it has no way
 	 to specify the pid.  */
@@ -8832,7 +8831,7 @@ remote_pid_to_str (struct target_ops *ops, ptid_t ptid)
     {
       if (ptid_equal (magic_null_ptid, ptid))
 	xsnprintf (buf, sizeof buf, "Thread <main>");
-      else if (remote_multi_process_p (rs))
+      else if (rs->extended && remote_multi_process_p (rs))
 	xsnprintf (buf, sizeof buf, "Thread %d.%ld",
 		   ptid_get_pid (ptid), ptid_get_tid (ptid));
       else
@@ -9773,7 +9772,11 @@ remote_supports_multi_process (void)
 {
   struct remote_state *rs = get_remote_state ();
 
-  return remote_multi_process_p (rs);
+  /* Only extended-remote handles being attached to multiple
+     processes, even though plain remote can use the multi-process
+     thread id extensions, so that GDB knows the target process's
+     PID.  */
+  return rs->extended && remote_multi_process_p (rs);
 }
 
 int

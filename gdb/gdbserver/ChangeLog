@@ -1,3 +1,9 @@
+2012-01-20  Pedro Alves  <palves@redhat.com>
+	    Ulrich Weigand  <ulrich.weigand@linaro.org>
+
+	* server.c (handle_v_requests): Only support vAttach and vRun to
+	start multiple processes when in extended protocol mode.
+
 2012-01-17  Pedro Alves  <palves@redhat.com>
 
 	* tracepoint.c (initialize_tracepoint): Use mmap instead of
