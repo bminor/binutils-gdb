@@ -561,8 +561,14 @@ gcore_copy_callback (bfd *obfd, asection *osec, void *ignored)
 static int
 gcore_memory_sections (bfd *obfd)
 {
-  if (target_find_memory_regions (gcore_create_callback, obfd) != 0)
-    return 0;			/* FIXME: error return/msg?  */
+  /* Try gdbarch method first, then fall back to target method.  */
+  if (!gdbarch_find_memory_regions_p (target_gdbarch)
+      || gdbarch_find_memory_regions (target_gdbarch,
+				      gcore_create_callback, obfd) != 0)
+    {
+      if (target_find_memory_regions (gcore_create_callback, obfd) != 0)
+	return 0;			/* FIXME: error return/msg?  */
+    }
 
   /* Record phdrs for section-to-segment mapping.  */
   bfd_map_over_sections (obfd, make_output_phdrs, NULL);

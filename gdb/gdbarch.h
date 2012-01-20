@@ -717,6 +717,14 @@ typedef char * (gdbarch_make_corefile_notes_ftype) (struct gdbarch *gdbarch, bfd
 extern char * gdbarch_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size);
 extern void set_gdbarch_make_corefile_notes (struct gdbarch *gdbarch, gdbarch_make_corefile_notes_ftype *make_corefile_notes);
 
+/* Find core file memory regions */
+
+extern int gdbarch_find_memory_regions_p (struct gdbarch *gdbarch);
+
+typedef int (gdbarch_find_memory_regions_ftype) (struct gdbarch *gdbarch, find_memory_region_ftype func, void *data);
+extern int gdbarch_find_memory_regions (struct gdbarch *gdbarch, find_memory_region_ftype func, void *data);
+extern void set_gdbarch_find_memory_regions (struct gdbarch *gdbarch, gdbarch_find_memory_regions_ftype *find_memory_regions);
+
 /* Read offset OFFSET of TARGET_OBJECT_LIBRARIES formatted shared libraries list from
    core file into buffer READBUF with length LEN. */
 

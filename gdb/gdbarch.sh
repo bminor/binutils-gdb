@@ -634,6 +634,9 @@ v:struct core_regset_section *:core_regset_sections:const char *name, int len:::
 # Create core file notes
 M:char *:make_corefile_notes:bfd *obfd, int *note_size:obfd, note_size
 
+# Find core file memory regions
+M:int:find_memory_regions:find_memory_region_ftype func, void *data:func, data
+
 # Read offset OFFSET of TARGET_OBJECT_LIBRARIES formatted shared libraries list from
 # core file into buffer READBUF with length LEN.
 M:LONGEST:core_xfer_shared_libraries:gdb_byte *readbuf, ULONGEST offset, LONGEST len:readbuf, offset, len

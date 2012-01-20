@@ -530,6 +530,53 @@ linux_info_proc (struct gdbarch *gdbarch, char *args,
     }
 }
 
+/* List memory regions in the inferior for a corefile.  */
+
+static int
+linux_find_memory_regions (struct gdbarch *gdbarch,
+			   find_memory_region_ftype func, void *obfd)
+{
+  char filename[100];
+  gdb_byte *data;
+
+  /* We need to know the real target PID to access /proc.  */
+  if (current_inferior ()->fake_pid_p)
+    return 1;
+
+  xsnprintf (filename, sizeof filename,
+	     "/proc/%d/maps", current_inferior ()->pid);
+  data = target_fileio_read_stralloc (filename);
+  if (data)
+    {
+      struct cleanup *cleanup = make_cleanup (xfree, data);
+      char *line;
+
+      for (line = strtok (data, "\n"); line; line = strtok (NULL, "\n"))
+	{
+	  ULONGEST addr, endaddr, offset, inode;
+	  const char *permissions, *device, *filename;
+	  size_t permissions_len, device_len;
+	  int read, write, exec;
+
+	  read_mapping (line, &addr, &endaddr, &permissions, &permissions_len,
+			&offset, &device, &device_len, &inode, &filename);
+
+	  /* Decode permissions.  */
+	  read = (memchr (permissions, 'r', permissions_len) != 0);
+	  write = (memchr (permissions, 'w', permissions_len) != 0);
+	  exec = (memchr (permissions, 'x', permissions_len) != 0);
+
+	  /* Invoke the callback function to create the corefile segment.  */
+	  func (addr, endaddr - addr, read, write, exec, obfd);
+	}
+
+      do_cleanups (cleanup);
+      return 0;
+    }
+
+  return 1;
+}
+
 /* Determine which signal stopped execution.  */
 
 static int
@@ -807,6 +854,7 @@ linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   set_gdbarch_core_pid_to_str (gdbarch, linux_core_pid_to_str);
   set_gdbarch_info_proc (gdbarch, linux_info_proc);
+  set_gdbarch_find_memory_regions (gdbarch, linux_find_memory_regions);
   set_gdbarch_make_corefile_notes (gdbarch, linux_make_corefile_notes_1);
 }
 

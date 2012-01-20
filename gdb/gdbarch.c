@@ -240,6 +240,7 @@ struct gdbarch
   gdbarch_regset_from_core_section_ftype *regset_from_core_section;
   struct core_regset_section * core_regset_sections;
   gdbarch_make_corefile_notes_ftype *make_corefile_notes;
+  gdbarch_find_memory_regions_ftype *find_memory_regions;
   gdbarch_core_xfer_shared_libraries_ftype *core_xfer_shared_libraries;
   gdbarch_core_pid_to_str_ftype *core_pid_to_str;
   const char * gcore_bfd_target;
@@ -397,6 +398,7 @@ struct gdbarch startup_gdbarch =
   0,  /* regset_from_core_section */
   0,  /* core_regset_sections */
   0,  /* make_corefile_notes */
+  0,  /* find_memory_regions */
   0,  /* core_xfer_shared_libraries */
   0,  /* core_pid_to_str */
   0,  /* gcore_bfd_target */
@@ -686,6 +688,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of fetch_pointer_argument, has predicate.  */
   /* Skip verify of regset_from_core_section, has predicate.  */
   /* Skip verify of make_corefile_notes, has predicate.  */
+  /* Skip verify of find_memory_regions, has predicate.  */
   /* Skip verify of core_xfer_shared_libraries, has predicate.  */
   /* Skip verify of core_pid_to_str, has predicate.  */
   /* Skip verify of gcore_bfd_target, has predicate.  */
@@ -927,6 +930,12 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: fetch_tls_load_module_address = <%s>\n",
                       host_address_to_string (gdbarch->fetch_tls_load_module_address));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_find_memory_regions_p() = %d\n",
+                      gdbarch_find_memory_regions_p (gdbarch));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: find_memory_regions = <%s>\n",
+                      host_address_to_string (gdbarch->find_memory_regions));
   fprintf_unfiltered (file,
                       "gdbarch_dump: float_bit = %s\n",
                       plongest (gdbarch->float_bit));
@@ -3275,6 +3284,30 @@ set_gdbarch_make_corefile_notes (struct gdbarch *gdbarch,
                                  gdbarch_make_corefile_notes_ftype make_corefile_notes)
 {
   gdbarch->make_corefile_notes = make_corefile_notes;
+}
+
+int
+gdbarch_find_memory_regions_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->find_memory_regions != NULL;
+}
+
+int
+gdbarch_find_memory_regions (struct gdbarch *gdbarch, find_memory_region_ftype func, void *data)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->find_memory_regions != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_find_memory_regions called\n");
+  return gdbarch->find_memory_regions (gdbarch, func, data);
+}
+
+void
+set_gdbarch_find_memory_regions (struct gdbarch *gdbarch,
+                                 gdbarch_find_memory_regions_ftype find_memory_regions)
+{
+  gdbarch->find_memory_regions = find_memory_regions;
 }
 
 int

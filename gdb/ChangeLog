@@ -1,5 +1,19 @@
 2012-01-20  Ulrich Weigand  <ulrich.weigand@linaro.org>
 
+	* gdbarch.sh (find_memory_regions): New callback.
+	* gdbarch.c, gdbarch.h: Regenerate.
+
+	* gcore.c (gcore_memory_sections): Try gdbarch find_memory_regions
+	callback before falling back to target method.
+
+	* linux-nat.c (read_mapping, linux_nat_find_memory_regions): Remove.
+	(linux_target_install_ops): No longer install it.
+
+	* linux-tdep.c (linux_find_memory_regions): New function.
+	(linux_init_abi): Install it.
+
+2012-01-20  Ulrich Weigand  <ulrich.weigand@linaro.org>
+
 	* gdbarch.sh (make_corefile_notes): New architecture callback.
 	* gdbarch.c: Regenerate.
 	* gdbarch.h: Likewise.

@@ -4396,90 +4396,6 @@ linux_child_pid_to_exec_file (int pid)
     return name1;
 }
 
-/* Service function for corefiles and info proc.  */
-
-static int
-read_mapping (FILE *mapfile,
-	      long long *addr,
-	      long long *endaddr,
-	      char *permissions,
-	      long long *offset,
-	      char *device, long long *inode, char *filename)
-{
-  int ret = fscanf (mapfile, "%llx-%llx %s %llx %s %llx",
-		    addr, endaddr, permissions, offset, device, inode);
-
-  filename[0] = '\0';
-  if (ret > 0 && ret != EOF)
-    {
-      /* Eat everything up to EOL for the filename.  This will prevent
-         weird filenames (such as one with embedded whitespace) from
-         confusing this code.  It also makes this code more robust in
-         respect to annotations the kernel may add after the filename.
-
-         Note the filename is used for informational purposes
-         only.  */
-      ret += fscanf (mapfile, "%[^\n]\n", filename);
-    }
-
-  return (ret != 0 && ret != EOF);
-}
-
-/* Fills the "to_find_memory_regions" target vector.  Lists the memory
-   regions in the inferior for a corefile.  */
-
-static int
-linux_nat_find_memory_regions (find_memory_region_ftype func, void *obfd)
-{
-  int pid = PIDGET (inferior_ptid);
-  char mapsfilename[MAXPATHLEN];
-  FILE *mapsfile;
-  long long addr, endaddr, size, offset, inode;
-  char permissions[8], device[8], filename[MAXPATHLEN];
-  int read, write, exec;
-  struct cleanup *cleanup;
-
-  /* Compose the filename for the /proc memory map, and open it.  */
-  sprintf (mapsfilename, "/proc/%d/maps", pid);
-  if ((mapsfile = fopen (mapsfilename, "r")) == NULL)
-    error (_("Could not open %s."), mapsfilename);
-  cleanup = make_cleanup_fclose (mapsfile);
-
-  if (info_verbose)
-    fprintf_filtered (gdb_stdout,
-		      "Reading memory regions from %s\n", mapsfilename);
-
-  /* Now iterate until end-of-file.  */
-  while (read_mapping (mapsfile, &addr, &endaddr, &permissions[0],
-		       &offset, &device[0], &inode, &filename[0]))
-    {
-      size = endaddr - addr;
-
-      /* Get the segment's permissions.  */
-      read = (strchr (permissions, 'r') != 0);
-      write = (strchr (permissions, 'w') != 0);
-      exec = (strchr (permissions, 'x') != 0);
-
-      if (info_verbose)
-	{
-	  fprintf_filtered (gdb_stdout,
-			    "Save segment, %s bytes at %s (%c%c%c)",
-			    plongest (size), paddress (target_gdbarch, addr),
-			    read ? 'r' : ' ',
-			    write ? 'w' : ' ', exec ? 'x' : ' ');
-	  if (filename[0])
-	    fprintf_filtered (gdb_stdout, " for %s", filename);
-	  fprintf_filtered (gdb_stdout, "\n");
-	}
-
-      /* Invoke the callback function to create the corefile
-	 segment.  */
-      func (addr, size, read, write, exec, obfd);
-    }
-  do_cleanups (cleanup);
-  return 0;
-}
-
 /* Records the thread's register state for the corefile note
    section.  */
 
@@ -4827,7 +4743,6 @@ linux_target_install_ops (struct target_ops *t)
   t->to_post_startup_inferior = linux_child_post_startup_inferior;
   t->to_post_attach = linux_child_post_attach;
   t->to_follow_fork = linux_child_follow_fork;
-  t->to_find_memory_regions = linux_nat_find_memory_regions;
   t->to_make_corefile_notes = linux_nat_make_corefile_notes;
 
   super_xfer_partial = t->to_xfer_partial;
