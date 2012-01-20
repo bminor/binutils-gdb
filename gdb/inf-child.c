@@ -27,6 +27,12 @@
 #include "inferior.h"
 #include "gdb_string.h"
 #include "inf-child.h"
+#include "gdb/fileio.h"
+
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 /* Fetch register REGNUM from the inferior.  If REGNUM is -1, do this
    for all registers.  */
@@ -108,6 +114,192 @@ inf_child_pid_to_exec_file (int pid)
   return NULL;
 }
 
+
+/* Target file operations.  */
+
+static int
+inf_child_fileio_open_flags_to_host (int fileio_open_flags, int *open_flags_p)
+{
+  int open_flags = 0;
+
+  if (fileio_open_flags & ~FILEIO_O_SUPPORTED)
+    return -1;
+
+  if (fileio_open_flags & FILEIO_O_CREAT)
+    open_flags |= O_CREAT;
+  if (fileio_open_flags & FILEIO_O_EXCL)
+    open_flags |= O_EXCL;
+  if (fileio_open_flags & FILEIO_O_TRUNC)
+    open_flags |= O_TRUNC;
+  if (fileio_open_flags & FILEIO_O_APPEND)
+    open_flags |= O_APPEND;
+  if (fileio_open_flags & FILEIO_O_RDONLY)
+    open_flags |= O_RDONLY;
+  if (fileio_open_flags & FILEIO_O_WRONLY)
+    open_flags |= O_WRONLY;
+  if (fileio_open_flags & FILEIO_O_RDWR)
+    open_flags |= O_RDWR;
+/* On systems supporting binary and text mode, always open files in
+   binary mode. */
+#ifdef O_BINARY
+  open_flags |= O_BINARY;
+#endif
+
+  *open_flags_p = open_flags;
+  return 0;
+}
+
+static int
+inf_child_errno_to_fileio_error (int errnum)
+{
+  switch (errnum)
+    {
+      case EPERM:
+        return FILEIO_EPERM;
+      case ENOENT:
+        return FILEIO_ENOENT;
+      case EINTR:
+        return FILEIO_EINTR;
+      case EIO:
+        return FILEIO_EIO;
+      case EBADF:
+        return FILEIO_EBADF;
+      case EACCES:
+        return FILEIO_EACCES;
+      case EFAULT:
+        return FILEIO_EFAULT;
+      case EBUSY:
+        return FILEIO_EBUSY;
+      case EEXIST:
+        return FILEIO_EEXIST;
+      case ENODEV:
+        return FILEIO_ENODEV;
+      case ENOTDIR:
+        return FILEIO_ENOTDIR;
+      case EISDIR:
+        return FILEIO_EISDIR;
+      case EINVAL:
+        return FILEIO_EINVAL;
+      case ENFILE:
+        return FILEIO_ENFILE;
+      case EMFILE:
+        return FILEIO_EMFILE;
+      case EFBIG:
+        return FILEIO_EFBIG;
+      case ENOSPC:
+        return FILEIO_ENOSPC;
+      case ESPIPE:
+        return FILEIO_ESPIPE;
+      case EROFS:
+        return FILEIO_EROFS;
+      case ENOSYS:
+        return FILEIO_ENOSYS;
+      case ENAMETOOLONG:
+        return FILEIO_ENAMETOOLONG;
+    }
+  return FILEIO_EUNKNOWN;
+}
+
+/* Open FILENAME on the target, using FLAGS and MODE.  Return a
+   target file descriptor, or -1 if an error occurs (and set
+   *TARGET_ERRNO).  */
+static int
+inf_child_fileio_open (const char *filename, int flags, int mode,
+		       int *target_errno)
+{
+  int nat_flags;
+  int fd;
+
+  if (inf_child_fileio_open_flags_to_host (flags, &nat_flags) == -1)
+    {
+      *target_errno = FILEIO_EINVAL;
+      return -1;
+    }
+
+  /* We do not need to convert MODE, since the fileio protocol uses
+     the standard values.  */
+  fd = open (filename, nat_flags, mode);
+  if (fd == -1)
+    *target_errno = inf_child_errno_to_fileio_error (errno);
+
+  return fd;
+}
+
+/* Write up to LEN bytes from WRITE_BUF to FD on the target.
+   Return the number of bytes written, or -1 if an error occurs
+   (and set *TARGET_ERRNO).  */
+static int
+inf_child_fileio_pwrite (int fd, const gdb_byte *write_buf, int len,
+			 ULONGEST offset, int *target_errno)
+{
+  int ret;
+
+#ifdef HAVE_PWRITE
+  ret = pwrite (fd, write_buf, len, (long) offset);
+#else
+  ret = lseek (fd, (long) offset, SEEK_SET);
+  if (ret != -1)
+    ret = write (fd, write_buf, len);
+#endif
+
+  if (ret == -1)
+    *target_errno = inf_child_errno_to_fileio_error (errno);
+
+  return ret;
+}
+
+/* Read up to LEN bytes FD on the target into READ_BUF.
+   Return the number of bytes read, or -1 if an error occurs
+   (and set *TARGET_ERRNO).  */
+static int
+inf_child_fileio_pread (int fd, gdb_byte *read_buf, int len,
+			ULONGEST offset, int *target_errno)
+{
+  int ret;
+
+#ifdef HAVE_PREAD
+  ret = pread (fd, read_buf, len, (long) offset);
+#else
+  ret = lseek (fd, (long) offset, SEEK_SET);
+  if (ret != -1)
+    ret = read (fd, read_buf, len);
+#endif
+
+  if (ret == -1)
+    *target_errno = inf_child_errno_to_fileio_error (errno);
+
+  return ret;
+}
+
+/* Close FD on the target.  Return 0, or -1 if an error occurs
+   (and set *TARGET_ERRNO).  */
+static int
+inf_child_fileio_close (int fd, int *target_errno)
+{
+  int ret;
+
+  ret = close (fd);
+  if (ret == -1)
+    *target_errno = inf_child_errno_to_fileio_error (errno);
+
+  return ret;
+}
+
+/* Unlink FILENAME on the target.  Return 0, or -1 if an error
+   occurs (and set *TARGET_ERRNO).  */
+static int
+inf_child_fileio_unlink (const char *filename, int *target_errno)
+{
+  int ret;
+
+  ret = unlink (filename);
+  if (ret == -1)
+    *target_errno = inf_child_errno_to_fileio_error (errno);
+
+  return ret;
+}
+
+
 struct target_ops *
 inf_child_target (void)
 {
@@ -139,6 +331,11 @@ inf_child_target (void)
   t->to_has_stack = default_child_has_stack;
   t->to_has_registers = default_child_has_registers;
   t->to_has_execution = default_child_has_execution;
+  t->to_fileio_open = inf_child_fileio_open;
+  t->to_fileio_pwrite = inf_child_fileio_pwrite;
+  t->to_fileio_pread = inf_child_fileio_pread;
+  t->to_fileio_close = inf_child_fileio_close;
+  t->to_fileio_unlink = inf_child_fileio_unlink;
   t->to_magic = OPS_MAGIC;
   return t;
 }

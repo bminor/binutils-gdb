@@ -1,6 +1,48 @@
 2012-01-20  Pedro Alves  <palves@redhat.com>
 	    Ulrich Weigand  <ulrich.weigand@linaro.org>
 
+	* configure.ac [AC_CHECK_FUNCS]: Check for pread and pwrite.
+	* config.in, configure: Regenerate.
+
+	* target.h (struct target_ops): Add to_fileio_open, to_fileio_pwrite,
+	to_fileio_pread, to_fileio_close, to_fileio_unlink.
+	(target_fileio_open): Add prototype.
+	(target_fileio_pwrite): Likewise.
+	(target_fileio_pread): Likewise.
+	(target_fileio_close): Likewise.
+	(target_fileio_unlink): Likewise.
+	(target_fileio_read_alloc): Likewise.
+	(target_fileio_read_stralloc): Likewise.
+
+	* target.c: Include "gdb/fileio.h".
+	(target_read_stralloc): Accept trailing, but not embedded NUL bytes.
+	(default_fileio_target): New function.
+	(target_fileio_open): Likewise.
+	(target_fileio_pwrite): Likewise.
+	(target_fileio_pread): Likewise.
+	(target_fileio_close): Likewise.
+	(target_fileio_unlink): Likewise.
+	(target_fileio_close_cleanup): Likewise.
+	(target_fileio_read_alloc_1): Likewise.
+	(target_fileio_read_alloc): Likewise.
+	(target_fileio_read_stralloc): Likewise.
+
+	* inf-child.c: Include "gdb/fileio.h", <sys/types.h>, <sys/stat.h>,
+	<fcntl.h>, and <unistd.h>.
+	(inf_child_fileio_open_flags_to_host): New function.
+	(inf_child_errno_to_fileio_error): Likewise.
+	(inf_child_fileio_open): Likewise.
+	(inf_child_fileio_pwrite): Likewise.
+	(inf_child_fileio_pread): Likewise.
+	(inf_child_fileio_close): Likewise.
+	(inf_child_fileio_unlink): Likewise.
+	(inf_child_target): Install to_fileio routines.
+
+	* remote.c (init_remote_ops): Install to_fileio routines.
+
+2012-01-20  Pedro Alves  <palves@redhat.com>
+	    Ulrich Weigand  <ulrich.weigand@linaro.org>
+
 	* remote.c (remote_multi_process_p): Only check for multi-process
 	protocol feature, do not check for extended protocol.
 	(remote_supports_multi_process): Check for extended protocol here.

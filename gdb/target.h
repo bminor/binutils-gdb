@@ -681,6 +681,35 @@ struct target_ops
     struct address_space *(*to_thread_address_space) (struct target_ops *,
 						      ptid_t);
 
+    /* Target file operations.  */
+
+    /* Open FILENAME on the target, using FLAGS and MODE.  Return a
+       target file descriptor, or -1 if an error occurs (and set
+       *TARGET_ERRNO).  */
+    int (*to_fileio_open) (const char *filename, int flags, int mode,
+			   int *target_errno);
+
+    /* Write up to LEN bytes from WRITE_BUF to FD on the target.
+       Return the number of bytes written, or -1 if an error occurs
+       (and set *TARGET_ERRNO).  */
+    int (*to_fileio_pwrite) (int fd, const gdb_byte *write_buf, int len,
+			     ULONGEST offset, int *target_errno);
+
+    /* Read up to LEN bytes FD on the target into READ_BUF.
+       Return the number of bytes read, or -1 if an error occurs
+       (and set *TARGET_ERRNO).  */
+    int (*to_fileio_pread) (int fd, gdb_byte *read_buf, int len,
+			    ULONGEST offset, int *target_errno);
+
+    /* Close FD on the target.  Return 0, or -1 if an error occurs
+       (and set *TARGET_ERRNO).  */
+    int (*to_fileio_close) (int fd, int *target_errno);
+
+    /* Unlink FILENAME on the target.  Return 0, or -1 if an error
+       occurs (and set *TARGET_ERRNO).  */
+    int (*to_fileio_unlink) (const char *filename, int *target_errno);
+
+
     /* Tracepoint-related operations.  */
 
     /* Prepare the target for a tracing run.  */
@@ -1488,6 +1517,54 @@ extern int target_search_memory (CORE_ADDR start_addr,
                                  const gdb_byte *pattern,
                                  ULONGEST pattern_len,
                                  CORE_ADDR *found_addrp);
+
+/* Target file operations.  */
+
+/* Open FILENAME on the target, using FLAGS and MODE.  Return a
+   target file descriptor, or -1 if an error occurs (and set
+   *TARGET_ERRNO).  */
+extern int target_fileio_open (const char *filename, int flags, int mode,
+			       int *target_errno);
+
+/* Write up to LEN bytes from WRITE_BUF to FD on the target.
+   Return the number of bytes written, or -1 if an error occurs
+   (and set *TARGET_ERRNO).  */
+extern int target_fileio_pwrite (int fd, const gdb_byte *write_buf, int len,
+				 ULONGEST offset, int *target_errno);
+
+/* Read up to LEN bytes FD on the target into READ_BUF.
+   Return the number of bytes read, or -1 if an error occurs
+   (and set *TARGET_ERRNO).  */
+extern int target_fileio_pread (int fd, gdb_byte *read_buf, int len,
+				ULONGEST offset, int *target_errno);
+
+/* Close FD on the target.  Return 0, or -1 if an error occurs
+   (and set *TARGET_ERRNO).  */
+extern int target_fileio_close (int fd, int *target_errno);
+
+/* Unlink FILENAME on the target.  Return 0, or -1 if an error
+   occurs (and set *TARGET_ERRNO).  */
+extern int target_fileio_unlink (const char *filename, int *target_errno);
+
+/* Read target file FILENAME.  The return value will be -1 if the transfer
+   fails or is not supported; 0 if the object is empty; or the length
+   of the object otherwise.  If a positive value is returned, a
+   sufficiently large buffer will be allocated using xmalloc and
+   returned in *BUF_P containing the contents of the object.
+
+   This method should be used for objects sufficiently small to store
+   in a single xmalloc'd buffer, when no fixed bound on the object's
+   size is known in advance.  */
+extern LONGEST target_fileio_read_alloc (const char *filename,
+					 gdb_byte **buf_p);
+
+/* Read target file FILENAME.  The result is NUL-terminated and
+   returned as a string, allocated using xmalloc.  If an error occurs
+   or the transfer is unsupported, NULL is returned.  Empty objects
+   are returned as allocated but empty strings.  A warning is issued
+   if the result contains any embedded NUL bytes.  */
+extern char *target_fileio_read_stralloc (const char *filename);
+
 
 /* Tracepoint-related operations.  */
 

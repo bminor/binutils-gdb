@@ -10674,6 +10674,11 @@ Specify the serial device it is connected to\n\
   remote_ops.to_supports_multi_process = remote_supports_multi_process;
   remote_ops.to_supports_disable_randomization
     = remote_supports_disable_randomization;
+  remote_ops.to_fileio_open = remote_hostio_open;
+  remote_ops.to_fileio_pwrite = remote_hostio_pwrite;
+  remote_ops.to_fileio_pread = remote_hostio_pread;
+  remote_ops.to_fileio_close = remote_hostio_close;
+  remote_ops.to_fileio_unlink = remote_hostio_unlink;
   remote_ops.to_supports_enable_disable_tracepoint = remote_supports_enable_disable_tracepoint;
   remote_ops.to_supports_string_tracing = remote_supports_string_tracing;
   remote_ops.to_trace_init = remote_trace_init;
