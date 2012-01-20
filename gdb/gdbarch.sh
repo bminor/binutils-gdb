@@ -830,6 +830,9 @@ v:int:has_dos_based_file_system:::0:0::0
 # places that the return address may be found.
 m:void:gen_return_address:struct agent_expr *ax, struct axs_value *value, CORE_ADDR scope:ax, value, scope::default_gen_return_address::0
 
+# Implement the "info proc" command.
+M:void:info_proc:char *args, enum info_proc_what what:args, what
+
 EOF
 }
 

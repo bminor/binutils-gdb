@@ -2810,7 +2810,12 @@ unset_command (char *args, int from_tty)
 static void
 info_proc_cmd_1 (char *args, enum info_proc_what what, int from_tty)
 {
-  target_info_proc (args, what);
+  struct gdbarch *gdbarch = get_current_arch ();
+
+  if (gdbarch_info_proc_p (gdbarch))
+    gdbarch_info_proc (gdbarch, args, what);
+  else
+    target_info_proc (args, what);
 }
 
 /* Implement `info proc' when given without any futher parameters.  */

@@ -272,6 +272,7 @@ struct gdbarch
   const char * solib_symbols_extension;
   int has_dos_based_file_system;
   gdbarch_gen_return_address_ftype *gen_return_address;
+  gdbarch_info_proc_ftype *info_proc;
 };
 
 
@@ -427,6 +428,7 @@ struct gdbarch startup_gdbarch =
   0,  /* solib_symbols_extension */
   0,  /* has_dos_based_file_system */
   default_gen_return_address,  /* gen_return_address */
+  0,  /* info_proc */
   /* startup_gdbarch() */
 };
 
@@ -715,6 +717,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of auto_wide_charset, invalid_p == 0 */
   /* Skip verify of has_dos_based_file_system, invalid_p == 0 */
   /* Skip verify of gen_return_address, invalid_p == 0 */
+  /* Skip verify of info_proc, has predicate.  */
   buf = ui_file_xstrdup (log, &length);
   make_cleanup (xfree, buf);
   if (length > 0)
@@ -1002,6 +1005,12 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: in_solib_return_trampoline = <%s>\n",
                       host_address_to_string (gdbarch->in_solib_return_trampoline));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_info_proc_p() = %d\n",
+                      gdbarch_info_proc_p (gdbarch));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: info_proc = <%s>\n",
+                      host_address_to_string (gdbarch->info_proc));
   fprintf_unfiltered (file,
                       "gdbarch_dump: inner_than = <%s>\n",
                       host_address_to_string (gdbarch->inner_than));
@@ -3909,6 +3918,30 @@ set_gdbarch_gen_return_address (struct gdbarch *gdbarch,
                                 gdbarch_gen_return_address_ftype gen_return_address)
 {
   gdbarch->gen_return_address = gen_return_address;
+}
+
+int
+gdbarch_info_proc_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->info_proc != NULL;
+}
+
+void
+gdbarch_info_proc (struct gdbarch *gdbarch, char *args, enum info_proc_what what)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->info_proc != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_info_proc called\n");
+  gdbarch->info_proc (gdbarch, args, what);
+}
+
+void
+set_gdbarch_info_proc (struct gdbarch *gdbarch,
+                       gdbarch_info_proc_ftype info_proc)
+{
+  gdbarch->info_proc = info_proc;
 }
 
 

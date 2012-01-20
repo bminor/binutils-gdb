@@ -1,5 +1,22 @@
 2012-01-20  Ulrich Weigand  <ulrich.weigand@linaro.org>
 
+	* gdbarch.sh (info_proc): New callback.
+	* gdbarch.c, gdbarch.h: Regenerate.
+
+	* infcmd.c (info_proc_cmd_1): Try gdbarch info_proc callback
+	before falling back to the target info_proc callback.
+
+	* linux-nat.c: Do not include "cli/cli-utils.h".
+	(linux_nat_info_proc): Remove.
+	(linux_target_install_ops): No longer install it.
+
+	* linux-tdep.c: Include "cli/cli-utils.h" and <ctype.h>.
+	(read_mapping): New function.
+	(linux_info_proc): Likewise.
+	(linux_init_abi): Install it.
+
+2012-01-20  Ulrich Weigand  <ulrich.weigand@linaro.org>
+
 	* defs.h (enum info_proc_what): Moved here from linux-nat.c
 	* infcmd.c: (info_proc_cmd_1): New function.
 	(info_proc_cmd): New function, moved here from equivalent routine

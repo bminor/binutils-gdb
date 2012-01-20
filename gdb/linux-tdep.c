@@ -24,6 +24,9 @@
 #include "target.h"
 #include "elf/common.h"
 #include "inferior.h"
+#include "cli/cli-utils.h"
+
+#include <ctype.h>
 
 static struct gdbarch_data *linux_gdbarch_data_handle;
 
@@ -196,6 +199,332 @@ linux_core_pid_to_str (struct gdbarch *gdbarch, ptid_t ptid)
   return normal_pid_to_str (ptid);
 }
 
+/* Service function for corefiles and info proc.  */
+
+static void
+read_mapping (const char *line,
+	      ULONGEST *addr, ULONGEST *endaddr,
+	      const char **permissions, size_t *permissions_len,
+	      ULONGEST *offset,
+              const char **device, size_t *device_len,
+	      ULONGEST *inode,
+	      const char **filename)
+{
+  const char *p = line;
+
+  *addr = strtoulst (p, &p, 16);
+  if (*p == '-')
+    p++;
+  *endaddr = strtoulst (p, &p, 16);
+
+  while (*p && isspace (*p))
+    p++;
+  *permissions = p;
+  while (*p && !isspace (*p))
+    p++;
+  *permissions_len = p - *permissions;
+
+  *offset = strtoulst (p, &p, 16);
+
+  while (*p && isspace (*p))
+    p++;
+  *device = p;
+  while (*p && !isspace (*p))
+    p++;
+  *device_len = p - *device;
+
+  *inode = strtoulst (p, &p, 10);
+
+  while (*p && isspace (*p))
+    p++;
+  *filename = p;
+}
+
+/* Implement the "info proc" command.  */
+
+static void
+linux_info_proc (struct gdbarch *gdbarch, char *args,
+		 enum info_proc_what what)
+{
+  /* A long is used for pid instead of an int to avoid a loss of precision
+     compiler warning from the output of strtoul.  */
+  long pid;
+  int cmdline_f = (what == IP_MINIMAL || what == IP_CMDLINE || what == IP_ALL);
+  int cwd_f = (what == IP_MINIMAL || what == IP_CWD || what == IP_ALL);
+  int exe_f = (what == IP_MINIMAL || what == IP_EXE || what == IP_ALL);
+  int mappings_f = (what == IP_MAPPINGS || what == IP_ALL);
+  int status_f = (what == IP_STATUS || what == IP_ALL);
+  int stat_f = (what == IP_STAT || what == IP_ALL);
+  char filename[100];
+  gdb_byte *data;
+  int target_errno;
+
+  if (args && isdigit (args[0]))
+    pid = strtoul (args, &args, 10);
+  else
+    {
+      if (!target_has_execution)
+	error (_("No current process: you must name one."));
+      if (current_inferior ()->fake_pid_p)
+	error (_("Can't determine the current process's PID: you must name one."));
+
+      pid = current_inferior ()->pid;
+    }
+
+  args = skip_spaces (args);
+  if (args && args[0])
+    error (_("Too many parameters: %s"), args);
+
+  printf_filtered (_("process %ld\n"), pid);
+  if (cmdline_f)
+    {
+      xsnprintf (filename, sizeof filename, "/proc/%ld/cmdline", pid);
+      data = target_fileio_read_stralloc (filename);
+      if (data)
+	{
+	  struct cleanup *cleanup = make_cleanup (xfree, data);
+          printf_filtered ("cmdline = '%s'\n", data);
+	  do_cleanups (cleanup);
+	}
+      else
+	warning (_("unable to open /proc file '%s'"), filename);
+    }
+  if (cwd_f)
+    {
+      xsnprintf (filename, sizeof filename, "/proc/%ld/cwd", pid);
+      data = target_fileio_readlink (filename, &target_errno);
+      if (data)
+	{
+	  struct cleanup *cleanup = make_cleanup (xfree, data);
+          printf_filtered ("cwd = '%s'\n", data);
+	  do_cleanups (cleanup);
+	}
+      else
+	warning (_("unable to read link '%s'"), filename);
+    }
+  if (exe_f)
+    {
+      xsnprintf (filename, sizeof filename, "/proc/%ld/exe", pid);
+      data = target_fileio_readlink (filename, &target_errno);
+      if (data)
+	{
+	  struct cleanup *cleanup = make_cleanup (xfree, data);
+          printf_filtered ("exe = '%s'\n", data);
+	  do_cleanups (cleanup);
+	}
+      else
+	warning (_("unable to read link '%s'"), filename);
+    }
+  if (mappings_f)
+    {
+      xsnprintf (filename, sizeof filename, "/proc/%ld/maps", pid);
+      data = target_fileio_read_stralloc (filename);
+      if (data)
+	{
+	  struct cleanup *cleanup = make_cleanup (xfree, data);
+	  char *line;
+
+	  printf_filtered (_("Mapped address spaces:\n\n"));
+	  if (gdbarch_addr_bit (gdbarch) == 32)
+	    {
+	      printf_filtered ("\t%10s %10s %10s %10s %s\n",
+			   "Start Addr",
+			   "  End Addr",
+			   "      Size", "    Offset", "objfile");
+            }
+	  else
+            {
+	      printf_filtered ("  %18s %18s %10s %10s %s\n",
+			   "Start Addr",
+			   "  End Addr",
+			   "      Size", "    Offset", "objfile");
+	    }
+
+	  for (line = strtok (data, "\n"); line; line = strtok (NULL, "\n"))
+	    {
+	      ULONGEST addr, endaddr, offset, inode;
+	      const char *permissions, *device, *filename;
+	      size_t permissions_len, device_len;
+
+	      read_mapping (line, &addr, &endaddr,
+			    &permissions, &permissions_len,
+			    &offset, &device, &device_len,
+			    &inode, &filename);
+
+	      if (gdbarch_addr_bit (gdbarch) == 32)
+	        {
+	          printf_filtered ("\t%10s %10s %10s %10s %s\n",
+				   paddress (gdbarch, addr),
+				   paddress (gdbarch, endaddr),
+				   hex_string (endaddr - addr),
+				   hex_string (offset),
+				   *filename? filename : "");
+		}
+	      else
+	        {
+	          printf_filtered ("  %18s %18s %10s %10s %s\n",
+				   paddress (gdbarch, addr),
+				   paddress (gdbarch, endaddr),
+				   hex_string (endaddr - addr),
+				   hex_string (offset),
+				   *filename? filename : "");
+	        }
+	    }
+
+	  do_cleanups (cleanup);
+	}
+      else
+	warning (_("unable to open /proc file '%s'"), filename);
+    }
+  if (status_f)
+    {
+      xsnprintf (filename, sizeof filename, "/proc/%ld/status", pid);
+      data = target_fileio_read_stralloc (filename);
+      if (data)
+	{
+	  struct cleanup *cleanup = make_cleanup (xfree, data);
+          puts_filtered (data);
+	  do_cleanups (cleanup);
+	}
+      else
+	warning (_("unable to open /proc file '%s'"), filename);
+    }
+  if (stat_f)
+    {
+      xsnprintf (filename, sizeof filename, "/proc/%ld/stat", pid);
+      data = target_fileio_read_stralloc (filename);
+      if (data)
+	{
+	  struct cleanup *cleanup = make_cleanup (xfree, data);
+	  const char *p = data;
+	  const char *ep;
+	  ULONGEST val;
+
+	  printf_filtered (_("Process: %s\n"),
+			   pulongest (strtoulst (p, &p, 10)));
+
+	  while (*p && isspace (*p))
+	    p++;
+	  if (*p == '(' && (ep = strchr (p, ')')) != NULL)
+	    {
+	      printf_filtered ("Exec file: %.*s\n", (int) (ep - p - 1), p + 1);
+	      p = ep + 1;
+	    }
+
+	  while (*p && isspace (*p))
+	    p++;
+	  if (*p)
+	    printf_filtered (_("State: %c\n"), *p++);
+
+	  if (*p)
+	    printf_filtered (_("Parent process: %s\n"),
+			     pulongest (strtoulst (p, &p, 10)));
+	  if (*p)
+	    printf_filtered (_("Process group: %s\n"),
+			     pulongest (strtoulst (p, &p, 10)));
+	  if (*p)
+	    printf_filtered (_("Session id: %s\n"),
+			     pulongest (strtoulst (p, &p, 10)));
+	  if (*p)
+	    printf_filtered (_("TTY: %s\n"),
+			     pulongest (strtoulst (p, &p, 10)));
+	  if (*p)
+	    printf_filtered (_("TTY owner process group: %s\n"),
+			     pulongest (strtoulst (p, &p, 10)));
+
+	  if (*p)
+	    printf_filtered (_("Flags: %s\n"),
+			     hex_string (strtoulst (p, &p, 10)));
+	  if (*p)
+	    printf_filtered (_("Minor faults (no memory page): %s\n"),
+			     pulongest (strtoulst (p, &p, 10)));
+	  if (*p)
+	    printf_filtered (_("Minor faults, children: %s\n"),
+			     pulongest (strtoulst (p, &p, 10)));
+	  if (*p)
+	    printf_filtered (_("Major faults (memory page faults): %s\n"),
+			     pulongest (strtoulst (p, &p, 10)));
+	  if (*p)
+	    printf_filtered (_("Major faults, children: %s\n"),
+			     pulongest (strtoulst (p, &p, 10)));
+	  if (*p)
+	    printf_filtered (_("utime: %s\n"),
+			     pulongest (strtoulst (p, &p, 10)));
+	  if (*p)
+	    printf_filtered (_("stime: %s\n"),
+			     pulongest (strtoulst (p, &p, 10)));
+	  if (*p)
+	    printf_filtered (_("utime, children: %s\n"),
+			     pulongest (strtoulst (p, &p, 10)));
+	  if (*p)
+	    printf_filtered (_("stime, children: %s\n"),
+			     pulongest (strtoulst (p, &p, 10)));
+	  if (*p)
+	    printf_filtered (_("jiffies remaining in current "
+			       "time slice: %s\n"),
+			     pulongest (strtoulst (p, &p, 10)));
+	  if (*p)
+	    printf_filtered (_("'nice' value: %s\n"),
+			     pulongest (strtoulst (p, &p, 10)));
+	  if (*p)
+	    printf_filtered (_("jiffies until next timeout: %s\n"),
+			     pulongest (strtoulst (p, &p, 10)));
+	  if (*p)
+	    printf_filtered (_("jiffies until next SIGALRM: %s\n"),
+			     pulongest (strtoulst (p, &p, 10)));
+	  if (*p)
+	    printf_filtered (_("start time (jiffies since "
+			       "system boot): %s\n"),
+			     pulongest (strtoulst (p, &p, 10)));
+	  if (*p)
+	    printf_filtered (_("Virtual memory size: %s\n"),
+			     pulongest (strtoulst (p, &p, 10)));
+	  if (*p)
+	    printf_filtered (_("Resident set size: %s\n"),
+			     pulongest (strtoulst (p, &p, 10)));
+	  if (*p)
+	    printf_filtered (_("rlim: %s\n"),
+			     pulongest (strtoulst (p, &p, 10)));
+	  if (*p)
+	    printf_filtered (_("Start of text: %s\n"),
+			     hex_string (strtoulst (p, &p, 10)));
+	  if (*p)
+	    printf_filtered (_("End of text: %s\n"),
+			     hex_string (strtoulst (p, &p, 10)));
+	  if (*p)
+	    printf_filtered (_("Start of stack: %s\n"),
+			     hex_string (strtoulst (p, &p, 10)));
+#if 0	/* Don't know how architecture-dependent the rest is...
+	   Anyway the signal bitmap info is available from "status".  */
+	  if (*p)
+	    printf_filtered (_("Kernel stack pointer: %s\n"),
+			     hex_string (strtoulst (p, &p, 10)));
+	  if (*p)
+	    printf_filtered (_("Kernel instr pointer: %s\n"),
+			     hex_string (strtoulst (p, &p, 10)));
+	  if (*p)
+	    printf_filtered (_("Pending signals bitmap: %s\n"),
+			     hex_string (strtoulst (p, &p, 10)));
+	  if (*p)
+	    printf_filtered (_("Blocked signals bitmap: %s\n"),
+			     hex_string (strtoulst (p, &p, 10)));
+	  if (*p)
+	    printf_filtered (_("Ignored signals bitmap: %s\n"),
+			     hex_string (strtoulst (p, &p, 10)));
+	  if (*p)
+	    printf_filtered (_("Catched signals bitmap: %s\n"),
+			     hex_string (strtoulst (p, &p, 10)));
+	  if (*p)
+	    printf_filtered (_("wchan (system call): %s\n"),
+			     hex_string (strtoulst (p, &p, 10)));
+#endif
+	  do_cleanups (cleanup);
+	}
+      else
+	warning (_("unable to open /proc file '%s'"), filename);
+    }
+}
+
 /* To be called from the various GDB_OSABI_LINUX handlers for the
    various GNU/Linux architectures and machine types.  */
 
@@ -203,6 +532,7 @@ void
 linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   set_gdbarch_core_pid_to_str (gdbarch, linux_core_pid_to_str);
+  set_gdbarch_info_proc (gdbarch, linux_info_proc);
 }
 
 void

@@ -1031,6 +1031,14 @@ typedef void (gdbarch_gen_return_address_ftype) (struct gdbarch *gdbarch, struct
 extern void gdbarch_gen_return_address (struct gdbarch *gdbarch, struct agent_expr *ax, struct axs_value *value, CORE_ADDR scope);
 extern void set_gdbarch_gen_return_address (struct gdbarch *gdbarch, gdbarch_gen_return_address_ftype *gen_return_address);
 
+/* Implement the "info proc" command. */
+
+extern int gdbarch_info_proc_p (struct gdbarch *gdbarch);
+
+typedef void (gdbarch_info_proc_ftype) (struct gdbarch *gdbarch, char *args, enum info_proc_what what);
+extern void gdbarch_info_proc (struct gdbarch *gdbarch, char *args, enum info_proc_what what);
+extern void set_gdbarch_info_proc (struct gdbarch *gdbarch, gdbarch_info_proc_ftype *info_proc);
+
 /* Definition for an unknown syscall, used basically in error-cases.  */
 #define UNKNOWN_SYSCALL (-1)
 
