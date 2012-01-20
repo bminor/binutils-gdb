@@ -27,6 +27,7 @@
 #include "objdump.h"
 #include "bucomm.h"
 #include "bfdlink.h"
+#include "libbfd.h"
 #include "mach-o.h"
 #include "mach-o/external.h"
 #include "mach-o/codesign.h"
@@ -38,6 +39,7 @@
 #define OPT_LOAD 3
 #define OPT_DYSYMTAB 4
 #define OPT_CODESIGN 5
+#define OPT_SEG_SPLIT_INFO 6
 
 /* List of actions.  */
 static struct objdump_private_option options[] =
@@ -48,6 +50,7 @@ static struct objdump_private_option options[] =
     { "load", 0 },
     { "dysymtab", 0 },
     { "codesign", 0 },
+    { "seg_split_info", 0 },
     { NULL, 0 }
   };
 
@@ -58,12 +61,13 @@ mach_o_help (FILE *stream)
 {
   fprintf (stream, _("\
 For Mach-O files:\n\
-  header      Display the file header\n\
-  section     Display the segments and sections commands\n\
-  map         Display the section map\n\
-  load        Display the load commands\n\
-  dysymtab    Display the dynamic symbol table\n\
-  codesign    Display code signature section\n\
+  header         Display the file header\n\
+  section        Display the segments and sections commands\n\
+  map            Display the section map\n\
+  load           Display the load commands\n\
+  dysymtab       Display the dynamic symbol table\n\
+  codesign       Display code signature\n\
+  seg_split_info Display segment split info\n\
 "));
 }
 
@@ -852,6 +856,53 @@ dump_code_signature (bfd *abfd, bfd_mach_o_linkedit_command *cmd)
 }
 
 static void
+dump_segment_split_info (bfd *abfd, bfd_mach_o_linkedit_command *cmd)
+{
+  unsigned char *buf = xmalloc (cmd->datasize);
+  unsigned char *p;
+  unsigned int len;
+  bfd_vma addr = 0;
+
+  if (bfd_seek (abfd, cmd->dataoff, SEEK_SET) != 0
+      || bfd_bread (buf, cmd->datasize, abfd) != cmd->datasize)
+    {
+      non_fatal (_("cannot read segment split info"));
+      free (buf);
+      return;
+    }
+  if (buf[cmd->datasize - 1] != 0)
+    {
+      non_fatal (_("segment split info is not nul terminated"));
+      free (buf);
+      return;
+    }
+
+  switch (buf[0])
+    {
+    case 0:
+      printf (_("  32 bit pointers:\n"));
+      break;
+    case 1:
+      printf (_("  64 bit pointers:\n"));
+      break;
+    case 2:
+      printf (_("  PPC hi-16:\n"));
+      break;
+    default:
+      printf (_("  Unhandled location type %u\n"), buf[0]);
+      break;
+    }
+  for (p = buf + 1; *p != 0; p += len)
+    {
+      addr += read_unsigned_leb128 (abfd, p, &len);
+      fputs ("    ", stdout);
+      bfd_printf_vma (abfd, addr);
+      putchar ('\n');
+    }
+  free (buf);
+}
+
+static void
 dump_load_command (bfd *abfd, bfd_mach_o_load_command *cmd,
                    bfd_boolean verbose)
 {
@@ -942,6 +993,8 @@ dump_load_command (bfd *abfd, bfd_mach_o_load_command *cmd,
 
         if (verbose && cmd->type == BFD_MACH_O_LC_CODE_SIGNATURE)
           dump_code_signature (abfd, linkedit);
+        else if (verbose && cmd->type == BFD_MACH_O_LC_SEGMENT_SPLIT_INFO)
+          dump_segment_split_info (abfd, linkedit);
         break;
       }
     case BFD_MACH_O_LC_SUB_FRAMEWORK:
@@ -1026,6 +1079,8 @@ mach_o_dump (bfd *abfd)
     dump_load_commands (abfd, BFD_MACH_O_LC_DYSYMTAB, 0);
   if (options[OPT_CODESIGN].selected)
     dump_load_commands (abfd, BFD_MACH_O_LC_CODE_SIGNATURE, 0);
+  if (options[OPT_SEG_SPLIT_INFO].selected)
+    dump_load_commands (abfd, BFD_MACH_O_LC_SEGMENT_SPLIT_INFO, 0);
 }
 
 /* Vector for Mach-O.  */

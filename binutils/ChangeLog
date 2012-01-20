@@ -1,3 +1,11 @@
+2012-01-20  Tristan Gingold  <gingold@adacore.com>
+
+	* od-macho.c (OPT_SEG_SPLIT_INFO): New macro.
+	(options): Add an entry for seg_split_info.
+	(mach_o_help): Document it.
+	(dump_segment_split_info): New function.
+	(dump_load_command): Handle seg_split_info.
+
 2012-01-19  Tristan Gingold  <gingold@adacore.com>
 
 	* dwarf.c (process_extended_line_op): Add a cast to silent a
