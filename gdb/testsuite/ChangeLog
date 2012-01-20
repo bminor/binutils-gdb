@@ -1,3 +1,7 @@
+2012-01-20  Pedro Alves  <palves@redhat.com>
+
+	* gdb.python/py-finish-breakpoint.py: Fix typo.
+
 2012-01-20  Ulrich Weigand  <ulrich.weigand@linaro.org>
 
 	* gdb.base/info-proc.exp: Also run on remote targets.  Main

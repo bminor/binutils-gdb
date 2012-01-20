@@ -86,4 +86,4 @@ class SimpleFinishBreakpoint(gdb.FinishBreakpoint):
 	def out_of_scope(self):
 		print "SimpleFinishBreakpoint out of scope"
 
-print "Python script importedd"
+print "Python script imported"
