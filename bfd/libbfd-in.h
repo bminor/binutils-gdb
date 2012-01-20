@@ -3,7 +3,7 @@
 
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
    1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009,
-   2010, 2011
+   2010, 2011, 2012
    Free Software Foundation, Inc.
 
    Written by Cygnus Support.
@@ -64,16 +64,17 @@ struct section_hash_entry
 /* tdata for an archive.  For an input archive, cache
    needs to be free()'d.  For an output archive, symdefs do.  */
 
-struct artdata {
+struct artdata
+{
   file_ptr first_file_filepos;
   /* Speed up searching the armap */
   htab_t cache;
-  bfd *archive_head;		/* Only interesting in output routines */
-  carsym *symdefs;		/* the symdef entries */
-  symindex symdef_count;	/* how many there are */
-  char *extended_names;		/* clever intel extension */
-  bfd_size_type extended_names_size; /* Size of extended names */
-  /* when more compilers are standard C, this can be a time_t */
+  bfd *archive_head;		/* Only interesting in output routines.  */
+  carsym *symdefs;		/* The symdef entries.  */
+  symindex symdef_count;	/* How many there are.  */
+  char *extended_names;		/* Clever intel extension.  */
+  bfd_size_type extended_names_size; /* Size of extended names.  */
+  /* When more compilers are standard C, this can be a time_t.  */
   long  armap_timestamp;	/* Timestamp value written into armap.
 				   This is used for BSD archives to check
 				   that the timestamp is recent enough
@@ -88,12 +89,13 @@ struct artdata {
 #define bfd_ardata(bfd) ((bfd)->tdata.aout_ar_data)
 
 /* Goes in bfd's arelt_data slot */
-struct areltdata {
-  char * arch_header;		/* it's actually a string */
-  unsigned int parsed_size;	/* octets of filesize not including ar_hdr */
-  unsigned int extra_size;	/* BSD4.4: extra bytes after the header.  */
-  char *filename;		/* null-terminated */
-  file_ptr origin;		/* for element of a thin archive */
+struct areltdata
+{
+  char * arch_header;		/* It's actually a string.  */
+  bfd_size_type parsed_size;	/* Octets of filesize not including ar_hdr.  */
+  bfd_size_type extra_size;	/* BSD4.4: extra bytes after the header.  */
+  char *filename;		/* Null-terminated.  */
+  file_ptr origin;		/* For element of a thin archive.  */
 };
 
 #define arelt_size(bfd) (((struct areltdata *)((bfd)->arelt_data))->parsed_size)
@@ -203,6 +205,8 @@ extern void *_bfd_generic_read_ar_hdr
   (bfd *);
 extern void _bfd_ar_spacepad
   (char *, size_t, const char *, long);
+extern bfd_boolean _bfd_ar_sizepad
+  (char *, size_t, bfd_size_type);
 
 extern void *_bfd_generic_read_ar_hdr_mag
   (bfd *, const char *);

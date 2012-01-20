@@ -1,3 +1,28 @@
+2012-01-20  Francois Gouget  <fgouget@codeweavers.com>
+
+	PR binutils/13534
+	* archive.c (_bfd_ar_sizepad): New function. Correctly install and
+	pad the size field in an archive header.
+	(_bfd_generic_read_ar_hdr_mag): Use the correct type and scan
+	function for the archive size field.
+	(bfd_generic_openr_next_archived_file): Likewise.
+	(do_slurp_coff_armap): Likewise.
+	(_bfd_write_archive_contents): Likewise.
+	(_bfd_bsd44_write_ar_hdr): Use the new function.
+	(bfd_ar_hdr_from_filesystem): Likewise.
+	(_bfd_write_archive_contents): Likewise.
+	(bsd_write_armap): Likewise.
+	(coff_write_armap): Likewise.
+	* archive64.c (bfd_elf64_archive_write_armap): Likewise.
+	* bfdio.c (bfd_bread): Use correct type for archive element
+	sizes.
+	* ar.c (open_inarch): Likewise.
+	(extract_file): Likewise.
+	* libbfd-in.h (struct areltdata): Use correct types for
+	parsed_size and extra_size fields.
+	Prototype _bfd_ar_sizepad function.
+	* libbfd.h: Regenerate.
+
 2012-01-20  Ulrich Weigand  <ulrich.weigand@linaro.org>
 
 	* elf.c (elfcore_write_prpsinfo): Provide unconditionally.
