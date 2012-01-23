@@ -26,7 +26,7 @@ extern char *saved_command_line;
 extern int saved_command_line_size;
 extern FILE *instream;
 extern int in_user_command;
-extern int caution;
+extern int confirm;
 extern char gdb_dirbuf[1024];
 extern int inhibit_gdbinit;
 extern int epoch_interface;

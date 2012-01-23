@@ -1,5 +1,17 @@
 2012-01-23  Pedro Alves  <palves@redhat.com>
 
+	* top.c (caution): Rename to ...
+	(confirm): ... this.
+	(show_caution): Rename to ...
+	(show_confirm): ... this.
+	(quit_cover): Adjust.
+	(init_main): Adjust.
+	* top.h (caution): Rename to ...
+	(confirm): ... this.
+	* utils.c (internal_vproblem, defaulted_query): Adjust.
+
+2012-01-23  Pedro Alves  <palves@redhat.com>
+
 	* top.c (caution): Update comment.
 	(execute_command): Don't consider the current value of `caution'.
 

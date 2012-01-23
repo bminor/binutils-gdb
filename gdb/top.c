@@ -101,10 +101,10 @@ extern char lang_frame_mismatch_warn[];		/* language.c */
 /* Flag for whether we want to confirm potentially dangerous
    operations.  Default is yes.  */
 
-int caution = 1;
+int confirm = 1;
 
 static void
-show_caution (struct ui_file *file, int from_tty,
+show_confirm (struct ui_file *file, int from_tty,
 	      struct cmd_list_element *c, const char *value)
 {
   fprintf_filtered (file, _("Whether to confirm potentially "
@@ -291,9 +291,9 @@ void (*deprecated_context_hook) (int id);
 /* static */ void
 quit_cover (void)
 {
-  caution = 0;			/* Throw caution to the wind -- we're exiting.
-				   This prevents asking the user dumb 
-				   questions.  */
+  /* Stop asking user for confirmation --- we're exiting.  This
+     prevents asking the user dumb questions.  */
+  confirm = 0;
   quit_command ((char *) 0, 0);
 }
 #endif /* defined SIGHUP */
@@ -1635,11 +1635,11 @@ Show the filename in which to record the command history"), _("\
 			    show_history_filename,
 			    &sethistlist, &showhistlist);
 
-  add_setshow_boolean_cmd ("confirm", class_support, &caution, _("\
+  add_setshow_boolean_cmd ("confirm", class_support, &confirm, _("\
 Set whether to confirm potentially dangerous operations."), _("\
 Show whether to confirm potentially dangerous operations."), NULL,
 			   NULL,
-			   show_caution,
+			   show_confirm,
 			   &setlist, &showlist);
 
   add_setshow_zinteger_cmd ("annotate", class_obscure, &annotation_level, _("\

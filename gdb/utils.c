@@ -970,7 +970,7 @@ internal_vproblem (struct internal_problem *problem,
       /* Default (yes/batch case) is to quit GDB.  When in batch mode
 	 this lessens the likelihood of GDB going into an infinite
 	 loop.  */
-      if (caution == 0)
+      if (!confirm)
         {
           /* Emit the message and quit.  */
           fputs_unfiltered (reason, gdb_stderr);
@@ -1384,7 +1384,7 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
 
   /* Automatically answer the default value if the user did not want
      prompts or the command was issued with the server prefix.  */
-  if (! caution || server_command)
+  if (!confirm || server_command)
     return def_value;
 
   /* If input isn't coming from the user directly, just say what
