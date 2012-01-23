@@ -3258,9 +3258,9 @@ target_fileio_pwrite (int fd, const gdb_byte *write_buf, int len,
 
 	  if (targetdebug)
 	    fprintf_unfiltered (gdb_stdlog,
-				"target_fileio_pwrite (%d,%p,%d,%s) "
+				"target_fileio_pwrite (%d,...,%d,%s) "
 				"= %d (%d)\n",
-				fd, write_buf, len, pulongest (offset),
+				fd, len, pulongest (offset),
 				ret, ret != -1 ? 0 : *target_errno);
 	  return ret;
 	}
@@ -3288,9 +3288,9 @@ target_fileio_pread (int fd, gdb_byte *read_buf, int len,
 
 	  if (targetdebug)
 	    fprintf_unfiltered (gdb_stdlog,
-				"target_fileio_pread (%d,%p,%d,%s) "
+				"target_fileio_pread (%d,...,%d,%s) "
 				"= %d (%d)\n",
-				fd, read_buf, len, pulongest (offset),
+				fd, len, pulongest (offset),
 				ret, ret != -1 ? 0 : *target_errno);
 	  return ret;
 	}

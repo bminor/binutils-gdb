@@ -402,7 +402,6 @@ linux_info_proc (struct gdbarch *gdbarch, char *args,
 	{
 	  struct cleanup *cleanup = make_cleanup (xfree, data);
 	  const char *p = data;
-	  const char *ep;
 	  ULONGEST val;
 
 	  printf_filtered (_("Process: %s\n"),
@@ -410,10 +409,15 @@ linux_info_proc (struct gdbarch *gdbarch, char *args,
 
 	  while (*p && isspace (*p))
 	    p++;
-	  if (*p == '(' && (ep = strchr (p, ')')) != NULL)
+	  if (*p == '(')
 	    {
-	      printf_filtered ("Exec file: %.*s\n", (int) (ep - p - 1), p + 1);
-	      p = ep + 1;
+	      const char *ep = strchr (p, ')');
+	      if (ep != NULL)
+		{
+		  printf_filtered ("Exec file: %.*s\n",
+				   (int) (ep - p - 1), p + 1);
+		  p = ep + 1;
+		}
 	    }
 
 	  while (*p && isspace (*p))

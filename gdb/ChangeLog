@@ -1,3 +1,11 @@
+2012-01-23  Ulrich Weigand  <ulrich.weigand@linaro.org>
+
+	* inf-child.c: Include "gdb_stat.h" instead of <sys/stat.h>.
+	* linux-tdep.c (linux_info_proc): Avoid ARI coding style warning.
+	* target.c (target_fileio_pwrite): Remove buffer address from
+	debug output.
+	(target_fileio_pread): Likewise.
+
 2012-01-20  Ulrich Weigand  <ulrich.weigand@linaro.org>
 
 	* NEWS: Document remote "info proc" and "generate-core-file".
