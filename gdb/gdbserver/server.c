@@ -2727,13 +2727,10 @@ main (int argc, char *argv[])
 	 inferiors, we'd end up here again, stuck in an infinite loop
 	 trap.  Be sure that if that happens, we exit immediately
 	 instead.  */
-      if (setjmp (toplevel))
-	{
-	  fprintf (stderr, "Detach or kill failed.  Exiting\n");
-	  exit (1);
-	}
-
-      detach_or_kill_for_exit ();
+      if (setjmp (toplevel) == 0)
+	detach_or_kill_for_exit ();
+      else
+	fprintf (stderr, "Detach or kill failed.  Exiting\n");
       exit (1);
     }
 
@@ -2779,8 +2776,20 @@ main (int argc, char *argv[])
 
       if (exit_requested || run_once)
 	{
-	  detach_or_kill_for_exit ();
-	  exit (0);
+	  /* If something fails and longjmps while detaching or
+	     killing inferiors, we'd end up here again, stuck in an
+	     infinite loop trap.  Be sure that if that happens, we
+	     exit immediately instead.  */
+	  if (setjmp (toplevel) == 0)
+	    {
+	      detach_or_kill_for_exit ();
+	      exit (0);
+	    }
+	  else
+	    {
+	      fprintf (stderr, "Detach or kill failed.  Exiting\n");
+	      exit (1);
+	    }
 	}
 
       fprintf (stderr,

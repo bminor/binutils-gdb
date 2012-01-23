@@ -1,3 +1,8 @@
+2012-01-23  Pedro Alves  <palves@redhat.com>
+
+	* server.c (main): Avoid yet another case of infinite loop while
+	detaching/killing after a longjmp.
+
 2012-01-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Code cleanup.
