@@ -513,6 +513,17 @@ find_and_open_script (const char *script_file, int search_path,
   do_cleanups (old_cleanups);
 
   *streamp = fdopen (fd, FOPEN_RT);
+  if (*streamp == NULL)
+    {
+      int save_errno = errno;
+
+      close (fd);
+      if (full_pathp)
+	xfree (*full_pathp);
+      errno = save_errno;
+      return 0;
+    }
+
   return 1;
 }
 
