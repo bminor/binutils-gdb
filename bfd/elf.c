@@ -1,7 +1,7 @@
 /* ELF executable support for BFD.
 
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-   2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011
+   2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -7406,6 +7406,8 @@ elf_find_function (bfd *abfd,
     {
       elf_symbol_type *q;
       unsigned int type;
+      asection *code_sec;
+      bfd_vma code_off;
 
       q = (elf_symbol_type *) *p;
 
@@ -7418,15 +7420,13 @@ elf_find_function (bfd *abfd,
 	    state = file_after_symbol_seen;
 	  continue;
 	default:
-	  if (!bed->is_function_type (type))
-	    break;
-	case STT_NOTYPE:
-	  if (bfd_get_section (&q->symbol) == section
-	      && q->symbol.value >= low_func
-	      && q->symbol.value <= offset)
+	  if (bed->maybe_function_sym (q, &code_sec, &code_off)
+	      && code_sec == section
+	      && code_off >= low_func
+	      && code_off <= offset)
 	    {
 	      func = (asymbol *) q;
-	      low_func = q->symbol.value;
+	      low_func = code_off;
 	      filename = NULL;
 	      if (file != NULL
 		  && (ELF_ST_BIND (q->internal_elf_sym.st_info) == STB_LOCAL
@@ -9689,4 +9689,23 @@ _bfd_elf_is_function_type (unsigned int type)
 {
   return (type == STT_FUNC
 	  || type == STT_GNU_IFUNC);
+}
+
+/* Return TRUE iff the ELF symbol SYM might be a function.  Set *CODE_SEC
+   and *CODE_OFF to the function's entry point.  */
+
+bfd_boolean
+_bfd_elf_maybe_function_sym (const elf_symbol_type *sym,
+			     asection **code_sec, bfd_vma *code_off)
+{
+  unsigned int type = ELF_ST_TYPE (sym->internal_elf_sym.st_info);
+  if (type == STT_NOTYPE
+      || type == STT_FUNC
+      || type == STT_GNU_IFUNC)
+    {
+      *code_sec = sym->symbol.section;
+      *code_off = sym->symbol.value;
+      return TRUE;
+    }
+  return FALSE;
 }

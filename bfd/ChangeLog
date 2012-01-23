@@ -1,3 +1,15 @@
+2012-01-23  Alan Modra  <amodra@gmail.com>
+
+	* elf-bfd.h: Formatting.
+	(struct elf_backend_data): Add "maybe_function_sym".
+	(_bfd_elf_maybe_function_sym): Declare.
+	* elfxx-target.h (elf_backend_maybe_function_sym): Define.
+	(elfNN_bed): Init new field.
+	* elf.c (elf_find_function): Use maybe_function_sym.
+	(_bfd_elf_maybe_function_sym): New function.
+	* elf64-ppc.c (elf_backend_maybe_function_sym): Define.
+	(ppc64_elf_maybe_function_sym): New function.
+
 2012-01-20  Francois Gouget  <fgouget@codeweavers.com>
 
 	PR binutils/13534

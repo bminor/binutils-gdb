@@ -105,6 +105,7 @@ static bfd_vma opd_entry_value
 #define elf_backend_gc_sweep_hook	      ppc64_elf_gc_sweep_hook
 #define elf_backend_adjust_dynamic_symbol     ppc64_elf_adjust_dynamic_symbol
 #define elf_backend_hide_symbol		      ppc64_elf_hide_symbol
+#define elf_backend_maybe_function_sym	      ppc64_elf_maybe_function_sym
 #define elf_backend_always_size_sections      ppc64_elf_func_desc_adjust
 #define elf_backend_size_dynamic_sections     ppc64_elf_size_dynamic_sections
 #define elf_backend_init_index_section	      _bfd_elf_init_2_index_sections
@@ -5528,7 +5529,8 @@ opd_entry_value (asection *opd_sec,
   Elf_Internal_Rela *lo, *hi, *look;
   bfd_vma val;
 
-  /* No relocs implies we are linking a --just-symbols object.  */
+  /* No relocs implies we are linking a --just-symbols object, or looking
+     at a final linked executable with addr2line or somesuch.  */
   if (opd_sec->reloc_count == 0)
     {
       char buf[8];
@@ -5629,6 +5631,23 @@ opd_entry_value (asection *opd_sec,
     }
 
   return val;
+}
+
+/* Return TRUE iff the ELF symbol SYM might be a function.  Set *CODE_SEC
+   and *CODE_OFF to the function's entry point.  */
+
+static bfd_boolean
+ppc64_elf_maybe_function_sym (const elf_symbol_type *sym,
+			      asection **code_sec, bfd_vma *code_off)
+{
+  if (_bfd_elf_maybe_function_sym (sym, code_sec, code_off))
+    {
+      if (strcmp (sym->symbol.section->name, ".opd") == 0)
+	opd_entry_value (sym->symbol.section, sym->symbol.value,
+			 code_sec, code_off);
+      return TRUE;
+    }
+  return FALSE;
 }
 
 /* Return true if symbol is defined in a regular object file.  */
