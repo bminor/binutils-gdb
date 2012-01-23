@@ -1,3 +1,11 @@
+2012-01-23  Roland McGrath  <mcgrathr@google.com>
+
+	* configure.tgt (i386-*-nacl*): Match it.
+	* config/te-nacl.h: New file.
+	* config/tc-i386.h [TE_NACL] (ELF_TARGET_FORMAT): Define for this case.
+	* config/tc-i386.c [TE_NACL] (i386_comment_chars, PREFIX_SEPARATOR):
+	Use TE_GNU et al case for TE_NACL too.
+
 2012-01-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (_i386_insn): Replace disp32_encoding with

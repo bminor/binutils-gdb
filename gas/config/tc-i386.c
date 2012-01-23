@@ -309,7 +309,8 @@ const char extra_symbol_chars[] = "*%-(["
      || ((defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF))	\
 	 && !defined (TE_GNU)				\
 	 && !defined (TE_LINUX)				\
- 	 && !defined (TE_NETWARE)			\
+	 && !defined (TE_NACL)				\
+	 && !defined (TE_NETWARE)			\
 	 && !defined (TE_FreeBSD)			\
 	 && !defined (TE_DragonFly)			\
 	 && !defined (TE_NetBSD)))
@@ -3337,11 +3338,11 @@ parse_insn (char *line, char *mnemonic)
 	 encoding.  */
       if (mnem_p - 2 == dot_p && dot_p[1] == 's')
 	i.swap_operand = 1;
-      else if (mnem_p - 3 == dot_p 
+      else if (mnem_p - 3 == dot_p
 	       && dot_p[1] == 'd'
 	       && dot_p[2] == '8')
 	i.disp_encoding = disp_encoding_8bit;
-      else if (mnem_p - 4 == dot_p 
+      else if (mnem_p - 4 == dot_p
 	       && dot_p[1] == 'd'
 	       && dot_p[2] == '3'
 	       && dot_p[3] == '2')
@@ -5854,7 +5855,7 @@ build_modrm_byte (void)
 		  vex_reg = op + 1;
 		}
 	      else
-		{ 
+		{
 		  /* There are only 2 operands.  */
 		  gas_assert (op < 2 && i.operands == 2);
 		  vex_reg = 1;
@@ -8647,7 +8648,7 @@ show_arch (FILE *stream, int ext, int check)
 	  fprintf (stream, "%s\n", message);
 	  p = start;
 	  left = size - (start - message) - len - 2;
-	  
+
 	  gas_assert (left >= 0);
 
 	  p = mempcpy (p, name, len);

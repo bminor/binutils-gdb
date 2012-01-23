@@ -1,6 +1,6 @@
 /* tc-i386.h -- Header file for tc-i386.c
    Copyright 1989, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010
+   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -61,6 +61,8 @@ extern unsigned long i386_mach (void);
 #define ELF_TARGET_FORMAT64	"elf64-x86-64-freebsd"
 #elif defined (TE_VXWORKS)
 #define ELF_TARGET_FORMAT	"elf32-i386-vxworks"
+#elif defined (TE_NACL)
+#define ELF_TARGET_FORMAT	"elf32-i386-nacl"
 #endif
 
 #ifdef TE_SOLARIS
@@ -162,7 +164,7 @@ extern int tc_i386_fix_adjustable (struct fix *);
 /* This expression evaluates to true if the relocation is for a local
    object for which we still want to do the relocation at runtime.
    False if we are willing to perform this relocation while building
-   the .o file.  GOTOFF and GOT32 do not need to be checked here because 
+   the .o file.  GOTOFF and GOT32 do not need to be checked here because
    they are not pcrel.  .*/
 
 #define TC_FORCE_RELOCATION_LOCAL(FIX)			\
