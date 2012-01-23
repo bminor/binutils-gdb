@@ -99,7 +99,7 @@ if { "$frame_number" == "" } {
 # Pop the dummy frame.
 gdb_test "frame $frame_number" ".*"
 gdb_test_no_output "set confirm off"
-gdb_test_no_output "return"
+gdb_test "return" ""
 
 # Resume execution, the program should continue without any signal.
 
@@ -132,7 +132,7 @@ if { "$frame_number" == "" } {
 # Pop the dummy frame.
 gdb_test "frame $frame_number" ".*"
 gdb_test_no_output "set confirm off"
-gdb_test_no_output "return"
+gdb_test "return" ""
 
 # Continue again, this time we should get to the signal handler.
 

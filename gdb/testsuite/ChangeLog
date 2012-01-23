@@ -1,3 +1,7 @@
+2012-01-23  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/call-signal-resume.exp: Allow output after "return".
+
 2012-01-20  Pedro Alves  <palves@redhat.com>
 
 	* gdb.python/py-finish-breakpoint.py: Fix typo.

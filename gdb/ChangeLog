@@ -1,3 +1,8 @@
+2012-01-23  Pedro Alves  <palves@redhat.com>
+
+	* top.c (caution): Update comment.
+	(execute_command): Don't consider the current value of `caution'.
+
 2012-01-23  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* cli/cli-cmds.c (find_and_open_script): Handle failure of fdopen.
