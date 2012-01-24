@@ -1,3 +1,37 @@
+2012-01-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix watchpoints across inferior fork.
+	* amd64-linux-nat.c (update_debug_registers_callback): Update the
+	comment for linux_nat_iterate_watchpoint_lwps.
+	(amd64_linux_dr_set_control, amd64_linux_dr_set_addr): Use
+	linux_nat_iterate_watchpoint_lwps.
+	(amd64_linux_prepare_to_resume): New comment on Linux kernel.
+	* i386-linux-nat.c (update_debug_registers_callback): Update the
+	comment for linux_nat_iterate_watchpoint_lwps.
+	(i386_linux_dr_set_control, i386_linux_dr_set_addr): Use
+	linux_nat_iterate_watchpoint_lwps.
+	(i386_linux_prepare_to_resume): New comment on Linux kernel.
+	* i386-nat.c: Include inferior.h.
+	(dr_mirror): Remove.
+	(i386_inferior_data, struct i386_inferior_data)
+	(i386_inferior_data_get): New.
+	(i386_debug_reg_state): Use i386_inferior_data_get.
+	(i386_cleanup_dregs, i386_update_inferior_debug_regs)
+	(i386_insert_watchpoint, i386_remove_watchpoint)
+	(i386_stopped_data_address, i386_insert_hw_breakpoint)
+	(i386_remove_hw_breakpoint): New variable state, use
+	i386_debug_reg_state instead of DR_MIRROR.
+	* linux-nat.c (delete_lwp): New declaration.
+	(num_lwps): Move here from downwards.
+	(delete_lwp_cleanup): New.
+	(linux_child_follow_fork): Create new child_lp, call
+	linux_nat_new_thread and linux_nat_prepare_to_resume before calling
+	PTRACE_DETACH.
+	(num_lwps): Move upwards.
+	(linux_nat_iterate_watchpoint_lwps): New.
+	* linux-nat.h (linux_nat_iterate_watchpoint_lwps_ftype): New.
+	(linux_nat_iterate_watchpoint_lwps_ftype): New declaration.
+
 2012-01-24  Joel Brobecker  <brobecker@adacore.com>
 
 	GDB 7.4 released.

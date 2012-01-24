@@ -1,3 +1,13 @@
+2012-01-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix watchpoints across inferior fork.
+	* gdb.threads/watchpoint-fork-child.c: New file.
+	* gdb.threads/watchpoint-fork-mt.c: New file.
+	* gdb.threads/watchpoint-fork-parent.c: New file.
+	* gdb.threads/watchpoint-fork-st.c: New file.
+	* gdb.threads/watchpoint-fork.exp: New file.
+	* gdb.threads/watchpoint-fork.h: New file.
+
 2012-01-23  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/call-signal-resume.exp: Allow output after "return".

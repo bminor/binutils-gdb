@@ -25,6 +25,7 @@
 #include "gdbcmd.h"
 #include "target.h"
 #include "gdb_assert.h"
+#include "inferior.h"
 
 /* Support for hardware watchpoints and breakpoints using the i386
    debug registers.
@@ -170,14 +171,72 @@ i386_init_dregs (struct i386_debug_reg_state *state)
   state->dr_status_mirror  = 0;
 }
 
-/* The local mirror of the inferior's debug registers.  Currently this
-   is a global, but it should really be per-inferior.  */
-static struct i386_debug_reg_state dr_mirror;
+/* Per-inferior data key.  */
+static const struct inferior_data *i386_inferior_data;
+
+/* Per-inferior data.  */
+struct i386_inferior_data
+{
+  /* Copy of i386 hardware debug registers for performance reasons.  */
+  struct i386_debug_reg_state state;
+};
+
+/* Get data specific for INFERIOR_PTID LWP.  Return special data area
+   for processes being detached.  */
+
+static struct i386_inferior_data *
+i386_inferior_data_get (void)
+{
+  /* Intermediate patch stub.  */
+  static struct i386_inferior_data inf_data_local;
+  struct inferior *inf = current_inferior ();
+  struct i386_inferior_data *inf_data = &inf_data_local;
+
+  if (inf->pid != ptid_get_pid (inferior_ptid))
+    {
+      /* INFERIOR_PTID is being detached from the inferior INF.
+	 Provide local cache specific for the detached LWP.  */
+
+      static struct i386_inferior_data detached_inf_data_local;
+      static int detached_inf_pid = -1;
+
+      if (detached_inf_pid != ptid_get_pid (inferior_ptid))
+	{
+	  /* Reinitialize the local cache if INFERIOR_PTID is
+	     different from the LWP last detached.
+ 
+	     Linux kernel before 2.6.33 commit
+	     72f674d203cd230426437cdcf7dd6f681dad8b0d
+	     will inherit hardware debug registers from parent
+	     on fork/vfork/clone.  Newer Linux kernels create such tasks with
+	     zeroed debug registers.
+
+	     GDB will remove all breakpoints (and watchpoints) from the forked
+	     off process.  We also need to reset the debug registers in that
+	     process to be compatible with the older Linux kernels.
+
+	     Copy the debug registers mirrors into the new process so that all
+	     breakpoints and watchpoints can be removed together.  The debug
+	     registers mirror will become zeroed in the end before detaching
+	     the forked off process.  */
+
+	  detached_inf_pid = ptid_get_pid (inferior_ptid);
+	  detached_inf_data_local = *inf_data;
+	}
+
+      return &detached_inf_data_local;
+    }
+
+  return inf_data;
+}
+
+/* Get debug registers state for INFERIOR_PTID, see
+   i386_inferior_data_get.  */
 
 struct i386_debug_reg_state *
 i386_debug_reg_state (void)
 {
-  return &dr_mirror;
+  return &i386_inferior_data_get ()->state;
 }
 
 /* Whether or not to print the mirrored debug registers.  */
@@ -230,7 +289,9 @@ static int i386_handle_nonaligned_watchpoint (struct i386_debug_reg_state *state
 void
 i386_cleanup_dregs (void)
 {
-  i386_init_dregs (&dr_mirror);
+  struct i386_debug_reg_state *state = i386_debug_reg_state ();
+
+  i386_init_dregs (state);
 }
 
 /* Print the values of the mirrored debug registers.  This is called
@@ -494,20 +555,21 @@ Invalid value %d of operation in i386_handle_nonaligned_watchpoint.\n"),
 static void
 i386_update_inferior_debug_regs (struct i386_debug_reg_state *new_state)
 {
+  struct i386_debug_reg_state *state = i386_debug_reg_state ();
   int i;
 
   ALL_DEBUG_REGISTERS (i)
     {
-      if (I386_DR_VACANT (new_state, i) != I386_DR_VACANT (&dr_mirror, i))
+      if (I386_DR_VACANT (new_state, i) != I386_DR_VACANT (state, i))
 	i386_dr_low.set_addr (i, new_state->dr_mirror[i]);
       else
-	gdb_assert (new_state->dr_mirror[i] == dr_mirror.dr_mirror[i]);
+	gdb_assert (new_state->dr_mirror[i] == state->dr_mirror[i]);
     }
 
-  if (new_state->dr_control_mirror != dr_mirror.dr_control_mirror)
+  if (new_state->dr_control_mirror != state->dr_control_mirror)
     i386_dr_low.set_control (new_state->dr_control_mirror);
 
-  dr_mirror = *new_state;
+  *state = *new_state;
 }
 
 /* Insert a watchpoint to watch a memory region which starts at
@@ -518,10 +580,11 @@ static int
 i386_insert_watchpoint (CORE_ADDR addr, int len, int type,
 			struct expression *cond)
 {
+  struct i386_debug_reg_state *state = i386_debug_reg_state ();
   int retval;
   /* Work on a local copy of the debug registers, and on success,
      commit the change back to the inferior.  */
-  struct i386_debug_reg_state local_state = dr_mirror;
+  struct i386_debug_reg_state local_state = *state;
 
   if (type == hw_read)
     return 1; /* unsupported */
@@ -542,7 +605,7 @@ i386_insert_watchpoint (CORE_ADDR addr, int len, int type,
     i386_update_inferior_debug_regs (&local_state);
 
   if (maint_show_dr)
-    i386_show_dr (&dr_mirror, "insert_watchpoint", addr, len, type);
+    i386_show_dr (state, "insert_watchpoint", addr, len, type);
 
   return retval;
 }
@@ -554,10 +617,11 @@ static int
 i386_remove_watchpoint (CORE_ADDR addr, int len, int type,
 			struct expression *cond)
 {
+  struct i386_debug_reg_state *state = i386_debug_reg_state ();
   int retval;
   /* Work on a local copy of the debug registers, and on success,
      commit the change back to the inferior.  */
-  struct i386_debug_reg_state local_state = dr_mirror;
+  struct i386_debug_reg_state local_state = *state;
 
   if (((len != 1 && len !=2 && len !=4) && !(TARGET_HAS_DR_LEN_8 && len == 8))
       || addr % len != 0)
@@ -575,7 +639,7 @@ i386_remove_watchpoint (CORE_ADDR addr, int len, int type,
     i386_update_inferior_debug_regs (&local_state);
 
   if (maint_show_dr)
-    i386_show_dr (&dr_mirror, "remove_watchpoint", addr, len, type);
+    i386_show_dr (state, "remove_watchpoint", addr, len, type);
 
   return retval;
 }
@@ -586,11 +650,12 @@ i386_remove_watchpoint (CORE_ADDR addr, int len, int type,
 static int
 i386_region_ok_for_watchpoint (CORE_ADDR addr, int len)
 {
+  struct i386_debug_reg_state *state = i386_debug_reg_state ();
   int nregs;
 
   /* Compute how many aligned watchpoints we would need to cover this
      region.  */
-  nregs = i386_handle_nonaligned_watchpoint (&dr_mirror,
+  nregs = i386_handle_nonaligned_watchpoint (state,
 					     WP_COUNT, addr, len, hw_write);
   return nregs <= DR_NADDR ? 1 : 0;
 }
@@ -602,6 +667,7 @@ i386_region_ok_for_watchpoint (CORE_ADDR addr, int len)
 static int
 i386_stopped_data_address (struct target_ops *ops, CORE_ADDR *addr_p)
 {
+  struct i386_debug_reg_state *state = i386_debug_reg_state ();
   CORE_ADDR addr = 0;
   int i;
   int rc = 0;
@@ -615,25 +681,24 @@ i386_stopped_data_address (struct target_ops *ops, CORE_ADDR *addr_p)
   unsigned control = 0;
 
   /* In non-stop/async, threads can be running while we change the
-     global dr_mirror (and friends).  Say, we set a watchpoint, and
-     let threads resume.  Now, say you delete the watchpoint, or
-     add/remove watchpoints such that dr_mirror changes while threads
-     are running.  On targets that support non-stop,
-     inserting/deleting watchpoints updates the global dr_mirror only.
-     It does not update the real thread's debug registers; that's only
-     done prior to resume.  Instead, if threads are running when the
-     mirror changes, a temporary and transparent stop on all threads
-     is forced so they can get their copy of the debug registers
-     updated on re-resume.  Now, say, a thread hit a watchpoint before
-     having been updated with the new dr_mirror contents, and we
-     haven't yet handled the corresponding SIGTRAP.  If we trusted
-     dr_mirror below, we'd mistake the real trapped address (from the
-     last time we had updated debug registers in the thread) with
-     whatever was currently in dr_mirror.  So to fix this, dr_mirror
-     always represents intention, what we _want_ threads to have in
-     debug registers.  To get at the address and cause of the trap, we
-     need to read the state the thread still has in its debug
-     registers.
+     STATE (and friends).  Say, we set a watchpoint, and let threads
+     resume.  Now, say you delete the watchpoint, or add/remove
+     watchpoints such that STATE changes while threads are running.
+     On targets that support non-stop, inserting/deleting watchpoints
+     updates the STATE only.  It does not update the real thread's
+     debug registers; that's only done prior to resume.  Instead, if
+     threads are running when the mirror changes, a temporary and
+     transparent stop on all threads is forced so they can get their
+     copy of the debug registers updated on re-resume.  Now, say,
+     a thread hit a watchpoint before having been updated with the new
+     STATE contents, and we haven't yet handled the corresponding
+     SIGTRAP.  If we trusted STATE below, we'd mistake the real
+     trapped address (from the last time we had updated debug
+     registers in the thread) with whatever was currently in STATE.
+     So to fix this, STATE always represents intention, what we _want_
+     threads to have in debug registers.  To get at the address and
+     cause of the trap, we need to read the state the thread still has
+     in its debug registers.
 
      In sum, always get the current debug register values the current
      thread has, instead of trusting the global mirror.  If the thread
@@ -663,11 +728,11 @@ i386_stopped_data_address (struct target_ops *ops, CORE_ADDR *addr_p)
 	  addr = i386_dr_low.get_addr (i);
 	  rc = 1;
 	  if (maint_show_dr)
-	    i386_show_dr (&dr_mirror, "watchpoint_hit", addr, -1, hw_write);
+	    i386_show_dr (state, "watchpoint_hit", addr, -1, hw_write);
 	}
     }
   if (maint_show_dr && addr == 0)
-    i386_show_dr (&dr_mirror, "stopped_data_addr", 0, 0, hw_write);
+    i386_show_dr (state, "stopped_data_addr", 0, 0, hw_write);
 
   if (rc)
     *addr_p = addr;
@@ -687,11 +752,12 @@ static int
 i386_insert_hw_breakpoint (struct gdbarch *gdbarch,
 			   struct bp_target_info *bp_tgt)
 {
+  struct i386_debug_reg_state *state = i386_debug_reg_state ();
   unsigned len_rw = i386_length_and_rw_bits (1, hw_execute);
   CORE_ADDR addr = bp_tgt->placed_address;
   /* Work on a local copy of the debug registers, and on success,
      commit the change back to the inferior.  */
-  struct i386_debug_reg_state local_state = dr_mirror;
+  struct i386_debug_reg_state local_state = *state;
   int retval = i386_insert_aligned_watchpoint (&local_state,
 					       addr, len_rw) ? EBUSY : 0;
 
@@ -699,7 +765,7 @@ i386_insert_hw_breakpoint (struct gdbarch *gdbarch,
     i386_update_inferior_debug_regs (&local_state);
 
   if (maint_show_dr)
-    i386_show_dr (&dr_mirror, "insert_hwbp", addr, 1, hw_execute);
+    i386_show_dr (state, "insert_hwbp", addr, 1, hw_execute);
 
   return retval;
 }
@@ -711,11 +777,12 @@ static int
 i386_remove_hw_breakpoint (struct gdbarch *gdbarch,
 			   struct bp_target_info *bp_tgt)
 {
+  struct i386_debug_reg_state *state = i386_debug_reg_state ();
   unsigned len_rw = i386_length_and_rw_bits (1, hw_execute);
   CORE_ADDR addr = bp_tgt->placed_address;
   /* Work on a local copy of the debug registers, and on success,
      commit the change back to the inferior.  */
-  struct i386_debug_reg_state local_state = dr_mirror;
+  struct i386_debug_reg_state local_state = *state;
   int retval = i386_remove_aligned_watchpoint (&local_state,
 					       addr, len_rw);
 
@@ -723,7 +790,7 @@ i386_remove_hw_breakpoint (struct gdbarch *gdbarch,
     i386_update_inferior_debug_regs (&local_state);
 
   if (maint_show_dr)
-    i386_show_dr (&dr_mirror, "remove_hwbp", addr, 1, hw_execute);
+    i386_show_dr (state, "remove_hwbp", addr, 1, hw_execute);
 
   return retval;
 }

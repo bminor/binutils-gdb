@@ -158,6 +158,12 @@ struct lwp_info *iterate_over_lwps (ptid_t filter,
 						     void *), 
 				    void *data);
 
+typedef int (*linux_nat_iterate_watchpoint_lwps_ftype) (struct lwp_info *lwp,
+							void *arg);
+
+extern void linux_nat_iterate_watchpoint_lwps
+  (linux_nat_iterate_watchpoint_lwps_ftype callback, void *callback_data);
+
 /* Create a prototype generic GNU/Linux target.  The client can
    override it with local methods.  */
 struct target_ops * linux_target (void);

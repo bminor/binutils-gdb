@@ -336,8 +336,8 @@ amd64_linux_dr_get_status (void)
   return amd64_linux_dr_get (inferior_ptid, DR_STATUS);
 }
 
-/* Callback for iterate_over_lwps.  Update the debug registers of
-   LWP.  */
+/* Callback for linux_nat_iterate_watchpoint_lwps.  Update the debug registers
+   of LWP.  */
 
 static int
 update_debug_registers_callback (struct lwp_info *lwp, void *arg)
@@ -363,9 +363,7 @@ update_debug_registers_callback (struct lwp_info *lwp, void *arg)
 static void
 amd64_linux_dr_set_control (unsigned long control)
 {
-  ptid_t pid_ptid = pid_to_ptid (ptid_get_pid (inferior_ptid));
-
-  iterate_over_lwps (pid_ptid, update_debug_registers_callback, NULL);
+  linux_nat_iterate_watchpoint_lwps (update_debug_registers_callback, NULL);
 }
 
 /* Set address REGNUM (zero based) to ADDR in all LWPs of the current
@@ -374,11 +372,9 @@ amd64_linux_dr_set_control (unsigned long control)
 static void
 amd64_linux_dr_set_addr (int regnum, CORE_ADDR addr)
 {
-  ptid_t pid_ptid = pid_to_ptid (ptid_get_pid (inferior_ptid));
-
   gdb_assert (regnum >= 0 && regnum <= DR_LASTADDR - DR_FIRSTADDR);
 
-  iterate_over_lwps (pid_ptid, update_debug_registers_callback, NULL);
+  linux_nat_iterate_watchpoint_lwps (update_debug_registers_callback, NULL);
 }
 
 /* Called when resuming a thread.
@@ -399,6 +395,13 @@ amd64_linux_prepare_to_resume (struct lwp_info *lwp)
     {
       struct i386_debug_reg_state *state = i386_debug_reg_state ();
       int i;
+
+      /* On Linux kernel before 2.6.33 commit
+	 72f674d203cd230426437cdcf7dd6f681dad8b0d
+	 if you enable a breakpoint by the DR_CONTROL bits you need to have
+	 already written the corresponding DR_FIRSTADDR...DR_LASTADDR registers.
+
+	 Ensure DR_CONTROL gets written as the very last register here.  */
 
       for (i = DR_FIRSTADDR; i <= DR_LASTADDR; i++)
 	if (state->dr_ref_count[i] > 0)

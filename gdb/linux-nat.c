@@ -288,6 +288,7 @@ static void restore_child_signals_mask (sigset_t *prev_mask);
 struct lwp_info;
 static struct lwp_info *add_lwp (ptid_t ptid);
 static void purge_lwp_list (int pid);
+static void delete_lwp (ptid_t ptid);
 static struct lwp_info *find_lwp_pid (ptid_t ptid);
 
 
@@ -584,6 +585,31 @@ linux_child_post_startup_inferior (ptid_t ptid)
   linux_enable_tracesysgood (ptid);
 }
 
+/* Return the number of known LWPs in the tgid given by PID.  */
+
+static int
+num_lwps (int pid)
+{
+  int count = 0;
+  struct lwp_info *lp;
+
+  for (lp = lwp_list; lp; lp = lp->next)
+    if (ptid_get_pid (lp->ptid) == pid)
+      count++;
+
+  return count;
+}
+
+/* Call delete_lwp with prototype compatible for make_cleanup.  */
+
+static void
+delete_lwp_cleanup (void *lp_voidp)
+{
+  struct lwp_info *lp = lp_voidp;
+
+  delete_lwp (lp->ptid);
+}
+
 static int
 linux_child_follow_fork (struct target_ops *ops, int follow_child)
 {
@@ -630,6 +656,8 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
       /* Detach new forked process?  */
       if (detach_fork)
 	{
+	  struct cleanup *old_chain;
+
 	  /* Before detaching from the child, remove all breakpoints
 	     from it.  If we forked, then this has already been taken
 	     care of by infrun.c.  If we vforked however, any
@@ -652,7 +680,28 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 				child_pid);
 	    }
 
+	  old_chain = save_inferior_ptid ();
+	  inferior_ptid = ptid_build (child_pid, child_pid, 0);
+
+	  child_lp = add_lwp (inferior_ptid);
+	  child_lp->stopped = 1;
+	  child_lp->last_resume_kind = resume_stop;
+	  make_cleanup (delete_lwp_cleanup, child_lp);
+
+	  /* CHILD_LP has new PID, therefore linux_nat_new_thread is not called for it.
+	     See i386_inferior_data_get for the Linux kernel specifics.
+	     Ensure linux_nat_prepare_to_resume will reset the hardware debug
+	     registers.  It is done by the linux_nat_new_thread call, which is
+	     being skipped in add_lwp above for the first lwp of a pid.  */
+	  gdb_assert (num_lwps (GET_PID (child_lp->ptid)) == 1);
+	  if (linux_nat_new_thread != NULL)
+	    linux_nat_new_thread (child_lp);
+
+	  if (linux_nat_prepare_to_resume != NULL)
+	    linux_nat_prepare_to_resume (child_lp);
 	  ptrace (PTRACE_DETACH, child_pid, 0, 0);
+
+	  do_cleanups (old_chain);
 	}
       else
 	{
@@ -1111,21 +1160,6 @@ purge_lwp_list (int pid)
     }
 }
 
-/* Return the number of known LWPs in the tgid given by PID.  */
-
-static int
-num_lwps (int pid)
-{
-  int count = 0;
-  struct lwp_info *lp;
-
-  for (lp = lwp_list; lp; lp = lp->next)
-    if (ptid_get_pid (lp->ptid) == pid)
-      count++;
-
-  return count;
-}
-
 /* Add the LWP specified by PID to the list.  Return a pointer to the
    structure describing the new LWP.  The LWP should already be stopped
    (with an exception for the very first LWP).  */
@@ -1233,6 +1267,46 @@ iterate_over_lwps (ptid_t filter,
     }
 
   return NULL;
+}
+
+/* Iterate like iterate_over_lwps does except when forking-off a child call
+   CALLBACK with CALLBACK_DATA specifically only for that new child PID.  */
+
+void
+linux_nat_iterate_watchpoint_lwps
+  (linux_nat_iterate_watchpoint_lwps_ftype callback, void *callback_data)
+{
+  int inferior_pid = ptid_get_pid (inferior_ptid);
+  struct inferior *inf = current_inferior ();
+
+  if (inf->pid == inferior_pid)
+    {
+      /* Iterate all the threads of the current inferior.  Without specifying
+	 INFERIOR_PID it would iterate all threads of all inferiors, which is
+	 inappropriate for watchpoints.  */
+
+      iterate_over_lwps (pid_to_ptid (inferior_pid), callback, callback_data);
+    }
+  else
+    {
+      /* Detaching a new child PID temporarily present in INFERIOR_PID.  */
+
+      struct lwp_info *child_lp;
+      struct cleanup *old_chain;
+      pid_t child_pid = GET_PID (inferior_ptid);
+      ptid_t child_ptid = ptid_build (child_pid, child_pid, 0);
+
+      gdb_assert (!is_lwp (inferior_ptid));
+      gdb_assert (find_lwp_pid (child_ptid) == NULL);
+      child_lp = add_lwp (child_ptid);
+      child_lp->stopped = 1;
+      child_lp->last_resume_kind = resume_stop;
+      old_chain = make_cleanup (delete_lwp_cleanup, child_lp);
+
+      callback (child_lp, callback_data);
+
+      do_cleanups (old_chain);
+    }
 }
 
 /* Update our internal state when changing from one checkpoint to
