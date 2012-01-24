@@ -181,16 +181,31 @@ struct i386_inferior_data
   struct i386_debug_reg_state state;
 };
 
+/* Per-inferior hook for register_inferior_data_with_cleanup.  */
+
+static void
+i386_inferior_data_cleanup (struct inferior *inf, void *arg)
+{
+  struct i386_inferior_data *inf_data = arg;
+
+  xfree (inf_data);
+}
+
 /* Get data specific for INFERIOR_PTID LWP.  Return special data area
    for processes being detached.  */
 
 static struct i386_inferior_data *
 i386_inferior_data_get (void)
 {
-  /* Intermediate patch stub.  */
-  static struct i386_inferior_data inf_data_local;
   struct inferior *inf = current_inferior ();
-  struct i386_inferior_data *inf_data = &inf_data_local;
+  struct i386_inferior_data *inf_data;
+
+  inf_data = inferior_data (inf, i386_inferior_data);
+  if (inf_data == NULL)
+    {
+      inf_data = xzalloc (sizeof (*inf_data));
+      set_inferior_data (current_inferior (), i386_inferior_data, inf_data);
+    }
 
   if (inf->pid != ptid_get_pid (inferior_ptid))
     {
@@ -855,6 +870,10 @@ i386_use_watchpoints (struct target_ops *t)
   t->to_remove_watchpoint = i386_remove_watchpoint;
   t->to_insert_hw_breakpoint = i386_insert_hw_breakpoint;
   t->to_remove_hw_breakpoint = i386_remove_hw_breakpoint;
+
+  if (i386_inferior_data == NULL)
+    i386_inferior_data
+      = register_inferior_data_with_cleanup (i386_inferior_data_cleanup);
 }
 
 void

@@ -1239,9 +1239,10 @@ is_watchpoint (const struct breakpoint *bpt)
 static int
 watchpoint_in_thread_scope (struct watchpoint *b)
 {
-  return (ptid_equal (b->watchpoint_thread, null_ptid)
-	  || (ptid_equal (inferior_ptid, b->watchpoint_thread)
-	      && !is_executing (inferior_ptid)));
+  return (b->base.pspace == current_program_space
+	  && (ptid_equal (b->watchpoint_thread, null_ptid)
+	      || (ptid_equal (inferior_ptid, b->watchpoint_thread)
+		  && !is_executing (inferior_ptid))));
 }
 
 /* Set watchpoint B to disp_del_at_next_stop, even including its possible

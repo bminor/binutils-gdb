@@ -1,5 +1,11 @@
 2012-01-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Fix watchpoints to be specific for each inferior.
+	* gdb.multi/watchpoint-multi.c: New file.
+	* gdb.multi/watchpoint-multi.exp: New file.
+
+2012-01-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Fix watchpoints across inferior fork.
 	* gdb.threads/watchpoint-fork-child.c: New file.
 	* gdb.threads/watchpoint-fork-mt.c: New file.

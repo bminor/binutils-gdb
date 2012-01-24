@@ -1,5 +1,17 @@
 2012-01-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Fix watchpoints to be specific for each inferior.
+	* breakpoint.c (watchpoint_in_thread_scope): Verify also
+	current_program_space.
+	* i386-nat.c (i386_inferior_data_cleanup): New.
+	(i386_inferior_data_get): Replace variable inf_data_local by an
+	inferior_data call.
+	(i386_use_watchpoints): Initialize i386_inferior_data.
+	* linux-nat.c (linux_nat_iterate_watchpoint_lwps): Use INFERIOR_PTID
+	specific iterate_over_lwps.
+
+2012-01-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Fix watchpoints across inferior fork.
 	* amd64-linux-nat.c (update_debug_registers_callback): Update the
 	comment for linux_nat_iterate_watchpoint_lwps.
