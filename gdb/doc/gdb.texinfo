@@ -6339,16 +6339,6 @@ Print the local variables of the selected frame, each on a separate
 line.  These are all variables (declared either static or automatic)
 accessible at the point of execution of the selected frame.
 
-@kindex info catch
-@cindex catch exceptions, list active handlers
-@cindex exception handlers, how to list
-@item info catch
-Print a list of all the exception handlers that are active in the
-current stack frame at the current point of execution.  To see other
-exception handlers, visit the associated frame (using the @code{up},
-@code{down}, or @code{frame} commands); then type @code{info catch}.
-@xref{Set Catchpoints, , Setting Catchpoints}.
-
 @end table
 
 

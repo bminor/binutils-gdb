@@ -240,8 +240,6 @@ gdb_test "help info args" "Argument variables of current stack frame\." "help in
 gdb_test "help info breakpoints" \
     "Status of specified breakpoints .all user-settable breakpoints if no argument.*\[\r\n\]+breakpoint set\." \
     "help info breakpoints"
-# test help info catch
-gdb_test "help info catch" "Exceptions that can be caught in the current stack frame\." "help info catch"
 # test help info copying
 gdb_test "help info copying" "Conditions for redistributing copies of GDB\." "help info copying"
 # test help info display

@@ -1,3 +1,11 @@
+2012-01-24  Gary Benson  <gbenson@redhat.com>
+
+	Delete #if 0'd out code.
+	* stack.c (print_frame_label_vars): Remove.
+	(catch_info): Likewise.
+	(_initialize_stack): Remove "info catch" command.
+	* NEWS: Mention the above.
+
 2012-01-24  Pedro Alves  <palves@redhat.com>
 
 	* remote.c (remote_add_inferior): New `fake_pid_p' parameter.  Use

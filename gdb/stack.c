@@ -1968,95 +1968,11 @@ print_frame_local_vars (struct frame_info *frame, int num_tabs,
     fprintf_filtered (stream, _("No locals.\n"));
 }
 
-/* Same, but print labels.  */
-
-static void
-print_frame_label_vars (struct frame_info *frame, int this_level_only,
-			struct ui_file *stream)
-{
-#if 1
-  fprintf_filtered (stream, "print_frame_label_vars disabled.\n");
-#else
-  struct blockvector *bl;
-  struct block *block = get_frame_block (frame, 0);
-  struct gdbarch *gdbarch = get_frame_arch (frame);
-  int values_printed = 0;
-  int index, have_default = 0;
-  char *blocks_printed;
-  CORE_ADDR pc = get_frame_pc (frame);
-
-  if (block == 0)
-    {
-      fprintf_filtered (stream, "No symbol table info available.\n");
-      return;
-    }
-
-  bl = blockvector_for_pc (BLOCK_END (block) - 4, &index);
-  blocks_printed = alloca (BLOCKVECTOR_NBLOCKS (bl) * sizeof (char));
-  memset (blocks_printed, 0, BLOCKVECTOR_NBLOCKS (bl) * sizeof (char));
-
-  while (block != 0)
-    {
-      CORE_ADDR end = BLOCK_END (block) - 4;
-      int last_index;
-
-      if (bl != blockvector_for_pc (end, &index))
-	error (_("blockvector blotch"));
-      if (BLOCKVECTOR_BLOCK (bl, index) != block)
-	error (_("blockvector botch"));
-      last_index = BLOCKVECTOR_NBLOCKS (bl);
-      index += 1;
-
-      /* Don't print out blocks that have gone by.  */
-      while (index < last_index
-	     && BLOCK_END (BLOCKVECTOR_BLOCK (bl, index)) < pc)
-	index++;
-
-      while (index < last_index
-	     && BLOCK_END (BLOCKVECTOR_BLOCK (bl, index)) < end)
-	{
-	  if (blocks_printed[index] == 0)
-	    {
-	      if (print_block_frame_labels (gdbarch,
-					    BLOCKVECTOR_BLOCK (bl, index),
-					    &have_default, stream))
-		values_printed = 1;
-	      blocks_printed[index] = 1;
-	    }
-	  index++;
-	}
-      if (have_default)
-	return;
-      if (values_printed && this_level_only)
-	return;
-
-      /* After handling the function's top-level block, stop.  Don't
-         continue to its superblock, the block of per-file symbols.
-         Also do not continue to the containing function of an inlined
-         function.  */
-      if (BLOCK_FUNCTION (block))
-	break;
-      block = BLOCK_SUPERBLOCK (block);
-    }
-
-  if (!values_printed && !this_level_only)
-    fprintf_filtered (stream, _("No catches.\n"));
-#endif
-}
-
 void
 locals_info (char *args, int from_tty)
 {
   print_frame_local_vars (get_selected_frame (_("No frame selected.")),
 			  0, gdb_stdout);
-}
-
-static void
-catch_info (char *ignore, int from_tty)
-{
-  /* Assume g++ compiled code; old GDB 4.16 behaviour.  */
-  print_frame_label_vars (get_selected_frame (_("No frame selected.")),
-                          0, gdb_stdout);
 }
 
 /* Iterate over all the argument variables in block B.
@@ -2614,9 +2530,6 @@ Usage: T <count>\n"));
     add_com ("func", class_stack, func_command, _("\
 Select the stack frame that contains <func>.\n\
 Usage: func <name>\n"));
-
-  add_info ("catch", catch_info,
-	    _("Exceptions that can be caught in the current stack frame."));
 
   add_setshow_enum_cmd ("frame-arguments", class_stack,
 			print_frame_arguments_choices, &print_frame_arguments,

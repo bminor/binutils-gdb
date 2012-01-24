@@ -85,7 +85,6 @@ info all-registers
 info args
 info bogus-gdb-command
 info breakpoints
-info catch
 info copying
 info display
 info f

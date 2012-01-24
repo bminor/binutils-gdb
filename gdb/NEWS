@@ -31,6 +31,9 @@
 * The "info proc" and "generate-core-file" commands will now also
   work on remote targets connected to GDBserver on Linux.
 
+* The command "info catch" has been removed.  It has been disabled
+  since December 2007.
+
 *** Changes in GDB 7.4
 
 * GDB now handles ambiguous linespecs more consistently; the existing
