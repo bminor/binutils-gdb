@@ -2701,10 +2701,6 @@ wait_for_inferior (void)
 	 state.  */
       old_chain = make_cleanup (finish_thread_state_cleanup, &minus_one_ptid);
 
-      if (ecs->ws.kind == TARGET_WAITKIND_SYSCALL_ENTRY
-          || ecs->ws.kind == TARGET_WAITKIND_SYSCALL_RETURN)
-        ecs->ws.value.syscall_number = UNKNOWN_SYSCALL;
-
       /* Now figure out what to do with the result of the result.  */
       handle_inferior_event (ecs);
 
@@ -3072,10 +3068,8 @@ handle_syscall_event (struct execution_control_state *ecs)
 
   regcache = get_thread_regcache (ecs->ptid);
   gdbarch = get_regcache_arch (regcache);
-  syscall_number = gdbarch_get_syscall_number (gdbarch, ecs->ptid);
+  syscall_number = ecs->ws.value.syscall_number;
   stop_pc = regcache_read_pc (regcache);
-
-  target_last_waitstatus.value.syscall_number = syscall_number;
 
   if (catch_syscall_enabled () > 0
       && catching_syscall_number (syscall_number) > 0)
@@ -6862,79 +6856,6 @@ discard_infcall_control_state (struct infcall_control_state *inf_status)
   xfree (inf_status);
 }
 
-int
-inferior_has_forked (ptid_t pid, ptid_t *child_pid)
-{
-  struct target_waitstatus last;
-  ptid_t last_ptid;
-
-  get_last_target_status (&last_ptid, &last);
-
-  if (last.kind != TARGET_WAITKIND_FORKED)
-    return 0;
-
-  if (!ptid_equal (last_ptid, pid))
-    return 0;
-
-  *child_pid = last.value.related_pid;
-  return 1;
-}
-
-int
-inferior_has_vforked (ptid_t pid, ptid_t *child_pid)
-{
-  struct target_waitstatus last;
-  ptid_t last_ptid;
-
-  get_last_target_status (&last_ptid, &last);
-
-  if (last.kind != TARGET_WAITKIND_VFORKED)
-    return 0;
-
-  if (!ptid_equal (last_ptid, pid))
-    return 0;
-
-  *child_pid = last.value.related_pid;
-  return 1;
-}
-
-int
-inferior_has_execd (ptid_t pid, char **execd_pathname)
-{
-  struct target_waitstatus last;
-  ptid_t last_ptid;
-
-  get_last_target_status (&last_ptid, &last);
-
-  if (last.kind != TARGET_WAITKIND_EXECD)
-    return 0;
-
-  if (!ptid_equal (last_ptid, pid))
-    return 0;
-
-  *execd_pathname = xstrdup (last.value.execd_pathname);
-  return 1;
-}
-
-int
-inferior_has_called_syscall (ptid_t pid, int *syscall_number)
-{
-  struct target_waitstatus last;
-  ptid_t last_ptid;
-
-  get_last_target_status (&last_ptid, &last);
-
-  if (last.kind != TARGET_WAITKIND_SYSCALL_ENTRY &&
-      last.kind != TARGET_WAITKIND_SYSCALL_RETURN)
-    return 0;
-
-  if (!ptid_equal (last_ptid, pid))
-    return 0;
-
-  *syscall_number = last.value.syscall_number;
-  return 1;
-}
-
 int
 ptid_match (ptid_t ptid, ptid_t filter)
 {

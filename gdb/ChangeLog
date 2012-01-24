@@ -1,3 +1,14 @@
+2012-01-24  Pedro Alves  <pedro@codesourcery.com>
+
+	* breakpoint.c (breakpoint_hit_catch_fork)
+	(breakpoint_hit_catch_vfork, breakpoint_hit_catch_syscall)
+	(breakpoint_hit_catch_exec): Make use of the `ws' argument.
+	* infrun.c (inferior_has_forked, inferior_has_vforked)
+	(inferior_has_execd, inferior_has_called_syscall): Delete.
+	(handle_syscall_event): Get syscall_number from the execution
+	control state's wait status.
+	(wait_for_inferior): Don't clear syscall_number.
+
 2012-01-24  Pedro Alves  <palves@redhat.com>
 
 	* breakpoint.c (bpstat_check_location, bpstat_stop_status,

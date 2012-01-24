@@ -6232,7 +6232,11 @@ breakpoint_hit_catch_fork (const struct bp_location *bl,
 {
   struct fork_catchpoint *c = (struct fork_catchpoint *) bl->owner;
 
-  return inferior_has_forked (inferior_ptid, &c->forked_inferior_pid);
+  if (ws->kind != TARGET_WAITKIND_FORKED)
+    return 0;
+
+  c->forked_inferior_pid = ws->value.related_pid;
+  return 1;
 }
 
 /* Implement the "print_it" breakpoint_ops method for fork
@@ -6342,7 +6346,11 @@ breakpoint_hit_catch_vfork (const struct bp_location *bl,
 {
   struct fork_catchpoint *c = (struct fork_catchpoint *) bl->owner;
 
-  return inferior_has_vforked (inferior_ptid, &c->forked_inferior_pid);
+  if (ws->kind != TARGET_WAITKIND_VFORKED)
+    return 0;
+
+  c->forked_inferior_pid = ws->value.related_pid;
+  return 1;
 }
 
 /* Implement the "print_it" breakpoint_ops method for vfork
@@ -6552,8 +6560,11 @@ breakpoint_hit_catch_syscall (const struct bp_location *bl,
   const struct syscall_catchpoint *c
     = (const struct syscall_catchpoint *) bl->owner;
 
-  if (!inferior_has_called_syscall (inferior_ptid, &syscall_number))
+  if (ws->kind != TARGET_WAITKIND_SYSCALL_ENTRY
+      && ws->kind != TARGET_WAITKIND_SYSCALL_RETURN)
     return 0;
+
+  syscall_number = ws->value.syscall_number;
 
   /* Now, checking if the syscall is the same.  */
   if (c->syscalls_to_be_caught)
@@ -6860,7 +6871,11 @@ breakpoint_hit_catch_exec (const struct bp_location *bl,
 {
   struct exec_catchpoint *c = (struct exec_catchpoint *) bl->owner;
 
-  return inferior_has_execd (inferior_ptid, &c->exec_pathname);
+  if (ws->kind != TARGET_WAITKIND_EXECD)
+    return 0;
+
+  c->exec_pathname = xstrdup (ws->value.execd_pathname);
+  return 1;
 }
 
 static enum print_stop_action
