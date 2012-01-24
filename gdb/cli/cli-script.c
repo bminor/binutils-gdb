@@ -1614,11 +1614,9 @@ script_from_file (FILE *stream, const char *file)
   if (stream == NULL)
     internal_error (__FILE__, __LINE__, _("called with NULL file pointer!"));
 
-  old_cleanups = make_cleanup_fclose (stream);
-
   old_lines.old_line = source_line_number;
   old_lines.old_file = source_file_name;
-  make_cleanup (source_cleanup_lines, &old_lines);
+  old_cleanups = make_cleanup (source_cleanup_lines, &old_lines);
   source_line_number = 0;
   source_file_name = file;
   /* This will get set every time we read a line.  So it won't stay ""

@@ -527,8 +527,7 @@ find_and_open_script (const char *script_file, int search_path,
   return 1;
 }
 
-/* Load script FILE, which has already been opened as STREAM.
-   STREAM is closed before we return.  */
+/* Load script FILE, which has already been opened as STREAM.  */
 
 static void
 source_script_from_stream (FILE *stream, const char *file)
@@ -556,12 +555,9 @@ source_script_from_stream (FILE *stream, const char *file)
 	  else
 	    {
 	      /* Nope, just punt.  */
-	      fclose (stream);
 	      throw_exception (e);
 	    }
 	}
-      else
-	fclose (stream);
     }
   else
     script_from_file (stream, file);
@@ -595,6 +591,7 @@ source_script_with_search (const char *file, int from_tty, int search_path)
     }
 
   old_cleanups = make_cleanup (xfree, full_path);
+  make_cleanup_fclose (stream);
   /* The python support reopens the file, so we need to pass full_path here
      in case the file was found on the search path.  It's useful to do this
      anyway so that error messages show the actual file used.  But only do

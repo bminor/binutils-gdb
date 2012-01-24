@@ -1,3 +1,12 @@
+2012-01-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Code cleanup.
+	* cli/cli-cmds.c (source_script_from_stream): Never fclose STREAM.
+	Update the function comment for it.
+	(source_script_with_search): Call make_cleanup_fclose for STREAM.
+	* cli/cli-script.c (script_from_file): Do not call make_cleanup_fclose
+	for STREAM.
+
 2012-01-24  Pedro Alves  <palves@redhat.com>
 
 	* breakpoint.c (bpstat_stop_status): Moving clearing print_it
