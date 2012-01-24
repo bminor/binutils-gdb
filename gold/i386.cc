@@ -1,6 +1,7 @@
 // i386.cc -- i386 target support for gold.
 
-// Copyright 2006, 2007, 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010, 2011, 2012
+// Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -3470,7 +3471,7 @@ Target_i386::do_code_fill(section_size_type length) const
       jmp[0] = 0xe9;
       elfcpp::Swap_unaligned<32, false>::writeval(jmp + 1, length - 5);
       return (std::string(reinterpret_cast<char*>(&jmp[0]), 5)
-              + std::string(length - 5, '\0'));
+              + std::string(length - 5, static_cast<char>(0x90)));
     }
 
   // Nop sequences of various lengths.

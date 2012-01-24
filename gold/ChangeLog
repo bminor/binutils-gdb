@@ -1,3 +1,10 @@
+2012-01-23  Ian Lance Taylor  <ian@airs.com>
+
+	PR gold/13617
+	* i386.cc (Target_i386::do_code_fill): When using a jmp
+	instruction, pad with nop instructions.
+	* x86_64.cc (Target_x86_64::do_code_fill): Likewise.
+
 2012-01-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* x86_64.cc (gc_process_relocs): Add typename on types used in
