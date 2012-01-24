@@ -1,3 +1,7 @@
+2012-01-24  Joel Brobecker  <brobecker@adacore.com>
+
+	* version.in: Update GDB version number to 7.4.
+
 2012-01-14  Doug Evans  <dje@google.com>
 
 	Restore "mt set python print-stack on|off" for 7.4.
