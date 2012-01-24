@@ -22,6 +22,7 @@
 #include "breakpoint.h"
 #include "target.h"
 #include "memrange.h"
+#include "gdb_vecs.h"
 
 /* A trace state variable is a value managed by a target being
    traced.  A trace state variable (or tsv for short) can be accessed
@@ -142,8 +143,6 @@ struct trace_status *current_trace_status (void);
 extern char *default_collect;
 
 /* Struct to collect random info about tracepoints on the target.  */
-
-DEF_VEC_P (char_ptr);
 
 struct uploaded_tp
 {

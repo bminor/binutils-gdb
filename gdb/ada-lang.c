@@ -57,6 +57,7 @@
 #include "observer.h"
 #include "vec.h"
 #include "stack.h"
+#include "gdb_vecs.h"
 
 #include "psymtab.h"
 #include "value.h"
@@ -5627,8 +5628,6 @@ symbol_completion_match (const char *sym_name,
 
   return sym_name;
 }
-
-DEF_VEC_P (char_ptr);
 
 /* A companion function to ada_make_symbol_completion_list().
    Check if SYM_NAME represents a symbol which name would be suitable

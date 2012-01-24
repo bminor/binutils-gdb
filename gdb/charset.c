@@ -27,6 +27,7 @@
 #include "vec.h"
 #include "environ.h"
 #include "arch-utils.h"
+#include "gdb_vecs.h"
 
 #include <stddef.h>
 #include "gdb_string.h"
@@ -716,8 +717,6 @@ wchar_iterate (struct wchar_iterator *iter,
 /* The charset.c module initialization function.  */
 
 extern initialize_file_ftype _initialize_charset; /* -Wmissing-prototype */
-
-DEF_VEC_P (char_ptr);
 
 static VEC (char_ptr) *charsets;
 

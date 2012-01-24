@@ -1,3 +1,10 @@
+2012-01-24  Tom Tromey  <tromey@redhat.com>
+
+	* ada-lang.c: Include gdb_vecs.h.
+	* charset.c: Include gdb_vecs.h.
+	* tracepoint.h: Include gdb_vecs.h.
+	* gdb_vecs.h: New file.
+
 2012-01-24  Pedro Alves  <pedro@codesourcery.com>
 
 	* breakpoint.c (breakpoint_hit_catch_fork)
