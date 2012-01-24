@@ -1,3 +1,12 @@
+2012-01-24  Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.c (bpstat_stop_status): Moving clearing print_it
+	outside `bs->stop' block.
+	(bpstat_what): Rework bp_shlib_event handling.
+	(internal_bkpt_check_status): If the breakpoint is a
+	bp_shlib_event, then set bs->stop and bs->print if
+	stop_on_solib_events is set.
+
 2012-01-24  Gary Benson  <gbenson@redhat.com>
 
 	Delete #if 0'd out code.

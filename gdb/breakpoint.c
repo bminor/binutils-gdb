@@ -4258,10 +4258,12 @@ bpstat_stop_status (struct address_space *aspace,
 		bs->print = 0;
 	    }
 
-	  /* Print nothing for this entry if we don't stop or don't print.  */
-	  if (bs->stop == 0 || bs->print == 0)
-	    bs->print_it = print_it_noop;
 	}
+
+      /* Print nothing for this entry if we don't stop or don't
+	 print.  */
+      if (!bs->stop || !bs->print)
+	bs->print_it = print_it_noop;
     }
 
   /* If we aren't stopping, the value of some hardware watchpoint may
@@ -4342,6 +4344,9 @@ bpstat_what (bpstat bs_head)
       else
 	bptype = bs->breakpoint_at->type;
 
+      if (bptype == bp_shlib_event)
+	shlib_event = 1;
+
       switch (bptype)
 	{
 	case bp_none:
@@ -4350,6 +4355,7 @@ bpstat_what (bpstat bs_head)
 	case bp_hardware_breakpoint:
 	case bp_until:
 	case bp_finish:
+	case bp_shlib_event:
 	  if (bs->stop)
 	    {
 	      if (bs->print)
@@ -4426,18 +4432,6 @@ bpstat_what (bpstat bs_head)
 	      /* There was a catchpoint, but we're not stopping.
 		 This requires no further action.  */
 	    }
-	  break;
-	case bp_shlib_event:
-	  shlib_event = 1;
-
-	  /* If requested, stop when the dynamic linker notifies GDB
-	     of events.  This allows the user to get control and place
-	     breakpoints in initializer routines for dynamically
-	     loaded objects (among other things).  */
-	  if (stop_on_solib_events)
-	    this_action = BPSTAT_WHAT_STOP_NOISY;
-	  else
-	    this_action = BPSTAT_WHAT_SINGLE;
 	  break;
 	case bp_jit_event:
 	  jit_event = 1;
@@ -11145,8 +11139,17 @@ internal_bkpt_re_set (struct breakpoint *b)
 static void
 internal_bkpt_check_status (bpstat bs)
 {
-  /* We do not stop for these.  */
-  bs->stop = 0;
+  if (bs->breakpoint_at->type == bp_shlib_event)
+    {
+      /* If requested, stop when the dynamic linker notifies GDB of
+	 events.  This allows the user to get control and place
+	 breakpoints in initializer routines for dynamically loaded
+	 objects (among other things).  */
+      bs->stop = stop_on_solib_events;
+      bs->print = stop_on_solib_events;
+    }
+  else
+    bs->stop = 0;
 }
 
 static enum print_stop_action
