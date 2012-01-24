@@ -140,9 +140,9 @@ do_locals_tests ()
   float *lpfloat = 0;
   double ldouble = 0;
   double *lpdouble = 0;
-  struct _simple_struct lsimple;
-  struct _simple_struct *lpsimple;
-  void (*func) (void);
+  struct _simple_struct lsimple = { 0 };
+  struct _simple_struct *lpsimple = 0;
+  void (*func) (void) = 0;
 
   /* Simple assignments */
   linteger = 1234;

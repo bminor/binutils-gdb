@@ -1,3 +1,9 @@
+2012-01-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix fuzzy results.
+	* gdb.mi/var-cmd.c (do_locals_tests): Initialize variables lsimple,
+	lpsimple and func.
+
 2012-01-24  Gary Benson  <gbenson@redhat.com>
 
 	Delete #if 0'd out code.
