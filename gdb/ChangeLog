@@ -1,3 +1,15 @@
+2012-01-24  Pedro Alves  <palves@redhat.com>
+
+	* remote.c (remote_add_inferior): New `fake_pid_p' parameter.  Use
+	it.
+	(remote_notice_new_inferior): If the remote end doesn't support
+	the multiprocess extensions, then the PID is fake.
+	(add_current_inferior_and_thread): New.
+	(remote_start_remote): Use it.
+	(extended_remote_attach_1): Adjust.
+	(extended_remote_create_inferior_1): Use
+	add_current_inferior_and_thread.
+
 2012-01-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix watchpoints to be specific for each inferior.

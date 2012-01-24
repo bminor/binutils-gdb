@@ -1440,16 +1440,17 @@ remote_query_attached (int pid)
   return 0;
 }
 
-/* Add PID to GDB's inferior table.  Since we can be connected to a
-   remote system before before knowing about any inferior, mark the
-   target with execution when we find the first inferior.  If ATTACHED
-   is 1, then we had just attached to this inferior.  If it is 0, then
-   we just created this inferior.  If it is -1, then try querying the
-   remote stub to find out if it had attached to the inferior or
-   not.  */
+/* Add PID to GDB's inferior table.  If FAKE_PID_P is true, then PID
+   has been invented by GDB, instead of reported by the target.  Since
+   we can be connected to a remote system before before knowing about
+   any inferior, mark the target with execution when we find the first
+   inferior.  If ATTACHED is 1, then we had just attached to this
+   inferior.  If it is 0, then we just created this inferior.  If it
+   is -1, then try querying the remote stub to find out if it had
+   attached to the inferior or not.  */
 
 static struct inferior *
-remote_add_inferior (int pid, int attached)
+remote_add_inferior (int fake_pid_p, int pid, int attached)
 {
   struct inferior *inf;
 
@@ -1481,6 +1482,7 @@ remote_add_inferior (int pid, int attached)
     }
 
   inf->attach_flag = attached;
+  inf->fake_pid_p = fake_pid_p;
 
   return inf;
 }
@@ -1556,7 +1558,13 @@ remote_notice_new_inferior (ptid_t currthread, int running)
 	 may not know about it yet.  Add it before adding its child
 	 thread, so notifications are emitted in a sensible order.  */
       if (!in_inferior_list (ptid_get_pid (currthread)))
-	inf = remote_add_inferior (ptid_get_pid (currthread), -1);
+	{
+	  struct remote_state *rs = get_remote_state ();
+	  int fake_pid_p = !remote_multi_process_p (rs);
+
+	  inf = remote_add_inferior (fake_pid_p,
+				     ptid_get_pid (currthread), -1);
+	}
 
       /* This is really a new thread.  Add it.  */
       remote_add_thread (currthread, running);
@@ -3150,6 +3158,45 @@ send_interrupt_sequence (void)
 		    interrupt_sequence_mode);
 }
 
+/* Query the remote target for which is the current thread/process,
+   add it to our tables, and update INFERIOR_PTID.  The caller is
+   responsible for setting the state such that the remote end is ready
+   to return the current thread.  */
+
+static void
+add_current_inferior_and_thread (void)
+{
+  struct remote_state *rs = get_remote_state ();
+  int fake_pid_p = 0;
+  ptid_t ptid;
+
+  inferior_ptid = null_ptid;
+
+  /* Now, if we have thread information, update inferior_ptid.  */
+  ptid = remote_current_thread (inferior_ptid);
+  if (!ptid_equal (ptid, null_ptid))
+    {
+      if (!remote_multi_process_p (rs))
+	fake_pid_p = 1;
+
+      inferior_ptid = ptid;
+    }
+  else
+    {
+      /* Without this, some commands which require an active target
+	 (such as kill) won't work.  This variable serves (at least)
+	 double duty as both the pid of the target process (if it has
+	 such), and as a flag indicating that a target is active.  */
+      inferior_ptid = magic_null_ptid;
+      fake_pid_p = 1;
+    }
+
+  remote_add_inferior (fake_pid_p, ptid_get_pid (inferior_ptid), -1);
+
+  /* Add the main thread.  */
+  add_thread_silent (inferior_ptid);
+}
+
 static void
 remote_start_remote (int from_tty, struct target_ops *target, int extended_p)
 {
@@ -3277,40 +3324,7 @@ remote_start_remote (int from_tty, struct target_ops *target, int extended_p)
       /* Let the stub know that we want it to return the thread.  */
       set_continue_thread (minus_one_ptid);
 
-      inferior_ptid = minus_one_ptid;
-
-      /* Now, if we have thread information, update inferior_ptid.  */
-      ptid = remote_current_thread (inferior_ptid);
-      if (!ptid_equal (ptid, minus_one_ptid))
-	{
-	  if (ptid_get_pid (ptid) == -1)
-	    {
-	      ptid = ptid_build (ptid_get_pid (magic_null_ptid),
-				 ptid_get_lwp (ptid),
-				 ptid_get_tid (ptid));
-	      fake_pid_p = 1;
-	    }
-
-	  inferior_ptid = ptid;
-	}
-      else
-	{
-	  /* Without this, some commands which require an active
-	     target (such as kill) won't work.  This variable serves
-	     (at least) double duty as both the pid of the target
-	     process (if it has such), and as a flag indicating that a
-	     target is active.  These functions should be split out
-	     into seperate variables, especially since GDB will
-	     someday have a notion of debugging several processes.  */
-	  inferior_ptid = magic_null_ptid;
-	  fake_pid_p = 1;
-	}
-
-      inf = remote_add_inferior (ptid_get_pid (inferior_ptid), -1);
-      inf->fake_pid_p = fake_pid_p;
-
-      /* Always add the main thread.  */
-      add_thread_silent (inferior_ptid);
+      add_current_inferior_and_thread ();
 
       /* init_wait_for_inferior should be called before get_offsets in order
 	 to manage `inserted' flag in bp loc in a correct state.
@@ -4300,7 +4314,7 @@ extended_remote_attach_1 (struct target_ops *target, char *args, int from_tty)
     error (_("Attaching to %s failed"),
 	   target_pid_to_str (pid_to_ptid (pid)));
 
-  set_current_inferior (remote_add_inferior (pid, 1));
+  set_current_inferior (remote_add_inferior (0, pid, 1));
 
   inferior_ptid = pid_to_ptid (pid);
 
@@ -7674,14 +7688,7 @@ extended_remote_create_inferior_1 (char *exec_file, char *args,
       init_wait_for_inferior ();
     }
 
-  /* Now mark the inferior as running before we do anything else.  */
-  inferior_ptid = magic_null_ptid;
-
-  /* Now, if we have thread information, update inferior_ptid.  */
-  inferior_ptid = remote_current_thread (inferior_ptid);
-
-  remote_add_inferior (ptid_get_pid (inferior_ptid), 0);
-  add_thread_silent (inferior_ptid);
+  add_current_inferior_and_thread ();
 
   /* Get updated offsets, if the stub uses qOffsets.  */
   get_offsets ();
