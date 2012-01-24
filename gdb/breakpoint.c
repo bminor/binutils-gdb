@@ -3825,14 +3825,15 @@ which its expression is valid.\n");
 
 static int
 bpstat_check_location (const struct bp_location *bl,
-		       struct address_space *aspace, CORE_ADDR bp_addr)
+		       struct address_space *aspace, CORE_ADDR bp_addr,
+		       const struct target_waitstatus *ws)
 {
   struct breakpoint *b = bl->owner;
 
   /* BL is from an existing breakpoint.  */
   gdb_assert (b != NULL);
 
-  return b->ops->breakpoint_hit (bl, aspace, bp_addr);
+  return b->ops->breakpoint_hit (bl, aspace, bp_addr, ws);
 }
 
 /* Determine if the watched values have actually changed, and we
@@ -4142,7 +4143,8 @@ bpstat_check_breakpoint_conditions (bpstat bs, ptid_t ptid)
 
 bpstat
 bpstat_stop_status (struct address_space *aspace,
-		    CORE_ADDR bp_addr, ptid_t ptid)
+		    CORE_ADDR bp_addr, ptid_t ptid,
+		    const struct target_waitstatus *ws)
 {
   struct breakpoint *b = NULL;
   struct bp_location *bl;
@@ -4180,7 +4182,7 @@ bpstat_stop_status (struct address_space *aspace,
 	  if (bl->shlib_disabled)
 	    continue;
 
-	  if (!bpstat_check_location (bl, aspace, bp_addr))
+	  if (!bpstat_check_location (bl, aspace, bp_addr, ws))
 	    continue;
 
 	  /* Come here if it's a watchpoint, or if the break address
@@ -6225,7 +6227,8 @@ remove_catch_fork (struct bp_location *bl)
 
 static int
 breakpoint_hit_catch_fork (const struct bp_location *bl,
-			   struct address_space *aspace, CORE_ADDR bp_addr)
+			   struct address_space *aspace, CORE_ADDR bp_addr,
+			   const struct target_waitstatus *ws)
 {
   struct fork_catchpoint *c = (struct fork_catchpoint *) bl->owner;
 
@@ -6334,7 +6337,8 @@ remove_catch_vfork (struct bp_location *bl)
 
 static int
 breakpoint_hit_catch_vfork (const struct bp_location *bl,
-			    struct address_space *aspace, CORE_ADDR bp_addr)
+			    struct address_space *aspace, CORE_ADDR bp_addr,
+			    const struct target_waitstatus *ws)
 {
   struct fork_catchpoint *c = (struct fork_catchpoint *) bl->owner;
 
@@ -6538,7 +6542,8 @@ remove_catch_syscall (struct bp_location *bl)
 
 static int
 breakpoint_hit_catch_syscall (const struct bp_location *bl,
-			      struct address_space *aspace, CORE_ADDR bp_addr)
+			      struct address_space *aspace, CORE_ADDR bp_addr,
+			      const struct target_waitstatus *ws)
 {
   /* We must check if we are catching specific syscalls in this
      breakpoint.  If we are, then we must guarantee that the called
@@ -6850,7 +6855,8 @@ remove_catch_exec (struct bp_location *bl)
 
 static int
 breakpoint_hit_catch_exec (const struct bp_location *bl,
-			   struct address_space *aspace, CORE_ADDR bp_addr)
+			   struct address_space *aspace, CORE_ADDR bp_addr,
+			   const struct target_waitstatus *ws)
 {
   struct exec_catchpoint *c = (struct exec_catchpoint *) bl->owner;
 
@@ -8094,8 +8100,13 @@ stopat_command (char *arg, int from_tty)
 static int
 breakpoint_hit_ranged_breakpoint (const struct bp_location *bl,
 				  struct address_space *aspace,
-				  CORE_ADDR bp_addr)
+				  CORE_ADDR bp_addr,
+				  const struct target_waitstatus *ws)
 {
+  if (ws->kind != TARGET_WAITKIND_STOPPED
+      || ws->value.sig != TARGET_SIGNAL_TRAP)
+    return 0;
+
   return breakpoint_address_match_range (bl->pspace->aspace, bl->address,
 					 bl->length, aspace, bp_addr);
 }
@@ -8562,7 +8573,8 @@ remove_watchpoint (struct bp_location *bl)
 
 static int
 breakpoint_hit_watchpoint (const struct bp_location *bl,
-			   struct address_space *aspace, CORE_ADDR bp_addr)
+			   struct address_space *aspace, CORE_ADDR bp_addr,
+			   const struct target_waitstatus *ws)
 {
   struct breakpoint *b = bl->owner;
   struct watchpoint *w = (struct watchpoint *) b;
@@ -10821,7 +10833,8 @@ base_breakpoint_remove_location (struct bp_location *bl)
 static int
 base_breakpoint_breakpoint_hit (const struct bp_location *bl,
 				struct address_space *aspace,
-				CORE_ADDR bp_addr)
+				CORE_ADDR bp_addr,
+				const struct target_waitstatus *ws)
 {
   internal_error_pure_virtual_called ();
 }
@@ -10967,9 +10980,14 @@ bkpt_remove_location (struct bp_location *bl)
 
 static int
 bkpt_breakpoint_hit (const struct bp_location *bl,
-		     struct address_space *aspace, CORE_ADDR bp_addr)
+		     struct address_space *aspace, CORE_ADDR bp_addr,
+		     const struct target_waitstatus *ws)
 {
   struct breakpoint *b = bl->owner;
+
+  if (ws->kind != TARGET_WAITKIND_STOPPED
+      || ws->value.sig != TARGET_SIGNAL_TRAP)
+    return 0;
 
   if (!breakpoint_address_match (bl->pspace->aspace, bl->address,
 				 aspace, bp_addr))
@@ -11271,7 +11289,8 @@ tracepoint_re_set (struct breakpoint *b)
 
 static int
 tracepoint_breakpoint_hit (const struct bp_location *bl,
-			   struct address_space *aspace, CORE_ADDR bp_addr)
+			   struct address_space *aspace, CORE_ADDR bp_addr,
+			   const struct target_waitstatus *ws)
 {
   /* By definition, the inferior does not report stops at
      tracepoints.  */
@@ -13626,7 +13645,8 @@ is_non_inline_function (struct breakpoint *b)
    have been inlined.  */
 
 int
-pc_at_non_inline_function (struct address_space *aspace, CORE_ADDR pc)
+pc_at_non_inline_function (struct address_space *aspace, CORE_ADDR pc,
+			   const struct target_waitstatus *ws)
 {
   struct breakpoint *b;
   struct bp_location *bl;
@@ -13639,7 +13659,7 @@ pc_at_non_inline_function (struct address_space *aspace, CORE_ADDR pc)
       for (bl = b->loc; bl != NULL; bl = bl->next)
 	{
 	  if (!bl->shlib_disabled
-	      && bpstat_check_location (bl, aspace, pc))
+	      && bpstat_check_location (bl, aspace, pc, ws))
 	    return 1;
 	}
     }

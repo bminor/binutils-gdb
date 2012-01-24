@@ -438,9 +438,14 @@ struct breakpoint_ops
 
   /* Return true if it the target has stopped due to hitting
      breakpoint location BL.  This function does not check if we
-     should stop, only if BL explains the stop.  */
-  int (*breakpoint_hit) (const struct bp_location *bl, struct address_space *,
-			 CORE_ADDR);
+     should stop, only if BL explains the stop.  ASPACE is the address
+     space in which the event occurred, BP_ADDR is the address at
+     which the inferior stopped, and WS is the target_waitstatus
+     describing the event.  */
+  int (*breakpoint_hit) (const struct bp_location *bl,
+			 struct address_space *aspace,
+			 CORE_ADDR bp_addr,
+			 const struct target_waitstatus *ws);
 
   /* Check internal conditions of the breakpoint referred to by BS.
      If we should not stop for this breakpoint, set BS->stop to 0.  */
@@ -774,7 +779,8 @@ extern void bpstat_clear (bpstat *);
 extern bpstat bpstat_copy (bpstat);
 
 extern bpstat bpstat_stop_status (struct address_space *aspace,
-				  CORE_ADDR pc, ptid_t ptid);
+				  CORE_ADDR pc, ptid_t ptid,
+				  const struct target_waitstatus *ws);
 
 /* This bpstat_what stuff tells wait_for_inferior what to do with a
    breakpoint (a challenging task).
@@ -1405,7 +1411,8 @@ extern struct breakpoint *iterate_over_breakpoints (int (*) (struct breakpoint *
    have been inlined.  */
 
 extern int pc_at_non_inline_function (struct address_space *aspace,
-				      CORE_ADDR pc);
+				      CORE_ADDR pc,
+				      const struct target_waitstatus *ws);
 
 extern int user_breakpoint_p (struct breakpoint *);
 

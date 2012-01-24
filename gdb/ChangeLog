@@ -1,3 +1,25 @@
+2012-01-24  Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.c (bpstat_check_location, bpstat_stop_status,
+	pc_at_non_inline_function): Add `ws' parameter, and pass it down.
+	(breakpoint_hit_catch_fork, breakpoint_hit_catch_vfork)
+	(breakpoint_hit_catch_syscall, breakpoint_hit_catch_exec): Add
+	`ws' parameter.
+	(breakpoint_hit_ranged_breakpoint): Add `ws' parameter.  Return
+	false for events other than TARGET_SIGNAL_TRAP.
+	(breakpoint_hit_watchpoint, base_breakpoint_breakpoint_hit):
+	Add `ws' parameter.
+	(bkpt_breakpoint_hit): Add `ws' parameter.  Return false for
+	events other than TARGET_SIGNAL_TRAP.
+	(tracepoint_breakpoint_hit): Add `ws' parameter.
+	* breakpoint.h (struct breakpoint_ops) <breakpoint_hit>: Add `ws'
+	parameter.
+	(bpstat_stop_status): Same.
+	(pc_at_non_inline_function): Same.
+	* infrun.c (handle_syscall_event, handle_inferior_event): Adjust
+	to pass the current event's waitstatus to bpstat_stop_status
+	and pc_at_non_inline_function.
+
 2012-01-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Code cleanup.

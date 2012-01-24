@@ -3086,7 +3086,7 @@ handle_syscall_event (struct execution_control_state *ecs)
 
       ecs->event_thread->control.stop_bpstat
 	= bpstat_stop_status (get_regcache_aspace (regcache),
-			      stop_pc, ecs->ptid);
+			      stop_pc, ecs->ptid, &ecs->ws);
       ecs->random_signal
 	= !bpstat_explains_signal (ecs->event_thread->control.stop_bpstat);
 
@@ -3537,7 +3537,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 
       ecs->event_thread->control.stop_bpstat
 	= bpstat_stop_status (get_regcache_aspace (get_current_regcache ()),
-			      stop_pc, ecs->ptid);
+			      stop_pc, ecs->ptid, &ecs->ws);
 
       /* Note that we're interested in knowing the bpstat actually
 	 causes a stop, not just if it may explain the signal.
@@ -3635,7 +3635,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 
       ecs->event_thread->control.stop_bpstat
 	= bpstat_stop_status (get_regcache_aspace (get_current_regcache ()),
-			      stop_pc, ecs->ptid);
+			      stop_pc, ecs->ptid, &ecs->ws);
       ecs->random_signal
 	= !bpstat_explains_signal (ecs->event_thread->control.stop_bpstat);
 
@@ -4094,11 +4094,12 @@ handle_inferior_event (struct execution_control_state *ecs)
 	 user had set a breakpoint on that inlined code, the missing
 	 skip_inline_frames call would break things.  Fortunately
 	 that's an extremely unlikely scenario.  */
-      if (!pc_at_non_inline_function (aspace, stop_pc)
+      if (!pc_at_non_inline_function (aspace, stop_pc, &ecs->ws)
           && !(ecs->event_thread->suspend.stop_signal == TARGET_SIGNAL_TRAP
                && ecs->event_thread->control.trap_expected
                && pc_at_non_inline_function (aspace,
-                                             ecs->event_thread->prev_pc)))
+                                             ecs->event_thread->prev_pc,
+					     &ecs->ws)))
 	skip_inline_frames (ecs->ptid);
     }
 
@@ -4200,10 +4201,11 @@ handle_inferior_event (struct execution_control_state *ecs)
 	  return;
 	}
 
-      /* See if there is a breakpoint at the current PC.  */
+      /* See if there is a breakpoint/watchpoint/catchpoint/etc. that
+	 handles this event.  */
       ecs->event_thread->control.stop_bpstat
 	= bpstat_stop_status (get_regcache_aspace (get_current_regcache ()),
-			      stop_pc, ecs->ptid);
+			      stop_pc, ecs->ptid, &ecs->ws);
 
       /* Following in case break condition called a
 	 function.  */
