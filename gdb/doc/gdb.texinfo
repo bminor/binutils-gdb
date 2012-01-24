@@ -4113,6 +4113,12 @@ and @sc{gnu}/Linux.
 A call to @code{vfork}.  This is currently only available for HP-UX
 and @sc{gnu}/Linux.
 
+@item load @r{[}regexp@r{]}
+@itemx unload @r{[}regexp@r{]}
+The loading or unloading of a shared library.  If @var{regexp} is
+given, then the catchpoint will stop only if the regular expression
+matches one of the affected libraries.
+
 @end table
 
 @item tcatch @var{event}
@@ -15588,8 +15594,14 @@ discarded.
 @end table
 
 Sometimes you may wish that @value{GDBN} stops and gives you control
-when any of shared library events happen.  Use the @code{set
-stop-on-solib-events} command for this:
+when any of shared library events happen.  The best way to do this is
+to use @code{catch load} and @code{catch unload} (@pxref{Set
+Catchpoints}).
+
+@value{GDBN} also supports the the @code{set stop-on-solib-events}
+command for this.  This command exists for historical reasons.  It is
+less useful than setting a catchpoint, because it does not allow for
+conditions or commands as a catchpoint does.
 
 @table @code
 @item set stop-on-solib-events
@@ -26293,8 +26305,9 @@ The inferior exited normally.
 A signal was received by the inferior.
 @item solib-event
 The inferior has stopped due to a library being loaded or unloaded.
-This can only happen when @code{stop-on-solib-events} (@pxref{Files})
-is set.
+This can happen when @code{stop-on-solib-events} (@pxref{Files}) is
+set or when a @code{catch load} or @code{catch unload} catchpoint is
+in use (@pxref{Set Catchpoints}).
 @item fork
 The inferior has forked.  This is reported when @code{catch fork}
 (@pxref{Set Catchpoints}) has been used.

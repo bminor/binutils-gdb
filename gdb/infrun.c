@@ -3316,28 +3316,32 @@ handle_inferior_event (struct execution_control_state *ecs)
          established.  */
       if (stop_soon == NO_STOP_QUIETLY)
 	{
-	  /* Check for any newly added shared libraries if we're
-	     supposed to be adding them automatically.  Switch
-	     terminal for any messages produced by
-	     breakpoint_re_set.  */
-	  target_terminal_ours_for_output ();
-	  /* NOTE: cagney/2003-11-25: Make certain that the target
-	     stack's section table is kept up-to-date.  Architectures,
-	     (e.g., PPC64), use the section table to perform
-	     operations such as address => section name and hence
-	     require the table to contain all sections (including
-	     those found in shared libraries).  */
-#ifdef SOLIB_ADD
-	  SOLIB_ADD (NULL, 0, &current_target, auto_solib_add);
-#else
-	  solib_add (NULL, 0, &current_target, auto_solib_add);
-#endif
-	  target_terminal_inferior ();
+	  struct regcache *regcache;
+
+	  if (!ptid_equal (ecs->ptid, inferior_ptid))
+	    context_switch (ecs->ptid);
+	  regcache = get_thread_regcache (ecs->ptid);
+
+	  handle_solib_event ();
+
+	  ecs->event_thread->control.stop_bpstat
+	    = bpstat_stop_status (get_regcache_aspace (regcache),
+				  stop_pc, ecs->ptid, &ecs->ws);
+	  ecs->random_signal
+	    = !bpstat_explains_signal (ecs->event_thread->control.stop_bpstat);
+
+	  if (!ecs->random_signal)
+	    {
+	      /* A catchpoint triggered.  */
+	      ecs->event_thread->suspend.stop_signal = TARGET_SIGNAL_TRAP;
+	      goto process_event_stop_test;
+	    }
 
 	  /* If requested, stop when the dynamic linker notifies
 	     gdb of events.  This allows the user to get control
 	     and place breakpoints in initializer routines for
 	     dynamically loaded objects (among other things).  */
+	  ecs->event_thread->suspend.stop_signal = TARGET_SIGNAL_0;
 	  if (stop_on_solib_events)
 	    {
 	      /* Make sure we print "Stopped due to solib-event" in
@@ -3347,9 +3351,6 @@ handle_inferior_event (struct execution_control_state *ecs)
 	      stop_stepping (ecs);
 	      return;
 	    }
-
-	  /* NOTE drow/2007-05-11: This might be a good place to check
-	     for "catch load".  */
 	}
 
       /* If we are skipping through a shell, or through shared library

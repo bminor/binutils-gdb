@@ -1,5 +1,43 @@
 2012-01-24  Tom Tromey  <tromey@redhat.com>
 
+	PR symtab/12406:
+	* solib.c (update_solib_list): Update the program space's
+	added_solibs and deleted_solibs fields.
+	* progspace.h (struct program_space) <added_solibs,
+	deleted_solibs>: New fields.
+	(clear_program_space_solib_cache): Declare.
+	* progspace.c (release_program_space): Call
+	clear_program_space_solib_cache.
+	(clear_program_space_solib_cache): New function.
+	* infrun.c (handle_inferior_event) <TARGET_WAITKIND_LOADED>: Call
+	bpstat_stop_status.  Use handle_solib_event.
+	* breakpoint.c: Include gdb_regex.h.
+	(print_solib_event): New function.
+	(bpstat_print): Use print_solib_event.
+	(bpstat_stop_status): Add special case for bp_shlib_event.
+	(handle_solib_event): New function.
+	(bpstat_what): Use handle_solib_event.
+	(struct solib_catchpoint): New.
+	(dtor_catch_solib, insert_catch_solib, remove_catch_solib)
+	(breakpoint_hit_catch_solib, check_status_catch_solib)
+	(print_it_catch_solib, print_one_catch_solib)
+	(print_mention_catch_solib, print_recreate_catch_solib): New
+	functions.
+	(catch_solib_breakpoint_ops): New global.
+	(catch_load_or_unload, catch_load_command_1)
+	(catch_unload_command_1): New functions.
+	(internal_bkpt_check_status): Add special case for
+	bp_shlib_event.
+	(internal_bkpt_print_it): Use print_solib_event.
+	(initialize_breakpoint_ops): Initialize
+	catch_solib_breakpoint_ops.
+	(_initialize_breakpoint): Register "catch load" and "catch
+	unload".
+	* breakpoint.h (handle_solib_event): Declare.
+	* NEWS: Add entry for "catch load" and "catch unload".
+
+2012-01-24  Tom Tromey  <tromey@redhat.com>
+
 	* ada-lang.c: Include gdb_vecs.h.
 	* charset.c: Include gdb_vecs.h.
 	* tracepoint.h: Include gdb_vecs.h.

@@ -34,6 +34,11 @@
 * The command "info catch" has been removed.  It has been disabled
   since December 2007.
 
+* New commands
+
+  ** "catch load" and "catch unload" can be used to stop when a shared
+     library is loaded or unloaded, respectively.
+
 *** Changes in GDB 7.4
 
 * GDB now handles ambiguous linespecs more consistently; the existing

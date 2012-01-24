@@ -155,7 +155,7 @@ proc reach_1 {func command displacement} {
 		pass $test
 	    }
 	}
-	-re "Stopped due to shared library event\r\n$gdb_prompt $" {
+	-re "Stopped due to (spurious )?shared library event.*\r\n$gdb_prompt $" {
 	    if {$func == "_dl_debug_state"} {
 		if {$debug_state_count == 0} {
 		    # First stop does not yet relocate the _start function

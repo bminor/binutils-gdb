@@ -758,6 +758,9 @@ update_solib_list (int from_tty, struct target_ops *target)
 	     unloaded before we remove it from GDB's tables.  */
 	  observer_notify_solib_unloaded (gdb);
 
+	  VEC_safe_push (char_ptr, current_program_space->deleted_solibs,
+			 xstrdup (gdb->so_name));
+
 	  *gdb_link = gdb->next;
 
 	  /* Unless the user loaded it explicitly, free SO's objfile.  */
@@ -793,6 +796,7 @@ update_solib_list (int from_tty, struct target_ops *target)
 	  volatile struct gdb_exception e;
 
 	  i->pspace = current_program_space;
+	  VEC_safe_push (so_list_ptr, current_program_space->added_solibs, i);
 
 	  TRY_CATCH (e, RETURN_MASK_ERROR)
 	    {

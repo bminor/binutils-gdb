@@ -1060,6 +1060,8 @@ proc mi_expect_stop { reason func args file line extra test } {
     set bn ""
     if { $reason == "breakpoint-hit" } {
         set bn {bkptno="[0-9]+",}
+    } elseif { $reason == "solib-event" } {
+	set bn ".*"
     }
 
     set r ""
