@@ -1,4 +1,4 @@
-2012-01-23  Ian Lance Taylor  <ian@airs.com>
+2012-01-23  Ian Lance Taylor  <iant@google.com>
 
 	PR gold/13617
 	* i386.cc (Target_i386::do_code_fill): When using a jmp
