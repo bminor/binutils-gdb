@@ -1,3 +1,7 @@
+2012-01-24  DJ Delorie  <dj@redhat.com>
+
+	* config/rl78-parse.y (NOT1): Add.
+
 2012-01-23  Roland McGrath  <mcgrathr@google.com>
 
 	* configure.tgt (i386-*-nacl*): Match it.

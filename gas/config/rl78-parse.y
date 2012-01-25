@@ -166,7 +166,7 @@ reg_xbc (int reg)
 %token HALT
 %token INC INCW
 %token MACH MACHU MOV MOV1 MOVS MOVW MULH MULHU MULU
-%token NOP
+%token NOP NOT1
 %token ONEB ONEW OR OR1
 %token POP PUSH
 %token RET RETI RETB ROL ROLC ROLWC ROR RORC
@@ -886,6 +886,11 @@ statement :
 
 /* ---------------------------------------------------------------------- */
 
+	| NOT1 CY
+	  { B2 (0x71, 0xc0); }
+
+/* ---------------------------------------------------------------------- */
+
 	| POP regw
 	  { B1 (0xc0); F ($2, 5, 2); }
 
@@ -1291,6 +1296,7 @@ token_table[] =
   OPC(MULHU),
   OPC(MULU),
   OPC(NOP),
+  OPC(NOT1),
   OPC(ONEB),
   OPC(ONEW),
   OPC(OR),
