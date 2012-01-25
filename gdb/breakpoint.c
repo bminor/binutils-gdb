@@ -4303,7 +4303,7 @@ bpstat_stop_status (struct address_space *aspace,
      "catch unload".  */
   for (bs = bs_head; bs != NULL; bs = bs->next)
     {
-      if (bs->breakpoint_at->type == bp_shlib_event)
+      if (bs->breakpoint_at && bs->breakpoint_at->type == bp_shlib_event)
 	{
 	  handle_solib_event ();
 	  break;
