@@ -94,6 +94,9 @@ object_unittest_SOURCES = object_unittest.cc
 check_PROGRAMS += binary_unittest
 binary_unittest_SOURCES = binary_unittest.cc
 
+check_PROGRAMS += leb128_unittest
+leb128_unittest_SOURCES = leb128_unittest.cc
+
 endif NATIVE_OR_CROSS_LINKER
 
 # ---------------------------------------------------------------------

@@ -54,7 +54,7 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 	$(am__EXEEXT_34) $(am__EXEEXT_35) $(am__EXEEXT_36) \
 	$(am__EXEEXT_37) $(am__EXEEXT_38)
 @NATIVE_OR_CROSS_LINKER_TRUE@am__append_1 = object_unittest \
-@NATIVE_OR_CROSS_LINKER_TRUE@	binary_unittest
+@NATIVE_OR_CROSS_LINKER_TRUE@	binary_unittest leb128_unittest
 
 # Test --detect-odr-violations
 
@@ -646,7 +646,8 @@ am_libgoldtest_a_OBJECTS = test.$(OBJEXT) testmain.$(OBJEXT) \
 	testfile.$(OBJEXT)
 libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @NATIVE_OR_CROSS_LINKER_TRUE@am__EXEEXT_1 = object_unittest$(EXEEXT) \
-@NATIVE_OR_CROSS_LINKER_TRUE@	binary_unittest$(EXEEXT)
+@NATIVE_OR_CROSS_LINKER_TRUE@	binary_unittest$(EXEEXT) \
+@NATIVE_OR_CROSS_LINKER_TRUE@	leb128_unittest$(EXEEXT)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_2 = icf_virtual_function_folding_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	basic_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	basic_pic_test$(EXEEXT)
@@ -1221,6 +1222,13 @@ justsyms_exec_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 large_OBJECTS = $(am_large_OBJECTS)
 large_LINK = $(CCLD) $(large_CFLAGS) $(CFLAGS) $(large_LDFLAGS) \
 	$(LDFLAGS) -o $@
+@NATIVE_OR_CROSS_LINKER_TRUE@am_leb128_unittest_OBJECTS =  \
+@NATIVE_OR_CROSS_LINKER_TRUE@	leb128_unittest.$(OBJEXT)
+leb128_unittest_OBJECTS = $(am_leb128_unittest_OBJECTS)
+leb128_unittest_LDADD = $(LDADD)
+leb128_unittest_DEPENDENCIES = libgoldtest.a ../libgold.a \
+	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 local_labels_test_SOURCES = local_labels_test.c
 local_labels_test_OBJECTS = local_labels_test.$(OBJEXT)
 local_labels_test_LDADD = $(LDADD)
@@ -1701,7 +1709,8 @@ SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c basic_pie_test.c \
 	incremental_test_3.c incremental_test_4.c incremental_test_5.c \
 	incremental_test_6.c $(initpri1_SOURCES) $(initpri2_SOURCES) \
 	$(initpri3a_SOURCES) $(initpri3b_SOURCES) $(justsyms_SOURCES) \
-	$(justsyms_exec_SOURCES) $(large_SOURCES) local_labels_test.c \
+	$(justsyms_exec_SOURCES) $(large_SOURCES) \
+	$(leb128_unittest_SOURCES) local_labels_test.c \
 	many_sections_r_test.c $(many_sections_test_SOURCES) \
 	$(object_unittest_SOURCES) permission_test.c plugin_test_1.c \
 	plugin_test_2.c plugin_test_3.c plugin_test_4.c \
@@ -2014,6 +2023,7 @@ LDADD = libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL) \
 
 @NATIVE_OR_CROSS_LINKER_TRUE@object_unittest_SOURCES = object_unittest.cc
 @NATIVE_OR_CROSS_LINKER_TRUE@binary_unittest_SOURCES = binary_unittest.cc
+@NATIVE_OR_CROSS_LINKER_TRUE@leb128_unittest_SOURCES = leb128_unittest.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@constructor_test_SOURCES = constructor_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@constructor_test_DEPENDENCIES = gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@constructor_test_LDFLAGS = -Bgcctestdir/
@@ -2942,6 +2952,9 @@ justsyms_exec$(EXEEXT): $(justsyms_exec_OBJECTS) $(justsyms_exec_DEPENDENCIES)
 large$(EXEEXT): $(large_OBJECTS) $(large_DEPENDENCIES) 
 	@rm -f large$(EXEEXT)
 	$(large_LINK) $(large_OBJECTS) $(large_LDADD) $(LIBS)
+leb128_unittest$(EXEEXT): $(leb128_unittest_OBJECTS) $(leb128_unittest_DEPENDENCIES) 
+	@rm -f leb128_unittest$(EXEEXT)
+	$(CXXLINK) $(leb128_unittest_OBJECTS) $(leb128_unittest_LDADD) $(LIBS)
 @GCC_FALSE@local_labels_test$(EXEEXT): $(local_labels_test_OBJECTS) $(local_labels_test_DEPENDENCIES) 
 @GCC_FALSE@	@rm -f local_labels_test$(EXEEXT)
 @GCC_FALSE@	$(LINK) $(local_labels_test_OBJECTS) $(local_labels_test_LDADD) $(LIBS)
@@ -3322,6 +3335,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/justsyms_1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/justsyms_exec.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/large-large.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/leb128_unittest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/local_labels_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/many_sections_r_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/many_sections_test.Po@am__quote@
@@ -3749,6 +3763,8 @@ object_unittest.log: object_unittest$(EXEEXT)
 	@p='object_unittest$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 binary_unittest.log: binary_unittest$(EXEEXT)
 	@p='binary_unittest$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+leb128_unittest.log: leb128_unittest$(EXEEXT)
+	@p='leb128_unittest$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 icf_virtual_function_folding_test.log: icf_virtual_function_folding_test$(EXEEXT)
 	@p='icf_virtual_function_folding_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 basic_test.log: basic_test$(EXEEXT)
