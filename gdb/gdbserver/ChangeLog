@@ -1,3 +1,10 @@
+2012-01-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* linux-low.c (linux_wait_for_event_1): Rename to ...
+	(linux_wait_for_event): ... here and merge it with former
+	linux_wait_for_event - new variable wait_ptid, use it.
+	(linux_wait_for_event): Remove - merge it to linux_wait_for_event_1.
+
 2012-01-23  Pedro Alves  <palves@redhat.com>
 
 	* server.c (main): Avoid yet another case of infinite loop while

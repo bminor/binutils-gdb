@@ -1569,9 +1569,10 @@ ptid_t step_over_bkpt;
    the stopped child otherwise.  */
 
 static int
-linux_wait_for_event_1 (ptid_t ptid, int *wstat, int options)
+linux_wait_for_event (ptid_t ptid, int *wstat, int options)
 {
   struct lwp_info *event_child, *requested_child;
+  ptid_t wait_ptid;
 
   event_child = NULL;
   requested_child = NULL;
@@ -1620,13 +1621,24 @@ linux_wait_for_event_1 (ptid_t ptid, int *wstat, int options)
       return lwpid_of (event_child);
     }
 
+  if (ptid_is_pid (ptid))
+    {
+      /* A request to wait for a specific tgid.  This is not possible
+	 with waitpid, so instead, we wait for any child, and leave
+	 children we're not interested in right now with a pending
+	 status to report later.  */
+      wait_ptid = minus_one_ptid;
+    }
+  else
+    wait_ptid = ptid;
+
   /* We only enter this loop if no process has a pending wait status.  Thus
      any action taken in response to a wait status inside this loop is
      responding as soon as we detect the status, not after any pending
      events.  */
   while (1)
     {
-      event_child = linux_wait_for_lwp (ptid, wstat, options);
+      event_child = linux_wait_for_lwp (wait_ptid, wstat, options);
 
       if ((options & WNOHANG) && event_child == NULL)
 	{
@@ -1637,6 +1649,19 @@ linux_wait_for_event_1 (ptid_t ptid, int *wstat, int options)
 
       if (event_child == NULL)
 	error ("event from unknown child");
+
+      if (ptid_is_pid (ptid)
+	  && ptid_get_pid (ptid) != ptid_get_pid (ptid_of (event_child)))
+	{
+	  if (! WIFSTOPPED (*wstat))
+	    mark_lwp_dead (event_child, *wstat);
+	  else
+	    {
+	      event_child->status_pending_p = 1;
+	      event_child->status_pending = *wstat;
+	    }
+	  continue;
+	}
 
       current_inferior = get_lwp_thread (event_child);
 
@@ -1729,48 +1754,6 @@ linux_wait_for_event_1 (ptid_t ptid, int *wstat, int options)
   /* NOTREACHED */
   return 0;
 }
-
-static int
-linux_wait_for_event (ptid_t ptid, int *wstat, int options)
-{
-  ptid_t wait_ptid;
-
-  if (ptid_is_pid (ptid))
-    {
-      /* A request to wait for a specific tgid.  This is not possible
-	 with waitpid, so instead, we wait for any child, and leave
-	 children we're not interested in right now with a pending
-	 status to report later.  */
-      wait_ptid = minus_one_ptid;
-    }
-  else
-    wait_ptid = ptid;
-
-  while (1)
-    {
-      int event_pid;
-
-      event_pid = linux_wait_for_event_1 (wait_ptid, wstat, options);
-
-      if (event_pid > 0
-	  && ptid_is_pid (ptid) && ptid_get_pid (ptid) != event_pid)
-	{
-	  struct lwp_info *event_child
-	    = find_lwp_pid (pid_to_ptid (event_pid));
-
-	  if (! WIFSTOPPED (*wstat))
-	    mark_lwp_dead (event_child, *wstat);
-	  else
-	    {
-	      event_child->status_pending_p = 1;
-	      event_child->status_pending = *wstat;
-	    }
-	}
-      else
-	return event_pid;
-    }
-}
-
 
 /* Count the LWP's that have had events.  */
 
