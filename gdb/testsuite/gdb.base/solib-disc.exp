@@ -62,7 +62,7 @@ if ![runto_main] then {
 
 gdb_test_no_output "set stop-on-solib-events 1"
 
-gdb_test "continue" "Stopped due to shared library event" "continue to load"
+gdb_test "continue" "Stopped due to shared library event.*" "continue to load"
 
 set msg "save \$pc after load"
 set saved_pc ""
@@ -84,7 +84,7 @@ if { [gdb_reconnect] == 0 } {
 gdb_test "print/x \$pc" "\\\$$decimal = $saved_pc" "check \$pc after load"
 
 
-gdb_test "continue" "Stopped due to shared library event" "continue to unload"
+gdb_test "continue" "Stopped due to shared library event.*" "continue to unload"
 
 set msg "save \$pc after unload"
 set saved_pc ""

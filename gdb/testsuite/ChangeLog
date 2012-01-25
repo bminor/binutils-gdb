@@ -1,3 +1,7 @@
+2012-01-25  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.base/solib-disc.exp: Fix regexps.
+
 2012-01-24  Tom Tromey  <tromey@redhat.com>
 
 	* lib/mi-support.exp (mi_expect_stop): Add special case for
