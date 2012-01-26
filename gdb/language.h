@@ -136,6 +136,16 @@ struct language_arch_info
   struct type *bool_type_default;
 };
 
+/* A pointer to a function expected to return nonzero if
+   SYMBOL_SEARCH_NAME matches the given LOOKUP_NAME.
+
+   SYMBOL_SEARCH_NAME should be a symbol's "search" name.
+   LOOKUP_NAME should be the name of an entity after it has been
+   transformed for lookup.  */
+
+typedef int (*symbol_name_match_p_ftype) (const char *symbol_search_name,
+					  const char *lookup_name);
+
 /* Structure tying together assorted information about a language.  */
 
 struct language_defn
@@ -318,19 +328,14 @@ struct language_defn
     void (*la_get_string) (struct value *value, gdb_byte **buffer, int *length,
 			   struct type **chartype, const char **charset);
 
-    /* Compare two symbol names according to language rules.  For
-       instance, in C++, we might want to ignore whitespaces in
-       the symbol name.  Or some case-insensitive language might
-       want to ignore casing during the match.
+    /* Return a pointer to the function that should be used to match
+       a symbol name against LOOKUP_NAME. This is mostly for languages
+       such as Ada where the matching algorithm depends on LOOKUP_NAME.
 
-       Both STR1 and STR2 are expected to be demangled name, except
-       for Ada, where STR1 and STR2 are expected to be encoded names.
-       The latter is because searches are performed using the encoded
-       name in Ada.
-
-       The return value follows the same spirit as strcmp.  */
-
-    int (*la_symbol_name_compare) (const char *str1, const char *str2);
+       This field may be NULL, in which case strcmp_iw will be used
+       to perform the matching.  */
+    symbol_name_match_p_ftype (*la_get_symbol_name_match_p)
+      (const char *lookup_name);
 
     /* Find all symbols in the current program space matching NAME in
        DOMAIN, according to this language's rules.

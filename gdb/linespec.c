@@ -321,6 +321,17 @@ cplusplus_error (const char *name, const char *fmt, ...)
   throw_error (NOT_FOUND_ERROR, "%s", message);
 }
 
+/* Some data for the expand_symtabs_matching callback.  */
+
+struct symbol_matcher_data
+{
+  /* The lookup name against which symbol name should be compared.  */
+  const char *lookup_name;
+
+  /* The routine to be used for comparison.  */
+  symbol_name_match_p_ftype symbol_name_match_p;
+};
+
 /* A helper for iterate_over_all_matching_symtabs that is passed as a
    callback to the expand_symtabs_matching method.  */
 
@@ -328,9 +339,9 @@ static int
 iterate_name_matcher (const struct language_defn *language,
 		      const char *name, void *d)
 {
-  const char **dname = d;
+  const struct symbol_matcher_data *data = d;
 
-  if (language->la_symbol_name_compare (name, *dname) == 0)
+  if (data->symbol_name_match_p (name, data->lookup_name))
     return 1;
   return 0;
 }
@@ -349,6 +360,13 @@ iterate_over_all_matching_symtabs (const char *name,
 {
   struct objfile *objfile;
   struct program_space *pspace;
+  struct symbol_matcher_data matcher_data;
+
+  matcher_data.lookup_name = name;
+  matcher_data.symbol_name_match_p =
+    current_language->la_get_symbol_name_match_p != NULL
+    ? current_language->la_get_symbol_name_match_p (name)
+    : strcmp_iw;
 
   ALL_PSPACES (pspace)
   {
@@ -367,7 +385,7 @@ iterate_over_all_matching_symtabs (const char *name,
 	objfile->sf->qf->expand_symtabs_matching (objfile, NULL,
 						  iterate_name_matcher,
 						  ALL_DOMAIN,
-						  &name);
+						  &matcher_data);
 
       ALL_OBJFILE_SYMTABS (objfile, symtab)
 	{

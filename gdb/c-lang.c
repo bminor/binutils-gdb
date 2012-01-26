@@ -863,7 +863,7 @@ const struct language_defn c_language_defn =
   default_print_array_index,
   default_pass_by_reference,
   c_get_string,
-  strcmp_iw_ordered,
+  NULL,				/* la_get_symbol_name_match_p */
   iterate_over_symbols,
   LANG_MAGIC
 };
@@ -986,7 +986,7 @@ const struct language_defn cplus_language_defn =
   default_print_array_index,
   cp_pass_by_reference,
   c_get_string,
-  strcmp_iw_ordered,
+  NULL,				/* la_get_symbol_name_match_p */
   iterate_over_symbols,
   LANG_MAGIC
 };
@@ -1027,7 +1027,7 @@ const struct language_defn asm_language_defn =
   default_print_array_index,
   default_pass_by_reference,
   c_get_string,
-  strcmp_iw_ordered,
+  NULL,				/* la_get_symbol_name_match_p */
   iterate_over_symbols,
   LANG_MAGIC
 };
@@ -1073,7 +1073,7 @@ const struct language_defn minimal_language_defn =
   default_print_array_index,
   default_pass_by_reference,
   c_get_string,
-  strcmp_iw_ordered,
+  NULL,				/* la_get_symbol_name_match_p */
   iterate_over_symbols,
   LANG_MAGIC
 };

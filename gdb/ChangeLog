@@ -1,3 +1,21 @@
+2012-01-26  Joel Brobecker  <brobecker@adacore.com>
+
+	* language.h (symbol_name_match_p_ftype): New typedef.
+	(struct language_defn): Replace field la_symbol_name_compare
+	by la_get_symbol_name_match_p.
+	* ada-lang.c (ada_get_symbol_name_match_p): New function.
+	(ada_language_defn): Use it.
+	* linespec.c (struct symbol_matcher_data): New type.
+	(iterate_name_matcher): Rewrite.
+	(iterate_over_all_matching_symtabs): Pass a pointer to
+	a symbol_matcher_data struct to expand_symtabs_matching
+	instead of just the lookup name.
+	* c-lang.c, d-lang.c, jv-lang.c, m2-lang.c, objc-lang.c,
+	opencl-lang.c, p-lang.c, language.c: Delete field
+	la_symbol_name_compare, and replace by NULL for new field
+	la_get_symbol_name_match_p.
+	* symfile.h (struct quick_symbol_functions): Update comment.
+
 2012-01-25  Tom Tromey  <tromey@redhat.com>
 
 	* breakpoint.c (bpstat_stop_status): Check 'breakpoint_at' before

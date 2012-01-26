@@ -401,7 +401,7 @@ const struct language_defn m2_language_defn =
   default_print_array_index,
   default_pass_by_reference,
   default_get_string,
-  strcmp_iw_ordered,
+  NULL,				/* la_get_symbol_name_match_p */
   iterate_over_symbols,
   LANG_MAGIC
 };

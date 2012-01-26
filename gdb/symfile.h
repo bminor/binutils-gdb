@@ -258,12 +258,10 @@ struct quick_symbol_functions
      file is skipped.  If FILE_MATCHER is NULL such file is not skipped.
 
      Otherwise, if KIND does not match this symbol is skipped.
-     
+
      If even KIND matches, then NAME_MATCHER is called for each symbol
-     defined in the file.  The current language, the symbol name and
-     DATA are passed to NAME_MATCHER.  The symbol "search" name should
-     be passed to NAME_MATCHER (see la_symbol_name_compare in struct
-     language_defn for more details on this).
+     defined in the file.  The current language, the symbol "search"
+     name and DATA are passed to NAME_MATCHER.
 
      If NAME_MATCHER returns zero, then this symbol is skipped.
 

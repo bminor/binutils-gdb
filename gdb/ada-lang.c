@@ -12319,6 +12319,18 @@ static const struct exp_descriptor ada_exp_descriptor = {
   ada_evaluate_subexp
 };
 
+/* Implement the "la_get_symbol_name_match_p" language_defn method
+   for Ada.  */
+
+static symbol_name_match_p_ftype
+ada_get_symbol_name_match_p (const char *lookup_name)
+{
+  if (should_use_wild_match (lookup_name))
+    return wild_match;
+  else
+    return compare_names;
+}
+
 const struct language_defn ada_language_defn = {
   "ada",                        /* Language name */
   language_ada,
@@ -12355,7 +12367,7 @@ const struct language_defn ada_language_defn = {
   ada_print_array_index,
   default_pass_by_reference,
   c_get_string,
-  compare_names,
+  ada_get_symbol_name_match_p,	/* la_get_symbol_name_match_p */
   ada_iterate_over_symbols,
   LANG_MAGIC
 };
