@@ -1,3 +1,10 @@
+2012-01-26  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/13622
+	* readelf.c (process_section_groups): If there are no section
+	headers do not scan for section groups.
+	(process_note_sections): Likewise for note sections.
+
 2012-01-20  Tristan Gingold  <gingold@adacore.com>
 
 	* od-macho.c (OPT_SEG_SPLIT_INFO): New macro.

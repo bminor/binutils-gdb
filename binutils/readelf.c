@@ -4961,7 +4961,8 @@ process_section_groups (FILE * file)
   if (section_headers == NULL)
     {
       error (_("Section headers are not available!\n"));
-      abort ();
+      /* PR 13622: This can happen with a corrupt ELF header.  */
+      return 0;
     }
 
   section_headers_groups = (struct group **) calloc (elf_header.e_shnum,
@@ -13070,7 +13071,7 @@ process_note_sections (FILE * file)
   int res = 1;
 
   for (i = 0, section = section_headers;
-       i < elf_header.e_shnum;
+       i < elf_header.e_shnum && section != NULL;
        i++, section++)
     if (section->sh_type == SHT_NOTE)
       res &= process_corefile_note_segment (file,
