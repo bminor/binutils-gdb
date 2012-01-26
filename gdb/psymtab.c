@@ -1250,7 +1250,7 @@ static void
 expand_symtabs_matching_via_partial
   (struct objfile *objfile,
    int (*file_matcher) (const char *, void *),
-   int (*name_matcher) (const struct language_defn *, const char *, void *),
+   int (*name_matcher) (const char *, void *),
    enum search_domain kind,
    void *data)
 {
@@ -1302,8 +1302,7 @@ expand_symtabs_matching_via_partial
 		       && SYMBOL_CLASS (*psym) == LOC_BLOCK)
 		   || (kind == TYPES_DOMAIN
 		       && SYMBOL_CLASS (*psym) == LOC_TYPEDEF))
-		  && (*name_matcher) (current_language,
-				      SYMBOL_SEARCH_NAME (*psym), data))
+		  && (*name_matcher) (SYMBOL_SEARCH_NAME (*psym), data))
 		{
 		  PSYMTAB_TO_SYMTAB (ps);
 		  keep_going = 0;
@@ -1943,8 +1942,7 @@ maintenance_check_symtabs (char *ignore, int from_tty)
 
 
 void
-expand_partial_symbol_names (int (*fun) (const struct language_defn *,
-					 const char *, void *),
+expand_partial_symbol_names (int (*fun) (const char *, void *),
 			     void *data)
 {
   struct objfile *objfile;

@@ -336,8 +336,7 @@ struct symbol_matcher_data
    callback to the expand_symtabs_matching method.  */
 
 static int
-iterate_name_matcher (const struct language_defn *language,
-		      const char *name, void *d)
+iterate_name_matcher (const char *name, void *d)
 {
   const struct symbol_matcher_data *data = d;
 

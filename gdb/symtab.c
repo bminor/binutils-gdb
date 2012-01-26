@@ -3201,8 +3201,7 @@ search_symbols_file_matches (const char *filename, void *user_data)
 
 /* A callback for expand_symtabs_matching.  */
 static int
-search_symbols_name_matches (const struct language_defn *language,
-			     const char *symname, void *user_data)
+search_symbols_name_matches (const char *symname, void *user_data)
 {
   struct search_symbols_data *data = user_data;
 
@@ -4010,8 +4009,7 @@ add_macro_name (const char *name, const struct macro_definition *ignore,
 
 /* A callback for expand_partial_symbol_names.  */
 static int
-expand_partial_symbol_name (const struct language_defn *language,
-			    const char *name, void *user_data)
+expand_partial_symbol_name (const char *name, void *user_data)
 {
   struct add_name_data *datum = (struct add_name_data *) user_data;
 

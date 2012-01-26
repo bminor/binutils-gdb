@@ -2691,7 +2691,7 @@ static void
 dw2_expand_symtabs_matching
   (struct objfile *objfile,
    int (*file_matcher) (const char *, void *),
-   int (*name_matcher) (const struct language_defn *, const char *, void *),
+   int (*name_matcher) (const char *, void *),
    enum search_domain kind,
    void *data)
 {
@@ -2745,7 +2745,7 @@ dw2_expand_symtabs_matching
 
       name = index->constant_pool + MAYBE_SWAP (index->symbol_table[idx]);
 
-      if (! (*name_matcher) (current_language, name, data))
+      if (! (*name_matcher) (name, data))
 	continue;
 
       /* The name was matched, now expand corresponding CUs that were

@@ -1,5 +1,19 @@
 2012-01-26  Joel Brobecker  <brobecker@adacore.com>
 
+	* symfile.h (struct quick_symbol_functions) [expand_symtabs_matching]:
+	Remove language parameter from name_matcher.  Adjust the comment.
+	* symtab.c (search_symbols_name_matches, expand_partial_symbol_name):
+	Remove language parameter.
+	* ada-lang.c (ada_expand_partial_symbol_name): Likewise.
+	* linespec.c (iterate_name_matcher): Likewise.
+	* dwarf2read.c (dw2_expand_symtabs_matching): Adjust type of
+	name_matcher.  Adjust call accordingly.
+	* psymtab.c (expand_symtabs_matching_via_partial): Likewise.
+	(maintenance_check_symtabs): Adjust type of parameter "fun".
+	* psymtab.h (maintenance_check_symtabs): Likewise.
+
+2012-01-26  Joel Brobecker  <brobecker@adacore.com>
+
 	* language.h (symbol_name_match_p_ftype): New typedef.
 	(struct language_defn): Replace field la_symbol_name_compare
 	by la_get_symbol_name_match_p.

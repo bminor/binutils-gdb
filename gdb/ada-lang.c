@@ -5699,8 +5699,7 @@ struct add_partial_datum
 
 /* A callback for expand_partial_symbol_names.  */
 static int
-ada_expand_partial_symbol_name (const struct language_defn *language,
-				const char *name, void *user_data)
+ada_expand_partial_symbol_name (const char *name, void *user_data)
 {
   struct add_partial_datum *data = user_data;
   

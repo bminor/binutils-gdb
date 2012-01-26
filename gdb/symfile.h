@@ -260,8 +260,8 @@ struct quick_symbol_functions
      Otherwise, if KIND does not match this symbol is skipped.
 
      If even KIND matches, then NAME_MATCHER is called for each symbol
-     defined in the file.  The current language, the symbol "search"
-     name and DATA are passed to NAME_MATCHER.
+     defined in the file.  The symbol "search" name and DATA are passed
+     to NAME_MATCHER.
 
      If NAME_MATCHER returns zero, then this symbol is skipped.
 
@@ -272,7 +272,7 @@ struct quick_symbol_functions
   void (*expand_symtabs_matching)
     (struct objfile *objfile,
      int (*file_matcher) (const char *, void *),
-     int (*name_matcher) (const struct language_defn *, const char *, void *),
+     int (*name_matcher) (const char *, void *),
      enum search_domain kind,
      void *data);
 
