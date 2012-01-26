@@ -1566,18 +1566,7 @@ append_psymbol_to_list (struct psymbol_allocation_list *list,
    Since one arg is a struct, we pass in a ptr and deref it (sigh).
    Return the partial symbol that has been added.  */
 
-/* NOTE: carlton/2003-09-11: The reason why we return the partial
-   symbol is so that callers can get access to the symbol's demangled
-   name, which they don't have any cheap way to determine otherwise.
-   (Currenly, dwarf2read.c is the only file who uses that information,
-   though it's possible that other readers might in the future.)
-   Elena wasn't thrilled about that, and I don't blame her, but we
-   couldn't come up with a better way to get that information.  If
-   it's needed in other situations, we could consider breaking up
-   SYMBOL_SET_NAMES to provide access to the demangled name lookup
-   cache.  */
-
-const struct partial_symbol *
+void
 add_psymbol_to_list (const char *name, int namelength, int copy_name,
 		     domain_enum domain,
 		     enum address_class class,
@@ -1597,11 +1586,10 @@ add_psymbol_to_list (const char *name, int namelength, int copy_name,
   /* Do not duplicate global partial symbols.  */
   if (list == &objfile->global_psymbols
       && !added)
-    return psym;
+    return;
 
   /* Save pointer to partial symbol in psymtab, growing symtab if needed.  */
   append_psymbol_to_list (list, psym, objfile);
-  return psym;
 }
 
 /* Initialize storage for partial symbols.  */
