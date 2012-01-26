@@ -1,3 +1,8 @@
+2012-01-26  Alexey Makhalov  <makhaloff@gmail.com>
+
+	PR gas/13624
+	* app.c (app_push): Set 'add_newlines' to zero after saving.
+
 2012-01-24  DJ Delorie  <dj@redhat.com>
 
 	* config/rl78-parse.y (NOT1): Add.
