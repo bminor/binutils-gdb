@@ -312,7 +312,7 @@ Use `info auto-load-scripts [REGEXP]' to list them."),
 	{
 	  /* If this file is not currently loaded, load it.  */
 	  if (! in_hash_table)
-	    source_python_script_for_objfile (objfile, full_path);
+	    source_python_script_for_objfile (objfile, stream, full_path);
 	  fclose (stream);
 	  xfree (full_path);
 	}
@@ -431,7 +431,7 @@ auto_load_objfile_script (struct objfile *objfile, const char *suffix)
 	 It's highly unlikely that we'd ever load it twice,
 	 and these scripts are required to be idempotent under multiple
 	 loads anyway.  */
-      source_python_script_for_objfile (objfile, debugfile);
+      source_python_script_for_objfile (objfile, input, debugfile);
       fclose (input);
     }
 

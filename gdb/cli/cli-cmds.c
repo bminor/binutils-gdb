@@ -539,9 +539,7 @@ source_script_from_stream (FILE *stream, const char *file)
 
       TRY_CATCH (e, RETURN_MASK_ERROR)
 	{
-          /* The python support reopens the file using python functions,
-             so there's no point in passing STREAM here.  */
-	  source_python_script (file);
+	  source_python_script (stream, file);
 	}
       if (e.reason < 0)
 	{

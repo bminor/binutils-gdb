@@ -30,7 +30,7 @@ extern void finish_python_initialization (void);
 
 void eval_python_from_control_command (struct command_line *);
 
-void source_python_script (const char *file);
+void source_python_script (FILE *file, const char *filename);
 
 int apply_val_pretty_printer (struct type *type, const gdb_byte *valaddr,
 			      int embedded_offset, CORE_ADDR address,

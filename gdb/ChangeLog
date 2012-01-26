@@ -1,3 +1,22 @@
+2012-01-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Do not open script filenames twice.
+	* cli/cli-cmds.c (source_script_from_stream): Pass to
+	source_python_script also STREAM.
+	* python/py-auto-load.c (source_section_scripts): Pass to
+	source_python_script_for_objfile also STREAM.
+	(auto_load_objfile_script): Pass to source_python_script_for_objfile
+	also INPUT.
+	* python/python-internal.h (source_python_script_for_objfile): New
+	parameter file, rename parameter file to filename.
+	* python/python.c (python_run_simple_file): Call PyRun_SimpleFile
+	instead if !_WIN32.  Update the function comment.
+	(source_python_script, source_python_script_for_objfile)
+	(source_python_script): New parameter file, rename parameter file to
+	filename.  Pass FILENAME to python_run_simple_file.
+	* python/python.h (source_python_script): New parameter file, rename
+	parameter file to filename.
+
 2012-01-26  Pedro Alves  <palves@redhat.com>
 
 	* corelow.c (core_has_fake_pid): Delete.

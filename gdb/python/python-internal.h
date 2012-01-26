@@ -289,8 +289,8 @@ extern const struct language_defn *python_language;
 
 void gdbpy_print_stack (void);
 
-void source_python_script_for_objfile (struct objfile *objfile,
-				       const char *file);
+void source_python_script_for_objfile (struct objfile *objfile, FILE *file,
+				       const char *filename);
 
 PyObject *python_string_to_unicode (PyObject *obj);
 char *unicode_to_target_string (PyObject *unicode_str);
