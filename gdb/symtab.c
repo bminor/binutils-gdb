@@ -459,6 +459,7 @@ symbol_init_cplus_specific (struct general_symbol_info *gsymbol,
    correctly allocated.  For C++ symbols a cplus_specific struct is
    allocated so OBJFILE must not be NULL.  If this is a non C++ symbol
    OBJFILE can be NULL.  */
+
 void
 symbol_set_demangled_name (struct general_symbol_info *gsymbol,
                            char *name,
@@ -476,6 +477,7 @@ symbol_set_demangled_name (struct general_symbol_info *gsymbol,
 }
 
 /* Return the demangled name of GSYMBOL.  */
+
 char *
 symbol_get_demangled_name (const struct general_symbol_info *gsymbol)
 {
@@ -493,6 +495,7 @@ symbol_get_demangled_name (const struct general_symbol_info *gsymbol)
 
 /* Initialize the language dependent portion of a symbol
    depending upon the language for the symbol.  */
+
 void
 symbol_set_language (struct general_symbol_info *gsymbol,
                      enum language language)
@@ -524,6 +527,7 @@ struct demangled_name_entry
 };
 
 /* Hash function for the demangled name hash.  */
+
 static hashval_t
 hash_demangled_name_entry (const void *data)
 {
@@ -533,6 +537,7 @@ hash_demangled_name_entry (const void *data)
 }
 
 /* Equality function for the demangled name hash.  */
+
 static int
 eq_demangled_name_entry (const void *a, const void *b)
 {
@@ -819,6 +824,7 @@ symbol_natural_name (const struct general_symbol_info *gsymbol)
 
 /* Return the demangled name for a symbol based on the language for
    that symbol.  If no demangled name exists, return NULL.  */
+
 char *
 symbol_demangled_name (const struct general_symbol_info *gsymbol)
 {
@@ -848,6 +854,7 @@ symbol_demangled_name (const struct general_symbol_info *gsymbol)
    linkage name of the symbol, depending on how it will be searched for.
    If there is no distinct demangled name, then returns the same value
    (same pointer) as SYMBOL_LINKAGE_NAME.  */
+
 char *
 symbol_search_name (const struct general_symbol_info *gsymbol)
 {
@@ -858,6 +865,7 @@ symbol_search_name (const struct general_symbol_info *gsymbol)
 }
 
 /* Initialize the structure fields to zero values.  */
+
 void
 init_sal (struct symtab_and_line *sal)
 {
@@ -1797,7 +1805,6 @@ basic_lookup_transparent_type (const char *name)
   return (struct type *) 0;
 }
 
-
 /* Find the name of the file containing main().  */
 /* FIXME:  What about languages without main() or specially linked
    executables that have no main() ?   */
@@ -2589,6 +2596,7 @@ find_pc_line_pc_range (CORE_ADDR pc, CORE_ADDR *startptr, CORE_ADDR *endptr)
    address for that function that has an entry in SYMTAB's line info
    table.  If such an entry cannot be found, return FUNC_ADDR
    unaltered.  */
+
 CORE_ADDR
 skip_prologue_using_lineinfo (CORE_ADDR func_addr, struct symtab *symtab)
 {
@@ -2660,6 +2668,7 @@ find_function_start_sal (struct symbol *sym, int funfirstline)
    If the PC was explicitly specified, the SAL is not changed.
    If the line number was explicitly specified, at most the SAL's PC
    is updated.  If SAL is already past the prologue, then do nothing.  */
+
 void
 skip_prologue_sal (struct symtab_and_line *sal)
 {
@@ -2832,6 +2841,7 @@ skip_prologue_sal (struct symtab_and_line *sal)
    some legitimate operator text, return a pointer to the
    beginning of the substring of the operator text.
    Otherwise, return "".  */
+
 static char *
 operator_chars (char *p, char **end)
 {
@@ -2970,6 +2980,7 @@ operator_chars (char *p, char **end)
    otherwise return non-zero.  Optionally add FILE to the table if ADD
    is non-zero.  If *FIRST is non-zero, forget the old table
    contents.  */
+
 static int
 filename_seen (const char *file, int add, int *first)
 {
@@ -3013,6 +3024,7 @@ filename_seen (const char *file, int add, int *first)
 /* Slave routine for sources_info.  Force line breaks at ,'s.
    NAME is the name to print and *FIRST is nonzero if this is the first
    name printed.  Set *FIRST to zero.  */
+
 static void
 output_source_filename (const char *name, int *first)
 {
@@ -3046,6 +3058,7 @@ output_source_filename (const char *name, int *first)
 }
 
 /* A callback for map_partial_symbol_filenames.  */
+
 static void
 output_partial_symbol_filename (const char *filename, const char *fullname,
 				void *data)
@@ -3104,6 +3117,7 @@ file_matches (const char *file, char *files[], int nfiles)
 }
 
 /* Free any memory associated with a search.  */
+
 void
 free_search_symbols (struct symbol_search *symbols)
 {
@@ -3131,6 +3145,7 @@ make_cleanup_free_search_symbols (struct symbol_search *symbols)
 
 /* Helper function for sort_search_symbols and qsort.  Can only
    sort symbols, not minimal symbols.  */
+
 static int
 compare_search_syms (const void *sa, const void *sb)
 {
@@ -3144,6 +3159,7 @@ compare_search_syms (const void *sa, const void *sb)
 /* Sort the ``nfound'' symbols in the list after prevtail.  Leave
    prevtail where it is, but update its next pointer to point to
    the first of the sorted symbols.  */
+
 static struct symbol_search *
 sort_search_symbols (struct symbol_search *prevtail, int nfound)
 {
@@ -3189,6 +3205,7 @@ struct search_symbols_data
 };
 
 /* A callback for expand_symtabs_matching.  */
+
 static int
 search_symbols_file_matches (const char *filename, void *user_data)
 {
@@ -3198,6 +3215,7 @@ search_symbols_file_matches (const char *filename, void *user_data)
 }
 
 /* A callback for expand_symtabs_matching.  */
+
 static int
 search_symbols_name_matches (const char *symname, void *user_data)
 {
@@ -3993,6 +4011,7 @@ struct add_name_data
 
 /* A callback used with macro_for_each and macro_for_each_in_scope.
    This adds a macro's name to the current completion list.  */
+
 static void
 add_macro_name (const char *name, const struct macro_definition *ignore,
 		struct macro_source_file *ignore2, int ignore3,
@@ -4006,6 +4025,7 @@ add_macro_name (const char *name, const struct macro_definition *ignore,
 }
 
 /* A callback for expand_partial_symbol_names.  */
+
 static int
 expand_partial_symbol_name (const char *name, void *user_data)
 {
@@ -4426,6 +4446,7 @@ struct add_partial_filename_data
 };
 
 /* A callback for map_partial_symbol_filenames.  */
+
 static void
 maybe_add_partial_symtab_filename (const char *filename, const char *fullname,
 				   void *user_data)
