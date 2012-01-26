@@ -1,3 +1,8 @@
+2012-01-26  Pedro Alves  <palves@redhat.com>
+
+	Make test messages unique, and more identifiable.
+	* gdb.multi/watchpoint-multi.exp: Change test messages.
+
 2012-01-25  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.base/solib-disc.exp: Fix regexps.
