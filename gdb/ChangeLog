@@ -1,3 +1,12 @@
+2012-01-26  Pedro Alves  <palves@redhat.com>
+
+	* corelow.c (core_has_fake_pid): Delete.
+	(core_close): Delete references to `core_has_fake_pid'.
+	(add_to_thread_list): Adjust to mark the inferior's pid as fake.
+	(core_open): Delete references to `core_has_fake_pid'.
+	(core_pid_to_str): Adjust to check inferior->fake_pid_p instead of
+	the removed global.
+
 2012-01-26  Joel Brobecker  <brobecker@adacore.com>
 
 	* symfile.h (struct quick_symbol_functions) [expand_symtabs_matching]:
