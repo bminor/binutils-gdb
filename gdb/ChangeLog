@@ -1,3 +1,7 @@
+2012-01-26  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (add_partial_symbol): Delete local psym, unused.
+
 2012-01-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Do not open script filenames twice.

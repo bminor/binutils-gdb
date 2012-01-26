@@ -3954,7 +3954,6 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
   struct objfile *objfile = cu->objfile;
   CORE_ADDR addr = 0;
   char *actual_name = NULL;
-  const struct partial_symbol *psym = NULL;
   CORE_ADDR baseaddr;
   int built_actual_name = 0;
 
