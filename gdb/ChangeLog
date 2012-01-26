@@ -1,5 +1,8 @@
 2012-01-26  Doug Evans  <dje@google.com>
 
+	* symtab.c (lookup_symbol_in_language): Improve comment.
+	(lookup_symbol_aux): Fix comment.
+
 	* psymtab.c (add_psymbol_to_list): Result is now "void".
 	* psympriv.h (add_psymbol_to_list): Update.
 

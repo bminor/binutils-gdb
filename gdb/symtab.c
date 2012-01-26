@@ -1170,11 +1170,11 @@ demangle_for_lookup (const char *name, enum language lang,
    BLOCK_FOUND is set to the block in which NAME is found (in the case of
    a field of `this', value_of_this sets BLOCK_FOUND to the proper value.)  */
 
-/* This function has a bunch of loops in it and it would seem to be
-   attractive to put in some QUIT's (though I'm not really sure
-   whether it can run long enough to be really important).  But there
+/* This function (or rather its subordinates) have a bunch of loops and
+   it would seem to be attractive to put in some QUIT's (though I'm not really
+   sure whether it can run long enough to be really important).  But there
    are a few calls for which it would appear to be bad news to quit
-   out of here: find_proc_desc in alpha-tdep.c and mips-tdep.c.  (Note
+   out of here: e.g., find_proc_desc in alpha-mdebug-tdep.c.  (Note
    that there is C++ code below which can error(), but that probably
    doesn't affect these calls since they are looking for a known
    variable and thus can probably assume it will never hit the C++
@@ -1234,9 +1234,7 @@ lookup_language_this (const struct language_defn *lang,
 }
 
 /* Behave like lookup_symbol except that NAME is the natural name
-   of the symbol that we're looking for and, if LINKAGE_NAME is
-   non-NULL, ensure that the symbol's linkage name matches as
-   well.  */
+   (e.g., demangled name) of the symbol that we're looking for.  */
 
 static struct symbol *
 lookup_symbol_aux (const char *name, const struct block *block,
