@@ -79,19 +79,15 @@ proc initialize {} {
     # reasons yet unknown, we've disabled the ability to set watches
     # without a running inferior.  Verify the restriction. 
     #
-    send_gdb "watch ival3\n"
-    gdb_expect {
+    set test "set watchpoint on ival3"
+    gdb_test_multiple "watch ival3" $test {
         -re ".*\[Ww\]atchpoint 3: ival3.*$gdb_prompt $" {
-            pass "set watchpoint on ival3"
+            pass $test
         }
         -re "warning: can't do that without a running program; try \"break main\", \"run\" first.*$gdb_prompt $" {
-            pass "set watchpoint on ival3"
+            pass $test
             set wp_set 0
             return 1
-        }
-        timeout {
-            fail "(timeout) set watchpoint on ival3"
-            return 0
         }
     }
 
@@ -135,18 +131,15 @@ proc test_simple_watchpoint {} {
 
     gdb_run_cmd
     set timeout 600
-    gdb_expect {
+    set test "run to marker1 in test_simple_watchpoint"
+    set retcode [gdb_test_multiple "" $test {
 	-re "Breakpoint 1, marker1 .*$gdb_prompt $" {
-	    pass "run to marker1 in test_simple_watchpoint"
+	    pass $test
 	}
-	-re ".*$gdb_prompt $" {
-	    fail "run to marker1 in test_simple_watchpoint"
-	    return
-	}
-	timeout {
-	    fail "run to marker1 in test_simple_watchpoint (timeout)"
-	    return
-	}
+    }]
+
+    if { $retcode != 0 } {
+	return
     }
 
     if { !$wp_set } {
@@ -188,10 +181,10 @@ proc test_simple_watchpoint {} {
 
     # Continue until the first change, from -1 to 0
 
-    send_gdb "cont\n"
-    gdb_expect {
+    set test "watchpoint hit, first time"
+    gdb_test_multiple "cont" $test {
 	-re "Continuing.*\[Ww\]atchpoint.*ival3.*Old value = -1.*New value = 0.*ival3 = count; ival4 = count;.*$gdb_prompt $" {
-	    pass "watchpoint hit, first time"
+	    pass $test
 	}
 	-re "Continuing.*Breakpoint.*func1.*$gdb_prompt $" {
 	    setup_xfail "m68*-*-*" 2597
@@ -199,11 +192,8 @@ proc test_simple_watchpoint {} {
 	    gdb_test_no_output "delete \$func1_breakpoint_number"
 	    gdb_test "continue" "\
 Continuing.*\[Ww\]atchpoint.*ival3.*Old value = -1.*New value = 0.*ival3 = count;" \
-		"watchpoint hit, first time"
+		$test
 	}
-	-re ".*$gdb_prompt $" { fail "watchpoint hit, first time" ; return }
-	timeout { fail "watchpoint hit, first time (timeout)" ; return }
-	eof { fail "watchpoint hit, first time (eof)" ; return }
     }
 
     # Check that the hit count is reported correctly
@@ -280,18 +270,15 @@ proc test_disabling_watchpoints {} {
 
     gdb_run_cmd
     set timeout 600
-    gdb_expect {
+    set test "run to marker1 in test_disabling_watchpoints"
+    set retcode [gdb_test_multiple "" $test {
 	-re "Breakpoint 1, marker1 .*$gdb_prompt $" {
-	    pass "run to marker1 in test_disabling_watchpoints"
+	    pass $test
 	}
-	-re ".*$gdb_prompt $" {
-	    fail "run to marker1 in test_disabling_watchpoints"
-	    return
-	}
-	timeout {
-	    fail "run to marker1 in test_disabling_watchpoints (timeout)"
-	    return
-	}
+    }]
+
+    if { $retcode != 0 } {
+	return
     }
 
     # After reaching the marker function, enable the watchpoint.
@@ -387,19 +374,14 @@ proc test_stepping {} {
 
 	gdb_test "until" "ival1 = count.*" "until to ival1 assignment"
 	gdb_test "until" "ival3 = count.*" "until to ival3 assignment"
-	send_gdb "until\n"
-	gdb_expect {
+	set test "until out of loop"
+	gdb_test_multiple "until" $test {
 	    -re "(for \\(count = 0|\}).*$gdb_prompt $" {
-		gdb_test "until" "ival1 = count; /. Outside loop ./" \
-		    "until out of loop"
+		gdb_test "until" "ival1 = count; /. Outside loop ./" $test
 	    }
 	    -re "ival1 = count; /. Outside loop ./.*$gdb_prompt $" {
-		pass "until out of loop"
+		pass $test
 	    }
-	    -re ".*$gdb_prompt $" {
-		fail "until out of loop"
-	    }
-	    default { fail "until out of loop (timeout)" ; return }
 	}
 
 	gdb_test "step" "ival2 = count.*" "step to ival2 assignment"
@@ -428,7 +410,7 @@ proc test_watchpoint_triggered_in_syscall {} {
 
 	gdb_test_no_output "set doread = 1"
 
-	# If we send_gdb "123\n" before gdb has switched the tty, then it goes
+	# If we send gdb "123\n" before gdb has switched the tty, then it goes
 	# to gdb, not the inferior, and we lose.  So that is why we have
 	# watchpoint.c prompt us, so we can wait for that prompt.
 
@@ -443,45 +425,36 @@ proc test_watchpoint_triggered_in_syscall {} {
 	    }
 	}
 
-	send_gdb "123\n"
-	gdb_expect {
+	set test "sent 123"
+	gdb_test_multiple "123" $test {
 	    -re ".*\[Ww\]atchpoint.*buf\\\[0\\\].*Old value = 0.*New value = 49\[^\n\]*\n" { set x [expr $x+1] ; exp_continue }
 	    -re ".*\[Ww\]atchpoint.*buf\\\[1\\\].*Old value = 0.*New value = 50\[^\n\]*\n" { set x [expr $x+1] ; exp_continue }
 	    -re ".*\[Ww\]atchpoint.*buf\\\[2\\\].*Old value = 0.*New value = 51\[^\n\]*\n" { set x [expr $x+1] ; exp_continue }
 	    -re ".*\[Ww\]atchpoint.*buf\\\[3\\\].*Old value = 0.*New value = 10\[^\n\]*\n" { set x [expr $x+1] ; exp_continue }
-	    -re ".*$gdb_prompt $" { pass "sent 123" }
-	    timeout { fail "sent 123 (timeout)" }
+	    -re ".*$gdb_prompt $" { pass $test }
 	}
 
 	# Examine the values in buf to see how many watchpoints we
 	# should have printed.
-	send_gdb "print buf\[0\]\n"
-	gdb_expect {
-	    -re ".*= 49.*$gdb_prompt $" { set y [expr $y+1]; pass "print buf\[0\]"}
-	    -re ".*= 0.*$gdb_prompt $" { pass "print buf\[0\]"}
-	    -re ".*$gdb_prompt $" { fail "print buf\[0\]"}
-	    default { fail "print buf\[0\]"}
+	set test "print buf\[0\]"
+	gdb_test_multiple $test $test {
+	    -re ".*= 49.*$gdb_prompt $" { set y [expr $y+1]; pass $test }
+	    -re ".*= 0.*$gdb_prompt $" { $test }
 	}
-	send_gdb "print buf\[1\]\n"
-	gdb_expect {
-	    -re ".*= 50.*$gdb_prompt $" { set y [expr $y+1]; pass "print buf\[1\]"}
-	    -re ".*= 0.*$gdb_prompt $" { pass "print buf\[1\]"}
-	    -re ".*$gdb_prompt $" { fail "print buf\[1\]"}
-	    default { fail "print buf\[1\]"}
+	set test "print buf\[1\]"
+	gdb_test_multiple $test $test {
+	    -re ".*= 50.*$gdb_prompt $" { set y [expr $y+1]; pass $test }
+	    -re ".*= 0.*$gdb_prompt $" { pass $test }
 	}
-	send_gdb "print buf\[2\]\n"
-	gdb_expect {
-	    -re ".*= 51.*$gdb_prompt $" { set y [expr $y+1]; pass "print buf\[2\]"}
-	    -re ".*= 0.*$gdb_prompt $" { pass "print buf\[2\]"}
-	    -re ".*$gdb_prompt $" { fail "print buf\[2\]"}
-	    default { fail "print buf\[2\]"}
+	set test "print buf\[2\]"
+	gdb_test_multiple $test $test {
+	    -re ".*= 51.*$gdb_prompt $" { set y [expr $y+1]; pass $test }
+	    -re ".*= 0.*$gdb_prompt $" { pass $test }
 	}
-	send_gdb "print buf\[3\]\n"
-	gdb_expect {
-	    -re ".*= 10.*$gdb_prompt $" { set y [expr $y+1]; pass "print buf\[3\]"}
-	    -re ".*= 0.*$gdb_prompt $" { pass "print buf\[3\]"}
-	    -re ".*$gdb_prompt $" { fail "print buf\[3\]" }
-	    default { fail "print buf\[3\]" }
+	set test "print buf\[3\]"
+	gdb_test_multiple $test $test {
+	    -re ".*= 10.*$gdb_prompt $" { set y [expr $y+1]; pass $test }
+	    -re ".*= 0.*$gdb_prompt $" { pass $test }
 	}
 
 	# Did we find what we were looking for?  If not, flunk it.
@@ -899,76 +872,41 @@ if [initialize] then {
     #
     if ![runto_main] then { fail "watch tests suppressed" }
 
-    send_gdb "set can-use-hw-watchpoints 0\n"
-    gdb_expect {
-      -re "$gdb_prompt $"\
-              {pass "disable fast watches"}
-      timeout {fail "(timeout) disable fast watches"}
-    }
-    send_gdb "show can-use-hw-watchpoints\n"
-    gdb_expect {
-      -re "Debugger's willingness to use watchpoint hardware is 0.*$gdb_prompt $"\
-              {pass "show disable fast watches"}
-      -re "$gdb_prompt $"\
-              {fail "show disable fast watches"}
-      timeout {fail "(timeout) show disable fast watches"}
-    }
-    send_gdb "watch ival3 if  count > 1\n"
-    gdb_expect {
-      -re "Watchpoint \[0-9\]*: ival3.*$gdb_prompt $"\
-              {pass "set slow conditional watch"}
-      -re "$gdb_prompt $"\
-              {fail "set slow conditional watch"}
-      timeout {fail "(timeout) set slow conditional watch"}
-    }
-    send_gdb "continue\n"
-    gdb_expect {
-      -re "Watchpoint \[0-9\]*: ival3.*Old value = 1.*New value = 2.*$gdb_prompt $"\
-              {pass "trigger slow conditional watch"}
-      -re "$gdb_prompt $"\
-              {fail "trigger slow conditional watch"}
-      timeout {fail "(timeout) trigger slow conditional watch"}
-    }
+    gdb_test_no_output "set can-use-hw-watchpoints 0" "disable fast watches"
+
+    gdb_test "show can-use-hw-watchpoints" \
+	"Debugger's willingness to use watchpoint hardware is 0." \
+	"show disable fast watches"
+
+    gdb_test "watch ival3 if  count > 1" \
+	"Watchpoint \[0-9\]*: ival3.*" \
+	"set slow conditional watch"
+
+    gdb_test "continue" \
+	"Watchpoint \[0-9\]*: ival3.*Old value = 1.*New value = 2.*" \
+	"trigger slow conditional watch"
 
     # We've explicitly disabled hardware watches.  Verify that GDB
     # refrains from using them.
     #
-    send_gdb "rwatch ival3\n"
-    gdb_expect {
-      -re "Expression cannot be implemented with read/access watchpoint..*$gdb_prompt $"\
-              {pass "rwatch disallowed when can-set-hw-watchpoints cleared"}
-      -re "$gdb_prompt $"\
-              {fail "rwatch disallowed when can-set-hw-watchpoints cleared"}
-      timeout {fail "(timeout) rwatch disallowed when can-use-hw-watchpoints cleared"}
-    }
+    gdb_test "rwatch ival3" \
+	"Expression cannot be implemented with read/access watchpoint..*" \
+	"rwatch disallowed when can-set-hw-watchpoints cleared"
 
     # Read- and access watchpoints are unsupported on HP-UX.  Verify
     # that GDB gracefully responds to requests to create them.
     #
     if [istarget "hppa*-*-hpux*"] then {
-      send_gdb "set can-use-hw-watchpoints 1\n"
-      gdb_expect {
-        -re "$gdb_prompt $"\
-                {pass "enable fast watches"}
-        timeout {fail "(timeout) enable fast watches"}
-      }
-      send_gdb "rwatch ival3\n"
-      gdb_expect {
-        -re "Target does not have this type of hardware watchpoint support.*$gdb_prompt $"\
-                {pass "read watches disallowed"}
-        -re "$gdb_prompt $"\
-                {fail "read watches disallowed"}
-        timeout {fail "(timeout) read watches disallowed"}
-      }
+	gdb_test_no_output "set can-use-hw-watchpoints 1" \
+	    "enable fast watches"
 
-      send_gdb "awatch ival3\n"
-      gdb_expect {
-        -re "Target does not have this type of hardware watchpoint support.*$gdb_prompt $"\
-                {pass "access watches disallowed"}
-        -re "$gdb_prompt $"\
-                {fail "access watches disallowed"}
-        timeout {fail "(timeout) access watches disallowed"}
-      }
+	gdb_test "rwatch ival3" \
+	    "Target does not have this type of hardware watchpoint support.*" \
+	    "read watches disallowed"
+
+	gdb_test "awatch ival3" \
+	    "Target does not have this type of hardware watchpoint support.*" \
+            "access watches disallowed"
     }
 
     # See above.
