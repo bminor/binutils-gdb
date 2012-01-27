@@ -1,5 +1,11 @@
 2012-01-27  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/watchpoint.exp (test_no_hw_watchpoints): New, factored
+	out from the top level.
+	(top level): Call it instead.
+
+2012-01-27  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/watchpoint.exp (top level): Re-enable hardware
 	watchpoints sooner.
 
