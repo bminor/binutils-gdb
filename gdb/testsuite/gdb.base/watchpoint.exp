@@ -769,8 +769,44 @@ proc test_inaccessible_watchpoint {} {
 proc test_watchpoint_in_big_blob {} {
     global gdb_prompt
 
-    gdb_test "watch buf" ".*atchpoint \[0-9\]+: buf"
-    gdb_test "cont" "Continuing.*atchpoint \[0-9\]+: buf\r\n\r\nOld value = .*testte\".*" "watchpoint on buf hit"
+    # On native targets where we do hardware resource accounting, this
+    # may end up as a software watchpoint.
+    set ok 0
+    set test "watch buf"
+    gdb_test_multiple "watch buf" $test {
+	-re "Hardware watchpoint \[0-9\]+: buf.*You may have requested too many hardware breakpoints/watchpoints.*$gdb_prompt $" {
+	    # This may happen with remote targets (where we don't do
+	    # resource accounting) that support hardware watchpoints,
+	    # when breakpoint always-inserted is on.  The watchpoint
+	    # was too large, for example.  If GDB is ever adjusted to
+	    # downgrade the watchpoint automatically in this case,
+	    # this match should be removed.  Note the breakpoint has
+	    # been created, and is in the list, so it needs deleting.
+	    pass $test
+	}
+	-re ".*atchpoint \[0-9\]+: buf.*$gdb_prompt $" {
+	    pass $test
+	    set ok 1
+	}
+    }
+
+    if { $ok } {
+	set test "watchpoint on buf hit"
+	gdb_test_multiple "cont" $test {
+	    -re "Continuing.*atchpoint \[0-9\]+: buf\r\n\r\nOld value = .*testte\".*$gdb_prompt $" {
+		pass $test
+	    }
+	    -re "Could not insert hardware breakpoints:.*You may have requested too many hardware breakpoints/watchpoints.*$gdb_prompt $" {
+		# This may happen with remote targets that support
+		# hardware watchpoints.  We only find out the
+		# watchpoint was too large, for example, at insert
+		# time.  If GDB is ever adjusted to downgrade the
+		# watchpoint automatically in this case, this match
+		# should be removed.
+		pass $test
+	    }
+	}
+    }
 
     gdb_test_no_output "delete \$bpnum" "delete watch buf"
 }

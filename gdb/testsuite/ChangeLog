@@ -1,5 +1,11 @@
 2012-01-27  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/watchpoint.exp (test_watchpoint_in_big_blob): Expect
+	"You may have requested too many hardware
+	breakpoints/watchpoints".
+
+2012-01-27  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/watchpoint.exp (maybe_clean_restart)
 	(maybe_reinitialize): New.
 	(test_disabling_watchpoints): Call maybe_reinitialize.  Don't
