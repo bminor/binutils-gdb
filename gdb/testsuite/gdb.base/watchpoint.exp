@@ -803,13 +803,7 @@ if [initialize] then {
 	gdb_load $binfile
     }
 
-    # Only enabled for some targets merely because it has not been tested 
-    # elsewhere.
-    if {[istarget "hppa*-*-*"] || \
-	    [istarget "sparc*-*-sunos*"] || \
-	    [istarget "m32r-*-*"]} then {
-	test_complex_watchpoint
-    }
+    test_complex_watchpoint
 
     test_inaccessible_watchpoint
 

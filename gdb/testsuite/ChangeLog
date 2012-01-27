@@ -1,5 +1,9 @@
 2012-01-27  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/watchpoint.exp: Always run test_complex_watchpoint.
+
+2012-01-27  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/watchpoint.exp: Clean restart after tests that don't
 	require `initialize' anymore.  Remove unnecessary `initialize'
 	calls.
