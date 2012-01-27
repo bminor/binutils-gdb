@@ -186,32 +186,6 @@ static int linux_event_pipe[2] = { -1, -1 };
 static void send_sigstop (struct lwp_info *lwp);
 static void wait_for_sigstop (struct inferior_list_entry *entry);
 
-/* Accepts an integer PID; Returns a string representing a file that
-   can be opened to get info for the child process.
-   Space for the result is malloc'd, caller must free.  */
-
-char *
-linux_child_pid_to_exec_file (int pid)
-{
-  char *name1, *name2;
-
-  name1 = xmalloc (MAXPATHLEN);
-  name2 = xmalloc (MAXPATHLEN);
-  memset (name2, 0, MAXPATHLEN);
-
-  sprintf (name1, "/proc/%d/exe", pid);
-  if (readlink (name1, name2, MAXPATHLEN) > 0)
-    {
-      free (name1);
-      return name2;
-    }
-  else
-    {
-      free (name2);
-      return name1;
-    }
-}
-
 /* Return non-zero if HEADER is a 64-bit ELF file.  */
 
 static int
@@ -228,7 +202,7 @@ elf_64_header_p (const Elf64_Ehdr *header)
    zero if the file is not a 64-bit ELF file,
    and -1 if the file is not accessible or doesn't exist.  */
 
-int
+static int
 elf_64_file_p (const char *file)
 {
   Elf64_Ehdr header;
@@ -246,6 +220,18 @@ elf_64_file_p (const char *file)
   close (fd);
 
   return elf_64_header_p (&header);
+}
+
+/* Accepts an integer PID; Returns true if the executable PID is
+   running is a 64-bit ELF file..  */
+
+int
+linux_pid_exe_is_elf_64_file (int pid)
+{
+  char file[MAXPATHLEN];
+
+  sprintf (file, "/proc/%d/exe", pid);
+  return elf_64_file_p (file);
 }
 
 static void

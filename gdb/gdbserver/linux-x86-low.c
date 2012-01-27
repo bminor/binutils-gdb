@@ -1106,10 +1106,7 @@ x86_arch_setup (void)
 {
 #ifdef __x86_64__
   int pid = pid_of (get_thread_lwp (current_inferior));
-  char *file = linux_child_pid_to_exec_file (pid);
-  int use_64bit = elf_64_file_p (file);
-
-  free (file);
+  int use_64bit = linux_pid_exe_is_elf_64_file (pid);
 
   if (use_64bit < 0)
     {

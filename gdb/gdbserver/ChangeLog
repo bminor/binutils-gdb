@@ -1,3 +1,14 @@
+2012-01-27  Pedro Alves  <palves@redhat.com>
+
+	* linux-low.c (linux_child_pid_to_exec_file): Delete.
+	(elf_64_file_p): Make static.
+	(linux_pid_exe_is_elf_64_file): New.
+	* linux-low.h (linux_child_pid_to_exec_file, elf_64_file_p):
+	Delete declarations.
+	(linux_pid_exe_is_elf_64_file): Declare.
+	* linux-x86-low.c (x86_arch_setup): Use
+	linux_pid_exe_is_elf_64_file.
+
 2012-01-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* linux-low.c (linux_wait_for_event_1): Rename to ...
