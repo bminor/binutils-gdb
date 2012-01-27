@@ -1,5 +1,10 @@
 2012-01-27  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/watchpoint.exp (test_inaccessible_watchpoint): Fix
+	typo.
+
+2012-01-27  Pedro Alves  <palves@redhat.com>
+
 	* config/extended-gdbserver.exp: New file.
 	* lib/gdbserver-support.exp (gdbserver_start_extended): Extend
 	comment.

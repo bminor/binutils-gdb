@@ -773,7 +773,7 @@ proc test_inaccessible_watchpoint {} {
 	gdb_test "delete \$global_ptr_breakpoint_number" ""
 	gdb_test "watch **global_ptr_ptr" ".*atchpoint \[0-9\]+: \\*\\*global_ptr_ptr"
 	gdb_test "set \$global_ptr_ptr_breakpoint_number = \$bpnum" ""
-	gdb_test "next" ".*global_ptr_ptr = &global_ptr.*" "gloabl_ptr_ptr next"
+	gdb_test "next" ".*global_ptr_ptr = &global_ptr.*" "global_ptr_ptr next"
 	gdb_test "next" ".*atchpoint \[0-9\]+: \\*\\*global_ptr_ptr\[\r\n\]+Old value = .*\r\nNew value = 7 .*" "next over global_ptr_ptr init"
 	gdb_test "next" ".*atchpoint \[0-9\]+: \\*\\*global_ptr_ptr\[\r\n\]+Old value = 7 .*\r\nNew value = 9 .*" "next over global_ptr_ptr buffer set"
 	gdb_test "next" ".*atchpoint \[0-9\]+: \\*\\*global_ptr_ptr\[\r\n\]+Old value = 9 .*\r\nNew value = 5 .*" "next over global_ptr_ptr pointer advance"
