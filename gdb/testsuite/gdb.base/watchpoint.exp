@@ -781,16 +781,11 @@ if [initialize] then {
 
     if ![target_info exists gdb,cannot_call_functions] {
 	test_stepping
-
-	# See above.
-	if [istarget "mips-idt-*"] then {
-	    gdb_exit
-	    gdb_start
-	    gdb_reinitialize_dir $srcdir/$subdir
-	    gdb_load $binfile
-	    initialize
-	}
     }
+
+    # Tests below don't rely on the markers and watchpoint set by
+    # `initialize' anymore.
+    clean_restart $testfile
 
     # Only enabled for some targets merely because it has not been tested 
     # elsewhere.
@@ -806,7 +801,6 @@ if [initialize] then {
 	gdb_start
 	gdb_reinitialize_dir $srcdir/$subdir
 	gdb_load $binfile
-	initialize
     }
 
     # Only enabled for some targets merely because it has not been tested 
@@ -852,7 +846,6 @@ if [initialize] then {
 	gdb_start
 	gdb_reinitialize_dir $srcdir/$subdir
 	gdb_load $binfile
-	initialize
     }
 
     test_watchpoint_and_breakpoint

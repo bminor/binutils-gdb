@@ -1,5 +1,11 @@
 2012-01-27  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/watchpoint.exp: Clean restart after tests that don't
+	require `initialize' anymore.  Remove unnecessary `initialize'
+	calls.
+
+2012-01-27  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/watchpoint.exp (wp_set): Delete.
 	(initialize, test_simple_watchpoint, top level): Remove dead code.
 
