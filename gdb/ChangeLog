@@ -1,3 +1,9 @@
+2012-01-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix the 2012-01-26 regression by la_get_symbol_name_match_p.
+	* linespec.c (iterate_name_matcher): Negate the SYMBOL_NAME_MATCH_P
+	result.
+
 2012-01-27  Doug Evans  <dje@google.com>
 
 	* configure.ac (with_python): Fix absolute path handling for win32.

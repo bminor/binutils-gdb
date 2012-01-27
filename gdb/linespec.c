@@ -340,7 +340,7 @@ iterate_name_matcher (const char *name, void *d)
 {
   const struct symbol_matcher_data *data = d;
 
-  if (data->symbol_name_match_p (name, data->lookup_name))
+  if (data->symbol_name_match_p (name, data->lookup_name) == 0)
     return 1;
   return 0;
 }
