@@ -89,6 +89,29 @@ proc initialize {} {
     return 1
 }
 
+proc maybe_clean_restart { } {
+    # The IDT/sim monitor only has 8 (!) open files, of which it uses
+    # 4 (!).  So we have to make sure one program exits before
+    # starting another one.
+    if [istarget "mips-idt-*"] then {
+	global testfile
+
+	clean_restart $testfile
+    }
+}
+
+proc maybe_reinitialize { } {
+    # The IDT/sim monitor only has 8 (!) open files, of which it uses
+    # 4 (!).  So we have to make sure one program exits before
+    # starting another one.
+    if [istarget "mips-idt-*"] then {
+	global testfile
+
+	clean_restart $testfile
+	initialize
+    }
+}
+
 #
 # Test simple watchpoint.
 #
@@ -209,8 +232,9 @@ proc test_disabling_watchpoints {} {
     global decimal
     global hex
 
-    # "info watch" is the same as "info break"
-    gdb_test "info watch" "\[0-9]+\[ \]*.*watchpoint.*ival3\r\n\.*\[0-9\]+ times.*" "watchpoints found in watchpoint/breakpoint table"
+    maybe_reinitialize
+
+    gdb_test "info watch" "\[0-9]+\[ \]*.*watchpoint.*ival3.*" "watchpoints found in watchpoint/breakpoint table"
 
     # Ensure that the watchpoint is disabled when we startup.
 
@@ -273,6 +297,8 @@ proc test_disabling_watchpoints {} {
 # Test stepping and other mundane operations with watchpoints enabled
 proc test_stepping {} {
     global gdb_prompt
+
+    maybe_clean_restart
 
     if [runto marker1] then {
 	gdb_test "watch ival2" ".*\[Ww\]atchpoint \[0-9\]*: ival2"
@@ -433,6 +459,8 @@ proc test_watchpoint_triggered_in_syscall {} {
 proc test_complex_watchpoint {} {
     global gdb_prompt
 
+    maybe_clean_restart
+
     if [runto marker4] then {
 	gdb_test "watch ptr1->val" ".*\[Ww\]atchpoint \[0-9\]*: ptr1->val"
 	gdb_test "break marker5" ".*Breakpoint.*"
@@ -534,6 +562,8 @@ proc test_complex_watchpoint {} {
 
 proc test_watchpoint_and_breakpoint {} {
     global gdb_prompt
+
+    maybe_clean_restart
 
     # This is a test for PR gdb/38, which involves setting a
     # watchpoint right after you've reached a breakpoint.
@@ -660,6 +690,8 @@ proc test_wide_location_2 {} {
 proc test_inaccessible_watchpoint {} {
     global gdb_prompt
 
+    maybe_clean_restart
+
     # This is a test for watchpoints on currently inaccessible (but later
     # valid) memory.
 
@@ -745,10 +777,7 @@ proc test_watchpoint_in_big_blob {} {
 
 # Start with a fresh gdb.
 
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load $binfile
+clean_restart $testfile
 set prev_timeout $timeout
 set timeout 600	
 verbose "Timeout now 600 sec.\n"
@@ -757,27 +786,7 @@ if [initialize] then {
 
     test_simple_watchpoint
 
-    # The IDT/sim monitor only has 8 (!) open files, of which it uses
-    # 4 (!).  So we have to make sure one program exits before
-    # starting another one.
-    if [istarget "mips-idt-*"] then {
-	gdb_exit
-	gdb_start
-	gdb_reinitialize_dir $srcdir/$subdir
-	gdb_load $binfile
-	initialize
-    }
-
     test_disabling_watchpoints
-
-    # See above.
-    if [istarget "mips-idt-*"] then {
-	gdb_exit
-	gdb_start
-	gdb_reinitialize_dir $srcdir/$subdir
-	gdb_load $binfile
-	initialize
-    }
 
     if ![target_info exists gdb,cannot_call_functions] {
 	test_stepping
@@ -795,17 +804,11 @@ if [initialize] then {
 	test_watchpoint_triggered_in_syscall
     }
 
-    # See above.
-    if [istarget "mips-idt-*"] then {
-	gdb_exit
-	gdb_start
-	gdb_reinitialize_dir $srcdir/$subdir
-	gdb_load $binfile
-    }
-
     test_complex_watchpoint
 
     test_inaccessible_watchpoint
+
+    maybe_clean_restart
 
     # Verify that a user can force GDB to use "slow" watchpoints.
     # (This proves rather little on kernels that don't support
@@ -834,22 +837,9 @@ if [initialize] then {
 	"Expression cannot be implemented with read/access watchpoint..*" \
 	"rwatch disallowed when can-set-hw-watchpoints cleared"
 
-    # See above.
-    if [istarget "mips-idt-*"] then {
-	gdb_exit
-	gdb_start
-	gdb_reinitialize_dir $srcdir/$subdir
-	gdb_load $binfile
-    }
-
     test_watchpoint_and_breakpoint
 
     test_watchpoint_in_big_blob
-
-    # See above.
-    if [istarget "mips-idt-*"] then {
-	clean_restart
-    }
 
     test_constant_watchpoint
 
