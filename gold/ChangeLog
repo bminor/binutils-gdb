@@ -1,5 +1,9 @@
 2012-01-27  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* x86_64.cc (Scan::global): Support x32 IFUNC function pointer.
+
+2012-01-27  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* configure.ac: Check if -mcmodel=medium works.
 	* configure: Regenerated.
 

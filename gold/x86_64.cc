@@ -2476,7 +2476,8 @@ Target_x86_64<size>::Scan::global(Symbol_table* symtab,
                 target->copy_reloc(symtab, layout, object,
                                    data_shndx, output_section, gsym, reloc);
               }
-	    else if (r_type == elfcpp::R_X86_64_64
+	    else if (((size == 64 && r_type == elfcpp::R_X86_64_64)
+		      || (size == 32 && r_type == elfcpp::R_X86_64_32))
 		     && gsym->type() == elfcpp::STT_GNU_IFUNC
 		     && gsym->can_use_relative_reloc(false)
 		     && !gsym->is_from_dynobj()
