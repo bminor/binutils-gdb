@@ -1,5 +1,10 @@
 2012-01-27  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/watchpoint.exp (wp_set): Delete.
+	(initialize, test_simple_watchpoint, top level): Remove dead code.
+
+2012-01-27  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/watchpoint.exp (test_inaccessible_watchpoint): Fix
 	typo.
 

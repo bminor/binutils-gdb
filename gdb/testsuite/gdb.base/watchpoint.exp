@@ -20,8 +20,6 @@ set testfile "watchpoint"
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
 
-set wp_set 1
-
 if [get_compiler_info ${binfile}] {
     return -1
 }
@@ -52,7 +50,6 @@ proc initialize {} {
     global hex
     global decimal
     global srcfile
-    global wp_set
 
     # Disable hardware watchpoints if necessary.
     if [target_info exists gdb,no_hardware_watchpoints] {
@@ -73,23 +70,7 @@ proc initialize {} {
       return 0; 
     }
 
-
-    # ??rehrauer: To fix DTS #CHFts23014, in which setting a watchpoint
-    # before running can cause the inferior to croak on HP-UX 11.0 for
-    # reasons yet unknown, we've disabled the ability to set watches
-    # without a running inferior.  Verify the restriction. 
-    #
-    set test "set watchpoint on ival3"
-    gdb_test_multiple "watch ival3" $test {
-        -re ".*\[Ww\]atchpoint 3: ival3.*$gdb_prompt $" {
-            pass $test
-        }
-        -re "warning: can't do that without a running program; try \"break main\", \"run\" first.*$gdb_prompt $" {
-            pass $test
-            set wp_set 0
-            return 1
-        }
-    }
+    gdb_test "watch ival3" ".*\[Ww\]atchpoint 3: ival3.*" "set watchpoint on ival3"
 
     if [gdb_test "info watch" "3\[ \]*.*watchpoint.*ival3" "watchpoint found in watchpoint/breakpoint table" ] { 
       return 0; 
@@ -116,16 +97,12 @@ proc test_simple_watchpoint {} {
     global gdb_prompt
     global hex
     global decimal
-    global wp_set
 
     # Ensure that the watchpoint is disabled when we startup.
 
-    if { $wp_set } {
-        if [gdb_test "disable 3" "^disable 3\[\r\n\]+" "disable watchpoint in test_simple_watchpoint" ] { 
-	    return 0; 
-	}
+    if [gdb_test "disable 3" "^disable 3\[\r\n\]+" "disable watchpoint in test_simple_watchpoint" ] { 
+      return 0; 
     }
-
 
     # Run until we get to the first marker function.
 
@@ -140,30 +117,6 @@ proc test_simple_watchpoint {} {
 
     if { $retcode != 0 } {
 	return
-    }
-
-    if { !$wp_set } {
-	# ??rehrauer: To fix DTS #CHFts23014, in which setting a watchpoint
-	# before running can cause the inferior to croak on HP-UX 11.0
-	# for reasons yet unknown, we've disabled the ability to set 
-	# watches without a running inferior.  The following testpoints used
-	# to be in [initialize].
-	#
-	gdb_test "watch ival3" \
-	    "\[Ww\]atchpoint 3: ival3" \
-	    "set watchpoint on ival3"
-
-        set wp_set 1
-
-	gdb_test "info watch" \
-	    "3\[ \]*.*watchpoint.*ival3" \
-	    "watchpoint found in watchpoint/breakpoint table"
-
-	# After installing the watchpoint, we disable it until we are ready
-	# to use it.  This allows the test program to run at full speed until
-	# we get to the first marker function.
-
-	gdb_test "disable 3" "disable 3" "disable watchpoint"
     }
 
     # After reaching the marker function, enable the watchpoint.
@@ -892,22 +845,6 @@ if [initialize] then {
     gdb_test "rwatch ival3" \
 	"Expression cannot be implemented with read/access watchpoint..*" \
 	"rwatch disallowed when can-set-hw-watchpoints cleared"
-
-    # Read- and access watchpoints are unsupported on HP-UX.  Verify
-    # that GDB gracefully responds to requests to create them.
-    #
-    if [istarget "hppa*-*-hpux*"] then {
-	gdb_test_no_output "set can-use-hw-watchpoints 1" \
-	    "enable fast watches"
-
-	gdb_test "rwatch ival3" \
-	    "Target does not have this type of hardware watchpoint support.*" \
-	    "read watches disallowed"
-
-	gdb_test "awatch ival3" \
-	    "Target does not have this type of hardware watchpoint support.*" \
-            "access watches disallowed"
-    }
 
     # See above.
     if [istarget "mips-idt-*"] then {
