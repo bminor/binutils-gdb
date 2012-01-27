@@ -6312,7 +6312,20 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $gold_cv_prog_gcc41" >&5
 $as_echo "$gold_cv_prog_gcc41" >&6; }
 
- if test "$target_cpu" = "x86_64" -a "$gold_cv_prog_gcc41" = "yes"; then
+save_CFLAGS="$CFLAGS"
+CFLAGS="$CFLAGS -mcmodel=medium"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+int i;
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  have_mcmodel_medium=yes
+else
+  have_mcmodel_medium=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+CFLAGS="$save_CFLAGS"
+ if test "$target_cpu" = "x86_64" -a "$have_mcmodel_medium" = "yes" -a "$gold_cv_prog_gcc41" = "yes"; then
   MCMODEL_MEDIUM_TRUE=
   MCMODEL_MEDIUM_FALSE='#'
 else

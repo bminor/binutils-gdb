@@ -312,9 +312,13 @@ error
 #endif
 ], [gold_cv_prog_gcc41=yes], [gold_cv_prog_gcc41=no])])
 
+save_CFLAGS="$CFLAGS"
+CFLAGS="$CFLAGS -mcmodel=medium"
+AC_COMPILE_IFELSE([int i;], [have_mcmodel_medium=yes], [have_mcmodel_medium=no])
+CFLAGS="$save_CFLAGS"
 dnl Whether we can test -mcmodel=medium.
 AM_CONDITIONAL(MCMODEL_MEDIUM,
-[test "$target_cpu" = "x86_64" -a "$gold_cv_prog_gcc41" = "yes"])
+[test "$target_cpu" = "x86_64" -a "$have_mcmodel_medium" = "yes" -a "$gold_cv_prog_gcc41" = "yes"])
 
 dnl Test for __thread support.
 AC_CACHE_CHECK([for thread support], [gold_cv_c_thread],

@@ -1,3 +1,8 @@
+2012-01-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure.ac: Check if -mcmodel=medium works.
+	* configure: Regenerated.
+
 2012-01-24  Cary Coutant  <ccoutant@google.com>
 
 	* int_encoding.cc (read_unsigned_LEB_128): Replaced with inline
