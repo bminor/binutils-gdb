@@ -1,5 +1,17 @@
 2012-01-27  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/watchpoint.exp (no_hw): New global.
+	(maybe_clean_restart, maybe_reinitialize): If no_hw is set,
+	disable hw watchpoints.
+	(test_wide_location_1, test_wide_location_2): If no_hw is set,
+	don't expect hw watchpoints.
+	(no_hw_watchpoints): Always clean restart.
+	(do_tests): New procedure, factored out from the top level.
+	(top level): Run tests twice.  Once with hw watchpoints enabled,
+	another time with hw watchpoints disabled.
+
+2012-01-27  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/watchpoint.exp (test_no_hw_watchpoints): New, factored
 	out from the top level.
 	(top level): Call it instead.

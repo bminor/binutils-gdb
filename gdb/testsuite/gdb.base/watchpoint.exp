@@ -29,6 +29,9 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
      return -1
 }
 
+# True if we're forcing no hardware watchpoints.
+set no_hw 0
+
 # Prepare for watchpoint tests by setting up two breakpoints and one
 # watchpoint.
 #
@@ -95,8 +98,13 @@ proc maybe_clean_restart { } {
     # starting another one.
     if [istarget "mips-idt-*"] then {
 	global testfile
+	global no_hw
 
 	clean_restart $testfile
+
+	if {$no_hw} {
+	    gdb_test_no_output "set can-use-hw-watchpoints 0" ""
+	}
     }
 }
 
@@ -106,8 +114,14 @@ proc maybe_reinitialize { } {
     # starting another one.
     if [istarget "mips-idt-*"] then {
 	global testfile
+	global no_hw
 
 	clean_restart $testfile
+
+	if {$no_hw} {
+	    gdb_test_no_output "set can-use-hw-watchpoints 0" ""
+	}
+
 	initialize
     }
 }
@@ -628,12 +642,14 @@ proc test_watch_location {} {
 # Tests watching areas larger than a word.
 
 proc test_wide_location_1 {} {
+    global no_hw
+
     # This test watches two words on most 32-bit ABIs, and one word on
     # most 64-bit ABIs.
 
     # Platforms where the target can't watch such a large region
     # should clear hw_expected below.
-    if [target_info exists gdb,no_hardware_watchpoints] {
+    if { $no_hw || [target_info exists gdb,no_hardware_watchpoints] } {
 	set hw_expected 0
     } else {
 	set hw_expected 1
@@ -658,12 +674,14 @@ proc test_wide_location_1 {} {
 }
 
 proc test_wide_location_2 {} {
+    global no_hw
+
     # This test watches four words on most 32-bit ABIs, and two words
     # on 64-bit ABIs.
 
     # Platforms where the target can't watch such a large region
     # should clear hw_expected below.
-    if [target_info exists gdb,no_hardware_watchpoints] {
+    if { $no_hw || [target_info exists gdb,no_hardware_watchpoints] } {
 	set hw_expected 0
     } else {
 	set hw_expected 1
@@ -767,7 +785,9 @@ proc test_inaccessible_watchpoint {} {
 }
 
 proc test_no_hw_watchpoints {} {
-    maybe_clean_restart
+    global testfile
+
+    clean_restart $testfile
 
     # Verify that a user can force GDB to use "slow" watchpoints.
     # (This proves rather little on kernels that don't support
@@ -851,24 +871,40 @@ proc test_watchpoint_in_big_blob {} {
 
 # Start with a fresh gdb.
 
-clean_restart $testfile
 set prev_timeout $timeout
 set timeout 600	
 verbose "Timeout now 600 sec.\n"
 
-if [initialize] then {
+test_no_hw_watchpoints
 
-    test_simple_watchpoint
+proc do_tests {} {
+    global testfile
+    global no_hw
 
-    test_disabling_watchpoints
+    clean_restart $testfile
 
-    if ![target_info exists gdb,cannot_call_functions] {
-	test_stepping
+    if {$no_hw} {
+	gdb_test_no_output "set can-use-hw-watchpoints 0" ""
+    }
+
+    if [initialize] then {
+
+	test_simple_watchpoint
+
+	test_disabling_watchpoints
+
+	if ![target_info exists gdb,cannot_call_functions] {
+	    test_stepping
+	}
     }
 
     # Tests below don't rely on the markers and watchpoint set by
     # `initialize' anymore.
     clean_restart $testfile
+
+    if {$no_hw} {
+	gdb_test_no_output "set can-use-hw-watchpoints 0" ""
+    }
 
     # Only enabled for some targets merely because it has not been tested 
     # elsewhere.
@@ -882,8 +918,6 @@ if [initialize] then {
 
     test_inaccessible_watchpoint
 
-    test_no_hw_watchpoints
-
     test_watchpoint_and_breakpoint
 
     test_watchpoint_in_big_blob
@@ -896,6 +930,20 @@ if [initialize] then {
 
     test_wide_location_1
     test_wide_location_2
+}
+
+# On targets that can do hardware watchpoints, run the tests twice:
+# once with hardware watchpoints enabled; another with hardware
+# watchpoints force-disabled.
+
+do_tests
+if ![target_info exists gdb,no_hardware_watchpoints] {
+    set save_pf_prefix $pf_prefix
+    lappend pf_prefix "no-hw:"
+
+    set no_hw 1
+    do_tests
+    set pf_prefix $save_pf_prefix
 }
 
 # Restore old timeout
