@@ -355,7 +355,9 @@ proc gdbserver_reconnect { } {
     return [gdb_target_cmd $gdbserver_protocol $gdbserver_gdbport]
 }
 
-# Start and connect to a gdbserver in extended mode.
+# Start and connect to a gdbserver in extended mode.  Note this frobs
+# $gdbserver_protocol, so should be used only from a board that
+# usually connects in target remote mode.
 proc gdbserver_start_extended { } {
     global gdbserver_protocol
     global gdbserver_gdbport
@@ -371,4 +373,33 @@ proc gdbserver_start_extended { } {
     set use_gdb_stub 0
 
     return [gdb_target_cmd $gdbserver_protocol $gdbserver_gdbport]
+}
+
+# Start and connect to a gdbserver in extended/multi mode.  Unlike
+# gdbserver_start_extended, this does not frob $gdbserver_protocol.
+
+proc gdbserver_start_multi { } {
+    global gdbserver_protocol
+    global gdbserver_gdbport
+
+    set res [gdbserver_start "--multi" ""]
+    set gdbserver_protocol [lindex $res 0]
+    set gdbserver_gdbport [lindex $res 1]
+
+    return [gdb_target_cmd $gdbserver_protocol $gdbserver_gdbport]
+}
+
+# Start a gdbserver process in multi/extended mode, and have GDB
+# connect to it (MI version).  Return 0 on success, or non-zero on
+# failure.
+
+proc mi_gdbserver_start_multi { } {
+    global gdbserver_protocol
+    global gdbserver_gdbport
+
+    set res [gdbserver_start "--multi" ""]
+    set gdbserver_protocol [lindex $res 0]
+    set gdbserver_gdbport [lindex $res 1]
+
+    return [mi_gdb_target_cmd $gdbserver_protocol $gdbserver_gdbport]
 }

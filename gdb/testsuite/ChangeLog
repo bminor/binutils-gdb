@@ -1,3 +1,11 @@
+2012-01-27  Pedro Alves  <palves@redhat.com>
+
+	* config/extended-gdbserver.exp: New file.
+	* lib/gdbserver-support.exp (gdbserver_start_extended): Extend
+	comment.
+	(gdbserver_start_multi, mi_gdbserver_start_multi): New.
+	* boards/native-extended-gdbserver.exp: New file.
+
 2012-01-26  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/watchpoint.exp: Replace send_gdb/gdb_expect by gdb_test
