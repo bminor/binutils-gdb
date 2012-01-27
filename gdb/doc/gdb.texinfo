@@ -34046,6 +34046,12 @@ the corresponding stop reply should indicate that the thread has stopped with
 signal @samp{0}, regardless of whether the target uses some other signal
 as an implementation detail.
 
+The stub must support @samp{vCont} if it reports support for
+multiprocess extensions (@pxref{multiprocess extensions}).  Note that in
+this case @samp{vCont} actions can be specified to apply to all threads
+in a process by using the @samp{p@var{pid}.-1} form of the
+@var{thread-id}.
+
 Reply:
 @xref{Stop Reply Packets}, for the reply specifications.
 
@@ -34077,12 +34083,6 @@ Format}).  @value{GDBN} groups flash memory programming operations
 together, and sends a @samp{vFlashDone} request after each group; the
 stub is allowed to delay erase operation until the @samp{vFlashDone}
 packet is received.
-
-The stub must support @samp{vCont} if it reports support for
-multiprocess extensions (@pxref{multiprocess extensions}).  Note that in
-this case @samp{vCont} actions can be specified to apply to all threads
-in a process by using the @samp{p@var{pid}.-1} form of the
-@var{thread-id}.
 
 Reply:
 @table @samp
