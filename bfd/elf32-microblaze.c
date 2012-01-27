@@ -1880,7 +1880,8 @@ create_got_section (bfd *dynobj, struct bfd_link_info *info)
   if (!htab->sgot || !htab->sgotplt)
     return FALSE;
 
-  htab->srelgot = bfd_make_section (dynobj, ".rela.got");
+  if (!(htab->srelgot = bfd_get_section_by_name (dynobj, ".rela.got")))
+    htab->srelgot = bfd_make_section (dynobj, ".rela.got");
   if (htab->srelgot == NULL
       || ! bfd_set_section_flags (dynobj, htab->srelgot, SEC_ALLOC
                                   | SEC_LOAD
