@@ -734,7 +734,7 @@ if test "${with_python}" = no; then
   have_libpython=no
 else
   case "${with_python}" in
-  /*)
+  [[\\/]]* | ?:[[\\/]]*)
     if test -d ${with_python}; then
       # Assume the python binary is ${with_python}/bin/python.
       python_prog="${with_python}/bin/python"

@@ -1,3 +1,8 @@
+2012-01-27  Doug Evans  <dje@google.com>
+
+	* configure.ac (with_python): Fix absolute path handling for win32.
+	* configure: Regenerate.
+
 2012-01-26  Doug Evans  <dje@google.com>
 
 	* symtab.c: Whitespace cleanup, no code changes.
