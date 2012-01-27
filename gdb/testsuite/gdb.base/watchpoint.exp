@@ -866,6 +866,8 @@ if [initialize] then {
 	"Watchpoint \[0-9\]*: ival3.*Old value = 1.*New value = 2.*" \
 	"trigger slow conditional watch"
 
+    gdb_test_no_output "delete \$bpnum" "delete watch ival3"
+
     # We've explicitly disabled hardware watches.  Verify that GDB
     # refrains from using them.
     #

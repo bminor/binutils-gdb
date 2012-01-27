@@ -1,5 +1,9 @@
 2012-01-27  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/watchpoint.exp (top level): Delete watch ival3.
+
+2012-01-27  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/watchpoint.exp (test_watchpoint_in_big_blob): Expect
 	"You may have requested too many hardware
 	breakpoints/watchpoints".
