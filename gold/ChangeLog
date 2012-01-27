@@ -1,5 +1,10 @@
 2012-01-27  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* x86_64.cc (Relocate::tls_gd_to_ie): Support x32.
+	(Relocate::tls_gd_to_le): Likewise.
+
+2012-01-27  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* x86_64.cc (Scan::global): Support x32 IFUNC function pointer.
 
 2012-01-27  H.J. Lu  <hongjiu.lu@intel.com>

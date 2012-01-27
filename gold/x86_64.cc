@@ -3534,19 +3534,37 @@ Target_x86_64<size>::Relocate::tls_gd_to_ie(
     typename elfcpp::Elf_types<size>::Elf_Addr address,
     section_size_type view_size)
 {
-  // .byte 0x66; leaq foo@tlsgd(%rip),%rdi;
-  // .word 0x6666; rex64; call __tls_get_addr
-  // ==> movq %fs:0,%rax; addq x@gottpoff(%rip),%rax
+  // For SIZE == 64:
+  //	.byte 0x66; leaq foo@tlsgd(%rip),%rdi;
+  //	.word 0x6666; rex64; call __tls_get_addr
+  //	==> movq %fs:0,%rax; addq x@gottpoff(%rip),%rax
+  // For SIZE == 32:
+  //	leaq foo@tlsgd(%rip),%rdi;
+  //	.word 0x6666; rex64; call __tls_get_addr
+  //	==> movl %fs:0,%eax; addq x@gottpoff(%rip),%rax
 
-  tls::check_range(relinfo, relnum, rela.get_r_offset(), view_size, -4);
   tls::check_range(relinfo, relnum, rela.get_r_offset(), view_size, 12);
-
-  tls::check_tls(relinfo, relnum, rela.get_r_offset(),
-                 (memcmp(view - 4, "\x66\x48\x8d\x3d", 4) == 0));
   tls::check_tls(relinfo, relnum, rela.get_r_offset(),
                  (memcmp(view + 4, "\x66\x66\x48\xe8", 4) == 0));
 
-  memcpy(view - 4, "\x64\x48\x8b\x04\x25\0\0\0\0\x48\x03\x05\0\0\0\0", 16);
+  if (size == 64)
+    {
+      tls::check_range(relinfo, relnum, rela.get_r_offset(), view_size,
+		       -4);
+      tls::check_tls(relinfo, relnum, rela.get_r_offset(),
+		     (memcmp(view - 4, "\x66\x48\x8d\x3d", 4) == 0));
+      memcpy(view - 4, "\x64\x48\x8b\x04\x25\0\0\0\0\x48\x03\x05\0\0\0\0",
+	     16);
+    }
+  else
+    {
+      tls::check_range(relinfo, relnum, rela.get_r_offset(), view_size,
+		       -3);
+      tls::check_tls(relinfo, relnum, rela.get_r_offset(),
+		     (memcmp(view - 3, "\x48\x8d\x3d", 3) == 0));
+      memcpy(view - 3, "\x64\x8b\x04\x25\0\0\0\0\x48\x03\x05\0\0\0\0",
+	     15);
+    }
 
   const elfcpp::Elf_Xword addend = rela.get_r_addend();
   Relocate_functions<size, false>::pcrela32(view + 8, value, addend - 8,
@@ -3572,19 +3590,38 @@ Target_x86_64<size>::Relocate::tls_gd_to_le(
     unsigned char* view,
     section_size_type view_size)
 {
-  // .byte 0x66; leaq foo@tlsgd(%rip),%rdi;
-  // .word 0x6666; rex64; call __tls_get_addr
-  // ==> movq %fs:0,%rax; leaq x@tpoff(%rax),%rax
+  // For SIZE == 64:
+  //	.byte 0x66; leaq foo@tlsgd(%rip),%rdi;
+  //	.word 0x6666; rex64; call __tls_get_addr
+  //	==> movq %fs:0,%rax; leaq x@tpoff(%rax),%rax
+  // For SIZE == 32:
+  //	leaq foo@tlsgd(%rip),%rdi;
+  //	.word 0x6666; rex64; call __tls_get_addr
+  //	==> movl %fs:0,%eax; leaq x@tpoff(%rax),%rax
 
-  tls::check_range(relinfo, relnum, rela.get_r_offset(), view_size, -4);
   tls::check_range(relinfo, relnum, rela.get_r_offset(), view_size, 12);
-
   tls::check_tls(relinfo, relnum, rela.get_r_offset(),
-                 (memcmp(view - 4, "\x66\x48\x8d\x3d", 4) == 0));
-  tls::check_tls(relinfo, relnum, rela.get_r_offset(),
-                 (memcmp(view + 4, "\x66\x66\x48\xe8", 4) == 0));
+		 (memcmp(view + 4, "\x66\x66\x48\xe8", 4) == 0));
 
-  memcpy(view - 4, "\x64\x48\x8b\x04\x25\0\0\0\0\x48\x8d\x80\0\0\0\0", 16);
+  if (size == 64)
+    {
+      tls::check_range(relinfo, relnum, rela.get_r_offset(), view_size,
+		       -4);
+      tls::check_tls(relinfo, relnum, rela.get_r_offset(),
+		     (memcmp(view - 4, "\x66\x48\x8d\x3d", 4) == 0));
+      memcpy(view - 4, "\x64\x48\x8b\x04\x25\0\0\0\0\x48\x8d\x80\0\0\0\0",
+	     16);
+    }
+  else
+    {
+      tls::check_range(relinfo, relnum, rela.get_r_offset(), view_size,
+		       -3);
+      tls::check_tls(relinfo, relnum, rela.get_r_offset(),
+		     (memcmp(view - 3, "\x48\x8d\x3d", 3) == 0));
+
+      memcpy(view - 3, "\x64\x8b\x04\x25\0\0\0\0\x48\x8d\x80\0\0\0\0",
+	     15);
+    }
 
   value -= tls_segment->memsz();
   Relocate_functions<size, false>::rela32(view + 8, value, 0);
