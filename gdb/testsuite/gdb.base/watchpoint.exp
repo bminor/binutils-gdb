@@ -875,6 +875,11 @@ if [initialize] then {
 	"Expression cannot be implemented with read/access watchpoint..*" \
 	"rwatch disallowed when can-set-hw-watchpoints cleared"
 
+    # Re-enable hardware watchpoints if necessary.
+    if ![target_info exists gdb,no_hardware_watchpoints] {
+        gdb_test_no_output "set can-use-hw-watchpoints 1" ""
+    }
+
     test_watchpoint_and_breakpoint
 
     test_watchpoint_in_big_blob
@@ -884,11 +889,6 @@ if [initialize] then {
     test_disable_enable_software_watchpoint
 
     test_watch_location
-
-    # Re-enable hardware watchpoints if necessary.
-    if ![target_info exists gdb,no_hardware_watchpoints] {
-        gdb_test_no_output "set can-use-hw-watchpoints 1" ""
-    }
 
     test_wide_location_1
     test_wide_location_2
