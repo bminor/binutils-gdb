@@ -1,6 +1,7 @@
 // elfcpp.h -- main header file for elfcpp    -*- C++ -*-
 
-// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010, 2011, 2012
+// Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of elfcpp.
@@ -513,8 +514,12 @@ enum STT
   STT_FILE = 4,
   STT_COMMON = 5,
   STT_TLS = 6,
-  STT_LOOS = 10,
+
+  // GNU extension: symbol value points to a function which is called
+  // at runtime to determine the final value of the symbol.
   STT_GNU_IFUNC = 10,
+
+  STT_LOOS = 10,
   STT_HIOS = 12,
   STT_LOPROC = 13,
   STT_HIPROC = 15,

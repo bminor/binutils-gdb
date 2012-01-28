@@ -1,3 +1,7 @@
+2012-01-27  Ian Lance Taylor  <iant@google.com>
+
+	* elfcpp.h (STT_GNU_IFUNC): Add comment.
+
 2011-07-03  Samuel Thibault  <samuel.thibault@gnu.org>
 	    Thomas Schwinge  <thomas@schwinge.name>
 
