@@ -1,3 +1,10 @@
+2012-01-27  Ian Lance Taylor  <iant@google.com>
+
+	* reloc.h (Bits): New class with static functions, copied from
+	namespace utils in arm.cc.
+	* arm.cc (namespace utils): Remove.  Rewrite all uses to use Bits
+	instead.
+
 2012-01-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* incremental.cc (write_info_blocks): Correct relocation offset.
