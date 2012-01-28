@@ -1,5 +1,9 @@
 2012-01-27  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* incremental.cc (write_info_blocks): Correct relocation offset.
+
+2012-01-27  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* x86_64.cc (Relocate::tls_gd_to_ie): Support x32.
 	(Relocate::tls_gd_to_le): Likewise.
 

@@ -1632,7 +1632,8 @@ Output_section_incremental_inputs<size, big_endian>::write_info_blocks(
 		Swap32::writeval(pov + 4, shndx);
 		Swap32::writeval(pov + 8, chain);
 		Swap32::writeval(pov + 12, nrelocs);
-		Swap32::writeval(pov + 16, first_reloc * 3 * sizeof_addr);
+		Swap32::writeval(pov + 16,
+				 first_reloc * (8 + 2 * sizeof_addr));
 		pov += 20;
 	      }
 
