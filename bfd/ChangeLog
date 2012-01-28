@@ -1,3 +1,14 @@
+2012-01-27  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	Backport from mainline:
+	2011-11-06  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	PR ld/13387
+	* elf32-hppa.c (elf32_hppa_hide_symbol): Make STT_GNU_IFUNC symbol
+	go through PLT.  Reset plt field with init_plt_offset.
+	(elf32_hppa_adjust_dynamic_symbol): Ensure that a PLT slot is
+	allocated for symbols referenced by a plabel.
+
 2012-01-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	Backport from mainline:
