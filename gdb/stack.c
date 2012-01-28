@@ -59,7 +59,7 @@ void (*deprecated_selected_frame_level_changed_hook) (int);
 /* The possible choices of "set print frame-arguments", and the value
    of this setting.  */
 
-static const char *print_frame_arguments_choices[] =
+static const char *const print_frame_arguments_choices[] =
   {"all", "scalars", "none", NULL};
 static const char *print_frame_arguments = "scalars";
 
@@ -73,7 +73,7 @@ const char print_entry_values_if_needed[] = "if-needed";
 const char print_entry_values_both[] = "both";
 const char print_entry_values_compact[] = "compact";
 const char print_entry_values_default[] = "default";
-static const char *print_entry_values_choices[] =
+static const char *const print_entry_values_choices[] =
 {
   print_entry_values_no,
   print_entry_values_only,

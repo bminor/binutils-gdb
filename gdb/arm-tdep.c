@@ -97,7 +97,7 @@ static struct cmd_list_element *showarmcmdlist = NULL;
 
 /* The type of floating-point to use.  Keep this in sync with enum
    arm_float_model, and the help string in _initialize_arm_tdep.  */
-static const char *fp_model_strings[] =
+static const char *const fp_model_strings[] =
 {
   "auto",
   "softfpa",
@@ -112,7 +112,7 @@ static enum arm_float_model arm_fp_model = ARM_FLOAT_AUTO;
 static const char *current_fp_model = "auto";
 
 /* The ABI to use.  Keep this in sync with arm_abi_kind.  */
-static const char *arm_abi_strings[] =
+static const char *const arm_abi_strings[] =
 {
   "auto",
   "APCS",
@@ -125,7 +125,7 @@ static enum arm_abi_kind arm_abi_global = ARM_ABI_AUTO;
 static const char *arm_abi_string = "auto";
 
 /* The execution mode to assume.  */
-static const char *arm_mode_strings[] =
+static const char *const arm_mode_strings[] =
   {
     "auto",
     "arm",

@@ -25,7 +25,7 @@
 const char file_system_kind_auto[] = "auto";
 const char file_system_kind_unix[] = "unix";
 const char file_system_kind_dos_based[] = "dos-based";
-const char *target_file_system_kinds[] =
+const char *const target_file_system_kinds[] =
 {
   file_system_kind_auto,
   file_system_kind_unix,

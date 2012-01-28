@@ -41,7 +41,7 @@ static const char python_excp_full[] = "full";
 static const char python_excp_message[] = "message";
 
 /* "set python print-stack" choices.  */
-static const char *python_excp_enums[] =
+static const char *const python_excp_enums[] =
   {
     python_excp_none,
     python_excp_full,

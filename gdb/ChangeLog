@@ -1,3 +1,38 @@
+2012-01-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Code cleanup: Make 1440 bytes of data segment read-only.
+	* arch-utils.c (endian_enum): Make it const char *const [].
+	* arm-tdep.c (fp_model_strings, arm_abi_strings, arm_mode_strings):
+	Likewise.
+	* breakpoint.c (always_inserted_enums): Likewise.
+	* cli/cli-cmds.c (script_ext_enums): Likewise.
+	* cli/cli-decode.c (add_setshow_enum_cmd, complete_on_enum): Make the
+	enumlist parameter const char *const *.
+	* cli/cli-decode.h (struct cmd_list_element): Make the enums field
+	const char *const *.
+	* command.h (complete_on_enum, add_setshow_enum_cmd): Make the enumlist
+	parameter const char *const *.
+	* cris-tdep.c (cris_modes): Make it const char *const [].
+	* filesystem.c (target_file_system_kinds): Likewise.
+	* i386-tdep.c (valid_flavors, valid_conventions): Likewise.
+	* infrun.c (follow_fork_mode_kind_names, follow_exec_mode_names)
+	(can_use_displaced_stepping_enum, scheduler_enums)
+	(exec_direction_names): Likewise.
+	* language.c (_initialize_language): Make the type_or_range_names and
+	case_sensitive_names variables const char *const [].
+	* mips-tdep.c (mips_abi_strings): Make it const char *const [].
+	* python/python.c (python_excp_enums): Likewise.
+	* remote.c (interrupt_sequence_modes): Likewise.
+	* rs6000-tdep.c (powerpc_vector_strings): Likewise.
+	* serial.c (logbase_enums): Likewise.
+	* sh-tdep.c (sh_cc_enum): Likewise.
+	* stack.c (print_frame_arguments_choices, print_entry_values_choices):
+	Likewise.
+	* symtab.c (multiple_symbols_modes): Likewise.
+	* tui/tui-win.c (tui_border_kind_enums, tui_border_mode_enums):
+	Likewise.
+	* utils.c (internal_problem_modes): Likewise.
+
 2012-01-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix the 2012-01-26 regression by la_get_symbol_name_match_p.

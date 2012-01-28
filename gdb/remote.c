@@ -742,7 +742,7 @@ static int wait_forever_enabled_p = 1;
 const char interrupt_sequence_control_c[] = "Ctrl-C";
 const char interrupt_sequence_break[] = "BREAK";
 const char interrupt_sequence_break_g[] = "BREAK-g";
-static const char *interrupt_sequence_modes[] =
+static const char *const interrupt_sequence_modes[] =
   {
     interrupt_sequence_control_c,
     interrupt_sequence_break,

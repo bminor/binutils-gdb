@@ -389,7 +389,7 @@ void init_infwait_state (void);
 static const char follow_fork_mode_child[] = "child";
 static const char follow_fork_mode_parent[] = "parent";
 
-static const char *follow_fork_mode_kind_names[] = {
+static const char *const follow_fork_mode_kind_names[] = {
   follow_fork_mode_child,
   follow_fork_mode_parent,
   NULL
@@ -778,7 +778,7 @@ handle_vfork_child_exec_or_exit (int exec)
 
 static const char follow_exec_mode_new[] = "new";
 static const char follow_exec_mode_same[] = "same";
-static const char *follow_exec_mode_names[] =
+static const char *const follow_exec_mode_names[] =
 {
   follow_exec_mode_new,
   follow_exec_mode_same,
@@ -1175,7 +1175,7 @@ infrun_inferior_exit (struct inferior *inf)
 static const char can_use_displaced_stepping_auto[] = "auto";
 static const char can_use_displaced_stepping_on[] = "on";
 static const char can_use_displaced_stepping_off[] = "off";
-static const char *can_use_displaced_stepping_enum[] =
+static const char *const can_use_displaced_stepping_enum[] =
 {
   can_use_displaced_stepping_auto,
   can_use_displaced_stepping_on,
@@ -1579,7 +1579,7 @@ resume_cleanups (void *ignore)
 static const char schedlock_off[] = "off";
 static const char schedlock_on[] = "on";
 static const char schedlock_step[] = "step";
-static const char *scheduler_enums[] = {
+static const char *const scheduler_enums[] = {
   schedlock_off,
   schedlock_on,
   schedlock_step,
@@ -6907,7 +6907,7 @@ int execution_direction = EXEC_FORWARD;
 static const char exec_forward[] = "forward";
 static const char exec_reverse[] = "reverse";
 static const char *exec_direction = exec_forward;
-static const char *exec_direction_names[] = {
+static const char *const exec_direction_names[] = {
   exec_forward,
   exec_reverse,
   NULL

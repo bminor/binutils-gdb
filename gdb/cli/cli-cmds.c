@@ -201,7 +201,7 @@ static const char script_ext_off[] = "off";
 static const char script_ext_soft[] = "soft";
 static const char script_ext_strict[] = "strict";
 
-static const char *script_ext_enums[] = {
+static const char *const script_ext_enums[] = {
   script_ext_off,
   script_ext_soft,
   script_ext_strict,

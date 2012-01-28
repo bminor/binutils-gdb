@@ -211,7 +211,7 @@ extern struct cmd_list_element *add_info_alias (char *, char *, int);
 extern char **complete_on_cmdlist (struct cmd_list_element *,
 				   char *, char *);
 
-extern char **complete_on_enum (const char *enumlist[],
+extern char **complete_on_enum (const char *const *enumlist,
 				char *, char *);
 
 /* Functions that implement commands about CLI commands.  */
@@ -232,7 +232,7 @@ extern show_value_ftype deprecated_show_value_hack;
 
 extern void add_setshow_enum_cmd (char *name,
 				  enum command_class class,
-				  const char *enumlist[],
+				  const char *const *enumlist,
 				  const char **var,
 				  const char *set_doc,
 				  const char *show_doc,

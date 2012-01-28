@@ -373,7 +373,7 @@ show_automatic_hardware_breakpoints (struct ui_file *file, int from_tty,
 static const char always_inserted_auto[] = "auto";
 static const char always_inserted_on[] = "on";
 static const char always_inserted_off[] = "off";
-static const char *always_inserted_enums[] = {
+static const char *const always_inserted_enums[] = {
   always_inserted_auto,
   always_inserted_off,
   always_inserted_on,

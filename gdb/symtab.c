@@ -122,7 +122,7 @@ int basenames_may_differ = 0;
 const char multiple_symbols_ask[] = "ask";
 const char multiple_symbols_all[] = "all";
 const char multiple_symbols_cancel[] = "cancel";
-static const char *multiple_symbols_modes[] =
+static const char *const multiple_symbols_modes[] =
 {
   multiple_symbols_ask,
   multiple_symbols_all,

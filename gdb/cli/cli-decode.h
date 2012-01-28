@@ -189,7 +189,7 @@ struct cmd_list_element
 
     /* Pointer to NULL terminated list of enumerated values (like
        argv).  */
-    const char **enums;
+    const char *const *enums;
 
     /* Pointer to command strings of user-defined commands */
     struct command_line *user_commands;

@@ -376,7 +376,7 @@ i386_svr4_reg_to_regnum (struct gdbarch *gdbarch, int reg)
    its legitimate values.  */
 static const char att_flavor[] = "att";
 static const char intel_flavor[] = "intel";
-static const char *valid_flavors[] =
+static const char *const valid_flavors[] =
 {
   att_flavor,
   intel_flavor,
@@ -2545,7 +2545,7 @@ i386_store_return_value (struct gdbarch *gdbarch, struct type *type,
 static const char default_struct_convention[] = "default";
 static const char pcc_struct_convention[] = "pcc";
 static const char reg_struct_convention[] = "reg";
-static const char *valid_conventions[] =
+static const char *const valid_conventions[] =
 {
   default_struct_convention,
   pcc_struct_convention,

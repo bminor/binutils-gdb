@@ -82,7 +82,7 @@ enum
 
 static const char *mips_abi_string;
 
-static const char *mips_abi_strings[] = {
+static const char *const mips_abi_strings[] = {
   "auto",
   "n32",
   "o32",

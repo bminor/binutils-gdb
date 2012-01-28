@@ -53,7 +53,7 @@ static void serial_logchar (struct ui_file *stream,
 static const char logbase_hex[] = "hex";
 static const char logbase_octal[] = "octal";
 static const char logbase_ascii[] = "ascii";
-static const char *logbase_enums[] =
+static const char *const logbase_enums[] =
 {logbase_hex, logbase_octal, logbase_ascii, NULL};
 static const char *serial_logbase = logbase_ascii;
 

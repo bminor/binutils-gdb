@@ -886,7 +886,7 @@ can_dump_core (const char *reason)
 const char internal_problem_ask[] = "ask";
 const char internal_problem_yes[] = "yes";
 const char internal_problem_no[] = "no";
-static const char *internal_problem_modes[] =
+static const char *const internal_problem_modes[] =
 {
   internal_problem_ask,
   internal_problem_yes,

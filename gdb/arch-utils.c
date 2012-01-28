@@ -251,7 +251,7 @@ static int target_byte_order_user = BFD_ENDIAN_UNKNOWN;
 static const char endian_big[] = "big";
 static const char endian_little[] = "little";
 static const char endian_auto[] = "auto";
-static const char *endian_enum[] =
+static const char *const endian_enum[] =
 {
   endian_big,
   endian_little,

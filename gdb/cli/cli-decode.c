@@ -412,7 +412,7 @@ add_setshow_cmd_full (char *name,
 void
 add_setshow_enum_cmd (char *name,
 		      enum command_class class,
-		      const char *enumlist[],
+		      const char *const *enumlist,
 		      const char **var,
 		      const char *set_doc,
 		      const char *show_doc,
@@ -1733,7 +1733,7 @@ complete_on_cmdlist (struct cmd_list_element *list, char *text, char *word)
    "oobar"; if WORD is "baz/foo", return "baz/foobar".  */
 
 char **
-complete_on_enum (const char *enumlist[],
+complete_on_enum (const char *const *enumlist,
 		  char *text,
 		  char *word)
 {

@@ -1109,10 +1109,10 @@ language_lookup_primitive_type_by_name (const struct language_defn *la,
 void
 _initialize_language (void)
 {
-  static const char *type_or_range_names[]
+  static const char *const type_or_range_names[]
     = { "on", "off", "warn", "auto", NULL };
 
-  static const char *case_sensitive_names[]
+  static const char *const case_sensitive_names[]
     = { "on", "off", "auto", NULL };
 
   language_gdbarch_data

@@ -59,7 +59,7 @@ static struct cmd_list_element *showshcmdlist = NULL;
 
 static const char sh_cc_gcc[] = "gcc";
 static const char sh_cc_renesas[] = "renesas";
-static const char *sh_cc_enum[] = {
+static const char *const sh_cc_enum[] = {
   sh_cc_gcc,
   sh_cc_renesas, 
   NULL

@@ -107,7 +107,7 @@ static void parse_scrolling_args (char *,
 #endif
 
 /* Possible values for tui-border-kind variable.  */
-static const char *tui_border_kind_enums[] = {
+static const char *const tui_border_kind_enums[] = {
   "space",
   "ascii",
   "acs",
@@ -115,7 +115,7 @@ static const char *tui_border_kind_enums[] = {
 };
 
 /* Possible values for tui-border-mode and tui-active-border-mode.  */
-static const char *tui_border_mode_enums[] = {
+static const char *const tui_border_mode_enums[] = {
   "normal",
   "standout",
   "reverse",

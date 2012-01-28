@@ -151,7 +151,7 @@ static int usr_cmd_cris_version_valid = 0;
 
 static const char cris_mode_normal[] = "normal";
 static const char cris_mode_guru[] = "guru";
-static const char *cris_modes[] = {
+static const char *const cris_modes[] = {
   cris_mode_normal,
   cris_mode_guru,
   0
