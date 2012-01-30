@@ -1,3 +1,8 @@
+2012-01-30  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/valgrind-db-attach.exp (attach to debugger): Fix
+	compatibility with valgrind-3.7.0.
+
 2012-01-27  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/watchpoint.exp (no_hw): New global.

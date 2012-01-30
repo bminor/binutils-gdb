@@ -72,7 +72,7 @@ set double_free [gdb_get_line_number "double-free"]
 
 set test "attach to debugger"
 gdb_test_multiple "" $test {
-    -re "Invalid free\\(\\) / delete / delete\\\[\\\]\r\n.*: main \\(${srcfile}:$double_free\\)\r\n.*---- Attach to debugger \\? --- \[^\r\n\]* ---- " {
+    -re "Invalid free\\(\\).*: main \\(${srcfile}:$double_free\\)\r\n.*---- Attach to debugger \\? --- \[^\r\n\]* ---- " {
 	send_gdb "y\r"
     }
     -re "---- Attach to debugger \\? --- \[^\r\n\]* ---- " {
