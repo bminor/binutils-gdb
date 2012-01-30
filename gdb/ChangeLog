@@ -1,3 +1,10 @@
+2012-01-30  Tom Tromey  <tromey@redhat.com>
+
+	PR breakpoints/13568:
+	* dwarf2read.c (dwarf_decode_macro_bytes): Add 'include_hash'
+	argument.  Check for recursive includes.
+	(dwarf_decode_macros): Create an include hash.
+
 2012-01-30  Michael Eager  <eager@eagercon.com>
 
 	* configure.tgt (powerpc-*-linux*): Add glibc-tdep.o.

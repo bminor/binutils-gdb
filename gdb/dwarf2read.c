@@ -15136,7 +15136,7 @@ dwarf_parse_macro_header (gdb_byte **opcode_definitions,
 }
 
 /* A helper for dwarf_decode_macros that handles the GNU extensions,
-   including DW_GNU_MACINFO_transparent_include.  */
+   including DW_MACRO_GNU_transparent_include.  */
 
 static void
 dwarf_decode_macro_bytes (bfd *abfd, gdb_byte *mac_ptr, gdb_byte *mac_end,
@@ -15145,7 +15145,8 @@ dwarf_decode_macro_bytes (bfd *abfd, gdb_byte *mac_ptr, gdb_byte *mac_end,
 			  struct dwarf2_section_info *section,
 			  int section_is_gnu,
 			  unsigned int offset_size,
-			  struct objfile *objfile)
+			  struct objfile *objfile,
+			  htab_t include_hash)
 {
   enum dwarf_macro_record_type macinfo_type;
   int at_commandline;
@@ -15320,16 +15321,33 @@ dwarf_decode_macro_bytes (bfd *abfd, gdb_byte *mac_ptr, gdb_byte *mac_end,
 	case DW_MACRO_GNU_transparent_include:
 	  {
 	    LONGEST offset;
+	    void **slot;
 
 	    offset = read_offset_1 (abfd, mac_ptr, offset_size);
 	    mac_ptr += offset_size;
 
-	    dwarf_decode_macro_bytes (abfd,
-				      section->buffer + offset,
-				      mac_end, current_file,
-				      lh, comp_dir,
-				      section, section_is_gnu,
-				      offset_size, objfile);
+	    slot = htab_find_slot (include_hash, mac_ptr, INSERT);
+	    if (*slot != NULL)
+	      {
+		/* This has actually happened; see
+		   http://sourceware.org/bugzilla/show_bug.cgi?id=13568.  */
+		complaint (&symfile_complaints,
+			   _("recursive DW_MACRO_GNU_transparent_include in "
+			     ".debug_macro section"));
+	      }
+	    else
+	      {
+		*slot = mac_ptr;
+
+		dwarf_decode_macro_bytes (abfd,
+					  section->buffer + offset,
+					  mac_end, current_file,
+					  lh, comp_dir,
+					  section, section_is_gnu,
+					  offset_size, objfile, include_hash);
+
+		htab_remove_elt (include_hash, mac_ptr);
+	      }
 	  }
 	  break;
 
@@ -15373,6 +15391,9 @@ dwarf_decode_macros (struct line_header *lh, unsigned int offset,
   enum dwarf_macro_record_type macinfo_type;
   unsigned int offset_size = cu->header.offset_size;
   gdb_byte *opcode_definitions[256];
+  struct cleanup *cleanup;
+  htab_t include_hash;
+  void **slot;
 
   dwarf2_read_section (objfile, section);
   if (section->buffer == NULL)
@@ -15506,9 +15527,16 @@ dwarf_decode_macros (struct line_header *lh, unsigned int offset,
      command-line macro definitions/undefinitions.  This flag is unset when we
      reach the first DW_MACINFO_start_file entry.  */
 
-  dwarf_decode_macro_bytes (abfd, section->buffer + offset, mac_end,
+  include_hash = htab_create_alloc (1, htab_hash_pointer, htab_eq_pointer,
+				    NULL, xcalloc, xfree);
+  cleanup = make_cleanup_htab_delete (include_hash);
+  mac_ptr = section->buffer + offset;
+  slot = htab_find_slot (include_hash, mac_ptr, INSERT);
+  *slot = mac_ptr;
+  dwarf_decode_macro_bytes (abfd, mac_ptr, mac_end,
 			    current_file, lh, comp_dir, section, section_is_gnu,
-			    offset_size, objfile);
+			    offset_size, objfile, include_hash);
+  do_cleanups (cleanup);
 }
 
 /* Check if the attribute's form is a DW_FORM_block*
