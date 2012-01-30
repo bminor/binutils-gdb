@@ -37,6 +37,7 @@
 #include "solist.h"
 #include "ppc-tdep.h"
 #include "ppc-linux-tdep.h"
+#include "glibc-tdep.h"
 #include "trad-frame.h"
 #include "frame-unwind.h"
 #include "tramp-frame.h"
@@ -64,6 +65,9 @@
 #include "features/rs6000/powerpc-isa205-altivec64l.c"
 #include "features/rs6000/powerpc-isa205-vsx64l.c"
 #include "features/rs6000/powerpc-e500l.c"
+
+/* Shared library operations for PowerPC-Linux.  */
+static struct target_so_ops powerpc_so_ops;
 
 /* The syscall's XML filename for PPC and PPC64.  */
 #define XML_SYSCALL_FILENAME_PPC "syscalls/ppc-linux.xml"
@@ -599,6 +603,86 @@ ppc64_standard_linkage3_target (struct frame_info *frame,
   return ppc64_desc_entry_point (gdbarch, desc);
 }
 
+/* PLT stub in executable.  */
+static struct insn_pattern powerpc32_plt_stub[] =
+  {
+    { 0xffff0000, 0x3d600000, 0 },	/* lis   r11, xxxx	 */
+    { 0xffff0000, 0x816b0000, 0 },	/* lwz   r11, xxxx(r11)  */
+    { 0xffffffff, 0x7d6903a6, 0 },	/* mtctr r11		 */
+    { 0xffffffff, 0x4e800420, 0 },	/* bctr			 */
+    {          0,          0, 0 }
+  };
+
+/* PLT stub in shared library.  */
+static struct insn_pattern powerpc32_plt_stub_so[] =
+  {
+    { 0xffff0000, 0x817e0000, 0 },	/* lwz   r11, xxxx(r30)  */
+    { 0xffffffff, 0x7d6903a6, 0 },	/* mtctr r11		 */
+    { 0xffffffff, 0x4e800420, 0 },	/* bctr			 */
+    { 0xffffffff, 0x60000000, 0 },	/* nop			 */
+    {          0,          0, 0 }
+  };
+#define POWERPC32_PLT_STUB_LEN 	ARRAY_SIZE (powerpc32_plt_stub)
+
+/* Check if PC is in PLT stub.  For non-secure PLT, stub is in .plt
+   section.  For secure PLT, stub is in .text and we need to check
+   instruction patterns.  */
+
+static int
+powerpc_linux_in_dynsym_resolve_code (CORE_ADDR pc)
+{
+  struct objfile *objfile;
+  struct minimal_symbol *sym;
+
+  /* Check whether PC is in the dynamic linker.  This also checks
+     whether it is in the .plt section, used by non-PIC executables.  */
+  if (svr4_in_dynsym_resolve_code (pc))
+    return 1;
+
+  /* Check if we are in the resolver.  */
+  sym = lookup_minimal_symbol_by_pc (pc);
+  if ((strcmp (SYMBOL_LINKAGE_NAME (sym), "__glink") == 0)
+      || (strcmp (SYMBOL_LINKAGE_NAME (sym), "__glink_PLTresolve") == 0))
+    return 1;
+
+  return 0;
+}
+
+/* Follow PLT stub to actual routine.  */
+
+static CORE_ADDR
+ppc_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
+{
+  int insnbuf[POWERPC32_PLT_STUB_LEN];
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  CORE_ADDR target = 0;
+
+  if (insns_match_pattern (pc, powerpc32_plt_stub, insnbuf))
+    {
+      /* Insn pattern is
+		lis   r11, xxxx
+		lwz   r11, xxxx(r11)
+	 Branch target is in r11.  */
+
+      target = (insn_d_field (insnbuf[0]) << 16) | insn_d_field (insnbuf[1]);
+      target = read_memory_unsigned_integer (target, 4, byte_order);
+    }
+
+  if (insns_match_pattern (pc, powerpc32_plt_stub_so, insnbuf))
+    {
+      /* Insn pattern is
+		lwz   r11, xxxx(r30)
+	 Branch target is in r11.  */
+
+      target = get_frame_register_unsigned (frame, tdep->ppc_gp0_regnum + 30)
+	       + insn_d_field (insnbuf[0]);
+      target = read_memory_unsigned_integer (target, 4, byte_order);
+    }
+
+  return target;
+}
 
 /* Given that we've begun executing a call trampoline at PC, return
    the entry point of the function the trampoline will go to.  */
@@ -1524,7 +1608,7 @@ ppc_linux_init_abi (struct gdbarch_info info,
                                             ppc_linux_memory_remove_breakpoint);
 
       /* Shared library handling.  */
-      set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
+      set_gdbarch_skip_trampoline_code (gdbarch, ppc_skip_trampoline_code);
       set_solib_svr4_fetch_link_map_offsets
         (gdbarch, svr4_ilp32_fetch_link_map_offsets);
 
@@ -1555,6 +1639,17 @@ ppc_linux_init_abi (struct gdbarch_info info,
       else
 	set_gdbarch_core_regset_sections (gdbarch,
 					  ppc_linux_fp_regset_sections);
+
+      if (powerpc_so_ops.in_dynsym_resolve_code == NULL)
+	{
+	  powerpc_so_ops = svr4_so_ops;
+	  /* Override dynamic resolve function.  */
+	  powerpc_so_ops.in_dynsym_resolve_code =
+	    powerpc_linux_in_dynsym_resolve_code;
+	}
+      set_solib_ops (gdbarch, &powerpc_so_ops);
+
+      set_gdbarch_skip_solib_resolver (gdbarch, glibc_skip_solib_resolver);
     }
   
   if (tdep->wordsize == 8)

@@ -1,3 +1,14 @@
+2012-01-30  Michael Eager  <eager@eagercon.com>
+
+	* configure.tgt (powerpc-*-linux*): Add glibc-tdep.o.
+	* ppc-linux-tdep.c: Include glibc-tdep.h.
+	(powerpc32_plt_stub, powerpc32_plt_stub_so): Add PLT stub templates.  
+	(powerpc_linux_in_plt_stub): New function.
+	(powerpc_linux_in_dynsym_resolve_code): New function.
+	(ppc_skip_trampoline_code): New function.
+	(ppc_linux_init_abi): Use PPC specific functions rather than generic.
+	Use glibc_skip_solib_resolver.
+
 2012-01-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Code cleanup: Make 1440 bytes of data segment read-only.
@@ -527,6 +538,7 @@
 	* target.c (unpush_target): Close target after unpushing it, not
 	before.
 
+>>>>>>> 1.13788
 2012-01-19  Gary Benson  <gbenson@redhat.com>
 
 	* mdebugread.c (sort_blocks): Replace integer constants with ones
@@ -567,6 +579,7 @@
 	record breakpoints list.  Only remove breakpoints from the
 	inferior if they had been inserted there in the first place.
 
+>>>>>>> 1.13749
 2012-01-17  Doug Evans  <dje@google.com>
 
 	* linespec.c (decode_line_internal): Don't call symtabs_from_filename
