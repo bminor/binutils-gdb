@@ -1,3 +1,8 @@
+2012-01-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure.ac: Check if -fpic -mtls-dialect=gnu2 works.
+	* configure: Regenerated.
+
 2012-01-27  Ian Lance Taylor  <iant@google.com>
 
 	* reloc.h (Bits): New class with static functions, copied from

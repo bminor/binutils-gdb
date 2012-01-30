@@ -6437,10 +6437,16 @@ fi
 
 
 save_CFLAGS="$CFLAGS"
-CFLAGS="$CFLAGS -mtls-dialect=gnu2"
+CFLAGS="$CFLAGS -fpic -mtls-dialect=gnu2"
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
-int i;
+
+__thread int i;
+void foo (void)
+{
+  i = 10;
+}
+
 _ACEOF
 if ac_fn_c_try_compile "$LINENO"; then :
   have_tls_gnu2=yes
