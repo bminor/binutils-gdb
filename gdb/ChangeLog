@@ -1,7 +1,7 @@
 2012-01-31  Doug Evans  <dje@google.com>
 
 	* symtab.h: Remove outdated comment.
-	(SYMBOL_MATCHES_NATURAL_NAME): Tweak comment.
+	(SYMBOL_MATCHES_NATURAL_NAME): Delete.
 
 2012-01-30  Tom Tromey  <tromey@redhat.com>
 

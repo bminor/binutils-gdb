@@ -254,13 +254,6 @@ extern char *symbol_demangled_name (const struct general_symbol_info *symbol);
   (demangle ? SYMBOL_NATURAL_NAME (symbol) : SYMBOL_LINKAGE_NAME (symbol))
 extern int demangle;
 
-/* Return non-zero if NAME matches the "natural" name of SYMBOL.
-   Whitespace and trailing parentheses are ignored.
-   See strcmp_iw for details about its behavior.  */
-
-#define SYMBOL_MATCHES_NATURAL_NAME(symbol, name)			\
-  (strcmp_iw (SYMBOL_NATURAL_NAME (symbol), (name)) == 0)
-
 /* Macro that returns the name to be used when sorting and searching symbols.
    In  C++, Chill, and Java, we search for the demangled form of a name,
    and so sort symbols accordingly.  In Ada, however, we search by mangled
@@ -270,8 +263,9 @@ extern int demangle;
    (symbol_search_name (&(symbol)->ginfo))
 extern char *symbol_search_name (const struct general_symbol_info *);
 
-/* Analogous to SYMBOL_MATCHES_NATURAL_NAME, but uses the search
-   name.  */
+/* Return non-zero if NAME matches the "search" name of SYMBOL.
+   Whitespace and trailing parentheses are ignored.
+   See strcmp_iw for details about its behavior.  */
 #define SYMBOL_MATCHES_SEARCH_NAME(symbol, name)			\
   (strcmp_iw (SYMBOL_SEARCH_NAME (symbol), (name)) == 0)
 
