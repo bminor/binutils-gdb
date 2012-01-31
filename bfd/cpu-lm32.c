@@ -36,6 +36,7 @@ const bfd_arch_info_type bfd_lm32_arch =
     TRUE,                         /* Is this the default machine for the target.  */
     bfd_default_compatible,       /* Function callback to test if two files have compatible machines.  */
     bfd_default_scan,
+    bfd_arch_default_fill,
     NULL                          /* Next.  */
 };
 

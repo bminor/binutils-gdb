@@ -226,5 +226,4 @@ Disassembly of section .text:
  +11a7:	90[ 	]+nop *
  +11a8:	c9[ 	]+leaveq *
  +11a9:	c3[ 	]+retq *
- +11aa:	90[ 	]+nop *
- +11ab:	90[ 	]+nop *
+ +11aa:	66 90[ 	]+xchg   %ax,%ax

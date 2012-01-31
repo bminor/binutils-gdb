@@ -174,9 +174,7 @@ Disassembly of section .text:
   401136:	90[ 	]+nop *
   401137:	c9[ 	]+leaveq *
   401138:	c3[ 	]+retq *
-  401139:	90[ 	]+nop *
-  40113a:	90[ 	]+nop *
-  40113b:	90[ 	]+nop *
+  401139:	0f 1f 00[ 	]+nopl   \(%rax\)
 
 0+40113c <_start>:
   40113c:	55[ 	]+push   %rbp

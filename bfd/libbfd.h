@@ -2575,4 +2575,8 @@ const bfd_arch_info_type *bfd_default_compatible
 bfd_boolean bfd_default_scan
    (const struct bfd_arch_info *info, const char *string);
 
+void *bfd_arch_default_fill (bfd_size_type count,
+    bfd_boolean is_bigendian,
+    bfd_boolean code);
+
 /* Extracted from elf.c.  */

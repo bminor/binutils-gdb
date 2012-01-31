@@ -2161,7 +2161,6 @@ enum bfd_architecture
 #define bfd_mach_tilegx    1
   bfd_arch_last
   };
-
 typedef struct bfd_arch_info
 {
   int bits_per_word;
@@ -2180,6 +2179,12 @@ typedef struct bfd_arch_info
     (const struct bfd_arch_info *a, const struct bfd_arch_info *b);
 
   bfd_boolean (*scan) (const struct bfd_arch_info *, const char *);
+
+  /* Allocate via bfd_malloc and return a fill buffer of size COUNT.  If
+     IS_BIGENDIAN is TRUE, the order of bytes is big endian.  If CODE is
+     TRUE, the buffer contains code.  */
+  void *(*fill) (bfd_size_type count, bfd_boolean is_bigendian,
+                 bfd_boolean code);
 
   const struct bfd_arch_info *next;
 }

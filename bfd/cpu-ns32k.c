@@ -27,7 +27,8 @@
 #include "ns32k.h"
 
 #define N(machine, printable, d, next)  \
-{  32, 32, 8, bfd_arch_ns32k, machine, "ns32k",printable,3,d,bfd_default_compatible,bfd_default_scan, next, }
+{  32, 32, 8, bfd_arch_ns32k, machine, "ns32k",printable,3,d, \
+   bfd_default_compatible,bfd_default_scan,bfd_arch_default_fill,next, }
 
 static const bfd_arch_info_type arch_info_struct[] =
 {

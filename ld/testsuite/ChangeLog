@@ -1,3 +1,13 @@
+2012-01-31  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/13616
+	* ld-i386/tlsbindesc.dd: Update no-op padding.
+	* ld-i386/tlsnopic.dd: Likewise. 
+	* ld-i386/tlspic.dd: Likewise. 
+	* ld-x86-64/tlsbin.dd: Likewise. 
+	* ld-x86-64/tlsbindesc.dd: Likewise. 
+	* ld-x86-64/tlspic.dd: Likewise. 
+
 2012-01-17  Alan Modra  <amodra@gmail.com>
 
 	* config/default.exp: Provide tmpdir/ld/collect-ld.

@@ -183,6 +183,7 @@ build_link_order (lang_statement_union_type *statement)
 	  default:
 	    abort ();
 	  }
+	link_order->u.data.size = link_order->size;
       }
       break;
 

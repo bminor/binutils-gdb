@@ -56,6 +56,7 @@ compatible (const bfd_arch_info_type * a, const bfd_arch_info_type * b)
   default,			/* The default machine.  */	\
   compatible,							\
   bfd_default_scan,						\
+  bfd_arch_default_fill,					\
   next								\
 }
 

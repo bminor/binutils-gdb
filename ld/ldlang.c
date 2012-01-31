@@ -4600,7 +4600,7 @@ insert_pad (lang_statement_union_type **ptr,
 	    asection *output_section,
 	    bfd_vma dot)
 {
-  static fill_type zero_fill = { 1, { 0 } };
+  static fill_type zero_fill;
   lang_statement_union_type *pad = NULL;
 
   if (ptr != &statement_list.head)

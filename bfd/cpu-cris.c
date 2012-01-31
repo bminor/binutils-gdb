@@ -69,7 +69,7 @@ get_compatible (a,b)
 
 #define N(NUMBER, PRINT, NEXT)  \
  { 32, 32, 8, bfd_arch_cris, NUMBER, "cris", PRINT, 1, FALSE, \
-   get_compatible, bfd_default_scan, NEXT }
+   get_compatible, bfd_default_scan, bfd_arch_default_fill, NEXT }
 
 static const bfd_arch_info_type bfd_cris_arch_compat_v10_v32 =
  N (bfd_mach_cris_v10_v32, "cris:common_v10_v32", NULL);
@@ -98,6 +98,7 @@ const bfd_arch_info_type bfd_cris_arch =
 				   bfd_arch_info_type.  */
   bfd_default_scan,		/* Check if a bfd_arch_info_type is a
 				   match.  */
+  bfd_arch_default_fill,	/* Default fill.  */
   &bfd_cris_arch_v32		/* Pointer to next bfd_arch_info_type in
 				   the same family.  */
 };

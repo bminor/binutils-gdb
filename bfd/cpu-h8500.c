@@ -56,5 +56,6 @@ const bfd_arch_info_type bfd_h8500_arch =
   TRUE,				/* the default machine */
   bfd_default_compatible,
   scan_mach,
+  bfd_arch_default_fill,
   0,
 };

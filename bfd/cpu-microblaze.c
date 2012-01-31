@@ -36,5 +36,6 @@ const bfd_arch_info_type bfd_microblaze_arch =
   TRUE,		  		/* Is this the default architecture ?  */
   bfd_default_compatible,	/* Architecture comparison function.  */
   bfd_default_scan,	   	/* String to architecture conversion.  */
+  bfd_arch_default_fill,	/* Default fill.  */
   NULL			   	/* Next in list.  */
 };

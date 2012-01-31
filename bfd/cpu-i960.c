@@ -166,7 +166,8 @@ compatible (a,b)
 }
 
 #define N(a,b,d,n) \
-{ 32, 32, 8,bfd_arch_i960,a,"i960",b,3,d,compatible,scan_960_mach,n,}
+{ 32, 32, 8,bfd_arch_i960,a,"i960",b,3,d,compatible,scan_960_mach, \
+  bfd_arch_default_fill, n,}
 
 static const bfd_arch_info_type arch_info_struct[] =
 {

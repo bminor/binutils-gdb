@@ -156,6 +156,4 @@ Disassembly of section .text:
     10ec:	8b 5d fc[ 	]+mov    -0x4\(%ebp\),%ebx
     10ef:	c9[ 	]+leave *
     10f0:	c3[ 	]+ret *
-    10f1:	90[ 	]+nop *
-    10f2:	90[ 	]+nop *
-    10f3:	90[ 	]+nop *
+    10f1:	0f 1f 00[ 	]+nopl   \(%eax\)

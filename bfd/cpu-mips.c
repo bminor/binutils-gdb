@@ -55,6 +55,7 @@ mips_compatible (const bfd_arch_info_type *a, const bfd_arch_info_type *b)
     DEFAULT,						\
     mips_compatible,					\
     bfd_default_scan,					\
+    bfd_arch_default_fill,				\
     NEXT,						\
   }
 

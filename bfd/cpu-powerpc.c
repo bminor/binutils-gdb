@@ -65,6 +65,7 @@ const bfd_arch_info_type bfd_powerpc_archs[] =
     TRUE, /* default for 64 bit target */
     powerpc_compatible,
     bfd_default_scan,
+    bfd_arch_default_fill,
     &bfd_powerpc_archs[1]
   },
   /* elf32-ppc:ppc_elf_object_p relies on the default 32 bit arch
@@ -81,6 +82,7 @@ const bfd_arch_info_type bfd_powerpc_archs[] =
     FALSE,
     powerpc_compatible,
     bfd_default_scan,
+    bfd_arch_default_fill,
     &bfd_powerpc_archs[2],
   },
 #else
@@ -97,6 +99,7 @@ const bfd_arch_info_type bfd_powerpc_archs[] =
     TRUE, /* default for 32 bit target */
     powerpc_compatible,
     bfd_default_scan,
+    bfd_arch_default_fill,
     &bfd_powerpc_archs[1],
   },
   /* elf64-ppc:ppc64_elf_object_p relies on the default 64 bit arch
@@ -113,6 +116,7 @@ const bfd_arch_info_type bfd_powerpc_archs[] =
     FALSE,
     powerpc_compatible,
     bfd_default_scan,
+    bfd_arch_default_fill,
     &bfd_powerpc_archs[2]
   },
 #endif
@@ -128,6 +132,7 @@ const bfd_arch_info_type bfd_powerpc_archs[] =
     FALSE, /* not the default */
     powerpc_compatible,
     bfd_default_scan,
+    bfd_arch_default_fill,
     &bfd_powerpc_archs[3]
   },
   {
@@ -142,6 +147,7 @@ const bfd_arch_info_type bfd_powerpc_archs[] =
     FALSE, /* not the default */
     powerpc_compatible,
     bfd_default_scan,
+    bfd_arch_default_fill,
     &bfd_powerpc_archs[4]
   },
   {
@@ -156,6 +162,7 @@ const bfd_arch_info_type bfd_powerpc_archs[] =
     FALSE, /* not the default */
     powerpc_compatible,
     bfd_default_scan,
+    bfd_arch_default_fill,
     &bfd_powerpc_archs[5]
   },
   {
@@ -170,6 +177,7 @@ const bfd_arch_info_type bfd_powerpc_archs[] =
     FALSE, /* not the default */
     powerpc_compatible,
     bfd_default_scan,
+    bfd_arch_default_fill,
     &bfd_powerpc_archs[6]
   },
   {
@@ -184,6 +192,7 @@ const bfd_arch_info_type bfd_powerpc_archs[] =
     FALSE, /* not the default */
     powerpc_compatible,
     bfd_default_scan,
+    bfd_arch_default_fill,
     &bfd_powerpc_archs[7]
   },
   {
@@ -198,6 +207,7 @@ const bfd_arch_info_type bfd_powerpc_archs[] =
     FALSE, /* not the default */
     powerpc_compatible,
     bfd_default_scan,
+    bfd_arch_default_fill,
     &bfd_powerpc_archs[8]
   },
   {
@@ -212,6 +222,7 @@ const bfd_arch_info_type bfd_powerpc_archs[] =
     FALSE, /* not the default */
     powerpc_compatible,
     bfd_default_scan,
+    bfd_arch_default_fill,
     &bfd_powerpc_archs[9]
   },
   {
@@ -226,6 +237,7 @@ const bfd_arch_info_type bfd_powerpc_archs[] =
     FALSE, /* not the default */
     powerpc_compatible,
     bfd_default_scan,
+    bfd_arch_default_fill,
     &bfd_powerpc_archs[10]
   },
   {
@@ -240,6 +252,7 @@ const bfd_arch_info_type bfd_powerpc_archs[] =
     FALSE, /* not the default */
     powerpc_compatible,
     bfd_default_scan,
+    bfd_arch_default_fill,
     &bfd_powerpc_archs[11]
   },
   {
@@ -254,6 +267,7 @@ const bfd_arch_info_type bfd_powerpc_archs[] =
     FALSE, /* not the default */
     powerpc_compatible,
     bfd_default_scan,
+    bfd_arch_default_fill,
     &bfd_powerpc_archs[12]
   },
   {
@@ -268,6 +282,7 @@ const bfd_arch_info_type bfd_powerpc_archs[] =
     FALSE, /* not the default */
     powerpc_compatible,
     bfd_default_scan,
+    bfd_arch_default_fill,
     &bfd_powerpc_archs[13]
   },
   {
@@ -282,6 +297,7 @@ const bfd_arch_info_type bfd_powerpc_archs[] =
     FALSE,
     powerpc_compatible,
     bfd_default_scan,
+    bfd_arch_default_fill,
     &bfd_powerpc_archs[14]
   },
   {
@@ -296,6 +312,7 @@ const bfd_arch_info_type bfd_powerpc_archs[] =
     FALSE, /* not the default */
     powerpc_compatible,
     bfd_default_scan,
+    bfd_arch_default_fill,
     &bfd_powerpc_archs[15]
   },
   {
@@ -310,6 +327,7 @@ const bfd_arch_info_type bfd_powerpc_archs[] =
     FALSE, /* not the default */
     powerpc_compatible,
     bfd_default_scan,
+    bfd_arch_default_fill,
     &bfd_powerpc_archs[16]
   },
   {
@@ -324,6 +342,7 @@ const bfd_arch_info_type bfd_powerpc_archs[] =
     FALSE, /* not the default */
     powerpc_compatible,
     bfd_default_scan,
+    bfd_arch_default_fill,
     &bfd_powerpc_archs[17]
   },
   {
@@ -338,6 +357,7 @@ const bfd_arch_info_type bfd_powerpc_archs[] =
     FALSE, /* not the default */
     powerpc_compatible,
     bfd_default_scan,
+    bfd_arch_default_fill,
     &bfd_powerpc_archs[18]
   },
   {
@@ -352,6 +372,7 @@ const bfd_arch_info_type bfd_powerpc_archs[] =
     FALSE, /* not the default */
     powerpc_compatible,
     bfd_default_scan,
+    bfd_arch_default_fill,
     0
   }
 };

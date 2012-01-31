@@ -485,6 +485,12 @@ DESCRIPTION
 .
 .  bfd_boolean (*scan) (const struct bfd_arch_info *, const char *);
 .
+.  {* Allocate via bfd_malloc and return a fill buffer of size COUNT.  If
+.     IS_BIGENDIAN is TRUE, the order of bytes is big endian.  If CODE is
+.     TRUE, the buffer contains code.  *}
+.  void *(*fill) (bfd_size_type count, bfd_boolean is_bigendian,
+.		  bfd_boolean code);
+.
 .  const struct bfd_arch_info *next;
 .}
 .bfd_arch_info_type;
@@ -814,6 +820,7 @@ const bfd_arch_info_type bfd_default_arch_struct = {
   32, 32, 8, bfd_arch_unknown, 0, "unknown", "unknown", 2, TRUE,
   bfd_default_compatible,
   bfd_default_scan,
+  bfd_arch_default_fill,
   0,
 };
 
@@ -1308,4 +1315,30 @@ bfd_arch_mach_octets_per_byte (enum bfd_architecture arch,
   if (ap)
     return ap->bits_per_byte / 8;
   return 1;
+}
+
+/*
+INTERNAL_FUNCTION
+	bfd_arch_default_fill
+
+SYNOPSIS
+	void *bfd_arch_default_fill (bfd_size_type count,
+				     bfd_boolean is_bigendian,
+				     bfd_boolean code);
+
+DESCRIPTION
+	Allocate via bfd_malloc and return a fill buffer of size COUNT.
+	If IS_BIGENDIAN is TRUE, the order of bytes is big endian.  If
+	CODE is TRUE, the buffer contains code.
+*/
+
+void *
+bfd_arch_default_fill (bfd_size_type count,
+		       bfd_boolean is_bigendian ATTRIBUTE_UNUSED,
+		       bfd_boolean code ATTRIBUTE_UNUSED)
+{
+  void *fill = bfd_malloc (count);
+  if (fill != NULL)
+    memset (fill, 0, count);
+  return fill;
 }

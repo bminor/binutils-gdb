@@ -1,3 +1,99 @@
+2012-01-31  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/13616
+	* archures.c (bfd_arch_info): Add fill.
+	(bfd_default_arch_struct): Add bfd_arch_default_fill.
+	(bfd_arch_default_fill): New.
+
+	* configure.in: Set bfd version to 2.22.52.
+	* configure: Regenerated.
+
+	* cpu-alpha.c: Add bfd_arch_default_fill to bfd_arch_info
+	initializer.
+	* cpu-arc.c: Likewise.
+	* cpu-arm.c: Likewise.
+	* cpu-avr.c: Likewise.
+	* cpu-bfin.c: Likewise.
+	* cpu-cr16.c: Likewise.
+	* cpu-cr16c.c: Likewise.
+	* cpu-cris.c: Likewise.
+	* cpu-crx.c: Likewise.
+	* cpu-d10v.c: Likewise.
+	* cpu-d30v.c: Likewise.
+	* cpu-dlx.c: Likewise.
+	* cpu-epiphany.c: Likewise.
+	* cpu-fr30.c: Likewise.
+	* cpu-frv.c: Likewise.
+	* cpu-h8300.c: Likewise.
+	* cpu-h8500.c: Likewise.
+	* cpu-hppa.c: Likewise.
+	* cpu-i370.c: Likewise.
+	* cpu-i860.c: Likewise.
+	* cpu-i960.c: Likewise.
+	* cpu-ia64.c: Likewise.
+	* cpu-ip2k.c: Likewise.
+	* cpu-iq2000.c: Likewise.
+	* cpu-lm32.c: Likewise.
+	* cpu-m10200.c: Likewise.
+	* cpu-m10300.c: Likewise.
+	* cpu-m32c.c: Likewise.
+	* cpu-m32r.c: Likewise.
+	* cpu-m68hc11.c: Likewise.
+	* cpu-m68hc12.c: Likewise.
+	* cpu-m68k.c: Likewise.
+	* cpu-m88k.c: Likewise.
+	* cpu-mcore.c: Likewise.
+	* cpu-mep.c: Likewise.
+	* cpu-microblaze.c: Likewise.
+	* cpu-mips.c: Likewise.
+	* cpu-mmix.c: Likewise.
+	* cpu-moxie.c: Likewise.
+	* cpu-msp430.c: Likewise.
+	* cpu-mt.c: Likewise.
+	* cpu-ns32k.c: Likewise.
+	* cpu-openrisc.c: Likewise.
+	* cpu-or32.c: Likewise.
+	* cpu-pdp11.c: Likewise.
+	* cpu-pj.c: Likewise.
+	* cpu-plugin.c: Likewise.
+	* cpu-powerpc.c: Likewise.
+	* cpu-rl78.c: Likewise.
+	* cpu-rs6000.c: Likewise.
+	* cpu-rx.c: Likewise.
+	* cpu-s390.c: Likewise.
+	* cpu-score.c: Likewise.
+	* cpu-sh.c: Likewise.
+	* cpu-sparc.c: Likewise.
+	* cpu-spu.c: Likewise.
+	* cpu-tic30.c: Likewise.
+	* cpu-tic4x.c: Likewise.
+	* cpu-tic54x.c: Likewise.
+	* cpu-tic6x.c: Likewise.
+	* cpu-tic80.c: Likewise.
+	* cpu-tilegx.c: Likewise.
+	* cpu-tilepro.c: Likewise.
+	* cpu-v850.c: Likewise.
+	* cpu-vax.c: Likewise.
+	* cpu-w65.c: Likewise.
+	* cpu-we32k.c: Likewise.
+	* cpu-xc16x.c: Likewise.
+	* cpu-xstormy16.c: Likewise.
+	* cpu-xtensa.c: Likewise.
+	* cpu-z80.c: Likewise.
+	* cpu-z8k.c: Likewise.
+
+	* cpu-i386.c: Include "libiberty.h".
+	(bfd_arch_i386_fill): New. 
+	Add bfd_arch_i386_fill to  bfd_arch_info initializer.
+
+	* cpu-k1om.c: Add bfd_arch_i386_fill to  bfd_arch_info initializer.
+	* cpu-l1om.c: Likewise.
+
+	* linker.c (default_data_link_order): Call abfd->arch_info->fill 
+	if fill size is 0.
+
+	* bfd-in2.h: Regenerated.
+
 2012-01-27  Michael Eager  <eager@eagercon.com>
 
 	* bfd/elf32-microblaze.c (create_got_section):
