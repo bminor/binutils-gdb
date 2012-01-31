@@ -254,17 +254,9 @@ extern char *symbol_demangled_name (const struct general_symbol_info *symbol);
   (demangle ? SYMBOL_NATURAL_NAME (symbol) : SYMBOL_LINKAGE_NAME (symbol))
 extern int demangle;
 
-/* Macro that tests a symbol for a match against a specified name string.
-   First test the unencoded name, then looks for and test a C++ encoded
-   name if it exists.  Note that whitespace is ignored while attempting to
-   match a C++ encoded name, so that "foo::bar(int,long)" is the same as
-   "foo :: bar (int, long)".
-   Evaluates to zero if the match fails, or nonzero if it succeeds.  */
-
-/* Macro that tests a symbol for a match against a specified name
-   string.  It tests against SYMBOL_NATURAL_NAME, and it ignores
-   whitespace and trailing parentheses.  (See strcmp_iw for details
-   about its behavior.)  */
+/* Return non-zero if NAME matches the "natural" name of SYMBOL.
+   Whitespace and trailing parentheses are ignored.
+   See strcmp_iw for details about its behavior.  */
 
 #define SYMBOL_MATCHES_NATURAL_NAME(symbol, name)			\
   (strcmp_iw (SYMBOL_NATURAL_NAME (symbol), (name)) == 0)

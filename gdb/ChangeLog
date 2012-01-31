@@ -1,3 +1,8 @@
+2012-01-31  Doug Evans  <dje@google.com>
+
+	* symtab.h: Remove outdated comment.
+	(SYMBOL_MATCHES_NATURAL_NAME): Tweak comment.
+
 2012-01-30  Tom Tromey  <tromey@redhat.com>
 
 	PR breakpoints/13568:
@@ -9,7 +14,7 @@
 
 	* configure.tgt (powerpc-*-linux*): Add glibc-tdep.o.
 	* ppc-linux-tdep.c: Include glibc-tdep.h.
-	(powerpc32_plt_stub, powerpc32_plt_stub_so): Add PLT stub templates.  
+	(powerpc32_plt_stub, powerpc32_plt_stub_so): Add PLT stub templates.
 	(powerpc_linux_in_plt_stub): New function.
 	(powerpc_linux_in_dynsym_resolve_code): New function.
 	(ppc_skip_trampoline_code): New function.
