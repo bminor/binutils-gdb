@@ -171,7 +171,6 @@ entry for that function.  Anything between this directive and the
 @code{.endp} directive will be added to the exception table entry.
 
 Must be preceded by a CFI block containing a @code{.cfi_lsda} directive.
-directive.
 
 @cindex @code{.nocmp} directive, TIC6X
 @item .nocmp
