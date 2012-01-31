@@ -1,3 +1,7 @@
+2012-01-30  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.base/skip.exp: Make test result unique.
+
 2012-01-30  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/valgrind-db-attach.exp (attach to debugger): Fix

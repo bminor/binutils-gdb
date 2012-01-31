@@ -27,9 +27,9 @@ set srcfile1 skip1.c
 #
 # Right after we start gdb, there's no default file or function to skip.
 #
-gdb_test "skip file" "No default file now."
+gdb_test "skip file" "No default file now." "skip file (no default file)"
 gdb_test "skip function" "No default function now."
-gdb_test "skip" "No default function now."
+gdb_test "skip" "No default function now." "skip (no default function)"
 
 if ![runto_main] { fail "skip tests suppressed" }
 
@@ -41,8 +41,8 @@ gdb_test "info skip" "Not skipping any files or functions\." "info skip empty"
 #
 # Create a skiplist entry for the current file and function.
 #
-gdb_test "skip file" "File .*$srcfile will be skipped when stepping\."
-gdb_test "skip" "Function main at .* will be skipped when stepping\."
+gdb_test "skip file" "File .*$srcfile will be skipped when stepping\." "skip file ($srcfile)"
+gdb_test "skip" "Function main at .* will be skipped when stepping\." "skip (main)"
 
 #
 # Create a skiplist entry for a specified file and function.
@@ -82,7 +82,7 @@ gdb_test "info skip" \
 #
 
 if ![runto_main] { fail "skip tests suppressed" }
-gdb_test "step"
+gdb_test "step" ".*" "step in the main"
 gdb_test "bt" "\\s*\\#0\\s+main.*" "step after all ignored"
 
 #
@@ -96,12 +96,13 @@ gdb_test "info skip" \
   "Num\\s+Type\\s+Enb\\s+Address\\s+What\\s*
 2\\s+function\\s+y\\s+0x\[0-9a-f\]+ main at .*$srcfile:\[0-9\]+\\s*
 3\\s+file\\s+y\\s+.*$srcfile1\\s*
-4\\s+function\\s+y\\s+0x\[0-9a-f\]+ baz at .*$srcfile1:\[0-9\]+\\s*"
+4\\s+function\\s+y\\s+0x\[0-9a-f\]+ baz at .*$srcfile1:\[0-9\]+\\s*" \
+    "info skip (delete 1)"
 
 if ![runto_main] { fail "skip tests suppressed" }
 gdb_test "step" "foo \\(\\) at.*" "step after deleting 1 (1)"
-gdb_test "step"; # Return from foo()
-gdb_test "step" "main \\(\\) at.*" "step after deleting 1 (2)"
+gdb_test "step" ".*" "step after deleting 1 (2)" ; # Return from foo()
+gdb_test "step" "main \\(\\) at.*" "step after deleting 1 (3)"
 
 #
 # Now disable the skiplist entry for  skip1.c.  We should now
@@ -114,10 +115,10 @@ gdb_test "info skip 3" ".*\\n3\\s+file\\s+n.*" \
 
 if ![runto_main] { fail "skip tests suppressed" }
 gdb_test "step" "bar \\(\\) at.*" "step after disabling 3 (1)"
-gdb_test "step"; # Return from foo()
-gdb_test "step" "foo \\(\\) at.*" "step after disabling 3 (2)"
-gdb_test "step"; # Return from bar()
-gdb_test "step" "main \\(\\) at.*" "step after disabling 3 (3)"
+gdb_test "step" ".*" "step after disabling 3 (2)"; # Return from foo()
+gdb_test "step" "foo \\(\\) at.*" "step after disabling 3 (3)"
+gdb_test "step" ".*" "step after disabling 3 (4)"; # Return from bar()
+gdb_test "step" "main \\(\\) at.*" "step after disabling 3 (5)"
 
 #
 # Enable skiplist entry 3 and make sure we step over it like before.
@@ -127,9 +128,9 @@ gdb_test "skip enable 3"
 gdb_test "info skip 3" ".*\\n3\\s+file\\s+y.*" \
   "info skip shows entry as enabled"
 if ![runto_main] { fail "skip tests suppressed" }
-gdb_test "step" "foo \\(\\) at.*" "step after deleting 1 (1)"
-gdb_test "step"; # Return from foo()
-gdb_test "step" "main \\(\\) at.*" "step after deleting 1 (2)"
+gdb_test "step" "foo \\(\\) at.*" "step after enable 3 (1)"
+gdb_test "step" ".*" "step after enable 3 (2)"; # Return from foo()
+gdb_test "step" "main \\(\\) at.*" "step after enable 3 (3)"
 
 gdb_test "skip disable"
 gdb_test "info skip" \
