@@ -348,9 +348,9 @@ struct language_defn
        argument.  If CALLBACK returns zero, the iteration ends at that
        point.
 
-       This field can be NULL, meaning that this language doesn't need
-       any special code aside from ordinary searches of the symbol
-       table.  */
+       This field may not be NULL.  If the language does not need any
+       special processing here, 'iterate_over_symbols' should be
+       used as the definition.  */
     void (*la_iterate_over_symbols) (const struct block *block,
 				     const char *name,
 				     domain_enum domain,
