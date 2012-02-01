@@ -127,6 +127,24 @@ mem_bfd_iovec_stat (struct bfd *abfd, void *stream, struct stat *sb)
   return 0;
 }
 
+/* Open a BFD from the target's memory.  */
+
+static struct bfd *
+bfd_open_from_target_memory (CORE_ADDR addr, ULONGEST size, char *target)
+{
+  const char *filename = xstrdup ("<in-memory>");
+  struct target_buffer *buffer = xmalloc (sizeof (struct target_buffer));
+
+  buffer->base = addr;
+  buffer->size = size;
+  return bfd_openr_iovec (filename, target,
+                          mem_bfd_iovec_open,
+                          buffer,
+                          mem_bfd_iovec_pread,
+                          mem_bfd_iovec_close,
+                          mem_bfd_iovec_stat);
+}
+
 /* One reader that has been loaded successfully, and can potentially be used to
    parse debug info.  */
 
@@ -211,24 +229,6 @@ jit_reader_unload_command (char *args, int from_tty)
   gdb_dlclose (loaded_jit_reader->handle);
   xfree (loaded_jit_reader);
   loaded_jit_reader = NULL;
-}
-
-/* Open a BFD from the target's memory.  */
-
-static struct bfd *
-bfd_open_from_target_memory (CORE_ADDR addr, ULONGEST size, char *target)
-{
-  const char *filename = xstrdup ("<in-memory>");
-  struct target_buffer *buffer = xmalloc (sizeof (struct target_buffer));
-
-  buffer->base = addr;
-  buffer->size = size;
-  return bfd_openr_iovec (filename, target,
-                          mem_bfd_iovec_open,
-                          buffer,
-                          mem_bfd_iovec_pread,
-                          mem_bfd_iovec_close,
-                          mem_bfd_iovec_stat);
 }
 
 /* Per-inferior structure recording the addresses in the inferior.  */
