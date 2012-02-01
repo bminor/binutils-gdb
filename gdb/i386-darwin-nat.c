@@ -34,6 +34,7 @@
 #include "arch-utils.h"
 #include "gdbcore.h"
 
+#include "i386-nat.h"
 #include "darwin-nat.h"
 #include "i386-darwin-tdep.h"
 

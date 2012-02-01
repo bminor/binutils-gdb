@@ -8,6 +8,11 @@
 	* symtab.h: Remove outdated comment.
 	(SYMBOL_MATCHES_NATURAL_NAME): Delete.
 
+2012-02-01  Josh Matthews  <josh@joshmatthews.net>  (tiny change)
+
+	Fix build error in Darwin port.
+	* i386-darwin-nat.c: Include i386-nat.h.
+
 2012-01-30  Tom Tromey  <tromey@redhat.com>
 
 	PR breakpoints/13568:
