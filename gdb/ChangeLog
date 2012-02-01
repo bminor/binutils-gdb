@@ -591,7 +591,6 @@
 	* target.c (unpush_target): Close target after unpushing it, not
 	before.
 
->>>>>>> 1.13788
 2012-01-19  Gary Benson  <gbenson@redhat.com>
 
 	* mdebugread.c (sort_blocks): Replace integer constants with ones
@@ -632,7 +631,6 @@
 	record breakpoints list.  Only remove breakpoints from the
 	inferior if they had been inserted there in the first place.
 
->>>>>>> 1.13749
 2012-01-17  Doug Evans  <dje@google.com>
 
 	* linespec.c (decode_line_internal): Don't call symtabs_from_filename
