@@ -354,7 +354,7 @@ struct language_defn
     void (*la_iterate_over_symbols) (const struct block *block,
 				     const char *name,
 				     domain_enum domain,
-				     int (*callback) (struct symbol *, void *),
+				     symbol_found_callback_ftype *callback,
 				     void *data);
 
     /* Add fields above this point, so the magic number is always last.  */

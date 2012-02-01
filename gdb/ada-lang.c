@@ -5102,7 +5102,7 @@ ada_name_for_lookup (const char *name)
 static void
 ada_iterate_over_symbols (const struct block *block,
 			  const char *name, domain_enum domain,
-			  int (*callback) (struct symbol *, void *),
+			  symbol_found_callback_ftype *callback,
 			  void *data)
 {
   int ndefs, i;

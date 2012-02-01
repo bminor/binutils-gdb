@@ -1248,9 +1248,18 @@ DEF_VEC_I (CORE_ADDR);
 VEC (CORE_ADDR) *find_pcs_for_symtab_line (struct symtab *symtab, int line,
 					   struct linetable_entry **best_entry);
 
+/* Callback for LA_ITERATE_OVER_SYMBOLS.  The callback will be called
+   once per matching symbol SYM, with DATA being the argument of the
+   same name that was passed to LA_ITERATE_OVER_SYMBOLS.  The callback
+   should return nonzero to indicate that LA_ITERATE_OVER_SYMBOLS
+   should continue iterating, or zero to indicate that the iteration
+   should end.  */
+
+typedef int (symbol_found_callback_ftype) (struct symbol *sym, void *data);
+
 void iterate_over_symbols (const struct block *block, const char *name,
 			   const domain_enum domain,
-			   int (*callback) (struct symbol *, void *),
+			   symbol_found_callback_ftype *callback,
 			   void *data);
 
 struct cleanup *demangle_for_lookup (const char *name, enum language lang,

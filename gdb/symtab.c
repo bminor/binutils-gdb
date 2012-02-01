@@ -1900,7 +1900,7 @@ lookup_block_symbol (const struct block *block, const char *name,
 void
 iterate_over_symbols (const struct block *block, const char *name,
 		      const domain_enum domain,
-		      int (*callback) (struct symbol *, void *),
+		      symbol_found_callback_ftype *callback,
 		      void *data)
 {
   while (block)

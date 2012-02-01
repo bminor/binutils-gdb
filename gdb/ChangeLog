@@ -1,3 +1,16 @@
+2012-02-01  Gary Benson  <gbenson@redhat.com>
+
+	* symtab.h (symbol_name_match_p_ftype): New typedef.
+	(iterate_over_symbols): Use the above.
+	* symtab.c (iterate_over_symbols): Likewise.
+	* language.h (language_defn->la_iterate_over_symbols): Likewise.
+	* ada-lang.c (ada_iterate_over_symbols): Likewise.
+	* linespec.c (iterate_over_all_matching_symtabs): Likewise.
+	(iterate_name_matcher): Document return values.
+	(collect_one_symbol): Likewise.
+	(collect_function_symbols): Likewise.
+	(collect_symbols): Likewise.
+
 2012-02-01  Tom Tromey  <tromey@redhat.com>
 
 	* ada-lang.c (resolve_subexp): Update.

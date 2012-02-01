@@ -341,8 +341,8 @@ iterate_name_matcher (const char *name, void *d)
   const struct symbol_matcher_data *data = d;
 
   if (data->symbol_name_match_p (name, data->lookup_name) == 0)
-    return 1;
-  return 0;
+    return 1; /* Expand this symbol's symbol table.  */
+  return 0; /* Skip this symbol.  */
 }
 
 /* A helper that walks over all matching symtabs in all objfiles and
@@ -353,7 +353,7 @@ iterate_name_matcher (const char *name, void *d)
 static void
 iterate_over_all_matching_symtabs (const char *name,
 				   const domain_enum domain,
-				   int (*callback) (struct symbol *, void *),
+				   symbol_found_callback_ftype *callback,
 				   void *data,
 				   struct program_space *search_pspace)
 {
@@ -1808,14 +1808,14 @@ collect_one_symbol (struct symbol *sym, void *d)
   struct type *t;
 
   if (SYMBOL_CLASS (sym) != LOC_TYPEDEF)
-    return 1;
+    return 1; /* Continue iterating.  */
 
   t = SYMBOL_TYPE (sym);
   CHECK_TYPEDEF (t);
   if (TYPE_CODE (t) != TYPE_CODE_STRUCT
       && TYPE_CODE (t) != TYPE_CODE_UNION
       && TYPE_CODE (t) != TYPE_CODE_NAMESPACE)
-    return 1;
+    return 1; /* Continue iterating.  */
 
   slot = htab_find_slot (collector->unique_syms, sym, INSERT);
   if (!*slot)
@@ -1824,7 +1824,7 @@ collect_one_symbol (struct symbol *sym, void *d)
       VEC_safe_push (symbolp, collector->symbols, sym);
     }
 
-  return 1;
+  return 1; /* Continue iterating.  */
 }
 
 /* Return the symbol corresponding to the substring of *ARGPTR ending
@@ -2215,7 +2215,7 @@ collect_function_symbols (struct symbol *sym, void *arg)
   if (SYMBOL_CLASS (sym) == LOC_BLOCK)
     VEC_safe_push (symbolp, *syms, sym);
 
-  return 1;
+  return 1; /* Continue iterating.  */
 }
 
 /* Look up a function symbol in *ARGPTR.  If found, advance *ARGPTR
@@ -2722,7 +2722,7 @@ collect_symbols (struct symbol *sym, void *data)
     add_sal_to_sals (info->state, &info->result, &sal,
 		     SYMBOL_NATURAL_NAME (sym));
 
-  return 1;
+  return 1; /* Continue iterating.  */
 }
 
 /* We've found a minimal symbol MSYMBOL to associate with our
