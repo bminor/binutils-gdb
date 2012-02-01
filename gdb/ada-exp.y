@@ -1021,7 +1021,7 @@ block_lookup (struct block *context, char *raw_name)
   else
     name = ada_encode (raw_name);
 
-  nsyms = ada_lookup_symbol_list (name, context, VAR_DOMAIN, &syms);
+  nsyms = ada_lookup_symbol_list (name, context, VAR_DOMAIN, &syms, 1);
   if (context == NULL
       && (nsyms == 0 || SYMBOL_CLASS (syms[0].sym) != LOC_BLOCK))
     symtab = lookup_symtab (name);
@@ -1278,7 +1278,7 @@ write_var_or_type (struct block *block, struct stoken name0)
 
 	  encoded_name[tail_index] = '\0';
 	  nsyms = ada_lookup_symbol_list (encoded_name, block,
-					  VAR_DOMAIN, &syms);
+					  VAR_DOMAIN, &syms, 1);
 	  encoded_name[tail_index] = terminator;
 
 	  /* A single symbol may rename a package or object. */
@@ -1427,7 +1427,7 @@ write_name_assoc (struct stoken name)
     {
       struct ada_symbol_info *syms;
       int nsyms = ada_lookup_symbol_list (name.ptr, expression_context_block,
-					  VAR_DOMAIN, &syms);
+					  VAR_DOMAIN, &syms, 1);
       if (nsyms != 1 || SYMBOL_CLASS (syms[0].sym) == LOC_TYPEDEF)
 	write_exp_op_with_string (OP_NAME, name);
       else

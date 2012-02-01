@@ -3057,7 +3057,7 @@ resolve_subexp (struct expression **expp, int *pos, int deprocedure_p,
             ada_lookup_symbol_list (SYMBOL_LINKAGE_NAME
                                     (exp->elts[pc + 2].symbol),
                                     exp->elts[pc + 1].block, VAR_DOMAIN,
-                                    &candidates);
+                                    &candidates, 1);
 
           if (n_candidates > 1)
             {
@@ -3149,7 +3149,7 @@ resolve_subexp (struct expression **expp, int *pos, int deprocedure_p,
               ada_lookup_symbol_list (SYMBOL_LINKAGE_NAME
                                       (exp->elts[pc + 5].symbol),
                                       exp->elts[pc + 4].block, VAR_DOMAIN,
-                                      &candidates);
+                                      &candidates, 1);
             if (n_candidates == 1)
               i = 0;
             else
@@ -3201,7 +3201,7 @@ resolve_subexp (struct expression **expp, int *pos, int deprocedure_p,
           n_candidates =
             ada_lookup_symbol_list (ada_encode (ada_decoded_op_name (op)),
                                     (struct block *) NULL, VAR_DOMAIN,
-                                    &candidates);
+                                    &candidates, 1);
           i = ada_resolve_function (candidates, n_candidates, argvec, nargs,
                                     ada_decoded_op_name (op), NULL);
           if (i < 0)
@@ -4979,16 +4979,18 @@ add_nonlocal_symbols (struct obstack *obstackp, const char *name,
    the next call of ada_lookup_symbol_list.  Any non-function/non-enumeral 
    symbol match within the nest of blocks whose innermost member is BLOCK0,
    is the one match returned (no other matches in that or
-     enclosing blocks is returned).  If there are any matches in or
-   surrounding BLOCK0, then these alone are returned.  Otherwise, the
-   search extends to global and file-scope (static) symbol tables.
+   enclosing blocks is returned).  If there are any matches in or
+   surrounding BLOCK0, then these alone are returned.  Otherwise, if
+   FULL_SEARCH is non-zero, then the search extends to global and
+   file-scope (static) symbol tables.
    Names prefixed with "standard__" are handled specially: "standard__" 
    is first stripped off, and only static and global symbols are searched.  */
 
 int
 ada_lookup_symbol_list (const char *name0, const struct block *block0,
-                        domain_enum namespace,
-                        struct ada_symbol_info **results)
+			domain_enum namespace,
+			struct ada_symbol_info **results,
+			int full_search)
 {
   struct symbol *sym;
   struct block *block;
@@ -5026,7 +5028,7 @@ ada_lookup_symbol_list (const char *name0, const struct block *block0,
 
   ada_add_local_symbols (&symbol_list_obstack, name, block, namespace,
                          wild_match);
-  if (num_defns_collected (&symbol_list_obstack) > 0)
+  if (num_defns_collected (&symbol_list_obstack) > 0 || !full_search)
     goto done;
 
   /* No non-global symbols found.  Check our cache to see if we have
@@ -5106,7 +5108,7 @@ ada_iterate_over_symbols (const struct block *block,
   int ndefs, i;
   struct ada_symbol_info *results;
 
-  ndefs = ada_lookup_symbol_list (name, block, domain, &results);
+  ndefs = ada_lookup_symbol_list (name, block, domain, &results, 0);
   for (i = 0; i < ndefs; ++i)
     {
       if (! (*callback) (results[i].sym, data))
@@ -5121,7 +5123,8 @@ ada_lookup_encoded_symbol (const char *name, const struct block *block0,
   struct ada_symbol_info *candidates;
   int n_candidates;
 
-  n_candidates = ada_lookup_symbol_list (name, block0, namespace, &candidates);
+  n_candidates = ada_lookup_symbol_list (name, block0, namespace, &candidates,
+					 1);
 
   if (n_candidates == 0)
     return NULL;
@@ -10359,7 +10362,7 @@ get_var_value (char *name, char *err_msg)
   int nsyms;
 
   nsyms = ada_lookup_symbol_list (name, get_selected_block (0), VAR_DOMAIN,
-                                  &syms);
+                                  &syms, 1);
 
   if (nsyms != 1)
     {

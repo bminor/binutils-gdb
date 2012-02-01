@@ -1,3 +1,16 @@
+2012-02-01  Tom Tromey  <tromey@redhat.com>
+
+	* ada-lang.c (resolve_subexp): Update.
+	(ada_lookup_symbol_list): Add 'full_search' argument.
+	(ada_iterate_over_symbols): Pass 0 as full_search argument to
+	ada_lookup_symbol_list.
+	(ada_lookup_encoded_symbol): Update.
+	(get_var_value): Update.
+	* ada-exp.y (block_lookup): Update.
+	(write_var_or_type): Update.
+	(write_name_assoc): Update.
+	* ada-lang.h (ada_lookup_symbol_list): Update.
+
 2012-01-31  Tom Tromey  <tromey@redhat.com>
 
 	* language.h (struct language_defn) <la_iterate_over_symbols>: Fix
