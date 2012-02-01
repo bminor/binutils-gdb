@@ -1,5 +1,25 @@
 2012-02-01  Tom Tromey  <tromey@redhat.com>
 
+	PR gdb/13431:
+	* jit.c (struct jit_inferior_data): Rewrite.
+	(struct jit_objfile_data): New.
+	(get_jit_objfile_data): New function.
+	(add_objfile_entry): Update.
+	(jit_read_descriptor): Return int.  Replace descriptor_addr
+	argument with inf_data.  Update.  Don't call error.
+	(jit_breakpoint_re_set_internal): Reorder logic.  Update.  Look up
+	descriptor here.
+	(jit_inferior_init): Don't look up descriptor.  Don't call error.
+	(jit_reset_inferior_data_and_breakpoints)
+	(jit_inferior_created_observer): Remove.
+	(jit_inferior_exit_hook): Update.
+	(jit_executable_changed_observer): Remove.
+	(jit_event_handler): Update.
+	(free_objfile_data): Reset inferior data if needed.
+	(_initialize_jit): Update.
+
+2012-02-01  Tom Tromey  <tromey@redhat.com>
+
 	* jit.c (bfd_open_from_target_memory): Move higher in file.
 
 2012-02-01  Tristan Gingold  <gingold@adacore.com>

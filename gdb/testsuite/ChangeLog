@@ -1,3 +1,8 @@
+2012-02-01  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.base/jit-simple.exp: New file.
+	* gdb.base/jit-simple.c: New file.
+
 2012-01-30  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.base/skip.exp: Make test result unique.
