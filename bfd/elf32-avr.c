@@ -1503,11 +1503,18 @@ elf32_avr_relax_delete_bytes (bfd *abfd,
        bfd_vma symval;
        bfd_vma shrinked_insn_address;
 
+       if (isec->reloc_count == 0)
+	 continue;
+
        shrinked_insn_address = (sec->output_section->vma
                                 + sec->output_offset + addr - count);
 
-       irelend = elf_section_data (isec)->relocs + isec->reloc_count;
-       for (irel = elf_section_data (isec)->relocs;
+       irel = elf_section_data (isec)->relocs;
+       /* PR 12161: Read in the relocs for this section if necessary.  */
+       if (irel == NULL)
+	 irel = _bfd_elf_link_read_relocs (abfd, isec, NULL, NULL, FALSE);
+
+       for (irelend = irel + isec->reloc_count;
             irel < irelend;
             irel++)
          {
@@ -1564,6 +1571,9 @@ elf32_avr_relax_delete_bytes (bfd *abfd,
 	   /* else...Reference symbol is extern.  No need for adjusting
 	      the addend.  */
 	 }
+
+       if (elf_section_data (isec)->relocs == NULL)
+	 free (irelend - isec->reloc_count);
      }
   }
 
