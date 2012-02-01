@@ -1,3 +1,8 @@
+2012-02-01  Tristan Gingold  <gingold@adacore.com>
+
+	* libunwind-frame.c (libunwind_load): Display message if dlopen
+	failed.
+
 2012-02-01  Gary Benson  <gbenson@redhat.com>
 
 	* symtab.h (symbol_name_match_p_ftype): New typedef.

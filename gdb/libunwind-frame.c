@@ -508,7 +508,11 @@ libunwind_load (void)
 
   handle = dlopen (LIBUNWIND_SO, RTLD_NOW);
   if (handle == NULL)
-    return 0;
+    {
+      fprintf_unfiltered (gdb_stderr, _("[GDB failed to load %s: %s]\n"),
+                          LIBUNWIND_SO, dlerror ());
+      return 0;
+    }
 
   /* Initialize pointers to the dynamic library functions we will use.  */
 
