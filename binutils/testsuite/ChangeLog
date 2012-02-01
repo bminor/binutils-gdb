@@ -1,3 +1,9 @@
+2012-02-01  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/13482
+	* binutils-all/version.s: New test source file.
+	* binutils-all/readelf.n: New file: expected readelf output.
+	* binutils-all/readelf.exp: Add test of .note section contents.
 
 For older changes see ChangeLog-0411
 

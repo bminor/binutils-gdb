@@ -1,3 +1,9 @@
+2012-02-01  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/13482
+	* readelf.c (process_corefile_note_segment): Fix off-by-one errors
+	verifying the contents of a note.
+
 2012-01-26  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/13622
