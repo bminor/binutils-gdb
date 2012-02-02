@@ -3729,6 +3729,13 @@ cmd_qtstmat (char *packet)
 static void
 cmd_qtminftpilen (char *packet)
 {
+  if (current_inferior == NULL)
+    {
+      /* Indicate that the minimum length is currently unknown.  */
+      strcpy (packet, "0");
+      return;
+    }
+
   sprintf (packet, "%x", target_get_min_fast_tracepoint_insn_len ());
 }
 

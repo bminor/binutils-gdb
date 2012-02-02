@@ -1,3 +1,8 @@
+2012-02-02  Pedro Alves  <palves@redhat.com>
+
+	* tracepoint.c (cmd_qtminftpilen): Return 0 if there's no current
+	inferior.
+
 2012-01-27  Pedro Alves  <palves@redhat.com>
 
 	* linux-low.c (linux_child_pid_to_exec_file): Delete.

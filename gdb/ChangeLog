@@ -1,3 +1,9 @@
+2012-02-02  Pedro Alves  <palves@redhat.com>
+
+	* remote.c (remote_get_min_fast_tracepoint_insn_len): Return 0 if
+	the current inferior has no execution.  Make sure the current
+	remote process matches gdb's current inferior.
+
 2012-02-02  Tom Tromey  <tromey@redhat.com>
 
 	PR gdb/13405:

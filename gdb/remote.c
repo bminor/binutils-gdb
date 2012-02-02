@@ -10592,6 +10592,14 @@ remote_get_min_fast_tracepoint_insn_len (void)
   struct remote_state *rs = get_remote_state ();
   char *reply;
 
+  /* If we're not debugging a process yet, the IPA can't be
+     loaded.  */
+  if (!target_has_execution)
+    return 0;
+
+  /* Make sure the remote is pointing at the right process.  */
+  set_general_process ();
+
   sprintf (rs->buf, "qTMinFTPILen");
   putpkt (rs->buf);
   reply = remote_get_noisy_reply (&target_buf, &target_buf_size);
