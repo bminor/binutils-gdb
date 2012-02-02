@@ -1,5 +1,12 @@
+2012-02-02  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/13224
+	* config/obj-elf.c (obj_elf_parse_section_letters): Rename 'clone'
+	to 'is_clone' to avoid shadowing a gloabl.
+	(obj_elf_section): Likewise.
+
 2012-01-31  Paul Brook  <paul@codesourcery.com>
-    
+
 	* doc/c-tic6x.c: Fix typo.
 
 2012-01-26  Alexey Makhalov  <makhaloff@gmail.com>
