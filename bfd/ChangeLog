@@ -1,3 +1,9 @@
+2012-02-02  Vidya Praveen (vidya.praveen@atmel.com)
+
+	PR bfd/13410
+	* bfd/elf32-avr.c (elf32_avr_relax_section): Correct the 
+	condition that qualifies the candidates for relaxation.
+
 2012-02-02  Tristan Gingold  <gingold@adacore.com>
 
 	* bfdio.c (real_fopen): Remove unused vms_modes variable.

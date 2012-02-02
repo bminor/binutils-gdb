@@ -1659,6 +1659,16 @@ elf32_avr_relax_section (bfd *abfd,
   Elf_Internal_Sym *isymbuf = NULL;
   struct elf32_avr_link_hash_table *htab;
 
+  /* If 'shrinkable' is FALSE, do not shrink by deleting bytes while
+     relaxing. Such shrinking can cause issues for the sections such 
+     as .vectors and .jumptables. Instead the unused bytes should be 
+     filled with nop instructions. */
+  bfd_boolean shrinkable = TRUE;
+
+  if (!strcmp (sec->name,".vectors")
+      || !strcmp (sec->name,".jumptables"))
+    shrinkable = FALSE;
+
   if (link_info->relocatable)
     (*link_info->callbacks->einfo)
       (_("%P%F: --relax and -r may not be used together\n"));
@@ -1815,10 +1825,16 @@ elf32_avr_relax_section (bfd *abfd,
             /* Compute the distance from this insn to the branch target.  */
             gap = value - dot;
 
-            /* If the distance is within -4094..+4098 inclusive, then we can
-               relax this jump/call.  +4098 because the call/jump target
-               will be closer after the relaxation.  */
-            if ((int) gap >= -4094 && (int) gap <= 4098)
+            /* Check if the gap falls in the range that can be accommodated
+               in 13bits signed (It is 12bits when encoded, as we deal with
+               word addressing). */
+            if (!shrinkable && ((int) gap >= -4096 && (int) gap <= 4095))
+              distance_short_enough = 1;
+            /* If shrinkable, then we can check for a range of distance which
+               is two bytes farther on both the directions because the call
+               or jump target will be closer by two bytes after the 
+               relaxation. */
+            else if (shrinkable && ((int) gap >= -4094 && (int) gap <= 4097))
               distance_short_enough = 1;
 
             /* Here we handle the wrap-around case.  E.g. for a 16k device
@@ -1892,11 +1908,9 @@ elf32_avr_relax_section (bfd *abfd,
                 irel->r_info = ELF32_R_INFO (ELF32_R_SYM (irel->r_info),
                                              R_AVR_13_PCREL);
 
-                /* Check for the vector section. There we don't want to
-                   modify the ordering!  */
-
-                if (!strcmp (sec->name,".vectors")
-                    || !strcmp (sec->name,".jumptables"))
+                /* We should not modify the ordering if 'shrinkable' is
+                   FALSE. */ 
+                if (!shrinkable)
                   {
                     /* Let's insert a nop.  */
                     bfd_put_8 (abfd, 0x00, contents + irel->r_offset + 2);
