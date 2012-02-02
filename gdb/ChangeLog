@@ -1,5 +1,11 @@
 2012-02-02  Tom Tromey  <tromey@redhat.com>
 
+	PR gdb/13405:
+	* tui/tui-win.c (parse_scrolling_args): Don't write to possibly
+	read-only memory.
+
+2012-02-02  Tom Tromey  <tromey@redhat.com>
+
 	PR gdb/9307:
 	* symtab.c (lookup_language_this): Set block_found.
 

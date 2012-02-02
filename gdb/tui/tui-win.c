@@ -1583,13 +1583,16 @@ parse_scrolling_args (char *arg,
 	      ;
 
 	  if (*buf_ptr != (char) 0)
-	    wname = buf_ptr;
+	    {
+	      wname = buf_ptr;
+
+	      /* Validate the window name.  */
+	      for (i = 0; i < strlen (wname); i++)
+		wname[i] = toupper (wname[i]);
+	    }
 	  else
 	    wname = "?";
 	  
-	  /* Validate the window name.  */
-	  for (i = 0; i < strlen (wname); i++)
-	    wname[i] = toupper (wname[i]);
 	  *win_to_scroll = tui_partial_win_by_name (wname);
 
 	  if (*win_to_scroll == (struct tui_win_info *) NULL
