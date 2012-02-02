@@ -1,5 +1,9 @@
 2012-02-02  Tristan Gingold  <gingold@adacore.com>
 
+	* bfdio.c (real_fopen): Remove unused vms_modes variable.
+
+2012-02-02  Tristan Gingold  <gingold@adacore.com>
+
 	* mach-o.c (bfd_mach_o_read_header): Silent uninitialized
 	variable warning.
 

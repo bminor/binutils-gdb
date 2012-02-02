@@ -87,7 +87,6 @@ FILE *
 real_fopen (const char *filename, const char *modes)
 {
 #ifdef VMS
-  char vms_modes[4];
   char *vms_attr;
 
   /* On VMS, fopen allows file attributes as optionnal arguments.
