@@ -1,3 +1,8 @@
+2012-02-02  Doug Kwan  <dougkwan@google.com>
+
+	* arm.cc (Reloc_stub::stub_type_for_reloc): Use PIC stubs in all
+	position independent outputs, not just shared objects.
+
 2012-01-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* configure.ac: Check if -fpic -mtls-dialect=gnu2 works.
