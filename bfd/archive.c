@@ -1103,7 +1103,7 @@ bfd_slurp_armap (bfd *abfd)
       /* Read the extended name.  We know its length.  */
       if (bfd_bread (extname, 20, abfd) != 20)
         return FALSE;
-      if (bfd_seek (abfd, (file_ptr) -(sizeof (hdr) + 20), SEEK_CUR) != 0)
+      if (bfd_seek (abfd, -(file_ptr) (sizeof (hdr) + 20), SEEK_CUR) != 0)
         return FALSE;
       if (CONST_STRNEQ (extname, "__.SYMDEF SORTED")
           || CONST_STRNEQ (extname, "__.SYMDEF"))
