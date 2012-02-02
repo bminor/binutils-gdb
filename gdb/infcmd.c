@@ -1036,7 +1036,7 @@ step_once (int skip_subroutines, int single_inst, int count, int thread)
 	    tp->control.step_range_start = tp->control.step_range_end = 1;
 	  else if (tp->control.step_range_end == 0)
 	    {
-	      char *name;
+	      const char *name;
 
 	      if (find_pc_partial_function (pc, &name,
 					    &tp->control.step_range_start,

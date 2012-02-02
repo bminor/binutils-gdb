@@ -47,7 +47,7 @@ alphaobsd_sigtramp_offset (struct gdbarch *gdbarch, CORE_ADDR pc)
 
 static int
 alphaobsd_pc_in_sigtramp (struct gdbarch *gdbarch,
-			  CORE_ADDR pc, char *name)
+			  CORE_ADDR pc, const char *name)
 {
   CORE_ADDR start_pc = (pc & ~(alphaobsd_page_size - 1));
   unsigned insn;

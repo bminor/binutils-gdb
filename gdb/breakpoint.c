@@ -5874,8 +5874,9 @@ set_breakpoint_location_function (struct bp_location *loc, int explicit_loc)
       || is_tracepoint (loc->owner))
     {
       int is_gnu_ifunc;
+      const char *function_name;
 
-      find_pc_partial_function_gnu_ifunc (loc->address, &loc->function_name,
+      find_pc_partial_function_gnu_ifunc (loc->address, &function_name,
 					  NULL, NULL, &is_gnu_ifunc);
 
       if (is_gnu_ifunc && !explicit_loc)
@@ -5883,7 +5884,7 @@ set_breakpoint_location_function (struct bp_location *loc, int explicit_loc)
 	  struct breakpoint *b = loc->owner;
 
 	  gdb_assert (loc->pspace == current_program_space);
-	  if (gnu_ifunc_resolve_name (loc->function_name,
+	  if (gnu_ifunc_resolve_name (function_name,
 				      &loc->requested_address))
 	    {
 	      /* Recalculate ADDRESS based on new REQUESTED_ADDRESS.  */
@@ -5900,8 +5901,8 @@ set_breakpoint_location_function (struct bp_location *loc, int explicit_loc)
 	    }
 	}
 
-      if (loc->function_name)
-	loc->function_name = xstrdup (loc->function_name);
+      if (function_name)
+	loc->function_name = xstrdup (function_name);
     }
 }
 

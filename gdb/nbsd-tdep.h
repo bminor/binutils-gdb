@@ -23,6 +23,6 @@
 struct link_map_offsets *nbsd_ilp32_solib_svr4_fetch_link_map_offsets (void);
 struct link_map_offsets *nbsd_lp64_solib_svr4_fetch_link_map_offsets (void);
 
-int nbsd_pc_in_sigtramp (CORE_ADDR, char *);
+int nbsd_pc_in_sigtramp (CORE_ADDR, const char *);
 
 #endif /* NBSD_TDEP_H */

@@ -99,7 +99,7 @@ extern CORE_ADDR generic_skip_solib_resolver (struct gdbarch *gdbarch,
 					      CORE_ADDR pc);
 
 extern int generic_in_solib_return_trampoline (struct gdbarch *gdbarch,
-					       CORE_ADDR pc, char *name);
+					       CORE_ADDR pc, const char *name);
 
 extern int generic_in_function_epilogue_p (struct gdbarch *gdbarch,
 					   CORE_ADDR pc);

@@ -353,7 +353,7 @@ rx_analyze_prologue (CORE_ADDR start_pc,
 static CORE_ADDR
 rx_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
-  char *name;
+  const char *name;
   CORE_ADDR func_addr, func_end;
   struct rx_prologue p;
 

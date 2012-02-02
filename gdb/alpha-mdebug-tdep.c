@@ -96,7 +96,7 @@ find_proc_desc (CORE_ADDR pc)
   struct block *b = block_for_pc (pc);
   struct mdebug_extra_func_info *proc_desc = NULL;
   struct symbol *sym = NULL;
-  char *sh_name = NULL;
+  const char *sh_name = NULL;
 
   if (b)
     {

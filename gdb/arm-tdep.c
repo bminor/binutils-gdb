@@ -9101,7 +9101,7 @@ arm_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
 CORE_ADDR
 arm_skip_stub (struct frame_info *frame, CORE_ADDR pc)
 {
-  char *name;
+  const char *name;
   int namelen;
   CORE_ADDR start_addr;
 

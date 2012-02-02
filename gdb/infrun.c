@@ -2367,7 +2367,7 @@ struct execution_control_state
   int stop_func_filled_in;
   CORE_ADDR stop_func_start;
   CORE_ADDR stop_func_end;
-  char *stop_func_name;
+  const char *stop_func_name;
   int new_thread_event;
   int wait_some_more;
 };

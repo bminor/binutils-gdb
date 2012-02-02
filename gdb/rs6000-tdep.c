@@ -2189,7 +2189,7 @@ rs6000_frame_align (struct gdbarch *gdbarch, CORE_ADDR addr)
 
 static int
 rs6000_in_solib_return_trampoline (struct gdbarch *gdbarch,
-				   CORE_ADDR pc, char *name)
+				   CORE_ADDR pc, const char *name)
 {
   return name && !strncmp (name, "@FIX", 4);
 }

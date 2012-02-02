@@ -1097,7 +1097,7 @@ disassemble_current_function (int flags)
   struct frame_info *frame;
   struct gdbarch *gdbarch;
   CORE_ADDR low, high, pc;
-  char *name;
+  const char *name;
 
   frame = get_selected_frame (_("No frame selected."));
   gdbarch = get_frame_arch (frame);
@@ -1135,7 +1135,7 @@ disassemble_command (char *arg, int from_tty)
 {
   struct gdbarch *gdbarch = get_current_arch ();
   CORE_ADDR low, high;
-  char *name;
+  const char *name;
   CORE_ADDR pc;
   int flags;
 

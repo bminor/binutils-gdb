@@ -86,7 +86,8 @@ struct gdbarch_tdep
   /* NOTE: cagney/2004-04-30: Do not copy/clone this code.  Instead
      look at tramp-frame.h and other simplier per-architecture
      sigtramp unwinders.  */
-  int (*pc_in_sigtramp) (struct gdbarch *gdbarch, CORE_ADDR pc, char *name);
+  int (*pc_in_sigtramp) (struct gdbarch *gdbarch, CORE_ADDR pc,
+			 const char *name);
 
   /* If TYPE will be returned in memory, return true.  */
   int (*return_in_memory) (struct type *type);

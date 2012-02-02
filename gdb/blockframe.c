@@ -159,7 +159,7 @@ find_pc_function (CORE_ADDR pc)
 
 static CORE_ADDR cache_pc_function_low = 0;
 static CORE_ADDR cache_pc_function_high = 0;
-static char *cache_pc_function_name = 0;
+static const char *cache_pc_function_name = 0;
 static struct obj_section *cache_pc_function_section = NULL;
 static int cache_pc_function_is_gnu_ifunc = 0;
 
@@ -190,7 +190,7 @@ clear_pc_function_cache (void)
 /* Backward compatibility, no section argument.  */
 
 int
-find_pc_partial_function_gnu_ifunc (CORE_ADDR pc, char **name,
+find_pc_partial_function_gnu_ifunc (CORE_ADDR pc, const char **name,
 				    CORE_ADDR *address, CORE_ADDR *endaddr,
 				    int *is_gnu_ifunc_p)
 {
@@ -346,7 +346,7 @@ find_pc_partial_function_gnu_ifunc (CORE_ADDR pc, char **name,
    is omitted here for backward API compatibility.  */
 
 int
-find_pc_partial_function (CORE_ADDR pc, char **name, CORE_ADDR *address,
+find_pc_partial_function (CORE_ADDR pc, const char **name, CORE_ADDR *address,
 			  CORE_ADDR *endaddr)
 {
   return find_pc_partial_function_gnu_ifunc (pc, name, address, endaddr, NULL);

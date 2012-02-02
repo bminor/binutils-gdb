@@ -1911,7 +1911,7 @@ mep_analyze_prologue (struct gdbarch *gdbarch,
 static CORE_ADDR
 mep_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
-  char *name;
+  const char *name;
   CORE_ADDR func_addr, func_end;
   struct mep_prologue p;
 

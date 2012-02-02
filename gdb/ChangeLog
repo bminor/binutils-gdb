@@ -1,3 +1,37 @@
+2012-02-02  Doug Evans  <dje@google.com>
+
+	* blockframe.c (find_pc_partial_function_gnu_ifunc): Change type of
+	"name" parameter to const char ** from char **.  All callers updated.
+	(find_pc_partial_function): Ditto.
+	(cache_pc_function_name): Change type to const char * from char *.
+	* symtab.h ((find_pc_partial_function_gnu_ifunc): Update.
+	(find_pc_partial_function): Update.
+	* alpha-tdep.h (struct gdbarch_tdep, member pc_in_sigtramp): Change
+	type of "name" parameter to const char * from char *.
+	All uses updated.
+	* arch-utils.c (generic_in_solib_return_trampoline): Change
+	type of "name" parameter to const char * from char *.
+	* arch-utils.h (generic_in_solib_return_trampoline): Update.
+	* frv-linux-tdep.c (frv_linux_pc_in_sigtramp): Change
+	type of "name" parameter to const char * from char *.
+	* gdbarch.sh (in_solib_return_trampoline): Ditto.
+	* gdbarch.c: Regenerate.
+	* gdbarch.h: Regenerate.
+	* hppa-hpux-tdep.c (hppa_hpux_in_solib_return_trampoline): Update.
+	* rs6000-tdep.c (rs6000_in_solib_return_trampoline): Update.
+	* m32r-linux-tdep.c (m32r_linux_pc_in_sigtramp): Change
+	type of "name" parameter to const char * from char *.
+	* skip.c (skip_function_pc): Ditto.
+	* sparc-sol2-tdep.c (sparc_sol2_pc_in_sigtramp): Ditto.
+	* sparc-tdep.h (sparc_sol2_pc_in_sigtramp): Update.
+	* sparc64fbsd-tdep.c (sparc64fbsd_pc_in_sigtramp): Ditto.
+	* sparc64nbsd-tdep.c (sparc64nbsd_pc_in_sigtramp): Ditto.
+	* sparc64obsd-tdep.c (sparc64obsd_pc_in_sigtramp): Ditto.
+	* sparcnbsd-tdep.c (sparc32nbsd_pc_in_sigtramp): Ditto.
+	* sparcobsd-tdep.c (sparc32obsd_pc_in_sigtramp): Ditto.
+	* nbsd-tdep.c (nbsd_pc_in_sigtramp): Similary for "func_name".
+	* nbsd-tdep.h (nbsd_pc_in_sigtramp): Update.
+
 2012-02-02  Pedro Alves  <palves@redhat.com>
 
 	* remote.c (remote_get_min_fast_tracepoint_insn_len): Return 0 if

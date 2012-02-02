@@ -65,7 +65,7 @@ CORE_ADDR alphafbsd_sigtramp_end = 0x11ffffe0;
 
 static int
 alphafbsd_pc_in_sigtramp (struct gdbarch *gdbarch,
-			  CORE_ADDR pc, char *func_name)
+			  CORE_ADDR pc, const char *func_name)
 {
   return (pc >= alphafbsd_sigtramp_start && pc < alphafbsd_sigtramp_end);
 }

@@ -173,7 +173,7 @@ m32r_linux_rt_sigtramp_start (CORE_ADDR pc, struct frame_info *this_frame)
 }
 
 static int
-m32r_linux_pc_in_sigtramp (CORE_ADDR pc, char *name,
+m32r_linux_pc_in_sigtramp (CORE_ADDR pc, const char *name,
 			   struct frame_info *this_frame)
 {
   /* If we have NAME, we can optimize the search.  The trampolines are
@@ -293,7 +293,7 @@ m32r_linux_sigtramp_frame_sniffer (const struct frame_unwind *self,
 				   void **this_cache)
 {
   CORE_ADDR pc = get_frame_pc (this_frame);
-  char *name;
+  const char *name;
 
   find_pc_partial_function (pc, &name, NULL, NULL);
   if (m32r_linux_pc_in_sigtramp (pc, name, this_frame))

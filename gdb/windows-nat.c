@@ -1118,7 +1118,7 @@ handle_exception (struct target_waitstatus *ourstatus)
 	   cygwin later in the process and will be sent as a
 	   cygwin-specific-signal.  So, ignore SEGVs if they show up
 	   within the text segment of the DLL itself.  */
-	char *fn;
+	const char *fn;
 	CORE_ADDR addr = (CORE_ADDR) (uintptr_t)
 	  current_event.u.Exception.ExceptionRecord.ExceptionAddress;
 

@@ -130,7 +130,7 @@ ppcobsd_sigtramp_frame_sniffer (const struct frame_unwind *self,
   CORE_ADDR pc = get_frame_pc (this_frame);
   CORE_ADDR start_pc = (pc & ~(ppcobsd_page_size - 1));
   const int *offset;
-  char *name;
+  const char *name;
 
   find_pc_partial_function (pc, &name, NULL, NULL);
   if (name)

@@ -3008,7 +3008,7 @@ set_gdbarch_skip_solib_resolver (struct gdbarch *gdbarch,
 }
 
 int
-gdbarch_in_solib_return_trampoline (struct gdbarch *gdbarch, CORE_ADDR pc, char *name)
+gdbarch_in_solib_return_trampoline (struct gdbarch *gdbarch, CORE_ADDR pc, const char *name)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->in_solib_return_trampoline != NULL);

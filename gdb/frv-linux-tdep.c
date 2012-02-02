@@ -42,7 +42,8 @@ enum {
 };
 
 static int
-frv_linux_pc_in_sigtramp (struct gdbarch *gdbarch, CORE_ADDR pc, char *name)
+frv_linux_pc_in_sigtramp (struct gdbarch *gdbarch, CORE_ADDR pc,
+			  const char *name)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   char buf[frv_instr_size];
@@ -323,7 +324,7 @@ frv_linux_sigtramp_frame_sniffer (const struct frame_unwind *self,
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   CORE_ADDR pc = get_frame_pc (this_frame);
-  char *name;
+  const char *name;
 
   find_pc_partial_function (pc, &name, NULL, NULL);
   if (frv_linux_pc_in_sigtramp (gdbarch, pc, name))

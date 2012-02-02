@@ -230,7 +230,7 @@ hppa64_hpux_in_solib_call_trampoline (struct gdbarch *gdbarch,
 
 static int
 hppa_hpux_in_solib_return_trampoline (struct gdbarch *gdbarch,
-				      CORE_ADDR pc, char *name)
+				      CORE_ADDR pc, const char *name)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   struct unwind_table_entry *u;
@@ -981,7 +981,7 @@ hppa64_hpux_search_dummy_call_sequence (struct gdbarch *gdbarch, CORE_ADDR pc,
   ALL_OBJFILE_MSYMBOLS (obj, msym)
     {
       CORE_ADDR begin, end;
-      char *name;
+      const char *name;
       gdb_byte buf[2 * HPPA_INSN_SIZE];
       int offset;
 

@@ -1834,7 +1834,7 @@ m32c_analyze_prologue (struct gdbarch *arch,
 static CORE_ADDR
 m32c_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR ip)
 {
-  char *name;
+  const char *name;
   CORE_ADDR func_addr, func_end, sal_end;
   struct m32c_prologue p;
 
@@ -2353,7 +2353,7 @@ m32c_skip_trampoline_code (struct frame_info *frame, CORE_ADDR stop_pc)
      someone loaded a new executable, and I'm not quite sure of the
      best way to do that.  find_pc_partial_function does do some
      caching, so we'll see how this goes.  */
-  char *name;
+  const char *name;
   CORE_ADDR start, end;
 
   if (find_pc_partial_function (stop_pc, &name, &start, &end))
@@ -2586,7 +2586,7 @@ m32c_virtual_frame_pointer (struct gdbarch *gdbarch, CORE_ADDR pc,
 			    int *frame_regnum,
 			    LONGEST *frame_offset)
 {
-  char *name;
+  const char *name;
   CORE_ADDR func_addr, func_end, sal_end;
   struct m32c_prologue p;
 

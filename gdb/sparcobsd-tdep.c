@@ -47,7 +47,7 @@
 static const int sparc32obsd_page_size = 4096;
 
 static int
-sparc32obsd_pc_in_sigtramp (CORE_ADDR pc, char *name)
+sparc32obsd_pc_in_sigtramp (CORE_ADDR pc, const char *name)
 {
   CORE_ADDR start_pc = (pc & ~(sparc32obsd_page_size - 1));
   unsigned long insn;
@@ -127,7 +127,7 @@ sparc32obsd_sigtramp_frame_sniffer (const struct frame_unwind *self,
 				    void **this_cache)
 {
   CORE_ADDR pc = get_frame_pc (this_frame);
-  char *name;
+  const char *name;
 
   find_pc_partial_function (pc, &name, NULL, NULL);
   if (sparc32obsd_pc_in_sigtramp (pc, name))

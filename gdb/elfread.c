@@ -920,7 +920,7 @@ elf_gnu_ifunc_resolve_name (const char *name, CORE_ADDR *addr_p)
 static CORE_ADDR
 elf_gnu_ifunc_resolve_addr (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
-  char *name_at_pc;
+  const char *name_at_pc;
   CORE_ADDR start_at_pc, address;
   struct type *func_func_type = builtin_type (gdbarch)->builtin_func_func;
   struct value *function, *address_val;

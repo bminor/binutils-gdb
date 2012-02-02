@@ -254,7 +254,7 @@ static int
 i386_linux_sigtramp_p (struct frame_info *this_frame)
 {
   CORE_ADDR pc = get_frame_pc (this_frame);
-  char *name;
+  const char *name;
 
   find_pc_partial_function (pc, &name, NULL, NULL);
 
@@ -279,7 +279,7 @@ i386_linux_dwarf_signal_frame_p (struct gdbarch *gdbarch,
 				 struct frame_info *this_frame)
 {
   CORE_ADDR pc = get_frame_pc (this_frame);
-  char *name;
+  const char *name;
 
   find_pc_partial_function (pc, &name, NULL, NULL);
 

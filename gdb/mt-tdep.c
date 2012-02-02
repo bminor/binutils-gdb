@@ -408,7 +408,7 @@ mt_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR func_addr = 0, func_end = 0;
-  char *func_name;
+  const char *func_name;
   unsigned long instr;
 
   if (find_pc_partial_function (pc, &func_name, &func_addr, &func_end))

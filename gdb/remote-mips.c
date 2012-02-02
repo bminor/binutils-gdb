@@ -1954,7 +1954,7 @@ mips_wait (struct target_ops *ops,
          is not a normal breakpoint.  */
       if (strcmp (target_shortname, "lsi") == 0)
 	{
-	  char *func_name;
+	  const char *func_name;
 	  CORE_ADDR func_start;
 	  CORE_ADDR pc = regcache_read_pc (get_current_regcache ());
 

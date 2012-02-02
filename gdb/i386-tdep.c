@@ -2036,7 +2036,7 @@ static int
 i386_in_stack_tramp_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   gdb_byte insn;
-  char *name;
+  const char *name;
 
   /* A stack trampoline is detected if no name is associated
     to the current pc and if it points inside a trampoline
@@ -3294,7 +3294,7 @@ int
 i386_sigtramp_p (struct frame_info *this_frame)
 {
   CORE_ADDR pc = get_frame_pc (this_frame);
-  char *name;
+  const char *name;
 
   find_pc_partial_function (pc, &name, NULL, NULL);
   return (name && strcmp ("_sigtramp", name) == 0);
@@ -3332,7 +3332,7 @@ static int
 i386_svr4_sigtramp_p (struct frame_info *this_frame)
 {
   CORE_ADDR pc = get_frame_pc (this_frame);
-  char *name;
+  const char *name;
 
   /* UnixWare uses _sigacthandler.  The origin of the other symbols is
      currently unknown.  */

@@ -228,7 +228,7 @@ microblaze_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR pc,
 			     CORE_ADDR current_pc,
 			     struct microblaze_frame_cache *cache)
 {
-  char *name;
+  const char *name;
   CORE_ADDR func_addr, func_end, addr, stop, prologue_end_addr = 0;
   unsigned long insn;
   int rn, rd, ra, rb, imm;
