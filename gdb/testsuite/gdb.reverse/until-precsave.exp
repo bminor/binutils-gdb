@@ -52,11 +52,12 @@ gdb_test "break $end_of_main" \
 set oldtimeout $timeout
 set timeout [expr $oldtimeout + 120]
 gdb_test "continue" "Breakpoint .* set breakpoint 10a here .*" "run to end of main"
-set timeout $oldtimeout
 
+# So can this, against gdbserver, for example.
 gdb_test "record save until.precsave" \
     "Saved core file until.precsave with execution log\."  \
     "save process recfile"
+set timeout $oldtimeout
 
 gdb_test "kill" "" "Kill process, prepare to debug log file" \
     "Kill the program being debugged\\? \\(y or n\\) " "y"
