@@ -434,7 +434,7 @@ obj_mach_o_zerofill (int ignore ATTRIBUTE_UNUSED)
   symbolS *sym = NULL;
   unsigned int align = 0;
   unsigned int specified_mask = 0;
-  offsetT size;
+  offsetT size = 0;
 
 #ifdef md_flush_pending_output
   md_flush_pending_output ();

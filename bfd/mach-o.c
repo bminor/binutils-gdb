@@ -2522,6 +2522,8 @@ bfd_mach_o_read_header (bfd *abfd, bfd_mach_o_header *header)
 
   if (mach_o_wide_p (header))
     header->reserved = (*get32) (raw.reserved);
+  else
+    header->reserved = 0;
 
   return TRUE;
 }
