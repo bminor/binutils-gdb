@@ -1232,7 +1232,10 @@ lookup_language_this (const struct language_defn *lang,
 
       sym = lookup_block_symbol (block, lang->la_name_of_this, VAR_DOMAIN);
       if (sym != NULL)
-	return sym;
+	{
+	  block_found = block;
+	  return sym;
+	}
       if (BLOCK_FUNCTION (block))
 	break;
       block = BLOCK_SUPERBLOCK (block);
