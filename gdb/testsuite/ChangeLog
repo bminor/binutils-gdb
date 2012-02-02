@@ -1,5 +1,10 @@
 2012-02-02  Pedro Alves  <palves@redhat.com>
 
+	* gdb.gdb/complaints.exp: Skip if gdb,noinferiorio is set.
+	* gdb.gdb/selftest.exp (test_with_self): Handle gdb,noinferiorio.
+
+2012-02-02  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/term.exp: Rewrite.
 	* gdb.base/term.c: New.
 

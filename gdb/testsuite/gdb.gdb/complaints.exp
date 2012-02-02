@@ -23,6 +23,11 @@ if { [is_remote target] || ![isnative] } then {
     return
 }
 
+if [target_info exists gdb,noinferiorio] {
+    verbose "Skipping because of no inferiorio capabilities."
+    return
+}
+
 proc setup_test { executable } {
     global gdb_prompt
     global timeout

@@ -394,19 +394,29 @@ proc test_with_self { executable } {
     }
 
     # start the "xgdb" process
-    gdb_test_multiple "continue" "xgdb is at prompt" {
-	-re "GNU gdb \[0-9\.\]*.*Copyright \\(C\\) \[0-9\]* Free Software Foundation, Inc.*License GPLv3\\+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.*This is free software: you are free to change and redistribute it.*There is NO WARRANTY, to the extent permitted by law.  Type \"show copying\".*and \"show warranty\" for details.*This GDB was configured as .*$gdb_prompt $" {
-	    pass "xgdb is at prompt"
+    if [target_info exists gdb,noinferiorio] {
+	# Maybe testing with a local extended-remote gdbserver.  With
+	# no way to interact with inferior GDB, all we can do is let
+	# it run.
+	send_gdb "continue\n"
+	# Wait a bit while the inferior gdb gets to its prompt.
+	sleep 1
+    } else {
+	set test "xgdb is at prompt"
+	gdb_test_multiple "continue" $test {
+	    -re "GNU gdb \[0-9\.\]*.*Copyright \\(C\\) \[0-9\]* Free Software Foundation, Inc.*License GPLv3\\+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.*This is free software: you are free to change and redistribute it.*There is NO WARRANTY, to the extent permitted by law.  Type \"show copying\".*and \"show warranty\" for details.*This GDB was configured as .*$gdb_prompt $" {
+		pass $test
+	    }
+	}
+
+	# set xgdb prompt so we can tell which is which
+	gdb_test_multiple "set prompt (xgdb) " "Set xgdb_prompt" {
+	    -re "\[(\]xgdb\[)\].*\[(\]xgdb\[)\] $" {
+		pass "Set xgdb prompt"
+	    }
 	}
     }
-    
-    # set xgdb prompt so we can tell which is which
-    gdb_test_multiple "set prompt (xgdb) " "Set xgdb_prompt" {
-	-re "\[(\]xgdb\[)\].*\[(\]xgdb\[)\] $" {
-	    pass "Set xgdb prompt"
-	}
-    }
-    
+
     # kill the xgdb process
     set description "send ^C to child process"
     send_gdb "\003"
