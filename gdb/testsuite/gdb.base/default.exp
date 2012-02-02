@@ -441,6 +441,8 @@ You must specify a function name to run, and arguments if any"\
 	    { pass "run \"r\" abbreviation" }
 	-re "Don't know how to run.  Try \"help target\"..*$gdb_prompt $"\
 	    { pass "run \"r\" abbreviation" }
+	-re "Starting program:  .*Running the default executable on the remote target failed; try \"set remote exec-file\"?.*$gdb_prompt $"\
+	    { pass "run \"r\" abbreviation" }
     }
 }
 
@@ -467,6 +469,8 @@ You must specify a function name to run, and arguments if any"
 	-re "Starting program:  .*No program loaded.*$gdb_prompt $"\
 	    { pass "run" }
 	-re "Don't know how to run.  Try \"help target\"..*$gdb_prompt $"\
+	    { pass "run" }
+	-re "Starting program:  .*Running the default executable on the remote target failed; try \"set remote exec-file\"?.*$gdb_prompt $"\
 	    { pass "run" }
     }
 }

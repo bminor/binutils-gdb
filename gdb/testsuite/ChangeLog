@@ -1,3 +1,8 @@
+2012-02-02  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/default.exp (run "r" abbreviation, run): Add
+	extended-remote expected output.
+
 2012-02-02  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.cp/dispcxx.exp: New file.
