@@ -801,10 +801,49 @@ last_thread_of_process_p (struct thread_info *thread)
 			 second_thread_of_pid_p, &counter) == NULL);
 }
 
-/* Kill the inferior lwp.  */
+/* Kill LWP.  */
+
+static void
+linux_kill_one_lwp (struct lwp_info *lwp)
+{
+  int pid = lwpid_of (lwp);
+
+  /* PTRACE_KILL is unreliable.  After stepping into a signal handler,
+     there is no signal context, and ptrace(PTRACE_KILL) (or
+     ptrace(PTRACE_CONT, SIGKILL), pretty much the same) acts like
+     ptrace(CONT, pid, 0,0) and just resumes the tracee.  A better
+     alternative is to kill with SIGKILL.  We only need one SIGKILL
+     per process, not one for each thread.  But since we still support
+     linuxthreads, and we also support debugging programs using raw
+     clone without CLONE_THREAD, we send one for each thread.  For
+     years, we used PTRACE_KILL only, so we're being a bit paranoid
+     about some old kernels where PTRACE_KILL might work better
+     (dubious if there are any such, but that's why it's paranoia), so
+     we try SIGKILL first, PTRACE_KILL second, and so we're fine
+     everywhere.  */
+
+  errno = 0;
+  kill (pid, SIGKILL);
+  if (debug_threads)
+    fprintf (stderr,
+	     "LKL:  kill (SIGKILL) %s, 0, 0 (%s)\n",
+	     target_pid_to_str (ptid_of (lwp)),
+	     errno ? strerror (errno) : "OK");
+
+  errno = 0;
+  ptrace (PTRACE_KILL, pid, 0, 0);
+  if (debug_threads)
+    fprintf (stderr,
+	     "LKL:  PTRACE_KILL %s, 0, 0 (%s)\n",
+	     target_pid_to_str (ptid_of (lwp)),
+	     errno ? strerror (errno) : "OK");
+}
+
+/* Callback for `find_inferior'.  Kills an lwp of a given process,
+   except the leader.  */
 
 static int
-linux_kill_one_lwp (struct inferior_list_entry *entry, void *args)
+kill_one_lwp_callback (struct inferior_list_entry *entry, void *args)
 {
   struct thread_info *thread = (struct thread_info *) entry;
   struct lwp_info *lwp = get_thread_lwp (thread);
@@ -829,7 +868,7 @@ linux_kill_one_lwp (struct inferior_list_entry *entry, void *args)
 
   do
     {
-      ptrace (PTRACE_KILL, lwpid_of (lwp), 0, 0);
+      linux_kill_one_lwp (lwp);
 
       /* Make sure it died.  The loop is most likely unnecessary.  */
       pid = linux_wait_for_event (lwp->head.id, &wstat, __WALL);
@@ -854,7 +893,7 @@ linux_kill (int pid)
      first, as PTRACE_KILL will not work otherwise.  */
   stop_all_lwps (0, NULL);
 
-  find_inferior (&all_threads, linux_kill_one_lwp, &pid);
+  find_inferior (&all_threads, kill_one_lwp_callback , &pid);
 
   /* See the comment in linux_kill_one_lwp.  We did not kill the first
      thread in the list, so do so now.  */
@@ -874,7 +913,7 @@ linux_kill (int pid)
 
       do
 	{
-	  ptrace (PTRACE_KILL, lwpid_of (lwp), 0, 0);
+	  linux_kill_one_lwp (lwp);
 
 	  /* Make sure it died.  The loop is most likely unnecessary.  */
 	  lwpid = linux_wait_for_event (lwp->head.id, &wstat, __WALL);

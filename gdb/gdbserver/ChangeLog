@@ -1,5 +1,13 @@
 2012-02-02  Pedro Alves  <palves@redhat.com>
 
+	Try SIGKILL first, then PTRACE_KILL.
+	* linux-low.c (linux_kill_one_lwp): New.
+	(linux_kill_one_lwp): Rename to ...
+	(kill_one_lwp_callback): ... this.  Use the new
+	linux_kill_one_lwp.
+
+2012-02-02  Pedro Alves  <palves@redhat.com>
+
 	* tracepoint.c (cmd_qtminftpilen): Return 0 if there's no current
 	inferior.
 
